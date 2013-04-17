@@ -1,0 +1,7 @@
+\form#0:$[0, 100]$
+\form#1:$[0, 255]^3$
+\form#2:$[0, 255]^4$
+\form#3:$(\mathbf{p}_i)_{1\leq i \leq n}$
+\form#4:$\mathbf{p}_i = (p_{2i}, p_{2i+1}) \in R^2 $
+\form#5:$(x,y)$
+\form#6:$p$

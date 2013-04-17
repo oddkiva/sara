@@ -1,0 +1,136 @@
+\hypertarget{group___window_management}{\section{Window management functions}
+\label{group___window_management}\index{Window management functions@{Window management functions}}
+}
+
+
+Open, close windows, wait for a click or a key, listen to events.  
+
+
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{group___window_management_ga0351d84c2f76eafe9ecbad9f28a2bd84}{D\-O\-\_\-\-E\-X\-P\-O\-R\-T Window \hyperlink{group___window_management_ga0351d84c2f76eafe9ecbad9f28a2bd84}{open\-Window} (int w, int h, const std\-::string \&window\-Title=\char`\"{}D\-O++\char`\"{}, int x=-\/1, int y=-\/1)}\label{group___window_management_ga0351d84c2f76eafe9ecbad9f28a2bd84}
+
+\begin{DoxyCompactList}\small\item\em Open a \hyperlink{class_d_o_1_1_painting_window}{Painting\-Window} for 2\-D drawing. \end{DoxyCompactList}\item 
+\hypertarget{group___window_management_ga54aa2a7fc6c38dc8f1cd7c08cf253aa8}{D\-O\-\_\-\-E\-X\-P\-O\-R\-T Window \hyperlink{group___window_management_ga54aa2a7fc6c38dc8f1cd7c08cf253aa8}{open\-G\-L\-Window} (int w, int h, const std\-::string \&window\-Title=\char`\"{}D\-O++\char`\"{}, int x=-\/1, int y=-\/1)}\label{group___window_management_ga54aa2a7fc6c38dc8f1cd7c08cf253aa8}
+
+\begin{DoxyCompactList}\small\item\em Open a \hyperlink{class_d_o_1_1_open_g_l_window}{Open\-G\-L\-Window} for 3\-D drawing. \end{DoxyCompactList}\item 
+\hypertarget{group___window_management_ga6bc2d961019076295185e819b956dc48}{D\-O\-\_\-\-E\-X\-P\-O\-R\-T Window \hyperlink{group___window_management_ga6bc2d961019076295185e819b956dc48}{open\-Graphics\-View} (int w, int h, const std\-::string \&window\-Title=\char`\"{}D\-O++\char`\"{}, int x=-\/1, int y=-\/1)}\label{group___window_management_ga6bc2d961019076295185e819b956dc48}
+
+\begin{DoxyCompactList}\small\item\em Open a \hyperlink{class_d_o_1_1_graphics_view}{Graphics\-View} for interactive viewing. \end{DoxyCompactList}\item 
+\hypertarget{group___window_management_ga3e25bff90d6edbfd1c84b78e4f8e413f}{D\-O\-\_\-\-E\-X\-P\-O\-R\-T void \hyperlink{group___window_management_ga3e25bff90d6edbfd1c84b78e4f8e413f}{close\-Window} (Window w=active\-Window())}\label{group___window_management_ga3e25bff90d6edbfd1c84b78e4f8e413f}
+
+\begin{DoxyCompactList}\small\item\em Close the window {\bfseries w} (regardless of its type). By default, the active window is closed. \end{DoxyCompactList}\item 
+\hypertarget{group___window_management_ga7f5c45f54f7b8e9d300a45ee3d33d95e}{D\-O\-\_\-\-E\-X\-P\-O\-R\-T void \hyperlink{group___window_management_ga7f5c45f54f7b8e9d300a45ee3d33d95e}{set\-Active\-Window} (Window w)}\label{group___window_management_ga7f5c45f54f7b8e9d300a45ee3d33d95e}
+
+\begin{DoxyCompactList}\small\item\em Set the chosen window {\bfseries w} as the current active window (regardless of its type). \end{DoxyCompactList}\item 
+\hypertarget{group___window_management_ga1f4b17862a64245cfc8615ee2815b064}{D\-O\-\_\-\-E\-X\-P\-O\-R\-T void \hyperlink{group___window_management_ga1f4b17862a64245cfc8615ee2815b064}{milli\-Sleep} (int msec)}\label{group___window_management_ga1f4b17862a64245cfc8615ee2815b064}
+
+\begin{DoxyCompactList}\small\item\em Wait {\bfseries msec} milliseconds before the window resumes its drawing. \end{DoxyCompactList}\item 
+\hypertarget{group___window_management_gad2a382b821da01b199aa816d087cd265}{D\-O\-\_\-\-E\-X\-P\-O\-R\-T void \hyperlink{group___window_management_gad2a382b821da01b199aa816d087cd265}{micro\-Sleep} (int usec)}\label{group___window_management_gad2a382b821da01b199aa816d087cd265}
+
+\begin{DoxyCompactList}\small\item\em Wait {\bfseries usec} microseconds before the window resumes its drawing. \end{DoxyCompactList}\item 
+D\-O\-\_\-\-E\-X\-P\-O\-R\-T int \hyperlink{group___window_management_ga5f65aa168357a4f932ac14bf3767af4f}{get\-Mouse} (int \&x, int \&y)
+\begin{DoxyCompactList}\small\item\em Wait for a click from the user. \end{DoxyCompactList}\item 
+int \hyperlink{group___window_management_gaa1b23139f5681ebfe40610f79e70de4b}{get\-Mouse} (Point2i \&p)
+\begin{DoxyCompactList}\small\item\em Wait for a click from the user (only on the {\itshape active} window) \end{DoxyCompactList}\item 
+D\-O\-\_\-\-E\-X\-P\-O\-R\-T int \hyperlink{group___window_management_gac4b8452beab69863b0ccba5a91b55983}{any\-Get\-Mouse} (Point2i \&p)
+\begin{DoxyCompactList}\small\item\em Wait for a click from the user (only on the {\itshape active} window) \end{DoxyCompactList}\item 
+\hypertarget{group___window_management_ga8330275bee3034e337eaeed23e2e49bf}{void \hyperlink{group___window_management_ga8330275bee3034e337eaeed23e2e49bf}{click} ()}\label{group___window_management_ga8330275bee3034e337eaeed23e2e49bf}
+
+\begin{DoxyCompactList}\small\item\em Wait for a click from the user only on the {\itshape active} window. \end{DoxyCompactList}\item 
+\hypertarget{group___window_management_ga0fda113cb57d325acd796bbb3bffc1e0}{void \hyperlink{group___window_management_ga0fda113cb57d325acd796bbb3bffc1e0}{any\-Click} ()}\label{group___window_management_ga0fda113cb57d325acd796bbb3bffc1e0}
+
+\begin{DoxyCompactList}\small\item\em Wait for a click from the user on any opened windows. \end{DoxyCompactList}\item 
+D\-O\-\_\-\-E\-X\-P\-O\-R\-T int \hyperlink{group___window_management_ga04118983b3f8f6a27943ecf1cae68e84}{get\-Key} ()
+\begin{DoxyCompactList}\small\item\em Wait for a hit key from the user. \end{DoxyCompactList}\item 
+D\-O\-\_\-\-E\-X\-P\-O\-R\-T int \hyperlink{group___window_management_ga74599c45badec95e5a89d49c843ed09a}{any\-Get\-Key} ()
+\begin{DoxyCompactList}\small\item\em Wait for a hit key from the user. \end{DoxyCompactList}\item 
+\hypertarget{group___window_management_ga6c3fd81bfb6ea6b78349aa8cd0455061}{D\-O\-\_\-\-E\-X\-P\-O\-R\-T void \hyperlink{group___window_management_ga6c3fd81bfb6ea6b78349aa8cd0455061}{get\-Event} (int ms, Event \&e)}\label{group___window_management_ga6c3fd81bfb6ea6b78349aa8cd0455061}
+
+\begin{DoxyCompactList}\small\item\em Listens to events sent from the active window. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Open, close windows, wait for a click or a key, listen to events. 
+
+\subsection{Function Documentation}
+\hypertarget{group___window_management_ga74599c45badec95e5a89d49c843ed09a}{\index{Window management functions@{Window management functions}!any\-Get\-Key@{any\-Get\-Key}}
+\index{any\-Get\-Key@{any\-Get\-Key}!Window management functions@{Window management functions}}
+\subsubsection[{any\-Get\-Key}]{\setlength{\rightskip}{0pt plus 5cm}D\-O\-\_\-\-E\-X\-P\-O\-R\-T int D\-O\-::any\-Get\-Key (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{group___window_management_ga74599c45badec95e5a89d49c843ed09a}
+
+
+Wait for a hit key from the user. 
+
+
+\begin{DoxyItemize}
+\item Works on any opened windows.
+\item Returns the hit key. 
+\end{DoxyItemize}\hypertarget{group___window_management_gac4b8452beab69863b0ccba5a91b55983}{\index{Window management functions@{Window management functions}!any\-Get\-Mouse@{any\-Get\-Mouse}}
+\index{any\-Get\-Mouse@{any\-Get\-Mouse}!Window management functions@{Window management functions}}
+\subsubsection[{any\-Get\-Mouse}]{\setlength{\rightskip}{0pt plus 5cm}D\-O\-\_\-\-E\-X\-P\-O\-R\-T int D\-O\-::any\-Get\-Mouse (
+\begin{DoxyParamCaption}
+\item[{Point2i \&}]{p}
+\end{DoxyParamCaption}
+)}}\label{group___window_management_gac4b8452beab69863b0ccba5a91b55983}
+
+
+Wait for a click from the user (only on the {\itshape active} window) 
+
+
+\begin{DoxyItemize}
+\item The user can click on any opened windows.
+\item Returns the clicked mouse button
+\item store the click coordinates $p$. 
+\end{DoxyItemize}\hypertarget{group___window_management_ga04118983b3f8f6a27943ecf1cae68e84}{\index{Window management functions@{Window management functions}!get\-Key@{get\-Key}}
+\index{get\-Key@{get\-Key}!Window management functions@{Window management functions}}
+\subsubsection[{get\-Key}]{\setlength{\rightskip}{0pt plus 5cm}D\-O\-\_\-\-E\-X\-P\-O\-R\-T int D\-O\-::get\-Key (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{group___window_management_ga04118983b3f8f6a27943ecf1cae68e84}
+
+
+Wait for a hit key from the user. 
+
+
+\begin{DoxyItemize}
+\item Works only on the {\itshape active} window.
+\item Returns the hit key. 
+\end{DoxyItemize}\hypertarget{group___window_management_ga5f65aa168357a4f932ac14bf3767af4f}{\index{Window management functions@{Window management functions}!get\-Mouse@{get\-Mouse}}
+\index{get\-Mouse@{get\-Mouse}!Window management functions@{Window management functions}}
+\subsubsection[{get\-Mouse}]{\setlength{\rightskip}{0pt plus 5cm}D\-O\-\_\-\-E\-X\-P\-O\-R\-T int D\-O\-::get\-Mouse (
+\begin{DoxyParamCaption}
+\item[{int \&}]{x, }
+\item[{int \&}]{y}
+\end{DoxyParamCaption}
+)}}\label{group___window_management_ga5f65aa168357a4f932ac14bf3767af4f}
+
+
+Wait for a click from the user. 
+
+
+\begin{DoxyItemize}
+\item Works only on the {\itshape active} window.
+\item Returns the clicked mouse button
+\item store the click coordinates $(x,y)$. 
+\end{DoxyItemize}\hypertarget{group___window_management_gaa1b23139f5681ebfe40610f79e70de4b}{\index{Window management functions@{Window management functions}!get\-Mouse@{get\-Mouse}}
+\index{get\-Mouse@{get\-Mouse}!Window management functions@{Window management functions}}
+\subsubsection[{get\-Mouse}]{\setlength{\rightskip}{0pt plus 5cm}int D\-O\-::get\-Mouse (
+\begin{DoxyParamCaption}
+\item[{Point2i \&}]{p}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{group___window_management_gaa1b23139f5681ebfe40610f79e70de4b}
+
+
+Wait for a click from the user (only on the {\itshape active} window) 
+
+
+\begin{DoxyItemize}
+\item Returns the clicked mouse button and
+\item Stores the click coordinates $p$. 
+\end{DoxyItemize}

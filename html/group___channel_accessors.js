@@ -1,0 +1,26 @@
+var group___channel_accessors =
+[
+    [ "DEFINE_COLOR_CHANNEL_GETTERS", "group___channel_accessors.html#ga17a132ee4905c132201008787b93e336", null ],
+    [ "alpha", "group___channel_accessors.html#gaa131549883a0aae99914ffe78da0dbcb", null ],
+    [ "alpha", "group___channel_accessors.html#gaedb55300f0a4cfb17d4f281e437e1ac3", null ],
+    [ "black", "group___channel_accessors.html#gab36760b6e747c3cdcb47643dce670493", null ],
+    [ "black", "group___channel_accessors.html#ga18f2660186c9e25f69ed6fe2d474752c", null ],
+    [ "blue", "group___channel_accessors.html#ga002fae45c069050f774c897a69e18b39", null ],
+    [ "blue", "group___channel_accessors.html#ga7f05f0fe577efb6d905528093fbaab0b", null ],
+    [ "cyan", "group___channel_accessors.html#ga47dfa2b4967e6d59132775b062f770be", null ],
+    [ "cyan", "group___channel_accessors.html#gaae689fe2a49dafa645bed231415281be", null ],
+    [ "green", "group___channel_accessors.html#gae8bbbd63c7f0aab610b1dd591b415519", null ],
+    [ "green", "group___channel_accessors.html#ga5bfc09b28f0f9052e3c133581f6667c3", null ],
+    [ "magenta", "group___channel_accessors.html#gad0c36c945f72154bacb9dd3339da3eb8", null ],
+    [ "magenta", "group___channel_accessors.html#ga012dc44d2b56f5688643a355f0737daa", null ],
+    [ "red", "group___channel_accessors.html#gaeb571624f9083b6e93caa612efbe33d5", null ],
+    [ "red", "group___channel_accessors.html#ga757afabac81c17de47404784d892fd3b", null ],
+    [ "u", "group___channel_accessors.html#ga056f2dcf2b4d1976e50bf20547617584", null ],
+    [ "u", "group___channel_accessors.html#gae90bfcd1e7783b7306b5d1df688f3671", null ],
+    [ "v", "group___channel_accessors.html#ga11fac27b0966d58ad0e9abdbcf3d71b1", null ],
+    [ "v", "group___channel_accessors.html#ga1dd2524c5b8d3db33137eedb803fc2ce", null ],
+    [ "y", "group___channel_accessors.html#gac90c52c5b3a7b2a7e3761e6e84f25778", null ],
+    [ "y", "group___channel_accessors.html#ga42846abfe3173fb8a817a0e3a3fa9c44", null ],
+    [ "yellow", "group___channel_accessors.html#ga6829ee374a312a1029a0148235540de3", null ],
+    [ "yellow", "group___channel_accessors.html#gac23bd53f11255e8179ab89bf48d050d1", null ]
+];

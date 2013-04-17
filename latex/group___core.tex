@@ -1,0 +1,88 @@
+\hypertarget{group___core}{\section{Core}
+\label{group___core}\index{Core@{Core}}
+}
+
+
+Note that the Core module heavily relies on the \href{http://eigen.tuxfamily.org/}{\tt Eigen} library (linear algebra).  
+
+
+\subsection*{Modules}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{group___color}{Color}
+\item 
+\hyperlink{group___eigen_typedefs}{Eigen Integration}
+\item 
+\hyperlink{group___image}{Image}
+\item 
+\hyperlink{group___locator}{Locator}
+\item 
+\hyperlink{group___meta}{Meta}
+\item 
+\hyperlink{group___multi_array}{Multi\-Array}
+\item 
+\hyperlink{group___sparse_multi_array}{Sparse\-Multi\-Array}
+\item 
+\hyperlink{group___utility}{Utility}
+\item 
+\hyperlink{group___tree}{Tree}
+\end{DoxyCompactItemize}
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{group___core_ga6befbca3f4c07866e5a0b6b255b6a469}{\#define \hyperlink{group___core_ga6befbca3f4c07866e5a0b6b255b6a469}{B\-E\-G\-I\-N\-\_\-\-N\-A\-M\-E\-S\-P\-A\-C\-E\-\_\-\-D\-O}~namespace D\-O \{}\label{group___core_ga6befbca3f4c07866e5a0b6b255b6a469}
+
+\begin{DoxyCompactList}\small\item\em Opening macro whose sole purpose is to increase the namespace visibility. \end{DoxyCompactList}\item 
+\hypertarget{group___core_gace84578be62b4659157bfae5b1e7b9f4}{\#define \hyperlink{group___core_gace84578be62b4659157bfae5b1e7b9f4}{E\-N\-D\-\_\-\-N\-A\-M\-E\-S\-P\-A\-C\-E\-\_\-\-D\-O}~\} /$\ast$ namespace D\-O $\ast$/}\label{group___core_gace84578be62b4659157bfae5b1e7b9f4}
+
+\begin{DoxyCompactList}\small\item\em Closing macro whose sole purpose is to increase the namespace visibility. \end{DoxyCompactList}\item 
+\#define \hyperlink{group___core_ga3a1adaa43f4f9abbba0e666652a3756c}{src\-Path}(s)~(s)
+\begin{DoxyCompactList}\small\item\em Returns the full path of a file when C\-Make is used. \end{DoxyCompactList}\item 
+\#define \hyperlink{group___core_ga6dcd6c29c77233d5b21cda46b3aad899}{string\-Src\-Path}(s)~(s)
+\begin{DoxyCompactList}\small\item\em Returns the full path of a file when C\-Make is used. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Note that the Core module heavily relies on the \href{http://eigen.tuxfamily.org/}{\tt Eigen} library (linear algebra). the \hyperlink{namespace_eigen}{Eigen} namespace is directly imported inside the \hyperlink{namespace_d_o}{D\-O} namespace for convenience. For details, have a look at the file \hyperlink{_eigen_extension_8hpp}{Eigen\-Extension.\-hpp}.
+
+So more specific information about the \hyperlink{namespace_eigen}{Eigen} library, refer to\-: \href{http://eigen.tuxfamily.org/dox/}{\tt http\-://eigen.\-tuxfamily.\-org/dox/} 
+
+\subsection{Macro Definition Documentation}
+\hypertarget{group___core_ga3a1adaa43f4f9abbba0e666652a3756c}{\index{Core@{Core}!src\-Path@{src\-Path}}
+\index{src\-Path@{src\-Path}!Core@{Core}}
+\subsubsection[{src\-Path}]{\setlength{\rightskip}{0pt plus 5cm}\#define src\-Path(
+\begin{DoxyParamCaption}
+\item[{}]{s}
+\end{DoxyParamCaption}
+)~(s)}}\label{group___core_ga3a1adaa43f4f9abbba0e666652a3756c}
+
+
+Returns the full path of a file when C\-Make is used. 
+
+To make the macro work properly, the file must be be put in the source directory file. 
+\begin{DoxyParams}{Parameters}
+{\em s} & a C constant string which contains the file name \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+full path of the file 
+\end{DoxyReturn}
+\hypertarget{group___core_ga6dcd6c29c77233d5b21cda46b3aad899}{\index{Core@{Core}!string\-Src\-Path@{string\-Src\-Path}}
+\index{string\-Src\-Path@{string\-Src\-Path}!Core@{Core}}
+\subsubsection[{string\-Src\-Path}]{\setlength{\rightskip}{0pt plus 5cm}\#define string\-Src\-Path(
+\begin{DoxyParamCaption}
+\item[{}]{s}
+\end{DoxyParamCaption}
+)~(s)}}\label{group___core_ga6dcd6c29c77233d5b21cda46b3aad899}
+
+
+Returns the full path of a file when C\-Make is used. 
+
+To make the macro work properly, the file must be be put in the source directory file. 
+\begin{DoxyParams}{Parameters}
+{\em s} & a C++ string which contains the file name \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+full path of the file 
+\end{DoxyReturn}

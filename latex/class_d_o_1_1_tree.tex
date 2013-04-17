@@ -1,0 +1,237 @@
+\hypertarget{class_d_o_1_1_tree}{\section{Tree$<$ T $>$ Class Template Reference}
+\label{class_d_o_1_1_tree}\index{Tree$<$ T $>$@{Tree$<$ T $>$}}
+}
+
+
+The tree data structure is by definition an arborescence, in graph theory, i.\-e., an directed graph with a root vertex 'u' such that there is a unique path from 'u' to any vertex 'v' in the tree.  
+
+
+
+
+{\ttfamily \#include $<$Tree.\-hpp$>$}
+
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_d_o_1_1_tree_a265a253612b46abed17c61b0a5e5ce30}{typedef T {\bfseries value\-\_\-type}}\label{class_d_o_1_1_tree_a265a253612b46abed17c61b0a5e5ce30}
+
+\item 
+\hypertarget{class_d_o_1_1_tree_a680c78d51cff3fd301666dd75bdbe49d}{typedef T $\ast$ {\bfseries pointer}}\label{class_d_o_1_1_tree_a680c78d51cff3fd301666dd75bdbe49d}
+
+\item 
+\hypertarget{class_d_o_1_1_tree_a53d259f0075b22d7646e373816830e8e}{typedef const T $\ast$ {\bfseries const\-\_\-pointer}}\label{class_d_o_1_1_tree_a53d259f0075b22d7646e373816830e8e}
+
+\item 
+\hypertarget{class_d_o_1_1_tree_a9b1a63f171d76a7a3995b6858e99f2ea}{typedef T \& {\bfseries reference}}\label{class_d_o_1_1_tree_a9b1a63f171d76a7a3995b6858e99f2ea}
+
+\item 
+\hypertarget{class_d_o_1_1_tree_af9ba3e25df088c62f7d535b91672cda9}{typedef const T \& {\bfseries const\-\_\-reference}}\label{class_d_o_1_1_tree_af9ba3e25df088c62f7d535b91672cda9}
+
+\item 
+\hypertarget{class_d_o_1_1_tree_a957b4932a1fe961a3b2f9c3df003afa5}{typedef Node {\bfseries node\-\_\-type}}\label{class_d_o_1_1_tree_a957b4932a1fe961a3b2f9c3df003afa5}
+
+\item 
+\hypertarget{class_d_o_1_1_tree_a5aaef33bc2a4eadb7938c46e008ece74}{typedef Node\-Handle$<$ false $>$ {\bfseries node\-\_\-handle}}\label{class_d_o_1_1_tree_a5aaef33bc2a4eadb7938c46e008ece74}
+
+\item 
+\hypertarget{class_d_o_1_1_tree_a63679e305245efb895f61220fae8b308}{typedef Children\-Iterator$<$ false $>$ {\bfseries children\-\_\-iterator}}\label{class_d_o_1_1_tree_a63679e305245efb895f61220fae8b308}
+
+\item 
+\hypertarget{class_d_o_1_1_tree_a1b68ac2ad80415afa4ab778a852c4880}{typedef Depth\-First\-Iterator$<$ false $>$ {\bfseries depth\-\_\-first\-\_\-iterator}}\label{class_d_o_1_1_tree_a1b68ac2ad80415afa4ab778a852c4880}
+
+\item 
+\hypertarget{class_d_o_1_1_tree_ab0764299e60d2534fd17a0e72c3fb546}{typedef Breadth\-First\-Iterator\\*
+$<$ false $>$ {\bfseries breadth\-\_\-first\-\_\-iterator}}\label{class_d_o_1_1_tree_ab0764299e60d2534fd17a0e72c3fb546}
+
+\item 
+\hypertarget{class_d_o_1_1_tree_adbbdf19f38b14d4da76d1614be080d00}{typedef Leaf\-Iterator$<$ false $>$ {\bfseries leaf\-\_\-iterator}}\label{class_d_o_1_1_tree_adbbdf19f38b14d4da76d1614be080d00}
+
+\item 
+\hypertarget{class_d_o_1_1_tree_ae753899577d159fa4affc363db9732fa}{typedef Node\-Handle$<$ true $>$ {\bfseries const\-\_\-node\-\_\-handle}}\label{class_d_o_1_1_tree_ae753899577d159fa4affc363db9732fa}
+
+\item 
+\hypertarget{class_d_o_1_1_tree_ae66bc4ac2dc4f6a2911f3c681a87edd6}{typedef Children\-Iterator$<$ true $>$ {\bfseries const\-\_\-children\-\_\-iterator}}\label{class_d_o_1_1_tree_ae66bc4ac2dc4f6a2911f3c681a87edd6}
+
+\item 
+\hypertarget{class_d_o_1_1_tree_a988b24ed2ea871f299c7b57b793d8284}{typedef Depth\-First\-Iterator$<$ true $>$ {\bfseries const\-\_\-depth\-\_\-first\-\_\-iterator}}\label{class_d_o_1_1_tree_a988b24ed2ea871f299c7b57b793d8284}
+
+\item 
+\hypertarget{class_d_o_1_1_tree_abf6d39fccb2d13ee71f1b66dbafbd851}{typedef Breadth\-First\-Iterator\\*
+$<$ true $>$ {\bfseries const\-\_\-breadth\-\_\-first\-\_\-iterator}}\label{class_d_o_1_1_tree_abf6d39fccb2d13ee71f1b66dbafbd851}
+
+\item 
+\hypertarget{class_d_o_1_1_tree_a61229ff3e7defea14d8fb68f94cc9ae6}{typedef Leaf\-Iterator$<$ true $>$ {\bfseries const\-\_\-leaf\-\_\-iterator}}\label{class_d_o_1_1_tree_a61229ff3e7defea14d8fb68f94cc9ae6}
+
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_d_o_1_1_tree_a3dee5770ede29888f2c0136bbd7f5a95}{\hyperlink{class_d_o_1_1_tree_a3dee5770ede29888f2c0136bbd7f5a95}{Tree} ()}\label{class_d_o_1_1_tree_a3dee5770ede29888f2c0136bbd7f5a95}
+
+\begin{DoxyCompactList}\small\item\em Default constructor. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_tree_ab2eeead563db79ec963561503f3db441}{\hyperlink{class_d_o_1_1_tree_ab2eeead563db79ec963561503f3db441}{Tree} (const T \&\hyperlink{group___channel_accessors_ga1dd2524c5b8d3db33137eedb803fc2ce}{v})}\label{class_d_o_1_1_tree_ab2eeead563db79ec963561503f3db441}
+
+\begin{DoxyCompactList}\small\item\em Constructor with root vertex. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_tree_a9603ba799d51fe7b2e8d2ac78abfa535}{\hyperlink{class_d_o_1_1_tree_a9603ba799d51fe7b2e8d2ac78abfa535}{Tree} (const \hyperlink{class_d_o_1_1_tree}{Tree} \&t)}\label{class_d_o_1_1_tree_a9603ba799d51fe7b2e8d2ac78abfa535}
+
+\begin{DoxyCompactList}\small\item\em Copy constructor. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_tree_a4d2d4eaa9ac9d347549728060df29842}{\hyperlink{class_d_o_1_1_tree_a4d2d4eaa9ac9d347549728060df29842}{$\sim$\-Tree} ()}\label{class_d_o_1_1_tree_a4d2d4eaa9ac9d347549728060df29842}
+
+\begin{DoxyCompactList}\small\item\em Destructor. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_tree_a54e71c610e133a9fb85c1b156d94da42}{\hyperlink{class_d_o_1_1_tree}{Tree} \& \hyperlink{class_d_o_1_1_tree_a54e71c610e133a9fb85c1b156d94da42}{operator=} (const \hyperlink{class_d_o_1_1_tree}{Tree} \&t)}\label{class_d_o_1_1_tree_a54e71c610e133a9fb85c1b156d94da42}
+
+\begin{DoxyCompactList}\small\item\em Assignment operator. \end{DoxyCompactList}\item 
+bool \hyperlink{class_d_o_1_1_tree_a72e422ad913c00d5443bfe02530394a1}{operator!=} (const \hyperlink{class_d_o_1_1_tree}{Tree} \&t) const 
+\begin{DoxyCompactList}\small\item\em Equality operator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_tree_a4ef88b6304d9d660dece87018d740033}{void \hyperlink{class_d_o_1_1_tree_a4ef88b6304d9d660dece87018d740033}{swap} (const \hyperlink{class_d_o_1_1_tree}{Tree} \&t)}\label{class_d_o_1_1_tree_a4ef88b6304d9d660dece87018d740033}
+
+\begin{DoxyCompactList}\small\item\em Swap function. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_tree_ac8bb3912a3ce86b15842e79d0b421204}{void \hyperlink{class_d_o_1_1_tree_ac8bb3912a3ce86b15842e79d0b421204}{clear} ()}\label{class_d_o_1_1_tree_ac8bb3912a3ce86b15842e79d0b421204}
+
+\begin{DoxyCompactList}\small\item\em Clear function. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_tree_ac6e61de369e994009e36f344f99c15ad}{bool \hyperlink{class_d_o_1_1_tree_ac6e61de369e994009e36f344f99c15ad}{empty} () const }\label{class_d_o_1_1_tree_ac6e61de369e994009e36f344f99c15ad}
+
+\begin{DoxyCompactList}\small\item\em Returns if the tree is empty. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_tree_a37a865cf4e8665ad843cbd3fa7fac805}{void \hyperlink{class_d_o_1_1_tree_a37a865cf4e8665ad843cbd3fa7fac805}{set\-\_\-root} (const T \&\hyperlink{group___channel_accessors_ga1dd2524c5b8d3db33137eedb803fc2ce}{v})}\label{class_d_o_1_1_tree_a37a865cf4e8665ad843cbd3fa7fac805}
+
+\begin{DoxyCompactList}\small\item\em Set the root of the tree with value 'v'. \end{DoxyCompactList}\item 
+node\-\_\-handle \hyperlink{class_d_o_1_1_tree_a3b85d61d075fcee2959be9c1b564e23b}{insert\-\_\-sibling\-\_\-before} (node\-\_\-handle n, const T \&\hyperlink{group___channel_accessors_ga1dd2524c5b8d3db33137eedb803fc2ce}{v})
+\item 
+node\-\_\-handle \hyperlink{class_d_o_1_1_tree_abe4588e8f434f4ab6fa9654427cc4dda}{insert\-\_\-sibling\-\_\-after} (node\-\_\-handle n, const T \&\hyperlink{group___channel_accessors_ga1dd2524c5b8d3db33137eedb803fc2ce}{v})
+\item 
+\hypertarget{class_d_o_1_1_tree_a120c2a2f64f45604e96c85ca3984aaed}{node\-\_\-handle \hyperlink{class_d_o_1_1_tree_a120c2a2f64f45604e96c85ca3984aaed}{append\-\_\-child} (node\-\_\-handle n, const T \&\hyperlink{group___channel_accessors_ga1dd2524c5b8d3db33137eedb803fc2ce}{v})}\label{class_d_o_1_1_tree_a120c2a2f64f45604e96c85ca3984aaed}
+
+\begin{DoxyCompactList}\small\item\em Append child to specified node and returns the child node handle. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_tree_aa3b8256209a0a013e04a479b0ed5d0a6}{node\-\_\-handle \hyperlink{class_d_o_1_1_tree_aa3b8256209a0a013e04a479b0ed5d0a6}{prepend\-\_\-child} (node\-\_\-handle n, const T \&\hyperlink{group___channel_accessors_ga1dd2524c5b8d3db33137eedb803fc2ce}{v})}\label{class_d_o_1_1_tree_aa3b8256209a0a013e04a479b0ed5d0a6}
+
+\begin{DoxyCompactList}\small\item\em Prepend child to specified node. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_tree_a15908e24c5d1f66b6d96b548291ff5c3}{void \hyperlink{class_d_o_1_1_tree_a15908e24c5d1f66b6d96b548291ff5c3}{append\-\_\-child\-\_\-tree} (node\-\_\-handle node, \hyperlink{class_d_o_1_1_tree}{Tree} \&tree)}\label{class_d_o_1_1_tree_a15908e24c5d1f66b6d96b548291ff5c3}
+
+\begin{DoxyCompactList}\small\item\em Append child tree to specified node. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_tree_a4261f34846d379bad5deee88b905762f}{void \hyperlink{class_d_o_1_1_tree_a4261f34846d379bad5deee88b905762f}{prepend\-\_\-child\-\_\-tree} (node\-\_\-handle node, \hyperlink{class_d_o_1_1_tree}{Tree} \&tree)}\label{class_d_o_1_1_tree_a4261f34846d379bad5deee88b905762f}
+
+\begin{DoxyCompactList}\small\item\em Prepend child tree to specified node. \end{DoxyCompactList}\item 
+\hyperlink{class_d_o_1_1_tree}{Tree} \hyperlink{class_d_o_1_1_tree_aba6ece339051b6bad21840d986bd0a3a}{cut\-\_\-tree} (node\-\_\-handle node)
+\item 
+void \hyperlink{class_d_o_1_1_tree_a73a3166a18f4d9091d128d7ede38d740}{delete\-\_\-subtree} (node\-\_\-handle node)
+\item 
+\hypertarget{class_d_o_1_1_tree_acebef34190c5b61c05d2c5e9308c00a4}{node\-\_\-handle \hyperlink{class_d_o_1_1_tree_acebef34190c5b61c05d2c5e9308c00a4}{begin} ()}\label{class_d_o_1_1_tree_acebef34190c5b61c05d2c5e9308c00a4}
+
+\begin{DoxyCompactList}\small\item\em Returns the root of the tree. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_tree_a84c3a10b394fa5d0687d032a086c3e96}{node\-\_\-handle \hyperlink{class_d_o_1_1_tree_a84c3a10b394fa5d0687d032a086c3e96}{end} ()}\label{class_d_o_1_1_tree_a84c3a10b394fa5d0687d032a086c3e96}
+
+\begin{DoxyCompactList}\small\item\em Returns the last node of the tree. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_tree_a50e15fc2193067f33398e37e01d8a2ae}{node\-\_\-handle \hyperlink{class_d_o_1_1_tree_a50e15fc2193067f33398e37e01d8a2ae}{parent\-\_\-of} (node\-\_\-handle \hyperlink{group___channel_accessors_ga1dd2524c5b8d3db33137eedb803fc2ce}{v})}\label{class_d_o_1_1_tree_a50e15fc2193067f33398e37e01d8a2ae}
+
+\begin{DoxyCompactList}\small\item\em Returns the parent of the input node. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_tree_ae25e673000362d17c5dbe34e13ed26a9}{children\-\_\-iterator \hyperlink{class_d_o_1_1_tree_ae25e673000362d17c5dbe34e13ed26a9}{children\-\_\-begin} (node\-\_\-handle \hyperlink{group___channel_accessors_ga1dd2524c5b8d3db33137eedb803fc2ce}{v})}\label{class_d_o_1_1_tree_ae25e673000362d17c5dbe34e13ed26a9}
+
+\begin{DoxyCompactList}\small\item\em Returns the first child iterator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_tree_a4bbe761f0929f34567f339615d616bda}{children\-\_\-iterator \hyperlink{class_d_o_1_1_tree_a4bbe761f0929f34567f339615d616bda}{children\-\_\-end} ()}\label{class_d_o_1_1_tree_a4bbe761f0929f34567f339615d616bda}
+
+\begin{DoxyCompactList}\small\item\em Returns the last child iterator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_tree_aacea50afcacf312bf2254b5c6aa515d4}{depth\-\_\-first\-\_\-iterator \hyperlink{class_d_o_1_1_tree_aacea50afcacf312bf2254b5c6aa515d4}{depth\-\_\-first\-\_\-begin} ()}\label{class_d_o_1_1_tree_aacea50afcacf312bf2254b5c6aa515d4}
+
+\begin{DoxyCompactList}\small\item\em Returns the first depth-\/first iterator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_tree_ab20dfe0da9bfd5b4e021b4081813555f}{depth\-\_\-first\-\_\-iterator \hyperlink{class_d_o_1_1_tree_ab20dfe0da9bfd5b4e021b4081813555f}{depth\-\_\-first\-\_\-end} ()}\label{class_d_o_1_1_tree_ab20dfe0da9bfd5b4e021b4081813555f}
+
+\begin{DoxyCompactList}\small\item\em Returns the last depth-\/first iterator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_tree_aeff3d8457fe71b935b10ce476917928b}{breadth\-\_\-first\-\_\-iterator \hyperlink{class_d_o_1_1_tree_aeff3d8457fe71b935b10ce476917928b}{breadth\-\_\-first\-\_\-begin} ()}\label{class_d_o_1_1_tree_aeff3d8457fe71b935b10ce476917928b}
+
+\begin{DoxyCompactList}\small\item\em Returns the first breadth-\/first iterator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_tree_a96a5a047c112cbba0d54d746a6073499}{breadth\-\_\-first\-\_\-iterator \hyperlink{class_d_o_1_1_tree_a96a5a047c112cbba0d54d746a6073499}{breadth\-\_\-first\-\_\-end} ()}\label{class_d_o_1_1_tree_a96a5a047c112cbba0d54d746a6073499}
+
+\begin{DoxyCompactList}\small\item\em Returns the last breadth-\/first iterator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_tree_a3cc80a426bf788cd6c5b94d2084b69cb}{leaf\-\_\-iterator \hyperlink{class_d_o_1_1_tree_a3cc80a426bf788cd6c5b94d2084b69cb}{leaf\-\_\-begin} ()}\label{class_d_o_1_1_tree_a3cc80a426bf788cd6c5b94d2084b69cb}
+
+\begin{DoxyCompactList}\small\item\em Returns the first leaf iterator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_tree_ac8e0c3fa6a007feaa01c7c18d314d145}{leaf\-\_\-iterator \hyperlink{class_d_o_1_1_tree_ac8e0c3fa6a007feaa01c7c18d314d145}{leaf\-\_\-end} ()}\label{class_d_o_1_1_tree_ac8e0c3fa6a007feaa01c7c18d314d145}
+
+\begin{DoxyCompactList}\small\item\em Returns the last leaf iterator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_tree_af5e8c199fcd6546df1e7b757eb6d2939}{const\-\_\-node\-\_\-handle \hyperlink{class_d_o_1_1_tree_af5e8c199fcd6546df1e7b757eb6d2939}{begin} () const }\label{class_d_o_1_1_tree_af5e8c199fcd6546df1e7b757eb6d2939}
+
+\begin{DoxyCompactList}\small\item\em Returns the root of the tree (constant accessor). \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_tree_a687d5908d94367fd391ce19fd6d48a39}{const\-\_\-node\-\_\-handle \hyperlink{class_d_o_1_1_tree_a687d5908d94367fd391ce19fd6d48a39}{end} () const }\label{class_d_o_1_1_tree_a687d5908d94367fd391ce19fd6d48a39}
+
+\begin{DoxyCompactList}\small\item\em Returns the last node of the tree (constant access). \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_tree_a8f8eaebcfc844da422dd317ce284a3ad}{const\-\_\-node\-\_\-handle \hyperlink{class_d_o_1_1_tree_a8f8eaebcfc844da422dd317ce284a3ad}{parent\-\_\-of} (node\-\_\-handle \hyperlink{group___channel_accessors_ga1dd2524c5b8d3db33137eedb803fc2ce}{v}) const }\label{class_d_o_1_1_tree_a8f8eaebcfc844da422dd317ce284a3ad}
+
+\begin{DoxyCompactList}\small\item\em Returns the parent of the input node. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_tree_a2d8a88ca545846840e8c0715cc3f36fc}{const\-\_\-children\-\_\-iterator \hyperlink{class_d_o_1_1_tree_a2d8a88ca545846840e8c0715cc3f36fc}{children\-\_\-begin} (const\-\_\-node\-\_\-handle \hyperlink{group___channel_accessors_ga1dd2524c5b8d3db33137eedb803fc2ce}{v}) const }\label{class_d_o_1_1_tree_a2d8a88ca545846840e8c0715cc3f36fc}
+
+\begin{DoxyCompactList}\small\item\em Returns the first constant child iterator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_tree_a4920faae174fd8fe38f2deef38ee7c6c}{const\-\_\-children\-\_\-iterator \hyperlink{class_d_o_1_1_tree_a4920faae174fd8fe38f2deef38ee7c6c}{children\-\_\-end} () const }\label{class_d_o_1_1_tree_a4920faae174fd8fe38f2deef38ee7c6c}
+
+\begin{DoxyCompactList}\small\item\em Returns the last constant child iterator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_tree_a9eb8970c962399d0408e4e0a2734d75e}{const\-\_\-depth\-\_\-first\-\_\-iterator \hyperlink{class_d_o_1_1_tree_a9eb8970c962399d0408e4e0a2734d75e}{depth\-\_\-first\-\_\-begin} () const }\label{class_d_o_1_1_tree_a9eb8970c962399d0408e4e0a2734d75e}
+
+\begin{DoxyCompactList}\small\item\em Returns the first constant depth-\/first iterator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_tree_a57f445cd71fd4dc556f451dcaac45ad2}{const\-\_\-depth\-\_\-first\-\_\-iterator \hyperlink{class_d_o_1_1_tree_a57f445cd71fd4dc556f451dcaac45ad2}{depth\-\_\-first\-\_\-end} () const }\label{class_d_o_1_1_tree_a57f445cd71fd4dc556f451dcaac45ad2}
+
+\begin{DoxyCompactList}\small\item\em Returns the last constant depth-\/first iterator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_tree_ad097f916ecfaf0eebfb0183c610ddcae}{const\-\_\-breadth\-\_\-first\-\_\-iterator \hyperlink{class_d_o_1_1_tree_ad097f916ecfaf0eebfb0183c610ddcae}{breadth\-\_\-first\-\_\-begin} () const }\label{class_d_o_1_1_tree_ad097f916ecfaf0eebfb0183c610ddcae}
+
+\begin{DoxyCompactList}\small\item\em Returns the first constant breadth-\/first iterator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_tree_aca0ea756c48799d75381de9ef0cce128}{const\-\_\-breadth\-\_\-first\-\_\-iterator \hyperlink{class_d_o_1_1_tree_aca0ea756c48799d75381de9ef0cce128}{breadth\-\_\-first\-\_\-end} () const }\label{class_d_o_1_1_tree_aca0ea756c48799d75381de9ef0cce128}
+
+\begin{DoxyCompactList}\small\item\em Returns the last constant breadth-\/first iterator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_tree_a8abf8ade23ce8300e97f274e178c2410}{const\-\_\-leaf\-\_\-iterator \hyperlink{class_d_o_1_1_tree_a8abf8ade23ce8300e97f274e178c2410}{leaf\-\_\-begin} () const }\label{class_d_o_1_1_tree_a8abf8ade23ce8300e97f274e178c2410}
+
+\begin{DoxyCompactList}\small\item\em Returns the first leaf iterator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_tree_a3906bbeeb57d6a406530290e49081eb3}{const\-\_\-leaf\-\_\-iterator \hyperlink{class_d_o_1_1_tree_a3906bbeeb57d6a406530290e49081eb3}{leaf\-\_\-end} () const }\label{class_d_o_1_1_tree_a3906bbeeb57d6a406530290e49081eb3}
+
+\begin{DoxyCompactList}\small\item\em Returns the last leaf iterator. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\subsubsection*{template$<$typename T$>$class D\-O\-::\-Tree$<$ T $>$}
+
+The tree data structure is by definition an arborescence, in graph theory, i.\-e., an directed graph with a root vertex 'u' such that there is a unique path from 'u' to any vertex 'v' in the tree. 
+
+\subsection{Member Function Documentation}
+\hypertarget{class_d_o_1_1_tree_aba6ece339051b6bad21840d986bd0a3a}{\index{D\-O\-::\-Tree@{D\-O\-::\-Tree}!cut\-\_\-tree@{cut\-\_\-tree}}
+\index{cut\-\_\-tree@{cut\-\_\-tree}!DO::Tree@{D\-O\-::\-Tree}}
+\subsubsection[{cut\-\_\-tree}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Tree} cut\-\_\-tree (
+\begin{DoxyParamCaption}
+\item[{node\-\_\-handle}]{node}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{class_d_o_1_1_tree_aba6ece339051b6bad21840d986bd0a3a}
+Cut the tree at the specified node which becomes the root of the subtree. T\-O\-D\-O\-: check if the implementation is correct. \hypertarget{class_d_o_1_1_tree_a73a3166a18f4d9091d128d7ede38d740}{\index{D\-O\-::\-Tree@{D\-O\-::\-Tree}!delete\-\_\-subtree@{delete\-\_\-subtree}}
+\index{delete\-\_\-subtree@{delete\-\_\-subtree}!DO::Tree@{D\-O\-::\-Tree}}
+\subsubsection[{delete\-\_\-subtree}]{\setlength{\rightskip}{0pt plus 5cm}void delete\-\_\-subtree (
+\begin{DoxyParamCaption}
+\item[{node\-\_\-handle}]{node}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{class_d_o_1_1_tree_a73a3166a18f4d9091d128d7ede38d740}
+Delete the subtree at the specified node being the root of the subtree. T\-O\-D\-O\-: check if the implementation is correct. \hypertarget{class_d_o_1_1_tree_abe4588e8f434f4ab6fa9654427cc4dda}{\index{D\-O\-::\-Tree@{D\-O\-::\-Tree}!insert\-\_\-sibling\-\_\-after@{insert\-\_\-sibling\-\_\-after}}
+\index{insert\-\_\-sibling\-\_\-after@{insert\-\_\-sibling\-\_\-after}!DO::Tree@{D\-O\-::\-Tree}}
+\subsubsection[{insert\-\_\-sibling\-\_\-after}]{\setlength{\rightskip}{0pt plus 5cm}node\-\_\-handle insert\-\_\-sibling\-\_\-after (
+\begin{DoxyParamCaption}
+\item[{node\-\_\-handle}]{n, }
+\item[{const T \&}]{v}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{class_d_o_1_1_tree_abe4588e8f434f4ab6fa9654427cc4dda}
+Insert a sibling with value 'v' after the specified node and returns the child node handle. \hypertarget{class_d_o_1_1_tree_a3b85d61d075fcee2959be9c1b564e23b}{\index{D\-O\-::\-Tree@{D\-O\-::\-Tree}!insert\-\_\-sibling\-\_\-before@{insert\-\_\-sibling\-\_\-before}}
+\index{insert\-\_\-sibling\-\_\-before@{insert\-\_\-sibling\-\_\-before}!DO::Tree@{D\-O\-::\-Tree}}
+\subsubsection[{insert\-\_\-sibling\-\_\-before}]{\setlength{\rightskip}{0pt plus 5cm}node\-\_\-handle insert\-\_\-sibling\-\_\-before (
+\begin{DoxyParamCaption}
+\item[{node\-\_\-handle}]{n, }
+\item[{const T \&}]{v}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{class_d_o_1_1_tree_a3b85d61d075fcee2959be9c1b564e23b}
+Insert a sibling with value 'v' before the specified node and returns the child node handle. \hypertarget{class_d_o_1_1_tree_a72e422ad913c00d5443bfe02530394a1}{\index{D\-O\-::\-Tree@{D\-O\-::\-Tree}!operator!=@{operator!=}}
+\index{operator!=@{operator!=}!DO::Tree@{D\-O\-::\-Tree}}
+\subsubsection[{operator!=}]{\setlength{\rightskip}{0pt plus 5cm}bool operator!= (
+\begin{DoxyParamCaption}
+\item[{const {\bf Tree}$<$ T $>$ \&}]{t}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [inline]}}}\label{class_d_o_1_1_tree_a72e422ad913c00d5443bfe02530394a1}
+
+
+Equality operator. 
+
+Inequality operator. 
+
+The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+src/\-D\-O/\-Core/\hyperlink{_tree_8hpp}{Tree.\-hpp}\end{DoxyCompactItemize}

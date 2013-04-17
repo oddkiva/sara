@@ -1,0 +1,59 @@
+\hypertarget{group___meta}{\section{Meta}
+\label{group___meta}\index{Meta@{Meta}}
+}
+\subsection*{Namespaces}
+\begin{DoxyCompactItemize}
+\item 
+namespace \hyperlink{namespace_d_o_1_1_meta}{D\-O\-::\-Meta}
+\begin{DoxyCompactList}\small\item\em This namespace contains meta-\/programming structures and functions. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{group___meta_ga2b69d33b4b707fde292f656c4e27b6a9}{D\-O\-\_\-\-S\-T\-A\-T\-I\-C\-\_\-\-A\-S\-S\-E\-R\-T}(expression, message)
+\begin{DoxyCompactList}\small\item\em Static assertion macro. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+
+
+\subsection{Macro Definition Documentation}
+\hypertarget{group___meta_ga2b69d33b4b707fde292f656c4e27b6a9}{\index{Meta@{Meta}!D\-O\-\_\-\-S\-T\-A\-T\-I\-C\-\_\-\-A\-S\-S\-E\-R\-T@{D\-O\-\_\-\-S\-T\-A\-T\-I\-C\-\_\-\-A\-S\-S\-E\-R\-T}}
+\index{D\-O\-\_\-\-S\-T\-A\-T\-I\-C\-\_\-\-A\-S\-S\-E\-R\-T@{D\-O\-\_\-\-S\-T\-A\-T\-I\-C\-\_\-\-A\-S\-S\-E\-R\-T}!Meta@{Meta}}
+\subsubsection[{D\-O\-\_\-\-S\-T\-A\-T\-I\-C\-\_\-\-A\-S\-S\-E\-R\-T}]{\setlength{\rightskip}{0pt plus 5cm}\#define D\-O\-\_\-\-S\-T\-A\-T\-I\-C\-\_\-\-A\-S\-S\-E\-R\-T(
+\begin{DoxyParamCaption}
+\item[{}]{expression, }
+\item[{}]{message}
+\end{DoxyParamCaption}
+)}}\label{group___meta_ga2b69d33b4b707fde292f656c4e27b6a9}
+{\bfseries Value\-:}
+\begin{DoxyCode}
+\textcolor{keyword}{struct }\hyperlink{_static_assert_8hpp_a94af0bf1263c669c40b41161203c57fc}{CAT}(\_\_static\_assertion\_at\_line\_, \_\_LINE\_\_)                           \(\backslash\)
+\{                                                                           \hyperlink{struct_d_o_1_1_meta_1_1_static_assertion}{\(\backslash\)}
+\hyperlink{struct_d_o_1_1_meta_1_1_static_assertion}{  DO::Meta::StaticAssertion<static\_cast<bool>}((expression))>  
+                    \(\backslash\)
+    CAT(\hyperlink{_static_assert_8hpp_a94af0bf1263c669c40b41161203c57fc}{CAT}(\hyperlink{_static_assert_8hpp_a94af0bf1263c669c40b41161203c57fc}{CAT}(STATIC\_ASSERTION\_FAILED\_AT\_LINE\_, \_\_LINE\_\_), \_), message);  \(\backslash\)
+\};                                                                          \(\backslash\)
+typedef \hyperlink{struct_d_o_1_1_meta_1_1_static_assertion_test}{DO::Meta::StaticAssertionTest}<                                      \(\backslash\)
+  sizeof(\hyperlink{_static_assert_8hpp_a94af0bf1263c669c40b41161203c57fc}{CAT}(\_\_static\_assertion\_at\_line\_, \_\_LINE\_\_))  >                     \(\backslash\)
+    CAT(\_\_static\_assertion\_test\_at\_line\_, \_\_LINE\_\_)
+\end{DoxyCode}
+
+
+Static assertion macro. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em expression} & a boolean expression \\
+\hline
+{\em message} & some error message\\
+\hline
+\end{DoxyParams}
+Usage\-:
+
+\hyperlink{group___meta_ga2b69d33b4b707fde292f656c4e27b6a9}{D\-O\-\_\-\-S\-T\-A\-T\-I\-C\-\_\-\-A\-S\-S\-E\-R\-T(expression, message)};
+
+When the static assertion test fails, a compiler error message that somehow contains the \char`\"{}\-S\-T\-A\-T\-I\-C\-\_\-\-A\-S\-S\-E\-R\-T\-I\-O\-N\-\_\-\-F\-A\-I\-L\-E\-D\-\_\-\-A\-T\-\_\-\-L\-I\-N\-E\-\_\-xxx\-\_\-message\char`\"{} is generated.
+
+W\-A\-R\-N\-I\-N\-G\-: message has to be a valid C++ identifier, that is to say it must not contain space characters, cannot start with a digit, etc.
+
+\hyperlink{group___meta_ga2b69d33b4b707fde292f656c4e27b6a9}{D\-O\-\_\-\-S\-T\-A\-T\-I\-C\-\_\-\-A\-S\-S\-E\-R\-T(true, this\-\_\-message\-\_\-will\-\_\-never\-\_\-be\-\_\-displayed)}; 

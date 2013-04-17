@@ -1,0 +1,224 @@
+\hypertarget{class_d_o_1_1_locator}{\section{Locator$<$ T, N, Storage\-Order $>$ Class Template Reference}
+\label{class_d_o_1_1_locator}\index{Locator$<$ T, N, Storage\-Order $>$@{Locator$<$ T, N, Storage\-Order $>$}}
+}
+
+
+N-\/dimensional iterator class.  
+
+
+
+
+{\ttfamily \#include $<$Locator.\-hpp$>$}
+
+Inheritance diagram for Locator$<$ T, N, Storage\-Order $>$\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_d_o_1_1_locator}
+\end{center}
+\end{figure}
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_d_o_1_1_locator_a758d02a5183e542558cd2f7ad65c683c}{typedef Base\-::value\-\_\-type \hyperlink{class_d_o_1_1_locator_a758d02a5183e542558cd2f7ad65c683c}{value\-\_\-type}}\label{class_d_o_1_1_locator_a758d02a5183e542558cd2f7ad65c683c}
+
+\begin{DoxyCompactList}\small\item\em value\-\_\-type \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_locator_aa4336e7fd692b20bda7b7227fa9c9f55}{typedef Base\-::difference\-\_\-type \hyperlink{class_d_o_1_1_locator_aa4336e7fd692b20bda7b7227fa9c9f55}{difference\-\_\-type}}\label{class_d_o_1_1_locator_aa4336e7fd692b20bda7b7227fa9c9f55}
+
+\begin{DoxyCompactList}\small\item\em difference\-\_\-type \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_locator_aa2158dc2d25210ef557a40d3b8a521e3}{typedef Base\-::pointer \hyperlink{class_d_o_1_1_locator_aa2158dc2d25210ef557a40d3b8a521e3}{pointer}}\label{class_d_o_1_1_locator_aa2158dc2d25210ef557a40d3b8a521e3}
+
+\begin{DoxyCompactList}\small\item\em pointer \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_locator_abaed3f9c23f38a6baedf841296fa931c}{typedef Base\-::reference \hyperlink{class_d_o_1_1_locator_abaed3f9c23f38a6baedf841296fa931c}{reference}}\label{class_d_o_1_1_locator_abaed3f9c23f38a6baedf841296fa931c}
+
+\begin{DoxyCompactList}\small\item\em reference \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_locator_a61a96ce54a0b0407ce9bdd9d3f0e3934}{typedef Base\-::iterator\-\_\-category \hyperlink{class_d_o_1_1_locator_a61a96ce54a0b0407ce9bdd9d3f0e3934}{iterator\-\_\-category}}\label{class_d_o_1_1_locator_a61a96ce54a0b0407ce9bdd9d3f0e3934}
+
+\begin{DoxyCompactList}\small\item\em iterator\-\_\-category \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_locator_a2b4e7bf0649f420e5db026e79ac499be}{typedef \hyperlink{class_d_o_1_1_locator}{Locator} \hyperlink{class_d_o_1_1_locator_a2b4e7bf0649f420e5db026e79ac499be}{self\-\_\-type}}\label{class_d_o_1_1_locator_a2b4e7bf0649f420e5db026e79ac499be}
+
+\begin{DoxyCompactList}\small\item\em self\-\_\-type \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_locator_ad4305c73fecc71059d7f201539322941}{typedef \hyperlink{class_d_o_1_1_axis_iterator}{Axis\-Iterator}\\*
+$<$ \hyperlink{class_d_o_1_1_locator_a758d02a5183e542558cd2f7ad65c683c}{value\-\_\-type}, 0, N, \\*
+Storage\-Order $>$ \hyperlink{class_d_o_1_1_locator_ad4305c73fecc71059d7f201539322941}{x\-\_\-iterator}}\label{class_d_o_1_1_locator_ad4305c73fecc71059d7f201539322941}
+
+\begin{DoxyCompactList}\small\item\em x\-\_\-iterator \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_locator_af164507f5d2199608aa38d15634c878b}{typedef \hyperlink{class_d_o_1_1_axis_iterator}{Axis\-Iterator}\\*
+$<$ \hyperlink{class_d_o_1_1_locator_a758d02a5183e542558cd2f7ad65c683c}{value\-\_\-type}, 1, N, \\*
+Storage\-Order $>$ \hyperlink{class_d_o_1_1_locator_af164507f5d2199608aa38d15634c878b}{y\-\_\-iterator}}\label{class_d_o_1_1_locator_af164507f5d2199608aa38d15634c878b}
+
+\begin{DoxyCompactList}\small\item\em y\-\_\-iterator \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_locator_a252ebfc1dc8bb45458786e358b6dd4cf}{typedef \hyperlink{class_d_o_1_1_axis_iterator}{Axis\-Iterator}\\*
+$<$ \hyperlink{class_d_o_1_1_locator_a758d02a5183e542558cd2f7ad65c683c}{value\-\_\-type}, 2, N, \\*
+Storage\-Order $>$ \hyperlink{class_d_o_1_1_locator_a252ebfc1dc8bb45458786e358b6dd4cf}{z\-\_\-iterator}}\label{class_d_o_1_1_locator_a252ebfc1dc8bb45458786e358b6dd4cf}
+
+\begin{DoxyCompactList}\small\item\em z\-\_\-iterator \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_locator_ae4fb477425bbeb20329d300396ac2582}{typedef Matrix$<$ int, N, 1 $>$ {\bfseries coord\-\_\-type}}\label{class_d_o_1_1_locator_ae4fb477425bbeb20329d300396ac2582}
+
+\item 
+\hypertarget{class_d_o_1_1_locator_aacf98e49e90f9aeead0ff8885fae3ac7}{typedef Matrix$<$ int, N, 1 $>$ \hyperlink{class_d_o_1_1_locator_aacf98e49e90f9aeead0ff8885fae3ac7}{vector\-\_\-type}}\label{class_d_o_1_1_locator_aacf98e49e90f9aeead0ff8885fae3ac7}
+
+\begin{DoxyCompactList}\small\item\em coord\-\_\-type \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_d_o_1_1_locator_ab755eccc7041f74d284063d3f44068e9}{\hyperlink{class_d_o_1_1_locator_ab755eccc7041f74d284063d3f44068e9}{Locator} (\hyperlink{class_d_o_1_1_locator_aa2158dc2d25210ef557a40d3b8a521e3}{pointer} pos, const coord\-\_\-type \&\hyperlink{class_d_o_1_1_locator_a097d0e1275ad521eec770c654ae7c11a}{coords}, \hyperlink{class_d_o_1_1_locator_aa2158dc2d25210ef557a40d3b8a521e3}{pointer} first, \hyperlink{class_d_o_1_1_locator_aa2158dc2d25210ef557a40d3b8a521e3}{pointer} last, const \hyperlink{class_d_o_1_1_locator_aacf98e49e90f9aeead0ff8885fae3ac7}{vector\-\_\-type} \&\hyperlink{class_d_o_1_1_locator_a15f0ce2877b385c9505f042faa705694}{sizes}, const \hyperlink{class_d_o_1_1_locator_aacf98e49e90f9aeead0ff8885fae3ac7}{vector\-\_\-type} \&\hyperlink{class_d_o_1_1_locator_a5be6b48ede748b588c237552cbf3b6b8}{strides})}\label{class_d_o_1_1_locator_ab755eccc7041f74d284063d3f44068e9}
+
+\begin{DoxyCompactList}\small\item\em Constructor. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_locator_ac775564b41ff8e45a763c87708a3a295}{\hyperlink{class_d_o_1_1_locator_ac775564b41ff8e45a763c87708a3a295}{Locator} (const \hyperlink{class_d_o_1_1_locator_a2b4e7bf0649f420e5db026e79ac499be}{self\-\_\-type} \&l)}\label{class_d_o_1_1_locator_ac775564b41ff8e45a763c87708a3a295}
+
+\begin{DoxyCompactList}\small\item\em Copy constructor. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_locator_aa149c2249879e7727f33688b76bf2c99}{\hyperlink{class_d_o_1_1_locator_abaed3f9c23f38a6baedf841296fa931c}{reference} \hyperlink{class_d_o_1_1_locator_aa149c2249879e7727f33688b76bf2c99}{operator$\ast$} () const }\label{class_d_o_1_1_locator_aa149c2249879e7727f33688b76bf2c99}
+
+\begin{DoxyCompactList}\small\item\em Referencing operator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_locator_a33ce448509e9cc0d73861e4c1919c7a7}{\hyperlink{class_d_o_1_1_locator_aa2158dc2d25210ef557a40d3b8a521e3}{pointer} \hyperlink{class_d_o_1_1_locator_a33ce448509e9cc0d73861e4c1919c7a7}{operator-\/$>$} () const }\label{class_d_o_1_1_locator_a33ce448509e9cc0d73861e4c1919c7a7}
+
+\begin{DoxyCompactList}\small\item\em Referencing operator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_locator_a32d919fd1ac974efa89582486e7752de}{\hyperlink{class_d_o_1_1_locator_abaed3f9c23f38a6baedf841296fa931c}{reference} \hyperlink{class_d_o_1_1_locator_a32d919fd1ac974efa89582486e7752de}{operator\mbox{[}$\,$\mbox{]}} (int n) const }\label{class_d_o_1_1_locator_a32d919fd1ac974efa89582486e7752de}
+
+\begin{DoxyCompactList}\small\item\em Referencing operator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_locator_a6b17c884f5a18c847944e567d71ad97e}{\hyperlink{class_d_o_1_1_locator_abaed3f9c23f38a6baedf841296fa931c}{reference} \hyperlink{class_d_o_1_1_locator_a6b17c884f5a18c847944e567d71ad97e}{operator()} (int i, int j) const }\label{class_d_o_1_1_locator_a6b17c884f5a18c847944e567d71ad97e}
+
+\begin{DoxyCompactList}\small\item\em Particular referencing operators. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_locator_a5755d4768b1c9721e052999ee4f7aa11}{\hyperlink{class_d_o_1_1_locator_abaed3f9c23f38a6baedf841296fa931c}{reference} \hyperlink{class_d_o_1_1_locator_a5755d4768b1c9721e052999ee4f7aa11}{operator()} (int i, int j, int k) const }\label{class_d_o_1_1_locator_a5755d4768b1c9721e052999ee4f7aa11}
+
+\begin{DoxyCompactList}\small\item\em Particular referencing operators. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_locator_afa077c4f1e1d6c36024842404b8574bd}{\hyperlink{class_d_o_1_1_locator_abaed3f9c23f38a6baedf841296fa931c}{reference} \hyperlink{class_d_o_1_1_locator_afa077c4f1e1d6c36024842404b8574bd}{operator()} (const \hyperlink{class_d_o_1_1_locator_aacf98e49e90f9aeead0ff8885fae3ac7}{vector\-\_\-type} \&t) const }\label{class_d_o_1_1_locator_afa077c4f1e1d6c36024842404b8574bd}
+
+\begin{DoxyCompactList}\small\item\em Particular referencing operators. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_locator_a1d893679af27db625590457f8e265eee}{bool \hyperlink{class_d_o_1_1_locator_a1d893679af27db625590457f8e265eee}{operator==} (const \hyperlink{class_d_o_1_1_locator_a2b4e7bf0649f420e5db026e79ac499be}{self\-\_\-type} \&rhs) const }\label{class_d_o_1_1_locator_a1d893679af27db625590457f8e265eee}
+
+\begin{DoxyCompactList}\small\item\em Equality operator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_locator_ad3e7caef9082dd2b3f65ea3867336476}{bool \hyperlink{class_d_o_1_1_locator_ad3e7caef9082dd2b3f65ea3867336476}{operator==} (\hyperlink{class_d_o_1_1_locator_aa2158dc2d25210ef557a40d3b8a521e3}{pointer} pos) const }\label{class_d_o_1_1_locator_ad3e7caef9082dd2b3f65ea3867336476}
+
+\begin{DoxyCompactList}\small\item\em Equality operator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_locator_afc84f4470aad70894501ebf4900b374f}{bool \hyperlink{class_d_o_1_1_locator_afc84f4470aad70894501ebf4900b374f}{operator!=} (const \hyperlink{class_d_o_1_1_locator_a2b4e7bf0649f420e5db026e79ac499be}{self\-\_\-type} \&rhs) const }\label{class_d_o_1_1_locator_afc84f4470aad70894501ebf4900b374f}
+
+\begin{DoxyCompactList}\small\item\em Inequality operator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_locator_ac966afbaec9c16d1cc1bb6819810ab10}{bool \hyperlink{class_d_o_1_1_locator_ac966afbaec9c16d1cc1bb6819810ab10}{operator!=} (\hyperlink{class_d_o_1_1_locator_aa2158dc2d25210ef557a40d3b8a521e3}{pointer} pos) const }\label{class_d_o_1_1_locator_ac966afbaec9c16d1cc1bb6819810ab10}
+
+\begin{DoxyCompactList}\small\item\em Inequality operator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_locator_a68c6d6abdde9fef27d6a4f2904212559}{\hyperlink{class_d_o_1_1_locator_a2b4e7bf0649f420e5db026e79ac499be}{self\-\_\-type} \& \hyperlink{class_d_o_1_1_locator_a68c6d6abdde9fef27d6a4f2904212559}{operator++} ()}\label{class_d_o_1_1_locator_a68c6d6abdde9fef27d6a4f2904212559}
+
+\begin{DoxyCompactList}\small\item\em Prefix increment operator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_locator_a2fa8797c1ff9e6c2ac6f879a53f60601}{\hyperlink{class_d_o_1_1_locator_a2b4e7bf0649f420e5db026e79ac499be}{self\-\_\-type} \& \hyperlink{class_d_o_1_1_locator_a2fa8797c1ff9e6c2ac6f879a53f60601}{operator-\/-\/} ()}\label{class_d_o_1_1_locator_a2fa8797c1ff9e6c2ac6f879a53f60601}
+
+\begin{DoxyCompactList}\small\item\em Prefix decrement operator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_locator_a39f7c37604fd9845ff487b36b6f88602}{\hyperlink{class_d_o_1_1_locator_a2b4e7bf0649f420e5db026e79ac499be}{self\-\_\-type} \hyperlink{class_d_o_1_1_locator_a39f7c37604fd9845ff487b36b6f88602}{operator++} (int)}\label{class_d_o_1_1_locator_a39f7c37604fd9845ff487b36b6f88602}
+
+\begin{DoxyCompactList}\small\item\em Postfix increment operator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_locator_ac8142815f977b8411faf27f7b8d804b3}{\hyperlink{class_d_o_1_1_locator_a2b4e7bf0649f420e5db026e79ac499be}{self\-\_\-type} \hyperlink{class_d_o_1_1_locator_ac8142815f977b8411faf27f7b8d804b3}{operator-\/-\/} (int)}\label{class_d_o_1_1_locator_ac8142815f977b8411faf27f7b8d804b3}
+
+\begin{DoxyCompactList}\small\item\em Postfix decrement operator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_locator_a6c0808c388428f119495e5ba1d9fbbed}{\hyperlink{class_d_o_1_1_locator_a2b4e7bf0649f420e5db026e79ac499be}{self\-\_\-type} \& {\bfseries operator+=} (const \hyperlink{class_d_o_1_1_locator_aacf98e49e90f9aeead0ff8885fae3ac7}{vector\-\_\-type} \&t)}\label{class_d_o_1_1_locator_a6c0808c388428f119495e5ba1d9fbbed}
+
+\item 
+\hypertarget{class_d_o_1_1_locator_afced994f988f5373b78393cab267065a}{\hyperlink{class_d_o_1_1_locator_a2b4e7bf0649f420e5db026e79ac499be}{self\-\_\-type} \& {\bfseries operator-\/=} (const \hyperlink{class_d_o_1_1_locator_aacf98e49e90f9aeead0ff8885fae3ac7}{vector\-\_\-type} \&t)}\label{class_d_o_1_1_locator_afced994f988f5373b78393cab267065a}
+
+\item 
+{\footnotesize template$<$int Axis$>$ }\\\hyperlink{class_d_o_1_1_axis_iterator}{Axis\-Iterator}$<$ T, Axis, N, \\*
+Storage\-Order $>$ \hyperlink{class_d_o_1_1_locator_a2e106e539d6ba7366e07cc4ae130b29e}{axis} ()
+\item 
+\hypertarget{class_d_o_1_1_locator_a73957d210565fc1dcf018c748cc7942c}{\hyperlink{class_d_o_1_1_locator_ad4305c73fecc71059d7f201539322941}{x\-\_\-iterator} \hyperlink{class_d_o_1_1_locator_a73957d210565fc1dcf018c748cc7942c}{x} ()}\label{class_d_o_1_1_locator_a73957d210565fc1dcf018c748cc7942c}
+
+\begin{DoxyCompactList}\small\item\em X-\/axis iterator getter. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_locator_af33cd0d6e05af68f0f5d58c905493f7c}{\hyperlink{class_d_o_1_1_locator_af164507f5d2199608aa38d15634c878b}{y\-\_\-iterator} \hyperlink{class_d_o_1_1_locator_af33cd0d6e05af68f0f5d58c905493f7c}{y} ()}\label{class_d_o_1_1_locator_af33cd0d6e05af68f0f5d58c905493f7c}
+
+\begin{DoxyCompactList}\small\item\em Y-\/axis iterator getter. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_locator_a67d32d4fcfd807176852b6dfbaa11f74}{\hyperlink{class_d_o_1_1_locator_a252ebfc1dc8bb45458786e358b6dd4cf}{z\-\_\-iterator} \hyperlink{class_d_o_1_1_locator_a67d32d4fcfd807176852b6dfbaa11f74}{z} ()}\label{class_d_o_1_1_locator_a67d32d4fcfd807176852b6dfbaa11f74}
+
+\begin{DoxyCompactList}\small\item\em Z-\/\-Axis iterator getter. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_locator_a097d0e1275ad521eec770c654ae7c11a}{const coord\-\_\-type \& \hyperlink{class_d_o_1_1_locator_a097d0e1275ad521eec770c654ae7c11a}{coords} () const }\label{class_d_o_1_1_locator_a097d0e1275ad521eec770c654ae7c11a}
+
+\begin{DoxyCompactList}\small\item\em Get the current coordinates. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_locator_a15f0ce2877b385c9505f042faa705694}{const \hyperlink{class_d_o_1_1_locator_aacf98e49e90f9aeead0ff8885fae3ac7}{vector\-\_\-type} \& \hyperlink{class_d_o_1_1_locator_a15f0ce2877b385c9505f042faa705694}{sizes} () const }\label{class_d_o_1_1_locator_a15f0ce2877b385c9505f042faa705694}
+
+\begin{DoxyCompactList}\small\item\em Get the sizes. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_locator_ab243ad95876992f71bfc9043b9a713bd}{int \hyperlink{class_d_o_1_1_locator_ab243ad95876992f71bfc9043b9a713bd}{size} (int i) const }\label{class_d_o_1_1_locator_ab243ad95876992f71bfc9043b9a713bd}
+
+\begin{DoxyCompactList}\small\item\em Get the size of the i-\/th dimension. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_locator_a5be6b48ede748b588c237552cbf3b6b8}{const \hyperlink{class_d_o_1_1_locator_aacf98e49e90f9aeead0ff8885fae3ac7}{vector\-\_\-type} \& \hyperlink{class_d_o_1_1_locator_a5be6b48ede748b588c237552cbf3b6b8}{strides} () const }\label{class_d_o_1_1_locator_a5be6b48ede748b588c237552cbf3b6b8}
+
+\begin{DoxyCompactList}\small\item\em Get the strides. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_locator_abe61dbf6dda369f1605c7700793791bd}{int \hyperlink{class_d_o_1_1_locator_abe61dbf6dda369f1605c7700793791bd}{stride} (int i) const }\label{class_d_o_1_1_locator_abe61dbf6dda369f1605c7700793791bd}
+
+\begin{DoxyCompactList}\small\item\em Get the i-\/th stride. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_locator_a4f69d9df692bff019419ca9b3b656c7f}{void \hyperlink{class_d_o_1_1_locator_a4f69d9df692bff019419ca9b3b656c7f}{check} () const }\label{class_d_o_1_1_locator_a4f69d9df692bff019419ca9b3b656c7f}
+
+\begin{DoxyCompactList}\small\item\em Debugging method. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_locator_aad7f0d952b12caba65ea4fa3043d2411}{void \hyperlink{class_d_o_1_1_locator_aad7f0d952b12caba65ea4fa3043d2411}{check\-\_\-strides} () const }\label{class_d_o_1_1_locator_aad7f0d952b12caba65ea4fa3043d2411}
+
+\begin{DoxyCompactList}\small\item\em Debugging method. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_locator_ae823a70ca36211a90342618e2c3ebf5f}{\hyperlink{class_d_o_1_1_locator_aa2158dc2d25210ef557a40d3b8a521e3}{pointer} \hyperlink{class_d_o_1_1_locator_ae823a70ca36211a90342618e2c3ebf5f}{operator()} () const }\label{class_d_o_1_1_locator_ae823a70ca36211a90342618e2c3ebf5f}
+
+\begin{DoxyCompactList}\small\item\em Additional features. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_locator_ab90f1f06efb41eee9fb48cd37dfbdccd}{\hyperlink{class_d_o_1_1_locator_aa2158dc2d25210ef557a40d3b8a521e3}{pointer} {\bfseries begin} ()}\label{class_d_o_1_1_locator_ab90f1f06efb41eee9fb48cd37dfbdccd}
+
+\item 
+\hypertarget{class_d_o_1_1_locator_a13c6690dd32b33d4bc6e3ae6897ca432}{\hyperlink{class_d_o_1_1_locator_aa2158dc2d25210ef557a40d3b8a521e3}{pointer} {\bfseries end} ()}\label{class_d_o_1_1_locator_a13c6690dd32b33d4bc6e3ae6897ca432}
+
+\item 
+\hypertarget{class_d_o_1_1_locator_a1bcb35403b8b8b24885e62614ac7619f}{bool {\bfseries is\-\_\-out\-\_\-of\-\_\-bounds} () const }\label{class_d_o_1_1_locator_a1bcb35403b8b8b24885e62614ac7619f}
+
+\item 
+\hypertarget{class_d_o_1_1_locator_acb17ad0e9cac4a4740fcb8ade0825ebc}{bool {\bfseries is\-\_\-out\-\_\-of\-\_\-bounds} (\hyperlink{class_d_o_1_1_locator_aa2158dc2d25210ef557a40d3b8a521e3}{pointer} p) const }\label{class_d_o_1_1_locator_acb17ad0e9cac4a4740fcb8ade0825ebc}
+
+\item 
+\hypertarget{class_d_o_1_1_locator_a5f837e03969e4f1af33017f9dea5b960}{bool {\bfseries is\-\_\-out\-\_\-of\-\_\-bounds} (const coord\-\_\-type \&c) const }\label{class_d_o_1_1_locator_a5f837e03969e4f1af33017f9dea5b960}
+
+\item 
+\hypertarget{class_d_o_1_1_locator_a384ff954aa602ae0ba4dc4caacf06e51}{coord\-\_\-type {\bfseries get\-\_\-coords\-\_\-of\-\_\-first} () const }\label{class_d_o_1_1_locator_a384ff954aa602ae0ba4dc4caacf06e51}
+
+\item 
+\hypertarget{class_d_o_1_1_locator_aaf19309c77f646830101b7abf0b3a2be}{coord\-\_\-type {\bfseries get\-\_\-coords\-\_\-of\-\_\-last} () const }\label{class_d_o_1_1_locator_aaf19309c77f646830101b7abf0b3a2be}
+
+\item 
+\hypertarget{class_d_o_1_1_locator_a94ebecd99f198eb2e0563fab74665af6}{void {\bfseries reset\-\_\-anchor} (const coord\-\_\-type \&c=coord\-\_\-type\-::\-Zero())}\label{class_d_o_1_1_locator_a94ebecd99f198eb2e0563fab74665af6}
+
+\item 
+\hypertarget{class_d_o_1_1_locator_a3fefb700e6efe9c377efc0490e55bdd9}{void {\bfseries reset\-\_\-anchor} (int \hyperlink{class_d_o_1_1_locator_a73957d210565fc1dcf018c748cc7942c}{x}, int \hyperlink{class_d_o_1_1_locator_af33cd0d6e05af68f0f5d58c905493f7c}{y})}\label{class_d_o_1_1_locator_a3fefb700e6efe9c377efc0490e55bdd9}
+
+\item 
+\hypertarget{class_d_o_1_1_locator_a4fe2e7200a747dcfed93cb504b227f9c}{void {\bfseries reset\-\_\-anchor} (int \hyperlink{class_d_o_1_1_locator_a73957d210565fc1dcf018c748cc7942c}{x}, int \hyperlink{class_d_o_1_1_locator_af33cd0d6e05af68f0f5d58c905493f7c}{y}, int \hyperlink{class_d_o_1_1_locator_a67d32d4fcfd807176852b6dfbaa11f74}{z})}\label{class_d_o_1_1_locator_a4fe2e7200a747dcfed93cb504b227f9c}
+
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_d_o_1_1_locator_ac031f1ee81de377a8aec7cce8f9ba05c}{\hyperlink{class_d_o_1_1_locator_aa2158dc2d25210ef557a40d3b8a521e3}{pointer} {\bfseries pos\-\_\-}}\label{class_d_o_1_1_locator_ac031f1ee81de377a8aec7cce8f9ba05c}
+
+\item 
+\hypertarget{class_d_o_1_1_locator_ae2f901e533f50408ae578d32206ca664}{coord\-\_\-type {\bfseries coords\-\_\-}}\label{class_d_o_1_1_locator_ae2f901e533f50408ae578d32206ca664}
+
+\item 
+\hypertarget{class_d_o_1_1_locator_a4af7b5f5ab4f7272914132ada9beace1}{\hyperlink{class_d_o_1_1_locator_aa2158dc2d25210ef557a40d3b8a521e3}{pointer} {\bfseries first\-\_\-}}\label{class_d_o_1_1_locator_a4af7b5f5ab4f7272914132ada9beace1}
+
+\item 
+\hypertarget{class_d_o_1_1_locator_ac56be895ad05f501af8808cfa6d9850f}{\hyperlink{class_d_o_1_1_locator_aa2158dc2d25210ef557a40d3b8a521e3}{pointer} {\bfseries last\-\_\-}}\label{class_d_o_1_1_locator_ac56be895ad05f501af8808cfa6d9850f}
+
+\item 
+\hypertarget{class_d_o_1_1_locator_acc3c4c5d00d37bbc0ed318ca59e1e5c8}{const \hyperlink{class_d_o_1_1_locator_aacf98e49e90f9aeead0ff8885fae3ac7}{vector\-\_\-type} \& {\bfseries sizes\-\_\-}}\label{class_d_o_1_1_locator_acc3c4c5d00d37bbc0ed318ca59e1e5c8}
+
+\item 
+\hypertarget{class_d_o_1_1_locator_a75797003a07a37c392447be7a21a9cd7}{const \hyperlink{class_d_o_1_1_locator_aacf98e49e90f9aeead0ff8885fae3ac7}{vector\-\_\-type} \& {\bfseries strides\-\_\-}}\label{class_d_o_1_1_locator_a75797003a07a37c392447be7a21a9cd7}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\subsubsection*{template$<$typename T, int N, int Storage\-Order = Col\-Major$>$class D\-O\-::\-Locator$<$ T, N, Storage\-Order $>$}
+
+N-\/dimensional iterator class. 
+
+\subsection{Member Function Documentation}
+\hypertarget{class_d_o_1_1_locator_a2e106e539d6ba7366e07cc4ae130b29e}{\index{D\-O\-::\-Locator@{D\-O\-::\-Locator}!axis@{axis}}
+\index{axis@{axis}!DO::Locator@{D\-O\-::\-Locator}}
+\subsubsection[{axis}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Axis\-Iterator}$<$T, Axis, N, Storage\-Order$>$ axis (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{class_d_o_1_1_locator_a2e106e539d6ba7366e07cc4ae130b29e}
+Axis iterator getter. The axes matches with the Cartesian view if the data is stored in a row major fashion. 
+
+The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+src/\-D\-O/\-Core/\hyperlink{_locator_8hpp}{Locator.\-hpp}\end{DoxyCompactItemize}

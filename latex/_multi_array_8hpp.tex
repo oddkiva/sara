@@ -1,0 +1,34 @@
+\hypertarget{_multi_array_8hpp}{\section{src/\-D\-O/\-Core/\-Multi\-Array.hpp File Reference}
+\label{_multi_array_8hpp}\index{src/\-D\-O/\-Core/\-Multi\-Array.\-hpp@{src/\-D\-O/\-Core/\-Multi\-Array.\-hpp}}
+}
+
+
+This contains the implementation of the N-\/dimensional array class.  
+
+
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{struct_d_o_1_1_element_traits}{Element\-Traits$<$ T $>$}
+\item 
+struct \hyperlink{struct_d_o_1_1_element_traits_3_01_matrix_3_01_t_00_01_m_00_01_n_01_4_01_4}{Element\-Traits$<$ Matrix$<$ T, M, N $>$ $>$}
+\begin{DoxyCompactList}\small\item\em The specialized element traits class when the entry is a non square matrix. Again the matrix is viewed as a 'super-\/scalar'. However, super-\/scalar operations will be regular point-\/wise matrix operations. Therefore this applies for row-\/vector and column vector. \end{DoxyCompactList}\item 
+struct \hyperlink{struct_d_o_1_1_element_traits_3_01_array_3_01_t_00_01_m_00_01_n_01_4_01_4}{Element\-Traits$<$ Array$<$ T, M, N $>$ $>$}
+\begin{DoxyCompactList}\small\item\em The specialized element traits class when the entry is an array. Default super-\/scalar operations are point-\/wise matrix operations. \end{DoxyCompactList}\item 
+class \hyperlink{class_d_o_1_1_multi_array}{Multi\-Array$<$ T, N, Storage\-Order $>$}
+\begin{DoxyCompactList}\small\item\em The N-\/dimensional array class. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Namespaces}
+\begin{DoxyCompactItemize}
+\item 
+namespace \hyperlink{namespace_d_o}{D\-O}
+\begin{DoxyCompactList}\small\item\em The library namespace. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{group___multi_array_ga9223155c64483239f48caab75fc0557d}{{\footnotesize template$<$typename T , int N, int Storage\-Order$>$ }\\std\-::ostream \& \hyperlink{group___multi_array_ga9223155c64483239f48caab75fc0557d}{operator$<$$<$} (std\-::ostream \&os, const Multi\-Array$<$ T, N, Storage\-Order $>$ \&M)}\label{group___multi_array_ga9223155c64483239f48caab75fc0557d}
+
+\begin{DoxyCompactList}\small\item\em output stream operator \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+This contains the implementation of the N-\/dimensional array class. 

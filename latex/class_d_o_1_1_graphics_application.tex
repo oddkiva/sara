@@ -1,0 +1,83 @@
+\hypertarget{class_d_o_1_1_graphics_application}{\section{Graphics\-Application Class Reference}
+\label{class_d_o_1_1_graphics_application}\index{Graphics\-Application@{Graphics\-Application}}
+}
+
+
+Q\-Application-\/derived class This graphic application establishes communication between the user drawing commands and the windows.  
+
+
+
+
+{\ttfamily \#include $<$Graphics\-Application.\-hpp$>$}
+
+Inheritance diagram for Graphics\-Application\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_d_o_1_1_graphics_application}
+\end{center}
+\end{figure}
+\subsection*{Public Slots}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_d_o_1_1_graphics_application_a91ede8552c45e54ff580346a1facd3e1}{void {\bfseries create\-Painting\-Window} (int w, int h, const Q\-String \&window\-Title, int x, int \hyperlink{group___channel_accessors_gac90c52c5b3a7b2a7e3761e6e84f25778}{y})}\label{class_d_o_1_1_graphics_application_a91ede8552c45e54ff580346a1facd3e1}
+
+\item 
+\hypertarget{class_d_o_1_1_graphics_application_abf7475aa077a1f00ac79d6d91870c605}{void {\bfseries create\-Open\-G\-L\-Window} (int w, int h, const Q\-String \&window\-Title, int x, int \hyperlink{group___channel_accessors_gac90c52c5b3a7b2a7e3761e6e84f25778}{y})}\label{class_d_o_1_1_graphics_application_abf7475aa077a1f00ac79d6d91870c605}
+
+\item 
+\hypertarget{class_d_o_1_1_graphics_application_a8e47c553a48b897d1a3c084808ec5cd4}{void {\bfseries create\-Graphics\-View} (int w, int h, const Q\-String \&window\-Title, int x, int \hyperlink{group___channel_accessors_gac90c52c5b3a7b2a7e3761e6e84f25778}{y})}\label{class_d_o_1_1_graphics_application_a8e47c553a48b897d1a3c084808ec5cd4}
+
+\item 
+\hypertarget{class_d_o_1_1_graphics_application_a80b900f921a02a88bc75f722495c5fa1}{void {\bfseries set\-Active\-Window} (Q\-Widget $\ast$w)}\label{class_d_o_1_1_graphics_application_a80b900f921a02a88bc75f722495c5fa1}
+
+\item 
+\hypertarget{class_d_o_1_1_graphics_application_ade0128cbcddef1b8a1911fc6019f9377}{void {\bfseries close\-Window} (Q\-Widget $\ast$w)}\label{class_d_o_1_1_graphics_application_ade0128cbcddef1b8a1911fc6019f9377}
+
+\item 
+\hypertarget{class_d_o_1_1_graphics_application_aeb7aedaa0751a70e7328c2f742b2686c}{void {\bfseries get\-File\-From\-Dialog\-Box} ()}\label{class_d_o_1_1_graphics_application_aeb7aedaa0751a70e7328c2f742b2686c}
+
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_d_o_1_1_graphics_application_a4eb7658f5775a01f8a1f9e03ffd75bd9}{{\bfseries Graphics\-Application} (int argc, char $\ast$$\ast$argv)}\label{class_d_o_1_1_graphics_application_a4eb7658f5775a01f8a1f9e03ffd75bd9}
+
+\item 
+\hypertarget{class_d_o_1_1_graphics_application_ad3db22dd49862e1f75afe856e6e89d1b}{bool {\bfseries active\-Window\-Is\-Visible} ()}\label{class_d_o_1_1_graphics_application_ad3db22dd49862e1f75afe856e6e89d1b}
+
+\item 
+\hypertarget{class_d_o_1_1_graphics_application_a3db095f1054de65a90af3d2631fac067}{void {\bfseries connect\-Window\-I\-O\-Events\-To\-User\-Thread} (Q\-Widget $\ast$w)}\label{class_d_o_1_1_graphics_application_a3db095f1054de65a90af3d2631fac067}
+
+\item 
+\hypertarget{class_d_o_1_1_graphics_application_ace71abe08c7012724571fed56e7e0e27}{void {\bfseries connect\-All\-Windows\-I\-O\-Events\-To\-User\-Thread} ()}\label{class_d_o_1_1_graphics_application_ace71abe08c7012724571fed56e7e0e27}
+
+\item 
+\hypertarget{class_d_o_1_1_graphics_application_aa9107742e1cddc2c5fc3854151e2e793}{void {\bfseries disconnect\-All\-Windows\-I\-O\-Events\-To\-User\-Thread} ()}\label{class_d_o_1_1_graphics_application_aa9107742e1cddc2c5fc3854151e2e793}
+
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_d_o_1_1_graphics_application_acd43bf2c420526decde3e16bca3b34d1}{\hyperlink{class_d_o_1_1_user_thread}{User\-Thread} {\bfseries user\-Thread}}\label{class_d_o_1_1_graphics_application_acd43bf2c420526decde3e16bca3b34d1}
+
+\item 
+\hypertarget{class_d_o_1_1_graphics_application_ae75bc8ab11de0993ec82b0dd4a26d521}{Q\-List$<$ Q\-Pointer$<$ Q\-Widget $>$ $>$ {\bfseries created\-Windows}}\label{class_d_o_1_1_graphics_application_ae75bc8ab11de0993ec82b0dd4a26d521}
+
+\item 
+\hypertarget{class_d_o_1_1_graphics_application_add8fca3b038b4747c6554c0f64cda1dc}{Q\-Pointer$<$ Q\-Widget $>$ {\bfseries active\-Window}}\label{class_d_o_1_1_graphics_application_add8fca3b038b4747c6554c0f64cda1dc}
+
+\item 
+\hypertarget{class_d_o_1_1_graphics_application_a5f689b51b1b814abf7df7dbc0f83f49d}{\hyperlink{struct_d_o_1_1_interactive_box}{Interactive\-Box} {\bfseries interactive\-Box}}\label{class_d_o_1_1_graphics_application_a5f689b51b1b814abf7df7dbc0f83f49d}
+
+\item 
+\hypertarget{class_d_o_1_1_graphics_application_af6f9da7af5126b3f589fc5ff8b002335}{Q\-Mutex {\bfseries mutex}}\label{class_d_o_1_1_graphics_application_af6f9da7af5126b3f589fc5ff8b002335}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Q\-Application-\/derived class This graphic application establishes communication between the user drawing commands and the windows. 
+
+The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+src/\-D\-O/\-Graphics/\-Derived\-Q\-Objects/\hyperlink{_graphics_application_8hpp}{Graphics\-Application.\-hpp}\end{DoxyCompactItemize}

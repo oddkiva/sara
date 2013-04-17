@@ -1,0 +1,359 @@
+\hypertarget{group___color_conversion}{\section{Color rescaling and conversion functions}
+\label{group___color_conversion}\index{Color rescaling and conversion functions@{Color rescaling and conversion functions}}
+}
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{group___color_conversion_gac0e4b5dd70b28feca22cc770d9862a8b}{C\-O\-L\-O\-R\-\_\-\-C\-O\-N\-V\-E\-R\-S\-I\-O\-N\-\_\-\-B\-E\-T\-W\-E\-E\-N\-\_\-\-G\-R\-A\-Y\-\_\-\-A\-N\-D\-\_\-\-R\-G\-B}(Gray\-Type)
+\begin{DoxyCompactList}\small\item\em Color conversion between gray and R\-G\-B color spaces. \end{DoxyCompactList}\item 
+\#define \hyperlink{group___color_conversion_gadcb0f8382525554854f5cb0ffa5ffeee}{D\-E\-F\-I\-N\-E\-\_\-\-C\-O\-L\-O\-R\-\_\-\-C\-O\-N\-V\-E\-R\-S\-I\-O\-N\-\_\-\-B\-E\-T\-W\-E\-E\-N\-\_\-\-I\-N\-T\-E\-G\-R\-A\-L\-\_\-\-G\-R\-A\-Y\-\_\-\-T\-Y\-P\-E\-S}(Gray1, Gray2)
+\begin{DoxyCompactList}\small\item\em Color conversion between integral gray colors. \end{DoxyCompactList}\item 
+\#define \hyperlink{group___color_conversion_gad00b96d2364bfb1473d0a12dbd5b26c5}{D\-E\-F\-I\-N\-E\-\_\-\-C\-O\-L\-O\-R\-\_\-\-C\-O\-N\-V\-E\-R\-S\-I\-O\-N\-\_\-\-B\-E\-T\-W\-E\-E\-N\-\_\-\-I\-N\-T\-\_\-\-A\-N\-D\-\_\-\-F\-L\-O\-A\-T\-I\-N\-G\-\_\-\-T\-Y\-P\-E\-S}(Float, Int)
+\begin{DoxyCompactList}\small\item\em Color conversion between integral and floating point gray colors. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{group___color_conversion_ga3e86b8eff1da0324f3aee0cef19b7d68}{{\footnotesize template$<$typename T $>$ }\\double \hyperlink{group___color_conversion_ga3e86b8eff1da0324f3aee0cef19b7d68}{get\-Rescaled\-Channel64f} (T value)}\label{group___color_conversion_ga3e86b8eff1da0324f3aee0cef19b7d68}
+
+\begin{DoxyCompactList}\small\item\em Channel normalization between 0 and 1 in double floating-\/point precision. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga77f1b557bb4f33fac18948fcd9178dd7}{{\footnotesize template$<$typename T , int N$>$ }\\Matrix$<$ double, N, 1 $>$ \hyperlink{group___color_conversion_ga77f1b557bb4f33fac18948fcd9178dd7}{get\-Rescaled\-Color64f} (const Matrix$<$ T, N, 1 $>$ \&color)}\label{group___color_conversion_ga77f1b557bb4f33fac18948fcd9178dd7}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} normalization between 0 and 1 in double floating-\/point precision. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_gaf2f95805ffea57b546cf2547806aae1b}{{\footnotesize template$<$typename T $>$ }\\void \hyperlink{group___color_conversion_gaf2f95805ffea57b546cf2547806aae1b}{normalize\-Channel} (T \&dst, double src)}\label{group___color_conversion_gaf2f95805ffea57b546cf2547806aae1b}
+
+\begin{DoxyCompactList}\small\item\em Channel rescaling from 'double' value in \mbox{[}0,1\mbox{]} to 'T' value. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga2d242024d4f8c533e01ffd1f231adf7a}{{\footnotesize template$<$typename T , int N$>$ }\\void \hyperlink{group___color_conversion_ga2d242024d4f8c533e01ffd1f231adf7a}{normalize\-Color} (Matrix$<$ T, N, 1 $>$ \&dst, const Matrix$<$ double, N, 1 $>$ \&src)}\label{group___color_conversion_ga2d242024d4f8c533e01ffd1f231adf7a}
+
+\begin{DoxyCompactList}\small\item\em Channel rescaling from 'T' value to 'double' value in \mbox{[}0,1\mbox{]}. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga04155a327ff725c0466e90ee1bdb6ecd}{{\footnotesize template$<$typename T $>$ }\\double \hyperlink{group___color_conversion_ga04155a327ff725c0466e90ee1bdb6ecd}{rgb2gray64f} (const Matrix$<$ T, 3, 1 $>$ \&rgb)}\label{group___color_conversion_ga04155a327ff725c0466e90ee1bdb6ecd}
+
+\begin{DoxyCompactList}\small\item\em R\-G\-B to grayscale color conversion function (includes color normalization). \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_gaa88c55b9890d4ec25b7318fb12dbae6a}{{\footnotesize template$<$typename T $>$ }\\Matrix$<$ double, 3, 1 $>$ \hyperlink{group___color_conversion_gaa88c55b9890d4ec25b7318fb12dbae6a}{gray2rgb64f} (T gray)}\label{group___color_conversion_gaa88c55b9890d4ec25b7318fb12dbae6a}
+
+\begin{DoxyCompactList}\small\item\em Grayscale to R\-G\-B color conversion function (includes color normalization). \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_gab873008f62a65b63fea0ff868104b43c}{{\footnotesize template$<$typename T $>$ }\\Vector3d \hyperlink{group___color_conversion_gab873008f62a65b63fea0ff868104b43c}{rgb2yuv64f} (const Matrix$<$ T, 3, 1 $>$ \&rgb)}\label{group___color_conversion_gab873008f62a65b63fea0ff868104b43c}
+
+\begin{DoxyCompactList}\small\item\em R\-G\-B to Y\-U\-V color conversion function (includes color normalization). \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga410f9201d95ba7b01b003cf9636e5011}{{\footnotesize template$<$typename T $>$ }\\Vector3d \hyperlink{group___color_conversion_ga410f9201d95ba7b01b003cf9636e5011}{yuv2rgb64f} (const Matrix$<$ T, 3, 1 $>$ \&yuv)}\label{group___color_conversion_ga410f9201d95ba7b01b003cf9636e5011}
+
+\begin{DoxyCompactList}\small\item\em Y\-U\-V to R\-G\-B color conversion function (includes color normalization). \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_gaaa9282cb999d6cb7301efd2c69b8f921}{{\footnotesize template$<$typename T , typename U $>$ }\\void \hyperlink{group___color_conversion_gaaa9282cb999d6cb7301efd2c69b8f921}{rgb2gray} (T \&gray, const Matrix$<$ U, 3, 1 $>$ \&rgb)}\label{group___color_conversion_gaaa9282cb999d6cb7301efd2c69b8f921}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion function from R\-G\-B to Grayscale. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_gacf7a6109ede1257816c1157b4d0c1fc1}{{\footnotesize template$<$typename T , typename U $>$ }\\void \hyperlink{group___color_conversion_gacf7a6109ede1257816c1157b4d0c1fc1}{gray2rgb} (Matrix$<$ T, 3, 1 $>$ \&rgb, const U \&gray)}\label{group___color_conversion_gacf7a6109ede1257816c1157b4d0c1fc1}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion function from Grayscale to R\-G\-B. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_gad19806a92d9d3561e4938aa8076519b3}{{\footnotesize template$<$typename T , typename U $>$ }\\void \hyperlink{group___color_conversion_gad19806a92d9d3561e4938aa8076519b3}{rgb2yuv} (Matrix$<$ T, 3, 1 $>$ \&yuv, const Matrix$<$ U, 3, 1 $>$ \&rgb)}\label{group___color_conversion_gad19806a92d9d3561e4938aa8076519b3}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion function from R\-G\-B to Y\-U\-V. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_gacd81aedbb5a1d6c2cd01d98da76e0903}{{\footnotesize template$<$typename T , typename U $>$ }\\void \hyperlink{group___color_conversion_gacd81aedbb5a1d6c2cd01d98da76e0903}{yuv2rgb} (Matrix$<$ T, 3, 1 $>$ \&rgb, const Matrix$<$ U, 3, 1 $>$ \&yuv)}\label{group___color_conversion_gacd81aedbb5a1d6c2cd01d98da76e0903}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion function from Y\-U\-V to R\-G\-B. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_gaf425c8b1868616a6840c61fe4a3e60c7}{{\footnotesize template$<$typename T , typename U , typename C\-Layout $>$ }\\void \hyperlink{group___color_conversion_gaf425c8b1868616a6840c61fe4a3e60c7}{convert\-Color} (Color$<$ T, C\-Layout $>$ \&dst, const Color$<$ U, C\-Layout $>$ \&src)}\label{group___color_conversion_gaf425c8b1868616a6840c61fe4a3e60c7}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion function with same color layout but different channel types. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga940c39e5cdcff0e182ad7f1911e1fdbb}{{\footnotesize template$<$typename T , typename U $>$ }\\void \hyperlink{group___color_conversion_ga940c39e5cdcff0e182ad7f1911e1fdbb}{convert\-Color} (Color$<$ T, Rgb $>$ \&dst, const Color$<$ U, Yuv $>$ \&src)}\label{group___color_conversion_ga940c39e5cdcff0e182ad7f1911e1fdbb}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion function from R\-G\-B to Y\-U\-V. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_gaf208517efbfb2d905bdb2724145383e7}{{\footnotesize template$<$typename T , typename U $>$ }\\void \hyperlink{group___color_conversion_gaf208517efbfb2d905bdb2724145383e7}{convert\-Color} (Color$<$ T, Yuv $>$ \&dst, const Color$<$ U, Rgb $>$ \&src)}\label{group___color_conversion_gaf208517efbfb2d905bdb2724145383e7}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion function from Y\-U\-V to R\-G\-B. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga11ec76ce23b7ed0a5df4cc76bb2afc2a}{{\footnotesize template$<$typename T $>$ }\\void \hyperlink{group___color_conversion_ga11ec76ce23b7ed0a5df4cc76bb2afc2a}{convert\-Color} (uchar \&dst, const Color$<$ T, Rgb $>$ \&src)}\label{group___color_conversion_ga11ec76ce23b7ed0a5df4cc76bb2afc2a}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion from R\-G\-B to \hyperlink{struct_d_o_1_1_gray}{Gray}. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_gafc8d94b34860d29067fe9b242c900f6b}{{\footnotesize template$<$typename T $>$ }\\void \hyperlink{group___color_conversion_gafc8d94b34860d29067fe9b242c900f6b}{convert\-Color} (Color$<$ T, Rgb $>$ \&dst, const uchar \&src)}\label{group___color_conversion_gafc8d94b34860d29067fe9b242c900f6b}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion from \hyperlink{struct_d_o_1_1_gray}{Gray} to R\-G\-B. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_gaab2e1b8480e491b35c672164f52065a1}{{\footnotesize template$<$typename T $>$ }\\void \hyperlink{group___color_conversion_gaab2e1b8480e491b35c672164f52065a1}{convert\-Color} (ushort \&dst, const Color$<$ T, Rgb $>$ \&src)}\label{group___color_conversion_gaab2e1b8480e491b35c672164f52065a1}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion from R\-G\-B to \hyperlink{struct_d_o_1_1_gray}{Gray}. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga51ae8a0b4207c11c6e21329dba4f6777}{{\footnotesize template$<$typename T $>$ }\\void \hyperlink{group___color_conversion_ga51ae8a0b4207c11c6e21329dba4f6777}{convert\-Color} (Color$<$ T, Rgb $>$ \&dst, const ushort \&src)}\label{group___color_conversion_ga51ae8a0b4207c11c6e21329dba4f6777}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion from \hyperlink{struct_d_o_1_1_gray}{Gray} to R\-G\-B. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga9bc400410f4ce0c92b283158b49f0deb}{{\footnotesize template$<$typename T $>$ }\\void \hyperlink{group___color_conversion_ga9bc400410f4ce0c92b283158b49f0deb}{convert\-Color} (uint \&dst, const Color$<$ T, Rgb $>$ \&src)}\label{group___color_conversion_ga9bc400410f4ce0c92b283158b49f0deb}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion from R\-G\-B to \hyperlink{struct_d_o_1_1_gray}{Gray}. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga1b0388fd6e73f47cd74f29fd57a3547b}{{\footnotesize template$<$typename T $>$ }\\void \hyperlink{group___color_conversion_ga1b0388fd6e73f47cd74f29fd57a3547b}{convert\-Color} (Color$<$ T, Rgb $>$ \&dst, const uint \&src)}\label{group___color_conversion_ga1b0388fd6e73f47cd74f29fd57a3547b}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion from \hyperlink{struct_d_o_1_1_gray}{Gray} to R\-G\-B. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga041e47dda16f0e33819de35b60fdff22}{{\footnotesize template$<$typename T $>$ }\\void \hyperlink{group___color_conversion_ga041e47dda16f0e33819de35b60fdff22}{convert\-Color} (char \&dst, const Color$<$ T, Rgb $>$ \&src)}\label{group___color_conversion_ga041e47dda16f0e33819de35b60fdff22}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion from R\-G\-B to \hyperlink{struct_d_o_1_1_gray}{Gray}. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_gaef965f101a5d8240f27f144dd810e5fd}{{\footnotesize template$<$typename T $>$ }\\void \hyperlink{group___color_conversion_gaef965f101a5d8240f27f144dd810e5fd}{convert\-Color} (Color$<$ T, Rgb $>$ \&dst, const char \&src)}\label{group___color_conversion_gaef965f101a5d8240f27f144dd810e5fd}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion from \hyperlink{struct_d_o_1_1_gray}{Gray} to R\-G\-B. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga1e5a93ec87d6a83ace06fdf2db0444b1}{{\footnotesize template$<$typename T $>$ }\\void \hyperlink{group___color_conversion_ga1e5a93ec87d6a83ace06fdf2db0444b1}{convert\-Color} (short \&dst, const Color$<$ T, Rgb $>$ \&src)}\label{group___color_conversion_ga1e5a93ec87d6a83ace06fdf2db0444b1}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion from R\-G\-B to \hyperlink{struct_d_o_1_1_gray}{Gray}. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga03d8f2fa5babb6e94d68322054c63f74}{{\footnotesize template$<$typename T $>$ }\\void \hyperlink{group___color_conversion_ga03d8f2fa5babb6e94d68322054c63f74}{convert\-Color} (Color$<$ T, Rgb $>$ \&dst, const short \&src)}\label{group___color_conversion_ga03d8f2fa5babb6e94d68322054c63f74}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion from \hyperlink{struct_d_o_1_1_gray}{Gray} to R\-G\-B. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga503b181247cf148267c36db74329c655}{{\footnotesize template$<$typename T $>$ }\\void \hyperlink{group___color_conversion_ga503b181247cf148267c36db74329c655}{convert\-Color} (int \&dst, const Color$<$ T, Rgb $>$ \&src)}\label{group___color_conversion_ga503b181247cf148267c36db74329c655}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion from R\-G\-B to \hyperlink{struct_d_o_1_1_gray}{Gray}. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_gab85cc40825c116643b2bfe8ed890e2b5}{{\footnotesize template$<$typename T $>$ }\\void \hyperlink{group___color_conversion_gab85cc40825c116643b2bfe8ed890e2b5}{convert\-Color} (Color$<$ T, Rgb $>$ \&dst, const int \&src)}\label{group___color_conversion_gab85cc40825c116643b2bfe8ed890e2b5}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion from \hyperlink{struct_d_o_1_1_gray}{Gray} to R\-G\-B. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga63067bbe79b68f1aca280be0751d9245}{{\footnotesize template$<$typename T $>$ }\\void \hyperlink{group___color_conversion_ga63067bbe79b68f1aca280be0751d9245}{convert\-Color} (float \&dst, const Color$<$ T, Rgb $>$ \&src)}\label{group___color_conversion_ga63067bbe79b68f1aca280be0751d9245}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion from R\-G\-B to \hyperlink{struct_d_o_1_1_gray}{Gray}. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga9e8d2d7254720f233eed734913c752e0}{{\footnotesize template$<$typename T $>$ }\\void \hyperlink{group___color_conversion_ga9e8d2d7254720f233eed734913c752e0}{convert\-Color} (Color$<$ T, Rgb $>$ \&dst, const float \&src)}\label{group___color_conversion_ga9e8d2d7254720f233eed734913c752e0}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion from \hyperlink{struct_d_o_1_1_gray}{Gray} to R\-G\-B. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_gae34a9bddf5dfcceeacb4e19819b7832e}{{\footnotesize template$<$typename T $>$ }\\void \hyperlink{group___color_conversion_gae34a9bddf5dfcceeacb4e19819b7832e}{convert\-Color} (double \&dst, const Color$<$ T, Rgb $>$ \&src)}\label{group___color_conversion_gae34a9bddf5dfcceeacb4e19819b7832e}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion from R\-G\-B to \hyperlink{struct_d_o_1_1_gray}{Gray}. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_gaf00036ce1c3287aa68280ca2e865ef14}{{\footnotesize template$<$typename T $>$ }\\void \hyperlink{group___color_conversion_gaf00036ce1c3287aa68280ca2e865ef14}{convert\-Color} (Color$<$ T, Rgb $>$ \&dst, const double \&src)}\label{group___color_conversion_gaf00036ce1c3287aa68280ca2e865ef14}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion from \hyperlink{struct_d_o_1_1_gray}{Gray} to R\-G\-B. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga8aa17d730c8424cb2b906ecd2c88c024}{void \hyperlink{group___color_conversion_ga8aa17d730c8424cb2b906ecd2c88c024}{convert\-Color} (float \&dst, double src)}\label{group___color_conversion_ga8aa17d730c8424cb2b906ecd2c88c024}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between floating point gray colors. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga4ac1dc80a53cbb26dc57f3e1899a687d}{void \hyperlink{group___color_conversion_ga4ac1dc80a53cbb26dc57f3e1899a687d}{convert\-Color} (double \&dst, float src)}\label{group___color_conversion_ga4ac1dc80a53cbb26dc57f3e1899a687d}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between floating point gray colors. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga83911520fb12e3f55813ff25458da026}{void \hyperlink{group___color_conversion_ga83911520fb12e3f55813ff25458da026}{convert\-Color} (float \&dst, float src)}\label{group___color_conversion_ga83911520fb12e3f55813ff25458da026}
+
+\begin{DoxyCompactList}\small\item\em Just in case, in order to avoid ambiguity for 'float'. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_gae5fae4dc30516ef8840615deb731cc69}{void \hyperlink{group___color_conversion_gae5fae4dc30516ef8840615deb731cc69}{convert\-Color} (double \&dst, double src)}\label{group___color_conversion_gae5fae4dc30516ef8840615deb731cc69}
+
+\begin{DoxyCompactList}\small\item\em Just in case, in order to avoid ambiguity for 'double'. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_gafb6cc749eb721f9ad19b66d97e8213d1}{void \hyperlink{group___color_conversion_gafb6cc749eb721f9ad19b66d97e8213d1}{convert\-Color} (ushort \&dst, uchar src)}\label{group___color_conversion_gafb6cc749eb721f9ad19b66d97e8213d1}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral gray colors. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga04b1ae827a5c4e892f6a2eb11e851e37}{void \hyperlink{group___color_conversion_ga04b1ae827a5c4e892f6a2eb11e851e37}{convert\-Color} (uchar \&dst, ushort src)}\label{group___color_conversion_ga04b1ae827a5c4e892f6a2eb11e851e37}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral gray colors. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_gaa298a4541bb12a9fe20a5fb53a50283b}{void \hyperlink{group___color_conversion_gaa298a4541bb12a9fe20a5fb53a50283b}{convert\-Color} (uint \&dst, uchar src)}\label{group___color_conversion_gaa298a4541bb12a9fe20a5fb53a50283b}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral gray colors. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga2330577f22e1ecac84babcd0cbb5be69}{void \hyperlink{group___color_conversion_ga2330577f22e1ecac84babcd0cbb5be69}{convert\-Color} (uchar \&dst, uint src)}\label{group___color_conversion_ga2330577f22e1ecac84babcd0cbb5be69}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral gray colors. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_gac075ca10f114e6f126638679a93fa329}{void \hyperlink{group___color_conversion_gac075ca10f114e6f126638679a93fa329}{convert\-Color} (char \&dst, uchar src)}\label{group___color_conversion_gac075ca10f114e6f126638679a93fa329}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral gray colors. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga92f89dd0d9d940faf3cd4d5c9644341d}{void \hyperlink{group___color_conversion_ga92f89dd0d9d940faf3cd4d5c9644341d}{convert\-Color} (uchar \&dst, char src)}\label{group___color_conversion_ga92f89dd0d9d940faf3cd4d5c9644341d}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral gray colors. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga2274ad23043767d747ba4d6adfde541d}{void \hyperlink{group___color_conversion_ga2274ad23043767d747ba4d6adfde541d}{convert\-Color} (short \&dst, uchar src)}\label{group___color_conversion_ga2274ad23043767d747ba4d6adfde541d}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral gray colors. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga6fcf6ac5330120270c5fe19d60e8cd72}{void \hyperlink{group___color_conversion_ga6fcf6ac5330120270c5fe19d60e8cd72}{convert\-Color} (uchar \&dst, short src)}\label{group___color_conversion_ga6fcf6ac5330120270c5fe19d60e8cd72}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral gray colors. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_gaff169b2dbbfc01c55fb6e77f51d84a2a}{void \hyperlink{group___color_conversion_gaff169b2dbbfc01c55fb6e77f51d84a2a}{convert\-Color} (int \&dst, uchar src)}\label{group___color_conversion_gaff169b2dbbfc01c55fb6e77f51d84a2a}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral gray colors. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga20d57b4234e7c75a2d9b383463f08010}{void \hyperlink{group___color_conversion_ga20d57b4234e7c75a2d9b383463f08010}{convert\-Color} (uchar \&dst, int src)}\label{group___color_conversion_ga20d57b4234e7c75a2d9b383463f08010}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral gray colors. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga6726e463a9fafa0a3081290e60f46d4e}{void \hyperlink{group___color_conversion_ga6726e463a9fafa0a3081290e60f46d4e}{convert\-Color} (uint \&dst, ushort src)}\label{group___color_conversion_ga6726e463a9fafa0a3081290e60f46d4e}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral gray colors. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga15da39b6712f4c2975f929218f9eaaa3}{void \hyperlink{group___color_conversion_ga15da39b6712f4c2975f929218f9eaaa3}{convert\-Color} (ushort \&dst, uint src)}\label{group___color_conversion_ga15da39b6712f4c2975f929218f9eaaa3}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral gray colors. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_gad2ca7698bf31d5d78dde33706938d762}{void \hyperlink{group___color_conversion_gad2ca7698bf31d5d78dde33706938d762}{convert\-Color} (int \&dst, ushort src)}\label{group___color_conversion_gad2ca7698bf31d5d78dde33706938d762}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral gray colors. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga883b3b1b598e8f88687948f370265fce}{void \hyperlink{group___color_conversion_ga883b3b1b598e8f88687948f370265fce}{convert\-Color} (ushort \&dst, int src)}\label{group___color_conversion_ga883b3b1b598e8f88687948f370265fce}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral gray colors. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga6b8b16d19786e6a1054113606719254f}{void \hyperlink{group___color_conversion_ga6b8b16d19786e6a1054113606719254f}{convert\-Color} (char \&dst, ushort src)}\label{group___color_conversion_ga6b8b16d19786e6a1054113606719254f}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral gray colors. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_gae64eec9a2b3fe598fd63e643d93f2410}{void \hyperlink{group___color_conversion_gae64eec9a2b3fe598fd63e643d93f2410}{convert\-Color} (ushort \&dst, char src)}\label{group___color_conversion_gae64eec9a2b3fe598fd63e643d93f2410}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral gray colors. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_gad36ee63656c9d9d574c851e0db63b8d3}{void \hyperlink{group___color_conversion_gad36ee63656c9d9d574c851e0db63b8d3}{convert\-Color} (short \&dst, ushort src)}\label{group___color_conversion_gad36ee63656c9d9d574c851e0db63b8d3}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral gray colors. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga1840eaa1ae69c7e73576f2098557a303}{void \hyperlink{group___color_conversion_ga1840eaa1ae69c7e73576f2098557a303}{convert\-Color} (ushort \&dst, short src)}\label{group___color_conversion_ga1840eaa1ae69c7e73576f2098557a303}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral gray colors. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_gadd796d13cfacf8c341e74c802f973a40}{void \hyperlink{group___color_conversion_gadd796d13cfacf8c341e74c802f973a40}{convert\-Color} (int \&dst, uint src)}\label{group___color_conversion_gadd796d13cfacf8c341e74c802f973a40}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral gray colors. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga87ea15e451fe8068aeda982b03fbeb9d}{void \hyperlink{group___color_conversion_ga87ea15e451fe8068aeda982b03fbeb9d}{convert\-Color} (uint \&dst, int src)}\label{group___color_conversion_ga87ea15e451fe8068aeda982b03fbeb9d}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral gray colors. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga517d8d20b19a5967f2f726520486ce17}{void \hyperlink{group___color_conversion_ga517d8d20b19a5967f2f726520486ce17}{convert\-Color} (char \&dst, uint src)}\label{group___color_conversion_ga517d8d20b19a5967f2f726520486ce17}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral gray colors. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga690f2c53f0217320b5d939d780320738}{void \hyperlink{group___color_conversion_ga690f2c53f0217320b5d939d780320738}{convert\-Color} (uint \&dst, char src)}\label{group___color_conversion_ga690f2c53f0217320b5d939d780320738}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral gray colors. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga65fd31f0bea4e7c548b0db3ff16d7916}{void \hyperlink{group___color_conversion_ga65fd31f0bea4e7c548b0db3ff16d7916}{convert\-Color} (short \&dst, uint src)}\label{group___color_conversion_ga65fd31f0bea4e7c548b0db3ff16d7916}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral gray colors. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_gac4540cf4f59605ebd6c7e448d8d1486a}{void \hyperlink{group___color_conversion_gac4540cf4f59605ebd6c7e448d8d1486a}{convert\-Color} (uint \&dst, short src)}\label{group___color_conversion_gac4540cf4f59605ebd6c7e448d8d1486a}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral gray colors. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga59961090cefe9adc547ee8f618b1b61c}{void \hyperlink{group___color_conversion_ga59961090cefe9adc547ee8f618b1b61c}{convert\-Color} (short \&dst, char src)}\label{group___color_conversion_ga59961090cefe9adc547ee8f618b1b61c}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral gray colors. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga1da3888429ad46ebfc33e6a12f9087e5}{void \hyperlink{group___color_conversion_ga1da3888429ad46ebfc33e6a12f9087e5}{convert\-Color} (char \&dst, short src)}\label{group___color_conversion_ga1da3888429ad46ebfc33e6a12f9087e5}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral gray colors. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga8ea44f59bd2d681cc210c3066027757e}{void \hyperlink{group___color_conversion_ga8ea44f59bd2d681cc210c3066027757e}{convert\-Color} (int \&dst, char src)}\label{group___color_conversion_ga8ea44f59bd2d681cc210c3066027757e}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral gray colors. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_gaed95c34a03689a19d0fb4b3402a4f663}{void \hyperlink{group___color_conversion_gaed95c34a03689a19d0fb4b3402a4f663}{convert\-Color} (char \&dst, int src)}\label{group___color_conversion_gaed95c34a03689a19d0fb4b3402a4f663}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral gray colors. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga74c347b60b2f8f89d49e8edf95bc256c}{void \hyperlink{group___color_conversion_ga74c347b60b2f8f89d49e8edf95bc256c}{convert\-Color} (int \&dst, short src)}\label{group___color_conversion_ga74c347b60b2f8f89d49e8edf95bc256c}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral gray colors. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga2886b206c1b6cdaeb4ca77afef11c49f}{void \hyperlink{group___color_conversion_ga2886b206c1b6cdaeb4ca77afef11c49f}{convert\-Color} (short \&dst, int src)}\label{group___color_conversion_ga2886b206c1b6cdaeb4ca77afef11c49f}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral gray colors. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_gacdd167431700fa7e3262bd0cd0505512}{void \hyperlink{group___color_conversion_gacdd167431700fa7e3262bd0cd0505512}{convert\-Color} (float \&dst, uchar src)}\label{group___color_conversion_gacdd167431700fa7e3262bd0cd0505512}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral and floating point gray. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga4c458acc6b6b19eff6e85750fc53379e}{void \hyperlink{group___color_conversion_ga4c458acc6b6b19eff6e85750fc53379e}{convert\-Color} (uchar \&dst, float src)}\label{group___color_conversion_ga4c458acc6b6b19eff6e85750fc53379e}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral and floating point gray. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga507e4121b2a6e960d6b7083357f7d6a9}{void \hyperlink{group___color_conversion_ga507e4121b2a6e960d6b7083357f7d6a9}{convert\-Color} (float \&dst, ushort src)}\label{group___color_conversion_ga507e4121b2a6e960d6b7083357f7d6a9}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral and floating point gray. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga0e51479a8743f6c8557bf4ebc68b6868}{void \hyperlink{group___color_conversion_ga0e51479a8743f6c8557bf4ebc68b6868}{convert\-Color} (ushort \&dst, float src)}\label{group___color_conversion_ga0e51479a8743f6c8557bf4ebc68b6868}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral and floating point gray. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga05deb3c453589c91dec56d5426c521fe}{void \hyperlink{group___color_conversion_ga05deb3c453589c91dec56d5426c521fe}{convert\-Color} (float \&dst, uint src)}\label{group___color_conversion_ga05deb3c453589c91dec56d5426c521fe}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral and floating point gray. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga7cd3b0184666f16f54713ddb9b7ba408}{void \hyperlink{group___color_conversion_ga7cd3b0184666f16f54713ddb9b7ba408}{convert\-Color} (uint \&dst, float src)}\label{group___color_conversion_ga7cd3b0184666f16f54713ddb9b7ba408}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral and floating point gray. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_gae6e303ccb39b66575d4dca9e3cf7f125}{void \hyperlink{group___color_conversion_gae6e303ccb39b66575d4dca9e3cf7f125}{convert\-Color} (float \&dst, char src)}\label{group___color_conversion_gae6e303ccb39b66575d4dca9e3cf7f125}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral and floating point gray. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga771ff14c748a8b73de71819dadb4d33e}{void \hyperlink{group___color_conversion_ga771ff14c748a8b73de71819dadb4d33e}{convert\-Color} (char \&dst, float src)}\label{group___color_conversion_ga771ff14c748a8b73de71819dadb4d33e}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral and floating point gray. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_gac0e2de0ed7e83cf04856e237f6562255}{void \hyperlink{group___color_conversion_gac0e2de0ed7e83cf04856e237f6562255}{convert\-Color} (float \&dst, short src)}\label{group___color_conversion_gac0e2de0ed7e83cf04856e237f6562255}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral and floating point gray. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga9db0741b322244e6857ed7cfd3360620}{void \hyperlink{group___color_conversion_ga9db0741b322244e6857ed7cfd3360620}{convert\-Color} (short \&dst, float src)}\label{group___color_conversion_ga9db0741b322244e6857ed7cfd3360620}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral and floating point gray. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_gacf105c01bcb8c0fb4fa40c42c61b34c5}{void \hyperlink{group___color_conversion_gacf105c01bcb8c0fb4fa40c42c61b34c5}{convert\-Color} (float \&dst, int src)}\label{group___color_conversion_gacf105c01bcb8c0fb4fa40c42c61b34c5}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral and floating point gray. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga5b08468b51bbfdf4c1126d01ba7b1228}{void \hyperlink{group___color_conversion_ga5b08468b51bbfdf4c1126d01ba7b1228}{convert\-Color} (int \&dst, float src)}\label{group___color_conversion_ga5b08468b51bbfdf4c1126d01ba7b1228}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral and floating point gray. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga0e207aa9d9aaff59a04cf01cdbf18f12}{void \hyperlink{group___color_conversion_ga0e207aa9d9aaff59a04cf01cdbf18f12}{convert\-Color} (double \&dst, uchar src)}\label{group___color_conversion_ga0e207aa9d9aaff59a04cf01cdbf18f12}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral and floating point gray. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga04ff77912603deeda3abebe6ccb58ec0}{void \hyperlink{group___color_conversion_ga04ff77912603deeda3abebe6ccb58ec0}{convert\-Color} (uchar \&dst, double src)}\label{group___color_conversion_ga04ff77912603deeda3abebe6ccb58ec0}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral and floating point gray. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga18995345fd71603c4460223a76840fc4}{void \hyperlink{group___color_conversion_ga18995345fd71603c4460223a76840fc4}{convert\-Color} (double \&dst, ushort src)}\label{group___color_conversion_ga18995345fd71603c4460223a76840fc4}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral and floating point gray. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga4a3e303e7f029775b76f89277d2d4ed2}{void \hyperlink{group___color_conversion_ga4a3e303e7f029775b76f89277d2d4ed2}{convert\-Color} (ushort \&dst, double src)}\label{group___color_conversion_ga4a3e303e7f029775b76f89277d2d4ed2}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral and floating point gray. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga9330d0d2855d6117e06138deb033ab86}{void \hyperlink{group___color_conversion_ga9330d0d2855d6117e06138deb033ab86}{convert\-Color} (double \&dst, uint src)}\label{group___color_conversion_ga9330d0d2855d6117e06138deb033ab86}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral and floating point gray. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga2b893f95d48b0c7f87abcc49ed785493}{void \hyperlink{group___color_conversion_ga2b893f95d48b0c7f87abcc49ed785493}{convert\-Color} (uint \&dst, double src)}\label{group___color_conversion_ga2b893f95d48b0c7f87abcc49ed785493}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral and floating point gray. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga13c963adaff605c177e4f4e5827645e6}{void \hyperlink{group___color_conversion_ga13c963adaff605c177e4f4e5827645e6}{convert\-Color} (double \&dst, char src)}\label{group___color_conversion_ga13c963adaff605c177e4f4e5827645e6}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral and floating point gray. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_gafa121f60ad1fdb13a51e65294ec19b33}{void \hyperlink{group___color_conversion_gafa121f60ad1fdb13a51e65294ec19b33}{convert\-Color} (char \&dst, double src)}\label{group___color_conversion_gafa121f60ad1fdb13a51e65294ec19b33}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral and floating point gray. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga50a8d828c5c4d4fa0acaf3f9660bdf76}{void \hyperlink{group___color_conversion_ga50a8d828c5c4d4fa0acaf3f9660bdf76}{convert\-Color} (double \&dst, short src)}\label{group___color_conversion_ga50a8d828c5c4d4fa0acaf3f9660bdf76}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral and floating point gray. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_gadf9e5fe5ca24d599c7aad7752e4f89c5}{void \hyperlink{group___color_conversion_gadf9e5fe5ca24d599c7aad7752e4f89c5}{convert\-Color} (short \&dst, double src)}\label{group___color_conversion_gadf9e5fe5ca24d599c7aad7752e4f89c5}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral and floating point gray. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_gacf7ae24078f1be907709c70a71be6127}{void \hyperlink{group___color_conversion_gacf7ae24078f1be907709c70a71be6127}{convert\-Color} (double \&dst, int src)}\label{group___color_conversion_gacf7ae24078f1be907709c70a71be6127}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral and floating point gray. \end{DoxyCompactList}\item 
+\hypertarget{group___color_conversion_ga86287b233492b328656c5c22f85d0baa}{void \hyperlink{group___color_conversion_ga86287b233492b328656c5c22f85d0baa}{convert\-Color} (int \&dst, double src)}\label{group___color_conversion_ga86287b233492b328656c5c22f85d0baa}
+
+\begin{DoxyCompactList}\small\item\em \hyperlink{class_d_o_1_1_color}{Color} conversion between integral and floating point gray. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+
+
+\subsection{Macro Definition Documentation}
+\hypertarget{group___color_conversion_gac0e4b5dd70b28feca22cc770d9862a8b}{\index{Color rescaling and conversion functions@{Color rescaling and conversion functions}!C\-O\-L\-O\-R\-\_\-\-C\-O\-N\-V\-E\-R\-S\-I\-O\-N\-\_\-\-B\-E\-T\-W\-E\-E\-N\-\_\-\-G\-R\-A\-Y\-\_\-\-A\-N\-D\-\_\-\-R\-G\-B@{C\-O\-L\-O\-R\-\_\-\-C\-O\-N\-V\-E\-R\-S\-I\-O\-N\-\_\-\-B\-E\-T\-W\-E\-E\-N\-\_\-\-G\-R\-A\-Y\-\_\-\-A\-N\-D\-\_\-\-R\-G\-B}}
+\index{C\-O\-L\-O\-R\-\_\-\-C\-O\-N\-V\-E\-R\-S\-I\-O\-N\-\_\-\-B\-E\-T\-W\-E\-E\-N\-\_\-\-G\-R\-A\-Y\-\_\-\-A\-N\-D\-\_\-\-R\-G\-B@{C\-O\-L\-O\-R\-\_\-\-C\-O\-N\-V\-E\-R\-S\-I\-O\-N\-\_\-\-B\-E\-T\-W\-E\-E\-N\-\_\-\-G\-R\-A\-Y\-\_\-\-A\-N\-D\-\_\-\-R\-G\-B}!Color rescaling and conversion functions@{Color rescaling and conversion functions}}
+\subsubsection[{C\-O\-L\-O\-R\-\_\-\-C\-O\-N\-V\-E\-R\-S\-I\-O\-N\-\_\-\-B\-E\-T\-W\-E\-E\-N\-\_\-\-G\-R\-A\-Y\-\_\-\-A\-N\-D\-\_\-\-R\-G\-B}]{\setlength{\rightskip}{0pt plus 5cm}\#define C\-O\-L\-O\-R\-\_\-\-C\-O\-N\-V\-E\-R\-S\-I\-O\-N\-\_\-\-B\-E\-T\-W\-E\-E\-N\-\_\-\-G\-R\-A\-Y\-\_\-\-A\-N\-D\-\_\-\-R\-G\-B(
+\begin{DoxyParamCaption}
+\item[{}]{Gray\-Type}
+\end{DoxyParamCaption}
+)}}\label{group___color_conversion_gac0e4b5dd70b28feca22cc770d9862a8b}
+{\bfseries Value\-:}
+\begin{DoxyCode}
+\(\backslash\)
+  template <typename T>                                             \(\backslash\)
+  inline \textcolor{keywordtype}{void} \hyperlink{group___color_conversion_gaf425c8b1868616a6840c61fe4a3e60c7}{convertColor}(GrayType& dst, \textcolor{keyword}{const} Color<T, Rgb>& src) \(\backslash\)
+  \{ \hyperlink{group___color_conversion_gaaa9282cb999d6cb7301efd2c69b8f921}{rgb2gray}(dst, src); \}                                           \(\backslash\)\(\backslash\)
+  template <typename T>                                             \(\backslash\)
+  inline \textcolor{keywordtype}{void} \hyperlink{group___color_conversion_gaf425c8b1868616a6840c61fe4a3e60c7}{convertColor}(Color<T, Rgb>& dst, \textcolor{keyword}{const} GrayType& src) \(\backslash\)
+  \{ \hyperlink{group___color_conversion_gacf7a6109ede1257816c1157b4d0c1fc1}{gray2rgb}(dst, src); \}
+\end{DoxyCode}
+
+
+Color conversion between gray and R\-G\-B color spaces. 
+
+\hypertarget{group___color_conversion_gad00b96d2364bfb1473d0a12dbd5b26c5}{\index{Color rescaling and conversion functions@{Color rescaling and conversion functions}!D\-E\-F\-I\-N\-E\-\_\-\-C\-O\-L\-O\-R\-\_\-\-C\-O\-N\-V\-E\-R\-S\-I\-O\-N\-\_\-\-B\-E\-T\-W\-E\-E\-N\-\_\-\-I\-N\-T\-\_\-\-A\-N\-D\-\_\-\-F\-L\-O\-A\-T\-I\-N\-G\-\_\-\-T\-Y\-P\-E\-S@{D\-E\-F\-I\-N\-E\-\_\-\-C\-O\-L\-O\-R\-\_\-\-C\-O\-N\-V\-E\-R\-S\-I\-O\-N\-\_\-\-B\-E\-T\-W\-E\-E\-N\-\_\-\-I\-N\-T\-\_\-\-A\-N\-D\-\_\-\-F\-L\-O\-A\-T\-I\-N\-G\-\_\-\-T\-Y\-P\-E\-S}}
+\index{D\-E\-F\-I\-N\-E\-\_\-\-C\-O\-L\-O\-R\-\_\-\-C\-O\-N\-V\-E\-R\-S\-I\-O\-N\-\_\-\-B\-E\-T\-W\-E\-E\-N\-\_\-\-I\-N\-T\-\_\-\-A\-N\-D\-\_\-\-F\-L\-O\-A\-T\-I\-N\-G\-\_\-\-T\-Y\-P\-E\-S@{D\-E\-F\-I\-N\-E\-\_\-\-C\-O\-L\-O\-R\-\_\-\-C\-O\-N\-V\-E\-R\-S\-I\-O\-N\-\_\-\-B\-E\-T\-W\-E\-E\-N\-\_\-\-I\-N\-T\-\_\-\-A\-N\-D\-\_\-\-F\-L\-O\-A\-T\-I\-N\-G\-\_\-\-T\-Y\-P\-E\-S}!Color rescaling and conversion functions@{Color rescaling and conversion functions}}
+\subsubsection[{D\-E\-F\-I\-N\-E\-\_\-\-C\-O\-L\-O\-R\-\_\-\-C\-O\-N\-V\-E\-R\-S\-I\-O\-N\-\_\-\-B\-E\-T\-W\-E\-E\-N\-\_\-\-I\-N\-T\-\_\-\-A\-N\-D\-\_\-\-F\-L\-O\-A\-T\-I\-N\-G\-\_\-\-T\-Y\-P\-E\-S}]{\setlength{\rightskip}{0pt plus 5cm}\#define D\-E\-F\-I\-N\-E\-\_\-\-C\-O\-L\-O\-R\-\_\-\-C\-O\-N\-V\-E\-R\-S\-I\-O\-N\-\_\-\-B\-E\-T\-W\-E\-E\-N\-\_\-\-I\-N\-T\-\_\-\-A\-N\-D\-\_\-\-F\-L\-O\-A\-T\-I\-N\-G\-\_\-\-T\-Y\-P\-E\-S(
+\begin{DoxyParamCaption}
+\item[{}]{Float, }
+\item[{}]{Int}
+\end{DoxyParamCaption}
+)}}\label{group___color_conversion_gad00b96d2364bfb1473d0a12dbd5b26c5}
+{\bfseries Value\-:}
+\begin{DoxyCode}
+\(\backslash\)
+  inline \textcolor{keywordtype}{void} \hyperlink{group___color_conversion_gaf425c8b1868616a6840c61fe4a3e60c7}{convertColor}(Float& dst, Int src)                           \(\backslash\)
+  \{                                                                       \(\backslash\)
+    Float M = \textcolor{keyword}{static\_cast<}Float\textcolor{keyword}{>}(ColorTraits<Int>::max());                \(\backslash\)
+    Float m = \textcolor{keyword}{static\_cast<}Float\textcolor{keyword}{>}(ColorTraits<Int>::min());                \(\backslash\)
+    dst = (\textcolor{keyword}{static\_cast<}Float\textcolor{keyword}{>}(src)-m) / (M-m);                            \(\backslash\)
+  \}                                                                       \(\backslash\)\(\backslash\)
+  inline \textcolor{keywordtype}{void} \hyperlink{group___color_conversion_gaf425c8b1868616a6840c61fe4a3e60c7}{convertColor}(Int& dst, Float src)                           \(\backslash\)
+  \{                                                                       \(\backslash\)
+    src = Float(ColorTraits<Int>::min())                                  \(\backslash\)
+      + src*( Float(ColorTraits<Int>::max())                              \(\backslash\)
+          - Float(ColorTraits<Int>::min()) );                             \(\backslash\)
+    dst = \textcolor{keyword}{static\_cast<}Int\textcolor{keyword}{>}(src);                                          \(\backslash\)
+  \}
+\end{DoxyCode}
+
+
+Color conversion between integral and floating point gray colors. 
+
+\hypertarget{group___color_conversion_gadcb0f8382525554854f5cb0ffa5ffeee}{\index{Color rescaling and conversion functions@{Color rescaling and conversion functions}!D\-E\-F\-I\-N\-E\-\_\-\-C\-O\-L\-O\-R\-\_\-\-C\-O\-N\-V\-E\-R\-S\-I\-O\-N\-\_\-\-B\-E\-T\-W\-E\-E\-N\-\_\-\-I\-N\-T\-E\-G\-R\-A\-L\-\_\-\-G\-R\-A\-Y\-\_\-\-T\-Y\-P\-E\-S@{D\-E\-F\-I\-N\-E\-\_\-\-C\-O\-L\-O\-R\-\_\-\-C\-O\-N\-V\-E\-R\-S\-I\-O\-N\-\_\-\-B\-E\-T\-W\-E\-E\-N\-\_\-\-I\-N\-T\-E\-G\-R\-A\-L\-\_\-\-G\-R\-A\-Y\-\_\-\-T\-Y\-P\-E\-S}}
+\index{D\-E\-F\-I\-N\-E\-\_\-\-C\-O\-L\-O\-R\-\_\-\-C\-O\-N\-V\-E\-R\-S\-I\-O\-N\-\_\-\-B\-E\-T\-W\-E\-E\-N\-\_\-\-I\-N\-T\-E\-G\-R\-A\-L\-\_\-\-G\-R\-A\-Y\-\_\-\-T\-Y\-P\-E\-S@{D\-E\-F\-I\-N\-E\-\_\-\-C\-O\-L\-O\-R\-\_\-\-C\-O\-N\-V\-E\-R\-S\-I\-O\-N\-\_\-\-B\-E\-T\-W\-E\-E\-N\-\_\-\-I\-N\-T\-E\-G\-R\-A\-L\-\_\-\-G\-R\-A\-Y\-\_\-\-T\-Y\-P\-E\-S}!Color rescaling and conversion functions@{Color rescaling and conversion functions}}
+\subsubsection[{D\-E\-F\-I\-N\-E\-\_\-\-C\-O\-L\-O\-R\-\_\-\-C\-O\-N\-V\-E\-R\-S\-I\-O\-N\-\_\-\-B\-E\-T\-W\-E\-E\-N\-\_\-\-I\-N\-T\-E\-G\-R\-A\-L\-\_\-\-G\-R\-A\-Y\-\_\-\-T\-Y\-P\-E\-S}]{\setlength{\rightskip}{0pt plus 5cm}\#define D\-E\-F\-I\-N\-E\-\_\-\-C\-O\-L\-O\-R\-\_\-\-C\-O\-N\-V\-E\-R\-S\-I\-O\-N\-\_\-\-B\-E\-T\-W\-E\-E\-N\-\_\-\-I\-N\-T\-E\-G\-R\-A\-L\-\_\-\-G\-R\-A\-Y\-\_\-\-T\-Y\-P\-E\-S(
+\begin{DoxyParamCaption}
+\item[{}]{Gray1, }
+\item[{}]{Gray2}
+\end{DoxyParamCaption}
+)}}\label{group___color_conversion_gadcb0f8382525554854f5cb0ffa5ffeee}
+{\bfseries Value\-:}
+\begin{DoxyCode}
+\(\backslash\)
+  inline \textcolor{keywordtype}{void} \hyperlink{group___color_conversion_gaf425c8b1868616a6840c61fe4a3e60c7}{convertColor}(Gray2& dst, Gray1 src)                         \(\backslash\)
+  \{ \hyperlink{group___color_conversion_gaf2f95805ffea57b546cf2547806aae1b}{normalizeChannel}(dst, \hyperlink{group___color_conversion_ga3e86b8eff1da0324f3aee0cef19b7d68}{getRescaledChannel64f}(src)); \}              
+         \(\backslash\)\(\backslash\)
+  inline \textcolor{keywordtype}{void} \hyperlink{group___color_conversion_gaf425c8b1868616a6840c61fe4a3e60c7}{convertColor}(Gray1& dst, Gray2 src)                         \(\backslash\)
+  \{ \hyperlink{group___color_conversion_gaf2f95805ffea57b546cf2547806aae1b}{normalizeChannel}(dst, \hyperlink{group___color_conversion_ga3e86b8eff1da0324f3aee0cef19b7d68}{getRescaledChannel64f}(src)); \}
+\end{DoxyCode}
+
+
+Color conversion between integral gray colors. 
+

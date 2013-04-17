@@ -1,0 +1,112 @@
+\hypertarget{class_d_o_1_1_axis_iterator}{\section{Axis\-Iterator$<$ T, Axis, N, Storage\-Order $>$ Class Template Reference}
+\label{class_d_o_1_1_axis_iterator}\index{Axis\-Iterator$<$ T, Axis, N, Storage\-Order $>$@{Axis\-Iterator$<$ T, Axis, N, Storage\-Order $>$}}
+}
+
+
+Axis iterator class for N-\/dimensional arrays.  
+
+
+
+
+{\ttfamily \#include $<$Locator.\-hpp$>$}
+
+Inheritance diagram for Axis\-Iterator$<$ T, Axis, N, Storage\-Order $>$\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_d_o_1_1_axis_iterator}
+\end{center}
+\end{figure}
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_d_o_1_1_axis_iterator_a758d02a5183e542558cd2f7ad65c683c}{typedef Base\-::value\-\_\-type {\bfseries value\-\_\-type}}\label{class_d_o_1_1_axis_iterator_a758d02a5183e542558cd2f7ad65c683c}
+
+\item 
+\hypertarget{class_d_o_1_1_axis_iterator_aa4336e7fd692b20bda7b7227fa9c9f55}{typedef Base\-::difference\-\_\-type {\bfseries difference\-\_\-type}}\label{class_d_o_1_1_axis_iterator_aa4336e7fd692b20bda7b7227fa9c9f55}
+
+\item 
+\hypertarget{class_d_o_1_1_axis_iterator_aa2158dc2d25210ef557a40d3b8a521e3}{typedef Base\-::pointer {\bfseries pointer}}\label{class_d_o_1_1_axis_iterator_aa2158dc2d25210ef557a40d3b8a521e3}
+
+\item 
+\hypertarget{class_d_o_1_1_axis_iterator_abaed3f9c23f38a6baedf841296fa931c}{typedef Base\-::reference {\bfseries reference}}\label{class_d_o_1_1_axis_iterator_abaed3f9c23f38a6baedf841296fa931c}
+
+\item 
+\hypertarget{class_d_o_1_1_axis_iterator_a61a96ce54a0b0407ce9bdd9d3f0e3934}{typedef Base\-::iterator\-\_\-category {\bfseries iterator\-\_\-category}}\label{class_d_o_1_1_axis_iterator_a61a96ce54a0b0407ce9bdd9d3f0e3934}
+
+\item 
+\hypertarget{class_d_o_1_1_axis_iterator_a94654f697ba0037a85b8a976f648c3fd}{typedef \hyperlink{class_d_o_1_1_axis_iterator}{Axis\-Iterator} {\bfseries self\-\_\-type}}\label{class_d_o_1_1_axis_iterator_a94654f697ba0037a85b8a976f648c3fd}
+
+\item 
+\hypertarget{class_d_o_1_1_axis_iterator_ae4fb477425bbeb20329d300396ac2582}{typedef Matrix$<$ int, N, 1 $>$ {\bfseries coord\-\_\-type}}\label{class_d_o_1_1_axis_iterator_ae4fb477425bbeb20329d300396ac2582}
+
+\item 
+\hypertarget{class_d_o_1_1_axis_iterator_aacf98e49e90f9aeead0ff8885fae3ac7}{typedef Matrix$<$ int, N, 1 $>$ {\bfseries vector\-\_\-type}}\label{class_d_o_1_1_axis_iterator_aacf98e49e90f9aeead0ff8885fae3ac7}
+
+\item 
+\hypertarget{class_d_o_1_1_axis_iterator_ae3ee468a9ca692fbed522f9eb22a1bd8}{typedef coord\-\_\-type \& {\bfseries coord\-\_\-reference}}\label{class_d_o_1_1_axis_iterator_ae3ee468a9ca692fbed522f9eb22a1bd8}
+
+\item 
+\hypertarget{class_d_o_1_1_axis_iterator_aa7d96038ae86b2607b1c75e8d8ff4797}{typedef pointer \& {\bfseries pointer\-\_\-reference}}\label{class_d_o_1_1_axis_iterator_aa7d96038ae86b2607b1c75e8d8ff4797}
+
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_d_o_1_1_axis_iterator_abfc20ae4f3e395a95f0aeb868272fc45}{\hyperlink{class_d_o_1_1_axis_iterator_abfc20ae4f3e395a95f0aeb868272fc45}{Axis\-Iterator} (pointer\-\_\-reference pos, coord\-\_\-reference coords, const vector\-\_\-type \&strides, const vector\-\_\-type \&\hyperlink{class_d_o_1_1_axis_iterator_ab8e4e3e2a7bf18888b71bdf9dda0770b}{size})}\label{class_d_o_1_1_axis_iterator_abfc20ae4f3e395a95f0aeb868272fc45}
+
+\begin{DoxyCompactList}\small\item\em Constructor. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_axis_iterator_a94cc353f1334b1d367d4df72ceb61071}{\hyperlink{class_d_o_1_1_axis_iterator_a94cc353f1334b1d367d4df72ceb61071}{Axis\-Iterator} (const \hyperlink{class_d_o_1_1_axis_iterator}{self\-\_\-type} \&it)}\label{class_d_o_1_1_axis_iterator_a94cc353f1334b1d367d4df72ceb61071}
+
+\begin{DoxyCompactList}\small\item\em Copy constructor. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_axis_iterator_aa149c2249879e7727f33688b76bf2c99}{reference \hyperlink{class_d_o_1_1_axis_iterator_aa149c2249879e7727f33688b76bf2c99}{operator$\ast$} () const }\label{class_d_o_1_1_axis_iterator_aa149c2249879e7727f33688b76bf2c99}
+
+\begin{DoxyCompactList}\small\item\em Referencing operator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_axis_iterator_a32d919fd1ac974efa89582486e7752de}{reference \hyperlink{class_d_o_1_1_axis_iterator_a32d919fd1ac974efa89582486e7752de}{operator\mbox{[}$\,$\mbox{]}} (int n) const }\label{class_d_o_1_1_axis_iterator_a32d919fd1ac974efa89582486e7752de}
+
+\begin{DoxyCompactList}\small\item\em Referencing operator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_axis_iterator_a33ce448509e9cc0d73861e4c1919c7a7}{pointer \hyperlink{class_d_o_1_1_axis_iterator_a33ce448509e9cc0d73861e4c1919c7a7}{operator-\/$>$} () const }\label{class_d_o_1_1_axis_iterator_a33ce448509e9cc0d73861e4c1919c7a7}
+
+\begin{DoxyCompactList}\small\item\em Non-\/mutable pointer operator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_axis_iterator_a74e10c48af258faf471b5ff616c6395a}{{\footnotesize template$<$typename Iterator $>$ }\\bool \hyperlink{class_d_o_1_1_axis_iterator_a74e10c48af258faf471b5ff616c6395a}{operator==} (const Iterator \&rhs) const }\label{class_d_o_1_1_axis_iterator_a74e10c48af258faf471b5ff616c6395a}
+
+\begin{DoxyCompactList}\small\item\em Equality operator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_axis_iterator_ad3e7caef9082dd2b3f65ea3867336476}{bool \hyperlink{class_d_o_1_1_axis_iterator_ad3e7caef9082dd2b3f65ea3867336476}{operator==} (pointer pos) const }\label{class_d_o_1_1_axis_iterator_ad3e7caef9082dd2b3f65ea3867336476}
+
+\begin{DoxyCompactList}\small\item\em Equality operator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_axis_iterator_a46311058c789c83df9d72020c4334da7}{{\footnotesize template$<$typename Iterator $>$ }\\bool \hyperlink{class_d_o_1_1_axis_iterator_a46311058c789c83df9d72020c4334da7}{operator!=} (const Iterator \&rhs) const }\label{class_d_o_1_1_axis_iterator_a46311058c789c83df9d72020c4334da7}
+
+\begin{DoxyCompactList}\small\item\em Inequality operator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_axis_iterator_ac966afbaec9c16d1cc1bb6819810ab10}{bool \hyperlink{class_d_o_1_1_axis_iterator_ac966afbaec9c16d1cc1bb6819810ab10}{operator!=} (pointer pos) const }\label{class_d_o_1_1_axis_iterator_ac966afbaec9c16d1cc1bb6819810ab10}
+
+\begin{DoxyCompactList}\small\item\em Inequality operator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_axis_iterator_a68c6d6abdde9fef27d6a4f2904212559}{\hyperlink{class_d_o_1_1_axis_iterator}{self\-\_\-type} \& \hyperlink{class_d_o_1_1_axis_iterator_a68c6d6abdde9fef27d6a4f2904212559}{operator++} ()}\label{class_d_o_1_1_axis_iterator_a68c6d6abdde9fef27d6a4f2904212559}
+
+\begin{DoxyCompactList}\small\item\em Prefix increment operator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_axis_iterator_a2fa8797c1ff9e6c2ac6f879a53f60601}{\hyperlink{class_d_o_1_1_axis_iterator}{self\-\_\-type} \& \hyperlink{class_d_o_1_1_axis_iterator_a2fa8797c1ff9e6c2ac6f879a53f60601}{operator-\/-\/} ()}\label{class_d_o_1_1_axis_iterator_a2fa8797c1ff9e6c2ac6f879a53f60601}
+
+\begin{DoxyCompactList}\small\item\em Prefix decrement operator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_axis_iterator_a39f7c37604fd9845ff487b36b6f88602}{\hyperlink{class_d_o_1_1_axis_iterator}{self\-\_\-type} \hyperlink{class_d_o_1_1_axis_iterator_a39f7c37604fd9845ff487b36b6f88602}{operator++} (int)}\label{class_d_o_1_1_axis_iterator_a39f7c37604fd9845ff487b36b6f88602}
+
+\begin{DoxyCompactList}\small\item\em Postfix increment operator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_axis_iterator_ac8142815f977b8411faf27f7b8d804b3}{\hyperlink{class_d_o_1_1_axis_iterator}{self\-\_\-type} \hyperlink{class_d_o_1_1_axis_iterator_ac8142815f977b8411faf27f7b8d804b3}{operator-\/-\/} (int)}\label{class_d_o_1_1_axis_iterator_ac8142815f977b8411faf27f7b8d804b3}
+
+\begin{DoxyCompactList}\small\item\em Postfix decrement operator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_axis_iterator_a2930986847b626523fbc0748b586fcdb}{\hyperlink{class_d_o_1_1_axis_iterator}{self\-\_\-type} \& \hyperlink{class_d_o_1_1_axis_iterator_a2930986847b626523fbc0748b586fcdb}{operator+=} (int n)}\label{class_d_o_1_1_axis_iterator_a2930986847b626523fbc0748b586fcdb}
+
+\begin{DoxyCompactList}\small\item\em Arithmetic operator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_axis_iterator_a742e3ed31b69f8f5dcf0b681f638b24b}{\hyperlink{class_d_o_1_1_axis_iterator}{self\-\_\-type} \& \hyperlink{class_d_o_1_1_axis_iterator_a742e3ed31b69f8f5dcf0b681f638b24b}{operator-\/=} (int n)}\label{class_d_o_1_1_axis_iterator_a742e3ed31b69f8f5dcf0b681f638b24b}
+
+\begin{DoxyCompactList}\small\item\em Arithmetic operator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_axis_iterator_ab8e4e3e2a7bf18888b71bdf9dda0770b}{int \hyperlink{class_d_o_1_1_axis_iterator_ab8e4e3e2a7bf18888b71bdf9dda0770b}{size} () const }\label{class_d_o_1_1_axis_iterator_ab8e4e3e2a7bf18888b71bdf9dda0770b}
+
+\begin{DoxyCompactList}\small\item\em Constant size accessor. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\subsubsection*{template$<$typename T, int Axis, int N, int Storage\-Order$>$class D\-O\-::\-Axis\-Iterator$<$ T, Axis, N, Storage\-Order $>$}
+
+Axis iterator class for N-\/dimensional arrays. 
+
+The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+src/\-D\-O/\-Core/\hyperlink{_locator_8hpp}{Locator.\-hpp}\end{DoxyCompactItemize}

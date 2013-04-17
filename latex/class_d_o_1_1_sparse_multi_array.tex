@@ -1,0 +1,135 @@
+\hypertarget{class_d_o_1_1_sparse_multi_array}{\section{Sparse\-Multi\-Array$<$ T, N $>$ Class Template Reference}
+\label{class_d_o_1_1_sparse_multi_array}\index{Sparse\-Multi\-Array$<$ T, N $>$@{Sparse\-Multi\-Array$<$ T, N $>$}}
+}
+
+
+Sparse N-\/dimensional array class.  
+
+
+
+
+{\ttfamily \#include $<$Sparse\-Multi\-Array.\-hpp$>$}
+
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_d_o_1_1_sparse_multi_array_ae4fb477425bbeb20329d300396ac2582}{typedef Matrix$<$ int, N, 1 $>$ \hyperlink{class_d_o_1_1_sparse_multi_array_ae4fb477425bbeb20329d300396ac2582}{coord\-\_\-type}}\label{class_d_o_1_1_sparse_multi_array_ae4fb477425bbeb20329d300396ac2582}
+
+\begin{DoxyCompactList}\small\item\em S\-T\-L-\/like interface. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_sparse_multi_array_a265a253612b46abed17c61b0a5e5ce30}{typedef T \hyperlink{class_d_o_1_1_sparse_multi_array_a265a253612b46abed17c61b0a5e5ce30}{value\-\_\-type}}\label{class_d_o_1_1_sparse_multi_array_a265a253612b46abed17c61b0a5e5ce30}
+
+\begin{DoxyCompactList}\small\item\em S\-T\-L-\/like interface. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_sparse_multi_array_ada51e68d31936547d3729c82daf6b7c6}{typedef unsigned int \hyperlink{class_d_o_1_1_sparse_multi_array_ada51e68d31936547d3729c82daf6b7c6}{size\-\_\-type}}\label{class_d_o_1_1_sparse_multi_array_ada51e68d31936547d3729c82daf6b7c6}
+
+\begin{DoxyCompactList}\small\item\em S\-T\-L-\/like interface. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_sparse_multi_array_aeb7d6a472fc07a6f5c9761e906c9f826}{typedef storage\-\_\-type\-::iterator \hyperlink{class_d_o_1_1_sparse_multi_array_aeb7d6a472fc07a6f5c9761e906c9f826}{iterator}}\label{class_d_o_1_1_sparse_multi_array_aeb7d6a472fc07a6f5c9761e906c9f826}
+
+\begin{DoxyCompactList}\small\item\em iterator type. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_sparse_multi_array_a136285f5e1620856973c0c4007453a57}{typedef \\*
+storage\-\_\-type\-::const\-\_\-iterator \hyperlink{class_d_o_1_1_sparse_multi_array_a136285f5e1620856973c0c4007453a57}{const\-\_\-iterator}}\label{class_d_o_1_1_sparse_multi_array_a136285f5e1620856973c0c4007453a57}
+
+\begin{DoxyCompactList}\small\item\em const\-\_\-iterator type. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_sparse_multi_array_a8d8689998714f4431b104a5b21f43e9f}{typedef \\*
+storage\-\_\-type\-::difference\-\_\-type \hyperlink{class_d_o_1_1_sparse_multi_array_a8d8689998714f4431b104a5b21f43e9f}{difference\-\_\-type}}\label{class_d_o_1_1_sparse_multi_array_a8d8689998714f4431b104a5b21f43e9f}
+
+\begin{DoxyCompactList}\small\item\em difference\-\_\-type type. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_sparse_multi_array_abe8933d436779a43cb5c1896ff5f2918}{typedef \hyperlink{class_d_o_1_1_sparse_multi_array_a265a253612b46abed17c61b0a5e5ce30}{value\-\_\-type} \& \hyperlink{class_d_o_1_1_sparse_multi_array_abe8933d436779a43cb5c1896ff5f2918}{reference}}\label{class_d_o_1_1_sparse_multi_array_abe8933d436779a43cb5c1896ff5f2918}
+
+\begin{DoxyCompactList}\small\item\em reference type. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_sparse_multi_array_afdb67657e63a66ed3fae7b0c9fd81b48}{typedef const \hyperlink{class_d_o_1_1_sparse_multi_array_a265a253612b46abed17c61b0a5e5ce30}{value\-\_\-type} \& \hyperlink{class_d_o_1_1_sparse_multi_array_afdb67657e63a66ed3fae7b0c9fd81b48}{const\-\_\-reference}}\label{class_d_o_1_1_sparse_multi_array_afdb67657e63a66ed3fae7b0c9fd81b48}
+
+\begin{DoxyCompactList}\small\item\em const\-\_\-reference type. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_d_o_1_1_sparse_multi_array_aa31288ffe2bcc901d1bea4ab9291c278}{\hyperlink{class_d_o_1_1_sparse_multi_array_aa31288ffe2bcc901d1bea4ab9291c278}{Sparse\-Multi\-Array} ()}\label{class_d_o_1_1_sparse_multi_array_aa31288ffe2bcc901d1bea4ab9291c278}
+
+\begin{DoxyCompactList}\small\item\em Default constructor. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_sparse_multi_array_adb2b3256fac8e82cdbb7532324788461}{\hyperlink{class_d_o_1_1_sparse_multi_array_adb2b3256fac8e82cdbb7532324788461}{Sparse\-Multi\-Array} (const \hyperlink{class_d_o_1_1_sparse_multi_array}{Sparse\-Multi\-Array} \&a)}\label{class_d_o_1_1_sparse_multi_array_adb2b3256fac8e82cdbb7532324788461}
+
+\begin{DoxyCompactList}\small\item\em Copy constructor. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_sparse_multi_array_ac6e61de369e994009e36f344f99c15ad}{bool \hyperlink{class_d_o_1_1_sparse_multi_array_ac6e61de369e994009e36f344f99c15ad}{empty} () const }\label{class_d_o_1_1_sparse_multi_array_ac6e61de369e994009e36f344f99c15ad}
+
+\begin{DoxyCompactList}\small\item\em Checks if the sparse multi-\/array is empty. \end{DoxyCompactList}\item 
+\hyperlink{class_d_o_1_1_sparse_multi_array_ae4fb477425bbeb20329d300396ac2582}{coord\-\_\-type} \hyperlink{class_d_o_1_1_sparse_multi_array_af74fcb5e1793fae740aa6cfa3da7b857}{min\-\_\-key} () const 
+\item 
+\hyperlink{class_d_o_1_1_sparse_multi_array_ae4fb477425bbeb20329d300396ac2582}{coord\-\_\-type} \hyperlink{class_d_o_1_1_sparse_multi_array_ad1a015f476d71c75dc93dadd5e344aec}{max\-\_\-key} () const 
+\item 
+\hypertarget{class_d_o_1_1_sparse_multi_array_a96c8baba4bb71887f51755f43047c026}{\hyperlink{class_d_o_1_1_sparse_multi_array_ae4fb477425bbeb20329d300396ac2582}{coord\-\_\-type} \hyperlink{class_d_o_1_1_sparse_multi_array_a96c8baba4bb71887f51755f43047c026}{all\-\_\-sizes} () const }\label{class_d_o_1_1_sparse_multi_array_a96c8baba4bb71887f51755f43047c026}
+
+\begin{DoxyCompactList}\small\item\em Returns the theoretical capacity of the sparse multi-\/array. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_sparse_multi_array_a64a533cf4dbc0310557c4a0c06ecef6a}{\hyperlink{class_d_o_1_1_sparse_multi_array_ae4fb477425bbeb20329d300396ac2582}{coord\-\_\-type} \hyperlink{class_d_o_1_1_sparse_multi_array_a64a533cf4dbc0310557c4a0c06ecef6a}{all\-\_\-actual\-\_\-sizes} () const }\label{class_d_o_1_1_sparse_multi_array_a64a533cf4dbc0310557c4a0c06ecef6a}
+
+\begin{DoxyCompactList}\small\item\em Returns the actual N-\/dimensional size of the sparse multi-\/array. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_sparse_multi_array_a503ab01f6c0142145d3434f6924714e7}{\hyperlink{class_d_o_1_1_sparse_multi_array_ada51e68d31936547d3729c82daf6b7c6}{size\-\_\-type} \hyperlink{class_d_o_1_1_sparse_multi_array_a503ab01f6c0142145d3434f6924714e7}{size} () const }\label{class_d_o_1_1_sparse_multi_array_a503ab01f6c0142145d3434f6924714e7}
+
+\begin{DoxyCompactList}\small\item\em Returns the raw size of the storage data. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_sparse_multi_array_a0ab5ce862c0331d9e45a6e1774fca131}{\hyperlink{class_d_o_1_1_sparse_multi_array_ada51e68d31936547d3729c82daf6b7c6}{size\-\_\-type} \hyperlink{class_d_o_1_1_sparse_multi_array_a0ab5ce862c0331d9e45a6e1774fca131}{max\-\_\-size} () const }\label{class_d_o_1_1_sparse_multi_array_a0ab5ce862c0331d9e45a6e1774fca131}
+
+\begin{DoxyCompactList}\small\item\em Returns the capacity of the storage data. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_sparse_multi_array_a475e9bb3f587819030146ed9b36a4fdd}{void \hyperlink{class_d_o_1_1_sparse_multi_array_a475e9bb3f587819030146ed9b36a4fdd}{swap} (\hyperlink{class_d_o_1_1_sparse_multi_array}{Sparse\-Multi\-Array} \&a)}\label{class_d_o_1_1_sparse_multi_array_a475e9bb3f587819030146ed9b36a4fdd}
+
+\begin{DoxyCompactList}\small\item\em Efficient swapping of two 2\-D arrays. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_sparse_multi_array_ac8bb3912a3ce86b15842e79d0b421204}{void \hyperlink{class_d_o_1_1_sparse_multi_array_ac8bb3912a3ce86b15842e79d0b421204}{clear} ()}\label{class_d_o_1_1_sparse_multi_array_ac8bb3912a3ce86b15842e79d0b421204}
+
+\begin{DoxyCompactList}\small\item\em Erase all of the elements. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_sparse_multi_array_a3a09e4b6b1d83553d805b190988e8e97}{\hyperlink{class_d_o_1_1_sparse_multi_array}{Sparse\-Multi\-Array} \& \hyperlink{class_d_o_1_1_sparse_multi_array_a3a09e4b6b1d83553d805b190988e8e97}{operator=} (const \hyperlink{class_d_o_1_1_sparse_multi_array}{Sparse\-Multi\-Array} \&a)}\label{class_d_o_1_1_sparse_multi_array_a3a09e4b6b1d83553d805b190988e8e97}
+
+\begin{DoxyCompactList}\small\item\em Assignment operator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_sparse_multi_array_aaa3d8cf68eaa4f28a3320b36606d5e9d}{bool \hyperlink{class_d_o_1_1_sparse_multi_array_aaa3d8cf68eaa4f28a3320b36606d5e9d}{operator==} (const \hyperlink{class_d_o_1_1_sparse_multi_array}{Sparse\-Multi\-Array} \&a) const }\label{class_d_o_1_1_sparse_multi_array_aaa3d8cf68eaa4f28a3320b36606d5e9d}
+
+\begin{DoxyCompactList}\small\item\em Equality operator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_sparse_multi_array_a5535cda5173e6de06f10f5d055142977}{bool \hyperlink{class_d_o_1_1_sparse_multi_array_a5535cda5173e6de06f10f5d055142977}{operator!=} (const \hyperlink{class_d_o_1_1_sparse_multi_array}{Sparse\-Multi\-Array} \&a) const }\label{class_d_o_1_1_sparse_multi_array_a5535cda5173e6de06f10f5d055142977}
+
+\begin{DoxyCompactList}\small\item\em Inequality operator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_sparse_multi_array_a300969d60d0c092b583ae79889b3bd67}{\hyperlink{class_d_o_1_1_sparse_multi_array_a265a253612b46abed17c61b0a5e5ce30}{value\-\_\-type} \& \hyperlink{class_d_o_1_1_sparse_multi_array_a300969d60d0c092b583ae79889b3bd67}{operator\mbox{[}$\,$\mbox{]}} (const \hyperlink{class_d_o_1_1_sparse_multi_array_ae4fb477425bbeb20329d300396ac2582}{coord\-\_\-type} \&k)}\label{class_d_o_1_1_sparse_multi_array_a300969d60d0c092b583ae79889b3bd67}
+
+\begin{DoxyCompactList}\small\item\em Mutable Access operator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_sparse_multi_array_a53e649bdfcb910262e552bbe9678c1dd}{const \hyperlink{class_d_o_1_1_sparse_multi_array_a265a253612b46abed17c61b0a5e5ce30}{value\-\_\-type} \& \hyperlink{class_d_o_1_1_sparse_multi_array_a53e649bdfcb910262e552bbe9678c1dd}{operator\mbox{[}$\,$\mbox{]}} (const \hyperlink{class_d_o_1_1_sparse_multi_array_ae4fb477425bbeb20329d300396ac2582}{coord\-\_\-type} \&k) const }\label{class_d_o_1_1_sparse_multi_array_a53e649bdfcb910262e552bbe9678c1dd}
+
+\begin{DoxyCompactList}\small\item\em Constant access operator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_sparse_multi_array_ad69bd11391be1a1dba5c8202259664f8}{\hyperlink{class_d_o_1_1_sparse_multi_array_aeb7d6a472fc07a6f5c9761e906c9f826}{iterator} \hyperlink{class_d_o_1_1_sparse_multi_array_ad69bd11391be1a1dba5c8202259664f8}{begin} ()}\label{class_d_o_1_1_sparse_multi_array_ad69bd11391be1a1dba5c8202259664f8}
+
+\begin{DoxyCompactList}\small\item\em Begin iterator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_sparse_multi_array_aa4b02d4f1a8500fb07a551069060709f}{\hyperlink{class_d_o_1_1_sparse_multi_array_a136285f5e1620856973c0c4007453a57}{const\-\_\-iterator} \hyperlink{class_d_o_1_1_sparse_multi_array_aa4b02d4f1a8500fb07a551069060709f}{begin} () const }\label{class_d_o_1_1_sparse_multi_array_aa4b02d4f1a8500fb07a551069060709f}
+
+\begin{DoxyCompactList}\small\item\em Constant begin iterator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_sparse_multi_array_acad38d52497a975bfb6f2f6acd76631f}{\hyperlink{class_d_o_1_1_sparse_multi_array_aeb7d6a472fc07a6f5c9761e906c9f826}{iterator} \hyperlink{class_d_o_1_1_sparse_multi_array_acad38d52497a975bfb6f2f6acd76631f}{end} ()}\label{class_d_o_1_1_sparse_multi_array_acad38d52497a975bfb6f2f6acd76631f}
+
+\begin{DoxyCompactList}\small\item\em End iterator. \end{DoxyCompactList}\item 
+\hypertarget{class_d_o_1_1_sparse_multi_array_a350132543d80a1c1e5be844e6d2878ea}{\hyperlink{class_d_o_1_1_sparse_multi_array_a136285f5e1620856973c0c4007453a57}{const\-\_\-iterator} \hyperlink{class_d_o_1_1_sparse_multi_array_a350132543d80a1c1e5be844e6d2878ea}{end} () const }\label{class_d_o_1_1_sparse_multi_array_a350132543d80a1c1e5be844e6d2878ea}
+
+\begin{DoxyCompactList}\small\item\em Constant end iterator. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_d_o_1_1_sparse_multi_array_a707c3ebff4b3587b5e3a4f8000ecb024}{static const \hyperlink{class_d_o_1_1_sparse_multi_array_ada51e68d31936547d3729c82daf6b7c6}{size\-\_\-type} \hyperlink{class_d_o_1_1_sparse_multi_array_a707c3ebff4b3587b5e3a4f8000ecb024}{dimension} = N}\label{class_d_o_1_1_sparse_multi_array_a707c3ebff4b3587b5e3a4f8000ecb024}
+
+\begin{DoxyCompactList}\small\item\em Dimension. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\subsubsection*{template$<$typename T, unsigned int N$>$class D\-O\-::\-Sparse\-Multi\-Array$<$ T, N $>$}
+
+Sparse N-\/dimensional array class. 
+
+\subsection{Member Function Documentation}
+\hypertarget{class_d_o_1_1_sparse_multi_array_ad1a015f476d71c75dc93dadd5e344aec}{\index{D\-O\-::\-Sparse\-Multi\-Array@{D\-O\-::\-Sparse\-Multi\-Array}!max\-\_\-key@{max\-\_\-key}}
+\index{max\-\_\-key@{max\-\_\-key}!DO::SparseMultiArray@{D\-O\-::\-Sparse\-Multi\-Array}}
+\subsubsection[{max\-\_\-key}]{\setlength{\rightskip}{0pt plus 5cm}{\bf coord\-\_\-type} max\-\_\-key (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [inline]}}}\label{class_d_o_1_1_sparse_multi_array_ad1a015f476d71c75dc93dadd5e344aec}
+Finds the maximum non-\/zero entry coordinates (in a lexicographical order). This function is computationally expensive. \hypertarget{class_d_o_1_1_sparse_multi_array_af74fcb5e1793fae740aa6cfa3da7b857}{\index{D\-O\-::\-Sparse\-Multi\-Array@{D\-O\-::\-Sparse\-Multi\-Array}!min\-\_\-key@{min\-\_\-key}}
+\index{min\-\_\-key@{min\-\_\-key}!DO::SparseMultiArray@{D\-O\-::\-Sparse\-Multi\-Array}}
+\subsubsection[{min\-\_\-key}]{\setlength{\rightskip}{0pt plus 5cm}{\bf coord\-\_\-type} min\-\_\-key (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [inline]}}}\label{class_d_o_1_1_sparse_multi_array_af74fcb5e1793fae740aa6cfa3da7b857}
+Finds the minimum non-\/zero entry coordinates (in a lexicographical order). This function is computationally expensive. 
+
+The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+src/\-D\-O/\-Core/\hyperlink{_sparse_multi_array_8hpp}{Sparse\-Multi\-Array.\-hpp}\end{DoxyCompactItemize}

@@ -1,0 +1,19 @@
+\hypertarget{namespace_eigen}{\section{Eigen Namespace Reference}
+\label{namespace_eigen}\index{Eigen@{Eigen}}
+}
+
+
+Some customized extension to interface for the \hyperlink{namespace_eigen}{Eigen} library Essentially template class specialization for array type instead of scalar. I wonder if this is very useful. But let's just put it for now.  
+
+
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{struct_eigen_1_1_num_traits_3_01_array_3_01_t_00_01_m_00_01_n_01_4_01_4}{Num\-Traits$<$ Array$<$ T, M, N $>$ $>$}
+\begin{DoxyCompactList}\small\item\em Num\-Traits template class specialization in case the scalar type is actually an array. For example, when an Array$<$\-Matrix2d, 2, 2$>$ type is instantiated, multiplication and addition operations are properly defined. \end{DoxyCompactList}\item 
+struct \hyperlink{struct_eigen_1_1_num_traits_3_01_matrix_3_01_t_00_01_m_00_01_n_01_4_01_4}{Num\-Traits$<$ Matrix$<$ T, M, N $>$ $>$}
+\begin{DoxyCompactList}\small\item\em Num\-Traits template class specialization in case the scalar type is actually a matrix. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Some customized extension to interface for the \hyperlink{namespace_eigen}{Eigen} library Essentially template class specialization for array type instead of scalar. I wonder if this is very useful. But let's just put it for now. 

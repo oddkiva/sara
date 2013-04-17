@@ -1,0 +1,120 @@
+\hypertarget{group___graphics_internal}{\section{Graphics Internals}
+\label{group___graphics_internal}\index{Graphics Internals@{Graphics Internals}}
+}
+
+
+This contains the Qt-\/based internal implementation of the Graphics module.  
+
+
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{struct_d_o_1_1_interactive_box}{Interactive\-Box}
+\begin{DoxyCompactList}\small\item\em quick-\/and-\/dirty thing to read file from dialog box. \end{DoxyCompactList}\item 
+class \hyperlink{class_d_o_1_1_graphics_application}{Graphics\-Application}
+\begin{DoxyCompactList}\small\item\em Q\-Application-\/derived class This graphic application establishes communication between the user drawing commands and the windows. \end{DoxyCompactList}\item 
+class \hyperlink{class_d_o_1_1_graphics_view}{Graphics\-View}
+\begin{DoxyCompactList}\small\item\em Q\-Graphics\-View-\/derived class used to view interactively images. \end{DoxyCompactList}\item 
+class \hyperlink{class_d_o_1_1_track_ball}{Track\-Ball}
+\begin{DoxyCompactList}\small\item\em The \hyperlink{class_d_o_1_1_track_ball}{Track\-Ball} class is used the \hyperlink{class_d_o_1_1_open_g_l_window}{Open\-G\-L\-Window} class to allow the user to view the 3\-D scene interactively. \end{DoxyCompactList}\item 
+class \hyperlink{class_d_o_1_1_open_g_l_window}{Open\-G\-L\-Window}
+\begin{DoxyCompactList}\small\item\em Q\-G\-L\-Widget-\/derived class used to view 3\-D scenes. \end{DoxyCompactList}\item 
+class \hyperlink{class_d_o_1_1_scroll_area}{Scroll\-Area}
+\begin{DoxyCompactList}\small\item\em Q\-Scroll\-Area-\/derived class on which we embed the \hyperlink{class_d_o_1_1_painting_window}{Painting\-Window} class in order to scroll the contents of the window properly. \end{DoxyCompactList}\item 
+class \hyperlink{class_d_o_1_1_painting_window}{Painting\-Window}
+\begin{DoxyCompactList}\small\item\em Q\-Widget-\/derived class on which we draw things. I choose not to use Q\-G\-L\-Widget because of some weird viewing artefacts... Maybe later... \end{DoxyCompactList}\item 
+class \hyperlink{class_d_o_1_1_user_thread}{User\-Thread}
+\begin{DoxyCompactList}\small\item\em This is actually where we actually call the drawing commands. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define {\bfseries main}()
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{group___graphics_internal_ga520a11a377381bb516be45e6d5564a51}{{\bfseries User\-Thread} (Q\-Object $\ast$parent=0)}\label{group___graphics_internal_ga520a11a377381bb516be45e6d5564a51}
+
+\item 
+\hypertarget{group___graphics_internal_ga205cb5d1ecd1b0a8473ec0233724b8d9}{void {\bfseries register\-User\-Main} (int($\ast$user\-Main)(void))}\label{group___graphics_internal_ga205cb5d1ecd1b0a8473ec0233724b8d9}
+
+\item 
+\hypertarget{group___graphics_internal_gaacb94ff196c97609974b21595461e093}{void {\bfseries milli\-Sleep} (int msec)}\label{group___graphics_internal_gaacb94ff196c97609974b21595461e093}
+
+\item 
+\hypertarget{group___graphics_internal_ga64b410b838a1bda3e1a16f1b4171eb99}{void {\bfseries micro\-Sleep} (int usec)}\label{group___graphics_internal_ga64b410b838a1bda3e1a16f1b4171eb99}
+
+\item 
+\hypertarget{group___graphics_internal_ga4ac6dfc380bd4b753f2433a081a51942}{int {\bfseries get\-Mouse} (int \&x, int \&y)}\label{group___graphics_internal_ga4ac6dfc380bd4b753f2433a081a51942}
+
+\item 
+\hypertarget{group___graphics_internal_gaa5cbe387ac3ae002933daa7d8371d17b}{int {\bfseries get\-Key} ()}\label{group___graphics_internal_gaa5cbe387ac3ae002933daa7d8371d17b}
+
+\item 
+\hypertarget{group___graphics_internal_ga66b52a9903f2651cd0968a9282d9d740}{void {\bfseries get\-Event} (Event \&e)}\label{group___graphics_internal_ga66b52a9903f2651cd0968a9282d9d740}
+
+\item 
+\hypertarget{group___graphics_internal_ga13a43e6d814de94978c515cb084873b1}{void {\bfseries run} ()}\label{group___graphics_internal_ga13a43e6d814de94978c515cb084873b1}
+
+\item 
+\hypertarget{group___graphics_internal_ga337b7855de20a6d29b8f511a12fe5203}{Graphics\-Application $\ast$ {\bfseries gui\-App} ()}\label{group___graphics_internal_ga337b7855de20a6d29b8f511a12fe5203}
+
+\item 
+\hypertarget{group___graphics_internal_gae68dd6e7617aa9e913b119b4d9931e56}{User\-Thread \& {\bfseries user\-Thread} ()}\label{group___graphics_internal_gae68dd6e7617aa9e913b119b4d9931e56}
+
+\item 
+\hypertarget{group___graphics_internal_ga932aea9cacdda38e1038be9193f13003}{Q\-Widget $\ast$ {\bfseries active\-Window} ()}\label{group___graphics_internal_ga932aea9cacdda38e1038be9193f13003}
+
+\item 
+\hypertarget{group___graphics_internal_gaffca2d4c12a458a3de219b805b1741d3}{bool {\bfseries active\-Window\-Is\-Visible} ()}\label{group___graphics_internal_gaffca2d4c12a458a3de219b805b1741d3}
+
+\item 
+\hypertarget{group___graphics_internal_ga355fd93aa33de5ae5eb97ce9fee10768}{Q\-String\-List {\bfseries get\-Main\-Args} ()}\label{group___graphics_internal_ga355fd93aa33de5ae5eb97ce9fee10768}
+
+\item 
+\hypertarget{group___graphics_internal_ga6e93ab38ced05dd92a0ef6cb6ff7a2aa}{int \hyperlink{group___graphics_internal_ga6e93ab38ced05dd92a0ef6cb6ff7a2aa}{\-\_\-\-\_\-main} ()}\label{group___graphics_internal_ga6e93ab38ced05dd92a0ef6cb6ff7a2aa}
+
+\begin{DoxyCompactList}\small\item\em Some convenient hack macros. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Public Slots}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{group___graphics_internal_ga17e8cfdefacfb6fc452b7505a5ddad42}{void {\bfseries listen\-To\-Window\-Events} ()}\label{group___graphics_internal_ga17e8cfdefacfb6fc452b7505a5ddad42}
+
+\item 
+\hypertarget{group___graphics_internal_ga211d59c0a6baf6072e762c542472efe6}{void {\bfseries pressed\-Mouse\-Buttons} (int x, int y, Qt\-::\-Mouse\-Buttons buttons)}\label{group___graphics_internal_ga211d59c0a6baf6072e762c542472efe6}
+
+\item 
+\hypertarget{group___graphics_internal_gaf3120a375a321654553779cf030a9508}{void {\bfseries pressed\-Key} (int key)}\label{group___graphics_internal_gaf3120a375a321654553779cf030a9508}
+
+\item 
+\hypertarget{group___graphics_internal_gab4b152469c806312bcb7fbbbcbccb6dc}{void {\bfseries closed\-Window} ()}\label{group___graphics_internal_gab4b152469c806312bcb7fbbbcbccb6dc}
+
+\item 
+\hypertarget{group___graphics_internal_ga2ea8e392e6f4fcb9fdb5b76e7bb02953}{void {\bfseries received\-Event} (Event e)}\label{group___graphics_internal_ga2ea8e392e6f4fcb9fdb5b76e7bb02953}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+This contains the Qt-\/based internal implementation of the Graphics module. 
+
+\subsection{Macro Definition Documentation}
+\hypertarget{group___graphics_internal_gad2dbf2e3357ca7dec0e3a9fd29b72d6f}{\index{Graphics Internals@{Graphics Internals}!main@{main}}
+\index{main@{main}!Graphics Internals@{Graphics Internals}}
+\subsubsection[{main}]{\setlength{\rightskip}{0pt plus 5cm}\#define main(
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{group___graphics_internal_gad2dbf2e3357ca7dec0e3a9fd29b72d6f}
+{\bfseries Value\-:}
+\begin{DoxyCode}
+\textcolor{comment}{/*int*/} main(\textcolor{keywordtype}{int} argc, \textcolor{keywordtype}{char} **argv)         \(\backslash\)
+\{                                           \hyperlink{class_d_o_1_1_graphics_application}{\(\backslash\)}
+\hyperlink{class_d_o_1_1_graphics_application}{  DO::GraphicsApplication} app(argc, argv);  \(\backslash\)
+  app.userThread.registerUserMain(\hyperlink{group___graphics_internal_ga6e93ab38ced05dd92a0ef6cb6ff7a2aa}{\_\_main});  \(\backslash\)
+  app.userThread.start();                   \(\backslash\)
+  app.exec();                               \(\backslash\)
+\}                                           \(\backslash\)
+                                            \(\backslash\)
+int \hyperlink{group___graphics_internal_ga6e93ab38ced05dd92a0ef6cb6ff7a2aa}{\_\_main}()
+\end{DoxyCode}
