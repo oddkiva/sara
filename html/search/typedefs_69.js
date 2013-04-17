@@ -1,5 +1,0 @@
-var searchData=
-[
-  ['iterator',['iterator',['../struct_d_o_1_1_element_traits_3_01_color_3_01_t_00_01_layout_01_4_01_4.html#a4b0424da8c99197075d119ba0959bf1e',1,'DO::ElementTraits&lt; Color&lt; T, Layout &gt; &gt;::iterator()'],['../struct_d_o_1_1_element_traits.html#a35c955cacac6aacaa1e82874b1628865',1,'DO::ElementTraits::iterator()'],['../struct_d_o_1_1_element_traits_3_01_matrix_3_01_t_00_01_m_00_01_n_01_4_01_4.html#a4b0424da8c99197075d119ba0959bf1e',1,'DO::ElementTraits&lt; Matrix&lt; T, M, N &gt; &gt;::iterator()'],['../struct_d_o_1_1_element_traits_3_01_array_3_01_t_00_01_m_00_01_n_01_4_01_4.html#a4b0424da8c99197075d119ba0959bf1e',1,'DO::ElementTraits&lt; Array&lt; T, M, N &gt; &gt;::iterator()'],['../class_d_o_1_1_multi_array.html#a35c955cacac6aacaa1e82874b1628865',1,'DO::MultiArray::iterator()'],['../class_d_o_1_1_sparse_multi_array.html#aeb7d6a472fc07a6f5c9761e906c9f826',1,'DO::SparseMultiArray::iterator()']]],
-  ['iterator_5fcategory',['iterator_category',['../class_d_o_1_1_locator.html#a61a96ce54a0b0407ce9bdd9d3f0e3934',1,'DO::Locator']]]
-];
