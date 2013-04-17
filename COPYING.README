@@ -1,0 +1,16 @@
+DO++ is primarily MPL2 licensed. See COPYING.MPL2 and these links:
+  http://www.mozilla.org/MPL/2.0/
+  http://www.mozilla.org/MPL/2.0/FAQ.html
+
+
+DO++ uses the following third-party libraries:
+- Eigen
+  Eigen is a C++ template library for linear algebra: matrices, vectors, numerical solvers,
+  and related algorithms.
+  Mozilla Public License v. 2 (MPL2)
+  http://eigen.tuxfamily.org/
+
+- Qt
+  Qt is a cross-platform application and UI framework with APIs for C++ programming.
+  GNU Lesser General Public License (LGPL) version 2.1
+  http://qt-project.org/
