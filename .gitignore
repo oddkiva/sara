@@ -4,6 +4,8 @@
 bin/
 lib/
 build/
+html/
+latex/
 
 #################
 ## Eclipse
