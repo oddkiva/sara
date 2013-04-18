@@ -31,7 +31,9 @@ DO++ uses the following third-party libraries:
 - [**Qt 5**](qt-project.org) is a cross-platform application and UI framework with APIs for C++ programming.
   Qt 5 is licensed with GNU Lesser General Public License (LGPL) version 2.1.
   
-  Qt 5 is not included in the repository and must be installed. If it is installed, then you must set system environment variable **QT5_DIR** which will be appended in **CMAKE_PREFIX_PATH** when generating projects with CMake. In addition, append the binary directory of Qt 5 (e.g., **%QT5_DIR%\bin** in windows environment) to the system **PATH**.
+  Qt 5 is not included in the repository and must be installed. 
+  
+  If it is installed, then you must set system environment variable **QT5_DIR** which will be appended in **CMAKE_PREFIX_PATH** when generating projects with CMake. In addition, append the binary directory of Qt 5 (e.g., **%QT5_DIR%\bin** in windows environment) to the system **PATH**.
   
   I have made available compiled Qt5 Libraries for Visual Studio 2010 x64 and Visual Studio 2012 x64.
   They are available here:
