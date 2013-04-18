@@ -13,12 +13,12 @@ I simply invite you to give a try to DO++ because:
 ## Documentation
 Documentation is still under construction. Have a look at the doxygen-generated documentation [here](http://davidok8.github.io/doplusplus/).
 
-## Currently available module
+## Currently Available Modules
 Currently added features are:
-- Core module
-- Graphics module
-- Features module (incomplete)
-- Image Processing module (incomplete)
+- **Core** module
+- **Graphics** module
+- **Image Processing** module (incomplete)
+- **Features** module (incomplete)
 
 The following modules are being cleaned and will be added in the process:
 - FLANN Wrapper module
@@ -39,7 +39,7 @@ DO++ uses the following third-party libraries:
   
   If it is installed, then you must set system environment variable **QT5_DIR** which will be appended in **CMAKE_PREFIX_PATH** when generating projects with CMake. In addition, append the binary directory of Qt 5 (e.g., **%QT5_DIR%\bin** in windows environment) to the system **PATH**.
   
-  I have made available compiled Qt5 Libraries for Visual Studio 2010 x64 and Visual Studio 2012 x64.
+  I have compiled Qt5 Libraries for Visual Studio 2010 x64 and Visual Studio 2012 x64.
   They are available here:
   - [Qt 5.0.1 compiled with VS2010 64bit (ICU and WebKit disabled) (561 Mb)](https://dl.dropbox.com/u/80774144/repositories/qt-5.0.1-msvc2010-x64.7z)
   - [Qt 5.0.1 compiled with VS2012 64bit (ICU and WebKit disabled) (594 Mb)](https://dl.dropbox.com/u/80774144/repositories/qt-5.0.1-msvc2012-x64.7z)

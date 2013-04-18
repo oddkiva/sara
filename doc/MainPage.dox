@@ -9,7 +9,18 @@
   
   Try DO++ by getting it at: https://github.com/davidok8/doplusplus.
   
-  Other features are being cleaned and will be added in the process... 
+  \section Currently Available Modules
+  Currently added features are:
+  - *Core* module
+  - *Graphics* module
+  - *Image Processing* module (incomplete)
+  - *Features* module (incomplete)
+
+  The following modules are being cleaned and will be added in the process:
+  - *FLANN Wrappers* module
+  - *Geometry* module
+  - *Feature Matching* module
+
   Please be patient...
   
   A windows installer will be made available soon. Meanwhile you can generate it with CPack and NSIS.
