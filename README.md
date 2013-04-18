@@ -10,6 +10,9 @@ I simply invite you to give a try to DO++ because:
 * DO++ is small and thus easily maintainable and extensible.
 * DO++ is opensource and licensed with the MPL2 license.
 
+## Documentation
+Documentation is still under construction. Have a look at the doxygen-generated documentation [here](http://davidok8.github.io/doplusplus/)
+
 # Currently available module
 Currently added features are:
 - Core module
