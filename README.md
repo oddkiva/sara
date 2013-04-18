@@ -1,7 +1,7 @@
 DO++
 ==========
 
-# Introduction
+## Introduction
 DO++ is a basic set of C++ libraries for computer vision.
 
 I am aware OpenCV is out there and competing with it is out of question.
