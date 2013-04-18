@@ -21,6 +21,7 @@ The following modules are being cleaned and will be added in the process:
 - FLANN Wrapper module
 - Geometry module
 - Feature Matching module
+
 Please be patient...
 
 A windows installer will be made available soon. Meanwhile you can generate it with CPack and NSIS.
