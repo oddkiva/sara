@@ -11,9 +11,9 @@ I simply invite you to give a try to DO++ because:
 * DO++ is opensource and licensed with the MPL2 license.
 
 ## Documentation
-Documentation is still under construction. Have a look at the doxygen-generated documentation [here](http://davidok8.github.io/doplusplus/)
+Documentation is still under construction. Have a look at the doxygen-generated documentation [here](http://davidok8.github.io/doplusplus/).
 
-# Currently available module
+## Currently available module
 Currently added features are:
 - Core module
 - Graphics module
@@ -29,7 +29,7 @@ Please be patient...
 
 A windows installer will be made available soon. Meanwhile you can generate it with CPack and NSIS.
 
-# Third-Party Software
+## Third-Party Software
 DO++ uses the following third-party libraries:
 
 - [**Qt 5**](qt-project.org) is a cross-platform application and UI framework with APIs for C++ programming.
