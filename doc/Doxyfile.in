@@ -4,8 +4,6 @@ PROJECT_NAME = "DO"
 INPUT = @CMAKE_SOURCE_DIR@/src/DO/ \
         @CMAKE_SOURCE_DIR@/doc/MainPage.dox
 RECURSIVE = YES
-EXCLUDE_PATTERNS += *Features*
-EXCLUDE_PATTERNS += *ImageProcessing*
 EXCLUDE_PATTERNS += *Match*
 EXCLUDE_PATTERNS += *.cpp
 
