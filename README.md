@@ -56,7 +56,7 @@ Currently added features are:
 The following modules are being cleaned and will be added in the process:
 - **FLANN Wrapper** module
 - **Geometry** module (in the repository but need clearning)
-- Feature Matching module (need cleaning)
+- **Feature Matching** module (need cleaning)
 
 Please be patient...
 
