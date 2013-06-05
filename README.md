@@ -5,25 +5,58 @@ DO++
 DO++ is a basic set of C++ libraries for computer vision.
 
 I am aware OpenCV is out there and competing with it is out of question.
-I simply invite you to give a try to DO++ because:
+Try it:
 * DO++ has a very user-friendly API.
 * DO++ is small and thus easily maintainable and extensible.
-* DO++ is opensource and licensed with the MPL2 license.
+
+DO++ is opensource and licensed with the MPL2 license.
 
 ## Documentation
 Documentation is still under construction. Have a look at the doxygen-generated documentation [here](http://davidok8.github.io/doplusplus/).
 
+Currently, the best way to see how the library works is to look at samples in the **test** folder
+
 ## Currently Available Modules
 Currently added features are:
 - **Core** module
+  Clean C++ template data structures:
+  * Eigen-based linear algebra integration and extension.
+  * N-dimensional array and N-dimensional iterators
+  * Image classes and color classes, color conversion and color rescaling.
+  * High resolution timer
+  * Tree data structure
 - **Graphics** module
-- **Image Processing** module (incomplete)
-- **Features** module (incomplete)
+  * Cross-platform
+  * Easy-to-use API for quick-prototyping
+  (has less features than in OpenCV but more convenient to use than in OpenCV)
+- **Image Processing** module
+  * Basic linear filtering (Sobel, Kirsch, Roberts-Cross, Gaussian blur...)
+  * Interpolation
+  * Image warping
+  * Deriche IIR filters
+  * Differential calculus, norm, orientation, second moment matrix...
+  * Image pyramid data structure, Gaussian pyramid, DoG, LoG
+  * Image processing filters can be chained in a very few lines and easy to understand.
+- **Features** module
+  * Feature and descriptor data structures
+  * I/O compatible with Bundler format.
+- **Feature Detectors** module
+  * Refinement/interpolation of keypoint localization based on Newton's method.
+  * DoG extrema
+  * scale normalized LoG extrema
+  * Harris-Laplace corners
+  * multiscale determinant of Hessian extrema
+  * Affine shape adaptation based on the second moment-matrix
+  * Scale selection based on the normalized Laplacian of Gaussians
+  * Dominant gradient orientations of patch
+  * SIFT implementation
+  * Adaptive non-maximal suppression
+  * Hessian-Laplace extrema (coming very soon, implementation straightforward, indeed see test_Hessian.cpp for now).
 
 The following modules are being cleaned and will be added in the process:
-- FLANN Wrapper module
-- Geometry module
-- Feature Matching module
+- **FLANN Wrapper** module
+- **Geometry** module (in the repository but need clearning)
+- Feature Matching module (need cleaning)
 
 Please be patient...
 
