@@ -14,7 +14,7 @@ DO++ is opensource and licensed with the MPL2 license.
 ## Documentation
 Documentation is still under construction. Have a look at the doxygen-generated documentation [here](http://davidok8.github.io/doplusplus/).
 
-Currently, the best way to see how the library works is to look at samples in the **test** folder
+Currently, the best way to see how the library works is to look at samples in the **test** folder.
 
 ## Currently Available Modules
 Currently added features are:
