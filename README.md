@@ -37,6 +37,7 @@ Currently added features are:
   * Differential calculus, norm, orientation, second moment matrix...
   * Image pyramid data structure, Gaussian pyramid, DoG, LoG
   * Image processing filters can be chained in a very few lines and easy to understand.
+  * Reduce, enlarge, upscale, downscale images.
 - **Features** module
   * Feature and descriptor data structures
   * I/O compatible with Bundler format.
