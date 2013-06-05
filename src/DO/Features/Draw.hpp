@@ -9,10 +9,17 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+//! @file
+
 #ifndef DO_FEATURES_DRAW_HPP
 #define DO_FEATURES_DRAW_HPP
 
 namespace DO {
+
+  /*!
+    \ingroup Features
+    @{
+  */
 
   template <typename Key>
   void drawKeypoints(const std::vector<Key>& keypoints, const Color3ub& c,
@@ -21,6 +28,8 @@ namespace DO {
     for (size_t i = 0; i < keypoints.size(); ++i)
       keypoints[i].feat().drawOnScreen(c, scale, off);
   }
+
+  //! @}
 
 } /* namespace DO */
 

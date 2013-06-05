@@ -9,20 +9,27 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+//! @file
+
 #ifndef DO_FEATURES_FEATURES_HPP
 #define DO_FEATURES_FEATURES_HPP
 
+#include <DO/Defines.hpp>
 #include <DO/Core.hpp>
+
 #include <vector>
 
+// ========================================================================== //
+// Components
+//
 // Data structures
 #include "Features/Feature.hpp"
 #include "Features/Descriptor.hpp"
 #include "Features/Key.hpp"
-
 // View, I/O
 #include "Features/Draw.hpp"
 #include "Features/IO.hpp"
 
+//! \defgroup Features Features
 
 #endif /* DO_FEATURES_FEATURES_HPP */

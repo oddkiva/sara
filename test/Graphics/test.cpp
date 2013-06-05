@@ -12,8 +12,7 @@
 #include <DO/Graphics.hpp>
 
 using namespace std;
-
-BEGIN_NAMESPACE_DO
+using namespace DO;
 
 const bool stepByStep = true;
 
@@ -199,10 +198,10 @@ void bitmapBasics()
 			cols2[i+256*j]=Color3ub(i,(2*j)%256,(i+j)%256);		// Colors, functions of (i,j)
 	putColorImage(Point2i(0,256),cols2,256,256);				  // Draw this 256x256 color bitmap in (0,256)
 
-	uchar grey[256*256];											            // A grey array
+	unsigned char grey[256*256];											            // A grey array
 	for (int j=0;j<256;j++) 
 		for (int i=0;i<256;i++) 
-			grey[i+256*j]=uchar(128+127*sin((i+j)/10.));			// Some pattern
+			grey[i+256*j]=unsigned char(128+127*sin((i+j)/10.));			// Some pattern
 	putGreyImage(256,0,grey,256,256);							        // Draw at point (256,0);
 
 	if (stepByStep) click();
@@ -243,7 +242,7 @@ void imageBasics()
 	putColorImage(0, h, I, w, h, 2.0);						      // Draw it under previous one, scaling 2.0
 	delete[] I;
 
-	uchar *grey;											                  // grey bitmap
+	unsigned char *grey;											                  // grey bitmap
 	loadGreyImage("outcol.png",grey,w,h);			// Read again (and convert into grey if not already)
 	putGreyImage(20, 2*h/3, grey, w, h, 0.5);				    // Draw it somewhere, scale 0.5
 	saveGreyImage("outgrey.tif", grey, w, h);	// Write grey image
@@ -429,10 +428,11 @@ void checkOpenGLWindow()
   Window w = openGLWindow(300, 300);
 
   SimpleTriangleMesh3f mesh;
-  string filename = srcPath("dragon.obj");
+  string filename = srcPath("buddha.obj");
   if (!MeshReader().readObjFile(mesh, filename))
   {
     cout << "Error reading mesh file:\n" << filename << endl;
+    closeWindow();
     return;
   }
   cout << "Read " << filename << " successfully" << endl;
@@ -465,13 +465,12 @@ void graphicsViewExample()
 }
 #endif
 
-END_NAMESPACE_DO
 
 int main()
 {
   using namespace DO;
 #ifdef TEST_2D
-  // Window manag ement examples.
+  // Window management examples.
   aWindow();
   twoWindows();
   twoWindows2();

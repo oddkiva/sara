@@ -61,11 +61,13 @@ namespace DO {
     // drawXXX
     void drawPoint(int x, int y, const QColor& c);
     void drawPoint(const QPointF& p, const QColor& c);
-    void drawCircle(int xc, int yc, int r, const QColor& c, int penWidth = 1);
     void drawLine(int x1, int y1, int x2, int y2, const QColor& c,
                   int penWidth = 1);
     void drawLine(const QPointF& p1, const QPointF& p2, const QColor& c,
                   int penWidth = 1);
+    void drawCircle(int xc, int yc, int r, const QColor& c, int penWidth = 1);
+    void drawCircle(const QPointF& center, float r, const QColor& c,
+                    int penWidth = 1);
     void drawEllipse(int x, int y, int w, int h, const QColor& c, 
                      int penWidth = 1);
     void drawEllipse(const QPointF& center, qreal r1, qreal r2, qreal degree,

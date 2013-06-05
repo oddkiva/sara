@@ -9,10 +9,17 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+//! @file
+
 #ifndef DO_FEATURES_IO_HPP
 #define DO_FEATURES_IO_HPP
 
 namespace DO {
+
+  /*!
+    \ingroup Features
+    @{
+  */
 
 	std::ostream& operator<<(std::ostream& os, const Keypoint& k);
 
@@ -21,6 +28,8 @@ namespace DO {
 
 	bool writeKeypoints(const std::vector<Keypoint>& keys, const std::string & name, 
 						          bool writeForBundler = false);
+
+  //! @}
 
 } /* namespace DO */
 

@@ -9,105 +9,125 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+//! @file
+
 #ifndef DO_IMAGEPROCESSING_DIFFERENTIAL_HPP
 #define DO_IMAGEPROCESSING_DIFFERENTIAL_HPP
 
 namespace DO {
 
-#define LocatorType(T, N, StorageOrder, IsConstant) \
-  typename Locator<typename Meta::Choose<IsConstant, const T, T>::Type, N, StorageOrder>
+  /*!
+    \ingroup ImageProcessing
+    \defgroup Differential Differential Calculus, Norms, and Other Stuff
+    @{
+   */
 
-	template <int N, int Axis>
-	struct Differential
+  //! Internals.
+  template <int N, int Axis>
+  struct Differential
 	{
 		DO_STATIC_ASSERT(Axis >= 0 && Axis < N,
       AXIS_MUST_NONNEGATIVE_AND_LESS_THAN_N);
 
-		template <typename T, int StorageOrder>
-		static inline T eval_derivative(Locator<T, N, StorageOrder>& loc)
+    template <bool IsConst, typename T, int StorageOrder>
+    static inline T
+    eval_partial_derivative(RangeIterator<IsConst, T, N, StorageOrder>& it)
 		{
-			return (loc.template axis<Axis>()[1] - loc.template axis<Axis>()[-1])
+			return (it.template axis<Axis>()[1] - it.template axis<Axis>()[-1])
 				/ static_cast<T>(2);
 		}
 
-		template <typename T, int StorageOrder>
-		static inline T accumulate_neighbor_values(Locator<T, N, StorageOrder>& loc)
+    template <bool IsConst, typename T, int StorageOrder>
+    static inline T 
+    accumulate_neighbor_values(RangeIterator<IsConst, T, N, StorageOrder>& it)
 		{
-			return loc.template axis<Axis>()[1]+loc.template axis<Axis>()[-1]
-				+ Differential<N, Axis-1>::accumulate_neighbor_values(loc);
+			return it.template axis<Axis>()[1]+it.template axis<Axis>()[-1]
+				+ Differential<N, Axis-1>::accumulate_neighbor_values(it);
 		}
 
-		template <typename T, int StorageOrder>
-		static inline void eval_gradient(Matrix<T, N, 1>& g,
-                                     Locator<const T, N, StorageOrder>& loc)
+    template <bool IsConst, typename T, int StorageOrder>
+    static inline void
+    eval_gradient(Matrix<T,N,1>& g, RangeIterator<IsConst,T,N,StorageOrder>& it)
 		{
-			g[Axis] = eval_derivative(loc);
-			Differential<N, Axis-1>::eval_gradient(g, loc);
+			g[Axis] = eval_partial_derivative(it);
+			Differential<N, Axis-1>::eval_gradient(g, it);
 		}
 
-		template <typename T, int StorageOrder>
-		static inline T eval_laplacian(Locator<T, N, StorageOrder>& loc)
+    template <bool IsConst, typename T, int StorageOrder>
+    static inline T
+    eval_laplacian(RangeIterator<IsConst, T, N, StorageOrder>& loc)
 		{ return accumulate_neighbor_values(loc) - 2*N*(*loc); }
 
-		template <typename T, int StorageOrder>
-		static inline T eval_divergence(Locator<Matrix<T, N, 1>, N, StorageOrder>& loc)
-		{
-			return eval_derivative(loc)
-				+ Differential<N, Axis-1>::eval_divergence(loc);
+    template <bool IsConst, typename T, int StorageOrder>
+    static inline T
+    eval_divergence(RangeIterator<IsConst, Matrix<T,N,1>, N, StorageOrder>& it)
+    {
+			return eval_partial_derivative(it)
+				+ Differential<N, Axis-1>::eval_divergence(it);
 		}
 	};
 
+  //! Internals.
 	template <int N>
 	struct Differential<N,0>
 	{
-		template <typename T, int StorageOrder>
-		static inline T eval_derivative(Locator<T, N, StorageOrder>& loc)
+		template <bool IsConst, typename T, int StorageOrder>
+		static inline T
+    eval_partial_derivative(RangeIterator<IsConst, T, N, StorageOrder>& it)
 		{
-			return (loc.template axis<0>()[1] - loc.template axis<0>()[-1])
+			return (it.template axis<0>()[1] - it.template axis<0>()[-1])
 				/ static_cast<T>(2);
 		}
 
-		template <typename T, int StorageOrder>
-		static inline T accumulate_neighbor_values(Locator<T, N, StorageOrder>& loc)
-		{ return loc.template axis<0>()[1] + loc.template axis<0>()[-1]; }
+		template <bool IsConst, typename T, int StorageOrder>
+		static inline T
+    accumulate_neighbor_values(RangeIterator<IsConst, T, N, StorageOrder>& it)
+		{ return it.template axis<0>()[1] + it.template axis<0>()[-1]; }
 
-		template <typename T, int StorageOrder>
-		static inline void eval_gradient(Matrix<T, N, 1>& g, Locator<const T, N, StorageOrder>& loc)
-		{ g[0] = eval_derivative(loc); }
+		template <bool IsConst, typename T, int StorageOrder>
+		static inline void
+    eval_gradient(Matrix<T,N,1>& g, RangeIterator<IsConst,T,N,StorageOrder>& it)
+		{ g[0] = eval_partial_derivative(it); }
 
-		template <typename T, int StorageOrder>
-		static inline T eval_divergence(Locator<Matrix<T, N, 1>, N, StorageOrder>& loc)
-		{ return eval_derivative(loc); }
+		template <bool IsConst, typename T, int StorageOrder>
+		static inline T
+    eval_divergence(RangeIterator<IsConst, Matrix<T,N,1>, N, StorageOrder>& it)
+		{ return eval_partial_derivative(it); }
 	};
 
+  //! Gradient functor class
 	template <typename T, int N = 2>
-	struct ComputeGradient
+	struct Gradient
 	{
 		typedef T Scalar;
 		typedef Matrix<T, N, 1> Vector;
 		typedef Matrix<int, N, 1> Coords;
 		typedef Image<T, N> ScalarField;
-		typedef Image<Vector, N> VectorField;
-		typedef typename ScalarField::ConstLocator ScalarLocator;
-		typedef typename VectorField::Locator VectorLocator;
+		typedef Image<Vector, N> VectorField, ReturnType;
+		typedef typename ScalarField::const_range_iterator ScalarIterator;
+		typedef typename VectorField::range_iterator VectorIterator;
 
-		inline ComputeGradient(const ScalarField& scalarField)
+		inline Gradient(const ScalarField& scalarField)
       : scalar_field_(scalarField) {}
 
-		inline void operator()(Vector& g, ScalarLocator& loc) const
+		inline void operator()(Vector& g, ScalarIterator& loc) const
 		{ Differential<N, N-1>::eval_gradient(g, loc); }
 
 		inline void operator()(Vector& g, const Coords& p) const
-		{ operator()(g, scalar_field_.begin_locator(p)); }
+		{
+      ScalarIterator loc(scalar_field_.begin_range(p));
+      this->operator()(g, loc);
+    }
 
 		void operator()(VectorField& dst) const
 		{
 			if (dst.sizes() != scalar_field_.sizes())
 				dst.resize(scalar_field_.sizes());
 
-			ScalarLocator src_loc(scalar_field_.begin_locator());
-			VectorLocator dst_loc(dst.begin_locator());
-			for ( ; src_loc != src_loc.end(); ++src_loc, ++dst_loc)
+			ScalarIterator src_loc(scalar_field_.begin_range());
+      ScalarIterator src_loc_end(scalar_field_.end_range());
+			VectorIterator dst_loc(dst.begin_range());
+			for ( ; src_loc != src_loc_end; ++src_loc, ++dst_loc)
 				operator()(*dst_loc, src_loc);
 		};
 
@@ -121,30 +141,38 @@ namespace DO {
 		const ScalarField& scalar_field_;
 	};
 
+  //! Laplacian functor class
 	template <typename T, int N = 2>
-	struct ComputeLaplacian
+	struct Laplacian
 	{
-		typedef Matrix<T, N, 1> Vector, Coords;
-		typedef Image<T, N> ScalarField;
-		typedef typename ScalarField::Locator Locator;
-    typedef typename ScalarField::ConstLocator ConstLocator;
+		typedef Matrix<int, N, 1> Coords;
+		typedef Image<T, N> ScalarField, ReturnType;
+		typedef typename ScalarField::range_iterator RangeIterator;
+    typedef typename ScalarField::const_range_iterator ConstRangeIterator;
 
-		inline ComputeLaplacian(const ScalarField& scalarField)
+		inline Laplacian(const ScalarField& scalarField)
 			: scalar_field_(scalarField) {}
 
-		inline T operator()(ConstLocator& loc) const
+		inline T operator()(ConstRangeIterator& loc) const
 		{ return Differential<N, N-1>::eval_laplacian(loc); }
 
 		inline T operator()(const Coords& p) const
-		{ return Differential<N, 0>::eval_laplacian(scalar_field_.locator(p)); }
+		{
+      ConstRangeIterator loc(scalar_field_.begin_range(p));
+      return this->operator()(loc);
+    }
 
 		void operator()(ScalarField& dst) const
 		{
-			ConstLocator src_loc(scalar_field_.begin_locator());
-			Locator dst_loc(dst.begin_locator());
+      if (dst.sizes() != scalar_field_.sizes())
+        dst.resize(scalar_field_.sizes());
 
-			for ( ; src_loc != src_loc.end(); ++src_loc, ++dst_loc)
-				*dst_loc = operator()(src_loc);
+			ConstRangeIterator src_it(scalar_field_.begin_range());
+      ConstRangeIterator src_it_end(scalar_field_.end_range());
+			RangeIterator dst_it(dst.begin_range());
+
+			for ( ; src_it != src_it_end; ++src_it, ++dst_it)
+				*dst_it = operator()(src_it);
 		};
 
 		ScalarField operator()() const
@@ -157,69 +185,66 @@ namespace DO {
 		const ScalarField& scalar_field_;
 	};
 
-  // Redo that: I don't care about N > 3...
+  //! Hessian matrix functor class
   template <typename T, int N = 2>
-  struct ComputeHessian
+  struct Hessian
   {
     typedef Matrix<int, N, 1> Coords, Vector;
     typedef Image<T, N> ScalarField;
-    typedef Matrix<T, N, N> Matrix;
-    typedef Image<Matrix, N> MatrixField;
-    typedef typename ScalarField::ConstLocator ScalarLocator;
-    typedef typename MatrixField::Locator MatrixLocator;
+    typedef Matrix<T, N, N> HessianMatrix;
+    typedef Image<HessianMatrix, N> HessianField, ReturnType;
+    typedef typename ScalarField::const_range_iterator ScalarIterator;
+    typedef typename HessianField::range_iterator MatrixIterator;
 
-		inline ComputeHessian(const ScalarField& scalarField)
+		inline Hessian(const ScalarField& scalarField)
 			: scalar_field_(scalarField) {}
 
-		void operator()(Matrix& H, const ScalarLocator& loc) const
+		void operator()(HessianMatrix& H, const ScalarIterator& loc) const
     {
-      /* Just a reminder:
-       *
-       * ixx = ( i(x+1,y) - 2*i(x,y) + i(x-1,y) ) / static_cast<T>(4);
-       * iyy = ( i(x,y+1) - 2*i(x,y) + i(x,y-1) ) / static_cast<T>(4);
-       * ixy = ( (i(x+1,y+1) - i(x-1,y+1)) - (i(x+1,y-1) - i(x-1,y-1)) ) 
-       *   / static_cast<T>(4);
-       */
+      if (  loc.coords().minCoeff() < 2 || 
+           (loc.sizes() - loc.coords()).minCoeff() < 2 )
+      {
+        H.setZero();
+        return;
+      }
+
       for (int i = 0; i < N; ++i)
         for (int j = i; j < N; ++j)
         {
           if (i == j)
-            H(i,i) = ( loc(delta(i,1)) - 2*(*loc) + loc(delta(i,-1)) )
+            H(i,i) = ( loc(delta(i,1)) - T(2)*(*loc) + loc(delta(i,-1)) )
                    / static_cast<T>(4);
           else
           {
-            H(i,j) = (  ( loc(delta(i,1,j, 1)) - loc(delta(i,-1,j, 1)) )
-                      - ( loc(delta(i,1,j,-1)) - loc(delta(i,-1,j,-1)) ) )
+            H(i,j) = (  loc(delta(i,1,j, 1)) - loc(delta(i,-1,j, 1))
+                      - loc(delta(i,1,j,-1)) + loc(delta(i,-1,j,-1)) )
                          / static_cast<T>(4);
             H(j,i) = H(i,j);
           }
         }
     }
 
-		Matrix operator()(ScalarLocator& loc) const
+		inline void operator()(HessianMatrix& H, const Coords& p) const
     {
-      Matrix H;
+      ScalarIterator loc(scalar_field_.begin_range(p));
       operator()(H, loc);
-      return H;
     }
 
-		inline Matrix operator()(const Coords& p) const
-    { return operator()(scalar_field_.locator(p)); }
-
-		void operator()(MatrixField& dst) const
+		void operator()(HessianField& dst) const
 		{
       if (dst.sizes() != scalar_field_.sizes())
         dst.resize(scalar_field_.sizes());
 
-			ScalarLocator src_loc(scalar_field_.begin_locator());
-			MatrixLocator dst_loc(dst.begin_locator());
-			for ( ; src_loc != src_loc.end(); ++src_loc, ++dst_loc)
-				*dst_loc = operator()(src_loc);
+			ScalarIterator src_loc(scalar_field_.begin_range());
+      ScalarIterator src_end(scalar_field_.end_range());
+			MatrixIterator dst_loc(dst.begin_range());
+			for ( ; src_loc != src_end; ++src_loc, ++dst_loc)
+				operator()(*dst_loc, src_loc);
 		};
 
-		MatrixField operator()() const
+		HessianField operator()() const
 		{
-			MatrixField hessianField;
+			HessianField hessianField;
 			operator()(hessianField);
 			return hessianField;
 		}
@@ -237,78 +262,117 @@ namespace DO {
 		const ScalarField& scalar_field_;
   };
 
-	//! helper functions
-	template <typename T, int N>
-	void grad(Image<Matrix<T,N,1>, N>& dst, const Image<T, N>& src)
-	{
-		ComputeGradient<T,N> computeGradient(src);
-		computeGradient(dst);
-	}
-
-	template <typename T, int N>
-	void del2(Image<T>& dst, const Image<T, N>& src)
-	{
-		ComputeLaplacian<T, N> computeLaplacian(src);
-		computeLaplacian(dst);
-	}
-
-	template <typename T, int N>
-	void squaredNorm(Image<T, N>& dst, const Image<Matrix<T,N,1>, N>& src)
-	{
-    if (dst.sizes() != src.sizes())
-      dst.resize(src.sizes());
-
-		typedef typename Image<T, N>::Locator ScalarLoc;
-		typedef typename Image<Matrix<T,N,1>, N>::ConstLocator VectorLoc;
-
-		ScalarLoc dst_loc(dst.begin_locator());
-		VectorLoc src_loc(src.begin_locator());
-		for ( ; dst_loc != dst_loc.end(); ++dst_loc, ++src_loc)
-			*dst_loc = src_loc->squaredNorm();
-	}
-
-	template <typename T, int N>
-	void blueNorm(Image<T, N>& dst, const Image<Matrix<T,N,1>, N>& src)
-	{
-		typedef typename Image<T, N>::Locator ScalarLoc;
-		typedef typename Image<Matrix<T,N,1>, N>::ConstLocator VectorLoc;
-
-		ScalarLoc dst_loc(dst.begin_locator());
-		VectorLoc src_loc(src.begin_locator());
-		for ( ; dst_loc != dst_loc.end(); ++dst_loc, ++src_loc)
-			*dst_loc = src_loc->blueNorm();
-	}
-
-	template <typename T, int N>
-	void stableNorm(Image<T, N>& dst, const Image<Matrix<T,N,1>, N>& src)
-	{
-		typedef typename Image<T, N>::Locator ScalarLoc;
-		typedef typename Image<Matrix<T,N,1>, N>::ConstLocator VectorLoc;
-
-		ScalarLoc dst_loc(dst.begin_locator());
-		VectorLoc src_loc(src.begin_locator());
-		for ( ; dst_loc != dst_loc.end(); ++dst_loc, ++src_loc)
-			*dst_loc = src_loc->stableNorm();
-	}
-
-	template <typename T>
-	void orientation(Image<T>& dst, const Image<Matrix<T, 2, 1> >& src)
-	{
-		typedef typename Image<T>::Locator ScalarLoc;
-		typedef typename Image<Matrix<T,2,1> >::ConstLocator VectorLoc;
-
-		ScalarLoc dst_loc(dst.begin_locator());
-		VectorLoc src_loc(src.begin_locator());
-		for ( ; dst_loc != dst_loc.end(); ++dst_loc, ++src_loc)
-			*dst_loc = std::atan2(src_loc->y(), src_loc->x());
-	}
-
+	/*!
+    \brief Gradient computation
+    @param[in] src input grayscale image.
+    @param[in] p position in the image.
+    \return 2D gradient vector.
+   */
   template <typename T, int N>
-  void hessian(Image<Matrix<T, N, N> >& dst, const Image<T, N>& src)
+  Matrix<T,N,1> gradient(const Image<T, N>& src, const Matrix<int, N, 1>& p)
   {
-    ComputeHessian<T, N> computeHessian(src);
+    Matrix<T,N,1> g;
+    Gradient<T, N> computeGradient(src);
+    computeGradient(g, p);
+    return g;
+  }
+  /*!
+    \brief Gradient computation
+    @param[in,out] dst gradient vector field
+    @param[in] src scalar field
+   */
+	template <typename T, int N>
+	void gradient(Image<Matrix<T,N,1>, N>& dst, const Image<T, N>& src)
+	{
+    Gradient<T, N> computeGradient(src);
+    computeGradient(dst);
+  }
+  /*!
+    \brief Gradient computation
+    @param[in] src scalar field
+    \return gradient vector field
+   */
+  template <typename T, int N>
+  Image<Matrix<T,N,1>, N> gradient(const Image<T, N>& src)
+  {
+    Image<Matrix<T,N,1>, N> g;
+    gradient(g, src);
+    return g;
+  }
+  /*!
+    \brief Laplacian computation
+    @param[in] src input grayscale image.
+    @param[in] p position in the image.
+    \return laplacian value
+   */
+  template <typename T, int N>
+  T laplacian(const Image<T, N>& src, const Matrix<int, N, 1>& p)
+  {
+    Laplacian<T, N> computeLaplacian(src);
+    return computeLaplacian(p);
+  }
+  /*!
+    \brief Laplacian computation
+    @param[in,out] dst Laplacian field.
+    @param[in] src scalar field.
+   */
+	template <typename T, int N>
+	void laplacian(Image<T, N>& dst, const Image<T, N>& src)
+	{
+		Laplacian<T, N> computeLaplacian(src);
+    computeLaplacian(dst);
+	}
+  /*!
+    \brief Laplacian computation
+    @param[in] src scalar field.
+    \return laplacian field.
+   */
+  template <typename T, int N>
+  Image<T, N> laplacian(const Image<T, N>& src)
+  {
+    Image<T, N> l;
+    laplacian(l, src);
+    return l;
+  }
+  /*!
+    \brief Hessian matrix computation
+    @param[in] src scalar field.
+    @param[in] p position in the image.
+    \return Hessian matrix.
+   */
+  template <typename T, int N>
+  Matrix<T,N,N> hessian(const Image<T, N>& src, const Matrix<int, N, 1>& p)
+  {
+    Matrix<T,N,N> H;
+    Hessian<T, N> computeHessian(src);
+    computeHessian(H, p);
+    return H;
+  }
+  /*!
+    \brief Hessian matrix computation
+    @param[in] src scalar field.
+    @param[in,out] dst Hessian matrix field
+   */
+  template <typename T, int N>
+  void hessian(Image<Matrix<T,N,N> >& dst, const Image<T,N>& src)
+  {
+    Hessian<T, N> computeHessian(src);
     computeHessian(dst);
   }
+  /*!
+    \brief Hessian matrix computation
+    @param[in] src scalar field.
+    \return Hessian matrix field
+   */
+  template <typename T, int N>
+  Image<Matrix<T,N,N> > hessian(const Image<T,N>& src)
+  {
+    Image<Matrix<T, N, N> > h;
+    hessian(h, src);
+    return h;
+  }
+
+  //! @}
 
 } /* namespace DO */
 

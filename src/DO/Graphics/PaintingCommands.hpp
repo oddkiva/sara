@@ -55,8 +55,8 @@ namespace DO {
     @param[in] c RGB color in \f$[0, 255]^3\f$.
     @param[in] penWidth width of the contour.
    */
-  DO_EXPORT
-	void drawCircle(int xc, int yc, int r, const Color3ub& c, int penWidth = 1);
+	void drawCircle(int xc, int yc, int r, const Color3ub& c,
+                  int penWidth = 1);
   /*!
     \brief Draw a circle in the active PaintingWindow window.
     @param[in] center circle center.
@@ -66,6 +66,15 @@ namespace DO {
 	inline void drawCircle(const Point2i& center, int r, const Color3ub& c,
 						             int penWidth = 1)
 	{ drawCircle(center.x(), center.y(), r, c, penWidth); }
+  /*!
+    \brief Draw a circle in the active PaintingWindow window.
+    @param[in] center circle center.
+    @param[in] c RGB color in \f$[0, 255]^3\f$.
+    @param[in] penWidth width of the contour.
+   */
+  DO_EXPORT
+	void drawCircle(const Point2f& center, float r, const Color3ub& c,
+						      int penWidth = 1);
   /*!
     \brief Draw an axis-aligned ellipse in the active PaintingWindow window.
     @param[in] x,y,w,h bounding box parameters of the ellipse.
@@ -414,16 +423,18 @@ namespace DO {
 	}
   //! \brief View an image in a new PaintingWindow window.
 	template <typename T>
-	void view(const Image<T>& I, const std::string& windowTitle = "DO++",
-            bool close = true)
+	void viewImage(const Image<T>& I, const std::string& windowTitle = "DO++",
+                 double fact = 1.0)
 	{
-		// Original image.
-		QWidget *win = openWindow(I.width(), I.height(), windowTitle);
-		setActiveWindow(win);
-		display(I);
-		click();
-		if (close)
-			closeWindow(win);
+    QWidget *win = activeWindow() ? activeWindow() : 0;
+		
+    setActiveWindow(openWindow(I.width()*fact, I.height()*fact, windowTitle));
+		display(I, 0, 0, fact);
+		getKey();
+    closeWindow();
+
+    if (win)
+      setActiveWindow(win);
 	}
 
 	// ======================================================================== //

@@ -34,16 +34,16 @@ namespace DO {
     os << "Feature type:\t";
     switch (k.feat().type())
     {
-    case Blob::DoG:
+    case PointFeature::DoG:
       os << "DoG" << std::endl;
       break;
-    case Corner::HarAff:
+    case PointFeature::HarAff:
       os << "HarrisAffine" << std::endl;
       break;
-    case Blob::HesAff:
+    case PointFeature::HesAff:
       os << "HessianAffine" << std::endl;
       break;
-    case Blob::MSER:
+    case PointFeature::MSER:
       os << "MSER" << std::endl;
       break;
     default:
@@ -96,8 +96,6 @@ namespace DO {
       f >> desc;
 		}
 		f.close();
-		/*std::cout << "Read " << name << " successfully: ";
-		std::cout << feats.size() << " keypoints." << std::endl;*/
 		return true;
 	}
 
@@ -126,20 +124,13 @@ namespace DO {
 			else
 			{
 				f << feat.x() << ' ' << feat.y() << std::endl;
-				f << feat.shapeMat() << std::endl;
+				f << feat.shapeMat().array() << std::endl;
 				f << feat.orientation() << std::endl;
 				f << double(feat.type()) << std::endl;
-			}
-			for (int k = 0; k < 128; ++k)
-			{
-				f << desc[k] << ' '; 
-				if ((k+1)%20==0 || k==128-1)
-					f << std::endl;
+        f << desc << std::endl;
 			}
 		}
 		f.close();
-		/*std::cout << "Saving " << keys.size() << " key points in ";
-		std::cout << name << " successfully!" << std::endl;*/
 		return true;
 	}
 }

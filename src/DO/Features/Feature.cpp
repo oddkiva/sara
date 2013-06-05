@@ -80,11 +80,13 @@ namespace DO {
     //Vector2f p2(p1 + z*r*u);
     Vector2f p2(p1 + z*L*Vector2f(1.f,0.f));
 
-    drawLine(p1, p2, Black8, 5); // Contour.
-    drawEllipse(p1, z*a, z*b, 180.f*ellOrient/float(M_PI), Black8, 5); // Contour.
-
-    drawLine(p1, p2, c, 3); // Fill-in.
-    drawEllipse(p1, z*a, z*b, 180.f*ellOrient/float(M_PI), c, 3); // Fill-in.
+    if (z*a > 1.f && z*b > 1.f && (p1-p2).squaredNorm() > 1.f)
+    {
+      drawLine(p1, p2, Black8, 5); // Contour.
+      drawEllipse(p1, z*a, z*b, 180.f*ellOrient/float(M_PI), Black8, 5); // Contour.
+      drawLine(p1, p2, c, 3); // Fill-in.
+      drawEllipse(p1, z*a, z*b, 180.f*ellOrient/float(M_PI), c, 3); // Fill-in.
+    }
 #endif
     //fillCircle(p1, 1.f, c);
     drawLine(c1, c2, c, 3);

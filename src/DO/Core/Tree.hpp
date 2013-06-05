@@ -24,6 +24,8 @@ namespace DO {
   //! \brief The tree data structure is by definition an arborescence, in graph 
   //! theory, i.e., an directed graph with a root vertex 'u' such that there is 
   //! a unique path from 'u' to any vertex 'v' in the tree.
+  //!
+  //! \todo: finish testing (cf. methods' description where TODO is present.).
   template <typename T>
   class Tree
   {
@@ -114,7 +116,7 @@ namespace DO {
     }
 
     //! Equality operator.
-    // TODO: you, dummy! That's false. Because equality can happen even if 
+    // \todo: you, dummy! That's false. Because equality can happen even if 
     // the tree structures differs. 
     // Check that each node also has the same number of children. Proof?
     /*bool operator==(const Tree& t) const
@@ -245,7 +247,7 @@ namespace DO {
     { node()->prepend_child(tree.begin()()); }
 
     //! Cut the tree at the specified node which becomes the root of the subtree.
-    //! TODO: check if the implementation is correct.
+    //! \todo: check if the implementation is correct.
     inline Tree cut_tree(node_handle node)
     {
       node.parent().remove_child(node);
@@ -255,7 +257,7 @@ namespace DO {
     }
 
     //! Delete the subtree at the specified node being the root of the subtree.
-    //! TODO: check if the implementation is correct.
+    //! \todo: check if the implementation is correct.
     inline void delete_subtree(node_handle node)
     {
       node.parent().remove_child(node);

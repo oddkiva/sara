@@ -83,14 +83,6 @@ namespace DO {
     update();
   }
 
-	void PaintingWindow::drawCircle(int xc, int yc, int r, const QColor& c,
-                                  int penWidth)
-  {
-    painter_.setPen(QPen(c, penWidth));
-    painter_.drawEllipse(QPoint(xc, yc), r, r);
-    update();
-  }
-
 	void PaintingWindow::drawLine(int x1, int y1, int x2, int y2,
 								                const QColor& c, int penWidth)
 	{
@@ -99,11 +91,27 @@ namespace DO {
 		update();
 	}
 
-  void PaintingWindow::drawLine(const QPointF& p1, const QPointF& p2, const QColor& c,
-                                int penWidth)
+  void PaintingWindow::drawLine(const QPointF& p1, const QPointF& p2, 
+                                const QColor& c, int penWidth)
   {
     painter_.setPen(QPen(c, penWidth));
     painter_.drawLine(p1, p2);
+    update();
+  }
+
+	void PaintingWindow::drawCircle(int xc, int yc, int r, const QColor& c,
+                                  int penWidth)
+  {
+    painter_.setPen(QPen(c, penWidth));
+    painter_.drawEllipse(QPoint(xc, yc), r, r);
+    update();
+  }
+
+  void PaintingWindow::drawCircle(const QPointF& center, float r,
+                                  const QColor& c, int penWidth)
+  {
+    painter_.setPen(QPen(c, penWidth));
+    painter_.drawEllipse(QPointF(center.x(), center.y()), r, r);
     update();
   }
 

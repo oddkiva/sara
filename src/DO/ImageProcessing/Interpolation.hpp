@@ -1,13 +1,33 @@
+// ========================================================================== //
+// This file is part of DO++, a basic set of libraries in C++ for computer 
+// vision.
+//
+// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public 
+// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
+//! @file
+
 #ifndef DO_IMAGEPROCESSING_INTERPOLATION_HPP
 #define DO_IMAGEPROCESSING_INTERPOLATION_HPP
 
 namespace DO {
 
+  /*!
+    \ingroup ImageProcessing
+    \defgroup Interpolation Interpolation
+    @{
+   */
+
 	// ====================================================================== //
 	// Interpolation
+  //! \brief Interpolation function
 	template <typename T, int N, typename F> 
-  inline typename ColorTraits<T>::Color64f interpolate(const Image<T,N> &I,
-                                                       const Matrix<F, N, 1>& xx)
+  typename ColorTraits<T>::Color64f interpolate(const Image<T,N> &I,
+                                                const Matrix<F, N, 1>& xx)
   {
     DO_STATIC_ASSERT(
       !std::numeric_limits<F>::is_integer,
@@ -30,7 +50,7 @@ namespace DO {
 
     typedef typename ColorTraits<T>::Color64f Col64f;
     Col64f val(ColorTraits<Col64f>::zero());
-    RangeIterator<N> p(c, (c.array()+1).matrix()), end;
+    CoordsIterator<N> p(c, (c.array()+1).matrix()), end;
     for ( ; p != end; ++p)
     {
       double f = 1.;

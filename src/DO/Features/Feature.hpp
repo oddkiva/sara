@@ -9,10 +9,17 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+//! @file
+
 #ifndef DO_FEATURES_FEATURE_HPP
 #define DO_FEATURES_FEATURE_HPP
 
 namespace DO {
+
+  /*!
+    \ingroup Features
+    @{
+  */
 
   //! Abstract 'Feature' class.
   class Feature {
@@ -34,6 +41,7 @@ namespace DO {
     //! ID for each point feature type.
     enum Type { Harris, HarAff, HarLap, FAST, SUSAN,
                 DoG, LoG, DoH, MSER, HesAff, HesLap };
+    enum ExtremumType { Max = 1, Min = -1 };
     //! Constructors.
     PointFeature() : Feature() {}
     PointFeature(const Point2f& coords) : coords_(coords) {}
@@ -45,12 +53,16 @@ namespace DO {
     const Point2f& coords() const { return coords_; }
     const Point2f& center() const { return coords(); }
     Type type() const { return type_; }
+    ExtremumType extremumType() const { return extremum_type_; }
+    float extremumValue() const { return extremum_value_; }
     //! Mutable getters.
     float& x() { return coords_(0); }
     float& y() { return coords_(1); }
     Point2f& coords() { return coords_; }
     Point2f& center() { return coords(); }
     Type& type() { return type_; }
+    ExtremumType& extremumType() { return extremum_type_; }
+    float& extremumValue() { return extremum_value_; }
     //! Equality operator.
     bool operator==(const PointFeature& f) const
     { return coords() == f.coords(); }
@@ -62,9 +74,12 @@ namespace DO {
   private:
     Point2f coords_;
     Type type_;
+    ExtremumType extremum_type_;
+    float extremum_value_;
   };
 
-  /*! The 'OERegion' class stands for 'Oriented Elliptic Region' and is 
+  /*!
+    The 'OERegion' class stands for 'Oriented Elliptic Region' and is 
     dedicated to store important geometric features such as:
     - DoG
     - Harris-Affine
@@ -77,7 +92,8 @@ namespace DO {
     OERegion() : PointFeature() {}
     //! Constructor for circular region.
     OERegion(const Point2f& coords, float scale)
-      : PointFeature(coords), shape_matrix_(Matrix2f::Identity()*scale) {}
+      : PointFeature(coords)
+      , shape_matrix_(Matrix2f::Identity()*(pow(scale,-2))) {}
     //! Destructor.
     virtual ~OERegion() {}
     //! Constant/mutable shape matrix getters.
@@ -109,31 +125,6 @@ namespace DO {
               orientation() == f.orientation() &&
               type() == f.type());
     };
-    //! Checks if the regions are equal regardless of the orientation.
-    bool sameRegionAs(const OERegion& f) const
-    {
-      return (coords() == f.coords() &&
-              shapeMat() == f.shapeMat() &&
-              type() == f.type());
-    }
-    //! Lexicographical comparison by region.
-    bool regionLexCompLess(const OERegion& f) const
-    {
-      if ( lexCompare(coords(), f.coords()) )
-        return true;
-      else if (coords() == f.coords() && lexCompare(shapeMat(), f.shapeMat()))
-        return true;
-      return false;
-    }
-    //! Lexicographical comparison by region and orientation.
-    bool lexCompLess(const OERegion& f) const
-    {
-      if (regionLexCompLess(f))
-        return true;
-      else if (sameRegionAs(f) && orientation() < f.orientation())
-        return true;
-      return false;
-    }
     //! I/O
     std::ostream& print(std::ostream& os) const
     { return PointFeature::print(os) << " " << shape_matrix_; }
@@ -151,28 +142,7 @@ namespace DO {
     float orientation_;
   };
 
-  class Corner : public OERegion
-  {
-  public:
-    float corner_measure;
-  };
-
-  class Blob : public OERegion
-  {
-  public:
-    enum ResponseType { Min, Max };
-
-    Blob() : OERegion() {}
-    Blob(const Point2f& coords, float scale) : OERegion(coords, scale) {}
-
-    ResponseType& response() { return response_; }
-    ResponseType response() const { return response_; }
-
-  private:
-    ResponseType response_;
-    Type type_;
-  };
-
+  //! @file
 }
 
 #endif /* DO_FEATURES_FEATURE_HPP */

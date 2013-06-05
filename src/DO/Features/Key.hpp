@@ -9,12 +9,19 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+//! @file
+
 #ifndef DO_FEATURES_KEY_HPP
 #define DO_FEATURES_KEY_HPP
 
 #include <Eigen/StdVector>
 
 namespace DO {
+
+  /*!
+    \ingroup Features
+    @{
+  */
 
   template <typename F, typename D>
   class Key
@@ -51,6 +58,8 @@ namespace DO {
   };
 
   typedef Key<OERegion, Desc128f> Keypoint;
+
+  //! @}
 
 } /* namespace DO */
 

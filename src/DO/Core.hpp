@@ -15,7 +15,7 @@
 #ifndef DO_CORE_HPP
 #define DO_CORE_HPP
 
-// Because of Eigen/Core compiling error
+// To avoid compilation error with Eigen
 #ifdef WIN32
 #	define NOMINMAX
 #endif
@@ -29,8 +29,9 @@
 //! Activate by default math constants.
 #define _USE_MATH_DEFINES
 
+//! Eigen dependencies.
 #include <Eigen/Eigen>
-
+// STL dependencies.
 #include <algorithm>
 #include <ctime>
 #include <exception>
@@ -45,18 +46,35 @@
 #include <string>
 #include <sstream>
 #include <stdexcept>
+#include <vector>
+// System-specific dependencies for "Timer.hpp".
+#ifdef _WIN32
+# include <windows.h>
+#else
+# include <sys/time.h>
+#endif
 
+// Linear algebra imports and extension from Eigen3
 #include "Core/EigenExtension.hpp"
+// Template meta-programming
 #include "Core/Meta.hpp"
 #include "Core/StaticAssert.hpp"
-#include "Core/Stringify.hpp"
-#include "Core/Timer.hpp"
-#include "Core/Color.hpp"
+// N-dimensional array and N-dimensional iterators
 #include "Core/Locator.hpp"
 #include "Core/MultiArray.hpp"
+// Sparse N-dimensional array
 #include "Core/SparseMultiArray.hpp"
+// Image and color data structures
+#include "Core/Color.hpp"
 #include "Core/Image.hpp"
+#include "Core/Subimage.hpp"
+// Tree data structures
 #include "Core/Tree.hpp"
+// Miscellaneous
+#include "Core/Stringify.hpp"
+#include "Core/Timer.hpp"
+#include "Core/StdVectorHelpers.hpp"
+
 
 /*!
   \namespace DO
@@ -74,10 +92,6 @@
   @{
  */
 
-//! Opening macro whose sole purpose is to increase the namespace visibility.
-#define BEGIN_NAMESPACE_DO namespace DO {
-//! Closing macro whose sole purpose is to increase the namespace visibility.
-#define END_NAMESPACE_DO } /* namespace DO */
 
 /*!
   \def srcPath(s)

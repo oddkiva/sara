@@ -20,7 +20,7 @@
 #	define NOMINMAX
 #endif
 
-#include "Defines.hpp"
+#include <DO/Defines.hpp>
 
 #include "Graphics/GraphicsUtilities.hpp"
 #include "Graphics/Events.hpp"

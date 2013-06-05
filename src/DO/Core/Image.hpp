@@ -43,63 +43,74 @@ namespace DO {
 
   //! \brief Helper function for color conversion.
   template <typename T, typename U, int N>
-	void convert(Image<T, N>& dst, const Image<U, N>& src);  
+	void convert(Image<T, N>& dst, const Image<U, N>& src);
 
   //! \brief The image class.
   template <typename Color, int N>
 	class Image : public MultiArray<Color, N, ColMajor>
 	{
-		typedef MultiArray<Color, N, ColMajor> Base;
+		typedef MultiArray<Color, N, ColMajor> base_type;
 
 	public: /* interface */
     //! N-dimensional integral vector type.
-    typedef typename Base::Vector Vector;
+    typedef typename base_type::vector_type vector_type, Vector;
     
     //! Default constructor.
 		inline Image()
-			: Base() {}
+			: base_type() {}
 
     //! Constructor with specified sizes.
-		inline explicit Image(const Vector& sizes)
-			: Base(sizes) {}
+		inline explicit Image(const vector_type& sizes)
+			: base_type(sizes) {}
 
     //! Constructor which wraps raw data.
-		inline Image(Color *data, const Vector& sizes)
-			: Base(data, sizes) {}
+		inline Image(Color *data, const vector_type& sizes)
+			: base_type(data, sizes) {}
 
     //! Constructor with specified sizes.
 		inline Image(int width, int height)
-			: Base(width, height) {}
+			: base_type(width, height) {}
 
     //! Constructor with specified sizes.
     inline Image(int width, int height, int depth)
-      : Base(width, height, depth) {}
+      : base_type(width, height, depth) {}
 
     //! Copy constructor.
-		inline Image(const Base& x)
-			: Base(x) {}
+		inline Image(const base_type& x)
+			: base_type(x) {}
 
     //! Assignment operators.
 		inline const Image& operator=(const Image& I)
-		{ Base::operator=(I); return *this;}
+		{ base_type::operator=(I); return *this;}
 
     //! Constant width accessor.
-		inline int width() const { return this->Base::rows(); }
+		inline int width() const { return this->base_type::rows(); }
 
     //! Constant height accessor.
-		inline int height() const {	return this->Base::cols(); }
+		inline int height() const {	return this->base_type::cols(); }
 
     //! Constant depth accessor (only for volumetric image.)
-		inline int depth() const {	return this->Base::depth(); }
+		inline int depth() const {	return this->base_type::depth(); }
 
-    //! Color conversion methods.
+    //! Color conversion method.
     template <typename Color2>
     Image<Color2, N> convert() const
     {
-      Image<Color2, N> dst(Base::sizes());
+      Image<Color2, N> dst(base_type::sizes());
       DO::convert(dst, *this);
       return dst;
     }
+
+    //! Convenient helper for chaining filters.
+    template <template<typename, int> class Filter>
+    inline typename Filter<Color, N>::ReturnType
+    compute() const
+    { return Filter<Color, N>(*this)(); }
+
+    template <template<typename, int> class Filter>
+    inline typename Filter<Color, N>::ReturnType
+    compute(const typename Filter<Color, N>::ParamType& param) const
+    { return Filter<Color, N>(*this)(param); }
 	};
 
 	// ====================================================================== //
@@ -248,32 +259,32 @@ namespace DO {
 
   //! Macro that defines a color rescaling function for a specific grayscale 
   //! color type.
-#define DEFINE_RESCALE_GRAY(T)											          \
-  /*! \brief Rescales color values properly for viewing. */   \
-	template <int N>													                  \
-	inline Image<T, N> colorRescale(const Image<T, N>& src,	    \
-									T a = ColorTraits<T>::min(),		            \
-									T b = ColorTraits<T>::max())		            \
-	{																	                          \
-		Image<T, N> dst(src.sizes());									            \
-																		                          \
-		const T *src_first = src.data();								          \
-		const T *src_last = src_first + src.size();						    \
-		T *dst_first  = dst.data();										            \
-																		                          \
-		T min = *std::min_element(src_first, src_last);				    \
-		T max = *std::max_element(src_first, src_last);				    \
-																		                          \
-		if (min == max)													                  \
-		{																                          \
-      std::cerr << "Warning: min == max!" << std::endl;       \
-			return dst;													                    \
-		}																                          \
-																		                          \
-		for ( ; src_first != src_last; ++src_first, ++dst_first)	\
-			*dst_first = a + (b-a)*(*src_first-min)/(max-min);			\
-                                                              \
-		return dst;														                    \
+#define DEFINE_RESCALE_GRAY(T)											            \
+  /*! \brief Rescales color values properly for viewing. */     \
+	template <int N>													                    \
+	inline Image<T, N> colorRescale(const Image<T, N>& src,	      \
+									                T a = ColorTraits<T>::min(),  \
+									                T b = ColorTraits<T>::max())  \
+	{																	                            \
+		Image<T, N> dst(src.sizes());									              \
+																		                            \
+		const T *src_first = src.data();								            \
+		const T *src_last = src_first + src.size();						      \
+		T *dst_first  = dst.data();										              \
+																		                            \
+		T min = *std::min_element(src_first, src_last);				      \
+		T max = *std::max_element(src_first, src_last);				      \
+																		                            \
+		if (min == max)													                    \
+		{																                            \
+      std::cerr << "Warning: min == max!" << std::endl;         \
+			return dst;													                      \
+		}																                            \
+																		                            \
+		for ( ; src_first != src_last; ++src_first, ++dst_first)	  \
+			*dst_first = a + (b-a)*(*src_first-min)/(max-min);			  \
+                                                                \
+		return dst;														                      \
 	}
 
 	DEFINE_RESCALE_GRAY(uchar)
@@ -286,6 +297,15 @@ namespace DO {
 	DEFINE_RESCALE_GRAY(double)
 #undef DEFINE_RESCALE_GRAY
 
+  //! \brief color rescaling functor helper.
+  template <typename T, int N>
+  struct ColorRescale
+  {
+    typedef Image<T, N> ReturnType;
+    ColorRescale(const Image<T, N>& src) : src_(src) {}
+    ReturnType operator()() const { return colorRescale(src_); }
+    const Image<T, N>& src_;
+  };
 
   //! @}
 

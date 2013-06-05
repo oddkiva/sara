@@ -9,11 +9,23 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+//! @file
+
 #ifndef DO_IMAGEPROCESSING_DERICHE_HPP
 #define DO_IMAGEPROCESSING_DERICHE_HPP
 
 namespace DO {
+  /*!
+    \ingroup ImageProcessing
+    \defgroup Deriche Deriche Filter
+    Deriche Infinite Impulse Response (IIR) filters which approximates
+    - Gaussian smoothing
+    - Gaussian smoothed first-order derivative
+    - Gaussian smoothed second-order derivative
+    @{
+   */
 
+  //! \brief Applies Deriche filter with specified order $o$ to dimension $d$.
 	template <typename T, int N>
 	void inPlaceDeriche(Image<T, N>& I, 
 						          typename ColorTraits<T>::ChannelType sigma,
@@ -93,13 +105,13 @@ namespace DO {
 		const size_t offset = I.stride(d);
 		const size_t nb = I.size(d);
 
-		typedef typename Image<T, N>::Coords Coords;
+		typedef typename Image<T, N>::coords_type Coords;
 		Coords beg; beg.fill(0);
 		Coords end((I.sizes().array() - 1).matrix());
 		end[d]=0;
 
 		// Do not change the code! It works optimally with interleaved color!
-		for (RangeIterator<N> p(beg,end); p != RangeIterator<N>(); ++p) {
+		for (CoordsIterator<N> p(beg,end); p != CoordsIterator<N>(); ++p) {
 			T *ima = &(I(*p));
 			T I2(*ima); ima += offset;
 			T I1(*ima); ima += offset;
@@ -134,7 +146,7 @@ namespace DO {
 		}
 		delete [] Y;
 	}
-
+  //! \brief Applies Deriche filter-based blurring.
 	template <typename T, int N>
 	void inPlaceDericheBlur(Image<T,N>&I,
 							            const Matrix<typename ColorTraits<T>::ChannelType, N, 1>& sigmas,
@@ -143,7 +155,7 @@ namespace DO {
 		for (int i=0;i<N;i++)
 			inPlaceDeriche(I,sigmas[i], 0, i, neumann);
 	}
-
+  //! \brief Applies Deriche filter-based blurring.
 	template <typename T, int N>
 	void inPlaceDericheBlur(Image<T,N>& I,
 							            typename ColorTraits<T>::ChannelType sigma,
@@ -153,7 +165,7 @@ namespace DO {
 		Matrix<S, N, 1> Sigma; Sigma.fill(sigma);
 		inPlaceDericheBlur(I, Sigma, neumann);
 	}
-
+  //! \brief Returns the blurred image using Deriche filter.
 	template <typename T, int N>
 	Image<T,N> dericheBlur(const Image<T,N>& I,
 						             typename ColorTraits<T>::ChannelType sigma,
@@ -163,7 +175,7 @@ namespace DO {
 		inPlaceDericheBlur(J,sigma,neumann);
 		return J;
 	}
-
+  //! \brief Returns the blurred image using Deriche filter.
 	template <typename T, int N>
 	Image<T,N> dericheBlur(const Image<T,N>& I,
 						             const Matrix<typename ColorTraits<T>::ChannelType, N, 1>& sigmas,
@@ -174,6 +186,18 @@ namespace DO {
 		return J;
 	}
 
+  //! \brief Helper class to use Image<T,N>::compute<DericheBlur>(T sigma)
+  template <typename T, int N>
+  struct DericheBlur
+  {
+    typedef Image<T, N> ReturnType;
+    typedef typename ColorTraits<T>::ChannelType ParamType;
+    DericheBlur(const Image<T, N>& src) : src_(src) {}
+    ReturnType operator()(ParamType sigma) const { return dericheBlur(src_, sigma); }
+    const Image<T, N>& src_;
+  };
+
+  //! @}
 } /* namespace DO */
 
 #endif /* DO_IMAGEPROCESSING_DERICHE_HPP */

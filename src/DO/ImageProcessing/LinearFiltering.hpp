@@ -9,29 +9,53 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+//! @file
+
 #ifndef DO_IMAGEPROCESSING_LINEARFILTERING_HPP
 #define DO_IMAGEPROCESSING_LINEARFILTERING_HPP
 
 namespace DO {
-    
-	enum PaddingType { ZeroPadding, BorderReplication };
 
-	template <typename T>
-	void convolveBuffer(T *buffer,
-					    const typename ColorTraits<T>::ChannelType *kernel,
-						int rsize, int ksize)
+  /*!
+    \ingroup ImageProcessing
+    \defgroup LinearFiltering 2D Linear Filtering
+    @{
+   */
+
+  /*!
+    \brief "Convolves" a 1D signal \f$f\f$ (or 1D array), with a kernel \f$g\f$.
+    @param[in,out]
+      signal
+      the 1D array containing the 1D signal \f$ f = (f_i)_{1\leq i \leq N}\f$,
+      the resulting signal \f$f*g\f$ is stored in signal.
+    @param[in]
+      kernel
+      the "convolution" kernel \f$g = (g_i)_{1 \leq i \leq K}\f$.
+    @param[in] signalSz the signal size \f$N\f$.
+    @param[in] kernelSz the kernel size \f$K\f$.
+    
+    Note that to be mathematically correct, the kernel must be symmetric, which
+    is why every time, the term "convolution" is mentioned is put in quotes
+    See the implementation for details.
+    This function is used intensively in applyFastRowBasedFilter and 
+    applyFastColumnBasedFilter.
+   */
+  template <typename T>
+	void convolveArray(T *signal,
+					           const typename ColorTraits<T>::ChannelType *kernel,
+						         int signalSz, int kernelSz)
 	{
 		T *bp;
-		T *b = buffer;
+		T *b = signal;
 		const typename ColorTraits<T>::ChannelType *kp;
 
-		for (int i = 0; i < rsize; ++i)
+		for (int i = 0; i < signalSz; ++i)
 		{
 			bp = b;
 			kp = kernel;
 
 			T sum(ColorTraits<T>::zero());
-			for (int j = 0; j < ksize; j++)
+			for (int j = 0; j < kernelSz; j++)
 				sum += *bp++ * *kp++;
 			
 			*b++ = sum;
@@ -40,14 +64,23 @@ namespace DO {
 
 	// ====================================================================== //
 	// Linear filters.
+  /*!
+    \brief Apply 1D filter to image rows. (Slow, deprecated).
+    @param[out] dst the row-filtered image.
+    @param[in] src the input image
+    @param[in] kernel the input kernel
+    @param[in] kernelSize the kernel size
+
+    Note that borders are replicated.
+   */
 	template <typename T>
 	void applyRowBasedFilter(Image<T>& dst, const Image<T>& src,
-							 const typename ColorTraits<T>::ChannelType *kernel,
-							 int kSize)
+							             const typename ColorTraits<T>::ChannelType *kernel,
+							             int kernelSize)
 	{
 		const int w = src.width();
 		const int h = src.height();
-		const int halfSize = kSize/2;
+		const int halfSize = kernelSize/2;
 		Image<T> buffer(w+halfSize*2,1);
 
 		// Resize if necessary.
@@ -61,26 +94,34 @@ namespace DO {
 				buffer(x,0) = src(0,y);
 			for (int x = 0; x < w; ++x)
 				buffer(halfSize+x,0) = src(x,y);
-			for (int x = 0; x < halfSize; ++x)
-				buffer(w+halfSize+x,0) = src(w-1,y);
+      for (int x = 0; x < halfSize; ++x)
+        buffer(w+halfSize+x,0) = src(w-1,y);
 
 			// Compute the value by convolution
 			for (int x = 0; x < w; ++x) {
 				dst(x,y) = ColorTraits<T>::zero();
-				for (int k = 0; k < kSize; ++k)
+				for (int k = 0; k < kernelSize; ++k)
 					dst(x,y) += kernel[k]*buffer(x+k,0);
 			}
 		}
 	}
-
+  /*!
+    \brief Apply 1D filter to image columns.
+    @param[out] dst the column-filtered image.
+    @param[in] src the input image
+    @param[in] kernel the input kernel
+    @param[in] kernelSize the kernel size
+    
+    Note that borders are replicated.
+   */
 	template <typename T>
 	void applyColumnBasedFilter(Image<T>& dst, const Image<T>& src,
-								const typename ColorTraits<T>::ChannelType *kernel,
-								int kSize)
+								              const typename ColorTraits<T>::ChannelType *kernel,
+								              int kernelSize)
 	{
 		const int w = src.width();
 		const int h = src.height();
-		const int halfSize = kSize/2;
+		const int halfSize = kernelSize/2;
 		
 		// Resize if necessary.
 		if (dst.sizes() != src.sizes())
@@ -102,20 +143,28 @@ namespace DO {
 			for (int y = 0; y < h; ++y)
 			{
 				dst(x,y) = ColorTraits<T>::zero();
-				for (int k = 0; k < kSize; ++k)
+				for (int k = 0; k < kernelSize; ++k)
 					dst(x,y) += kernel[k]*buffer(y+k,0);
 			}
 		}
 	}
+  /*!
+    \brief Apply 1D filter to image rows.
+    @param[out] dst the row-filtered image.
+    @param[in] src the input image
+    @param[in] kernel the input kernel
+    @param[in] kernelSize the kernel size
 
+    Note that borders are replicated.
+   */
 	template <typename T>
 	void applyFastRowBasedFilter(Image<T>& dst, const Image<T>& src,
-								 const typename ColorTraits<T>::ChannelType *kernel,
-								 int kSize)
+								               const typename ColorTraits<T>::ChannelType *kernel,
+								               int kernelSize)
 	{
 		const int w = src.width();
 		const int h = src.height();
-		const int halfSize = kSize/2;
+		const int halfSize = kernelSize/2;
 		T *buffer = new T[w+halfSize*2];
 		for (int y = 0; y < h; ++y)
 		{
@@ -127,21 +176,30 @@ namespace DO {
 			for (int x = 0; x < halfSize; ++x)
 				buffer[w+halfSize+x] = src(w-1,y);
 
-			convolveBuffer(buffer, kernel, w, kSize);
+			convolveArray(buffer, kernel, w, kernelSize);
 			for (int x = 0; x < w; ++x)
 				dst(x,y) = buffer[x];
 		}
 
 		delete[] buffer;
 	}
+  /*!
+    \brief Apply 1D filter to image columns. (Slow, deprecated).
+    @param[out] dst the column-filtered image.
+    @param[in] src the input image
+    @param[in] kernel the input kernel
+    @param[in] kernelSize the kernel size
+
+    Note that borders are replicated.
+   */
 	template <typename T>
 	void applyFastColumnBasedFilter(Image<T>& dst, const Image<T>& src,
-									const typename ColorTraits<T>::ChannelType *kernel,
-									int kSize)
+									                const typename ColorTraits<T>::ChannelType *kernel,
+									                int kernelSize)
 	{
 		const int w = src.width();
 		const int h = src.height();
-		const int halfSize = kSize/2;
+		const int halfSize = kernelSize/2;
 
 		// Resize if necessary.
 		if (dst.sizes() != src.sizes())
@@ -158,14 +216,14 @@ namespace DO {
 			for (int y = 0; y < halfSize; ++y)
 				buffer[h+halfSize+y] = src(x,h-1);
 			
-			convolveBuffer(buffer, kernel, h, kSize);
+			convolveArray(buffer, kernel, h, kernelSize);
 			for (int y = 0; y < h; ++y)
 				dst(x,y) = buffer[y];
 		}
 
 		delete[] buffer;
 	}
-
+  //! brief Apply row-derivative to image.
 	template <typename T>
 	void applyRowDerivative(Image<T>& dst, const Image<T>& src)
 	{
@@ -173,7 +231,7 @@ namespace DO {
 		S diff[] = { S(1), S(0), S(-1) };
 		applyFastRowBasedFilter(dst, src, diff, 3);
 	}
-
+  //! \brief Apply column-derivative to image.
 	template <typename T>
 	void applyColumnDerivative(Image<T>& dst, const Image<T>& src)
 	{
@@ -181,7 +239,7 @@ namespace DO {
 		S diff[] = { S(1), S(0), S(-1) };
 		applyFastColumnBasedFilter(dst, src, diff, 3);
 	}
-
+  //! \brief Apply Gaussian smoothing to image.
 	template <typename T>
 	void applyGaussianFilter(Image<T>& dst, const Image<T>& src,
                            typename ColorTraits<T>::ChannelType sigma,
@@ -222,7 +280,7 @@ namespace DO {
         
     delete[] kernel;
 	}
-
+  //! \brief Apply Sobel filter to image.
 	template <typename T>
 	void applySobelFilter(Image<T>& dst, const Image<T>& src)
 	{
@@ -238,7 +296,7 @@ namespace DO {
 
 		dst.array() = (dst.array().abs2()+ tmp.array().abs2()).sqrt();
 	}
-
+  //! \brief Apply Scharr filter to image.
 	template <typename T>
 	void applyScharrFilter(Image<T>& dst, const Image<T>& src)
 	{
@@ -256,7 +314,7 @@ namespace DO {
 
 		dst.array() = (dst.array().abs2()+ tmp.array().abs2()).sqrt();
 	}
-
+  //! \brief Apply Prewitt filter to image.
 	template <typename T>
 	void applyPrewittFilter(Image<T>& dst, const Image<T>& src)
 	{
@@ -277,12 +335,13 @@ namespace DO {
 
 	// ====================================================================== //
 	// Non-separable filter functions.
+  //! \brief Apply 2D non separable filter to image.
 	template <typename T>
 	void apply2DNonSeparableFilter(Image<T>& dst, const Image<T>& src,
                                  const typename ColorTraits<T>::ChannelType *kernel,
                                  int kWidth, int kHeight)
 	{
-		typedef typename Image<T>::Coords Coords;
+		typedef typename Image<T>::coords_type Coords;
 		
 		const int hkWidth = kWidth/2;
 		const int hkHeight = kHeight/2;
@@ -342,7 +401,7 @@ namespace DO {
 			}
 		}
 	}
-
+  //! \brief Apply Laplacian filter (slow).
 	template <typename T>
 	void applyLaplacianFilter(Image<T>& dst, const Image<T>& src)
 	{
@@ -354,7 +413,7 @@ namespace DO {
 		};
 		apply2DNonSeparableFilter(dst, src, kernel, 3, 3);
 	}
-
+  //! \brief Apply Roberts-Cross filter.
 	template <typename T>
 	void applyRobertsCrossFilter(Image<T>& dst, const Image<T>& src)
 	{
@@ -375,7 +434,7 @@ namespace DO {
 		apply2DNonSeparableFilter(dst, src, k2, 2, 2);
 		dst.array() = (dst.array().abs2()+ tmp.array().abs2()).sqrt();
 	}
-
+  //! \brief Apply Kirsch filter.
 	template <typename T>
 	void applyKirschFilter(Image<T>& dst, const Image<T>& src)
 	{
@@ -420,7 +479,7 @@ namespace DO {
 		dst.array() += tmp.array().abs();
 		//dst.array().sqrt();
 	}
-
+  //! \brief Apply Robinson filter.
 	template <typename T>
 	void applyRobinsonFilter(Image<T>& dst, const Image<T>& src)
 	{
@@ -468,6 +527,7 @@ namespace DO {
 
 	// ====================================================================== //
 	// Helper functions for linear filtering
+  //! brief Apply row-derivative to image.
 	template <typename T>
 	inline Image<T> rowDerivative(const Image<T>& src)
 	{
@@ -475,7 +535,7 @@ namespace DO {
 		applyRowDerivative(dst, src);
 		return dst;
 	}
-
+  //! brief Apply column-derivative to image.
 	template <typename T>
 	inline Image<T> columnDerivative(const Image<T>& src)
 	{
@@ -483,7 +543,7 @@ namespace DO {
 		applyColumnDerivative(dst, src);
 		return dst;
 	}
-
+  //! \brief Apply Gaussian smoothing to image.
 	template <typename T, typename S>
 	inline Image<T> gaussian(const Image<T>& src, S sigma, S gaussTruncate = S(4))
 	{
@@ -491,7 +551,7 @@ namespace DO {
 		applyGaussianFilter(dst, src, sigma, gaussTruncate);
 		return dst;
 	}
-
+  //! \brief Apply Sobel filter to image.
 	template <typename T>
 	inline Image<T> sobel(const Image<T>& src)
 	{
@@ -499,7 +559,7 @@ namespace DO {
 		applySobelFilter(dst, src);
 		return dst;
 	}
-
+  //! \brief Apply Scharr filter to image.
 	template <typename T>
 	inline Image<T> scharr(const Image<T>& src)
 	{
@@ -507,7 +567,7 @@ namespace DO {
 		applyScharrFilter(dst, src);
 		return dst;
 	}
-
+  //! \brief Apply Prewitt filter to image.
 	template <typename T>
 	inline Image<T> prewitt(const Image<T>& src)
 	{
@@ -515,7 +575,7 @@ namespace DO {
 		applyPrewittFilter(dst, src);
 		return dst;
 	}
-
+  //! \brief Apply Roberts-Cross filter to image.
 	template <typename T>
 	inline Image<T> robertsCross(const Image<T>& src)
 	{
@@ -523,15 +583,15 @@ namespace DO {
 		applyRobertsCrossFilter(dst, src);
 		return dst;
 	}
-
+  //! \brief Apply Laplacian filter to image (slow).
 	template <typename T>
-	inline Image<T> laplacian(const Image<T>& src)
+	inline Image<T> laplacianFilter(const Image<T>& src)
 	{
 		Image<T> dst(src.sizes());
 		applyLaplacianFilter(dst, src);
 		return dst;
 	}
-
+  //! \brief Apply Kirsch filter to image.
 	template <typename T>
 	inline Image<T> kirsch(const Image<T>& src)
 	{
@@ -539,7 +599,7 @@ namespace DO {
 		applyKirschFilter(dst, src);
 		return dst;
 	}
-
+  //! \brief Apply Robinson filter to image.
 	template <typename T>
 	inline Image<T> robinson(const Image<T>& src)
 	{
@@ -547,6 +607,46 @@ namespace DO {
 		applyRobinsonFilter(dst, src);
 		return dst;
 	}	
+
+  // ====================================================================== //
+  // Helper 2D linear filtering functors
+#define CREATE_2D_ONLY_FILTER_FUNCTOR(FilterName, function)           \
+  /*! \brief Helper class to use Image<T,N>::compute<FilterName>() */ \
+  template <typename T, int N> struct FilterName;                     \
+  template <typename T> struct FilterName<T,2>                        \
+  {                                                                   \
+    typedef Image<T> ReturnType;                                      \
+    inline FilterName(const Image<T>& src) : src_(src) {}             \
+    inline ReturnType operator()() const { return function(src_); }   \
+    const Image<T>& src_;                                             \
+  }
+
+#define CREATE_2D_ONLY_FILTER_FUNCTOR_WITH_PARAM(FilterName, function)  \
+  /*! \brief Helper class to use Image<T,N>::compute<FilterName>() */   \
+  template <typename T, int N> struct FilterName;                       \
+  template <typename T> struct FilterName<T,2>                          \
+  {                                                                     \
+    typedef Image<T> ReturnType;                                        \
+    typedef typename ColorTraits<T>::ChannelType ParamType;             \
+    inline FilterName(const Image<T>& src) : src_(src) {}               \
+    inline ReturnType operator()(const ParamType& param) const          \
+    { return function(src_, param); }                                   \
+    const Image<T>& src_;                                               \
+  }
+
+  CREATE_2D_ONLY_FILTER_FUNCTOR(Sobel, sobel);
+  CREATE_2D_ONLY_FILTER_FUNCTOR(Scharr, scharr);
+  CREATE_2D_ONLY_FILTER_FUNCTOR(Prewitt, prewitt);
+  CREATE_2D_ONLY_FILTER_FUNCTOR(RobertsCross, robertsCross);
+  CREATE_2D_ONLY_FILTER_FUNCTOR(Robinson, robinson);
+  CREATE_2D_ONLY_FILTER_FUNCTOR(Kirsch, kirsch);
+  CREATE_2D_ONLY_FILTER_FUNCTOR_WITH_PARAM(Gaussian, gaussian);
+
+#undef CREATE_2D_ONLY_FILTER_FUNCTOR
+#undef CREATE_2D_ONLY_FILTER_FUNCTOR_WITH_PARAM
+
+  //! @}
+
 }
 
 #endif /* DO_IMAGEPROCESSING_LINEARFILTERING_HPP */

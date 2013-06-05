@@ -9,6 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+//! @file
+
 #ifndef DO_AFFINECOVARIANTFEATURES_VIEW_H
 #define DO_AFFINECOVARIANTFEATURES_VIEW_H
 
@@ -17,6 +19,11 @@
 #include "GraphicsView/FeatureItem.h"
 
 namespace DO {
+
+  /*!
+    \ingroup Features
+    @{
+  */
 
   template <typename Keypoint>
   class ImageFeaturesItem : public QGraphicsPixmapItem
@@ -151,6 +158,8 @@ namespace DO {
       new Features(keys, pixItem)),
       Q_ARG(QGraphicsItem *, pixItem));
   }
+
+  //! @file
 
 } /* namespace DO */
 

@@ -91,7 +91,6 @@ namespace DO {
    */
   DO_EXPORT
 	bool loadFromDialogBox(Image<Rgb8>& I);
-	
   /*!
     \brief Load image from a dialog box.
     @param[in]  I image file.
@@ -163,7 +162,8 @@ namespace DO {
     \return true if image is successfully saved.
     \return false otherwise.
    */
-  inline bool save(const Image<Rgb8>& I, const std::string& name, int quality = 85)
+  inline bool save(const Image<Rgb8>& I, const std::string& name,
+                   int quality = 85)
   { return saveColorImage(name, I.data(), I.width(), I.height(), quality); }
 
 } /* namespace DO */

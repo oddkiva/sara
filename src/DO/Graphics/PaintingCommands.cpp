@@ -51,6 +51,18 @@ namespace DO {
 								              Q_ARG(int, penWidth));
 	}
 
+  void drawCircle(const Point2f& center, float r, const Color3ub& c,
+                  int penWidth)
+  {
+    QMetaObject::invokeMethod(activeWindow(), "drawCircle", 
+                              Qt::QueuedConnection,
+                              Q_ARG(const QPointF&,
+                                    QPointF(center.x(), center.y())),
+                              Q_ARG(float, r),
+                              Q_ARG(const QColor&, QColor(c[0], c[1], c[2])),
+                              Q_ARG(int, penWidth));
+  }
+
 	void drawEllipse(int x, int y, int w, int h, const Color3ub&c, int penWidth)
 	{
 		QMetaObject::invokeMethod(activeWindow(), "drawEllipse", 

@@ -38,6 +38,7 @@ if (NOT DO_FOUND)
     do_append_components(DO_COMPONENTS Graphics)
     do_append_components(DO_COMPONENTS ImageProcessing)
     do_append_components(DO_COMPONENTS Features)
+		do_append_components(DO_COMPONENTS FeatureDetectors)
     
     # DEBUG: Print the list of component libraries
     do_step_message("Currently available component libraries:")

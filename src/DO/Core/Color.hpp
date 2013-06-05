@@ -262,18 +262,18 @@ namespace DO {
     { return doubleMax() - doubleMin(); }
   };
 
-  //! \brief Specialized color traits class for 3D color types.
-  template <typename ChannelType_>
-  struct ColorTraits<Matrix<ChannelType_, 3, 1> >
+  //! \brief Specialized color traits class for MxN-Dimensional color types.
+  template <typename ChannelType_, int M, int N>
+  struct ColorTraits<Matrix<ChannelType_, M, N> >
   {
     //! Color type.
-    typedef Matrix<ChannelType_, 3, 1> Color;
+    typedef Matrix<ChannelType_, M, N> Color;
     //! Channel type.
     typedef ChannelType_ ChannelType;
     //! Color type where the channel type is 'double'.
-    typedef Matrix<double, 3, 1> Color64f;
+    typedef Matrix<double, M, N> Color64f;
     //! Number of channels
-    enum { NumChannels = 3 };
+    enum { NumChannels = M*N };
     //! Zero color (=Black for RGB).
     static inline const Color zero()
     { Color c; c.fill(ChannelType(0)); return c; }
@@ -284,45 +284,13 @@ namespace DO {
     static inline const Color max()
     { Color c; c.fill(ChannelTraits<ChannelType>::max()); return c; }
     //! Entry-wise minimum color (=Black for RGB).
-    static inline Matrix<double, NumChannels, 1> doubleMin()
+    static inline Color64f doubleMin()
     { return min().template cast<double>(); }
     //! Entry-wise maximum color (=White for RGB).
-    static inline Matrix<double, NumChannels, 1> doubleMax()
+    static inline Color64f doubleMax()
     { return max().template cast<double>(); }
     //! Entry-wise range.
-    static inline Matrix<double, NumChannels, 1> doubleRange()
-    { return doubleMax() - doubleMin(); }
-  };
-
-  //! \brief Specialized color traits class for 4D color types.
-  template <typename ChannelType_>
-  struct ColorTraits<Matrix<ChannelType_, 4, 1> >
-  {
-    //! Color type.
-    typedef Matrix<ChannelType_, 4, 1> Color;
-    //! Channel type.
-    typedef ChannelType_ ChannelType;
-    //! Color type where the channel type is 'double'.
-    typedef Matrix<double, 4, 1> Color64f;
-    //! Number of channels
-    enum { NumChannels = 4 };
-    //! Zero color (=Black for RGB).
-    static inline const Color zero()
-    { Color c; c.fill(ChannelType(0)); return c; }
-    //! Entry-wise minimum color (=Black for RGB).
-    static inline const Color min()
-    { Color c; c.fill(ChannelTraits<ChannelType>::min()); return c; }
-    //! Entry-wise maximum color (=White for RGB).
-    static inline const Color max()
-    { Color c; c.fill(ChannelTraits<ChannelType>::max()); return c; }
-    //! Entry-wise minimum color (=Black for RGB).
-    static inline Matrix<double, NumChannels, 1> doubleMin()
-    { return min().template cast<double>(); }
-    //! Entry-wise maximum color (=White for RGB).
-    static inline Matrix<double, NumChannels, 1> doubleMax()
-    { return max().template cast<double>(); }
-    //! Entry-wise range.
-    static inline Matrix<double, NumChannels, 1> doubleRange()
+    static inline Color64f doubleRange()
     { return doubleMax() - doubleMin(); }
   };
 
@@ -414,17 +382,6 @@ template <> struct ColorTraits<gray_channel_t>			    \
 		typedef Color<T, Rgb> Col;
 		Matrix<double, N, 1> tmp( ColorTraits<Col>::doubleMin()
 			+ src.cwiseProduct(ColorTraits<Col>::doubleRange()) );
-		/*for (int i = 0; i < N; ++i)
-			if (tmp[i] < ChannelTraits<T>::doubleMin() || tmp[i] > ChannelTraits<T>::doubleMax())
-			{
-				std::cout << "Error: channel #" << i << std::endl;
-				std::cout << "Min =" << ChannelTraits<T>::doubleMin() << " ";
-				std::cout << "Max =" << ChannelTraits<T>::doubleMax() << std::endl;
-				std::cout << "src = "<< Map<const Matrix<double, 1, N> >(src.data()) << std::endl;
-				std::cout << "doubleRange = "<< Map<Matrix<double, 1, N> >(ColorTraits<Col>::doubleRange().data()) << std::endl;
-				std::cout << Map<Matrix<double, 1, N> >(tmp.data()) << std::endl;
-				break;
-			}*/
 		dst = tmp.template cast<T>();
 	}
 
@@ -770,9 +727,9 @@ template <> struct ColorTraits<gray_channel_t>			    \
 	DEFINE_COLOR_CONSTANT(Black, black)
 	DEFINE_COLOR_CONSTANT(White, white)
 #undef DEFINE_COLOR_CONSTANT
-  //! @} PrimaryColors
+  //! @}
 
-  //! @} Color
+  //! @}
 
 } /* namespace DO */
 

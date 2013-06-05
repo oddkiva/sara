@@ -25,8 +25,8 @@ using namespace std;
 // scrPath test
 TEST(DOCoreTest, srcPathTest)
 {
-  cout << "string source path: " << srcPath("") << endl;
-  ASSERT_TRUE(string(srcPath("")).find("test/Core") != string::npos);
+  cout << "string source path: " << endl << srcPath("") << endl;
+  EXPECT_TRUE(string(srcPath("")).find("test/Core") != string::npos);
 }
 
 // ========================================================================== //
@@ -50,33 +50,33 @@ TYPED_TEST_P(RgbTest, assignmentTest)
   typedef Color<ChannelType, Rgb> Color3;
 
   Color3 a1(black<ChannelType>());
-  ASSERT_EQ(a1, black<ChannelType>());
+  EXPECT_EQ(a1, black<ChannelType>());
 
   Color3 a2(1, 2, 3);
-  ASSERT_EQ(a2(0), 1);
-  ASSERT_EQ(a2(1), 2);
-  ASSERT_EQ(a2(2), 3);
+  EXPECT_EQ(a2(0), 1);
+  EXPECT_EQ(a2(1), 2);
+  EXPECT_EQ(a2(2), 3);
 
   a1.template channel<R>() = 64;
   a1.template channel<G>() = 12;
   a1.template channel<B>() = 124;
-  ASSERT_EQ(a1.template channel<R>(), static_cast<T>(64));
-  ASSERT_EQ(a1.template channel<G>(), static_cast<T>(12));
-  ASSERT_EQ(a1.template channel<B>(), static_cast<T>(124));
+  EXPECT_EQ(a1.template channel<R>(), static_cast<T>(64));
+  EXPECT_EQ(a1.template channel<G>(), static_cast<T>(12));
+  EXPECT_EQ(a1.template channel<B>(), static_cast<T>(124));
 
   const Color3& ca1 = a1;
-  ASSERT_EQ(ca1.template channel<R>(), static_cast<T>(64));
-  ASSERT_EQ(ca1.template channel<G>(), static_cast<T>(12));
-  ASSERT_EQ(ca1.template channel<B>(), static_cast<T>(124));
+  EXPECT_EQ(ca1.template channel<R>(), static_cast<T>(64));
+  EXPECT_EQ(ca1.template channel<G>(), static_cast<T>(12));
+  EXPECT_EQ(ca1.template channel<B>(), static_cast<T>(124));
 
   red(a1) = 89; green(a1) = 50; blue(a1) = 12;
-  ASSERT_EQ(red(a1), static_cast<T>(89));
-  ASSERT_EQ(green(a1), static_cast<T>(50));
-  ASSERT_EQ(blue(a1), static_cast<T>(12));
+  EXPECT_EQ(red(a1), static_cast<T>(89));
+  EXPECT_EQ(green(a1), static_cast<T>(50));
+  EXPECT_EQ(blue(a1), static_cast<T>(12));
 
-  ASSERT_EQ(red(ca1), static_cast<T>(89));
-  ASSERT_EQ(green(ca1), static_cast<T>(50));
-  ASSERT_EQ(blue(ca1), static_cast<T>(12));
+  EXPECT_EQ(red(ca1), static_cast<T>(89));
+  EXPECT_EQ(green(ca1), static_cast<T>(50));
+  EXPECT_EQ(blue(ca1), static_cast<T>(12));
 }
 
 REGISTER_TYPED_TEST_CASE_P(RgbTest, assignmentTest);
@@ -98,7 +98,7 @@ TEST(DOCoreTest, multiArrayTest)
 			for (int k = 0; k < volume.depth(); ++k)
 				volume(i,j,k) = Color4f(float(i),float(j),float(k),255.f);
 
-	Volume::ArrayView array = volume.array();
+	Volume::array_view_type array = volume.array();
 	array += array;
 	array = array.abs2();
 
@@ -108,7 +108,7 @@ TEST(DOCoreTest, multiArrayTest)
 		for (int j = 0; j < M.cols(); ++j)
 			M(i,j) = float(i*M.cols()+j);
 
-	Mat::MatrixView M2(M.matrix());
+	Mat::matrix_view_type M2(M.matrix());
 	std::cout << M2 << std::endl;
 
 	M.sizes()*2;
@@ -136,139 +136,266 @@ TEST(DOCoreTest, multiArrayTest)
 
 // ========================================================================== //
 // Locator test
-TEST(DOCoreTest, locatorTest)
+template <int StorageOrder>
+void locatorTest_()
 {
-	// Create coords and dims.
-	int coords[] = { 2, 3, 4 };
-	int dims[] = { 10, 20, 30 };
+  // Create coords and dims.
+  int coords[] = { 2, 3, 4 };
+  int dims[] = { 10, 20, 30 };
 
-	// Check offset computations.
-	std::cout << "// ========================================= //" << std::endl;
-	std::cout << "Check offset computation" << std::endl;
-  cout << "Column major storage" << std::endl;
-  ASSERT_EQ((Offset<1, ColMajor>::eval(coords, dims)), 2);
-  ASSERT_EQ((Offset<2, ColMajor>::eval(coords, dims)), 3*10+2);
-  ASSERT_EQ((Offset<3, ColMajor>::eval(coords, dims)), 4*10*20+3*10+2);
-	
-  cout << "Row major storage" << std::endl;
-  ASSERT_EQ((Offset<1, RowMajor>::eval(coords, dims)), 2);
-  ASSERT_EQ((Offset<2, RowMajor>::eval(coords, dims)), 2*20+3);
-  ASSERT_EQ((Offset<3, RowMajor>::eval(coords, dims)), 2*20*30+3*30+4);
+  // Check offset computations.
+  printStage("Check offset computation");
+  if (StorageOrder == RowMajor)
+  {
+    cout << "Row major storage" << std::endl;
+    EXPECT_EQ((Offset<1, StorageOrder>::eval(coords, dims)), 2);
+    EXPECT_EQ((Offset<2, StorageOrder>::eval(coords, dims)), 2*20+3);
+    EXPECT_EQ((Offset<3, StorageOrder>::eval(coords, dims)), 2*20*30+3*30+4);
+  }
+  else
+  {
+    cout << "Column major storage" << std::endl;
+    EXPECT_EQ((Offset<1, StorageOrder>::eval(coords, dims)), 2);
+    EXPECT_EQ((Offset<2, StorageOrder>::eval(coords, dims)), 3*10+2);
+    EXPECT_EQ((Offset<3, StorageOrder>::eval(coords, dims)), 4*10*20+3*10+2);
+  }
 
-	// Check stride computations.
-	std::cout << "// ========================================= //" << std::endl;
-	std::cout << "Check stride computation" << std::endl;
-	int strides[3];
-	// Column major strides
-  Offset<3, ColMajor>::eval_strides(strides, dims);
-  ASSERT_EQ(strides[0], 1);
-  ASSERT_EQ(strides[1], 10);
-  ASSERT_EQ(strides[2], 200);
-	cout << "Column major strides: " << Map<Matrix<int,1,3> >(strides) << endl;
-	// Row major strides
-  Offset<3>::eval_strides(strides, dims);
-  ASSERT_EQ(strides[0], 600);
-  ASSERT_EQ(strides[1], 30);
-  ASSERT_EQ(strides[2], 1);
-	cout << "Row major strides: " << Map<Matrix<int,1,3> >(strides) << endl << endl;
-
-	// Check MultiArray class.
-	std::cout << "// ========================================= //" << std::endl;
-	std::cout << "Check MultiArray class" << std::endl;
-	typedef MultiArray<Color4f, 3, RowMajor> Volume;
-	Volume volume(10, 20, 30);
-	volume.check_sizes_and_strides();
-	cout << endl;
-	for (int i = 0; i < volume.rows(); ++i)
-		for (int j = 0; j < volume.cols(); ++j)
-			for (int k = 0; k < volume.depth(); ++k)
-				volume(i,j,k) = Color4f(float(i),float(j),float(k),255.f);
+  // Check stride computations.
+  printStage("Check stride computation");
+  int strides[3];
+  if (StorageOrder == ColMajor)
+  {
+    // Column major strides
+    Offset<3, StorageOrder>::eval_strides(strides, dims);
+    EXPECT_EQ(strides[0], 1);
+    EXPECT_EQ(strides[1], 10);
+    EXPECT_EQ(strides[2], 200);
+    cout << "Column major strides: " << Map<Matrix<int,1,3> >(strides) << endl;
+  }
+  else
+  {
+    // Row major strides
+    Offset<3, StorageOrder>::eval_strides(strides, dims);
+    EXPECT_EQ(strides[0], 600);
+    EXPECT_EQ(strides[1], 30);
+    EXPECT_EQ(strides[2], 1);
+    cout << "Row major strides: " << Map<Matrix<int,1,3> >(strides) << endl << endl;
+  }
+  
+  // Check MultiArray class.
+  printStage("Check MultiArray class");
+  typedef MultiArray<Color4f, 3, StorageOrder> Volume;
+  Volume volume(10, 20, 30);
+  volume.check_sizes_and_strides();
+  cout << endl;
+  for (int i = 0; i < volume.rows(); ++i)
+    for (int j = 0; j < volume.cols(); ++j)
+      for (int k = 0; k < volume.depth(); ++k)
+        volume(i,j,k) = Color4f(float(i),float(j),float(k),255.f);
 
   for (int i = 0; i < volume.rows(); ++i)
     for (int j = 0; j < volume.cols(); ++j)
       for (int k = 0; k < volume.depth(); ++k)
         ASSERT_EQ(volume(i,j,k), Color4f(float(i),float(j),float(k),255.f));
 
-	// Check Locator class.
-	std::cout << "// ========================================= //" << std::endl;
-	std::cout << "Check Locator class" << std::endl;
-	typedef Color4f Pixel;
-	typedef Volume::Locator Loc;
-	typedef Loc::coord_type Coords, Vector;
-	
-	Loc loc(volume.begin_locator());
-	loc.check();
-	cout << endl;
+  // Check Locator class.
+  printStage("Check Locator class");
+  typedef Color4f Pixel;
+  typedef typename Volume::range_iterator RangeIterator;
+  typedef typename RangeIterator::vector_type Coords, Vector;
 
-	// Increment
-	for (int i = 0; i < volume.rows(); ++i)
-		for (int j = 0; j < volume.cols(); ++j)
-			for (int k = 0; k < volume.depth(); ++k, ++loc)
+  RangeIterator it(volume.begin_range());
+  it.check();
+  cout << endl;
+
+  // Increment
+  printStage("Check Locator increment");
+  if (StorageOrder == RowMajor)
+  {
+    for (int i = 0; i < volume.rows(); ++i)
+    {
+      for (int j = 0; j < volume.cols(); ++j)
       {
-        ASSERT_EQ(*loc, volume(i,j,k));
-				ASSERT_EQ(loc.coords(), Vector3i(i,j,k));
+        for (int k = 0; k < volume.depth(); ++k, ++it)
+        {
+          ASSERT_EQ(*it, volume(i,j,k));
+          //cout << loc->transpose() << endl;
+          //cout << volume(i,j,k).transpose() << endl;
+          //cout << "loc.coords() = " << loc.coords().transpose() << endl;
+          ASSERT_EQ(it.coords(), Vector3i(i,j,k));
+        }
       }
-	
-	// Reset
-	loc.reset_anchor(loc.get_coords_of_last());
-	loc.check();
-	
-	// Decrement.
-	for (int i = 0; i < volume.rows(); ++i)
-		for (int j = 0; j < volume.cols(); ++j)
-			for (int k = 0; k < volume.depth(); ++k, --loc)
+    }
+  }
+  else
+  {
+    for (int k = 0; k < volume.depth(); ++k)
+    {
+      for (int j = 0; j < volume.cols(); ++j)
       {
-        ASSERT_EQ(*loc, volume(volume.rows()-1-i,
-                               volume.cols()-1-j,
-                               volume.depth()-1-k));
-        ASSERT_EQ(loc.coords(), Vector3i(volume.rows()-1-i,
-                                         volume.cols()-1-j,
-                                         volume.depth()-1-k));
+        for (int i = 0; i < volume.rows(); ++i, ++it)
+        {
+          ASSERT_EQ(*it, volume(i,j,k));
+          //cout << "loc.coords() = " << loc.coords().transpose() << endl;
+          ASSERT_EQ(it.coords(), Vector3i(i,j,k));
+        }
       }
+    }
+  }
+  
 
-	// Reset
-	loc.reset_anchor();
+  // Reset
+  it.reset_anchor( (volume.sizes().array()-1).matrix() );
+  it.check();
 
-	++loc;
-	cout << "++loc = " << endl;
-	loc.check();
-	cout << endl;
+  // Decrement.
+  printStage("Check Locator decrement");
+  if (StorageOrder == RowMajor)
+  {
+    for (int i = 0; i < volume.rows(); ++i)
+    {
+      for (int j = 0; j < volume.cols(); ++j)
+      {
+        for (int k = 0; k < volume.depth(); ++k, --it)
+        {
+          ASSERT_EQ(*it, volume(volume.rows()-1-i,
+                                 volume.cols()-1-j,
+                                 volume.depth()-1-k));
+          //cout << "loc.coords() = " << loc.coords().transpose() << endl;
+          ASSERT_EQ(it.coords(), Vector3i(volume.rows()-1-i,
+                                           volume.cols()-1-j,
+                                           volume.depth()-1-k));
+        }
+      }
+    }
+  }
+  else
+  {
+    for (int k = 0; k < volume.depth(); ++k)
+    {
+      for (int j = 0; j < volume.cols(); ++j)
+      {
+        for (int i = 0; i < volume.rows(); ++i, --it)
+        {
+          ASSERT_EQ(*it, volume(volume.rows()-1-i,
+                                 volume.cols()-1-j,
+                                 volume.depth()-1-k));
+          //cout << "loc.coords() = " << loc.coords().transpose() << endl;
+          ASSERT_EQ(it.coords(), Vector3i(volume.rows()-1-i,
+                                           volume.cols()-1-j,
+                                           volume.depth()-1-k));
+        }
+      }
+    }
+  }
 
+  printStage("Check operation on locators");
+  // Reset
+  printStage("Reset anchor point of locator");
+  it.reset_anchor();
 
-	Loc loc2(loc);
-	if (loc2 == loc) cout << "Equality comparison OK!" << endl;
+  printStage("Incrementing locator");
+  ++it;
+  cout << "++loc = " << endl;
+  it.check();
+  cout << endl;
 
-	Loc loc3(loc++);
-	if (loc3 != loc) cout << "Inequality comparison OK!" << endl;
+  printStage("Check copy constructor of locator");
+  RangeIterator loc2(it);
+  if (loc2 == it) cout << "Equality comparison OK!" << endl;
 
-	--loc;
-	loc.check();
-	if (loc3 == loc) cout << "--loc OK!" << endl;
+  RangeIterator loc3(it++);
+  if (loc3 != it) cout << "Inequality comparison OK!" << endl;
 
-	Loc loc4(loc++);
-	loc4.check();
+  printStage("Decrementing locator");
+  --it;
+  it.check();
+  if (loc3 == it) cout << "--loc OK!" << endl;
 
-	loc4.x() += 5;
-	loc4.check();
-	
-	loc4 += Vector(2, 2, 2);
-	loc4.check();
+  printStage("Postfix increment locator");
+  RangeIterator loc4(it++);
+  loc4.check();
 
-	loc4 -= Vector(2, 2, 2);
-	loc4.check();
+  printStage("Axis iterator");
+  loc4.x() += 5;
+  loc4.check();
 
-	loc4.y() += 10;
-	loc4.check();
+  loc4 += Vector(2, 2, 2);
+  loc4.check();
+
+  loc4 -= Vector(2, 2, 2);
+  loc4.check();
+
+  loc4.y() += 10;
+  loc4.check();
 
   //for (int i = 0; i < 4; ++i)
   //  ++loc4.axis<i>();
-  loc4.axis<0>()[1];
+  loc4.template axis<0>()[1];
   loc4.check();
   loc4.check_strides();
   cout << "Finished" << endl;
 
-  Loc& loc4bis = loc4;
-  loc4bis.axis<0>()[1];
+  RangeIterator& loc4bis = loc4;
+  loc4bis.template axis<0>()[1];
+};
+
+template <int StorageOrder>
+void locatorTest2_()
+{
+  typedef MultiArray<Color3f, 3, StorageOrder> Volume;
+  typedef typename Volume::range_iterator range_iterator;
+  typedef typename Volume::subrange_iterator subrange_iterator;
+
+  // Data
+  Vector3i dims(5, 10, 15);
+  Volume vol(dims);
+
+  // Work variable
+  Vector3i coords( Vector3i::Zero() );
+
+  range_iterator it(vol.begin_range());
+  for ( ; it != vol.end_range(); ++it)
+  {
+    // 'r_it.coords()' is denoted as $c_i$.
+    // 'dims[i]' is denoted as $d_i$.
+    //
+    // Check that $0 \leq c_i < d_i$.
+    *it = it.coords().template cast<float>();
+    //r_it.check();
+
+    // 1. Check that $\min_i c_i \geq 0$.
+    ASSERT_GE( (it->template cast<int>().array().minCoeff()), 0 );
+    // 2. Check that $\max_i d_i - c_i \geq 1$.
+    ASSERT_GE( (dims - it->template cast<int>()).array().maxCoeff(), 1 );
+  }
+
+  Vector3i start(1,1,1), end(3, 3, 3);
+
+  subrange_iterator it2(vol.begin_subrange(start, end));
+  for ( ; it2 != vol.end_subrange(); ++it2)
+  {
+    // 'sr_it.coords()' is denoted as $c_i$.
+    // 'start[i]' is denoted as $a_i$.
+    // 'end[i]' is denoted as $b_i$.
+    //
+    // Check that $a_i \leq c_i < b_i$.
+    *it2 = it2.coords().template cast<float>();
+    //sr_it.check();
+
+    // 1. Check that $\min_i c_i - a_i \geq 0$.
+    ASSERT_GE( (it2->template cast<int>() - start).array().minCoeff(), 0 );
+    // 2. Check that $\max_i b_i - c_i \geq 1$.
+    ASSERT_GE( (end - it2->template cast<int>()).array().maxCoeff(), 1 );
+  }
+};
+
+TEST(DOCoreTest, locatorTest)
+{
+	locatorTest_<RowMajor>();
+  locatorTest_<ColMajor>();
+  locatorTest2_<RowMajor>();
+  locatorTest2_<ColMajor>();
 }
 
 // ========================================================================== //
@@ -289,16 +416,19 @@ TEST(DOCoreTest, miscTest)
   // Initialize the matrices m and n.
   m.array().fill(a);
   n.array().fill(b);
+  
   // Check m
   cout << "Check m" << endl;
   for (int i = 0; i < m.rows(); ++i)
     for (int j = 0; j < m.cols(); ++j)
-      cout << "m(" << i << "," << j << ") = " << endl << m(i,j) << endl;
+      //cout << "m(" << i << "," << j << ") = " << endl << m(i,j) << endl;
+      EXPECT_EQ(m(i,j), a);
   // Check n
   cout << "Check n" << endl;
   for (int i = 0; i < n.rows(); ++i)
     for (int j = 0; j < n.cols(); ++j)
-      cout << "n(" << i << "," << j << ") = " << endl << n(i,j) << endl;
+      //cout << "n(" << i << "," << j << ") = " << endl << n(i,j) << endl;
+      EXPECT_EQ(n(i,j), b);
 
 
   // Double that matrix
@@ -307,10 +437,12 @@ TEST(DOCoreTest, miscTest)
   // Check that matrix
   for (int i = 0; i < m.rows(); ++i)
     for (int j = 0; j < m.cols(); ++j)
-      cout << "m(" << i << "," << j << ") = " << endl << m(i,j) << endl;
+      //cout << "m(" << i << "," << j << ") = " << endl << m(i,j) << endl;
+      EXPECT_EQ(m(i,j), (a+b).eval());
 
   cout << "m(0,0)*n(0,0)=" << endl;
   cout << m(0,0)*n(0,0) << endl;
+  EXPECT_EQ(m(0,0)*n(0,0), (a+b)*b);
 
   // Double that matrix
   cout << "m.array() *= n.array()" << endl;
@@ -318,13 +450,14 @@ TEST(DOCoreTest, miscTest)
   // Check that matrix
   for (int i = 0; i < m.rows(); ++i)
     for (int j = 0; j < m.cols(); ++j)
-      cout << "m(" << i << "," << j << ") = " << endl << m(i,j) << endl;
+      //cout << "m(" << i << "," << j << ") = " << endl << m(i,j) << endl;
+      EXPECT_EQ(m(i,j), (a+b)*b);
 
   m.matrix() += n.matrix();
   (m.array() * n.array()) + n.array() / m.array();
 }
 
-#endif TEST_TREE_ONLY
+#endif //TEST_TREE_ONLY
 
 //TEST(DOCoreTest, treeTest)
 

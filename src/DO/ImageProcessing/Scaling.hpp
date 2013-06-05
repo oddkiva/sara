@@ -1,45 +1,44 @@
-/*
- * =============================================================================
- *
- *       Filename:  Scaling.hpp
- *
- *    Description: enlarge and reduce functions borrowed from Imagine++.
- *
- *        Version:  1.0
- *        Created:  16/07/2011 10:30:30
- *       Revision:  none
- *       Compiler:  msvc
- *
- *         Author:  David OK (DO), david.ok@imagine.enpc.fr 
- *        Company:  IMAGINE, (Ecole des Ponts ParisTech & CSTB)
- *
- * =============================================================================
- */
+// ========================================================================== //
+// This file is part of DO++, a basic set of libraries in C++ for computer 
+// vision.
+//
+// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public 
+// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
+//! @file
 
 #ifndef DO_IMAGEPROCESSING_SCALING_HPP
 #define DO_IMAGEPROCESSING_SCALING_HPP
 
 namespace DO {
 
+  /*!
+    \ingroup ImageProcessing
+    \defgroup Scaling Reduce, enlarge, warp image...
+    @{
+   */
+
 	// ====================================================================== //
 	// Naive upsampling and downsampling functions.
 	template <typename T, int N>
-	Image<T, N> scaleUp(const Image<T, N>& I, int fact)
+	Image<T, N> upscale(const Image<T, N>& I, int fact)
 	{
 		Image<T, N> I1(I.sizes()*fact);
-		typedef typename RangeIterator<N>::Coords Coords;
-		RangeIterator<N> c(I1.begin_range()), end;
+		CoordsIterator<N> c(I1.begin_coords()), end;
 		for ( ; c != end; ++c)
 			I1(*c) = I((*c)/fact);
 		return I1;
 	}
 
 	template <typename T, int N>
-	Image<T, N> scaleDown(const Image<T, N>& I, int fact)
+	Image<T, N> downscale(const Image<T, N>& I, int fact)
 	{
 		Image<T, N> I1(I.sizes()/fact);
-		typedef typename RangeIterator<N>::Coords Coords;
-		RangeIterator<N> c(I1.begin_range()), end;
+		CoordsIterator<N> c(I1.begin_coords()), end;
 		for ( ; c != end; ++c)
 			I1(*c) = I((*c)*fact);
 		return I1;
@@ -83,7 +82,7 @@ namespace DO {
 
     // Create the new image by interpolating pixel values.
     Image<T, N> nI(newSizes);
-    RangeIterator<N> r(nI.begin_range()), end;
+    CoordsIterator<N> r(nI.begin_coords()), end;
     for ( ; r != end; ++r)
     {
       Vectord x( r->template cast<double>().cwiseProduct(f) );
@@ -128,7 +127,7 @@ namespace DO {
 
     // Create the new image by interpolation.
     Image<T,N> nI(newSizes);
-    RangeIterator<N> r(nI.begin_range()), end;
+    CoordsIterator<N> r(nI.begin_coords()), end;
     for ( ; r != end; ++r)
     {
       Vectord x( r->template cast<double>().cwiseProduct(f) );
@@ -155,6 +154,7 @@ namespace DO {
     return enlarge(I,nd);
   }
 
+  //! @} file
 }
 
 #endif /* DO_IMAGEPROCESSING_SCALING_HPP */

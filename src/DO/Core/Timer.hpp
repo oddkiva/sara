@@ -11,11 +11,8 @@
 
 //! @file
 
-#ifdef WIN32
-# include <windows.h>
-#else
-# include <sys/time.h>
-#endif
+#ifndef DO_CORE_TIMER_HPP
+#define DO_CORE_TIMER_HPP
 
 namespace DO {
 
@@ -26,19 +23,19 @@ namespace DO {
   //! \brief Timer class.
   class Timer
   {
-  public:
+  public: /* interface. */
     //! Default constructor
     Timer()
       : start_(std::clock())
-      , elapsed_(0) {}
-    
+      , elapsed_(0)
+    {
+    }
     //! Reset the timer to zero.
     void restart()
     {
       start_ = std::clock();
       elapsed_ = 0;
     }
-
     //! Returns the elapsed time.
     double elapsed()
     {
@@ -46,13 +43,11 @@ namespace DO {
       elapsed_ /= CLOCKS_PER_SEC;
       return elapsed_;
     }
-
     //! Helper function that prints the elapsed time in a friendly manner.
     void print()
     {
       std::cout << "Elapsed time: " << elapsed() << " s" << std::endl;
     }
-  
   private:
     std::clock_t start_; //!< Records the start instant.
     double elapsed_; //!< Stores the elapsed time from the start instant.
@@ -61,47 +56,55 @@ namespace DO {
   //! \brief Timer class with microsecond accuracy.
   class HighResTimer
   {
-  public:
+  public: /* interface. */
+    //! Default constructor
     HighResTimer ()
       : elapsed_(0)
-    {
 #ifdef WIN32
-      QueryPerformanceCounter(&frequency_);
+      , PCFreq_(0.), start_(0)
 #endif
+    {
     }
+    //! Reset the timer to zero.
     void restart()
     {
 #ifdef WIN32
-      QueryPerformanceCounter(&start_);
+      if (!QueryPerformanceFrequency(&li_))
+        std::cout << "QueryPerformanceFrequency failed!" << std::endl;
+      PCFreq_ = static_cast<double>(li_.QuadPart)/1000.0;
+      QueryPerformanceCounter(&li_);
+      start_ = li_.QuadPart;
 #else
       gettimeofday(&start_, NULL);
 #endif
       elapsed_ = 0;
     }
-
+    //! Returns the elapsed time in milliseconds.
     double elapsedMs()
     {
-#ifdef WIN32
-      QueryPerformanceCounter(&end_);
-      elapsed_ = (end_.QuadPart - start_.QuadPart)*1000.0 / frequency_.QuadPart;
+#ifdef _WIN32
+      QueryPerformanceCounter(&li_);
+      elapsed_ = static_cast<double>(li_.QuadPart-start_)/PCFreq_;
 #else
       gettimeofday(&end_, NULL);
       elapsed_ = (end_.tv_sec - start_.tv_sec) * 1000.0;
-      elapsed_ += (end_.tv_usec - start_.tv_usec) * 1000.0;
+      elapsed_ += (end_.tv_usec - start_.tv_usec) / 1000.0;
 #endif
       return elapsed_;
     }
-
+  private: /* data members. */
 #ifdef WIN32
-    LARGE_INTEGER start_, end_;
-    LARGE_INTEGER frequency_;
+    LARGE_INTEGER li_;
+    __int64 start_;
+    double PCFreq_;
 #else
     timeval start_, end_;
 #endif
-
     double elapsed_;
   };
 
   //! @}
 
 } /* namespace DO */
+
+#endif /* DO_CORE_TIMER_HPP */

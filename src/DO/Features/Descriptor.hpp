@@ -9,10 +9,17 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+//! @file
+
 #ifndef DO_FEATURES_DESCRIPTOR_HPP
 #define DO_FEATURES_DESCRIPTOR_HPP
 
 namespace DO {
+
+ /*!
+  \ingroup Features
+  @{
+  */
 
   class DescriptorBase {
   public:
@@ -93,6 +100,8 @@ namespace DO {
   template <typename T, int N>
   std::istream& Descriptor<T,N>::read(std::istream& in)
   { return readT<T>(in, Vector::data(), N); }
+
+  //! @}
 
 } /* namespace DO */
 
