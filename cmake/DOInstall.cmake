@@ -1,17 +1,17 @@
 macro (do_set_output_directories COMPILER_NAME)
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib/${COMPILER_NAME})
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib/${COMPILER_NAME})
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/${COMPILER_NAME})
+  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib/${COMPILER_NAME})
+  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib/${COMPILER_NAME})
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/${COMPILER_NAME})
 endmacro ()
 
 if (MSVC9)
-    do_set_output_directories("msvc9")
+  do_set_output_directories("msvc9")
 endif ()
 if (MSVC10)
-    do_set_output_directories("msvc10")
+  do_set_output_directories("msvc10")
 endif ()
 if (MSVC11)
-    do_set_output_directories("msvc11")
+  do_set_output_directories("msvc11")
 endif ()
 
 # Eigen 3
@@ -74,18 +74,18 @@ endforeach (component)
 
 
 if (MSVC)
-    if (MSVC9)
-        set(DO_LIB_DIR ${CMAKE_SOURCE_DIR}/packaged-libs/msvc9)
-    endif ()
-    if (MSVC10)
-        set(DO_LIB_DIR ${CMAKE_SOURCE_DIR}/packaged-libs/msvc10)
-    endif ()
-    if (MSVC11)
-        set(DO_LIB_DIR ${CMAKE_SOURCE_DIR}/packaged-libs/msvc11)
-    endif ()
-    install(DIRECTORY ${DO_LIB_DIR}/
-            DESTINATION .
-            COMPONENT Libraries)
+  if (MSVC9)
+    set(DO_LIB_DIR ${CMAKE_SOURCE_DIR}/packaged-libs/msvc9)
+  endif ()
+  if (MSVC10)
+    set(DO_LIB_DIR ${CMAKE_SOURCE_DIR}/packaged-libs/msvc10)
+  endif ()
+  if (MSVC11)
+    set(DO_LIB_DIR ${CMAKE_SOURCE_DIR}/packaged-libs/msvc11)
+  endif ()
+  install(DIRECTORY ${DO_LIB_DIR}/
+          DESTINATION .
+          COMPONENT Libraries)
 endif ()
 
 

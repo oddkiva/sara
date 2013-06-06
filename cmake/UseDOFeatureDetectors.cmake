@@ -16,58 +16,58 @@ macro (do_list_featuredetectors_source_files)
     set(DO_FeatureDetectors_HEADER_FILES
         ${DO_FeatureDetectors_MASTER_HEADER}
         ${DO_FeatureDetectors_HEADER_FILES})
-		# Organize source files as follows.
-		source_group("Keypoint Detector Wrapper (Lowe's SIFT implementation)" FILES
-								 ${DO_FeatureDetectors_SOURCE_DIR}/DoGSiftDetector.hpp
-								 ${DO_FeatureDetectors_SOURCE_DIR}/DoGSiftDetector.cpp)
-		source_group("Keypoint Detector Wrapper (Mikolajczyk's binary)" FILES
-								 ${DO_FeatureDetectors_SOURCE_DIR}/HarAffSiftDetector.hpp
-								 ${DO_FeatureDetectors_SOURCE_DIR}/HarAffSiftDetector.cpp
-								 ${DO_FeatureDetectors_SOURCE_DIR}/HesAffSiftDetector.hpp
-								 ${DO_FeatureDetectors_SOURCE_DIR}/HesAffSiftDetector.cpp
-								 ${DO_FeatureDetectors_SOURCE_DIR}/MserSiftDetector.hpp
-								 ${DO_FeatureDetectors_SOURCE_DIR}/MserSiftDetector.cpp)
-		source_group("Interest Point Detection" FILES
-								 ${DO_FeatureDetectors_SOURCE_DIR}/DoG.hpp
-								 ${DO_FeatureDetectors_SOURCE_DIR}/DoG.cpp
-								 ${DO_FeatureDetectors_SOURCE_DIR}/Harris.hpp
-								 ${DO_FeatureDetectors_SOURCE_DIR}/Harris.cpp
-								 ${DO_FeatureDetectors_SOURCE_DIR}/Hessian.hpp
-								 ${DO_FeatureDetectors_SOURCE_DIR}/Hessian.cpp)
-		source_group("Extremum Filtering and Refinement" FILES
-								 ${DO_FeatureDetectors_SOURCE_DIR}/RefineExtremum.hpp
-								 ${DO_FeatureDetectors_SOURCE_DIR}/RefineExtremum.cpp)
-		source_group("Affine Shape Adaptation" FILES
-								 ${DO_FeatureDetectors_SOURCE_DIR}/AffineShapeAdaptation.hpp
-								 ${DO_FeatureDetectors_SOURCE_DIR}/AffineShapeAdaptation.cpp)
-		source_group("Dominant Orientation" FILES
-								 ${DO_FeatureDetectors_SOURCE_DIR}/Orientation.hpp
-								 ${DO_FeatureDetectors_SOURCE_DIR}/Orientation.cpp)
-		source_group("SIFT Descriptor" FILES
-								 ${DO_FeatureDetectors_SOURCE_DIR}/SIFT.hpp
-								 ${DO_FeatureDetectors_SOURCE_DIR}/SIFT.cpp)
-		source_group("Utilities and Debug" FILES
-								 ${DO_FeatureDetectors_SOURCE_DIR}/StdVectorHelpers.hpp
-								 ${DO_FeatureDetectors_SOURCE_DIR}/Subimage.hpp
-								 ${DO_FeatureDetectors_SOURCE_DIR}/Debug.hpp
-								 ${DO_FeatureDetectors_SOURCE_DIR}/Debug.cpp)
-		source_group("Adaptive Non Maximal Suppression" FILES
-								 ${DO_FeatureDetectors_SOURCE_DIR}/AdaptiveNonMaximalSuppression.hpp
-								 ${DO_FeatureDetectors_SOURCE_DIR}/AdaptiveNonMaximalSuppression.cpp)
+    # Organize source files as follows.
+    source_group("Keypoint Detector Wrapper (Lowe's SIFT implementation)" FILES
+                 ${DO_FeatureDetectors_SOURCE_DIR}/DoGSiftDetector.hpp
+                 ${DO_FeatureDetectors_SOURCE_DIR}/DoGSiftDetector.cpp)
+    source_group("Keypoint Detector Wrapper (Mikolajczyk's binary)" FILES
+                 ${DO_FeatureDetectors_SOURCE_DIR}/HarAffSiftDetector.hpp
+                 ${DO_FeatureDetectors_SOURCE_DIR}/HarAffSiftDetector.cpp
+                 ${DO_FeatureDetectors_SOURCE_DIR}/HesAffSiftDetector.hpp
+                 ${DO_FeatureDetectors_SOURCE_DIR}/HesAffSiftDetector.cpp
+                 ${DO_FeatureDetectors_SOURCE_DIR}/MserSiftDetector.hpp
+                 ${DO_FeatureDetectors_SOURCE_DIR}/MserSiftDetector.cpp)
+    source_group("Interest Point Detection" FILES
+                 ${DO_FeatureDetectors_SOURCE_DIR}/DoG.hpp
+                 ${DO_FeatureDetectors_SOURCE_DIR}/DoG.cpp
+                 ${DO_FeatureDetectors_SOURCE_DIR}/Harris.hpp
+                 ${DO_FeatureDetectors_SOURCE_DIR}/Harris.cpp
+                 ${DO_FeatureDetectors_SOURCE_DIR}/Hessian.hpp
+                 ${DO_FeatureDetectors_SOURCE_DIR}/Hessian.cpp)
+    source_group("Extremum Filtering and Refinement" FILES
+                 ${DO_FeatureDetectors_SOURCE_DIR}/RefineExtremum.hpp
+                 ${DO_FeatureDetectors_SOURCE_DIR}/RefineExtremum.cpp)
+    source_group("Affine Shape Adaptation" FILES
+                 ${DO_FeatureDetectors_SOURCE_DIR}/AffineShapeAdaptation.hpp
+                 ${DO_FeatureDetectors_SOURCE_DIR}/AffineShapeAdaptation.cpp)
+    source_group("Dominant Orientation" FILES
+                 ${DO_FeatureDetectors_SOURCE_DIR}/Orientation.hpp
+                 ${DO_FeatureDetectors_SOURCE_DIR}/Orientation.cpp)
+    source_group("SIFT Descriptor" FILES
+                 ${DO_FeatureDetectors_SOURCE_DIR}/SIFT.hpp
+                 ${DO_FeatureDetectors_SOURCE_DIR}/SIFT.cpp)
+    source_group("Utilities and Debug" FILES
+                 ${DO_FeatureDetectors_SOURCE_DIR}/StdVectorHelpers.hpp
+                 ${DO_FeatureDetectors_SOURCE_DIR}/Subimage.hpp
+                 ${DO_FeatureDetectors_SOURCE_DIR}/Debug.hpp
+                 ${DO_FeatureDetectors_SOURCE_DIR}/Debug.cpp)
+    source_group("Adaptive Non Maximal Suppression" FILES
+                 ${DO_FeatureDetectors_SOURCE_DIR}/AdaptiveNonMaximalSuppression.hpp
+                 ${DO_FeatureDetectors_SOURCE_DIR}/AdaptiveNonMaximalSuppression.cpp)
 endmacro (do_list_featuredetectors_source_files)
 
 
 macro (do_load_packages_for_featuredetectors_library)
     include(${DO_Core_USE_FILE})
     include(${DO_Graphics_USE_FILE})
-		include(${DO_Features_USE_FILE})
-		include_directories(${DO_ThirdParty_DIR})
+    include(${DO_Features_USE_FILE})
+    include_directories(${DO_ThirdParty_DIR})
 endmacro (do_load_packages_for_featuredetectors_library)
 
 macro (do_create_variables_for_featuredetectors_library)
     set(DO_FeatureDetectors_LIBRARIES DO_FeatureDetectors)
     set(DO_FeatureDetectors_LINK_LIBRARIES
-				${DO_Features_LIBRARIES} ${DO_Graphics_LIBRARIES})
+        ${DO_Features_LIBRARIES} ${DO_Graphics_LIBRARIES})
 endmacro (do_create_variables_for_featuredetectors_library)
 
 do_load_packages_for_featuredetectors_library()
@@ -88,27 +88,27 @@ if (DO_USE_FROM_SOURCE)
         "${DO_FeatureDetectors_SOURCE_FILES}"
         "${DO_FeatureDetectors_LINK_LIBRARIES}"
     )
-		do_set_specific_target_properties(DO_FeatureDetectors DO_STATIC)
+    do_set_specific_target_properties(DO_FeatureDetectors DO_STATIC)
     # Specify the location of external binaries.
     set_target_properties(
-			DO_FeatureDetectors PROPERTIES
-			COMPILE_FLAGS -DEXTERNBINDIR="\"${DO_ThirdParty_DIR}/Mikolajczyk\""
-		)
-			
+      DO_FeatureDetectors PROPERTIES
+      COMPILE_FLAGS -DEXTERNBINDIR="\"${DO_ThirdParty_DIR}/Mikolajczyk\""
+    )
+      
     # Shared library
     if (DO_BUILD_SHARED_LIBS)
       do_append_library(
         FeatureDetectors_SHARED SHARED
-				"${DO_SOURCE_DIR}"
+        "${DO_SOURCE_DIR}"
         "${DO_FeatureDetectors_HEADER_FILES}"
         "${DO_FeatureDetectors_SOURCE_FILES}"
         "${DO_FeatureDetectors_LINK_LIBRARIES}"
       )
-			do_set_specific_target_properties(DO_FeatureDetectors DO_EXPORTS)
-			# Specify the location of external binaries.
-			set_target_properties(
-				DO_FeatureDetectors_SHARED PROPERTIES
-				COMPILE_FLAGS -DEXTERNBINDIR="\"${DO_ThirdParty_DIR}/Mikolajczyk\""
-			)
+      do_set_specific_target_properties(DO_FeatureDetectors DO_EXPORTS)
+      # Specify the location of external binaries.
+      set_target_properties(
+        DO_FeatureDetectors_SHARED PROPERTIES
+        COMPILE_FLAGS -DEXTERNBINDIR="\"${DO_ThirdParty_DIR}/Mikolajczyk\""
+      )
     endif ()
 endif()
