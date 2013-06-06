@@ -156,11 +156,11 @@ namespace DO {
 
   //! \brief Macro that defines short mutable and non-mutable channel accessors.
 #define DEFINE_COLOR_CHANNEL_GETTERS(channelName, channelTag) \
-  /*! \brief Mutable channel accessor. */\
+  /*! \brief Mutable channel accessor. */                     \
   template <typename T, typename Layout>                      \
   inline T& channelName(Color<T, Layout>& c)                  \
   { return c.template channel<channelTag>(); }                \
-  /*! \brief Non-mutable channel accessor. */\
+  /*! \brief Non-mutable channel accessor. */                 \
   template <typename T, typename Layout>                      \
   inline const T& channelName(const Color<T, Layout>& c)      \
   { return c.template channel<channelTag>(); }
@@ -295,37 +295,37 @@ namespace DO {
   };
 
   //! Macro that defines specialized color traits classes for grayscale types.
-#define DEFINE_GRAY_COLOR_TRAITS(gray_channel_t)        \
-template <> struct ColorTraits<gray_channel_t>          \
-{                                                        \
-  /*! Color type. */\
-  typedef gray_channel_t Color;                          \
-  /*! Channel type. */\
-  typedef gray_channel_t ChannelType;                    \
-  /*! Double floating precision grayscale color type. */\
-  typedef double Color64f;                              \
-  /*! Grayscale color layout. */\
-  typedef Gray ColorLayout;                              \
-  /*! Number of channels. */\
-  enum { NumChannels = 1 };                              \
-  /*! Zero grayscale value (=Black). */\
-  static inline Color zero()                            \
-  { return ChannelType(0); }                            \
-  /*! Minimum grayscale value (=Black). */\
-  static inline Color min()                              \
-  { return ChannelTraits<ChannelType>::min(); }          \
-  /*! Maximum grayscale value (=White). */\
-  static inline Color max()                              \
-  { return ChannelTraits<ChannelType>::max(); }          \
-  /*! Double minimum grayscale value (=Black). */\
-  static inline double doubleMin()                      \
-  { return ChannelTraits<ChannelType>::doubleMin(); }    \
-  /*! Double maximum grayscale value (=White). */\
-  static inline double doubleMax()                      \
-  { return ChannelTraits<ChannelType>::doubleMax(); }    \
-  /*! Double range grayscale value. */\
-  static inline double doubleRange()                    \
-  { return doubleMax() - doubleMin(); }                  \
+#define DEFINE_GRAY_COLOR_TRAITS(gray_channel_t)          \
+template <> struct ColorTraits<gray_channel_t>            \
+{                                                         \
+  /*! Color type. */                                      \
+  typedef gray_channel_t Color;                           \
+  /*! Channel type. */                                    \
+  typedef gray_channel_t ChannelType;                     \
+  /*! Double floating precision grayscale color type. */  \
+  typedef double Color64f;                                \
+  /*! Grayscale color layout. */                          \
+  typedef Gray ColorLayout;                               \
+  /*! Number of channels. */                              \
+  enum { NumChannels = 1 };                               \
+  /*! Zero grayscale value (=Black). */                   \
+  static inline Color zero()                              \
+  { return ChannelType(0); }                              \
+  /*! Minimum grayscale value (=Black). */                \
+  static inline Color min()                               \
+  { return ChannelTraits<ChannelType>::min(); }           \
+  /*! Maximum grayscale value (=White). */                \
+  static inline Color max()                               \
+  { return ChannelTraits<ChannelType>::max(); }           \
+  /*! Double minimum grayscale value (=Black). */         \
+  static inline double doubleMin()                        \
+  { return ChannelTraits<ChannelType>::doubleMin(); }     \
+  /*! Double maximum grayscale value (=White). */         \
+  static inline double doubleMax()                        \
+  { return ChannelTraits<ChannelType>::doubleMax(); }     \
+  /*! Double range grayscale value. */                    \
+  static inline double doubleRange()                      \
+  { return doubleMax() - doubleMin(); }                   \
 };
 
   //! Specialized color traits class for 'uchar' grayscale color.
@@ -457,11 +457,11 @@ template <> struct ColorTraits<gray_channel_t>          \
 
   //! Color conversion between gray and RGB color spaces.
 #define COLOR_CONVERSION_BETWEEN_GRAY_AND_RGB(GrayType)             \
-  /*! \brief Color conversion from RGB to Gray. */									\
+  /*! \brief Color conversion from RGB to Gray. */                  \
   template <typename T>                                             \
   inline void convertColor(GrayType& dst, const Color<T, Rgb>& src) \
   { rgb2gray(dst, src); }                                           \
-  /*! \brief Color conversion from Gray to RGB. */									\
+  /*! \brief Color conversion from Gray to RGB. */                  \
   template <typename T>                                             \
   inline void convertColor(Color<T, Rgb>& dst, const GrayType& src) \
   { gray2rgb(dst, src); }
@@ -491,10 +491,10 @@ template <> struct ColorTraits<gray_channel_t>          \
 
   //! Color conversion between integral gray colors.
 #define DEFINE_COLOR_CONVERSION_BETWEEN_INTEGRAL_GRAY_TYPES(Gray1, Gray2) \
-  /*! \brief Color conversion between integral gray colors. */           	\
+  /*! \brief Color conversion between integral gray colors. */            \
   inline void convertColor(Gray2& dst, Gray1 src)                         \
   { normalizeChannel(dst, getRescaledChannel64f(src)); }                  \
-  /*! \brief Color conversion between integral gray colors. */						\
+  /*! \brief Color conversion between integral gray colors. */            \
   inline void convertColor(Gray1& dst, Gray2 src)                         \
   { normalizeChannel(dst, getRescaledChannel64f(src)); }
 
@@ -581,22 +581,22 @@ template <> struct ColorTraits<gray_channel_t>          \
 
   // ======================================================================== //
   //! Macro for generic color typedefs
-#define DEFINE_GENERIC_COLOR_TYPEDEFS(N)      \
-  /*! \brief Color{NumChannels}{ChannelType} */\
-  typedef Matrix<uchar, N, 1> Color##N##ub;   \
-  /*! \brief Color{NumChannels}{ChannelType} */\
-  typedef Matrix<char, N, 1> Color##N##b;     \
-  /*! \brief Color{NumChannels}{ChannelType} */\
-  typedef Matrix<ushort, N, 1> Color##N##us;  \
-  /*! \brief Color{NumChannels}{ChannelType} */\
-  typedef Matrix<short, N, 1> Color##N##s;    \
+#define DEFINE_GENERIC_COLOR_TYPEDEFS(N)        \
+  /*! \brief Color{NumChannels}{ChannelType} */ \
+  typedef Matrix<uchar, N, 1> Color##N##ub;     \
+  /*! \brief Color{NumChannels}{ChannelType} */ \
+  typedef Matrix<char, N, 1> Color##N##b;       \
+  /*! \brief Color{NumChannels}{ChannelType} */ \
+  typedef Matrix<ushort, N, 1> Color##N##us;    \
+  /*! \brief Color{NumChannels}{ChannelType} */ \
+  typedef Matrix<short, N, 1> Color##N##s;      \
   /*! \brief Color{NumChannels}{ChannelType}. */\
-  typedef Matrix<uint, N, 1> Color##N##ui;    \
-  /*! \brief Color{NumChannels}{ChannelType} */\
-  typedef Matrix<int, N, 1> Color##N##i;      \
-  /*! \brief Color{NumChannels}{ChannelType} */\
-  typedef Matrix<float, N, 1> Color##N##f;    \
-  /*! \brief Color{NumChannels}{ChannelType} */\
+  typedef Matrix<uint, N, 1> Color##N##ui;      \
+  /*! \brief Color{NumChannels}{ChannelType} */ \
+  typedef Matrix<int, N, 1> Color##N##i;        \
+  /*! \brief Color{NumChannels}{ChannelType} */ \
+  typedef Matrix<float, N, 1> Color##N##f;      \
+  /*! \brief Color{NumChannels}{ChannelType} */ \
   typedef Matrix<double, N, 1> Color##N##d;
 
   DEFINE_GENERIC_COLOR_TYPEDEFS(3)
@@ -605,21 +605,21 @@ template <> struct ColorTraits<gray_channel_t>          \
 
   // ======================================================================== //
   //! Macro for color typedefs.
-#define DEFINE_COLOR_TYPES(colorspace)            \
+#define DEFINE_COLOR_TYPES(colorspace)                \
   /*! \brief {ColorSpace}{NumChannels}{ChannelType} */\
-  typedef Color<uchar, colorspace> colorspace##8;   \
+  typedef Color<uchar, colorspace> colorspace##8;     \
   /*! \brief {ColorSpace}{NumChannels}{ChannelType} */\
-  typedef Color<ushort, colorspace> colorspace##16;  \
+  typedef Color<ushort, colorspace> colorspace##16;   \
   /*! \brief {ColorSpace}{NumChannels}{ChannelType} */\
-  typedef Color<uint, colorspace> colorspace##32;    \
+  typedef Color<uint, colorspace> colorspace##32;     \
   /*! \brief {ColorSpace}{NumChannels}{ChannelType} */\
-  typedef Color<char, colorspace> colorspace##8s;    \
+  typedef Color<char, colorspace> colorspace##8s;     \
   /*! \brief {ColorSpace}{NumChannels}{ChannelType} */\
-  typedef Color<short, colorspace> colorspace##16s;  \
+  typedef Color<short, colorspace> colorspace##16s;   \
   /*! \brief {ColorSpace}{NumChannels}{ChannelType} */\
-  typedef Color<int, colorspace> colorspace##32s;    \
+  typedef Color<int, colorspace> colorspace##32s;     \
   /*! \brief {ColorSpace}{NumChannels}{ChannelType} */\
-  typedef Color<float, colorspace> colorspace##32f; \
+  typedef Color<float, colorspace> colorspace##32f;   \
   /*! \brief {ColorSpace}{NumChannels}{ChannelType} */\
   typedef Color<double, colorspace> colorspace##64f;
 
@@ -700,11 +700,11 @@ template <> struct ColorTraits<gray_channel_t>          \
   }
 
   //! Primary color definition.
-#define DEFINE_COLOR_CONSTANT(Name, function)      \
+#define DEFINE_COLOR_CONSTANT(Name, function)       \
   /*! \brief Return primary color of type Rgb8. */  \
   const Rgb8 Name##8(function<uchar>());            \
   /*! \brief Return primary color of type Rgb8s. */ \
-  const Rgb8s Name##8s(function<char>());            \
+  const Rgb8s Name##8s(function<char>());           \
   /*! \brief Return primary color of type Rgb16. */ \
   const Rgb16 Name##16(function<ushort>());         \
   /*! \brief Return primary color of type Rgb16s. */\
