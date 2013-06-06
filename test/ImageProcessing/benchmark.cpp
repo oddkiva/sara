@@ -34,11 +34,11 @@ template <typename T>
 void viewWithoutConversion(const Image<T>& I, 
                            const std::string& windowTitle = "DO++")
 {
-	// Original image.
-	Window win = openWindow(I.width(), I.height(), windowTitle);
-	displayThreeChannelColorImageAsIs(I);
-	click();
-	closeWindow(win);
+  // Original image.
+  Window win = openWindow(I.width(), I.height(), windowTitle);
+  displayThreeChannelColorImageAsIs(I);
+  click();
+  closeWindow(win);
 }
 
 template <typename T, int N, int StorageOrder>
@@ -257,5 +257,5 @@ int main()
     "bench_array3D_rowmajor.txt", Vector3i(200, 200, 200), 1);
   benchmarkLocator_ALL<3, ColMajor>(
     "bench_array3D_colmajor.txt", Vector3i(200, 200, 200), 1);
-	return 0;
+  return 0;
 }

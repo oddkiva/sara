@@ -21,16 +21,16 @@ namespace DO {
     \defgroup DetectorWrappers
     @{
    */
-	
+  
   //! Mikolajczyk's binaries wrapped for our need.
   class HarAffSiftDetector
-	{
-	public:
-		HarAffSiftDetector() {}
+  {
+  public:
+    HarAffSiftDetector() {}
 
-		std::vector<Keypoint> run(const Image<uchar>& I, bool specifyThres = false,
+    std::vector<Keypoint> run(const Image<uchar>& I, bool specifyThres = false,
                               double HarrisT = 100) const;
-	};
+  };
 
   //! @}
 

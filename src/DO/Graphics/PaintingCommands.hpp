@@ -25,22 +25,22 @@ namespace DO {
     @{
   */
 
-	// ======================================================================== //
-	// Drawing commands
+  // ======================================================================== //
+  // Drawing commands
   /*!
     \brief Draw a point in the active PaintingWindow window.
     @param[in] x,y coordinates.
     @param[in] c   RGB color in \f$[0, 255]^3\f$.
    */
   DO_EXPORT
-	void drawPoint(int x, int y, const Color3ub& c);
+  void drawPoint(int x, int y, const Color3ub& c);
   /*!
     \brief Draw a point in the active PaintingWindow window.
     @param[in] x,y coordinates.
     @param[in] c RGBA color in \f$[0, 255]^4\f$.
    */
   DO_EXPORT
-	void drawPoint(int x, int y, const Color4ub& c);
+  void drawPoint(int x, int y, const Color4ub& c);
   /*!
     \brief Draw a point in the active PaintingWindow window.
     @param[in] p coordinates where scalar is of float type.
@@ -55,7 +55,7 @@ namespace DO {
     @param[in] c RGB color in \f$[0, 255]^3\f$.
     @param[in] penWidth width of the contour.
    */
-	void drawCircle(int xc, int yc, int r, const Color3ub& c,
+  void drawCircle(int xc, int yc, int r, const Color3ub& c,
                   int penWidth = 1);
   /*!
     \brief Draw a circle in the active PaintingWindow window.
@@ -63,9 +63,9 @@ namespace DO {
     @param[in] c RGB color in \f$[0, 255]^3\f$.
     @param[in] penWidth width of the contour.
    */
-	inline void drawCircle(const Point2i& center, int r, const Color3ub& c,
-						             int penWidth = 1)
-	{ drawCircle(center.x(), center.y(), r, c, penWidth); }
+  inline void drawCircle(const Point2i& center, int r, const Color3ub& c,
+                         int penWidth = 1)
+  { drawCircle(center.x(), center.y(), r, c, penWidth); }
   /*!
     \brief Draw a circle in the active PaintingWindow window.
     @param[in] center circle center.
@@ -73,8 +73,8 @@ namespace DO {
     @param[in] penWidth width of the contour.
    */
   DO_EXPORT
-	void drawCircle(const Point2f& center, float r, const Color3ub& c,
-						      int penWidth = 1);
+  void drawCircle(const Point2f& center, float r, const Color3ub& c,
+                  int penWidth = 1);
   /*!
     \brief Draw an axis-aligned ellipse in the active PaintingWindow window.
     @param[in] x,y,w,h bounding box parameters of the ellipse.
@@ -82,8 +82,8 @@ namespace DO {
     @param[in] penWidth width of the contour.
    */
   DO_EXPORT
-	void drawEllipse(int x, int y, int w, int h, const Color3ub&c,
-					         int penWidth = 1);
+  void drawEllipse(int x, int y, int w, int h, const Color3ub&c,
+                   int penWidth = 1);
   /*!
     \brief Draw an oriented ellipse in the active PaintingWindow window.
     @param[in] center ellipse center.
@@ -102,8 +102,8 @@ namespace DO {
     @param[in] penWidth width of the contour.
    */
   DO_EXPORT
-	void drawLine(int x1, int y1, int x2, int y2, const Color3ub& c,
-				        int penWidth = 1);
+  void drawLine(int x1, int y1, int x2, int y2, const Color3ub& c,
+                int penWidth = 1);
   /*!
     \brief Draw a line in the active PaintingWindow window.
     @param[in] p1,p2 start and end points of the line.
@@ -129,9 +129,9 @@ namespace DO {
     @param[in] penWidth width of the contour.
    */
   DO_EXPORT
-	inline void drawLine(const Point2i& p1, const Point2i& p2, const Color3ub&c,
-						           int penWidth = 1)
-	{ drawLine(p1.x(), p1.y(), p2.x(), p2.y(), c, penWidth); }
+  inline void drawLine(const Point2i& p1, const Point2i& p2, const Color3ub&c,
+                       int penWidth = 1)
+  { drawLine(p1.x(), p1.y(), p2.x(), p2.y(), c, penWidth); }
   /*!
     \brief Draw a rectangle in the active PaintingWindow window.
     @param[in] x,y,w,h rectangle parameters.
@@ -139,8 +139,8 @@ namespace DO {
     @param[in] penWidth width of the contour.
    */
   DO_EXPORT
-	void drawRect(int x, int y, int w, int h, const Color3ub& c,
-				        int penWidth = 1);
+  void drawRect(int x, int y, int w, int h, const Color3ub& c,
+                int penWidth = 1);
   /*!
     \brief Draw a polygon in the active PaintingWindow window.
     @param[in] poly polygon.
@@ -148,7 +148,7 @@ namespace DO {
     @param[in] width width of the contour.
    */
   DO_EXPORT
-	void drawPoly(const QPolygonF& poly, const Color3ub& c, int width = 1);
+  void drawPoly(const QPolygonF& poly, const Color3ub& c, int width = 1);
   /*!
     \brief Draw a polygon in the active PaintingWindow window.
     @param[in] x,y array of vertices of the polygon.
@@ -157,8 +157,8 @@ namespace DO {
     @param[in] width width of the contour.
    */
   DO_EXPORT
-	void drawPoly(const int x[], const int y[], int n, const Color3ub& c,
-				        int width = 1);
+  void drawPoly(const int x[], const int y[], int n, const Color3ub& c,
+                int width = 1);
   /*!
     \brief Draw a polygon in the active PaintingWindow window.
     @param[in] p array of vertices of the polygon.
@@ -167,7 +167,7 @@ namespace DO {
     @param[in] width width of the contour.
    */
   DO_EXPORT
-	void drawPoly(const Point2i* p, int n, const Color3ub& c, int width = 1);
+  void drawPoly(const Point2i* p, int n, const Color3ub& c, int width = 1);
   /*!
     \brief Draw text in the active PaintingWindow window.
     @param[in] x,y array of vertices of the polygon.
@@ -176,9 +176,9 @@ namespace DO {
     @param[in] width width of the contour.
    */
   DO_EXPORT
-	void drawString(int x, int y, const std::string &s, const Color3ub& c,
-					        int fontSize = 12, double alpha = 0, bool italic = false,
-					        bool bold = false, bool underlined = false);
+  void drawString(int x, int y, const std::string &s, const Color3ub& c,
+                  int fontSize = 12, double alpha = 0, bool italic = false,
+                  bool bold = false, bool underlined = false);
   /*!
     \brief Draw an arrow in the active PaintingWindow window.
     @param[in] a,b,c,d start and end points of the arrow.
@@ -187,8 +187,8 @@ namespace DO {
     @param[in] width width of the contour.
    */
   DO_EXPORT
-	void drawArrow(int a, int b, int c, int d, const Color3ub& col,
-				         int arrowWidth = 8, int arrowHeight = 5, 
+  void drawArrow(int a, int b, int c, int d, const Color3ub& col,
+                 int arrowWidth = 8, int arrowHeight = 5, 
                  int style = 0, int width = 1);
   /*!
     \brief Draw an arrow in the active PaintingWindow window.
@@ -198,30 +198,30 @@ namespace DO {
     @param[in] style arrow style.
     @param[in] width width of the contour.
    */
-	inline void drawArrow(int x1, int y1, int x2, int y2, const Color3ub&  col,
-						            double ta, double tl, int style, int width) 
-	{ 
-		drawArrow(x1, y1, x2, y2, col,
-				  int(tl*cos(ta*3.14/180)), int(2*tl*sin(ta*3.14/180)),
-				  style, width);
-	}
+  inline void drawArrow(int x1, int y1, int x2, int y2, const Color3ub&  col,
+                        double ta, double tl, int style, int width) 
+  { 
+    drawArrow(x1, y1, x2, y2, col,
+          int(tl*cos(ta*3.14/180)), int(2*tl*sin(ta*3.14/180)),
+          style, width);
+  }
 
-	// ======================================================================== //
-	// Filling commands
+  // ======================================================================== //
+  // Filling commands
   /*!
     \brief Draw a color-filled ellipse in the active PaintingWindow window.
     @param[in] x,y,w,h bounding box of the ellipse.
     @param[in] c RGB color in \f$[0, 255]^3\f$.
    */
   DO_EXPORT
-	void fillEllipse(int x, int y, int w, int h, const Color3ub& c);
+  void fillEllipse(int x, int y, int w, int h, const Color3ub& c);
   /*!
     \brief Draw a color-filled ellipse in the active PaintingWindow window.
     @param[in] p,w,h bounding box of the ellipse.
     @param[in] c RGB color in \f$[0, 255]^3\f$.
    */
-	inline void fillEllipse(const Point2i& p, int w, int h, const Color3ub&c)
-	{ fillEllipse(p.x(), p.y(), w, h, c); }
+  inline void fillEllipse(const Point2i& p, int w, int h, const Color3ub&c)
+  { fillEllipse(p.x(), p.y(), w, h, c); }
   /*!
     \brief Draw a color-filled ellipse in the active PaintingWindow window.
     @param[in] p ellipse center.
@@ -238,14 +238,14 @@ namespace DO {
     @param[in] c RGB color in \f$[0, 255]^3\f$.
    */
   DO_EXPORT
-	void fillRect(int x, int y, int w, int h, const Color3ub& c);
-	/*!
+  void fillRect(int x, int y, int w, int h, const Color3ub& c);
+  /*!
     \brief Draw a color-filled circle in the active PaintingWindow window.
     @param[in] p,w,h rectangle parameters.
     @param[in] c RGB color in \f$[0, 255]^3\f$.
    */
-	inline void fillRect(const Point2i& p, int w, int h, const Color3ub&c)
-	{ fillRect(p.x(), p.y(), w, h, c); }
+  inline void fillRect(const Point2i& p, int w, int h, const Color3ub&c)
+  { fillRect(p.x(), p.y(), w, h, c); }
   /*!
     \brief Draw a color-filled circle in the active PaintingWindow window.
     @param[in] x,y circle center.
@@ -253,15 +253,15 @@ namespace DO {
     @param[in] c RGB color in \f$[0, 255]^3\f$.
    */
   DO_EXPORT
-	void fillCircle(int x, int y, int r, const Color3ub& c);
+  void fillCircle(int x, int y, int r, const Color3ub& c);
   /*!
     \brief Draw a color-filled circle in the active PaintingWindow window.
     @param[in] p circle center.
     @param[in] r circle radius.
     @param[in] c RGB color in \f$[0, 255]^3\f$.
    */
-	inline void fillCircle(const Point2i& p, int r, const Color3ub& c)
-	{ fillCircle(p.x(), p.y(), r, c); }
+  inline void fillCircle(const Point2i& p, int r, const Color3ub& c)
+  { fillCircle(p.x(), p.y(), r, c); }
   /*!
     \brief Draw a color-filled circle in the active PaintingWindow window.
     @param[in] p circle center.
@@ -277,7 +277,7 @@ namespace DO {
     @param[in] c RGB color in \f$[0, 255]^3\f$.
    */
   DO_EXPORT
-	void fillPoly(const QPolygonF& polygon, const Color3ub& c);
+  void fillPoly(const QPolygonF& polygon, const Color3ub& c);
   /*!
     \brief Draw a color-filled polygon in the active PaintingWindow window.
     @param[in] x,y array of vertices.
@@ -285,7 +285,7 @@ namespace DO {
     @param[in] c RGB color in \f$[0, 255]^3\f$.
    */
   DO_EXPORT
-	void fillPoly(const int x[], const int y[], int n, const Color3ub& c);
+  void fillPoly(const int x[], const int y[], int n, const Color3ub& c);
   /*!
     \brief Draw a color-filled polygon in the active PaintingWindow window.
     @param[in] p array of vertices \f$(\mathbf{p}_i)_{1\leq i \leq n}\f$ where 
@@ -294,18 +294,18 @@ namespace DO {
     @param[in] c RGB color in \f$[0, 255]^3\f$.
    */
   DO_EXPORT
-	void fillPoly(const int p[], int n, const Color3ub& c);
-	/*!
+  void fillPoly(const int p[], int n, const Color3ub& c);
+  /*!
     \brief Draw a color-filled polygon in the active PaintingWindow window.
     @param[in] p array of vertices.
     @param[in] n number of vertices.
     @param[in] c RGB color in \f$[0, 255]^3\f$.
    */
   DO_EXPORT
-	void fillPoly(const Point2i *p, int n, const Color3ub& c);
+  void fillPoly(const Point2i *p, int n, const Color3ub& c);
 
-	// ======================================================================== //
-	// Image display commands
+  // ======================================================================== //
+  // Image display commands
   /*!
     \brief Draw an image in the active PaintingWindow window.
     @param[in] image image.
@@ -314,7 +314,7 @@ namespace DO {
    */
   DO_EXPORT
   void display(const QImage& image, int xoff = 0, int yoff = 0,
-				       double fact = 1.);
+               double fact = 1.);
   /*!
     \brief Draw an image in the active PaintingWindow window.
     @param[in] x,y position of the top-left image corner.
@@ -323,8 +323,8 @@ namespace DO {
     @param[in] fact image viewing scale.
    */
   DO_EXPORT
-	void putColorImage(int x, int y, const Color3ub *data, int w, int h,
-					           double fact = 1.);
+  void putColorImage(int x, int y, const Color3ub *data, int w, int h,
+                     double fact = 1.);
   /*!
     \brief Draw a color image in the active PaintingWindow window.
     @param[in] p position of the top-left image corner.
@@ -332,9 +332,9 @@ namespace DO {
     @param[in] w,h image sizes
     @param[in] fact image viewing scale.
    */
-	inline void putColorImage(const Point2i& p, const Color3ub *data, int w, int h,
-							              double fact = 1.)
-	{ putColorImage(p.x(), p.y(), data, w, h, fact); }
+  inline void putColorImage(const Point2i& p, const Color3ub *data, int w, int h,
+                            double fact = 1.)
+  { putColorImage(p.x(), p.y(), data, w, h, fact); }
   /*!
     \brief Draw a grayscale image in the active PaintingWindow window.
     @param[in] x,y position of the top-left image corner.
@@ -343,8 +343,8 @@ namespace DO {
     @param[in] fact image viewing scale.
    */
   DO_EXPORT
-	void putGreyImage(int x, int y, const uchar *data, int w, int h,
-					          double fact = 1.);
+  void putGreyImage(int x, int y, const uchar *data, int w, int h,
+                    double fact = 1.);
   /*!
     \brief Draw a grayscale image in the active PaintingWindow window.
     @param[in] p position of the top-left image corner.
@@ -352,39 +352,39 @@ namespace DO {
     @param[in] w,h image sizes
     @param[in] fact image viewing scale.
    */
-	inline void putGreyImage(const Point2i& p, const uchar *data, int w, int h,
-							             double fact = 1.)
-	{ putGreyImage(p.x(), p.y(), data, w, h, fact); }
+  inline void putGreyImage(const Point2i& p, const uchar *data, int w, int h,
+                           double fact = 1.)
+  { putGreyImage(p.x(), p.y(), data, w, h, fact); }
   /*!
     \brief Draw a color image in the active PaintingWindow window.
     @param[in] image color image.
     @param[in] xoff,yoff position of the top-left image corner.
     @param[in] fact image viewing scale.
    */
-	inline void display(const Image<Color3ub>& image, int xoff = 0, int yoff = 0,
-						          double fact = 1.)
-	{ putColorImage(xoff, yoff, image.data(), image.width(), image.height(), fact); }
+  inline void display(const Image<Color3ub>& image, int xoff = 0, int yoff = 0,
+                      double fact = 1.)
+  { putColorImage(xoff, yoff, image.data(), image.width(), image.height(), fact); }
   /*!
     \brief Draw a color image in the active PaintingWindow window.
     @param[in] image color image.
     @param[in] off position of the top-left image corner.
     @param[in] fact image viewing scale.
    */
-	inline void display(const Image<Color3ub>& image,
-						          const Point2i& off = Point2i::Zero(), double fact = 1.)
-	{ display(image, off.x(), off.y(), fact); }
+  inline void display(const Image<Color3ub>& image,
+                      const Point2i& off = Point2i::Zero(), double fact = 1.)
+  { display(image, off.x(), off.y(), fact); }
   /*!
     \brief Draw a color image in the active PaintingWindow window.
     @param[in] image color image.
     @param[in] off position of the top-left image corner.
     @param[in] fact image viewing scale.
    */
-	inline void display(const Image<Rgb8>& image, int xoff = 0, int yoff = 0,
-						          double fact = 1.)
-	{
-		putColorImage(xoff, yoff, reinterpret_cast<const Color3ub *>(image.data()),
-					        image.width(), image.height(), fact);
-	}
+  inline void display(const Image<Rgb8>& image, int xoff = 0, int yoff = 0,
+                      double fact = 1.)
+  {
+    putColorImage(xoff, yoff, reinterpret_cast<const Color3ub *>(image.data()),
+                  image.width(), image.height(), fact);
+  }
   /*!
     \brief Draw a color image in the active PaintingWindow window.
     @param[in] image color image.
@@ -400,45 +400,45 @@ namespace DO {
     @param[in] xoff,yoff position of the top-left image corner.
     @param[in] fact image viewing scale.
    */
-	template <typename T>
-	inline void display(const Image<T>& image, int xoff = 0, int yoff = 0,
-						          double fact = 1.)
-	{ display(image.convert<Rgb8>(), xoff, yoff, fact); }
+  template <typename T>
+  inline void display(const Image<T>& image, int xoff = 0, int yoff = 0,
+                      double fact = 1.)
+  { display(image.convert<Rgb8>(), xoff, yoff, fact); }
   /*!
     \brief Draw an image in the active PaintingWindow window.
     @param[in] image image.
     @param[in] xoff,yoff position of the top-left image corner.
     @param[in] fact image viewing scale.
    */
-	template <typename T>
-	void displayThreeChannelColorImageAsIs(const Image<T>& image, int xoff = 0, 
-										                     int yoff = 0, double fact = 1.)
-	{
-		Image<Rgb8> tmp(image.sizes());
-		for (int y = 0; y < image.height(); ++y)
-			for (int x = 0; x < image.width(); ++x)
-				for (int i = 0; i < 3; ++i)
-					tmp(x,y)[i] = uchar(getRescaledChannel64f(image(x,y)[i])*255.);
-		display(tmp, xoff, yoff, fact);
-	}
+  template <typename T>
+  void displayThreeChannelColorImageAsIs(const Image<T>& image, int xoff = 0, 
+                                         int yoff = 0, double fact = 1.)
+  {
+    Image<Rgb8> tmp(image.sizes());
+    for (int y = 0; y < image.height(); ++y)
+      for (int x = 0; x < image.width(); ++x)
+        for (int i = 0; i < 3; ++i)
+          tmp(x,y)[i] = uchar(getRescaledChannel64f(image(x,y)[i])*255.);
+    display(tmp, xoff, yoff, fact);
+  }
   //! \brief View an image in a new PaintingWindow window.
-	template <typename T>
-	void viewImage(const Image<T>& I, const std::string& windowTitle = "DO++",
+  template <typename T>
+  void viewImage(const Image<T>& I, const std::string& windowTitle = "DO++",
                  double fact = 1.0)
-	{
+  {
     QWidget *win = activeWindow() ? activeWindow() : 0;
-		
+    
     setActiveWindow(openWindow(I.width()*fact, I.height()*fact, windowTitle));
-		display(I, 0, 0, fact);
-		getKey();
+    display(I, 0, 0, fact);
+    getKey();
     closeWindow();
 
     if (win)
       setActiveWindow(win);
-	}
+  }
 
-	// ======================================================================== //
-	// Clearing commands
+  // ======================================================================== //
+  // Clearing commands
   //! \brief Clear the image
   DO_EXPORT
   void clearWindow();

@@ -14,111 +14,111 @@
 
 namespace DO {
 
-	UserThread::UserThread(QObject* parent)
-		: QThread(parent)
-		, userMain_(0)
-		, doWaitForClick_(false)
-		, doWaitForKey_(false)
-	{
-	}
+  UserThread::UserThread(QObject* parent)
+    : QThread(parent)
+    , userMain_(0)
+    , doWaitForClick_(false)
+    , doWaitForKey_(false)
+  {
+  }
 
-	int UserThread::getMouse(int& x, int& y)
-	{
-		mutex_.lock();
-		doWaitForClick_ = true;
-		condition_.wait(&mutex_);
+  int UserThread::getMouse(int& x, int& y)
+  {
+    mutex_.lock();
+    doWaitForClick_ = true;
+    condition_.wait(&mutex_);
     mutex_.unlock();
     x = mouseX_; y = mouseY_;
     if (mouseButton_ == Qt::LeftButton)
       return 1;
     else if (mouseButton_ == Qt::MiddleButton)
-			return 2;
-		else if (mouseButton_ == Qt::RightButton)
-			return 3;
-		else
-			return 0;
-	}
+      return 2;
+    else if (mouseButton_ == Qt::RightButton)
+      return 3;
+    else
+      return 0;
+  }
 
-	int UserThread::getKey()
-	{
-		mutex_.lock();
-		doWaitForKey_ = true;
-		condition_.wait(&mutex_);
-		mutex_.unlock();
-		return key_;
-	}
+  int UserThread::getKey()
+  {
+    mutex_.lock();
+    doWaitForKey_ = true;
+    condition_.wait(&mutex_);
+    mutex_.unlock();
+    return key_;
+  }
 
-	void UserThread::listenToWindowEvents()
-	{
-		mutex_.lock();
-		condition_.wait(&mutex_);
-		mutex_.unlock();
-	}
+  void UserThread::listenToWindowEvents()
+  {
+    mutex_.lock();
+    condition_.wait(&mutex_);
+    mutex_.unlock();
+  }
 
-	void UserThread::getEvent(Event& e)
-	{
-		mutex_.lock();
-		e = event_;
-		mutex_.unlock();
-	}
+  void UserThread::getEvent(Event& e)
+  {
+    mutex_.lock();
+    e = event_;
+    mutex_.unlock();
+  }
 
-	void UserThread::pressedMouseButtons(int x, int y, Qt::MouseButtons buttons)
-	{
-		mutex_.lock();
-		if (doWaitForClick_)
-		{
-			doWaitForClick_ = false;
-			mouseButton_ = buttons; mouseX_ = x; mouseY_ = y;
-			condition_.wakeOne();
-		}
-		mutex_.unlock();
-	}
+  void UserThread::pressedMouseButtons(int x, int y, Qt::MouseButtons buttons)
+  {
+    mutex_.lock();
+    if (doWaitForClick_)
+    {
+      doWaitForClick_ = false;
+      mouseButton_ = buttons; mouseX_ = x; mouseY_ = y;
+      condition_.wakeOne();
+    }
+    mutex_.unlock();
+  }
 
-	void UserThread::pressedKey(int key)
-	{
-		mutex_.lock();
-		if (doWaitForKey_)
-		{
-			doWaitForKey_ = false;
-			key_ = key;
-			condition_.wakeOne();
-		}
-		mutex_.unlock();
-	}
+  void UserThread::pressedKey(int key)
+  {
+    mutex_.lock();
+    if (doWaitForKey_)
+    {
+      doWaitForKey_ = false;
+      key_ = key;
+      condition_.wakeOne();
+    }
+    mutex_.unlock();
+  }
 
-	void UserThread::receivedEvent(Event e)
-	{
-		mutex_.lock();
-		condition_.wakeOne();
-		event_ = e;
-		mutex_.unlock();
-	}
+  void UserThread::receivedEvent(Event e)
+  {
+    mutex_.lock();
+    condition_.wakeOne();
+    event_ = e;
+    mutex_.unlock();
+  }
 
-	void UserThread::closedWindow()
-	{
-		// What to do in case the window was closed by the user and that 
-		// the program was expecting for a mouse click or a pressed key?
-		mutex_.lock();
-		if (doWaitForClick_ || doWaitForKey_)
-		{
-			qDebug() << "Window closed unexpectedly while waiting for user input!";
-			condition_.wakeOne();
-		}
-		//qDebug() << "Closing window as requested!";
-		mutex_.unlock();
-	}
+  void UserThread::closedWindow()
+  {
+    // What to do in case the window was closed by the user and that 
+    // the program was expecting for a mouse click or a pressed key?
+    mutex_.lock();
+    if (doWaitForClick_ || doWaitForKey_)
+    {
+      qDebug() << "Window closed unexpectedly while waiting for user input!";
+      condition_.wakeOne();
+    }
+    //qDebug() << "Closing window as requested!";
+    mutex_.unlock();
+  }
 
-	void UserThread::run()
-	{
-		//qDebug("Running user thread!");
-		if (!userMain_)
-		{
-			qFatal("No registered user main!");
-			return;
-		}
-		int ret;
+  void UserThread::run()
+  {
+    //qDebug("Running user thread!");
+    if (!userMain_)
+    {
+      qFatal("No registered user main!");
+      return;
+    }
+    int ret;
     ret = userMain_();
-		return;
-	}
+    return;
+  }
 
 } /* namespace DO */

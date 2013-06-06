@@ -25,8 +25,8 @@ namespace DO {
     @{
    */
 
-	// ====================================================================== //
-	// Image loading functions
+  // ====================================================================== //
+  // Image loading functions
   /*!
     \brief Load color image.
     @param[in]  name path of the image file.
@@ -36,7 +36,7 @@ namespace DO {
     \return false otherwise.
    */
   DO_EXPORT
-	bool loadColorImage(const std::string& name, Color3ub *& data, 
+  bool loadColorImage(const std::string& name, Color3ub *& data, 
                       int& w, int& h);
   /*!
     \brief Load grayscale image.
@@ -47,7 +47,7 @@ namespace DO {
     \return false otherwise
    */
   DO_EXPORT
-	bool loadGreyImage(const std::string& name, uchar *& data, 
+  bool loadGreyImage(const std::string& name, uchar *& data, 
                      int& w, int& h);
   /*!
     \brief Load color image.
@@ -57,7 +57,7 @@ namespace DO {
     \return false otherwise.
    */
   DO_EXPORT
-	bool load(Image<Color3ub>& I, const std::string& name);
+  bool load(Image<Color3ub>& I, const std::string& name);
   /*!
     \brief Load color image.
     @param[out] I    RGB image with unsigned char channel type.
@@ -66,7 +66,7 @@ namespace DO {
     \return false otherwise.
    */
   DO_EXPORT
-	bool load(Image<Rgb8>& I, const std::string& name);
+  bool load(Image<Rgb8>& I, const std::string& name);
   /*!
     \brief Load image.
     @param[out] I    image where color is of type T.
@@ -90,7 +90,7 @@ namespace DO {
     \return false otherwise.
    */
   DO_EXPORT
-	bool loadFromDialogBox(Image<Rgb8>& I);
+  bool loadFromDialogBox(Image<Rgb8>& I);
   /*!
     \brief Load image from a dialog box.
     @param[in]  I image file.
@@ -115,8 +115,8 @@ namespace DO {
     return true;
   }
 
-	// ====================================================================== //
-	// Image saving functions
+  // ====================================================================== //
+  // Image saving functions
   /*!
     \brief Save image.
     @param[in]  name path of the output image.
@@ -128,7 +128,7 @@ namespace DO {
     \return false otherwise.
    */
   DO_EXPORT
-	bool saveColorImage(const std::string& name, const Color3ub *cols, 
+  bool saveColorImage(const std::string& name, const Color3ub *cols, 
                       int w, int h, int quality = 85);
   /*!
     \brief Save grayscale image.
@@ -141,7 +141,7 @@ namespace DO {
     \return false otherwise.
    */
   DO_EXPORT
-	bool saveGreyImage(const std::string& name, const uchar *g, 
+  bool saveGreyImage(const std::string& name, const uchar *g, 
                      int w, int h, int quality = 85);
   /*!
     \brief Save grayscale image.

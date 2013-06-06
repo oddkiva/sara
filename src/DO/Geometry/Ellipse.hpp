@@ -15,22 +15,22 @@
 namespace DO {
 
   //! Ellipse class
-	class Ellipse
-	{
-	public:
+  class Ellipse
+  {
+  public:
     Ellipse() {}
-		Ellipse(double radius1, double radius2, double orientation, const Point2d& center)
-		  : a_(radius1), b_(radius2), o_(orientation), c_(center) {}
+    Ellipse(double radius1, double radius2, double orientation, const Point2d& center)
+      : a_(radius1), b_(radius2), o_(orientation), c_(center) {}
 
-		double r1() const { return a_; }
-		double r2() const { return b_; }
-		double o() const { return o_; }
-		const Point2d& c() const { return c_; }
+    double r1() const { return a_; }
+    double r2() const { return b_; }
+    double o() const { return o_; }
+    const Point2d& c() const { return c_; }
 
-		double& r1() { return a_; }
-		double& r2() { return b_; }
-		double& o() { return o_; }
-		Point2d& c() { return c_; }
+    double& r1() { return a_; }
+    double& r2() { return b_; }
+    double& o() { return o_; }
+    Point2d& c() { return c_; }
 
     double area() const { return 3.14159265358979323846*a_*b_; }
     
@@ -72,11 +72,11 @@ namespace DO {
 
     void drawOnScreen(const Color3ub c, double scale = 1.) const;
 
-	private:
-		double a_, b_;
-		double o_;
-		Point2d c_;
-	};
+  private:
+    double a_, b_;
+    double o_;
+    Point2d c_;
+  };
 
   //! I/O.
   std::ostream& operator<<(std::ostream& os, const Ellipse& e);

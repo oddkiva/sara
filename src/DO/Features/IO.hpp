@@ -21,13 +21,13 @@ namespace DO {
     @{
   */
 
-	std::ostream& operator<<(std::ostream& os, const Keypoint& k);
+  std::ostream& operator<<(std::ostream& os, const Keypoint& k);
 
-	bool readKeypoints(std::vector<Keypoint>& keys, const std::string & name,
-					           bool bundlerFormat = false);	
+  bool readKeypoints(std::vector<Keypoint>& keys, const std::string & name,
+                     bool bundlerFormat = false);  
 
-	bool writeKeypoints(const std::vector<Keypoint>& keys, const std::string & name, 
-						          bool writeForBundler = false);
+  bool writeKeypoints(const std::vector<Keypoint>& keys, const std::string & name, 
+                      bool writeForBundler = false);
 
   //! @}
 

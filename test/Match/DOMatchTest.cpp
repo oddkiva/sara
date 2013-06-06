@@ -16,8 +16,8 @@ using namespace DO;
 
 int main()
 {
-	Match m(indexMatch(0, 1000));
+  Match m(indexMatch(0, 1000));
   cout << m.indexPair().transpose() << endl;
-	
-	return 0;
+  
+  return 0;
 }

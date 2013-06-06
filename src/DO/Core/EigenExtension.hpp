@@ -102,30 +102,30 @@ namespace DO {
 
   // Typedefs for basic data types.
   typedef unsigned char uchar;   //!< Self-explanatory.
-	typedef unsigned short ushort; //!< Self-explanatory.
+  typedef unsigned short ushort; //!< Self-explanatory.
   typedef unsigned int uint;     //!< Self-explanatory.
   typedef unsigned long ulong;   //!< Self-explanatory.
 
-	// Point types with integral scalar type.
-	typedef Vector2i Point2i; //!< Self-explanatory
-	typedef Vector3i Point3i; //!< Self-explanatory
-	typedef Vector4i Point4i; //!< Self-explanatory
+  // Point types with integral scalar type.
+  typedef Vector2i Point2i; //!< Self-explanatory
+  typedef Vector3i Point3i; //!< Self-explanatory
+  typedef Vector4i Point4i; //!< Self-explanatory
   
   // Point types with single precision floating scalar type.
   typedef Vector2f Point2f; //!< Self-explanatory
-	typedef Vector3f Point3f; //!< Self-explanatory
-	typedef Vector4f Point4f; //!< Self-explanatory
+  typedef Vector3f Point3f; //!< Self-explanatory
+  typedef Vector4f Point4f; //!< Self-explanatory
   
   // Point types with double precision floating scalar type.
-	typedef Vector2d Point2d; //!< Self-explanatory
-	typedef Vector3d Point3d; //!< Self-explanatory
-	typedef Vector4d Point4d; //!< Self-explanatory
+  typedef Vector2d Point2d; //!< Self-explanatory
+  typedef Vector3d Point3d; //!< Self-explanatory
+  typedef Vector4d Point4d; //!< Self-explanatory
   
   //! 128-dimensional integral vector type.
-	typedef Matrix<uchar, 128, 1> Vector128ub;
+  typedef Matrix<uchar, 128, 1> Vector128ub;
   
   //! 128-dimensional single precision vector type.
-	typedef Matrix<float, 128, 1> Vector128f;
+  typedef Matrix<float, 128, 1> Vector128f;
 
   //! I/O.
   template <typename T, int M, int N>

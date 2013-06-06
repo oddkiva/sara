@@ -446,7 +446,7 @@ namespace DO {
                                         bool& stop)
     {
       DO_STATIC_ASSERT(std::numeric_limits<Index>::is_integer,
-        INDEX_MUST_BE_INTEGRAL);				
+        INDEX_MUST_BE_INTEGRAL);        
 //      for (int axis = 0; axis < N; ++axis, ++coords, ++size)
 //      {
 //        ++(*coords);
@@ -764,33 +764,33 @@ namespace DO {
   typedef typename base_type::iterator_category iterator_category
 
   //! \brief Axis iterator class for N-dimensional arrays.
-	template <bool IsConst, typename T, int Axis, int N>
+  template <bool IsConst, typename T, int Axis, int N>
   class AxisIterator : public ITERATOR_BASE_TYPE(IsConst)
-	{
+  {
     DO_STATIC_ASSERT(Axis >= 0 && Axis < N,
       AXIS_MUST_BE_NONNEGATIVE_AND_LESS_THAN_N);
     typedef ITERATOR_BASE_TYPE(IsConst) base_type;
 
-	public: /* STL-like typedefs */
-		TYPEDEF_ITERATOR_TYPES(base_type);
+  public: /* STL-like typedefs */
+    TYPEDEF_ITERATOR_TYPES(base_type);
     typedef AxisIterator self_type;
     typedef Matrix<int, N, 1> coords_type, vector_type;
     typedef coords_type& coords_reference;
     typedef pointer& pointer_reference;
 
-	public: /* interface */
-		//! Constructor.
-		inline AxisIterator(pointer_reference pos, coords_reference coords, 
-							          const vector_type& strides, const vector_type& size)
-			: pos_(pos), coords_(coords), strides_(strides), sizes_(size) {}
-		//! Copy constructor.
+  public: /* interface */
+    //! Constructor.
+    inline AxisIterator(pointer_reference pos, coords_reference coords, 
+                        const vector_type& strides, const vector_type& size)
+      : pos_(pos), coords_(coords), strides_(strides), sizes_(size) {}
+    //! Copy constructor.
     inline AxisIterator(const self_type& it)
-			: pos_(it.pos_), coords_(it.coords_)
-			, strides_(it.strides_), sizes_(it.sizes_) {}
+      : pos_(it.pos_), coords_(it.coords_)
+      , strides_(it.strides_), sizes_(it.sizes_) {}
 
   public: /* dereferencing, access functions. */
-		//! Dereferencing operator.
-		inline reference operator*() const
+    //! Dereferencing operator.
+    inline reference operator*() const
     { return *pos_; }
     //! Dereferencing operator.
     inline pointer operator->() const
@@ -871,12 +871,12 @@ namespace DO {
     //! Constant size accessor.
     inline int size() const { return sizes_[Axis]; }
 
-	private: /* data members. */
-		pointer_reference pos_; //!< current pointer.
-		coords_reference coords_; //!< current coordinates.
-		const vector_type& strides_; //!< strides.
-		const vector_type& sizes_; //!< sizes.
-	};
+  private: /* data members. */
+    pointer_reference pos_; //!< current pointer.
+    coords_reference coords_; //!< current coordinates.
+    const vector_type& strides_; //!< strides.
+    const vector_type& sizes_; //!< sizes.
+  };
 
   //! \brief N-dimensional iterator class.
   //! In any case the 'Locator2' class is a heavy object. It is slower 
@@ -885,21 +885,21 @@ namespace DO {
   //! other iterator instead.
   template <bool IsConst, typename T, int N, int StorageOrder = ColMajor>
   class RangeIteratorBase : public ITERATOR_BASE_TYPE(IsConst)
-	{
-		typedef Offset<N, StorageOrder> offset;
-		typedef ITERATOR_BASE_TYPE(IsConst) base_type;
+  {
+    typedef Offset<N, StorageOrder> offset;
+    typedef ITERATOR_BASE_TYPE(IsConst) base_type;
 
-	public: /* typedefs */
-		TYPEDEF_ITERATOR_TYPES(base_type);
+  public: /* typedefs */
+    TYPEDEF_ITERATOR_TYPES(base_type);
     typedef RangeIteratorBase self_type;
     typedef Matrix<int, N, 1> coords_type, vector_type;
     typedef AxisIterator<IsConst, value_type, 0, N> x_iterator;
     typedef AxisIterator<IsConst, value_type, 1, N> y_iterator;
     typedef AxisIterator<IsConst, value_type, 2, N> z_iterator;
 
-	public: /* interface */
-		//! Constructor
-		inline RangeIteratorBase(pointer pos,
+  public: /* interface */
+    //! Constructor
+    inline RangeIteratorBase(pointer pos,
                              const coords_type& coords,
                              const vector_type& sizes,
                              const vector_type& strides,
@@ -909,31 +909,31 @@ namespace DO {
       , sizes_(sizes), strides_(strides)
       , stop_(stop) {}
     //! Copy constructor
-		inline RangeIteratorBase(const self_type& l)
-			: base_type()
+    inline RangeIteratorBase(const self_type& l)
+      : base_type()
       , cur_pos_(l.cur_pos_), cur_coords_(l.cur_coords_)
-			, sizes_(l.sizes_), strides_(l.strides_)
+      , sizes_(l.sizes_), strides_(l.strides_)
       , stop_(l.stop_) {}
 
   public: /* dereferencing functions. */
-		//! Dereferencing operator.
-		inline reference operator*() const
+    //! Dereferencing operator.
+    inline reference operator*() const
     { return *cur_pos_; }
     //! Dereferencing operator.
-		inline pointer operator->() const
+    inline pointer operator->() const
     { return cur_pos_; }
-		//! Special dereferencing operator.
-		inline reference operator()(int i, int j) const
-		{ return *(cur_pos_ + strides_[0]*i + strides_[1]*j); }
     //! Special dereferencing operator.
-		inline reference operator()(int i, int j, int k) const
-		{ return *(cur_pos_ + strides_[0]*i + strides_[1]*j + strides_[2]*k); }
+    inline reference operator()(int i, int j) const
+    { return *(cur_pos_ + strides_[0]*i + strides_[1]*j); }
+    //! Special dereferencing operator.
+    inline reference operator()(int i, int j, int k) const
+    { return *(cur_pos_ + strides_[0]*i + strides_[1]*j + strides_[2]*k); }
     //! Special dereferencing operator.
     inline reference operator()(const vector_type& t) const 
     {
       pointer pos = cur_pos_;
-			Offset2<N>::advance(pos, strides_.data(), t.data());
-			return *pos;
+      Offset2<N>::advance(pos, strides_.data(), t.data());
+      return *pos;
     }
     //! Special dereferencing operator (mostly for the hessian matrix).
     inline reference delta(int i, int di, int j, int dj) const
@@ -964,18 +964,18 @@ namespace DO {
     inline z_iterator z() { return axis<2>(); }
 
   public: /* comparison functions */
-		//! Equality operator.
-		inline bool operator==(const self_type& rhs) const 
-		{ return stop_ ? rhs.stop_ : (!rhs.stop_ && cur_pos_ == rhs.cur_pos_); }
     //! Equality operator.
-		inline bool operator==(pointer pos) const
-		{ return cur_pos_ == pos; }
-		//! Inequality operator.
-		inline bool operator!=(const self_type& rhs) const
-		{ return !this->operator==(rhs); }
+    inline bool operator==(const self_type& rhs) const 
+    { return stop_ ? rhs.stop_ : (!rhs.stop_ && cur_pos_ == rhs.cur_pos_); }
+    //! Equality operator.
+    inline bool operator==(pointer pos) const
+    { return cur_pos_ == pos; }
     //! Inequality operator.
-		inline bool operator!=(pointer pos) const
-		{ return !this->operator==(pos); }
+    inline bool operator!=(const self_type& rhs) const
+    { return !this->operator==(rhs); }
+    //! Inequality operator.
+    inline bool operator!=(pointer pos) const
+    { return !this->operator==(pos); }
 
   public: /* additional features. */
     //! Get the current coordinates.
@@ -1002,13 +1002,13 @@ namespace DO {
       std::cout << "Sizes = " << sizes_.transpose() << std::endl;
     }
 
-	protected: /* data members */
+  protected: /* data members */
     pointer cur_pos_; //!< current pointer.
     coords_type cur_coords_; //!< current coordinates.
     const vector_type& sizes_; //!< sizes.
     const vector_type& strides_; //!< strides.
     bool stop_;
-	};
+  };
 
   //! \brief N-dimensional iterator class.
   //! In any case the 'RangeIterator' class is a heavy object.
@@ -1038,10 +1038,10 @@ namespace DO {
                          const vector_type& strides,
                          bool stop = false)
       : base_type(pos, coords, sizes, strides, stop)
-			, first_(first), last_(last)
+      , first_(first), last_(last)
     {}
     //! Copy constructor
-		inline RangeIterator(const self_type& l)
+    inline RangeIterator(const self_type& l)
       : base_type(l.cur_pos_, l.cur_coords_, l.sizes_, l.strides_, l.stop_)
       , first_(l.first_), last_(l.last_)
     {}
@@ -1068,8 +1068,8 @@ namespace DO {
     inline self_type operator--(int)
     { self_type old(*this); operator--(); return old; }
     //! Arithmetic operator (slow: avoid using it).
-		inline self_type& operator+=(const vector_type& t)
-		{
+    inline self_type& operator+=(const vector_type& t)
+    {
       /*for (int i = 0; i < N; ++i)
         pos_ += strides_[i]*t[i];*/
       if ((sizes_ - cur_coords_ - t).minCoeff() > 0)
@@ -1077,20 +1077,20 @@ namespace DO {
         Offset2<N>::advance(cur_pos_, strides_.data(), t.data());
         cur_coords_ += t;
       }
-			return *this;
-		}
+      return *this;
+    }
     //! Arithmetic operator (slow: avoid using it)
-		inline self_type& operator-=(const vector_type& t)
-		{
-			/*for (int i = 0; i < N; ++i)
-				pos_ -= strides_[i]*t[i];*/
+    inline self_type& operator-=(const vector_type& t)
+    {
+      /*for (int i = 0; i < N; ++i)
+        pos_ -= strides_[i]*t[i];*/
       if ((cur_coords_ - t).minCoeff() >= 0)
       {
         Offset2<N>::reverse(cur_pos_, strides_.data(), t.data());
         cur_coords_ -= t;
       }
       return *this;
-		}
+    }
 
   public: /* additional features. */
     inline void reset_anchor(const coords_type& c = coords_type::Zero())
@@ -1207,62 +1207,62 @@ namespace DO {
 
   //! \brief Coords iterator class for N-dimensional array.
   //! See if loop unrolling makes them faster.
-	template <int N>
-	class CoordsIterator
-	{
-	public:
+  template <int N>
+  class CoordsIterator
+  {
+  public:
     typedef CoordsIterator self_type;
-		typedef Matrix<int, N, 1> coords_type;
+    typedef Matrix<int, N, 1> coords_type;
 
-	protected:
-		coords_type a_;
-		coords_type b_;
-		coords_type pos_;
-		bool stop_;
-	public:
-		inline CoordsIterator()
-			: stop_(true) {}
+  protected:
+    coords_type a_;
+    coords_type b_;
+    coords_type pos_;
+    bool stop_;
+  public:
+    inline CoordsIterator()
+      : stop_(true) {}
 
-		inline CoordsIterator(const coords_type& a, const coords_type& b)
-			: a_(a), b_(b), pos_(a), stop_(false) {}
+    inline CoordsIterator(const coords_type& a, const coords_type& b)
+      : a_(a), b_(b), pos_(a), stop_(false) {}
 
-		inline CoordsIterator& operator=(const self_type& it)
-		{
-			a_ = it.a_;
-			b_ = it.b_;
-			pos_ = it.pos_;
-			stop_ = it.stop_;
-			return *this;
-		}
+    inline CoordsIterator& operator=(const self_type& it)
+    {
+      a_ = it.a_;
+      b_ = it.b_;
+      pos_ = it.pos_;
+      stop_ = it.stop_;
+      return *this;
+    }
 
-		inline bool operator==(const self_type& it) const
-		{ return (stop_ ? it.stop_ : !it.stop_ && pos_ == it.pos_); }
+    inline bool operator==(const self_type& it) const
+    { return (stop_ ? it.stop_ : !it.stop_ && pos_ == it.pos_); }
 
-		inline bool operator!=(const self_type& it) const
-		{ return (stop_ ? !it.stop_ : it.stop_ || pos_ != it.pos_); }
+    inline bool operator!=(const self_type& it) const
+    { return (stop_ ? !it.stop_ : it.stop_ || pos_ != it.pos_); }
 
-		inline self_type& operator++()
-		{
-			for (int i=0;i<N;i++) {
-				if (pos_[i]!=b_[i]) {
-					pos_[i]++;
-					return *this;
-				}
-				pos_[i]=a_[i];
-			}
-			stop_ = true;
-			return *this;
-		}
+    inline self_type& operator++()
+    {
+      for (int i=0;i<N;i++) {
+        if (pos_[i]!=b_[i]) {
+          pos_[i]++;
+          return *this;
+        }
+        pos_[i]=a_[i];
+      }
+      stop_ = true;
+      return *this;
+    }
 
-		inline self_type operator++(int)
-		{ CoordsIterator tmp(*this); ++(*this); return tmp; }
+    inline self_type operator++(int)
+    { CoordsIterator tmp(*this); ++(*this); return tmp; }
 
-		inline coords_type operator*() const
-		{ return pos_; }
+    inline coords_type operator*() const
+    { return pos_; }
 
-		inline const coords_type* operator->() const
-		{ return &pos_; }
-	};
+    inline const coords_type* operator->() const
+    { return &pos_; }
+  };
 
   //! @}
 

@@ -31,18 +31,18 @@ namespace GLObject {
   const double defaultAxisLength = 10.0;
   const double defaultAxisRadius = 0.125;
 
-	class Frame
-	{
-	public:
-		Frame();
-		~Frame();
+  class Frame
+  {
+  public:
+    Frame();
+    ~Frame();
     void draw(double axisLength, double axisRadius);
-		static void genFrameList(GLuint *frameList,
-								             double axisLength = defaultAxisLength,
-								             double axisRadius = defaultAxisRadius);
-	private:
-		GLUquadricObj * pQuadObj;
-	};
+    static void genFrameList(GLuint *frameList,
+                             double axisLength = defaultAxisLength,
+                             double axisRadius = defaultAxisRadius);
+  private:
+    GLUquadricObj * pQuadObj;
+  };
 
 
 }

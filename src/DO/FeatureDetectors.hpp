@@ -56,7 +56,7 @@
 #ifdef EXTERNBINDIR
 #define EXTERNBINDIR_STRINGIFY(s)  #s
 #define EXTERNBINDIR_EVAL(s) EXTERNBINDIR_STRINGIFY(s)
-#define externBinPath(s) (EXTERNBINDIR_EVAL(EXTERNBINDIR)"/"s)	
+#define externBinPath(s) (EXTERNBINDIR_EVAL(EXTERNBINDIR)"/"s)  
 #endif
 
 //! \defgroup FeatureDetectors

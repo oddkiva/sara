@@ -24,19 +24,19 @@ namespace DO {
     @{
    */
 
-	// ====================================================================== //
-	// Convenience functions
-	inline GraphicsApplication *guiApp()
-	{ return qobject_cast<DO::GraphicsApplication *>(qApp); }
+  // ====================================================================== //
+  // Convenience functions
+  inline GraphicsApplication *guiApp()
+  { return qobject_cast<DO::GraphicsApplication *>(qApp); }
 
-	inline UserThread& userThread()
-	{ return guiApp()->userThread; }
+  inline UserThread& userThread()
+  { return guiApp()->userThread; }
 
-	inline QWidget *activeWindow()
-	{ return guiApp()->activeWindow; }
+  inline QWidget *activeWindow()
+  { return guiApp()->activeWindow; }
 
-	inline bool activeWindowIsVisible()
-	{ return guiApp()->activeWindowIsVisible(); }
+  inline bool activeWindowIsVisible()
+  { return guiApp()->activeWindowIsVisible(); }
 
   inline QStringList getMainArgs()
   { return guiApp()->arguments(); }
@@ -66,10 +66,10 @@ int __main();
 #define main()                              \
 /*int*/ main(int argc, char **argv)         \
 {                                           \
-	DO::GraphicsApplication app(argc, argv);  \
-	app.userThread.registerUserMain(__main);  \
-	app.userThread.start();                   \
-	app.exec();                               \
+  DO::GraphicsApplication app(argc, argv);  \
+  app.userThread.registerUserMain(__main);  \
+  app.userThread.start();                   \
+  app.exec();                               \
 }                                           \
                                             \
 int __main()

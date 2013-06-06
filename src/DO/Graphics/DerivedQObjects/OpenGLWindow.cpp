@@ -13,21 +13,21 @@
 
 namespace DO {
 
-	// ====================================================================== //
-	// TrackBall implementation
-	TrackBall::TrackBall()
-	{
+  // ====================================================================== //
+  // TrackBall implementation
+  TrackBall::TrackBall()
+  {
     pressed_ = false;
-		axis_ = QVector3D(0, 1, 0);
-		rotation_ = QQuaternion();
-	}
+    axis_ = QVector3D(0, 1, 0);
+    rotation_ = QQuaternion();
+  }
 
-	void TrackBall::push(const QPointF& p, const QQuaternion &)
-	{
-		rotation_ = rotation();
-		pressed_ = true;
-		lastPos_ = p;
-	}
+  void TrackBall::push(const QPointF& p, const QQuaternion &)
+  {
+    rotation_ = rotation();
+    pressed_ = true;
+    lastPos_ = p;
+  }
 
   static void projectToSphere(QVector3D& x)
   {
@@ -38,10 +38,10 @@ namespace DO {
       x.normalize();
   }
 
-	void TrackBall::move(const QPointF& p, const QQuaternion &transformation)
-	{
-		if (!pressed_)
-			return;
+  void TrackBall::move(const QPointF& p, const QQuaternion &transformation)
+  {
+    if (!pressed_)
+      return;
     // Get the last position and project it on the sphere
     QVector3D lastPos3D = QVector3D(lastPos_.x(), lastPos_.y(), 0.0f);
     projectToSphere(lastPos3D);
@@ -56,7 +56,7 @@ namespace DO {
     rotation_ = QQuaternion::fromAxisAndAngle(axis_, 2.0) * rotation_;
     // Remember the current position as the last position when move is called again.
     lastPos_ = p;
-	}
+  }
 
   void TrackBall::release(const QPointF& p, const QQuaternion &transformation)
   {
@@ -64,15 +64,15 @@ namespace DO {
     pressed_ = false;
   }
 
-	QQuaternion TrackBall::rotation() const
-	{
-		if (pressed_)
-			return rotation_;
-		return  QQuaternion::fromAxisAndAngle(axis_, 2.0) * rotation_;
-	}
+  QQuaternion TrackBall::rotation() const
+  {
+    if (pressed_)
+      return rotation_;
+    return  QQuaternion::fromAxisAndAngle(axis_, 2.0) * rotation_;
+  }
 
-	// ====================================================================== //
-	// OpenGLWindow implementation
+  // ====================================================================== //
+  // OpenGLWindow implementation
   OpenGLWindow::OpenGLWindow(int width, int height, 
                              const QString& windowTitle,
                              int x, int y,
@@ -93,12 +93,12 @@ namespace DO {
     display_frame_ = false;
   }
 
-	void OpenGLWindow::setMesh(const SimpleTriangleMesh3f& mesh)
-	{
-		mesh_ = mesh;
-		center_ = mesh.center();
+  void OpenGLWindow::setMesh(const SimpleTriangleMesh3f& mesh)
+  {
+    mesh_ = mesh;
+    center_ = mesh.center();
     update();
-	}
+  }
 
   void OpenGLWindow::displayMesh()
   {
@@ -116,57 +116,57 @@ namespace DO {
     }
     glEnd();
   }
-	
-	void OpenGLWindow::initializeGL()
-	{
-		// Set background color
-		qglClearColor(background_color_);
+  
+  void OpenGLWindow::initializeGL()
+  {
+    // Set background color
+    qglClearColor(background_color_);
 
     glShadeModel(GL_SMOOTH);  // Enable smooth shading
 
-		// Set up the cosmic background radiation.
+    // Set up the cosmic background radiation.
     glEnable(GL_LIGHTING);    // Enable lighting
-		GLfloat ambientLight[] = { 0.2f, 0.2f, 0.2f, 1.0f };
-		glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambientLight);
+    GLfloat ambientLight[] = { 0.2f, 0.2f, 0.2f, 1.0f };
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambientLight);
 
-		// Set up light source 0
-		GLfloat light0Pos[]      = { 0.0f, 0.0f, 10.0f, 1.0f };
-		GLfloat light0SpotDir[]  = { 0.0f, 0.0f,-1.0f, 1.0f };
-		GLfloat diffuseLight0[]  = { 0.8f, 0.5f, 0.5f, 0.8f };
-		GLfloat specularLight0[] = { 1.0f, 1.0f, 0.0f, 1.0f };
-		glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight0);
-		glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight0);
-		glLightfv(GL_LIGHT0, GL_POSITION, light0Pos);
-		glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, light0SpotDir);
-		glEnable(GL_LIGHT0);
+    // Set up light source 0
+    GLfloat light0Pos[]      = { 0.0f, 0.0f, 10.0f, 1.0f };
+    GLfloat light0SpotDir[]  = { 0.0f, 0.0f,-1.0f, 1.0f };
+    GLfloat diffuseLight0[]  = { 0.8f, 0.5f, 0.5f, 0.8f };
+    GLfloat specularLight0[] = { 1.0f, 1.0f, 0.0f, 1.0f };
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight0);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight0);
+    glLightfv(GL_LIGHT0, GL_POSITION, light0Pos);
+    glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, light0SpotDir);
+    glEnable(GL_LIGHT0);
 
-		// Set up color material
-		glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-		glColorMaterial(GL_FRONT_AND_BACK, GL_SPECULAR);
-		glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, 100);
-		glEnable(GL_COLOR_MATERIAL);
+    // Set up color material
+    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+    glColorMaterial(GL_FRONT_AND_BACK, GL_SPECULAR);
+    glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, 100);
+    glEnable(GL_COLOR_MATERIAL);
 
     // ?
     glEnable(GL_MULTISAMPLE);
 
     // Normalize the vector for the lighting
     glEnable(GL_NORMALIZE);
-	}
+  }
 
-	static void multMatrix(const QMatrix4x4& m)
-	{
-		// static to prevent glMultMatrixf to fail on certain drivers
-		static GLfloat mat[16];
-		const float *data = m.constData();
-		for (int index = 0; index < 16; ++index)
-			mat[index] = data[index];
-		glMultMatrixf(mat);
-	}
+  static void multMatrix(const QMatrix4x4& m)
+  {
+    // static to prevent glMultMatrixf to fail on certain drivers
+    static GLfloat mat[16];
+    const float *data = m.constData();
+    for (int index = 0; index < 16; ++index)
+      mat[index] = data[index];
+    glMultMatrixf(mat);
+  }
 
-	void OpenGLWindow::paintEvent(QPaintEvent *event)
-	{
+  void OpenGLWindow::paintEvent(QPaintEvent *event)
+  {
     makeCurrent();
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Setup the viewing mode for the mesh
     glPolygonMode(GL_FRONT, GL_FILL); // we make each front face filled
@@ -225,19 +225,19 @@ namespace DO {
       rect.width(), rect.height(),
       Qt::AlignCenter | Qt::TextWordWrap, text);
     p.end();
-	}
+  }
 
-	void OpenGLWindow::resizeGL(int width, int height)
-	{
-		glViewport(0, 0, width, height);
+  void OpenGLWindow::resizeGL(int width, int height)
+  {
+    glViewport(0, 0, width, height);
 
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		double ratio = width/static_cast<double>(height);
-		gluPerspective(60.0, ratio, 1.0, 100.0);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    double ratio = width/static_cast<double>(height);
+    gluPerspective(60.0, ratio, 1.0, 100.0);
 
-		glMatrixMode(GL_MODELVIEW);
-	}
+    glMatrixMode(GL_MODELVIEW);
+  }
 
   QPointF OpenGLWindow::normalizePos(const QPointF& localPos) const
   {
@@ -247,62 +247,62 @@ namespace DO {
     return pos;
   }
 
-	void OpenGLWindow::mousePressEvent(QMouseEvent *event)
-	{
-		QGLWidget::mousePressEvent(event);
-		if (event->isAccepted())
-			return;
+  void OpenGLWindow::mousePressEvent(QMouseEvent *event)
+  {
+    QGLWidget::mousePressEvent(event);
+    if (event->isAccepted())
+      return;
 
     QPointF pos(normalizePos(event->localPos()));
-		if (event->buttons() & Qt::LeftButton) {
-			trackball_.push(pos, trackball_.rotation());
-			event->accept();
-		}
-		update();
-	}
+    if (event->buttons() & Qt::LeftButton) {
+      trackball_.push(pos, trackball_.rotation());
+      event->accept();
+    }
+    update();
+  }
 
-	void OpenGLWindow::mouseReleaseEvent(QMouseEvent *event)
-	{
-		QGLWidget::mouseReleaseEvent(event);
-		if (event->isAccepted())
-			return;
+  void OpenGLWindow::mouseReleaseEvent(QMouseEvent *event)
+  {
+    QGLWidget::mouseReleaseEvent(event);
+    if (event->isAccepted())
+      return;
 
     QPointF pos(normalizePos(event->localPos()));
-		if (event->button() == Qt::LeftButton) {
-			trackball_.release(pos, trackball_.rotation());
-			event->accept();
-		}
-		update();
-	}
+    if (event->button() == Qt::LeftButton) {
+      trackball_.release(pos, trackball_.rotation());
+      event->accept();
+    }
+    update();
+  }
 
-	void OpenGLWindow::mouseMoveEvent(QMouseEvent *event)
-	{
-		QGLWidget::mouseMoveEvent(event);
-		if (event->isAccepted())
+  void OpenGLWindow::mouseMoveEvent(QMouseEvent *event)
+  {
+    QGLWidget::mouseMoveEvent(event);
+    if (event->isAccepted())
     {
       qDebug() << "mouse move event already accepted";
-			return;
+      return;
     }
 
     QPointF pos(normalizePos(event->localPos()));
-		if (event->buttons() & Qt::LeftButton) {
-			trackball_.move(pos, trackball_.rotation());
-			event->accept();
-		} else {
-			trackball_.release(pos, trackball_.rotation());
+    if (event->buttons() & Qt::LeftButton) {
+      trackball_.move(pos, trackball_.rotation());
+      event->accept();
+    } else {
+      trackball_.release(pos, trackball_.rotation());
     }
-		update();
-	}
+    update();
+  }
 
-	void OpenGLWindow::wheelEvent(QWheelEvent* event)
-	{
-		QGLWidget::wheelEvent(event);
+  void OpenGLWindow::wheelEvent(QWheelEvent* event)
+  {
+    QGLWidget::wheelEvent(event);
 
-		if (!event->isAccepted()) {
-			event->delta() > 0 ? scale_ += 0.05f*scale_ : scale_ -= 0.05f*scale_;
-			update();
-		}
-	}
+    if (!event->isAccepted()) {
+      event->delta() > 0 ? scale_ += 0.05f*scale_ : scale_ -= 0.05f*scale_;
+      update();
+    }
+  }
 
   void OpenGLWindow::keyPressEvent(QKeyEvent *event)
   {

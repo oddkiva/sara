@@ -86,32 +86,32 @@ INSTANTIATE_TYPED_TEST_CASE_P(DOCoreTest, RgbTest, ChannelTypes);
 // Multi-array test
 TEST(DOCoreTest, multiArrayTest)
 {
-	// Check MultiArray class.
-	std::cout << "// ========================================= //" << std::endl;
-	std::cout << "Check MultiArray class" << std::endl;
-	typedef MultiArray<Color4f, 3, RowMajor> Volume;
-	Volume volume(10, 20, 30);
-	volume.check_sizes_and_strides();
-	cout << endl;
-	for (int i = 0; i < volume.rows(); ++i)
-		for (int j = 0; j < volume.cols(); ++j)
-			for (int k = 0; k < volume.depth(); ++k)
-				volume(i,j,k) = Color4f(float(i),float(j),float(k),255.f);
+  // Check MultiArray class.
+  std::cout << "// ========================================= //" << std::endl;
+  std::cout << "Check MultiArray class" << std::endl;
+  typedef MultiArray<Color4f, 3, RowMajor> Volume;
+  Volume volume(10, 20, 30);
+  volume.check_sizes_and_strides();
+  cout << endl;
+  for (int i = 0; i < volume.rows(); ++i)
+    for (int j = 0; j < volume.cols(); ++j)
+      for (int k = 0; k < volume.depth(); ++k)
+        volume(i,j,k) = Color4f(float(i),float(j),float(k),255.f);
 
-	Volume::array_view_type array = volume.array();
-	array += array;
-	array = array.abs2();
+  Volume::array_view_type array = volume.array();
+  array += array;
+  array = array.abs2();
 
-	typedef MultiArray<float, 2> Mat;
-	Mat M(5, 10);
-	for (int i = 0; i < M.rows(); ++i)
-		for (int j = 0; j < M.cols(); ++j)
-			M(i,j) = float(i*M.cols()+j);
+  typedef MultiArray<float, 2> Mat;
+  Mat M(5, 10);
+  for (int i = 0; i < M.rows(); ++i)
+    for (int j = 0; j < M.cols(); ++j)
+      M(i,j) = float(i*M.cols()+j);
 
-	Mat::matrix_view_type M2(M.matrix());
-	std::cout << M2 << std::endl;
+  Mat::matrix_view_type M2(M.matrix());
+  std::cout << M2 << std::endl;
 
-	M.sizes()*2;
+  M.sizes()*2;
 
   // Conversion test.
   typedef MultiArray<int, 2> Mat2i;
@@ -392,7 +392,7 @@ void locatorTest2_()
 
 TEST(DOCoreTest, locatorTest)
 {
-	locatorTest_<RowMajor>();
+  locatorTest_<RowMajor>();
   locatorTest_<ColMajor>();
   locatorTest2_<RowMajor>();
   locatorTest2_<ColMajor>();
@@ -633,5 +633,5 @@ int main(int argc, char** argv)
   //return 0;
 
   testing::InitGoogleTest(&argc, argv); 
-	return RUN_ALL_TESTS();
+  return RUN_ALL_TESTS();
 }

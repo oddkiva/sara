@@ -20,58 +20,58 @@
 #endif
 
 namespace DO {
-	
-	std::vector<Keypoint> MserSiftDetector::run(const Image<uchar>& I) const
-	{
-		using namespace std;
+  
+  std::vector<Keypoint> MserSiftDetector::run(const Image<uchar>& I) const
+  {
+    using namespace std;
 
-		// Save image in PNG format (required by Mikolajczyk's software.)
+    // Save image in PNG format (required by Mikolajczyk's software.)
     int tn = 0;
 #ifdef _OPENMP
     tn = omp_get_thread_num();
 #endif
-		const string fileName("TMP_IMAGE_"+toString(tn)+".png");
-		if ( !save(I, fileName, 100) )
-			cerr << "Error: cannot save image!" << std::endl;
+    const string fileName("TMP_IMAGE_"+toString(tn)+".png");
+    if ( !save(I, fileName, 100) )
+      cerr << "Error: cannot save image!" << std::endl;
 
-		// Run Mikolajczyk's binary.
-		// I need to rerun twice the binary just to get the key orientation.
-		// This is stupid but I don't know other alternative.
-		const string program = externBinPath("MikolajczykFeatureExtractor2.exe ");
-		const string command(  program + "-mser -sift "
-							 + "-i " + fileName
-							 + " -o1 TMP_DESC1_" + toString(tn) );
+    // Run Mikolajczyk's binary.
+    // I need to rerun twice the binary just to get the key orientation.
+    // This is stupid but I don't know other alternative.
+    const string program = externBinPath("MikolajczykFeatureExtractor2.exe ");
+    const string command(  program + "-mser -sift "
+               + "-i " + fileName
+               + " -o1 TMP_DESC1_" + toString(tn) );
 
-		const string command2(  program + "-mser -sift "
-							  + "-i " + fileName
-							  + " -o2 TMP_DESC2_" + toString(tn) );
+    const string command2(  program + "-mser -sift "
+                + "-i " + fileName
+                + " -o2 TMP_DESC2_" + toString(tn) );
 
-		std::system(command.c_str());
-		std::system(command2.c_str());
+    std::system(command.c_str());
+    std::system(command2.c_str());
 
-		// Parse the descriptor files.
-		ifstream descFile1(string("TMP_DESC1_"+ toString(tn)).c_str());
-		if (!descFile1.is_open())
-			cerr << "Cant open file " << "TMP_DESC1_" << toString(tn) << endl;
-		ifstream descFile2(string("TMP_DESC2_"+ toString(tn)).c_str());
-		if(!descFile2.is_open())
-			cerr << "Cant open file " << "TMP_DESC2_" << toString(tn) << endl;
+    // Parse the descriptor files.
+    ifstream descFile1(string("TMP_DESC1_"+ toString(tn)).c_str());
+    if (!descFile1.is_open())
+      cerr << "Cant open file " << "TMP_DESC1_" << toString(tn) << endl;
+    ifstream descFile2(string("TMP_DESC2_"+ toString(tn)).c_str());
+    if(!descFile2.is_open())
+      cerr << "Cant open file " << "TMP_DESC2_" << toString(tn) << endl;
 
-		int descDim, sz;
-		const int siftDim = 128;
-		descFile1 >> descDim >> sz;
+    int descDim, sz;
+    const int siftDim = 128;
+    descFile1 >> descDim >> sz;
 
-		// Ignore the 4 first lines in file2
-		string line;
-		for(int i = 0; i < 4; ++i)
-			getline(descFile2, line);
+    // Ignore the 4 first lines in file2
+    string line;
+    for(int i = 0; i < 4; ++i)
+      getline(descFile2, line);
 
-		if(descDim != siftDim)
-		{
-			cerr << "Descriptor dimension does not match with SIFT descriptor"
-				 << " dimension!" << endl;
-			exit(-1);
-		}
+    if(descDim != siftDim)
+    {
+      cerr << "Descriptor dimension does not match with SIFT descriptor"
+         << " dimension!" << endl;
+      exit(-1);
+    }
 
     // Get the array of features
     vector<Keypoint>  features;
@@ -114,7 +114,7 @@ namespace DO {
       descFile2 >> desc1;
     }
 
-		return features;
-	}
+    return features;
+  }
 
 } /* namespace DO */

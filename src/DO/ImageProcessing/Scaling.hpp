@@ -22,27 +22,27 @@ namespace DO {
     @{
    */
 
-	// ====================================================================== //
-	// Naive upsampling and downsampling functions.
-	template <typename T, int N>
-	Image<T, N> upscale(const Image<T, N>& I, int fact)
-	{
-		Image<T, N> I1(I.sizes()*fact);
-		CoordsIterator<N> c(I1.begin_coords()), end;
-		for ( ; c != end; ++c)
-			I1(*c) = I((*c)/fact);
-		return I1;
-	}
+  // ====================================================================== //
+  // Naive upsampling and downsampling functions.
+  template <typename T, int N>
+  Image<T, N> upscale(const Image<T, N>& I, int fact)
+  {
+    Image<T, N> I1(I.sizes()*fact);
+    CoordsIterator<N> c(I1.begin_coords()), end;
+    for ( ; c != end; ++c)
+      I1(*c) = I((*c)/fact);
+    return I1;
+  }
 
-	template <typename T, int N>
-	Image<T, N> downscale(const Image<T, N>& I, int fact)
-	{
-		Image<T, N> I1(I.sizes()/fact);
-		CoordsIterator<N> c(I1.begin_coords()), end;
-		for ( ; c != end; ++c)
-			I1(*c) = I((*c)*fact);
-		return I1;
-	}
+  template <typename T, int N>
+  Image<T, N> downscale(const Image<T, N>& I, int fact)
+  {
+    Image<T, N> I1(I.sizes()/fact);
+    CoordsIterator<N> c(I1.begin_coords()), end;
+    for ( ; c != end; ++c)
+      I1(*c) = I((*c)*fact);
+    return I1;
+  }
 
   template <typename T, int N>
   inline std::pair<T, T> range(const Matrix<T, N, 1>& v)

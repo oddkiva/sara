@@ -47,7 +47,7 @@ namespace DO {
   }
   
   bool TriangleFlatness::isNotFlat(const Point2d& a, const Point2d& b, 
-					                         const Point2d& c) const
+                                   const Point2d& c) const
   {
     Vector2d d[3] = { (b-a), (c-a), (c-b) };
     for (int i = 0; i < 3; ++i)
@@ -59,9 +59,9 @@ namespace DO {
     std::sort(dot, dot+3);
     // We need to consider two cases:
     // 1. All the dot products are non negative.
-    //	  Then the three angles are less than 90 degrees.
+    //    Then the three angles are less than 90 degrees.
     // 2. One dot product is negative. It corresponds to the greatest 
-    //	  angle of the triangle.
+    //    angle of the triangle.
     // In the end, the smallest angles have the greatest cosines which 
     // are in both cases dot[1] and dot[2] with dot[1] < dot[2].
     // In our case dot[1] <= cos(40°)=lb2 and dot[2] <= cos(30°)=lb1

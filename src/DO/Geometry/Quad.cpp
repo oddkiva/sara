@@ -249,7 +249,7 @@ namespace DO {
   {
     ifstream f(filePath.c_str());
     if (!f.is_open()) {
-      std::cerr << "Cant open file " << filePath << std::endl;		
+      std::cerr << "Cant open file " << filePath << std::endl;    
       return false;
     }
 
@@ -273,7 +273,7 @@ namespace DO {
   {
     ofstream f(filePath.c_str());
     if (!f.is_open()) {
-      std::cerr << "Cant open file " << filePath << std::endl;		
+      std::cerr << "Cant open file " << filePath << std::endl;    
       return false;
     }
 

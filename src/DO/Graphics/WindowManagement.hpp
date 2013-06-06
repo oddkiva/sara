@@ -18,7 +18,7 @@ class QWidget;
 
 namespace DO {
 
-	typedef QWidget *Window;
+  typedef QWidget *Window;
 
   /*!
     \ingroup Graphics
@@ -28,8 +28,8 @@ namespace DO {
     @{
    */
 
-	// ====================================================================== //
-	// Windows handling function
+  // ====================================================================== //
+  // Windows handling function
   //! Open a PaintingWindow for 2D drawing.
   DO_EXPORT
   Window openWindow(int w, int h, const std::string& windowTitle = "DO++",
@@ -50,8 +50,8 @@ namespace DO {
   DO_EXPORT
   void setActiveWindow(Window w);
 
-	// ====================================================================== //
-	// Temporizing functions
+  // ====================================================================== //
+  // Temporizing functions
   //! Wait **msec** milliseconds before the window resumes its drawing.
   DO_EXPORT
   void milliSleep(int msec);
@@ -59,8 +59,8 @@ namespace DO {
   DO_EXPORT
   void microSleep(int usec);
 
-	// ====================================================================== //
-	// I/O control functions
+  // ====================================================================== //
+  // I/O control functions
   //! \brief Wait for a click from the user. 
   //! - Works only on the *active* window.
   //! - Returns the clicked mouse button
@@ -70,35 +70,35 @@ namespace DO {
   //! \brief Wait for a click from the user (only on the *active* window)
   //! - Returns the clicked mouse button and 
   //! - Stores the click coordinates \f$p\f$.
-	inline int getMouse(Point2i& p)
-	{ return getMouse(p.x(), p.y()); }
+  inline int getMouse(Point2i& p)
+  { return getMouse(p.x(), p.y()); }
   //! \brief Wait for a click from the user (only on the *active* window)
   //! - The user can click on any opened windows.
   //! - Returns the clicked mouse button
   //! - store the click coordinates \f$p\f$.
   DO_EXPORT
-	int anyGetMouse(Point2i& p);
+  int anyGetMouse(Point2i& p);
   //! Wait for a click from the user only on the *active* window.
-	inline void click()
-	{ Point2i p; getMouse(p); }
+  inline void click()
+  { Point2i p; getMouse(p); }
   //! Wait for a click from the user on any opened windows.
-	inline void anyClick()
-	{ Point2i p; anyGetMouse(p); }
+  inline void anyClick()
+  { Point2i p; anyGetMouse(p); }
   //! \brief Wait for a hit key from the user.
   //! - Works only on the *active* window.
   //! - Returns the hit key.
-	DO_EXPORT
+  DO_EXPORT
   int getKey();
   //! \brief Wait for a hit key from the user.
   //! - Works on any opened windows.
   //! - Returns the hit key.
-	DO_EXPORT
+  DO_EXPORT
   int anyGetKey();
 
-	// ====================================================================== //
-	// Window event management
-	//! Listens to events sent from the active window.
-	DO_EXPORT
+  // ====================================================================== //
+  // Window event management
+  //! Listens to events sent from the active window.
+  DO_EXPORT
   void getEvent(int ms, Event& e);
 
   //! @}

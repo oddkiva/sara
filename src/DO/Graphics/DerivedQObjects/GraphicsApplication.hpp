@@ -22,7 +22,7 @@
 #define DO_GRAPHICS_GRAPHICSAPPLICATION_HPP
 
 #ifdef WIN32
-#	define NOMINMAX
+#  define NOMINMAX
 #endif
 
 #include <DO/Defines.hpp>
@@ -45,51 +45,51 @@ namespace DO {
 
   //! \brief quick-and-dirty thing to read file from dialog box.
   //! \todo See if it can be done in a more elegant way.
-	struct InteractiveBox
-	{
-		QPixmap pixmap;
-		QString filename;
-	};
+  struct InteractiveBox
+  {
+    QPixmap pixmap;
+    QString filename;
+  };
   
   //! \brief QApplication-derived class
   //! This graphic application establishes communication between the user 
   //! drawing commands and the windows.
   class DO_EXPORT GraphicsApplication : public QApplication
   {
-	Q_OBJECT
-	public:
-		GraphicsApplication(int argc, char **argv);
+  Q_OBJECT
+  public:
+    GraphicsApplication(int argc, char **argv);
 
   public slots:
-		void createPaintingWindow(int w, int h, const QString& windowTitle,
+    void createPaintingWindow(int w, int h, const QString& windowTitle,
                               int x, int y);
     void createOpenGLWindow(int w, int h, const QString& windowTitle,
                             int x, int y);
     void createGraphicsView(int w, int h, const QString& windowTitle,
                             int x, int y);
 
-		void setActiveWindow(QWidget *w);
-		void closeWindow(QWidget *w);
+    void setActiveWindow(QWidget *w);
+    void closeWindow(QWidget *w);
     
     void getFileFromDialogBox();
     
-	public: /* connection methods for the keyboard and mouse handling. */
-		bool activeWindowIsVisible();
-		void connectWindowIOEventsToUserThread(QWidget *w);
-		void connectAllWindowsIOEventsToUserThread();
-		void disconnectAllWindowsIOEventsToUserThread();
+  public: /* connection methods for the keyboard and mouse handling. */
+    bool activeWindowIsVisible();
+    void connectWindowIOEventsToUserThread(QWidget *w);
+    void connectAllWindowsIOEventsToUserThread();
+    void disconnectAllWindowsIOEventsToUserThread();
     
-	public:
-		UserThread userThread;
-		QList<QPointer<QWidget> > createdWindows;
-		QPointer<QWidget> activeWindow;
+  public:
+    UserThread userThread;
+    QList<QPointer<QWidget> > createdWindows;
+    QPointer<QWidget> activeWindow;
     
     //GraphicsView *graphicsView;
     InteractiveBox interactiveBox;
     
-		QMutex mutex;
+    QMutex mutex;
   };
-	
+  
   //! @}
 
 } /* namespace DO */

@@ -24,14 +24,14 @@
    */
 
   //! Mikolajczyk's binaries wrapped for our need.
-	class HesAffSiftDetector
-	{
-	public:
-		HesAffSiftDetector() {}
+  class HesAffSiftDetector
+  {
+  public:
+    HesAffSiftDetector() {}
 
-		std::vector<Keypoint> run(const Image<uchar>& I, bool specifyThres = false,
-							                double HessianT = 200) const;
-	};
+    std::vector<Keypoint> run(const Image<uchar>& I, bool specifyThres = false,
+                              double HessianT = 200) const;
+  };
 
   //! @}
 

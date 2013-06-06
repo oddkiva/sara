@@ -17,7 +17,7 @@
 
 // To avoid compilation error with Eigen
 #ifdef WIN32
-#	define NOMINMAX
+#  define NOMINMAX
 #endif
 
 // This is a specific compiling issue with MSVC 2008
@@ -113,8 +113,8 @@
 #ifdef SRCDIR
 #define SP_STRINGIFY(s)  #s
 #define SP_EVAL(s) SP_STRINGIFY(s)
-#define srcPath(s) (SP_EVAL(SRCDIR)"/"s)	
-#define stringSrcPath(s) (SP_EVAL(SRCDIR)"/"+s)	
+#define srcPath(s) (SP_EVAL(SRCDIR)"/"s)  
+#define stringSrcPath(s) (SP_EVAL(SRCDIR)"/"+s)  
 #else
 #define srcPath(s) (s)
 #define stringSrcPath(s) (s)

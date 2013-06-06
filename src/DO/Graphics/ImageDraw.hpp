@@ -28,31 +28,31 @@ namespace DO {
 #ifdef USE_IMAGE_PAINTER
   // ====================================================================== //
   // A transformation stack management like OpenGL.
-	class Painter : public QPainter
-	{
-		inline void beginImPaint(QImage& image) { begin(&image); }
-		inline void endImPaint(QImage& image) { end(); }
+  class Painter : public QPainter
+  {
+    inline void beginImPaint(QImage& image) { begin(&image); }
+    inline void endImPaint(QImage& image) { end(); }
 
-		inline void pushImTransform(const QTransform& t)
-		{ transformStack.push(t); }
-		inline void popImTransform()
-		{
-			QTransform newTransform( transform() * transformStack.pop().inverted() ); 
-			setTransform(newTransform);
-		}
+    inline void pushImTransform(const QTransform& t)
+    { transformStack.push(t); }
+    inline void popImTransform()
+    {
+      QTransform newTransform( transform() * transformStack.pop().inverted() ); 
+      setTransform(newTransform);
+    }
 
-		inline void imTranslate(double x, double y)
-		{ pushImTransform( QTransform::fromTranslate(qreal(x), qreal(y)) ); }
-		inline void imScale(double sx, double sy)
-		{ pushImTransform( QTransform::fromScale(qreal(sx), qreal(sy)) ); }
-		inline void imRotate(double degree)
-		{ QTransform r; r.rotate(degree); pushImTransform(r); }
-		inline void imRotateRadians(double radian)
-		{ QTransform r; r.rotateRadians(radian); pushImTransform(r); }
+    inline void imTranslate(double x, double y)
+    { pushImTransform( QTransform::fromTranslate(qreal(x), qreal(y)) ); }
+    inline void imScale(double sx, double sy)
+    { pushImTransform( QTransform::fromScale(qreal(sx), qreal(sy)) ); }
+    inline void imRotate(double degree)
+    { QTransform r; r.rotate(degree); pushImTransform(r); }
+    inline void imRotateRadians(double radian)
+    { QTransform r; r.rotateRadians(radian); pushImTransform(r); }
 
-	private:
-		QStack<QTransform> transformStack;
-	};
+  private:
+    QStack<QTransform> transformStack;
+  };
 #endif
 
   /*!
@@ -85,7 +85,7 @@ namespace DO {
   DO_EXPORT
   void drawLine(Image<Rgb8>& image,
                 int x1, int y1, int x2, int y2, const Color3ub& c,
-				        int penWidth = 1);
+                int penWidth = 1);
   /*!
     \brief Draw rectangle on image.
     @param[in]  image     image.
@@ -96,7 +96,7 @@ namespace DO {
   DO_EXPORT
   void drawRect(Image<Rgb8>& image,
                 int x, int y, int w, int h, const Color3ub& c,
-				        int penWidth = 1);
+                int penWidth = 1);
   /*!
     \brief Draw color-filled rectangle on image.
     @param[in]  image     image.

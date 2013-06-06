@@ -14,57 +14,57 @@
 
 namespace DO {
 
-	// ====================================================================== //
-	//! Windows handling function
-	Window openWindow(int w, int h, const std::string& windowTitle,
-					          int x, int y)
+  // ====================================================================== //
+  //! Windows handling function
+  Window openWindow(int w, int h, const std::string& windowTitle,
+                    int x, int y)
   {
-		QMetaObject::invokeMethod(guiApp(), "createPaintingWindow",
-								              Qt::BlockingQueuedConnection,
-								              Q_ARG(int, w), Q_ARG(int, h),
-								              Q_ARG(const QString&,
-										            QString(windowTitle.c_str())),
-								              Q_ARG(int, x), Q_ARG(int, y));
-		return guiApp()->createdWindows.back();
-	}
+    QMetaObject::invokeMethod(guiApp(), "createPaintingWindow",
+                              Qt::BlockingQueuedConnection,
+                              Q_ARG(int, w), Q_ARG(int, h),
+                              Q_ARG(const QString&,
+                                QString(windowTitle.c_str())),
+                              Q_ARG(int, x), Q_ARG(int, y));
+    return guiApp()->createdWindows.back();
+  }
 
   Window openGLWindow(int w, int h, const std::string& windowTitle,
-					            int x, int y)
+                      int x, int y)
   {
-		QMetaObject::invokeMethod(guiApp(), "createOpenGLWindow",
-								              Qt::BlockingQueuedConnection,
-								              Q_ARG(int, w), Q_ARG(int, h),
-								              Q_ARG(const QString&,
-										            QString(windowTitle.c_str())),
-								              Q_ARG(int, x), Q_ARG(int, y));
-		return guiApp()->createdWindows.back();
-	}
+    QMetaObject::invokeMethod(guiApp(), "createOpenGLWindow",
+                              Qt::BlockingQueuedConnection,
+                              Q_ARG(int, w), Q_ARG(int, h),
+                              Q_ARG(const QString&,
+                                QString(windowTitle.c_str())),
+                              Q_ARG(int, x), Q_ARG(int, y));
+    return guiApp()->createdWindows.back();
+  }
 
-	void closeWindow(Window w)
+  void closeWindow(Window w)
   {
-		QMetaObject::invokeMethod(guiApp(), "closeWindow",
-								              Qt::BlockingQueuedConnection,
-								              Q_ARG(QWidget *, w));
-	}
+    QMetaObject::invokeMethod(guiApp(), "closeWindow",
+                              Qt::BlockingQueuedConnection,
+                              Q_ARG(QWidget *, w));
+  }
 
-	void setActiveWindow(Window w)
-	{
-		QMetaObject::invokeMethod(guiApp(), "setActiveWindow",
-								              Qt::BlockingQueuedConnection,
-								              Q_ARG(QWidget *, w));
-	}
+  void setActiveWindow(Window w)
+  {
+    QMetaObject::invokeMethod(guiApp(), "setActiveWindow",
+                              Qt::BlockingQueuedConnection,
+                              Q_ARG(QWidget *, w));
+  }
     
-	// ====================================================================== //
-	//! Temporizing functions
-	void milliSleep(int msec)
-	{
-		userThread().milliSleep(msec);
-	}
+  // ====================================================================== //
+  //! Temporizing functions
+  void milliSleep(int msec)
+  {
+    userThread().milliSleep(msec);
+  }
 
-	void microSleep(int usec)
-	{
-		userThread().microSleep(usec);
-	}
+  void microSleep(int usec)
+  {
+    userThread().microSleep(usec);
+  }
 
   // ====================================================================== //
   //! I/O control functions
@@ -75,44 +75,44 @@ namespace DO {
     return userThread().getMouse(x, y);
   }
 
-	int anyGetMouse(Point2i &p)
-	{
-		int c;
-		guiApp()->connectAllWindowsIOEventsToUserThread();
-		c = getMouse(p);
-		guiApp()->disconnectAllWindowsIOEventsToUserThread();
-		setActiveWindow(activeWindow());
-		return c;
-	}
+  int anyGetMouse(Point2i &p)
+  {
+    int c;
+    guiApp()->connectAllWindowsIOEventsToUserThread();
+    c = getMouse(p);
+    guiApp()->disconnectAllWindowsIOEventsToUserThread();
+    setActiveWindow(activeWindow());
+    return c;
+  }
        
-	int getKey()
-	{
-		if (!activeWindow())
+  int getKey()
+  {
+    if (!activeWindow())
       return -1;
-		return userThread().getKey();
-	}
+    return userThread().getKey();
+  }
     
-	int anyGetKey()
-	{
-		int k;
-		guiApp()->connectAllWindowsIOEventsToUserThread();
-		k = getKey();
-		guiApp()->disconnectAllWindowsIOEventsToUserThread();
-		if (activeWindow())
-			setActiveWindow(activeWindow());
-		return k;
-	}
+  int anyGetKey()
+  {
+    int k;
+    guiApp()->connectAllWindowsIOEventsToUserThread();
+    k = getKey();
+    guiApp()->disconnectAllWindowsIOEventsToUserThread();
+    if (activeWindow())
+      setActiveWindow(activeWindow());
+    return k;
+  }
     
-	// ====================================================================== //
-	//! Window event management
-	//! From active window only! I am lazy.
+  // ====================================================================== //
+  //! Window event management
+  //! From active window only! I am lazy.
   void getEvent(int ms, Event& e)
   {
-		QMetaObject::invokeMethod(activeWindow(), "waitForEvent", 
-								              Qt::QueuedConnection,
-								              Q_ARG(int, ms));
-		userThread().listenToWindowEvents();
-		userThread().getEvent(e);
-	}
+    QMetaObject::invokeMethod(activeWindow(), "waitForEvent", 
+                              Qt::QueuedConnection,
+                              Q_ARG(int, ms));
+    userThread().listenToWindowEvents();
+    userThread().getEvent(e);
+  }
 
 } /* namespace DO */

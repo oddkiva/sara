@@ -14,7 +14,7 @@
 
 namespace DO {
 
-	static inline QImage toQImage(Image<Rgb8>& image)
+  static inline QImage toQImage(Image<Rgb8>& image)
   {
     return QImage(reinterpret_cast<uchar *>(image.data()),
                   image.width(), image.height(), image.width()*3,
@@ -31,7 +31,7 @@ namespace DO {
     QImage qimage(toQImage(image));
     QPainter p(&qimage);
     p.setPen(toQColor(c));
-		p.drawPoint(x, y);
+    p.drawPoint(x, y);
   }
 
   void drawCircle(Image<Rgb8>& image,
@@ -45,22 +45,22 @@ namespace DO {
 
   void drawLine(Image<Rgb8>& image,
                 int x1, int y1, int x2, int y2, const Color3ub& c,
-				        int penWidth)
+                int penWidth)
   {
     QImage qimage(toQImage(image));
     QPainter p(&qimage);
     p.setPen(QPen(toQColor(c), penWidth));
-		p.drawLine(x1, y1, x2, y2);
+    p.drawLine(x1, y1, x2, y2);
   }
 
   void drawRect(Image<Rgb8>& image,
                 int x, int y, int w, int h, const Color3ub& c,
-				        int penWidth)
+                int penWidth)
   {
     QImage qimage(toQImage(image));
     QPainter p(&qimage);
     p.setPen(QPen(toQColor(c), penWidth));
-		p.drawRect(x, y, w, h);
+    p.drawRect(x, y, w, h);
   }
 
   void fillRect(Image<Rgb8>& image,
@@ -68,7 +68,7 @@ namespace DO {
   {
     QImage qimage(toQImage(image));
     QPainter p(&qimage);
-		p.fillRect(x, y, w, h, toQColor(c));
+    p.fillRect(x, y, w, h, toQColor(c));
   }
 
   void fillCircle(Image<Rgb8>& image,

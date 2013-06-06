@@ -18,13 +18,13 @@ namespace DO {
 
   //! \ingroup Utility
   //! \brief stringifying function.
-	template <typename T>
-	std::string toString(const T& x)
-	{
-		std::stringstream oss;
-		oss << x;
-		return oss.str();
-	}
+  template <typename T>
+  std::string toString(const T& x)
+  {
+    std::stringstream oss;
+    oss << x;
+    return oss.str();
+  }
 
   //! \ingroup Utility
   //! \brief Outputting program stage description on console.

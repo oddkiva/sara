@@ -24,54 +24,54 @@
 #include <QTime>
 
 namespace DO {
-	
+  
   /*!
     \addtogroup GraphicsInternal
 
     @{
    */
 
-	//! \brief The TrackBall class is used the OpenGLWindow class to allow the 
+  //! \brief The TrackBall class is used the OpenGLWindow class to allow the 
   //! user to view the 3D scene interactively.
-	class TrackBall
-	{
-	public:
-		TrackBall();
-		// coordinates in [-1,1]x[-1,1]
-		void push(const QPointF& p, const QQuaternion& transformation);
-		void move(const QPointF& p, const QQuaternion& transformation);
-		void release(const QPointF& p, const QQuaternion& transformation);
-		QQuaternion rotation() const;
-	private:
-		QQuaternion rotation_;
-		QVector3D axis_;
-		QPointF lastPos_;
-		bool pressed_;
-	};
+  class TrackBall
+  {
+  public:
+    TrackBall();
+    // coordinates in [-1,1]x[-1,1]
+    void push(const QPointF& p, const QQuaternion& transformation);
+    void move(const QPointF& p, const QQuaternion& transformation);
+    void release(const QPointF& p, const QQuaternion& transformation);
+    QQuaternion rotation() const;
+  private:
+    QQuaternion rotation_;
+    QVector3D axis_;
+    QPointF lastPos_;
+    bool pressed_;
+  };
 
   //! \brief QGLWidget-derived class used to view 3D scenes.
-	class OpenGLWindow : public QGLWidget
-	{
-		Q_OBJECT
+  class OpenGLWindow : public QGLWidget
+  {
+    Q_OBJECT
 
-	public:
+  public:
     OpenGLWindow(int width, int height, 
                  const QString& windowTitle = "DO++",
                  int x = -1, int y = -1,
                  QWidget* parent = 0);
 
-	public slots:
-		void setMesh(const SimpleTriangleMesh3f& mesh_);
-		void displayMesh();
+  public slots:
+    void setMesh(const SimpleTriangleMesh3f& mesh_);
+    void displayMesh();
 
-	protected:
-		void initializeGL();
-		void paintEvent(QPaintEvent *event);
-		void resizeGL(int width, int height);
-		void mousePressEvent(QMouseEvent *event);
-		void mouseReleaseEvent(QMouseEvent *event);
-		void mouseMoveEvent(QMouseEvent *event);
-		void wheelEvent(QWheelEvent *event);
+  protected:
+    void initializeGL();
+    void paintEvent(QPaintEvent *event);
+    void resizeGL(int width, int height);
+    void mousePressEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
+    void wheelEvent(QWheelEvent *event);
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
     void closeEvent(QCloseEvent *event);
@@ -87,22 +87,22 @@ namespace DO {
   protected:
     QPointF normalizePos(const QPointF& localPos) const;
 
-	private:
-		GLfloat scale_;
-		Point3f center_;
+  private:
+    GLfloat scale_;
+    Point3f center_;
     GLObject::Frame frame_;
-		TrackBall trackball_;
-		
-		SimpleTriangleMesh3f mesh_;
+    TrackBall trackball_;
+    
+    SimpleTriangleMesh3f mesh_;
 
-		QPoint last_pos_;
-		QColor background_color_, color_;
+    QPoint last_pos_;
+    QColor background_color_, color_;
 
     bool display_frame_;
 
     QTimer event_listening_timer_;
-		
-	};
+    
+  };
 
   //! @}
 

@@ -14,50 +14,50 @@
 
 namespace DO {
 
-	class Match
-	{
+  class Match
+  {
   public:
 
-		enum MatchingDirection { SourceToTarget, TargetToSource };
-		//! Default constructor
-		inline Match()
-		  : source_(0), target_(0)
+    enum MatchingDirection { SourceToTarget, TargetToSource };
+    //! Default constructor
+    inline Match()
+      : source_(0), target_(0)
       , targetRank_(-1), score_(std::numeric_limits<float>::max())
       , matchingDir_(SourceToTarget)
       , sInd_(-1), tInd_(-1) {}
 
-		inline Match(const Keypoint *source,
-						     const Keypoint *target,
-						     float score = std::numeric_limits<float>::max(),
-						     MatchingDirection matchingDir = SourceToTarget,
+    inline Match(const Keypoint *source,
+                 const Keypoint *target,
+                 float score = std::numeric_limits<float>::max(),
+                 MatchingDirection matchingDir = SourceToTarget,
                  int i1 = -1, int i2 = -1)
-		  : source_(source), target_(target)
+      : source_(source), target_(target)
       , targetRank_(-1), score_(score)
       , matchingDir_(matchingDir), sInd_(i1), tInd_(i2)
     {}
 
-		//! Constant accessors.
+    //! Constant accessors.
     bool isSKeyNull() const { return source_ == 0; }
     bool isTKeyNull() const { return target_ == 0; }
     const Keypoint& source() const { if (isSKeyNull()) exit(-1); return *source_; }
-		const Keypoint& target() const { if (isTKeyNull()) exit(-1); return *target_; }
-		const OERegion& sFeat() const { return source().feat(); }
-		const OERegion& tFeat() const { return target().feat(); }
+    const Keypoint& target() const { if (isTKeyNull()) exit(-1); return *target_; }
+    const OERegion& sFeat() const { return source().feat(); }
+    const OERegion& tFeat() const { return target().feat(); }
     const Point2f& sPos() const { return sFeat().center(); }
     const Point2f& tPos() const { return tFeat().center(); }
-		int rank() const { return targetRank_; }
-		float score() const { return score_; }
-		MatchingDirection matchingDir() const { return matchingDir_; }
+    int rank() const { return targetRank_; }
+    float score() const { return score_; }
+    MatchingDirection matchingDir() const { return matchingDir_; }
     int sInd() const { return sInd_; }
     int tInd() const { return tInd_; }
     Vector2i indexPair() const { return Vector2i(sInd_, tInd_); }
 
-		//! Non-constant accessors.
+    //! Non-constant accessors.
     const Keypoint *& sPtr() { return source_; }
     const Keypoint *& tPtr() { return target_; }
     int& rank() { return targetRank_; }
-		float& score() { return score_; }
-		MatchingDirection& matchingDir() { return matchingDir_; }
+    float& score() { return score_; }
+    MatchingDirection& matchingDir() { return matchingDir_; }
     int& sInd() { return sInd_; }
     int& tInd() { return tInd_; }
 
@@ -65,20 +65,20 @@ namespace DO {
     bool operator==(const Match& m) const
     { return (source() == m.source() && target() == m.target()); }
 
-	private: /* data members */
-		const Keypoint *source_;
-		const Keypoint *target_;
-		int targetRank_;
+  private: /* data members */
+    const Keypoint *source_;
+    const Keypoint *target_;
+    int targetRank_;
     float score_;
-		MatchingDirection matchingDir_;
+    MatchingDirection matchingDir_;
     int sInd_, tInd_;
-	};
+  };
 
   inline Match indexMatch(int i1, int i2)
   { return Match(0, 0, std::numeric_limits<float>::max(), Match::SourceToTarget, i1, i2); }
 
-	//! I/O
-	std::ostream & operator<<(std::ostream & os, const Match& m);
+  //! I/O
+  std::ostream & operator<<(std::ostream & os, const Match& m);
 
   bool writeMatches(const std::vector<Match>& matches, const std::string& fileName);
 

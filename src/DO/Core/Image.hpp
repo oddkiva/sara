@@ -24,73 +24,73 @@ namespace DO {
    */
 
   //! \brief The specialized element traits class when the entry is a color.
-	template <typename T, typename Layout>
-	struct ElementTraits<Color<T, Layout> >
-	{
-		typedef Array<T, Layout::size, 1> value_type; //!< STL-like typedef.
-		typedef size_t size_type; //!< STL-like typedef.
-		typedef value_type * pointer; //!< STL-like typedef.
-		typedef const value_type * const_pointer; //!< STL-like typedef.
-		typedef value_type& reference; //!< STL-like typedef.
-		typedef const value_type& const_reference; //!< STL-like typedef.
-		typedef value_type * iterator; //!< STL-like typedef.
-		typedef const value_type * const_iterator; //!< STL-like typedef.
-		static const bool is_scalar = false; //!< STL-like typedef.
-	};
+  template <typename T, typename Layout>
+  struct ElementTraits<Color<T, Layout> >
+  {
+    typedef Array<T, Layout::size, 1> value_type; //!< STL-like typedef.
+    typedef size_t size_type; //!< STL-like typedef.
+    typedef value_type * pointer; //!< STL-like typedef.
+    typedef const value_type * const_pointer; //!< STL-like typedef.
+    typedef value_type& reference; //!< STL-like typedef.
+    typedef const value_type& const_reference; //!< STL-like typedef.
+    typedef value_type * iterator; //!< STL-like typedef.
+    typedef const value_type * const_iterator; //!< STL-like typedef.
+    static const bool is_scalar = false; //!< STL-like typedef.
+  };
 
   //! The forward declaration of the image class.
   template <typename Color, int N = 2> class Image;
 
   //! \brief Helper function for color conversion.
   template <typename T, typename U, int N>
-	void convert(Image<T, N>& dst, const Image<U, N>& src);
+  void convert(Image<T, N>& dst, const Image<U, N>& src);
 
   //! \brief The image class.
   template <typename Color, int N>
-	class Image : public MultiArray<Color, N, ColMajor>
-	{
-		typedef MultiArray<Color, N, ColMajor> base_type;
+  class Image : public MultiArray<Color, N, ColMajor>
+  {
+    typedef MultiArray<Color, N, ColMajor> base_type;
 
-	public: /* interface */
+  public: /* interface */
     //! N-dimensional integral vector type.
     typedef typename base_type::vector_type vector_type, Vector;
     
     //! Default constructor.
-		inline Image()
-			: base_type() {}
+    inline Image()
+      : base_type() {}
 
     //! Constructor with specified sizes.
-		inline explicit Image(const vector_type& sizes)
-			: base_type(sizes) {}
+    inline explicit Image(const vector_type& sizes)
+      : base_type(sizes) {}
 
     //! Constructor which wraps raw data.
-		inline Image(Color *data, const vector_type& sizes)
-			: base_type(data, sizes) {}
+    inline Image(Color *data, const vector_type& sizes)
+      : base_type(data, sizes) {}
 
     //! Constructor with specified sizes.
-		inline Image(int width, int height)
-			: base_type(width, height) {}
+    inline Image(int width, int height)
+      : base_type(width, height) {}
 
     //! Constructor with specified sizes.
     inline Image(int width, int height, int depth)
       : base_type(width, height, depth) {}
 
     //! Copy constructor.
-		inline Image(const base_type& x)
-			: base_type(x) {}
+    inline Image(const base_type& x)
+      : base_type(x) {}
 
     //! Assignment operators.
-		inline const Image& operator=(const Image& I)
-		{ base_type::operator=(I); return *this;}
+    inline const Image& operator=(const Image& I)
+    { base_type::operator=(I); return *this;}
 
     //! Constant width accessor.
-		inline int width() const { return this->base_type::rows(); }
+    inline int width() const { return this->base_type::rows(); }
 
     //! Constant height accessor.
-		inline int height() const {	return this->base_type::cols(); }
+    inline int height() const {  return this->base_type::cols(); }
 
     //! Constant depth accessor (only for volumetric image.)
-		inline int depth() const {	return this->base_type::depth(); }
+    inline int depth() const {  return this->base_type::depth(); }
 
     //! Color conversion method.
     template <typename Color2>
@@ -111,23 +111,23 @@ namespace DO {
     inline typename Filter<Color, N>::ReturnType
     compute(const typename Filter<Color, N>::ParamType& param) const
     { return Filter<Color, N>(*this)(param); }
-	};
+  };
 
-	// ====================================================================== //
-	// Construct image views from row major multi-array.
+  // ====================================================================== //
+  // Construct image views from row major multi-array.
   //! \todo Check this functionality...
 #define DEFINE_IMAGE_VIEW_FROM_COLMAJOR_MULTIARRAY(Colorspace)          \
   /*! \brief Reinterpret column-major matrix as an image. */            \
-	template <typename T>                                                 \
-	inline Image<Color<T, Colorspace>, Colorspace::size>                  \
+  template <typename T>                                                 \
+  inline Image<Color<T, Colorspace>, Colorspace::size>                  \
   as##Colorspace##Image(const MultiArray<Matrix<T,3,1>,                 \
                                          Colorspace::size,              \
                                          ColMajor>& M)                  \
-	{                                                                     \
-		return Image<Color<T, Colorspace> >(                                \
-			reinterpret_cast<Color<T, Colorspace> *>(M.data()),               \
-			M.sizes() );                                                      \
-	}
+  {                                                                     \
+    return Image<Color<T, Colorspace> >(                                \
+      reinterpret_cast<Color<T, Colorspace> *>(M.data()),               \
+      M.sizes() );                                                      \
+  }
 
   DEFINE_IMAGE_VIEW_FROM_COLMAJOR_MULTIARRAY(Rgb)
   DEFINE_IMAGE_VIEW_FROM_COLMAJOR_MULTIARRAY(Rgba)
@@ -136,8 +136,8 @@ namespace DO {
 #undef DEFINE_IMAGE_VIEW_FROM_COLMAJOR_MULTIARRAY
 
 
-	// ====================================================================== //
-	// Generic image conversion function.
+  // ====================================================================== //
+  // Generic image conversion function.
   //! \brief Generic image converter class.
   template <typename T, typename U, int N>
   struct ConvertImage {
@@ -168,133 +168,133 @@ namespace DO {
     }
   };
 
-	template <typename T, typename U, int N>
-	inline void convert(Image<T, N>& dst, const Image<U, N>& src)
-	{
+  template <typename T, typename U, int N>
+  inline void convert(Image<T, N>& dst, const Image<U, N>& src)
+  {
     ConvertImage<T,U,N>::apply(dst, src);
-	}
+  }
 
 
-	// ====================================================================== //
-	// Find min and max values in images according to point-wise comparison.
+  // ====================================================================== //
+  // Find min and max values in images according to point-wise comparison.
   //! \brief Find min and max pixel values of the image.
-	template <typename T, int N, typename Layout>
-	void findMinMax(Color<T, Layout>& min, Color<T, Layout>& max,
+  template <typename T, int N, typename Layout>
+  void findMinMax(Color<T, Layout>& min, Color<T, Layout>& max,
                   const Image<Color<T, Layout>, N>& src)
-	{
-		const Color<T,Layout> *src_first = src.data();
-		const Color<T,Layout> *src_last = src_first + src.size();
+  {
+    const Color<T,Layout> *src_first = src.data();
+    const Color<T,Layout> *src_last = src_first + src.size();
 
-		min = *src_first;
-		max = *src_first;
+    min = *src_first;
+    max = *src_first;
 
-		for ( ; src_first != src_last; ++src_first)
-		{
-			min = min.cwiseMin(*src_first);
-			max = max.cwiseMax(*src_first);
-		}
-	}
+    for ( ; src_first != src_last; ++src_first)
+    {
+      min = min.cwiseMin(*src_first);
+      max = max.cwiseMax(*src_first);
+    }
+  }
 
   //! Macro that defines min-max value functions for a specific grayscale 
   //! color types.
 #define DEFINE_FINDMINMAX_GRAY(T)                               \
   /*! \brief Find min and max grayscale values of the image. */ \
-	template <int N>                                              \
-	inline void findMinMax(T& min, T& max, const Image<T, N>& src)\
-	{                                                             \
-		const T *src_first = src.data();                            \
-		const T *src_last = src_first + src.size();                 \
+  template <int N>                                              \
+  inline void findMinMax(T& min, T& max, const Image<T, N>& src)\
+  {                                                             \
+    const T *src_first = src.data();                            \
+    const T *src_last = src_first + src.size();                 \
                                                                 \
-		min = *std::min_element(src_first, src_last);               \
-		max = *std::max_element(src_first, src_last);               \
-	}
+    min = *std::min_element(src_first, src_last);               \
+    max = *std::max_element(src_first, src_last);               \
+  }
 
-	DEFINE_FINDMINMAX_GRAY(uchar)
-	DEFINE_FINDMINMAX_GRAY(char)
-	DEFINE_FINDMINMAX_GRAY(ushort)
-	DEFINE_FINDMINMAX_GRAY(short)
-	DEFINE_FINDMINMAX_GRAY(uint)
-	DEFINE_FINDMINMAX_GRAY(int)
-	DEFINE_FINDMINMAX_GRAY(float)
-	DEFINE_FINDMINMAX_GRAY(double)
+  DEFINE_FINDMINMAX_GRAY(uchar)
+  DEFINE_FINDMINMAX_GRAY(char)
+  DEFINE_FINDMINMAX_GRAY(ushort)
+  DEFINE_FINDMINMAX_GRAY(short)
+  DEFINE_FINDMINMAX_GRAY(uint)
+  DEFINE_FINDMINMAX_GRAY(int)
+  DEFINE_FINDMINMAX_GRAY(float)
+  DEFINE_FINDMINMAX_GRAY(double)
 #undef DEFINE_FINDMINMAX_GRAY
 
 
-	// ====================================================================== //
-	// Image rescaling functions
+  // ====================================================================== //
+  // Image rescaling functions
   //! \brief color rescaling function.
-	template <typename T, typename Layout, int N>
-	inline Image<Color<T,Layout>, N> colorRescale(
-		const Image<Color<T,Layout>, N>& src,
-		const Color<T, Layout>& a = black<T>(),
-		const Color<T, Layout>& b = white<T>())
-	{
-		Image<Color<T,Layout>, N> dst(src.sizes());
+  template <typename T, typename Layout, int N>
+  inline Image<Color<T,Layout>, N> colorRescale(
+    const Image<Color<T,Layout>, N>& src,
+    const Color<T, Layout>& a = black<T>(),
+    const Color<T, Layout>& b = white<T>())
+  {
+    Image<Color<T,Layout>, N> dst(src.sizes());
 
-		const Color<T,Layout> *src_first = src.data();
-		const Color<T,Layout> *src_last = src_first + src.size();
-		Color<T,Layout> *dst_first  = dst.data();
+    const Color<T,Layout> *src_first = src.data();
+    const Color<T,Layout> *src_last = src_first + src.size();
+    Color<T,Layout> *dst_first  = dst.data();
 
-		Color<T,Layout> min(*src_first);
-		Color<T,Layout> max(*src_first);
-		for ( ; src_first != src_last; ++src_first)
-		{
-			min = min.cwiseMin(*src_first);
-			max = max.cwiseMax(*src_first);
-		}
+    Color<T,Layout> min(*src_first);
+    Color<T,Layout> max(*src_first);
+    for ( ; src_first != src_last; ++src_first)
+    {
+      min = min.cwiseMin(*src_first);
+      max = max.cwiseMax(*src_first);
+    }
 
-		if (min == max)
-		{
-			std::cerr << "Warning: min == max!" << std::endl;
-			return dst;
-		}
+    if (min == max)
+    {
+      std::cerr << "Warning: min == max!" << std::endl;
+      return dst;
+    }
 
-		for (src_first = src.data(); src_first != src_last; 
-			 ++src_first, ++dst_first)
-			*dst_first = a + (*src_first-min).cwiseProduct(b-a).
+    for (src_first = src.data(); src_first != src_last; 
+       ++src_first, ++dst_first)
+      *dst_first = a + (*src_first-min).cwiseProduct(b-a).
                                         cwiseQuotient(max-min);
 
-		return dst;
-	}
+    return dst;
+  }
 
   //! Macro that defines a color rescaling function for a specific grayscale 
   //! color type.
-#define DEFINE_RESCALE_GRAY(T)											            \
+#define DEFINE_RESCALE_GRAY(T)                                  \
   /*! \brief Rescales color values properly for viewing. */     \
-	template <int N>													                    \
-	inline Image<T, N> colorRescale(const Image<T, N>& src,	      \
-									                T a = ColorTraits<T>::min(),  \
-									                T b = ColorTraits<T>::max())  \
-	{																	                            \
-		Image<T, N> dst(src.sizes());									              \
-																		                            \
-		const T *src_first = src.data();								            \
-		const T *src_last = src_first + src.size();						      \
-		T *dst_first  = dst.data();										              \
-																		                            \
-		T min = *std::min_element(src_first, src_last);				      \
-		T max = *std::max_element(src_first, src_last);				      \
-																		                            \
-		if (min == max)													                    \
-		{																                            \
-      std::cerr << "Warning: min == max!" << std::endl;         \
-			return dst;													                      \
-		}																                            \
-																		                            \
-		for ( ; src_first != src_last; ++src_first, ++dst_first)	  \
-			*dst_first = a + (b-a)*(*src_first-min)/(max-min);			  \
+  template <int N>                                              \
+  inline Image<T, N> colorRescale(const Image<T, N>& src,       \
+                                  T a = ColorTraits<T>::min(),  \
+                                  T b = ColorTraits<T>::max())  \
+  {                                                             \
+    Image<T, N> dst(src.sizes());                               \
                                                                 \
-		return dst;														                      \
-	}
+    const T *src_first = src.data();                            \
+    const T *src_last = src_first + src.size();                 \
+    T *dst_first  = dst.data();                                 \
+                                                                \
+    T min = *std::min_element(src_first, src_last);             \
+    T max = *std::max_element(src_first, src_last);             \
+                                                                \
+    if (min == max)                                             \
+    {                                                           \
+      std::cerr << "Warning: min == max!" << std::endl;         \
+      return dst;                                               \
+    }                                                           \
+                                                                \
+    for ( ; src_first != src_last; ++src_first, ++dst_first)    \
+      *dst_first = a + (b-a)*(*src_first-min)/(max-min);        \
+                                                                \
+    return dst;                                                 \
+  }
 
-	DEFINE_RESCALE_GRAY(uchar)
-	DEFINE_RESCALE_GRAY(char)
-	DEFINE_RESCALE_GRAY(ushort)
-	DEFINE_RESCALE_GRAY(short)
-	DEFINE_RESCALE_GRAY(uint)
-	DEFINE_RESCALE_GRAY(int)
-	DEFINE_RESCALE_GRAY(float)
-	DEFINE_RESCALE_GRAY(double)
+  DEFINE_RESCALE_GRAY(uchar)
+  DEFINE_RESCALE_GRAY(char)
+  DEFINE_RESCALE_GRAY(ushort)
+  DEFINE_RESCALE_GRAY(short)
+  DEFINE_RESCALE_GRAY(uint)
+  DEFINE_RESCALE_GRAY(int)
+  DEFINE_RESCALE_GRAY(float)
+  DEFINE_RESCALE_GRAY(double)
 #undef DEFINE_RESCALE_GRAY
 
   //! \brief color rescaling functor helper.

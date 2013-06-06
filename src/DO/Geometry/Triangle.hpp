@@ -34,23 +34,23 @@ namespace DO {
   };
 
 
-	//! Simple criterion to test if the triangle is too flat
-	class TriangleFlatness
-	{
-	public:
-		TriangleFlatness(double lowestAngleDegree, double secondLowestDegree)
-		  : lb(std::cos(toRadian(lowestAngleDegree)))
+  //! Simple criterion to test if the triangle is too flat
+  class TriangleFlatness
+  {
+  public:
+    TriangleFlatness(double lowestAngleDegree, double secondLowestDegree)
+      : lb(std::cos(toRadian(lowestAngleDegree)))
       , lb2(std::cos(toRadian(secondLowestDegree))) {}
 
-		inline bool operator()(const Point2d& a, const Point2d& b, const Point2d& c) const
-		{ return !isNotFlat(a, b, c); }
+    inline bool operator()(const Point2d& a, const Point2d& b, const Point2d& c) const
+    { return !isNotFlat(a, b, c); }
 
     bool isNotFlat(const Point2d& a, const Point2d& b, const Point2d& c) const;
 
-	private:
-		const double lb;
-		const double lb2;
-	};
+  private:
+    const double lb;
+    const double lb2;
+  };
 
 } /* namespace DO */
 

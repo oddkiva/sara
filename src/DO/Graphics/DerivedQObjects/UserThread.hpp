@@ -36,26 +36,26 @@ namespace DO {
     UserThread(QObject* parent = 0);
     void registerUserMain(int (*userMain)(void)) { userMain_ = userMain; }
 
-	public: /* timing methods */
-		void milliSleep(int msec) { msleep(msec); }
-		void microSleep(int usec) { usleep(usec); }
+  public: /* timing methods */
+    void milliSleep(int msec) { msleep(msec); }
+    void microSleep(int usec) { usleep(usec); }
 
-	public: /* I/O handling methods */
-		int getMouse(int& x, int& y);
-		int getKey();
-		void getEvent(Event& e);
+  public: /* I/O handling methods */
+    int getMouse(int& x, int& y);
+    int getKey();
+    void getEvent(Event& e);
 
-	public slots: /* I/O handling slot methods */
-		void listenToWindowEvents();
-		void pressedMouseButtons(int x, int y, Qt::MouseButtons buttons);
-		void pressedKey(int key);
-		void closedWindow();
-		void receivedEvent(Event e);
+  public slots: /* I/O handling slot methods */
+    void listenToWindowEvents();
+    void pressedMouseButtons(int x, int y, Qt::MouseButtons buttons);
+    void pressedKey(int key);
+    void closedWindow();
+    void receivedEvent(Event e);
 
-	protected:
-		void run();
+  protected:
+    void run();
 
-	private:
+  private:
     int (*userMain_)(void);
 
     QMutex mutex_;

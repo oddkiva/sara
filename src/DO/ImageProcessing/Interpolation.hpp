@@ -22,10 +22,10 @@ namespace DO {
     @{
    */
 
-	// ====================================================================== //
-	// Interpolation
+  // ====================================================================== //
+  // Interpolation
   //! \brief Interpolation function
-	template <typename T, int N, typename F> 
+  template <typename T, int N, typename F> 
   typename ColorTraits<T>::Color64f interpolate(const Image<T,N> &I,
                                                 const Matrix<F, N, 1>& xx)
   {

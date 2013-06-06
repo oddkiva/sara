@@ -43,7 +43,7 @@ namespace DO {
     void closeEvent(QCloseEvent *event);
   };
 
-	//! \brief QWidget-derived class on which we draw things.
+  //! \brief QWidget-derived class on which we draw things.
   //! I choose not to use QGLWidget because of some weird viewing artefacts...
   //! Maybe later...
   class PaintingWindow : public QWidget

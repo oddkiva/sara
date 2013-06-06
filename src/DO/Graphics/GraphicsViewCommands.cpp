@@ -20,9 +20,9 @@ namespace DO {
   
   // ====================================================================== //
   //! Graphics view window control functions
-	Window openGraphicsView(int w, int h, const std::string& windowTitle,
+  Window openGraphicsView(int w, int h, const std::string& windowTitle,
                           int x, int y)
-	{
+  {
     QMetaObject::invokeMethod(guiApp(), "createGraphicsView",
                               Qt::BlockingQueuedConnection,
                               Q_ARG(int, w), Q_ARG(int, h),
@@ -30,7 +30,7 @@ namespace DO {
                                     QString(windowTitle.c_str())),
                               Q_ARG(int, x), Q_ARG(int, y));
     return activeWindow();
-	}
+  }
     
   // ====================================================================== //
   //! Convenience graphics scene functions

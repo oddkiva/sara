@@ -22,12 +22,12 @@ namespace DO {
   // ========================================================================== //
   // Ellipse related functions
   // ========================================================================== //
-	Matrix2d Ellipse::shapeMat() const
+  Matrix2d Ellipse::shapeMat() const
   {
     const Eigen::Rotation2D<double> R(o());
     Vector2d D( 1./(r1()*r1()), 1./(r2()*r2()) );
-		return R.matrix()*D.asDiagonal()*R.matrix().transpose();
-	}
+    return R.matrix()*D.asDiagonal()*R.matrix().transpose();
+  }
 
   void Ellipse::drawOnScreen(const Color3ub col, double z) const
   {
@@ -44,15 +44,15 @@ namespace DO {
     return os;
   }
 
-	Ellipse fromShapeMat(const Matrix2d& shapeMat,
-							         const Point2d& c)
-	{
-		Eigen::JacobiSVD<Matrix2d> svd(shapeMat, Eigen::ComputeFullU);
-		const Vector2d r = svd.singularValues().cwiseSqrt().cwiseInverse();
-		const Matrix2d& U = svd.matrixU();
-		double o = std::atan2(U(1,0), U(0,0));
-		return Ellipse(r(0), r(1), o, c);
-	}
+  Ellipse fromShapeMat(const Matrix2d& shapeMat,
+                       const Point2d& c)
+  {
+    Eigen::JacobiSVD<Matrix2d> svd(shapeMat, Eigen::ComputeFullU);
+    const Vector2d r = svd.singularValues().cwiseSqrt().cwiseInverse();
+    const Matrix2d& U = svd.matrixU();
+    double o = std::atan2(U(1,0), U(0,0));
+    return Ellipse(r(0), r(1), o, c);
+  }
 
   // ========================================================================== //
   // Approximate ellipse intersections
@@ -79,33 +79,33 @@ namespace DO {
 
   void drawPolygon(const Polygon& polygon, const Color3ub& c)
   {
-  		//cout << "polygon.size() == " << polygon.size() << endl;
-  		Polygon::Edge_const_circulator e = polygon.edges_circulator();
-  		Polygon::Edge_const_circulator done(e);
-  		do
-  		{
-  			drawLine(Point2f((*e).source().x(), (*e).source().y()),
-  					     Point2f((*e).target().x(), (*e).target().y()),
-  					     c, 2);
-  		} while(++e != done);
-  	}
+      //cout << "polygon.size() == " << polygon.size() << endl;
+      Polygon::Edge_const_circulator e = polygon.edges_circulator();
+      Polygon::Edge_const_circulator done(e);
+      do
+      {
+        drawLine(Point2f((*e).source().x(), (*e).source().y()),
+                 Point2f((*e).target().x(), (*e).target().y()),
+                 c, 2);
+      } while(++e != done);
+    }
 
-	double approximateIntersectionUnionRatio(const Ellipse& e1, const Ellipse& e2,
-										                       int n, double limit)
-	{
-		if( !e1.isWellDefined(limit) || !e2.isWellDefined(limit) )
-			return 0.;
+  double approximateIntersectionUnionRatio(const Ellipse& e1, const Ellipse& e2,
+                                           int n, double limit)
+  {
+    if( !e1.isWellDefined(limit) || !e2.isWellDefined(limit) )
+      return 0.;
 
-		Polygon p1(discretizeEllipse(e1, n));
-		Polygon p2(discretizeEllipse(e2, n));
-		PwhList intR;
+    Polygon p1(discretizeEllipse(e1, n));
+    Polygon p2(discretizeEllipse(e2, n));
+    PwhList intR;
 
     CGAL::intersection(p1, p2, back_inserter(intR));
 
 #ifdef DEBUG_APPROX_ELLIPSE_INTERSECTION
     /*std::cout << "Intersection between ";
-		std::cout << "E1 " << e1 << std::endl;
-		std::cout << "E2 " << e2 << std::endl;*/
+    std::cout << "E1 " << e1 << std::endl;
+    std::cout << "E2 " << e2 << std::endl;*/
 
     drawPolygon(p1, Red8);
     drawPolygon(p2, Blue8);
@@ -116,19 +116,19 @@ namespace DO {
       cout << "no intersections" << endl;
 #endif
 
-		if(!intR.empty())
-		{
+    if(!intR.empty())
+    {
 #ifdef DEBUG_ELLIPSE_INTERSECTION
-			drawPolygon(intR.back().outer_boundary(), Green8);
+      drawPolygon(intR.back().outer_boundary(), Green8);
       //getKey();
 #endif
-			double interArea = intR.back().outer_boundary().area();
-			double unionArea = p1.area()+p2.area()-interArea;
-			return interArea/unionArea;
-		}
-		else
-			return 0.;
-	}
+      double interArea = intR.back().outer_boundary().area();
+      double unionArea = p1.area()+p2.area()-interArea;
+      return interArea/unionArea;
+    }
+    else
+      return 0.;
+  }
 
   // ========================================================================== //
   // Computation of polynomial roots
@@ -181,7 +181,7 @@ namespace DO {
 
     // Cardano's formula.
     const double p = (3*c-b*b)/3;
-    const double q = (-9*c*b + 27*d + 2*b*b*b)/27;	
+    const double q = (-9*c*b + 27*d + 2*b*b*b)/27;  
     const double delta = q*q + 4*p*p*p/27;
 
     if(delta < -1e-3)

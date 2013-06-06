@@ -24,13 +24,13 @@ namespace DO
    */
 
   //! Mikolajczyk's binaries wrapped for our need.
-	class MserSiftDetector
-	{
-	public:
-		MserSiftDetector() {}
+  class MserSiftDetector
+  {
+  public:
+    MserSiftDetector() {}
 
-		std::vector<Keypoint> run(const Image<uchar>& I) const;
-	};
+    std::vector<Keypoint> run(const Image<uchar>& I) const;
+  };
 
   //! @}
 

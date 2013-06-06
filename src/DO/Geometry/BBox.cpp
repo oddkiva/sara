@@ -24,23 +24,23 @@ namespace DO {
       );
   }
 
-	bool BBox::isDegenerate() const
-	{
-		bool degenerate = (
+  bool BBox::isDegenerate() const
+  {
+    bool degenerate = (
       topLeft.x() == bottomRight.x() || 
       topLeft.y() == bottomRight.y()
       );
-		if (degenerate)
-			std::cout << "degenerate" << std::endl;
+    if (degenerate)
+      std::cout << "degenerate" << std::endl;
 
-		return degenerate;
-	}
+    return degenerate;
+  }
 
-	bool BBox::invert()
-	{
+  bool BBox::invert()
+  {
     bool inverted = false;
 
-		if (topLeft.x() > bottomRight.x())
+    if (topLeft.x() > bottomRight.x())
     {
       std::swap(topLeft.x(), bottomRight.x());
       inverted = true;
@@ -51,7 +51,7 @@ namespace DO {
       inverted = true;
     }
     return inverted;
-	}
+  }
 
   void BBox::print() const
   {

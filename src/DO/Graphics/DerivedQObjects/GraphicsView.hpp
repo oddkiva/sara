@@ -27,15 +27,15 @@ namespace DO {
    */
 
   //! \brief QGraphicsView-derived class used to view interactively images.
-	class GraphicsView : public QGraphicsView
-	{
-		Q_OBJECT
-	public:
+  class GraphicsView : public QGraphicsView
+  {
+    Q_OBJECT
+  public:
     GraphicsView(int width, int height, 
                  const QString& windowTitle = "DO++",
                  int x = -1, int y = -1,
                  QWidget* parent = 0);
-		void activateOpenGL();
+    void activateOpenGL();
     
     QGraphicsItem *lastAddedItem() { return last_inserted_item_; }
 
@@ -45,10 +45,10 @@ namespace DO {
     void drawPointOnPixmapItem(int x, int y, const QColor& c,
                                QGraphicsPixmapItem *pixItem);
 
-	protected:
+  protected:
     void mousePressEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
-		void wheelEvent(QWheelEvent *);
+    void wheelEvent(QWheelEvent *);
     void keyPressEvent(QKeyEvent *event);
     void closeEvent(QCloseEvent *event);
 
@@ -65,7 +65,7 @@ namespace DO {
   private:
     QTimer event_listening_timer_;
     QGraphicsItem* last_inserted_item_;
-	};
+  };
 
   //! @}
 } /* namespace DO */

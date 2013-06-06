@@ -46,7 +46,7 @@ namespace DO {
     std::size_t matchCount;
     file >> matchCount;
 
-    matches.reserve(matchCount);	
+    matches.reserve(matchCount);  
     for (size_t i = 0; i < matchCount; ++i)
     {
       Match m;
@@ -78,7 +78,7 @@ namespace DO {
     std::size_t matchCount;
     file >> matchCount;
 
-    matches.reserve(matchCount);	
+    matches.reserve(matchCount);  
     for (size_t i = 0; i < matchCount; ++i)
     {
       Match m;

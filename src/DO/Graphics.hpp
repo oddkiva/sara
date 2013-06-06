@@ -17,7 +17,7 @@
 
 // Because of Eigen/Core compiling error
 #ifdef WIN32
-#	define NOMINMAX
+#  define NOMINMAX
 #endif
 
 #include <DO/Defines.hpp>

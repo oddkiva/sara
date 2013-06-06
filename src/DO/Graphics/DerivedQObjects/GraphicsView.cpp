@@ -25,7 +25,7 @@ namespace DO {
     setRenderHints(QPainter::Antialiasing);
     setDragMode(RubberBandDrag);
 
-    setWindowTitle(windowTitle);		
+    setWindowTitle(windowTitle);    
     resize(w, h);
     move(x, y);
     show();
