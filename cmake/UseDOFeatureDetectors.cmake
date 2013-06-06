@@ -67,7 +67,7 @@ endmacro (do_load_packages_for_featuredetectors_library)
 macro (do_create_variables_for_featuredetectors_library)
     set(DO_FeatureDetectors_LIBRARIES DO_FeatureDetectors)
     set(DO_FeatureDetectors_LINK_LIBRARIES
-				${DO_Features_LIBRARIES} ${DO_Graphics_LIBRARIES} Lowe_SIFT)
+				${DO_Features_LIBRARIES} ${DO_Graphics_LIBRARIES})
 endmacro (do_create_variables_for_featuredetectors_library)
 
 do_load_packages_for_featuredetectors_library()

@@ -1,20 +1,13 @@
-/*
- * =============================================================================
- *
- *       Filename:  Quad.hpp
- *
- *    Description:  
- *
- *        Version:  1.0
- *        Created:  24/03/2011 14:29:00
- *       Revision:  none
- *       Compiler:  msvc
- *
- *         Author:  David OK (DO), david.ok@imagine.enpc.fr 
- *        Company:  IMAGINE, (Ecole des Ponts ParisTech & CSTB)
- *
- * =============================================================================
- */
+// ========================================================================== //
+// This file is part of DO++, a basic set of libraries in C++ for computer 
+// vision.
+//
+// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public 
+// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
 
 #ifndef DO_GEOMETRY_QUAD_HPP
 #define DO_GEOMETRY_QUAD_HPP

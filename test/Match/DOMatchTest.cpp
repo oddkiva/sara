@@ -1,20 +1,13 @@
-/*
- * =============================================================================
- *
- *       Filename:  main.cpp
- *
- *    Description:  Testing affine covariant region detectors.	
- *
- *        Version:  1.0
- *        Created:  16/06/2010 10:30:30
- *       Revision:  none
- *       Compiler:  msvc
- *
- *         Author:  David OK (DO), david.ok@imagine.enpc.fr 
- *        Company:  IMAGINE, (Ecole des Ponts ParisTech & CSTB)
- *
- * =============================================================================
- */
+// ========================================================================== //
+// This file is part of DO++, a basic set of libraries in C++ for computer 
+// vision.
+//
+// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public 
+// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
 
 #include <DO/Match.hpp>
 

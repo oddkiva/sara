@@ -189,31 +189,6 @@ const Rgb8& c = Cyan8;
 
 // ========================================================================== //
 // Testing with painting
-void testDoGSift(const Image<unsigned char>& image, bool drawFeatureCenterOnly = false)
-{
-  // Run DoG Detector
-  cout << "Detecting DoG features... " << endl;
-  HighResTimer t;
-  double elapsed;
-  t.restart();
-  DoGSiftDetector dogsiftDetector;
-  dogsiftDetector.setFirstOctave(-1);
-  vector<Keypoint> keys(dogsiftDetector.run(image));
-  elapsed = t.elapsedMs();
-  cout << "Elapsed time = " << elapsed << " ms" << endl;
-  cout << "Found " << keys.size() << " DoG-SIFT keypoints." << endl;
-
-  cout << "Writing keypoints..." << endl;
-  writeKeypoints(keys, srcPath("test.dogkey"));
-
-  // Draw features.
-  cout << "Drawing features... ";
-  display(image);
-  drawKeypoints(keys, Red8);
-  cout << "done!" << endl;
-  click();
-}
-
 void testHarAffSift(const Image<unsigned char>& image,
                     bool drawFeatureCenterOnly = false)
 {
@@ -288,10 +263,9 @@ int main()
 
   setActiveWindow(openWindow(I.width(), I.height()));
   setAntialiasing(activeWindow());
-  testDoGSift(I);
-  //testHarAffSift(I);
-  //testHesAffSift(I);
-  //testMserSift(I);
+  testHarAffSift(I);
+  testHesAffSift(I);
+  testMserSift(I);
   getKey();
 
   return 0;

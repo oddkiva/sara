@@ -5,8 +5,8 @@ DO++
 DO++ is a basic set of C++ libraries for computer vision.
 
 I am aware OpenCV is out there and competing with it is out of question.
-Try it:
-* DO++ has a very user-friendly API.
+Still, I invite to give it a try:
+* DO++ has a very user-friendly API
 * DO++ is small and thus easily maintainable and extensible.
 
 DO++ is opensource and licensed with the MPL2 license.
