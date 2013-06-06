@@ -296,172 +296,172 @@ namespace DO {
 
   //! Macro that defines specialized color traits classes for grayscale types.
 #define DEFINE_GRAY_COLOR_TRAITS(gray_channel_t)        \
-template <> struct ColorTraits<gray_channel_t>			    \
-{														                            \
+template <> struct ColorTraits<gray_channel_t>          \
+{                                                        \
   /*! Color type. */\
-	typedef gray_channel_t Color;						              \
+  typedef gray_channel_t Color;                          \
   /*! Channel type. */\
-	typedef gray_channel_t ChannelType;					          \
+  typedef gray_channel_t ChannelType;                    \
   /*! Double floating precision grayscale color type. */\
-	typedef double Color64f;							                \
+  typedef double Color64f;                              \
   /*! Grayscale color layout. */\
-	typedef Gray ColorLayout;							                \
+  typedef Gray ColorLayout;                              \
   /*! Number of channels. */\
-	enum { NumChannels = 1 };							                \
+  enum { NumChannels = 1 };                              \
   /*! Zero grayscale value (=Black). */\
-	static inline Color zero()							              \
-	{ return ChannelType(0); }							              \
+  static inline Color zero()                            \
+  { return ChannelType(0); }                            \
   /*! Minimum grayscale value (=Black). */\
-	static inline Color min()							                \
-	{ return ChannelTraits<ChannelType>::min(); }		      \
+  static inline Color min()                              \
+  { return ChannelTraits<ChannelType>::min(); }          \
   /*! Maximum grayscale value (=White). */\
-	static inline Color max()							                \
-	{ return ChannelTraits<ChannelType>::max(); }		      \
+  static inline Color max()                              \
+  { return ChannelTraits<ChannelType>::max(); }          \
   /*! Double minimum grayscale value (=Black). */\
-	static inline double doubleMin()					            \
-	{ return ChannelTraits<ChannelType>::doubleMin(); }	  \
-	/*! Double maximum grayscale value (=White). */\
-  static inline double doubleMax()					            \
-	{ return ChannelTraits<ChannelType>::doubleMax(); }	  \
+  static inline double doubleMin()                      \
+  { return ChannelTraits<ChannelType>::doubleMin(); }    \
+  /*! Double maximum grayscale value (=White). */\
+  static inline double doubleMax()                      \
+  { return ChannelTraits<ChannelType>::doubleMax(); }    \
   /*! Double range grayscale value. */\
-	static inline double doubleRange()					          \
-	{ return doubleMax() - doubleMin(); }				          \
+  static inline double doubleRange()                    \
+  { return doubleMax() - doubleMin(); }                  \
 };
 
   //! Specialized color traits class for 'uchar' grayscale color.
-	DEFINE_GRAY_COLOR_TRAITS(uchar)
+  DEFINE_GRAY_COLOR_TRAITS(uchar)
   //! Specialized color traits class for 'ushort' grayscale color.
-	DEFINE_GRAY_COLOR_TRAITS(ushort)
+  DEFINE_GRAY_COLOR_TRAITS(ushort)
   //! Specialized color traits class for 'uint' grayscale color.
-	DEFINE_GRAY_COLOR_TRAITS(uint)
+  DEFINE_GRAY_COLOR_TRAITS(uint)
   //! Specialized color traits class for 'char' grayscale color.
-	DEFINE_GRAY_COLOR_TRAITS(char)
+  DEFINE_GRAY_COLOR_TRAITS(char)
   //! Specialized color traits class for 'short' grayscale color.
-	DEFINE_GRAY_COLOR_TRAITS(short)
+  DEFINE_GRAY_COLOR_TRAITS(short)
   //! Specialized color traits class for 'int' grayscale color.
-	DEFINE_GRAY_COLOR_TRAITS(int)
+  DEFINE_GRAY_COLOR_TRAITS(int)
   //! Specialized color traits class for 'float' grayscale color.
-	DEFINE_GRAY_COLOR_TRAITS(float)
+  DEFINE_GRAY_COLOR_TRAITS(float)
   //! Specialized color traits class for 'double' grayscale color.
-	DEFINE_GRAY_COLOR_TRAITS(double)
+  DEFINE_GRAY_COLOR_TRAITS(double)
 #undef DEFINE_GRAY_COLOR_TRAITS
 
   //! @} ColorTraits
 
-	
+  
   //! \defgroup ColorConversion Color rescaling and conversion functions
   //! @{
 
-	// ======================================================================== //
-	//! Channel normalization between 0 and 1 in double floating-point precision.
-	template <typename T>
-	inline double getRescaledChannel64f(T value)
-	{
-		return (static_cast<double>(value) - ChannelTraits<T>::doubleMin())
-			/ ChannelTraits<T>::doubleRange();
-	}
+  // ======================================================================== //
+  //! Channel normalization between 0 and 1 in double floating-point precision.
+  template <typename T>
+  inline double getRescaledChannel64f(T value)
+  {
+    return (static_cast<double>(value) - ChannelTraits<T>::doubleMin())
+      / ChannelTraits<T>::doubleRange();
+  }
   //! Color normalization between 0 and 1 in double floating-point precision.
-	template <typename T, int N>
-	inline Matrix<double, N, 1> getRescaledColor64f(const Matrix<T, N, 1>& color)
-	{
-		Matrix<double, N, 1> min; min.fill(ChannelTraits<T>::doubleMin());
-		Matrix<double, N, 1> max; max.fill(ChannelTraits<T>::doubleMax());
-		return (color.template cast<double>() - min).cwiseQuotient(max - min);
-	}
+  template <typename T, int N>
+  inline Matrix<double, N, 1> getRescaledColor64f(const Matrix<T, N, 1>& color)
+  {
+    Matrix<double, N, 1> min; min.fill(ChannelTraits<T>::doubleMin());
+    Matrix<double, N, 1> max; max.fill(ChannelTraits<T>::doubleMax());
+    return (color.template cast<double>() - min).cwiseQuotient(max - min);
+  }
   //! Channel rescaling from 'double' value in [0,1] to 'T' value.
-	template <typename T>
-	inline void normalizeChannel(T& dst, double src)
-	{
-		dst = static_cast<T>(
-			ColorTraits<T>::doubleMin() + src*ColorTraits<T>::doubleRange() );
-	}
+  template <typename T>
+  inline void normalizeChannel(T& dst, double src)
+  {
+    dst = static_cast<T>(
+      ColorTraits<T>::doubleMin() + src*ColorTraits<T>::doubleRange() );
+  }
   //! Channel rescaling from 'T' value to 'double' value in [0,1].
-	template <typename T, int N>
-	inline void normalizeColor(Matrix<T, N, 1>& dst, const Matrix<double, N, 1>& src)
-	{
-		typedef Color<T, Rgb> Col;
-		Matrix<double, N, 1> tmp( ColorTraits<Col>::doubleMin()
-			+ src.cwiseProduct(ColorTraits<Col>::doubleRange()) );
-		dst = tmp.template cast<T>();
-	}
+  template <typename T, int N>
+  inline void normalizeColor(Matrix<T, N, 1>& dst, const Matrix<double, N, 1>& src)
+  {
+    typedef Color<T, Rgb> Col;
+    Matrix<double, N, 1> tmp( ColorTraits<Col>::doubleMin()
+      + src.cwiseProduct(ColorTraits<Col>::doubleRange()) );
+    dst = tmp.template cast<T>();
+  }
 
-	// ======================================================================== //
-	//! RGB to grayscale color conversion function (includes color normalization).
-	template <typename T>
-	inline double rgb2gray64f(const Matrix<T, 3, 1>& rgb)
-	{
-		Matrix<double, 3, 1> rgb64f(getRescaledColor64f(rgb));
-		return 0.3*rgb64f[0] + 0.59*rgb64f[1] + 0.11*rgb64f[2]; 
-	}
+  // ======================================================================== //
+  //! RGB to grayscale color conversion function (includes color normalization).
+  template <typename T>
+  inline double rgb2gray64f(const Matrix<T, 3, 1>& rgb)
+  {
+    Matrix<double, 3, 1> rgb64f(getRescaledColor64f(rgb));
+    return 0.3*rgb64f[0] + 0.59*rgb64f[1] + 0.11*rgb64f[2]; 
+  }
   //! Grayscale to RGB color conversion function (includes color normalization).
-	template <typename T>
-	inline Matrix<double, 3, 1> gray2rgb64f(T gray)
-	{
-		double gray64f = getRescaledChannel64f(gray);
-		Matrix<double, 3, 1> rgb64f;
-		rgb64f.fill(gray64f);
-		return rgb64f;
-	}
+  template <typename T>
+  inline Matrix<double, 3, 1> gray2rgb64f(T gray)
+  {
+    double gray64f = getRescaledChannel64f(gray);
+    Matrix<double, 3, 1> rgb64f;
+    rgb64f.fill(gray64f);
+    return rgb64f;
+  }
   //! RGB to YUV color conversion function (includes color normalization).
-	template<typename T>
-	inline Vector3d rgb2yuv64f(const Matrix<T, 3, 1>& rgb)
-	{
-		Matrix<double, 3, 1> rgb64f(getRescaledColor64f(rgb));
+  template<typename T>
+  inline Vector3d rgb2yuv64f(const Matrix<T, 3, 1>& rgb)
+  {
+    Matrix<double, 3, 1> rgb64f(getRescaledColor64f(rgb));
 
-		double y = .299*rgb64f[0] + .587*rgb64f[1] + .114*rgb64f[2];
-		return Vector3d(y, .492*(rgb64f[2]-y), .877*(rgb64f[0]-y));
-	}
+    double y = .299*rgb64f[0] + .587*rgb64f[1] + .114*rgb64f[2];
+    return Vector3d(y, .492*(rgb64f[2]-y), .877*(rgb64f[0]-y));
+  }
   //! YUV to RGB color conversion function (includes color normalization).
-	template<typename T>
-	inline Vector3d yuv2rgb64f(const Matrix<T, 3, 1>& yuv)
-	{
-		Vector3d yuv64f(getRescaledColor64f(yuv));
-		double r = yuv64f[2]/.877 + yuv64f[0];
-		double b = yuv64f[1]/.492 + yuv64f[0];
-		double g = (yuv64f[0] - .299*r - .114*b) / .587;
-		return Matrix<double, 3, 1>(r, g, b);
-	}
+  template<typename T>
+  inline Vector3d yuv2rgb64f(const Matrix<T, 3, 1>& yuv)
+  {
+    Vector3d yuv64f(getRescaledColor64f(yuv));
+    double r = yuv64f[2]/.877 + yuv64f[0];
+    double b = yuv64f[1]/.492 + yuv64f[0];
+    double g = (yuv64f[0] - .299*r - .114*b) / .587;
+    return Matrix<double, 3, 1>(r, g, b);
+  }
 
-	// ======================================================================== //
-	//! Color conversion function from RGB to Grayscale.
-	template <typename T, typename U>
-	inline void rgb2gray(T& gray, const Matrix<U, 3, 1>& rgb)
-	{ normalizeChannel(gray, rgb2gray64f(rgb)); }
+  // ======================================================================== //
+  //! Color conversion function from RGB to Grayscale.
+  template <typename T, typename U>
+  inline void rgb2gray(T& gray, const Matrix<U, 3, 1>& rgb)
+  { normalizeChannel(gray, rgb2gray64f(rgb)); }
   //! Color conversion function from Grayscale to RGB.
-	template <typename T, typename U>
-	inline void gray2rgb(Matrix<T, 3, 1>& rgb, const U& gray)
-	{ normalizeColor(rgb, gray2rgb64f(gray)); }
+  template <typename T, typename U>
+  inline void gray2rgb(Matrix<T, 3, 1>& rgb, const U& gray)
+  { normalizeColor(rgb, gray2rgb64f(gray)); }
   //! Color conversion function from RGB to YUV.
-	template <typename T, typename U>
-	inline void rgb2yuv(Matrix<T, 3, 1>& yuv, const Matrix<U, 3, 1>& rgb)
-	{ normalizeColor(rgb, rgb2yuv64f(yuv)); }
+  template <typename T, typename U>
+  inline void rgb2yuv(Matrix<T, 3, 1>& yuv, const Matrix<U, 3, 1>& rgb)
+  { normalizeColor(rgb, rgb2yuv64f(yuv)); }
   //! Color conversion function from YUV to RGB.
-	template <typename T, typename U>
-	inline void yuv2rgb(Matrix<T, 3, 1>& rgb, const Matrix<U, 3, 1>& yuv)
-	{ normalizeColor(rgb, yuv2rgb64f(yuv)); }
+  template <typename T, typename U>
+  inline void yuv2rgb(Matrix<T, 3, 1>& rgb, const Matrix<U, 3, 1>& yuv)
+  { normalizeColor(rgb, yuv2rgb64f(yuv)); }
 
-	// ======================================================================== //
-	//! \brief Color conversion function with same color layout but different 
+  // ======================================================================== //
+  //! \brief Color conversion function with same color layout but different 
   //! channel types.
-	template <typename T, typename U, typename CLayout>
-	inline void convertColor(Color<T, CLayout>& dst, const Color<U, CLayout>& src)
-	{ normalizeColor(dst, getRescaledColor64f(src)); }
+  template <typename T, typename U, typename CLayout>
+  inline void convertColor(Color<T, CLayout>& dst, const Color<U, CLayout>& src)
+  { normalizeColor(dst, getRescaledColor64f(src)); }
   //! \brief Color conversion function from RGB to YUV.
-	template <typename T, typename U>
-	inline void convertColor(Color<T, Rgb>& dst, const Color<U, Yuv>& src)
-	{ normalizeColor(dst, yuv2rgb64f(src)); }
+  template <typename T, typename U>
+  inline void convertColor(Color<T, Rgb>& dst, const Color<U, Yuv>& src)
+  { normalizeColor(dst, yuv2rgb64f(src)); }
   //! \brief Color conversion function from YUV to RGB.
-	template <typename T, typename U>
-	inline void convertColor(Color<T, Yuv>& dst, const Color<U, Rgb>& src)
-	{ normalizeColor(dst, rgb2yuv64f(src)); }
+  template <typename T, typename U>
+  inline void convertColor(Color<T, Yuv>& dst, const Color<U, Rgb>& src)
+  { normalizeColor(dst, rgb2yuv64f(src)); }
 
-	//! Color conversion between gray and RGB color spaces.
+  //! Color conversion between gray and RGB color spaces.
 #define COLOR_CONVERSION_BETWEEN_GRAY_AND_RGB(GrayType)             \
-  /*! \brief Color conversion from RGB to Gray. */\
+  /*! \brief Color conversion from RGB to Gray. */									\
   template <typename T>                                             \
   inline void convertColor(GrayType& dst, const Color<T, Rgb>& src) \
-  { rgb2gray(dst, src); }												                    \
-  /*! \brief Color conversion from Gray to RGB. */\
+  { rgb2gray(dst, src); }                                           \
+  /*! \brief Color conversion from Gray to RGB. */									\
   template <typename T>                                             \
   inline void convertColor(Color<T, Rgb>& dst, const GrayType& src) \
   { gray2rgb(dst, src); }
@@ -476,11 +476,11 @@ template <> struct ColorTraits<gray_channel_t>			    \
   COLOR_CONVERSION_BETWEEN_GRAY_AND_RGB(double)
 #undef COLOR_CONVERSION_BETWEEN_GRAY_AND_RGB
 
-	//! Color conversion between floating point gray colors.
-	inline void convertColor(float& dst, double src)
+  //! Color conversion between floating point gray colors.
+  inline void convertColor(float& dst, double src)
   { dst = static_cast<float>(src); }
   //! Color conversion between floating point gray colors.
-	inline void convertColor(double& dst, float src)
+  inline void convertColor(double& dst, float src)
   { dst = static_cast<double>(src); }
   //! Just in case, in order to avoid ambiguity for 'float'.
   inline void convertColor(float& dst, float src)
@@ -489,69 +489,69 @@ template <> struct ColorTraits<gray_channel_t>			    \
   inline void convertColor(double& dst, double src)
   { dst = src; }
 
-	//! Color conversion between integral gray colors.
+  //! Color conversion between integral gray colors.
 #define DEFINE_COLOR_CONVERSION_BETWEEN_INTEGRAL_GRAY_TYPES(Gray1, Gray2) \
-  /*! \brief Color conversion between integral gray colors. */\
+  /*! \brief Color conversion between integral gray colors. */           	\
   inline void convertColor(Gray2& dst, Gray1 src)                         \
-  { normalizeChannel(dst, getRescaledChannel64f(src)); }					        \
-  /*! \brief Color conversion between integral gray colors. */\
-  inline void convertColor(Gray1& dst, Gray2 src)							            \
+  { normalizeChannel(dst, getRescaledChannel64f(src)); }                  \
+  /*! \brief Color conversion between integral gray colors. */						\
+  inline void convertColor(Gray1& dst, Gray2 src)                         \
   { normalizeChannel(dst, getRescaledChannel64f(src)); }
 
-	// uchar
-	DEFINE_COLOR_CONVERSION_BETWEEN_INTEGRAL_GRAY_TYPES(uchar, ushort)
-	DEFINE_COLOR_CONVERSION_BETWEEN_INTEGRAL_GRAY_TYPES(uchar, uint)
+  // uchar
+  DEFINE_COLOR_CONVERSION_BETWEEN_INTEGRAL_GRAY_TYPES(uchar, ushort)
+  DEFINE_COLOR_CONVERSION_BETWEEN_INTEGRAL_GRAY_TYPES(uchar, uint)
   DEFINE_COLOR_CONVERSION_BETWEEN_INTEGRAL_GRAY_TYPES(uchar, char)
-	DEFINE_COLOR_CONVERSION_BETWEEN_INTEGRAL_GRAY_TYPES(uchar, short)
-	DEFINE_COLOR_CONVERSION_BETWEEN_INTEGRAL_GRAY_TYPES(uchar, int)
-	// ushort
-	DEFINE_COLOR_CONVERSION_BETWEEN_INTEGRAL_GRAY_TYPES(ushort, uint)
-	DEFINE_COLOR_CONVERSION_BETWEEN_INTEGRAL_GRAY_TYPES(ushort, int)
-	DEFINE_COLOR_CONVERSION_BETWEEN_INTEGRAL_GRAY_TYPES(ushort, char)
-	DEFINE_COLOR_CONVERSION_BETWEEN_INTEGRAL_GRAY_TYPES(ushort, short)
-	// uint
-	DEFINE_COLOR_CONVERSION_BETWEEN_INTEGRAL_GRAY_TYPES(uint, int)
-	DEFINE_COLOR_CONVERSION_BETWEEN_INTEGRAL_GRAY_TYPES(uint, char)
-	DEFINE_COLOR_CONVERSION_BETWEEN_INTEGRAL_GRAY_TYPES(uint, short)
-	// char
-	DEFINE_COLOR_CONVERSION_BETWEEN_INTEGRAL_GRAY_TYPES(char, short)
-	DEFINE_COLOR_CONVERSION_BETWEEN_INTEGRAL_GRAY_TYPES(char, int)
-	// short
-	DEFINE_COLOR_CONVERSION_BETWEEN_INTEGRAL_GRAY_TYPES(short, int)
-	// int
+  DEFINE_COLOR_CONVERSION_BETWEEN_INTEGRAL_GRAY_TYPES(uchar, short)
+  DEFINE_COLOR_CONVERSION_BETWEEN_INTEGRAL_GRAY_TYPES(uchar, int)
+  // ushort
+  DEFINE_COLOR_CONVERSION_BETWEEN_INTEGRAL_GRAY_TYPES(ushort, uint)
+  DEFINE_COLOR_CONVERSION_BETWEEN_INTEGRAL_GRAY_TYPES(ushort, int)
+  DEFINE_COLOR_CONVERSION_BETWEEN_INTEGRAL_GRAY_TYPES(ushort, char)
+  DEFINE_COLOR_CONVERSION_BETWEEN_INTEGRAL_GRAY_TYPES(ushort, short)
+  // uint
+  DEFINE_COLOR_CONVERSION_BETWEEN_INTEGRAL_GRAY_TYPES(uint, int)
+  DEFINE_COLOR_CONVERSION_BETWEEN_INTEGRAL_GRAY_TYPES(uint, char)
+  DEFINE_COLOR_CONVERSION_BETWEEN_INTEGRAL_GRAY_TYPES(uint, short)
+  // char
+  DEFINE_COLOR_CONVERSION_BETWEEN_INTEGRAL_GRAY_TYPES(char, short)
+  DEFINE_COLOR_CONVERSION_BETWEEN_INTEGRAL_GRAY_TYPES(char, int)
+  // short
+  DEFINE_COLOR_CONVERSION_BETWEEN_INTEGRAL_GRAY_TYPES(short, int)
+  // int
 #undef DEFINE_COLOR_CONVERSION_BETWEEN_INTEGRAL_GRAY_TYPES
 
-	//! Color conversion between integral and floating point gray colors.
+  //! Color conversion between integral and floating point gray colors.
 #define DEFINE_COLOR_CONVERSION_BETWEEN_INT_AND_FLOATING_TYPES(Float, Int)\
   /*! \brief Color conversion between integral and floating point gray. */\
-  inline void convertColor(Float& dst, Int src)							              \
-  {																		                                    \
-	  Float M = static_cast<Float>(ColorTraits<Int>::max());				        \
-	  Float m = static_cast<Float>(ColorTraits<Int>::min());				        \
-	  dst = (static_cast<Float>(src)-m) / (M-m);							              \
-  }																		                                    \
+  inline void convertColor(Float& dst, Int src)                           \
+  {                                                                       \
+    Float M = static_cast<Float>(ColorTraits<Int>::max());                \
+    Float m = static_cast<Float>(ColorTraits<Int>::min());                \
+    dst = (static_cast<Float>(src)-m) / (M-m);                            \
+  }                                                                       \
   /*! \brief Color conversion between integral and floating point gray. */\
-  inline void convertColor(Int& dst, Float src)							              \
-  {																		                                    \
-	  src = Float(ColorTraits<Int>::min())								                  \
-		  + src*( Float(ColorTraits<Int>::max())							                \
-			    - Float(ColorTraits<Int>::min()) );						                  \
-	  dst = static_cast<Int>(src);										                      \
+  inline void convertColor(Int& dst, Float src)                           \
+  {                                                                       \
+    src = Float(ColorTraits<Int>::min())                                  \
+      + src*( Float(ColorTraits<Int>::max())                              \
+          - Float(ColorTraits<Int>::min()) );                             \
+    dst = static_cast<Int>(src);                                          \
   }
 
-	DEFINE_COLOR_CONVERSION_BETWEEN_INT_AND_FLOATING_TYPES(float, uchar)
-	DEFINE_COLOR_CONVERSION_BETWEEN_INT_AND_FLOATING_TYPES(float, ushort)
-	DEFINE_COLOR_CONVERSION_BETWEEN_INT_AND_FLOATING_TYPES(float, uint)
-	DEFINE_COLOR_CONVERSION_BETWEEN_INT_AND_FLOATING_TYPES(float, char)
-	DEFINE_COLOR_CONVERSION_BETWEEN_INT_AND_FLOATING_TYPES(float, short)
-	DEFINE_COLOR_CONVERSION_BETWEEN_INT_AND_FLOATING_TYPES(float, int)
+  DEFINE_COLOR_CONVERSION_BETWEEN_INT_AND_FLOATING_TYPES(float, uchar)
+  DEFINE_COLOR_CONVERSION_BETWEEN_INT_AND_FLOATING_TYPES(float, ushort)
+  DEFINE_COLOR_CONVERSION_BETWEEN_INT_AND_FLOATING_TYPES(float, uint)
+  DEFINE_COLOR_CONVERSION_BETWEEN_INT_AND_FLOATING_TYPES(float, char)
+  DEFINE_COLOR_CONVERSION_BETWEEN_INT_AND_FLOATING_TYPES(float, short)
+  DEFINE_COLOR_CONVERSION_BETWEEN_INT_AND_FLOATING_TYPES(float, int)
 
-	DEFINE_COLOR_CONVERSION_BETWEEN_INT_AND_FLOATING_TYPES(double, uchar)
-	DEFINE_COLOR_CONVERSION_BETWEEN_INT_AND_FLOATING_TYPES(double, ushort)
-	DEFINE_COLOR_CONVERSION_BETWEEN_INT_AND_FLOATING_TYPES(double, uint)
-	DEFINE_COLOR_CONVERSION_BETWEEN_INT_AND_FLOATING_TYPES(double, char)
-	DEFINE_COLOR_CONVERSION_BETWEEN_INT_AND_FLOATING_TYPES(double, short)
-	DEFINE_COLOR_CONVERSION_BETWEEN_INT_AND_FLOATING_TYPES(double, int)
+  DEFINE_COLOR_CONVERSION_BETWEEN_INT_AND_FLOATING_TYPES(double, uchar)
+  DEFINE_COLOR_CONVERSION_BETWEEN_INT_AND_FLOATING_TYPES(double, ushort)
+  DEFINE_COLOR_CONVERSION_BETWEEN_INT_AND_FLOATING_TYPES(double, uint)
+  DEFINE_COLOR_CONVERSION_BETWEEN_INT_AND_FLOATING_TYPES(double, char)
+  DEFINE_COLOR_CONVERSION_BETWEEN_INT_AND_FLOATING_TYPES(double, short)
+  DEFINE_COLOR_CONVERSION_BETWEEN_INT_AND_FLOATING_TYPES(double, int)
 #undef DEFINE_COLOR_CONVERSION_BETWEEN_INT_AND_FLOATING_TYPES
 
   //! @} ColorConversion
@@ -561,26 +561,26 @@ template <> struct ColorTraits<gray_channel_t>			    \
   //! \defgroup ColorTypes Color typedefs
   //! @{
 
-	// ======================================================================== //
-	//! self-explanatory.
-	typedef uchar gray8;
+  // ======================================================================== //
   //! self-explanatory.
-	typedef char gray8s;
+  typedef uchar gray8;
   //! self-explanatory.
-	typedef ushort gray16;
+  typedef char gray8s;
   //! self-explanatory.
-	typedef short gray16s;
+  typedef ushort gray16;
   //! self-explanatory.
-	typedef uint gray32;
+  typedef short gray16s;
   //! self-explanatory.
-	typedef int gray32s;
+  typedef uint gray32;
   //! self-explanatory.
-	typedef float gray32f;
+  typedef int gray32s;
   //! self-explanatory.
-	typedef double gray64f;
+  typedef float gray32f;
+  //! self-explanatory.
+  typedef double gray64f;
 
-	// ======================================================================== //
-	//! Macro for generic color typedefs
+  // ======================================================================== //
+  //! Macro for generic color typedefs
 #define DEFINE_GENERIC_COLOR_TYPEDEFS(N)      \
   /*! \brief Color{NumChannels}{ChannelType} */\
   typedef Matrix<uchar, N, 1> Color##N##ub;   \
@@ -603,35 +603,35 @@ template <> struct ColorTraits<gray_channel_t>			    \
   DEFINE_GENERIC_COLOR_TYPEDEFS(4)
 #undef DEFINE_GENERIC_COLOR_TYPEDEFS
 
-	// ======================================================================== //
-	//! Macro for color typedefs.
-#define DEFINE_COLOR_TYPES(colorspace)					  \
+  // ======================================================================== //
+  //! Macro for color typedefs.
+#define DEFINE_COLOR_TYPES(colorspace)            \
   /*! \brief {ColorSpace}{NumChannels}{ChannelType} */\
   typedef Color<uchar, colorspace> colorspace##8;   \
   /*! \brief {ColorSpace}{NumChannels}{ChannelType} */\
-  typedef Color<ushort, colorspace> colorspace##16;	\
+  typedef Color<ushort, colorspace> colorspace##16;  \
   /*! \brief {ColorSpace}{NumChannels}{ChannelType} */\
-  typedef Color<uint, colorspace> colorspace##32;		\
+  typedef Color<uint, colorspace> colorspace##32;    \
   /*! \brief {ColorSpace}{NumChannels}{ChannelType} */\
-  typedef Color<char, colorspace> colorspace##8s;		\
+  typedef Color<char, colorspace> colorspace##8s;    \
   /*! \brief {ColorSpace}{NumChannels}{ChannelType} */\
-  typedef Color<short, colorspace> colorspace##16s;	\
+  typedef Color<short, colorspace> colorspace##16s;  \
   /*! \brief {ColorSpace}{NumChannels}{ChannelType} */\
-  typedef Color<int, colorspace> colorspace##32s;		\
+  typedef Color<int, colorspace> colorspace##32s;    \
   /*! \brief {ColorSpace}{NumChannels}{ChannelType} */\
   typedef Color<float, colorspace> colorspace##32f; \
   /*! \brief {ColorSpace}{NumChannels}{ChannelType} */\
   typedef Color<double, colorspace> colorspace##64f;
 
-	DEFINE_COLOR_TYPES(Rgb)
-	DEFINE_COLOR_TYPES(Rgba)
-	DEFINE_COLOR_TYPES(Cmyk)
-	DEFINE_COLOR_TYPES(Yuv)
+  DEFINE_COLOR_TYPES(Rgb)
+  DEFINE_COLOR_TYPES(Rgba)
+  DEFINE_COLOR_TYPES(Cmyk)
+  DEFINE_COLOR_TYPES(Yuv)
 #undef DEFINE_COLOR_TYPES
   //! @} ColorTypes
 
-	// ======================================================================== //
-	//! \defgroup PrimaryColors Primary Colors 
+  // ======================================================================== //
+  //! \defgroup PrimaryColors Primary Colors 
   //! @{
 
   //! White color function.
@@ -700,32 +700,32 @@ template <> struct ColorTraits<gray_channel_t>			    \
   }
 
   //! Primary color definition.
-#define DEFINE_COLOR_CONSTANT(Name, function)	    \
+#define DEFINE_COLOR_CONSTANT(Name, function)      \
   /*! \brief Return primary color of type Rgb8. */  \
-  const Rgb8 Name##8(function<uchar>());		        \
+  const Rgb8 Name##8(function<uchar>());            \
   /*! \brief Return primary color of type Rgb8s. */ \
-  const Rgb8s Name##8s(function<char>());		        \
+  const Rgb8s Name##8s(function<char>());            \
   /*! \brief Return primary color of type Rgb16. */ \
-  const Rgb16 Name##16(function<ushort>()); 	      \
+  const Rgb16 Name##16(function<ushort>());         \
   /*! \brief Return primary color of type Rgb16s. */\
-  const Rgb16s Name##16s(function<short>());	      \
+  const Rgb16s Name##16s(function<short>());        \
   /*! \brief Return primary color of type Rgb32. */ \
-  const Rgb32 Name##32(function<uint>());		        \
+  const Rgb32 Name##32(function<uint>());           \
   /*! \brief Return primary color of type Rgb32s. */\
-  const Rgb32s Name##32s(function<int>());	        \
+  const Rgb32s Name##32s(function<int>());          \
   /*! \brief Return primary color of type Rgb32f. */\
-  const Rgb32f Name##32f(function<float>());	      \
+  const Rgb32f Name##32f(function<float>());        \
   /*! \brief Return primary color of type Rgb64f. */\
   const Rgb64f Name##64f(function<double>());
 
-	DEFINE_COLOR_CONSTANT(Red, red)
-	DEFINE_COLOR_CONSTANT(Green, green)
-	DEFINE_COLOR_CONSTANT(Blue, blue)
-	DEFINE_COLOR_CONSTANT(Cyan, cyan)
-	DEFINE_COLOR_CONSTANT(Magenta, magenta)
-	DEFINE_COLOR_CONSTANT(Yellow, yellow)
-	DEFINE_COLOR_CONSTANT(Black, black)
-	DEFINE_COLOR_CONSTANT(White, white)
+  DEFINE_COLOR_CONSTANT(Red, red)
+  DEFINE_COLOR_CONSTANT(Green, green)
+  DEFINE_COLOR_CONSTANT(Blue, blue)
+  DEFINE_COLOR_CONSTANT(Cyan, cyan)
+  DEFINE_COLOR_CONSTANT(Magenta, magenta)
+  DEFINE_COLOR_CONSTANT(Yellow, yellow)
+  DEFINE_COLOR_CONSTANT(Black, black)
+  DEFINE_COLOR_CONSTANT(White, white)
 #undef DEFINE_COLOR_CONSTANT
   //! @}
 
