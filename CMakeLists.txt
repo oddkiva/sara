@@ -29,8 +29,8 @@ include(DOInstall)
 
 # Setup unit test projects
 if (DO_BUILD_UNIT_TESTS)
-    add_subdirectory(test)
-    enable_testing()
+  add_subdirectory(test)
+  enable_testing()
 endif ()
 
 # Make documentation

@@ -13,7 +13,7 @@ if (NOT DO_FOUND)
     if (DEFINED ENV{DO_DIR} AND EXISTS "$ENV{DO_DIR}/cmake/findDO.cmake") # Check if DO++ is installed
         string(REPLACE "\\" "/" DO_DIR "$ENV{DO_DIR}")
         set(DO_INCLUDE_DIR ${DO_DIR}/include)
-    elseif (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/cmake/findDO.cmake") # DO++ needs to be built or used from source
+    elseif (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/cmake/findDO.cmake.in") # DO++ needs to be built or used from source
         message(STATUS "Building DO++ from source")
         set(DO_DIR ${CMAKE_CURRENT_SOURCE_DIR})
         set(DO_INCLUDE_DIR ${DO_DIR}/src)
