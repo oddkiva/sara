@@ -16,7 +16,7 @@ option(DO_BUILD_UNIT_TESTS  "Build unit tests for DO++ libraries" ON)
 option(DO_BUILD_SHARED_LIBS "Build shared libraries for DO++ libraries" OFF)
 
 # Go!
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMake)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 find_package(DO REQUIRED)
 do_dissect_version()
 do_get_os_info()
