@@ -15,29 +15,29 @@ macro (do_list_imageprocessing_source_files)
   set(DO_ImageProcessing_HEADER_FILES
       ${DO_ImageProcessing_MASTER_HEADER}
       ${DO_ImageProcessing_HEADER_FILES})
-	
-	# Custom library project organization.
-	source_group("0. Master Header File" FILES
-							 ${DO_ImageProcessing_MASTER_HEADER})	
-	source_group("1. Linear Filtering" FILES
-							 ${DO_ImageProcessing_SOURCE_DIR}/LinearFiltering.hpp)
-	source_group("2. Deriche IIR Filters" FILES
-							 ${DO_ImageProcessing_SOURCE_DIR}/Deriche.hpp)
-	source_group("3. Differential Calculus, ..." FILES
-							 ${DO_ImageProcessing_SOURCE_DIR}/Differential.hpp
-							 ${DO_ImageProcessing_SOURCE_DIR}/Determinant.hpp
-							 ${DO_ImageProcessing_SOURCE_DIR}/Norm.hpp
-							 ${DO_ImageProcessing_SOURCE_DIR}/Orientation.hpp
-							 ${DO_ImageProcessing_SOURCE_DIR}/SecondMomentMatrix.hpp)
-	source_group("4. Interpolation" FILES
-							 ${DO_ImageProcessing_SOURCE_DIR}/Interpolation.hpp)
-	source_group("5. Reduce, Enlarge, Warp..." FILES
-							 ${DO_ImageProcessing_SOURCE_DIR}/Scaling.hpp
-							 ${DO_ImageProcessing_SOURCE_DIR}/Warp.hpp)
-	source_group("6. Gaussian Scale-Space" FILES
-							 ${DO_ImageProcessing_SOURCE_DIR}/ImagePyramid.hpp
-							 ${DO_ImageProcessing_SOURCE_DIR}/DoG.hpp
-							 ${DO_ImageProcessing_SOURCE_DIR}/Extrema.hpp)
+  
+  # Custom library project organization.
+  source_group("0. Master Header File" FILES
+               ${DO_ImageProcessing_MASTER_HEADER})  
+  source_group("1. Linear Filtering" FILES
+               ${DO_ImageProcessing_SOURCE_DIR}/LinearFiltering.hpp)
+  source_group("2. Deriche IIR Filters" FILES
+               ${DO_ImageProcessing_SOURCE_DIR}/Deriche.hpp)
+  source_group("3. Differential Calculus, ..." FILES
+               ${DO_ImageProcessing_SOURCE_DIR}/Differential.hpp
+               ${DO_ImageProcessing_SOURCE_DIR}/Determinant.hpp
+               ${DO_ImageProcessing_SOURCE_DIR}/Norm.hpp
+               ${DO_ImageProcessing_SOURCE_DIR}/Orientation.hpp
+               ${DO_ImageProcessing_SOURCE_DIR}/SecondMomentMatrix.hpp)
+  source_group("4. Interpolation" FILES
+               ${DO_ImageProcessing_SOURCE_DIR}/Interpolation.hpp)
+  source_group("5. Reduce, Enlarge, Warp..." FILES
+               ${DO_ImageProcessing_SOURCE_DIR}/Scaling.hpp
+               ${DO_ImageProcessing_SOURCE_DIR}/Warp.hpp)
+  source_group("6. Gaussian Scale-Space" FILES
+               ${DO_ImageProcessing_SOURCE_DIR}/ImagePyramid.hpp
+               ${DO_ImageProcessing_SOURCE_DIR}/DoG.hpp
+               ${DO_ImageProcessing_SOURCE_DIR}/Extrema.hpp)
 endmacro (do_list_imageprocessing_source_files)
 
 macro (do_load_packages_for_imageprocessing_library)
