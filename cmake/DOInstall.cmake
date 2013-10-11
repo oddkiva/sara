@@ -4,15 +4,9 @@ macro (do_set_output_directories COMPILER_NAME)
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/${COMPILER_NAME})
 endmacro ()
 
-if (MSVC9)
-  do_set_output_directories("msvc9")
-endif ()
-if (MSVC10)
-  do_set_output_directories("msvc10")
-endif ()
-if (MSVC11)
-  do_set_output_directories("msvc11")
-endif ()
+string(TOLOWER "${CMAKE_CXX_COMPILER_ID}_${CMAKE_CXX_COMPILER_VERSION}" DO_OUTPUT_DIR)
+do_set_output_directories(${DO_OUTPUT_DIR})
+
 
 # Eigen 3
 do_message("Installing Eigen")

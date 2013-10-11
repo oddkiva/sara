@@ -95,7 +95,6 @@ macro (do_append_library NAME            # Library name
 endmacro (do_append_library)
 
 
-
 macro (do_unit_test NAME SOURCES EXTRA_LIBS)
   include_directories(${gtest_DIR}/include)
   add_executable(DO_${NAME}_test ${SOURCES})
