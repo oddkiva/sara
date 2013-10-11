@@ -7,4 +7,4 @@ message(STATUS "  - DO_Core_test")
 find_package(DO COMPONENTS Core REQUIRED)
 include(${DO_USE_FILE})
 
-do_unit_test(Core "${DO_LIBRARIES}")
+do_unit_test(Core test.cpp "${DO_LIBRARIES}")
