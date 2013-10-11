@@ -80,6 +80,8 @@ namespace DO {
     void disconnectAllWindowsIOEventsToUserThread();
     
   public:
+    int argc;
+    char **argv;
     UserThread userThread;
     QList<QPointer<QWidget> > createdWindows;
     QPointer<QWidget> activeWindow;

@@ -21,6 +21,7 @@ namespace DO {
     : QGraphicsView(new QGraphicsScene, parent)
   {
     //activateOpenGL();
+    setAttribute(Qt::WA_DeleteOnClose);
     setTransformationAnchor(AnchorUnderMouse);
     setRenderHints(QPainter::Antialiasing);
     setDragMode(RubberBandDrag);

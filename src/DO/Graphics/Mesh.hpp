@@ -25,9 +25,9 @@ namespace DO {
    */
 
   //! \brief Triangle face consisting of 3 vertex indices
-  typedef Array<size_t, 3, 1> Triangle;
+  typedef Array<size_t, 3, 1> Face3;
   //! \brief Quad face consisting of 4 vertex indices
-  typedef Array<size_t, 4, 1> Quad;
+  typedef Array<size_t, 4, 1> Face4;
   
   //! \brief Simple mesh data structure.
   template <typename Vector_, typename Face_>
@@ -84,7 +84,7 @@ namespace DO {
 
   //! \brief Simple mesh data structure that should be used preferably for
   //! OpenGL.
-  typedef SimpleMesh<Point3f, Triangle> SimpleTriangleMesh3f;
+  typedef SimpleMesh<Point3f, Face3> SimpleTriangleMesh3f;
 
   //! \brief Mesh reader (WARNING: still experimental!).
   class MeshReader
@@ -92,7 +92,7 @@ namespace DO {
   public:
     /* WARNING: this function may not work because I just read the vertices and triangles */
     template <typename Vector>
-    bool readObjFile(SimpleMesh<Vector, Triangle>& mesh,
+    bool readObjFile(SimpleMesh<Vector, Face3>& mesh,
                      const std::string& fileName)
     {
       // Attempt to read file.
@@ -103,7 +103,7 @@ namespace DO {
         return false;
       }
       // Clear the mesh data structure.
-      mesh = SimpleMesh<Vector, Triangle>();
+      mesh = SimpleMesh<Vector, Face3>();
       // Fill the mesh data structure.
       std::string line;
       while ( std::getline(file, line) )
@@ -122,7 +122,7 @@ namespace DO {
         {
           size_t a, b, c;
           ss >> a >> b >> c;
-          mesh.faces().push_back(Triangle(a-1, b-1, c-1));
+          mesh.faces().push_back(Face3(a-1, b-1, c-1));
         }
       }
       // Read mesh successfully.

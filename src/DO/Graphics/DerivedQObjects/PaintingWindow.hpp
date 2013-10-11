@@ -90,15 +90,15 @@ namespace DO {
                      const QColor& c);
     void fillPoly(const QPolygonF& polygon, const QColor& c);
     void fillRect(int x, int y, int w, int h, const QColor& c);
-    // Clear window
+    // Clear window.
     void clear();
-
     // Painting modes.
     void setAntialiasing(bool on = true);
     void setTransparency(bool on = true);
-
-    // Save screen
+    // Save screen.
     void saveScreen(const QString& filename);
+    // Resize screen.
+    void resizeScreen(int width, int height);
 
   public slots: /* event management slots */
       void waitForEvent(int ms);

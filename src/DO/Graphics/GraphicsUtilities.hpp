@@ -24,7 +24,7 @@ namespace DO {
     @{
    */
 
-  // ====================================================================== //
+  // ======================================================================== //
   // Convenience functions
   inline GraphicsApplication *guiApp()
   { return qobject_cast<DO::GraphicsApplication *>(qApp); }
@@ -38,17 +38,7 @@ namespace DO {
   inline bool activeWindowIsVisible()
   { return guiApp()->activeWindowIsVisible(); }
 
-  inline QStringList getMainArgs()
-  { return guiApp()->arguments(); }
-
   //!@}
-
-  // Deprecated since Qt 5.0.1.
-  /*inline void getMainArgsFromGuiApp(int& argc, char **& argv)
-  {
-    argc = guiApp()->arguments().size();
-    argv = guiApp()->argv();
-  }*/
 
 } /* namespace DO */
 
@@ -67,6 +57,8 @@ int __main();
 /*int*/ main(int argc, char **argv)         \
 {                                           \
   DO::GraphicsApplication app(argc, argv);  \
+  app.argc = argc;                          \
+  app.argv = argv;                          \
   app.userThread.registerUserMain(__main);  \
   app.userThread.start();                   \
   app.exec();                               \

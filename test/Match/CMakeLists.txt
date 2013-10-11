@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 2.6)
 
-project(DOMatch)
+project(DO_Match_test)
 
-find_package(DOMatch REQUIRED)
-include(${DOMatch_USE_FILE})
+message(STATUS "  - DO_Match_test")
 
-unit_test(DO Match "DOMatch")
+find_package(DO COMPONENTS Core Graphics Match REQUIRED)
+include(${DO_USE_FILE})
+
+do_unit_test(Match "${DO_LIBRARIES}")
