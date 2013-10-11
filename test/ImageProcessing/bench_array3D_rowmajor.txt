@@ -1,0 +1,161 @@
+Benchmarking Locator
+// ======================== //
+// gray32f
+Timing memory allocation for image
+Elapsed time = 0.0410531 ms
+
+Assignment by pointer iteration
+Elapsed time = 13.1986 ms
+
+Assignment by iterator
+Elapsed time = 8.12509 ms
+
+Assignment by range_iterator
+Elapsed time = 19.6678 ms
+
+Assignment by subrange_iterator
+Elapsed time = 36.7331 ms
+
+Assignment by coords_iterator
+Elapsed time = 93.7973 ms
+
+Copy from const_iterator to iterator
+Elapsed time = 13.338 ms
+
+Copy from const_range_iterator to range_iterator
+Elapsed time = 52.8994 ms
+
+Copy from const_subrange_iterator to subrange_iterator
+Elapsed time = 75.2695 ms
+
+Copy with coords_iterator
+Elapsed time = 251.406 ms
+
+// ======================== //
+// gray64f
+Timing memory allocation for image
+Elapsed time = 0.0688494 ms
+
+Assignment by pointer iteration
+Elapsed time = 21.8419 ms
+
+Assignment by iterator
+Elapsed time = 12.271 ms
+
+Assignment by range_iterator
+Elapsed time = 18.6535 ms
+
+Assignment by subrange_iterator
+Elapsed time = 36.8096 ms
+
+Assignment by coords_iterator
+Elapsed time = 101.562 ms
+
+Copy from const_iterator to iterator
+Elapsed time = 26.3954 ms
+
+Copy from const_range_iterator to range_iterator
+Elapsed time = 57.3841 ms
+
+Copy from const_subrange_iterator to subrange_iterator
+Elapsed time = 77.4808 ms
+
+Copy with coords_iterator
+Elapsed time = 300.526 ms
+
+// ======================== //
+// Rgb32f
+Timing memory allocation for image
+Elapsed time = 0.0923694 ms
+
+Assignment by pointer iteration
+Elapsed time = 38.5373 ms
+
+Assignment by iterator
+Elapsed time = 19.2915 ms
+
+Assignment by range_iterator
+Elapsed time = 30.5653 ms
+
+Assignment by subrange_iterator
+Elapsed time = 48.4589 ms
+
+Assignment by coords_iterator
+Elapsed time = 104.712 ms
+
+Copy from const_iterator to iterator
+Elapsed time = 39.4687 ms
+
+Copy from const_range_iterator to range_iterator
+Elapsed time = 58.9933 ms
+
+Copy from const_subrange_iterator to subrange_iterator
+Elapsed time = 86.5022 ms
+
+Copy with coords_iterator
+Elapsed time = 344.46 ms
+
+// ======================== //
+// Rgb64f
+Timing memory allocation for image
+Elapsed time = 0.154377 ms
+
+Assignment by pointer iteration
+Elapsed time = 60.7252 ms
+
+Assignment by iterator
+Elapsed time = 34.4658 ms
+
+Assignment by range_iterator
+Elapsed time = 42.7781 ms
+
+Assignment by subrange_iterator
+Elapsed time = 42.3544 ms
+
+Assignment by coords_iterator
+Elapsed time = 130.403 ms
+
+Copy from const_iterator to iterator
+Elapsed time = 78.6406 ms
+
+Copy from const_range_iterator to range_iterator
+Elapsed time = 63.7511 ms
+
+Copy from const_subrange_iterator to subrange_iterator
+Elapsed time = 80.3964 ms
+
+Copy with coords_iterator
+Elapsed time = 384.114 ms
+
+// ======================== //
+// Color4d
+Timing memory allocation for image
+Elapsed time = 0.268555 ms
+
+Assignment by pointer iteration
+Elapsed time = 85.0701 ms
+
+Assignment by iterator
+Elapsed time = 46.8287 ms
+
+Assignment by range_iterator
+Elapsed time = 50.3169 ms
+
+Assignment by subrange_iterator
+Elapsed time = 56.1841 ms
+
+Assignment by coords_iterator
+Elapsed time = 135.294 ms
+
+Copy from const_iterator to iterator
+Elapsed time = 104.087 ms
+
+Copy from const_range_iterator to range_iterator
+Elapsed time = 75.8357 ms
+
+Copy from const_subrange_iterator to subrange_iterator
+Elapsed time = 97.3749 ms
+
+Copy with coords_iterator
+Elapsed time = 358.238 ms
+
