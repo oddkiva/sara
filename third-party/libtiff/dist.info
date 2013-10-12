@@ -1,0 +1,16 @@
+--- This file is part of LuaDist project
+
+name = "libtiff"
+version = "3.8.2"
+
+desc = "TIFF library."
+author = "Sam Leffler"
+license = "BSD-like"
+url = "http://www.remotesensing.org/libtiff"
+maintainer = "Peter Kapec"
+
+depends = {
+	"zlib >= 1.2.3",
+	"libjpeg >= 7",
+}
+
