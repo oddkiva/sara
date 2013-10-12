@@ -2,160 +2,160 @@ Benchmarking Locator
 // ======================== //
 // gray32f
 Timing memory allocation for image
-Elapsed time = 0.0410531 ms
+Elapsed time = 0.0057036 ms
 
 Assignment by pointer iteration
-Elapsed time = 13.1986 ms
+Elapsed time = 8.60163 ms
 
 Assignment by iterator
-Elapsed time = 8.12509 ms
+Elapsed time = 4.82104 ms
 
 Assignment by range_iterator
-Elapsed time = 19.6678 ms
+Elapsed time = 16.1058 ms
 
 Assignment by subrange_iterator
-Elapsed time = 36.7331 ms
+Elapsed time = 30.1687 ms
 
 Assignment by coords_iterator
-Elapsed time = 93.7973 ms
+Elapsed time = 79.8492 ms
 
 Copy from const_iterator to iterator
-Elapsed time = 13.338 ms
+Elapsed time = 10.1911 ms
 
 Copy from const_range_iterator to range_iterator
-Elapsed time = 52.8994 ms
+Elapsed time = 45.3463 ms
 
 Copy from const_subrange_iterator to subrange_iterator
-Elapsed time = 75.2695 ms
+Elapsed time = 61.8537 ms
 
 Copy with coords_iterator
-Elapsed time = 251.406 ms
+Elapsed time = 101.145 ms
 
 // ======================== //
 // gray64f
 Timing memory allocation for image
-Elapsed time = 0.0688494 ms
+Elapsed time = 0.0102064 ms
 
 Assignment by pointer iteration
-Elapsed time = 21.8419 ms
+Elapsed time = 13.8426 ms
 
 Assignment by iterator
-Elapsed time = 12.271 ms
+Elapsed time = 7.00582 ms
 
 Assignment by range_iterator
-Elapsed time = 18.6535 ms
+Elapsed time = 15.9842 ms
 
 Assignment by subrange_iterator
-Elapsed time = 36.8096 ms
+Elapsed time = 31.7162 ms
 
 Assignment by coords_iterator
-Elapsed time = 101.562 ms
+Elapsed time = 84.2193 ms
 
 Copy from const_iterator to iterator
-Elapsed time = 26.3954 ms
+Elapsed time = 19.2019 ms
 
 Copy from const_range_iterator to range_iterator
-Elapsed time = 57.3841 ms
+Elapsed time = 48.5427 ms
 
 Copy from const_subrange_iterator to subrange_iterator
-Elapsed time = 77.4808 ms
+Elapsed time = 63.6396 ms
 
 Copy with coords_iterator
-Elapsed time = 300.526 ms
+Elapsed time = 125.52 ms
 
 // ======================== //
 // Rgb32f
 Timing memory allocation for image
-Elapsed time = 0.0923694 ms
+Elapsed time = 0.00810511 ms
 
 Assignment by pointer iteration
-Elapsed time = 38.5373 ms
+Elapsed time = 21.6052 ms
 
 Assignment by iterator
-Elapsed time = 19.2915 ms
+Elapsed time = 10.5099 ms
 
 Assignment by range_iterator
-Elapsed time = 30.5653 ms
+Elapsed time = 21.0529 ms
 
 Assignment by subrange_iterator
-Elapsed time = 48.4589 ms
+Elapsed time = 36.0813 ms
 
 Assignment by coords_iterator
-Elapsed time = 104.712 ms
+Elapsed time = 90.979 ms
 
 Copy from const_iterator to iterator
-Elapsed time = 39.4687 ms
+Elapsed time = 30.335 ms
 
 Copy from const_range_iterator to range_iterator
-Elapsed time = 58.9933 ms
+Elapsed time = 49.881 ms
 
 Copy from const_subrange_iterator to subrange_iterator
-Elapsed time = 86.5022 ms
+Elapsed time = 73.3396 ms
 
 Copy with coords_iterator
-Elapsed time = 344.46 ms
+Elapsed time = 262.224 ms
 
 // ======================== //
 // Rgb64f
 Timing memory allocation for image
-Elapsed time = 0.154377 ms
+Elapsed time = 0.0138087 ms
 
 Assignment by pointer iteration
-Elapsed time = 60.7252 ms
+Elapsed time = 42.354 ms
 
 Assignment by iterator
-Elapsed time = 34.4658 ms
+Elapsed time = 21.5194 ms
 
 Assignment by range_iterator
-Elapsed time = 42.7781 ms
+Elapsed time = 30.1336 ms
 
 Assignment by subrange_iterator
-Elapsed time = 42.3544 ms
+Elapsed time = 41.104 ms
 
 Assignment by coords_iterator
-Elapsed time = 130.403 ms
+Elapsed time = 105.396 ms
 
 Copy from const_iterator to iterator
-Elapsed time = 78.6406 ms
+Elapsed time = 56.3287 ms
 
 Copy from const_range_iterator to range_iterator
-Elapsed time = 63.7511 ms
+Elapsed time = 51.7004 ms
 
 Copy from const_subrange_iterator to subrange_iterator
-Elapsed time = 80.3964 ms
+Elapsed time = 74.4377 ms
 
 Copy with coords_iterator
-Elapsed time = 384.114 ms
+Elapsed time = 323.152 ms
 
 // ======================== //
 // Color4d
 Timing memory allocation for image
-Elapsed time = 0.268555 ms
+Elapsed time = 0.0141089 ms
 
 Assignment by pointer iteration
-Elapsed time = 85.0701 ms
+Elapsed time = 57.9597 ms
 
 Assignment by iterator
-Elapsed time = 46.8287 ms
+Elapsed time = 28.8251 ms
 
 Assignment by range_iterator
-Elapsed time = 50.3169 ms
+Elapsed time = 34.2399 ms
 
 Assignment by subrange_iterator
-Elapsed time = 56.1841 ms
+Elapsed time = 46.001 ms
 
 Assignment by coords_iterator
-Elapsed time = 135.294 ms
+Elapsed time = 147.281 ms
 
 Copy from const_iterator to iterator
-Elapsed time = 104.087 ms
+Elapsed time = 72.3781 ms
 
 Copy from const_range_iterator to range_iterator
-Elapsed time = 75.8357 ms
+Elapsed time = 55.8031 ms
 
 Copy from const_subrange_iterator to subrange_iterator
-Elapsed time = 97.3749 ms
+Elapsed time = 77.3585 ms
 
 Copy with coords_iterator
-Elapsed time = 358.238 ms
+Elapsed time = 351.776 ms
 
