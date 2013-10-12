@@ -1,0 +1,11 @@
+--- This file is part of LuaDist project
+
+name = "zlib"
+version = "1.2.6"
+
+author = "Jean-loup Gailly and Mark Adler"
+desc = "zlib is a general purpose data compression library."
+license = "zlib license"
+url = "http://zlib.net"
+maintainer = "Peter Kapec"
+
