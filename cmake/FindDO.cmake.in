@@ -29,9 +29,9 @@ if (NOT DO_FOUND)
     # Set third-party software directories
     set(DO_SOURCE_DIR ${DO_DIR}/src/DO)
     set(DO_ThirdParty_DIR ${DO_DIR}/third-party)
-    set(Eigen3_DIR ${DO_ThirdParty_DIR}/eigen-3.2.0)
-    set(gtest_DIR ${DO_ThirdParty_DIR}/gtest-1.7.0)
-    set(flann_DIR ${DO_ThirdParty_DIR}/flann-1.8.4)
+    set(Eigen3_DIR ${DO_ThirdParty_DIR}/eigen)
+    set(gtest_DIR ${DO_ThirdParty_DIR}/gtest)
+    set(flann_DIR ${DO_ThirdParty_DIR}/flann)
     
     # List the available component libraries in DO++
     # Foundational libraries
