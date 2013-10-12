@@ -106,43 +106,51 @@ void twoDimBasics() {
   cout << "Basic 2D drawings ... click when done" << endl;
   Window W=openWindow(512,512,"2D basics");
   // Lines
-  drawLine(20,10,300,100,Red8,5);                          // Line (20,10)-(300,100) in RED, thickness=5
-  drawLine(Point2i(320,100),Point2i(500,100),Black8,5);    // Specify 2 pixels instead of 4 coords
+  drawLine(20,10,300,100,Red8,5);                         // Line (20,10)-(300,100) in RED, thickness=5
+  drawLine(Point2i(320,100),Point2i(500,100),Black8,5);   // Specify 2 pixels instead of 4 coords
   // Rects
   drawRect(400,10,100,50,Blue8,3);                        // A 100x50 rectangle in (400,10) (up-left corner)
-  fillRect(Point2i(400,400),100,50,Green8);                // A filled rectangle
+  fillRect(Point2i(400,400),100,50,Green8);               // A filled rectangle
   // Ellipspe
   drawEllipse(50,350,50,90,Cyan8,2);                      // A 50x90 ellipse in (50,350) (up-left corner), thick=2
-  drawCircle(Point2i(200,200),40,Red8);                    // A circle centered in (200,200), radius=40   
+  drawCircle(Point2i(200,200),40,Red8);                   // A circle centered in (200,200), radius=40
   fillEllipse(350,150,90,100,Color3ub(128,128,128));      // A filled grey ellipse
-  drawEllipse(Vector2f(150.f, 100.f), 10.f, 20.f, 45.f, Cyan8, 1); // an oriented ellipse whose
-                                                                   // center = (150, 100)
-                                                                   // r1 = 10
-                                                                   // r2 = 20
-                                                                   // orientation = 45°
-                                                                   // in cyan color, 
-                                                                   // and a pencil width = 1.
+
+  /*
+   Draw an oriented ellipse with
+   - center = (150, 100)
+   - radii r1 = 10, r2 = 20,
+   - orientation = 45 degree
+   - in cyan color,
+   - pencil width = 1.
+   */
+  drawEllipse(Vector2f(150.f, 100.f), 10.f, 20.f, 45.f, Cyan8, 1);
   drawEllipse(Vector2f(50.f, 50.f), 10.f, 20.f, 0.f, Red8, 1);
   // Points
   for (int i=0;i<20;i+=2)
-    drawPoint(i+100,i+200,Black8);                        // Some BLACK points
+    drawPoint(i+100,i+200,Black8);                          // Some BLACK points
   // Strings
-  drawString(50,250,"a string",Red8);                      // A RED string in (50,200)
-  drawString(40,270,"another string",Magenta8,18,0,true);  // size=18, italic
+  drawString(50,250,"a string",Red8);                       // A RED string in (50,200)
+  drawString(40,270,"another string",Magenta8,18,0,true);   // size=18, italic
   // size=24, angle=-10, bold
-  drawString(30,300,"yet another string",Black8,24,-10,false,true);
+  drawString(30,300,"yet another string",Black8,24,-10,
+             false,true);
   // Polygons
   int px[]={201,200,260,240},py[]={301,350,330,280};
-  fillPoly(px,py,4,Blue8);                                // A filled polygon (px[i],py[i])
+  fillPoly(px,py,4,Blue8);                                  // A filled polygon (px[i],py[i])
   int t[]={300,300,300,400,400,350};
-  fillPoly(t,3,Green8);                                    // A filled polygon (t[2*i],t[2*i+1])
-  Point2i P[]={Point2i(100,100),Point2i(100,150),Point2i(150,120)};
-  drawPoly(P,3,Red8,3);                                    // A polygon P[i] (thickness=3)
+  fillPoly(t,3,Green8);                                     // A filled polygon (t[2*i],t[2*i+1])
+  Point2i P[]={
+    Point2i(100,100),
+    Point2i(100,150),
+    Point2i(150,120)
+  };
+  drawPoly(P,3,Red8,3);                         // A polygon P[i] (thickness=3)
   // Arrows
-  drawArrow(100,470,200,450,Blue8);                        // An arrow from (100,450) to (200,450)
-  drawArrow(300,470,200,450,Red8,30,10,1);                // tip=30x10 pixels, style=1
-  drawArrow(200,450,250,400,Black8,20,20,2);              // tip=20x20 pixels, style=2
-  drawArrow(200,450,150,400,Green8,35.,8.,0,2);            // tip: (angle,length)=(35,8) , style=0, width=2
+  drawArrow(100,470,200,450,Blue8);             // An arrow from (100,450) to (200,450)
+  drawArrow(300,470,200,450,Red8,30,10,1);      // tip=30x10 pixels, style=1
+  drawArrow(200,450,250,400,Black8,20,20,2);    // tip=20x20 pixels, style=2
+  drawArrow(200,450,150,400,Green8,35.,8.,0,2); // tip: (angle,length)=(35,8) , style=0, width=2
   if (stepByStep) click();
   closeWindow(W);
 }
@@ -185,23 +193,28 @@ void floatingPointDrawing()
 void bitmapBasics()
 {
   cout << "Basic bitmap drawings... click when done" << endl;
-  Window W=openWindow(512,512,"Bitmaps");
-  Color3ub cols[256*256];                                // byte arrays
+  Window W = openWindow(512,512,"Bitmaps");
+  // Array of bytes
+  Color3ub cols[256*256];
+  // Some (RED,GREEN,BLUE) function of (i,j)
   for (int j=0;j<256;j++)
     for (int i=0;i<256;i++)
-      cols[i+256*j]= Color3ub(i, 255-i, (j<128)?255:0);  // Some (RED,GREEN,BLUE) functions of (i,j)
-  putColorImage(0,0,cols,256,256);                      // Draw this 256x256 (r,g,b) bitmap in (0,0)
+      cols[i+256*j]= Color3ub(i, 255-i, (j<128)?255:0);
+  // Draw this 256x256 (r,g,b) bitmap in (0,0)
+  putColorImage(0,0,cols,256,256);
 
-  Color3ub cols2[256*256];                              // A Color3ub array
+  // An array of colors.
+  // Color3ub = 3D color vector where each channel has a value in [0,255].
+  Color3ub cols2[256*256];
   for (int j=0;j<256;j++) 
     for (int i=0;i<256;i++) 
-      cols2[i+256*j]=Color3ub(i,(2*j)%256,(i+j)%256);    // Colors, functions of (i,j)
+      cols2[i+256*j]=Color3ub(i,(2*j)%256,(i+j)%256);   // Colors, functions of (i,j)
   putColorImage(Point2i(0,256),cols2,256,256);          // Draw this 256x256 color bitmap in (0,256)
 
-  unsigned char grey[256*256];                                  // A grey array
+  unsigned char grey[256*256];                          // A grey array
   for (int j=0;j<256;j++) 
     for (int i=0;i<256;i++) 
-      grey[i+256*j]=unsigned char(128+127*sin((i+j)/10.));      // Some pattern
+      grey[i+256*j] = static_cast<unsigned char>(128+127*sin((i+j)/10.));      // Some pattern
   putGreyImage(256,0,grey,256,256);                      // Draw at point (256,0);
 
   if (stepByStep) click();
@@ -217,7 +230,8 @@ void mouseBasics()
   drawString(10,40,"click again (left=BLUE, middle=RED, right=done)",Black8);
   int button;    
   Point2i p;
-  while ((button=getMouse(p))!=3)              // Get clicked point p, and used button (1,2,3)=(left,middle,right)
+  while ((button=getMouse(p))!=3) // Get clicked point p,
+                                  // and used button (1,2,3)=(left,middle,right)
     fillCircle(p,5,(button==1)?Blue8:Red8);
   closeWindow(W);
 }
@@ -225,26 +239,26 @@ void mouseBasics()
 void imageBasics()
 {
   cout << "Basic image reading/writing. click when done" << endl; 
-  int w, h;                                            // Dimensions
+  int w, h;                                           // Dimensions
   Color3ub* col;                                      // RGB bitmaps
   loadColorImage(srcPath("ksmall.jpg"),col,w,h);      // Read image (and allocate)
   Window W = openWindow(w,2*h,"Images");
-  putColorImage(0, 0, col, w, h);                      // Draw it
+  putColorImage(0, 0, col, w, h);                     // Draw it
 
   cout << sizeof(Color3ub) << endl;
   saveColorImage("outcol.png", col, w, h);    // Write image
   saveColorImage("outcol.tif", col, w, h);    // Write image
   saveColorImage("outcol.jpg", col, w, h);    // Write image
-  delete[] col;                                        // ...
+  delete[] col;                               // ...
 
-  Color3ub *I;                                        // Color3ub bitmap
+  Color3ub *I;                               // Color3ub bitmap
   loadColorImage("outcol.png",I,w,h);        // Read again (in one Color3ub array)
-  putColorImage(0, h, I, w, h, 2.0);                  // Draw it under previous one, scaling 2.0
+  putColorImage(0, h, I, w, h, 2.0);         // Draw it under previous one, scaling 2.0
   delete[] I;
 
-  unsigned char *grey;                                        // grey bitmap
+  unsigned char *grey;                       // grey bitmap
   loadGreyImage("outcol.png",grey,w,h);      // Read again (and convert into grey if not already)
-  putGreyImage(20, 2*h/3, grey, w, h, 0.5);            // Draw it somewhere, scale 0.5
+  putGreyImage(20, 2*h/3, grey, w, h, 0.5);  // Draw it somewhere, scale 0.5
   saveGreyImage("outgrey.tif", grey, w, h);  // Write grey image
   delete[] grey;
 
@@ -325,8 +339,8 @@ void naiveAnimation()
     getEvent(1, e);
     fillRect(rand()%300, rand()%300, rand()%50, rand()%50,
       Color3ub(rand()%256, rand()%256, rand()%256));
-    //microSleep(100); // TODO: sometimes if you don't put this, the program 
-                     // freezes in some machine. Investigate.
+    //microSleep(100);  // TODO: sometimes if you don't put this, the program
+                        // freezes in some machine. Investigate.
   } while (e.key != Qt::Key_Escape);
 
   cout << "Finished!" << endl;
@@ -426,6 +440,7 @@ void loadImageFromDialogBox()
 void checkOpenGLWindow()
 {
   Window w = openGLWindow(300, 300);
+  setActiveWindow(w);
 
   SimpleTriangleMesh3f mesh;
   string filename = srcPath("buddha.obj");
@@ -458,8 +473,12 @@ void graphicsViewExample()
   openGraphicsView(I.width(), I.height());
 
   for (int i = 0; i < 10; ++i)
+  {
     ImageItem image = addImage(I);
-
+    if (!image)
+      cerr << "Error image display" << endl;
+  }
+  
   while (getKey() != Qt::Key_Escape);
   closeWindow();
 }
