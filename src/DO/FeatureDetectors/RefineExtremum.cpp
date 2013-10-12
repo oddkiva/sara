@@ -283,7 +283,6 @@ namespace DO {
     float gaussTruncFactor = 4.f;
     float incSigmaMax = sqrt(2.f);
     int patchRadius = int(ceil(incSigmaMax*gaussTruncFactor)); // patch radius
-    int& r = patchRadius;
 
     // Ensure the patch is inside the image.
     if ( x-patchRadius < 0 || x+patchRadius >= nearestGaussian.width() ||

@@ -234,7 +234,6 @@ namespace DO {
   void checkQuarticEquationSolver()
   {
     // check quadratic equation solver
-    int realSolutionCount = 0;
     complex<double> x1, x2, x3, x4;
     for(int i = 0; i < 10; ++i)
     {

@@ -66,7 +66,6 @@ namespace DO {
   {
     float x = extremum.x();
     float y = extremum.y();
-    float sigma = extremum.scale();
     int s = scaleOctPair(0);
     int o = scaleOctPair(1);
     return this->operator()(pyramid(s,o), x, y, s);
