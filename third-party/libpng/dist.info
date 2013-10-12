@@ -1,0 +1,10 @@
+--- This file is part of LuaDist project
+
+name = "libpng"
+version = "1.5.10"
+
+author = "Guy Eric Schalnat, Andreas Dilger, Glenn Randers-Pehrson (current maintainer), and others"
+desc = "official PNG reference library"
+license = "libpng license"
+url = "http://www.libpng.org/pub/png/libpng.html"
+maintainer = "Peter Kapec"
