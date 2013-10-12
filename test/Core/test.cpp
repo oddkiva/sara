@@ -611,6 +611,9 @@ void testTree()
   tree2.append_child(n2, 4);
   tree2.append_child(n2, 5);
   tree2.append_child(n2, 6);
+  
+  cout << "3 -> 7" << endl;
+  tree2.append_child(n3, 7);
   checkLeaves(tree2);
 
 
