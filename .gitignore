@@ -172,6 +172,11 @@ pip-log.txt
 .DS_Store
 
 #############
-## Specific files
+## Project-specific files
 #############
 test/ImageProcessing/bench*.txt
+cmake/FindDO.cmake
+third-party/libpng/pnglibconf.h
+third-party/libtiff/tif_config.h
+third-party/libtiff/tiffconf.h
+third-party/zlib/zconf.h
