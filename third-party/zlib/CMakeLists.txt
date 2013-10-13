@@ -71,7 +71,7 @@ endif ()
 #endif ()
 
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/zconf.h.cmakein 
-                 ${CMAKE_CURRENT_SOURCE_DIR}/zconf.h @ONLY)
+                ${CMAKE_CURRENT_SOURCE_DIR}/zconf.h @ONLY)
 #include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
 #============================================================================
@@ -91,9 +91,9 @@ if (MINGW)
   # for win32/zlib.rc
 endif ()
 
-if (MINGW OR WIN32)
-  set (ZLIB_SRCS ${ZLIB_SRCS} win32/zlib1.rc)
-endif ()
+#if (MINGW OR WIN32)
+#  set (ZLIB_SRCS ${ZLIB_SRCS} win32/zlib1.rc)
+#endif ()
 
 # parse the full version number from zlib.h and include in ZLIB_FULL_VERSION
 file (READ ${CMAKE_CURRENT_SOURCE_DIR}/zlib.h _zlib_h_contents)
@@ -102,7 +102,7 @@ string (REGEX REPLACE
         ZLIB_FULL_VERSION ${_zlib_h_contents})
 
 add_library (zlib ${ZLIB_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
-set_target_properties (zlib PROPERTIES DEFINE_SYMBOL ZLIB_DLL)
+#set_target_properties (zlib PROPERTIES DEFINE_SYMBOL ZLIB_DLL)
 
 if (UNIX)
   # On unix-like platforms the library is almost always called libz
