@@ -177,7 +177,7 @@ pip-log.txt
 test/ImageProcessing/bench*.txt
 cmake/FindDO.cmake
 third-party/zlib/zconf.h
-third-party/libjpeg/jconf.h
+third-party/libjpeg/jconfig.h
 third-party/libpng/pnglibconf.h
 third-party/libtiff/libtiff/tif_config.h
 third-party/libtiff/libtiff/tiffconf.h
