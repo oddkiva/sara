@@ -16,12 +16,13 @@ if ( WIN32 AND NOT CYGWIN )
   set ( TWO_FILE_COMMANDLINE true )
   # jconfig.h
 endif ( )
-configure_file ( jconfig.h.cmake jconfig.h )
+configure_file ( jconfig.h.cmake ${CMAKE_CURRENT_SOURCE_DIR}/jconfig.h )
 
-include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
+#include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
 # jconfig.h
 
-set ( HEADERS jerror.h jmorecfg.h jpeglib.h ${CMAKE_CURRENT_BINARY_DIR}/jconfig.h )
+#set ( HEADERS jerror.h jmorecfg.h jpeglib.h ${CMAKE_CURRENT_BINARY_DIR}/jconfig.h )
+set ( HEADERS jerror.h jmorecfg.h jpeglib.h ${CMAKE_CURRENT_SOURCE_DIR}/jconfig.h )
 
 set ( SRC jmemnobs.c jaricom.c jcapimin.c jcapistd.c jcarith.c jccoefct.c jccolor.c 
   jcdctmgr.c jchuff.c jcinit.c jcmainct.c jcmarker.c jcmaster.c jcomapi.c jcparam.c 

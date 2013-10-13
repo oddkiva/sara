@@ -10,11 +10,33 @@
 // ========================================================================== //
 
 #include <DO/Graphics.hpp>
-#include <libjpeg/jpeglib.h>
+#include <cstdio>
+#include "ImageIO.hpp"
 
-#undef main
+using namespace DO;
+using namespace std;
 
 int main()
 {
+  string filepath(srcPath("ksmall.jpg"));
+  Image<Rgb8> image;
+  try
+  {
+    unsigned char *data = 0;
+    int w, h, d;
+    w = h = d = 0;
+
+    JpegFileReader reader(filepath);
+    reader.read(data, w, h, d);
+    Image<Rgb8> image( (Rgb8 *) &data[0], Vector2i(w,h));
+    viewImage(image);
+    
+    delete [] data;
+  }
+  catch (exception& e)
+  {
+    cout << e.what() << endl;
+  }  
+
   return 0;
 }
