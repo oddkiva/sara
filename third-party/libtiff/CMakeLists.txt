@@ -164,10 +164,10 @@ set (const const)
 # all is defined, so generate config.h
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/libtiff/tif_config.h.cmake
                 #${CMAKE_CURRENT_BINARY_DIR}/tif_config.h)
-                ${CMAKE_CURRENT_SOURCE_DIR}/tif_config.h)
+                ${CMAKE_CURRENT_SOURCE_DIR}/libtiff/tif_config.h)
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/libtiff/tiffconf.h.cmake
                 #${CMAKE_CURRENT_BINARY_DIR}/tiffconf.h)
-                ${CMAKE_CURRENT_SOURCE_DIR}/tiffconf.h)
+                ${CMAKE_CURRENT_SOURCE_DIR}/libtiff/tiffconf.h)
 message ("Configure: libtiff - done.")
 add_definitions (-DHAVE_CONFIG_H)
 
