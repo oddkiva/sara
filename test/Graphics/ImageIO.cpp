@@ -12,16 +12,18 @@ const char* FileError::what() const throw()
   return os.str().c_str();
 }
 
-FileReader::FileReader(const std::string& filepath, const std::string& mode)
+ImageFileHandle::ImageFileHandle(const std::string& filepath,
+                                 const std::string& mode)
 {
   file_ = fopen(filepath.c_str(), mode.c_str());
-  if (file_==0)
+  if (!file_)
     throw FileError(filepath, mode);
 }
 
-FileReader::~FileReader()
+ImageFileHandle::~ImageFileHandle()
 {
-  fclose(file_);
+  if (file_)
+    fclose(file_);
 }
 
 METHODDEF(void) jpeg_error(j_common_ptr cinfo)
@@ -31,8 +33,8 @@ METHODDEF(void) jpeg_error(j_common_ptr cinfo)
   longjmp(myerr->setjmp_buffer, 1);
 }
 
-JpegFileReader::JpegFileReader(const std::string& filepath)
-  : FileReader(filepath, "rb")
+JpegFileHandle::JpegFileHandle(const std::string& filepath)
+  : FileHandle(filepath, "rb")
 {
   cinfo_.err = jpeg_std_error(&jerr_.pub);
   jerr_.pub.error_exit = &jpeg_error;
@@ -46,12 +48,12 @@ JpegFileReader::JpegFileReader(const std::string& filepath)
   jpeg_stdio_src(&cinfo_, file_);
 }
 
-JpegFileReader::~JpegFileReader()
+JpegFileHandle::~JpegFileHandle()
 {
   jpeg_destroy_decompress(&cinfo_);
 }
 
-bool JpegFileReader::read(unsigned char *& data,
+bool JpegFileHandle::read(unsigned char *& data,
                           int& width, int& height, int& depth)
 {
   // Read header file.
