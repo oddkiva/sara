@@ -142,11 +142,11 @@ namespace DO {
       , is_wrapped_data_(false)
     {}
     //! Constructor that wraps plain data with its known sizes.
-    inline MultiArray(value_type *data, const vector_type& sizes)
+    inline MultiArray(value_type *data, const vector_type& sizes, bool getDataOwnership = false)
       : begin_(data)
       , end_(data+compute_size(sizes))
       , sizes_(sizes), strides_(compute_strides(sizes))
-      , is_wrapped_data_(true)
+      , is_wrapped_data_(!getDataOwnership)
     {}
     //! \brief Default constructor that allocates an N-dimensional array with 
     //! the specified sizes.
