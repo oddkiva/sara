@@ -328,8 +328,18 @@ namespace DO {
   {
     if (pixmap_.width() == width && pixmap_.height() == height)
       return;
-    pixmap_ = QPixmap(width, height);
+    /*
+       The following internal changes are critical to prevent Qt from crashing.
+       1. Tell QPainter 'painter_' to stop using using QPixmap 'pixmap_'.
+       2. Reinitialize the QPixmap with the new size.
+       3. Now we can re-allow QPainter 'painter_' to re-use QPixmap 'pixmap_'.
+     */
+    painter_.end();
+    pixmap_.swap(QPixmap(width, height));
     pixmap_.fill();
+    painter_.begin(&pixmap_);
+    
+    // Resize the window and the scroll area as follows.
     resize(width, height);
     if (width > qApp->desktop()->width() || height > qApp->desktop()->height())
     {
