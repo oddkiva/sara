@@ -273,7 +273,8 @@ TiffFileReader::~TiffFileReader()
     TIFFClose(tiff_);
 }
 
-bool TiffFileReader::operator()(unsigned char *& data, int& width, int& height, int& depth)
+bool TiffFileReader::operator()(unsigned char *& data,
+                                int& width, int& height, int& depth)
 {
   uint32 w, h;
   TIFFGetField(tiff_, TIFFTAG_IMAGEWIDTH, &w);
@@ -286,7 +287,8 @@ bool TiffFileReader::operator()(unsigned char *& data, int& width, int& height, 
   return true;
 }
 
-TiffFileWriter::TiffFileWriter(const unsigned char *data, int width, int height, int depth)
+TiffFileWriter::TiffFileWriter(const unsigned char *data,
+                               int width, int height, int depth)
   : ImageFileWriter(data, width, height, depth), out(NULL)
 {
 }
@@ -299,38 +301,25 @@ TiffFileWriter::~TiffFileWriter()
 
 bool TiffFileWriter::operator()(const std::string& filepath, int quality)
 {
-  TIFF *out = TIFFOpen(filepath.c_str(), "w");
-  if (!out)
+  // Open the TIFF file
+  if((out = TIFFOpen(filepath.c_str(), "w")) == NULL){
+    std::cerr << "Unable to write tif file: " << filepath << std::endl;
     return false;
-
-  // Set the image dimensions.
-  TIFFSetField(out, TIFFTAG_IMAGEWIDTH, (uint32) width_);
-  TIFFSetField(out, TIFFTAG_IMAGELENGTH, (uint32) height_);
-  // Set the number of channels per pixel.
-  TIFFSetField(out, TIFFTAG_SAMPLESPERPIXEL, depth_);
-  // Bit depth.
-  TIFFSetField(out, TIFFTAG_BITSPERSAMPLE, 8);
-  // Orientation
-  TIFFSetField(out, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
-  // Single plane image (RGBA, RGBA, ...) and not (RRR..., GGG..., BBB...)
-  TIFFSetField(out, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
-  // Color space
-  TIFFSetField(out, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
-
-
-  tsize_t num_bytes_per_row = width_*depth_;
-  vector<unsigned char> buffer(num_bytes_per_row);
-
-  // We set the strip size of the file to be size of one row of pixels
-  TIFFSetField(out, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(out, num_bytes_per_row));
-
-  //Now writing image to the file one strip at a time
-  for (uint32 y = 0; y < (uint32) depth_; ++y)
-  {
-    memcpy(&buffer[0], &data_[(uint32(depth_) - y - 1)*num_bytes_per_row], num_bytes_per_row);
-    if (TIFFWriteScanline(out, &buffer[0], y, 0) < 0)
-      break;
   }
-
+  
+  // We need to set some values for basic tags before we can add any data
+  TIFFSetField(out, TIFFTAG_IMAGEWIDTH, width_);
+  TIFFSetField(out, TIFFTAG_IMAGELENGTH, height_);
+  TIFFSetField(out, TIFFTAG_BITSPERSAMPLE, 8);
+  TIFFSetField(out, TIFFTAG_SAMPLESPERPIXEL, depth_);
+  TIFFSetField(out, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+  
+  TIFFSetField(out, TIFFTAG_COMPRESSION, COMPRESSION_DEFLATE);
+  TIFFSetField(out, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
+  
+  // Write the information to the file
+  TIFFWriteEncodedStrip(out, 0, const_cast<unsigned char *>(&data_[0]),
+                        width_*height_*depth_);
+  
   return true;
 }

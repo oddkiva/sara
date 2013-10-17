@@ -12,13 +12,14 @@ extern "C" {
 # include <setjmp.h>
 }
 
-class FileError: public std::exception
+class FileError : public std::exception
 {
   std::string filepath_;
   std::string mode_;
 public:
   FileError(const std::string& filepath, const std::string& mode);
-  virtual const char* what() const throw();
+  virtual ~FileError() throw () {}
+  virtual const char * what() const throw();
 };
 
 class FileHandler
