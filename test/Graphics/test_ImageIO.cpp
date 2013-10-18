@@ -10,7 +10,6 @@
 // ========================================================================== //
 
 #include <DO/Graphics.hpp>
-#include <cstdio>
 #include "ImageIO.hpp"
 
 using namespace DO;
@@ -87,6 +86,38 @@ void test_image_io(const string& inpath, const string& outpath)
   }
 }
 
+string fileExtension(const string& filepath)
+{
+  string ext( filepath.substr(filepath.find_last_of(".") + 1) );
+  transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+  return ext;
+}
+
+template <typename T>
+bool read(Image<T>& image, const string& filepath)
+{
+  string ext(fileExtension(filepath));
+  bool success = false;
+  switch (ext)
+  {
+  case ".jpeg":
+  case ".jpe":
+  case ".jfif":
+  case ".jfi":
+    success = test_image_io<JpegFileReader, JpegFileWriter>(filepath, srcPath("test")+ext);
+    break;
+  case ".png":
+    success = test_image_io<PngFileReader, PngFileWriter>(filepath, srcPath("test")+ext);
+    break;
+  case ".tif":
+  case ".tiff":
+    success = test_image_io<TiffFileReader, TiffFileWriter>(filepath, srcPath("test")+ext);
+  case default:
+    cerr << "Image format: " << ext << " either currently unsupported or invalid" << endl;
+  }
+  return false;
+}
+
 template <typename T, typename ImageReader>
 bool readImage(Image<T>& image, const string& filepath)
 {
@@ -116,72 +147,11 @@ bool readImage(Image<T>& image, const string& filepath)
   }
 }
 
-class Bresenham
-{
-  template <typename Color>
-  void drawLine(Image<Color>& image, int x1, int y1, int x2, int y2, const Color& color)
-  {
-
-  }
-
-  template <typename Color>
-  void drawCircle(Image<Color>& image, int x1, int y1, int r, const Color& Color)
-  {
-
-  }
-
-  template <typename Color>
-  void drawEllipse(Image<Color>& image, int x1, int y1, int r1, int r2, const Color& Color)
-  {
-
-  }
-};
-
-class Wu
-{
-  template <typename T>
-  void drawLine(Image<T>& image, int x1, int y1, int x2, int y2, const T& Color)
-  {
-
-  }
-
-  template <typename T>
-  void drawCircle(Image<T>& image, int x1, int y1, int r, const T& Color)
-  {
-
-  }
-
-  template <typename T>
-  void drawEllipse(Image<T>& image, int x1, int y1, int r1, int r2, const T& Color)
-  {
-
-  }
-};
-
-void additional_unit_test_for_do_graphics()
-{
-  Image<Rgb8> img1, img2;
-  load(img1, srcPath("ksmall.jpg"));
-  load(img2, srcPath("flower.png"));
-  openWindow(300, 300);
-  getKey();
-
-  cout << "Display ksmall.jpg" << endl;
-  resizePaintingWindow(activeWindow(), img1.width(), img1.height());
-  display(img1);
-  getKey();
-
-  cout << "Display flower.jpg" << endl;
-  resizePaintingWindow(activeWindow(), img2.width(), img2.height());
-  display(img2);
-  getKey();
-}
-
 int main()
 {
   //test_image_io<JpegFileReader, JpegFileWriter>(srcPath("ksmall.jpg"), srcPath("ksmall_write.jpg"));
   //test_image_io<PngFileReader,  PngFileWriter >(srcPath("flower.png"), srcPath("flower_write.png"));
-  //test_image_io<TiffFileReader,  TiffFileWriter >(srcPath("MARBIBM.TIF"), srcPath("MARBIBM_write.TIF"));
+  test_image_io<TiffFileReader,  TiffFileWriter >(srcPath("MARBIBM.TIF"), srcPath("MARBIBM_write.TIF"));
 
   //Image<Rgb8> image;
   //readImage<Rgb8, TiffFileReader>(image, srcPath("MARBIBM.TIF"));

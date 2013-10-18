@@ -11,5 +11,6 @@ do_unit_test(Graphics_Qt test.cpp "${DO_LIBRARIES}")
 
 add_library(ImageIO ImageIO.hpp ImageIO.cpp)
 target_link_libraries(ImageIO libjpeg libpng libtiff)
-do_unit_test(Graphics_ImageIO test_ImageIO.cpp "${DO_LIBRARIES}")
-target_link_libraries(DO_Graphics_ImageIO_test ImageIO)
+
+do_unit_test(Graphics_ImageIO test_ImageIO.cpp "${DO_LIBRARIES};ImageIO")
+do_unit_test(Graphics_ImageDrawing test_ImageDrawing.cpp "${DO_LIBRARIES}")
