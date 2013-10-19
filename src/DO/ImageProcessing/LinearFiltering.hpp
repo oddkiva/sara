@@ -228,7 +228,7 @@ namespace DO {
   void applyRowDerivative(Image<T>& dst, const Image<T>& src)
   {
     typedef typename ColorTraits<T>::ChannelType S;
-    S diff[] = { S(1), S(0), S(-1) };
+    S diff[] = { S(-1), S(0), S(1) };
     applyFastRowBasedFilter(dst, src, diff, 3);
   }
   //! \brief Apply column-derivative to image.
@@ -236,7 +236,7 @@ namespace DO {
   void applyColumnDerivative(Image<T>& dst, const Image<T>& src)
   {
     typedef typename ColorTraits<T>::ChannelType S;
-    S diff[] = { S(1), S(0), S(-1) };
+    S diff[] = { S(-1), S(0), S(1) };
     applyFastColumnBasedFilter(dst, src, diff, 3);
   }
   //! \brief Apply Gaussian smoothing to image.
@@ -301,8 +301,8 @@ namespace DO {
   void applyScharrFilter(Image<T>& dst, const Image<T>& src)
   {
     typedef typename ColorTraits<T>::ChannelType S;
-    S meanKernel[] = { S(3), S(10), S(3) };
-    S diffKernel[] = { S(1), S(0), S(-1) };
+    S meanKernel[] = { S( 3), S(10), S(3) };
+    S diffKernel[] = { S(-1),  S(0), S(1) };
 
     if (dst.sizes() != src.sizes())
       dst.resize(src.sizes());
