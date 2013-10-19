@@ -335,7 +335,7 @@ namespace DO {
        3. Now we can re-allow QPainter 'painter_' to re-use QPixmap 'pixmap_'.
      */
     painter_.end();
-    pixmap_.swap(QPixmap(width, height));
+    pixmap_ = QPixmap(width, height);
     pixmap_.fill();
     painter_.begin(&pixmap_);
     

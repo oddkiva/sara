@@ -38,16 +38,18 @@ struct Bresenham
     {
       // Put color to image at current point $(x_0, y_0)$
       putColor(image, x0, y0, color);
+
       // Stop drawing when we reach the end point $(x_1, y_1)$
       if (x0 == x1 && y0 == y1)
         return;
-
       const int e2 = 2*err;
       if (e2 > -dy)
       {
         err -= dy;
         x0 += sx;
       }
+
+      // Stop drawing when we reach the end point $(x_1, y_1)$
       if (x0 == x1 && y0 == y1)
       {
         putColor(image, x0, y0, color);
@@ -63,14 +65,14 @@ struct Bresenham
 
   template <typename Color>
   static void drawCircle(Image<Color>& image, int x1, int y1, int r,
-                         const Color& Color)
+                         const Color& color)
   {
 
   }
 
   template <typename Color>
   static void drawEllipse(Image<Color>& image, int x1, int y1, int r1, int r2,
-                          const Color& Color)
+                          const Color& color)
   {
 
   }

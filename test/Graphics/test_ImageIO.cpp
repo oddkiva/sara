@@ -97,28 +97,21 @@ template <typename T>
 bool read(Image<T>& image, const string& filepath)
 {
   string ext(fileExtension(filepath));
-  bool success = false;
-  switch (ext)
-  {
-  case ".jpeg":
-  case ".jpe":
-  case ".jfif":
-  case ".jfi":
-    success = test_image_io<JpegFileReader, JpegFileWriter>(filepath, srcPath("test")+ext);
-    break;
-  case ".png":
-    success = test_image_io<PngFileReader, PngFileWriter>(filepath, srcPath("test")+ext);
-    break;
-  case ".tif":
-  case ".tiff":
-    success = test_image_io<TiffFileReader, TiffFileWriter>(filepath, srcPath("test")+ext);
-  case default:
+  bool success = true;
+  if (ext == ".jpeg" || ext == ".jpe" || ext == ".jfif" || ext == ".jfi")
+    test_image_io<JpegFileReader, JpegFileWriter>(filepath, srcPath("test")+ext);
+  else if (ext == ".png")
+    test_image_io<PngFileReader, PngFileWriter>(filepath, srcPath("test")+ext);
+  else if (ext == ".tif")
+    test_image_io<TiffFileReader, TiffFileWriter>(filepath, srcPath("test")+ext);
+  else {
     cerr << "Image format: " << ext << " either currently unsupported or invalid" << endl;
+    success = false;
   }
-  return false;
+  return success;
 }
 
-template <typename T, typename ImageReader>
+/*template <typename T, typename ImageReader>
 bool readImage(Image<T>& image, const string& filepath)
 {
   try
@@ -145,7 +138,7 @@ bool readImage(Image<T>& image, const string& filepath)
     cout << e.what() << endl;
     return false;
   }
-}
+}*/
 
 int main()
 {
