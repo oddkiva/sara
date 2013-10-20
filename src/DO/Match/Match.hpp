@@ -37,33 +37,33 @@ namespace DO {
     {}
 
     //! Constant accessors.
-    bool isSKeyNull() const { return x_ == 0; }
-    bool isTKeyNull() const { return y_ == 0; }
-    const Keypoint& source() const { if (isSKeyNull()) exit(-1); return *x_; }
-    const Keypoint& target() const { if (isTKeyNull()) exit(-1); return *y_; }
-    const OERegion& sFeat() const { return source().feat(); }
-    const OERegion& tFeat() const { return target().feat(); }
-    const Point2f& sPos() const { return sFeat().center(); }
-    const Point2f& tPos() const { return tFeat().center(); }
+    bool isXNull() const { return x_ == 0; }
+    bool isYNull() const { return y_ == 0; }
+    const Keypoint& x() const { if (isXNull()) throw 0; return *x_; }
+    const Keypoint& y() const { if (isYNull()) throw 0; return *y_; }
+    const OERegion& featX() const { return x().feat(); }
+    const OERegion& featY() const { return y().feat(); }
+    const Point2f& posX() const { return featX().center(); }
+    const Point2f& posY() const { return featY().center(); }
     int rank() const { return target_rank_; }
     float score() const { return score_; }
     MatchingDirection matchingDir() const { return matching_dir_; }
-    int sInd() const { return x_ind_; }
-    int tInd() const { return y_ind_; }
+    int indX() const { return x_ind_; }
+    int indY() const { return y_ind_; }
     Vector2i indexPair() const { return Vector2i(x_ind_, y_ind_); }
 
     //! Non-constant accessors.
-    const Keypoint *& sPtr() { return x_; }
-    const Keypoint *& tPtr() { return y_; }
+    const Keypoint *& ptrX() { return x_; }
+    const Keypoint *& ptrY() { return y_; }
     int& rank() { return target_rank_; }
     float& score() { return score_; }
     MatchingDirection& matchingDir() { return matching_dir_; }
-    int& sInd() { return x_ind_; }
-    int& tInd() { return y_ind_; }
+    int& indX() { return x_ind_; }
+    int& indY() { return y_ind_; }
 
     //! Key match equality.
     bool operator==(const Match& m) const
-    { return (source() == m.source() && target() == m.target()); }
+    { return (x() == m.x() && y() == m.y()); }
 
   private: /* data members */
     const Keypoint *x_;

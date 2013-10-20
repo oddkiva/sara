@@ -1,3 +1,14 @@
+// ========================================================================== //
+// This file is part of DO++, a basic set of libraries in C++ for computer 
+// vision.
+//
+// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public 
+// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
 #include <DO/Match.hpp>
 #include <DO/Graphics.hpp>
 
@@ -5,8 +16,9 @@ namespace DO {
 
   void PairWiseDrawer::displayImages() const
   {
+    using namespace std;
     display(image1, (offF(0)*scale(0)).cast<int>(), z1);
-    display(image2, (offF(1)*scale(1)).cast<int>(), z2);
+    display(image2, (offF(1)*scale(0)).cast<int>(), z2);
   }
 
   void PairWiseDrawer::drawPoint(int i, const Point2f& p, const Color3ub& c, int r) const
@@ -45,8 +57,8 @@ namespace DO {
   {
     assert(i==0 || i==1);
     Point2f s, e, d;
-    s = scale(i)*p1;
-    e = scale(i)*p2;
+    s = scale(i)*p1+offF(i)*scale(0);
+    e = scale(i)*p2+offF(i)*scale(0);
     d = e-s;
 
     DO::drawRect(s.x(), s.y(), d.x(), d.y(), c, r);
@@ -73,13 +85,13 @@ namespace DO {
 
   void PairWiseDrawer::drawMatch(const Match& m, const Color3ub& c, bool drawLine) const
   {
-    drawKeypoint(0, m.source(), c);
-    drawKeypoint(1, m.target(), c);
+    drawKeypoint(0, m.x(), c);
+    drawKeypoint(1, m.y(), c);
 
     if(drawLine)
     {
       Vector2f a,b;
-      a = scale(0)*m.sPos(); b = scale(1)*(m.tPos()+offF(1));
+      a = scale(0)*m.posX(); b = scale(1)*(m.posY()+offF(1));
       DO::drawLine(a, b, c);
     }
   }
