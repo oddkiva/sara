@@ -1,3 +1,10 @@
+# DO++ modified version of LuaDist version of CMakeLists.txt
+# Copyright (C) 2013 David OK.
+# Redistribution and use of this file is allowed according to the terms of the 
+# MPLv2 license.
+# For details see the COPYRIGHT file distributed with DO++.
+# Please note that the package source code is licensed under its own license.
+
 # LuaDist modified version of original CMakeLists.txt provided with zlib.
 # Modified install destinations and removed versioning
 
@@ -70,6 +77,7 @@ endif ()
 #  endif ()
 #endif ()
 
+# [DO++]: modifications
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/zconf.h.cmakein 
                 ${CMAKE_CURRENT_SOURCE_DIR}/zconf.h @ONLY)
 #include_directories (${CMAKE_CURRENT_BINARY_DIR})
@@ -101,15 +109,16 @@ string (REGEX REPLACE
         ".*#define[ \t]+ZLIB_VERSION[ \t]+\"([0-9A-Za-z.]+)\".*" "\\1" 
         ZLIB_FULL_VERSION ${_zlib_h_contents})
 
+# [DO++]: modifications
 add_library (zlib ${ZLIB_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
 #set_target_properties (zlib PROPERTIES DEFINE_SYMBOL ZLIB_DLL)
 
 if (UNIX)
   # On unix-like platforms the library is almost always called libz
   set_target_properties (zlib PROPERTIES OUTPUT_NAME z)
-elseif (BUILD_SHARED_LIBS AND WIN32)
-# Creates zlib1.dll when building shared library version
-#removed:  set_target_properties(zlib PROPERTIES SUFFIX "1.dll")
+#elseif (BUILD_SHARED_LIBS AND WIN32)
+## Creates zlib1.dll when building shared library version
+##removed:  set_target_properties(zlib PROPERTIES SUFFIX "1.dll")
 endif ()
 
 #install_library (zlib)

@@ -1,3 +1,10 @@
+# DO++ modified version of LuaDist version of CMakeLists.txt
+# Copyright (C) 2013 David OK.
+# Redistribution and use of this file is allowed according to the terms of the 
+# MPLv2 license.
+# For details see the COPYRIGHT file distributed with DO++.
+# Please note that the package source code is licensed under its own license.
+
 # Copyright (C) 2007-2012 LuaDist.
 # Redistribution and use of this file is allowed according to the terms of the 
 # MIT license.
@@ -29,9 +36,9 @@ set (CHECK_JPEG_YCBCR_SUBSAMPLING 1)
 set (CXX_SUPPORT 1)
 set (DEFAULT_EXTRASAMPLE_AS_ALPHA 1)
 
-if (MACOS)
-  # TODO: set (HAVE_APPLE_OPENGL_FRAMEWORK 1)
-endif ()
+#if (MACOS)
+#  # TODO: set (HAVE_APPLE_OPENGL_FRAMEWORK 1)
+#endif ()
 
 check_include_files (assert.h HAVE_ASSERT_H)
 check_include_files (dlfcn.h HAVE_DLFCN_H)
@@ -94,9 +101,10 @@ set (HOST_BIGENDIAN 0)
 # Set the native cpu bit order (FILLORDER_LSB2MSB or FILLORDER_MSB2LSB)
 set (HOST_FILLORDER "FILLORDER_LSB2MSB")
 
-if (HAVE_JPEG)
+# [DO++]: libjpeg is here so add JPEG SUPPORT.
+#if (HAVE_JPEG)
   set (JPEG_SUPPORT 1)
-endif ()
+#endif ()
 set (LOGLUV_SUPPORT 1)
 
 set (LZW_SUPPORT 1)
@@ -171,6 +179,8 @@ configure_file (${CMAKE_CURRENT_SOURCE_DIR}/libtiff/tiffconf.h.cmake
 message ("Configure: libtiff - done.")
 add_definitions (-DHAVE_CONFIG_H)
 
+# [DO++]: modifications
+include_directories (../zlib ../libjpeg)
 #find_package (ZLIB REQUIRED)
 #find_package (JPEG)
 #
@@ -178,7 +188,6 @@ add_definitions (-DHAVE_CONFIG_H)
 #if (JPEG_FOUND)
 #  include_directories (${JPEG_INCLUDE_DIR})
 #endif ()
-include_directories (../zlib ../libjpeg)
 
 set (TIFF_SRCS
   tif_aux.c tif_close.c tif_codec.c tif_color.c tif_compress.c tif_dir.c 
@@ -209,17 +218,19 @@ if (WIN32)
   add_definitions (-DUSE_WIN32_FILEIO)
 endif ()
 
+# [D0++]: Make sure to build a static library.
+add_library (libtiff ${TIFF_SRCS} libtiff/libtiff.def)
+target_link_libraries (libtiff zlib libjpeg ${M_LIBRARY})
+
 #add_library (tiff ${TIFF_SRCS} libtiff/libtiff.def)
 #target_link_libraries (tiff ${ZLIB_LIBRARY} ${M_LIBRARY})
 #if (JPEG_FOUND)
 #  target_link_libraries (tiff ${JPEG_LIBRARY})
 #endif ()
-add_library (libtiff ${TIFF_SRCS} libtiff/libtiff.def)
-target_link_libraries (libtiff zlib libjpeg ${M_LIBRARY})
-
+#
 #add_library (tiffxx libtiff/tif_stream.cxx)
 #target_link_libraries (tiffxx tiff)
-
+#
 #install_library (tiff tiffxx)
 #install_header (libtiff/tiff.h ${CMAKE_CURRENT_BINARY_DIR}/tiffconf.h libtiff/tiffio.h
 #  libtiff/tiffvers.h ${CMAKE_CURRENT_BINARY_DIR}/tif_config.h)

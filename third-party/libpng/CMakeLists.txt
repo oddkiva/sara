@@ -1,3 +1,10 @@
+# DO++ modified version of LuaDist version of CMakeLists.txt
+# Copyright (C) 2013 David OK.
+# Redistribution and use of this file is allowed according to the terms of the 
+# MPLv2 license.
+# For details see the COPYRIGHT file distributed with DO++.
+# Please note that the package source code is licensed under its own license.
+
 # Copyright (C) 2007-2012 LuaDist.
 # Modified by David Manura.
 # Redistribution and use of this file is allowed according to the terms of the
@@ -75,12 +82,12 @@ endif ()
 include_directories (${CMAKE_CURRENT_SOURCE_DIR} ${ZLIB_INCLUDE_DIR})
 
 add_library (${PNG_LIB_NAME} ${libpng_sources})
-#target_link_libraries (${PNG_LIB_NAME} ${ZLIB_LIBRARY} ${M_LIBRARY})
 target_link_libraries (${PNG_LIB_NAME} zlib ${M_LIBRARY})
+#target_link_libraries (${PNG_LIB_NAME} ${ZLIB_LIBRARY} ${M_LIBRARY})
 
-if (PNG_SHARED AND WIN32)
-  set_target_properties (${PNG_LIB_NAME} PROPERTIES DEFINE_SYMBOL PNG_BUILD_DLL)
-endif ()
+#if (PNG_SHARED AND WIN32)
+#  set_target_properties (${PNG_LIB_NAME} PROPERTIES DEFINE_SYMBOL PNG_BUILD_DLL)
+#endif ()
 
 #enable_testing ()
 #if (PNG_TESTS)

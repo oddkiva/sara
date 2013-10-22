@@ -14,7 +14,7 @@ option(DO_USE_FROM_SOURCE   "Use DO++ libraries from source" ON)
 option(DO_USE_STATIC_LIBS   "Use DO++ static libraries" OFF)
 option(DO_BUILD_UNIT_TESTS  "Build unit tests for DO++ libraries" ON)
 option(DO_BUILD_SHARED_LIBS "Build shared libraries for DO++ libraries" OFF)
-option(DO_BUILD_WITH_QT5   "Use DO++ libraries from source" OFF)
+option(DO_BUILD_IMAGE_IO   "Build third-party image I/O libraries" ON)
 
 # Go!
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)

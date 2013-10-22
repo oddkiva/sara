@@ -6,7 +6,7 @@ if (DO_BUILD_UNIT_TESTS)
   add_subdirectory(gtest)
 endif ()
 
-if (NOT DO_BUILD_WITH_QT5)
+if (DO_BUILD_IMAGE_IO)
   message(STATUS "  - zlib")
   add_subdirectory(zlib)
 

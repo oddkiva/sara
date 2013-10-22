@@ -1,3 +1,10 @@
+# DO++ modified version of # LuaDist CMake utility library.
+# Copyright (C) 2013 David OK.
+# Redistribution and use of this file is allowed according to the terms of the 
+# MPLv2 license.
+# For details see the COPYRIGHT file distributed with DO++.
+# Please note that the package source code is licensed under its own license.
+
 # LuaDist CMake utility library.
 # Provides sane project defaults and macros common to LuaDist CMake builds.
 # 
@@ -47,52 +54,58 @@ endif ()
 message ( "DIST_DEPENDS: ${DIST_DEPENDS}")
 ## 2DO: Parse DIST_DEPENDS and try to install Dependencies with automatically using externalproject_add
 
+# [DO++]: modifications
+string(TOLOWER "${CMAKE_CXX_COMPILER_ID}_${CMAKE_CXX_COMPILER_VERSION}" 
+       COMPILER_NAME)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/${COMPILER_NAME})
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/${COMPILER_NAME})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/${COMPILER_NAME})
 
-## INSTALL DEFAULTS (Relative to CMAKE_INSTALL_PREFIX)
-# Primary paths
-set ( INSTALL_BIN bin CACHE PATH "Where to install binaries to." )
-set ( INSTALL_LIB lib CACHE PATH "Where to install libraries to." )
-set ( INSTALL_INC include CACHE PATH "Where to install headers to." )
-set ( INSTALL_ETC etc CACHE PATH "Where to store configuration files" )
-set ( INSTALL_SHARE share CACHE PATH "Directory for shared data." )
-
-# Secondary paths
-option ( INSTALL_VERSION
-      "Install runtime libraries and executables with version information." OFF)
-set ( INSTALL_DATA ${INSTALL_SHARE}/${DIST_NAME} CACHE PATH
-      "Directory the package can store documentation, tests or other data in.")  
-set ( INSTALL_DOC  ${INSTALL_DATA}/doc CACHE PATH
-      "Recommended directory to install documentation into.")
-set ( INSTALL_EXAMPLE ${INSTALL_DATA}/example CACHE PATH
-      "Recommended directory to install examples into.")
-set ( INSTALL_TEST ${INSTALL_DATA}/test CACHE PATH
-      "Recommended directory to install tests into.")
-set ( INSTALL_FOO  ${INSTALL_DATA}/etc CACHE PATH
-      "Where to install additional files")
+### INSTALL DEFAULTS (Relative to CMAKE_INSTALL_PREFIX)
+## Primary paths
+#set ( INSTALL_BIN bin CACHE PATH "Where to install binaries to." )
+#set ( INSTALL_LIB lib CACHE PATH "Where to install libraries to." )
+#set ( INSTALL_INC include CACHE PATH "Where to install headers to." )
+#set ( INSTALL_ETC etc CACHE PATH "Where to store configuration files" )
+#set ( INSTALL_SHARE share CACHE PATH "Directory for shared data." )
+#
+## Secondary paths
+#option ( INSTALL_VERSION
+#      "Install runtime libraries and executables with version information." OFF)
+#set ( INSTALL_DATA ${INSTALL_SHARE}/${DIST_NAME} CACHE PATH
+#      "Directory the package can store documentation, tests or other data in.")  
+#set ( INSTALL_DOC  ${INSTALL_DATA}/doc CACHE PATH
+#      "Recommended directory to install documentation into.")
+#set ( INSTALL_EXAMPLE ${INSTALL_DATA}/example CACHE PATH
+#      "Recommended directory to install examples into.")
+#set ( INSTALL_TEST ${INSTALL_DATA}/test CACHE PATH
+#      "Recommended directory to install tests into.")
+#set ( INSTALL_FOO  ${INSTALL_DATA}/etc CACHE PATH
+#      "Where to install additional files")
 
 # Tweaks and other defaults
 # Setting CMAKE to use loose block and search for find modules in source directory
 set ( CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS true )
 set ( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH} )
-option ( BUILD_SHARED_LIBS "Build shared libraries" ON )
+#option ( BUILD_SHARED_LIBS "Build shared libraries" ON )
 
 # In MSVC, prevent warnings that can occur when using standard libraries.
 if ( MSVC )
   add_definitions ( -D_CRT_SECURE_NO_WARNINGS )
 endif ()
 
-# RPath and relative linking
-option ( USE_RPATH "Use relative linking." ON)
-if ( USE_RPATH )
-  string ( REGEX REPLACE "[^!/]+" ".." UP_DIR ${INSTALL_BIN} )
-  set ( CMAKE_SKIP_BUILD_RPATH FALSE CACHE STRING "" FORCE )
-  set ( CMAKE_BUILD_WITH_INSTALL_RPATH FALSE CACHE STRING "" FORCE )
-  set ( CMAKE_INSTALL_RPATH $ORIGIN/${UP_DIR}/${INSTALL_LIB}
-        CACHE STRING "" FORCE )
-  set ( CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE CACHE STRING "" FORCE )
-  set ( CMAKE_INSTALL_NAME_DIR @executable_path/${UP_DIR}/${INSTALL_LIB}
-        CACHE STRING "" FORCE )
-endif ()
+## RPath and relative linking
+#option ( USE_RPATH "Use relative linking." ON)
+#if ( USE_RPATH )
+#  string ( REGEX REPLACE "[^!/]+" ".." UP_DIR ${INSTALL_BIN} )
+#  set ( CMAKE_SKIP_BUILD_RPATH FALSE CACHE STRING "" FORCE )
+#  set ( CMAKE_BUILD_WITH_INSTALL_RPATH FALSE CACHE STRING "" FORCE )
+#  set ( CMAKE_INSTALL_RPATH $ORIGIN/${UP_DIR}/${INSTALL_LIB}
+#        CACHE STRING "" FORCE )
+#  set ( CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE CACHE STRING "" FORCE )
+#  set ( CMAKE_INSTALL_NAME_DIR @executable_path/${UP_DIR}/${INSTALL_LIB}
+#        CACHE STRING "" FORCE )
+#endif ()
 
 ## MACROS
 # Parser macro

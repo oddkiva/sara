@@ -1,3 +1,10 @@
+# DO++ modified version of LuaDist version of CMakeLists.txt
+# Copyright (C) 2013 David OK.
+# Redistribution and use of this file is allowed according to the terms of the 
+# MPLv2 license.
+# For details see the COPYRIGHT file distributed with DO++.
+# Please note that the package source code is licensed under its own license.
+
 # Copyright (C) 2007-2012 LuaDist.
 # Created by Peter Kapec, David Manura
 # Redistribution and use of this file is allowed according to the terms of the MIT license.
