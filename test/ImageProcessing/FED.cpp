@@ -140,7 +140,6 @@ namespace DO { namespace AKAZE {
 
     // Check if number $n$ is prime with a naive loop
     // from $11$ to $\sqrt(n)$.
-    bool is_prime = true;
     int upperLimit = static_cast<int>(sqrt(number+1.0));
     int divisor = 11;
 
