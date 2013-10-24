@@ -181,10 +181,7 @@ namespace DO {
       , sizes_(M.sizes())
       , strides_(M.strides())
       , is_wrapped_data_(false)
-    {
-      std::cout << "A copy is being made" << std::endl;
-      std::copy(M.data(), M.data() + M.size(), begin_);
-    }
+    { std::copy(M.data(), M.data() + M.size(), begin_); }
     //! \brief Copy constructor that recopies the data source array with 
     //! appropriate type casting.
     template <typename T2>

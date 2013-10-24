@@ -119,6 +119,14 @@ void testDoGSIFTKeypoints(const Image<float>& I)
 }
 #endif
 
+static HighResTimer timer;
+inline void tic() { timer.restart(); }
+inline void toc(string task)
+{
+  double elapsed = timer.elapsedMs();
+  cout << task << " time = " << elapsed << " ms" << endl;
+}
+
 int main()
 {
   Image<Rgb8> I;
@@ -130,6 +138,7 @@ int main()
 
   // 1. Feature extraction.
   printStage("Computing DoG extrema");
+  tic();
   ImagePyramidParams pyrParams(-1);
   ComputeDoGExtrema computeDoGs(pyrParams);
   vector<OERegion> dogs;
@@ -140,19 +149,23 @@ int main()
   // 2. Feature orientation.
   // Prepare the computation of gradients on gaussians.
   printStage("Computing gradients of Gaussians");
+  //tic();
   ImagePyramid<Vector2f> gradG;
   gradG = gradPolar(computeDoGs.gaussians());
   // Find dominant gradient orientations.
   printStage("Assigning (possibly multiple) dominant orientations to DoG extrema");
   ComputeDominantOrientations assignOri;
   assignOri(gradG, dogs, scaleOctPairs);
+  //toc();
   cout << "DoGs.size() = " << dogs.size() << endl;
 
   // 3. Feature description.
   printStage("Describe DoG extrema with SIFT descriptors");
+  //tic();
   ComputeSIFTDescriptor<> computeSIFT;
   std::vector<ComputeSIFTDescriptor<>::SIFT> sifts;
   sifts = computeSIFT(dogs, scaleOctPairs, gradG);
+  toc("SIFT detection");
   cout << "sifts.size() = " << sifts.size() << endl;
 
   // 4. Rescale  the feature position and scale $(x,y,\sigma)$ with the octave
