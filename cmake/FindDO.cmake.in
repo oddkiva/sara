@@ -40,16 +40,16 @@ if (NOT DO_FOUND)
   # List the available component libraries in DO++
   # Foundational libraries
   do_append_components(DO_COMPONENTS Core)
-  do_append_components(DO_COMPONENTS Graphics)
-  do_append_components(DO_COMPONENTS ImageProcessing)
+  #do_append_components(DO_COMPONENTS Graphics)
+  #do_append_components(DO_COMPONENTS ImageProcessing)
   
-  do_append_components(DO_COMPONENTS Geometry)
+  #do_append_components(DO_COMPONENTS Geometry)
   
-  do_append_components(DO_COMPONENTS Features)
-  do_append_components(DO_COMPONENTS FeatureDetectors)
+  #do_append_components(DO_COMPONENTS Features)
+  #do_append_components(DO_COMPONENTS FeatureDetectors)
   
-  do_append_components(DO_COMPONENTS Match)
-  do_append_components(DO_COMPONENTS FeatureMatching)
+  #do_append_components(DO_COMPONENTS Match)
+  #do_append_components(DO_COMPONENTS FeatureMatching)
   
   # DEBUG: Print the list of component libraries
   do_step_message("Currently available component libraries:")

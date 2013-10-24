@@ -181,7 +181,10 @@ namespace DO {
       , sizes_(M.sizes())
       , strides_(M.strides())
       , is_wrapped_data_(false)
-    { std::copy(M.data(), M.data() + M.size(), begin_); }
+    {
+      std::cout << "A copy is being made" << std::endl;
+      std::copy(M.data(), M.data() + M.size(), begin_);
+    }
     //! \brief Copy constructor that recopies the data source array with 
     //! appropriate type casting.
     template <typename T2>
@@ -200,32 +203,10 @@ namespace DO {
         delete [] begin_;
     }
 
-    //! \brief Assignment operator that makes a deep copy of the source array.
-    const self_type& operator=(const self_type& M)
+    //! \brief Assignment operator uses the copy-swap idiom.
+    self_type& operator=(self_type M)
     {
-      // We must be careful when (M == *this)!
-      if (!is_wrapped_data_ && begin_ != M.data())
-      {
-        delete[] begin_;
-        begin_ = 0;
-        end_ = 0;
-      }
-      
-      // Allocate new data.
-      T *newData = new T[M.size()];
-      sizes_ = M.sizes();
-      strides_ = M.strides();
-      is_wrapped_data_ = false;
-
-      if (newData)
-        std::copy(M.data(), M.data() + M.size(), newData);
-
-      // We must be careful when (M == *this)!
-      if (begin_ == M.data())
-        delete[] begin_;
-      begin_ = newData;
-      end_ = begin_ + M.size();
-
+      swap(M);
       return *this;
     }
     //! \brief Assignment operator that recopies the content of the source array
@@ -434,6 +415,18 @@ namespace DO {
         << Map<const Matrix<int, 1, N> >(sizes_.data()) << std::endl;
       std::cout << "Multiarray strides = " 
         << Map<const Matrix<int, 1, N> >(strides_.data()) << std::endl;
+    }
+
+    //! Swap arrays.
+    self_type& swap(self_type& other)
+    {
+      using std::swap;
+      swap(begin_, other.begin_);
+      swap(end_, other.end_);
+      swap(sizes_, other.sizes_);
+      swap(strides_, other.strides_);
+      swap(is_wrapped_data_, other.is_wrapped_data_);
+      return *this;
     }
 
   private: /* helper functions for offset computation. */

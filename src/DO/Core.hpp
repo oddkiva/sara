@@ -54,6 +54,9 @@
 # include <sys/time.h>
 #endif
 
+// DO++ specific defines.
+#include "Defines.hpp"
+
 // Linear algebra imports and extension from Eigen3
 #include "Core/EigenExtension.hpp"
 // Template meta-programming
