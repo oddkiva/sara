@@ -34,21 +34,6 @@
 // Affine shape adaptation (cf. [Mikolajczyk & Schmid, ECCV 2002]).
 #include "FeatureDetectors/AffineShapeAdaptation.hpp"
 
-// Third-party software wrappers
-//
-// Affine-covariant features detected by Mikolajczyk's binary.
-#include "FeatureDetectors/HarAffSiftDetector.hpp"
-#include "FeatureDetectors/HesAffSiftDetector.hpp"
-#include "FeatureDetectors/MserSiftDetector.hpp"
-
-
-
-#ifdef EXTERNBINDIR
-#define EXTERNBINDIR_STRINGIFY(s)  #s
-#define EXTERNBINDIR_EVAL(s) EXTERNBINDIR_STRINGIFY(s)
-#define externBinPath(s) (EXTERNBINDIR_EVAL(EXTERNBINDIR)"/"s)  
-#endif
-
 //! \defgroup FeatureDetectors
 
 

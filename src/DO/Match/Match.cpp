@@ -74,7 +74,7 @@ namespace DO {
 
   bool readMatches(
     vector<Match>& matches, 
-    const vector<Keypoint>& sKeys, const vector<Keypoint>& tKeys,
+    const vector<OERegion>& sKeys, const vector<OERegion>& tKeys,
     const string& fileName, float scoreT)
   {
     if (!matches.empty())
@@ -115,8 +115,8 @@ namespace DO {
 
   void drawMatch(const Match& m, const Color3ub& c, const Point2f& off2, float z)
   {
-    m.featX().drawOnScreen(c, z);
-    m.featY().drawOnScreen(c, z, off2);
+    drawFeature(m.featX(), c, z);
+    drawFeature(m.featY(), c, z, off2);
     Point2f p1(m.posX()*z);
     Point2f p2((m.posY()+off2)*z);
     drawLine(p1, p2, c);

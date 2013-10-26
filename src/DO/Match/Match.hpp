@@ -26,8 +26,8 @@ namespace DO {
       , matching_dir_(SourceToTarget)
       , x_ind_(-1), y_ind_(-1) {}
 
-    inline Match(const Keypoint *x,
-                 const Keypoint *y,
+    inline Match(const OERegion *x,
+                 const OERegion *y,
                  float score = std::numeric_limits<float>::max(),
                  MatchingDirection matchingDir = SourceToTarget,
                  int indX = -1, int indY = -1)
@@ -39,12 +39,12 @@ namespace DO {
     //! Constant accessors.
     bool isXNull() const { return x_ == 0; }
     bool isYNull() const { return y_ == 0; }
-    const Keypoint& x() const { if (isXNull()) throw 0; return *x_; }
-    const Keypoint& y() const { if (isYNull()) throw 0; return *y_; }
-    const OERegion& featX() const { return x().feat(); }
-    const OERegion& featY() const { return y().feat(); }
-    const Point2f& posX() const { return featX().center(); }
-    const Point2f& posY() const { return featY().center(); }
+    const OERegion& x() const { if (isXNull()) throw 0; return *x_; }
+    const OERegion& y() const { if (isYNull()) throw 0; return *y_; }
+    const OERegion& featX() const { return x(); }
+    const OERegion& featY() const { return y(); }
+    const Point2f& posX() const { return x().center(); }
+    const Point2f& posY() const { return y().center(); }
     int rank() const { return target_rank_; }
     float score() const { return score_; }
     MatchingDirection matchingDir() const { return matching_dir_; }
@@ -53,8 +53,8 @@ namespace DO {
     Vector2i indexPair() const { return Vector2i(x_ind_, y_ind_); }
 
     //! Non-constant accessors.
-    const Keypoint *& ptrX() { return x_; }
-    const Keypoint *& ptrY() { return y_; }
+    const OERegion *& ptrX() { return x_; }
+    const OERegion *& ptrY() { return y_; }
     int& rank() { return target_rank_; }
     float& score() { return score_; }
     MatchingDirection& matchingDir() { return matching_dir_; }
@@ -66,8 +66,8 @@ namespace DO {
     { return (x() == m.x() && y() == m.y()); }
 
   private: /* data members */
-    const Keypoint *x_;
-    const Keypoint *y_;
+    const OERegion *x_;
+    const OERegion *y_;
     int target_rank_;
     float score_;
     MatchingDirection matching_dir_;
@@ -85,7 +85,7 @@ namespace DO {
   bool readMatches(std::vector<Match>& matches, const std::string& fileName, float scoreT = 10.f);
 
   bool readMatches(std::vector<Match>& matches,
-    const std::vector<Keypoint>& sKeys, const std::vector<Keypoint>& tKeys,
+    const std::vector<OERegion>& sKeys, const std::vector<OERegion>& tKeys,
     const std::string& fileName, float scoreT = 10.f);
 
   //! View matches.

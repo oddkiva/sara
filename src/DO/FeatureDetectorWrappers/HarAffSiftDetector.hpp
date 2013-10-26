@@ -11,30 +11,31 @@
 
 //! @file
 
-#ifndef DO_FEATUREDETECTORS_HESAFFSIFTDETECTOR_HPP
-#define DO_FEATUREDETECTORS_HESAFFSIFTDETECTOR_HPP
+#ifndef DO_FEATUREDETECTORS_HARAFFSIFTDETECTOR_HPP
+#define DO_FEATUREDETECTORS_HARAFFSIFTDETECTOR_HPP
 
- namespace DO 
-{
+namespace DO {
 
   /*!
     \ingroup FeatureDetectors
-    \defgroup DetectorWrappers Feature Detector Wrappers
+    \defgroup DetectorWrappers
     @{
    */
-
+  
   //! Mikolajczyk's binaries wrapped for our need.
-  class HesAffSiftDetector
+  class HarAffSiftDetector
   {
   public:
-    HesAffSiftDetector() {}
+    HarAffSiftDetector() {}
 
-    std::vector<Keypoint> run(const Image<uchar>& I, bool specifyThres = false,
-                              double HessianT = 200) const;
+    void run(std::vector<OERegion>& features,
+             DescriptorMatrix<float>& descriptors,
+             const Image<uchar>& I, bool specifyThres = false,
+             double HarrisT = 100) const;
   };
 
   //! @}
 
 } /* namespace DO */
 
-#endif /* DO_FEATUREDETECTORS_HESAFFSIFTDETECTOR_HPP */
+#endif /* DO_FEATUREDETECTORS_HARAFFSIFTDETECTOR_HPP */

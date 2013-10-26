@@ -25,7 +25,6 @@ namespace DO {
     @{
   */
 
-  template <typename Keypoint>
   class ImageFeaturesItem : public QGraphicsPixmapItem
   {
     struct KeyShape
@@ -64,8 +63,8 @@ namespace DO {
 
   protected:
     void paint(QPainter *painter,
-      const QStyleOptionGraphicsItem *option,
-      QWidget *widget)
+               const QStyleOptionGraphicsItem *option,
+               QWidget *widget)
     {
       const qreal lod = option->
         levelOfDetailFromTransform(painter->worldTransform());
@@ -127,25 +126,8 @@ namespace DO {
   };
 
 
-  template <typename FeatureOrKey>
-  inline void putFeatureOnPixmapItem(const FeatureOrKey& key,
-    QGraphicsPixmapItem *pixItem)
-  {
-    typedef FeatureItemSelector<FeatureOrKey> S;
-    typedef typename S::FeatureItem FItem;
-    QMetaObject::invokeMethod(scene(), "insertItem",
-      Qt::QueuedConnection,
-      Q_ARG(QGraphicsItem *, new FItem(key)),
-      Q_ARG(QGraphicsItem *, pixItem));
-  }
-
-  template <typename FeatureOrKey>
-  void simplePutFeaturesOnPixmapItem(const std::vector<FeatureOrKey>& keys,
-    QGraphicsPixmapItem *pixItem)
-  {
-    for (size_t i = 0; i != keys.size(); ++i)
-      putFeatureOnPixmapItem(keys[i], pixItem);
-  }
+  inline void putFeatureOnPixmapItem(const Feature& f,
+                                     QGraphicsPixmapItem *pixItem);
 
   template <typename FeatureOrKey>
   void putFeaturesOnPixmapItem(const std::vector<FeatureOrKey>& keys,

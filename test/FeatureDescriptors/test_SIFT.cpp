@@ -1,4 +1,5 @@
 #include <DO/FeatureDetectors.hpp>
+#include <DO/FeatureDescriptors.hpp>
 #include <DO/Graphics.hpp>
 
 using namespace DO;
@@ -195,7 +196,7 @@ int main()
     /*cout << dogs[i].center().transpose() << " " 
          << dogs[i].scale() << " "
          << dogs[i].orientation() << endl;*/
-    dogs[i].drawOnScreen(dogs[i].extremumType() == OERegion::Max ? Red8 : Blue8);
+    drawFeature(dogs[i], dogs[i].extremumType() == OERegion::Max ? Red8 : Blue8);
     //getKey();
   }
   getKey();

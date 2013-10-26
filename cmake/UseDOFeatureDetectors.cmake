@@ -17,16 +17,6 @@ macro (do_list_featuredetectors_source_files)
         ${DO_FeatureDetectors_MASTER_HEADER}
         ${DO_FeatureDetectors_HEADER_FILES})
     # Organize source files as follows.
-    source_group("Keypoint Detector Wrapper (Lowe's SIFT implementation)" FILES
-                 ${DO_FeatureDetectors_SOURCE_DIR}/DoGSiftDetector.hpp
-                 ${DO_FeatureDetectors_SOURCE_DIR}/DoGSiftDetector.cpp)
-    source_group("Keypoint Detector Wrapper (Mikolajczyk's binary)" FILES
-                 ${DO_FeatureDetectors_SOURCE_DIR}/HarAffSiftDetector.hpp
-                 ${DO_FeatureDetectors_SOURCE_DIR}/HarAffSiftDetector.cpp
-                 ${DO_FeatureDetectors_SOURCE_DIR}/HesAffSiftDetector.hpp
-                 ${DO_FeatureDetectors_SOURCE_DIR}/HesAffSiftDetector.cpp
-                 ${DO_FeatureDetectors_SOURCE_DIR}/MserSiftDetector.hpp
-                 ${DO_FeatureDetectors_SOURCE_DIR}/MserSiftDetector.cpp)
     source_group("Interest Point Detection" FILES
                  ${DO_FeatureDetectors_SOURCE_DIR}/DoG.hpp
                  ${DO_FeatureDetectors_SOURCE_DIR}/DoG.cpp
@@ -83,11 +73,6 @@ if (DO_USE_FROM_SOURCE)
         "${DO_FeatureDetectors_LINK_LIBRARIES}"
     )
     do_set_specific_target_properties(DO_FeatureDetectors DO_STATIC)
-    # Specify the location of external binaries.
-    set_target_properties(
-      DO_FeatureDetectors PROPERTIES
-      COMPILE_FLAGS -DEXTERNBINDIR="\"${DO_ThirdParty_DIR}/Mikolajczyk\""
-    )
       
     # Shared library
     if (DO_BUILD_SHARED_LIBS)
@@ -99,10 +84,5 @@ if (DO_USE_FROM_SOURCE)
         "${DO_FeatureDetectors_LINK_LIBRARIES}"
       )
       do_set_specific_target_properties(DO_FeatureDetectors DO_EXPORTS)
-      # Specify the location of external binaries.
-      set_target_properties(
-        DO_FeatureDetectors_SHARED PROPERTIES
-        COMPILE_FLAGS -DEXTERNBINDIR="\"${DO_ThirdParty_DIR}/Mikolajczyk\""
-      )
     endif ()
 endif()

@@ -9,7 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/FeatureDetectors.hpp>
+#include <DO/FeatureDetectorWrappers.hpp>
 #include <DO/Graphics.hpp>
 #include <fstream>
 #include <cstdlib>
@@ -22,9 +22,11 @@
 namespace DO
 {
 
-  std::vector<Keypoint> HesAffSiftDetector::run(const Image<uchar>& I,
-                                                bool specifyThres,
-                                                double HessianT) const
+  void HesAffSiftDetector::run(std::vector<OERegion>& features,
+                               DescriptorMatrix<float>& descriptors,
+                               const Image<uchar>& I,
+                               bool specifyThres,
+                               double HessianT) const
   {
     using namespace std;
 
@@ -85,13 +87,11 @@ namespace DO
     }
 
     // Get the array of features
-    vector<Keypoint>  features;
     features.resize(sz);
+    descriptors.resize(sz, 128);
     for (int i = 0; i < sz; ++i)
     {
-      Keypoint& k = features[i];
-      OERegion& f = k.feat();
-      Desc128f& d = k.desc();
+      OERegion& f = features[i];
       // Feature type
       f.type() = OERegion::HesAff;
       // Position
@@ -103,7 +103,7 @@ namespace DO
         >> f.shapeMat()(1,1);
       f.shapeMat()(0,1) = f.shapeMat()(1,0);
       // SIFT descriptor
-      descFile1 >> d;
+      descFile1 >> descriptors[i];
       
       // Ignore the following variables before getting the orientation
       // from the second file.
@@ -124,8 +124,6 @@ namespace DO
       Matrix<double, 128, 1> desc1;
       descFile2 >> desc1;
     }
-
-    return features;
   }
 
 } /* namespace DO */

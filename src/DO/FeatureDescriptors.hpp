@@ -14,7 +14,6 @@
 #ifndef DO_FEATUREDESCRIPTORS_HPP
 #define DO_FEATUREDESCRIPTORS_HPP
 
-#include <DO/Defines.hpp>
 #include <DO/Graphics.hpp>
 #include <DO/Features.hpp>
 #include <DO/ImageProcessing.hpp>

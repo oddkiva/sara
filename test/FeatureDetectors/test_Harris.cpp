@@ -94,7 +94,7 @@ void testSimplifiedHarrisLaplace(const Image<float>& I,
 // - number of iterations in the keypoint localization,...
 // Keypoints are described with the SIFT descriptor.
 template <typename ComputeFeature>
-vector<Keypoint> computeAffineAdaptedKeypoints(const Image<float>& I,
+vector<OERegion> computeAffineAdaptedKeypoints(const Image<float>& I,
                                                bool verbose = true)
 {
   // 1. Feature extraction.
@@ -166,8 +166,8 @@ vector<Keypoint> computeAffineAdaptedKeypoints(const Image<float>& I,
   const float numBins = 4.f;
   const float scaleRelRadius = sqrt(2.f)*binSideLength*(numBins+1)/2.f;
   // Store the keypoints here.
-  vector<Keypoint> keys;
-  keys.reserve(2*feats.size());
+  vector<OERegion> keptFeats;
+  keptFeats.reserve(2*feats.size());
   for (size_t i = 0; i != feats.size(); ++i)
   {
     if (keepFeatures[i] == 1)
@@ -193,50 +193,26 @@ vector<Keypoint> computeAffineAdaptedKeypoints(const Image<float>& I,
       if (!warp(normalizedPatch, gaussPyr(s,o), T, 0.f, true))
         continue;
 
-      // Compute the gradients on the normalized patch.
-      Image<Vector2f> gradients_patch(gradPolar(normalizedPatch));
 
-      // Shorten names.
-      const float x_patch = patchRadius;
-      const float y_patch = patchRadius;
-      const float sigma_patch = patchRadius/scaleRelRadius;
-
-      // Find dominant orientations in the normalized patch.
-      ComputeDominantOrientations assignOri;
-      vector<float> orientations(assignOri(
-        gradients_patch, x_patch, y_patch, sigma_patch));
-
-      // Describe the normalized patch for each dominant orientation.
-      ComputeSIFTDescriptor<> computeSIFT;
-      for (int t = 0; t < orientations.size(); ++t)
-      {
-        double fact = gaussPyr.octaveScalingFactor(o);
-        float theta = orientations[t];
-        // Create a keypoint.
-        Keypoint k;
-        k.feat() = feats[i];
-        k.feat().orientation() = theta;
-        k.desc() = computeSIFT(x_patch, y_patch, sigma_patch, theta,
-                               gradients_patch);
-        // Rescale the feature position and shape to the original image
-        // dimensions.
-        k.feat().shapeMat() *= pow(fact/**scaleRelRadius*/, -2);
-        k.feat().center() *= fact;
-        // Store the keypoint.
-        keys.push_back(k);
-      }
+      // Rescale the feature position and shape to the original image
+      // dimensions.
+      double fact = gaussPyr.octaveScalingFactor(o);
+      feats[i].shapeMat() *= pow(fact/**scaleRelRadius*/, -2);
+      feats[i].center() *= fact;
+      // Store the keypoint.
+      keptFeats.push_back(feats[i]);
     }
   }
   if (verbose)
     toc();
-  return keys;
+  return keptFeats;
 }
 
-void checkKeys(const Image<float>& I, const vector<Keypoint>& keys)
+void checkKeys(const Image<float>& I, const vector<OERegion>& features)
 {
   display(I);
   setAntialiasing();
-  drawKeypoints(keys, Red8);
+  drawFeatures(features, Red8);
   getKey();
 }
 
@@ -251,13 +227,13 @@ int main()
   //testSimplifiedHarrisLaplace(I);
 
   openWindow(I.width(), I.height());
-  vector<Keypoint> keys;
+  vector<OERegion> features;
   
-  keys = computeAffineAdaptedKeypoints<ComputeDoGExtrema>(I);
-  checkKeys(I, keys);
+  features = computeAffineAdaptedKeypoints<ComputeDoGExtrema>(I);
+  checkKeys(I, features);
 
-  keys = computeAffineAdaptedKeypoints<ComputeHarrisLaplaceCorners>(I);
-  checkKeys(I, keys);
+  features = computeAffineAdaptedKeypoints<ComputeHarrisLaplaceCorners>(I);
+  checkKeys(I, features);
 
   return 0;
 }

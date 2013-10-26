@@ -1,4 +1,4 @@
-#include <DO/FeatureDetectors.hpp>
+#include <DO/FeatureDetectorWrappers.hpp>
 #include <DO/Graphics.hpp>
 #include <DO/ImageProcessing.hpp>
 
@@ -6,12 +6,12 @@ using namespace DO;
 using namespace std;
 
 void checkPatch(const Image<unsigned char>& image,
-                const Keypoint& k)
+                const OERegion& f)
 {
   int w = image.width();
   int h = image.height();
   display(image);
-  k.feat().drawOnScreen(Yellow8);
+  drawFeature(f, Yellow8);
   saveScreen(activeWindow(), srcPath("whole_picture.png"));
 
 
@@ -20,15 +20,15 @@ void checkPatch(const Image<unsigned char>& image,
   Image<float> patch(w, h);
   patch.array().fill(0.f);
 
-  OERegion rg(k.feat());
+  OERegion rg(f);
   rg.center().fill(patchSz/2.f);
   rg.shapeMat() /= 4.;
 
   Matrix3f A;
   A.fill(0.f);
   A(0,0) = A(1,1) = r/2.;
-  A(0,2) = k.feat().x();
-  A(1,2) = k.feat().y();
+  A(0,2) = f.x();
+  A(1,2) = f.y();
   A(2,2) = 1.f;
   cout << "A=\n" << A << endl;
 
@@ -56,7 +56,7 @@ void checkPatch(const Image<unsigned char>& image,
   setActiveWindow(w2);
   setAntialiasing();
   display(patch);
-  rg.drawOnScreen(Yellow8);
+  drawFeature(rg, Yellow8);
   saveScreen(activeWindow(), srcPath("patch.png"));
   getKey();
   closeWindow(w2);
@@ -66,12 +66,12 @@ void checkPatch(const Image<unsigned char>& image,
 }
 
 void checkAffineAdaptation(const Image<unsigned char>& image,
-                           const Keypoint& k)
+                           const OERegion& f)
 {
   int w = image.width();
   int h = image.height();
   display(image);
-  k.feat().drawOnScreen(Yellow8);
+  drawFeature(f, Yellow8);
 
 
   int r = 100;
@@ -80,18 +80,18 @@ void checkAffineAdaptation(const Image<unsigned char>& image,
   patch.array().fill(0.f);
 
 
-  OERegion rg(k.feat());
+  OERegion rg(f);
   rg.center().fill(patchSz/2.f);
   rg.orientation() = 0.f;
-  Matrix2f Q = Rotation2D<float>(k.feat().orientation()).matrix();
-  rg.shapeMat() = Q.transpose()*k.feat().shapeMat()*Q/4.;
+  Matrix2f Q = Rotation2D<float>(f.orientation()).matrix();
+  rg.shapeMat() = Q.transpose()*f.shapeMat()*Q/4.;
 
 
-  Matrix3f A(k.feat().affinity());  
+  Matrix3f A(f.affinity());  
   A.fill(0.f);
   A.block(0,0,2,2) = Q*r/2.;
-  A(0,2) = k.feat().x();
-  A(1,2) = k.feat().y();
+  A(0,2) = f.x();
+  A(1,2) = f.y();
   A(2,2) = 1.f;
   cout << "A=\n" << A << endl;
 
@@ -119,7 +119,7 @@ void checkAffineAdaptation(const Image<unsigned char>& image,
   setActiveWindow(w2);
   setAntialiasing();
   display(patch);
-  rg.drawOnScreen(Yellow8);
+  drawFeature(rg, Yellow8);
   saveScreen(activeWindow(), srcPath("rotated_patch.png"));
   getKey();
   closeWindow(w2);
@@ -129,12 +129,12 @@ void checkAffineAdaptation(const Image<unsigned char>& image,
 }
 
 void checkAffineAdaptation2(const Image<unsigned char>& image,
-                            const Keypoint& k)
+                            const OERegion& f)
 {
   int w = image.width();
   int h = image.height();
   display(image);
-  k.feat().drawOnScreen(Blue8);
+  drawFeature(f, Blue8);
 
 
   int r = 100;
@@ -143,12 +143,12 @@ void checkAffineAdaptation2(const Image<unsigned char>& image,
   patch.array().fill(0.f);
 
 
-  OERegion rg(k.feat());
+  OERegion rg(f);
   rg.center().fill(patchSz/2.f);
   rg.orientation() = 0.f;
   rg.shapeMat() = Matrix2f::Identity()*4.f / (r*r);
 
-  Matrix3f A(k.feat().affinity());
+  Matrix3f A(f.affinity());
   cout << "A=\n" << A << endl;
 
   for (int y = 0; y < patchSz; ++y)
@@ -175,7 +175,7 @@ void checkAffineAdaptation2(const Image<unsigned char>& image,
   setActiveWindow(w2);
   setAntialiasing();
   display(patch);
-  rg.drawOnScreen(Yellow8);
+  drawFeature(rg, Yellow8);
   saveScreen(activeWindow(), srcPath("normalized_patch.png"));
   getKey();
   closeWindow(w2);
@@ -184,73 +184,21 @@ void checkAffineAdaptation2(const Image<unsigned char>& image,
   setActiveWindow(w1);
 }
 
-const bool drawFeatureCenterOnly = false;
-const Rgb8& c = Cyan8;
-
-// ========================================================================== //
-// Testing with painting
-void testHarAffSift(const Image<unsigned char>& image,
-                    bool drawFeatureCenterOnly = false)
+template <typename Detector>
+void testKeypointDetector(const Image<unsigned char>& image,
+                          double detectorParam)
 {
-  // Run Harris Affine Detector
-  cout << "Detecting Harris-Affine features... " << endl;
-  vector<Keypoint> keys(HarAffSiftDetector().run(image, true, 100000));
-  cout << "Found " << keys.size() << " Harris-Affine-SIFT keypoints" << endl;
-
-  cout << "Writing keypoints..." << endl;
-  writeKeypoints(keys, srcPath("test.haraffkey"));
+  cout << "Detecting features... " << endl;
+  vector<OERegion> features;
+  DescriptorMatrix<float> descriptors;
+  Detector().run(features, descriptors, image, true, detectorParam);
+  cout << "Found " << features.size() << " Harris-Affine-SIFT keypoints" << endl;
 
   // Draw features.
   cout << "Drawing features... ";
   display(image);
-  //drawKeypoints(keys, Red8);
-  for (int i = 0; i < keys.size(); ++i)
-  {
-    keys[i].feat().drawOnScreen(Red8);
-    getKey();
-  }
-  cout << "done!" << endl;
-  click();
-}
-
-void testHesAffSift(const Image<unsigned char>& image,
-                    bool drawFeatureCenterOnly = false)
-{
-  // Run Hessian Affine Detector
-  cout << "Detecting Hessian-Affine features... " << endl;
-  vector<Keypoint> keys(HesAffSiftDetector().run(image, true, 200));
-  cout << "Found " << keys.size() << " Hessian-Affine-SIFT keypoints" << endl;
-
-  cout << "Writing keypoints..." << endl;
-  writeKeypoints(keys, srcPath("test.hesaffkey"));
-
-  // Draw features.
-  cout << "Drawing features... ";
-  display(image);
-  drawKeypoints(keys, Red8);
-  cout << "done!" << endl;
-  click();
-  
-  checkPatch(image, keys[100]);
-  checkAffineAdaptation(image, keys[100]);
-  checkAffineAdaptation2(image, keys[100]);
-}
-
-void testMserSift(const Image<unsigned char>& image,
-                  bool drawFeatureCenterOnly = false)
-{
-  // Run MSER Detector
-  cout << "Detecting MSER features... " << endl;
-  vector<Keypoint> keys(MserSiftDetector().run(image));
-  cout << "Found " << keys.size() << " MSER-SIFT keypoints" << endl;
-
-  cout << "Writing keypoints..." << endl;
-  writeKeypoints(keys, srcPath("test.mserkey"));
-
-  // Draw features.
-  cout << "Drawing features... ";
-  display(image);
-  drawKeypoints(keys, Red8);
+  for (int i = 0; i < features.size(); ++i)
+    drawFeature(features[i], Red8);
   cout << "done!" << endl;
   click();
 }
@@ -258,14 +206,14 @@ void testMserSift(const Image<unsigned char>& image,
 int main()
 {
   Image<unsigned char> I;
-  if (!load(I, srcPath("sunflowerField.jpg")))
+  if (!load(I, srcPath("obama_2.jpg")))
     return -1;
 
   setActiveWindow(openWindow(I.width(), I.height()));
   setAntialiasing(activeWindow());
-  testHarAffSift(I);
-  testHesAffSift(I);
-  testMserSift(I);
+  testKeypointDetector<HarAffSiftDetector>(I, 10000);
+  testKeypointDetector<HesAffSiftDetector>(I, 200);
+  testKeypointDetector<MserSiftDetector>(I, 0);
   getKey();
 
   return 0;

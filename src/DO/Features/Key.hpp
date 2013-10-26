@@ -22,21 +22,6 @@ namespace DO {
     \ingroup Features
     @{
   */
-  
-  template <typename T>
-  class Descriptors : private Matrix<T, Dynamic, Dynamic>
-  {
-  public:
-    typedef Matrix<T, Dynamic, Dynamic> MatrixType;
-    typedef Descriptor<T> DescriptorType;
-
-  public:
-    Descriptors() {}
-
-  private:
-    std::vector<DescriptorType > descriptors_;
-
-  };
 
   class Key
   {
@@ -54,9 +39,28 @@ namespace DO {
     //! Non constant accessors.
     inline Feature& feat() { return *pf_; }
     inline DescriptorBase& desc() { return *pd_; }
-    bool operator==(const Key& k) const
-    { return pf_ == k.pf_ && pd_ == k.pd_; }
   };
+
+  //typedef Matrix<float, 128, 1> Desc128f;
+  //
+  ////! Deprecated...
+  //class Keypoint
+  //{
+  //public:
+  //  Keypoint() {}
+  //  Keypoint(const OERegion& f, Desc128f& d) : f_(f), d_(d) {}
+
+  //  //! Constant accessors.
+  //  inline const OERegion& feat() const { return f_; }
+  //  inline const Desc128f& desc() const { return d_; }
+
+  //  //! Non constant accessors.
+  //  inline OERegion& feat() { return f_; }
+  //  inline Desc128f& desc() { return d_; }
+  //private:
+  //  OERegion f_;
+  //  Desc128f d_;
+  //};
 
   //! @}
 

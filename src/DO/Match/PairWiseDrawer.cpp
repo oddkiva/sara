@@ -77,16 +77,16 @@ namespace DO {
     drawLine(i, a, b, c, r);
   }
 
-  void PairWiseDrawer::drawKeypoint(int i, const Keypoint& k, const Color3ub& c) const
+  void PairWiseDrawer::drawFeature(int i, const OERegion& f, const Color3ub& c) const
   {
     assert(i == 0 || i == 1);
-    k.feat().drawOnScreen(c, z1, offF(i));
+    DO::drawFeature(f, c, z1, offF(i));
   }
 
   void PairWiseDrawer::drawMatch(const Match& m, const Color3ub& c, bool drawLine) const
   {
-    drawKeypoint(0, m.x(), c);
-    drawKeypoint(1, m.y(), c);
+    drawFeature(0, m.x(), c);
+    drawFeature(1, m.y(), c);
 
     if(drawLine)
     {

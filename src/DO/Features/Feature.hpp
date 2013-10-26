@@ -26,13 +26,13 @@ namespace DO {
   public:
     Feature() {}
     virtual ~Feature() {}
-    virtual std::ostream& print(std::ostream& os) const = 0;
-    virtual std::istream& read(std::istream& in) = 0;
+    virtual std::ostream& print(std::ostream& os) const { return os; };
+    virtual std::istream& read(std::istream& in) { return in; };
+    friend std::ostream& operator<<(std::ostream& out, const Feature& f)
+    { return f.print(out); }
+    friend std::istream& operator<<(std::istream& in, Feature& f)
+    { return f.read(in); }
   };
-  inline std::ostream& operator<<(std::ostream& out, const Feature& obj)
-  { return obj.print(out); }
-  inline std::istream& operator>>(std::istream& in, Feature& obj)
-  { return obj.read(in); }
 
   //! PointFeature is fairly a self-explanatory class.
   class PointFeature : public Feature
@@ -67,10 +67,8 @@ namespace DO {
     bool operator==(const PointFeature& f) const
     { return coords() == f.coords(); }
     //! I/O
-    std::ostream& print(std::ostream& os) const
-    { return os << x() << " " << y(); }
-    std::istream& read(std::istream& in)
-    { return in >> x() >> y(); }
+    std::ostream& print(std::ostream& os) const;
+    std::istream& read(std::istream& in);
   private:
     Point2f coords_;
     Type type_;
@@ -126,17 +124,9 @@ namespace DO {
               type() == f.type());
     };
     //! I/O
-    std::ostream& print(std::ostream& os) const
-    { return PointFeature::print(os) << " " << shape_matrix_; }
-    std::istream& read(std::istream& in)
-    {
-      return PointFeature::read(in) >> 
-        shape_matrix_(0,0) >> shape_matrix_(0,1) >> 
-        shape_matrix_(1,0) >> shape_matrix_(1,1);
-    }
-    //! Graphics.
-    virtual void drawOnScreen(const Color3ub& c, float scale = 1.0f,
-                              const Point2f& off = Point2f::Zero()) const;
+    std::ostream& print(std::ostream& os) const;
+    std::istream& read(std::istream& in);
+
   private:
     Matrix2f shape_matrix_;
     float orientation_;

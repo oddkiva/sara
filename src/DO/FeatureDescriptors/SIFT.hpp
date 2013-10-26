@@ -11,8 +11,8 @@
 
 //! @file
 
-#ifndef DO_FEATUREDETECTORS_SIFT_HPP
-#define DO_FEATUREDETECTORS_SIFT_HPP
+#ifndef DO_FEATUREDESCRIPTORS_SIFT_HPP
+#define DO_FEATUREDESCRIPTORS_SIFT_HPP
 
 namespace DO {
 
@@ -28,7 +28,7 @@ namespace DO {
   {
   public: /* interface. */
     enum { Dim = N*N*O };
-    typedef Descriptor<float, Dim> SIFT;
+    typedef Matrix<float, Dim, 1> SIFT;
     //! Constructor.
     ComputeSIFTDescriptor(float binScaleUnitLength = 3.f,
                           float maxBinValue = 0.2f)
@@ -294,4 +294,4 @@ namespace DO {
 
 } /* namespace DO */
 
-#endif /* DO_FEATUREDETECTORS_SIFT_HPP */
+#endif /* DO_FEATUREDESCRIPTORS_SIFT_HPP */

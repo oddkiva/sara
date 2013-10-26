@@ -76,7 +76,7 @@ namespace DO {
         drawPoint(i, Point2f( (*vh)->point().x(), (*vh)->point().y() ), c, r);
     }
 
-    void drawKeypoint(int i, const Keypoint& k, const Color3ub& c = Red8) const;
+    void drawFeature(int i, const OERegion& f, const Color3ub& c = Red8) const;
 
     void drawMatch(const Match& m, const Color3ub& c = Magenta8, bool drawLine = false) const;
 

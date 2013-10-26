@@ -11,8 +11,8 @@
 
 //! @file
 
-#ifndef DO_FEATURES_DESCRIPTOR_HPP
-#define DO_FEATURES_DESCRIPTOR_HPP
+#ifndef DO_FEATUREDESCRIPTORS_DESCRIPTOR_HPP
+#define DO_FEATUREDESCRIPTORS_DESCRIPTOR_HPP
 
 namespace DO {
 
@@ -26,32 +26,32 @@ namespace DO {
     virtual ~DescriptorBase() {}
     virtual std::ostream& print(std::ostream& os) const = 0;
     virtual std::istream& read(std::istream& in) = 0;
+    
+    friend
+    inline std::ostream& operator<<(std::ostream& out, const DescriptorBase& d)
+    { return d.print(out); }
+    friend
+    inline std::istream& operator>>(std::istream& in, DescriptorBase& d)
+    { return d.read(in); }
   };
-
-  inline std::ostream& operator<<(std::ostream& out, const DescriptorBase& obj)
-  { return obj.print(out); }
-
-  inline std::istream& operator>>(std::istream& in, DescriptorBase& obj)
-  { return obj.read(in); }
 
   template <typename T>
   class Descriptor : public DescriptorBase, public Map<Matrix<T, Dynamic, 1> >
   {
   public:
     typedef T bin_type;
-    typedef Map<Matrix<T, Dynamic, 1> > Vector;
+    typedef Map<Matrix<T, Dynamic, 1> > MappedVectorType;
 
-    inline Descriptor() : Vector() {}
-    inline Descriptor(const Vector& v) : Vector(v) {}
+    inline Descriptor() : MappedVectorType(0, 0) {} 
+    inline Descriptor(T *data, int sz) : MappedVectorType(data, sz) {}
     virtual inline ~Descriptor() {}
 
-    template <typename OtherDerived>
-    inline Descriptor& operator=(const MatrixBase<OtherDerived>& other)
-    { this->Vector::operator=(other); return *this; }
-
-    std::ostream& print(std::ostream& os) const ;
+    std::ostream& print(std::ostream& os) const;
     std::istream& read(std::istream& in);
   };
+
+  typedef Descriptor<float> RealDescriptor;
+  typedef Descriptor<unsigned char> BinaryDescriptor;
 
   template <typename T> 
   inline std::ostream& printT(std::ostream& os, const T *array, int N)
@@ -90,16 +90,16 @@ namespace DO {
     return is;
   }
 
-  template <typename T, int N>
-  std::ostream& Descriptor<T,N>::print(std::ostream& os) const
-  { return printT<T>(os, Vector::data(), N); }
+  template <typename T>
+  std::ostream& Descriptor<T>::print(std::ostream& os) const
+  { return printT<T>(os, data(), static_cast<int>(size())); }
 
-  template <typename T, int N>
-  std::istream& Descriptor<T,N>::read(std::istream& in)
-  { return readT<T>(in, Vector::data(), N); }
+  template <typename T>
+  std::istream& Descriptor<T>::read(std::istream& in)
+  { return readT<T>(in, data(), static_cast<int>(size())); }
 
   //! @}
 
 } /* namespace DO */
 
-#endif /* DO_FEATURES_DESCRIPTOR_HPP */
+#endif /* DO_FEATUREDESCRIPTORS_DESCRIPTOR_HPP */
