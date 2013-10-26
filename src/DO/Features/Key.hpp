@@ -31,21 +31,21 @@ namespace DO {
     typedef D Descriptor;
 
     inline Key() {}
-    inline Key(const Feature& f, const Descriptor& d) : f_(f), d_(d) {}
+    inline Key(const Feature& f, const Descriptor& d) : pf_(&f), pd_(&d) {}
 
     //! Constant accessors.
-    inline const Feature& feat() const { return f_; }
-    inline const Descriptor& desc() const { return d_; }
+    inline const Feature& feat() const { return pf_; }
+    inline const Descriptor& desc() const { return pd_; }
     
     //! Non constant accessors.
-    inline Feature& feat() { return f_; }
-    inline Descriptor& desc() { return d_; }
+    inline Feature& feat() { return pf_; }
+    inline Descriptor& desc() { return pd_; }
     bool operator==(const Key& k) const
     { return feat() == k.feat() && desc() == k.desc(); }
 
   private:
-    Feature f_;
-    Descriptor d_;
+    Feature *pf_;
+    Descriptor *pd_;
   };
 
   struct KeyRef

@@ -17,7 +17,7 @@
 namespace DO {
 
   /*!
-    \ingroup FeatureDetectors
+    \ingroup FeatureDesriptors
     \defgroup Orientation Dominant Orientation Assignment
     @{
   */

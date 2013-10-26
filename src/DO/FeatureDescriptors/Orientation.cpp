@@ -10,7 +10,7 @@
 // ========================================================================== //
 
 #include <Eigen/StdVector>
-#include <DO/FeatureDetectors.hpp>
+#include <DO/FeatureDescriptors.hpp>
 
 using namespace std;
 

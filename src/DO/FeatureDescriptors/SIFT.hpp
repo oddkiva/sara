@@ -17,7 +17,7 @@
 namespace DO {
 
   /*!
-    \ingroup FeatureDetectors
+    \ingroup FeatureDescriptors
     \defgroup Descriptors
     @{
    */

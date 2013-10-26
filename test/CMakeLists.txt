@@ -11,5 +11,5 @@ add_subdirectory(Geometry)
 add_subdirectory(Features)
 add_subdirectory(FeatureDetectors)
 
-add_subdirectory(Match)
-add_subdirectory(FeatureMatching)
+#add_subdirectory(Match)
+#add_subdirectory(FeatureMatching)

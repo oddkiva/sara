@@ -47,9 +47,10 @@ if (NOT DO_FOUND)
   
   do_append_components(DO_COMPONENTS Features)
   do_append_components(DO_COMPONENTS FeatureDetectors)
+  do_append_components(DO_COMPONENTS FeatureDescriptors)
   
-  do_append_components(DO_COMPONENTS Match)
-  do_append_components(DO_COMPONENTS FeatureMatching)
+  #do_append_components(DO_COMPONENTS Match)
+  #do_append_components(DO_COMPONENTS FeatureMatching)
   
   # DEBUG: Print the list of component libraries
   do_step_message("Currently available component libraries:")

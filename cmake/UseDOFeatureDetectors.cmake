@@ -40,12 +40,6 @@ macro (do_list_featuredetectors_source_files)
     source_group("Affine Shape Adaptation" FILES
                  ${DO_FeatureDetectors_SOURCE_DIR}/AffineShapeAdaptation.hpp
                  ${DO_FeatureDetectors_SOURCE_DIR}/AffineShapeAdaptation.cpp)
-    source_group("Dominant Orientation" FILES
-                 ${DO_FeatureDetectors_SOURCE_DIR}/Orientation.hpp
-                 ${DO_FeatureDetectors_SOURCE_DIR}/Orientation.cpp)
-    source_group("SIFT Descriptor" FILES
-                 ${DO_FeatureDetectors_SOURCE_DIR}/SIFT.hpp
-                 ${DO_FeatureDetectors_SOURCE_DIR}/SIFT.cpp)
     source_group("Utilities and Debug" FILES
                  ${DO_FeatureDetectors_SOURCE_DIR}/StdVectorHelpers.hpp
                  ${DO_FeatureDetectors_SOURCE_DIR}/Subimage.hpp

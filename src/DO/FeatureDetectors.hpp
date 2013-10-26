@@ -11,8 +11,8 @@
 
 //! @file
 
-#ifndef DO_FEATUREDETECTORS_FEATUREDETECTORS_HPP
-#define DO_FEATUREDETECTORS_FEATUREDETECTORS_HPP
+#ifndef DO_FEATUREDETECTORS_HPP
+#define DO_FEATUREDETECTORS_HPP
 
 #include <DO/Defines.hpp>
 #include <DO/Graphics.hpp>
@@ -34,16 +34,6 @@
 // Affine shape adaptation (cf. [Mikolajczyk & Schmid, ECCV 2002]).
 #include "FeatureDetectors/AffineShapeAdaptation.hpp"
 
-// Feature description.
-//
-// Assign dominant orientations $\theta$ to image patch $(x,y,\sigma)$ using 
-// Lowe's method (cf. [Lowe, IJCV 2004]).
-#include "FeatureDetectors/Orientation.hpp"
-// Describe keypoint $(x,y,\sigma,\theta)$ with the SIFT descriptor (cf. 
-// [Lowe, IJCV 2004]).
-#include "FeatureDetectors/SIFT.hpp"
-
-
 // Third-party software wrappers
 //
 // Affine-covariant features detected by Mikolajczyk's binary.
@@ -62,4 +52,4 @@
 //! \defgroup FeatureDetectors
 
 
-#endif /* DO_FEATUREDETECTORS_FEATUREDETECTORS_HPP */
+#endif /* DO_FEATUREDETECTORS_HPP */

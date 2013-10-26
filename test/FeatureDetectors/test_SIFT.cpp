@@ -119,14 +119,6 @@ void testDoGSIFTKeypoints(const Image<float>& I)
 }
 #endif
 
-static HighResTimer timer;
-inline void tic() { timer.restart(); }
-inline void toc(string task)
-{
-  double elapsed = timer.elapsedMs();
-  cout << task << " time = " << elapsed << " ms" << endl;
-}
-
 int main()
 {
   Image<Rgb8> I;
@@ -134,39 +126,55 @@ int main()
     return -1;
   //I = enlarge(I,4);
 
+  HighResTimer timer;
+  double elapsed = 0.;
+  double dogDetTime, oriAssignTime, siftDescTime;
+
   // We describe the work flow of the feature detection and description.
 
   // 1. Feature extraction.
   printStage("Computing DoG extrema");
-  tic();
+  timer.restart();
   ImagePyramidParams pyrParams(-1);
   ComputeDoGExtrema computeDoGs(pyrParams);
   vector<OERegion> dogs;
   vector<Point2i> scaleOctPairs;
   dogs = computeDoGs(I.convert<float>(), &scaleOctPairs);
+  dogDetTime = timer.elapsedMs();
+  elapsed += dogDetTime;
+  cout << "DoG detection time = " << dogDetTime << " ms" << endl;
   cout << "DoGs.size() = " << dogs.size() << endl;
 
   // 2. Feature orientation.
   // Prepare the computation of gradients on gaussians.
   printStage("Computing gradients of Gaussians");
-  //tic();
+  timer.restart();
   ImagePyramid<Vector2f> gradG;
   gradG = gradPolar(computeDoGs.gaussians());
   // Find dominant gradient orientations.
   printStage("Assigning (possibly multiple) dominant orientations to DoG extrema");
   ComputeDominantOrientations assignOri;
   assignOri(gradG, dogs, scaleOctPairs);
-  //toc();
+  oriAssignTime = timer.elapsedMs();
+  elapsed += oriAssignTime;
+  cout << "orientation assignment time = " << oriAssignTime << " ms" << endl;
   cout << "DoGs.size() = " << dogs.size() << endl;
+  
 
   // 3. Feature description.
   printStage("Describe DoG extrema with SIFT descriptors");
-  //tic();
+  timer.restart();
   ComputeSIFTDescriptor<> computeSIFT;
   std::vector<ComputeSIFTDescriptor<>::SIFT> sifts;
   sifts = computeSIFT(dogs, scaleOctPairs, gradG);
-  toc("SIFT detection");
+  assignOri(gradG, dogs, scaleOctPairs);
+  siftDescTime = timer.elapsedMs();
+  elapsed += siftDescTime;
+  cout << "description time = " << siftDescTime << " ms" << endl;
   cout << "sifts.size() = " << sifts.size() << endl;
+
+  cout << "SIFT description time = " << elapsed << " ms" << endl;
+
 
   // 4. Rescale  the feature position and scale $(x,y,\sigma)$ with the octave
   //    scale.
