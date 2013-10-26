@@ -185,6 +185,8 @@ third-party/libpng/pnglibconf.h
 third-party/libtiff/libtiff/tif_config.h
 third-party/libtiff/libtiff/tiffconf.h
 
+test/Features/test_copy.*
+
 test/Graphics/MARBIBM_write.TIF
 test/Graphics/flower_write.png
 test/Graphics/ksmall_write.jpg
