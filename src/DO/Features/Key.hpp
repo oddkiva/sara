@@ -22,49 +22,44 @@ namespace DO {
     \ingroup Features
     @{
   */
-
-  template <typename F, typename D>
-  class Key
+  
+  template <typename T>
+  class Descriptors : private Matrix<T, Dynamic, Dynamic>
   {
   public:
-    typedef F Feature;
-    typedef D Descriptor;
+    typedef Matrix<T, Dynamic, Dynamic> MatrixType;
+    typedef Descriptor<T> DescriptorType;
 
-    inline Key() {}
-    inline Key(const Feature& f, const Descriptor& d) : pf_(&f), pd_(&d) {}
-
-    //! Constant accessors.
-    inline const Feature& feat() const { return pf_; }
-    inline const Descriptor& desc() const { return pd_; }
-    
-    //! Non constant accessors.
-    inline Feature& feat() { return pf_; }
-    inline Descriptor& desc() { return pd_; }
-    bool operator==(const Key& k) const
-    { return feat() == k.feat() && desc() == k.desc(); }
+  public:
+    Descriptors() {}
 
   private:
-    Feature *pf_;
-    Descriptor *pd_;
+    std::vector<DescriptorType > descriptors_;
+
   };
 
-  struct KeyRef
+  class Key
   {
-    Feature *f;
-    void *d;
-    int N;
-    int type;
-    int dScalarType;
-  };
+    Feature *pf_;
+    DescriptorBase *pd_;
 
-  typedef Key<OERegion, Desc128f> Keypoint;
+  public:
+    inline Key() : pf_(0), pd_(0) {}
+    inline Key(Feature& f, DescriptorBase& d) : pf_(&f), pd_(&d) {}
+
+    //! Constant accessors.
+    inline const Feature& feat() const { return *pf_; }
+    inline const DescriptorBase& desc() const { return *pd_; }
+    
+    //! Non constant accessors.
+    inline Feature& feat() { return *pf_; }
+    inline DescriptorBase& desc() { return *pd_; }
+    bool operator==(const Key& k) const
+    { return pf_ == k.pf_ && pd_ == k.pd_; }
+  };
 
   //! @}
 
 } /* namespace DO */
-
-#ifndef __APPLE__
-  EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(DO::Key<DO::OERegion, DO::Desc128ub>)
-#endif
 
 #endif /* DO_FEATURES_KEY_HPP */

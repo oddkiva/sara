@@ -34,12 +34,12 @@ namespace DO {
   inline std::istream& operator>>(std::istream& in, DescriptorBase& obj)
   { return obj.read(in); }
 
-  template <typename T, int N>
-  class Descriptor : public DescriptorBase, public Matrix<T, N, 1>
+  template <typename T>
+  class Descriptor : public DescriptorBase, public Map<Matrix<T, Dynamic, 1> >
   {
   public:
     typedef T bin_type;
-    typedef Matrix<T, N, 1> Vector;
+    typedef Map<Matrix<T, Dynamic, 1> > Vector;
 
     inline Descriptor() : Vector() {}
     inline Descriptor(const Vector& v) : Vector(v) {}
@@ -53,42 +53,39 @@ namespace DO {
     std::istream& read(std::istream& in);
   };
 
-  /// Descriptor typedefs
-  typedef Descriptor<uchar, 128> Desc128ub;
-  typedef Descriptor<float, 128> Desc128f;
-
   template <typename T> 
-  inline std::ostream& printT(std::ostream& os, const T *tab, int N)
+  inline std::ostream& printT(std::ostream& os, const T *array, int N)
   {
-    std::copy( tab, &tab[N], std::ostream_iterator<T>(os," "));
+    std::copy( array, &array[N], std::ostream_iterator<T>(os," "));
     return os;
   }
 
   template <> 
   inline std::ostream& printT<unsigned char>(std::ostream& os, 
-                                             const unsigned char *tab, int N)
+                                             const unsigned char *array, int N)
   {
     for(int i = 0; i < N; ++i)
-      os << (int)tab[i] << " ";
+      os << static_cast<int>(array[i]) << " ";
     return os;
   }
 
   template<typename T> 
-  inline std::istream& readT(std::istream& is, T *tab, int N)
+  inline std::istream& readT(std::istream& is, T *array, int N)
   {
     for(int i = 0; i < N; ++i)
-      is >> tab[i];
+      is >> array[i];
     return is;
   }
 
   template <> 
   inline std::istream& readT<unsigned char>(std::istream& is,
-                                            unsigned char *tab, int N)
+                                            unsigned char *array, int N)
   {
     int temp = -1;
     for(int i = 0; i < N; ++i)
     {
-      is >> temp; tab[i] = (unsigned char)temp;
+      is >> temp;
+      array[i] = static_cast<unsigned char>(temp);
     }
     return is;
   }
