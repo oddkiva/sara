@@ -19,8 +19,8 @@ namespace DO
 	{
 	public:
     //! Constructors
-    AnnMatcher(const std::vector<Keypoint>& keys1,
-               const std::vector<Keypoint>& keys2,
+    AnnMatcher(const std::vector<OERegion>& feats1,
+               const std::vector<OERegion>& feats2,
                float siftRatioT = 1.2f);
 
     AnnMatcher(const std::vector<Keypoint>& keys, float siftRatioT = 1.2f,

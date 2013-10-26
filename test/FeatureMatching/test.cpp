@@ -9,7 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/FeatureDetectors.hpp>
+#include <DO/FeatureDetectorWrappers.hpp>
 #include <DO/FeatureMatching.hpp>
 #include <DO/Graphics.hpp>
 #include <DO/ImageProcessing.hpp>
@@ -60,184 +60,184 @@ void load(Image<Rgb8>& image1, Image<Rgb8>& image2,
 DO::Ellipse ellFromFeature(const OERegion& f)
 { return fromShapeMat(f.shapeMat().cast<double>(), f.center().cast<double>()); }
 
-void checkPatch(const Image<unsigned char>& image,
-                const Keypoint& k)
-{
-  int w = image.width();
-  int h = image.height();
-  display(image);
-  k.feat().drawOnScreen(Yellow8);
-  saveScreen(activeWindow(), srcPath("whole_picture.png"));
-
-
-  int r = 100;
-  int patchSz = 2*r;
-  Image<float> patch(w, h);
-  patch.array().fill(0.f);
-
-  OERegion rg(k.feat());
-  rg.center().fill(patchSz/2.f);
-  rg.shapeMat() /= 4.;
-
-  Matrix3f A;
-  A.fill(0.f);
-  A(0,0) = A(1,1) = r/2.;
-  A(0,2) = k.feat().x();
-  A(1,2) = k.feat().y();
-  A(2,2) = 1.f;
-  cout << "A=\n" << A << endl;
-
-  for (int y = 0; y < patchSz; ++y)
-  {
-    float v = float(y-r)/r;
-    for (int x = 0; x < patchSz; ++x)
-    {
-      float u = float(x-r)/r;
-      Point3f pp(u, v, 1.);
-      pp = A*pp;
-
-      Point2f p;
-      p << pp(0), pp(1);
-
-      if (p.x() < 0 || p.x() >= w || p.y() < 0 || p.y() >= h)
-        continue;
-
-      patch(x,y) = interpolate(image, p);
-    }
-  }
-
-  Window w1 = activeWindow();
-  Window w2 = openWindow(patchSz, patchSz);
-  setActiveWindow(w2);
-  setAntialiasing();
-  display(patch);
-  rg.drawOnScreen(Yellow8);
-  saveScreen(activeWindow(), srcPath("patch.png"));
-  getKey();
-  closeWindow(w2);
-
-  milliSleep(40);
-  setActiveWindow(w1);
-}
-
-void checkAffineAdaptation(const Image<unsigned char>& image,
-                           const Keypoint& k)
-{
-  int w = image.width();
-  int h = image.height();
-  display(image);
-  k.feat().drawOnScreen(Yellow8);
-
-
-  int r = 100;
-  int patchSz = 2*r;
-  Image<float> patch(w, h);
-  patch.array().fill(0.f);
-
-
-  OERegion rg(k.feat());
-  rg.center().fill(patchSz/2.f);
-  rg.orientation() = 0.f;
-  Matrix2f Q = Rotation2D<float>(k.feat().orientation()).matrix();
-  rg.shapeMat() = Q.transpose()*k.feat().shapeMat()*Q/4.;
-
-
-  Matrix3f A(k.feat().affinity());  
-  A.fill(0.f);
-  A.block(0,0,2,2) = Q*r/2.;
-  A(0,2) = k.feat().x();
-  A(1,2) = k.feat().y();
-  A(2,2) = 1.f;
-  cout << "A=\n" << A << endl;
-
-  for (int y = 0; y < patchSz; ++y)
-  {
-    float v = float(y-r)/r;
-    for (int x = 0; x < patchSz; ++x)
-    {
-      float u = float(x-r)/r;
-      Point3f pp(u, v, 1.);
-      pp = A*pp;
-
-      Point2f p;
-      p << pp(0), pp(1);
-
-      if (p.x() < 0 || p.x() >= w || p.y() < 0 || p.y() >= h)
-        continue;
-
-      patch(x,y) = interpolate(image, p);
-    }
-  }
-
-  Window w1 = activeWindow();
-  Window w2 = openWindow(patchSz, patchSz);
-  setActiveWindow(w2);
-  setAntialiasing();
-  display(patch);
-  rg.drawOnScreen(Yellow8);
-  saveScreen(activeWindow(), srcPath("rotated_patch.png"));
-  getKey();
-  closeWindow(w2);
-
-  milliSleep(40);
-  setActiveWindow(w1);
-}
-
-void checkAffineAdaptation2(const Image<unsigned char>& image,
-                            const Keypoint& k)
-{
-  int w = image.width();
-  int h = image.height();
-  display(image);
-  k.feat().drawOnScreen(Blue8);
-
-
-  int r = 100;
-  int patchSz = 2*r;
-  Image<float> patch(w, h);
-  patch.array().fill(0.f);
-
-
-  OERegion rg(k.feat());
-  rg.center().fill(patchSz/2.f);
-  rg.orientation() = 0.f;
-  rg.shapeMat() = Matrix2f::Identity()*4.f / (r*r);
-
-  Matrix3f A(k.feat().affinity());
-  cout << "A=\n" << A << endl;
-
-  for (int y = 0; y < patchSz; ++y)
-  {
-    float v = 2*float(y-r)/r;
-    for (int x = 0; x < patchSz; ++x)
-    {
-      float u = 2*float(x-r)/r;
-      Point3f pp(u, v, 1.);
-      pp = A*pp;
-
-      Point2f p;
-      p << pp(0), pp(1);
-
-      if (p.x() < 0 || p.x() >= w || p.y() < 0 || p.y() >= h)
-        continue;
-
-      patch(x,y) = interpolate(image, p);
-    }
-  }
-
-  Window w1 = activeWindow();
-  Window w2 = openWindow(patchSz, patchSz);
-  setActiveWindow(w2);
-  setAntialiasing();
-  display(patch);
-  rg.drawOnScreen(Yellow8);
-  saveScreen(activeWindow(), srcPath("normalized_patch.png"));
-  getKey();
-  closeWindow(w2);
-
-  milliSleep(40);
-  setActiveWindow(w1);
-}
+//void checkPatch(const Image<unsigned char>& image,
+//                const Keypoint& k)
+//{
+//  int w = image.width();
+//  int h = image.height();
+//  display(image);
+//  k.feat().drawOnScreen(Yellow8);
+//  saveScreen(activeWindow(), srcPath("whole_picture.png"));
+//
+//
+//  int r = 100;
+//  int patchSz = 2*r;
+//  Image<float> patch(w, h);
+//  patch.array().fill(0.f);
+//
+//  OERegion rg(k.feat());
+//  rg.center().fill(patchSz/2.f);
+//  rg.shapeMat() /= 4.;
+//
+//  Matrix3f A;
+//  A.fill(0.f);
+//  A(0,0) = A(1,1) = r/2.;
+//  A(0,2) = k.feat().x();
+//  A(1,2) = k.feat().y();
+//  A(2,2) = 1.f;
+//  cout << "A=\n" << A << endl;
+//
+//  for (int y = 0; y < patchSz; ++y)
+//  {
+//    float v = float(y-r)/r;
+//    for (int x = 0; x < patchSz; ++x)
+//    {
+//      float u = float(x-r)/r;
+//      Point3f pp(u, v, 1.);
+//      pp = A*pp;
+//
+//      Point2f p;
+//      p << pp(0), pp(1);
+//
+//      if (p.x() < 0 || p.x() >= w || p.y() < 0 || p.y() >= h)
+//        continue;
+//
+//      patch(x,y) = interpolate(image, p);
+//    }
+//  }
+//
+//  Window w1 = activeWindow();
+//  Window w2 = openWindow(patchSz, patchSz);
+//  setActiveWindow(w2);
+//  setAntialiasing();
+//  display(patch);
+//  rg.drawOnScreen(Yellow8);
+//  saveScreen(activeWindow(), srcPath("patch.png"));
+//  getKey();
+//  closeWindow(w2);
+//
+//  milliSleep(40);
+//  setActiveWindow(w1);
+//}
+//
+//void checkAffineAdaptation(const Image<unsigned char>& image,
+//                           const Keypoint& k)
+//{
+//  int w = image.width();
+//  int h = image.height();
+//  display(image);
+//  k.feat().drawOnScreen(Yellow8);
+//
+//
+//  int r = 100;
+//  int patchSz = 2*r;
+//  Image<float> patch(w, h);
+//  patch.array().fill(0.f);
+//
+//
+//  OERegion rg(k.feat());
+//  rg.center().fill(patchSz/2.f);
+//  rg.orientation() = 0.f;
+//  Matrix2f Q = Rotation2D<float>(k.feat().orientation()).matrix();
+//  rg.shapeMat() = Q.transpose()*k.feat().shapeMat()*Q/4.;
+//
+//
+//  Matrix3f A(k.feat().affinity());  
+//  A.fill(0.f);
+//  A.block(0,0,2,2) = Q*r/2.;
+//  A(0,2) = k.feat().x();
+//  A(1,2) = k.feat().y();
+//  A(2,2) = 1.f;
+//  cout << "A=\n" << A << endl;
+//
+//  for (int y = 0; y < patchSz; ++y)
+//  {
+//    float v = float(y-r)/r;
+//    for (int x = 0; x < patchSz; ++x)
+//    {
+//      float u = float(x-r)/r;
+//      Point3f pp(u, v, 1.);
+//      pp = A*pp;
+//
+//      Point2f p;
+//      p << pp(0), pp(1);
+//
+//      if (p.x() < 0 || p.x() >= w || p.y() < 0 || p.y() >= h)
+//        continue;
+//
+//      patch(x,y) = interpolate(image, p);
+//    }
+//  }
+//
+//  Window w1 = activeWindow();
+//  Window w2 = openWindow(patchSz, patchSz);
+//  setActiveWindow(w2);
+//  setAntialiasing();
+//  display(patch);
+//  rg.drawOnScreen(Yellow8);
+//  saveScreen(activeWindow(), srcPath("rotated_patch.png"));
+//  getKey();
+//  closeWindow(w2);
+//
+//  milliSleep(40);
+//  setActiveWindow(w1);
+//}
+//
+//void checkAffineAdaptation2(const Image<unsigned char>& image,
+//                            const Keypoint& k)
+//{
+//  int w = image.width();
+//  int h = image.height();
+//  display(image);
+//  k.feat().drawOnScreen(Blue8);
+//
+//
+//  int r = 100;
+//  int patchSz = 2*r;
+//  Image<float> patch(w, h);
+//  patch.array().fill(0.f);
+//
+//
+//  OERegion rg(k.feat());
+//  rg.center().fill(patchSz/2.f);
+//  rg.orientation() = 0.f;
+//  rg.shapeMat() = Matrix2f::Identity()*4.f / (r*r);
+//
+//  Matrix3f A(k.feat().affinity());
+//  cout << "A=\n" << A << endl;
+//
+//  for (int y = 0; y < patchSz; ++y)
+//  {
+//    float v = 2*float(y-r)/r;
+//    for (int x = 0; x < patchSz; ++x)
+//    {
+//      float u = 2*float(x-r)/r;
+//      Point3f pp(u, v, 1.);
+//      pp = A*pp;
+//
+//      Point2f p;
+//      p << pp(0), pp(1);
+//
+//      if (p.x() < 0 || p.x() >= w || p.y() < 0 || p.y() >= h)
+//        continue;
+//
+//      patch(x,y) = interpolate(image, p);
+//    }
+//  }
+//
+//  Window w1 = activeWindow();
+//  Window w2 = openWindow(patchSz, patchSz);
+//  setActiveWindow(w2);
+//  setAntialiasing();
+//  display(patch);
+//  rg.drawOnScreen(Yellow8);
+//  saveScreen(activeWindow(), srcPath("normalized_patch.png"));
+//  getKey();
+//  closeWindow(w2);
+//
+//  milliSleep(40);
+//  setActiveWindow(w1);
+//}
 
 int main()
 {

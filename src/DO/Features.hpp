@@ -25,6 +25,7 @@
 #include "Features/Feature.hpp"
 #include "Features/Descriptor.hpp"
 #include "Features/DescriptorMatrix.hpp"
+#include "Features/Key.hpp"
 // View, I/O
 #include "Features/Draw.hpp"
 #include "Features/IO.hpp"
