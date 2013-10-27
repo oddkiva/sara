@@ -80,7 +80,7 @@ namespace DO {
   void PairWiseDrawer::drawFeature(int i, const OERegion& f, const Color3ub& c) const
   {
     assert(i == 0 || i == 1);
-    DO::drawFeature(f, c, z1, offF(i));
+    f.draw(c, z1, offF(i));
   }
 
   void PairWiseDrawer::drawMatch(const Match& m, const Color3ub& c, bool drawLine) const

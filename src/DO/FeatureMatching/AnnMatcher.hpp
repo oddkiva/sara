@@ -19,20 +19,20 @@ namespace DO
 	{
 	public:
     //! Constructors
-    AnnMatcher(const std::vector<OERegion>& feats1,
-               const std::vector<OERegion>& feats2,
+    AnnMatcher(const DescriptorMatrix<float>& descriptors1,
+               const DescriptorMatrix<float>& descriptors2,
                float siftRatioT = 1.2f);
 
-    AnnMatcher(const std::vector<Keypoint>& keys, float siftRatioT = 1.2f,
-               float minMaxMetricDistT = 0.5f, float pixelDistT = 10.f);
+    AnnMatcher(const DescriptorMatrix<float>& descriptors,
+               float siftRatioT = 1.2f,
+               float minMaxMetricDistT = 0.5f,
+               float pixelDistT = 10.f);
 
     std::vector<Match> computeMatches();
     std::vector<Match> computeSelfMatches() { return computeMatches(); }
 		
 	private: /* data members */
 		//! Input parameters
-    const std::vector<Keypoint>& keys1_;
-    const std::vector<Keypoint>& keys2_;
 		float sqRatioT;
 
 		//! Internals

@@ -84,9 +84,8 @@ void testMultiScaleHessian(const Image<float>& I)
       //display(D(s,o).compute<ColorRescale>(), 0, 0, D.octaveScalingFactor(o));
       //display(I);
       for (size_t i = 0; i != extrema.size(); ++i)
-        drawFeature(extrema[i],
-                    extrema[i].extremumType()==OERegion::Max?Red8:Blue8,
-                    D.octaveScalingFactor(o));
+        extrema[i].draw(extrema[i].extremumType()==OERegion::Max?Red8:Blue8,
+                        D.octaveScalingFactor(o));
       getKey();
     }
   }

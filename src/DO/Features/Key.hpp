@@ -25,19 +25,19 @@ namespace DO {
 
   class Key
   {
-    Feature *pf_;
+    VisualFeature *pf_;
     DescriptorBase *pd_;
 
   public:
     inline Key() : pf_(0), pd_(0) {}
-    inline Key(Feature& f, DescriptorBase& d) : pf_(&f), pd_(&d) {}
+    inline Key(VisualFeature& f, DescriptorBase& d) : pf_(&f), pd_(&d) {}
 
     //! Constant accessors.
-    inline const Feature& feat() const { return *pf_; }
+    inline const VisualFeature& feat() const { return *pf_; }
     inline const DescriptorBase& desc() const { return *pd_; }
     
     //! Non constant accessors.
-    inline Feature& feat() { return *pf_; }
+    inline VisualFeature& feat() { return *pf_; }
     inline DescriptorBase& desc() { return *pd_; }
   };
 

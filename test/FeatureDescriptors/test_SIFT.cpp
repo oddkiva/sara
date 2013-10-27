@@ -120,31 +120,30 @@ void testDoGSIFTKeypoints(const Image<float>& I)
 }
 #endif
 
-int main()
-{
-  Image<Rgb8> I;
-  if (!load(I, srcPath("sunflowerField.jpg")))
-    return -1;
-  //I = enlarge(I,4);
+typedef pair<vector<OERegion>, DescriptorMatrix<float> > Keys;
 
+Keys computeSIFT(const Image<float>& image)
+{
+  // Time everything.
   HighResTimer timer;
   double elapsed = 0.;
-  double dogDetTime, oriAssignTime, siftDescTime;
+  double DoGDetTime, oriAssignTime, siftDescTime;
 
   // We describe the work flow of the feature detection and description.
+  vector<OERegion> DoGs;
+  DescriptorMatrix<float> SIFTDescriptors;
 
   // 1. Feature extraction.
   printStage("Computing DoG extrema");
   timer.restart();
   ImagePyramidParams pyrParams(-1);
   ComputeDoGExtrema computeDoGs(pyrParams);
-  vector<OERegion> dogs;
   vector<Point2i> scaleOctPairs;
-  dogs = computeDoGs(I.convert<float>(), &scaleOctPairs);
-  dogDetTime = timer.elapsedMs();
-  elapsed += dogDetTime;
-  cout << "DoG detection time = " << dogDetTime << " ms" << endl;
-  cout << "DoGs.size() = " << dogs.size() << endl;
+  DoGs = computeDoGs(image, &scaleOctPairs);
+  DoGDetTime = timer.elapsedMs();
+  elapsed += DoGDetTime;
+  cout << "DoG detection time = " << DoGDetTime << " ms" << endl;
+  cout << "DoGs.size() = " << DoGs.size() << endl;
 
   // 2. Feature orientation.
   // Prepare the computation of gradients on gaussians.
@@ -154,52 +153,64 @@ int main()
   gradG = gradPolar(computeDoGs.gaussians());
   // Find dominant gradient orientations.
   printStage("Assigning (possibly multiple) dominant orientations to DoG extrema");
-  ComputeDominantOrientations assignOri;
-  assignOri(gradG, dogs, scaleOctPairs);
+  ComputeDominantOrientations assignOrientations;
+  assignOrientations(gradG, DoGs, scaleOctPairs);
   oriAssignTime = timer.elapsedMs();
   elapsed += oriAssignTime;
   cout << "orientation assignment time = " << oriAssignTime << " ms" << endl;
-  cout << "DoGs.size() = " << dogs.size() << endl;
-  
+  cout << "DoGs.size() = " << DoGs.size() << endl;
+
 
   // 3. Feature description.
   printStage("Describe DoG extrema with SIFT descriptors");
   timer.restart();
   ComputeSIFTDescriptor<> computeSIFT;
-  std::vector<ComputeSIFTDescriptor<>::SIFT> sifts;
-  sifts = computeSIFT(dogs, scaleOctPairs, gradG);
-  assignOri(gradG, dogs, scaleOctPairs);
+  SIFTDescriptors = computeSIFT(DoGs, scaleOctPairs, gradG);
+  assignOrientations(gradG, DoGs, scaleOctPairs);
   siftDescTime = timer.elapsedMs();
   elapsed += siftDescTime;
   cout << "description time = " << siftDescTime << " ms" << endl;
-  cout << "sifts.size() = " << sifts.size() << endl;
+  cout << "sifts.size() = " << SIFTDescriptors.size() << endl;
 
   cout << "SIFT description time = " << elapsed << " ms" << endl;
 
 
   // 4. Rescale  the feature position and scale $(x,y,\sigma)$ with the octave
   //    scale.
-  printStage("Draw features");
-  for (size_t i = 0; i != dogs.size(); ++i)
+  for (size_t i = 0; i != DoGs.size(); ++i)
   {
     float octScaleFact = gradG.octaveScalingFactor(scaleOctPairs[i](1));
-    dogs[i].center() *= octScaleFact;
-    dogs[i].shapeMat() /= pow(octScaleFact, 2);
+    DoGs[i].center() *= octScaleFact;
+    DoGs[i].shapeMat() /= pow(octScaleFact, 2);
   }
 
-  // 5. Check the features visually.
-  openWindow(I.width(), I.height());
-  display(I.convert<float>());
-  setAntialiasing();
-  for (size_t i=0; i != dogs.size(); ++i)
-  {
-    /*cout << dogs[i].center().transpose() << " " 
-         << dogs[i].scale() << " "
-         << dogs[i].orientation() << endl;*/
-    drawFeature(dogs[i], dogs[i].extremumType() == OERegion::Max ? Red8 : Blue8);
-    //getKey();
-  }
-  getKey();
+  return make_pair(DoGs, SIFTDescriptors);
+}
+
+
+
+int main()
+{
+  Image<Rgb8> image;
+  if (!load(image, srcPath("sunflowerField.jpg")))
+    return -1;
+
+  Keys SIFTs = computeSIFT(image.convert<float>());
+
+  //// 5. Check the features visually.
+  //printStage("Draw features");
+  //openWindow(I.width(), I.height());
+  //display(I.convert<float>());
+  //setAntialiasing();
+  //for (size_t i=0; i != dogs.size(); ++i)
+  //{
+  //  /*cout << dogs[i].center().transpose() << " " 
+  //       << dogs[i].scale() << " "
+  //       << dogs[i].orientation() << endl;*/
+  //  dogs[i].draw(dogs[i].extremumType() == OERegion::Max ? Red8 : Blue8);
+  //  //getKey();
+  //}
+  //getKey();
 
   return 0;
 }

@@ -11,7 +11,7 @@ void checkPatch(const Image<unsigned char>& image,
   int w = image.width();
   int h = image.height();
   display(image);
-  drawFeature(f, Yellow8);
+  f.draw(Yellow8);
   saveScreen(activeWindow(), srcPath("whole_picture.png"));
 
 
@@ -56,7 +56,7 @@ void checkPatch(const Image<unsigned char>& image,
   setActiveWindow(w2);
   setAntialiasing();
   display(patch);
-  drawFeature(rg, Yellow8);
+  rg.draw(Yellow8);
   saveScreen(activeWindow(), srcPath("patch.png"));
   getKey();
   closeWindow(w2);
@@ -71,7 +71,7 @@ void checkAffineAdaptation(const Image<unsigned char>& image,
   int w = image.width();
   int h = image.height();
   display(image);
-  drawFeature(f, Yellow8);
+  f.draw(Yellow8);
 
 
   int r = 100;
@@ -119,7 +119,7 @@ void checkAffineAdaptation(const Image<unsigned char>& image,
   setActiveWindow(w2);
   setAntialiasing();
   display(patch);
-  drawFeature(rg, Yellow8);
+  rg.draw(Yellow8);
   saveScreen(activeWindow(), srcPath("rotated_patch.png"));
   getKey();
   closeWindow(w2);
@@ -134,7 +134,7 @@ void checkAffineAdaptation2(const Image<unsigned char>& image,
   int w = image.width();
   int h = image.height();
   display(image);
-  drawFeature(f, Blue8);
+  f.draw(Blue8);
 
 
   int r = 100;
@@ -175,7 +175,7 @@ void checkAffineAdaptation2(const Image<unsigned char>& image,
   setActiveWindow(w2);
   setAntialiasing();
   display(patch);
-  drawFeature(rg, Yellow8);
+  rg.draw(Yellow8);
   saveScreen(activeWindow(), srcPath("normalized_patch.png"));
   getKey();
   closeWindow(w2);
@@ -198,7 +198,7 @@ void testKeypointDetector(const Image<unsigned char>& image,
   cout << "Drawing features... ";
   display(image);
   for (int i = 0; i < features.size(); ++i)
-    drawFeature(features[i], Red8);
+    features[i].draw(Red8);
   cout << "done!" << endl;
   click();
 }

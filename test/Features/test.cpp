@@ -26,7 +26,7 @@ void checkAffineAdaptation(const Image<unsigned char>& image,
   int w = image.width();
   int h = image.height();
   display(image);
-  drawFeature(f, Blue8);
+  f.draw(Blue8);
     
 
   int r = 100;
@@ -66,7 +66,7 @@ void checkAffineAdaptation(const Image<unsigned char>& image,
   setActiveWindow(w2);
   setAntialiasing();
   display(patch);
-  drawFeature(rg, Blue8);
+  rg.draw(Blue8);
   milliSleep(1000);
   closeWindow(w2);
 
@@ -114,7 +114,7 @@ void readFeatures(const Image<unsigned char>& image,
   // Draw features.
   cout << "Drawing features... ";
   display(image);
-  drawFeatures(features, Red8);
+  drawOERegions(features, Red8);
   cout << "done!" << endl;
   milliSleep(1000);
 }

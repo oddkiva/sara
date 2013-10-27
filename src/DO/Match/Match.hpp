@@ -41,8 +41,6 @@ namespace DO {
     bool isYNull() const { return y_ == 0; }
     const OERegion& x() const { if (isXNull()) throw 0; return *x_; }
     const OERegion& y() const { if (isYNull()) throw 0; return *y_; }
-    const OERegion& featX() const { return x(); }
-    const OERegion& featY() const { return y(); }
     const Point2f& posX() const { return x().center(); }
     const Point2f& posY() const { return y().center(); }
     int rank() const { return target_rank_; }

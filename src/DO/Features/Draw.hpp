@@ -21,12 +21,8 @@ namespace DO {
     @{
   */
 
-  //! Graphics.
-  void drawFeature(const OERegion& f, const Color3ub& c, float scale = 1.0f,
-                   const Point2f& off = Point2f::Zero());
-
-  void drawFeatures(const std::vector<OERegion>& features, const Color3ub& c,
-                    float scale = 1.0f, const Point2f& off = Point2f::Zero());
+  void drawOERegions(const std::vector<OERegion>& features, const Color3ub& c,
+                     float scale = 1.f, const Point2f& off = Point2f::Zero());
 
   //! @}
 

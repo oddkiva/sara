@@ -115,8 +115,8 @@ namespace DO {
 
   void drawMatch(const Match& m, const Color3ub& c, const Point2f& off2, float z)
   {
-    drawFeature(m.featX(), c, z);
-    drawFeature(m.featY(), c, z, off2);
+    m.x().draw(c, z);
+    m.y().draw(c, z, off2);
     Point2f p1(m.posX()*z);
     Point2f p2((m.posY()+off2)*z);
     drawLine(p1, p2, c);

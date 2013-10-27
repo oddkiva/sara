@@ -212,7 +212,7 @@ void checkKeys(const Image<float>& I, const vector<OERegion>& features)
 {
   display(I);
   setAntialiasing();
-  drawFeatures(features, Red8);
+  drawOERegions(features, Red8);
   getKey();
 }
 

@@ -28,14 +28,15 @@ namespace DO {
   {
   public: /* interface. */
     enum { Dim = N*N*O };
-    typedef Matrix<float, Dim, 1> SIFT;
+    typedef Matrix<float, Dim, 1> SIFTDescriptor;
     //! Constructor.
     ComputeSIFTDescriptor(float binScaleUnitLength = 3.f,
                           float maxBinValue = 0.2f)
-      : bin_scale_unit_length_(binScaleUnitLength), max_bin_value_(maxBinValue) {}
+      : bin_scale_unit_length_(binScaleUnitLength)
+      , max_bin_value_(maxBinValue) {}
     //! Computes the SIFT descriptor for keypoint \$(x,y,\sigma,\theta)\f$.
-    SIFT operator()(float x, float y, float sigma, float theta,
-                    const Image<Vector2f>& gradPolar) const
+    SIFTDescriptor operator()(float x, float y, float sigma, float theta,
+                              const Image<Vector2f>& gradPolar) const
     {
       const float pi = static_cast<float>(M_PI);
       /*
@@ -80,7 +81,7 @@ namespace DO {
         Let us initialize the SIFT descriptor consisting of the NxN histograms 
         $\mathbf{h}_{i,j}$, each in $\mathbf{R}^O$ as follows.
       */
-      SIFT h(SIFT::Zero());
+      SIFTDescriptor h(SIFTDescriptor::Zero());
 
       /*
        In the rescaled and oriented coordinate frame bound to the patch $P(k)$, 
@@ -179,16 +180,17 @@ namespace DO {
       return h;
     }
     //! Helper member function.
-    SIFT operator()(const OERegion& f, const Image<Vector2f>& gradPolar) const
+    SIFTDescriptor operator()(const OERegion& f,
+                              const Image<Vector2f>& gradPolar) const
     { return this->operator()(f.x(), f.y(), f.scale(), f.orientation(), gradPolar); }
     //! Helper member function.
-    std::vector<SIFT> operator()(const std::vector<OERegion>& features,
-                                 const std::vector<Point2i>& scaleOctavePairs,
-                                 const ImagePyramid<Vector2f>& gradPolars) const
+    DescriptorMatrix<float>
+    operator()(const std::vector<OERegion>& features,
+               const std::vector<Point2i>& scaleOctavePairs,
+               const ImagePyramid<Vector2f>& gradPolars) const
     {
-      std::vector<SIFT> sifts;
-      sifts.resize(features.size());
-      for (size_t i = 0; i != features.size(); ++i)
+      DescriptorMatrix<float> sifts(int(features.size()), Dim);
+      for (int i = 0; i < features.size(); ++i)
       {
         sifts[i] = this->operator()(
           features[i],
@@ -198,8 +200,8 @@ namespace DO {
     }
   public: /* debugging functions. */
     //! Check the grid on which we are drawing.
-    void drawGrid(float x, float y, float sigma, float theta, float octScaleFactor,
-                   int penWidth = 1)
+    void drawGrid(float x, float y, float sigma, float theta,
+                  float octScaleFactor, int penWidth = 1)
     {
       const float lambda = 3.f;
       const float l = lambda*sigma;
@@ -225,7 +227,7 @@ namespace DO {
     }
   private: /* member functions. */
     //! The accumulation function based on trilinear interpolation.
-    void accumulate(SIFT& h, const Vector2f& pos, float ori,
+    void accumulate(SIFTDescriptor& h, const Vector2f& pos, float ori,
                     float weight, float mag) const
     {
       // By trilinear interpolation, we mean that in this translated coordinate
@@ -272,13 +274,13 @@ namespace DO {
       }
     }
     //! Normalize in a contrast-invariant way.
-    void normalize(SIFT& h)
+    void normalize(SIFTDescriptor& h)
     {
       // Euclidean normalization.
       h.normalize();
       // Clamp histogram bin values $h_i$ to 0.2 for enhanced robustness to 
       // lighting change.
-      h = h.cwiseMin(SIFT::Ones()*max_bin_value_);
+      h = h.cwiseMin(SIFTDescriptor::Ones()*max_bin_value_);
       // Renormalize again.
       h.normalize();
     }

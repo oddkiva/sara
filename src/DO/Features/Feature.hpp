@@ -21,21 +21,23 @@ namespace DO {
     @{
   */
 
-  //! Abstract 'Feature' class.
-  class Feature {
+  //! Abstract 'VisualFeature' class.
+  class VisualFeature {
   public:
-    Feature() {}
-    virtual ~Feature() {}
-    virtual std::ostream& print(std::ostream& os) const { return os; };
-    virtual std::istream& read(std::istream& in) { return in; };
-    friend std::ostream& operator<<(std::ostream& out, const Feature& f)
+    VisualFeature() {}
+    virtual ~VisualFeature() {}
+    virtual void draw(const Color3ub& c, float scale = 1.f,
+                      const Point2f& offset = Point2f::Zero()) const = 0;
+    virtual std::ostream& print(std::ostream& os) const = 0;
+    virtual std::istream& read(std::istream& in) = 0;
+    friend std::ostream& operator<<(std::ostream& out, const VisualFeature& f)
     { return f.print(out); }
-    friend std::istream& operator<<(std::istream& in, Feature& f)
+    friend std::istream& operator<<(std::istream& in, VisualFeature& f)
     { return f.read(in); }
   };
 
-  //! PointFeature is fairly a self-explanatory class.
-  class PointFeature : public Feature
+  //! PointFeature for interest points
+  class PointFeature : public VisualFeature
   {
   public:
     //! ID for each point feature type.
@@ -43,7 +45,7 @@ namespace DO {
                 DoG, LoG, DoH, MSER, HesAff, HesLap };
     enum ExtremumType { Max = 1, Min = -1 };
     //! Constructors.
-    PointFeature() : Feature() {}
+    PointFeature() : VisualFeature() {}
     PointFeature(const Point2f& coords) : coords_(coords) {}
     //! Destructor.
     virtual ~PointFeature() {}
@@ -66,7 +68,10 @@ namespace DO {
     //! Equality operator.
     bool operator==(const PointFeature& f) const
     { return coords() == f.coords(); }
-    //! I/O
+    //! Drawing.
+    void draw(const Color3ub& c, float scale = 1.f,
+              const Point2f& offset = Point2f::Zero()) const;
+    //! I/O.
     std::ostream& print(std::ostream& os) const;
     std::istream& read(std::istream& in);
   private:
@@ -123,6 +128,9 @@ namespace DO {
               orientation() == f.orientation() &&
               type() == f.type());
     };
+    //! Drawing.
+    void draw(const Color3ub& c, float scale = 1.f,
+              const Point2f& offset = Point2f::Zero()) const;
     //! I/O
     std::ostream& print(std::ostream& os) const;
     std::istream& read(std::istream& in);

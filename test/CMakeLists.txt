@@ -14,4 +14,4 @@ add_subdirectory(FeatureDescriptors)
 add_subdirectory(FeatureDetectorWrappers)
 
 add_subdirectory(Match)
-add_subdirectory(FeatureMatching)
+#add_subdirectory(FeatureMatching)
