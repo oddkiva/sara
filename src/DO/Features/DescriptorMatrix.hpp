@@ -41,14 +41,11 @@ namespace DO {
     matrix_type& matrix() { return *this; }
     const matrix_type& matrix() const { return *this; }
 
-    int size() const { return static_cast<int>(cols()); }
-    int dimension() const { return static_cast<int>(rows()); }
+    int size() const { return static_cast<int>(matrix_type::cols()); }
+    int dimension() const { return static_cast<int>(matrix_type::rows()); }
 
-    typename descriptor_type operator[](int i)
-    { return this->col(i); }
-
-    typename const_descriptor_type operator[](int i) const
-    { return this->col(i); }
+    descriptor_type operator[](int i) { return this->col(i); }
+    const_descriptor_type operator[](int i) const { return this->col(i); }
   };
 
   //! @}

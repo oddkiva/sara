@@ -92,11 +92,13 @@ namespace DO {
 
   template <typename T>
   std::ostream& Descriptor<T>::print(std::ostream& os) const
-  { return printT<T>(os, data(), static_cast<int>(size())); }
+  { return printT<T>(os, MappedVectorType::data(),
+                     static_cast<int>(MappedVectorType::size())); }
 
   template <typename T>
   std::istream& Descriptor<T>::read(std::istream& in)
-  { return readT<T>(in, data(), static_cast<int>(size())); }
+  { return readT<T>(in, MappedVectorType::data(),
+                    static_cast<int>(MappedVectorType::size())); }
 
   //! @}
 
