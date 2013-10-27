@@ -13,15 +13,15 @@
 
 namespace DO {
 
-  bool KeyProximity::operator()(const Keypoint& k1, const Keypoint& k2) const
+  bool KeyProximity::operator()(const OERegion& f1, const OERegion& f2) const
   {
-    SquaredRefDistance<float, 2> m1(mappedSquaredMetric(k1.feat()));
-    SquaredRefDistance<float, 2> m2(mappedSquaredMetric(k2.feat()));
+    SquaredRefDistance<float, 2> m1(mappedSquaredMetric(f1));
+    SquaredRefDistance<float, 2> m2(mappedSquaredMetric(f1));
 
-    float sd1 = m1(k1.feat().center(), k2.feat().center());
-    float sd2 = m2(k1.feat().center(), k2.feat().center());
+    float sd1 = m1(f1.center(), f2.center());
+    float sd2 = m2(f1.center(), f2.center());
 
-    float pixelDist2 = (k1.feat().center() - k2.feat().center()).squaredNorm();
+    float pixelDist2 = (f1.center() - f2.center()).squaredNorm();
 
     return (pixelDist2 < sqPixDist) || 
       (sd1 < sqMetricDist) || (sd2 < sqMetricDist);

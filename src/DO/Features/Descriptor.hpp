@@ -35,6 +35,7 @@ namespace DO {
     { return d.read(in); }
   };
 
+  //! Deprecated.
   template <typename T>
   class Descriptor : public DescriptorBase, public Map<Matrix<T, Dynamic, 1> >
   {
@@ -49,9 +50,6 @@ namespace DO {
     std::ostream& print(std::ostream& os) const;
     std::istream& read(std::istream& in);
   };
-
-  typedef Descriptor<float> RealDescriptor;
-  typedef Descriptor<unsigned char> BinaryDescriptor;
 
   template <typename T> 
   inline std::ostream& printT(std::ostream& os, const T *array, int N)

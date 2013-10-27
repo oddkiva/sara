@@ -73,6 +73,9 @@ namespace DO {
   void removeRedundancies(std::vector<OERegion>& features,
                           DescriptorMatrix<float>& descriptors);
 
+  inline void removeRedundancies(Set<OERegion, RealDescriptor>& keys)
+  { removeRedundancies(keys.features, keys.descriptors); }
+
   //! @}
 
 } /* namespace DO */

@@ -25,42 +25,66 @@ namespace DO {
 
   //! Deprecated...
   template <typename F, typename D>
-  class Key
+  class KeyRef
   {
+  public:
     typedef F Feature;
     typedef D Descriptor;
+    inline KeyRef(Feature& f, Descriptor& d) : f_(&f), d_(&d) {}
+    inline Feature& feat() const { return f_; }
+    inline Descriptor& desc() const { return d_; }
+    KeyRef operator=(KeyRef key) const
+    { f_ = key.f_; d_ = key.d_; return *this; }
+  private:
+    Feature& f_;
+    Descriptor& d_;
+  };
 
-    Feature *pf_;
-    Descriptor *pd_;
+  enum DescriptorType { RealDescriptor, BinaryDescriptor };
+  template <DescriptorType> struct Bin;
+  template <> struct Bin<RealDescriptor> { typedef float Type; };
+  template <> struct Bin<BinaryDescriptor> { typedef unsigned char Type; };
 
+  template <typename F, DescriptorType D>
+  class Set
+  {  
   public:
-    inline Key() : pf_(0), pd_(0) {}
-    inline Key(Feature& f, Descriptor& d) : pf_(&f), pd_(&d) {}
+    typedef typename Bin<D>::Type BinType;
+    typedef F Feature;
+    typedef typename DescriptorMatrix<BinType>::descriptor_type 
+      Descriptor;
+    typedef typename DescriptorMatrix<BinType>::const_descriptor_type 
+      ConstDescriptor;
 
-    //! Constant accessors.
-    inline const Feature& feat() const { return *pf_; }
-    inline const Descriptor& desc() const { return *pd_; }
-    
-    //! Non constant accessors.
-    inline Feature& feat() { return *pf_; }
-    inline Descriptor& desc() { return *pd_; }
+    typedef KeyRef<const Feature, ConstDescriptor> Key;
+    typedef KeyRef<const Feature, ConstDescriptor> ConstKey;
 
-    inline void swap(const Key& k)
+    Key operator[](int i)
+    { return KeyRef<Feature, Descriptor>(features[i], descriptors[i]); }
+    ConstKey operator[](int i) const
+    { return KeyRef<const Feature, ConstDescriptor>(features[i], descriptors[i]); }
+
+    inline void swap(const Set& set)
     {
-      std::swap(pf_, k.pf_);
-      std::swap(pd_, k.pd_);
+      std::swap(features, set.features);
+      std::swap(descriptors, set.descriptors);
     }
+    inline size_t size() const
+    {
+      if (features.size() != descriptors.size())
+      {
+        std::cerr << "Invalid size" << std::endl;
+        throw 0;
+      }
+      return features.size();
+    }
+
+    std::vector<F> features;
+    DescriptorMatrix<BinType> descriptors;
   };
 
   //! @}
 
 } /* namespace DO */
-
-namespace std
-{
-  template <typename F, typename D>
-  inline void swap(DO::Key<F,D>& a, DO::Key<F,D>& b)
-  { a.swap(b); }
-}
 
 #endif /* DO_FEATURES_KEY_HPP */

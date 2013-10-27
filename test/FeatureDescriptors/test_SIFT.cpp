@@ -120,8 +120,7 @@ void testDoGSIFTKeypoints(const Image<float>& I)
 }
 #endif
 
-typedef pair<vector<OERegion>, DescriptorMatrix<float> > Keys;
-Keys computeSIFT(const Image<float>& image)
+Set<OERegion, RealDescriptor> computeSIFT(const Image<float>& image)
 {
   // Time everything.
   HighResTimer timer;
@@ -129,8 +128,9 @@ Keys computeSIFT(const Image<float>& image)
   double DoGDetTime, oriAssignTime, siftDescTime, gradGaussianTime;
 
   // We describe the work flow of the feature detection and description.
-  vector<OERegion> DoGs;
-  DescriptorMatrix<float> SIFTDescriptors;
+  Set<OERegion, RealDescriptor> keys;
+  vector<OERegion>& DoGs = keys.features;
+  DescriptorMatrix<float>& SIFTDescriptors = keys.descriptors;
 
   // 1. Feature extraction.
   printStage("Computing DoG extrema");
@@ -190,7 +190,7 @@ Keys computeSIFT(const Image<float>& image)
     DoGs[i].shapeMat() /= pow(octScaleFact, 2);
   }
 
-  return make_pair(DoGs, SIFTDescriptors);
+  return keys;
 }
 
 bool checkDescriptors(const DescriptorMatrix<float>& descriptors)
@@ -217,14 +217,13 @@ int main()
     return -1;
 
   printStage("Detecting SIFT features");
-  Keys SIFTs = computeSIFT(image.convert<float>());
-  const vector<OERegion>& features = SIFTs.first; 
+  Set<OERegion, RealDescriptor> SIFTs = computeSIFT(image.convert<float>());
+  const vector<OERegion>& features = SIFTs.features; 
 
   printStage("Removing existing redundancies");
-  removeRedundancies(SIFTs.first, SIFTs.second);
-#define CHECK(x) cout << #x << " = " << x << endl
-  CHECK(SIFTs.first.size());
-  CHECK(SIFTs.second.size());
+  removeRedundancies(SIFTs);
+  CHECK(SIFTs.features.size());
+  CHECK(SIFTs.descriptors.size());
 
   // Check the features visually.
   printStage("Draw features");

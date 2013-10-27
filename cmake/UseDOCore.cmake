@@ -33,6 +33,7 @@ macro (do_list_core_source_files)
   source_group("5. Tree" FILES ${DO_Core_TREE})
 	# Miscellaneous stuff
   set(DO_Core_MISC
+      ${DO_Core_SOURCE_DIR}/DebugUtilities.hpp
       ${DO_Core_SOURCE_DIR}/Stringify.hpp
 			${DO_Core_SOURCE_DIR}/StdVectorHelpers.hpp
       ${DO_Core_SOURCE_DIR}/Timer.hpp)

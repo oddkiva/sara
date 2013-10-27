@@ -19,28 +19,28 @@ namespace DO
 	{
 	public:
     //! Constructors
-    AnnMatcher(const DescriptorMatrix<float>& descriptors1,
-               const DescriptorMatrix<float>& descriptors2,
+    AnnMatcher(const Set<OERegion, RealDescriptor>& keys1,
+               const Set<OERegion, RealDescriptor>& keys2,
                float siftRatioT = 1.2f);
-
-    AnnMatcher(const DescriptorMatrix<float>& descriptors,
+    AnnMatcher(const Set<OERegion, RealDescriptor>& keys,
                float siftRatioT = 1.2f,
                float minMaxMetricDistT = 0.5f,
                float pixelDistT = 10.f);
 
     std::vector<Match> computeMatches();
-    std::vector<Match> computeSelfMatches() { return computeMatches(); }
-		
-	private: /* data members */
-		//! Input parameters
-		float sqRatioT;
+		std::vector<Match> computeSelfMatches() { return computeMatches(); }
 
-		//! Internals
-		KeyProximity is_too_close_;
-		std::size_t max_neighbors_;
-		std::vector<int> vec_indices_;
-		std::vector<float> vec_dists_;
-		bool self_matching_;
+	private: /* data members */
+    //! Input parameters
+    const Set<OERegion, RealDescriptor>& keys1_;
+    const Set<OERegion, RealDescriptor>& keys2_;
+		float sqRatioT;
+    //! Internals
+    KeyProximity is_too_close_;
+    std::size_t max_neighbors_;
+    std::vector<int> vec_indices_;
+    std::vector<float> vec_dists_;
+    bool self_matching_;
 	};
 
 } /* namespace DO */

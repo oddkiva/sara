@@ -77,6 +77,7 @@
 #include "Core/Stringify.hpp"
 #include "Core/Timer.hpp"
 #include "Core/StdVectorHelpers.hpp"
+#include "Core/DebugUtilities.hpp"
 
 
 /*!

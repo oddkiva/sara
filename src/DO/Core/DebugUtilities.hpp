@@ -9,18 +9,11 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_FEATUREMATCHING_HPP
-#define DO_FEATUREMATCHING_HPP
+//! @file
 
-#include <DO/Features.hpp>
-#include <DO/Geometry.hpp>
-#include <DO/Match.hpp>
+#ifndef DO_DEBUG_UTILITIES
+#define DO_DEBUG_UTILITIES
 
-// Key Proximity
-#include "FeatureMatching/KeyProximity.hpp"
+#define CHECK(x) std::cout << #x << " = " << x << std::endl
 
-// Basic feature matching
-#include "FeatureMatching/AnnMatcher.hpp"
-
-
-#endif /* DO_FEATUREMATCHING_HPP */
+#endif /* DO_DEBUG_UTILITIES */

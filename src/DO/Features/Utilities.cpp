@@ -81,7 +81,8 @@ namespace DO {
 #endif
 
     vector<OERegion> features2(indices.size());
-    DescriptorMatrix<float> descriptors2(indices.size(), descriptors.dimension());
+    DescriptorMatrix<float> descriptors2(
+      int(indices.size()), descriptors.dimension() );
 
     for (int i = 0; i < indices.size(); ++i)
     {

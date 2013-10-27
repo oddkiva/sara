@@ -188,21 +188,22 @@ template <typename Detector>
 void testKeypointDetector(const Image<unsigned char>& image,
                           double detectorParam)
 {
-  cout << "Detecting features... " << endl;
-  vector<OERegion> features;
-  DescriptorMatrix<float> descriptors;
-  Detector().run(features, descriptors, image, true, detectorParam);
-  cout << "Found " << features.size() << " Harris-Affine-SIFT keypoints" << endl;
+  printStage("Detecting features... ");
+  Set<OERegion, RealDescriptor> keys;
+  keys = Detector().run(image, true, detectorParam);
+  cout << "Found " << keys.size() << " XXX-SIFT keypoints" << endl;
 
   display(image);
-  cout << "Removing redundant features with the same descriptors." << endl;
-  cout << "Keep the ones with the high response threshold" << endl;
-  removeRedundancies(features, descriptors);
+  printStage("Removing redundant features with the same descriptors.");
+  cout << "// Only keep the ones with the high response threshold" << endl;
+  removeRedundancies(keys.features, keys.descriptors);
+  CHECK(keys.features.size());
+  CHECK(keys.descriptors.size());
 
   // Draw features.
-  cout << "Drawing features... ";
+  printStage("Drawing features...");
   display(image);
-  drawOERegions(features, Red8);
+  drawOERegions(keys.features, Green8);
   getKey();
 }
 
@@ -214,8 +215,8 @@ int main()
 
   setActiveWindow(openWindow(I.width(), I.height()));
   setAntialiasing(activeWindow());
-  //testKeypointDetector<HarAffSiftDetector>(I, 10000);
-  //testKeypointDetector<HesAffSiftDetector>(I, 200);
+  testKeypointDetector<HarAffSiftDetector>(I, 10000);
+  testKeypointDetector<HesAffSiftDetector>(I, 200);
   testKeypointDetector<MserSiftDetector>(I, 0);
   getKey();
 

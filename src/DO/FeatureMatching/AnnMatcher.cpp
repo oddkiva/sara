@@ -9,6 +9,11 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+// Disable FLANN warnings
+#ifdef _MSC_VER 
+# pragma warning ( disable : 4244 4267 4800 4305 4291 4996)
+#endif
+
 #include <DO/FeatureMatching.hpp>
 #include <flann/flann.hpp>
 
@@ -18,30 +23,30 @@ using namespace std;
 namespace DO {
 
   //! Create FLANN matrix
-  flann::Matrix<float> createFlannMatrix(const vector<Keypoint>& keys)
+  flann::Matrix<float> createFlannMatrix(const DescriptorMatrix<float>& descs)
   {
-    if (keys.empty())
+    if (descs.size() == 0)
     {
       std::cerr << "Error: list of key-points is empty!" << endl;
       throw 0;
     }
 
-    const int sz = keys.size();
+    const int sz = descs.size();
+    const int dim = descs.dimension();
     // Print summary.
     cout << "Gentle Warning: make sure every key has distinct descriptors..." << endl;
     cout << "Number of descriptors = " << sz << endl;
     // Create a matrix that will contain a set of descriptors.
-    flann::Matrix<float> matrix(new float[sz*128], sz, 128);    
-    for (size_t i = 0; i != keys.size(); ++i)
-      copy(keys[i].desc().data(), keys[i].desc().data()+128, matrix[i]);
+    flann::Matrix<float> matrix(
+      const_cast<float *>(descs.matrix().data()), sz, dim );
     return matrix;
   }
 
   //! Find the nearest neighbors in the descriptor space using FLANN.
   void
   appendNearestNeighbors(size_t i1,
-                         const vector<Keypoint>& keys1,
-                         const vector<Keypoint>& keys2,
+                         const Set<OERegion, RealDescriptor>& keys1,
+                         const Set<OERegion, RealDescriptor>& keys2,
                          vector<Match>& matches,
                          const flann::Matrix<float>& data2,
                          flann::Index<flann::L2<float> >& tree2,
@@ -50,8 +55,9 @@ namespace DO {
                          vector<int>& vecIndices, vector<float>& vecDists, size_t maxNeighbors) // internal storage parameters
   {
     // Prepare the query matrix
-    Desc128f desc1(keys1[i1].desc());
-    flann::Matrix<float> query(desc1.data(), 1, 128);
+    flann::Matrix<float> query(
+      const_cast<float *>(&(keys1.descriptors.matrix()(0,i1))),
+      1, keys1.descriptors.dimension() );
 
     // Prepare the indices and distances.
     flann::Matrix<int> indices(&vecIndices[0], 1, maxNeighbors);
@@ -96,10 +102,10 @@ namespace DO {
       int i2 = indices[0][rank];
 
       // Ignore the match if keys1 == keys2.
-      if (selfMatching && isRedundant(keys1[i1], keys2[i2]))
+      if (selfMatching && isRedundant(keys1.features[i1], keys2.features[i2]))
         continue;
 
-      Match m(&keys1[i1], &keys2[i2], score, dir, i1, i2);
+      Match m(&keys1.features[i1], &keys2.features[i2], score, dir, i1, i2);
       m.rank() = (startIndex == 0) ? rank+1 : rank;
       if(dir == Match::TargetToSource)
       {
@@ -111,8 +117,8 @@ namespace DO {
     }
   }
 
-  AnnMatcher::AnnMatcher(const vector<Keypoint>& keys1,
-                         const vector<Keypoint>& keys2,
+  AnnMatcher::AnnMatcher(const Set<OERegion, RealDescriptor>& keys1,
+                         const Set<OERegion, RealDescriptor>& keys2,
                          float siftRatioT)
     : keys1_(keys1)
     , keys2_(keys2)
@@ -124,7 +130,7 @@ namespace DO {
     vec_dists_.resize(max_neighbors_);
   }
 
-  AnnMatcher::AnnMatcher(const std::vector<Keypoint>& keys,
+  AnnMatcher::AnnMatcher(const Set<OERegion, RealDescriptor>& keys,
                          float siftRatioT,
                          float minMaxMetricDistT,
                          float pixelDistT)
@@ -146,8 +152,8 @@ namespace DO {
 
     flann::KDTreeIndexParams params(8);
     flann::Matrix<float> data1, data2;
-    data1 = createFlannMatrix(keys1_);
-    data2 = createFlannMatrix(keys2_);
+    data1 = createFlannMatrix(keys1_.descriptors);
+    data2 = createFlannMatrix(keys2_.descriptors);
 
     flann::Index<flann::L2<float> > tree1(data1, params);
     flann::Index<flann::L2<float> > tree2(data2, params);
@@ -159,14 +165,14 @@ namespace DO {
     matches.reserve(1e5);
 
     t.restart();
-    for (size_t i1 = 0; i1 != keys1_.size(); ++i1)
+    for (int i1 = 0; i1 < keys1_.size(); ++i1)
     {
       appendNearestNeighbors(
         i1, keys1_, keys2_, matches, data2, tree2,
         sqRatioT, Match::SourceToTarget,
         self_matching_, is_too_close_, vec_indices_, vec_dists_, max_neighbors_);
     }
-    for (size_t i2 = 0; i2 != keys2_.size(); ++i2)
+    for (int i2 = 0; i2 < keys2_.size(); ++i2)
     {
       appendNearestNeighbors(
         i2, keys2_, keys1_, matches, data1, tree1,

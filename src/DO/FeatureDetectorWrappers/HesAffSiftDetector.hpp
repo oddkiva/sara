@@ -34,6 +34,15 @@
              const Image<uchar>& I,
              bool specifyThres = false,
              double HessianT = 200) const;
+
+    Set<OERegion, RealDescriptor> run(const Image<uchar>& I, 
+                                      bool specifyThres = false,
+                                      double HarrisT = 200) const
+    {
+      Set<OERegion, RealDescriptor> keys;
+      run(keys.features, keys.descriptors, I, specifyThres, HarrisT);
+      return keys;
+    }
   };
 
   //! @}

@@ -24,7 +24,7 @@ namespace DO {
     SquaredRefDistance<float, 2> mappedSquaredMetric(const OERegion& f) const
     { return SquaredRefDistance<float, 2>(f.shapeMat()); }
 
-		bool operator()(const Keypoint& k1, const Keypoint& k2) const;
+		bool operator()(const OERegion& f1, const OERegion& f2) const;
 
   private:
     float sqMetricDist;
