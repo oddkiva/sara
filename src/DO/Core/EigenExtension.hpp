@@ -142,9 +142,8 @@ namespace DO {
   inline bool lexCompare(const Eigen::MatrixBase<Derived>& m1,
                          const Eigen::MatrixBase<Derived>& m2)
   {
-    return std::lexicographical_compare(
-      m1.data(), m1.data()+M*N, m2.data(), m2.data()+M*N
-      );
+    return std::lexicographical_compare(m1.data(), m1.data()+m1.size(),
+                                        m2.data(), m2.data()+m2.size());
   }
 
   //! Lexicographical comparison functor for matrices.
