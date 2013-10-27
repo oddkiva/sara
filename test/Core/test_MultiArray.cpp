@@ -30,7 +30,7 @@ template <typename T, int N, int StorageOrder>
 void testMultiArrayCopyConstructor()
 {
   typedef MultiArray<T, N, StorageOrder> NDArray;
-  typedef NDArray::vector_type Coords;
+  typedef typename NDArray::vector_type Coords;
   Coords sizes(Coords::Ones()*5);
   for (int i = 1; i < sizes.size(); ++i)
     sizes(i) = sizes(i-1)*2;
