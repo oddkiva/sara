@@ -26,8 +26,6 @@ namespace DO {
   public:
     VisualFeature() {}
     virtual ~VisualFeature() {}
-    virtual void draw(const Color3ub& c, float scale = 1.f,
-                      const Point2f& offset = Point2f::Zero()) const = 0;
     virtual std::ostream& print(std::ostream& os) const = 0;
     virtual std::istream& read(std::istream& in) = 0;
     friend std::ostream& operator<<(std::ostream& out, const VisualFeature& f)
@@ -37,18 +35,18 @@ namespace DO {
   };
 
   //! PointFeature for interest points
-  class PointFeature : public VisualFeature
+  class InterestPoint : public VisualFeature
   {
   public:
     //! ID for each point feature type.
     enum Type { Harris, HarAff, HarLap, FAST, SUSAN,
                 DoG, LoG, DoH, MSER, HesAff, HesLap };
-    enum ExtremumType { Max = 1, Min = -1 };
+    enum ExtremumType { Min = -1, Saddle = 0,  Max = 1 };
     //! Constructors.
-    PointFeature() : VisualFeature() {}
-    PointFeature(const Point2f& coords) : coords_(coords) {}
+    InterestPoint() : VisualFeature() {}
+    InterestPoint(const Point2f& coords) : coords_(coords) {}
     //! Destructor.
-    virtual ~PointFeature() {}
+    virtual ~InterestPoint() {}
     //! Constant getters.
     float x() const { return coords_(0); }
     float y() const { return coords_(1); }
@@ -66,7 +64,7 @@ namespace DO {
     ExtremumType& extremumType() { return extremum_type_; }
     float& extremumValue() { return extremum_value_; }
     //! Equality operator.
-    bool operator==(const PointFeature& f) const
+    bool operator==(const InterestPoint& f) const
     { return coords() == f.coords(); }
     //! Drawing.
     void draw(const Color3ub& c, float scale = 1.f,
@@ -88,14 +86,14 @@ namespace DO {
     - Harris-Affine
     - Hessian-Affine features and so on...
    */
-  class OERegion : public PointFeature
+  class OERegion : public InterestPoint
   {
   public:
     //! Default constructor
-    OERegion() : PointFeature() {}
+    OERegion() : InterestPoint() {}
     //! Constructor for circular region.
     OERegion(const Point2f& coords, float scale)
-      : PointFeature(coords)
+      : InterestPoint(coords)
       , shape_matrix_(Matrix2f::Identity()*(pow(scale,-2))) {}
     //! Destructor.
     virtual ~OERegion() {}

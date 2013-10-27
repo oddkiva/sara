@@ -46,6 +46,8 @@ namespace DO {
 
     descriptor_type operator[](int i) { return this->col(i); }
     const_descriptor_type operator[](int i) const { return this->col(i); }
+
+    void swap(DescriptorMatrix& other) { matrix_type::swap(other); }
   };
 
   //! @}

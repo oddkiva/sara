@@ -115,6 +115,8 @@ namespace DO
       Matrix2f m;
       descFile2 >> p; 
       descFile2 >> cornerness;
+      f.extremumType() = InterestPoint::Max;
+      f.extremumValue() = cornerness;
       descFile2 >> patchSize >> f.orientation();
 
       // Ignore the following variables.

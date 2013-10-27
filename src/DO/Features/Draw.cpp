@@ -17,7 +17,7 @@ using namespace std;
 
 namespace DO {
 
-  void PointFeature::draw(const Color3ub& c, float z, const Point2f& off) const
+  void InterestPoint::draw(const Color3ub& c, float z, const Point2f& off) const
   {
     Vector2f p1(z*(center()+off));
     float cross_offset=3.0f;
@@ -67,7 +67,7 @@ namespace DO {
       drawEllipse(p1, z*a, z*b, 180.f*ellOrient/float(M_PI), c, 3);
     }
     else
-      PointFeature::draw(c, z, off);
+      InterestPoint::draw(c, z, off);
   }
 
   void drawOERegions(const vector<OERegion>& features, const Color3ub& c,

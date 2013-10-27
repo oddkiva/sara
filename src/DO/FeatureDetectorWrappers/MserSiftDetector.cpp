@@ -104,6 +104,23 @@ namespace DO {
       Point2f p;
       Matrix2f m;
       descFile2 >> psize >> dDim >> p >> cornerness >> scale;
+      
+      f.extremumType() = InterestPoint::Max;
+      // TODO: investigate extremum value of MSER... 
+      // The following does not make sense actually...
+      f.extremumValue() = scale;
+
+//#define CHECK(x) cout << #x << " = " << x << endl
+//      cout << i << endl;
+//      CHECK(psize);
+//      CHECK(dDim);
+//      CHECK(cornerness);
+//      CHECK(objIndex);
+//      CHECK(ptType);
+//      CHECK(laplacianVal);
+//      CHECK(extremumType);
+//      CHECK(scale);
+//      cout << endl;
 
       // Now get the orientation
       descFile2 >> f.orientation();

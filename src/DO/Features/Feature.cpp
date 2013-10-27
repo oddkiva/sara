@@ -15,7 +15,7 @@ using namespace std;
 
 namespace DO {
 
-  std::ostream& PointFeature::print(std::ostream& os) const
+  std::ostream& InterestPoint::print(std::ostream& os) const
   {
     os << "Feature type:\t";
     switch (type())
@@ -24,26 +24,28 @@ namespace DO {
 //    case PointFeature::x:     \
 //      os << #x << endl;       \
 //      break;
-    case PointFeature::DoG:
+    case InterestPoint::DoG:
       os << "DoG" << std::endl;
       break;
-    case PointFeature::HarAff:
+    case InterestPoint::HarAff:
       os << "Harris-Affine" << endl;
       break;
-    case PointFeature::HesAff:
+    case InterestPoint::HesAff:
       os << "Hessian-Affine" << endl;
       break;
-    case PointFeature::MSER:
+    case InterestPoint::MSER:
       os << "MSER" << endl;
       break;
     default:
       break;
     }
-    os << "position:\n" << coords() << endl;
+    os << "position:\t" << coords().transpose() << endl;
+    os << "extremum type:\t" << extremumType() << endl;
+    os << "extremum value:\t" << extremumValue() << endl;
     return os;
   }
   
-  std::istream& PointFeature::read(std::istream& in)
+  std::istream& InterestPoint::read(std::istream& in)
   { 
     return in >> x() >> y();
   }
@@ -82,7 +84,7 @@ namespace DO {
 
   ostream& OERegion::print(ostream& os) const
   {
-    return PointFeature::print(os) 
+    return InterestPoint::print(os) 
       << "shape matrix:\n" << shapeMat() << endl
       << "orientation:\t" << toDegree(orientation()) << " degrees" << endl;
   }
@@ -90,7 +92,7 @@ namespace DO {
   istream& OERegion::read(istream& in)
   {
     int featureType;
-    PointFeature::read(in) 
+    InterestPoint::read(in) 
       >> shape_matrix_(0,0) >> shape_matrix_(0,1) 
       >> shape_matrix_(1,0) >> shape_matrix_(1,1) 
       >> orientation_ >> featureType;

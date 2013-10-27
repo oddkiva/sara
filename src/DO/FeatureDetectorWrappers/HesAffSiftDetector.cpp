@@ -114,6 +114,9 @@ namespace DO
       Matrix2f m;
       descFile2 >> psize >> dDim >> p >> cornerness >> scale;
       
+      f.extremumType() = InterestPoint::Max;
+      f.extremumValue() = cornerness;
+
       // Now get the orientation
       descFile2 >> f.orientation();
 

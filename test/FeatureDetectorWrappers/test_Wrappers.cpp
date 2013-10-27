@@ -194,13 +194,16 @@ void testKeypointDetector(const Image<unsigned char>& image,
   Detector().run(features, descriptors, image, true, detectorParam);
   cout << "Found " << features.size() << " Harris-Affine-SIFT keypoints" << endl;
 
+  display(image);
+  cout << "Removing redundant features with the same descriptors." << endl;
+  cout << "Keep the ones with the high response threshold" << endl;
+  removeRedundancies(features, descriptors);
+
   // Draw features.
   cout << "Drawing features... ";
   display(image);
-  for (int i = 0; i < features.size(); ++i)
-    features[i].draw(Red8);
-  cout << "done!" << endl;
-  click();
+  drawOERegions(features, Red8);
+  getKey();
 }
 
 int main()
@@ -211,8 +214,8 @@ int main()
 
   setActiveWindow(openWindow(I.width(), I.height()));
   setAntialiasing(activeWindow());
-  testKeypointDetector<HarAffSiftDetector>(I, 10000);
-  testKeypointDetector<HesAffSiftDetector>(I, 200);
+  //testKeypointDetector<HarAffSiftDetector>(I, 10000);
+  //testKeypointDetector<HesAffSiftDetector>(I, 200);
   testKeypointDetector<MserSiftDetector>(I, 0);
   getKey();
 

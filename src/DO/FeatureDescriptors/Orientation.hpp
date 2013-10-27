@@ -40,7 +40,7 @@ namespace DO {
     {
       float r = 2*it->norm();
       float theta = atan2(it->y(), it->x());
-      *it = Vector2f(r, theta);
+      *it << r, theta;
     }
     return g;
   }

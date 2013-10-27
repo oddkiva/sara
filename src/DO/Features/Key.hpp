@@ -23,47 +23,44 @@ namespace DO {
     @{
   */
 
+  //! Deprecated...
+  template <typename F, typename D>
   class Key
   {
-    VisualFeature *pf_;
-    DescriptorBase *pd_;
+    typedef F Feature;
+    typedef D Descriptor;
+
+    Feature *pf_;
+    Descriptor *pd_;
 
   public:
     inline Key() : pf_(0), pd_(0) {}
-    inline Key(VisualFeature& f, DescriptorBase& d) : pf_(&f), pd_(&d) {}
+    inline Key(Feature& f, Descriptor& d) : pf_(&f), pd_(&d) {}
 
     //! Constant accessors.
-    inline const VisualFeature& feat() const { return *pf_; }
-    inline const DescriptorBase& desc() const { return *pd_; }
+    inline const Feature& feat() const { return *pf_; }
+    inline const Descriptor& desc() const { return *pd_; }
     
     //! Non constant accessors.
-    inline VisualFeature& feat() { return *pf_; }
-    inline DescriptorBase& desc() { return *pd_; }
+    inline Feature& feat() { return *pf_; }
+    inline Descriptor& desc() { return *pd_; }
+
+    inline void swap(const Key& k)
+    {
+      std::swap(pf_, k.pf_);
+      std::swap(pd_, k.pd_);
+    }
   };
-
-  //typedef Matrix<float, 128, 1> Desc128f;
-  //
-  ////! Deprecated...
-  //class Keypoint
-  //{
-  //public:
-  //  Keypoint() {}
-  //  Keypoint(const OERegion& f, Desc128f& d) : f_(f), d_(d) {}
-
-  //  //! Constant accessors.
-  //  inline const OERegion& feat() const { return f_; }
-  //  inline const Desc128f& desc() const { return d_; }
-
-  //  //! Non constant accessors.
-  //  inline OERegion& feat() { return f_; }
-  //  inline Desc128f& desc() { return d_; }
-  //private:
-  //  OERegion f_;
-  //  Desc128f d_;
-  //};
 
   //! @}
 
 } /* namespace DO */
+
+namespace std
+{
+  template <typename F, typename D>
+  inline void swap(DO::Key<F,D>& a, DO::Key<F,D>& b)
+  { a.swap(b); }
+}
 
 #endif /* DO_FEATURES_KEY_HPP */

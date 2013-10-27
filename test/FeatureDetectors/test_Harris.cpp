@@ -220,7 +220,7 @@ int main()
 {
   Image<float> I;
   string name;
-  name = srcPath("sunflowerField.jpg");
+  name = srcPath("ellipse.png");
   if (!load(I, name))
     return -1;
 

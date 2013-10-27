@@ -121,13 +121,12 @@ void testDoGSIFTKeypoints(const Image<float>& I)
 #endif
 
 typedef pair<vector<OERegion>, DescriptorMatrix<float> > Keys;
-
 Keys computeSIFT(const Image<float>& image)
 {
   // Time everything.
   HighResTimer timer;
   double elapsed = 0.;
-  double DoGDetTime, oriAssignTime, siftDescTime;
+  double DoGDetTime, oriAssignTime, siftDescTime, gradGaussianTime;
 
   // We describe the work flow of the feature detection and description.
   vector<OERegion> DoGs;
@@ -136,7 +135,7 @@ Keys computeSIFT(const Image<float>& image)
   // 1. Feature extraction.
   printStage("Computing DoG extrema");
   timer.restart();
-  ImagePyramidParams pyrParams(-1);
+  ImagePyramidParams pyrParams(0);
   ComputeDoGExtrema computeDoGs(pyrParams);
   vector<Point2i> scaleOctPairs;
   DoGs = computeDoGs(image, &scaleOctPairs);
@@ -151,8 +150,15 @@ Keys computeSIFT(const Image<float>& image)
   timer.restart();
   ImagePyramid<Vector2f> gradG;
   gradG = gradPolar(computeDoGs.gaussians());
+  gradGaussianTime = timer.elapsedMs();
+  elapsed += gradGaussianTime;
+  cout << "gradient of Gaussian computation time = " << gradGaussianTime << " ms" << endl;
+  cout << "DoGs.size() = " << DoGs.size() << endl;
+
+
   // Find dominant gradient orientations.
   printStage("Assigning (possibly multiple) dominant orientations to DoG extrema");
+  timer.restart();
   ComputeDominantOrientations assignOrientations;
   assignOrientations(gradG, DoGs, scaleOctPairs);
   oriAssignTime = timer.elapsedMs();
@@ -166,14 +172,14 @@ Keys computeSIFT(const Image<float>& image)
   timer.restart();
   ComputeSIFTDescriptor<> computeSIFT;
   SIFTDescriptors = computeSIFT(DoGs, scaleOctPairs, gradG);
-  assignOrientations(gradG, DoGs, scaleOctPairs);
   siftDescTime = timer.elapsedMs();
   elapsed += siftDescTime;
   cout << "description time = " << siftDescTime << " ms" << endl;
   cout << "sifts.size() = " << SIFTDescriptors.size() << endl;
 
-  cout << "SIFT description time = " << elapsed << " ms" << endl;
-
+  // Summary in terms of computation time.
+  printStage("Total Detection/Description time");
+  cout << "SIFT computation time = " << elapsed << " ms" << endl;
 
   // 4. Rescale  the feature position and scale $(x,y,\sigma)$ with the octave
   //    scale.
@@ -187,30 +193,48 @@ Keys computeSIFT(const Image<float>& image)
   return make_pair(DoGs, SIFTDescriptors);
 }
 
-
+bool checkDescriptors(const DescriptorMatrix<float>& descriptors)
+{
+  for (int i = 0; i < descriptors.size(); ++i)
+  {
+    for (int j = 0; j < descriptors.dimension(); ++j)
+    {
+      if (!isfinite(descriptors[i](j)))
+      {
+        cerr << "Not a finite number" << endl;
+        return false;
+      }
+    }
+  }
+  cout << "OK all numbers are finite" << endl;
+  return true;
+}
 
 int main()
 {
-  Image<Rgb8> image;
+  Image<float> image;
   if (!load(image, srcPath("sunflowerField.jpg")))
     return -1;
 
+  printStage("Detecting SIFT features");
   Keys SIFTs = computeSIFT(image.convert<float>());
+  const vector<OERegion>& features = SIFTs.first; 
 
-  //// 5. Check the features visually.
-  //printStage("Draw features");
-  //openWindow(I.width(), I.height());
-  //display(I.convert<float>());
-  //setAntialiasing();
-  //for (size_t i=0; i != dogs.size(); ++i)
-  //{
-  //  /*cout << dogs[i].center().transpose() << " " 
-  //       << dogs[i].scale() << " "
-  //       << dogs[i].orientation() << endl;*/
-  //  dogs[i].draw(dogs[i].extremumType() == OERegion::Max ? Red8 : Blue8);
-  //  //getKey();
-  //}
-  //getKey();
+  printStage("Removing existing redundancies");
+  removeRedundancies(SIFTs.first, SIFTs.second);
+#define CHECK(x) cout << #x << " = " << x << endl
+  CHECK(SIFTs.first.size());
+  CHECK(SIFTs.second.size());
+
+  // Check the features visually.
+  printStage("Draw features");
+  openWindow(image.width(), image.height());
+  setAntialiasing();
+  display(image);
+  for (size_t i=0; i != features.size(); ++i)
+    features[i].draw(features[i].extremumType() == OERegion::Max ? Red8 : Blue8);
+  getKey();
+  
 
   return 0;
 }
