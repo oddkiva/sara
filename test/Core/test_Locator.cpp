@@ -39,8 +39,7 @@ void testOffsetComputation()
 template <int StorageOrder>
 void testStrideComputation()
 {
-  // Create coords and dims.
-  const int coords[] = { 2, 3, 4 };
+  // Create dims.
   const int dims[] = { 10, 20, 30 };
   // Check stride computations.
   printStage("Check stride computation");
