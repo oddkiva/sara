@@ -15,6 +15,9 @@
 #ifndef DO_IMAGEPROCESSING_HPP
 #define DO_IMAGEPROCESSING_HPP
 
+#ifdef _OPENMP
+# include <omp.h>
+#endif
 #include <DO/Core.hpp>
 
 #include <vector>
