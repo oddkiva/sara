@@ -25,7 +25,7 @@
 using namespace DO;
 using namespace std;
 
-inline void sleep(unsigned milliseconds)
+inline void wait(unsigned milliseconds)
 {
 #ifdef _WIN32
   Sleep(milliseconds);
@@ -41,12 +41,12 @@ TEST(DO_Core_Test,  testTimer)
   double elapsed;
 
   hrTimer.restart();
-  sleep(1000);
+  wait(1000);
   elapsed =  hrTimer.elapsedMs();
   EXPECT_NEAR(elapsed, 1000., 1);
 
   timer.restart();
-  sleep(1000);
+  wait(1000);
   elapsed = timer.elapsed();
   EXPECT_NEAR(elapsed, 1, 1e-3);
 }
