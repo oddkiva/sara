@@ -103,7 +103,8 @@ namespace DO
         >> f.shapeMat()(1,1);
       f.shapeMat()(0,1) = f.shapeMat()(1,0);
       // SIFT descriptor
-      descFile1 >> descriptors[i];
+      for (int k = 0; k < 128; ++k)
+        descFile1 >> descriptors[i](k);
       
       // Ignore the following variables before getting the orientation
       // from the second file.
