@@ -50,15 +50,19 @@ namespace DO {
     void swap(DescriptorMatrix& other) { matrix_type::swap(other); }
     void append(const DescriptorMatrix& other) 
     {
-      if (dimension() != other.dimension())
+      if ( dimension() != other.dimension() && matrix_type::size() != 0)
       {
         std::cerr << "Fatal: other descriptor matrix does not have same dimension" << endl;
+        CHECK(dimension());
+        CHECK(other.dimension());
         throw 0;
       }
 
-      matrix_type tmp(dimension(), size() + other.size());
-      tmp.block(0, 0, dimension(), size()) = *this;
-      tmp.block(0, size(), dimension(), other.size()) = other;
+      int dim = other.dimension();
+
+      matrix_type tmp(dim, size() + other.size());
+      tmp.block(0, 0, dim, size()) = *this;
+      tmp.block(0, size(), dim, other.size()) = other;
       matrix_type::swap(tmp);
     }
   };

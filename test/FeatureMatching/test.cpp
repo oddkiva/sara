@@ -20,7 +20,7 @@ using namespace DO;
 const bool drawFeatureCenterOnly = false;
 const Rgb8 c = Cyan8;
 
-//#define MSER_KEYS
+#define MSER_KEYS
 #define HARRIS_KEYS
 
 string file1 = srcPath("All.tif");
@@ -43,13 +43,18 @@ void load(Image<Rgb8>& image1, Image<Rgb8>& image2,
   keys2.append(har2);
 #endif // HARRIS_KEYS
 #ifdef MSER_KEYS
-  vector<Keypoint> mser1 = MserSiftDetector().run(image1.convert<unsigned char>());
-  vector<Keypoint> mser2 = MserSiftDetector().run(image2.convert<unsigned char>());
+  Set<OERegion, RealDescriptor> mser1 = MserSiftDetector().run(image1.convert<unsigned char>());
+  Set<OERegion, RealDescriptor> mser2 = MserSiftDetector().run(image2.convert<unsigned char>());
   keys1.append(mser1);
   keys2.append(mser2);
 #endif // MSER_KEYS
   cout << "Image 1: " << keys1.size() << " keypoints" << endl;
   cout << "Image 2: " << keys2.size() << " keypoints" << endl;
+
+  CHECK(keys1.features.size());
+  CHECK(keys1.descriptors.size());
+  CHECK(keys2.features.size());
+  CHECK(keys2.descriptors.size());
 
   // Compute/read matches
   cout << "Computing Matches" << endl;
