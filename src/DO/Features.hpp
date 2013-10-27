@@ -23,7 +23,6 @@
 //
 // Data structures
 #include "Features/Feature.hpp"
-#include "Features/Descriptor.hpp"
 #include "Features/DescriptorMatrix.hpp"
 #include "Features/Key.hpp"
 // Utilities, View, I/O

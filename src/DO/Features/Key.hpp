@@ -23,7 +23,6 @@ namespace DO {
     @{
   */
 
-  //! Deprecated...
   template <typename F, typename D>
   class KeyRef
   {
@@ -64,11 +63,6 @@ namespace DO {
     ConstKey operator[](int i) const
     { return KeyRef<const Feature, ConstDescriptor>(features[i], descriptors[i]); }
 
-    inline void swap(const Set& set)
-    {
-      std::swap(features, set.features);
-      std::swap(descriptors, set.descriptors);
-    }
     inline size_t size() const
     {
       if (features.size() != descriptors.size())
@@ -77,6 +71,18 @@ namespace DO {
         throw 0;
       }
       return features.size();
+    }
+
+    inline void swap(const Set& set)
+    {
+      std::swap(features, set.features);
+      std::swap(descriptors, set.descriptors);
+    }
+
+    inline void append(const Set& other)
+    {
+      ::append(features, other.features);
+      descriptors.append(other.descriptors);
     }
 
     std::vector<F> features;

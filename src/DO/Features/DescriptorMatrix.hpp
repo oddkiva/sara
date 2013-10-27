@@ -48,6 +48,19 @@ namespace DO {
     const_descriptor_type operator[](int i) const { return this->col(i); }
 
     void swap(DescriptorMatrix& other) { matrix_type::swap(other); }
+    void append(const DescriptorMatrix& other) 
+    {
+      if (dimension() != other.dimension())
+      {
+        std::cerr << "Fatal: other descriptor matrix does not have same dimension" << endl;
+        throw 0;
+      }
+
+      matrix_type tmp(dimension(), size() + other.size());
+      tmp.block(0, 0, dimension(), size()) = *this;
+      tmp.block(0, size(), dimension(), other.size()) = other;
+      matrix_type::swap(tmp);
+    }
   };
 
   //! @}
