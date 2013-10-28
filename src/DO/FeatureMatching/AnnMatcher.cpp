@@ -180,9 +180,6 @@ namespace DO {
         self_matching_, is_too_close_, vec_indices_, vec_dists_, max_neighbors_);
     }
 
-    delete[] data1.ptr();
-    delete[] data2.ptr();
-
     // Sort by indices and by score.
     struct CompareMatch {
       bool operator()(const Match& m1, const Match& m2) const {

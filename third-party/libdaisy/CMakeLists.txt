@@ -46,11 +46,11 @@ set(daisy_srcs
     src/interaction.cpp
 )
 
-add_library(TOLA_Daisy ${daisy_srcs} ${daisy_hdrs})
+add_library(Tola_DAISY ${daisy_srcs} ${daisy_hdrs})
 
 find_package(DO COMPONENTS Graphics Features FeatureDetectors REQUIRED)
 include(${DO_USE_FILE})
 
-add_executable(TOLA_Daisy_main src/main.cpp)
-do_use_modules(TOLA_Daisy_main "TOLA_Daisy;${DO_LIBRARIES}")
+add_executable(Tola_DAISY_main src/main.cpp)
+do_use_modules(Tola_DAISY_main "Tola_DAISY;${DO_LIBRARIES}")
 

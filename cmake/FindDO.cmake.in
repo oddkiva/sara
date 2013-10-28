@@ -40,16 +40,19 @@ if (NOT DO_FOUND)
   # List the available component libraries in DO++
   # Foundational libraries
   do_append_components(DO_COMPONENTS Core)
+  do_append_components(DO_COMPONENTS KDTree)
+  do_append_components(DO_COMPONENTS FileSystem)
   do_append_components(DO_COMPONENTS Graphics)
+  # Image processing
   do_append_components(DO_COMPONENTS ImageProcessing)
-  
+  # Geometry
   do_append_components(DO_COMPONENTS Geometry)
-  
+  # Feature detection and description
   do_append_components(DO_COMPONENTS Features)
   do_append_components(DO_COMPONENTS FeatureDetectors)
   do_append_components(DO_COMPONENTS FeatureDetectorWrappers)
   do_append_components(DO_COMPONENTS FeatureDescriptors)
-  
+  # Feature matching
   do_append_components(DO_COMPONENTS Match)
   do_append_components(DO_COMPONENTS FeatureMatching)
   
