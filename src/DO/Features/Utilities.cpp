@@ -25,7 +25,7 @@ namespace DO {
 
   void removeRedundancies(vector<OERegion>& features,
                           DescriptorMatrix<float>& descriptors)
-  {
+  { 
     if (features.size() != descriptors.size())
     {
       cerr << "Fatal: number of features and descriptors are not equal" << endl;

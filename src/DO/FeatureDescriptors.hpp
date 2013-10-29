@@ -30,9 +30,12 @@
 // [Lowe, IJCV 2004]).
 #include "FeatureDescriptors/SIFT.hpp"
 
+// DAISY descriptor.
+#include "FeatureDescriptors/Daisy.hpp"
+
 
 
 //! \defgroup FeatureDescriptors
 
 
-#endif /* DO_FEATUREDETECTORS_FEATUREDETECTORS_HPP */
+#endif /* DO_FEATUREDESCRIPTORS_HPP */

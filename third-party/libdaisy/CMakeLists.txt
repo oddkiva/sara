@@ -51,6 +51,7 @@ add_library(Tola_DAISY ${daisy_srcs} ${daisy_hdrs})
 find_package(DO COMPONENTS Graphics Features FeatureDetectors REQUIRED)
 include(${DO_USE_FILE})
 
+add_definitions(-DSRCDIR=${CMAKE_CURRENT_SOURCE_DIR})
 add_executable(Tola_DAISY_main src/main.cpp)
 do_use_modules(Tola_DAISY_main "Tola_DAISY;${DO_LIBRARIES}")
 

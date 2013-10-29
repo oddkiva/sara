@@ -44,6 +44,7 @@ namespace DO {
     // Convert orientation to radian.
     for (size_t i = 0; i != peaks_.size(); ++i)
     {
+#define LOWE
 #ifndef LOWE
       // Orientations in $[0, 2\pi[$
       peaks_[i] *= float(M_PI)/36.f;

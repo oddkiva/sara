@@ -23,6 +23,9 @@ macro (do_list_featuredescriptors_source_files)
     source_group("SIFT Descriptor" FILES
                  ${DO_FeatureDescriptors_SOURCE_DIR}/SIFT.hpp
                  ${DO_FeatureDescriptors_SOURCE_DIR}/SIFT.cpp)
+    source_group("DAISY Descriptor" FILES
+                 ${DO_FeatureDescriptors_SOURCE_DIR}/DAISY.hpp
+                 ${DO_FeatureDescriptors_SOURCE_DIR}/DAISY.cpp)
 endmacro (do_list_featuredescriptors_source_files)
 
 
@@ -30,13 +33,13 @@ macro (do_load_packages_for_featuredescriptors_library)
     include(${DO_Core_USE_FILE})
     include(${DO_Graphics_USE_FILE})
     include(${DO_Features_USE_FILE})
-    include_directories(${DO_ThirdParty_DIR})
+    include_directories(${DO_ThirdParty_DIR}/libdaisy/include)
 endmacro (do_load_packages_for_featuredescriptors_library)
 
 macro (do_create_variables_for_featuredescriptors_library)
     set(DO_FeatureDescriptors_LIBRARIES DO_FeatureDescriptors)
     set(DO_FeatureDescriptors_LINK_LIBRARIES
-        ${DO_Features_LIBRARIES} ${DO_Graphics_LIBRARIES})
+        ${DO_Features_LIBRARIES} ${DO_Graphics_LIBRARIES} Tola_DAISY)
 endmacro (do_create_variables_for_featuredescriptors_library)
 
 do_load_packages_for_featuredescriptors_library()

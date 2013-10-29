@@ -10,6 +10,8 @@
 // ========================================================================== //
 
 #include <DO/FeatureDetectorWrappers.hpp>
+#include <DO/FeatureDetectors.hpp>
+#include <DO/FeatureDescriptors.hpp>
 #include <DO/FeatureMatching.hpp>
 #include <DO/Graphics.hpp>
 #include <DO/ImageProcessing.hpp>
@@ -17,14 +19,86 @@
 using namespace std;
 using namespace DO;
 
-const bool drawFeatureCenterOnly = false;
-const Rgb8 c = Cyan8;
+//#define MSER_KEYS
+//#define HARRIS_KEYS
 
-#define MSER_KEYS
-#define HARRIS_KEYS
+string file1 = srcPath("All.tif");//srcPath("img1.ppm");
+string file2 = srcPath("GuardOnBlonde.tif");//srcPath("img4.ppm");
 
-string file1 = srcPath("All.tif");
-string file2 = srcPath("GuardOnBlonde.tif");
+
+Set<OERegion, RealDescriptor> computeSIFT(const Image<float>& image)
+{
+  // Time everything.
+  HighResTimer timer;
+  double elapsed = 0.;
+  double DoGDetTime, oriAssignTime, siftCompTime, gradGaussianTime;
+
+  // We describe the work flow of the feature detection and description.
+  Set<OERegion, RealDescriptor> keys;
+  vector<OERegion>& DoGs = keys.features;
+  DescriptorMatrix<float>& SIFTs = keys.descriptors;
+
+  // 1. Feature extraction.
+  printStage("Computing DoG extrema");
+  timer.restart();
+  ImagePyramidParams pyrParams(0);
+  ComputeDoGExtrema computeDoGs(pyrParams);
+  vector<Point2i> scaleOctPairs;
+  DoGs = computeDoGs(image, &scaleOctPairs);
+  DoGDetTime = timer.elapsedMs();
+  elapsed += DoGDetTime;
+  cout << "DoG detection time = " << DoGDetTime << " ms" << endl;
+  cout << "DoGs.size() = " << DoGs.size() << endl;
+
+  // 2. Feature orientation.
+  // Prepare the computation of gradients on gaussians.
+  printStage("Computing gradients of Gaussians");
+  timer.restart();
+  ImagePyramid<Vector2f> gradG;
+  const ImagePyramid<float>& gaussPyr = computeDoGs.gaussians();
+  gradG = gradPolar(gaussPyr);
+  gradGaussianTime = timer.elapsedMs();
+  elapsed += gradGaussianTime;
+  cout << "gradient of Gaussian computation time = " << gradGaussianTime << " ms" << endl;
+  cout << "DoGs.size() = " << DoGs.size() << endl;
+
+
+  // Find dominant gradient orientations.
+  printStage("Assigning (possibly multiple) dominant orientations to DoG extrema");
+  timer.restart();
+  ComputeDominantOrientations assignOrientations;
+  assignOrientations(gradG, DoGs, scaleOctPairs);
+  oriAssignTime = timer.elapsedMs();
+  elapsed += oriAssignTime;
+  cout << "orientation assignment time = " << oriAssignTime << " ms" << endl;
+  cout << "DoGs.size() = " << DoGs.size() << endl;
+
+
+  // 3. Feature description.
+  printStage("Describe DoG extrema with SIFT descriptors");
+  timer.restart();
+  ComputeSIFTDescriptor<> computeSIFT;
+  SIFTs = computeSIFT(DoGs, scaleOctPairs, gradG);
+  siftCompTime = timer.elapsedMs();
+  elapsed += siftCompTime;
+  cout << "description time = " << siftCompTime << " ms" << endl;
+  cout << "sifts.size() = " << SIFTs.size() << endl;
+
+
+  // 4. Rescale  the feature position and scale $(x,y,\sigma)$ with the octave
+  //    scale.
+  for (size_t i = 0; i != DoGs.size(); ++i)
+  {
+    float octScaleFact = gradG.octaveScalingFactor(scaleOctPairs[i](1));
+    DoGs[i].center() *= octScaleFact;
+    DoGs[i].shapeMat() /= pow(octScaleFact, 2);
+  }
+
+  removeRedundancies(keys.features, keys.descriptors);
+
+  return keys;
+}
+
 
 void load(Image<Rgb8>& image1, Image<Rgb8>& image2,
           Set<OERegion, RealDescriptor>& keys1,
@@ -48,6 +122,10 @@ void load(Image<Rgb8>& image1, Image<Rgb8>& image2,
   keys1.append(mser1);
   keys2.append(mser2);
 #endif // MSER_KEYS
+  Set<OERegion, RealDescriptor> DoGDaisies1 = computeSIFT(image1.convert<float>());
+  Set <OERegion, RealDescriptor> DoGDaisies2 = computeSIFT(image2.convert<float>());
+  keys1.append(DoGDaisies1);
+  keys2.append(DoGDaisies2);
   cout << "Image 1: " << keys1.size() << " keypoints" << endl;
   cout << "Image 2: " << keys2.size() << " keypoints" << endl;
 
