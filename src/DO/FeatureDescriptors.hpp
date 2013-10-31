@@ -31,7 +31,7 @@
 #include "FeatureDescriptors/SIFT.hpp"
 
 // DAISY descriptor.
-#include "FeatureDescriptors/Daisy.hpp"
+//#include "FeatureDescriptors/Experimental/Daisy.hpp"
 
 
 

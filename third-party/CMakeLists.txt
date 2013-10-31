@@ -23,5 +23,5 @@ endif ()
 message(STATUS "  - FLANN")
 add_subdirectory(flann)
 
-message(STATUS "  - DAISY")
-add_subdirectory(libdaisy)
+# message(STATUS "  - DAISY")
+# add_subdirectory(libdaisy)
