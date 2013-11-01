@@ -51,7 +51,8 @@ namespace DO {
       file >> feat.orientation();
       file >> doubleFeatType;
       feat.type() = OERegion::Type(int(doubleFeatType));
-      file >> descriptors[i];
+      for (int k = 0; k < descriptors.dimension(); ++k)
+        file >> descriptors[i](k);
 
       /*cout 
         << feat.coords().transpose() << " " 

@@ -52,7 +52,7 @@ namespace DO {
     {
       if ( dimension() != other.dimension() && matrix_type::size() != 0)
       {
-        std::cerr << "Fatal: other descriptor matrix does not have same dimension" << endl;
+        std::cerr << "Fatal: other descriptor matrix does not have same dimension" << std::endl;
         CHECK(dimension());
         CHECK(other.dimension());
         throw 0;

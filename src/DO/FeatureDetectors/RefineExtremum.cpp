@@ -30,6 +30,8 @@ namespace DO {
     Matrix3f Dsecond; // hessian
     Vector3f h;
     Vector3f lambda;
+    
+    pos = Vector3f(float(x),float(y),I.octRelScale(s));
 
     int i;
     for (i = 0; i < numIter; ++i)
@@ -219,7 +221,7 @@ namespace DO {
     Image<int> map(I(s,o).sizes());
     map.array().setZero();
 
-    //#define STRICT_LOCAL_EXTREMA
+//#define STRICT_LOCAL_EXTREMA
 #ifdef STRICT_LOCAL_EXTREMA
     LocalScaleSpaceExtremum<std::greater, float> local_max;
     LocalScaleSpaceExtremum<std::less, float> local_min;
@@ -239,24 +241,30 @@ namespace DO {
         else if (local_min(x,y,s,o,I))
           type = -1; // minimum 
         else
-          continue;        
+          continue;
+#ifndef STRICT_LOCAL_EXTREMA
         // Reject early.
         if (std::abs(I(x,y,s,o)) < 0.8f*extremumThres)
           continue;
+#endif
         // Reject early if located on edge.
         if (onEdge(I(s,o),x,y,edgeRatioThres))
           continue;
         // Try to refine extremum.
         Point3f pos;
         float val;
-        if (!refineExtremum(I,x,y,s,o,type,pos,val,imgPaddingSz,refineIter))
-          continue;
+        /*if (!refineExtremum(I,x,y,s,o,type,pos,val,imgPaddingSz,refineIter))
+          continue;*/
+        refineExtremum(I,x,y,s,o,type,pos,val,imgPaddingSz,refineIter);
+        
         // Don't add if already marked.
         if (map(static_cast<int>(x), static_cast<int>(y)) == 1)
           continue;
+#ifndef STRICT_LOCAL_EXTREMA
         // Reject if contrast too low.
         if (std::abs(val) < extremumThres)
           continue;
+#endif
         // Store the DoG extremum.
         OERegion dog(pos.head<2>(), pos.z());
 

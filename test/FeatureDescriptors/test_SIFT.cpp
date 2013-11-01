@@ -136,7 +136,7 @@ Set<OERegion, RealDescriptor> computeSIFT(const Image<float>& image)
   printStage("Computing DoG extrema");
   timer.restart();
   ImagePyramidParams pyrParams(0);
-  ComputeDoGExtrema computeDoGs(pyrParams);
+  ComputeDoGExtrema computeDoGs(pyrParams, 0.005f);
   vector<Point2i> scaleOctPairs;
   DoGs = computeDoGs(image, &scaleOctPairs);
   DoGDetTime = timer.elapsedMs();
@@ -199,7 +199,7 @@ bool checkDescriptors(const DescriptorMatrix<float>& descriptors)
   {
     for (int j = 0; j < descriptors.dimension(); ++j)
     {
-      if (!isfinite(descriptors[i](j)))
+      if (!DO::isfinite(descriptors[i](j)))
       {
         cerr << "Not a finite number" << endl;
         return false;
