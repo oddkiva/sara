@@ -13,7 +13,7 @@ do_step_message("Appending test projects:")
 # add_subdirectory(Geometry)
 
 # add_subdirectory(Features)
-# add_subdirectory(FeatureDetectors)
+add_subdirectory(FeatureDetectors)
 add_subdirectory(FeatureDescriptors)
 # add_subdirectory(FeatureDetectorWrappers)
 

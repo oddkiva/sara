@@ -135,8 +135,8 @@ Set<OERegion, RealDescriptor> computeSIFT(const Image<float>& image)
   // 1. Feature extraction.
   printStage("Computing DoG extrema");
   timer.restart();
-  ImagePyramidParams pyrParams(0);
-  ComputeDoGExtrema computeDoGs(pyrParams, 0.005f);
+  ImagePyramidParams pyrParams;//(0);
+  ComputeDoGExtrema computeDoGs(pyrParams, 0.01f);
   vector<Point2i> scaleOctPairs;
   DoGs = computeDoGs(image, &scaleOctPairs);
   DoGDetTime = timer.elapsedMs();

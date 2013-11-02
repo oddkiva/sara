@@ -26,6 +26,7 @@
 #include "FeatureDetectors/RefineExtremum.hpp"
 
 // Feature detection.
+#include "FeatureDetectors/LoG.hpp"
 #include "FeatureDetectors/DoG.hpp"
 #include "FeatureDetectors/Harris.hpp"
 #include "FeatureDetectors/Hessian.hpp"

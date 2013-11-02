@@ -126,6 +126,8 @@ namespace DO {
     Matrix2f Dsecond; // hessian
     Vector2f h; // offset to estimate
 
+    pos = Vector2f(float(x),float(y));
+
     int i;
     for (i = 0; i < numIter; ++i)
     {
@@ -402,12 +404,12 @@ namespace DO {
   }
 
   vector<OERegion> laplaceMaxima(const ImagePyramid<float>& function,
-                                  const ImagePyramid<float>& gaussPyramid,
-                                  int s, int o,
-                                  float extremumThres,
-                                  float imgPaddingSz,
-                                  float numScales,
-                                  int refineIter)
+                                 const ImagePyramid<float>& gaussPyramid,
+                                 int s, int o,
+                                 float extremumThres,
+                                 float imgPaddingSz,
+                                 float numScales,
+                                 int refineIter)
   {
     LocalMax<float> localMax;
 
@@ -428,8 +430,9 @@ namespace DO {
         // Refine the spatial coordinates.
         float val = function(x,y,s,o);
         Point2f p(x,y);
-        if (!refineExtremum(function(s,o),x,y,1,p,val,imgPaddingSz,refineIter))
-          continue;        
+        /*if (!refineExtremum(function(s,o),x,y,1,p,val,imgPaddingSz,refineIter))
+          continue;*/
+        refineExtremum(function(s,o),x,y,1,p,val,imgPaddingSz,refineIter);
         // Store the extremum.
         OERegion c;
         c.center() = p;

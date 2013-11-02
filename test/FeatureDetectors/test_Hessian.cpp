@@ -19,78 +19,173 @@ void toc()
   cout << "Elapsed time = " << elapsed << " ms" << endl << endl;
 }
 
-void testHessian(const Image<float>& I)
+vector<OERegion> computeHessianLaplaceAffineCorners(const Image<float>& I,
+                                                    bool verbose = true)
 {
-  // Chek out the image.
-  openWindow(I.width(), I.height());
-  display(I);
-  getKey();
-
-  // Determinant of Hessian
-  Image<float> DoH;
-  DoH = I.convert<float>().
-    compute<Gaussian>(1.6f).
-    compute<Hessian>().
-    compute<Determinant>();
-  display(DoH.compute<ColorRescale>());
-  getKey();
-
-  // Find local maxima
-  vector<Point2i> extrema( localMaxima(DoH) );
-  display(I);
-  setAntialiasing();
-  for (size_t i = 0; i != extrema.size(); ++i)
-    fillCircle(extrema[i], 5, Red8);
-  getKey();
-}
-
-void testMultiScaleHessian(const Image<float>& I)
-{
-  openWindow(I.width(), I.height());
-  setAntialiasing();
-
-  int firstOctave = -1;
-  int numScalesPerOctave = 3;
-  ImagePyramidParams pyrParams(firstOctave, numScalesPerOctave+2, 
-                               pow(2.f, 1.f/numScalesPerOctave), 2);
-  ImagePyramid<float> G(gaussianPyramid(I, pyrParams));
-  //checkImagePyramid(G);
-
-  ImagePyramid<float> D(DoHPyramid(G));
-  //checkImagePyramid(D, true);
-
-  display(I);
-  for (int o = 0; o < D.numOctaves(); ++o)
+  // 1. Feature extraction.
+  if (verbose)
   {
-    // Verbose.
-    printStage("Processing octave");
-    cout << "Octave " << o << endl;
-    cout << "Octave scaling factor = " << D.octaveScalingFactor(o) << endl;
+    printStage("Localizing Hessian-Laplace interest points");
+    tic();
+  }
+  ComputeHessianLaplaceMaxima computeDoHs;
+  vector<OERegion> heslapMaxima;
+  vector<Point2i> scaleOctPairs;
+  heslapMaxima = computeDoHs(I, &scaleOctPairs);
+  if (verbose)
+    toc();
 
-    // Be careful of the bounds. We go from 1 to N-1.
-    for (int s = 1; s < D.numScalesPerOctave()-1; ++s)
+  const ImagePyramid<float>& gaussPyr = computeDoHs.gaussians();
+  const ImagePyramid<float>& detHessians = computeDoHs.detOfHessians();
+
+  // 2. Affine shape adaptation
+  if (verbose)
+  {
+    printStage("Affine shape adaptation");
+    tic();
+  }
+  AdaptFeatureAffinelyToLocalShape adaptShape;
+  vector<int> keepFeatures(heslapMaxima.size(), 0);
+  for (size_t i = 0; i != heslapMaxima.size(); ++i)
+  {
+    const int s = scaleOctPairs[i](0);
+    const int o = scaleOctPairs[i](1);
+
+    Matrix2f affAdaptTransformMat;
+    if (adaptShape(affAdaptTransformMat, gaussPyr(s,o), heslapMaxima[i]))
     {
-      vector<OERegion> extrema( localScaleSpaceExtrema(D,s,o,1e-6f,10.f,2) );
-
-      // Verbose.
-      printStage("Detected extrema");
-      cout << "[" << s << "] sigma = " << D.scale(s,o) << endl;
-      cout << "    num extrema = " << extrema.size() << endl;
-
-      // Draw the keypoints.
-      //drawExtrema(D, extrema, s, o);
-      //getKey();
-
-      //display(D(s,o).compute<ColorRescale>(), 0, 0, D.octaveScalingFactor(o));
-      //display(I);
-      for (size_t i = 0; i != extrema.size(); ++i)
-        extrema[i].draw(extrema[i].extremumType()==OERegion::Max?Red8:Blue8,
-                        D.octaveScalingFactor(o));
-      getKey();
+      heslapMaxima[i].shapeMat() = affAdaptTransformMat*heslapMaxima[i].shapeMat();
+      keepFeatures[i] = 1;
     }
   }
+  if (verbose)
+    toc();
 
-  closeWindow();
+
+  // 3. Rescale the kept features to original image dimensions.
+  size_t num_kept_features = 
+    std::accumulate(keepFeatures.begin(), keepFeatures.end(), 0);
+
+  vector<OERegion> keptDoHs;
+  keptDoHs.reserve(num_kept_features);
+  for (size_t i = 0; i != keepFeatures.size(); ++i)
+  {
+    if (keepFeatures[i] == 1)
+    {
+      keptDoHs.push_back(heslapMaxima[i]);
+      const float fact = detHessians.octaveScalingFactor(scaleOctPairs[i](1));
+      keptDoHs.back().shapeMat() *= pow(fact,-2);
+      keptDoHs.back().coords() *= fact;
+    }    
+  }
+
+  return keptDoHs;
+}
+
+vector<OERegion> computeDoHExtrema(const Image<float>& I,
+  bool verbose = true)
+{
+  // 1. Feature extraction.
+  if (verbose)
+  {
+    printStage("Localizing DoH interest points");
+    tic();
+  }
+  ComputeDoHExtrema computeDoHs;
+  vector<OERegion> DoHs;
+  vector<Point2i> scaleOctPairs;
+  DoHs = computeDoHs(I, &scaleOctPairs);
+  if (verbose)
+    toc();
+  CHECK(DoHs.size());
+
+  const ImagePyramid<float>& gaussPyr = computeDoHs.gaussians();
+  const ImagePyramid<float>& detHessians = computeDoHs.detOfHessians();
+
+  // 2. Rescale feature points to original image dimensions.
+  for (size_t i = 0; i != DoHs.size(); ++i)
+  {
+    const float fact = detHessians.octaveScalingFactor(scaleOctPairs[i](1));
+    DoHs[i].shapeMat() *= pow(fact,-2);
+    DoHs[i].coords() *= fact;  
+  }
+
+  return DoHs;
+}
+
+vector<OERegion> computeDoHAffineExtrema(const Image<float>& I,
+                                   bool verbose = true)
+{
+  // 1. Feature extraction.
+  if (verbose)
+  {
+    printStage("Localizing DoH affine interest points");
+    tic();
+  }
+  ComputeDoHExtrema computeDoHs;
+  vector<OERegion> DoHs;
+  vector<Point2i> scaleOctPairs;
+  DoHs = computeDoHs(I, &scaleOctPairs);
+  if (verbose)
+    toc();
+  CHECK(DoHs.size());
+
+  const ImagePyramid<float>& gaussPyr = computeDoHs.gaussians();
+  const ImagePyramid<float>& detHessians = computeDoHs.detOfHessians();
+
+  // 2. Affine shape adaptation
+  if (verbose)
+  {
+    printStage("Affine shape adaptation");
+    tic();
+  }
+  AdaptFeatureAffinelyToLocalShape adaptShape;
+  vector<int> keepFeatures(DoHs.size(), 0);
+  for (size_t i = 0; i != DoHs.size(); ++i)
+  {
+    const int s = scaleOctPairs[i](0);
+    const int o = scaleOctPairs[i](1);
+
+    Matrix2f affAdaptTransformMat;
+    if (adaptShape(affAdaptTransformMat, gaussPyr(s,o), DoHs[i]))
+    {
+      DoHs[i].shapeMat() = affAdaptTransformMat*DoHs[i].shapeMat();
+      keepFeatures[i] = 1;
+    }
+  }
+  if (verbose)
+    toc();
+
+
+  // 3. Rescale the kept features to original image dimensions.
+  size_t num_kept_features = 
+    std::accumulate(keepFeatures.begin(), keepFeatures.end(), 0);
+
+  vector<OERegion> keptDoHs;
+  keptDoHs.reserve(num_kept_features);
+  for (size_t i = 0; i != keepFeatures.size(); ++i)
+  {
+    if (keepFeatures[i] == 1)
+    {
+      keptDoHs.push_back(DoHs[i]);
+      const float fact = detHessians.octaveScalingFactor(scaleOctPairs[i](1));
+      keptDoHs.back().shapeMat() *= pow(fact,-2);
+      keptDoHs.back().coords() *= fact;
+
+    }    
+  }
+
+  return keptDoHs;
+}
+
+void checkKeys(const Image<float>& I, const vector<OERegion>& features)
+{
+  display(I);
+  setAntialiasing();
+  for (size_t i = 0; i != features.size(); ++i)
+    features[i].draw(features[i].extremumType() == OERegion::Max ? 
+                     Red8 : Blue8);
+  getKey();
 }
 
 int main()
@@ -101,7 +196,16 @@ int main()
   if (!load(I, name))
     return -1;
 
-  testMultiScaleHessian(I);
+  openWindow(I.width(), I.height());
+  vector<OERegion> features;
+  features = computeHessianLaplaceAffineCorners(I);
+  checkKeys(I, features);
+
+  /*features = computeDoHExtrema(I);
+  checkKeys(I, features);
+
+  features = computeDoHAffineExtrema(I);
+  checkKeys(I, features);*/
 
   return 0;
 }

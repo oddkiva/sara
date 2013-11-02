@@ -18,6 +18,8 @@ macro (do_list_featuredetectors_source_files)
         ${DO_FeatureDetectors_HEADER_FILES})
     # Organize source files as follows.
     source_group("Interest Point Detection" FILES
+                 ${DO_FeatureDetectors_SOURCE_DIR}/LoG.hpp
+                 ${DO_FeatureDetectors_SOURCE_DIR}/LoG.cpp
                  ${DO_FeatureDetectors_SOURCE_DIR}/DoG.hpp
                  ${DO_FeatureDetectors_SOURCE_DIR}/DoG.cpp
                  ${DO_FeatureDetectors_SOURCE_DIR}/Harris.hpp

@@ -132,7 +132,7 @@ namespace DO {
 
   bool
   AdaptFeatureAffinelyToLocalShape::
-  operator()(Matrix2f& shapeMat,
+  operator()(Matrix2f& affAdaptTransfmMat,
              const Image<float>& I,
              const OERegion& feature)
   {
@@ -173,7 +173,7 @@ namespace DO {
     debug_closeWindowUsedToViewPatch();
 
     // Return the shape matrix.
-    shapeMat = U.inverse().transpose()*U.inverse();
+    affAdaptTransfmMat = U.inverse().transpose()*U.inverse();
     return true;
   }
 

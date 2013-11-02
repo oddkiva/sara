@@ -11,8 +11,8 @@
 
 //! @file
 
-#ifndef DO_FEATUREDETECTORS_DOG_HPP
-#define DO_FEATUREDETECTORS_DOG_HPP
+#ifndef DO_FEATUREDETECTORS_LOG_HPP
+#define DO_FEATUREDETECTORS_LOG_HPP
 
 namespace DO {
 
@@ -22,19 +22,19 @@ namespace DO {
     @{
   */
 
-  //! Functor class to compute DoG extrema
-  class ComputeDoGExtrema
+  //! Functor class to compute LoG extrema
+  class ComputeLoGExtrema
   {
   public:
     /*!
       \brief Constructor
       @param[in]
         extremumThres
-        the response threshold which the DoG extremum absolute value
+        the response threshold which the LoG extremum absolute value
         \f$
           \left|
-            \left( g_{\sigma(s+1,o)} - g_{\sigma(s,o)} \right) * I
-          \right| (\mathbf{x})
+            \sigma^2 \Delta I(\mathbf{x}, \sigma) 
+          \right|
         \f$
         must exceed.
         Note that \f$ \sigma(s',o') = 2^{s'/S+o'}\f$  where \f$S\f$ is the 
@@ -60,8 +60,8 @@ namespace DO {
         localization of DoG extrema in scale-space. The refinement process is 
         based on the function **DO::refineExtremum()**.
      */
-    ComputeDoGExtrema(
-      const ImagePyramidParams& pyrParams = ImagePyramidParams(),
+    ComputeLoGExtrema(
+      const ImagePyramidParams& pyrParams = ImagePyramidParams(-1, 3+2),
       float extremumThres = 0.01f,
       float edgeRatioThres = 10.f,
       int imgPaddingSz = 1,
@@ -73,27 +73,7 @@ namespace DO {
       , extremum_refinement_iter_(extremumRefinementIter)
     {}
     /*!
-      \brief Localizes DoG extrema for a given image.
-
-      This function does the following:
-      1. Constructs a gaussian pyramid \f$\nabla g_{\sigma(s,o)} * I\f$ from 
-      the image \f$I\f$, where \f$(s,o)\f$ are integers. Here:
-      \f$\sigma(s,o) = 2^{s/S + o}\f$ where \f$S\f$ is the number of scales per
-      octaves.
-
-      2. Localize extrema in each difference of Gaussians 
-      \f$\left( g_{\sigma(s+1,o)} - g_{\sigma(s,o)} \right) * I \f$
-      where \f$(s,o)\f$ are scale and octave indices.
-      
-      \param[in, out] scaleOctavePairs a pointer to vector of scale and octave
-      index pairs \f$(s_i,o_i)\f$. This index pair corresponds to the difference
-      of Gaussians
-      \f$\left( g_{\sigma(s_i+1,o_i)} - g_{\sigma(s_i,o_i)} \right) * I\f$
-      where the extremum \f$(x_i,y_i,\sigma_i)\f$ is detected.
-
-      \return set of DoG extrema in **std::vector<OERegion>** in each
-      difference of Gaussians
-      \f$\left( g_{\sigma(s+1,o)} - g_{\sigma(s,o)} \right) * I \f$.
+      \brief Localizes LoG extrema for a given image.
      */
     std::vector<OERegion> operator()(const Image<float>& I,
                                      std::vector<Point2i> *scaleOctavePairs = 0);
@@ -111,17 +91,17 @@ namespace DO {
     const ImagePyramid<float>& gaussians() const
     { return gaussians_; }
     /*!
-      \brief Returns the pyramid of difference of Gaussians used to localize 
+      \brief Returns the pyramid of Laplacians of Gaussians used to localize 
       scale-space extrema of image **I**.
 
-      The pyramid of difference of Gaussians is available after calling the 
+      The pyramid of Laplacians of Gaussians is available after calling the 
       function method **ComputeDoGExtrema::operator()(I, scaleOctavePairs)**, 
       
-      \return the pyramid of difference of Gaussians used to localize 
+      \return the pyramid of Laplacians of Gaussians used to localize 
       scale-space extrema of image **I**.
      */
-    const ImagePyramid<float>& diffOfGaussians() const
-    { return diff_of_gaussians_; }
+    const ImagePyramid<float>& laplaciansOfGaussians() const
+    { return laplacians_of_gaussians_; }
   private: /* data members. */
     // Parameters
     ImagePyramidParams params_;
@@ -131,9 +111,9 @@ namespace DO {
     int extremum_refinement_iter_;
     // Difference of Gaussians.
     ImagePyramid<float> gaussians_;
-    ImagePyramid<float> diff_of_gaussians_;
+    ImagePyramid<float> laplacians_of_gaussians_;
   };
 
 } /* namespace DO */
 
-#endif /* DO_FEATUREDETECTORS_DOG_HPP */
+#endif /* DO_FEATUREDETECTORS_LOG_HPP */
