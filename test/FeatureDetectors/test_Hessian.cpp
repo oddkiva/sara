@@ -19,8 +19,8 @@ void toc()
   cout << "Elapsed time = " << elapsed << " ms" << endl << endl;
 }
 
-vector<OERegion> computeHessianLaplaceAffineCorners(const Image<float>& I,
-                                                    bool verbose = true)
+vector<OERegion> computeHessianLaplaceAffineMaxima(const Image<float>& I,
+                                                   bool verbose = true)
 {
   // 1. Feature extraction.
   if (verbose)
@@ -99,7 +99,6 @@ vector<OERegion> computeDoHExtrema(const Image<float>& I,
     toc();
   CHECK(DoHs.size());
 
-  const ImagePyramid<float>& gaussPyr = computeDoHs.gaussians();
   const ImagePyramid<float>& detHessians = computeDoHs.detOfHessians();
 
   // 2. Rescale feature points to original image dimensions.
@@ -198,14 +197,14 @@ int main()
 
   openWindow(I.width(), I.height());
   vector<OERegion> features;
-  features = computeHessianLaplaceAffineCorners(I);
+  features = computeHessianLaplaceAffineMaxima(I);
   checkKeys(I, features);
 
-  /*features = computeDoHExtrema(I);
+  features = computeDoHExtrema(I);
   checkKeys(I, features);
 
   features = computeDoHAffineExtrema(I);
-  checkKeys(I, features);*/
+  checkKeys(I, features);
 
   return 0;
 }
