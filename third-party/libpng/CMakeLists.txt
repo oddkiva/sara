@@ -52,7 +52,7 @@ endif ()
 #option (PNGARG "Disable ANSI-C prototypes" NO)
 
 # SET LIBNAME
-set (PNG_LIB_NAME libpng)
+set (PNG_LIB_NAME png)
 #removed: ${PNGLIB_MAJOR}${PNGLIB_MINOR}
 
 # Use the prebuilt pnglibconf.h file from the scripts folder

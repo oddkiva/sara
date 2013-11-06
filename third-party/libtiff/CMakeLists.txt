@@ -219,8 +219,8 @@ if (WIN32)
 endif ()
 
 # [D0++]: Make sure to build a static library.
-add_library (libtiff ${TIFF_SRCS} libtiff/libtiff.def)
-target_link_libraries (libtiff zlib libjpeg ${M_LIBRARY})
+add_library (tiff ${TIFF_SRCS} libtiff/libtiff.def)
+target_link_libraries (tiff zlib jpeg ${M_LIBRARY})
 
 #add_library (tiff ${TIFF_SRCS} libtiff/libtiff.def)
 #target_link_libraries (tiff ${ZLIB_LIBRARY} ${M_LIBRARY})

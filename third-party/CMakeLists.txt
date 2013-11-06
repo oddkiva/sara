@@ -7,6 +7,9 @@ if (DO_BUILD_UNIT_TESTS)
 endif ()
 
 if (DO_BUILD_IMAGE_IO)
+  message(STATUS “  - antigrain”)
+  add_subdirectory(antigrain)
+
   message(STATUS "  - zlib")
   add_subdirectory(zlib)
 
