@@ -22,14 +22,14 @@ find_package(DO REQUIRED)
 do_dissect_version()
 do_get_os_info()
 
+# Set installation settings.
+include(DOInstall)
+
 # Build third-party software (google test, FLANN,...)
 add_subdirectory(third-party)
 
 # Temporary
 include_directories(third-party)
-
-# Install packages
-include(DOInstall)
 
 # Setup unit test projects
 if (DO_BUILD_UNIT_TESTS)
