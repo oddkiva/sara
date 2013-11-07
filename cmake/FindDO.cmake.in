@@ -42,6 +42,7 @@ if (NOT DO_FOUND)
   do_append_components(DO_COMPONENTS Core)
   do_append_components(DO_COMPONENTS KDTree)
   do_append_components(DO_COMPONENTS FileSystem)
+  do_append_components(DO_COMPONENTS ImageDrawing)
   do_append_components(DO_COMPONENTS Graphics)
   # Image processing
   do_append_components(DO_COMPONENTS ImageProcessing)
