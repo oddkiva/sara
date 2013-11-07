@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets">
+    <Import Project="..\..\Eigen-3.1.2\vsprops\Eigen-3.1.2.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup>
+    <Link>
+      <AdditionalDependencies>DO_FeatureDescriptors-1.0.0-debug.lib;DO_FeatureDetectors-1.0.0-debug.lib;DO_FeatureDetectorWrappers-1.0.0-debug.lib;DO_FeatureMatching-1.0.0-debug.lib;DO_Features-1.0.0-debug.lib;DO_FileSystem-1.0.0-debug.lib;DO_Geometry-1.0.0-debug.lib;DO_Graphics-1.0.0-debug.lib;DO_KDTree-1.0.0-debug.lib;DO_Match-1.0.0-debug.lib;flann_cpp_s.lib;glu32.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VMExternalLibsDir)doplusplus\lib\msvc11\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(VMExternalLibsDir)doplusplus\src;$(VMExternalLibsDir)doplusplus\third-party\eigen;$(VMExternalLibsDir)doplusplus\third-party\flann\src\cpp;%(AdditionalIncludeDirectories)
+      </AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup />
+</Project>
