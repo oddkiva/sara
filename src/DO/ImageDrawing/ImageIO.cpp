@@ -7,7 +7,7 @@ FileError::FileError(const string& filepath, const string& mode)
   : filepath_(filepath), mode_(mode)
 {
 }
- 
+
 const char * FileError::what() const throw()
 {
   ostringstream os;

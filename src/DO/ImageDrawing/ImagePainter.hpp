@@ -22,9 +22,7 @@ namespace DO {
     ImagePainter(unsigned char *rgb_raw_data, int width, int height)
       : framebuffer(&rgb_raw_data[0], width, height, width*3)
       , pixel_format(framebuffer)
-      , renderer_base(pixel_format)
-      {
-      }
+      , renderer_base(pixel_format) {}
 
     void drawLine(double x1, double y1, double x2, double y2,
                   const Vector3d& rgb, double penWidth)
