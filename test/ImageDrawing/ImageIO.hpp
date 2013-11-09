@@ -9,8 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_IMAGEIO_HPP
-#define DO_IMAGEIO_HPP
+#ifndef DO_IMAGEDRAWING_IMAGEIO_HPP
+#define DO_IMAGEDRAWING_IMAGEIO_HPP
 
 #include <cstdio>
 #include <exception>
@@ -137,4 +137,4 @@ public:
   bool operator()(const std::string& filepath, int quality);
 };
 
-#endif /* DO_IMAGEIO_HPP */
+#endif /* DO_IMAGEDRAWING_IMAGEIO_HPP */

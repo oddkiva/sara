@@ -9,11 +9,49 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Graphics.hpp>
+#include <DO/Core.hpp>
 #include "ImageIO.hpp"
+#include "ImagePainter.hpp"
 
 using namespace DO;
 using namespace std;
+
+
+namespace DO {
+
+  template <typename T>
+  void convertColor(Color<T, Rgb>& dst, const Color<T, Rgba>& src)
+  {
+    red(dst) = red(src);
+    blue(dst) = blue(src);
+    green(dst) = green(src);
+  }
+
+  template <typename T>
+  void convertColor(Color<T, Rgba>& dst, const Color<T, Rgb>& src)
+  {
+    red(dst) = red(src);
+    blue(dst) = blue(src);
+    green(dst) = green(src);
+  }
+
+  template <typename T, typename U>
+  void convertColor(Color<T, Rgb>& dst, const Color<U, Rgba>& src)
+  {
+    convertColor(red(dst), red(src));
+    convertColor(blue(dst), blue(src));
+    convertColor(green(dst), green(src));
+  }
+
+  template <typename T, typename U>
+  void convertColor(Color<T, Rgba>& dst, const Color<U, Rgb>& src)
+  {
+    convertColor(red(dst), red(src));
+    convertColor(blue(dst), blue(src));
+    convertColor(green(dst), green(src));
+  }
+
+}
 
 template <typename ImageReader, typename ImageWriter>
 void test_image_io(const string& inpath, const string& outpath)
@@ -29,13 +67,13 @@ void test_image_io(const string& inpath, const string& outpath)
     readImage(data, w, h, d);
     if (d == 1) {
       Image<unsigned char> image(&data[0], Vector2i(w,h));
-      viewImage(image);
+      //viewImage(image);
     } else if (d == 3) {
       Image<Rgb8> image(reinterpret_cast<Rgb8 *>(&data[0]), Vector2i(w,h));
-      viewImage(image);
+      //viewImage(image);
     } else if (d == 4) {
       Image<Rgba8> image(reinterpret_cast<Rgba8 *>(&data[0]), Vector2i(w,h));
-      viewImage(image);
+      //viewImage(image);
     }
 
     cout << "Try writing file:" << endl << outpath << endl;
@@ -75,42 +113,15 @@ bool read(Image<T>& image, const string& filepath)
   return success;
 }
 
-/*template <typename T, typename ImageReader>
-bool readImage(Image<T>& image, const string& filepath)
-{
-  try
-  {
-    unsigned char *data = 0;
-    int w, h, d;
-
-    ImageReader readImage(filepath);
-    readImage(data, w, h, d);
-    if (d == 1) {
-      Image<unsigned char> tmp(&data[0], Vector2i(w,h), true);
-      image = tmp.convert<T>();
-    } else if (d == 3) {
-      Image<Rgb8> tmp(reinterpret_cast<Rgb8 *>(&data[0]), Vector2i(w,h), true);
-      image = tmp.convert<T>();
-    } else if (d == 4) {
-      Image<Rgba8> tmp(reinterpret_cast<Rgba8 *>(&data[0]), Vector2i(w,h), true);
-      image = tmp.convert<T>();
-    }
-    return true;
-  }
-  catch (exception& e)
-  {
-    cout << e.what() << endl;
-    return false;
-  }
-}*/
-
 int main()
 {
-  //test_image_io<JpegFileReader, JpegFileWriter>(srcPath("ksmall.jpg"), srcPath("ksmall_write.jpg"));
-  //test_image_io<PngFileReader,  PngFileWriter >(srcPath("flower.png"), srcPath("flower_write.png"));
-  test_image_io<TiffFileReader,  TiffFileWriter >(srcPath("MARBIBM.TIF"), srcPath("MARBIBM_write.TIF"));
-
-  //Image<Rgb8> image;
-  //readImage<Rgb8, TiffFileReader>(image, srcPath("MARBIBM.TIF"));
+  test_image_io<JpegFileReader, JpegFileWriter>(srcPath("ksmall.jpg"),
+                                                srcPath("ksmall_write.jpg"));
+  test_image_io<PngFileReader,  PngFileWriter >(srcPath("flower.png"),
+                                                srcPath("flower_write.png"));
+  //test_image_io<TiffFileReader,  TiffFileWriter >(srcPath("MARBIBM.TIF"),
+  //                                                srcPath("MARBIBM_write.TIF"));
+  Image<Rgb8> image;
+  read(image, srcPath("MARBIBM.TIF"));
   return 0;
 }

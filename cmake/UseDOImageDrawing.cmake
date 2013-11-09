@@ -20,6 +20,11 @@ endmacro (do_list_imagedrawing_source_files)
 
 macro (do_load_packages_for_imagedrawing_library)
   include(${DO_Core_USE_FILE})
+  include_directories(
+    ${antigrain_DIR}/include
+    ${jpeg_DIR}
+    ${png_DIR}
+    ${tiff_DIR})
 endmacro (do_load_packages_for_imagedrawing_library)
 
 macro (do_create_variables_for_imagedrawing_library)

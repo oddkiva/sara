@@ -9,8 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_IMAGEDRAWING_IMAGEPAINTER_HPP
-#define DO_IMAGEDRAWING_IMAGEPAINTER_HPP
+#ifndef DO_IMAGEPAINTER_HPP
+#define DO_IMAGEPAINTER_HPP
 
 #include <DO/Core.hpp>
 // Pixel format
@@ -156,4 +156,4 @@ namespace DO {
 
 } /* namespace DO */
 
-#endif /* DO_IMAGEDRAWING_IMAGEPAINTER_HPP */
+#endif /* DO_IMAGEPAINTER_HPP */
