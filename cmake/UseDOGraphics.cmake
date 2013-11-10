@@ -41,7 +41,9 @@ macro (do_load_packages_for_graphics_library)
   if (DEFINED ENV{QT5_DIR})
     list(APPEND CMAKE_PREFIX_PATH $ENV{QT5_DIR})
   else ()
-    message("WARNING: it is recommended that you set QT5_DIR to help cmake find Qt 5: ${QT5_DIR} is then appended to CMAKE_PREFIX_PATH variable to locate Qt 5.")
+    message(
+    "WARNING: it is recommended that you set QT5_DIR to help cmake find Qt 5:
+    ${QT5_DIR} is then appended to CMAKE_PREFIX_PATH variable to locate Qt 5.")
   endif ()
   find_package(Qt5Widgets REQUIRED)
   find_package(Qt5OpenGL REQUIRED)

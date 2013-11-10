@@ -9,8 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include "ImageIO.hpp"
-#include <vector>
+#include <DO/ImageDrawing.hpp>
 
 using namespace std;
 
@@ -195,7 +194,7 @@ bool PngFileReader::operator()(unsigned char *& data,
                &interlaceType, (int *)NULL, (int *)NULL);
 
   png_read_update_info(png_ptr, info_ptr);
-  png_uint_32 rowbytes = png_get_rowbytes(png_ptr, info_ptr);
+  png_uint_32 rowbytes = (png_uint_32) png_get_rowbytes(png_ptr, info_ptr);
   png_byte channels = png_get_channels(png_ptr, info_ptr);
 
   width = static_cast<int>(pngWidth);
@@ -204,7 +203,7 @@ bool PngFileReader::operator()(unsigned char *& data,
   data = new unsigned char[width*height*depth];
 
   vector<png_bytep> row_pointers(width*height);
-  for (png_uint_32 y = 0; y < height; ++y)
+  for (int y = 0; y < height; ++y)
     row_pointers[y] = static_cast<png_byte *>(data) + rowbytes*y;
 
   png_read_image(png_ptr, &row_pointers[0]);

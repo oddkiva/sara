@@ -29,7 +29,7 @@ endmacro (do_load_packages_for_imagedrawing_library)
 
 macro (do_create_variables_for_imagedrawing_library)
   set(DO_ImageDrawing_LIBRARIES DO_ImageDrawing)
-  set(DO_ImageDrawing_LINK_LIBRARIES antigrain jpeg png tiff)
+  set(DO_ImageDrawing_LINK_LIBRARIES "antigrain;jpeg;png;tiff")
 endmacro (do_create_variables_for_imagedrawing_library)
 
 do_load_packages_for_imagedrawing_library()

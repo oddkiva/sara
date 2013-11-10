@@ -12,7 +12,6 @@
 #ifndef DO_IMAGEDRAWING_IMAGEPAINTER_HPP
 #define DO_IMAGEDRAWING_IMAGEPAINTER_HPP
 
-#include <DO/Core.hpp>
 // Pixel format
 #include "agg_pixfmt_rgb.h"
 // Rendering-related headers.

@@ -9,9 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Core.hpp>
-#include "ImageIO.hpp"
-#include "ImagePainter.hpp"
+#include <DO/ImageDrawing.hpp>
 
 using namespace DO;
 using namespace std;
@@ -90,7 +88,7 @@ void test_image_io(const string& inpath, const string& outpath)
 
 string fileExtension(const string& filepath)
 {
-  string ext( filepath.substr(filepath.find_last_of(".") + 1) );
+  string ext( filepath.substr(filepath.find_last_of(".")) );
   transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
   return ext;
 }
@@ -104,7 +102,7 @@ bool read(Image<T>& image, const string& filepath)
     test_image_io<JpegFileReader, JpegFileWriter>(filepath, srcPath("test")+ext);
   else if (ext == ".png")
     test_image_io<PngFileReader, PngFileWriter>(filepath, srcPath("test")+ext);
-  else if (ext == ".tif")
+  else if (ext == ".tif" || ext == ".tiff")
     test_image_io<TiffFileReader, TiffFileWriter>(filepath, srcPath("test")+ext);
   else {
     cerr << "Image format: " << ext << " either currently unsupported or invalid" << endl;
@@ -116,12 +114,10 @@ bool read(Image<T>& image, const string& filepath)
 int main()
 {
   test_image_io<JpegFileReader, JpegFileWriter>(srcPath("ksmall.jpg"),
-                                                srcPath("ksmall_write.jpg"));
+  srcPath("ksmall_write.jpg"));
   test_image_io<PngFileReader,  PngFileWriter >(srcPath("flower.png"),
-                                                srcPath("flower_write.png"));
-  //test_image_io<TiffFileReader,  TiffFileWriter >(srcPath("MARBIBM.TIF"),
-  //                                                srcPath("MARBIBM_write.TIF"));
-  Image<Rgb8> image;
-  read(image, srcPath("MARBIBM.TIF"));
+  srcPath("flower_write.png"));
+  test_image_io<TiffFileReader,  TiffFileWriter >(srcPath("MARBIBM.TIF"),
+  srcPath("MARBIBM_write.TIF"));
   return 0;
 }

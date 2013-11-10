@@ -12,7 +12,9 @@
 #ifndef DO_IMAGEDRAWING_HPP
 #define DO_IMAGEDRAWING_HPP
 
+#include <DO/Core.hpp>
+
 #include "ImageDrawing/ImageIO.hpp"
-#include "ImageDrawing/ImageDrawing.hpp"
+#include "ImageDrawing/ImagePainter.hpp"
 
 #endif /* DO_IMAGEDRAWING_HPP */
