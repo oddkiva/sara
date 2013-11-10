@@ -10,10 +10,10 @@
 // ========================================================================== //
 
 #include <DO/ImageDrawing.hpp>
+#include <DO/Graphics.hpp>
 
 using namespace DO;
 using namespace std;
-
 
 namespace DO {
 
@@ -65,13 +65,13 @@ void test_image_io(const string& inpath, const string& outpath)
     readImage(data, w, h, d);
     if (d == 1) {
       Image<unsigned char> image(&data[0], Vector2i(w,h));
-      //viewImage(image);
+      viewImage(image);
     } else if (d == 3) {
       Image<Rgb8> image(reinterpret_cast<Rgb8 *>(&data[0]), Vector2i(w,h));
-      //viewImage(image);
+      viewImage(image);
     } else if (d == 4) {
       Image<Rgba8> image(reinterpret_cast<Rgba8 *>(&data[0]), Vector2i(w,h));
-      //viewImage(image);
+      viewImage(image);
     }
 
     cout << "Try writing file:" << endl << outpath << endl;
@@ -102,8 +102,8 @@ bool read(Image<T>& image, const string& filepath)
     test_image_io<JpegFileReader, JpegFileWriter>(filepath, srcPath("test")+ext);
   else if (ext == ".png")
     test_image_io<PngFileReader, PngFileWriter>(filepath, srcPath("test")+ext);
-  else if (ext == ".tif" || ext == ".tiff")
-    test_image_io<TiffFileReader, TiffFileWriter>(filepath, srcPath("test")+ext);
+  //else if (ext == ".tif" || ext == ".tiff")
+  //  test_image_io<TiffFileReader, TiffFileWriter>(filepath, srcPath("test")+ext);
   else {
     cerr << "Image format: " << ext << " either currently unsupported or invalid" << endl;
     success = false;
@@ -114,10 +114,10 @@ bool read(Image<T>& image, const string& filepath)
 int main()
 {
   test_image_io<JpegFileReader, JpegFileWriter>(srcPath("ksmall.jpg"),
-  srcPath("ksmall_write.jpg"));
-  test_image_io<PngFileReader,  PngFileWriter >(srcPath("flower.png"),
-  srcPath("flower_write.png"));
-  test_image_io<TiffFileReader,  TiffFileWriter >(srcPath("MARBIBM.TIF"),
-  srcPath("MARBIBM_write.TIF"));
+                                                srcPath("ksmall_write.jpg"));
+  test_image_io<PngFileReader, PngFileWriter>(srcPath("flower.png"),
+                                              srcPath("flower_write.png"));
+  test_image_io<TiffFileReader, TiffFileWriter>(srcPath("MARBIBM.TIF"),
+                                                srcPath("MARBIBM_write.TIF"));
   return 0;
 }
