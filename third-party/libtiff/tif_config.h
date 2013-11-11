@@ -30,13 +30,13 @@
 #define HAVE_IEEEFP 1
 
 /* Define to 1 if you have the <io.h> header file. */
-/* #undef HAVE_IO_H */
+#define HAVE_IO_H
 
 /* Define to 1 if you have the `jbg_newlen' function. */
 /* #undef HAVE_JBG_NEWLEN */
 
 /* Define to 1 if you have the `mmap' function. */
-#define HAVE_MMAP
+/* #undef HAVE_MMAP */
 
 /* Define to 1 if you have the <search.h> header file. */
 #define HAVE_SEARCH_H
@@ -49,7 +49,7 @@
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #ifndef HAVE_UNISTD_H
-#define HAVE_UNISTD_H
+/* #undef HAVE_UNISTD_H */
 #endif
 
 /* Native cpu byte order: 1 if big-endian (Motorola) or 0 if little-endian
@@ -152,7 +152,7 @@
 #endif
 
 /* define to use win32 IO system */
-/* #undef USE_WIN32_FILEIO */
+#define USE_WIN32_FILEIO
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */
