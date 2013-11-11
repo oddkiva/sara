@@ -62,7 +62,7 @@ namespace DO {
      */
     ComputeDoGExtrema(
       const ImagePyramidParams& pyrParams = ImagePyramidParams(),
-      float extremumThres = 0.04f/3.f/*0.03f*/,
+      float extremumThres = 0.01f,
       float edgeRatioThres = 10.f,
       int imgPaddingSz = 1,
       int extremumRefinementIter = 5)

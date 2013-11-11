@@ -11,8 +11,8 @@
 
 //! @file
 
-#ifndef DO_FEATUREDETECTORS_FEATUREDETECTORS_HPP
-#define DO_FEATUREDETECTORS_FEATUREDETECTORS_HPP
+#ifndef DO_FEATUREDETECTORS_HPP
+#define DO_FEATUREDETECTORS_HPP
 
 #include <DO/Defines.hpp>
 #include <DO/Graphics.hpp>
@@ -26,6 +26,7 @@
 #include "FeatureDetectors/RefineExtremum.hpp"
 
 // Feature detection.
+#include "FeatureDetectors/LoG.hpp"
 #include "FeatureDetectors/DoG.hpp"
 #include "FeatureDetectors/Harris.hpp"
 #include "FeatureDetectors/Hessian.hpp"
@@ -34,32 +35,7 @@
 // Affine shape adaptation (cf. [Mikolajczyk & Schmid, ECCV 2002]).
 #include "FeatureDetectors/AffineShapeAdaptation.hpp"
 
-// Feature description.
-//
-// Assign dominant orientations $\theta$ to image patch $(x,y,\sigma)$ using 
-// Lowe's method (cf. [Lowe, IJCV 2004]).
-#include "FeatureDetectors/Orientation.hpp"
-// Describe keypoint $(x,y,\sigma,\theta)$ with the SIFT descriptor (cf. 
-// [Lowe, IJCV 2004]).
-#include "FeatureDetectors/SIFT.hpp"
-
-
-// Third-party software wrappers
-//
-// Affine-covariant features detected by Mikolajczyk's binary.
-#include "FeatureDetectors/HarAffSiftDetector.hpp"
-#include "FeatureDetectors/HesAffSiftDetector.hpp"
-#include "FeatureDetectors/MserSiftDetector.hpp"
-
-
-
-#ifdef EXTERNBINDIR
-#define EXTERNBINDIR_STRINGIFY(s)  #s
-#define EXTERNBINDIR_EVAL(s) EXTERNBINDIR_STRINGIFY(s)
-#define externBinPath(s) (EXTERNBINDIR_EVAL(EXTERNBINDIR)"/"s)  
-#endif
-
 //! \defgroup FeatureDetectors
 
 
-#endif /* DO_FEATUREDETECTORS_FEATUREDETECTORS_HPP */
+#endif /* DO_FEATUREDETECTORS_HPP */

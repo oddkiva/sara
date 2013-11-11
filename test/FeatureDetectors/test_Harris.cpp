@@ -19,96 +19,29 @@ void toc()
   cout << "Elapsed time = " << elapsed << " ms" << endl << endl;
 }
 
-//#define CHECK_STEP_BY_STEP
-#ifdef CHECK_STEP_BY_STEP
-void testSimplifiedHarrisLaplace(const Image<float>& I,
-                                 int firstOctave = -1,
-                                 int numScalesPerOctaves = 2,
-                                 bool debug = false)
-{
-  // Open window to check each step.
-  Window win = openWindow(I.width(), I.height());
-  setAntialiasing();
-
-  // Harris pyramid
-  printStage("Constructing Harris Pyramid");
-  tic();
-  ImagePyramid<float> cornerness;
-  ImagePyramidParams harrisPyrParams(
-    firstOctave, numScalesPerOctaves+1,
-    pow(2.f, 1.f/numScalesPerOctaves), 1);
-  cornerness = harrisCornernessPyramid(I, 0.04f, harrisPyrParams);
-  toc();
-
-  // Gaussian Pyramid
-  printStage("Constructing Gaussian Pyramid");
-  tic();
-  ImagePyramid<float> G;
-  G = gaussianPyramid(I, harrisPyrParams);
-  toc();
-
-  AdaptFeatureAffinelyToLocalShape adaptShape;
-  
-  display(I);
-  for (int o = 0; o < cornerness.numOctaves(); ++o)
-  {
-    cout << "Octave " << o << endl;
-    for (int s = 1; s < cornerness.numScalesPerOctave(); ++s)
-    {
-      cout << "image " << s << endl;
-      cout << cornerness.octaveScalingFactor(o) << endl;
-
-      // Find local maxima.
-      vector<OERegion> corners;
-      corners = laplaceMaxima(cornerness, G, s, o);
-      cout << "Cornerness extrema: " << corners.size() << endl;
-
-      // Display local maxima.
-      float fact = cornerness.octaveScalingFactor(o);
-      display(colorRescale(cornerness(s,o)), 0, 0, fact);
-
-      // Check the affine shape adaptation.
-      for (size_t i = 0; i != corners.size(); ++i)
-      {
-        Matrix2f shapeMat;
-        if (adaptShape(shapeMat, G(s,o), corners[i]))
-        {
-          corners[i].shapeMat() = shapeMat*corners[i].shapeMat();
-          // I believe Mikolajczyk dilates the shape to get the size ratio
-          // of the feature of the shape.
-          const float binFactorSz = 3.f;
-          const float numBins = 2.f;
-          corners[i].shapeMat() *= pow(binFactorSz*numBins,-2);
-          corners[i].drawOnScreen(Blue8, fact);
-        }        
-      }
-      getKey();
-    }
-  }
-}
-#endif
-
 // A helper function
 // Be aware that detection parameters are those set by default, e.g.,
 // - thresholds like on extremum responses,
 // - number of iterations in the keypoint localization,...
 // Keypoints are described with the SIFT descriptor.
-template <typename ComputeFeature>
-vector<Keypoint> computeAffineAdaptedKeypoints(const Image<float>& I,
-                                               bool verbose = true)
+vector<OERegion> computeHarrisLaplaceAffineCorners(const Image<float>& I,
+                                                   bool verbose = true)
 {
   // 1. Feature extraction.
   if (verbose)
   {
-    printStage("Localizing interest points");
+    printStage("Localizing Harris-Laplace interest points");
     tic();
   }
-  ComputeFeature computeFeatures;
-  vector<OERegion> feats;
+  ComputeHarrisLaplaceCorners computeCorners;
+  vector<OERegion> corners;
   vector<Point2i> scaleOctPairs;
-  feats = computeFeatures(I, &scaleOctPairs);
+  corners = computeCorners(I, &scaleOctPairs);
   if (verbose)
     toc();
+
+  const ImagePyramid<float>& gaussPyr = computeCorners.gaussians();
+  const ImagePyramid<float>& harrisPyr = computeCorners.harris();
 
   // 2. Affine shape adaptation
   if (verbose)
@@ -116,127 +49,51 @@ vector<Keypoint> computeAffineAdaptedKeypoints(const Image<float>& I,
     printStage("Affine shape adaptation");
     tic();
   }
-  const ImagePyramid<float>& gaussPyr = computeFeatures.gaussians();
   AdaptFeatureAffinelyToLocalShape adaptShape;
-  vector<int> keepFeatures(feats.size(), 0);
-  for (size_t i = 0; i != feats.size(); ++i)
+  vector<int> keepFeatures(corners.size(), 0);
+  for (size_t i = 0; i != corners.size(); ++i)
   {
-    Matrix2f shapeMat;
-    int s = scaleOctPairs[i](0);
-    int o = scaleOctPairs[i](1);
-    if (adaptShape(shapeMat, gaussPyr(s,o), feats[i]))
+    const int s = scaleOctPairs[i](0);
+    const int o = scaleOctPairs[i](1);
+
+    Matrix2f affAdaptTransformMat;
+    if (adaptShape(affAdaptTransformMat, gaussPyr(s,o), corners[i]))
     {
-      feats[i].shapeMat() = shapeMat*feats[i].shapeMat();
+      corners[i].shapeMat() = affAdaptTransformMat*corners[i].shapeMat();
       keepFeatures[i] = 1;
     }
   }
   if (verbose)
     toc();
 
-  // 3. Dominant orientations and photometric description, e.g., SIFT.
-  if (verbose)
-  {
-    printStage("Dominant orientations and feature description");
-    tic();
-  }
-  /*
-    Compute the affinity that maps the normalized patch to the local region
-    around feature $f$.
-    We denote a point in the normalized patch by $(u,v) \in [0,w]^2$
-    The center point is $(w/2, w/2)$ corresponds to the center $(x_f, y_f)$
-    of feature $f$.
+  // 3. Rescale the kept features to original image dimensions.
+  size_t num_kept_features = 
+    std::accumulate(keepFeatures.begin(), keepFeatures.end(), 0);
 
-    We introduce the notion of 'scale unit', i.e.,
-    $1$ scale unit is equivalent $\sigma$ pixels in the image.
-  */
-  /* 
-    Let us set some important constants needed for the computation of the 
-    normalized patch computation. 
-   */
-  // Patch "radius"
-  const int patchRadius = 20;
-  // Patch side length
-  const int patchSideLength = 2*patchRadius+1;
-  // Gaussian smoothing is involved in the computation of gradients orientations
-  // to compute dominant orientations and the SIFT descriptor.
-  const float gaussTruncFactor = 3.f; 
-  // A normalized patch is composed of a grid of NxN square patches, i.e. bins,
-  // centered on the feature
-  const float binSideLength = 3.f; // side length of a bin in scale unit.
-  const float numBins = 4.f;
-  const float scaleRelRadius = sqrt(2.f)*binSideLength*(numBins+1)/2.f;
-  // Store the keypoints here.
-  vector<Keypoint> keys;
-  keys.reserve(2*feats.size());
-  for (size_t i = 0; i != feats.size(); ++i)
+  vector<OERegion> keptCorners;
+  keptCorners.reserve(num_kept_features);
+  for (size_t i = 0; i != keepFeatures.size(); ++i)
   {
     if (keepFeatures[i] == 1)
     {
-      // The linear transform computed from the SVD
-      const Matrix2f& shapeMat = feats[i].shapeMat();
-      JacobiSVD<Matrix2f> svd(shapeMat, ComputeFullU);
-      Vector2f S(svd.singularValues().cwiseInverse().cwiseSqrt());
-      S *= scaleRelRadius/patchRadius; // Scaling
-      Matrix2f U(svd.matrixU()); // Rotation
-      Matrix2f L(U*S.asDiagonal()*U.transpose()); // Linear transform.
-      // The translation vector
-      Vector2f t(L*Point2f::Ones()*(-patchRadius) + feats[i].center());
-      // The affinity that maps the patch to the local region around the feature
-      Matrix3f T(Matrix3f::Zero());
-      T.block<2,2>(0,0) = L;
-      T.col(2) << t, 1.f;
+      keptCorners.push_back(corners[i]);
+      const float fact = harrisPyr.octaveScalingFactor(scaleOctPairs[i](1));
+      keptCorners.back().shapeMat() *= pow(fact,-2);
+      keptCorners.back().coords() *= fact;
 
-      // Get the normalized patch.
-      Image<float> normalizedPatch(patchSideLength,patchSideLength);
-      int s = scaleOctPairs[i](0);
-      int o = scaleOctPairs[i](1);
-      if (!warp(normalizedPatch, gaussPyr(s,o), T, 0.f, true))
-        continue;
-
-      // Compute the gradients on the normalized patch.
-      Image<Vector2f> gradients_patch(gradPolar(normalizedPatch));
-
-      // Shorten names.
-      const float x_patch = patchRadius;
-      const float y_patch = patchRadius;
-      const float sigma_patch = patchRadius/scaleRelRadius;
-
-      // Find dominant orientations in the normalized patch.
-      ComputeDominantOrientations assignOri;
-      vector<float> orientations(assignOri(
-        gradients_patch, x_patch, y_patch, sigma_patch));
-
-      // Describe the normalized patch for each dominant orientation.
-      ComputeSIFTDescriptor<> computeSIFT;
-      for (int t = 0; t < orientations.size(); ++t)
-      {
-        double fact = gaussPyr.octaveScalingFactor(o);
-        float theta = orientations[t];
-        // Create a keypoint.
-        Keypoint k;
-        k.feat() = feats[i];
-        k.feat().orientation() = theta;
-        k.desc() = computeSIFT(x_patch, y_patch, sigma_patch, theta,
-                               gradients_patch);
-        // Rescale the feature position and shape to the original image
-        // dimensions.
-        k.feat().shapeMat() *= pow(fact/**scaleRelRadius*/, -2);
-        k.feat().center() *= fact;
-        // Store the keypoint.
-        keys.push_back(k);
-      }
-    }
+    }    
   }
-  if (verbose)
-    toc();
-  return keys;
+
+  CHECK(keptCorners.size());
+
+  return keptCorners;
 }
 
-void checkKeys(const Image<float>& I, const vector<Keypoint>& keys)
+void checkKeys(const Image<float>& I, const vector<OERegion>& features)
 {
   display(I);
   setAntialiasing();
-  drawKeypoints(keys, Red8);
+  drawOERegions(features, Red8);
   getKey();
 }
 
@@ -248,16 +105,10 @@ int main()
   if (!load(I, name))
     return -1;
 
-  //testSimplifiedHarrisLaplace(I);
-
   openWindow(I.width(), I.height());
-  vector<Keypoint> keys;
-  
-  keys = computeAffineAdaptedKeypoints<ComputeDoGExtrema>(I);
-  checkKeys(I, keys);
-
-  keys = computeAffineAdaptedKeypoints<ComputeHarrisLaplaceCorners>(I);
-  checkKeys(I, keys);
+  vector<OERegion> features;
+  features = computeHarrisLaplaceAffineCorners(I);
+  checkKeys(I, features);
 
   return 0;
 }

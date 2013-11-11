@@ -106,6 +106,10 @@ namespace DO {
 
   double analyticInterUnionRatio(const Ellipse& e1, const Ellipse& e2);
 
+  // Move somewhere instead.
+  std::vector<Point2d> convexHull(const std::vector<Point2d>& points);
+  double convexHullArea(const std::vector<Point2d>& points);
+
 
 } /* namespace DO */
 

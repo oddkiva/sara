@@ -23,8 +23,8 @@ Image<float> warp(const Image<float>& I, const Matrix2f& T)
     {
       Point2f p(x,y);
       p = T*p;
-      if ( p.x() < 0 && p.x() >= I.width()-1  ||
-        p.y() < 0 && p.y() >= I.height()-1 )
+      if ( p.x() < 0 || p.x() >= I.width()-1  ||
+           p.y() < 0 || p.y() >= I.height()-1 )
         continue;
       warpedI(x,y) = interpolate(I, p);
     }

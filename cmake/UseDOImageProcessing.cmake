@@ -42,6 +42,12 @@ endmacro (do_list_imageprocessing_source_files)
 
 macro (do_load_packages_for_imageprocessing_library)
   include(${DO_Core_USE_FILE})
+  if (NOT APPLE)
+    find_package(OpenMP)
+    if (OPENMP_FOUND)
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    endif()
+  endif()
 endmacro (do_load_packages_for_imageprocessing_library)
 
 macro (do_create_variables_for_imageprocessing_library)

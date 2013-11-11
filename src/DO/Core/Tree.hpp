@@ -809,9 +809,9 @@ namespace DO {
     for (const_breadth_first_iterator n = tree.breadth_first_begin();
          n != tree.breadth_first_end(); ++n)
     {
-      const_children_iterator child = tree.children_begin(n), end = tree.children_end();
-      for (const_children_iterator child = tree.children_begin(n);
-           child != end; ++child)
+      const_children_iterator child = tree.children_begin(n);
+      const_children_iterator end = tree.children_end();
+      for ( ; child != end; ++child)
         f << "\t" << *n << " -> " << *child << ";" << endl;
     }
 

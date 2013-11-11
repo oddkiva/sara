@@ -49,6 +49,9 @@ namespace DO {
   //! Set the chosen window **w** as the current active window (regardless of its type).
   DO_EXPORT
   void setActiveWindow(Window w);
+  //! Resize the specified window **w** with the following parameters.
+  DO_EXPORT
+  void resizePaintingWindow(Window w, int width, int height);
 
   // ====================================================================== //
   // Temporizing functions

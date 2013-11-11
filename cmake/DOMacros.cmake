@@ -95,17 +95,16 @@ macro (do_append_library NAME            # Library name
 endmacro (do_append_library)
 
 
-
-macro (do_unit_test NAME EXTRA_LIBS)
+macro (do_unit_test NAME SOURCES EXTRA_LIBS)
   include_directories(${gtest_DIR}/include)
-  add_executable(DO_${NAME}_test test.cpp)
+  add_executable(DO_${NAME}_test ${SOURCES})
   target_link_libraries(DO_${NAME}_test
                         ${EXTRA_LIBS} # Extra libs MUST be first.
                         gtest)
-  add_test(${NAMESPACE}_${NAME}_test ${NAMESPACE}_${NAME}_test)
   set_target_properties(DO_${NAME}_test PROPERTIES
                         COMPILE_FLAGS -DSRCDIR=${CMAKE_CURRENT_SOURCE_DIR}
                         COMPILE_DEFINITIONS DO_STATIC)
+  add_test(DO_${NAME}_test "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/DO_${NAME}_test")
 endmacro (do_unit_test)
 
 

@@ -19,6 +19,7 @@ namespace DO {
   ScrollArea::ScrollArea(QWidget* parent) : QScrollArea(parent)
   {
     setAlignment(Qt::AlignCenter);
+    setAttribute(Qt::WA_DeleteOnClose);
   }
 
   void ScrollArea::closeEvent(QCloseEvent *event)
@@ -41,31 +42,30 @@ namespace DO {
     , pixmap_(width, height)
     , painter_(&pixmap_)
   {
-    resize(width, height);
     //setMouseTracking(true);
     setFocusPolicy(Qt::WheelFocus);
-
+    // Set event listener.
     event_listening_timer_.setSingleShot(true);
     connect(&event_listening_timer_, SIGNAL(timeout()),
-      this, SLOT(eventListeningTimerStopped()));
-
+            this, SLOT(eventListeningTimerStopped()));
+    // Move widget.
     if(x != -1 && y != -1)
       scroll_area_->move(x,y);
     scroll_area_->setWindowTitle(windowTitle);
     scroll_area_->setWidget(this);
     scroll_area_->setFocusProxy(this);
-
+    // Resize widget.
+    resize(width, height);
     if (width > qApp->desktop()->width() || height > qApp->desktop()->height())
     {
       width = 800;
       height = 600;
     }
-
     scroll_area_->resize(width+2, height+2);
-
+    // Initialize the pixmap.
     pixmap_.fill();
     update();
-
+    // Show the widget.
     scroll_area_->show();
   }
 
@@ -322,6 +322,31 @@ namespace DO {
   void PaintingWindow::saveScreen(const QString& filename)
   {
     pixmap_.save(filename);
+  }
+
+  void PaintingWindow::resizeScreen(int width, int height)
+  {
+    if (pixmap_.width() == width && pixmap_.height() == height)
+      return;
+    /*
+       The following internal changes are critical to prevent Qt from crashing.
+       1. Tell QPainter 'painter_' to stop using using QPixmap 'pixmap_'.
+       2. Reinitialize the QPixmap with the new size.
+       3. Now we can re-allow QPainter 'painter_' to re-use QPixmap 'pixmap_'.
+     */
+    painter_.end();
+    pixmap_ = QPixmap(width, height);
+    pixmap_.fill();
+    painter_.begin(&pixmap_);
+    
+    // Resize the window and the scroll area as follows.
+    resize(width, height);
+    if (width > qApp->desktop()->width() || height > qApp->desktop()->height())
+    {
+      width = 800;
+      height = 600;
+    }
+    scroll_area_->resize(width+2, height+2);
   }
 
   void PaintingWindow::waitForEvent(int ms)

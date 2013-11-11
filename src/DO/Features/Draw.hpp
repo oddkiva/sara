@@ -21,13 +21,8 @@ namespace DO {
     @{
   */
 
-  template <typename Key>
-  void drawKeypoints(const std::vector<Key>& keypoints, const Color3ub& c,
-                     float scale = 1.0f, const Point2f& off = Point2f::Zero())
-  {
-    for (size_t i = 0; i < keypoints.size(); ++i)
-      keypoints[i].feat().drawOnScreen(c, scale, off);
-  }
+  void drawOERegions(const std::vector<OERegion>& features, const Color3ub& c,
+                     float scale = 1.f, const Point2f& off = Point2f::Zero());
 
   //! @}
 

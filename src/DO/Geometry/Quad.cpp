@@ -13,21 +13,10 @@
 
 #include <DO/Geometry.hpp>
 #include <DO/Graphics.hpp>
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/ch_graham_andrew.h>
-#include <CGAL/Polygon_2.h>
-#include <CGAL/Boolean_set_operations_2.h>
 #include <iostream>
 #include <fstream>
 
 using namespace std;
-using namespace CGAL;
-
-typedef Exact_predicates_inexact_constructions_kernel K;
-typedef Polygon_2<K> Polygon;
-typedef Polygon_with_holes_2<K>  PolygonWithHoles;
-typedef std::list<PolygonWithHoles> PwhList;
-typedef K::Point_2 Point;
 
 namespace DO {
 
@@ -39,43 +28,6 @@ namespace DO {
     //Inward normal
     Vector2d n(u[1], -u[0]);
     return Vector3d(n[0], n[1],-n[0]*a[0]-n[1]*a[1]);
-  }
-
-  // CGAL crashes because of rounding errors...
-  double round(double x)
-  {
-    return floor(x + 0.5);
-  }
-
-  Polygon toPoly(const Quad& quad)
-  {
-    Polygon poly;
-    // Stupid CGAL, intersection requires polygon to be enumerated in a CCW way.
-    /*p.push_back( Point(quad.a.x(), quad.a.y()) );
-    p.push_back( Point(quad.b.x(), quad.b.y()) );
-    p.push_back( Point(quad.c.x(), quad.c.y()) );
-    p.push_back( Point(quad.d.x(), quad.d.y()) );*/
-    Point pts[4];
-    pts[0] = Point( round(quad.a.x()), round(quad.a.y()) );
-    pts[1] = Point( round(quad.b.x()), round(quad.b.y()) );
-    pts[2] = Point( round(quad.c.x()), round(quad.c.y()) );
-    pts[3] = Point( round(quad.d.x()), round(quad.d.y()) );
-    CGAL::ch_graham_andrew(pts, pts+4, std::back_inserter(poly) );
-    return poly;
-  }
-
-  static void drawPolygon(const Polygon& polygon, const Color3ub& c)
-  {
-    //cout << "polygon.size() == " << polygon.size() << endl;
-    Polygon::Edge_const_circulator e = polygon.edges_circulator();
-    Polygon::Edge_const_circulator done(e);
-    do
-    {
-      drawArrow(
-        (*e).source().x(), (*e).source().y(),
-        (*e).target().x(), (*e).target().y(),
-        c);
-    } while(++e != done);
   }
 
   Quad::Quad(const BBox& bbox)
@@ -192,37 +144,15 @@ namespace DO {
 
   bool Quad::intersect(const Quad& quad) const
   {
-    Polygon p1( toPoly(*this) );
-    Polygon p2( toPoly(quad) );
-#ifdef DEBUG_QUAD_INTERSECTION
-    drawPolygon(p1, Cyan8);
-    drawPolygon(p2, Magenta8);
-
-    PwhList intR;
-    CGAL::intersection(p1, p2, back_inserter(intR));
-
-    if (!intR.empty())
-      drawPolygon(intR.back().outer_boundary(), Green8);
-    else
-      cout << "intersection empty" << endl;
-#endif
-    return CGAL::do_intersect(p1, p2);
+    return true;
   }
 
   double Quad::overlap(const Quad& quad) const
   {
     if (isAlmostSimilar(quad))
-      return 1.0;
+      return 1.;
 
-    Polygon p1( toPoly(*this) );
-    Polygon p2( toPoly(quad) );
-    PolygonWithHoles unionR;
-    if ( !CGAL::join(p2, p1, unionR) )
-      return 0;
-
-    double unionArea = unionR.outer_boundary().area();
-    double interArea = p1.area() + p2.area() - unionArea;
-    return interArea/unionArea;    
+    return 0.;  
   }
 
   void Quad::print() const

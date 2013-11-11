@@ -23,7 +23,6 @@ namespace DO {
     PixmapItem(const QPixmap& pixmap, QGraphicsItem* parent = 0)
       : QGraphicsPixmapItem(pixmap, parent)
       , scaleFactor(1.0)
-      , childrenHidden(true)
     {
       setFlags(ItemIsMovable | ItemIsSelectable | ItemIsFocusable);
     }
@@ -33,7 +32,6 @@ namespace DO {
 
   private:
     qreal scaleFactor;
-    bool childrenHidden;
   };
 
 } /* namespace DO */

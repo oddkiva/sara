@@ -1,23 +1,16 @@
-/*
- * =============================================================================
- *
- *       Filename:  Match.hpp
- *
- *    Description:
- *
- *        Version:  1.0
- *        Created:  04/05/2010 12:31:00
- *       Revision:  none
- *       Compiler:  msvc
- *
- *         Author:  David OK (DO), david.ok@imagine.enpc.fr 
- *        Company:  IMAGINE, (Ecole des Ponts ParisTech & CSTB)
- *
- * =============================================================================
- */
+// ========================================================================== //
+// This file is part of DO++, a basic set of libraries in C++ for computer 
+// vision.
+//
+// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public 
+// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
 
-#ifndef DO_MATCH_MATCH_HPP
-#define DO_MATCH_MATCH_HPP
+#ifndef DO_MATCH_HPP
+#define DO_MATCH_HPP
 
 #include <DO/Features.hpp>
 #include <vector>
@@ -26,4 +19,4 @@
 #include "Match/Match.hpp"
 #include "Match/PairWiseDrawer.hpp"
 
-#endif /* DO_MATCH_MATCH_HPP */
+#endif /* DO_MATCH_HPP */

@@ -21,57 +21,55 @@ namespace DO {
     enum MatchingDirection { SourceToTarget, TargetToSource };
     //! Default constructor
     inline Match()
-      : source_(0), target_(0)
-      , targetRank_(-1), score_(std::numeric_limits<float>::max())
-      , matchingDir_(SourceToTarget)
-      , sInd_(-1), tInd_(-1) {}
+      : x_(0), y_(0)
+      , target_rank_(-1), score_(std::numeric_limits<float>::max())
+      , matching_dir_(SourceToTarget)
+      , x_ind_(-1), y_ind_(-1) {}
 
-    inline Match(const Keypoint *source,
-                 const Keypoint *target,
+    inline Match(const OERegion *x,
+                 const OERegion *y,
                  float score = std::numeric_limits<float>::max(),
                  MatchingDirection matchingDir = SourceToTarget,
-                 int i1 = -1, int i2 = -1)
-      : source_(source), target_(target)
-      , targetRank_(-1), score_(score)
-      , matchingDir_(matchingDir), sInd_(i1), tInd_(i2)
+                 int indX = -1, int indY = -1)
+      : x_(x), y_(y)
+      , target_rank_(-1), score_(score)
+      , matching_dir_(matchingDir), x_ind_(indX), y_ind_(indY)
     {}
 
     //! Constant accessors.
-    bool isSKeyNull() const { return source_ == 0; }
-    bool isTKeyNull() const { return target_ == 0; }
-    const Keypoint& source() const { if (isSKeyNull()) exit(-1); return *source_; }
-    const Keypoint& target() const { if (isTKeyNull()) exit(-1); return *target_; }
-    const OERegion& sFeat() const { return source().feat(); }
-    const OERegion& tFeat() const { return target().feat(); }
-    const Point2f& sPos() const { return sFeat().center(); }
-    const Point2f& tPos() const { return tFeat().center(); }
-    int rank() const { return targetRank_; }
+    bool isXNull() const { return x_ == 0; }
+    bool isYNull() const { return y_ == 0; }
+    const OERegion& x() const { if (isXNull()) throw 0; return *x_; }
+    const OERegion& y() const { if (isYNull()) throw 0; return *y_; }
+    const Point2f& posX() const { return x().center(); }
+    const Point2f& posY() const { return y().center(); }
+    int rank() const { return target_rank_; }
     float score() const { return score_; }
-    MatchingDirection matchingDir() const { return matchingDir_; }
-    int sInd() const { return sInd_; }
-    int tInd() const { return tInd_; }
-    Vector2i indexPair() const { return Vector2i(sInd_, tInd_); }
+    MatchingDirection matchingDir() const { return matching_dir_; }
+    int indX() const { return x_ind_; }
+    int indY() const { return y_ind_; }
+    Vector2i indexPair() const { return Vector2i(x_ind_, y_ind_); }
 
     //! Non-constant accessors.
-    const Keypoint *& sPtr() { return source_; }
-    const Keypoint *& tPtr() { return target_; }
-    int& rank() { return targetRank_; }
+    const OERegion *& ptrX() { return x_; }
+    const OERegion *& ptrY() { return y_; }
+    int& rank() { return target_rank_; }
     float& score() { return score_; }
-    MatchingDirection& matchingDir() { return matchingDir_; }
-    int& sInd() { return sInd_; }
-    int& tInd() { return tInd_; }
+    MatchingDirection& matchingDir() { return matching_dir_; }
+    int& indX() { return x_ind_; }
+    int& indY() { return y_ind_; }
 
     //! Key match equality.
     bool operator==(const Match& m) const
-    { return (source() == m.source() && target() == m.target()); }
+    { return (x() == m.x() && y() == m.y()); }
 
   private: /* data members */
-    const Keypoint *source_;
-    const Keypoint *target_;
-    int targetRank_;
+    const OERegion *x_;
+    const OERegion *y_;
+    int target_rank_;
     float score_;
-    MatchingDirection matchingDir_;
-    int sInd_, tInd_;
+    MatchingDirection matching_dir_;
+    int x_ind_, y_ind_;
   };
 
   inline Match indexMatch(int i1, int i2)
@@ -85,7 +83,7 @@ namespace DO {
   bool readMatches(std::vector<Match>& matches, const std::string& fileName, float scoreT = 10.f);
 
   bool readMatches(std::vector<Match>& matches,
-    const std::vector<Keypoint>& sKeys, const std::vector<Keypoint>& tKeys,
+    const std::vector<OERegion>& sKeys, const std::vector<OERegion>& tKeys,
     const std::string& fileName, float scoreT = 10.f);
 
   //! View matches.

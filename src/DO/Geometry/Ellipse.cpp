@@ -4,18 +4,10 @@
 
 #include <DO/Geometry.hpp>
 #include <DO/Graphics.hpp>
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/Polygon_2.h>
-#include <CGAL/Boolean_set_operations_2.h>
+#include "Polygon.hpp"
+#include <deque>
 
 using namespace std;
-using namespace CGAL;
-
-typedef Exact_predicates_inexact_constructions_kernel K;
-typedef Polygon_2<K> Polygon;
-typedef Polygon_with_holes_2<K>  PolygonWithHoles;
-typedef std::list<PolygonWithHoles> PwhList;
-typedef K::Point_2 Point;
 
 namespace DO {
 
@@ -52,82 +44,6 @@ namespace DO {
     const Matrix2d& U = svd.matrixU();
     double o = std::atan2(U(1,0), U(0,0));
     return Ellipse(r(0), r(1), o, c);
-  }
-
-  // ========================================================================== //
-  // Approximate ellipse intersections
-  // ========================================================================== //
-  Polygon discretizeEllipse(const Ellipse& e, int n)
-  {
-    Polygon polygon;
-
-    const Matrix2d Ro(rotation2(e.o()));
-    Vector2d D( e.r1(), e.r2() );
-
-    for(int i = 0; i < n; ++i)
-    {
-      const double theta = 2.*M_PI*double(i)/n;
-      const Matrix2d R(rotation2(theta));
-      Point2d p(1.0, 0.0);
-
-      const Point2d p1(e.c() + Ro.matrix()*D.asDiagonal()*R.matrix()*p);
-      polygon.push_back( Point(p1.x(), p1.y()) );
-    }
-
-    return polygon;
-  }
-
-  void drawPolygon(const Polygon& polygon, const Color3ub& c)
-  {
-      //cout << "polygon.size() == " << polygon.size() << endl;
-      Polygon::Edge_const_circulator e = polygon.edges_circulator();
-      Polygon::Edge_const_circulator done(e);
-      do
-      {
-        drawLine(Point2f((*e).source().x(), (*e).source().y()),
-                 Point2f((*e).target().x(), (*e).target().y()),
-                 c, 2);
-      } while(++e != done);
-    }
-
-  double approximateIntersectionUnionRatio(const Ellipse& e1, const Ellipse& e2,
-                                           int n, double limit)
-  {
-    if( !e1.isWellDefined(limit) || !e2.isWellDefined(limit) )
-      return 0.;
-
-    Polygon p1(discretizeEllipse(e1, n));
-    Polygon p2(discretizeEllipse(e2, n));
-    PwhList intR;
-
-    CGAL::intersection(p1, p2, back_inserter(intR));
-
-#ifdef DEBUG_APPROX_ELLIPSE_INTERSECTION
-    /*std::cout << "Intersection between ";
-    std::cout << "E1 " << e1 << std::endl;
-    std::cout << "E2 " << e2 << std::endl;*/
-
-    drawPolygon(p1, Red8);
-    drawPolygon(p2, Blue8);
-
-    if(CGAL::do_intersect(p1, p2))
-      cout << "intersection in their interior" << endl;
-    else
-      cout << "no intersections" << endl;
-#endif
-
-    if(!intR.empty())
-    {
-#ifdef DEBUG_ELLIPSE_INTERSECTION
-      drawPolygon(intR.back().outer_boundary(), Green8);
-      //getKey();
-#endif
-      double interArea = intR.back().outer_boundary().area();
-      double unionArea = p1.area()+p2.area()-interArea;
-      return interArea/unionArea;
-    }
-    else
-      return 0.;
   }
 
   // ========================================================================== //
@@ -198,11 +114,11 @@ namespace DO {
     }
     else
     {
-      const double rad1 = (-q+sqrt(delta))/2.0;
-      const double rad2 = (-q-sqrt(delta))/2.0;
-      const double u = rad1 < 0 ? -pow(-rad1, 1.0/3.0) : pow(rad1, 1.0/3.0);
-      const double v = rad2 < 0 ? -pow(-rad2, 1.0/3.0) : pow(rad2, 1.0/3.0);
-      const complex<double> j(-0.5, sqrt(3.0)*0.5);
+      double r1 = (-q+sqrt(delta))/2.0;
+      double r2 = (-q-sqrt(delta))/2.0;
+      double u = r1 < 0 ? -pow(-r1, 1.0/3.0) : pow(r1, 1.0/3.0);
+      double v = r2 < 0 ? -pow(-r2, 1.0/3.0) : pow(r2, 1.0/3.0);
+      complex<double> j(-0.5, sqrt(3.0)*0.5);
       z1 = u + v;
       z2 = j*u+conj(j)*v;
       z3 = j*j*u+conj(j*j)*v;
@@ -320,7 +236,6 @@ namespace DO {
   void checkQuarticEquationSolver()
   {
     // check quadratic equation solver
-    int realSolutionCount = 0;
     complex<double> x1, x2, x3, x4;
     for(int i = 0; i < 10; ++i)
     {
@@ -650,5 +565,38 @@ namespace DO {
     }
 
     return interUnionRatio;
+  }
+
+  // ======================================================================== //
+  // Polygon-based approximate computation of the area of intersecting ellipses.
+  // ======================================================================== //
+  double approximateIntersectionUnionRatio(const Ellipse& e1, const Ellipse& e2,
+                                           int n, double limit)
+  {
+    if( !e1.isWellDefined(limit) || !e2.isWellDefined(limit) )
+      return 0.;
+
+    using namespace boost::geometry;
+    CCWPolygon p1(discretizeEllipse(e1, n));
+    CCWPolygon p2(discretizeEllipse(e2, n));
+    std::deque<CCWPolygon> intR;
+    intersection(p1, p2, intR);
+    if (intR.empty())
+      return 0.;
+
+    //#define DEBUG_ELLIPSE_INTERSECTION
+#ifdef DEBUG_ELLIPSE_INTERSECTION
+    drawPolygon(p1, Red8);
+    drawPolygon(p2, Blue8);
+    drawPolygon(intR.back(), Green8);
+    std::cout << "Intersection between ";
+    std::cout << "E1 " << e1 << std::endl;
+    std::cout << "E2 " << e2 << std::endl;
+    getKey();
+#endif
+
+    double interArea = area(intR.back());
+    double unionArea = area(p1)+area(p2)-interArea;
+    return interArea/unionArea;
   }
 }

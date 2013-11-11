@@ -9,6 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include <gtest/gtest.h>
 #include <DO/Features.hpp>
 #include <DO/Graphics.hpp>
 #include <DO/ImageProcessing.hpp>
@@ -20,12 +21,12 @@ const bool drawFeatureCenterOnly = false;
 const Rgb8& c = Cyan8;
 
 void checkAffineAdaptation(const Image<unsigned char>& image,
-                           const Keypoint& k)
+                           const OERegion& f)
 {
   int w = image.width();
   int h = image.height();
   display(image);
-  k.feat().drawOnScreen(Blue8);
+  f.draw(Blue8);
     
 
   int r = 100;
@@ -33,13 +34,12 @@ void checkAffineAdaptation(const Image<unsigned char>& image,
   Image<float> patch(w, h);
   patch.array().fill(0.f);
 
-
-  OERegion rg(k.feat());
+  OERegion rg(f);
   rg.center().fill(patchSz/2.f);
   rg.orientation() = 0.f;
   rg.shapeMat() = Matrix2f::Identity()*4.f / (r*r);
 
-  Matrix3f A(k.feat().affinity());
+  Matrix3f A(f.affinity());
   cout << "A=\n" << A << endl;
 
   for (int y = 0; y < patchSz; ++y)
@@ -66,97 +66,73 @@ void checkAffineAdaptation(const Image<unsigned char>& image,
   setActiveWindow(w2);
   setAntialiasing();
   display(patch);
-  rg.drawOnScreen(Blue8);
-  getKey();
+  rg.draw(Blue8);
+  milliSleep(1000);
   closeWindow(w2);
 
   milliSleep(40);
   setActiveWindow(w1);
 }
 
-void testDoGSift(const Image<unsigned char>& image, bool drawFeatureCenterOnly = false)
+void readFeatures(const Image<unsigned char>& image,
+                  const string& filepath)
 {
-  // Run DoG Detector
-  cout << "Detecting DoG features... " << endl;
-  vector<Keypoint> keys;
+  cout << "Reading DoG features... " << endl;
+  vector<OERegion> features;
+  DescriptorMatrix<float> descriptors;
 
   cout << "Reading keypoints..." << endl;
-  readKeypoints(keys, srcPath("test.dogkey"));
+  readKeypoints(features, descriptors, filepath);
+
+  for (int i = 0; i < 10; ++i)
+    checkAffineAdaptation(image, features[i]);
+
+  string ext = filepath.substr(filepath.find_last_of("."), filepath.size());
+  string name = filepath.substr(0, filepath.find_last_of("."));
+  string copy_filepath = name + "_copy" + ext;
+  writeKeypoints(features, descriptors, name + "_copy" + ext);
+
+  vector<OERegion> features2;
+  DescriptorMatrix<float> descriptors2;
+  cout << "Checking written file..." << endl;
+  readKeypoints(features2, descriptors2, copy_filepath);
+
+  ASSERT_EQ(features.size(), features2.size());
+  ASSERT_EQ(descriptors.size(), descriptors2.size());
+
+  for(int i = 0; i < 10; ++i)
+  {
+    ASSERT_EQ(features[i], features2[i]);
+    ASSERT_EQ(descriptors[i], descriptors2[i]);
+  }
+
 
   cout << "Printing the 10 first keypoints..." << endl;
   for(size_t i = 0; i < 10; ++i)
-    cout << keys[i] << endl;
+    cout << features[i] << endl;
 
   // Draw features.
   cout << "Drawing features... ";
   display(image);
-  drawKeypoints(keys, Red8);
+  drawOERegions(features, Red8);
   cout << "done!" << endl;
-  getKey();
-
-  for (int i = 0; i < 10; ++i)
-    checkAffineAdaptation(image, keys[i]);
+  milliSleep(1000);
 }
 
-void testHarAffSift(const Image<unsigned char>& image,
-                    bool drawFeatureCenterOnly = false)
-{
-  // Run Harris Affine Detector
-  cout << "Detecting Harris-Affine features... " << endl;
-  vector<Keypoint> keys;
-  cout << "Reading keypoints..." << endl;
-  readKeypoints(keys, srcPath("test.haraffkey"));
-
-  cout << "Printing the 10 first keypoints..." << endl;
-  for(size_t i = 0; i < 10; ++i)
-    cout << keys[i] << endl;
-
-  // Draw features.
-  cout << "Drawing features... ";
-  display(image);
-  drawKeypoints(keys, Red8);
-  cout << "done!" << endl;
-  click();
-
-  for (int i = 0; i < 10; ++i)
-    checkAffineAdaptation(image, keys[i]);
-}
-
-void testMserSift(const Image<unsigned char>& image,
-                  bool drawFeatureCenterOnly = false)
-{
-  // Run MSER Detector
-  cout << "Detecting MSER features... " << endl;
-  vector<Keypoint> keys;
-  cout << "Reading keypoints..." << endl;
-  readKeypoints(keys, srcPath("test.mserkey"));
-
-  cout << "Printing the 10 first keypoints..." << endl;
-  for(size_t i = 0; i < 10; ++i)
-    cout << keys[i] << endl;
-
-  // Draw features.
-  cout << "Drawing features... ";
-  display(image);
-  drawKeypoints(keys, Red8);
-  
-  cout << "done!" << endl;
-  click();
-  for (int i = 0; i < 10; ++i)
-    checkAffineAdaptation(image, keys[i]);
-}
-
-int main()
+TEST(DO_Features_Test, testFeaturesIO)
 {
   Image<unsigned char> I;
   load(I, srcPath("obama_2.jpg"));
 
   setActiveWindow(openWindow(I.width(), I.height()));
   setAntialiasing(activeWindow());
-  testDoGSift(I);
-  testHarAffSift(I);
-  testMserSift(I);
-  getKey();
+  readFeatures(I, srcPath("test.dogkey"));
+  readFeatures(I, srcPath("test.haraffkey"));
+  readFeatures(I, srcPath("test.mserkey"));
+}
 
-  return 0;
+int main()
+{
+  testing::InitGoogleTest(&guiApp()->argc, guiApp()->argv); 
+  return RUN_ALL_TESTS();
 }

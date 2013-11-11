@@ -53,6 +53,13 @@ namespace DO {
                               Qt::BlockingQueuedConnection,
                               Q_ARG(QWidget *, w));
   }
+
+  void resizePaintingWindow(Window w, int width, int height)
+  {
+    QMetaObject::invokeMethod(w, "resizeScreen", 
+                              Qt::BlockingQueuedConnection,
+                              Q_ARG(int, width), Q_ARG(int, height));
+  }
     
   // ====================================================================== //
   //! Temporizing functions

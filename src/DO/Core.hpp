@@ -17,7 +17,7 @@
 
 // To avoid compilation error with Eigen
 #ifdef WIN32
-#  define NOMINMAX
+# define NOMINMAX
 #endif
 
 // This is a specific compiling issue with MSVC 2008
@@ -54,6 +54,9 @@
 # include <sys/time.h>
 #endif
 
+// DO++ specific defines.
+#include "Defines.hpp"
+
 // Linear algebra imports and extension from Eigen3
 #include "Core/EigenExtension.hpp"
 // Template meta-programming
@@ -74,6 +77,7 @@
 #include "Core/Stringify.hpp"
 #include "Core/Timer.hpp"
 #include "Core/StdVectorHelpers.hpp"
+#include "Core/DebugUtilities.hpp"
 
 
 /*!
@@ -111,13 +115,13 @@
   \return full path of the file
  */
 #ifdef SRCDIR
-#define SP_STRINGIFY(s)  #s
-#define SP_EVAL(s) SP_STRINGIFY(s)
-#define srcPath(s) (SP_EVAL(SRCDIR)"/"s)  
-#define stringSrcPath(s) (SP_EVAL(SRCDIR)"/"+s)  
+# define SP_STRINGIFY(s)  #s
+# define SP_EVAL(s) SP_STRINGIFY(s)
+# define srcPath(s) (SP_EVAL(SRCDIR)"/"s)  
+# define stringSrcPath(s) (SP_EVAL(SRCDIR)"/"+s)  
 #else
-#define srcPath(s) (s)
-#define stringSrcPath(s) (s)
+# define srcPath(s) (s)
+# define stringSrcPath(s) (s)
 #endif
 
 //! @}

@@ -11,10 +11,9 @@
 
 //! @file
 
-#ifndef DO_FEATURES_FEATURES_HPP
-#define DO_FEATURES_FEATURES_HPP
+#ifndef DO_FEATURES_HPP
+#define DO_FEATURES_HPP
 
-#include <DO/Defines.hpp>
 #include <DO/Core.hpp>
 
 #include <vector>
@@ -24,12 +23,13 @@
 //
 // Data structures
 #include "Features/Feature.hpp"
-#include "Features/Descriptor.hpp"
+#include "Features/DescriptorMatrix.hpp"
 #include "Features/Key.hpp"
-// View, I/O
+// Utilities, View, I/O
+#include "Features/Utilities.hpp"
 #include "Features/Draw.hpp"
 #include "Features/IO.hpp"
 
 //! \defgroup Features Features
 
-#endif /* DO_FEATURES_FEATURES_HPP */
+#endif /* DO_FEATURES_HPP */

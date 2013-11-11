@@ -59,19 +59,19 @@ namespace DO {
   }
 
   template <typename T>
-  Matrix<T, 2, 2> linearTransform2(const Matrix<T, 2, 1>& va,
-                                   const Matrix<T, 2, 1>& vb,
-                                   const Matrix<T, 2, 1>& fva,
-                                   const Matrix<T, 2, 1>& fvb)
+  Matrix<T, 2, 2> linearTransform2(const Matrix<T, 2, 1>& p1,
+                                   const Matrix<T, 2, 1>& p2,
+                                   const Matrix<T, 2, 1>& q1,
+                                   const Matrix<T, 2, 1>& q2)
   {
     Matrix<T, 4, 4> M;
-    M << va.x(), va.y(), T(0)  , T(0),
-         T(0)  , T(0)  , va.x(), va.y(),
-         vb.x(), vb.y(), T(0)  , T(0),
-         T(0)  , T(0)  , vb.x(), vb.y();
+    M << p1.x(), p1.y(),   T(0),   T(0),
+           T(0),   T(0), p1.x(), p1.y(),
+         p2.x(), p2.y(),   T(0),   T(0),
+           T(0),   T(0), p2.x(), p2.y();
 
     Matrix<T, 4, 1> b;
-    b << fva.x(), fva.y(), fvb.x(), fvb.y();
+    b << q1.x(), q1.y(), q2.x(), q2.y();
 
     Matrix<T, 4, 1> vecA(M.colPivHouseholderQr().solve(b));
 
@@ -83,23 +83,23 @@ namespace DO {
   }
 
   template <typename T>
-  Matrix<T, 3, 3> affineTransform2(const Matrix<T, 2, 1>& a,
-                                   const Matrix<T, 2, 1>& b,
-                                   const Matrix<T, 2, 1>& c,
-                                   const Matrix<T, 2, 1>& fa,
-                                   const Matrix<T, 2, 1>& fb,
-                                   const Matrix<T, 2, 1>& fc)
+  Matrix<T, 3, 3> affineTransform2(const Matrix<T, 2, 1>& p1,
+                                   const Matrix<T, 2, 1>& p2,
+                                   const Matrix<T, 2, 1>& p3,
+                                   const Matrix<T, 2, 1>& q1,
+                                   const Matrix<T, 2, 1>& q2,
+                                   const Matrix<T, 2, 1>& q3)
   {
     Matrix<T, 6, 6> M;
-    M << a.x(), a.y(), T(1), T(0) , T(0) , T(0),
-         T(0) , T(0) , T(0), a.x(), a.y(), T(1),
-         b.x(), b.y(), T(1), T(0) , T(0) , T(0),
-         T(0) , T(0) , T(0), b.x(), b.y(), T(1),
-         c.x(), c.y(), T(1), T(0) , T(0) , T(0),
-         T(0) , T(0) , T(0), c.x(), c.y(), T(1);
+    M << p1.x(), p1.y(), T(1),   T(0),   T(0), T(0),
+           T(0),   T(0), T(0), p1.x(), p1.y(), T(1),
+         p2.x(), p2.y(), T(1),   T(0),   T(0), T(0),
+           T(0),   T(0), T(0), p2.x(), p2.y(), T(1),
+         p3.x(), p3.y(), T(1),   T(0),   T(0), T(0),
+           T(0),   T(0), T(0), p3.x(), p3.y(), T(1);
 
     Matrix<T, 6, 1> y;
-    y << fa.x(), fa.y(), fb.x(), fb.y(), fc.x(), fc.y();
+    y << q1.x(), q1.y(), q2.x(), q2.y(), q3.x(), q3.y();
 
     Matrix<T, 6, 1> x(M.colPivHouseholderQr().solve(y));
 
@@ -116,28 +116,28 @@ namespace DO {
   { return A.template block<2,2>(0,0); }
 
   template <typename T>
-  Matrix<T, 3, 3> homography(const Matrix<T, 2, 1>& a,
-                             const Matrix<T, 2, 1>& b,
-                             const Matrix<T, 2, 1>& c,
-                             const Matrix<T, 2, 1>& d,
-                             const Matrix<T, 2, 1>& fa,
-                             const Matrix<T, 2, 1>& fb,
-                             const Matrix<T, 2, 1>& fc,
-                             const Matrix<T, 2, 1>& fd)
+  Matrix<T, 3, 3> homography(const Matrix<T, 2, 1>& p1,
+                             const Matrix<T, 2, 1>& p2,
+                             const Matrix<T, 2, 1>& p3,
+                             const Matrix<T, 2, 1>& p4,
+                             const Matrix<T, 2, 1>& q1,
+                             const Matrix<T, 2, 1>& q2,
+                             const Matrix<T, 2, 1>& q3,
+                             const Matrix<T, 2, 1>& q4)
   {
     Matrix<T, 8, 8> M;
     M << 
-    a.x(), a.y(), T(1), T(0) , T(0) , T(0), -a.x()*fa.x(), -a.y()*fa.x(),
-    T(0) , T(0) , T(0), a.x(), a.y(), T(1), -a.x()*fa.y(), -a.y()*fa.y(),
-    b.x(), b.y(), T(1), T(0) , T(0) , T(0), -b.x()*fb.x(), -b.y()*fb.x(),
-    T(0) , T(0) , T(0), b.x(), b.y(), T(1), -b.x()*fb.y(), -b.y()*fb.y(),
-    c.x(), c.y(), T(1), T(0) , T(0) , T(0), -c.x()*fc.x(), -c.y()*fc.x(),
-    T(0) , T(0) , T(0), c.x(), c.y(), T(1), -c.x()*fc.y(), -c.y()*fc.y(),
-    d.x(), d.y(), T(1), T(0) , T(0) , T(0), -d.x()*fd.x(), -d.y()*fd.x(),
-    T(0) , T(0) , T(0), d.x(), d.y(), T(1), -d.x()*fd.y(), -d.y()*fd.y();
+    p1.x(), p1.y(), T(1),   T(0),   T(0), T(0), -p1.x()*q1.x(), -p1.y()*q1.x(),
+      T(0),   T(0), T(0), p1.x(), p1.y(), T(1), -p1.x()*q1.y(), -p1.y()*q1.y(),
+    p2.x(), p2.y(), T(1),   T(0),   T(0), T(0), -p2.x()*q2.x(), -p2.y()*q2.x(),
+      T(0),   T(0), T(0), p2.x(), p2.y(), T(1), -p2.x()*q2.y(), -p2.y()*q2.y(),
+    p3.x(), p3.y(), T(1),   T(0),   T(0), T(0), -p3.x()*q3.x(), -p3.y()*q3.x(),
+      T(0),   T(0), T(0), p3.x(), p3.y(), T(1), -p3.x()*q3.y(), -p3.y()*q3.y(),
+    p4.x(), p4.y(), T(1),   T(0),   T(0), T(0), -p4.x()*q4.x(), -p4.y()*q4.x(),
+      T(0),   T(0), T(0), p4.x(), p4.y(), T(1), -p4.x()*q4.y(), -p4.y()*q4.y();
 
     Matrix<T, 8, 1> y;
-    y << fa.x(), fa.y(), fb.x(), fb.y(), fc.x(), fc.y(), fd.x(), fd.y();
+    y << q1.x(), q1.y(), q2.x(), q2.y(), q3.x(), q3.y(), q4.x(), q4.y();
 
     Matrix<T, 8, 1> x(M.colPivHouseholderQr().solve(y));
 

@@ -1,3 +1,14 @@
+// ========================================================================== //
+// This file is part of DO++, a basic set of libraries in C++ for computer 
+// vision.
+//
+// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public 
+// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
 #ifndef DO_MATCH_PAIRWISEDRAWER_HPP
 #define DO_MATCH_PAIRWISEDRAWER_HPP
 
@@ -65,7 +76,7 @@ namespace DO {
         drawPoint(i, Point2f( (*vh)->point().x(), (*vh)->point().y() ), c, r);
     }
 
-    void drawKeypoint(int i, const Keypoint& k, const Color3ub& c = Red8) const;
+    void drawFeature(int i, const OERegion& f, const Color3ub& c = Red8) const;
 
     void drawMatch(const Match& m, const Color3ub& c = Magenta8, bool drawLine = false) const;
 

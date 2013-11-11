@@ -46,15 +46,15 @@ namespace DO {
     /*!
       Estimates the local shape at some given point of an image.
       @param[in,out]
-        shapeMat
-        the shape matrix, i.e., the Mahalanobis distance reflecting the 
-        anisotropy of the local shape
+        affAdaptTransfmMat
+        the affine adaptation transformation matrix, i.e., the Mahalanobis
+        distance reflecting the anisotropy of the local shape
       @param[in] I the input image
       @param[in]
         feature
         the point on which we estimate the local shape in image I.
      */
-    bool operator()(Matrix2f& shapeMat,
+    bool operator()(Matrix2f& affAdaptTransfmMat,
                     const Image<float>& I,
                     const OERegion& feature);
   private:

@@ -24,47 +24,73 @@ namespace DO {
   */
 
   template <typename F, typename D>
-  class Key
+  class KeyRef
   {
   public:
     typedef F Feature;
     typedef D Descriptor;
-
-    inline Key() {}
-    inline Key(const Feature& f, const Descriptor& d) : f_(f), d_(d) {}
-
-    //! Constant accessors.
-    inline const Feature& feat() const { return f_; }
-    inline const Descriptor& desc() const { return d_; }
-    
-    //! Non constant accessors.
-    inline Feature& feat() { return f_; }
-    inline Descriptor& desc() { return d_; }
-    bool operator==(const Key& k) const
-    { return feat() == k.feat() && desc() == k.desc(); }
-
+    inline KeyRef(Feature& f, Descriptor& d) : f_(&f), d_(&d) {}
+    inline Feature& feat() const { return f_; }
+    inline Descriptor& desc() const { return d_; }
+    KeyRef operator=(KeyRef key) const
+    { f_ = key.f_; d_ = key.d_; return *this; }
   private:
-    Feature f_;
-    Descriptor d_;
+    Feature& f_;
+    Descriptor& d_;
   };
 
-  struct KeyRef
-  {
-    Feature *f;
-    void *d;
-    int N;
-    int type;
-    int dScalarType;
-  };
+  enum DescriptorType { RealDescriptor, BinaryDescriptor };
+  template <DescriptorType> struct Bin;
+  template <> struct Bin<RealDescriptor> { typedef float Type; };
+  template <> struct Bin<BinaryDescriptor> { typedef unsigned char Type; };
 
-  typedef Key<OERegion, Desc128f> Keypoint;
+  template <typename F, DescriptorType D>
+  class Set
+  {  
+  public:
+    typedef typename Bin<D>::Type BinType;
+    typedef F Feature;
+    typedef typename DescriptorMatrix<BinType>::descriptor_type 
+      Descriptor;
+    typedef typename DescriptorMatrix<BinType>::const_descriptor_type 
+      ConstDescriptor;
+
+    typedef KeyRef<const Feature, ConstDescriptor> Key;
+    typedef KeyRef<const Feature, ConstDescriptor> ConstKey;
+
+    Key operator[](int i)
+    { return KeyRef<Feature, Descriptor>(features[i], descriptors[i]); }
+    ConstKey operator[](int i) const
+    { return KeyRef<const Feature, ConstDescriptor>(features[i], descriptors[i]); }
+
+    inline size_t size() const
+    {
+      if (features.size() != descriptors.size())
+      {
+        std::cerr << "Invalid size" << std::endl;
+        throw 0;
+      }
+      return features.size();
+    }
+
+    inline void swap(const Set& set)
+    {
+      std::swap(features, set.features);
+      std::swap(descriptors, set.descriptors);
+    }
+
+    inline void append(const Set& other)
+    {
+      ::append(features, other.features);
+      descriptors.append(other.descriptors);
+    }
+
+    std::vector<F> features;
+    DescriptorMatrix<BinType> descriptors;
+  };
 
   //! @}
 
 } /* namespace DO */
-
-#ifndef __APPLE__
-  EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(DO::Key<DO::OERegion, DO::Desc128ub>)
-#endif
 
 #endif /* DO_FEATURES_KEY_HPP */

@@ -1,3 +1,14 @@
+// ========================================================================== //
+// This file is part of DO++, a basic set of libraries in C++ for computer 
+// vision.
+//
+// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public 
+// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
 #include <DO/Match.hpp>
 #include <DO/Graphics.hpp>
 #include <fstream>
@@ -10,8 +21,8 @@ namespace DO {
 
   ostream & operator<<(ostream & os, const Match& m)
   {
-    os << "source=" << m.sPos().transpose()
-       << " target=" << m.tPos().transpose() << std::endl;
+    os << "source=" << m.posX().transpose()
+       << " target=" << m.posY().transpose() << std::endl;
     os << "score=" << m.score() << " " << "rank=" << m.rank();
     return os;
   }
@@ -26,7 +37,7 @@ namespace DO {
 
     file << matches.size() << std::endl;
     for(vector<Match>::const_iterator m = matches.begin(); m != matches.end(); ++m)
-      file << m->sInd() << ' ' << m->tInd() << ' '
+      file << m->indX() << ' ' << m->indY() << ' '
       << m->rank() << ' ' << m->score() << std::endl;
 
     return true;
@@ -51,7 +62,7 @@ namespace DO {
     {
       Match m;
 
-      file >> m.sInd() >> m.tInd() >> m.rank() >> m.score();
+      file >> m.indX() >> m.indY() >> m.rank() >> m.score();
       if(m.score() > scoreT)
         break;
 
@@ -63,7 +74,7 @@ namespace DO {
 
   bool readMatches(
     vector<Match>& matches, 
-    const vector<Keypoint>& sKeys, const vector<Keypoint>& tKeys,
+    const vector<OERegion>& sKeys, const vector<OERegion>& tKeys,
     const string& fileName, float scoreT)
   {
     if (!matches.empty())
@@ -83,9 +94,9 @@ namespace DO {
     {
       Match m;
 
-      file >> m.sInd() >> m.tInd() >> m.rank() >> m.score();
-      m.sPtr() = &sKeys[m.sInd()];
-      m.tPtr() = &tKeys[m.tInd()];
+      file >> m.indX() >> m.indY() >> m.rank() >> m.score();
+      m.ptrX() = &sKeys[m.indX()];
+      m.ptrY() = &tKeys[m.indY()];
 
       if(m.score() > scoreT)
         break;
@@ -104,10 +115,10 @@ namespace DO {
 
   void drawMatch(const Match& m, const Color3ub& c, const Point2f& off2, float z)
   {
-    m.sFeat().drawOnScreen(c, z);
-    m.tFeat().drawOnScreen(c, z, off2);
-    Point2f p1(m.sPos()*z);
-    Point2f p2((m.tPos()+off2)*z);
+    m.x().draw(c, z);
+    m.y().draw(c, z, off2);
+    Point2f p1(m.posX()*z);
+    Point2f p2((m.posY()+off2)*z);
     drawLine(p1, p2, c);
   }
 

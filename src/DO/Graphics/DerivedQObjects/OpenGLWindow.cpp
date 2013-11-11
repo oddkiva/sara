@@ -82,6 +82,7 @@ namespace DO {
     , background_color_(QColor::fromCmykF(0.39, 0.39, 0.0, 0.0))
     , color_(QColor::fromCmykF(0.40, 0.0, 1.0, 0.0))
   {
+    setAttribute(Qt::WA_DeleteOnClose);
     if(x != -1 && y != -1)
       move(x,y);
     setWindowTitle(windowTitle);

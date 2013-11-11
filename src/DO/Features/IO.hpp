@@ -21,13 +21,77 @@ namespace DO {
     @{
   */
 
-  std::ostream& operator<<(std::ostream& os, const Keypoint& k);
+  template <typename T>
+  bool readKeypoints(std::vector<OERegion>& features,
+                     DescriptorMatrix<T>& descriptors,
+                     const std::string& name)
+  {
+    using namespace std;
+    ifstream file(name.c_str());
+    if (!file.is_open()) {
+      cerr << "Cant open file " << name << endl;    
+      return false;
+    }
+    
+    int num_features, descriptor_dimension;
+    file >> num_features >> descriptor_dimension;
 
-  bool readKeypoints(std::vector<Keypoint>& keys, const std::string & name,
-                     bool bundlerFormat = false);  
+    cout << "num_features = " << num_features << endl;
+    cout << "descriptor_dimension = " << descriptor_dimension << endl;
+    
+    features.resize(num_features);
+    descriptors.resize(num_features, descriptor_dimension);
 
-  bool writeKeypoints(const std::vector<Keypoint>& keys, const std::string & name, 
-                      bool writeForBundler = false);
+    double doubleFeatType;
+    for (int i = 0; i < num_features; ++i)
+    {
+      OERegion& feat = features[i];
+      file >> feat.coords();
+      file >> feat.shapeMat();
+      file >> feat.orientation();
+      file >> doubleFeatType;
+      feat.type() = OERegion::Type(int(doubleFeatType));
+      for (int k = 0; k < descriptors.dimension(); ++k)
+        file >> descriptors[i](k);
+
+      /*cout 
+        << feat.coords().transpose() << " " 
+        << feat.shapeMat().row(0) << " " << feat.shapeMat().row(1) << " "
+        << feat.orientation() << " "
+        << int(feat.type()) << endl;
+      cout << descriptors[i].transpose() << endl;*/
+    }
+    file.close();
+    return true;
+  }
+
+  template <typename T>
+  bool writeKeypoints(const std::vector<OERegion>& features,
+                      const DescriptorMatrix<T>& descriptors,
+                      const std::string& name)
+  {
+    using namespace std;
+    ofstream file(name.c_str());
+    if (!file.is_open()) {
+      cerr << "Cant open file" << std::endl;    
+      return false;
+    }
+
+    file << features.size() << " " << descriptors.dimension() << std::endl;
+    for(size_t i = 0; i < features.size(); ++i)
+    {
+      const OERegion& feat = features[i];
+
+      file << feat.x() << ' ' << feat.y() << ' ';
+      file << Map<const RowVector4f>(feat.shapeMat().data()) << ' ';
+      file << feat.orientation() << ' ';
+      file << double(feat.type()) << ' ';
+      
+      file << Map<const Matrix<T, 1, Dynamic> >(descriptors[static_cast<int>(i)].data(), 1, descriptors.dimension()) << endl;
+    }
+    file.close();
+    return true;
+  }
 
   //! @}
 

@@ -403,7 +403,7 @@ namespace DO {
   template <typename T>
   inline void display(const Image<T>& image, int xoff = 0, int yoff = 0,
                       double fact = 1.)
-  { display(image.convert<Rgb8>(), xoff, yoff, fact); }
+  { display(image.template convert<Rgb8>(), xoff, yoff, fact); }
   /*!
     \brief Draw an image in the active PaintingWindow window.
     @param[in] image image.

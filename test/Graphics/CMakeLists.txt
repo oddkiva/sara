@@ -7,4 +7,4 @@ message(STATUS "  - DO_Graphics_test")
 find_package(DO COMPONENTS Core Graphics REQUIRED)
 include(${DO_USE_FILE})
 
-do_unit_test(Graphics "${DO_LIBRARIES}")
+do_unit_test(Graphics_Qt test.cpp "${DO_LIBRARIES}")

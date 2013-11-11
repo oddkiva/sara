@@ -128,31 +128,37 @@ namespace DO {
   typedef Matrix<float, 128, 1> Vector128f;
 
   //! I/O.
-  template <typename T, int M, int N>
-  std::istream& operator>>(std::istream& in, Matrix<T, M, N>& m)
+  template <typename Derived>
+  std::istream& operator>>(std::istream& in, Eigen::MatrixBase<Derived>& matrix)
   {
-    for (int i = 0; i < M; ++i)
-      for (int j = 0; j < N; ++j)
-        in >> m(i,j);
+    for (int i = 0; i < matrix.rows(); ++i)
+      for (int j = 0; j < matrix.cols(); ++j)
+        in >> matrix(i,j);
     return in;
   }
 
   //! Lexicographical comparison function for matrices.
-  template <typename T, int M, int N>
-  inline bool lexCompare(const Matrix<T, M, N>& m1, const Matrix<T, M, N>& m2)
+  template <typename Derived>
+  inline bool lexCompare(const Eigen::MatrixBase<Derived>& m1,
+                         const Eigen::MatrixBase<Derived>& m2)
   {
-    return std::lexicographical_compare(
-      m1.data(), m1.data()+M*N, m2.data(), m2.data()+M*N
-      );
+    int i = 0;
+    while (i != m1.size())
+    {
+      if (i==m2.size() || m2(i) < m1(i)) return false;
+      else if (m1(i) < m2(i)) return true;
+      ++i;
+    }
+    return (i != m2.size());
   }
 
   //! Lexicographical comparison functor for matrices.
   struct LexicographicalOrder
   {
     //! Implementation of the functor.
-    template <typename T, int M, int N>
-    inline bool operator()(const Matrix<T, M, N>& m1,
-                           const Matrix<T, M, N>& m2) const
+    template <typename Derived>
+    inline bool operator()(const Eigen::MatrixBase<Derived>& m1,
+                           const Eigen::MatrixBase<Derived>& m2) const
     { return lexCompare(m1, m2); }
   };
 
