@@ -22,6 +22,9 @@ find_package(DO REQUIRED)
 do_dissect_version()
 do_get_os_info()
 
+# Group projects by category.
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
 # Set installation settings.
 include(DOInstall)
 

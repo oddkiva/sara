@@ -12,5 +12,8 @@ add_library(DO_AKAZE
             NonlinearDiffusion.hpp NonlinearDiffusion.cpp)
 
 do_unit_test(ImageProcessing_filter test.cpp "${DO_LIBRARIES}")
+set_property(TARGET DO_ImageProcessing_filter_test PROPERTY FOLDER "DO Tests/ImageProcessing")
 do_unit_test(ImageProcessing_local_extrema test2.cpp "${DO_LIBRARIES}")
+set_property(TARGET DO_ImageProcessing_local_extrema_test PROPERTY FOLDER "DO Tests/ImageProcessing")
 do_unit_test(ImageProcessing_benchmark benchmark.cpp "${DO_LIBRARIES}")
+set_property(TARGET DO_ImageProcessing_benchmark_test PROPERTY FOLDER "DO Tests/ImageProcessing")

@@ -92,6 +92,7 @@ macro (do_append_library NAME            # Library name
       add_custom_target(DO_${NAME} SOURCES ${HEADER_FILES})
     endif ()
   endif ()
+  set_property(TARGET DO_${NAME} PROPERTY FOLDER "DO Modules")
 endmacro (do_append_library)
 
 

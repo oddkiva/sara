@@ -8,3 +8,4 @@ find_package(DO COMPONENTS Graphics Geometry KDTree REQUIRED)
 include(${DO_USE_FILE})
 
 do_unit_test(KDTree test.cpp "${DO_LIBRARIES}")
+set_property(TARGET DO_KDTree_test PROPERTY FOLDER "DO Tests/KDTree")
