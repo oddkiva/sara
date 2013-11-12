@@ -113,11 +113,11 @@ bool read(Image<T>& image, const string& filepath)
 
 int main()
 {
-  test_image_io<JpegFileReader, JpegFileWriter>(srcPath("ksmall.jpg"),
+  test_image_io<JpegFileReader, JpegFileWriter>(srcPath("../../datasets/ksmall.jpg"),
                                                 srcPath("ksmall_write.jpg"));
-  test_image_io<PngFileReader, PngFileWriter>(srcPath("flower.png"),
-                                              srcPath("flower_write.png"));
-  test_image_io<TiffFileReader, TiffFileWriter>(srcPath("MARBIBM.TIF"),
-                                                srcPath("MARBIBM_write.TIF"));
+  test_image_io<PngFileReader, PngFileWriter>(srcPath("../../datasets/stinkbug.png"),
+                                              srcPath("stinkbug_write.png"));
+  test_image_io<TiffFileReader, TiffFileWriter>(srcPath("../../datasets/GuardOnBlonde.TIF"),
+                                                srcPath("GuardOnBlonde_write.TIF"));
   return 0;
 }
