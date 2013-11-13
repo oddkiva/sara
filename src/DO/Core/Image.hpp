@@ -64,8 +64,9 @@ namespace DO {
       : base_type(sizes) {}
 
     //! Constructor which wraps raw data.
-    inline Image(Color *data, const vector_type& sizes)
-      : base_type(data, sizes) {}
+    inline Image(Color *data, const vector_type& sizes,
+                 bool getOwnership = false)
+      : base_type(data, sizes, getOwnership) {}
 
     //! Constructor with specified sizes.
     inline Image(int width, int height)

@@ -94,30 +94,71 @@ string fileExtension(const string& filepath)
 }
 
 template <typename T>
-bool read(Image<T>& image, const string& filepath)
+bool imread(Image<T>& image, const string& filepath)
 {
   string ext(fileExtension(filepath));
-  bool success = true;
-  if (ext == ".jpeg" || ext == ".jpe" || ext == ".jfif" || ext == ".jfi")
-    test_image_io<JpegFileReader, JpegFileWriter>(filepath, srcPath("test")+ext);
-  else if (ext == ".png")
-    test_image_io<PngFileReader, PngFileWriter>(filepath, srcPath("test")+ext);
-  //else if (ext == ".tif" || ext == ".tiff")
-  //  test_image_io<TiffFileReader, TiffFileWriter>(filepath, srcPath("test")+ext);
-  else {
-    cerr << "Image format: " << ext << " either currently unsupported or invalid" << endl;
-    success = false;
+  // Read file
+  unsigned char *data;
+  int w, h, d;
+  data = 0;
+  w = h = d = 0;
+  if (ext == ".jpg" || ext == ".jpeg" || ext == ".jpe" || ext == ".jfif" || ext == ".jfi") {
+    if (!JpegFileReader(filepath).operator()(data, w, h, d))
+      return false;
+  } else if (ext == ".png") {
+    if (!PngFileReader(filepath).operator()(data, w, h, d))
+      return false;
   }
-  return success;
+  else if (ext == ".tif" || ext == ".tiff") {
+    if (!TiffFileReader(filepath).operator()(data, w, h, d))
+      return false;
+  } else {
+    cerr << "Image format: " << ext << " either currently unsupported or invalid" << endl;
+    return false;
+  }
+
+  // Wrap data and get data ownership
+  if (d == 1) {
+    image = Image<unsigned char>(&data[0], Vector2i(w,h), true)
+      .convert<T>();
+  } else if (d == 3) {
+    image = Image<Rgb8>(reinterpret_cast<Rgb8 *>(&data[0]), Vector2i(w,h), true)
+      .convert<T>();
+  } else if (d == 4) {
+    image = Image<Rgba8>(reinterpret_cast<Rgba8 *>(&data[0]), Vector2i(w,h), true)
+      .convert<T>();
+  }
+  return true;
 }
 
 int main()
 {
-  test_image_io<JpegFileReader, JpegFileWriter>(srcPath("../../datasets/ksmall.jpg"),
+  /*test_image_io<JpegFileReader, JpegFileWriter>(srcPath("../../datasets/ksmall.jpg"),
                                                 srcPath("ksmall_write.jpg"));
   test_image_io<PngFileReader, PngFileWriter>(srcPath("../../datasets/stinkbug.png"),
                                               srcPath("stinkbug_write.png"));
   test_image_io<TiffFileReader, TiffFileWriter>(srcPath("../../datasets/GuardOnBlonde.TIF"),
-                                                srcPath("GuardOnBlonde_write.TIF"));
+                                                srcPath("GuardOnBlonde_write.TIF"));*/
+  Image<Rgb8> image;
+  if ( !imread(image, srcPath("../../datasets/stinkbug.png")) )
+  {
+    cerr << "Cannot read image" << endl;
+    return -1;
+  }
+
+  ImagePainter painter(reinterpret_cast<unsigned char *>(image.data()), image.width(), image.height());
+
+  openWindow(image.width(), image.height());
+  display(image);
+  getKey();
+  int x = 0, y = 0;
+  for (;;)
+  {
+    painter.drawCircle(x, y, 20, red<double>(), 10);
+    display(image);
+    ++x; ++y;
+  }
+  
+
   return 0;
 }
