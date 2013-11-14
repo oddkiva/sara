@@ -86,6 +86,7 @@ if (DO_USE_FROM_SOURCE)
     qt5_use_modules(DO_Graphics Widgets OpenGL)
     target_link_libraries(DO_Graphics ${OPENGL_LIBRARIES})
     do_set_specific_target_properties(DO_Graphics DO_STATIC) # See DOMacros.cmake for details
+    set_property(TARGET DO_Graphics PROPERTY FOLDER "DO Modules")
         
     # Shared library
     if (DO_BUILD_SHARED_LIBS)
@@ -94,6 +95,7 @@ if (DO_USE_FROM_SOURCE)
       qt5_use_modules(DO_Graphics_SHARED Widgets OpenGL)    
       target_link_libraries(DO_Graphics_SHARED ${OPENGL_LIBRARIES})
       do_set_specific_target_properties(DO_Graphics_SHARED DO_EXPORTS)
+      set_property(TARGET DO_Graphics_SHARED PROPERTY FOLDER "DO Modules")
     endif ()
     
     set(CMAKE_AUTOMOC OFF)

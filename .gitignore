@@ -182,8 +182,7 @@ src/DO/Defines.hpp
 third-party/zlib/zconf.h
 third-party/libjpeg/jconfig.h
 third-party/libpng/pnglibconf.h
-third-party/libtiff/libtiff/tif_config.h
-third-party/libtiff/libtiff/tiffconf.h
+third-party/libtiff/tif_config.h
 
 test/Features/test_copy.*
 

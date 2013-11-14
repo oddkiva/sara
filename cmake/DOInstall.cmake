@@ -10,7 +10,6 @@ if (NOT MSVC)
 else (MSVC)
   math(EXPR VC_VERSION "${MSVC_VERSION}/100 - 6")
   string(TOLOWER "${CMAKE_CXX_COMPILER_ID}${VC_VERSION}" DO_OUTPUT_DIR)
-  message("${DO_OUTPUT_DIR}")
 endif ()
 do_set_output_directories(${DO_OUTPUT_DIR})
 

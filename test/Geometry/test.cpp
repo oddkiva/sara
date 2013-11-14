@@ -54,106 +54,106 @@ bool ccw(const Point2d& a, const Point2d& b, const Point2d& c)
   return M.determinant() > 0;
 }
 
-//void testEllipseAlgorithms()
-//{
-//  do
-//  {
-//    Ellipse e1(randomEllipse(w, h));
-//    Ellipse e2(randomEllipse(w, h));
-//
-//    // Verbose comments.
-//    cout << endl;
-//    cout << "Ellipse 1" << endl;
-//    cout << e1 << endl;
-//    cout << "Ellipse 2" << endl;
-//    cout << e2 << endl;
-//
-//    // Visualize.
-//    bool display = true;
-//    int numInter;
-//    if (display)
-//    {
-//      clearWindow();
-//      drawEllipse(e1, Red8);
-//      drawEllipse(e2, Blue8);
-//
-//      Point2d interPts[4];
-//      getEllipseIntersections(interPts, numInter, e1, e2);
-//      cout << "\nIntersection count = " << numInter << endl;
-//      for (int i = 0; i < numInter; ++i)
-//      {
-//        fillCircle(interPts[i].cast<float>(), 5.f, Green8);
-//        cout << "[" << i << "] " << interPts[i].transpose() << endl;
-//      }
-//    }
-//
-//    // ====================================================================== //
-//    // Approximate computation of intersecting ellipses.
-//    //
-//    // Very reliable and based on Boost::geometry polygon intersections. 
-//    // Approximating an ellipse by an 8-sided polygon turns out to be actually 
-//    // a quite good approximation in practice!
-//    // We use in our method.
-//    //
-//    // For a good trade-off between precision and speed, it seems sufficient to
-//    // choose a 36-sided polygon in practice.
-//    //
-//    // The approximate computation could be made much faster in practice.
-//    // However, this routine is very slow for our target applications, in 
-//    // particular feature correspondence.
-//    // This is probably because of CGAL uses a Polygon class with dynamic memory
-//    // allocation and also requires very high numerical precision are required.
-//    //
-//    // Reimplementing with Boost::Geometry may be an alternative worth 
-//    // investigating.
-//    double approxRatio = approximateIntersectionUnionRatio(e1, e2, 36);
-//
-//    // ====================================================================== //
-//    // Closed-form computation. 
-//    // TODO: there are still numerical precision issues to investigate.
-//    // Numerical precision are tuned by hand.
-//    double analyticRatio = analyticInterUnionRatio(e1, e2);
-//
-//    // ====================================================================== //
-//    // Speed comparison.
-//    // 
-//    // Experimental settings.
-//    bool compareSpeed = true;
-//    if (compareSpeed)
-//    {
-//      HighResTimer t;
-//      int times = 1e3;
-//      // Approximate computation.
-//      t.restart();
-//      for (int i = 0; i < times; ++i)
-//        approxRatio = approximateIntersectionUnionRatio(e1, e2, 36);
-//      double approximateTime = t.elapsedMs()/double(times);
-//      cout << "Approximate computation time = " << approximateTime << " ms" << endl;
-//
-//      t.restart();
-//      for (int i = 0; i < times; ++i)
-//        analyticRatio = analyticInterUnionRatio(e1, e2);
-//      double closedFormTime = t.elapsedMs()/double(times);
-//      cout << "Closed-form computation time = " << closedFormTime << " ms" << endl;
-//
-//      //
-//      double speedGain = approximateTime / closedFormTime; 
-//      cout << "speed gain = " << speedGain << endl;
-//      getKey();
-//    }
-//
-//    // Summary
-//    double relativeError = abs(approxRatio-analyticRatio) / approxRatio;
-//    if (relativeError > 0.2)
-//    {
-//      cout << "Approximate intersection-union area ratio = " << approxRatio << endl;
-//      cout << "Exact intersection-union area ratio = " << analyticRatio << endl;
-//      cout << "Relative error = " << relativeError << endl;
-//      getKey();
-//    }
-//
-//  } while(true);
-//}
+void testEllipseAlgorithms()
+{
+  do
+  {
+    Ellipse e1(randomEllipse(w, h));
+    Ellipse e2(randomEllipse(w, h));
+
+    // Verbose comments.
+    cout << endl;
+    cout << "Ellipse 1" << endl;
+    cout << e1 << endl;
+    cout << "Ellipse 2" << endl;
+    cout << e2 << endl;
+
+    // Visualize.
+    bool display = true;
+    int numInter;
+    if (display)
+    {
+      clearWindow();
+      drawEllipse(e1, Red8);
+      drawEllipse(e2, Blue8);
+
+      Point2d interPts[4];
+      getEllipseIntersections(interPts, numInter, e1, e2);
+      cout << "\nIntersection count = " << numInter << endl;
+      for (int i = 0; i < numInter; ++i)
+      {
+        fillCircle(interPts[i].cast<float>(), 5.f, Green8);
+        cout << "[" << i << "] " << interPts[i].transpose() << endl;
+      }
+    }
+
+    // ====================================================================== //
+    // Approximate computation of intersecting ellipses.
+    //
+    // Very reliable and based on Boost::geometry polygon intersections. 
+    // Approximating an ellipse by an 8-sided polygon turns out to be actually 
+    // a quite good approximation in practice!
+    // We use in our method.
+    //
+    // For a good trade-off between precision and speed, it seems sufficient to
+    // choose a 36-sided polygon in practice.
+    //
+    // The approximate computation could be made much faster in practice.
+    // However, this routine is very slow for our target applications, in 
+    // particular feature correspondence.
+    // This is probably because of CGAL uses a Polygon class with dynamic memory
+    // allocation and also requires very high numerical precision are required.
+    //
+    // Reimplementing with Boost::Geometry may be an alternative worth 
+    // investigating.
+    double approxRatio = approximateIntersectionUnionRatio(e1, e2, 36);
+
+    // ====================================================================== //
+    // Closed-form computation. 
+    // TODO: there are still numerical precision issues to investigate.
+    // Numerical precision are tuned by hand.
+    double analyticRatio = analyticInterUnionRatio(e1, e2);
+
+    // ====================================================================== //
+    // Speed comparison.
+    // 
+    // Experimental settings.
+    bool compareSpeed = false;
+    if (compareSpeed)
+    {
+      HighResTimer t;
+      int times = 1e3;
+      // Approximate computation.
+      t.restart();
+      for (int i = 0; i < times; ++i)
+        approxRatio = approximateIntersectionUnionRatio(e1, e2, 36);
+      double approximateTime = t.elapsedMs()/double(times);
+      cout << "Approximate computation time = " << approximateTime << " ms" << endl;
+
+      t.restart();
+      for (int i = 0; i < times; ++i)
+        analyticRatio = analyticInterUnionRatio(e1, e2);
+      double closedFormTime = t.elapsedMs()/double(times);
+      cout << "Closed-form computation time = " << closedFormTime << " ms" << endl;
+
+      //
+      double speedGain = approximateTime / closedFormTime; 
+      cout << "speed gain = " << speedGain << endl;
+      getKey();
+    }
+
+    // Summary
+    double relativeError = abs(approxRatio-analyticRatio) / approxRatio;
+    if (relativeError > 0.2)
+    {
+      cout << "Approximate intersection-union area ratio = " << approxRatio << endl;
+      cout << "Exact intersection-union area ratio = " << analyticRatio << endl;
+      cout << "Relative error = " << relativeError << endl;
+      getKey();
+    }
+
+  } while(true);
+}
 
 void testBBoxAlgorithms()
 {
@@ -237,7 +237,7 @@ int main()
   setAntialiasing(activeWindow());
   cout << unitVector2(M_PI/6.) << endl;
 
-  //testEllipseAlgorithms();
+  testEllipseAlgorithms();
   testQuadAlgorithms();
   testBBoxAlgorithms();
   testAffineTransforms();

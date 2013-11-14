@@ -13,6 +13,16 @@
 
 using namespace std;
 
+static bool openFile(FILE **file, const string& filepath, const string& mode)
+{
+#ifdef WIN32
+  return fopen_s(file, filepath.c_str(), mode.c_str()) == 0;
+#else
+  *file = fopen(filepath.c_str(), mode.c_str());
+  return *file != 0;
+#endif
+}
+
 FileError::FileError(const string& filepath, const string& mode)
   : filepath_(filepath), mode_(mode)
 {
@@ -30,8 +40,7 @@ const char * FileError::what() const throw()
 FileHandler::FileHandler(const string& filepath,
                          const string& mode)
 {
-  file_ = fopen(filepath.c_str(), mode.c_str());
-  if (!file_)
+  if (!openFile(&file_, filepath, mode))
     throw FileError(filepath, mode);
 }
 
@@ -133,8 +142,7 @@ bool JpegFileWriter::operator()(const string& filepath,
     return false;
   }
 
-  file_ = fopen(filepath.c_str(), "wb");
-  if (!file_)
+  if (!openFile(&file_, filepath, "wb"))
     return false;
 
   jpeg_stdio_dest(&cinfo_, file_);
@@ -234,8 +242,7 @@ PngFileWriter::~PngFileWriter()
 bool PngFileWriter::operator()(const string& filepath,
                                int quality)
 {
-  file_ = fopen(filepath.c_str(), "wb");
-  if (!file_)
+  if (!openFile(&file_, filepath, "wb"))
     return false;
 
   png_init_io(png_ptr, file_);
@@ -293,7 +300,8 @@ bool TiffFileReader::operator()(unsigned char *& data,
   height = h;
   depth = 4;
   data = new unsigned char[width*height*depth];
-  TIFFReadRGBAImage(tiff_, w, h, reinterpret_cast<uint32 *>(data), 0);
+  TIFFReadRGBAImageOriented(tiff_, w, h, reinterpret_cast<uint32 *>(data), 
+                            ORIENTATION_TOPLEFT, 0);
   return true;
 }
 
