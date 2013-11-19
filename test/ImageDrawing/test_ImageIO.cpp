@@ -152,9 +152,12 @@ int main()
   display(image);
   getKey();
   int x = 0, y = 0;
+
+  painter.drawCircle(x, y, 20, 5, red<double>());
+  getKey();
   for (;;)
   {
-    painter.drawCircle(x, y, 20, red<double>(), 10);
+    painter.drawCircle(x, y, 20, 5, red<double>(), 0.1);
     display(image);
     ++x; ++y;
   }
