@@ -95,6 +95,14 @@ macro (do_append_library NAME            # Library name
   set_property(TARGET DO_${NAME} PROPERTY FOLDER "DO Modules")
 endmacro (do_append_library)
 
+macro (do_cotire TARGET MASTER_HEADER)
+  # Experimental: create precompiled libraries
+  set_target_properties(DO_${TARGET} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT
+                        ${MASTER_HEADER})
+  cotire(DO_${TARGET})
+  target_link_libraries(DO_${TARGET}_unity DO_${TARGET})
+endmacro (do_cotire)
+
 
 macro (do_unit_test NAME SOURCES EXTRA_LIBS)
   include_directories(${gtest_DIR}/include)

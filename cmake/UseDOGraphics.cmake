@@ -73,8 +73,8 @@ if (DO_USE_FROM_SOURCE)
     do_set_graphics_source_dir()
     do_list_graphics_source_files()
     do_create_variables_for_graphics_library()
-  endif ()
-  if (NOT DO_Graphics_ADDED)
+
+    # Static library
     set_property(GLOBAL PROPERTY _DO_Graphics_INCLUDED 1)
     # Moc files
     set(CMAKE_AUTOMOC ON)
@@ -87,7 +87,9 @@ if (DO_USE_FROM_SOURCE)
     target_link_libraries(DO_Graphics ${OPENGL_LIBRARIES})
     do_set_specific_target_properties(DO_Graphics DO_STATIC) # See DOMacros.cmake for details
     set_property(TARGET DO_Graphics PROPERTY FOLDER "DO Modules")
-        
+    # Precompiled headers
+    do_cotire(Graphics ${DO_Graphics_MASTER_HEADER})
+
     # Shared library
     if (DO_BUILD_SHARED_LIBS)
       add_library(DO_Graphics_SHARED SHARED
@@ -97,7 +99,7 @@ if (DO_USE_FROM_SOURCE)
       do_set_specific_target_properties(DO_Graphics_SHARED DO_EXPORTS)
       set_property(TARGET DO_Graphics_SHARED PROPERTY FOLDER "DO Modules")
     endif ()
-    
+
     set(CMAKE_AUTOMOC OFF)
     set(CMAKE_INCLUDE_CURRENT_DIR OFF)
   endif()

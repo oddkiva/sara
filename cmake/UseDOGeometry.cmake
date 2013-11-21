@@ -38,27 +38,28 @@ if (DO_USE_FROM_SOURCE)
     do_set_geometry_source_dir()
     do_list_geometry_source_files()
     do_create_variables_for_geometry_library()
-  endif ()
-
-  # Static library
-  do_append_library(
-    Geometry STATIC
-    "${DO_SOURCE_DIR}"
-    "${DO_Geometry_HEADER_FILES}"
-    "${DO_Geometry_SOURCE_FILES}"
-    "${DO_Geometry_LINK_LIBRARIES}"
-  )
-  do_set_specific_target_properties(DO_Geometry DO_STATIC)
     
-  # Shared library
-  if (DO_BUILD_SHARED_LIBS)
+    # Static library
     do_append_library(
-      Geometry_SHARED SHARED
+      Geometry STATIC
       "${DO_SOURCE_DIR}"
       "${DO_Geometry_HEADER_FILES}"
       "${DO_Geometry_SOURCE_FILES}"
       "${DO_Geometry_LINK_LIBRARIES}"
     )
-    do_set_specific_target_properties(DO_Geometry DO_EXPORTS)
+    do_set_specific_target_properties(DO_Geometry DO_STATIC)
+    do_cotire(Geometry ${DO_Geometry_MASTER_HEADER})
+      
+    # Shared library
+    if (DO_BUILD_SHARED_LIBS)
+      do_append_library(
+        Geometry_SHARED SHARED
+        "${DO_SOURCE_DIR}"
+        "${DO_Geometry_HEADER_FILES}"
+        "${DO_Geometry_SOURCE_FILES}"
+        "${DO_Geometry_LINK_LIBRARIES}"
+      )
+      do_set_specific_target_properties(DO_Geometry DO_EXPORTS)
+    endif ()
   endif ()
 endif ()

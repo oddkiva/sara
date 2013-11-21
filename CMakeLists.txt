@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.7)
 
-project(DO)
+project(DO-CV)
 set(DO_VERSION 1.0.0)
 
 # Configure DO++: put the versions.

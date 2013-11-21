@@ -59,12 +59,11 @@ endmacro (do_create_variables_for_featuredetectors_library)
 do_load_packages_for_featuredetectors_library()
 
 if (DO_USE_FROM_SOURCE)
-    get_property(DO_FeatureDetectors_ADDED GLOBAL PROPERTY _DO_FeatureDetectors_INCLUDED)
-    if (NOT DO_FeatureDetectors_ADDED)
-        do_set_featuredetectors_source_dir()
-        do_list_featuredetectors_source_files()
-        do_create_variables_for_featuredetectors_library()
-    endif ()
+  get_property(DO_FeatureDetectors_ADDED GLOBAL PROPERTY _DO_FeatureDetectors_INCLUDED)
+  if (NOT DO_FeatureDetectors_ADDED)
+    do_set_featuredetectors_source_dir()
+    do_list_featuredetectors_source_files()
+    do_create_variables_for_featuredetectors_library()
     
     # Static library
     do_append_library(
@@ -75,6 +74,7 @@ if (DO_USE_FROM_SOURCE)
         "${DO_FeatureDetectors_LINK_LIBRARIES}"
     )
     do_set_specific_target_properties(DO_FeatureDetectors DO_STATIC)
+    do_cotire(FeatureDetectors ${DO_FeatureDetectors_MASTER_HEADER})
       
     # Shared library
     if (DO_BUILD_SHARED_LIBS)
@@ -87,4 +87,5 @@ if (DO_USE_FROM_SOURCE)
       )
       do_set_specific_target_properties(DO_FeatureDetectors DO_EXPORTS)
     endif ()
+  endif ()
 endif()

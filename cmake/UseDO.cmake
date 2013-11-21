@@ -41,7 +41,7 @@ macro (do_use_modules TARGET COMPONENT_LIST)
     else ()
       set(FLAG -L"${DO_DIR}/lib")
     endif ()
-    set_target_properties(${TARGET} PROPERTIES LINK_FLAGS ${FLAG})    
+    set_target_properties(${TARGET} PROPERTIES LINK_FLAGS ${FLAG})
 
     # Link with libraries listed in ${COMPONENT_LIST}
     foreach (f ${COMPONENT_LIST})

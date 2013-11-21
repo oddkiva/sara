@@ -36,27 +36,28 @@ if (DO_USE_FROM_SOURCE)
     do_set_match_source_dir()
     do_list_match_source_files()
     do_create_variables_for_match_library()
-  endif ()
-
-  # Static library
-  do_append_library(
-    Match STATIC
-    "${DO_SOURCE_DIR}"
-    "${DO_Match_HEADER_FILES}"
-    "${DO_Match_SOURCE_FILES}"
-    "${DO_Match_LINK_LIBRARIES}"
-  )
-  do_set_specific_target_properties(DO_Match DO_STATIC)
     
-  # Shared library
-  if (DO_BUILD_SHARED_LIBS)
+    # Static library
     do_append_library(
-      Match_SHARED SHARED
+      Match STATIC
       "${DO_SOURCE_DIR}"
       "${DO_Match_HEADER_FILES}"
       "${DO_Match_SOURCE_FILES}"
       "${DO_Match_LINK_LIBRARIES}"
     )
-    do_set_specific_target_properties(DO_Match DO_EXPORTS)
+    do_set_specific_target_properties(DO_Match DO_STATIC)
+    do_cotire(Match ${DO_Match_MASTER_HEADER})
+      
+    # Shared library
+    if (DO_BUILD_SHARED_LIBS)
+      do_append_library(
+        Match_SHARED SHARED
+        "${DO_SOURCE_DIR}"
+        "${DO_Match_HEADER_FILES}"
+        "${DO_Match_SOURCE_FILES}"
+        "${DO_Match_LINK_LIBRARIES}"
+      )
+      do_set_specific_target_properties(DO_Match DO_EXPORTS)
+    endif ()
   endif ()
 endif ()

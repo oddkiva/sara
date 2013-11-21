@@ -241,7 +241,7 @@ void imageBasics()
   cout << "Basic image reading/writing. click when done" << endl; 
   int w, h;                                           // Dimensions
   Color3ub* col;                                      // RGB bitmaps
-  loadColorImage(srcPath("ksmall.jpg"),col,w,h);      // Read image (and allocate)
+  loadColorImage(srcPath("../../datasets/ksmall.jpg"),col,w,h);      // Read image (and allocate)
   Window W = openWindow(w,2*h,"Images");
   putColorImage(0, 0, col, w, h);                     // Draw it
 
@@ -271,8 +271,8 @@ void imageBasics()
 void imageAnimation()
 {
   Image<Color3ub> I;
-  cout << srcPath("ksmall.jpg") << endl;
-  if ( !load(I, srcPath("ksmall.jpg")) )
+  cout << srcPath("../../datasets/ksmall.jpg") << endl;
+  if ( !load(I, srcPath("../../datasets/ksmall.jpg")) )
   {
     cerr << "Error: could not open 'ksmall.jpg' file" << endl;
     return;
@@ -354,7 +354,7 @@ void advancedEvents()
   Window W = openWindow(1024, 768);
   setActiveWindow(W);
   Image<Color3ub> I;
-  load(I, srcPath("ksmall.jpg"));
+  load(I, srcPath("../../datasets/ksmall.jpg"));
 
   Event ev;
   do {
@@ -443,7 +443,7 @@ void checkOpenGLWindow()
   setActiveWindow(w);
 
   SimpleTriangleMesh3f mesh;
-  string filename = srcPath("buddha.obj");
+  string filename = srcPath("../../datasets/molecule.obj");
   if (!MeshReader().readObjFile(mesh, filename))
   {
     cout << "Error reading mesh file:\n" << filename << endl;
@@ -468,7 +468,7 @@ void checkOpenGLWindow()
 void graphicsViewExample()
 {
   Image<Rgb8> I;
-  load(I, srcPath("ksmall.jpg"));
+  load(I, srcPath("../../datasets/ksmall.jpg"));
 
   openGraphicsView(I.width(), I.height());
 

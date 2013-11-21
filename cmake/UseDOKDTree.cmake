@@ -31,13 +31,12 @@ endmacro (do_create_variables_for_kdtree_library)
 do_load_packages_for_kdtree_library()
 
 if (DO_USE_FROM_SOURCE)
-    get_property(DO_KDTree_ADDED GLOBAL PROPERTY _DO_KDTree_INCLUDED)
-    if (NOT DO_KDTree_ADDED)
-        do_set_kdtree_source_dir()
-        do_list_kdtree_source_files()
-        do_create_variables_for_kdtree_library()
-    endif ()
-    
+  get_property(DO_KDTree_ADDED GLOBAL PROPERTY _DO_KDTree_INCLUDED)
+  if (NOT DO_KDTree_ADDED)
+    do_set_kdtree_source_dir()
+    do_list_kdtree_source_files()
+    do_create_variables_for_kdtree_library()
+
     # Static library
     do_append_library(
         KDTree STATIC
@@ -47,7 +46,8 @@ if (DO_USE_FROM_SOURCE)
         "${DO_KDTree_LINK_LIBRARIES}"
     )
     do_set_specific_target_properties(DO_KDTree DO_STATIC)
-      
+    do_cotire(KDTree ${DO_KDTree_MASTER_HEADER})
+
     # Shared library
     if (DO_BUILD_SHARED_LIBS)
       do_append_library(
@@ -59,4 +59,5 @@ if (DO_USE_FROM_SOURCE)
       )
       do_set_specific_target_properties(DO_KDTree DO_EXPORTS)
     endif ()
+  endif ()    
 endif()

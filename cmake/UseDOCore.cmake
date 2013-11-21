@@ -65,8 +65,7 @@ if (DO_USE_FROM_SOURCE)
     Core STATIC
     "${DO_Core_SOURCE_DIR}"
     "${DO_Core_FILES}" ""
-    "${DO_Core_LIBRARIES}"
-    )
+    "${DO_Core_LIBRARIES}" )
 else ()
   do_create_variables_for_core_library()
 endif ()

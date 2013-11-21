@@ -8,3 +8,4 @@ find_package(DO COMPONENTS Graphics Features ImageProcessing REQUIRED)
 include(${DO_USE_FILE})
 
 do_unit_test(Features test.cpp "${DO_LIBRARIES}")
+set_property(TARGET DO_Features_test PROPERTY FOLDER "DO Tests/Features")

@@ -37,27 +37,28 @@ if (DO_USE_FROM_SOURCE)
     do_set_featurematching_source_dir()
     do_list_featurematching_source_files()
     do_create_variables_for_featurematching_library()
-  endif ()
-
-  # Static library
-  do_append_library(
-    FeatureMatching STATIC
-    "${DO_SOURCE_DIR}"
-    "${DO_FeatureMatching_HEADER_FILES}"
-    "${DO_FeatureMatching_SOURCE_FILES}"
-    "${DO_FeatureMatching_LINK_LIBRARIES}"
-  )
-  do_set_specific_target_properties(DO_FeatureMatching DO_STATIC)
     
-  # Shared library
-  if (DO_BUILD_SHARED_LIBS)
+    # Static library
     do_append_library(
-      FeatureMatching_SHARED SHARED
+      FeatureMatching STATIC
       "${DO_SOURCE_DIR}"
       "${DO_FeatureMatching_HEADER_FILES}"
       "${DO_FeatureMatching_SOURCE_FILES}"
       "${DO_FeatureMatching_LINK_LIBRARIES}"
     )
-    do_set_specific_target_properties(DO_FeatureMatching DO_EXPORTS)
+    do_set_specific_target_properties(DO_FeatureMatching DO_STATIC)
+    do_cotire(FeatureMatching ${DO_FeatureMatching_MASTER_HEADER}) 
+    
+    # Shared library
+    if (DO_BUILD_SHARED_LIBS)
+      do_append_library(
+        FeatureMatching_SHARED SHARED
+        "${DO_SOURCE_DIR}"
+        "${DO_FeatureMatching_HEADER_FILES}"
+        "${DO_FeatureMatching_SOURCE_FILES}"
+        "${DO_FeatureMatching_LINK_LIBRARIES}"
+      )
+      do_set_specific_target_properties(DO_FeatureMatching DO_EXPORTS)
+    endif ()    
   endif ()
 endif ()

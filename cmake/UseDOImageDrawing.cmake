@@ -40,27 +40,28 @@ if (DO_USE_FROM_SOURCE)
     do_set_imagedrawing_source_dir()
     do_list_imagedrawing_source_files()
     do_create_variables_for_imagedrawing_library()
-  endif ()
-
-  # Static library
-  do_append_library(
-    ImageDrawing STATIC
-    "${DO_SOURCE_DIR}"
-    "${DO_ImageDrawing_HEADER_FILES}"
-    "${DO_ImageDrawing_SOURCE_FILES}"
-    "${DO_ImageDrawing_LINK_LIBRARIES}"
-  )
-  do_set_specific_target_properties(DO_ImageDrawing DO_STATIC)
     
-  # Shared library
-  if (DO_BUILD_SHARED_LIBS)
+    # Static library
     do_append_library(
-      ImageDrawing_SHARED SHARED
+      ImageDrawing STATIC
       "${DO_SOURCE_DIR}"
       "${DO_ImageDrawing_HEADER_FILES}"
       "${DO_ImageDrawing_SOURCE_FILES}"
       "${DO_ImageDrawing_LINK_LIBRARIES}"
     )
-    do_set_specific_target_properties(DO_ImageDrawing DO_EXPORTS)
+    do_set_specific_target_properties(DO_ImageDrawing DO_STATIC)
+    do_cotire(ImageDrawing ${DO_ImageDrawing_MASTER_HEADER})
+      
+    # Shared library
+    if (DO_BUILD_SHARED_LIBS)
+      do_append_library(
+        ImageDrawing_SHARED SHARED
+        "${DO_SOURCE_DIR}"
+        "${DO_ImageDrawing_HEADER_FILES}"
+        "${DO_ImageDrawing_SOURCE_FILES}"
+        "${DO_ImageDrawing_LINK_LIBRARIES}"
+      )
+      do_set_specific_target_properties(DO_ImageDrawing_SHARED DO_EXPORTS)
+    endif ()
   endif ()
 endif ()

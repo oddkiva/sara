@@ -9,7 +9,6 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/FeatureDetectorWrappers.hpp>
 #include <DO/FeatureDetectors.hpp>
 #include <DO/FeatureDescriptors.hpp>
 #include <DO/FeatureMatching.hpp>
@@ -22,8 +21,8 @@ using namespace DO;
 //#define MSER_KEYS
 //#define HARRIS_KEYS
 
-string file1 = srcPath("All.tif");//srcPath("img1.ppm");
-string file2 = srcPath("GuardOnBlonde.tif");//srcPath("img4.ppm");
+string file1 = srcPath("../../datasets/All.tif");
+string file2 = srcPath("../../datasets/GuardOnBlonde.tif");
 
 
 Set<OERegion, RealDescriptor> computeSIFT(const Image<float>& image)
@@ -106,26 +105,22 @@ void load(Image<Rgb8>& image1, Image<Rgb8>& image2,
           vector<Match>& matches)
 {
   cout << "Loading images" << endl;
-  load(image1, file1);
-  load(image2, file2);
+  if (!load(image1, file1))
+  {
+    cerr << "Error: cannot load image file 1: " << file1 << endl;
+    return;
+  }
+  if (!load(image2, file2))
+  {
+    cerr << "Error: cannot load image file 2: " << file2 << endl;
+    return;
+  }
 
   cout << "Computing/Reading keypoints" << endl;
-#ifdef HARRIS_KEYS
-  Set<OERegion, RealDescriptor> har1 = HarAffSiftDetector().run(image1.convert<unsigned char>());
-  Set<OERegion, RealDescriptor> har2 = HarAffSiftDetector().run(image2.convert<unsigned char>());
-  keys1.append(har1);
-  keys2.append(har2);
-#endif // HARRIS_KEYS
-#ifdef MSER_KEYS
-  Set<OERegion, RealDescriptor> mser1 = MserSiftDetector().run(image1.convert<unsigned char>());
-  Set<OERegion, RealDescriptor> mser2 = MserSiftDetector().run(image2.convert<unsigned char>());
-  keys1.append(mser1);
-  keys2.append(mser2);
-#endif // MSER_KEYS
-  Set<OERegion, RealDescriptor> DoGDaisies1 = computeSIFT(image1.convert<float>());
-  Set <OERegion, RealDescriptor> DoGDaisies2 = computeSIFT(image2.convert<float>());
-  keys1.append(DoGDaisies1);
-  keys2.append(DoGDaisies2);
+  Set<OERegion, RealDescriptor> SIFTs1 = computeSIFT(image1.convert<float>());
+  Set<OERegion, RealDescriptor> SIFTs2 = computeSIFT(image2.convert<float>());
+  keys1.append(SIFTs1);
+  keys2.append(SIFTs2);
   cout << "Image 1: " << keys1.size() << " keypoints" << endl;
   cout << "Image 2: " << keys2.size() << " keypoints" << endl;
 
