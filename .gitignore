@@ -58,6 +58,7 @@ local.properties
 *.ilk
 *.meta
 *.obj
+!pumpkin_tall_10k.obj
 *.pch
 *.pdb
 *.pgc
