@@ -213,7 +213,7 @@ bool checkDescriptors(const DescriptorMatrix<float>& descriptors)
 int main()
 {
   Image<float> image;
-  if (!load(image, srcPath("sunflowerField.jpg")))
+  if (!load(image, srcPath("../../datasets/sunflowerField.jpg")))
     return -1;
 
   printStage("Detecting SIFT features");

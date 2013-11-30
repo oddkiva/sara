@@ -130,7 +130,7 @@ int main()
 {
   Image<float> I;
   string name;
-  name = srcPath("sunflowerField.jpg");
+  name = srcPath("../../datasets/sunflowerField.jpg");
   if (!load(I, name))
     return -1;
 
