@@ -27,7 +27,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # Set installation settings.
 #include(cotire)
-include(PCH)
+#include(PCH)
 include(DOInstall)
 
 # Build third-party software (google test, FLANN,...)
