@@ -16,7 +16,7 @@
 #define DO_CORE_HPP
 
 // To avoid compilation error with Eigen
-#ifdef WIN32
+#ifdef _WIN32
 # define NOMINMAX
 #endif
 
