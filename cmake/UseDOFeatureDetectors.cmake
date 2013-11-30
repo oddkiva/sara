@@ -74,8 +74,7 @@ if (DO_USE_FROM_SOURCE)
         "${DO_FeatureDetectors_LINK_LIBRARIES}"
     )
     do_set_specific_target_properties(DO_FeatureDetectors DO_STATIC)
-    do_cotire(FeatureDetectors ${DO_FeatureDetectors_MASTER_HEADER})
-      
+
     # Shared library
     if (DO_BUILD_SHARED_LIBS)
       do_append_library(

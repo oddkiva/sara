@@ -47,8 +47,7 @@ if (DO_USE_FROM_SOURCE)
       "${DO_FeatureMatching_LINK_LIBRARIES}"
     )
     do_set_specific_target_properties(DO_FeatureMatching DO_STATIC)
-    do_cotire(FeatureMatching ${DO_FeatureMatching_MASTER_HEADER}) 
-    
+
     # Shared library
     if (DO_BUILD_SHARED_LIBS)
       do_append_library(

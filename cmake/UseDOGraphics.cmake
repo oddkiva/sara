@@ -51,13 +51,17 @@ macro (do_load_packages_for_graphics_library)
   include_directories(${Qt5Widgets_INCLUDE_DIRS}
                       ${Qt5OpenGL_INCLUDE_DIRS})
   include(${DO_Core_USE_FILE})
+  add_definitions(${Qt5Widgets_DEFINITIONS})
+  set(CMAKE_CXX_FLAGS "${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
 endmacro (do_load_packages_for_graphics_library)
 
 macro (do_create_variables_for_graphics_library)
   # Use this variable if you want to link statically DO_Graphics
   set(DO_Graphics_LIBRARIES DO_Graphics)
   # External libraries which DO_Graphics depends on.
-  list(APPEND DO_Graphics_LINK_LIBRARIES ${OPENGL_LIBRARIES}) # Actually there is also Qt but I use qt5_use_modules which takes care of the linking with Qt5.
+  list(APPEND DO_Graphics_LINK_LIBRARIES ${OPENGL_LIBRARIES})
+  # Note that DO_Graphics must also be linked against Qt but qt5_use_modules() 
+  # takes care of this.
 endmacro (do_create_variables_for_graphics_library)
 
 
@@ -87,8 +91,6 @@ if (DO_USE_FROM_SOURCE)
     target_link_libraries(DO_Graphics ${OPENGL_LIBRARIES})
     do_set_specific_target_properties(DO_Graphics DO_STATIC) # See DOMacros.cmake for details
     set_property(TARGET DO_Graphics PROPERTY FOLDER "DO Modules")
-    # Precompiled headers
-    do_cotire(Graphics ${DO_Graphics_MASTER_HEADER})
 
     # Shared library
     if (DO_BUILD_SHARED_LIBS)

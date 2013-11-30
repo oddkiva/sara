@@ -60,7 +60,6 @@ if (DO_USE_FROM_SOURCE)
       "${DO_FeatureDescriptors_LINK_LIBRARIES}"
     )
     do_set_specific_target_properties(DO_FeatureDescriptors DO_STATIC)
-    do_cotire(FeatureDescriptors ${DO_FeatureDescriptors_MASTER_HEADER})    
 
     # Shared library
     if (DO_BUILD_SHARED_LIBS)

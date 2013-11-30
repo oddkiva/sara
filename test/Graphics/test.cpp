@@ -9,7 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Graphics.hpp>
+#include "GraphicsTesting.hpp"
 
 using namespace std;
 using namespace DO;
@@ -18,7 +18,7 @@ const bool stepByStep = true;
 
 #define TEST_2D
 #define TEST_3D
-#define TEST_GRAPHICSVIEW
+//#define TEST_GRAPHICSVIEW
 
 #ifdef TEST_2D
 void aWindow()
@@ -443,7 +443,7 @@ void checkOpenGLWindow()
   setActiveWindow(w);
 
   SimpleTriangleMesh3f mesh;
-  string filename = srcPath("../../datasets/molecule.obj");
+  string filename = srcPath("../../datasets/pumpkin_tall_10k.obj");
   if (!MeshReader().readObjFile(mesh, filename))
   {
     cout << "Error reading mesh file:\n" << filename << endl;

@@ -46,7 +46,6 @@ if (DO_USE_FROM_SOURCE)
         "${DO_KDTree_LINK_LIBRARIES}"
     )
     do_set_specific_target_properties(DO_KDTree DO_STATIC)
-    do_cotire(KDTree ${DO_KDTree_MASTER_HEADER})
 
     # Shared library
     if (DO_BUILD_SHARED_LIBS)
