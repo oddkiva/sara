@@ -221,7 +221,12 @@ namespace DO {
     for(int i = 0; i < 10; ++i)
     {
       cout << "iteration " << i << endl;
-      double p[4] ={-rand()%10, -rand()%10, -rand()%10, rand()%10+1};
+      double p[4] ={
+        static_cast<double>(-rand()%10),
+        static_cast<double>(-rand()%10),
+        static_cast<double>(-rand()%10),
+        static_cast<double>(-rand()%10)
+      };
       printPolynomial(p, 3);
 
       solveCubicEquation(x1, x2, x3, p[3], p[2], p[1], p[0]);
@@ -240,7 +245,13 @@ namespace DO {
     for(int i = 0; i < 10; ++i)
     {
       cout << "iteration " << i << endl;
-      double p[5] ={rand()%100000, rand()%10, rand()%10, rand()%10, rand()%10+1};
+      double p[5] ={
+        static_cast<double>(rand()%100000),
+        static_cast<double>(-rand()%10),
+        static_cast<double>(-rand()%10),
+        static_cast<double>(-rand()%10),
+        static_cast<double>(-rand()%10)+1
+      };
       printPolynomial(p, 4);
       solveQuarticEquation(x1, x2, x3, x4,
                            p[4], p[3], p[2], p[1], p[0]);
