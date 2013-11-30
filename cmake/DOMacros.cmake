@@ -24,30 +24,32 @@ endmacro(do_dissect_version)
 ################################################################################
 # Helper macros
 # 
-macro (do_message MSG)
-  message (STATUS "[DO] ${MSG}")
-endmacro (do_message MSG)
-
-macro (do_step_message MSG)
-  message ("[DO] ${MSG}")
-endmacro (do_step_message MSG)
-
-macro (do_substep_message MSG)
-  message ("     ${MSG}")
-endmacro (do_substep_message MSG)
+macro (do_message _msg)
+  message (STATUS "[DO] ${_msg}")
+endmacro (do_message _msg)
 
 
-macro (do_append_components COMPONENTLIST COMPONENT)
-  set(DO_${COMPONENT}_LIBRARIES DO_${COMPONENT})
-  set(DO_${COMPONENT}_USE_FILE UseDO${COMPONENT})
-  list(APPEND "${COMPONENTLIST}" ${COMPONENT})
+macro (do_step_message _msg)
+  message ("[DO] ${_msg}")
+endmacro (do_step_message _msg)
+
+
+macro (do_substep_message _msg)
+  message ("     ${_msg}")
+endmacro (do_substep_message _msg)
+
+
+macro (do_append_components _component_list _component)
+  set(DO_${_component}_LIBRARIES DO_${_component})
+  set(DO_${_component}_USE_FILE UseDO${_component})
+  list(APPEND "${_component_list}" ${_component})
 endmacro (do_append_components)
 
 
-macro (do_list_files SOURCE_FILES REL_PATH EXTENSION)
-  file(GLOB SOURCE_FILES
-       RELATIVE ${REL_PATH}
-       FILES_MATCHING PATTERN ${EXTENSION})
+macro (do_list_files _src_files _rel_path _extension)
+  file(GLOB _src_files
+       RELATIVE ${_rel_path}
+       FILES_MATCHING PATTERN ${_extension})
   foreach (l ${LIST})
     set(l ${PATH}/l)
     message (l)
@@ -56,75 +58,96 @@ macro (do_list_files SOURCE_FILES REL_PATH EXTENSION)
 endmacro (do_list_files)
 
 
-macro (do_append_library NAME            # Library name
-                         LIBRARY_TYPE    # shared or static
-                         INCLUDE_DIRS    # include directories
-                         HEADER_FILES    # header files needed to build library
-                         SOURCE_FILES    # source files needed to build library
-                         LINK_LIBRARIES) # library dependencies
-  get_property(DO_${NAME}_ADDED GLOBAL PROPERTY _DO_${NAME}_INCLUDED)
-  if (NOT DO_${NAME}_ADDED)
+macro (do_append_library _library_name
+                         _library_type # shared or static
+                         _include_dirs
+                         _hdr_files _src_files
+                         _lib_dependencies)
+  get_property(DO_${_library_name}_ADDED GLOBAL PROPERTY 
+               _DO_${_library_name}_INCLUDED)
+  if (NOT DO_${_library_name}_ADDED)
     # 1. Verbose
-    #message(STATUS "[DO] Creating project 'DO${NAME}'")
+    #message(STATUS "[DO] Creating project 'DO${_library_name}'")
     # 2. Bookmark the project to make sure we don't try to add the library 
     #    more than once.
-    set_property(GLOBAL PROPERTY _DO_${NAME}_INCLUDED 1)
+    set_property(GLOBAL PROPERTY _DO_${_library_name}_INCLUDED 1)
     # 3. Include third-party library directories.
-    if (NOT "${INCLUDE_DIRS}" STREQUAL "")
-      include_directories(${INCLUDE_DIRS})
+    if (NOT "${_include_dirs}" STREQUAL "")
+      include_directories(${_include_dirs})
     endif ()
     # 4. Create the project:
-    if (NOT "${SOURCE_FILES}" STREQUAL "")
+    if (NOT "${_src_files}" STREQUAL "")
       # - Case 1: the project contains 'cpp' source files
       #   Specify the source files.
-      add_library(DO_${NAME} ${LIBRARY_TYPE} ${HEADER_FILES} ${SOURCE_FILES})
+      add_library(DO_${_library_name} ${LIBRARY_TYPE} ${_hdr_files} ${_src_files})
       # Link with external libraries
       #message(STATUS 
-      #        "[DO] Linking project 'DO${NAME}' with '${LINK_LIBRARIES}'")
-      target_link_libraries(DO_${NAME} ${LINK_LIBRARIES})
+      #        "[DO] Linking project 'DO${_library_name}' with '${_lib_dependencies}'")
+      target_link_libraries(DO_${_library_name} ${_lib_dependencies})
     else ()
       # - Case 2: the project is a header-only library
       #   Specify the source files.
-      #add_library(DO_${NAME} STATIC ${HEADER_FILES})
+      #add_library(DO_${_library_name} STATIC ${_hdr_files})
       #message(STATUS 
-      #        "[DO] No linking needed for header-only project 'DO.${NAME}'")
-      #set_target_properties(DO_${NAME} PROPERTIES LINKER_LANGUAGE CXX)
-      add_custom_target(DO_${NAME} SOURCES ${HEADER_FILES})
+      #"[DO] No linking needed for header-only project 'DO.${_library_name}'")
+      #set_target_properties(DO_${_library_name} PROPERTIES LINKER_LANGUAGE CXX)
+      add_custom_target(DO_${_library_name} SOURCES ${_hdr_files})
     endif ()
   endif ()
-  set_property(TARGET DO_${NAME} PROPERTY FOLDER "DO Modules")
+  set_property(TARGET DO_${_library_name} PROPERTY FOLDER "DO Modules")
 endmacro (do_append_library)
 
-macro (do_cotire TARGET MASTER_HEADER)
+
+macro (do_cotire _target _master_header)
   # Experimental: create precompiled libraries
-  set_target_properties(DO_${TARGET} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT
-                        ${MASTER_HEADER})
-  cotire(DO_${TARGET})
-  target_link_libraries(DO_${TARGET}_unity DO_${TARGET})
+  set_target_properties(DO_${_target} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT
+                        ${_master_header})
+  cotire(DO_${_target})
+  target_link_libraries(DO_${_target}_unity DO_${_target})
 endmacro (do_cotire)
 
 
-macro (do_unit_test NAME SOURCES EXTRA_LIBS)
+macro (do_unit_test _unit_test_name _srcs _additional_lib_deps)
   include_directories(${gtest_DIR}/include)
-  add_executable(DO_${NAME}_test ${SOURCES})
-  target_link_libraries(DO_${NAME}_test
-                        ${EXTRA_LIBS} # Extra libs MUST be first.
+  add_executable(DO_${_unit_test_name}_test ${_srcs})
+  target_link_libraries(DO_${_unit_test_name}_test
+                        ${_additional_lib_deps}
                         gtest)
-  set_target_properties(DO_${NAME}_test PROPERTIES
+  set_target_properties(DO_${_unit_test_name}_test PROPERTIES
                         COMPILE_FLAGS -DSRCDIR=${CMAKE_CURRENT_SOURCE_DIR}
                         COMPILE_DEFINITIONS DO_STATIC)
-  add_test(DO_${NAME}_test "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/DO_${NAME}_test")
+  add_test(DO_${_unit_test_name}_test
+           "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/DO_${_unit_test_name}_test")
 endmacro (do_unit_test)
 
 
-macro (do_set_specific_target_properties TARGET COMPILE_DEFS)
-  set_target_properties(${TARGET} PROPERTIES
+macro (do_set_specific_target_properties _target _additional_compile_flags)
+  set_target_properties(${_target} PROPERTIES
                         VERSION ${DO_VERSION}
                         SOVERSION ${DO_SOVERSION}
-                        COMPILE_DEFINITIONS ${COMPILE_DEFS})
-  if (WIN32)
-    set_target_properties(${TARGET} PROPERTIES
-                          OUTPUT_NAME_DEBUG   ${TARGET}-${DO_VERSION}-debug
-                          OUTPUT_NAME_RELEASE ${TARGET}-${DO_VERSION}-release)
-  endif ()
+                        COMPILE_DEFINITIONS ${_additional_compile_flags}
+                        OUTPUT_NAME_DEBUG   ${_target}-${DO_VERSION}-d
+                        OUTPUT_NAME_RELEASE ${_target}-${DO_VERSION})
 endmacro (do_set_specific_target_properties)
+
+
+macro (do_add_msvc_precompiled_header _pch _src_var)
+  if (MSVC)
+    get_filename_component(_pch_basename ${_pch} NAME_WE)
+    set(_pch_binary "${CMAKE_CURRENT_BINARY_DIR}/${_pch_basename}.pch")
+    set(_srcs ${${_src_var}})
+
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+    set(_pch_src ${CMAKE_CURRENT_BINARY_DIR}/${_pch_basename}.cpp)
+    file(WRITE ${_pch_src} "// Precompiled header unity generated by CMake\n")
+    file(APPEND ${_pch_src} "#include \"${_pch}\"\n")
+
+    set_source_files_properties(${_pch_src} PROPERTIES
+                                COMPILE_FLAGS "/Yc\"${_pch}\" /Fp\"${_pch_binary}\""
+                                OBJECT_OUTPUTS "${_pch_binary}")
+    set_source_files_properties(${_srcs} PROPERTIES
+                                COMPILE_FLAGS "/Yu\"${_pch}\" /FI\"${_pch_binary}\" /Fp\"${_pch_binary}\""
+                                OBJECT_DEPENDS "${_pch_binary}")
+    list(APPEND ${_src_var} ${_pch_src})
+  endif ()
+endmacro (do_add_msvc_precompiled_header)
