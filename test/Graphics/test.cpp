@@ -18,7 +18,7 @@ const bool stepByStep = true;
 
 #define TEST_2D
 #define TEST_3D
-//#define TEST_GRAPHICSVIEW
+#define TEST_GRAPHICSVIEW
 
 #ifdef TEST_2D
 void aWindow()
