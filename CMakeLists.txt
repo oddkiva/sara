@@ -3,8 +3,9 @@ cmake_minimum_required(VERSION 2.8.7)
 project(DO-CV)
 set(DO_VERSION 1.0.0)
 
-cmake_policy(PUSH)
-cmake_policy(SET CMP0020 OLD)
+if (POLICY CMP0020)
+  cmake_policy(SET CMP0020 OLD)
+endif (POLICY CMP0020)
 
 # Configure DO++: put the versions.
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindDO.cmake.in
@@ -50,5 +51,3 @@ add_subdirectory(doc)
 
 # Make packages
 include(DOMakePackages)
-
-cmake_policy(POP)

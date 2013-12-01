@@ -108,6 +108,9 @@ endmacro (do_cotire)
 
 
 macro (do_unit_test _unit_test_name _srcs _additional_lib_deps)
+  if (POLICY CMP0020)
+    cmake_policy(SET CMP0020 OLD)
+  endif (POLICY CMP0020)
   include_directories(${gtest_DIR}/include)
   add_executable(DO_${_unit_test_name}_test ${_srcs})
   target_link_libraries(DO_${_unit_test_name}_test
