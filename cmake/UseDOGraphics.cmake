@@ -38,12 +38,9 @@ macro (do_list_graphics_source_files)
 endmacro (do_list_graphics_source_files)
 
 macro (do_load_packages_for_graphics_library)
-  if (DEFINED ENV{QT5_DIR})
-    list(APPEND CMAKE_PREFIX_PATH $ENV{QT5_DIR})
-  else ()
-    message(
-    "WARNING: it is recommended that you set QT5_DIR to help cmake find Qt 5:
-    ${QT5_DIR} is then appended to CMAKE_PREFIX_PATH variable to locate Qt 5.")
+  if (WIN32)
+    # Temporary workaround for windows 8
+    list(APPEND CMAKE_PREFIX_PATH "C:/Program Files (x86)/Windows Kits/8.0/Lib/win8/um/x64")
   endif ()
   find_package(Qt5Widgets REQUIRED)
   find_package(Qt5OpenGL REQUIRED)
