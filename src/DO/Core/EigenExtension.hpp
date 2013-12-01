@@ -100,12 +100,6 @@ namespace DO {
 
   using namespace Eigen;
 
-  // Typedefs for basic data types.
-  typedef unsigned char uchar;   //!< Self-explanatory.
-  typedef unsigned short ushort; //!< Self-explanatory.
-  typedef unsigned int uint;     //!< Self-explanatory.
-  typedef unsigned long ulong;   //!< Self-explanatory.
-
   // Point types with integral scalar type.
   typedef Vector2i Point2i; //!< Self-explanatory
   typedef Vector3i Point3i; //!< Self-explanatory
@@ -122,7 +116,7 @@ namespace DO {
   typedef Vector4d Point4d; //!< Self-explanatory
   
   //! 128-dimensional integral vector type.
-  typedef Matrix<uchar, 128, 1> Vector128ub;
+  typedef Matrix<unsigned char, 128, 1> Vector128ub;
   
   //! 128-dimensional single precision vector type.
   typedef Matrix<float, 128, 1> Vector128f;

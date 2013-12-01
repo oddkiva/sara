@@ -26,8 +26,10 @@ protected:
   RgbTest() : Base() {}
 };
 
-typedef testing::Types<uchar, ushort, uint, char, short, int, float, double> 
-  ChannelTypes;
+typedef testing::Types<
+  unsigned char, unsigned short, unsigned int,
+  char, short, int, float, double
+> ChannelTypes;
 
 TYPED_TEST_CASE_P(RgbTest);
 

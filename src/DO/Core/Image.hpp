@@ -210,11 +210,11 @@ namespace DO {
     max = *std::max_element(src_first, src_last);               \
   }
 
-  DEFINE_FINDMINMAX_GRAY(uchar)
+  DEFINE_FINDMINMAX_GRAY(unsigned char)
   DEFINE_FINDMINMAX_GRAY(char)
-  DEFINE_FINDMINMAX_GRAY(ushort)
+  DEFINE_FINDMINMAX_GRAY(unsigned short)
   DEFINE_FINDMINMAX_GRAY(short)
-  DEFINE_FINDMINMAX_GRAY(uint)
+  DEFINE_FINDMINMAX_GRAY(unsigned int)
   DEFINE_FINDMINMAX_GRAY(int)
   DEFINE_FINDMINMAX_GRAY(float)
   DEFINE_FINDMINMAX_GRAY(double)
@@ -288,11 +288,11 @@ namespace DO {
     return dst;                                                 \
   }
 
-  DEFINE_RESCALE_GRAY(uchar)
+  DEFINE_RESCALE_GRAY(unsigned char)
   DEFINE_RESCALE_GRAY(char)
-  DEFINE_RESCALE_GRAY(ushort)
+  DEFINE_RESCALE_GRAY(unsigned short)
   DEFINE_RESCALE_GRAY(short)
-  DEFINE_RESCALE_GRAY(uint)
+  DEFINE_RESCALE_GRAY(unsigned int)
   DEFINE_RESCALE_GRAY(int)
   DEFINE_RESCALE_GRAY(float)
   DEFINE_RESCALE_GRAY(double)
