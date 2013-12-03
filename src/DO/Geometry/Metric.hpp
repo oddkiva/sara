@@ -1,11 +1,11 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO++, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
@@ -19,8 +19,8 @@ namespace DO {
   {
   public:
     typedef T Scalar;
-    typedef Matrix<T, N, 1> Vector, Point;
-    typedef Matrix<T, N, N> Matrix;
+    typedef Eigen::Matrix<T, N, 1> Vector, Point;
+    typedef Eigen::Matrix<T, N, N> Matrix;
 
   public:
     inline SquaredRefDistance(const Matrix& m) : m_(m) {}
@@ -43,8 +43,8 @@ namespace DO {
   {
   public:
     typedef T Scalar;
-    typedef Matrix<T, N, 1> Vector, Point;
-    typedef Matrix<T, N, N> Matrix;
+    typedef Eigen::Matrix<T, N, 1> Vector, Point;
+    typedef Eigen::Matrix<T, N, N> Matrix;
 
   public:
     inline SquaredDistance(const Matrix& m) : m_(m) {}

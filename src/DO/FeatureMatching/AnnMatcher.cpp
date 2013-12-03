@@ -1,16 +1,16 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO++, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
 // Disable FLANN warnings
-#ifdef _MSC_VER 
+#ifdef _MSC_VER
 # pragma warning ( disable : 4244 4267 4800 4305 4291 4996)
 #endif
 
@@ -112,7 +112,7 @@ namespace DO {
         swap(m.ptrX(), m.ptrY());
         swap(m.indX(), m.indY());
       }
-      
+
       matches.push_back(m);
     }
   }
@@ -144,6 +144,25 @@ namespace DO {
     vec_indices_.resize(max_neighbors_);
     vec_dists_.resize(max_neighbors_);
   }
+
+  // Sort by indices and by score.
+    struct CompareMatch {
+      bool operator()(const Match& m1, const Match& m2) const {
+        if (m1.indX() < m2.indX())
+          return true;
+        if (m1.indX() == m2.indX() && m1.indY() < m2.indY())
+          return true;
+        if (m1.indX() == m2.indX() && m1.indY() == m2.indY() && m1.score() < m2.score())
+          return true;
+        return false;
+      }
+    };
+
+    struct CompareByScore {
+      bool operator()(const Match& m1, const Match& m2) const {
+        return m1.score() < m2.score();
+      }
+    };
 
   //! Compute candidate matches using the Euclidean distance.
   vector<Match> AnnMatcher::computeMatches()
@@ -179,29 +198,11 @@ namespace DO {
         sqRatioT, Match::TargetToSource,
         self_matching_, is_too_close_, vec_indices_, vec_dists_, max_neighbors_);
     }
-
-    // Sort by indices and by score.
-    struct CompareMatch {
-      bool operator()(const Match& m1, const Match& m2) const {
-        if (m1.indX() < m2.indX())
-          return true;
-        if (m1.indX() == m2.indX() && m1.indY() < m2.indY())
-          return true;
-        if (m1.indX() == m2.indX() && m1.indY() == m2.indY() && m1.score() < m2.score())
-          return true;
-        return false;
-      }
-    };
     sort(matches.begin(), matches.end(), CompareMatch());
+
     // Remove redundant matches in each consecutive group of identical matches.
     // We keep the one with the best score, which is the first one according to 'CompareMatch'.
     matches.resize(unique(matches.begin(), matches.end()) - matches.begin());
-
-    struct CompareByScore {
-      bool operator()(const Match& m1, const Match& m2) const {
-        return m1.score() < m2.score();
-      }
-    };
     sort(matches.begin(), matches.end(), CompareByScore());
 
     cout << "Computed " << matches.size() << " matches in " << t.elapsed() << " seconds." << endl;

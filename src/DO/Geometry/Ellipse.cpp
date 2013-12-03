@@ -83,7 +83,7 @@ namespace DO {
     else
       hasRealSolutions = false;
   }
-  
+
   // Discriminant precision: 1e-3.
   void solveCubicEquation(complex<double>& z1, complex<double>& z2, complex<double>& z3,
                           double a, double b, double c, double d)
@@ -97,7 +97,7 @@ namespace DO {
 
     // Cardano's formula.
     const double p = (3*c-b*b)/3;
-    const double q = (-9*c*b + 27*d + 2*b*b*b)/27;  
+    const double q = (-9*c*b + 27*d + 2*b*b*b)/27;
     const double delta = q*q + 4*p*p*p/27;
 
     if(delta < -1e-3)
@@ -128,7 +128,7 @@ namespace DO {
     z2 -= b/(3*a);
     z3 -= b/(3*a);
   }
-  
+
   // Involves the precision of the cubic equation solver: (1e-3.)
   void solveQuarticEquation(complex<double>& z1, complex<double>& z2,
                             complex<double>& z3, complex<double>& z4,
@@ -180,7 +180,7 @@ namespace DO {
     z3 = -R/2.0 + E/2.0;
     z4 = -R/2.0 - E/2.0;
 
-    // Check Viete's formula. 
+    // Check Viete's formula.
     /*double p = a2 - 3*a3*a3/8;
     double q = a1 - a2*a3/2 + a3*a3*a3/8;
     double r = a0 - a1*a3/4 + a2*a3*a3/16 - 3*a3*a3*a3*a3/256;
@@ -387,6 +387,13 @@ namespace DO {
     return indexFirst;
   }
 
+  struct SortByAngle
+  {
+    typedef std::pair<Point2d, double> PtAngle;
+    bool operator()(const PtAngle& a, const PtAngle& b) const
+    { return a.second < b.second; }
+  };
+
   void ccwSortPoints(Point2d pts[], int numPts)
   {
     assert(numPts <= 4);
@@ -405,12 +412,6 @@ namespace DO {
         atan2(pts[i].y()-pts[0].y(), pts[i].x()-pts[0].x()));
     }
     // Sort points by polar angles.
-    struct SortByAngle
-    {
-      typedef std::pair<Point2d, double> PtAngle;
-      bool operator()(const PtAngle& a, const PtAngle& b) const
-      { return a.second < b.second; }
-    };
     std::sort(ptsAngles+1, ptsAngles+numPts, SortByAngle());
 
     // Recopy the sorted points.

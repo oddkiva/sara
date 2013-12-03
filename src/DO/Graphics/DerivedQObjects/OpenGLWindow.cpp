@@ -3,7 +3,7 @@
 #ifdef __APPLE__
 # include <OpenGL/GLU.h>
 #else
-# include <GL/GLU.h>
+# include <GL/glu.h>
 #endif
 #include "../Frame.hpp"
 
@@ -48,7 +48,7 @@ namespace DO {
     // Get the current position and project it on the sphere
     QVector3D currentPos3D = QVector3D(p.x(), p.y(), 0.0f);
     projectToSphere(currentPos3D);
-    // Compute the new axis by cross product 
+    // Compute the new axis by cross product
     axis_ = QVector3D::crossProduct(lastPos3D, currentPos3D);
     axis_.normalize();
     // Compose the old rotation with the new rotation.
@@ -73,7 +73,7 @@ namespace DO {
 
   // ====================================================================== //
   // OpenGLWindow implementation
-  OpenGLWindow::OpenGLWindow(int width, int height, 
+  OpenGLWindow::OpenGLWindow(int width, int height,
                              const QString& windowTitle,
                              int x, int y,
                              QWidget* parent)
@@ -117,7 +117,7 @@ namespace DO {
     }
     glEnd();
   }
-  
+
   void OpenGLWindow::initializeGL()
   {
     // Set background color

@@ -1,11 +1,11 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO++, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
@@ -27,7 +27,7 @@ void checkAffineAdaptation(const Image<unsigned char>& image,
   int h = image.height();
   display(image);
   f.draw(Blue8);
-    
+
 
   int r = 100;
   int patchSz = 2*r;
@@ -122,17 +122,17 @@ void readFeatures(const Image<unsigned char>& image,
 TEST(DO_Features_Test, testFeaturesIO)
 {
   Image<unsigned char> I;
-  load(I, srcPath("obama_2.jpg"));
+  load(I, srcPath("../../datasets/obama_2.jpg"));
 
   setActiveWindow(openWindow(I.width(), I.height()));
   setAntialiasing(activeWindow());
-  readFeatures(I, srcPath("test.dogkey"));
-  readFeatures(I, srcPath("test.haraffkey"));
-  readFeatures(I, srcPath("test.mserkey"));
+  readFeatures(I, srcPath("../../datasets/test.dogkey"));
+  readFeatures(I, srcPath("../../datasets/test.haraffkey"));
+  readFeatures(I, srcPath("../../datasets/test.mserkey"));
 }
 
 int main()
 {
-  testing::InitGoogleTest(&guiApp()->argc, guiApp()->argv); 
+  testing::InitGoogleTest(&guiApp()->argc, guiApp()->argv);
   return RUN_ALL_TESTS();
 }
