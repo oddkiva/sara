@@ -30,7 +30,7 @@ namespace DO {
   class DO_EXPORT GraphicsApplication
   {
   public:
-    struct Impl;
+    class Impl;
     GraphicsApplication(int argc, char **argv);
     ~GraphicsApplication();
     int exec();

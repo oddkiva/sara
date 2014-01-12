@@ -40,7 +40,7 @@ namespace DO {
   {
     Q_OBJECT
   public:
-    GraphicsApplication::Impl(int argc, char **argv);
+    Impl(int argc, char **argv);
 
   public slots:
     void createPaintingWindow(int w, int h, const QString& windowTitle,
