@@ -9,8 +9,6 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-//! TODO: make better testing of the tree...
-
 #include "gtest/gtest.h"
 #include <DO/Core.hpp>
 #include <iostream>

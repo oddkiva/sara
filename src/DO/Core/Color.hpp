@@ -387,10 +387,13 @@ template <> struct ColorTraits<gray_channel_t>            \
 
   // ======================================================================== //
   //! RGB to grayscale color conversion function (includes color normalization).
-  template <typename T>
-  inline double rgb2gray64f(const Matrix<T, 3, 1>& rgb)
+  template <typename T, int N>
+  inline double rgb2gray64f(const Matrix<T, N, 1>& rgb)
   {
-    Matrix<double, 3, 1> rgb64f(getRescaledColor64f(rgb));
+    DO_STATIC_ASSERT(
+      N==3 || N==4, 
+      N_MUST_BE_3_OR_4_FOR_RGB_TO_GRAY_COLOR_CONVERSION);
+    Matrix<double, N, 1> rgb64f(getRescaledColor64f(rgb));
     return 0.3*rgb64f[0] + 0.59*rgb64f[1] + 0.11*rgb64f[2]; 
   }
   //! Grayscale to RGB color conversion function (includes color normalization).
@@ -423,19 +426,19 @@ template <> struct ColorTraits<gray_channel_t>            \
   }
 
   // ======================================================================== //
-  //! Color conversion function from RGB to Grayscale.
+  //! Color conversion function from RGB to grayscale.
   template <typename T, typename U>
   inline void rgb2gray(T& gray, const Matrix<U, 3, 1>& rgb)
   { normalizeChannel(gray, rgb2gray64f(rgb)); }
-  //! Color conversion function from Grayscale to RGB.
+  //! Color conversion from grayscale to RGB.
   template <typename T, typename U>
   inline void gray2rgb(Matrix<T, 3, 1>& rgb, const U& gray)
   { normalizeColor(rgb, gray2rgb64f(gray)); }
-  //! Color conversion function from RGB to YUV.
+  //! Color conversion from RGB to YUV.
   template <typename T, typename U>
   inline void rgb2yuv(Matrix<T, 3, 1>& yuv, const Matrix<U, 3, 1>& rgb)
   { normalizeColor(rgb, rgb2yuv64f(yuv)); }
-  //! Color conversion function from YUV to RGB.
+  //! Color conversion from YUV to RGB.
   template <typename T, typename U>
   inline void yuv2rgb(Matrix<T, 3, 1>& rgb, const Matrix<U, 3, 1>& yuv)
   { normalizeColor(rgb, yuv2rgb64f(yuv)); }
@@ -446,11 +449,11 @@ template <> struct ColorTraits<gray_channel_t>            \
   template <typename T, typename U, typename CLayout>
   inline void convertColor(Color<T, CLayout>& dst, const Color<U, CLayout>& src)
   { normalizeColor(dst, getRescaledColor64f(src)); }
-  //! \brief Color conversion function from RGB to YUV.
+  //! \brief Color conversion from RGB to YUV.
   template <typename T, typename U>
   inline void convertColor(Color<T, Rgb>& dst, const Color<U, Yuv>& src)
   { normalizeColor(dst, yuv2rgb64f(src)); }
-  //! \brief Color conversion function from YUV to RGB.
+  //! \brief Color conversion from YUV to RGB.
   template <typename T, typename U>
   inline void convertColor(Color<T, Yuv>& dst, const Color<U, Rgb>& src)
   { normalizeColor(dst, rgb2yuv64f(src)); }
@@ -553,6 +556,49 @@ template <> struct ColorTraits<gray_channel_t>            \
   DEFINE_COLOR_CONVERSION_BETWEEN_INT_AND_FLOATING_TYPES(double, short)
   DEFINE_COLOR_CONVERSION_BETWEEN_INT_AND_FLOATING_TYPES(double, int)
 #undef DEFINE_COLOR_CONVERSION_BETWEEN_INT_AND_FLOATING_TYPES
+
+  //! Color conversion from RGBA to RGB
+  template <typename T>
+  void convertColor(Color<T, Rgb>& dst, const Color<T, Rgba>& src)
+  {
+    red(dst) = red(src);
+    blue(dst) = blue(src);
+    green(dst) = green(src);
+  }
+  //! Color conversion from RGB to RGBA
+  template <typename T>
+  void convertColor(Color<T, Rgba>& dst, const Color<T, Rgb>& src)
+  {
+    red(dst) = red(src);
+    blue(dst) = blue(src);
+    green(dst) = green(src);
+    alpha(dst) = ChannelTraits<T>::max();
+  }
+  //! Color conversion from RGB to RGBA
+  template <typename T, typename U>
+  void convertColor(Color<T, Rgb>& dst, const Color<U, Rgba>& src)
+  {
+    convertColor(red(dst), red(src));
+    convertColor(blue(dst), blue(src));
+    convertColor(green(dst), green(src));
+  }
+  //! Color conversion from RGBA to RGB
+  template <typename T, typename U>
+  void convertColor(Color<T, Rgba>& dst, const Color<U, Rgb>& src)
+  {
+    convertColor(red(dst), red(src));
+    convertColor(blue(dst), blue(src));
+    convertColor(green(dst), green(src));
+    alpha(dst) = ChannelTraits<T>::max();
+  }
+  //! Color conversion from RGBA to unsigned char
+  template <typename T, typename U>
+  void convertColor(T& gray, const Color<U, Rgba>& src)
+  {
+    Color<double, Rgb> rgb64f;
+    convertColor(rgb64f, src);
+    convertColor(gray, rgb64f);
+  }
 
   //! @} ColorConversion
 

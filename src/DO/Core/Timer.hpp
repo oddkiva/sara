@@ -58,33 +58,34 @@ namespace DO {
   {
   public: /* interface. */
     //! Default constructor
-    HighResTimer ()
+    HighResTimer()
       : elapsed_(0)
-#ifdef WIN32
-      , PCFreq_(0.), start_(0)
-#endif
     {
+#ifdef WIN32
+      if (!QueryPerformanceFrequency(&frequency_))
+      {
+        const char *msg = "Failed to initialize high resolution timer!";
+        std::cerr << msg << std::endl;
+        throw std::runtime_error(msg);
+      }
+#endif
     }
     //! Reset the timer to zero.
     void restart()
     {
 #ifdef WIN32
-      if (!QueryPerformanceFrequency(&li_))
-        std::cout << "QueryPerformanceFrequency failed!" << std::endl;
-      PCFreq_ = static_cast<double>(li_.QuadPart)/1000.0;
-      QueryPerformanceCounter(&li_);
-      start_ = li_.QuadPart;
+      QueryPerformanceCounter(&start_);
 #else
       gettimeofday(&start_, NULL);
 #endif
-      elapsed_ = 0;
     }
-    //! Returns the elapsed time in milliseconds.
-    double elapsedMs()
+    //! Returns the elapsed time in seconds.
+    double elapsed()
     {
 #ifdef _WIN32
-      QueryPerformanceCounter(&li_);
-      elapsed_ = static_cast<double>(li_.QuadPart-start_)/PCFreq_;
+      QueryPerformanceCounter(&end_);
+      elapsed_ = static_cast<double>(end_.QuadPart - start_.QuadPart)
+               / frequency_.QuadPart;
 #else
       gettimeofday(&end_, NULL);
       elapsed_ = (end_.tv_sec - start_.tv_sec) * 1000.0;
@@ -92,13 +93,17 @@ namespace DO {
 #endif
       return elapsed_;
     }
+    //! Returns the elapsed time in milliseconds.
+    double elapsedMs()
+    { return elapsed() * 1000.; }
   private: /* data members. */
 #ifdef WIN32
-    LARGE_INTEGER li_;
-    __int64 start_;
-    double PCFreq_;
+    LARGE_INTEGER frequency_;
+    LARGE_INTEGER start_;
+    LARGE_INTEGER end_;
 #else
-    timeval start_, end_;
+    timeval start_;
+    timeval end_;
 #endif
     double elapsed_;
   };
