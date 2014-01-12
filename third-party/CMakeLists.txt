@@ -30,6 +30,10 @@ if (DO_BUILD_IMAGE_IO)
   message(STATUS "  - libtiff")
   add_subdirectory(libtiff)
   set_property(TARGET tiff PROPERTY FOLDER ${THIRDPARTY_FOLDER_NAME})
+  
+  message(STATUS "  - easyexif")
+  add_subdirectory(easyexif)
+  set_property(TARGET easyexif PROPERTY FOLDER ${THIRDPARTY_FOLDER_NAME})
 endif ()
 
 message(STATUS "  - FLANN")
