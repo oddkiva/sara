@@ -12,6 +12,12 @@ macro (do_list_imagedrawing_source_files)
   # Source files
   file(GLOB DO_ImageDrawing_SOURCE_FILES
        ${DO_ImageDrawing_SOURCE_DIR}/*.cpp)
+  # Header files
+  file(GLOB DO_ImageDrawing_HEADER_FILES
+       ${DO_ImageDrawing_SOURCE_DIR}/*.hpp)
+  # Source files
+  file(GLOB DO_ImageDrawing_SOURCE_FILES
+       ${DO_ImageDrawing_SOURCE_DIR}/*.cpp)
   # All header files here
   set(DO_ImageDrawing_HEADER_FILES
       ${DO_ImageDrawing_MASTER_HEADER}
@@ -29,7 +35,7 @@ endmacro (do_load_packages_for_imagedrawing_library)
 
 macro (do_create_variables_for_imagedrawing_library)
   set(DO_ImageDrawing_LIBRARIES DO_ImageDrawing)
-  set(DO_ImageDrawing_LINK_LIBRARIES "antigrain;jpeg;png;tiff")
+  set(DO_ImageDrawing_LINK_LIBRARIES "antigrain;jpeg;png;tiff;easyexif")
 endmacro (do_create_variables_for_imagedrawing_library)
 
 do_load_packages_for_imagedrawing_library()

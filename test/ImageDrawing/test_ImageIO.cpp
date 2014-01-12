@@ -10,158 +10,87 @@
 // ========================================================================== //
 
 #include <DO/ImageDrawing.hpp>
+#include <DO/FileSystem.hpp>
 #include <DO/Graphics.hpp>
+#include <gtest/gtest.h>
 
 using namespace DO;
 using namespace std;
 
-namespace DO {
-
-  template <typename T>
-  void convertColor(Color<T, Rgb>& dst, const Color<T, Rgba>& src)
-  {
-    red(dst) = red(src);
-    blue(dst) = blue(src);
-    green(dst) = green(src);
-  }
-
-  template <typename T>
-  void convertColor(Color<T, Rgba>& dst, const Color<T, Rgb>& src)
-  {
-    red(dst) = red(src);
-    blue(dst) = blue(src);
-    green(dst) = green(src);
-  }
-
-  template <typename T, typename U>
-  void convertColor(Color<T, Rgb>& dst, const Color<U, Rgba>& src)
-  {
-    convertColor(red(dst), red(src));
-    convertColor(blue(dst), blue(src));
-    convertColor(green(dst), green(src));
-  }
-
-  template <typename T, typename U>
-  void convertColor(Color<T, Rgba>& dst, const Color<U, Rgb>& src)
-  {
-    convertColor(red(dst), red(src));
-    convertColor(blue(dst), blue(src));
-    convertColor(green(dst), green(src));
-  }
-
-}
-
-template <typename ImageReader, typename ImageWriter>
-void test_image_io(const string& inpath, const string& outpath)
+TEST(DO_ImageDrawing_Test, imageFileReadingTest)
 {
-  try
+  string filePaths[] = {
+    srcPath("../../datasets/ksmall.jpg"),
+    srcPath("../../datasets/stinkbug.png"),
+    srcPath("../../datasets/All.tif")
+  };
+
+  HighResTimer timer;
+  double elapsed1, elapsed2;
+
+  for (int i = 0; i < 3; ++i)
   {
-    cout << "Try reading file:" << endl << inpath << endl;
-    unsigned char *data = 0;
-    int w, h, d;
-    w = h = d = 0;
+    Image<Rgb8> image;
 
-    ImageReader readImage(inpath);
-    readImage(data, w, h, d);
-    if (d == 1) {
-      Image<unsigned char> image(&data[0], Vector2i(w,h));
-      viewImage(image);
-    } else if (d == 3) {
-      Image<Rgb8> image(reinterpret_cast<Rgb8 *>(&data[0]), Vector2i(w,h));
-      viewImage(image);
-    } else if (d == 4) {
-      Image<Rgba8> image(reinterpret_cast<Rgba8 *>(&data[0]), Vector2i(w,h));
-      viewImage(image);
-    }
+    timer.restart();
+    ASSERT_TRUE(imread(image, filePaths[i]));
+    ASSERT_NE(image.sizes(), Vector2i::Zero());
+    elapsed1 = timer.elapsedMs();
+    cout << "ImageIO loading time = " << elapsed1 << " ms" << endl;
+    viewImage(image);
 
-    cout << "Try writing file:" << endl << outpath << endl;
-    ImageWriter writeImage(data, w, h, d);
-    writeImage(outpath, 100);
+    timer.restart();
+    ASSERT_TRUE(load(image, filePaths[i]));
+    ASSERT_NE(image.sizes(), Vector2i::Zero());
+    elapsed2 = timer.elapsedMs();
+    cout << "Qt-based loading time = " << elapsed2 << " ms" << endl;
+    viewImage(image);
 
-    delete [] data;
-  }
-  catch (exception& e)
-  {
-    cout << e.what() << endl;
+    cout << "Speed factor = " << elapsed2/elapsed1 << endl << endl;
+
+    EXIFInfo exifInfo;
+    if (readExifInfo(exifInfo, filePaths[i]))
+      print(exifInfo);
   }
 }
 
-string fileExtension(const string& filepath)
+TEST(DO_ImageDrawing_Test, imageExifOriTest)
 {
-  string ext( filepath.substr(filepath.find_last_of(".")) );
-  transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-  return ext;
+  vector<string> filePaths;
+  getImageFilePaths(filePaths, "C:/data/David-Ok-Iphone4S");
+
+  HighResTimer timer;
+  double elapsed;
+
+  bool viewImageCollection = true;
+  if (viewImageCollection)
+  openGraphicsView(1024, 768);
+
+  for (const auto& filePath : filePaths)
+  {
+    Image<Rgb8> image;
+    EXIFInfo exifInfo;
+
+    timer.restart();
+    ASSERT_TRUE(imread(image, filePath));
+    elapsed = timer.elapsedMs();
+    cout << "Load time = " << elapsed << " ms" << endl;
+
+    ASSERT_NE(image.sizes(), Vector2i::Zero());
+    ASSERT_TRUE(readExifInfo(exifInfo, filePath));
+
+    if (viewImageCollection)
+      addImage(image, true);
+
+    print(exifInfo);
+  }
+
+  while (getKey() != KEY_ESCAPE && viewImageCollection);
+    closeWindow();
 }
 
-template <typename T>
-bool imread(Image<T>& image, const string& filepath)
+int main(int argc, char **argv)
 {
-  string ext(fileExtension(filepath));
-  // Read file
-  unsigned char *data;
-  int w, h, d;
-  data = 0;
-  w = h = d = 0;
-  if (ext == ".jpg" || ext == ".jpeg" || ext == ".jpe" || ext == ".jfif" || ext == ".jfi") {
-    if (!JpegFileReader(filepath).operator()(data, w, h, d))
-      return false;
-  } else if (ext == ".png") {
-    if (!PngFileReader(filepath).operator()(data, w, h, d))
-      return false;
-  }
-  else if (ext == ".tif" || ext == ".tiff") {
-    if (!TiffFileReader(filepath).operator()(data, w, h, d))
-      return false;
-  } else {
-    cerr << "Image format: " << ext << " either currently unsupported or invalid" << endl;
-    return false;
-  }
-
-  // Wrap data and get data ownership
-  if (d == 1) {
-    image = Image<unsigned char>(&data[0], Vector2i(w,h), true)
-      .convert<T>();
-  } else if (d == 3) {
-    image = Image<Rgb8>(reinterpret_cast<Rgb8 *>(&data[0]), Vector2i(w,h), true)
-      .convert<T>();
-  } else if (d == 4) {
-    image = Image<Rgba8>(reinterpret_cast<Rgba8 *>(&data[0]), Vector2i(w,h), true)
-      .convert<T>();
-  }
-  return true;
-}
-
-int main()
-{
-  /*test_image_io<JpegFileReader, JpegFileWriter>(srcPath("../../datasets/ksmall.jpg"),
-                                                srcPath("ksmall_write.jpg"));
-  test_image_io<PngFileReader, PngFileWriter>(srcPath("../../datasets/stinkbug.png"),
-                                              srcPath("stinkbug_write.png"));
-  test_image_io<TiffFileReader, TiffFileWriter>(srcPath("../../datasets/GuardOnBlonde.TIF"),
-                                                srcPath("GuardOnBlonde_write.TIF"));*/
-  Image<Rgb8> image;
-  if ( !imread(image, srcPath("../../datasets/stinkbug.png")) )
-  {
-    cerr << "Cannot read image" << endl;
-    return -1;
-  }
-
-  ImagePainter painter(reinterpret_cast<unsigned char *>(image.data()), image.width(), image.height());
-
-  openWindow(image.width(), image.height());
-  display(image);
-  getKey();
-  int x = 0, y = 0;
-
-  painter.drawCircle(x, y, 20, 5, red<double>());
-  getKey();
-  for (;;)
-  {
-    painter.drawCircle(x, y, 20, 5, red<double>(), 0.1);
-    display(image);
-    ++x; ++y;
-  }
-  
-
-  return 0;
+  testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }
