@@ -16,7 +16,7 @@ namespace DO {
 
   static inline QImage toQImage(Image<Rgb8>& image)
   {
-    return QImage(reinterpret_cast<uchar *>(image.data()),
+    return QImage(reinterpret_cast<unsigned char *>(image.data()),
                   image.width(), image.height(), image.width()*3,
                   QImage::Format_RGB888);
   }

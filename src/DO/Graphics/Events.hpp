@@ -13,7 +13,6 @@
 #define DO_GRAPHICS_EVENTS_HPP
 
 #include <DO/Core.hpp>
-#include <QEvent>
 
 namespace DO {
 
@@ -27,11 +26,55 @@ namespace DO {
 
   enum EventType { 
     NO_EVENT,
-    KEY_PRESSED = QEvent::KeyPress,
-    KEY_RELEASED = QEvent::KeyRelease,
-    MOUSE_PRESSED = QEvent::MouseButtonPress,
-    MOUSE_RELEASED = QEvent::MouseButtonRelease,
-    MOUSE_PRESSED_AND_MOVED = QEvent::MouseMove
+    KEY_PRESSED /*= QEvent::KeyPress*/,
+    KEY_RELEASED /*= QEvent::KeyRelease*/,
+    MOUSE_PRESSED /*= QEvent::MouseButtonPress*/,
+    MOUSE_RELEASED /*= QEvent::MouseButtonRelease*/,
+    MOUSE_PRESSED_AND_MOVED /*= QEvent::MouseMove*/
+  };
+
+  //! Values are copy-pasted from Qt's documentation.
+  enum KeyModifierType {
+    KEY_NOMODIFIER = 0x00000000,
+    KEY_SHIFT = 0x02000000,
+    KEY_CTRL = 0x04000000,
+    KEY_ALT = 0x08000000,
+    KEY_META = 0x10000000
+  };
+
+  //! Values are copy-pasted from Qt's documentation.
+  enum KeyType {
+    KEY_UNKNOWN = 0x01ffffff,
+    // Special keys.
+    KEY_ESCAPE = 0x01000000,
+    KEY_TAB =	0x01000001,
+    KEY_BACKTAB = 0x01000002,	 
+    KEY_BACKSPACE = 0x01000003,	 
+    KEY_RETURN = 0x01000004,
+    KEY_ENTER = 0x01000005,
+    KEY_INSERT = 0x01000006,	 
+    KEY_DELETE = 0x01000007, 
+    KEY_PAUSE = 0x01000008,
+    KEY_PRINT = 0x01000009,
+    KEY_SYSREQ = 0x0100000a,
+    KEY_CLEAR = 0x0100000b,
+    KEY_HOME = 0x01000010,
+    KEY_END = 0x01000011,
+    // Arrow keys.
+    KEY_LEFT = 0x01000012,
+    KEY_UP = 0x01000013,
+    KEY_RIGHT = 0x01000014,
+    KEY_DOWN = 0x01000015,
+    KEY_PAGEUP = 0x01000016,
+    KEY_PAGEDOWN = 0x01000017
+  };
+
+  //! Values are copy-pasted from Qt's documentation.
+  enum MouseButton {
+    MOUSE_NO_BUTTON = 0x00000000 /*Qt::NoButton*/,
+    MOUSE_LEFT_BUTTON = 0x00000001 /*Qt::LeftButton*/,
+    MOUSE_RIGHT_BUTTON = 0x00000002 /*Qt::RightButton*/,
+    MOUSE_MIDDLE_BUTTON = 0x00000004 /*Qt::MiddleButton*/,
   };
 
   struct Event
@@ -47,41 +90,41 @@ namespace DO {
   {
     Event e;
     e.type = NO_EVENT;
-    e.key = Qt::Key_unknown;
-    e.keyModifiers = Qt::NoModifier;
-    e.buttons = Qt::NoButton;
+    e.key = KEY_UNKNOWN;
+    e.keyModifiers = KEY_NOMODIFIER;
+    e.buttons = MOUSE_NO_BUTTON;
     e.mousePos << -1, -1;
     return e;
   }
 
-  inline Event keyPressed(int key, int keyModifiers = Qt::NoModifier)
+  inline Event keyPressed(int key, int keyModifiers = KEY_NOMODIFIER)
   {
     Event e;
     e.type = KEY_PRESSED;
     e.key = key;
     e.keyModifiers = keyModifiers;
-    e.buttons = Qt::NoButton;
+    e.buttons = MOUSE_NO_BUTTON;
     e.mousePos << -1, -1;
     return e;
   }
 
-  inline Event keyReleased(int key, int keyModifiers = Qt::NoModifier)
+  inline Event keyReleased(int key, int keyModifiers = KEY_NOMODIFIER)
   {
     Event e;
     e.type = KEY_RELEASED;
     e.key = key;
     e.keyModifiers = keyModifiers;
-    e.buttons = Qt::NoButton;
+    e.buttons = MOUSE_NO_BUTTON;
     e.mousePos << -1, -1;
     return e;
   }
 
   inline Event mousePressed(int x, int y, int buttons,
-                            int keyModifiers = Qt::NoModifier)
+                            int keyModifiers = KEY_NOMODIFIER)
   {
     Event e;
     e.type = MOUSE_PRESSED;
-    e.key = Qt::Key_unknown;
+    e.key = KEY_UNKNOWN;
     e.keyModifiers = keyModifiers;
     e.buttons = buttons;
     e.mousePos << x, y;
@@ -89,11 +132,11 @@ namespace DO {
   }
 
   inline Event mouseReleased(int x, int y, int buttons,
-                             int keyModifiers = Qt::NoModifier)
+                             int keyModifiers = KEY_NOMODIFIER)
   {
     Event e;
     e.type = MOUSE_RELEASED;
-    e.key = Qt::Key_unknown;
+    e.key = KEY_UNKNOWN;
     e.keyModifiers = keyModifiers;
     e.buttons = buttons;
     e.mousePos << x, y;
@@ -101,11 +144,11 @@ namespace DO {
   }
 
   inline Event mouseMoved(int x, int y, int buttons,
-                          int keyModifiers = Qt::NoModifier)
+                          int keyModifiers = KEY_NOMODIFIER)
   {
     Event e;
     e.type = MOUSE_PRESSED_AND_MOVED;
-    e.key = Qt::Key_unknown;
+    e.key = KEY_UNKNOWN;
     e.keyModifiers = keyModifiers;
     e.buttons = buttons;
     e.mousePos << x, y;

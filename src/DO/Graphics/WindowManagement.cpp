@@ -10,46 +10,56 @@
 // ========================================================================== //
 
 #include <DO/Graphics.hpp>
-#include <QDebug>
+#include "GraphicsUtilities.hpp"
 
 namespace DO {
+
+  QWidget * getActiveWindow()
+  { 
+    return getGuiApp()->activeWindow;
+  }
+
+  Vector2i getWindowSizes(Window w)
+  {
+    return Point2i(w->width(), w->height());
+  }
 
   // ====================================================================== //
   //! Windows handling function
   Window openWindow(int w, int h, const std::string& windowTitle,
                     int x, int y)
   {
-    QMetaObject::invokeMethod(guiApp(), "createPaintingWindow",
+    QMetaObject::invokeMethod(getGuiApp(), "createPaintingWindow",
                               Qt::BlockingQueuedConnection,
                               Q_ARG(int, w), Q_ARG(int, h),
                               Q_ARG(const QString&,
                                 QString(windowTitle.c_str())),
                               Q_ARG(int, x), Q_ARG(int, y));
-    return guiApp()->createdWindows.back();
+    return getGuiApp()->createdWindows.back();
   }
 
   Window openGLWindow(int w, int h, const std::string& windowTitle,
                       int x, int y)
   {
-    QMetaObject::invokeMethod(guiApp(), "createOpenGLWindow",
+    QMetaObject::invokeMethod(getGuiApp(), "createOpenGLWindow",
                               Qt::BlockingQueuedConnection,
                               Q_ARG(int, w), Q_ARG(int, h),
                               Q_ARG(const QString&,
                                 QString(windowTitle.c_str())),
                               Q_ARG(int, x), Q_ARG(int, y));
-    return guiApp()->createdWindows.back();
+    return getGuiApp()->createdWindows.back();
   }
 
   void closeWindow(Window w)
   {
-    QMetaObject::invokeMethod(guiApp(), "closeWindow",
+    QMetaObject::invokeMethod(getGuiApp(), "closeWindow",
                               Qt::BlockingQueuedConnection,
                               Q_ARG(QWidget *, w));
   }
 
   void setActiveWindow(Window w)
   {
-    QMetaObject::invokeMethod(guiApp(), "setActiveWindow",
+    QMetaObject::invokeMethod(getGuiApp(), "setActiveWindow",
                               Qt::BlockingQueuedConnection,
                               Q_ARG(QWidget *, w));
   }
@@ -60,66 +70,66 @@ namespace DO {
                               Qt::BlockingQueuedConnection,
                               Q_ARG(int, width), Q_ARG(int, height));
   }
-    
+
   // ====================================================================== //
   //! Temporizing functions
   void milliSleep(int msec)
   {
-    userThread().milliSleep(msec);
+    getUserThread().milliSleep(msec);
   }
 
   void microSleep(int usec)
   {
-    userThread().microSleep(usec);
+    getUserThread().microSleep(usec);
   }
 
   // ====================================================================== //
   //! I/O control functions
   int getMouse(int& x, int& y)
   {
-    if (!activeWindow())
+    if (!getActiveWindow())
       return -1;
-    return userThread().getMouse(x, y);
+    return getUserThread().getMouse(x, y);
   }
 
   int anyGetMouse(Point2i &p)
   {
     int c;
-    guiApp()->connectAllWindowsIOEventsToUserThread();
+    getGuiApp()->connectAllWindowsIOEventsToUserThread();
     c = getMouse(p);
-    guiApp()->disconnectAllWindowsIOEventsToUserThread();
-    setActiveWindow(activeWindow());
+    getGuiApp()->disconnectAllWindowsIOEventsToUserThread();
+    setActiveWindow(getActiveWindow());
     return c;
   }
-       
+
   int getKey()
   {
-    if (!activeWindow())
+    if (!getActiveWindow())
       return -1;
-    return userThread().getKey();
+    return getUserThread().getKey();
   }
-    
+
   int anyGetKey()
   {
     int k;
-    guiApp()->connectAllWindowsIOEventsToUserThread();
+    getGuiApp()->connectAllWindowsIOEventsToUserThread();
     k = getKey();
-    guiApp()->disconnectAllWindowsIOEventsToUserThread();
-    if (activeWindow())
-      setActiveWindow(activeWindow());
+    getGuiApp()->disconnectAllWindowsIOEventsToUserThread();
+    if (getActiveWindow())
+      setActiveWindow(getActiveWindow());
     return k;
   }
-    
+
   // ====================================================================== //
   //! Window event management
   //! From active window only! I am lazy.
   void getEvent(int ms, Event& e)
   {
-    QMetaObject::invokeMethod(activeWindow(), "waitForEvent", 
+    QMetaObject::invokeMethod(getActiveWindow(), "waitForEvent", 
                               Qt::QueuedConnection,
                               Q_ARG(int, ms));
-    userThread().listenToWindowEvents();
-    userThread().getEvent(e);
+    getUserThread().listenToWindowEvents();
+    getUserThread().getEvent(e);
   }
 
 } /* namespace DO */

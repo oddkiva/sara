@@ -11,54 +11,36 @@
 
 //! @file
 
-//! WTF: QString::fromStdString(s) makes DO.Graphics crash in RelWithDebInfo 
-//! with Qt 5.0.1!!!!
-//! I am not the only one who experienced this problem:
-//! https://www.assembla.com/spaces/plus/messages/1093143
-//! https://www.assembla.com/spaces/plus/tickets/162#/activity/ticket:
+#ifndef DO_GRAPHICS_GRAPHICSAPPLICATIONIMPL_HPP
+#define DO_GRAPHICS_GRAPHICSAPPLICATIONIMPL_HPP
 
-
-#ifndef DO_GRAPHICS_GRAPHICSAPPLICATION_HPP
-#define DO_GRAPHICS_GRAPHICSAPPLICATION_HPP
-
-#ifdef WIN32
-#  define NOMINMAX
-#endif
-
-#include <DO/Defines.hpp>
+#include <DO/Graphics.hpp>
 #include <QApplication>
 #include <QPointer>
 #include <QPixmap>
 #include <QString>
 #include <QWidget>
 #include "UserThread.hpp"
+#include "PaintingWindow.hpp"
+#include "OpenGLWindow.hpp"
+#include "GraphicsView.hpp"
 
 namespace DO {
 
-  /*!
-  \ingroup Graphics
-  \defgroup GraphicsInternal Graphics Internals
-  \brief This contains the Qt-based internal implementation of the Graphics 
-  module.
-  @{
- */
-
   //! \brief quick-and-dirty thing to read file from dialog box.
   //! \todo See if it can be done in a more elegant way.
-  struct InteractiveBox
+  struct DialogBoxInfo
   {
     QPixmap pixmap;
     QString filename;
   };
-  
-  //! \brief QApplication-derived class
-  //! This graphic application establishes communication between the user 
-  //! drawing commands and the windows.
-  class DO_EXPORT GraphicsApplication : public QApplication
+
+  //! Private implementation of the class GraphicsApplication
+  class GraphicsApplication::Impl : public QApplication
   {
-  Q_OBJECT
+    Q_OBJECT
   public:
-    GraphicsApplication(int argc, char **argv);
+    GraphicsApplication::Impl(int argc, char **argv);
 
   public slots:
     void createPaintingWindow(int w, int h, const QString& windowTitle,
@@ -67,33 +49,29 @@ namespace DO {
                             int x, int y);
     void createGraphicsView(int w, int h, const QString& windowTitle,
                             int x, int y);
-
     void setActiveWindow(QWidget *w);
     void closeWindow(QWidget *w);
-    
     void getFileFromDialogBox();
-    
+
   public: /* connection methods for the keyboard and mouse handling. */
     bool activeWindowIsVisible();
     void connectWindowIOEventsToUserThread(QWidget *w);
     void connectAllWindowsIOEventsToUserThread();
     void disconnectAllWindowsIOEventsToUserThread();
-    
+
   public:
     int argc;
     char **argv;
     UserThread userThread;
     QList<QPointer<QWidget> > createdWindows;
     QPointer<QWidget> activeWindow;
-    
+
     //GraphicsView *graphicsView;
-    InteractiveBox interactiveBox;
-    
+    DialogBoxInfo dialogBoxInfo;
+
     QMutex mutex;
   };
-  
-  //! @}
-
+    
 } /* namespace DO */
 
-#endif /* DO_GRAPHICS_GRAPHICSAPPLICATION_HPP */
+#endif /* DO_GRAPHICS_GRAPHICSAPPLICATIONIMPL_HPP */

@@ -16,12 +16,15 @@
 #define DO_GRAPHICS_HPP
 
 // Because of Eigen/Core compiling error
-#ifdef WIN32
-#  define NOMINMAX
+#ifdef _WIN32
+# define NOMINMAX
 #endif
 
-#include "Graphics/GraphicsUtilities.hpp"
+#include <DO/Defines.hpp>
+#include <DO/Core.hpp>
+
 #include "Graphics/Events.hpp"
+#include "Graphics/GraphicsApplication.hpp"
 #include "Graphics/WindowManagement.hpp"
 #include "Graphics/PaintingCommands.hpp"
 #include "Graphics/ImageIO.hpp"

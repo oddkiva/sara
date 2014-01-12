@@ -9,6 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include "../GraphicsUtilities.hpp"
 #include "UserThread.hpp"
 #include <QDebug>
 
@@ -117,7 +118,7 @@ namespace DO {
       return;
     }
     int ret;
-    ret = userMain_();
+    ret = userMain_(getGuiApp()->argc, getGuiApp()->argv);
     return;
   }
 

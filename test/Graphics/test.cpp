@@ -62,7 +62,7 @@ void twoWindows2()
   openWindow(300, 300);
   getKey();
 
-  Window w1 = activeWindow();
+  Window w1 = getActiveWindow();
   Window w2 = openWindow(100, 100);
   setActiveWindow(w2);
   getKey();
@@ -85,8 +85,10 @@ void multipleWindows()
              "Window #" + toString(i*3+j),
              300*j+300, 300*i+50));
     setActiveWindow(windows.back());
-    fillRect(0, 0, windows.back()->width(), windows.back()->height(),
-         Color3ub(rand()%255, rand()%255, rand()%255));
+    fillRect(0, 0,
+             getWindowWidth(windows.back()),
+             getWindowHeight(windows.back()),
+             Color3ub(rand()%255, rand()%255, rand()%255));
     drawString(100, 100, toString(i*3+j), Yellow8, 15);
     cout << "Pressed '" << char(anyGetKey()) << "'" << endl;
   }
@@ -159,8 +161,8 @@ void floatingPointDrawing()
 {
   // Open 300x200 window
   Window W = openWindow(300,200);
-  setAntialiasing(activeWindow());
-  setTransparency(activeWindow());
+  setAntialiasing(getActiveWindow());
+  setTransparency(getActiveWindow());
 
   drawPoint(Point2f(10.5f, 10.5f), Green8);
   drawPoint(Point2f(20.8f, 52.8132f), Green8);
@@ -236,38 +238,6 @@ void mouseBasics()
   closeWindow(W);
 }
 
-void imageBasics()
-{
-  cout << "Basic image reading/writing. click when done" << endl; 
-  int w, h;                                           // Dimensions
-  Color3ub* col;                                      // RGB bitmaps
-  loadColorImage(srcPath("../../datasets/ksmall.jpg"),col,w,h);      // Read image (and allocate)
-  Window W = openWindow(w,2*h,"Images");
-  putColorImage(0, 0, col, w, h);                     // Draw it
-
-  cout << sizeof(Color3ub) << endl;
-  saveColorImage("outcol.png", col, w, h);    // Write image
-  saveColorImage("outcol.tif", col, w, h);    // Write image
-  saveColorImage("outcol.jpg", col, w, h);    // Write image
-  delete[] col;                               // ...
-
-  Color3ub *I;                               // Color3ub bitmap
-  loadColorImage("outcol.png",I,w,h);        // Read again (in one Color3ub array)
-  putColorImage(0, h, I, w, h, 2.0);         // Draw it under previous one, scaling 2.0
-  delete[] I;
-
-  unsigned char *grey;                       // grey bitmap
-  loadGreyImage("outcol.png",grey,w,h);      // Read again (and convert into grey if not already)
-  putGreyImage(20, 2*h/3, grey, w, h, 0.5);  // Draw it somewhere, scale 0.5
-  saveGreyImage("outgrey.tif", grey, w, h);  // Write grey image
-  delete[] grey;
-
-  if (stepByStep) click();
-  saveScreen(W, "capturedScreen.png");
-
-  closeWindow(W);
-}
-
 void imageAnimation()
 {
   Image<Color3ub> I;
@@ -323,7 +293,7 @@ void imageAnimation()
     if (t.elapsed() > 2)
       break;
   }
-  closeWindow(activeWindow());
+  closeWindow(getActiveWindow());
 
   cout << "Finished!" << endl;
 }
@@ -341,11 +311,11 @@ void naiveAnimation()
       Color3ub(rand()%256, rand()%256, rand()%256));
     //microSleep(100);  // TODO: sometimes if you don't put this, the program
                         // freezes in some machine. Investigate.
-  } while (e.key != Qt::Key_Escape);
+  } while (e.key != KEY_ESCAPE);
 
   cout << "Finished!" << endl;
 
-  closeWindow(activeWindow());
+  closeWindow(getActiveWindow());
 }
 
 void advancedEvents()
@@ -382,7 +352,7 @@ void advancedEvents()
       cout << "Button " << ev.buttons << " released"<< endl;
       break;
     }
-  } while (ev.type != KEY_PRESSED || ev.key != Qt::Key_Up);
+  } while (ev.type != KEY_PRESSED || ev.key != KEY_UP);
   closeWindow(W);
 }
  
@@ -458,7 +428,7 @@ void checkOpenGLWindow()
   while (!quit)
   {
     int c = getKey();
-    quit = (c==Qt::Key_Escape || c==Qt::Key_Space);
+    quit = (c==KEY_ESCAPE || c==' ');
   }
   closeWindow();
 }
@@ -479,11 +449,10 @@ void graphicsViewExample()
       cerr << "Error image display" << endl;
   }
   
-  while (getKey() != Qt::Key_Escape);
+  while (getKey() != KEY_ESCAPE);
   closeWindow();
 }
 #endif
-
 
 int main()
 {
@@ -499,7 +468,6 @@ int main()
   floatingPointDrawing();
   // Image display examples
   bitmapBasics(); 
-  imageBasics();
   imageAnimation();
   naiveAnimation();
   imageDrawing();  

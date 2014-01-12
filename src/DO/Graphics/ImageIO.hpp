@@ -27,35 +27,6 @@ namespace DO {
 
   // ====================================================================== //
   // Image loading functions
-  /*!
-    \brief Load color image.
-    @param[in]  name path of the image file.
-    @param[out] data array of \b Color3ub.
-    @param[out] w,h  width and height of the image.
-    \return true if image is successfully loaded.
-    \return false otherwise.
-   */
-  DO_EXPORT
-  bool loadColorImage(const std::string& name, Color3ub *& data, 
-                      int& w, int& h);
-  /*!
-    \brief Load grayscale image.
-    @param[in]  name path of the image file.
-    @param[out] data array of **unsigned char**.
-    @param[out] w,h  width and height of the image.
-    \return true if image is successfully loaded.
-    \return false otherwise
-   */
-  DO_EXPORT
-  bool loadGreyImage(const std::string& name, uchar *& data, 
-                     int& w, int& h);
-  /*!
-    \brief Load color image.
-    @param[out] I    color image with unsigned char channel type.
-    @param[in]  name path of the image file.
-    \return true if image is successfully loaded.
-    \return false otherwise.
-   */
   DO_EXPORT
   bool load(Image<Color3ub>& I, const std::string& name);
   /*!
@@ -118,32 +89,6 @@ namespace DO {
   // ====================================================================== //
   // Image saving functions
   /*!
-    \brief Save image.
-    @param[in]  name path of the output image.
-    @param[in]  cols array of \b Color3ub
-    @param[in]  w image width.
-    @param[in]  h image height.
-    @param[in]  quality image quality in \f$[0, 100]\f$.
-    \return true if image is successfully saved.
-    \return false otherwise.
-   */
-  DO_EXPORT
-  bool saveColorImage(const std::string& name, const Color3ub *cols, 
-                      int w, int h, int quality = 85);
-  /*!
-    \brief Save grayscale image.
-    @param[in]  name path of the output image.
-    @param[in]  g array of **unsigned char**
-    @param[in]  w image width.
-    @param[in]  h image height.
-    @param[in]  quality image quality in \f$[0, 100]\f$.
-    \return true if image is successfully saved.
-    \return false otherwise.
-   */
-  DO_EXPORT
-  bool saveGreyImage(const std::string& name, const uchar *g, 
-                     int w, int h, int quality = 85);
-  /*!
     \brief Save grayscale image.
     @param[in]  I image
     @param[in]  name path of the output image.
@@ -151,9 +96,8 @@ namespace DO {
     \return true if image is successfully saved.
     \return false otherwise.
    */
-  inline bool save(const Image<uchar>& I, const std::string& name,
-                   int quality = 85)
-  { return saveGreyImage(name, I.data(), I.width(), I.height(), quality); }
+  inline bool save(const Image<unsigned char>& image, const std::string& name,
+                   int quality = 85);
   /*!
     \brief Save color image.
     @param[in]  I image
@@ -162,9 +106,8 @@ namespace DO {
     \return true if image is successfully saved.
     \return false otherwise.
    */
-  inline bool save(const Image<Rgb8>& I, const std::string& name,
-                   int quality = 85)
-  { return saveColorImage(name, I.data(), I.width(), I.height(), quality); }
+  inline bool save(const Image<Rgb8>& image, const std::string& name,
+                   int quality = 85);
 
 } /* namespace DO */
 

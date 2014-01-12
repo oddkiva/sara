@@ -14,7 +14,7 @@
 #ifndef DO_GRAPHICS_GRAPHICSUTILITIES_HPP
 #define DO_GRAPHICS_GRAPHICSUTILITIES_HPP
 
-#include "DerivedQObjects/GraphicsApplication.hpp"
+#include "DerivedQObjects/GraphicsApplicationImpl.hpp"
 
 namespace DO {
 
@@ -26,45 +26,18 @@ namespace DO {
 
   // ======================================================================== //
   // Convenience functions
-  inline GraphicsApplication *guiApp()
-  { return qobject_cast<DO::GraphicsApplication *>(qApp); }
+  inline GraphicsApplication::Impl * getGuiApp()
+  { return qobject_cast<GraphicsApplication::Impl *>(qApp); }
 
-  inline UserThread& userThread()
-  { return guiApp()->userThread; }
-
-  inline QWidget *activeWindow()
-  { return guiApp()->activeWindow; }
+  inline UserThread& getUserThread()
+  { return getGuiApp()->userThread; }
 
   inline bool activeWindowIsVisible()
-  { return guiApp()->activeWindowIsVisible(); }
+  { return getGuiApp()->activeWindowIsVisible(); }
 
   //!@}
 
 } /* namespace DO */
-
-
-/*!
-  \addtogroup GraphicsInternal
-
-  @{
- */
-
-// ====================================================================== //
-//! \brief Some convenient hack macros.
-int __main();
-
-#define main()                              \
-/*int*/ main(int argc, char **argv)         \
-{                                           \
-  DO::GraphicsApplication app(argc, argv);  \
-  app.argc = argc;                          \
-  app.argv = argv;                          \
-  app.userThread.registerUserMain(__main);  \
-  app.userThread.start();                   \
-  app.exec();                               \
-}                                           \
-                                            \
-int __main()
 
 //! @}
 

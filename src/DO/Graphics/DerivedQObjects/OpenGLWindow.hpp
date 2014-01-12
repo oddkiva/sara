@@ -22,6 +22,7 @@
 #include <QVector3D>
 #include <QQuaternion>
 #include <QTime>
+#include <QTimer>
 
 namespace DO {
   

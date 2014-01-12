@@ -18,7 +18,7 @@ class QWidget;
 
 namespace DO {
 
-  typedef QWidget *Window;
+  typedef QWidget * Window;
 
   /*!
     \ingroup Graphics
@@ -27,6 +27,19 @@ namespace DO {
     \brief Open, close windows, wait for a click or a key, listen to events.
     @{
    */
+
+  //! Window getter
+  DO_EXPORT
+  inline Window getActiveWindow();
+  //! Window size getter.
+  DO_EXPORT
+  Vector2i getWindowSizes(Window w);
+  //! Window width getter.
+  DO_EXPORT
+  inline int getWindowWidth(Window w) { return getWindowSizes(w)(0); }
+  //! Window height getter.
+  DO_EXPORT
+  inline int getWindowHeight(Window w) { return getWindowSizes(w)(1); }
 
   // ====================================================================== //
   // Windows handling function
@@ -45,7 +58,7 @@ namespace DO {
   //! \brief Close the window **w** (regardless of its type). 
   //! By default, the active window is closed.
   DO_EXPORT
-  void closeWindow(Window w = activeWindow());
+  void closeWindow(Window w = getActiveWindow());
   //! Set the chosen window **w** as the current active window (regardless of its type).
   DO_EXPORT
   void setActiveWindow(Window w);

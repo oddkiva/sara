@@ -10,33 +10,33 @@
 // ========================================================================== //
 
 #include <DO/Graphics.hpp>
-#include "DerivedQObjects/GraphicsView.hpp"
 #include <QGraphicsItem>
+#include "GraphicsUtilities.hpp"
 
 namespace DO {
 
   static GraphicsView *view()
-  { return qobject_cast<GraphicsView *>(activeWindow()); }  
+  { return qobject_cast<GraphicsView *>(getActiveWindow()); }  
   
   // ====================================================================== //
   //! Graphics view window control functions
   Window openGraphicsView(int w, int h, const std::string& windowTitle,
                           int x, int y)
   {
-    QMetaObject::invokeMethod(guiApp(), "createGraphicsView",
+    QMetaObject::invokeMethod(getGuiApp(), "createGraphicsView",
                               Qt::BlockingQueuedConnection,
                               Q_ARG(int, w), Q_ARG(int, h),
                               Q_ARG(const QString&,
                                     QString(windowTitle.c_str())),
                               Q_ARG(int, x), Q_ARG(int, y));
-    return activeWindow();
+    return getActiveWindow();
   }
     
   // ====================================================================== //
   //! Convenience graphics scene functions
   QImage toQImage(const Image<Rgb8>& I)
   {
-    return QImage(reinterpret_cast<const uchar*>(I.data()),
+    return QImage(reinterpret_cast<const unsigned char*>(I.data()),
                   I.width(), I.height(), I.width()*3,
                   QImage::Format_RGB888);
   }

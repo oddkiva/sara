@@ -14,11 +14,23 @@
 
 namespace DO {
 
-  void displayMesh(const SimpleTriangleMesh3f& mesh)
+  GraphicsApplication::GraphicsApplication(int argc, char **argv)
+    : pimpl_(new GraphicsApplication::Impl(argc, argv))
   {
-    QMetaObject::invokeMethod(getActiveWindow(), "setMesh", 
-                              Qt::QueuedConnection,
-                              Q_ARG(const SimpleTriangleMesh3f&, mesh));
+    pimpl_->userThread.registerUserMain(__main);
+    pimpl_->userThread.start();
+  }
+
+  GraphicsApplication::~GraphicsApplication()
+  {
+    if (pimpl_)
+      delete pimpl_;
+    pimpl_ = 0;
+  }
+
+  int GraphicsApplication::exec()
+  {
+    return pimpl_->exec();
   }
 
 } /* namespace DO */

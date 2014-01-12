@@ -10,51 +10,12 @@
 // ========================================================================== //
 
 #include <DO/Graphics.hpp>
+#include "GraphicsUtilities.hpp"
 
 namespace DO {
 
   // ====================================================================== //
   //! Image loading functions
-  bool loadColorImage(const std::string& name, Color3ub *& data, 
-                      int& w, int& h)
-  {
-    data = 0; w = 0; h = 0;
-    QImage image(QString(name.c_str()));
-    if (image.isNull())
-      return false;
-    image = image.convertToFormat(QImage::Format_RGB888);
-    w = image.width(); h = image.height();
-    data = new Color3ub[w*h];
-    Color3ub *src = reinterpret_cast<Color3ub *>(image.bits());
-    std::copy(src, src+w*h, data);
-    return true;
-  }
-
-  bool loadGreyImage(const std::string& name, uchar *& data, 
-                     int& w, int& h)
-  {
-    data = 0; w = 0; h = 0;
-    QImage image(QString(name.c_str()));
-    if (image.isNull())
-      return false;
-    w = image.width(); h = image.height();
-    data = new uchar[w*h];
-    if(!image.isGrayscale())
-    {
-      for(int y = 0; y < h; ++y)
-        for(int x = 0; x < w; ++x)
-          data[x+w*y] = uchar( qGray( image.pixel(x,y) ) );
-    }
-    else
-    {
-      for(int y = 0; y < h; ++y)
-        for(int x = 0; x < w; ++x)
-          data[x+w*y] = uchar( qRed( image.pixel(x,y) ) );
-    }
-
-    return true;
-  }
-
   bool load(Image<Color3ub>& I, const std::string& name)
   {
     QImage image(QString(name.c_str()));
@@ -76,48 +37,43 @@ namespace DO {
       return false;
     image = image.convertToFormat(QImage::Format_RGB888);
     I.resize(image.width(), image.height());
-    Color3ub *dst = I.data();
-    Color3ub *src = reinterpret_cast<Color3ub *>(image.bits());
+    Rgb8 *dst = I.data();
+    Rgb8 *src = reinterpret_cast<Rgb8 *>(image.bits());
     std::copy(src, src+image.width()*image.height(), dst);
-    for (int y = 0; y < image.height(); ++y)
-    {
-      for (int x = 0; x < image.width(); ++x)
-      {
-        red(I(x,y)) = qRed(image.pixel(x,y));
-        green(I(x,y)) = qGreen(image.pixel(x,y));
-        blue(I(x,y)) = qBlue(image.pixel(x,y));
-      }
-    }
     return true;
   }
 
-  bool loadFromDialogBox(Image<Rgb8>& I)
+  bool loadFromDialogBox(Image<Rgb8>& image)
   {
-    QMetaObject::invokeMethod(guiApp(), "getFileFromDialogBox",
+    QMetaObject::invokeMethod(getGuiApp(), "getFileFromDialogBox",
                               Qt::BlockingQueuedConnection);
-    bool r = load(I, guiApp()->interactiveBox.filename.toLocal8Bit().constData());
+    bool r = load(image, 
+                  getGuiApp()->dialogBoxInfo.filename.toLocal8Bit().constData());
     return r;
   }
 
-  bool loadFromDialogBox(Image<Color3ub>& I)
+  bool loadFromDialogBox(Image<Color3ub>& image)
   {
-    QMetaObject::invokeMethod(guiApp(), "getFileFromDialogBox",
+    QMetaObject::invokeMethod(getGuiApp(), "getFileFromDialogBox",
                               Qt::BlockingQueuedConnection);
-    bool r = load(I, std::string(guiApp()->interactiveBox.filename.toLocal8Bit().constData()));
+    bool r = load(image, 
+      std::string(getGuiApp()->dialogBoxInfo.filename.toLocal8Bit().constData()));
     return r;
   }
 
   // ====================================================================== //
   //! Image saving functions
+  static
   bool saveColorImage(const std::string& name, const Color3ub *cols, 
                       int w, int h, int quality)
   {
-    return QImage(reinterpret_cast<const uchar*>(cols),
+    return QImage(reinterpret_cast<const unsigned char*>(cols),
                   w, h, w*3, QImage::Format_RGB888).
       save(QString(name.c_str()), 0, quality);
   }
 
-  bool saveGreyImage(const std::string& name, const uchar *g, 
+  static
+  bool saveGreyImage(const std::string& name, const unsigned char *g, 
                      int w, int h, int quality)
   {
     QImage image(g, w, h, w, QImage::Format_Indexed8);
@@ -127,6 +83,13 @@ namespace DO {
     image.setColorTable(colorTable);
     return image.save(QString(name.c_str()), 0, quality);
   }
+
+  bool save(const Image<unsigned char>& I, const std::string& name,
+            int quality)
+  { return saveGreyImage(name, I.data(), I.width(), I.height(), quality); }
+
+  bool save(const Image<Rgb8>& I, const std::string& name, int quality)
+  { return saveColorImage(name, I.data(), I.width(), I.height(), quality); }
 
 
 } /* namespace DO */

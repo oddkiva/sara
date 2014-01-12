@@ -343,7 +343,7 @@ namespace DO {
     @param[in] fact image viewing scale.
    */
   DO_EXPORT
-  void putGreyImage(int x, int y, const uchar *data, int w, int h,
+  void putGreyImage(int x, int y, const unsigned char *data, int w, int h,
                     double fact = 1.);
   /*!
     \brief Draw a grayscale image in the active PaintingWindow window.
@@ -352,8 +352,8 @@ namespace DO {
     @param[in] w,h image sizes
     @param[in] fact image viewing scale.
    */
-  inline void putGreyImage(const Point2i& p, const uchar *data, int w, int h,
-                           double fact = 1.)
+  inline void putGreyImage(const Point2i& p, const unsigned char *data,
+                           int w, int h, double fact = 1.)
   { putGreyImage(p.x(), p.y(), data, w, h, fact); }
   /*!
     \brief Draw a color image in the active PaintingWindow window.
@@ -426,7 +426,7 @@ namespace DO {
   void viewImage(const Image<T>& I, const std::string& windowTitle = "DO++",
                  double fact = 1.0)
   {
-    QWidget *win = activeWindow() ? activeWindow() : 0;
+    QWidget *win = getActiveWindow() ? getActiveWindow() : 0;
     
     setActiveWindow(openWindow(I.width()*fact, I.height()*fact, windowTitle));
     display(I, 0, 0, fact);
@@ -447,10 +447,10 @@ namespace DO {
   // Painting options commands
   //! \brief Activate anti-aliased drawing.
   DO_EXPORT
-  void setAntialiasing(Window w = activeWindow(), bool on = true);
+  void setAntialiasing(Window w = getActiveWindow(), bool on = true);
   //! \bug Buggy. Investigate...
   DO_EXPORT
-  void setTransparency(Window w = activeWindow(), bool on = true);
+  void setTransparency(Window w = getActiveWindow(), bool on = true);
 
   // ======================================================================== //
   // Save screen command on window.

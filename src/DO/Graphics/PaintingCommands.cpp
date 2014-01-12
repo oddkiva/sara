@@ -10,6 +10,7 @@
 // ========================================================================== //
 
 #include <DO/Graphics.hpp>
+#include "GraphicsUtilities.hpp"
 
 namespace DO {
 
@@ -17,7 +18,7 @@ namespace DO {
   //! Drawing commands
   void drawPoint(int x, int y, const Color3ub& c)
   {
-    QMetaObject::invokeMethod(activeWindow(), "drawPoint", 
+    QMetaObject::invokeMethod(getActiveWindow(), "drawPoint", 
                               Qt::QueuedConnection,
                               Q_ARG(int, x), Q_ARG(int, y),
                               Q_ARG(const QColor&, QColor(c[0], c[1], c[2])));
@@ -25,7 +26,7 @@ namespace DO {
 
   void drawPoint(int x, int y, const Color4ub& c)
   {
-    QMetaObject::invokeMethod(activeWindow(), "drawPoint", 
+    QMetaObject::invokeMethod(getActiveWindow(), "drawPoint", 
                               Qt::QueuedConnection,
                               Q_ARG(int, x), Q_ARG(int, y),
                               Q_ARG(const QColor&, 
@@ -34,7 +35,7 @@ namespace DO {
 
   void drawPoint(const Point2f& p, const Color3ub& c)
   {
-    QMetaObject::invokeMethod(activeWindow(), "drawPoint", 
+    QMetaObject::invokeMethod(getActiveWindow(), "drawPoint", 
                               Qt::QueuedConnection,
                               Q_ARG(const QPointF&, QPointF(p.x(), p.y())),
                               Q_ARG(const QColor&, 
@@ -43,7 +44,7 @@ namespace DO {
 
   void drawCircle(int xc, int yc, int r, const Color3ub& c, int penWidth)
   {
-    QMetaObject::invokeMethod(activeWindow(), "drawCircle", 
+    QMetaObject::invokeMethod(getActiveWindow(), "drawCircle", 
                               Qt::QueuedConnection,
                               Q_ARG(int, xc), Q_ARG(int, yc),
                               Q_ARG(int, r),
@@ -54,7 +55,7 @@ namespace DO {
   void drawCircle(const Point2f& center, float r, const Color3ub& c,
                   int penWidth)
   {
-    QMetaObject::invokeMethod(activeWindow(), "drawCircle", 
+    QMetaObject::invokeMethod(getActiveWindow(), "drawCircle", 
                               Qt::QueuedConnection,
                               Q_ARG(const QPointF&,
                                     QPointF(center.x(), center.y())),
@@ -65,7 +66,7 @@ namespace DO {
 
   void drawEllipse(int x, int y, int w, int h, const Color3ub&c, int penWidth)
   {
-    QMetaObject::invokeMethod(activeWindow(), "drawEllipse", 
+    QMetaObject::invokeMethod(getActiveWindow(), "drawEllipse", 
                               Qt::QueuedConnection,
                               Q_ARG(int, x), Q_ARG(int, y),
                               Q_ARG(int, w), Q_ARG(int, h),
@@ -76,7 +77,7 @@ namespace DO {
   void drawEllipse(const Point2f& center, float r1, float r2, float degree,
                    const Color3ub& c, int penWidth)
   {
-    QMetaObject::invokeMethod(activeWindow(), "drawEllipse", 
+    QMetaObject::invokeMethod(getActiveWindow(), "drawEllipse", 
                               Qt::QueuedConnection,
                               Q_ARG(const QPointF&,
                                     QPointF(center.x(), center.y())),
@@ -89,7 +90,7 @@ namespace DO {
   void drawLine(int x1, int y1, int x2, int y2, const Color3ub& c,
                 int penWidth)
   {
-    QMetaObject::invokeMethod(activeWindow(), "drawLine", 
+    QMetaObject::invokeMethod(getActiveWindow(), "drawLine", 
                               Qt::QueuedConnection,
                               Q_ARG(int, x1), Q_ARG(int, y1),
                               Q_ARG(int, x2), Q_ARG(int, y2),
@@ -100,7 +101,7 @@ namespace DO {
   void drawLine(const Point2f& p1, const Point2f& p2, const Color3ub& c,
                 int penWidth)
   {
-    QMetaObject::invokeMethod(activeWindow(), "drawLine", 
+    QMetaObject::invokeMethod(getActiveWindow(), "drawLine", 
                               Qt::QueuedConnection,
                               Q_ARG(const QPointF&, QPointF(p1.x(), p1.y())),
                               Q_ARG(const QPointF&, QPointF(p2.x(), p2.y())),
@@ -111,7 +112,7 @@ namespace DO {
   void drawLine(const Point2d& p1, const Point2d& p2, const Color3ub& c,
                 int penWidth)
   {
-    QMetaObject::invokeMethod(activeWindow(), "drawLine", 
+    QMetaObject::invokeMethod(getActiveWindow(), "drawLine", 
                               Qt::QueuedConnection,
                               Q_ARG(const QPointF&, QPointF(p1.x(), p1.y())),
                               Q_ARG(const QPointF&, QPointF(p2.x(), p2.y())),
@@ -121,7 +122,7 @@ namespace DO {
 
   void drawRect(int x, int y, int w, int h, const Color3ub& c, int penWidth)
   {
-    QMetaObject::invokeMethod(activeWindow(), "drawRect", 
+    QMetaObject::invokeMethod(getActiveWindow(), "drawRect", 
                               Qt::QueuedConnection,
                               Q_ARG(int, x), Q_ARG(int, y),
                               Q_ARG(int, w), Q_ARG(int, h),
@@ -132,7 +133,7 @@ namespace DO {
 
   void drawPoly(const QPolygonF& poly, const Color3ub& c, int width)
   {
-    QMetaObject::invokeMethod(activeWindow(), "drawPoly", 
+    QMetaObject::invokeMethod(getActiveWindow(), "drawPoly", 
                               Qt::QueuedConnection,
                               Q_ARG(const QPolygonF&, poly),
                               Q_ARG(const QColor&, 
@@ -161,7 +162,7 @@ namespace DO {
                   int fontSize, double alpha, bool italic, bool bold, 
                   bool underlined)
   {
-    QMetaObject::invokeMethod(activeWindow(), "drawText", 
+    QMetaObject::invokeMethod(getActiveWindow(), "drawText", 
                               Qt::QueuedConnection,
                               Q_ARG(int, x), Q_ARG(int, y),
                               Q_ARG(const QString&, 
@@ -177,7 +178,7 @@ namespace DO {
   void drawArrow(int a, int b, int c, int d, const Color3ub& col,
                  int arrowWidth, int arrowHeight, int style, int width)
   {
-    QMetaObject::invokeMethod(activeWindow(), "drawArrow", 
+    QMetaObject::invokeMethod(getActiveWindow(), "drawArrow", 
                               Qt::QueuedConnection,
                               Q_ARG(int, a), Q_ARG(int, b),
                               Q_ARG(int, c), Q_ARG(int, d),
@@ -192,7 +193,7 @@ namespace DO {
   //! Filling commands
   void fillEllipse(int x, int y, int w, int h, const Color3ub& c)
   {
-    QMetaObject::invokeMethod(activeWindow(), "fillEllipse", 
+    QMetaObject::invokeMethod(getActiveWindow(), "fillEllipse", 
                               Qt::QueuedConnection,
                               Q_ARG(int, x), Q_ARG(int, y),
                               Q_ARG(int, w), Q_ARG(int, h),
@@ -203,7 +204,7 @@ namespace DO {
   void fillEllipse(const Point2f& p, float rx, float ry, float degree,
                    const Color3ub& c)
   {
-    QMetaObject::invokeMethod(activeWindow(), "fillEllipse",
+    QMetaObject::invokeMethod(getActiveWindow(), "fillEllipse",
                               Qt::QueuedConnection,
                               Q_ARG(const QPointF&, QPointF(p.x(), p.y())),
                               Q_ARG(qreal, rx),
@@ -215,7 +216,7 @@ namespace DO {
 
   void fillRect(int x, int y, int w, int h, const Color3ub& c)
   {
-    QMetaObject::invokeMethod(activeWindow(), "fillRect", 
+    QMetaObject::invokeMethod(getActiveWindow(), "fillRect", 
                               Qt::QueuedConnection,
                               Q_ARG(int, x), Q_ARG(int, y),
                               Q_ARG(int, w), Q_ARG(int, h),
@@ -225,7 +226,7 @@ namespace DO {
 
   void fillCircle(int x, int y, int r, const Color3ub& c)
   {
-    QMetaObject::invokeMethod(activeWindow(), "fillCircle", 
+    QMetaObject::invokeMethod(getActiveWindow(), "fillCircle", 
                               Qt::QueuedConnection,
                               Q_ARG(int, x), Q_ARG(int, y),
                               Q_ARG(int, r),
@@ -235,7 +236,7 @@ namespace DO {
 
   void fillCircle(const Point2f& p, float r, const Color3ub& c)
   {
-    QMetaObject::invokeMethod(activeWindow(), "fillCircle", 
+    QMetaObject::invokeMethod(getActiveWindow(), "fillCircle", 
                               Qt::QueuedConnection,
                               Q_ARG(const QPointF&, QPoint(p.x(), p.y())),
                               Q_ARG(qreal, r),
@@ -245,7 +246,7 @@ namespace DO {
 
   void fillPoly(const QPolygonF& polygon, const Color3ub& c)
   {
-    QMetaObject::invokeMethod(activeWindow(), "fillPoly", 
+    QMetaObject::invokeMethod(getActiveWindow(), "fillPoly", 
                               Qt::QueuedConnection,
                               Q_ARG(const QPolygonF&, polygon),
                               Q_ARG(const QColor&,
@@ -280,7 +281,7 @@ namespace DO {
   //! Image display commands
   void display(const QImage& image, int xoff, int yoff, double fact)
   {
-    QMetaObject::invokeMethod(activeWindow(), "display", 
+    QMetaObject::invokeMethod(getActiveWindow(), "display", 
                               Qt::BlockingQueuedConnection,
                               Q_ARG(const QImage&, image),
                               Q_ARG(int, xoff), Q_ARG(int, yoff),
@@ -310,7 +311,7 @@ namespace DO {
   //! Clearing commands
   void clearWindow()
   {
-    QMetaObject::invokeMethod(activeWindow(), "clear", Qt::QueuedConnection);
+    QMetaObject::invokeMethod(getActiveWindow(), "clear", Qt::QueuedConnection);
   }
 
   // ======================================================================== //

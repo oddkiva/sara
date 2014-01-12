@@ -34,7 +34,7 @@ namespace DO {
 
   public:
     UserThread(QObject* parent = 0);
-    void registerUserMain(int (*userMain)(void)) { userMain_ = userMain; }
+    void registerUserMain(int (*userMain)(int, char **)) { userMain_ = userMain; }
 
   public: /* timing methods */
     void milliSleep(int msec) { msleep(msec); }
@@ -56,7 +56,7 @@ namespace DO {
     void run();
 
   private:
-    int (*userMain_)(void);
+    int (*userMain_)(int, char **);
 
     QMutex mutex_;
     QWaitCondition condition_;
