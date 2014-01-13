@@ -7,7 +7,9 @@ message(STATUS "  - DO_VideoCapture_test")
 find_package(DO COMPONENTS Core ImageProcessing Graphics REQUIRED)
 include(${DO_USE_FILE})
 
-find_package(Qt5 COMPONENTS Widgets Multimedia MultimediaWidgets REQUIRED)
+find_package(Qt5Widgets REQUIRED)
+find_package(Qt5Multimedia REQUIRED)
+find_package(Qt5MultimediaWidgets REQUIRED)
 include_directories(${Qt5Widgets_INCLUDE_DIRS}
                     ${Qt5Multimedia_INCLUDE_DIRS}
                     ${Qt5MultimediaWidgets_INCLUDE_DIRS})

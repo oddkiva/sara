@@ -66,8 +66,9 @@ TEST(DO_ImageDrawing_Test, imageExifOriTest)
   if (viewImageCollection)
   openGraphicsView(1024, 768);
 
-  for (const auto& filePath : filePaths)
+  for (size_t i = 0; i < filePaths.size(); ++i)
   {
+    const string& filePath = filePaths[i];
     Image<Rgb8> image;
     EXIFInfo exifInfo;
 
