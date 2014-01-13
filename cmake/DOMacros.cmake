@@ -1,11 +1,45 @@
-macro(do_get_os_info)
+################################################################################
+# Debug and verbose functions
+# 
+function (do_message _msg)
+  message (STATUS "[DO] ${_msg}")
+endfunction (do_message _msg)
+
+
+function (do_step_message _msg)
+  message ("[DO] ${_msg}")
+endfunction (do_step_message _msg)
+
+
+function (do_substep_message _msg)
+  message ("     ${_msg}")
+endfunction (do_substep_message _msg)
+
+function (do_list_files _src_files _rel_path _extension)
+  file(GLOB _src_files
+       RELATIVE ${_rel_path}
+       FILES_MATCHING PATTERN ${_extension})
+  foreach (l ${LIST})
+    set(l ${PATH}/l)
+    message (l)
+  endforeach ()
+  message (${LIST})
+endfunction (do_list_files)
+
+
+
+################################################################################
+# Useful macros
+# 
+macro (do_get_os_info)
   string(REGEX MATCH "Linux" OS_IS_LINUX ${CMAKE_SYSTEM_NAME})
   set(DO_LIB_INSTALL_DIR "lib")
   set(DO_INCLUDE_INSTALL_DIR
       "include/DO-${DO_MAJOR_VERSION}.${DO_MINOR_VERSION}")
-endmacro(do_get_os_info)
+endmacro (do_get_os_info)
 
-macro(do_dissect_version)
+
+macro (do_dissect_version)
   # Find version components
   string(REGEX REPLACE "^([0-9]+).*" "\\1"
          DO_VERSION_MAJOR "${DO_VERSION}")
@@ -16,27 +50,7 @@ macro(do_dissect_version)
   string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.[0-9]+(.*)" "\\1"
          DO_VERSION_CANDIDATE ${DO_VERSION})
   set(DO_SOVERSION "${DO_VERSION_MAJOR}.${DO_VERSION_MINOR}")
-endmacro(do_dissect_version)
-
-
-
-
-################################################################################
-# Helper macros
-# 
-macro (do_message _msg)
-  message (STATUS "[DO] ${_msg}")
-endmacro (do_message _msg)
-
-
-macro (do_step_message _msg)
-  message ("[DO] ${_msg}")
-endmacro (do_step_message _msg)
-
-
-macro (do_substep_message _msg)
-  message ("     ${_msg}")
-endmacro (do_substep_message _msg)
+endmacro (do_dissect_version)
 
 
 macro (do_append_components _component_list _component)
@@ -44,18 +58,6 @@ macro (do_append_components _component_list _component)
   set(DO_${_component}_USE_FILE UseDO${_component})
   list(APPEND "${_component_list}" ${_component})
 endmacro (do_append_components)
-
-
-macro (do_list_files _src_files _rel_path _extension)
-  file(GLOB _src_files
-       RELATIVE ${_rel_path}
-       FILES_MATCHING PATTERN ${_extension})
-  foreach (l ${LIST})
-    set(l ${PATH}/l)
-    message (l)
-  endforeach ()
-  message (${LIST})
-endmacro (do_list_files)
 
 
 macro (do_append_library _library_name
@@ -98,45 +100,18 @@ macro (do_append_library _library_name
 endmacro (do_append_library)
 
 
-macro (do_cotire _target _master_header)
-  # Experimental: create precompiled libraries
-  set_target_properties(DO_${_target} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT
-                        ${_master_header})
-  cotire(DO_${_target})
-  target_link_libraries(DO_${_target}_unity DO_${_target})
-endmacro (do_cotire)
-
-
-macro (do_unit_test _unit_test_name _srcs _additional_lib_deps)
-  if (POLICY CMP0020)
-    cmake_policy(SET CMP0020 OLD)
-  endif (POLICY CMP0020)
-  include_directories(${gtest_DIR}/include)
-  add_executable(DO_${_unit_test_name}_test ${_srcs})
-  target_link_libraries(DO_${_unit_test_name}_test
-                        ${_additional_lib_deps}
-                        gtest)
-  set_target_properties(DO_${_unit_test_name}_test PROPERTIES
-                        COMPILE_FLAGS -DSRCDIR=${CMAKE_CURRENT_SOURCE_DIR}
-                        COMPILE_DEFINITIONS DO_STATIC)
-  add_test(DO_${_unit_test_name}_test
-           "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/DO_${_unit_test_name}_test")
-endmacro (do_unit_test)
-
-
-macro (do_set_specific_target_properties _target _additional_compile_flags)
-  set_target_properties(${_target} PROPERTIES
-                        VERSION ${DO_VERSION}
-                        SOVERSION ${DO_SOVERSION}
-                        COMPILE_DEFINITIONS ${_additional_compile_flags}
-                        OUTPUT_NAME_DEBUG   ${_target}-${DO_VERSION}-d
-                        OUTPUT_NAME_RELEASE ${_target}-${DO_VERSION})
-endmacro (do_set_specific_target_properties)
-
-
 macro (do_add_msvc_precompiled_header _pch _src_var)
+  # Get extra arguments.
+  set(extra_macro_args ${ARGN})
+  list(LENGTH extra_macro_args num_extra_args)
+  
   if (MSVC)
-    get_filename_component(_pch_basename ${_pch} NAME_WE)
+    if (${num_extra_args} GREATER 0)
+      list(GET extra_macro_args 0 _pch_basename)
+    else ()
+      get_filename_component(_pch_basename ${_pch} NAME_WE)
+    endif ()
+
     set(_pch_binary "${CMAKE_CURRENT_BINARY_DIR}/${_pch_basename}.pch")
     set(_srcs ${${_src_var}})
 
@@ -154,3 +129,61 @@ macro (do_add_msvc_precompiled_header _pch _src_var)
     list(APPEND ${_src_var} ${_pch_src})
   endif ()
 endmacro (do_add_msvc_precompiled_header)
+
+
+function (do_unit_test _unit_test_name _srcs _additional_lib_deps)
+  if (POLICY CMP0020)
+    cmake_policy(SET CMP0020 OLD)
+  endif (POLICY CMP0020)
+  
+  # Create a variable containing the list of source files
+  set(_srcs_var ${_srcs})
+  
+  # Get extra arguments.
+  set(extra_macro_args ${ARGN})
+  list(LENGTH extra_macro_args num_extra_args)
+  
+  # Check if a name is defined for a group of unit tests.
+  if (${num_extra_args} GREATER 0)
+    list(GET extra_macro_args 0 test_group_name)
+  endif ()
+  
+  # Check if we want to use precompiled header.
+  if (${num_extra_args} GREATER 1)
+    list(GET extra_macro_args -1 pch)
+  endif ()
+  
+  if (DEFINED pch)
+    do_substep_message(
+    "Activating precompiled header: '${pch}' for unit test: 'DO_${_unit_test_name}_test'")
+    list(APPEND _srcs_var ${pch})
+    do_add_msvc_precompiled_header(${pch} _srcs_var ${_unit_test_name}_test_PCH)
+  endif ()
+  
+  # Create the unit test project
+  include_directories(${gtest_DIR}/include)
+  add_executable(DO_${_unit_test_name}_test ${_srcs_var})
+  target_link_libraries(DO_${_unit_test_name}_test
+                        ${_additional_lib_deps}
+                        gtest)
+  set_target_properties(DO_${_unit_test_name}_test PROPERTIES
+                        COMPILE_FLAGS -DSRCDIR=${CMAKE_CURRENT_SOURCE_DIR}
+                        COMPILE_DEFINITIONS DO_STATIC)
+  add_test(DO_${_unit_test_name}_test
+           "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/DO_${_unit_test_name}_test")
+  
+  if (DEFINED test_group_name)
+    set_property(TARGET DO_${_unit_test_name}_test 
+                 PROPERTY FOLDER "DO Unit Tests/${test_group_name}")
+  endif ()
+endfunction (do_unit_test)
+
+
+function (do_set_specific_target_properties _target _additional_compile_flags)
+  set_target_properties(${_target} PROPERTIES
+                        VERSION ${DO_VERSION}
+                        SOVERSION ${DO_SOVERSION}
+                        COMPILE_DEFINITIONS ${_additional_compile_flags}
+                        OUTPUT_NAME_DEBUG   ${_target}-${DO_VERSION}-d
+                        OUTPUT_NAME_RELEASE ${_target}-${DO_VERSION})
+endfunction (do_set_specific_target_properties)

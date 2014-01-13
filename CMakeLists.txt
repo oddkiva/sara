@@ -30,7 +30,6 @@ do_get_os_info()
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # Set installation settings.
-#include(cotire)
 #include(PCH)
 include(DOInstall)
 

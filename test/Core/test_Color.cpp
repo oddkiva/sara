@@ -9,11 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include "gtest/gtest.h"
-#include <DO/Core.hpp>
-#include <iostream>
-#include <list>
-#include <utility>
+#include "CoreTesting.hpp"
 
 using namespace DO;
 using namespace std;

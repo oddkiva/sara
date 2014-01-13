@@ -9,8 +9,11 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include "gtest/gtest.h"
+#include "CoreTesting.hpp"
 #include "MultiArrayTestingFunctions.hpp"
+
+using namespace DO;
+using namespace std;
 
 template <int StorageOrder>
 void testOffsetComputation()

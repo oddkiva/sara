@@ -9,16 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include "gtest/gtest.h"
-#include <DO/Core.hpp>
-#include <iostream>
-#include <list>
-#include <utility>
-#ifdef _WIN32
-# include <windows.h>
-#else
-# include <unistd.h>
-#endif
+#include "CoreTesting.hpp"
 
 using namespace DO;
 using namespace std;
@@ -51,7 +42,6 @@ TEST(DO_Core_Test,  testTimer)
 
 int main(int argc, char** argv) 
 {
-
   testing::InitGoogleTest(&argc, argv); 
   return RUN_ALL_TESTS();
 }
