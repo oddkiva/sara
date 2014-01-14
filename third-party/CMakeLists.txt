@@ -40,5 +40,9 @@ message(STATUS "  - FLANN")
 add_subdirectory(flann)
 set_property(TARGET flann_cpp_s PROPERTY FOLDER ${THIRDPARTY_FOLDER_NAME})
 
+message(STATUS "  - stlplus")
+add_subdirectory(stlplus)
+set_property(TARGET stlplus PROPERTY FOLDER ${THIRDPARTY_FOLDER_NAME})
+
 # message(STATUS "  - DAISY")
 # add_subdirectory(libdaisy)

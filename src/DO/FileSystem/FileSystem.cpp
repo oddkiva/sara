@@ -10,171 +10,96 @@
 // ========================================================================== //
 
 #include <DO/FileSystem.hpp>
-#include <boost/filesystem.hpp>
+#include <stlplus/portability/file_system.hpp>
 #include <algorithm>
 #include <cctype>
 #include <iostream>
 
 using namespace std;
-namespace fs = boost::filesystem;
 
 namespace DO {	
 
 	typedef pair<size_t, size_t> Match;
 
-	bool createDirectory(const string& dirName)
+	bool createFolder(const string& dirName)
 	{
-		if(fs::is_directory(dirName))
+		if (stlplus::folder_exists(dirName))
 			return true;
-		try
-		{
-			fs::create_directory(dirName);
-		}
-		catch(const std::exception & e)
-		{ 
-			cout << e.what() << endl;
-			return false;
-		}
-		return true;
+    return stlplus::folder_create(dirName);
 	}
 
 	bool copyFile(const string& from, const string& to)
 	{
-		try
-		{ 
-			fs::copy_file(
-				from, to, 
-				fs::copy_option::overwrite_if_exists
-				);
-		}
-		catch (const std::exception & e)
-		{ 
-			cout << e.what() << endl;
-			return false;
-		}
-		return true;
+    return stlplus::file_copy(from, to);
 	}
 
-  string parentDirectory(const string& filepath)
+  string getParentFolder(const string& filepath)
   {
-    return fs::path(filepath).parent_path().string();
+    return stlplus::folder_part(filepath);
   }
 
-	string basename(const string& filepath)
+	string getBasename(const string& filepath)
 	{
-    return fs::basename(filepath);
+    return stlplus::basename_part(filepath);
 	}
 
-	vector<string> populateKeyFileNames(const vector<string>& imageFileNames)
-	{
-		vector<string> keyFileNames;
-		for(vector<string>::const_iterator img = imageFileNames.begin();
-			img < imageFileNames.end(); ++img)
-			keyFileNames.push_back(basename(*img)+".affkey");
-		return keyFileNames;
-	}
 
-	bool getImageFilePaths(vector<string> & filePaths, const string& dirName)
-	{
-		// Retrieve the full path of the directory.
-		fs::path inPath(fs::system_complete(fs::path(dirName)));
-
-		// Does the path exist?
-		if(!fs::exists(inPath))
-		{
-			cerr << "\nError: cannot find directory ";
-			cerr << inPath.string() << endl;
-			return false;
-		}
-
-		// Is it a directory?
-		if(!fs::is_directory(inPath))
-		{
-			cerr << "\nError: " << inPath.string();
-			cerr << " is not a folder!" << endl;
-			return false;
-		}
-
-		// Now parsing...
-		cout << "\nParsing image directory: '" << inPath.string() << "'" << endl;
-		cout << "Found:" << endl;
-
-		size_t imageCount = 0;
-		fs::directory_iterator end_iter;
-		for(fs::directory_iterator dirIt(inPath);
-			dirIt != end_iter; ++dirIt, ++imageCount)
-		{
-			try
-			{
-				if(!fs::is_regular_file(dirIt->status()))
-					continue;
-				string ext = fs::extension(dirIt->path());
-        transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-				if( ext == ".jpg" || ext == ".tif" || ext == ".jpeg" ||
-					ext == ".png" || ext == ".ppm" )
-				{
-					cout << "[" << imageCount << "]\t'" << dirIt->path().filename() << "'" << endl;
-					filePaths.push_back(dirIt->path().string());
-				}
-			}
-			catch(const std::exception& e)
-			{
-				cout << dirIt->path().filename() << " ";
-				cout << e.what() << endl;
-			}
-		}
-		return true;
-	}
-
-  bool getFilePaths(vector<string>& filePaths, const string& dirName, const string& nameFilter)
+  bool getFilePaths(vector<string>& filePaths, const string& folder,
+                    const string& wildcard, bool verbose)
   {
-    // Retrieve the full path of the directory.
-    fs::path inPath(fs::system_complete(fs::path(dirName)));
-
     // Does the path exist?
-    if(!fs::exists(inPath))
+    if(!stlplus::folder_exists(folder))
     {
-      cerr << "\nError: cannot find directory ";
-      cerr << inPath.string() << endl;
+      cerr << "\nError: cannot find folder ";
+      cerr << folder << endl;
       return false;
     }
 
-    // Is it a directory?
-    if(!fs::is_directory(inPath))
-    {
-      cerr << "\nError: " << inPath.string();
-      cerr << " is not a folder!" << endl;
-      return false;
-    }
+    filePaths = stlplus::folder_wildcard(folder, wildcard);
 
-    // Now parsing...
-    cout << "\nParsing file directory: '" << inPath.string() << "'" << endl;
-    cout << "Found:" << endl;
-
-    size_t fileCount = 0;
-    fs::directory_iterator end_iter;
-    for(fs::directory_iterator dirIt(inPath); dirIt != end_iter; ++dirIt)
+    // Now listing files in folder.
+    if (verbose)
     {
-      try
-      {
-        if(!fs::is_regular_file(dirIt->status()))
-          continue;
-        string ext = fs::extension(dirIt->path());
-        transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-        if( ext == nameFilter )
-        {
-          cout << "[" << fileCount << "]\t'" << dirIt->path().filename() << "'" << endl;
-          filePaths.push_back(dirIt->path().string());
-          ++fileCount;
-        }
-      }
-      catch(const std::exception& e)
-      {
-        cout << dirIt->path().filename() << " ";
-        cout << e.what() << endl;
-      }
+      cout << "\nListing files in folder: '" << folder << "'" << endl;
+      cout << "Found:" << endl;
+      for(size_t i = 0; i != filePaths.size(); ++i)
+        cout << "[" << i << "]\t'" << filePaths[i] << "'" << endl;
     }
     return true;
   }
+  
+  bool getImageFilePaths(vector<string>& filePaths, const string& folder,
+                         bool verbose)
+  {
+    if (!filePaths.empty())
+      filePaths.clear();
+    
+    const string wildcards[7] = {
+      "*.jpeg", "*.jpg", "*.jfif", "*.jpe",
+      "*.tif", "*.tiff",
+      "*.png"
+    };
+    
+    for (int i = 0; i < 7; ++i)
+    {
+      vector<string> newFilePaths;
+      if (!getFilePaths(newFilePaths, folder, wildcards[i], false))
+        return false;
+      filePaths.insert(filePaths.end(),
+                       newFilePaths.begin(), newFilePaths.end());
+    }
+    
+    // Now listing files in folder.
+    if (verbose)
+    {
+      cout << "\nListing files in folder: '" << folder << "'" << endl;
+      cout << "Found:" << endl;
+      for(size_t i = 0; i != filePaths.size(); ++i)
+        cout << "[" << i << "]\t'" << filePaths[i] << "'" << endl;
+    }
+    return true;
+  }
+  
+  
 
 } /* namespace DO */

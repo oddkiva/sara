@@ -9,53 +9,53 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include <DO/Core.hpp>
 #include <DO/FileSystem.hpp>
 #include <iostream>
-#include <boost/program_options.hpp>
+#include <cmdLine/cmdLine.h>
 
 using namespace DO;
 using namespace std;
-namespace po = boost::program_options;
+
+void print_usage(char **argv)
+{
+  cout << "Usage: " << argv[0] << " -i input_folder" << endl;
+}
 
 int main(int argc, char **argv)
 {
   string in;
 
-  // Parser
-  po::command_line_parser(argc, argv);
-  // Description
-  po::options_description desc("DOFileSystemTest");
-  // Command options
-  desc.add_options()
-    ("help,h", "Produce help message")
-    ("in,i", po::value<string>(&in), "Input directory")
-    ;
-  // Required options.
-  po::positional_options_description p;
-  p.add("in", 1);
-
-  // Parse options.
-  try
-  {
-    po::variables_map vm;
-    po::store(po::command_line_parser(argc, argv).
-      options(desc).
-      positional(p).
-      run(),
-      vm);
-    notify(vm);
-    if(vm.count("help") || !vm.count("in"))
-      cout << desc << endl; 
-  }
-  catch(const std::exception& e)
-  {
-    cout << e.what() << endl;
-  }
-
+//  // Create command line options.
+//  CmdLine cmdLine;
+//  cmdLine.add(make_switch('h', "help"));
+//  // Verbose option for debug.
+//  cmdLine.add(make_option('i', in, "input folder"));
+//  // Image file name.
+//  
+//  // Try to process
+//  try
+//  {
+//    if (argc == 1)
+//      throw std::string("Invalid command line parameter.");
+//    
+//    cmdLine.process(argc, argv);
+//    
+//    if (!cmdLine.used('i'))
+//      throw std::string("Invalid command line parameter.");
+//    
+//    if (cmdLine.used('h'))
+//      print_usage(argv);
+//  }
+//  catch(const std::string& s)
+//  {
+//    print_usage(argv);
+//    return false;
+//  }
 
   // Get image filenames.
   vector<string> filenames;
-  getImageFilePaths(filenames, in);
+  getImageFilePaths(filenames, srcPath("../../datasets/"));
 
   
 	return 0;

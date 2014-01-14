@@ -19,8 +19,6 @@ macro (do_list_geometry_source_files)
 endmacro (do_list_geometry_source_files)
 
 macro (do_load_packages_for_geometry_library)
-  find_package(Boost 1.47 REQUIRED)
-  include_directories(${Boost_INCLUDE_DIRS})
   include(${DO_Core_USE_FILE})
   include(${DO_Graphics_USE_FILE})
 endmacro (do_load_packages_for_geometry_library)

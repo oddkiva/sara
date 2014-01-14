@@ -20,22 +20,22 @@ namespace DO {
 
 	typedef std::vector<std::pair<size_t, size_t> > IndexMatches;
 
-	bool createDirectory(const std::string& dirName);
+	bool createFolder(const std::string& folder);
 
 	bool copyFile(const std::string& from, const std::string& to);
 
-  std::string parentDirectory(const std::string& filepath);
+  std::string getParentFolder(const std::string& filepath);
 
-	std::string basename(const std::string& filepath);
+	std::string getBasename(const std::string& filepath);
 
-	bool getImageFilePaths(
-    std::vector<std::string>& filePaths,
-    const std::string& dirName);
-
-  bool getFilePaths(
-    std::vector<std::string>& filePaths,
-    const std::string& dirName,
-    const std::string& nameFilter);
+  bool getFilePaths(std::vector<std::string>& filePaths,
+                    const std::string& folder,
+                    const std::string& wildcard,
+                    bool verbose = true);
+  
+  bool getImageFilePaths(std::vector<std::string>& filePaths,
+                         const std::string& folder,
+                         bool verbose = true);
 
 } /* namespace DO */
 
