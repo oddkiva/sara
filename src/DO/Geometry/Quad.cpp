@@ -31,10 +31,10 @@ namespace DO {
   }
 
   Quad::Quad(const BBox& bbox)
-    : a(bbox.topLeft)
-    , b(bbox.topLeft.x(), bbox.bottomRight.y())
-    , c(bbox.bottomRight)
-    , d(bbox.bottomRight.x(), bbox.topLeft.y())
+    : a(bbox.topLeft())
+    , b(bbox.topRight())
+    , c(bbox.bottomRight())
+    , d(bbox.bottomLeft())
   {
     lineEqns[0] = computeLineEqn(a, b);
     lineEqns[1] = computeLineEqn(b, c);

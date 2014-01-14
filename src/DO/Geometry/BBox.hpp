@@ -14,42 +14,66 @@
 
 namespace DO {
 
-  struct BBox {
-    Point2d topLeft, bottomRight;
+  class BBox
+  {
+    Point2d tl_, br_;
+  public:
     BBox() {}
-    BBox(const Point2d& tl, const Point2d& br) : topLeft(tl), bottomRight(br) {}
-    bool isInside(const Point2d& p) const;
-    bool isDegenerate() const;
-    bool invert();
-    void drawOnScreen(const Color3ub& c, double scale = 1.) const;
+    BBox(const Point2d& topLeft, const Point2d& bottomRight)
+      : tl_(topLeft), br_(bottomRight)
+    {
+      if ( tl_.x() > br_.x() ||
+           tl_.y() > br_.y() )
+      {
+        throw std::runtime_error(
+          "Error: Top-left corners and bottom-right corners are wrong!");
+      }
+    }
+
+    void drawOnScreen(const Color3ub& c, double scale = 1., int thickness = 1) const;
     void print() const;
-    double width() const { return std::abs(bottomRight.x() - topLeft.x()); }
-    double height() const { return std::abs(bottomRight.y() - topLeft.y()); }
+    
+    Point2d& topLeft()     { return tl_; }
+    Point2d& bottomRight() { return br_; }
+    double& x1() { return  tl_.x(); }
+    double& y1() { return  tl_.y(); }
+    double& x2() { return  br_.x(); }
+    double& y2() { return  br_.y(); }
 
-    Point2d tl() const { return topLeft; }
-    Point2d tr() const { return topLeft+Point2d(width(), 0); }
-    Point2d bl() const { return bottomRight-Point2d(width(), 0); }
-    Point2d br() const { return bottomRight; }
+    const Point2d& topLeft()     const { return tl_; }
+    const Point2d& bottomRight() const { return br_; }
+    Point2d        topRight()    const { return tl_+Point2d(width(), 0); }
+    Point2d        bottomLeft()  const { return br_-Point2d(width(), 0); }
 
-    double x1() const { return  topLeft.x(); }
-    double y1() const { return  topLeft.y(); }
-    double x2() const { return  bottomRight.x(); }
-    double y2() const { return  bottomRight.y(); }
+    double x1() const { return  tl_.x(); }
+    double y1() const { return  tl_.y(); }
+    double x2() const { return  br_.x(); }
+    double y2() const { return  br_.y(); }
 
-    static BBox infBBox() {
+    double width() const  { return std::abs(br_.x() - tl_.x()); }
+    double height() const { return std::abs(br_.y() - tl_.y()); }
+    double area() const   { return width()*height(); }
+
+    static BBox infiniteBBox() {
       BBox b;
-      b.topLeft.fill(-std::numeric_limits<double>::infinity());
-      b.bottomRight.fill(std::numeric_limits<double>::infinity());
+      b.topLeft().fill(-std::numeric_limits<double>::infinity());
+      b.bottomRight().fill(std::numeric_limits<double>::infinity());
       return b;
     }
 
     static BBox nullBBox() {
-        BBox b;
-        b.topLeft.fill(-std::numeric_limits<double>::infinity());
-        b.bottomRight.fill(-std::numeric_limits<double>::infinity());
+        BBox b(Point2d::Zero(), Point2d::Zero());
         return b;
     }
   };
+
+  BBox intersection(const BBox& bbox1, const BBox& bbox2);
+  bool intersect(const BBox& bbox1, const BBox& bbox2);
+
+  bool isSimilar(const BBox& bbox1, const BBox& bbox2,
+                 double jaccardDistance);
+  bool isDegenerate(const BBox& bbox, double areaThres);
+  bool isInside(const Point2d& p, const BBox& bbox);
 
 } /* namespace DO */
 

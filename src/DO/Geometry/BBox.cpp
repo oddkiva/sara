@@ -16,55 +16,33 @@ using namespace std;
 
 namespace DO {
 
-  bool BBox::isInside(const Point2d& p) const
-  {
-    return (
-      p.x() >= topLeft.x() && p.x() <= bottomRight.x() &&
-      p.y() >= topLeft.y() && p.y() <= bottomRight.y() 
-      );
-  }
-
-  bool BBox::isDegenerate() const
-  {
-    bool degenerate = (
-      topLeft.x() == bottomRight.x() || 
-      topLeft.y() == bottomRight.y()
-      );
-    if (degenerate)
-      std::cout << "degenerate" << std::endl;
-
-    return degenerate;
-  }
-
-  bool BBox::invert()
-  {
-    bool inverted = false;
-
-    if (topLeft.x() > bottomRight.x())
-    {
-      std::swap(topLeft.x(), bottomRight.x());
-      inverted = true;
-    }
-    if (topLeft.y() > bottomRight.y())
-    {
-      std::swap(topLeft.y(), bottomRight.y());
-      inverted = true;
-    }
-    return inverted;
-  }
-
   void BBox::print() const
   {
-    cout << "top left " << topLeft.transpose() << endl;
-    cout << "bottom right " << bottomRight.transpose() << endl;
+    cout << "top left " << tl_.transpose() << endl;
+    cout << "bottom right " << br_.transpose() << endl;
   }
 
-  void BBox::drawOnScreen(const Color3ub& col, double z) const
+  void BBox::drawOnScreen(const Color3ub& col, double z,
+                          int thickness) const
   {
-    Point2d tl(z*topLeft);
-    Point2d br(z*bottomRight);
+    Point2d tl(z*tl_);
+    Point2d br(z*br_);
     Point2d sz(br-tl);
-    drawRect(tl.cast<int>()(0), tl.cast<int>()(1), sz.cast<int>()(0), sz.cast<int>()(1), col);
+    drawRect(tl.cast<int>()(0), tl.cast<int>()(1),
+             sz.cast<int>()(0), sz.cast<int>()(1),
+             col, thickness);
+  }
+
+  bool isInside(const Point2d& p, const BBox& bbox)
+  {
+    return 
+      p.x() >= bbox.topLeft().x() && p.x() <= bbox.bottomRight().x() &&
+      p.y() >= bbox.topLeft().y() && p.y() <= bbox.bottomRight().y() ;
+  }
+
+  bool isDegenerate(const BBox& bbox, double areaThres)
+  {
+    return (bbox.area() < areaThres);
   }
 
 } /* namespace DO */

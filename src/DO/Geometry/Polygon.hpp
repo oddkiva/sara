@@ -9,23 +9,13 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <boost/geometry.hpp>
-#include <boost/geometry/geometries/point_xy.hpp>
-#include <boost/geometry/geometries/polygon.hpp>
+#include <DO/Core.hpp>
+#include <vector>
 
 namespace DO {
 
-  // ========================================================================== //
-  // Polygon-based approximate computation of the area of intersecting ellipses.
-  // ========================================================================== //
-  typedef boost::geometry::model::d2::point_xy<double> Point;
-  typedef boost::geometry::model::polygon<Point, false> CCWPolygon;
+  std::vector<Point2d> grahamScanConvexHull(const std::vector<Point2d>& points);
 
-  CCWPolygon discretizeEllipse(const Ellipse& e, int n);
-
-  inline Point2d P(const Point& p)
-  { return Point2d(p.x(), p.y()); }
-
-  void drawPolygon(const CCWPolygon& poly, const Rgb8& color);
+  double area(const std::vector<Point2d>& ccwPolygon);
 
 } /* namespace DO */

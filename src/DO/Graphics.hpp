@@ -15,11 +15,6 @@
 #ifndef DO_GRAPHICS_HPP
 #define DO_GRAPHICS_HPP
 
-// Because of Eigen/Core compiling error
-#ifdef _WIN32
-# define NOMINMAX
-#endif
-
 #include <DO/Defines.hpp>
 #include <DO/Core.hpp>
 

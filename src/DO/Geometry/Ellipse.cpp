@@ -4,7 +4,6 @@
 
 #include <DO/Geometry.hpp>
 #include <DO/Graphics.hpp>
-#include "Polygon.hpp"
 #include <deque>
 
 using namespace std;
@@ -582,33 +581,4 @@ namespace DO {
   // ======================================================================== //
   // Polygon-based approximate computation of the area of intersecting ellipses.
   // ======================================================================== //
-  double approximateIntersectionUnionRatio(const Ellipse& e1, const Ellipse& e2,
-                                           int n, double limit)
-  {
-    if( !e1.isWellDefined(limit) || !e2.isWellDefined(limit) )
-      return 0.;
-
-    using namespace boost::geometry;
-    CCWPolygon p1(discretizeEllipse(e1, n));
-    CCWPolygon p2(discretizeEllipse(e2, n));
-    std::deque<CCWPolygon> intR;
-    intersection(p1, p2, intR);
-    if (intR.empty())
-      return 0.;
-
-    //#define DEBUG_ELLIPSE_INTERSECTION
-#ifdef DEBUG_ELLIPSE_INTERSECTION
-    drawPolygon(p1, Red8);
-    drawPolygon(p2, Blue8);
-    drawPolygon(intR.back(), Green8);
-    std::cout << "Intersection between ";
-    std::cout << "E1 " << e1 << std::endl;
-    std::cout << "E2 " << e2 << std::endl;
-    getKey();
-#endif
-
-    double interArea = area(intR.back());
-    double unionArea = area(p1)+area(p2)-interArea;
-    return interArea/unionArea;
-  }
 }
