@@ -15,8 +15,6 @@
 using namespace std;
 using namespace DO;
 
-namespace DO {
-
 const int w = 512, h = 512;
 
 void initRandom()
@@ -46,13 +44,13 @@ void drawEllipse(const Ellipse& e, const Rgb8& c)
   drawArrow(e.c().x(), e.c().y(), tip.x(), tip.y(), c);
 }
 
-bool ccw(const Point2d& a, const Point2d& b, const Point2d& c)
-{
-  Matrix2d M;
-  M.col(0) = b-a;
-  M.col(1) = c-a;
-  return M.determinant() > 0;
-}
+//bool ccw(const Point2d& a, const Point2d& b, const Point2d& c)
+//{
+//  Matrix2d M;
+//  M.col(0) = b-a;
+//  M.col(1) = c-a;
+//  return M.determinant() > 0;
+//}
 
 void testEllipseAlgorithms()
 {
@@ -159,7 +157,6 @@ void testBBoxAlgorithms()
 {
 
   BBox b(Point2d(w/4, h/4), Point2d(3*w/4, 3*h/4));
-  b.invert();
   do
   {
     clearWindow();
@@ -167,11 +164,11 @@ void testBBoxAlgorithms()
     Point2d p(randPoint2d(w, h));
     b.drawOnScreen(Blue8);
     fillCircle(p.cast<float>(), 3.0f, Red8);
-    if ( b.isInside(p) )
+    if ( isInside(p, b) )
       cout << "p is inside bbox" << endl;
     else
       cout << "p is not inside bbox" << endl;
-  } while(getKey() != Qt::Key_Escape);
+  } while(getKey() != KEY_ESCAPE);
 }
 
 void testQuadAlgorithms()
@@ -196,7 +193,7 @@ void testQuadAlgorithms()
     cout << "There is "
       << (quad.intersect(quad2) ? "" : "no ") << "intersection." << endl;
 
-  } while(getKey() != Qt::Key_Escape);
+  } while(getKey() != KEY_ESCAPE);
 }
 
 void testAffineTransforms()
@@ -229,12 +226,10 @@ void testAffineTransforms()
   getKey();
 }
 
-} /* namespace DO */
-
 int main()
 {
   openWindow(w,h);
-  setAntialiasing(activeWindow());
+  setAntialiasing(getActiveWindow());
   cout << unitVector2(M_PI/6.) << endl;
 
   testEllipseAlgorithms();

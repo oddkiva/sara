@@ -30,7 +30,8 @@ namespace DO {
       }
     }
 
-    void drawOnScreen(const Color3ub& c, double scale = 1., int thickness = 1) const;
+    void drawOnScreen(const Color3ub& c, double scale = 1.,
+                      int thickness = 1) const;
     void print() const;
     
     Point2d& topLeft()     { return tl_; }
@@ -54,14 +55,14 @@ namespace DO {
     double height() const { return std::abs(br_.y() - tl_.y()); }
     double area() const   { return width()*height(); }
 
-    static BBox infiniteBBox() {
+    static BBox infinite() {
       BBox b;
       b.topLeft().fill(-std::numeric_limits<double>::infinity());
       b.bottomRight().fill(std::numeric_limits<double>::infinity());
       return b;
     }
 
-    static BBox nullBBox() {
+    static BBox zero() {
         BBox b(Point2d::Zero(), Point2d::Zero());
         return b;
     }
