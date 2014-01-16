@@ -16,7 +16,7 @@
 
 namespace DO {
     
-  void PixmapItem::keyPressEvent(QKeyEvent *event)
+  void ImageItem::keyPressEvent(QKeyEvent *event)
   {
     if (!isSelected())
       return;

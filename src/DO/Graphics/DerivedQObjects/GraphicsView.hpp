@@ -42,8 +42,7 @@ namespace DO {
   public slots:
     void addItem(QGraphicsItem *item, QGraphicsItem *parent = 0);
     void addImageItem(const QImage& image, bool randomPos = false);
-    void drawPointOnPixmapItem(int x, int y, const QColor& c,
-                               QGraphicsPixmapItem *pixItem);
+    void drawPoint(int x, int y, const QColor& c, QGraphicsPixmapItem *item);
 
   protected:
     void mousePressEvent(QMouseEvent *event);

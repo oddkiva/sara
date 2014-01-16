@@ -47,20 +47,20 @@ namespace DO {
 
   void GraphicsView::addImageItem(const QImage& image, bool randomPos)
   {
-    last_inserted_item_ = new PixmapItem(QPixmap::fromImage(image));
+    last_inserted_item_ = new ImageItem(QPixmap::fromImage(image));
     addItem(last_inserted_item_);
     if (randomPos)
       last_inserted_item_->setPos(QPointF(qrand()%10240, qrand()%7680));
   }
 
-  void GraphicsView::drawPointOnPixmapItem(int x, int y, const QColor& c,
-                                           QGraphicsPixmapItem *pixItem)
+  void GraphicsView::drawPoint(int x, int y, const QColor& c,
+                               QGraphicsPixmapItem *item) 
   {
-    QPixmap pixmap(pixItem->pixmap());
+    QPixmap pixmap(item->pixmap());
     QPainter p(&pixmap);
     p.setPen(c);
     p.drawPoint(x, y);
-    pixItem->setPixmap(pixmap);
+    item->setPixmap(pixmap);
   }
 
   void GraphicsView::mousePressEvent(QMouseEvent *event)

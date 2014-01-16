@@ -47,14 +47,27 @@ namespace DO {
   DO_EXPORT
   Window openWindow(int w, int h, const std::string& windowTitle = "DO++",
                     int x = -1, int y = -1);
+  inline Window openWindow(const Vector2i& sizes,
+                           const std::string& windowTitle = "DO++",
+                           int x = -1, int y = -1)
+  { return openWindow(sizes(0), sizes(1), windowTitle, x, y); }
   //! Open a OpenGLWindow for 3D drawing.
   DO_EXPORT
   Window openGLWindow(int w, int h, const std::string& windowTitle = "DO++",
                       int x = -1, int y = -1);
+  inline Window openGLWindow(const Vector2i& sizes,
+                             const std::string& windowTitle = "DO++",
+                             int x = -1, int y = -1)
+  { return openGLWindow(sizes(0), sizes(1), windowTitle, x, y); }
   //! Open a GraphicsView for interactive viewing.
   DO_EXPORT
   Window openGraphicsView(int w, int h, const std::string& windowTitle = "DO++",
                           int x = -1, int y = -1);
+  DO_EXPORT
+  inline Window openGraphicsView(const Vector2i& sizes,
+                                 const std::string& windowTitle = "DO++",
+                                 int x = -1, int y = -1)
+  { return openGraphicsView(sizes(0), sizes(1), windowTitle, x, y); }
   //! \brief Close the window **w** (regardless of its type). 
   //! By default, the active window is closed.
   DO_EXPORT
@@ -64,7 +77,7 @@ namespace DO {
   void setActiveWindow(Window w);
   //! Resize the specified window **w** with the following parameters.
   DO_EXPORT
-  void resizePaintingWindow(Window w, int width, int height);
+  void resizeWindow(Window w, int width, int height);
 
   // ====================================================================== //
   // Temporizing functions
