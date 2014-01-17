@@ -15,8 +15,63 @@ using namespace std;
 
 namespace DO {
   
+  int findFirstPoint(const Point2d pts[], int numPts)
+  {
+    assert(numPts <= 4);
+    
+    Point2d first(pts[0]);
+    int indexFirst = 0;
+    for (int i = 1; i < numPts; ++i)
+    {
+      if (pts[i].y() < first.y())
+      {
+        first = pts[i];
+        indexFirst = i;
+      }
+      else if (pts[i].y() == first.y() && pts[i].x() < first.x())
+      {
+        first = pts[i];
+        indexFirst = 0;
+      }
+    }
+    return indexFirst;
+  }
+  
+  struct SortByAngle
+  {
+    typedef std::pair<Point2d, double> PtAngle;
+    bool operator()(const PtAngle& a, const PtAngle& b) const
+    { return a.second < b.second; }
+  };
+  
+  void ccwSortPoints(Point2d pts[], int numPts)
+  {
+    assert(numPts <= 4);
+    
+    int indexFirst = findFirstPoint(pts, numPts);
+    std::swap(pts[0], pts[indexFirst]);
+    
+    // Compute polar angles with respect to the first point.
+    std::pair<Point2d, double> ptsAngles[4];
+    for (int i = 0; i < numPts; ++i)
+    {
+      if (i == 0)
+        ptsAngles[i] = std::make_pair(pts[i], 0);
+      else
+        ptsAngles[i] = std::make_pair(pts[i],
+                                      atan2(pts[i].y()-pts[0].y(), pts[i].x()-pts[0].x()));
+    }
+    // Sort points by polar angles.
+    std::sort(ptsAngles+1, ptsAngles+numPts, SortByAngle());
+    
+    // Recopy the sorted points.
+    for (int i = 0; i < numPts; ++i)
+      pts[i] = ptsAngles[i].first;
+  }
+  
+  // Computational Geometry Algorithms
   inline
-  bool compareY(const Point2d& p, const Point2d& q)
+  bool compareOrdinate(const Point2d& p, const Point2d& q)
   {
     if (p.y() < q.y())
       return true;
@@ -38,7 +93,7 @@ namespace DO {
   {
     return p.second > q.second;
   }
-
+  
   inline
   double ccw(const Point2d& a, const Point2d& b, const Point2d& c)
   {
@@ -47,13 +102,13 @@ namespace DO {
     A.col(1) = (c-a);
     return A.determinant();
   }
-
+  
   vector<Point2d> grahamScanConvexHull(const vector<Point2d>& points)
   {
     // Sanity check.
     if (points.size() < 3)
       return points;
-
+    
     // Eliminate redundant points.
     vector<Point2d> ch(points);
     //sort(ch.begin(), ch.end(), compareLexicographically);
@@ -62,7 +117,7 @@ namespace DO {
     // Sanity check.
     if (ch.size() < 3)
       return ch;
-
+    
     // Find the point with the lowest y-coordinate value.
     vector<Point2d>::iterator lowestY;
     lowestY = min_element(ch.begin(), ch.end(), compareY);
@@ -86,8 +141,9 @@ namespace DO {
         ch.pop_back();
       ch.push_back(sortedPts[i].first);
     }
-
+    
     return ch;
   }
+
 
 } /* namespace DO */
