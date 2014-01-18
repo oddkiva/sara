@@ -12,33 +12,18 @@
 #ifndef DO_GEOMETRY_QUAD_HPP
 #define DO_GEOMETRY_QUAD_HPP
 
+#include <DO/Core/Color.hpp>
+#include <vector>
+
 namespace DO {
 
-  struct Quad {
-    Point2d a, b, c, d; // Important: must be enumerated in ccw order.
-    Vector3d lineEqns[4];
-    Quad() {}
+  class Quad : public SmallPolygon<4>
+  {
+  public:
     Quad(const BBox& bbox);
-    Quad(const Point2d& a_, const Point2d& b_, const Point2d& c_,
-         const Point2d& d_);
-
-    void dilate(double step);
-    void applyH(const Matrix3d& H);
-    bool invertEnumerationOrder();
-
-    BBox bbox() const;
-    bool isAlmostSimilar(const Quad& quad) const;
-
-    bool isInside(const Point2d& p) const;
-    bool intersect(const Quad& quad) const;
-    double overlap(const Quad& quad) const;
-    
-    void print() const;
-    void drawOnScreen(const Color3ub& c, double scale = 1.) const;
+    Quad(const Point2d& a, const Point2d& b,
+         const Point2d& c, const Point2d& d);
   };
-
-  bool readQuads(std::vector<Quad>& quads, const std::string& filePath);
-  bool writeQuads(const std::vector<Quad>& quads, const std::string& filePath);
 
 } /* namespace DO */
 

@@ -9,7 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Core.hpp>
+#include <DO/Defines.hpp>
 #include <DO/FileSystem.hpp>
 #include <iostream>
 #include <cmdLine/cmdLine.h>
@@ -19,39 +19,40 @@ using namespace std;
 
 void print_usage(char **argv)
 {
-  cout << "Usage: " << argv[0] << " -i input_folder" << endl;
+  cout << "Usage:\t" << getBasename(argv[0]) << " -i input_folder" << endl;
 }
 
 int main(int argc, char **argv)
 {
+#ifdef TEST_CMD_LINE
   string in;
-
-//  // Create command line options.
-//  CmdLine cmdLine;
-//  cmdLine.add(make_switch('h', "help"));
-//  // Verbose option for debug.
-//  cmdLine.add(make_option('i', in, "input folder"));
-//  // Image file name.
-//  
-//  // Try to process
-//  try
-//  {
-//    if (argc == 1)
-//      throw std::string("Invalid command line parameter.");
-//    
-//    cmdLine.process(argc, argv);
-//    
-//    if (!cmdLine.used('i'))
-//      throw std::string("Invalid command line parameter.");
-//    
-//    if (cmdLine.used('h'))
-//      print_usage(argv);
-//  }
-//  catch(const std::string& s)
-//  {
-//    print_usage(argv);
-//    return false;
-//  }
+  // Create command line options.
+  CmdLine cmdLine;
+  cmdLine.add(make_switch('h', "help"));
+  // Verbose option for debug.
+  cmdLine.add(make_option('i', in, "input folder"));
+  // Image file name.
+  
+  // Try to process
+  try
+  {
+    if (argc == 1)
+      throw std::string("Invalid command line parameter.");
+    
+    cmdLine.process(argc, argv);
+    
+    if (!cmdLine.used('i'))
+      throw std::string("Invalid command line parameter.");
+    
+    if (cmdLine.used('h'))
+      print_usage(argv);
+  }
+  catch(const std::string& s)
+  {
+    print_usage(argv);
+    return false;
+  }
+#endif
 
   // Get image filenames.
   vector<string> filenames;

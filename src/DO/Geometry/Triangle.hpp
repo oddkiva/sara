@@ -12,24 +12,19 @@
 #ifndef DO_GEOMETRY_TRIANGLE_HPP
 #define DO_GEOMETRY_TRIANGLE_HPP
 
+#include <DO/Core/EigenExtension.hpp>
+#include <DO/Core/Color.hpp>
+
 namespace DO {
 
   // Triangle (a,b,c) enumerated in CCW order.
-  class Triangle
+  class Triangle : public SmallPolygon<3>
   {
   public:
-    Triangle() {}
-
     Triangle(const Point2d& a, const Point2d& b, const Point2d& c);
-
-    double area() const;
-
-  private:
-    Point2d v[3]; // vertices
-    Vector2d n[3]; // outward normals
   };
   
-  bool isInside(const Point2d& p, const Triangle& t);
+  bool inside(const Point2d& p, const Triangle& t);
   
   void drawTriangle(const Triangle& t, const Rgb8& col = Red8,
                     int penWidth = 1);

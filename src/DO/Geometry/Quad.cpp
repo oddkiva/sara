@@ -31,11 +31,12 @@ namespace DO {
   }
 
   Quad::Quad(const BBox& bbox)
-    : a(bbox.topLeft())
-    , b(bbox.topRight())
-    , c(bbox.bottomRight())
-    , d(bbox.bottomLeft())
   {
+    v_[0] = bbox.topLeft();
+    v_[1] = bbox.topRight();
+    v_[2] = bbox.bottomRight();
+    v_[3] = bbox.bottomLeft();
+
     lineEqns[0] = computeLineEqn(a, b);
     lineEqns[1] = computeLineEqn(b, c);
     lineEqns[2] = computeLineEqn(c, d);
@@ -155,24 +156,25 @@ namespace DO {
     return 0.;  
   }
 
-  void Quad::print() const
+  std::ostream& operator<<(std::ostream& os, const Quad& Q)
   {
-    cout << "a = " << a.transpose() << endl;
-    cout << "b = " << b.transpose() << endl;
-    cout << "c = " << c.transpose() << endl;
-    cout << "d = " << d.transpose() << endl;
+    os << "a = " << Q[0].transpose() << endl;
+    os << "b = " << Q[1].transpose() << endl;
+    os << "c = " << Q[2].transpose() << endl;
+    os << "d = " << Q[3].transpose() << endl;
+    return os;
   }
 
-  void Quad::drawOnScreen(const Color3ub& col, double z) const
+  void drawQuad(const Quad& Q, const Color3ub& color, double scale)
   {
-    Point2d az(a*z);
-    Point2d bz(b*z);
-    Point2d cz(c*z);
-    Point2d dz(d*z);
-    drawLine(az, bz, col);
-    drawLine(bz, cz, col);
-    drawLine(cz, dz, col);
-    drawLine(dz, az, col);
+    Point2d az(Q[0]*scale);
+    Point2d bz(Q[1]*scale);
+    Point2d cz(Q[2]*scale);
+    Point2d dz(Q[3]*scale);
+    drawLine(az, bz, color);
+    drawLine(bz, cz, color);
+    drawLine(cz, dz, color);
+    drawLine(dz, az, color);
   }
 
   bool readQuads(vector<Quad>& quads, const string& filePath)

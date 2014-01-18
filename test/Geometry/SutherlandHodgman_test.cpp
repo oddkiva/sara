@@ -9,7 +9,6 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include "short_alloc.h"
 #include <DO/Geometry.hpp>
 #include <DO/Graphics.hpp>
 
@@ -150,15 +149,6 @@ int main()
 
   openWindow(w,h);
   setAntialiasing();
-
-  typedef short_alloc<int, 100> Alloc;
-  typedef std::vector<int, Alloc> VectorInt;
-  VectorInt v;
-  v.push_back(1);
-  v.push_back(2);
-  for (int i = 0; i < v.size(); ++i)
-    cout << v[i] << endl;
-
 
   SimplePolygon poly, clip, res;
   {

@@ -23,14 +23,14 @@ namespace DO {
     return os;
   }
   
-  bool isInside(const Point2d& p, const BBox& bbox)
+  bool inside(const Point2d& p, const BBox& bbox)
   {
     return 
       p.x() >= bbox.topLeft().x() && p.x() <= bbox.bottomRight().x() &&
       p.y() >= bbox.topLeft().y() && p.y() <= bbox.bottomRight().y() ;
   }
 
-  bool isDegenerate(const BBox& bbox, double areaThres)
+  bool degenerate(const BBox& bbox, double areaThres)
   {
     return (bbox.area() < areaThres);
   }

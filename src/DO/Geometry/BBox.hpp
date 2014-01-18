@@ -31,6 +31,9 @@ namespace DO {
         throw std::logic_error(msg);
       }
     }
+    template <typename PointIterator>
+    BBox(PointIterator begin, PointIterator end);
+    BBox(const std::vector<Point2d>& points);
     
     Point2d& topLeft()     { return tl_; }
     Point2d& bottomRight() { return br_; }
@@ -61,20 +64,19 @@ namespace DO {
       b.bottomRight().fill(std::numeric_limits<double>::infinity());
       return b;
     }
-
     static BBox zero() {
         BBox b(Point2d::Zero(), Point2d::Zero());
         return b;
     }
   };
 
+  // Very fast.
   BBox intersection(const BBox& bbox1, const BBox& bbox2);
   bool intersect(const BBox& bbox1, const BBox& bbox2);
 
-  bool isSimilar(const BBox& bbox1, const BBox& bbox2, double jaccardDistance);
-  bool isDegenerate(const BBox& bbox, double eps = 1e-3);
-  bool isInside(const Point2d& p, const BBox& bbox);
-  
+  bool similar(const BBox& bbox1, const BBox& bbox2, double overlap);
+  bool degenerate(const BBox& bbox, double eps = 1e-3);
+  bool inside(const Point2d& p, const BBox& bbox);
   
   void drawBBox(const BBox& bbox, const Color3ub& c, double scale = 1.,
                 int penWidth = 1);

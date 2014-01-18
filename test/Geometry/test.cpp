@@ -11,6 +11,7 @@
 
 #include <DO/Geometry.hpp>
 #include <DO/Graphics.hpp>
+#include <ctime>
 
 using namespace std;
 using namespace DO;

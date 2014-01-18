@@ -1,8 +1,6 @@
 
 namespace DO {
-  // ======================================================================== //
-  // Computation of polynomial roots
-  // ======================================================================== //
+
   void computeRoots(bool& hasRealSolutions,
                     std::complex<double>& x1,
                     std::complex<double>& x2,
