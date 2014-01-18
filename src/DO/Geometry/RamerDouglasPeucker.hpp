@@ -53,7 +53,7 @@ namespace DO {
     std::vector<Point2d> lines;
     lines.reserve(lines.size());
     internal::ramerDouglasPeucker(lines, contours, 0, contours.size(), eps);
-    shrunk_to_fit(lines);
+    shrink_to_fit(lines);
     return lines;
   }
 }

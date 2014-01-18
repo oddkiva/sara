@@ -36,93 +36,76 @@ namespace DO {
     template <typename PointIterator>
     inline PointIterator findOrigin(PointIterator begin, PointIterator end)
     {
-      return min_element(begin, end, compareOrdinate);
+      return min_element(begin, end, compareYCoord);
     }
 
-    template <typename Allocator>
-    std::vector<std::pair<Point2d, double>, Allocator >
-    sortedPointsByPolarAngle(const std::vector<Point2d, Allocator>& points)
+    template <typename PtCotgIterator, typename PointIterator>
+    void sortByPolarAngle(PtCotgIterator outBegin, PtCotgIterator outEnd,
+                          PointIterator inBegin, PointIterator inEnd)
     {
-      // Find point with the lowest y-coordinate
-      typename std::vector<Point2d, Allocator>::iterator origin;
-      origin = findOrigin(points.begin(), pts.end());
-      swap(*origin, *begin);
-
+      // Sanity check
+      if (outEnd-outBegin != inEnd-inBegin)
+      {
+        const char *msg = "output array size and input array size differ";
+        throw std::logic_error(msg);
+      }
+      // Avoid degenerate cases.
+      if (outEnd-outBegin < 3)
+        return;
+      // Find the origin, i.e., the point with the lowest y-coordinate.
+      PointIterator origin = findOrigin(inBegin, inEnd);
+      swap(*origin, *inBegin);
       // Sort points by cotangent values, i.e., increasing orientation angle
       // w.r.t. the point with lowest y-coordinate.
       typedef std::pair<Point2d, double> PtCotg;
-      std::vector<PtCotg, Allocator> sortedPts(pts.size());
-      sortedPts[0] = make_pair(ch[0], numeric_limits<double>::infinity());
-      for (size_t i = 1; i != sortedPts.size; ++i)
+      *outBegin = make_pair(*inBegin, numeric_limits<double>::infinity());
+      PointIterator i = inBegin;
+      PtCotgIterator o = outBegin;
+      for (++i, ++o; o != outEnd; ++i, ++o)
       {
-        Vector2d diff(ch[i]-ch[0]);
-        sortedPts[i] = make_pair(ch[i], diff.x()/diff.y());
+        Vector2d diff(*i - *inBegin);
+        *o = make_pair(*i, diff.x()/diff.y());
       }
-      sort(sortedPts.begin(), sortedPts.end(), compareCotg);
+      sort(outBegin, outEnd, compareCotg);
     }
 
   } /* namespace internal */
 
-  /*!
-   * This function is a cheap
-   *
-   * The allocator becomes a perfomance-critical issue especially when we
-   * deal with very small number of points, e.g., vertices of a quad.
-   *
-   * In such a case, using a stack allocator memory becomes very judicious 
-   * to avoid the overhead due to heap allocation.
-   */
-  template <typename Allocator>
-  void sortPointsInConvexPoly(std::vector<Point2d, Allocator>& convexPoly)
+  void sortByPolarAngle(std::vector<Point2d>& points)
   {
-    if (points.size() < 2)
-      return;
-
-    std::vector<std::pair<Point2d, double> > sortedPts;
-    sortedPts = sortedPointsByPolarAngle(convexPoly);
-
-    // Copy back in a sorted manner.
-    for (size_t i = 0; i != sortedPts.size(); ++i)
-      convexPoly[i] = sortedPts[i].first;
+    std::vector<std::pair<Point2d, double> > ptCotgs(points.size());
+    sortByPolarAngle(ptCotgs.begin(), ptCotgs.end(),
+                     points.begin(), points.end());
+    for (size_t i = 0; i != ptCotgs.size(); ++i)
+      points[i] = sortedPts[i].first;
   }
 
-  /*!
-   * The allocator becomes a perfomance-critical issue especially when we
-   * deal with very small number of points, e.g., vertices of a quad.
-   *
-   * In such a case, using a stack allocator memory becomes very judicious 
-   * to avoid the overhead due to heap allocation.
-   */
-  template <typename Allocator>
-  std::vector<Point2d, Allocator>
-  grahamScanConvexHull(const std::vector<Point2d, Allocator>& points)
+  template <int N>
+  void sortByPolarAngle(Point2d *points[])
+  {
+    std::pair<Point2d, double> > ptCotgs[N];
+    sortedPointsByPolarAngle(ptCotgs, ptCotgs+N, points, points+N);
+    for (size_t i = 0; i != N; ++i)
+      points[i] = sortedPts[i].first;
+  }
+
+  std::vector<Point2d> grahamScanConvexHull(const std::vector<Point2d>& points)
   {
     // Sanity check.
     if (points.size() < 3)
       return points;
-
-    // Find point with the lowest y-coordinate
-    typename std::vector<Point2d, Allocator>::iterator lowestY;
-    lowestY = findOrigin(points.begin(), pts.end());
-    swap(*lowestY, *begin);
-
-    // Sort points by cotangent values, i.e., increasing orientation angle
-    // w.r.t. the point with lowest y-coordinate.
-    typedef std::pair<Point2d, double> PtCotg;
-    std::vector<PtCotg, Allocator> sortedPts(pts.size());
-    sortedPts[0] = make_pair(ch[0], numeric_limits<double>::infinity());
-    for (size_t i = 1; i != sortedPts.size; ++i)
-    {
-      Vector2d diff(ch[i]-ch[0]);
-      sortedPts[i] = make_pair(ch[i], diff.x()/diff.y());
-    }
-    sort(sortedPts.begin(), sortedPts.end(), compareCotg);
-
+    // Sort by polar angle.
+    std::vector<std::pair<Point2d, double> > sortedPts(points.size());
+    sortByPolarAngle(sortedPts.begin(), sortedPts.end(),
+                     points.begin(), points.end());
     // Weed out the points inside the convex hull.
-    ch.resize(2);
+    std::vector<Point2d> ch;
+    ch.reserve(points.size());
+    ch.push_back(sortedPts[0].first);
+    ch.push_back(sortedPts[1].first);
     for (size_t i = 2; i != sortedPts.size(); ++i)
     {
-      while (ccw(ch[ch.size()-2], ch[ch.size()-1], sortedPts[i].first) <= 0)
+      while (cross(ch[ch.size()-2], ch[ch.size()-1], sortedPts[i].first) <= 0)
         ch.pop_back();
       ch.push_back(sortedPts[i].first);
     }

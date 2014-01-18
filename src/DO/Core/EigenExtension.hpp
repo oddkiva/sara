@@ -21,6 +21,8 @@
 #ifndef DO_CORE_EIGENEXTENSION_HPP
 #define DO_CORE_EIGENEXTENSION_HPP
 
+#include <Eigen/Eigen>
+
 //! \namespace Eigen
 //! \brief Some customized extension to interface for the Eigen library
 //! Essentially template class specialization for array type instead of scalar.

@@ -9,8 +9,10 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_REGIONGROWING_BBOX_HPP
-#define DO_REGIONGROWING_BBOX_HPP
+#ifndef DO_GEOMETRY_BBOX_HPP
+#define DO_GEOMETRY_BBOX_HPP
+
+#include <DO/Core/EigenExtension.hpp>
 
 namespace DO {
 
@@ -25,14 +27,10 @@ namespace DO {
       if ( tl_.x() > br_.x() ||
            tl_.y() > br_.y() )
       {
-        throw std::runtime_error(
-          "Error: Top-left corners and bottom-right corners are wrong!");
+        const char *msg = "Top-left and bottom-right corners are wrong!";
+        throw std::logic_error(msg);
       }
     }
-
-    void drawOnScreen(const Color3ub& c, double scale = 1.,
-                      int thickness = 1) const;
-    void print() const;
     
     Point2d& topLeft()     { return tl_; }
     Point2d& bottomRight() { return br_; }
@@ -54,6 +52,8 @@ namespace DO {
     double width() const  { return std::abs(br_.x() - tl_.x()); }
     double height() const { return std::abs(br_.y() - tl_.y()); }
     double area() const   { return width()*height(); }
+    
+    friend std::ostream& operator<<(std::ostream& os, const BBox& bbox);
 
     static BBox infinite() {
       BBox b;
@@ -71,11 +71,14 @@ namespace DO {
   BBox intersection(const BBox& bbox1, const BBox& bbox2);
   bool intersect(const BBox& bbox1, const BBox& bbox2);
 
-  bool isSimilar(const BBox& bbox1, const BBox& bbox2,
-                 double jaccardDistance);
-  bool isDegenerate(const BBox& bbox, double areaThres);
+  bool isSimilar(const BBox& bbox1, const BBox& bbox2, double jaccardDistance);
+  bool isDegenerate(const BBox& bbox, double eps = 1e-3);
   bool isInside(const Point2d& p, const BBox& bbox);
+  
+  
+  void drawBBox(const BBox& bbox, const Color3ub& c, double scale = 1.,
+                int penWidth = 1);
 
 } /* namespace DO */
 
-#endif /* DO_REGIONGROWING_BBOX_HPP */
+#endif /* DO_GEOMETRY_BBOX_HPP */
