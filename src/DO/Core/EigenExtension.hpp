@@ -21,7 +21,23 @@
 #ifndef DO_CORE_EIGENEXTENSION_HPP
 #define DO_CORE_EIGENEXTENSION_HPP
 
+// To avoid compilation error with Eigen
+#if defined(_WIN32) || defined(_WIN32_WCE)
+# define NOMINMAX
+#endif
+
+// This is a specific compiling issue with MSVC 2008
+#if (_MSC_VER >= 1500 && _MSC_VER < 1600)
+# define EIGEN_DONT_ALIGN
+# pragma warning ( disable : 4181 ) // "../Core/Locator.hpp(444) : warning C4181: qualifier applied to reference type; ignored"
+#endif
+
+//! Activate by default math constants.
+#define _USE_MATH_DEFINES
+
+//! Eigen dependencies.
 #include <Eigen/Eigen>
+#include <sstream>
 
 //! \namespace Eigen
 //! \brief Some customized extension to interface for the Eigen library

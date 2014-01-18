@@ -14,6 +14,9 @@
 #ifndef DO_CORE_IMAGE_HPP
 #define DO_CORE_IMAGE_HPP
 
+#include "Color.hpp"
+#include "MultiArray.hpp"
+
 namespace DO {
 
   // ======================================================================== //

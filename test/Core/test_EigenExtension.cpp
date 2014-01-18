@@ -9,16 +9,15 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include "CoreTesting.hpp"
+#include <gtest/gtest.h>
+#include <DO/Core/EigenExtension.hpp>
+#include <DO/Core/MultiArray.hpp>
 
 using namespace DO;
 using namespace std;
 
 TEST(DO_Core_Test, eigenExtensionTest)
 {
-  typedef pair<Point2i, Point2i> Line;
-  list<Line> lines;
-
   typedef Matrix2f SuperScalar;
   typedef MultiArray<SuperScalar, 2> Mat2i;
   SuperScalar a; a << 1, 2, 3, 4;

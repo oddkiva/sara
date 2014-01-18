@@ -9,15 +9,15 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include "CoreTesting.hpp"
+#include <gtest/gtest.h>
+#include <DO/Defines.hpp>
 
-using namespace DO;
 using namespace std;
 
 TEST(DO_Core_Test, definesTest)
 {
   cout << "DO++ version: " << DO_VERSION << endl;
-  EXPECT_TRUE( !string(DO_VERSION).empty() );
+  EXPECT_EQ(string(DO_VERSION), "1.0.0");
 
   cout << "string source path: " << endl << srcPath("") << endl << endl;
   EXPECT_TRUE( string(srcPath("")).find("test/Core") != string::npos );

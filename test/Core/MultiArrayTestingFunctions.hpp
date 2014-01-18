@@ -1,13 +1,10 @@
 #ifndef MULTIARRAY_TESTING_FUNCTIONS_HPP
 #define MULTIARRAY_TESTING_FUNCTIONS_HPP
 
-#include <DO/Core.hpp>
-#include <iostream>
-#include <list>
-#include <utility>
+#include <DO/Core/MultiArray.hpp>
+#include <DO/Core/Color.hpp>
 
 using namespace DO;
-using namespace std;
 
 template <int StorageOrder>
 void initVolume(MultiArray<Color4f, 3, StorageOrder>& volume)

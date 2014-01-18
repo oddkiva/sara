@@ -14,6 +14,8 @@
 #ifndef DO_CORE_IMAGEPATCH_HPP
 #define DO_CORE_IMAGEPATCH_HPP
 
+#include "Image.hpp"
+
 namespace DO {
 
   // \todo: test.

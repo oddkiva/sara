@@ -9,7 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include "CoreTesting.hpp"
+#include <gtest/gtest.h>
+#include <DO/Core/MultiArray.hpp>
 #include "MultiArrayTestingFunctions.hpp"
 
 template <typename T, int N, int StorageOrder>

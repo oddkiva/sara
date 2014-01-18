@@ -15,6 +15,11 @@
 #ifndef DO_CORE_TREE_HPP
 #define DO_CORE_TREE_HPP
 
+#include "Meta.hpp"
+#include <queue>
+#include <stack>
+#include <fstream>
+
 namespace DO {
 
   //! \ingroup Core

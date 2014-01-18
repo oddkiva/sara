@@ -15,6 +15,9 @@
 #ifndef DO_CORE_SPARSEMULTIARRAY_HPP
 #define DO_CORE_SPARSEMULTIARRAY_HPP
 
+#include "EigenExtension.hpp"
+#include <map>
+
 namespace DO {
 
   //! \ingroup Core

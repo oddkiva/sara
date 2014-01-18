@@ -15,6 +15,11 @@
 #ifndef DO_CORE_LOCATOR_HPP
 #define DO_CORE_LOCATOR_HPP
 
+#include "StaticAssert.hpp"
+#include "Meta.hpp"
+#include "EigenExtension.hpp"
+#include <iterator>
+
 namespace DO {
 
   //! \ingroup Core

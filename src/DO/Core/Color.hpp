@@ -14,6 +14,9 @@
 #ifndef DO_CORE_COLOR_HPP
 #define DO_CORE_COLOR_HPP
 
+#include "Meta.hpp"
+#include "EigenExtension.hpp"
+
 namespace DO {
 
   // ======================================================================== //
