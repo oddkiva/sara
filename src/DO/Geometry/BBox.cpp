@@ -16,23 +16,13 @@ using namespace std;
 
 namespace DO {
 
-  void BBox::print() const
+  std::ostream& operator<<(std::ostream& os, const BBox& bbox)
   {
-    cout << "top left " << tl_.transpose() << endl;
-    cout << "bottom right " << br_.transpose() << endl;
+    os << "top-left " << bbox.tl_.transpose() << endl;
+    os << "bottom-right " << bbox.br_.transpose() << endl;
+    return os;
   }
-
-  void BBox::drawOnScreen(const Color3ub& col, double z,
-                          int thickness) const
-  {
-    Point2d tl(z*tl_);
-    Point2d br(z*br_);
-    Point2d sz(br-tl);
-    drawRect(tl.cast<int>()(0), tl.cast<int>()(1),
-             sz.cast<int>()(0), sz.cast<int>()(1),
-             col, thickness);
-  }
-
+  
   bool isInside(const Point2d& p, const BBox& bbox)
   {
     return 
@@ -43,6 +33,16 @@ namespace DO {
   bool isDegenerate(const BBox& bbox, double areaThres)
   {
     return (bbox.area() < areaThres);
+  }
+  
+  void drawBBox(const BBox& b, const Color3ub& color, double z, int penWidth)
+  {
+    Point2d tl(z*b.topLeft());
+    Point2d br(z*b.bottomRight());
+    Point2d sz(br-tl);
+    drawRect(tl.cast<int>()(0), tl.cast<int>()(1),
+             sz.cast<int>()(0), sz.cast<int>()(1),
+             color, penWidth);
   }
 
 } /* namespace DO */

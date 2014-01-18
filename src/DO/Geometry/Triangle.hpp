@@ -14,7 +14,7 @@
 
 namespace DO {
 
-  // Triangle with vertices (a,b,c) in CCW order.
+  // Triangle (a,b,c) enumerated in CCW order.
   class Triangle
   {
   public:
@@ -24,33 +24,15 @@ namespace DO {
 
     double area() const;
 
-    bool isInside(const Point2d& p) const;
-
-    void drawOnScreen(const Rgb8& col = Red8) const;
-
   private:
     Point2d v[3]; // vertices
     Vector2d n[3]; // outward normals
   };
-
-
-  //! Simple criterion to test if the triangle is too flat
-  class TriangleFlatness
-  {
-  public:
-    TriangleFlatness(double lowestAngleDegree, double secondLowestDegree)
-      : lb(std::cos(toRadian(lowestAngleDegree)))
-      , lb2(std::cos(toRadian(secondLowestDegree))) {}
-
-    inline bool operator()(const Point2d& a, const Point2d& b, const Point2d& c) const
-    { return !isNotFlat(a, b, c); }
-
-    bool isNotFlat(const Point2d& a, const Point2d& b, const Point2d& c) const;
-
-  private:
-    const double lb;
-    const double lb2;
-  };
+  
+  bool isInside(const Point2d& p, const Triangle& t);
+  
+  void drawTriangle(const Triangle& t, const Rgb8& col = Red8,
+                    int penWidth = 1);
 
 } /* namespace DO */
 

@@ -19,7 +19,8 @@ namespace DO {
     Vector3d lineEqns[4];
     Quad() {}
     Quad(const BBox& bbox);
-    Quad(const Point2d& a_, const Point2d& b_, const Point2d& c_, const Point2d& d_);
+    Quad(const Point2d& a_, const Point2d& b_, const Point2d& c_,
+         const Point2d& d_);
 
     void dilate(double step);
     void applyH(const Matrix3d& H);

@@ -19,7 +19,8 @@ namespace DO {
   {
   public:
     Ellipse() {}
-    Ellipse(double radius1, double radius2, double orientation, const Point2d& center)
+    Ellipse(double radius1, double radius2, double orientation,
+            const Point2d& center)
       : a_(radius1), b_(radius2), o_(orientation), c_(center) {}
 
     double r1() const { return a_; }
@@ -33,11 +34,6 @@ namespace DO {
     Point2d& c() { return c_; }
 
     double area() const { return 3.14159265358979323846*a_*b_; }
-    
-    double F_(double theta) const
-    {
-      return a_*b_*0.5*atan(a_*tan(theta)/b_);
-    }
 
     // Polar antiderivative
     double F(double theta) const
@@ -45,24 +41,6 @@ namespace DO {
       return a_*b_*0.5*
            ( theta 
            - atan( (b_-a_)*sin(2*theta) / ((b_+a_)+(b_-a_)*cos(2*theta)) ) );
-      /*const double pi = 3.14159265358979323846;
-      if (abs(theta) < pi/2.)
-      {
-        std::cout << "abs(theta) < pi/2." << std::endl;
-        return F_(theta);
-      }
-      if (theta > 0)
-      {
-        std::cout << "pi/2. < theta < pi" << std::endl;
-        return pi*a_*b_*0.5 - F_(pi-theta);
-      }
-      std::cout << "-pi < theta < -pi/2." << std::endl;
-      return -pi*a_*b_*0.5 + F_(theta+pi);*/
-    }
-
-    bool isInside(const Point2d& p) const
-    {
-      return (p-c_).transpose()*shapeMat()*(p-c_) < 1.;
     }
 
     Matrix2d shapeMat() const;
@@ -77,6 +55,12 @@ namespace DO {
     double o_;
     Point2d c_;
   };
+  
+  
+  inline bool isInside(const Point2d& p, const Ellipse& e) const
+  {
+    return (p-e.c()).transpose()*shapeMat()*(p-e.c()) < 1.;
+  }
 
   //! I/O.
   std::ostream& operator<<(std::ostream& os, const Ellipse& e);
@@ -97,10 +81,6 @@ namespace DO {
 
   void getEllipseIntersections(Point2d intersections[4], int& numInter,
                                const Ellipse& e1, const Ellipse& e2);
-
-  int findFirstPoint(const Point2d pts[], int numPts);
-
-  void ccwSortPoints(Point2d pts[], int numPts);
 
   double convexSectorArea(const Ellipse& e, const Point2d pts[]);
 

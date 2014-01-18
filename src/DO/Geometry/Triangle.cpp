@@ -39,7 +39,7 @@ namespace DO {
     return 0.5*abs(M.determinant());
   }
 
-  bool Triangle::isInside(const Point2d& p) const
+  bool isInside(const Point2d& p, const Triangle& t)
   {
     for (int i = 0; i < 3; ++i)
     {
@@ -50,32 +50,11 @@ namespace DO {
     return true;
   }
 
-  void Triangle::drawOnScreen(const Rgb8& col) const
+  void drawTriangle(const Rgb8& col)
   {
-    drawLine(v[0],v[1],col);
-    drawLine(v[1],v[2],col);
-    drawLine(v[0],v[2],col);
+    drawLine(v[0], v[1], col, penWidth);
+    drawLine(v[1], v[2], col, penWidth);
+    drawLine(v[0], v[2], col, penWidth);
   }
-  
-  bool TriangleFlatness::isNotFlat(const Point2d& a, const Point2d& b, 
-                                   const Point2d& c) const
-  {
-    Vector2d d[3] = { (b-a), (c-a), (c-b) };
-    for (int i = 0; i < 3; ++i)
-      d[i].normalize();
-    // Find the two smallest angles. They necessarily have non negative
-    // dot products.
-    double dot[3] = { d[0].dot(d[1]), d[1].dot(d[2]), -d[2].dot(d[0]) };
-    // Sort dot products in increasing order.
-    std::sort(dot, dot+3);
-    // We need to consider two cases:
-    // 1. All the dot products are non negative.
-    //    Then the three angles are less than 90 degrees.
-    // 2. One dot product is negative. It corresponds to the greatest 
-    //    angle of the triangle.
-    // In the end, the smallest angles have the greatest cosines which 
-    // are in both cases dot[1] and dot[2] with dot[1] < dot[2].
-    // In our case dot[1] <= cos(40°)=lb2 and dot[2] <= cos(30°)=lb1
-    return (lb2 >= dot[1] && lb >= dot[2]);
-  }
+
 }

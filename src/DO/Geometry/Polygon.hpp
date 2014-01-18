@@ -14,8 +14,15 @@
 
 namespace DO {
 
-  std::vector<Point2d> grahamScanConvexHull(const std::vector<Point2d>& points);
-
+  //! computation using Green-Riemann formula
   double area(const std::vector<Point2d>& ccwPolygon);
+  
+  /*! 
+   Simple implementation of Sutherland-Hodgman algorithm.
+   - Polygon 'subject' must be a simple polygon, i.e., without holes.
+   - Polygon 'clip' must be a convex polygon.
+   */
+  std::vector<Point2d> clipPolygon(const std::vector<Point2d>& subject,
+                                   const std::vector<Point2d>& clip);
 
 } /* namespace DO */

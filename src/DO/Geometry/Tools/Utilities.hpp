@@ -9,12 +9,12 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_GEOMETRY_UTILITIES_HPP
-#define DO_GEOMETRY_UTILITIES_HPP
+#ifndef DO_MATH_UTILITIES_HPP
+#define DO_MATH_UTILITIES_HPP
 
-#ifndef M_PI
-# define M_PI 3.14159265358979323846
-#endif
+#define _USE_MATH_DEFINES
+#include <cmath>
+#include <Eigen/Eigen>
 
 namespace DO {
 
@@ -150,7 +150,8 @@ namespace DO {
   }
 
   template <typename T>
-  Matrix<T, 2, 2> homographyJacobianMatrix(const Matrix<T, 3, 3>& H, const Matrix<T, 2, 1>& x)
+  Matrix<T, 2, 2> homographyJacobianMatrix(const Matrix<T, 3, 3>& H,
+                                           const Matrix<T, 2, 1>& x)
   {
     Matrix<T, 2, 2> dH;
     const T u = H(0,0)*x[0] + H(0,1)*x[1] + H(0,2);
@@ -173,4 +174,4 @@ namespace DO {
 
 } /* namespace DO */
 
-#endif /* DO_GEOMETRY_UTILITIES_HPP */
+#endif /* DO_MATH_UTILITIES_HPP */
