@@ -12,7 +12,7 @@
 #ifndef DO_GRAPHICS_EVENTS_HPP
 #define DO_GRAPHICS_EVENTS_HPP
 
-#include <DO/Core.hpp>
+#include <DO/Core/EigenExtension.hpp>
 
 namespace DO {
 

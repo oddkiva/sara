@@ -14,8 +14,9 @@
 #ifndef DO_GRAPHICS_MESH_HPP
 #define DO_GRAPHICS_MESH_HPP
 
-#include <DO/Core.hpp>
+#include <DO/Core/EigenExtension.hpp>
 #include <vector>
+#include <string>
 
 namespace DO {
 

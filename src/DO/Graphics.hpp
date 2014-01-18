@@ -16,7 +16,7 @@
 #define DO_GRAPHICS_HPP
 
 #include <DO/Defines.hpp>
-#include <DO/Core.hpp>
+#include <DO/Core/Image.hpp>
 
 #include "Graphics/Events.hpp"
 #include "Graphics/GraphicsApplication.hpp"
@@ -28,6 +28,7 @@
 // The following are still experimental but can be extended very easily.
 
 // 3D viewer (still experimental and little features.)
+// \todo: see if we need to separate the Mesh from the Graphics module.
 #include "Graphics/Mesh.hpp"
 #include "Graphics/Draw3D.hpp"
 

@@ -14,6 +14,8 @@
 #ifndef DO_GRAPHICS_WINDOWCONTROL_HPP
 #define DO_GRAPHICS_WINDOWCONTROL_HPP
 
+#include "Events.hpp"
+
 class QWidget;
 
 namespace DO {
