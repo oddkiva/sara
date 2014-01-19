@@ -15,6 +15,7 @@
 #define DO_CORE_COLOR_HPP
 
 #include "Meta.hpp"
+#include "StaticAssert.hpp"
 #include "EigenExtension.hpp"
 
 namespace DO {

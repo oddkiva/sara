@@ -3,6 +3,7 @@
 
 #include <DO/Core/MultiArray.hpp>
 #include <DO/Core/Color.hpp>
+#include <DO/Core/DebugUtilities.hpp>
 
 using namespace DO;
 
@@ -12,7 +13,7 @@ void initVolume(MultiArray<Color4f, 3, StorageOrder>& volume)
   typedef MultiArray<Color4f, 3, StorageOrder> Volume;
   volume.resize(10, 20, 30);
   volume.check_sizes_and_strides();
-  cout << endl;
+  std::cout << std::endl;
   for (int i = 0; i < volume.rows(); ++i)
     for (int j = 0; j < volume.cols(); ++j)
       for (int k = 0; k < volume.depth(); ++k)
@@ -127,23 +128,23 @@ void checkLocatorPotPourri(MultiArray<Color4f, 3, StorageOrder>& volume)
   // Prefix increment.
   printStage("Incrementing locator");
   ++it;
-  cout << "++loc = " << endl;
+  std::cout << "++loc = " << std::endl;
   it.check();
-  cout << endl;
+  std::cout << std::endl;
 
   // Copy constructor.
   printStage("Check copy constructor of locator");
   RangeIterator loc2(it);
-  if (loc2 == it) cout << "Equality comparison OK!" << endl;
+  if (loc2 == it) std::cout << "Equality comparison OK!" << std::endl;
 
   // Postfix increment.
   RangeIterator loc3(it++);
-  if (loc3 != it) cout << "Inequality comparison OK!" << endl;
+  if (loc3 != it) std::cout << "Inequality comparison OK!" << std::endl;
 
   printStage("Decrementing locator");
   --it;
   it.check();
-  if (loc3 == it) cout << "--loc OK!" << endl;
+  if (loc3 == it) std::cout << "--loc OK!" << std::endl;
 
   printStage("Postfix increment locator");
   RangeIterator loc4(it++);
@@ -168,7 +169,7 @@ void checkLocatorPotPourri(MultiArray<Color4f, 3, StorageOrder>& volume)
   loc4.template axis<0>()[1];
   loc4.check();
   loc4.check_strides();
-  cout << "Finished" << endl;
+  std::cout << "Finished" << std::endl;
 
   RangeIterator& loc4bis = loc4;
   loc4bis.template axis<0>()[1];

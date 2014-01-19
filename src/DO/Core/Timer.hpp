@@ -47,9 +47,8 @@ namespace DO {
     //! Returns the elapsed time.
     double elapsed()
     {
-      elapsed_ = static_cast<double>(std::clock()) - start_;
-      elapsed_ /= CLOCKS_PER_SEC;
-      return elapsed_;
+      elapsed_ = std::clock() - start_;
+      return double(elapsed_) / double(CLOCKS_PER_SEC);
     }
     //! Helper function that prints the elapsed time in a friendly manner.
     void print()
@@ -58,7 +57,7 @@ namespace DO {
     }
   private:
     std::clock_t start_; //!< Records the start instant.
-    double elapsed_; //!< Stores the elapsed time from the start instant.
+    std::clock_t elapsed_; //!< Stores the elapsed time from the start instant.
   };
 
   //! \brief Timer class with microsecond accuracy.
@@ -96,14 +95,14 @@ namespace DO {
                / frequency_.QuadPart;
 #else
       gettimeofday(&end_, NULL);
-      elapsed_ = (end_.tv_sec - start_.tv_sec) * 1000.0;
-      elapsed_ += (end_.tv_usec - start_.tv_usec) / 1000.0;
+      elapsed_ = (end_.tv_sec - start_.tv_sec);
+      elapsed_ += (end_.tv_usec - start_.tv_usec) / 1e6;
 #endif
       return elapsed_;
     }
     //! Returns the elapsed time in milliseconds.
     double elapsedMs()
-    { return elapsed() * 1000.; }
+    { return elapsed() * 1e3; }
   private: /* data members. */
 #ifdef WIN32
     LARGE_INTEGER frequency_;
