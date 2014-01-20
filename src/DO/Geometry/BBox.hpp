@@ -34,6 +34,12 @@ namespace DO {
     }
     BBox(const Point2d *begin, const Point2d *end)
     {
+      if (!begin)
+      {
+        const char *msg = "The array of points seems wrong.";
+        throw std::logic_error(msg);
+      }
+      tl_ = br_ = *begin;
       for (const Point2d *p = begin; p != end; ++p)
       {
         tl_.x() = std::min(tl_.x(), p->x());
