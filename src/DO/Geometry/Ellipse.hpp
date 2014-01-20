@@ -12,6 +12,9 @@
 #ifndef DO_GEOMETRY_ELLIPSE_HPP
 #define DO_GEOMETRY_ELLIPSE_HPP
 
+#define _USE_MATH_DEFINES
+#include <cmath>
+
 namespace DO {
 
   //! Ellipse class
@@ -33,37 +36,36 @@ namespace DO {
     double& o() { return o_; }
     Point2d& c() { return c_; }
 
-    double area() const { return 3.14159265358979323846*a_*b_; }
-
-    // Polar antiderivative
-    double F(double theta) const
+    //! Polar antiderivative.
+    friend inline double polarAntiderivative(const Ellipse& e, double theta)
     {
-      return a_*b_*0.5*
-           ( theta 
-           - atan( (b_-a_)*sin(2*theta) / ((b_+a_)+(b_-a_)*cos(2*theta)) ) );
+      const double y = (e.b_-e.a_)*sin(2*theta);
+      const double x = ((e.b_+e.a_)+(e.b_-e.a_)*cos(2*theta));
+      return e.a_*e.b_*0.5*( theta - atan(y/x) );
     }
-
-    Matrix2d shapeMat() const;
-    
-    bool isWellDefined(double limit = 1e9) const
-    { return (std::abs(r1()) < limit && std::abs(r2()) < limit); }
-
-    void drawOnScreen(const Color3ub c, double scale = 1.) const;
+    //! Ellipse area.
+    friend inline double area(const Ellipse& e)
+    { return M_PI*e.a_*e.b_; }
+    //! Shape matrix.
+    friend inline Matrix2d shapeMat(const Ellipse& e)
+    {
+      const Eigen::Rotation2D<double> R(e.o_);
+      Vector2d D( 1./(e.a_*e.a_), 1./(e.b_*e.b_) );
+      return R.matrix()*D.asDiagonal()*R.matrix().transpose();
+    }
+    friend inline bool inside(const Point2d& p, const Ellipse& e)
+    { return (p-e.c_).transpose()*shapeMat(e)*(p-e.c_) < 1.; }
+    //! Checks if the ellipse is not weird
+    friend inline bool wellDefined(const Ellipse& e, double limit = 1e9)
+    { return (std::abs(e.a_) < limit && std::abs(e.b_) < limit); }
+    //! I/O.
+    friend std::ostream& operator<<(std::ostream& os, const Ellipse& e);
 
   private:
     double a_, b_;
     double o_;
     Point2d c_;
   };
-  
-  
-  inline bool isInside(const Point2d& p, const Ellipse& e) const
-  {
-    return (p-e.c()).transpose()*shapeMat()*(p-e.c()) < 1.;
-  }
-
-  //! I/O.
-  std::ostream& operator<<(std::ostream& os, const Ellipse& e);
 
   //! Compute the ellipse from the conic equation
   Ellipse fromShapeMat(const Matrix2d& shapeMat, const Point2d& c);
@@ -85,10 +87,6 @@ namespace DO {
   double convexSectorArea(const Ellipse& e, const Point2d pts[]);
 
   double analyticInterUnionRatio(const Ellipse& e1, const Ellipse& e2);
-
-  // Move somewhere instead.
-  std::vector<Point2d> convexHull(const std::vector<Point2d>& points);
-  double convexHullArea(const std::vector<Point2d>& points);
 
 
 } /* namespace DO */

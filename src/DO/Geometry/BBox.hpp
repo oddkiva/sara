@@ -13,6 +13,7 @@
 #define DO_GEOMETRY_BBOX_HPP
 
 #include <DO/Core/EigenExtension.hpp>
+#include <vector>
 
 namespace DO {
 
@@ -31,10 +32,18 @@ namespace DO {
         throw std::logic_error(msg);
       }
     }
-    template <typename PointIterator>
-    BBox(PointIterator begin, PointIterator end);
+    BBox(const Point2d *begin, const Point2d *end)
+    {
+      for (const Point2d *p = begin; p != end; ++p)
+      {
+        tl_.x() = std::min(tl_.x(), p->x());
+        tl_.y() = std::min(tl_.y(), p->y());
+        br_.x() = std::max(br_.x(), p->x());
+        br_.y() = std::max(br_.y(), p->y());
+      }
+    }
     BBox(const std::vector<Point2d>& points);
-    
+
     Point2d& topLeft()     { return tl_; }
     Point2d& bottomRight() { return br_; }
     double& x1() { return  tl_.x(); }
@@ -54,32 +63,35 @@ namespace DO {
 
     double width() const  { return std::abs(br_.x() - tl_.x()); }
     double height() const { return std::abs(br_.y() - tl_.y()); }
-    double area() const   { return width()*height(); }
-    
-    friend std::ostream& operator<<(std::ostream& os, const BBox& bbox);
 
-    static BBox infinite() {
+    static BBox infinite()
+    {
       BBox b;
       b.topLeft().fill(-std::numeric_limits<double>::infinity());
       b.bottomRight().fill(std::numeric_limits<double>::infinity());
       return b;
     }
-    static BBox zero() {
-        BBox b(Point2d::Zero(), Point2d::Zero());
-        return b;
+    static BBox zero()
+    {
+      BBox b(Point2d::Zero(), Point2d::Zero());
+      return b;
     }
   };
 
-  // Very fast.
-  BBox intersection(const BBox& bbox1, const BBox& bbox2);
-  bool intersect(const BBox& bbox1, const BBox& bbox2);
-
-  bool similar(const BBox& bbox1, const BBox& bbox2, double overlap);
-  bool degenerate(const BBox& bbox, double eps = 1e-3);
+  // Utility functions.
+  double area(const BBox& bbox);
   bool inside(const Point2d& p, const BBox& bbox);
+  bool degenerate(const BBox& bbox, double eps = 1e-3);
+  bool intersect(const BBox& bbox1, const BBox& bbox2);
+  double jaccardSimilarity(const BBox& bbox1, const BBox& bbox2);
+  double jaccardDistance(const BBox& bbox1, const BBox& bbox2);
+
+  // I/O.
+  std::ostream& operator<<(std::ostream& os, const BBox& bbox);
+
+  // Intersection test.
+  BBox intersection(const BBox& bbox1, const BBox& bbox2);
   
-  void drawBBox(const BBox& bbox, const Color3ub& c, double scale = 1.,
-                int penWidth = 1);
 
 } /* namespace DO */
 

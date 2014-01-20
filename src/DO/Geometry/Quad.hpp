@@ -12,13 +12,15 @@
 #ifndef DO_GEOMETRY_QUAD_HPP
 #define DO_GEOMETRY_QUAD_HPP
 
-#include <DO/Core/Color.hpp>
-#include <vector>
+#include <DO/Core/EigenExtension.hpp>
+#include <DO/Geometry/Polygon.hpp>
+#include <DO/Geometry/BBox.hpp>
 
 namespace DO {
 
   class Quad : public SmallPolygon<4>
   {
+    typedef SmallPolygon<4> Base;
   public:
     Quad(const BBox& bbox);
     Quad(const Point2d& a, const Point2d& b,

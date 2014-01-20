@@ -6,6 +6,7 @@ namespace DO { namespace P2 {
 
     typedef Vector3d Line, Point;
     typedef Point2d Point2;
+    typedef Vector2d Vector2;
 
     inline Point2 euclidean(const Point& p)
     { return (p/p(2)).head(2); }
@@ -22,12 +23,8 @@ namespace DO { namespace P2 {
     inline Line line(const Point2&a, const Point2& b)
     { return line(homogeneous(a), homogeneous(b)); }
 
-    inline Line line(const LineSegment& segment)
-    { return line(segment.first, segment.second); }
-
     inline double dist(const Point& p, const Line& l)
     { return std::abs((p/p(2)).dot(l))/l.head(2).norm(); }
 
 } /* namespace P2 */
 } /* namespace DO */
-

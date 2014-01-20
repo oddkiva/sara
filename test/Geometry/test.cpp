@@ -9,8 +9,13 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Geometry.hpp>
+#include <gtest/gtest.h>
 #include <DO/Graphics.hpp>
+#include <DO/Geometry/BBox.hpp>
+#include <DO/Geometry/Quad.hpp>
+#include <DO/Geometry/Triangle.hpp>
+#include <DO/Geometry/Graphics/DrawPolygon.hpp>
+#include <DO/Core/DebugUtilities.hpp>
 #include <ctime>
 
 using namespace std;
@@ -29,31 +34,98 @@ inline Point2d randPoint2d(double w, double h)
 
 Ellipse randomEllipse(double w, double h)
 {
-	return Ellipse(myRandom(0., w/2.), myRandom(0., w/2.),
-				         myRandom(0,2*M_PI),
-					       Point2d(myRandom(0, w), myRandom(0, w)) );
+  return Ellipse(myRandom(0., w/2.), myRandom(0., w/2.),
+    myRandom(0,2*M_PI),
+    Point2d(myRandom(0, w), myRandom(0, w)) );
 }
 
-void drawEllipse(const Ellipse& e, const Rgb8& c)
+#ifdef DEBUG
+void testQuadAlgorithms()
 {
-  e.drawOnScreen(c);
-  fillCircle(e.c().cast<float>(), 3.f, c);
+  BBox b(Point2d(w/4, h/4), Point2d(3*w/4, 3*h/4));
+  Quad quad(b);
 
-  Point2d tip(e.r1(), 0);
-  tip = rotation2(e.o())*tip;
-  tip += e.c();
-  drawArrow(e.c().x(), e.c().y(), tip.x(), tip.y(), c);
+  do
+  {
+    clearWindow();
+
+    Point2d p(randPoint2d(w, h));
+    quad.drawOnScreen(Blue8);
+    fillCircle(p.cast<float>(), 3.0f, Red8);
+    if ( quad.isInside(p) )
+      cout << "p is inside quad" << endl;
+    else
+      cout << "p is not inside quad" << endl;
+    
+    Quad quad2(BBox(Point2d::Zero(), p));
+    quad2.drawOnScreen(Red8);
+    cout << "There is "
+      << (quad.intersect(quad2) ? "" : "no ") << "intersection." << endl;
+
+  } while(getKey() != KEY_ESCAPE);
 }
 
-//bool ccw(const Point2d& a, const Point2d& b, const Point2d& c)
-//{
-//  Matrix2d M;
-//  M.col(0) = b-a;
-//  M.col(1) = c-a;
-//  return M.determinant() > 0;
-//}
+void testAffineTransforms()
+{
+  Point2f c(w/2., h/2.);
+  double r = 100.;
+  int N = 100;
+  MatrixXf p(2, N);
+  for (int i = 0; i < N; ++i)
+  {
+    float theta = 2.*M_PI*i/N;
+    p.col(i) = Point2f(cos(theta), sin(theta));
+  }
 
-void testEllipseAlgorithms()
+  Matrix2f R;
+  R << 0.5, 2,
+         0, 1;
+
+  for (int i = 0; i < N; ++i)
+    fillCircle(c+r*p.col(i), 3.f, Blue8);
+  for (int i = 0; i < N; ++i)
+    fillCircle(c+r*R*p.col(i), 3.f, Red8);
+  getKey();
+
+  Matrix2f S = R.transpose()*R;
+  cout << S << endl;
+
+  Ellipse E(fromShapeMat(S.cast<double>(), c.cast<double>()));
+  E.drawOnScreen(Green8);
+  getKey();
+}
+#endif
+
+TEST(DO_Geometry_Test, bboxTest)
+{
+  BBox bbox(Point2d(w/4, h/4), Point2d(3*w/4, 3*h/4));
+  EXPECT_EQ(bbox.topLeft(), Point2d(w/4, h/4));
+  EXPECT_EQ(bbox.topRight(), Point2d(3*w/4, h/4));
+  EXPECT_EQ(bbox.bottomRight(), Point2d(3*w/4, 3*h/4));
+  EXPECT_EQ(bbox.bottomLeft(), Point2d(w/4, 3*h/4));
+
+  //if (!getActiveWindow())
+  //  setAntialiasing(openWindow(w,h));
+  //drawBBox(b, Blue8, 3);
+
+  Point2d points[] = {
+    Point2d::Zero(),
+    Point2d(w/4, w/4),
+    Point2d(w/2., h/2.)
+  };
+  EXPECT_FALSE(inside(points[0], bbox));
+  EXPECT_TRUE (inside(points[1], bbox));
+  EXPECT_TRUE (inside(points[2], bbox));
+
+  bbox = BBox(points, points+3);
+  EXPECT_EQ(bbox.topLeft(), points[0]);
+  EXPECT_EQ(bbox.bottomRight(), points[2]);
+
+  // \todo: intersection test.
+}
+
+#ifdef CHECK_ELLIPSE
+TEST(DO_Geometry_Test, ellipseAlgorithmsTest)
 {
   do
   {
@@ -72,10 +144,14 @@ void testEllipseAlgorithms()
     int numInter;
     if (display)
     {
-      clearWindow();
-      drawEllipse(e1, Red8);
-      drawEllipse(e2, Blue8);
+      if (!getActiveWindow())
+        setAntialiasing(openWindow(w, h));
 
+      clearWindow();
+      drawEllipse(e1, Red8, 3);
+      drawEllipse(e2, Blue8, 3);
+
+#ifdef DEBUG
       Point2d interPts[4];
       getEllipseIntersections(interPts, numInter, e1, e2);
       cout << "\nIntersection count = " << numInter << endl;
@@ -84,8 +160,10 @@ void testEllipseAlgorithms()
         fillCircle(interPts[i].cast<float>(), 5.f, Green8);
         cout << "[" << i << "] " << interPts[i].transpose() << endl;
       }
+#endif
     }
 
+#ifdef DEBUG
     // ====================================================================== //
     // Approximate computation of intersecting ellipses.
     //
@@ -150,93 +228,32 @@ void testEllipseAlgorithms()
       cout << "Relative error = " << relativeError << endl;
       getKey();
     }
+#endif
 
   } while(true);
 }
+#endif
 
-void testBBoxAlgorithms()
+TEST(DO_Geometry_Test, quadTest)
 {
+  BBox bbox(Point2d(w/4, h/4), Point2d(3*w/4, 3*h/4));
+  EXPECT_EQ(bbox.topLeft(), Point2d(w/4, h/4));
+  EXPECT_EQ(bbox.topRight(), Point2d(3*w/4, h/4));
+  EXPECT_EQ(bbox.bottomRight(), Point2d(3*w/4, 3*h/4));
+  EXPECT_EQ(bbox.bottomLeft(), Point2d(w/4, 3*h/4));
 
-  BBox b(Point2d(w/4, h/4), Point2d(3*w/4, 3*h/4));
-  do
-  {
-    clearWindow();
+  Quad q(bbox);
+  EXPECT_NEAR(area(bbox), area(q), 1e-10);
 
-    Point2d p(randPoint2d(w, h));
-    b.drawOnScreen(Blue8);
-    fillCircle(p.cast<float>(), 3.0f, Red8);
-    if ( isInside(p, b) )
-      cout << "p is inside bbox" << endl;
-    else
-      cout << "p is not inside bbox" << endl;
-  } while(getKey() != KEY_ESCAPE);
+  Triangle t1(Point2d(0,0), Point2d(100, 0), Point2d(100, 100));
+  EXPECT_NEAR(area(t1), 1e4/2., 1e-10);
+
+  Triangle t2(Point2d(100,0), Point2d(0, 0), Point2d(100, 100));
+  EXPECT_NEAR(area(t2), -1e4/2., 1e-10);
 }
 
-void testQuadAlgorithms()
+int main(int argc, char** argv) 
 {
-  BBox b(Point2d(w/4, h/4), Point2d(3*w/4, 3*h/4));
-  Quad quad(b);
-
-  do
-  {
-    clearWindow();
-
-    Point2d p(randPoint2d(w, h));
-    quad.drawOnScreen(Blue8);
-    fillCircle(p.cast<float>(), 3.0f, Red8);
-    if ( quad.isInside(p) )
-      cout << "p is inside quad" << endl;
-    else
-      cout << "p is not inside quad" << endl;
-    
-    Quad quad2(BBox(Point2d::Zero(), p));
-    quad2.drawOnScreen(Red8);
-    cout << "There is "
-      << (quad.intersect(quad2) ? "" : "no ") << "intersection." << endl;
-
-  } while(getKey() != KEY_ESCAPE);
-}
-
-void testAffineTransforms()
-{
-  Point2f c(w/2., h/2.);
-  double r = 100.;
-  int N = 100;
-  MatrixXf p(2, N);
-  for (int i = 0; i < N; ++i)
-  {
-    float theta = 2.*M_PI*i/N;
-    p.col(i) = Point2f(cos(theta), sin(theta));
-  }
-
-  Matrix2f R;
-  R << 0.5, 2,
-         0, 1;
-
-  for (int i = 0; i < N; ++i)
-    fillCircle(c+r*p.col(i), 3.f, Blue8);
-  for (int i = 0; i < N; ++i)
-    fillCircle(c+r*R*p.col(i), 3.f, Red8);
-  getKey();
-
-  Matrix2f S = R.transpose()*R;
-  cout << S << endl;
-
-  Ellipse E(fromShapeMat(S.cast<double>(), c.cast<double>()));
-  E.drawOnScreen(Green8);
-  getKey();
-}
-
-int main()
-{
-  openWindow(w,h);
-  setAntialiasing(getActiveWindow());
-  cout << unitVector2(M_PI/6.) << endl;
-
-  testEllipseAlgorithms();
-  testQuadAlgorithms();
-  testBBoxAlgorithms();
-  testAffineTransforms();
-
-  return 0;
+  testing::InitGoogleTest(&argc, argv); 
+  return RUN_ALL_TESTS();
 }

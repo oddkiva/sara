@@ -6,12 +6,15 @@ macro (do_list_geometry_source_files)
   # Master header file
   set(DO_Geometry_MASTER_HEADER ${DO_SOURCE_DIR}/Geometry.hpp)
   source_group("Master Header File" FILES ${DO_Geometry_MASTER_HEADER})
+  
   # Header files
-  file(GLOB DO_Geometry_HEADER_FILES
+  file(GLOB_RECURSE DO_Geometry_HEADER_FILES
        ${DO_Geometry_SOURCE_DIR}/*.hpp)
   # Source files
-  file(GLOB DO_Geometry_SOURCE_FILES
+  file(GLOB_RECURSE DO_Geometry_SOURCE_FILES
        ${DO_Geometry_SOURCE_DIR}/*.cpp)
+  source_group("1. API Header Files" 
+               FILES ${DO_Graphics_API_HEADER_FILES})
   # All header files here
   set(DO_Geometry_HEADER_FILES
       ${DO_Geometry_MASTER_HEADER}

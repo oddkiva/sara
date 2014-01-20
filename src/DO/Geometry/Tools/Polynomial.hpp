@@ -9,11 +9,11 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_MATH_POLYNOMIAL_HPP
-#define DO_MATH_POLYNOMIAL_HPP
+#ifndef DO_GEOMETRY_TOOLS_POLYNOMIAL_HPP
+#define DO_GEOMETRY_TOOLS_POLYNOMIAL_HPP
 
-#include <Eigen/Eigen>
-#include <vector>
+#include <DO/Geometry/Tools/Utilities.hpp>
+#include <algorithm>
 
 namespace DO {
 
@@ -37,7 +37,7 @@ namespace DO {
     inline bool operator!=(const Monomial& other) const
     { return !operator==(other); }
   private:
-    T coeff_
+    T coeff_;
     int degree_;
   };
 
@@ -49,9 +49,9 @@ namespace DO {
     enum { Degree = N };
     //! Default constructor
     inline Polynomial() {}
-    inline Polynomial(const Matrix<T, N+1, 1>& coeff) : coeff_(coeff) {}
-    inline Polynomial(const Polynomial& P) { copy(P); };
-    inline Polynomial(Polynomial&& P);
+    inline Polynomial(const T *coeff) { std::copy(coeff, coeff+N+1, coeff_); }
+    inline Polynomial(const Polynomial& P) { std::copy(P); }
+    //inline Polynomial(Polynomial&& P);
     //! Assignment operator
     Polynomial& operator=(const Polynomial& P) { copy(P); return *this; }
     //! Coefficient accessor at given degree.
@@ -61,6 +61,13 @@ namespace DO {
     inline T operator()(const T& x) const
     {
       T res = static_cast<T>(0);
+      for (int i = 0; i <= N; ++i)
+        res += coeff_[i]*std::pow(x, i);
+      return res;
+    }
+    inline std::complex<T> operator()(const std::complex<T>& x) const
+    {
+      std::complex<T> res;
       for (int i = 0; i <= N; ++i)
         res += coeff_[i]*std::pow(x, i);
       return res;
@@ -80,23 +87,23 @@ namespace DO {
     {
       for(int i = N; i >= 0; --i)
       {
-        os << P.coeff_[i] << " X^" << i;
-        if(i > 0)
-          os << " + ";
+        if (signum(P[i]) >= 0)
+          os << "+";
+        else
+          os << "-";
+        os << std::abs(P[i]);
+        if (i > 0) 
+          os << "X**" << i << " ";
       }
       return os;
     }
   private:
     inline void copy(const Polynomial& other)
     { coeff_ = other.coeff; }
-    inline void swap(const Polynomial& other)
-    { coeff_.swap(other); }
   private:
-    Matrix<T, N+1, 1> coeff_[N+1];
+    T coeff_[N+1];
   };
-
-
 
 } /* namespace DO */
 
-#endif /* DO_MATH_POLYNOMIAL_HPP */
+#endif /* DO_GEOMETRY_TOOLS_POLYNOMIAL_HPP */

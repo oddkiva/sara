@@ -13,7 +13,7 @@
 #define DO_FEATUREMATCHING_HPP
 
 #include <DO/Features.hpp>
-#include <DO/Geometry.hpp>
+#include <DO/Geometry/Tools/Metric.hpp>
 #include <DO/Match.hpp>
 
 // Key Proximity

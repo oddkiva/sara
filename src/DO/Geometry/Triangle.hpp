@@ -13,7 +13,6 @@
 #define DO_GEOMETRY_TRIANGLE_HPP
 
 #include <DO/Core/EigenExtension.hpp>
-#include <DO/Core/Color.hpp>
 
 namespace DO {
 
@@ -23,11 +22,6 @@ namespace DO {
   public:
     Triangle(const Point2d& a, const Point2d& b, const Point2d& c);
   };
-  
-  bool inside(const Point2d& p, const Triangle& t);
-  
-  void drawTriangle(const Triangle& t, const Rgb8& col = Red8,
-                    int penWidth = 1);
 
 } /* namespace DO */
 

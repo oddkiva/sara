@@ -9,15 +9,24 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_MATH_UTILITIES_HPP
-#define DO_MATH_UTILITIES_HPP
+//! @file \todo Refactor this file. It needs code review.
+
+#ifndef DO_GEOMETRY_UTILITIES_HPP
+#define DO_GEOMETRY_UTILITIES_HPP
 
 #define _USE_MATH_DEFINES
+#include <DO/Core/EigenExtension.hpp>
+#include <DO/Core/StaticAssert.hpp>
 #include <cmath>
-#include <Eigen/Eigen>
 
 namespace DO {
 
+  //! Sign function.
+  template <typename T>
+  inline int signum(T val)
+  { return (T(0) < val) - (val < T(0)); }
+
+  //! Degree to radian conversion.
   template <typename T>
   inline T toRadian(T degree)
   {
@@ -26,12 +35,42 @@ namespace DO {
     return degree*static_cast<T>(M_PI)/static_cast<T>(180);
   }
 
+  //! Radian to degree conversion.
   template <typename T>
   inline T toDegree(T radian)
   {
     DO_STATIC_ASSERT( !std::numeric_limits<T>::is_integer, 
       SCALAR_MUST_BE_OF_FLOATING_TYPE );
     return radian*static_cast<T>(180)/static_cast<T>(M_PI);
+  }
+
+  //! Check if the basis [u, v] is counter-clockwise.
+  template <typename T>
+  inline T cross(const Matrix<T, 2, 1>& u, const Matrix<T, 2, 1>& v)
+  {
+    DO_STATIC_ASSERT( !std::numeric_limits<T>::is_integer, 
+      SCALAR_MUST_BE_OF_FLOATING_TYPE );
+    Matrix<T, 2, 2> M;
+    M.col(0) = u;
+    M.col(1) = v;
+    return M.determinant();
+  }
+
+  /*!
+    Suppose line segment [a, b] is vertical.
+    There are three cases:
+    - If point 'c' is on the left, then det([b-a, c-a]) > 0.
+    - If point 'c' is on the right, then det([b-a, c-a]) < 0.
+    - If point 'c' is on the line (a,b), then det([b-a, c-a]) = 0.
+    */
+  template <typename T>
+  int ccw(const Matrix<T, 2, 1>& a, const Matrix<T, 2, 1>& b,
+          const Matrix<T, 2, 1>& c)
+  {
+    DO_STATIC_ASSERT( !std::numeric_limits<T>::is_integer, 
+      SCALAR_MUST_BE_OF_FLOATING_TYPE );
+    Matrix<T, 2, 1> u(b-a), v(c-a);
+    return signum( cross(u, v) );
   }
 
   template <typename T>
@@ -174,4 +213,4 @@ namespace DO {
 
 } /* namespace DO */
 
-#endif /* DO_MATH_UTILITIES_HPP */
+#endif /* DO_GEOMETRY_UTILITIES_HPP */
