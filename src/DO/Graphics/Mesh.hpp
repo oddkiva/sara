@@ -15,6 +15,8 @@
 #define DO_GRAPHICS_MESH_HPP
 
 #include <DO/Core/EigenExtension.hpp>
+#include <fstream>
+#include <iostream>
 #include <vector>
 #include <string>
 

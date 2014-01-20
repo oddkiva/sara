@@ -22,8 +22,8 @@ namespace DO {
   class SmallPolygon
   {
   public:
-    typedef typename Point2d Point;
-    typedef typename Vector3d Line;
+    typedef Point2d Point;
+    typedef Vector3d Line;
     typedef Point * iterator;
     typedef const Point * const_iterator;
     //! Constructors
@@ -47,6 +47,8 @@ namespace DO {
     inline const Point * end()   const { return v_+N; }
 
     inline int num_vertices() const { return N; }
+    
+    friend bool inside(const Point2d& p, const SmallPolygon<N>& poly);
 
   protected:
     inline void copy_vertices(const Point2d *vertices)
@@ -99,15 +101,15 @@ namespace DO {
   }
 
   template <int N>
-  bool inside(const Point2d& p, const SmallPolygon<N>& bbox)
+  bool inside(const Point2d& p, const SmallPolygon<N>& poly)
   {
     Vector3d P(P2::homogeneous(p));
     for (int i = 0; i < N; ++i)
-      if (line_eqns[i]*P < 0.)
+      if (poly.line_eqns_[i].dot(P) < 0.)
         return false;
     return true;
   }
-  
+
   template <int N>
   bool degenerate(const SmallPolygon<N>& bbox,
                   double eps = std::numeric_limits<double>::epsilon())

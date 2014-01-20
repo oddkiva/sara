@@ -13,8 +13,6 @@
 
 #include <DO/Core/EigenExtension.hpp>
 #include <DO/Geometry/Tools/Utilities.hpp>
-#include <Eigen/StdVector>
-#define EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(Vector2d)
 
 namespace DO {
 

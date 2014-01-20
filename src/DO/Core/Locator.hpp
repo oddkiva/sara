@@ -19,6 +19,7 @@
 #include "Meta.hpp"
 #include "EigenExtension.hpp"
 #include <iterator>
+#include <iostream>
 
 namespace DO {
 

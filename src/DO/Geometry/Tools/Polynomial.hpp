@@ -24,7 +24,7 @@ namespace DO {
   public:
     //! Default constructor
     inline Monomial() {}
-    inline Monomial(T coeff, int degree) : coeff_(coeff), degree(d) {}
+    inline Monomial(T coeff, int degree) : coeff_(coeff), degree_(degree) {}
     // Mutable accessor
     inline T& coeff() { return coeff_; }
     inline int& degree() { return degree_; }
@@ -33,7 +33,7 @@ namespace DO {
     inline int degree() const { return degree_; }
     // Comparison operator
     inline bool operator==(const Monomial& other) const
-    { return coeff_ == other.coeff_ && d == other.d; }
+    { return coeff_ == other.coeff_ && degree_ == other.degree_; }
     inline bool operator!=(const Monomial& other) const
     { return !operator==(other); }
   private:

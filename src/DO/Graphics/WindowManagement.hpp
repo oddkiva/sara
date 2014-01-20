@@ -32,7 +32,7 @@ namespace DO {
 
   //! Window getter
   DO_EXPORT
-  inline Window getActiveWindow();
+  Window getActiveWindow();
   //! Window size getter.
   DO_EXPORT
   Vector2i getWindowSizes(Window w);
