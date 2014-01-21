@@ -86,7 +86,7 @@ namespace DO {
     bool c = false;
     for (int i1 = 0, i2 = N-1; i1 < N; i2 = i1++)
     {
-      if ( (poly[i1].x() > p.x()) != (poly[i2].y() > p.y()) &&
+      if ( (poly[i1].y() > p.y()) != (poly[i2].y() > p.y()) &&
            (p.x() <   (poly[i2].x()-poly[i1].x()) * (p.y()-poly[i1].y())
                     / (poly[i2].y()-poly[i1].y()) + poly[i1].x()) )
         c = !c;

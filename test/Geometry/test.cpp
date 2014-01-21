@@ -39,7 +39,6 @@ Ellipse randomEllipse(double w, double h)
     Point2d(myRandom(0, w), myRandom(0, w)) );
 }
 
-#ifdef DEBUG
 void testQuadAlgorithms()
 {
   BBox b(Point2d(w/4, h/4), Point2d(3*w/4, 3*h/4));
@@ -47,24 +46,27 @@ void testQuadAlgorithms()
 
   do
   {
+    if (!getActiveWindow())
+      openWindow(w,h);
     clearWindow();
 
     Point2d p(randPoint2d(w, h));
-    quad.drawOnScreen(Blue8);
+    drawQuad(quad, Blue8);
     fillCircle(p.cast<float>(), 3.0f, Red8);
-    if ( quad.isInside(p) )
+    if ( inside(p, quad) )
       cout << "p is inside quad" << endl;
     else
       cout << "p is not inside quad" << endl;
     
     Quad quad2(BBox(Point2d::Zero(), p));
-    quad2.drawOnScreen(Red8);
-    cout << "There is "
-      << (quad.intersect(quad2) ? "" : "no ") << "intersection." << endl;
+    drawQuad(quad2, Red8);
+    //cout << "There is "
+    //  << (intersection(quad, quad2) ? "" : "no ") << "intersection." << endl;
 
   } while(getKey() != KEY_ESCAPE);
 }
 
+#ifdef DEBUG
 void testAffineTransforms()
 {
   Point2f c(w/2., h/2.);
@@ -124,7 +126,6 @@ TEST(DO_Geometry_Test, bboxTest)
   // \todo: intersection test.
 }
 
-#ifdef CHECK_ELLIPSE
 TEST(DO_Geometry_Test, ellipseAlgorithmsTest)
 {
   do
@@ -232,7 +233,6 @@ TEST(DO_Geometry_Test, ellipseAlgorithmsTest)
 
   } while(true);
 }
-#endif
 
 TEST(DO_Geometry_Test, quadTest)
 {
@@ -253,6 +253,8 @@ TEST(DO_Geometry_Test, quadTest)
   
   Point2d  p1(w/2., h/2.);
   EXPECT_TRUE(inside(p1, q));
+  
+  testQuadAlgorithms();
 }
 
 int main(int argc, char** argv) 
