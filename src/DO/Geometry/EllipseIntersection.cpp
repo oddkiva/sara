@@ -88,7 +88,6 @@ namespace DO {
       return make_pair(false, Point2d());
   }
 
-#ifdef ELLIPSE_INTER
   void getEllipseIntersections(Point2d intersections[4], int& numInter,
                                const Ellipse & e1, const Ellipse & e2)
   {
@@ -140,7 +139,7 @@ namespace DO {
     if (theta[0] > theta[1])
       std::swap(theta[0], theta[1]);
 
-    return e.F(theta[1]) - e.F(theta[0]);
+    return polarAntiderivative(e, theta[1]) - polarAntiderivative(e, theta[0]);
   }
 
   double analyticInterUnionRatio(const Ellipse& e1, const Ellipse& e2)
@@ -162,11 +161,11 @@ namespace DO {
       // TODO: understand why there are numerical errors.
       // Namely, 'numInter' is actually '4' actually in some rare cases.
       double interArea = 0;
-      double unionArea = e1.area()+e2.area();
-      if (e1.isInside(e2.c()) || e2.isInside(e1.c()))
+      double unionArea = area(e1)+area(e2);
+      if (inside(e2.c(), e1) || inside(e1.c(), e2))
       {
-        interArea = std::min(e1.area(), e2.area());
-        unionArea = std::max(e1.area(), e2.area());
+        interArea = std::min(area(e1), area(e2));
+        unionArea = std::max(area(e1), area(e2));
       }
       interUnionRatio = interArea/unionArea;
     }
@@ -206,7 +205,7 @@ namespace DO {
         cout << "Revert[" << i << "] = " << int(revert[i]) << endl;
 #endif
       double ellSectArea1 = convexSectorArea(e1, interPts);
-      double triArea1 = t1.area();
+      double triArea1 = area(t1);
       double portionArea1 = ellSectArea1 - triArea1;
       if (revert[0])
         portionArea1 = area(e1) - portionArea1;
@@ -219,10 +218,10 @@ namespace DO {
       cout << "portionAreaPercentage1 = " << portionArea1/e1.area() << endl;
 #endif
       double ellSectArea2 = convexSectorArea(e2, interPts);
-      double triArea2 = t2.area();
+      double triArea2 = area(t2);
       double portionArea2 = ellSectArea2 - triArea2;
       if (revert[1])
-        portionArea2 = e2.area() - portionArea2;
+        portionArea2 = area(e2) - portionArea2;
 #ifdef DEBUG_ELLIPSE_INTERSECTION
       cout << "Ellipse 2" << endl;
       cout << "sectorArea2 = " << ellSectArea2 << endl;
@@ -232,7 +231,7 @@ namespace DO {
       cout << "portionAreaPercentage2 = " << portionArea2/e2.area() << endl;
 #endif
       double interArea = portionArea1 + portionArea2;
-      double unionArea = e1.area() + e2.area() - interArea;
+      double unionArea = area(e1) + area(e2) - interArea;
       interUnionRatio = interArea/unionArea;
     }
     else // if (numInter == 3 || numInter == 4)
@@ -253,8 +252,8 @@ namespace DO {
 
         double sectorArea1 = convexSectorArea(e1, pts);
         double sectorArea2 = convexSectorArea(e2, pts);
-        double triArea1 = t1.area();
-        double triArea2 = t2.area();
+        double triArea1 = area(t1);
+        double triArea2 = area(t2);
         double portionArea1 = sectorArea1 - triArea1;
         double portionArea2 = sectorArea2 - triArea2;
 
@@ -269,12 +268,11 @@ namespace DO {
         quadArea += 0.5*M.determinant();
       }
       interArea = ellipticSectorsArea + quadArea;
-      double unionArea = e1.area() + e2.area() - interArea;
+      double unionArea = area(e1) + area(e2) - interArea;
       interUnionRatio = interArea/unionArea;
     }
 
     return interUnionRatio;
   }
-#endif
 
 } /* namespace DO */

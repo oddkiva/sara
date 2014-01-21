@@ -70,25 +70,6 @@ namespace DO {
   //! Compute the ellipse from the conic equation
   Ellipse fromShapeMat(const Matrix2d& shapeMat, const Point2d& c);
 
-  //! Compute the intersection union ratio approximately
-  double approximateIntersectionUnionRatio(const Ellipse& e1, const Ellipse& e2,
-                                           int n = 36,
-                                           double limit = 1e9);
-
-  //! Check polynomial solvers.
-  //! TODO: Make a special library for polynomial solvers.
-  void checkQuadraticEquationSolver();
-  void checkCubicEquationSolver();
-  void checkQuarticEquationSolver();
-
-  void getEllipseIntersections(Point2d intersections[4], int& numInter,
-                               const Ellipse& e1, const Ellipse& e2);
-
-  double convexSectorArea(const Ellipse& e, const Point2d pts[]);
-
-  double analyticInterUnionRatio(const Ellipse& e1, const Ellipse& e2);
-
-
 } /* namespace DO */
 
 #endif /* DO_GEOMETRY_ELLIPSE_HPP */
