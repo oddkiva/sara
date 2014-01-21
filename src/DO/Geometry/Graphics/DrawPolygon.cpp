@@ -30,8 +30,8 @@ namespace DO {
   void drawPoly(const std::vector<Point2d>& p, const Color3ub& color,
                 int penWidth)
   {
-    for (size_t i = 0; i != p.size(); ++i)
-      drawLine(p[i], p[(i+1)%p.size()], color, penWidth);
+    for (size_t i1 = 0, i2 = p.size()-1; i1 != p.size(); i2=i1++)
+      drawLine(p[i1], p[i2], color, penWidth);
   }
 
 

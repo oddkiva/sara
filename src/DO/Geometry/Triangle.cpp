@@ -16,8 +16,9 @@ namespace DO {
 
   Triangle::Triangle(const Point2d& a, const Point2d& b, const Point2d& c)
   {
-    v_[0] = a; v_[1] = b; v_[2] = c;
-    compute_lines();
+    v_[0] = a;
+    v_[1] = b;
+    v_[2] = c;
   }
 
 }

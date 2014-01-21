@@ -250,6 +250,9 @@ TEST(DO_Geometry_Test, quadTest)
 
   Triangle t2(Point2d(100,0), Point2d(0, 0), Point2d(100, 100));
   EXPECT_NEAR(area(t2), -1e4/2., 1e-10);
+  
+  Point2d  p1(w/2., h/2.);
+  EXPECT_TRUE(inside(p1, q));
 }
 
 int main(int argc, char** argv) 

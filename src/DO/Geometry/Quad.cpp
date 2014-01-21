@@ -26,7 +26,6 @@ namespace DO {
     v_[1] = bbox.topRight();
     v_[2] = bbox.bottomRight();
     v_[3] = bbox.bottomLeft();
-    compute_lines();
   }
 
   Quad::Quad(const Point2d& a, const Point2d& b,
@@ -36,7 +35,6 @@ namespace DO {
     v_[1] = b;
     v_[2] = c;
     v_[3] = d;
-    compute_lines();
   }
 
 } /* namespace DO */

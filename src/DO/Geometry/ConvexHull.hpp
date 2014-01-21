@@ -25,14 +25,6 @@ namespace DO {
       return p.second > q.second;
     }
 
-    inline double cross(const Point2d& a, const Point2d& b, const Point2d& c)
-    {
-      Matrix2d A;
-      A.col(0) = (b-a);
-      A.col(1) = (c-a);
-      return A.determinant();
-    }
-
     template <typename PointIterator>
     inline PointIterator findOrigin(PointIterator begin, PointIterator end)
     {

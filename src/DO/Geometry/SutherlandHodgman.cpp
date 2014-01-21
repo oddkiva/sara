@@ -36,34 +36,34 @@ namespace DO {
     out = subject;
     const size_t M = clip.size();
     // Loop.
-    for (size_t e = 0; e != M; ++e) // 'e' like edge of the clip polygon.
+    for (size_t e2 = 0, e1 = M-1; e2 != M; e1 = e2++) // 'e' like edge of the clip polygon.
     {
       in = out;
       out.clear();
 
       const size_t N = in.size();
-      for (size_t v = 0; v != N; ++v)
+      for (size_t v2 = 0, v1 = N-1; v2 != N; v1 = v2++)
       {
-        int ccw_a = ccw(clip[e], clip[(e+1)%M], in[v]);
-        int ccw_b = ccw(clip[e], clip[(e+1)%M], in[(v+1)%N]);
+        int ccw1 = ccw(clip[e1], clip[e2], in[v1]);
+        int ccw2 = ccw(clip[e1], clip[e2], in[v2]);
 
-        if (ccw_a ==  1 && ccw_b ==  1)
-          out.push_back(in[(v+1)%N]);
-        else if (ccw_a ==  1 && ccw_b == -1)
+        if (ccw1 ==  1 && ccw2 ==  1)
+          out.push_back(in[v2]);
+        else if (ccw1 ==  1 && ccw2 == -1)
         {
-          clipLine = lineFrom(clip[e], clip[(e+1)%M]);
-          inLine = lineFrom(in[v], in[(v+1)%N]);
+          clipLine = lineFrom(clip[e1], clip[e2]);
+          inLine = lineFrom(in[v1], in[v2]);
 
           if ( intersection(clipLine, inLine, inter) )
             out.push_back(inter);
         }
-        else if (ccw_a == -1 && ccw_b ==  1)
+        else if (ccw1 == -1 && ccw2 ==  1)
         {
-          clipLine = lineFrom(clip[e], clip[(e+1)%M]);
-          inLine = lineFrom(in[v], in[(v+1)%N]);
+          clipLine = lineFrom(clip[e1], clip[e2]);
+          inLine = lineFrom(in[v1], in[v2]);
           if ( intersection(clipLine, inLine, inter) )
             out.push_back(inter);
-          out.push_back(in[(v+1)%N]);
+          out.push_back(in[v2]);
         }
       }
     }
