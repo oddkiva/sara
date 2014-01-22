@@ -9,9 +9,14 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Core.hpp>
+#if defined(_WIN32) || defined(_WIN32_WCE)
+# define NOMINMAX
+// This is the best I found to solve the include problem with libjpeg...
+# include <windows.h>
+#endif
 #include <DO/ImageDrawing/ImageIO.hpp>
-#include "ImageIOObjects.hpp"
+#include <DO/Core/Image.hpp>
+#include <DO/ImageDrawing/ImageIOObjects.hpp>
 
 using namespace std;
 

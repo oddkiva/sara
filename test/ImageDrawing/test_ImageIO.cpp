@@ -9,6 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include <DO/Core/Timer.hpp>
 #include <DO/ImageDrawing.hpp>
 #include <DO/FileSystem.hpp>
 #include <DO/Graphics.hpp>
