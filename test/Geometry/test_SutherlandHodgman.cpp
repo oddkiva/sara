@@ -27,7 +27,7 @@ int main()
   openWindow(w,h);
   setAntialiasing();
 
-  std::vector<Point2d> poly, clip, res;
+  SmallPolygon2<100> poly, clip, res;
   {
     int step = 18;
     for (int i = 0; i < step; ++i)
@@ -38,7 +38,7 @@ int main()
         h/2. + 150*sin(i*2*M_PI/step);
       poly.push_back(p);
 
-      p.array() += 150;
+      p.array() += 90;
       clip.push_back(p);
     }
   }
@@ -50,8 +50,8 @@ int main()
   timer.restart();
   for (int i = 0; i < numIter; ++i)
     res = sutherlandHodgman(poly, clip);
-  elapsed = timer.elapsed()/numIter;
-  cout << "Intersection computation time = " << elapsed << " seconds" << endl;
+  elapsed = timer.elapsedMs()/numIter;
+  cout << "Intersection computation time = " << elapsed << " milliseconds" << endl;
  
   drawPoly(res, Green8,5);
   getKey();

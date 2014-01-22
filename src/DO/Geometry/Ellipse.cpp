@@ -12,7 +12,6 @@ namespace DO {
 
   std::ostream& operator<<(std::ostream& os, const Ellipse& e)
   {
-    os << "Ellipse info\n";
     os << "a = " << e.r1() << std::endl;
     os << "b = " << e.r2() << std::endl;
     os << "o = " << toDegree(e.o()) << " degree" << std::endl;

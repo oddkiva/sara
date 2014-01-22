@@ -14,14 +14,15 @@ namespace DO {
     return true;
   }
 
-  static P2::Line lineFrom(const Vector2d& s, const Vector2d& e)
+  static
+  P2::Line lineFrom(const Vector2d& s, const Vector2d& e)
   {
     P2::Line l;
     l = P2::line(s, e);
     l /= l.maxCoeff();
     return l;
   }
-
+  
   // Polygon 'subject' can be a polygon of any type.
   // Polygon 'clip'  must be a convex polygon.
   std::vector<Point2d> sutherlandHodgman(const std::vector<Point2d>& subject,
@@ -70,4 +71,5 @@ namespace DO {
 
     return out;
   }
+  
 }

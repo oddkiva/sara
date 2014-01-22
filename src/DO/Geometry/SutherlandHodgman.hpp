@@ -13,6 +13,7 @@
 
 #include <DO/Core/EigenExtension.hpp>
 #include <DO/Geometry/Tools/Utilities.hpp>
+#include <DO/Geometry/Polygon.hpp>
 
 namespace DO {
 

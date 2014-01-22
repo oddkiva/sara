@@ -35,6 +35,8 @@ namespace DO {
     v_[1] = b;
     v_[2] = c;
     v_[3] = d;
+    internal::PtCotg work[4];
+    internal::sortPointsByPolarAngle(v_, work, 4);
   }
 
 } /* namespace DO */

@@ -10,6 +10,9 @@
 // ========================================================================== //
 
 #include <DO/Geometry.hpp>
+#include <DO/Core/Stringify.hpp>
+#include <DO/Core/DebugUtilities.hpp>
+#include <vector>
 #include <iostream>
 
 using namespace std;
@@ -36,18 +39,20 @@ namespace DO {
     s[5] = M(1,1);
   }
 
-  void getQuarticEquation(double u[5], const double s[6], const double t[6])
+  Polynomial<double, 4> getQuarticEquation(const double s[6], const double t[6])
   {
     double d[6][6];
     for(int i = 0; i < 6; ++i)
       for(int j = 0; j < 6; ++j)
         d[i][j] = s[i]*t[j] - s[j]*t[i];
 
+    Polynomial<double, 4> u;
     u[0] = d[3][1]*d[1][0] - d[3][0]*d[3][0];
     u[1] = d[3][4]*d[1][0] + d[3][1]*(d[4][0]+d[1][2]) - 2*d[3][2]*d[3][0];
     u[2] = d[3][4]*(d[4][0]+d[1][2]) + d[3][1]*(d[4][2]-d[5][1]) - d[3][2]*d[3][2] - 2*d[3][5]*d[3][0];
     u[3] = d[3][4]*(d[4][2]-d[5][1]) + d[3][1]*d[4][5] - 2*d[3][5]*d[3][2];
     u[4] = d[3][4]*d[4][5] - d[3][5]*d[3][5];
+    return u;
   }
 
   void getSigmaPolynomial(double sigma[3], const double s[6], double y)
@@ -68,7 +73,7 @@ namespace DO {
   pair<bool, Point2d> isRootValid(const complex<double>& y,
                                   const double s[6], const double t[6])
   {
-    if(imag(y) > 1e-6)
+    if ( abs(imag(y)) > 1e-1*abs(real(y)) )
       return make_pair(false, Point2d());
     const double realY = real(y);
     double sigma[3], tau[3];
@@ -77,8 +82,8 @@ namespace DO {
     const double x = (sigma[2]*tau[0] - sigma[0]*tau[2])
                    / (sigma[1]*tau[2] - sigma[2]*tau[1]);
 
-    if (fabs(computeConicExpression(x, realY, s)) < 5e-3 &&
-        fabs(computeConicExpression(x, realY, t)) < 5e-3)
+    if (fabs(computeConicExpression(x, realY, s)) < 1e-1 &&
+        fabs(computeConicExpression(x, realY, t)) < 1e-1)
     {
       /*cout << "QO(x,y) = " << computeConicExpression(x, realY, s) << endl;
       cout << "Q1(x,y) = " << computeConicExpression(x, realY, t) << endl;*/
@@ -88,20 +93,19 @@ namespace DO {
       return make_pair(false, Point2d());
   }
 
-  void getEllipseIntersections(Point2d intersections[4], int& numInter,
-                               const Ellipse & e1, const Ellipse & e2)
+  int computeEllipseIntersections(Point2d intersections[4],
+                                  const Ellipse & e1, const Ellipse & e2)
   {
     double s[6], t[6];
-    double u[5];
     getConicEquation(s, e1);
     getConicEquation(t, e2);
-    getQuarticEquation(u, s, t);
+    
+    Polynomial<double, 4> u(getQuarticEquation(s, t));
 
     complex<double> y[4];
-    solveQuarticEquation(y[0], y[1], y[2], y[3],
-                         u[4], u[3], u[2], u[1], u[0]);
+    roots(u, y[0], y[1], y[2], y[3]);
 
-    numInter = 0;
+    int numInter = 0;
     for(int i = 0; i < 4; ++i)
     {
       pair<bool, Point2d> p(isRootValid(y[i], s, t));
@@ -110,6 +114,14 @@ namespace DO {
       intersections[numInter] = p.second;
       ++numInter;
     }
+//    
+//    auto lexcmp = [](const Point2d& x, const Point2d& y)
+//    { return std::lexicographical_compare(x.data(), x.data()+2, y.data(), y.data()+2); };
+//    sort(intersections, intersections+4, lexcmp);
+    auto quasi_equal = [](const Point2d& x, const Point2d& y)
+    { return (x-y).squaredNorm() < 1e-2; };
+    
+    return unique(intersections, intersections+numInter, quasi_equal) - intersections;
   }
 
   // ========================================================================== //
@@ -142,42 +154,38 @@ namespace DO {
     return polarAntiderivative(e, theta[1]) - polarAntiderivative(e, theta[0]);
   }
 
-  double analyticInterUnionRatio(const Ellipse& e1, const Ellipse& e2)
-  {
+  double analyticInterArea(const Ellipse& e1, const Ellipse& e2, bool debug)
+  {    
     Point2d interPts[4];
-    int numInter;
-    getEllipseIntersections(interPts, numInter, e1, e2);
-#ifdef DEBUG_ELLIPSE_INTERSECTION
-    cout << "\nIntersection count = " << numInter << endl;
-    for (int i = 0; i < numInter; ++i)
+    int numInter = computeEllipseIntersections(interPts, e1, e2);
+
+    if (debug)
     {
-      fillCircle(interPts[i].cast<float>(), 5.f, Green8);
-      cout << "[" << i << "] " << interPts[i].transpose() << endl;
-    }
-#endif
-    double interUnionRatio = 0.;
-    if (numInter == 0 || numInter == 1)
-    {
-      // TODO: understand why there are numerical errors.
-      // Namely, 'numInter' is actually '4' actually in some rare cases.
-      double interArea = 0;
-      double unionArea = area(e1)+area(e2);
-      if (inside(e2.c(), e1) || inside(e1.c(), e2))
+      cout << "\nIntersection count = " << numInter << endl;
+      for (int i = 0; i < numInter; ++i)
       {
-        interArea = std::min(area(e1), area(e2));
-        unionArea = std::max(area(e1), area(e2));
+        fillCircle(interPts[i].cast<float>(), 5.f, Green8);
+        cout << "[" << i << "] " << interPts[i].transpose() << endl;
       }
-      interUnionRatio = interArea/unionArea;
     }
-    else if (numInter == 2)
+
+    if (numInter < 2)
+    {
+      if (inside(e2.c(), e1) || inside(e1.c(), e2))
+        return std::min(area(e1), area(e2));
+    }
+    
+    if (numInter == 2)
     {
       // TODO: seems OK, I think in terms of numerical accuracy.
       Triangle t1(e1.c(), interPts[0], interPts[1]);
       Triangle t2(e2.c(), interPts[0], interPts[1]);
-#ifdef DEBUG_ELLIPSE_INTERSECTION
-      t1.drawOnScreen(Red8);
-      t2.drawOnScreen(Blue8);
-#endif
+      if (debug)
+      {
+        drawTriangle(t1, Red8);
+        drawTriangle(t2, Blue8);
+      }
+      
       // Find the correct elliptic sectors.
       bool revert[2] = {false, false};
       {
@@ -200,48 +208,55 @@ namespace DO {
             revert[1] = true;
         }
       }
-#ifdef DEBUG_ELLIPSE_INTERSECTION
-      for (int i = 0; i < 2; ++i)
-        cout << "Revert[" << i << "] = " << int(revert[i]) << endl;
-#endif
+
+      if (debug)
+        for (int i = 0; i < 2; ++i)
+          cout << "Revert[" << i << "] = " << int(revert[i]) << endl;
+
       double ellSectArea1 = convexSectorArea(e1, interPts);
       double triArea1 = area(t1);
       double portionArea1 = ellSectArea1 - triArea1;
       if (revert[0])
         portionArea1 = area(e1) - portionArea1;
-#ifdef DEBUG_ELLIPSE_INTERSECTION
-      cout << "Ellipse 1" << endl;
-      cout << "sectorArea1 = " << ellSectArea1 << endl;
-      cout << "area1 = " << e1.area() << endl;
-      cout << "triangleArea1 = " << triArea1 << endl;
-      cout << "portionArea1 = " << portionArea1 << endl;
-      cout << "portionAreaPercentage1 = " << portionArea1/e1.area() << endl;
-#endif
+
+      if (debug)
+      {
+        cout << "Ellipse 1" << endl;
+        cout << "sectorArea1 = " << ellSectArea1 << endl;
+        cout << "area1 = " << area(e1) << endl;
+        cout << "triangleArea1 = " << triArea1 << endl;
+        cout << "portionArea1 = " << portionArea1 << endl;
+        cout << "portionAreaPercentage1 = " << portionArea1/area(e1) << endl;
+      }
+      
       double ellSectArea2 = convexSectorArea(e2, interPts);
       double triArea2 = area(t2);
       double portionArea2 = ellSectArea2 - triArea2;
       if (revert[1])
         portionArea2 = area(e2) - portionArea2;
-#ifdef DEBUG_ELLIPSE_INTERSECTION
-      cout << "Ellipse 2" << endl;
-      cout << "sectorArea2 = " << ellSectArea2 << endl;
-      cout << "area2 = " << e2.area() << endl;
-      cout << "triangleArea2 = " << triArea2 << endl;
-      cout << "portionArea2 = " << portionArea2 << endl;
-      cout << "portionAreaPercentage2 = " << portionArea2/e2.area() << endl;
-#endif
-      double interArea = portionArea1 + portionArea2;
-      double unionArea = area(e1) + area(e2) - interArea;
-      interUnionRatio = interArea/unionArea;
+
+      if (debug)
+      {
+        cout << "Ellipse 2" << endl;
+        cout << "sectorArea2 = " << ellSectArea2 << endl;
+        cout << "area2 = " << area(e2) << endl;
+        cout << "triangleArea2 = " << triArea2 << endl;
+        cout << "portionArea2 = " << portionArea2 << endl;
+        cout << "portionAreaPercentage2 = " << portionArea2/area(e2) << endl;
+      }
+      
+      return portionArea1 + portionArea2;
     }
-    else // if (numInter == 3 || numInter == 4)
+    
+    if (numInter >= 3)
     {
-      sortByPolarAngle(interPts, numInter);
-#ifdef DEBUG_ELLIPSE_INTERSECTION
-      for (int i = 0; i < numInter; ++i)
-        drawString(interPts[i].x()+10, interPts[i].y()+10, toString(i), Green8);
-#endif
-      double interArea = 0;
+      internal::PtCotg workArray[4];
+      internal::sortPointsByPolarAngle(interPts, workArray, numInter);
+      if (debug) {
+        for (int i = 0; i < numInter; ++i)
+          drawString(interPts[i].x()+10, interPts[i].y()+10, toString(i), Green8);
+      }
+      
       // Add elliptic sectors.
       double ellipticSectorsArea = 0;
       for (int i = 0; i < numInter; ++i)
@@ -249,13 +264,19 @@ namespace DO {
         Point2d pts[2] = { interPts[i], interPts[(i+1)%numInter] };
         Triangle t1(e1.c(), pts[0], pts[1]);
         Triangle t2(e2.c(), pts[0], pts[1]);
-
+        
+        drawTriangle(t1, Red8, 1);
+        drawTriangle(t2, Blue8, 1);
+        
+        // correct here when pts[0], pts[1] more than pi degree.
         double sectorArea1 = convexSectorArea(e1, pts);
         double sectorArea2 = convexSectorArea(e2, pts);
         double triArea1 = area(t1);
         double triArea2 = area(t2);
         double portionArea1 = sectorArea1 - triArea1;
         double portionArea2 = sectorArea2 - triArea2;
+        
+        
 
         ellipticSectorsArea += std::min(portionArea1, portionArea2);
       }
@@ -267,12 +288,78 @@ namespace DO {
         M.col(0) = interPts[i]; M.col(1) = interPts[(i+1)%numInter];
         quadArea += 0.5*M.determinant();
       }
-      interArea = ellipticSectorsArea + quadArea;
-      double unionArea = area(e1) + area(e2) - interArea;
-      interUnionRatio = interArea/unionArea;
+      return ellipticSectorsArea + quadArea;
     }
+    
+    return 0;
+  }
+  
+  double analyticInterUnionRatio(const Ellipse& e1, const Ellipse& e2)
+  {
+    double interArea = analyticInterArea(e1, e2);
+    double unionArea = area(e1) + area(e2) - interArea;
+    return interArea / unionArea;
+  }
 
-    return interUnionRatio;
+  // ========================================================================== //
+  // Approximate computation of area of intersection ellipses.
+  // ========================================================================== //
+  std::vector<Point2d> discretizeEllipse(const Ellipse& e, int n)
+  {
+    std::vector<Point2d> polygon;
+    polygon.reserve(n);
+    
+    const Matrix2d Ro(rotation2(e.o()));
+    Vector2d D( e.r1(), e.r2() );
+    
+    for(int i = 0; i < n; ++i)
+    {
+      const double theta = 2.*M_PI*double(i)/n;
+      const Matrix2d R(rotation2(theta));
+      Point2d p(1.0, 0.0);
+      
+      const Point2d p1(e.c() + Ro.matrix()*D.asDiagonal()*R.matrix()*p);
+      polygon.push_back(p1);
+    }
+    
+    return polygon;
+  }
+  
+  std::vector<Point2d> approxInter(const Ellipse& e1, const Ellipse& e2, int n)
+  {
+    std::vector<Point2d> p1(discretizeEllipse(e1,n));
+    std::vector<Point2d> p2(discretizeEllipse(e2,n));
+
+    std::vector<Point2d> inter;
+    inter = sutherlandHodgman(p1, p2);
+    if (inter.empty())
+      inter = sutherlandHodgman(p2, p1);
+    return inter;
+  }
+  
+  double approximateIntersectionUnionRatio(const Ellipse& e1, const Ellipse& e2,
+                                           int n, double limit)
+  {
+    typedef std::vector<Point2d> Polygon;
+    
+		if( !wellDefined(e1, limit) || !wellDefined(e2, limit) )
+			return 0.;
+
+    std::vector<Point2d> p1(discretizeEllipse(e1,n));
+    std::vector<Point2d> p2(discretizeEllipse(e2,n));
+    std::vector<Point2d> inter;
+    inter = sutherlandHodgman(p1, p2);
+    if (inter.empty())
+      inter = sutherlandHodgman(p2, p1);
+    
+		if (!inter.empty())
+		{
+			double interArea = area(inter);
+			double unionArea = area(p1)+area(p2)-interArea;
+			return interArea/unionArea;
+		}
+		else
+			return 0.;
   }
 
 } /* namespace DO */

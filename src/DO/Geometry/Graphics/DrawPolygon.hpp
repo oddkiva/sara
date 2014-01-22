@@ -28,15 +28,15 @@ namespace DO {
   void drawPoly(const std::vector<Point2d>& p, const Color3ub& color,
                 int penWidth = 1);
   void drawEllipse(const Ellipse& e, const Color3ub col, int penWidth = 1);
-
+  
   template <int N>
   void drawPoly(const SmallPolygon<N>& poly, const Color3ub& color,
                 int penWidth = 1)
   {
-    for (size_t i = 0; i != N; ++i)
-      drawLine(poly[i], poly[(i+1)%N], color, penWidth);
+    for (int i1 = N-1, i2 = 0; i2 != N; i1=i2++)
+      drawLine(poly[i1], poly[i2], color, penWidth);
   }
-  
+
   inline void drawTriangle(const Triangle& t, const Rgb8& col = Red8,
                            int penWidth = 1)
   { drawPoly(t, col, penWidth); }

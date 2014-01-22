@@ -19,16 +19,19 @@
 namespace DO {
 
   //! Compute the intersection union ratio approximately
+  std::vector<Point2d> approxInter(const Ellipse& e1, const Ellipse& e2, int n);
   double approximateIntersectionUnionRatio(const Ellipse& e1, const Ellipse& e2,
                                            int n = 36,
                                            double limit = 1e9);
 
   //! Check polynomial solvers.
-  void getEllipseIntersections(Point2d intersections[4], int& numInter,
-                               const Ellipse& e1, const Ellipse& e2);
+  int computeEllipseIntersections(Point2d intersections[], const Ellipse& e1,
+                                  const Ellipse& e2);
 
+  //! Compute the intersection union ratio exactly.
   double convexSectorArea(const Ellipse& e, const Point2d pts[]);
-
+  double analyticInterArea(const Ellipse& e1, const Ellipse& e2,
+                           bool debug = false);
   double analyticInterUnionRatio(const Ellipse& e1, const Ellipse& e2);
 
 

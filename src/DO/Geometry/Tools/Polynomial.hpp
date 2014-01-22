@@ -50,7 +50,7 @@ namespace DO {
     //! Default constructor
     inline Polynomial() {}
     inline Polynomial(const T *coeff) { std::copy(coeff, coeff+N+1, coeff_); }
-    inline Polynomial(const Polynomial& P) { std::copy(P); }
+    inline Polynomial(const Polynomial& P) { copy(P); }
     //inline Polynomial(Polynomial&& P);
     //! Assignment operator
     Polynomial& operator=(const Polynomial& P) { copy(P); return *this; }
@@ -99,7 +99,7 @@ namespace DO {
     }
   private:
     inline void copy(const Polynomial& other)
-    { coeff_ = other.coeff; }
+    { std::copy(other.coeff_, other.coeff_+N+1, coeff_); }
   private:
     T coeff_[N+1];
   };

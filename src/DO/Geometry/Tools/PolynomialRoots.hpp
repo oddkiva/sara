@@ -81,7 +81,8 @@ namespace DO {
   // Involves the precision of the cubic equation solver: (1e-3.)
   template <typename T>
   void roots(const Polynomial<T, 4>& P, std::complex<T>& z1,
-             std::complex<T>& z2, std::complex<T>& z3, std::complex<T>& z4)
+             std::complex<T>& z2, std::complex<T>& z3, std::complex<T>& z4,
+             double eps = 1e-6)
   {
     T a4 = P[4], a3 = P[3], a2 = P[2], a1 = P[1], a0 = P[0];
     a3 /= a4; a2/= a4; a1 /= a4; a0 /= a4; a4 = 1.0;
@@ -93,7 +94,7 @@ namespace DO {
     Q[0] = 4.0*a2*a0 - a1*a1 - a3*a3*a0;
 
     std::complex<T> y1, y2, y3;
-    roots<T>(Q, y1, y2, y3);
+    roots<T>(Q, y1, y2, y3, eps);
 
     T yr = std::real(y1);
     T yi = std::abs(std::imag(y1));
@@ -112,7 +113,7 @@ namespace DO {
     std::complex<T> R( std::sqrt(radicand) );
     std::complex<T> D, E;
 
-    if(abs(R) > 1e-3)
+    if(abs(R) > 0)
     {
       D = std::sqrt( 3.0*a3*a3/4.0 - R*R - 2.0*a2 + (4.0*a3*a2 - 8.0*a1 - a3*a3*a3)/(4.0*R) );
       E = std::sqrt( 3.0*a3*a3/4.0 - R*R - 2.0*a2 - (4.0*a3*a2 - 8.0*a1 - a3*a3*a3)/(4.0*R) );

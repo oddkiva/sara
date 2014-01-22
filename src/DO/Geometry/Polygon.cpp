@@ -2,7 +2,7 @@
 // This file is part of DO++, a basic set of libraries in C++ for computer 
 // vision.
 //
-// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2014 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public 
 // License v. 2.0. If a copy of the MPL was not distributed with this file, 
@@ -10,17 +10,22 @@
 // ========================================================================== //
 
 #include <DO/Geometry.hpp>
-#include <DO/Graphics.hpp>
 
 namespace DO {
 
-  Triangle::Triangle(const Point2d& a, const Point2d& b, const Point2d& c)
+  double area(const std::vector<Point2d>& polygon)
   {
-    v_[0] = a;
-    v_[1] = b;
-    v_[2] = c;
-    internal::PtCotg work[3];
-    internal::sortPointsByPolarAngle(v_, work, 3);
+    //! Computation derived from Green's formula
+    double A = 0.;
+    int N = int(polygon.size());
+    for (int i1 = N-1, i2 = 0; i2 < N; i1=i2++)
+    {
+      Matrix2d M;
+      M.col(0) = polygon[i1];
+      M.col(1) = polygon[i2];
+      A += M.determinant();
+    }
+    return fabs(0.5*A);
   }
 
-}
+} /* namespace DO */

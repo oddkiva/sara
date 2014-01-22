@@ -65,19 +65,23 @@ namespace DO {
 
   //! Utility functions.
   template <int N>
-  double area(const SmallPolygon<N>& polygon)
+  double signedArea(const SmallPolygon<N>& polygon)
   {
     //! Computation derived from Green's formula
     double A = 0.;
-    for (int i = 0; i < N; ++i)
+    for (int i1 = N-1, i2 = 0; i2 < N; i1=i2++)
     {
       Matrix2d M;
-      M.col(0) = polygon[i];
-      M.col(1) = polygon[(i+1)%N];
+      M.col(0) = polygon[i1];
+      M.col(1) = polygon[i2];
       A += M.determinant();
     }
     return 0.5*A;
   }
+  
+  template <int N>
+  inline double area(const SmallPolygon<N>& polygon)
+  { return std::abs(signedArea(polygon)); }
 
   //! Even-odd rule implementation.
   template <int N>
@@ -100,6 +104,8 @@ namespace DO {
   {
     return area(poly) < eps;
   }
+  
+  double area(const std::vector<Point2d>& polygon);
 
 } /* namespace DO */
 
