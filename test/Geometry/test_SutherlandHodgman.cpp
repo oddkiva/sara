@@ -27,7 +27,7 @@ int main()
   openWindow(w,h);
   setAntialiasing();
 
-  SmallPolygon2<100> poly, clip, res;
+  std::vector<Point2d> poly, clip, res;
   {
     int step = 18;
     for (int i = 0; i < step; ++i)
