@@ -26,7 +26,8 @@ endmacro (do_load_packages_for_featurematching_library)
 
 macro (do_create_variables_for_featurematching_library)
   set(DO_FeatureMatching_LIBRARIES DO_FeatureMatching)
-  set(DO_FeatureMatching_LINK_LIBRARIES "${DO_Graphics_LIBRARIES};flann_cpp_s")
+  set(DO_FeatureMatching_LINK_LIBRARIES
+      "${DO_Graphics_LIBRARIES};${DO_Core_LIBRARIES};flann_cpp_s")
 endmacro (do_create_variables_for_featurematching_library)
 
 do_load_packages_for_featurematching_library()
