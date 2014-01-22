@@ -11,7 +11,6 @@
 
 #include <DO/Geometry.hpp>
 #include <DO/Core/Stringify.hpp>
-#include <DO/Core/DebugUtilities.hpp>
 #include <vector>
 #include <iostream>
 

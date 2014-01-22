@@ -33,9 +33,10 @@
 #include "Core/Subimage.hpp"
 // Tree data structures
 #include "Core/Tree.hpp"
+// Timer classes
+#include "Core/Timer.hpp"
 // Miscellaneous
 #include "Core/Stringify.hpp"
-#include "Core/Timer.hpp"
 #include "Core/StdVectorHelpers.hpp"
 #include "Core/DebugUtilities.hpp"
 

@@ -27,7 +27,7 @@ inline void wait(unsigned milliseconds)
 }
 
 // Thread function: Detach
-void ThreadDetach(void *)
+void oneSecondSleep(void *)
 {
   // We don't do anything much, just sleep a little...
   tthread::this_thread::sleep_for(tthread::chrono::milliseconds(1000));
@@ -53,7 +53,7 @@ TEST(DO_Core_Test,  testTimer)
   
   timer.restart();
   // Start the child thread
-  tthread::thread t(ThreadDetach, 0);
+  tthread::thread t(oneSecondSleep, 0);
   // Wait for the thread to finish
   t.join();
   elapsedTimeS = timer.elapsed();

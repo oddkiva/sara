@@ -11,11 +11,7 @@
 
 //! @file
 
-#ifndef DO_CORE_TIMER_HPP
-#define DO_CORE_TIMER_HPP
-
-#include <ctime>
-#include <iostream>
+#include <DO/Core/Timer.hpp>
 #ifdef _WIN32
 # include <windows.h>
 #else
@@ -24,100 +20,71 @@
 
 namespace DO {
 
-  //! \ingroup Core
-  //! \defgroup Utility Utility
-  //! @{
-
-  //! \brief Timer class.
-  class Timer
+  Timer::Timer()
+    : start_(std::clock())
+    , elapsed_(0) 
   {
-  public: /* interface. */
-    //! Default constructor
-    Timer()
-      : start_(std::clock())
-      , elapsed_(0)
-    {
-    }
-    //! Reset the timer to zero.
-    void restart()
-    {
-      start_ = std::clock();
-      elapsed_ = 0;
-    }
-    //! Returns the elapsed time.
-    double elapsed()
-    {
-      elapsed_ = static_cast<double>(std::clock()) - start_;
-      elapsed_ /= CLOCKS_PER_SEC;
-      return elapsed_;
-    }
-    //! Helper function that prints the elapsed time in a friendly manner.
-    void print()
-    {
-      std::cout << "Elapsed time: " << elapsed() << " s" << std::endl;
-    }
-  private:
-    std::clock_t start_; //!< Records the start instant.
-    double elapsed_; //!< Stores the elapsed time from the start instant.
-  };
-
-  //! \brief Timer class with microsecond accuracy.
-  class HighResTimer
+  }
+  
+  void Timer::restart()
   {
-  public: /* interface. */
-    //! Default constructor
-    HighResTimer()
-      : elapsed_(0)
-    {
+    start_ = std::clock();
+    elapsed_ = 0;
+  }
+
+  double Timer::elapsed()
+  {
+    elapsed_ = static_cast<double>(std::clock()) - start_;
+    elapsed_ /= CLOCKS_PER_SEC;
+    return elapsed_;
+  }
+
+  HighResTimer::HighResTimer()
+    : elapsed_(0)
+  {
 #ifdef WIN32
-      if (!QueryPerformanceFrequency(&frequency_))
-      {
-        const char *msg = "Failed to initialize high resolution timer!";
-        std::cerr << msg << std::endl;
-        throw std::runtime_error(msg);
-      }
+    LARGE_INTEGER freq;
+    if (!QueryPerformanceFrequency(&freq))
+    {
+      const char *msg = "Failed to initialize high resolution timer!";
+      std::cerr << msg << std::endl;
+      throw std::runtime_error(msg);
+    }
+    frequency_ = static_cast<double>(freq.QuadPart);
 #endif
-    }
-    //! Reset the timer to zero.
-    void restart()
-    {
+  }
+  //! Reset the timer to zero.
+  void HighResTimer::restart()
+  {
 #ifdef WIN32
-      QueryPerformanceCounter(&start_);
+    LARGE_INTEGER li_start_;
+    QueryPerformanceCounter(&li_start_);
+    start_ = static_cast<double>(li_start_.QuadPart);
 #else
-      gettimeofday(&start_, NULL);
+    timeval start;
+    gettimeofday(&start, NULL);
+    start_ = start.tv_sec * 1e3 + start.tv_usec * 1e-3;
 #endif
-    }
-    //! Returns the elapsed time in seconds.
-    double elapsed()
-    {
+  }
+  //! Returns the elapsed time in seconds.
+  double HighResTimer::elapsed()
+  {
 #ifdef _WIN32
-      QueryPerformanceCounter(&end_);
-      elapsed_ = static_cast<double>(end_.QuadPart - start_.QuadPart)
-               / frequency_.QuadPart;
-#else
-      gettimeofday(&end_, NULL);
-      elapsed_ = (end_.tv_sec - start_.tv_sec) * 1000.0;
-      elapsed_ += (end_.tv_usec - start_.tv_usec) / 1000.0;
-#endif
-      return elapsed_;
-    }
-    //! Returns the elapsed time in milliseconds.
-    double elapsedMs()
-    { return elapsed() * 1000.; }
-  private: /* data members. */
-#ifdef WIN32
-    LARGE_INTEGER frequency_;
-    LARGE_INTEGER start_;
     LARGE_INTEGER end_;
+    QueryPerformanceCounter(&end_);
+    elapsed_ = (static_cast<double>(end_.QuadPart) - start_) / frequency_;
 #else
-    timeval start_;
     timeval end_;
+    gettimeofday(&end_, NULL);
+    double end_ = end_.tv_sec * 1e3 + end_.tv_usec * 1e-3;
+    elapsed_ = end_ - start_;
 #endif
-    double elapsed_;
-  };
+    return elapsed_;
+  }
 
-  //! @}
+  double HighResTimer::elapsedMs()
+  {
+    return elapsed() * 1000.; 
+  }
 
 } /* namespace DO */
-
-#endif /* DO_CORE_TIMER_HPP */

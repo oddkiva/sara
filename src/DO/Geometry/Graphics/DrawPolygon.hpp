@@ -9,13 +9,13 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include <DO/Graphics.hpp>
 #include <DO/Geometry/LineSegment.hpp>
 #include <DO/Geometry/BBox.hpp>
 #include <DO/Geometry/Polygon.hpp>
 #include <DO/Geometry/Ellipse.hpp>
 #include <DO/Geometry/Triangle.hpp>
 #include <DO/Geometry/Quad.hpp>
-#include <DO/Graphics.hpp>
 #include <vector>
 #include <string>
 

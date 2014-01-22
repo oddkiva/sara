@@ -10,6 +10,7 @@
 // ========================================================================== //
 
 #include <gtest/gtest.h>
+#include <DO/Graphics.hpp>
 #include <DO/Core/DebugUtilities.hpp>
 #include <DO/Core/Timer.hpp>
 #include <DO/Graphics.hpp>
