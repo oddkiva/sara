@@ -19,19 +19,23 @@ using namespace DO;
 
 TEST(DO_Geometry_Test, testQuadraticPolynomialRoots)
 {
+  bool verbose = false;
+
   double coeff[3] = { -1.0, 0.0, 2.0 };
   Polynomial<double,2> P(coeff);
-  
-  cout << P << endl;
  
   bool realRoots;
   complex<double> x1, x2;
   roots(P, x1, x2, realRoots);
   
-  cout << "x1 = " << x1 << " and x2 = " << x2 << endl;
-  cout << "P(" << x1 << ") = " << P(x1) << endl;
-  cout << "P(" << x2 << ") = " << P(x2) << endl;
-  cout << endl;
+  if (verbose)
+  {
+    cout << P << endl;
+    cout << "x1 = " << x1 << " and x2 = " << x2 << endl;
+    cout << "P(" << x1 << ") = " << P(x1) << endl;
+    cout << "P(" << x2 << ") = " << P(x2) << endl;
+    cout << endl;
+  }
 
   EXPECT_TRUE(realRoots);
   EXPECT_NEAR(abs(P(x1)), 0., std::numeric_limits<double>::epsilon());
@@ -75,7 +79,7 @@ TEST(DO_Geometry_Test, testCubicPolynomialRoots)
 
 TEST(DO_Geometry_Test, testQuarticPolynomialRoots)
 {
-  bool verbose = true;
+  bool verbose = false;
 
   // check quadratic equation solver
   complex<double> x1, x2, x3, x4;
