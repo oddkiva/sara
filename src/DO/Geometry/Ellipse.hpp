@@ -43,6 +43,8 @@ namespace DO {
       const double x = ((e.b_+e.a_)+(e.b_-e.a_)*cos(2*theta));
       return e.a_*e.b_*0.5*( theta - atan(y/x) );
     }
+    //! Convex sector area
+    friend double convexSectorArea(const Ellipse& e, const Point2d pts[]);
     //! Ellipse area.
     friend inline double area(const Ellipse& e)
     { return M_PI*e.a_*e.b_; }

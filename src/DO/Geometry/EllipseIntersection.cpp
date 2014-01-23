@@ -18,9 +18,9 @@ using namespace std;
 
 namespace DO {
 
-  // ========================================================================== //
+  // ======================================================================== //
   // Computation of intersecting points of intersecting ellipses
-  // ========================================================================== //
+  // ======================================================================== //
   void printConicEquation(double s[6])
   {
     cout << s[0] << " + " << s[1] << " x + " << s[2] << " y + ";
@@ -91,6 +91,14 @@ namespace DO {
     else
       return make_pair(false, Point2d());
   }
+  
+  struct Equal
+  {
+    Equal(double eps) : squared_eps_(eps*eps) {}
+    bool operator()(const Point2d& p, const Point2d& q) const
+    { return (p-q).squaredNorm() < squared_eps_; }
+    double squared_eps_;
+  };
 
   int computeEllipseIntersections(Point2d intersections[4],
                                   const Ellipse & e1, const Ellipse & e2)
@@ -113,46 +121,14 @@ namespace DO {
       intersections[numInter] = p.second;
       ++numInter;
     }
-//    
-//    auto lexcmp = [](const Point2d& x, const Point2d& y)
-//    { return std::lexicographical_compare(x.data(), x.data()+2, y.data(), y.data()+2); };
-//    sort(intersections, intersections+4, lexcmp);
-    auto quasi_equal = [](const Point2d& x, const Point2d& y)
-    { return (x-y).squaredNorm() < 1e-2; };
-    
-    return unique(intersections, intersections+numInter, quasi_equal) - intersections;
+
+    Equal equal(1e-2);
+    return unique(intersections, intersections+numInter, equal) - intersections;
   }
 
-  // ========================================================================== //
+  // ======================================================================== //
   // Computation of the area of intersecting ellipses.
-  // ========================================================================== //
-  double convexSectorArea(const Ellipse& e, const Point2d pts[])
-  {
-    double theta[2];
-    for (int i = 0; i < 2; ++i)
-    {
-      const Vector2d dir(pts[i]-e.c());
-      double c = cos(e.o()), s = sin(e.o());
-      const Vector2d u0( c, s);
-      const Vector2d u1(-s, c);
-
-      theta[i] = atan2(u1.dot(dir), u0.dot(dir));
-    }
-
-    if (abs(theta[1]-theta[0]) > M_PI)
-    {
-      if (theta[0] < 0)
-        theta[0] += 2*M_PI;
-      else
-        theta[1] += 2*M_PI;
-    }
-
-    if (theta[0] > theta[1])
-      std::swap(theta[0], theta[1]);
-
-    return polarAntiderivative(e, theta[1]) - polarAntiderivative(e, theta[0]);
-  }
-
+  // ======================================================================== //
   double analyticInterArea(const Ellipse& e1, const Ellipse& e2, bool debug)
   {    
     Point2d interPts[4];
@@ -300,9 +276,9 @@ namespace DO {
     return interArea / unionArea;
   }
 
-  // ========================================================================== //
+  // ======================================================================== //
   // Approximate computation of area of intersection ellipses.
-  // ========================================================================== //
+  // ======================================================================== //
   std::vector<Point2d> discretizeEllipse(const Ellipse& e, int n)
   {
     std::vector<Point2d> polygon;

@@ -9,6 +9,33 @@
 using namespace std;
 
 namespace DO {
+  
+  double convexSectorArea(const Ellipse& e, const Point2d pts[])
+  {
+    double theta[2];
+    for (int i = 0; i < 2; ++i)
+    {
+      const Vector2d dir(pts[i]-e.c());
+      double c = cos(e.o()), s = sin(e.o());
+      const Vector2d u0( c, s);
+      const Vector2d u1(-s, c);
+      
+      theta[i] = atan2(u1.dot(dir), u0.dot(dir));
+    }
+    
+    if (abs(theta[1]-theta[0]) > M_PI)
+    {
+      if (theta[0] < 0)
+        theta[0] += 2*M_PI;
+      else
+        theta[1] += 2*M_PI;
+    }
+    
+    if (theta[0] > theta[1])
+      std::swap(theta[0], theta[1]);
+    
+    return fabs(polarAntiderivative(e, theta[1]) - polarAntiderivative(e, theta[0]));
+  }
 
   std::ostream& operator<<(std::ostream& os, const Ellipse& e)
   {
