@@ -55,7 +55,9 @@ namespace DO {
   private: /* data members. */
     double start_;
     double elapsed_;
+#if defined(_WIN32) || defined(_WIN32_WCE)
     double frequency_;
+#endif
   };
 
   //! @}

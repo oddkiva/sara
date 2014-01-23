@@ -74,9 +74,9 @@ namespace DO {
     QueryPerformanceCounter(&end_);
     elapsed_ = (static_cast<double>(end_.QuadPart) - start_) / frequency_;
 #else
-    timeval end_;
-    gettimeofday(&end_, NULL);
-    double end_ = end_.tv_sec * 1e3 + end_.tv_usec * 1e-3;
+    timeval end;
+    gettimeofday(&end, NULL);
+    double end_ = end.tv_sec * 1e3 + end.tv_usec * 1e-3;
     elapsed_ = end_ - start_;
 #endif
     return elapsed_;
