@@ -20,8 +20,9 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
       set(ENABLE_CXX11 "-std=c++0x")
     endif ()
   endif ()
-  #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ENABLE_CXX11}")
-  add_definitions(${ENABLE_CXX11})
-  message(STATUS "  - Activating C++11 features, specifically for dependencies with Boost libraries.")
+  # TODO: investigate why C++11 is not still activated with the following.
+  # So I am commenting this for now.
+  #set (CMAKE_CXX_FLAGS "${ENABLE_CXX11}")
+  #message(STATUS "  - Activating C++11 features, specifically for dependencies with Boost libraries.")
   message(STATUS "  - C++11 compiler flags: ${CMAKE_CXX_FLAGS}")
 endif ()
