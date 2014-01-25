@@ -36,27 +36,6 @@ if (DO_USE_FROM_SOURCE)
     do_set_features_source_dir()
     do_list_features_source_files()
     do_create_variables_for_features_library()
-    
-    # Static library
-    do_append_library(
-      Features STATIC
-      "${DO_SOURCE_DIR}"
-      "${DO_Features_HEADER_FILES}"
-      "${DO_Features_SOURCE_FILES}"
-      "${DO_Features_LINK_LIBRARIES}"
-    )
-    do_set_specific_target_properties(DO_Features DO_STATIC)
-
-    # Shared library
-    if (DO_BUILD_SHARED_LIBS)
-      do_append_library(
-        Features_SHARED SHARED
-        "${DO_SOURCE_DIR}"
-        "${DO_Features_HEADER_FILES}"
-        "${DO_Features_SOURCE_FILES}"
-        "${DO_Features_LINK_LIBRARIES}"
-      )
-      do_set_specific_target_properties(DO_Features DO_EXPORTS)
-    endif ()
+    do_generate_library("Features")
   endif ()
 endif ()
