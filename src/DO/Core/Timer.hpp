@@ -14,6 +14,7 @@
 #ifndef DO_UTILITIES_TIMER_HPP
 #define DO_UTILITIES_TIMER_HPP
 
+#include <DO/Defines.hpp>
 #include <ctime>
 #include <iostream>
 
@@ -24,7 +25,7 @@ namespace DO {
   //! @{
 
   //! \brief Timer class.
-  class Timer
+  class DO_EXPORT Timer
   {
   public: /* interface. */
     //! Default constructor
@@ -41,7 +42,7 @@ namespace DO {
   };
 
   //! \brief Timer class with microsecond accuracy.
-  class HighResTimer
+  class DO_EXPORT HighResTimer
   {
   public: /* interface. */
     //! Default constructor
