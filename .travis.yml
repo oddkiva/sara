@@ -1,4 +1,12 @@
+language: cpp
+compiler:
+  - clang
+  - gcc
 before_install:
+  - pwd
+  - cmake --version
+  - ls /usr/local/lib
+  - ls /usr/local/include
   - sudo add-apt-repository --yes ppa:ubuntu-sdk-team/ppa
   - sudo apt-get update -qq
   - sudo apt-get install -qq qt5-qmake qtbase5-dev qtdeclarative5-dev libqt5webkit5-dev libsqlite3-dev
