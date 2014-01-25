@@ -15,7 +15,7 @@
 
 namespace DO {
 
-  class LineSegment : public std::pair<Point2d, Point2d>
+  class LineSegment : private std::pair<Point2d, Point2d>
   {
   public:
     typedef std::pair<Point2d, Point2d> Base;

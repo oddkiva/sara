@@ -34,7 +34,27 @@ namespace DO {
     if (theta[0] > theta[1])
       std::swap(theta[0], theta[1]);
     
-    return fabs(polarAntiderivative(e, theta[1]) - polarAntiderivative(e, theta[0]));
+    return polarAntiderivative(e, theta[1]) - polarAntiderivative(e, theta[0]);
+  }
+
+  double algebraicArea(const Ellipse& e, double theta0, double theta1)
+  {
+    return polarAntiderivative(e, theta1) - polarAntiderivative(e, theta0);
+  }
+
+  double sectorArea(const Ellipse& e, double theta0, double theta1)
+  {
+    if ( theta0 < -M_PI || theta0 > M_PI ||
+         theta1 < -M_PI || theta1 > M_PI )
+    {
+      const char *msg = "theta0 and theta1 must be in the range [-Pi, Pi]";
+      throw msg;
+    }
+
+    if (theta0 <= theta1)
+      return algebraicArea(e, theta0, theta1);
+    else if (theta0 > theta1)
+      return area(e) - algebraicArea(e, theta1, theta0);
   }
 
   std::ostream& operator<<(std::ostream& os, const Ellipse& e)

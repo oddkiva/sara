@@ -29,7 +29,6 @@ namespace DO {
                                   const Ellipse& e2);
 
   //! Compute the intersection union ratio exactly.
-  double convexSectorArea(const Ellipse& e, const Point2d pts[]);
   double analyticInterArea(const Ellipse& e1, const Ellipse& e2,
                            bool debug = false);
   double analyticInterUnionRatio(const Ellipse& e1, const Ellipse& e2);

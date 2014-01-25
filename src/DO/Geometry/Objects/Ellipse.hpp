@@ -43,8 +43,20 @@ namespace DO {
       const double x = ((e.b_+e.a_)+(e.b_-e.a_)*cos(2*theta));
       return e.a_*e.b_*0.5*( theta - atan(y/x) );
     }
-    //! Convex sector area
+    //! Convex sector area: this function is deprecated.
     friend double convexSectorArea(const Ellipse& e, const Point2d pts[]);
+    /*!
+      This function should be used instead to compute the sector area of an ellipse
+      going from the polar angle $\theta_1$ to $\theta_2$ w.r.t. to ellipse orientation
+      $o$.
+      $\theta_1$ and $\theta_2$ are required to be in the range $]-\pi, \pi]$ and it is
+      required to have $\theta_1$ and $\theta_2$.
+
+      Still the definition of the sector area remains ambiguous and we must specify the
+      direction either *clockwise* == -1, or *counter-clockwise* == 1
+     */
+    friend double sectorArea(const Ellipse& e, double theta1, double theta2,
+                             int direction);
     //! Ellipse area.
     friend inline double area(const Ellipse& e)
     { return M_PI*e.a_*e.b_; }
