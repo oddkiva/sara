@@ -14,11 +14,10 @@
 #include <DO/Core/DebugUtilities.hpp>
 #include <DO/Core/Timer.hpp>
 #include <DO/Graphics.hpp>
-#include <DO/Geometry/BBox.hpp>
-#include <DO/Geometry/Quad.hpp>
-#include <DO/Geometry/Triangle.hpp>
-#include <DO/Geometry/Graphics/DrawPolygon.hpp>
-#include <DO/Geometry/EllipseIntersection.hpp>
+#include <DO/Geometry/Objects.hpp>
+#include <DO/Geometry/Graphics.hpp>
+#include <DO/Geometry/Algorithms/EllipseIntersection.hpp>
+#include <DO/Geometry/Tools/Cone.hpp>
 #include <ctime>
 
 using namespace std;
@@ -41,6 +40,8 @@ Ellipse randomEllipse(double w, double h)
                  myRandom(0,2*M_PI),
                  Point2d(myRandom(w/4., 3*w/4.), myRandom(h/4., 3*h/4.)) );
 }
+
+// \todo: add CSG.
 
 void testQuadAlgorithms()
 {
@@ -100,6 +101,40 @@ void testAffineTransforms()
   getKey();
 }
 #endif
+
+TEST(DO_Geometry_Test, coneTest)
+{
+  AffineCone2 K(Vector2d(1,0), Vector2d(1,1), Point2d(w/2.,h/2.), AffineCone2::Blunt);
+  
+  Point2d v = K.vertex(), a = K.vertex()+K.alpha()*100, b = K.vertex()+K.beta()*50;
+  
+  bool debug = false;
+  if (!getActiveWindow() && debug)
+    setAntialiasing(openWindow(w, h));
+  
+  for (int y = 0; y < h; ++y)
+  {
+    for (int x = 0; x < w; ++x)
+    {
+      bool insideCone = inside(Point2d(x,y), K);
+      if (x >= w/2. && y >= h/2. && x >= y)
+      {
+        EXPECT_TRUE(insideCone);
+        if (debug)
+          drawPoint(x, y, Green8);
+      }
+      else
+        EXPECT_FALSE(insideCone);
+    }
+  }
+
+  if (debug)
+  {
+    drawArrow(v, a, Black8);
+    drawArrow(v, b, Black8);
+    getKey();
+  }
+}
 
 TEST(DO_Geometry_Test, bboxTest)
 {

@@ -199,12 +199,25 @@ namespace DO {
     @param[in] width width of the contour.
    */
   inline void drawArrow(int x1, int y1, int x2, int y2, const Color3ub&  col,
-                        double ta, double tl, int style, int width) 
+                        double ta, double tl, int style, int width)
   { 
     drawArrow(x1, y1, x2, y2, col,
           int(tl*cos(ta*3.14/180)), int(2*tl*sin(ta*3.14/180)),
           style, width);
   }
+  inline void drawArrow(const Point2f& a, const Point2f& b, const Color3ub& col,
+                        int penWidth = 1)
+  {
+    drawArrow(int(a.x()), int(a.y()), int(b.x()), int(b.y()), col,
+              8, 5, 0, penWidth);
+  }
+  inline void drawArrow(const Point2d& a, const Point2d& b, const Color3ub& col,
+                        int penWidth = 1)
+  {
+    drawArrow(int(a.x()), int(a.y()), int(b.x()), int(b.y()), col,
+              8, 5, 0, penWidth);
+  }
+  
 
   // ======================================================================== //
   // Filling commands

@@ -53,49 +53,49 @@ namespace DO { namespace Projective {
   };
 
   template <typename T, int N>
-  class Conic : public MatrixBasedObject
+  class Conic : public MatrixBasedObject<T,N>
   {
-    typedef ProjectiveBasedObject Base;
+    typedef MatrixBasedObject<T,N> Base;
     using Base::mat_;
   public:
     using Base::Dimension;
-    typedef Base::Mat  Mat;
-    typedef Base::HVec HVec;
-    typedef Base::Vec  Vec;
+    typedef typename Base::Mat  Mat;
+    typedef typename Base::HVec HVec;
+    typedef typename Base::Vec  Vec;
     //! Common constructors
     inline Conic() : Base() {}
     inline Conic(const Base& other) : Base(other) {}
     inline Conic(const Mat& data) : Base(data) {}
     //! Evaluation at point 'x'
     inline T operator()(const HVec& x) const
-    { return hx.transpose()*mat_*x; }
+    { return x.transpose()*mat_*x; }
     //! Evaluation at point 'x'
     inline T operator()(const Vec& x) const
-    { return operator((HVec() << x, 1).finished()); }
+    { return (*this)((HVec() << x, 1).finished()); }
     //! I/O
-    friend std::ostream& operator<<(std::ostream& os,const ProjBasedObject& P);
+    friend std::ostream& operator<<(std::ostream& os,const Conic& P);
   };
   
   template <typename T, int N>
-  class Homography : public MatrixBasedObject
+  class Homography : public MatrixBasedObject<T,N>
   {
-    typedef MatrixBasedObject Base;
+    typedef MatrixBasedObject<T,N> Base;
     using Base::mat_;
   public:
     using Base::Dimension;
-    typedef Base::Mat  Mat;
-    typedef Base::HVec HVec;
-    typedef Base::Vec  Vec;
+    typedef typename Base::Mat  Mat;
+    typedef typename Base::HVec HVec;
+    typedef typename Base::Vec  Vec;
     //! Common constructors
     inline Homography() : Base() {}
     inline Homography(const Base& other) : Base(other) {}
     inline Homography(const Mat& data) : Base(data) {}
     //! Evaluation at point 'x'
     inline T operator()(const HVec& x) const
-    { return hx.transpose()*mat_*x; }
+    { return x.transpose()*mat_*x; }
     //! Evaluation at point 'x'
     inline T operator()(const Vec& x) const
-    { return operator((HVec() << x, 1).finished()); }
+    { return (*this)((HVec() << x, 1).finished()); }
   };
 
 } /* namespace Projective */

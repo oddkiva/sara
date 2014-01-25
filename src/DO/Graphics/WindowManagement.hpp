@@ -79,7 +79,10 @@ namespace DO {
   void setActiveWindow(Window w);
   //! Resize the specified window **w** with the following parameters.
   DO_EXPORT
-  void resizeWindow(Window w, int width, int height);
+  void resizeWindow(int width, int height, Window w = getActiveWindow());
+  //! Resize the specified window **w** with the following parameters.
+  inline void resizeWindow(const Vector2i& sizes, Window w = getActiveWindow())
+  { resizeWindow(sizes(0), sizes(1), w); }
 
   // ====================================================================== //
   // Temporizing functions

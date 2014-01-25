@@ -9,9 +9,13 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_GEOMETRY_GRAPHICS_HPP
-#define DO_GEOMETRY_GRAPHICS_HPP
+#include <DO/Geometry/Tools/Cone.hpp>
 
-#include <DO/Geometry/Graphics/DrawPolygon.hpp>
+namespace DO {
+  
+  template class Cone<2>;
+  template class Cone<3>;
+  template class AffineCone<2>;
+  template class AffineCone<3>;
 
-#endif /* DO_GEOMETRY_GRAPHICS_HPP */
+} /* namespace DO */

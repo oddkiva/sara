@@ -13,8 +13,8 @@
 #define DO_GEOMETRY_QUAD_HPP
 
 #include <DO/Core/EigenExtension.hpp>
-#include <DO/Geometry/Polygon.hpp>
-#include <DO/Geometry/BBox.hpp>
+#include <DO/Geometry/Objects/Polygon.hpp>
+#include <DO/Geometry/Objects/BBox.hpp>
 
 namespace DO {
 

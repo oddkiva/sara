@@ -13,25 +13,12 @@
 #define DO_GEOMETRY_HPP
 
 //! Some useful mathematical tools.
-#include "Geometry/Tools/Projective.hpp"
-#include "Geometry/Tools/Utilities.hpp"
-#include "Geometry/Tools/Metric.hpp"
-#include "Geometry/Tools/Polynomial.hpp"
-#include "Geometry/Tools/PolynomialRoots.hpp"
-
+#include <DO/Geometry/Tools.hpp>
 //! Basic data structures for computational geometry.
-#include "Geometry/LineSegment.hpp"
-#include "Geometry/BBox.hpp"
-#include "Geometry/Polygon.hpp"
-#include "Geometry/Triangle.hpp"
-#include "Geometry/Quad.hpp"
-#include "Geometry/Ellipse.hpp"
+#include <DO/Geometry/Objects.hpp>
 //! Basic computational geometry algorithms
-#include "Geometry/ConvexHull.hpp"
-#include "Geometry/EllipseIntersection.hpp"
-#include "Geometry/SutherlandHodgman.hpp"
-
+#include <DO/Geometry/Algorithms.hpp>
 //! Graphics.
-#include "Geometry/Graphics/DrawPolygon.hpp"
+#include <DO/Geometry/Graphics.hpp>
 
 #endif /* DO_GEOMETRY_HPP */

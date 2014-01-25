@@ -9,101 +9,97 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_GEOMETRY_TOOLS_POLYNOMIAL_HPP
-#define DO_GEOMETRY_TOOLS_POLYNOMIAL_HPP
+#ifndef DO_GEOMETRY_TOOLS_CONE_HPP
+#define DO_GEOMETRY_TOOLS_CONE_HPP
 
-#include <DO/Geometry/Tools/Utilities.hpp>
+#include <DO/Core/EigenExtension.hpp>
+#include <DO/Core/DebugUtilities.hpp>
 #include <algorithm>
 
 namespace DO {
-
-  //! Monomial class.
-  template <typename T>
-  class Monomial
+  
+  template <int N>
+  class Cone
   {
   public:
-    //! Default constructor
-    inline Monomial() {}
-    inline Monomial(T coeff, int degree) : coeff_(coeff), degree_(degree) {}
-    // Mutable accessor
-    inline T& coeff() { return coeff_; }
-    inline int& degree() { return degree_; }
-    // Immutable accessor
-    inline const T& coeff() const { return coeff_; }
-    inline int degree() const { return degree_; }
-    // Comparison operator
-    inline bool operator==(const Monomial& other) const
-    { return coeff_ == other.coeff_ && degree_ == other.degree_; }
-    inline bool operator!=(const Monomial& other) const
-    { return !operator==(other); }
-  private:
-    T coeff_;
-    int degree_;
-  };
+    enum { Dimension = N };
+    typedef Matrix<double, N, 2> Basis;
+    typedef Matrix<double, N, 1> Vector;
+    
+    enum Type { Convex, Blunt, Pointed };
 
-  //! Rudimentary polynomial class.
-  template <typename T, int N>
-  class Polynomial
-  {
-  public:
-    enum { Degree = N };
-    //! Default constructor
-    inline Polynomial() {}
-    inline Polynomial(const T *coeff) { std::copy(coeff, coeff+N+1, coeff_); }
-    inline Polynomial(const Polynomial& P) { copy(P); }
-    //inline Polynomial(Polynomial&& P);
-    //! Assignment operator
-    Polynomial& operator=(const Polynomial& P) { copy(P); return *this; }
-    //! Coefficient accessor at given degree.
-    inline T& operator[](int degree) { return coeff_[degree]; }
-    inline const T& operator[](int degree) const { return coeff_[degree]; }
-    //! Evaluation at point 'x'
-    inline T operator()(const T& x) const
+    inline Cone(const Vector& alpha, const Vector& beta, Type type = Convex,
+                double eps = 1e-8)
+      : eps_(eps), type_(type)
     {
-      T res = static_cast<T>(0);
-      for (int i = 0; i <= N; ++i)
-        res += coeff_[i]*std::pow(x, i);
-      return res;
+      basis_.col(0) = alpha;
+      basis_.col(1) = beta;
+      FullPivLU<Basis> luSolver(basis_);
+      luSolver.setThreshold(eps_);
+      if (luSolver.rank() == 1)
+        type_ = Pointed;
     }
-    inline std::complex<T> operator()(const std::complex<T>& x) const
+    
+    inline const Basis& basis() const { return basis_; }
+    inline Vector alpha() const { return basis_.col(0); }
+    inline Vector beta() const { return basis_.col(1); }
+
+    friend
+    inline bool inside(const Vector& p, const Cone& K)
+    { return K.insideMe(p); }
+    
+  protected:
+    bool insideMe(const Vector& x) const
     {
-      std::complex<T> res;
-      for (int i = 0; i <= N; ++i)
-        res += coeff_[i]*std::pow(x, i);
-      return res;
+      Vector2d theta;
+      theta = basis_.fullPivLu().solve(x);
+      double relError = (basis_*theta - x).squaredNorm() / x.squaredNorm();
+      
+      if (relError > eps_)
+        return false;
+      
+      double minCoeff = theta.minCoeff();
+      if (type_ == Convex)
+        return minCoeff > 0;
+      return minCoeff >= 0;
     }
-    //! Comparison operator
-    inline bool operator==(const Polynomial& other) const
-    {
-      for (int i = 0; i < N; ++i)
-        if (coeff_[i] != other.coeff_[i])
-          return false;
-      return true;
-    } 
-    inline bool operator!=(const Polynomial& other) const
-    { return !operator=(other); }
-    //! I/O
-    friend std::ostream& operator<<(std::ostream& os,const Polynomial& P)
-    {
-      for(int i = N; i >= 0; --i)
-      {
-        if (signum(P[i]) >= 0)
-          os << "+";
-        else
-          os << "-";
-        os << std::abs(P[i]);
-        if (i > 0) 
-          os << "X**" << i << " ";
-      }
-      return os;
-    }
-  private:
-    inline void copy(const Polynomial& other)
-    { std::copy(other.coeff_, other.coeff_+N+1, coeff_); }
-  private:
-    T coeff_[N+1];
+
+  protected:
+    Basis basis_;
+    double eps_;
+    Type type_;
   };
+  
+  template <int N>
+  class AffineCone : public Cone<N>
+  {
+    typedef Cone<N> Base;
+
+  public:
+    enum { Dimension = Base::Dimension };
+    typedef typename Base::Type Type;
+    typedef typename Base::Vector Vector;
+
+    inline AffineCone(const Vector& alpha, const Vector& beta,
+                      const Vector& vertex, Type type = Base::Convex)
+      : Base(alpha, beta, type), vertex_(vertex) {}
+
+    inline const Vector& vertex() const { return vertex_; }
+    
+    friend
+    inline bool inside(const Vector& p, const AffineCone& K)
+    { return K.insideMe(Vector(p-K.vertex_)); }
+
+  private:
+    Vector vertex_;
+  };
+  
+  typedef Cone<2> Cone2;
+  typedef Cone<3> Cone3;
+  typedef AffineCone<2> AffineCone2;
+  typedef AffineCone<3> AffineCone3;
+
 
 } /* namespace DO */
 
-#endif /* DO_GEOMETRY_TOOLS_POLYNOMIAL_HPP */
+#endif /* DO_GEOMETRY_TOOLS_CONE_HPP */

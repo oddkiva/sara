@@ -9,10 +9,9 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_GEOMETRY_ELLIPSEINTERSECTION_HPP
-#define DO_GEOMETRY_ELLIPSEINTERSECTION_HPP
+#pragma once
 
-#include <DO/Geometry/Ellipse.hpp>
+#include <DO/Geometry/Objects/Ellipse.hpp>
 #define _USE_MATH_DEFINES
 #include <cmath>
 
@@ -35,5 +34,3 @@ namespace DO {
 
 
 } /* namespace DO */
-
-#endif /* DO_GEOMETRY_ELLIPSEINTERSECTION_HPP */

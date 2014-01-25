@@ -53,7 +53,7 @@ namespace DO {
 
     if (theta0 <= theta1)
       return algebraicArea(e, theta0, theta1);
-    else if (theta0 > theta1)
+    else // theta0 > theta1
       return area(e) - algebraicArea(e, theta1, theta0);
   }
 
