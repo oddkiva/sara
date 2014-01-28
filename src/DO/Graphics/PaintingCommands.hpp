@@ -76,6 +76,15 @@ namespace DO {
   void drawCircle(const Point2f& center, float r, const Color3ub& c,
                   int penWidth = 1);
   /*!
+    \brief Draw a circle in the active PaintingWindow window.
+    @param[in] center circle center.
+    @param[in] c RGB color in \f$[0, 255]^3\f$.
+    @param[in] penWidth width of the contour.
+   */
+  DO_EXPORT
+  void drawCircle(const Point2d& center, double r, const Color3ub& c,
+                  int penWidth = 1);
+  /*!
     \brief Draw an axis-aligned ellipse in the active PaintingWindow window.
     @param[in] x,y,w,h bounding box parameters of the ellipse.
     @param[in] c RGB color in \f$[0, 255]^3\f$.
