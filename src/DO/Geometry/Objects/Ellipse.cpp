@@ -2,13 +2,24 @@
 
 //#define DEBUG_ELLIPSE_INTERSECTION
 
+#include <DO/Geometry/Tools/Utilities.hpp>
+#include <DO/Geometry/Objects/Ellipse.hpp>
+#include <DO/Geometry/Objects/Triangle.hpp>
 #include <DO/Geometry.hpp>
-#include <DO/Graphics.hpp>
 #include <deque>
 
 using namespace std;
 
 namespace DO {
+
+  Point2d Ellipse::operator()(double theta) const 
+  {
+    Point2d p(unitVector2(theta));
+    p(0) *= a_;
+    p(1) *= b_;
+    p += c_;
+    return p;
+  }
   
   double convexSectorArea(const Ellipse& e, const Point2d pts[])
   {
@@ -42,19 +53,43 @@ namespace DO {
     return polarAntiderivative(e, theta1) - polarAntiderivative(e, theta0);
   }
 
-  double sectorArea(const Ellipse& e, double theta0, double theta1)
+  static
+  void shiftOrientations(double& theta0, double& theta1) 
   {
-    if ( theta0 < -M_PI || theta0 > M_PI ||
+    /*if ( theta0 < -M_PI || theta0 > M_PI ||
          theta1 < -M_PI || theta1 > M_PI )
     {
       const char *msg = "theta0 and theta1 must be in the range [-Pi, Pi]";
-      throw msg;
-    }
+      throw std::logic_error(msg);
+    }*/
 
-    if (theta0 <= theta1)
+    if (theta0 < 0)
+      theta0 += 2*M_PI;
+    if (theta1 < 0)
+      theta1 += 2*M_PI;
+  }
+
+  double sectorArea(const Ellipse& e, double theta0, double theta1)
+  {
+    shiftOrientations(theta0, theta1);
+    if (theta0 < theta1)
       return algebraicArea(e, theta0, theta1);
     else // theta0 > theta1
       return area(e) - algebraicArea(e, theta1, theta0);
+  }
+
+  double segmentArea(const Ellipse& e, double theta0, double theta1)
+  {
+    Point2d p0(e(theta0)), p1(e(theta1));
+
+    Triangle t(e.c(), p0, p1);
+
+    double triArea = area(t);
+    double sectArea = sectorArea(e, theta0, theta1);
+
+    if (abs(theta1 - theta0) < M_PI)
+      return sectArea - triArea;
+    return sectArea + triArea;
   }
 
   std::ostream& operator<<(std::ostream& os, const Ellipse& e)

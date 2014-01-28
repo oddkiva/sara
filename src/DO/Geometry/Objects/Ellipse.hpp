@@ -14,6 +14,7 @@
 
 #define _USE_MATH_DEFINES
 #include <cmath>
+#include <DO/Core/EigenExtension.hpp>
 
 namespace DO {
 
@@ -36,6 +37,9 @@ namespace DO {
     double& o() { return o_; }
     Point2d& c() { return c_; }
 
+    // Get point on ellipse at angle $\theta$ w.r.t. orientation $o$ of ellipse.
+    Point2d operator()(double theta) const;
+
     //! Polar antiderivative.
     friend inline double polarAntiderivative(const Ellipse& e, double theta)
     {
@@ -46,17 +50,22 @@ namespace DO {
     //! Convex sector area: this function is deprecated.
     friend double convexSectorArea(const Ellipse& e, const Point2d pts[]);
     /*!
-      This function should be used instead to compute the sector area of an ellipse
-      going from the polar angle $\theta_1$ to $\theta_2$ w.r.t. to ellipse orientation
-      $o$.
-      $\theta_1$ and $\theta_2$ are required to be in the range $]-\pi, \pi]$ and it is
-      required to have $\theta_1$ and $\theta_2$.
+      This function should be used instead to compute the **positive** area 
+      of an ellipse sector which we define as the region bounded by:
+      - the **counter-clockwise** oriented arc going **from** the endpoint
+        $M(\theta0)$ **to** endpoint $M(\theta_1)$.
+      - line segments connecting the center of the ellipse and the endpoints 
+        of the arc.
 
-      Still the definition of the sector area remains ambiguous and we must specify the
-      direction either *clockwise* == -1, or *counter-clockwise* == 1
+      $\theta_0$ and $\theta_1$ are required to be in the range $]\pi, \pi]$ but
+      it does not matter if $\theta_0 > \theta_1$.      
      */
-    friend double sectorArea(const Ellipse& e, double theta1, double theta2,
-                             int direction);
+    friend double sectorArea(const Ellipse& e, double theta0, double theta1);
+    /*!
+      An elliptic segment is a region bounded by an arc and the chord connecting
+      the arc's endpoints.
+     */
+    friend double segmentArea(const Ellipse& e, double theta0, double theta1);
     //! Ellipse area.
     friend inline double area(const Ellipse& e)
     { return M_PI*e.a_*e.b_; }

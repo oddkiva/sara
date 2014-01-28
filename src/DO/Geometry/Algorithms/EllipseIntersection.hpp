@@ -11,9 +11,11 @@
 
 #pragma once
 
-#include <DO/Geometry/Objects/Ellipse.hpp>
 #define _USE_MATH_DEFINES
+#include <DO/Geometry/Objects/Ellipse.hpp>
+#include <vector>
 #include <cmath>
+
 
 namespace DO {
 

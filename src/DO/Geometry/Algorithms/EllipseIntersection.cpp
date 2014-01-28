@@ -9,7 +9,12 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Geometry.hpp>
+#include <DO/Geometry/Algorithms/EllipseIntersection.hpp>
+#include <DO/Geometry/Algorithms/ConvexHull.hpp>
+#include <DO/Geometry/Algorithms/SutherlandHodgman.hpp>
+#include <DO/Geometry/Tools/PolynomialRoots.hpp>
+#include <DO/Geometry/Tools/Utilities.hpp>
+#include <DO/Geometry/Graphics/DrawPolygon.hpp>
 #include <DO/Core/Stringify.hpp>
 #include <vector>
 #include <iostream>
@@ -79,7 +84,7 @@ namespace DO {
     getSigmaPolynomial(sigma, s, realY);
     getSigmaPolynomial(tau, t, realY);
     const double x = (sigma[2]*tau[0] - sigma[0]*tau[2])
-                   / (sigma[1]*tau[2] - sigma[2]*tau[1]);
+      / (sigma[1]*tau[2] - sigma[2]*tau[1]);
 
     if (fabs(computeConicExpression(x, realY, s)) < 1e-1 &&
         fabs(computeConicExpression(x, realY, t)) < 1e-1)
@@ -100,12 +105,31 @@ namespace DO {
     double squared_eps_;
   };
 
+  void rescaleEllipse(Ellipse& e, double scale/*, const Point2d& center*/)
+  {
+    e.r1() /= scale;
+    e.r2() /= scale;
+    e.c() /= scale;
+  }
+
   int computeEllipseIntersections(Point2d intersections[4],
                                   const Ellipse & e1, const Ellipse & e2)
   {
+    // Rescale ellipse to try to improve numerical accuracy.
+    Point2d center;
+    center = 0.5*(e1.c() + e2.c());
+
+    Ellipse ee1(e1), ee2(e2);
+    ee1.c() -= center;
+    ee2.c() -= center;
+    //double scale = (ee1.c()-center).norm();
+    //rescaleEllipse(e1, scale);
+    //rescaleEllipse(e2, scale);
+
+
     double s[6], t[6];
-    getConicEquation(s, e1);
-    getConicEquation(t, e2);
+    getConicEquation(s, ee1);
+    getConicEquation(t, ee2);
     
     Polynomial<double, 4> u(getQuarticEquation(s, t));
 
@@ -118,7 +142,7 @@ namespace DO {
       pair<bool, Point2d> p(isRootValid(y[i], s, t));
       if(!p.first)
         continue;
-      intersections[numInter] = p.second;
+      intersections[numInter] = /*scale*/p.second + center;
       ++numInter;
     }
 
@@ -126,13 +150,25 @@ namespace DO {
     return unique(intersections, intersections+numInter, equal) - intersections;
   }
 
+  void orientation(double *ori, const Point2d *pts, int numPoints,
+                   const Ellipse& e)
+  {
+    for (int i = 0; i < numPoints; ++i)
+    {
+      const Vector2d d(pts[i]-e.c());
+      const Vector2d u(unitVector2(e.o()));
+      const Vector2d v(-u(1), u(0));
+      ori[i] = atan2(v.dot(d), u.dot(d));
+    }
+  }
+
   // ======================================================================== //
   // Computation of the area of intersecting ellipses.
   // ======================================================================== //
-  double analyticInterArea(const Ellipse& e1, const Ellipse& e2, bool debug)
+  double analyticInterArea(const Ellipse& e0, const Ellipse& e1, bool debug)
   {    
     Point2d interPts[4];
-    int numInter = computeEllipseIntersections(interPts, e1, e2);
+    int numInter = computeEllipseIntersections(interPts, e0, e1);
 
     if (debug)
     {
@@ -146,81 +182,29 @@ namespace DO {
 
     if (numInter < 2)
     {
-      if (inside(e2.c(), e1) || inside(e1.c(), e2))
-        return std::min(area(e1), area(e2));
+      if (inside(e1.c(), e0) || inside(e0.c(), e1))
+        return std::min(area(e0), area(e1));
     }
     
     if (numInter == 2)
     {
-      // TODO: seems OK, I think in terms of numerical accuracy.
-      Triangle t1(e1.c(), interPts[0], interPts[1]);
-      Triangle t2(e2.c(), interPts[0], interPts[1]);
-      if (debug)
-      {
-        drawTriangle(t1, Red8);
-        drawTriangle(t2, Blue8);
-      }
-      
-      // Find the correct elliptic sectors.
-      bool revert[2] = {false, false};
-      {
-        const Point2d& c0 = e1.c();
-        const Point2d& c1 = e2.c();
-        const Point2d& p0 = interPts[0];
-        const Point2d& p1 = interPts[1];
+      const Point2d& p0 = interPts[0];
+      const Point2d& p1 = interPts[1];
 
-        Vector2d u(p1-p0);
-        Vector2d n(-u(1), u(0));
+      drawCircle(e0.c(), 5., Red8, 3);
+      drawCircle(e1.c(), 5., Blue8, 3);
 
-        Vector2d dir0(c0-p0), dir1(c1-p0);
-        double d0 = n.dot(dir0), d1 = n.dot(dir1);
+      double ori0[2];
+      double ori1[2];
+      orientation(ori0, interPts, 2, e0);
+      orientation(ori1, interPts, 2, e1);
 
-        if (d0*d1 > 0)
-        {
-          if (abs(d0) < abs(d1))
-            revert[0] = true;
-          else
-            revert[1] = true;
-        }
-      }
-
-      if (debug)
-        for (int i = 0; i < 2; ++i)
-          cout << "Revert[" << i << "] = " << int(revert[i]) << endl;
-
-      double ellSectArea1 = convexSectorArea(e1, interPts);
-      double triArea1 = area(t1);
-      double portionArea1 = ellSectArea1 - triArea1;
-      if (revert[0])
-        portionArea1 = area(e1) - portionArea1;
-
-      if (debug)
-      {
-        cout << "Ellipse 1" << endl;
-        cout << "sectorArea1 = " << ellSectArea1 << endl;
-        cout << "area1 = " << area(e1) << endl;
-        cout << "triangleArea1 = " << triArea1 << endl;
-        cout << "portionArea1 = " << portionArea1 << endl;
-        cout << "portionAreaPercentage1 = " << portionArea1/area(e1) << endl;
-      }
-      
-      double ellSectArea2 = convexSectorArea(e2, interPts);
-      double triArea2 = area(t2);
-      double portionArea2 = ellSectArea2 - triArea2;
-      if (revert[1])
-        portionArea2 = area(e2) - portionArea2;
-
-      if (debug)
-      {
-        cout << "Ellipse 2" << endl;
-        cout << "sectorArea2 = " << ellSectArea2 << endl;
-        cout << "area2 = " << area(e2) << endl;
-        cout << "triangleArea2 = " << triArea2 << endl;
-        cout << "portionArea2 = " << portionArea2 << endl;
-        cout << "portionAreaPercentage2 = " << portionArea2/area(e2) << endl;
-      }
-      
-      return portionArea1 + portionArea2;
+      double seg01, seg10;
+      seg01 = min(segmentArea(e0, ori0[0], ori0[1]), 
+                  segmentArea(e1, ori1[0], ori1[1]));
+      seg10 = min(segmentArea(e0, ori0[1], ori0[0]), 
+                  segmentArea(e1, ori1[1], ori1[0]));
+      return seg01+seg10;
     }
     
     if (numInter >= 3)
@@ -237,15 +221,18 @@ namespace DO {
       for (int i = 0; i < numInter; ++i)
       {
         Point2d pts[2] = { interPts[i], interPts[(i+1)%numInter] };
-        Triangle t1(e1.c(), pts[0], pts[1]);
-        Triangle t2(e2.c(), pts[0], pts[1]);
+        Triangle t1(e0.c(), pts[0], pts[1]);
+        Triangle t2(e1.c(), pts[0], pts[1]);
         
-        drawTriangle(t1, Red8, 1);
-        drawTriangle(t2, Blue8, 1);
+        if (debug)
+        {
+          drawTriangle(t1, Red8, 1);
+          drawTriangle(t2, Blue8, 1);
+        }
         
         // correct here when pts[0], pts[1] more than pi degree.
-        double sectorArea1 = convexSectorArea(e1, pts);
-        double sectorArea2 = convexSectorArea(e2, pts);
+        double sectorArea1 = convexSectorArea(e0, pts);
+        double sectorArea2 = convexSectorArea(e1, pts);
         double triArea1 = area(t1);
         double triArea2 = area(t2);
         double portionArea1 = sectorArea1 - triArea1;
