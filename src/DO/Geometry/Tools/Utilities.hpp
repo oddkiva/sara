@@ -48,30 +48,28 @@ namespace DO {
   template <typename T>
   inline T cross(const Matrix<T, 2, 1>& u, const Matrix<T, 2, 1>& v)
   {
-    DO_STATIC_ASSERT( !std::numeric_limits<T>::is_integer, 
-      SCALAR_MUST_BE_OF_FLOATING_TYPE );
     Matrix<T, 2, 2> M;
     M.col(0) = u;
     M.col(1) = v;
     return M.determinant();
   }
 
+  template <typename T>
+  inline T cross(const Matrix<T, 2, 1>& a, const Matrix<T, 2, 1>& b,
+                 const Matrix<T, 2, 1>& c)
+  { return cross(Matrix<T,2,1>(b-a), Matrix<T,2,1>(c-a)); }
+
   /*!
-    Suppose line segment [a, b] is vertical.
+    Suppose the 'b-a' is an upfront vector.
     There are three cases:
     - If point 'c' is on the left, then det([b-a, c-a]) > 0.
     - If point 'c' is on the right, then det([b-a, c-a]) < 0.
     - If point 'c' is on the line (a,b), then det([b-a, c-a]) = 0.
     */
   template <typename T>
-  int ccw(const Matrix<T, 2, 1>& a, const Matrix<T, 2, 1>& b,
-          const Matrix<T, 2, 1>& c)
-  {
-    DO_STATIC_ASSERT( !std::numeric_limits<T>::is_integer, 
-      SCALAR_MUST_BE_OF_FLOATING_TYPE );
-    Matrix<T, 2, 1> u(b-a), v(c-a);
-    return signum( cross(u, v) );
-  }
+  inline int ccw(const Matrix<T, 2, 1>& a, const Matrix<T, 2, 1>& b,
+                 const Matrix<T, 2, 1>& c)
+  { return signum( cross(a, b, c) ); }
 
   template <typename T>
   inline Matrix<T, 2, 1> unitVector2(T radian)
