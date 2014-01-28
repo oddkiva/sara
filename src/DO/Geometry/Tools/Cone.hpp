@@ -26,18 +26,25 @@ namespace DO {
     typedef Matrix<double, N, 2> Basis;
     typedef Matrix<double, N, 1> Vector;
     
-    enum Type { Convex, Blunt, Pointed };
+    enum Type {
+      Convex = 0x1, Blunt = 0x2, Pointed = 0x4,
+      PositiveCosine = 0x8
+    };
 
     inline Cone(const Vector& alpha, const Vector& beta, Type type = Convex,
                 double eps = 1e-8)
       : eps_(eps), type_(type)
     {
-      basis_.col(0) = alpha;
-      basis_.col(1) = beta;
+      basis_.col(0) = alpha.normalized();
+      basis_.col(1) = beta.normalized();
       FullPivLU<Basis> luSolver(basis_);
       luSolver.setThreshold(eps_);
       if (luSolver.rank() == 1)
-        type_ = Pointed;
+      {
+        type_ |= Pointed;
+        if (basis_.col(0).dot(basis_.col(1)) > 0)
+          type_ |= PositiveCosine;
+      }
     }
     
     inline const Basis& basis() const { return basis_; }
@@ -46,28 +53,41 @@ namespace DO {
 
     friend
     inline bool inside(const Vector& p, const Cone& K)
-    { return K.insideMe(p); }
+    { return K.contains(p); }
     
   protected:
-    bool insideMe(const Vector& x) const
+    bool contains(const Vector& x) const
     {
+      // Deal with the null vector.
+      if (x.squaredNorm() < eps_*eps_)
+        return type_ & Blunt;
+
+      // Otherwise decompose x w.r.t. to the basis.
       Vector2d theta;
       theta = basis_.fullPivLu().solve(x);
       double relError = (basis_*theta - x).squaredNorm() / x.squaredNorm();
-      
       if (relError > eps_)
         return false;
-      
+
+      // Deal with the degenerate cases (Pointed cone).
+      if (type_ & Pointed)
+      {
+        if (type_ & PositiveCosine && type_ & Blunt)
+          return theta.minCoeff() > -eps_;
+        return type_ & Blunt;
+      }
+
+      // Generic case.
       double minCoeff = theta.minCoeff();
-      if (type_ == Convex)
-        return minCoeff > 0;
-      return minCoeff >= 0;
+      if (type_ & Convex)
+        return minCoeff > eps_;
+      return minCoeff > -eps_;
     }
 
   protected:
     Basis basis_;
     double eps_;
-    Type type_;
+    unsigned char type_;
   };
   
   template <int N>
@@ -81,14 +101,15 @@ namespace DO {
     typedef typename Base::Vector Vector;
 
     inline AffineCone(const Vector& alpha, const Vector& beta,
-                      const Vector& vertex, Type type = Base::Convex)
+                      const Vector& vertex, Type type = Base::Convex,
+                      double eps = 1e-8)
       : Base(alpha, beta, type), vertex_(vertex) {}
 
     inline const Vector& vertex() const { return vertex_; }
     
     friend
     inline bool inside(const Vector& p, const AffineCone& K)
-    { return K.insideMe(Vector(p-K.vertex_)); }
+    { return K.contains(Vector(p-K.vertex_)); }
 
   private:
     Vector vertex_;
