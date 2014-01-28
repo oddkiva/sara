@@ -1,4 +1,5 @@
-#include <DO/Geometry.hpp>
+#include <DO/Geometry/Objects/LineSegment.hpp>
+#include <DO/Geometry/Tools/Utilities.hpp>
 
 namespace DO {
 
