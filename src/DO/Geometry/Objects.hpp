@@ -12,11 +12,22 @@
 #ifndef DO_GEOMETRY_OBJECTS_HPP
 #define DO_GEOMETRY_OBJECTS_HPP
 
+// 2D objects but their generalization to higher dimensions is straightforward.
+// \todo: see if generalization can be implemented easily by implementing a Kernel.
 #include <DO/Geometry/Objects/LineSegment.hpp>
 #include <DO/Geometry/Objects/BBox.hpp>
 #include <DO/Geometry/Objects/Polygon.hpp>
 #include <DO/Geometry/Objects/Triangle.hpp>
 #include <DO/Geometry/Objects/Quad.hpp>
 #include <DO/Geometry/Objects/Ellipse.hpp>
+
+// 3D objects
+#include <DO/Geometry/Objects/Cube.hpp>
+#include <DO/Geometry/Objects/HalfSpace.hpp>
+#include <DO/Geometry/Objects/Sphere.hpp>
+
+// Constructive Solid Geometry.
+#include <DO/Geometry/Objects/CSG.hpp>
+
 
 #endif /* DO_GEOMETRY_OBJECTS_HPP */
