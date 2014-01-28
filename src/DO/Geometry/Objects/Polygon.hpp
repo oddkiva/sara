@@ -88,11 +88,11 @@ namespace DO {
   bool inside(const Point2d& p, const SmallPolygon<N>& poly)
   {
     bool c = false;
-    for (int i1 = 0, i2 = N-1; i1 < N; i2 = i1++)
+    for (int i = 0, j = N-1; i < N; j = i++)
     {
-      if ( (poly[i1].y() > p.y()) != (poly[i2].y() > p.y()) &&
-           (p.x() <   (poly[i2].x()-poly[i1].x()) * (p.y()-poly[i1].y())
-                    / (poly[i2].y()-poly[i1].y()) + poly[i1].x()) )
+      if ( (poly[i].y() > p.y()) != (poly[j].y() > p.y()) &&
+           (p.x() <   (poly[j].x()-poly[i].x()) * (p.y()-poly[i].y())
+                    / (poly[j].y()-poly[i].y()) + poly[i].x()) )
         c = !c;
     }
     return c;
