@@ -9,7 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Geometry.hpp>
+#include <DO/Geometry/Objects/Polygon.hpp>
 
 namespace DO {
 

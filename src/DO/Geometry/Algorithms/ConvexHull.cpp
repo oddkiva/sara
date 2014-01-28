@@ -9,7 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Geometry.hpp>
+#include <DO/Geometry/Tools/Utilities.hpp>
+#include <DO/Geometry/Algorithms/ConvexHull.hpp>
 
 using namespace std;
 

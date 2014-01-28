@@ -9,8 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Geometry.hpp>
-#include <DO/Graphics.hpp>
+#include <DO/Geometry/Objects/BBox.hpp>
 
 using namespace std;
 
@@ -31,8 +30,8 @@ namespace DO {
   bool inside(const Point2d& p, const BBox& bbox)
   {
     return 
-      p.x() >= bbox.topLeft().x() && p.x() <= bbox.bottomRight().x() &&
-      p.y() >= bbox.topLeft().y() && p.y() <= bbox.bottomRight().y() ;
+      p.cwiseMin(bbox.topLeft()) == bbox.topLeft() &&
+      p.cwiseMax(bbox.bottomRight()) == bbox.bottomRight();
   }
 
   bool degenerate(const BBox& bbox, double eps)
