@@ -11,10 +11,7 @@
 
 #pragma warning (disable : 4267 4503)
 
-#include <DO/Geometry.hpp>
-#include <DO/Graphics.hpp>
-#include <iostream>
-#include <fstream>
+#include <DO/Geometry/Objects/Quad.hpp>
 
 using namespace std;
 
@@ -35,8 +32,6 @@ namespace DO {
     v_[1] = b;
     v_[2] = c;
     v_[3] = d;
-    internal::PtCotg work[4];
-    internal::sortPointsByPolarAngle(v_, work, 4);
   }
 
 } /* namespace DO */

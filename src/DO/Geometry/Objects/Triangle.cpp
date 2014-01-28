@@ -9,8 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Geometry.hpp>
-#include <DO/Graphics.hpp>
+#include <DO/Geometry/Objects/Triangle.hpp>
 
 namespace DO {
 
@@ -19,8 +18,6 @@ namespace DO {
     v_[0] = a;
     v_[1] = b;
     v_[2] = c;
-    internal::PtCotg work[3];
-    internal::sortPointsByPolarAngle(v_, work, 3);
   }
 
 }

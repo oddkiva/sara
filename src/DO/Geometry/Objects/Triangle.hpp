@@ -13,6 +13,7 @@
 #define DO_GEOMETRY_TRIANGLE_HPP
 
 #include <DO/Core/EigenExtension.hpp>
+#include <DO/Geometry/Objects/Polygon.hpp>
 
 namespace DO {
 
@@ -20,6 +21,7 @@ namespace DO {
   class Triangle : public SmallPolygon<3>
   {
   public:
+    Triangle() : SmallPolygon<3>() {}
     Triangle(const Point2d& a, const Point2d& b, const Point2d& c);
   };
 
