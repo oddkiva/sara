@@ -37,12 +37,8 @@ namespace DO {
 
   void drawEllipse(const Ellipse& e, const Color3ub col, int penWidth)
   {
-    drawEllipse(
-      e.c().cast<float>(),
-      static_cast<float>(e.r1()),
-      static_cast<float>(e.r2()),
-      static_cast<float>(toDegree(e.o())),
-      col, penWidth);
+    drawEllipse(e.center(), e.radius1(), e.radius2(),
+                toDegree(e.orientation()), col, penWidth);
   }
 
 

@@ -104,6 +104,9 @@ namespace DO {
   DO_EXPORT
   void drawEllipse(const Point2f& center, float r1, float r2, float degree,
                    const Color3ub& c, int penWidth = 1);
+  DO_EXPORT
+  void drawEllipse(const Point2d& center, double r1, double r2, double degree,
+                   const Color3ub& c, int penWidth = 1);
   /*!
     \brief Draw a line in the active PaintingWindow window.
     @param[in] x1,y1,x2,y2 start and end points of the line.

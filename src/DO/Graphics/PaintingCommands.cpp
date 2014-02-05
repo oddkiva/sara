@@ -99,6 +99,19 @@ namespace DO {
                               Q_ARG(int, penWidth));
   }
 
+  void drawEllipse(const Point2d& center, double r1, double r2, double degree,
+                   const Color3ub& c, int penWidth)
+  {
+    QMetaObject::invokeMethod(getActiveWindow(), "drawEllipse", 
+                              Qt::QueuedConnection,
+                              Q_ARG(const QPointF&,
+                                    QPointF(center.x(), center.y())),
+                              Q_ARG(qreal, qreal(r1)), Q_ARG(qreal, qreal(r2)),
+                              Q_ARG(qreal, qreal(degree)),
+                              Q_ARG(const QColor&, QColor(c[0], c[1], c[2])),
+                              Q_ARG(int, penWidth));
+  }
+
   void drawLine(int x1, int y1, int x2, int y2, const Color3ub& c,
                 int penWidth)
   {

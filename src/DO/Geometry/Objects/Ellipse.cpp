@@ -14,11 +14,11 @@ namespace DO {
 
   Point2d Ellipse::operator()(double theta) const 
   {
-    Point2d p(unitVector2(theta));
-    p(0) *= a_;
-    p(1) *= b_;
-    p += c_;
-    return p;
+    Vector2d u(unitVector2(theta));
+    double& c = u(0);
+    double& s = u(1);
+    double rho = (a_*b_) / sqrt(b_*b_*c*c + a_*a_*s*s);
+    return c_ + rho*rotation2(o_)*u;
   }
   
   double convexSectorArea(const Ellipse& e, const Point2d pts[])
@@ -26,8 +26,8 @@ namespace DO {
     double theta[2];
     for (int i = 0; i < 2; ++i)
     {
-      const Vector2d dir(pts[i]-e.c());
-      double c = cos(e.o()), s = sin(e.o());
+      const Vector2d dir(pts[i]-e.center());
+      double c = cos(e.orientation()), s = sin(e.orientation());
       const Vector2d u0( c, s);
       const Vector2d u1(-s, c);
       
@@ -50,6 +50,8 @@ namespace DO {
 
   double algebraicArea(const Ellipse& e, double theta0, double theta1)
   {
+    CHECK(polarAntiderivative(e, theta0));
+    CHECK(polarAntiderivative(e, theta1));
     return polarAntiderivative(e, theta1) - polarAntiderivative(e, theta0);
   }
 
@@ -82,22 +84,30 @@ namespace DO {
   {
     Point2d p0(e(theta0)), p1(e(theta1));
 
-    Triangle t(e.c(), p0, p1);
+    Triangle t(e.center(), p0, p1);
 
     double triArea = area(t);
     double sectArea = sectorArea(e, theta0, theta1);
 
     if (abs(theta1 - theta0) < M_PI)
+    {
+      CHECK(toDegree(theta0));
+      CHECK(toDegree(theta1));
+      CHECK(theta0);
+      CHECK(theta1);
+      CHECK(triArea);
+      CHECK(sectArea);
       return sectArea - triArea;
+    }
     return sectArea + triArea;
   }
 
   std::ostream& operator<<(std::ostream& os, const Ellipse& e)
   {
-    os << "a = " << e.r1() << std::endl;
-    os << "b = " << e.r2() << std::endl;
-    os << "o = " << toDegree(e.o()) << " degree" << std::endl;
-    os << "c = " << e.c().transpose() << std::endl;
+    os << "a = " << e.radius1() << std::endl;
+    os << "b = " << e.radius2() << std::endl;
+    os << "o = " << toDegree(e.orientation()) << " degree" << std::endl;
+    os << "c = " << e.center().transpose() << std::endl;
     return os;
   }
 

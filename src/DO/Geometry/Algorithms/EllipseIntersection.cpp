@@ -35,9 +35,9 @@ namespace DO {
   void getConicEquation(double s[6], const Ellipse & e)
   {
     const Matrix2d M(shapeMat(e));
-    s[0] = e.c().x()*M(0,0)*e.c().x() + 2*e.c().x()*M(0,1)*e.c().y() + e.c().y()*M(1,1)*e.c().y() - 1.0;
-    s[1] =-2.0*(M(0,0)*e.c().x() + M(0,1)*e.c().y());
-    s[2] =-2.0*(M(1,0)*e.c().x() + M(1,1)*e.c().y());
+    s[0] = e.center().x()*M(0,0)*e.center().x() + 2*e.center().x()*M(0,1)*e.center().y() + e.center().y()*M(1,1)*e.center().y() - 1.0;
+    s[1] =-2.0*(M(0,0)*e.center().x() + M(0,1)*e.center().y());
+    s[2] =-2.0*(M(1,0)*e.center().x() + M(1,1)*e.center().y());
     s[3] = M(0,0);
     s[4] = 2.0*M(0,1);
     s[5] = M(1,1);
@@ -107,9 +107,9 @@ namespace DO {
 
   void rescaleEllipse(Ellipse& e, double scale/*, const Point2d& center*/)
   {
-    e.r1() /= scale;
-    e.r2() /= scale;
-    e.c() /= scale;
+    e.radius1() /= scale;
+    e.radius2() /= scale;
+    e.center() /= scale;
   }
 
   int computeEllipseIntersections(Point2d intersections[4],
@@ -117,11 +117,11 @@ namespace DO {
   {
     // Rescale ellipse to try to improve numerical accuracy.
     Point2d center;
-    center = 0.5*(e1.c() + e2.c());
+    center = 0.5*(e1.center() + e2.center());
 
     Ellipse ee1(e1), ee2(e2);
-    ee1.c() -= center;
-    ee2.c() -= center;
+    ee1.center() -= center;
+    ee2.center() -= center;
     //double scale = (ee1.c()-center).norm();
     //rescaleEllipse(e1, scale);
     //rescaleEllipse(e2, scale);
@@ -155,8 +155,8 @@ namespace DO {
   {
     for (int i = 0; i < numPoints; ++i)
     {
-      const Vector2d d(pts[i]-e.c());
-      const Vector2d u(unitVector2(e.o()));
+      const Vector2d d(pts[i]-e.center());
+      const Vector2d u(unitVector2(e.orientation()));
       const Vector2d v(-u(1), u(0));
       ori[i] = atan2(v.dot(d), u.dot(d));
     }
@@ -182,7 +182,7 @@ namespace DO {
 
     if (numInter < 2)
     {
-      if (inside(e1.c(), e0) || inside(e0.c(), e1))
+      if (inside(e1.center(), e0) || inside(e0.center(), e1))
         return std::min(area(e0), area(e1));
     }
     
@@ -191,8 +191,8 @@ namespace DO {
       const Point2d& p0 = interPts[0];
       const Point2d& p1 = interPts[1];
 
-      drawCircle(e0.c(), 5., Red8, 3);
-      drawCircle(e1.c(), 5., Blue8, 3);
+      drawCircle(e0.center(), 5., Red8, 3);
+      drawCircle(e1.center(), 5., Blue8, 3);
 
       double ori0[2];
       double ori1[2];
@@ -221,8 +221,8 @@ namespace DO {
       for (int i = 0; i < numInter; ++i)
       {
         Point2d pts[2] = { interPts[i], interPts[(i+1)%numInter] };
-        Triangle t1(e0.c(), pts[0], pts[1]);
-        Triangle t2(e1.c(), pts[0], pts[1]);
+        Triangle t1(e0.center(), pts[0], pts[1]);
+        Triangle t2(e1.center(), pts[0], pts[1]);
         
         if (debug)
         {
@@ -271,8 +271,8 @@ namespace DO {
     std::vector<Point2d> polygon;
     polygon.reserve(n);
     
-    const Matrix2d Ro(rotation2(e.o()));
-    Vector2d D( e.r1(), e.r2() );
+    const Matrix2d Ro(rotation2(e.orientation()));
+    Vector2d D( e.radius1(), e.radius2() );
     
     for(int i = 0; i < n; ++i)
     {
@@ -280,7 +280,7 @@ namespace DO {
       const Matrix2d R(rotation2(theta));
       Point2d p(1.0, 0.0);
       
-      const Point2d p1(e.c() + Ro.matrix()*D.asDiagonal()*R.matrix()*p);
+      const Point2d p1(e.center() + Ro.matrix()*D.asDiagonal()*R.matrix()*p);
       polygon.push_back(p1);
     }
     

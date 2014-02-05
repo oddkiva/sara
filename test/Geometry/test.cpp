@@ -141,6 +141,30 @@ TEST(DO_Geometry_Test, triangleTest)
 
   Triangle t2(Point2d(100,0), Point2d(0, 0), Point2d(100, 100));
   EXPECT_NEAR(signedArea(t2), -1e4/2., 1e-10);
+
+  Triangle t3(Point2d(50, 73), Point2d(350, 400), Point2d(25, 200));
+  int pixelArea3 = 0;
+  if (!getActiveWindow())
+    openWindow(TestParams::w, TestParams::h);
+  for (int y = 0; y < TestParams::h; ++y)
+  {
+    for (int x = 0; x < TestParams::w; ++x)
+    {
+      Point2d p(x,y);
+
+      if (inside(p, t3) && TestParams::debug)
+      {
+        drawPoint(x,y,Green8);
+        ++pixelArea3;
+      }
+    }
+  }
+  getKey();
+  double exactArea3 = area(t3);
+  CHECK(exactArea3);
+  CHECK(pixelArea3);
+  double relError = fabs(exactArea3 - pixelArea3)/exactArea3;
+  EXPECT_NEAR(relError, 0., 5e-2);
 }
 
 void drawAffineConeAxes(const AffineCone2& K)
@@ -306,7 +330,7 @@ TEST(DO_Geometry_Test, csgTest)
     getKey();
   }
 }
-
+#endif
 
 int countPixelsInside(Image<Rgb8>& image, const CSG::Object& obj, bool display = false)
 {
@@ -337,7 +361,7 @@ AffineCone2 affineCone2(double theta0, double theta1, const Point2d& vertex)
 
 TEST(DO_Geometry_Test, ellipseSectorArea)
 {
-  Ellipse E(180, 100, toRadian(30.), TestParams::center);
+  Ellipse E(180, 100, /*toRadian(30.)*/0, TestParams::center);
    
   if (TestParams::debug)
   {
@@ -357,23 +381,28 @@ TEST(DO_Geometry_Test, ellipseSectorArea)
     for (int i0 = 0; i0 <= steps; ++i0)
     {
       double theta0 = i0*2*M_PI/steps;
-
-      //for (int i1 = i0+1; i1 <= i0+steps; ++i1)
-      for (int i1 = 0; i1 < i0; ++i1) // revert order.
+      for (int i1 = i0+1; i1 <= i0+steps; ++i1)
+      //for (int i1 = 0; i1 < i0; ++i1) // revert order.
       {
-        /*cout << i0 << "     " << i1 << endl;
-        cout << toDegree(theta0) << "     " << toDegree(theta1) << endl;*/
-
         double theta1 = i1*2*M_PI/steps;
         double dTheta = fabs(theta1 - theta0);
 
-        CSG::Singleton<AffineCone2> cone(affineCone2(theta0+E.o(), theta1+E.o(), E.c()));
+        cout << i0 << "     " << i1 << endl;
+        cout << toDegree(theta0) << "     " << toDegree(theta1) << endl;
+        cout << theta0 << "     " << theta1 << endl;
+
+
+        Triangle t(E.center(), E(theta0), E(theta1));
+
+        CSG::Singleton<AffineCone2> cone(affineCone2(theta0+E.orientation(),
+                                                     theta1+E.orientation(),
+                                                     E.center()));
         auto inter = ell*cone;
         auto reldiff = ell - inter;
 
         int estimatedSectorArea = 0;
-        //if (i1 - i0 < steps/2)
-        if (i0-i1 > steps/2) // revert order
+        if (i1 - i0 < steps/2)
+        //if (i0-i1 > steps/2) // revert order
           estimatedSectorArea = countPixelsInside(buffer, inter);
         else if (abs(i1-i0) == steps/2)
           estimatedSectorArea = area(E) / 2.;
@@ -387,7 +416,16 @@ TEST(DO_Geometry_Test, ellipseSectorArea)
         double relError = absError/estimatedSectorArea;
         if (estimatedSectorArea == 0 && absError < 1e-2)
           relError = absError;
-        
+
+
+        printStage("Check error");
+        CHECK(analyticSectorArea);
+        CHECK(estimatedSectorArea);
+        CHECK(area(t));
+        CHECK(absError);
+        drawTriangle(t, Green8, 1);
+        getKey();
+
         EXPECT_NEAR(relError, 0, 1e-1);
         if (TestParams::debug && relError > 1e-1)
         {
@@ -410,7 +448,7 @@ TEST(DO_Geometry_Test, ellipseSectorArea)
   }
 
 }
-#endif
+
 
 double countPixelArea(Image<Rgb8>& image, double theta0, double theta1, const Ellipse& e)
 {
@@ -431,75 +469,75 @@ double countPixelArea(Image<Rgb8>& image, double theta0, double theta1, const El
   return double(interArea);
 }
 
-//TEST(DO_Geometry_Test, ellipseSectorArea)
-//{
-//  Ellipse E(180, 100, /*toRadian(42.)*/0, TestParams::center);
-//   
-//  if (TestParams::debug)
-//  {
-//    if (!getActiveWindow())
-//      setAntialiasing(openWindow(TestParams::w, TestParams::h));
-//    clearWindow();
-//  }
-//
-//  Image<Rgb8> image(TestParams::w, TestParams::h);
-//
-//  try
-//  {
-//    int steps = 18;
-//    ASSERT_EQ(steps%2, 0);
-//
-//    for (int i0 = 0; i0 <= steps; ++i0)
-//    {
-//      double theta0 = i0*2*M_PI/steps;
-//      for (int i1 = i0+1; i1 <= i0+steps; ++i1)
-//      //for (int i1 = 0; i1 < i0; ++i1) // revert order.
-//      {
-//        double theta1 = i1*2*M_PI/steps;
-//        double dTheta = fabs(theta1 - theta0);
-//
-//
-//        Triangle t(E.c(), E(theta0), E(theta1));
-//
-//        double segArea1 = countPixelArea(image, theta0, theta1, E);
-//        double segArea2 = segmentArea(E, theta0, theta1);
-//        double sectArea = sectorArea(E, theta0, theta1);
-//        double triArea = area(t);
-//
-//        display(image);
-//        drawTriangle(t, Green8, 3);
-//        getKey();
-//
-//
-//        double absError = fabs(segArea1 -segArea2);
-//        double relError = absError/segArea1;
-//        if (segArea1 == 0 && segArea2 < 1e-2)
-//          relError = absError;
-//
-//        EXPECT_NEAR(relError, 0, 1e-1);
-//        if (TestParams::debug && relError > 1e-1)
-//        {
-//          printStage("Numerical error");
-//          cout << i0 << "     " << i1 << endl;
-//          cout << toDegree(theta0) << "     " << toDegree(theta1) << endl;
-//          CHECK(abs(i1-i0));
-//          CHECK(segArea1);
-//          CHECK(segArea2);
-//          CHECK(sectArea);
-//          CHECK(triArea);
-//          CHECK(relError);
-//          getKey();
-//        }
-//      }
-//    }
-//  }
-//  catch (exception& e)
-//  {
-//    cout << e.what() << endl;
-//    getKey();
-//  }
-//
-//}
+TEST(DO_Geometry_Test, ellipseSegmentArea)
+{
+  Ellipse E(180, 100, /*toRadian(42.)*/0, TestParams::center);
+   
+  if (TestParams::debug)
+  {
+    if (!getActiveWindow())
+      setAntialiasing(openWindow(TestParams::w, TestParams::h));
+    clearWindow();
+  }
+
+  Image<Rgb8> image(TestParams::w, TestParams::h);
+
+  try
+  {
+    int steps = 18;
+    ASSERT_EQ(steps%2, 0);
+
+    for (int i0 = 0; i0 <= steps; ++i0)
+    {
+      double theta0 = i0*2*M_PI/steps;
+      for (int i1 = i0+1; i1 <= i0+steps; ++i1)
+      //for (int i1 = 0; i1 < i0; ++i1) // revert order.
+      {
+        double theta1 = i1*2*M_PI/steps;
+        double dTheta = fabs(theta1 - theta0);
+
+
+        Triangle t(E.center(), E(theta0), E(theta1));
+
+        double segArea1 = countPixelArea(image, theta0, theta1, E);
+        double segArea2 = segmentArea(E, theta0, theta1);
+        double sectArea = sectorArea(E, theta0, theta1);
+        double triArea = area(t);
+
+        display(image);
+        drawTriangle(t, Green8, 3);
+        getKey();
+
+
+        double absError = fabs(segArea1 -segArea2);
+        double relError = absError/segArea1;
+        if (segArea1 == 0 && segArea2 < 1e-2)
+          relError = absError;
+
+        EXPECT_NEAR(relError, 0, 1e-1);
+        if (TestParams::debug && relError > 1e-1)
+        {
+          printStage("Numerical error");
+          cout << i0 << "     " << i1 << endl;
+          cout << toDegree(theta0) << "     " << toDegree(theta1) << endl;
+          CHECK(abs(i1-i0));
+          CHECK(segArea1);
+          CHECK(segArea2);
+          CHECK(sectArea);
+          CHECK(triArea);
+          CHECK(relError);
+          getKey();
+        }
+      }
+    }
+  }
+  catch (exception& e)
+  {
+    cout << e.what() << endl;
+    getKey();
+  }
+
+}
 
 ////! \todo: what's this?
 //void testAffineTransforms()
@@ -674,8 +712,8 @@ TEST(DO_Geometry_Test, ellipseAlgorithmsTest)
 
       CHECK(area(e1));
       CHECK(area(e2));
-      CHECK(inside(e2.c(), e1));
-      CHECK(inside(e1.c(), e2));
+      CHECK(inside(e2.center(), e1));
+      CHECK(inside(e1.center(), e2));
       CHECK(analyticInterArea(e1, e2, true));
       cout << "Approximate intersection-union area ratio = " << approxRatio << endl;
       cout << "Exact intersection-union area ratio = " << analyticRatio << endl;

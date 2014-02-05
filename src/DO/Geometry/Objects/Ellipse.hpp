@@ -27,15 +27,15 @@ namespace DO {
             const Point2d& center)
       : a_(radius1), b_(radius2), o_(orientation), c_(center) {}
 
-    double r1() const { return a_; }
-    double r2() const { return b_; }
-    double o() const { return o_; }
-    const Point2d& c() const { return c_; }
+    double radius1() const { return a_; }
+    double radius2() const { return b_; }
+    double orientation() const { return o_; }
+    const Point2d& center() const { return c_; }
 
-    double& r1() { return a_; }
-    double& r2() { return b_; }
-    double& o() { return o_; }
-    Point2d& c() { return c_; }
+    double& radius1() { return a_; }
+    double& radius2() { return b_; }
+    double& orientation() { return o_; }
+    Point2d& center() { return c_; }
 
     // Get point on ellipse at angle $\theta$ w.r.t. orientation $o$ of ellipse.
     Point2d operator()(double theta) const;
@@ -44,8 +44,8 @@ namespace DO {
     friend inline double polarAntiderivative(const Ellipse& e, double theta)
     {
       const double y = (e.b_-e.a_)*sin(2*theta);
-      const double x = ((e.b_+e.a_)+(e.b_-e.a_)*cos(2*theta));
-      return e.a_*e.b_*0.5*( theta - atan(y/x) );
+      const double x = (e.b_+e.a_) + (e.b_-e.a_)*cos(2*theta);
+      return e.a_*e.b_*0.5*( theta - atan2(y,x) );
     }
     //! Convex sector area: this function is deprecated.
     friend double convexSectorArea(const Ellipse& e, const Point2d pts[]);
