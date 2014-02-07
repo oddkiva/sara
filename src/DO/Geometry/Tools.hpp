@@ -13,7 +13,6 @@
 #define DO_GEOMETRY_TOOLS_HPP
 
 #include <DO/Geometry/Tools/Utilities.hpp>
-#include <DO/Geometry/Tools/Cone.hpp>
 #include <DO/Geometry/Tools/Metric.hpp>
 #include <DO/Geometry/Tools/Conic.hpp>
 #include <DO/Geometry/Tools/Polynomial.hpp>
