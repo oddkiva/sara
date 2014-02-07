@@ -50,8 +50,6 @@ namespace DO {
 
   double algebraicArea(const Ellipse& e, double theta0, double theta1)
   {
-    CHECK(polarAntiderivative(e, theta0));
-    CHECK(polarAntiderivative(e, theta1));
     return polarAntiderivative(e, theta1) - polarAntiderivative(e, theta0);
   }
 
@@ -91,12 +89,12 @@ namespace DO {
 
     if (abs(theta1 - theta0) < M_PI)
     {
-      CHECK(toDegree(theta0));
+      /*CHECK(toDegree(theta0));
       CHECK(toDegree(theta1));
       CHECK(theta0);
       CHECK(theta1);
       CHECK(triArea);
-      CHECK(sectArea);
+      CHECK(sectArea);*/
       return sectArea - triArea;
     }
     return sectArea + triArea;

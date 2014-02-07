@@ -159,6 +159,9 @@ namespace DO {
       const Vector2d u(unitVector2(e.orientation()));
       const Vector2d v(-u(1), u(0));
       ori[i] = atan2(v.dot(d), u.dot(d));
+      if (ori[i] < 0)
+        ori[i] += 2*M_PI;
+
     }
   }
 
@@ -196,8 +199,8 @@ namespace DO {
 
       double ori0[2];
       double ori1[2];
-      orientation(ori0, interPts, 2, e0);
-      orientation(ori1, interPts, 2, e1);
+      orientation(ori0, interPts, numInter, e0);
+      orientation(ori1, interPts, numInter, e1);
 
       double seg01, seg10;
       seg01 = min(segmentArea(e0, ori0[0], ori0[1]), 
