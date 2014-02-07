@@ -37,9 +37,15 @@ namespace DO {
     double& orientation() { return o_; }
     Point2d& center() { return c_; }
 
-    // Get point on ellipse at angle $\theta$ w.r.t. orientation $o$ of ellipse.
+    //! Get the radial vector at angle $\theta$ w.r.t. orientation $o$ of ellipse.
+    Vector2d rho(double theta) const;
+    //! Get point on ellipse at angle $\theta$ w.r.t. orientation $o$ of ellipse.
     Point2d operator()(double theta) const;
-
+    /*!
+      Retrieve relative orientation of point $p$ w.r.t. orientation 
+      $o$ of ellipse.
+     */
+    friend double orientation(const Point2d& p, const Ellipse& e);
     //! Polar antiderivative.
     friend inline double polarAntiderivative(const Ellipse& e, double theta)
     {

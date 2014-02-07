@@ -20,19 +20,22 @@
 namespace DO {
 
   //! Compute the intersection union ratio approximately
-  std::vector<Point2d> approxInter(const Ellipse& e1, const Ellipse& e2, int n);
-  double approximateIntersectionUnionRatio(const Ellipse& e1, const Ellipse& e2,
-                                           int n = 36,
-                                           double limit = 1e9);
+  std::vector<Point2d> approxIntersection(const Ellipse& e1, const Ellipse& e2, int n);
+  double approxJaccardSimilarity(const Ellipse& e1, const Ellipse& e2,
+                                 int n = 36, double limit = 1e9);
 
   //! Check polynomial solvers.
-  int computeEllipseIntersections(Point2d intersections[], const Ellipse& e1,
-                                  const Ellipse& e2);
+  int computeIntersectionPoints(Point2d intersections[],
+                                const Ellipse& e1,
+                                const Ellipse& e2);
 
-  //! Compute the intersection union ratio exactly.
-  double analyticInterArea(const Ellipse& e1, const Ellipse& e2,
-                           bool debug = false);
-  double analyticInterUnionRatio(const Ellipse& e1, const Ellipse& e2);
+  /*!
+    Compute the intersection union ratio exactly.
+    CAUTION: Numerical issues are not totally solved. We are almost there...
+    Investigation is still ongoing.
+   */
+  double analyticIntersection(const Ellipse& e1, const Ellipse& e2);
+  double analyticJaccardSimilarity(const Ellipse& e1, const Ellipse& e2);
 
 
 } /* namespace DO */

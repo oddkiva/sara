@@ -36,12 +36,22 @@ namespace DO {
 
   void drawEllipse(const Ellipse& e, const Color3ub col, int penWidth)
   {
+    // Ellipse...
     drawEllipse(e.center(), e.radius1(), e.radius2(),
                 toDegree(e.orientation()), col, penWidth);
+    // Arrow...
+    Vector2d u(unitVector2(e.orientation()));
+    u *= e.radius1()*1.1;
+    Point2d a, b;
+    a = e.center();
+    b = e.center() + u;
+    drawArrow(a, b, col, penWidth);
+    // Center...
+    drawCircle(e.center(), 5., col, penWidth);
   }
 
-  void drawAffineConeAxes(const AffineCone2& K, double arrowLength,
-                          const Color3ub& color)
+  void drawAffineCone(const AffineCone2& K, double arrowLength,
+                      const Color3ub& color)
   {
     const Point2d& v = K.vertex();
     Point2d a, b;

@@ -1,7 +1,3 @@
-#pragma warning (disable : 4267)
-
-//#define DEBUG_ELLIPSE_INTERSECTION
-
 #include <DO/Geometry/Tools/Utilities.hpp>
 #include <DO/Geometry/Objects/Ellipse.hpp>
 #include <DO/Geometry/Objects/Triangle.hpp>
@@ -12,13 +8,26 @@ using namespace std;
 
 namespace DO {
 
-  Point2d Ellipse::operator()(double theta) const 
+  Vector2d Ellipse::rho(double theta) const 
   {
     Vector2d u(unitVector2(theta));
     double& c = u(0);
     double& s = u(1);
-    double rho = (a_*b_) / sqrt(b_*b_*c*c + a_*a_*s*s);
-    return c_ + rho*rotation2(o_)*u;
+    double r = (a_*b_) / sqrt(b_*b_*c*c + a_*a_*s*s);
+    return r*u;
+  }
+
+  Point2d Ellipse::operator()(double theta) const 
+  {
+    return c_ + rotation2(o_)*rho(theta);
+  }
+
+  double orientation(const Point2d& p, const Ellipse& e)
+  {
+    const Vector2d x(p-e.center());
+    const Vector2d u(unitVector2(e.orientation()));
+    const Vector2d v(-u(1), u(0));
+    return atan2(v.dot(x), u.dot(x));
   }
   
   double convexSectorArea(const Ellipse& e, const Point2d pts[])
@@ -48,34 +57,9 @@ namespace DO {
     return polarAntiderivative(e, theta[1]) - polarAntiderivative(e, theta[0]);
   }
 
-  double algebraicArea(const Ellipse& e, double theta0, double theta1)
-  {
-    return polarAntiderivative(e, theta1) - polarAntiderivative(e, theta0);
-  }
-
-  static
-  void shiftOrientations(double& theta0, double& theta1) 
-  {
-    /*if ( theta0 < -M_PI || theta0 > M_PI ||
-         theta1 < -M_PI || theta1 > M_PI )
-    {
-      const char *msg = "theta0 and theta1 must be in the range [-Pi, Pi]";
-      throw std::logic_error(msg);
-    }*/
-
-    if (theta0 < 0)
-      theta0 += 2*M_PI;
-    if (theta1 < 0)
-      theta1 += 2*M_PI;
-  }
-
   double sectorArea(const Ellipse& e, double theta0, double theta1)
   {
-    shiftOrientations(theta0, theta1);
-    if (theta0 < theta1)
-      return algebraicArea(e, theta0, theta1);
-    else // theta0 > theta1
-      return area(e) - algebraicArea(e, theta1, theta0);
+    return polarAntiderivative(e, theta1) - polarAntiderivative(e, theta0);
   }
 
   double segmentArea(const Ellipse& e, double theta0, double theta1)
@@ -88,15 +72,7 @@ namespace DO {
     double sectArea = sectorArea(e, theta0, theta1);
 
     if (abs(theta1 - theta0) < M_PI)
-    {
-      /*CHECK(toDegree(theta0));
-      CHECK(toDegree(theta1));
-      CHECK(theta0);
-      CHECK(theta1);
-      CHECK(triArea);
-      CHECK(sectArea);*/
       return sectArea - triArea;
-    }
     return sectArea + triArea;
   }
 

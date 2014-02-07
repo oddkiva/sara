@@ -77,7 +77,7 @@ namespace DO {
   pair<bool, Point2d> isRootValid(const complex<double>& y,
                                   const double s[6], const double t[6])
   {
-    if ( abs(imag(y)) > 1e-1*abs(real(y)) )
+    if ( abs(imag(y)) > 1e-2*abs(real(y)) )
       return make_pair(false, Point2d());
     const double realY = real(y);
     double sigma[3], tau[3];
@@ -86,8 +86,8 @@ namespace DO {
     const double x = (sigma[2]*tau[0] - sigma[0]*tau[2])
       / (sigma[1]*tau[2] - sigma[2]*tau[1]);
 
-    if (fabs(computeConicExpression(x, realY, s)) < 1e-1 &&
-        fabs(computeConicExpression(x, realY, t)) < 1e-1)
+    if (fabs(computeConicExpression(x, realY, s)) < 1e-2 &&
+        fabs(computeConicExpression(x, realY, t)) < 1e-2)
     {
       /*cout << "QO(x,y) = " << computeConicExpression(x, realY, s) << endl;
       cout << "Q1(x,y) = " << computeConicExpression(x, realY, t) << endl;*/
@@ -96,24 +96,9 @@ namespace DO {
     else
       return make_pair(false, Point2d());
   }
-  
-  struct Equal
-  {
-    Equal(double eps) : squared_eps_(eps*eps) {}
-    bool operator()(const Point2d& p, const Point2d& q) const
-    { return (p-q).squaredNorm() < squared_eps_; }
-    double squared_eps_;
-  };
 
-  void rescaleEllipse(Ellipse& e, double scale/*, const Point2d& center*/)
-  {
-    e.radius1() /= scale;
-    e.radius2() /= scale;
-    e.center() /= scale;
-  }
-
-  int computeEllipseIntersections(Point2d intersections[4],
-                                  const Ellipse & e1, const Ellipse & e2)
+  int computeIntersectionPoints(Point2d intersections[4],
+                                const Ellipse & e1, const Ellipse & e2)
   {
     // Rescale ellipse to try to improve numerical accuracy.
     Point2d center;
@@ -122,10 +107,6 @@ namespace DO {
     Ellipse ee1(e1), ee2(e2);
     ee1.center() -= center;
     ee2.center() -= center;
-    //double scale = (ee1.c()-center).norm();
-    //rescaleEllipse(e1, scale);
-    //rescaleEllipse(e2, scale);
-
 
     double s[6], t[6];
     getConicEquation(s, ee1);
@@ -136,132 +117,108 @@ namespace DO {
     complex<double> y[4];
     roots(u, y[0], y[1], y[2], y[3]);
 
+
     int numInter = 0;
     for(int i = 0; i < 4; ++i)
     {
       pair<bool, Point2d> p(isRootValid(y[i], s, t));
       if(!p.first)
         continue;
-      intersections[numInter] = /*scale*/p.second + center;
+      intersections[numInter] = p.second + center;
       ++numInter;
     }
 
-    Equal equal(1e-2);
-    return unique(intersections, intersections+numInter, equal) - intersections;
+    const double eps = 1e-2;
+    const double squared_eps = eps*eps;
+    auto identicalPoints = [&](const Point2d& p, const Point2d& q) {
+      return (p-q).squaredNorm() < squared_eps;
+    };
+
+    auto it = unique(intersections, intersections+numInter, identicalPoints);
+    return it - intersections;
   }
 
   void orientation(double *ori, const Point2d *pts, int numPoints,
                    const Ellipse& e)
   {
-    for (int i = 0; i < numPoints; ++i)
+    const Vector2d u(unitVector2(e.orientation()));
+    const Vector2d v(-u(1), u(0));
+    transform(pts, pts+numPoints, ori, [&](const Point2d& p) -> double
     {
-      const Vector2d d(pts[i]-e.center());
-      const Vector2d u(unitVector2(e.orientation()));
-      const Vector2d v(-u(1), u(0));
-      ori[i] = atan2(v.dot(d), u.dot(d));
-      if (ori[i] < 0)
-        ori[i] += 2*M_PI;
-
-    }
+      const Vector2d d(p-e.center());
+      return atan2(v.dot(d), u.dot(d));
+    });
   }
 
   // ======================================================================== //
   // Computation of the area of intersecting ellipses.
   // ======================================================================== //
-  double analyticInterArea(const Ellipse& e0, const Ellipse& e1, bool debug)
-  {    
+  double analyticIntersection(const Ellipse& E_0, const Ellipse& E_1)
+  {
+    // Find the intersection points of the two ellipses.
     Point2d interPts[4];
-    int numInter = computeEllipseIntersections(interPts, e0, e1);
-
-    if (debug)
+    int numInter = computeIntersectionPoints(interPts, E_0, E_1);
+    if (numInter > 2)
     {
-      cout << "\nIntersection count = " << numInter << endl;
-      for (int i = 0; i < numInter; ++i)
-      {
-        fillCircle(interPts[i].cast<float>(), 5.f, Green8);
-        cout << "[" << i << "] " << interPts[i].transpose() << endl;
-      }
+      internal::PtCotg work[4];
+      internal::sortPointsByPolarAngle(interPts, work, numInter);
     }
 
+    // SPECIAL CASE.
+    // If there is at most one intersection point, then either one of the 
+    // ellipse is included in the other.
     if (numInter < 2)
     {
-      if (inside(e1.center(), e0) || inside(e0.center(), e1))
-        return std::min(area(e0), area(e1));
+      if (inside(E_1.center(), E_0) || inside(E_0.center(), E_1))
+        return std::min(area(E_0), area(E_1));
     }
-    
-    if (numInter == 2)
+
+    // GENERIC CASE
+    // Compute the relative orientation of the intersection points w.r.t. the 
+    // ellipse orientation.
+    double o_0[4];
+    double o_1[4];
+    orientation(o_0, interPts, numInter, E_0);
+    orientation(o_1, interPts, numInter, E_1);
+
+    // Sum the segment area.
+    double area = 0;
+    for (int i = 0, j = numInter-1; i < numInter; j=i++)
     {
-      const Point2d& p0 = interPts[0];
-      const Point2d& p1 = interPts[1];
+      double theta_0 = o_0[j];
+      double theta_1 = o_0[i];
 
-      drawCircle(e0.center(), 5., Red8, 3);
-      drawCircle(e1.center(), 5., Blue8, 3);
+      double psi_0 = o_1[j];
+      double psi_1 = o_1[i];
 
-      double ori0[2];
-      double ori1[2];
-      orientation(ori0, interPts, numInter, e0);
-      orientation(ori1, interPts, numInter, e1);
+      if (theta_0 > theta_1)
+        theta_1 += 2*M_PI;
 
-      double seg01, seg10;
-      seg01 = min(segmentArea(e0, ori0[0], ori0[1]), 
-                  segmentArea(e1, ori1[0], ori1[1]));
-      seg10 = min(segmentArea(e0, ori0[1], ori0[0]), 
-                  segmentArea(e1, ori1[1], ori1[0]));
-      return seg01+seg10;
+      if (psi_0 > psi_1)
+        psi_1 += 2*M_PI;
+
+      area += min(segmentArea(E_0, theta_0, theta_1),
+                  segmentArea(E_1, psi_0, psi_1));
     }
-    
-    if (numInter >= 3)
+    // If the number of the intersection > 2, compute the area of the polygon
+    // whose vertices are p[0], p[1], ..., p[numInter].
+    if (numInter > 2)
     {
-      internal::PtCotg workArray[4];
-      internal::sortPointsByPolarAngle(interPts, workArray, numInter);
-      if (debug) {
-        for (int i = 0; i < numInter; ++i)
-          drawString(interPts[i].x()+10, interPts[i].y()+10, toString(i), Green8);
-      }
-      
-      // Add elliptic sectors.
-      double ellipticSectorsArea = 0;
-      for (int i = 0; i < numInter; ++i)
-      {
-        Point2d pts[2] = { interPts[i], interPts[(i+1)%numInter] };
-        Triangle t1(e0.center(), pts[0], pts[1]);
-        Triangle t2(e1.center(), pts[0], pts[1]);
-        
-        if (debug)
-        {
-          drawTriangle(t1, Red8, 1);
-          drawTriangle(t2, Blue8, 1);
-        }
-        
-        // correct here when pts[0], pts[1] more than pi degree.
-        double sectorArea1 = convexSectorArea(e0, pts);
-        double sectorArea2 = convexSectorArea(e1, pts);
-        double triArea1 = area(t1);
-        double triArea2 = area(t2);
-        double portionArea1 = sectorArea1 - triArea1;
-        double portionArea2 = sectorArea2 - triArea2;
-        
-        
-
-        ellipticSectorsArea += std::min(portionArea1, portionArea2);
-      }
-      // Add inner quad area computed with the Green-Riemann formula.
-      double quadArea = 0;
-      for (int i = 0; i < numInter; ++i)
+      for (int i = 0, j = numInter-1; i < numInter; j=i++)
       {
         Matrix2d M;
-        M.col(0) = interPts[i]; M.col(1) = interPts[(i+1)%numInter];
-        quadArea += 0.5*M.determinant();
+        M.col(0) = interPts[j];
+        M.col(1) = interPts[i];
+        area += 0.5*M.determinant();
       }
-      return ellipticSectorsArea + quadArea;
     }
-    
-    return 0;
+
+    return area;
   }
   
-  double analyticInterUnionRatio(const Ellipse& e1, const Ellipse& e2)
+  double analyticJaccardSimilarity(const Ellipse& e1, const Ellipse& e2)
   {
-    double interArea = analyticInterArea(e1, e2);
+    double interArea = analyticIntersection(e1, e2);
     double unionArea = area(e1) + area(e2) - interArea;
     return interArea / unionArea;
   }
@@ -269,7 +226,8 @@ namespace DO {
   // ======================================================================== //
   // Approximate computation of area of intersection ellipses.
   // ======================================================================== //
-  std::vector<Point2d> discretizeEllipse(const Ellipse& e, int n)
+  std::vector<Point2d>
+  discretizeEllipse(const Ellipse& e, int n)
   {
     std::vector<Point2d> polygon;
     polygon.reserve(n);
@@ -290,7 +248,8 @@ namespace DO {
     return polygon;
   }
   
-  std::vector<Point2d> approxInter(const Ellipse& e1, const Ellipse& e2, int n)
+  std::vector<Point2d>
+  approxIntersection(const Ellipse& e1, const Ellipse& e2, int n)
   {
     std::vector<Point2d> p1(discretizeEllipse(e1,n));
     std::vector<Point2d> p2(discretizeEllipse(e2,n));
@@ -302,14 +261,9 @@ namespace DO {
     return inter;
   }
   
-  double approximateIntersectionUnionRatio(const Ellipse& e1, const Ellipse& e2,
-                                           int n, double limit)
+  double approxJaccardSimilarity(const Ellipse& e1, const Ellipse& e2,
+                                 int n, double limit)
   {
-    typedef std::vector<Point2d> Polygon;
-    
-		if( !wellDefined(e1, limit) || !wellDefined(e2, limit) )
-			return 0.;
-
     std::vector<Point2d> p1(discretizeEllipse(e1,n));
     std::vector<Point2d> p2(discretizeEllipse(e2,n));
     std::vector<Point2d> inter;

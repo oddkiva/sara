@@ -42,7 +42,7 @@ namespace DO {
                        int penWidth = 1)
   { drawPoly(q, col, penWidth); }
 
-  void drawAffineConeAxes(const AffineCone2& K, double arrowLength = 50.,
+  void drawAffineCone(const AffineCone2& K, double arrowLength = 50.,
                           const Color3ub& color = Black8);
 
 } /* namespace DO */
