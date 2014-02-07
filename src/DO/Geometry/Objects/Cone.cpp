@@ -9,7 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Geometry/Tools/Cone.hpp>
+#include <DO/Geometry/Objects/Cone.hpp>
+#include <DO/Geometry/Tools/Utilities.hpp>
 
 namespace DO {
   
@@ -17,5 +18,13 @@ namespace DO {
   template class Cone<3>;
   template class AffineCone<2>;
   template class AffineCone<3>;
+
+  AffineCone2 affineCone2(double theta0, double theta1, const Point2d& vertex)
+  {
+    Point2d u0, u1;
+    u0 = unitVector2(theta0);
+    u1 = unitVector2(theta1);
+    return AffineCone2(u0, u1, vertex, AffineCone2::Convex);
+  }
 
 } /* namespace DO */

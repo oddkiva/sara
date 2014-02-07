@@ -9,8 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_GEOMETRY_TOOLS_CONE_HPP
-#define DO_GEOMETRY_TOOLS_CONE_HPP
+#ifndef DO_GEOMETRY_OBJECTS_CONE_HPP
+#define DO_GEOMETRY_OBJECTS_CONE_HPP
 
 #include <DO/Core/EigenExtension.hpp>
 #include <DO/Core/DebugUtilities.hpp>
@@ -120,7 +120,9 @@ namespace DO {
   typedef AffineCone<2> AffineCone2;
   typedef AffineCone<3> AffineCone3;
 
+  AffineCone2 affineCone2(double theta0, double theta1, const Point2d& vertex);
+
 
 } /* namespace DO */
 
-#endif /* DO_GEOMETRY_TOOLS_CONE_HPP */
+#endif /* DO_GEOMETRY_OBJECTS_CONE_HPP */
