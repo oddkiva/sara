@@ -34,11 +34,21 @@ namespace DO {
       drawLine(p[i1], p[i2], color, penWidth);
   }
 
-
   void drawEllipse(const Ellipse& e, const Color3ub col, int penWidth)
   {
     drawEllipse(e.center(), e.radius1(), e.radius2(),
                 toDegree(e.orientation()), col, penWidth);
+  }
+
+  void drawAffineConeAxes(const AffineCone2& K, double arrowLength,
+                          const Color3ub& color)
+  {
+    const Point2d& v = K.vertex();
+    Point2d a, b;
+    a = v + arrowLength*K.alpha();
+    b = v + arrowLength*K.beta();
+    drawArrow(v, a, color);
+    drawArrow(v, b, color);
   }
 
 

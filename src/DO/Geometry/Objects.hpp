@@ -20,6 +20,7 @@
 #include <DO/Geometry/Objects/Triangle.hpp>
 #include <DO/Geometry/Objects/Quad.hpp>
 #include <DO/Geometry/Objects/Ellipse.hpp>
+#include <DO/Geometry/Objects/Cone.hpp>
 
 // 3D objects
 #include <DO/Geometry/Objects/Cube.hpp>
