@@ -17,7 +17,7 @@
 #include <DO/Geometry/Objects.hpp>
 #include <DO/Geometry/Graphics.hpp>
 #include <DO/Geometry/Algorithms/EllipseIntersection.hpp>
-#include <DO/Geometry/Tools/Cone.hpp>
+#include <DO/Geometry/Objects/Cone.hpp>
 #include <DO/Geometry/Tools/Utilities.hpp>
 #include <ctime>
 
@@ -51,8 +51,8 @@ namespace TestParams
 } /* namespace TestParameters */
 
 template <typename TestPred, typename GroundTruth>
-void planeSweepTest(const TestPred& pred,
-                    const GroundTruth& gdTruth)
+void sweepTest(const TestPred& pred,
+               const GroundTruth& gdTruth)
 {
   if (TestParams::debug)
   {
@@ -81,7 +81,58 @@ void planeSweepTest(const TestPred& pred,
   }
 }
 
-#ifdef RUN_PREVIOUS_TESTS
+template <typename TestPred>
+int sweepCountPixels(const TestPred& pred)
+{
+  if (TestParams::debug)
+  {
+    if (!getActiveWindow())
+      setAntialiasing(openWindow(TestParams::w, TestParams::h));
+    clearWindow();
+  }
+
+  int quantity = 0;
+  for (int y = 0; y < TestParams::h; ++y)
+  {
+    for (int x = 0; x < TestParams::w; ++x)
+    {
+      Point2d p(x,y);
+      if (pred(p))
+      {
+        ++quantity;
+        if (TestParams::debug)
+          drawPoint(x,y, Green8);
+      }
+    }
+  }
+
+  if (TestParams::debug)
+    getKey();
+
+  return quantity;
+}
+
+template <typename TestPred>
+int sweepCountPixels(const TestPred& pred, Image<Rgb8>& buffer)
+{
+  buffer.array().fill(White8);
+  int interArea = 0;
+  for (int y = 0; y < TestParams::h; ++y)
+  {
+    for (int x = 0; x < TestParams::w; ++x)
+    {
+      Point2d p(x,y);
+      if (pred(p))
+      {
+        ++interArea;
+        buffer(x,y) = Red8;
+      }
+    }
+  }
+  return interArea;
+}
+
+#ifdef THESE_ARE_OK
 TEST(DO_Geometry_Test, bboxTest)
 {
   BBox bbox(TestParams::p1, TestParams::p2);
@@ -98,7 +149,7 @@ TEST(DO_Geometry_Test, bboxTest)
       p.cwiseMin(TestParams::p1) == TestParams::p1 && 
       p.cwiseMax(TestParams::p2) == TestParams::p2;
   };
-  planeSweepTest(predicate, groundTruth);
+  sweepTest(predicate, groundTruth);
 
 
   Point2d points[] = {
@@ -123,15 +174,15 @@ TEST(DO_Geometry_Test, quadTest)
 
   EXPECT_NEAR(area(bbox), area(quad), 1e-10);
 
-  auto predicate = [&](const Point2d& p) {
-    return inside(p, quad);
-  };
-  auto groundTruth = [&](const Point2d& p) {
-    return 
-      (p.cwiseMin(TestParams::p1) - TestParams::p1).norm() < 1e-1 && 
-      (p.cwiseMax(TestParams::p2) - TestParams::p2).norm() < 1e-1;
-  };
-  planeSweepTest(predicate, groundTruth);
+  //auto predicate = [&](const Point2d& p) {
+  //  return inside(p, quad);
+  //};
+  //auto groundTruth = [&](const Point2d& p) {
+  //  return 
+  //    (p.cwiseMin(TestParams::p1) - TestParams::p1).norm() < 1e-1 && 
+  //    (p.cwiseMax(TestParams::p2) - TestParams::p2).norm() < 1e-1;
+  //};
+  //sweepTest(predicate, groundTruth);
 }
 
 TEST(DO_Geometry_Test, triangleTest)
@@ -143,38 +194,11 @@ TEST(DO_Geometry_Test, triangleTest)
   EXPECT_NEAR(signedArea(t2), -1e4/2., 1e-10);
 
   Triangle t3(Point2d(50, 73), Point2d(350, 400), Point2d(25, 200));
-  int pixelArea3 = 0;
-  if (!getActiveWindow())
-    openWindow(TestParams::w, TestParams::h);
-  for (int y = 0; y < TestParams::h; ++y)
-  {
-    for (int x = 0; x < TestParams::w; ++x)
-    {
-      Point2d p(x,y);
-
-      if (inside(p, t3) && TestParams::debug)
-      {
-        drawPoint(x,y,Green8);
-        ++pixelArea3;
-      }
-    }
-  }
-  getKey();
+  int pixelArea3 = sweepCountPixels([&](Point2d& p){ return inside(p, t3); });
   double exactArea3 = area(t3);
-  CHECK(exactArea3);
-  CHECK(pixelArea3);
+
   double relError = fabs(exactArea3 - pixelArea3)/exactArea3;
   EXPECT_NEAR(relError, 0., 5e-2);
-}
-
-void drawAffineConeAxes(const AffineCone2& K)
-{
-  const Point2d& v = K.vertex();
-  Point2d a, b;
-  a = v + K.alpha()*50;
-  b = v + K.beta()*50;
-  drawArrow(v, a, Black8);
-  drawArrow(v, b, Black8);
 }
 
 TEST(DO_Geometry_Test, coneTest)
@@ -187,9 +211,6 @@ TEST(DO_Geometry_Test, coneTest)
   AffineCone2 convexPointedK2(alpha, -alpha, TestParams::center, AffineCone2::Convex, std::numeric_limits<double>::epsilon());
   AffineCone2 bluntPointedK2(alpha, -alpha, TestParams::center, AffineCone2::Blunt, std::numeric_limits<double>::epsilon());
 
-  if (!getActiveWindow() && TestParams::debug)
-    setAntialiasing(openWindow(TestParams::w, TestParams::h));
-
   // ======================================================================== //
   printStage("Convex affine cone testing");
   auto convexPredicate = [&](const Point2d& p) {
@@ -201,7 +222,7 @@ TEST(DO_Geometry_Test, coneTest)
       p.y() > TestParams::h/2. && 
       p.x() > p.y();
   };
-  planeSweepTest(convexPredicate, convexGroundTruth);
+  sweepTest(convexPredicate, convexGroundTruth);
   if (TestParams::debug)
   {
     drawAffineConeAxes(convexK);
@@ -219,7 +240,7 @@ TEST(DO_Geometry_Test, coneTest)
       p.y() >= TestParams::h/2. && 
       p.x() >= p.y();
   };
-  planeSweepTest(bluntPredicate, bluntGroundTruth);
+  sweepTest(bluntPredicate, bluntGroundTruth);
   if (TestParams::debug)
   {
     drawAffineConeAxes(bluntK);
@@ -234,7 +255,7 @@ TEST(DO_Geometry_Test, coneTest)
   auto convexPointedGroundTruth = [&](const Point2d& p) {
     return false;
   };
-  planeSweepTest(convexPointedPredicate, convexPointedGroundTruth);
+  sweepTest(convexPointedPredicate, convexPointedGroundTruth);
   if (TestParams::debug)
   {
     drawAffineConeAxes(convexPointedK);
@@ -251,7 +272,7 @@ TEST(DO_Geometry_Test, coneTest)
       p.x() >= TestParams::w/2. && 
       p.y() == TestParams::h/2.;
   };
-  planeSweepTest(bluntPointedPredicate, bluntPointedGroundTruth);
+  sweepTest(bluntPointedPredicate, bluntPointedGroundTruth);
   if (TestParams::debug)
   {
     drawAffineConeAxes(bluntPointedK);
@@ -266,7 +287,7 @@ TEST(DO_Geometry_Test, coneTest)
   auto convexPointedGroundTruth2 = [&](const Point2d& p) {
     return false;
   };
-  planeSweepTest(convexPointedPredicate2, convexPointedGroundTruth2);
+  sweepTest(convexPointedPredicate2, convexPointedGroundTruth2);
   if (TestParams::debug)
   {
     drawAffineConeAxes(convexPointedK2);
@@ -281,7 +302,7 @@ TEST(DO_Geometry_Test, coneTest)
   auto bluntPointedGroundTruth2 = [&](const Point2d& p) {
     return p.y() == TestParams::h/2.;
   };
-  planeSweepTest(bluntPointedPredicate2, bluntPointedGroundTruth2);
+  sweepTest(bluntPointedPredicate2, bluntPointedGroundTruth2);
   if (TestParams::debug)
   {
     drawAffineConeAxes(bluntPointedK2);
@@ -299,27 +320,8 @@ TEST(DO_Geometry_Test, csgTest)
   CSG::Singleton<AffineCone2> cone(K);
   auto inter = ell*cone;
 
-  if (TestParams::debug)
-  {
-    if (!getActiveWindow())
-      setAntialiasing(openWindow(TestParams::w, TestParams::h));
-    clearWindow();
-  }
-
-  int interArea = 0;
-  for (int y = 0; y < TestParams::h; ++y)
-  {
-    for (int x = 0; x < TestParams::w; ++x)
-    {
-      Point2d p(x,y);
-      if (inter.contains(p))
-      {
-        ++interArea;
-        if (TestParams::debug)
-          drawPoint(x,y,Red8);
-      }
-    }
-  }
+  int interArea = sweepCountPixels([&](const Point2d& p)
+  { return inter.contains(p); });
 
   double trueArea = area(E)/4.;
   double relativeError = fabs(interArea -trueArea)/trueArea;
@@ -330,101 +332,67 @@ TEST(DO_Geometry_Test, csgTest)
     getKey();
   }
 }
-#endif
-
-int countPixelsInside(Image<Rgb8>& image, const CSG::Object& obj, bool display = false)
-{
-  image.array().fill(White8);
-  int interArea = 0;
-  for (int y = 0; y < TestParams::h; ++y)
-  {
-    for (int x = 0; x < TestParams::w; ++x)
-    {
-      Point2d p(x,y);
-      if (obj.contains(p))
-      {
-        ++interArea;
-        image(x,y) = Red8;
-      }
-    }
-  }
-  return interArea;
-}
-
-AffineCone2 affineCone2(double theta0, double theta1, const Point2d& vertex)
-{
-  Point2d u0, u1;
-  u0 = unitVector2(theta0);
-  u1 = unitVector2(theta1);
-  return AffineCone2(u0, u1, vertex, AffineCone2::Convex);
-}
 
 TEST(DO_Geometry_Test, ellipseSectorArea)
 {
-  Ellipse E(180, 100, /*toRadian(30.)*/0, TestParams::center);
-   
-  if (TestParams::debug)
-  {
-    if (!getActiveWindow())
-      setAntialiasing(openWindow(TestParams::w, TestParams::h));
-    clearWindow();
-  }
+  Ellipse E(180, 100, toRadian(30.), TestParams::center);
 
   CSG::Singleton<Ellipse> ell(E);
   Image<Rgb8> buffer(TestParams::w, TestParams::h);
 
   try {
 
+    if (TestParams::debug)
+    {
+      if (!getActiveWindow())
+        setAntialiasing(openWindow(TestParams::w, TestParams::h));
+      clearWindow();
+    }
+
     int steps = 18;
     ASSERT_EQ(steps%2, 0);
-
     for (int i0 = 0; i0 <= steps; ++i0)
     {
       double theta0 = i0*2*M_PI/steps;
-      for (int i1 = i0+1; i1 <= i0+steps; ++i1)
-      //for (int i1 = 0; i1 < i0; ++i1) // revert order.
+      //for (int i1 = i0+1; i1 <= i0+steps; ++i1)
+      for (int i1 = 0; i1 < i0; ++i1) // revert order.
       {
         double theta1 = i1*2*M_PI/steps;
         double dTheta = fabs(theta1 - theta0);
-
-        cout << i0 << "     " << i1 << endl;
-        cout << toDegree(theta0) << "     " << toDegree(theta1) << endl;
-        cout << theta0 << "     " << theta1 << endl;
-
 
         Triangle t(E.center(), E(theta0), E(theta1));
 
         CSG::Singleton<AffineCone2> cone(affineCone2(theta0+E.orientation(),
                                                      theta1+E.orientation(),
                                                      E.center()));
-        auto inter = ell*cone;
-        auto reldiff = ell - inter;
+        auto E_and_Cone = ell*cone;
+        auto E_minus_Cone = ell - E_and_Cone;
+        auto inside_E_and_Cone = [&](const Point2d& p){ return E_and_Cone.contains(p); };
+        auto inside_E_minus_Cone = [&](const Point2d& p){ return E_minus_Cone.contains(p); };
 
         int estimatedSectorArea = 0;
-        if (i1 - i0 < steps/2)
-        //if (i0-i1 > steps/2) // revert order
-          estimatedSectorArea = countPixelsInside(buffer, inter);
+        //if (i1 - i0 < steps/2)
+        if (i0-i1 > steps/2) // revert order
+          estimatedSectorArea = sweepCountPixels(inside_E_and_Cone, buffer);
         else if (abs(i1-i0) == steps/2)
           estimatedSectorArea = area(E) / 2.;
         else
-          estimatedSectorArea = countPixelsInside(buffer, reldiff);
-        display(buffer);
-        //getKey();
+          estimatedSectorArea = sweepCountPixels(inside_E_minus_Cone, buffer);
+
+        if (TestParams::debug)
+        {
+          /*cout << i0 << "     " << i1 << endl;
+          cout << toDegree(theta0) << "     " << toDegree(theta1) << endl;
+          cout << theta0 << "     " << theta1 << endl;*/
+          display(buffer);
+          //getKey();
+        }
 
         double analyticSectorArea = sectorArea(E, theta0, theta1);
         double absError = fabs(estimatedSectorArea -analyticSectorArea);
         double relError = absError/estimatedSectorArea;
         if (estimatedSectorArea == 0 && absError < 1e-2)
           relError = absError;
-
-
-        printStage("Check error");
-        CHECK(analyticSectorArea);
-        CHECK(estimatedSectorArea);
-        CHECK(area(t));
-        CHECK(absError);
-        drawTriangle(t, Green8, 1);
-        getKey();
 
         EXPECT_NEAR(relError, 0, 1e-1);
         if (TestParams::debug && relError > 1e-1)
@@ -434,53 +402,31 @@ TEST(DO_Geometry_Test, ellipseSectorArea)
           CHECK(abs(i1-i0));
           CHECK(analyticSectorArea);
           CHECK(estimatedSectorArea);
+          CHECK(absError);
           CHECK(relError);
           getKey();
         }
       }
     }
-
   }
   catch (exception& e)
   {
     cout << e.what() << endl;
     getKey();
   }
-
-}
-
-
-double countPixelArea(Image<Rgb8>& image, double theta0, double theta1, const Ellipse& e)
-{
-  image.array().fill(White8);
-  int interArea = 0;
-  Point2d a(e(theta0));
-  Point2d b(e(theta1));
-  for (int y = 0; y < TestParams::h; ++y)
-    for (int x = 0; x < TestParams::w; ++x)
-    {
-      Point2d p(x,y);
-      if (ccw(a,b,p) == -1 && inside(p, e))
-      {
-        ++interArea;
-        image(x,y) = Red8;
-      }
-    }
-  return double(interArea);
 }
 
 TEST(DO_Geometry_Test, ellipseSegmentArea)
 {
-  Ellipse E(180, 100, /*toRadian(42.)*/0, TestParams::center);
-   
+  Ellipse E(180, 100, toRadian(42.), TestParams::center);
+  Image<Rgb8> buffer(TestParams::w, TestParams::h);
+
   if (TestParams::debug)
   {
     if (!getActiveWindow())
       setAntialiasing(openWindow(TestParams::w, TestParams::h));
     clearWindow();
   }
-
-  Image<Rgb8> image(TestParams::w, TestParams::h);
 
   try
   {
@@ -490,23 +436,26 @@ TEST(DO_Geometry_Test, ellipseSegmentArea)
     for (int i0 = 0; i0 <= steps; ++i0)
     {
       double theta0 = i0*2*M_PI/steps;
-      for (int i1 = i0+1; i1 <= i0+steps; ++i1)
+      for (int i1 = i0+1; i1 < i0+steps; ++i1)
       //for (int i1 = 0; i1 < i0; ++i1) // revert order.
       {
         double theta1 = i1*2*M_PI/steps;
         double dTheta = fabs(theta1 - theta0);
 
+        const Point2d a(E(theta0));
+        const Point2d b(E(theta1));
+        Triangle t(E.center(), a, b);
 
-        Triangle t(E.center(), E(theta0), E(theta1));
+        auto insideSegment = [&](const Point2d& p) -> bool
+        { return (ccw(a,b,p) == -1) && inside(p, E); };
 
-        double segArea1 = countPixelArea(image, theta0, theta1, E);
+        double segArea1 = sweepCountPixels(insideSegment, buffer);
         double segArea2 = segmentArea(E, theta0, theta1);
         double sectArea = sectorArea(E, theta0, theta1);
         double triArea = area(t);
 
-        display(image);
+        display(buffer);
         drawTriangle(t, Green8, 3);
-        getKey();
 
 
         double absError = fabs(segArea1 -segArea2);
@@ -515,11 +464,13 @@ TEST(DO_Geometry_Test, ellipseSegmentArea)
           relError = absError;
 
         EXPECT_NEAR(relError, 0, 1e-1);
-        if (TestParams::debug && relError > 1e-1)
+        if (TestParams::debug && relError > 2e-1)
         {
           printStage("Numerical error");
-          cout << i0 << "     " << i1 << endl;
-          cout << toDegree(theta0) << "     " << toDegree(theta1) << endl;
+          CHECK(i0);
+          CHECK(i1);
+          CHECK(toDegree(theta0));
+          CHECK(toDegree(theta1));
           CHECK(abs(i1-i0));
           CHECK(segArea1);
           CHECK(segArea2);
@@ -538,37 +489,7 @@ TEST(DO_Geometry_Test, ellipseSegmentArea)
   }
 
 }
-
-////! \todo: what's this?
-//void testAffineTransforms()
-//{
-//  const Point2d& c = TestParams::center;
-//  double r = 100.;
-//  int N = 100;
-//  MatrixXf p(2, N);
-//  for (int i = 0; i < N; ++i)
-//  {
-//    float theta = 2.*M_PI*i/N;
-//    p.col(i) = Point2f(cos(theta), sin(theta));
-//  }
-//
-//  Matrix2d R;
-//  R << 0.5, 2,
-//    0, 1;
-//
-//  for (int i = 0; i < N; ++i)
-//    fillCircle(c+r*p.col(i), 3.f, Blue8);
-//  for (int i = 0; i < N; ++i)
-//    fillCircle(c+r*R*p.col(i), 3.f, Red8);
-//  getKey();
-//
-//  Matrix2f S = R.transpose()*R;
-//  cout << S << endl;
-//
-//  Ellipse E(fromShapeMat(S.cast<double>(), c.cast<double>()));
-//  drawEllipse(E, Green8, 3);
-//  getKey();
-//}
+#endif
 
 void compareComputationTimes(const Ellipse& e1, const Ellipse& e2,
                              int discretization, double& bestSpeedGain)
@@ -701,13 +622,13 @@ TEST(DO_Geometry_Test, ellipseAlgorithmsTest)
     // Summary
     double relativeError = abs(approxRatio-analyticRatio) / approxRatio;
     double absoluteError = abs(approxRatio-analyticRatio);
-    
+
     double areaRatio = min(area(e1), area(e2)) / max(area(e1), area(e2));
     if (absoluteError > 0.05  /*&& areaRatio > 0.2*/)
     {
       viewEllipses(e1, e2);
       ostringstream oss;
-      oss << "ATTEMPTS = " << attempts;
+      oss << "ATTEMPTS = " << attempts << " encountered computational issue";
       printStage(oss.str());
 
       CHECK(area(e1));
