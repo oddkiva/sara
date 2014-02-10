@@ -181,7 +181,7 @@ namespace DO {
     orientation(o_0, interPts, numInter, E_0);
     orientation(o_1, interPts, numInter, E_1);
 
-    // Sum the segment area.
+    // Sum the segment areas.
     double area = 0;
     for (int i = 0, j = numInter-1; i < numInter; j=i++)
     {
@@ -200,7 +200,7 @@ namespace DO {
       area += min(segmentArea(E_0, theta_0, theta_1),
                   segmentArea(E_1, psi_0, psi_1));
     }
-    // If the number of the intersection > 2, compute the area of the polygon
+    // If the number of the intersection > 2, add the area of the polygon
     // whose vertices are p[0], p[1], ..., p[numInter].
     if (numInter > 2)
     {
