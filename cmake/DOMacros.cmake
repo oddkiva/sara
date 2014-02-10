@@ -81,7 +81,7 @@ macro (do_set_internal_dependencies _library_name _dep_list)
   message ("Dependencies: ${DO_${_library_name}_LINK_LIBRARIES}")
 endmacro ()
 
-macro (do_append_subdir_files _parentdir _child_dir _hdr_list_var _src_list_var) 
+macro (do_append_subdir_files _parentdir _child_dir _hdr_list_var _src_list_var)
   get_filename_component(parentdir_name "${_parentdir}" NAME)
 
   set(hdr_sublist_var DO_${parentdir_name}_${_child_dir}_HEADER_FILES)
@@ -90,7 +90,8 @@ macro (do_append_subdir_files _parentdir _child_dir _hdr_list_var _src_list_var)
   file(GLOB ${hdr_sublist_var} FILES ${_parentdir}/${_child_dir}/*.hpp)
   file(GLOB ${src_sublist_var} FILES ${_parentdir}/${_child_dir}/*.cpp)
   
-  source_group("${_child_dir}" FILES ${${hdr_sublist_var}} ${${src_sublist_var}})
+  source_group("${_child_dir}" FILES
+               ${${hdr_sublist_var}} ${${src_sublist_var}})
   list(APPEND ${_hdr_list_var} ${${hdr_sublist_var}})
   list(APPEND ${_src_list_var} ${${src_sublist_var}})
   
@@ -119,7 +120,8 @@ macro(do_glob_directory _curdir)
   set(DO_${curdir_name}_MASTER_HEADER ${DO_SOURCE_DIR}/${curdir_name}.hpp)
   source_group("Master Header File" FILES ${DO_${curdir_name}_MASTER_HEADER})
   
-  list(APPEND DO_${curdir_name}_HEADER_FILES ${${DO_${curdir_name}_MASTER_HEADER}})
+  list(APPEND DO_${curdir_name}_HEADER_FILES
+       ${${DO_${curdir_name}_MASTER_HEADER}})
   
   message(STATUS "Master Header:\n ${DO_${curdir_name}_MASTER_HEADER}")
   message(STATUS "Header file list:\n ${DO_${curdir_name}_HEADER_FILES}")
@@ -148,14 +150,16 @@ macro (do_append_library _library_name
     add_library(DO_${_library_name} ${library_type} ${_hdr_files} ${_src_files})
     # Link with external libraries
     message(STATUS 
-            "[DO] Linking project 'DO_${_library_name}' with '${_lib_dependencies}'")
+      "[DO] Linking project 'DO_${_library_name}' with '${_lib_dependencies}'")
     target_link_libraries(DO_${_library_name} ${_lib_dependencies})
+    set_target_properties(DO_${_library_name} PROPERTIES
+                          COMPILE_FLAGS ${ENABLE_CXX11})
   else ()
     # - Case 2: the project is a header-only library
     #   Specify the source files.
     #add_library(DO_${_library_name} STATIC ${_hdr_files})
     message(STATUS 
-            "[DO] No linking needed for header-only project 'DO_${_library_name}'")
+      "[DO] No linking needed for header-only project 'DO_${_library_name}'")
     #set_target_properties(DO_${_library_name} PROPERTIES LINKER_LANGUAGE CXX)
     add_custom_target(DO_${_library_name} SOURCES ${_hdr_files})
   endif ()
@@ -226,11 +230,11 @@ macro (do_add_msvc_precompiled_header _pch _src_var)
     file(APPEND ${_pch_src} "#include \"${_pch}\"\n")
 
     set_source_files_properties(${_pch_src} PROPERTIES
-                                COMPILE_FLAGS "/Yc\"${_pch}\" /Fp\"${_pch_binary}\""
-                                OBJECT_OUTPUTS "${_pch_binary}")
+      COMPILE_FLAGS "/Yc\"${_pch}\" /Fp\"${_pch_binary}\""
+      OBJECT_OUTPUTS "${_pch_binary}")
     set_source_files_properties(${_srcs} PROPERTIES
-                                COMPILE_FLAGS "/Yu\"${_pch}\" /FI\"${_pch_binary}\" /Fp\"${_pch_binary}\""
-                                OBJECT_DEPENDS "${_pch_binary}")
+      COMPILE_FLAGS "/Yu\"${_pch}\" /FI\"${_pch_binary}\" /Fp\"${_pch_binary}\""
+      OBJECT_DEPENDS "${_pch_binary}")
     list(APPEND ${_src_var} ${_pch_src})
   endif ()
 endmacro (do_add_msvc_precompiled_header)
@@ -275,8 +279,8 @@ function (do_unit_test _unit_test_name _srcs _additional_lib_deps)
                         ${_additional_lib_deps}
                         gtest)
   set_target_properties(DO_${_unit_test_name}_test PROPERTIES
-                        COMPILE_FLAGS -DSRCDIR=${CMAKE_CURRENT_SOURCE_DIR}
-                        COMPILE_DEFINITIONS DO_STATIC)
+    COMPILE_FLAGS "${ENABLE_CXX11} -DSRCDIR=${CMAKE_CURRENT_SOURCE_DIR}"
+    COMPILE_DEFINITIONS DO_STATIC)
   add_test(DO_${_unit_test_name}_test
            "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/DO_${_unit_test_name}_test")
   

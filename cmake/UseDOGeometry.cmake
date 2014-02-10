@@ -13,7 +13,6 @@ if (DO_USE_FROM_SOURCE)
     do_set_internal_dependencies("Geometry" "Graphics")
     #do_set_external_dependencies("")
     do_glob_directory(${DO_SOURCE_DIR}/Geometry)
-
     do_generate_library("Geometry")
   endif ()
 endif ()

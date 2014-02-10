@@ -25,7 +25,6 @@ if (NOT DO_FOUND)
     message(FATAL_ERROR "DO++ is not found!")
   endif ()
   
-  
   # DEBUG
   do_step_message("Found DO libraries in directory:")
   message(STATUS "  - DO_DIR = '${DO_DIR}'")
@@ -66,9 +65,9 @@ if (NOT DO_FOUND)
     message (STATUS "  - ${component}")
   endforeach (component)
   
-  # Configure compiler
+  # Configure compiler for the specific project.
   include (DOConfigureCompiler)
-  
+
   # Set DO
   set(DO_FOUND TRUE)
   set(DO_USE_FILE UseDO)
@@ -81,8 +80,11 @@ endif ()
 # Check that the requested libraries exists whenever:
 # 'find_package(DO COMPONENTS Core Graphics ... REQUIRED)' is called.
 if (DO_FIND_COMPONENTS)
+  # Configure compiler for the specific project.
+  include (DOConfigureCompiler)
+  
   # DEBUG
-  do_substep_message("Requested libraries by project '${PROJECT_NAME}':")
+  do_step_message("Requested libraries by project '${PROJECT_NAME}':")
   foreach (component ${DO_FIND_COMPONENTS})
    do_substep_message ("- ${component}")
   endforeach (component)
