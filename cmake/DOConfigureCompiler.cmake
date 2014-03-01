@@ -7,7 +7,6 @@
 # - auto
 # - lambda
 #
-set(ENABLE_CXX11 "")
 
 do_step_message("Found ${CMAKE_CXX_COMPILER_ID} compiler:")
 
@@ -15,6 +14,8 @@ do_step_message("Found ${CMAKE_CXX_COMPILER_ID} compiler:")
 if (MSVC)
   add_definitions(-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE)
   message(STATUS "  - NON-SECURE warnings are disabled.")
+  add_definitions(/EHsc)
+  message(STATUS "  - Using /EHsc: catches C++ exceptions only and tells the compiler to assume that extern C functions never throw a C++ exception.")
   if (MSVC_VERSION EQUAL 1700)
     message(STATUS "  - Using version 2012: setting '_VARIADIC_MAX=10' to compile 'Google Test'")
     add_definitions(/D _VARIADIC_MAX=10)
@@ -33,7 +34,7 @@ elseif (CMAKE_COMPILER_IS_GNUCXX)
   elseif (GCC_VERSION VERSION_LESS 4.7)
     set(ENABLE_CXX11 "-std=c++0x")
   else ()
-    set (ENABLE_CXX11 "-std=c++11 -stdlib=libstdc++")
+    set (ENABLE_CXX11 "-std=c++11")
   endif ()
 else ()
   message("WARNING: Compiler '${CMAKE_CXX_COMPILER}' may not be supported by DO-CV. Make sure that C++0x features are needed (auto and lambda) and adjust the CMake variable 'ENABLE_CXX11'. Otherwise, report back to me: david.ok8@gmail.com and I'll try to do what I can.")

@@ -152,8 +152,10 @@ macro (do_append_library _library_name
     message(STATUS 
       "[DO] Linking project 'DO_${_library_name}' with '${_lib_dependencies}'")
     target_link_libraries(DO_${_library_name} ${_lib_dependencies})
-    set_target_properties(DO_${_library_name} PROPERTIES
-                          COMPILE_FLAGS ${ENABLE_CXX11})
+    if (DEFINED ENABLE_CXX11)
+      set_target_properties(DO_${_library_name} PROPERTIES
+                            COMPILE_FLAGS ${ENABLE_CXX11})
+    endif ()
   else ()
     # - Case 2: the project is a header-only library
     #   Specify the source files.
