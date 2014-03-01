@@ -17,14 +17,14 @@ Still, I invite to give it a try:
 License
 -------
 
-See [LICENSE MPL2](https://github.com/DO-CV/DO-CV/raw/master/COPYING.MPL2) license.
+See [LICENSE MPL2](https://github.com/DO-CV/DO-CV/raw/master/COPYING.MPL2) text file.
 
 
 -------
 Authors
 -------
 
-See [Authors](https://github.com/openMVG/openMVG/raw/master/AUTHORS) text file.
+See [AUTHORS](https://github.com/openMVG/openMVG/raw/master/AUTHORS) text file.
 
 
 --------
