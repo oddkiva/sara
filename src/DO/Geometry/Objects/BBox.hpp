@@ -71,6 +71,8 @@ namespace DO {
     double height() const { return std::abs(br_.y() - tl_.y()); }
     Vector2d sizes() const { return br_ - tl_; }
 
+    Point2d center() const { return 0.5*(tl_ + br_); }
+
     static BBox infinite()
     {
       BBox b;
