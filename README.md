@@ -1,15 +1,18 @@
-DO++
-==========
+=====
+DO-CV
+=====
 
-## Introduction
-DO++ is a basic set of C++ libraries for computer vision.
+------------
+Introduction
+------------
+
+DO-CV is a basic set of C++ libraries for computer vision.
 
 I am aware OpenCV is out there and competing with it is out of question.
 Still, I invite to give it a try:
-* DO++ has a very user-friendly API
-* DO++ is small and thus easily maintainable and extensible.
+* DO-CV has a very user-friendly API
+* DO-CV is small and thus easily maintainable and extensible.
 
-DO++ is opensource and licensed with the MPL2 license.
 
 ## Documentation
 Documentation is still under construction. Have a look at the doxygen-generated documentation [here](http://davidok8.github.io/doplusplus/).
