@@ -13,13 +13,30 @@ Still, I invite to give it a try:
 * DO-CV has a very user-friendly API
 * DO-CV is small and thus easily maintainable and extensible.
 
+-------
+License
+-------
 
-## Documentation
-Documentation is still under construction. Have a look at the doxygen-generated documentation [here](http://davidok8.github.io/doplusplus/).
+See [LICENSE MPL2](https://github.com/DO-CV/DO-CV/raw/master/COPYING.MPL2) license.
+
+
+-------
+Authors
+-------
+
+See [Authors](https://github.com/openMVG/openMVG/raw/master/AUTHORS) text file.
+
+-------------
+Documentation
+-------------
+
+Documentation is still under construction. Have a look at the doxygen-generated documentation [here](http://do-cv.github.io/DO-CV/).
 
 Currently, the best way to see how the library works is to look at samples in the **test** folder.
 
-## Currently Available Modules
+---------------------------
+Currently Available Modules
+---------------------------
 Currently added features are:
 - **Core** module
   Clean C++ template data structures:
@@ -66,7 +83,11 @@ Please be patient...
 
 A windows installer will be made available soon. Meanwhile you can generate it with CPack and NSIS.
 
-## Third-Party Software
+
+--------------------
+Third-Party Software
+--------------------
+
 DO++ uses the following third-party libraries:
 
 - [**Qt 5**](qt-project.org) is a cross-platform application and UI framework with APIs for C++ programming.
