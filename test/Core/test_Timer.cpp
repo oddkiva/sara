@@ -12,25 +12,16 @@
 #include <gtest/gtest.h>
 #include <DO/Core/Timer.hpp>
 #include <DO/Core/DebugUtilities.hpp>
-#include <TinyThread++/source/tinythread.h>
+#include <chrono>
+#include <thread>
 
 using namespace DO;
 using namespace std;
 
 inline void wait(unsigned milliseconds)
 {
-#ifdef _WIN32
-  Sleep(milliseconds);
-#else
-  usleep(milliseconds*1e3);
-#endif
-}
-
-// Thread function: Detach
-void oneSecondSleep(void *)
-{
-  // We don't do anything much, just sleep a little...
-  tthread::this_thread::sleep_for(tthread::chrono::milliseconds(1000));
+  chrono::milliseconds duration(milliseconds);
+  this_thread::sleep_for(duration);
 }
 
 TEST(DO_Core_Test,  testTimer)
@@ -39,7 +30,7 @@ TEST(DO_Core_Test,  testTimer)
   HighResTimer hrTimer;
   double elapsedTimeMs;
   double elapsedTimeS;
-  double sleepTimeMs = 1e3;
+  unsigned sleepTimeMs = 1000;
 
   hrTimer.restart();
   wait(sleepTimeMs);
@@ -53,9 +44,7 @@ TEST(DO_Core_Test,  testTimer)
   
   timer.restart();
   // Start the child thread
-  tthread::thread t(oneSecondSleep, 0);
-  // Wait for the thread to finish
-  t.join();
+  wait(sleepTimeMs);
   elapsedTimeS = timer.elapsed();
   EXPECT_NEAR(elapsedTimeS, sleepTimeMs/1e3, 1e-3);
 }
