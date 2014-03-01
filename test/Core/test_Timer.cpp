@@ -20,11 +20,8 @@ using namespace std;
 
 inline void wait(unsigned milliseconds)
 {
-  thread t([&]{
-    chrono::milliseconds duration(milliseconds);
-    this_thread::sleep_for(duration);
-  });
-  t.join();
+  chrono::milliseconds duration(milliseconds);
+  this_thread::sleep_for(duration);
 }
 
 TEST(DO_Core_Test,  testTimer)
@@ -47,9 +44,10 @@ TEST(DO_Core_Test,  testTimer)
   
   timer.restart();
   // Start the child thread
-  wait(sleepTimeMs);
+  thread t([&]() { wait(sleepTimeMs); });
+  t.join();
   elapsedTimeS = timer.elapsed();
-  EXPECT_NEAR(elapsedTimeS, sleepTimeMs/1e3, 1e-3);
+  EXPECT_NEAR(elapsedTimeS, sleepTimeMs/1e3, 1e-2);
 }
 
 int main(int argc, char** argv) 
