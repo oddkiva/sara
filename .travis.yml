@@ -9,12 +9,14 @@ before_install:
   - cmake --version
   # Remove the rabbitmq source file since it currently times out and we don't need it
   - sudo rm -f /etc/apt/sources.list.d/rabbitmq-source.list
+  # Update APT repositories.
+  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+  - sudo add-apt-repository --yes ppa:ubuntu-sdk-team/ppa
+  - sudo apt-get update -qq
   # Install GCC 4.8 for C++11 features.
   - if [ "$CXX" = "g++" ]; then sudo apt-get install -qq g++-4.8; fi
   - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
   # Install Qt5
-  - sudo add-apt-repository --yes ppa:ubuntu-sdk-team/ppa
-  - sudo apt-get update -qq
   - sudo apt-get install -qq qt5-qmake qtbase5-dev qtdeclarative5-dev libqt5webkit5-dev libsqlite3-dev
 script:
   - mkdir build
