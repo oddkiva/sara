@@ -44,9 +44,5 @@ message(STATUS "  - stlplus")
 add_subdirectory(stlplus)
 set_property(TARGET stlplus PROPERTY FOLDER ${THIRDPARTY_FOLDER_NAME})
 
-message(STATUS "  - TinyThread++")
-add_subdirectory(TinyThread++)
-set_property(TARGET TinyThread PROPERTY FOLDER ${THIRDPARTY_FOLDER_NAME})
-
 # message(STATUS "  - DAISY")
 # add_subdirectory(libdaisy)
