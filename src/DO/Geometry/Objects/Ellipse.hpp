@@ -15,6 +15,7 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <DO/Core/EigenExtension.hpp>
+#include <DO/Geometry/Objects/Quad.hpp>
 
 namespace DO {
 
@@ -84,6 +85,8 @@ namespace DO {
     //! Checks if point is inside ellipse.
     friend inline bool inside(const Point2d& p, const Ellipse& e)
     { return (p-e.c_).transpose()*shapeMat(e)*(p-e.c_) < 1.; }
+    //! Compute rotated bbox of the ellispe.
+    friend Quad rotatedBBox(const Ellipse& e);
     //! I/O.
     friend std::ostream& operator<<(std::ostream& os, const Ellipse& e);
 

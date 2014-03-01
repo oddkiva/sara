@@ -33,7 +33,6 @@ namespace DO {
   double segmentArea(const Ellipse& e, double theta0, double theta1)
   {
     Point2d p0(e(theta0)), p1(e(theta1));
-
     Triangle t(e.center(), p0, p1);
 
     double triArea = area(t);
@@ -62,4 +61,14 @@ namespace DO {
     return Ellipse(r(0), r(1), o, c);
   }
 
+  Quad rotatedBBox(const Ellipse& e)
+  {
+    Vector2d u(e.radius1(), e.radius2());
+    BBox bbox(-u, u);
+    Quad quad(bbox);
+    Matrix2d R( rotation2(e.orientation()) );
+    for (int i = 0; i < 4; ++i)
+      quad[i] = e.center()+ R*quad[i];
+    return quad;
+  }
 }
