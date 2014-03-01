@@ -128,7 +128,7 @@ int sweepCountPixels(const TestPred& pred, Image<Rgb8>& buffer)
   return interArea;
 }
 
-#define RERUN
+//#define RERUN
 #ifdef RERUN
 TEST(DO_Geometry_Test, bboxTest)
 {
@@ -642,6 +642,7 @@ TEST(DO_Geometry_Test, ellipseAlgorithmsTest)
       cout << "Exact intersection-union area ratio = " << analyticRatio << endl;
       cout << "Relative error = " << jaccardRelError << endl;
       cout << "Absolute error = " << jaccardAbsError << endl;
+      getKey();
     }
 
     ++attempts;
