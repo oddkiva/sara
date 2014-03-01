@@ -26,8 +26,8 @@ elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   set (ENABLE_CXX11 "-std=c++11 -stdlib=libc++")
 
 # GNU compiler
-elseif (CMAKE_COMPILER_IS_GNUCXX)
-  execute_process(COMMAND "${CMAKE_CXX_COMPILER} -dumpversion"
+elseif (CMAKE_COMPILER_IS_GNUCXX)               
+  execute_process(COMMAND "${CMAKE_C_COMPILER} -dumpversion"
                   OUTPUT_VARIABLE GCC_VERSION)
   do_substep_message("${CMAKE_CXX_COMPILER} version: ${GCC_VERSION}")
   if (GCC_VERSION  VERSION_LESS 4.5)
