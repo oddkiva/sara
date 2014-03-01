@@ -42,7 +42,7 @@ elseif (CMAKE_COMPILER_IS_GNUCXX)
   endif()
   set(GCC_VERSION "${GCC_MAJOR}.${GCC_MINOR}")
   
-  do_substep_message("${CMAKE_CXX_COMPILER_ID} compiler version: ${GCC_VERSION}"")
+  do_substep_message("${CMAKE_CXX_COMPILER_ID} compiler version: ${GCC_VERSION}")
   if (GCC_VERSION  VERSION_LESS 4.5)
     message(FATAL_ERROR "GNU compiler version lower than 4.5 are not supported anymore: C++0x features (auto and lambda) are needed.")
   elseif (GCC_VERSION  VERSION_LESS 4.7)
