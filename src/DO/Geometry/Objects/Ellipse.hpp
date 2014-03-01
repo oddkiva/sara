@@ -81,6 +81,7 @@ namespace DO {
       Vector2d D( 1./(e.a_*e.a_), 1./(e.b_*e.b_) );
       return R.matrix()*D.asDiagonal()*R.matrix().transpose();
     }
+    //! Checks if point is inside ellipse.
     friend inline bool inside(const Point2d& p, const Ellipse& e)
     { return (p-e.c_).transpose()*shapeMat(e)*(p-e.c_) < 1.; }
     //! I/O.
