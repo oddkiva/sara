@@ -104,6 +104,7 @@ namespace DO {
     Point2d center;
     center = 0.5*(e1.center() + e2.center());
 
+
     Ellipse ee1(e1), ee2(e2);
     ee1.center() -= center;
     ee2.center() -= center;
@@ -157,7 +158,63 @@ namespace DO {
   {
     // Find the intersection points of the two ellipses.
     Point2d interPts[4];
+#ifdef RESOLVED_NUMERICAL_ACCURACY
     int numInter = computeIntersectionPoints(interPts, E_0, E_1);
+#else
+    /*if (numInter > 0)
+    {
+      CHECK(numInter);*/
+      if (!getActiveWindow())
+        setAntialiasing(openWindow(512, 512));
+      clearWindow();
+      drawEllipse(E_0, Red8, 3);
+      drawEllipse(E_1, Blue8, 3);
+      Quad Q_0(rotatedBBox(E_0));
+      Quad Q_1(rotatedBBox(E_1));
+
+      BBox b0(&Q_0[0], &Q_0[0]+4);
+      BBox b1(&Q_1[0], &Q_1[0]+4);
+      b0.topLeft() = b0.topLeft().cwiseMin(b1.topLeft());
+      b0.bottomRight() = b0.bottomRight().cwiseMax(b1.bottomRight());
+
+      drawQuad(Q_0, Red8, 3);
+      drawQuad(Q_1, Blue8, 3);
+      drawBBox(b0, Green8, 3);
+      getKey();
+      
+      // now rescale the ellipse.
+      Point2d center(b0.center());
+      Vector2d delta(b0.sizes() - center);
+      delta = delta.cwiseAbs();
+
+      //min <-> max
+      //-1 <-> 1
+      double xmin = b0.topLeft().x();
+      double ymin = b0.topLeft().y();
+      double xmax = b0.bottomRight().x();
+      double ymax = b0.bottomRight().y();
+
+      Ellipse EE_0, EE_1;
+      Matrix2d S_0 = delta.asDiagonal()*shapeMat(E_0)*delta.asDiagonal();
+      Matrix2d S_1 = delta.asDiagonal()*shapeMat(E_1)*delta.asDiagonal();
+
+      CHECK(shapeMat(E_0));
+      CHECK(S_0);
+
+
+      Vector2d c_0 = E_0.center() - center;
+      Vector2d c_1 = E_1.center() - center;
+      EE_0 = fromShapeMat(S_0, c_0);
+      EE_1 = fromShapeMat(S_1, c_1);
+      int numInter = computeIntersectionPoints(interPts, EE_0, EE_1);
+
+      for (int i = 0; i < numInter; ++i)
+        interPts[i] = delta.asDiagonal()*interPts[i] + center;
+    /*}*/
+#endif
+
+
+
     if (numInter > 2)
     {
       internal::PtCotg work[4];
