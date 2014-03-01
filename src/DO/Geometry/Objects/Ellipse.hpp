@@ -83,9 +83,6 @@ namespace DO {
     }
     friend inline bool inside(const Point2d& p, const Ellipse& e)
     { return (p-e.c_).transpose()*shapeMat(e)*(p-e.c_) < 1.; }
-    //! Checks if the ellipse is not weird
-    friend inline bool wellDefined(const Ellipse& e, double limit = 1e9)
-    { return std::abs(e.a_) < limit && std::abs(e.b_) < limit; }
     //! I/O.
     friend std::ostream& operator<<(std::ostream& os, const Ellipse& e);
 
