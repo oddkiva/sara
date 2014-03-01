@@ -29,6 +29,7 @@ elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 elseif (CMAKE_COMPILER_IS_GNUCXX)
   execute_process(COMMAND "${CMAKE_CXX_COMPILER} -dumpversion"
     OUTPUT_VARIABLE GCC_VERSION)
+  do_substep_message("GNU compiler version: ${GCC_VERSION}")
   if (GCC_VERSION VERSION_LESS 4.5)
     message(FATAL_ERROR "GNU compiler version lower than 4.5 are not supported anymore: C++0x features (auto and lambda) are needed.")
   elseif (GCC_VERSION VERSION_LESS 4.7)
