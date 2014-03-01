@@ -67,7 +67,7 @@ namespace DO {
     {
       if (features.size() != descriptors.size())
       {
-        string msg("Number of features and number of descriptors don't match!");
+        std::string msg("Number of features and number of descriptors don't match!");
         throw std::runtime_error(msg.c_str());
       }
       return features.size();

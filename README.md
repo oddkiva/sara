@@ -1,22 +1,51 @@
-DO++
-==========
+=====
+DO-CV
+=====
 
-## Introduction
-DO++ is a basic set of C++ libraries for computer vision.
+------------
+Introduction
+------------
+
+DO-CV is a basic set of C++ libraries for computer vision.
 
 I am aware OpenCV is out there and competing with it is out of question.
 Still, I invite to give it a try:
-* DO++ has a very user-friendly API
-* DO++ is small and thus easily maintainable and extensible.
+* DO-CV has a very user-friendly API
+* DO-CV is small and thus easily maintainable and extensible.
 
-DO++ is opensource and licensed with the MPL2 license.
+-------
+License
+-------
 
-## Documentation
-Documentation is still under construction. Have a look at the doxygen-generated documentation [here](http://davidok8.github.io/doplusplus/).
+See [LICENSE MPL2](https://github.com/DO-CV/DO-CV/raw/master/COPYING.MPL2) text file.
+
+
+-------
+Authors
+-------
+
+See [AUTHORS](https://github.com/openMVG/openMVG/raw/master/AUTHORS) text file.
+
+
+--------
+Building
+--------
+
+Continuous integration using [Travis CI](www.travis-ci.org) (master branch, linux 64 bits, BUILD + UNIT TESTING):
+
+[![Build Status](https://travis-ci.org/DO-CV/DO-CV.png?branch=master)](https://travis-ci.org/DO-CV/DO-CV)
+
+-------------
+Documentation
+-------------
+
+Documentation is still under construction. Have a look at the doxygen-generated documentation [here](http://do-cv.github.io/DO-CV/).
 
 Currently, the best way to see how the library works is to look at samples in the **test** folder.
 
-## Currently Available Modules
+---------------------------
+Currently Available Modules
+---------------------------
 Currently added features are:
 - **Core** module
   Clean C++ template data structures:
@@ -63,7 +92,11 @@ Please be patient...
 
 A windows installer will be made available soon. Meanwhile you can generate it with CPack and NSIS.
 
-## Third-Party Software
+
+--------------------
+Third-Party Software
+--------------------
+
 DO++ uses the following third-party libraries:
 
 - [**Qt 5**](qt-project.org) is a cross-platform application and UI framework with APIs for C++ programming.
@@ -71,16 +104,11 @@ DO++ uses the following third-party libraries:
   
   Qt 5 is not included in the repository and must be installed. 
   
-  If it is installed, then you must set system environment variable **QT5_DIR** which will be appended in **CMAKE_PREFIX_PATH** when generating projects with CMake. In addition, append the binary directory of Qt 5 (e.g., **%QT5_DIR%\bin** in windows environment) to the system **PATH**.
-  
-  I have compiled Qt5 Libraries for Visual Studio 2010 x64 and Visual Studio 2012 x64.
-  They are available here:
-  - [Qt 5.0.1 compiled with VS2010 64bit (ICU and WebKit disabled) (561 Mb)](https://dl.dropbox.com/u/80774144/repositories/qt-5.0.1-msvc2010-x64.7z)
-  - [Qt 5.0.1 compiled with VS2012 64bit (ICU and WebKit disabled) (594 Mb)](https://dl.dropbox.com/u/80774144/repositories/qt-5.0.1-msvc2012-x64.7z)
+  *The following paragraph might be applicable only for Windows and Mac OS X platform:* if Qt 5 is installed, then you must set system environment variable **QT5_DIR** which will be appended in **CMAKE_PREFIX_PATH** when generating projects with CMake. In addition, append the binary directory of Qt 5 (e.g., **%QT5_DIR%\bin** in windows environment) to the system **PATH**.
 
 - [**Eigen**](http://eigen.tuxfamily.org/) is a C++ template library for linear algebra: matrices, vectors, numerical solvers, and related algorithms. Eigen is licensed with Mozilla Public License v.2 (MPL2).
   
-  **Eigen 3.1.2** is already included in the repository and it is therefore not needed to install it.
+  **Eigen 3.2.1** is already included in the repository and it is therefore not needed to install it.
 
 - [**Google Test**](https://code.google.com/p/googletest/) is Google's framework for writing C++ tests on a variety of platforms (Linux, Mac OS X, Windows, Cygwin, Windows CE, and Symbian). Based on the xUnit architecture. Supports automatic test discovery, a rich set of assertions, user-defined assertions, death tests, fatal and non-fatal failures, value- and type-parameterized tests, various options for running the tests, and XML test report generation. Google Test is licensed with New BSD License.
   

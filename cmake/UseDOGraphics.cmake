@@ -88,8 +88,12 @@ if (DO_USE_FROM_SOURCE)
     # Static library
     add_library(DO_Graphics STATIC
                 ${DO_Graphics_FILES} ${DOGraphics_MOC_SOURCES})
-    qt5_use_modules(DO_Graphics Widgets OpenGL)
-    target_link_libraries(DO_Graphics ${OPENGL_LIBRARIES})
+    #qt5_use_modules(DO_Graphics Widgets OpenGL)
+    #target_link_libraries(DO_Graphics ${OPENGL_LIBRARIES})
+    target_link_libraries(DO_Graphics
+                          ${Qt5Widgets_LIBRARIES}
+                          ${Qt5OpenGL_LIBRARIES}
+                          ${OPENGL_LIBRARIES})
     do_set_specific_target_properties(DO_Graphics DO_STATIC) # See DOMacros.cmake for details
     set_property(TARGET DO_Graphics PROPERTY FOLDER "DO Modules")
 
@@ -97,8 +101,12 @@ if (DO_USE_FROM_SOURCE)
     if (DO_BUILD_SHARED_LIBS)
       add_library(DO_Graphics_SHARED SHARED
                   ${DO_Graphics_FILES} ${DOGraphics_MOC_SOURCES})
-      qt5_use_modules(DO_Graphics_SHARED Widgets OpenGL)    
-      target_link_libraries(DO_Graphics_SHARED ${OPENGL_LIBRARIES})
+      #qt5_use_modules(DO_Graphics_SHARED Widgets OpenGL)    
+      #target_link_libraries(DO_Graphics_SHARED ${OPENGL_LIBRARIES})
+      target_link_libraries(DO_Graphics_SHARED
+                            ${Qt5Widgets_LIBRARIES}
+                            ${Qt5OpenGL_LIBRARIES}
+                            ${OPENGL_LIBRARIES})
       do_set_specific_target_properties(DO_Graphics_SHARED DO_EXPORTS)
       set_property(TARGET DO_Graphics_SHARED PROPERTY FOLDER "DO Modules")
     endif ()
