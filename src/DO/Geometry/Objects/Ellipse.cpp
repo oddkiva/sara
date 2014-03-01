@@ -29,38 +29,6 @@ namespace DO {
     const Vector2d v(-u(1), u(0));
     return atan2(v.dot(x), u.dot(x));
   }
-  
-  double convexSectorArea(const Ellipse& e, const Point2d pts[])
-  {
-    double theta[2];
-    for (int i = 0; i < 2; ++i)
-    {
-      const Vector2d dir(pts[i]-e.center());
-      double c = cos(e.orientation()), s = sin(e.orientation());
-      const Vector2d u0( c, s);
-      const Vector2d u1(-s, c);
-      
-      theta[i] = atan2(u1.dot(dir), u0.dot(dir));
-    }
-    
-    if (abs(theta[1]-theta[0]) > M_PI)
-    {
-      if (theta[0] < 0)
-        theta[0] += 2*M_PI;
-      else
-        theta[1] += 2*M_PI;
-    }
-    
-    if (theta[0] > theta[1])
-      std::swap(theta[0], theta[1]);
-    
-    return polarAntiderivative(e, theta[1]) - polarAntiderivative(e, theta[0]);
-  }
-
-  double sectorArea(const Ellipse& e, double theta0, double theta1)
-  {
-    return polarAntiderivative(e, theta1) - polarAntiderivative(e, theta0);
-  }
 
   double segmentArea(const Ellipse& e, double theta0, double theta1)
   {

@@ -53,8 +53,6 @@ namespace DO {
       const double x = (e.b_+e.a_) + (e.b_-e.a_)*cos(2*theta);
       return e.a_*e.b_*0.5*( theta - atan2(y,x) );
     }
-    //! Convex sector area: this function is deprecated.
-    friend double convexSectorArea(const Ellipse& e, const Point2d pts[]);
     /*!
       This function should be used instead to compute the **positive** area 
       of an ellipse sector which we define as the region bounded by:
@@ -66,7 +64,8 @@ namespace DO {
       $\theta_0$ and $\theta_1$ are required to be in the range $]\pi, \pi]$ but
       it does not matter if $\theta_0 > \theta_1$.      
      */
-    friend double sectorArea(const Ellipse& e, double theta0, double theta1);
+    friend double sectorArea(const Ellipse& e, double theta0, double theta1)
+    { return polarAntiderivative(e, theta1) - polarAntiderivative(e, theta0); }
     /*!
       An elliptic segment is a region bounded by an arc and the chord connecting
       the arc's endpoints.
