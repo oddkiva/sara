@@ -21,5 +21,5 @@ do_unit_test(Core_MultiArray test_MultiArray.cpp "${DO_LIBRARIES}"
              ${TestGroupName})# ${TestPch})
 do_unit_test(Core_Tree test_Tree.cpp "${DO_LIBRARIES}" 
              ${TestGroupName})# ${TestPch})
-do_unit_test(Core_Timer test_Timer.cpp "${DO_LIBRARIES};TinyThread"
+do_unit_test(Core_Timer test_Timer.cpp "${DO_LIBRARIES}"
              ${TestGroupName})# ${TestPch})
