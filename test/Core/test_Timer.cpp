@@ -20,8 +20,11 @@ using namespace std;
 
 inline void wait(unsigned milliseconds)
 {
-  chrono::milliseconds duration(milliseconds);
-  this_thread::sleep_for(duration);
+  thread t([&]{
+    chrono::milliseconds duration(milliseconds);
+    this_thread::sleep_for(duration);
+  });
+  t.join();
 }
 
 TEST(DO_Core_Test,  testTimer)
