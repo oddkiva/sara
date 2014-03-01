@@ -12,7 +12,7 @@
 #ifndef DO_GEOMETRY_TOOLS_CONIC_HPP
 #define DO_GEOMETRY_TOOLS_CONIC_HPP
 
-#include <algorithm>
+#include <DO/Geometry/Tools/MatrixBasedObject.hpp>
 
 namespace DO { namespace Projective {
 
