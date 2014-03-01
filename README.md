@@ -26,6 +26,15 @@ Authors
 
 See [Authors](https://github.com/openMVG/openMVG/raw/master/AUTHORS) text file.
 
+
+--------
+Building
+--------
+
+Continuous integration using [Travis CI](www.travis-ci.org) (master branch, linux 64 bits, BUILD + UNIT TESTING):
+
+[![Build Status](https://travis-ci.org/DO-CV/DO-CV.png?branch=master)](https://travis-ci.org/DO-CV/DO-CV)
+
 -------------
 Documentation
 -------------
