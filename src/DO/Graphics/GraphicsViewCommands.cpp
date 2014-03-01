@@ -51,16 +51,15 @@ namespace DO {
     return qgraphicsitem_cast<QGraphicsPixmapItem *>(view()->lastAddedItem());
   }
 
-  /*void drawPointOnPixmapItem(int x, int y, const Color3ub& c,
-                             QGraphicsPixmapItem *pixItem)
+  void drawPoint(ImageItem pixItem, int x, int y, const Rgb8& c)
   {
-    QMetaObject::invokeMethod(view(), "drawPointOnPixmapItem",
+    QMetaObject::invokeMethod(view(), "drawPoint",
                               Qt::QueuedConnection,
                               Q_ARG(int, x),
                               Q_ARG(int, y),
                               Q_ARG(const QColor&, 
                                     QColor(c[0], c[1], c[2])),
                               Q_ARG(QGraphicsPixmapItem *, pixItem));
-  }*/
+  }
 
 } /* namespace DO */

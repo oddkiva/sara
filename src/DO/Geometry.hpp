@@ -1,33 +1,24 @@
-/*
- * =============================================================================
- *
- *       Filename:  Geometry.hpp
- *
- *    Description:
- *
- *        Version:  1.0
- *        Created:  23/02/2010 00:25:05
- *       Revision:  none
- *       Compiler:  msvc
- *
- *         Author:  David OK (DO), david.ok@imagine.enpc.fr
- *        Company:  IMAGINE, (Ecole des Ponts ParisTech & CSTB)
- *
- * =============================================================================
- */
+// ========================================================================== //
+// This file is part of DO++, a basic set of libraries in C++ for computer 
+// vision.
+//
+// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public 
+// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
 
 #ifndef DO_GEOMETRY_HPP
 #define DO_GEOMETRY_HPP
 
-#include <DO/Core.hpp>
-
-#include <vector>
-
-#include "Geometry/Utilities.hpp"
-#include "Geometry/Triangle.hpp"
-#include "Geometry/BBox.hpp"
-#include "Geometry/Quad.hpp"
-#include "Geometry/Ellipse.hpp"
-#include "Geometry/Metric.hpp"
+//! Some useful mathematical tools.
+#include <DO/Geometry/Tools.hpp>
+//! Basic data structures for computational geometry.
+#include <DO/Geometry/Objects.hpp>
+//! Basic computational geometry algorithms
+#include <DO/Geometry/Algorithms.hpp>
+//! Graphics.
+#include <DO/Geometry/Graphics.hpp>
 
 #endif /* DO_GEOMETRY_HPP */

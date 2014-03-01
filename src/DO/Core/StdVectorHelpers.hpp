@@ -14,6 +14,8 @@
 #ifndef DO_STDVECTORHELPERS_HPP
 #define DO_STDVECTORHELPERS_HPP
 
+#include <vector>
+
 template <typename T>
 inline void append(std::vector<T>& a, const std::vector<T>& b)
 { a.insert(a.end(), b.begin(), b.end()); }

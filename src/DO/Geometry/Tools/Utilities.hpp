@@ -9,15 +9,24 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+//! @file \todo Refactor this file. It needs code review.
+
 #ifndef DO_GEOMETRY_UTILITIES_HPP
 #define DO_GEOMETRY_UTILITIES_HPP
 
-#ifndef M_PI
-# define M_PI 3.14159265358979323846
-#endif
+#define _USE_MATH_DEFINES
+#include <DO/Core/EigenExtension.hpp>
+#include <DO/Core/StaticAssert.hpp>
+#include <cmath>
 
 namespace DO {
 
+  //! Sign function.
+  template <typename T>
+  inline int signum(T val)
+  { return (T(0) < val) - (val < T(0)); }
+
+  //! Degree to radian conversion.
   template <typename T>
   inline T toRadian(T degree)
   {
@@ -26,6 +35,7 @@ namespace DO {
     return degree*static_cast<T>(M_PI)/static_cast<T>(180);
   }
 
+  //! Radian to degree conversion.
   template <typename T>
   inline T toDegree(T radian)
   {
@@ -33,6 +43,33 @@ namespace DO {
       SCALAR_MUST_BE_OF_FLOATING_TYPE );
     return radian*static_cast<T>(180)/static_cast<T>(M_PI);
   }
+
+  //! Check if the basis [u, v] is counter-clockwise.
+  template <typename T>
+  inline T cross(const Matrix<T, 2, 1>& u, const Matrix<T, 2, 1>& v)
+  {
+    Matrix<T, 2, 2> M;
+    M.col(0) = u;
+    M.col(1) = v;
+    return M.determinant();
+  }
+
+  template <typename T>
+  inline T cross(const Matrix<T, 2, 1>& a, const Matrix<T, 2, 1>& b,
+                 const Matrix<T, 2, 1>& c)
+  { return cross(Matrix<T,2,1>(b-a), Matrix<T,2,1>(c-a)); }
+
+  /*!
+    Suppose the 'b-a' is an upfront vector.
+    There are three cases:
+    - If point 'c' is on the left, then det([b-a, c-a]) > 0.
+    - If point 'c' is on the right, then det([b-a, c-a]) < 0.
+    - If point 'c' is on the line (a,b), then det([b-a, c-a]) = 0.
+    */
+  template <typename T>
+  inline int ccw(const Matrix<T, 2, 1>& a, const Matrix<T, 2, 1>& b,
+                 const Matrix<T, 2, 1>& c)
+  { return signum( cross(a, b, c) ); }
 
   template <typename T>
   inline Matrix<T, 2, 1> unitVector2(T radian)
@@ -150,7 +187,8 @@ namespace DO {
   }
 
   template <typename T>
-  Matrix<T, 2, 2> homographyJacobianMatrix(const Matrix<T, 3, 3>& H, const Matrix<T, 2, 1>& x)
+  Matrix<T, 2, 2> homographyJacobianMatrix(const Matrix<T, 3, 3>& H,
+                                           const Matrix<T, 2, 1>& x)
   {
     Matrix<T, 2, 2> dH;
     const T u = H(0,0)*x[0] + H(0,1)*x[1] + H(0,2);

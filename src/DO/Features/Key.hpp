@@ -67,13 +67,13 @@ namespace DO {
     {
       if (features.size() != descriptors.size())
       {
-        std::cerr << "Invalid size" << std::endl;
-        throw 0;
+        string msg("Number of features and number of descriptors don't match!");
+        throw std::runtime_error(msg.c_str());
       }
       return features.size();
     }
 
-    inline void swap(const Set& set)
+    inline void swap(Set& set)
     {
       std::swap(features, set.features);
       std::swap(descriptors, set.descriptors);

@@ -10,6 +10,7 @@
 // ========================================================================== //
 
 #include <DO/FeatureDetectors.hpp>
+#include <DO/Core/StdVectorHelpers.hpp>
 
 using namespace std;
 

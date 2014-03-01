@@ -17,8 +17,6 @@ namespace DO {
   GraphicsApplication::GraphicsApplication(int argc, char **argv)
     : pimpl_(new GraphicsApplication::Impl(argc, argv))
   {
-    pimpl_->userThread.registerUserMain(__main);
-    pimpl_->userThread.start();
   }
 
   GraphicsApplication::~GraphicsApplication()
@@ -28,8 +26,14 @@ namespace DO {
     pimpl_ = 0;
   }
 
+  void GraphicsApplication::registerUserMain(int (*userMain)(int, char **))
+  {
+    pimpl_->userThread.registerUserMain(userMain);
+  }
+
   int GraphicsApplication::exec()
   {
+    pimpl_->userThread.start();
     return pimpl_->exec();
   }
 

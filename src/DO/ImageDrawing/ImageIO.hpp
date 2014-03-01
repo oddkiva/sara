@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include <DO/Core/Image.hpp>
 #include <easyexif/exif.h>
 
 namespace DO {

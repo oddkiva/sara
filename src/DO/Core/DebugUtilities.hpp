@@ -14,6 +14,29 @@
 #ifndef DO_DEBUG_UTILITIES
 #define DO_DEBUG_UTILITIES
 
+#include <iostream>
+
 #define CHECK(x) std::cout << #x << " = " << x << std::endl
+
+namespace DO {
+
+  //! \ingroup Utility
+  //! \brief Outputting program stage description on console.
+  inline void printStage(const std::string& stageName)
+  {
+    std::cout << std::endl;
+    std::cout << "// ======================================================================= //" << std::endl;
+    std::cout << "// " << stageName << std::endl;
+  }
+
+  //! \ingroup Utility
+  //! \brief Wait for return key on the console.
+  inline void waitReturnKey()
+  {
+    std::cout << "Press RETURN key to continue...";
+    std::cin.ignore();
+  }
+
+} /* namespace DO */
 
 #endif /* DO_DEBUG_UTILITIES */

@@ -14,6 +14,8 @@
 #ifndef DO_CORE_IMAGEPATCH_HPP
 #define DO_CORE_IMAGEPATCH_HPP
 
+#include "Image.hpp"
+
 namespace DO {
 
   // \todo: test.
@@ -28,9 +30,9 @@ namespace DO {
     for (typename Image<T, N>::iterator dst_it = dst.begin();
          dst_it != dst.end(); ++dst_it, ++c)
     {
-      if ((*c-a).minCoeff() < 0 || (b-*c).minCoeff() >= 0)
+      if ((*c-a).minCoeff() < 0 || (*c-b).minCoeff() >= 0)
         continue;
-      *dst_it = src(*++c);
+      *dst_it = src(*c);
     }
     return dst;
   }

@@ -7,26 +7,26 @@ endmacro (do_set_graphics_source_dir)
 macro (do_list_graphics_source_files)
   # Master header file
   set(DO_Graphics_MASTER_HEADER ${DO_SOURCE_DIR}/Graphics.hpp)
-  source_group("0. Master Header File" FILES ${DO_Graphics_MASTER_HEADER})
+  source_group("Master Header File" FILES ${DO_Graphics_MASTER_HEADER})
   # API header files
   file(GLOB DO_Graphics_API_HEADER_FILES
        ${DO_Graphics_SOURCE_DIR}/*.hpp)
-  source_group("1. API Header Files" 
+  source_group("API Header Files" 
                FILES ${DO_Graphics_API_HEADER_FILES})
   # API source files
   file(GLOB DO_Graphics_API_SOURCE_FILES
        ${DO_Graphics_SOURCE_DIR}/*.cpp)
-  source_group("1. API Source Files" 
+  source_group("API Source Files" 
                FILES ${DO_Graphics_API_SOURCE_FILES})
   # Derived QObjects header files
   file(GLOB DO_Graphics_DerivedQObjects_HEADER_FILES
        ${DO_Graphics_SOURCE_DIR}/DerivedQObjects/*.hpp)
-  source_group("2. Derived QObjects Header Files"
+  source_group("Derived QObjects Header Files"
                FILES ${DO_Graphics_DerivedQObjects_HEADER_FILES})
   # Derived QObjects source files
   file(GLOB DO_Graphics_DerivedQObjects_SOURCE_FILES
        ${DO_Graphics_SOURCE_DIR}/DerivedQObjects/*.cpp)
-  source_group("2. Derived QObjects Source Files"
+  source_group("Derived QObjects Source Files"
                FILES ${DO_Graphics_DerivedQObjects_SOURCE_FILES})
   # All files here
   set(DO_Graphics_FILES

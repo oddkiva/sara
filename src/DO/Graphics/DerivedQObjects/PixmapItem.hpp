@@ -16,11 +16,11 @@
 
 namespace DO {
 
-  class PixmapItem : public QGraphicsPixmapItem
+  class ImageItem : public QGraphicsPixmapItem
   {
   public:
-    PixmapItem(QGraphicsItem* parent = 0) : QGraphicsPixmapItem(parent) {}
-    PixmapItem(const QPixmap& pixmap, QGraphicsItem* parent = 0)
+    ImageItem(QGraphicsItem* parent = 0) : QGraphicsPixmapItem(parent) {}
+    ImageItem(const QPixmap& pixmap, QGraphicsItem* parent = 0)
       : QGraphicsPixmapItem(pixmap, parent)
       , scaleFactor(1.0)
     {

@@ -11,6 +11,9 @@
 
 //! @file
 
+#ifndef DO_CORE_META_HPP
+#define DO_CORE_META_HPP
+
 /*!
   \ingroup Core
   \defgroup Meta Meta
@@ -122,4 +125,7 @@ namespace DO { namespace Meta {
   struct Choose<false, IsTrue, IsFalse>
   { typedef IsFalse Type; /*!< Return type. */};
 
-}}
+} /* namespace Meta */
+} /* namespace DO */
+
+#endif /* DO_CORE_META_HPP */

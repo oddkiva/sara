@@ -15,8 +15,6 @@ foreach (COMPONENT ${DO_USE_COMPONENTS})
   endif ()
 endforeach (COMPONENT)
 
-
-
 # Not stable yet.
 macro (do_use_modules TARGET COMPONENT_LIST)
   # Include the following useful macros.
@@ -27,7 +25,8 @@ macro (do_use_modules TARGET COMPONENT_LIST)
     set_target_properties(${TARGET} PROPERTIES COMPILE_DEFINITIONS DO_STATIC)
     target_link_libraries(${TARGET} ${COMPONENT_LIST})
   else ()
-    # Warn the user that precompiled libraries does not work for every build types...
+    # Warn the user that precompiled libraries does not work for every build 
+    # types...
     message (WARNING "Precompiled libraries only work for DEBUG or RELEASE builds... If you want to use other build modes, you need to recompile DO++ from the sources. To do so, just insert at the top of the CMakeLists.txt: '(set DO_USE_FROM_SOURCE 1)'")
 
     # Static or dynamic linking?
@@ -50,20 +49,22 @@ macro (do_use_modules TARGET COMPONENT_LIST)
         target_link_libraries(${TARGET} ${OPENGL_LIBRARIES})
       endif ()
       
+      # \todo: CHECK THAT AGAIN...
       if (NOT "${${f}_LIBRARIES}" STREQUAL "" AND NOT DO_USE_STATIC_LIBS)
         if (WIN32)
           target_link_libraries(${TARGET} 
-                                debug ${f}_SHARED-1.0.0-debug
-                                optimized ${f}_SHARED-1.0.0-release)
+                                debug ${f}-${DO_VERSION}-d
+                                optimized ${f}-${DO_VERSION})
         else ()
-          target_link_libraries(${TARGET} ${f}_SHARED-1.0.0)
+          target_link_libraries(${TARGET} ${f}-${DO_VERSION})
         endif ()
       elseif (NOT "${${f}_LIBRARIES}" STREQUAL "")
          if (WIN32)
-          target_link_libraries(${TARGET} debug ${f}-1.0.0-debug
-                                optimized ${f}-1.0.0-release)
+           target_link_libraries(${TARGET}
+                                 debug ${f}-{DO_VERSION}-debug
+                                 optimized ${f}-${DO_VERSION})
         else ()
-          target_link_libraries(${TARGET} ${f}-1.0.0)
+          target_link_libraries(${TARGET} ${f}-${DO_VERSION})
         endif ()
       endif ()
     endforeach ()

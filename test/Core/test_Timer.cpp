@@ -9,7 +9,10 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include "CoreTesting.hpp"
+#include <gtest/gtest.h>
+#include <DO/Core/Timer.hpp>
+#include <DO/Core/DebugUtilities.hpp>
+#include <TinyThread++/source/tinythread.h>
 
 using namespace DO;
 using namespace std;
@@ -19,25 +22,42 @@ inline void wait(unsigned milliseconds)
 #ifdef _WIN32
   Sleep(milliseconds);
 #else
-  usleep(milliseconds*1000);
+  usleep(milliseconds*1e3);
 #endif
+}
+
+// Thread function: Detach
+void oneSecondSleep(void *)
+{
+  // We don't do anything much, just sleep a little...
+  tthread::this_thread::sleep_for(tthread::chrono::milliseconds(1000));
 }
 
 TEST(DO_Core_Test,  testTimer)
 {
   Timer timer;
   HighResTimer hrTimer;
-  double elapsed;
+  double elapsedTimeMs;
+  double elapsedTimeS;
+  double sleepTimeMs = 1e3;
 
   hrTimer.restart();
-  wait(1000);
-  elapsed =  hrTimer.elapsedMs();
-  EXPECT_NEAR(elapsed, 1000., 1);
+  wait(sleepTimeMs);
+  elapsedTimeMs =  hrTimer.elapsedMs();
+  EXPECT_NEAR(elapsedTimeMs, sleepTimeMs, 100);
 
+  hrTimer.restart();
+  wait(sleepTimeMs);
+  elapsedTimeS = hrTimer.elapsed();
+  EXPECT_NEAR(elapsedTimeS, sleepTimeMs/1e3, 1e-3);
+  
   timer.restart();
-  wait(1000);
-  elapsed = timer.elapsed();
-  EXPECT_NEAR(elapsed, 1, 1e-3);
+  // Start the child thread
+  tthread::thread t(oneSecondSleep, 0);
+  // Wait for the thread to finish
+  t.join();
+  elapsedTimeS = timer.elapsed();
+  EXPECT_NEAR(elapsedTimeS, sleepTimeMs/1e3, 1e-3);
 }
 
 int main(int argc, char** argv) 

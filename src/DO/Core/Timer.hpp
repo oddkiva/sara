@@ -11,8 +11,12 @@
 
 //! @file
 
-#ifndef DO_CORE_TIMER_HPP
-#define DO_CORE_TIMER_HPP
+#ifndef DO_UTILITIES_TIMER_HPP
+#define DO_UTILITIES_TIMER_HPP
+
+#include <DO/Defines.hpp>
+#include <ctime>
+#include <iostream>
 
 namespace DO {
 
@@ -21,95 +25,44 @@ namespace DO {
   //! @{
 
   //! \brief Timer class.
-  class Timer
+  class DO_EXPORT Timer
   {
   public: /* interface. */
     //! Default constructor
-    Timer()
-      : start_(std::clock())
-      , elapsed_(0)
-    {
-    }
+    Timer();
     //! Reset the timer to zero.
-    void restart()
-    {
-      start_ = std::clock();
-      elapsed_ = 0;
-    }
+    void restart();
     //! Returns the elapsed time.
-    double elapsed()
-    {
-      elapsed_ = static_cast<double>(std::clock()) - start_;
-      elapsed_ /= CLOCKS_PER_SEC;
-      return elapsed_;
-    }
-    //! Helper function that prints the elapsed time in a friendly manner.
-    void print()
-    {
-      std::cout << "Elapsed time: " << elapsed() << " s" << std::endl;
-    }
+    double elapsed();
   private:
-    std::clock_t start_; //!< Records the start instant.
-    double elapsed_; //!< Stores the elapsed time from the start instant.
+    //! Records the start instant time.
+    std::clock_t start_; 
+    //! Stores the elapsed time from the start instant time.
+    std::clock_t elapsed_;
   };
 
   //! \brief Timer class with microsecond accuracy.
-  class HighResTimer
+  class DO_EXPORT HighResTimer
   {
   public: /* interface. */
     //! Default constructor
-    HighResTimer()
-      : elapsed_(0)
-    {
-#ifdef WIN32
-      if (!QueryPerformanceFrequency(&frequency_))
-      {
-        const char *msg = "Failed to initialize high resolution timer!";
-        std::cerr << msg << std::endl;
-        throw std::runtime_error(msg);
-      }
-#endif
-    }
+    HighResTimer();
     //! Reset the timer to zero.
-    void restart()
-    {
-#ifdef WIN32
-      QueryPerformanceCounter(&start_);
-#else
-      gettimeofday(&start_, NULL);
-#endif
-    }
+    void restart();
     //! Returns the elapsed time in seconds.
-    double elapsed()
-    {
-#ifdef _WIN32
-      QueryPerformanceCounter(&end_);
-      elapsed_ = static_cast<double>(end_.QuadPart - start_.QuadPart)
-               / frequency_.QuadPart;
-#else
-      gettimeofday(&end_, NULL);
-      elapsed_ = (end_.tv_sec - start_.tv_sec) * 1000.0;
-      elapsed_ += (end_.tv_usec - start_.tv_usec) / 1000.0;
-#endif
-      return elapsed_;
-    }
+    double elapsed();
     //! Returns the elapsed time in milliseconds.
-    double elapsedMs()
-    { return elapsed() * 1000.; }
+    double elapsedMs();
   private: /* data members. */
-#ifdef WIN32
-    LARGE_INTEGER frequency_;
-    LARGE_INTEGER start_;
-    LARGE_INTEGER end_;
-#else
-    timeval start_;
-    timeval end_;
-#endif
+    double start_;
     double elapsed_;
+#if defined(_WIN32) || defined(_WIN32_WCE)
+    double frequency_;
+#endif
   };
 
   //! @}
 
 } /* namespace DO */
 
-#endif /* DO_CORE_TIMER_HPP */
+#endif /* DO_UTILITIES_TIMER_HPP */

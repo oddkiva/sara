@@ -99,76 +99,82 @@ void VideoWidgetSurface::updateVideoRect()
 }
 
 using namespace DO;
-typedef Image<float> WorkImage;
-WorkImage work;
+typedef Image<float> WorkBuffer;
+WorkBuffer workBuffer;
 Image<Rgb8> dst;
 HighResTimer timer;
 double elapsed;
 
-void inPlaceColorRescale(WorkImage& work)
+void inPlaceColorRescale(WorkBuffer& work)
 {
   // Find min, max pixel intensity values.
-  WorkImage::value_type minPixVal, maxPixVal;
+  WorkBuffer::value_type minPixVal, maxPixVal;
   findMinMax(minPixVal, maxPixVal, work);
-  WorkImage::value_type rangeVal(maxPixVal - minPixVal);
+  WorkBuffer::value_type rangeVal(maxPixVal - minPixVal);
   // Avoid numeric accuracy issue.
   rangeVal += 1e-6f;
   // Rescale intensity in range [0, 1];
-  WorkImage::iterator work_pix = work.begin();
+  WorkBuffer::iterator work_pix = work.begin();
   for ( ; work_pix != work.end(); ++work_pix)
     *work_pix = (*work_pix-minPixVal) / rangeVal;
 }
 
 void VideoWidgetSurface::paint(QPainter *painter)
 {
-  if (currentFrame.map(QAbstractVideoBuffer::ReadOnly)) {
-    const QTransform oldTransform = painter->transform();
+  if (!currentFrame.map(QAbstractVideoBuffer::ReadOnly))
+    return;
 
-    if (surfaceFormat().scanLineDirection() == QVideoSurfaceFormat::BottomToTop) {
-      painter->scale(1, -1);
-      painter->translate(0, -widget->height());
-    }
-
-    // Time image processing.
-    timer.restart();
-    // Wrap image buffer.
-    Image<Rgb8> wrapped_src(
-      reinterpret_cast<Rgb8 *>(currentFrame.bits()),
-      Vector2i(currentFrame.width(), currentFrame.height()) );
-    // Sanity check.
-    if (work.width() != currentFrame.width() || work.height() != currentFrame.height())
-    {
-      work.resize(currentFrame.width(), currentFrame.height());
-      dst.resize(currentFrame.width(), currentFrame.height());
-    }
-
-    // Color-convert and copy buffer.
-    WorkImage::iterator work_pix = work.begin();
-    Image<Rgb8>::const_iterator const_src_pix = wrapped_src.begin();
-    for ( ; work_pix != work.end(); ++work_pix, ++const_src_pix)
-      convertColor(*work_pix, *const_src_pix);
-    // Apply image processing.
-    inPlaceDeriche(work, 5.f, 0, 0);
-    inPlaceDeriche(work, 5.f, 0, 1);
-    //inPlaceColorRescale(work);
-    // Copy back to destination
-    WorkImage::const_iterator const_work_pix = work.begin();
-    Image<Rgb8>::iterator dst_pix = dst.begin();
-    for ( ; dst_pix != dst.end(); ++dst_pix, ++const_work_pix)
-      convertColor(*dst_pix, *const_work_pix);
-    elapsed = timer.elapsedMs();
-    qDebug() << "Image frame processing time = " << elapsed << " ms";
-
-    timer.restart();
-    QImage image(
-      reinterpret_cast<uchar *>(dst.data()),
-      dst.width(), dst.height(), dst.width()*3,
-      imageFormat);
-    painter->drawImage(targetRect, image, sourceRect);
-    painter->setTransform(oldTransform);
-    elapsed = timer.elapsedMs();
-    qDebug() << "Image display time = " << elapsed << " ms";
-
-    currentFrame.unmap();
+  // Get transform.
+  const QTransform oldTransform = painter->transform();
+  if (surfaceFormat().scanLineDirection() == QVideoSurfaceFormat::BottomToTop)
+  {
+    painter->scale(1, -1);
+    painter->translate(0, -widget->height());
   }
+
+  // Time image processing.
+  timer.restart();
+  // Wrap image buffer.
+  Image<Rgb8> wrapped_src(
+    reinterpret_cast<Rgb8 *>(currentFrame.bits()),
+    Vector2i(currentFrame.width(), currentFrame.height()) );
+  // Sanity check.
+  if ( workBuffer.width() != currentFrame.width()   ||
+       workBuffer.height() != currentFrame.height() )
+  {
+    workBuffer.resize(currentFrame.width(), currentFrame.height());
+    dst.resize(currentFrame.width(), currentFrame.height());
+  }
+
+  // Color-convert and copy buffer.
+  WorkBuffer::iterator work_pix = workBuffer.begin();
+  Image<Rgb8>::const_iterator const_src_pix = wrapped_src.begin();
+  for ( ; work_pix != workBuffer.end(); ++work_pix, ++const_src_pix)
+    convertColor(*work_pix, *const_src_pix);
+
+  // Apply image processing.
+  inPlaceDeriche(workBuffer, 5.f, 0, 0);
+  inPlaceDeriche(workBuffer, 5.f, 0, 1);
+  //inPlaceColorRescale(work);
+  
+  // Copy back to destination
+  WorkBuffer::const_iterator const_work_pix = workBuffer.begin();
+  Image<Rgb8>::iterator dst_pix = dst.begin();
+  for ( ; dst_pix != dst.end(); ++dst_pix, ++const_work_pix)
+    convertColor(*dst_pix, *const_work_pix);
+  elapsed = timer.elapsedMs();
+  qDebug() << "Image frame processing time = " << elapsed << " ms";
+
+  // Blit image to the screen.
+  timer.restart();
+  QImage image(
+    reinterpret_cast<uchar *>(dst.data()),
+    dst.width(), dst.height(), dst.width()*3,
+    imageFormat);
+  painter->drawImage(targetRect, image, sourceRect);
+  painter->setTransform(oldTransform);
+  elapsed = timer.elapsedMs();
+  qDebug() << "Image display time = " << elapsed << " ms";
+
+  currentFrame.unmap();
 }

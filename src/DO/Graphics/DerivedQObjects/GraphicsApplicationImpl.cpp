@@ -32,7 +32,7 @@ namespace DO {
     qRegisterMetaType<SimpleTriangleMesh3f>("SimpleTriangleMesh3f");
 
     // Register graphics view data types.
-    //qRegisterMetaType<QGraphicsPixmapItem *>("QGraphicsPixmapItem *");
+    qRegisterMetaType<QGraphicsPixmapItem *>("QGraphicsPixmapItem *");
     //qRegisterMetaType<QGraphicsItem *>("QGraphicsItem *");
 
     // Register Event data types

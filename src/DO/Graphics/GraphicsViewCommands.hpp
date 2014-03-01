@@ -39,8 +39,7 @@ namespace DO {
 
   //! \todo Not yet implemented I think. Check that.
   DO_EXPORT
-  void drawPointOnPixmapItem(int x, int y, const Rgb8& c,
-                             ImageItem pixItem);
+  void drawPoint(ImageItem pixItem, int x, int y, const Rgb8& c);
 
   //! @}
 

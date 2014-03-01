@@ -9,7 +9,9 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include "CoreTesting.hpp"
+#include <gtest/gtest.h>
+#include <DO/Core/Locator.hpp>
+#include <DO/Core/DebugUtilities.hpp>
 #include "MultiArrayTestingFunctions.hpp"
 
 using namespace DO;

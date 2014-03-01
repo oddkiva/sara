@@ -63,6 +63,18 @@ namespace DO {
                               Q_ARG(const QColor&, QColor(c[0], c[1], c[2])),
                               Q_ARG(int, penWidth));
   }
+  
+  void drawCircle(const Point2d& center, double r, const Color3ub& c,
+                  int penWidth)
+  {
+    QMetaObject::invokeMethod(getActiveWindow(), "drawCircle", 
+                              Qt::QueuedConnection,
+                              Q_ARG(const QPointF&,
+                                    QPointF(center.x(), center.y())),
+                              Q_ARG(float, r),
+                              Q_ARG(const QColor&, QColor(c[0], c[1], c[2])),
+                              Q_ARG(int, penWidth));
+  }
 
   void drawEllipse(int x, int y, int w, int h, const Color3ub&c, int penWidth)
   {
@@ -75,6 +87,19 @@ namespace DO {
   }
 
   void drawEllipse(const Point2f& center, float r1, float r2, float degree,
+                   const Color3ub& c, int penWidth)
+  {
+    QMetaObject::invokeMethod(getActiveWindow(), "drawEllipse", 
+                              Qt::QueuedConnection,
+                              Q_ARG(const QPointF&,
+                                    QPointF(center.x(), center.y())),
+                              Q_ARG(qreal, qreal(r1)), Q_ARG(qreal, qreal(r2)),
+                              Q_ARG(qreal, qreal(degree)),
+                              Q_ARG(const QColor&, QColor(c[0], c[1], c[2])),
+                              Q_ARG(int, penWidth));
+  }
+
+  void drawEllipse(const Point2d& center, double r1, double r2, double degree,
                    const Color3ub& c, int penWidth)
   {
     QMetaObject::invokeMethod(getActiveWindow(), "drawEllipse", 

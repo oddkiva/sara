@@ -14,6 +14,9 @@
 #ifndef DO_CORE_STRINGIFY_HPP
 #define DO_CORE_STRINGIFY_HPP
 
+#include <sstream>
+#include <string>
+
 namespace DO {
 
   //! \ingroup Utility
@@ -24,23 +27,6 @@ namespace DO {
     std::stringstream oss;
     oss << x;
     return oss.str();
-  }
-
-  //! \ingroup Utility
-  //! \brief Outputting program stage description on console.
-  inline void printStage(const std::string& stageName)
-  {
-    std::cout << std::endl;
-    std::cout << "// ======================================================================= //" << std::endl;
-    std::cout << "// " << stageName << std::endl;
-  }
-
-  //! \ingroup Utility
-  //! \brief Wait for return key on the console.
-  inline void waitReturnKey()
-  {
-    std::cout << "Press RETURN key to continue...";
-    std::cin.ignore();
   }
 
 } /* namespace DO */

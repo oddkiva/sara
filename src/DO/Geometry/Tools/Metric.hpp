@@ -9,8 +9,10 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_GEOMETRY_METRIC_HPP
-#define DO_GEOMETRY_METRIC_HPP
+#ifndef DO_GEOMETRY_TOOLS_METRIC_HPP
+#define DO_GEOMETRY_TOOLS_METRIC_HPP
+
+#include <Eigen/Eigen>
 
 namespace DO {
 
@@ -48,9 +50,12 @@ namespace DO {
 
   public:
     inline SquaredDistance(const Matrix& m) : m_(m) {}
-    inline Matrix& mappedMatrix() { return m_; }
-    inline const Matrix& mappedMatrix() const { return m_; }
-    inline int dim() const { return N; }
+    inline Matrix& mappedMatrix()
+    { return m_; }
+    inline const Matrix& mappedMatrix() const
+    { return m_; }
+    inline int dim() const
+    { return N; }
     inline T operator()(const Vector& a, const Vector& b) const
     { return (b-a).dot(m_*(b-a)); }
     inline bool isQuasiIsotropic(T threshold = 0.9) const
@@ -76,9 +81,12 @@ namespace DO {
                     const SquaredDistance& squaredDistance)
       : center_(center), radius_(radius), squaredDistance_(squaredDistance) {}
 
-    inline const Point& center() const { return center_; }
-    inline T radius() const { return radius_; }
-    inline const SquaredDistance& squaredDistance() const { return squaredDistance_; }
+    inline const Point& center() const
+    { return center_; }
+    inline T radius() const
+    { return radius_; }
+    inline const SquaredDistance& squaredDistance() const
+    { return squaredDistance_; }
     inline bool isInside(const Point& x) const
     { return squaredDistance(center_, x) < radius_*radius_; }
 
@@ -90,4 +98,4 @@ namespace DO {
 
 } /* namespace DO */
 
-#endif /* DO_GEOMETRY_METRIC_HPP */
+#endif /* DO_GEOMETRY_TOOLS_METRIC_HPP */

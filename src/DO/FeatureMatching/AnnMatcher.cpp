@@ -15,6 +15,7 @@
 #endif
 
 #include <DO/FeatureMatching.hpp>
+#include <DO/Core/Timer.hpp>
 #include <flann/flann.hpp>
 
 //#define DEBUG_FLANN
@@ -146,23 +147,21 @@ namespace DO {
   }
 
   // Sort by indices and by score.
-    struct CompareMatch {
-      bool operator()(const Match& m1, const Match& m2) const {
-        if (m1.indX() < m2.indX())
-          return true;
-        if (m1.indX() == m2.indX() && m1.indY() < m2.indY())
-          return true;
-        if (m1.indX() == m2.indX() && m1.indY() == m2.indY() && m1.score() < m2.score())
-          return true;
-        return false;
-      }
-    };
+  inline bool compareMatch(const Match& m1, const Match& m2) 
+  {
+    if (m1.indX() < m2.indX())
+      return true;
+    if (m1.indX() == m2.indX() && m1.indY() < m2.indY())
+      return true;
+    if (m1.indX() == m2.indX() && m1.indY() == m2.indY() && m1.score() < m2.score())
+      return true;
+    return false;
+  }
 
-    struct CompareByScore {
-      bool operator()(const Match& m1, const Match& m2) const {
-        return m1.score() < m2.score();
-      }
-    };
+  inline bool compareByScore(const Match& m1, const Match& m2)
+  {
+    return m1.score() < m2.score();
+  }
 
   //! Compute candidate matches using the Euclidean distance.
   vector<Match> AnnMatcher::computeMatches()
@@ -198,12 +197,12 @@ namespace DO {
         sqRatioT, Match::TargetToSource,
         self_matching_, is_too_close_, vec_indices_, vec_dists_, max_neighbors_);
     }
-    sort(matches.begin(), matches.end(), CompareMatch());
+    sort(matches.begin(), matches.end(), compareMatch);
 
     // Remove redundant matches in each consecutive group of identical matches.
     // We keep the one with the best score, which is the first one according to 'CompareMatch'.
     matches.resize(unique(matches.begin(), matches.end()) - matches.begin());
-    sort(matches.begin(), matches.end(), CompareByScore());
+    sort(matches.begin(), matches.end(), compareByScore);
 
     cout << "Computed " << matches.size() << " matches in " << t.elapsed() << " seconds." << endl;
 
