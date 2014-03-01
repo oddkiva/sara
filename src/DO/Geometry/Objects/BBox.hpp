@@ -69,6 +69,7 @@ namespace DO {
 
     double width() const  { return std::abs(br_.x() - tl_.x()); }
     double height() const { return std::abs(br_.y() - tl_.y()); }
+    Vector2d sizes() const { return br_ - tl_; }
 
     static BBox infinite()
     {
