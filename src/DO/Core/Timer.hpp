@@ -36,9 +36,9 @@ namespace DO {
     double elapsed();
   private:
     //! Records the start instant time.
-    std::chrono::time_point<std::chrono::steady_clock> start_;
+    std::chrono::time_point<std::chrono::high_resolution_clock> start_;
     //! Records the end instant time.
-    std::chrono::time_point<std::chrono::steady_clock> end_;
+    std::chrono::time_point<std::chrono::high_resolution_clock> end_;
   };
 
   //! \brief Timer class with microsecond accuracy.
