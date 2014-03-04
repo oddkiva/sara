@@ -21,22 +21,18 @@
 namespace DO {
 
   Timer::Timer()
-    : start_(std::clock())
-    , elapsed_(0) 
   {
   }
   
   void Timer::restart()
   {
-    start_ = std::clock();
-    elapsed_ = 0;
+    start_ = std::chrono::high_resolution_clock::now();
   }
 
   double Timer::elapsed()
   {
-    elapsed_ = static_cast<double>(std::clock()) - start_;
-    elapsed_ /= CLOCKS_PER_SEC;
-    return elapsed_;
+    end_ = std::chrono::high_resolution_clock::now();
+    return std::chrono::duration<double>(end_-start_).count();
   }
 
   HighResTimer::HighResTimer()
