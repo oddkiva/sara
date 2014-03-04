@@ -59,7 +59,7 @@ namespace DO {
 #else
     timeval start;
     gettimeofday(&start, NULL);
-    start_ = start.tv_sec * 1e3 + start.tv_usec * 1e-3;
+    start_ = start.tv_sec + start.tv_usec * 1e-6;
 #endif
   }
   //! Returns the elapsed time in seconds.
@@ -72,7 +72,7 @@ namespace DO {
 #else
     timeval end;
     gettimeofday(&end, NULL);
-    double end_ = end.tv_sec * 1e3 + end.tv_usec * 1e-3;
+    double end_ = end.tv_sec + end.tv_usec * 1e-6;
     elapsed_ = end_ - start_;
 #endif
     return elapsed_;
