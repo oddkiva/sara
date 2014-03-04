@@ -18,41 +18,35 @@
 using namespace DO;
 using namespace std;
 
-inline void wait(unsigned milliseconds)
+inline void milliSleep(unsigned milliseconds)
 {
   chrono::milliseconds duration(milliseconds);
   this_thread::sleep_for(duration);
 }
 
-TEST(DO_Core_Test, DISABLED_testTimer)
+TEST(DO_Core_Test, testTimer)
 {
   Timer timer;
   HighResTimer hrTimer;
   double elapsedTimeMs;
   double elapsedTimeS;
-  unsigned sleepTimeMs = 1000;
+  unsigned sleepTimeMs = 580;
 
   hrTimer.restart();
-  wait(sleepTimeMs);
+  milliSleep(sleepTimeMs);
   elapsedTimeMs =  hrTimer.elapsedMs();
   EXPECT_NEAR(elapsedTimeMs, sleepTimeMs, 100);
 
   hrTimer.restart();
-  wait(sleepTimeMs);
+  milliSleep(sleepTimeMs);
   elapsedTimeS = hrTimer.elapsed();
-  EXPECT_NEAR(elapsedTimeS, sleepTimeMs/1e3, 1e-3);
+  EXPECT_NEAR(elapsedTimeS, sleepTimeMs/1e3, 2e-3);
 
   timer.restart();
-  // Start the child thread
-  thread t([&]() { wait(sleepTimeMs); });
-  t.join();
+  milliSleep(sleepTimeMs);
   elapsedTimeS = timer.elapsed();
   EXPECT_NEAR(elapsedTimeS, sleepTimeMs/1e3, 1e-2);
 }
-
-class DISABLED_testTimer : public ::testing::Test
-{
-};
 
 int main(int argc, char** argv) 
 {

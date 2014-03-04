@@ -15,7 +15,7 @@
 #define DO_UTILITIES_TIMER_HPP
 
 #include <DO/Defines.hpp>
-#include <ctime>
+#include <chrono>
 #include <iostream>
 
 namespace DO {
@@ -36,9 +36,9 @@ namespace DO {
     double elapsed();
   private:
     //! Records the start instant time.
-    std::clock_t start_; 
-    //! Stores the elapsed time from the start instant time.
-    std::clock_t elapsed_;
+    std::chrono::time_point<std::chrono::high_resolution_clock> start_;
+    //! Records the end instant time.
+    std::chrono::time_point<std::chrono::high_resolution_clock> end_;
   };
 
   //! \brief Timer class with microsecond accuracy.
