@@ -12,6 +12,7 @@
 #include <gtest/gtest.h>
 #include <DO/Features.hpp>
 #include <DO/Graphics.hpp>
+#include <DO/Graphics/GraphicsUtilities.hpp>
 #include <DO/ImageProcessing.hpp>
 
 using namespace DO;
@@ -61,7 +62,7 @@ void checkAffineAdaptation(const Image<unsigned char>& image,
     }
   }
 
-  Window w1 = activeWindow();
+  Window w1 = getActiveWindow();
   Window w2 = openWindow(patchSz, patchSz);
   setActiveWindow(w2);
   setAntialiasing();
@@ -125,7 +126,7 @@ TEST(DO_Features_Test, testFeaturesIO)
   load(I, srcPath("../../datasets/obama_2.jpg"));
 
   setActiveWindow(openWindow(I.width(), I.height()));
-  setAntialiasing(activeWindow());
+  setAntialiasing(getActiveWindow());
   readFeatures(I, srcPath("../../datasets/test.dogkey"));
   readFeatures(I, srcPath("../../datasets/test.haraffkey"));
   readFeatures(I, srcPath("../../datasets/test.mserkey"));
@@ -133,6 +134,6 @@ TEST(DO_Features_Test, testFeaturesIO)
 
 int main()
 {
-  testing::InitGoogleTest(&guiApp()->argc, guiApp()->argv);
+  testing::InitGoogleTest(&getGuiApp()->argc, getGuiApp()->argv);
   return RUN_ALL_TESTS();
 }
