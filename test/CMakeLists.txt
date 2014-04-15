@@ -18,3 +18,5 @@ add_subdirectory(FeatureDescriptors)
 
 add_subdirectory(Match)
 add_subdirectory(FeatureMatching)
+
+add_subdirectory(MatchPropagation)
