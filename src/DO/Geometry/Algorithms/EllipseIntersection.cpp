@@ -158,6 +158,7 @@ namespace DO {
   {
     // Find the intersection points of the two ellipses.
     Point2d interPts[4];
+#define RESOLVED_NUMERICAL_ACCURACY // ACTUALLY IT IS NOT SOLVED...
 #ifdef RESOLVED_NUMERICAL_ACCURACY
     int numInter = computeIntersectionPoints(interPts, E_0, E_1);
 #else
