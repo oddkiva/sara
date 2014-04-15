@@ -12,6 +12,7 @@
 #ifndef DO_GEOMETRY_BBOX_HPP
 #define DO_GEOMETRY_BBOX_HPP
 
+#include <stdexcept>
 #include <DO/Core/EigenExtension.hpp>
 #include <vector>
 
