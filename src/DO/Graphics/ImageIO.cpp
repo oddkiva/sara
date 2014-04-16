@@ -24,9 +24,15 @@ namespace DO {
     image = image.convertToFormat(QImage::Format_RGB888);
     I.resize(image.width(), image.height());
     
-    Color3ub *dst = I.data();
-    Color3ub *src = reinterpret_cast<Color3ub *>(image.bits());
-    std::copy(src, src+image.width()*image.height(), dst);
+    for (int y = 0; y < image.height(); ++y)
+    {
+      for (int x = 0; x < image.width(); ++x)
+      {
+        I(x,y)[0] = qRed(image.pixel(x,y));
+        I(x,y)[1] = qGreen(image.pixel(x,y));
+        I(x,y)[2] = qBlue(image.pixel(x,y));
+      }
+    }
     return true;
   }
 
@@ -37,9 +43,13 @@ namespace DO {
       return false;
     image = image.convertToFormat(QImage::Format_RGB888);
     I.resize(image.width(), image.height());
-    Rgb8 *dst = I.data();
-    Rgb8 *src = reinterpret_cast<Rgb8 *>(image.bits());
-    std::copy(src, src+image.width()*image.height(), dst);
+    for (int y = 0; y < image.height(); ++y)
+      for (int x = 0; x < image.width(); ++x)
+      {
+        I(x,y)[0] = qRed(image.pixel(x,y));
+        I(x,y)[1] = qGreen(image.pixel(x,y));
+        I(x,y)[2] = qBlue(image.pixel(x,y));
+      }
     return true;
   }
 

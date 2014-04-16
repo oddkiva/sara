@@ -66,25 +66,25 @@ if (DO_USE_FROM_SOURCE)
     do_set_imageprocessing_source_dir()
     do_list_imageprocessing_source_files()
     do_create_variables_for_imageprocessing_library()
-  endif ()
-
-  # Static library
-  do_append_library(
-    ImageProcessing STATIC
-    "${DO_SOURCE_DIR}"
-    "${DO_ImageProcessing_HEADER_FILES}"
-    "${DO_ImageProcessing_SOURCE_FILES}"
-    "${DO_ImageProcessing_LINK_LIBRARIES}"
-    )
-
-  # Shared library
-  if (DO_BUILD_SHARED_LIBS)
+    
+    # Static library
     do_append_library(
-      ImageProcessing_SHARED SHARED
+      ImageProcessing STATIC
       "${DO_SOURCE_DIR}"
       "${DO_ImageProcessing_HEADER_FILES}"
       "${DO_ImageProcessing_SOURCE_FILES}"
       "${DO_ImageProcessing_LINK_LIBRARIES}"
       )
+
+    # Shared library
+    if (DO_BUILD_SHARED_LIBS)
+      do_append_library(
+        ImageProcessing_SHARED SHARED
+        "${DO_SOURCE_DIR}"
+        "${DO_ImageProcessing_HEADER_FILES}"
+        "${DO_ImageProcessing_SOURCE_FILES}"
+        "${DO_ImageProcessing_LINK_LIBRARIES}"
+        )
+    endif ()
   endif ()
 endif ()

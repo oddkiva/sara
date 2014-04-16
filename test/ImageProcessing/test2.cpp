@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <DO/ImageProcessing.hpp>
 #include <DO/Graphics.hpp>
+#include <DO/Graphics/GraphicsUtilities.hpp>
 #include <exception>
 
 using namespace DO;
@@ -159,7 +160,7 @@ TYPED_TEST_P(GaussPyrTest, gaussianPyramidTest)
 {
   typedef TypeParam T;
   Image<T> I;
-  ASSERT_TRUE(load(I, srcPath("sunflowerField.jpg")));
+  ASSERT_TRUE(load(I, srcPath("../../datasets/sunflowerField.jpg")));
 
   openWindow(I.width(), I.height());
   tic();
@@ -188,9 +189,7 @@ INSTANTIATE_TYPED_TEST_CASE_P(DO_ImageProcessing_Pyramid_Test,
 
 int main(/*int argc, char** argv*/)
 {
-  int argc = 0;
-  char **argv = 0;
-  testing::InitGoogleTest(&argc, argv); 
+  testing::InitGoogleTest(&getGuiApp()->argc, getGuiApp()->argv); 
   return RUN_ALL_TESTS(); 
 
   return 0;

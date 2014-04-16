@@ -17,6 +17,7 @@
 
 #include <stdexcept>
 
+
 namespace DO {
 
   /*!
@@ -143,5 +144,6 @@ namespace DO {
 
   //! @file
 }
+
 
 #endif /* DO_FEATURES_FEATURE_HPP */

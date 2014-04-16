@@ -18,7 +18,7 @@
 using namespace DO;
 using namespace std;
 
-TEST(DO_ImageDrawing_Test, imageFileReadingTest)
+TEST(DO_ImageDrawing_Test, DISABLE_imageFileReadingTest)
 {
   string filePaths[] = {
     srcPath("../../datasets/ksmall.jpg"),
@@ -58,37 +58,33 @@ TEST(DO_ImageDrawing_Test, imageFileReadingTest)
 TEST(DO_ImageDrawing_Test, imageExifOriTest)
 {
   vector<string> filePaths;
-  getImageFilePaths(filePaths, "C:/data/David-Ok-Iphone4S");
 
   HighResTimer timer;
   double elapsed;
 
   bool viewImageCollection = true;
   if (viewImageCollection)
-  openGraphicsView(1024, 768);
+    openGraphicsView(1024, 768);
 
-  for (size_t i = 0; i < filePaths.size(); ++i)
-  {
-    const string& filePath = filePaths[i];
-    Image<Rgb8> image;
-    EXIFInfo exifInfo;
+  Image<Rgb8> image;
+  EXIFInfo exifInfo;
 
-    timer.restart();
-    ASSERT_TRUE(imread(image, filePath));
-    elapsed = timer.elapsedMs();
-    cout << "Load time = " << elapsed << " ms" << endl;
+  timer.restart();
+  string filePath(srcPath("../../datasets/Photo_058.jpg"));
+  ASSERT_TRUE(imread(image, filePath));
+  elapsed = timer.elapsedMs();
+  cout << "Load time = " << elapsed << " ms" << endl;
 
-    ASSERT_NE(image.sizes(), Vector2i::Zero());
-    ASSERT_TRUE(readExifInfo(exifInfo, filePath));
+  ASSERT_NE(image.sizes(), Vector2i::Zero());
+  ASSERT_TRUE(readExifInfo(exifInfo, filePath));
 
-    if (viewImageCollection)
-      addImage(image, true);
+  if (viewImageCollection)
+    addImage(image, true);
 
-    print(exifInfo);
-  }
+  print(exifInfo);
 
   while (getKey() != KEY_ESCAPE && viewImageCollection);
-    closeWindow();
+  closeWindow();
 }
 
 int main(int argc, char **argv)

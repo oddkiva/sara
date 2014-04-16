@@ -9,12 +9,15 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+
 #ifndef DO_GEOMETRY_BBOX_HPP
 #define DO_GEOMETRY_BBOX_HPP
 
 #include <stdexcept>
-#include <DO/Core/EigenExtension.hpp>
 #include <vector>
+
+#include <DO/Core/EigenExtension.hpp>
+
 
 namespace DO {
 
@@ -104,5 +107,6 @@ namespace DO {
   
 
 } /* namespace DO */
+
 
 #endif /* DO_GEOMETRY_BBOX_HPP */

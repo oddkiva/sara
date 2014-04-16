@@ -49,7 +49,7 @@ namespace DO {
     frequency_ = static_cast<double>(freq.QuadPart);
 #endif
   }
-  //! Reset the timer to zero.
+
   void HighResTimer::restart()
   {
 #ifdef WIN32
@@ -62,7 +62,7 @@ namespace DO {
     start_ = start.tv_sec + start.tv_usec * 1e-6;
 #endif
   }
-  //! Returns the elapsed time in seconds.
+
   double HighResTimer::elapsed()
   {
 #ifdef _WIN32

@@ -8,5 +8,5 @@ message(STATUS "  - DO_FeatureMatching_test")
 find_package(DO COMPONENTS Geometry Features FeatureDescriptors FeatureDetectors Match FeatureMatching REQUIRED)
 include(${DO_USE_FILE})
 
-do_unit_test(FeatureMatching test.cpp "${DO_LIBRARIES}")
-set_property(TARGET DO_FeatureMatching_test PROPERTY FOLDER "DO Tests/FeatureMatching")
+set(TestGroupName "FeatureMatching")
+do_unit_test(FeatureMatching test.cpp "${DO_LIBRARIES}" ${TestGroupName})
