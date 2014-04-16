@@ -11,8 +11,11 @@
 
 //! @file
 
+
 #ifndef DO_FEATURES_FEATURE_HPP
 #define DO_FEATURES_FEATURE_HPP
+
+#include <stdexcept>
 
 namespace DO {
 
