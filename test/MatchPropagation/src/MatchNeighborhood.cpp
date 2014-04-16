@@ -149,7 +149,9 @@ namespace DO {
 #endif
 
     int num_indices = static_cast<int>(indices.size());
-#pragma omp parallel for
+#ifdef _OPENMP
+# pragma omp parallel for
+#endif
     for (int i = 0; i < num_indices; ++i)
     {
       getMatchesFromX(indexScores[i], indices[i], xIndices[i], squaredRhoMin);
