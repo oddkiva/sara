@@ -8,6 +8,9 @@ set_property(TARGET DO_Stat PROPERTY FOLDER "DO 4th-Order Match Propagation")
 add_library(DO_Region
             Region.cpp Region.hpp
             RegionBoundary.cpp RegionBoundary.hpp)
+if (DEFINED ENABLE_CXX11)
+  set_target_properties(DO_Region PROPERTIES COMPILE_FLAGS ${ENABLE_CXX11})
+endif ()
 do_use_modules(DO_Region ${DO_LIBRARIES})
 set_property(TARGET DO_Region PROPERTY FOLDER "DO 4th-Order Match Propagation")
 
@@ -22,6 +25,9 @@ add_library(DO_GrowRegion
             GrowRegion.cpp GrowRegion.hpp
             GrowMultipleRegions.cpp GrowMultipleRegions.hpp
             RegionGrowingAnalyzer.cpp RegionGrowingAnalyzer.hpp)
+if (DEFINED ENABLE_CXX11)
+  set_target_properties(DO_GrowRegion PROPERTIES COMPILE_FLAGS ${ENABLE_CXX11})
+endif ()
 do_use_modules(DO_GrowRegion "${DO_LIBRARIES};DO_Region;DO_Stat")
 set_property(TARGET DO_GrowRegion PROPERTY FOLDER "DO 4th-Order Match Propagation")
 
@@ -32,6 +38,10 @@ add_library(DO_MikolajczykDataset
             MikolajczykDataset.cpp MikolajczykDataset.hpp
             StudyOnMikolajczykDataset.cpp StudyOnMikolajczykDataset.hpp)
 do_use_modules(DO_MikolajczykDataset "${DO_LIBRARIES};DO_Stat")
+if (DEFINED ENABLE_CXX11)
+  set_target_properties(DO_GrowRegion PROPERTIES COMPILE_FLAGS ${ENABLE_CXX11})
+endif ()
+
 set_property(TARGET DO_MikolajczykDataset PROPERTY FOLDER "DO 4th-Order Match Propagation")
 
 
