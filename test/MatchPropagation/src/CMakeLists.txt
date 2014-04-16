@@ -39,7 +39,7 @@ add_library(DO_MikolajczykDataset
             StudyOnMikolajczykDataset.cpp StudyOnMikolajczykDataset.hpp)
 do_use_modules(DO_MikolajczykDataset "${DO_LIBRARIES};DO_Stat")
 if (DEFINED ENABLE_CXX11)
-  set_target_properties(DO_GrowRegion PROPERTIES COMPILE_FLAGS ${ENABLE_CXX11})
+  set_target_properties(DO_MikolajczykDataset PROPERTIES COMPILE_FLAGS ${ENABLE_CXX11})
 endif ()
 
 set_property(TARGET DO_MikolajczykDataset PROPERTY FOLDER "DO 4th-Order Match Propagation")
