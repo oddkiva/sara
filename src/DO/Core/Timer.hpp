@@ -15,7 +15,6 @@
 #define DO_UTILITIES_TIMER_HPP
 
 #include <DO/Defines.hpp>
-#include <chrono>
 #include <iostream>
 
 namespace DO {
@@ -24,29 +23,12 @@ namespace DO {
   //! \defgroup Utility Utility
   //! @{
 
-  //! \brief Timer class.
+  //! \brief Timer class with microsecond accuracy.
   class DO_EXPORT Timer
   {
   public: /* interface. */
     //! Default constructor
     Timer();
-    //! Reset the timer to zero.
-    void restart();
-    //! Returns the elapsed time.
-    double elapsed();
-  private:
-    //! Records the start instant time.
-    std::chrono::time_point<std::chrono::high_resolution_clock> start_;
-    //! Records the end instant time.
-    std::chrono::time_point<std::chrono::high_resolution_clock> end_;
-  };
-
-  //! \brief Timer class with microsecond accuracy.
-  class DO_EXPORT HighResTimer
-  {
-  public: /* interface. */
-    //! Default constructor
-    HighResTimer();
     //! Reset the timer to zero.
     void restart();
     //! Returns the elapsed time in seconds.

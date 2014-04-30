@@ -27,25 +27,19 @@ inline void milliSleep(unsigned milliseconds)
 TEST(DO_Core_Test, testTimer)
 {
   Timer timer;
-  HighResTimer hrTimer;
   double elapsedTimeMs;
   double elapsedTimeS;
   unsigned sleepTimeMs = 580;
 
-  hrTimer.restart();
+  timer.restart();
   milliSleep(sleepTimeMs);
-  elapsedTimeMs =  hrTimer.elapsedMs();
+  elapsedTimeMs =  timer.elapsedMs();
   EXPECT_NEAR(elapsedTimeMs, sleepTimeMs, 100);
-
-  hrTimer.restart();
-  milliSleep(sleepTimeMs);
-  elapsedTimeS = hrTimer.elapsed();
-  EXPECT_NEAR(elapsedTimeS, sleepTimeMs/1e3, 2e-3);
 
   timer.restart();
   milliSleep(sleepTimeMs);
   elapsedTimeS = timer.elapsed();
-  EXPECT_NEAR(elapsedTimeS, sleepTimeMs/1e3, 1e-2);
+  EXPECT_NEAR(elapsedTimeS, sleepTimeMs/1e3, 2e-3);
 }
 
 int main(int argc, char** argv) 
