@@ -21,21 +21,6 @@
 namespace DO {
 
   Timer::Timer()
-  {
-  }
-  
-  void Timer::restart()
-  {
-    start_ = std::chrono::high_resolution_clock::now();
-  }
-
-  double Timer::elapsed()
-  {
-    end_ = std::chrono::high_resolution_clock::now();
-    return std::chrono::duration<double>(end_-start_).count();
-  }
-
-  HighResTimer::HighResTimer()
     : elapsed_(0)
   {
 #ifdef WIN32
@@ -49,8 +34,8 @@ namespace DO {
     frequency_ = static_cast<double>(freq.QuadPart);
 #endif
   }
-  //! Reset the timer to zero.
-  void HighResTimer::restart()
+
+  void Timer::restart()
   {
 #ifdef WIN32
     LARGE_INTEGER li_start_;
@@ -62,8 +47,8 @@ namespace DO {
     start_ = start.tv_sec + start.tv_usec * 1e-6;
 #endif
   }
-  //! Returns the elapsed time in seconds.
-  double HighResTimer::elapsed()
+
+  double Timer::elapsed()
   {
 #ifdef _WIN32
     LARGE_INTEGER end_;
@@ -78,7 +63,7 @@ namespace DO {
     return elapsed_;
   }
 
-  double HighResTimer::elapsedMs()
+  double Timer::elapsedMs()
   {
     return elapsed() * 1000.; 
   }
