@@ -443,7 +443,9 @@ namespace DO {
     for (int y = 0; y < image.height(); ++y)
       for (int x = 0; x < image.width(); ++x)
         for (int i = 0; i < 3; ++i)
-          tmp(x,y)[i] = uchar(getRescaledChannel64f(image(x,y)[i])*255.);
+          tmp(x,y)[i] = static_cast<unsigned char>(
+            getRescaledChannel64f(image(x,y)[i])*255.
+          );
     display(tmp, xoff, yoff, fact);
   }
   //! \brief View an image in a new PaintingWindow window.
