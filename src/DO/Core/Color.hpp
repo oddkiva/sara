@@ -332,11 +332,11 @@ template <> struct ColorTraits<gray_channel_t>            \
   { return doubleMax() - doubleMin(); }                   \
 };
 
-  //! Specialized color traits class for 'uchar' grayscale color.
+  //! Specialized color traits class for 'unsigned char' grayscale color.
   DEFINE_GRAY_COLOR_TRAITS(unsigned char)
-  //! Specialized color traits class for 'ushort' grayscale color.
+  //! Specialized color traits class for 'unsigned short' grayscale color.
   DEFINE_GRAY_COLOR_TRAITS(unsigned short)
-  //! Specialized color traits class for 'uint' grayscale color.
+  //! Specialized color traits class for 'unsigned int' grayscale color.
   DEFINE_GRAY_COLOR_TRAITS(unsigned int)
   //! Specialized color traits class for 'char' grayscale color.
   DEFINE_GRAY_COLOR_TRAITS(char)
