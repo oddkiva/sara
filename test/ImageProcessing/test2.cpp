@@ -159,7 +159,7 @@ TYPED_TEST_P(GaussPyrTest, gaussianPyramidTest)
 {
   typedef TypeParam T;
   Image<T> I;
-  ASSERT_TRUE(load(I, srcPath("sunflowerField.jpg")));
+  ASSERT_TRUE(load(I, srcPath("../../datasets/sunflowerField.jpg")));
 
   openWindow(I.width(), I.height());
   tic();
@@ -188,10 +188,8 @@ INSTANTIATE_TYPED_TEST_CASE_P(DO_ImageProcessing_Pyramid_Test,
 
 int main(/*int argc, char** argv*/)
 {
-  int argc = 0;
-  char **argv = 0;
-  testing::InitGoogleTest(&argc, argv); 
+  int fake_argc = 0;
+  char **fake_argv = 0;
+  testing::InitGoogleTest(&fake_argc, fake_argv); 
   return RUN_ALL_TESTS(); 
-
-  return 0;
 }
