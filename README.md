@@ -35,6 +35,15 @@ Continuous integration using [Travis CI](https://travis-ci.org/) (master branch,
 
 [![Build Status](https://travis-ci.org/DO-CV/DO-CV.png?branch=master)](https://travis-ci.org/DO-CV/DO-CV)
 
+To build the libraries, run:
+```
+  mkdir build && cd build
+  cmake ..
+  make  -j N # N is the number of cores you want to use for the build.
+  make test
+```
+
+
 -------------
 Documentation
 -------------
