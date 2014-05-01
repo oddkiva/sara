@@ -54,4 +54,11 @@ else ()
   message("WARNING: Compiler '${CMAKE_CXX_COMPILER}' may not be supported by DO-CV. Make sure that C++0x features are needed (auto and lambda) and adjust the CMake variable 'ENABLE_CXX11'. Otherwise, report back to me: david.ok8@gmail.com and I'll try to do what I can.")
 endif ()
 
+if (UNIX)
+  set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wunused-variable -fPIE")
+  set(CMAKE_CXX_RELEASE_FLAGS "-03 -ffast-math")
+  set(CMAKE_CXX_DEBUG_FLAGS "-00 -g -DDEBUG -D_DEBUG")
+endif ()
+
+
 do_step_message("Activating C++11 features with: '${ENABLE_CXX11}'")
