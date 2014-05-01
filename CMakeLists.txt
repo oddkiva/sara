@@ -13,6 +13,10 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindDO.cmake.in
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/DO/Defines.hpp.in
                ${CMAKE_CURRENT_SOURCE_DIR}/src/DO/Defines.hpp @ONLY)
 
+# Set default build type to Release mode.
+set(CMAKE_BUILD_TYPE "Release" CACHE STRING
+    "Choose the build type, options are: Debug, Release" FORCE)
+
 # Set options.
 option(DO_USE_FROM_SOURCE   "Use DO++ libraries from source" ON)
 option(DO_USE_STATIC_LIBS   "Use DO++ static libraries" OFF)
