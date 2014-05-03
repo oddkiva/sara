@@ -7,7 +7,17 @@ message(STATUS "  - DO_Graphics_test")
 find_package(DO COMPONENTS Core Graphics REQUIRED)
 include(${DO_USE_FILE})
 
+find_package(Qt5Test REQUIRED)
+
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+include_directories(${Qt5Test_INCLUDE_DIRS}
+                    ${DO_DIR}/build/test/Graphics)
+
 set(TestGroupName "Graphics")
-set(TestPch "GraphicsTesting.hpp")
-do_unit_test(Graphics_Qt test.cpp "${DO_LIBRARIES}"
-             ${TestGroupName} ${TestPch})
+do_unit_test(test_painting_window test_painting_window.cpp
+             "${DO_LIBRARIES};${Qt5Test_LIBRARIES}" "${TestGroupName}")
+
+set(CMAKE_AUTOMOC OFF)
+set(CMAKE_INCLUDE_CURRENT_DIR OFF)
