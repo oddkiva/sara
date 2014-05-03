@@ -9,7 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include "GraphicsTesting.hpp"
+#include "GraphicsExample.hpp"
 
 using namespace std;
 using namespace DO;
@@ -25,7 +25,7 @@ void aWindow()
 {
   cout << "A window... click when done" << endl;
   // Open 300x200 window
-  Window W = openWindow(300,200, "A window");
+  Window W = openWindow(300, 200, "A window");
   // A 150x100 filled RED rectangle in (20,10)
   fillRect(20, 10, 150, 100, Red8);
   // Wait for a click
