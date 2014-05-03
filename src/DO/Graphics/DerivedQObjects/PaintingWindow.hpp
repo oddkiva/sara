@@ -1,4 +1,4 @@
-// ========================================================================== //
+// ========================================================================= //
 // This file is part of DO++, a basic set of libraries in C++ for computer 
 // vision.
 //
@@ -7,18 +7,21 @@
 // This Source Code Form is subject to the terms of the Mozilla Public 
 // License v. 2.0. If a copy of the MPL was not distributed with this file, 
 // you can obtain one at http://mozilla.org/MPL/2.0/.
-// ========================================================================== //
+// ========================================================================= //
 
 //! @file
 
 #ifndef DO_GRAPHICS_PAINTINGWINDOW_HPP
 #define DO_GRAPHICS_PAINTINGWINDOW_HPP
 
+
 #include <QScrollArea>
 #include <QWidget>
 #include <QPainter>
 #include <QTimer>
+
 #include "../Events.hpp"
+
 
 class QPixmap;
 
@@ -44,7 +47,7 @@ namespace DO {
   };
 
   //! \brief QWidget-derived class on which we draw things.
-  //! I choose not to use QGLWidget because of some weird viewing artefacts...
+  //! I choose not to use QGLWidget because of some weird viewing artifacts...
   //! Maybe later...
   class PaintingWindow : public QWidget
   {
@@ -56,6 +59,9 @@ namespace DO {
                    int x = -1, int y = -1,
                    QWidget* parent = 0);
     QScrollArea *scrollArea() { return scroll_area_; }
+    QString windowTitle() const;
+    int x() const;
+    int y() const;
 
   public slots: /* drawing slots */
     // drawXXX

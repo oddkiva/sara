@@ -69,6 +69,21 @@ namespace DO {
     scroll_area_->show();
   }
 
+  QString PaintingWindow::windowTitle() const
+  {
+    return scroll_area_->windowTitle();
+  }
+
+  int PaintingWindow::x() const
+  {
+    return scroll_area_->pos().x();
+  }
+
+  int PaintingWindow::y() const
+  {
+    return scroll_area_->pos().y();
+  }
+
   void PaintingWindow::drawPoint(int x, int y, const QColor& c)
   {
     painter_.setPen(c);
