@@ -44,27 +44,31 @@ namespace DO {
   {
     //setMouseTracking(true);
     setFocusPolicy(Qt::WheelFocus);
+    
     // Set event listener.
     event_listening_timer_.setSingleShot(true);
     connect(&event_listening_timer_, SIGNAL(timeout()),
             this, SLOT(eventListeningTimerStopped()));
+    
     // Move widget.
     if(x != -1 && y != -1)
       scroll_area_->move(x,y);
     scroll_area_->setWindowTitle(windowTitle);
     scroll_area_->setWidget(this);
     scroll_area_->setFocusProxy(this);
-    // Resize widget.
+    
+    // Maximize if necessary.
+    if (width >= qApp->desktop()->width() || height >= qApp->desktop()->height())
+      scroll_area_->showMaximized();
+    // Resize the scroll area with the size plus a two-pixel offset.
+    else
+      scroll_area_->resize(width+2, height+2);
     resize(width, height);
-    if (width > qApp->desktop()->width() || height > qApp->desktop()->height())
-    {
-      width = 800;
-      height = 600;
-    }
-    scroll_area_->resize(width+2, height+2);
+
     // Initialize the pixmap.
     pixmap_.fill();
     update();
+    
     // Show the widget.
     scroll_area_->show();
   }
