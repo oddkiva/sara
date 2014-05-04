@@ -18,7 +18,8 @@ add_executable(DO_Graphics_example example.cpp GraphicsExample.hpp)
 set_target_properties(DO_Graphics_example PROPERTIES
                       COMPILE_FLAGS "${ENABLE_CXX11} -DSRCDIR=${CMAKE_CURRENT_SOURCE_DIR}"
                       COMPILE_DEFINITIONS DO_STATIC)
-target_link_libraries(DO_Graphics_example "${DO_LIBRARIES}")
+target_link_libraries(DO_Graphics_example ${DO_LIBRARIES})
 
 # Group this project as part of the set of sample programs.
 set_property(TARGET DO_Graphics_example PROPERTY FOLDER "DO Examples")
+message(${DO_LIBRARIES})
