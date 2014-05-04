@@ -191,7 +191,7 @@ void testLinearFiltering(const Image<Rgb8>& rgb8image)
   Image<Color> I2(I);
 
   // Timing
-  HighResTimer t;
+  Timer t;
   double elapsed;
 
   // x-gradient
@@ -280,7 +280,7 @@ void testDiffAlgos(const Image<Rgb8>& rgb8image)
   Image<T> gn(I.sizes());
   Image<T> go(I.sizes());
   Image<T> lap(I.sizes());
-  HighResTimer t;
+  Timer t;
   double elapsed;
 
   // Gradient.

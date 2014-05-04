@@ -147,7 +147,7 @@ void displayImagePyramid(const ImagePyramid<T>& pyramid, bool rescale = false)
   }
 }
 
-static HighResTimer timer;
+static Timer timer;
 inline void tic() { timer.restart(); }
 inline void toc(string task)
 {

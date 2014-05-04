@@ -17,7 +17,7 @@ using namespace std;
 
 namespace DO {
 
-static HighResTimer timer;
+static Timer timer;
 double time = 0.0;
 void tic()
 {
@@ -166,7 +166,7 @@ void benchmarkLocator_ALL(const string& name, const Matrix<int,N,1>& imSizes,
     return;
 
 //#ifdef WIN32
-//  // Timing check (TODO: put this to DO_Core_test and check HighResTimer).
+//  // Timing check (TODO: put this to DO_Core_test and check Timer).
 //  file << "// ======================== //" << endl;
 //  file << "Check 1000ms sleep time" << endl;
 //  tic();
