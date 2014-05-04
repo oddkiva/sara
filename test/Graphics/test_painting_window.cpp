@@ -1,8 +1,11 @@
-#include <QtWidgets>
 #include <QtTest>
+#include <QtWidgets>
+
 #include <DO/Graphics/DerivedQObjects/PaintingWindow.hpp>
 
+
 using namespace DO;
+
 
 class TestPaintingWindow: public QObject
 {
@@ -49,6 +52,7 @@ private slots:
     QCOMPARE(image.pixel(150, 100), QColor(255, 0, 0).rgb());
   }
 };
+
 
 QTEST_MAIN(TestPaintingWindow)
 #include "test_painting_window.moc"
