@@ -5,7 +5,7 @@ do_step_message("Appending test projects:")
 
 add_subdirectory(Core)
 #add_subdirectory(ImageDrawing)
-#add_subdirectory(Graphics)
+add_subdirectory(Graphics)
 add_subdirectory(FileSystem)
 
 #add_subdirectory(KDTree)
