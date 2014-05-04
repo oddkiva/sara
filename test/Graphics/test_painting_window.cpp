@@ -43,7 +43,7 @@ private slots:
     PaintingWindow *window = new PaintingWindow(300, 200);
     window->drawPoint(150, 100, QColor(255, 0, 0));
 
-    QImage image(window->size(), QImage::Format_RGBA8888);
+    QImage image(window->size(), QImage::Format_RGB32);
     image.fill(Qt::white);
     window->render(&image, QPoint(), QRegion(QRect(QPoint(), window->size())));
     QCOMPARE(image.pixel(150, 100), QColor(255, 0, 0).rgb());
