@@ -12,7 +12,7 @@ include(${DO_USE_FILE})
 #set(SRCS example.cpp GraphicsExample.hpp)
 #do_add_msvc_precompiled_header("GraphicsExample.hpp" SRCS "GraphicsExample_PCH")
 
-add_executable(DO_Graphics_example example.cpp GraphicsExample.hpp)
+add_executable(DO_Graphics_example example.cpp precompiled.hpp)
 # TODO: if C++11 is available, activate it **GLOBALLY**.
 # TODO: improve this, this is not very user-friendly!
 set_target_properties(DO_Graphics_example PROPERTIES
@@ -22,4 +22,3 @@ target_link_libraries(DO_Graphics_example ${DO_LIBRARIES})
 
 # Group this project as part of the set of sample programs.
 set_property(TARGET DO_Graphics_example PROPERTY FOLDER "DO Examples")
-message(${DO_LIBRARIES})

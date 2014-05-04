@@ -1,4 +1,4 @@
-// ========================================================================== //
+// ========================================================================= //
 // This file is part of DO++, a basic set of libraries in C++ for computer 
 // vision.
 //
@@ -7,18 +7,16 @@
 // This Source Code Form is subject to the terms of the Mozilla Public 
 // License v. 2.0. If a copy of the MPL was not distributed with this file, 
 // you can obtain one at http://mozilla.org/MPL/2.0/.
-// ========================================================================== //
-
-#include "GraphicsExample.hpp"
-
-using namespace std;
-using namespace DO;
-
-const bool stepByStep = true;
+// ========================================================================= //
 
 #define TEST_2D
 #define TEST_3D
 #define TEST_GRAPHICSVIEW
+
+#include "precompiled.hpp"
+
+using namespace std;
+using namespace DO;
 
 #ifdef TEST_2D
 void aWindow()
@@ -29,8 +27,7 @@ void aWindow()
   // A 150x100 filled RED rectangle in (20,10)
   fillRect(20, 10, 150, 100, Red8);
   // Wait for a click
-  if (stepByStep)
-    click();
+  click();
   // Close window...
   closeWindow(W);
 }
@@ -52,7 +49,7 @@ void twoWindows()
   // Another line, in GREEN, in the first window
   drawLine(20,10,250,170,Green8);
   // Wait for a click in any window
-  if (stepByStep) anyClick();
+  anyClick();
   closeWindow(W1);
   closeWindow(W2);
 }
@@ -82,8 +79,8 @@ void multipleWindows()
   {
     windows.push_back(
       openWindow(200, 200,
-             "Window #" + toString(i*3+j),
-             300*j+300, 300*i+50));
+                 "Window #" + toString(i*3+j),
+                 300*j+300, 300*i+50));
     setActiveWindow(windows.back());
     fillRect(0, 0,
              getWindowWidth(windows.back()),
@@ -104,19 +101,31 @@ void multipleWindows()
   }
 }
 
-void twoDimBasics() {
+void twoDimBasics()
+{
   cout << "Basic 2D drawings ... click when done" << endl;
-  Window W=openWindow(512,512,"2D basics");
-  // Lines
-  drawLine(20,10,300,100,Red8,5);                         // Line (20,10)-(300,100) in RED, thickness=5
-  drawLine(Point2i(320,100),Point2i(500,100),Black8,5);   // Specify 2 pixels instead of 4 coords
-  // Rects
-  drawRect(400,10,100,50,Blue8,3);                        // A 100x50 rectangle in (400,10) (up-left corner)
-  fillRect(Point2i(400,400),100,50,Green8);               // A filled rectangle
-  // Ellipspe
-  drawEllipse(50,350,50,90,Cyan8,2);                      // A 50x90 ellipse in (50,350) (up-left corner), thick=2
-  drawCircle(Point2i(200,200),40,Red8);                   // A circle centered in (200,200), radius=40
-  fillEllipse(350,150,90,100,Color3ub(128,128,128));      // A filled grey ellipse
+
+  Window W = openWindow(512, 512, "2D basics");
+
+  // Draw a red line from (20, 10) to (300, 100) with 5-pixel thickness.
+  drawLine(20, 10, 300, 100, Red8, 5);
+  // Draw a black line from (320, 100) to (500, 100) with 5-pixel thickness.
+  drawLine(Point2i(320, 100), Point2i(500, 100), Black8, 5);
+
+  // Draw a blue rectangle with top-left corner (400, 10) and size (100, 50).
+  drawRect(400, 10, 100, 50, Blue8, 3);
+  // Draw a green color-filled rectangle with top-left corner (400, 400) and 
+  // size (100, 50).
+  fillRect(Point2i(400, 400), 100, 50,Green8);
+
+  // Draw an axis-aligned ellipse bounded by a rectangle whose top-left 
+  // corner is (50,350) and size is (50, 90) using a cyan Pen with a 2-pixel
+  // thickness.
+  drawEllipse(50, 350, 50, 90, Cyan8, 2);
+  // Simple exercise: decipher this one.
+  fillEllipse(350, 150, 90, 100, Color3ub(128, 128, 128));
+  // A circle with a center point located at (200, 200) and a 40-pixel radius.
+  drawCircle(Point2i(200, 200), 40, Red8);
 
   /*
    Draw an oriented ellipse with
@@ -128,32 +137,44 @@ void twoDimBasics() {
    */
   drawEllipse(Vector2f(150.f, 100.f), 10.f, 20.f, 45.f, Cyan8, 1);
   drawEllipse(Vector2f(50.f, 50.f), 10.f, 20.f, 0.f, Red8, 1);
-  // Points
-  for (int i=0;i<20;i+=2)
-    drawPoint(i+100,i+200,Black8);                          // Some BLACK points
-  // Strings
-  drawString(50,250,"a string",Red8);                       // A RED string in (50,200)
-  drawString(40,270,"another string",Magenta8,18,0,true);   // size=18, italic
-  // size=24, angle=-10, bold
+
+  // Draw a few black points.
+  for (int i = 0; i < 20; i+= 2)
+    drawPoint(i+100, i+200, Black8);
+  // Draw a string.
+  drawString(50, 250, "a string", Red8);
+  // Draw another string but with font size=18 and in italic.
+  drawString(40, 270, "another string", Magenta8, 18, 0, true);   
+  // ... font size=24, rotation angle=-10, bold
   drawString(30,300,"yet another string",Black8,24,-10,
              false,true);
-  // Polygons
-  int px[]={201,200,260,240},py[]={301,350,330,280};
-  fillPoly(px,py,4,Blue8);                                  // A filled polygon (px[i],py[i])
-  int t[]={300,300,300,400,400,350};
-  fillPoly(t,3,Green8);                                     // A filled polygon (t[2*i],t[2*i+1])
+  // Draw a polygon with the following points.
+  int px[] = { 201, 200, 260, 240};
+  int py[] = { 301, 350, 330, 280};
+  fillPoly(px, py, 4, Blue8);
+  // Draw another polygon.
+  //      { (x1, y1), (x2, y2), (x3, y3) }
+  int t[]={ 300, 300, 300, 400, 400, 350 };
+  fillPoly(t, 3, Green8);
+  // Draw another polygon.
   Point2i P[]={
     Point2i(100,100),
     Point2i(100,150),
     Point2i(150,120)
   };
-  drawPoly(P,3,Red8,3);                         // A polygon P[i] (thickness=3)
-  // Arrows
-  drawArrow(100,470,200,450,Blue8);             // An arrow from (100,450) to (200,450)
-  drawArrow(300,470,200,450,Red8,30,10,1);      // tip=30x10 pixels, style=1
-  drawArrow(200,450,250,400,Black8,20,20,2);    // tip=20x20 pixels, style=2
-  drawArrow(200,450,150,400,Green8,35.,8.,0,2); // tip: (angle,length)=(35,8) , style=0, width=2
-  if (stepByStep) click();
+  drawPoly(P, 3, Red8, 3);  // ... with a red pen with 3-pixel thickness.
+
+  // Draw a blue arrow from (100,450) to (200,450).
+  drawArrow(100, 470, 200, 450, Blue8);
+  // Draw a red arrow with the a 30x10 pixels with style 1.
+  // TODO: improve this API.
+  drawArrow(300, 470, 200, 450, Red8, 30, 10, 1);
+  drawArrow(200, 450, 250, 400, Black8, 20, 20, 2);
+  // Draw another arrow with tip: (angle,length)=(35,8) , style=0, width=2.
+  // TODO: improve this **horrible** legacy API.
+  drawArrow(200, 450, 150, 400, Green8, 35., 8., 0, 2); 
+
+  click();
   closeWindow(W);
 }
 
@@ -186,9 +207,7 @@ void floatingPointDrawing()
   Point2f p2(rand()%300, rand()%200);
   drawPoint((p1*2+p2)/2, Green8);
 
-  if (stepByStep)
-    click();
-  // Close window...
+  click();
   closeWindow(W);
 }
 
@@ -199,8 +218,8 @@ void bitmapBasics()
   // Array of bytes
   Color3ub cols[256*256];
   // Some (RED,GREEN,BLUE) function of (i,j)
-  for (int j=0;j<256;j++)
-    for (int i=0;i<256;i++)
+  for (int j = 0; j < 256; j++)
+    for (int i = 0; i < 256; i++)
       cols[i+256*j]= Color3ub(i, 255-i, (j<128)?255:0);
   // Draw this 256x256 (r,g,b) bitmap in (0,0)
   putColorImage(0,0,cols,256,256);
@@ -208,33 +227,42 @@ void bitmapBasics()
   // An array of colors.
   // Color3ub = 3D color vector where each channel has a value in [0,255].
   Color3ub cols2[256*256];
+  for (int j = 0; j < 256; j++) 
+    for (int i = 0; i < 256; i++) 
+      cols2[i+256*j]=Color3ub(i, (2*j)%256, (i+j)%256);  // RGB colors.
+  // Display the bitmap from the following top-left corner (0,256)
+  // TODO: rename this function.
+  putColorImage(Point2i(0,256), cols2, 256, 256);
+
+  // A grayscale image.
+  unsigned char grey[256*256];
   for (int j=0;j<256;j++) 
     for (int i=0;i<256;i++) 
-      cols2[i+256*j]=Color3ub(i,(2*j)%256,(i+j)%256);   // Colors, functions of (i,j)
-  putColorImage(Point2i(0,256),cols2,256,256);          // Draw this 256x256 color bitmap in (0,256)
+      grey[i+256*j] = static_cast<unsigned char>(128+127*sin((i+j)/10.));
+  // Display the bitmap from the following top-left corner (0,256)
+  // TODO: rename this function.
+  putGreyImage(256,0,grey,256,256); // Draw at point (256,0);
 
-  unsigned char grey[256*256];                          // A grey array
-  for (int j=0;j<256;j++) 
-    for (int i=0;i<256;i++) 
-      grey[i+256*j] = static_cast<unsigned char>(128+127*sin((i+j)/10.));      // Some pattern
-  putGreyImage(256,0,grey,256,256);                      // Draw at point (256,0);
-
-  if (stepByStep) click();
+  click();
   closeWindow(W);
 }
 
 void mouseBasics()
 {
   cout << "Basic mouse functions" << endl;
-  Window W=openWindow(512,512,"Mouse");
+
+  Window W = openWindow(512,512,"Mouse");
   drawString(10,10,"Please click anywhere",Black8);
-  if (stepByStep) click();  
+
+  click();  
+
   drawString(10,40,"click again (left=BLUE, middle=RED, right=done)",Black8);
   int button;    
   Point2i p;
   while ((button=getMouse(p))!=3) // Get clicked point p,
                                   // and used button (1,2,3)=(left,middle,right)
     fillCircle(p,5,(button==1)?Blue8:Red8);
+
   closeWindow(W);
 }
 
