@@ -82,8 +82,8 @@ namespace DO {
                   int penWidth = 1);
     void drawPoly(const QPolygonF& polygon, const QColor& c, int width);
     void drawText(int x,int y,const QString& s,const QColor& c, int fontSize,
-                  qreal alpha, bool italic, bool bold, bool underline);
-    void drawArrow(int a, int b, int c, int d, const QColor&  col,
+                  qreal orientation, bool italic, bool bold, bool underline);
+    void drawArrow(int x1, int y1, int x2, int y2, const QColor&  color,
                    int arrowWidth, int arrowHeight, int style, int width);
     // Display image
     void display(const QImage& image, int xoff = 0, int yoff = 0,
