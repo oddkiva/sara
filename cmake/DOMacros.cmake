@@ -289,7 +289,7 @@ function (do_unit_test _unit_test_name _srcs _additional_lib_deps)
     COMPILE_FLAGS "${ENABLE_CXX11} -DSRCDIR=${CMAKE_CURRENT_SOURCE_DIR}"
     COMPILE_DEFINITIONS DO_STATIC)
   add_test(${_unit_test_name}
-           "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/DO_${_unit_test_name}_test")
+           "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${_unit_test_name}")
   
   if (DEFINED test_group_name)
     set_property(TARGET ${_unit_test_name}
