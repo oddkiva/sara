@@ -1,20 +1,10 @@
-#include <iostream>
 #include <QtTest>
 #include <QtWidgets>
 #include <DO/Graphics/DerivedQObjects/PaintingWindow.hpp>
 
 using namespace DO;
 
-
-QImage getImageFromWindow(PaintingWindow *window)
-{
-  QImage image(window->size(), QImage::Format_RGB32);
-  window->render(&image, QPoint(), QRegion(QRect(QPoint(), window->size())));
-  return image;
-}
-
-
-class TestPaintingWindow: public QObject
+class TestPaintingWindowConstructors: public QObject
 {
   Q_OBJECT
 
@@ -37,6 +27,8 @@ private slots:
     QCOMPARE(window->x(), x);
     QCOMPARE(window->y(), y);
     QVERIFY(window->isVisible());
+
+    window->deleteLater();
   }
 
   void test_construction_of_PaintingWindow_with_size_larger_than_desktop()
@@ -48,214 +40,207 @@ private slots:
 
     QVERIFY(window->scrollArea()->isMaximized());
     QVERIFY(window->isVisible());
+
+    window->deleteLater();
+  }
+};
+
+class TestPaintingWindowDrawMethods: public QObject
+{
+  Q_OBJECT
+
+private: // data members
+  PaintingWindow *test_window_;
+  QImage true_image_;
+  QPainter painter_;
+
+private: // methods
+  QImage get_image_from_window()
+  {
+    QImage image(test_window_->size(), QImage::Format_RGB32);
+    test_window_->render(&image, QPoint(), QRegion(QRect(QPoint(), test_window_->size())));
+    return image;
+  }
+
+private slots:
+  void initTestCase()
+  {
+    test_window_ = new PaintingWindow(300, 300);
+    true_image_ =  QImage(test_window_->size(), QImage::Format_RGB32);
+  }
+
+  void init()
+  {
+    test_window_->clear();
+    true_image_.fill(Qt::white);
+    painter_.begin(&true_image_);
+  }
+
+  void cleanup()
+  {
+    painter_.end();
+  }
+
+  void cleanupTestCase()
+  {
+    test_window_->deleteLater();
   }
 
   void test_drawPoint_using_integer_coordinates()
   {
-    PaintingWindow *window = new PaintingWindow(300, 300);
-
     int x = 150, y = 100;
     QColor color(255, 0, 0);
 
-    window->drawPoint(x, y, color);
+    test_window_->drawPoint(x, y, color);
 
-    QImage trueImage(window->size(), QImage::Format_RGB32);
-    trueImage.fill(Qt::white);
-    QPainter painter(&trueImage);
-    painter.setPen(color);
-    painter.drawPoint(QPoint(x, y));
+    painter_.setPen(color);
+    painter_.drawPoint(QPoint(x, y));
 
-    QCOMPARE(getImageFromWindow(window), trueImage);
+    QCOMPARE(get_image_from_window(), true_image_);
   }
 
   void test_drawPoint_using_QPointF()
   {
-    PaintingWindow *window = new PaintingWindow(300, 300);
-
     double x = 150.95, y = 100.3333;
     QColor color(0, 225, 0);
 
-    window->drawPoint(QPointF(x, y), color);
+    test_window_->drawPoint(QPointF(x, y), color);
 
-    QImage trueImage(window->size(), QImage::Format_RGB32);
-    trueImage.fill(Qt::white);
-    QPainter painter(&trueImage);
-    painter.setPen(color);
-    painter.drawPoint(QPointF(x, y));
+    painter_.setPen(color);
+    painter_.drawPoint(QPointF(x, y));
 
-    QCOMPARE(getImageFromWindow(window), trueImage);
+    QCOMPARE(get_image_from_window(), true_image_);
   }
 
   void test_drawLine_using_integer_coordinates()
   {
-    PaintingWindow *window = new PaintingWindow(300, 300);
-
     int x1 = 100, y1 = 100;
     int x2 = 200, y2 = 240;
     QColor color(0, 255, 0);
     int thickness = 3;
 
-    window->drawLine(x1, y1, x2, y2, color, thickness);
+    test_window_->drawLine(x1, y1, x2, y2, color, thickness);
 
-    QImage trueImage(window->size(), QImage::Format_RGB32);
-    trueImage.fill(Qt::white);
-    QPainter painter(&trueImage);
-    painter.setPen(QPen(color, thickness));
-    painter.drawLine(x1, y1, x2, y2);
+    painter_.setPen(QPen(color, thickness));
+    painter_.drawLine(x1, y1, x2, y2);
 
-    QCOMPARE(getImageFromWindow(window), trueImage);
+    QCOMPARE(get_image_from_window(), true_image_);
   }
 
   void test_drawLine_using_QPointF()
   {
-    PaintingWindow *window = new PaintingWindow(300, 300);
-
     QPointF p1(100.350, 100.699);
     QPointF p2(203.645, 240.664);
     QColor color(0, 255, 123);
     int thickness = 4;
 
-    window->drawLine(p1, p2, color, thickness);
+    test_window_->drawLine(p1, p2, color, thickness);
 
-    QImage trueImage(window->size(), QImage::Format_RGB32);
-    trueImage.fill(Qt::white);
-    QPainter painter(&trueImage);
-    painter.setPen(QPen(color, thickness));
-    painter.drawLine(p1, p2);
+    painter_.setPen(QPen(color, thickness));
+    painter_.drawLine(p1, p2);
 
-    QCOMPARE(getImageFromWindow(window), trueImage);
+    QCOMPARE(get_image_from_window(), true_image_);
   }
 
   void test_drawCircle_using_integer_coordinates()
   {
-    PaintingWindow *window = new PaintingWindow(300, 300);
-
     int xc = 150, yc = 123;
     int r = 39;
     QColor color(0, 255, 123);
     int thickness = 4;
 
-    window->drawCircle(xc, yc, r, color, thickness);
+    test_window_->drawCircle(xc, yc, r, color, thickness);
 
-    QImage trueImage(window->size(), QImage::Format_RGB32);
-    trueImage.fill(Qt::white);
-    QPainter painter(&trueImage);
-    painter.setPen(QPen(color, thickness));
-    painter.drawEllipse(QPoint(xc, yc), r, r);
+    painter_.setPen(QPen(color, thickness));
+    painter_.drawEllipse(QPoint(xc, yc), r, r);
 
-    QCOMPARE(getImageFromWindow(window), trueImage);
+    QCOMPARE(get_image_from_window(), true_image_);
   }
 
   void test_drawCircle_using_Circle_using_QPointF()
   {
-    PaintingWindow *window = new PaintingWindow(300, 300);
-
     QPointF c(150.999, 123.231);
     int r = 39;
     QColor color(0, 255, 123);
     int thickness = 4;
 
-    window->drawCircle(c, r, color, thickness);
+    test_window_->drawCircle(c, r, color, thickness);
 
-    QImage trueImage(window->size(), QImage::Format_RGB32);
-    trueImage.fill(Qt::white);
-    QPainter painter(&trueImage);
-    painter.setPen(QPen(color, thickness));
-    painter.drawEllipse(c, r, r);
+    painter_.setPen(QPen(color, thickness));
+    painter_.drawEllipse(c, r, r);
 
-    QCOMPARE(getImageFromWindow(window), trueImage);
+    QCOMPARE(get_image_from_window(), true_image_);
   }
 
   void test_drawEllipse_using_axis_aligned_bounding_box()
   {
-    PaintingWindow *window = new PaintingWindow(300, 300);
-
     // Axis-aligned ellipse defined by the following axis-aligned bounding box.
     int x = 150, y = 123;
     int w = 39, h = 100;
     QColor color(0, 255, 123);
     int thickness = 4;
 
-    window->drawEllipse(x, y, w, h, color, thickness);
+    test_window_->drawEllipse(x, y, w, h, color, thickness);
 
-    QImage trueImage(window->size(), QImage::Format_RGB32);
-    trueImage.fill(Qt::white);
-    QPainter painter(&trueImage);
-    painter.setPen(QPen(color, thickness));
-    painter.drawEllipse(x, y, w, h);
+    painter_.setPen(QPen(color, thickness));
+    painter_.drawEllipse(x, y, w, h);
 
-    QCOMPARE(getImageFromWindow(window), trueImage);
+    QCOMPARE(get_image_from_window(), true_image_);
   }
 
   void test_drawEllipse_with_center_and_semi_axes_and_orientation()
   {
-    PaintingWindow *window = new PaintingWindow(300, 300);
-
     QPointF center(123.123, 156.123);
     qreal r1 = 100.13, r2 = 40.12;
     qreal oriDegree = 48.65;
     QColor color(0, 255, 123);
     int thickness = 4;
 
-    window->drawEllipse(center, r1, r2, oriDegree, color, thickness);
+    test_window_->drawEllipse(center, r1, r2, oriDegree, color, thickness);
 
-    QImage trueImage(window->size(), QImage::Format_RGB32);
-    trueImage.fill(Qt::white);
-    QPainter painter(&trueImage);
-    painter.setPen(QPen(color, thickness));
-    painter.translate(center);
-    painter.rotate(oriDegree);
-    painter.translate(-r1, -r2);
-    painter.drawEllipse(QRectF(0, 0, 2*r1, 2*r2));
+    painter_.setPen(QPen(color, thickness));
+    painter_.translate(center);
+    painter_.rotate(oriDegree);
+    painter_.translate(-r1, -r2);
+    painter_.drawEllipse(QRectF(0, 0, 2*r1, 2*r2));
 
-    QCOMPARE(getImageFromWindow(window), trueImage);
+    QCOMPARE(get_image_from_window(), true_image_);
   }
 
   void test_drawRect()
   {
-    PaintingWindow *window = new PaintingWindow(300, 300);
-
     int x = 150, y = 123;
     int w = 39, h = 100;
     QColor color(0, 255, 123);
     int thickness = 4;
 
-    window->drawRect(x, y, w, h, color, thickness);
+    test_window_->clear();
+    test_window_->drawRect(x, y, w, h, color, thickness);
 
-    QImage trueImage(window->size(), QImage::Format_RGB32);
-    trueImage.fill(Qt::white);
-    QPainter painter(&trueImage);
-    painter.setPen(QPen(color, thickness));
-    painter.drawRect(x, y, w, h);
+    painter_.setPen(QPen(color, thickness));
+    painter_.drawRect(x, y, w, h);
 
-    QCOMPARE(getImageFromWindow(window), trueImage);
+    QCOMPARE(get_image_from_window(), true_image_);
   }
 
   void test_drawPoly()
   {
-    PaintingWindow *window = new PaintingWindow(300, 300);
-
     QPolygonF polygon;
     polygon << QPointF(10, 10) << QPointF(250, 20) << QPointF(150, 258);
 
     QColor color(0, 255, 123);
     int thickness = 4;
 
-    window->drawPoly(polygon, color, thickness);
+    test_window_->drawPoly(polygon, color, thickness);
 
-    QImage trueImage(window->size(), QImage::Format_RGB32);
-    trueImage.fill(Qt::white);
-    QPainter painter(&trueImage);
-    painter.setPen(QPen(color, thickness));
-    painter.drawPolygon(polygon);
+    painter_.setPen(QPen(color, thickness));
+    painter_.drawPolygon(polygon);
 
-    QCOMPARE(getImageFromWindow(window), trueImage);
+    QCOMPARE(get_image_from_window(), true_image_);
   }
 
   void test_drawText()
   {
-    PaintingWindow *window = new PaintingWindow(300, 300);
-
     // What text.
     QString text("DO-CV is awesome!");
     // Where.
@@ -268,34 +253,28 @@ private slots:
     bool bold = true;
     bool underline = true;
 
-    window->drawText(x, y, text, color, fontSize, orientation, italic, bold,
+    test_window_->drawText(x, y, text, color, fontSize, orientation, italic, bold,
                      underline);
 
-    QImage trueImage(window->size(), QImage::Format_RGB32);
-    trueImage.fill(Qt::white);
-
-    QPainter painter(&trueImage);
-    painter.setPen(color);
+    painter_.setPen(color);
 
     QFont font;
     font.setPointSize(fontSize);
     font.setItalic(italic);
     font.setBold(bold);
     font.setUnderline(underline);
-    painter.setFont(font);
+    painter_.setFont(font);
 
-    painter.translate(x, y);
-    painter.rotate(orientation);
-    painter.drawText(0, 0, text);
+    painter_.translate(x, y);
+    painter_.rotate(orientation);
+    painter_.drawText(0, 0, text);
 
-    QCOMPARE(getImageFromWindow(window), trueImage);
+    QCOMPARE(get_image_from_window(), true_image_);
   }
 
   // TODO: make this test more exhaustive.
   void test_drawArrow()
   {
-    PaintingWindow *window = new PaintingWindow(300, 300);
-
     int x1 = 150, y1 = 150;
     int x2 = 200, y2 = 200;
 
@@ -304,27 +283,25 @@ private slots:
     int style = 0;
     int width = 3;
 
-    window->drawArrow(x1, y1, x2, y2, color, arrowWidth, arrowHeight, style,
+    test_window_->drawArrow(x1, y1, x2, y2, color, arrowWidth, arrowHeight, style,
                       width);
 
-    QImage image(getImageFromWindow(window));
+    QImage image(get_image_from_window());
     for (int x = 150; x < 200; ++x)
       QCOMPARE(image.pixel(x,x), color.rgb());
   }
 
   void test_display()
   {
-    PaintingWindow *window = new PaintingWindow(300, 300);
-
     int w = 20, h = 20;
     QImage patch(QSize(w, h), QImage::Format_RGB32);
     patch.fill(Qt::red);
     int x_offset = 20, y_offset = 30;
     double zoom_factor = 2.;
 
-    window->display(patch, x_offset, y_offset, zoom_factor);
+    test_window_->display(patch, x_offset, y_offset, zoom_factor);
 
-    QImage image(getImageFromWindow(window));
+    QImage image(get_image_from_window());
     for (int y = 0; y < image.height(); ++y)
       for (int x = 0; x < image.width(); ++x)
         if ( x >= x_offset && x < x_offset+zoom_factor*w && 
