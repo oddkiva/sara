@@ -387,13 +387,13 @@ namespace DO {
 
   void PaintingWindow::mouseMoveEvent(QMouseEvent *event)
   {
-    emit(event->x(), event->y(), event->buttons());
+    emit movedMouse(event->x(), event->y(), event->buttons());
 
     if (event_listening_timer_.isActive())
     {
       event_listening_timer_.stop();
-      sendEvent(mouseMoved(event->x(), event->y(), event->buttons(),
-                event->modifiers()));
+      emit sendEvent(mouseMoved(event->x(), event->y(), event->buttons(),
+                     event->modifiers()));
     }
   }
 
@@ -410,28 +410,26 @@ namespace DO {
     if (event_listening_timer_.isActive())
     {
       event_listening_timer_.stop();
-      sendEvent(mousePressed(event->x(), event->y(), event->buttons(), 
-                event->modifiers()));
+      emit sendEvent(mousePressed(event->x(), event->y(), event->buttons(),
+                     event->modifiers()));
     }
   }
 
   void PaintingWindow::mouseReleaseEvent(QMouseEvent *event)
   {
-    //qDebug() << "Released " << event->pos().x() << " " << event->pos().y();
 #ifdef Q_OS_MAC
     Qt::MouseButtons buttons = (event->modifiers() == Qt::ControlModifier &&
       event->button() == Qt::LeftButton) ? 
       Qt::MiddleButton : event->button();
     emit releasedMouseButtons(event->x(), event->y(), buttons);
 #else
-    //qDebug() << int(event->button());
     emit releasedMouseButtons(event->x(), event->y(), event->button());
 #endif
     if (event_listening_timer_.isActive())
     {
       event_listening_timer_.stop();
-      sendEvent(mouseReleased(event->x(), event->y(), 
-                              event->button(), event->modifiers()));
+      emit sendEvent(mouseReleased(event->x(), event->y(),
+                                   event->button(), event->modifiers()));
     }
   }
 
@@ -441,7 +439,7 @@ namespace DO {
     if (event_listening_timer_.isActive())
     {
       event_listening_timer_.stop();
-      sendEvent(keyPressed(event->key(), event->modifiers()));
+      emit sendEvent(keyPressed(event->key(), event->modifiers()));
     }
   }
 
@@ -451,7 +449,7 @@ namespace DO {
     if (event_listening_timer_.isActive())
     {
       event_listening_timer_.stop();
-      sendEvent(keyReleased(event->key(), event->modifiers()));
+      emit sendEvent(keyReleased(event->key(), event->modifiers()));
     }
   }
 
