@@ -182,12 +182,14 @@ namespace DO {
     font.setBold(bold);
     font.setUnderline(underline);
 
+    painter_.save();
     painter_.setPen(color);
     painter_.setFont(font);
 
     painter_.translate(x, y);
     painter_.rotate(qreal(orientation));
     painter_.drawText(0, 0, text);
+    painter_.restore();
     update();
   }
 
