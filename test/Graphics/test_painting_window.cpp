@@ -310,9 +310,67 @@ private slots:
         else
           QCOMPARE(image.pixel(x, y), QColor(Qt::white).rgb());
   }
+};
+
+class TestPaintingWindowEvents: public QObject
+{
+  Q_OBJECT
+
+private:
+  PaintingWindow *test_window_;
+
+private slots:
+  void initTestCase()
+  {
+    qRegisterMetaType<Qt::MouseButtons>("Qt::MouseButtons");
+    test_window_ = new PaintingWindow(300, 300);
+  }
+
+  void cleanupTestCase()
+  {
+    test_window_->deleteLater();
+  }
+
+  void test_mouse_move_event()
+  {
+    test_window_->setMouseTracking(true);
+    QSignalSpy spy(test_window_,
+                   SIGNAL(movedMouse(int, int, Qt::MouseButtons)));
+    QVERIFY(spy.isValid());
+
+    QTestEventList events;
+    for (int x = 0; x < 200; ++x)
+      events.addMouseMove(QPoint(x+10, x+10), 1);
+    events.simulate(test_window_);
+
+    QCOMPARE(spy.count(), 200);
+    QList<QVariant> arguments = spy.takeFirst();
+
+    QCOMPARE(arguments.at(0).toInt(), 10);
+    QCOMPARE(arguments.at(1).toInt(), 10);
+    QCOMPARE(arguments.at(2).toInt(), int(Qt::NoButton));
+  }
 
 };
 
+int main(int argc, char *argv[])
+{
+  QApplication app(argc, argv);
+  app.setAttribute(Qt::AA_Use96Dpi, true);
+  QTEST_DISABLE_KEYPAD_NAVIGATION;
 
-QTEST_MAIN(TestPaintingWindow)
+  int num_failed_tests = 0;
+
+  TestPaintingWindowConstructors test_painting_window_constructors;
+  num_failed_tests += QTest::qExec(&test_painting_window_constructors);
+
+  TestPaintingWindowDrawMethods test_painting_window_draw_methods;
+  num_failed_tests += QTest::qExec(&test_painting_window_draw_methods);
+
+  TestPaintingWindowEvents test_painting_window_events;
+  num_failed_tests += QTest::qExec(&test_painting_window_events);
+
+  return num_failed_tests;
+}
+
 #include "test_painting_window.moc"
