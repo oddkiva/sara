@@ -58,7 +58,8 @@ private: // methods
   QImage get_image_from_window()
   {
     QImage image(test_window_->size(), QImage::Format_RGB32);
-    test_window_->render(&image, QPoint(), QRegion(QRect(QPoint(), test_window_->size())));
+    test_window_->render(&image, QPoint(), QRegion(QRect(QPoint(),
+                         test_window_->size())));
     return image;
   }
 
@@ -253,8 +254,8 @@ private slots:
     bool bold = true;
     bool underline = true;
 
-    test_window_->drawText(x, y, text, color, fontSize, orientation, italic, bold,
-                     underline);
+    test_window_->drawText(x, y, text, color, fontSize, orientation, italic,
+                           bold, underline);
 
     painter_.setPen(color);
 
@@ -283,8 +284,8 @@ private slots:
     int style = 0;
     int width = 3;
 
-    test_window_->drawArrow(x1, y1, x2, y2, color, arrowWidth, arrowHeight, style,
-                      width);
+    test_window_->drawArrow(x1, y1, x2, y2, color, arrowWidth, arrowHeight,
+                            style, width);
 
     QImage image(get_image_from_window());
     for (int x = 150; x < 200; ++x)
