@@ -51,14 +51,15 @@ namespace DO {
             this, SLOT(eventListeningTimerStopped()));
     
     // Move widget.
-    if(x != -1 && y != -1)
+    if (x != -1 && y != -1)
       scroll_area_->move(x,y);
     scroll_area_->setWindowTitle(windowTitle);
     scroll_area_->setWidget(this);
     scroll_area_->setFocusProxy(this);
     
     // Maximize if necessary.
-    if (width >= qApp->desktop()->width() || height >= qApp->desktop()->height())
+    if ( width >= qApp->desktop()->width()   ||
+         height >= qApp->desktop()->height() )
       scroll_area_->showMaximized();
     // Resize the scroll area with the size plus a two-pixel offset.
     else
