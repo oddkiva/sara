@@ -339,8 +339,8 @@ private slots:
                    SIGNAL(movedMouse(int, int, Qt::MouseButtons)));
     QVERIFY(spy.isValid());
 
-    int x=10, y= 10;
     QTestEventList events;
+    int x = 10, y = 10;
     events.addMouseMove(QPoint(x, y));
     events.addMouseMove(QPoint(x+1, y+1));
     events.simulate(test_window_);
