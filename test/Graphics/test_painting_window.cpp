@@ -338,16 +338,17 @@ private slots:
                    SIGNAL(movedMouse(int, int, Qt::MouseButtons)));
     QVERIFY(spy.isValid());
 
+    int x=10, y= 10;
     QTestEventList events;
-    for (int x = 0; x < 200; ++x)
-      events.addMouseMove(QPoint(x+10, x+10), 1);
+    events.addMouseMove(QPoint(x, y));
+    events.addMouseMove(QPoint(x+1, y+1));
     events.simulate(test_window_);
 
-    QCOMPARE(spy.count(), 200);
+    QCOMPARE(spy.count(), 1);
     QList<QVariant> arguments = spy.takeFirst();
 
-    QCOMPARE(arguments.at(0).toInt(), 10);
-    QCOMPARE(arguments.at(1).toInt(), 10);
+    QCOMPARE(arguments.at(0).toInt(), x+1);
+    QCOMPARE(arguments.at(1).toInt(), y+1);
     QCOMPARE(arguments.at(2).toInt(), int(Qt::NoButton));
   }
 
