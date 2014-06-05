@@ -2,6 +2,8 @@
 #include <QtWidgets>
 #include <DO/Graphics/DerivedQObjects/PaintingWindow.hpp>
 
+Q_DECLARE_METATYPE(DO::Event);
+
 using namespace DO;
 
 class TestPaintingWindowConstructors: public QObject
@@ -319,12 +321,38 @@ class TestPaintingWindowEvents: public QObject
 
 private:
   PaintingWindow *test_window_;
+  QPoint mouse_pos_;
+  Qt::Key key_;
+  int mouse_buttons_type_id_;
+  int event_type_id_;
+
+  void compare_spied_mouse_event_arguments(QSignalSpy& spy) const
+  {
+    QCOMPARE(spy.count(), 1);
+
+    QList<QVariant> arguments = spy.takeFirst();
+    QCOMPARE(arguments.at(0).toInt(), mouse_pos_.x());
+    QCOMPARE(arguments.at(1).toInt(), mouse_pos_.y());
+    QCOMPARE(static_cast<Qt::MouseButtons>(arguments.at(2).toInt()),
+             Qt::NoButton);
+  }
+
+  void compare_spied_key_event_arguments(QSignalSpy& spy) const
+  {
+    QCOMPARE(spy.count(), 1);
+
+    QList<QVariant> arguments = spy.takeFirst();
+    QCOMPARE(static_cast<Qt::Key>(arguments.at(0).toInt()), key_);
+  }
 
 private slots:
   void initTestCase()
   {
-    qRegisterMetaType<Qt::MouseButtons>("Qt::MouseButtons");
+    mouse_buttons_type_id_ = qRegisterMetaType<Qt::MouseButtons>("Qt::MouseButtons");
+    event_type_id_ = qRegisterMetaType<Event>("Event");
     test_window_ = new PaintingWindow(300, 300);
+    mouse_pos_ = QPoint(10, 10);
+    key_ = Qt::Key_A;
   }
 
   void cleanupTestCase()
@@ -342,15 +370,67 @@ private slots:
     QTestEventList events;
     int x = 10, y = 10;
     events.addMouseMove(QPoint(x, y));
-    events.addMouseMove(QPoint(x+1, y+1));
     events.simulate(test_window_);
 
+    QTest::mouseMove(test_window_, mouse_pos_);
+    compare_spied_mouse_event_arguments(spy);
+  }
+
+  void test_mouse_press_event()
+  {
+    QSignalSpy spy(test_window_,
+                   SIGNAL(pressedMouseButtons(int, int, Qt::MouseButtons)));
+    QVERIFY(spy.isValid());
+
+    QTest::mousePress(test_window_, Qt::LeftButton, Qt::NoModifier, mouse_pos_);
+    compare_spied_mouse_event_arguments(spy);
+  }
+
+  void test_mouse_release_event()
+  {
+    QSignalSpy spy(test_window_,
+                   SIGNAL(releasedMouseButtons(int, int, Qt::MouseButtons)));
+    QVERIFY(spy.isValid());
+
+    QTest::mouseRelease(test_window_, Qt::LeftButton, Qt::NoModifier, mouse_pos_);
+    compare_spied_mouse_event_arguments(spy);
+  }
+
+  void test_key_press_event()
+  {
+    QSignalSpy spy(test_window_, SIGNAL(pressedKey(int)));
+    QVERIFY(spy.isValid());
+
+    QTest::keyPress(test_window_, key_, Qt::NoModifier);
+    compare_spied_key_event_arguments(spy);
+  }
+
+  void test_key_release_event()
+  {
+    QSignalSpy spy(test_window_, SIGNAL(releasedKey(int)));
+    QVERIFY(spy.isValid());
+
+    QTest::keyRelease(test_window_, key_, Qt::NoModifier);
+    compare_spied_key_event_arguments(spy);
+  }
+
+  void test_send_event()
+  {
+    QSignalSpy spy(test_window_, SIGNAL(sendEvent(Event)));
+    QVERIFY(spy.isValid());
+
+    QMetaObject::invokeMethod(test_window_, "waitForEvent",
+                              Qt::DirectConnection, Q_ARG(int, 1));
+    
+    QTest::qWait(10);
+    
+    // Nothing happens.
     QCOMPARE(spy.count(), 1);
     QList<QVariant> arguments = spy.takeFirst();
-
-    QCOMPARE(arguments.at(0).toInt(), x+1);
-    QCOMPARE(arguments.at(1).toInt(), y+1);
-    QCOMPARE(arguments.at(2).toInt(), int(Qt::NoButton));
+    QVariant arg = arguments.at(0);
+    arg.convert(event_type_id_);
+    Event event(arguments.at(0).value<Event>());
+    QCOMPARE(event.type, DO::NO_EVENT);
   }
 
 };
