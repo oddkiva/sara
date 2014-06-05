@@ -369,6 +369,9 @@ private slots:
 
     QTestEventList events;
     int x = 10, y = 10;
+#ifndef _WIN32
+    events.addMouseMove(QPoint(x-1, y-1));
+#endif
     events.addMouseMove(QPoint(x, y));
     events.simulate(test_window_);
 
