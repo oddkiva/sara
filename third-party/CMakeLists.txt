@@ -4,8 +4,12 @@ do_step_message("Appending third-party libraries:")
 set(THIRDPARTY_FOLDER_NAME "DO Third-Party")
 
 if (DO_BUILD_UNIT_TESTS)
+  message(STATUS "  - Google Mock")
+  add_subdirectory(gmock)
+  set_property(TARGET gmock PROPERTY FOLDER ${THIRDPARTY_FOLDER_NAME})
+  set_property(TARGET gmock_main PROPERTY FOLDER ${THIRDPARTY_FOLDER_NAME})
+
   message(STATUS "  - Google Test")
-  add_subdirectory(gtest)
   set_property(TARGET gtest PROPERTY FOLDER ${THIRDPARTY_FOLDER_NAME})
   set_property(TARGET gtest_main PROPERTY FOLDER ${THIRDPARTY_FOLDER_NAME})
 endif ()
