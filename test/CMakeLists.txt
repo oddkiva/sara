@@ -1,4 +1,5 @@
 include_directories(${gtest_DIR}/include)
+include_directories(${gmock_DIR}/include)
 
 message(STATUS "")
 do_step_message("Appending test projects:")
