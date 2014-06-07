@@ -351,7 +351,9 @@ private:
 private slots:
   void initTestCase()
   {
-    mouse_buttons_type_id_ = qRegisterMetaType<Qt::MouseButtons>("Qt::MouseButtons");
+    mouse_buttons_type_id_ = qRegisterMetaType<Qt::MouseButtons>(
+      "Qt::MouseButtons"
+    );
     event_type_id_ = qRegisterMetaType<Event>("Event");
     test_window_ = new PaintingWindow(300, 300);
     mouse_pos_ = QPoint(10, 10);
@@ -388,7 +390,8 @@ private slots:
                    SIGNAL(pressedMouseButtons(int, int, Qt::MouseButtons)));
     QVERIFY(spy.isValid());
 
-    QTest::mousePress(test_window_, Qt::LeftButton, Qt::NoModifier, mouse_pos_);
+    QTest::mousePress(test_window_, Qt::LeftButton, Qt::NoModifier,
+                      mouse_pos_);
     compare_spied_mouse_event_arguments(spy);
   }
 
@@ -398,7 +401,8 @@ private slots:
                    SIGNAL(releasedMouseButtons(int, int, Qt::MouseButtons)));
     QVERIFY(spy.isValid());
 
-    QTest::mouseRelease(test_window_, Qt::LeftButton, Qt::NoModifier, mouse_pos_);
+    QTest::mouseRelease(test_window_, Qt::LeftButton, Qt::NoModifier,
+                        mouse_pos_);
     compare_spied_mouse_event_arguments(spy);
   }
 
