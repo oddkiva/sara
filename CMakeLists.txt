@@ -15,7 +15,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/DO/Defines.hpp.in
 
 # Set default build type to Release mode.
 set(CMAKE_BUILD_TYPE "Release" CACHE STRING
-    "Build type options are: Debug, Release" FORCE)
+    "Build type options are: Debug, Release")
 
 # Set options.
 option(DO_USE_FROM_SOURCE        "Use DO++ libraries from source" ON)
