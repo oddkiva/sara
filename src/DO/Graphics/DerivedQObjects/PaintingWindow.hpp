@@ -107,8 +107,8 @@ namespace DO {
     void resizeScreen(int width, int height);
 
   public slots: /* event management slots */
-      void waitForEvent(int ms);
-      void eventListeningTimerStopped();
+    void waitForEvent(int ms);
+    void eventListeningTimerStopped();
 
   protected:
     void mouseMoveEvent(QMouseEvent *event);
