@@ -15,7 +15,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/DO/Defines.hpp.in
 
 # Set default build type to Release mode.
 set(CMAKE_BUILD_TYPE "Release" CACHE STRING
-    "Build type options are: Debug, Release" FORCE)
+    "Build type options are: Debug, Release")
 
 # Set options.
 option(DO_USE_FROM_SOURCE        "Use DO++ libraries from source" ON)
@@ -25,7 +25,7 @@ option(DO_BUILD_SAMPLE_PROGRAMS  "Build sample programs using DO++ libraries" ON
 option(DO_BUILD_SHARED_LIBS      "Build shared libraries for DO++ libraries" OFF)
 option(DO_BUILD_IMAGE_IO         "Build third-party image I/O libraries" ON)
 
-# Go!
+# Add DO-CV to the CMake module path.
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 find_package(DO REQUIRED)
 do_dissect_version()
@@ -34,15 +34,17 @@ do_get_os_info()
 # Group projects by category.
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+# Set up code coverage for Debug mode.
+if (CMAKE_BUILD_TYPE STREQUAL "Debug" AND UNIX)
+  message("Setting up code coverage.")
+  include(CodeCoverage)
+endif ()
+
 # Set installation settings.
-#include(PCH)
 include(DOInstall)
 
 # Build third-party software (google test, FLANN,...)
 add_subdirectory(third-party)
-
-# Temporary
-include_directories(third-party)
 
 # Setup unit test projects
 if (DO_BUILD_UNIT_TESTS)
