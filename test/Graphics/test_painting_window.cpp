@@ -50,7 +50,7 @@ private slots:
   }
 };
 
-class TestPaintingWindowDrawMethods: public QObject
+class TestPaintingWindowDrawingMethods: public QObject
 {
   Q_OBJECT
 
@@ -455,7 +455,7 @@ int main(int argc, char *argv[])
   TestPaintingWindowConstructors test_painting_window_constructors;
   num_failed_tests += QTest::qExec(&test_painting_window_constructors);
 
-  TestPaintingWindowDrawMethods test_painting_window_draw_methods;
+  TestPaintingWindowDrawingMethods test_painting_window_drawing_methods;
   num_failed_tests += QTest::qExec(&test_painting_window_draw_methods);
 
 #ifndef DISABLE_IN_TRAVIS_CI
