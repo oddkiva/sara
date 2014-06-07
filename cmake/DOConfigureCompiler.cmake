@@ -57,7 +57,7 @@ endif ()
 if (UNIX)
   set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wunused-variable -fPIE")
   set(CMAKE_CXX_RELEASE_FLAGS "-03 -ffast-math")
-  set(CMAKE_CXX_DEBUG_FLAGS "-00 -g -DDEBUG -D_DEBUG")
+  set(CMAKE_CXX_DEBUG_FLAGS "-00 -g -DDEBUG -D_DEBUG --coverage -fprofile-arcs -ftest-coverage")
 endif ()
 
 
