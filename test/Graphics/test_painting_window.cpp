@@ -456,7 +456,7 @@ int main(int argc, char *argv[])
   num_failed_tests += QTest::qExec(&test_painting_window_constructors);
 
   TestPaintingWindowDrawingMethods test_painting_window_drawing_methods;
-  num_failed_tests += QTest::qExec(&test_painting_window_draw_methods);
+  num_failed_tests += QTest::qExec(&test_painting_window_drawing_methods);
 
 #ifndef DISABLE_IN_TRAVIS_CI
   // TODO: this test suite does not seem to work with Travis CI. We probably
