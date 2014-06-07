@@ -426,11 +426,10 @@ private slots:
     QVERIFY(spy.isValid());
 
     QMetaObject::invokeMethod(test_window_, "waitForEvent",
-                              Qt::DirectConnection, Q_ARG(int, 1));
-    
-    QTest::qWait(100);
+                              Qt::AutoConnection, Q_ARG(int, 1));
     
     // Nothing happens.
+    QVERIFY(spy.wait(10));
     QCOMPARE(spy.count(), 1);
     QList<QVariant> arguments = spy.takeFirst();
     QVariant arg = arguments.at(0);
