@@ -3,10 +3,7 @@ compiler:
   #- clang
   - gcc
 before_install:
-  # Print working directory
-  - pwd
-  # Check CMake version.
-  - cmake --version
+  - sudo pip install cpp-coveralls
   # Remove the rabbitmq source file since it currently times out and 
   # we don't need it.
   - sudo rm -f /etc/apt/sources.list.d/rabbitmq-source.list
@@ -31,3 +28,5 @@ script:
   - cmake -DDO_DISABLE_SPECIFIC_TEST_SUITES_FOR_TRAVIS_CI=ON ..
   - make -j 4
   - make test
+after_success:
+  - coveralls --root src
