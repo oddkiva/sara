@@ -425,7 +425,7 @@ private slots:
     QMetaObject::invokeMethod(test_window_, "waitForEvent",
                               Qt::DirectConnection, Q_ARG(int, 1));
     
-    QTest::qWait(10);
+    QTest::qWait(100);
     
     // Nothing happens.
     QCOMPARE(spy.count(), 1);
