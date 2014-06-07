@@ -150,7 +150,7 @@ function(cxx_shared_library name cxx_flags)
 endfunction()
 
 function(cxx_library name cxx_flags)
-  cxx_library_with_type(${name} STATIC "${cxx_flags}" ${ARGN})
+  cxx_library_with_type(${name} "" "${cxx_flags}" ${ARGN})
 endfunction()
 
 # cxx_executable_with_flags(name cxx_flags libs srcs...)
