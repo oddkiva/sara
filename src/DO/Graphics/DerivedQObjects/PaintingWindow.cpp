@@ -42,7 +42,6 @@ namespace DO {
     , pixmap_(width, height)
     , painter_(&pixmap_)
   {
-    //setMouseTracking(true);
     setFocusPolicy(Qt::WheelFocus);
     
     // Set event listener.
