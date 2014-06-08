@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.6)
 
 project(DO_Graphics_test)
 
-message(STATUS "  - DO_Graphics_test")
+message(STATUS "  - DO_Graphics_tests")
 
 find_package(DO COMPONENTS Core Graphics REQUIRED)
 include(${DO_USE_FILE})
@@ -16,12 +16,12 @@ include_directories(${Qt5Test_INCLUDE_DIRS}
                     ${DO_DIR}/build/test/Graphics)
 
 set(TestGroupName "Graphics")
-do_unit_test(test_painting_window test_painting_window.cpp
-             "${DO_LIBRARIES};${Qt5Test_LIBRARIES}" "${TestGroupName}")
-do_unit_test(test_opengl_window test_opengl_window.cpp
-             "${DO_LIBRARIES};${Qt5Test_LIBRARIES}" "${TestGroupName}")
-do_unit_test(test_graphics_view test_graphics_view.cpp
-             "${DO_LIBRARIES};${Qt5Test_LIBRARIES}" "${TestGroupName}")
+do_test(test_painting_window test_painting_window.cpp
+        "${DO_LIBRARIES};${Qt5Test_LIBRARIES}" "${TestGroupName}")
+do_test(test_opengl_window test_opengl_window.cpp
+        "${DO_LIBRARIES};${Qt5Test_LIBRARIES}" "${TestGroupName}")
+do_test(test_graphics_view test_graphics_view.cpp
+        "${DO_LIBRARIES};${Qt5Test_LIBRARIES}" "${TestGroupName}")
 
 set(CMAKE_AUTOMOC OFF)
 set(CMAKE_INCLUDE_CURRENT_DIR OFF)
