@@ -21,14 +21,17 @@ include_directories(${Qt5Test_INCLUDE_DIRS}
                     ${DO_DIR}/build/test/Graphics)
 
 set(TestGroupName "Graphics")
-do_test(test_painting_window test_painting_window.cpp
+do_test(Graphics_DerivedQObjects_PaintingWindow test_painting_window.cpp
         "${DO_LIBRARIES};${Qt5Test_LIBRARIES}" ${TestGroupName})
-do_test(test_opengl_window test_opengl_window.cpp
+do_test(Graphics_DerivedQObjects_OpenGLWindow test_opengl_window.cpp
         "${DO_LIBRARIES};${Qt5Test_LIBRARIES}" ${TestGroupName})
-do_test(test_graphics_view test_graphics_view.cpp
+do_test(Graphics_DerivedQObjects_GraphicsView test_graphics_view.cpp
         "${DO_LIBRARIES};${Qt5Test_LIBRARIES}" ${TestGroupName})
-do_test(test_keyboard_mouse_input test_keyboard_mouse_input.cpp
-        "${DO_LIBRARIES};${Qt5Test_LIBRARIES}" ${TestGroupName})
+# TODO: see if we can virtual configure keyboard and mouse devices in Travis.
+if (NOT DO_DISABLE_SPECIFIC_TEST_SUITES_FOR_TRAVIS_CI)
+  do_test(Graphics_Keyboard_Mouse_Input test_keyboard_mouse_input.cpp
+          "${DO_LIBRARIES};${Qt5Test_LIBRARIES}" ${TestGroupName})
+endif ()
 
 set(CMAKE_AUTOMOC OFF)
 set(CMAKE_INCLUDE_CURRENT_DIR OFF)
