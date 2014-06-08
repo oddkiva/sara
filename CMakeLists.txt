@@ -18,12 +18,18 @@ set(CMAKE_BUILD_TYPE "Release" CACHE STRING
     "Build type options are: Debug, Release")
 
 # Set options.
-option(DO_USE_FROM_SOURCE        "Use DO++ libraries from source" ON)
-option(DO_USE_STATIC_LIBS        "Use DO++ static libraries" OFF)
-option(DO_BUILD_UNIT_TESTS       "Build unit tests for DO++ libraries" ON)
-option(DO_BUILD_SAMPLE_PROGRAMS  "Build sample programs using DO++ libraries" ON)
-option(DO_BUILD_SHARED_LIBS      "Build shared libraries for DO++ libraries" OFF)
-option(DO_BUILD_IMAGE_IO         "Build third-party image I/O libraries" ON)
+option(DO_USE_FROM_SOURCE
+       "Use DO++ libraries from source"             ON)
+option(DO_USE_STATIC_LIBS
+       "Use DO++ static libraries"                  OFF)
+option(DO_BUILD_UNIT_TESTS
+       "Build unit tests for DO++ libraries"        ON)
+option(DO_BUILD_SAMPLE_PROGRAMS
+       "Build sample programs using DO++ libraries" ON)
+option(DO_BUILD_SHARED_LIBS
+       "Build shared libraries for DO++ libraries"  OFF)
+option(DO_BUILD_IMAGE_IO
+       "Build third-party image I/O libraries"      ON)
 
 # Add DO-CV to the CMake module path.
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
@@ -49,6 +55,8 @@ add_subdirectory(third-party)
 # Setup unit test projects
 if (DO_BUILD_UNIT_TESTS)
   enable_testing()
+  option(DO_DISABLE_SPECIFIC_TEST_SUITES_FOR_TRAVIS_CI
+         "Some test suites fail with Travis CI. Disable them?" OFF)
   add_subdirectory(test)
 endif ()
 

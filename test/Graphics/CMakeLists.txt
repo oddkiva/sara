@@ -4,6 +4,11 @@ project(DO_Graphics_test)
 
 message(STATUS "  - DO_Graphics_tests")
 
+if (DO_DISABLE_SPECIFIC_TEST_SUITES_FOR_TRAVIS_CI)
+  message("Warning: some test suites are disabled for Travis CI.")
+  add_definitions("-DDISABLE_IN_TRAVIS_CI")
+endif ()
+
 find_package(DO COMPONENTS Core Graphics REQUIRED)
 include(${DO_USE_FILE})
 
