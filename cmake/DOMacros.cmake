@@ -247,7 +247,7 @@ endmacro (do_add_msvc_precompiled_header)
 # ==============================================================================
 # Specific macro to add a unit test
 #
-function (do_unit_test _unit_test_name _srcs _additional_lib_deps)
+function (do_test _test_name _srcs _additional_lib_deps)
   if (POLICY CMP0020)
     cmake_policy(SET CMP0020 OLD)
   endif (POLICY CMP0020)
@@ -272,27 +272,27 @@ function (do_unit_test _unit_test_name _srcs _additional_lib_deps)
   if (DEFINED pch)
     do_substep_message(
       "Activating precompiled header: '${pch}' for unit test: "
-      "'DO_${_unit_test_name}_test'"
+      "'DO_${_test_name}_test'"
     )
     list(APPEND _srcs_var ${pch})
-    do_add_msvc_precompiled_header(${pch} _srcs_var ${_unit_test_name}_test_PCH)
+    do_add_msvc_precompiled_header(${pch} _srcs_var ${_test_name}_test_PCH)
   endif ()
 
   # Create the unit test project
   include_directories(${gtest_DIR}/include)
-  add_executable(${_unit_test_name} ${_srcs_var})
-  target_link_libraries(${_unit_test_name}
+  add_executable(${_test_name} ${_srcs_var})
+  target_link_libraries(${_test_name}
                         ${_additional_lib_deps}
                         gtest)
   set_target_properties(
-    ${_unit_test_name} PROPERTIES
+    ${_test_name} PROPERTIES
     COMPILE_FLAGS "${ENABLE_CXX11} -DSRCDIR=${CMAKE_CURRENT_SOURCE_DIR}"
     COMPILE_DEFINITIONS DO_STATIC)
-  add_test(${_unit_test_name}
-           "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${_unit_test_name}")
+  add_test(${_test_name}
+           "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${_test_name}")
   
   if (DEFINED test_group_name)
-    set_property(TARGET ${_unit_test_name}
-                 PROPERTY FOLDER "DO Unit Tests/${test_group_name}")
+    set_property(TARGET ${_test_name}
+                 PROPERTY FOLDER "DO Tests/${test_group_name}")
   endif ()
-endfunction (do_unit_test)
+endfunction (do_test)
