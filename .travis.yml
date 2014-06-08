@@ -23,7 +23,9 @@ before_install:
 script:
   - mkdir build
   - cd build
-  - cmake ..
+  # TODO: try to remove this workaround for Travis CI. We need to configure 
+  # virtual mouse and keyboard devices.
+  - cmake -DDO_DISABLE_SPECIFIC_TEST_SUITES_FOR_TRAVIS_CI=ON ..
   - make -j 4
   - make test
 after_success:

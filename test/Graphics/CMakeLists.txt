@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 2.6)
 
 project(DO_Graphics_test)
 
+if (DO_DISABLE_SPECIFIC_TEST_SUITES_FOR_TRAVIS_CI)
+  message("Warning: some test suites are disabled for Travis CI.")
+  add_definitions("-DDISABLE_IN_TRAVIS_CI")
+endif ()
+
 message(STATUS "  - DO_Graphics_test")
 
 find_package(DO COMPONENTS Core Graphics REQUIRED)
