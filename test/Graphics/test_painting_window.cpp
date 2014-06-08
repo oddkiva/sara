@@ -77,6 +77,7 @@ private slots:
 
   void init()
   {
+    test_window_->setAntialiasing(false);
     test_window_->clear();
     true_image_.fill(Qt::white);
     painter_.begin(&true_image_);
@@ -163,7 +164,7 @@ private slots:
     QCOMPARE(get_image_from_window(), true_image_);
   }
 
-  void test_drawCircle_using_Circle_using_QPointF()
+  void test_drawCircle_using_QPointF()
   {
     QPointF c(150.999, 123.231);
     int r = 39;
@@ -316,6 +317,158 @@ private slots:
         else
           QCOMPARE(image.pixel(x, y), QColor(Qt::white).rgb());
   }
+
+  void test_fillCircle_using_integer_coordinates()
+  {
+    int xc = 150, yc = 123;
+    int r = 39;
+    QColor color(0, 255, 123);
+
+    test_window_->fillCircle(xc, yc, r, color);
+
+    QPainterPath path;
+    path.addEllipse(qreal(xc) - r/2., qreal(yc) - r/2., r, r);
+    painter_.fillPath(path, color);
+
+    QCOMPARE(get_image_from_window(), true_image_);
+  }
+
+  void test_fillCircle_using_QPointF()
+  {
+    QPointF c(150.999, 123.231);
+    qreal r = 39;
+    QColor color(0, 255, 123);
+
+    test_window_->fillCircle(c, r, color);
+
+    QPainterPath path;
+    path.addEllipse(c, r, r);
+    painter_.fillPath(path, color);
+
+    QCOMPARE(get_image_from_window(), true_image_);
+  }
+
+  void test_fillEllipse_using_integer_coordinates()
+  {
+    int xc = 150, yc = 123;
+    int r1 = 39, r2 = 20;
+    QColor color(0, 255, 123);
+
+    test_window_->fillEllipse(xc, yc, r1, r2, color);
+
+    QPainterPath path;
+    path.addEllipse(xc, yc, r1, r2);
+    painter_.fillPath(path, color);
+
+    QCOMPARE(get_image_from_window(), true_image_);
+  }
+
+  void test_fillEllipse_using_QPointF()
+  {
+    QPointF c(150.999, 123.231);
+    qreal r1 = 39.01, r2 = 100.29;
+    qreal ori_degree = 30.0;
+    QColor color(0, 255, 123);
+
+    test_window_->fillEllipse(c, r1, r2, ori_degree, color);
+
+    QPainterPath path;
+    path.addEllipse(0, 0, 2*r1, 2*r2);
+    painter_.translate(c);
+    painter_.rotate(ori_degree);
+    painter_.translate(-r1, -r2);
+    painter_.fillPath(path, color);
+
+    QCOMPARE(get_image_from_window(), true_image_);
+  }
+
+  void test_fillPoly()
+  {
+    QPolygonF polygon;
+    polygon << QPointF(10, 10) << QPointF(250, 20) << QPointF(150, 258);
+
+    QColor color(0, 255, 123);
+
+    test_window_->fillPoly(polygon, color);
+
+    QPainterPath path;
+    path.addPolygon(polygon);
+    painter_.fillPath(path, color);
+
+    QCOMPARE(get_image_from_window(), true_image_);
+  }
+
+  void test_fillRect()
+  {
+    int x = 150, y = 123;
+    int w = 39, h = 100;
+    QColor color(0, 255, 123);
+
+    test_window_->clear();
+    test_window_->fillRect(x, y, w, h, color);
+
+    QPainterPath path;
+    path.addRect(x, y, w, h);
+    painter_.fillPath(path, color);
+
+    QCOMPARE(get_image_from_window(), true_image_);
+  }
+
+  void test_clear()
+  {
+    test_window_->drawRect(100, 10, 20, 30, QColor(100, 200, 29), 1);
+
+    // "true_image_" is a white image.
+    QVERIFY(get_image_from_window() != true_image_);
+    test_window_->clear();
+    QCOMPARE(get_image_from_window(), true_image_);
+  }
+
+  void test_antialiasing()
+  {
+    int x = 150, y = 100, r = 10;
+    int penWidth = 3;
+    QColor color(255, 0, 0);
+
+    test_window_->setAntialiasing(false);
+    test_window_->drawCircle(x, y, r, color, penWidth);
+
+    painter_.setRenderHints(QPainter::Antialiasing, true);
+    painter_.setPen(QPen(color, penWidth));
+    painter_.drawEllipse(QPointF(x, y), r, r);
+
+    QVERIFY(get_image_from_window() != true_image_);
+
+    test_window_->clear();
+    test_window_->setAntialiasing();
+    test_window_->drawCircle(x, y, r, color, penWidth);
+    QCOMPARE(get_image_from_window(), true_image_);
+  }
+
+  void test_saveScreen()
+  {
+    QPointF c(150.999, 123.231);
+    qreal r1 = 39.01, r2 = 100.29;
+    qreal ori_degree = 30.0;
+    QColor color(0, 255, 123);
+
+    test_window_->fillEllipse(c, r1, r2, ori_degree, color);
+    test_window_->saveScreen("test.png");
+
+    QPainterPath path;
+    path.addEllipse(0, 0, 2*r1, 2*r2);
+    painter_.translate(c);
+    painter_.rotate(ori_degree);
+    painter_.translate(-r1, -r2);
+    painter_.fillPath(path, color);
+
+    QImage image(QString("test.png"));
+    QVERIFY(!image.isNull());
+    QCOMPARE(image.size(), true_image_.size());    
+    QCOMPARE(image, true_image_);
+  }
+
+  // TODO: test transparency, which is buggy.
 };
 
 class TestPaintingWindowEvents: public QObject
@@ -442,6 +595,25 @@ private slots:
     QCOMPARE(event.type, DO::NO_EVENT);
   }
 
+};
+
+class TestPaintingWindowResizing: public QObject
+{
+  Q_OBJECT
+
+private slots:
+    void test_construction_of_PaintingWindow_with_small_size()
+    {
+      PaintingWindow *window = new PaintingWindow(50, 50);
+      QCOMPARE(window->width(), 50);
+      QCOMPARE(window->height(), 50);
+
+      window->resizeScreen(50, 100);
+      QCOMPARE(window->width(), 50);
+      QCOMPARE(window->height(), 50);
+
+      window->deleteLater();
+    }
 };
 
 int main(int argc, char *argv[])
