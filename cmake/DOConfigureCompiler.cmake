@@ -60,7 +60,7 @@ if (UNIX)
   # Additional flags for Release builds.
   set(CMAKE_CXX_RELEASE_FLAGS "-03 -ffast-math")
   # Additional flags for Debug builds, which include code coverage.
-  set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -g -DDEBUG -D_DEBUG --coverage -fprofile-arcs -ftest-coverage -fno-inline -fno-inline-small-functions -fno-default-inline")
+  set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -g -DDEBUG -D_DEBUG --coverage -fprofile-arcs -ftest-coverage -fno-inline")
 endif ()
 
 
