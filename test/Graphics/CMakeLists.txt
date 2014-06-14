@@ -40,5 +40,8 @@ if (NOT DO_DISABLE_SPECIFIC_TEST_SUITES_FOR_TRAVIS_CI)
           "${DO_LIBRARIES};${Qt5_LIBRARIES};Graphics_Tests_Common" ${TestGroupName})
 endif ()
 
+do_test(Graphics_Sleep_Functions test_sleep_functions.cpp
+        "${DO_LIBRARIES};${Qt5_LIBRARIES};Graphics_Tests_Common" ${TestGroupName})
+
 set(CMAKE_AUTOMOC OFF)
 set(CMAKE_INCLUDE_CURRENT_DIR OFF)
