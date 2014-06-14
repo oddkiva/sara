@@ -2,6 +2,9 @@
 DO-CV
 =====
 
+[![Build Status](https://travis-ci.org/DO-CV/DO-CV.png?branch=master)](https://travis-ci.org/DO-CV/DO-CV)
+
+
 ------------
 Introduction
 ------------
@@ -30,10 +33,6 @@ See [AUTHORS](https://github.com/DO-CV/DO-CV/raw/master/AUTHORS) text file.
 --------
 Building
 --------
-
-Continuous integration using [Travis CI](https://travis-ci.org/) (master branch, linux 64 bits, BUILD + UNIT TESTING):
-
-[![Build Status](https://travis-ci.org/DO-CV/DO-CV.png?branch=master)](https://travis-ci.org/DO-CV/DO-CV)
 
 To build the libraries, run:
 ```
