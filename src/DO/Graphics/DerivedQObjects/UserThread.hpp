@@ -52,6 +52,9 @@ namespace DO {
     void closedWindow();
     void receivedEvent(Event e);
 
+  signals: /* for debugging and testing purposes */
+    void sendEvent(QEvent *event, int delayMs);
+
   protected:
     void run();
 

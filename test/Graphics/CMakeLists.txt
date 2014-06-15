@@ -21,12 +21,22 @@ include_directories(${Qt5Test_INCLUDE_DIRS}
                     ${DO_DIR}/build/test/Graphics)
 
 set(TestGroupName "Graphics")
-do_test(test_painting_window test_painting_window.cpp
-        "${DO_LIBRARIES};${Qt5Test_LIBRARIES}" "${TestGroupName}")
-do_test(test_opengl_window test_opengl_window.cpp
-        "${DO_LIBRARIES};${Qt5Test_LIBRARIES}" "${TestGroupName}")
-do_test(test_graphics_view test_graphics_view.cpp
-        "${DO_LIBRARIES};${Qt5Test_LIBRARIES}" "${TestGroupName}")
+
+add_library(Graphics_Tests_Common
+            event_scheduler.hpp event_scheduler.cpp)
+target_link_libraries(Graphics_Test_Common ${Qt5_LIBRARIES})
+set_property(TARGET Graphics_Tests_Common
+             PROPERTY FOLDER "DO Tests/${TestGroupName}")
+
+do_test(Graphics_DerivedQObjects_PaintingWindow test_painting_window.cpp
+        "${DO_LIBRARIES};${Qt5Test_LIBRARIES}" ${TestGroupName})
+do_test(Graphics_DerivedQObjects_OpenGLWindow test_opengl_window.cpp
+        "${DO_LIBRARIES};${Qt5Test_LIBRARIES}" ${TestGroupName})
+do_test(Graphics_DerivedQObjects_GraphicsView test_graphics_view.cpp
+        "${DO_LIBRARIES};${Qt5Test_LIBRARIES}" ${TestGroupName})
+
+do_test(Graphics_Keyboard_Mouse_Input test_keyboard_mouse_input.cpp
+        "${DO_LIBRARIES};${Qt5_LIBRARIES};Graphics_Tests_Common" ${TestGroupName})
 
 set(CMAKE_AUTOMOC OFF)
 set(CMAKE_INCLUDE_CURRENT_DIR OFF)
