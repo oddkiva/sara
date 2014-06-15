@@ -34,11 +34,11 @@ do_test(Graphics_DerivedQObjects_OpenGLWindow test_opengl_window.cpp
         "${DO_LIBRARIES};${Qt5Test_LIBRARIES}" ${TestGroupName})
 do_test(Graphics_DerivedQObjects_GraphicsView test_graphics_view.cpp
         "${DO_LIBRARIES};${Qt5Test_LIBRARIES}" ${TestGroupName})
-# TODO: see if we can virtual configure keyboard and mouse devices in Travis.
-if (NOT DO_DISABLE_SPECIFIC_TEST_SUITES_FOR_TRAVIS_CI)
-  do_test(Graphics_Keyboard_Mouse_Input test_keyboard_mouse_input.cpp
-          "${DO_LIBRARIES};${Qt5_LIBRARIES};Graphics_Tests_Common" ${TestGroupName})
-endif ()
+
+do_test(Graphics_Keyboard_Mouse_Input test_keyboard_mouse_input.cpp
+        "${DO_LIBRARIES};${Qt5_LIBRARIES};Graphics_Tests_Common" ${TestGroupName})
+do_test(Graphics_Sleep_Functions test_sleep_functions.cpp
+        "${DO_LIBRARIES};${Qt5_LIBRARIES};Graphics_Tests_Common" ${TestGroupName})
 
 do_test(Graphics_Sleep_Functions test_sleep_functions.cpp
         "${DO_LIBRARIES};${Qt5_LIBRARIES};Graphics_Tests_Common" ${TestGroupName})
