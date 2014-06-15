@@ -37,7 +37,6 @@ do_test(Graphics_DerivedQObjects_GraphicsView test_graphics_view.cpp
 
 do_test(Graphics_Keyboard_Mouse_Input test_keyboard_mouse_input.cpp
         "${DO_LIBRARIES};${Qt5_LIBRARIES};Graphics_Tests_Common" ${TestGroupName})
-
 do_test(Graphics_Sleep_Functions test_sleep_functions.cpp
         "${DO_LIBRARIES};${Qt5_LIBRARIES};Graphics_Tests_Common" ${TestGroupName})
 
