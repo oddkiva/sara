@@ -10,7 +10,6 @@
 // ========================================================================== //
 
 // STL.
-#include <iostream>
 #include <vector>
 // Google Test.
 #include <gtest/gtest.h>
