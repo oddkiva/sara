@@ -4,11 +4,6 @@ project(DO_Graphics_test)
 
 message(STATUS "  - DO_Graphics_tests")
 
-if (DO_DISABLE_SPECIFIC_TEST_SUITES_FOR_TRAVIS_CI)
-  message("Warning: some test suites are disabled for Travis CI.")
-  add_definitions("-DDISABLE_IN_TRAVIS_CI")
-endif ()
-
 find_package(DO COMPONENTS Core Graphics REQUIRED)
 include(${DO_USE_FILE})
 
@@ -29,7 +24,7 @@ set_property(TARGET Graphics_Tests_Common
              PROPERTY FOLDER "DO Tests/${TestGroupName}")
 
 do_test(Graphics_DerivedQObjects_PaintingWindow test_painting_window.cpp
-        "${DO_LIBRARIES};${Qt5Test_LIBRARIES}" ${TestGroupName})
+        "${DO_LIBRARIES};${Qt5Test_LIBRARIES};Graphics_Tests_Common" ${TestGroupName})
 do_test(Graphics_DerivedQObjects_OpenGLWindow test_opengl_window.cpp
         "${DO_LIBRARIES};${Qt5Test_LIBRARIES}" ${TestGroupName})
 do_test(Graphics_DerivedQObjects_GraphicsView test_graphics_view.cpp
