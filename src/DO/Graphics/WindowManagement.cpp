@@ -64,7 +64,7 @@ namespace DO {
                               Q_ARG(QWidget *, w));
   }
 
-  void resizeWindow(Window w, int width, int height)
+  void resizeWindow(int width, int height, Window w)
   {
     QMetaObject::invokeMethod(w, "resizeScreen", 
                               Qt::BlockingQueuedConnection,
