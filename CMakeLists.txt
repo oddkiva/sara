@@ -55,8 +55,6 @@ add_subdirectory(third-party)
 # Setup unit test projects
 if (DO_BUILD_UNIT_TESTS)
   enable_testing()
-  option(DO_DISABLE_SPECIFIC_TEST_SUITES_FOR_TRAVIS_CI
-         "Some test suites fail with Travis CI. Disable them?" OFF)
   add_subdirectory(test)
 endif ()
 

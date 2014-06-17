@@ -12,8 +12,11 @@
 #include <QtTest>
 #include <QtWidgets>
 #include <DO/Graphics/DerivedQObjects/PaintingWindow.hpp>
+#include "event_scheduler.hpp"
 
 Q_DECLARE_METATYPE(DO::Event);
+Q_DECLARE_METATYPE(Qt::Key);
+Q_DECLARE_METATYPE(Qt::MouseButtons);
 
 using namespace DO;
 
@@ -488,28 +491,31 @@ class TestPaintingWindowEvents: public QObject
 
 private:
   PaintingWindow *test_window_;
+  EventScheduler event_scheduler_;
   QPoint mouse_pos_;
   Qt::Key key_;
   int mouse_buttons_type_id_;
   int event_type_id_;
 
-  void compare_spied_mouse_event_arguments(QSignalSpy& spy) const
+  void compare_mouse_event(QSignalSpy& spy,
+                           const QMouseEvent& expected_event) const
   {
+    spy.wait(100);
     QCOMPARE(spy.count(), 1);
 
     QList<QVariant> arguments = spy.takeFirst();
-    QCOMPARE(arguments.at(0).toInt(), mouse_pos_.x());
-    QCOMPARE(arguments.at(1).toInt(), mouse_pos_.y());
-    QCOMPARE(static_cast<Qt::MouseButtons>(arguments.at(2).toInt()),
-             Qt::NoButton);
+    QCOMPARE(arguments.at(0).toInt(), expected_event.x());
+    QCOMPARE(arguments.at(1).toInt(), expected_event.y());
+    QCOMPARE(arguments.at(2).value<Qt::MouseButtons>(), expected_event.buttons());
   }
 
-  void compare_spied_key_event_arguments(QSignalSpy& spy) const
+  void compare_key_event(QSignalSpy& spy) const
   {
+    spy.wait(100);
     QCOMPARE(spy.count(), 1);
 
     QList<QVariant> arguments = spy.takeFirst();
-    QCOMPARE(static_cast<Qt::Key>(arguments.at(0).toInt()), key_);
+    QCOMPARE(arguments.at(0).toInt(), static_cast<int>(key_));
   }
 
 private slots:
@@ -520,6 +526,7 @@ private slots:
     );
     event_type_id_ = qRegisterMetaType<Event>("Event");
     test_window_ = new PaintingWindow(300, 300);
+    event_scheduler_.set_receiver(test_window_);
     mouse_pos_ = QPoint(10, 10);
     key_ = Qt::Key_A;
   }
@@ -536,16 +543,13 @@ private slots:
                    SIGNAL(movedMouse(int, int, Qt::MouseButtons)));
     QVERIFY(spy.isValid());
 
-    QTestEventList events;
-    int x = 10, y = 10;
-#ifndef _WIN32
-    events.addMouseMove(QPoint(x-1, y-1));
-#endif
-    events.addMouseMove(QPoint(x, y));
-    events.simulate(test_window_);
+    QMouseEvent event(
+      QEvent::MouseMove, mouse_pos_,
+      Qt::NoButton, Qt::NoButton, Qt::NoModifier
+    );
+    event_scheduler_.schedule_event(&event, 10);
 
-    QTest::mouseMove(test_window_, mouse_pos_);
-    compare_spied_mouse_event_arguments(spy);
+    compare_mouse_event(spy, event);
   }
 
   void test_mouse_press_event()
@@ -554,9 +558,13 @@ private slots:
                    SIGNAL(pressedMouseButtons(int, int, Qt::MouseButtons)));
     QVERIFY(spy.isValid());
 
-    QTest::mousePress(test_window_, Qt::LeftButton, Qt::NoModifier,
-                      mouse_pos_);
-    compare_spied_mouse_event_arguments(spy);
+    QMouseEvent event(
+      QEvent::MouseButtonPress, mouse_pos_,
+      Qt::LeftButton, Qt::LeftButton, Qt::NoModifier
+    );
+    event_scheduler_.schedule_event(&event, 10);
+    
+    compare_mouse_event(spy, event);
   }
 
   void test_mouse_release_event()
@@ -565,9 +573,13 @@ private slots:
                    SIGNAL(releasedMouseButtons(int, int, Qt::MouseButtons)));
     QVERIFY(spy.isValid());
 
-    QTest::mouseRelease(test_window_, Qt::LeftButton, Qt::NoModifier,
-                        mouse_pos_);
-    compare_spied_mouse_event_arguments(spy);
+    QMouseEvent event(
+      QEvent::MouseButtonRelease, mouse_pos_,
+      Qt::LeftButton, Qt::LeftButton, Qt::NoModifier
+    );
+    event_scheduler_.schedule_event(&event, 10);
+    
+    compare_mouse_event(spy, event);
   }
 
   void test_key_press_event()
@@ -575,8 +587,10 @@ private slots:
     QSignalSpy spy(test_window_, SIGNAL(pressedKey(int)));
     QVERIFY(spy.isValid());
 
-    QTest::keyPress(test_window_, key_, Qt::NoModifier);
-    compare_spied_key_event_arguments(spy);
+    QKeyEvent event(QEvent::KeyPress, key_, Qt::NoModifier);
+    event_scheduler_.schedule_event(&event, 10);
+
+    compare_key_event(spy);
   }
 
   void test_key_release_event()
@@ -584,8 +598,10 @@ private slots:
     QSignalSpy spy(test_window_, SIGNAL(releasedKey(int)));
     QVERIFY(spy.isValid());
 
-    QTest::keyRelease(test_window_, key_, Qt::NoModifier);
-    compare_spied_key_event_arguments(spy);
+    QKeyEvent event(QEvent::KeyRelease, key_, Qt::NoModifier);
+    event_scheduler_.schedule_event(&event, 10);
+
+    compare_key_event(spy);
   }
 
   void test_send_event()
@@ -641,13 +657,8 @@ int main(int argc, char *argv[])
   TestPaintingWindowDrawingMethods test_painting_window_drawing_methods;
   num_failed_tests += QTest::qExec(&test_painting_window_drawing_methods);
 
-#ifndef DISABLE_IN_TRAVIS_CI
-  // TODO: this test suite does not seem to work with Travis CI. We probably
-  // need to tweak .travis.yml to make it work.
-  // For now, this is disabled in travis CI.
   TestPaintingWindowEvents test_painting_window_events;
   num_failed_tests += QTest::qExec(&test_painting_window_events);
-#endif
 
   return num_failed_tests;
 }

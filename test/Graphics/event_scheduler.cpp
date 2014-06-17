@@ -7,6 +7,7 @@ EventScheduler::EventScheduler()
   , event_(0)
 {
   timer_.setSingleShot(true);
+  connect(&timer_, SIGNAL(timeout()), this, SLOT(notify()));
 }
 
 void EventScheduler::set_receiver(QObject *receiver)
@@ -18,7 +19,6 @@ void EventScheduler::schedule_event(QEvent *event, int delay_ms)
 {
   event_ = event;
   timer_.start(delay_ms);
-  connect(&timer_, SIGNAL(timeout()), this, SLOT(notify()));
 }
 
 void EventScheduler::notify()

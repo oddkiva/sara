@@ -10,7 +10,6 @@
 // ========================================================================== //
 
 // STL.
-#include <iostream>
 #include <vector>
 // Google Test.
 #include <gtest/gtest.h>
@@ -47,11 +46,11 @@ TEST_F(TestKeyboardMouseInputOnSingleWindow, test_getMouse)
 {
   Qt::MouseButton expected_button = Qt::LeftButton;
   int expected_x = 150, expected_y = 150;
-  QMouseEvent *event = new QMouseEvent(
+  QMouseEvent event(
     QEvent::MouseButtonRelease, QPointF(expected_x, expected_y),
     expected_button, expected_button, Qt::NoModifier
   );
-  emit getUserThread().sendEvent(event, 10);
+  emit getUserThread().sendEvent(&event, 10);
 
   int actual_x, actual_y;
   int actual_button = getMouse(actual_x, actual_y);
@@ -65,11 +64,11 @@ TEST_F(TestKeyboardMouseInputOnSingleWindow, test_click)
 {
   Qt::MouseButton expected_button = Qt::LeftButton;
   int expected_x = 150, expected_y = 150;
-  QMouseEvent *event = new QMouseEvent(
+  QMouseEvent event(
     QEvent::MouseButtonRelease, QPointF(expected_x, expected_y),
     expected_button, expected_button, Qt::NoModifier
-    );
-  emit getUserThread().sendEvent(event, 10);
+  );
+  emit getUserThread().sendEvent(&event, 10);
 
   click();
 }
@@ -77,10 +76,10 @@ TEST_F(TestKeyboardMouseInputOnSingleWindow, test_click)
 TEST_F(TestKeyboardMouseInputOnSingleWindow, test_getKey)
 {
   int expected_key = Qt::Key_A;
-  QKeyEvent *event = new QKeyEvent(
+  QKeyEvent event(
     QEvent::KeyPress, expected_key, Qt::NoModifier
-    );
-  emit getUserThread().sendEvent(event, 10);
+  );
+  emit getUserThread().sendEvent(&event, 10);
 
   int actual_key = getKey();
 
@@ -97,10 +96,10 @@ TEST_F(TestKeyboardMouseInputOnSingleWindow, test_getEvent_with_no_input_event)
 TEST_F(TestKeyboardMouseInputOnSingleWindow, test_getEvent_with_input_key_event)
 {
   int expected_key = Qt::Key_A;
-  QKeyEvent *qt_event = new QKeyEvent(
+  QKeyEvent qt_event(
     QEvent::KeyPress, expected_key, Qt::NoModifier
   );
-  emit getUserThread().sendEvent(qt_event, 5);
+  emit getUserThread().sendEvent(&qt_event, 5);
 
   Event event;
   getEvent(50, event);
@@ -114,11 +113,11 @@ TEST_F(TestKeyboardMouseInputOnSingleWindow, test_getEvent_with_input_mouse_even
 {
   Qt::MouseButton expected_button = Qt::LeftButton;
   int expected_x = 150, expected_y = 150;
-  QMouseEvent *qt_event = new QMouseEvent(
+  QMouseEvent qt_event(
     QEvent::MouseButtonRelease, QPointF(expected_x, expected_y),
     expected_button, expected_button, Qt::NoModifier
   );
-  emit getUserThread().sendEvent(qt_event, 5);
+  emit getUserThread().sendEvent(&qt_event, 5);
 
   Event event;
   getEvent(50, event);
@@ -155,16 +154,15 @@ TEST_F(TestKeyboardMouseInputOnAnyWindow, test_anyGetMouse)
   for (auto wi : test_windows_)
   {
     setActiveWindow(wi);
-    scheduler->set_receiver(wi);
 
     for (auto wj : test_windows_)
     {
-      
-      QMouseEvent *event = new QMouseEvent(
+      scheduler->set_receiver(wj);
+      QMouseEvent event(
         QEvent::MouseButtonRelease, QPointF(expected_x, expected_y),
         expected_button, expected_button, Qt::NoModifier
-        );
-      emit getUserThread().sendEvent(event, 10);
+      );
+      emit getUserThread().sendEvent(&event, 10);
 
       Point2i actual_position;
       int actual_button = anyGetMouse(actual_position);
@@ -184,16 +182,15 @@ TEST_F(TestKeyboardMouseInputOnAnyWindow, test_anyClick)
   for (auto wi : test_windows_)
   {
     setActiveWindow(wi);
-    scheduler->set_receiver(wi);
 
     for (auto wj : test_windows_)
     {
-
-      QMouseEvent *event = new QMouseEvent(
+      scheduler->set_receiver(wj);
+      QMouseEvent event(
         QEvent::MouseButtonRelease, QPointF(expected_x, expected_y),
         expected_button, expected_button, Qt::NoModifier
-        );
-      emit getUserThread().sendEvent(event, 10);
+      );
+      emit getUserThread().sendEvent(&event, 10);
 
       anyClick();
     }
@@ -207,14 +204,14 @@ TEST_F(TestKeyboardMouseInputOnAnyWindow, test_anyGetKey)
   for (auto wi : test_windows_)
   {
     setActiveWindow(wi);
-    scheduler->set_receiver(wi);
 
     for (auto wj : test_windows_)
     {
-      QKeyEvent *event = new QKeyEvent(
+      scheduler->set_receiver(wj);
+      QKeyEvent event(
         QEvent::KeyPress, expected_key, Qt::NoModifier
         );
-      emit getUserThread().sendEvent(event, 10);
+      emit getUserThread().sendEvent(&event, 10);
 
       int actual_key = anyGetKey();
 

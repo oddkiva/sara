@@ -419,17 +419,17 @@ namespace DO {
   {
 #ifdef Q_OS_MAC
     Qt::MouseButtons buttons = (event->modifiers() == Qt::ControlModifier &&
-      event->button() == Qt::LeftButton) ? 
-      Qt::MiddleButton : event->button();
+      event->buttons() == Qt::LeftButton) ? 
+      Qt::MiddleButton : event->buttons();
     emit releasedMouseButtons(event->x(), event->y(), buttons);
 #else
-    emit releasedMouseButtons(event->x(), event->y(), event->button());
+    emit releasedMouseButtons(event->x(), event->y(), event->buttons());
 #endif
     if (event_listening_timer_.isActive())
     {
       event_listening_timer_.stop();
       emit sendEvent(mouseReleased(event->x(), event->y(),
-                                   event->button(), event->modifiers()));
+                                   event->buttons(), event->modifiers()));
     }
   }
 
