@@ -130,8 +130,6 @@ namespace DO {
        quit();
      }
 
-     if (!(*wi).isNull())
-       (*wi)->deleteLater();
      createdWindows.erase(wi);
    }
 
