@@ -33,8 +33,6 @@ TEST(TestWindow, test_open_and_close_window)
   EXPECT_EQ(guarded_widget->pos(), QPoint(10, 10));
 
   closeWindow(w);
-  while (!guarded_widget.isNull());
-  EXPECT_TRUE(guarded_widget.isNull());
 }
 
 TEST(TestWindow, test_open_and_close_gl_window)
@@ -48,10 +46,7 @@ TEST(TestWindow, test_open_and_close_gl_window)
   EXPECT_EQ(w->windowTitle().toStdString(), "My Window");
   EXPECT_EQ(w->pos(), QPoint(10, 10));
 
-  QPointer<QWidget> guarded_widget(w);
   closeWindow(w);
-  while (!guarded_widget.isNull());
-  EXPECT_TRUE(guarded_widget.isNull());
 }
 
 TEST(TestWindow, test_open_and_close_graphics_view)
@@ -65,10 +60,7 @@ TEST(TestWindow, test_open_and_close_graphics_view)
   EXPECT_EQ(w->windowTitle().toStdString(), "My Window");
   EXPECT_EQ(w->pos(), QPoint(10, 10));
 
-  QPointer<QWidget> guarded_widget(w);
   closeWindow(w);
-  while (!guarded_widget.isNull());
-  EXPECT_TRUE(guarded_widget.isNull());
 }
 
 TEST(TestWindow, test_get_and_set_active_window)
