@@ -28,10 +28,13 @@ TEST(TestWindow, test_open_and_close_window)
 
   PaintingWindow *pw = qobject_cast<PaintingWindow *>(w);
   EXPECT_EQ(pw->windowTitle().toStdString(), "My Window");
-  EXPECT_EQ(pw->scrollArea()->pos(), QPoint(10, 10));
+  
+  QPointer<QWidget> guarded_widget(pw->scrollArea());
+  EXPECT_EQ(guarded_widget->pos(), QPoint(10, 10));
 
   closeWindow(w);
-  EXPECT_TRUE(pw->scrollArea()->isHidden());
+  while (!guarded_widget.isNull());
+  EXPECT_TRUE(guarded_widget.isNull());
 }
 
 TEST(TestWindow, test_open_and_close_gl_window)
@@ -45,8 +48,10 @@ TEST(TestWindow, test_open_and_close_gl_window)
   EXPECT_EQ(w->windowTitle().toStdString(), "My Window");
   EXPECT_EQ(w->pos(), QPoint(10, 10));
 
+  QPointer<QWidget> guarded_widget(w);
   closeWindow(w);
-  EXPECT_TRUE(w->isHidden());
+  while (!guarded_widget.isNull());
+  EXPECT_TRUE(guarded_widget.isNull());
 }
 
 TEST(TestWindow, test_open_and_close_graphics_view)
@@ -60,8 +65,10 @@ TEST(TestWindow, test_open_and_close_graphics_view)
   EXPECT_EQ(w->windowTitle().toStdString(), "My Window");
   EXPECT_EQ(w->pos(), QPoint(10, 10));
 
+  QPointer<QWidget> guarded_widget(w);
   closeWindow(w);
-  EXPECT_TRUE(w->isHidden());
+  while (!guarded_widget.isNull());
+  EXPECT_TRUE(guarded_widget.isNull());
 }
 
 TEST(TestWindow, test_get_and_set_active_window)
@@ -102,6 +109,6 @@ TEST(TestWindow, test_resize_window)
 
 int main(int argc, char **argv)
 {
-  testing::InitGoogleTest(&argc, argv); 
+  testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
