@@ -71,7 +71,6 @@ namespace DO {
     QList<QPointer<QWidget> > createdWindows;
     QPointer<QWidget> activeWindow;
 
-    //GraphicsView *graphicsView;
     DialogBoxInfo dialogBoxInfo;
 
     QMutex mutex;

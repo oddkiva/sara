@@ -21,7 +21,6 @@ namespace DO {
     , argc(argc_)
     , argv(argv_)
     , activeWindow(0)
-    //, graphicsView(0)
     , mutex(QMutex::NonRecursive)
   {
     // Register painting data types.
