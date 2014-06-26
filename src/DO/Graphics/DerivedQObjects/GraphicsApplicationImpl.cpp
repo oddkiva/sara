@@ -60,18 +60,24 @@ namespace DO {
     }
   }
 
-   void 
-   GraphicsApplication::Impl::
-   createGraphicsView(int w, int h, const QString& windowTitle,
-                      int x, int y)
-   {
-     createdWindows << new GraphicsView(w, h, windowTitle, x, y);
-     if (createdWindows.size() == 1)
-     {
-       activeWindow = createdWindows.front();
-       setActiveWindow(activeWindow);
-     }
-   }
+  void
+  GraphicsApplication::Impl::
+  createWindow(int windowType, int w, int h,
+               const QString& windowTitle, int x, int y)
+  {
+    if (windowType == PAINTING_WINDOW)
+      createdWindows << new PaintingWindow(w, h, windowTitle, x, y);
+    if (windowType == OPENGL_WINDOW)
+      createdWindows << new OpenGLWindow(w, h, windowTitle, x, y);
+    if (windowType == GRAPHICS_VIEW)
+      createdWindows << new GraphicsView(w, h, windowTitle, x, y);
+
+    if (createdWindows.size() == 1)
+    {
+      activeWindow = createdWindows.front();
+      setActiveWindow(activeWindow);
+    }
+  }
 
    void 
    GraphicsApplication::Impl::

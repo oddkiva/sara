@@ -39,17 +39,21 @@ namespace DO {
   class GraphicsApplication::Impl : public QApplication
   {
     Q_OBJECT
-  public:
+
+  public: /* enum */
+    enum WindowType {
+      PAINTING_WINDOW = 0,
+      OPENGL_WINDOW = 1,
+      GRAPHICS_VIEW = 2
+    };
+
+  public: /* methods */
     Impl(int argc, char **argv);
     virtual ~Impl();
 
   public slots:
-    void createPaintingWindow(int w, int h, const QString& windowTitle,
-                              int x, int y);
-    void createOpenGLWindow(int w, int h, const QString& windowTitle,
-                            int x, int y);
-    void createGraphicsView(int w, int h, const QString& windowTitle,
-                            int x, int y);
+    void createWindow(int windowType, int w, int h,
+                      const QString& windowTitle, int x, int y);
     void setActiveWindow(QWidget *w);
     void closeWindow(QWidget *w);
     void getFileFromDialogBox();
