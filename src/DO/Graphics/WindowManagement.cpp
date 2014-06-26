@@ -29,11 +29,12 @@ namespace DO {
   Window openWindow(int w, int h, const std::string& windowTitle,
                     int x, int y)
   {
-    QMetaObject::invokeMethod(getGuiApp(), "createPaintingWindow",
+    QMetaObject::invokeMethod(getGuiApp(), "createWindow",
                               Qt::BlockingQueuedConnection,
+                              Q_ARG(int, 0),
                               Q_ARG(int, w), Q_ARG(int, h),
                               Q_ARG(const QString&,
-                                QString(windowTitle.c_str())),
+                                    QString(windowTitle.c_str())),
                               Q_ARG(int, x), Q_ARG(int, y));
     return getGuiApp()->createdWindows.back();
   }
@@ -41,11 +42,12 @@ namespace DO {
   Window openGLWindow(int w, int h, const std::string& windowTitle,
                       int x, int y)
   {
-    QMetaObject::invokeMethod(getGuiApp(), "createOpenGLWindow",
+    QMetaObject::invokeMethod(getGuiApp(), "createWindow",
                               Qt::BlockingQueuedConnection,
+                              Q_ARG(int, 1),
                               Q_ARG(int, w), Q_ARG(int, h),
                               Q_ARG(const QString&,
-                                QString(windowTitle.c_str())),
+                                    QString(windowTitle.c_str())),
                               Q_ARG(int, x), Q_ARG(int, y));
     return getGuiApp()->createdWindows.back();
   }
