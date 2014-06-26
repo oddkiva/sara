@@ -78,30 +78,30 @@ namespace DO {
     }
   }
 
-   void 
-   GraphicsApplication::Impl::
-   setActiveWindow(QWidget *w)
-   {
-     if (w == 0)
-     {
-       qWarning() << "I can't make a null window active!";
-       return;
-     }
+  void
+  GraphicsApplication::Impl::
+  setActiveWindow(QWidget *w)
+  {
+    if (w == 0)
+    {
+      qWarning() << "I can't make a null window active!";
+      return;
+    }
 
-     // Disconnect the communication between:
-     // All windows and user thread in both directions.
-     // Why? I don't want the user thread to listens to communicate from any
-     // window but the requested window 'w'.
-     disconnectAllWindowsIOEventsToUserThread();
+    // Disconnect the communication between:
+    // All windows and user thread in both directions.
+    // Why? I don't want the user thread to listens to communicate from any
+    // window but the requested window 'w'.
+    disconnectAllWindowsIOEventsToUserThread();
 
-     // This is now our current active window
-     activeWindow = w;
-     connectWindowIOEventsToUserThread(w);
-   }
+    // This is now our current active window
+    activeWindow = w;
+    connectWindowIOEventsToUserThread(w);
+  }
 
-   void
-   GraphicsApplication::Impl::
-   closeWindow(QWidget *w) 
+  void
+  GraphicsApplication::Impl::
+  closeWindow(QWidget *w)
    {
      QList<QPointer<QWidget> >::iterator wi = qFind(
        createdWindows.begin(), createdWindows.end(), w);
@@ -129,14 +129,14 @@ namespace DO {
      createdWindows.erase(wi);
    }
 
-   void
-   GraphicsApplication::Impl::
-   getFileFromDialogBox()
-   {
-     dialogBoxInfo.filename = 
-       QFileDialog::getOpenFileName(0, "Open File", "/home", 
-       "Images (*.png *.xpm *.jpg)");
-   }
+  void
+  GraphicsApplication::Impl::
+  getFileFromDialogBox()
+  {
+    dialogBoxInfo.filename =
+      QFileDialog::getOpenFileName(0, "Open File", "/home",
+      "Images (*.png *.xpm *.jpg)");
+  }
 
   bool
   GraphicsApplication::Impl::
