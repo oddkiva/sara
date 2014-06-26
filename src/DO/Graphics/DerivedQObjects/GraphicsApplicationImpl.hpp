@@ -41,6 +41,7 @@ namespace DO {
     Q_OBJECT
   public:
     Impl(int argc, char **argv);
+    virtual ~Impl();
 
   public slots:
     void createPaintingWindow(int w, int h, const QString& windowTitle,

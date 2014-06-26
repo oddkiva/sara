@@ -43,31 +43,22 @@ namespace DO {
     setQuitOnLastWindowClosed(false);
   }
 
-   void
-   GraphicsApplication::Impl::
-   createPaintingWindow(int w, int h, const QString& windowTitle,
-                        int x, int y)
-   {
-     createdWindows << new PaintingWindow(w, h, windowTitle, x, y);
-     if (createdWindows.size() == 1)
-     {
-       activeWindow = createdWindows.front();
-       setActiveWindow(activeWindow);
-     }
-   }
-
-   void
-   GraphicsApplication::Impl::
-   createOpenGLWindow(int w, int h, const QString& windowTitle,
-                      int x, int y)
-   {
-     createdWindows << new OpenGLWindow(w, h, windowTitle, x, y);
-     if (createdWindows.size() == 1)
-     {
-       activeWindow = createdWindows.front();
-       setActiveWindow(activeWindow);
-     }
-   }
+  GraphicsApplication::Impl::
+  ~Impl()
+  {
+    QList<QPointer<QWidget> >::iterator w = createdWindows.begin();
+    for ( ; w != createdWindows.end(); ++w)
+    {
+      if (!w->isNull())
+      {
+        PaintingWindow *paintingWindow = qobject_cast<PaintingWindow *>(*w);
+        if (paintingWindow)
+          delete paintingWindow->scrollArea();
+        else
+          delete *w;
+      }
+    }
+  }
 
    void 
    GraphicsApplication::Impl::
