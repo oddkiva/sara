@@ -21,20 +21,26 @@ using namespace DO;
 
 TEST(TestWindow, test_open_and_close_window)
 {
+  std::cout << "trying to open window: " << std::endl;
   Window w = openWindow(300, 300, "My Window", 10, 10);
+  std::cout << "OK" << std::endl;
   EXPECT_NE(w, Window(0));
 
+  std::cout << "check window attributes: " << std::endl;
   EXPECT_EQ(getWindowWidth(w), w->width());
   EXPECT_EQ(getWindowHeight(w), w->height());
   EXPECT_EQ(getWindowSizes(w), Vector2i(w->width(), w->height()));
 
   PaintingWindow *pw = qobject_cast<PaintingWindow *>(w);
   EXPECT_EQ(pw->windowTitle().toStdString(), "My Window");
+  std::cout << "OK" << std::endl;
   
   QPointer<QWidget> guarded_widget(pw->scrollArea());
   EXPECT_EQ(guarded_widget->pos(), QPoint(10, 10));
 
+  std::cout << "closing window: " << std::endl;
   closeWindow(w);
+  std::cout << "OK" << std::endl;
 }
 
 TEST(TestWindow, test_open_and_close_gl_window)
