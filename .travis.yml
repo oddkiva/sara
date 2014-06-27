@@ -25,6 +25,6 @@ script:
   - cd build
   - cmake ..
   - make -j 4
-  - make test
+  - make verbose_test
 after_success:
   - coveralls --root src
