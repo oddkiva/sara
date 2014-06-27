@@ -9,6 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+// TODO: we still need to check if windows are closed somehow.
+
 // Google Test.
 #include <gtest/gtest.h>
 // DO-CV.
