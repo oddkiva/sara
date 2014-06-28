@@ -22,31 +22,31 @@ using namespace DO;
 void aWindow()
 {
   cout << "A window... click when done" << endl;
-  // Open 300x200 window
+  // Open a 300x200 window.
   Window W = openWindow(300, 200, "A window");
-  // A 150x100 filled RED rectangle in (20,10)
+  // A 150x100 filled RED rectangle with top-left corner at (20,10).
   fillRect(20, 10, 150, 100, Red8);
-  // Wait for a click
+  // Wait for a click.
   click();
-  // Close window...
+  // Close window.
   closeWindow(W);
 }
 
 void twoWindows()
 {
   cout << "Two windows ... click when done" << endl;
-  // A 300x200 window in (10,10)
+  // A 300x200 window with top-left corner at (10,10).
   Window W1=openWindow(300,200,"A first window",10,10);
-  // A 150x100 RED rectangle in (20,10) (up-left corner)
+  // A 150x100 RED rectangle with top-left corner at (20,10).
   drawRect(20,10,150,100,Red8);
   // A 200x300 window in (320,10)
   Window W2=openWindow(200,300,"A second window",330,10);
-  // Note that openWindow does not make the new window the current one
+  // Note that openWindow does not make the new window the current one.
   setActiveWindow(W2);
-  // A BLUE line from (20,10) to (150,270)
+  // A blue line from (20,10) to (150,270).
   drawLine(20,10,150,270,Blue8);
   setActiveWindow(W1);
-  // Another line, in GREEN, in the first window
+  // Another line, in green, in the first window.
   drawLine(20,10,250,170,Green8);
   // Wait for a click in any window
   anyClick();
@@ -114,7 +114,7 @@ void twoDimBasics()
 
   // Draw a blue rectangle with top-left corner (400, 10) and size (100, 50).
   drawRect(400, 10, 100, 50, Blue8, 3);
-  // Draw a green color-filled rectangle with top-left corner (400, 400) and 
+  // Draw a green color-filled rectangle with top-left corner (400, 400) and
   // size (100, 50).
   fillRect(Point2i(400, 400), 100, 50,Green8);
 
@@ -180,7 +180,7 @@ void twoDimBasics()
 
 void floatingPointDrawing()
 {
-  // Open 300x200 window
+  // Open a 300x200 window.
   Window W = openWindow(300,200);
   setAntialiasing(getActiveWindow());
   setTransparency(getActiveWindow());
@@ -191,7 +191,7 @@ void floatingPointDrawing()
   drawLine(Point2f(10.5f, 10.5f), Point2f(20.8f, 52.8132f), Blue8, 2);
   drawLine(Point2f(10.5f, 20.5f), Point2f(20.8f, 52.8132f), Magenta8, 5);
 
-  // Draw an oriented ellipse whose
+  // Draw an oriented ellipse with
   // center = (150, 100)
   // r1 = 10
   // r2 = 20
