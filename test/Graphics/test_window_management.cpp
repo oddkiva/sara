@@ -19,7 +19,40 @@
 
 using namespace DO;
 
-TEST(TestWindow, test_open_and_close_window)
+class TestPaintingWindow: public testing::Test
+{
+protected:
+  Window test_window_;
+
+  TestPaintingWindow()
+  {
+    std::cout << "Constructing window: " << std::endl;
+    test_window_ = openWindow(300, 300, "My Window", 10, 10);
+    std::cout << "OK!" << std::endl;
+  }
+
+  virtual ~TestPaintingWindow()
+  {
+    std::cout << "Destroying window: " << std::endl;
+    closeWindow(test_window_);
+    std::cout << "OK!" << std::endl;
+  }
+};
+
+TEST_F(TestPaintingWindow, test_window_attributes)
+{
+  EXPECT_EQ(getWindowWidth(test_window_), test_window_->width());
+  EXPECT_EQ(getWindowHeight(test_window_), test_window_->height());
+  EXPECT_EQ(getWindowSizes(test_window_),
+            Vector2i(test_window_->width(), test_window_->height()));
+
+  PaintingWindow *pw = qobject_cast<PaintingWindow *>(test_window_);
+
+  EXPECT_EQ(pw->windowTitle().toStdString(), "My Window");
+  EXPECT_EQ(pw->scrollArea()->pos(), QPoint(10, 10));
+}
+
+TEST(TestWindow, DISABLED_test_open_and_close_window)
 {
   std::cout << "trying to open window: " << std::endl;
   Window w = openWindow(300, 300, "My Window", 10, 10);
