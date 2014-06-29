@@ -64,6 +64,8 @@ namespace DO {
   public slots:
     void setMesh(const SimpleTriangleMesh3f& mesh_);
     void displayMesh();
+    void waitForEvent(int ms);
+    void eventListeningTimerStopped();
 
   protected:
     void initializeGL();
