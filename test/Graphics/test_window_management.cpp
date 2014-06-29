@@ -128,7 +128,6 @@ protected:
   TestSleepFunctions()
   {
     test_window_ = openWindow(300, 300);
-    global_scheduler->set_receiver(test_window_);
   }
 
   virtual ~TestSleepFunctions()
