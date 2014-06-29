@@ -25,49 +25,47 @@ Q_DECLARE_METATYPE(Qt::MouseButtons);
 
 using namespace DO;
 
-class TestPaintingWindowConstructors: public QObject
+TEST(TestPaintingWindowConstructors,
+     test_construction_of_PaintingWindow_with_small_size)
 {
-  Q_OBJECT
+  int width = 50;
+  int height = 50;
+  QString windowName = "painting window";
+  int x = 200;
+  int y = 300;
 
-private slots:
-  void test_construction_of_PaintingWindow_with_small_size()
-  {
-    int width = 50;
-    int height = 50;
-    QString windowName = "painting window";
-    int x = 200;
-    int y = 300;
+  PaintingWindow *window = new PaintingWindow(
+    width, height,
+    windowName,
+    x, y
+  );
 
-    PaintingWindow *window = new PaintingWindow(width, height,
-                                                windowName,
-                                                x, y);
-
-    QCOMPARE(window->width(), width);
-    QCOMPARE(window->height(), height);
-    QCOMPARE(window->windowTitle(), windowName);
+  EXPECT_EQ(window->width(), width);
+  EXPECT_EQ(window->height(), height);
+  EXPECT_EQ(window->windowTitle(), windowName);
 #ifndef __APPLE__
-    // Strangely, when we have 2 monitor screens, this fails on Mac OS X...
-    QCOMPARE(window->x(), x);
-    QCOMPARE(window->y(), y);
+  // Strangely, when we have 2 monitor screens, this fails on Mac OS X...
+  EXPECT_EQ(window->x(), x);
+  EXPECT_EQ(window->y(), y);
 #endif
-    QVERIFY(window->isVisible());
+  EXPECT_TRUE(window->isVisible());
 
-    delete window->scrollArea();
-  }
+  delete window->scrollArea();
+}
 
-  void test_construction_of_PaintingWindow_with_size_larger_than_desktop()
-  {
-    int width = qApp->desktop()->width();
-    int height = qApp->desktop()->height();
+TEST(TestPaintingWindowConstructors,
+     test_construction_of_PaintingWindow_with_size_larger_than_desktop)
+{
+  int width = qApp->desktop()->width();
+  int height = qApp->desktop()->height();
 
-    PaintingWindow *window = new PaintingWindow(width, height);
+  PaintingWindow *window = new PaintingWindow(width, height);
 
-    QVERIFY(window->scrollArea()->isMaximized());
-    QVERIFY(window->isVisible());
+  EXPECT_TRUE(window->scrollArea()->isMaximized());
+  EXPECT_TRUE(window->isVisible());
 
-    delete window->scrollArea();
-  }
-};
+  delete window->scrollArea();
+}
 
 class TestPaintingWindowDrawingMethods: public QObject
 {
