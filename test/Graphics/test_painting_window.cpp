@@ -9,9 +9,14 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+// Google Test.
+#include <gtest/gtest.h>
+// Qt libraries.
 #include <QtTest>
 #include <QtWidgets>
+// DO-CV libraries.
 #include <DO/Graphics/DerivedQObjects/PaintingWindow.hpp>
+// Local libraries.
 #include "event_scheduler.hpp"
 
 Q_DECLARE_METATYPE(DO::Event);
