@@ -154,9 +154,6 @@ int main(int argc, char **argv)
 
   // Create an event scheduler on the GUI thread.
   global_scheduler = new EventScheduler;
-  // Connect the user thread and the event scheduler.
-  QObject::connect(&getUserThread(), SIGNAL(sendEvent(QEvent *, int)),
-                   global_scheduler, SLOT(schedule_event(QEvent*, int)));
 
   // Run the worker thread 
   gui_app_.registerUserMain(worker_thread_task);
