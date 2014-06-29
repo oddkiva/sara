@@ -14,14 +14,15 @@
 // Google Test.
 #include <gtest/gtest.h>
 // DO-CV.
-#include <DO/Core/Timer.hpp>
 #include <DO/Graphics.hpp>
 #include <DO/Graphics/GraphicsUtilities.hpp>
+#include "event_scheduler.hpp"
 
 using namespace DO;
 
-#ifdef TRAVIS_CI_SEGFAULT_SOLVED
-TEST(TestWindow, DISABLED_test_open_and_close_window)
+EventScheduler *global_scheduler;
+
+TEST(TestWindow, test_open_and_close_window)
 {
   std::cout << "trying to open window: " << std::endl;
   Window w = openWindow(300, 300, "My Window", 10, 10);
@@ -109,37 +110,6 @@ TEST(TestWindow, DISABLED_test_resize_window)
   fillCircle(100, 100, 30, Red8);
 }
 
-#undef main
-int main(int argc, char **argv)
-{
-  testing::InitGoogleTest(&argc, argv); 
-  return RUN_ALL_TESTS();
-}
-#else
-#include "event_scheduler.hpp"
-
-EventScheduler *global_scheduler;
-
-class TestSleepFunctions: public testing::Test
-{
-protected:
-  Window test_window_;
-
-  TestSleepFunctions()
-  {
-    test_window_ = openWindow(300, 300);
-  }
-
-  virtual ~TestSleepFunctions()
-  {
-    closeWindow(test_window_);
-  }
-};
-
-TEST_F(TestSleepFunctions, test_milliSleep)
-{
-}
-
 int worker_thread_task(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv); 
@@ -166,4 +136,3 @@ int main(int argc, char **argv)
   delete global_scheduler;
   return return_code;
 }
-#endif
