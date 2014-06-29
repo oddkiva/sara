@@ -18,9 +18,10 @@ namespace DO {
     
   GraphicsView::GraphicsView(int w, int h, const QString& windowTitle,
                              int x, int y, QWidget* parent)
-    : QGraphicsView(new QGraphicsScene, parent)
+    : QGraphicsView(parent)
   {
-    //activateOpenGL();
+    setScene(new QGraphicsScene(this));
+
     setAttribute(Qt::WA_DeleteOnClose);
     setTransformationAnchor(AnchorUnderMouse);
     setRenderHints(QPainter::Antialiasing);

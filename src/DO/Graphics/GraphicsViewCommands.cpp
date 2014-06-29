@@ -23,15 +23,16 @@ namespace DO {
   Window openGraphicsView(int w, int h, const std::string& windowTitle,
                           int x, int y)
   {
-    QMetaObject::invokeMethod(getGuiApp(), "createGraphicsView",
+    QMetaObject::invokeMethod(getGuiApp(), "createWindow",
                               Qt::BlockingQueuedConnection,
+                              Q_ARG(int, 2),
                               Q_ARG(int, w), Q_ARG(int, h),
                               Q_ARG(const QString&,
                                     QString(windowTitle.c_str())),
                               Q_ARG(int, x), Q_ARG(int, y));
-    return getActiveWindow();
+    return getGuiApp()->createdWindows.back();
   }
-    
+
   // ====================================================================== //
   //! Convenience graphics scene functions
   QImage toQImage(const Image<Rgb8>& I)
