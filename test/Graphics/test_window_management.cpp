@@ -84,22 +84,23 @@ TEST(TestWindow, test_set_active_window)
 {
   Window w1 = openWindow(300, 300, "My Window", 10, 10);
   Window w2 = openGLWindow(300, 300, "My GL Window", 10, 10);
-  // TODO: FIXME.
-  //Window w3 = openGraphicsView(300, 300, "My Graphics View", 10, 10);
+  Window w3 = openGraphicsView(300, 300, "My Graphics View", 10, 10);
+
+  EXPECT_TRUE(w1);
+  EXPECT_TRUE(w2);
+  EXPECT_TRUE(w3);
 
   EXPECT_EQ(w1, getActiveWindow());
 
   setActiveWindow(w2);
   EXPECT_EQ(w2, getActiveWindow());
 
-  // TODO: FIXME.
-  //setActiveWindow(w3);
-  //EXPECT_EQ(w3, getActiveWindow());
+  setActiveWindow(w3);
+  EXPECT_EQ(w3, getActiveWindow());
 
   closeWindow(w1);
   closeWindow(w2);
-  // TODO: FIXME.
-  //closeWindow(w3);
+  closeWindow(w3);
 }
 
 TEST(TestWindow, test_resize_window)
