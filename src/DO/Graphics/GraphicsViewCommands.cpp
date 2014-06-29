@@ -30,9 +30,9 @@ namespace DO {
                               Q_ARG(const QString&,
                                     QString(windowTitle.c_str())),
                               Q_ARG(int, x), Q_ARG(int, y));
-    return getActiveWindow();
+    return getGuiApp()->createdWindows.back();
   }
-    
+
   // ====================================================================== //
   //! Convenience graphics scene functions
   QImage toQImage(const Image<Rgb8>& I)
