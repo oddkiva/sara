@@ -583,7 +583,6 @@ TEST_F(TestPaintingWindowEvents, test_mouse_press_event)
   compare_mouse_event(spy, event);
 }
 
-
 TEST_F(TestPaintingWindowEvents, test_mouse_release_event)
 {
   QSignalSpy spy(test_window_,
@@ -640,13 +639,26 @@ TEST_F(TestPaintingWindowEvents, test_send_event)
 }
 
 
-  TestPaintingWindowDrawingMethods test_painting_window_drawing_methods;
-  num_failed_tests += QTest::qExec(&test_painting_window_drawing_methods);
+TEST(TestPaintingWindowResizing,
+     test_construction_of_PaintingWindow_with_small_size)
+{
+  PaintingWindow *window = new PaintingWindow(100, 100);
+  EXPECT_EQ(window->width(), 100);
+  EXPECT_EQ(window->height(), 100);
 
-  TestPaintingWindowEvents test_painting_window_events;
-  num_failed_tests += QTest::qExec(&test_painting_window_events);
+  window->resizeScreen(150, 100);
+  EXPECT_EQ(window->width(), 150);
+  EXPECT_EQ(window->height(), 100);
 
-  return num_failed_tests;
+  delete window->scrollArea();
 }
 
+int main(int argc, char *argv[])
+{
+  QApplication app(argc, argv);
+  app.setAttribute(Qt::AA_Use96Dpi, true);
+
+  testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+}
 #include "test_painting_window.moc"
