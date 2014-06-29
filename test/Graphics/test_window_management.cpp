@@ -139,14 +139,6 @@ protected:
 
 TEST_F(TestSleepFunctions, test_milliSleep)
 {
-  int delay_ms = 20;
-  Timer timer;
-  timer.restart();
-  milliSleep(delay_ms);
-  double elapsed = timer.elapsedMs();
-
-  double tol_ms = 1.;
-  EXPECT_NEAR(elapsed, static_cast<double>(delay_ms), tol_ms);
 }
 
 int worker_thread_task(int argc, char **argv)
