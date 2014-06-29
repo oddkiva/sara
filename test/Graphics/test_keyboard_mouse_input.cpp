@@ -44,20 +44,38 @@ protected:
 
 TEST_F(TestKeyboardMouseInputOnSingleWindow, test_getMouse)
 {
-  Qt::MouseButton expected_button = Qt::LeftButton;
+  Qt::MouseButton expected_qt_mouse_buttons[] = { 
+    Qt::LeftButton,
+    Qt::MiddleButton,
+    Qt::RightButton,
+  };
+  
+  int expected_button_codes[] = {
+    MOUSE_LEFT_BUTTON,
+    MOUSE_MIDDLE_BUTTON,
+    MOUSE_RIGHT_BUTTON
+  };
+
   int expected_x = 150, expected_y = 150;
-  QMouseEvent event(
-    QEvent::MouseButtonRelease, QPointF(expected_x, expected_y),
-    expected_button, expected_button, Qt::NoModifier
-  );
-  emit getUserThread().sendEvent(&event, 10);
+  
+  for (int i = 0; i < 3; ++i)
+  {
+    Qt::MouseButton input_qt_mouse_button = expected_qt_mouse_buttons[i];
+    int expected_button_code = expected_button_codes[i];
 
-  int actual_x, actual_y;
-  int actual_button = getMouse(actual_x, actual_y);
+    QMouseEvent event(
+      QEvent::MouseButtonRelease, QPointF(expected_x, expected_y),
+      input_qt_mouse_button, Qt::MouseButtons(input_qt_mouse_button), Qt::NoModifier
+      );
+    emit getUserThread().sendEvent(&event, 10);
 
-  EXPECT_EQ(actual_button, 1);
-  EXPECT_EQ(actual_x, expected_x);
-  EXPECT_EQ(actual_y, expected_y);
+    int actual_x, actual_y;
+    int actual_button = getMouse(actual_x, actual_y);
+
+    EXPECT_EQ(actual_button, expected_button_code);
+    EXPECT_EQ(actual_x, expected_x);
+    EXPECT_EQ(actual_y, expected_y);
+  }
 }
 
 TEST_F(TestKeyboardMouseInputOnSingleWindow, test_click)
