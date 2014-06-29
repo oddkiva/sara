@@ -261,9 +261,17 @@ void mouseBasics()
 
   int button;    
   Point2i p;
-  while ((button=getMouse(p))!=3) // Get clicked point p,
-                                  // and used button (1,2,3)=(left,middle,right)
-    fillCircle(p,5,(button==1)?Blue8:Red8);
+  while ((button=getMouse(p)) != MOUSE_RIGHT_BUTTON)
+  {
+    Rgb8 color;
+    if (button == MOUSE_LEFT_BUTTON)
+      color = Blue8;
+    else if (button == MOUSE_MIDDLE_BUTTON)
+      color = Red8;
+    else
+      color = Black8;
+    fillCircle(p, 5, color);
+  }
 
   closeWindow(W);
 }
