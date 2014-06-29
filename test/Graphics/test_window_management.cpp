@@ -116,10 +116,6 @@ int main(int argc, char **argv)
   return RUN_ALL_TESTS();
 }
 #else
-#include "event_scheduler.hpp"
-
-EventScheduler *global_scheduler;
-
 class TestSleepFunctions: public testing::Test
 {
 protected:
@@ -128,7 +124,6 @@ protected:
   TestSleepFunctions()
   {
     test_window_ = openWindow(300, 300);
-    global_scheduler->set_receiver(test_window_);
   }
 
   virtual ~TestSleepFunctions()
@@ -139,14 +134,6 @@ protected:
 
 TEST_F(TestSleepFunctions, test_milliSleep)
 {
-  int delay_ms = 20;
-  Timer timer;
-  timer.restart();
-  milliSleep(delay_ms);
-  double elapsed = timer.elapsedMs();
-
-  double tol_ms = 1.;
-  EXPECT_NEAR(elapsed, static_cast<double>(delay_ms), tol_ms);
 }
 
 int worker_thread_task(int argc, char **argv)
@@ -158,21 +145,9 @@ int worker_thread_task(int argc, char **argv)
 #undef main
 int main(int argc, char **argv)
 {
-  // Create Qt Application.
   GraphicsApplication gui_app_(argc, argv);
 
-  // Create an event scheduler on the GUI thread.
-  global_scheduler = new EventScheduler;
-  // Connect the user thread and the event scheduler.
-  QObject::connect(&getUserThread(), SIGNAL(sendEvent(QEvent *, int)),
-                   global_scheduler, SLOT(schedule_event(QEvent*, int)));
-
-  // Run the worker thread 
   gui_app_.registerUserMain(worker_thread_task);
-  int return_code = gui_app_.exec();
-
-  // Cleanup and terminate
-  delete global_scheduler;
-  return return_code;
+  return gui_app_.exec();
 }
 #endif
