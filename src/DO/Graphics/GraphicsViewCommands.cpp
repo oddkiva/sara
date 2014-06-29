@@ -32,7 +32,7 @@ namespace DO {
                               Q_ARG(int, x), Q_ARG(int, y));
     return getGuiApp()->createdWindows.back();
   }
-    
+
   // ====================================================================== //
   //! Convenience graphics scene functions
   QImage toQImage(const Image<Rgb8>& I)
