@@ -52,30 +52,34 @@ TEST(TestWindow, test_open_and_close_window)
 
 TEST(TestWindow, test_open_and_close_gl_window)
 {
-  Window w = openGLWindow(300, 300, "My Window", 10, 10);
-  EXPECT_NE(w, Window(0));
+  QPointer<QWidget> window = openGLWindow(300, 300, "My Window", 10, 10);
 
-  EXPECT_EQ(getWindowWidth(w), w->width());
-  EXPECT_EQ(getWindowHeight(w), w->height());
-  EXPECT_EQ(getWindowSizes(w), Vector2i(w->width(), w->height()));
-  EXPECT_EQ(w->windowTitle().toStdString(), "My Window");
-  EXPECT_EQ(w->pos(), QPoint(10, 10));
+  EXPECT_EQ(getWindowWidth(window), window->width());
+  EXPECT_EQ(getWindowHeight(window), window->height());
+  EXPECT_EQ(getWindowSizes(window),
+            Vector2i(window->width(), window->height()));
+  EXPECT_EQ(window->windowTitle().toStdString(), "My Window");
+  EXPECT_EQ(window->pos(), QPoint(10, 10));
 
-  closeWindow(w);
+  closeWindow(window);
+  while (!window.isNull());
+  EXPECT_TRUE(window.isNull());
 }
 
 TEST(TestWindow, test_open_and_close_graphics_view)
 {
-  Window w = openGraphicsView(300, 300, "My Window", 10, 10);
-  EXPECT_NE(w, Window(0));
+  QPointer<QWidget> window = openGraphicsView(300, 300, "My Window", 10, 10);
 
-  EXPECT_EQ(getWindowWidth(w), w->width());
-  EXPECT_EQ(getWindowHeight(w), w->height());
-  EXPECT_EQ(getWindowSizes(w), Vector2i(w->width(), w->height()));
-  EXPECT_EQ(w->windowTitle().toStdString(), "My Window");
-  EXPECT_EQ(w->pos(), QPoint(10, 10));
+  EXPECT_EQ(getWindowWidth(window), window->width());
+  EXPECT_EQ(getWindowHeight(window), window->height());
+  EXPECT_EQ(getWindowSizes(window),
+            Vector2i(window->width(), window->height()));
+  EXPECT_EQ(window->windowTitle().toStdString(), "My Window");
+  EXPECT_EQ(window->pos(), QPoint(10, 10));
 
-  closeWindow(w);
+  closeWindow(window);
+  while (!window.isNull());
+  EXPECT_TRUE(window.isNull());
 }
 
 TEST(TestWindow, test_set_active_window)
