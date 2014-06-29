@@ -47,7 +47,7 @@ private slots:
 #endif
     QVERIFY(window->isVisible());
 
-    window->deleteLater();
+    delete window->scrollArea();
   }
 
   void test_construction_of_PaintingWindow_with_size_larger_than_desktop()
@@ -60,7 +60,7 @@ private slots:
     QVERIFY(window->scrollArea()->isMaximized());
     QVERIFY(window->isVisible());
 
-    window->deleteLater();
+    delete window->scrollArea();
   }
 };
 
@@ -104,7 +104,7 @@ private slots:
 
   void cleanupTestCase()
   {
-    test_window_->deleteLater();
+    delete test_window_->scrollArea();
   }
 
   void test_drawPoint_using_integer_coordinates()
@@ -533,7 +533,7 @@ private slots:
 
   void cleanupTestCase()
   {
-    test_window_->deleteLater();
+    delete test_window_->scrollArea();
   }
 
   void test_mouse_move_event()
@@ -639,7 +639,7 @@ private slots:
       QCOMPARE(window->width(), 50);
       QCOMPARE(window->height(), 50);
 
-      window->deleteLater();
+      delete window->scrollArea();
     }
 };
 
