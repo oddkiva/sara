@@ -499,11 +499,10 @@ TEST_F(TestPaintingWindowDrawingMethods, test_transparency)
   // TODO: test transparency, which is buggy.
 }
 
-class TestPaintingWindowEvents: public QObject
-{
-  Q_OBJECT
 
-private:
+class TestPaintingWindowEvents: public testing::Test
+{
+protected: // data members.
   PaintingWindow *test_window_;
   EventScheduler event_scheduler_;
   QPoint mouse_pos_;
@@ -511,29 +510,8 @@ private:
   int mouse_buttons_type_id_;
   int event_type_id_;
 
-  void compare_mouse_event(QSignalSpy& spy,
-                           const QMouseEvent& expected_event) const
-  {
-    spy.wait(100);
-    QCOMPARE(spy.count(), 1);
-
-    QList<QVariant> arguments = spy.takeFirst();
-    QCOMPARE(arguments.at(0).toInt(), expected_event.x());
-    QCOMPARE(arguments.at(1).toInt(), expected_event.y());
-    QCOMPARE(arguments.at(2).value<Qt::MouseButtons>(), expected_event.buttons());
-  }
-
-  void compare_key_event(QSignalSpy& spy) const
-  {
-    spy.wait(100);
-    QCOMPARE(spy.count(), 1);
-
-    QList<QVariant> arguments = spy.takeFirst();
-    QCOMPARE(arguments.at(0).toInt(), static_cast<int>(key_));
-  }
-
-private slots:
-  void initTestCase()
+protected: // methods.
+  TestPaintingWindowEvents()
   {
     mouse_buttons_type_id_ = qRegisterMetaType<Qt::MouseButtons>(
       "Qt::MouseButtons"
@@ -545,128 +523,122 @@ private slots:
     key_ = Qt::Key_A;
   }
 
-  void cleanupTestCase()
+  virtual ~TestPaintingWindowEvents()
   {
     delete test_window_->scrollArea();
   }
 
-  void test_mouse_move_event()
+  void compare_mouse_event(QSignalSpy& spy,
+                           const QMouseEvent& expected_event) const
   {
-    test_window_->setMouseTracking(true);
-    QSignalSpy spy(test_window_,
-                   SIGNAL(movedMouse(int, int, Qt::MouseButtons)));
-    QVERIFY(spy.isValid());
+    spy.wait(100);
+    EXPECT_EQ(spy.count(), 1);
 
-    QMouseEvent event(
-      QEvent::MouseMove, mouse_pos_,
-      Qt::NoButton, Qt::NoButton, Qt::NoModifier
-    );
-    event_scheduler_.schedule_event(&event, 10);
-
-    compare_mouse_event(spy, event);
-  }
-
-  void test_mouse_press_event()
-  {
-    QSignalSpy spy(test_window_,
-                   SIGNAL(pressedMouseButtons(int, int, Qt::MouseButtons)));
-    QVERIFY(spy.isValid());
-
-    QMouseEvent event(
-      QEvent::MouseButtonPress, mouse_pos_,
-      Qt::LeftButton, Qt::LeftButton, Qt::NoModifier
-    );
-    event_scheduler_.schedule_event(&event, 10);
-    
-    compare_mouse_event(spy, event);
-  }
-
-  void test_mouse_release_event()
-  {
-    QSignalSpy spy(test_window_,
-                   SIGNAL(releasedMouseButtons(int, int, Qt::MouseButtons)));
-    QVERIFY(spy.isValid());
-
-    QMouseEvent event(
-      QEvent::MouseButtonRelease, mouse_pos_,
-      Qt::LeftButton, Qt::LeftButton, Qt::NoModifier
-    );
-    event_scheduler_.schedule_event(&event, 10);
-    
-    compare_mouse_event(spy, event);
-  }
-
-  void test_key_press_event()
-  {
-    QSignalSpy spy(test_window_, SIGNAL(pressedKey(int)));
-    QVERIFY(spy.isValid());
-
-    QKeyEvent event(QEvent::KeyPress, key_, Qt::NoModifier);
-    event_scheduler_.schedule_event(&event, 10);
-
-    compare_key_event(spy);
-  }
-
-  void test_key_release_event()
-  {
-    QSignalSpy spy(test_window_, SIGNAL(releasedKey(int)));
-    QVERIFY(spy.isValid());
-
-    QKeyEvent event(QEvent::KeyRelease, key_, Qt::NoModifier);
-    event_scheduler_.schedule_event(&event, 10);
-
-    compare_key_event(spy);
-  }
-
-  void test_send_event()
-  {
-    QSignalSpy spy(test_window_, SIGNAL(sendEvent(Event)));
-    QVERIFY(spy.isValid());
-
-    QMetaObject::invokeMethod(test_window_, "waitForEvent",
-                              Qt::AutoConnection, Q_ARG(int, 1));
-    
-    // Nothing happens.
-    QVERIFY(spy.wait(10));
-    QCOMPARE(spy.count(), 1);
     QList<QVariant> arguments = spy.takeFirst();
-    QVariant arg = arguments.at(0);
-    arg.convert(event_type_id_);
-    Event event(arguments.at(0).value<Event>());
-    QCOMPARE(event.type, DO::NO_EVENT);
+    EXPECT_EQ(arguments.at(0).toInt(), expected_event.x());
+    EXPECT_EQ(arguments.at(1).toInt(), expected_event.y());
+    EXPECT_EQ(arguments.at(2).value<Qt::MouseButtons>(),
+              expected_event.buttons());
+  }
+
+  void compare_key_event(QSignalSpy& spy) const
+  {
+    spy.wait(100);
+    EXPECT_EQ(spy.count(), 1);
+
+    QList<QVariant> arguments = spy.takeFirst();
+    EXPECT_EQ(arguments.at(0).toInt(), static_cast<int>(key_));
   }
 
 };
 
-class TestPaintingWindowResizing: public QObject
+TEST_F(TestPaintingWindowEvents, test_mouse_move_event)
 {
-  Q_OBJECT
+  test_window_->setMouseTracking(true);
+  QSignalSpy spy(test_window_,
+                 SIGNAL(movedMouse(int, int, Qt::MouseButtons)));
+  EXPECT_TRUE(spy.isValid());
 
-private slots:
-    void test_construction_of_PaintingWindow_with_small_size()
-    {
-      PaintingWindow *window = new PaintingWindow(50, 50);
-      QCOMPARE(window->width(), 50);
-      QCOMPARE(window->height(), 50);
+  QMouseEvent event(
+    QEvent::MouseMove, mouse_pos_,
+    Qt::NoButton, Qt::NoButton, Qt::NoModifier
+  );
+  event_scheduler_.schedule_event(&event, 10);
 
-      window->resizeScreen(50, 100);
-      QCOMPARE(window->width(), 50);
-      QCOMPARE(window->height(), 50);
+  compare_mouse_event(spy, event);
+}
 
-      delete window->scrollArea();
-    }
-};
-
-int main(int argc, char *argv[])
+TEST_F(TestPaintingWindowEvents, test_mouse_press_event)
 {
-  QApplication app(argc, argv);
-  app.setAttribute(Qt::AA_Use96Dpi, true);
-  QTEST_DISABLE_KEYPAD_NAVIGATION;
+  QSignalSpy spy(test_window_,
+                 SIGNAL(pressedMouseButtons(int, int, Qt::MouseButtons)));
+  EXPECT_TRUE(spy.isValid());
 
-  int num_failed_tests = 0;
+  QMouseEvent event(
+    QEvent::MouseButtonPress, mouse_pos_,
+    Qt::LeftButton, Qt::LeftButton, Qt::NoModifier
+  );
+  event_scheduler_.schedule_event(&event, 10);
 
-  TestPaintingWindowConstructors test_painting_window_constructors;
-  num_failed_tests += QTest::qExec(&test_painting_window_constructors);
+  compare_mouse_event(spy, event);
+}
+
+
+TEST_F(TestPaintingWindowEvents, test_mouse_release_event)
+{
+  QSignalSpy spy(test_window_,
+                 SIGNAL(releasedMouseButtons(int, int, Qt::MouseButtons)));
+  EXPECT_TRUE(spy.isValid());
+
+  QMouseEvent event(
+    QEvent::MouseButtonRelease, mouse_pos_,
+    Qt::LeftButton, Qt::LeftButton, Qt::NoModifier
+    );
+  event_scheduler_.schedule_event(&event, 10);
+
+  compare_mouse_event(spy, event);
+}
+
+TEST_F(TestPaintingWindowEvents, test_key_press_event)
+{
+  QSignalSpy spy(test_window_, SIGNAL(pressedKey(int)));
+  EXPECT_TRUE(spy.isValid());
+
+  QKeyEvent event(QEvent::KeyPress, key_, Qt::NoModifier);
+  event_scheduler_.schedule_event(&event, 10);
+
+  compare_key_event(spy);
+}
+
+TEST_F(TestPaintingWindowEvents, test_key_release_event)
+{
+  QSignalSpy spy(test_window_, SIGNAL(releasedKey(int)));
+  EXPECT_TRUE(spy.isValid());
+
+  QKeyEvent event(QEvent::KeyRelease, key_, Qt::NoModifier);
+  event_scheduler_.schedule_event(&event, 10);
+
+  compare_key_event(spy);
+}
+
+TEST_F(TestPaintingWindowEvents, test_send_event)
+{
+  QSignalSpy spy(test_window_, SIGNAL(sendEvent(Event)));
+  EXPECT_TRUE(spy.isValid());
+
+  QMetaObject::invokeMethod(test_window_, "waitForEvent",
+                            Qt::AutoConnection, Q_ARG(int, 1));
+
+  // Nothing happens.
+  EXPECT_TRUE(spy.wait(10));
+  EXPECT_EQ(spy.count(), 1);
+  QList<QVariant> arguments = spy.takeFirst();
+  QVariant arg = arguments.at(0);
+  arg.convert(event_type_id_);
+  Event event(arguments.at(0).value<Event>());
+  EXPECT_EQ(event.type, DO::NO_EVENT);
+}
+
 
   TestPaintingWindowDrawingMethods test_painting_window_drawing_methods;
   num_failed_tests += QTest::qExec(&test_painting_window_drawing_methods);
