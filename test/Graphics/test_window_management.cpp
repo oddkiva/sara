@@ -41,8 +41,11 @@ protected:
 
 TEST_F(TestPaintingWindow, test_window_attributes)
 {
+  std::cout << "Checking attributes" << std::endl;
   EXPECT_EQ(getWindowWidth(test_window_), test_window_->width());
+  std::cout << "Checking attributes" << std::endl;
   EXPECT_EQ(getWindowHeight(test_window_), test_window_->height());
+  std::cout << "Checking attributes" << std::endl;
   EXPECT_EQ(getWindowSizes(test_window_),
             Vector2i(test_window_->width(), test_window_->height()));
 
