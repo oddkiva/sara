@@ -143,8 +143,21 @@ TEST(TestWindow, DISABLED_test_resize_window)
   fillCircle(100, 100, 30, Red8);
 }
 
+int worker_thread_task(int argc, char **argv)
+{
+  testing::InitGoogleTest(&argc, argv); 
+  return RUN_ALL_TESTS();
+}
+
+#undef main
 int main(int argc, char **argv)
 {
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+  // Create Qt Application.
+  GraphicsApplication gui_app_(argc, argv);
+
+  // Run the worker thread 
+  gui_app_.registerUserMain(worker_thread_task);
+  int return_code = gui_app_.exec();
+
+  return return_code;
 }
