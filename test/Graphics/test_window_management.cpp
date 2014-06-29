@@ -56,7 +56,7 @@ TEST(TestWindow, test_open_and_close_gl_window)
   EXPECT_EQ(getWindowHeight(window), window->height());
   EXPECT_EQ(getWindowSizes(window),
             Vector2i(window->width(), window->height()));
-  EXPECT_EQ(window->windowTitle().toStdString(), "My Window");
+  EXPECT_EQ(window->windowTitle(), QString("My Window"));
   EXPECT_EQ(window->pos(), QPoint(10, 10));
 
   closeWindow(window);
@@ -72,7 +72,7 @@ TEST(TestWindow, test_open_and_close_graphics_view)
   EXPECT_EQ(getWindowHeight(window), window->height());
   EXPECT_EQ(getWindowSizes(window),
             Vector2i(window->width(), window->height()));
-  EXPECT_EQ(window->windowTitle().toStdString(), "My Window");
+  EXPECT_EQ(window->windowTitle(), QString("My Window"));
   EXPECT_EQ(window->pos(), QPoint(10, 10));
 
   closeWindow(window);
