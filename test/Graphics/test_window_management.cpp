@@ -20,6 +20,9 @@
 
 using namespace DO;
 
+// N.B.: this is not needed but for very **STRANGELY**, if we don't add this,
+// the program seg-faults in Travis CI. We need to sort this out because this
+// issue is completely both unfathomable and ridiculous.
 EventScheduler *global_scheduler;
 
 TEST(TestWindow, test_open_and_close_window)
@@ -126,7 +129,7 @@ int main(int argc, char **argv)
   gui_app_.registerUserMain(worker_thread_task);
   int return_code = gui_app_.exec();
 
-  // Cleanup and terminate
+  // Cleanup and terminate.
   delete global_scheduler;
   return return_code;
 }
