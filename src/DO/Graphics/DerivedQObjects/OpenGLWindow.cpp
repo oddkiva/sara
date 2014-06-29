@@ -83,6 +83,12 @@ namespace DO {
     , color_(QColor::fromCmykF(0.40, 0.0, 1.0, 0.0))
   {
     setAttribute(Qt::WA_DeleteOnClose);
+
+    // Set event listener.
+    event_listening_timer_.setSingleShot(true);
+    connect(&event_listening_timer_, SIGNAL(timeout()),
+            this, SLOT(eventListeningTimerStopped()));
+
     if(x != -1 && y != -1)
       move(x,y);
     setWindowTitle(windowTitle);
@@ -116,6 +122,17 @@ namespace DO {
       }
     }
     glEnd();
+  }
+
+  void OpenGLWindow::waitForEvent(int ms)
+  {
+    event_listening_timer_.setInterval(ms);
+    event_listening_timer_.start();
+  }
+
+  void OpenGLWindow::eventListeningTimerStopped()
+  {
+    emit sendEvent(noEvent());
   }
 
   void OpenGLWindow::initializeGL()
@@ -316,7 +333,7 @@ namespace DO {
     if (event_listening_timer_.isActive())
     {
       event_listening_timer_.stop();
-      sendEvent(keyPressed(event->key(), event->modifiers()));
+      emit sendEvent(keyPressed(event->key(), event->modifiers()));
     }
   }
 
@@ -326,7 +343,7 @@ namespace DO {
     if (event_listening_timer_.isActive())
     {
       event_listening_timer_.stop();
-      sendEvent(keyReleased(event->key(), event->modifiers()));
+      emit sendEvent(keyReleased(event->key(), event->modifiers()));
     }
   }
 
