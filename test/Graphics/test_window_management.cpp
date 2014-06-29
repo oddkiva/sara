@@ -43,7 +43,7 @@ TEST(TestWindow, test_open_and_close_window)
   std::cout << "OK" << std::endl;
 }
 
-TEST(TestWindow, DISABLED_test_open_and_close_window)
+TEST(TestWindow, DISABLED_test_open_and_close_gl_window)
 {
   Window w = openGLWindow(300, 300, "My Window", 10, 10);
   EXPECT_NE(w, Window(0));
@@ -57,7 +57,7 @@ TEST(TestWindow, DISABLED_test_open_and_close_window)
   closeWindow(w);
 }
 
-TEST(TestWindow, DISABLED_test_open_and_close_window)
+TEST(TestWindow, DISABLED_test_open_and_close_graphics_view)
 {
   Window w = openGraphicsView(300, 300, "My Window", 10, 10);
   EXPECT_NE(w, Window(0));
@@ -71,7 +71,7 @@ TEST(TestWindow, DISABLED_test_open_and_close_window)
   closeWindow(w);
 }
 
-TEST(TestWindow, DISABLED_test_open_and_close_window)
+TEST(TestWindow, DISABLED_test_set_active_window)
 {
   Window w1 = openWindow(300, 300, "My Window", 10, 10);
   Window w2 = openGLWindow(300, 300, "My GL Window", 10, 10);
@@ -93,7 +93,7 @@ TEST(TestWindow, DISABLED_test_open_and_close_window)
   //closeWindow(w3);
 }
 
-TEST(TestWindow, DISABLED_test_open_and_close_window)
+TEST(TestWindow, DISABLED_test_resize_window)
 {
   Window w = openWindow(300, 300, "My Window", 10, 10);
   EXPECT_EQ(w, getActiveWindow());
