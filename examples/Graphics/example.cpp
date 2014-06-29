@@ -22,36 +22,36 @@ using namespace DO;
 void aWindow()
 {
   cout << "A window... click when done" << endl;
-  // Open 300x200 window
-  Window W = openWindow(300, 200, "A window");
-  // A 150x100 filled RED rectangle in (20,10)
+  // Open a 300x200 window.
+  Window window = openWindow(300, 200, "A window");
+  // A 150x100 filled RED rectangle with top-left corner at (20, 10).
   fillRect(20, 10, 150, 100, Red8);
-  // Wait for a click
+  // Wait for a click.
   click();
-  // Close window...
-  closeWindow(W);
+  // Close window.
+  closeWindow(window);
 }
 
 void twoWindows()
 {
-  cout << "Two windows ... click when done" << endl;
-  // A 300x200 window in (10,10)
-  Window W1=openWindow(300,200,"A first window",10,10);
-  // A 150x100 RED rectangle in (20,10) (up-left corner)
-  drawRect(20,10,150,100,Red8);
-  // A 200x300 window in (320,10)
-  Window W2=openWindow(200,300,"A second window",330,10);
-  // Note that openWindow does not make the new window the current one
-  setActiveWindow(W2);
-  // A BLUE line from (20,10) to (150,270)
-  drawLine(20,10,150,270,Blue8);
-  setActiveWindow(W1);
-  // Another line, in GREEN, in the first window
-  drawLine(20,10,250,170,Green8);
-  // Wait for a click in any window
+  cout << "Two windows... click when done" << endl;
+  // A 300x200 window with top-left corner at (10,10).
+  Window w1 = openWindow(300, 200, "A first window", 10, 10);
+  // A 150x100 RED rectangle with top-left corner at (20, 10).
+  drawRect(20, 10, 150, 100, Red8);
+  // A 200x300 window in (320, 10)
+  Window w2 = openWindow(200, 300, "A second window", 330, 10);
+  // Note that openWindow does not make the new window the current one.
+  setActiveWindow(w2);
+  // A blue line from (20, 10) to (150, 270).
+  drawLine(20, 10, 150, 270, Blue8);
+  setActiveWindow(w1);
+  // Another line, in green, in the first window.
+  drawLine(20, 10, 250, 170, Green8);
+  // Wait for a click in any window.
   anyClick();
-  closeWindow(W1);
-  closeWindow(W2);
+  closeWindow(w1);
+  closeWindow(w2);
 }
 
 void twoWindows2()
@@ -114,9 +114,9 @@ void twoDimBasics()
 
   // Draw a blue rectangle with top-left corner (400, 10) and size (100, 50).
   drawRect(400, 10, 100, 50, Blue8, 3);
-  // Draw a green color-filled rectangle with top-left corner (400, 400) and 
+  // Draw a green color-filled rectangle with top-left corner (400, 400) and
   // size (100, 50).
-  fillRect(Point2i(400, 400), 100, 50,Green8);
+  fillRect(Point2i(400, 400), 100, 50, Green8);
 
   // Draw an axis-aligned ellipse bounded by a rectangle whose top-left 
   // corner is (50,350) and size is (50, 90) using a cyan Pen with a 2-pixel
@@ -149,8 +149,8 @@ void twoDimBasics()
   drawString(30,300,"yet another string",Black8,24,-10,
              false,true);
   // Draw a polygon with the following points.
-  int px[] = { 201, 200, 260, 240};
-  int py[] = { 301, 350, 330, 280};
+  int px[] = { 201, 200, 260, 240 };
+  int py[] = { 301, 350, 330, 280 };
   fillPoly(px, py, 4, Blue8);
   // Draw another polygon.
   //      { (x1, y1), (x2, y2), (x3, y3) }
@@ -158,9 +158,9 @@ void twoDimBasics()
   fillPoly(t, 3, Green8);
   // Draw another polygon.
   Point2i P[]={
-    Point2i(100,100),
-    Point2i(100,150),
-    Point2i(150,120)
+    Point2i(100, 100),
+    Point2i(100, 150),
+    Point2i(150, 120)
   };
   drawPoly(P, 3, Red8, 3);  // ... with a red pen with 3-pixel thickness.
 
@@ -180,8 +180,8 @@ void twoDimBasics()
 
 void floatingPointDrawing()
 {
-  // Open 300x200 window
-  Window W = openWindow(300,200);
+  // Open a 300x200 window.
+  Window W = openWindow(300, 200);
   setAntialiasing(getActiveWindow());
   setTransparency(getActiveWindow());
 
@@ -191,7 +191,7 @@ void floatingPointDrawing()
   drawLine(Point2f(10.5f, 10.5f), Point2f(20.8f, 52.8132f), Blue8, 2);
   drawLine(Point2f(10.5f, 20.5f), Point2f(20.8f, 52.8132f), Magenta8, 5);
 
-  // Draw an oriented ellipse whose
+  // Draw an oriented ellipse with:
   // center = (150, 100)
   // r1 = 10
   // r2 = 20
@@ -214,7 +214,7 @@ void floatingPointDrawing()
 void bitmapBasics()
 {
   cout << "Basic bitmap drawings... click when done" << endl;
-  Window W = openWindow(512,512,"Bitmaps");
+  Window W = openWindow(512, 512, "Bitmaps");
   // Array of bytes
   Color3ub cols[256*256];
   // Some (RED,GREEN,BLUE) function of (i,j)
@@ -222,7 +222,7 @@ void bitmapBasics()
     for (int i = 0; i < 256; i++)
       cols[i+256*j]= Color3ub(i, 255-i, (j<128)?255:0);
   // Draw this 256x256 (r,g,b) bitmap in (0,0)
-  putColorImage(0,0,cols,256,256);
+  putColorImage(0, 0, cols, 256, 256);
 
   // An array of colors.
   // Color3ub = 3D color vector where each channel has a value in [0,255].
@@ -232,16 +232,16 @@ void bitmapBasics()
       cols2[i+256*j]=Color3ub(i, (2*j)%256, (i+j)%256);  // RGB colors.
   // Display the bitmap from the following top-left corner (0,256)
   // TODO: rename this function.
-  putColorImage(Point2i(0,256), cols2, 256, 256);
+  putColorImage(Point2i(0, 256), cols2, 256, 256);
 
   // A grayscale image.
   unsigned char grey[256*256];
-  for (int j=0;j<256;j++) 
-    for (int i=0;i<256;i++) 
+  for (int j = 0; j < 256; ++j) 
+    for (int i = 0; i < 256; ++i) 
       grey[i+256*j] = static_cast<unsigned char>(128+127*sin((i+j)/10.));
   // Display the bitmap from the following top-left corner (0,256)
   // TODO: rename this function.
-  putGreyImage(256,0,grey,256,256); // Draw at point (256,0);
+  putGreyImage(256 ,0, grey, 256, 256); // Draw at point (256,0);
 
   click();
   closeWindow(W);
@@ -251,12 +251,14 @@ void mouseBasics()
 {
   cout << "Basic mouse functions" << endl;
 
-  Window W = openWindow(512,512,"Mouse");
-  drawString(10,10,"Please click anywhere",Black8);
+  Window W = openWindow(512, 512, "Mouse");
+  drawString(10, 10, "Please click anywhere", Black8);
 
   click();  
 
-  drawString(10,40,"click again (left=BLUE, middle=RED, right=done)",Black8);
+  drawString(10, 40, "click again (left=BLUE, middle=RED, right=done)",
+             Black8);
+
   int button;    
   Point2i p;
   while ((button=getMouse(p))!=3) // Get clicked point p,
