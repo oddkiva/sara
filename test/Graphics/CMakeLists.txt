@@ -9,9 +9,7 @@ include(${DO_USE_FILE})
 
 find_package(Qt5Test REQUIRED)
 
-
-include_directories(${Qt5Test_INCLUDE_DIRS}
-                    ${DO_DIR}/build/test/Graphics)
+include_directories(${Qt5Test_INCLUDE_DIRS})
 
 set(TestGroupName "Graphics")
 
