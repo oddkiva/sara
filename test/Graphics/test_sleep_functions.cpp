@@ -23,7 +23,7 @@
 using namespace DO;
 using namespace std;
 
-QPointer<EventScheduler> scheduler;
+EventScheduler *global_scheduler;
 
 class TestSleepFunctions: public testing::Test
 {
@@ -33,7 +33,7 @@ protected:
   TestSleepFunctions()
   {
     test_window_ = openWindow(300, 300);
-    scheduler->set_receiver(test_window_);
+    global_scheduler->set_receiver(test_window_);
   }
 
   virtual ~TestSleepFunctions()
@@ -80,16 +80,16 @@ int main(int argc, char **argv)
   GraphicsApplication gui_app_(argc, argv);
 
   // Create an event scheduler on the GUI thread.
-  scheduler = new EventScheduler;
+  global_scheduler = new EventScheduler;
   // Connect the user thread and the event scheduler.
   QObject::connect(&getUserThread(), SIGNAL(sendEvent(QEvent *, int)),
-                   scheduler.data(), SLOT(schedule_event(QEvent*, int)));
+                   global_scheduler, SLOT(schedule_event(QEvent*, int)));
 
   // Run the worker thread 
   gui_app_.registerUserMain(worker_thread_task);
   int return_code = gui_app_.exec();
 
   // Cleanup and terminate
-  scheduler.clear();
+  delete global_scheduler;
   return return_code;
 }

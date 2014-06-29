@@ -30,6 +30,8 @@ private slots:
                                             windowName,
                                             x, y);
 
+
+    delete window;
   }
 
 };
