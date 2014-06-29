@@ -26,7 +26,7 @@ set_property(TARGET Graphics_Tests_Common
 do_test(Graphics_DerivedQObjects_PaintingWindow test_painting_window.cpp
         "${DO_LIBRARIES};${Qt5Test_LIBRARIES};Graphics_Tests_Common" ${TestGroupName})
 do_test(Graphics_DerivedQObjects_OpenGLWindow test_opengl_window.cpp
-        "${DO_LIBRARIES};${Qt5Test_LIBRARIES}" ${TestGroupName})
+        "${DO_LIBRARIES};${Qt5Test_LIBRARIES};Graphics_Tests_Common" ${TestGroupName})
 do_test(Graphics_DerivedQObjects_GraphicsView test_graphics_view.cpp
         "${DO_LIBRARIES};${Qt5Test_LIBRARIES}" ${TestGroupName})
 
