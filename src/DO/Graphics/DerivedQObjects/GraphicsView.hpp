@@ -43,6 +43,8 @@ namespace DO {
     void addItem(QGraphicsItem *item, QGraphicsItem *parent = 0);
     void addImageItem(const QImage& image, bool randomPos = false);
     void drawPoint(int x, int y, const QColor& c, QGraphicsPixmapItem *item);
+    void waitForEvent(int ms);
+    void eventListeningTimerStopped();
 
   protected:
     void mousePressEvent(QMouseEvent *event);
