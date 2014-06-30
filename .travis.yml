@@ -36,4 +36,4 @@ script:
   - make verbose_test
 
 after_success:
-  - coveralls --root src
+  - coveralls --build-root .
