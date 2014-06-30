@@ -5,11 +5,8 @@ compiler:
   - gcc
 
 before_install:
-  # Install cpp-coveralls for code coverage.
-  - sudo pip install cpp-coveralls
-  # Remove the rabbitmq source file since it currently times out and 
-  # we don't need it.
-  - sudo rm -f /etc/apt/sources.list.d/rabbitmq-source.list
+  # Install coveralls-lcov for code coverage.
+  - gem install coveralls-lcov
   # Update apt repositories to get GNU compiler 4.8.
   - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
   # Update apt repositories to get Qt5.
@@ -24,16 +21,18 @@ install:
   - sudo apt-get install -qq qt5-qmake qtbase5-dev qtdeclarative5-dev libqt5webkit5-dev libsqlite3-dev
 
 before_script:
-  # Fake X server
+  # Fake X server.
   - export DISPLAY=:99.0
   - sh -e /etc/init.d/xvfb start
-
-script:
+  # Create build directory.
   - mkdir build
   - cd build
-  - cmake ..
+  - cmake -DCMAKE_BUILD_TYPE=Debug ..
+
+script:
   - make -j 4
   - make verbose_test
 
 after_success:
-  - coveralls --build-root .
+  - lcov --directory . --base-directory=../src --no-external --output-file=coverage.info
+  - coveralls-lcov coverage.info
