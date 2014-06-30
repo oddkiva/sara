@@ -24,17 +24,14 @@ void testOffsetComputation()
   const int coords[] = { 2, 3, 4 };
   const int dims[] = { 10, 20, 30 };
   // Check offset computations.
-  printStage("Check offset computation");
   if (StorageOrder == RowMajor)
   {
-    cout << "Row major storage" << std::endl;
     EXPECT_EQ((Offset<1, StorageOrder>::eval(coords, dims)), 2);
     EXPECT_EQ((Offset<2, StorageOrder>::eval(coords, dims)), 2*20+3);
     EXPECT_EQ((Offset<3, StorageOrder>::eval(coords, dims)), 2*20*30+3*30+4);
   }
   else
   {
-    cout << "Column major storage" << std::endl;
     EXPECT_EQ((Offset<1, StorageOrder>::eval(coords, dims)), 2);
     EXPECT_EQ((Offset<2, StorageOrder>::eval(coords, dims)), 3*10+2);
     EXPECT_EQ((Offset<3, StorageOrder>::eval(coords, dims)), 4*10*20+3*10+2);
@@ -47,7 +44,6 @@ void testStrideComputation()
   // Create dims.
   const int dims[] = { 10, 20, 30 };
   // Check stride computations.
-  printStage("Check stride computation");
   int strides[3];
   if (StorageOrder == ColMajor)
   {
@@ -56,7 +52,6 @@ void testStrideComputation()
     EXPECT_EQ(strides[0], 1);
     EXPECT_EQ(strides[1], 10);
     EXPECT_EQ(strides[2], 200);
-    cout << "Column major strides: " << Map<Matrix<int,1,3> >(strides) << endl;
   }
   else
   {
@@ -65,7 +60,6 @@ void testStrideComputation()
     EXPECT_EQ(strides[0], 600);
     EXPECT_EQ(strides[1], 30);
     EXPECT_EQ(strides[2], 1);
-    cout << "Row major strides: " << Map<Matrix<int,1,3> >(strides) << endl << endl;
   }
 }
 
@@ -76,18 +70,15 @@ void testRangeIterator()
   Volume volume;
 
   // Check MultiArray class.
-  printStage("Check MultiArray initialization");
   initVolume(volume);
 
   // Check Locator class.
-  printStage("Check Locator increment");
   checkLocatorIncrement(volume);
 
   // Decrement.
-  printStage("Check Locator decrement");
   checkLocatorDecrement(volume);
 
-  printStage("Potpourri check on locators");
+  // Pot-pourri testing.
   checkLocatorPotPourri(volume);
 };
 

@@ -12,8 +12,6 @@ void initVolume(MultiArray<Color4f, 3, StorageOrder>& volume)
 {
   typedef MultiArray<Color4f, 3, StorageOrder> Volume;
   volume.resize(10, 20, 30);
-  volume.check_sizes_and_strides();
-  std::cout << std::endl;
   for (int i = 0; i < volume.rows(); ++i)
     for (int j = 0; j < volume.cols(); ++j)
       for (int k = 0; k < volume.depth(); ++k)
@@ -121,55 +119,37 @@ void checkLocatorPotPourri(MultiArray<Color4f, 3, StorageOrder>& volume)
 
   RangeIterator it(volume.begin_range());
 
-  // Reset
-  printStage("Reset anchor point of locator");
+  // Reset.
   it.reset_anchor();
 
   // Prefix increment.
-  printStage("Incrementing locator");
   ++it;
-  std::cout << "++loc = " << std::endl;
-  it.check();
-  std::cout << std::endl;
 
   // Copy constructor.
-  printStage("Check copy constructor of locator");
   RangeIterator loc2(it);
-  if (loc2 == it) std::cout << "Equality comparison OK!" << std::endl;
+  EXPECT_EQ(loc2, it);
 
   // Postfix increment.
   RangeIterator loc3(it++);
-  if (loc3 != it) std::cout << "Inequality comparison OK!" << std::endl;
+  EXPECT_NE(loc3, it);
 
-  printStage("Decrementing locator");
+  // Prefix decrement.
   --it;
-  it.check();
-  if (loc3 == it) std::cout << "--loc OK!" << std::endl;
+  EXPECT_EQ(loc3, it);
 
-  printStage("Postfix increment locator");
+  // Postfix increment.
   RangeIterator loc4(it++);
-  loc4.check();
 
   // N-D random iterator.
-  printStage("Axis iterator");
   loc4.x() += 5;
-  loc4.check();
 
   loc4 += Vector(2, 2, 2);
-  loc4.check();
 
   loc4 -= Vector(2, 2, 2);
-  loc4.check();
 
   loc4.y() += 10;
-  loc4.check();
 
-  //for (int i = 0; i < 4; ++i)
-  //  ++loc4.axis<i>();
   loc4.template axis<0>()[1];
-  loc4.check();
-  loc4.check_strides();
-  std::cout << "Finished" << std::endl;
 
   RangeIterator& loc4bis = loc4;
   loc4bis.template axis<0>()[1];
