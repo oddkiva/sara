@@ -19,6 +19,9 @@ install:
   # Install GCC 4.8 for C++11 features.
   - if [ "$CXX" = "g++" ]; then sudo apt-get install -qq g++-4.8; fi
   - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
+  # Use gcov 4.8
+  - sudo ln -fs /usr/bin/gcov-4.8 /usr/bin/gcov
+  - gcov --version
   # Install Qt5.
   - sudo apt-get install -qq qt5-qmake qtbase5-dev qtdeclarative5-dev libqt5webkit5-dev libsqlite3-dev
 
