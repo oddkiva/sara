@@ -40,8 +40,9 @@ script:
 
 after_success:
   - cd ..
-  - lcov --directory build --base-directory=src --no-external --capture --output-file=coverage.info
+  - lcov --directory build --base-directory=src --capture --output-file=coverage.info
   - lcov --remove coverage.info '*automoc.cpp*' --output-file coverage.info
+  - lcov --remove coverage.info 'usr/*' --output-file coverage.info
   - lcov --remove coverage.info 'third-party/*' --output-file coverage.info
   - lcov --remove coverage.info 'test/*' --output-file coverage.info
   - lcov --remove coverage.info '*/build/*' --output-file coverage.info
