@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="group___graphics" kind="group">
+    <compoundname>Graphics</compoundname>
+    <title>Graphics</title>
+    <innergroup refid="group___draw3_d">Drawing 3D</innergroup>
+    <innergroup refid="group___event">Event handling functions</innergroup>
+    <innergroup refid="group___graphics_internal">Graphics Internals</innergroup>
+    <innergroup refid="group___graphics_view">Graphics View</innergroup>
+    <innergroup refid="group___image_drawing">Drawing Image</innergroup>
+    <innergroup refid="group___image_i_o">Image I/O</innergroup>
+    <innergroup refid="group___draw2_d">Drawing 2D</innergroup>
+    <innergroup refid="group___window_management">Window management functions</innergroup>
+    <briefdescription>
+<para>The Graphics module relies on the Qt 5 framework. It covers basic graphical features such as: </para>    </briefdescription>
+    <detaileddescription>
+<para><itemizedlist>
+<listitem><para>opening, closing a window,</para></listitem><listitem><para>draw 2D things,</para></listitem><listitem><para>display a 3D mesh,</para></listitem><listitem><para>interactive viewing of images. </para></listitem></itemizedlist>
+</para>    </detaileddescription>
+  </compounddef>
+</doxygen>

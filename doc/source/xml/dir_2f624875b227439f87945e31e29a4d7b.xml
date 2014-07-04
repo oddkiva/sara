@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="dir_2f624875b227439f87945e31e29a4d7b" kind="dir">
+    <compoundname>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics</compoundname>
+    <innerdir refid="dir_f2ac84854d93f13057622f7fff59d56e">C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects</innerdir>
+    <innerfile refid="_draw3_d_8hpp">Draw3D.hpp</innerfile>
+    <innerfile refid="_events_8hpp">Events.hpp</innerfile>
+    <innerfile refid="_frame_8hpp">Frame.hpp</innerfile>
+    <innerfile refid="_graphics_application_8hpp">GraphicsApplication.hpp</innerfile>
+    <innerfile refid="_graphics_utilities_8hpp">GraphicsUtilities.hpp</innerfile>
+    <innerfile refid="_graphics_view_commands_8hpp">GraphicsViewCommands.hpp</innerfile>
+    <innerfile refid="_image_draw_8hpp">ImageDraw.hpp</innerfile>
+    <innerfile refid="_graphics_2_image_i_o_8hpp">ImageIO.hpp</innerfile>
+    <innerfile refid="_mesh_8hpp">Mesh.hpp</innerfile>
+    <innerfile refid="_painting_commands_8hpp">PaintingCommands.hpp</innerfile>
+    <innerfile refid="_window_management_8hpp">WindowManagement.hpp</innerfile>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/"/>
+  </compounddef>
+</doxygen>

@@ -1,0 +1,121 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="_triangle_8hpp" kind="file">
+    <compoundname>Triangle.hpp</compoundname>
+    <includes refid="_eigen_extension_8hpp" local="no">DO/Core/EigenExtension.hpp</includes>
+    <includes refid="_polygon_8hpp" local="no">DO/Geometry/Objects/Polygon.hpp</includes>
+    <includedby refid="_objects_8hpp" local="no">C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects.hpp</includedby>
+    <incdepgraph>
+      <node id="1148">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/Triangle.hpp</label>
+        <link refid="Triangle.hpp"/>
+        <childnode refid="1149" relation="include">
+        </childnode>
+        <childnode refid="1152" relation="include">
+        </childnode>
+      </node>
+      <node id="1150">
+        <label>Eigen/Eigen</label>
+      </node>
+      <node id="1152">
+        <label>DO/Geometry/Objects/Polygon.hpp</label>
+        <link refid="_polygon_8hpp_source"/>
+        <childnode refid="1153" relation="include">
+        </childnode>
+        <childnode refid="1154" relation="include">
+        </childnode>
+      </node>
+      <node id="1154">
+        <label>vector</label>
+      </node>
+      <node id="1153">
+        <label>DO/Geometry/Tools/Projective.hpp</label>
+        <link refid="_projective_8hpp_source"/>
+        <childnode refid="1149" relation="include">
+        </childnode>
+      </node>
+      <node id="1151">
+        <label>sstream</label>
+      </node>
+      <node id="1149">
+        <label>DO/Core/EigenExtension.hpp</label>
+        <link refid="_eigen_extension_8hpp"/>
+        <childnode refid="1150" relation="include">
+        </childnode>
+        <childnode refid="1151" relation="include">
+        </childnode>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="1157">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Graphics/DrawPolygon.hpp</label>
+        <link refid="_draw_polygon_8hpp_source"/>
+        <childnode refid="1158" relation="include">
+        </childnode>
+      </node>
+      <node id="1155">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/Triangle.hpp</label>
+        <link refid="Triangle.hpp"/>
+        <childnode refid="1156" relation="include">
+        </childnode>
+      </node>
+      <node id="1159">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry.hpp</label>
+        <link refid="_geometry_8hpp_source"/>
+      </node>
+      <node id="1156">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects.hpp</label>
+        <link refid="_objects_8hpp_source"/>
+        <childnode refid="1157" relation="include">
+        </childnode>
+        <childnode refid="1159" relation="include">
+        </childnode>
+      </node>
+      <node id="1158">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Graphics.hpp</label>
+        <link refid="_geometry_2_graphics_8hpp_source"/>
+        <childnode refid="1159" relation="include">
+        </childnode>
+      </node>
+    </invincdepgraph>
+    <innerclass refid="class_d_o_1_1_triangle" prot="public">DO::Triangle</innerclass>
+    <innernamespace refid="namespace_d_o">DO</innernamespace>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="comment">//<sp/>==========================================================================<sp/>//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="comment">//<sp/>This<sp/>file<sp/>is<sp/>part<sp/>of<sp/>DO++,<sp/>a<sp/>basic<sp/>set<sp/>of<sp/>libraries<sp/>in<sp/>C++<sp/>for<sp/>computer<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight><highlight class="comment">//<sp/>vision.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="comment">//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Copyright<sp/>(C)<sp/>2013<sp/>David<sp/>Ok<sp/>&lt;david.ok8@gmail.com&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight><highlight class="comment">//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight><highlight class="comment">//<sp/>This<sp/>Source<sp/>Code<sp/>Form<sp/>is<sp/>subject<sp/>to<sp/>the<sp/>terms<sp/>of<sp/>the<sp/>Mozilla<sp/>Public<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight><highlight class="comment">//<sp/>License<sp/>v.<sp/>2.0.<sp/>If<sp/>a<sp/>copy<sp/>of<sp/>the<sp/>MPL<sp/>was<sp/>not<sp/>distributed<sp/>with<sp/>this<sp/>file,<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight><highlight class="comment">//<sp/>you<sp/>can<sp/>obtain<sp/>one<sp/>at<sp/>http://mozilla.org/MPL/2.0/.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight><highlight class="comment">//<sp/>==========================================================================<sp/>//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight><highlight class="preprocessor">#ifndef<sp/>DO_GEOMETRY_TRIANGLE_HPP</highlight></codeline>
+<codeline lineno="13"><highlight class="preprocessor"></highlight><highlight class="preprocessor">#define<sp/>DO_GEOMETRY_TRIANGLE_HPP</highlight></codeline>
+<codeline lineno="14"><highlight class="preprocessor"></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;<ref refid="_eigen_extension_8hpp" kindref="compound" tooltip="Eigen matrices and vector typedefs.">DO/Core/EigenExtension.hpp</ref>&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="16"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;DO/Geometry/Objects/Polygon.hpp&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="17"><highlight class="normal"></highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight><highlight class="keyword">namespace<sp/></highlight><highlight class="normal">DO<sp/>{</highlight></codeline>
+<codeline lineno="19"><highlight class="normal"></highlight></codeline>
+<codeline lineno="20"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>Triangle<sp/>(a,b,c)<sp/>enumerated<sp/>in<sp/>CCW<sp/>order.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="21" refid="class_d_o_1_1_triangle" refkind="compound"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="class_d_o_1_1_triangle" kindref="compound">Triangle</ref><sp/>:<sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_small_polygon" kindref="compound">SmallPolygon</ref>&lt;3&gt;</highlight></codeline>
+<codeline lineno="22"><highlight class="normal"><sp/><sp/>{</highlight></codeline>
+<codeline lineno="23"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="24"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="class_d_o_1_1_triangle" kindref="compound">Triangle</ref>()<sp/>:<sp/><ref refid="class_d_o_1_1_small_polygon" kindref="compound">SmallPolygon&lt;3&gt;</ref>()<sp/>{}</highlight></codeline>
+<codeline lineno="25"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="class_d_o_1_1_triangle" kindref="compound">Triangle</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member" tooltip="Self-explanatory.">Point2d</ref>&amp;<sp/>a,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member" tooltip="Self-explanatory.">Point2d</ref>&amp;<sp/>b,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member" tooltip="Self-explanatory.">Point2d</ref>&amp;<sp/>c);</highlight></codeline>
+<codeline lineno="26"><highlight class="normal"><sp/><sp/>};</highlight></codeline>
+<codeline lineno="27"><highlight class="normal"></highlight></codeline>
+<codeline lineno="28"><highlight class="normal">}<sp/></highlight><highlight class="comment">/*<sp/>namespace<sp/>DO<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="29"><highlight class="normal"></highlight></codeline>
+<codeline lineno="30"><highlight class="normal"></highlight><highlight class="preprocessor">#endif<sp/></highlight><highlight class="comment">/*<sp/>DO_TRIANGLE_HPP<sp/>*/</highlight><highlight class="preprocessor"></highlight></codeline>
+    </programlisting>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/Triangle.hpp"/>
+  </compounddef>
+</doxygen>

@@ -1,0 +1,585 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="group___channel_accessors" kind="group">
+    <compoundname>ChannelAccessors</compoundname>
+    <title>Short mutable and non-mutable channel accessors</title>
+      <sectiondef kind="func">
+      <memberdef kind="function" id="group___channel_accessors_1ga757afabac81c17de47404784d892fd3b" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>typename Layout</type>
+          </param>
+        </templateparamlist>
+        <type>T &amp;</type>
+        <definition>T&amp; DO::red</definition>
+        <argsstring>(Color&lt; T, Layout &gt; &amp;c)</argsstring>
+        <name>red</name>
+        <param>
+          <type>Color&lt; T, Layout &gt; &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Mutable channel accessor. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="172" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="172" bodyend="172"/>
+      </memberdef>
+      <memberdef kind="function" id="group___channel_accessors_1gaeb571624f9083b6e93caa612efbe33d5" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>typename Layout</type>
+          </param>
+        </templateparamlist>
+        <type>const T &amp;</type>
+        <definition>const T&amp; DO::red</definition>
+        <argsstring>(const Color&lt; T, Layout &gt; &amp;c)</argsstring>
+        <name>red</name>
+        <param>
+          <type>const Color&lt; T, Layout &gt; &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Non-mutable channel accessor. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="172" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="172" bodyend="172"/>
+      </memberdef>
+      <memberdef kind="function" id="group___channel_accessors_1gae8bbbd63c7f0aab610b1dd591b415519" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>typename Layout</type>
+          </param>
+        </templateparamlist>
+        <type>T &amp;</type>
+        <definition>T&amp; DO::green</definition>
+        <argsstring>(Color&lt; T, Layout &gt; &amp;c)</argsstring>
+        <name>green</name>
+        <param>
+          <type>Color&lt; T, Layout &gt; &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Mutable channel accessor. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="173" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="173" bodyend="173"/>
+      </memberdef>
+      <memberdef kind="function" id="group___channel_accessors_1ga5bfc09b28f0f9052e3c133581f6667c3" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>typename Layout</type>
+          </param>
+        </templateparamlist>
+        <type>const T &amp;</type>
+        <definition>const T&amp; DO::green</definition>
+        <argsstring>(const Color&lt; T, Layout &gt; &amp;c)</argsstring>
+        <name>green</name>
+        <param>
+          <type>const Color&lt; T, Layout &gt; &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Non-mutable channel accessor. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="173" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="173" bodyend="173"/>
+      </memberdef>
+      <memberdef kind="function" id="group___channel_accessors_1ga002fae45c069050f774c897a69e18b39" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>typename Layout</type>
+          </param>
+        </templateparamlist>
+        <type>T &amp;</type>
+        <definition>T&amp; DO::blue</definition>
+        <argsstring>(Color&lt; T, Layout &gt; &amp;c)</argsstring>
+        <name>blue</name>
+        <param>
+          <type>Color&lt; T, Layout &gt; &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Mutable channel accessor. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="174" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="174" bodyend="174"/>
+      </memberdef>
+      <memberdef kind="function" id="group___channel_accessors_1ga7f05f0fe577efb6d905528093fbaab0b" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>typename Layout</type>
+          </param>
+        </templateparamlist>
+        <type>const T &amp;</type>
+        <definition>const T&amp; DO::blue</definition>
+        <argsstring>(const Color&lt; T, Layout &gt; &amp;c)</argsstring>
+        <name>blue</name>
+        <param>
+          <type>const Color&lt; T, Layout &gt; &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Non-mutable channel accessor. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="174" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="174" bodyend="174"/>
+      </memberdef>
+      <memberdef kind="function" id="group___channel_accessors_1gaa131549883a0aae99914ffe78da0dbcb" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>typename Layout</type>
+          </param>
+        </templateparamlist>
+        <type>T &amp;</type>
+        <definition>T&amp; DO::alpha</definition>
+        <argsstring>(Color&lt; T, Layout &gt; &amp;c)</argsstring>
+        <name>alpha</name>
+        <param>
+          <type>Color&lt; T, Layout &gt; &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Mutable channel accessor. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="175" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="175" bodyend="175"/>
+      </memberdef>
+      <memberdef kind="function" id="group___channel_accessors_1gaedb55300f0a4cfb17d4f281e437e1ac3" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>typename Layout</type>
+          </param>
+        </templateparamlist>
+        <type>const T &amp;</type>
+        <definition>const T&amp; DO::alpha</definition>
+        <argsstring>(const Color&lt; T, Layout &gt; &amp;c)</argsstring>
+        <name>alpha</name>
+        <param>
+          <type>const Color&lt; T, Layout &gt; &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Non-mutable channel accessor. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="175" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="175" bodyend="175"/>
+      </memberdef>
+      <memberdef kind="function" id="group___channel_accessors_1ga47dfa2b4967e6d59132775b062f770be" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>typename Layout</type>
+          </param>
+        </templateparamlist>
+        <type>T &amp;</type>
+        <definition>T&amp; DO::cyan</definition>
+        <argsstring>(Color&lt; T, Layout &gt; &amp;c)</argsstring>
+        <name>cyan</name>
+        <param>
+          <type>Color&lt; T, Layout &gt; &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Mutable channel accessor. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="177" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="177" bodyend="177"/>
+      </memberdef>
+      <memberdef kind="function" id="group___channel_accessors_1gaae689fe2a49dafa645bed231415281be" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>typename Layout</type>
+          </param>
+        </templateparamlist>
+        <type>const T &amp;</type>
+        <definition>const T&amp; DO::cyan</definition>
+        <argsstring>(const Color&lt; T, Layout &gt; &amp;c)</argsstring>
+        <name>cyan</name>
+        <param>
+          <type>const Color&lt; T, Layout &gt; &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Non-mutable channel accessor. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="177" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="177" bodyend="177"/>
+      </memberdef>
+      <memberdef kind="function" id="group___channel_accessors_1gad0c36c945f72154bacb9dd3339da3eb8" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>typename Layout</type>
+          </param>
+        </templateparamlist>
+        <type>T &amp;</type>
+        <definition>T&amp; DO::magenta</definition>
+        <argsstring>(Color&lt; T, Layout &gt; &amp;c)</argsstring>
+        <name>magenta</name>
+        <param>
+          <type>Color&lt; T, Layout &gt; &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Mutable channel accessor. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="178" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="178" bodyend="178"/>
+      </memberdef>
+      <memberdef kind="function" id="group___channel_accessors_1ga012dc44d2b56f5688643a355f0737daa" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>typename Layout</type>
+          </param>
+        </templateparamlist>
+        <type>const T &amp;</type>
+        <definition>const T&amp; DO::magenta</definition>
+        <argsstring>(const Color&lt; T, Layout &gt; &amp;c)</argsstring>
+        <name>magenta</name>
+        <param>
+          <type>const Color&lt; T, Layout &gt; &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Non-mutable channel accessor. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="178" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="178" bodyend="178"/>
+      </memberdef>
+      <memberdef kind="function" id="group___channel_accessors_1ga6829ee374a312a1029a0148235540de3" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>typename Layout</type>
+          </param>
+        </templateparamlist>
+        <type>T &amp;</type>
+        <definition>T&amp; DO::yellow</definition>
+        <argsstring>(Color&lt; T, Layout &gt; &amp;c)</argsstring>
+        <name>yellow</name>
+        <param>
+          <type>Color&lt; T, Layout &gt; &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Mutable channel accessor. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="179" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="179" bodyend="179"/>
+      </memberdef>
+      <memberdef kind="function" id="group___channel_accessors_1gac23bd53f11255e8179ab89bf48d050d1" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>typename Layout</type>
+          </param>
+        </templateparamlist>
+        <type>const T &amp;</type>
+        <definition>const T&amp; DO::yellow</definition>
+        <argsstring>(const Color&lt; T, Layout &gt; &amp;c)</argsstring>
+        <name>yellow</name>
+        <param>
+          <type>const Color&lt; T, Layout &gt; &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Non-mutable channel accessor. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="179" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="179" bodyend="179"/>
+      </memberdef>
+      <memberdef kind="function" id="group___channel_accessors_1ga18f2660186c9e25f69ed6fe2d474752c" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>typename Layout</type>
+          </param>
+        </templateparamlist>
+        <type>T &amp;</type>
+        <definition>T&amp; DO::black</definition>
+        <argsstring>(Color&lt; T, Layout &gt; &amp;c)</argsstring>
+        <name>black</name>
+        <param>
+          <type>Color&lt; T, Layout &gt; &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Mutable channel accessor. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="180" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="180" bodyend="180"/>
+      </memberdef>
+      <memberdef kind="function" id="group___channel_accessors_1gab36760b6e747c3cdcb47643dce670493" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>typename Layout</type>
+          </param>
+        </templateparamlist>
+        <type>const T &amp;</type>
+        <definition>const T&amp; DO::black</definition>
+        <argsstring>(const Color&lt; T, Layout &gt; &amp;c)</argsstring>
+        <name>black</name>
+        <param>
+          <type>const Color&lt; T, Layout &gt; &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Non-mutable channel accessor. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="180" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="180" bodyend="180"/>
+      </memberdef>
+      <memberdef kind="function" id="group___channel_accessors_1gac90c52c5b3a7b2a7e3761e6e84f25778" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>typename Layout</type>
+          </param>
+        </templateparamlist>
+        <type>T &amp;</type>
+        <definition>T&amp; DO::y</definition>
+        <argsstring>(Color&lt; T, Layout &gt; &amp;c)</argsstring>
+        <name>y</name>
+        <param>
+          <type>Color&lt; T, Layout &gt; &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Mutable channel accessor. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="182" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="182" bodyend="182"/>
+      </memberdef>
+      <memberdef kind="function" id="group___channel_accessors_1ga42846abfe3173fb8a817a0e3a3fa9c44" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>typename Layout</type>
+          </param>
+        </templateparamlist>
+        <type>const T &amp;</type>
+        <definition>const T&amp; DO::y</definition>
+        <argsstring>(const Color&lt; T, Layout &gt; &amp;c)</argsstring>
+        <name>y</name>
+        <param>
+          <type>const Color&lt; T, Layout &gt; &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Non-mutable channel accessor. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="182" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="182" bodyend="182"/>
+      </memberdef>
+      <memberdef kind="function" id="group___channel_accessors_1ga056f2dcf2b4d1976e50bf20547617584" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>typename Layout</type>
+          </param>
+        </templateparamlist>
+        <type>T &amp;</type>
+        <definition>T&amp; DO::u</definition>
+        <argsstring>(Color&lt; T, Layout &gt; &amp;c)</argsstring>
+        <name>u</name>
+        <param>
+          <type>Color&lt; T, Layout &gt; &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Mutable channel accessor. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="183" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="183" bodyend="183"/>
+      </memberdef>
+      <memberdef kind="function" id="group___channel_accessors_1gae90bfcd1e7783b7306b5d1df688f3671" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>typename Layout</type>
+          </param>
+        </templateparamlist>
+        <type>const T &amp;</type>
+        <definition>const T&amp; DO::u</definition>
+        <argsstring>(const Color&lt; T, Layout &gt; &amp;c)</argsstring>
+        <name>u</name>
+        <param>
+          <type>const Color&lt; T, Layout &gt; &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Non-mutable channel accessor. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="183" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="183" bodyend="183"/>
+      </memberdef>
+      <memberdef kind="function" id="group___channel_accessors_1ga1dd2524c5b8d3db33137eedb803fc2ce" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>typename Layout</type>
+          </param>
+        </templateparamlist>
+        <type>T &amp;</type>
+        <definition>T&amp; DO::v</definition>
+        <argsstring>(Color&lt; T, Layout &gt; &amp;c)</argsstring>
+        <name>v</name>
+        <param>
+          <type>Color&lt; T, Layout &gt; &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Mutable channel accessor. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="184" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="184" bodyend="184"/>
+      </memberdef>
+      <memberdef kind="function" id="group___channel_accessors_1ga11fac27b0966d58ad0e9abdbcf3d71b1" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>typename Layout</type>
+          </param>
+        </templateparamlist>
+        <type>const T &amp;</type>
+        <definition>const T&amp; DO::v</definition>
+        <argsstring>(const Color&lt; T, Layout &gt; &amp;c)</argsstring>
+        <name>v</name>
+        <param>
+          <type>const Color&lt; T, Layout &gt; &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Non-mutable channel accessor. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="184" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="184" bodyend="184"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="define">
+      <memberdef kind="define" id="group___channel_accessors_1ga17a132ee4905c132201008787b93e336" prot="public" static="no">
+        <name>DEFINE_COLOR_CHANNEL_GETTERS</name>
+        <param><defname>channelName</defname></param>
+        <param><defname>channelTag</defname></param>
+        <initializer>/*! \brief Mutable channel accessor. */                     \
+  template &lt;typename T, typename Layout&gt;                      \
+  inline T&amp; channelName(Color&lt;T, Layout&gt;&amp; c)                  \
+  { return c.template channel&lt;channelTag&gt;(); }                \
+  /*! \brief Non-mutable channel accessor. */                 \
+  template &lt;typename T, typename Layout&gt;                      \
+  inline const T&amp; channelName(const Color&lt;T, Layout&gt;&amp; c)      \
+  { return c.template channel&lt;channelTag&gt;(); }</initializer>
+        <briefdescription>
+<para>Macro that defines short mutable and non-mutable channel accessors. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="170" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="162" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+<para>Example: <computeroutput>red(c)</computeroutput> is equivalent to <computeroutput>c.channel&lt;R&gt;()</computeroutput></para><para>It is shorter and may be less error prone if we forget the color layout. </para>    </detaileddescription>
+  </compounddef>
+</doxygen>

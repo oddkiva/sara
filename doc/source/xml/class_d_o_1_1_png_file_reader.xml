@@ -1,0 +1,152 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="class_d_o_1_1_png_file_reader" kind="class" prot="public">
+    <compoundname>DO::PngFileReader</compoundname>
+    <basecompoundref refid="class_d_o_1_1_image_file_reader" prot="public" virt="non-virtual">ImageFileReader</basecompoundref>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="class_d_o_1_1_png_file_reader_1a55aeeb404d5f026787361dda7a4f1cb8" prot="private" static="no" mutable="no">
+        <type>png_structp</type>
+        <definition>png_structp png_ptr</definition>
+        <argsstring></argsstring>
+        <name>png_ptr</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" line="100" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" bodystart="100" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_png_file_reader_1acff20584e44b8e5b6ebd0ef649fd89f9" prot="private" static="no" mutable="no">
+        <type>png_infop</type>
+        <definition>png_infop info_ptr</definition>
+        <argsstring></argsstring>
+        <name>info_ptr</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" line="101" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" bodystart="101" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_d_o_1_1_png_file_reader_1a063e47c9df5cafa734f3d4fbd9e8330c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>PngFileReader</definition>
+        <argsstring>(const std::string &amp;filepath)</argsstring>
+        <name>PngFileReader</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>filepath</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" line="103"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_png_file_reader_1ae7dcab4ffb3fd144d188e85f248c9a14" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>~PngFileReader</definition>
+        <argsstring>()</argsstring>
+        <name>~PngFileReader</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" line="104"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_png_file_reader_1acbd31eb8e1a32a8fca72f77ae234928b" prot="public" static="no" const="no" explicit="no" inline="no" virt="virtual">
+        <type>bool</type>
+        <definition>bool operator()</definition>
+        <argsstring>(unsigned char *&amp;data, int &amp;width, int &amp;height, int &amp;depth)</argsstring>
+        <name>operator()</name>
+        <reimplements refid="class_d_o_1_1_image_file_reader_1a3f40f6bedd4be74c3f58806a1a099e4c">operator()</reimplements>
+        <param>
+          <type>unsigned char *&amp;</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>int &amp;</type>
+          <declname>width</declname>
+        </param>
+        <param>
+          <type>int &amp;</type>
+          <declname>height</declname>
+        </param>
+        <param>
+          <type>int &amp;</type>
+          <declname>depth</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" line="105"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="462">
+        <label>FileHandler</label>
+        <link refid="class_d_o_1_1_file_handler"/>
+      </node>
+      <node id="460">
+        <label>PngFileReader</label>
+        <link refid="class_d_o_1_1_png_file_reader"/>
+        <childnode refid="461" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="461">
+        <label>ImageFileReader</label>
+        <link refid="class_d_o_1_1_image_file_reader"/>
+        <childnode refid="462" relation="public-inheritance">
+        </childnode>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="465">
+        <label>FileHandler</label>
+        <link refid="class_d_o_1_1_file_handler"/>
+      </node>
+      <node id="463">
+        <label>PngFileReader</label>
+        <link refid="class_d_o_1_1_png_file_reader"/>
+        <childnode refid="464" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="464">
+        <label>ImageFileReader</label>
+        <link refid="class_d_o_1_1_image_file_reader"/>
+        <childnode refid="465" relation="public-inheritance">
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" line="99" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" bodystart="98" bodyend="106"/>
+    <listofallmembers>
+      <member refid="class_d_o_1_1_file_handler_1a715b2a1d4ad04ec0c950d1467f91964e" prot="protected" virt="non-virtual"><scope>DO::PngFileReader</scope><name>file_</name></member>
+      <member refid="class_d_o_1_1_file_handler_1a7a105e8757c6bbbe0e6be820ce84f1ed" prot="public" virt="non-virtual"><scope>DO::PngFileReader</scope><name>FileHandler</name></member>
+      <member refid="class_d_o_1_1_file_handler_1ab8b9ecc7384dd1830ea8d76aeda28f88" prot="public" virt="non-virtual"><scope>DO::PngFileReader</scope><name>FileHandler</name></member>
+      <member refid="class_d_o_1_1_image_file_reader_1ae9c2bb6aab48f01b222a2ad44dc08a69" prot="public" virt="non-virtual"><scope>DO::PngFileReader</scope><name>ImageFileReader</name></member>
+      <member refid="class_d_o_1_1_image_file_reader_1a0111a8473f26e7eeb51ec815630871e9" prot="public" virt="non-virtual"><scope>DO::PngFileReader</scope><name>ImageFileReader</name></member>
+      <member refid="class_d_o_1_1_png_file_reader_1acff20584e44b8e5b6ebd0ef649fd89f9" prot="private" virt="non-virtual"><scope>DO::PngFileReader</scope><name>info_ptr</name></member>
+      <member refid="class_d_o_1_1_png_file_reader_1acbd31eb8e1a32a8fca72f77ae234928b" prot="public" virt="virtual"><scope>DO::PngFileReader</scope><name>operator()</name></member>
+      <member refid="class_d_o_1_1_png_file_reader_1a55aeeb404d5f026787361dda7a4f1cb8" prot="private" virt="non-virtual"><scope>DO::PngFileReader</scope><name>png_ptr</name></member>
+      <member refid="class_d_o_1_1_png_file_reader_1a063e47c9df5cafa734f3d4fbd9e8330c" prot="public" virt="non-virtual"><scope>DO::PngFileReader</scope><name>PngFileReader</name></member>
+      <member refid="class_d_o_1_1_file_handler_1a0d3895a0eb5141fa24ba508c743d1924" prot="public" virt="virtual"><scope>DO::PngFileReader</scope><name>~FileHandler</name></member>
+      <member refid="class_d_o_1_1_image_file_reader_1a7a80b92c01860dc95f596d974a05ce8c" prot="public" virt="virtual"><scope>DO::PngFileReader</scope><name>~ImageFileReader</name></member>
+      <member refid="class_d_o_1_1_png_file_reader_1ae7dcab4ffb3fd144d188e85f248c9a14" prot="public" virt="non-virtual"><scope>DO::PngFileReader</scope><name>~PngFileReader</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

@@ -1,0 +1,263 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="_sparse_multi_array_8hpp" kind="file">
+    <compoundname>SparseMultiArray.hpp</compoundname>
+    <includes refid="_eigen_extension_8hpp" local="yes">EigenExtension.hpp</includes>
+    <includes local="no">map</includes>
+    <includedby refid="_core_8hpp" local="yes">C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core.hpp</includedby>
+    <incdepgraph>
+      <node id="254">
+        <label>Eigen/Eigen</label>
+      </node>
+      <node id="256">
+        <label>map</label>
+      </node>
+      <node id="255">
+        <label>sstream</label>
+      </node>
+      <node id="253">
+        <label>EigenExtension.hpp</label>
+        <link refid="_eigen_extension_8hpp"/>
+        <childnode refid="254" relation="include">
+        </childnode>
+        <childnode refid="255" relation="include">
+        </childnode>
+      </node>
+      <node id="252">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/SparseMultiArray.hpp</label>
+        <link refid="SparseMultiArray.hpp"/>
+        <childnode refid="253" relation="include">
+        </childnode>
+        <childnode refid="256" relation="include">
+        </childnode>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="266">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/KDTree.hpp</label>
+        <link refid="_k_d_tree_8hpp_source"/>
+      </node>
+      <node id="261">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features.hpp</label>
+        <link refid="_features_8hpp"/>
+        <childnode refid="262" relation="include">
+        </childnode>
+        <childnode refid="263" relation="include">
+        </childnode>
+      </node>
+      <node id="262">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDescriptors.hpp</label>
+        <link refid="_feature_descriptors_8hpp"/>
+      </node>
+      <node id="263">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors.hpp</label>
+        <link refid="_feature_detectors_8hpp"/>
+      </node>
+      <node id="260">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/View.hpp</label>
+        <link refid="_view_8hpp"/>
+      </node>
+      <node id="264">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing.hpp</label>
+        <link refid="_image_processing_8hpp"/>
+        <childnode refid="262" relation="include">
+        </childnode>
+        <childnode refid="263" relation="include">
+        </childnode>
+      </node>
+      <node id="258">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core.hpp</label>
+        <link refid="_core_8hpp"/>
+        <childnode refid="259" relation="include">
+        </childnode>
+        <childnode refid="260" relation="include">
+        </childnode>
+        <childnode refid="261" relation="include">
+        </childnode>
+        <childnode refid="264" relation="include">
+        </childnode>
+        <childnode refid="265" relation="include">
+        </childnode>
+      </node>
+      <node id="257">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/SparseMultiArray.hpp</label>
+        <link refid="SparseMultiArray.hpp"/>
+        <childnode refid="258" relation="include">
+        </childnode>
+      </node>
+      <node id="259">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/FeatureItem.hpp</label>
+        <link refid="_feature_item_8hpp_source"/>
+      </node>
+      <node id="265">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/KDTree/KDTree.hpp</label>
+        <link refid="_k_d_tree_2_k_d_tree_8hpp_source"/>
+        <childnode refid="266" relation="include">
+        </childnode>
+      </node>
+    </invincdepgraph>
+    <innerclass refid="class_d_o_1_1_sparse_multi_array" prot="public">DO::SparseMultiArray</innerclass>
+    <innernamespace refid="namespace_d_o">DO</innernamespace>
+    <briefdescription>
+<para>This contains the implementation of the sparse N-dimensional array class. </para>    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="comment">//<sp/>==========================================================================<sp/>//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="comment">//<sp/>This<sp/>file<sp/>is<sp/>part<sp/>of<sp/>DO++,<sp/>a<sp/>basic<sp/>set<sp/>of<sp/>libraries<sp/>in<sp/>C++<sp/>for<sp/>computer<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight><highlight class="comment">//<sp/>vision.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="comment">//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Copyright<sp/>(C)<sp/>2013<sp/>David<sp/>Ok<sp/>&lt;david.ok8@gmail.com&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight><highlight class="comment">//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight><highlight class="comment">//<sp/>This<sp/>Source<sp/>Code<sp/>Form<sp/>is<sp/>subject<sp/>to<sp/>the<sp/>terms<sp/>of<sp/>the<sp/>Mozilla<sp/>Public<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight><highlight class="comment">//<sp/>License<sp/>v.<sp/>2.0.<sp/>If<sp/>a<sp/>copy<sp/>of<sp/>the<sp/>MPL<sp/>was<sp/>not<sp/>distributed<sp/>with<sp/>this<sp/>file,<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight><highlight class="comment">//<sp/>you<sp/>can<sp/>obtain<sp/>one<sp/>at<sp/>http://mozilla.org/MPL/2.0/.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight><highlight class="comment">//<sp/>==========================================================================<sp/>//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight><highlight class="preprocessor">#ifndef<sp/>DO_CORE_SPARSEMULTIARRAY_HPP</highlight></codeline>
+<codeline lineno="16"><highlight class="preprocessor"></highlight><highlight class="preprocessor">#define<sp/>DO_CORE_SPARSEMULTIARRAY_HPP</highlight></codeline>
+<codeline lineno="17"><highlight class="preprocessor"></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_eigen_extension_8hpp" kindref="compound" tooltip="Eigen matrices and vector typedefs.">EigenExtension.hpp</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="19"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;map&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="20"><highlight class="normal"></highlight></codeline>
+<codeline lineno="21"><highlight class="normal"></highlight><highlight class="keyword">namespace<sp/></highlight><highlight class="normal">DO<sp/>{</highlight></codeline>
+<codeline lineno="22"><highlight class="normal"></highlight></codeline>
+<codeline lineno="26"></codeline>
+<codeline lineno="28"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">template</highlight><highlight class="normal"><sp/>&lt;</highlight><highlight class="keyword">typename</highlight><highlight class="normal"><sp/>T,<sp/></highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>N&gt;</highlight></codeline>
+<codeline lineno="29" refid="class_d_o_1_1_sparse_multi_array" refkind="compound"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="class_d_o_1_1_sparse_multi_array" kindref="compound" tooltip="Sparse N-dimensional array class.">SparseMultiArray</ref></highlight></codeline>
+<codeline lineno="30"><highlight class="normal"><sp/><sp/>{</highlight></codeline>
+<codeline lineno="31"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="32" refid="class_d_o_1_1_sparse_multi_array_1ae4fb477425bbeb20329d300396ac2582" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/>Matrix&lt;int,<sp/>N,<sp/>1&gt;<sp/><ref refid="class_d_o_1_1_sparse_multi_array_1ae4fb477425bbeb20329d300396ac2582" kindref="member" tooltip="STL-like interface.">coord_type</ref>;<sp/></highlight></codeline>
+<codeline lineno="33" refid="class_d_o_1_1_sparse_multi_array_1a265a253612b46abed17c61b0a5e5ce30" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/>T<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1a265a253612b46abed17c61b0a5e5ce30" kindref="member" tooltip="STL-like interface.">value_type</ref>;<sp/></highlight></codeline>
+<codeline lineno="34" refid="class_d_o_1_1_sparse_multi_array_1ada51e68d31936547d3729c82daf6b7c6" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1ada51e68d31936547d3729c82daf6b7c6" kindref="member" tooltip="STL-like interface.">size_type</ref>;<sp/></highlight></codeline>
+<codeline lineno="35"><highlight class="normal"></highlight></codeline>
+<codeline lineno="36"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">private</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="37"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/>std::map&lt;coord_type,<sp/>value_type,<sp/>LexicographicalOrder&gt;<sp/>storage_type;</highlight></codeline>
+<codeline lineno="38"><highlight class="normal"></highlight></codeline>
+<codeline lineno="39"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal">:<sp/></highlight><highlight class="comment">//<sp/>STL-like<sp/>interface</highlight></codeline>
+<codeline lineno="41" refid="class_d_o_1_1_sparse_multi_array_1a707c3ebff4b3587b5e3a4f8000ecb024" refkind="member"><highlight class="comment"></highlight><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1ada51e68d31936547d3729c82daf6b7c6" kindref="member" tooltip="STL-like interface.">size_type</ref><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1a707c3ebff4b3587b5e3a4f8000ecb024" kindref="member" tooltip="Dimension.">dimension</ref><sp/>=<sp/>N;</highlight></codeline>
+<codeline lineno="43" refid="class_d_o_1_1_sparse_multi_array_1aeb7d6a472fc07a6f5c9761e906c9f826" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">typename</highlight><highlight class="normal"><sp/>storage_type::iterator<sp/><ref refid="class_d_o_1_1_sparse_multi_array_1aeb7d6a472fc07a6f5c9761e906c9f826" kindref="member" tooltip="iterator type.">iterator</ref>;</highlight></codeline>
+<codeline lineno="45" refid="class_d_o_1_1_sparse_multi_array_1a136285f5e1620856973c0c4007453a57" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">typename</highlight><highlight class="normal"><sp/>storage_type::const_iterator<sp/><ref refid="class_d_o_1_1_sparse_multi_array_1a136285f5e1620856973c0c4007453a57" kindref="member" tooltip="const_iterator type.">const_iterator</ref>;</highlight></codeline>
+<codeline lineno="46"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//typedef<sp/>typename<sp/>storage_type::size_type<sp/>size_type;</highlight></codeline>
+<codeline lineno="48" refid="class_d_o_1_1_sparse_multi_array_1a8d8689998714f4431b104a5b21f43e9f" refkind="member"><highlight class="comment"></highlight><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">typename</highlight><highlight class="normal"><sp/>storage_type::difference_type<sp/><ref refid="class_d_o_1_1_sparse_multi_array_1a8d8689998714f4431b104a5b21f43e9f" kindref="member" tooltip="difference_type type.">difference_type</ref>;</highlight></codeline>
+<codeline lineno="50" refid="class_d_o_1_1_sparse_multi_array_1abe8933d436779a43cb5c1896ff5f2918" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1a265a253612b46abed17c61b0a5e5ce30" kindref="member" tooltip="STL-like interface.">value_type</ref>&amp;<sp/><ref refid="class_d_o_1_1_sparse_multi_array_1abe8933d436779a43cb5c1896ff5f2918" kindref="member" tooltip="reference type.">reference</ref>;</highlight></codeline>
+<codeline lineno="52" refid="class_d_o_1_1_sparse_multi_array_1afdb67657e63a66ed3fae7b0c9fd81b48" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1a265a253612b46abed17c61b0a5e5ce30" kindref="member" tooltip="STL-like interface.">value_type</ref>&amp;<sp/><ref refid="class_d_o_1_1_sparse_multi_array_1afdb67657e63a66ed3fae7b0c9fd81b48" kindref="member" tooltip="const_reference type.">const_reference</ref>;</highlight></codeline>
+<codeline lineno="53"><highlight class="normal"></highlight></codeline>
+<codeline lineno="54"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal">:<sp/></highlight><highlight class="comment">//<sp/>interface</highlight></codeline>
+<codeline lineno="56" refid="class_d_o_1_1_sparse_multi_array_1aa31288ffe2bcc901d1bea4ab9291c278" refkind="member"><highlight class="comment"></highlight><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1aa31288ffe2bcc901d1bea4ab9291c278" kindref="member" tooltip="Default constructor.">SparseMultiArray</ref>()</highlight></codeline>
+<codeline lineno="57"><highlight class="normal"><sp/><sp/><sp/><sp/>{}</highlight></codeline>
+<codeline lineno="58"><highlight class="normal"></highlight></codeline>
+<codeline lineno="60" refid="class_d_o_1_1_sparse_multi_array_1adb2b3256fac8e82cdbb7532324788461" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1aa31288ffe2bcc901d1bea4ab9291c278" kindref="member" tooltip="Default constructor.">SparseMultiArray</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_sparse_multi_array" kindref="compound" tooltip="Sparse N-dimensional array class.">SparseMultiArray</ref>&amp;<sp/>a)</highlight></codeline>
+<codeline lineno="61"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>:<sp/>storage(a.storage)<sp/>{}</highlight></codeline>
+<codeline lineno="62"><highlight class="normal"></highlight></codeline>
+<codeline lineno="64" refid="class_d_o_1_1_sparse_multi_array_1ac6e61de369e994009e36f344f99c15ad" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1ac6e61de369e994009e36f344f99c15ad" kindref="member" tooltip="Checks if the sparse multi-array is empty.">empty</ref>()</highlight><highlight class="keyword"><sp/>const</highlight></codeline>
+<codeline lineno="65"><highlight class="keyword"><sp/><sp/><sp/><sp/></highlight><highlight class="normal">{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>storage.empty();<sp/>}</highlight></codeline>
+<codeline lineno="66"><highlight class="normal"></highlight></codeline>
+<codeline lineno="69" refid="class_d_o_1_1_sparse_multi_array_1af74fcb5e1793fae740aa6cfa3da7b857" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1ae4fb477425bbeb20329d300396ac2582" kindref="member" tooltip="STL-like interface.">coord_type</ref><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1af74fcb5e1793fae740aa6cfa3da7b857" kindref="member">min_key</ref>()</highlight><highlight class="keyword"><sp/>const</highlight></codeline>
+<codeline lineno="70"><highlight class="keyword"><sp/><sp/><sp/><sp/></highlight><highlight class="normal">{</highlight></codeline>
+<codeline lineno="71"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1a136285f5e1620856973c0c4007453a57" kindref="member" tooltip="const_iterator type.">const_iterator</ref><sp/>i_begin<sp/>=<sp/>storage.begin();</highlight></codeline>
+<codeline lineno="72"><highlight class="normal"></highlight></codeline>
+<codeline lineno="73"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1ae4fb477425bbeb20329d300396ac2582" kindref="member" tooltip="STL-like interface.">coord_type</ref><sp/>k<sp/>=<sp/>i_begin-&gt;first;</highlight></codeline>
+<codeline lineno="74"><highlight class="normal"></highlight></codeline>
+<codeline lineno="75"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>i_begin++;</highlight></codeline>
+<codeline lineno="76"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal">(<ref refid="class_d_o_1_1_sparse_multi_array_1a136285f5e1620856973c0c4007453a57" kindref="member" tooltip="const_iterator type.">const_iterator</ref><sp/>i<sp/>=<sp/>i_begin,<sp/>i_end<sp/>=<sp/>storage.end();<sp/>i<sp/>!=<sp/>i_end;i++)</highlight></codeline>
+<codeline lineno="77"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>{</highlight></codeline>
+<codeline lineno="78"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal">(<ref refid="class_d_o_1_1_sparse_multi_array_1ada51e68d31936547d3729c82daf6b7c6" kindref="member" tooltip="STL-like interface.">size_type</ref><sp/>n<sp/>=<sp/>0;n<sp/>&lt;<sp/><ref refid="class_d_o_1_1_sparse_multi_array_1a707c3ebff4b3587b5e3a4f8000ecb024" kindref="member" tooltip="Dimension.">dimension</ref>;n++)</highlight></codeline>
+<codeline lineno="79"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>{<sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="80"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal">&amp;<sp/>k_n<sp/>=<sp/>k[n];</highlight></codeline>
+<codeline lineno="81"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>k_n<sp/>=<sp/>min(k_n,(i-&gt;first)[n]);</highlight></codeline>
+<codeline lineno="82"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="83"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="84"><highlight class="normal"></highlight></codeline>
+<codeline lineno="85"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>k;</highlight></codeline>
+<codeline lineno="86"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="87"><highlight class="normal"></highlight></codeline>
+<codeline lineno="90" refid="class_d_o_1_1_sparse_multi_array_1ad1a015f476d71c75dc93dadd5e344aec" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1ae4fb477425bbeb20329d300396ac2582" kindref="member" tooltip="STL-like interface.">coord_type</ref><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1ad1a015f476d71c75dc93dadd5e344aec" kindref="member">max_key</ref>()</highlight><highlight class="keyword"><sp/>const</highlight></codeline>
+<codeline lineno="91"><highlight class="keyword"><sp/><sp/><sp/><sp/></highlight><highlight class="normal">{</highlight></codeline>
+<codeline lineno="92"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1a136285f5e1620856973c0c4007453a57" kindref="member" tooltip="const_iterator type.">const_iterator</ref><sp/>i_begin<sp/>=<sp/>storage.begin();</highlight></codeline>
+<codeline lineno="93"><highlight class="normal"></highlight></codeline>
+<codeline lineno="94"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1ae4fb477425bbeb20329d300396ac2582" kindref="member" tooltip="STL-like interface.">coord_type</ref><sp/>k<sp/>=<sp/>i_begin-&gt;first;</highlight></codeline>
+<codeline lineno="95"><highlight class="normal"></highlight></codeline>
+<codeline lineno="96"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>i_begin++;</highlight></codeline>
+<codeline lineno="97"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal">(<ref refid="class_d_o_1_1_sparse_multi_array_1a136285f5e1620856973c0c4007453a57" kindref="member" tooltip="const_iterator type.">const_iterator</ref><sp/>i<sp/>=<sp/>i_begin,<sp/>i_end<sp/>=<sp/>storage.end();<sp/>i<sp/>!=<sp/>i_end;i++)</highlight></codeline>
+<codeline lineno="98"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>{</highlight></codeline>
+<codeline lineno="99"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal">(<ref refid="class_d_o_1_1_sparse_multi_array_1ada51e68d31936547d3729c82daf6b7c6" kindref="member" tooltip="STL-like interface.">size_type</ref><sp/>n<sp/>=<sp/>0;n<sp/>&lt;<sp/><ref refid="class_d_o_1_1_sparse_multi_array_1a707c3ebff4b3587b5e3a4f8000ecb024" kindref="member" tooltip="Dimension.">dimension</ref>;n++)</highlight></codeline>
+<codeline lineno="100"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>{<sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="101"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal">&amp;<sp/>k_n<sp/>=<sp/>k[n];</highlight></codeline>
+<codeline lineno="102"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>k_n<sp/>=<sp/>max(k_n,(i-&gt;first)[n]);</highlight></codeline>
+<codeline lineno="103"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="104"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="105"><highlight class="normal"></highlight></codeline>
+<codeline lineno="106"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>k;</highlight></codeline>
+<codeline lineno="107"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="108"><highlight class="normal"></highlight></codeline>
+<codeline lineno="110" refid="class_d_o_1_1_sparse_multi_array_1a96c8baba4bb71887f51755f43047c026" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1ae4fb477425bbeb20329d300396ac2582" kindref="member" tooltip="STL-like interface.">coord_type</ref><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1a96c8baba4bb71887f51755f43047c026" kindref="member" tooltip="Returns the theoretical capacity of the sparse multi-array.">all_sizes</ref>()</highlight><highlight class="keyword"><sp/>const</highlight></codeline>
+<codeline lineno="111"><highlight class="keyword"><sp/><sp/><sp/><sp/></highlight><highlight class="normal">{</highlight></codeline>
+<codeline lineno="112"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1ae4fb477425bbeb20329d300396ac2582" kindref="member" tooltip="STL-like interface.">coord_type</ref><sp/>sizes;</highlight></codeline>
+<codeline lineno="113"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal">(<ref refid="class_d_o_1_1_sparse_multi_array_1ada51e68d31936547d3729c82daf6b7c6" kindref="member" tooltip="STL-like interface.">size_type</ref><sp/>n<sp/>=<sp/>0;<sp/>n<sp/>&lt;<sp/><ref refid="class_d_o_1_1_sparse_multi_array_1a707c3ebff4b3587b5e3a4f8000ecb024" kindref="member" tooltip="Dimension.">dimension</ref>;<sp/>++n)</highlight></codeline>
+<codeline lineno="114"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>sizes[n]<sp/>=<sp/>std::numeric_limits&lt;int&gt;::max();</highlight></codeline>
+<codeline lineno="115"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>sizes;</highlight></codeline>
+<codeline lineno="116"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="117"><highlight class="normal"></highlight></codeline>
+<codeline lineno="119" refid="class_d_o_1_1_sparse_multi_array_1a64a533cf4dbc0310557c4a0c06ecef6a" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1ae4fb477425bbeb20329d300396ac2582" kindref="member" tooltip="STL-like interface.">coord_type</ref><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1a64a533cf4dbc0310557c4a0c06ecef6a" kindref="member" tooltip="Returns the actual N-dimensional size of the sparse multi-array.">all_actual_sizes</ref>()</highlight><highlight class="keyword"><sp/>const</highlight></codeline>
+<codeline lineno="120"><highlight class="keyword"><sp/><sp/><sp/><sp/></highlight><highlight class="normal">{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1ad1a015f476d71c75dc93dadd5e344aec" kindref="member">max_key</ref>()-<ref refid="class_d_o_1_1_sparse_multi_array_1af74fcb5e1793fae740aa6cfa3da7b857" kindref="member">min_key</ref>();<sp/>}</highlight></codeline>
+<codeline lineno="121"><highlight class="normal"></highlight></codeline>
+<codeline lineno="123" refid="class_d_o_1_1_sparse_multi_array_1a503ab01f6c0142145d3434f6924714e7" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1ada51e68d31936547d3729c82daf6b7c6" kindref="member" tooltip="STL-like interface.">size_type</ref><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1a503ab01f6c0142145d3434f6924714e7" kindref="member" tooltip="Returns the raw size of the storage data.">size</ref>()</highlight><highlight class="keyword"><sp/>const</highlight></codeline>
+<codeline lineno="124"><highlight class="keyword"><sp/><sp/><sp/><sp/></highlight><highlight class="normal">{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>storage.size();<sp/>}</highlight></codeline>
+<codeline lineno="125"><highlight class="normal"></highlight></codeline>
+<codeline lineno="127" refid="class_d_o_1_1_sparse_multi_array_1a0ab5ce862c0331d9e45a6e1774fca131" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1ada51e68d31936547d3729c82daf6b7c6" kindref="member" tooltip="STL-like interface.">size_type</ref><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1a0ab5ce862c0331d9e45a6e1774fca131" kindref="member" tooltip="Returns the capacity of the storage data.">max_size</ref>()</highlight><highlight class="keyword"><sp/>const</highlight></codeline>
+<codeline lineno="128"><highlight class="keyword"><sp/><sp/><sp/><sp/></highlight><highlight class="normal">{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>storage.max_size();<sp/>}</highlight></codeline>
+<codeline lineno="129"><highlight class="normal"></highlight></codeline>
+<codeline lineno="131" refid="class_d_o_1_1_sparse_multi_array_1a475e9bb3f587819030146ed9b36a4fdd" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1a475e9bb3f587819030146ed9b36a4fdd" kindref="member" tooltip="Efficient swapping of two 2D arrays.">swap</ref>(<ref refid="class_d_o_1_1_sparse_multi_array" kindref="compound" tooltip="Sparse N-dimensional array class.">SparseMultiArray</ref>&amp;<sp/>a)</highlight></codeline>
+<codeline lineno="132"><highlight class="normal"><sp/><sp/><sp/><sp/>{<sp/>storage.swap(a.storage);<sp/>}</highlight></codeline>
+<codeline lineno="133"><highlight class="normal"></highlight></codeline>
+<codeline lineno="135" refid="class_d_o_1_1_sparse_multi_array_1ac8bb3912a3ce86b15842e79d0b421204" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1ac8bb3912a3ce86b15842e79d0b421204" kindref="member" tooltip="Erase all of the elements.">clear</ref>()</highlight></codeline>
+<codeline lineno="136"><highlight class="normal"><sp/><sp/><sp/><sp/>{<sp/>storage.clear();<sp/>}</highlight></codeline>
+<codeline lineno="137"><highlight class="normal"></highlight></codeline>
+<codeline lineno="139" refid="class_d_o_1_1_sparse_multi_array_1a3a09e4b6b1d83553d805b190988e8e97" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_sparse_multi_array" kindref="compound" tooltip="Sparse N-dimensional array class.">SparseMultiArray</ref>&amp;<sp/><ref refid="class_d_o_1_1_sparse_multi_array_1a3a09e4b6b1d83553d805b190988e8e97" kindref="member" tooltip="Assignment operator.">operator=</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_sparse_multi_array" kindref="compound" tooltip="Sparse N-dimensional array class.">SparseMultiArray</ref>&amp;<sp/>a)</highlight></codeline>
+<codeline lineno="140"><highlight class="normal"><sp/><sp/><sp/><sp/>{<sp/>storage<sp/>=<sp/>a.storage;<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>*</highlight><highlight class="keyword">this</highlight><highlight class="normal">;<sp/>}</highlight></codeline>
+<codeline lineno="141"><highlight class="normal"></highlight></codeline>
+<codeline lineno="143" refid="class_d_o_1_1_sparse_multi_array_1aaa3d8cf68eaa4f28a3320b36606d5e9d" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1aaa3d8cf68eaa4f28a3320b36606d5e9d" kindref="member" tooltip="Equality operator.">operator==</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_sparse_multi_array" kindref="compound" tooltip="Sparse N-dimensional array class.">SparseMultiArray</ref>&amp;<sp/>a)</highlight><highlight class="keyword"><sp/>const</highlight></codeline>
+<codeline lineno="144"><highlight class="keyword"><sp/><sp/><sp/><sp/></highlight><highlight class="normal">{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>storage<sp/>==<sp/>a.storage;<sp/>}</highlight></codeline>
+<codeline lineno="145"><highlight class="normal"></highlight></codeline>
+<codeline lineno="147" refid="class_d_o_1_1_sparse_multi_array_1a5535cda5173e6de06f10f5d055142977" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1a5535cda5173e6de06f10f5d055142977" kindref="member" tooltip="Inequality operator.">operator!=</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_sparse_multi_array" kindref="compound" tooltip="Sparse N-dimensional array class.">SparseMultiArray</ref>&amp;<sp/>a)</highlight><highlight class="keyword"><sp/>const</highlight></codeline>
+<codeline lineno="148"><highlight class="keyword"><sp/><sp/><sp/><sp/></highlight><highlight class="normal">{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>!(*</highlight><highlight class="keyword">this</highlight><highlight class="normal"><sp/>==<sp/>a);<sp/>}</highlight></codeline>
+<codeline lineno="149"><highlight class="normal"></highlight></codeline>
+<codeline lineno="151" refid="class_d_o_1_1_sparse_multi_array_1a300969d60d0c092b583ae79889b3bd67" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1a265a253612b46abed17c61b0a5e5ce30" kindref="member" tooltip="STL-like interface.">value_type</ref>&amp;<sp/><ref refid="class_d_o_1_1_sparse_multi_array_1a300969d60d0c092b583ae79889b3bd67" kindref="member" tooltip="Mutable Access operator.">operator[]</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1ae4fb477425bbeb20329d300396ac2582" kindref="member" tooltip="STL-like interface.">coord_type</ref>&amp;<sp/>k)</highlight></codeline>
+<codeline lineno="152"><highlight class="normal"><sp/><sp/><sp/><sp/>{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>storage[k];<sp/>}</highlight></codeline>
+<codeline lineno="153"><highlight class="normal"></highlight></codeline>
+<codeline lineno="155" refid="class_d_o_1_1_sparse_multi_array_1a53e649bdfcb910262e552bbe9678c1dd" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1a265a253612b46abed17c61b0a5e5ce30" kindref="member" tooltip="STL-like interface.">value_type</ref>&amp;<sp/><ref refid="class_d_o_1_1_sparse_multi_array_1a300969d60d0c092b583ae79889b3bd67" kindref="member" tooltip="Mutable Access operator.">operator[]</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1ae4fb477425bbeb20329d300396ac2582" kindref="member" tooltip="STL-like interface.">coord_type</ref>&amp;<sp/>k)</highlight><highlight class="keyword"><sp/>const</highlight></codeline>
+<codeline lineno="156"><highlight class="keyword"><sp/><sp/><sp/><sp/></highlight><highlight class="normal">{</highlight></codeline>
+<codeline lineno="157"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1a136285f5e1620856973c0c4007453a57" kindref="member" tooltip="const_iterator type.">const_iterator</ref><sp/>i<sp/>=<sp/>storage.find(k);</highlight></codeline>
+<codeline lineno="158"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(i<sp/>!=<sp/>storage.end())</highlight></codeline>
+<codeline lineno="159"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>i-&gt;second;</highlight></codeline>
+<codeline lineno="160"><highlight class="normal"></highlight></codeline>
+<codeline lineno="161"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1a265a253612b46abed17c61b0a5e5ce30" kindref="member" tooltip="STL-like interface.">value_type</ref><sp/>default_value<sp/>=<sp/><ref refid="class_d_o_1_1_sparse_multi_array_1a265a253612b46abed17c61b0a5e5ce30" kindref="member" tooltip="STL-like interface.">value_type</ref>();</highlight></codeline>
+<codeline lineno="162"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>default_value;</highlight></codeline>
+<codeline lineno="163"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="164"><highlight class="normal"></highlight></codeline>
+<codeline lineno="166" refid="class_d_o_1_1_sparse_multi_array_1ad69bd11391be1a1dba5c8202259664f8" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1aeb7d6a472fc07a6f5c9761e906c9f826" kindref="member" tooltip="iterator type.">iterator</ref><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1ad69bd11391be1a1dba5c8202259664f8" kindref="member" tooltip="Begin iterator.">begin</ref>()</highlight></codeline>
+<codeline lineno="167"><highlight class="normal"><sp/><sp/><sp/><sp/>{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>storage.begin();<sp/>}</highlight></codeline>
+<codeline lineno="168"><highlight class="normal"></highlight></codeline>
+<codeline lineno="170" refid="class_d_o_1_1_sparse_multi_array_1aa4b02d4f1a8500fb07a551069060709f" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1a136285f5e1620856973c0c4007453a57" kindref="member" tooltip="const_iterator type.">const_iterator</ref><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1ad69bd11391be1a1dba5c8202259664f8" kindref="member" tooltip="Begin iterator.">begin</ref>()</highlight><highlight class="keyword"><sp/>const</highlight></codeline>
+<codeline lineno="171"><highlight class="keyword"><sp/><sp/><sp/><sp/></highlight><highlight class="normal">{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>storage.begin();<sp/>}</highlight></codeline>
+<codeline lineno="172"><highlight class="normal"></highlight></codeline>
+<codeline lineno="174" refid="class_d_o_1_1_sparse_multi_array_1acad38d52497a975bfb6f2f6acd76631f" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1aeb7d6a472fc07a6f5c9761e906c9f826" kindref="member" tooltip="iterator type.">iterator</ref><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1acad38d52497a975bfb6f2f6acd76631f" kindref="member" tooltip="End iterator.">end</ref>()</highlight></codeline>
+<codeline lineno="175"><highlight class="normal"><sp/><sp/><sp/><sp/>{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>storage.end();<sp/>}</highlight></codeline>
+<codeline lineno="176"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="178" refid="class_d_o_1_1_sparse_multi_array_1a350132543d80a1c1e5be844e6d2878ea" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1a136285f5e1620856973c0c4007453a57" kindref="member" tooltip="const_iterator type.">const_iterator</ref><sp/><ref refid="class_d_o_1_1_sparse_multi_array_1acad38d52497a975bfb6f2f6acd76631f" kindref="member" tooltip="End iterator.">end</ref>()</highlight><highlight class="keyword"><sp/>const</highlight></codeline>
+<codeline lineno="179"><highlight class="keyword"><sp/><sp/><sp/><sp/></highlight><highlight class="normal">{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>storage.end();<sp/>}</highlight></codeline>
+<codeline lineno="180"><highlight class="normal"></highlight></codeline>
+<codeline lineno="181"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">private</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="182"><highlight class="normal"><sp/><sp/><sp/><sp/>storage_type<sp/>storage;</highlight></codeline>
+<codeline lineno="183"><highlight class="normal"><sp/><sp/>};</highlight></codeline>
+<codeline lineno="184"><highlight class="normal"></highlight></codeline>
+<codeline lineno="186"><highlight class="normal"></highlight></codeline>
+<codeline lineno="187"><highlight class="normal">}<sp/></highlight><highlight class="comment">/*<sp/>namespace<sp/>DO<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="188"><highlight class="normal"></highlight></codeline>
+<codeline lineno="189"><highlight class="normal"></highlight><highlight class="preprocessor">#endif<sp/></highlight><highlight class="comment">/*<sp/>DO_CORE_SPARSEMULTIARRAY_HPP<sp/>*/</highlight><highlight class="preprocessor"></highlight></codeline>
+    </programlisting>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/SparseMultiArray.hpp"/>
+  </compounddef>
+</doxygen>

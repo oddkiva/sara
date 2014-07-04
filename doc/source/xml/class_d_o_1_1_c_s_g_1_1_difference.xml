@@ -1,0 +1,112 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="class_d_o_1_1_c_s_g_1_1_difference" kind="class" prot="public">
+    <compoundname>DO::CSG::Difference</compoundname>
+    <basecompoundref refid="class_d_o_1_1_c_s_g_1_1_object" prot="public" virt="non-virtual">Object</basecompoundref>
+    <includes refid="_c_s_g_8hpp" local="no">CSG.hpp</includes>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="class_d_o_1_1_c_s_g_1_1_difference_1acba28fc72ade42211788f2e45ee5277a" prot="private" static="no" mutable="no">
+        <type>const <ref refid="class_d_o_1_1_c_s_g_1_1_object" kindref="compound">Object</ref> *</type>
+        <definition>const Object* o1_</definition>
+        <argsstring></argsstring>
+        <name>o1_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/CSG.hpp" line="37" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/CSG.hpp" bodystart="37" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_c_s_g_1_1_difference_1af963a8f87d7ea2b0ccdf487aa72487a4" prot="private" static="no" mutable="no">
+        <type>const <ref refid="class_d_o_1_1_c_s_g_1_1_object" kindref="compound">Object</ref> *</type>
+        <definition>const Object* o2_</definition>
+        <argsstring></argsstring>
+        <name>o2_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/CSG.hpp" line="38" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/CSG.hpp" bodystart="38" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_d_o_1_1_c_s_g_1_1_difference_1aedae0153cf08254241481cb02623691a" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>Difference</definition>
+        <argsstring>(const Object *o1, const Object *o2)</argsstring>
+        <name>Difference</name>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_c_s_g_1_1_object" kindref="compound">Object</ref> *</type>
+          <declname>o1</declname>
+        </param>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_c_s_g_1_1_object" kindref="compound">Object</ref> *</type>
+          <declname>o2</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/CSG.hpp" line="41" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/CSG.hpp" bodystart="40" bodyend="41"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_c_s_g_1_1_difference_1a50a93f8875a1aa06ceecbc4e001803ba" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="virtual">
+        <type>bool</type>
+        <definition>bool contains</definition>
+        <argsstring>(const Point2d &amp;p) const </argsstring>
+        <name>contains</name>
+        <reimplements refid="class_d_o_1_1_c_s_g_1_1_object_1a20e575b0d75df1fb21c80ea6c3f91d8e">contains</reimplements>
+        <param>
+          <type>const <ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member">Point2d</ref> &amp;</type>
+          <declname>p</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/CSG.hpp" line="43" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/CSG.hpp" bodystart="42" bodyend="43"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>CSG object difference. </para>    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="154">
+        <label>Object</label>
+        <link refid="class_d_o_1_1_c_s_g_1_1_object"/>
+      </node>
+      <node id="153">
+        <label>Difference</label>
+        <link refid="class_d_o_1_1_c_s_g_1_1_difference"/>
+        <childnode refid="154" relation="public-inheritance">
+        </childnode>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="156">
+        <label>Object</label>
+        <link refid="class_d_o_1_1_c_s_g_1_1_object"/>
+      </node>
+      <node id="155">
+        <label>Difference</label>
+        <link refid="class_d_o_1_1_c_s_g_1_1_difference"/>
+        <childnode refid="156" relation="public-inheritance">
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/CSG.hpp" line="36" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/CSG.hpp" bodystart="35" bodyend="44"/>
+    <listofallmembers>
+      <member refid="class_d_o_1_1_c_s_g_1_1_difference_1a50a93f8875a1aa06ceecbc4e001803ba" prot="public" virt="virtual"><scope>DO::CSG::Difference</scope><name>contains</name></member>
+      <member refid="class_d_o_1_1_c_s_g_1_1_difference_1aedae0153cf08254241481cb02623691a" prot="public" virt="non-virtual"><scope>DO::CSG::Difference</scope><name>Difference</name></member>
+      <member refid="class_d_o_1_1_c_s_g_1_1_difference_1acba28fc72ade42211788f2e45ee5277a" prot="private" virt="non-virtual"><scope>DO::CSG::Difference</scope><name>o1_</name></member>
+      <member refid="class_d_o_1_1_c_s_g_1_1_difference_1af963a8f87d7ea2b0ccdf487aa72487a4" prot="private" virt="non-virtual"><scope>DO::CSG::Difference</scope><name>o2_</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

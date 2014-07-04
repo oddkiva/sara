@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="struct_d_o_1_1_convert_image" kind="struct" prot="public">
+    <compoundname>DO::ConvertImage</compoundname>
+    <includes refid="_image_8hpp" local="no">Image.hpp</includes>
+    <templateparamlist>
+      <param>
+        <type>typename T</type>
+      </param>
+      <param>
+        <type>typename <ref refid="struct_d_o_1_1_u" kindref="compound">U</ref></type>
+      </param>
+      <param>
+        <type>int</type>
+        <declname>N</declname>
+        <defname>N</defname>
+      </param>
+    </templateparamlist>
+      <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="struct_d_o_1_1_convert_image_1afe48b50d9ed6115f19df98129e540c47" prot="public" static="yes" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>static void apply</definition>
+        <argsstring>(Image&lt; T, N &gt; &amp;dst, const Image&lt; U, N &gt; &amp;src)</argsstring>
+        <name>apply</name>
+        <param>
+          <type><ref refid="class_d_o_1_1_image" kindref="compound">Image</ref>&lt; T, N &gt; &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_image" kindref="compound">Image</ref>&lt; <ref refid="struct_d_o_1_1_u" kindref="compound">U</ref>, N &gt; &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para>Implementation of the image conversion. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Image.hpp" line="150" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Image.hpp" bodystart="149" bodyend="161"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Generic image converter class. </para>    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Image.hpp" line="147" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Image.hpp" bodystart="147" bodyend="162"/>
+    <listofallmembers>
+      <member refid="struct_d_o_1_1_convert_image_1afe48b50d9ed6115f19df98129e540c47" prot="public" virt="non-virtual"><scope>DO::ConvertImage</scope><name>apply</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

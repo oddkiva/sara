@@ -1,0 +1,250 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="class_d_o_1_1_compute_do_g_extrema" kind="class" prot="public">
+    <compoundname>DO::ComputeDoGExtrema</compoundname>
+    <includes refid="_feature_detectors_2_do_g_8hpp" local="no">DoG.hpp</includes>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="group___interest_point_1ga61776394f8ae1420b283df415c5f5fd6" prot="private" static="no" mutable="no">
+        <type><ref refid="class_d_o_1_1_image_pyramid_params" kindref="compound">ImagePyramidParams</ref></type>
+        <definition>ImagePyramidParams params_</definition>
+        <argsstring></argsstring>
+        <name>params_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/DoG.hpp" line="127" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/DoG.hpp" bodystart="127" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___interest_point_1ga7b35debe79df0ea6b48dc4664138c9a9" prot="private" static="no" mutable="no">
+        <type>float</type>
+        <definition>float extremum_thres_</definition>
+        <argsstring></argsstring>
+        <name>extremum_thres_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/DoG.hpp" line="128" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/DoG.hpp" bodystart="128" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___interest_point_1ga87474503ff7e44a24e92d6637d67ed87" prot="private" static="no" mutable="no">
+        <type>float</type>
+        <definition>float edge_ratio_thres_</definition>
+        <argsstring></argsstring>
+        <name>edge_ratio_thres_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/DoG.hpp" line="129" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/DoG.hpp" bodystart="129" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___interest_point_1ga65def80e27a2c0d37731db713f295382" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int img_padding_sz_</definition>
+        <argsstring></argsstring>
+        <name>img_padding_sz_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/DoG.hpp" line="130" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/DoG.hpp" bodystart="130" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___interest_point_1ga8beff751cd2416a22d686336f818f1c0" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int extremum_refinement_iter_</definition>
+        <argsstring></argsstring>
+        <name>extremum_refinement_iter_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/DoG.hpp" line="131" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/DoG.hpp" bodystart="131" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___interest_point_1ga69b7f64ca8b4987b760bc76ce8c445e0" prot="private" static="no" mutable="no">
+        <type><ref refid="class_d_o_1_1_image_pyramid" kindref="compound">ImagePyramid</ref>&lt; float &gt;</type>
+        <definition>ImagePyramid&lt;float&gt; gaussians_</definition>
+        <argsstring></argsstring>
+        <name>gaussians_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/DoG.hpp" line="133" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/DoG.hpp" bodystart="133" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___interest_point_1ga2c69867cae5aaf6e7a4e12cfb28066d5" prot="private" static="no" mutable="no">
+        <type><ref refid="class_d_o_1_1_image_pyramid" kindref="compound">ImagePyramid</ref>&lt; float &gt;</type>
+        <definition>ImagePyramid&lt;float&gt; diff_of_gaussians_</definition>
+        <argsstring></argsstring>
+        <name>diff_of_gaussians_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/DoG.hpp" line="134" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/DoG.hpp" bodystart="134" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="group___interest_point_1ga0ec97797c3953f749f97503eac5e9b02" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>ComputeDoGExtrema</definition>
+        <argsstring>(const ImagePyramidParams &amp;pyrParams=ImagePyramidParams(), float extremumThres=0.01f, float edgeRatioThres=10.f, int imgPaddingSz=1, int extremumRefinementIter=5)</argsstring>
+        <name>ComputeDoGExtrema</name>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_image_pyramid_params" kindref="compound">ImagePyramidParams</ref> &amp;</type>
+          <declname>pyrParams</declname>
+          <defval><ref refid="class_d_o_1_1_image_pyramid_params" kindref="compound">ImagePyramidParams</ref>()</defval>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>extremumThres</declname>
+          <defval>0.01f</defval>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>edgeRatioThres</declname>
+          <defval>10.f</defval>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>imgPaddingSz</declname>
+          <defval>1</defval>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>extremumRefinementIter</declname>
+          <defval>5</defval>
+        </param>
+        <briefdescription>
+<para>Constructor. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">extremumThres</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>the response threshold which the DoG extremum absolute value <formula id="27">$ \left| \left( g_{\sigma(s+1,o)} - g_{\sigma(s,o)} \right) * I \right| (\mathbf{x}) $</formula> must exceed. Note that <formula id="28">$ \sigma(s&apos;,o&apos;) = 2^{s&apos;/S+o&apos;}$</formula> where <formula id="29">$S$</formula> is the number of scales per octave. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">edgeRatioThres</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>the <ref refid="struct_d_o_1_1_hessian" kindref="compound">Hessian</ref> matrix <formula id="30">$\mathbf{H}$</formula> at the local scale-space extremum must satisfy <formula id="31">\[ \frac{\mathrm{det}(\mathbf{H})}{\mathrm{tr}(\mathbf{H}} &gt; \frac{(r+1)^2}{r} \]</formula> where <formula id="32">$r$</formula> corresponds to the variable <bold>edgeRatioThres</bold>. In terms of implementation, we use the function <bold><ref refid="group___extremum_refinement_1gadb49f79daf3b221e16bc44e68377e14b" kindref="member">DO::onEdge()</ref></bold>. We use the <formula id="33">$r=10$</formula> as stated in [Lowe, IJCV 2004]. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">imgPaddingSz</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>This variable indicates the minimum border size of the image. DoG extrema located at the size-specified border are discarded. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">extremumRefinementIter</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>This variable controls the number of iterations to refine the localization of DoG extrema in scale-space. The refinement process is based on the function <bold><ref refid="group___extremum_refinement_1ga2f13bba1b141af45dbf3e71aed91016c" kindref="member">DO::refineExtremum()</ref></bold>. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/DoG.hpp" line="74" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/DoG.hpp" bodystart="63" bodyend="74"/>
+      </memberdef>
+      <memberdef kind="function" id="group___interest_point_1ga97b5e86e276173bb410ce58d39f28266" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>std::vector&lt; <ref refid="class_d_o_1_1_o_e_region" kindref="compound">OERegion</ref> &gt;</type>
+        <definition>std::vector&lt;OERegion&gt; operator()</definition>
+        <argsstring>(const Image&lt; float &gt; &amp;I, std::vector&lt; Point2i &gt; *scaleOctavePairs=0)</argsstring>
+        <name>operator()</name>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_image" kindref="compound">Image</ref>&lt; float &gt; &amp;</type>
+          <declname>I</declname>
+        </param>
+        <param>
+          <type>std::vector&lt; <ref refid="group___eigen_typedefs_1ga048a27763e58f682b1b91af86144f701" kindref="member">Point2i</ref> &gt; *</type>
+          <declname>scaleOctavePairs</declname>
+          <defval>0</defval>
+        </param>
+        <briefdescription>
+<para>Localizes DoG extrema for a given image. </para>        </briefdescription>
+        <detaileddescription>
+<para>This function does the following:<orderedlist>
+<listitem><para>Constructs a gaussian pyramid <formula id="34">$\nabla g_{\sigma(s,o)} * I$</formula> from the image <formula id="0">$I$</formula>, where <formula id="35">$(s,o)$</formula> are integers. Here: <formula id="36">$\sigma(s,o) = 2^{s/S + o}$</formula> where <formula id="29">$S$</formula> is the number of scales per octaves.</para></listitem></orderedlist>
+</para><para><orderedlist>
+<listitem><para>Localize extrema in each difference of Gaussians <formula id="37">$\left( g_{\sigma(s+1,o)} - g_{\sigma(s,o)} \right) * I $</formula> where <formula id="35">$(s,o)$</formula> are scale and octave indices.</para></listitem></orderedlist>
+</para><para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="inout">scaleOctavePairs</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>a pointer to vector of scale and octave index pairs <formula id="38">$(s_i,o_i)$</formula>. This index pair corresponds to the difference of Gaussians <formula id="39">$\left( g_{\sigma(s_i+1,o_i)} - g_{\sigma(s_i,o_i)} \right) * I$</formula> where the extremum <formula id="40">$(x_i,y_i,\sigma_i)$</formula> is detected.</para></parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>set of DoG extrema in <bold>std::vector&lt;OERegion&gt;</bold> in each difference of Gaussians <formula id="37">$\left( g_{\sigma(s+1,o)} - g_{\sigma(s,o)} \right) * I $</formula>. </para></simplesect>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/DoG.hpp" line="99"/>
+      </memberdef>
+      <memberdef kind="function" id="group___interest_point_1gaf837b3a21f63e182a711ab0ad2d8b8a8" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>const <ref refid="class_d_o_1_1_image_pyramid" kindref="compound">ImagePyramid</ref>&lt; float &gt; &amp;</type>
+        <definition>const ImagePyramid&lt;float&gt;&amp; gaussians</definition>
+        <argsstring>() const </argsstring>
+        <name>gaussians</name>
+        <briefdescription>
+<para>Returns the <ref refid="struct_d_o_1_1_gaussian" kindref="compound">Gaussian</ref> pyramid used to localize scale-space extrema of image <bold>I</bold>. </para>        </briefdescription>
+        <detaileddescription>
+<para>The <ref refid="struct_d_o_1_1_gaussian" kindref="compound">Gaussian</ref> pyramid is available after calling the function method <bold>ComputeDoGExtrema::operator()(I, scaleOctavePairs)</bold> for the given image <bold>I</bold>.</para><para><simplesect kind="return"><para>the <ref refid="struct_d_o_1_1_gaussian" kindref="compound">Gaussian</ref> pyramid used to localize scale-space extrema of image <bold>I</bold>. </para></simplesect>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/DoG.hpp" line="112" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/DoG.hpp" bodystart="111" bodyend="112"/>
+      </memberdef>
+      <memberdef kind="function" id="group___interest_point_1gafe3fa95f391e3ad4a4139602f97f3a36" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>const <ref refid="class_d_o_1_1_image_pyramid" kindref="compound">ImagePyramid</ref>&lt; float &gt; &amp;</type>
+        <definition>const ImagePyramid&lt;float&gt;&amp; diffOfGaussians</definition>
+        <argsstring>() const </argsstring>
+        <name>diffOfGaussians</name>
+        <briefdescription>
+<para>Returns the pyramid of difference of Gaussians used to localize scale-space extrema of image <bold>I</bold>. </para>        </briefdescription>
+        <detaileddescription>
+<para>The pyramid of difference of Gaussians is available after calling the function method <bold>ComputeDoGExtrema::operator()(I, scaleOctavePairs)</bold>,</para><para><simplesect kind="return"><para>the pyramid of difference of Gaussians used to localize scale-space extrema of image <bold>I</bold>. </para></simplesect>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/DoG.hpp" line="124" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/DoG.hpp" bodystart="123" bodyend="124"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Functor class to compute DoG extrema. </para>    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/DoG.hpp" line="27" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/DoG.hpp" bodystart="26" bodyend="135"/>
+    <listofallmembers>
+      <member refid="group___interest_point_1ga0ec97797c3953f749f97503eac5e9b02" prot="public" virt="non-virtual"><scope>DO::ComputeDoGExtrema</scope><name>ComputeDoGExtrema</name></member>
+      <member refid="group___interest_point_1ga2c69867cae5aaf6e7a4e12cfb28066d5" prot="private" virt="non-virtual"><scope>DO::ComputeDoGExtrema</scope><name>diff_of_gaussians_</name></member>
+      <member refid="group___interest_point_1gafe3fa95f391e3ad4a4139602f97f3a36" prot="public" virt="non-virtual"><scope>DO::ComputeDoGExtrema</scope><name>diffOfGaussians</name></member>
+      <member refid="group___interest_point_1ga87474503ff7e44a24e92d6637d67ed87" prot="private" virt="non-virtual"><scope>DO::ComputeDoGExtrema</scope><name>edge_ratio_thres_</name></member>
+      <member refid="group___interest_point_1ga8beff751cd2416a22d686336f818f1c0" prot="private" virt="non-virtual"><scope>DO::ComputeDoGExtrema</scope><name>extremum_refinement_iter_</name></member>
+      <member refid="group___interest_point_1ga7b35debe79df0ea6b48dc4664138c9a9" prot="private" virt="non-virtual"><scope>DO::ComputeDoGExtrema</scope><name>extremum_thres_</name></member>
+      <member refid="group___interest_point_1gaf837b3a21f63e182a711ab0ad2d8b8a8" prot="public" virt="non-virtual"><scope>DO::ComputeDoGExtrema</scope><name>gaussians</name></member>
+      <member refid="group___interest_point_1ga69b7f64ca8b4987b760bc76ce8c445e0" prot="private" virt="non-virtual"><scope>DO::ComputeDoGExtrema</scope><name>gaussians_</name></member>
+      <member refid="group___interest_point_1ga65def80e27a2c0d37731db713f295382" prot="private" virt="non-virtual"><scope>DO::ComputeDoGExtrema</scope><name>img_padding_sz_</name></member>
+      <member refid="group___interest_point_1ga97b5e86e276173bb410ce58d39f28266" prot="public" virt="non-virtual"><scope>DO::ComputeDoGExtrema</scope><name>operator()</name></member>
+      <member refid="group___interest_point_1ga61776394f8ae1420b283df415c5f5fd6" prot="private" virt="non-virtual"><scope>DO::ComputeDoGExtrema</scope><name>params_</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

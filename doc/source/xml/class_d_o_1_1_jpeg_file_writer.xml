@@ -1,0 +1,159 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="class_d_o_1_1_jpeg_file_writer" kind="class" prot="public">
+    <compoundname>DO::JpegFileWriter</compoundname>
+    <basecompoundref refid="class_d_o_1_1_image_file_writer" prot="public" virt="non-virtual">ImageFileWriter</basecompoundref>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="class_d_o_1_1_jpeg_file_writer_1aefdd3dddeabd09525cf0113bb1148323" prot="private" static="no" mutable="no">
+        <type>struct jpeg_compress_struct</type>
+        <definition>struct jpeg_compress_struct cinfo_</definition>
+        <argsstring></argsstring>
+        <name>cinfo_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" line="90" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" bodystart="90" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_jpeg_file_writer_1a4643dc3deea9a4038a7f301b05017a34" prot="private" static="no" mutable="no">
+        <type>struct jpeg_error_mgr</type>
+        <definition>struct jpeg_error_mgr jerr_</definition>
+        <argsstring></argsstring>
+        <name>jerr_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" line="91" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" bodystart="91" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_d_o_1_1_jpeg_file_writer_1a30929163a53c0d8a1684686549d71158" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>JpegFileWriter</definition>
+        <argsstring>(const unsigned char *data, int width, int height, int depth)</argsstring>
+        <name>JpegFileWriter</name>
+        <param>
+          <type>const unsigned char *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>width</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>height</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>depth</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" line="93"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_jpeg_file_writer_1aa730707d7f0159f9351b29f2f8fc6a69" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>~JpegFileWriter</definition>
+        <argsstring>()</argsstring>
+        <name>~JpegFileWriter</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" line="94"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_jpeg_file_writer_1a3379894ef7b13be5bd7e15ee4dada776" prot="public" static="no" const="no" explicit="no" inline="no" virt="virtual">
+        <type>bool</type>
+        <definition>bool operator()</definition>
+        <argsstring>(const std::string &amp;filepath, int quality)</argsstring>
+        <name>operator()</name>
+        <reimplements refid="class_d_o_1_1_image_file_writer_1a125f4fa216024ef70143095ce6ef3f01">operator()</reimplements>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>filepath</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>quality</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" line="95"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="314">
+        <label>FileHandler</label>
+        <link refid="class_d_o_1_1_file_handler"/>
+      </node>
+      <node id="313">
+        <label>ImageFileWriter</label>
+        <link refid="class_d_o_1_1_image_file_writer"/>
+        <childnode refid="314" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="312">
+        <label>JpegFileWriter</label>
+        <link refid="class_d_o_1_1_jpeg_file_writer"/>
+        <childnode refid="313" relation="public-inheritance">
+        </childnode>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="317">
+        <label>FileHandler</label>
+        <link refid="class_d_o_1_1_file_handler"/>
+      </node>
+      <node id="316">
+        <label>ImageFileWriter</label>
+        <link refid="class_d_o_1_1_image_file_writer"/>
+        <childnode refid="317" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="315">
+        <label>JpegFileWriter</label>
+        <link refid="class_d_o_1_1_jpeg_file_writer"/>
+        <childnode refid="316" relation="public-inheritance">
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" line="89" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" bodystart="88" bodyend="96"/>
+    <listofallmembers>
+      <member refid="class_d_o_1_1_jpeg_file_writer_1aefdd3dddeabd09525cf0113bb1148323" prot="private" virt="non-virtual"><scope>DO::JpegFileWriter</scope><name>cinfo_</name></member>
+      <member refid="class_d_o_1_1_image_file_writer_1a19d91a1b24741b006fcebfd7fa70f851" prot="protected" virt="non-virtual"><scope>DO::JpegFileWriter</scope><name>data_</name></member>
+      <member refid="class_d_o_1_1_image_file_writer_1ad44441440d13feeced3a5592d8853ce8" prot="protected" virt="non-virtual"><scope>DO::JpegFileWriter</scope><name>depth_</name></member>
+      <member refid="class_d_o_1_1_file_handler_1a715b2a1d4ad04ec0c950d1467f91964e" prot="protected" virt="non-virtual"><scope>DO::JpegFileWriter</scope><name>file_</name></member>
+      <member refid="class_d_o_1_1_file_handler_1a7a105e8757c6bbbe0e6be820ce84f1ed" prot="public" virt="non-virtual"><scope>DO::JpegFileWriter</scope><name>FileHandler</name></member>
+      <member refid="class_d_o_1_1_file_handler_1ab8b9ecc7384dd1830ea8d76aeda28f88" prot="public" virt="non-virtual"><scope>DO::JpegFileWriter</scope><name>FileHandler</name></member>
+      <member refid="class_d_o_1_1_image_file_writer_1a4bda835cfa4ff0f321d5f283ada09f6f" prot="protected" virt="non-virtual"><scope>DO::JpegFileWriter</scope><name>height_</name></member>
+      <member refid="class_d_o_1_1_image_file_writer_1a8ec7045ca1566c391aa36221c2dc184e" prot="public" virt="non-virtual"><scope>DO::JpegFileWriter</scope><name>ImageFileWriter</name></member>
+      <member refid="class_d_o_1_1_jpeg_file_writer_1a4643dc3deea9a4038a7f301b05017a34" prot="private" virt="non-virtual"><scope>DO::JpegFileWriter</scope><name>jerr_</name></member>
+      <member refid="class_d_o_1_1_jpeg_file_writer_1a30929163a53c0d8a1684686549d71158" prot="public" virt="non-virtual"><scope>DO::JpegFileWriter</scope><name>JpegFileWriter</name></member>
+      <member refid="class_d_o_1_1_jpeg_file_writer_1a3379894ef7b13be5bd7e15ee4dada776" prot="public" virt="virtual"><scope>DO::JpegFileWriter</scope><name>operator()</name></member>
+      <member refid="class_d_o_1_1_image_file_writer_1a2b766f0e7825587681ec40b1920dbd0d" prot="protected" virt="non-virtual"><scope>DO::JpegFileWriter</scope><name>width_</name></member>
+      <member refid="class_d_o_1_1_file_handler_1a0d3895a0eb5141fa24ba508c743d1924" prot="public" virt="virtual"><scope>DO::JpegFileWriter</scope><name>~FileHandler</name></member>
+      <member refid="class_d_o_1_1_image_file_writer_1a8137aae6c4a9b80e63f4e398a3f543a7" prot="public" virt="virtual"><scope>DO::JpegFileWriter</scope><name>~ImageFileWriter</name></member>
+      <member refid="class_d_o_1_1_jpeg_file_writer_1aa730707d7f0159f9351b29f2f8fc6a69" prot="public" virt="non-virtual"><scope>DO::JpegFileWriter</scope><name>~JpegFileWriter</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

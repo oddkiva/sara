@@ -1,0 +1,289 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="class_d_o_1_1_descriptor_matrix" kind="class" prot="public">
+    <compoundname>DO::DescriptorMatrix</compoundname>
+    <basecompoundref prot="private" virt="non-virtual">Matrix&lt; T, Dynamic, Dynamic &gt;</basecompoundref>
+    <templateparamlist>
+      <param>
+        <type>typename</type>
+        <declname>T</declname>
+        <defname>T</defname>
+      </param>
+    </templateparamlist>
+      <sectiondef kind="public-type">
+      <memberdef kind="typedef" id="class_d_o_1_1_descriptor_matrix_1aa492c9de8edd89948e6f0ef2eb5f6857" prot="public" static="no">
+        <type>T</type>
+        <definition>typedef T bin_type</definition>
+        <argsstring></argsstring>
+        <name>bin_type</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/DescriptorMatrix.hpp" line="28" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/DescriptorMatrix.hpp" bodystart="28" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_d_o_1_1_descriptor_matrix_1acaa3997fa361016666e00f3252b09301" prot="public" static="no">
+        <type>Matrix&lt; T, Dynamic, Dynamic &gt;</type>
+        <definition>typedef Matrix&lt;T, Dynamic, Dynamic&gt; matrix_type</definition>
+        <argsstring></argsstring>
+        <name>matrix_type</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/DescriptorMatrix.hpp" line="29" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/DescriptorMatrix.hpp" bodystart="29" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_d_o_1_1_descriptor_matrix_1a5ef6ac9db4c76f6f5839809a39e774d5" prot="public" static="no">
+        <type>matrix_type::ColXpr</type>
+        <definition>typedef matrix_type::ColXpr descriptor_type</definition>
+        <argsstring></argsstring>
+        <name>descriptor_type</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/DescriptorMatrix.hpp" line="30" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/DescriptorMatrix.hpp" bodystart="30" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_d_o_1_1_descriptor_matrix_1a8adb7f042ee6e38b9999d6f64ac57adc" prot="public" static="no">
+        <type>matrix_type::ConstColXpr</type>
+        <definition>typedef matrix_type::ConstColXpr const_descriptor_type</definition>
+        <argsstring></argsstring>
+        <name>const_descriptor_type</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/DescriptorMatrix.hpp" line="31" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/DescriptorMatrix.hpp" bodystart="31" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_d_o_1_1_descriptor_matrix_1a91bc53a3142af3feb306044bbfa07b0f" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>DescriptorMatrix</definition>
+        <argsstring>()</argsstring>
+        <name>DescriptorMatrix</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/DescriptorMatrix.hpp" line="34" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/DescriptorMatrix.hpp" bodystart="34" bodyend="34"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_descriptor_matrix_1aa47d2379f3e37cd1b5778de835e278e5" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>DescriptorMatrix</definition>
+        <argsstring>(int num_descriptors, int dimension)</argsstring>
+        <name>DescriptorMatrix</name>
+        <param>
+          <type>int</type>
+          <declname>num_descriptors</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>dimension</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/DescriptorMatrix.hpp" line="36" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/DescriptorMatrix.hpp" bodystart="35" bodyend="36"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_descriptor_matrix_1a60fad64b023d179a751d21d6eb76eaba" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void resize</definition>
+        <argsstring>(int num_descriptors, int dimension)</argsstring>
+        <name>resize</name>
+        <param>
+          <type>int</type>
+          <declname>num_descriptors</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>dimension</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/DescriptorMatrix.hpp" line="39" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/DescriptorMatrix.hpp" bodystart="38" bodyend="39"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_descriptor_matrix_1a3bfc0fa927a26d75fa693788abaf0581" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>matrix_type &amp;</type>
+        <definition>matrix_type&amp; matrix</definition>
+        <argsstring>()</argsstring>
+        <name>matrix</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/DescriptorMatrix.hpp" line="41" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/DescriptorMatrix.hpp" bodystart="41" bodyend="41"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_descriptor_matrix_1a35888a9f1061ffaff6fd5cd909a56c0d" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>const matrix_type &amp;</type>
+        <definition>const matrix_type&amp; matrix</definition>
+        <argsstring>() const </argsstring>
+        <name>matrix</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/DescriptorMatrix.hpp" line="42" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/DescriptorMatrix.hpp" bodystart="42" bodyend="42"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_descriptor_matrix_1ab8e4e3e2a7bf18888b71bdf9dda0770b" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>int</type>
+        <definition>int size</definition>
+        <argsstring>() const </argsstring>
+        <name>size</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/DescriptorMatrix.hpp" line="44" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/DescriptorMatrix.hpp" bodystart="44" bodyend="44"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_descriptor_matrix_1ae5acbe47d704ceb866e3717e2ac9422f" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>int</type>
+        <definition>int dimension</definition>
+        <argsstring>() const </argsstring>
+        <name>dimension</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/DescriptorMatrix.hpp" line="45" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/DescriptorMatrix.hpp" bodystart="45" bodyend="45"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_descriptor_matrix_1a2f16dc592375dd9070d0eb7f893bbf01" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>descriptor_type</type>
+        <definition>descriptor_type operator[]</definition>
+        <argsstring>(int i)</argsstring>
+        <name>operator[]</name>
+        <param>
+          <type>int</type>
+          <declname>i</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/DescriptorMatrix.hpp" line="47" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/DescriptorMatrix.hpp" bodystart="47" bodyend="47"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_descriptor_matrix_1ad1113a261a096dc90a8a0058c20cf603" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>const_descriptor_type</type>
+        <definition>const_descriptor_type operator[]</definition>
+        <argsstring>(int i) const </argsstring>
+        <name>operator[]</name>
+        <param>
+          <type>int</type>
+          <declname>i</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/DescriptorMatrix.hpp" line="48" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/DescriptorMatrix.hpp" bodystart="48" bodyend="48"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_descriptor_matrix_1a2c29b601b61cd5bf6aa7284f2dd01559" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void swap</definition>
+        <argsstring>(DescriptorMatrix &amp;other)</argsstring>
+        <name>swap</name>
+        <param>
+          <type><ref refid="class_d_o_1_1_descriptor_matrix" kindref="compound">DescriptorMatrix</ref> &amp;</type>
+          <declname>other</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/DescriptorMatrix.hpp" line="50" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/DescriptorMatrix.hpp" bodystart="50" bodyend="50"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_descriptor_matrix_1a90e62fe48acde010066244f8c771697a" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void append</definition>
+        <argsstring>(const DescriptorMatrix &amp;other)</argsstring>
+        <name>append</name>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_descriptor_matrix" kindref="compound">DescriptorMatrix</ref> &amp;</type>
+          <declname>other</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/DescriptorMatrix.hpp" line="52" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/DescriptorMatrix.hpp" bodystart="51" bodyend="67"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="144">
+        <label>Matrix&lt; T, Dynamic, Dynamic &gt;</label>
+      </node>
+      <node id="143">
+        <label>DescriptorMatrix&lt; T &gt;</label>
+        <link refid="class_d_o_1_1_descriptor_matrix"/>
+        <childnode refid="144" relation="private-inheritance">
+        </childnode>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="146">
+        <label>Matrix&lt; T, Dynamic, Dynamic &gt;</label>
+      </node>
+      <node id="145">
+        <label>DescriptorMatrix&lt; T &gt;</label>
+        <link refid="class_d_o_1_1_descriptor_matrix"/>
+        <childnode refid="146" relation="private-inheritance">
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/DescriptorMatrix.hpp" line="26" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/DescriptorMatrix.hpp" bodystart="25" bodyend="68"/>
+    <listofallmembers>
+      <member refid="class_d_o_1_1_descriptor_matrix_1a90e62fe48acde010066244f8c771697a" prot="public" virt="non-virtual"><scope>DO::DescriptorMatrix</scope><name>append</name></member>
+      <member refid="class_d_o_1_1_descriptor_matrix_1aa492c9de8edd89948e6f0ef2eb5f6857" prot="public" virt="non-virtual"><scope>DO::DescriptorMatrix</scope><name>bin_type</name></member>
+      <member refid="class_d_o_1_1_descriptor_matrix_1a8adb7f042ee6e38b9999d6f64ac57adc" prot="public" virt="non-virtual"><scope>DO::DescriptorMatrix</scope><name>const_descriptor_type</name></member>
+      <member refid="class_d_o_1_1_descriptor_matrix_1a5ef6ac9db4c76f6f5839809a39e774d5" prot="public" virt="non-virtual"><scope>DO::DescriptorMatrix</scope><name>descriptor_type</name></member>
+      <member refid="class_d_o_1_1_descriptor_matrix_1a91bc53a3142af3feb306044bbfa07b0f" prot="public" virt="non-virtual"><scope>DO::DescriptorMatrix</scope><name>DescriptorMatrix</name></member>
+      <member refid="class_d_o_1_1_descriptor_matrix_1aa47d2379f3e37cd1b5778de835e278e5" prot="public" virt="non-virtual"><scope>DO::DescriptorMatrix</scope><name>DescriptorMatrix</name></member>
+      <member refid="class_d_o_1_1_descriptor_matrix_1ae5acbe47d704ceb866e3717e2ac9422f" prot="public" virt="non-virtual"><scope>DO::DescriptorMatrix</scope><name>dimension</name></member>
+      <member refid="class_d_o_1_1_descriptor_matrix_1a3bfc0fa927a26d75fa693788abaf0581" prot="public" virt="non-virtual"><scope>DO::DescriptorMatrix</scope><name>matrix</name></member>
+      <member refid="class_d_o_1_1_descriptor_matrix_1a35888a9f1061ffaff6fd5cd909a56c0d" prot="public" virt="non-virtual"><scope>DO::DescriptorMatrix</scope><name>matrix</name></member>
+      <member refid="class_d_o_1_1_descriptor_matrix_1acaa3997fa361016666e00f3252b09301" prot="public" virt="non-virtual"><scope>DO::DescriptorMatrix</scope><name>matrix_type</name></member>
+      <member refid="class_d_o_1_1_descriptor_matrix_1a2f16dc592375dd9070d0eb7f893bbf01" prot="public" virt="non-virtual"><scope>DO::DescriptorMatrix</scope><name>operator[]</name></member>
+      <member refid="class_d_o_1_1_descriptor_matrix_1ad1113a261a096dc90a8a0058c20cf603" prot="public" virt="non-virtual"><scope>DO::DescriptorMatrix</scope><name>operator[]</name></member>
+      <member refid="class_d_o_1_1_descriptor_matrix_1a60fad64b023d179a751d21d6eb76eaba" prot="public" virt="non-virtual"><scope>DO::DescriptorMatrix</scope><name>resize</name></member>
+      <member refid="class_d_o_1_1_descriptor_matrix_1ab8e4e3e2a7bf18888b71bdf9dda0770b" prot="public" virt="non-virtual"><scope>DO::DescriptorMatrix</scope><name>size</name></member>
+      <member refid="class_d_o_1_1_descriptor_matrix_1a2c29b601b61cd5bf6aa7284f2dd01559" prot="public" virt="non-virtual"><scope>DO::DescriptorMatrix</scope><name>swap</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

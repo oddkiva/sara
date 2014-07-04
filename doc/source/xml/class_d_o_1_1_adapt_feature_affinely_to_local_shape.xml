@@ -1,0 +1,388 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="class_d_o_1_1_adapt_feature_affinely_to_local_shape" kind="class" prot="public">
+    <compoundname>DO::AdaptFeatureAffinelyToLocalShape</compoundname>
+    <includes refid="_affine_shape_adaptation_8hpp" local="no">AffineShapeAdaptation.hpp</includes>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1a59a266267431a447c03bbc047b8ceb47" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int patch_size_</definition>
+        <argsstring></argsstring>
+        <name>patch_size_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/AffineShapeAdaptation.hpp" line="96" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/AffineShapeAdaptation.hpp" bodystart="96" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1acc5b46e5fef29d616cdbeeb029b52c81" prot="private" static="no" mutable="no">
+        <type>float</type>
+        <definition>float gauss_trunc_factor_</definition>
+        <argsstring></argsstring>
+        <name>gauss_trunc_factor_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/AffineShapeAdaptation.hpp" line="97" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/AffineShapeAdaptation.hpp" bodystart="97" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1a306b3abe5e9813cb7c5ecd3171e2dc97" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int affine_adaptation_max_iter_</definition>
+        <argsstring></argsstring>
+        <name>affine_adaptation_max_iter_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/AffineShapeAdaptation.hpp" line="98" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/AffineShapeAdaptation.hpp" bodystart="98" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1a6f6283d0daabfe586bec7f3e380cacd7" prot="private" static="no" mutable="no">
+        <type><ref refid="class_d_o_1_1_image" kindref="compound">Image</ref>&lt; float &gt;</type>
+        <definition>Image&lt;float&gt; patch_</definition>
+        <argsstring></argsstring>
+        <name>patch_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/AffineShapeAdaptation.hpp" line="99" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/AffineShapeAdaptation.hpp" bodystart="99" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1ab98cf00d9cf90a54ebecb2e9f62d735c" prot="private" static="no" mutable="no">
+        <type><ref refid="class_d_o_1_1_image" kindref="compound">Image</ref>&lt; float &gt;</type>
+        <definition>Image&lt;float&gt; gaussian_weight_</definition>
+        <argsstring></argsstring>
+        <name>gaussian_weight_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/AffineShapeAdaptation.hpp" line="100" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/AffineShapeAdaptation.hpp" bodystart="100" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1ad2d053f92903faf23a300ced53e35d5c" prot="private" static="no" mutable="no">
+        <type>float</type>
+        <definition>float patch_zoom_factor_</definition>
+        <argsstring></argsstring>
+        <name>patch_zoom_factor_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/AffineShapeAdaptation.hpp" line="102" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/AffineShapeAdaptation.hpp" bodystart="102" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1afa3f4fa08a8a3b675e2dab06e29412a1" prot="private" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool debug_</definition>
+        <argsstring></argsstring>
+        <name>debug_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/AffineShapeAdaptation.hpp" line="103" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/AffineShapeAdaptation.hpp" bodystart="103" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1adb280b2d26559fc4fd143870777efcd0" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>AdaptFeatureAffinelyToLocalShape</definition>
+        <argsstring>()</argsstring>
+        <name>AdaptFeatureAffinelyToLocalShape</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para><xrefsect id="todo_1_todo000006"><xreftitle>Todo</xreftitle><xrefdescription><para>: redo because there are hard-coded parameters in the default constructor. </para></xrefdescription></xrefsect></para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/AffineShapeAdaptation.hpp" line="45"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1ae00f8ba4b5adb8c9a53d5c008e428506" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool operator()</definition>
+        <argsstring>(Matrix2f &amp;affAdaptTransfmMat, const Image&lt; float &gt; &amp;I, const OERegion &amp;feature)</argsstring>
+        <name>operator()</name>
+        <param>
+          <type>Matrix2f &amp;</type>
+          <declname>affAdaptTransfmMat</declname>
+        </param>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_image" kindref="compound">Image</ref>&lt; float &gt; &amp;</type>
+          <declname>I</declname>
+        </param>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_o_e_region" kindref="compound">OERegion</ref> &amp;</type>
+          <declname>feature</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Estimates the local shape at some given point of an image. <parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="inout">affAdaptTransfmMat</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>the affine adaptation transformation matrix, i.e., the Mahalanobis distance reflecting the anisotropy of the local shape </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">I</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>the input image </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">feature</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>the point on which we estimate the local shape in image I. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/AffineShapeAdaptation.hpp" line="59"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="private-func">
+      <memberdef kind="function" id="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1a7e0c6b0b9c3e3eb4288e2e42ea4bb993" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool updateNormalizedPatch</definition>
+        <argsstring>(const Image&lt; float &gt; &amp;I, const OERegion &amp;feature, const Matrix2f &amp;T)</argsstring>
+        <name>updateNormalizedPatch</name>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_image" kindref="compound">Image</ref>&lt; float &gt; &amp;</type>
+          <declname>I</declname>
+        </param>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_o_e_region" kindref="compound">OERegion</ref> &amp;</type>
+          <declname>feature</declname>
+        </param>
+        <param>
+          <type>const Matrix2f &amp;</type>
+          <declname>T</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Returns:<itemizedlist>
+<listitem><para>true if the normalized patch does not touch the image boundaries.</para></listitem><listitem><para>false otherwise. If false is returned, then </para></listitem></itemizedlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/AffineShapeAdaptation.hpp" line="69"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1aa1b8a5a70cfeba9bfbe288bae0485670" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Matrix2f</type>
+        <definition>Matrix2f computeMomentMatrixFromPatch</definition>
+        <argsstring>()</argsstring>
+        <name>computeMomentMatrixFromPatch</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Given a feature $({x}, ) <formula id="25">$, computes $</formula>{x} <formula id="26">$ at the second moment matrix $</formula>(x, ) </para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/AffineShapeAdaptation.hpp" line="78"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1ab357fcf05f9b9c1543167c5c0ab77c46" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>Matrix2f</type>
+        <definition>Matrix2f computeTransformFromMomentMatrix</definition>
+        <argsstring>(const Matrix2f &amp;momentMatrix, float &amp;anisotropicRatio)</argsstring>
+        <name>computeTransformFromMomentMatrix</name>
+        <param>
+          <type>const Matrix2f &amp;</type>
+          <declname>momentMatrix</declname>
+        </param>
+        <param>
+          <type>float &amp;</type>
+          <declname>anisotropicRatio</declname>
+        </param>
+        <briefdescription>
+<para>Find one linear transform associated to the second moment matrix. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/AffineShapeAdaptation.hpp" line="81"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1aeee127cdf82f845d4f6ee61d2bc167d3" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void rescaleTransform</definition>
+        <argsstring>(Matrix2f &amp;T)</argsstring>
+        <name>rescaleTransform</name>
+        <param>
+          <type>Matrix2f &amp;</type>
+          <declname>T</declname>
+        </param>
+        <briefdescription>
+<para>Normalize the transform. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/AffineShapeAdaptation.hpp" line="83"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1a7d9bd8b66bcf7669d339071398bc3e83" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void debug_openWindowToViewPatch</definition>
+        <argsstring>()</argsstring>
+        <name>debug_openWindowToViewPatch</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/AffineShapeAdaptation.hpp" line="85"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1acc73d97267759acb330f0af2cc179ac3" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void debug_printAffineAdaptationIteration</definition>
+        <argsstring>(int iter)</argsstring>
+        <name>debug_printAffineAdaptationIteration</name>
+        <param>
+          <type>int</type>
+          <declname>iter</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/AffineShapeAdaptation.hpp" line="86"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1a868d09b851b28f50a9cac6af504237dc" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void debug_printPatchTouchesImageBoundaries</definition>
+        <argsstring>()</argsstring>
+        <name>debug_printPatchTouchesImageBoundaries</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/AffineShapeAdaptation.hpp" line="87"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1a398bbcb890687b6f626292ca69f7c10e" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void debug_displayNormalizedPatch</definition>
+        <argsstring>(float fact)</argsstring>
+        <name>debug_displayNormalizedPatch</name>
+        <param>
+          <type>float</type>
+          <declname>fact</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/AffineShapeAdaptation.hpp" line="88"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1a1b55e107f2bd42978d427ab2cde646b3" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void debug_checkWeightedPatch</definition>
+        <argsstring>(const Image&lt; Vector2f &gt; &amp;gradients)</argsstring>
+        <name>debug_checkWeightedPatch</name>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_image" kindref="compound">Image</ref>&lt; Vector2f &gt; &amp;</type>
+          <declname>gradients</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/AffineShapeAdaptation.hpp" line="89"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1afe5ab7576a6cfc79d49f87a9fdd98e52" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void debug_checkMomentMatrixAndTransform</definition>
+        <argsstring>(const Matrix2f &amp;mu, const Matrix2f &amp;delta_U, float anisotropicRatio, const Matrix2f &amp;U)</argsstring>
+        <name>debug_checkMomentMatrixAndTransform</name>
+        <param>
+          <type>const Matrix2f &amp;</type>
+          <declname>mu</declname>
+        </param>
+        <param>
+          <type>const Matrix2f &amp;</type>
+          <declname>delta_U</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>anisotropicRatio</declname>
+        </param>
+        <param>
+          <type>const Matrix2f &amp;</type>
+          <declname>U</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/AffineShapeAdaptation.hpp" line="93"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1abb936682a71cacd0a189039bc122bd65" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void debug_closeWindowUsedToViewPatch</definition>
+        <argsstring>()</argsstring>
+        <name>debug_closeWindowUsedToViewPatch</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/AffineShapeAdaptation.hpp" line="94"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Functor that adapts the feature scale to the local shape from the second-moment matrix (cf. [Mikolajczyk &amp; Schmid, ECCV 2002]). </para>    </briefdescription>
+    <detaileddescription>
+<para>Given a feature <formula id="23">$(\mathbf{x}, \sigma)$</formula>, the local affine shape adaptation is based on the estimation of the second moment matrix <formula id="24">\[ \mu(\mathbf{x}, \sigma) = (g_\sigma) * \left[ (\nabla I) (\nabla I)^T \right] (\mathbf{x}) \]</formula> which is also the Mahalanobis distance reflecting the anisotropy of the local shape. </para>    </detaileddescription>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/AffineShapeAdaptation.hpp" line="39" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/AffineShapeAdaptation.hpp" bodystart="38" bodyend="104"/>
+    <listofallmembers>
+      <member refid="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1adb280b2d26559fc4fd143870777efcd0" prot="public" virt="non-virtual"><scope>DO::AdaptFeatureAffinelyToLocalShape</scope><name>AdaptFeatureAffinelyToLocalShape</name></member>
+      <member refid="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1a306b3abe5e9813cb7c5ecd3171e2dc97" prot="private" virt="non-virtual"><scope>DO::AdaptFeatureAffinelyToLocalShape</scope><name>affine_adaptation_max_iter_</name></member>
+      <member refid="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1aa1b8a5a70cfeba9bfbe288bae0485670" prot="private" virt="non-virtual"><scope>DO::AdaptFeatureAffinelyToLocalShape</scope><name>computeMomentMatrixFromPatch</name></member>
+      <member refid="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1ab357fcf05f9b9c1543167c5c0ab77c46" prot="private" virt="non-virtual"><scope>DO::AdaptFeatureAffinelyToLocalShape</scope><name>computeTransformFromMomentMatrix</name></member>
+      <member refid="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1afa3f4fa08a8a3b675e2dab06e29412a1" prot="private" virt="non-virtual"><scope>DO::AdaptFeatureAffinelyToLocalShape</scope><name>debug_</name></member>
+      <member refid="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1afe5ab7576a6cfc79d49f87a9fdd98e52" prot="private" virt="non-virtual"><scope>DO::AdaptFeatureAffinelyToLocalShape</scope><name>debug_checkMomentMatrixAndTransform</name></member>
+      <member refid="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1a1b55e107f2bd42978d427ab2cde646b3" prot="private" virt="non-virtual"><scope>DO::AdaptFeatureAffinelyToLocalShape</scope><name>debug_checkWeightedPatch</name></member>
+      <member refid="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1abb936682a71cacd0a189039bc122bd65" prot="private" virt="non-virtual"><scope>DO::AdaptFeatureAffinelyToLocalShape</scope><name>debug_closeWindowUsedToViewPatch</name></member>
+      <member refid="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1a398bbcb890687b6f626292ca69f7c10e" prot="private" virt="non-virtual"><scope>DO::AdaptFeatureAffinelyToLocalShape</scope><name>debug_displayNormalizedPatch</name></member>
+      <member refid="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1a7d9bd8b66bcf7669d339071398bc3e83" prot="private" virt="non-virtual"><scope>DO::AdaptFeatureAffinelyToLocalShape</scope><name>debug_openWindowToViewPatch</name></member>
+      <member refid="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1acc73d97267759acb330f0af2cc179ac3" prot="private" virt="non-virtual"><scope>DO::AdaptFeatureAffinelyToLocalShape</scope><name>debug_printAffineAdaptationIteration</name></member>
+      <member refid="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1a868d09b851b28f50a9cac6af504237dc" prot="private" virt="non-virtual"><scope>DO::AdaptFeatureAffinelyToLocalShape</scope><name>debug_printPatchTouchesImageBoundaries</name></member>
+      <member refid="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1acc5b46e5fef29d616cdbeeb029b52c81" prot="private" virt="non-virtual"><scope>DO::AdaptFeatureAffinelyToLocalShape</scope><name>gauss_trunc_factor_</name></member>
+      <member refid="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1ab98cf00d9cf90a54ebecb2e9f62d735c" prot="private" virt="non-virtual"><scope>DO::AdaptFeatureAffinelyToLocalShape</scope><name>gaussian_weight_</name></member>
+      <member refid="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1ae00f8ba4b5adb8c9a53d5c008e428506" prot="public" virt="non-virtual"><scope>DO::AdaptFeatureAffinelyToLocalShape</scope><name>operator()</name></member>
+      <member refid="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1a6f6283d0daabfe586bec7f3e380cacd7" prot="private" virt="non-virtual"><scope>DO::AdaptFeatureAffinelyToLocalShape</scope><name>patch_</name></member>
+      <member refid="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1a59a266267431a447c03bbc047b8ceb47" prot="private" virt="non-virtual"><scope>DO::AdaptFeatureAffinelyToLocalShape</scope><name>patch_size_</name></member>
+      <member refid="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1ad2d053f92903faf23a300ced53e35d5c" prot="private" virt="non-virtual"><scope>DO::AdaptFeatureAffinelyToLocalShape</scope><name>patch_zoom_factor_</name></member>
+      <member refid="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1aeee127cdf82f845d4f6ee61d2bc167d3" prot="private" virt="non-virtual"><scope>DO::AdaptFeatureAffinelyToLocalShape</scope><name>rescaleTransform</name></member>
+      <member refid="class_d_o_1_1_adapt_feature_affinely_to_local_shape_1a7e0c6b0b9c3e3eb4288e2e42ea4bb993" prot="private" virt="non-virtual"><scope>DO::AdaptFeatureAffinelyToLocalShape</scope><name>updateNormalizedPatch</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

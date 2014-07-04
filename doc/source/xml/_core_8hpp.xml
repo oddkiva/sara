@@ -1,0 +1,319 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="_core_8hpp" kind="file">
+    <compoundname>Core.hpp</compoundname>
+    <includes refid="_defines_8hpp" local="yes">Defines.hpp</includes>
+    <includes refid="_meta_8hpp" local="yes">Core/Meta.hpp</includes>
+    <includes refid="_static_assert_8hpp" local="yes">Core/StaticAssert.hpp</includes>
+    <includes refid="_eigen_extension_8hpp" local="yes">Core/EigenExtension.hpp</includes>
+    <includes refid="_locator_8hpp" local="yes">Core/Locator.hpp</includes>
+    <includes refid="_multi_array_8hpp" local="yes">Core/MultiArray.hpp</includes>
+    <includes refid="_sparse_multi_array_8hpp" local="yes">Core/SparseMultiArray.hpp</includes>
+    <includes refid="_color_8hpp" local="yes">Core/Color.hpp</includes>
+    <includes refid="_image_8hpp" local="yes">Core/Image.hpp</includes>
+    <includes refid="_subimage_8hpp" local="yes">Core/Subimage.hpp</includes>
+    <includes refid="_tree_8hpp" local="yes">Core/Tree.hpp</includes>
+    <includes refid="_timer_8hpp" local="yes">Core/Timer.hpp</includes>
+    <includes refid="_stringify_8hpp" local="yes">Core/Stringify.hpp</includes>
+    <includes refid="_std_vector_helpers_8hpp" local="yes">Core/StdVectorHelpers.hpp</includes>
+    <includes refid="_debug_utilities_8hpp" local="yes">Core/DebugUtilities.hpp</includes>
+    <includedby refid="_feature_item_8hpp" local="no">C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/FeatureItem.hpp</includedby>
+    <includedby refid="_view_8hpp" local="no">C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/View.hpp</includedby>
+    <includedby refid="_features_8hpp" local="no">C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features.hpp</includedby>
+    <includedby refid="_image_processing_8hpp" local="no">C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing.hpp</includedby>
+    <includedby refid="_k_d_tree_2_k_d_tree_8hpp" local="no">C:/Users/David/Desktop/GitHub/DO-CV/src/DO/KDTree/KDTree.hpp</includedby>
+    <incdepgraph>
+      <node id="3">
+        <label>Defines.hpp</label>
+        <link refid="_defines_8hpp_source"/>
+      </node>
+      <node id="20">
+        <label>queue</label>
+      </node>
+      <node id="10">
+        <label>iterator</label>
+      </node>
+      <node id="12">
+        <label>Core/MultiArray.hpp</label>
+        <link refid="_multi_array_8hpp"/>
+        <childnode refid="9" relation="include">
+        </childnode>
+        <childnode refid="11" relation="include">
+        </childnode>
+        <childnode refid="13" relation="include">
+        </childnode>
+      </node>
+      <node id="26">
+        <label>Core/StdVectorHelpers.hpp</label>
+        <link refid="_std_vector_helpers_8hpp"/>
+        <childnode refid="27" relation="include">
+        </childnode>
+      </node>
+      <node id="13">
+        <label>numeric</label>
+      </node>
+      <node id="7">
+        <label>Eigen/Eigen</label>
+      </node>
+      <node id="25">
+        <label>string</label>
+      </node>
+      <node id="15">
+        <label>map</label>
+      </node>
+      <node id="17">
+        <label>Core/Image.hpp</label>
+        <link refid="_image_8hpp"/>
+        <childnode refid="16" relation="include">
+        </childnode>
+        <childnode refid="12" relation="include">
+        </childnode>
+      </node>
+      <node id="19">
+        <label>Core/Tree.hpp</label>
+        <link refid="_tree_8hpp"/>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="20" relation="include">
+        </childnode>
+        <childnode refid="21" relation="include">
+        </childnode>
+        <childnode refid="22" relation="include">
+        </childnode>
+      </node>
+      <node id="24">
+        <label>Core/Stringify.hpp</label>
+        <link refid="_stringify_8hpp"/>
+        <childnode refid="8" relation="include">
+        </childnode>
+        <childnode refid="25" relation="include">
+        </childnode>
+      </node>
+      <node id="22">
+        <label>fstream</label>
+      </node>
+      <node id="9">
+        <label>Core/Locator.hpp</label>
+        <link refid="_locator_8hpp"/>
+        <childnode refid="5" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="6" relation="include">
+        </childnode>
+        <childnode refid="10" relation="include">
+        </childnode>
+        <childnode refid="11" relation="include">
+        </childnode>
+      </node>
+      <node id="23">
+        <label>Core/Timer.hpp</label>
+        <link refid="_timer_8hpp"/>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="11" relation="include">
+        </childnode>
+      </node>
+      <node id="28">
+        <label>Core/DebugUtilities.hpp</label>
+        <link refid="_debug_utilities_8hpp"/>
+        <childnode refid="11" relation="include">
+        </childnode>
+      </node>
+      <node id="18">
+        <label>Core/Subimage.hpp</label>
+        <link refid="_subimage_8hpp"/>
+        <childnode refid="17" relation="include">
+        </childnode>
+      </node>
+      <node id="4">
+        <label>Core/Meta.hpp</label>
+        <link refid="_meta_8hpp"/>
+      </node>
+      <node id="27">
+        <label>vector</label>
+      </node>
+      <node id="21">
+        <label>stack</label>
+      </node>
+      <node id="5">
+        <label>Core/StaticAssert.hpp</label>
+        <link refid="_static_assert_8hpp"/>
+      </node>
+      <node id="8">
+        <label>sstream</label>
+      </node>
+      <node id="6">
+        <label>Core/EigenExtension.hpp</label>
+        <link refid="_eigen_extension_8hpp"/>
+        <childnode refid="7" relation="include">
+        </childnode>
+        <childnode refid="8" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core.hpp</label>
+        <link refid="Core.hpp"/>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+        <childnode refid="6" relation="include">
+        </childnode>
+        <childnode refid="9" relation="include">
+        </childnode>
+        <childnode refid="12" relation="include">
+        </childnode>
+        <childnode refid="14" relation="include">
+        </childnode>
+        <childnode refid="16" relation="include">
+        </childnode>
+        <childnode refid="17" relation="include">
+        </childnode>
+        <childnode refid="18" relation="include">
+        </childnode>
+        <childnode refid="19" relation="include">
+        </childnode>
+        <childnode refid="23" relation="include">
+        </childnode>
+        <childnode refid="24" relation="include">
+        </childnode>
+        <childnode refid="26" relation="include">
+        </childnode>
+        <childnode refid="28" relation="include">
+        </childnode>
+      </node>
+      <node id="11">
+        <label>iostream</label>
+      </node>
+      <node id="14">
+        <label>Core/SparseMultiArray.hpp</label>
+        <link refid="_sparse_multi_array_8hpp"/>
+        <childnode refid="6" relation="include">
+        </childnode>
+        <childnode refid="15" relation="include">
+        </childnode>
+      </node>
+      <node id="16">
+        <label>Core/Color.hpp</label>
+        <link refid="_color_8hpp"/>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+        <childnode refid="6" relation="include">
+        </childnode>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="37">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/KDTree.hpp</label>
+        <link refid="_k_d_tree_8hpp_source"/>
+      </node>
+      <node id="32">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features.hpp</label>
+        <link refid="_features_8hpp"/>
+        <childnode refid="33" relation="include">
+        </childnode>
+        <childnode refid="34" relation="include">
+        </childnode>
+      </node>
+      <node id="33">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDescriptors.hpp</label>
+        <link refid="_feature_descriptors_8hpp"/>
+      </node>
+      <node id="34">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors.hpp</label>
+        <link refid="_feature_detectors_8hpp"/>
+      </node>
+      <node id="31">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/View.hpp</label>
+        <link refid="_view_8hpp"/>
+      </node>
+      <node id="35">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing.hpp</label>
+        <link refid="_image_processing_8hpp"/>
+        <childnode refid="33" relation="include">
+        </childnode>
+        <childnode refid="34" relation="include">
+        </childnode>
+      </node>
+      <node id="29">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core.hpp</label>
+        <link refid="Core.hpp"/>
+        <childnode refid="30" relation="include">
+        </childnode>
+        <childnode refid="31" relation="include">
+        </childnode>
+        <childnode refid="32" relation="include">
+        </childnode>
+        <childnode refid="35" relation="include">
+        </childnode>
+        <childnode refid="36" relation="include">
+        </childnode>
+      </node>
+      <node id="30">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/FeatureItem.hpp</label>
+        <link refid="_feature_item_8hpp_source"/>
+      </node>
+      <node id="36">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/KDTree/KDTree.hpp</label>
+        <link refid="_k_d_tree_2_k_d_tree_8hpp_source"/>
+        <childnode refid="37" relation="include">
+        </childnode>
+      </node>
+    </invincdepgraph>
+    <innernamespace refid="namespace_d_o">DO</innernamespace>
+    <briefdescription>
+<para>Master header file of the Core module. </para>    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="comment">//<sp/>==========================================================================<sp/>//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="comment">//<sp/>This<sp/>file<sp/>is<sp/>part<sp/>of<sp/>DO++,<sp/>a<sp/>basic<sp/>set<sp/>of<sp/>libraries<sp/>in<sp/>C++<sp/>for<sp/>computer<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight><highlight class="comment">//<sp/>vision.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="comment">//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Copyright<sp/>(C)<sp/>2013<sp/>David<sp/>Ok<sp/>&lt;david.ok8@gmail.com&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight><highlight class="comment">//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight><highlight class="comment">//<sp/>This<sp/>Source<sp/>Code<sp/>Form<sp/>is<sp/>subject<sp/>to<sp/>the<sp/>terms<sp/>of<sp/>the<sp/>Mozilla<sp/>Public<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight><highlight class="comment">//<sp/>License<sp/>v.<sp/>2.0.<sp/>If<sp/>a<sp/>copy<sp/>of<sp/>the<sp/>MPL<sp/>was<sp/>not<sp/>distributed<sp/>with<sp/>this<sp/>file,<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight><highlight class="comment">//<sp/>you<sp/>can<sp/>obtain<sp/>one<sp/>at<sp/>http://mozilla.org/MPL/2.0/.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight><highlight class="comment">//<sp/>==========================================================================<sp/>//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight><highlight class="preprocessor">#ifndef<sp/>DO_CORE_HPP</highlight></codeline>
+<codeline lineno="16"><highlight class="preprocessor"></highlight><highlight class="preprocessor">#define<sp/>DO_CORE_HPP</highlight></codeline>
+<codeline lineno="17"><highlight class="preprocessor"></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight><highlight class="comment">//<sp/>DO++<sp/>specific<sp/>defines.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="19"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;Defines.hpp&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="20"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Template<sp/>meta-programming</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="21"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_meta_8hpp" kindref="compound">Core/Meta.hpp</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="22"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_static_assert_8hpp" kindref="compound" tooltip="Implementation from: http://stackoverflow.com/questions/1980012/boost-static-assert-without-boost.">Core/StaticAssert.hpp</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="23"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Linear<sp/>algebra<sp/>imports<sp/>and<sp/>extension<sp/>from<sp/>Eigen3</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="24"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_eigen_extension_8hpp" kindref="compound" tooltip="Eigen matrices and vector typedefs.">Core/EigenExtension.hpp</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="25"><highlight class="normal"></highlight><highlight class="comment">//<sp/>N-dimensional<sp/>array<sp/>and<sp/>N-dimensional<sp/>iterators</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="26"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_locator_8hpp" kindref="compound" tooltip="Implementation of N-dimensional iterators.">Core/Locator.hpp</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="27"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_multi_array_8hpp" kindref="compound" tooltip="This contains the implementation of the N-dimensional array class.">Core/MultiArray.hpp</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="28"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Sparse<sp/>N-dimensional<sp/>array</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="29"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_sparse_multi_array_8hpp" kindref="compound" tooltip="This contains the implementation of the sparse N-dimensional array class.">Core/SparseMultiArray.hpp</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="30"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Image<sp/>and<sp/>color<sp/>data<sp/>structures</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="31"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_color_8hpp" kindref="compound">Core/Color.hpp</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="32"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_image_8hpp" kindref="compound">Core/Image.hpp</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="33"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_subimage_8hpp" kindref="compound">Core/Subimage.hpp</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="34"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Tree<sp/>data<sp/>structures</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="35"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_tree_8hpp" kindref="compound" tooltip="This contains the implementation of the tree data structure.">Core/Tree.hpp</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="36"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Timer<sp/>classes</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="37"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_timer_8hpp" kindref="compound">Core/Timer.hpp</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="38"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Miscellaneous</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="39"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_stringify_8hpp" kindref="compound">Core/Stringify.hpp</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="40"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_std_vector_helpers_8hpp" kindref="compound">Core/StdVectorHelpers.hpp</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="41"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_debug_utilities_8hpp" kindref="compound">Core/DebugUtilities.hpp</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="42"><highlight class="normal"></highlight></codeline>
+<codeline lineno="43"><highlight class="normal"></highlight></codeline>
+<codeline lineno="59"><highlight class="preprocessor">#endif<sp/></highlight><highlight class="comment">/*<sp/>DO_CORE_HPP<sp/>*/</highlight><highlight class="preprocessor"></highlight></codeline>
+    </programlisting>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core.hpp"/>
+  </compounddef>
+</doxygen>

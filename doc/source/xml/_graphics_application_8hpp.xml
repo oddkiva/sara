@@ -1,0 +1,169 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="_graphics_application_8hpp" kind="file">
+    <compoundname>GraphicsApplication.hpp</compoundname>
+    <includedby refid="_graphics_8hpp" local="yes">C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics.hpp</includedby>
+    <invincdepgraph>
+      <node id="1399">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/GraphicsUtilities.hpp</label>
+        <link refid="_graphics_utilities_8hpp"/>
+      </node>
+      <node id="1395">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Graphics/DrawPolygon.hpp</label>
+        <link refid="_draw_polygon_8hpp_source"/>
+        <childnode refid="1396" relation="include">
+        </childnode>
+      </node>
+      <node id="1397">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry.hpp</label>
+        <link refid="_geometry_8hpp_source"/>
+      </node>
+      <node id="1398">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/GraphicsApplicationImpl.hpp</label>
+        <link refid="_graphics_application_impl_8hpp"/>
+        <childnode refid="1399" relation="include">
+        </childnode>
+      </node>
+      <node id="1392">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDescriptors.hpp</label>
+        <link refid="_feature_descriptors_8hpp"/>
+      </node>
+      <node id="1390">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/GraphicsApplication.hpp</label>
+        <link refid="GraphicsApplication.hpp"/>
+        <childnode refid="1391" relation="include">
+        </childnode>
+      </node>
+      <node id="1393">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors.hpp</label>
+        <link refid="_feature_detectors_8hpp"/>
+      </node>
+      <node id="1394">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/View.hpp</label>
+        <link refid="_view_8hpp"/>
+      </node>
+      <node id="1396">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Graphics.hpp</label>
+        <link refid="_geometry_2_graphics_8hpp_source"/>
+        <childnode refid="1397" relation="include">
+        </childnode>
+      </node>
+      <node id="1391">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics.hpp</label>
+        <link refid="_graphics_8hpp"/>
+        <childnode refid="1392" relation="include">
+        </childnode>
+        <childnode refid="1393" relation="include">
+        </childnode>
+        <childnode refid="1394" relation="include">
+        </childnode>
+        <childnode refid="1395" relation="include">
+        </childnode>
+        <childnode refid="1398" relation="include">
+        </childnode>
+      </node>
+    </invincdepgraph>
+    <innerclass refid="class_d_o_1_1_graphics_application" prot="public">DO::GraphicsApplication</innerclass>
+    <innernamespace refid="namespace_d_o">DO</innernamespace>
+      <sectiondef kind="define">
+      <memberdef kind="define" id="group___graphics_internal_1ga883e6b01983b9ef0003f57cb8a411fbd" prot="public" static="no">
+        <name>main</name>
+        <param><defname>...</defname></param>
+        <initializer>/*int*/ main(int argc, char **argv)         \
+{                                           \
+  <ref refid="class_d_o_1_1_graphics_application" kindref="compound">DO::GraphicsApplication</ref> app(argc, argv);  \
+  app.registerUserMain(<ref refid="group___graphics_internal_1ga02f7e011c919803c30df1c248ebe13a9" kindref="member">__main</ref>);             \
+  app.exec();                               \
+}                                           \
+                                            \
+int <ref refid="group___graphics_internal_1ga02f7e011c919803c30df1c248ebe13a9" kindref="member">__main</ref>(int argc, char **argv)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/GraphicsApplication.hpp" line="65" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/GraphicsApplication.hpp" bodystart="57" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="func">
+      <memberdef kind="function" id="group___graphics_internal_1ga02f7e011c919803c30df1c248ebe13a9" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int</type>
+        <definition>int __main</definition>
+        <argsstring>(int, char **)</argsstring>
+        <name>__main</name>
+        <param>
+          <type>int</type>
+        </param>
+        <param>
+          <type>char **</type>
+        </param>
+        <briefdescription>
+<para>Some convenient hacks. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/GraphicsApplication.hpp" line="55"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="comment">//<sp/>==========================================================================<sp/>//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="comment">//<sp/>This<sp/>file<sp/>is<sp/>part<sp/>of<sp/>DO++,<sp/>a<sp/>basic<sp/>set<sp/>of<sp/>libraries<sp/>in<sp/>C++<sp/>for<sp/>computer<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight><highlight class="comment">//<sp/>vision.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="comment">//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Copyright<sp/>(C)<sp/>2013<sp/>David<sp/>Ok<sp/>&lt;david.ok8@gmail.com&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight><highlight class="comment">//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight><highlight class="comment">//<sp/>This<sp/>Source<sp/>Code<sp/>Form<sp/>is<sp/>subject<sp/>to<sp/>the<sp/>terms<sp/>of<sp/>the<sp/>Mozilla<sp/>Public<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight><highlight class="comment">//<sp/>License<sp/>v.<sp/>2.0.<sp/>If<sp/>a<sp/>copy<sp/>of<sp/>the<sp/>MPL<sp/>was<sp/>not<sp/>distributed<sp/>with<sp/>this<sp/>file,<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight><highlight class="comment">//<sp/>you<sp/>can<sp/>obtain<sp/>one<sp/>at<sp/>http://mozilla.org/MPL/2.0/.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight><highlight class="comment">//<sp/>==========================================================================<sp/>//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight><highlight class="preprocessor">#ifndef<sp/>DO_GRAPHICS_GRAPHICSAPPLICATION_HPP</highlight></codeline>
+<codeline lineno="15"><highlight class="preprocessor"></highlight><highlight class="preprocessor">#define<sp/>DO_GRAPHICS_GRAPHICSAPPLICATION_HPP</highlight></codeline>
+<codeline lineno="16"><highlight class="preprocessor"></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="17"><highlight class="normal"></highlight><highlight class="keyword">namespace<sp/></highlight><highlight class="normal">DO<sp/>{</highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight></codeline>
+<codeline lineno="27"></codeline>
+<codeline lineno="28"></codeline>
+<codeline lineno="29"></codeline>
+<codeline lineno="30" refid="class_d_o_1_1_graphics_application" refkind="compound"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal">DO_EXPORT<sp/><ref refid="class_d_o_1_1_graphics_application" kindref="compound" tooltip="QApplication-derived class This graphic application establishes communication between the user drawin...">GraphicsApplication</ref></highlight></codeline>
+<codeline lineno="31"><highlight class="normal"><sp/><sp/>{</highlight></codeline>
+<codeline lineno="32"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="33"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="class_d_o_1_1_graphics_application_1_1_impl" kindref="compound" tooltip="Private implementation of the class GraphicsApplication.">Impl</ref>;</highlight></codeline>
+<codeline lineno="34"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="class_d_o_1_1_graphics_application" kindref="compound" tooltip="QApplication-derived class This graphic application establishes communication between the user drawin...">GraphicsApplication</ref>(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>argc,<sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>**argv);</highlight></codeline>
+<codeline lineno="35"><highlight class="normal"><sp/><sp/><sp/><sp/>~<ref refid="class_d_o_1_1_graphics_application" kindref="compound" tooltip="QApplication-derived class This graphic application establishes communication between the user drawin...">GraphicsApplication</ref>();</highlight></codeline>
+<codeline lineno="36"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>registerUserMain(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>(*userMain)(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal">,<sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>**));</highlight></codeline>
+<codeline lineno="37"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>exec();</highlight></codeline>
+<codeline lineno="38"><highlight class="normal"></highlight></codeline>
+<codeline lineno="39"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">private</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="40"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="class_d_o_1_1_graphics_application_1_1_impl" kindref="compound" tooltip="Private implementation of the class GraphicsApplication.">Impl</ref><sp/>*pimpl_;</highlight></codeline>
+<codeline lineno="41"><highlight class="normal"><sp/><sp/>};</highlight></codeline>
+<codeline lineno="42"><highlight class="normal"><sp/><sp/></highlight></codeline>
+<codeline lineno="44"><highlight class="normal"></highlight></codeline>
+<codeline lineno="45"><highlight class="normal">}<sp/></highlight><highlight class="comment">/*<sp/>namespace<sp/>DO<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="46"><highlight class="normal"></highlight></codeline>
+<codeline lineno="53"><highlight class="comment">//<sp/>======================================================================<sp/>//</highlight></codeline>
+<codeline lineno="55"><highlight class="comment"></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="group___graphics_internal_1ga02f7e011c919803c30df1c248ebe13a9" kindref="member" tooltip="Some convenient hacks.">__main</ref>(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal">,<sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>**);</highlight></codeline>
+<codeline lineno="56"><highlight class="normal"></highlight></codeline>
+<codeline lineno="57"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>main(...)<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>\</highlight></codeline>
+<codeline lineno="58"><highlight class="preprocessor"></highlight><highlight class="comment">/*int*/</highlight><highlight class="preprocessor"><sp/>main(int<sp/>argc,<sp/>char<sp/>**argv)<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>\</highlight></codeline>
+<codeline lineno="59"><highlight class="preprocessor">{<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>\</highlight></codeline>
+<codeline lineno="60"><highlight class="preprocessor"><sp/><sp/>DO::GraphicsApplication<sp/>app(argc,<sp/>argv);<sp/><sp/>\</highlight></codeline>
+<codeline lineno="61"><highlight class="preprocessor"><sp/><sp/>app.registerUserMain(__main);<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>\</highlight></codeline>
+<codeline lineno="62"><highlight class="preprocessor"><sp/><sp/>app.exec();<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>\</highlight></codeline>
+<codeline lineno="63"><highlight class="preprocessor">}<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>\</highlight></codeline>
+<codeline lineno="64"><highlight class="preprocessor"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>\</highlight></codeline>
+<codeline lineno="65"><highlight class="preprocessor">int<sp/>__main(int<sp/>argc,<sp/>char<sp/>**argv)</highlight></codeline>
+<codeline lineno="66"><highlight class="preprocessor"></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="67"><highlight class="normal"></highlight></codeline>
+<codeline lineno="68"><highlight class="normal"></highlight><highlight class="preprocessor">#endif<sp/></highlight><highlight class="comment">/*<sp/>DO_GRAPHICS_GRAPHICSAPPLICATION_HPP<sp/>*/</highlight><highlight class="preprocessor"></highlight></codeline>
+    </programlisting>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/GraphicsApplication.hpp"/>
+  </compounddef>
+</doxygen>

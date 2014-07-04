@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="namespace_d_o_1_1_projective" kind="namespace">
+    <compoundname>DO::Projective</compoundname>
+    <innerclass refid="class_d_o_1_1_projective_1_1_conic" prot="public">DO::Projective::Conic</innerclass>
+    <innerclass refid="class_d_o_1_1_projective_1_1_matrix_based_object" prot="public">DO::Projective::MatrixBasedObject</innerclass>
+    <innerclass refid="class_d_o_1_1_projective_1_1_homography" prot="public">DO::Projective::Homography</innerclass>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/Conic.hpp" line="17"/>
+  </compounddef>
+</doxygen>

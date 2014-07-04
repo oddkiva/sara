@@ -1,0 +1,82 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="_feature_detectors_2_do_g_8hpp" kind="file">
+    <compoundname>DoG.hpp</compoundname>
+    <includedby refid="_feature_detectors_8hpp" local="yes">C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors.hpp</includedby>
+    <invincdepgraph>
+      <node id="554">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors.hpp</label>
+        <link refid="_feature_detectors_8hpp"/>
+      </node>
+      <node id="553">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/DoG.hpp</label>
+        <link refid="FeatureDetectors/DoG.hpp"/>
+        <childnode refid="554" relation="include">
+        </childnode>
+      </node>
+    </invincdepgraph>
+    <innerclass refid="class_d_o_1_1_compute_do_g_extrema" prot="public">DO::ComputeDoGExtrema</innerclass>
+    <innernamespace refid="namespace_d_o">DO</innernamespace>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="comment">//<sp/>==========================================================================<sp/>//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="comment">//<sp/>This<sp/>file<sp/>is<sp/>part<sp/>of<sp/>DO++,<sp/>a<sp/>basic<sp/>set<sp/>of<sp/>libraries<sp/>in<sp/>C++<sp/>for<sp/>computer<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight><highlight class="comment">//<sp/>vision.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="comment">//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Copyright<sp/>(C)<sp/>2013<sp/>David<sp/>Ok<sp/>&lt;david.ok8@gmail.com&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight><highlight class="comment">//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight><highlight class="comment">//<sp/>This<sp/>Source<sp/>Code<sp/>Form<sp/>is<sp/>subject<sp/>to<sp/>the<sp/>terms<sp/>of<sp/>the<sp/>Mozilla<sp/>Public<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight><highlight class="comment">//<sp/>License<sp/>v.<sp/>2.0.<sp/>If<sp/>a<sp/>copy<sp/>of<sp/>the<sp/>MPL<sp/>was<sp/>not<sp/>distributed<sp/>with<sp/>this<sp/>file,<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight><highlight class="comment">//<sp/>you<sp/>can<sp/>obtain<sp/>one<sp/>at<sp/>http://mozilla.org/MPL/2.0/.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight><highlight class="comment">//<sp/>==========================================================================<sp/>//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight><highlight class="preprocessor">#ifndef<sp/>DO_FEATUREDETECTORS_DOG_HPP</highlight></codeline>
+<codeline lineno="15"><highlight class="preprocessor"></highlight><highlight class="preprocessor">#define<sp/>DO_FEATUREDETECTORS_DOG_HPP</highlight></codeline>
+<codeline lineno="16"><highlight class="preprocessor"></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="17"><highlight class="normal"></highlight><highlight class="keyword">namespace<sp/></highlight><highlight class="normal">DO<sp/>{</highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight></codeline>
+<codeline lineno="25"></codeline>
+<codeline lineno="26" refid="class_d_o_1_1_compute_do_g_extrema" refkind="compound"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="class_d_o_1_1_compute_do_g_extrema" kindref="compound" tooltip="Functor class to compute DoG extrema.">ComputeDoGExtrema</ref></highlight></codeline>
+<codeline lineno="27"><highlight class="normal"><sp/><sp/>{</highlight></codeline>
+<codeline lineno="28"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="63" refid="group___interest_point_1ga0ec97797c3953f749f97503eac5e9b02" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___interest_point_1ga0ec97797c3953f749f97503eac5e9b02" kindref="member" tooltip="Constructor.">ComputeDoGExtrema</ref>(</highlight></codeline>
+<codeline lineno="64"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_image_pyramid_params" kindref="compound" tooltip="Image pyramid parameters which discretizes the Gaussian scale-space.">ImagePyramidParams</ref>&amp;<sp/>pyrParams<sp/>=<sp/><ref refid="class_d_o_1_1_image_pyramid_params" kindref="compound" tooltip="Image pyramid parameters which discretizes the Gaussian scale-space.">ImagePyramidParams</ref>(),</highlight></codeline>
+<codeline lineno="65"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>extremumThres<sp/>=<sp/>0.01f,</highlight></codeline>
+<codeline lineno="66"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>edgeRatioThres<sp/>=<sp/>10.f,</highlight></codeline>
+<codeline lineno="67"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>imgPaddingSz<sp/>=<sp/>1,</highlight></codeline>
+<codeline lineno="68"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>extremumRefinementIter<sp/>=<sp/>5)</highlight></codeline>
+<codeline lineno="69"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>:<sp/>params_(pyrParams)</highlight></codeline>
+<codeline lineno="70"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>,<sp/>extremum_thres_(extremumThres)</highlight></codeline>
+<codeline lineno="71"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>,<sp/>edge_ratio_thres_(edgeRatioThres)</highlight></codeline>
+<codeline lineno="72"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>,<sp/>img_padding_sz_(imgPaddingSz)</highlight></codeline>
+<codeline lineno="73"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>,<sp/>extremum_refinement_iter_(extremumRefinementIter)</highlight></codeline>
+<codeline lineno="74"><highlight class="normal"><sp/><sp/><sp/><sp/>{}</highlight></codeline>
+<codeline lineno="98"><highlight class="normal"><sp/><sp/><sp/><sp/>std::vector&lt;OERegion&gt;<sp/><ref refid="group___interest_point_1ga97b5e86e276173bb410ce58d39f28266" kindref="member" tooltip="Localizes DoG extrema for a given image.">operator()</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_image" kindref="compound">Image&lt;float&gt;</ref>&amp;<sp/>I,</highlight></codeline>
+<codeline lineno="99"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>std::vector&lt;Point2i&gt;<sp/>*scaleOctavePairs<sp/>=<sp/>0);</highlight></codeline>
+<codeline lineno="111" refid="group___interest_point_1gaf837b3a21f63e182a711ab0ad2d8b8a8" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_image_pyramid" kindref="compound">ImagePyramid&lt;float&gt;</ref>&amp;<sp/><ref refid="group___interest_point_1gaf837b3a21f63e182a711ab0ad2d8b8a8" kindref="member" tooltip="Returns the Gaussian pyramid used to localize scale-space extrema of image I.">gaussians</ref>()</highlight><highlight class="keyword"><sp/>const</highlight></codeline>
+<codeline lineno="112"><highlight class="keyword"><sp/><sp/><sp/><sp/></highlight><highlight class="normal">{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>gaussians_;<sp/>}</highlight></codeline>
+<codeline lineno="123" refid="group___interest_point_1gafe3fa95f391e3ad4a4139602f97f3a36" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_image_pyramid" kindref="compound">ImagePyramid&lt;float&gt;</ref>&amp;<sp/><ref refid="group___interest_point_1gafe3fa95f391e3ad4a4139602f97f3a36" kindref="member" tooltip="Returns the pyramid of difference of Gaussians used to localize scale-space extrema of image I...">diffOfGaussians</ref>()</highlight><highlight class="keyword"><sp/>const</highlight></codeline>
+<codeline lineno="124"><highlight class="keyword"><sp/><sp/><sp/><sp/></highlight><highlight class="normal">{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>diff_of_gaussians_;<sp/>}</highlight></codeline>
+<codeline lineno="125"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">private</highlight><highlight class="normal">:<sp/></highlight><highlight class="comment">/*<sp/>data<sp/>members.<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="126"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>Parameters</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="127"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="class_d_o_1_1_image_pyramid_params" kindref="compound" tooltip="Image pyramid parameters which discretizes the Gaussian scale-space.">ImagePyramidParams</ref><sp/>params_;</highlight></codeline>
+<codeline lineno="128"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>extremum_thres_;</highlight></codeline>
+<codeline lineno="129"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>edge_ratio_thres_;</highlight></codeline>
+<codeline lineno="130"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>img_padding_sz_;</highlight></codeline>
+<codeline lineno="131"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>extremum_refinement_iter_;</highlight></codeline>
+<codeline lineno="132"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>Difference<sp/>of<sp/>Gaussians.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="133"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="class_d_o_1_1_image_pyramid" kindref="compound">ImagePyramid&lt;float&gt;</ref><sp/>gaussians_;</highlight></codeline>
+<codeline lineno="134"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="class_d_o_1_1_image_pyramid" kindref="compound">ImagePyramid&lt;float&gt;</ref><sp/>diff_of_gaussians_;</highlight></codeline>
+<codeline lineno="135"><highlight class="normal"><sp/><sp/>};</highlight></codeline>
+<codeline lineno="136"><highlight class="normal"></highlight></codeline>
+<codeline lineno="137"><highlight class="normal">}<sp/></highlight><highlight class="comment">/*<sp/>namespace<sp/>DO<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="138"><highlight class="normal"></highlight></codeline>
+<codeline lineno="139"><highlight class="normal"></highlight><highlight class="preprocessor">#endif<sp/></highlight><highlight class="comment">/*<sp/>DO_FEATUREDETECTORS_DOG_HPP<sp/>*/</highlight><highlight class="preprocessor"></highlight></codeline>
+    </programlisting>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/DoG.hpp"/>
+  </compounddef>
+</doxygen>

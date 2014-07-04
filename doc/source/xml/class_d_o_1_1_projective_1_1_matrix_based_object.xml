@@ -1,0 +1,321 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="class_d_o_1_1_projective_1_1_matrix_based_object" kind="class" prot="public">
+    <compoundname>DO::Projective::MatrixBasedObject</compoundname>
+    <derivedcompoundref refid="class_d_o_1_1_projective_1_1_conic" prot="public" virt="non-virtual">Conic&lt; T, N &gt;</derivedcompoundref>
+    <derivedcompoundref refid="class_d_o_1_1_projective_1_1_homography" prot="public" virt="non-virtual">Homography&lt; T, N &gt;</derivedcompoundref>
+    <includes refid="_matrix_based_object_8hpp" local="no">MatrixBasedObject.hpp</includes>
+    <templateparamlist>
+      <param>
+        <type>typename T</type>
+      </param>
+      <param>
+        <type>int</type>
+        <declname>N</declname>
+        <defname>N</defname>
+      </param>
+    </templateparamlist>
+      <sectiondef kind="public-type">
+      <memberdef kind="enum" id="class_d_o_1_1_projective_1_1_matrix_based_object_1a94798fdadfbf49a7c658ace669a1d310" prot="public" static="no">
+        <name>@24</name>
+        <enumvalue id="class_d_o_1_1_projective_1_1_matrix_based_object_1a94798fdadfbf49a7c658ace669a1d310a33cede6b934046a29e456d31efa91468" prot="public">
+          <name>Dimension</name>
+          <initializer>= N</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/MatrixBasedObject.hpp" line="23" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/MatrixBasedObject.hpp" bodystart="23" bodyend="23"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_d_o_1_1_projective_1_1_matrix_based_object_1a32a648ca8bfc49041d07043a5e2716a9" prot="public" static="no">
+        <type>Matrix&lt; T, N+1, N+1 &gt;</type>
+        <definition>typedef Matrix&lt;T, N+1, N+1&gt; Mat</definition>
+        <argsstring></argsstring>
+        <name>Mat</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/MatrixBasedObject.hpp" line="24" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/MatrixBasedObject.hpp" bodystart="24" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_d_o_1_1_projective_1_1_matrix_based_object_1a2672b80e9744062f0267c644e3530fbe" prot="public" static="no">
+        <type>Matrix&lt; T, N+1, 1 &gt;</type>
+        <definition>typedef Matrix&lt;T, N+1, 1&gt; HVec</definition>
+        <argsstring></argsstring>
+        <name>HVec</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/MatrixBasedObject.hpp" line="25" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/MatrixBasedObject.hpp" bodystart="25" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_d_o_1_1_projective_1_1_matrix_based_object_1a59bef1cbb4ff85d879a58db452bbe185" prot="public" static="no">
+        <type>Matrix&lt; T, N, 1 &gt;</type>
+        <definition>typedef Matrix&lt;T, N , 1&gt; Vec</definition>
+        <argsstring></argsstring>
+        <name>Vec</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/MatrixBasedObject.hpp" line="26" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/MatrixBasedObject.hpp" bodystart="26" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="protected-attrib">
+      <memberdef kind="variable" id="class_d_o_1_1_projective_1_1_matrix_based_object_1aef2cbf2dd0eca093467e5f531448212a" prot="protected" static="no" mutable="no">
+        <type>Mat</type>
+        <definition>Mat mat_</definition>
+        <argsstring></argsstring>
+        <name>mat_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/MatrixBasedObject.hpp" line="51" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/MatrixBasedObject.hpp" bodystart="51" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_d_o_1_1_projective_1_1_matrix_based_object_1a4f6656518eb5234e883064b57e9f28b7" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>MatrixBasedObject</definition>
+        <argsstring>()</argsstring>
+        <name>MatrixBasedObject</name>
+        <briefdescription>
+<para>Common constructors. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/MatrixBasedObject.hpp" line="28" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/MatrixBasedObject.hpp" bodystart="28" bodyend="28"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_projective_1_1_matrix_based_object_1ae9ddbd747e498351ae091463a0661cf4" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>MatrixBasedObject</definition>
+        <argsstring>(const MatrixBasedObject &amp;other)</argsstring>
+        <name>MatrixBasedObject</name>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_projective_1_1_matrix_based_object" kindref="compound">MatrixBasedObject</ref> &amp;</type>
+          <declname>other</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/MatrixBasedObject.hpp" line="29" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/MatrixBasedObject.hpp" bodystart="29" bodyend="29"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_projective_1_1_matrix_based_object_1ada37199131a99b7423c03ff268e01665" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>MatrixBasedObject</definition>
+        <argsstring>(const Mat &amp;data)</argsstring>
+        <name>MatrixBasedObject</name>
+        <param>
+          <type>const Mat &amp;</type>
+          <declname>data</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/MatrixBasedObject.hpp" line="30" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/MatrixBasedObject.hpp" bodystart="30" bodyend="30"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_projective_1_1_matrix_based_object_1aa24ee40fcefa664912de21bb09a6bd17" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_projective_1_1_matrix_based_object" kindref="compound">MatrixBasedObject</ref> &amp;</type>
+        <definition>MatrixBasedObject&amp; operator=</definition>
+        <argsstring>(const MatrixBasedObject &amp;other)</argsstring>
+        <name>operator=</name>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_projective_1_1_matrix_based_object" kindref="compound">MatrixBasedObject</ref> &amp;</type>
+          <declname>other</declname>
+        </param>
+        <briefdescription>
+<para>Assignment operator. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/MatrixBasedObject.hpp" line="33" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/MatrixBasedObject.hpp" bodystart="32" bodyend="33"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_projective_1_1_matrix_based_object_1a3edf7532ac66a15d00405992b51a5843" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>Mat &amp;</type>
+        <definition>Mat&amp; matrix</definition>
+        <argsstring>()</argsstring>
+        <name>matrix</name>
+        <briefdescription>
+<para>Matrix accessor. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/MatrixBasedObject.hpp" line="35" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/MatrixBasedObject.hpp" bodystart="35" bodyend="35"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_projective_1_1_matrix_based_object_1a1ab82dd2ceec3757e3134d79199de300" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>const Mat &amp;</type>
+        <definition>const Mat&amp; matrix</definition>
+        <argsstring>() const </argsstring>
+        <name>matrix</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/MatrixBasedObject.hpp" line="36" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/MatrixBasedObject.hpp" bodystart="36" bodyend="36"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_projective_1_1_matrix_based_object_1a8c8ceabc696d63c5c1949706e5f949af" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>T &amp;</type>
+        <definition>T&amp; operator()</definition>
+        <argsstring>(int i, int j)</argsstring>
+        <name>operator()</name>
+        <param>
+          <type>int</type>
+          <declname>i</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>j</declname>
+        </param>
+        <briefdescription>
+<para>Coefficient accessor. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/MatrixBasedObject.hpp" line="39" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/MatrixBasedObject.hpp" bodystart="38" bodyend="39"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_projective_1_1_matrix_based_object_1a52f400707bfe09b4abe0f2cc6dac6e74" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>T</type>
+        <definition>T operator()</definition>
+        <argsstring>(int i, int j) const </argsstring>
+        <name>operator()</name>
+        <param>
+          <type>int</type>
+          <declname>i</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>j</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/MatrixBasedObject.hpp" line="41" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/MatrixBasedObject.hpp" bodystart="40" bodyend="41"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_projective_1_1_matrix_based_object_1a8b19ca72f93990e6beee12533d6c0c21" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool operator==</definition>
+        <argsstring>(const MatrixBasedObject &amp;other) const </argsstring>
+        <name>operator==</name>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_projective_1_1_matrix_based_object" kindref="compound">MatrixBasedObject</ref> &amp;</type>
+          <declname>other</declname>
+        </param>
+        <briefdescription>
+<para>Comparison operator. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/MatrixBasedObject.hpp" line="44" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/MatrixBasedObject.hpp" bodystart="43" bodyend="44"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_projective_1_1_matrix_based_object_1a424af4502059088b375471d8ca04239a" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool operator!=</definition>
+        <argsstring>(const MatrixBasedObject &amp;other) const </argsstring>
+        <name>operator!=</name>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_projective_1_1_matrix_based_object" kindref="compound">MatrixBasedObject</ref> &amp;</type>
+          <declname>other</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/MatrixBasedObject.hpp" line="46" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/MatrixBasedObject.hpp" bodystart="45" bodyend="46"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="private-func">
+      <memberdef kind="function" id="class_d_o_1_1_projective_1_1_matrix_based_object_1a79a22c1d93bcf3663fd9da5404fd1e82" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void copy</definition>
+        <argsstring>(const MatrixBasedObject &amp;other)</argsstring>
+        <name>copy</name>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_projective_1_1_matrix_based_object" kindref="compound">MatrixBasedObject</ref> &amp;</type>
+          <declname>other</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/MatrixBasedObject.hpp" line="49" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/MatrixBasedObject.hpp" bodystart="48" bodyend="49"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Rudimentary polynomial class. </para>    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="385">
+        <label>Homography&lt; T, N &gt;</label>
+        <link refid="class_d_o_1_1_projective_1_1_homography"/>
+        <childnode refid="383" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="384">
+        <label>Conic&lt; T, N &gt;</label>
+        <link refid="class_d_o_1_1_projective_1_1_conic"/>
+        <childnode refid="383" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="383">
+        <label>MatrixBasedObject&lt; T, N &gt;</label>
+        <link refid="class_d_o_1_1_projective_1_1_matrix_based_object"/>
+      </node>
+    </inheritancegraph>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/MatrixBasedObject.hpp" line="21" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/MatrixBasedObject.hpp" bodystart="20" bodyend="52"/>
+    <listofallmembers>
+      <member refid="class_d_o_1_1_projective_1_1_matrix_based_object_1a79a22c1d93bcf3663fd9da5404fd1e82" prot="private" virt="non-virtual"><scope>DO::Projective::MatrixBasedObject</scope><name>copy</name></member>
+      <member refid="class_d_o_1_1_projective_1_1_matrix_based_object_1a94798fdadfbf49a7c658ace669a1d310a33cede6b934046a29e456d31efa91468" prot="public" virt="non-virtual"><scope>DO::Projective::MatrixBasedObject</scope><name>Dimension</name></member>
+      <member refid="class_d_o_1_1_projective_1_1_matrix_based_object_1a2672b80e9744062f0267c644e3530fbe" prot="public" virt="non-virtual"><scope>DO::Projective::MatrixBasedObject</scope><name>HVec</name></member>
+      <member refid="class_d_o_1_1_projective_1_1_matrix_based_object_1a32a648ca8bfc49041d07043a5e2716a9" prot="public" virt="non-virtual"><scope>DO::Projective::MatrixBasedObject</scope><name>Mat</name></member>
+      <member refid="class_d_o_1_1_projective_1_1_matrix_based_object_1aef2cbf2dd0eca093467e5f531448212a" prot="protected" virt="non-virtual"><scope>DO::Projective::MatrixBasedObject</scope><name>mat_</name></member>
+      <member refid="class_d_o_1_1_projective_1_1_matrix_based_object_1a3edf7532ac66a15d00405992b51a5843" prot="public" virt="non-virtual"><scope>DO::Projective::MatrixBasedObject</scope><name>matrix</name></member>
+      <member refid="class_d_o_1_1_projective_1_1_matrix_based_object_1a1ab82dd2ceec3757e3134d79199de300" prot="public" virt="non-virtual"><scope>DO::Projective::MatrixBasedObject</scope><name>matrix</name></member>
+      <member refid="class_d_o_1_1_projective_1_1_matrix_based_object_1a4f6656518eb5234e883064b57e9f28b7" prot="public" virt="non-virtual"><scope>DO::Projective::MatrixBasedObject</scope><name>MatrixBasedObject</name></member>
+      <member refid="class_d_o_1_1_projective_1_1_matrix_based_object_1ae9ddbd747e498351ae091463a0661cf4" prot="public" virt="non-virtual"><scope>DO::Projective::MatrixBasedObject</scope><name>MatrixBasedObject</name></member>
+      <member refid="class_d_o_1_1_projective_1_1_matrix_based_object_1ada37199131a99b7423c03ff268e01665" prot="public" virt="non-virtual"><scope>DO::Projective::MatrixBasedObject</scope><name>MatrixBasedObject</name></member>
+      <member refid="class_d_o_1_1_projective_1_1_matrix_based_object_1a424af4502059088b375471d8ca04239a" prot="public" virt="non-virtual"><scope>DO::Projective::MatrixBasedObject</scope><name>operator!=</name></member>
+      <member refid="class_d_o_1_1_projective_1_1_matrix_based_object_1a8c8ceabc696d63c5c1949706e5f949af" prot="public" virt="non-virtual"><scope>DO::Projective::MatrixBasedObject</scope><name>operator()</name></member>
+      <member refid="class_d_o_1_1_projective_1_1_matrix_based_object_1a52f400707bfe09b4abe0f2cc6dac6e74" prot="public" virt="non-virtual"><scope>DO::Projective::MatrixBasedObject</scope><name>operator()</name></member>
+      <member refid="class_d_o_1_1_projective_1_1_matrix_based_object_1aa24ee40fcefa664912de21bb09a6bd17" prot="public" virt="non-virtual"><scope>DO::Projective::MatrixBasedObject</scope><name>operator=</name></member>
+      <member refid="class_d_o_1_1_projective_1_1_matrix_based_object_1a8b19ca72f93990e6beee12533d6c0c21" prot="public" virt="non-virtual"><scope>DO::Projective::MatrixBasedObject</scope><name>operator==</name></member>
+      <member refid="class_d_o_1_1_projective_1_1_matrix_based_object_1a59bef1cbb4ff85d879a58db452bbe185" prot="public" virt="non-virtual"><scope>DO::Projective::MatrixBasedObject</scope><name>Vec</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

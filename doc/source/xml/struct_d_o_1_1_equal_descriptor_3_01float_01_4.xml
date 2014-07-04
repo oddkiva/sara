@@ -1,0 +1,91 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="struct_d_o_1_1_equal_descriptor_3_01float_01_4" kind="struct" prot="public">
+    <compoundname>DO::EqualDescriptor&lt; float &gt;</compoundname>
+    <templateparamlist>
+    </templateparamlist>
+      <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="struct_d_o_1_1_equal_descriptor_3_01float_01_4_1a043439eb6b017950cef866f30fa6099a" prot="public" static="no" mutable="no">
+        <type>const <ref refid="class_d_o_1_1_descriptor_matrix" kindref="compound">DescriptorMatrix</ref>&lt; float &gt; &amp;</type>
+        <definition>const DescriptorMatrix&lt;float&gt;&amp; descriptors_</definition>
+        <argsstring></argsstring>
+        <name>descriptors_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Utilities.hpp" line="41" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Utilities.hpp" bodystart="41" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="struct_d_o_1_1_equal_descriptor_3_01float_01_4_1a91f253e126bdadc7a146a8d7dbc7e4c3" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>EqualDescriptor</definition>
+        <argsstring>(const DescriptorMatrix&lt; float &gt; &amp;descriptors)</argsstring>
+        <name>EqualDescriptor</name>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_descriptor_matrix" kindref="compound">DescriptorMatrix</ref>&lt; float &gt; &amp;</type>
+          <declname>descriptors</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Utilities.hpp" line="38" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Utilities.hpp" bodystart="37" bodyend="38"/>
+      </memberdef>
+      <memberdef kind="function" id="struct_d_o_1_1_equal_descriptor_3_01float_01_4_1a00db4f1ac71e3846bb6db58afdd44180" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool operator()</definition>
+        <argsstring>(int i1, int i2) const </argsstring>
+        <name>operator()</name>
+        <param>
+          <type>int</type>
+          <declname>i1</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>i2</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Utilities.hpp" line="40" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Utilities.hpp" bodystart="39" bodyend="40"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <collaborationgraph>
+      <node id="178">
+        <label>Matrix&lt;float , Dynamic, Dynamic&gt;</label>
+      </node>
+      <node id="177">
+        <label>DescriptorMatrix&lt; float &gt;</label>
+        <link refid="class_d_o_1_1_descriptor_matrix"/>
+        <childnode refid="178" relation="private-inheritance">
+        </childnode>
+      </node>
+      <node id="176">
+        <label>EqualDescriptor&lt; float &gt;</label>
+        <link refid="struct_d_o_1_1_equal_descriptor_3_01float_01_4"/>
+        <childnode refid="177" relation="usage">
+          <edgelabel>descriptors_</edgelabel>
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Utilities.hpp" line="36" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Utilities.hpp" bodystart="35" bodyend="42"/>
+    <listofallmembers>
+      <member refid="struct_d_o_1_1_equal_descriptor_3_01float_01_4_1a043439eb6b017950cef866f30fa6099a" prot="public" virt="non-virtual"><scope>DO::EqualDescriptor&lt; float &gt;</scope><name>descriptors_</name></member>
+      <member refid="struct_d_o_1_1_equal_descriptor_3_01float_01_4_1a91f253e126bdadc7a146a8d7dbc7e4c3" prot="public" virt="non-virtual"><scope>DO::EqualDescriptor&lt; float &gt;</scope><name>EqualDescriptor</name></member>
+      <member refid="struct_d_o_1_1_equal_descriptor_3_01float_01_4_1a00db4f1ac71e3846bb6db58afdd44180" prot="public" virt="non-virtual"><scope>DO::EqualDescriptor&lt; float &gt;</scope><name>operator()</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

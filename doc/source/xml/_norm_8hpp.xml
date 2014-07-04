@@ -1,0 +1,178 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="_norm_8hpp" kind="file">
+    <compoundname>Norm.hpp</compoundname>
+    <includedby refid="_image_processing_8hpp" local="yes">C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing.hpp</includedby>
+    <invincdepgraph>
+      <node id="1680">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDescriptors.hpp</label>
+        <link refid="_feature_descriptors_8hpp"/>
+      </node>
+      <node id="1681">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors.hpp</label>
+        <link refid="_feature_detectors_8hpp"/>
+      </node>
+      <node id="1679">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing.hpp</label>
+        <link refid="_image_processing_8hpp"/>
+        <childnode refid="1680" relation="include">
+        </childnode>
+        <childnode refid="1681" relation="include">
+        </childnode>
+      </node>
+      <node id="1678">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Norm.hpp</label>
+        <link refid="Norm.hpp"/>
+        <childnode refid="1679" relation="include">
+        </childnode>
+      </node>
+    </invincdepgraph>
+    <innerclass refid="struct_d_o_1_1_squared_norm" prot="public">DO::SquaredNorm</innerclass>
+    <innerclass refid="struct_d_o_1_1_blue_norm" prot="public">DO::BlueNorm</innerclass>
+    <innerclass refid="struct_d_o_1_1_stable_norm" prot="public">DO::StableNorm</innerclass>
+    <innernamespace refid="namespace_d_o">DO</innernamespace>
+      <sectiondef kind="user-defined">
+      <memberdef kind="define" id="_norm_8hpp_1a9ac06501e419d516c5383bec6a7ac245" prot="public" static="no">
+        <name>CREATE_NORM_FUNCTOR</name>
+        <param><defname>Function</defname></param>
+        <param><defname>function</defname></param>
+        <initializer>/*! \brief Helper class to use Image&lt;T,N&gt;::compute&lt;Function&gt;() */ \
+  template &lt;typename T, int N&gt;                        \
+  struct Function                                     \
+  {                                                   \
+    typedef typename T::Scalar Scalar;                \
+    typedef Image&lt;T, N&gt; TField;                       \
+    typedef Image&lt;Scalar, N&gt; ScalarField, ReturnType; \
+    inline Function(const TField&amp; tField)             \
+      : t_field_(tField) {}                           \
+    ReturnType operator()() const                     \
+    { return function(t_field_); }                    \
+    const TField&amp; t_field_;                           \
+  }</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Norm.hpp" line="134" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Norm.hpp" bodystart="121" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="comment">//<sp/>==========================================================================<sp/>//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="comment">//<sp/>This<sp/>file<sp/>is<sp/>part<sp/>of<sp/>DO++,<sp/>a<sp/>basic<sp/>set<sp/>of<sp/>libraries<sp/>in<sp/>C++<sp/>for<sp/>computer<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight><highlight class="comment">//<sp/>vision.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="comment">//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Copyright<sp/>(C)<sp/>2013<sp/>David<sp/>Ok<sp/>&lt;david.ok8@gmail.com&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight><highlight class="comment">//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight><highlight class="comment">//<sp/>This<sp/>Source<sp/>Code<sp/>Form<sp/>is<sp/>subject<sp/>to<sp/>the<sp/>terms<sp/>of<sp/>the<sp/>Mozilla<sp/>Public<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight><highlight class="comment">//<sp/>License<sp/>v.<sp/>2.0.<sp/>If<sp/>a<sp/>copy<sp/>of<sp/>the<sp/>MPL<sp/>was<sp/>not<sp/>distributed<sp/>with<sp/>this<sp/>file,<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight><highlight class="comment">//<sp/>you<sp/>can<sp/>obtain<sp/>one<sp/>at<sp/>http://mozilla.org/MPL/2.0/.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight><highlight class="comment">//<sp/>==========================================================================<sp/>//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight><highlight class="preprocessor">#ifndef<sp/>DO_IMAGEPROCESSING_NORM_HPP</highlight></codeline>
+<codeline lineno="15"><highlight class="preprocessor"></highlight><highlight class="preprocessor">#define<sp/>DO_IMAGEPROCESSING_NORM_HPP</highlight></codeline>
+<codeline lineno="16"><highlight class="preprocessor"></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="17"><highlight class="normal"></highlight><highlight class="keyword">namespace<sp/></highlight><highlight class="normal">DO<sp/>{</highlight></codeline>
+<codeline lineno="18"><highlight class="normal"><sp/><sp/></highlight></codeline>
+<codeline lineno="29"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">template</highlight><highlight class="normal"><sp/>&lt;</highlight><highlight class="keyword">typename</highlight><highlight class="normal"><sp/>T,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>M,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>N,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>D&gt;</highlight></codeline>
+<codeline lineno="30" refid="group___differential_1ga7315b78bba45e4a1882ad9566b99e949" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="group___differential_1ga7315b78bba45e4a1882ad9566b99e949" kindref="member" tooltip="Squared norm computation.">squaredNorm</ref>(<ref refid="class_d_o_1_1_image" kindref="compound" tooltip="The forward declaration of the image class.">Image&lt;T, D&gt;</ref>&amp;<sp/>dst,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_image" kindref="compound" tooltip="The forward declaration of the image class.">Image</ref>&lt;Matrix&lt;T,M,N&gt;,<sp/>D&gt;&amp;<sp/>src)</highlight></codeline>
+<codeline lineno="31"><highlight class="normal"><sp/><sp/>{</highlight></codeline>
+<codeline lineno="32"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(dst.<ref refid="class_d_o_1_1_multi_array_1a15f0ce2877b385c9505f042faa705694" kindref="member" tooltip="Size getter.">sizes</ref>()<sp/>!=<sp/>src.sizes())</highlight></codeline>
+<codeline lineno="33"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>dst.<ref refid="class_d_o_1_1_multi_array_1a3f049389446e1c60e25f09be5b64f192" kindref="member" tooltip="Resizing method.">resize</ref>(src.sizes());</highlight></codeline>
+<codeline lineno="34"><highlight class="normal"></highlight></codeline>
+<codeline lineno="35"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">typename</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_image" kindref="compound" tooltip="The forward declaration of the image class.">Image&lt;Matrix&lt;T,M,N&gt;</ref>,<sp/>D&gt;::const_iterator<sp/>InputIterator;</highlight></codeline>
+<codeline lineno="36"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">typename</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_color" kindref="compound" tooltip="Lightweight template color class with some flexibility.">Image&lt;T, D&gt;::iterator</ref><sp/>OutputIterator;</highlight></codeline>
+<codeline lineno="37"><highlight class="normal"></highlight></codeline>
+<codeline lineno="38"><highlight class="normal"><sp/><sp/><sp/><sp/>InputIterator<sp/>src_it(src.begin());</highlight></codeline>
+<codeline lineno="39"><highlight class="normal"><sp/><sp/><sp/><sp/>InputIterator<sp/>src_it_end(src.end());</highlight></codeline>
+<codeline lineno="40"><highlight class="normal"><sp/><sp/><sp/><sp/>OutputIterator<sp/>dst_it(dst.<ref refid="class_d_o_1_1_multi_array_1ad69bd11391be1a1dba5c8202259664f8" kindref="member" tooltip="Mutable beginning iterator.">begin</ref>());</highlight></codeline>
+<codeline lineno="41"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal"><sp/>(<sp/>;<sp/>src_it<sp/>!=<sp/>src_it_end;<sp/>++src_it,<sp/>++dst_it)</highlight></codeline>
+<codeline lineno="42"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>*dst_it<sp/>=<sp/>src_it-&gt;squaredNorm();</highlight></codeline>
+<codeline lineno="43"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="49"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">template</highlight><highlight class="normal"><sp/>&lt;</highlight><highlight class="keyword">typename</highlight><highlight class="normal"><sp/>T,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>M,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>N,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>D&gt;</highlight></codeline>
+<codeline lineno="50" refid="group___differential_1ga8880ca08e1e287668f610db64f54cfea" refkind="member"><highlight class="normal"><sp/><sp/><ref refid="class_d_o_1_1_image" kindref="compound" tooltip="The forward declaration of the image class.">Image&lt;T, D&gt;</ref><sp/><ref refid="group___differential_1ga7315b78bba45e4a1882ad9566b99e949" kindref="member" tooltip="Squared norm computation.">squaredNorm</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_image" kindref="compound" tooltip="The forward declaration of the image class.">Image</ref>&lt;Matrix&lt;T,M,N&gt;,<sp/>D&gt;&amp;<sp/>src)</highlight></codeline>
+<codeline lineno="51"><highlight class="normal"><sp/><sp/>{</highlight></codeline>
+<codeline lineno="52"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="class_d_o_1_1_image" kindref="compound" tooltip="The forward declaration of the image class.">Image&lt;T, D&gt;</ref><sp/>sqNorm;</highlight></codeline>
+<codeline lineno="53"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___differential_1ga7315b78bba45e4a1882ad9566b99e949" kindref="member" tooltip="Squared norm computation.">squaredNorm</ref>(sqNorm,<sp/>src);</highlight></codeline>
+<codeline lineno="54"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>sqNorm;</highlight></codeline>
+<codeline lineno="55"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="61"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">template</highlight><highlight class="normal"><sp/>&lt;</highlight><highlight class="keyword">typename</highlight><highlight class="normal"><sp/>T,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>M,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>N,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>D&gt;</highlight></codeline>
+<codeline lineno="62" refid="group___differential_1ga64a1c18b3a769c991d4458cbf1b5b85c" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="group___differential_1ga64a1c18b3a769c991d4458cbf1b5b85c" kindref="member" tooltip="Blue norm computation.">blueNorm</ref>(<ref refid="class_d_o_1_1_image" kindref="compound" tooltip="The forward declaration of the image class.">Image&lt;T, D&gt;</ref>&amp;<sp/>dst,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_image" kindref="compound" tooltip="The forward declaration of the image class.">Image</ref>&lt;Matrix&lt;T,M,N&gt;,<sp/>D&gt;&amp;<sp/>src)</highlight></codeline>
+<codeline lineno="63"><highlight class="normal"><sp/><sp/>{</highlight></codeline>
+<codeline lineno="64"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(dst.<ref refid="class_d_o_1_1_multi_array_1a15f0ce2877b385c9505f042faa705694" kindref="member" tooltip="Size getter.">sizes</ref>()<sp/>!=<sp/>src.sizes())</highlight></codeline>
+<codeline lineno="65"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>dst.<ref refid="class_d_o_1_1_multi_array_1a3f049389446e1c60e25f09be5b64f192" kindref="member" tooltip="Resizing method.">resize</ref>(src.sizes());</highlight></codeline>
+<codeline lineno="66"><highlight class="normal"></highlight></codeline>
+<codeline lineno="67"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">typename</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_image" kindref="compound" tooltip="The forward declaration of the image class.">Image&lt;Matrix&lt;T,M,N&gt;</ref>,<sp/>D&gt;::const_iterator<sp/>InputIterator;</highlight></codeline>
+<codeline lineno="68"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">typename</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_color" kindref="compound" tooltip="Lightweight template color class with some flexibility.">Image&lt;T, D&gt;::iterator</ref><sp/>OutputIterator;</highlight></codeline>
+<codeline lineno="69"><highlight class="normal"></highlight></codeline>
+<codeline lineno="70"><highlight class="normal"><sp/><sp/><sp/><sp/>InputIterator<sp/>src_it(src.begin());</highlight></codeline>
+<codeline lineno="71"><highlight class="normal"><sp/><sp/><sp/><sp/>InputIterator<sp/>src_it_end(src.end());</highlight></codeline>
+<codeline lineno="72"><highlight class="normal"><sp/><sp/><sp/><sp/>OutputIterator<sp/>dst_it(dst.<ref refid="class_d_o_1_1_multi_array_1ad69bd11391be1a1dba5c8202259664f8" kindref="member" tooltip="Mutable beginning iterator.">begin</ref>());</highlight></codeline>
+<codeline lineno="73"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal"><sp/>(<sp/>;<sp/>src_it<sp/>!=<sp/>src_it_end;<sp/>++src_it,<sp/>++dst_it)</highlight></codeline>
+<codeline lineno="74"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>*dst_it<sp/>=<sp/>src_it-&gt;blueNorm();</highlight></codeline>
+<codeline lineno="75"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="81"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">template</highlight><highlight class="normal"><sp/>&lt;</highlight><highlight class="keyword">typename</highlight><highlight class="normal"><sp/>T,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>M,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>N,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>D&gt;</highlight></codeline>
+<codeline lineno="82" refid="group___differential_1ga3e186700b17ea6fc33f987f81c6a6ac6" refkind="member"><highlight class="normal"><sp/><sp/><ref refid="class_d_o_1_1_image" kindref="compound" tooltip="The forward declaration of the image class.">Image&lt;T, D&gt;</ref><sp/><ref refid="group___differential_1ga64a1c18b3a769c991d4458cbf1b5b85c" kindref="member" tooltip="Blue norm computation.">blueNorm</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_image" kindref="compound" tooltip="The forward declaration of the image class.">Image</ref>&lt;Matrix&lt;T,M,N&gt;,<sp/>D&gt;&amp;<sp/>src)</highlight></codeline>
+<codeline lineno="83"><highlight class="normal"><sp/><sp/>{</highlight></codeline>
+<codeline lineno="84"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="class_d_o_1_1_image" kindref="compound" tooltip="The forward declaration of the image class.">Image&lt;T, D&gt;</ref><sp/>bNorm;</highlight></codeline>
+<codeline lineno="85"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___differential_1ga64a1c18b3a769c991d4458cbf1b5b85c" kindref="member" tooltip="Blue norm computation.">blueNorm</ref>(bNorm,<sp/>src);</highlight></codeline>
+<codeline lineno="86"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>bNorm;</highlight></codeline>
+<codeline lineno="87"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="93"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">template</highlight><highlight class="normal"><sp/>&lt;</highlight><highlight class="keyword">typename</highlight><highlight class="normal"><sp/>T,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>M,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>N,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>D&gt;</highlight></codeline>
+<codeline lineno="94" refid="group___differential_1ga71ea0be02e15acc698cbdcd0657b05a1" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="group___differential_1ga71ea0be02e15acc698cbdcd0657b05a1" kindref="member" tooltip="Stable norm computation.">stableNorm</ref>(<ref refid="class_d_o_1_1_image" kindref="compound" tooltip="The forward declaration of the image class.">Image&lt;T, D&gt;</ref>&amp;<sp/>dst,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_image" kindref="compound" tooltip="The forward declaration of the image class.">Image</ref>&lt;Matrix&lt;T,M,N&gt;,<sp/>D&gt;&amp;<sp/>src)</highlight></codeline>
+<codeline lineno="95"><highlight class="normal"><sp/><sp/>{</highlight></codeline>
+<codeline lineno="96"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(dst.<ref refid="class_d_o_1_1_multi_array_1a15f0ce2877b385c9505f042faa705694" kindref="member" tooltip="Size getter.">sizes</ref>()<sp/>!=<sp/>src.sizes())</highlight></codeline>
+<codeline lineno="97"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>dst.<ref refid="class_d_o_1_1_multi_array_1a3f049389446e1c60e25f09be5b64f192" kindref="member" tooltip="Resizing method.">resize</ref>(src.sizes());</highlight></codeline>
+<codeline lineno="98"><highlight class="normal"></highlight></codeline>
+<codeline lineno="99"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">typename</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_image" kindref="compound" tooltip="The forward declaration of the image class.">Image&lt;Matrix&lt;T,M,N&gt;</ref>,<sp/>D&gt;::const_iterator<sp/>InputIterator;</highlight></codeline>
+<codeline lineno="100"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">typename</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_color" kindref="compound" tooltip="Lightweight template color class with some flexibility.">Image&lt;T, D&gt;::iterator</ref><sp/>OutputIterator;</highlight></codeline>
+<codeline lineno="101"><highlight class="normal"></highlight></codeline>
+<codeline lineno="102"><highlight class="normal"><sp/><sp/><sp/><sp/>InputIterator<sp/>src_it(src.begin());</highlight></codeline>
+<codeline lineno="103"><highlight class="normal"><sp/><sp/><sp/><sp/>InputIterator<sp/>src_it_end(src.end());</highlight></codeline>
+<codeline lineno="104"><highlight class="normal"><sp/><sp/><sp/><sp/>OutputIterator<sp/>dst_it(dst.<ref refid="class_d_o_1_1_multi_array_1ad69bd11391be1a1dba5c8202259664f8" kindref="member" tooltip="Mutable beginning iterator.">begin</ref>());</highlight></codeline>
+<codeline lineno="105"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal"><sp/>(<sp/>;<sp/>src_it<sp/>!=<sp/>src_it_end;<sp/>++src_it,<sp/>++dst_it)</highlight></codeline>
+<codeline lineno="106"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>*dst_it<sp/>=<sp/>src_it-&gt;stableNorm();</highlight></codeline>
+<codeline lineno="107"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="113"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">template</highlight><highlight class="normal"><sp/>&lt;</highlight><highlight class="keyword">typename</highlight><highlight class="normal"><sp/>T,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>M,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>N,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>D&gt;</highlight></codeline>
+<codeline lineno="114" refid="group___differential_1ga56bd039983fa692c8309e6911bbd3a7c" refkind="member"><highlight class="normal"><sp/><sp/><ref refid="class_d_o_1_1_image" kindref="compound" tooltip="The forward declaration of the image class.">Image&lt;T, D&gt;</ref><sp/><ref refid="group___differential_1ga71ea0be02e15acc698cbdcd0657b05a1" kindref="member" tooltip="Stable norm computation.">stableNorm</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_image" kindref="compound" tooltip="The forward declaration of the image class.">Image</ref>&lt;Matrix&lt;T,M,N&gt;,<sp/>D&gt;&amp;<sp/>src)</highlight></codeline>
+<codeline lineno="115"><highlight class="normal"><sp/><sp/>{</highlight></codeline>
+<codeline lineno="116"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="class_d_o_1_1_image" kindref="compound" tooltip="The forward declaration of the image class.">Image&lt;T, D&gt;</ref><sp/>sNorm;</highlight></codeline>
+<codeline lineno="117"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___differential_1ga71ea0be02e15acc698cbdcd0657b05a1" kindref="member" tooltip="Stable norm computation.">stableNorm</ref>(sNorm,<sp/>src);</highlight></codeline>
+<codeline lineno="118"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>sNorm;</highlight></codeline>
+<codeline lineno="119"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="120"><highlight class="normal"></highlight></codeline>
+<codeline lineno="121"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>CREATE_NORM_FUNCTOR(Function,<sp/>function)<sp/><sp/><sp/><sp/><sp/><sp/><sp/>\</highlight></codeline>
+<codeline lineno="122"><highlight class="preprocessor"><sp/>\</highlight></codeline>
+<codeline lineno="123"><highlight class="preprocessor"><sp/><sp/>template<sp/>&lt;typename<sp/>T,<sp/>int<sp/>N&gt;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>\</highlight></codeline>
+<codeline lineno="124"><highlight class="preprocessor"><sp/><sp/>struct<sp/>Function<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>\</highlight></codeline>
+<codeline lineno="125"><highlight class="preprocessor"><sp/><sp/>{<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>\</highlight></codeline>
+<codeline lineno="126"><highlight class="preprocessor"><sp/><sp/><sp/><sp/>typedef<sp/>typename<sp/>T::Scalar<sp/>Scalar;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>\</highlight></codeline>
+<codeline lineno="127"><highlight class="preprocessor"><sp/><sp/><sp/><sp/>typedef<sp/>Image&lt;T,<sp/>N&gt;<sp/>TField;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>\</highlight></codeline>
+<codeline lineno="128"><highlight class="preprocessor"><sp/><sp/><sp/><sp/>typedef<sp/>Image&lt;Scalar,<sp/>N&gt;<sp/>ScalarField,<sp/>ReturnType;<sp/>\</highlight></codeline>
+<codeline lineno="129"><highlight class="preprocessor"><sp/><sp/><sp/><sp/>inline<sp/>Function(const<sp/>TField&amp;<sp/>tField)<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>\</highlight></codeline>
+<codeline lineno="130"><highlight class="preprocessor"><sp/><sp/><sp/><sp/><sp/><sp/>:<sp/>t_field_(tField)<sp/>{}<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>\</highlight></codeline>
+<codeline lineno="131"><highlight class="preprocessor"><sp/><sp/><sp/><sp/>ReturnType<sp/>operator()()<sp/>const<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>\</highlight></codeline>
+<codeline lineno="132"><highlight class="preprocessor"><sp/><sp/><sp/><sp/>{<sp/>return<sp/>function(t_field_);<sp/>}<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>\</highlight></codeline>
+<codeline lineno="133"><highlight class="preprocessor"><sp/><sp/><sp/><sp/>const<sp/>TField&amp;<sp/>t_field_;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>\</highlight></codeline>
+<codeline lineno="134"><highlight class="preprocessor"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="135"><highlight class="preprocessor"></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="136" refid="struct_d_o_1_1_squared_norm" refkind="compound"><highlight class="normal"><sp/><sp/>CREATE_NORM_FUNCTOR(<ref refid="struct_d_o_1_1_squared_norm" kindref="compound" tooltip="Helper class to use Image&amp;lt;T,N&amp;gt;::compute&amp;lt; SquaredNorm &amp;gt;()">SquaredNorm</ref>,<sp/><ref refid="group___differential_1ga7315b78bba45e4a1882ad9566b99e949" kindref="member" tooltip="Squared norm computation.">squaredNorm</ref>);</highlight></codeline>
+<codeline lineno="137" refid="struct_d_o_1_1_blue_norm" refkind="compound"><highlight class="normal"><sp/><sp/>CREATE_NORM_FUNCTOR(<ref refid="struct_d_o_1_1_blue_norm" kindref="compound" tooltip="Helper class to use Image&amp;lt;T,N&amp;gt;::compute&amp;lt; BlueNorm &amp;gt;()">BlueNorm</ref>,<sp/><ref refid="group___differential_1ga64a1c18b3a769c991d4458cbf1b5b85c" kindref="member" tooltip="Blue norm computation.">blueNorm</ref>);</highlight></codeline>
+<codeline lineno="138" refid="struct_d_o_1_1_stable_norm" refkind="compound"><highlight class="normal"><sp/><sp/>CREATE_NORM_FUNCTOR(<ref refid="struct_d_o_1_1_stable_norm" kindref="compound" tooltip="Helper class to use Image&amp;lt;T,N&amp;gt;::compute&amp;lt; StableNorm &amp;gt;()">StableNorm</ref>,<sp/><ref refid="group___differential_1ga71ea0be02e15acc698cbdcd0657b05a1" kindref="member" tooltip="Stable norm computation.">stableNorm</ref>);</highlight></codeline>
+<codeline lineno="139"><highlight class="normal"></highlight></codeline>
+<codeline lineno="140"><highlight class="normal"></highlight><highlight class="preprocessor">#undef<sp/>CREATE_NORM_FUNCTOR</highlight></codeline>
+<codeline lineno="141"><highlight class="preprocessor"></highlight></codeline>
+<codeline lineno="143"><highlight class="normal"></highlight></codeline>
+<codeline lineno="144"><highlight class="normal">}<sp/></highlight><highlight class="comment">/*<sp/>namespace<sp/>DO<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="145"><highlight class="normal"></highlight></codeline>
+<codeline lineno="146"><highlight class="normal"></highlight><highlight class="preprocessor">#endif<sp/></highlight><highlight class="comment">/*<sp/>DO_IMAGEPROCESSING_NORM_HPP<sp/>*/</highlight><highlight class="preprocessor"></highlight></codeline>
+    </programlisting>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Norm.hpp"/>
+  </compounddef>
+</doxygen>

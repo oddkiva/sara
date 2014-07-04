@@ -1,0 +1,66 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="group___color_traits" kind="group">
+    <compoundname>ColorTraits</compoundname>
+    <title>Color and channel traits classes</title>
+    <innerclass refid="struct_d_o_1_1_channel_traits" prot="public">DO::ChannelTraits</innerclass>
+    <innerclass refid="struct_d_o_1_1_color_traits" prot="public">DO::ColorTraits</innerclass>
+    <innerclass refid="struct_d_o_1_1_color_traits_3_01_matrix_3_01_channel_type___00_01_m_00_01_n_01_4_01_4" prot="public">DO::ColorTraits&lt; Matrix&lt; ChannelType_, M, N &gt; &gt;</innerclass>
+    <innerclass refid="struct_d_o_1_1_color_traits_3_01unsigned_01char_01_4" prot="public">DO::ColorTraits&lt; unsigned char &gt;</innerclass>
+    <innerclass refid="struct_d_o_1_1_color_traits_3_01unsigned_01short_01_4" prot="public">DO::ColorTraits&lt; unsigned short &gt;</innerclass>
+    <innerclass refid="struct_d_o_1_1_color_traits_3_01unsigned_01int_01_4" prot="public">DO::ColorTraits&lt; unsigned int &gt;</innerclass>
+    <innerclass refid="struct_d_o_1_1_color_traits_3_01char_01_4" prot="public">DO::ColorTraits&lt; char &gt;</innerclass>
+    <innerclass refid="struct_d_o_1_1_color_traits_3_01short_01_4" prot="public">DO::ColorTraits&lt; short &gt;</innerclass>
+    <innerclass refid="struct_d_o_1_1_color_traits_3_01int_01_4" prot="public">DO::ColorTraits&lt; int &gt;</innerclass>
+    <innerclass refid="struct_d_o_1_1_color_traits_3_01float_01_4" prot="public">DO::ColorTraits&lt; float &gt;</innerclass>
+    <innerclass refid="struct_d_o_1_1_color_traits_3_01double_01_4" prot="public">DO::ColorTraits&lt; double &gt;</innerclass>
+      <sectiondef kind="define">
+      <memberdef kind="define" id="group___color_traits_1ga02ba6c4706c9e998a2fa50912709bac2" prot="public" static="no">
+        <name>DEFINE_GRAY_COLOR_TRAITS</name>
+        <param><defname>gray_channel_t</defname></param>
+        <initializer>template &lt;&gt; struct ColorTraits&lt;gray_channel_t&gt;            \
+{                                                         \
+  /*! Color type. */                                      \
+  typedef gray_channel_t Color;                           \
+  /*! Channel type. */                                    \
+  typedef gray_channel_t ChannelType;                     \
+  /*! Double floating precision grayscale color type. */  \
+  typedef double Color64f;                                \
+  /*! Grayscale color layout. */                          \
+  typedef Gray ColorLayout;                               \
+  /*! Number of channels. */                              \
+  enum { NumChannels = 1 };                               \
+  /*! Zero grayscale value (=Black). */                   \
+  static inline Color zero()                              \
+  { return ChannelType(0); }                              \
+  /*! Minimum grayscale value (=Black). */                \
+  static inline Color min()                               \
+  { return ChannelTraits&lt;ChannelType&gt;::min(); }           \
+  /*! Maximum grayscale value (=White). */                \
+  static inline Color max()                               \
+  { return ChannelTraits&lt;ChannelType&gt;::max(); }           \
+  /*! Double minimum grayscale value (=Black). */         \
+  static inline double doubleMin()                        \
+  { return ChannelTraits&lt;ChannelType&gt;::doubleMin(); }     \
+  /*! Double maximum grayscale value (=White). */         \
+  static inline double doubleMax()                        \
+  { return ChannelTraits&lt;ChannelType&gt;::doubleMax(); }     \
+  /*! Double range grayscale value. */                    \
+  static inline double doubleRange()                      \
+  { return doubleMax() - doubleMin(); }                   \
+};</initializer>
+        <briefdescription>
+<para>Macro that defines specialized color traits classes for grayscale types. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="333" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="302" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+  </compounddef>
+</doxygen>

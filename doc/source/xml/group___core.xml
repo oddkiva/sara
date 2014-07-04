@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="group___core" kind="group">
+    <compoundname>Core</compoundname>
+    <title>Core</title>
+    <innergroup refid="group___color">Color</innergroup>
+    <innergroup refid="group___eigen_typedefs">Eigen Integration</innergroup>
+    <innergroup refid="group___image">Image</innergroup>
+    <innergroup refid="group___locator">Locator</innergroup>
+    <innergroup refid="group___meta">Meta</innergroup>
+    <innergroup refid="group___multi_array">MultiArray</innergroup>
+    <innergroup refid="group___sparse_multi_array">SparseMultiArray</innergroup>
+    <innergroup refid="group___utility">Utility</innergroup>
+    <innergroup refid="group___tree">Tree</innergroup>
+    <briefdescription>
+<para>Note that the Core module heavily relies on the <ulink url="http://eigen.tuxfamily.org/">Eigen</ulink> library (linear algebra). </para>    </briefdescription>
+    <detaileddescription>
+<para>the <ref refid="namespace_eigen" kindref="compound">Eigen</ref> namespace is directly imported inside the <ref refid="namespace_d_o" kindref="compound">DO</ref> namespace for convenience. For details, have a look at the file <ref refid="_eigen_extension_8hpp" kindref="compound">EigenExtension.hpp</ref>.</para><para>So more specific information about the <ref refid="namespace_eigen" kindref="compound">Eigen</ref> library, refer to: <ulink url="http://eigen.tuxfamily.org/dox/">http://eigen.tuxfamily.org/dox/</ulink> </para>    </detaileddescription>
+  </compounddef>
+</doxygen>

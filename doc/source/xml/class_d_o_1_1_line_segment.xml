@@ -1,0 +1,276 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="class_d_o_1_1_line_segment" kind="class" prot="public">
+    <compoundname>DO::LineSegment</compoundname>
+    <basecompoundref prot="private" virt="non-virtual">std::pair&lt; Point2d, Point2d &gt;</basecompoundref>
+      <sectiondef kind="public-type">
+      <memberdef kind="typedef" id="class_d_o_1_1_line_segment_1a4541fbb168c0d8a993b0901fa37b273b" prot="public" static="no">
+        <type>std::pair&lt; <ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member">Point2d</ref>, <ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member">Point2d</ref> &gt;</type>
+        <definition>typedef std::pair&lt;Point2d, Point2d&gt; Base</definition>
+        <argsstring></argsstring>
+        <name>Base</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/LineSegment.hpp" line="21" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/LineSegment.hpp" bodystart="21" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_d_o_1_1_line_segment_1aa71356db246e0b3af10699386963368f" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>LineSegment</definition>
+        <argsstring>()</argsstring>
+        <name>LineSegment</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/LineSegment.hpp" line="22" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/LineSegment.hpp" bodystart="22" bodyend="22"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_line_segment_1a87108561b02a5342fee0ebd101aa43f6" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>LineSegment</definition>
+        <argsstring>(const Base &amp;pair)</argsstring>
+        <name>LineSegment</name>
+        <param>
+          <type>const Base &amp;</type>
+          <declname>pair</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/LineSegment.hpp" line="23" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/LineSegment.hpp" bodystart="23" bodyend="23"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_line_segment_1a519f47e76a5f6b968c6b41f7d3ad8e03" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>LineSegment</definition>
+        <argsstring>(const Point2d &amp;p1, const Point2d &amp;p2)</argsstring>
+        <name>LineSegment</name>
+        <param>
+          <type>const <ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member">Point2d</ref> &amp;</type>
+          <declname>p1</declname>
+        </param>
+        <param>
+          <type>const <ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member">Point2d</ref> &amp;</type>
+          <declname>p2</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/LineSegment.hpp" line="24" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/LineSegment.hpp" bodystart="24" bodyend="24"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_line_segment_1a157c965a8727ed7edcc33c2b1eb54f85" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member">Point2d</ref> &amp;</type>
+        <definition>Point2d&amp; p1</definition>
+        <argsstring>()</argsstring>
+        <name>p1</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/LineSegment.hpp" line="26" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/LineSegment.hpp" bodystart="26" bodyend="26"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_line_segment_1ab7150efb8a37fbd4a295b5f366749b42" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member">Point2d</ref> &amp;</type>
+        <definition>Point2d&amp; p2</definition>
+        <argsstring>()</argsstring>
+        <name>p2</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/LineSegment.hpp" line="27" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/LineSegment.hpp" bodystart="27" bodyend="27"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_line_segment_1a97b4c45b90f863c4d79a8f2ef7111dd1" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>const <ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member">Point2d</ref> &amp;</type>
+        <definition>const Point2d&amp; p1</definition>
+        <argsstring>() const </argsstring>
+        <name>p1</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/LineSegment.hpp" line="28" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/LineSegment.hpp" bodystart="28" bodyend="28"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_line_segment_1a966279703bb46181c8202efa9da80611" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>const <ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member">Point2d</ref> &amp;</type>
+        <definition>const Point2d&amp; p2</definition>
+        <argsstring>() const </argsstring>
+        <name>p2</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/LineSegment.hpp" line="29" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/LineSegment.hpp" bodystart="29" bodyend="29"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_line_segment_1a71af5717bb437e63034a8192583ff16f" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>double</type>
+        <definition>double x1</definition>
+        <argsstring>() const </argsstring>
+        <name>x1</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/LineSegment.hpp" line="31" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/LineSegment.hpp" bodystart="31" bodyend="31"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_line_segment_1af4090c1687b2576d20303d3789d8f4ec" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>double</type>
+        <definition>double y1</definition>
+        <argsstring>() const </argsstring>
+        <name>y1</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/LineSegment.hpp" line="32" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/LineSegment.hpp" bodystart="32" bodyend="32"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_line_segment_1aebdb5d2baae12fbbd46215c5da97678f" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>double &amp;</type>
+        <definition>double&amp; x1</definition>
+        <argsstring>()</argsstring>
+        <name>x1</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/LineSegment.hpp" line="33" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/LineSegment.hpp" bodystart="33" bodyend="33"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_line_segment_1aba3113f4eac2623a664db161c271eaaf" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>double &amp;</type>
+        <definition>double&amp; y1</definition>
+        <argsstring>()</argsstring>
+        <name>y1</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/LineSegment.hpp" line="34" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/LineSegment.hpp" bodystart="34" bodyend="34"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_line_segment_1ae19ba70737353cf4a0cfe795d0f27f05" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>double</type>
+        <definition>double x2</definition>
+        <argsstring>() const </argsstring>
+        <name>x2</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/LineSegment.hpp" line="36" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/LineSegment.hpp" bodystart="36" bodyend="36"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_line_segment_1a14129fe85e75c9eadf29378cbbcf57a0" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>double</type>
+        <definition>double y2</definition>
+        <argsstring>() const </argsstring>
+        <name>y2</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/LineSegment.hpp" line="37" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/LineSegment.hpp" bodystart="37" bodyend="37"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_line_segment_1ae6989ab803b2300b79074ab32e7b8eaf" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>double &amp;</type>
+        <definition>double&amp; x2</definition>
+        <argsstring>()</argsstring>
+        <name>x2</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/LineSegment.hpp" line="38" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/LineSegment.hpp" bodystart="38" bodyend="38"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_line_segment_1a2e3e5c61c0236d30209a28515912cea3" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>double &amp;</type>
+        <definition>double&amp; y2</definition>
+        <argsstring>()</argsstring>
+        <name>y2</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/LineSegment.hpp" line="39" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/LineSegment.hpp" bodystart="39" bodyend="39"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="348">
+        <label>pair&lt;Point2d, Point2d&gt;</label>
+      </node>
+      <node id="347">
+        <label>LineSegment</label>
+        <link refid="class_d_o_1_1_line_segment"/>
+        <childnode refid="348" relation="private-inheritance">
+        </childnode>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="350">
+        <label>pair&lt;Point2d, Point2d&gt;</label>
+      </node>
+      <node id="349">
+        <label>LineSegment</label>
+        <link refid="class_d_o_1_1_line_segment"/>
+        <childnode refid="350" relation="private-inheritance">
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/LineSegment.hpp" line="19" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/LineSegment.hpp" bodystart="18" bodyend="40"/>
+    <listofallmembers>
+      <member refid="class_d_o_1_1_line_segment_1a4541fbb168c0d8a993b0901fa37b273b" prot="public" virt="non-virtual"><scope>DO::LineSegment</scope><name>Base</name></member>
+      <member refid="class_d_o_1_1_line_segment_1aa71356db246e0b3af10699386963368f" prot="public" virt="non-virtual"><scope>DO::LineSegment</scope><name>LineSegment</name></member>
+      <member refid="class_d_o_1_1_line_segment_1a87108561b02a5342fee0ebd101aa43f6" prot="public" virt="non-virtual"><scope>DO::LineSegment</scope><name>LineSegment</name></member>
+      <member refid="class_d_o_1_1_line_segment_1a519f47e76a5f6b968c6b41f7d3ad8e03" prot="public" virt="non-virtual"><scope>DO::LineSegment</scope><name>LineSegment</name></member>
+      <member refid="class_d_o_1_1_line_segment_1a157c965a8727ed7edcc33c2b1eb54f85" prot="public" virt="non-virtual"><scope>DO::LineSegment</scope><name>p1</name></member>
+      <member refid="class_d_o_1_1_line_segment_1a97b4c45b90f863c4d79a8f2ef7111dd1" prot="public" virt="non-virtual"><scope>DO::LineSegment</scope><name>p1</name></member>
+      <member refid="class_d_o_1_1_line_segment_1ab7150efb8a37fbd4a295b5f366749b42" prot="public" virt="non-virtual"><scope>DO::LineSegment</scope><name>p2</name></member>
+      <member refid="class_d_o_1_1_line_segment_1a966279703bb46181c8202efa9da80611" prot="public" virt="non-virtual"><scope>DO::LineSegment</scope><name>p2</name></member>
+      <member refid="class_d_o_1_1_line_segment_1a71af5717bb437e63034a8192583ff16f" prot="public" virt="non-virtual"><scope>DO::LineSegment</scope><name>x1</name></member>
+      <member refid="class_d_o_1_1_line_segment_1aebdb5d2baae12fbbd46215c5da97678f" prot="public" virt="non-virtual"><scope>DO::LineSegment</scope><name>x1</name></member>
+      <member refid="class_d_o_1_1_line_segment_1ae19ba70737353cf4a0cfe795d0f27f05" prot="public" virt="non-virtual"><scope>DO::LineSegment</scope><name>x2</name></member>
+      <member refid="class_d_o_1_1_line_segment_1ae6989ab803b2300b79074ab32e7b8eaf" prot="public" virt="non-virtual"><scope>DO::LineSegment</scope><name>x2</name></member>
+      <member refid="class_d_o_1_1_line_segment_1af4090c1687b2576d20303d3789d8f4ec" prot="public" virt="non-virtual"><scope>DO::LineSegment</scope><name>y1</name></member>
+      <member refid="class_d_o_1_1_line_segment_1aba3113f4eac2623a664db161c271eaaf" prot="public" virt="non-virtual"><scope>DO::LineSegment</scope><name>y1</name></member>
+      <member refid="class_d_o_1_1_line_segment_1a14129fe85e75c9eadf29378cbbcf57a0" prot="public" virt="non-virtual"><scope>DO::LineSegment</scope><name>y2</name></member>
+      <member refid="class_d_o_1_1_line_segment_1a2e3e5c61c0236d30209a28515912cea3" prot="public" virt="non-virtual"><scope>DO::LineSegment</scope><name>y2</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

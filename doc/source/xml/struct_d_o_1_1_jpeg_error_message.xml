@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="struct_d_o_1_1_jpeg_error_message" kind="struct" prot="public">
+    <compoundname>DO::JpegErrorMessage</compoundname>
+      <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="struct_d_o_1_1_jpeg_error_message_1a971a43fba6975522cd3cc552501f47de" prot="public" static="no" mutable="no">
+        <type>struct jpeg_error_mgr</type>
+        <definition>struct jpeg_error_mgr pub</definition>
+        <argsstring></argsstring>
+        <name>pub</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" line="73" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" bodystart="73" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_d_o_1_1_jpeg_error_message_1a5be06c604b7002679fcf9aee7d417072" prot="public" static="no" mutable="no">
+        <type>jmp_buf</type>
+        <definition>jmp_buf setjmp_buffer</definition>
+        <argsstring></argsstring>
+        <name>setjmp_buffer</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" line="74" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" bodystart="74" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" line="72" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" bodystart="72" bodyend="75"/>
+    <listofallmembers>
+      <member refid="struct_d_o_1_1_jpeg_error_message_1a971a43fba6975522cd3cc552501f47de" prot="public" virt="non-virtual"><scope>DO::JpegErrorMessage</scope><name>pub</name></member>
+      <member refid="struct_d_o_1_1_jpeg_error_message_1a5be06c604b7002679fcf9aee7d417072" prot="public" virt="non-virtual"><scope>DO::JpegErrorMessage</scope><name>setjmp_buffer</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

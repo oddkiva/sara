@@ -1,0 +1,294 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="group___image_i_o" kind="group">
+    <compoundname>ImageIO</compoundname>
+    <title>Image I/O</title>
+      <sectiondef kind="func">
+      <memberdef kind="function" id="group___image_i_o_1ga3f159548cda10d37b3ffcb6edc45d6be" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT bool</type>
+        <definition>DO_EXPORT bool DO::load</definition>
+        <argsstring>(Image&lt; Color3ub &gt; &amp;I, const std::string &amp;name)</argsstring>
+        <name>load</name>
+        <param>
+          <type>Image&lt; Color3ub &gt; &amp;</type>
+          <declname>I</declname>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>name</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/ImageIO.hpp" line="31"/>
+      </memberdef>
+      <memberdef kind="function" id="group___image_i_o_1ga863c35bb044665359b8c170480f1e98e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT bool</type>
+        <definition>DO_EXPORT bool DO::load</definition>
+        <argsstring>(Image&lt; Rgb8 &gt; &amp;I, const std::string &amp;name)</argsstring>
+        <name>load</name>
+        <param>
+          <type>Image&lt; Rgb8 &gt; &amp;</type>
+          <declname>I</declname>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>name</declname>
+        </param>
+        <briefdescription>
+<para>Load color image. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="out">I</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGB image with unsigned char channel type. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">name</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>path of the image file. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>true if image is successfully loaded. </para><simplesectsep/><para>false otherwise. </para></simplesect>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/ImageIO.hpp" line="40"/>
+      </memberdef>
+      <memberdef kind="function" id="group___image_i_o_1ga55434e11aa6293606de098414d7b5ae4" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>bool</type>
+        <definition>bool DO::load</definition>
+        <argsstring>(Image&lt; T &gt; &amp;I, const std::string &amp;name)</argsstring>
+        <name>load</name>
+        <param>
+          <type>Image&lt; T &gt; &amp;</type>
+          <declname>I</declname>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>name</declname>
+        </param>
+        <briefdescription>
+<para>Load image. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="out">I</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>image where color is of type T. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">name</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>path of the image file. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>true if image is successfully loaded. </para><simplesectsep/><para>false otherwise. </para></simplesect>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/ImageIO.hpp" line="50" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/ImageIO.hpp" bodystart="49" bodyend="56"/>
+      </memberdef>
+      <memberdef kind="function" id="group___image_i_o_1ga4a26960f04d5aa85afb1883f7fd6956b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT bool</type>
+        <definition>DO_EXPORT bool DO::loadFromDialogBox</definition>
+        <argsstring>(Image&lt; Rgb8 &gt; &amp;I)</argsstring>
+        <name>loadFromDialogBox</name>
+        <param>
+          <type>Image&lt; Rgb8 &gt; &amp;</type>
+          <declname>I</declname>
+        </param>
+        <briefdescription>
+<para>Load image from a dialog box. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">I</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>image file. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>true if image is successfully loaded. </para><simplesectsep/><para>false otherwise. </para></simplesect>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/ImageIO.hpp" line="64"/>
+      </memberdef>
+      <memberdef kind="function" id="group___image_i_o_1ga5fead3977bbe969d001d0abd115fe4b5" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT bool</type>
+        <definition>DO_EXPORT bool DO::loadFromDialogBox</definition>
+        <argsstring>(Image&lt; Color3ub &gt; &amp;I)</argsstring>
+        <name>loadFromDialogBox</name>
+        <param>
+          <type>Image&lt; Color3ub &gt; &amp;</type>
+          <declname>I</declname>
+        </param>
+        <briefdescription>
+<para>Load image from a dialog box. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">I</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>image file. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>true if image is successfully loaded. </para><simplesectsep/><para>false otherwise. </para></simplesect>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/ImageIO.hpp" line="72"/>
+      </memberdef>
+      <memberdef kind="function" id="group___image_i_o_1ga3fb8d2fc4fd39bbf6352d316fd656bea" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>bool</type>
+        <definition>bool DO::loadFromDialogBox</definition>
+        <argsstring>(Image&lt; T &gt; &amp;I)</argsstring>
+        <name>loadFromDialogBox</name>
+        <param>
+          <type>Image&lt; T &gt; &amp;</type>
+          <declname>I</declname>
+        </param>
+        <briefdescription>
+<para>Load image from a dialog box. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">I</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>image file. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>true if image is successfully loaded. </para><simplesectsep/><para>false otherwise. </para></simplesect>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/ImageIO.hpp" line="81" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/ImageIO.hpp" bodystart="80" bodyend="87"/>
+      </memberdef>
+      <memberdef kind="function" id="group___image_i_o_1ga3f0ee657c0f4be4681c9d21536b0f947" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool DO::save</definition>
+        <argsstring>(const Image&lt; unsigned char &gt; &amp;image, const std::string &amp;name, int quality=85)</argsstring>
+        <name>save</name>
+        <param>
+          <type>const Image&lt; unsigned char &gt; &amp;</type>
+          <declname>image</declname>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>name</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>quality</declname>
+          <defval>85</defval>
+        </param>
+        <briefdescription>
+<para>Save grayscale image. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">I</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>image </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">name</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>path of the output image. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">quality</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>image quality in <formula id="61">$[0, 100]$</formula>. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>true if image is successfully saved. </para><simplesectsep/><para>false otherwise. </para></simplesect>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/ImageIO.hpp" line="100"/>
+      </memberdef>
+      <memberdef kind="function" id="group___image_i_o_1gaf541e8b122867ea926cb55aa686633c0" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool DO::save</definition>
+        <argsstring>(const Image&lt; Rgb8 &gt; &amp;image, const std::string &amp;name, int quality=85)</argsstring>
+        <name>save</name>
+        <param>
+          <type>const Image&lt; Rgb8 &gt; &amp;</type>
+          <declname>image</declname>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>name</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>quality</declname>
+          <defval>85</defval>
+        </param>
+        <briefdescription>
+<para>Save color image. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">I</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>image </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">name</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>path of the output image. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">quality</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>image quality in <formula id="61">$[0, 100]$</formula>. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>true if image is successfully saved. </para><simplesectsep/><para>false otherwise. </para></simplesect>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/ImageIO.hpp" line="110"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+  </compounddef>
+</doxygen>

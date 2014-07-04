@@ -1,0 +1,276 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="class_d_o_1_1_compute_harris_laplace_corners" kind="class" prot="public">
+    <compoundname>DO::ComputeHarrisLaplaceCorners</compoundname>
+    <includes refid="_harris_8hpp" local="no">Harris.hpp</includes>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="class_d_o_1_1_compute_harris_laplace_corners_1a4da4366701014b9e206054f795e4671b" prot="private" static="no" mutable="no">
+        <type><ref refid="class_d_o_1_1_image_pyramid_params" kindref="compound">ImagePyramidParams</ref></type>
+        <definition>ImagePyramidParams pyr_params_</definition>
+        <argsstring></argsstring>
+        <name>pyr_params_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/Harris.hpp" line="170" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/Harris.hpp" bodystart="170" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_compute_harris_laplace_corners_1a222f3ed6ca008ea3f9040937adaeab86" prot="private" static="no" mutable="no">
+        <type>float</type>
+        <definition>float kappa_</definition>
+        <argsstring></argsstring>
+        <name>kappa_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/Harris.hpp" line="171" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/Harris.hpp" bodystart="171" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_compute_harris_laplace_corners_1a7b35debe79df0ea6b48dc4664138c9a9" prot="private" static="no" mutable="no">
+        <type>float</type>
+        <definition>float extremum_thres_</definition>
+        <argsstring></argsstring>
+        <name>extremum_thres_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/Harris.hpp" line="172" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/Harris.hpp" bodystart="172" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_compute_harris_laplace_corners_1a65def80e27a2c0d37731db713f295382" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int img_padding_sz_</definition>
+        <argsstring></argsstring>
+        <name>img_padding_sz_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/Harris.hpp" line="173" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/Harris.hpp" bodystart="173" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_compute_harris_laplace_corners_1a8beff751cd2416a22d686336f818f1c0" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int extremum_refinement_iter_</definition>
+        <argsstring></argsstring>
+        <name>extremum_refinement_iter_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/Harris.hpp" line="174" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/Harris.hpp" bodystart="174" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_compute_harris_laplace_corners_1a42052cb3e879c24351a0cd3ab1d996e8" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int num_scales_</definition>
+        <argsstring></argsstring>
+        <name>num_scales_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/Harris.hpp" line="175" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/Harris.hpp" bodystart="175" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_compute_harris_laplace_corners_1a69b7f64ca8b4987b760bc76ce8c445e0" prot="private" static="no" mutable="no">
+        <type><ref refid="class_d_o_1_1_image_pyramid" kindref="compound">ImagePyramid</ref>&lt; float &gt;</type>
+        <definition>ImagePyramid&lt;float&gt; gaussians_</definition>
+        <argsstring></argsstring>
+        <name>gaussians_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/Harris.hpp" line="177" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/Harris.hpp" bodystart="177" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_compute_harris_laplace_corners_1ab797ee2862a4273324ac80f78c8bd2b5" prot="private" static="no" mutable="no">
+        <type><ref refid="class_d_o_1_1_image_pyramid" kindref="compound">ImagePyramid</ref>&lt; float &gt;</type>
+        <definition>ImagePyramid&lt;float&gt; harris_</definition>
+        <argsstring></argsstring>
+        <name>harris_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/Harris.hpp" line="178" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/Harris.hpp" bodystart="178" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_d_o_1_1_compute_harris_laplace_corners_1aa51169ba1a20ba349de20058b62c03c2" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>ComputeHarrisLaplaceCorners</definition>
+        <argsstring>(const ImagePyramidParams &amp;pyrParams=ImagePyramidParams(-1, 2+1, sqrt(2.f), 1), float kappa=0.04f, float extremumThres=1e-6f, int imgPaddingSz=1, int numScales=10, int extremumRefinementIter=5)</argsstring>
+        <name>ComputeHarrisLaplaceCorners</name>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_image_pyramid_params" kindref="compound">ImagePyramidParams</ref> &amp;</type>
+          <declname>pyrParams</declname>
+          <defval><ref refid="class_d_o_1_1_image_pyramid_params" kindref="compound">ImagePyramidParams</ref>(-1, 2+1, sqrt(2.f), 1)</defval>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>kappa</declname>
+          <defval>0.04f</defval>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>extremumThres</declname>
+          <defval>1e-6f</defval>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>imgPaddingSz</declname>
+          <defval>1</defval>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>numScales</declname>
+          <defval>10</defval>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>extremumRefinementIter</declname>
+          <defval>5</defval>
+        </param>
+        <briefdescription>
+<para>Constructor. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">kappa</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>the user parameter in the Harris corner function. Good values of <formula id="43">$\kappa$</formula> range in <formula id="44">$[0.04, 0.15]$</formula>. See description of function <bold>scaleAdaptedHarrisCornerness</bold> for details </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">extremumThres</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>the response threshold which local maxima of the Harris cornerness function must satisfy. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">imgPaddingSz</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>This variable indicates the minimum border size of the image. DoG extrema located at the size-specified border are discarded. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">numScales</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>This variable indicates the number of scales to search in order to select the characteristic scale of a corner. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">extremumRefinementIter</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>This variable controls the number of iterations to refine the localization of DoG extrema in scale-space. The refinement process is based on the function <bold><ref refid="group___extremum_refinement_1ga2f13bba1b141af45dbf3e71aed91016c" kindref="member">DO::refineExtremum()</ref></bold>. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/Harris.hpp" line="117" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/Harris.hpp" bodystart="104" bodyend="117"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_compute_harris_laplace_corners_1a97b5e86e276173bb410ce58d39f28266" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>std::vector&lt; <ref refid="class_d_o_1_1_o_e_region" kindref="compound">OERegion</ref> &gt;</type>
+        <definition>std::vector&lt;OERegion&gt; operator()</definition>
+        <argsstring>(const Image&lt; float &gt; &amp;I, std::vector&lt; Point2i &gt; *scaleOctavePairs=0)</argsstring>
+        <name>operator()</name>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_image" kindref="compound">Image</ref>&lt; float &gt; &amp;</type>
+          <declname>I</declname>
+        </param>
+        <param>
+          <type>std::vector&lt; <ref refid="group___eigen_typedefs_1ga048a27763e58f682b1b91af86144f701" kindref="member">Point2i</ref> &gt; *</type>
+          <declname>scaleOctavePairs</declname>
+          <defval>0</defval>
+        </param>
+        <briefdescription>
+<para>Localizes Harris cornerness local maxima for a given image. </para>        </briefdescription>
+        <detaileddescription>
+<para>This function does the following:<orderedlist>
+<listitem><para>Constructs a gaussian pyramid <formula id="34">$\nabla g_{\sigma(s,o)} * I$</formula> from the image <formula id="0">$I$</formula>, where <formula id="35">$(s,o)$</formula> are integers. Here: <formula id="36">$\sigma(s,o) = 2^{s/S + o}$</formula> where <formula id="29">$S$</formula> is the number of scales per octaves.</para></listitem></orderedlist>
+</para><para><orderedlist>
+<listitem><para>Localize extrema in Harris corner functions in each scale <formula id="51">$\sigma(s,o)$</formula>.</para></listitem></orderedlist>
+</para><para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="inout">scaleOctavePairs</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>a pointer to vector of scale and octave index pairs <formula id="38">$(s_i,o_i)$</formula>. This index pair corresponds to the difference of Gaussians <formula id="39">$\left( g_{\sigma(s_i+1,o_i)} - g_{\sigma(s_i,o_i)} \right) * I$</formula> where the extremum <formula id="40">$(x_i,y_i,\sigma_i)$</formula> is detected.</para></parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>set of Harris corners in <bold>std::vector&lt;OERegion&gt;</bold> in each difference of Gaussians <formula id="37">$\left( g_{\sigma(s+1,o)} - g_{\sigma(s,o)} \right) * I $</formula>. </para></simplesect>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/Harris.hpp" line="141"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_compute_harris_laplace_corners_1af837b3a21f63e182a711ab0ad2d8b8a8" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>const <ref refid="class_d_o_1_1_image_pyramid" kindref="compound">ImagePyramid</ref>&lt; float &gt; &amp;</type>
+        <definition>const ImagePyramid&lt;float&gt;&amp; gaussians</definition>
+        <argsstring>() const </argsstring>
+        <name>gaussians</name>
+        <briefdescription>
+<para>Returns the <ref refid="struct_d_o_1_1_gaussian" kindref="compound">Gaussian</ref> pyramid used to select characteristic scales for Harris-Laplace corners. </para>        </briefdescription>
+        <detaileddescription>
+<para>The <ref refid="struct_d_o_1_1_gaussian" kindref="compound">Gaussian</ref> pyramid is available after calling the function method <bold>ComputeHarrisLaplaceExtrema::operator()(I, scaleOctavePairs)</bold> for the given image <bold>I</bold>.</para><para><simplesect kind="return"><para>the <ref refid="struct_d_o_1_1_gaussian" kindref="compound">Gaussian</ref> pyramid used to localize scale-space extrema of image <bold>I</bold>. </para></simplesect>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/Harris.hpp" line="154" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/Harris.hpp" bodystart="153" bodyend="154"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_compute_harris_laplace_corners_1aaea8b0c370158bbc4a140146966ef757" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>const <ref refid="class_d_o_1_1_image_pyramid" kindref="compound">ImagePyramid</ref>&lt; float &gt; &amp;</type>
+        <definition>const ImagePyramid&lt;float&gt;&amp; harris</definition>
+        <argsstring>() const </argsstring>
+        <name>harris</name>
+        <briefdescription>
+<para>Returns the pyramid of Harris corner functions used to localize scale-space extrema of image <bold>I</bold>. </para>        </briefdescription>
+        <detaileddescription>
+<para>The pyramid of Harris corner functions is available after calling the function method <bold>ComputeHarrisLaplaceExtrema::operator()(I, scaleOctavePairs)</bold>,</para><para><simplesect kind="return"><para>the pyramid of difference of Gaussians used to localize scale-space extrema of image <bold>I</bold>. </para></simplesect>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/Harris.hpp" line="167" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/Harris.hpp" bodystart="166" bodyend="167"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Functor class to compute Harris-Laplace corners. </para>    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/Harris.hpp" line="77" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/Harris.hpp" bodystart="76" bodyend="179"/>
+    <listofallmembers>
+      <member refid="class_d_o_1_1_compute_harris_laplace_corners_1aa51169ba1a20ba349de20058b62c03c2" prot="public" virt="non-virtual"><scope>DO::ComputeHarrisLaplaceCorners</scope><name>ComputeHarrisLaplaceCorners</name></member>
+      <member refid="class_d_o_1_1_compute_harris_laplace_corners_1a8beff751cd2416a22d686336f818f1c0" prot="private" virt="non-virtual"><scope>DO::ComputeHarrisLaplaceCorners</scope><name>extremum_refinement_iter_</name></member>
+      <member refid="class_d_o_1_1_compute_harris_laplace_corners_1a7b35debe79df0ea6b48dc4664138c9a9" prot="private" virt="non-virtual"><scope>DO::ComputeHarrisLaplaceCorners</scope><name>extremum_thres_</name></member>
+      <member refid="class_d_o_1_1_compute_harris_laplace_corners_1af837b3a21f63e182a711ab0ad2d8b8a8" prot="public" virt="non-virtual"><scope>DO::ComputeHarrisLaplaceCorners</scope><name>gaussians</name></member>
+      <member refid="class_d_o_1_1_compute_harris_laplace_corners_1a69b7f64ca8b4987b760bc76ce8c445e0" prot="private" virt="non-virtual"><scope>DO::ComputeHarrisLaplaceCorners</scope><name>gaussians_</name></member>
+      <member refid="class_d_o_1_1_compute_harris_laplace_corners_1aaea8b0c370158bbc4a140146966ef757" prot="public" virt="non-virtual"><scope>DO::ComputeHarrisLaplaceCorners</scope><name>harris</name></member>
+      <member refid="class_d_o_1_1_compute_harris_laplace_corners_1ab797ee2862a4273324ac80f78c8bd2b5" prot="private" virt="non-virtual"><scope>DO::ComputeHarrisLaplaceCorners</scope><name>harris_</name></member>
+      <member refid="class_d_o_1_1_compute_harris_laplace_corners_1a65def80e27a2c0d37731db713f295382" prot="private" virt="non-virtual"><scope>DO::ComputeHarrisLaplaceCorners</scope><name>img_padding_sz_</name></member>
+      <member refid="class_d_o_1_1_compute_harris_laplace_corners_1a222f3ed6ca008ea3f9040937adaeab86" prot="private" virt="non-virtual"><scope>DO::ComputeHarrisLaplaceCorners</scope><name>kappa_</name></member>
+      <member refid="class_d_o_1_1_compute_harris_laplace_corners_1a42052cb3e879c24351a0cd3ab1d996e8" prot="private" virt="non-virtual"><scope>DO::ComputeHarrisLaplaceCorners</scope><name>num_scales_</name></member>
+      <member refid="class_d_o_1_1_compute_harris_laplace_corners_1a97b5e86e276173bb410ce58d39f28266" prot="public" virt="non-virtual"><scope>DO::ComputeHarrisLaplaceCorners</scope><name>operator()</name></member>
+      <member refid="class_d_o_1_1_compute_harris_laplace_corners_1a4da4366701014b9e206054f795e4671b" prot="private" virt="non-virtual"><scope>DO::ComputeHarrisLaplaceCorners</scope><name>pyr_params_</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

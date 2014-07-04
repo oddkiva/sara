@@ -1,0 +1,78 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="class_d_o_1_1_scroll_area" kind="class" prot="public">
+    <compoundname>DO::ScrollArea</compoundname>
+    <basecompoundref prot="public" virt="non-virtual">QScrollArea</basecompoundref>
+    <includes refid="_painting_window_8hpp" local="no">PaintingWindow.hpp</includes>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_d_o_1_1_scroll_area_1a8a2de1733d4acfc45cd0bd449b882279" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>ScrollArea</definition>
+        <argsstring>(QWidget *parent=0)</argsstring>
+        <name>ScrollArea</name>
+        <param>
+          <type>QWidget *</type>
+          <declname>parent</declname>
+          <defval>0</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="43"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="protected-func">
+      <memberdef kind="function" id="class_d_o_1_1_scroll_area_1a5de2bd09256045c0b96e5a0be780fa85" prot="protected" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void closeEvent</definition>
+        <argsstring>(QCloseEvent *event)</argsstring>
+        <name>closeEvent</name>
+        <param>
+          <type>QCloseEvent *</type>
+          <declname>event</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="46"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>QScrollArea-derived class on which we embed the <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> class in order to scroll the contents of the window properly. </para>    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="526">
+        <label>ScrollArea</label>
+        <link refid="class_d_o_1_1_scroll_area"/>
+        <childnode refid="527" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="527">
+        <label>QScrollArea</label>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="528">
+        <label>ScrollArea</label>
+        <link refid="class_d_o_1_1_scroll_area"/>
+        <childnode refid="529" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="529">
+        <label>QScrollArea</label>
+      </node>
+    </collaborationgraph>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="39" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" bodystart="38" bodyend="47"/>
+    <listofallmembers>
+      <member refid="class_d_o_1_1_scroll_area_1a5de2bd09256045c0b96e5a0be780fa85" prot="protected" virt="non-virtual"><scope>DO::ScrollArea</scope><name>closeEvent</name></member>
+      <member refid="class_d_o_1_1_scroll_area_1a8a2de1733d4acfc45cd0bd449b882279" prot="public" virt="non-virtual"><scope>DO::ScrollArea</scope><name>ScrollArea</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

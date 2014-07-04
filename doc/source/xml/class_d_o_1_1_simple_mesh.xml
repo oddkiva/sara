@@ -1,0 +1,428 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="class_d_o_1_1_simple_mesh" kind="class" prot="public">
+    <compoundname>DO::SimpleMesh</compoundname>
+    <includes refid="_mesh_8hpp" local="no">Mesh.hpp</includes>
+    <templateparamlist>
+      <param>
+        <type>typename</type>
+        <declname>Vector_</declname>
+        <defname>Vector_</defname>
+      </param>
+      <param>
+        <type>typename</type>
+        <declname>Face_</declname>
+        <defname>Face_</defname>
+      </param>
+    </templateparamlist>
+      <sectiondef kind="public-type">
+      <memberdef kind="typedef" id="class_d_o_1_1_simple_mesh_1a4e0f748b614e44317e0961073fec8585" prot="public" static="no">
+        <type>Vector_</type>
+        <definition>typedef Vector_ Vector</definition>
+        <argsstring></argsstring>
+        <name>Vector</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" line="40" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" bodystart="40" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_d_o_1_1_simple_mesh_1aea0be5a8a64c17740c31d27605b844e1" prot="public" static="no">
+        <type>Vector_</type>
+        <definition>typedef Vector_ Point</definition>
+        <argsstring></argsstring>
+        <name>Point</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" line="40" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" bodystart="40" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_d_o_1_1_simple_mesh_1aae4240566b5bfdaa1405339dd3831082" prot="public" static="no">
+        <type>Face_</type>
+        <definition>typedef Face_ Face</definition>
+        <argsstring></argsstring>
+        <name>Face</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" line="41" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" bodystart="41" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="class_d_o_1_1_simple_mesh_1a1195a7067abb07efee57ebfa9c9d2012" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; Point &gt;</type>
+        <definition>std::vector&lt;Point&gt; v_</definition>
+        <argsstring></argsstring>
+        <name>v_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" line="83" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" bodystart="83" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_simple_mesh_1a5e13d8a72932e63d8a84b93c9a4e2e25" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; Vector &gt;</type>
+        <definition>std::vector&lt;Vector&gt; n_</definition>
+        <argsstring></argsstring>
+        <name>n_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" line="84" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" bodystart="84" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_simple_mesh_1a269e53f302d6641ba15110806503e724" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; Face &gt;</type>
+        <definition>std::vector&lt;Face&gt; f_</definition>
+        <argsstring></argsstring>
+        <name>f_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" line="85" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" bodystart="85" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_d_o_1_1_simple_mesh_1a4610f007d7ba928346ea0d9c80210b89" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>std::vector&lt; Point &gt; &amp;</type>
+        <definition>std::vector&lt;Point&gt;&amp; vertices</definition>
+        <argsstring>()</argsstring>
+        <name>vertices</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" line="43" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" bodystart="43" bodyend="43"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_simple_mesh_1a3313a9f1de5f63e9c74add9afb1f14ee" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>std::vector&lt; Vector &gt; &amp;</type>
+        <definition>std::vector&lt;Vector&gt;&amp; normals</definition>
+        <argsstring>()</argsstring>
+        <name>normals</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" line="44" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" bodystart="44" bodyend="44"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_simple_mesh_1a4cc70785d08ebebc4df3e2d9cb603bfb" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>std::vector&lt; Face &gt; &amp;</type>
+        <definition>std::vector&lt;Face&gt;&amp; faces</definition>
+        <argsstring>()</argsstring>
+        <name>faces</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" line="45" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" bodystart="45" bodyend="45"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_simple_mesh_1a87f418d4394ff3f5d938b001cdea64e3" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>Point &amp;</type>
+        <definition>Point&amp; vertex</definition>
+        <argsstring>(size_t i)</argsstring>
+        <name>vertex</name>
+        <param>
+          <type>size_t</type>
+          <declname>i</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" line="46" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" bodystart="46" bodyend="46"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_simple_mesh_1a83d364654c11d9af7b0b73872df412dc" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>Vector &amp;</type>
+        <definition>Vector&amp; normal</definition>
+        <argsstring>(size_t i)</argsstring>
+        <name>normal</name>
+        <param>
+          <type>size_t</type>
+          <declname>i</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" line="47" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" bodystart="47" bodyend="47"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_simple_mesh_1a08e3f8b85341fe7bd5f44a37a1734283" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>Face &amp;</type>
+        <definition>Face&amp; face</definition>
+        <argsstring>(size_t i)</argsstring>
+        <name>face</name>
+        <param>
+          <type>size_t</type>
+          <declname>i</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" line="48" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" bodystart="48" bodyend="48"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_simple_mesh_1ae0a8f4e6ca684c4e43dc3dd18fcb5530" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>Point &amp;</type>
+        <definition>Point&amp; vertex_of_face</definition>
+        <argsstring>(size_t v, size_t f)</argsstring>
+        <name>vertex_of_face</name>
+        <param>
+          <type>size_t</type>
+          <declname>v</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>f</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" line="50" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" bodystart="49" bodyend="50"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_simple_mesh_1a1e445f3a0e3d6f411423af8ab8439dd5" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>Vector &amp;</type>
+        <definition>Vector&amp; normal_of_vertex_of_face</definition>
+        <argsstring>(size_t v, size_t f)</argsstring>
+        <name>normal_of_vertex_of_face</name>
+        <param>
+          <type>size_t</type>
+          <declname>v</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>f</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" line="52" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" bodystart="51" bodyend="52"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_simple_mesh_1ab0c76900f50e7e713d0fe8f17e0e516d" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>const std::vector&lt; Point &gt; &amp;</type>
+        <definition>const std::vector&lt;Point&gt;&amp; vertices</definition>
+        <argsstring>() const </argsstring>
+        <name>vertices</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" line="54" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" bodystart="54" bodyend="54"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_simple_mesh_1a03017e9adf738c62ee22ab8a87a84f0f" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>const std::vector&lt; Vector &gt; &amp;</type>
+        <definition>const std::vector&lt;Vector&gt;&amp; normals</definition>
+        <argsstring>() const </argsstring>
+        <name>normals</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" line="55" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" bodystart="55" bodyend="55"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_simple_mesh_1a5afef1c0c4baa6ef3d6ae8320167b6c8" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>const std::vector&lt; Face &gt; &amp;</type>
+        <definition>const std::vector&lt;Face&gt;&amp; faces</definition>
+        <argsstring>() const </argsstring>
+        <name>faces</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" line="56" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" bodystart="56" bodyend="56"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_simple_mesh_1a6a3138e4eae655177f255b17090602fd" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>const Point &amp;</type>
+        <definition>const Point&amp; vertex</definition>
+        <argsstring>(size_t i) const </argsstring>
+        <name>vertex</name>
+        <param>
+          <type>size_t</type>
+          <declname>i</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" line="57" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" bodystart="57" bodyend="57"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_simple_mesh_1a5c05a2740b7e83d17ce5eaa706ac8381" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>const Vector &amp;</type>
+        <definition>const Vector&amp; normal</definition>
+        <argsstring>(size_t i) const </argsstring>
+        <name>normal</name>
+        <param>
+          <type>size_t</type>
+          <declname>i</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" line="58" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" bodystart="58" bodyend="58"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_simple_mesh_1afb365293bbdd726f291c685172d5522a" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>const Face &amp;</type>
+        <definition>const Face&amp; face</definition>
+        <argsstring>(size_t i) const </argsstring>
+        <name>face</name>
+        <param>
+          <type>size_t</type>
+          <declname>i</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" line="59" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" bodystart="59" bodyend="59"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_simple_mesh_1addf2fb5edd942f095b116f11afa62618" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>const Point &amp;</type>
+        <definition>const Point&amp; vertex_of_face</definition>
+        <argsstring>(size_t v, size_t f) const </argsstring>
+        <name>vertex_of_face</name>
+        <param>
+          <type>size_t</type>
+          <declname>v</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>f</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" line="61" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" bodystart="60" bodyend="61"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_simple_mesh_1ae5ff33ab9086c49c55d3fc85fcfc929f" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>const Vector &amp;</type>
+        <definition>const Vector&amp; normal_of_vertex_of_face</definition>
+        <argsstring>(size_t v, size_t f) const </argsstring>
+        <name>normal_of_vertex_of_face</name>
+        <param>
+          <type>size_t</type>
+          <declname>v</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>f</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" line="63" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" bodystart="62" bodyend="63"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_simple_mesh_1a609e38971a439a95017a7ff40adc85af" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>Point</type>
+        <definition>Point center</definition>
+        <argsstring>() const </argsstring>
+        <name>center</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" line="66" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" bodystart="65" bodyend="72"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_simple_mesh_1a2f18d56c763ffde4b8de9f9d4e00c20e" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>Vector</type>
+        <definition>Vector face_normal</definition>
+        <argsstring>(size_t f) const </argsstring>
+        <name>face_normal</name>
+        <param>
+          <type>size_t</type>
+          <declname>f</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" line="74" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" bodystart="73" bodyend="80"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Simple mesh data structure. </para>    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" line="38" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" bodystart="37" bodyend="86"/>
+    <listofallmembers>
+      <member refid="class_d_o_1_1_simple_mesh_1a609e38971a439a95017a7ff40adc85af" prot="public" virt="non-virtual"><scope>DO::SimpleMesh</scope><name>center</name></member>
+      <member refid="class_d_o_1_1_simple_mesh_1a269e53f302d6641ba15110806503e724" prot="private" virt="non-virtual"><scope>DO::SimpleMesh</scope><name>f_</name></member>
+      <member refid="class_d_o_1_1_simple_mesh_1a08e3f8b85341fe7bd5f44a37a1734283" prot="public" virt="non-virtual"><scope>DO::SimpleMesh</scope><name>face</name></member>
+      <member refid="class_d_o_1_1_simple_mesh_1afb365293bbdd726f291c685172d5522a" prot="public" virt="non-virtual"><scope>DO::SimpleMesh</scope><name>face</name></member>
+      <member refid="class_d_o_1_1_simple_mesh_1aae4240566b5bfdaa1405339dd3831082" prot="public" virt="non-virtual"><scope>DO::SimpleMesh</scope><name>Face</name></member>
+      <member refid="class_d_o_1_1_simple_mesh_1a2f18d56c763ffde4b8de9f9d4e00c20e" prot="public" virt="non-virtual"><scope>DO::SimpleMesh</scope><name>face_normal</name></member>
+      <member refid="class_d_o_1_1_simple_mesh_1a4cc70785d08ebebc4df3e2d9cb603bfb" prot="public" virt="non-virtual"><scope>DO::SimpleMesh</scope><name>faces</name></member>
+      <member refid="class_d_o_1_1_simple_mesh_1a5afef1c0c4baa6ef3d6ae8320167b6c8" prot="public" virt="non-virtual"><scope>DO::SimpleMesh</scope><name>faces</name></member>
+      <member refid="class_d_o_1_1_simple_mesh_1a5e13d8a72932e63d8a84b93c9a4e2e25" prot="private" virt="non-virtual"><scope>DO::SimpleMesh</scope><name>n_</name></member>
+      <member refid="class_d_o_1_1_simple_mesh_1a83d364654c11d9af7b0b73872df412dc" prot="public" virt="non-virtual"><scope>DO::SimpleMesh</scope><name>normal</name></member>
+      <member refid="class_d_o_1_1_simple_mesh_1a5c05a2740b7e83d17ce5eaa706ac8381" prot="public" virt="non-virtual"><scope>DO::SimpleMesh</scope><name>normal</name></member>
+      <member refid="class_d_o_1_1_simple_mesh_1a1e445f3a0e3d6f411423af8ab8439dd5" prot="public" virt="non-virtual"><scope>DO::SimpleMesh</scope><name>normal_of_vertex_of_face</name></member>
+      <member refid="class_d_o_1_1_simple_mesh_1ae5ff33ab9086c49c55d3fc85fcfc929f" prot="public" virt="non-virtual"><scope>DO::SimpleMesh</scope><name>normal_of_vertex_of_face</name></member>
+      <member refid="class_d_o_1_1_simple_mesh_1a3313a9f1de5f63e9c74add9afb1f14ee" prot="public" virt="non-virtual"><scope>DO::SimpleMesh</scope><name>normals</name></member>
+      <member refid="class_d_o_1_1_simple_mesh_1a03017e9adf738c62ee22ab8a87a84f0f" prot="public" virt="non-virtual"><scope>DO::SimpleMesh</scope><name>normals</name></member>
+      <member refid="class_d_o_1_1_simple_mesh_1aea0be5a8a64c17740c31d27605b844e1" prot="public" virt="non-virtual"><scope>DO::SimpleMesh</scope><name>Point</name></member>
+      <member refid="class_d_o_1_1_simple_mesh_1a1195a7067abb07efee57ebfa9c9d2012" prot="private" virt="non-virtual"><scope>DO::SimpleMesh</scope><name>v_</name></member>
+      <member refid="class_d_o_1_1_simple_mesh_1a4e0f748b614e44317e0961073fec8585" prot="public" virt="non-virtual"><scope>DO::SimpleMesh</scope><name>Vector</name></member>
+      <member refid="class_d_o_1_1_simple_mesh_1a87f418d4394ff3f5d938b001cdea64e3" prot="public" virt="non-virtual"><scope>DO::SimpleMesh</scope><name>vertex</name></member>
+      <member refid="class_d_o_1_1_simple_mesh_1a6a3138e4eae655177f255b17090602fd" prot="public" virt="non-virtual"><scope>DO::SimpleMesh</scope><name>vertex</name></member>
+      <member refid="class_d_o_1_1_simple_mesh_1ae0a8f4e6ca684c4e43dc3dd18fcb5530" prot="public" virt="non-virtual"><scope>DO::SimpleMesh</scope><name>vertex_of_face</name></member>
+      <member refid="class_d_o_1_1_simple_mesh_1addf2fb5edd942f095b116f11afa62618" prot="public" virt="non-virtual"><scope>DO::SimpleMesh</scope><name>vertex_of_face</name></member>
+      <member refid="class_d_o_1_1_simple_mesh_1a4610f007d7ba928346ea0d9c80210b89" prot="public" virt="non-virtual"><scope>DO::SimpleMesh</scope><name>vertices</name></member>
+      <member refid="class_d_o_1_1_simple_mesh_1ab0c76900f50e7e713d0fe8f17e0e516d" prot="public" virt="non-virtual"><scope>DO::SimpleMesh</scope><name>vertices</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

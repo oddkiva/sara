@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="dir_45fd7ef7d674a7fc6fafcbff4b5d6aa8" kind="dir">
+    <compoundname>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Algorithms</compoundname>
+    <innerfile refid="_convex_hull_8hpp">ConvexHull.hpp</innerfile>
+    <innerfile refid="_ellipse_intersection_8hpp">EllipseIntersection.hpp</innerfile>
+    <innerfile refid="_ramer_douglas_peucker_8hpp">RamerDouglasPeucker.hpp</innerfile>
+    <innerfile refid="_sutherland_hodgman_8hpp">SutherlandHodgman.hpp</innerfile>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Algorithms/"/>
+  </compounddef>
+</doxygen>

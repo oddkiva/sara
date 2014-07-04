@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="struct_d_o_1_1_dialog_box_info" kind="struct" prot="public">
+    <compoundname>DO::DialogBoxInfo</compoundname>
+    <includes refid="_graphics_application_impl_8hpp" local="no">GraphicsApplicationImpl.hpp</includes>
+      <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="struct_d_o_1_1_dialog_box_info_1a734934801a260897766516dac3a878bd" prot="public" static="no" mutable="no">
+        <type>QPixmap</type>
+        <definition>QPixmap pixmap</definition>
+        <argsstring></argsstring>
+        <name>pixmap</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/GraphicsApplicationImpl.hpp" line="34" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/GraphicsApplicationImpl.hpp" bodystart="34" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_d_o_1_1_dialog_box_info_1aac274af37f5fbaaa2c47d19145cfd856" prot="public" static="no" mutable="no">
+        <type>QString</type>
+        <definition>QString filename</definition>
+        <argsstring></argsstring>
+        <name>filename</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/GraphicsApplicationImpl.hpp" line="35" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/GraphicsApplicationImpl.hpp" bodystart="35" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>quick-and-dirty thing to read file from dialog box. </para>    </briefdescription>
+    <detaileddescription>
+<para><xrefsect id="todo_1_todo000008"><xreftitle>Todo</xreftitle><xrefdescription><para>See if it can be done in a more elegant way. </para></xrefdescription></xrefsect></para>    </detaileddescription>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/GraphicsApplicationImpl.hpp" line="33" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/GraphicsApplicationImpl.hpp" bodystart="32" bodyend="36"/>
+    <listofallmembers>
+      <member refid="struct_d_o_1_1_dialog_box_info_1aac274af37f5fbaaa2c47d19145cfd856" prot="public" virt="non-virtual"><scope>DO::DialogBoxInfo</scope><name>filename</name></member>
+      <member refid="struct_d_o_1_1_dialog_box_info_1a734934801a260897766516dac3a878bd" prot="public" virt="non-virtual"><scope>DO::DialogBoxInfo</scope><name>pixmap</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

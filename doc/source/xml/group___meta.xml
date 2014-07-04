@@ -1,0 +1,49 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="group___meta" kind="group">
+    <compoundname>Meta</compoundname>
+    <title>Meta</title>
+    <innernamespace refid="namespace_d_o_1_1_meta">DO::Meta</innernamespace>
+      <sectiondef kind="define">
+      <memberdef kind="define" id="group___meta_1ga2b69d33b4b707fde292f656c4e27b6a9" prot="public" static="no">
+        <name>DO_STATIC_ASSERT</name>
+        <param><defname>expression</defname></param>
+        <param><defname>message</defname></param>
+        <initializer>struct <ref refid="_static_assert_8hpp_1a94af0bf1263c669c40b41161203c57fc" kindref="member">CAT</ref>(__static_assertion_at_line_, __LINE__)                           \
+{                                                                           \
+  <ref refid="struct_d_o_1_1_meta_1_1_static_assertion" kindref="compound">DO::Meta::StaticAssertion</ref>&lt;static_cast&lt;bool&gt;((expression))&gt;                \
+    <ref refid="_static_assert_8hpp_1a94af0bf1263c669c40b41161203c57fc" kindref="member">CAT</ref>(<ref refid="_static_assert_8hpp_1a94af0bf1263c669c40b41161203c57fc" kindref="member">CAT</ref>(<ref refid="_static_assert_8hpp_1a94af0bf1263c669c40b41161203c57fc" kindref="member">CAT</ref>(STATIC_ASSERTION_FAILED_AT_LINE_, __LINE__), _), message);  \
+};                                                                          \
+typedef <ref refid="struct_d_o_1_1_meta_1_1_static_assertion_test" kindref="compound">DO::Meta::StaticAssertionTest</ref>&lt;                                      \
+  sizeof(<ref refid="_static_assert_8hpp_1a94af0bf1263c669c40b41161203c57fc" kindref="member">CAT</ref>(__static_assertion_at_line_, __LINE__))  &gt;                     \
+    <ref refid="_static_assert_8hpp_1a94af0bf1263c669c40b41161203c57fc" kindref="member">CAT</ref>(__static_assertion_test_at_line_, __LINE__)</initializer>
+        <briefdescription>
+<para>Static assertion macro. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>expression</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>a boolean expression </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>message</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>some error message</para></parameterdescription>
+</parameteritem>
+</parameterlist>
+Usage:</para><para><ref refid="group___meta_1ga2b69d33b4b707fde292f656c4e27b6a9" kindref="member">DO_STATIC_ASSERT(expression, message)</ref>;</para><para>When the static assertion test fails, a compiler error message that somehow contains the &quot;STATIC_ASSERTION_FAILED_AT_LINE_xxx_message&quot; is generated.</para><para>WARNING: message has to be a valid C++ identifier, that is to say it must not contain space characters, cannot start with a digit, etc.</para><para><ref refid="group___meta_1ga2b69d33b4b707fde292f656c4e27b6a9" kindref="member">DO_STATIC_ASSERT(true, this_message_will_never_be_displayed)</ref>; </para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/StaticAssert.hpp" line="54" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/StaticAssert.hpp" bodystart="46" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+  </compounddef>
+</doxygen>

@@ -1,0 +1,112 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="class_d_o_1_1_c_s_g_1_1_intersection" kind="class" prot="public">
+    <compoundname>DO::CSG::Intersection</compoundname>
+    <basecompoundref refid="class_d_o_1_1_c_s_g_1_1_object" prot="public" virt="non-virtual">Object</basecompoundref>
+    <includes refid="_c_s_g_8hpp" local="no">CSG.hpp</includes>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="class_d_o_1_1_c_s_g_1_1_intersection_1acba28fc72ade42211788f2e45ee5277a" prot="private" static="no" mutable="no">
+        <type>const <ref refid="class_d_o_1_1_c_s_g_1_1_object" kindref="compound">Object</ref> *</type>
+        <definition>const Object* o1_</definition>
+        <argsstring></argsstring>
+        <name>o1_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/CSG.hpp" line="61" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/CSG.hpp" bodystart="61" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_c_s_g_1_1_intersection_1af963a8f87d7ea2b0ccdf487aa72487a4" prot="private" static="no" mutable="no">
+        <type>const <ref refid="class_d_o_1_1_c_s_g_1_1_object" kindref="compound">Object</ref> *</type>
+        <definition>const Object* o2_</definition>
+        <argsstring></argsstring>
+        <name>o2_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/CSG.hpp" line="62" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/CSG.hpp" bodystart="62" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_d_o_1_1_c_s_g_1_1_intersection_1affdad229454899e635954be8f49b937f" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>Intersection</definition>
+        <argsstring>(const Object *o1, const Object *o2)</argsstring>
+        <name>Intersection</name>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_c_s_g_1_1_object" kindref="compound">Object</ref> *</type>
+          <declname>o1</declname>
+        </param>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_c_s_g_1_1_object" kindref="compound">Object</ref> *</type>
+          <declname>o2</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/CSG.hpp" line="65" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/CSG.hpp" bodystart="64" bodyend="65"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_c_s_g_1_1_intersection_1a50a93f8875a1aa06ceecbc4e001803ba" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="virtual">
+        <type>bool</type>
+        <definition>bool contains</definition>
+        <argsstring>(const Point2d &amp;p) const </argsstring>
+        <name>contains</name>
+        <reimplements refid="class_d_o_1_1_c_s_g_1_1_object_1a20e575b0d75df1fb21c80ea6c3f91d8e">contains</reimplements>
+        <param>
+          <type>const <ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member">Point2d</ref> &amp;</type>
+          <declname>p</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/CSG.hpp" line="67" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/CSG.hpp" bodystart="66" bodyend="67"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>CSG object intersection. </para>    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="297">
+        <label>Object</label>
+        <link refid="class_d_o_1_1_c_s_g_1_1_object"/>
+      </node>
+      <node id="296">
+        <label>Intersection</label>
+        <link refid="class_d_o_1_1_c_s_g_1_1_intersection"/>
+        <childnode refid="297" relation="public-inheritance">
+        </childnode>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="299">
+        <label>Object</label>
+        <link refid="class_d_o_1_1_c_s_g_1_1_object"/>
+      </node>
+      <node id="298">
+        <label>Intersection</label>
+        <link refid="class_d_o_1_1_c_s_g_1_1_intersection"/>
+        <childnode refid="299" relation="public-inheritance">
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/CSG.hpp" line="60" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/CSG.hpp" bodystart="59" bodyend="68"/>
+    <listofallmembers>
+      <member refid="class_d_o_1_1_c_s_g_1_1_intersection_1a50a93f8875a1aa06ceecbc4e001803ba" prot="public" virt="virtual"><scope>DO::CSG::Intersection</scope><name>contains</name></member>
+      <member refid="class_d_o_1_1_c_s_g_1_1_intersection_1affdad229454899e635954be8f49b937f" prot="public" virt="non-virtual"><scope>DO::CSG::Intersection</scope><name>Intersection</name></member>
+      <member refid="class_d_o_1_1_c_s_g_1_1_intersection_1acba28fc72ade42211788f2e45ee5277a" prot="private" virt="non-virtual"><scope>DO::CSG::Intersection</scope><name>o1_</name></member>
+      <member refid="class_d_o_1_1_c_s_g_1_1_intersection_1af963a8f87d7ea2b0ccdf487aa72487a4" prot="private" virt="non-virtual"><scope>DO::CSG::Intersection</scope><name>o2_</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

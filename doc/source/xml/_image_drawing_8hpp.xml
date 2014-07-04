@@ -1,0 +1,181 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="_image_drawing_8hpp" kind="file">
+    <compoundname>ImageDrawing.hpp</compoundname>
+    <includes refid="_image_drawing_2_image_i_o_8hpp" local="yes">ImageDrawing/ImageIO.hpp</includes>
+    <includes refid="_image_painter_8hpp" local="yes">ImageDrawing/ImagePainter.hpp</includes>
+    <incdepgraph>
+      <node id="1568">
+        <label>agg_conv_transform.h</label>
+      </node>
+      <node id="1558">
+        <label>iterator</label>
+      </node>
+      <node id="1556">
+        <label>MultiArray.hpp</label>
+        <link refid="_multi_array_8hpp"/>
+        <childnode refid="1557" relation="include">
+        </childnode>
+        <childnode refid="1559" relation="include">
+        </childnode>
+        <childnode refid="1560" relation="include">
+        </childnode>
+      </node>
+      <node id="1569">
+        <label>agg_trans_affine.h</label>
+      </node>
+      <node id="1567">
+        <label>agg_scanline_p.h</label>
+      </node>
+      <node id="1560">
+        <label>numeric</label>
+      </node>
+      <node id="1554">
+        <label>Eigen/Eigen</label>
+      </node>
+      <node id="1549">
+        <label>DO/Core/Image.hpp</label>
+        <link refid="_image_8hpp"/>
+        <childnode refid="1550" relation="include">
+        </childnode>
+        <childnode refid="1556" relation="include">
+        </childnode>
+      </node>
+      <node id="1566">
+        <label>agg_rasterizer_scanline_aa.h</label>
+      </node>
+      <node id="1547">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing.hpp</label>
+        <link refid="ImageDrawing.hpp"/>
+        <childnode refid="1548" relation="include">
+        </childnode>
+        <childnode refid="1562" relation="include">
+        </childnode>
+      </node>
+      <node id="1557">
+        <label>Locator.hpp</label>
+        <link refid="_locator_8hpp"/>
+        <childnode refid="1552" relation="include">
+        </childnode>
+        <childnode refid="1551" relation="include">
+        </childnode>
+        <childnode refid="1553" relation="include">
+        </childnode>
+        <childnode refid="1558" relation="include">
+        </childnode>
+        <childnode refid="1559" relation="include">
+        </childnode>
+      </node>
+      <node id="1562">
+        <label>ImageDrawing/ImagePainter.hpp</label>
+        <link refid="_image_painter_8hpp_source"/>
+        <childnode refid="1563" relation="include">
+        </childnode>
+        <childnode refid="1564" relation="include">
+        </childnode>
+        <childnode refid="1565" relation="include">
+        </childnode>
+        <childnode refid="1566" relation="include">
+        </childnode>
+        <childnode refid="1567" relation="include">
+        </childnode>
+        <childnode refid="1568" relation="include">
+        </childnode>
+        <childnode refid="1569" relation="include">
+        </childnode>
+        <childnode refid="1570" relation="include">
+        </childnode>
+        <childnode refid="1571" relation="include">
+        </childnode>
+        <childnode refid="1572" relation="include">
+        </childnode>
+      </node>
+      <node id="1551">
+        <label>Meta.hpp</label>
+        <link refid="_meta_8hpp"/>
+      </node>
+      <node id="1570">
+        <label>agg_ellipse.h</label>
+      </node>
+      <node id="1552">
+        <label>StaticAssert.hpp</label>
+        <link refid="_static_assert_8hpp"/>
+      </node>
+      <node id="1555">
+        <label>sstream</label>
+      </node>
+      <node id="1553">
+        <label>EigenExtension.hpp</label>
+        <link refid="_eigen_extension_8hpp"/>
+        <childnode refid="1554" relation="include">
+        </childnode>
+        <childnode refid="1555" relation="include">
+        </childnode>
+      </node>
+      <node id="1564">
+        <label>agg_renderer_scanline.h</label>
+      </node>
+      <node id="1559">
+        <label>iostream</label>
+      </node>
+      <node id="1563">
+        <label>agg_pixfmt_rgb.h</label>
+      </node>
+      <node id="1550">
+        <label>Color.hpp</label>
+        <link refid="_color_8hpp"/>
+        <childnode refid="1551" relation="include">
+        </childnode>
+        <childnode refid="1552" relation="include">
+        </childnode>
+        <childnode refid="1553" relation="include">
+        </childnode>
+      </node>
+      <node id="1561">
+        <label>easyexif/exif.h</label>
+      </node>
+      <node id="1572">
+        <label>agg_conv_stroke.h</label>
+      </node>
+      <node id="1548">
+        <label>ImageDrawing/ImageIO.hpp</label>
+        <link refid="_image_drawing_2_image_i_o_8hpp_source"/>
+        <childnode refid="1549" relation="include">
+        </childnode>
+        <childnode refid="1561" relation="include">
+        </childnode>
+      </node>
+      <node id="1571">
+        <label>agg_path_storage.h</label>
+      </node>
+      <node id="1565">
+        <label>agg_renderer_base.h</label>
+      </node>
+    </incdepgraph>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="comment">//<sp/>==========================================================================<sp/>//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="comment">//<sp/>This<sp/>file<sp/>is<sp/>part<sp/>of<sp/>DO++,<sp/>a<sp/>basic<sp/>set<sp/>of<sp/>libraries<sp/>in<sp/>C++<sp/>for<sp/>computer</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight><highlight class="comment">//<sp/>vision.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="comment">//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Copyright<sp/>(C)<sp/>2013<sp/>David<sp/>Ok<sp/>&lt;david.ok8@gmail.com&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight><highlight class="comment">//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight><highlight class="comment">//<sp/>This<sp/>Source<sp/>Code<sp/>Form<sp/>is<sp/>subject<sp/>to<sp/>the<sp/>terms<sp/>of<sp/>the<sp/>Mozilla<sp/>Public</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight><highlight class="comment">//<sp/>License<sp/>v.<sp/>2.0.<sp/>If<sp/>a<sp/>copy<sp/>of<sp/>the<sp/>MPL<sp/>was<sp/>not<sp/>distributed<sp/>with<sp/>this<sp/>file,</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight><highlight class="comment">//<sp/>you<sp/>can<sp/>obtain<sp/>one<sp/>at<sp/>http://mozilla.org/MPL/2.0/.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight><highlight class="comment">//<sp/>==========================================================================<sp/>//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight><highlight class="preprocessor">#ifndef<sp/>DO_IMAGEDRAWING_HPP</highlight></codeline>
+<codeline lineno="13"><highlight class="preprocessor"></highlight><highlight class="preprocessor">#define<sp/>DO_IMAGEDRAWING_HPP</highlight></codeline>
+<codeline lineno="14"><highlight class="preprocessor"></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;ImageDrawing/ImageIO.hpp&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="16"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;ImageDrawing/ImagePainter.hpp&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="17"><highlight class="normal"></highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight><highlight class="preprocessor">#endif<sp/></highlight><highlight class="comment">/*<sp/>DO_IMAGEDRAWING_HPP<sp/>*/</highlight><highlight class="preprocessor"></highlight></codeline>
+    </programlisting>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing.hpp"/>
+  </compounddef>
+</doxygen>

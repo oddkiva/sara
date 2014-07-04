@@ -1,0 +1,301 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="class_d_o_1_1_match_item" kind="class" prot="public">
+    <compoundname>DO::MatchItem</compoundname>
+    <basecompoundref prot="public" virt="non-virtual">QGraphicsItem</basecompoundref>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="class_d_o_1_1_match_item_1a820d0ae45ff3b8aaebeee9f7b3b08dce" prot="private" static="no" mutable="no">
+        <type><ref refid="class_d_o_1_1_o_e_region_item" kindref="compound">OERegionItem</ref> *</type>
+        <definition>OERegionItem* source_</definition>
+        <argsstring></argsstring>
+        <name>source_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/FeatureItem.hpp" line="86" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/FeatureItem.hpp" bodystart="86" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_match_item_1a565167ce29848ca5234800035971ccc0" prot="private" static="no" mutable="no">
+        <type><ref refid="class_d_o_1_1_o_e_region_item" kindref="compound">OERegionItem</ref> *</type>
+        <definition>OERegionItem* target_</definition>
+        <argsstring></argsstring>
+        <name>target_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/FeatureItem.hpp" line="87" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/FeatureItem.hpp" bodystart="87" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_match_item_1ac8cd6113064d06bb5686834f22ea0d26" prot="private" static="no" mutable="no">
+        <type>QPointF</type>
+        <definition>QPointF sourcePoint_</definition>
+        <argsstring></argsstring>
+        <name>sourcePoint_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/FeatureItem.hpp" line="88" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/FeatureItem.hpp" bodystart="88" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_match_item_1afdfc9c24c187686f70a398a80c670751" prot="private" static="no" mutable="no">
+        <type>QPointF</type>
+        <definition>QPointF targetPoint_</definition>
+        <argsstring></argsstring>
+        <name>targetPoint_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/FeatureItem.hpp" line="89" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/FeatureItem.hpp" bodystart="89" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_match_item_1a19294383e671058855ffa3698507613d" prot="private" static="no" mutable="no">
+        <type>qreal</type>
+        <definition>qreal arrowSize_</definition>
+        <argsstring></argsstring>
+        <name>arrowSize_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/FeatureItem.hpp" line="90" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/FeatureItem.hpp" bodystart="90" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_match_item_1a5006e022949188b8f36b0f234131dd35" prot="private" static="no" mutable="no">
+        <type>QColor</type>
+        <definition>QColor color_</definition>
+        <argsstring></argsstring>
+        <name>color_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/FeatureItem.hpp" line="91" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/FeatureItem.hpp" bodystart="91" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_match_item_1af0cf768cad28d4bb9978372d16e5efbc" prot="private" static="no" mutable="no">
+        <type>QColor</type>
+        <definition>QColor colorOnHover_</definition>
+        <argsstring></argsstring>
+        <name>colorOnHover_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/FeatureItem.hpp" line="92" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/FeatureItem.hpp" bodystart="92" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_match_item_1a0deed2a3a994eca759c455d5cf24f671" prot="private" static="no" mutable="no">
+        <type>QColor</type>
+        <definition>QColor currentColor_</definition>
+        <argsstring></argsstring>
+        <name>currentColor_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/FeatureItem.hpp" line="93" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/FeatureItem.hpp" bodystart="93" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_d_o_1_1_match_item_1ac8c34858249dbddee9a62a83a0bec1b1" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>MatchItem</definition>
+        <argsstring>(OERegionItem *source, OERegionItem *target, qreal arrowSize=qreal(5), const QColor &amp;color=Qt::red, const QColor &amp;colorOnHover=Qt::blue)</argsstring>
+        <name>MatchItem</name>
+        <param>
+          <type><ref refid="class_d_o_1_1_o_e_region_item" kindref="compound">OERegionItem</ref> *</type>
+          <declname>source</declname>
+        </param>
+        <param>
+          <type><ref refid="class_d_o_1_1_o_e_region_item" kindref="compound">OERegionItem</ref> *</type>
+          <declname>target</declname>
+        </param>
+        <param>
+          <type>qreal</type>
+          <declname>arrowSize</declname>
+          <defval>qreal(5)</defval>
+        </param>
+        <param>
+          <type>const QColor &amp;</type>
+          <declname>color</declname>
+          <defval>Qt::red</defval>
+        </param>
+        <param>
+          <type>const QColor &amp;</type>
+          <declname>colorOnHover</declname>
+          <defval>Qt::blue</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/FeatureItem.hpp" line="65"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_match_item_1a21de674c125e943b0623788ceeebb8d8" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_o_e_region_item" kindref="compound">OERegionItem</ref> *</type>
+        <definition>OERegionItem* source</definition>
+        <argsstring>() const </argsstring>
+        <name>source</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/FeatureItem.hpp" line="66" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/FeatureItem.hpp" bodystart="66" bodyend="66"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_match_item_1a5408e610992cb805f05717cc32d27f5a" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_o_e_region_item" kindref="compound">OERegionItem</ref> *</type>
+        <definition>OERegionItem* target</definition>
+        <argsstring>() const </argsstring>
+        <name>target</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/FeatureItem.hpp" line="67" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/FeatureItem.hpp" bodystart="67" bodyend="67"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_match_item_1a70c18eca95b2b0ba60c4b8368867216c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void adjust</definition>
+        <argsstring>()</argsstring>
+        <name>adjust</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/FeatureItem.hpp" line="68"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_match_item_1a846b07e015bf52abc7627cb98a8136b6" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void mark</definition>
+        <argsstring>()</argsstring>
+        <name>mark</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/FeatureItem.hpp" line="69"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_match_item_1af58985514746629bca9fa7d58b7ff7ca" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void unmark</definition>
+        <argsstring>()</argsstring>
+        <name>unmark</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/FeatureItem.hpp" line="70"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="protected-func">
+      <memberdef kind="function" id="class_d_o_1_1_match_item_1a7f9aac15380d5c7a5b33979d006275d7" prot="protected" static="no" const="yes" explicit="no" inline="no" virt="non-virtual">
+        <type>QRectF</type>
+        <definition>QRectF boundingRect</definition>
+        <argsstring>() const </argsstring>
+        <name>boundingRect</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/FeatureItem.hpp" line="73"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_match_item_1ac7e6c577486dbb0f61b2bf88f01d8ff0" prot="protected" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void paint</definition>
+        <argsstring>(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)</argsstring>
+        <name>paint</name>
+        <param>
+          <type>QPainter *</type>
+          <declname>painter</declname>
+        </param>
+        <param>
+          <type>const QStyleOptionGraphicsItem *</type>
+          <declname>option</declname>
+        </param>
+        <param>
+          <type>QWidget *</type>
+          <declname>widget</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/FeatureItem.hpp" line="76"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="380">
+        <label>QGraphicsItem</label>
+      </node>
+      <node id="379">
+        <label>MatchItem</label>
+        <link refid="class_d_o_1_1_match_item"/>
+        <childnode refid="380" relation="public-inheritance">
+        </childnode>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="382">
+        <label>QGraphicsItem</label>
+      </node>
+      <node id="381">
+        <label>MatchItem</label>
+        <link refid="class_d_o_1_1_match_item"/>
+        <childnode refid="382" relation="public-inheritance">
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/FeatureItem.hpp" line="60" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/FeatureItem.hpp" bodystart="59" bodyend="94"/>
+    <listofallmembers>
+      <member refid="class_d_o_1_1_match_item_1a70c18eca95b2b0ba60c4b8368867216c" prot="public" virt="non-virtual"><scope>DO::MatchItem</scope><name>adjust</name></member>
+      <member refid="class_d_o_1_1_match_item_1a19294383e671058855ffa3698507613d" prot="private" virt="non-virtual"><scope>DO::MatchItem</scope><name>arrowSize_</name></member>
+      <member refid="class_d_o_1_1_match_item_1a7f9aac15380d5c7a5b33979d006275d7" prot="protected" virt="non-virtual"><scope>DO::MatchItem</scope><name>boundingRect</name></member>
+      <member refid="class_d_o_1_1_match_item_1a5006e022949188b8f36b0f234131dd35" prot="private" virt="non-virtual"><scope>DO::MatchItem</scope><name>color_</name></member>
+      <member refid="class_d_o_1_1_match_item_1af0cf768cad28d4bb9978372d16e5efbc" prot="private" virt="non-virtual"><scope>DO::MatchItem</scope><name>colorOnHover_</name></member>
+      <member refid="class_d_o_1_1_match_item_1a0deed2a3a994eca759c455d5cf24f671" prot="private" virt="non-virtual"><scope>DO::MatchItem</scope><name>currentColor_</name></member>
+      <member refid="class_d_o_1_1_match_item_1a846b07e015bf52abc7627cb98a8136b6" prot="public" virt="non-virtual"><scope>DO::MatchItem</scope><name>mark</name></member>
+      <member refid="class_d_o_1_1_match_item_1ac8c34858249dbddee9a62a83a0bec1b1" prot="public" virt="non-virtual"><scope>DO::MatchItem</scope><name>MatchItem</name></member>
+      <member refid="class_d_o_1_1_match_item_1ac7e6c577486dbb0f61b2bf88f01d8ff0" prot="protected" virt="non-virtual"><scope>DO::MatchItem</scope><name>paint</name></member>
+      <member refid="class_d_o_1_1_match_item_1a21de674c125e943b0623788ceeebb8d8" prot="public" virt="non-virtual"><scope>DO::MatchItem</scope><name>source</name></member>
+      <member refid="class_d_o_1_1_match_item_1a820d0ae45ff3b8aaebeee9f7b3b08dce" prot="private" virt="non-virtual"><scope>DO::MatchItem</scope><name>source_</name></member>
+      <member refid="class_d_o_1_1_match_item_1ac8cd6113064d06bb5686834f22ea0d26" prot="private" virt="non-virtual"><scope>DO::MatchItem</scope><name>sourcePoint_</name></member>
+      <member refid="class_d_o_1_1_match_item_1a5408e610992cb805f05717cc32d27f5a" prot="public" virt="non-virtual"><scope>DO::MatchItem</scope><name>target</name></member>
+      <member refid="class_d_o_1_1_match_item_1a565167ce29848ca5234800035971ccc0" prot="private" virt="non-virtual"><scope>DO::MatchItem</scope><name>target_</name></member>
+      <member refid="class_d_o_1_1_match_item_1afdfc9c24c187686f70a398a80c670751" prot="private" virt="non-virtual"><scope>DO::MatchItem</scope><name>targetPoint_</name></member>
+      <member refid="class_d_o_1_1_match_item_1af58985514746629bca9fa7d58b7ff7ca" prot="public" virt="non-virtual"><scope>DO::MatchItem</scope><name>unmark</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

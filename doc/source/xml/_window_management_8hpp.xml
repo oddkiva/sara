@@ -1,0 +1,204 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="_window_management_8hpp" kind="file">
+    <compoundname>WindowManagement.hpp</compoundname>
+    <includes refid="_events_8hpp" local="yes">Events.hpp</includes>
+    <includedby refid="_graphics_8hpp" local="yes">C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics.hpp</includedby>
+    <incdepgraph>
+      <node id="1535">
+        <label>Eigen/Eigen</label>
+      </node>
+      <node id="1533">
+        <label>Events.hpp</label>
+        <link refid="_events_8hpp_source"/>
+        <childnode refid="1534" relation="include">
+        </childnode>
+      </node>
+      <node id="1536">
+        <label>sstream</label>
+      </node>
+      <node id="1534">
+        <label>DO/Core/EigenExtension.hpp</label>
+        <link refid="_eigen_extension_8hpp"/>
+        <childnode refid="1535" relation="include">
+        </childnode>
+        <childnode refid="1536" relation="include">
+        </childnode>
+      </node>
+      <node id="1532">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/WindowManagement.hpp</label>
+        <link refid="WindowManagement.hpp"/>
+        <childnode refid="1533" relation="include">
+        </childnode>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="1546">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/GraphicsUtilities.hpp</label>
+        <link refid="_graphics_utilities_8hpp"/>
+      </node>
+      <node id="1542">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Graphics/DrawPolygon.hpp</label>
+        <link refid="_draw_polygon_8hpp_source"/>
+        <childnode refid="1543" relation="include">
+        </childnode>
+      </node>
+      <node id="1544">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry.hpp</label>
+        <link refid="_geometry_8hpp_source"/>
+      </node>
+      <node id="1545">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/GraphicsApplicationImpl.hpp</label>
+        <link refid="_graphics_application_impl_8hpp"/>
+        <childnode refid="1546" relation="include">
+        </childnode>
+      </node>
+      <node id="1539">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDescriptors.hpp</label>
+        <link refid="_feature_descriptors_8hpp"/>
+      </node>
+      <node id="1540">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors.hpp</label>
+        <link refid="_feature_detectors_8hpp"/>
+      </node>
+      <node id="1541">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/View.hpp</label>
+        <link refid="_view_8hpp"/>
+      </node>
+      <node id="1537">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/WindowManagement.hpp</label>
+        <link refid="WindowManagement.hpp"/>
+        <childnode refid="1538" relation="include">
+        </childnode>
+      </node>
+      <node id="1543">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Graphics.hpp</label>
+        <link refid="_geometry_2_graphics_8hpp_source"/>
+        <childnode refid="1544" relation="include">
+        </childnode>
+      </node>
+      <node id="1538">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics.hpp</label>
+        <link refid="_graphics_8hpp"/>
+        <childnode refid="1539" relation="include">
+        </childnode>
+        <childnode refid="1540" relation="include">
+        </childnode>
+        <childnode refid="1541" relation="include">
+        </childnode>
+        <childnode refid="1542" relation="include">
+        </childnode>
+        <childnode refid="1545" relation="include">
+        </childnode>
+      </node>
+    </invincdepgraph>
+    <innernamespace refid="namespace_d_o">DO</innernamespace>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="comment">//<sp/>=========================================================================<sp/>//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="comment">//<sp/>This<sp/>file<sp/>is<sp/>part<sp/>of<sp/>DO++,<sp/>a<sp/>basic<sp/>set<sp/>of<sp/>libraries<sp/>in<sp/>C++<sp/>for<sp/>computer<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight><highlight class="comment">//<sp/>vision.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="comment">//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Copyright<sp/>(C)<sp/>2013<sp/>David<sp/>Ok<sp/>&lt;david.ok8@gmail.com&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight><highlight class="comment">//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight><highlight class="comment">//<sp/>This<sp/>Source<sp/>Code<sp/>Form<sp/>is<sp/>subject<sp/>to<sp/>the<sp/>terms<sp/>of<sp/>the<sp/>Mozilla<sp/>Public<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight><highlight class="comment">//<sp/>License<sp/>v.<sp/>2.0.<sp/>If<sp/>a<sp/>copy<sp/>of<sp/>the<sp/>MPL<sp/>was<sp/>not<sp/>distributed<sp/>with<sp/>this<sp/>file,<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight><highlight class="comment">//<sp/>you<sp/>can<sp/>obtain<sp/>one<sp/>at<sp/>http://mozilla.org/MPL/2.0/.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight><highlight class="comment">//<sp/>=========================================================================<sp/>//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight><highlight class="preprocessor">#ifndef<sp/>DO_GRAPHICS_WINDOWCONTROL_HPP</highlight></codeline>
+<codeline lineno="15"><highlight class="preprocessor"></highlight><highlight class="preprocessor">#define<sp/>DO_GRAPHICS_WINDOWCONTROL_HPP</highlight></codeline>
+<codeline lineno="16"><highlight class="preprocessor"></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="17"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;Events.hpp&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight></codeline>
+<codeline lineno="19"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal">QWidget;</highlight></codeline>
+<codeline lineno="20"><highlight class="normal"></highlight></codeline>
+<codeline lineno="21"><highlight class="normal"></highlight><highlight class="keyword">namespace<sp/></highlight><highlight class="normal">DO<sp/>{</highlight></codeline>
+<codeline lineno="22"><highlight class="normal"></highlight></codeline>
+<codeline lineno="23"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/>QWidget<sp/>*<sp/>Window;</highlight></codeline>
+<codeline lineno="24"><highlight class="normal"></highlight></codeline>
+<codeline lineno="33"></codeline>
+<codeline lineno="34"><highlight class="normal"><sp/><sp/>DO_EXPORT</highlight></codeline>
+<codeline lineno="35"><highlight class="normal"><sp/><sp/>Window<sp/><ref refid="group___window_management_1gab5f08c396a83e394df40da185d530a42" kindref="member" tooltip="Window getter.">getActiveWindow</ref>();</highlight></codeline>
+<codeline lineno="37"><highlight class="normal"><sp/><sp/>DO_EXPORT</highlight></codeline>
+<codeline lineno="38"><highlight class="normal"><sp/><sp/>Vector2i<sp/><ref refid="group___window_management_1ga4d5f54d61c154cfa993e6ab5b36e8d2a" kindref="member" tooltip="Window size getter.">getWindowSizes</ref>(Window<sp/>w);</highlight></codeline>
+<codeline lineno="40"><highlight class="normal"><sp/><sp/>DO_EXPORT</highlight></codeline>
+<codeline lineno="41" refid="group___window_management_1ga5b32fe29f473b4e4aad3ca328ad4270b" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="group___window_management_1ga5b32fe29f473b4e4aad3ca328ad4270b" kindref="member" tooltip="Window width getter.">getWindowWidth</ref>(Window<sp/>w)<sp/>{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/><ref refid="group___window_management_1ga4d5f54d61c154cfa993e6ab5b36e8d2a" kindref="member" tooltip="Window size getter.">getWindowSizes</ref>(w)(0);<sp/>}</highlight></codeline>
+<codeline lineno="43"><highlight class="normal"><sp/><sp/>DO_EXPORT</highlight></codeline>
+<codeline lineno="44" refid="group___window_management_1gad8e92593c588337e8afea43277ef288b" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="group___window_management_1gad8e92593c588337e8afea43277ef288b" kindref="member" tooltip="Window height getter.">getWindowHeight</ref>(Window<sp/>w)<sp/>{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/><ref refid="group___window_management_1ga4d5f54d61c154cfa993e6ab5b36e8d2a" kindref="member" tooltip="Window size getter.">getWindowSizes</ref>(w)(1);<sp/>}</highlight></codeline>
+<codeline lineno="45"><highlight class="normal"></highlight></codeline>
+<codeline lineno="46"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>=======================================================================<sp/>//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="47"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>Windows<sp/>handling<sp/>function</highlight></codeline>
+<codeline lineno="49"><highlight class="comment"></highlight><highlight class="normal"><sp/><sp/>DO_EXPORT</highlight></codeline>
+<codeline lineno="50"><highlight class="normal"><sp/><sp/>Window<sp/><ref refid="group___window_management_1ga0351d84c2f76eafe9ecbad9f28a2bd84" kindref="member" tooltip="Open a PaintingWindow for 2D drawing.">openWindow</ref>(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>w,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>h,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>std::string&amp;<sp/>windowTitle<sp/>=<sp/></highlight><highlight class="stringliteral">&quot;DO++&quot;</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="51"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>x<sp/>=<sp/>-1,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="group___channel_accessors_1gac90c52c5b3a7b2a7e3761e6e84f25778" kindref="member" tooltip="Mutable channel accessor.">y</ref><sp/>=<sp/>-1);</highlight></codeline>
+<codeline lineno="52"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/>Window<sp/><ref refid="group___window_management_1ga0351d84c2f76eafe9ecbad9f28a2bd84" kindref="member" tooltip="Open a PaintingWindow for 2D drawing.">openWindow</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>Vector2i&amp;<sp/>sizes,</highlight></codeline>
+<codeline lineno="53"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>std::string&amp;<sp/>windowTitle<sp/>=<sp/></highlight><highlight class="stringliteral">&quot;DO++&quot;</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="54"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>x<sp/>=<sp/>-1,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="group___channel_accessors_1gac90c52c5b3a7b2a7e3761e6e84f25778" kindref="member" tooltip="Mutable channel accessor.">y</ref><sp/>=<sp/>-1)</highlight></codeline>
+<codeline lineno="55"><highlight class="normal"><sp/><sp/>{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/><ref refid="group___window_management_1ga0351d84c2f76eafe9ecbad9f28a2bd84" kindref="member" tooltip="Open a PaintingWindow for 2D drawing.">openWindow</ref>(sizes(0),<sp/>sizes(1),<sp/>windowTitle,<sp/>x,<sp/><ref refid="group___channel_accessors_1gac90c52c5b3a7b2a7e3761e6e84f25778" kindref="member" tooltip="Mutable channel accessor.">y</ref>);<sp/>}</highlight></codeline>
+<codeline lineno="57"><highlight class="normal"><sp/><sp/>DO_EXPORT</highlight></codeline>
+<codeline lineno="58"><highlight class="normal"><sp/><sp/>Window<sp/><ref refid="group___window_management_1ga54aa2a7fc6c38dc8f1cd7c08cf253aa8" kindref="member" tooltip="Open a OpenGLWindow for 3D drawing.">openGLWindow</ref>(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>w,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>h,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>std::string&amp;<sp/>windowTitle<sp/>=<sp/></highlight><highlight class="stringliteral">&quot;DO++&quot;</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="59"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>x<sp/>=<sp/>-1,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="group___channel_accessors_1gac90c52c5b3a7b2a7e3761e6e84f25778" kindref="member" tooltip="Mutable channel accessor.">y</ref><sp/>=<sp/>-1);</highlight></codeline>
+<codeline lineno="60"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/>Window<sp/><ref refid="group___window_management_1ga54aa2a7fc6c38dc8f1cd7c08cf253aa8" kindref="member" tooltip="Open a OpenGLWindow for 3D drawing.">openGLWindow</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>Vector2i&amp;<sp/>sizes,</highlight></codeline>
+<codeline lineno="61"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>std::string&amp;<sp/>windowTitle<sp/>=<sp/></highlight><highlight class="stringliteral">&quot;DO++&quot;</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="62"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>x<sp/>=<sp/>-1,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="group___channel_accessors_1gac90c52c5b3a7b2a7e3761e6e84f25778" kindref="member" tooltip="Mutable channel accessor.">y</ref><sp/>=<sp/>-1)</highlight></codeline>
+<codeline lineno="63"><highlight class="normal"><sp/><sp/>{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/><ref refid="group___window_management_1ga54aa2a7fc6c38dc8f1cd7c08cf253aa8" kindref="member" tooltip="Open a OpenGLWindow for 3D drawing.">openGLWindow</ref>(sizes(0),<sp/>sizes(1),<sp/>windowTitle,<sp/>x,<sp/><ref refid="group___channel_accessors_1gac90c52c5b3a7b2a7e3761e6e84f25778" kindref="member" tooltip="Mutable channel accessor.">y</ref>);<sp/>}</highlight></codeline>
+<codeline lineno="65"><highlight class="normal"><sp/><sp/>DO_EXPORT</highlight></codeline>
+<codeline lineno="66"><highlight class="normal"><sp/><sp/>Window<sp/><ref refid="group___window_management_1ga6bc2d961019076295185e819b956dc48" kindref="member" tooltip="Open a GraphicsView for interactive viewing.">openGraphicsView</ref>(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>w,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>h,</highlight></codeline>
+<codeline lineno="67"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>std::string&amp;<sp/>windowTitle<sp/>=<sp/></highlight><highlight class="stringliteral">&quot;DO++&quot;</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="68"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>x<sp/>=<sp/>-1,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="group___channel_accessors_1gac90c52c5b3a7b2a7e3761e6e84f25778" kindref="member" tooltip="Mutable channel accessor.">y</ref><sp/>=<sp/>-1);</highlight></codeline>
+<codeline lineno="69"><highlight class="normal"><sp/><sp/>DO_EXPORT</highlight></codeline>
+<codeline lineno="70"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/>Window<sp/><ref refid="group___window_management_1ga6bc2d961019076295185e819b956dc48" kindref="member" tooltip="Open a GraphicsView for interactive viewing.">openGraphicsView</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>Vector2i&amp;<sp/>sizes,</highlight></codeline>
+<codeline lineno="71"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>std::string&amp;<sp/>windowTitle<sp/>=<sp/></highlight><highlight class="stringliteral">&quot;DO++&quot;</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="72"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>x<sp/>=<sp/>-1,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="group___channel_accessors_1gac90c52c5b3a7b2a7e3761e6e84f25778" kindref="member" tooltip="Mutable channel accessor.">y</ref><sp/>=<sp/>-1)</highlight></codeline>
+<codeline lineno="73"><highlight class="normal"><sp/><sp/>{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/><ref refid="group___window_management_1ga6bc2d961019076295185e819b956dc48" kindref="member" tooltip="Open a GraphicsView for interactive viewing.">openGraphicsView</ref>(sizes(0),<sp/>sizes(1),<sp/>windowTitle,<sp/>x,<sp/><ref refid="group___channel_accessors_1gac90c52c5b3a7b2a7e3761e6e84f25778" kindref="member" tooltip="Mutable channel accessor.">y</ref>);<sp/>}</highlight></codeline>
+<codeline lineno="76"><highlight class="normal"><sp/><sp/>DO_EXPORT</highlight></codeline>
+<codeline lineno="77"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="group___window_management_1ga540df7e323c1ee64c9b67f8adf5975ac" kindref="member" tooltip="Close the window w (regardless of its type). By default, the active window is closed.">closeWindow</ref>(Window<sp/>w<sp/>=<sp/><ref refid="group___window_management_1gab5f08c396a83e394df40da185d530a42" kindref="member" tooltip="Window getter.">getActiveWindow</ref>());</highlight></codeline>
+<codeline lineno="80"><highlight class="normal"><sp/><sp/>DO_EXPORT</highlight></codeline>
+<codeline lineno="81"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="group___window_management_1ga7f5c45f54f7b8e9d300a45ee3d33d95e" kindref="member">setActiveWindow</ref>(Window<sp/>w);</highlight></codeline>
+<codeline lineno="83"><highlight class="normal"><sp/><sp/>DO_EXPORT</highlight></codeline>
+<codeline lineno="84"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="group___window_management_1ga338a6964d1e52ea78b2f25766f6054ad" kindref="member" tooltip="Resize the specified window w with the following parameters.">resizeWindow</ref>(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>width,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>height,<sp/>Window<sp/>w<sp/>=<sp/><ref refid="group___window_management_1gab5f08c396a83e394df40da185d530a42" kindref="member" tooltip="Window getter.">getActiveWindow</ref>());</highlight></codeline>
+<codeline lineno="86" refid="group___window_management_1ga139e10a0099c79b95e148d2aa87e4eda" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="group___window_management_1ga338a6964d1e52ea78b2f25766f6054ad" kindref="member" tooltip="Resize the specified window w with the following parameters.">resizeWindow</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>Vector2i&amp;<sp/>sizes,<sp/>Window<sp/>w<sp/>=<sp/><ref refid="group___window_management_1gab5f08c396a83e394df40da185d530a42" kindref="member" tooltip="Window getter.">getActiveWindow</ref>())</highlight></codeline>
+<codeline lineno="87"><highlight class="normal"><sp/><sp/>{<sp/><ref refid="group___window_management_1ga338a6964d1e52ea78b2f25766f6054ad" kindref="member" tooltip="Resize the specified window w with the following parameters.">resizeWindow</ref>(sizes(0),<sp/>sizes(1),<sp/>w);<sp/>}</highlight></codeline>
+<codeline lineno="88"><highlight class="normal"></highlight></codeline>
+<codeline lineno="89"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>=======================================================================<sp/>//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="90"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>Temporizing<sp/>functions</highlight></codeline>
+<codeline lineno="92"><highlight class="comment"></highlight><highlight class="normal"><sp/><sp/>DO_EXPORT</highlight></codeline>
+<codeline lineno="93"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="group___window_management_1ga1f4b17862a64245cfc8615ee2815b064" kindref="member" tooltip="Wait msec milliseconds before the window resumes its drawing.">milliSleep</ref>(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>msec);</highlight></codeline>
+<codeline lineno="95"><highlight class="normal"><sp/><sp/>DO_EXPORT</highlight></codeline>
+<codeline lineno="96"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="group___window_management_1gad2a382b821da01b199aa816d087cd265" kindref="member" tooltip="Wait usec microseconds before the window resumes its drawing.">microSleep</ref>(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>usec);</highlight></codeline>
+<codeline lineno="97"><highlight class="normal"></highlight></codeline>
+<codeline lineno="98"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>=======================================================================<sp/>//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="99"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>I/O<sp/>control<sp/>functions</highlight></codeline>
+<codeline lineno="104"><highlight class="comment"></highlight><highlight class="normal"><sp/><sp/>DO_EXPORT</highlight></codeline>
+<codeline lineno="105"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="group___window_management_1ga5f65aa168357a4f932ac14bf3767af4f" kindref="member" tooltip="Wait for a click from the user.">getMouse</ref>(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal">&amp;<sp/>x,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal">&amp;<sp/><ref refid="group___channel_accessors_1gac90c52c5b3a7b2a7e3761e6e84f25778" kindref="member" tooltip="Mutable channel accessor.">y</ref>);</highlight></codeline>
+<codeline lineno="109" refid="group___window_management_1gaa1b23139f5681ebfe40610f79e70de4b" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="group___window_management_1ga5f65aa168357a4f932ac14bf3767af4f" kindref="member" tooltip="Wait for a click from the user.">getMouse</ref>(<ref refid="group___eigen_typedefs_1ga048a27763e58f682b1b91af86144f701" kindref="member" tooltip="Self-explanatory.">Point2i</ref>&amp;<sp/>p)</highlight></codeline>
+<codeline lineno="110"><highlight class="normal"><sp/><sp/>{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/><ref refid="group___window_management_1ga5f65aa168357a4f932ac14bf3767af4f" kindref="member" tooltip="Wait for a click from the user.">getMouse</ref>(p.x(),<sp/>p.y());<sp/>}</highlight></codeline>
+<codeline lineno="115"><highlight class="normal"><sp/><sp/>DO_EXPORT</highlight></codeline>
+<codeline lineno="116"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="group___window_management_1gac4b8452beab69863b0ccba5a91b55983" kindref="member" tooltip="Wait for a click from the user (only on the active window)">anyGetMouse</ref>(<ref refid="group___eigen_typedefs_1ga048a27763e58f682b1b91af86144f701" kindref="member" tooltip="Self-explanatory.">Point2i</ref>&amp;<sp/>p);</highlight></codeline>
+<codeline lineno="118" refid="group___window_management_1ga8330275bee3034e337eaeed23e2e49bf" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="group___window_management_1ga8330275bee3034e337eaeed23e2e49bf" kindref="member" tooltip="Wait for a click from the user only on the active window.">click</ref>()</highlight></codeline>
+<codeline lineno="119"><highlight class="normal"><sp/><sp/>{<sp/><ref refid="group___eigen_typedefs_1ga048a27763e58f682b1b91af86144f701" kindref="member" tooltip="Self-explanatory.">Point2i</ref><sp/>p;<sp/><ref refid="group___window_management_1ga5f65aa168357a4f932ac14bf3767af4f" kindref="member" tooltip="Wait for a click from the user.">getMouse</ref>(p);<sp/>}</highlight></codeline>
+<codeline lineno="121" refid="group___window_management_1ga0fda113cb57d325acd796bbb3bffc1e0" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="group___window_management_1ga0fda113cb57d325acd796bbb3bffc1e0" kindref="member" tooltip="Wait for a click from the user on any opened windows.">anyClick</ref>()</highlight></codeline>
+<codeline lineno="122"><highlight class="normal"><sp/><sp/>{<sp/><ref refid="group___eigen_typedefs_1ga048a27763e58f682b1b91af86144f701" kindref="member" tooltip="Self-explanatory.">Point2i</ref><sp/>p;<sp/><ref refid="group___window_management_1gac4b8452beab69863b0ccba5a91b55983" kindref="member" tooltip="Wait for a click from the user (only on the active window)">anyGetMouse</ref>(p);<sp/>}</highlight></codeline>
+<codeline lineno="126"><highlight class="normal"><sp/><sp/>DO_EXPORT</highlight></codeline>
+<codeline lineno="127"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="group___window_management_1ga04118983b3f8f6a27943ecf1cae68e84" kindref="member" tooltip="Wait for a hit key from the user.">getKey</ref>();</highlight></codeline>
+<codeline lineno="131"><highlight class="normal"><sp/><sp/>DO_EXPORT</highlight></codeline>
+<codeline lineno="132"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="group___window_management_1ga74599c45badec95e5a89d49c843ed09a" kindref="member" tooltip="Wait for a hit key from the user.">anyGetKey</ref>();</highlight></codeline>
+<codeline lineno="133"><highlight class="normal"></highlight></codeline>
+<codeline lineno="134"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>=======================================================================<sp/>//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="135"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>Window<sp/>event<sp/>management</highlight></codeline>
+<codeline lineno="137"><highlight class="comment"></highlight><highlight class="normal"><sp/><sp/>DO_EXPORT</highlight></codeline>
+<codeline lineno="138"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="group___window_management_1ga6c3fd81bfb6ea6b78349aa8cd0455061" kindref="member" tooltip="Listens to events sent from the active window.">getEvent</ref>(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>ms,<sp/>Event&amp;<sp/>e);</highlight></codeline>
+<codeline lineno="139"><highlight class="normal"></highlight></codeline>
+<codeline lineno="141"><highlight class="normal"></highlight></codeline>
+<codeline lineno="142"><highlight class="normal">}<sp/></highlight><highlight class="comment">/*<sp/>namespace<sp/>DO<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="143"><highlight class="normal"></highlight></codeline>
+<codeline lineno="144"><highlight class="normal"></highlight><highlight class="preprocessor">#endif<sp/></highlight><highlight class="comment">/*<sp/>DO_GRAPHICS_WINDOWCONTROL_HPP<sp/>*/</highlight><highlight class="preprocessor"></highlight></codeline>
+    </programlisting>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/WindowManagement.hpp"/>
+  </compounddef>
+</doxygen>

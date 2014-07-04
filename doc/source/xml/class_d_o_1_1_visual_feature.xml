@@ -1,0 +1,149 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="class_d_o_1_1_visual_feature" kind="class" prot="public" abstract="yes">
+    <compoundname>DO::VisualFeature</compoundname>
+    <derivedcompoundref refid="class_d_o_1_1_interest_point" prot="public" virt="non-virtual">InterestPoint</derivedcompoundref>
+    <includes refid="_feature_8hpp" local="no">Feature.hpp</includes>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_d_o_1_1_visual_feature_1ad093861747b49d50e2edf45b840de71c" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>VisualFeature</definition>
+        <argsstring>()</argsstring>
+        <name>VisualFeature</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Feature.hpp" line="30" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Feature.hpp" bodystart="30" bodyend="30"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_visual_feature_1a7bbf2f23fbbf94f6836e10cabe747dfb" prot="public" static="no" const="no" explicit="no" inline="yes" virt="virtual">
+        <type></type>
+        <definition>virtual ~VisualFeature</definition>
+        <argsstring>()</argsstring>
+        <name>~VisualFeature</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Feature.hpp" line="31" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Feature.hpp" bodystart="31" bodyend="31"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_visual_feature_1afed4f86b0662986f692edd2335acac75" prot="public" static="no" const="yes" explicit="no" inline="no" virt="pure-virtual">
+        <type>std::ostream &amp;</type>
+        <definition>virtual std::ostream&amp; print</definition>
+        <argsstring>(std::ostream &amp;os) const =0</argsstring>
+        <name>print</name>
+        <reimplementedby refid="class_d_o_1_1_interest_point_1af289b06f5eb5c7bcf6ae7ef4cc61c520">print</reimplementedby>
+        <reimplementedby refid="class_d_o_1_1_o_e_region_1af289b06f5eb5c7bcf6ae7ef4cc61c520">print</reimplementedby>
+        <param>
+          <type>std::ostream &amp;</type>
+          <declname>os</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Feature.hpp" line="32"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_visual_feature_1a1aa99ed23bd7769a018e8f03a435519c" prot="public" static="no" const="no" explicit="no" inline="no" virt="pure-virtual">
+        <type>std::istream &amp;</type>
+        <definition>virtual std::istream&amp; read</definition>
+        <argsstring>(std::istream &amp;in)=0</argsstring>
+        <name>read</name>
+        <reimplementedby refid="class_d_o_1_1_interest_point_1ab685cbd1cee5d00405e2777bdfe41c04">read</reimplementedby>
+        <reimplementedby refid="class_d_o_1_1_o_e_region_1ab685cbd1cee5d00405e2777bdfe41c04">read</reimplementedby>
+        <param>
+          <type>std::istream &amp;</type>
+          <declname>in</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Feature.hpp" line="33"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="friend">
+      <memberdef kind="friend" id="class_d_o_1_1_visual_feature_1a2bb46bec9410d44c45488bd43285c3aa" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>friend std::ostream &amp;</type>
+        <definition>std::ostream&amp; operator&lt;&lt;</definition>
+        <argsstring>(std::ostream &amp;out, const VisualFeature &amp;f)</argsstring>
+        <name>operator&lt;&lt;</name>
+        <param>
+          <type>std::ostream &amp;</type>
+          <declname>out</declname>
+        </param>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_visual_feature" kindref="compound">VisualFeature</ref> &amp;</type>
+          <declname>f</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Feature.hpp" line="35" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Feature.hpp" bodystart="34" bodyend="35"/>
+      </memberdef>
+      <memberdef kind="friend" id="class_d_o_1_1_visual_feature_1aad473cf7c0594136ac4899aff57bb704" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>friend std::istream &amp;</type>
+        <definition>std::istream&amp; operator&lt;&lt;</definition>
+        <argsstring>(std::istream &amp;in, VisualFeature &amp;f)</argsstring>
+        <name>operator&lt;&lt;</name>
+        <param>
+          <type>std::istream &amp;</type>
+          <declname>in</declname>
+        </param>
+        <param>
+          <type><ref refid="class_d_o_1_1_visual_feature" kindref="compound">VisualFeature</ref> &amp;</type>
+          <declname>f</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Feature.hpp" line="37" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Feature.hpp" bodystart="36" bodyend="37"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Abstract &apos;<ref refid="class_d_o_1_1_visual_feature" kindref="compound">VisualFeature</ref>&apos; class. </para>    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="644">
+        <label>VisualFeature</label>
+        <link refid="class_d_o_1_1_visual_feature"/>
+      </node>
+      <node id="645">
+        <label>InterestPoint</label>
+        <link refid="class_d_o_1_1_interest_point"/>
+        <childnode refid="644" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="646">
+        <label>OERegion</label>
+        <link refid="class_d_o_1_1_o_e_region"/>
+        <childnode refid="645" relation="public-inheritance">
+        </childnode>
+      </node>
+    </inheritancegraph>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Feature.hpp" line="28" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Feature.hpp" bodystart="28" bodyend="38"/>
+    <listofallmembers>
+      <member refid="class_d_o_1_1_visual_feature_1a2bb46bec9410d44c45488bd43285c3aa" prot="public" virt="non-virtual"><scope>DO::VisualFeature</scope><name>operator&lt;&lt;</name></member>
+      <member refid="class_d_o_1_1_visual_feature_1aad473cf7c0594136ac4899aff57bb704" prot="public" virt="non-virtual"><scope>DO::VisualFeature</scope><name>operator&lt;&lt;</name></member>
+      <member refid="class_d_o_1_1_visual_feature_1afed4f86b0662986f692edd2335acac75" prot="public" virt="pure-virtual"><scope>DO::VisualFeature</scope><name>print</name></member>
+      <member refid="class_d_o_1_1_visual_feature_1a1aa99ed23bd7769a018e8f03a435519c" prot="public" virt="pure-virtual"><scope>DO::VisualFeature</scope><name>read</name></member>
+      <member refid="class_d_o_1_1_visual_feature_1ad093861747b49d50e2edf45b840de71c" prot="public" virt="non-virtual"><scope>DO::VisualFeature</scope><name>VisualFeature</name></member>
+      <member refid="class_d_o_1_1_visual_feature_1a7bbf2f23fbbf94f6836e10cabe747dfb" prot="public" virt="virtual"><scope>DO::VisualFeature</scope><name>~VisualFeature</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

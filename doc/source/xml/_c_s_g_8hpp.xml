@@ -1,0 +1,153 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="_c_s_g_8hpp" kind="file">
+    <compoundname>CSG.hpp</compoundname>
+    <includes refid="_eigen_extension_8hpp" local="no">DO/Core/EigenExtension.hpp</includes>
+    <includedby refid="_objects_8hpp" local="no">C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects.hpp</includedby>
+    <incdepgraph>
+      <node id="1061">
+        <label>Eigen/Eigen</label>
+      </node>
+      <node id="1062">
+        <label>sstream</label>
+      </node>
+      <node id="1060">
+        <label>DO/Core/EigenExtension.hpp</label>
+        <link refid="_eigen_extension_8hpp"/>
+        <childnode refid="1061" relation="include">
+        </childnode>
+        <childnode refid="1062" relation="include">
+        </childnode>
+      </node>
+      <node id="1059">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/CSG.hpp</label>
+        <link refid="CSG.hpp"/>
+        <childnode refid="1060" relation="include">
+        </childnode>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="1065">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Graphics/DrawPolygon.hpp</label>
+        <link refid="_draw_polygon_8hpp_source"/>
+        <childnode refid="1066" relation="include">
+        </childnode>
+      </node>
+      <node id="1067">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry.hpp</label>
+        <link refid="_geometry_8hpp_source"/>
+      </node>
+      <node id="1064">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects.hpp</label>
+        <link refid="_objects_8hpp_source"/>
+        <childnode refid="1065" relation="include">
+        </childnode>
+        <childnode refid="1067" relation="include">
+        </childnode>
+      </node>
+      <node id="1066">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Graphics.hpp</label>
+        <link refid="_geometry_2_graphics_8hpp_source"/>
+        <childnode refid="1067" relation="include">
+        </childnode>
+      </node>
+      <node id="1063">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/CSG.hpp</label>
+        <link refid="CSG.hpp"/>
+        <childnode refid="1064" relation="include">
+        </childnode>
+      </node>
+    </invincdepgraph>
+    <innerclass refid="class_d_o_1_1_c_s_g_1_1_object" prot="public">DO::CSG::Object</innerclass>
+    <innerclass refid="class_d_o_1_1_c_s_g_1_1_singleton" prot="public">DO::CSG::Singleton</innerclass>
+    <innerclass refid="class_d_o_1_1_c_s_g_1_1_difference" prot="public">DO::CSG::Difference</innerclass>
+    <innerclass refid="class_d_o_1_1_c_s_g_1_1_union" prot="public">DO::CSG::Union</innerclass>
+    <innerclass refid="class_d_o_1_1_c_s_g_1_1_intersection" prot="public">DO::CSG::Intersection</innerclass>
+    <innernamespace refid="namespace_d_o">DO</innernamespace>
+    <innernamespace refid="namespace_d_o_1_1_c_s_g">DO::CSG</innernamespace>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="comment">//<sp/>==========================================================================<sp/>//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="comment">//<sp/>This<sp/>file<sp/>is<sp/>part<sp/>of<sp/>DO++,<sp/>a<sp/>basic<sp/>set<sp/>of<sp/>libraries<sp/>in<sp/>C++<sp/>for<sp/>computer<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight><highlight class="comment">//<sp/>vision.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="comment">//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Copyright<sp/>(C)<sp/>2013<sp/>David<sp/>Ok<sp/>&lt;david.ok8@gmail.com&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight><highlight class="comment">//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight><highlight class="comment">//<sp/>This<sp/>Source<sp/>Code<sp/>Form<sp/>is<sp/>subject<sp/>to<sp/>the<sp/>terms<sp/>of<sp/>the<sp/>Mozilla<sp/>Public<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight><highlight class="comment">//<sp/>License<sp/>v.<sp/>2.0.<sp/>If<sp/>a<sp/>copy<sp/>of<sp/>the<sp/>MPL<sp/>was<sp/>not<sp/>distributed<sp/>with<sp/>this<sp/>file,<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight><highlight class="comment">//<sp/>you<sp/>can<sp/>obtain<sp/>one<sp/>at<sp/>http://mozilla.org/MPL/2.0/.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight><highlight class="comment">//<sp/>==========================================================================<sp/>//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight><highlight class="preprocessor">#pragma<sp/>once</highlight></codeline>
+<codeline lineno="13"><highlight class="preprocessor"></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;<ref refid="_eigen_extension_8hpp" kindref="compound" tooltip="Eigen matrices and vector typedefs.">DO/Core/EigenExtension.hpp</ref>&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight></codeline>
+<codeline lineno="16"><highlight class="normal"></highlight><highlight class="keyword">namespace<sp/></highlight><highlight class="normal">DO<sp/>{<sp/></highlight><highlight class="keyword">namespace<sp/></highlight><highlight class="normal">CSG<sp/>{</highlight></codeline>
+<codeline lineno="17"><highlight class="normal"></highlight></codeline>
+<codeline lineno="18" refid="class_d_o_1_1_c_s_g_1_1_object" refkind="compound"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="class_d_o_1_1_c_s_g_1_1_object" kindref="compound">Object</ref></highlight></codeline>
+<codeline lineno="19"><highlight class="normal"><sp/><sp/>{</highlight></codeline>
+<codeline lineno="20"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="21"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">virtual</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>contains(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member" tooltip="Self-explanatory.">Point2d</ref>&amp;<sp/>p)<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>=<sp/>0;</highlight></codeline>
+<codeline lineno="22"><highlight class="normal"><sp/><sp/>};</highlight></codeline>
+<codeline lineno="23"><highlight class="normal"></highlight></codeline>
+<codeline lineno="24"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">template</highlight><highlight class="normal"><sp/>&lt;</highlight><highlight class="keyword">typename</highlight><highlight class="normal"><sp/>Obj&gt;</highlight></codeline>
+<codeline lineno="25" refid="class_d_o_1_1_c_s_g_1_1_singleton" refkind="compound"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="class_d_o_1_1_c_s_g_1_1_singleton" kindref="compound">Singleton</ref><sp/>:<sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_c_s_g_1_1_object" kindref="compound">Object</ref></highlight></codeline>
+<codeline lineno="26"><highlight class="normal"><sp/><sp/>{</highlight></codeline>
+<codeline lineno="27"><highlight class="normal"><sp/><sp/><sp/><sp/>Obj<sp/>obj_;</highlight></codeline>
+<codeline lineno="28"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="29"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">explicit</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_c_s_g_1_1_singleton" kindref="compound">Singleton</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>Obj&amp;<sp/>obj)<sp/>:<sp/>obj_(obj)<sp/>{}</highlight></codeline>
+<codeline lineno="30"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>contains(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member" tooltip="Self-explanatory.">Point2d</ref>&amp;<sp/>p)</highlight><highlight class="keyword"><sp/>const</highlight></codeline>
+<codeline lineno="31"><highlight class="keyword"><sp/><sp/><sp/><sp/></highlight><highlight class="normal">{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>inside(p,<sp/>obj_);<sp/>}</highlight></codeline>
+<codeline lineno="32"><highlight class="normal"><sp/><sp/>};</highlight></codeline>
+<codeline lineno="33"><highlight class="normal"></highlight></codeline>
+<codeline lineno="35" refid="class_d_o_1_1_c_s_g_1_1_difference" refkind="compound"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="class_d_o_1_1_c_s_g_1_1_difference" kindref="compound" tooltip="CSG object difference.">Difference</ref><sp/>:<sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_c_s_g_1_1_object" kindref="compound">Object</ref></highlight></codeline>
+<codeline lineno="36"><highlight class="normal"><sp/><sp/>{</highlight></codeline>
+<codeline lineno="37"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_c_s_g_1_1_object" kindref="compound">Object</ref><sp/>*o1_;</highlight></codeline>
+<codeline lineno="38"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_c_s_g_1_1_object" kindref="compound">Object</ref><sp/>*o2_;</highlight></codeline>
+<codeline lineno="39"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="40"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_c_s_g_1_1_difference" kindref="compound" tooltip="CSG object difference.">Difference</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_c_s_g_1_1_object" kindref="compound">Object</ref><sp/>*o1,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_c_s_g_1_1_object" kindref="compound">Object</ref><sp/>*o2)</highlight></codeline>
+<codeline lineno="41"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>:<sp/>o1_(o1),<sp/>o2_(o2)<sp/>{}</highlight></codeline>
+<codeline lineno="42"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>contains(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member" tooltip="Self-explanatory.">Point2d</ref>&amp;<sp/>p)</highlight><highlight class="keyword"><sp/>const</highlight></codeline>
+<codeline lineno="43"><highlight class="keyword"><sp/><sp/><sp/><sp/></highlight><highlight class="normal">{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>o1_-&gt;contains(p)<sp/>&amp;&amp;<sp/>!o2_-&gt;contains(p);<sp/>}</highlight></codeline>
+<codeline lineno="44"><highlight class="normal"><sp/><sp/>};<sp/><sp/></highlight></codeline>
+<codeline lineno="45"><highlight class="normal"></highlight></codeline>
+<codeline lineno="47" refid="class_d_o_1_1_c_s_g_1_1_union" refkind="compound"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="class_d_o_1_1_c_s_g_1_1_union" kindref="compound" tooltip="CSG object union.">Union</ref><sp/>:<sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_c_s_g_1_1_object" kindref="compound">Object</ref></highlight></codeline>
+<codeline lineno="48"><highlight class="normal"><sp/><sp/>{</highlight></codeline>
+<codeline lineno="49"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_c_s_g_1_1_object" kindref="compound">Object</ref><sp/>*o1_;</highlight></codeline>
+<codeline lineno="50"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_c_s_g_1_1_object" kindref="compound">Object</ref><sp/>*o2_;</highlight></codeline>
+<codeline lineno="51"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="52"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_c_s_g_1_1_union" kindref="compound" tooltip="CSG object union.">Union</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_c_s_g_1_1_object" kindref="compound">Object</ref><sp/>*o1,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_c_s_g_1_1_object" kindref="compound">Object</ref><sp/>*o2)</highlight></codeline>
+<codeline lineno="53"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>:<sp/>o1_(o1),<sp/>o2_(o2)<sp/>{}</highlight></codeline>
+<codeline lineno="54"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>contains(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member" tooltip="Self-explanatory.">Point2d</ref>&amp;<sp/>p)</highlight><highlight class="keyword"><sp/>const</highlight></codeline>
+<codeline lineno="55"><highlight class="keyword"><sp/><sp/><sp/><sp/></highlight><highlight class="normal">{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>o1_-&gt;contains(p)<sp/>||<sp/>o2_-&gt;contains(p);<sp/>}</highlight></codeline>
+<codeline lineno="56"><highlight class="normal"><sp/><sp/>};</highlight></codeline>
+<codeline lineno="57"><highlight class="normal"></highlight></codeline>
+<codeline lineno="59" refid="class_d_o_1_1_c_s_g_1_1_intersection" refkind="compound"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="class_d_o_1_1_c_s_g_1_1_intersection" kindref="compound" tooltip="CSG object intersection.">Intersection</ref><sp/>:<sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_c_s_g_1_1_object" kindref="compound">Object</ref></highlight></codeline>
+<codeline lineno="60"><highlight class="normal"><sp/><sp/>{</highlight></codeline>
+<codeline lineno="61"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_c_s_g_1_1_object" kindref="compound">Object</ref><sp/>*o1_;</highlight></codeline>
+<codeline lineno="62"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_c_s_g_1_1_object" kindref="compound">Object</ref><sp/>*o2_;</highlight></codeline>
+<codeline lineno="63"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="64"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_c_s_g_1_1_intersection" kindref="compound" tooltip="CSG object intersection.">Intersection</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_c_s_g_1_1_object" kindref="compound">Object</ref><sp/>*o1,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_c_s_g_1_1_object" kindref="compound">Object</ref><sp/>*o2)</highlight></codeline>
+<codeline lineno="65"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>:<sp/>o1_(o1),<sp/>o2_(o2)<sp/>{}</highlight></codeline>
+<codeline lineno="66"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>contains(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member" tooltip="Self-explanatory.">Point2d</ref>&amp;<sp/>p)</highlight><highlight class="keyword"><sp/>const</highlight></codeline>
+<codeline lineno="67"><highlight class="keyword"><sp/><sp/><sp/><sp/></highlight><highlight class="normal">{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>o1_-&gt;contains(p)<sp/>&amp;&amp;<sp/>o2_-&gt;contains(p);<sp/>}</highlight></codeline>
+<codeline lineno="68"><highlight class="normal"><sp/><sp/>};</highlight></codeline>
+<codeline lineno="69"><highlight class="normal"></highlight></codeline>
+<codeline lineno="71"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_c_s_g_1_1_difference" kindref="compound" tooltip="CSG object difference.">Difference</ref><sp/>operator-(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_c_s_g_1_1_object" kindref="compound">Object</ref>&amp;<sp/>o1,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_c_s_g_1_1_object" kindref="compound">Object</ref>&amp;<sp/>o2)</highlight></codeline>
+<codeline lineno="72"><highlight class="normal"><sp/><sp/>{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_c_s_g_1_1_difference" kindref="compound" tooltip="CSG object difference.">Difference</ref>(&amp;o1,<sp/>&amp;o2);<sp/>}</highlight></codeline>
+<codeline lineno="73"><highlight class="normal"></highlight></codeline>
+<codeline lineno="75"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/>Intersection<sp/>operator*(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>Object&amp;<sp/>o1,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>Object&amp;<sp/>o2)</highlight></codeline>
+<codeline lineno="76"><highlight class="normal"><sp/><sp/>{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>Intersection(&amp;o1,<sp/>&amp;o2);<sp/>}</highlight></codeline>
+<codeline lineno="77"><highlight class="normal"></highlight></codeline>
+<codeline lineno="79"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/>Union<sp/>operator+(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>Object&amp;<sp/>o1,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>Object&amp;<sp/>o2)</highlight></codeline>
+<codeline lineno="80"><highlight class="normal"><sp/><sp/>{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>Union(&amp;o1,<sp/>&amp;o2);<sp/>}</highlight></codeline>
+<codeline lineno="81"><highlight class="normal"></highlight></codeline>
+<codeline lineno="82"><highlight class="normal">}<sp/></highlight><highlight class="comment">/*<sp/>namespace<sp/>CSG<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="83"><highlight class="normal">}<sp/></highlight><highlight class="comment">/*<sp/>namespace<sp/>DO<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+    </programlisting>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/CSG.hpp"/>
+  </compounddef>
+</doxygen>

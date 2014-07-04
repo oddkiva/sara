@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="struct_d_o_1_1_meta_1_1_is_same" kind="struct" prot="public">
+    <compoundname>DO::Meta::IsSame</compoundname>
+    <includes refid="_meta_8hpp" local="no">Meta.hpp</includes>
+    <templateparamlist>
+      <param>
+        <type>typename T</type>
+      </param>
+      <param>
+        <type>typename <ref refid="struct_d_o_1_1_u" kindref="compound">U</ref></type>
+      </param>
+    </templateparamlist>
+      <sectiondef kind="public-static-attrib">
+      <memberdef kind="variable" id="struct_d_o_1_1_meta_1_1_is_same_1a11ddd051208250c32dc4985abcafa86d" prot="public" static="yes" mutable="no">
+        <type>const bool</type>
+        <definition>const bool value</definition>
+        <argsstring></argsstring>
+        <name>value</name>
+        <initializer>= false</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Default value. </para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Meta.hpp" line="108" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Meta.hpp" bodystart="108" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Type equality function. </para>    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Meta.hpp" line="108" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Meta.hpp" bodystart="108" bodyend="108"/>
+    <listofallmembers>
+      <member refid="struct_d_o_1_1_meta_1_1_is_same_1a11ddd051208250c32dc4985abcafa86d" prot="public" virt="non-virtual"><scope>DO::Meta::IsSame</scope><name>value</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

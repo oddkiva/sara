@@ -1,0 +1,53 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="struct_d_o_1_1_local_scale_space_min" kind="struct" prot="public">
+    <compoundname>DO::LocalScaleSpaceMin</compoundname>
+    <basecompoundref refid="struct_d_o_1_1_local_scale_space_extremum" prot="public" virt="non-virtual">LocalScaleSpaceExtremum&lt; std::less_equal, T &gt;</basecompoundref>
+    <includes refid="_extrema_8hpp" local="no">Extrema.hpp</includes>
+    <templateparamlist>
+      <param>
+        <type>typename T</type>
+      </param>
+    </templateparamlist>
+    <briefdescription>
+<para>Local scale-space minimum test. </para>    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="372">
+        <label>LocalScaleSpaceMin&lt; T &gt;</label>
+        <link refid="struct_d_o_1_1_local_scale_space_min"/>
+        <childnode refid="373" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="373">
+        <label>LocalScaleSpaceExtremum&lt; std::less_equal, T &gt;</label>
+        <link refid="struct_d_o_1_1_local_scale_space_extremum"/>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="376">
+        <label>CompareWithNeighborhood3&lt; std::less_equal, T &gt;</label>
+        <link refid="struct_d_o_1_1_compare_with_neighborhood3"/>
+      </node>
+      <node id="374">
+        <label>LocalScaleSpaceMin&lt; T &gt;</label>
+        <link refid="struct_d_o_1_1_local_scale_space_min"/>
+        <childnode refid="375" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="375">
+        <label>LocalScaleSpaceExtremum&lt; std::less_equal, T &gt;</label>
+        <link refid="struct_d_o_1_1_local_scale_space_extremum"/>
+        <childnode refid="376" relation="usage">
+          <edgelabel>compare_</edgelabel>
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Extrema.hpp" line="109" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Extrema.hpp" bodystart="109" bodyend="109"/>
+    <listofallmembers>
+      <member refid="struct_d_o_1_1_local_scale_space_extremum_1a2a09a4b49af049c30db35c0dbfb63924" prot="public" virt="non-virtual"><scope>DO::LocalScaleSpaceMin</scope><name>compare_</name></member>
+      <member refid="struct_d_o_1_1_local_scale_space_extremum_1ac8424dac52fbe061b8b8fe44c3c111a9" prot="public" virt="non-virtual"><scope>DO::LocalScaleSpaceMin</scope><name>operator()</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

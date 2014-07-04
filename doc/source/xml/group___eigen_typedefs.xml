@@ -1,0 +1,211 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="group___eigen_typedefs" kind="group">
+    <compoundname>EigenTypedefs</compoundname>
+    <title>Eigen Integration</title>
+    <innerclass refid="struct_d_o_1_1_lexicographical_order" prot="public">DO::LexicographicalOrder</innerclass>
+      <sectiondef kind="typedef">
+      <memberdef kind="typedef" id="group___eigen_typedefs_1ga048a27763e58f682b1b91af86144f701" prot="public" static="no">
+        <type>Vector2i</type>
+        <definition>typedef Vector2i Point2i</definition>
+        <argsstring></argsstring>
+        <name>Point2i</name>
+        <briefdescription>
+<para>Self-explanatory. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/EigenExtension.hpp" line="122" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/EigenExtension.hpp" bodystart="122" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="group___eigen_typedefs_1ga5242d6757cdeb6dee656cfe31ddd1e51" prot="public" static="no">
+        <type>Vector3i</type>
+        <definition>typedef Vector3i Point3i</definition>
+        <argsstring></argsstring>
+        <name>Point3i</name>
+        <briefdescription>
+<para>Self-explanatory. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/EigenExtension.hpp" line="123" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/EigenExtension.hpp" bodystart="123" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="group___eigen_typedefs_1ga882df170555d578871ee332dc170dd54" prot="public" static="no">
+        <type>Vector4i</type>
+        <definition>typedef Vector4i Point4i</definition>
+        <argsstring></argsstring>
+        <name>Point4i</name>
+        <briefdescription>
+<para>Self-explanatory. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/EigenExtension.hpp" line="124" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/EigenExtension.hpp" bodystart="124" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="group___eigen_typedefs_1ga02df8c02295a7722cc3f5b89e8137464" prot="public" static="no">
+        <type>Vector2f</type>
+        <definition>typedef Vector2f Point2f</definition>
+        <argsstring></argsstring>
+        <name>Point2f</name>
+        <briefdescription>
+<para>Self-explanatory. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/EigenExtension.hpp" line="127" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/EigenExtension.hpp" bodystart="127" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="group___eigen_typedefs_1gad660f7355dc0f792adc7d7717e9664cb" prot="public" static="no">
+        <type>Vector3f</type>
+        <definition>typedef Vector3f Point3f</definition>
+        <argsstring></argsstring>
+        <name>Point3f</name>
+        <briefdescription>
+<para>Self-explanatory. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/EigenExtension.hpp" line="128" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/EigenExtension.hpp" bodystart="128" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="group___eigen_typedefs_1gadaa2d084bca437f361ab101860e38a75" prot="public" static="no">
+        <type>Vector4f</type>
+        <definition>typedef Vector4f Point4f</definition>
+        <argsstring></argsstring>
+        <name>Point4f</name>
+        <briefdescription>
+<para>Self-explanatory. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/EigenExtension.hpp" line="129" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/EigenExtension.hpp" bodystart="129" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" prot="public" static="no">
+        <type>Vector2d</type>
+        <definition>typedef Vector2d Point2d</definition>
+        <argsstring></argsstring>
+        <name>Point2d</name>
+        <briefdescription>
+<para>Self-explanatory. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/EigenExtension.hpp" line="132" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/EigenExtension.hpp" bodystart="132" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="group___eigen_typedefs_1gaa979df133eaeb0d59bc4c11cc09324d1" prot="public" static="no">
+        <type>Vector3d</type>
+        <definition>typedef Vector3d Point3d</definition>
+        <argsstring></argsstring>
+        <name>Point3d</name>
+        <briefdescription>
+<para>Self-explanatory. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/EigenExtension.hpp" line="133" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/EigenExtension.hpp" bodystart="133" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="group___eigen_typedefs_1ga78b225dff8d9416f7c193bff95436d5e" prot="public" static="no">
+        <type>Vector4d</type>
+        <definition>typedef Vector4d Point4d</definition>
+        <argsstring></argsstring>
+        <name>Point4d</name>
+        <briefdescription>
+<para>Self-explanatory. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/EigenExtension.hpp" line="134" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/EigenExtension.hpp" bodystart="134" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="group___eigen_typedefs_1gacf9f5f0db3a36d553c338b4f6b0e108f" prot="public" static="no">
+        <type>Matrix&lt; unsigned char, 128, 1 &gt;</type>
+        <definition>typedef Matrix&lt;unsigned char, 128, 1&gt; Vector128ub</definition>
+        <argsstring></argsstring>
+        <name>Vector128ub</name>
+        <briefdescription>
+<para>128-dimensional integral vector type. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/EigenExtension.hpp" line="137" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/EigenExtension.hpp" bodystart="137" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="group___eigen_typedefs_1ga5af1d2cf882552fe7d1f0f8c673948ad" prot="public" static="no">
+        <type>Matrix&lt; float, 128, 1 &gt;</type>
+        <definition>typedef Matrix&lt;float, 128, 1&gt; Vector128f</definition>
+        <argsstring></argsstring>
+        <name>Vector128f</name>
+        <briefdescription>
+<para>128-dimensional single precision vector type. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/EigenExtension.hpp" line="140" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/EigenExtension.hpp" bodystart="140" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="func">
+      <memberdef kind="function" id="group___eigen_typedefs_1gaa5f91dc56407c46af18c9f6d478082c3" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename Derived</type>
+          </param>
+        </templateparamlist>
+        <type>std::istream &amp;</type>
+        <definition>std::istream&amp; DO::operator&gt;&gt;</definition>
+        <argsstring>(std::istream &amp;in, Eigen::MatrixBase&lt; Derived &gt; &amp;matrix)</argsstring>
+        <name>operator&gt;&gt;</name>
+        <param>
+          <type>std::istream &amp;</type>
+          <declname>in</declname>
+        </param>
+        <param>
+          <type>Eigen::MatrixBase&lt; Derived &gt; &amp;</type>
+          <declname>matrix</declname>
+        </param>
+        <briefdescription>
+<para>I/O. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/EigenExtension.hpp" line="145" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/EigenExtension.hpp" bodystart="144" bodyend="150"/>
+      </memberdef>
+      <memberdef kind="function" id="group___eigen_typedefs_1gac912aeec3438e2c9e82c38ebc38fd804" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename Derived</type>
+          </param>
+        </templateparamlist>
+        <type>bool</type>
+        <definition>bool DO::lexCompare</definition>
+        <argsstring>(const Eigen::MatrixBase&lt; Derived &gt; &amp;m1, const Eigen::MatrixBase&lt; Derived &gt; &amp;m2)</argsstring>
+        <name>lexCompare</name>
+        <param>
+          <type>const Eigen::MatrixBase&lt; Derived &gt; &amp;</type>
+          <declname>m1</declname>
+        </param>
+        <param>
+          <type>const Eigen::MatrixBase&lt; Derived &gt; &amp;</type>
+          <declname>m2</declname>
+        </param>
+        <briefdescription>
+<para>Lexicographical comparison function for matrices. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/EigenExtension.hpp" line="156" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/EigenExtension.hpp" bodystart="154" bodyend="165"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+  </compounddef>
+</doxygen>

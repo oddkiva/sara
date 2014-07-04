@@ -1,0 +1,70 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="struct_d_o_1_1_local_extremum" kind="struct" prot="public">
+    <compoundname>DO::LocalExtremum</compoundname>
+    <includes refid="_extrema_8hpp" local="no">Extrema.hpp</includes>
+    <templateparamlist>
+      <param>
+        <type>template&lt; typename &gt; class</type>
+        <declname>Compare</declname>
+        <defname>Compare</defname>
+      </param>
+      <param>
+        <type>typename</type>
+        <declname>T</declname>
+        <defname>T</defname>
+      </param>
+    </templateparamlist>
+      <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="struct_d_o_1_1_local_extremum_1a2a09a4b49af049c30db35c0dbfb63924" prot="public" static="no" mutable="no">
+        <type><ref refid="struct_d_o_1_1_compare_with_neighborhood3" kindref="compound">CompareWithNeighborhood3</ref>&lt; Compare, T &gt;</type>
+        <definition>CompareWithNeighborhood3&lt;Compare, T&gt; compare_</definition>
+        <argsstring></argsstring>
+        <name>compare_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Extrema.hpp" line="54" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Extrema.hpp" bodystart="54" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="struct_d_o_1_1_local_extremum_1a1a8daa7107c8bf0916fba55dc2cd1d6d" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool operator()</definition>
+        <argsstring>(int x, int y, const Image&lt; T &gt; &amp;I) const </argsstring>
+        <name>operator()</name>
+        <param>
+          <type>int</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_image" kindref="compound">Image</ref>&lt; T &gt; &amp;</type>
+          <declname>I</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Extrema.hpp" line="51" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Extrema.hpp" bodystart="50" bodyend="53"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Local spatial extremum test. </para>    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Extrema.hpp" line="49" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Extrema.hpp" bodystart="48" bodyend="55"/>
+    <listofallmembers>
+      <member refid="struct_d_o_1_1_local_extremum_1a2a09a4b49af049c30db35c0dbfb63924" prot="public" virt="non-virtual"><scope>DO::LocalExtremum</scope><name>compare_</name></member>
+      <member refid="struct_d_o_1_1_local_extremum_1a1a8daa7107c8bf0916fba55dc2cd1d6d" prot="public" virt="non-virtual"><scope>DO::LocalExtremum</scope><name>operator()</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

@@ -1,0 +1,1205 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="class_d_o_1_1_painting_window" kind="class" prot="public">
+    <compoundname>DO::PaintingWindow</compoundname>
+    <basecompoundref prot="public" virt="non-virtual">QWidget</basecompoundref>
+    <includes refid="_painting_window_8hpp" local="no">PaintingWindow.hpp</includes>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="class_d_o_1_1_painting_window_1a9ae2142b8fb161d444921d2a42a720a8" prot="private" static="no" mutable="no">
+        <type>QScrollArea *</type>
+        <definition>QScrollArea* scroll_area_</definition>
+        <argsstring></argsstring>
+        <name>scroll_area_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="130" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" bodystart="130" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_painting_window_1a97357f6593d2b96f0dc532c83d03c194" prot="private" static="no" mutable="no">
+        <type>QPixmap</type>
+        <definition>QPixmap pixmap_</definition>
+        <argsstring></argsstring>
+        <name>pixmap_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="131" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" bodystart="131" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_painting_window_1aecca9bfc52c152875deee0bb065998d3" prot="private" static="no" mutable="no">
+        <type>QPainter</type>
+        <definition>QPainter painter_</definition>
+        <argsstring></argsstring>
+        <name>painter_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="132" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" bodystart="132" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_painting_window_1a83847badf08d9bc35511d92024a6a8fd" prot="private" static="no" mutable="no">
+        <type>QTimer</type>
+        <definition>QTimer event_listening_timer_</definition>
+        <argsstring></argsstring>
+        <name>event_listening_timer_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="133" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" bodystart="133" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_d_o_1_1_painting_window_1a7ea1bce9e0027f7fc48c1c138564d84c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>PaintingWindow</definition>
+        <argsstring>(int width, int height, const QString &amp;windowTitle=&quot;DO++&quot;, int x=-1, int y=-1, QWidget *parent=0)</argsstring>
+        <name>PaintingWindow</name>
+        <param>
+          <type>int</type>
+          <declname>width</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>height</declname>
+        </param>
+        <param>
+          <type>const QString &amp;</type>
+          <declname>windowTitle</declname>
+          <defval>&quot;DO++&quot;</defval>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>x</declname>
+          <defval>-1</defval>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y</declname>
+          <defval>-1</defval>
+        </param>
+        <param>
+          <type>QWidget *</type>
+          <declname>parent</declname>
+          <defval>0</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="60"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_painting_window_1ae1c14bcabfd3af8c71bb47964f7c5509" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>QScrollArea *</type>
+        <definition>QScrollArea* scrollArea</definition>
+        <argsstring>()</argsstring>
+        <name>scrollArea</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="61" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" bodystart="61" bodyend="61"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_painting_window_1af5c8f9badba5576a7478937b3ab5628c" prot="public" static="no" const="yes" explicit="no" inline="no" virt="non-virtual">
+        <type>QString</type>
+        <definition>QString windowTitle</definition>
+        <argsstring>() const </argsstring>
+        <name>windowTitle</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="62"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_painting_window_1a971a06eb44d062213dea454cf065b247" prot="public" static="no" const="yes" explicit="no" inline="no" virt="non-virtual">
+        <type>int</type>
+        <definition>int x</definition>
+        <argsstring>() const </argsstring>
+        <name>x</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="63"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_painting_window_1a5db7363c1b8382ca9e9479dbf7cdc5f8" prot="public" static="no" const="yes" explicit="no" inline="no" virt="non-virtual">
+        <type>int</type>
+        <definition>int y</definition>
+        <argsstring>() const </argsstring>
+        <name>y</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="64"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-slot">
+      <memberdef kind="slot" id="class_d_o_1_1_painting_window_1a0d126d763b4c0a6250c9880354111ff4" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void drawPoint</definition>
+        <argsstring>(int x, int y, const QColor &amp;c)</argsstring>
+        <name>drawPoint</name>
+        <param>
+          <type>int</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>const QColor &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="68"/>
+      </memberdef>
+      <memberdef kind="slot" id="class_d_o_1_1_painting_window_1a1b8b8efe20acf5e73b7521b2a5a0d155" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void drawPoint</definition>
+        <argsstring>(const QPointF &amp;p, const QColor &amp;c)</argsstring>
+        <name>drawPoint</name>
+        <param>
+          <type>const QPointF &amp;</type>
+          <declname>p</declname>
+        </param>
+        <param>
+          <type>const QColor &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="69"/>
+      </memberdef>
+      <memberdef kind="slot" id="class_d_o_1_1_painting_window_1a3871290c78c7c8d13a6fb157dab84be2" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void drawLine</definition>
+        <argsstring>(int x1, int y1, int x2, int y2, const QColor &amp;c, int penWidth=1)</argsstring>
+        <name>drawLine</name>
+        <param>
+          <type>int</type>
+          <declname>x1</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y1</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>x2</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y2</declname>
+        </param>
+        <param>
+          <type>const QColor &amp;</type>
+          <declname>c</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>penWidth</declname>
+          <defval>1</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="71"/>
+      </memberdef>
+      <memberdef kind="slot" id="class_d_o_1_1_painting_window_1a9a95ae8faa3b0064053ed5683c5aab19" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void drawLine</definition>
+        <argsstring>(const QPointF &amp;p1, const QPointF &amp;p2, const QColor &amp;c, int penWidth=1)</argsstring>
+        <name>drawLine</name>
+        <param>
+          <type>const QPointF &amp;</type>
+          <declname>p1</declname>
+        </param>
+        <param>
+          <type>const QPointF &amp;</type>
+          <declname>p2</declname>
+        </param>
+        <param>
+          <type>const QColor &amp;</type>
+          <declname>c</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>penWidth</declname>
+          <defval>1</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="73"/>
+      </memberdef>
+      <memberdef kind="slot" id="class_d_o_1_1_painting_window_1a7051cc5fd5f19b9070b60e35dde2cdd9" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void drawCircle</definition>
+        <argsstring>(int xc, int yc, int r, const QColor &amp;c, int penWidth=1)</argsstring>
+        <name>drawCircle</name>
+        <param>
+          <type>int</type>
+          <declname>xc</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>yc</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>r</declname>
+        </param>
+        <param>
+          <type>const QColor &amp;</type>
+          <declname>c</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>penWidth</declname>
+          <defval>1</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="74"/>
+      </memberdef>
+      <memberdef kind="slot" id="class_d_o_1_1_painting_window_1a0bebeb558aed00b708493d8204000b57" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void drawCircle</definition>
+        <argsstring>(const QPointF &amp;center, float r, const QColor &amp;c, int penWidth=1)</argsstring>
+        <name>drawCircle</name>
+        <param>
+          <type>const QPointF &amp;</type>
+          <declname>center</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>r</declname>
+        </param>
+        <param>
+          <type>const QColor &amp;</type>
+          <declname>c</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>penWidth</declname>
+          <defval>1</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="76"/>
+      </memberdef>
+      <memberdef kind="slot" id="class_d_o_1_1_painting_window_1ab48b68294566b5ef4bce71a551a1a3fb" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void drawEllipse</definition>
+        <argsstring>(int x, int y, int w, int h, const QColor &amp;c, int penWidth=1)</argsstring>
+        <name>drawEllipse</name>
+        <param>
+          <type>int</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>w</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>h</declname>
+        </param>
+        <param>
+          <type>const QColor &amp;</type>
+          <declname>c</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>penWidth</declname>
+          <defval>1</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="78"/>
+      </memberdef>
+      <memberdef kind="slot" id="class_d_o_1_1_painting_window_1a5234523b6d222165c2ccd1dc1235bc71" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void drawEllipse</definition>
+        <argsstring>(const QPointF &amp;center, qreal r1, qreal r2, qreal degree, const QColor &amp;c, int penWidth=1)</argsstring>
+        <name>drawEllipse</name>
+        <param>
+          <type>const QPointF &amp;</type>
+          <declname>center</declname>
+        </param>
+        <param>
+          <type>qreal</type>
+          <declname>r1</declname>
+        </param>
+        <param>
+          <type>qreal</type>
+          <declname>r2</declname>
+        </param>
+        <param>
+          <type>qreal</type>
+          <declname>degree</declname>
+        </param>
+        <param>
+          <type>const QColor &amp;</type>
+          <declname>c</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>penWidth</declname>
+          <defval>1</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="80"/>
+      </memberdef>
+      <memberdef kind="slot" id="class_d_o_1_1_painting_window_1a0d31c2cf884bc801e677704a452fc092" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void drawRect</definition>
+        <argsstring>(int x, int y, int w, int h, const QColor &amp;c, int penWidth=1)</argsstring>
+        <name>drawRect</name>
+        <param>
+          <type>int</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>w</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>h</declname>
+        </param>
+        <param>
+          <type>const QColor &amp;</type>
+          <declname>c</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>penWidth</declname>
+          <defval>1</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="82"/>
+      </memberdef>
+      <memberdef kind="slot" id="class_d_o_1_1_painting_window_1afa8643e3c75e788691af0971bbd78e04" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void drawPoly</definition>
+        <argsstring>(const QPolygonF &amp;polygon, const QColor &amp;c, int width)</argsstring>
+        <name>drawPoly</name>
+        <param>
+          <type>const QPolygonF &amp;</type>
+          <declname>polygon</declname>
+        </param>
+        <param>
+          <type>const QColor &amp;</type>
+          <declname>c</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>width</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="83"/>
+      </memberdef>
+      <memberdef kind="slot" id="class_d_o_1_1_painting_window_1aa90428ff73ba9a1823126f7ba27439ab" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void drawText</definition>
+        <argsstring>(int x, int y, const QString &amp;s, const QColor &amp;c, int fontSize, qreal orientation, bool italic, bool bold, bool underline)</argsstring>
+        <name>drawText</name>
+        <param>
+          <type>int</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>const QString &amp;</type>
+          <declname>s</declname>
+        </param>
+        <param>
+          <type>const QColor &amp;</type>
+          <declname>c</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>fontSize</declname>
+        </param>
+        <param>
+          <type>qreal</type>
+          <declname>orientation</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>italic</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>bold</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>underline</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="85"/>
+      </memberdef>
+      <memberdef kind="slot" id="class_d_o_1_1_painting_window_1a71074e3ccd691b1ca5cc04270b2ecee8" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void drawArrow</definition>
+        <argsstring>(int x1, int y1, int x2, int y2, const QColor &amp;color, int arrowWidth, int arrowHeight, int style, int width)</argsstring>
+        <name>drawArrow</name>
+        <param>
+          <type>int</type>
+          <declname>x1</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y1</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>x2</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y2</declname>
+        </param>
+        <param>
+          <type>const QColor &amp;</type>
+          <declname>color</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>arrowWidth</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>arrowHeight</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>style</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>width</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="87"/>
+      </memberdef>
+      <memberdef kind="slot" id="class_d_o_1_1_painting_window_1a8a2b0d9ee239a064684d767e392f54f8" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void display</definition>
+        <argsstring>(const QImage &amp;image, int xoff=0, int yoff=0, double fact=1.)</argsstring>
+        <name>display</name>
+        <param>
+          <type>const QImage &amp;</type>
+          <declname>image</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>xoff</declname>
+          <defval>0</defval>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>yoff</declname>
+          <defval>0</defval>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>fact</declname>
+          <defval>1.</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="90"/>
+      </memberdef>
+      <memberdef kind="slot" id="class_d_o_1_1_painting_window_1a8a255a3cbc57a58081502343b981e011" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void fillCircle</definition>
+        <argsstring>(int x, int y, int r, const QColor &amp;c)</argsstring>
+        <name>fillCircle</name>
+        <param>
+          <type>int</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>r</declname>
+        </param>
+        <param>
+          <type>const QColor &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="92"/>
+      </memberdef>
+      <memberdef kind="slot" id="class_d_o_1_1_painting_window_1af23f5a16098bd15457909bfad4cb6da0" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void fillCircle</definition>
+        <argsstring>(const QPointF &amp;p, qreal r, const QColor &amp;c)</argsstring>
+        <name>fillCircle</name>
+        <param>
+          <type>const QPointF &amp;</type>
+          <declname>p</declname>
+        </param>
+        <param>
+          <type>qreal</type>
+          <declname>r</declname>
+        </param>
+        <param>
+          <type>const QColor &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="93"/>
+      </memberdef>
+      <memberdef kind="slot" id="class_d_o_1_1_painting_window_1a049b71d8961d194ebedfb090ca58680b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void fillEllipse</definition>
+        <argsstring>(int x, int y, int w, int h, const QColor &amp;c)</argsstring>
+        <name>fillEllipse</name>
+        <param>
+          <type>int</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>w</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>h</declname>
+        </param>
+        <param>
+          <type>const QColor &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="94"/>
+      </memberdef>
+      <memberdef kind="slot" id="class_d_o_1_1_painting_window_1abae47f4f659a578a13cd6a68a4dd64ba" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void fillEllipse</definition>
+        <argsstring>(const QPointF &amp;p, qreal rx, qreal ry, qreal degree, const QColor &amp;c)</argsstring>
+        <name>fillEllipse</name>
+        <param>
+          <type>const QPointF &amp;</type>
+          <declname>p</declname>
+        </param>
+        <param>
+          <type>qreal</type>
+          <declname>rx</declname>
+        </param>
+        <param>
+          <type>qreal</type>
+          <declname>ry</declname>
+        </param>
+        <param>
+          <type>qreal</type>
+          <declname>degree</declname>
+        </param>
+        <param>
+          <type>const QColor &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="96"/>
+      </memberdef>
+      <memberdef kind="slot" id="class_d_o_1_1_painting_window_1a3bd68bbe82c6c705bf58f9e86ae5702c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void fillPoly</definition>
+        <argsstring>(const QPolygonF &amp;polygon, const QColor &amp;c)</argsstring>
+        <name>fillPoly</name>
+        <param>
+          <type>const QPolygonF &amp;</type>
+          <declname>polygon</declname>
+        </param>
+        <param>
+          <type>const QColor &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="97"/>
+      </memberdef>
+      <memberdef kind="slot" id="class_d_o_1_1_painting_window_1a11e314c190027a1c4bf11d24027dfbd4" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void fillRect</definition>
+        <argsstring>(int x, int y, int w, int h, const QColor &amp;c)</argsstring>
+        <name>fillRect</name>
+        <param>
+          <type>int</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>w</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>h</declname>
+        </param>
+        <param>
+          <type>const QColor &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="98"/>
+      </memberdef>
+      <memberdef kind="slot" id="class_d_o_1_1_painting_window_1ac8bb3912a3ce86b15842e79d0b421204" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void clear</definition>
+        <argsstring>()</argsstring>
+        <name>clear</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="100"/>
+      </memberdef>
+      <memberdef kind="slot" id="class_d_o_1_1_painting_window_1a012338601cb5f258cb9e10a11c15afea" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void setAntialiasing</definition>
+        <argsstring>(bool on=true)</argsstring>
+        <name>setAntialiasing</name>
+        <param>
+          <type>bool</type>
+          <declname>on</declname>
+          <defval>true</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="102"/>
+      </memberdef>
+      <memberdef kind="slot" id="class_d_o_1_1_painting_window_1ae29eab5ad5147b234c346bb7e3dbd425" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void setTransparency</definition>
+        <argsstring>(bool on=true)</argsstring>
+        <name>setTransparency</name>
+        <param>
+          <type>bool</type>
+          <declname>on</declname>
+          <defval>true</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="103"/>
+      </memberdef>
+      <memberdef kind="slot" id="class_d_o_1_1_painting_window_1a476ff5751c04f3a88e037b396638dcbe" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void saveScreen</definition>
+        <argsstring>(const QString &amp;filename)</argsstring>
+        <name>saveScreen</name>
+        <param>
+          <type>const QString &amp;</type>
+          <declname>filename</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="105"/>
+      </memberdef>
+      <memberdef kind="slot" id="class_d_o_1_1_painting_window_1a7126c1ff9439892b2a2df3627f17df4a" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void resizeScreen</definition>
+        <argsstring>(int width, int height)</argsstring>
+        <name>resizeScreen</name>
+        <param>
+          <type>int</type>
+          <declname>width</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>height</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="107"/>
+      </memberdef>
+      <memberdef kind="slot" id="class_d_o_1_1_painting_window_1a0fbc37525f0506f77256b69d5009eccf" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void waitForEvent</definition>
+        <argsstring>(int ms)</argsstring>
+        <name>waitForEvent</name>
+        <param>
+          <type>int</type>
+          <declname>ms</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="110"/>
+      </memberdef>
+      <memberdef kind="slot" id="class_d_o_1_1_painting_window_1a8ca6be03a1706b85ffe8389dde2b771f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void eventListeningTimerStopped</definition>
+        <argsstring>()</argsstring>
+        <name>eventListeningTimerStopped</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="111"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="protected-func">
+      <memberdef kind="function" id="class_d_o_1_1_painting_window_1ae820c6a86f0a1908bf451f86db043489" prot="protected" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void mouseMoveEvent</definition>
+        <argsstring>(QMouseEvent *event)</argsstring>
+        <name>mouseMoveEvent</name>
+        <param>
+          <type>QMouseEvent *</type>
+          <declname>event</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="114"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_painting_window_1ad2272e344e46519f026cd02f419884f1" prot="protected" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void mousePressEvent</definition>
+        <argsstring>(QMouseEvent *event)</argsstring>
+        <name>mousePressEvent</name>
+        <param>
+          <type>QMouseEvent *</type>
+          <declname>event</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="115"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_painting_window_1a35226f6549add1ff837c65888fcd00fc" prot="protected" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void mouseReleaseEvent</definition>
+        <argsstring>(QMouseEvent *event)</argsstring>
+        <name>mouseReleaseEvent</name>
+        <param>
+          <type>QMouseEvent *</type>
+          <declname>event</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="116"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_painting_window_1adf2e9d5e456a754a5459e8435b0b094b" prot="protected" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void keyPressEvent</definition>
+        <argsstring>(QKeyEvent *event)</argsstring>
+        <name>keyPressEvent</name>
+        <param>
+          <type>QKeyEvent *</type>
+          <declname>event</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="117"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_painting_window_1a9e0db194f0850420e6bf556d821e6080" prot="protected" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void keyReleaseEvent</definition>
+        <argsstring>(QKeyEvent *event)</argsstring>
+        <name>keyReleaseEvent</name>
+        <param>
+          <type>QKeyEvent *</type>
+          <declname>event</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="118"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_painting_window_1accfb24f32254fb98c049727597a53956" prot="protected" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void paintEvent</definition>
+        <argsstring>(QPaintEvent *event)</argsstring>
+        <name>paintEvent</name>
+        <param>
+          <type>QPaintEvent *</type>
+          <declname>event</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="119"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="signal">
+      <memberdef kind="signal" id="class_d_o_1_1_painting_window_1aa284cd282d9c672d56291f539ad864c7" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void movedMouse</definition>
+        <argsstring>(int x, int y, Qt::MouseButtons buttons)</argsstring>
+        <name>movedMouse</name>
+        <param>
+          <type>int</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>Qt::MouseButtons</type>
+          <declname>buttons</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="122"/>
+      </memberdef>
+      <memberdef kind="signal" id="class_d_o_1_1_painting_window_1a211d59c0a6baf6072e762c542472efe6" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void pressedMouseButtons</definition>
+        <argsstring>(int x, int y, Qt::MouseButtons buttons)</argsstring>
+        <name>pressedMouseButtons</name>
+        <param>
+          <type>int</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>Qt::MouseButtons</type>
+          <declname>buttons</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="123"/>
+      </memberdef>
+      <memberdef kind="signal" id="class_d_o_1_1_painting_window_1aa6e288186f3b4d8668cbcb77d4d5cc71" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void releasedMouseButtons</definition>
+        <argsstring>(int x, int y, Qt::MouseButtons buttons)</argsstring>
+        <name>releasedMouseButtons</name>
+        <param>
+          <type>int</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>Qt::MouseButtons</type>
+          <declname>buttons</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="124"/>
+      </memberdef>
+      <memberdef kind="signal" id="class_d_o_1_1_painting_window_1af3120a375a321654553779cf030a9508" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void pressedKey</definition>
+        <argsstring>(int key)</argsstring>
+        <name>pressedKey</name>
+        <param>
+          <type>int</type>
+          <declname>key</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="125"/>
+      </memberdef>
+      <memberdef kind="signal" id="class_d_o_1_1_painting_window_1ac80bf1948c09a26181b72cb51f4ea4c3" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void releasedKey</definition>
+        <argsstring>(int key)</argsstring>
+        <name>releasedKey</name>
+        <param>
+          <type>int</type>
+          <declname>key</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="126"/>
+      </memberdef>
+      <memberdef kind="signal" id="class_d_o_1_1_painting_window_1a497371cbad118b80dc07aa5c288f2573" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void sendEvent</definition>
+        <argsstring>(Event e)</argsstring>
+        <name>sendEvent</name>
+        <param>
+          <type><ref refid="struct_d_o_1_1_event" kindref="compound">Event</ref></type>
+          <declname>e</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="127"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>QWidget-derived class on which we draw things. I choose not to use QGLWidget because of some weird viewing artifacts... Maybe later... </para>    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="456">
+        <label>PaintingWindow</label>
+        <link refid="class_d_o_1_1_painting_window"/>
+        <childnode refid="457" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="457">
+        <label>QWidget</label>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="458">
+        <label>PaintingWindow</label>
+        <link refid="class_d_o_1_1_painting_window"/>
+        <childnode refid="459" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="459">
+        <label>QWidget</label>
+      </node>
+    </collaborationgraph>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" line="53" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp" bodystart="52" bodyend="134"/>
+    <listofallmembers>
+      <member refid="class_d_o_1_1_painting_window_1ac8bb3912a3ce86b15842e79d0b421204" prot="public" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>clear</name></member>
+      <member refid="class_d_o_1_1_painting_window_1a8a2b0d9ee239a064684d767e392f54f8" prot="public" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>display</name></member>
+      <member refid="class_d_o_1_1_painting_window_1a71074e3ccd691b1ca5cc04270b2ecee8" prot="public" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>drawArrow</name></member>
+      <member refid="class_d_o_1_1_painting_window_1a7051cc5fd5f19b9070b60e35dde2cdd9" prot="public" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>drawCircle</name></member>
+      <member refid="class_d_o_1_1_painting_window_1a0bebeb558aed00b708493d8204000b57" prot="public" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>drawCircle</name></member>
+      <member refid="class_d_o_1_1_painting_window_1ab48b68294566b5ef4bce71a551a1a3fb" prot="public" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>drawEllipse</name></member>
+      <member refid="class_d_o_1_1_painting_window_1a5234523b6d222165c2ccd1dc1235bc71" prot="public" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>drawEllipse</name></member>
+      <member refid="class_d_o_1_1_painting_window_1a3871290c78c7c8d13a6fb157dab84be2" prot="public" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>drawLine</name></member>
+      <member refid="class_d_o_1_1_painting_window_1a9a95ae8faa3b0064053ed5683c5aab19" prot="public" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>drawLine</name></member>
+      <member refid="class_d_o_1_1_painting_window_1a0d126d763b4c0a6250c9880354111ff4" prot="public" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>drawPoint</name></member>
+      <member refid="class_d_o_1_1_painting_window_1a1b8b8efe20acf5e73b7521b2a5a0d155" prot="public" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>drawPoint</name></member>
+      <member refid="class_d_o_1_1_painting_window_1afa8643e3c75e788691af0971bbd78e04" prot="public" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>drawPoly</name></member>
+      <member refid="class_d_o_1_1_painting_window_1a0d31c2cf884bc801e677704a452fc092" prot="public" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>drawRect</name></member>
+      <member refid="class_d_o_1_1_painting_window_1aa90428ff73ba9a1823126f7ba27439ab" prot="public" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>drawText</name></member>
+      <member refid="class_d_o_1_1_painting_window_1a83847badf08d9bc35511d92024a6a8fd" prot="private" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>event_listening_timer_</name></member>
+      <member refid="class_d_o_1_1_painting_window_1a8ca6be03a1706b85ffe8389dde2b771f" prot="public" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>eventListeningTimerStopped</name></member>
+      <member refid="class_d_o_1_1_painting_window_1a8a255a3cbc57a58081502343b981e011" prot="public" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>fillCircle</name></member>
+      <member refid="class_d_o_1_1_painting_window_1af23f5a16098bd15457909bfad4cb6da0" prot="public" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>fillCircle</name></member>
+      <member refid="class_d_o_1_1_painting_window_1a049b71d8961d194ebedfb090ca58680b" prot="public" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>fillEllipse</name></member>
+      <member refid="class_d_o_1_1_painting_window_1abae47f4f659a578a13cd6a68a4dd64ba" prot="public" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>fillEllipse</name></member>
+      <member refid="class_d_o_1_1_painting_window_1a3bd68bbe82c6c705bf58f9e86ae5702c" prot="public" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>fillPoly</name></member>
+      <member refid="class_d_o_1_1_painting_window_1a11e314c190027a1c4bf11d24027dfbd4" prot="public" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>fillRect</name></member>
+      <member refid="class_d_o_1_1_painting_window_1adf2e9d5e456a754a5459e8435b0b094b" prot="protected" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>keyPressEvent</name></member>
+      <member refid="class_d_o_1_1_painting_window_1a9e0db194f0850420e6bf556d821e6080" prot="protected" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>keyReleaseEvent</name></member>
+      <member refid="class_d_o_1_1_painting_window_1ae820c6a86f0a1908bf451f86db043489" prot="protected" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>mouseMoveEvent</name></member>
+      <member refid="class_d_o_1_1_painting_window_1ad2272e344e46519f026cd02f419884f1" prot="protected" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>mousePressEvent</name></member>
+      <member refid="class_d_o_1_1_painting_window_1a35226f6549add1ff837c65888fcd00fc" prot="protected" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>mouseReleaseEvent</name></member>
+      <member refid="class_d_o_1_1_painting_window_1aa284cd282d9c672d56291f539ad864c7" prot="public" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>movedMouse</name></member>
+      <member refid="class_d_o_1_1_painting_window_1aecca9bfc52c152875deee0bb065998d3" prot="private" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>painter_</name></member>
+      <member refid="class_d_o_1_1_painting_window_1accfb24f32254fb98c049727597a53956" prot="protected" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>paintEvent</name></member>
+      <member refid="class_d_o_1_1_painting_window_1a7ea1bce9e0027f7fc48c1c138564d84c" prot="public" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>PaintingWindow</name></member>
+      <member refid="class_d_o_1_1_painting_window_1a97357f6593d2b96f0dc532c83d03c194" prot="private" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>pixmap_</name></member>
+      <member refid="class_d_o_1_1_painting_window_1af3120a375a321654553779cf030a9508" prot="public" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>pressedKey</name></member>
+      <member refid="class_d_o_1_1_painting_window_1a211d59c0a6baf6072e762c542472efe6" prot="public" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>pressedMouseButtons</name></member>
+      <member refid="class_d_o_1_1_painting_window_1ac80bf1948c09a26181b72cb51f4ea4c3" prot="public" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>releasedKey</name></member>
+      <member refid="class_d_o_1_1_painting_window_1aa6e288186f3b4d8668cbcb77d4d5cc71" prot="public" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>releasedMouseButtons</name></member>
+      <member refid="class_d_o_1_1_painting_window_1a7126c1ff9439892b2a2df3627f17df4a" prot="public" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>resizeScreen</name></member>
+      <member refid="class_d_o_1_1_painting_window_1a476ff5751c04f3a88e037b396638dcbe" prot="public" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>saveScreen</name></member>
+      <member refid="class_d_o_1_1_painting_window_1a9ae2142b8fb161d444921d2a42a720a8" prot="private" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>scroll_area_</name></member>
+      <member refid="class_d_o_1_1_painting_window_1ae1c14bcabfd3af8c71bb47964f7c5509" prot="public" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>scrollArea</name></member>
+      <member refid="class_d_o_1_1_painting_window_1a497371cbad118b80dc07aa5c288f2573" prot="public" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>sendEvent</name></member>
+      <member refid="class_d_o_1_1_painting_window_1a012338601cb5f258cb9e10a11c15afea" prot="public" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>setAntialiasing</name></member>
+      <member refid="class_d_o_1_1_painting_window_1ae29eab5ad5147b234c346bb7e3dbd425" prot="public" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>setTransparency</name></member>
+      <member refid="class_d_o_1_1_painting_window_1a0fbc37525f0506f77256b69d5009eccf" prot="public" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>waitForEvent</name></member>
+      <member refid="class_d_o_1_1_painting_window_1af5c8f9badba5576a7478937b3ab5628c" prot="public" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>windowTitle</name></member>
+      <member refid="class_d_o_1_1_painting_window_1a971a06eb44d062213dea454cf065b247" prot="public" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>x</name></member>
+      <member refid="class_d_o_1_1_painting_window_1a5db7363c1b8382ca9e9479dbf7cdc5f8" prot="public" virt="non-virtual"><scope>DO::PaintingWindow</scope><name>y</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

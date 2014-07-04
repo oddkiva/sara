@@ -1,0 +1,244 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="_polynomial_roots_8hpp" kind="file">
+    <compoundname>PolynomialRoots.hpp</compoundname>
+    <includes refid="_polynomial_8hpp" local="no">DO/Geometry/Tools/Polynomial.hpp</includes>
+    <includes local="no">complex</includes>
+    <includedby refid="_tools_8hpp" local="no">C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools.hpp</includedby>
+    <incdepgraph>
+      <node id="1217">
+        <label>cmath</label>
+      </node>
+      <node id="1214">
+        <label>Eigen/Eigen</label>
+      </node>
+      <node id="1211">
+        <label>DO/Geometry/Tools/Polynomial.hpp</label>
+        <link refid="_polynomial_8hpp_source"/>
+        <childnode refid="1212" relation="include">
+        </childnode>
+        <childnode refid="1218" relation="include">
+        </childnode>
+      </node>
+      <node id="1216">
+        <label>DO/Core/StaticAssert.hpp</label>
+        <link refid="_static_assert_8hpp"/>
+      </node>
+      <node id="1215">
+        <label>sstream</label>
+      </node>
+      <node id="1213">
+        <label>DO/Core/EigenExtension.hpp</label>
+        <link refid="_eigen_extension_8hpp"/>
+        <childnode refid="1214" relation="include">
+        </childnode>
+        <childnode refid="1215" relation="include">
+        </childnode>
+      </node>
+      <node id="1210">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/PolynomialRoots.hpp</label>
+        <link refid="PolynomialRoots.hpp"/>
+        <childnode refid="1211" relation="include">
+        </childnode>
+        <childnode refid="1219" relation="include">
+        </childnode>
+      </node>
+      <node id="1212">
+        <label>DO/Geometry/Tools/Utilities.hpp</label>
+        <link refid="_geometry_2_tools_2_utilities_8hpp_source"/>
+        <childnode refid="1213" relation="include">
+        </childnode>
+        <childnode refid="1216" relation="include">
+        </childnode>
+        <childnode refid="1217" relation="include">
+        </childnode>
+      </node>
+      <node id="1219">
+        <label>complex</label>
+      </node>
+      <node id="1218">
+        <label>algorithm</label>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="1222">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry.hpp</label>
+        <link refid="_geometry_8hpp_source"/>
+      </node>
+      <node id="1221">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools.hpp</label>
+        <link refid="_tools_8hpp_source"/>
+        <childnode refid="1222" relation="include">
+        </childnode>
+      </node>
+      <node id="1220">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/PolynomialRoots.hpp</label>
+        <link refid="PolynomialRoots.hpp"/>
+        <childnode refid="1221" relation="include">
+        </childnode>
+      </node>
+    </invincdepgraph>
+    <innernamespace refid="namespace_d_o">DO</innernamespace>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="comment">//<sp/>==========================================================================<sp/>//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="comment">//<sp/>This<sp/>file<sp/>is<sp/>part<sp/>of<sp/>DO++,<sp/>a<sp/>basic<sp/>set<sp/>of<sp/>libraries<sp/>in<sp/>C++<sp/>for<sp/>computer</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight><highlight class="comment">//<sp/>vision.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="comment">//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Copyright<sp/>(C)<sp/>2014<sp/>David<sp/>Ok<sp/>&lt;david.ok8@gmail.com&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight><highlight class="comment">//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight><highlight class="comment">//<sp/>This<sp/>Source<sp/>Code<sp/>Form<sp/>is<sp/>subject<sp/>to<sp/>the<sp/>terms<sp/>of<sp/>the<sp/>Mozilla<sp/>Public</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight><highlight class="comment">//<sp/>License<sp/>v.<sp/>2.0.<sp/>If<sp/>a<sp/>copy<sp/>of<sp/>the<sp/>MPL<sp/>was<sp/>not<sp/>distributed<sp/>with<sp/>this<sp/>file,</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight><highlight class="comment">//<sp/>you<sp/>can<sp/>obtain<sp/>one<sp/>at<sp/>http://mozilla.org/MPL/2.0/.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight><highlight class="comment">//<sp/>==========================================================================<sp/>//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight><highlight class="preprocessor">#pragma<sp/>once</highlight></codeline>
+<codeline lineno="13"><highlight class="preprocessor"></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;DO/Geometry/Tools/Polynomial.hpp&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;complex&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="16"><highlight class="normal"></highlight></codeline>
+<codeline lineno="17"><highlight class="normal"></highlight><highlight class="keyword">namespace<sp/></highlight><highlight class="normal">DO<sp/>{</highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight></codeline>
+<codeline lineno="19"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">template</highlight><highlight class="normal"><sp/>&lt;</highlight><highlight class="keyword">typename</highlight><highlight class="normal"><sp/>T&gt;</highlight></codeline>
+<codeline lineno="20"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>roots(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_polynomial" kindref="compound">Polynomial&lt;T, 2&gt;</ref>&amp;<sp/>P,<sp/>std::complex&lt;T&gt;&amp;<sp/>x1,</highlight></codeline>
+<codeline lineno="21"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>std::complex&lt;T&gt;&amp;<sp/>x2,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal">&amp;<sp/>realRoots)</highlight></codeline>
+<codeline lineno="22"><highlight class="normal"><sp/><sp/>{</highlight></codeline>
+<codeline lineno="23"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>T&amp;<sp/>a<sp/>=<sp/>P[2];</highlight></codeline>
+<codeline lineno="24"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>T&amp;<sp/>b<sp/>=<sp/>P[1];</highlight></codeline>
+<codeline lineno="25"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>T&amp;<sp/>c<sp/>=<sp/>P[0];</highlight></codeline>
+<codeline lineno="26"><highlight class="normal"><sp/><sp/><sp/><sp/>T<sp/>delta<sp/>=<sp/>b*b-4*a*c;</highlight></codeline>
+<codeline lineno="27"><highlight class="normal"><sp/><sp/><sp/><sp/>x1<sp/>=<sp/>(-b<sp/>-<sp/>sqrt(std::complex&lt;T&gt;(delta)))<sp/>/<sp/>(2*a);</highlight></codeline>
+<codeline lineno="28"><highlight class="normal"><sp/><sp/><sp/><sp/>x2<sp/>=<sp/>(-b<sp/>+<sp/>sqrt(std::complex&lt;T&gt;(delta)))<sp/>/<sp/>(2*a);</highlight></codeline>
+<codeline lineno="29"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal">(delta<sp/>&gt;=<sp/>0)</highlight></codeline>
+<codeline lineno="30"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>realRoots<sp/>=<sp/></highlight><highlight class="keyword">true</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="31"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="32"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>realRoots<sp/>=<sp/></highlight><highlight class="keyword">false</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="33"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="34"><highlight class="normal"></highlight></codeline>
+<codeline lineno="35"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>Discriminant<sp/>precision:<sp/>1e-3.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="36"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">template</highlight><highlight class="normal"><sp/>&lt;</highlight><highlight class="keyword">typename</highlight><highlight class="normal"><sp/>T&gt;</highlight></codeline>
+<codeline lineno="37"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>roots(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_polynomial" kindref="compound">Polynomial&lt;T, 3&gt;</ref>&amp;<sp/>P,<sp/>std::complex&lt;T&gt;&amp;<sp/>z1,<sp/></highlight></codeline>
+<codeline lineno="38"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>std::complex&lt;T&gt;&amp;<sp/>z2,<sp/>std::complex&lt;T&gt;&amp;<sp/>z3,</highlight></codeline>
+<codeline lineno="39"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>eps<sp/>=<sp/>1e-3)</highlight></codeline>
+<codeline lineno="40"><highlight class="normal"><sp/><sp/>{</highlight></codeline>
+<codeline lineno="41"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>T<sp/>pi<sp/>=<sp/>M_PI;</highlight><highlight class="comment">//3.14159265358979323846;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="42"><highlight class="normal"></highlight></codeline>
+<codeline lineno="43"><highlight class="normal"><sp/><sp/><sp/><sp/>T<sp/>a<sp/>=<sp/>P[3],<sp/>b<sp/>=<sp/>P[2],<sp/>c<sp/>=<sp/>P[1],<sp/>d<sp/>=<sp/>P[0];</highlight></codeline>
+<codeline lineno="44"><highlight class="normal"><sp/><sp/><sp/><sp/>b<sp/>/=<sp/>a;</highlight></codeline>
+<codeline lineno="45"><highlight class="normal"><sp/><sp/><sp/><sp/>c<sp/>/=<sp/>a;</highlight></codeline>
+<codeline lineno="46"><highlight class="normal"><sp/><sp/><sp/><sp/>d<sp/>/=<sp/>a;</highlight></codeline>
+<codeline lineno="47"><highlight class="normal"><sp/><sp/><sp/><sp/>a<sp/>=<sp/>1.0;</highlight></codeline>
+<codeline lineno="48"><highlight class="normal"></highlight></codeline>
+<codeline lineno="49"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>Cardano&apos;s<sp/>formula.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="50"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>T<sp/>p<sp/>=<sp/>(3*c-b*b)/3;</highlight></codeline>
+<codeline lineno="51"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>T<sp/>q<sp/>=<sp/>(-9*c*b<sp/>+<sp/>27*d<sp/>+<sp/>2*b*b*b)/27;</highlight></codeline>
+<codeline lineno="52"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>T<sp/>delta<sp/>=<sp/>q*q<sp/>+<sp/>4*p*p*p/27;</highlight></codeline>
+<codeline lineno="53"><highlight class="normal"></highlight></codeline>
+<codeline lineno="54"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal">(delta<sp/>&lt;<sp/>-eps)</highlight></codeline>
+<codeline lineno="55"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight></codeline>
+<codeline lineno="56"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>T<sp/>theta<sp/>=<sp/>std::acos(<sp/>-q/2*std::sqrt(27/(-p*p*p))<sp/>)/3.0;</highlight></codeline>
+<codeline lineno="57"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>z1<sp/>=<sp/>2*std::sqrt(-p/3)*std::cos(<sp/>theta<sp/>);</highlight></codeline>
+<codeline lineno="58"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>z2<sp/>=<sp/>2*std::sqrt(-p/3)*std::cos(<sp/>theta<sp/>+<sp/>2*pi/3);</highlight></codeline>
+<codeline lineno="59"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>z3<sp/>=<sp/>2*std::sqrt(-p/3)*std::cos(<sp/>theta<sp/>+<sp/>4*pi/3);</highlight></codeline>
+<codeline lineno="60"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="61"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal">(delta<sp/>&lt;=<sp/>eps)</highlight></codeline>
+<codeline lineno="62"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight></codeline>
+<codeline lineno="63"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>z1<sp/>=<sp/>3*q/p;</highlight></codeline>
+<codeline lineno="64"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>z2<sp/>=<sp/>z3<sp/>=<sp/>-3*q/(2*p);</highlight></codeline>
+<codeline lineno="65"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="66"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="67"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight></codeline>
+<codeline lineno="68"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>T<sp/>r1<sp/>=<sp/>(-q+std::sqrt(delta))/2.0;</highlight></codeline>
+<codeline lineno="69"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>T<sp/>r2<sp/>=<sp/>(-q-std::sqrt(delta))/2.0;</highlight></codeline>
+<codeline lineno="70"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>T<sp/><ref refid="group___channel_accessors_1ga056f2dcf2b4d1976e50bf20547617584" kindref="member" tooltip="Mutable channel accessor.">u</ref><sp/>=<sp/>r1<sp/>&lt;<sp/>0<sp/>?<sp/>-std::pow(-r1,<sp/>1.0/3.0)<sp/>:<sp/>std::pow(r1,<sp/>1.0/3.0);</highlight></codeline>
+<codeline lineno="71"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>T<sp/><ref refid="group___channel_accessors_1ga1dd2524c5b8d3db33137eedb803fc2ce" kindref="member" tooltip="Mutable channel accessor.">v</ref><sp/>=<sp/>r2<sp/>&lt;<sp/>0<sp/>?<sp/>-std::pow(-r2,<sp/>1.0/3.0)<sp/>:<sp/>std::pow(r2,<sp/>1.0/3.0);</highlight></codeline>
+<codeline lineno="72"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>std::complex&lt;T&gt;<sp/>j(-0.5,<sp/>std::sqrt(3.0)*0.5);</highlight></codeline>
+<codeline lineno="73"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>z1<sp/>=<sp/>u<sp/>+<sp/><ref refid="group___channel_accessors_1ga1dd2524c5b8d3db33137eedb803fc2ce" kindref="member" tooltip="Mutable channel accessor.">v</ref>;</highlight></codeline>
+<codeline lineno="74"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>z2<sp/>=<sp/>j*u+std::conj(j)*<ref refid="group___channel_accessors_1ga1dd2524c5b8d3db33137eedb803fc2ce" kindref="member" tooltip="Mutable channel accessor.">v</ref>;</highlight></codeline>
+<codeline lineno="75"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>z3<sp/>=<sp/>j*j*u+std::conj(j*j)*<ref refid="group___channel_accessors_1ga1dd2524c5b8d3db33137eedb803fc2ce" kindref="member" tooltip="Mutable channel accessor.">v</ref>;</highlight></codeline>
+<codeline lineno="76"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="77"><highlight class="normal"></highlight></codeline>
+<codeline lineno="78"><highlight class="normal"><sp/><sp/><sp/><sp/>z1<sp/>-=<sp/>b/(3*a);</highlight></codeline>
+<codeline lineno="79"><highlight class="normal"><sp/><sp/><sp/><sp/>z2<sp/>-=<sp/>b/(3*a);</highlight></codeline>
+<codeline lineno="80"><highlight class="normal"><sp/><sp/><sp/><sp/>z3<sp/>-=<sp/>b/(3*a);</highlight></codeline>
+<codeline lineno="81"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="82"><highlight class="normal"></highlight></codeline>
+<codeline lineno="83"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>Involves<sp/>the<sp/>precision<sp/>of<sp/>the<sp/>cubic<sp/>equation<sp/>solver:<sp/>(1e-3.)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="84"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">template</highlight><highlight class="normal"><sp/>&lt;</highlight><highlight class="keyword">typename</highlight><highlight class="normal"><sp/>T&gt;</highlight></codeline>
+<codeline lineno="85"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>roots(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_polynomial" kindref="compound">Polynomial&lt;T, 4&gt;</ref>&amp;<sp/>P,<sp/>std::complex&lt;T&gt;&amp;<sp/>z1,</highlight></codeline>
+<codeline lineno="86"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>std::complex&lt;T&gt;&amp;<sp/>z2,<sp/>std::complex&lt;T&gt;&amp;<sp/>z3,<sp/>std::complex&lt;T&gt;&amp;<sp/>z4,</highlight></codeline>
+<codeline lineno="87"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>eps<sp/>=<sp/>1e-6)</highlight></codeline>
+<codeline lineno="88"><highlight class="normal"><sp/><sp/>{</highlight></codeline>
+<codeline lineno="89"><highlight class="normal"><sp/><sp/><sp/><sp/>T<sp/>a4<sp/>=<sp/>P[4],<sp/>a3<sp/>=<sp/>P[3],<sp/>a2<sp/>=<sp/>P[2],<sp/>a1<sp/>=<sp/>P[1],<sp/>a0<sp/>=<sp/>P[0];</highlight></codeline>
+<codeline lineno="90"><highlight class="normal"><sp/><sp/><sp/><sp/>a3<sp/>/=<sp/>a4;<sp/>a2/=<sp/>a4;<sp/>a1<sp/>/=<sp/>a4;<sp/>a0<sp/>/=<sp/>a4;<sp/>a4<sp/>=<sp/>1.0;</highlight></codeline>
+<codeline lineno="91"><highlight class="normal"></highlight></codeline>
+<codeline lineno="92"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="class_polynomial" kindref="compound">Polynomial&lt;T, 3&gt;</ref><sp/>Q;</highlight></codeline>
+<codeline lineno="93"><highlight class="normal"><sp/><sp/><sp/><sp/>Q[3]<sp/>=<sp/>1.0;</highlight></codeline>
+<codeline lineno="94"><highlight class="normal"><sp/><sp/><sp/><sp/>Q[2]<sp/>=<sp/>-a2;</highlight></codeline>
+<codeline lineno="95"><highlight class="normal"><sp/><sp/><sp/><sp/>Q[1]<sp/>=<sp/>a1*a3<sp/>-<sp/>4.0*a0;</highlight></codeline>
+<codeline lineno="96"><highlight class="normal"><sp/><sp/><sp/><sp/>Q[0]<sp/>=<sp/>4.0*a2*a0<sp/>-<sp/>a1*a1<sp/>-<sp/>a3*a3*a0;</highlight></codeline>
+<codeline lineno="97"><highlight class="normal"></highlight></codeline>
+<codeline lineno="98"><highlight class="normal"><sp/><sp/><sp/><sp/>std::complex&lt;T&gt;<sp/>y1,<sp/>y2,<sp/>y3;</highlight></codeline>
+<codeline lineno="99"><highlight class="normal"><sp/><sp/><sp/><sp/>roots&lt;T&gt;(Q,<sp/>y1,<sp/>y2,<sp/>y3,<sp/>eps);</highlight></codeline>
+<codeline lineno="100"><highlight class="normal"></highlight></codeline>
+<codeline lineno="101"><highlight class="normal"><sp/><sp/><sp/><sp/>T<sp/>yr<sp/>=<sp/>std::real(y1);</highlight></codeline>
+<codeline lineno="102"><highlight class="normal"><sp/><sp/><sp/><sp/>T<sp/>yi<sp/>=<sp/>std::abs(std::imag(y1));</highlight></codeline>
+<codeline lineno="103"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal">(yi<sp/>&gt;<sp/>std::abs(std::imag(y2)))</highlight></codeline>
+<codeline lineno="104"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight></codeline>
+<codeline lineno="105"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>yr<sp/>=<sp/>std::real(y2);</highlight></codeline>
+<codeline lineno="106"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>yi<sp/>=<sp/>std::abs(std::imag(y2));</highlight></codeline>
+<codeline lineno="107"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="108"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal">(yi<sp/>&gt;<sp/>std::abs(std::imag(y3)))</highlight></codeline>
+<codeline lineno="109"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight></codeline>
+<codeline lineno="110"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>yr<sp/>=<sp/>std::real(y3);</highlight></codeline>
+<codeline lineno="111"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>yi<sp/>=<sp/>std::abs(std::imag(y3));</highlight></codeline>
+<codeline lineno="112"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="113"><highlight class="normal"></highlight></codeline>
+<codeline lineno="114"><highlight class="normal"><sp/><sp/><sp/><sp/>std::complex&lt;T&gt;<sp/>radicand<sp/>=<sp/>a3*a3/4.0<sp/>-<sp/>a2<sp/>+<sp/>yr;</highlight></codeline>
+<codeline lineno="115"><highlight class="normal"><sp/><sp/><sp/><sp/>std::complex&lt;T&gt;<sp/>R(<sp/>std::sqrt(radicand)<sp/>);</highlight></codeline>
+<codeline lineno="116"><highlight class="normal"><sp/><sp/><sp/><sp/>std::complex&lt;T&gt;<sp/>D,<sp/>E;</highlight></codeline>
+<codeline lineno="117"><highlight class="normal"></highlight></codeline>
+<codeline lineno="118"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal">(abs(R)<sp/>&gt;<sp/>0)</highlight></codeline>
+<codeline lineno="119"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight></codeline>
+<codeline lineno="120"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>D<sp/>=<sp/>std::sqrt(<sp/>3.0*a3*a3/4.0<sp/>-<sp/>R*R<sp/>-<sp/>2.0*a2<sp/>+<sp/>(4.0*a3*a2<sp/>-<sp/>8.0*a1<sp/>-<sp/>a3*a3*a3)/(4.0*R)<sp/>);</highlight></codeline>
+<codeline lineno="121"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>E<sp/>=<sp/>std::sqrt(<sp/>3.0*a3*a3/4.0<sp/>-<sp/>R*R<sp/>-<sp/>2.0*a2<sp/>-<sp/>(4.0*a3*a2<sp/>-<sp/>8.0*a1<sp/>-<sp/>a3*a3*a3)/(4.0*R)<sp/>);</highlight></codeline>
+<codeline lineno="122"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="123"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="124"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight></codeline>
+<codeline lineno="125"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>D<sp/>=<sp/>std::sqrt(<sp/>3.0*a3*a3/4.0<sp/>-<sp/>2.0*a2<sp/>+<sp/>2.0*std::sqrt(yr*yr<sp/>-<sp/>4.0*a0)<sp/>);</highlight></codeline>
+<codeline lineno="126"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>E<sp/>=<sp/>std::sqrt(<sp/>3.0*a3*a3/4.0<sp/>-<sp/>2.0*a2<sp/>-<sp/>2.0*std::sqrt(yr*yr<sp/>-<sp/>4.0*a0)<sp/>);</highlight></codeline>
+<codeline lineno="127"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="128"><highlight class="normal"></highlight></codeline>
+<codeline lineno="129"><highlight class="normal"><sp/><sp/><sp/><sp/>z1<sp/>=<sp/><sp/>R/2.0<sp/>+<sp/>D/2.0;</highlight></codeline>
+<codeline lineno="130"><highlight class="normal"><sp/><sp/><sp/><sp/>z2<sp/>=<sp/><sp/>R/2.0<sp/>-<sp/>D/2.0;</highlight></codeline>
+<codeline lineno="131"><highlight class="normal"><sp/><sp/><sp/><sp/>z3<sp/>=<sp/>-R/2.0<sp/>+<sp/>E/2.0;</highlight></codeline>
+<codeline lineno="132"><highlight class="normal"><sp/><sp/><sp/><sp/>z4<sp/>=<sp/>-R/2.0<sp/>-<sp/>E/2.0;</highlight></codeline>
+<codeline lineno="133"><highlight class="normal"></highlight></codeline>
+<codeline lineno="134"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>Check<sp/>Viete&apos;s<sp/>formula.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="135"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">/*double<sp/>p<sp/>=<sp/>a2<sp/>-<sp/>3*a3*a3/8;</highlight></codeline>
+<codeline lineno="136"><highlight class="comment"><sp/><sp/><sp/><sp/>double<sp/>q<sp/>=<sp/>a1<sp/>-<sp/>a2*a3/2<sp/>+<sp/>a3*a3*a3/8;</highlight></codeline>
+<codeline lineno="137"><highlight class="comment"><sp/><sp/><sp/><sp/>double<sp/>r<sp/>=<sp/>a0<sp/>-<sp/>a1*a3/4<sp/>+<sp/>a2*a3*a3/16<sp/>-<sp/>3*a3*a3*a3*a3/256;</highlight></codeline>
+<codeline lineno="138"><highlight class="comment"></highlight></codeline>
+<codeline lineno="139"><highlight class="comment"><sp/><sp/><sp/><sp/>cout<sp/>&lt;&lt;<sp/>&quot;-2p<sp/>=<sp/>&quot;<sp/>&lt;&lt;<sp/>-2*p<sp/>&lt;&lt;<sp/>endl;</highlight></codeline>
+<codeline lineno="140"><highlight class="comment"><sp/><sp/><sp/><sp/>cout<sp/>&lt;&lt;<sp/>pow(z1,2)<sp/>+<sp/>pow(z2,2)<sp/>+<sp/>pow(z3,2)<sp/>+<sp/>pow(z4,2)<sp/>&lt;&lt;<sp/>endl;</highlight></codeline>
+<codeline lineno="141"><highlight class="comment"><sp/><sp/><sp/><sp/>cout<sp/>&lt;&lt;<sp/>&quot;-3*q<sp/>=<sp/>&quot;<sp/>&lt;&lt;<sp/>-3*q<sp/>&lt;&lt;<sp/>endl;</highlight></codeline>
+<codeline lineno="142"><highlight class="comment"><sp/><sp/><sp/><sp/>cout<sp/>&lt;&lt;<sp/>pow(z1,3)<sp/>+<sp/>pow(z2,3)<sp/>+<sp/>pow(z3,3)<sp/>+<sp/>pow(z4,3)<sp/>&lt;&lt;<sp/>endl;</highlight></codeline>
+<codeline lineno="143"><highlight class="comment"><sp/><sp/><sp/><sp/>cout<sp/>&lt;&lt;<sp/>&quot;2p^2<sp/>-<sp/>4r<sp/>=<sp/>&quot;<sp/>&lt;&lt;<sp/>2*p*p<sp/>-<sp/>4*r<sp/>&lt;&lt;<sp/>endl;</highlight></codeline>
+<codeline lineno="144"><highlight class="comment"><sp/><sp/><sp/><sp/>cout<sp/>&lt;&lt;<sp/>pow(z1,4)<sp/>+<sp/>pow(z2,4)<sp/>+<sp/>pow(z3,4)<sp/>+<sp/>pow(z4,4)<sp/>&lt;&lt;<sp/>endl;</highlight></codeline>
+<codeline lineno="145"><highlight class="comment"><sp/><sp/><sp/><sp/>cout<sp/>&lt;&lt;<sp/>&quot;5pq<sp/>=<sp/>&quot;<sp/>&lt;&lt;<sp/>5*p*q<sp/>&lt;&lt;<sp/>endl;</highlight></codeline>
+<codeline lineno="146"><highlight class="comment"><sp/><sp/><sp/><sp/>cout<sp/>&lt;&lt;<sp/>pow(z1,5)<sp/>+<sp/>pow(z2,5)<sp/>+<sp/>pow(z3,5)<sp/>+<sp/>pow(z4,5)<sp/>&lt;&lt;<sp/>endl;*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="147"><highlight class="normal"></highlight></codeline>
+<codeline lineno="148"><highlight class="normal"><sp/><sp/><sp/><sp/>z1<sp/>-=<sp/>a3/4;</highlight></codeline>
+<codeline lineno="149"><highlight class="normal"><sp/><sp/><sp/><sp/>z2<sp/>-=<sp/>a3/4;</highlight></codeline>
+<codeline lineno="150"><highlight class="normal"><sp/><sp/><sp/><sp/>z3<sp/>-=<sp/>a3/4;</highlight></codeline>
+<codeline lineno="151"><highlight class="normal"><sp/><sp/><sp/><sp/>z4<sp/>-=<sp/>a3/4;</highlight></codeline>
+<codeline lineno="152"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="153"><highlight class="normal"></highlight></codeline>
+<codeline lineno="154"><highlight class="normal">}<sp/></highlight><highlight class="comment">/*<sp/>namespace<sp/>DO<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+    </programlisting>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/PolynomialRoots.hpp"/>
+  </compounddef>
+</doxygen>

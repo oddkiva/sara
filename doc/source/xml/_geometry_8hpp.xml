@@ -1,0 +1,473 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="_geometry_8hpp" kind="file">
+    <compoundname>Geometry.hpp</compoundname>
+    <includes refid="_tools_8hpp" local="no">DO/Geometry/Tools.hpp</includes>
+    <includes refid="_objects_8hpp" local="no">DO/Geometry/Objects.hpp</includes>
+    <includes refid="_algorithms_8hpp" local="no">DO/Geometry/Algorithms.hpp</includes>
+    <includes refid="_geometry_2_graphics_8hpp" local="no">DO/Geometry/Graphics.hpp</includes>
+    <incdepgraph>
+      <node id="784">
+        <label>DO/Defines.hpp</label>
+        <link refid="_defines_8hpp_source"/>
+      </node>
+      <node id="797">
+        <label>Graphics/ImageDraw.hpp</label>
+        <link refid="_image_draw_8hpp"/>
+      </node>
+      <node id="782">
+        <label>DO/Geometry/Graphics/DrawPolygon.hpp</label>
+        <link refid="_draw_polygon_8hpp_source"/>
+        <childnode refid="783" relation="include">
+        </childnode>
+        <childnode refid="759" relation="include">
+        </childnode>
+        <childnode refid="763" relation="include">
+        </childnode>
+        <childnode refid="800" relation="include">
+        </childnode>
+      </node>
+      <node id="765">
+        <label>DO/Geometry/Objects/Triangle.hpp</label>
+        <link refid="_triangle_8hpp_source"/>
+        <childnode refid="746" relation="include">
+        </childnode>
+        <childnode refid="764" relation="include">
+        </childnode>
+      </node>
+      <node id="790">
+        <label>iterator</label>
+      </node>
+      <node id="743">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry.hpp</label>
+        <link refid="Geometry.hpp"/>
+        <childnode refid="744" relation="include">
+        </childnode>
+        <childnode refid="759" relation="include">
+        </childnode>
+        <childnode refid="775" relation="include">
+        </childnode>
+        <childnode refid="781" relation="include">
+        </childnode>
+      </node>
+      <node id="744">
+        <label>DO/Geometry/Tools.hpp</label>
+        <link refid="_tools_8hpp_source"/>
+        <childnode refid="745" relation="include">
+        </childnode>
+        <childnode refid="751" relation="include">
+        </childnode>
+        <childnode refid="752" relation="include">
+        </childnode>
+        <childnode refid="754" relation="include">
+        </childnode>
+        <childnode refid="756" relation="include">
+        </childnode>
+        <childnode refid="758" relation="include">
+        </childnode>
+      </node>
+      <node id="776">
+        <label>DO/Geometry/Algorithms/ConvexHull.hpp</label>
+        <link refid="_convex_hull_8hpp_source"/>
+        <childnode refid="764" relation="include">
+        </childnode>
+      </node>
+      <node id="759">
+        <label>DO/Geometry/Objects.hpp</label>
+        <link refid="_objects_8hpp_source"/>
+        <childnode refid="760" relation="include">
+        </childnode>
+        <childnode refid="761" relation="include">
+        </childnode>
+        <childnode refid="764" relation="include">
+        </childnode>
+        <childnode refid="765" relation="include">
+        </childnode>
+        <childnode refid="766" relation="include">
+        </childnode>
+        <childnode refid="767" relation="include">
+        </childnode>
+        <childnode refid="768" relation="include">
+        </childnode>
+        <childnode refid="771" relation="include">
+        </childnode>
+        <childnode refid="772" relation="include">
+        </childnode>
+        <childnode refid="773" relation="include">
+        </childnode>
+        <childnode refid="774" relation="include">
+        </childnode>
+      </node>
+      <node id="788">
+        <label>MultiArray.hpp</label>
+        <link refid="_multi_array_8hpp"/>
+        <childnode refid="789" relation="include">
+        </childnode>
+        <childnode refid="770" relation="include">
+        </childnode>
+        <childnode refid="791" relation="include">
+        </childnode>
+      </node>
+      <node id="768">
+        <label>DO/Geometry/Objects/Cone.hpp</label>
+        <link refid="_cone_8hpp_source"/>
+        <childnode refid="746" relation="include">
+        </childnode>
+        <childnode refid="769" relation="include">
+        </childnode>
+        <childnode refid="755" relation="include">
+        </childnode>
+      </node>
+      <node id="750">
+        <label>cmath</label>
+      </node>
+      <node id="780">
+        <label>DO/Core/StdVectorHelpers.hpp</label>
+        <link refid="_std_vector_helpers_8hpp"/>
+        <childnode refid="763" relation="include">
+        </childnode>
+      </node>
+      <node id="762">
+        <label>stdexcept</label>
+      </node>
+      <node id="791">
+        <label>numeric</label>
+      </node>
+      <node id="771">
+        <label>DO/Geometry/Objects/Cube.hpp</label>
+        <link refid="_cube_8hpp_source"/>
+      </node>
+      <node id="747">
+        <label>Eigen/Eigen</label>
+      </node>
+      <node id="777">
+        <label>DO/Geometry/Algorithms/EllipseIntersection.hpp</label>
+        <link refid="_ellipse_intersection_8hpp_source"/>
+        <childnode refid="767" relation="include">
+        </childnode>
+        <childnode refid="763" relation="include">
+        </childnode>
+        <childnode refid="750" relation="include">
+        </childnode>
+      </node>
+      <node id="800">
+        <label>string</label>
+      </node>
+      <node id="779">
+        <label>DO/Geometry/Algorithms/RamerDouglasPeucker.hpp</label>
+        <link refid="_ramer_douglas_peucker_8hpp_source"/>
+        <childnode refid="746" relation="include">
+        </childnode>
+        <childnode refid="780" relation="include">
+        </childnode>
+      </node>
+      <node id="754">
+        <label>DO/Geometry/Tools/Polynomial.hpp</label>
+        <link refid="_polynomial_8hpp_source"/>
+        <childnode refid="745" relation="include">
+        </childnode>
+        <childnode refid="755" relation="include">
+        </childnode>
+      </node>
+      <node id="785">
+        <label>DO/Core/Image.hpp</label>
+        <link refid="_image_8hpp"/>
+        <childnode refid="786" relation="include">
+        </childnode>
+        <childnode refid="788" relation="include">
+        </childnode>
+      </node>
+      <node id="799">
+        <label>fstream</label>
+      </node>
+      <node id="801">
+        <label>Graphics/Draw3D.hpp</label>
+        <link refid="_draw3_d_8hpp"/>
+      </node>
+      <node id="789">
+        <label>Locator.hpp</label>
+        <link refid="_locator_8hpp"/>
+        <childnode refid="749" relation="include">
+        </childnode>
+        <childnode refid="787" relation="include">
+        </childnode>
+        <childnode refid="746" relation="include">
+        </childnode>
+        <childnode refid="790" relation="include">
+        </childnode>
+        <childnode refid="770" relation="include">
+        </childnode>
+      </node>
+      <node id="751">
+        <label>DO/Geometry/Tools/Metric.hpp</label>
+        <link refid="_metric_8hpp_source"/>
+        <childnode refid="747" relation="include">
+        </childnode>
+      </node>
+      <node id="767">
+        <label>DO/Geometry/Objects/Ellipse.hpp</label>
+        <link refid="_ellipse_8hpp_source"/>
+        <childnode refid="750" relation="include">
+        </childnode>
+        <childnode refid="746" relation="include">
+        </childnode>
+        <childnode refid="766" relation="include">
+        </childnode>
+      </node>
+      <node id="793">
+        <label>Graphics/GraphicsApplication.hpp</label>
+        <link refid="_graphics_application_8hpp"/>
+      </node>
+      <node id="802">
+        <label>Graphics/GraphicsViewCommands.hpp</label>
+        <link refid="_graphics_view_commands_8hpp"/>
+      </node>
+      <node id="769">
+        <label>DO/Core/DebugUtilities.hpp</label>
+        <link refid="_debug_utilities_8hpp"/>
+        <childnode refid="770" relation="include">
+        </childnode>
+      </node>
+      <node id="760">
+        <label>DO/Geometry/Objects/LineSegment.hpp</label>
+        <link refid="_line_segment_8hpp_source"/>
+        <childnode refid="746" relation="include">
+        </childnode>
+      </node>
+      <node id="792">
+        <label>Graphics/Events.hpp</label>
+        <link refid="_events_8hpp_source"/>
+        <childnode refid="746" relation="include">
+        </childnode>
+      </node>
+      <node id="764">
+        <label>DO/Geometry/Objects/Polygon.hpp</label>
+        <link refid="_polygon_8hpp_source"/>
+        <childnode refid="758" relation="include">
+        </childnode>
+        <childnode refid="763" relation="include">
+        </childnode>
+      </node>
+      <node id="787">
+        <label>Meta.hpp</label>
+        <link refid="_meta_8hpp"/>
+      </node>
+      <node id="798">
+        <label>Graphics/Mesh.hpp</label>
+        <link refid="_mesh_8hpp"/>
+        <childnode refid="746" relation="include">
+        </childnode>
+        <childnode refid="799" relation="include">
+        </childnode>
+        <childnode refid="770" relation="include">
+        </childnode>
+        <childnode refid="763" relation="include">
+        </childnode>
+        <childnode refid="800" relation="include">
+        </childnode>
+      </node>
+      <node id="763">
+        <label>vector</label>
+      </node>
+      <node id="758">
+        <label>DO/Geometry/Tools/Projective.hpp</label>
+        <link refid="_projective_8hpp_source"/>
+        <childnode refid="746" relation="include">
+        </childnode>
+      </node>
+      <node id="749">
+        <label>DO/Core/StaticAssert.hpp</label>
+        <link refid="_static_assert_8hpp"/>
+      </node>
+      <node id="796">
+        <label>Graphics/ImageIO.hpp</label>
+        <link refid="_graphics_2_image_i_o_8hpp"/>
+      </node>
+      <node id="748">
+        <label>sstream</label>
+      </node>
+      <node id="773">
+        <label>DO/Geometry/Objects/Sphere.hpp</label>
+        <link refid="_sphere_8hpp_source"/>
+      </node>
+      <node id="795">
+        <label>Graphics/PaintingCommands.hpp</label>
+        <link refid="_painting_commands_8hpp"/>
+      </node>
+      <node id="746">
+        <label>DO/Core/EigenExtension.hpp</label>
+        <link refid="_eigen_extension_8hpp"/>
+        <childnode refid="747" relation="include">
+        </childnode>
+        <childnode refid="748" relation="include">
+        </childnode>
+      </node>
+      <node id="778">
+        <label>DO/Geometry/Algorithms/SutherlandHodgman.hpp</label>
+        <link refid="_sutherland_hodgman_8hpp_source"/>
+        <childnode refid="746" relation="include">
+        </childnode>
+        <childnode refid="745" relation="include">
+        </childnode>
+        <childnode refid="764" relation="include">
+        </childnode>
+      </node>
+      <node id="761">
+        <label>DO/Geometry/Objects/BBox.hpp</label>
+        <link refid="_b_box_8hpp_source"/>
+        <childnode refid="762" relation="include">
+        </childnode>
+        <childnode refid="746" relation="include">
+        </childnode>
+        <childnode refid="763" relation="include">
+        </childnode>
+      </node>
+      <node id="756">
+        <label>DO/Geometry/Tools/PolynomialRoots.hpp</label>
+        <link refid="_polynomial_roots_8hpp_source"/>
+        <childnode refid="754" relation="include">
+        </childnode>
+        <childnode refid="757" relation="include">
+        </childnode>
+      </node>
+      <node id="770">
+        <label>iostream</label>
+      </node>
+      <node id="766">
+        <label>DO/Geometry/Objects/Quad.hpp</label>
+        <link refid="_quad_8hpp_source"/>
+        <childnode refid="746" relation="include">
+        </childnode>
+        <childnode refid="764" relation="include">
+        </childnode>
+        <childnode refid="761" relation="include">
+        </childnode>
+      </node>
+      <node id="775">
+        <label>DO/Geometry/Algorithms.hpp</label>
+        <link refid="_algorithms_8hpp_source"/>
+        <childnode refid="776" relation="include">
+        </childnode>
+        <childnode refid="777" relation="include">
+        </childnode>
+        <childnode refid="778" relation="include">
+        </childnode>
+        <childnode refid="779" relation="include">
+        </childnode>
+      </node>
+      <node id="794">
+        <label>Graphics/WindowManagement.hpp</label>
+        <link refid="_window_management_8hpp"/>
+        <childnode refid="792" relation="include">
+        </childnode>
+      </node>
+      <node id="786">
+        <label>Color.hpp</label>
+        <link refid="_color_8hpp"/>
+        <childnode refid="787" relation="include">
+        </childnode>
+        <childnode refid="749" relation="include">
+        </childnode>
+        <childnode refid="746" relation="include">
+        </childnode>
+      </node>
+      <node id="752">
+        <label>DO/Geometry/Tools/Conic.hpp</label>
+        <link refid="_conic_8hpp_source"/>
+        <childnode refid="753" relation="include">
+        </childnode>
+      </node>
+      <node id="745">
+        <label>DO/Geometry/Tools/Utilities.hpp</label>
+        <link refid="_geometry_2_tools_2_utilities_8hpp_source"/>
+        <childnode refid="746" relation="include">
+        </childnode>
+        <childnode refid="749" relation="include">
+        </childnode>
+        <childnode refid="750" relation="include">
+        </childnode>
+      </node>
+      <node id="781">
+        <label>DO/Geometry/Graphics.hpp</label>
+        <link refid="_geometry_2_graphics_8hpp_source"/>
+        <childnode refid="782" relation="include">
+        </childnode>
+      </node>
+      <node id="753">
+        <label>DO/Geometry/Tools/MatrixBasedObject.hpp</label>
+        <link refid="_matrix_based_object_8hpp_source"/>
+        <childnode refid="746" relation="include">
+        </childnode>
+      </node>
+      <node id="757">
+        <label>complex</label>
+      </node>
+      <node id="755">
+        <label>algorithm</label>
+      </node>
+      <node id="783">
+        <label>DO/Graphics.hpp</label>
+        <link refid="_graphics_8hpp"/>
+        <childnode refid="784" relation="include">
+        </childnode>
+        <childnode refid="785" relation="include">
+        </childnode>
+        <childnode refid="792" relation="include">
+        </childnode>
+        <childnode refid="793" relation="include">
+        </childnode>
+        <childnode refid="794" relation="include">
+        </childnode>
+        <childnode refid="795" relation="include">
+        </childnode>
+        <childnode refid="796" relation="include">
+        </childnode>
+        <childnode refid="797" relation="include">
+        </childnode>
+        <childnode refid="798" relation="include">
+        </childnode>
+        <childnode refid="801" relation="include">
+        </childnode>
+        <childnode refid="802" relation="include">
+        </childnode>
+      </node>
+      <node id="772">
+        <label>DO/Geometry/Objects/HalfSpace.hpp</label>
+        <link refid="_half_space_8hpp_source"/>
+      </node>
+      <node id="774">
+        <label>DO/Geometry/Objects/CSG.hpp</label>
+        <link refid="_c_s_g_8hpp_source"/>
+        <childnode refid="746" relation="include">
+        </childnode>
+      </node>
+    </incdepgraph>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="comment">//<sp/>==========================================================================<sp/>//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="comment">//<sp/>This<sp/>file<sp/>is<sp/>part<sp/>of<sp/>DO++,<sp/>a<sp/>basic<sp/>set<sp/>of<sp/>libraries<sp/>in<sp/>C++<sp/>for<sp/>computer<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight><highlight class="comment">//<sp/>vision.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="comment">//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Copyright<sp/>(C)<sp/>2013<sp/>David<sp/>Ok<sp/>&lt;david.ok8@gmail.com&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight><highlight class="comment">//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight><highlight class="comment">//<sp/>This<sp/>Source<sp/>Code<sp/>Form<sp/>is<sp/>subject<sp/>to<sp/>the<sp/>terms<sp/>of<sp/>the<sp/>Mozilla<sp/>Public<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight><highlight class="comment">//<sp/>License<sp/>v.<sp/>2.0.<sp/>If<sp/>a<sp/>copy<sp/>of<sp/>the<sp/>MPL<sp/>was<sp/>not<sp/>distributed<sp/>with<sp/>this<sp/>file,<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight><highlight class="comment">//<sp/>you<sp/>can<sp/>obtain<sp/>one<sp/>at<sp/>http://mozilla.org/MPL/2.0/.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight><highlight class="comment">//<sp/>==========================================================================<sp/>//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight><highlight class="preprocessor">#ifndef<sp/>DO_GEOMETRY_HPP</highlight></codeline>
+<codeline lineno="13"><highlight class="preprocessor"></highlight><highlight class="preprocessor">#define<sp/>DO_GEOMETRY_HPP</highlight></codeline>
+<codeline lineno="14"><highlight class="preprocessor"></highlight></codeline>
+<codeline lineno="16"><highlight class="preprocessor">#include<sp/>&lt;DO/Geometry/Tools.hpp&gt;</highlight></codeline>
+<codeline lineno="18"><highlight class="preprocessor">#include<sp/>&lt;DO/Geometry/Objects.hpp&gt;</highlight></codeline>
+<codeline lineno="20"><highlight class="preprocessor">#include<sp/>&lt;DO/Geometry/Algorithms.hpp&gt;</highlight></codeline>
+<codeline lineno="22"><highlight class="preprocessor">#include<sp/>&lt;DO/Geometry/Graphics.hpp&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="23"><highlight class="normal"></highlight></codeline>
+<codeline lineno="24"><highlight class="normal"></highlight><highlight class="preprocessor">#endif<sp/></highlight><highlight class="comment">/*<sp/>DO_GEOMETRY_HPP<sp/>*/</highlight><highlight class="preprocessor"></highlight></codeline>
+    </programlisting>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry.hpp"/>
+  </compounddef>
+</doxygen>

@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="dir_ab9d0b52c28e69d97e01aed062910d82" kind="dir">
+    <compoundname>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView</compoundname>
+    <innerfile refid="_feature_item_8hpp">FeatureItem.hpp</innerfile>
+    <innerfile refid="_view_8hpp">View.hpp</innerfile>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/"/>
+  </compounddef>
+</doxygen>

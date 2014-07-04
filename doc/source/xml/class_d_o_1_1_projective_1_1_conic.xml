@@ -1,0 +1,232 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="class_d_o_1_1_projective_1_1_conic" kind="class" prot="public">
+    <compoundname>DO::Projective::Conic</compoundname>
+    <basecompoundref refid="class_d_o_1_1_projective_1_1_matrix_based_object" prot="public" virt="non-virtual">DO::Projective::MatrixBasedObject&lt; T, N &gt;</basecompoundref>
+    <templateparamlist>
+      <param>
+        <type>typename T</type>
+      </param>
+      <param>
+        <type>int</type>
+        <declname>N</declname>
+        <defname>N</defname>
+      </param>
+    </templateparamlist>
+      <sectiondef kind="private-type">
+      <memberdef kind="typedef" id="class_d_o_1_1_projective_1_1_conic_1a6baaa486702432fad623ccd11f4e134f" prot="private" static="no">
+        <type><ref refid="class_d_o_1_1_projective_1_1_matrix_based_object" kindref="compound">MatrixBasedObject</ref>&lt; T, N &gt;</type>
+        <definition>typedef MatrixBasedObject&lt;T,N&gt; Base</definition>
+        <argsstring></argsstring>
+        <name>Base</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/Conic.hpp" line="22" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/Conic.hpp" bodystart="22" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-type">
+      <memberdef kind="typedef" id="class_d_o_1_1_projective_1_1_conic_1a0159b05dba397e3fef754ceb6d369083" prot="public" static="no">
+        <type>Base::Mat</type>
+        <definition>typedef Base::Mat Mat</definition>
+        <argsstring></argsstring>
+        <name>Mat</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/Conic.hpp" line="26" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/Conic.hpp" bodystart="26" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_d_o_1_1_projective_1_1_conic_1ae93a951553194e2b26715a322fbfba02" prot="public" static="no">
+        <type>Base::HVec</type>
+        <definition>typedef Base::HVec HVec</definition>
+        <argsstring></argsstring>
+        <name>HVec</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/Conic.hpp" line="27" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/Conic.hpp" bodystart="27" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_d_o_1_1_projective_1_1_conic_1a651c6725792959fc48eb085cc7a3a0df" prot="public" static="no">
+        <type>Base::Vec</type>
+        <definition>typedef Base::Vec Vec</definition>
+        <argsstring></argsstring>
+        <name>Vec</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/Conic.hpp" line="28" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/Conic.hpp" bodystart="28" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_d_o_1_1_projective_1_1_conic_1afa8a28b353f5fb54ca7faddb101a08fb" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>Conic</definition>
+        <argsstring>()</argsstring>
+        <name>Conic</name>
+        <briefdescription>
+<para>Common constructors. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/Conic.hpp" line="30" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/Conic.hpp" bodystart="30" bodyend="30"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_projective_1_1_conic_1a7b2ad5bad4c538e03a63e40c9bc51316" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>Conic</definition>
+        <argsstring>(const Base &amp;other)</argsstring>
+        <name>Conic</name>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_projective_1_1_matrix_based_object" kindref="compound">Base</ref> &amp;</type>
+          <declname>other</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/Conic.hpp" line="31" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/Conic.hpp" bodystart="31" bodyend="31"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_projective_1_1_conic_1a2fff723fb8da97d5b9d314543063d77d" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>Conic</definition>
+        <argsstring>(const Mat &amp;data)</argsstring>
+        <name>Conic</name>
+        <param>
+          <type>const Mat &amp;</type>
+          <declname>data</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/Conic.hpp" line="32" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/Conic.hpp" bodystart="32" bodyend="32"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_projective_1_1_conic_1ac246b2b30ffc1c4051a06f11c44f61dc" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>T</type>
+        <definition>T operator()</definition>
+        <argsstring>(const HVec &amp;x) const </argsstring>
+        <name>operator()</name>
+        <param>
+          <type>const HVec &amp;</type>
+          <declname>x</declname>
+        </param>
+        <briefdescription>
+<para>Evaluation at point &apos;x&apos;. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/Conic.hpp" line="35" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/Conic.hpp" bodystart="34" bodyend="35"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_projective_1_1_conic_1a9ee277790cf90d5be80d3db3e042e770" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>T</type>
+        <definition>T operator()</definition>
+        <argsstring>(const Vec &amp;x) const </argsstring>
+        <name>operator()</name>
+        <param>
+          <type>const Vec &amp;</type>
+          <declname>x</declname>
+        </param>
+        <briefdescription>
+<para>Evaluation at point &apos;x&apos;. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/Conic.hpp" line="38" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/Conic.hpp" bodystart="37" bodyend="38"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="friend">
+      <memberdef kind="friend" id="class_d_o_1_1_projective_1_1_conic_1a206f8bff4134b802a022c53282ee7fe7" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>friend std::ostream &amp;</type>
+        <definition>std::ostream&amp; operator&lt;&lt;</definition>
+        <argsstring>(std::ostream &amp;os, const Conic &amp;P)</argsstring>
+        <name>operator&lt;&lt;</name>
+        <param>
+          <type>std::ostream &amp;</type>
+          <declname>os</declname>
+        </param>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_projective_1_1_conic" kindref="compound">Conic</ref> &amp;</type>
+          <declname>P</declname>
+        </param>
+        <briefdescription>
+<para>I/O. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/Conic.hpp" line="40"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="117">
+        <label>Conic&lt; T, N &gt;</label>
+        <link refid="class_d_o_1_1_projective_1_1_conic"/>
+        <childnode refid="118" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="118">
+        <label>MatrixBasedObject&lt; T, N &gt;</label>
+        <link refid="class_d_o_1_1_projective_1_1_matrix_based_object"/>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="119">
+        <label>Conic&lt; T, N &gt;</label>
+        <link refid="class_d_o_1_1_projective_1_1_conic"/>
+        <childnode refid="120" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="120">
+        <label>MatrixBasedObject&lt; T, N &gt;</label>
+        <link refid="class_d_o_1_1_projective_1_1_matrix_based_object"/>
+      </node>
+    </collaborationgraph>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/Conic.hpp" line="21" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/Conic.hpp" bodystart="20" bodyend="41"/>
+    <listofallmembers>
+      <member refid="class_d_o_1_1_projective_1_1_conic_1a6baaa486702432fad623ccd11f4e134f" prot="private" virt="non-virtual"><scope>DO::Projective::Conic</scope><name>Base</name></member>
+      <member refid="class_d_o_1_1_projective_1_1_conic_1afa8a28b353f5fb54ca7faddb101a08fb" prot="public" virt="non-virtual"><scope>DO::Projective::Conic</scope><name>Conic</name></member>
+      <member refid="class_d_o_1_1_projective_1_1_conic_1a7b2ad5bad4c538e03a63e40c9bc51316" prot="public" virt="non-virtual"><scope>DO::Projective::Conic</scope><name>Conic</name></member>
+      <member refid="class_d_o_1_1_projective_1_1_conic_1a2fff723fb8da97d5b9d314543063d77d" prot="public" virt="non-virtual"><scope>DO::Projective::Conic</scope><name>Conic</name></member>
+      <member refid="class_d_o_1_1_projective_1_1_matrix_based_object_1a94798fdadfbf49a7c658ace669a1d310a33cede6b934046a29e456d31efa91468" prot="public" virt="non-virtual"><scope>DO::Projective::Conic</scope><name>Dimension</name></member>
+      <member refid="class_d_o_1_1_projective_1_1_conic_1ae93a951553194e2b26715a322fbfba02" prot="public" virt="non-virtual"><scope>DO::Projective::Conic</scope><name>HVec</name></member>
+      <member refid="class_d_o_1_1_projective_1_1_conic_1a0159b05dba397e3fef754ceb6d369083" prot="public" virt="non-virtual"><scope>DO::Projective::Conic</scope><name>Mat</name></member>
+      <member refid="class_d_o_1_1_projective_1_1_matrix_based_object_1aef2cbf2dd0eca093467e5f531448212a" prot="protected" virt="non-virtual"><scope>DO::Projective::Conic</scope><name>mat_</name></member>
+      <member refid="class_d_o_1_1_projective_1_1_matrix_based_object_1a3edf7532ac66a15d00405992b51a5843" prot="public" virt="non-virtual"><scope>DO::Projective::Conic</scope><name>matrix</name></member>
+      <member refid="class_d_o_1_1_projective_1_1_matrix_based_object_1a1ab82dd2ceec3757e3134d79199de300" prot="public" virt="non-virtual"><scope>DO::Projective::Conic</scope><name>matrix</name></member>
+      <member refid="class_d_o_1_1_projective_1_1_matrix_based_object_1a4f6656518eb5234e883064b57e9f28b7" prot="public" virt="non-virtual"><scope>DO::Projective::Conic</scope><name>MatrixBasedObject</name></member>
+      <member refid="class_d_o_1_1_projective_1_1_matrix_based_object_1ae9ddbd747e498351ae091463a0661cf4" prot="public" virt="non-virtual"><scope>DO::Projective::Conic</scope><name>MatrixBasedObject</name></member>
+      <member refid="class_d_o_1_1_projective_1_1_matrix_based_object_1ada37199131a99b7423c03ff268e01665" prot="public" virt="non-virtual"><scope>DO::Projective::Conic</scope><name>MatrixBasedObject</name></member>
+      <member refid="class_d_o_1_1_projective_1_1_matrix_based_object_1a424af4502059088b375471d8ca04239a" prot="public" virt="non-virtual"><scope>DO::Projective::Conic</scope><name>operator!=</name></member>
+      <member refid="class_d_o_1_1_projective_1_1_conic_1ac246b2b30ffc1c4051a06f11c44f61dc" prot="public" virt="non-virtual"><scope>DO::Projective::Conic</scope><name>operator()</name></member>
+      <member refid="class_d_o_1_1_projective_1_1_conic_1a9ee277790cf90d5be80d3db3e042e770" prot="public" virt="non-virtual"><scope>DO::Projective::Conic</scope><name>operator()</name></member>
+      <member refid="class_d_o_1_1_projective_1_1_matrix_based_object_1a8c8ceabc696d63c5c1949706e5f949af" prot="public" virt="non-virtual" ambiguityscope="DO::Projective::MatrixBasedObject::"><scope>DO::Projective::Conic</scope><name>operator()</name></member>
+      <member refid="class_d_o_1_1_projective_1_1_matrix_based_object_1a52f400707bfe09b4abe0f2cc6dac6e74" prot="public" virt="non-virtual" ambiguityscope="DO::Projective::MatrixBasedObject::"><scope>DO::Projective::Conic</scope><name>operator()</name></member>
+      <member refid="class_d_o_1_1_projective_1_1_conic_1a206f8bff4134b802a022c53282ee7fe7" prot="public" virt="non-virtual"><scope>DO::Projective::Conic</scope><name>operator&lt;&lt;</name></member>
+      <member refid="class_d_o_1_1_projective_1_1_matrix_based_object_1aa24ee40fcefa664912de21bb09a6bd17" prot="public" virt="non-virtual"><scope>DO::Projective::Conic</scope><name>operator=</name></member>
+      <member refid="class_d_o_1_1_projective_1_1_matrix_based_object_1a8b19ca72f93990e6beee12533d6c0c21" prot="public" virt="non-virtual"><scope>DO::Projective::Conic</scope><name>operator==</name></member>
+      <member refid="class_d_o_1_1_projective_1_1_conic_1a651c6725792959fc48eb085cc7a3a0df" prot="public" virt="non-virtual"><scope>DO::Projective::Conic</scope><name>Vec</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

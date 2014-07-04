@@ -1,0 +1,168 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="class_d_o_1_1_track_ball" kind="class" prot="public">
+    <compoundname>DO::TrackBall</compoundname>
+    <includes refid="_open_g_l_window_8hpp" local="no">OpenGLWindow.hpp</includes>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="class_d_o_1_1_track_ball_1a5a3f9b40c21bc02d8c5a7cde89430565" prot="private" static="no" mutable="no">
+        <type>QQuaternion</type>
+        <definition>QQuaternion rotation_</definition>
+        <argsstring></argsstring>
+        <name>rotation_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/OpenGLWindow.hpp" line="47" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/OpenGLWindow.hpp" bodystart="47" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_track_ball_1a3e50d9692ef42c5c79276f10bfbcdd37" prot="private" static="no" mutable="no">
+        <type>QVector3D</type>
+        <definition>QVector3D axis_</definition>
+        <argsstring></argsstring>
+        <name>axis_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/OpenGLWindow.hpp" line="48" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/OpenGLWindow.hpp" bodystart="48" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_track_ball_1a4afbc49a942f1b38053911896bb47839" prot="private" static="no" mutable="no">
+        <type>QPointF</type>
+        <definition>QPointF lastPos_</definition>
+        <argsstring></argsstring>
+        <name>lastPos_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/OpenGLWindow.hpp" line="49" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/OpenGLWindow.hpp" bodystart="49" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_track_ball_1ab9dc3dba5383f273e59520b2296a49b5" prot="private" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool pressed_</definition>
+        <argsstring></argsstring>
+        <name>pressed_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/OpenGLWindow.hpp" line="50" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/OpenGLWindow.hpp" bodystart="50" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_d_o_1_1_track_ball_1a71bb229848b4e21ad90c9f8f448a35bd" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>TrackBall</definition>
+        <argsstring>()</argsstring>
+        <name>TrackBall</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/OpenGLWindow.hpp" line="40"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_track_ball_1af48014ef141c7038209831db7ba1cb3c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void push</definition>
+        <argsstring>(const QPointF &amp;p, const QQuaternion &amp;transformation)</argsstring>
+        <name>push</name>
+        <param>
+          <type>const QPointF &amp;</type>
+          <declname>p</declname>
+        </param>
+        <param>
+          <type>const QQuaternion &amp;</type>
+          <declname>transformation</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/OpenGLWindow.hpp" line="42"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_track_ball_1a38def792dd690a4deb5d4dcd2900d8d4" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void move</definition>
+        <argsstring>(const QPointF &amp;p, const QQuaternion &amp;transformation)</argsstring>
+        <name>move</name>
+        <param>
+          <type>const QPointF &amp;</type>
+          <declname>p</declname>
+        </param>
+        <param>
+          <type>const QQuaternion &amp;</type>
+          <declname>transformation</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/OpenGLWindow.hpp" line="43"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_track_ball_1a7e815bb859d1468635bd6515581f083c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void release</definition>
+        <argsstring>(const QPointF &amp;p, const QQuaternion &amp;transformation)</argsstring>
+        <name>release</name>
+        <param>
+          <type>const QPointF &amp;</type>
+          <declname>p</declname>
+        </param>
+        <param>
+          <type>const QQuaternion &amp;</type>
+          <declname>transformation</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/OpenGLWindow.hpp" line="44"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_track_ball_1aab269586dca28633e4a7adb4c580f00f" prot="public" static="no" const="yes" explicit="no" inline="no" virt="non-virtual">
+        <type>QQuaternion</type>
+        <definition>QQuaternion rotation</definition>
+        <argsstring>() const </argsstring>
+        <name>rotation</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/OpenGLWindow.hpp" line="45"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>The <ref refid="class_d_o_1_1_track_ball" kindref="compound">TrackBall</ref> class is used the <ref refid="class_d_o_1_1_open_g_l_window" kindref="compound">OpenGLWindow</ref> class to allow the user to view the 3D scene interactively. </para>    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/OpenGLWindow.hpp" line="38" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/OpenGLWindow.hpp" bodystart="37" bodyend="51"/>
+    <listofallmembers>
+      <member refid="class_d_o_1_1_track_ball_1a3e50d9692ef42c5c79276f10bfbcdd37" prot="private" virt="non-virtual"><scope>DO::TrackBall</scope><name>axis_</name></member>
+      <member refid="class_d_o_1_1_track_ball_1a4afbc49a942f1b38053911896bb47839" prot="private" virt="non-virtual"><scope>DO::TrackBall</scope><name>lastPos_</name></member>
+      <member refid="class_d_o_1_1_track_ball_1a38def792dd690a4deb5d4dcd2900d8d4" prot="public" virt="non-virtual"><scope>DO::TrackBall</scope><name>move</name></member>
+      <member refid="class_d_o_1_1_track_ball_1ab9dc3dba5383f273e59520b2296a49b5" prot="private" virt="non-virtual"><scope>DO::TrackBall</scope><name>pressed_</name></member>
+      <member refid="class_d_o_1_1_track_ball_1af48014ef141c7038209831db7ba1cb3c" prot="public" virt="non-virtual"><scope>DO::TrackBall</scope><name>push</name></member>
+      <member refid="class_d_o_1_1_track_ball_1a7e815bb859d1468635bd6515581f083c" prot="public" virt="non-virtual"><scope>DO::TrackBall</scope><name>release</name></member>
+      <member refid="class_d_o_1_1_track_ball_1aab269586dca28633e4a7adb4c580f00f" prot="public" virt="non-virtual"><scope>DO::TrackBall</scope><name>rotation</name></member>
+      <member refid="class_d_o_1_1_track_ball_1a5a3f9b40c21bc02d8c5a7cde89430565" prot="private" virt="non-virtual"><scope>DO::TrackBall</scope><name>rotation_</name></member>
+      <member refid="class_d_o_1_1_track_ball_1a71bb229848b4e21ad90c9f8f448a35bd" prot="public" virt="non-virtual"><scope>DO::TrackBall</scope><name>TrackBall</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

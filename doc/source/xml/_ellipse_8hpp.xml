@@ -1,0 +1,222 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="_ellipse_8hpp" kind="file">
+    <compoundname>Ellipse.hpp</compoundname>
+    <includes local="no">cmath</includes>
+    <includes refid="_eigen_extension_8hpp" local="no">DO/Core/EigenExtension.hpp</includes>
+    <includes refid="_quad_8hpp" local="no">DO/Geometry/Objects/Quad.hpp</includes>
+    <includedby refid="_ellipse_intersection_8hpp" local="no">C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Algorithms/EllipseIntersection.hpp</includedby>
+    <includedby refid="_objects_8hpp" local="no">C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects.hpp</includedby>
+    <incdepgraph>
+      <node id="1075">
+        <label>cmath</label>
+      </node>
+      <node id="1084">
+        <label>stdexcept</label>
+      </node>
+      <node id="1077">
+        <label>Eigen/Eigen</label>
+      </node>
+      <node id="1074">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/Ellipse.hpp</label>
+        <link refid="Ellipse.hpp"/>
+        <childnode refid="1075" relation="include">
+        </childnode>
+        <childnode refid="1076" relation="include">
+        </childnode>
+        <childnode refid="1079" relation="include">
+        </childnode>
+      </node>
+      <node id="1080">
+        <label>DO/Geometry/Objects/Polygon.hpp</label>
+        <link refid="_polygon_8hpp_source"/>
+        <childnode refid="1081" relation="include">
+        </childnode>
+        <childnode refid="1082" relation="include">
+        </childnode>
+      </node>
+      <node id="1082">
+        <label>vector</label>
+      </node>
+      <node id="1081">
+        <label>DO/Geometry/Tools/Projective.hpp</label>
+        <link refid="_projective_8hpp_source"/>
+        <childnode refid="1076" relation="include">
+        </childnode>
+      </node>
+      <node id="1078">
+        <label>sstream</label>
+      </node>
+      <node id="1076">
+        <label>DO/Core/EigenExtension.hpp</label>
+        <link refid="_eigen_extension_8hpp"/>
+        <childnode refid="1077" relation="include">
+        </childnode>
+        <childnode refid="1078" relation="include">
+        </childnode>
+      </node>
+      <node id="1083">
+        <label>DO/Geometry/Objects/BBox.hpp</label>
+        <link refid="_b_box_8hpp_source"/>
+        <childnode refid="1084" relation="include">
+        </childnode>
+        <childnode refid="1076" relation="include">
+        </childnode>
+        <childnode refid="1082" relation="include">
+        </childnode>
+      </node>
+      <node id="1079">
+        <label>DO/Geometry/Objects/Quad.hpp</label>
+        <link refid="_quad_8hpp_source"/>
+        <childnode refid="1076" relation="include">
+        </childnode>
+        <childnode refid="1080" relation="include">
+        </childnode>
+        <childnode refid="1083" relation="include">
+        </childnode>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="1090">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Graphics/DrawPolygon.hpp</label>
+        <link refid="_draw_polygon_8hpp_source"/>
+        <childnode refid="1091" relation="include">
+        </childnode>
+      </node>
+      <node id="1088">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry.hpp</label>
+        <link refid="_geometry_8hpp_source"/>
+      </node>
+      <node id="1089">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects.hpp</label>
+        <link refid="_objects_8hpp_source"/>
+        <childnode refid="1090" relation="include">
+        </childnode>
+        <childnode refid="1088" relation="include">
+        </childnode>
+      </node>
+      <node id="1086">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Algorithms/EllipseIntersection.hpp</label>
+        <link refid="_ellipse_intersection_8hpp_source"/>
+        <childnode refid="1087" relation="include">
+        </childnode>
+      </node>
+      <node id="1085">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/Ellipse.hpp</label>
+        <link refid="Ellipse.hpp"/>
+        <childnode refid="1086" relation="include">
+        </childnode>
+        <childnode refid="1089" relation="include">
+        </childnode>
+      </node>
+      <node id="1087">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Algorithms.hpp</label>
+        <link refid="_algorithms_8hpp_source"/>
+        <childnode refid="1088" relation="include">
+        </childnode>
+      </node>
+      <node id="1091">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Graphics.hpp</label>
+        <link refid="_geometry_2_graphics_8hpp_source"/>
+        <childnode refid="1088" relation="include">
+        </childnode>
+      </node>
+    </invincdepgraph>
+    <innerclass refid="class_d_o_1_1_ellipse" prot="public">DO::Ellipse</innerclass>
+    <innernamespace refid="namespace_d_o">DO</innernamespace>
+      <sectiondef kind="define">
+      <memberdef kind="define" id="_ellipse_8hpp_1a525335710b53cb064ca56b936120431e" prot="public" static="no">
+        <name>_USE_MATH_DEFINES</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/Ellipse.hpp" line="15" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/Ellipse.hpp" bodystart="15" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="comment">//<sp/>==========================================================================<sp/>//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="comment">//<sp/>This<sp/>file<sp/>is<sp/>part<sp/>of<sp/>DO++,<sp/>a<sp/>basic<sp/>set<sp/>of<sp/>libraries<sp/>in<sp/>C++<sp/>for<sp/>computer<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight><highlight class="comment">//<sp/>vision.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="comment">//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Copyright<sp/>(C)<sp/>2013<sp/>David<sp/>Ok<sp/>&lt;david.ok8@gmail.com&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight><highlight class="comment">//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight><highlight class="comment">//<sp/>This<sp/>Source<sp/>Code<sp/>Form<sp/>is<sp/>subject<sp/>to<sp/>the<sp/>terms<sp/>of<sp/>the<sp/>Mozilla<sp/>Public<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight><highlight class="comment">//<sp/>License<sp/>v.<sp/>2.0.<sp/>If<sp/>a<sp/>copy<sp/>of<sp/>the<sp/>MPL<sp/>was<sp/>not<sp/>distributed<sp/>with<sp/>this<sp/>file,<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight><highlight class="comment">//<sp/>you<sp/>can<sp/>obtain<sp/>one<sp/>at<sp/>http://mozilla.org/MPL/2.0/.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight><highlight class="comment">//<sp/>==========================================================================<sp/>//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight><highlight class="preprocessor">#ifndef<sp/>DO_GEOMETRY_ELLIPSE_HPP</highlight></codeline>
+<codeline lineno="13"><highlight class="preprocessor"></highlight><highlight class="preprocessor">#define<sp/>DO_GEOMETRY_ELLIPSE_HPP</highlight></codeline>
+<codeline lineno="14"><highlight class="preprocessor"></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>_USE_MATH_DEFINES</highlight></codeline>
+<codeline lineno="16"><highlight class="preprocessor"></highlight><highlight class="preprocessor">#include<sp/>&lt;cmath&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="17"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;<ref refid="_eigen_extension_8hpp" kindref="compound" tooltip="Eigen matrices and vector typedefs.">DO/Core/EigenExtension.hpp</ref>&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;DO/Geometry/Objects/Quad.hpp&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="19"><highlight class="normal"></highlight></codeline>
+<codeline lineno="20"><highlight class="normal"></highlight><highlight class="keyword">namespace<sp/></highlight><highlight class="normal">DO<sp/>{</highlight></codeline>
+<codeline lineno="21"><highlight class="normal"></highlight></codeline>
+<codeline lineno="23" refid="class_d_o_1_1_ellipse" refkind="compound"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="class_d_o_1_1_ellipse" kindref="compound" tooltip="Ellipse class.">Ellipse</ref></highlight></codeline>
+<codeline lineno="24"><highlight class="normal"><sp/><sp/>{</highlight></codeline>
+<codeline lineno="25"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="26"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="class_d_o_1_1_ellipse" kindref="compound" tooltip="Ellipse class.">Ellipse</ref>()<sp/>{}</highlight></codeline>
+<codeline lineno="27"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="class_d_o_1_1_ellipse" kindref="compound" tooltip="Ellipse class.">Ellipse</ref>(</highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>radius1,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>radius2,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>orientation,</highlight></codeline>
+<codeline lineno="28"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member" tooltip="Self-explanatory.">Point2d</ref>&amp;<sp/>center)</highlight></codeline>
+<codeline lineno="29"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>:<sp/>a_(radius1),<sp/>b_(radius2),<sp/>o_(orientation),<sp/>c_(center)<sp/>{}</highlight></codeline>
+<codeline lineno="30"><highlight class="normal"></highlight></codeline>
+<codeline lineno="31"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>radius1()</highlight><highlight class="keyword"><sp/>const<sp/></highlight><highlight class="normal">{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>a_;<sp/>}</highlight></codeline>
+<codeline lineno="32"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>radius2()</highlight><highlight class="keyword"><sp/>const<sp/></highlight><highlight class="normal">{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>b_;<sp/>}</highlight></codeline>
+<codeline lineno="33"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>orientation()</highlight><highlight class="keyword"><sp/>const<sp/></highlight><highlight class="normal">{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>o_;<sp/>}</highlight></codeline>
+<codeline lineno="34"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member" tooltip="Self-explanatory.">Point2d</ref>&amp;<sp/>center()</highlight><highlight class="keyword"><sp/>const<sp/></highlight><highlight class="normal">{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>c_;<sp/>}</highlight></codeline>
+<codeline lineno="35"><highlight class="normal"></highlight></codeline>
+<codeline lineno="36"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal">&amp;<sp/>radius1()<sp/>{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>a_;<sp/>}</highlight></codeline>
+<codeline lineno="37"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal">&amp;<sp/>radius2()<sp/>{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>b_;<sp/>}</highlight></codeline>
+<codeline lineno="38"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal">&amp;<sp/>orientation()<sp/>{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>o_;<sp/>}</highlight></codeline>
+<codeline lineno="39"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member" tooltip="Self-explanatory.">Point2d</ref>&amp;<sp/>center()<sp/>{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>c_;<sp/>}</highlight></codeline>
+<codeline lineno="40"><highlight class="normal"></highlight></codeline>
+<codeline lineno="42"><highlight class="normal"><sp/><sp/><sp/><sp/>Vector2d<sp/><ref refid="class_d_o_1_1_ellipse_1aad1e0e358dcbe6d56d0d228f3bc6c57c" kindref="member" tooltip="Get the radial vector at angle $$ w.r.t. orientation $o$ of ellipse.">rho</ref>(</highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>theta)<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="44"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member" tooltip="Self-explanatory.">Point2d</ref><sp/><ref refid="class_d_o_1_1_ellipse_1add3b532e31c31db4d381ce0cadf79988" kindref="member" tooltip="Get point on ellipse at angle $$ w.r.t. orientation $o$ of ellipse.">operator()</ref>(</highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>theta)<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="49"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">friend</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>orientation(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member" tooltip="Self-explanatory.">Point2d</ref>&amp;<sp/>p,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_ellipse" kindref="compound" tooltip="Ellipse class.">Ellipse</ref>&amp;<sp/>e);</highlight></codeline>
+<codeline lineno="51" refid="class_d_o_1_1_ellipse_1a1d6399e2cdd64b8323932c83b7262c15" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">friend</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_ellipse_1a1d6399e2cdd64b8323932c83b7262c15" kindref="member" tooltip="Polar antiderivative.">polarAntiderivative</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_ellipse" kindref="compound" tooltip="Ellipse class.">Ellipse</ref>&amp;<sp/>e,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>theta)</highlight></codeline>
+<codeline lineno="52"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight></codeline>
+<codeline lineno="53"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/><ref refid="group___channel_accessors_1gac90c52c5b3a7b2a7e3761e6e84f25778" kindref="member" tooltip="Mutable channel accessor.">y</ref><sp/>=<sp/>(e.b_-e.a_)*sin(2*theta);</highlight></codeline>
+<codeline lineno="54"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>x<sp/>=<sp/>(e.b_+e.a_)<sp/>+<sp/>(e.b_-e.a_)*cos(2*theta);</highlight></codeline>
+<codeline lineno="55"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>e.a_*e.b_*0.5*(<sp/>theta<sp/>-<sp/>atan2(y,x)<sp/>);</highlight></codeline>
+<codeline lineno="56"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="68" refid="class_d_o_1_1_ellipse_1a2b5ee7f2142b8e25f7079f3265125d73" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">friend</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_ellipse_1a2b5ee7f2142b8e25f7079f3265125d73" kindref="member">sectorArea</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_ellipse" kindref="compound" tooltip="Ellipse class.">Ellipse</ref>&amp;<sp/>e,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>theta0,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>theta1)</highlight></codeline>
+<codeline lineno="69"><highlight class="normal"><sp/><sp/><sp/><sp/>{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_ellipse_1a1d6399e2cdd64b8323932c83b7262c15" kindref="member" tooltip="Polar antiderivative.">polarAntiderivative</ref>(e,<sp/>theta1)<sp/>-<sp/><ref refid="class_d_o_1_1_ellipse_1a1d6399e2cdd64b8323932c83b7262c15" kindref="member" tooltip="Polar antiderivative.">polarAntiderivative</ref>(e,<sp/>theta0);<sp/>}</highlight></codeline>
+<codeline lineno="74"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">friend</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_ellipse_1a17012d26c6eb0860faf911c5a4b94ac0" kindref="member">segmentArea</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_ellipse" kindref="compound" tooltip="Ellipse class.">Ellipse</ref>&amp;<sp/>e,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>theta0,<sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>theta1);</highlight></codeline>
+<codeline lineno="76" refid="class_d_o_1_1_ellipse_1a8de7820396236f42dd7ee87f836d05ae" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">friend</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_ellipse_1a8de7820396236f42dd7ee87f836d05ae" kindref="member" tooltip="Ellipse area.">area</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_ellipse" kindref="compound" tooltip="Ellipse class.">Ellipse</ref>&amp;<sp/>e)</highlight></codeline>
+<codeline lineno="77"><highlight class="normal"><sp/><sp/><sp/><sp/>{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>M_PI*e.a_*e.b_;<sp/>}</highlight></codeline>
+<codeline lineno="79" refid="class_d_o_1_1_ellipse_1a25737434583b137492391b7185afe7fb" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">friend</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/>Matrix2d<sp/><ref refid="class_d_o_1_1_ellipse_1a25737434583b137492391b7185afe7fb" kindref="member" tooltip="Shape matrix.">shapeMat</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_ellipse" kindref="compound" tooltip="Ellipse class.">Ellipse</ref>&amp;<sp/>e)</highlight></codeline>
+<codeline lineno="80"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight></codeline>
+<codeline lineno="81"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>Eigen::Rotation2D&lt;double&gt;<sp/><ref refid="struct_d_o_1_1_r" kindref="compound" tooltip="Red channel name (RGB, RGBA).">R</ref>(e.o_);</highlight></codeline>
+<codeline lineno="82"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>Vector2d<sp/>D(<sp/>1./(e.a_*e.a_),<sp/>1./(e.b_*e.b_)<sp/>);</highlight></codeline>
+<codeline lineno="83"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>R.matrix()*D.asDiagonal()*R.matrix().transpose();</highlight></codeline>
+<codeline lineno="84"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="86" refid="class_d_o_1_1_ellipse_1a090b213b23d2762bfd78fdb0f82ad3eb" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">friend</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_ellipse_1a090b213b23d2762bfd78fdb0f82ad3eb" kindref="member" tooltip="Checks if point is inside ellipse.">inside</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member" tooltip="Self-explanatory.">Point2d</ref>&amp;<sp/>p,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_ellipse" kindref="compound" tooltip="Ellipse class.">Ellipse</ref>&amp;<sp/>e)</highlight></codeline>
+<codeline lineno="87"><highlight class="normal"><sp/><sp/><sp/><sp/>{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>(p-e.c_).transpose()*<ref refid="class_d_o_1_1_ellipse_1a25737434583b137492391b7185afe7fb" kindref="member" tooltip="Shape matrix.">shapeMat</ref>(e)*(p-e.c_)<sp/>&lt;<sp/>1.;<sp/>}</highlight></codeline>
+<codeline lineno="89"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">friend</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_quad" kindref="compound">Quad</ref><sp/><ref refid="class_d_o_1_1_ellipse_1ae22e819af5be5ab4bb8ff92a4fee2d5b" kindref="member" tooltip="Compute rotated bbox of the ellispe.">rotatedBBox</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_ellipse" kindref="compound" tooltip="Ellipse class.">Ellipse</ref>&amp;<sp/>e);</highlight></codeline>
+<codeline lineno="91"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">friend</highlight><highlight class="normal"><sp/>std::ostream&amp;<sp/><ref refid="class_d_o_1_1_ellipse_1a1c2deaa00778c6c5ab11b2f4c96483d5" kindref="member" tooltip="I/O.">operator&lt;&lt;</ref>(std::ostream&amp;<sp/>os,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="class_d_o_1_1_ellipse" kindref="compound" tooltip="Ellipse class.">Ellipse</ref>&amp;<sp/>e);</highlight></codeline>
+<codeline lineno="92"><highlight class="normal"></highlight></codeline>
+<codeline lineno="93"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">private</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="94"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>a_,<sp/>b_;</highlight></codeline>
+<codeline lineno="95"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>o_;</highlight></codeline>
+<codeline lineno="96"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member" tooltip="Self-explanatory.">Point2d</ref><sp/>c_;</highlight></codeline>
+<codeline lineno="97"><highlight class="normal"><sp/><sp/>};</highlight></codeline>
+<codeline lineno="98"><highlight class="normal"></highlight></codeline>
+<codeline lineno="100"><highlight class="normal"><sp/><sp/>Ellipse<sp/><ref refid="namespace_d_o_1a2e0926bdfcf1211c139b2ff58def04a6" kindref="member" tooltip="Compute the ellipse from the conic equation.">fromShapeMat</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>Matrix2d&amp;<sp/>shapeMat,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member" tooltip="Self-explanatory.">Point2d</ref>&amp;<sp/>c);</highlight></codeline>
+<codeline lineno="101"><highlight class="normal"></highlight></codeline>
+<codeline lineno="102"><highlight class="normal">}<sp/></highlight><highlight class="comment">/*<sp/>namespace<sp/>DO<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="103"><highlight class="normal"></highlight></codeline>
+<codeline lineno="104"><highlight class="normal"></highlight><highlight class="preprocessor">#endif<sp/></highlight><highlight class="comment">/*<sp/>DO_GEOMETRY_ELLIPSE_HPP<sp/>*/</highlight><highlight class="preprocessor"></highlight></codeline>
+    </programlisting>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/Ellipse.hpp"/>
+  </compounddef>
+</doxygen>

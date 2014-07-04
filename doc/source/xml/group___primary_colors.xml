@@ -1,0 +1,1021 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="group___primary_colors" kind="group">
+    <compoundname>PrimaryColors</compoundname>
+    <title>Primary Colors</title>
+      <sectiondef kind="var">
+      <memberdef kind="variable" id="group___primary_colors_1ga3f07e7bf977602effe4d2e20b4b28436" prot="public" static="no" mutable="no">
+        <type>const Rgb8</type>
+        <definition>const Rgb8 Red8(red&lt; unsigned char &gt;())</definition>
+        <argsstring>(red&lt; unsigned char &gt;())</argsstring>
+        <name>Red8</name>
+        <briefdescription>
+<para>Return primary color of type Rgb8. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="771"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1gae0daacdd8093bcea7ab7a93d09330d0f" prot="public" static="no" mutable="no">
+        <type>const Rgb8s</type>
+        <definition>const Rgb8s Red8s(red&lt; char &gt;())</definition>
+        <argsstring>(red&lt; char &gt;())</argsstring>
+        <name>Red8s</name>
+        <briefdescription>
+<para>Return primary color of type Rgb8s. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="771"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1gab32f88f8106146d86b172920adf5a403" prot="public" static="no" mutable="no">
+        <type>const Rgb16</type>
+        <definition>const Rgb16 Red16(red&lt; unsigned short &gt;())</definition>
+        <argsstring>(red&lt; unsigned short &gt;())</argsstring>
+        <name>Red16</name>
+        <briefdescription>
+<para>Return primary color of type Rgb16. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="771"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1gaa065a837acc59ab6d296af7439c4355d" prot="public" static="no" mutable="no">
+        <type>const Rgb16s</type>
+        <definition>const Rgb16s Red16s(red&lt; short &gt;())</definition>
+        <argsstring>(red&lt; short &gt;())</argsstring>
+        <name>Red16s</name>
+        <briefdescription>
+<para>Return primary color of type Rgb16s. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="771"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1ga7cf87fc8a9e0d17883968bc92fd740aa" prot="public" static="no" mutable="no">
+        <type>const Rgb32</type>
+        <definition>const Rgb32 Red32(red&lt; unsigned int &gt;())</definition>
+        <argsstring>(red&lt; unsigned int &gt;())</argsstring>
+        <name>Red32</name>
+        <briefdescription>
+<para>Return primary color of type Rgb32. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="771"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1ga12f396a9b393e3c94856b54041934aac" prot="public" static="no" mutable="no">
+        <type>const Rgb32s</type>
+        <definition>const Rgb32s Red32s(red&lt; int &gt;())</definition>
+        <argsstring>(red&lt; int &gt;())</argsstring>
+        <name>Red32s</name>
+        <briefdescription>
+<para>Return primary color of type Rgb32s. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="771"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1gabaaba4cfd833e047e03b4215f9e5eaed" prot="public" static="no" mutable="no">
+        <type>const Rgb32f</type>
+        <definition>const Rgb32f Red32f(red&lt; float &gt;())</definition>
+        <argsstring>(red&lt; float &gt;())</argsstring>
+        <name>Red32f</name>
+        <briefdescription>
+<para>Return primary color of type Rgb32f. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="771"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1gaffa94c131340d3ccf88bfc519f37a2c6" prot="public" static="no" mutable="no">
+        <type>const Rgb64f</type>
+        <definition>const Rgb64f Red64f(red&lt; double &gt;())</definition>
+        <argsstring>(red&lt; double &gt;())</argsstring>
+        <name>Red64f</name>
+        <briefdescription>
+<para>Return primary color of type Rgb64f. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="771"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1ga1acc67038a98fae29989b43a8cd792e5" prot="public" static="no" mutable="no">
+        <type>const Rgb8</type>
+        <definition>const Rgb8 Green8(green&lt; unsigned char &gt;())</definition>
+        <argsstring>(green&lt; unsigned char &gt;())</argsstring>
+        <name>Green8</name>
+        <briefdescription>
+<para>Return primary color of type Rgb8. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="772"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1ga692b3541a0136d7cea81f6b72cfbd600" prot="public" static="no" mutable="no">
+        <type>const Rgb8s</type>
+        <definition>const Rgb8s Green8s(green&lt; char &gt;())</definition>
+        <argsstring>(green&lt; char &gt;())</argsstring>
+        <name>Green8s</name>
+        <briefdescription>
+<para>Return primary color of type Rgb8s. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="772"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1gadc8de4b0f29a2c1f5bd0bfaa1bf0ca06" prot="public" static="no" mutable="no">
+        <type>const Rgb16</type>
+        <definition>const Rgb16 Green16(green&lt; unsigned short &gt;())</definition>
+        <argsstring>(green&lt; unsigned short &gt;())</argsstring>
+        <name>Green16</name>
+        <briefdescription>
+<para>Return primary color of type Rgb16. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="772"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1gaf9d52ad7cd375f81b300695aa8e8ec49" prot="public" static="no" mutable="no">
+        <type>const Rgb16s</type>
+        <definition>const Rgb16s Green16s(green&lt; short &gt;())</definition>
+        <argsstring>(green&lt; short &gt;())</argsstring>
+        <name>Green16s</name>
+        <briefdescription>
+<para>Return primary color of type Rgb16s. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="772"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1gaa95922ce1aaa362929e1fda9e451203f" prot="public" static="no" mutable="no">
+        <type>const Rgb32</type>
+        <definition>const Rgb32 Green32(green&lt; unsigned int &gt;())</definition>
+        <argsstring>(green&lt; unsigned int &gt;())</argsstring>
+        <name>Green32</name>
+        <briefdescription>
+<para>Return primary color of type Rgb32. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="772"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1ga594299db7793fb76b6005da5b14e0f0b" prot="public" static="no" mutable="no">
+        <type>const Rgb32s</type>
+        <definition>const Rgb32s Green32s(green&lt; int &gt;())</definition>
+        <argsstring>(green&lt; int &gt;())</argsstring>
+        <name>Green32s</name>
+        <briefdescription>
+<para>Return primary color of type Rgb32s. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="772"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1ga4ff41245084297b158f1edb21f8fc983" prot="public" static="no" mutable="no">
+        <type>const Rgb32f</type>
+        <definition>const Rgb32f Green32f(green&lt; float &gt;())</definition>
+        <argsstring>(green&lt; float &gt;())</argsstring>
+        <name>Green32f</name>
+        <briefdescription>
+<para>Return primary color of type Rgb32f. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="772"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1gae8b15a349bc81a9b7a0e80fe118d645f" prot="public" static="no" mutable="no">
+        <type>const Rgb64f</type>
+        <definition>const Rgb64f Green64f(green&lt; double &gt;())</definition>
+        <argsstring>(green&lt; double &gt;())</argsstring>
+        <name>Green64f</name>
+        <briefdescription>
+<para>Return primary color of type Rgb64f. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="772"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1gac6a6919089540c8864b76a8086f77593" prot="public" static="no" mutable="no">
+        <type>const Rgb8</type>
+        <definition>const Rgb8 Blue8(blue&lt; unsigned char &gt;())</definition>
+        <argsstring>(blue&lt; unsigned char &gt;())</argsstring>
+        <name>Blue8</name>
+        <briefdescription>
+<para>Return primary color of type Rgb8. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="773"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1ga337cfba761649f338adce54f09cd748b" prot="public" static="no" mutable="no">
+        <type>const Rgb8s</type>
+        <definition>const Rgb8s Blue8s(blue&lt; char &gt;())</definition>
+        <argsstring>(blue&lt; char &gt;())</argsstring>
+        <name>Blue8s</name>
+        <briefdescription>
+<para>Return primary color of type Rgb8s. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="773"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1gaf9d3dd280aee770d9242ef39dfab4b4f" prot="public" static="no" mutable="no">
+        <type>const Rgb16</type>
+        <definition>const Rgb16 Blue16(blue&lt; unsigned short &gt;())</definition>
+        <argsstring>(blue&lt; unsigned short &gt;())</argsstring>
+        <name>Blue16</name>
+        <briefdescription>
+<para>Return primary color of type Rgb16. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="773"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1ga1c194d70f2088366be5d2c8198fbb06f" prot="public" static="no" mutable="no">
+        <type>const Rgb16s</type>
+        <definition>const Rgb16s Blue16s(blue&lt; short &gt;())</definition>
+        <argsstring>(blue&lt; short &gt;())</argsstring>
+        <name>Blue16s</name>
+        <briefdescription>
+<para>Return primary color of type Rgb16s. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="773"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1ga6ae30a297d995a200db3da5ef063d2ab" prot="public" static="no" mutable="no">
+        <type>const Rgb32</type>
+        <definition>const Rgb32 Blue32(blue&lt; unsigned int &gt;())</definition>
+        <argsstring>(blue&lt; unsigned int &gt;())</argsstring>
+        <name>Blue32</name>
+        <briefdescription>
+<para>Return primary color of type Rgb32. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="773"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1gafe573892c53f718c47b085e76938d4c7" prot="public" static="no" mutable="no">
+        <type>const Rgb32s</type>
+        <definition>const Rgb32s Blue32s(blue&lt; int &gt;())</definition>
+        <argsstring>(blue&lt; int &gt;())</argsstring>
+        <name>Blue32s</name>
+        <briefdescription>
+<para>Return primary color of type Rgb32s. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="773"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1ga20777da7b2c0ea7c12bcddaccf7cd862" prot="public" static="no" mutable="no">
+        <type>const Rgb32f</type>
+        <definition>const Rgb32f Blue32f(blue&lt; float &gt;())</definition>
+        <argsstring>(blue&lt; float &gt;())</argsstring>
+        <name>Blue32f</name>
+        <briefdescription>
+<para>Return primary color of type Rgb32f. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="773"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1ga5ee1a3fcac104fa37c06648fe2ed0b91" prot="public" static="no" mutable="no">
+        <type>const Rgb64f</type>
+        <definition>const Rgb64f Blue64f(blue&lt; double &gt;())</definition>
+        <argsstring>(blue&lt; double &gt;())</argsstring>
+        <name>Blue64f</name>
+        <briefdescription>
+<para>Return primary color of type Rgb64f. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="773"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1ga2a0f650d2d76d04d5012fe78b6605e3b" prot="public" static="no" mutable="no">
+        <type>const Rgb8</type>
+        <definition>const Rgb8 Cyan8(cyan&lt; unsigned char &gt;())</definition>
+        <argsstring>(cyan&lt; unsigned char &gt;())</argsstring>
+        <name>Cyan8</name>
+        <briefdescription>
+<para>Return primary color of type Rgb8. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="774"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1ga478abd1bda71241ece158980514d2284" prot="public" static="no" mutable="no">
+        <type>const Rgb8s</type>
+        <definition>const Rgb8s Cyan8s(cyan&lt; char &gt;())</definition>
+        <argsstring>(cyan&lt; char &gt;())</argsstring>
+        <name>Cyan8s</name>
+        <briefdescription>
+<para>Return primary color of type Rgb8s. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="774"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1ga36b26bc7bcadf41dec8da694559f138b" prot="public" static="no" mutable="no">
+        <type>const Rgb16</type>
+        <definition>const Rgb16 Cyan16(cyan&lt; unsigned short &gt;())</definition>
+        <argsstring>(cyan&lt; unsigned short &gt;())</argsstring>
+        <name>Cyan16</name>
+        <briefdescription>
+<para>Return primary color of type Rgb16. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="774"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1gafb6d4a0e35de27b2f598c5fdf5ff7673" prot="public" static="no" mutable="no">
+        <type>const Rgb16s</type>
+        <definition>const Rgb16s Cyan16s(cyan&lt; short &gt;())</definition>
+        <argsstring>(cyan&lt; short &gt;())</argsstring>
+        <name>Cyan16s</name>
+        <briefdescription>
+<para>Return primary color of type Rgb16s. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="774"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1ga2623324e05df7b9448b51359200ddccc" prot="public" static="no" mutable="no">
+        <type>const Rgb32</type>
+        <definition>const Rgb32 Cyan32(cyan&lt; unsigned int &gt;())</definition>
+        <argsstring>(cyan&lt; unsigned int &gt;())</argsstring>
+        <name>Cyan32</name>
+        <briefdescription>
+<para>Return primary color of type Rgb32. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="774"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1ga453129ba2b1378cb5568721d637b5b71" prot="public" static="no" mutable="no">
+        <type>const Rgb32s</type>
+        <definition>const Rgb32s Cyan32s(cyan&lt; int &gt;())</definition>
+        <argsstring>(cyan&lt; int &gt;())</argsstring>
+        <name>Cyan32s</name>
+        <briefdescription>
+<para>Return primary color of type Rgb32s. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="774"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1gabaf314b3ee2b4ae65c7a354863cbfd6b" prot="public" static="no" mutable="no">
+        <type>const Rgb32f</type>
+        <definition>const Rgb32f Cyan32f(cyan&lt; float &gt;())</definition>
+        <argsstring>(cyan&lt; float &gt;())</argsstring>
+        <name>Cyan32f</name>
+        <briefdescription>
+<para>Return primary color of type Rgb32f. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="774"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1ga353d007048893d08d591e4eaa969b46e" prot="public" static="no" mutable="no">
+        <type>const Rgb64f</type>
+        <definition>const Rgb64f Cyan64f(cyan&lt; double &gt;())</definition>
+        <argsstring>(cyan&lt; double &gt;())</argsstring>
+        <name>Cyan64f</name>
+        <briefdescription>
+<para>Return primary color of type Rgb64f. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="774"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1gabb957eb7034b8e56e03cd4faa3f0157a" prot="public" static="no" mutable="no">
+        <type>const Rgb8</type>
+        <definition>const Rgb8 Magenta8(magenta&lt; unsigned char &gt;())</definition>
+        <argsstring>(magenta&lt; unsigned char &gt;())</argsstring>
+        <name>Magenta8</name>
+        <briefdescription>
+<para>Return primary color of type Rgb8. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="775"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1ga3908ec25531764a56fd1664bc01b1a54" prot="public" static="no" mutable="no">
+        <type>const Rgb8s</type>
+        <definition>const Rgb8s Magenta8s(magenta&lt; char &gt;())</definition>
+        <argsstring>(magenta&lt; char &gt;())</argsstring>
+        <name>Magenta8s</name>
+        <briefdescription>
+<para>Return primary color of type Rgb8s. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="775"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1ga963dbf14bea0f779eb3dda07cb027b3b" prot="public" static="no" mutable="no">
+        <type>const Rgb16</type>
+        <definition>const Rgb16 Magenta16(magenta&lt; unsigned short &gt;())</definition>
+        <argsstring>(magenta&lt; unsigned short &gt;())</argsstring>
+        <name>Magenta16</name>
+        <briefdescription>
+<para>Return primary color of type Rgb16. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="775"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1gad4bfc76a9a3ce390b460b550dc03d950" prot="public" static="no" mutable="no">
+        <type>const Rgb16s</type>
+        <definition>const Rgb16s Magenta16s(magenta&lt; short &gt;())</definition>
+        <argsstring>(magenta&lt; short &gt;())</argsstring>
+        <name>Magenta16s</name>
+        <briefdescription>
+<para>Return primary color of type Rgb16s. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="775"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1gafa7ef6236c8194c6ec00957f6169b2d0" prot="public" static="no" mutable="no">
+        <type>const Rgb32</type>
+        <definition>const Rgb32 Magenta32(magenta&lt; unsigned int &gt;())</definition>
+        <argsstring>(magenta&lt; unsigned int &gt;())</argsstring>
+        <name>Magenta32</name>
+        <briefdescription>
+<para>Return primary color of type Rgb32. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="775"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1ga71d1b8fc050b2ff201295e759c8414bc" prot="public" static="no" mutable="no">
+        <type>const Rgb32s</type>
+        <definition>const Rgb32s Magenta32s(magenta&lt; int &gt;())</definition>
+        <argsstring>(magenta&lt; int &gt;())</argsstring>
+        <name>Magenta32s</name>
+        <briefdescription>
+<para>Return primary color of type Rgb32s. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="775"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1ga9e1cfbc25293adeaa7c985af8dc13929" prot="public" static="no" mutable="no">
+        <type>const Rgb32f</type>
+        <definition>const Rgb32f Magenta32f(magenta&lt; float &gt;())</definition>
+        <argsstring>(magenta&lt; float &gt;())</argsstring>
+        <name>Magenta32f</name>
+        <briefdescription>
+<para>Return primary color of type Rgb32f. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="775"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1gaa60b75fd0b5fc1fa511e93308bdb67e4" prot="public" static="no" mutable="no">
+        <type>const Rgb64f</type>
+        <definition>const Rgb64f Magenta64f(magenta&lt; double &gt;())</definition>
+        <argsstring>(magenta&lt; double &gt;())</argsstring>
+        <name>Magenta64f</name>
+        <briefdescription>
+<para>Return primary color of type Rgb64f. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="775"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1gabc927a59cb47062b7bed719f870a335d" prot="public" static="no" mutable="no">
+        <type>const Rgb8</type>
+        <definition>const Rgb8 Yellow8(yellow&lt; unsigned char &gt;())</definition>
+        <argsstring>(yellow&lt; unsigned char &gt;())</argsstring>
+        <name>Yellow8</name>
+        <briefdescription>
+<para>Return primary color of type Rgb8. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="776"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1ga727cf787d43d7c9830a402d272403450" prot="public" static="no" mutable="no">
+        <type>const Rgb8s</type>
+        <definition>const Rgb8s Yellow8s(yellow&lt; char &gt;())</definition>
+        <argsstring>(yellow&lt; char &gt;())</argsstring>
+        <name>Yellow8s</name>
+        <briefdescription>
+<para>Return primary color of type Rgb8s. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="776"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1ga4bca47a900845600e46649ca7878d080" prot="public" static="no" mutable="no">
+        <type>const Rgb16</type>
+        <definition>const Rgb16 Yellow16(yellow&lt; unsigned short &gt;())</definition>
+        <argsstring>(yellow&lt; unsigned short &gt;())</argsstring>
+        <name>Yellow16</name>
+        <briefdescription>
+<para>Return primary color of type Rgb16. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="776"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1ga6746cbfaacce6d8bd3784dadc6565a35" prot="public" static="no" mutable="no">
+        <type>const Rgb16s</type>
+        <definition>const Rgb16s Yellow16s(yellow&lt; short &gt;())</definition>
+        <argsstring>(yellow&lt; short &gt;())</argsstring>
+        <name>Yellow16s</name>
+        <briefdescription>
+<para>Return primary color of type Rgb16s. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="776"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1ga6f50df87896b60cf3f595738f8f71ed5" prot="public" static="no" mutable="no">
+        <type>const Rgb32</type>
+        <definition>const Rgb32 Yellow32(yellow&lt; unsigned int &gt;())</definition>
+        <argsstring>(yellow&lt; unsigned int &gt;())</argsstring>
+        <name>Yellow32</name>
+        <briefdescription>
+<para>Return primary color of type Rgb32. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="776"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1gafda747b3ce2a23dbedcd60b246c8963f" prot="public" static="no" mutable="no">
+        <type>const Rgb32s</type>
+        <definition>const Rgb32s Yellow32s(yellow&lt; int &gt;())</definition>
+        <argsstring>(yellow&lt; int &gt;())</argsstring>
+        <name>Yellow32s</name>
+        <briefdescription>
+<para>Return primary color of type Rgb32s. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="776"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1ga69028963fa031abd357693846b4cc0d4" prot="public" static="no" mutable="no">
+        <type>const Rgb32f</type>
+        <definition>const Rgb32f Yellow32f(yellow&lt; float &gt;())</definition>
+        <argsstring>(yellow&lt; float &gt;())</argsstring>
+        <name>Yellow32f</name>
+        <briefdescription>
+<para>Return primary color of type Rgb32f. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="776"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1ga347649a808efdbe4466095a8663e85fd" prot="public" static="no" mutable="no">
+        <type>const Rgb64f</type>
+        <definition>const Rgb64f Yellow64f(yellow&lt; double &gt;())</definition>
+        <argsstring>(yellow&lt; double &gt;())</argsstring>
+        <name>Yellow64f</name>
+        <briefdescription>
+<para>Return primary color of type Rgb64f. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="776"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1ga2a1d9dded3bfcfad489285c0533c8565" prot="public" static="no" mutable="no">
+        <type>const Rgb8</type>
+        <definition>const Rgb8 Black8(black&lt; unsigned char &gt;())</definition>
+        <argsstring>(black&lt; unsigned char &gt;())</argsstring>
+        <name>Black8</name>
+        <briefdescription>
+<para>Return primary color of type Rgb8. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="777"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1gaed8c3ac856006472dd1a4189e9a58f07" prot="public" static="no" mutable="no">
+        <type>const Rgb8s</type>
+        <definition>const Rgb8s Black8s(black&lt; char &gt;())</definition>
+        <argsstring>(black&lt; char &gt;())</argsstring>
+        <name>Black8s</name>
+        <briefdescription>
+<para>Return primary color of type Rgb8s. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="777"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1gac00ef9f1197d2417cb30f3aad5878aaa" prot="public" static="no" mutable="no">
+        <type>const Rgb16</type>
+        <definition>const Rgb16 Black16(black&lt; unsigned short &gt;())</definition>
+        <argsstring>(black&lt; unsigned short &gt;())</argsstring>
+        <name>Black16</name>
+        <briefdescription>
+<para>Return primary color of type Rgb16. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="777"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1ga0b670bffa2bec06760670923e33e92b4" prot="public" static="no" mutable="no">
+        <type>const Rgb16s</type>
+        <definition>const Rgb16s Black16s(black&lt; short &gt;())</definition>
+        <argsstring>(black&lt; short &gt;())</argsstring>
+        <name>Black16s</name>
+        <briefdescription>
+<para>Return primary color of type Rgb16s. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="777"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1ga7f55369a8930ca1e5428c9c644035a74" prot="public" static="no" mutable="no">
+        <type>const Rgb32</type>
+        <definition>const Rgb32 Black32(black&lt; unsigned int &gt;())</definition>
+        <argsstring>(black&lt; unsigned int &gt;())</argsstring>
+        <name>Black32</name>
+        <briefdescription>
+<para>Return primary color of type Rgb32. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="777"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1ga17731be1ee8f6db2009ed73956281eea" prot="public" static="no" mutable="no">
+        <type>const Rgb32s</type>
+        <definition>const Rgb32s Black32s(black&lt; int &gt;())</definition>
+        <argsstring>(black&lt; int &gt;())</argsstring>
+        <name>Black32s</name>
+        <briefdescription>
+<para>Return primary color of type Rgb32s. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="777"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1ga7e8acde084a97e61751907b0b3d4e675" prot="public" static="no" mutable="no">
+        <type>const Rgb32f</type>
+        <definition>const Rgb32f Black32f(black&lt; float &gt;())</definition>
+        <argsstring>(black&lt; float &gt;())</argsstring>
+        <name>Black32f</name>
+        <briefdescription>
+<para>Return primary color of type Rgb32f. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="777"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1gabfe37c60a3af0a0e46e705df031c90ee" prot="public" static="no" mutable="no">
+        <type>const Rgb64f</type>
+        <definition>const Rgb64f Black64f(black&lt; double &gt;())</definition>
+        <argsstring>(black&lt; double &gt;())</argsstring>
+        <name>Black64f</name>
+        <briefdescription>
+<para>Return primary color of type Rgb64f. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="777"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1gaaef2f1710463332baea368d7a8244243" prot="public" static="no" mutable="no">
+        <type>const Rgb8</type>
+        <definition>const Rgb8 White8(white&lt; unsigned char &gt;())</definition>
+        <argsstring>(white&lt; unsigned char &gt;())</argsstring>
+        <name>White8</name>
+        <briefdescription>
+<para>Return primary color of type Rgb8. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="778"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1ga2be3104e00bf5359d5d3794cadf4ab20" prot="public" static="no" mutable="no">
+        <type>const Rgb8s</type>
+        <definition>const Rgb8s White8s(white&lt; char &gt;())</definition>
+        <argsstring>(white&lt; char &gt;())</argsstring>
+        <name>White8s</name>
+        <briefdescription>
+<para>Return primary color of type Rgb8s. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="778"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1ga91c65aa3023d5dd8c298445eb9660ebc" prot="public" static="no" mutable="no">
+        <type>const Rgb16</type>
+        <definition>const Rgb16 White16(white&lt; unsigned short &gt;())</definition>
+        <argsstring>(white&lt; unsigned short &gt;())</argsstring>
+        <name>White16</name>
+        <briefdescription>
+<para>Return primary color of type Rgb16. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="778"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1ga96dc78b5ef63b72872a0be12b92f7b24" prot="public" static="no" mutable="no">
+        <type>const Rgb16s</type>
+        <definition>const Rgb16s White16s(white&lt; short &gt;())</definition>
+        <argsstring>(white&lt; short &gt;())</argsstring>
+        <name>White16s</name>
+        <briefdescription>
+<para>Return primary color of type Rgb16s. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="778"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1ga12291c934505e00c8d1bd3bc54247b17" prot="public" static="no" mutable="no">
+        <type>const Rgb32</type>
+        <definition>const Rgb32 White32(white&lt; unsigned int &gt;())</definition>
+        <argsstring>(white&lt; unsigned int &gt;())</argsstring>
+        <name>White32</name>
+        <briefdescription>
+<para>Return primary color of type Rgb32. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="778"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1ga643cc450dd398a08422d6c5be4680956" prot="public" static="no" mutable="no">
+        <type>const Rgb32s</type>
+        <definition>const Rgb32s White32s(white&lt; int &gt;())</definition>
+        <argsstring>(white&lt; int &gt;())</argsstring>
+        <name>White32s</name>
+        <briefdescription>
+<para>Return primary color of type Rgb32s. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="778"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1gae7d335f51e9b22c17d909ede91474101" prot="public" static="no" mutable="no">
+        <type>const Rgb32f</type>
+        <definition>const Rgb32f White32f(white&lt; float &gt;())</definition>
+        <argsstring>(white&lt; float &gt;())</argsstring>
+        <name>White32f</name>
+        <briefdescription>
+<para>Return primary color of type Rgb32f. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="778"/>
+      </memberdef>
+      <memberdef kind="variable" id="group___primary_colors_1ga472f163bd5521fe28f3d2f9a5c68f5cb" prot="public" static="no" mutable="no">
+        <type>const Rgb64f</type>
+        <definition>const Rgb64f White64f(white&lt; double &gt;())</definition>
+        <argsstring>(white&lt; double &gt;())</argsstring>
+        <name>White64f</name>
+        <briefdescription>
+<para>Return primary color of type Rgb64f. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="778"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="func">
+      <memberdef kind="function" id="group___primary_colors_1gadc4ed12abc0d5a541d12226cb1b4aff3" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>Matrix&lt; T, 3, 1 &gt;</type>
+        <definition>Matrix&lt;T, 3, 1&gt; DO::white</definition>
+        <argsstring>()</argsstring>
+        <name>white</name>
+        <briefdescription>
+<para>White color function. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="689" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="688" bodyend="694"/>
+      </memberdef>
+      <memberdef kind="function" id="group___primary_colors_1ga80b0871f1549bb1f83903fc572b0b6ef" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>Matrix&lt; T, 3, 1 &gt;</type>
+        <definition>Matrix&lt;T, 3, 1&gt; DO::black</definition>
+        <argsstring>()</argsstring>
+        <name>black</name>
+        <briefdescription>
+<para>Black color function. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="697" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="696" bodyend="702"/>
+      </memberdef>
+      <memberdef kind="function" id="group___primary_colors_1gab84f59703c6ed9af4ad0a3a22fbc7dde" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>Matrix&lt; T, 3, 1 &gt;</type>
+        <definition>Matrix&lt;T, 3, 1&gt; DO::red</definition>
+        <argsstring>()</argsstring>
+        <name>red</name>
+        <briefdescription>
+<para>Red color function. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="705" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="704" bodyend="710"/>
+      </memberdef>
+      <memberdef kind="function" id="group___primary_colors_1ga3636f495be874a77dcb70d98f6601abc" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>Matrix&lt; T, 3, 1 &gt;</type>
+        <definition>Matrix&lt;T, 3, 1&gt; DO::green</definition>
+        <argsstring>()</argsstring>
+        <name>green</name>
+        <briefdescription>
+<para>Green color function. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="713" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="712" bodyend="718"/>
+      </memberdef>
+      <memberdef kind="function" id="group___primary_colors_1ga854c3a582fd097c73469f89b73e63915" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>Matrix&lt; T, 3, 1 &gt;</type>
+        <definition>Matrix&lt;T, 3, 1&gt; DO::blue</definition>
+        <argsstring>()</argsstring>
+        <name>blue</name>
+        <briefdescription>
+<para>Blue color function. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="721" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="720" bodyend="726"/>
+      </memberdef>
+      <memberdef kind="function" id="group___primary_colors_1gac171b7ffb96afd731cdb154a9eb41f1c" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>Matrix&lt; T, 3, 1 &gt;</type>
+        <definition>Matrix&lt;T, 3, 1&gt; DO::cyan</definition>
+        <argsstring>()</argsstring>
+        <name>cyan</name>
+        <briefdescription>
+<para>Cyan color function. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="729" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="728" bodyend="734"/>
+      </memberdef>
+      <memberdef kind="function" id="group___primary_colors_1ga03c463032ad2ac98a3661c1801fea9cb" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>Matrix&lt; T, 3, 1 &gt;</type>
+        <definition>Matrix&lt;T, 3, 1&gt; DO::yellow</definition>
+        <argsstring>()</argsstring>
+        <name>yellow</name>
+        <briefdescription>
+<para>Yellow color function. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="737" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="736" bodyend="742"/>
+      </memberdef>
+      <memberdef kind="function" id="group___primary_colors_1gadfcf6ebbbe83635103749fc438e1b4a0" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>Matrix&lt; T, 3, 1 &gt;</type>
+        <definition>Matrix&lt;T, 3, 1&gt; DO::magenta</definition>
+        <argsstring>()</argsstring>
+        <name>magenta</name>
+        <briefdescription>
+<para>Magenta color function. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="745" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="744" bodyend="750"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="define">
+      <memberdef kind="define" id="group___primary_colors_1ga372b1b173b9a8fcb12af311790630867" prot="public" static="no">
+        <name>DEFINE_COLOR_CONSTANT</name>
+        <param><defname>Name</defname></param>
+        <param><defname>function</defname></param>
+        <initializer>/*! \brief Return primary color of type Rgb8. */  \
+  const Rgb8 Name##8(function&lt;unsigned char&gt;());    \
+  /*! \brief Return primary color of type Rgb8s. */ \
+  const Rgb8s Name##8s(function&lt;char&gt;());           \
+  /*! \brief Return primary color of type Rgb16. */ \
+  const Rgb16 Name##16(function&lt;unsigned short&gt;()); \
+  /*! \brief Return primary color of type Rgb16s. */\
+  const Rgb16s Name##16s(function&lt;short&gt;());        \
+  /*! \brief Return primary color of type Rgb32. */ \
+  const Rgb32 Name##32(function&lt;unsigned int&gt;());   \
+  /*! \brief Return primary color of type Rgb32s. */\
+  const Rgb32s Name##32s(function&lt;int&gt;());          \
+  /*! \brief Return primary color of type Rgb32f. */\
+  const Rgb32f Name##32f(function&lt;float&gt;());        \
+  /*! \brief Return primary color of type Rgb64f. */\
+  const Rgb64f Name##64f(function&lt;double&gt;());</initializer>
+        <briefdescription>
+<para>Primary color definition. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="769" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="753" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+  </compounddef>
+</doxygen>

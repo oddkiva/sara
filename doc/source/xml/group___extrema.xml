@@ -1,0 +1,294 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="group___extrema" kind="group">
+    <compoundname>Extrema</compoundname>
+    <title>Extremum Localization</title>
+    <innerclass refid="struct_d_o_1_1_compare_with_neighborhood3" prot="public">DO::CompareWithNeighborhood3</innerclass>
+    <innerclass refid="struct_d_o_1_1_local_extremum" prot="public">DO::LocalExtremum</innerclass>
+    <innerclass refid="struct_d_o_1_1_local_scale_space_extremum" prot="public">DO::LocalScaleSpaceExtremum</innerclass>
+    <innerclass refid="struct_d_o_1_1_local_max" prot="public">DO::LocalMax</innerclass>
+    <innerclass refid="struct_d_o_1_1_local_min" prot="public">DO::LocalMin</innerclass>
+    <innerclass refid="struct_d_o_1_1_local_scale_space_max" prot="public">DO::LocalScaleSpaceMax</innerclass>
+    <innerclass refid="struct_d_o_1_1_local_scale_space_min" prot="public">DO::LocalScaleSpaceMin</innerclass>
+    <innerclass refid="struct_d_o_1_1_strict_local_max" prot="public">DO::StrictLocalMax</innerclass>
+    <innerclass refid="struct_d_o_1_1_strict_local_min" prot="public">DO::StrictLocalMin</innerclass>
+    <innerclass refid="struct_d_o_1_1_strict_local_scale_space_max" prot="public">DO::StrictLocalScaleSpaceMax</innerclass>
+    <innerclass refid="struct_d_o_1_1_strict_local_scale_space_min" prot="public">DO::StrictLocalScaleSpaceMin</innerclass>
+      <sectiondef kind="func">
+      <memberdef kind="function" id="group___extrema_1ga95c749feff3d1a9b4cb1be05828485ed" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>template&lt; typename &gt; class</type>
+            <declname>Compare</declname>
+            <defname>Compare</defname>
+          </param>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>std::vector&lt; Point2i &gt;</type>
+        <definition>std::vector&lt;Point2i&gt; DO::localExtrema</definition>
+        <argsstring>(const Image&lt; T &gt; &amp;I)</argsstring>
+        <name>localExtrema</name>
+        <param>
+          <type>const Image&lt; T &gt; &amp;</type>
+          <declname>I</declname>
+        </param>
+        <briefdescription>
+<para>Get local spatial extrema. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Extrema.hpp" line="74" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Extrema.hpp" bodystart="73" bodyend="82"/>
+      </memberdef>
+      <memberdef kind="function" id="group___extrema_1gaed8171a877c2988aed0346dea279550e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>template&lt; typename &gt; class</type>
+            <declname>Compare</declname>
+            <defname>Compare</defname>
+          </param>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>std::vector&lt; Point2i &gt;</type>
+        <definition>std::vector&lt;Point2i&gt; DO::localScaleSpaceExtrema</definition>
+        <argsstring>(const ImagePyramid&lt; T &gt; &amp;I, int s, int o)</argsstring>
+        <name>localScaleSpaceExtrema</name>
+        <param>
+          <type>const ImagePyramid&lt; T &gt; &amp;</type>
+          <declname>I</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>s</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>o</declname>
+        </param>
+        <briefdescription>
+<para>Get local scale-space extrema at scale <formula id="51">$\sigma(s,o)$</formula>. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Extrema.hpp" line="88" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Extrema.hpp" bodystart="86" bodyend="96"/>
+      </memberdef>
+      <memberdef kind="function" id="group___extrema_1ga6be4e0a86056c9a3863016d548cb8975" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>std::vector&lt; Point2i &gt;</type>
+        <definition>std::vector&lt;Point2i&gt; DO::localMaxima</definition>
+        <argsstring>(const Image&lt; T &gt; &amp;I)</argsstring>
+        <name>localMaxima</name>
+        <param>
+          <type>const Image&lt; T &gt; &amp;</type>
+          <declname>I</declname>
+        </param>
+        <briefdescription>
+<para>Get local spatial maxima. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Extrema.hpp" line="126" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Extrema.hpp" bodystart="125" bodyend="126"/>
+      </memberdef>
+      <memberdef kind="function" id="group___extrema_1ga72f11b8d935e267a7617a4f75af6d935" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>std::vector&lt; Point2i &gt;</type>
+        <definition>std::vector&lt;Point2i&gt; DO::localMinima</definition>
+        <argsstring>(const Image&lt; T &gt; &amp;I)</argsstring>
+        <name>localMinima</name>
+        <param>
+          <type>const Image&lt; T &gt; &amp;</type>
+          <declname>I</declname>
+        </param>
+        <briefdescription>
+<para>Get local spatial minima. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Extrema.hpp" line="130" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Extrema.hpp" bodystart="129" bodyend="130"/>
+      </memberdef>
+      <memberdef kind="function" id="group___extrema_1ga1bcb8f73e7a3ec33fb675c57f0d0f253" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>std::vector&lt; Point2i &gt;</type>
+        <definition>std::vector&lt;Point2i&gt; DO::strictLocalMaxima</definition>
+        <argsstring>(const Image&lt; T &gt; &amp;I)</argsstring>
+        <name>strictLocalMaxima</name>
+        <param>
+          <type>const Image&lt; T &gt; &amp;</type>
+          <declname>I</declname>
+        </param>
+        <briefdescription>
+<para>Get strict local spatial maxima. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Extrema.hpp" line="134" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Extrema.hpp" bodystart="133" bodyend="134"/>
+      </memberdef>
+      <memberdef kind="function" id="group___extrema_1gadb2379959164e3074294f29ceeb900c1" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>std::vector&lt; Point2i &gt;</type>
+        <definition>std::vector&lt;Point2i&gt; DO::strictLocalMinima</definition>
+        <argsstring>(const Image&lt; T &gt; &amp;I)</argsstring>
+        <name>strictLocalMinima</name>
+        <param>
+          <type>const Image&lt; T &gt; &amp;</type>
+          <declname>I</declname>
+        </param>
+        <briefdescription>
+<para>Get strict local spatial minima. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Extrema.hpp" line="138" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Extrema.hpp" bodystart="137" bodyend="138"/>
+      </memberdef>
+      <memberdef kind="function" id="group___extrema_1gaf830b9ca561608d0e73f8c279bf7aaed" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>std::vector&lt; Point2i &gt;</type>
+        <definition>std::vector&lt;Point2i&gt; DO::localScaleSpaceMaxima</definition>
+        <argsstring>(const ImagePyramid&lt; T &gt; &amp;I, int s, int o)</argsstring>
+        <name>localScaleSpaceMaxima</name>
+        <param>
+          <type>const ImagePyramid&lt; T &gt; &amp;</type>
+          <declname>I</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>s</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>o</declname>
+        </param>
+        <briefdescription>
+<para>Get local scale space maxima. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Extrema.hpp" line="144" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Extrema.hpp" bodystart="143" bodyend="144"/>
+      </memberdef>
+      <memberdef kind="function" id="group___extrema_1gaf0308d9902926279ff4a44df0d42cba1" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>std::vector&lt; Point2i &gt;</type>
+        <definition>std::vector&lt;Point2i&gt; DO::localScaleSpaceMinima</definition>
+        <argsstring>(const ImagePyramid&lt; T &gt; &amp;I, int s, int o)</argsstring>
+        <name>localScaleSpaceMinima</name>
+        <param>
+          <type>const ImagePyramid&lt; T &gt; &amp;</type>
+          <declname>I</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>s</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>o</declname>
+        </param>
+        <briefdescription>
+<para>Get local scale space minima. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Extrema.hpp" line="149" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Extrema.hpp" bodystart="148" bodyend="149"/>
+      </memberdef>
+      <memberdef kind="function" id="group___extrema_1gaac5113209911a61d66ee3dd5d9d376cd" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>std::vector&lt; Point2i &gt;</type>
+        <definition>std::vector&lt;Point2i&gt; DO::strictLocalScaleSpaceMaxima</definition>
+        <argsstring>(const ImagePyramid&lt; T &gt; &amp;I, int s, int o)</argsstring>
+        <name>strictLocalScaleSpaceMaxima</name>
+        <param>
+          <type>const ImagePyramid&lt; T &gt; &amp;</type>
+          <declname>I</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>s</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>o</declname>
+        </param>
+        <briefdescription>
+<para>Get strict local scale space maxima. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Extrema.hpp" line="154" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Extrema.hpp" bodystart="153" bodyend="154"/>
+      </memberdef>
+      <memberdef kind="function" id="group___extrema_1ga0c693a917a000520346c242c6cdb2612" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>std::vector&lt; Point2i &gt;</type>
+        <definition>std::vector&lt;Point2i&gt; DO::strictLocalScaleSpaceMinima</definition>
+        <argsstring>(const ImagePyramid&lt; T &gt; &amp;I, int s, int o)</argsstring>
+        <name>strictLocalScaleSpaceMinima</name>
+        <param>
+          <type>const ImagePyramid&lt; T &gt; &amp;</type>
+          <declname>I</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>s</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>o</declname>
+        </param>
+        <briefdescription>
+<para>Get strict local scale space minima. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Extrema.hpp" line="159" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Extrema.hpp" bodystart="158" bodyend="159"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+  </compounddef>
+</doxygen>

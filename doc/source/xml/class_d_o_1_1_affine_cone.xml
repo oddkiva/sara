@@ -1,0 +1,215 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="class_d_o_1_1_affine_cone" kind="class" prot="public">
+    <compoundname>DO::AffineCone</compoundname>
+    <basecompoundref refid="class_d_o_1_1_cone" prot="public" virt="non-virtual">DO::Cone&lt; N &gt;</basecompoundref>
+    <templateparamlist>
+      <param>
+        <type>int</type>
+        <declname>N</declname>
+        <defname>N</defname>
+      </param>
+    </templateparamlist>
+      <sectiondef kind="public-type">
+      <memberdef kind="enum" id="class_d_o_1_1_affine_cone_1aaf8fd5f0e57d456151c951e0f3715fc4" prot="public" static="no">
+        <name>@23</name>
+        <enumvalue id="class_d_o_1_1_affine_cone_1aaf8fd5f0e57d456151c951e0f3715fc4a33cede6b934046a29e456d31efa91468" prot="public">
+          <name>Dimension</name>
+          <initializer>= Base::Dimension</initializer>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/Cone.hpp" line="99" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/Cone.hpp" bodystart="99" bodyend="99"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_d_o_1_1_affine_cone_1aef32f8cfb67c8c467a42ab3706c8145d" prot="public" static="no">
+        <type>Base::Type</type>
+        <definition>typedef Base::Type Type</definition>
+        <argsstring></argsstring>
+        <name>Type</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/Cone.hpp" line="100" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/Cone.hpp" bodystart="100" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_d_o_1_1_affine_cone_1abbab566abe3e8de5e0b8b8d3ca150a0c" prot="public" static="no">
+        <type>Base::Vector</type>
+        <definition>typedef Base::Vector Vector</definition>
+        <argsstring></argsstring>
+        <name>Vector</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/Cone.hpp" line="101" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/Cone.hpp" bodystart="101" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="private-type">
+      <memberdef kind="typedef" id="class_d_o_1_1_affine_cone_1ab5a6dcb475bc740b893773171fecb777" prot="private" static="no">
+        <type><ref refid="class_d_o_1_1_cone" kindref="compound">Cone</ref>&lt; N &gt;</type>
+        <definition>typedef Cone&lt;N&gt; Base</definition>
+        <argsstring></argsstring>
+        <name>Base</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/Cone.hpp" line="96" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/Cone.hpp" bodystart="96" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="class_d_o_1_1_affine_cone_1a2a177a2af044b1d8533f14cf82e70d0c" prot="private" static="no" mutable="no">
+        <type>Vector</type>
+        <definition>Vector vertex_</definition>
+        <argsstring></argsstring>
+        <name>vertex_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/Cone.hpp" line="115" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/Cone.hpp" bodystart="115" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_d_o_1_1_affine_cone_1aa96b6729e5fa231089e6bbde61a06527" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>AffineCone</definition>
+        <argsstring>(const Vector &amp;alpha, const Vector &amp;beta, const Vector &amp;vertex, Type type=Base::Convex, double eps=1e-8)</argsstring>
+        <name>AffineCone</name>
+        <param>
+          <type>const Vector &amp;</type>
+          <declname>alpha</declname>
+        </param>
+        <param>
+          <type>const Vector &amp;</type>
+          <declname>beta</declname>
+        </param>
+        <param>
+          <type>const Vector &amp;</type>
+          <declname>vertex</declname>
+        </param>
+        <param>
+          <type>Type</type>
+          <declname>type</declname>
+          <defval>Base::Convex</defval>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>eps</declname>
+          <defval>1e-8</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/Cone.hpp" line="106" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/Cone.hpp" bodystart="103" bodyend="106"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_affine_cone_1a0863d5442a0accbbc6b5c38d47d1469a" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>const Vector &amp;</type>
+        <definition>const Vector&amp; vertex</definition>
+        <argsstring>() const </argsstring>
+        <name>vertex</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/Cone.hpp" line="108" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/Cone.hpp" bodystart="108" bodyend="108"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="friend">
+      <memberdef kind="friend" id="class_d_o_1_1_affine_cone_1a765ce55d98f7dcb952389c0b31b29468" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>friend bool</type>
+        <definition>bool inside</definition>
+        <argsstring>(const Vector &amp;p, const AffineCone &amp;K)</argsstring>
+        <name>inside</name>
+        <param>
+          <type>const Vector &amp;</type>
+          <declname>p</declname>
+        </param>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_affine_cone" kindref="compound">AffineCone</ref> &amp;</type>
+          <declname>K</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/Cone.hpp" line="112" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/Cone.hpp" bodystart="111" bodyend="112"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="5">
+        <label>Cone&lt; N &gt;</label>
+        <link refid="class_d_o_1_1_cone"/>
+      </node>
+      <node id="4">
+        <label>AffineCone&lt; N &gt;</label>
+        <link refid="class_d_o_1_1_affine_cone"/>
+        <childnode refid="5" relation="public-inheritance">
+        </childnode>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="7">
+        <label>Cone&lt; N &gt;</label>
+        <link refid="class_d_o_1_1_cone"/>
+      </node>
+      <node id="6">
+        <label>AffineCone&lt; N &gt;</label>
+        <link refid="class_d_o_1_1_affine_cone"/>
+        <childnode refid="7" relation="public-inheritance">
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/Cone.hpp" line="95" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/Cone.hpp" bodystart="94" bodyend="116"/>
+    <listofallmembers>
+      <member refid="class_d_o_1_1_affine_cone_1aa96b6729e5fa231089e6bbde61a06527" prot="public" virt="non-virtual"><scope>DO::AffineCone</scope><name>AffineCone</name></member>
+      <member refid="class_d_o_1_1_cone_1a987e81d1c0a3aa97608775e7028bf39d" prot="public" virt="non-virtual"><scope>DO::AffineCone</scope><name>alpha</name></member>
+      <member refid="class_d_o_1_1_affine_cone_1ab5a6dcb475bc740b893773171fecb777" prot="private" virt="non-virtual"><scope>DO::AffineCone</scope><name>Base</name></member>
+      <member refid="class_d_o_1_1_cone_1af6b91fabf4f30bc1206416b879953c22" prot="public" virt="non-virtual"><scope>DO::AffineCone</scope><name>basis</name></member>
+      <member refid="class_d_o_1_1_cone_1a2812094453b9a4e6094f0b18ae91633a" prot="public" virt="non-virtual"><scope>DO::AffineCone</scope><name>Basis</name></member>
+      <member refid="class_d_o_1_1_cone_1a6021856e35c7dfc047cbe0b492edb609" prot="protected" virt="non-virtual"><scope>DO::AffineCone</scope><name>basis_</name></member>
+      <member refid="class_d_o_1_1_cone_1af249452e858f5f7642ce3c38a86e3dbf" prot="public" virt="non-virtual"><scope>DO::AffineCone</scope><name>beta</name></member>
+      <member refid="class_d_o_1_1_cone_1a1d1cfd8ffb84e947f82999c682b666a7a4067cab9a3b8a162e30a3c2528f85054" prot="public" virt="non-virtual"><scope>DO::AffineCone</scope><name>Blunt</name></member>
+      <member refid="class_d_o_1_1_cone_1a6664867d56597447bd0d63139774504f" prot="public" virt="non-virtual"><scope>DO::AffineCone</scope><name>Cone</name></member>
+      <member refid="class_d_o_1_1_cone_1a9d12cca2a30cd161de164fe4adf19eca" prot="protected" virt="non-virtual"><scope>DO::AffineCone</scope><name>contains</name></member>
+      <member refid="class_d_o_1_1_cone_1a1d1cfd8ffb84e947f82999c682b666a7a4f784258e1855b27e4bae49edaf7167d" prot="public" virt="non-virtual"><scope>DO::AffineCone</scope><name>Convex</name></member>
+      <member refid="class_d_o_1_1_affine_cone_1aaf8fd5f0e57d456151c951e0f3715fc4a33cede6b934046a29e456d31efa91468" prot="public" virt="non-virtual"><scope>DO::AffineCone</scope><name>Dimension</name></member>
+      <member refid="class_d_o_1_1_cone_1a92918be88430888e3a2879fe331cc98c" prot="protected" virt="non-virtual"><scope>DO::AffineCone</scope><name>eps_</name></member>
+      <member refid="class_d_o_1_1_affine_cone_1a765ce55d98f7dcb952389c0b31b29468" prot="public" virt="non-virtual"><scope>DO::AffineCone</scope><name>inside</name></member>
+      <member refid="class_d_o_1_1_cone_1a1d1cfd8ffb84e947f82999c682b666a7ad8cc620f2f071df5e4e08e0895c4b344" prot="public" virt="non-virtual"><scope>DO::AffineCone</scope><name>Pointed</name></member>
+      <member refid="class_d_o_1_1_cone_1a1d1cfd8ffb84e947f82999c682b666a7a28efd6bb856a41cb98eba3aaa8c82fbf" prot="public" virt="non-virtual"><scope>DO::AffineCone</scope><name>PositiveCosine</name></member>
+      <member refid="class_d_o_1_1_affine_cone_1aef32f8cfb67c8c467a42ab3706c8145d" prot="public" virt="non-virtual"><scope>DO::AffineCone</scope><name>Type</name></member>
+      <member refid="class_d_o_1_1_cone_1a574a64eb377123002e5a1e010e47ba1d" prot="protected" virt="non-virtual"><scope>DO::AffineCone</scope><name>type_</name></member>
+      <member refid="class_d_o_1_1_affine_cone_1abbab566abe3e8de5e0b8b8d3ca150a0c" prot="public" virt="non-virtual"><scope>DO::AffineCone</scope><name>Vector</name></member>
+      <member refid="class_d_o_1_1_affine_cone_1a0863d5442a0accbbc6b5c38d47d1469a" prot="public" virt="non-virtual"><scope>DO::AffineCone</scope><name>vertex</name></member>
+      <member refid="class_d_o_1_1_affine_cone_1a2a177a2af044b1d8533f14cf82e70d0c" prot="private" virt="non-virtual"><scope>DO::AffineCone</scope><name>vertex_</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

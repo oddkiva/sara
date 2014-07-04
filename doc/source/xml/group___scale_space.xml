@@ -1,0 +1,162 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="group___scale_space" kind="group">
+    <compoundname>ScaleSpace</compoundname>
+    <title>Scale-Space Representation</title>
+    <innerclass refid="class_d_o_1_1_image_pyramid_params" prot="public">DO::ImagePyramidParams</innerclass>
+    <innerclass refid="class_d_o_1_1_image_pyramid" prot="public">DO::ImagePyramid</innerclass>
+      <sectiondef kind="user-defined">
+      <memberdef kind="function" id="group___scale_space_1gac43ae8da0a66097395da0436a50ae854" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>ImagePyramid&lt; T &gt;</type>
+        <definition>ImagePyramid&lt;T&gt; DO::gaussianPyramid</definition>
+        <argsstring>(const Image&lt; T &gt; &amp;image, const ImagePyramidParams &amp;params=ImagePyramidParams())</argsstring>
+        <name>gaussianPyramid</name>
+        <param>
+          <type>const Image&lt; T &gt; &amp;</type>
+          <declname>image</declname>
+        </param>
+        <param>
+          <type>const ImagePyramidParams &amp;</type>
+          <declname>params</declname>
+          <defval>ImagePyramidParams()</defval>
+        </param>
+        <briefdescription>
+<para>Computes a pyramid of Gaussians. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/DoG.hpp" line="29" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/DoG.hpp" bodystart="27" bodyend="96"/>
+      </memberdef>
+      <memberdef kind="function" id="group___scale_space_1ga4387db3d795aaa1ed48401930ce780ba" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>ImagePyramid&lt; T &gt;</type>
+        <definition>ImagePyramid&lt;T&gt; DO::DoGPyramid</definition>
+        <argsstring>(const ImagePyramid&lt; T &gt; &amp;gaussians)</argsstring>
+        <name>DoGPyramid</name>
+        <param>
+          <type>const ImagePyramid&lt; T &gt; &amp;</type>
+          <declname>gaussians</declname>
+        </param>
+        <briefdescription>
+<para>Computes a pyramid of difference of Gaussians from the <ref refid="struct_d_o_1_1_gaussian" kindref="compound">Gaussian</ref> pyramid. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/DoG.hpp" line="100" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/DoG.hpp" bodystart="99" bodyend="117"/>
+      </memberdef>
+      <memberdef kind="function" id="group___scale_space_1ga952f368693735ace06251f2102d8affb" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>ImagePyramid&lt; T &gt;</type>
+        <definition>ImagePyramid&lt;T&gt; DO::LoGPyramid</definition>
+        <argsstring>(const ImagePyramid&lt; T &gt; &amp;gaussians)</argsstring>
+        <name>LoGPyramid</name>
+        <param>
+          <type>const ImagePyramid&lt; T &gt; &amp;</type>
+          <declname>gaussians</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Computes a pyramid of scale-normalized Laplacians of Gaussians from the <ref refid="struct_d_o_1_1_gaussian" kindref="compound">Gaussian</ref> pyramid. </para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/DoG.hpp" line="122" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/DoG.hpp" bodystart="121" bodyend="141"/>
+      </memberdef>
+      <memberdef kind="function" id="group___scale_space_1ga5594bf25921d4964fb5c4f8d2c42c758" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>Matrix&lt; T, 3, 1 &gt;</type>
+        <definition>Matrix&lt;T, 3, 1&gt; DO::gradient</definition>
+        <argsstring>(const ImagePyramid&lt; T &gt; &amp;I, int x, int y, int s, int o)</argsstring>
+        <name>gradient</name>
+        <param>
+          <type>const ImagePyramid&lt; T &gt; &amp;</type>
+          <declname>I</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>s</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>o</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Computes the gradient vector of <formula id="67">$I(x,y,\sigma)$</formula> at <formula id="6">$(x,y,\sigma)$</formula>, where <formula id="68">$\sigma = 2^{s/S + o}$</formula> where <formula id="29">$S$</formula> is the number of scales per octave. </para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/DoG.hpp" line="147" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/DoG.hpp" bodystart="146" bodyend="164"/>
+      </memberdef>
+      <memberdef kind="function" id="group___scale_space_1gac25e0eee069b818476255c4d02512e5f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>Matrix&lt; T, 3, 3 &gt;</type>
+        <definition>Matrix&lt;T, 3, 3&gt; DO::hessian</definition>
+        <argsstring>(const ImagePyramid&lt; T &gt; &amp;I, int x, int y, int s, int o)</argsstring>
+        <name>hessian</name>
+        <param>
+          <type>const ImagePyramid&lt; T &gt; &amp;</type>
+          <declname>I</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>s</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>o</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Computes the hessian matrix of <formula id="67">$I(x,y,\sigma)$</formula> at <formula id="6">$(x,y,\sigma)$</formula>, where <formula id="68">$\sigma = 2^{s/S + o}$</formula> where <formula id="29">$S$</formula> is the number of scales per octave. </para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/DoG.hpp" line="170" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/DoG.hpp" bodystart="169" bodyend="199"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+  </compounddef>
+</doxygen>

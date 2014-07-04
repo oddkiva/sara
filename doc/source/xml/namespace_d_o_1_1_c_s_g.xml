@@ -1,0 +1,81 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="namespace_d_o_1_1_c_s_g" kind="namespace">
+    <compoundname>DO::CSG</compoundname>
+    <innerclass refid="class_d_o_1_1_c_s_g_1_1_object" prot="public">DO::CSG::Object</innerclass>
+    <innerclass refid="class_d_o_1_1_c_s_g_1_1_singleton" prot="public">DO::CSG::Singleton</innerclass>
+    <innerclass refid="class_d_o_1_1_c_s_g_1_1_difference" prot="public">DO::CSG::Difference</innerclass>
+    <innerclass refid="class_d_o_1_1_c_s_g_1_1_union" prot="public">DO::CSG::Union</innerclass>
+    <innerclass refid="class_d_o_1_1_c_s_g_1_1_intersection" prot="public">DO::CSG::Intersection</innerclass>
+      <sectiondef kind="func">
+      <memberdef kind="function" id="namespace_d_o_1_1_c_s_g_1ab70a60c9b740ac51c3ee20741242ec0d" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_c_s_g_1_1_difference" kindref="compound">Difference</ref></type>
+        <definition>Difference DO::CSG::operator-</definition>
+        <argsstring>(const Object &amp;o1, const Object &amp;o2)</argsstring>
+        <name>operator-</name>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_c_s_g_1_1_object" kindref="compound">Object</ref> &amp;</type>
+          <declname>o1</declname>
+        </param>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_c_s_g_1_1_object" kindref="compound">Object</ref> &amp;</type>
+          <declname>o2</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_c_s_g_1_1_difference" kindref="compound">Difference</ref> of two objects. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/CSG.hpp" line="72" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/CSG.hpp" bodystart="71" bodyend="72"/>
+      </memberdef>
+      <memberdef kind="function" id="namespace_d_o_1_1_c_s_g_1a3c3376f28f9e55731ec99d137dcab2e1" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_c_s_g_1_1_intersection" kindref="compound">Intersection</ref></type>
+        <definition>Intersection DO::CSG::operator*</definition>
+        <argsstring>(const Object &amp;o1, const Object &amp;o2)</argsstring>
+        <name>operator*</name>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_c_s_g_1_1_object" kindref="compound">Object</ref> &amp;</type>
+          <declname>o1</declname>
+        </param>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_c_s_g_1_1_object" kindref="compound">Object</ref> &amp;</type>
+          <declname>o2</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_c_s_g_1_1_intersection" kindref="compound">Intersection</ref> of two objects. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/CSG.hpp" line="76" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/CSG.hpp" bodystart="75" bodyend="76"/>
+      </memberdef>
+      <memberdef kind="function" id="namespace_d_o_1_1_c_s_g_1a73d4acd9b13f5abba66977c85bddc11a" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_c_s_g_1_1_union" kindref="compound">Union</ref></type>
+        <definition>Union DO::CSG::operator+</definition>
+        <argsstring>(const Object &amp;o1, const Object &amp;o2)</argsstring>
+        <name>operator+</name>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_c_s_g_1_1_object" kindref="compound">Object</ref> &amp;</type>
+          <declname>o1</declname>
+        </param>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_c_s_g_1_1_object" kindref="compound">Object</ref> &amp;</type>
+          <declname>o2</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_c_s_g_1_1_union" kindref="compound">Union</ref> of two objects. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/CSG.hpp" line="80" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/CSG.hpp" bodystart="79" bodyend="80"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/CSG.hpp" line="16"/>
+  </compounddef>
+</doxygen>

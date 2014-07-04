@@ -1,0 +1,413 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="group___image_drawing" kind="group">
+    <compoundname>ImageDrawing</compoundname>
+    <title>Drawing Image</title>
+      <sectiondef kind="func">
+      <memberdef kind="function" id="group___image_drawing_1gac01a694d079363a4ee4e0c06baaddcb7" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::drawPoint</definition>
+        <argsstring>(Image&lt; Rgb8 &gt; &amp;image, int x, int y, const Color3ub &amp;c)</argsstring>
+        <name>drawPoint</name>
+        <param>
+          <type>Image&lt; Rgb8 &gt; &amp;</type>
+          <declname>image</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Draw point on image. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">image</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>image. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">x</parametername>
+<parametername direction="in">y</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>coordinates. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGB color. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/ImageDraw.hpp" line="66"/>
+      </memberdef>
+      <memberdef kind="function" id="group___image_drawing_1gaf99b9267edc72d74cda95f33baaa7e2a" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::drawCircle</definition>
+        <argsstring>(Image&lt; Rgb8 &gt; &amp;image, int xc, int yc, int r, const Color3ub &amp;c, int penWidth=1)</argsstring>
+        <name>drawCircle</name>
+        <param>
+          <type>Image&lt; Rgb8 &gt; &amp;</type>
+          <declname>image</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>xc</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>yc</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>r</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>c</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>penWidth</declname>
+          <defval>1</defval>
+        </param>
+        <briefdescription>
+<para>Draw circle on image. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">image</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>image. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">xc</parametername>
+<parametername direction="in">yc</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>circle center. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">r</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>circle radius. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGB color. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">penWidth</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>width of the contour. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/ImageDraw.hpp" line="77"/>
+      </memberdef>
+      <memberdef kind="function" id="group___image_drawing_1ga451047caac18dd6bfb59bdc9b983eed1" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::drawLine</definition>
+        <argsstring>(Image&lt; Rgb8 &gt; &amp;image, int x1, int y1, int x2, int y2, const Color3ub &amp;c, int penWidth=1)</argsstring>
+        <name>drawLine</name>
+        <param>
+          <type>Image&lt; Rgb8 &gt; &amp;</type>
+          <declname>image</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>x1</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y1</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>x2</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y2</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>c</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>penWidth</declname>
+          <defval>1</defval>
+        </param>
+        <briefdescription>
+<para>Draw line on image. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">image</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>image. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">x1</parametername>
+<parametername direction="in">y1</parametername>
+<parametername direction="in">x2</parametername>
+<parametername direction="in">y2</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>start and end points of the line. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGB color. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">penWidth</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>width of the contour. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/ImageDraw.hpp" line="88"/>
+      </memberdef>
+      <memberdef kind="function" id="group___image_drawing_1ga6c2140a7a5e0cf130a3dd51abe4376ad" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::drawRect</definition>
+        <argsstring>(Image&lt; Rgb8 &gt; &amp;image, int x, int y, int w, int h, const Color3ub &amp;c, int penWidth=1)</argsstring>
+        <name>drawRect</name>
+        <param>
+          <type>Image&lt; Rgb8 &gt; &amp;</type>
+          <declname>image</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>w</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>h</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>c</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>penWidth</declname>
+          <defval>1</defval>
+        </param>
+        <briefdescription>
+<para>Draw rectangle on image. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">image</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>image. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">x</parametername>
+<parametername direction="in">y</parametername>
+<parametername direction="in">w</parametername>
+<parametername direction="in">h</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>start and end points of the line. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGB color. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">penWidth</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>width of the contour. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/ImageDraw.hpp" line="99"/>
+      </memberdef>
+      <memberdef kind="function" id="group___image_drawing_1gafe36fdf2a8b63bc7fd18457c28064346" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::fillRect</definition>
+        <argsstring>(Image&lt; Rgb8 &gt; &amp;image, int x, int y, int w, int h, const Color3ub &amp;c)</argsstring>
+        <name>fillRect</name>
+        <param>
+          <type>Image&lt; Rgb8 &gt; &amp;</type>
+          <declname>image</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>w</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>h</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Draw color-filled rectangle on image. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">image</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>image. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">x</parametername>
+<parametername direction="in">y</parametername>
+<parametername direction="in">w</parametername>
+<parametername direction="in">h</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>start and end points of the line. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGB color. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/ImageDraw.hpp" line="108"/>
+      </memberdef>
+      <memberdef kind="function" id="group___image_drawing_1gae92bc8aef0c29edc577c531d505b04bb" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::fillCircle</definition>
+        <argsstring>(Image&lt; Rgb8 &gt; &amp;image, int x, int y, int r, const Color3ub &amp;c)</argsstring>
+        <name>fillCircle</name>
+        <param>
+          <type>Image&lt; Rgb8 &gt; &amp;</type>
+          <declname>image</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>r</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Draw color-filled circle on image. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">image</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>image. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">x</parametername>
+<parametername direction="in">y</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>circle center. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">r</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>circle radius. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGB color. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/ImageDraw.hpp" line="118"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+  </compounddef>
+</doxygen>

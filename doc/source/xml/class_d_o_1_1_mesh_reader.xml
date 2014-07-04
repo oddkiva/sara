@@ -1,0 +1,183 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="class_d_o_1_1_mesh_reader" kind="class" prot="public">
+    <compoundname>DO::MeshReader</compoundname>
+    <includes refid="_mesh_8hpp" local="no">Mesh.hpp</includes>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="class_d_o_1_1_mesh_reader_1a18cbb5bc7be9fd9e797c733339e72a96" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; std::vector&lt; size_t &gt; &gt;</type>
+        <definition>std::vector&lt;std::vector&lt;size_t&gt; &gt; vertex_rings_</definition>
+        <argsstring></argsstring>
+        <name>vertex_rings_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" line="200" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" bodystart="200" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_mesh_reader_1ac8dd9b752efd0f4cad105d910559c400" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; std::vector&lt; size_t &gt; &gt;</type>
+        <definition>std::vector&lt;std::vector&lt;size_t&gt; &gt; face_rings_</definition>
+        <argsstring></argsstring>
+        <name>face_rings_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" line="201" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" bodystart="201" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_d_o_1_1_mesh_reader_1aab84cfe6462321af9e07cd832f82bdd9" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename Vector</type>
+          </param>
+        </templateparamlist>
+        <type>bool</type>
+        <definition>bool readObjFile</definition>
+        <argsstring>(SimpleMesh&lt; Vector, Face3 &gt; &amp;mesh, const std::string &amp;fileName)</argsstring>
+        <name>readObjFile</name>
+        <param>
+          <type><ref refid="class_d_o_1_1_simple_mesh" kindref="compound">SimpleMesh</ref>&lt; Vector, <ref refid="group___draw3_d_1gab412213b30248bb6aadf015e4dd4c04e" kindref="member">Face3</ref> &gt; &amp;</type>
+          <declname>mesh</declname>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>fileName</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" line="100" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" bodystart="98" bodyend="136"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="private-func">
+      <memberdef kind="function" id="class_d_o_1_1_mesh_reader_1a41f9be1e59a2a0cef1ff15269a9b0a7e" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename Vector</type>
+          </param>
+          <param>
+            <type>typename Face</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void computeVertexRings</definition>
+        <argsstring>(const SimpleMesh&lt; Vector, Face &gt; &amp;mesh)</argsstring>
+        <name>computeVertexRings</name>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_simple_mesh" kindref="compound">SimpleMesh</ref>&lt; Vector, Face &gt; &amp;</type>
+          <declname>mesh</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" line="141" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" bodystart="140" bodyend="164"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_mesh_reader_1aaab3fcebdb2738c5599ea008eeea73a1" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename Vector</type>
+          </param>
+          <param>
+            <type>typename Face</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void computeFaceRings</definition>
+        <argsstring>(const SimpleMesh&lt; Vector, Face &gt; &amp;mesh)</argsstring>
+        <name>computeFaceRings</name>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_simple_mesh" kindref="compound">SimpleMesh</ref>&lt; Vector, Face &gt; &amp;</type>
+          <declname>mesh</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" line="168" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" bodystart="167" bodyend="176"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_mesh_reader_1a5d3419666cc68b61f81cc6903693edbd" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename Vector</type>
+          </param>
+          <param>
+            <type>typename Face</type>
+          </param>
+        </templateparamlist>
+        <type>Vector</type>
+        <definition>Vector computeVertexNormal</definition>
+        <argsstring>(const SimpleMesh&lt; Vector, Face &gt; &amp;mesh, size_t v)</argsstring>
+        <name>computeVertexNormal</name>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_simple_mesh" kindref="compound">SimpleMesh</ref>&lt; Vector, Face &gt; &amp;</type>
+          <declname>mesh</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>v</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" line="181" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" bodystart="179" bodyend="189"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_mesh_reader_1ae3935669077a1b77552151d0300f50e4" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename Vector</type>
+          </param>
+          <param>
+            <type>typename Face</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void computeNormals</definition>
+        <argsstring>(SimpleMesh&lt; Vector, Face &gt; &amp;mesh)</argsstring>
+        <name>computeNormals</name>
+        <param>
+          <type><ref refid="class_d_o_1_1_simple_mesh" kindref="compound">SimpleMesh</ref>&lt; Vector, Face &gt; &amp;</type>
+          <declname>mesh</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" line="193" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" bodystart="192" bodyend="197"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Mesh reader (WARNING: still experimental!). </para>    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" line="94" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" bodystart="93" bodyend="202"/>
+    <listofallmembers>
+      <member refid="class_d_o_1_1_mesh_reader_1aaab3fcebdb2738c5599ea008eeea73a1" prot="private" virt="non-virtual"><scope>DO::MeshReader</scope><name>computeFaceRings</name></member>
+      <member refid="class_d_o_1_1_mesh_reader_1ae3935669077a1b77552151d0300f50e4" prot="private" virt="non-virtual"><scope>DO::MeshReader</scope><name>computeNormals</name></member>
+      <member refid="class_d_o_1_1_mesh_reader_1a5d3419666cc68b61f81cc6903693edbd" prot="private" virt="non-virtual"><scope>DO::MeshReader</scope><name>computeVertexNormal</name></member>
+      <member refid="class_d_o_1_1_mesh_reader_1a41f9be1e59a2a0cef1ff15269a9b0a7e" prot="private" virt="non-virtual"><scope>DO::MeshReader</scope><name>computeVertexRings</name></member>
+      <member refid="class_d_o_1_1_mesh_reader_1ac8dd9b752efd0f4cad105d910559c400" prot="private" virt="non-virtual"><scope>DO::MeshReader</scope><name>face_rings_</name></member>
+      <member refid="class_d_o_1_1_mesh_reader_1aab84cfe6462321af9e07cd832f82bdd9" prot="public" virt="non-virtual"><scope>DO::MeshReader</scope><name>readObjFile</name></member>
+      <member refid="class_d_o_1_1_mesh_reader_1a18cbb5bc7be9fd9e797c733339e72a96" prot="private" virt="non-virtual"><scope>DO::MeshReader</scope><name>vertex_rings_</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

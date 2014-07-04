@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="dir_45fa7d2be159dd8dd51b5d6b24629f14" kind="dir">
+    <compoundname>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core</compoundname>
+    <innerfile refid="_color_8hpp">Color.hpp</innerfile>
+    <innerfile refid="_debug_utilities_8hpp">DebugUtilities.hpp</innerfile>
+    <innerfile refid="_eigen_extension_8hpp">EigenExtension.hpp</innerfile>
+    <innerfile refid="_image_8hpp">Image.hpp</innerfile>
+    <innerfile refid="_locator_8hpp">Locator.hpp</innerfile>
+    <innerfile refid="_meta_8hpp">Meta.hpp</innerfile>
+    <innerfile refid="_multi_array_8hpp">MultiArray.hpp</innerfile>
+    <innerfile refid="_sparse_multi_array_8hpp">SparseMultiArray.hpp</innerfile>
+    <innerfile refid="_static_assert_8hpp">StaticAssert.hpp</innerfile>
+    <innerfile refid="_std_vector_helpers_8hpp">StdVectorHelpers.hpp</innerfile>
+    <innerfile refid="_stringify_8hpp">Stringify.hpp</innerfile>
+    <innerfile refid="_subimage_8hpp">Subimage.hpp</innerfile>
+    <innerfile refid="_timer_8hpp">Timer.hpp</innerfile>
+    <innerfile refid="_tree_8hpp">Tree.hpp</innerfile>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/"/>
+  </compounddef>
+</doxygen>

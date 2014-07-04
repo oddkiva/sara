@@ -1,0 +1,105 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="class_d_o_1_1_half_space3" kind="class" prot="public">
+    <compoundname>DO::HalfSpace3</compoundname>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="class_d_o_1_1_half_space3_1aaf1a56c9148fd1c251bebecc28aa2aac" prot="private" static="no" mutable="no">
+        <type>Vector3d</type>
+        <definition>Vector3d n0</definition>
+        <argsstring></argsstring>
+        <name>n0</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/HalfSpace.hpp" line="7" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/HalfSpace.hpp" bodystart="7" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_half_space3_1a96630e3c705a2dd7a7b3db215b833941" prot="private" static="no" mutable="no">
+        <type><ref refid="group___eigen_typedefs_1gaa979df133eaeb0d59bc4c11cc09324d1" kindref="member">Point3d</ref></type>
+        <definition>Point3d p0</definition>
+        <argsstring></argsstring>
+        <name>p0</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/HalfSpace.hpp" line="8" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/HalfSpace.hpp" bodystart="8" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_d_o_1_1_half_space3_1a2af52072edd600e6bd67de57ace92b75" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>HalfSpace3</definition>
+        <argsstring>()</argsstring>
+        <name>HalfSpace3</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/HalfSpace.hpp" line="11" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/HalfSpace.hpp" bodystart="11" bodyend="11"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_half_space3_1aa7aee87b8d2e049aba53cf0d787bcad3" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>HalfSpace3</definition>
+        <argsstring>(const Vector3d &amp;normal, const Point3d &amp;point)</argsstring>
+        <name>HalfSpace3</name>
+        <param>
+          <type>const Vector3d &amp;</type>
+          <declname>normal</declname>
+        </param>
+        <param>
+          <type>const <ref refid="group___eigen_typedefs_1gaa979df133eaeb0d59bc4c11cc09324d1" kindref="member">Point3d</ref> &amp;</type>
+          <declname>point</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/HalfSpace.hpp" line="13" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/HalfSpace.hpp" bodystart="12" bodyend="13"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="friend">
+      <memberdef kind="friend" id="class_d_o_1_1_half_space3_1adf30efbb1981d1bb150af3c15ebf6137" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>friend bool</type>
+        <definition>bool inside</definition>
+        <argsstring>(const Point3d &amp;p, const HalfSpace3 &amp;hs)</argsstring>
+        <name>inside</name>
+        <param>
+          <type>const <ref refid="group___eigen_typedefs_1gaa979df133eaeb0d59bc4c11cc09324d1" kindref="member">Point3d</ref> &amp;</type>
+          <declname>p</declname>
+        </param>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_half_space3" kindref="compound">HalfSpace3</ref> &amp;</type>
+          <declname>hs</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/HalfSpace.hpp" line="16" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/HalfSpace.hpp" bodystart="15" bodyend="16"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/HalfSpace.hpp" line="6" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/HalfSpace.hpp" bodystart="5" bodyend="17"/>
+    <listofallmembers>
+      <member refid="class_d_o_1_1_half_space3_1a2af52072edd600e6bd67de57ace92b75" prot="public" virt="non-virtual"><scope>DO::HalfSpace3</scope><name>HalfSpace3</name></member>
+      <member refid="class_d_o_1_1_half_space3_1aa7aee87b8d2e049aba53cf0d787bcad3" prot="public" virt="non-virtual"><scope>DO::HalfSpace3</scope><name>HalfSpace3</name></member>
+      <member refid="class_d_o_1_1_half_space3_1adf30efbb1981d1bb150af3c15ebf6137" prot="public" virt="non-virtual"><scope>DO::HalfSpace3</scope><name>inside</name></member>
+      <member refid="class_d_o_1_1_half_space3_1aaf1a56c9148fd1c251bebecc28aa2aac" prot="private" virt="non-virtual"><scope>DO::HalfSpace3</scope><name>n0</name></member>
+      <member refid="class_d_o_1_1_half_space3_1a96630e3c705a2dd7a7b3db215b833941" prot="private" virt="non-virtual"><scope>DO::HalfSpace3</scope><name>p0</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="struct_d_o_1_1_meta_1_1_static_assertion_3_01true_01_4" kind="struct" prot="public">
+    <compoundname>DO::Meta::StaticAssertion&lt; true &gt;</compoundname>
+    <includes refid="_static_assert_8hpp" local="no">StaticAssert.hpp</includes>
+    <templateparamlist>
+    </templateparamlist>
+    <briefdescription>
+<para>Used for the implementation of DO_STATIC_ASSERT. </para>    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/StaticAssert.hpp" line="67" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/StaticAssert.hpp" bodystart="67" bodyend="67"/>
+    <listofallmembers>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

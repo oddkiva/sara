@@ -1,0 +1,795 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="group___differential" kind="group">
+    <compoundname>Differential</compoundname>
+    <title>Differential Calculus, Norms, and Other Stuff</title>
+    <innerclass refid="struct_d_o_1_1_determinant" prot="public">DO::Determinant</innerclass>
+    <innerclass refid="struct_d_o_1_1_differential" prot="public">DO::Differential</innerclass>
+    <innerclass refid="struct_d_o_1_1_differential_3_01_n_00_010_01_4" prot="public">DO::Differential&lt; N, 0 &gt;</innerclass>
+    <innerclass refid="struct_d_o_1_1_gradient" prot="public">DO::Gradient</innerclass>
+    <innerclass refid="struct_d_o_1_1_laplacian" prot="public">DO::Laplacian</innerclass>
+    <innerclass refid="struct_d_o_1_1_hessian" prot="public">DO::Hessian</innerclass>
+    <innerclass refid="struct_d_o_1_1_second_moment_matrix" prot="public">DO::SecondMomentMatrix</innerclass>
+      <sectiondef kind="user-defined">
+      <memberdef kind="function" id="group___differential_1ga7315b78bba45e4a1882ad9566b99e949" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>M</declname>
+            <defname>M</defname>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>N</declname>
+            <defname>N</defname>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>D</declname>
+            <defname>D</defname>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::squaredNorm</definition>
+        <argsstring>(Image&lt; T, D &gt; &amp;dst, const Image&lt; Matrix&lt; T, M, N &gt;, D &gt; &amp;src)</argsstring>
+        <name>squaredNorm</name>
+        <param>
+          <type>Image&lt; T, D &gt; &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>const Image&lt; Matrix&lt; T, M, N &gt;, D &gt; &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para>Squared norm computation. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">src</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>scalar field. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="inout">scalar</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>field of squared norms </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Norm.hpp" line="31" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Norm.hpp" bodystart="30" bodyend="43"/>
+      </memberdef>
+      <memberdef kind="function" id="group___differential_1ga8880ca08e1e287668f610db64f54cfea" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>M</declname>
+            <defname>M</defname>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>N</declname>
+            <defname>N</defname>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>D</declname>
+            <defname>D</defname>
+          </param>
+        </templateparamlist>
+        <type>Image&lt; T, D &gt;</type>
+        <definition>Image&lt;T, D&gt; DO::squaredNorm</definition>
+        <argsstring>(const Image&lt; Matrix&lt; T, M, N &gt;, D &gt; &amp;src)</argsstring>
+        <name>squaredNorm</name>
+        <param>
+          <type>const Image&lt; Matrix&lt; T, M, N &gt;, D &gt; &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para>Squared norm computation. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">src</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>scalar field. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>scalar field of squared norms </para></simplesect>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Norm.hpp" line="51" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Norm.hpp" bodystart="50" bodyend="55"/>
+      </memberdef>
+      <memberdef kind="function" id="group___differential_1ga64a1c18b3a769c991d4458cbf1b5b85c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>M</declname>
+            <defname>M</defname>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>N</declname>
+            <defname>N</defname>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>D</declname>
+            <defname>D</defname>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::blueNorm</definition>
+        <argsstring>(Image&lt; T, D &gt; &amp;dst, const Image&lt; Matrix&lt; T, M, N &gt;, D &gt; &amp;src)</argsstring>
+        <name>blueNorm</name>
+        <param>
+          <type>Image&lt; T, D &gt; &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>const Image&lt; Matrix&lt; T, M, N &gt;, D &gt; &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para>Blue norm computation. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">src</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>scalar field. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="inout">scalar</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>field of norms </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Norm.hpp" line="63" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Norm.hpp" bodystart="62" bodyend="75"/>
+      </memberdef>
+      <memberdef kind="function" id="group___differential_1ga3e186700b17ea6fc33f987f81c6a6ac6" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>M</declname>
+            <defname>M</defname>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>N</declname>
+            <defname>N</defname>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>D</declname>
+            <defname>D</defname>
+          </param>
+        </templateparamlist>
+        <type>Image&lt; T, D &gt;</type>
+        <definition>Image&lt;T, D&gt; DO::blueNorm</definition>
+        <argsstring>(const Image&lt; Matrix&lt; T, M, N &gt;, D &gt; &amp;src)</argsstring>
+        <name>blueNorm</name>
+        <param>
+          <type>const Image&lt; Matrix&lt; T, M, N &gt;, D &gt; &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para>Blue norm computation. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">src</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>scalar field. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>scalar field of norms </para></simplesect>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Norm.hpp" line="83" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Norm.hpp" bodystart="82" bodyend="87"/>
+      </memberdef>
+      <memberdef kind="function" id="group___differential_1ga71ea0be02e15acc698cbdcd0657b05a1" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>M</declname>
+            <defname>M</defname>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>N</declname>
+            <defname>N</defname>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>D</declname>
+            <defname>D</defname>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::stableNorm</definition>
+        <argsstring>(Image&lt; T, D &gt; &amp;dst, const Image&lt; Matrix&lt; T, M, N &gt;, D &gt; &amp;src)</argsstring>
+        <name>stableNorm</name>
+        <param>
+          <type>Image&lt; T, D &gt; &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>const Image&lt; Matrix&lt; T, M, N &gt;, D &gt; &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para>Stable norm computation. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">src</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>scalar field. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="inout">scalar</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>field of norms </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Norm.hpp" line="95" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Norm.hpp" bodystart="94" bodyend="107"/>
+      </memberdef>
+      <memberdef kind="function" id="group___differential_1ga56bd039983fa692c8309e6911bbd3a7c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>M</declname>
+            <defname>M</defname>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>N</declname>
+            <defname>N</defname>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>D</declname>
+            <defname>D</defname>
+          </param>
+        </templateparamlist>
+        <type>Image&lt; T, D &gt;</type>
+        <definition>Image&lt;T, D&gt; DO::stableNorm</definition>
+        <argsstring>(const Image&lt; Matrix&lt; T, M, N &gt;, D &gt; &amp;src)</argsstring>
+        <name>stableNorm</name>
+        <param>
+          <type>const Image&lt; Matrix&lt; T, M, N &gt;, D &gt; &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para>Stable norm computation. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">src</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>scalar field. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>scalar field of norms </para></simplesect>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Norm.hpp" line="115" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Norm.hpp" bodystart="114" bodyend="119"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="user-defined">
+      <memberdef kind="function" id="group___differential_1ga1e0840d5585c59e1b1b86175686780c2" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::orientation</definition>
+        <argsstring>(Image&lt; T &gt; &amp;dst, const Image&lt; Matrix&lt; T, 2, 1 &gt; &gt; &amp;src)</argsstring>
+        <name>orientation</name>
+        <param>
+          <type>Image&lt; T &gt; &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>const Image&lt; Matrix&lt; T, 2, 1 &gt; &gt; &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para>Computes an orientation field from a 2D vector field. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">src</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>an image in which each element <bold>src(x,y)</bold> are 2D vectors, i.e., a discretized 2D vector field, e.g. image gradients. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="inout">dst</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>an image where each pixel <bold>dst(x,y)</bold> contains the orientation of the 2D vector &apos;src(x,y)&apos; </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Orientation.hpp" line="37" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Orientation.hpp" bodystart="36" bodyend="49"/>
+      </memberdef>
+      <memberdef kind="function" id="group___differential_1ga1726772490c0aaf8cbf03007b413fc25" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>Image&lt; T &gt;</type>
+        <definition>Image&lt;T&gt; DO::orientation</definition>
+        <argsstring>(const Image&lt; Matrix&lt; T, 2, 1 &gt; &gt; &amp;src)</argsstring>
+        <name>orientation</name>
+        <param>
+          <type>const Image&lt; Matrix&lt; T, 2, 1 &gt; &gt; &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para>Computes an orientation field from a 2D vector field. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">src</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>an image in which each element <bold>src(x,y)</bold> are 2D vectors, i.e., a discretized 2D vector field, e.g. image gradients. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="out">dst</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>an image where each pixel <bold>dst(x,y)</bold> contains the orientation of the 2D vector <bold>src(x,y)</bold> </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Orientation.hpp" line="63" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Orientation.hpp" bodystart="62" bodyend="67"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="func">
+      <memberdef kind="function" id="group___differential_1ga3b68fc0aa689b2bcdb6a1a556da93eec" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>N</declname>
+            <defname>N</defname>
+          </param>
+        </templateparamlist>
+        <type>Matrix&lt; T, N, 1 &gt;</type>
+        <definition>Matrix&lt;T,N,1&gt; DO::gradient</definition>
+        <argsstring>(const Image&lt; T, N &gt; &amp;src, const Matrix&lt; int, N, 1 &gt; &amp;p)</argsstring>
+        <name>gradient</name>
+        <param>
+          <type>const Image&lt; T, N &gt; &amp;</type>
+          <declname>src</declname>
+        </param>
+        <param>
+          <type>const Matrix&lt; int, N, 1 &gt; &amp;</type>
+          <declname>p</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="struct_d_o_1_1_gradient" kindref="compound">Gradient</ref> computation. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">src</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>input grayscale image. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">p</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>position in the image. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>2D gradient vector. </para></simplesect>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Differential.hpp" line="273" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Differential.hpp" bodystart="272" bodyend="278"/>
+      </memberdef>
+      <memberdef kind="function" id="group___differential_1ga19bf84abd269ae3dd5a322008cd7495b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>N</declname>
+            <defname>N</defname>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::gradient</definition>
+        <argsstring>(Image&lt; Matrix&lt; T, N, 1 &gt;, N &gt; &amp;dst, const Image&lt; T, N &gt; &amp;src)</argsstring>
+        <name>gradient</name>
+        <param>
+          <type>Image&lt; Matrix&lt; T, N, 1 &gt;, N &gt; &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>const Image&lt; T, N &gt; &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="struct_d_o_1_1_gradient" kindref="compound">Gradient</ref> computation. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="inout">dst</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>gradient vector field </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">src</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>scalar field </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Differential.hpp" line="286" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Differential.hpp" bodystart="285" bodyend="289"/>
+      </memberdef>
+      <memberdef kind="function" id="group___differential_1ga96135e1292050104f2b02f99cc7df69d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>N</declname>
+            <defname>N</defname>
+          </param>
+        </templateparamlist>
+        <type>Image&lt; Matrix&lt; T, N, 1 &gt;, N &gt;</type>
+        <definition>Image&lt;Matrix&lt;T,N,1&gt;, N&gt; DO::gradient</definition>
+        <argsstring>(const Image&lt; T, N &gt; &amp;src)</argsstring>
+        <name>gradient</name>
+        <param>
+          <type>const Image&lt; T, N &gt; &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="struct_d_o_1_1_gradient" kindref="compound">Gradient</ref> computation. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">src</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>scalar field </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>gradient vector field </para></simplesect>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Differential.hpp" line="297" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Differential.hpp" bodystart="296" bodyend="301"/>
+      </memberdef>
+      <memberdef kind="function" id="group___differential_1gad4dc35278f3799f4130399a34521c4eb" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>N</declname>
+            <defname>N</defname>
+          </param>
+        </templateparamlist>
+        <type>T</type>
+        <definition>T DO::laplacian</definition>
+        <argsstring>(const Image&lt; T, N &gt; &amp;src, const Matrix&lt; int, N, 1 &gt; &amp;p)</argsstring>
+        <name>laplacian</name>
+        <param>
+          <type>const Image&lt; T, N &gt; &amp;</type>
+          <declname>src</declname>
+        </param>
+        <param>
+          <type>const Matrix&lt; int, N, 1 &gt; &amp;</type>
+          <declname>p</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="struct_d_o_1_1_laplacian" kindref="compound">Laplacian</ref> computation. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">src</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>input grayscale image. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">p</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>position in the image. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>laplacian value </para></simplesect>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Differential.hpp" line="310" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Differential.hpp" bodystart="309" bodyend="313"/>
+      </memberdef>
+      <memberdef kind="function" id="group___differential_1ga487ed381811c3871bd06cfe631f32f83" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>N</declname>
+            <defname>N</defname>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::laplacian</definition>
+        <argsstring>(Image&lt; T, N &gt; &amp;dst, const Image&lt; T, N &gt; &amp;src)</argsstring>
+        <name>laplacian</name>
+        <param>
+          <type>Image&lt; T, N &gt; &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>const Image&lt; T, N &gt; &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="struct_d_o_1_1_laplacian" kindref="compound">Laplacian</ref> computation. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="inout">dst</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><ref refid="struct_d_o_1_1_laplacian" kindref="compound">Laplacian</ref> field. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">src</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>scalar field. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Differential.hpp" line="321" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Differential.hpp" bodystart="320" bodyend="324"/>
+      </memberdef>
+      <memberdef kind="function" id="group___differential_1ga0f34e33582aeb726da5f618f78c8ad7b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>N</declname>
+            <defname>N</defname>
+          </param>
+        </templateparamlist>
+        <type>Image&lt; T, N &gt;</type>
+        <definition>Image&lt;T, N&gt; DO::laplacian</definition>
+        <argsstring>(const Image&lt; T, N &gt; &amp;src)</argsstring>
+        <name>laplacian</name>
+        <param>
+          <type>const Image&lt; T, N &gt; &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="struct_d_o_1_1_laplacian" kindref="compound">Laplacian</ref> computation. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">src</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>scalar field. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>laplacian field. </para></simplesect>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Differential.hpp" line="332" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Differential.hpp" bodystart="331" bodyend="336"/>
+      </memberdef>
+      <memberdef kind="function" id="group___differential_1gac0b0ba5fdd1608dd1290e127fb3f22bb" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>N</declname>
+            <defname>N</defname>
+          </param>
+        </templateparamlist>
+        <type>Matrix&lt; T, N, N &gt;</type>
+        <definition>Matrix&lt;T,N,N&gt; DO::hessian</definition>
+        <argsstring>(const Image&lt; T, N &gt; &amp;src, const Matrix&lt; int, N, 1 &gt; &amp;p)</argsstring>
+        <name>hessian</name>
+        <param>
+          <type>const Image&lt; T, N &gt; &amp;</type>
+          <declname>src</declname>
+        </param>
+        <param>
+          <type>const Matrix&lt; int, N, 1 &gt; &amp;</type>
+          <declname>p</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="struct_d_o_1_1_hessian" kindref="compound">Hessian</ref> matrix computation. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">src</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>scalar field. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">p</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>position in the image. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para><ref refid="struct_d_o_1_1_hessian" kindref="compound">Hessian</ref> matrix. </para></simplesect>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Differential.hpp" line="345" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Differential.hpp" bodystart="344" bodyend="350"/>
+      </memberdef>
+      <memberdef kind="function" id="group___differential_1gaa0dfb4cdf49f06188df9b5fbb1f251d5" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>N</declname>
+            <defname>N</defname>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::hessian</definition>
+        <argsstring>(Image&lt; Matrix&lt; T, N, N &gt; &gt; &amp;dst, const Image&lt; T, N &gt; &amp;src)</argsstring>
+        <name>hessian</name>
+        <param>
+          <type>Image&lt; Matrix&lt; T, N, N &gt; &gt; &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>const Image&lt; T, N &gt; &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="struct_d_o_1_1_hessian" kindref="compound">Hessian</ref> matrix computation. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">src</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>scalar field. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="inout">dst</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><ref refid="struct_d_o_1_1_hessian" kindref="compound">Hessian</ref> matrix field </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Differential.hpp" line="358" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Differential.hpp" bodystart="357" bodyend="361"/>
+      </memberdef>
+      <memberdef kind="function" id="group___differential_1gabce7c4e0432985de285764ff74bdae95" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>N</declname>
+            <defname>N</defname>
+          </param>
+        </templateparamlist>
+        <type>Image&lt; Matrix&lt; T, N, N &gt; &gt;</type>
+        <definition>Image&lt;Matrix&lt;T,N,N&gt; &gt; DO::hessian</definition>
+        <argsstring>(const Image&lt; T, N &gt; &amp;src)</argsstring>
+        <name>hessian</name>
+        <param>
+          <type>const Image&lt; T, N &gt; &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="struct_d_o_1_1_hessian" kindref="compound">Hessian</ref> matrix computation. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">src</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>scalar field. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para><ref refid="struct_d_o_1_1_hessian" kindref="compound">Hessian</ref> matrix field </para></simplesect>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Differential.hpp" line="369" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Differential.hpp" bodystart="368" bodyend="373"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+  </compounddef>
+</doxygen>

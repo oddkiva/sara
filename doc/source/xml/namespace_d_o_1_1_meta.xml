@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="namespace_d_o_1_1_meta" kind="namespace">
+    <compoundname>DO::Meta</compoundname>
+    <innerclass refid="struct_d_o_1_1_meta_1_1_vector3" prot="public">DO::Meta::Vector3</innerclass>
+    <innerclass refid="struct_d_o_1_1_meta_1_1_vector4" prot="public">DO::Meta::Vector4</innerclass>
+    <innerclass refid="struct_d_o_1_1_meta_1_1_at" prot="public">DO::Meta::At</innerclass>
+    <innerclass refid="struct_d_o_1_1_meta_1_1_at_3_01_vector_00_010_01_4" prot="public">DO::Meta::At&lt; Vector, 0 &gt;</innerclass>
+    <innerclass refid="struct_d_o_1_1_meta_1_1_at_3_01_vector_00_011_01_4" prot="public">DO::Meta::At&lt; Vector, 1 &gt;</innerclass>
+    <innerclass refid="struct_d_o_1_1_meta_1_1_at_3_01_vector_00_012_01_4" prot="public">DO::Meta::At&lt; Vector, 2 &gt;</innerclass>
+    <innerclass refid="struct_d_o_1_1_meta_1_1_at_3_01_vector_00_013_01_4" prot="public">DO::Meta::At&lt; Vector, 3 &gt;</innerclass>
+    <innerclass refid="struct_d_o_1_1_meta_1_1_index_of" prot="public">DO::Meta::IndexOf</innerclass>
+    <innerclass refid="struct_d_o_1_1_meta_1_1_index_of_3_01_vector3_3_01_t0_00_01_t1_00_01_t2_01_4_00_01_t0_01_4" prot="public">DO::Meta::IndexOf&lt; Vector3&lt; T0, T1, T2 &gt;, T0 &gt;</innerclass>
+    <innerclass refid="struct_d_o_1_1_meta_1_1_index_of_3_01_vector3_3_01_t0_00_01_t1_00_01_t2_01_4_00_01_t1_01_4" prot="public">DO::Meta::IndexOf&lt; Vector3&lt; T0, T1, T2 &gt;, T1 &gt;</innerclass>
+    <innerclass refid="struct_d_o_1_1_meta_1_1_index_of_3_01_vector3_3_01_t0_00_01_t1_00_01_t2_01_4_00_01_t2_01_4" prot="public">DO::Meta::IndexOf&lt; Vector3&lt; T0, T1, T2 &gt;, T2 &gt;</innerclass>
+    <innerclass refid="struct_d_o_1_1_meta_1_1_index_of_3_01_vector4_3_01_t0_00_01_t1_00_01_t2_00_01_t3_01_4_00_01_t0_01_4" prot="public">DO::Meta::IndexOf&lt; Vector4&lt; T0, T1, T2, T3 &gt;, T0 &gt;</innerclass>
+    <innerclass refid="struct_d_o_1_1_meta_1_1_index_of_3_01_vector4_3_01_t0_00_01_t1_00_01_t2_00_01_t3_01_4_00_01_t1_01_4" prot="public">DO::Meta::IndexOf&lt; Vector4&lt; T0, T1, T2, T3 &gt;, T1 &gt;</innerclass>
+    <innerclass refid="struct_d_o_1_1_meta_1_1_index_of_3_01_vector4_3_01_t0_00_01_t1_00_01_t2_00_01_t3_01_4_00_01_t2_01_4" prot="public">DO::Meta::IndexOf&lt; Vector4&lt; T0, T1, T2, T3 &gt;, T2 &gt;</innerclass>
+    <innerclass refid="struct_d_o_1_1_meta_1_1_index_of_3_01_vector4_3_01_t0_00_01_t1_00_01_t2_00_01_t3_01_4_00_01_t3_01_4" prot="public">DO::Meta::IndexOf&lt; Vector4&lt; T0, T1, T2, T3 &gt;, T3 &gt;</innerclass>
+    <innerclass refid="struct_d_o_1_1_meta_1_1_is_same" prot="public">DO::Meta::IsSame</innerclass>
+    <innerclass refid="struct_d_o_1_1_meta_1_1_is_same_3_01_t_00_01_t_01_4" prot="public">DO::Meta::IsSame&lt; T, T &gt;</innerclass>
+    <innerclass refid="struct_d_o_1_1_meta_1_1_choose" prot="public">DO::Meta::Choose</innerclass>
+    <innerclass refid="struct_d_o_1_1_meta_1_1_choose_3_01true_00_01_is_true_00_01_is_false_01_4" prot="public">DO::Meta::Choose&lt; true, IsTrue, IsFalse &gt;</innerclass>
+    <innerclass refid="struct_d_o_1_1_meta_1_1_choose_3_01false_00_01_is_true_00_01_is_false_01_4" prot="public">DO::Meta::Choose&lt; false, IsTrue, IsFalse &gt;</innerclass>
+    <innerclass refid="struct_d_o_1_1_meta_1_1_static_assertion" prot="public">DO::Meta::StaticAssertion</innerclass>
+    <innerclass refid="struct_d_o_1_1_meta_1_1_static_assertion_3_01true_01_4" prot="public">DO::Meta::StaticAssertion&lt; true &gt;</innerclass>
+    <innerclass refid="struct_d_o_1_1_meta_1_1_static_assertion_test" prot="public">DO::Meta::StaticAssertionTest</innerclass>
+    <briefdescription>
+<para>This namespace contains meta-programming structures and functions. </para>    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Meta.hpp" line="21"/>
+  </compounddef>
+</doxygen>

@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="dir_620b7f17ad153e1c7c962169f0920ed3" kind="dir">
+    <compoundname>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects</compoundname>
+    <innerfile refid="_b_box_8hpp">BBox.hpp</innerfile>
+    <innerfile refid="_cone_8hpp">Cone.hpp</innerfile>
+    <innerfile refid="_c_s_g_8hpp">CSG.hpp</innerfile>
+    <innerfile refid="_cube_8hpp">Cube.hpp</innerfile>
+    <innerfile refid="_ellipse_8hpp">Ellipse.hpp</innerfile>
+    <innerfile refid="_half_space_8hpp">HalfSpace.hpp</innerfile>
+    <innerfile refid="_line_segment_8hpp">LineSegment.hpp</innerfile>
+    <innerfile refid="_polygon_8hpp">Polygon.hpp</innerfile>
+    <innerfile refid="_quad_8hpp">Quad.hpp</innerfile>
+    <innerfile refid="_sphere_8hpp">Sphere.hpp</innerfile>
+    <innerfile refid="_triangle_8hpp">Triangle.hpp</innerfile>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/"/>
+  </compounddef>
+</doxygen>

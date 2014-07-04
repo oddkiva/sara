@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="struct_d_o_1_1_h" kind="struct" prot="public">
+    <compoundname>DO::H</compoundname>
+    <includes refid="_color_8hpp" local="no">Color.hpp</includes>
+    <briefdescription>
+<para>Hue channel name (HSV). </para>    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="62" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="62" bodyend="62"/>
+    <listofallmembers>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

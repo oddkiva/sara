@@ -1,0 +1,112 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="_graphics_view_commands_8hpp" kind="file">
+    <compoundname>GraphicsViewCommands.hpp</compoundname>
+    <includedby refid="_graphics_8hpp" local="yes">C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics.hpp</includedby>
+    <invincdepgraph>
+      <node id="1463">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/GraphicsUtilities.hpp</label>
+        <link refid="_graphics_utilities_8hpp"/>
+      </node>
+      <node id="1459">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Graphics/DrawPolygon.hpp</label>
+        <link refid="_draw_polygon_8hpp_source"/>
+        <childnode refid="1460" relation="include">
+        </childnode>
+      </node>
+      <node id="1461">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry.hpp</label>
+        <link refid="_geometry_8hpp_source"/>
+      </node>
+      <node id="1462">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/GraphicsApplicationImpl.hpp</label>
+        <link refid="_graphics_application_impl_8hpp"/>
+        <childnode refid="1463" relation="include">
+        </childnode>
+      </node>
+      <node id="1456">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDescriptors.hpp</label>
+        <link refid="_feature_descriptors_8hpp"/>
+      </node>
+      <node id="1454">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/GraphicsViewCommands.hpp</label>
+        <link refid="GraphicsViewCommands.hpp"/>
+        <childnode refid="1455" relation="include">
+        </childnode>
+      </node>
+      <node id="1457">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors.hpp</label>
+        <link refid="_feature_detectors_8hpp"/>
+      </node>
+      <node id="1458">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/View.hpp</label>
+        <link refid="_view_8hpp"/>
+      </node>
+      <node id="1460">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Graphics.hpp</label>
+        <link refid="_geometry_2_graphics_8hpp_source"/>
+        <childnode refid="1461" relation="include">
+        </childnode>
+      </node>
+      <node id="1455">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics.hpp</label>
+        <link refid="_graphics_8hpp"/>
+        <childnode refid="1456" relation="include">
+        </childnode>
+        <childnode refid="1457" relation="include">
+        </childnode>
+        <childnode refid="1458" relation="include">
+        </childnode>
+        <childnode refid="1459" relation="include">
+        </childnode>
+        <childnode refid="1462" relation="include">
+        </childnode>
+      </node>
+    </invincdepgraph>
+    <innernamespace refid="namespace_d_o">DO</innernamespace>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="comment">//<sp/>==========================================================================<sp/>//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="comment">//<sp/>This<sp/>file<sp/>is<sp/>part<sp/>of<sp/>DO++,<sp/>a<sp/>basic<sp/>set<sp/>of<sp/>libraries<sp/>in<sp/>C++<sp/>for<sp/>computer<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight><highlight class="comment">//<sp/>vision.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="comment">//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Copyright<sp/>(C)<sp/>2013<sp/>David<sp/>Ok<sp/>&lt;david.ok8@gmail.com&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight><highlight class="comment">//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight><highlight class="comment">//<sp/>This<sp/>Source<sp/>Code<sp/>Form<sp/>is<sp/>subject<sp/>to<sp/>the<sp/>terms<sp/>of<sp/>the<sp/>Mozilla<sp/>Public<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight><highlight class="comment">//<sp/>License<sp/>v.<sp/>2.0.<sp/>If<sp/>a<sp/>copy<sp/>of<sp/>the<sp/>MPL<sp/>was<sp/>not<sp/>distributed<sp/>with<sp/>this<sp/>file,<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight><highlight class="comment">//<sp/>you<sp/>can<sp/>obtain<sp/>one<sp/>at<sp/>http://mozilla.org/MPL/2.0/.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight><highlight class="comment">//<sp/>==========================================================================<sp/>//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight><highlight class="preprocessor">#ifndef<sp/>DO_GRAPHICS_GRAPHICSVIEWCOMMANDS_HPP</highlight></codeline>
+<codeline lineno="15"><highlight class="preprocessor"></highlight><highlight class="preprocessor">#define<sp/>DO_GRAPHICS_GRAPHICSVIEWCOMMANDS_HPP</highlight></codeline>
+<codeline lineno="16"><highlight class="preprocessor"></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="17"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal">QGraphicsItem;</highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal">QGraphicsPixmapItem;</highlight></codeline>
+<codeline lineno="19"><highlight class="normal"></highlight></codeline>
+<codeline lineno="20"><highlight class="normal"></highlight><highlight class="keyword">namespace<sp/></highlight><highlight class="normal">DO<sp/>{</highlight></codeline>
+<codeline lineno="21"><highlight class="normal"></highlight></codeline>
+<codeline lineno="22"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/>QGraphicsItem<sp/>*<sp/>Item;</highlight></codeline>
+<codeline lineno="23"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/>QGraphicsPixmapItem<sp/>*<sp/>ImageItem;</highlight></codeline>
+<codeline lineno="24"><highlight class="normal"></highlight></codeline>
+<codeline lineno="33"></codeline>
+<codeline lineno="34"></codeline>
+<codeline lineno="35"></codeline>
+<codeline lineno="36"></codeline>
+<codeline lineno="37"><highlight class="normal"><sp/><sp/>DO_EXPORT</highlight></codeline>
+<codeline lineno="38"><highlight class="normal"><sp/><sp/>ImageItem<sp/><ref refid="group___graphics_view_1ga26dd076d57f9e1e5e6ea70fb5383a0f3" kindref="member" tooltip="Add image I to the active GraphicsView window. The added window can be:">addImage</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>Image&lt;Rgb8&gt;&amp;<sp/>I,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>randomPos<sp/>=<sp/></highlight><highlight class="keyword">false</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="39"><highlight class="normal"></highlight></codeline>
+<codeline lineno="41"><highlight class="normal"><sp/><sp/>DO_EXPORT</highlight></codeline>
+<codeline lineno="42"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="group___graphics_view_1gae24b6fc4e3898246eff487e6f227c4f9" kindref="member">drawPoint</ref>(ImageItem<sp/>pixItem,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>x,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="group___channel_accessors_1gac90c52c5b3a7b2a7e3761e6e84f25778" kindref="member" tooltip="Mutable channel accessor.">y</ref>,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="group___color_types_1ga649315dc9bd6e95ef269f84d9bfc8b4c" kindref="member" tooltip="{ColorSpace}{BitDepthPerChannel}">Rgb8</ref>&amp;<sp/>c);</highlight></codeline>
+<codeline lineno="43"><highlight class="normal"></highlight></codeline>
+<codeline lineno="45"><highlight class="normal"></highlight></codeline>
+<codeline lineno="46"><highlight class="normal">}<sp/></highlight><highlight class="comment">/*<sp/>namespace<sp/>DO<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="47"><highlight class="normal"></highlight></codeline>
+<codeline lineno="48"><highlight class="normal"></highlight><highlight class="preprocessor">#endif<sp/></highlight><highlight class="comment">/*<sp/>DO_GRAPHICS_GRAPHICSVIEWCOMMANDS_HPP<sp/>*/</highlight><highlight class="preprocessor"></highlight></codeline>
+    </programlisting>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/GraphicsViewCommands.hpp"/>
+  </compounddef>
+</doxygen>

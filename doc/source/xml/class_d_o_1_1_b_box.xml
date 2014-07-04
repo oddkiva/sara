@@ -1,0 +1,403 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="class_d_o_1_1_b_box" kind="class" prot="public">
+    <compoundname>DO::BBox</compoundname>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="class_d_o_1_1_b_box_1aa67c1abdaff7d2999aa57c2c9a43103d" prot="private" static="no" mutable="no">
+        <type><ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member">Point2d</ref></type>
+        <definition>Point2d tl_</definition>
+        <argsstring></argsstring>
+        <name>tl_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" line="23" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" bodystart="23" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_b_box_1a1f82deb44cb32fa0480d1b23e7c85858" prot="private" static="no" mutable="no">
+        <type><ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member">Point2d</ref></type>
+        <definition>Point2d br_</definition>
+        <argsstring></argsstring>
+        <name>br_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" line="23" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" bodystart="23" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_d_o_1_1_b_box_1a2205847ebd03bb83b357d0f312c6f073" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>BBox</definition>
+        <argsstring>()</argsstring>
+        <name>BBox</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" line="25" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" bodystart="25" bodyend="25"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_b_box_1a060753eaee6b666aa7b1328dcc5d8a56" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>BBox</definition>
+        <argsstring>(const Point2d &amp;topLeft, const Point2d &amp;bottomRight)</argsstring>
+        <name>BBox</name>
+        <param>
+          <type>const <ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member">Point2d</ref> &amp;</type>
+          <declname>topLeft</declname>
+        </param>
+        <param>
+          <type>const <ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member">Point2d</ref> &amp;</type>
+          <declname>bottomRight</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" line="28" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" bodystart="26" bodyend="35"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_b_box_1a1f675afea091976a1f8a86bfd92b9b66" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>BBox</definition>
+        <argsstring>(const Point2d *begin, const Point2d *end)</argsstring>
+        <name>BBox</name>
+        <param>
+          <type>const <ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member">Point2d</ref> *</type>
+          <declname>begin</declname>
+        </param>
+        <param>
+          <type>const <ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member">Point2d</ref> *</type>
+          <declname>end</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" line="37" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" bodystart="36" bodyend="51"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_b_box_1abb53e32e272ae03b331d90da52f5f948" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>BBox</definition>
+        <argsstring>(const std::vector&lt; Point2d &gt; &amp;points)</argsstring>
+        <name>BBox</name>
+        <param>
+          <type>const std::vector&lt; <ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member">Point2d</ref> &gt; &amp;</type>
+          <declname>points</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" line="52"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_b_box_1a3ccc4b9c85718e4d9486eb61cb804b0f" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member">Point2d</ref> &amp;</type>
+        <definition>Point2d&amp; topLeft</definition>
+        <argsstring>()</argsstring>
+        <name>topLeft</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" line="54" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" bodystart="54" bodyend="54"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_b_box_1a0a70572010f4a94ff0b3b69ad6a602ac" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member">Point2d</ref> &amp;</type>
+        <definition>Point2d&amp; bottomRight</definition>
+        <argsstring>()</argsstring>
+        <name>bottomRight</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" line="55" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" bodystart="55" bodyend="55"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_b_box_1aebdb5d2baae12fbbd46215c5da97678f" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>double &amp;</type>
+        <definition>double&amp; x1</definition>
+        <argsstring>()</argsstring>
+        <name>x1</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" line="56" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" bodystart="56" bodyend="56"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_b_box_1aba3113f4eac2623a664db161c271eaaf" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>double &amp;</type>
+        <definition>double&amp; y1</definition>
+        <argsstring>()</argsstring>
+        <name>y1</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" line="57" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" bodystart="57" bodyend="57"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_b_box_1ae6989ab803b2300b79074ab32e7b8eaf" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>double &amp;</type>
+        <definition>double&amp; x2</definition>
+        <argsstring>()</argsstring>
+        <name>x2</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" line="58" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" bodystart="58" bodyend="58"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_b_box_1a2e3e5c61c0236d30209a28515912cea3" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>double &amp;</type>
+        <definition>double&amp; y2</definition>
+        <argsstring>()</argsstring>
+        <name>y2</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" line="59" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" bodystart="59" bodyend="59"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_b_box_1aa6b7f620e05a765821f479325e0caf9c" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>const <ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member">Point2d</ref> &amp;</type>
+        <definition>const Point2d&amp; topLeft</definition>
+        <argsstring>() const </argsstring>
+        <name>topLeft</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" line="61" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" bodystart="61" bodyend="61"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_b_box_1a5f335230293ef9fdae8b09c9c843dae8" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>const <ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member">Point2d</ref> &amp;</type>
+        <definition>const Point2d&amp; bottomRight</definition>
+        <argsstring>() const </argsstring>
+        <name>bottomRight</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" line="62" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" bodystart="62" bodyend="62"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_b_box_1ac1cfbb4530c2ff95be91b3afa2144bb4" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member">Point2d</ref></type>
+        <definition>Point2d topRight</definition>
+        <argsstring>() const </argsstring>
+        <name>topRight</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" line="63" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" bodystart="63" bodyend="63"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_b_box_1ab6f6df1ea9fe4b219e2029915cad672b" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member">Point2d</ref></type>
+        <definition>Point2d bottomLeft</definition>
+        <argsstring>() const </argsstring>
+        <name>bottomLeft</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" line="64" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" bodystart="64" bodyend="64"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_b_box_1a71af5717bb437e63034a8192583ff16f" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>double</type>
+        <definition>double x1</definition>
+        <argsstring>() const </argsstring>
+        <name>x1</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" line="66" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" bodystart="66" bodyend="66"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_b_box_1af4090c1687b2576d20303d3789d8f4ec" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>double</type>
+        <definition>double y1</definition>
+        <argsstring>() const </argsstring>
+        <name>y1</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" line="67" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" bodystart="67" bodyend="67"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_b_box_1ae19ba70737353cf4a0cfe795d0f27f05" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>double</type>
+        <definition>double x2</definition>
+        <argsstring>() const </argsstring>
+        <name>x2</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" line="68" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" bodystart="68" bodyend="68"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_b_box_1a14129fe85e75c9eadf29378cbbcf57a0" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>double</type>
+        <definition>double y2</definition>
+        <argsstring>() const </argsstring>
+        <name>y2</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" line="69" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" bodystart="69" bodyend="69"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_b_box_1a6cddcbf72c80144aa2e6501abb150c30" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>double</type>
+        <definition>double width</definition>
+        <argsstring>() const </argsstring>
+        <name>width</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" line="71" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" bodystart="71" bodyend="71"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_b_box_1afa7750092d5dcf402c83fb5adba91453" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>double</type>
+        <definition>double height</definition>
+        <argsstring>() const </argsstring>
+        <name>height</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" line="72" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" bodystart="72" bodyend="72"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_b_box_1afd250a73e19d12fb73d489bb9b7f7150" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>Vector2d</type>
+        <definition>Vector2d sizes</definition>
+        <argsstring>() const </argsstring>
+        <name>sizes</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" line="73" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" bodystart="73" bodyend="73"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_b_box_1add5a3629eda78fcc21079a625e89733c" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member">Point2d</ref></type>
+        <definition>Point2d center</definition>
+        <argsstring>() const </argsstring>
+        <name>center</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" line="75" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" bodystart="75" bodyend="75"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="class_d_o_1_1_b_box_1aa61918557abd7ff002ee1181616d180b" prot="public" static="yes" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_b_box" kindref="compound">BBox</ref></type>
+        <definition>static BBox infinite</definition>
+        <argsstring>()</argsstring>
+        <name>infinite</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" line="78" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" bodystart="77" bodyend="83"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_b_box_1a6dd7708b280220af506a7b5cc477ea17" prot="public" static="yes" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_b_box" kindref="compound">BBox</ref></type>
+        <definition>static BBox zero</definition>
+        <argsstring>()</argsstring>
+        <name>zero</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" line="85" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" bodystart="84" bodyend="88"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" line="22" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp" bodystart="21" bodyend="89"/>
+    <listofallmembers>
+      <member refid="class_d_o_1_1_b_box_1a2205847ebd03bb83b357d0f312c6f073" prot="public" virt="non-virtual"><scope>DO::BBox</scope><name>BBox</name></member>
+      <member refid="class_d_o_1_1_b_box_1a060753eaee6b666aa7b1328dcc5d8a56" prot="public" virt="non-virtual"><scope>DO::BBox</scope><name>BBox</name></member>
+      <member refid="class_d_o_1_1_b_box_1a1f675afea091976a1f8a86bfd92b9b66" prot="public" virt="non-virtual"><scope>DO::BBox</scope><name>BBox</name></member>
+      <member refid="class_d_o_1_1_b_box_1abb53e32e272ae03b331d90da52f5f948" prot="public" virt="non-virtual"><scope>DO::BBox</scope><name>BBox</name></member>
+      <member refid="class_d_o_1_1_b_box_1ab6f6df1ea9fe4b219e2029915cad672b" prot="public" virt="non-virtual"><scope>DO::BBox</scope><name>bottomLeft</name></member>
+      <member refid="class_d_o_1_1_b_box_1a0a70572010f4a94ff0b3b69ad6a602ac" prot="public" virt="non-virtual"><scope>DO::BBox</scope><name>bottomRight</name></member>
+      <member refid="class_d_o_1_1_b_box_1a5f335230293ef9fdae8b09c9c843dae8" prot="public" virt="non-virtual"><scope>DO::BBox</scope><name>bottomRight</name></member>
+      <member refid="class_d_o_1_1_b_box_1a1f82deb44cb32fa0480d1b23e7c85858" prot="private" virt="non-virtual"><scope>DO::BBox</scope><name>br_</name></member>
+      <member refid="class_d_o_1_1_b_box_1add5a3629eda78fcc21079a625e89733c" prot="public" virt="non-virtual"><scope>DO::BBox</scope><name>center</name></member>
+      <member refid="class_d_o_1_1_b_box_1afa7750092d5dcf402c83fb5adba91453" prot="public" virt="non-virtual"><scope>DO::BBox</scope><name>height</name></member>
+      <member refid="class_d_o_1_1_b_box_1aa61918557abd7ff002ee1181616d180b" prot="public" virt="non-virtual"><scope>DO::BBox</scope><name>infinite</name></member>
+      <member refid="class_d_o_1_1_b_box_1afd250a73e19d12fb73d489bb9b7f7150" prot="public" virt="non-virtual"><scope>DO::BBox</scope><name>sizes</name></member>
+      <member refid="class_d_o_1_1_b_box_1aa67c1abdaff7d2999aa57c2c9a43103d" prot="private" virt="non-virtual"><scope>DO::BBox</scope><name>tl_</name></member>
+      <member refid="class_d_o_1_1_b_box_1a3ccc4b9c85718e4d9486eb61cb804b0f" prot="public" virt="non-virtual"><scope>DO::BBox</scope><name>topLeft</name></member>
+      <member refid="class_d_o_1_1_b_box_1aa6b7f620e05a765821f479325e0caf9c" prot="public" virt="non-virtual"><scope>DO::BBox</scope><name>topLeft</name></member>
+      <member refid="class_d_o_1_1_b_box_1ac1cfbb4530c2ff95be91b3afa2144bb4" prot="public" virt="non-virtual"><scope>DO::BBox</scope><name>topRight</name></member>
+      <member refid="class_d_o_1_1_b_box_1a6cddcbf72c80144aa2e6501abb150c30" prot="public" virt="non-virtual"><scope>DO::BBox</scope><name>width</name></member>
+      <member refid="class_d_o_1_1_b_box_1aebdb5d2baae12fbbd46215c5da97678f" prot="public" virt="non-virtual"><scope>DO::BBox</scope><name>x1</name></member>
+      <member refid="class_d_o_1_1_b_box_1a71af5717bb437e63034a8192583ff16f" prot="public" virt="non-virtual"><scope>DO::BBox</scope><name>x1</name></member>
+      <member refid="class_d_o_1_1_b_box_1ae6989ab803b2300b79074ab32e7b8eaf" prot="public" virt="non-virtual"><scope>DO::BBox</scope><name>x2</name></member>
+      <member refid="class_d_o_1_1_b_box_1ae19ba70737353cf4a0cfe795d0f27f05" prot="public" virt="non-virtual"><scope>DO::BBox</scope><name>x2</name></member>
+      <member refid="class_d_o_1_1_b_box_1aba3113f4eac2623a664db161c271eaaf" prot="public" virt="non-virtual"><scope>DO::BBox</scope><name>y1</name></member>
+      <member refid="class_d_o_1_1_b_box_1af4090c1687b2576d20303d3789d8f4ec" prot="public" virt="non-virtual"><scope>DO::BBox</scope><name>y1</name></member>
+      <member refid="class_d_o_1_1_b_box_1a2e3e5c61c0236d30209a28515912cea3" prot="public" virt="non-virtual"><scope>DO::BBox</scope><name>y2</name></member>
+      <member refid="class_d_o_1_1_b_box_1a14129fe85e75c9eadf29378cbbcf57a0" prot="public" virt="non-virtual"><scope>DO::BBox</scope><name>y2</name></member>
+      <member refid="class_d_o_1_1_b_box_1a6dd7708b280220af506a7b5cc477ea17" prot="public" virt="non-virtual"><scope>DO::BBox</scope><name>zero</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

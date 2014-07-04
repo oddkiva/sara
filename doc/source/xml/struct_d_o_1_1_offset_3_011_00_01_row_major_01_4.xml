@@ -1,0 +1,398 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="struct_d_o_1_1_offset_3_011_00_01_row_major_01_4" kind="struct" prot="public">
+    <compoundname>DO::Offset&lt; 1, RowMajor &gt;</compoundname>
+    <includes refid="_locator_8hpp" local="no">Locator.hpp</includes>
+    <templateparamlist>
+    </templateparamlist>
+      <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="struct_d_o_1_1_offset_3_011_00_01_row_major_01_4_1a1ffa69ab4cc1df64eaa174cfbfb1839d" prot="public" static="yes" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename Index</type>
+          </param>
+        </templateparamlist>
+        <type>Index</type>
+        <definition>static Index eval</definition>
+        <argsstring>(const Index *coords, const Index *dims)</argsstring>
+        <name>eval</name>
+        <param>
+          <type>const Index *</type>
+          <declname>coords</declname>
+        </param>
+        <param>
+          <type>const Index *</type>
+          <declname>dims</declname>
+        </param>
+        <briefdescription>
+<para>Merely returns the 1D coordinates. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Locator.hpp" line="241" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Locator.hpp" bodystart="240" bodyend="245"/>
+      </memberdef>
+      <memberdef kind="function" id="struct_d_o_1_1_offset_3_011_00_01_row_major_01_4_1ad02911d67da0ad2bcf95bf5957f37553" prot="public" static="yes" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename Index</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>static void eval_strides</definition>
+        <argsstring>(Index *strides, const Index *size)</argsstring>
+        <name>eval_strides</name>
+        <param>
+          <type>Index *</type>
+          <declname>strides</declname>
+        </param>
+        <param>
+          <type>const Index *</type>
+          <declname>size</declname>
+        </param>
+        <briefdescription>
+<para>Merely returns 1. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Locator.hpp" line="249" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Locator.hpp" bodystart="248" bodyend="253"/>
+      </memberdef>
+      <memberdef kind="function" id="struct_d_o_1_1_offset_3_011_00_01_row_major_01_4_1a0b52d46c505c64599af0ed217401d2fe" prot="public" static="yes" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename Index</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>static void eval_coords_from_offset</definition>
+        <argsstring>(Index *coords, Index offset, const Index *dims)</argsstring>
+        <name>eval_coords_from_offset</name>
+        <param>
+          <type>Index *</type>
+          <declname>coords</declname>
+        </param>
+        <param>
+          <type>Index</type>
+          <declname>offset</declname>
+        </param>
+        <param>
+          <type>const Index *</type>
+          <declname>dims</declname>
+        </param>
+        <briefdescription>
+<para>Merely returns the offset value. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Locator.hpp" line="258" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Locator.hpp" bodystart="256" bodyend="262"/>
+      </memberdef>
+      <memberdef kind="function" id="struct_d_o_1_1_offset_3_011_00_01_row_major_01_4_1aacfaf9567f24a89ec57f519c3eaba471" prot="public" static="yes" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename Index</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>static void eval_coords_from_offset_</definition>
+        <argsstring>(Index *coords, Index offset, const Index *dims)</argsstring>
+        <name>eval_coords_from_offset_</name>
+        <param>
+          <type>Index *</type>
+          <declname>coords</declname>
+        </param>
+        <param>
+          <type>Index</type>
+          <declname>offset</declname>
+        </param>
+        <param>
+          <type>const Index *</type>
+          <declname>dims</declname>
+        </param>
+        <briefdescription>
+<para>Finishes the unrolled loop of &apos;eval_coords_from_offset&apos;. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Locator.hpp" line="267" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Locator.hpp" bodystart="265" bodyend="269"/>
+      </memberdef>
+      <memberdef kind="function" id="struct_d_o_1_1_offset_3_011_00_01_row_major_01_4_1a197c87541b2f7ceca6df994e3f933dca" prot="public" static="yes" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename Index</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>static void increment_coords</definition>
+        <argsstring>(Index *coords, const Index *size, bool &amp;stop)</argsstring>
+        <name>increment_coords</name>
+        <param>
+          <type>Index *</type>
+          <declname>coords</declname>
+        </param>
+        <param>
+          <type>const Index *</type>
+          <declname>size</declname>
+        </param>
+        <param>
+          <type>bool &amp;</type>
+          <declname>stop</declname>
+        </param>
+        <briefdescription>
+<para>Merely does +1. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Locator.hpp" line="274" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Locator.hpp" bodystart="272" bodyend="283"/>
+      </memberdef>
+      <memberdef kind="function" id="struct_d_o_1_1_offset_3_011_00_01_row_major_01_4_1a5e4f52f6fce1f306223b7efda4ea1186" prot="public" static="yes" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename Index</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>static void increment_coords_</definition>
+        <argsstring>(Index *coords, const Index *size, bool &amp;stop)</argsstring>
+        <name>increment_coords_</name>
+        <param>
+          <type>Index *</type>
+          <declname>coords</declname>
+        </param>
+        <param>
+          <type>const Index *</type>
+          <declname>size</declname>
+        </param>
+        <param>
+          <type>bool &amp;</type>
+          <declname>stop</declname>
+        </param>
+        <briefdescription>
+<para>Finishes the underlying loop of &apos;increment_coords&apos;. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Locator.hpp" line="288" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Locator.hpp" bodystart="286" bodyend="295"/>
+      </memberdef>
+      <memberdef kind="function" id="struct_d_o_1_1_offset_3_011_00_01_row_major_01_4_1a03d8bb7719e368c749c854315197a6ab" prot="public" static="yes" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename Index</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>static void increment_coords</definition>
+        <argsstring>(Index *coords, const Index *start, const Index *end, bool &amp;stop)</argsstring>
+        <name>increment_coords</name>
+        <param>
+          <type>Index *</type>
+          <declname>coords</declname>
+        </param>
+        <param>
+          <type>const Index *</type>
+          <declname>start</declname>
+        </param>
+        <param>
+          <type>const Index *</type>
+          <declname>end</declname>
+        </param>
+        <param>
+          <type>bool &amp;</type>
+          <declname>stop</declname>
+        </param>
+        <briefdescription>
+<para>Finishes the incremented coordinates. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Locator.hpp" line="301" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Locator.hpp" bodystart="298" bodyend="310"/>
+      </memberdef>
+      <memberdef kind="function" id="struct_d_o_1_1_offset_3_011_00_01_row_major_01_4_1a8953400b698926cd8d544cec97ed6927" prot="public" static="yes" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename Index</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>static void increment_coords_</definition>
+        <argsstring>(Index *coords, const Index *start, const Index *end, bool &amp;stop)</argsstring>
+        <name>increment_coords_</name>
+        <param>
+          <type>Index *</type>
+          <declname>coords</declname>
+        </param>
+        <param>
+          <type>const Index *</type>
+          <declname>start</declname>
+        </param>
+        <param>
+          <type>const Index *</type>
+          <declname>end</declname>
+        </param>
+        <param>
+          <type>bool &amp;</type>
+          <declname>stop</declname>
+        </param>
+        <briefdescription>
+<para>Finishes the underlying loop of &apos;increment_coords&apos;. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Locator.hpp" line="316" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Locator.hpp" bodystart="313" bodyend="323"/>
+      </memberdef>
+      <memberdef kind="function" id="struct_d_o_1_1_offset_3_011_00_01_row_major_01_4_1aa2c7a84c84fd8cafee697efb4db62c42" prot="public" static="yes" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename Index</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>static void decrement_coords</definition>
+        <argsstring>(Index *coords, const Index *size, bool &amp;stop)</argsstring>
+        <name>decrement_coords</name>
+        <param>
+          <type>Index *</type>
+          <declname>coords</declname>
+        </param>
+        <param>
+          <type>const Index *</type>
+          <declname>size</declname>
+        </param>
+        <param>
+          <type>bool &amp;</type>
+          <declname>stop</declname>
+        </param>
+        <briefdescription>
+<para>Merely does -1. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Locator.hpp" line="328" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Locator.hpp" bodystart="326" bodyend="337"/>
+      </memberdef>
+      <memberdef kind="function" id="struct_d_o_1_1_offset_3_011_00_01_row_major_01_4_1a4b61b1eedc0e83692372a953a637b576" prot="public" static="yes" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename Index</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>static void decrement_coords_</definition>
+        <argsstring>(Index *coords, const Index *size, bool &amp;stop)</argsstring>
+        <name>decrement_coords_</name>
+        <param>
+          <type>Index *</type>
+          <declname>coords</declname>
+        </param>
+        <param>
+          <type>const Index *</type>
+          <declname>size</declname>
+        </param>
+        <param>
+          <type>bool &amp;</type>
+          <declname>stop</declname>
+        </param>
+        <briefdescription>
+<para>Finishes the underlying loop of &apos;decrement_coords&apos;. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Locator.hpp" line="342" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Locator.hpp" bodystart="340" bodyend="349"/>
+      </memberdef>
+      <memberdef kind="function" id="struct_d_o_1_1_offset_3_011_00_01_row_major_01_4_1a1d543cc7b3cbf75393b4fe8539fd059a" prot="public" static="yes" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename Index</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>static void decrement_coords</definition>
+        <argsstring>(Index *coords, const Index *start, const Index *end, bool &amp;stop)</argsstring>
+        <name>decrement_coords</name>
+        <param>
+          <type>Index *</type>
+          <declname>coords</declname>
+        </param>
+        <param>
+          <type>const Index *</type>
+          <declname>start</declname>
+        </param>
+        <param>
+          <type>const Index *</type>
+          <declname>end</declname>
+        </param>
+        <param>
+          <type>bool &amp;</type>
+          <declname>stop</declname>
+        </param>
+        <briefdescription>
+<para>Finishes the incremented coordinates. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Locator.hpp" line="355" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Locator.hpp" bodystart="352" bodyend="364"/>
+      </memberdef>
+      <memberdef kind="function" id="struct_d_o_1_1_offset_3_011_00_01_row_major_01_4_1a8b30f9594b8ab4d69bb830cb137dc3d0" prot="public" static="yes" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename Index</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>static void decrement_coords_</definition>
+        <argsstring>(Index *coords, const Index *start, const Index *end, bool &amp;stop)</argsstring>
+        <name>decrement_coords_</name>
+        <param>
+          <type>Index *</type>
+          <declname>coords</declname>
+        </param>
+        <param>
+          <type>const Index *</type>
+          <declname>start</declname>
+        </param>
+        <param>
+          <type>const Index *</type>
+          <declname>end</declname>
+        </param>
+        <param>
+          <type>bool &amp;</type>
+          <declname>stop</declname>
+        </param>
+        <briefdescription>
+<para>Finishes the underlying loop of &apos;increment_coords&apos;. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Locator.hpp" line="370" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Locator.hpp" bodystart="367" bodyend="377"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>The specialized offset computer for dimension 1 and row-major storage (for loop unrolling). </para>    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Locator.hpp" line="237" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Locator.hpp" bodystart="236" bodyend="378"/>
+    <listofallmembers>
+      <member refid="struct_d_o_1_1_offset_3_011_00_01_row_major_01_4_1aa2c7a84c84fd8cafee697efb4db62c42" prot="public" virt="non-virtual"><scope>DO::Offset&lt; 1, RowMajor &gt;</scope><name>decrement_coords</name></member>
+      <member refid="struct_d_o_1_1_offset_3_011_00_01_row_major_01_4_1a1d543cc7b3cbf75393b4fe8539fd059a" prot="public" virt="non-virtual"><scope>DO::Offset&lt; 1, RowMajor &gt;</scope><name>decrement_coords</name></member>
+      <member refid="struct_d_o_1_1_offset_3_011_00_01_row_major_01_4_1a4b61b1eedc0e83692372a953a637b576" prot="public" virt="non-virtual"><scope>DO::Offset&lt; 1, RowMajor &gt;</scope><name>decrement_coords_</name></member>
+      <member refid="struct_d_o_1_1_offset_3_011_00_01_row_major_01_4_1a8b30f9594b8ab4d69bb830cb137dc3d0" prot="public" virt="non-virtual"><scope>DO::Offset&lt; 1, RowMajor &gt;</scope><name>decrement_coords_</name></member>
+      <member refid="struct_d_o_1_1_offset_3_011_00_01_row_major_01_4_1a1ffa69ab4cc1df64eaa174cfbfb1839d" prot="public" virt="non-virtual"><scope>DO::Offset&lt; 1, RowMajor &gt;</scope><name>eval</name></member>
+      <member refid="struct_d_o_1_1_offset_3_011_00_01_row_major_01_4_1a0b52d46c505c64599af0ed217401d2fe" prot="public" virt="non-virtual"><scope>DO::Offset&lt; 1, RowMajor &gt;</scope><name>eval_coords_from_offset</name></member>
+      <member refid="struct_d_o_1_1_offset_3_011_00_01_row_major_01_4_1aacfaf9567f24a89ec57f519c3eaba471" prot="public" virt="non-virtual"><scope>DO::Offset&lt; 1, RowMajor &gt;</scope><name>eval_coords_from_offset_</name></member>
+      <member refid="struct_d_o_1_1_offset_3_011_00_01_row_major_01_4_1ad02911d67da0ad2bcf95bf5957f37553" prot="public" virt="non-virtual"><scope>DO::Offset&lt; 1, RowMajor &gt;</scope><name>eval_strides</name></member>
+      <member refid="struct_d_o_1_1_offset_3_011_00_01_row_major_01_4_1a197c87541b2f7ceca6df994e3f933dca" prot="public" virt="non-virtual"><scope>DO::Offset&lt; 1, RowMajor &gt;</scope><name>increment_coords</name></member>
+      <member refid="struct_d_o_1_1_offset_3_011_00_01_row_major_01_4_1a03d8bb7719e368c749c854315197a6ab" prot="public" virt="non-virtual"><scope>DO::Offset&lt; 1, RowMajor &gt;</scope><name>increment_coords</name></member>
+      <member refid="struct_d_o_1_1_offset_3_011_00_01_row_major_01_4_1a5e4f52f6fce1f306223b7efda4ea1186" prot="public" virt="non-virtual"><scope>DO::Offset&lt; 1, RowMajor &gt;</scope><name>increment_coords_</name></member>
+      <member refid="struct_d_o_1_1_offset_3_011_00_01_row_major_01_4_1a8953400b698926cd8d544cec97ed6927" prot="public" virt="non-virtual"><scope>DO::Offset&lt; 1, RowMajor &gt;</scope><name>increment_coords_</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

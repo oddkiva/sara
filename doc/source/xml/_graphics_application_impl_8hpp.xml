@@ -1,0 +1,427 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="_graphics_application_impl_8hpp" kind="file">
+    <compoundname>GraphicsApplicationImpl.hpp</compoundname>
+    <includes refid="_graphics_8hpp" local="no">DO/Graphics.hpp</includes>
+    <includes local="no">QApplication</includes>
+    <includes local="no">QPointer</includes>
+    <includes local="no">QPixmap</includes>
+    <includes local="no">QString</includes>
+    <includes local="no">QWidget</includes>
+    <includes refid="_user_thread_8hpp" local="yes">UserThread.hpp</includes>
+    <includes refid="_painting_window_8hpp" local="yes">PaintingWindow.hpp</includes>
+    <includes refid="_open_g_l_window_8hpp" local="yes">OpenGLWindow.hpp</includes>
+    <includes refid="_graphics_view_8hpp" local="yes">GraphicsView.hpp</includes>
+    <includedby refid="_graphics_utilities_8hpp" local="yes">C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/GraphicsUtilities.hpp</includedby>
+    <incdepgraph>
+      <node id="1243">
+        <label>DO/Defines.hpp</label>
+        <link refid="_defines_8hpp_source"/>
+      </node>
+      <node id="1287">
+        <label>QVector3D</label>
+      </node>
+      <node id="1261">
+        <label>Graphics/ImageDraw.hpp</label>
+        <link refid="_image_draw_8hpp"/>
+      </node>
+      <node id="1253">
+        <label>iterator</label>
+      </node>
+      <node id="1282">
+        <label>../Frame.hpp</label>
+        <link refid="_frame_8hpp_source"/>
+        <childnode refid="1283" relation="include">
+        </childnode>
+        <childnode refid="1284" relation="include">
+        </childnode>
+      </node>
+      <node id="1241">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/GraphicsApplicationImpl.hpp</label>
+        <link refid="GraphicsApplicationImpl.hpp"/>
+        <childnode refid="1242" relation="include">
+        </childnode>
+        <childnode refid="1268" relation="include">
+        </childnode>
+        <childnode refid="1269" relation="include">
+        </childnode>
+        <childnode refid="1270" relation="include">
+        </childnode>
+        <childnode refid="1271" relation="include">
+        </childnode>
+        <childnode refid="1272" relation="include">
+        </childnode>
+        <childnode refid="1273" relation="include">
+        </childnode>
+        <childnode refid="1277" relation="include">
+        </childnode>
+        <childnode refid="1281" relation="include">
+        </childnode>
+        <childnode refid="1290" relation="include">
+        </childnode>
+      </node>
+      <node id="1288">
+        <label>QQuaternion</label>
+      </node>
+      <node id="1251">
+        <label>MultiArray.hpp</label>
+        <link refid="_multi_array_8hpp"/>
+        <childnode refid="1252" relation="include">
+        </childnode>
+        <childnode refid="1254" relation="include">
+        </childnode>
+        <childnode refid="1255" relation="include">
+        </childnode>
+      </node>
+      <node id="1291">
+        <label>QGraphicsView</label>
+      </node>
+      <node id="1274">
+        <label>QThread</label>
+      </node>
+      <node id="1255">
+        <label>numeric</label>
+      </node>
+      <node id="1249">
+        <label>Eigen/Eigen</label>
+      </node>
+      <node id="1265">
+        <label>string</label>
+      </node>
+      <node id="1244">
+        <label>DO/Core/Image.hpp</label>
+        <link refid="_image_8hpp"/>
+        <childnode refid="1245" relation="include">
+        </childnode>
+        <childnode refid="1251" relation="include">
+        </childnode>
+      </node>
+      <node id="1263">
+        <label>fstream</label>
+      </node>
+      <node id="1266">
+        <label>Graphics/Draw3D.hpp</label>
+        <link refid="_draw3_d_8hpp"/>
+      </node>
+      <node id="1284">
+        <label>GL/glu.h</label>
+      </node>
+      <node id="1252">
+        <label>Locator.hpp</label>
+        <link refid="_locator_8hpp"/>
+        <childnode refid="1247" relation="include">
+        </childnode>
+        <childnode refid="1246" relation="include">
+        </childnode>
+        <childnode refid="1248" relation="include">
+        </childnode>
+        <childnode refid="1253" relation="include">
+        </childnode>
+        <childnode refid="1254" relation="include">
+        </childnode>
+      </node>
+      <node id="1275">
+        <label>QMutex</label>
+      </node>
+      <node id="1279">
+        <label>QPainter</label>
+      </node>
+      <node id="1273">
+        <label>UserThread.hpp</label>
+        <link refid="_user_thread_8hpp"/>
+        <childnode refid="1274" relation="include">
+        </childnode>
+        <childnode refid="1275" relation="include">
+        </childnode>
+        <childnode refid="1276" relation="include">
+        </childnode>
+        <childnode refid="1256" relation="include">
+        </childnode>
+      </node>
+      <node id="1257">
+        <label>Graphics/GraphicsApplication.hpp</label>
+        <link refid="_graphics_application_8hpp"/>
+      </node>
+      <node id="1267">
+        <label>Graphics/GraphicsViewCommands.hpp</label>
+        <link refid="_graphics_view_commands_8hpp"/>
+      </node>
+      <node id="1278">
+        <label>QScrollArea</label>
+      </node>
+      <node id="1289">
+        <label>QTime</label>
+      </node>
+      <node id="1268">
+        <label>QApplication</label>
+      </node>
+      <node id="1290">
+        <label>GraphicsView.hpp</label>
+        <link refid="_graphics_view_8hpp"/>
+        <childnode refid="1256" relation="include">
+        </childnode>
+        <childnode refid="1291" relation="include">
+        </childnode>
+        <childnode refid="1280" relation="include">
+        </childnode>
+      </node>
+      <node id="1281">
+        <label>OpenGLWindow.hpp</label>
+        <link refid="_open_g_l_window_8hpp"/>
+        <childnode refid="1262" relation="include">
+        </childnode>
+        <childnode refid="1282" relation="include">
+        </childnode>
+        <childnode refid="1256" relation="include">
+        </childnode>
+        <childnode refid="1285" relation="include">
+        </childnode>
+        <childnode refid="1286" relation="include">
+        </childnode>
+        <childnode refid="1287" relation="include">
+        </childnode>
+        <childnode refid="1288" relation="include">
+        </childnode>
+        <childnode refid="1289" relation="include">
+        </childnode>
+        <childnode refid="1280" relation="include">
+        </childnode>
+      </node>
+      <node id="1256">
+        <label>Graphics/Events.hpp</label>
+        <link refid="_events_8hpp_source"/>
+        <childnode refid="1248" relation="include">
+        </childnode>
+      </node>
+      <node id="1246">
+        <label>Meta.hpp</label>
+        <link refid="_meta_8hpp"/>
+      </node>
+      <node id="1262">
+        <label>Graphics/Mesh.hpp</label>
+        <link refid="_mesh_8hpp"/>
+        <childnode refid="1248" relation="include">
+        </childnode>
+        <childnode refid="1263" relation="include">
+        </childnode>
+        <childnode refid="1254" relation="include">
+        </childnode>
+        <childnode refid="1264" relation="include">
+        </childnode>
+        <childnode refid="1265" relation="include">
+        </childnode>
+      </node>
+      <node id="1269">
+        <label>QPointer</label>
+      </node>
+      <node id="1280">
+        <label>QTimer</label>
+      </node>
+      <node id="1264">
+        <label>vector</label>
+      </node>
+      <node id="1247">
+        <label>StaticAssert.hpp</label>
+        <link refid="_static_assert_8hpp"/>
+      </node>
+      <node id="1272">
+        <label>QWidget</label>
+      </node>
+      <node id="1260">
+        <label>Graphics/ImageIO.hpp</label>
+        <link refid="_graphics_2_image_i_o_8hpp"/>
+      </node>
+      <node id="1250">
+        <label>sstream</label>
+      </node>
+      <node id="1271">
+        <label>QString</label>
+      </node>
+      <node id="1285">
+        <label>QGLWidget</label>
+      </node>
+      <node id="1259">
+        <label>Graphics/PaintingCommands.hpp</label>
+        <link refid="_painting_commands_8hpp"/>
+      </node>
+      <node id="1276">
+        <label>QWaitCondition</label>
+      </node>
+      <node id="1248">
+        <label>EigenExtension.hpp</label>
+        <link refid="_eigen_extension_8hpp"/>
+        <childnode refid="1249" relation="include">
+        </childnode>
+        <childnode refid="1250" relation="include">
+        </childnode>
+      </node>
+      <node id="1283">
+        <label>QtOpenGL</label>
+      </node>
+      <node id="1254">
+        <label>iostream</label>
+      </node>
+      <node id="1258">
+        <label>Graphics/WindowManagement.hpp</label>
+        <link refid="_window_management_8hpp"/>
+        <childnode refid="1256" relation="include">
+        </childnode>
+      </node>
+      <node id="1270">
+        <label>QPixmap</label>
+      </node>
+      <node id="1245">
+        <label>Color.hpp</label>
+        <link refid="_color_8hpp"/>
+        <childnode refid="1246" relation="include">
+        </childnode>
+        <childnode refid="1247" relation="include">
+        </childnode>
+        <childnode refid="1248" relation="include">
+        </childnode>
+      </node>
+      <node id="1277">
+        <label>PaintingWindow.hpp</label>
+        <link refid="_painting_window_8hpp"/>
+        <childnode refid="1278" relation="include">
+        </childnode>
+        <childnode refid="1272" relation="include">
+        </childnode>
+        <childnode refid="1279" relation="include">
+        </childnode>
+        <childnode refid="1280" relation="include">
+        </childnode>
+        <childnode refid="1256" relation="include">
+        </childnode>
+      </node>
+      <node id="1242">
+        <label>DO/Graphics.hpp</label>
+        <link refid="_graphics_8hpp"/>
+        <childnode refid="1243" relation="include">
+        </childnode>
+        <childnode refid="1244" relation="include">
+        </childnode>
+        <childnode refid="1256" relation="include">
+        </childnode>
+        <childnode refid="1257" relation="include">
+        </childnode>
+        <childnode refid="1258" relation="include">
+        </childnode>
+        <childnode refid="1259" relation="include">
+        </childnode>
+        <childnode refid="1260" relation="include">
+        </childnode>
+        <childnode refid="1261" relation="include">
+        </childnode>
+        <childnode refid="1262" relation="include">
+        </childnode>
+        <childnode refid="1266" relation="include">
+        </childnode>
+        <childnode refid="1267" relation="include">
+        </childnode>
+      </node>
+      <node id="1286">
+        <label>QVector</label>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="1293">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/GraphicsUtilities.hpp</label>
+        <link refid="_graphics_utilities_8hpp"/>
+      </node>
+      <node id="1292">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/GraphicsApplicationImpl.hpp</label>
+        <link refid="GraphicsApplicationImpl.hpp"/>
+        <childnode refid="1293" relation="include">
+        </childnode>
+      </node>
+    </invincdepgraph>
+    <innerclass refid="struct_d_o_1_1_dialog_box_info" prot="public">DO::DialogBoxInfo</innerclass>
+    <innerclass refid="class_d_o_1_1_graphics_application_1_1_impl" prot="public">DO::GraphicsApplication::Impl</innerclass>
+    <innernamespace refid="namespace_d_o">DO</innernamespace>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="comment">//<sp/>==========================================================================<sp/>//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="comment">//<sp/>This<sp/>file<sp/>is<sp/>part<sp/>of<sp/>DO++,<sp/>a<sp/>basic<sp/>set<sp/>of<sp/>libraries<sp/>in<sp/>C++<sp/>for<sp/>computer<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight><highlight class="comment">//<sp/>vision.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="comment">//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Copyright<sp/>(C)<sp/>2013<sp/>David<sp/>Ok<sp/>&lt;david.ok8@gmail.com&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight><highlight class="comment">//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight><highlight class="comment">//<sp/>This<sp/>Source<sp/>Code<sp/>Form<sp/>is<sp/>subject<sp/>to<sp/>the<sp/>terms<sp/>of<sp/>the<sp/>Mozilla<sp/>Public<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight><highlight class="comment">//<sp/>License<sp/>v.<sp/>2.0.<sp/>If<sp/>a<sp/>copy<sp/>of<sp/>the<sp/>MPL<sp/>was<sp/>not<sp/>distributed<sp/>with<sp/>this<sp/>file,<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight><highlight class="comment">//<sp/>you<sp/>can<sp/>obtain<sp/>one<sp/>at<sp/>http://mozilla.org/MPL/2.0/.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight><highlight class="comment">//<sp/>==========================================================================<sp/>//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight><highlight class="preprocessor">#ifndef<sp/>DO_GRAPHICS_GRAPHICSAPPLICATIONIMPL_HPP</highlight></codeline>
+<codeline lineno="15"><highlight class="preprocessor"></highlight><highlight class="preprocessor">#define<sp/>DO_GRAPHICS_GRAPHICSAPPLICATIONIMPL_HPP</highlight></codeline>
+<codeline lineno="16"><highlight class="preprocessor"></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="17"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;<ref refid="_graphics_8hpp" kindref="compound" tooltip="Master header file of the Graphics module.">DO/Graphics.hpp</ref>&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;QApplication&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="19"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;QPointer&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="20"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;QPixmap&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="21"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;QString&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="22"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;QWidget&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="23"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_user_thread_8hpp" kindref="compound">UserThread.hpp</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="24"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_painting_window_8hpp" kindref="compound">PaintingWindow.hpp</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="25"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_open_g_l_window_8hpp" kindref="compound">OpenGLWindow.hpp</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="26"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_graphics_view_8hpp" kindref="compound">GraphicsView.hpp</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="27"><highlight class="normal"></highlight></codeline>
+<codeline lineno="28"><highlight class="normal"></highlight><highlight class="keyword">namespace<sp/></highlight><highlight class="normal">DO<sp/>{</highlight></codeline>
+<codeline lineno="29"><highlight class="normal"></highlight></codeline>
+<codeline lineno="32" refid="struct_d_o_1_1_dialog_box_info" refkind="compound"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal"><ref refid="struct_d_o_1_1_dialog_box_info" kindref="compound" tooltip="quick-and-dirty thing to read file from dialog box.">DialogBoxInfo</ref></highlight></codeline>
+<codeline lineno="33"><highlight class="normal"><sp/><sp/>{</highlight></codeline>
+<codeline lineno="34"><highlight class="normal"><sp/><sp/><sp/><sp/>QPixmap<sp/>pixmap;</highlight></codeline>
+<codeline lineno="35"><highlight class="normal"><sp/><sp/><sp/><sp/>QString<sp/>filename;</highlight></codeline>
+<codeline lineno="36"><highlight class="normal"><sp/><sp/>};</highlight></codeline>
+<codeline lineno="37"><highlight class="normal"></highlight></codeline>
+<codeline lineno="39" refid="class_d_o_1_1_graphics_application_1_1_impl" refkind="compound"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="class_d_o_1_1_graphics_application_1_1_impl" kindref="compound" tooltip="Private implementation of the class GraphicsApplication.">GraphicsApplication::Impl</ref><sp/>:<sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal"><sp/>QApplication</highlight></codeline>
+<codeline lineno="40"><highlight class="normal"><sp/><sp/>{</highlight></codeline>
+<codeline lineno="41"><highlight class="normal"><sp/><sp/><sp/><sp/>Q_OBJECT</highlight></codeline>
+<codeline lineno="42"><highlight class="normal"></highlight></codeline>
+<codeline lineno="43"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal">:<sp/></highlight><highlight class="comment">/*<sp/>enum<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="44"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">enum</highlight><highlight class="normal"><sp/>WindowType<sp/>{</highlight></codeline>
+<codeline lineno="45"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>PAINTING_WINDOW<sp/>=<sp/>0,</highlight></codeline>
+<codeline lineno="46"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>OPENGL_WINDOW<sp/>=<sp/>1,</highlight></codeline>
+<codeline lineno="47"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>GRAPHICS_VIEW<sp/>=<sp/>2</highlight></codeline>
+<codeline lineno="48"><highlight class="normal"><sp/><sp/><sp/><sp/>};</highlight></codeline>
+<codeline lineno="49"><highlight class="normal"></highlight></codeline>
+<codeline lineno="50"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal">:<sp/></highlight><highlight class="comment">/*<sp/>methods<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="51"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="class_d_o_1_1_graphics_application_1_1_impl" kindref="compound" tooltip="Private implementation of the class GraphicsApplication.">Impl</ref>(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>argc,<sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>**argv);</highlight></codeline>
+<codeline lineno="52"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">virtual</highlight><highlight class="normal"><sp/>~<ref refid="class_d_o_1_1_graphics_application_1_1_impl" kindref="compound" tooltip="Private implementation of the class GraphicsApplication.">Impl</ref>();</highlight></codeline>
+<codeline lineno="53"><highlight class="normal"></highlight></codeline>
+<codeline lineno="54"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal"><sp/>slots:</highlight></codeline>
+<codeline lineno="55"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>createWindow(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>windowType,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>w,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>h,</highlight></codeline>
+<codeline lineno="56"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>QString&amp;<sp/>windowTitle,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>x,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="group___channel_accessors_1gac90c52c5b3a7b2a7e3761e6e84f25778" kindref="member" tooltip="Mutable channel accessor.">y</ref>);</highlight></codeline>
+<codeline lineno="57"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>setActiveWindow(QWidget<sp/>*w);</highlight></codeline>
+<codeline lineno="58"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>closeWindow(QWidget<sp/>*w);</highlight></codeline>
+<codeline lineno="59"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>getFileFromDialogBox();</highlight></codeline>
+<codeline lineno="60"><highlight class="normal"></highlight></codeline>
+<codeline lineno="61"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal">:<sp/></highlight><highlight class="comment">/*<sp/>connection<sp/>methods<sp/>for<sp/>the<sp/>keyboard<sp/>and<sp/>mouse<sp/>handling.<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="62"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>activeWindowIsVisible();</highlight></codeline>
+<codeline lineno="63"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>connectWindowIOEventsToUserThread(QWidget<sp/>*w);</highlight></codeline>
+<codeline lineno="64"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>connectAllWindowsIOEventsToUserThread();</highlight></codeline>
+<codeline lineno="65"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>disconnectAllWindowsIOEventsToUserThread();</highlight></codeline>
+<codeline lineno="66"><highlight class="normal"></highlight></codeline>
+<codeline lineno="67"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="68"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>argc;</highlight></codeline>
+<codeline lineno="69"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>**argv;</highlight></codeline>
+<codeline lineno="70"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="class_d_o_1_1_user_thread" kindref="compound" tooltip="This is actually where we actually call the drawing commands.">UserThread</ref><sp/>userThread;</highlight></codeline>
+<codeline lineno="71"><highlight class="normal"><sp/><sp/><sp/><sp/>QList&lt;QPointer&lt;QWidget&gt;<sp/>&gt;<sp/>createdWindows;</highlight></codeline>
+<codeline lineno="72"><highlight class="normal"><sp/><sp/><sp/><sp/>QPointer&lt;QWidget&gt;<sp/>activeWindow;</highlight></codeline>
+<codeline lineno="73"><highlight class="normal"></highlight></codeline>
+<codeline lineno="74"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="struct_d_o_1_1_dialog_box_info" kindref="compound" tooltip="quick-and-dirty thing to read file from dialog box.">DialogBoxInfo</ref><sp/>dialogBoxInfo;</highlight></codeline>
+<codeline lineno="75"><highlight class="normal"></highlight></codeline>
+<codeline lineno="76"><highlight class="normal"><sp/><sp/><sp/><sp/>QMutex<sp/>mutex;</highlight></codeline>
+<codeline lineno="77"><highlight class="normal"><sp/><sp/>};</highlight></codeline>
+<codeline lineno="78"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="79"><highlight class="normal">}<sp/></highlight><highlight class="comment">/*<sp/>namespace<sp/>DO<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="80"><highlight class="normal"></highlight></codeline>
+<codeline lineno="81"><highlight class="normal"></highlight><highlight class="preprocessor">#endif<sp/></highlight><highlight class="comment">/*<sp/>DO_GRAPHICS_GRAPHICSAPPLICATIONIMPL_HPP<sp/>*/</highlight><highlight class="preprocessor"></highlight></codeline>
+    </programlisting>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/GraphicsApplicationImpl.hpp"/>
+  </compounddef>
+</doxygen>

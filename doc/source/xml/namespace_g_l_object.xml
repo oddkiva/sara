@@ -1,0 +1,126 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="namespace_g_l_object" kind="namespace">
+    <compoundname>GLObject</compoundname>
+    <innerclass refid="class_g_l_object_1_1_frame" prot="public">GLObject::Frame</innerclass>
+      <sectiondef kind="var">
+      <memberdef kind="variable" id="namespace_g_l_object_1aadbf8db381d8c33cf738de6dc4e896ac" prot="public" static="no" mutable="no">
+        <type>const GLfloat</type>
+        <definition>const GLfloat red[]</definition>
+        <argsstring>[]</argsstring>
+        <name>red</name>
+        <initializer>= { 1.0f, 0.0f, 0.0f, 1.0f }</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Frame.hpp" line="24" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Frame.hpp" bodystart="24" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="namespace_g_l_object_1a16d7f7d6532ab534f1a3b32f5445c544" prot="public" static="no" mutable="no">
+        <type>const GLfloat</type>
+        <definition>const GLfloat green[]</definition>
+        <argsstring>[]</argsstring>
+        <name>green</name>
+        <initializer>= { 0.0f, 1.0f, 0.0f, 1.0f }</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Frame.hpp" line="25" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Frame.hpp" bodystart="25" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="namespace_g_l_object_1afc2d938de168cf1437242cf6b83a62f1" prot="public" static="no" mutable="no">
+        <type>const GLfloat</type>
+        <definition>const GLfloat blue[]</definition>
+        <argsstring>[]</argsstring>
+        <name>blue</name>
+        <initializer>= { 0.0f, 0.0f, 1.0f, 1.0f }</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Frame.hpp" line="26" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Frame.hpp" bodystart="26" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="namespace_g_l_object_1adb0647b81065f4c46fd1ec63cc7058ab" prot="public" static="no" mutable="no">
+        <type>const GLfloat</type>
+        <definition>const GLfloat yellow[]</definition>
+        <argsstring>[]</argsstring>
+        <name>yellow</name>
+        <initializer>= { 1.0f, 1.0f, 0.0f, 1.0f }</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Frame.hpp" line="27" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Frame.hpp" bodystart="27" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="namespace_g_l_object_1a3deb836a6792d0302e1b7819d1e51dc4" prot="public" static="no" mutable="no">
+        <type>const GLfloat</type>
+        <definition>const GLfloat white[]</definition>
+        <argsstring>[]</argsstring>
+        <name>white</name>
+        <initializer>= { 1.0f, 1.0f, 1.0f, 1.0f }</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Frame.hpp" line="28" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Frame.hpp" bodystart="28" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="namespace_g_l_object_1a3e89afec718ac162aa70c5a6d0abf56e" prot="public" static="no" mutable="no">
+        <type>const GLfloat</type>
+        <definition>const GLfloat defaultAmbient[]</definition>
+        <argsstring>[]</argsstring>
+        <name>defaultAmbient</name>
+        <initializer>= { 0.2f, 0.2f, 0.2f, 1.0f }</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Frame.hpp" line="29" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Frame.hpp" bodystart="29" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="namespace_g_l_object_1a98ce433a6e2199eb6d79010044596a9d" prot="public" static="no" mutable="no">
+        <type>const double</type>
+        <definition>const double defaultAxisLength</definition>
+        <argsstring></argsstring>
+        <name>defaultAxisLength</name>
+        <initializer>= 10.0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Frame.hpp" line="31" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Frame.hpp" bodystart="31" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="namespace_g_l_object_1aba2bb5a7bbfb8d3bc843cfce4a518077" prot="public" static="no" mutable="no">
+        <type>const double</type>
+        <definition>const double defaultAxisRadius</definition>
+        <argsstring></argsstring>
+        <name>defaultAxisRadius</name>
+        <initializer>= 0.125</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Frame.hpp" line="32" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Frame.hpp" bodystart="32" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Frame.hpp" line="22"/>
+  </compounddef>
+</doxygen>

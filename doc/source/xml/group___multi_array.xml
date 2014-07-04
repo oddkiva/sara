@@ -1,0 +1,53 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="group___multi_array" kind="group">
+    <compoundname>MultiArray</compoundname>
+    <title>MultiArray</title>
+    <innerclass refid="struct_d_o_1_1_element_traits" prot="public">DO::ElementTraits</innerclass>
+    <innerclass refid="struct_d_o_1_1_element_traits_3_01_matrix_3_01_t_00_01_m_00_01_n_01_4_01_4" prot="public">DO::ElementTraits&lt; Matrix&lt; T, M, N &gt; &gt;</innerclass>
+    <innerclass refid="struct_d_o_1_1_element_traits_3_01_array_3_01_t_00_01_m_00_01_n_01_4_01_4" prot="public">DO::ElementTraits&lt; Array&lt; T, M, N &gt; &gt;</innerclass>
+    <innerclass refid="class_d_o_1_1_multi_array" prot="public">DO::MultiArray</innerclass>
+      <sectiondef kind="func">
+      <memberdef kind="function" id="group___multi_array_1ga9223155c64483239f48caab75fc0557d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>N</declname>
+            <defname>N</defname>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>StorageOrder</declname>
+            <defname>StorageOrder</defname>
+          </param>
+        </templateparamlist>
+        <type>std::ostream &amp;</type>
+        <definition>std::ostream&amp; DO::operator&lt;&lt;</definition>
+        <argsstring>(std::ostream &amp;os, const MultiArray&lt; T, N, StorageOrder &gt; &amp;M)</argsstring>
+        <name>operator&lt;&lt;</name>
+        <param>
+          <type>std::ostream &amp;</type>
+          <declname>os</declname>
+        </param>
+        <param>
+          <type>const MultiArray&lt; T, N, StorageOrder &gt; &amp;</type>
+          <declname>M</declname>
+        </param>
+        <briefdescription>
+<para>output stream operator </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="486" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="484" bodyend="490"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+  </compounddef>
+</doxygen>

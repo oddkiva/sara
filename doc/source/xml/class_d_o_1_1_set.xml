@@ -1,0 +1,245 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="class_d_o_1_1_set" kind="class" prot="public">
+    <compoundname>DO::Set</compoundname>
+    <templateparamlist>
+      <param>
+        <type>typename F</type>
+      </param>
+      <param>
+        <type>DescriptorType</type>
+        <declname>D</declname>
+        <defname>D</defname>
+      </param>
+    </templateparamlist>
+      <sectiondef kind="public-type">
+      <memberdef kind="typedef" id="class_d_o_1_1_set_1a8521d7cfb344c657fc9b05676dae6959" prot="public" static="no">
+        <type><ref refid="struct_d_o_1_1_bin" kindref="compound">Bin</ref>&lt; D &gt;::Type</type>
+        <definition>typedef Bin&lt;D&gt;::Type BinType</definition>
+        <argsstring></argsstring>
+        <name>BinType</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Key.hpp" line="51" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Key.hpp" bodystart="51" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_d_o_1_1_set_1a68b4e90ade498f561075fed99f6d96f9" prot="public" static="no">
+        <type>F</type>
+        <definition>typedef F Feature</definition>
+        <argsstring></argsstring>
+        <name>Feature</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Key.hpp" line="52" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Key.hpp" bodystart="52" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_d_o_1_1_set_1ac1571f45ff287d0fb5fdd274443a5b34" prot="public" static="no">
+        <type><ref refid="class_d_o_1_1_descriptor_matrix" kindref="compound">DescriptorMatrix</ref>&lt; BinType &gt;::descriptor_type</type>
+        <definition>typedef DescriptorMatrix&lt;BinType&gt;::descriptor_type Descriptor</definition>
+        <argsstring></argsstring>
+        <name>Descriptor</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Key.hpp" line="54" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Key.hpp" bodystart="54" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_d_o_1_1_set_1aaaa7b485cbde4b8076c02872ccd8d0d0" prot="public" static="no">
+        <type><ref refid="class_d_o_1_1_descriptor_matrix" kindref="compound">DescriptorMatrix</ref>&lt; BinType &gt;::const_descriptor_type</type>
+        <definition>typedef DescriptorMatrix&lt;BinType&gt;::const_descriptor_type ConstDescriptor</definition>
+        <argsstring></argsstring>
+        <name>ConstDescriptor</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Key.hpp" line="56" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Key.hpp" bodystart="56" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_d_o_1_1_set_1adaaff15adcfe4a8264141fee886bdc58" prot="public" static="no">
+        <type><ref refid="class_d_o_1_1_key_ref" kindref="compound">KeyRef</ref>&lt; const Feature, ConstDescriptor &gt;</type>
+        <definition>typedef KeyRef&lt;const Feature, ConstDescriptor&gt; Key</definition>
+        <argsstring></argsstring>
+        <name>Key</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Key.hpp" line="58" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Key.hpp" bodystart="58" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_d_o_1_1_set_1a14d78735d033aa29cb335630381eadda" prot="public" static="no">
+        <type><ref refid="class_d_o_1_1_key_ref" kindref="compound">KeyRef</ref>&lt; const Feature, ConstDescriptor &gt;</type>
+        <definition>typedef KeyRef&lt;const Feature, ConstDescriptor&gt; ConstKey</definition>
+        <argsstring></argsstring>
+        <name>ConstKey</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Key.hpp" line="59" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Key.hpp" bodystart="59" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="class_d_o_1_1_set_1ad22af92e52ad7bd5f0472d0da2ea708e" prot="public" static="no" mutable="no">
+        <type>std::vector&lt; F &gt;</type>
+        <definition>std::vector&lt;F&gt; features</definition>
+        <argsstring></argsstring>
+        <name>features</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Key.hpp" line="88" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Key.hpp" bodystart="88" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_set_1aabecd8f90ed24721be12c1cbc3aa98fb" prot="public" static="no" mutable="no">
+        <type><ref refid="class_d_o_1_1_descriptor_matrix" kindref="compound">DescriptorMatrix</ref>&lt; BinType &gt;</type>
+        <definition>DescriptorMatrix&lt;BinType&gt; descriptors</definition>
+        <argsstring></argsstring>
+        <name>descriptors</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Key.hpp" line="89" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Key.hpp" bodystart="89" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_d_o_1_1_set_1a48786ee5f89bb414f479dd98957acc7a" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_key_ref" kindref="compound">Key</ref></type>
+        <definition>Key operator[]</definition>
+        <argsstring>(int i)</argsstring>
+        <name>operator[]</name>
+        <param>
+          <type>int</type>
+          <declname>i</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Key.hpp" line="62" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Key.hpp" bodystart="61" bodyend="62"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_set_1a2c0b425fff59a57b74f96ff29273ef5c" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_key_ref" kindref="compound">ConstKey</ref></type>
+        <definition>ConstKey operator[]</definition>
+        <argsstring>(int i) const </argsstring>
+        <name>operator[]</name>
+        <param>
+          <type>int</type>
+          <declname>i</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Key.hpp" line="64" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Key.hpp" bodystart="63" bodyend="64"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_set_1aac782da1f912bceb5d8ad00c8dc892ac" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>size_t</type>
+        <definition>size_t size</definition>
+        <argsstring>() const </argsstring>
+        <name>size</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Key.hpp" line="67" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Key.hpp" bodystart="66" bodyend="74"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_set_1a5d2ee2eb167c78359543d3cfa34c7ba0" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void swap</definition>
+        <argsstring>(Set &amp;set)</argsstring>
+        <name>swap</name>
+        <param>
+          <type><ref refid="class_d_o_1_1_set" kindref="compound">Set</ref> &amp;</type>
+          <declname>set</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Key.hpp" line="77" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Key.hpp" bodystart="76" bodyend="80"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_set_1a3865728c61c9634202d1c3b773991433" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void append</definition>
+        <argsstring>(const Set &amp;other)</argsstring>
+        <name>append</name>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_set" kindref="compound">Set</ref> &amp;</type>
+          <declname>other</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Key.hpp" line="83" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Key.hpp" bodystart="82" bodyend="86"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <collaborationgraph>
+      <node id="536">
+        <label>DescriptorMatrix&lt; BinType &gt;</label>
+        <link refid="class_d_o_1_1_descriptor_matrix"/>
+        <childnode refid="537" relation="private-inheritance">
+        </childnode>
+      </node>
+      <node id="537">
+        <label>Matrix&lt; BinType, Dynamic, Dynamic &gt;</label>
+      </node>
+      <node id="535">
+        <label>Set&lt; F, D &gt;</label>
+        <link refid="class_d_o_1_1_set"/>
+        <childnode refid="536" relation="usage">
+          <edgelabel>descriptors</edgelabel>
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Key.hpp" line="49" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/Key.hpp" bodystart="48" bodyend="90"/>
+    <listofallmembers>
+      <member refid="class_d_o_1_1_set_1a3865728c61c9634202d1c3b773991433" prot="public" virt="non-virtual"><scope>DO::Set</scope><name>append</name></member>
+      <member refid="class_d_o_1_1_set_1a8521d7cfb344c657fc9b05676dae6959" prot="public" virt="non-virtual"><scope>DO::Set</scope><name>BinType</name></member>
+      <member refid="class_d_o_1_1_set_1aaaa7b485cbde4b8076c02872ccd8d0d0" prot="public" virt="non-virtual"><scope>DO::Set</scope><name>ConstDescriptor</name></member>
+      <member refid="class_d_o_1_1_set_1a14d78735d033aa29cb335630381eadda" prot="public" virt="non-virtual"><scope>DO::Set</scope><name>ConstKey</name></member>
+      <member refid="class_d_o_1_1_set_1ac1571f45ff287d0fb5fdd274443a5b34" prot="public" virt="non-virtual"><scope>DO::Set</scope><name>Descriptor</name></member>
+      <member refid="class_d_o_1_1_set_1aabecd8f90ed24721be12c1cbc3aa98fb" prot="public" virt="non-virtual"><scope>DO::Set</scope><name>descriptors</name></member>
+      <member refid="class_d_o_1_1_set_1a68b4e90ade498f561075fed99f6d96f9" prot="public" virt="non-virtual"><scope>DO::Set</scope><name>Feature</name></member>
+      <member refid="class_d_o_1_1_set_1ad22af92e52ad7bd5f0472d0da2ea708e" prot="public" virt="non-virtual"><scope>DO::Set</scope><name>features</name></member>
+      <member refid="class_d_o_1_1_set_1adaaff15adcfe4a8264141fee886bdc58" prot="public" virt="non-virtual"><scope>DO::Set</scope><name>Key</name></member>
+      <member refid="class_d_o_1_1_set_1a48786ee5f89bb414f479dd98957acc7a" prot="public" virt="non-virtual"><scope>DO::Set</scope><name>operator[]</name></member>
+      <member refid="class_d_o_1_1_set_1a2c0b425fff59a57b74f96ff29273ef5c" prot="public" virt="non-virtual"><scope>DO::Set</scope><name>operator[]</name></member>
+      <member refid="class_d_o_1_1_set_1aac782da1f912bceb5d8ad00c8dc892ac" prot="public" virt="non-virtual"><scope>DO::Set</scope><name>size</name></member>
+      <member refid="class_d_o_1_1_set_1a5d2ee2eb167c78359543d3cfa34c7ba0" prot="public" virt="non-virtual"><scope>DO::Set</scope><name>swap</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

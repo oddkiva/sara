@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="dir_558986a36dac444fa47f02c03d0753b4" kind="dir">
+    <compoundname>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools</compoundname>
+    <innerfile refid="_conic_8hpp">Conic.hpp</innerfile>
+    <innerfile refid="_matrix_based_object_8hpp">MatrixBasedObject.hpp</innerfile>
+    <innerfile refid="_metric_8hpp">Metric.hpp</innerfile>
+    <innerfile refid="_polynomial_8hpp">Polynomial.hpp</innerfile>
+    <innerfile refid="_polynomial_roots_8hpp">PolynomialRoots.hpp</innerfile>
+    <innerfile refid="_projective_8hpp">Projective.hpp</innerfile>
+    <innerfile refid="_geometry_2_tools_2_utilities_8hpp">Utilities.hpp</innerfile>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/"/>
+  </compounddef>
+</doxygen>

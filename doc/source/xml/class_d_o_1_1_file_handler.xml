@@ -1,0 +1,137 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="class_d_o_1_1_file_handler" kind="class" prot="public">
+    <compoundname>DO::FileHandler</compoundname>
+    <derivedcompoundref refid="class_d_o_1_1_image_file_reader" prot="public" virt="non-virtual">ImageFileReader</derivedcompoundref>
+    <derivedcompoundref refid="class_d_o_1_1_image_file_writer" prot="public" virt="non-virtual">ImageFileWriter</derivedcompoundref>
+      <sectiondef kind="protected-attrib">
+      <memberdef kind="variable" id="class_d_o_1_1_file_handler_1a715b2a1d4ad04ec0c950d1467f91964e" prot="protected" static="no" mutable="no">
+        <type>FILE *</type>
+        <definition>FILE* file_</definition>
+        <argsstring></argsstring>
+        <name>file_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" line="39" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" bodystart="39" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_d_o_1_1_file_handler_1a7a105e8757c6bbbe0e6be820ce84f1ed" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>FileHandler</definition>
+        <argsstring>()</argsstring>
+        <name>FileHandler</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" line="41" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" bodystart="41" bodyend="41"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_file_handler_1ab8b9ecc7384dd1830ea8d76aeda28f88" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>FileHandler</definition>
+        <argsstring>(const std::string &amp;filepath, const std::string &amp;mode)</argsstring>
+        <name>FileHandler</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>filepath</declname>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>mode</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" line="42"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_file_handler_1a0d3895a0eb5141fa24ba508c743d1924" prot="public" static="no" const="no" explicit="no" inline="no" virt="virtual">
+        <type></type>
+        <definition>virtual ~FileHandler</definition>
+        <argsstring>()</argsstring>
+        <name>~FileHandler</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" line="43"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="185">
+        <label>FileHandler</label>
+        <link refid="class_d_o_1_1_file_handler"/>
+      </node>
+      <node id="193">
+        <label>TiffFileWriter</label>
+        <link refid="class_d_o_1_1_tiff_file_writer"/>
+        <childnode refid="190" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="190">
+        <label>ImageFileWriter</label>
+        <link refid="class_d_o_1_1_image_file_writer"/>
+        <childnode refid="185" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="188">
+        <label>PngFileReader</label>
+        <link refid="class_d_o_1_1_png_file_reader"/>
+        <childnode refid="186" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="187">
+        <label>JpegFileReader</label>
+        <link refid="class_d_o_1_1_jpeg_file_reader"/>
+        <childnode refid="186" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="189">
+        <label>TiffFileReader</label>
+        <link refid="class_d_o_1_1_tiff_file_reader"/>
+        <childnode refid="186" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="192">
+        <label>PngFileWriter</label>
+        <link refid="class_d_o_1_1_png_file_writer"/>
+        <childnode refid="190" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="186">
+        <label>ImageFileReader</label>
+        <link refid="class_d_o_1_1_image_file_reader"/>
+        <childnode refid="185" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="191">
+        <label>JpegFileWriter</label>
+        <link refid="class_d_o_1_1_jpeg_file_writer"/>
+        <childnode refid="190" relation="public-inheritance">
+        </childnode>
+      </node>
+    </inheritancegraph>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" line="37" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" bodystart="36" bodyend="44"/>
+    <listofallmembers>
+      <member refid="class_d_o_1_1_file_handler_1a715b2a1d4ad04ec0c950d1467f91964e" prot="protected" virt="non-virtual"><scope>DO::FileHandler</scope><name>file_</name></member>
+      <member refid="class_d_o_1_1_file_handler_1a7a105e8757c6bbbe0e6be820ce84f1ed" prot="public" virt="non-virtual"><scope>DO::FileHandler</scope><name>FileHandler</name></member>
+      <member refid="class_d_o_1_1_file_handler_1ab8b9ecc7384dd1830ea8d76aeda28f88" prot="public" virt="non-virtual"><scope>DO::FileHandler</scope><name>FileHandler</name></member>
+      <member refid="class_d_o_1_1_file_handler_1a0d3895a0eb5141fa24ba508c743d1924" prot="public" virt="virtual"><scope>DO::FileHandler</scope><name>~FileHandler</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

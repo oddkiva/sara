@@ -1,0 +1,384 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="group___scaling" kind="group">
+    <compoundname>Scaling</compoundname>
+    <title>Reduce, enlarge, warp image...</title>
+      <sectiondef kind="func">
+      <memberdef kind="function" id="group___scaling_1gad1722e482660c0ab4bc2353c7aa85299" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>N</declname>
+            <defname>N</defname>
+          </param>
+        </templateparamlist>
+        <type>Image&lt; T, N &gt;</type>
+        <definition>Image&lt;T, N&gt; DO::upscale</definition>
+        <argsstring>(const Image&lt; T, N &gt; &amp;I, int fact)</argsstring>
+        <name>upscale</name>
+        <param>
+          <type>const Image&lt; T, N &gt; &amp;</type>
+          <declname>I</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>fact</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Scaling.hpp" line="29" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Scaling.hpp" bodystart="28" bodyend="35"/>
+      </memberdef>
+      <memberdef kind="function" id="group___scaling_1gaea62a65f0fd8ef0c43a5bb7cc4202a37" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>N</declname>
+            <defname>N</defname>
+          </param>
+        </templateparamlist>
+        <type>Image&lt; T, N &gt;</type>
+        <definition>Image&lt;T, N&gt; DO::downscale</definition>
+        <argsstring>(const Image&lt; T, N &gt; &amp;I, int fact)</argsstring>
+        <name>downscale</name>
+        <param>
+          <type>const Image&lt; T, N &gt; &amp;</type>
+          <declname>I</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>fact</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Scaling.hpp" line="39" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Scaling.hpp" bodystart="38" bodyend="45"/>
+      </memberdef>
+      <memberdef kind="function" id="group___scaling_1ga1b1044c1416b07c29d6f3dbc60ec5085" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>N</declname>
+            <defname>N</defname>
+          </param>
+        </templateparamlist>
+        <type>std::pair&lt; T, T &gt;</type>
+        <definition>std::pair&lt;T, T&gt; DO::range</definition>
+        <argsstring>(const Matrix&lt; T, N, 1 &gt; &amp;v)</argsstring>
+        <name>range</name>
+        <param>
+          <type>const Matrix&lt; T, N, 1 &gt; &amp;</type>
+          <declname>v</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Scaling.hpp" line="49" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Scaling.hpp" bodystart="48" bodyend="54"/>
+      </memberdef>
+      <memberdef kind="function" id="group___scaling_1gace65217e22b185d8b8004dfb6e4c037a" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>N</declname>
+            <defname>N</defname>
+          </param>
+        </templateparamlist>
+        <type>Image&lt; T, N &gt;</type>
+        <definition>Image&lt;T, N&gt; DO::reduce</definition>
+        <argsstring>(const Image&lt; T, N &gt; &amp;I, Matrix&lt; int, N, 1 &gt; newSizes, bool keepRatio=false)</argsstring>
+        <name>reduce</name>
+        <param>
+          <type>const Image&lt; T, N &gt; &amp;</type>
+          <declname>I</declname>
+        </param>
+        <param>
+          <type>Matrix&lt; int, N, 1 &gt;</type>
+          <declname>newSizes</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>keepRatio</declname>
+          <defval>false</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Scaling.hpp" line="59" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Scaling.hpp" bodystart="57" bodyend="93"/>
+      </memberdef>
+      <memberdef kind="function" id="group___scaling_1gaf7a7a0b7133b062819b4e3260e40d6c4" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>Image&lt; T, 2 &gt;</type>
+        <definition>Image&lt;T,2&gt; DO::reduce</definition>
+        <argsstring>(const Image&lt; T, 2 &gt; &amp;I, int w, int h, bool keepRatio=false)</argsstring>
+        <name>reduce</name>
+        <param>
+          <type>const Image&lt; T, 2 &gt; &amp;</type>
+          <declname>I</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>w</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>h</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>keepRatio</declname>
+          <defval>false</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Scaling.hpp" line="97" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Scaling.hpp" bodystart="96" bodyend="97"/>
+      </memberdef>
+      <memberdef kind="function" id="group___scaling_1gaaeb7d7a50b5256978e36412404de5ed5" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>Image&lt; T, 3 &gt;</type>
+        <definition>Image&lt;T,3&gt; DO::reduce</definition>
+        <argsstring>(const Image&lt; T, 3 &gt; &amp;I, int w, int h, int d, bool keepRatio=false)</argsstring>
+        <name>reduce</name>
+        <param>
+          <type>const Image&lt; T, 3 &gt; &amp;</type>
+          <declname>I</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>w</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>h</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>d</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>keepRatio</declname>
+          <defval>false</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Scaling.hpp" line="101" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Scaling.hpp" bodystart="100" bodyend="101"/>
+      </memberdef>
+      <memberdef kind="function" id="group___scaling_1ga520f9e82111927f367454b3f2f988afc" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>N</declname>
+            <defname>N</defname>
+          </param>
+        </templateparamlist>
+        <type>Image&lt; T, N &gt;</type>
+        <definition>Image&lt;T,N&gt; DO::reduce</definition>
+        <argsstring>(const Image&lt; T, N &gt; &amp;I, double fact)</argsstring>
+        <name>reduce</name>
+        <param>
+          <type>const Image&lt; T, N &gt; &amp;</type>
+          <declname>I</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>fact</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Scaling.hpp" line="105" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Scaling.hpp" bodystart="104" bodyend="109"/>
+      </memberdef>
+      <memberdef kind="function" id="group___scaling_1ga6ec1b584e258e3442657456bcf74e12a" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>N</declname>
+            <defname>N</defname>
+          </param>
+        </templateparamlist>
+        <type>Image&lt; T, N &gt;</type>
+        <definition>Image&lt;T,N&gt; DO::enlarge</definition>
+        <argsstring>(const Image&lt; T, N &gt; &amp;I, Matrix&lt; int, N, 1 &gt; newSizes, bool keepRatio=false)</argsstring>
+        <name>enlarge</name>
+        <param>
+          <type>const Image&lt; T, N &gt; &amp;</type>
+          <declname>I</declname>
+        </param>
+        <param>
+          <type>Matrix&lt; int, N, 1 &gt;</type>
+          <declname>newSizes</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>keepRatio</declname>
+          <defval>false</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Scaling.hpp" line="114" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Scaling.hpp" bodystart="112" bodyend="137"/>
+      </memberdef>
+      <memberdef kind="function" id="group___scaling_1ga5298efc3e40574a761a5007e3d686660" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>Image&lt; T, 2 &gt;</type>
+        <definition>Image&lt;T,2&gt; DO::enlarge</definition>
+        <argsstring>(const Image&lt; T, 2 &gt; &amp;I, int w, int h, bool keepRatio=false)</argsstring>
+        <name>enlarge</name>
+        <param>
+          <type>const Image&lt; T, 2 &gt; &amp;</type>
+          <declname>I</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>w</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>h</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>keepRatio</declname>
+          <defval>false</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Scaling.hpp" line="142" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Scaling.hpp" bodystart="140" bodyend="142"/>
+      </memberdef>
+      <memberdef kind="function" id="group___scaling_1gad9c20ed5d745c1475eb2c7dfe6a2f8d0" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>Image&lt; T, 3 &gt;</type>
+        <definition>Image&lt;T,3&gt; DO::enlarge</definition>
+        <argsstring>(const Image&lt; T, 3 &gt; &amp;I, int w, int h, int d, bool keepRatio=false)</argsstring>
+        <name>enlarge</name>
+        <param>
+          <type>const Image&lt; T, 3 &gt; &amp;</type>
+          <declname>I</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>w</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>h</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>d</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>keepRatio</declname>
+          <defval>false</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Scaling.hpp" line="147" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Scaling.hpp" bodystart="145" bodyend="147"/>
+      </memberdef>
+      <memberdef kind="function" id="group___scaling_1ga580f996fda091e5d0cd287a9d13ffde8" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>N</declname>
+            <defname>N</defname>
+          </param>
+        </templateparamlist>
+        <type>Image&lt; T, N &gt;</type>
+        <definition>Image&lt;T,N&gt; DO::enlarge</definition>
+        <argsstring>(const Image&lt; T, N &gt; &amp;I, double fact)</argsstring>
+        <name>enlarge</name>
+        <param>
+          <type>const Image&lt; T, N &gt; &amp;</type>
+          <declname>I</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>fact</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Scaling.hpp" line="151" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Scaling.hpp" bodystart="150" bodyend="155"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+  </compounddef>
+</doxygen>

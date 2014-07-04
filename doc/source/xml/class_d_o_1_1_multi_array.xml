@@ -1,0 +1,1384 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="class_d_o_1_1_multi_array" kind="class" prot="public">
+    <compoundname>DO::MultiArray</compoundname>
+    <includes refid="_multi_array_8hpp" local="no">MultiArray.hpp</includes>
+    <innerclass refid="struct_d_o_1_1_multi_array_1_1_cast" prot="private">DO::MultiArray::Cast</innerclass>
+    <templateparamlist>
+      <param>
+        <type>typename</type>
+        <declname>T</declname>
+        <defname>T</defname>
+      </param>
+      <param>
+        <type>int</type>
+        <declname>N</declname>
+        <defname>N</defname>
+      </param>
+      <param>
+        <type>int</type>
+        <declname>StorageOrder</declname>
+        <defname>StorageOrder</defname>
+        <defval>RowMajor</defval>
+      </param>
+    </templateparamlist>
+      <sectiondef kind="private-type">
+      <memberdef kind="typedef" id="class_d_o_1_1_multi_array_1a5efa58fcdc2a9126334a336487184a00" prot="private" static="no">
+        <type><ref refid="struct_d_o_1_1_offset" kindref="compound">Offset</ref>&lt; N, StorageOrder &gt;</type>
+        <definition>typedef Offset&lt;N, StorageOrder&gt; storage_index</definition>
+        <argsstring></argsstring>
+        <name>storage_index</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="98" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="98" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_d_o_1_1_multi_array_1a501b052796303859ca0b48fed6d57f76" prot="private" static="no">
+        <type><ref refid="class_d_o_1_1_multi_array" kindref="compound">MultiArray</ref></type>
+        <definition>typedef MultiArray self_type</definition>
+        <argsstring></argsstring>
+        <name>self_type</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="99" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="99" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-type">
+      <memberdef kind="typedef" id="class_d_o_1_1_multi_array_1a89a6dcafb6130e3e1bcd6d1285e0dd6f" prot="public" static="no">
+        <type>std::size_t</type>
+        <definition>typedef std::size_t size_type</definition>
+        <argsstring></argsstring>
+        <name>size_type</name>
+        <briefdescription>
+<para>STL typedef. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="102" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="102" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_d_o_1_1_multi_array_1ad319fc54a93a2c7058c70e40428ed2e2" prot="public" static="no">
+        <type>std::ptrdiff_t</type>
+        <definition>typedef std::ptrdiff_t difference_type</definition>
+        <argsstring></argsstring>
+        <name>difference_type</name>
+        <briefdescription>
+<para>STL typedef. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="103" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="103" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_d_o_1_1_multi_array_1a265a253612b46abed17c61b0a5e5ce30" prot="public" static="no">
+        <type>T</type>
+        <definition>typedef T value_type</definition>
+        <argsstring></argsstring>
+        <name>value_type</name>
+        <briefdescription>
+<para>STL typedef. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="104" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="104" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_d_o_1_1_multi_array_1a680c78d51cff3fd301666dd75bdbe49d" prot="public" static="no">
+        <type>T *</type>
+        <definition>typedef T* pointer</definition>
+        <argsstring></argsstring>
+        <name>pointer</name>
+        <briefdescription>
+<para>STL typedef. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="105" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="105" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_d_o_1_1_multi_array_1a53d259f0075b22d7646e373816830e8e" prot="public" static="no">
+        <type>const T *</type>
+        <definition>typedef const T* const_pointer</definition>
+        <argsstring></argsstring>
+        <name>const_pointer</name>
+        <briefdescription>
+<para>STL typedef. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="106" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="106" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_d_o_1_1_multi_array_1a9b1a63f171d76a7a3995b6858e99f2ea" prot="public" static="no">
+        <type>T &amp;</type>
+        <definition>typedef T&amp; reference</definition>
+        <argsstring></argsstring>
+        <name>reference</name>
+        <briefdescription>
+<para>STL typedef. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="107" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="107" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_d_o_1_1_multi_array_1af9ba3e25df088c62f7d535b91672cda9" prot="public" static="no">
+        <type>const T &amp;</type>
+        <definition>typedef const T&amp; const_reference</definition>
+        <argsstring></argsstring>
+        <name>const_reference</name>
+        <briefdescription>
+<para>STL typedef. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="108" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="108" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_d_o_1_1_multi_array_1a35c955cacac6aacaa1e82874b1628865" prot="public" static="no">
+        <type>T *</type>
+        <definition>typedef T* iterator</definition>
+        <argsstring></argsstring>
+        <name>iterator</name>
+        <briefdescription>
+<para>STL typedef. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="109" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="109" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_d_o_1_1_multi_array_1a2fc97dce62b7053449cc868607540dba" prot="public" static="no">
+        <type>const T *</type>
+        <definition>typedef const T* const_iterator</definition>
+        <argsstring></argsstring>
+        <name>const_iterator</name>
+        <briefdescription>
+<para>STL typedef. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="110" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="110" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_d_o_1_1_multi_array_1af94cd6f98815d838c630d458ffbd5d88" prot="public" static="no">
+        <type>Matrix&lt; int, N, 1 &gt;</type>
+        <definition>typedef Matrix&lt;int, N, 1&gt; coords_type</definition>
+        <argsstring></argsstring>
+        <name>coords_type</name>
+        <briefdescription>
+<para>Vector type. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="113" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="113" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_d_o_1_1_multi_array_1aacf98e49e90f9aeead0ff8885fae3ac7" prot="public" static="no">
+        <type>Matrix&lt; int, N, 1 &gt;</type>
+        <definition>typedef Matrix&lt;int, N, 1&gt; vector_type</definition>
+        <argsstring></argsstring>
+        <name>vector_type</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="113" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="113" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_d_o_1_1_multi_array_1a598d93e43e894a9acbbaf36d99afeaa2" prot="public" static="no">
+        <type><ref refid="class_d_o_1_1_range_iterator" kindref="compound">RangeIterator</ref>&lt; false, T, N, StorageOrder &gt;</type>
+        <definition>typedef RangeIterator&lt;false, T, N, StorageOrder&gt; range_iterator</definition>
+        <argsstring></argsstring>
+        <name>range_iterator</name>
+        <briefdescription>
+<para>N-dimensional iterator. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="116" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="116" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_d_o_1_1_multi_array_1aa8ebb791e2ac5be9d07eb78236f6b75e" prot="public" static="no">
+        <type><ref refid="class_d_o_1_1_subrange_iterator" kindref="compound">SubrangeIterator</ref>&lt; false, T, N, StorageOrder &gt;</type>
+        <definition>typedef SubrangeIterator&lt;false, T, N, StorageOrder&gt; subrange_iterator</definition>
+        <argsstring></argsstring>
+        <name>subrange_iterator</name>
+        <briefdescription>
+<para>N-dimensional subrange iterator. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="118" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="118" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_d_o_1_1_multi_array_1ad69c27e7edbb13178e1dc9147c5ce613" prot="public" static="no">
+        <type><ref refid="class_d_o_1_1_range_iterator" kindref="compound">RangeIterator</ref>&lt; true, T, N, StorageOrder &gt;</type>
+        <definition>typedef RangeIterator&lt;true, T, N, StorageOrder&gt; const_range_iterator</definition>
+        <argsstring></argsstring>
+        <name>const_range_iterator</name>
+        <briefdescription>
+<para>Immutable N-dimensional iterator. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="120" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="120" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_d_o_1_1_multi_array_1a860b7c52202b3cf2240cfc5cd84e9556" prot="public" static="no">
+        <type><ref refid="class_d_o_1_1_subrange_iterator" kindref="compound">SubrangeIterator</ref>&lt; true, T, N, StorageOrder &gt;</type>
+        <definition>typedef SubrangeIterator&lt;true, T, N, StorageOrder&gt; const_subrange_iterator</definition>
+        <argsstring></argsstring>
+        <name>const_subrange_iterator</name>
+        <briefdescription>
+<para>Immutable N-dimensional subrange iterator. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="122" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="122" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_d_o_1_1_multi_array_1a51ca55d9377565ef193eae7ebbf945db" prot="public" static="no">
+        <type><ref refid="class_d_o_1_1_coords_iterator" kindref="compound">CoordsIterator</ref>&lt; N &gt;</type>
+        <definition>typedef CoordsIterator&lt;N&gt; coords_iterator</definition>
+        <argsstring></argsstring>
+        <name>coords_iterator</name>
+        <briefdescription>
+<para>Iterator over the coordinates. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="124" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="124" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_d_o_1_1_multi_array_1a4c4550c956b26060ca29852fc7752500" prot="public" static="no">
+        <type>Map&lt; const Array&lt; typename <ref refid="struct_d_o_1_1_element_traits" kindref="compound">ElementTraits</ref>&lt; T &gt;::<ref refid="class_d_o_1_1_multi_array_1a265a253612b46abed17c61b0a5e5ce30" kindref="member">value_type</ref>, Dynamic, 1 &gt; &gt;</type>
+        <definition>typedef Map&lt;const Array&lt;typename ElementTraits&lt;T&gt;::value_type, Dynamic, 1&gt; &gt; const_array_view_type</definition>
+        <argsstring></argsstring>
+        <name>const_array_view_type</name>
+        <briefdescription>
+<para>Immutable matrix view for linear algebra. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="128" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="128" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_d_o_1_1_multi_array_1a9f4b00f1ddd01a394b9e7efc47206238" prot="public" static="no">
+        <type>Map&lt; Array&lt; typename <ref refid="struct_d_o_1_1_element_traits" kindref="compound">ElementTraits</ref>&lt; T &gt;::<ref refid="class_d_o_1_1_multi_array_1a265a253612b46abed17c61b0a5e5ce30" kindref="member">value_type</ref>, Dynamic, 1 &gt; &gt;</type>
+        <definition>typedef Map&lt;Array&lt;typename ElementTraits&lt;T&gt;::value_type, Dynamic, 1&gt; &gt; array_view_type</definition>
+        <argsstring></argsstring>
+        <name>array_view_type</name>
+        <briefdescription>
+<para>Mutable matrix view for linear algebra. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="131" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="131" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_d_o_1_1_multi_array_1a6dcd1d235928f2209e19860122cfe407" prot="public" static="no">
+        <type>Map&lt; const Matrix&lt; typename <ref refid="struct_d_o_1_1_element_traits" kindref="compound">ElementTraits</ref>&lt; T &gt;::<ref refid="class_d_o_1_1_multi_array_1a265a253612b46abed17c61b0a5e5ce30" kindref="member">value_type</ref>, Dynamic, Dynamic, StorageOrder &gt; &gt;</type>
+        <definition>typedef Map&lt;const Matrix&lt;typename ElementTraits&lt;T&gt;::value_type, Dynamic, Dynamic, StorageOrder&gt; &gt; const_matrix_view_type</definition>
+        <argsstring></argsstring>
+        <name>const_matrix_view_type</name>
+        <briefdescription>
+<para>Immutable matrix view for linear algebra. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="134" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="134" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_d_o_1_1_multi_array_1a185870835281f858bc66928f6c9e1e52" prot="public" static="no">
+        <type>Map&lt; Matrix&lt; typename <ref refid="struct_d_o_1_1_element_traits" kindref="compound">ElementTraits</ref>&lt; T &gt;::<ref refid="class_d_o_1_1_multi_array_1a265a253612b46abed17c61b0a5e5ce30" kindref="member">value_type</ref>, Dynamic, Dynamic, StorageOrder &gt; &gt;</type>
+        <definition>typedef Map&lt;Matrix&lt;typename ElementTraits&lt;T&gt;::value_type, Dynamic, Dynamic, StorageOrder&gt; &gt; matrix_view_type</definition>
+        <argsstring></argsstring>
+        <name>matrix_view_type</name>
+        <briefdescription>
+<para>Mutable matrix view for linear algebra. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="137" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="137" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="class_d_o_1_1_multi_array_1a756f0e00978692fda84b7b7a6e9d888b" prot="private" static="no" mutable="no">
+        <type><ref refid="class_d_o_1_1_multi_array_1a265a253612b46abed17c61b0a5e5ce30" kindref="member">value_type</ref> *</type>
+        <definition>value_type* begin_</definition>
+        <argsstring></argsstring>
+        <name>begin_</name>
+        <briefdescription>
+<para>first element of the data. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="473" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="473" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_multi_array_1a1e8189b04efb7c529ef24066ba60cd40" prot="private" static="no" mutable="no">
+        <type><ref refid="class_d_o_1_1_multi_array_1a265a253612b46abed17c61b0a5e5ce30" kindref="member">value_type</ref> *</type>
+        <definition>value_type* end_</definition>
+        <argsstring></argsstring>
+        <name>end_</name>
+        <briefdescription>
+<para>first element of the data. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="474" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="474" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_multi_array_1ae26995a4bfa479a2f6163671c625cb83" prot="private" static="no" mutable="no">
+        <type>vector_type</type>
+        <definition>vector_type sizes_</definition>
+        <argsstring></argsstring>
+        <name>sizes_</name>
+        <briefdescription>
+<para>vector of size along each dimension. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="475" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="475" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_multi_array_1a0d7dcb2954c80ff40f4c12b4b29b44c8" prot="private" static="no" mutable="no">
+        <type>vector_type</type>
+        <definition>vector_type strides_</definition>
+        <argsstring></argsstring>
+        <name>strides_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>vector of stride for each dimension. </para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="476" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="476" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_multi_array_1a5c6d1fec40f4465e6f111bdb0825f8c8" prot="private" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool is_wrapped_data_</definition>
+        <argsstring></argsstring>
+        <name>is_wrapped_data_</name>
+        <briefdescription>
+<para>flag that checks if the array wraps some data. It is used for deallocation. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="479" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="479" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1a596f3b4b4084da422cb3320e165e1d89" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>MultiArray</definition>
+        <argsstring>()</argsstring>
+        <name>MultiArray</name>
+        <briefdescription>
+<para>Default constructor that constructs an empty N-dimensional array. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="147" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="141" bodyend="147"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1a94b6d325d4d1647132755287d95f8991" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>MultiArray</definition>
+        <argsstring>(value_type *data, const vector_type &amp;sizes, bool getOwnership=false)</argsstring>
+        <name>MultiArray</name>
+        <param>
+          <type><ref refid="class_d_o_1_1_multi_array_1a265a253612b46abed17c61b0a5e5ce30" kindref="member">value_type</ref> *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>const vector_type &amp;</type>
+          <declname>sizes</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>getOwnership</declname>
+          <defval>false</defval>
+        </param>
+        <briefdescription>
+<para>Constructor that wraps plain data with its known sizes. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="155" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="149" bodyend="155"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1a12c16e1c2846b8ca00471291ba650988" prot="public" static="no" const="no" explicit="yes" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>MultiArray</definition>
+        <argsstring>(const vector_type &amp;sizes)</argsstring>
+        <name>MultiArray</name>
+        <param>
+          <type>const vector_type &amp;</type>
+          <declname>sizes</declname>
+        </param>
+        <briefdescription>
+<para>Default constructor that allocates an N-dimensional array with the specified sizes. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="163" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="158" bodyend="163"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1acbb77f86b0c9386505a84adcd76f66e7" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>MultiArray</definition>
+        <argsstring>(int rows, int cols)</argsstring>
+        <name>MultiArray</name>
+        <param>
+          <type>int</type>
+          <declname>rows</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>cols</declname>
+        </param>
+        <briefdescription>
+<para>Default constructor that allocates a 2D array with the specified rows and columns. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="172" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="166" bodyend="172"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1a8009a5ab280ef118a93962a538f023db" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>MultiArray</definition>
+        <argsstring>(int rows, int cols, int depth)</argsstring>
+        <name>MultiArray</name>
+        <param>
+          <type>int</type>
+          <declname>rows</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>cols</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>depth</declname>
+        </param>
+        <briefdescription>
+<para>Default constructor that allocates a 3D array with the specified rows, columns and depth. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="181" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="175" bodyend="181"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1a50b55fece94eb8d5bb64c267a3ab54fc" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>MultiArray</definition>
+        <argsstring>(const self_type &amp;M)</argsstring>
+        <name>MultiArray</name>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_multi_array" kindref="compound">self_type</ref> &amp;</type>
+          <declname>M</declname>
+        </param>
+        <briefdescription>
+<para>Copy constructor that makes a deep copy of the source array. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="189" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="183" bodyend="189"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1aff00de73e78f6b4e9c3f534bfc4afeb9" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T2</type>
+          </param>
+        </templateparamlist>
+        <type></type>
+        <definition>MultiArray</definition>
+        <argsstring>(const MultiArray&lt; T2, N, StorageOrder &gt; &amp;M)</argsstring>
+        <name>MultiArray</name>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_multi_array" kindref="compound">MultiArray</ref>&lt; T2, N, StorageOrder &gt; &amp;</type>
+          <declname>M</declname>
+        </param>
+        <briefdescription>
+<para>Copy constructor that recopies the data source array with appropriate type casting. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="199" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="193" bodyend="199"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1ae67638f4b1e3885c9308aac696c195fa" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>~MultiArray</definition>
+        <argsstring>()</argsstring>
+        <name>~MultiArray</name>
+        <briefdescription>
+<para>Destructor. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="203" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="202" bodyend="206"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1a6c4f23db722b5e9bf57ef750c5fd18bd" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_multi_array" kindref="compound">self_type</ref> &amp;</type>
+        <definition>self_type&amp; operator=</definition>
+        <argsstring>(self_type M)</argsstring>
+        <name>operator=</name>
+        <param>
+          <type><ref refid="class_d_o_1_1_multi_array" kindref="compound">self_type</ref></type>
+          <declname>M</declname>
+        </param>
+        <briefdescription>
+<para>Assignment operator uses the copy-swap idiom. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="210" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="209" bodyend="213"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1aeaf5648ec46dbd53a8818e3aed129068" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T2</type>
+          </param>
+        </templateparamlist>
+        <type>const <ref refid="class_d_o_1_1_multi_array" kindref="compound">self_type</ref> &amp;</type>
+        <definition>const self_type&amp; operator=</definition>
+        <argsstring>(const MultiArray&lt; T2, N, StorageOrder &gt; &amp;M)</argsstring>
+        <name>operator=</name>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_multi_array" kindref="compound">MultiArray</ref>&lt; T2, N, StorageOrder &gt; &amp;</type>
+          <declname>M</declname>
+        </param>
+        <briefdescription>
+<para>Assignment operator that recopies the content of the source array with appropriate type casting. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="218" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="217" bodyend="234"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1acde7384c0a8f7d0d69bc9ec7d57967c3" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_multi_array_1a9b1a63f171d76a7a3995b6858e99f2ea" kindref="member">reference</ref></type>
+        <definition>reference operator()</definition>
+        <argsstring>(const coords_type &amp;c)</argsstring>
+        <name>operator()</name>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_multi_array_1af94cd6f98815d838c630d458ffbd5d88" kindref="member">coords_type</ref> &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Mutable referencing operator. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="238" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="237" bodyend="238"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1a07f8b52897f0d3f5835cef615d3a4ff0" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_multi_array_1a9b1a63f171d76a7a3995b6858e99f2ea" kindref="member">reference</ref></type>
+        <definition>reference operator()</definition>
+        <argsstring>(int i, int j)</argsstring>
+        <name>operator()</name>
+        <param>
+          <type>int</type>
+          <declname>i</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>j</declname>
+        </param>
+        <briefdescription>
+<para>Mutable referencing operator. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="241" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="240" bodyend="241"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1a39b2df46d5f4fc6ab3f6311e21bbf184" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_multi_array_1a9b1a63f171d76a7a3995b6858e99f2ea" kindref="member">reference</ref></type>
+        <definition>reference operator()</definition>
+        <argsstring>(int i, int j, int k)</argsstring>
+        <name>operator()</name>
+        <param>
+          <type>int</type>
+          <declname>i</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>j</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>k</declname>
+        </param>
+        <briefdescription>
+<para>Mutable referencing operator. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="244" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="243" bodyend="244"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1ac4b8c64f6893bd74ecd120d8895b887d" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_multi_array_1af9ba3e25df088c62f7d535b91672cda9" kindref="member">const_reference</ref></type>
+        <definition>const_reference operator()</definition>
+        <argsstring>(const coords_type &amp;c) const </argsstring>
+        <name>operator()</name>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_multi_array_1af94cd6f98815d838c630d458ffbd5d88" kindref="member">coords_type</ref> &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Non-mutable referencing operator. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="247" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="246" bodyend="247"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1a775d64bc033de30a55882546aa444731" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_multi_array_1af9ba3e25df088c62f7d535b91672cda9" kindref="member">const_reference</ref></type>
+        <definition>const_reference operator()</definition>
+        <argsstring>(int i, int j) const </argsstring>
+        <name>operator()</name>
+        <param>
+          <type>int</type>
+          <declname>i</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>j</declname>
+        </param>
+        <briefdescription>
+<para>Non-mutable referencing operator. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="250" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="249" bodyend="250"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1a5f265fc9984db753cbe10b36e438a741" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_multi_array_1af9ba3e25df088c62f7d535b91672cda9" kindref="member">const_reference</ref></type>
+        <definition>const_reference operator()</definition>
+        <argsstring>(int i, int j, int k) const </argsstring>
+        <name>operator()</name>
+        <param>
+          <type>int</type>
+          <declname>i</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>j</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>k</declname>
+        </param>
+        <briefdescription>
+<para>Non-mutable referencing operator. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="253" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="252" bodyend="253"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1a36e4d11a00a3572c87bf7e913e9b5ca1" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_multi_array_1a680c78d51cff3fd301666dd75bdbe49d" kindref="member">pointer</ref></type>
+        <definition>pointer data</definition>
+        <argsstring>()</argsstring>
+        <name>data</name>
+        <briefdescription>
+<para>Mutable POD accessor. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="257" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="256" bodyend="257"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1a794bbc6c3888bcfe88fb961f527c3563" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_multi_array_1a53d259f0075b22d7646e373816830e8e" kindref="member">const_pointer</ref></type>
+        <definition>const_pointer data</definition>
+        <argsstring>() const </argsstring>
+        <name>data</name>
+        <briefdescription>
+<para>Non-mutable POD accessor. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="260" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="259" bodyend="260"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1ad69bd11391be1a1dba5c8202259664f8" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_multi_array_1a35c955cacac6aacaa1e82874b1628865" kindref="member">iterator</ref></type>
+        <definition>iterator begin</definition>
+        <argsstring>()</argsstring>
+        <name>begin</name>
+        <briefdescription>
+<para>Mutable beginning iterator. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="264" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="263" bodyend="264"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1aa4b02d4f1a8500fb07a551069060709f" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_multi_array_1a2fc97dce62b7053449cc868607540dba" kindref="member">const_iterator</ref></type>
+        <definition>const_iterator begin</definition>
+        <argsstring>() const </argsstring>
+        <name>begin</name>
+        <briefdescription>
+<para>Non-mutable beginning iterator. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="267" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="266" bodyend="267"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1acad38d52497a975bfb6f2f6acd76631f" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_multi_array_1a35c955cacac6aacaa1e82874b1628865" kindref="member">iterator</ref></type>
+        <definition>iterator end</definition>
+        <argsstring>()</argsstring>
+        <name>end</name>
+        <briefdescription>
+<para>Mutable ending iterator. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="270" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="269" bodyend="270"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1a350132543d80a1c1e5be844e6d2878ea" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_multi_array_1a2fc97dce62b7053449cc868607540dba" kindref="member">const_iterator</ref></type>
+        <definition>const_iterator end</definition>
+        <argsstring>() const </argsstring>
+        <name>end</name>
+        <briefdescription>
+<para>Non-mutable ending iterator. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="273" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="272" bodyend="273"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1a15f0ce2877b385c9505f042faa705694" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>const vector_type &amp;</type>
+        <definition>const vector_type&amp; sizes</definition>
+        <argsstring>() const </argsstring>
+        <name>sizes</name>
+        <briefdescription>
+<para>Size getter. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="277" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="276" bodyend="277"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1a503ab01f6c0142145d3434f6924714e7" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_multi_array_1a89a6dcafb6130e3e1bcd6d1285e0dd6f" kindref="member">size_type</ref></type>
+        <definition>size_type size</definition>
+        <argsstring>() const </argsstring>
+        <name>size</name>
+        <briefdescription>
+<para>Raw size getter. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="280" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="279" bodyend="280"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1ab243ad95876992f71bfc9043b9a713bd" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>int</type>
+        <definition>int size</definition>
+        <argsstring>(int i) const </argsstring>
+        <name>size</name>
+        <param>
+          <type>int</type>
+          <declname>i</declname>
+        </param>
+        <briefdescription>
+<para>Size getter along the i-th. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="283" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="282" bodyend="283"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1a48cdd99e4e82f74c1adae2bd69970220" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>int</type>
+        <definition>int rows</definition>
+        <argsstring>() const </argsstring>
+        <name>rows</name>
+        <briefdescription>
+<para>Number of rows getter. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="286" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="285" bodyend="286"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1a3cefa469a7524d4bbc80531ebb9b5df4" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>int</type>
+        <definition>int cols</definition>
+        <argsstring>() const </argsstring>
+        <name>cols</name>
+        <briefdescription>
+<para>Number of cols getter. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="289" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="288" bodyend="289"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1a3275d1392d01b26af1c8cd52b0d10745" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>int</type>
+        <definition>int depth</definition>
+        <argsstring>() const </argsstring>
+        <name>depth</name>
+        <briefdescription>
+<para>Depth getter. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="292" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="291" bodyend="292"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1a5be6b48ede748b588c237552cbf3b6b8" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>const vector_type &amp;</type>
+        <definition>const vector_type&amp; strides</definition>
+        <argsstring>() const </argsstring>
+        <name>strides</name>
+        <briefdescription>
+<para>Strides getter. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="296" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="295" bodyend="296"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1abe61dbf6dda369f1605c7700793791bd" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>int</type>
+        <definition>int stride</definition>
+        <argsstring>(int i) const </argsstring>
+        <name>stride</name>
+        <param>
+          <type>int</type>
+          <declname>i</declname>
+        </param>
+        <briefdescription>
+<para>Stride along the i-th dimension. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="299" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="298" bodyend="299"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1ab90f193517fda2b4390b14eba239dd5d" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_multi_array_1a598d93e43e894a9acbbaf36d99afeaa2" kindref="member">range_iterator</ref></type>
+        <definition>range_iterator begin_range</definition>
+        <argsstring>(const coords_type &amp;anchor=coords_type::Zero())</argsstring>
+        <name>begin_range</name>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_multi_array_1af94cd6f98815d838c630d458ffbd5d88" kindref="member">coords_type</ref> &amp;</type>
+          <declname>anchor</declname>
+          <defval>coords_type::Zero()</defval>
+        </param>
+        <briefdescription>
+<para>Mutable locator. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="303" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="302" bodyend="309"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1a2b3ae12c53cb9519f739dba262b116bf" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_multi_array_1a598d93e43e894a9acbbaf36d99afeaa2" kindref="member">range_iterator</ref></type>
+        <definition>range_iterator end_range</definition>
+        <argsstring>()</argsstring>
+        <name>end_range</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="311" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="310" bodyend="311"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1ad4ccc9303c78df229b72e331d4d1fa63" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_multi_array_1aa8ebb791e2ac5be9d07eb78236f6b75e" kindref="member">subrange_iterator</ref></type>
+        <definition>subrange_iterator begin_subrange</definition>
+        <argsstring>(const vector_type &amp;start, const vector_type &amp;end)</argsstring>
+        <name>begin_subrange</name>
+        <param>
+          <type>const vector_type &amp;</type>
+          <declname>start</declname>
+        </param>
+        <param>
+          <type>const vector_type &amp;</type>
+          <declname>end</declname>
+        </param>
+        <briefdescription>
+<para>Mutable subrange locator. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="315" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="313" bodyend="319"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1a2141b26412eecd978e31ad21a94df8f8" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_multi_array_1aa8ebb791e2ac5be9d07eb78236f6b75e" kindref="member">subrange_iterator</ref></type>
+        <definition>subrange_iterator end_subrange</definition>
+        <argsstring>()</argsstring>
+        <name>end_subrange</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="321" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="320" bodyend="325"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1a5161c07fa6877d2f743ebc615d537efa" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_multi_array_1ad69c27e7edbb13178e1dc9147c5ce613" kindref="member">const_range_iterator</ref></type>
+        <definition>const_range_iterator begin_range</definition>
+        <argsstring>(const coords_type &amp;anchor=coords_type::Zero()) const </argsstring>
+        <name>begin_range</name>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_multi_array_1af94cd6f98815d838c630d458ffbd5d88" kindref="member">coords_type</ref> &amp;</type>
+          <declname>anchor</declname>
+          <defval>coords_type::Zero()</defval>
+        </param>
+        <briefdescription>
+<para>Immutable locator. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="328" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="327" bodyend="334"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1a5c169dbb9bbfb5c72f21d8d29225b239" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_multi_array_1ad69c27e7edbb13178e1dc9147c5ce613" kindref="member">const_range_iterator</ref></type>
+        <definition>const_range_iterator end_range</definition>
+        <argsstring>() const </argsstring>
+        <name>end_range</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="336" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="335" bodyend="336"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1a20329a245ea068ae0caca3226ecddc11" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_multi_array_1a860b7c52202b3cf2240cfc5cd84e9556" kindref="member">const_subrange_iterator</ref></type>
+        <definition>const_subrange_iterator begin_subrange</definition>
+        <argsstring>(const vector_type &amp;start, const vector_type &amp;end) const </argsstring>
+        <name>begin_subrange</name>
+        <param>
+          <type>const vector_type &amp;</type>
+          <declname>start</declname>
+        </param>
+        <param>
+          <type>const vector_type &amp;</type>
+          <declname>end</declname>
+        </param>
+        <briefdescription>
+<para>Mutable subrange locator. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="340" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="338" bodyend="344"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1a7c43d5bbfe44e25bb343edf6e797da05" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_multi_array_1a860b7c52202b3cf2240cfc5cd84e9556" kindref="member">const_subrange_iterator</ref></type>
+        <definition>const_subrange_iterator end_subrange</definition>
+        <argsstring>() const </argsstring>
+        <name>end_subrange</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="346" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="345" bodyend="350"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1a0bd08eea84159de6ddc3e5279e3b6e2d" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_multi_array_1a51ca55d9377565ef193eae7ebbf945db" kindref="member">coords_iterator</ref></type>
+        <definition>coords_iterator begin_coords</definition>
+        <argsstring>() const </argsstring>
+        <name>begin_coords</name>
+        <briefdescription>
+<para>Coords iterator. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="353" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="352" bodyend="353"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1afc0a5b7732c947828b3c19ce21f88212" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_multi_array_1a51ca55d9377565ef193eae7ebbf945db" kindref="member">coords_iterator</ref></type>
+        <definition>coords_iterator end_coords</definition>
+        <argsstring>() const </argsstring>
+        <name>end_coords</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="355" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="354" bodyend="355"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1a3f049389446e1c60e25f09be5b64f192" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool resize</definition>
+        <argsstring>(const vector_type &amp;sizes)</argsstring>
+        <name>resize</name>
+        <param>
+          <type>const vector_type &amp;</type>
+          <declname>sizes</declname>
+        </param>
+        <briefdescription>
+<para>Resizing method. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="359" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="358" bodyend="374"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1a574c89c5254dabd3d20950612732104a" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool resize</definition>
+        <argsstring>(int rows, int cols)</argsstring>
+        <name>resize</name>
+        <param>
+          <type>int</type>
+          <declname>rows</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>cols</declname>
+        </param>
+        <briefdescription>
+<para>Resizing method. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="377" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="376" bodyend="377"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1ae519bd2dc457833fb5de167c6da87a2f" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>bool</type>
+        <definition>bool resize</definition>
+        <argsstring>(int rows, int cols, int depth)</argsstring>
+        <name>resize</name>
+        <param>
+          <type>int</type>
+          <declname>rows</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>cols</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>depth</declname>
+        </param>
+        <briefdescription>
+<para>Resizing method. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="380" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="379" bodyend="380"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1a8ede4f48ca36ec46ca4b57e3e2eeb3f7" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_multi_array_1a4c4550c956b26060ca29852fc7752500" kindref="member">const_array_view_type</ref></type>
+        <definition>const_array_view_type array</definition>
+        <argsstring>() const </argsstring>
+        <name>array</name>
+        <briefdescription>
+<para>Non-mutable array view for linear algebra with <ref refid="namespace_eigen" kindref="compound">Eigen</ref> 3. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="384" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="383" bodyend="388"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1a32bc57ca621cb7ae27ab5aa25ef1c70d" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_multi_array_1a9f4b00f1ddd01a394b9e7efc47206238" kindref="member">array_view_type</ref></type>
+        <definition>array_view_type array</definition>
+        <argsstring>()</argsstring>
+        <name>array</name>
+        <briefdescription>
+<para>Mutable array view for linear algebra with <ref refid="namespace_eigen" kindref="compound">Eigen</ref> 3. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="391" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="390" bodyend="395"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1a401c62522ef1eaf762863bc2cab8916e" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_multi_array_1a6dcd1d235928f2209e19860122cfe407" kindref="member">const_matrix_view_type</ref></type>
+        <definition>const_matrix_view_type matrix</definition>
+        <argsstring>() const </argsstring>
+        <name>matrix</name>
+        <briefdescription>
+<para>Non-mutable matrix view for linear algebra with <ref refid="namespace_eigen" kindref="compound">Eigen</ref> 3. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="398" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="397" bodyend="403"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1a2661eb3a043e573e6039849f9742975a" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_multi_array_1a185870835281f858bc66928f6c9e1e52" kindref="member">matrix_view_type</ref></type>
+        <definition>matrix_view_type matrix</definition>
+        <argsstring>()</argsstring>
+        <name>matrix</name>
+        <briefdescription>
+<para>Mutable matrix view for linear algebra with <ref refid="namespace_eigen" kindref="compound">Eigen</ref> 3. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="406" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="405" bodyend="411"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1af05ca63ef4968e9da0971052f416df2c" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void check_sizes_and_strides</definition>
+        <argsstring>() const </argsstring>
+        <name>check_sizes_and_strides</name>
+        <briefdescription>
+<para>Debugging methods. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="415" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="414" bodyend="420"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1aec44f1e87d499827231c9087be3bd99b" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_multi_array" kindref="compound">self_type</ref> &amp;</type>
+        <definition>self_type&amp; swap</definition>
+        <argsstring>(self_type &amp;other)</argsstring>
+        <name>swap</name>
+        <param>
+          <type><ref refid="class_d_o_1_1_multi_array" kindref="compound">self_type</ref> &amp;</type>
+          <declname>other</declname>
+        </param>
+        <briefdescription>
+<para>Swap arrays. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="424" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="423" bodyend="432"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="private-func">
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1a41c4d5c3b64429dfc407cc37ecb2eb73" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>vector_type</type>
+        <definition>vector_type compute_strides</definition>
+        <argsstring>(const vector_type &amp;sizes)</argsstring>
+        <name>compute_strides</name>
+        <param>
+          <type>const vector_type &amp;</type>
+          <declname>sizes</declname>
+        </param>
+        <briefdescription>
+<para>Stride computing method called in the construction and resizing of the array. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="438" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="437" bodyend="442"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1aaa140dc99ece9492b2eb7351e6fc8c74" prot="private" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>int</type>
+        <definition>int compute_size</definition>
+        <argsstring>(const vector_type &amp;sizes) const </argsstring>
+        <name>compute_size</name>
+        <param>
+          <type>const vector_type &amp;</type>
+          <declname>sizes</declname>
+        </param>
+        <briefdescription>
+<para>Raw size computing method called in the construction and resizing of the array. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="446" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="445" bodyend="449"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1a2e31e6b8185f5ee5070fa8c2600b0beb" prot="private" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>int</type>
+        <definition>int offset</definition>
+        <argsstring>(const coords_type &amp;c) const </argsstring>
+        <name>offset</name>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_multi_array_1af94cd6f98815d838c630d458ffbd5d88" kindref="member">coords_type</ref> &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="struct_d_o_1_1_offset" kindref="compound">Offset</ref> computing method. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="452" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="451" bodyend="457"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1aafd4c10d4ddf4fe8075b1a9a16901635" prot="private" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>int</type>
+        <definition>int offset</definition>
+        <argsstring>(int i, int j) const </argsstring>
+        <name>offset</name>
+        <param>
+          <type>int</type>
+          <declname>i</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>j</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="struct_d_o_1_1_offset" kindref="compound">Offset</ref> computing method. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="460" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="459" bodyend="460"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_multi_array_1a1cda6b336627882d3165b381fb558a74" prot="private" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>int</type>
+        <definition>int offset</definition>
+        <argsstring>(int i, int j, int k) const </argsstring>
+        <name>offset</name>
+        <param>
+          <type>int</type>
+          <declname>i</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>j</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>k</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="struct_d_o_1_1_offset" kindref="compound">Offset</ref> computing method. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="463" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="462" bodyend="463"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>The N-dimensional array class. </para>    </briefdescription>
+    <detaileddescription>
+<para><xrefsect id="todo_1_todo000002"><xreftitle>Todo</xreftitle><xrefdescription><para>:<itemizedlist>
+<listitem><para>prefer shallow copy in copy constructor and in the assignment operator</para></listitem><listitem><para>add &apos;<ref refid="class_d_o_1_1_multi_array" kindref="compound">MultiArray</ref> MultiArray::clone() const&apos; method. (Performance still seems acceptable even if deep copies are always done.)</para></listitem><listitem><para><bold>DOUBLE-CHECK</bold> all existing image-based algorithm.</para></listitem><listitem><para>Extract boost::shared_pointer with bcp to get the job done. </para></listitem></itemizedlist>
+</para></xrefdescription></xrefsect></para>    </detaileddescription>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" line="96" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp" bodystart="95" bodyend="480"/>
+    <listofallmembers>
+      <member refid="class_d_o_1_1_multi_array_1a8ede4f48ca36ec46ca4b57e3e2eeb3f7" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>array</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a32bc57ca621cb7ae27ab5aa25ef1c70d" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>array</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a9f4b00f1ddd01a394b9e7efc47206238" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>array_view_type</name></member>
+      <member refid="class_d_o_1_1_multi_array_1ad69bd11391be1a1dba5c8202259664f8" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>begin</name></member>
+      <member refid="class_d_o_1_1_multi_array_1aa4b02d4f1a8500fb07a551069060709f" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>begin</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a756f0e00978692fda84b7b7a6e9d888b" prot="private" virt="non-virtual"><scope>DO::MultiArray</scope><name>begin_</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a0bd08eea84159de6ddc3e5279e3b6e2d" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>begin_coords</name></member>
+      <member refid="class_d_o_1_1_multi_array_1ab90f193517fda2b4390b14eba239dd5d" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>begin_range</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a5161c07fa6877d2f743ebc615d537efa" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>begin_range</name></member>
+      <member refid="class_d_o_1_1_multi_array_1ad4ccc9303c78df229b72e331d4d1fa63" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>begin_subrange</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a20329a245ea068ae0caca3226ecddc11" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>begin_subrange</name></member>
+      <member refid="class_d_o_1_1_multi_array_1af05ca63ef4968e9da0971052f416df2c" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>check_sizes_and_strides</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a3cefa469a7524d4bbc80531ebb9b5df4" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>cols</name></member>
+      <member refid="class_d_o_1_1_multi_array_1aaa140dc99ece9492b2eb7351e6fc8c74" prot="private" virt="non-virtual"><scope>DO::MultiArray</scope><name>compute_size</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a41c4d5c3b64429dfc407cc37ecb2eb73" prot="private" virt="non-virtual"><scope>DO::MultiArray</scope><name>compute_strides</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a4c4550c956b26060ca29852fc7752500" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>const_array_view_type</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a2fc97dce62b7053449cc868607540dba" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>const_iterator</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a6dcd1d235928f2209e19860122cfe407" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>const_matrix_view_type</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a53d259f0075b22d7646e373816830e8e" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>const_pointer</name></member>
+      <member refid="class_d_o_1_1_multi_array_1ad69c27e7edbb13178e1dc9147c5ce613" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>const_range_iterator</name></member>
+      <member refid="class_d_o_1_1_multi_array_1af9ba3e25df088c62f7d535b91672cda9" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>const_reference</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a860b7c52202b3cf2240cfc5cd84e9556" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>const_subrange_iterator</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a51ca55d9377565ef193eae7ebbf945db" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>coords_iterator</name></member>
+      <member refid="class_d_o_1_1_multi_array_1af94cd6f98815d838c630d458ffbd5d88" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>coords_type</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a36e4d11a00a3572c87bf7e913e9b5ca1" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>data</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a794bbc6c3888bcfe88fb961f527c3563" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>data</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a3275d1392d01b26af1c8cd52b0d10745" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>depth</name></member>
+      <member refid="class_d_o_1_1_multi_array_1ad319fc54a93a2c7058c70e40428ed2e2" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>difference_type</name></member>
+      <member refid="class_d_o_1_1_multi_array_1acad38d52497a975bfb6f2f6acd76631f" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>end</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a350132543d80a1c1e5be844e6d2878ea" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>end</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a1e8189b04efb7c529ef24066ba60cd40" prot="private" virt="non-virtual"><scope>DO::MultiArray</scope><name>end_</name></member>
+      <member refid="class_d_o_1_1_multi_array_1afc0a5b7732c947828b3c19ce21f88212" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>end_coords</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a2b3ae12c53cb9519f739dba262b116bf" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>end_range</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a5c169dbb9bbfb5c72f21d8d29225b239" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>end_range</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a2141b26412eecd978e31ad21a94df8f8" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>end_subrange</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a7c43d5bbfe44e25bb343edf6e797da05" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>end_subrange</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a5c6d1fec40f4465e6f111bdb0825f8c8" prot="private" virt="non-virtual"><scope>DO::MultiArray</scope><name>is_wrapped_data_</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a35c955cacac6aacaa1e82874b1628865" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>iterator</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a401c62522ef1eaf762863bc2cab8916e" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>matrix</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a2661eb3a043e573e6039849f9742975a" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>matrix</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a185870835281f858bc66928f6c9e1e52" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>matrix_view_type</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a596f3b4b4084da422cb3320e165e1d89" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>MultiArray</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a94b6d325d4d1647132755287d95f8991" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>MultiArray</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a12c16e1c2846b8ca00471291ba650988" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>MultiArray</name></member>
+      <member refid="class_d_o_1_1_multi_array_1acbb77f86b0c9386505a84adcd76f66e7" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>MultiArray</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a8009a5ab280ef118a93962a538f023db" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>MultiArray</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a50b55fece94eb8d5bb64c267a3ab54fc" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>MultiArray</name></member>
+      <member refid="class_d_o_1_1_multi_array_1aff00de73e78f6b4e9c3f534bfc4afeb9" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>MultiArray</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a2e31e6b8185f5ee5070fa8c2600b0beb" prot="private" virt="non-virtual"><scope>DO::MultiArray</scope><name>offset</name></member>
+      <member refid="class_d_o_1_1_multi_array_1aafd4c10d4ddf4fe8075b1a9a16901635" prot="private" virt="non-virtual"><scope>DO::MultiArray</scope><name>offset</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a1cda6b336627882d3165b381fb558a74" prot="private" virt="non-virtual"><scope>DO::MultiArray</scope><name>offset</name></member>
+      <member refid="class_d_o_1_1_multi_array_1acde7384c0a8f7d0d69bc9ec7d57967c3" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>operator()</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a07f8b52897f0d3f5835cef615d3a4ff0" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>operator()</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a39b2df46d5f4fc6ab3f6311e21bbf184" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>operator()</name></member>
+      <member refid="class_d_o_1_1_multi_array_1ac4b8c64f6893bd74ecd120d8895b887d" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>operator()</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a775d64bc033de30a55882546aa444731" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>operator()</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a5f265fc9984db753cbe10b36e438a741" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>operator()</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a6c4f23db722b5e9bf57ef750c5fd18bd" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>operator=</name></member>
+      <member refid="class_d_o_1_1_multi_array_1aeaf5648ec46dbd53a8818e3aed129068" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>operator=</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a680c78d51cff3fd301666dd75bdbe49d" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>pointer</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a598d93e43e894a9acbbaf36d99afeaa2" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>range_iterator</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a9b1a63f171d76a7a3995b6858e99f2ea" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>reference</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a3f049389446e1c60e25f09be5b64f192" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>resize</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a574c89c5254dabd3d20950612732104a" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>resize</name></member>
+      <member refid="class_d_o_1_1_multi_array_1ae519bd2dc457833fb5de167c6da87a2f" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>resize</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a48cdd99e4e82f74c1adae2bd69970220" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>rows</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a501b052796303859ca0b48fed6d57f76" prot="private" virt="non-virtual"><scope>DO::MultiArray</scope><name>self_type</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a503ab01f6c0142145d3434f6924714e7" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>size</name></member>
+      <member refid="class_d_o_1_1_multi_array_1ab243ad95876992f71bfc9043b9a713bd" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>size</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a89a6dcafb6130e3e1bcd6d1285e0dd6f" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>size_type</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a15f0ce2877b385c9505f042faa705694" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>sizes</name></member>
+      <member refid="class_d_o_1_1_multi_array_1ae26995a4bfa479a2f6163671c625cb83" prot="private" virt="non-virtual"><scope>DO::MultiArray</scope><name>sizes_</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a5efa58fcdc2a9126334a336487184a00" prot="private" virt="non-virtual"><scope>DO::MultiArray</scope><name>storage_index</name></member>
+      <member refid="class_d_o_1_1_multi_array_1abe61dbf6dda369f1605c7700793791bd" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>stride</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a5be6b48ede748b588c237552cbf3b6b8" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>strides</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a0d7dcb2954c80ff40f4c12b4b29b44c8" prot="private" virt="non-virtual"><scope>DO::MultiArray</scope><name>strides_</name></member>
+      <member refid="class_d_o_1_1_multi_array_1aa8ebb791e2ac5be9d07eb78236f6b75e" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>subrange_iterator</name></member>
+      <member refid="class_d_o_1_1_multi_array_1aec44f1e87d499827231c9087be3bd99b" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>swap</name></member>
+      <member refid="class_d_o_1_1_multi_array_1a265a253612b46abed17c61b0a5e5ce30" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>value_type</name></member>
+      <member refid="class_d_o_1_1_multi_array_1aacf98e49e90f9aeead0ff8885fae3ac7" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>vector_type</name></member>
+      <member refid="class_d_o_1_1_multi_array_1ae67638f4b1e3885c9308aac696c195fa" prot="public" virt="non-virtual"><scope>DO::MultiArray</scope><name>~MultiArray</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

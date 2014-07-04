@@ -1,0 +1,121 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="struct_d_o_1_1_gaussian_3_01_t_00_012_01_4" kind="struct" prot="public">
+    <compoundname>DO::Gaussian&lt; T, 2 &gt;</compoundname>
+    <templateparamlist>
+      <param>
+        <type>typename T</type>
+      </param>
+    </templateparamlist>
+      <sectiondef kind="public-type">
+      <memberdef kind="typedef" id="struct_d_o_1_1_gaussian_3_01_t_00_012_01_4_1a00183175daad09d01f17c6f60d19dfb3" prot="public" static="no">
+        <type><ref refid="class_d_o_1_1_image" kindref="compound">Image</ref>&lt; T &gt;</type>
+        <definition>typedef Image&lt;T&gt; ReturnType</definition>
+        <argsstring></argsstring>
+        <name>ReturnType</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/LinearFiltering.hpp" line="643" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/LinearFiltering.hpp" bodystart="643" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="struct_d_o_1_1_gaussian_3_01_t_00_012_01_4_1a861c819a2ed467ea81a64bfc4e364f51" prot="public" static="no">
+        <type><ref refid="struct_d_o_1_1_color_traits" kindref="compound">ColorTraits</ref>&lt; T &gt;::ChannelType</type>
+        <definition>typedef ColorTraits&lt;T&gt;::ChannelType ParamType</definition>
+        <argsstring></argsstring>
+        <name>ParamType</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/LinearFiltering.hpp" line="643" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/LinearFiltering.hpp" bodystart="643" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="struct_d_o_1_1_gaussian_3_01_t_00_012_01_4_1a26dcd8a2ed0dd5a1cf4e9d3de8cbf7eb" prot="public" static="no" mutable="no">
+        <type>const <ref refid="class_d_o_1_1_image" kindref="compound">Image</ref>&lt; T &gt; &amp;</type>
+        <definition>const Image&lt;T&gt;&amp; src_</definition>
+        <argsstring></argsstring>
+        <name>src_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/LinearFiltering.hpp" line="643" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/LinearFiltering.hpp" bodystart="643" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="struct_d_o_1_1_gaussian_3_01_t_00_012_01_4_1a38f3869096be92cd450483e22f9b633d" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>Gaussian</definition>
+        <argsstring>(const Image&lt; T &gt; &amp;src)</argsstring>
+        <name>Gaussian</name>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_image" kindref="compound">Image</ref>&lt; T &gt; &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/LinearFiltering.hpp" line="643" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/LinearFiltering.hpp" bodystart="643" bodyend="643"/>
+      </memberdef>
+      <memberdef kind="function" id="struct_d_o_1_1_gaussian_3_01_t_00_012_01_4_1a1e88e8880bb4f4608ee78457f46cefed" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_d_o_1_1_image" kindref="compound">ReturnType</ref></type>
+        <definition>ReturnType operator()</definition>
+        <argsstring>(const ParamType &amp;param) const </argsstring>
+        <name>operator()</name>
+        <param>
+          <type>const ParamType &amp;</type>
+          <declname>param</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/LinearFiltering.hpp" line="643" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/LinearFiltering.hpp" bodystart="643" bodyend="643"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <collaborationgraph>
+      <node id="203">
+        <label>Image&lt; T &gt;</label>
+        <link refid="class_d_o_1_1_image"/>
+        <childnode refid="204" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="202">
+        <label>Gaussian&lt; T, 2 &gt;</label>
+        <link refid="struct_d_o_1_1_gaussian_3_01_t_00_012_01_4"/>
+        <childnode refid="203" relation="usage">
+          <edgelabel>src_</edgelabel>
+        </childnode>
+      </node>
+      <node id="204">
+        <label>MultiArray&lt; T, 2, ColMajor &gt;</label>
+        <link refid="class_d_o_1_1_multi_array"/>
+      </node>
+    </collaborationgraph>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/LinearFiltering.hpp" line="643" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/LinearFiltering.hpp" bodystart="643" bodyend="643"/>
+    <listofallmembers>
+      <member refid="struct_d_o_1_1_gaussian_3_01_t_00_012_01_4_1a38f3869096be92cd450483e22f9b633d" prot="public" virt="non-virtual"><scope>DO::Gaussian&lt; T, 2 &gt;</scope><name>Gaussian</name></member>
+      <member refid="struct_d_o_1_1_gaussian_3_01_t_00_012_01_4_1a1e88e8880bb4f4608ee78457f46cefed" prot="public" virt="non-virtual"><scope>DO::Gaussian&lt; T, 2 &gt;</scope><name>operator()</name></member>
+      <member refid="struct_d_o_1_1_gaussian_3_01_t_00_012_01_4_1a861c819a2ed467ea81a64bfc4e364f51" prot="public" virt="non-virtual"><scope>DO::Gaussian&lt; T, 2 &gt;</scope><name>ParamType</name></member>
+      <member refid="struct_d_o_1_1_gaussian_3_01_t_00_012_01_4_1a00183175daad09d01f17c6f60d19dfb3" prot="public" virt="non-virtual"><scope>DO::Gaussian&lt; T, 2 &gt;</scope><name>ReturnType</name></member>
+      <member refid="struct_d_o_1_1_gaussian_3_01_t_00_012_01_4_1a26dcd8a2ed0dd5a1cf4e9d3de8cbf7eb" prot="public" virt="non-virtual"><scope>DO::Gaussian&lt; T, 2 &gt;</scope><name>src_</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

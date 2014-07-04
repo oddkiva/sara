@@ -1,0 +1,145 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="class_d_o_1_1_tiff_file_writer" kind="class" prot="public">
+    <compoundname>DO::TiffFileWriter</compoundname>
+    <basecompoundref refid="class_d_o_1_1_image_file_writer" prot="public" virt="non-virtual">ImageFileWriter</basecompoundref>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="class_d_o_1_1_tiff_file_writer_1ae998d8590ae6fba6fb73e3d17a35fa0b" prot="private" static="no" mutable="no">
+        <type>TIFF *</type>
+        <definition>TIFF* out</definition>
+        <argsstring></argsstring>
+        <name>out</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" line="129" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" bodystart="129" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_d_o_1_1_tiff_file_writer_1a37a3b4055dfc7edd813f11432e13983e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>TiffFileWriter</definition>
+        <argsstring>(const unsigned char *data, int width, int height, int depth)</argsstring>
+        <name>TiffFileWriter</name>
+        <param>
+          <type>const unsigned char *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>width</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>height</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>depth</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" line="131"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_tiff_file_writer_1a6d7392ad54b5dab93fd6c6d5c9cab53e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>~TiffFileWriter</definition>
+        <argsstring>()</argsstring>
+        <name>~TiffFileWriter</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" line="132"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_tiff_file_writer_1a3379894ef7b13be5bd7e15ee4dada776" prot="public" static="no" const="no" explicit="no" inline="no" virt="virtual">
+        <type>bool</type>
+        <definition>bool operator()</definition>
+        <argsstring>(const std::string &amp;filepath, int quality)</argsstring>
+        <name>operator()</name>
+        <reimplements refid="class_d_o_1_1_image_file_writer_1a125f4fa216024ef70143095ce6ef3f01">operator()</reimplements>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>filepath</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>quality</declname>
+        </param>
+        <briefdescription>
+<para>Quick-and-dirty but it works. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" line="134"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="612">
+        <label>FileHandler</label>
+        <link refid="class_d_o_1_1_file_handler"/>
+      </node>
+      <node id="610">
+        <label>TiffFileWriter</label>
+        <link refid="class_d_o_1_1_tiff_file_writer"/>
+        <childnode refid="611" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="611">
+        <label>ImageFileWriter</label>
+        <link refid="class_d_o_1_1_image_file_writer"/>
+        <childnode refid="612" relation="public-inheritance">
+        </childnode>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="615">
+        <label>FileHandler</label>
+        <link refid="class_d_o_1_1_file_handler"/>
+      </node>
+      <node id="613">
+        <label>TiffFileWriter</label>
+        <link refid="class_d_o_1_1_tiff_file_writer"/>
+        <childnode refid="614" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="614">
+        <label>ImageFileWriter</label>
+        <link refid="class_d_o_1_1_image_file_writer"/>
+        <childnode refid="615" relation="public-inheritance">
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" line="128" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" bodystart="127" bodyend="135"/>
+    <listofallmembers>
+      <member refid="class_d_o_1_1_image_file_writer_1a19d91a1b24741b006fcebfd7fa70f851" prot="protected" virt="non-virtual"><scope>DO::TiffFileWriter</scope><name>data_</name></member>
+      <member refid="class_d_o_1_1_image_file_writer_1ad44441440d13feeced3a5592d8853ce8" prot="protected" virt="non-virtual"><scope>DO::TiffFileWriter</scope><name>depth_</name></member>
+      <member refid="class_d_o_1_1_file_handler_1a715b2a1d4ad04ec0c950d1467f91964e" prot="protected" virt="non-virtual"><scope>DO::TiffFileWriter</scope><name>file_</name></member>
+      <member refid="class_d_o_1_1_file_handler_1a7a105e8757c6bbbe0e6be820ce84f1ed" prot="public" virt="non-virtual"><scope>DO::TiffFileWriter</scope><name>FileHandler</name></member>
+      <member refid="class_d_o_1_1_file_handler_1ab8b9ecc7384dd1830ea8d76aeda28f88" prot="public" virt="non-virtual"><scope>DO::TiffFileWriter</scope><name>FileHandler</name></member>
+      <member refid="class_d_o_1_1_image_file_writer_1a4bda835cfa4ff0f321d5f283ada09f6f" prot="protected" virt="non-virtual"><scope>DO::TiffFileWriter</scope><name>height_</name></member>
+      <member refid="class_d_o_1_1_image_file_writer_1a8ec7045ca1566c391aa36221c2dc184e" prot="public" virt="non-virtual"><scope>DO::TiffFileWriter</scope><name>ImageFileWriter</name></member>
+      <member refid="class_d_o_1_1_tiff_file_writer_1a3379894ef7b13be5bd7e15ee4dada776" prot="public" virt="virtual"><scope>DO::TiffFileWriter</scope><name>operator()</name></member>
+      <member refid="class_d_o_1_1_tiff_file_writer_1ae998d8590ae6fba6fb73e3d17a35fa0b" prot="private" virt="non-virtual"><scope>DO::TiffFileWriter</scope><name>out</name></member>
+      <member refid="class_d_o_1_1_tiff_file_writer_1a37a3b4055dfc7edd813f11432e13983e" prot="public" virt="non-virtual"><scope>DO::TiffFileWriter</scope><name>TiffFileWriter</name></member>
+      <member refid="class_d_o_1_1_image_file_writer_1a2b766f0e7825587681ec40b1920dbd0d" prot="protected" virt="non-virtual"><scope>DO::TiffFileWriter</scope><name>width_</name></member>
+      <member refid="class_d_o_1_1_file_handler_1a0d3895a0eb5141fa24ba508c743d1924" prot="public" virt="virtual"><scope>DO::TiffFileWriter</scope><name>~FileHandler</name></member>
+      <member refid="class_d_o_1_1_image_file_writer_1a8137aae6c4a9b80e63f4e398a3f543a7" prot="public" virt="virtual"><scope>DO::TiffFileWriter</scope><name>~ImageFileWriter</name></member>
+      <member refid="class_d_o_1_1_tiff_file_writer_1a6d7392ad54b5dab93fd6c6d5c9cab53e" prot="public" virt="non-virtual"><scope>DO::TiffFileWriter</scope><name>~TiffFileWriter</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

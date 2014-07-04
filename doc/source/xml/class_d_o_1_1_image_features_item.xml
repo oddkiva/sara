@@ -1,0 +1,195 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="class_d_o_1_1_image_features_item" kind="class" prot="public">
+    <compoundname>DO::ImageFeaturesItem</compoundname>
+    <basecompoundref prot="public" virt="non-virtual">QGraphicsPixmapItem</basecompoundref>
+    <innerclass refid="struct_d_o_1_1_image_features_item_1_1_key_shape" prot="private">DO::ImageFeaturesItem::KeyShape</innerclass>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="class_d_o_1_1_image_features_item_1a1d1ec4e4b213c30a222c01480c4e9dfb" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; KeyShape &gt;</type>
+        <definition>std::vector&lt;KeyShape&gt; shapes_</definition>
+        <argsstring></argsstring>
+        <name>shapes_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/View.hpp" line="122" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/View.hpp" bodystart="122" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_image_features_item_1a66a0579a0270601b03f436f32d8c36f0" prot="private" static="no" mutable="no">
+        <type>QPen</type>
+        <definition>QPen pen_</definition>
+        <argsstring></argsstring>
+        <name>pen_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/View.hpp" line="123" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/View.hpp" bodystart="123" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_image_features_item_1af23f565d4a04cd830c93241eddf59ca9" prot="private" static="no" mutable="no">
+        <type>QRectF</type>
+        <definition>QRectF boundingRect_</definition>
+        <argsstring></argsstring>
+        <name>boundingRect_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/View.hpp" line="124" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/View.hpp" bodystart="124" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_image_features_item_1aca6225cde2bad6a59a702405551a4bf6" prot="private" static="no" mutable="no">
+        <type>QPainterPath</type>
+        <definition>QPainterPath shape_</definition>
+        <argsstring></argsstring>
+        <name>shape_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/View.hpp" line="125" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/View.hpp" bodystart="125" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_d_o_1_1_image_features_item_1a221d3f1dd8105c71077d299701ae02a7" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>ImageFeaturesItem</definition>
+        <argsstring>(const std::vector&lt; Keypoint &gt; &amp;keys, QGraphicsItem *parent)</argsstring>
+        <name>ImageFeaturesItem</name>
+        <param>
+          <type>const std::vector&lt; Keypoint &gt; &amp;</type>
+          <declname>keys</declname>
+        </param>
+        <param>
+          <type>QGraphicsItem *</type>
+          <declname>parent</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/View.hpp" line="42" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/View.hpp" bodystart="38" bodyend="62"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="protected-func">
+      <memberdef kind="function" id="class_d_o_1_1_image_features_item_1ac7e6c577486dbb0f61b2bf88f01d8ff0" prot="protected" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void paint</definition>
+        <argsstring>(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)</argsstring>
+        <name>paint</name>
+        <param>
+          <type>QPainter *</type>
+          <declname>painter</declname>
+        </param>
+        <param>
+          <type>const QStyleOptionGraphicsItem *</type>
+          <declname>option</declname>
+        </param>
+        <param>
+          <type>QWidget *</type>
+          <declname>widget</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/View.hpp" line="68" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/View.hpp" bodystart="65" bodyend="99"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_image_features_item_1a7f9aac15380d5c7a5b33979d006275d7" prot="protected" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>QRectF</type>
+        <definition>QRectF boundingRect</definition>
+        <argsstring>() const </argsstring>
+        <name>boundingRect</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/View.hpp" line="102" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/View.hpp" bodystart="101" bodyend="104"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_image_features_item_1a6e4b5bc28b84f0ec515bb76daba69390" prot="protected" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>QPainterPath</type>
+        <definition>QPainterPath shape</definition>
+        <argsstring>() const </argsstring>
+        <name>shape</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/View.hpp" line="107" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/View.hpp" bodystart="106" bodyend="109"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="private-func">
+      <memberdef kind="function" id="class_d_o_1_1_image_features_item_1abb5f18d51f7b0b7ff2f68b076ef8793a" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>std::vector&lt; KeyShape &gt;</type>
+        <definition>std::vector&lt;KeyShape&gt; toKeyShapes</definition>
+        <argsstring>(const std::vector&lt; Keypoint &gt; &amp;keys)</argsstring>
+        <name>toKeyShapes</name>
+        <param>
+          <type>const std::vector&lt; Keypoint &gt; &amp;</type>
+          <declname>keys</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/View.hpp" line="113" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/View.hpp" bodystart="112" bodyend="119"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="239">
+        <label>ImageFeaturesItem</label>
+        <link refid="class_d_o_1_1_image_features_item"/>
+        <childnode refid="240" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="240">
+        <label>QGraphicsPixmapItem</label>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="241">
+        <label>ImageFeaturesItem</label>
+        <link refid="class_d_o_1_1_image_features_item"/>
+        <childnode refid="242" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="242">
+        <label>QGraphicsPixmapItem</label>
+      </node>
+    </collaborationgraph>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/View.hpp" line="29" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/View.hpp" bodystart="28" bodyend="126"/>
+    <listofallmembers>
+      <member refid="class_d_o_1_1_image_features_item_1a7f9aac15380d5c7a5b33979d006275d7" prot="protected" virt="non-virtual"><scope>DO::ImageFeaturesItem</scope><name>boundingRect</name></member>
+      <member refid="class_d_o_1_1_image_features_item_1af23f565d4a04cd830c93241eddf59ca9" prot="private" virt="non-virtual"><scope>DO::ImageFeaturesItem</scope><name>boundingRect_</name></member>
+      <member refid="class_d_o_1_1_image_features_item_1a221d3f1dd8105c71077d299701ae02a7" prot="public" virt="non-virtual"><scope>DO::ImageFeaturesItem</scope><name>ImageFeaturesItem</name></member>
+      <member refid="class_d_o_1_1_image_features_item_1ac7e6c577486dbb0f61b2bf88f01d8ff0" prot="protected" virt="non-virtual"><scope>DO::ImageFeaturesItem</scope><name>paint</name></member>
+      <member refid="class_d_o_1_1_image_features_item_1a66a0579a0270601b03f436f32d8c36f0" prot="private" virt="non-virtual"><scope>DO::ImageFeaturesItem</scope><name>pen_</name></member>
+      <member refid="class_d_o_1_1_image_features_item_1a6e4b5bc28b84f0ec515bb76daba69390" prot="protected" virt="non-virtual"><scope>DO::ImageFeaturesItem</scope><name>shape</name></member>
+      <member refid="class_d_o_1_1_image_features_item_1aca6225cde2bad6a59a702405551a4bf6" prot="private" virt="non-virtual"><scope>DO::ImageFeaturesItem</scope><name>shape_</name></member>
+      <member refid="class_d_o_1_1_image_features_item_1a1d1ec4e4b213c30a222c01480c4e9dfb" prot="private" virt="non-virtual"><scope>DO::ImageFeaturesItem</scope><name>shapes_</name></member>
+      <member refid="class_d_o_1_1_image_features_item_1abb5f18d51f7b0b7ff2f68b076ef8793a" prot="private" virt="non-virtual"><scope>DO::ImageFeaturesItem</scope><name>toKeyShapes</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

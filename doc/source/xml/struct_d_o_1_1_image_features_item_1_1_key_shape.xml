@@ -1,0 +1,71 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="struct_d_o_1_1_image_features_item_1_1_key_shape" kind="struct" prot="private">
+    <compoundname>DO::ImageFeaturesItem::KeyShape</compoundname>
+      <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="struct_d_o_1_1_image_features_item_1_1_key_shape_1af39f21db56f12fe8cb920f0812da1214" prot="public" static="no" mutable="no">
+        <type>QPointF</type>
+        <definition>QPointF center</definition>
+        <argsstring></argsstring>
+        <name>center</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/View.hpp" line="32" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/View.hpp" bodystart="32" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_d_o_1_1_image_features_item_1_1_key_shape_1a1fc94d78ce9afd1097c71258067523b7" prot="public" static="no" mutable="no">
+        <type>qreal</type>
+        <definition>qreal radius</definition>
+        <argsstring></argsstring>
+        <name>radius</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/View.hpp" line="33" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/View.hpp" bodystart="33" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="struct_d_o_1_1_image_features_item_1_1_key_shape_1aff346f62b32290afb9768b319796f2f8" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>KeyShape</definition>
+        <argsstring>(qreal x, qreal y, qreal r)</argsstring>
+        <name>KeyShape</name>
+        <param>
+          <type>qreal</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>qreal</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>qreal</type>
+          <declname>r</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/View.hpp" line="34" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/View.hpp" bodystart="34" bodyend="34"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/View.hpp" line="31" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/View.hpp" bodystart="30" bodyend="35"/>
+    <listofallmembers>
+      <member refid="struct_d_o_1_1_image_features_item_1_1_key_shape_1af39f21db56f12fe8cb920f0812da1214" prot="public" virt="non-virtual"><scope>DO::ImageFeaturesItem::KeyShape</scope><name>center</name></member>
+      <member refid="struct_d_o_1_1_image_features_item_1_1_key_shape_1aff346f62b32290afb9768b319796f2f8" prot="public" virt="non-virtual"><scope>DO::ImageFeaturesItem::KeyShape</scope><name>KeyShape</name></member>
+      <member refid="struct_d_o_1_1_image_features_item_1_1_key_shape_1a1fc94d78ce9afd1097c71258067523b7" prot="public" virt="non-virtual"><scope>DO::ImageFeaturesItem::KeyShape</scope><name>radius</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

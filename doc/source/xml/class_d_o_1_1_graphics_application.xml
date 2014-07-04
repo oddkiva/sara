@@ -1,0 +1,101 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="class_d_o_1_1_graphics_application" kind="class" prot="public">
+    <compoundname>DO::GraphicsApplication</compoundname>
+    <includes refid="_graphics_application_8hpp" local="no">GraphicsApplication.hpp</includes>
+    <innerclass refid="class_d_o_1_1_graphics_application_1_1_impl" prot="public">DO::GraphicsApplication::Impl</innerclass>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="group___graphics_internal_1ga3dc24ddcc71cda83d7719fca4f07354d" prot="private" static="no" mutable="no">
+        <type><ref refid="class_d_o_1_1_graphics_application_1_1_impl" kindref="compound">Impl</ref> *</type>
+        <definition>Impl* pimpl_</definition>
+        <argsstring></argsstring>
+        <name>pimpl_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/GraphicsApplication.hpp" line="40" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/GraphicsApplication.hpp" bodystart="40" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="group___graphics_internal_1ga4eb7658f5775a01f8a1f9e03ffd75bd9" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>GraphicsApplication</definition>
+        <argsstring>(int argc, char **argv)</argsstring>
+        <name>GraphicsApplication</name>
+        <param>
+          <type>int</type>
+          <declname>argc</declname>
+        </param>
+        <param>
+          <type>char **</type>
+          <declname>argv</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/GraphicsApplication.hpp" line="34"/>
+      </memberdef>
+      <memberdef kind="function" id="group___graphics_internal_1gaf776e0b59973918dd06eb3e66287d3f6" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>~GraphicsApplication</definition>
+        <argsstring>()</argsstring>
+        <name>~GraphicsApplication</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/GraphicsApplication.hpp" line="35"/>
+      </memberdef>
+      <memberdef kind="function" id="group___graphics_internal_1ga52842d7fa8ebde0ce28d954d565476ad" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void registerUserMain</definition>
+        <argsstring>(int(*userMain)(int, char **))</argsstring>
+        <name>registerUserMain</name>
+        <param>
+          <type>int(*)(int, char **)</type>
+          <declname>userMain</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/GraphicsApplication.hpp" line="36"/>
+      </memberdef>
+      <memberdef kind="function" id="group___graphics_internal_1ga0a779c8ad978e3dd1debcc73bf705d20" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int</type>
+        <definition>int exec</definition>
+        <argsstring>()</argsstring>
+        <name>exec</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/GraphicsApplication.hpp" line="37"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>QApplication-derived class This graphic application establishes communication between the user drawing commands and the windows. </para>    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/GraphicsApplication.hpp" line="31" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/GraphicsApplication.hpp" bodystart="30" bodyend="41"/>
+    <listofallmembers>
+      <member refid="group___graphics_internal_1ga0a779c8ad978e3dd1debcc73bf705d20" prot="public" virt="non-virtual"><scope>DO::GraphicsApplication</scope><name>exec</name></member>
+      <member refid="group___graphics_internal_1ga4eb7658f5775a01f8a1f9e03ffd75bd9" prot="public" virt="non-virtual"><scope>DO::GraphicsApplication</scope><name>GraphicsApplication</name></member>
+      <member refid="group___graphics_internal_1ga3dc24ddcc71cda83d7719fca4f07354d" prot="private" virt="non-virtual"><scope>DO::GraphicsApplication</scope><name>pimpl_</name></member>
+      <member refid="group___graphics_internal_1ga52842d7fa8ebde0ce28d954d565476ad" prot="public" virt="non-virtual"><scope>DO::GraphicsApplication</scope><name>registerUserMain</name></member>
+      <member refid="group___graphics_internal_1gaf776e0b59973918dd06eb3e66287d3f6" prot="public" virt="non-virtual"><scope>DO::GraphicsApplication</scope><name>~GraphicsApplication</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

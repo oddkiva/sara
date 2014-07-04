@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="dir_9f4bcda11c0eb0f8d7a12187499360f3" kind="dir">
+    <compoundname>C:/Users/David/Desktop/GitHub/DO-CV/src/DO</compoundname>
+    <innerdir refid="dir_45fa7d2be159dd8dd51b5d6b24629f14">C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core</innerdir>
+    <innerdir refid="dir_3b366a4bcaee39b01e15e135be43c70e">C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDescriptors</innerdir>
+    <innerdir refid="dir_ebfee908a8ef69d3e662030fe50570ec">C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors</innerdir>
+    <innerdir refid="dir_86106ba30a609a0e6403751018f610a0">C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features</innerdir>
+    <innerdir refid="dir_edf6c86ae92933de6b869b85a84717ed">C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FileSystem</innerdir>
+    <innerdir refid="dir_acb9b5ed373c4d78aae6045ddef9bb4b">C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry</innerdir>
+    <innerdir refid="dir_2f624875b227439f87945e31e29a4d7b">C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics</innerdir>
+    <innerdir refid="dir_01bbdda935a8c5b4eddadf60c9457335">C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing</innerdir>
+    <innerdir refid="dir_5a8bdb9790d55450e41ba067f6b61f56">C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing</innerdir>
+    <innerdir refid="dir_94b102dc0bde27a7b6250b13a5c50c6f">C:/Users/David/Desktop/GitHub/DO-CV/src/DO/KDTree</innerdir>
+    <innerfile refid="_core_8hpp">Core.hpp</innerfile>
+    <innerfile refid="_defines_8hpp">Defines.hpp</innerfile>
+    <innerfile refid="_feature_descriptors_8hpp">FeatureDescriptors.hpp</innerfile>
+    <innerfile refid="_feature_detectors_8hpp">FeatureDetectors.hpp</innerfile>
+    <innerfile refid="_features_8hpp">Features.hpp</innerfile>
+    <innerfile refid="_file_system_8hpp">FileSystem.hpp</innerfile>
+    <innerfile refid="_geometry_8hpp">Geometry.hpp</innerfile>
+    <innerfile refid="_graphics_8hpp">Graphics.hpp</innerfile>
+    <innerfile refid="_image_drawing_8hpp">ImageDrawing.hpp</innerfile>
+    <innerfile refid="_image_processing_8hpp">ImageProcessing.hpp</innerfile>
+    <innerfile refid="_k_d_tree_8hpp">KDTree.hpp</innerfile>
+    <innerfile refid="_math_8hpp">Math.hpp</innerfile>
+    <innerfile refid="_polynomial__draft_8hpp">Polynomial_draft.hpp</innerfile>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/"/>
+  </compounddef>
+</doxygen>

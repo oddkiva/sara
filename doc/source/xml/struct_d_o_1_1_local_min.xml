@@ -1,0 +1,53 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="struct_d_o_1_1_local_min" kind="struct" prot="public">
+    <compoundname>DO::LocalMin</compoundname>
+    <basecompoundref refid="struct_d_o_1_1_local_extremum" prot="public" virt="non-virtual">LocalExtremum&lt; std::less_equal, T &gt;</basecompoundref>
+    <includes refid="_extrema_8hpp" local="no">Extrema.hpp</includes>
+    <templateparamlist>
+      <param>
+        <type>typename T</type>
+      </param>
+    </templateparamlist>
+    <briefdescription>
+<para>Local spatial minimum test. </para>    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="361">
+        <label>LocalExtremum&lt; std::less_equal, T &gt;</label>
+        <link refid="struct_d_o_1_1_local_extremum"/>
+      </node>
+      <node id="360">
+        <label>LocalMin&lt; T &gt;</label>
+        <link refid="struct_d_o_1_1_local_min"/>
+        <childnode refid="361" relation="public-inheritance">
+        </childnode>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="363">
+        <label>LocalExtremum&lt; std::less_equal, T &gt;</label>
+        <link refid="struct_d_o_1_1_local_extremum"/>
+        <childnode refid="364" relation="usage">
+          <edgelabel>compare_</edgelabel>
+        </childnode>
+      </node>
+      <node id="364">
+        <label>CompareWithNeighborhood3&lt; std::less_equal, T &gt;</label>
+        <link refid="struct_d_o_1_1_compare_with_neighborhood3"/>
+      </node>
+      <node id="362">
+        <label>LocalMin&lt; T &gt;</label>
+        <link refid="struct_d_o_1_1_local_min"/>
+        <childnode refid="363" relation="public-inheritance">
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Extrema.hpp" line="103" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Extrema.hpp" bodystart="103" bodyend="103"/>
+    <listofallmembers>
+      <member refid="struct_d_o_1_1_local_extremum_1a2a09a4b49af049c30db35c0dbfb63924" prot="public" virt="non-virtual"><scope>DO::LocalMin</scope><name>compare_</name></member>
+      <member refid="struct_d_o_1_1_local_extremum_1a1a8daa7107c8bf0916fba55dc2cd1d6d" prot="public" virt="non-virtual"><scope>DO::LocalMin</scope><name>operator()</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="dir_acb9b5ed373c4d78aae6045ddef9bb4b" kind="dir">
+    <compoundname>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry</compoundname>
+    <innerdir refid="dir_45fd7ef7d674a7fc6fafcbff4b5d6aa8">C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Algorithms</innerdir>
+    <innerdir refid="dir_ea471c17cb4e3959469223db930f5a0e">C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Graphics</innerdir>
+    <innerdir refid="dir_220b5e033cfaa4454c13b54726902dff">C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Kernel</innerdir>
+    <innerdir refid="dir_620b7f17ad153e1c7c962169f0920ed3">C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects</innerdir>
+    <innerdir refid="dir_558986a36dac444fa47f02c03d0753b4">C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools</innerdir>
+    <innerfile refid="_algorithms_8hpp">Algorithms.hpp</innerfile>
+    <innerfile refid="_geometry_2_graphics_8hpp">Graphics.hpp</innerfile>
+    <innerfile refid="_objects_8hpp">Objects.hpp</innerfile>
+    <innerfile refid="_tools_8hpp">Tools.hpp</innerfile>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/"/>
+  </compounddef>
+</doxygen>

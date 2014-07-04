@@ -1,0 +1,152 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="class_d_o_1_1_jpeg_file_reader" kind="class" prot="public">
+    <compoundname>DO::JpegFileReader</compoundname>
+    <basecompoundref refid="class_d_o_1_1_image_file_reader" prot="public" virt="non-virtual">ImageFileReader</basecompoundref>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="class_d_o_1_1_jpeg_file_reader_1a16d170bcb767938c0ae1552bd7d0a487" prot="private" static="no" mutable="no">
+        <type>struct jpeg_decompress_struct</type>
+        <definition>struct jpeg_decompress_struct cinfo_</definition>
+        <argsstring></argsstring>
+        <name>cinfo_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" line="79" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" bodystart="79" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_d_o_1_1_jpeg_file_reader_1ac59a71505d3497cdbaa081b493182892" prot="private" static="no" mutable="no">
+        <type>struct <ref refid="struct_d_o_1_1_jpeg_error_message" kindref="compound">JpegErrorMessage</ref></type>
+        <definition>struct JpegErrorMessage jerr_</definition>
+        <argsstring></argsstring>
+        <name>jerr_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" line="80" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" bodystart="80" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_d_o_1_1_jpeg_file_reader_1af82320fae10a15eda052000328ae2981" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>JpegFileReader</definition>
+        <argsstring>(const std::string &amp;filepath)</argsstring>
+        <name>JpegFileReader</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>filepath</declname>
+        </param>
+        <briefdescription>
+<para>TODO: make better exception? </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" line="83"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_jpeg_file_reader_1a74dfab54e2441bd50eed44930b30bd09" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>~JpegFileReader</definition>
+        <argsstring>()</argsstring>
+        <name>~JpegFileReader</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" line="84"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_jpeg_file_reader_1acbd31eb8e1a32a8fca72f77ae234928b" prot="public" static="no" const="no" explicit="no" inline="no" virt="virtual">
+        <type>bool</type>
+        <definition>bool operator()</definition>
+        <argsstring>(unsigned char *&amp;data, int &amp;width, int &amp;height, int &amp;depth)</argsstring>
+        <name>operator()</name>
+        <reimplements refid="class_d_o_1_1_image_file_reader_1a3f40f6bedd4be74c3f58806a1a099e4c">operator()</reimplements>
+        <param>
+          <type>unsigned char *&amp;</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>int &amp;</type>
+          <declname>width</declname>
+        </param>
+        <param>
+          <type>int &amp;</type>
+          <declname>height</declname>
+        </param>
+        <param>
+          <type>int &amp;</type>
+          <declname>depth</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" line="85"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="308">
+        <label>FileHandler</label>
+        <link refid="class_d_o_1_1_file_handler"/>
+      </node>
+      <node id="306">
+        <label>JpegFileReader</label>
+        <link refid="class_d_o_1_1_jpeg_file_reader"/>
+        <childnode refid="307" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="307">
+        <label>ImageFileReader</label>
+        <link refid="class_d_o_1_1_image_file_reader"/>
+        <childnode refid="308" relation="public-inheritance">
+        </childnode>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="311">
+        <label>FileHandler</label>
+        <link refid="class_d_o_1_1_file_handler"/>
+      </node>
+      <node id="309">
+        <label>JpegFileReader</label>
+        <link refid="class_d_o_1_1_jpeg_file_reader"/>
+        <childnode refid="310" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="310">
+        <label>ImageFileReader</label>
+        <link refid="class_d_o_1_1_image_file_reader"/>
+        <childnode refid="311" relation="public-inheritance">
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" line="78" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp" bodystart="77" bodyend="86"/>
+    <listofallmembers>
+      <member refid="class_d_o_1_1_jpeg_file_reader_1a16d170bcb767938c0ae1552bd7d0a487" prot="private" virt="non-virtual"><scope>DO::JpegFileReader</scope><name>cinfo_</name></member>
+      <member refid="class_d_o_1_1_file_handler_1a715b2a1d4ad04ec0c950d1467f91964e" prot="protected" virt="non-virtual"><scope>DO::JpegFileReader</scope><name>file_</name></member>
+      <member refid="class_d_o_1_1_file_handler_1a7a105e8757c6bbbe0e6be820ce84f1ed" prot="public" virt="non-virtual"><scope>DO::JpegFileReader</scope><name>FileHandler</name></member>
+      <member refid="class_d_o_1_1_file_handler_1ab8b9ecc7384dd1830ea8d76aeda28f88" prot="public" virt="non-virtual"><scope>DO::JpegFileReader</scope><name>FileHandler</name></member>
+      <member refid="class_d_o_1_1_image_file_reader_1ae9c2bb6aab48f01b222a2ad44dc08a69" prot="public" virt="non-virtual"><scope>DO::JpegFileReader</scope><name>ImageFileReader</name></member>
+      <member refid="class_d_o_1_1_image_file_reader_1a0111a8473f26e7eeb51ec815630871e9" prot="public" virt="non-virtual"><scope>DO::JpegFileReader</scope><name>ImageFileReader</name></member>
+      <member refid="class_d_o_1_1_jpeg_file_reader_1ac59a71505d3497cdbaa081b493182892" prot="private" virt="non-virtual"><scope>DO::JpegFileReader</scope><name>jerr_</name></member>
+      <member refid="class_d_o_1_1_jpeg_file_reader_1af82320fae10a15eda052000328ae2981" prot="public" virt="non-virtual"><scope>DO::JpegFileReader</scope><name>JpegFileReader</name></member>
+      <member refid="class_d_o_1_1_jpeg_file_reader_1acbd31eb8e1a32a8fca72f77ae234928b" prot="public" virt="virtual"><scope>DO::JpegFileReader</scope><name>operator()</name></member>
+      <member refid="class_d_o_1_1_file_handler_1a0d3895a0eb5141fa24ba508c743d1924" prot="public" virt="virtual"><scope>DO::JpegFileReader</scope><name>~FileHandler</name></member>
+      <member refid="class_d_o_1_1_image_file_reader_1a7a80b92c01860dc95f596d974a05ce8c" prot="public" virt="virtual"><scope>DO::JpegFileReader</scope><name>~ImageFileReader</name></member>
+      <member refid="class_d_o_1_1_jpeg_file_reader_1a74dfab54e2441bd50eed44930b30bd09" prot="public" virt="non-virtual"><scope>DO::JpegFileReader</scope><name>~JpegFileReader</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

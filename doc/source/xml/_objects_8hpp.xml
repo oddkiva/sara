@@ -1,0 +1,235 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="_objects_8hpp" kind="file">
+    <compoundname>Objects.hpp</compoundname>
+    <includes refid="_line_segment_8hpp" local="no">DO/Geometry/Objects/LineSegment.hpp</includes>
+    <includes refid="_b_box_8hpp" local="no">DO/Geometry/Objects/BBox.hpp</includes>
+    <includes refid="_polygon_8hpp" local="no">DO/Geometry/Objects/Polygon.hpp</includes>
+    <includes refid="_triangle_8hpp" local="no">DO/Geometry/Objects/Triangle.hpp</includes>
+    <includes refid="_quad_8hpp" local="no">DO/Geometry/Objects/Quad.hpp</includes>
+    <includes refid="_ellipse_8hpp" local="no">DO/Geometry/Objects/Ellipse.hpp</includes>
+    <includes refid="_cone_8hpp" local="no">DO/Geometry/Objects/Cone.hpp</includes>
+    <includes refid="_cube_8hpp" local="no">DO/Geometry/Objects/Cube.hpp</includes>
+    <includes refid="_half_space_8hpp" local="no">DO/Geometry/Objects/HalfSpace.hpp</includes>
+    <includes refid="_sphere_8hpp" local="no">DO/Geometry/Objects/Sphere.hpp</includes>
+    <includes refid="_c_s_g_8hpp" local="no">DO/Geometry/Objects/CSG.hpp</includes>
+    <includedby refid="_draw_polygon_8hpp" local="no">C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Graphics/DrawPolygon.hpp</includedby>
+    <includedby refid="_geometry_8hpp" local="no">C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry.hpp</includedby>
+    <incdepgraph>
+      <node id="1016">
+        <label>DO/Geometry/Objects/Triangle.hpp</label>
+        <link refid="_triangle_8hpp_source"/>
+        <childnode refid="1008" relation="include">
+        </childnode>
+        <childnode refid="1014" relation="include">
+        </childnode>
+      </node>
+      <node id="1006">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects.hpp</label>
+        <link refid="Objects.hpp"/>
+        <childnode refid="1007" relation="include">
+        </childnode>
+        <childnode refid="1011" relation="include">
+        </childnode>
+        <childnode refid="1014" relation="include">
+        </childnode>
+        <childnode refid="1016" relation="include">
+        </childnode>
+        <childnode refid="1017" relation="include">
+        </childnode>
+        <childnode refid="1018" relation="include">
+        </childnode>
+        <childnode refid="1020" relation="include">
+        </childnode>
+        <childnode refid="1024" relation="include">
+        </childnode>
+        <childnode refid="1025" relation="include">
+        </childnode>
+        <childnode refid="1026" relation="include">
+        </childnode>
+        <childnode refid="1027" relation="include">
+        </childnode>
+      </node>
+      <node id="1020">
+        <label>DO/Geometry/Objects/Cone.hpp</label>
+        <link refid="_cone_8hpp_source"/>
+        <childnode refid="1008" relation="include">
+        </childnode>
+        <childnode refid="1021" relation="include">
+        </childnode>
+        <childnode refid="1023" relation="include">
+        </childnode>
+      </node>
+      <node id="1019">
+        <label>cmath</label>
+      </node>
+      <node id="1012">
+        <label>stdexcept</label>
+      </node>
+      <node id="1024">
+        <label>DO/Geometry/Objects/Cube.hpp</label>
+        <link refid="_cube_8hpp_source"/>
+      </node>
+      <node id="1009">
+        <label>Eigen/Eigen</label>
+      </node>
+      <node id="1018">
+        <label>DO/Geometry/Objects/Ellipse.hpp</label>
+        <link refid="_ellipse_8hpp_source"/>
+        <childnode refid="1019" relation="include">
+        </childnode>
+        <childnode refid="1008" relation="include">
+        </childnode>
+        <childnode refid="1017" relation="include">
+        </childnode>
+      </node>
+      <node id="1021">
+        <label>DO/Core/DebugUtilities.hpp</label>
+        <link refid="_debug_utilities_8hpp"/>
+        <childnode refid="1022" relation="include">
+        </childnode>
+      </node>
+      <node id="1007">
+        <label>DO/Geometry/Objects/LineSegment.hpp</label>
+        <link refid="_line_segment_8hpp_source"/>
+        <childnode refid="1008" relation="include">
+        </childnode>
+      </node>
+      <node id="1014">
+        <label>DO/Geometry/Objects/Polygon.hpp</label>
+        <link refid="_polygon_8hpp_source"/>
+        <childnode refid="1015" relation="include">
+        </childnode>
+        <childnode refid="1013" relation="include">
+        </childnode>
+      </node>
+      <node id="1013">
+        <label>vector</label>
+      </node>
+      <node id="1015">
+        <label>DO/Geometry/Tools/Projective.hpp</label>
+        <link refid="_projective_8hpp_source"/>
+        <childnode refid="1008" relation="include">
+        </childnode>
+      </node>
+      <node id="1010">
+        <label>sstream</label>
+      </node>
+      <node id="1026">
+        <label>DO/Geometry/Objects/Sphere.hpp</label>
+        <link refid="_sphere_8hpp_source"/>
+      </node>
+      <node id="1008">
+        <label>DO/Core/EigenExtension.hpp</label>
+        <link refid="_eigen_extension_8hpp"/>
+        <childnode refid="1009" relation="include">
+        </childnode>
+        <childnode refid="1010" relation="include">
+        </childnode>
+      </node>
+      <node id="1011">
+        <label>DO/Geometry/Objects/BBox.hpp</label>
+        <link refid="_b_box_8hpp_source"/>
+        <childnode refid="1012" relation="include">
+        </childnode>
+        <childnode refid="1008" relation="include">
+        </childnode>
+        <childnode refid="1013" relation="include">
+        </childnode>
+      </node>
+      <node id="1022">
+        <label>iostream</label>
+      </node>
+      <node id="1017">
+        <label>DO/Geometry/Objects/Quad.hpp</label>
+        <link refid="_quad_8hpp_source"/>
+        <childnode refid="1008" relation="include">
+        </childnode>
+        <childnode refid="1014" relation="include">
+        </childnode>
+        <childnode refid="1011" relation="include">
+        </childnode>
+      </node>
+      <node id="1023">
+        <label>algorithm</label>
+      </node>
+      <node id="1025">
+        <label>DO/Geometry/Objects/HalfSpace.hpp</label>
+        <link refid="_half_space_8hpp_source"/>
+      </node>
+      <node id="1027">
+        <label>DO/Geometry/Objects/CSG.hpp</label>
+        <link refid="_c_s_g_8hpp_source"/>
+        <childnode refid="1008" relation="include">
+        </childnode>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="1029">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Graphics/DrawPolygon.hpp</label>
+        <link refid="_draw_polygon_8hpp_source"/>
+        <childnode refid="1030" relation="include">
+        </childnode>
+      </node>
+      <node id="1031">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry.hpp</label>
+        <link refid="_geometry_8hpp_source"/>
+      </node>
+      <node id="1028">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects.hpp</label>
+        <link refid="Objects.hpp"/>
+        <childnode refid="1029" relation="include">
+        </childnode>
+        <childnode refid="1031" relation="include">
+        </childnode>
+      </node>
+      <node id="1030">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Graphics.hpp</label>
+        <link refid="_geometry_2_graphics_8hpp_source"/>
+        <childnode refid="1031" relation="include">
+        </childnode>
+      </node>
+    </invincdepgraph>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="comment">//<sp/>==========================================================================<sp/>//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="comment">//<sp/>This<sp/>file<sp/>is<sp/>part<sp/>of<sp/>DO++,<sp/>a<sp/>basic<sp/>set<sp/>of<sp/>libraries<sp/>in<sp/>C++<sp/>for<sp/>computer</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight><highlight class="comment">//<sp/>vision.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="comment">//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Copyright<sp/>(C)<sp/>2014<sp/>David<sp/>Ok<sp/>&lt;david.ok8@gmail.com&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight><highlight class="comment">//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight><highlight class="comment">//<sp/>This<sp/>Source<sp/>Code<sp/>Form<sp/>is<sp/>subject<sp/>to<sp/>the<sp/>terms<sp/>of<sp/>the<sp/>Mozilla<sp/>Public</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight><highlight class="comment">//<sp/>License<sp/>v.<sp/>2.0.<sp/>If<sp/>a<sp/>copy<sp/>of<sp/>the<sp/>MPL<sp/>was<sp/>not<sp/>distributed<sp/>with<sp/>this<sp/>file,</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight><highlight class="comment">//<sp/>you<sp/>can<sp/>obtain<sp/>one<sp/>at<sp/>http://mozilla.org/MPL/2.0/.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight><highlight class="comment">//<sp/>==========================================================================<sp/>//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight><highlight class="preprocessor">#ifndef<sp/>DO_GEOMETRY_OBJECTS_HPP</highlight></codeline>
+<codeline lineno="13"><highlight class="preprocessor"></highlight><highlight class="preprocessor">#define<sp/>DO_GEOMETRY_OBJECTS_HPP</highlight></codeline>
+<codeline lineno="14"><highlight class="preprocessor"></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight><highlight class="comment">//<sp/>2D<sp/>objects<sp/>but<sp/>their<sp/>generalization<sp/>to<sp/>higher<sp/>dimensions<sp/>is<sp/>straightforward.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="16"><highlight class="normal"></highlight><highlight class="comment">//<sp/>\todo:<sp/>see<sp/>if<sp/>generalization<sp/>can<sp/>be<sp/>implemented<sp/>easily<sp/>by<sp/>implementing<sp/>a<sp/>Kernel.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="17"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;DO/Geometry/Objects/LineSegment.hpp&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;DO/Geometry/Objects/BBox.hpp&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="19"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;DO/Geometry/Objects/Polygon.hpp&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="20"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;DO/Geometry/Objects/Triangle.hpp&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="21"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;DO/Geometry/Objects/Quad.hpp&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="22"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;DO/Geometry/Objects/Ellipse.hpp&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="23"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;DO/Geometry/Objects/Cone.hpp&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="24"><highlight class="normal"></highlight></codeline>
+<codeline lineno="25"><highlight class="normal"></highlight><highlight class="comment">//<sp/>3D<sp/>objects</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="26"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;DO/Geometry/Objects/Cube.hpp&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="27"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;DO/Geometry/Objects/HalfSpace.hpp&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="28"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;DO/Geometry/Objects/Sphere.hpp&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="29"><highlight class="normal"></highlight></codeline>
+<codeline lineno="30"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Constructive<sp/>Solid<sp/>Geometry.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="31"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;DO/Geometry/Objects/CSG.hpp&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="32"><highlight class="normal"></highlight></codeline>
+<codeline lineno="33"><highlight class="normal"></highlight></codeline>
+<codeline lineno="34"><highlight class="normal"></highlight><highlight class="preprocessor">#endif<sp/></highlight><highlight class="comment">/*<sp/>DO_GEOMETRY_OBJECTS_HPP<sp/>*/</highlight><highlight class="preprocessor"></highlight></codeline>
+    </programlisting>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects.hpp"/>
+  </compounddef>
+</doxygen>

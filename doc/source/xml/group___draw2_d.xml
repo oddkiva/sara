@@ -1,0 +1,2658 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="group___draw2_d" kind="group">
+    <compoundname>Draw2D</compoundname>
+    <title>Drawing 2D</title>
+      <sectiondef kind="func">
+      <memberdef kind="function" id="group___draw2_d_1gac5a7d7f69f27b67a54658d70fd2ecf92" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::drawPoint</definition>
+        <argsstring>(int x, int y, const Color3ub &amp;c)</argsstring>
+        <name>drawPoint</name>
+        <param>
+          <type>int</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Draw a point in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">x</parametername>
+<parametername direction="in">y</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>coordinates. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGB color in <formula id="62">$[0, 255]^3$</formula>. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="36"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1ga404236e564421c6870b162167e459491" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::drawPoint</definition>
+        <argsstring>(int x, int y, const Color4ub &amp;c)</argsstring>
+        <name>drawPoint</name>
+        <param>
+          <type>int</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>const Color4ub &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Draw a point in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">x</parametername>
+<parametername direction="in">y</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>coordinates. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGBA color in <formula id="63">$[0, 255]^4$</formula>. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="43"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1gafd722a4bc47cf9ce5110ee6b639b2b3f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::drawPoint</definition>
+        <argsstring>(const Point2f &amp;p, const Color3ub &amp;c)</argsstring>
+        <name>drawPoint</name>
+        <param>
+          <type>const Point2f &amp;</type>
+          <declname>p</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Draw a point in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">p</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>coordinates where scalar is of float type. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGB color in <formula id="62">$[0, 255]^3$</formula>. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="50"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1ga3a5f1861fa6d1300657c037e4ee6fc95" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::drawCircle</definition>
+        <argsstring>(int xc, int yc, int r, const Color3ub &amp;c, int penWidth=1)</argsstring>
+        <name>drawCircle</name>
+        <param>
+          <type>int</type>
+          <declname>xc</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>yc</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>r</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>c</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>penWidth</declname>
+          <defval>1</defval>
+        </param>
+        <briefdescription>
+<para>Draw a circle in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">xc</parametername>
+<parametername direction="in">yc</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>circle center. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">r</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>circle radius. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGB color in <formula id="62">$[0, 255]^3$</formula>. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">penWidth</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>width of the contour. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="59"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1ga0dcd2c6ad80005cf9fc3e92198fc508f" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::drawCircle</definition>
+        <argsstring>(const Point2i &amp;center, int r, const Color3ub &amp;c, int penWidth=1)</argsstring>
+        <name>drawCircle</name>
+        <param>
+          <type>const Point2i &amp;</type>
+          <declname>center</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>r</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>c</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>penWidth</declname>
+          <defval>1</defval>
+        </param>
+        <briefdescription>
+<para>Draw a circle in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">center</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>circle center. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGB color in <formula id="62">$[0, 255]^3$</formula>. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">penWidth</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>width of the contour. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="68" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" bodystart="66" bodyend="68"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1ga222b3771f2dc60e8887d125479ae3dee" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::drawCircle</definition>
+        <argsstring>(const Point2f &amp;center, float r, const Color3ub &amp;c, int penWidth=1)</argsstring>
+        <name>drawCircle</name>
+        <param>
+          <type>const Point2f &amp;</type>
+          <declname>center</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>r</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>c</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>penWidth</declname>
+          <defval>1</defval>
+        </param>
+        <briefdescription>
+<para>Draw a circle in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">center</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>circle center. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGB color in <formula id="62">$[0, 255]^3$</formula>. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">penWidth</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>width of the contour. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="77"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1ga111d4a73e9c29daceed106df45f57564" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::drawCircle</definition>
+        <argsstring>(const Point2d &amp;center, double r, const Color3ub &amp;c, int penWidth=1)</argsstring>
+        <name>drawCircle</name>
+        <param>
+          <type>const Point2d &amp;</type>
+          <declname>center</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>r</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>c</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>penWidth</declname>
+          <defval>1</defval>
+        </param>
+        <briefdescription>
+<para>Draw a circle in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">center</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>circle center. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGB color in <formula id="62">$[0, 255]^3$</formula>. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">penWidth</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>width of the contour. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="86"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1ga7f9dee248b78883c0948e13612831835" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::drawEllipse</definition>
+        <argsstring>(int x, int y, int w, int h, const Color3ub &amp;c, int penWidth=1)</argsstring>
+        <name>drawEllipse</name>
+        <param>
+          <type>int</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>w</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>h</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>c</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>penWidth</declname>
+          <defval>1</defval>
+        </param>
+        <briefdescription>
+<para>Draw an axis-aligned ellipse in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">x</parametername>
+<parametername direction="in">y</parametername>
+<parametername direction="in">w</parametername>
+<parametername direction="in">h</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>bounding box parameters of the ellipse. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGB color in <formula id="62">$[0, 255]^3$</formula>. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">penWidth</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>width of the contour. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="95"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1gad48ba1e8253e2f9308cc1b6c4c3eec22" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::drawEllipse</definition>
+        <argsstring>(const Point2f &amp;center, float r1, float r2, float degree, const Color3ub &amp;c, int penWidth=1)</argsstring>
+        <name>drawEllipse</name>
+        <param>
+          <type>const Point2f &amp;</type>
+          <declname>center</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>r1</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>r2</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>degree</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>c</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>penWidth</declname>
+          <defval>1</defval>
+        </param>
+        <briefdescription>
+<para>Draw an oriented ellipse in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">center</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>ellipse center. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">r1</parametername>
+<parametername direction="in">r2</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>ellipse radii. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">degree</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>ellipse orientation in degree. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGB color in <formula id="62">$[0, 255]^3$</formula>. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">penWidth</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>width of the contour. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="106"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1gaadf22a6d4ea37ab6bd73d02d15252857" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::drawEllipse</definition>
+        <argsstring>(const Point2d &amp;center, double r1, double r2, double degree, const Color3ub &amp;c, int penWidth=1)</argsstring>
+        <name>drawEllipse</name>
+        <param>
+          <type>const Point2d &amp;</type>
+          <declname>center</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>r1</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>r2</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>degree</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>c</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>penWidth</declname>
+          <defval>1</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="109"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1ga768901f98aa242de772e32e0aaad4bd1" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::drawLine</definition>
+        <argsstring>(int x1, int y1, int x2, int y2, const Color3ub &amp;c, int penWidth=1)</argsstring>
+        <name>drawLine</name>
+        <param>
+          <type>int</type>
+          <declname>x1</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y1</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>x2</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y2</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>c</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>penWidth</declname>
+          <defval>1</defval>
+        </param>
+        <briefdescription>
+<para>Draw a line in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">x1</parametername>
+<parametername direction="in">y1</parametername>
+<parametername direction="in">x2</parametername>
+<parametername direction="in">y2</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>start and end points of the line. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGB color in <formula id="62">$[0, 255]^3$</formula>. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">penWidth</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>width of the contour. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="118"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1gab6fedda279868c00c6e6b905cfabf6ba" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::drawLine</definition>
+        <argsstring>(const Point2f &amp;p1, const Point2f &amp;p2, const Color3ub &amp;c, int penWidth=1)</argsstring>
+        <name>drawLine</name>
+        <param>
+          <type>const Point2f &amp;</type>
+          <declname>p1</declname>
+        </param>
+        <param>
+          <type>const Point2f &amp;</type>
+          <declname>p2</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>c</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>penWidth</declname>
+          <defval>1</defval>
+        </param>
+        <briefdescription>
+<para>Draw a line in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">p1</parametername>
+<parametername direction="in">p2</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>start and end points of the line. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGB color in <formula id="62">$[0, 255]^3$</formula>. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">penWidth</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>width of the contour. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="127"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1ga89406d15592ca2c54fa17468c6ce7fa3" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::drawLine</definition>
+        <argsstring>(const Point2d &amp;p1, const Point2d &amp;p2, const Color3ub &amp;c, int penWidth=1)</argsstring>
+        <name>drawLine</name>
+        <param>
+          <type>const Point2d &amp;</type>
+          <declname>p1</declname>
+        </param>
+        <param>
+          <type>const Point2d &amp;</type>
+          <declname>p2</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>c</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>penWidth</declname>
+          <defval>1</defval>
+        </param>
+        <briefdescription>
+<para>Draw a line in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">p1</parametername>
+<parametername direction="in">p2</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>start and end points of the line. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGB color in <formula id="62">$[0, 255]^3$</formula>. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">penWidth</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>width of the contour. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="136"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1ga949db317830adf652591ff57a1f23a4b" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::drawLine</definition>
+        <argsstring>(const Point2i &amp;p1, const Point2i &amp;p2, const Color3ub &amp;c, int penWidth=1)</argsstring>
+        <name>drawLine</name>
+        <param>
+          <type>const Point2i &amp;</type>
+          <declname>p1</declname>
+        </param>
+        <param>
+          <type>const Point2i &amp;</type>
+          <declname>p2</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>c</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>penWidth</declname>
+          <defval>1</defval>
+        </param>
+        <briefdescription>
+<para>Draw a line in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">p1</parametername>
+<parametername direction="in">p2</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>start and end points of the line. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGB color in <formula id="62">$[0, 255]^3$</formula>. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">penWidth</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>width of the contour. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="146" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" bodystart="144" bodyend="146"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1ga9b53d46ef158cd6e3cbe1bf7a7845b30" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::drawRect</definition>
+        <argsstring>(int x, int y, int w, int h, const Color3ub &amp;c, int penWidth=1)</argsstring>
+        <name>drawRect</name>
+        <param>
+          <type>int</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>w</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>h</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>c</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>penWidth</declname>
+          <defval>1</defval>
+        </param>
+        <briefdescription>
+<para>Draw a rectangle in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">x</parametername>
+<parametername direction="in">y</parametername>
+<parametername direction="in">w</parametername>
+<parametername direction="in">h</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>rectangle parameters. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGB color in <formula id="62">$[0, 255]^3$</formula>. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">penWidth</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>width of the contour. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="155"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1ga52558e3f2f1212919480f8bbae221782" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::drawPoly</definition>
+        <argsstring>(const QPolygonF &amp;poly, const Color3ub &amp;c, int width=1)</argsstring>
+        <name>drawPoly</name>
+        <param>
+          <type>const QPolygonF &amp;</type>
+          <declname>poly</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>c</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>width</declname>
+          <defval>1</defval>
+        </param>
+        <briefdescription>
+<para>Draw a polygon in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">poly</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>polygon. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGB color in <formula id="62">$[0, 255]^3$</formula>. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">width</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>width of the contour. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="163"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1ga046ecaf871cc43b13a63fbe84a7074af" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::drawPoly</definition>
+        <argsstring>(const int x[], const int y[], int n, const Color3ub &amp;c, int width=1)</argsstring>
+        <name>drawPoly</name>
+        <param>
+          <type>const int</type>
+          <declname>x</declname>
+          <array>[]</array>
+        </param>
+        <param>
+          <type>const int</type>
+          <declname>y</declname>
+          <array>[]</array>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>n</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>c</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>width</declname>
+          <defval>1</defval>
+        </param>
+        <briefdescription>
+<para>Draw a polygon in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">x</parametername>
+<parametername direction="in">y</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>array of vertices of the polygon. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">n</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>number of vertices in the polygon. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGB color in <formula id="62">$[0, 255]^3$</formula>. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">width</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>width of the contour. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="173"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1gaf83f860ff583d8ea177703d589d43568" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::drawPoly</definition>
+        <argsstring>(const Point2i *p, int n, const Color3ub &amp;c, int width=1)</argsstring>
+        <name>drawPoly</name>
+        <param>
+          <type>const Point2i *</type>
+          <declname>p</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>n</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>c</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>width</declname>
+          <defval>1</defval>
+        </param>
+        <briefdescription>
+<para>Draw a polygon in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">p</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>array of vertices of the polygon. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">n</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>number of vertices in the polygon. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGB color in <formula id="62">$[0, 255]^3$</formula>. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">width</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>width of the contour. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="182"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1gabc402ab820b0c16d0179e526de04949d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::drawString</definition>
+        <argsstring>(int x, int y, const std::string &amp;s, const Color3ub &amp;c, int fontSize=12, double alpha=0, bool italic=false, bool bold=false, bool underlined=false)</argsstring>
+        <name>drawString</name>
+        <param>
+          <type>int</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>s</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>c</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>fontSize</declname>
+          <defval>12</defval>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>alpha</declname>
+          <defval>0</defval>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>italic</declname>
+          <defval>false</defval>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>bold</declname>
+          <defval>false</defval>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>underlined</declname>
+          <defval>false</defval>
+        </param>
+        <briefdescription>
+<para>Draw text in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">x</parametername>
+<parametername direction="in">y</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>array of vertices of the polygon. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">text</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>text. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGB color in <formula id="62">$[0, 255]^3$</formula>. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">width</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>width of the contour. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="193"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1ga16d65640d0280fda29e54c359bf03357" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::drawArrow</definition>
+        <argsstring>(int a, int b, int c, int d, const Color3ub &amp;col, int arrowWidth=8, int arrowHeight=5, int style=0, int width=1)</argsstring>
+        <name>drawArrow</name>
+        <param>
+          <type>int</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>b</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>c</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>d</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>col</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>arrowWidth</declname>
+          <defval>8</defval>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>arrowHeight</declname>
+          <defval>5</defval>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>style</declname>
+          <defval>0</defval>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>width</declname>
+          <defval>1</defval>
+        </param>
+        <briefdescription>
+<para>Draw an arrow in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">a</parametername>
+<parametername direction="in">b</parametername>
+<parametername direction="in">c</parametername>
+<parametername direction="in">d</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>start and end points of the arrow. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGB color in <formula id="62">$[0, 255]^3$</formula>. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">arrowWidth</parametername>
+<parametername direction="in">arrowHeight</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>arrow parameters. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">width</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>width of the contour. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="204"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1ga23b2f26a1d7ffaa2c1e72aedeaa76dfa" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::drawArrow</definition>
+        <argsstring>(int x1, int y1, int x2, int y2, const Color3ub &amp;col, double ta, double tl, int style, int width)</argsstring>
+        <name>drawArrow</name>
+        <param>
+          <type>int</type>
+          <declname>x1</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y1</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>x2</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y2</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>col</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>ta</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>tl</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>style</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>width</declname>
+        </param>
+        <briefdescription>
+<para>Draw an arrow in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">x1</parametername>
+<parametername direction="in">y1</parametername>
+<parametername direction="in">x2</parametername>
+<parametername direction="in">y2</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>start and end points of the arrow. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">col</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGB color in <formula id="62">$[0, 255]^3$</formula>. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">ta</parametername>
+<parametername direction="in">tl</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>arrow parameters. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">style</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>arrow style. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">width</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>width of the contour. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="215" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" bodystart="213" bodyend="219"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1ga2e796325aec51e27a63c71d510b0acb1" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::drawArrow</definition>
+        <argsstring>(const Point2f &amp;a, const Point2f &amp;b, const Color3ub &amp;col, int penWidth=1)</argsstring>
+        <name>drawArrow</name>
+        <param>
+          <type>const Point2f &amp;</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>const Point2f &amp;</type>
+          <declname>b</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>col</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>penWidth</declname>
+          <defval>1</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="222" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" bodystart="220" bodyend="225"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1ga42939c8db1f5f1a6dcc4905e0d3bcdc8" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::drawArrow</definition>
+        <argsstring>(const Point2d &amp;a, const Point2d &amp;b, const Color3ub &amp;col, int penWidth=1)</argsstring>
+        <name>drawArrow</name>
+        <param>
+          <type>const Point2d &amp;</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>const Point2d &amp;</type>
+          <declname>b</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>col</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>penWidth</declname>
+          <defval>1</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="228" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" bodystart="226" bodyend="231"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1ga3ed03162b6c7f9878b29744b4ff93d08" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::fillEllipse</definition>
+        <argsstring>(int x, int y, int w, int h, const Color3ub &amp;c)</argsstring>
+        <name>fillEllipse</name>
+        <param>
+          <type>int</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>w</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>h</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Draw a color-filled ellipse in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">x</parametername>
+<parametername direction="in">y</parametername>
+<parametername direction="in">w</parametername>
+<parametername direction="in">h</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>bounding box of the ellipse. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGB color in <formula id="62">$[0, 255]^3$</formula>. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="242"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1ga857cc343c89d77047513cfffec925d83" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::fillEllipse</definition>
+        <argsstring>(const Point2i &amp;p, int w, int h, const Color3ub &amp;c)</argsstring>
+        <name>fillEllipse</name>
+        <param>
+          <type>const Point2i &amp;</type>
+          <declname>p</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>w</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>h</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Draw a color-filled ellipse in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">p</parametername>
+<parametername direction="in">w</parametername>
+<parametername direction="in">h</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>bounding box of the ellipse. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGB color in <formula id="62">$[0, 255]^3$</formula>. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="249" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" bodystart="248" bodyend="249"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1ga0cd7ab76249b31006f12efb89e96930a" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::fillEllipse</definition>
+        <argsstring>(const Point2f &amp;p, float rx, float ry, float degree, const Color3ub &amp;c)</argsstring>
+        <name>fillEllipse</name>
+        <param>
+          <type>const Point2f &amp;</type>
+          <declname>p</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>rx</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>ry</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>degree</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Draw a color-filled ellipse in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">p</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>ellipse center. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">rx</parametername>
+<parametername direction="in">ry</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>ellipse radii. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">degree</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>ellipse orientation in degree. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGB color in <formula id="62">$[0, 255]^3$</formula>. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="259"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1ga0304730b10cb0cc85cf54fce55dd56f8" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::fillRect</definition>
+        <argsstring>(int x, int y, int w, int h, const Color3ub &amp;c)</argsstring>
+        <name>fillRect</name>
+        <param>
+          <type>int</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>w</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>h</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Draw a color-filled circle in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">x</parametername>
+<parametername direction="in">y</parametername>
+<parametername direction="in">w</parametername>
+<parametername direction="in">h</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>rectangle parameters. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGB color in <formula id="62">$[0, 255]^3$</formula>. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="266"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1ga38298352a8d082ea8a9d26eb3be3b368" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::fillRect</definition>
+        <argsstring>(const Point2i &amp;p, int w, int h, const Color3ub &amp;c)</argsstring>
+        <name>fillRect</name>
+        <param>
+          <type>const Point2i &amp;</type>
+          <declname>p</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>w</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>h</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Draw a color-filled circle in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">p</parametername>
+<parametername direction="in">w</parametername>
+<parametername direction="in">h</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>rectangle parameters. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGB color in <formula id="62">$[0, 255]^3$</formula>. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="273" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" bodystart="272" bodyend="273"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1ga7758ea21077f78b7d312dcdc8f4e83ed" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::fillCircle</definition>
+        <argsstring>(int x, int y, int r, const Color3ub &amp;c)</argsstring>
+        <name>fillCircle</name>
+        <param>
+          <type>int</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>r</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Draw a color-filled circle in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">x</parametername>
+<parametername direction="in">y</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>circle center. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">r</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>circle radius. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGB color in <formula id="62">$[0, 255]^3$</formula>. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="281"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1gaf463f29531934900d51e68c5533bdd9b" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::fillCircle</definition>
+        <argsstring>(const Point2i &amp;p, int r, const Color3ub &amp;c)</argsstring>
+        <name>fillCircle</name>
+        <param>
+          <type>const Point2i &amp;</type>
+          <declname>p</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>r</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Draw a color-filled circle in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">p</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>circle center. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">r</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>circle radius. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGB color in <formula id="62">$[0, 255]^3$</formula>. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="289" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" bodystart="288" bodyend="289"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1gab52e27210e68ac177b681a7cdcbaa359" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::fillCircle</definition>
+        <argsstring>(const Point2f &amp;p, float r, const Color3ub &amp;c)</argsstring>
+        <name>fillCircle</name>
+        <param>
+          <type>const Point2f &amp;</type>
+          <declname>p</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>r</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Draw a color-filled circle in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">p</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>circle center. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">r</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>circle radius. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGB color in <formula id="62">$[0, 255]^3$</formula>. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="297"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1ga4123a714c0d3f678e3b469f668166564" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::fillPoly</definition>
+        <argsstring>(const QPolygonF &amp;polygon, const Color3ub &amp;c)</argsstring>
+        <name>fillPoly</name>
+        <param>
+          <type>const QPolygonF &amp;</type>
+          <declname>polygon</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Draw a color-filled circle in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">p</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>circle center. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">r</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>circle radius. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGB color in <formula id="62">$[0, 255]^3$</formula>. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="305"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1gaf22fdb89e30d4c6a3dfa955bca0f9d3b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::fillPoly</definition>
+        <argsstring>(const int x[], const int y[], int n, const Color3ub &amp;c)</argsstring>
+        <name>fillPoly</name>
+        <param>
+          <type>const int</type>
+          <declname>x</declname>
+          <array>[]</array>
+        </param>
+        <param>
+          <type>const int</type>
+          <declname>y</declname>
+          <array>[]</array>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>n</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Draw a color-filled polygon in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">x</parametername>
+<parametername direction="in">y</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>array of vertices. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">n</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>number of vertices. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGB color in <formula id="62">$[0, 255]^3$</formula>. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="313"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1ga601adc22394b6713b98872874f621179" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::fillPoly</definition>
+        <argsstring>(const int p[], int n, const Color3ub &amp;c)</argsstring>
+        <name>fillPoly</name>
+        <param>
+          <type>const int</type>
+          <declname>p</declname>
+          <array>[]</array>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>n</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Draw a color-filled polygon in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">p</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>array of vertices <formula id="64">$(\mathbf{p}_i)_{1\leq i \leq n}$</formula> where <formula id="65">$\mathbf{p}_i = (p_{2i}, p_{2i+1}) \in R^2 $</formula>. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">n</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>number of vertices. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGB color in <formula id="62">$[0, 255]^3$</formula>. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="322"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1ga9bce7ee3dfbf9d22449a4cd84ab15b87" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::fillPoly</definition>
+        <argsstring>(const Point2i *p, int n, const Color3ub &amp;c)</argsstring>
+        <name>fillPoly</name>
+        <param>
+          <type>const Point2i *</type>
+          <declname>p</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>n</declname>
+        </param>
+        <param>
+          <type>const Color3ub &amp;</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Draw a color-filled polygon in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">p</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>array of vertices. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">n</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>number of vertices. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RGB color in <formula id="62">$[0, 255]^3$</formula>. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="330"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1ga21ef0ec97c68ddfe1610831f9abad05a" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::display</definition>
+        <argsstring>(const QImage &amp;image, int xoff=0, int yoff=0, double fact=1.)</argsstring>
+        <name>display</name>
+        <param>
+          <type>const QImage &amp;</type>
+          <declname>image</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>xoff</declname>
+          <defval>0</defval>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>yoff</declname>
+          <defval>0</defval>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>fact</declname>
+          <defval>1.</defval>
+        </param>
+        <briefdescription>
+<para>Draw an image in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">image</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>image. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">xoff</parametername>
+<parametername direction="in">yoff</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>position of the top-left image corner. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">fact</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>image viewing scale. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="342"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1ga88a29cdb7128f7420a377be1a920ad26" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::putColorImage</definition>
+        <argsstring>(int x, int y, const Color3ub *data, int w, int h, double fact=1.)</argsstring>
+        <name>putColorImage</name>
+        <param>
+          <type>int</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>const Color3ub *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>w</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>h</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>fact</declname>
+          <defval>1.</defval>
+        </param>
+        <briefdescription>
+<para>Draw an image in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">x</parametername>
+<parametername direction="in">y</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>position of the top-left image corner. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">data</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>color image. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">w</parametername>
+<parametername direction="in">h</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>image sizes </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">fact</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>image viewing scale. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="352"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1gad6d58648ab2826b1840c473af1565680" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::putColorImage</definition>
+        <argsstring>(const Point2i &amp;p, const Color3ub *data, int w, int h, double fact=1.)</argsstring>
+        <name>putColorImage</name>
+        <param>
+          <type>const Point2i &amp;</type>
+          <declname>p</declname>
+        </param>
+        <param>
+          <type>const Color3ub *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>w</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>h</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>fact</declname>
+          <defval>1.</defval>
+        </param>
+        <briefdescription>
+<para>Draw a color image in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">p</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>position of the top-left image corner. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">data</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>color image. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">w</parametername>
+<parametername direction="in">h</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>image sizes </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">fact</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>image viewing scale. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="362" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" bodystart="360" bodyend="362"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1ga1993ea2ed50bb99cf5d1b38f3cfceaa3" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::putGreyImage</definition>
+        <argsstring>(int x, int y, const unsigned char *data, int w, int h, double fact=1.)</argsstring>
+        <name>putGreyImage</name>
+        <param>
+          <type>int</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>const unsigned char *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>w</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>h</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>fact</declname>
+          <defval>1.</defval>
+        </param>
+        <briefdescription>
+<para>Draw a grayscale image in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">x</parametername>
+<parametername direction="in">y</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>position of the top-left image corner. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">data</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>color image. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">w</parametername>
+<parametername direction="in">h</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>image sizes </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">fact</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>image viewing scale. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="372"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1ga77b23c010a8600ed62500731089e862d" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::putGreyImage</definition>
+        <argsstring>(const Point2i &amp;p, const unsigned char *data, int w, int h, double fact=1.)</argsstring>
+        <name>putGreyImage</name>
+        <param>
+          <type>const Point2i &amp;</type>
+          <declname>p</declname>
+        </param>
+        <param>
+          <type>const unsigned char *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>w</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>h</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>fact</declname>
+          <defval>1.</defval>
+        </param>
+        <briefdescription>
+<para>Draw a grayscale image in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">p</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>position of the top-left image corner. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">data</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>color image. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">w</parametername>
+<parametername direction="in">h</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>image sizes </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">fact</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>image viewing scale. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="382" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" bodystart="380" bodyend="382"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1ga0e5d4d3aadae2bf37d6faa1e8b84c5e9" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::display</definition>
+        <argsstring>(const Image&lt; Color3ub &gt; &amp;image, int xoff=0, int yoff=0, double fact=1.)</argsstring>
+        <name>display</name>
+        <param>
+          <type>const Image&lt; Color3ub &gt; &amp;</type>
+          <declname>image</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>xoff</declname>
+          <defval>0</defval>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>yoff</declname>
+          <defval>0</defval>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>fact</declname>
+          <defval>1.</defval>
+        </param>
+        <briefdescription>
+<para>Draw a color image in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">image</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>color image. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">xoff</parametername>
+<parametername direction="in">yoff</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>position of the top-left image corner. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">fact</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>image viewing scale. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="391" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" bodystart="389" bodyend="391"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1ga0e452fddc5470393c55af60e940bc624" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::display</definition>
+        <argsstring>(const Image&lt; Color3ub &gt; &amp;image, const Point2i &amp;off=Point2i::Zero(), double fact=1.)</argsstring>
+        <name>display</name>
+        <param>
+          <type>const Image&lt; Color3ub &gt; &amp;</type>
+          <declname>image</declname>
+        </param>
+        <param>
+          <type>const Point2i &amp;</type>
+          <declname>off</declname>
+          <defval>Point2i::Zero()</defval>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>fact</declname>
+          <defval>1.</defval>
+        </param>
+        <briefdescription>
+<para>Draw a color image in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">image</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>color image. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">off</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>position of the top-left image corner. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">fact</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>image viewing scale. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="400" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" bodystart="398" bodyend="400"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1gaff59f1e3836248047c31d6cb117ad733" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::display</definition>
+        <argsstring>(const Image&lt; Rgb8 &gt; &amp;image, int xoff=0, int yoff=0, double fact=1.)</argsstring>
+        <name>display</name>
+        <param>
+          <type>const Image&lt; Rgb8 &gt; &amp;</type>
+          <declname>image</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>xoff</declname>
+          <defval>0</defval>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>yoff</declname>
+          <defval>0</defval>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>fact</declname>
+          <defval>1.</defval>
+        </param>
+        <briefdescription>
+<para>Draw a color image in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">image</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>color image. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">off</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>position of the top-left image corner. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">fact</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>image viewing scale. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="409" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" bodystart="407" bodyend="412"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1ga295040f0084e284ebe3a020e10aff55e" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::display</definition>
+        <argsstring>(const Image&lt; Rgb8 &gt; &amp;image, const Point2i &amp;off, double fact=1.)</argsstring>
+        <name>display</name>
+        <param>
+          <type>const Image&lt; Rgb8 &gt; &amp;</type>
+          <declname>image</declname>
+        </param>
+        <param>
+          <type>const Point2i &amp;</type>
+          <declname>off</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>fact</declname>
+          <defval>1.</defval>
+        </param>
+        <briefdescription>
+<para>Draw a color image in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">image</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>color image. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">off</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>position of the top-left image corner. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">fact</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>image viewing scale. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="421" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" bodystart="419" bodyend="421"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1ga79613afee03373bbd813403651582f6b" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::display</definition>
+        <argsstring>(const Image&lt; T &gt; &amp;image, int xoff=0, int yoff=0, double fact=1.)</argsstring>
+        <name>display</name>
+        <param>
+          <type>const Image&lt; T &gt; &amp;</type>
+          <declname>image</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>xoff</declname>
+          <defval>0</defval>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>yoff</declname>
+          <defval>0</defval>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>fact</declname>
+          <defval>1.</defval>
+        </param>
+        <briefdescription>
+<para>Draw an image in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">image</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>image. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">xoff</parametername>
+<parametername direction="in">yoff</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>position of the top-left image corner. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">fact</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>image viewing scale. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="431" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" bodystart="429" bodyend="431"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1gab725fb61c4c95346186b4b64c842297d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::displayThreeChannelColorImageAsIs</definition>
+        <argsstring>(const Image&lt; T &gt; &amp;image, int xoff=0, int yoff=0, double fact=1.)</argsstring>
+        <name>displayThreeChannelColorImageAsIs</name>
+        <param>
+          <type>const Image&lt; T &gt; &amp;</type>
+          <declname>image</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>xoff</declname>
+          <defval>0</defval>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>yoff</declname>
+          <defval>0</defval>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>fact</declname>
+          <defval>1.</defval>
+        </param>
+        <briefdescription>
+<para>Draw an image in the active <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">image</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>image. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">xoff</parametername>
+<parametername direction="in">yoff</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>position of the top-left image corner. </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">fact</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>image viewing scale. </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="441" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" bodystart="439" bodyend="450"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1gafffa14be173576d6e5a3af58ed6bee3a" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::viewImage</definition>
+        <argsstring>(const Image&lt; T &gt; &amp;I, const std::string &amp;windowTitle=&quot;DO++&quot;, double fact=1.0)</argsstring>
+        <name>viewImage</name>
+        <param>
+          <type>const Image&lt; T &gt; &amp;</type>
+          <declname>I</declname>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>windowTitle</declname>
+          <defval>&quot;DO++&quot;</defval>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>fact</declname>
+          <defval>1.0</defval>
+        </param>
+        <briefdescription>
+<para>View an image in a new <ref refid="class_d_o_1_1_painting_window" kindref="compound">PaintingWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="455" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" bodystart="453" bodyend="465"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1ga91250b6a86a927c0570061883fd5a21b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::clearWindow</definition>
+        <argsstring>()</argsstring>
+        <name>clearWindow</name>
+        <briefdescription>
+<para>Clear the image. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="471"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1ga05be071c9610f7b8df7af791ee6396b3" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::setAntialiasing</definition>
+        <argsstring>(Window w=getActiveWindow(), bool on=true)</argsstring>
+        <name>setAntialiasing</name>
+        <param>
+          <type>Window</type>
+          <declname>w</declname>
+          <defval>getActiveWindow()</defval>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>on</declname>
+          <defval>true</defval>
+        </param>
+        <briefdescription>
+<para>Activate anti-aliased drawing. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="477"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1ga19ef396dbab3621673974af94cba293a" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::setTransparency</definition>
+        <argsstring>(Window w=getActiveWindow(), bool on=true)</argsstring>
+        <name>setTransparency</name>
+        <param>
+          <type>Window</type>
+          <declname>w</declname>
+          <defval>getActiveWindow()</defval>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>on</declname>
+          <defval>true</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para><xrefsect id="bug_1_bug000001"><xreftitle>Bug</xreftitle><xrefdescription><para>Buggy. Investigate... </para></xrefdescription></xrefsect></para>        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="480"/>
+      </memberdef>
+      <memberdef kind="function" id="group___draw2_d_1ga7f40424c6ecca2871552b0fdba3a9a70" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT bool</type>
+        <definition>DO_EXPORT bool DO::saveScreen</definition>
+        <argsstring>(Window w, const std::string &amp;fileName)</argsstring>
+        <name>saveScreen</name>
+        <param>
+          <type>Window</type>
+          <declname>w</declname>
+        </param>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>fileName</declname>
+        </param>
+        <briefdescription>
+<para>Save contents on the screen. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/PaintingCommands.hpp" line="486"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+  </compounddef>
+</doxygen>

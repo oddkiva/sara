@@ -1,0 +1,98 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="class_d_o_1_1_c_s_g_1_1_singleton" kind="class" prot="public">
+    <compoundname>DO::CSG::Singleton</compoundname>
+    <basecompoundref refid="class_d_o_1_1_c_s_g_1_1_object" prot="public" virt="non-virtual">Object</basecompoundref>
+    <templateparamlist>
+      <param>
+        <type>typename Obj</type>
+      </param>
+    </templateparamlist>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="class_d_o_1_1_c_s_g_1_1_singleton_1a9f638edca74f7f13650719d94b813b54" prot="private" static="no" mutable="no">
+        <type>Obj</type>
+        <definition>Obj obj_</definition>
+        <argsstring></argsstring>
+        <name>obj_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/CSG.hpp" line="27" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/CSG.hpp" bodystart="27" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_d_o_1_1_c_s_g_1_1_singleton_1a5db2169460586a8ea263f3c7e54f3aa3" prot="public" static="no" const="no" explicit="yes" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>Singleton</definition>
+        <argsstring>(const Obj &amp;obj)</argsstring>
+        <name>Singleton</name>
+        <param>
+          <type>const Obj &amp;</type>
+          <declname>obj</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/CSG.hpp" line="29" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/CSG.hpp" bodystart="29" bodyend="29"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_c_s_g_1_1_singleton_1a50a93f8875a1aa06ceecbc4e001803ba" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="virtual">
+        <type>bool</type>
+        <definition>bool contains</definition>
+        <argsstring>(const Point2d &amp;p) const </argsstring>
+        <name>contains</name>
+        <reimplements refid="class_d_o_1_1_c_s_g_1_1_object_1a20e575b0d75df1fb21c80ea6c3f91d8e">contains</reimplements>
+        <param>
+          <type>const <ref refid="group___eigen_typedefs_1ga17451c1ba65dc5ceb1f90e1fc710fa24" kindref="member">Point2d</ref> &amp;</type>
+          <declname>p</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/CSG.hpp" line="31" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/CSG.hpp" bodystart="30" bodyend="31"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="540">
+        <label>Singleton&lt; Obj &gt;</label>
+        <link refid="class_d_o_1_1_c_s_g_1_1_singleton"/>
+        <childnode refid="541" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="541">
+        <label>Object</label>
+        <link refid="class_d_o_1_1_c_s_g_1_1_object"/>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="542">
+        <label>Singleton&lt; Obj &gt;</label>
+        <link refid="class_d_o_1_1_c_s_g_1_1_singleton"/>
+        <childnode refid="543" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="543">
+        <label>Object</label>
+        <link refid="class_d_o_1_1_c_s_g_1_1_object"/>
+      </node>
+    </collaborationgraph>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/CSG.hpp" line="26" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/CSG.hpp" bodystart="25" bodyend="32"/>
+    <listofallmembers>
+      <member refid="class_d_o_1_1_c_s_g_1_1_singleton_1a50a93f8875a1aa06ceecbc4e001803ba" prot="public" virt="virtual"><scope>DO::CSG::Singleton</scope><name>contains</name></member>
+      <member refid="class_d_o_1_1_c_s_g_1_1_singleton_1a9f638edca74f7f13650719d94b813b54" prot="private" virt="non-virtual"><scope>DO::CSG::Singleton</scope><name>obj_</name></member>
+      <member refid="class_d_o_1_1_c_s_g_1_1_singleton_1a5db2169460586a8ea263f3c7e54f3aa3" prot="public" virt="non-virtual"><scope>DO::CSG::Singleton</scope><name>Singleton</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

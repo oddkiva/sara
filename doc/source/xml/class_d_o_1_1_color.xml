@@ -1,0 +1,263 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="class_d_o_1_1_color" kind="class" prot="public">
+    <compoundname>DO::Color</compoundname>
+    <basecompoundref prot="public" virt="non-virtual">Matrix&lt; T, Layout::size, 1 &gt;</basecompoundref>
+    <includes refid="_color_8hpp" local="no">Color.hpp</includes>
+    <templateparamlist>
+      <param>
+        <type>typename</type>
+        <declname>T</declname>
+        <defname>T</defname>
+      </param>
+      <param>
+        <type>typename</type>
+        <declname>Layout</declname>
+        <defname>Layout</defname>
+        <defval><ref refid="group___color_space_1gaad92fea51e98e11252ac86f2c8665d13" kindref="member">Rgb</ref></defval>
+      </param>
+    </templateparamlist>
+      <sectiondef kind="private-type">
+      <memberdef kind="typedef" id="class_d_o_1_1_color_1ae51c3645a252d2df13f3aef61f9c02f2" prot="private" static="no">
+        <type>Matrix&lt; T, Layout::size, 1 &gt;</type>
+        <definition>typedef Matrix&lt;T, Layout::size, 1&gt; Base</definition>
+        <argsstring></argsstring>
+        <name>Base</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="118" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="118" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-type">
+      <memberdef kind="typedef" id="class_d_o_1_1_color_1a4fc05512d90a4b0e4d7a6ca6e56b9ed4" prot="public" static="no">
+        <type>T</type>
+        <definition>typedef T ChannelType</definition>
+        <argsstring></argsstring>
+        <name>ChannelType</name>
+        <briefdescription>
+<para>Channel type. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="122" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="122" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="class_d_o_1_1_color_1a7a81d850ad8c8ac23245eabb7fae392b" prot="public" static="no">
+        <type>Layout</type>
+        <definition>typedef Layout ColorLayout</definition>
+        <argsstring></argsstring>
+        <name>ColorLayout</name>
+        <briefdescription>
+<para>Layout type (RGB, BGR, RGBA, CMYK, ...) </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="124" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="124" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_d_o_1_1_color_1a1589b83974b42a2f3315624f14c3c92c" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>Color</definition>
+        <argsstring>()</argsstring>
+        <name>Color</name>
+        <briefdescription>
+<para>Default constructor. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="126" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="126" bodyend="126"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_color_1a86b6c08f8a3c0123d9f4df11e8ffe526" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>Color</definition>
+        <argsstring>(T x, T y, T z)</argsstring>
+        <name>Color</name>
+        <param>
+          <type>T</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>T</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>T</type>
+          <declname>z</declname>
+        </param>
+        <briefdescription>
+<para>Custom constructor. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="128" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="128" bodyend="128"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_color_1abad592080ccdd941af94bfe0150012af" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>Color</definition>
+        <argsstring>(T x, T y, T z, T t)</argsstring>
+        <name>Color</name>
+        <param>
+          <type>T</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>T</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>T</type>
+          <declname>z</declname>
+        </param>
+        <param>
+          <type>T</type>
+          <declname>t</declname>
+        </param>
+        <briefdescription>
+<para>Custom constructor. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="130" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="130" bodyend="130"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_color_1a086c48494a60de214f91d716a7510e71" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>Color</definition>
+        <argsstring>(const Base &amp;x)</argsstring>
+        <name>Color</name>
+        <param>
+          <type>const Base &amp;</type>
+          <declname>x</declname>
+        </param>
+        <briefdescription>
+<para>Copy constructor. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="132" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="132" bodyend="132"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_color_1acd86e5a133b3e760a79309ffff2bc996" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename OtherDerived</type>
+          </param>
+        </templateparamlist>
+        <type><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> &amp;</type>
+        <definition>Color&amp; operator=</definition>
+        <argsstring>(const Eigen::MatrixBase&lt; OtherDerived &gt; &amp;other)</argsstring>
+        <name>operator=</name>
+        <param>
+          <type>const Eigen::MatrixBase&lt; OtherDerived &gt; &amp;</type>
+          <declname>other</declname>
+        </param>
+        <briefdescription>
+<para>Assignment operator. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="136" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="135" bodyend="136"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_color_1af4923830e61e808a81501dc9344bc731" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename Channel</type>
+          </param>
+        </templateparamlist>
+        <type>const T &amp;</type>
+        <definition>const T&amp; channel</definition>
+        <argsstring>() const </argsstring>
+        <name>channel</name>
+        <briefdescription>
+<para>Constant channel accessor. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="140" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="139" bodyend="140"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_color_1a0b6849e95fe39fc5321a33ca630fd5df" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename Channel</type>
+          </param>
+        </templateparamlist>
+        <type><ref refid="class_d_o_1_1_color_1a4fc05512d90a4b0e4d7a6ca6e56b9ed4" kindref="member">ChannelType</ref> &amp;</type>
+        <definition>ChannelType&amp; channel</definition>
+        <argsstring>()</argsstring>
+        <name>channel</name>
+        <briefdescription>
+<para>Mutable channel accessor. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="144" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="143" bodyend="144"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_color_1aa025989b00244ede2f541d9c79a36724" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>int</type>
+        <definition>int numChannels</definition>
+        <argsstring>() const </argsstring>
+        <name>numChannels</name>
+        <briefdescription>
+<para>Returns the number of channels. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="147" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="146" bodyend="147"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Lightweight template color class with some flexibility. </para>    </briefdescription>
+    <detaileddescription>
+<para>The color space and layout can have some flexibility. Here are some supported color space and layout examples: RGB, BGR, RGBA, BGRA, ARGB, YUV, HSV.</para><para>However every channel <emphasis>must</emphasis> have the same bit depth. For complex packed pixels with complex color layouts, consider Boost.GIL instead.</para><para>Also note this may not be intended for video processing!</para><para>Anyways, I wanted to do some image processing as conveniently as possible because:<itemizedlist>
+<listitem><para>I want to avoid introducing a dependency with Boost in the Core module because it is too big...</para></listitem><listitem><para>I had a bad user experience with the API of Boost.GIL. It seems neither easy to remember nor easy to use and I wasted a lot of time with the documentation. </para></listitem></itemizedlist>
+</para>    </detaileddescription>
+    <inheritancegraph>
+      <node id="66">
+        <label>Color&lt; T, Layout &gt;</label>
+        <link refid="class_d_o_1_1_color"/>
+        <childnode refid="67" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="67">
+        <label>Matrix&lt; T, Layout::size, 1 &gt;</label>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="68">
+        <label>Color&lt; T, Layout &gt;</label>
+        <link refid="class_d_o_1_1_color"/>
+        <childnode refid="69" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="69">
+        <label>Matrix&lt; T, Layout::size, 1 &gt;</label>
+      </node>
+    </collaborationgraph>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="117" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="116" bodyend="148"/>
+    <listofallmembers>
+      <member refid="class_d_o_1_1_color_1ae51c3645a252d2df13f3aef61f9c02f2" prot="private" virt="non-virtual"><scope>DO::Color</scope><name>Base</name></member>
+      <member refid="class_d_o_1_1_color_1af4923830e61e808a81501dc9344bc731" prot="public" virt="non-virtual"><scope>DO::Color</scope><name>channel</name></member>
+      <member refid="class_d_o_1_1_color_1a0b6849e95fe39fc5321a33ca630fd5df" prot="public" virt="non-virtual"><scope>DO::Color</scope><name>channel</name></member>
+      <member refid="class_d_o_1_1_color_1a4fc05512d90a4b0e4d7a6ca6e56b9ed4" prot="public" virt="non-virtual"><scope>DO::Color</scope><name>ChannelType</name></member>
+      <member refid="class_d_o_1_1_color_1a1589b83974b42a2f3315624f14c3c92c" prot="public" virt="non-virtual"><scope>DO::Color</scope><name>Color</name></member>
+      <member refid="class_d_o_1_1_color_1a86b6c08f8a3c0123d9f4df11e8ffe526" prot="public" virt="non-virtual"><scope>DO::Color</scope><name>Color</name></member>
+      <member refid="class_d_o_1_1_color_1abad592080ccdd941af94bfe0150012af" prot="public" virt="non-virtual"><scope>DO::Color</scope><name>Color</name></member>
+      <member refid="class_d_o_1_1_color_1a086c48494a60de214f91d716a7510e71" prot="public" virt="non-virtual"><scope>DO::Color</scope><name>Color</name></member>
+      <member refid="class_d_o_1_1_color_1a7a81d850ad8c8ac23245eabb7fae392b" prot="public" virt="non-virtual"><scope>DO::Color</scope><name>ColorLayout</name></member>
+      <member refid="class_d_o_1_1_color_1aa025989b00244ede2f541d9c79a36724" prot="public" virt="non-virtual"><scope>DO::Color</scope><name>numChannels</name></member>
+      <member refid="class_d_o_1_1_color_1acd86e5a133b3e760a79309ffff2bc996" prot="public" virt="non-virtual"><scope>DO::Color</scope><name>operator=</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

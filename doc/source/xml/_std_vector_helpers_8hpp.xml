@@ -1,0 +1,185 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="_std_vector_helpers_8hpp" kind="file">
+    <compoundname>StdVectorHelpers.hpp</compoundname>
+    <includes local="no">vector</includes>
+    <includedby refid="_core_8hpp" local="yes">C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core.hpp</includedby>
+    <includedby refid="_ramer_douglas_peucker_8hpp" local="no">C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Algorithms/RamerDouglasPeucker.hpp</includedby>
+    <incdepgraph>
+      <node id="297">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/StdVectorHelpers.hpp</label>
+        <link refid="StdVectorHelpers.hpp"/>
+        <childnode refid="298" relation="include">
+        </childnode>
+      </node>
+      <node id="298">
+        <label>vector</label>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="308">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/KDTree.hpp</label>
+        <link refid="_k_d_tree_8hpp_source"/>
+      </node>
+      <node id="311">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry.hpp</label>
+        <link refid="_geometry_8hpp_source"/>
+      </node>
+      <node id="303">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features.hpp</label>
+        <link refid="_features_8hpp"/>
+        <childnode refid="304" relation="include">
+        </childnode>
+        <childnode refid="305" relation="include">
+        </childnode>
+      </node>
+      <node id="299">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/StdVectorHelpers.hpp</label>
+        <link refid="StdVectorHelpers.hpp"/>
+        <childnode refid="300" relation="include">
+        </childnode>
+        <childnode refid="309" relation="include">
+        </childnode>
+      </node>
+      <node id="309">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Algorithms/RamerDouglasPeucker.hpp</label>
+        <link refid="_ramer_douglas_peucker_8hpp_source"/>
+        <childnode refid="310" relation="include">
+        </childnode>
+      </node>
+      <node id="304">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDescriptors.hpp</label>
+        <link refid="_feature_descriptors_8hpp"/>
+      </node>
+      <node id="305">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors.hpp</label>
+        <link refid="_feature_detectors_8hpp"/>
+      </node>
+      <node id="302">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/View.hpp</label>
+        <link refid="_view_8hpp"/>
+      </node>
+      <node id="306">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageProcessing.hpp</label>
+        <link refid="_image_processing_8hpp"/>
+        <childnode refid="304" relation="include">
+        </childnode>
+        <childnode refid="305" relation="include">
+        </childnode>
+      </node>
+      <node id="300">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core.hpp</label>
+        <link refid="_core_8hpp"/>
+        <childnode refid="301" relation="include">
+        </childnode>
+        <childnode refid="302" relation="include">
+        </childnode>
+        <childnode refid="303" relation="include">
+        </childnode>
+        <childnode refid="306" relation="include">
+        </childnode>
+        <childnode refid="307" relation="include">
+        </childnode>
+      </node>
+      <node id="310">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Geometry/Algorithms.hpp</label>
+        <link refid="_algorithms_8hpp_source"/>
+        <childnode refid="311" relation="include">
+        </childnode>
+      </node>
+      <node id="301">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/FeatureItem.hpp</label>
+        <link refid="_feature_item_8hpp_source"/>
+      </node>
+      <node id="307">
+        <label>C:/Users/David/Desktop/GitHub/DO-CV/src/DO/KDTree/KDTree.hpp</label>
+        <link refid="_k_d_tree_2_k_d_tree_8hpp_source"/>
+        <childnode refid="308" relation="include">
+        </childnode>
+      </node>
+    </invincdepgraph>
+      <sectiondef kind="func">
+      <memberdef kind="function" id="_std_vector_helpers_8hpp_1a2c47a6b744b0e83ee4269581d2d647bb" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void append</definition>
+        <argsstring>(std::vector&lt; T &gt; &amp;a, const std::vector&lt; T &gt; &amp;b)</argsstring>
+        <name>append</name>
+        <param>
+          <type>std::vector&lt; T &gt; &amp;</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>const std::vector&lt; T &gt; &amp;</type>
+          <declname>b</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/StdVectorHelpers.hpp" line="21" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/StdVectorHelpers.hpp" bodystart="20" bodyend="21"/>
+      </memberdef>
+      <memberdef kind="function" id="_std_vector_helpers_8hpp_1ac32b8fdf46f52602409eb19d45346fb6" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void shrink_to_fit</definition>
+        <argsstring>(std::vector&lt; T &gt; &amp;v)</argsstring>
+        <name>shrink_to_fit</name>
+        <param>
+          <type>std::vector&lt; T &gt; &amp;</type>
+          <declname>v</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/StdVectorHelpers.hpp" line="25" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/StdVectorHelpers.hpp" bodystart="24" bodyend="25"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="comment">//<sp/>==========================================================================<sp/>//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="comment">//<sp/>This<sp/>file<sp/>is<sp/>part<sp/>of<sp/>DO++,<sp/>a<sp/>basic<sp/>set<sp/>of<sp/>libraries<sp/>in<sp/>C++<sp/>for<sp/>computer<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight><highlight class="comment">//<sp/>vision.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="comment">//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Copyright<sp/>(C)<sp/>2013<sp/>David<sp/>Ok<sp/>&lt;david.ok8@gmail.com&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight><highlight class="comment">//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight><highlight class="comment">//<sp/>This<sp/>Source<sp/>Code<sp/>Form<sp/>is<sp/>subject<sp/>to<sp/>the<sp/>terms<sp/>of<sp/>the<sp/>Mozilla<sp/>Public<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight><highlight class="comment">//<sp/>License<sp/>v.<sp/>2.0.<sp/>If<sp/>a<sp/>copy<sp/>of<sp/>the<sp/>MPL<sp/>was<sp/>not<sp/>distributed<sp/>with<sp/>this<sp/>file,<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight><highlight class="comment">//<sp/>you<sp/>can<sp/>obtain<sp/>one<sp/>at<sp/>http://mozilla.org/MPL/2.0/.</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight><highlight class="comment">//<sp/>==========================================================================<sp/>//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight><highlight class="preprocessor">#ifndef<sp/>DO_STDVECTORHELPERS_HPP</highlight></codeline>
+<codeline lineno="15"><highlight class="preprocessor"></highlight><highlight class="preprocessor">#define<sp/>DO_STDVECTORHELPERS_HPP</highlight></codeline>
+<codeline lineno="16"><highlight class="preprocessor"></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="17"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;vector&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight></codeline>
+<codeline lineno="19"><highlight class="normal"></highlight><highlight class="keyword">template</highlight><highlight class="normal"><sp/>&lt;</highlight><highlight class="keyword">typename</highlight><highlight class="normal"><sp/>T&gt;</highlight></codeline>
+<codeline lineno="20"><highlight class="normal"></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>append(std::vector&lt;T&gt;&amp;<sp/>a,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>std::vector&lt;T&gt;&amp;<sp/>b)</highlight></codeline>
+<codeline lineno="21"><highlight class="normal">{<sp/>a.insert(a.end(),<sp/>b.begin(),<sp/>b.end());<sp/>}</highlight></codeline>
+<codeline lineno="22"><highlight class="normal"></highlight></codeline>
+<codeline lineno="23"><highlight class="normal"></highlight><highlight class="keyword">template</highlight><highlight class="normal"><sp/>&lt;</highlight><highlight class="keyword">typename</highlight><highlight class="normal"><sp/>T&gt;</highlight></codeline>
+<codeline lineno="24"><highlight class="normal"></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>shrink_to_fit(std::vector&lt;T&gt;&amp;<sp/><ref refid="group___channel_accessors_1ga1dd2524c5b8d3db33137eedb803fc2ce" kindref="member" tooltip="Mutable channel accessor.">v</ref>)</highlight></codeline>
+<codeline lineno="25"><highlight class="normal">{<sp/>std::vector&lt;T&gt;(<ref refid="group___channel_accessors_1ga1dd2524c5b8d3db33137eedb803fc2ce" kindref="member" tooltip="Mutable channel accessor.">v</ref>).swap(v);<sp/>}</highlight></codeline>
+<codeline lineno="26"><highlight class="normal"></highlight></codeline>
+<codeline lineno="27"><highlight class="normal"></highlight><highlight class="preprocessor">#endif<sp/></highlight><highlight class="comment">/*<sp/>DO_STDVECTORHELPERS_HPP<sp/>*/</highlight><highlight class="preprocessor"></highlight></codeline>
+    </programlisting>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/StdVectorHelpers.hpp"/>
+  </compounddef>
+</doxygen>

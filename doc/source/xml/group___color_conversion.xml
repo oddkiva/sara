@@ -1,0 +1,2257 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="group___color_conversion" kind="group">
+    <compoundname>ColorConversion</compoundname>
+    <title>Color rescaling and conversion functions</title>
+      <sectiondef kind="func">
+      <memberdef kind="function" id="group___color_conversion_1ga3e86b8eff1da0324f3aee0cef19b7d68" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>double</type>
+        <definition>double DO::getRescaledChannel64f</definition>
+        <argsstring>(T value)</argsstring>
+        <name>getRescaledChannel64f</name>
+        <param>
+          <type>T</type>
+          <declname>value</declname>
+        </param>
+        <briefdescription>
+<para>Channel normalization between 0 and 1 in double floating-point precision. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="363" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="362" bodyend="366"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga77f1b557bb4f33fac18948fcd9178dd7" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>N</declname>
+            <defname>N</defname>
+          </param>
+        </templateparamlist>
+        <type>Matrix&lt; double, N, 1 &gt;</type>
+        <definition>Matrix&lt;double, N, 1&gt; DO::getRescaledColor64f</definition>
+        <argsstring>(const Matrix&lt; T, N, 1 &gt; &amp;color)</argsstring>
+        <name>getRescaledColor64f</name>
+        <param>
+          <type>const Matrix&lt; T, N, 1 &gt; &amp;</type>
+          <declname>color</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> normalization between 0 and 1 in double floating-point precision. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="370" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="369" bodyend="374"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gaf2f95805ffea57b546cf2547806aae1b" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::normalizeChannel</definition>
+        <argsstring>(T &amp;dst, double src)</argsstring>
+        <name>normalizeChannel</name>
+        <param>
+          <type>T &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para>Channel rescaling from &apos;double&apos; value in [0,1] to &apos;T&apos; value. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="378" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="377" bodyend="381"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga2d242024d4f8c533e01ffd1f231adf7a" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>N</declname>
+            <defname>N</defname>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::normalizeColor</definition>
+        <argsstring>(Matrix&lt; T, N, 1 &gt; &amp;dst, const Matrix&lt; double, N, 1 &gt; &amp;src)</argsstring>
+        <name>normalizeColor</name>
+        <param>
+          <type>Matrix&lt; T, N, 1 &gt; &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>const Matrix&lt; double, N, 1 &gt; &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para>Channel rescaling from &apos;T&apos; value to &apos;double&apos; value in [0,1]. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="385" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="384" bodyend="390"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga92798e934e6c8e632b4f3d6d24e4f70d" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>int</type>
+            <declname>N</declname>
+            <defname>N</defname>
+          </param>
+        </templateparamlist>
+        <type>double</type>
+        <definition>double DO::rgb2gray64f</definition>
+        <argsstring>(const Matrix&lt; T, N, 1 &gt; &amp;rgb)</argsstring>
+        <name>rgb2gray64f</name>
+        <param>
+          <type>const Matrix&lt; T, N, 1 &gt; &amp;</type>
+          <declname>rgb</declname>
+        </param>
+        <briefdescription>
+<para>RGB to grayscale color conversion function (includes color normalization). </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="396" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="395" bodyend="402"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gaa88c55b9890d4ec25b7318fb12dbae6a" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>Matrix&lt; double, 3, 1 &gt;</type>
+        <definition>Matrix&lt;double, 3, 1&gt; DO::gray2rgb64f</definition>
+        <argsstring>(T gray)</argsstring>
+        <name>gray2rgb64f</name>
+        <param>
+          <type>T</type>
+          <declname>gray</declname>
+        </param>
+        <briefdescription>
+<para>Grayscale to RGB color conversion function (includes color normalization). </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="406" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="405" bodyend="411"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gab873008f62a65b63fea0ff868104b43c" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>Vector3d</type>
+        <definition>Vector3d DO::rgb2yuv64f</definition>
+        <argsstring>(const Matrix&lt; T, 3, 1 &gt; &amp;rgb)</argsstring>
+        <name>rgb2yuv64f</name>
+        <param>
+          <type>const Matrix&lt; T, 3, 1 &gt; &amp;</type>
+          <declname>rgb</declname>
+        </param>
+        <briefdescription>
+<para>RGB to YUV color conversion function (includes color normalization). </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="415" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="414" bodyend="420"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga410f9201d95ba7b01b003cf9636e5011" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>Vector3d</type>
+        <definition>Vector3d DO::yuv2rgb64f</definition>
+        <argsstring>(const Matrix&lt; T, 3, 1 &gt; &amp;yuv)</argsstring>
+        <name>yuv2rgb64f</name>
+        <param>
+          <type>const Matrix&lt; T, 3, 1 &gt; &amp;</type>
+          <declname>yuv</declname>
+        </param>
+        <briefdescription>
+<para>YUV to RGB color conversion function (includes color normalization). </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="424" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="423" bodyend="430"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gaaa9282cb999d6cb7301efd2c69b8f921" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>typename U</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::rgb2gray</definition>
+        <argsstring>(T &amp;gray, const Matrix&lt; U, 3, 1 &gt; &amp;rgb)</argsstring>
+        <name>rgb2gray</name>
+        <param>
+          <type>T &amp;</type>
+          <declname>gray</declname>
+        </param>
+        <param>
+          <type>const Matrix&lt; U, 3, 1 &gt; &amp;</type>
+          <declname>rgb</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion function from RGB to grayscale. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="436" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="435" bodyend="436"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gacf7a6109ede1257816c1157b4d0c1fc1" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>typename U</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::gray2rgb</definition>
+        <argsstring>(Matrix&lt; T, 3, 1 &gt; &amp;rgb, const U &amp;gray)</argsstring>
+        <name>gray2rgb</name>
+        <param>
+          <type>Matrix&lt; T, 3, 1 &gt; &amp;</type>
+          <declname>rgb</declname>
+        </param>
+        <param>
+          <type>const U &amp;</type>
+          <declname>gray</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion from grayscale to RGB. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="440" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="439" bodyend="440"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gad19806a92d9d3561e4938aa8076519b3" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>typename U</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::rgb2yuv</definition>
+        <argsstring>(Matrix&lt; T, 3, 1 &gt; &amp;yuv, const Matrix&lt; U, 3, 1 &gt; &amp;rgb)</argsstring>
+        <name>rgb2yuv</name>
+        <param>
+          <type>Matrix&lt; T, 3, 1 &gt; &amp;</type>
+          <declname>yuv</declname>
+        </param>
+        <param>
+          <type>const Matrix&lt; U, 3, 1 &gt; &amp;</type>
+          <declname>rgb</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion from RGB to YUV. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="444" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="443" bodyend="444"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gacd81aedbb5a1d6c2cd01d98da76e0903" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>typename U</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::yuv2rgb</definition>
+        <argsstring>(Matrix&lt; T, 3, 1 &gt; &amp;rgb, const Matrix&lt; U, 3, 1 &gt; &amp;yuv)</argsstring>
+        <name>yuv2rgb</name>
+        <param>
+          <type>Matrix&lt; T, 3, 1 &gt; &amp;</type>
+          <declname>rgb</declname>
+        </param>
+        <param>
+          <type>const Matrix&lt; U, 3, 1 &gt; &amp;</type>
+          <declname>yuv</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion from YUV to RGB. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="448" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="447" bodyend="448"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gaf425c8b1868616a6840c61fe4a3e60c7" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>typename U</type>
+          </param>
+          <param>
+            <type>typename CLayout</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(Color&lt; T, CLayout &gt; &amp;dst, const Color&lt; U, CLayout &gt; &amp;src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>Color&lt; T, CLayout &gt; &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>const Color&lt; U, CLayout &gt; &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion function with same color layout but different channel types. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="455" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="454" bodyend="455"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga940c39e5cdcff0e182ad7f1911e1fdbb" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>typename U</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(Color&lt; T, Rgb &gt; &amp;dst, const Color&lt; U, Yuv &gt; &amp;src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>Color&lt; T, Rgb &gt; &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>const Color&lt; U, Yuv &gt; &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion from RGB to YUV. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="459" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="458" bodyend="459"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gaf208517efbfb2d905bdb2724145383e7" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>typename U</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(Color&lt; T, Yuv &gt; &amp;dst, const Color&lt; U, Rgb &gt; &amp;src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>Color&lt; T, Yuv &gt; &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>const Color&lt; U, Rgb &gt; &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion from YUV to RGB. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="463" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="462" bodyend="463"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga8bec21e5ddb4e45e4a9cc77177feb30c" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(unsigned char &amp;dst, const Color&lt; T, Rgb &gt; &amp;src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>unsigned char &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>const Color&lt; T, Rgb &gt; &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion from RGB to <ref refid="struct_d_o_1_1_gray" kindref="compound">Gray</ref>. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="476" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="476" bodyend="476"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga70fa1352e38ceb42273387b2c0ee7d89" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(Color&lt; T, Rgb &gt; &amp;dst, const unsigned char &amp;src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>Color&lt; T, Rgb &gt; &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>const unsigned char &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion from <ref refid="struct_d_o_1_1_gray" kindref="compound">Gray</ref> to RGB. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="476" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="476" bodyend="476"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga253f94bd10031c80672f611584422eec" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(unsigned short &amp;dst, const Color&lt; T, Rgb &gt; &amp;src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>unsigned short &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>const Color&lt; T, Rgb &gt; &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion from RGB to <ref refid="struct_d_o_1_1_gray" kindref="compound">Gray</ref>. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="477" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="477" bodyend="477"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga1bb67162118039ed9bf615c259585db6" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(Color&lt; T, Rgb &gt; &amp;dst, const unsigned short &amp;src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>Color&lt; T, Rgb &gt; &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>const unsigned short &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion from <ref refid="struct_d_o_1_1_gray" kindref="compound">Gray</ref> to RGB. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="477" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="477" bodyend="477"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga571d3219f4feec8072e9f350247ee441" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(unsigned int &amp;dst, const Color&lt; T, Rgb &gt; &amp;src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>unsigned int &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>const Color&lt; T, Rgb &gt; &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion from RGB to <ref refid="struct_d_o_1_1_gray" kindref="compound">Gray</ref>. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="478" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="478" bodyend="478"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga68961d8e951a087429c39af15d20a340" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(Color&lt; T, Rgb &gt; &amp;dst, const unsigned int &amp;src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>Color&lt; T, Rgb &gt; &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>const unsigned int &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion from <ref refid="struct_d_o_1_1_gray" kindref="compound">Gray</ref> to RGB. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="478" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="478" bodyend="478"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga041e47dda16f0e33819de35b60fdff22" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(char &amp;dst, const Color&lt; T, Rgb &gt; &amp;src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>char &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>const Color&lt; T, Rgb &gt; &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion from RGB to <ref refid="struct_d_o_1_1_gray" kindref="compound">Gray</ref>. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="479" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="479" bodyend="479"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gaef965f101a5d8240f27f144dd810e5fd" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(Color&lt; T, Rgb &gt; &amp;dst, const char &amp;src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>Color&lt; T, Rgb &gt; &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>const char &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion from <ref refid="struct_d_o_1_1_gray" kindref="compound">Gray</ref> to RGB. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="479" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="479" bodyend="479"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga1e5a93ec87d6a83ace06fdf2db0444b1" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(short &amp;dst, const Color&lt; T, Rgb &gt; &amp;src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>short &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>const Color&lt; T, Rgb &gt; &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion from RGB to <ref refid="struct_d_o_1_1_gray" kindref="compound">Gray</ref>. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="480" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="480" bodyend="480"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga03d8f2fa5babb6e94d68322054c63f74" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(Color&lt; T, Rgb &gt; &amp;dst, const short &amp;src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>Color&lt; T, Rgb &gt; &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>const short &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion from <ref refid="struct_d_o_1_1_gray" kindref="compound">Gray</ref> to RGB. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="480" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="480" bodyend="480"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga503b181247cf148267c36db74329c655" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(int &amp;dst, const Color&lt; T, Rgb &gt; &amp;src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>int &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>const Color&lt; T, Rgb &gt; &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion from RGB to <ref refid="struct_d_o_1_1_gray" kindref="compound">Gray</ref>. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="481" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="481" bodyend="481"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gab85cc40825c116643b2bfe8ed890e2b5" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(Color&lt; T, Rgb &gt; &amp;dst, const int &amp;src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>Color&lt; T, Rgb &gt; &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>const int &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion from <ref refid="struct_d_o_1_1_gray" kindref="compound">Gray</ref> to RGB. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="481" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="481" bodyend="481"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga63067bbe79b68f1aca280be0751d9245" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(float &amp;dst, const Color&lt; T, Rgb &gt; &amp;src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>float &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>const Color&lt; T, Rgb &gt; &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion from RGB to <ref refid="struct_d_o_1_1_gray" kindref="compound">Gray</ref>. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="482" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="482" bodyend="482"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga9e8d2d7254720f233eed734913c752e0" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(Color&lt; T, Rgb &gt; &amp;dst, const float &amp;src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>Color&lt; T, Rgb &gt; &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>const float &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion from <ref refid="struct_d_o_1_1_gray" kindref="compound">Gray</ref> to RGB. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="482" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="482" bodyend="482"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gae34a9bddf5dfcceeacb4e19819b7832e" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(double &amp;dst, const Color&lt; T, Rgb &gt; &amp;src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>double &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>const Color&lt; T, Rgb &gt; &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion from RGB to <ref refid="struct_d_o_1_1_gray" kindref="compound">Gray</ref>. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="483" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="483" bodyend="483"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gaf00036ce1c3287aa68280ca2e865ef14" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(Color&lt; T, Rgb &gt; &amp;dst, const double &amp;src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>Color&lt; T, Rgb &gt; &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>const double &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion from <ref refid="struct_d_o_1_1_gray" kindref="compound">Gray</ref> to RGB. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="483" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="483" bodyend="483"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga8aa17d730c8424cb2b906ecd2c88c024" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(float &amp;dst, double src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>float &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between floating point gray colors. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="488" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="487" bodyend="488"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga4ac1dc80a53cbb26dc57f3e1899a687d" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(double &amp;dst, float src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>double &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between floating point gray colors. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="491" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="490" bodyend="491"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga83911520fb12e3f55813ff25458da026" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(float &amp;dst, float src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>float &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para>Just in case, in order to avoid ambiguity for &apos;float&apos;. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="494" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="493" bodyend="494"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gae5fae4dc30516ef8840615deb731cc69" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(double &amp;dst, double src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>double &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para>Just in case, in order to avoid ambiguity for &apos;double&apos;. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="497" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="496" bodyend="497"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gad2b653cadac41b0019f2303b036e0746" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(unsigned short &amp;dst, unsigned char src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>unsigned short &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>unsigned char</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral gray colors. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="509" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="509" bodyend="509"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gaaead31474a1aa5b861f6d88d45f86cd6" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(unsigned char &amp;dst, unsigned short src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>unsigned char &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>unsigned short</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral gray colors. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="509" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="509" bodyend="509"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gaa4f594ca46ffb198f4ad7f3b8b9a582a" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(unsigned int &amp;dst, unsigned char src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>unsigned int &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>unsigned char</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral gray colors. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="510" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="510" bodyend="510"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga60d4088736f67b538b09433315ee6879" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(unsigned char &amp;dst, unsigned int src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>unsigned char &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>unsigned int</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral gray colors. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="510" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="510" bodyend="510"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga5cc07cb428ba7b666f61dbd125f4ee41" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(char &amp;dst, unsigned char src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>char &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>unsigned char</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral gray colors. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="511" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="511" bodyend="511"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga0f17f362473c21034a2b2caa8ad14777" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(unsigned char &amp;dst, char src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>unsigned char &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>char</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral gray colors. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="511" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="511" bodyend="511"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga318cfabad323719b5fbf1064ccc2ada7" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(short &amp;dst, unsigned char src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>short &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>unsigned char</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral gray colors. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="512" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="512" bodyend="512"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga435584c9ded6c1d89df1564de341001a" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(unsigned char &amp;dst, short src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>unsigned char &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>short</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral gray colors. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="512" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="512" bodyend="512"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga073572726aea29da4a3a9c7b72e78d83" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(int &amp;dst, unsigned char src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>int &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>unsigned char</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral gray colors. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="513" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="513" bodyend="513"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga247be8dc9f226f8d279ef3a120034706" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(unsigned char &amp;dst, int src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>unsigned char &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral gray colors. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="513" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="513" bodyend="513"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga9e3b01f6c68fd27748917c7bf7d7e1a3" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(unsigned int &amp;dst, unsigned short src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>unsigned int &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>unsigned short</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral gray colors. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="515" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="515" bodyend="515"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gabd81728ceb038bc5f1008e5def4ef635" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(unsigned short &amp;dst, unsigned int src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>unsigned short &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>unsigned int</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral gray colors. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="515" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="515" bodyend="515"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gabf081cf2eea4ac693fa50d0932ac7051" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(int &amp;dst, unsigned short src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>int &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>unsigned short</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral gray colors. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="516" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="516" bodyend="516"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gaf27092d1a85ecc780eb55c3d11831fd6" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(unsigned short &amp;dst, int src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>unsigned short &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral gray colors. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="516" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="516" bodyend="516"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gac29fddd8e1085f714b72a5732dcb98d2" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(char &amp;dst, unsigned short src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>char &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>unsigned short</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral gray colors. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="517" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="517" bodyend="517"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga0bd51dfb0b71566ae13e30daa8365940" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(unsigned short &amp;dst, char src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>unsigned short &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>char</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral gray colors. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="517" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="517" bodyend="517"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga40d98c46ce039f45429c25a4c072b484" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(short &amp;dst, unsigned short src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>short &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>unsigned short</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral gray colors. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="518" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="518" bodyend="518"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gaea27f4c5800042e64864e07266c84d6c" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(unsigned short &amp;dst, short src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>unsigned short &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>short</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral gray colors. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="518" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="518" bodyend="518"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga53233da6885dd9b1d48aea8d6bec0a7d" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(int &amp;dst, unsigned int src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>int &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>unsigned int</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral gray colors. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="520" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="520" bodyend="520"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga4ddde7fd2444770a6d9a542fe06b755c" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(unsigned int &amp;dst, int src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>unsigned int &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral gray colors. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="520" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="520" bodyend="520"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gac796fe2ec271f3155da926c5c331d6ba" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(char &amp;dst, unsigned int src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>char &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>unsigned int</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral gray colors. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="521" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="521" bodyend="521"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga5ca4961fddc86a7bf67484332737d2e2" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(unsigned int &amp;dst, char src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>unsigned int &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>char</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral gray colors. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="521" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="521" bodyend="521"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gadf59d4726cf87acd39d695b14c8a512b" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(short &amp;dst, unsigned int src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>short &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>unsigned int</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral gray colors. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="522" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="522" bodyend="522"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gab2afe610144e20c8e579842e63d0adf4" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(unsigned int &amp;dst, short src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>unsigned int &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>short</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral gray colors. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="522" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="522" bodyend="522"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga59961090cefe9adc547ee8f618b1b61c" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(short &amp;dst, char src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>short &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>char</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral gray colors. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="524" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="524" bodyend="524"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga1da3888429ad46ebfc33e6a12f9087e5" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(char &amp;dst, short src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>char &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>short</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral gray colors. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="524" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="524" bodyend="524"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga8ea44f59bd2d681cc210c3066027757e" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(int &amp;dst, char src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>int &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>char</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral gray colors. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="525" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="525" bodyend="525"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gaed95c34a03689a19d0fb4b3402a4f663" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(char &amp;dst, int src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>char &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral gray colors. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="525" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="525" bodyend="525"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga74c347b60b2f8f89d49e8edf95bc256c" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(int &amp;dst, short src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>int &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>short</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral gray colors. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="527" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="527" bodyend="527"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga2886b206c1b6cdaeb4ca77afef11c49f" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(short &amp;dst, int src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>short &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral gray colors. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="527" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="527" bodyend="527"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga3a5c21f7293924e21ed3638526ecedb0" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(float &amp;dst, unsigned char src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>float &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>unsigned char</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral and floating point gray. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="549" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="549" bodyend="549"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga6bf1e87672a2d3203608ea0d0fd46e70" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(unsigned char &amp;dst, float src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>unsigned char &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral and floating point gray. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="549" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="549" bodyend="549"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gaedb51c3696783ea65d8304b08902e076" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(float &amp;dst, unsigned short src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>float &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>unsigned short</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral and floating point gray. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="550" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="550" bodyend="550"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga764158c67d7e77bea1f6beed73b80c31" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(unsigned short &amp;dst, float src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>unsigned short &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral and floating point gray. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="550" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="550" bodyend="550"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gaad0d2b1e7ef46e4c68dc439b4b08a211" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(float &amp;dst, unsigned int src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>float &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>unsigned int</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral and floating point gray. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="551" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="551" bodyend="551"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gada7b0c0ade9aafaad3694fa4131e0690" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(unsigned int &amp;dst, float src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>unsigned int &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral and floating point gray. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="551" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="551" bodyend="551"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gae6e303ccb39b66575d4dca9e3cf7f125" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(float &amp;dst, char src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>float &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>char</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral and floating point gray. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="552" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="552" bodyend="552"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga771ff14c748a8b73de71819dadb4d33e" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(char &amp;dst, float src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>char &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral and floating point gray. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="552" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="552" bodyend="552"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gac0e2de0ed7e83cf04856e237f6562255" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(float &amp;dst, short src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>float &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>short</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral and floating point gray. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="553" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="553" bodyend="553"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga9db0741b322244e6857ed7cfd3360620" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(short &amp;dst, float src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>short &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral and floating point gray. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="553" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="553" bodyend="553"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gacf105c01bcb8c0fb4fa40c42c61b34c5" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(float &amp;dst, int src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>float &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral and floating point gray. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="554" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="554" bodyend="554"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga5b08468b51bbfdf4c1126d01ba7b1228" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(int &amp;dst, float src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>int &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral and floating point gray. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="554" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="554" bodyend="554"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gaf6d666473f76765857b994a3ae8b2406" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(double &amp;dst, unsigned char src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>double &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>unsigned char</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral and floating point gray. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="556" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="556" bodyend="556"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga91a16de0fc35aaba6d0a562c26104187" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(unsigned char &amp;dst, double src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>unsigned char &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral and floating point gray. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="556" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="556" bodyend="556"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga3bd8ec87d8a4e237be941c03ff847c50" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(double &amp;dst, unsigned short src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>double &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>unsigned short</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral and floating point gray. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="557" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="557" bodyend="557"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gac72788aa28a3d742d62047738cc2d027" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(unsigned short &amp;dst, double src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>unsigned short &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral and floating point gray. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="557" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="557" bodyend="557"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gafbc9e0994daea4da2c85613ad7fe7a83" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(double &amp;dst, unsigned int src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>double &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>unsigned int</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral and floating point gray. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="558" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="558" bodyend="558"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga1d03aee3cfe8eba1cf036ef068ebbe43" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(unsigned int &amp;dst, double src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>unsigned int &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral and floating point gray. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="558" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="558" bodyend="558"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga13c963adaff605c177e4f4e5827645e6" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(double &amp;dst, char src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>double &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>char</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral and floating point gray. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="559" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="559" bodyend="559"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gafa121f60ad1fdb13a51e65294ec19b33" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(char &amp;dst, double src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>char &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral and floating point gray. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="559" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="559" bodyend="559"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga50a8d828c5c4d4fa0acaf3f9660bdf76" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(double &amp;dst, short src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>double &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>short</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral and floating point gray. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="560" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="560" bodyend="560"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gadf9e5fe5ca24d599c7aad7752e4f89c5" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(short &amp;dst, double src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>short &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral and floating point gray. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="560" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="560" bodyend="560"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gacf7ae24078f1be907709c70a71be6127" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(double &amp;dst, int src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>double &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral and floating point gray. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="561" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="561" bodyend="561"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga86287b233492b328656c5c22f85d0baa" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(int &amp;dst, double src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>int &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion between integral and floating point gray. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="561" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="561" bodyend="561"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gaaab01754e98ff497aac007b99ad0beb2" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(Color&lt; T, Rgb &gt; &amp;dst, const Color&lt; T, Rgba &gt; &amp;src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>Color&lt; T, Rgb &gt; &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>const Color&lt; T, Rgba &gt; &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion from RGBA to RGB. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="567" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="566" bodyend="571"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga563fbc91f3b771db7d5c673f9504ef27" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(Color&lt; T, Rgba &gt; &amp;dst, const Color&lt; T, Rgb &gt; &amp;src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>Color&lt; T, Rgba &gt; &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>const Color&lt; T, Rgb &gt; &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion from RGB to RGBA. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="575" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="574" bodyend="580"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1gad1bbaeff3d1840da0b81db50495174c5" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>typename U</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(Color&lt; T, Rgb &gt; &amp;dst, const Color&lt; U, Rgba &gt; &amp;src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>Color&lt; T, Rgb &gt; &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>const Color&lt; U, Rgba &gt; &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion from RGB to RGBA. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="584" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="583" bodyend="588"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga2bc5f600c5a79f984147685a58f117c0" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>typename U</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(Color&lt; T, Rgba &gt; &amp;dst, const Color&lt; U, Rgb &gt; &amp;src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>Color&lt; T, Rgba &gt; &amp;</type>
+          <declname>dst</declname>
+        </param>
+        <param>
+          <type>const Color&lt; U, Rgb &gt; &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion from RGBA to RGB. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="592" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="591" bodyend="597"/>
+      </memberdef>
+      <memberdef kind="function" id="group___color_conversion_1ga65c035a4dc772c69aabde8d11a3de8f7" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+          <param>
+            <type>typename U</type>
+          </param>
+        </templateparamlist>
+        <type>void</type>
+        <definition>void DO::convertColor</definition>
+        <argsstring>(T &amp;gray, const Color&lt; U, Rgba &gt; &amp;src)</argsstring>
+        <name>convertColor</name>
+        <param>
+          <type>T &amp;</type>
+          <declname>gray</declname>
+        </param>
+        <param>
+          <type>const Color&lt; U, Rgba &gt; &amp;</type>
+          <declname>src</declname>
+        </param>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_color" kindref="compound">Color</ref> conversion from RGBA to unsigned char. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="601" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="600" bodyend="605"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="define">
+      <memberdef kind="define" id="group___color_conversion_1gac0e4b5dd70b28feca22cc770d9862a8b" prot="public" static="no">
+        <name>COLOR_CONVERSION_BETWEEN_GRAY_AND_RGB</name>
+        <param><defname>GrayType</defname></param>
+        <initializer>/*! \brief Color conversion from RGB to Gray. */                  \
+  template &lt;typename T&gt;                                             \
+  inline void convertColor(GrayType&amp; dst, const Color&lt;T, Rgb&gt;&amp; src) \
+  { rgb2gray(dst, src); }                                           \
+  /*! \brief Color conversion from Gray to RGB. */                  \
+  template &lt;typename T&gt;                                             \
+  inline void convertColor(Color&lt;T, Rgb&gt;&amp; dst, const GrayType&amp; src) \
+  { gray2rgb(dst, src); }</initializer>
+        <briefdescription>
+<para>Color conversion between gray and RGB color spaces. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="474" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="466" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="group___color_conversion_1gadcb0f8382525554854f5cb0ffa5ffeee" prot="public" static="no">
+        <name>DEFINE_COLOR_CONVERSION_BETWEEN_INTEGRAL_GRAY_TYPES</name>
+        <param><defname>Gray1</defname></param>
+        <param><defname>Gray2</defname></param>
+        <initializer>/*! \brief Color conversion between integral gray colors. */            \
+  inline void convertColor(Gray2&amp; dst, Gray1 src)                         \
+  { normalizeChannel(dst, getRescaledChannel64f(src)); }                  \
+  /*! \brief Color conversion between integral gray colors. */            \
+  inline void convertColor(Gray1&amp; dst, Gray2 src)                         \
+  { normalizeChannel(dst, getRescaledChannel64f(src)); }</initializer>
+        <briefdescription>
+<para>Color conversion between integral gray colors. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="506" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="500" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="group___color_conversion_1gad00b96d2364bfb1473d0a12dbd5b26c5" prot="public" static="no">
+        <name>DEFINE_COLOR_CONVERSION_BETWEEN_INT_AND_FLOATING_TYPES</name>
+        <param><defname>Float</defname></param>
+        <param><defname>Int</defname></param>
+        <initializer>/*! \brief Color conversion between integral and floating point gray. */\
+  inline void convertColor(Float&amp; dst, Int src)                           \
+  {                                                                       \
+    Float M = static_cast&lt;Float&gt;(ColorTraits&lt;Int&gt;::max());                \
+    Float m = static_cast&lt;Float&gt;(ColorTraits&lt;Int&gt;::min());                \
+    dst = (static_cast&lt;Float&gt;(src)-m) / (M-m);                            \
+  }                                                                       \
+  /*! \brief Color conversion between integral and floating point gray. */\
+  inline void convertColor(Int&amp; dst, Float src)                           \
+  {                                                                       \
+    src = Float(ColorTraits&lt;Int&gt;::min())                                  \
+      + src*( Float(ColorTraits&lt;Int&gt;::max())                              \
+          - Float(ColorTraits&lt;Int&gt;::min()) );                             \
+    dst = static_cast&lt;Int&gt;(src);                                          \
+  }</initializer>
+        <briefdescription>
+<para>Color conversion between integral and floating point gray colors. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" line="547" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Color.hpp" bodystart="532" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+  </compounddef>
+</doxygen>

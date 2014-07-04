@@ -1,0 +1,165 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="class_d_o_1_1_d_a_i_s_y" kind="class" prot="public">
+    <compoundname>DO::DAISY</compoundname>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="class_d_o_1_1_d_a_i_s_y_1ad45b10c2cabe493fa91678ca5a28e181" prot="private" static="no" mutable="no">
+        <type>daisy *</type>
+        <definition>daisy* daisy_computer_</definition>
+        <argsstring></argsstring>
+        <name>daisy_computer_</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDescriptors/Experimental/DAISY.hpp" line="35" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDescriptors/Experimental/DAISY.hpp" bodystart="35" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_d_o_1_1_d_a_i_s_y_1a9fa4ecf91d8b377f7b948bc52eb5157e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>DAISY</definition>
+        <argsstring>()</argsstring>
+        <name>DAISY</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDescriptors/Experimental/DAISY.hpp" line="23"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_d_a_i_s_y_1a230d1900aeccb8b50ce46ce524fe507e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>~DAISY</definition>
+        <argsstring>()</argsstring>
+        <name>~DAISY</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDescriptors/Experimental/DAISY.hpp" line="24"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_d_a_i_s_y_1a43baebbf1b38ed9775e0a83db7fec8ea" prot="public" static="no" const="yes" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void compute</definition>
+        <argsstring>(VectorXf &amp;descriptor, float x, float y, float o) const </argsstring>
+        <name>compute</name>
+        <param>
+          <type>VectorXf &amp;</type>
+          <declname>descriptor</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>y</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>o</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDescriptors/Experimental/DAISY.hpp" line="25"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_d_a_i_s_y_1a7905fb761b033a8d73378e5d1a8c7889" prot="public" static="no" const="yes" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void compute</definition>
+        <argsstring>(DescriptorMatrix&lt; float &gt; &amp;daisies, const std::vector&lt; OERegion &gt; &amp;features, const std::vector&lt; Vector2i &gt; &amp;scaleOctPairs, const ImagePyramid&lt; float &gt; &amp;pyramid) const </argsstring>
+        <name>compute</name>
+        <param>
+          <type><ref refid="class_d_o_1_1_descriptor_matrix" kindref="compound">DescriptorMatrix</ref>&lt; float &gt; &amp;</type>
+          <declname>daisies</declname>
+        </param>
+        <param>
+          <type>const std::vector&lt; <ref refid="class_d_o_1_1_o_e_region" kindref="compound">OERegion</ref> &gt; &amp;</type>
+          <declname>features</declname>
+        </param>
+        <param>
+          <type>const std::vector&lt; Vector2i &gt; &amp;</type>
+          <declname>scaleOctPairs</declname>
+        </param>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_image_pyramid" kindref="compound">ImagePyramid</ref>&lt; float &gt; &amp;</type>
+          <declname>pyramid</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDescriptors/Experimental/DAISY.hpp" line="29"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_d_a_i_s_y_1a65aad436c5b860bf64b8ac1259840798" prot="public" static="no" const="yes" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void initialize</definition>
+        <argsstring>(const Image&lt; float &gt; &amp;image) const </argsstring>
+        <name>initialize</name>
+        <param>
+          <type>const <ref refid="class_d_o_1_1_image" kindref="compound">Image</ref>&lt; float &gt; &amp;</type>
+          <declname>image</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDescriptors/Experimental/DAISY.hpp" line="30"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_d_a_i_s_y_1aaae50e1372b2bf8b0c667a96c46a4d9c" prot="public" static="no" const="yes" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void reset</definition>
+        <argsstring>() const </argsstring>
+        <name>reset</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDescriptors/Experimental/DAISY.hpp" line="31"/>
+      </memberdef>
+      <memberdef kind="function" id="class_d_o_1_1_d_a_i_s_y_1ae5acbe47d704ceb866e3717e2ac9422f" prot="public" static="no" const="yes" explicit="no" inline="no" virt="non-virtual">
+        <type>int</type>
+        <definition>int dimension</definition>
+        <argsstring>() const </argsstring>
+        <name>dimension</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDescriptors/Experimental/DAISY.hpp" line="32"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDescriptors/Experimental/DAISY.hpp" line="21" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/FeatureDescriptors/Experimental/DAISY.hpp" bodystart="21" bodyend="36"/>
+    <listofallmembers>
+      <member refid="class_d_o_1_1_d_a_i_s_y_1a43baebbf1b38ed9775e0a83db7fec8ea" prot="public" virt="non-virtual"><scope>DO::DAISY</scope><name>compute</name></member>
+      <member refid="class_d_o_1_1_d_a_i_s_y_1a7905fb761b033a8d73378e5d1a8c7889" prot="public" virt="non-virtual"><scope>DO::DAISY</scope><name>compute</name></member>
+      <member refid="class_d_o_1_1_d_a_i_s_y_1a9fa4ecf91d8b377f7b948bc52eb5157e" prot="public" virt="non-virtual"><scope>DO::DAISY</scope><name>DAISY</name></member>
+      <member refid="class_d_o_1_1_d_a_i_s_y_1ad45b10c2cabe493fa91678ca5a28e181" prot="private" virt="non-virtual"><scope>DO::DAISY</scope><name>daisy_computer_</name></member>
+      <member refid="class_d_o_1_1_d_a_i_s_y_1ae5acbe47d704ceb866e3717e2ac9422f" prot="public" virt="non-virtual"><scope>DO::DAISY</scope><name>dimension</name></member>
+      <member refid="class_d_o_1_1_d_a_i_s_y_1a65aad436c5b860bf64b8ac1259840798" prot="public" virt="non-virtual"><scope>DO::DAISY</scope><name>initialize</name></member>
+      <member refid="class_d_o_1_1_d_a_i_s_y_1aaae50e1372b2bf8b0c667a96c46a4d9c" prot="public" virt="non-virtual"><scope>DO::DAISY</scope><name>reset</name></member>
+      <member refid="class_d_o_1_1_d_a_i_s_y_1a230d1900aeccb8b50ce46ce524fe507e" prot="public" virt="non-virtual"><scope>DO::DAISY</scope><name>~DAISY</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

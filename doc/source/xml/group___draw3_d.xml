@@ -1,0 +1,73 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="group___draw3_d" kind="group">
+    <compoundname>Draw3D</compoundname>
+    <title>Drawing 3D</title>
+    <innerclass refid="class_d_o_1_1_simple_mesh" prot="public">DO::SimpleMesh</innerclass>
+    <innerclass refid="class_d_o_1_1_mesh_reader" prot="public">DO::MeshReader</innerclass>
+      <sectiondef kind="typedef">
+      <memberdef kind="typedef" id="group___draw3_d_1gab412213b30248bb6aadf015e4dd4c04e" prot="public" static="no">
+        <type>Array&lt; size_t, 3, 1 &gt;</type>
+        <definition>typedef Array&lt;size_t, 3, 1&gt; Face3</definition>
+        <argsstring></argsstring>
+        <name>Face3</name>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_triangle" kindref="compound">Triangle</ref> face consisting of 3 vertex indices. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" line="31" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" bodystart="31" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="group___draw3_d_1ga12d54996ef1f128c70f2d7596b93e610" prot="public" static="no">
+        <type>Array&lt; size_t, 4, 1 &gt;</type>
+        <definition>typedef Array&lt;size_t, 4, 1&gt; Face4</definition>
+        <argsstring></argsstring>
+        <name>Face4</name>
+        <briefdescription>
+<para><ref refid="class_d_o_1_1_quad" kindref="compound">Quad</ref> face consisting of 4 vertex indices. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" line="33" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" bodystart="33" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="group___draw3_d_1ga545ca8d3fe8778a7a0ba8307d7fd9bf0" prot="public" static="no">
+        <type>SimpleMesh&lt; Point3f, Face3 &gt;</type>
+        <definition>typedef SimpleMesh&lt;Point3f, Face3&gt; SimpleTriangleMesh3f</definition>
+        <argsstring></argsstring>
+        <name>SimpleTriangleMesh3f</name>
+        <briefdescription>
+<para>Simple mesh data structure that should be used preferably for OpenGL. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" line="90" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Mesh.hpp" bodystart="90" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="func">
+      <memberdef kind="function" id="group___draw3_d_1ga07235b9568ca2bcaaa75fcd401e6ded3" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>DO_EXPORT void</type>
+        <definition>DO_EXPORT void DO::displayMesh</definition>
+        <argsstring>(const SimpleTriangleMesh3f &amp;mesh)</argsstring>
+        <name>displayMesh</name>
+        <param>
+          <type>const SimpleTriangleMesh3f &amp;</type>
+          <declname>mesh</declname>
+        </param>
+        <briefdescription>
+<para>Display a mesh in the active <ref refid="class_d_o_1_1_open_g_l_window" kindref="compound">OpenGLWindow</ref> window. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Graphics/Draw3D.hpp" line="28"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+  </compounddef>
+</doxygen>

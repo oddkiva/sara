@@ -1,0 +1,66 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="group___utility" kind="group">
+    <compoundname>Utility</compoundname>
+    <title>Utility</title>
+    <innerclass refid="class_d_o_1_1_timer" prot="public">DO::Timer</innerclass>
+      <sectiondef kind="func">
+      <memberdef kind="function" id="group___utility_1gaec63207d40454271e3d0e42802dbb73e" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::printStage</definition>
+        <argsstring>(const std::string &amp;stageName)</argsstring>
+        <name>printStage</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>stageName</declname>
+        </param>
+        <briefdescription>
+<para>Outputting program stage description on console. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/DebugUtilities.hpp" line="26" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/DebugUtilities.hpp" bodystart="25" bodyend="30"/>
+      </memberdef>
+      <memberdef kind="function" id="group___utility_1ga553a39cfa65861e30418250dfba7417c" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void DO::waitReturnKey</definition>
+        <argsstring>()</argsstring>
+        <name>waitReturnKey</name>
+        <briefdescription>
+<para>Wait for return key on the console. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/DebugUtilities.hpp" line="35" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/DebugUtilities.hpp" bodystart="34" bodyend="38"/>
+      </memberdef>
+      <memberdef kind="function" id="group___utility_1ga822e83b6eef265d4189aca150f0821db" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename T</type>
+          </param>
+        </templateparamlist>
+        <type>std::string</type>
+        <definition>std::string DO::toString</definition>
+        <argsstring>(const T &amp;x)</argsstring>
+        <name>toString</name>
+        <param>
+          <type>const T &amp;</type>
+          <declname>x</declname>
+        </param>
+        <briefdescription>
+<para>stringifying function. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Stringify.hpp" line="26" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/Core/Stringify.hpp" bodystart="25" bodyend="30"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+  </compounddef>
+</doxygen>

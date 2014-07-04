@@ -1,0 +1,445 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.3.1">
+  <compounddef id="struct_d_o_1_1_image_painter" kind="struct" prot="public">
+    <compoundname>DO::ImagePainter</compoundname>
+      <sectiondef kind="public-type">
+      <memberdef kind="typedef" id="struct_d_o_1_1_image_painter_1abb0f3446e3f9bbdb9c2f2473715a723d" prot="public" static="no">
+        <type>agg::renderer_base&lt; agg::pixfmt_rgb24 &gt;</type>
+        <definition>typedef agg::renderer_base&lt;agg::pixfmt_rgb24&gt; renderer_base_type</definition>
+        <argsstring></argsstring>
+        <name>renderer_base_type</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImagePainter.hpp" line="58" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImagePainter.hpp" bodystart="58" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="struct_d_o_1_1_image_painter_1a9f7c06ded35f606184e0dd71b6426edc" prot="public" static="no">
+        <type>agg::renderer_scanline_aa_solid&lt; renderer_base_type &gt;</type>
+        <definition>typedef agg::renderer_scanline_aa_solid&lt;renderer_base_type&gt; renderer_scanline_type</definition>
+        <argsstring></argsstring>
+        <name>renderer_scanline_type</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImagePainter.hpp" line="60" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImagePainter.hpp" bodystart="60" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="struct_d_o_1_1_image_painter_1a9d5050eb18429317b844a9c07dc47b3c" prot="public" static="no">
+        <type>agg::rasterizer_scanline_aa</type>
+        <definition>typedef agg::rasterizer_scanline_aa rasterizer_scanline_type</definition>
+        <argsstring></argsstring>
+        <name>rasterizer_scanline_type</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImagePainter.hpp" line="61" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImagePainter.hpp" bodystart="61" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="struct_d_o_1_1_image_painter_1a25d7d5b5fd78514f7f4f595273b4bfe8" prot="public" static="no" mutable="no">
+        <type>agg::rendering_buffer</type>
+        <definition>agg::rendering_buffer framebuffer</definition>
+        <argsstring></argsstring>
+        <name>framebuffer</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImagePainter.hpp" line="63" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImagePainter.hpp" bodystart="63" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_d_o_1_1_image_painter_1af47309f5df96c44749edf366e8fcfd46" prot="public" static="no" mutable="no">
+        <type>agg::pixfmt_rgb24</type>
+        <definition>agg::pixfmt_rgb24 pixel_format</definition>
+        <argsstring></argsstring>
+        <name>pixel_format</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImagePainter.hpp" line="65" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImagePainter.hpp" bodystart="65" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_d_o_1_1_image_painter_1aa885ffbe8bcec680655489aa5fe18272" prot="public" static="no" mutable="no">
+        <type>agg::renderer_base&lt; agg::pixfmt_rgb24 &gt;</type>
+        <definition>agg::renderer_base&lt;agg::pixfmt_rgb24&gt; renderer_base</definition>
+        <argsstring></argsstring>
+        <name>renderer_base</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImagePainter.hpp" line="67" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImagePainter.hpp" bodystart="67" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_d_o_1_1_image_painter_1a62a5098e4ec352e3deb058b046322937" prot="public" static="no" mutable="no">
+        <type>agg::rasterizer_scanline_aa</type>
+        <definition>agg::rasterizer_scanline_aa aa_rasterizer</definition>
+        <argsstring></argsstring>
+        <name>aa_rasterizer</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImagePainter.hpp" line="69" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImagePainter.hpp" bodystart="69" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_d_o_1_1_image_painter_1af6dbfe4f1549ad43da00a999cdba866a" prot="public" static="no" mutable="no">
+        <type>agg::scanline_p8</type>
+        <definition>agg::scanline_p8 scanline</definition>
+        <argsstring></argsstring>
+        <name>scanline</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImagePainter.hpp" line="71" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImagePainter.hpp" bodystart="71" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="struct_d_o_1_1_image_painter_1ac49bbe1c2f5a625672e82bfb78e2da26" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>ImagePainter</definition>
+        <argsstring>(unsigned char *rgb_raw_data, int width, int height)</argsstring>
+        <name>ImagePainter</name>
+        <param>
+          <type>unsigned char *</type>
+          <declname>rgb_raw_data</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>width</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>height</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImagePainter.hpp" line="37" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImagePainter.hpp" bodystart="34" bodyend="37"/>
+      </memberdef>
+      <memberdef kind="function" id="struct_d_o_1_1_image_painter_1a15d5e898b4e413fdd96c6a2c4180c9f3" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void drawLine</definition>
+        <argsstring>(double x1, double y1, double x2, double y2, double penWidth, const Vector3d &amp;rgb, double alpha=1)</argsstring>
+        <name>drawLine</name>
+        <param>
+          <type>double</type>
+          <declname>x1</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>y1</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>x2</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>y2</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>penWidth</declname>
+        </param>
+        <param>
+          <type>const Vector3d &amp;</type>
+          <declname>rgb</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>alpha</declname>
+          <defval>1</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImagePainter.hpp" line="40"/>
+      </memberdef>
+      <memberdef kind="function" id="struct_d_o_1_1_image_painter_1a51e702042659e5ea9ea39e344937bf0e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void drawRectangle</definition>
+        <argsstring>(double x1, double y1, double x2, double y2, double penWidth, const Vector3d &amp;rgb, double alpha)</argsstring>
+        <name>drawRectangle</name>
+        <param>
+          <type>double</type>
+          <declname>x1</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>y1</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>x2</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>y2</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>penWidth</declname>
+        </param>
+        <param>
+          <type>const Vector3d &amp;</type>
+          <declname>rgb</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>alpha</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImagePainter.hpp" line="42"/>
+      </memberdef>
+      <memberdef kind="function" id="struct_d_o_1_1_image_painter_1a7d021103a3710016834c14d0dac1b3ad" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void drawEllipse</definition>
+        <argsstring>(double cx, double cy, double rx, double ry, double penWidth, double oriRadian, const Vector3d &amp;rgb, double alpha=1)</argsstring>
+        <name>drawEllipse</name>
+        <param>
+          <type>double</type>
+          <declname>cx</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>cy</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>rx</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>ry</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>penWidth</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>oriRadian</declname>
+        </param>
+        <param>
+          <type>const Vector3d &amp;</type>
+          <declname>rgb</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>alpha</declname>
+          <defval>1</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImagePainter.hpp" line="45"/>
+      </memberdef>
+      <memberdef kind="function" id="struct_d_o_1_1_image_painter_1a7db92afbbfc900748ec09f156b5ac0c0" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void drawCircle</definition>
+        <argsstring>(double cx, double cy, double r, double penWidth, const Vector3d &amp;rgb, double alpha=1)</argsstring>
+        <name>drawCircle</name>
+        <param>
+          <type>double</type>
+          <declname>cx</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>cy</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>r</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>penWidth</declname>
+        </param>
+        <param>
+          <type>const Vector3d &amp;</type>
+          <declname>rgb</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>alpha</declname>
+          <defval>1</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImagePainter.hpp" line="48" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImagePainter.hpp" bodystart="46" bodyend="48"/>
+      </memberdef>
+      <memberdef kind="function" id="struct_d_o_1_1_image_painter_1af2a438e6f98abf341c97cddf238e9e26" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void fillRectangle</definition>
+        <argsstring>(double x1, double y1, double x2, double y2, const Vector3d &amp;rgb, double alpha=1)</argsstring>
+        <name>fillRectangle</name>
+        <param>
+          <type>double</type>
+          <declname>x1</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>y1</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>x2</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>y2</declname>
+        </param>
+        <param>
+          <type>const Vector3d &amp;</type>
+          <declname>rgb</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>alpha</declname>
+          <defval>1</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImagePainter.hpp" line="50"/>
+      </memberdef>
+      <memberdef kind="function" id="struct_d_o_1_1_image_painter_1ad4a4d4978593fa5c4c1b2d917500eca9" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void fillEllipse</definition>
+        <argsstring>(double cx, double cy, double rx, double ry, double oriRadian, const Vector3d &amp;rgb, double alpha=1)</argsstring>
+        <name>fillEllipse</name>
+        <param>
+          <type>double</type>
+          <declname>cx</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>cy</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>rx</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>ry</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>oriRadian</declname>
+        </param>
+        <param>
+          <type>const Vector3d &amp;</type>
+          <declname>rgb</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>alpha</declname>
+          <defval>1</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImagePainter.hpp" line="52"/>
+      </memberdef>
+      <memberdef kind="function" id="struct_d_o_1_1_image_painter_1ab8b4e66b2f30394445dcd22654cdb208" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void fillCircle</definition>
+        <argsstring>(double cx, double cy, double r, const Vector3d &amp;rgb, double alpha=1)</argsstring>
+        <name>fillCircle</name>
+        <param>
+          <type>double</type>
+          <declname>cx</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>cy</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>r</declname>
+        </param>
+        <param>
+          <type>const Vector3d &amp;</type>
+          <declname>rgb</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>alpha</declname>
+          <defval>1</defval>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImagePainter.hpp" line="55" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImagePainter.hpp" bodystart="53" bodyend="55"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImagePainter.hpp" line="33" bodyfile="C:/Users/David/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImagePainter.hpp" bodystart="32" bodyend="72"/>
+    <listofallmembers>
+      <member refid="struct_d_o_1_1_image_painter_1a62a5098e4ec352e3deb058b046322937" prot="public" virt="non-virtual"><scope>DO::ImagePainter</scope><name>aa_rasterizer</name></member>
+      <member refid="struct_d_o_1_1_image_painter_1a7db92afbbfc900748ec09f156b5ac0c0" prot="public" virt="non-virtual"><scope>DO::ImagePainter</scope><name>drawCircle</name></member>
+      <member refid="struct_d_o_1_1_image_painter_1a7d021103a3710016834c14d0dac1b3ad" prot="public" virt="non-virtual"><scope>DO::ImagePainter</scope><name>drawEllipse</name></member>
+      <member refid="struct_d_o_1_1_image_painter_1a15d5e898b4e413fdd96c6a2c4180c9f3" prot="public" virt="non-virtual"><scope>DO::ImagePainter</scope><name>drawLine</name></member>
+      <member refid="struct_d_o_1_1_image_painter_1a51e702042659e5ea9ea39e344937bf0e" prot="public" virt="non-virtual"><scope>DO::ImagePainter</scope><name>drawRectangle</name></member>
+      <member refid="struct_d_o_1_1_image_painter_1ab8b4e66b2f30394445dcd22654cdb208" prot="public" virt="non-virtual"><scope>DO::ImagePainter</scope><name>fillCircle</name></member>
+      <member refid="struct_d_o_1_1_image_painter_1ad4a4d4978593fa5c4c1b2d917500eca9" prot="public" virt="non-virtual"><scope>DO::ImagePainter</scope><name>fillEllipse</name></member>
+      <member refid="struct_d_o_1_1_image_painter_1af2a438e6f98abf341c97cddf238e9e26" prot="public" virt="non-virtual"><scope>DO::ImagePainter</scope><name>fillRectangle</name></member>
+      <member refid="struct_d_o_1_1_image_painter_1a25d7d5b5fd78514f7f4f595273b4bfe8" prot="public" virt="non-virtual"><scope>DO::ImagePainter</scope><name>framebuffer</name></member>
+      <member refid="struct_d_o_1_1_image_painter_1ac49bbe1c2f5a625672e82bfb78e2da26" prot="public" virt="non-virtual"><scope>DO::ImagePainter</scope><name>ImagePainter</name></member>
+      <member refid="struct_d_o_1_1_image_painter_1af47309f5df96c44749edf366e8fcfd46" prot="public" virt="non-virtual"><scope>DO::ImagePainter</scope><name>pixel_format</name></member>
+      <member refid="struct_d_o_1_1_image_painter_1a9d5050eb18429317b844a9c07dc47b3c" prot="public" virt="non-virtual"><scope>DO::ImagePainter</scope><name>rasterizer_scanline_type</name></member>
+      <member refid="struct_d_o_1_1_image_painter_1aa885ffbe8bcec680655489aa5fe18272" prot="public" virt="non-virtual"><scope>DO::ImagePainter</scope><name>renderer_base</name></member>
+      <member refid="struct_d_o_1_1_image_painter_1abb0f3446e3f9bbdb9c2f2473715a723d" prot="public" virt="non-virtual"><scope>DO::ImagePainter</scope><name>renderer_base_type</name></member>
+      <member refid="struct_d_o_1_1_image_painter_1a9f7c06ded35f606184e0dd71b6426edc" prot="public" virt="non-virtual"><scope>DO::ImagePainter</scope><name>renderer_scanline_type</name></member>
+      <member refid="struct_d_o_1_1_image_painter_1af6dbfe4f1549ad43da00a999cdba866a" prot="public" virt="non-virtual"><scope>DO::ImagePainter</scope><name>scanline</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>
