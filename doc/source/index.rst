@@ -17,10 +17,13 @@ List of modules:
    reference/Core
    reference/Graphics
    reference/FileSystem
+   reference/Geometry
    reference/ImageProcessing
    reference/Features
-   reference/FeatureDetection
+   reference/FeatureDetectors
+   reference/FeatureDescriptors
    reference/FeatureMatching
+   reference/Match
    :maxdepth: 2
 
 

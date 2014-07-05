@@ -12,10 +12,13 @@ DO_LIBRARIES = [
     'Core',
     'Graphics',
     'FileSystem',
+    'Geometry',
     'ImageProcessing',
     'Features',
-    'FeatureDetection',
+    'FeatureDescriptors',
+    'FeatureDetectors',
     'FeatureMatching',
+    'Match'
 ]
 
 logger = logging.getLogger(__name__)
