@@ -1,0 +1,4 @@
+{{ section }}
+
+.. autodoxygenindex::
+   :project: {{ library }}

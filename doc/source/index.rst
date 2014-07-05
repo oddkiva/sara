@@ -14,7 +14,13 @@ Reference Documentation
 List of modules:
 
 .. toctree::
-   reference/core
+   reference/Core
+   reference/Graphics
+   reference/FileSystem
+   reference/ImageProcessing
+   reference/Features
+   reference/FeatureDetection
+   reference/FeatureMatching
    :maxdepth: 2
 
 
