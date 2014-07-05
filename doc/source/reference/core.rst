@@ -1,6 +1,7 @@
 DO::Core
 ========
 
-.. doxygenclass:: DO::Color
-   :project: do-cv
-   :members:
+.. toctree::
+   core/color
+   core/timer
+   :maxdepth: 2

@@ -8,11 +8,11 @@ Welcome to DO-CV's documentation!
 
 This is still experimental.
 
-.. toctree::
-   :maxdepth: 2
-
 Reference Documentation
 -----------------------
+
+List of modules:
+
 .. toctree::
    reference/core
    :maxdepth: 2
