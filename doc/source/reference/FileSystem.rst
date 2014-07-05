@@ -1,5 +1,6 @@
-DO::FileSystem
-==============
+FileSystem
+==========
 
-.. autodoxygenindex::
-   :project: FileSystem
+.. toctree::
+   FileSystem/FileSystem
+   :maxdepth: 2

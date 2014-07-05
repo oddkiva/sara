@@ -1,5 +1,7 @@
-DO::Match
-=========
+Match
+=====
 
-.. autodoxygenindex::
-   :project: Match
+.. toctree::
+   Match/Match
+   Match/PairWiseDrawer
+   :maxdepth: 2

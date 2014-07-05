@@ -1,5 +1,7 @@
-DO::FeatureMatching
-===================
+FeatureMatching
+===============
 
-.. autodoxygenindex::
-   :project: FeatureMatching
+.. toctree::
+   FeatureMatching/KeyProximity
+   FeatureMatching/AnnMatcher
+   :maxdepth: 2
