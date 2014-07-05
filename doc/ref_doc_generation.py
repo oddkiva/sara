@@ -8,7 +8,7 @@ from jinja2 import Environment, FileSystemLoader
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 DO_PROJECT_NAME = 'DO-CV'
 DO_SOURCE_DIR = os.path.join(CURRENT_DIR, '../src/DO')
-DO_LIBRARIES = os.walk(DO_SOURCE_DIR).next()[1]
+DO_LIBRARIES = sorted(os.walk(DO_SOURCE_DIR).next()[1])
 
 # Input directory containing Jinja2-based templates.
 REF_DOC_TEMPLATE_DIR = 'ref_doc_templates'
@@ -153,17 +153,17 @@ def generate_ref_doc(library, module_list):
         output_file.write(rendered_template)
 
 
-def generate_index():
-    """ Generate the documentation index page.
+def generate_ref_doc_toc():
+    """ Generate the table of contents of the reference documentation.
 
     """
 
-    template = env.get_template('index.rst')
+    template = env.get_template('ref_doc_toc.rst')
     context_data = {
         'libraries': DO_LIBRARIES
     }
     rendered_template = template.render(**context_data)
-    with open(os.path.join('source', 'index.rst'), 'w') as output_file:
+    with open(os.path.join('source', 'ref_doc_toc.rst'), 'w') as output_file:
         output_file.write(rendered_template)
 
 
@@ -173,7 +173,7 @@ def generate_all_ref_doc():
     """
 
     # Generate the documentation index.
-    generate_index()
+    generate_ref_doc_toc()
 
     for library in DO_LIBRARIES:
         # Remove the master header file from the list of modules.
