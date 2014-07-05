@@ -6,30 +6,6 @@
 Welcome to DO-CV's documentation!
 =================================
 
-This is still experimental.
-
-Reference Documentation
------------------------
-
-List of modules:
-
-.. toctree::
-   reference/Core
-   reference/Graphics
-   reference/FileSystem
-   reference/Geometry
-   reference/ImageProcessing
-   reference/Features
-   reference/FeatureDetectors
-   reference/FeatureDescriptors
-   reference/FeatureMatching
-   reference/Match
-   :maxdepth: 2
-
-
-Introduction
-============
-
 DO-CV is a basic set of C++ libraries for computer vision.
 
 - DO-CV has a very user-friendly API.
@@ -37,30 +13,14 @@ DO-CV is a basic set of C++ libraries for computer vision.
 - DO-CV is opensource and licensed with the MPL2 license.
   
 Try DO-CV by getting it at: https://github.com/davidok8/doplusplus.
-  
-Currently Available Modules
----------------------------
 
-Currently added features are:
 
-- *Core* module
-- *Graphics* module
-- *Image Processing* module (incomplete)
-- *Features* module (incomplete)
+.. include:: ref_doc_toc.rst
 
-The following modules are being cleaned and will be added in the process:
-
-- *FLANN Wrappers* module
-- *Geometry* module
-- *Feature Matching* module
-
-Please be patient...
-
-A windows installer will be made available soon. Meanwhile you can generate it
-with CPack and NSIS.
 
 Third-Party Libraries
----------------------
+=====================
+
 DO-CV uses the following third-party libraries:
 
 - `Qt 5`_ is a cross-platform application and UI framework with APIs for C++
