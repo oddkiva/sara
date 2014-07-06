@@ -1,4 +1,4 @@
-DO-CV: C++ computer vision library
+DO-CV: C++ Computer Vision Library
 ==================================
 
 DO-CV focuses on:
@@ -17,7 +17,7 @@ evolve as much as my time and energy allow it.
 DO-CV is licensed with the [Mozilla Public License version
 2.0](https://github.com/DO-CV/DO-CV/raw/master/COPYING.MPL2).
 
-Continuous integration status:
+**Continuous integration status:**
 
 [![Build
 Status](https://travis-ci.org/DO-CV/DO-CV.png?branch=master)](https://travis-ci.org/DO-CV/DO-CV)
@@ -47,7 +47,7 @@ with it. After a while, I started writing the library as a hobby to have a more
 easy-to-use library and also to gain a better mastery of the C++ language.
 
 Today openCV has evolved a lot. Despite that, openCV has yet to convince me to
-use it, API-wise. I also want to keep my library alive.
+use it, API-wise. Another reason is that I also want to keep my library alive.
 
 
 Build the libraries
