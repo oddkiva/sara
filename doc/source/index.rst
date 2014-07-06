@@ -15,13 +15,17 @@ DO-CV is a basic set of C++ libraries for computer vision.
 Try DO-CV by getting it at: https://github.com/davidok8/doplusplus.
 
 
-.. include:: ref_doc_toc.rst
+Table of Contents
+-----------------
+.. toctree::
+   :maxdepth: 1
 
-.. include:: third_party_libraries.rst
-
+   ref_doc_toc
+   third_party_libraries
+   
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`

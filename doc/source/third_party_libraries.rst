@@ -18,8 +18,7 @@ DO-CV uses the following third-party libraries:
   
 - Eigen_ is a C++ template library for linear
   algebra: matrices, vectors, numerical solvers, and related algorithms. Eigen
-  is licensed with _`Mozilla Public License v.2 (MPL2)
-  <http://www.mozilla.org/MPL/>`:
+  is licensed with `Mozilla Public License v.2 (MPL2) <http://www.mozilla.org/MPL/>`_:
   
   **Eigen 3.2.0** is already included in the repository and it is therefore
   not needed to install it.

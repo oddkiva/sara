@@ -1,7 +1,9 @@
 Reference Documentation
------------------------
+=======================
 
 .. toctree::
+   :maxdepth: 2
+
    reference/Core
    reference/FeatureDescriptors
    reference/FeatureDetectors
@@ -14,4 +16,3 @@ Reference Documentation
    reference/ImageProcessing
    reference/KDTree
    reference/Match
-   :maxdepth: 1
