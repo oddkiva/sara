@@ -19,6 +19,88 @@ using namespace std;
 using namespace DO;
 
 #ifdef TEST_2D
+void aWindow()
+{
+  cout << "A window... click when done" << endl;
+  // Open a 300x200 window.
+  Window window = openWindow(300, 200, "A window");
+  // A 150x100 filled RED rectangle with top-left corner at (20, 10).
+  fillRect(20, 10, 150, 100, Red8);
+  // Wait for a click.
+  click();
+  // Close window.
+  closeWindow(window);
+}
+
+void twoWindows()
+{
+  cout << "Two windows... click when done" << endl;
+  // A 300x200 window with top-left corner at (10,10).
+  Window w1 = openWindow(300, 200, "A first window", 10, 10);
+  // A 150x100 RED rectangle with top-left corner at (20, 10).
+  drawRect(20, 10, 150, 100, Red8);
+  // A 200x300 window in (320, 10)
+  Window w2 = openWindow(200, 300, "A second window", 330, 10);
+  // Note that openWindow does not make the new window the current one.
+  setActiveWindow(w2);
+  // A blue line from (20, 10) to (150, 270).
+  drawLine(20, 10, 150, 270, Blue8);
+  setActiveWindow(w1);
+  // Another line, in green, in the first window.
+  drawLine(20, 10, 250, 170, Green8);
+  // Wait for a click in any window.
+  anyClick();
+  closeWindow(w1);
+  closeWindow(w2);
+}
+
+void twoWindows2()
+{
+  openWindow(300, 300);
+  getKey();
+
+  Window w1 = getActiveWindow();
+  Window w2 = openWindow(100, 100);
+  setActiveWindow(w2);
+  getKey();
+  closeWindow(w2);
+
+  setActiveWindow(w1);
+  drawCircle(120, 120, 30, Red8);
+  getKey();
+  closeWindow();
+}
+
+void multipleWindows()
+{
+  vector<Window> windows;
+  for (int i = 0; i < 2; ++i)
+    for (int j = 0; j < 3; ++j)
+  {
+    windows.push_back(
+      openWindow(200, 200,
+                 "Window #" + toString(i*3+j),
+                 300*j+300, 300*i+50));
+    setActiveWindow(windows.back());
+    fillRect(0, 0,
+             getWindowWidth(windows.back()),
+             getWindowHeight(windows.back()),
+             Color3ub(rand()%255, rand()%255, rand()%255));
+    drawString(100, 100, toString(i*3+j), Yellow8, 15);
+    cout << "Pressed '" << char(anyGetKey()) << "'" << endl;
+  }
+
+  setActiveWindow(windows.back());
+  anyClick();
+
+  for (size_t i = 0; i < windows.size(); ++i)
+  {
+    anyGetKey();
+    cout << "Closing window #" << i << endl;
+    closeWindow(windows[i]);
+  }
+}
+
 void twoDimBasics()
 {
   cout << "Basic 2D drawings ... click when done" << endl;
