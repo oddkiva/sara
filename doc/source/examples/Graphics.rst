@@ -77,7 +77,7 @@ Tutorial 6: Drawing with Floating-Point Coordinates
    :encoding: latin-1
    :language: cpp
    
-Tutorial 7: Display Images (1/2)
+Tutorial 7: Display Images (1/3)
 --------------------------------
 
 .. literalinclude:: ../../../examples/Graphics/example_7.cpp
@@ -85,9 +85,17 @@ Tutorial 7: Display Images (1/2)
    :language: cpp
 
 
-Tutorial 8: Display Images (2/2)
+Tutorial 8: Display Images (2/3)
 --------------------------------
 
 .. literalinclude:: ../../../examples/Graphics/example_8.cpp
+   :encoding: latin-1
+   :language: cpp
+
+
+Tutorial 9: Display Images (3/3)
+--------------------------------
+
+.. literalinclude:: ../../../examples/Graphics/example_9.cpp
    :encoding: latin-1
    :language: cpp
