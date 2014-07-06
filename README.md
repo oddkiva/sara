@@ -36,8 +36,9 @@ Also have a look at the legacy doxygen-based documentation
 Why yet another library?
 ------------------------
 
-I have written DO-CV during my PhD at the IMAGINE lab in Ecole des Ponts,
-ParisTech.
+I have written DO-CV during my PhD at the [IMAGINE
+lab](http://imagine.enpc.fr/) in [Ecole des Ponts,
+ParisTech](http://www.enpc.fr).
 
 Historically, I started writing DO-CV before openCV came up with a new C++ API.
 I used openCV for the first time during my research internship at Siemens. That
