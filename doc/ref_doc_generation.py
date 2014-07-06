@@ -31,7 +31,7 @@ def list_source_files(library):
 
     """
 
-    # Get the absolute path of the module.
+    # Get the absolute path of the library directory.
     library_dir_path = os.path.join(DO_SOURCE_DIR, library)
 
     source_files = []
@@ -43,7 +43,7 @@ def list_source_files(library):
         if dir_relpath == '.':
             dir_relpath = ''
 
-        # Get the list of header files
+        # Get the list of header files.
         for file in files:
             if file.endswith('.hpp'):
                 file_relpath = os.path.join(dir_relpath, file)
