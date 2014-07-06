@@ -21,6 +21,7 @@ Table of Contents
    :maxdepth: 1
 
    ref_doc_toc
+   examples
    third_party_libraries
    
 
