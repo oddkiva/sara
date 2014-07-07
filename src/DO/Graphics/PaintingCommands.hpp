@@ -481,7 +481,7 @@ namespace DO {
 
   // ======================================================================== //
   // Save screen command on window.
-  //! \bried Save contents on the screen.
+  //! \brief Save contents on the screen.
   DO_EXPORT
   bool saveScreen(Window w, const std::string& fileName);
 
