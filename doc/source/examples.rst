@@ -4,5 +4,5 @@ Examples
 .. toctree::
    :maxdepth: 2
 
-   examples/Core
-   examples/Graphics
+   examples/core
+   examples/graphics
