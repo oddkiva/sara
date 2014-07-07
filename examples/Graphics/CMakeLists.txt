@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 2.6)
 
+if(POLICY CMP0020)
+  cmake_policy(SET CMP0020 NEW)
+endif()
+
 project(DO_Graphics_example)
 
 message(STATUS "  - DO_Graphics_example")
@@ -10,27 +14,37 @@ include(${DO_USE_FILE})
 # TODO: make precompiled support easier. This is not maintainable.
 # This should be along these lines:
 #set(SRCS example.cpp GraphicsExample.hpp)
-#do_add_msvc_precompiled_header("GraphicsExample.hpp" SRCS "GraphicsExample_PCH")
+#do_add_msvc_precompiled_header("GraphicsExample.hpp"
+#                               SRCS "GraphicsExample_PCH")
 
-macro (do_add_executable _project_name _project_sources)
-  add_executable(${_project_name} ${_project_sources})
-  # TODO: if C++11 is available, activate it **GLOBALLY**.
-  # TODO: improve this, this is not very user-friendly!
-  set_target_properties(${_project_name} PROPERTIES
-                        COMPILE_FLAGS "${ENABLE_CXX11} -DSRCDIR=${CMAKE_CURRENT_SOURCE_DIR}"
+macro (do_add_example example)
+  add_executable(${example} ${example}.cpp)
+  set_target_properties(${example} PROPERTIES
+                        COMPILE_FLAGS "-DSRCDIR=${CMAKE_CURRENT_SOURCE_DIR}"
                         COMPILE_DEFINITIONS DO_STATIC)
-  target_link_libraries(${_project_name} ${DO_LIBRARIES})
-  # Group this project as part of the set of sample programs.
-  set_property(TARGET ${_project_name} PROPERTY FOLDER "DO Examples/Graphics")
+  target_link_libraries(${example} ${DO_LIBRARIES})
+  set_property(TARGET ${example} PROPERTY FOLDER "DO Examples/Graphics")
 endmacro()
 
-do_add_executable(DO_Graphics_example "example.cpp;precompiled.hpp")
-
-do_add_executable(example_1 example_1.cpp)
-do_add_executable(example_2 example_2.cpp)
-do_add_executable(example_3 example_3.cpp)
-do_add_executable(example_4 example_4.cpp)
-do_add_executable(example_5 example_5.cpp)
-do_add_executable(example_6 example_6.cpp)
-do_add_executable(example_7 example_7.cpp)
-do_add_executable(example_8 example_8.cpp)
+# Window management examples.
+foreach(i RANGE 1 4)
+  do_add_example(window_management_example_${i})
+endforeach()
+# Drawing examples.
+foreach(i RANGE 1 2)
+  do_add_example(drawing_example_${i})
+endforeach()
+# Image display examples.
+foreach(i RANGE 1 3)
+  do_add_example(image_example_${i})
+endforeach()
+# Keyboard and mouse input examples.
+foreach(i RANGE 1 3)
+  do_add_example(keyboard_mouse_event_example_${i})
+endforeach()
+# Dialog box example.
+do_add_example(dialog_box_example)
+# Mesh viewer example.
+do_add_example(mesh_viewer_example)
+# Interactive viewer example.
+do_add_example(interactive_viewer_example)

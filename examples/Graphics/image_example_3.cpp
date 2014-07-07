@@ -3,7 +3,7 @@
 
 using namespace std;
 using namespace DO;
- 
+
 int main()
 {
   Image<Color3ub> I;

@@ -76,4 +76,6 @@ int main()
 
   click();
   closeWindow(W);
+
+  return 0;
 }
