@@ -1,6 +1,20 @@
 Graphics
 ========
 
+Table of Contents
+-----------------
+
+.. toctree::
+   graphics/window_management
+   graphics/drawing_commands
+   graphics/keyboard_mouse_input
+   graphics/image_display
+   graphics/dialog_box_example
+   graphics/mesh_viewer
+   graphics/interactive_viewer
+   :maxdepth: 2
+
+
 Quick-start
 -----------
 
