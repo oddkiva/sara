@@ -154,10 +154,6 @@ macro (do_append_library _library_name
              "'${_lib_dependencies}'"
     )
     target_link_libraries(DO_${_library_name} ${_lib_dependencies})
-    if (DEFINED ENABLE_CXX11)
-      set_target_properties(DO_${_library_name} PROPERTIES
-                            COMPILE_FLAGS ${ENABLE_CXX11})
-    endif ()
   else ()
     # - Case 2: the project is a header-only library
     #   Specify the source files.
@@ -286,7 +282,7 @@ function (do_test _test_name _srcs _additional_lib_deps)
                         gtest)
   set_target_properties(
     ${_test_name} PROPERTIES
-    COMPILE_FLAGS "${ENABLE_CXX11} -DSRCDIR=${CMAKE_CURRENT_SOURCE_DIR}"
+    COMPILE_FLAGS "-DSRCDIR=${CMAKE_CURRENT_SOURCE_DIR}"
     COMPILE_DEFINITIONS DO_STATIC)
   add_test(${_test_name}
            "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${_test_name}")
