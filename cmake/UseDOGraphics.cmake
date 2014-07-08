@@ -53,7 +53,8 @@ macro (do_load_packages_for_graphics_library)
                       ${Qt5OpenGL_INCLUDE_DIRS})
   include(${DO_Core_USE_FILE})
   add_definitions(${Qt5Widgets_DEFINITIONS})
-  set(CMAKE_CXX_FLAGS "${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
+  set(CMAKE_CXX_FLAGS
+      "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
 endmacro (do_load_packages_for_graphics_library)
 
 macro (do_create_variables_for_graphics_library)
