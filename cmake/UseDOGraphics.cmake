@@ -40,10 +40,13 @@ endmacro (do_list_graphics_source_files)
 macro (do_load_packages_for_graphics_library)
   if (WIN32)
     # Temporary workaround for windows 8
-    list(APPEND CMAKE_PREFIX_PATH "C:/Program Files (x86)/Windows Kits/8.0/Lib/win8/um/x64")
+    list(APPEND CMAKE_PREFIX_PATH
+         "C:/Program Files (x86)/Windows Kits/8.0/Lib/win8/um/x64")
   endif ()
   if (DEFINED ENV{QT5_DIR})
-    #message(STATUS "Found environment variable QT5_DIR = $ENV{QT5_DIR} and appending it to CMAKE_MODULE_PATH")
+    message(STATUS
+            "Found environment variable QT5_DIR = $ENV{QT5_DIR} and appending "
+            "it to CMAKE_MODULE_PATH")
     list(APPEND CMAKE_PREFIX_PATH $ENV{QT5_DIR})
   endif ()
   find_package(Qt5Widgets REQUIRED)
@@ -62,7 +65,7 @@ macro (do_create_variables_for_graphics_library)
   set(DO_Graphics_LIBRARIES DO_Graphics)
   # External libraries which DO_Graphics depends on.
   list(APPEND DO_Graphics_LINK_LIBRARIES ${OPENGL_LIBRARIES})
-  # Note that DO_Graphics must also be linked against Qt but qt5_use_modules() 
+  # Note that DO_Graphics must also be linked against Qt but qt5_use_modules()
   # takes care of this.
 endmacro (do_create_variables_for_graphics_library)
 
@@ -95,7 +98,8 @@ if (DO_USE_FROM_SOURCE)
                           ${Qt5Widgets_LIBRARIES}
                           ${Qt5OpenGL_LIBRARIES}
                           ${OPENGL_LIBRARIES})
-    do_set_specific_target_properties(DO_Graphics DO_STATIC) # See DOMacros.cmake for details
+    do_set_specific_target_properties(DO_Graphics DO_STATIC)
+    # See DOMacros.cmake for details on do_set_specific_target_properties.
     set_property(TARGET DO_Graphics PROPERTY FOLDER "DO Modules")
 
     # Shared library
