@@ -1,5 +1,4 @@
 ImagePainting
 =============
 
-.. autodoxygenfile:: ImagePainting.hpp
-   :project: DO-CV
+.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImagePainting.hpp

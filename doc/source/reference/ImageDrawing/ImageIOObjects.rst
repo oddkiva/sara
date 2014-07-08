@@ -1,5 +1,4 @@
 ImageIOObjects
 ==============
 
-.. autodoxygenfile:: ImageIOObjects.hpp
-   :project: DO-CV
+.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIOObjects.hpp

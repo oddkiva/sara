@@ -1,5 +1,4 @@
 WindowManagement
 ================
 
-.. autodoxygenfile:: WindowManagement.hpp
-   :project: DO-CV
+.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/Graphics/WindowManagement.hpp

@@ -1,5 +1,4 @@
 View
 ====
 
-.. autodoxygenfile:: View.hpp
-   :project: DO-CV
+.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/Features/GraphicsView/View.hpp

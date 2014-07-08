@@ -1,5 +1,4 @@
 KDTree
 ======
 
-.. autodoxygenfile:: KDTree.hpp
-   :project: DO-CV
+.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/KDTree/KDTree.hpp

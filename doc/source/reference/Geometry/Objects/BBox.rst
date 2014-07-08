@@ -1,5 +1,4 @@
 BBox
 ====
 
-.. autodoxygenfile:: BBox.hpp
-   :project: DO-CV
+.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/BBox.hpp

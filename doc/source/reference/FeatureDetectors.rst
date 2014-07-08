@@ -2,6 +2,8 @@ FeatureDetectors
 ================
 
 .. toctree::
+   :maxdepth: 2
+
    FeatureDetectors/RefineExtremum
    FeatureDetectors/DoG
    FeatureDetectors/LoG
@@ -10,4 +12,6 @@ FeatureDetectors
    FeatureDetectors/Debug
    FeatureDetectors/Hessian
    FeatureDetectors/AdaptiveNonMaximalSuppression
-   :maxdepth: 2
+
+
+.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors.hpp

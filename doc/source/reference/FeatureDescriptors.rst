@@ -2,7 +2,11 @@ FeatureDescriptors
 ==================
 
 .. toctree::
+   :maxdepth: 2
+
    FeatureDescriptors/SIFT
    FeatureDescriptors/Orientation
    FeatureDescriptors/Experimental/DAISY
-   :maxdepth: 2
+
+
+.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/FeatureDescriptors.hpp

@@ -2,6 +2,8 @@ ImageProcessing
 ===============
 
 .. toctree::
+   :maxdepth: 2
+
    ImageProcessing/Norm
    ImageProcessing/Warp
    ImageProcessing/DoG
@@ -15,4 +17,6 @@ ImageProcessing
    ImageProcessing/Interpolation
    ImageProcessing/Determinant
    ImageProcessing/Orientation
-   :maxdepth: 2
+
+
+.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/ImageProcessing.hpp

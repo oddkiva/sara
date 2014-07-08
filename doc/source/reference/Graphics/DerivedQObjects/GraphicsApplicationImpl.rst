@@ -1,5 +1,4 @@
 GraphicsApplicationImpl
 =======================
 
-.. autodoxygenfile:: GraphicsApplicationImpl.hpp
-   :project: DO-CV
+.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/GraphicsApplicationImpl.hpp

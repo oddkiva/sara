@@ -2,6 +2,10 @@ Match
 =====
 
 .. toctree::
+   :maxdepth: 2
+
    Match/Match
    Match/PairWiseDrawer
-   :maxdepth: 2
+
+
+.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/Match.hpp

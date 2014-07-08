@@ -1,5 +1,4 @@
 Draw3D
 ======
 
-.. autodoxygenfile:: Draw3D.hpp
-   :project: DO-CV
+.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/Graphics/Draw3D.hpp

@@ -2,6 +2,8 @@ Core
 ====
 
 .. toctree::
+   :maxdepth: 2
+
    Core/StdVectorHelpers
    Core/StaticAssert
    Core/Locator
@@ -16,4 +18,6 @@ Core
    Core/Image
    Core/Subimage
    Core/EigenExtension
-   :maxdepth: 2
+
+
+.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/Core.hpp

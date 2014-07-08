@@ -1,5 +1,4 @@
 ImageDraw
 =========
 
-.. autodoxygenfile:: ImageDraw.hpp
-   :project: DO-CV
+.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/Graphics/ImageDraw.hpp

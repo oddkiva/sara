@@ -2,6 +2,8 @@ Graphics
 ========
 
 .. toctree::
+   :maxdepth: 2
+
    Graphics/ImageDraw
    Graphics/PaintingCommands
    Graphics/ImageIO
@@ -19,4 +21,6 @@ Graphics
    Graphics/DerivedQObjects/PixmapItem
    Graphics/DerivedQObjects/UserThread
    Graphics/DerivedQObjects/GraphicsView
-   :maxdepth: 2
+
+
+.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/Graphics.hpp

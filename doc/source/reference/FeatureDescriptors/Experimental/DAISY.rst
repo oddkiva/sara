@@ -1,5 +1,4 @@
 DAISY
 =====
 
-.. autodoxygenfile:: DAISY.hpp
-   :project: DO-CV
+.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/FeatureDescriptors/Experimental/DAISY.hpp

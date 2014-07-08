@@ -1,5 +1,4 @@
 Tools
 =====
 
-.. autodoxygenfile:: Tools.hpp
-   :project: DO-CV
+.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools.hpp

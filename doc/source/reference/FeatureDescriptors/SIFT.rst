@@ -1,5 +1,4 @@
 SIFT
 ====
 
-.. autodoxygenfile:: SIFT.hpp
-   :project: DO-CV
+.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/FeatureDescriptors/SIFT.hpp

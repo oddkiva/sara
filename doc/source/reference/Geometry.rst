@@ -2,6 +2,8 @@ Geometry
 ========
 
 .. toctree::
+   :maxdepth: 2
+
    Geometry/Algorithms
    Geometry/Graphics
    Geometry/Objects
@@ -30,4 +32,6 @@ Geometry
    Geometry/Objects/Cube
    Geometry/Objects/Cone
    Geometry/Objects/Ellipse
-   :maxdepth: 2
+
+
+.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/Geometry.hpp

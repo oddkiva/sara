@@ -1,5 +1,4 @@
 FileSystem
 ==========
 
-.. autodoxygenfile:: FileSystem.hpp
-   :project: DO-CV
+.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/FileSystem/FileSystem.hpp
