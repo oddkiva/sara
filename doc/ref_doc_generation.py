@@ -1,3 +1,4 @@
+import argparse
 import logging
 import os
 
@@ -7,8 +8,10 @@ from jinja2 import Environment, FileSystemLoader
 # Input source directory and input list of directories.
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 DO_PROJECT_NAME = 'DO-CV'
-DO_SOURCE_DIR = os.path.join(CURRENT_DIR, '../src/DO')
-DO_LIBRARIES = sorted(os.walk(DO_SOURCE_DIR).next()[1])
+DO_SOURCE_DIR = os.path.abspath(os.path.join(CURRENT_DIR, '../src'))
+DO_LIBRARIES = sorted(
+    os.walk(os.path.join(DO_SOURCE_DIR, 'DO')).next()[1]
+)
 
 # Input directory containing Jinja2-based templates.
 REF_DOC_TEMPLATE_DIR = 'ref_doc_templates'
@@ -27,22 +30,22 @@ def list_source_files(library_path):
     Parameters
     ----------
     library_path: str
-        The absolute path of the library directory.
+        The path of the library directory.
 
     """
 
+    logger.info("Listing header files in directory: '{}'".format(library_path))
+
     source_files = []
     for dir, sub_dirs, files in os.walk(library_path):
-        logger.info('Exploring directory: {}'.format(dir))
-
         # Get the list of header files.
         for file in files:
             if file.endswith('.hpp'):
                 file_path = os.path.join(dir, file)
                 source_files.append(file_path)
-                logger.info('Appended file: {}'.format(file_path))
+                logger.info("Appended '{}'".format(file_path))
 
-    return source_files
+    return sorted(source_files)
 
 
 def generate_section(title):
@@ -57,14 +60,17 @@ def generate_module_doc(library, module):
         The name of the library.
 
     module: str
-        The name of the module.
+        The module path.
     """
 
     module_dirpath = os.path.dirname(module)
-    module_relpath = os.path.relpath(module_dirpath, DO_SOURCE_DIR)
+    module_relpath = os.path.relpath(module, DO_SOURCE_DIR)
+    module_dir_relpath = os.path.relpath(module_dirpath,
+                                         os.path.join(DO_SOURCE_DIR, 'DO'))
 
     # Create the directory if necessary.
-    output_dir = os.path.join(OUTPUT_REF_DOC_DIR, module_relpath)
+    output_dir = os.path.join(OUTPUT_REF_DOC_DIR, module_dir_relpath)
+    logger.info("Try to create directory: '{}'".format(output_dir))
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
@@ -73,13 +79,16 @@ def generate_module_doc(library, module):
     title, _ = os.path.splitext(os.path.basename(module))
     context_data = {
         'section': generate_section(title),
-        'module': module
+        'module': module_relpath
     }
+    logger.info("Generate context data {}".format(context_data))
+
     rendered_template = template.render(**context_data)
 
     # Save the rendered documentation to file.
     output_file_path = '{}.rst'.format(os.path.join(output_dir, title))
     with open(output_file_path, 'w') as output_file:
+        logger.info("Save module documentation '{}'".format(output_file_path))
         output_file.write(rendered_template)
 
 
@@ -93,7 +102,7 @@ def generate_library_ref_doc(library, header_filepath_list):
         The library name.
 
     header_filepath_list: list(str)
-        The list of absolute paths of header files in the library.
+        The list of relative paths of header files in the library.
 
     """
 
@@ -101,20 +110,22 @@ def generate_library_ref_doc(library, header_filepath_list):
     template = env.get_template('library.rst')
     # The list of documentation files for each module.
     header_filepath_list = [
-        os.path.relpath(header, DO_SOURCE_DIR)
+        os.path.relpath(header, os.path.join(DO_SOURCE_DIR, 'DO'))
         for header in header_filepath_list
     ]
     doc_files = [
         os.path.splitext(header)[0]
         for header in header_filepath_list
     ]
-    master_header_filepath = os.path.abspath(
-        os.path.join(DO_SOURCE_DIR, library) + '.hpp')
+    master_header_filepath = os.path.join('DO', library) + '.hpp'
+
     context_data = {
         'section': generate_section(library),
         'master_header': master_header_filepath,
         'modules': doc_files
     }
+    logger.info("Generate context data {}".format(context_data))
+
     rendered_template = template.render(**context_data)
 
     # Save the rendered documentation to file.
@@ -123,6 +134,7 @@ def generate_library_ref_doc(library, header_filepath_list):
 
     output_file_path = '{}.rst'.format(os.path.join(OUTPUT_REF_DOC_DIR,
                                                     library))
+    logger.info("Save library doc: '{}'".format(output_file_path))
     with open(output_file_path, 'w') as output_file:
         output_file.write(rendered_template)
 
@@ -136,8 +148,13 @@ def generate_ref_doc_toc():
     context_data = {
         'libraries': DO_LIBRARIES
     }
+    msg = "Generate table of contents from the following libraries: {}"
+    logger.info(msg.format(DO_LIBRARIES))
+
     rendered_template = template.render(**context_data)
-    with open(os.path.join('source', 'ref_doc_toc.rst'), 'w') as output_file:
+    output_filepath = os.path.join('source', 'ref_doc_toc.rst')
+    logger.info("Save ref doc toc: '{}'".format(output_filepath))
+    with open(output_filepath, 'w') as output_file:
         output_file.write(rendered_template)
 
 
@@ -151,7 +168,7 @@ def generate_all_ref_doc():
 
     for library in DO_LIBRARIES:
         # Get the list of modules that constitutes the library.
-        library_path = os.path.abspath(os.path.join(DO_SOURCE_DIR, library))
+        library_path = os.path.join(DO_SOURCE_DIR, 'DO', library)
         library_module_list = list_source_files(library_path)
         # Generate documentation index of the library.
         generate_library_ref_doc(library, library_module_list)
@@ -160,5 +177,26 @@ def generate_all_ref_doc():
             generate_module_doc(library, module)
 
 
+def parse_command_line_args():
+    parser = argparse.ArgumentParser(
+        description='Generate the reference documentation'
+    )
+    parser.add_argument(
+        "-v", "--verbose",
+        action="store_true",
+        default=False,
+        help="enable verbose logging"
+    )
+    return parser.parse_args()
+
 if __name__ == '__main__':
+    args = parse_command_line_args()
+    if args.verbose:
+        logging_level = logging.DEBUG
+    else:
+        logging_level = logging.WARNING
+    logging.basicConfig(filename='ref_doc_generation.log', level=logging_level)
+
     generate_all_ref_doc()
+
+    logging.shutdown()
