@@ -27,7 +27,7 @@ def list_source_files(library_path):
     Parameters
     ----------
     library_path: str
-        The folder absolute path where the library lives.
+        The absolute path of the library directory.
 
     """
 
@@ -93,7 +93,7 @@ def generate_library_ref_doc(library, header_filepath_list):
         The library name.
 
     header_filepath_list: list(str)
-        The list of absolute path of header files in the library.
+        The list of absolute paths of header files in the library.
 
     """
 
