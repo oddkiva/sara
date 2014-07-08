@@ -21,63 +21,28 @@ logger = logging.getLogger(__name__)
 env = Environment(loader=FileSystemLoader(REF_DOC_TEMPLATE_DIR))
 
 
-def list_source_files(library):
+def list_source_files(library_path):
     """ Establish the list of header files that constitute the target library.
 
     Parameters
     ----------
-    library: str
-        The library name.
+    library_path: str
+        The folder absolute path where the library lives.
 
     """
 
-    # Get the absolute path of the library directory.
-    library_dir_path = os.path.join(DO_SOURCE_DIR, library)
-
     source_files = []
-    for dir, sub_dirs, files in os.walk(library_dir_path):
+    for dir, sub_dirs, files in os.walk(library_path):
         logger.info('Exploring directory: {}'.format(dir))
-
-        # Get the relative path of the directory.
-        dir_relpath = os.path.relpath(dir, DO_SOURCE_DIR)
-        if dir_relpath == '.':
-            dir_relpath = ''
 
         # Get the list of header files.
         for file in files:
             if file.endswith('.hpp'):
-                file_relpath = os.path.join(dir_relpath, file)
-                source_files.append(file_relpath)
-                logger.info('Appended file: {}'.format(file_relpath))
+                file_path = os.path.join(dir, file)
+                source_files.append(file_path)
+                logger.info('Appended file: {}'.format(file_path))
 
     return source_files
-
-
-def list_projects_source():
-    """ Populate the list of projects source for breathe.
-
-    `breathe_projects_source` should be of the following form:
-    breathe_projects_source = {
-        'DO-CV': (
-            DO_SOURCE_DIR,
-            ['Core.hpp', 'Core/Timer.hpp', 'Core/Color.hpp', ...
-             'Graphics.hpp', ...]
-        )
-    }
-
-    """
-
-    header_files = []
-    for library in DO_LIBRARIES:
-        master_header_file = '{}.hpp'.format(library)
-        modules = list_source_files(library)
-        header_files.append(master_header_file)
-        header_files.extend(modules)
-
-    breathe_projects_source = {
-        DO_PROJECT_NAME: (DO_SOURCE_DIR, header_files)
-    }
-    return breathe_projects_source
 
 
 def generate_section(title):
@@ -95,10 +60,11 @@ def generate_module_doc(library, module):
         The name of the module.
     """
 
-    module_dir = os.path.dirname(module)
+    module_dirpath = os.path.dirname(module)
+    module_relpath = os.path.relpath(module_dirpath, DO_SOURCE_DIR)
 
     # Create the directory if necessary.
-    output_dir = os.path.join(OUTPUT_REF_DOC_DIR, module_dir)
+    output_dir = os.path.join(OUTPUT_REF_DOC_DIR, module_relpath)
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
@@ -107,8 +73,7 @@ def generate_module_doc(library, module):
     title, _ = os.path.splitext(os.path.basename(module))
     context_data = {
         'section': generate_section(title),
-        'module': os.path.basename(module),
-        'library': DO_PROJECT_NAME
+        'module': module
     }
     rendered_template = template.render(**context_data)
 
@@ -118,7 +83,7 @@ def generate_module_doc(library, module):
         output_file.write(rendered_template)
 
 
-def generate_ref_doc(library, module_list):
+def generate_library_ref_doc(library, header_filepath_list):
     """ This generates automatically rst files for the reference documentation
     of the target library.
 
@@ -127,18 +92,27 @@ def generate_ref_doc(library, module_list):
     library: str
         The library name.
 
-    module_list: list(str)
-        The list of modules that constitutes the library.
+    header_filepath_list: list(str)
+        The list of absolute path of header files in the library.
 
     """
 
     # Render the reference documentation.
     template = env.get_template('library.rst')
     # The list of documentation files for each module.
-    doc_files = [os.path.splitext(module)[0] for module in module_list]
+    header_filepath_list = [
+        os.path.relpath(header, DO_SOURCE_DIR)
+        for header in header_filepath_list
+    ]
+    doc_files = [
+        os.path.splitext(header)[0]
+        for header in header_filepath_list
+    ]
+    master_header_filepath = os.path.abspath(
+        os.path.join(DO_SOURCE_DIR, library) + '.hpp')
     context_data = {
         'section': generate_section(library),
-        'library': library,
+        'master_header': master_header_filepath,
         'modules': doc_files
     }
     rendered_template = template.render(**context_data)
@@ -176,16 +150,15 @@ def generate_all_ref_doc():
     generate_ref_doc_toc()
 
     for library in DO_LIBRARIES:
-        # Remove the master header file from the list of modules.
-        module_list = list_source_files(library)
+        # Get the list of modules that constitutes the library.
+        library_path = os.path.abspath(os.path.join(DO_SOURCE_DIR, library))
+        library_module_list = list_source_files(library_path)
         # Generate documentation index of the library.
-        generate_ref_doc(library, module_list)
+        generate_library_ref_doc(library, library_module_list)
         # Generate documentation file for each module of the library.
-        for module in module_list:
+        for module in library_module_list:
             generate_module_doc(library, module)
 
 
 if __name__ == '__main__':
     generate_all_ref_doc()
-
-    sources = list_projects_source()
