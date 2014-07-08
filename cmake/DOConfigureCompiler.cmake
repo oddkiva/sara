@@ -77,8 +77,13 @@ if (UNIX)
   # Base compilation flags.
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wcast-align")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wnon-virtual-dtor")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wpointer-arith")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wundef")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wunused-variable")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-long-long")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIE")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ENABLE_CXX11}")
   # Additional flags for Release builds.
