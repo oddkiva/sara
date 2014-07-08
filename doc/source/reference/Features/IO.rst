@@ -1,4 +1,4 @@
 IO
 ==
 
-.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/Features/IO.hpp
+.. doxygenfile:: DO/Features/IO.hpp

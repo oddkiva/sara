@@ -1,4 +1,4 @@
 Scaling
 =======
 
-.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Scaling.hpp
+.. doxygenfile:: DO/ImageProcessing/Scaling.hpp

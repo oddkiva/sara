@@ -1,4 +1,4 @@
 RefineExtremum
 ==============
 
-.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/RefineExtremum.hpp
+.. doxygenfile:: DO/FeatureDetectors/RefineExtremum.hpp

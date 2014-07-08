@@ -1,4 +1,4 @@
 Polynomial
 ==========
 
-.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/Polynomial.hpp
+.. doxygenfile:: DO/Geometry/Tools/Polynomial.hpp

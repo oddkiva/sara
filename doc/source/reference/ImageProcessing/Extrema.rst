@@ -1,4 +1,4 @@
 Extrema
 =======
 
-.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Extrema.hpp
+.. doxygenfile:: DO/ImageProcessing/Extrema.hpp

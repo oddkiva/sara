@@ -1,4 +1,4 @@
 PolynomialRoots
 ===============
 
-.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/Geometry/Tools/PolynomialRoots.hpp
+.. doxygenfile:: DO/Geometry/Tools/PolynomialRoots.hpp

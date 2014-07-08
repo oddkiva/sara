@@ -1,4 +1,4 @@
 Hessian
 =======
 
-.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/Hessian.hpp
+.. doxygenfile:: DO/FeatureDetectors/Hessian.hpp

@@ -1,4 +1,4 @@
 MultiArray
 ==========
 
-.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/Core/MultiArray.hpp
+.. doxygenfile:: DO/Core/MultiArray.hpp

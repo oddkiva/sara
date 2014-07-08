@@ -6,12 +6,12 @@ Features
 
    Features/DescriptorMatrix
    Features/Draw
-   Features/Utilities
-   Features/Key
    Features/Feature
-   Features/IO
    Features/GraphicsView/FeatureItem
    Features/GraphicsView/View
+   Features/IO
+   Features/Key
+   Features/Utilities
 
 
-.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/Features.hpp
+.. doxygenfile:: DO/Features.hpp

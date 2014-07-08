@@ -1,4 +1,4 @@
 AffineShapeAdaptation
 =====================
 
-.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/AffineShapeAdaptation.hpp
+.. doxygenfile:: DO/FeatureDetectors/AffineShapeAdaptation.hpp

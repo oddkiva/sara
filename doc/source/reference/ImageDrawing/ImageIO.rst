@@ -1,4 +1,4 @@
 ImageIO
 =======
 
-.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImageIO.hpp
+.. doxygenfile:: DO/ImageDrawing/ImageIO.hpp

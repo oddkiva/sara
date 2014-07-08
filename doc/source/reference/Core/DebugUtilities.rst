@@ -1,4 +1,4 @@
 DebugUtilities
 ==============
 
-.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/Core/DebugUtilities.hpp
+.. doxygenfile:: DO/Core/DebugUtilities.hpp

@@ -1,4 +1,4 @@
 ImageDraw
 =========
 
-.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/Graphics/ImageDraw.hpp
+.. doxygenfile:: DO/Graphics/ImageDraw.hpp

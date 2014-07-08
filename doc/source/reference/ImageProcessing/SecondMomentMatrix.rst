@@ -1,4 +1,4 @@
 SecondMomentMatrix
 ==================
 
-.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/SecondMomentMatrix.hpp
+.. doxygenfile:: DO/ImageProcessing/SecondMomentMatrix.hpp

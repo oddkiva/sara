@@ -1,4 +1,4 @@
 EllipseIntersection
 ===================
 
-.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/Geometry/Algorithms/EllipseIntersection.hpp
+.. doxygenfile:: DO/Geometry/Algorithms/EllipseIntersection.hpp

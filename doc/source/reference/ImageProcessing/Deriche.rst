@@ -1,4 +1,4 @@
 Deriche
 =======
 
-.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Deriche.hpp
+.. doxygenfile:: DO/ImageProcessing/Deriche.hpp

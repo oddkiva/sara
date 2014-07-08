@@ -1,4 +1,4 @@
 StaticAssert
 ============
 
-.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/Core/StaticAssert.hpp
+.. doxygenfile:: DO/Core/StaticAssert.hpp

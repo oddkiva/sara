@@ -1,4 +1,4 @@
 SparseMultiArray
 ================
 
-.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/Core/SparseMultiArray.hpp
+.. doxygenfile:: DO/Core/SparseMultiArray.hpp

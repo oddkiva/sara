@@ -1,4 +1,4 @@
 Interpolation
 =============
 
-.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Interpolation.hpp
+.. doxygenfile:: DO/ImageProcessing/Interpolation.hpp

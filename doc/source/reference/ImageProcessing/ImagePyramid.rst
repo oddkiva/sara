@@ -1,4 +1,4 @@
 ImagePyramid
 ============
 
-.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/ImagePyramid.hpp
+.. doxygenfile:: DO/ImageProcessing/ImagePyramid.hpp

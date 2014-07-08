@@ -4,23 +4,23 @@ Graphics
 .. toctree::
    :maxdepth: 2
 
-   Graphics/ImageDraw
-   Graphics/PaintingCommands
-   Graphics/ImageIO
-   Graphics/WindowManagement
-   Graphics/GraphicsApplication
-   Graphics/Draw3D
-   Graphics/Frame
-   Graphics/Events
-   Graphics/Mesh
-   Graphics/GraphicsUtilities
-   Graphics/GraphicsViewCommands
+   Graphics/DerivedQObjects/GraphicsApplicationImpl
+   Graphics/DerivedQObjects/GraphicsView
    Graphics/DerivedQObjects/OpenGLWindow
    Graphics/DerivedQObjects/PaintingWindow
-   Graphics/DerivedQObjects/GraphicsApplicationImpl
    Graphics/DerivedQObjects/PixmapItem
    Graphics/DerivedQObjects/UserThread
-   Graphics/DerivedQObjects/GraphicsView
+   Graphics/Draw3D
+   Graphics/Events
+   Graphics/Frame
+   Graphics/GraphicsApplication
+   Graphics/GraphicsUtilities
+   Graphics/GraphicsViewCommands
+   Graphics/ImageDraw
+   Graphics/ImageIO
+   Graphics/Mesh
+   Graphics/PaintingCommands
+   Graphics/WindowManagement
 
 
-.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/Graphics.hpp
+.. doxygenfile:: DO/Graphics.hpp

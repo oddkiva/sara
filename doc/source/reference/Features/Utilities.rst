@@ -1,4 +1,4 @@
 Utilities
 =========
 
-.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/Features/Utilities.hpp
+.. doxygenfile:: DO/Features/Utilities.hpp

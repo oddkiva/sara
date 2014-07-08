@@ -8,4 +8,4 @@ Match
    Match/PairWiseDrawer
 
 
-.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/Match.hpp
+.. doxygenfile:: DO/Match.hpp

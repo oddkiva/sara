@@ -1,4 +1,4 @@
 PixmapItem
 ==========
 
-.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PixmapItem.hpp
+.. doxygenfile:: DO/Graphics/DerivedQObjects/PixmapItem.hpp

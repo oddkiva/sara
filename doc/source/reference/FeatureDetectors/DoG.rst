@@ -1,4 +1,4 @@
 DoG
 ===
 
-.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/FeatureDetectors/DoG.hpp
+.. doxygenfile:: DO/FeatureDetectors/DoG.hpp

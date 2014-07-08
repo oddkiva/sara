@@ -1,4 +1,4 @@
 LinearFiltering
 ===============
 
-.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/LinearFiltering.hpp
+.. doxygenfile:: DO/ImageProcessing/LinearFiltering.hpp

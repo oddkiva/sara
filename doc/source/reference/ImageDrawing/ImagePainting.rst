@@ -1,4 +1,4 @@
 ImagePainting
 =============
 
-.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/ImageDrawing/ImagePainting.hpp
+.. doxygenfile:: DO/ImageDrawing/ImagePainting.hpp

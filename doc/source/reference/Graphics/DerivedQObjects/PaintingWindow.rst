@@ -1,4 +1,4 @@
 PaintingWindow
 ==============
 
-.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/Graphics/DerivedQObjects/PaintingWindow.hpp
+.. doxygenfile:: DO/Graphics/DerivedQObjects/PaintingWindow.hpp

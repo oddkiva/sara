@@ -4,20 +4,20 @@ Core
 .. toctree::
    :maxdepth: 2
 
-   Core/StdVectorHelpers
-   Core/StaticAssert
+   Core/Color
+   Core/DebugUtilities
+   Core/EigenExtension
+   Core/Image
    Core/Locator
    Core/Meta
    Core/MultiArray
-   Core/DebugUtilities
-   Core/Timer
-   Core/Stringify
-   Core/Color
-   Core/Tree
    Core/SparseMultiArray
-   Core/Image
+   Core/StaticAssert
+   Core/StdVectorHelpers
+   Core/Stringify
    Core/Subimage
-   Core/EigenExtension
+   Core/Timer
+   Core/Tree
 
 
-.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/Core.hpp
+.. doxygenfile:: DO/Core.hpp

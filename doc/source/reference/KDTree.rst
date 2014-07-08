@@ -7,4 +7,4 @@ KDTree
    KDTree/KDTree
 
 
-.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/KDTree.hpp
+.. doxygenfile:: DO/KDTree.hpp

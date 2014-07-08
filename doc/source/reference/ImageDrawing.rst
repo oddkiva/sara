@@ -5,9 +5,9 @@ ImageDrawing
    :maxdepth: 2
 
    ImageDrawing/ImageIO
-   ImageDrawing/ImagePainting
-   ImageDrawing/ImagePainter
    ImageDrawing/ImageIOObjects
+   ImageDrawing/ImagePainter
+   ImageDrawing/ImagePainting
 
 
-.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/ImageDrawing.hpp
+.. doxygenfile:: DO/ImageDrawing.hpp

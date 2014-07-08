@@ -1,4 +1,4 @@
 Determinant
 ===========
 
-.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/ImageProcessing/Determinant.hpp
+.. doxygenfile:: DO/ImageProcessing/Determinant.hpp

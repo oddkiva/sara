@@ -4,8 +4,8 @@ FeatureMatching
 .. toctree::
    :maxdepth: 2
 
-   FeatureMatching/KeyProximity
    FeatureMatching/AnnMatcher
+   FeatureMatching/KeyProximity
 
 
-.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/FeatureMatching.hpp
+.. doxygenfile:: DO/FeatureMatching.hpp

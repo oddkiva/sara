@@ -1,4 +1,4 @@
 GraphicsViewCommands
 ====================
 
-.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/Graphics/GraphicsViewCommands.hpp
+.. doxygenfile:: DO/Graphics/GraphicsViewCommands.hpp

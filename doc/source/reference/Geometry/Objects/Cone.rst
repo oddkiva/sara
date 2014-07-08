@@ -1,4 +1,4 @@
 Cone
 ====
 
-.. doxygenfile:: /home/david/Desktop/GitHub/DO-CV/src/DO/Geometry/Objects/Cone.hpp
+.. doxygenfile:: DO/Geometry/Objects/Cone.hpp
