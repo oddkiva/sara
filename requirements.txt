@@ -1,1 +1,2 @@
-breathejinja2sphinx_rtd_theme
+breathe
+jinja2
