@@ -1,5 +1,4 @@
 Debug
 =====
 
-.. autodoxygenfile:: Debug.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/FeatureDetectors/Debug.hpp

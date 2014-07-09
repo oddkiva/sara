@@ -1,5 +1,4 @@
 Stringify
 =========
 
-.. autodoxygenfile:: Stringify.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Core/Stringify.hpp

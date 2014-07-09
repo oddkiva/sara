@@ -1,5 +1,4 @@
 Cube
 ====
 
-.. autodoxygenfile:: Cube.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Geometry/Objects/Cube.hpp

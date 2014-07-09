@@ -2,12 +2,16 @@ FeatureDetectors
 ================
 
 .. toctree::
-   FeatureDetectors/RefineExtremum
-   FeatureDetectors/DoG
-   FeatureDetectors/LoG
-   FeatureDetectors/AffineShapeAdaptation
-   FeatureDetectors/Harris
-   FeatureDetectors/Debug
-   FeatureDetectors/Hessian
-   FeatureDetectors/AdaptiveNonMaximalSuppression
    :maxdepth: 2
+
+   FeatureDetectors/AdaptiveNonMaximalSuppression
+   FeatureDetectors/AffineShapeAdaptation
+   FeatureDetectors/Debug
+   FeatureDetectors/DoG
+   FeatureDetectors/Harris
+   FeatureDetectors/Hessian
+   FeatureDetectors/LoG
+   FeatureDetectors/RefineExtremum
+
+
+.. doxygenfile:: DO/FeatureDetectors.hpp

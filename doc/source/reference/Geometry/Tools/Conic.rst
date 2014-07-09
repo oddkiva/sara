@@ -1,5 +1,4 @@
 Conic
 =====
 
-.. autodoxygenfile:: Conic.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Geometry/Tools/Conic.hpp

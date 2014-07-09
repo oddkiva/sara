@@ -1,5 +1,4 @@
 ConvexHull
 ==========
 
-.. autodoxygenfile:: ConvexHull.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Geometry/Algorithms/ConvexHull.hpp

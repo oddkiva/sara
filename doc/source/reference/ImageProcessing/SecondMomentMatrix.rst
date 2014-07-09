@@ -1,5 +1,4 @@
 SecondMomentMatrix
 ==================
 
-.. autodoxygenfile:: SecondMomentMatrix.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/ImageProcessing/SecondMomentMatrix.hpp

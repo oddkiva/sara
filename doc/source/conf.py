@@ -12,16 +12,21 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys
 import os
+import subprocess
+import sys
+
+subprocess.call('cd ..; doxygen rtd_doxyfile', shell=True)
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath('..'))
-from ref_doc_generation import list_projects_source
+this_dir = os.path.dirname(os.path.realpath(__file__))
+xml_dir = os.path.abspath(os.path.join(this_dir, '../xml'))
 
-breathe_projects_source = list_projects_source()
+breathe_projects = {"DO-CV": xml_dir}
+breathe_default_project = "DO-CV"
 
 # -- General configuration ------------------------------------------------
 

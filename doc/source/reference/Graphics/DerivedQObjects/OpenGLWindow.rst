@@ -1,5 +1,4 @@
 OpenGLWindow
 ============
 
-.. autodoxygenfile:: OpenGLWindow.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Graphics/DerivedQObjects/OpenGLWindow.hpp

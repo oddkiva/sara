@@ -1,5 +1,4 @@
 ImagePyramid
 ============
 
-.. autodoxygenfile:: ImagePyramid.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/ImageProcessing/ImagePyramid.hpp

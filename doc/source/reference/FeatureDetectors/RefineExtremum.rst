@@ -1,5 +1,4 @@
 RefineExtremum
 ==============
 
-.. autodoxygenfile:: RefineExtremum.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/FeatureDetectors/RefineExtremum.hpp

@@ -1,5 +1,4 @@
 Projective
 ==========
 
-.. autodoxygenfile:: Projective.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Geometry/Tools/Projective.hpp

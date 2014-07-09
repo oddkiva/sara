@@ -1,5 +1,4 @@
 Timer
 =====
 
-.. autodoxygenfile:: Timer.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Core/Timer.hpp

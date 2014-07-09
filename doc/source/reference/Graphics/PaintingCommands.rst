@@ -1,5 +1,4 @@
 PaintingCommands
 ================
 
-.. autodoxygenfile:: PaintingCommands.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Graphics/PaintingCommands.hpp

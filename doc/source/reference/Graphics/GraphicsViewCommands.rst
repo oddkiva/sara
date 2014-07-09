@@ -1,5 +1,4 @@
 GraphicsViewCommands
 ====================
 
-.. autodoxygenfile:: GraphicsViewCommands.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Graphics/GraphicsViewCommands.hpp

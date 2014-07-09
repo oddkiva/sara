@@ -1,5 +1,4 @@
 DoG
 ===
 
-.. autodoxygenfile:: DoG.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/ImageProcessing/DoG.hpp

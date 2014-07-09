@@ -1,5 +1,4 @@
 Events
 ======
 
-.. autodoxygenfile:: Events.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Graphics/Events.hpp

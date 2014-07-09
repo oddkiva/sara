@@ -1,5 +1,4 @@
 Objects
 =======
 
-.. autodoxygenfile:: Objects.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Geometry/Objects.hpp

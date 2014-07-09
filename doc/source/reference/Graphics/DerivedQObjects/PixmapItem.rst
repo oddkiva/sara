@@ -1,5 +1,4 @@
 PixmapItem
 ==========
 
-.. autodoxygenfile:: PixmapItem.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Graphics/DerivedQObjects/PixmapItem.hpp

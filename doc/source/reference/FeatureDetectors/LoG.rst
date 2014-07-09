@@ -1,5 +1,4 @@
 LoG
 ===
 
-.. autodoxygenfile:: LoG.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/FeatureDetectors/LoG.hpp

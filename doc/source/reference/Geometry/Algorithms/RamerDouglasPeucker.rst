@@ -1,5 +1,4 @@
 RamerDouglasPeucker
 ===================
 
-.. autodoxygenfile:: RamerDouglasPeucker.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Geometry/Algorithms/RamerDouglasPeucker.hpp

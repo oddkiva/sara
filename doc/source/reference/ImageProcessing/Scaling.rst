@@ -1,5 +1,4 @@
 Scaling
 =======
 
-.. autodoxygenfile:: Scaling.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/ImageProcessing/Scaling.hpp

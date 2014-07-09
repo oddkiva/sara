@@ -1,5 +1,4 @@
 MultiArray
 ==========
 
-.. autodoxygenfile:: MultiArray.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Core/MultiArray.hpp

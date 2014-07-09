@@ -1,5 +1,4 @@
 Quad
 ====
 
-.. autodoxygenfile:: Quad.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Geometry/Objects/Quad.hpp

@@ -1,5 +1,4 @@
 Utilities
 =========
 
-.. autodoxygenfile:: Utilities.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Geometry/Tools/Utilities.hpp

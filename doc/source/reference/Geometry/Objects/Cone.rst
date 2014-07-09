@@ -1,5 +1,4 @@
 Cone
 ====
 
-.. autodoxygenfile:: Cone.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Geometry/Objects/Cone.hpp

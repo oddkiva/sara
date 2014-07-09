@@ -1,5 +1,4 @@
 HalfSpace
 =========
 
-.. autodoxygenfile:: HalfSpace.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Geometry/Objects/HalfSpace.hpp

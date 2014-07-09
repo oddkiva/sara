@@ -1,5 +1,4 @@
 Hessian
 =======
 
-.. autodoxygenfile:: Hessian.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/FeatureDetectors/Hessian.hpp

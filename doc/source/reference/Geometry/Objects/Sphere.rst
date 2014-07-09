@@ -1,5 +1,4 @@
 Sphere
 ======
 
-.. autodoxygenfile:: Sphere.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Geometry/Objects/Sphere.hpp

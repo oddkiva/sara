@@ -1,5 +1,4 @@
 Triangle
 ========
 
-.. autodoxygenfile:: Triangle.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Geometry/Objects/Triangle.hpp

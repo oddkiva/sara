@@ -1,5 +1,4 @@
 Meta
 ====
 
-.. autodoxygenfile:: Meta.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Core/Meta.hpp

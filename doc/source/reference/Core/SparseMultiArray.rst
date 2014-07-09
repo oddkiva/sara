@@ -1,5 +1,4 @@
 SparseMultiArray
 ================
 
-.. autodoxygenfile:: SparseMultiArray.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Core/SparseMultiArray.hpp

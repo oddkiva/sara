@@ -1,5 +1,4 @@
 Frame
 =====
 
-.. autodoxygenfile:: Frame.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Graphics/Frame.hpp

@@ -1,5 +1,4 @@
 Polygon
 =======
 
-.. autodoxygenfile:: Polygon.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Geometry/Objects/Polygon.hpp

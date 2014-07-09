@@ -1,5 +1,4 @@
 Metric
 ======
 
-.. autodoxygenfile:: Metric.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Geometry/Tools/Metric.hpp

@@ -1,5 +1,4 @@
 EllipseIntersection
 ===================
 
-.. autodoxygenfile:: EllipseIntersection.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Geometry/Algorithms/EllipseIntersection.hpp

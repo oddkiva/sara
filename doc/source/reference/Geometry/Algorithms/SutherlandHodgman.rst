@@ -1,5 +1,4 @@
 SutherlandHodgman
 =================
 
-.. autodoxygenfile:: SutherlandHodgman.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Geometry/Algorithms/SutherlandHodgman.hpp

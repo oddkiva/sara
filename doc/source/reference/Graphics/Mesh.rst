@@ -1,5 +1,4 @@
 Mesh
 ====
 
-.. autodoxygenfile:: Mesh.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Graphics/Mesh.hpp

@@ -1,5 +1,4 @@
 Draw
 ====
 
-.. autodoxygenfile:: Draw.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Features/Draw.hpp

@@ -1,5 +1,4 @@
 ImageIOObjects
 ==============
 
-.. autodoxygenfile:: ImageIOObjects.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/ImageDrawing/ImageIOObjects.hpp

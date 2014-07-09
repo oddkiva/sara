@@ -1,5 +1,4 @@
 GraphicsView
 ============
 
-.. autodoxygenfile:: GraphicsView.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Graphics/DerivedQObjects/GraphicsView.hpp

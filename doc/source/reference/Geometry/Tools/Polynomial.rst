@@ -1,5 +1,4 @@
 Polynomial
 ==========
 
-.. autodoxygenfile:: Polynomial.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Geometry/Tools/Polynomial.hpp
