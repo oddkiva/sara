@@ -455,9 +455,8 @@ namespace DO {
   {
     QWidget *win = getActiveWindow() ? getActiveWindow() : 0;
     
-    setActiveWindow(
-      openWindow(image.width()*fact, image.height()*fact, windowTitle));
-    display(image, 0, 0, fact);
+    setActiveWindow(openWindow(I.width()*fact, I.height()*fact, windowTitle));
+    display(I, 0, 0, fact);
     getKey();
     closeWindow();
 
