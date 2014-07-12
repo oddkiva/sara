@@ -163,7 +163,7 @@ macro (do_append_library _library_name
     #set_target_properties(DO_${_library_name} PROPERTIES LINKER_LANGUAGE CXX)
     add_custom_target(DO_${_library_name} SOURCES ${_hdr_files})
   endif ()
-  set_property(TARGET DO_${_library_name} PROPERTY FOLDER "DO Modules")
+  set_property(TARGET DO_${_library_name} PROPERTY FOLDER "DO Libraries")
 endmacro (do_append_library)
 
 function (do_set_specific_target_properties _target _additional_compile_flags)
