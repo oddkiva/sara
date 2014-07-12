@@ -17,8 +17,11 @@
 // DO-CV.
 #include <DO/Graphics.hpp>
 #include <DO/Graphics/GraphicsUtilities.hpp>
+#include "event_scheduler.cpp"
 
 using namespace DO;
+
+EventScheduler *global_scheduler;
 
 class TestPaintingCommands: public testing::Test
 {
@@ -209,9 +212,35 @@ TYPED_TEST_P(TestTemplateDisplay, test_display)
   EXPECT_TRUE(display(image, Point2i(0, 10), 1.4));
 }
 
-
-int main(int argc, char **argv)
+int worker_thread(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
+}
+
+int worker_thread_task(int argc, char **argv)
+{
+  testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+}
+
+#undef main
+int main(int argc, char **argv)
+{
+  // Create Qt Application.
+  GraphicsApplication gui_app_(argc, argv);
+
+  // Create an event scheduler on the GUI thread.
+  global_scheduler = new EventScheduler;
+  // Connect the user thread and the event scheduler.
+  QObject::connect(&getUserThread(), SIGNAL(sendEvent(QEvent *, int)),
+                   global_scheduler, SLOT(schedule_event(QEvent*, int)));
+
+  // Run the worker thread
+  gui_app_.registerUserMain(worker_thread_task);
+  int return_code = gui_app_.exec();
+
+  // Cleanup and terminate.
+  delete global_scheduler;
+  return return_code;
 }
