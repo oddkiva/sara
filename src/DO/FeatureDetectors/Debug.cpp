@@ -50,7 +50,7 @@ namespace DO {
   {
     const float magFactor = 3.f;
     float z = D.octaveScalingFactor(o);
-    int r = floor(1.5f*s*magFactor*z + 0.5f);
+    int r = static_cast<int>(floor(1.5f*s*magFactor*z + 0.5f));
     x *= z;
     y *= z;
     drawRect(intRound(x)-r, intRound(y)-r, 2*r+1, 2*r+1, Green8, 3);

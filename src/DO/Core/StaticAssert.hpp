@@ -33,7 +33,7 @@
 
   Usage:
 
-  DO_STATIC_ASSERT(expression, message);
+  DO_STATIC_ASSERT(expression, message); // **don't forget** the semi-colon!
 
   When the static assertion test fails, a compiler error message that somehow
   contains the "STATIC_ASSERTION_FAILED_AT_LINE_xxx_message" is generated.
@@ -48,11 +48,7 @@ struct CAT(__static_assertion_at_line_, __LINE__)                           \
 {                                                                           \
   DO::Meta::StaticAssertion<static_cast<bool>((expression))>                \
     CAT(CAT(CAT(STATIC_ASSERTION_FAILED_AT_LINE_, __LINE__), _), message);  \
-};                                                                          \
-typedef DO::Meta::StaticAssertionTest<                                      \
-  sizeof(CAT(__static_assertion_at_line_, __LINE__))  >                     \
-    CAT(__static_assertion_test_at_line_, __LINE__)
-
+}
 
 // Note that we wrap the non existing type inside a struct to avoid warning
 // messages about unused variables when static assertions are used at function
