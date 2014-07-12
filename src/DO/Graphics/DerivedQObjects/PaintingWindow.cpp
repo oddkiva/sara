@@ -126,7 +126,7 @@ namespace DO {
     update();
   }
 
-  void PaintingWindow::drawCircle(const QPointF& center, qreal r,
+  void PaintingWindow::drawCircle(const QPointF& center, float r,
                                   const QColor& c, int penWidth)
   {
     painter_.setPen(QPen(c, penWidth));
