@@ -53,6 +53,10 @@ int main()
   int py[] = { 301, 350, 330, 280 };
   fillPoly(px, py, 4, Blue8);
   // Draw another polygon.
+  //      { (x1, y1), (x2, y2), (x3, y3) }
+  int t[]={ 300, 300, 300, 400, 400, 350 };
+  fillPoly(t, 3, Green8);
+  // Draw another polygon.
   Point2i P[]={
     Point2i(100, 100),
     Point2i(100, 150),
