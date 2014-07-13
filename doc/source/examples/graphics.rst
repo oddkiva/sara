@@ -15,7 +15,7 @@ Table of Contents
    :maxdepth: 2
 
 
-Quick-start
+Quickstart
 -----------
 
 The example below shows how to:
