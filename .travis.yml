@@ -5,11 +5,6 @@ compiler:
   - gcc
 
 before_install:
-  # Install cpp-coveralls for code coverage.
-  - sudo pip install cpp-coveralls
-  # Remove the rabbitmq source file since it currently times out and 
-  # we don't need it.
-  - sudo rm -f /etc/apt/sources.list.d/rabbitmq-source.list
   # Update apt repositories to get GNU compiler 4.8.
   - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
   # Update apt repositories to get Qt5.
@@ -34,6 +29,3 @@ script:
   - cmake ..
   - make -j 4
   - make verbose_test
-
-after_success:
-  - coveralls --root src
