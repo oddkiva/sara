@@ -25,13 +25,11 @@ The example below shows how to:
 #. wait for a mouse click,
 #. close the window.
 
+.. image:: example_1.png
+
 .. literalinclude:: ../../../examples/Graphics/window_management_example_1.cpp
    :encoding: latin-1
    :language: cpp
-
-You should be able to see something like below:
-
-.. image:: example_1.png
 
 .. note::
 
