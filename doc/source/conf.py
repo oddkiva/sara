@@ -12,16 +12,21 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys
 import os
+import subprocess
+import sys
+
+subprocess.call('cd ..; doxygen rtd_doxyfile', shell=True)
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath('..'))
-from ref_doc_generation import list_projects_source
+this_dir = os.path.dirname(os.path.realpath(__file__))
+xml_dir = os.path.abspath(os.path.join(this_dir, '../xml'))
 
-breathe_projects_source = list_projects_source()
+breathe_projects = {"DO-CV": xml_dir}
+breathe_default_project = "DO-CV"
 
 # -- General configuration ------------------------------------------------
 
@@ -106,7 +111,11 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'default'
+on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+if not on_rtd:  # only import and set the theme if we're building docs locally
+    import sphinx_rtd_theme
+    html_theme = 'sphinx_rtd_theme'
+    html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the

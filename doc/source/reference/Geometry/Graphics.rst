@@ -1,5 +1,4 @@
 Graphics
 ========
 
-.. autodoxygenfile:: Graphics.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Geometry/Graphics.hpp

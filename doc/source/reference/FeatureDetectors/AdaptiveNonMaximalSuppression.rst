@@ -1,5 +1,4 @@
 AdaptiveNonMaximalSuppression
 =============================
 
-.. autodoxygenfile:: AdaptiveNonMaximalSuppression.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/FeatureDetectors/AdaptiveNonMaximalSuppression.hpp

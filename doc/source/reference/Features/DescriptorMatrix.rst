@@ -1,5 +1,4 @@
 DescriptorMatrix
 ================
 
-.. autodoxygenfile:: DescriptorMatrix.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Features/DescriptorMatrix.hpp

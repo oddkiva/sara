@@ -1,5 +1,4 @@
 Determinant
 ===========
 
-.. autodoxygenfile:: Determinant.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/ImageProcessing/Determinant.hpp

@@ -1,5 +1,4 @@
 Match
 =====
 
-.. autodoxygenfile:: Match.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Match/Match.hpp

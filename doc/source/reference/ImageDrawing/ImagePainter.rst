@@ -1,5 +1,4 @@
 ImagePainter
 ============
 
-.. autodoxygenfile:: ImagePainter.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/ImageDrawing/ImagePainter.hpp

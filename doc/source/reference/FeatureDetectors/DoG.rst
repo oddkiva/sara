@@ -1,5 +1,4 @@
 DoG
 ===
 
-.. autodoxygenfile:: DoG.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/FeatureDetectors/DoG.hpp

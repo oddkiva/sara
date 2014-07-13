@@ -1,5 +1,4 @@
 Algorithms
 ==========
 
-.. autodoxygenfile:: Algorithms.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Geometry/Algorithms.hpp

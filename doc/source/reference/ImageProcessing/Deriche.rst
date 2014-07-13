@@ -1,5 +1,4 @@
 Deriche
 =======
 
-.. autodoxygenfile:: Deriche.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/ImageProcessing/Deriche.hpp

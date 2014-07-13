@@ -1,5 +1,4 @@
 KeyProximity
 ============
 
-.. autodoxygenfile:: KeyProximity.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/FeatureMatching/KeyProximity.hpp

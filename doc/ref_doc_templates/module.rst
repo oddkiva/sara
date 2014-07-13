@@ -1,4 +1,3 @@
 {{ section }}
 
-.. autodoxygenfile:: {{ module }}
-   :project: {{ library }}
+.. doxygenfile:: {{ module }}

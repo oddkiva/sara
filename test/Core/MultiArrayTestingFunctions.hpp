@@ -10,7 +10,6 @@ using namespace DO;
 template <int StorageOrder>
 void initVolume(MultiArray<Color4f, 3, StorageOrder>& volume)
 {
-  typedef MultiArray<Color4f, 3, StorageOrder> Volume;
   volume.resize(10, 20, 30);
   for (int i = 0; i < volume.rows(); ++i)
     for (int j = 0; j < volume.cols(); ++j)
@@ -28,7 +27,6 @@ void checkLocatorIncrement(MultiArray<Color4f, 3, StorageOrder>& volume)
 {
   typedef MultiArray<Color4f, 3, StorageOrder> Volume;
   typedef typename Volume::range_iterator RangeIterator;
-  typedef typename RangeIterator::vector_type Coords, Vector;
 
   RangeIterator it(volume.begin_range());
   if (StorageOrder == RowMajor)
@@ -66,7 +64,6 @@ void checkLocatorDecrement(MultiArray<Color4f, 3, StorageOrder>& volume)
 {
   typedef MultiArray<Color4f, 3, StorageOrder> Volume;
   typedef typename Volume::range_iterator RangeIterator;
-  typedef typename RangeIterator::vector_type Coords, Vector;
 
   RangeIterator it(volume.begin_range());
   it.reset_anchor( (volume.sizes().array()-1).matrix() );
@@ -115,7 +112,7 @@ void checkLocatorPotPourri(MultiArray<Color4f, 3, StorageOrder>& volume)
 {
   typedef MultiArray<Color4f, 3, StorageOrder> Volume;
   typedef typename Volume::range_iterator RangeIterator;
-  typedef typename RangeIterator::vector_type Coords, Vector;
+  typedef typename RangeIterator::vector_type Vector;
 
   RangeIterator it(volume.begin_range());
 

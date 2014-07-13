@@ -1,5 +1,4 @@
 DrawPolygon
 ===========
 
-.. autodoxygenfile:: DrawPolygon.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Geometry/Graphics/DrawPolygon.hpp

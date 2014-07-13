@@ -1,5 +1,4 @@
 GraphicsApplication
 ===================
 
-.. autodoxygenfile:: GraphicsApplication.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Graphics/GraphicsApplication.hpp

@@ -1,5 +1,4 @@
 CSG
 ===
 
-.. autodoxygenfile:: CSG.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Geometry/Objects/CSG.hpp

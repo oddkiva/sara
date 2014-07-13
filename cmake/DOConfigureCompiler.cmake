@@ -28,7 +28,12 @@ if (MSVC)
 
 # Clang compiler
 elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  set (ENABLE_CXX11 "-std=c++11 -stdlib=libc++")
+  if (APPLE)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+  else ()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libstdc++")
+  endif ()
+  set (ENABLE_CXX11 "-std=c++11")
 
 # GNU compiler
 elseif (CMAKE_COMPILER_IS_GNUCXX)               
@@ -81,7 +86,7 @@ if (UNIX)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wnon-virtual-dtor")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wpointer-arith")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wundef")
+  #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wundef")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wunused-variable")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-long-long")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIE")

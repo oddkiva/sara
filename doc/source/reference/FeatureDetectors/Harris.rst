@@ -1,5 +1,4 @@
 Harris
 ======
 
-.. autodoxygenfile:: Harris.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/FeatureDetectors/Harris.hpp

@@ -57,7 +57,7 @@ To build the libraries, run:
 
 ```
   sudo apt-get install cmake
-  sudo apt-get install -qq qt5-qmake qtbase5-dev qtdeclarative5-dev libqt5webkit5-dev libsqlite3-dev
+  sudo apt-get install -qq qtbase5-dev
 
   mkdir build
   cd build

@@ -19,9 +19,9 @@
 // Local libraries.
 #include "event_scheduler.hpp"
 
-Q_DECLARE_METATYPE(DO::Event);
-Q_DECLARE_METATYPE(Qt::Key);
-Q_DECLARE_METATYPE(Qt::MouseButtons);
+Q_DECLARE_METATYPE(DO::Event)
+Q_DECLARE_METATYPE(Qt::Key)
+Q_DECLARE_METATYPE(Qt::MouseButtons)
 
 using namespace DO;
 

@@ -1,5 +1,4 @@
 AffineShapeAdaptation
 =====================
 
-.. autodoxygenfile:: AffineShapeAdaptation.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/FeatureDetectors/AffineShapeAdaptation.hpp

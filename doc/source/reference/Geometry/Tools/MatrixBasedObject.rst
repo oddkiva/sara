@@ -1,5 +1,4 @@
 MatrixBasedObject
 =================
 
-.. autodoxygenfile:: MatrixBasedObject.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Geometry/Tools/MatrixBasedObject.hpp

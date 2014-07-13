@@ -1,5 +1,4 @@
 PairWiseDrawer
 ==============
 
-.. autodoxygenfile:: PairWiseDrawer.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Match/PairWiseDrawer.hpp

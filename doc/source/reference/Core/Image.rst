@@ -1,5 +1,4 @@
 Image
 =====
 
-.. autodoxygenfile:: Image.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Core/Image.hpp

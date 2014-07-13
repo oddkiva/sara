@@ -1,5 +1,4 @@
 PaintingWindow
 ==============
 
-.. autodoxygenfile:: PaintingWindow.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Graphics/DerivedQObjects/PaintingWindow.hpp

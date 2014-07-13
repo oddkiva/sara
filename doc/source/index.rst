@@ -6,62 +6,47 @@
 Welcome to DO-CV's documentation!
 =================================
 
-DO-CV is a basic set of C++ libraries for computer vision.
+DO-CV is a small and easy-to-use C++ computer vision library.
 
-- DO-CV has a very user-friendly API.
-- DO-CV is small, easily maintenable and extensible.
-- DO-CV is opensource and licensed with the MPL2 license.
-  
-Try DO-CV by getting it at: https://github.com/davidok8/doplusplus.
+DO-CV focuses on:
+
+1. having an **easy-to-use and simple API**,
+2. having **human-readable and efficient** implementations of computer vision
+   algorithms,
+3. **rigorous testing**.
+
+DO-CV is licensed with the `Mozilla Public License version
+2.0 <https://github.com/DO-CV/DO-CV/raw/master/COPYING.MPL2>`_.
 
 
-.. include:: ref_doc_toc.rst
+Build the libraries
+-------------------
+
+To build the libraries, run::
+
+  sudo apt-get install cmake
+  sudo apt-get install -qq qtbase5-dev
+
+  mkdir build
+  cd build
+  cmake ..
+  make  -j N  # N is the number of CPU cores you want to use.
+
+  make test
 
 
-Third-Party Libraries
-=====================
+Table of Contents
+-----------------
+.. toctree::
+   :maxdepth: 2
 
-DO-CV uses the following third-party libraries:
-
-- `Qt 5`_ is a cross-platform application and UI framework with APIs for C++
-  programming.  `Qt 5`_ is licensed with `GNU Lesser General Public License
-  (LGPL) version 2.1
-  <https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html>`_.
-
-  `Qt 5`_ is not included in the repository and **must be installed**.  If it is
-  installed, then you must set system environment variable **QT5_DIR** which
-  will be appended in **CMAKE_PREFIX_PATH** when generating projects with
-  CMake. In addition, append the binary directory of `Qt 5`_ (e.g.,
-  `%QT5_DIR\%\\bin` in windows environment) to the system `PATH`.
-
-  .. _`Qt 5`: http://qt-project.org/
-  
-- Eigen_ is a C++ template library for linear
-  algebra: matrices, vectors, numerical solvers, and related algorithms. Eigen
-  is licensed with _`Mozilla Public License v.2 (MPL2)
-  <http://www.mozilla.org/MPL/>`:
-  
-  **Eigen 3.2.0** is already included in the repository and it is therefore
-  not needed to install it.
-
-  .. _Eigen: http://eigen.tuxfamily.org/
-
-- `Google Test`_ is Google's framework
-  for writing C++ tests on a variety of platforms (Linux, Mac OS X, Windows,
-  Cygwin, Windows CE, and Symbian). Based on the xUnit architecture. Supports
-  automatic test discovery, a rich set of assertions, user-defined assertions,
-  death tests, fatal and non-fatal failures, value- and type-parameterized
-  tests, various options for running the tests, and XML test report generation.
-  `Google Test`_ is licensed with New BSD License.
-  
-  **Google Test 1.6.0** is already included in the repository and it is
-  therefore not needed to install it.
-
-  .. _`Google Test`: https://code.google.com/p/googletest/
-
+   ref_doc_toc
+   examples
+   third_party_libraries
+   
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`

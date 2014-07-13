@@ -1,5 +1,4 @@
 Subimage
 ========
 
-.. autodoxygenfile:: Subimage.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Core/Subimage.hpp

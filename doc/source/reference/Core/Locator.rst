@@ -1,5 +1,4 @@
 Locator
 =======
 
-.. autodoxygenfile:: Locator.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Core/Locator.hpp

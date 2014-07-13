@@ -1,5 +1,4 @@
 EigenExtension
 ==============
 
-.. autodoxygenfile:: EigenExtension.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Core/EigenExtension.hpp

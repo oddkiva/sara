@@ -2,12 +2,16 @@ Features
 ========
 
 .. toctree::
+   :maxdepth: 2
+
    Features/DescriptorMatrix
    Features/Draw
-   Features/Utilities
-   Features/Key
    Features/Feature
-   Features/IO
    Features/GraphicsView/FeatureItem
    Features/GraphicsView/View
-   :maxdepth: 2
+   Features/IO
+   Features/Key
+   Features/Utilities
+
+
+.. doxygenfile:: DO/Features.hpp

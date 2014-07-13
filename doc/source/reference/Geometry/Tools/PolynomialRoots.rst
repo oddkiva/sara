@@ -1,5 +1,4 @@
 PolynomialRoots
 ===============
 
-.. autodoxygenfile:: PolynomialRoots.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Geometry/Tools/PolynomialRoots.hpp

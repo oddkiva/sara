@@ -1,5 +1,4 @@
 Feature
 =======
 
-.. autodoxygenfile:: Feature.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Features/Feature.hpp

@@ -1,5 +1,4 @@
 Interpolation
 =============
 
-.. autodoxygenfile:: Interpolation.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/ImageProcessing/Interpolation.hpp

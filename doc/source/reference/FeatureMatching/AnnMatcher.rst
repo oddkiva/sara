@@ -1,5 +1,4 @@
 AnnMatcher
 ==========
 
-.. autodoxygenfile:: AnnMatcher.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/FeatureMatching/AnnMatcher.hpp

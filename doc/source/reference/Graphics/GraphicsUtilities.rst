@@ -1,5 +1,4 @@
 GraphicsUtilities
 =================
 
-.. autodoxygenfile:: GraphicsUtilities.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Graphics/GraphicsUtilities.hpp

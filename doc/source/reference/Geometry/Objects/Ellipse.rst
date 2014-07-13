@@ -1,5 +1,4 @@
 Ellipse
 =======
 
-.. autodoxygenfile:: Ellipse.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Geometry/Objects/Ellipse.hpp

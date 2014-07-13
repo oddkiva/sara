@@ -1,7 +1,10 @@
 {{ section }}
 
 .. toctree::
-{%- for module in modules %}
+   :maxdepth: 2
+{% for module in modules %}
    {{ module }}
 {%- endfor %}
-   :maxdepth: 2
+
+
+.. doxygenfile:: {{ master_header }}

@@ -1,5 +1,4 @@
 Cartesian
 =========
 
-.. autodoxygenfile:: Cartesian.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Geometry/Kernel/Cartesian.hpp

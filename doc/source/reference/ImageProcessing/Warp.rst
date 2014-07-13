@@ -1,5 +1,4 @@
 Warp
 ====
 
-.. autodoxygenfile:: Warp.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/ImageProcessing/Warp.hpp

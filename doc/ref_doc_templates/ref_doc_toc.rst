@@ -1,8 +1,8 @@
 Reference Documentation
------------------------
+=======================
 
 .. toctree::
-{%- for library in libraries %}
+   :maxdepth: 2
+{% for library in libraries %}
    reference/{{ library }}
 {%- endfor %}
-   :maxdepth: 1

@@ -1,5 +1,4 @@
 Extrema
 =======
 
-.. autodoxygenfile:: Extrema.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/ImageProcessing/Extrema.hpp

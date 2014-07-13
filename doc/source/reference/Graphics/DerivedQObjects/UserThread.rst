@@ -1,5 +1,4 @@
 UserThread
 ==========
 
-.. autodoxygenfile:: UserThread.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Graphics/DerivedQObjects/UserThread.hpp

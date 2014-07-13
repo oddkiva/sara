@@ -1,5 +1,4 @@
 Differential
 ============
 
-.. autodoxygenfile:: Differential.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/ImageProcessing/Differential.hpp

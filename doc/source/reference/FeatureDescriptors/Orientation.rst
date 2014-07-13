@@ -1,5 +1,4 @@
 Orientation
 ===========
 
-.. autodoxygenfile:: Orientation.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/FeatureDescriptors/Orientation.hpp

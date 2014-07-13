@@ -1,5 +1,4 @@
 LineSegment
 ===========
 
-.. autodoxygenfile:: LineSegment.hpp
-   :project: DO-CV
+.. doxygenfile:: DO/Geometry/Objects/LineSegment.hpp

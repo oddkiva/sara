@@ -2,18 +2,22 @@ Core
 ====
 
 .. toctree::
-   Core/StdVectorHelpers
-   Core/StaticAssert
+   :maxdepth: 2
+
+   Core/Color
+   Core/DebugUtilities
+   Core/EigenExtension
+   Core/Image
    Core/Locator
    Core/Meta
    Core/MultiArray
-   Core/DebugUtilities
-   Core/Timer
-   Core/Stringify
-   Core/Color
-   Core/Tree
    Core/SparseMultiArray
-   Core/Image
+   Core/StaticAssert
+   Core/StdVectorHelpers
+   Core/Stringify
    Core/Subimage
-   Core/EigenExtension
-   :maxdepth: 2
+   Core/Timer
+   Core/Tree
+
+
+.. doxygenfile:: DO/Core.hpp
