@@ -16,7 +16,7 @@ install:
   - if [ "$CXX" = "g++" ]; then sudo apt-get install -qq g++-4.8; fi
   - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
   # Install Qt5
-  - sudo apt-get install -qq qt5-qmake qtbase5-dev qtdeclarative5-dev
+  - sudo apt-get install -qq qt5-qmake qtbase5-dev
 
 before_script:
   # Fake X server
