@@ -6,19 +6,39 @@
 Welcome to DO-CV's documentation!
 =================================
 
-DO-CV is a basic set of C++ libraries for computer vision.
+DO-CV is a small and easy-to-use C++ computer vision library.
 
-- DO-CV has a very user-friendly API.
-- DO-CV is small, easily maintenable and extensible.
-- DO-CV is opensource and licensed with the MPL2 license.
-  
-Try DO-CV by getting it at: https://github.com/davidok8/doplusplus.
+DO-CV focuses on:
+
+1. having an **easy-to-use and simple API**,
+2. having **human-readable and efficient** implementations of computer vision
+   algorithms,
+3. **rigorous testing**.
+
+DO-CV is licensed with the `Mozilla Public License version
+2.0 <https://github.com/DO-CV/DO-CV/raw/master/COPYING.MPL2>`_.
+
+
+Build the libraries
+-------------------
+
+To build the libraries, run::
+
+  sudo apt-get install cmake
+  sudo apt-get install -qq qtbase5-dev
+
+  mkdir build
+  cd build
+  cmake ..
+  make  -j N  # N is the number of CPU cores you want to use.
+
+  make test
 
 
 Table of Contents
 -----------------
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    ref_doc_toc
    examples
