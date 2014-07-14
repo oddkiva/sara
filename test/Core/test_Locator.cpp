@@ -1,11 +1,11 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO++, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
@@ -13,29 +13,41 @@
 #include <DO/Core/Locator.hpp>
 #include <DO/Core/DebugUtilities.hpp>
 #include "MultiArrayTestingFunctions.hpp"
+#include <algorithm>
 
 using namespace DO;
 using namespace std;
 
-template <int StorageOrder>
-void testOffsetComputation()
+class TestOffset: public testing::Test
 {
-  // Create coords and dims.
-  const int coords[] = { 2, 3, 4 };
-  const int dims[] = { 10, 20, 30 };
-  // Check offset computations.
-  if (StorageOrder == RowMajor)
+protected:
+  int coords[3];
+  int dims[3];
+
+  TestOffset()
   {
-    EXPECT_EQ((Offset<1, StorageOrder>::eval(coords, dims)), 2);
-    EXPECT_EQ((Offset<2, StorageOrder>::eval(coords, dims)), 2*20+3);
-    EXPECT_EQ((Offset<3, StorageOrder>::eval(coords, dims)), 2*20*30+3*30+4);
+    // Create coords and dims.
+    const int coords_[] = { 2, 3, 4 };
+    const int dims_[] = { 10, 20, 30 };
+    std::copy(coords_, coords_+3, coords);
+    std::copy(dims_, dims_+3, dims);
   }
-  else
-  {
-    EXPECT_EQ((Offset<1, StorageOrder>::eval(coords, dims)), 2);
-    EXPECT_EQ((Offset<2, StorageOrder>::eval(coords, dims)), 3*10+2);
-    EXPECT_EQ((Offset<3, StorageOrder>::eval(coords, dims)), 4*10*20+3*10+2);
-  }
+
+  virtual ~TestOffset() {}
+};
+
+TEST_F(TestOffset, test_row_major_index_computation)
+{
+  EXPECT_EQ((Offset<1, RowMajor>::eval(coords, dims)), 2);
+  EXPECT_EQ((Offset<2, RowMajor>::eval(coords, dims)), 2*20+3);
+  EXPECT_EQ((Offset<3, RowMajor>::eval(coords, dims)), 2*20*30+3*30+4);
+}
+
+TEST_F(TestOffset, test_col_major_index_computation)
+{
+  EXPECT_EQ((Offset<1, ColMajor>::eval(coords, dims)), 2);
+  EXPECT_EQ((Offset<2, ColMajor>::eval(coords, dims)), 3*10+2);
+  EXPECT_EQ((Offset<3, ColMajor>::eval(coords, dims)), 4*10*20+3*10+2);
 }
 
 template <int StorageOrder>
@@ -135,10 +147,8 @@ void testSubrangeIterator()
 TEST(DO_Core_Test, MultiArrayIndexComputation)
 {
   // Row-major based tests.
-  testOffsetComputation<RowMajor>();  
   testStrideComputation<RowMajor>();
   // Column-major based tests.
-  testOffsetComputation<ColMajor>();
   testStrideComputation<ColMajor>();
 }
 
@@ -150,8 +160,8 @@ TEST(DO_Core_Test, NDIterator)
   testSubrangeIterator<ColMajor>();
 }
 
-int main(int argc, char** argv) 
+int main(int argc, char** argv)
 {
-  testing::InitGoogleTest(&argc, argv); 
+  testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
