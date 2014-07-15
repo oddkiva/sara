@@ -51,29 +51,38 @@ TEST_F(TestOffsetComputation, test_col_major_index_computation)
   EXPECT_EQ((Offset<3, ColMajor>::eval(coords, dims)), 4*10*20+3*10+2);
 }
 
-template <int StorageOrder>
-void testStrideComputation()
+class TestStrideComputation: public testing::Test
 {
-  // Create dims.
-  const int dims[] = { 10, 20, 30 };
-  // Check stride computations.
+protected:
+  int dims[3];
+
+  TestStrideComputation()
+  {
+    const int dims_[] = { 10, 20, 30 };
+    std::copy(dims_, dims_+3, dims);
+  }
+
+  virtual ~TestStrideComputation()
+  {
+  }
+};
+
+TEST_F(TestStrideComputation, test_row_major_stride_computation)
+{
   int strides[3];
-  if (StorageOrder == ColMajor)
-  {
-    // Column major strides
-    Offset<3, StorageOrder>::eval_strides(strides, dims);
-    EXPECT_EQ(strides[0], 1);
-    EXPECT_EQ(strides[1], 10);
-    EXPECT_EQ(strides[2], 200);
-  }
-  else
-  {
-    // Row major strides
-    Offset<3, StorageOrder>::eval_strides(strides, dims);
-    EXPECT_EQ(strides[0], 600);
-    EXPECT_EQ(strides[1], 30);
-    EXPECT_EQ(strides[2], 1);
-  }
+  Offset<3, RowMajor>::eval_strides(strides, dims);
+  EXPECT_EQ(strides[0], 600);
+  EXPECT_EQ(strides[1], 30);
+  EXPECT_EQ(strides[2], 1);
+}
+
+TEST_F(TestStrideComputation, test_col_major_stride_computation)
+{
+  int strides[3];
+  Offset<3, ColMajor>::eval_strides(strides, dims);
+  EXPECT_EQ(strides[0], 1);
+  EXPECT_EQ(strides[1], 10);
+  EXPECT_EQ(strides[2], 200);
 }
 
 template <int StorageOrder>
@@ -145,13 +154,6 @@ void testSubrangeIterator()
   }
 };
 
-TEST(DO_Core_Test, MultiArrayIndexComputation)
-{
-  // Row-major based tests.
-  testStrideComputation<RowMajor>();
-  // Column-major based tests.
-  testStrideComputation<ColMajor>();
-}
 
 TEST(DO_Core_Test, NDIterator)
 {
