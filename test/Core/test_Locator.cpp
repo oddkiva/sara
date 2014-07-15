@@ -18,32 +18,33 @@
 using namespace DO;
 using namespace std;
 
-class TestOffset: public testing::Test
+class TestOffsetComputation: public testing::Test
 {
 protected:
   int coords[3];
   int dims[3];
 
-  TestOffset()
+  TestOffsetComputation()
   {
-    // Create coords and dims.
     const int coords_[] = { 2, 3, 4 };
     const int dims_[] = { 10, 20, 30 };
     std::copy(coords_, coords_+3, coords);
     std::copy(dims_, dims_+3, dims);
   }
 
-  virtual ~TestOffset() {}
+  virtual ~TestOffsetComputation()
+  {
+  }
 };
 
-TEST_F(TestOffset, test_row_major_index_computation)
+TEST_F(TestOffsetComputation, test_row_major_index_computation)
 {
   EXPECT_EQ((Offset<1, RowMajor>::eval(coords, dims)), 2);
   EXPECT_EQ((Offset<2, RowMajor>::eval(coords, dims)), 2*20+3);
   EXPECT_EQ((Offset<3, RowMajor>::eval(coords, dims)), 2*20*30+3*30+4);
 }
 
-TEST_F(TestOffset, test_col_major_index_computation)
+TEST_F(TestOffsetComputation, test_col_major_index_computation)
 {
   EXPECT_EQ((Offset<1, ColMajor>::eval(coords, dims)), 2);
   EXPECT_EQ((Offset<2, ColMajor>::eval(coords, dims)), 3*10+2);
