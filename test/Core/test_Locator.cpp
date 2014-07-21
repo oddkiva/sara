@@ -11,155 +11,139 @@
 
 #include <gtest/gtest.h>
 #include <DO/Core/Locator.hpp>
-#include <DO/Core/DebugUtilities.hpp>
-#include "MultiArrayTestingFunctions.hpp"
-#include <algorithm>
+#include <vld.h>
+#include "AssertHelpers.hpp"
 
 using namespace DO;
 using namespace std;
 
-class TestOffsetComputation: public testing::Test
+
+TEST(TestStrideComputer, test_row_major_strides_computation_2d)
 {
-protected:
-  int coords[3];
-  int dims[3];
+  Vector2i sizes(10, 20);
+  Vector2i strides(20, 1);
 
-  TestOffsetComputation()
-  {
-    const int coords_[] = { 2, 3, 4 };
-    const int dims_[] = { 10, 20, 30 };
-    std::copy(coords_, coords_+3, coords);
-    std::copy(dims_, dims_+3, dims);
-  }
-
-  virtual ~TestOffsetComputation()
-  {
-  }
-};
-
-TEST_F(TestOffsetComputation, test_row_major_index_computation)
-{
-  EXPECT_EQ((Offset<1, RowMajor>::eval(coords, dims)), 2);
-  EXPECT_EQ((Offset<2, RowMajor>::eval(coords, dims)), 2*20+3);
-  EXPECT_EQ((Offset<3, RowMajor>::eval(coords, dims)), 2*20*30+3*30+4);
+  EXPECT_EQ(StrideComputer<RowMajor>::eval(sizes), strides);
 }
 
-TEST_F(TestOffsetComputation, test_col_major_index_computation)
+TEST(TestStrideComputer, test_col_major_strides_computation_2d)
 {
-  EXPECT_EQ((Offset<1, ColMajor>::eval(coords, dims)), 2);
-  EXPECT_EQ((Offset<2, ColMajor>::eval(coords, dims)), 3*10+2);
-  EXPECT_EQ((Offset<3, ColMajor>::eval(coords, dims)), 4*10*20+3*10+2);
+  Vector2i sizes(10, 20);
+  Vector2i strides(1, 10);
+
+  EXPECT_EQ(StrideComputer<ColMajor>::eval(sizes), strides);
 }
 
-template <int StorageOrder>
-void testStrideComputation()
+TEST(TestStrideComputer, test_row_major_stride_computation_3d)
 {
-  // Create dims.
-  const int dims[] = { 10, 20, 30 };
-  // Check stride computations.
-  int strides[3];
-  if (StorageOrder == ColMajor)
-  {
-    // Column major strides
-    Offset<3, StorageOrder>::eval_strides(strides, dims);
-    EXPECT_EQ(strides[0], 1);
-    EXPECT_EQ(strides[1], 10);
-    EXPECT_EQ(strides[2], 200);
-  }
-  else
-  {
-    // Row major strides
-    Offset<3, StorageOrder>::eval_strides(strides, dims);
-    EXPECT_EQ(strides[0], 600);
-    EXPECT_EQ(strides[1], 30);
-    EXPECT_EQ(strides[2], 1);
-  }
+  Vector3i sizes(10, 20, 30);
+  Vector3i strides(20*30, 30, 1);
+
+  EXPECT_EQ(StrideComputer<RowMajor>::eval(sizes), strides);
 }
 
-template <int StorageOrder>
-void testRangeIterator()
+TEST(TestStrideComputer, test_col_major_stride_computation_3d)
 {
-  typedef MultiArray<Color4f, 3, StorageOrder> Volume;
-  Volume volume;
+  Vector3i sizes(10, 20, 30);
+  Vector3i strides(1, 10, 10*20);
 
-  // Check MultiArray class.
-  initVolume(volume);
-
-  // Check Locator class.
-  checkLocatorIncrement(volume);
-
-  // Decrement.
-  checkLocatorDecrement(volume);
-
-  // Pot-pourri testing.
-  checkLocatorPotPourri(volume);
-};
-
-template <int StorageOrder>
-void testSubrangeIterator()
-{
-  typedef MultiArray<Color3f, 3, StorageOrder> Volume;
-  typedef typename Volume::range_iterator range_iterator;
-  typedef typename Volume::subrange_iterator subrange_iterator;
-
-  // Data
-  Vector3i dims(5, 10, 15);
-  Volume vol(dims);
-
-  // Work variable
-  Vector3i coords( Vector3i::Zero() );
-
-  range_iterator it(vol.begin_range());
-  for ( ; it != vol.end_range(); ++it)
-  {
-    // 'r_it.coords()' is denoted as $c_i$.
-    // 'dims[i]' is denoted as $d_i$.
-    //
-    // Check that $0 \leq c_i < d_i$.
-    *it = it.coords().template cast<float>();
-    //r_it.check();
-
-    // 1. Check that $\min_i c_i \geq 0$.
-    ASSERT_GE( (it->template cast<int>().array().minCoeff()), 0 );
-    // 2. Check that $\max_i d_i - c_i \geq 1$.
-    ASSERT_GE( (dims - it->template cast<int>()).array().maxCoeff(), 1 );
-  }
-
-  Vector3i start(1,1,1), end(3, 3, 3);
-
-  subrange_iterator it2(vol.begin_subrange(start, end));
-  for ( ; it2 != vol.end_subrange(); ++it2)
-  {
-    // 'sr_it.coords()' is denoted as $c_i$.
-    // 'start[i]' is denoted as $a_i$.
-    // 'end[i]' is denoted as $b_i$.
-    //
-    // Check that $a_i \leq c_i < b_i$.
-    *it2 = it2.coords().template cast<float>();
-    //sr_it.check();
-
-    // 1. Check that $\min_i c_i - a_i \geq 0$.
-    ASSERT_GE( (it2->template cast<int>() - start).array().minCoeff(), 0 );
-    // 2. Check that $\max_i b_i - c_i \geq 1$.
-    ASSERT_GE( (end - it2->template cast<int>()).array().maxCoeff(), 1 );
-  }
-};
-
-TEST(DO_Core_Test, MultiArrayIndexComputation)
-{
-  // Row-major based tests.
-  testStrideComputation<RowMajor>();
-  // Column-major based tests.
-  testStrideComputation<ColMajor>();
+  EXPECT_EQ(StrideComputer<ColMajor>::eval(sizes), strides);
 }
 
-TEST(DO_Core_Test, NDIterator)
+
+TEST(TestJump, test_jump_2d)
 {
-  testRangeIterator<RowMajor>();
-  testRangeIterator<ColMajor>();
-  testSubrangeIterator<RowMajor>();
-  testSubrangeIterator<ColMajor>();
+  Vector2i coords(2, 3);
+  Vector2i sizes(10, 20);
+  Vector2i strides = StrideComputer<RowMajor>::eval(sizes);
+
+  EXPECT_EQ(2*20+3, jump(coords, strides));
 }
+
+TEST(TestJump, test_jump_3d)
+{
+  Vector3i coords(2, 3, 4);
+  Vector3i sizes(10, 20, 30);
+  Vector3i strides = StrideComputer<RowMajor>::eval(sizes);
+
+  EXPECT_EQ(jump(coords, strides), 2*20*30+3*30+4);
+}
+
+
+TEST(TestPositionIncrementer, test_row_major_incrementer_2d)
+{
+  bool stop = false;
+  Vector2i start(2, 3);
+  Vector2i end(5, 10);
+  
+  Vector2i coords(start);
+  for (int i = start(0); i < end(0); ++i) {
+    for (int j = start(1); j < end(1); ++j) {
+      ASSERT_FALSE(stop);
+      ASSERT_MATRIX_EQ(coords, Vector2i(i,j));
+      PositionIncrementer<RowMajor>::apply(coords, stop, start, end);
+    }
+  }
+  cout << coords << endl;
+  EXPECT_TRUE(stop);
+}
+
+TEST(TestPositionIncrementer, test_col_major_incrementer_2d)
+{
+  bool stop = false;
+  Vector2i start(2, 3);
+  Vector2i end(5, 10);
+
+  Vector2i coords(start);
+  for (int j = start(1); j < end(1); ++j) {
+    for (int i = start(0); i < end(0); ++i) {
+      ASSERT_FALSE(stop);
+      ASSERT_MATRIX_EQ(coords, Vector2i(i,j));
+      PositionIncrementer<ColMajor>::apply(coords, stop, start, end);
+    }
+  }
+  cout << coords << endl;
+  EXPECT_TRUE(stop);
+}
+
+TEST(TestPositionDecrementer, test_row_major_decrementer_2d)
+{
+  bool stop = false;
+  Vector2i start(2, 3);
+  Vector2i end(5, 10);
+
+  Vector2i coords;
+  coords.array() = end.array()-1;
+  for (int i = end(0)-1; i >= start(0); --i) {
+    for (int j = end(1)-1; j >= start(1); --j) {
+      ASSERT_FALSE(stop);
+      ASSERT_MATRIX_EQ(coords, Vector2i(i,j));
+      PositionDecrementer<RowMajor>::apply(coords, stop, start, end);
+    }
+  }
+  cout << coords << endl;
+  EXPECT_TRUE(stop);
+}
+
+TEST(TestPositionDecrementer, test_col_major_decrementer_2d)
+{
+  bool stop = false;
+  Vector2i start(2, 3);
+  Vector2i end(5, 10);
+
+  Vector2i coords;
+  coords.array() = end.array()-1;
+  for (int j = end(1)-1; j >= start(1); --j) {
+    for (int i = end(0)-1; i >= start(0); --i) {
+      ASSERT_FALSE(stop);
+      ASSERT_MATRIX_EQ(coords, Vector2i(i,j));
+      PositionDecrementer<ColMajor>::apply(coords, stop, start, end);
+    }
+  }
+  cout << coords << endl;
+  EXPECT_TRUE(stop);
+}
+
 
 int main(int argc, char** argv)
 {
