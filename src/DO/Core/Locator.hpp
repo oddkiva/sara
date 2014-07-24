@@ -250,7 +250,7 @@ namespace DO {
     //! Access operator.
     inline reference operator[](int n) const
     {
-      if (coords_[Axis]+n < 0  || coords_[Axis]+n >= sizes_[Axis])
+      if (cur_pos_[Axis]+n < 0  || cur_pos_[Axis]+n >= sizes_[Axis])
         throw std::out_of_range("Axis iterator is out of range");
       return *(cur_ptr_+strides_[Axis]*n); 
     }
@@ -484,6 +484,12 @@ namespace DO {
     typedef RangeIterator self_type;
     typedef PositionIncrementer<StorageOrder> incrementer;
     typedef PositionDecrementer<StorageOrder> decrementer;
+    
+    using base_type::cur_pos_;
+    using base_type::cur_ptr_;
+    using base_type::stop_;
+    using base_type::sizes_;
+    using base_type::strides_;
 
   public:
     TYPEDEF_ITERATOR_TYPES(base_type);
@@ -560,10 +566,14 @@ namespace DO {
     typedef SubrangeIterator self_type;
     typedef PositionIncrementer<StorageOrder> incrementer;
     typedef PositionDecrementer<StorageOrder> decrementer;
+    
+    using base_type::stop_;
+    using base_type::cur_pos_;
+    using base_type::cur_ptr_;
+    using base_type::strides_;
 
   public: /* typedefs. */
     TYPEDEF_ITERATOR_TYPES(base_type);
-    typedef SubrangeIterator self_type;
     typedef Matrix<int, N, 1> coords_type, vector_type;
 
   public: /* constructors */
