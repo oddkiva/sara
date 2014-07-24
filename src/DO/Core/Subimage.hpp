@@ -26,13 +26,16 @@ namespace DO {
   {
     Image<T,N> dst(b-a);
     dst.array().fill(ColorTraits<T>::zero());
-    CoordsIterator<N> c(a,b), end;
+    typedef typename Image<T, N>::const_subrange_iterator const_src_iterator;
+    const_src_iterator src_it = src.begin_subrange(a, b);
     for (typename Image<T, N>::iterator dst_it = dst.begin();
-         dst_it != dst.end(); ++dst_it, ++c)
+         dst_it != dst.end(); ++dst_it, ++src_it)
     {
-      if ((*c-a).minCoeff() < 0 || (*c-b).minCoeff() >= 0)
+      // If a and b are coordinates out bounds.
+      if ((src_it.coords()-a).minCoeff() < 0 ||
+          (src_it.coords()-b).minCoeff() >= 0)
         continue;
-      *dst_it = src(*c);
+      *dst_it = *src_it;
     }
     return dst;
   }
