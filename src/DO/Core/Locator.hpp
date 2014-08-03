@@ -462,6 +462,12 @@ namespace DO {
     //! Return the current position in the the array.
     inline const vector_type& position() const
     { return cur_pos_; }
+    //! Return the array strides.
+    inline const vector_type& strides() const
+    { return strides_; }
+    //! Return the array sizes.
+    inline const vector_type& sizes() const
+    { return sizes_; }
 
   protected: /* data members */
     bool stop_;
