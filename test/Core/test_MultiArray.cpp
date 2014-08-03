@@ -11,7 +11,6 @@
 
 #include <gtest/gtest.h>
 #include <DO/Core/MultiArray.hpp>
-#include <vld.h>
 #include "AssertHelpers.hpp"
 
 

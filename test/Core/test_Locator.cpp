@@ -11,7 +11,6 @@
 
 #include <gtest/gtest.h>
 #include <DO/Core/Locator.hpp>
-#include <vld.h>
 #include "AssertHelpers.hpp"
 
 using namespace DO;
