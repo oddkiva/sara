@@ -33,10 +33,10 @@ namespace DO {
   {
     typedef typename ColorTraits<T>::ChannelType S;
 
-    // Checks parameter values
+    // Check the parameter values
     assert(sigma>0 && order>=0 && order<3 && d>=0 && d<N);
 
-    // Computes coefficients of the recursive filter
+    // Compute the coefficients of the recursive filter
     const S alpha = 1.695f/sigma;
     const S ea = std::exp(alpha);
     const S ema = std::exp(-alpha);
@@ -48,7 +48,7 @@ namespace DO {
 
     switch(order) {
 
-      // first-order derivative
+    // first-order derivative
     case 1:                 
       ek = -(1-ema)*(1-ema)*(1-ema)/(2*(ema+1)*ema);
       a1 = a4 = 0;
@@ -64,7 +64,7 @@ namespace DO {
         g0 = sumg0 = sumg1 = 0;
       break;
 
-      // second-order derivative
+    // second-order derivative
     case 2:               
       ekn = ( -2*(-1+3*ea-3*ea*ea+ea*ea*ea)/(3*ea+1+3*ea*ea+ea*ea*ea) );
       ek = -(em2a-1)/(2*alpha*ema);
@@ -82,7 +82,7 @@ namespace DO {
         g0 = sumg0 = sumg1 = 0;
       break;
 
-      // smoothing
+    // smoothing
     default:
       ek = (1-ema)*(1-ema) / (1+2*alpha*ema - em2a);
       a1 = ek;
@@ -105,14 +105,11 @@ namespace DO {
     const size_t offset = I.stride(d);
     const size_t nb = I.size(d);
 
-    typedef typename Image<T, N>::coords_type Coords;
-    Coords beg; beg.fill(0);
-    Coords end((I.sizes().array() - 1).matrix());
-    end[d]=0;
+    typename Image<T, N>::iterator it;
 
-    // Do not change the code! It works optimally with interleaved color!
-    for (CoordsIterator<N> p(beg,end); p != CoordsIterator<N>(); ++p) {
-      T *ima = &(I(*p));
+    for (it = I.begin(); it != I.end(); ++it)
+    {
+      T *ima = it;
       T I2(*ima); ima += offset;
       T I1(*ima); ima += offset;
       T Y2(sumg0*I2);
@@ -142,7 +139,7 @@ namespace DO {
         Y1=Y0;
         if (i==0)
           break;
-      } 
+      }
     }
     delete [] Y;
   }
