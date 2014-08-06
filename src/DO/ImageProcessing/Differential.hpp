@@ -115,7 +115,8 @@ namespace DO {
 
     inline void operator()(Vector& g, const Coords& p) const
     {
-      ScalarIterator loc(scalar_field_.begin_range(p));
+      ScalarIterator loc(scalar_field_.begin_range());
+      loc += p;
       this->operator()(g, loc);
     }
 
@@ -158,7 +159,8 @@ namespace DO {
 
     inline T operator()(const Coords& p) const
     {
-      ConstRangeIterator loc(scalar_field_.begin_range(p));
+      ConstRangeIterator loc(scalar_field_.begin_range());
+      loc += p;
       return this->operator()(loc);
     }
 
@@ -201,8 +203,8 @@ namespace DO {
 
     void operator()(HessianMatrix& H, const ScalarIterator& loc) const
     {
-      if (  loc.coords().minCoeff() < 2 || 
-           (loc.sizes() - loc.coords()).minCoeff() < 2 )
+      if (  loc.position().minCoeff() < 2 ||
+           (loc.sizes() - loc.position()).minCoeff() < 2 )
       {
         H.setZero();
         return;
@@ -226,7 +228,8 @@ namespace DO {
 
     inline void operator()(HessianMatrix& H, const Coords& p) const
     {
-      ScalarIterator loc(scalar_field_.begin_range(p));
+      ScalarIterator loc(scalar_field_.begin_range());
+      loc += p;
       operator()(H, loc);
     }
 
