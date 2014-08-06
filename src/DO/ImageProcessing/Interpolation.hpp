@@ -14,6 +14,8 @@
 #ifndef DO_IMAGEPROCESSING_INTERPOLATION_HPP
 #define DO_IMAGEPROCESSING_INTERPOLATION_HPP
 
+#include <stdexcept>
+
 namespace DO {
 
   /*!
@@ -26,41 +28,44 @@ namespace DO {
   // Interpolation
   //! \brief Interpolation function
   template <typename T, int N, typename F> 
-  typename ColorTraits<T>::Color64f interpolate(const Image<T,N> &I,
-                                                const Matrix<F, N, 1>& xx)
+  typename ColorTraits<T>::Color64f interpolate(const Image<T,N>& image,
+                                                const Matrix<F, N, 1>& pos)
   {
     DO_STATIC_ASSERT(
       !std::numeric_limits<F>::is_integer,
       INTERPOLATION_NOT_ALLOWED_FROM_VECTOR_WITH_INTEGRAL_SCALAR_TYPE);
-    Matrix<F, N, 1> x(xx);
-    for (int i=0; i < N; ++i)
-    {
-      if (x[i]<0)
-        x[i] = 0.;
-      else if (x[i] > I.size(i)-1)
-        x[i] = static_cast<F>(I.size(i)-1);
-    }
+    
+    Matrix<F, N, 1> a, b;
+    a.setZero();
+    b = image.sizes().template cast<F>() - Matrix<F, N, 1>::Ones();
+    if ((pos - a).minCoeff() < 0 || (b - pos).minCoeff() <= 0)
+      throw std::range_error("Cannot interpolate: position is out of range");
 
-    Matrix<F, N, 1> a;
-    Matrix<int, N, 1> c;
-    for (int i = 0; i < N; ++i) {
-      c[i] = static_cast<int>(x[i]);
-      a[i] = x[i]-static_cast<F>(c[i]);
+    Matrix<int, N, 1> start, end;
+    Matrix<F, N, 1> frac;
+    for (int i = 0; i < N; ++i)
+    {
+      double ith_int_part;
+      frac[i] = std::modf(pos[i], &ith_int_part);
+      start[i] = static_cast<int>(ith_int_part);
     }
+    end.array() = start.array() + 2;
 
     typedef typename ColorTraits<T>::Color64f Col64f;
+    typedef typename Image<T, N>::const_subrange_iterator CSubrangeIterator;
+
     Col64f val(ColorTraits<Col64f>::zero());
-    CoordsIterator<N> p(c, (c.array()+1).matrix()), end;
-    for ( ; p != end; ++p)
+    CSubrangeIterator it(image.begin_subrange(start, end));
+    static const int num_times = 1 << N;
+
+    for (int i = 0; i < num_times; ++i, ++it)
     {
-      double f = 1.;
+      double weight = 1.;
       for (int i = 0; i < N; ++i)
-        f *= ((*p)[i] == c[i]) ? (1.-a[i]) : a[i];
-      if (f==0)
-        continue;
-      Col64f pix;
-      convertColor(pix, I(*p));
-      val += pix*f;
+        weight *= (it.position()[i] == start[i]) ? (1.-frac[i]) : frac[i];
+      Col64f color;
+      convertColor(color, *it);
+      val += color*weight;
     }
     return val;
   }
