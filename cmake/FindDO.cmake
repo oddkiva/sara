@@ -1,10 +1,11 @@
 # Load DO-specific macros
 include(DOMacros)
 
-set(DO_VERSION @DO_VERSION@)
+# Specify DO-CV version.
+include(DOVersion)
 
 ################################################################################
-# DEBUG: Which project calls FindDO.cmake?
+# Debug message.
 do_step_message("FindDO running for project '${PROJECT_NAME}'")
 
 ################################################################################
