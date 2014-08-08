@@ -15,7 +15,7 @@
 #ifndef DO_CORE_MULTIARRAY_HPP
 #define DO_CORE_MULTIARRAY_HPP
 
-#include "Locator.hpp"
+#include "ArrayIterators.hpp"
 #include <iostream>
 #include <numeric>
 
