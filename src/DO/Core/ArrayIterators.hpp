@@ -12,8 +12,8 @@
 //! @file
 //! \brief Implementation of N-dimensional iterators.
 
-#ifndef DO_CORE_LOCATOR_HPP
-#define DO_CORE_LOCATOR_HPP
+#ifndef DO_CORE_ARRAYITERATORS_HPP
+#define DO_CORE_ARRAYITERATORS_HPP
 
 #include "StaticAssert.hpp"
 #include "Meta.hpp"
@@ -650,4 +650,4 @@ namespace DO {
 
 } /* namespace DO */
 
-#endif /* DO_CORE_LOCATOR_HPP */
+#endif /* DO_CORE_ARRAYITERATORS_HPP */
