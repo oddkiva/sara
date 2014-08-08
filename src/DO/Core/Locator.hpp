@@ -182,11 +182,11 @@ namespace DO {
   // ======================================================================== //
   // Forward declaration of multidimensional iterators.
   template <bool IsConst, typename T, int N, int StorageOrder>
-  class RangeIteratorBase;
+  class ArrayIteratorBase;
   template <bool IsConst, typename T, int N, int StorageOrder>
-  class RangeIterator;
+  class ArrayIterator;
   template <bool IsConst, typename T, int N, int StorageOrder>
-  class SubrangeIterator;
+  class SubarrayIterator;
   template <bool IsConst, typename T, int Axis, int N>
   class AxisIterator;
 
@@ -218,7 +218,7 @@ namespace DO {
 
     // Friend classes.
     template <bool, typename, int, int> friend class AxisIterator;
-    template <bool, typename, int, int> friend class RangeIteratorBase;
+    template <bool, typename, int, int> friend class ArrayIteratorBase;
 
     // Private typedefs.
     typedef ITERATOR_BASE_TYPE(IsConst) base_type;
@@ -261,7 +261,7 @@ namespace DO {
     inline bool operator==(const AxisIterator<IsConst2, T, Axis2, N>& rhs) const
     { return cur_ptr_ == rhs.cur_ptr_; }
     template <bool IsConst2, int StorageOrder>
-    inline bool operator==(const RangeIteratorBase<IsConst2, T, N, StorageOrder>& rhs) const
+    inline bool operator==(const ArrayIteratorBase<IsConst2, T, N, StorageOrder>& rhs) const
     { return cur_ptr_ == rhs.cur_ptr_; }
     //! Equality operator.
     inline bool operator==(const T *ptr) const
@@ -271,7 +271,7 @@ namespace DO {
     inline bool operator!=(const AxisIterator<IsConst2, T, Axis2, N>& other) const
     { return !operator==(other); }
     template <bool IsConst2, int StorageOrder>
-    inline bool operator!=(const RangeIteratorBase<IsConst2, T, N, StorageOrder>& other) const
+    inline bool operator!=(const ArrayIteratorBase<IsConst2, T, N, StorageOrder>& other) const
     { return !operator==(other); }
     //! Inequality operator.
     inline bool operator!=(const T *ptr) const
@@ -328,20 +328,19 @@ namespace DO {
 
   // ======================================================================== //
   //! \brief Multidimensional iterator base class.
-  //! In any case the 'Locator2' class is a heavy object. It is slower 
-  //! than the 'Locator' class for incremental iteration.
-  //! It is mostly useful for differential calculus. Otherwise prefer using 
-  //! other iterator instead.
+  //! Note that the 'MultiArrayIteratorBase' class is a heavy object. It is 
+  //! mostly useful for differential calculus. Otherwise prefer using more
+  //! elementary iterator instead.
   template <bool IsConst, typename T, int N, int StorageOrder>
-  class RangeIteratorBase : public ITERATOR_BASE_TYPE(IsConst)
+  class ArrayIteratorBase : public ITERATOR_BASE_TYPE(IsConst)
   {
     typedef ITERATOR_BASE_TYPE(IsConst) base_type;
     template <bool, typename, int, int> friend class AxisIterator;
-    template <bool, typename, int, int> friend class RangeIteratorBase;
+    template <bool, typename, int, int> friend class ArrayIteratorBase;
 
   public: /* typedefs */
     TYPEDEF_ITERATOR_TYPES(base_type);
-    typedef RangeIteratorBase self_type;
+    typedef ArrayIteratorBase self_type;
     typedef Matrix<int, N, 1> vector_type;
     typedef AxisIterator<IsConst, value_type, 0, N> x_iterator;
     typedef AxisIterator<IsConst, value_type, 1, N> y_iterator;
@@ -349,7 +348,7 @@ namespace DO {
 
   public: /* interface */
     //! Constructor
-    inline RangeIteratorBase(bool stop,
+    inline ArrayIteratorBase(bool stop,
                              pointer ptr,
                              const vector_type& pos,
                              const vector_type& strides,
@@ -384,7 +383,7 @@ namespace DO {
     //! Equality operator.
     template <bool IsConst2>
     inline bool operator==(
-      const RangeIteratorBase<IsConst2, T, N, StorageOrder>& other
+      const ArrayIteratorBase<IsConst2, T, N, StorageOrder>& other
     ) const
     { 
       if (stop_ && other.stop_)
@@ -402,7 +401,7 @@ namespace DO {
     //! Inequality operator.
     template <bool IsConst2>
     inline bool operator!=(
-      const RangeIteratorBase<IsConst2, T, N, StorageOrder>& other
+      const ArrayIteratorBase<IsConst2, T, N, StorageOrder>& other
     ) const
     { return !this->operator==(other); }
     //! Inequality operator.
@@ -483,11 +482,11 @@ namespace DO {
   //! It is mostly useful for differential calculus. Otherwise prefer using
   //! other iterator instead.
   template <bool IsConst, typename T, int N, int StorageOrder>
-  class RangeIterator : public RangeIteratorBase<IsConst, T, N, StorageOrder>
+  class ArrayIterator : public ArrayIteratorBase<IsConst, T, N, StorageOrder>
   {
     DO_STATIC_ASSERT(N >= 0, NUMBER_OF_DIMENSIONS_MUST_BE_NONNEGATIVE);
-    typedef RangeIteratorBase<IsConst, T, N, StorageOrder> base_type;
-    typedef RangeIterator self_type;
+    typedef ArrayIteratorBase<IsConst, T, N, StorageOrder> base_type;
+    typedef ArrayIterator self_type;
     typedef PositionIncrementer<StorageOrder> incrementer;
     typedef PositionDecrementer<StorageOrder> decrementer;
     
@@ -504,7 +503,7 @@ namespace DO {
     typedef vector_type& vector_reference;
 
   public:
-    inline RangeIterator(bool stop,
+    inline ArrayIterator(bool stop,
                          const pointer ptr,
                          const vector_type& pos,
                          const vector_type& sizes,
@@ -564,12 +563,12 @@ namespace DO {
   //! It is mostly useful for differential calculus. Otherwise prefer using 
   //! other iterator instead.
   template <bool IsConst, typename T, int N, int StorageOrder = ColMajor>
-  class SubrangeIterator : public RangeIteratorBase<IsConst, T, N, StorageOrder>
+  class SubarrayIterator : public ArrayIteratorBase<IsConst, T, N, StorageOrder>
   {
     DO_STATIC_ASSERT(N >= 0, NUMBER_OF_DIMENSIONS_MUST_BE_NONNEGATIVE);
 
-    typedef RangeIteratorBase<IsConst, T, N, StorageOrder> base_type;
-    typedef SubrangeIterator self_type;
+    typedef ArrayIteratorBase<IsConst, T, N, StorageOrder> base_type;
+    typedef SubarrayIterator self_type;
     typedef PositionIncrementer<StorageOrder> incrementer;
     typedef PositionDecrementer<StorageOrder> decrementer;
     
@@ -584,7 +583,7 @@ namespace DO {
 
   public: /* constructors */
     //! Constructor
-    inline SubrangeIterator(bool stop, pointer ptr,
+    inline SubarrayIterator(bool stop, pointer ptr,
                             const vector_type& begin_pos,
                             const vector_type& end_pos,
                             const vector_type& strides,
