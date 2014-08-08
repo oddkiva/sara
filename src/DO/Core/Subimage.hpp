@@ -26,7 +26,7 @@ namespace DO {
   {
     Image<T,N> dst(b-a);
     dst.array().fill(ColorTraits<T>::zero());
-    typedef typename Image<T, N>::const_subrange_iterator const_src_iterator;
+    typedef typename Image<T, N>::const_subarray_iterator const_src_iterator;
     const_src_iterator src_it = src.begin_subrange(a, b);
     for (typename Image<T, N>::iterator dst_it = dst.begin();
          dst_it != dst.end(); ++dst_it, ++src_it)
