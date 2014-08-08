@@ -8,8 +8,8 @@ if (POLICY CMP0020)
 endif (POLICY CMP0020)
 
 # Configure DO++: put the versions.
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindDO.cmake.in
-               ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindDO.cmake @ONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/DOVersion.cmake.in
+               ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DOVersion.cmake @ONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/DO/Defines.hpp.in
                ${CMAKE_CURRENT_SOURCE_DIR}/src/DO/Defines.hpp @ONLY)
 
