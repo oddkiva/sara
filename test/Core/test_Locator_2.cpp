@@ -42,7 +42,7 @@ class TestRangeIterator2D : public TestIterator2D {};
 
 TEST_F(TestRangeIterator2D, test_row_major_prefix_increment)
 {
-  Image::range_iterator it(image.begin_range());
+  Image::array_iterator it(image.begin_range());
   for (int i = 0; i < image.rows(); ++i) {
     for (int j = 0; j < image.cols(); ++j) {
       ASSERT_MATRIX_EQ(*it, Vector2i(i,j));
@@ -58,7 +58,7 @@ TEST_F(TestRangeIterator2D, test_row_major_prefix_increment)
 
 TEST_F(TestRangeIterator2D, test_row_major_postfix_increment)
 {
-  Image::range_iterator it(image.begin_range());
+  Image::array_iterator it(image.begin_range());
   for (int i = 0; i < image.rows(); ++i)
     for (int j = 0; j < image.cols(); ++j)
       ASSERT_MATRIX_EQ(*(it++), Vector2i(i,j));
@@ -66,7 +66,7 @@ TEST_F(TestRangeIterator2D, test_row_major_postfix_increment)
 
 TEST_F(TestRangeIterator2D, test_row_major_prefix_decrement)
 {
-  Image::range_iterator it(image.begin_range());
+  Image::array_iterator it(image.begin_range());
   it += image.sizes() - Vector2i::Ones();
 
   for (int i = image.rows()-1; i >= 0; --i) {
@@ -84,7 +84,7 @@ TEST_F(TestRangeIterator2D, test_row_major_prefix_decrement)
 
 TEST_F(TestRangeIterator2D, test_row_major_postfix_decrement)
 {
-  Image::range_iterator it(image.begin_range());
+  Image::array_iterator it(image.begin_range());
   it += image.sizes() - Vector2i::Ones();
 
   for (int i = image.rows()-1; i >= 0; --i)
@@ -94,7 +94,7 @@ TEST_F(TestRangeIterator2D, test_row_major_postfix_decrement)
 
 TEST_F(TestRangeIterator2D, test_special_dereferencing_operator)
 {
-  Image::range_iterator it(image.begin_range());
+  Image::array_iterator it(image.begin_range());
   ASSERT_MATRIX_EQ(it(Vector2i(1,2)), Vector2i(1,2));
   ASSERT_MATRIX_EQ(it(1,2), Vector2i(1,2));
 }
@@ -102,8 +102,8 @@ TEST_F(TestRangeIterator2D, test_special_dereferencing_operator)
 TEST_F(TestRangeIterator2D, test_const_multiarray_iterator)
 {
   const Image& const_image = image;
-  Image::const_range_iterator it = const_image.begin_range();
-  Image::const_range_iterator end = const_image.end_range();
+  Image::const_array_iterator it = const_image.begin_range();
+  Image::const_array_iterator end = const_image.end_range();
   while (it != end)
     ++it;
 }
@@ -151,7 +151,7 @@ protected:
 
 TEST_F(TestSubrangeIterator2D, test_row_major_prefix_increment)
 {
-  Image::subrange_iterator it(image.begin_subrange(start, end));
+  Image::subarray_iterator it(image.begin_subrange(start, end));
   for (int i = start(0); i < end(0); ++i) {
     for (int j = start(1); j < end(1); ++j) {
       ASSERT_MATRIX_EQ(*it, Vector2i(i,j));
@@ -167,7 +167,7 @@ TEST_F(TestSubrangeIterator2D, test_row_major_prefix_increment)
 
 TEST_F(TestSubrangeIterator2D, test_row_major_postfix_increment)
 {
-  Image::subrange_iterator it(image.begin_subrange(start, end));
+  Image::subarray_iterator it(image.begin_subrange(start, end));
   for (int i = start(0); i < end(0); ++i)
     for (int j = start(1); j < end(1); ++j)
       ASSERT_MATRIX_EQ(*(it++), Vector2i(i,j));
@@ -175,7 +175,7 @@ TEST_F(TestSubrangeIterator2D, test_row_major_postfix_increment)
 
 TEST_F(TestSubrangeIterator2D, test_row_major_prefix_decrement)
 {
-  Image::subrange_iterator it(image.begin_subrange(start, end));
+  Image::subarray_iterator it(image.begin_subrange(start, end));
   it += end - start - Vector2i::Ones();
 
   for (int i = end(0)-1; i >= start(0); --i) {
@@ -193,7 +193,7 @@ TEST_F(TestSubrangeIterator2D, test_row_major_prefix_decrement)
 
 TEST_F(TestSubrangeIterator2D, test_row_major_postfix_decrement)
 {
-  Image::subrange_iterator it(image.begin_subrange(start, end));
+  Image::subarray_iterator it(image.begin_subrange(start, end));
   it += end - start - Vector2i::Ones();
 
   for (int i = end(0)-1; i >= start(0); --i)
@@ -203,7 +203,7 @@ TEST_F(TestSubrangeIterator2D, test_row_major_postfix_decrement)
 
 TEST_F(TestSubrangeIterator2D, test_special_dereferencing_operator)
 {
-  Image::subrange_iterator it(image.begin_subrange(start, end));
+  Image::subarray_iterator it(image.begin_subrange(start, end));
 
   Vector2i relative_position(2, -1);
   Vector2i absolute_position = start + relative_position;
@@ -215,8 +215,8 @@ TEST_F(TestSubrangeIterator2D, test_special_dereferencing_operator)
 TEST_F(TestSubrangeIterator2D, test_const_multiarray_iterator)
 {
   const Image& const_image = image;
-  Image::const_subrange_iterator it = const_image.begin_subrange(start, end);
-  Image::const_subrange_iterator end = const_image.end_subrange();
+  Image::const_subarray_iterator it = const_image.begin_subrange(start, end);
+  Image::const_subarray_iterator end = const_image.end_subrange();
   while (it != end)
     ++it;
 }
@@ -266,7 +266,7 @@ class TestAxisIterator2D : public TestIterator2D {};
 TEST_F(TestAxisIterator2D, test_equality_and_inequality_comparisons)
 {
   const Image& const_image = image;
-  Image::range_iterator it = image.begin_range();
+  Image::array_iterator it = image.begin_range();
 
   // Check equalities.
   EXPECT_EQ(it.x(), image.begin_range());
@@ -295,14 +295,14 @@ TEST_F(TestAxisIterator2D, test_equality_and_inequality_comparisons)
 
 TEST_F(TestAxisIterator2D, test_iterations)
 {
-  Image::range_iterator it = image.begin_range();
+  Image::array_iterator it = image.begin_range();
   EXPECT_EQ(++it.x(), image.begin()+image.stride(0));
   EXPECT_EQ(--it.x(), image.begin());
 }
 
 TEST_F(TestAxisIterator2D, test_arithmetic_operations)
 {
-  Image::range_iterator it = image.begin_range();
+  Image::array_iterator it = image.begin_range();
   
   // Addition.
   it.x()+=2;
@@ -341,7 +341,7 @@ protected:
 
 TEST_F(TestIterators3D, test_row_major_increment)
 {
-  Volume::range_iterator it(volume.begin_range());
+  Volume::array_iterator it(volume.begin_range());
   for (int i = 0; i < volume.rows(); ++i) {
     for (int j = 0; j < volume.cols(); ++j) {
       for (int k = 0; k < volume.depth(); ++k) {
@@ -359,7 +359,7 @@ TEST_F(TestIterators3D, test_row_major_increment)
 
 TEST_F(TestIterators3D, test_row_major_decrement)
 {
-  Volume::range_iterator it(volume.begin_range());
+  Volume::array_iterator it(volume.begin_range());
   it += volume.sizes() - Vector3i::Ones();
 
   for (int i = volume.rows()-1; i >= 0; --i) {
@@ -379,14 +379,14 @@ TEST_F(TestIterators3D, test_row_major_decrement)
 
 TEST_F(TestIterators3D, test_special_dereferencing_operator)
 {
-  Volume::range_iterator it(volume.begin_range());
+  Volume::array_iterator it(volume.begin_range());
   EXPECT_MATRIX_EQ(it(Vector3i(1,2,4)), Vector3i(1,2,4));
   EXPECT_MATRIX_EQ(it(1,2,4), Vector3i(1,2,4));
 }
 
 TEST_F(TestIterators3D, test_delta)
 {
-  Volume::range_iterator it(volume.begin_range());
+  Volume::array_iterator it(volume.begin_range());
   const int X = 0;
   const int Y = 1;
   int dx = 1;

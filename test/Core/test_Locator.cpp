@@ -10,7 +10,7 @@
 // ========================================================================== //
 
 #include <gtest/gtest.h>
-#include <DO/Core/Locator.hpp>
+#include <DO/Core/ArrayIterators.hpp>
 #include "AssertHelpers.hpp"
 
 using namespace DO;
