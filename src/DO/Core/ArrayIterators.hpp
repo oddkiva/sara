@@ -328,9 +328,9 @@ namespace DO {
 
   // ======================================================================== //
   //! \brief Multidimensional iterator base class.
-  //! Note that the 'MultiArrayIteratorBase' class is a heavy object. It is 
-  //! mostly useful for differential calculus. Otherwise prefer using more
-  //! elementary iterator instead.
+  //! The 'ArrayIteratorBase' class is a heavy object. It is mostly useful
+  //! for differential calculus. When possible, prefer using more elementary
+  //! iterator instead.
   template <bool IsConst, typename T, int N, int StorageOrder>
   class ArrayIteratorBase : public ITERATOR_BASE_TYPE(IsConst)
   {
@@ -478,9 +478,10 @@ namespace DO {
 
 
   // ======================================================================== //
-  //! \brief Multidimensional iterator base class.
-  //! It is mostly useful for differential calculus. Otherwise prefer using
-  //! other iterator instead.
+  //! \brief Multidimensional iterator class.
+  //! The 'ArrayIterator' class is a heavy object. It is mostly useful for
+  //! differential calculus. When possible, prefer using more elementary
+  //! iterator instead.
   template <bool IsConst, typename T, int N, int StorageOrder>
   class ArrayIterator : public ArrayIteratorBase<IsConst, T, N, StorageOrder>
   {
@@ -558,10 +559,9 @@ namespace DO {
 
   // ======================================================================== //
   //! \brief Multidimensional iterator base class.
-  //! In any case the 'SubrangeIterator' class is a heavy object. It is slower 
-  //! than the 'RangeIterator' class for incremental iteration.
-  //! It is mostly useful for differential calculus. Otherwise prefer using 
-  //! other iterator instead.
+  //! The 'SubarrayIterator' class is a heavy object. It is mostly useful for
+  //! differential calculus. When possible, prefer using more elementary
+  //! iterator instead.
   template <bool IsConst, typename T, int N, int StorageOrder = ColMajor>
   class SubarrayIterator : public ArrayIteratorBase<IsConst, T, N, StorageOrder>
   {
