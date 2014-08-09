@@ -43,7 +43,6 @@ TYPED_TEST_P(Test_multiarray_constructors,
 {
   typedef TypeParam MultiArray;
   typedef typename MultiArray::vector_type Vector;
-  typedef typename MultiArray::size_type size_type;
   typedef StrideComputer<MultiArray::StorageOrder> StrideComputer;
 
   // Create sizes, one for each dimension.
