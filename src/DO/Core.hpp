@@ -23,7 +23,7 @@
 // Linear algebra imports and extension from Eigen3
 #include "Core/EigenExtension.hpp"
 // N-dimensional array and N-dimensional iterators
-#include "Core/Locator.hpp"
+#include "Core/ArrayIterators.hpp"
 #include "Core/MultiArray.hpp"
 // Sparse N-dimensional array
 #include "Core/SparseMultiArray.hpp"

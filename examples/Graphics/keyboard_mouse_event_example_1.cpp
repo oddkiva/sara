@@ -3,7 +3,7 @@
 using namespace std;
 using namespace DO;
 
-int main()
+GRAPHICS_MAIN_SIMPLE()
 {
   cout << "Basic mouse functions" << endl;
 

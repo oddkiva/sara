@@ -15,7 +15,7 @@
 #ifndef DO_CORE_MULTIARRAY_HPP
 #define DO_CORE_MULTIARRAY_HPP
 
-#include "Locator.hpp"
+#include "ArrayIterators.hpp"
 #include <iostream>
 #include <numeric>
 
@@ -112,13 +112,13 @@ namespace DO {
     typedef Matrix<int, N, 1> vector_type;
 
     //! N-dimensional iterator.
-    typedef RangeIterator<false, T, N, StorageOrder> range_iterator;
+    typedef ArrayIterator<false, T, N, StorageOrder> array_iterator;
     //! N-dimensional subrange iterator.
-    typedef SubrangeIterator<false, T, N, StorageOrder> subrange_iterator;
+    typedef SubarrayIterator<false, T, N, StorageOrder> subarray_iterator;
      //! Immutable N-dimensional iterator.
-    typedef RangeIterator<true, T, N, StorageOrder> const_range_iterator;
+    typedef ArrayIterator<true, T, N, StorageOrder> const_array_iterator;
     //! Immutable N-dimensional subrange iterator.
-    typedef SubrangeIterator<true, T, N, StorageOrder> const_subrange_iterator;
+    typedef SubarrayIterator<true, T, N, StorageOrder> const_subarray_iterator;
 
     //! Immutable matrix view for linear algebra.
     typedef Map<const Array<typename ElementTraits<T>::value_type, Dynamic, 1> >
@@ -289,41 +289,41 @@ namespace DO {
     { return strides_[i]; }
 
     //! Mutable begin range iterator.
-    inline range_iterator begin_range()
-    { return range_iterator(false, begin_, vector_type::Zero(), sizes_, strides_); }
+    inline array_iterator begin_range()
+    { return array_iterator(false, begin_, vector_type::Zero(), sizes_, strides_); }
     //! Mutable end range iterator.
-    inline range_iterator end_range()
-    { return range_iterator(true, end_, sizes_, sizes_, strides_); }
+    inline array_iterator end_range()
+    { return array_iterator(true, end_, sizes_, sizes_, strides_); }
     //! Mutable begin subrange iterator.
-    inline subrange_iterator begin_subrange(const vector_type& start,
+    inline subarray_iterator begin_subrange(const vector_type& start,
                                             const vector_type& end)
-    { return subrange_iterator(false, begin_, start, end, strides_, sizes_); }
+    { return subarray_iterator(false, begin_, start, end, strides_, sizes_); }
     //! Mutable begin subrange iterator.
-    inline subrange_iterator end_subrange()
+    inline subarray_iterator end_subrange()
     {
-      return subrange_iterator(
+      return subarray_iterator(
         true, begin_, sizes_, sizes_, strides_, sizes_);
     }
     //! Immutable begin range iterator.
-    inline const_range_iterator begin_range() const
+    inline const_array_iterator begin_range() const
     {
-      return const_range_iterator(
+      return const_array_iterator(
         false, begin_, vector_type::Zero(), sizes_, strides_);
     }
     //! Immutable end range iterator.
-    inline const_range_iterator end_range() const
-    { return const_range_iterator(true, end_, sizes_, sizes_, strides_); }
+    inline const_array_iterator end_range() const
+    { return const_array_iterator(true, end_, sizes_, sizes_, strides_); }
     //! Immutable begin subrange iterator.
-    inline const_subrange_iterator begin_subrange(const vector_type& start,
+    inline const_subarray_iterator begin_subrange(const vector_type& start,
                                                   const vector_type& end) const
     {
-      return const_subrange_iterator(
+      return const_subarray_iterator(
         false, begin_, start, end, strides_, sizes_);
     }
     //! Immutable end subrange iterator.
-    inline const_subrange_iterator end_subrange() const
+    inline const_subarray_iterator end_subrange() const
     {
-        return const_subrange_iterator(
+        return const_subarray_iterator(
           true, begin_, sizes_, sizes_, strides_, sizes_);
     }
 

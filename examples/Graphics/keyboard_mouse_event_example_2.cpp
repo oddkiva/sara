@@ -3,7 +3,7 @@
 using namespace std;
 using namespace DO;
 
-int main()
+GRAPHICS_MAIN_SIMPLE()
 {
   Window w = openWindow(300, 300);
   setActiveWindow(w);

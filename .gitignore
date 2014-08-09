@@ -192,3 +192,4 @@ test/Graphics/flower_write.png
 test/Graphics/ksmall_write.jpg
 test/MikolajzcykDatasets/
 test/AKAZE/
+cmake/DOVersion.cmake
