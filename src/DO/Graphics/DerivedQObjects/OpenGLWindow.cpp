@@ -38,7 +38,7 @@ namespace DO {
       x.normalize();
   }
 
-  void TrackBall::move(const QPointF& p, const QQuaternion &transformation)
+  void TrackBall::move(const QPointF& p)
   {
     if (!pressed_)
       return;
@@ -58,9 +58,9 @@ namespace DO {
     lastPos_ = p;
   }
 
-  void TrackBall::release(const QPointF& p, const QQuaternion &transformation)
+  void TrackBall::release(const QPointF& p)
   {
-    move(p, transformation);
+    move(p);
     pressed_ = false;
   }
 
@@ -83,6 +83,12 @@ namespace DO {
     , color_(QColor::fromCmykF(0.40, 0.0, 1.0, 0.0))
   {
     setAttribute(Qt::WA_DeleteOnClose);
+
+    // Set event listener.
+    event_listening_timer_.setSingleShot(true);
+    connect(&event_listening_timer_, SIGNAL(timeout()),
+            this, SLOT(eventListeningTimerStopped()));
+
     if(x != -1 && y != -1)
       move(x,y);
     setWindowTitle(windowTitle);
@@ -116,6 +122,17 @@ namespace DO {
       }
     }
     glEnd();
+  }
+
+  void OpenGLWindow::waitForEvent(int ms)
+  {
+    event_listening_timer_.setInterval(ms);
+    event_listening_timer_.start();
+  }
+
+  void OpenGLWindow::eventListeningTimerStopped()
+  {
+    emit sendEvent(noEvent());
   }
 
   void OpenGLWindow::initializeGL()
@@ -164,7 +181,7 @@ namespace DO {
     glMultMatrixf(mat);
   }
 
-  void OpenGLWindow::paintEvent(QPaintEvent *event)
+  void OpenGLWindow::paintEvent(QPaintEvent *)
   {
     makeCurrent();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -270,7 +287,7 @@ namespace DO {
 
     QPointF pos(normalizePos(event->localPos()));
     if (event->button() == Qt::LeftButton) {
-      trackball_.release(pos, trackball_.rotation());
+      trackball_.release(pos);
       event->accept();
     }
     update();
@@ -287,10 +304,10 @@ namespace DO {
 
     QPointF pos(normalizePos(event->localPos()));
     if (event->buttons() & Qt::LeftButton) {
-      trackball_.move(pos, trackball_.rotation());
+      trackball_.move(pos);
       event->accept();
     } else {
-      trackball_.release(pos, trackball_.rotation());
+      trackball_.release(pos);
     }
     update();
   }
@@ -316,7 +333,7 @@ namespace DO {
     if (event_listening_timer_.isActive())
     {
       event_listening_timer_.stop();
-      sendEvent(keyPressed(event->key(), event->modifiers()));
+      emit sendEvent(keyPressed(event->key(), event->modifiers()));
     }
   }
 
@@ -326,7 +343,7 @@ namespace DO {
     if (event_listening_timer_.isActive())
     {
       event_listening_timer_.stop();
-      sendEvent(keyReleased(event->key(), event->modifiers()));
+      emit sendEvent(keyReleased(event->key(), event->modifiers()));
     }
   }
 

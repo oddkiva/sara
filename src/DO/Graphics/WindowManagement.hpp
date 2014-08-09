@@ -1,4 +1,4 @@
-// ========================================================================== //
+// ========================================================================= //
 // This file is part of DO++, a basic set of libraries in C++ for computer 
 // vision.
 //
@@ -7,7 +7,7 @@
 // This Source Code Form is subject to the terms of the Mozilla Public 
 // License v. 2.0. If a copy of the MPL was not distributed with this file, 
 // you can obtain one at http://mozilla.org/MPL/2.0/.
-// ========================================================================== //
+// ========================================================================= //
 
 //! @file
 
@@ -43,7 +43,7 @@ namespace DO {
   DO_EXPORT
   inline int getWindowHeight(Window w) { return getWindowSizes(w)(1); }
 
-  // ====================================================================== //
+  // ======================================================================= //
   // Windows handling function
   //! Open a PaintingWindow for 2D drawing.
   DO_EXPORT
@@ -63,7 +63,8 @@ namespace DO {
   { return openGLWindow(sizes(0), sizes(1), windowTitle, x, y); }
   //! Open a GraphicsView for interactive viewing.
   DO_EXPORT
-  Window openGraphicsView(int w, int h, const std::string& windowTitle = "DO++",
+  Window openGraphicsView(int w, int h,
+                          const std::string& windowTitle = "DO++",
                           int x = -1, int y = -1);
   DO_EXPORT
   inline Window openGraphicsView(const Vector2i& sizes,
@@ -74,7 +75,8 @@ namespace DO {
   //! By default, the active window is closed.
   DO_EXPORT
   void closeWindow(Window w = getActiveWindow());
-  //! Set the chosen window **w** as the current active window (regardless of its type).
+  //! Set the chosen window **w** as the current active window (regardless of
+  //! its type).
   DO_EXPORT
   void setActiveWindow(Window w);
   //! Resize the specified window **w** with the following parameters.
@@ -84,7 +86,7 @@ namespace DO {
   inline void resizeWindow(const Vector2i& sizes, Window w = getActiveWindow())
   { resizeWindow(sizes(0), sizes(1), w); }
 
-  // ====================================================================== //
+  // ======================================================================= //
   // Temporizing functions
   //! Wait **msec** milliseconds before the window resumes its drawing.
   DO_EXPORT
@@ -93,7 +95,7 @@ namespace DO {
   DO_EXPORT
   void microSleep(int usec);
 
-  // ====================================================================== //
+  // ======================================================================= //
   // I/O control functions
   //! \brief Wait for a click from the user. 
   //! - Works only on the *active* window.
@@ -129,7 +131,7 @@ namespace DO {
   DO_EXPORT
   int anyGetKey();
 
-  // ====================================================================== //
+  // ======================================================================= //
   // Window event management
   //! Listens to events sent from the active window.
   DO_EXPORT

@@ -212,13 +212,13 @@ namespace DO {
         static_cast<T>(1) : std::numeric_limits<T>::max();
     }
     //! Returns the minimum value for a specific channel type (in double type).
-    static inline const double doubleMin()
+    static inline double doubleMin()
     { return static_cast<double>(min()); }
     //! Returns the maximum value for a specific channel type (in double type).
-    static inline const double doubleMax()
+    static inline double doubleMax()
     { return static_cast<double>(max()); }
     //! Returns the maximum range for a specific channel type (in double type).
-    static inline const double doubleRange()
+    static inline double doubleRange()
     { return doubleMax() - doubleMin();}
     //! Cast function.
     template <typename U>

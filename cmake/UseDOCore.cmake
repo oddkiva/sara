@@ -23,7 +23,7 @@ macro (do_list_core_source_files)
   source_group("Template Meta-Programming" FILES ${DO_Core_METAPROGRAMMING})
   # N-dimensional array with N-dimensional iterators
   set(DO_Core_MULTIARRAY
-      ${DO_Core_SOURCE_DIR}/Locator.hpp
+      ${DO_Core_SOURCE_DIR}/ArrayIterators.hpp
       ${DO_Core_SOURCE_DIR}/MultiArray.hpp
       ${DO_Core_SOURCE_DIR}/SparseMultiArray.hpp)
   source_group("Multi-Array" FILES ${DO_Core_MULTIARRAY})

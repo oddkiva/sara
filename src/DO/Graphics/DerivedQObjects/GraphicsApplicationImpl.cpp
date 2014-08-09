@@ -21,7 +21,6 @@ namespace DO {
     , argc(argc_)
     , argv(argv_)
     , activeWindow(0)
-    //, graphicsView(0)
     , mutex(QMutex::NonRecursive)
   {
     // Register painting data types.
@@ -43,69 +42,66 @@ namespace DO {
     setQuitOnLastWindowClosed(false);
   }
 
-   void
-   GraphicsApplication::Impl::
-   createPaintingWindow(int w, int h, const QString& windowTitle,
-                        int x, int y)
-   {
-     createdWindows << new PaintingWindow(w, h, windowTitle, x, y);
-     if (createdWindows.size() == 1)
-     {
-       activeWindow = createdWindows.front();
-       setActiveWindow(activeWindow);
-     }
-   }
+  GraphicsApplication::Impl::
+  ~Impl()
+  {
+    QList<QPointer<QWidget> >::iterator w = createdWindows.begin();
+    for ( ; w != createdWindows.end(); ++w)
+    {
+      if (!w->isNull())
+      {
+        PaintingWindow *paintingWindow = qobject_cast<PaintingWindow *>(*w);
+        if (paintingWindow)
+          delete paintingWindow->scrollArea();
+        else
+          delete *w;
+      }
+    }
+  }
 
-   void
-   GraphicsApplication::Impl::
-   createOpenGLWindow(int w, int h, const QString& windowTitle,
-                      int x, int y)
-   {
-     createdWindows << new OpenGLWindow(w, h, windowTitle, x, y);
-     if (createdWindows.size() == 1)
-     {
-       activeWindow = createdWindows.front();
-       setActiveWindow(activeWindow);
-     }
-   }
+  void
+  GraphicsApplication::Impl::
+  createWindow(int windowType, int w, int h,
+               const QString& windowTitle, int x, int y)
+  {
+    if (windowType == PAINTING_WINDOW)
+      createdWindows << new PaintingWindow(w, h, windowTitle, x, y);
+    if (windowType == OPENGL_WINDOW)
+      createdWindows << new OpenGLWindow(w, h, windowTitle, x, y);
+    if (windowType == GRAPHICS_VIEW)
+      createdWindows << new GraphicsView(w, h, windowTitle, x, y);
 
-   void 
-   GraphicsApplication::Impl::
-   createGraphicsView(int w, int h, const QString& windowTitle,
-                      int x, int y)
-   {
-     createdWindows << new GraphicsView(w, h, windowTitle, x, y);
-     if (createdWindows.size() == 1)
-     {
-       activeWindow = createdWindows.front();
-       setActiveWindow(activeWindow);
-     }
-   }
+    if (createdWindows.size() == 1)
+    {
+      activeWindow = createdWindows.front();
+      setActiveWindow(activeWindow);
+    }
+  }
 
-   void 
-   GraphicsApplication::Impl::
-   setActiveWindow(QWidget *w)
-   {
-     if (w == 0)
-     {
-       qWarning() << "I can't make a null window active!";
-       return;
-     }
+  void
+  GraphicsApplication::Impl::
+  setActiveWindow(QWidget *w)
+  {
+    if (w == 0)
+    {
+      qWarning() << "I can't make a null window active!";
+      return;
+    }
 
-     // Disconnect the communication between:
-     // All windows and user thread in both directions.
-     // Why? I don't want the user thread to listens to communicate from any
-     // window but the requested window 'w'.
-     disconnectAllWindowsIOEventsToUserThread();
+    // Disconnect the communication between:
+    // All windows and user thread in both directions.
+    // Why? I don't want the user thread to listens to communicate from any
+    // window but the requested window 'w'.
+    disconnectAllWindowsIOEventsToUserThread();
 
-     // This is now our current active window
-     activeWindow = w;
-     connectWindowIOEventsToUserThread(w);
-   }
+    // This is now our current active window
+    activeWindow = w;
+    connectWindowIOEventsToUserThread(w);
+  }
 
-   void
-   GraphicsApplication::Impl::
-   closeWindow(QWidget *w) 
+  void
+  GraphicsApplication::Impl::
+  closeWindow(QWidget *w)
    {
      QList<QPointer<QWidget> >::iterator wi = qFind(
        createdWindows.begin(), createdWindows.end(), w);
@@ -130,19 +126,17 @@ namespace DO {
        quit();
      }
 
-     if (!(*wi).isNull())
-       delete *wi;
      createdWindows.erase(wi);
    }
 
-   void
-   GraphicsApplication::Impl::
-   getFileFromDialogBox()
-   {
-     dialogBoxInfo.filename = 
-       QFileDialog::getOpenFileName(0, "Open File", "/home", 
-       "Images (*.png *.xpm *.jpg)");
-   }
+  void
+  GraphicsApplication::Impl::
+  getFileFromDialogBox()
+  {
+    dialogBoxInfo.filename =
+      QFileDialog::getOpenFileName(0, "Open File", "/home",
+      "Images (*.png *.xpm *.jpg)");
+  }
 
   bool
   GraphicsApplication::Impl::

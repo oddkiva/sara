@@ -149,13 +149,11 @@ macro (do_append_library _library_name
     #   Specify the source files.
     add_library(DO_${_library_name} ${library_type} ${_hdr_files} ${_src_files})
     # Link with external libraries
-    message(STATUS 
-      "[DO] Linking project 'DO_${_library_name}' with '${_lib_dependencies}'")
+    message(
+      STATUS "[DO] Linking project 'DO_${_library_name}' with "
+             "'${_lib_dependencies}'"
+    )
     target_link_libraries(DO_${_library_name} ${_lib_dependencies})
-    if (DEFINED ENABLE_CXX11)
-      set_target_properties(DO_${_library_name} PROPERTIES
-                            COMPILE_FLAGS ${ENABLE_CXX11})
-    endif ()
   else ()
     # - Case 2: the project is a header-only library
     #   Specify the source files.
@@ -165,7 +163,7 @@ macro (do_append_library _library_name
     #set_target_properties(DO_${_library_name} PROPERTIES LINKER_LANGUAGE CXX)
     add_custom_target(DO_${_library_name} SOURCES ${_hdr_files})
   endif ()
-  set_property(TARGET DO_${_library_name} PROPERTY FOLDER "DO Modules")
+  set_property(TARGET DO_${_library_name} PROPERTY FOLDER "DO Libraries")
 endmacro (do_append_library)
 
 function (do_set_specific_target_properties _target _additional_compile_flags)
@@ -245,49 +243,52 @@ endmacro (do_add_msvc_precompiled_header)
 # ==============================================================================
 # Specific macro to add a unit test
 #
-function (do_unit_test _unit_test_name _srcs _additional_lib_deps)
+function (do_test _test_name _srcs _additional_lib_deps)
   if (POLICY CMP0020)
     cmake_policy(SET CMP0020 OLD)
   endif (POLICY CMP0020)
-  
+
   # Create a variable containing the list of source files
   set(_srcs_var ${_srcs})
-  
+
   # Get extra arguments.
   set(extra_macro_args ${ARGN})
   list(LENGTH extra_macro_args num_extra_args)
-  
+
   # Check if a name is defined for a group of unit tests.
   if (${num_extra_args} GREATER 0)
     list(GET extra_macro_args 0 test_group_name)
   endif ()
-  
+
   # Check if we want to use precompiled header.
   if (${num_extra_args} GREATER 1)
     list(GET extra_macro_args -1 pch)
   endif ()
-  
+
   if (DEFINED pch)
     do_substep_message(
-    "Activating precompiled header: '${pch}' for unit test: 'DO_${_unit_test_name}_test'")
+      "Activating precompiled header: '${pch}' for unit test: "
+      "'DO_${_test_name}_test'"
+    )
     list(APPEND _srcs_var ${pch})
-    do_add_msvc_precompiled_header(${pch} _srcs_var ${_unit_test_name}_test_PCH)
+    do_add_msvc_precompiled_header(${pch} _srcs_var ${_test_name}_test_PCH)
   endif ()
-  
+
   # Create the unit test project
   include_directories(${gtest_DIR}/include)
-  add_executable(DO_${_unit_test_name}_test ${_srcs_var})
-  target_link_libraries(DO_${_unit_test_name}_test
+  add_executable(${_test_name} ${_srcs_var})
+  target_link_libraries(${_test_name}
                         ${_additional_lib_deps}
                         gtest)
-  set_target_properties(DO_${_unit_test_name}_test PROPERTIES
-    COMPILE_FLAGS "${ENABLE_CXX11} -DSRCDIR=${CMAKE_CURRENT_SOURCE_DIR}"
+  set_target_properties(
+    ${_test_name} PROPERTIES
+    COMPILE_FLAGS "-DSRCDIR=${CMAKE_CURRENT_SOURCE_DIR}"
     COMPILE_DEFINITIONS DO_STATIC)
-  add_test(DO_${_unit_test_name}_test
-           "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/DO_${_unit_test_name}_test")
+  add_test(${_test_name}
+           "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${_test_name}")
   
   if (DEFINED test_group_name)
-    set_property(TARGET DO_${_unit_test_name}_test 
-                 PROPERTY FOLDER "DO Unit Tests/${test_group_name}")
+    set_property(TARGET ${_test_name}
+                 PROPERTY FOLDER "DO Tests/${test_group_name}")
   endif ()
-endfunction (do_unit_test)
+endfunction (do_test)

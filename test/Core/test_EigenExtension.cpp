@@ -30,40 +30,29 @@ TEST(DO_Core_Test, eigenExtensionTest)
   m.array().fill(a);
   n.array().fill(b);
   
-  // Check m
-  cout << "Check m" << endl;
   for (int i = 0; i < m.rows(); ++i)
     for (int j = 0; j < m.cols(); ++j)
-      //cout << "m(" << i << "," << j << ") = " << endl << m(i,j) << endl;
       EXPECT_EQ(m(i,j), a);
-  // Check n
-  cout << "Check n" << endl;
+
   for (int i = 0; i < n.rows(); ++i)
     for (int j = 0; j < n.cols(); ++j)
-      //cout << "n(" << i << "," << j << ") = " << endl << n(i,j) << endl;
       EXPECT_EQ(n(i,j), b);
 
 
   // Double that matrix
-  cout << "m.array() += n.array()" << endl;
   m.array() += n.array();
   // Check that matrix
   for (int i = 0; i < m.rows(); ++i)
     for (int j = 0; j < m.cols(); ++j)
-      //cout << "m(" << i << "," << j << ") = " << endl << m(i,j) << endl;
       EXPECT_EQ(m(i,j), (a+b).eval());
 
-  cout << "m(0,0)*n(0,0)=" << endl;
-  cout << m(0,0)*n(0,0) << endl;
   EXPECT_EQ(m(0,0)*n(0,0), (a+b)*b);
 
   // Double that matrix
-  cout << "m.array() *= n.array()" << endl;
   m.array() *= n.array();
   // Check that matrix
   for (int i = 0; i < m.rows(); ++i)
     for (int j = 0; j < m.cols(); ++j)
-      //cout << "m(" << i << "," << j << ") = " << endl << m(i,j) << endl;
       EXPECT_EQ(m(i,j), (a+b)*b);
 
   m.matrix() += n.matrix();

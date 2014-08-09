@@ -175,8 +175,6 @@ pip-log.txt
 #############
 ## Project-specific files
 #############
-xml/
-
 test/Core/tree.gv
 test/FeatureDetectors/test.haraffkey
 test/ImageProcessing/bench*.txt
@@ -194,3 +192,4 @@ test/Graphics/flower_write.png
 test/Graphics/ksmall_write.jpg
 test/MikolajzcykDatasets/
 test/AKAZE/
+cmake/DOVersion.cmake

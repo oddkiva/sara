@@ -54,8 +54,19 @@ namespace DO {
 //! \brief Some convenient hacks.
 int __main(int, char **);
 
-#define main(...)                           \
-/*int*/ main(int argc, char **argv)         \
+#define GRAPHICS_MAIN_SIMPLE()              \
+int main(int argc, char **argv)             \
+{                                           \
+  DO::GraphicsApplication app(argc, argv);  \
+  app.registerUserMain(__main);             \
+  return app.exec();                        \
+}                                           \
+                                            \
+int __main(int, char **)
+
+
+#define GRAPHICS_MAIN(...)                  \
+int main(int argc, char **argv)             \
 {                                           \
   DO::GraphicsApplication app(argc, argv);  \
   app.registerUserMain(__main);             \
@@ -63,6 +74,5 @@ int __main(int, char **);
 }                                           \
                                             \
 int __main(int argc, char **argv)
-
 
 #endif /* DO_GRAPHICS_GRAPHICSAPPLICATION_HPP */

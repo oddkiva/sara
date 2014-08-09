@@ -23,7 +23,7 @@ namespace DO {
   Timer::Timer()
     : elapsed_(0)
   {
-#ifdef WIN32
+#ifdef _WIN32
     LARGE_INTEGER freq;
     if (!QueryPerformanceFrequency(&freq))
     {
@@ -37,7 +37,7 @@ namespace DO {
 
   void Timer::restart()
   {
-#ifdef WIN32
+#ifdef _WIN32
     LARGE_INTEGER li_start_;
     QueryPerformanceCounter(&li_start_);
     start_ = static_cast<double>(li_start_.QuadPart);

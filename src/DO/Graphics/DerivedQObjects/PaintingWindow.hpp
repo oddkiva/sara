@@ -72,7 +72,7 @@ namespace DO {
     void drawLine(const QPointF& p1, const QPointF& p2, const QColor& c,
                   int penWidth = 1);
     void drawCircle(int xc, int yc, int r, const QColor& c, int penWidth = 1);
-    void drawCircle(const QPointF& center, float r, const QColor& c,
+    void drawCircle(const QPointF& center, qreal r, const QColor& c,
                     int penWidth = 1);
     void drawEllipse(int x, int y, int w, int h, const QColor& c, 
                      int penWidth = 1);
@@ -81,9 +81,9 @@ namespace DO {
     void drawRect(int x, int y, int w, int h, const QColor& c,
                   int penWidth = 1);
     void drawPoly(const QPolygonF& polygon, const QColor& c, int width);
-    void drawText(int x,int y,const QString& s,const QColor& c, int fontSize,
-                  qreal alpha, bool italic, bool bold, bool underline);
-    void drawArrow(int a, int b, int c, int d, const QColor&  col,
+    void drawText(int x,int y, const QString& s,const QColor& c, int fontSize,
+                  qreal orientation, bool italic, bool bold, bool underline);
+    void drawArrow(int x1, int y1, int x2, int y2, const QColor&  color,
                    int arrowWidth, int arrowHeight, int style, int width);
     // Display image
     void display(const QImage& image, int xoff = 0, int yoff = 0,
@@ -107,8 +107,8 @@ namespace DO {
     void resizeScreen(int width, int height);
 
   public slots: /* event management slots */
-      void waitForEvent(int ms);
-      void eventListeningTimerStopped();
+    void waitForEvent(int ms);
+    void eventListeningTimerStopped();
 
   protected:
     void mouseMoveEvent(QMouseEvent *event);

@@ -31,13 +31,13 @@ namespace DO {
     mutex_.unlock();
     x = mouseX_; y = mouseY_;
     if (mouseButton_ == Qt::LeftButton)
-      return 1;
+      return MOUSE_LEFT_BUTTON;
     else if (mouseButton_ == Qt::MiddleButton)
-      return 2;
+      return MOUSE_MIDDLE_BUTTON;
     else if (mouseButton_ == Qt::RightButton)
-      return 3;
+      return MOUSE_RIGHT_BUTTON;
     else
-      return 0;
+      return MOUSE_NO_BUTTON;
   }
 
   int UserThread::getKey()
@@ -117,8 +117,7 @@ namespace DO {
       qFatal("No registered user main!");
       return;
     }
-    int ret;
-    ret = userMain_(getGuiApp()->argc, getGuiApp()->argv);
+    userMain_(getGuiApp()->argc, getGuiApp()->argv);
     return;
   }
 

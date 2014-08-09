@@ -18,9 +18,15 @@ namespace DO {
     
   GraphicsView::GraphicsView(int w, int h, const QString& windowTitle,
                              int x, int y, QWidget* parent)
-    : QGraphicsView(new QGraphicsScene, parent)
+    : QGraphicsView(parent)
   {
-    //activateOpenGL();
+    setScene(new QGraphicsScene(this));
+
+    // Set event listener.
+    event_listening_timer_.setSingleShot(true);
+    connect(&event_listening_timer_, SIGNAL(timeout()),
+            this, SLOT(eventListeningTimerStopped()));
+
     setAttribute(Qt::WA_DeleteOnClose);
     setTransformationAnchor(AnchorUnderMouse);
     setRenderHints(QPainter::Antialiasing);
@@ -61,6 +67,17 @@ namespace DO {
     p.setPen(c);
     p.drawPoint(x, y);
     item->setPixmap(pixmap);
+  }
+
+  void GraphicsView::waitForEvent(int ms)
+  {
+    event_listening_timer_.setInterval(ms);
+    event_listening_timer_.start();
+  }
+
+  void GraphicsView::eventListeningTimerStopped()
+  {
+    emit sendEvent(noEvent());
   }
 
   void GraphicsView::mousePressEvent(QMouseEvent *event)
@@ -121,7 +138,7 @@ namespace DO {
     if (event_listening_timer_.isActive())
     {
       event_listening_timer_.stop();
-      sendEvent(keyPressed(event->key(), event->modifiers()));
+      emit sendEvent(keyPressed(event->key(), event->modifiers()));
     }
     QGraphicsView::keyPressEvent(event);
   }
