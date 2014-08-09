@@ -1,10 +1,11 @@
 # Load DO-specific macros
 include(DOMacros)
 
-set(DO_VERSION @DO_VERSION@)
+# Specify DO-CV version.
+include(DOVersion)
 
 ################################################################################
-# DEBUG: Which project calls FindDO.cmake?
+# Debug message.
 do_step_message("FindDO running for project '${PROJECT_NAME}'")
 
 ################################################################################
@@ -33,8 +34,7 @@ if (NOT DO_FOUND)
   set(DO_SOURCE_DIR ${DO_DIR}/src/DO)
   set(DO_ThirdParty_DIR ${DO_DIR}/third-party)
   set(Eigen3_DIR ${DO_ThirdParty_DIR}/eigen)
-  set(gmock_DIR ${DO_ThirdParty_DIR}/gmock)
-  set(gtest_DIR ${DO_ThirdParty_DIR}/gmock/gtest)
+  set(gtest_DIR ${DO_ThirdParty_DIR}/gtest)
   set(flann_DIR ${DO_ThirdParty_DIR}/flann)
   set(antigrain_DIR ${DO_ThirdParty_DIR}/antigrain)
   set(jpeg_DIR ${DO_ThirdParty_DIR}/libjpeg)
