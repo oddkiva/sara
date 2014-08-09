@@ -49,9 +49,7 @@ TEST(DO_Core_Test, treeTest)
 {
   typedef Tree<int>::node_handle node_handle;
   typedef Tree<int>::depth_first_iterator depth_first_iterator;
-  typedef Tree<int>::breadth_first_iterator breadth_first_iterator;
   typedef Tree<int>::breadth_first_iterator breadth_first_queued_iterator;
-  typedef Tree<int>::children_iterator children_iterator;
   typedef Tree<int>::leaf_iterator leaf_iterator;
 
   // Create the tree.
