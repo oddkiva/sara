@@ -38,7 +38,7 @@ namespace DO {
       x.normalize();
   }
 
-  void TrackBall::move(const QPointF& p, const QQuaternion &transformation)
+  void TrackBall::move(const QPointF& p)
   {
     if (!pressed_)
       return;
@@ -58,9 +58,9 @@ namespace DO {
     lastPos_ = p;
   }
 
-  void TrackBall::release(const QPointF& p, const QQuaternion &transformation)
+  void TrackBall::release(const QPointF& p)
   {
-    move(p, transformation);
+    move(p);
     pressed_ = false;
   }
 
@@ -181,7 +181,7 @@ namespace DO {
     glMultMatrixf(mat);
   }
 
-  void OpenGLWindow::paintEvent(QPaintEvent *event)
+  void OpenGLWindow::paintEvent(QPaintEvent *)
   {
     makeCurrent();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -287,7 +287,7 @@ namespace DO {
 
     QPointF pos(normalizePos(event->localPos()));
     if (event->button() == Qt::LeftButton) {
-      trackball_.release(pos, trackball_.rotation());
+      trackball_.release(pos);
       event->accept();
     }
     update();
@@ -304,10 +304,10 @@ namespace DO {
 
     QPointF pos(normalizePos(event->localPos()));
     if (event->buttons() & Qt::LeftButton) {
-      trackball_.move(pos, trackball_.rotation());
+      trackball_.move(pos);
       event->accept();
     } else {
-      trackball_.release(pos, trackball_.rotation());
+      trackball_.release(pos);
     }
     update();
   }

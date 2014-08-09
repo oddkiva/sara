@@ -40,8 +40,8 @@ namespace DO {
     TrackBall();
     // coordinates in [-1,1]x[-1,1]
     void push(const QPointF& p, const QQuaternion& transformation);
-    void move(const QPointF& p, const QQuaternion& transformation);
-    void release(const QPointF& p, const QQuaternion& transformation);
+    void move(const QPointF& p);
+    void release(const QPointF& p);
     QQuaternion rotation() const;
   private:
     QQuaternion rotation_;

@@ -4,7 +4,7 @@
 using namespace std;
 using namespace DO;
 
-int main()
+GRAPHICS_MAIN_SIMPLE()
 {
   Image<Color3ub> I;
   cout << srcPath("../../datasets/ksmall.jpg") << endl;
