@@ -44,21 +44,24 @@ if (NOT DO_FOUND)
   # List the available component libraries in DO++
   # Foundational libraries
   do_append_components(DO_COMPONENTS Core)
-  do_append_components(DO_COMPONENTS KDTree)
-  do_append_components(DO_COMPONENTS FileSystem)
-  do_append_components(DO_COMPONENTS ImageDrawing)
   do_append_components(DO_COMPONENTS Graphics)
+
+  # TODO: Don't re-enable this components as long there are not properly
+  # tested.
+  #do_append_components(DO_COMPONENTS KDTree)
+  #do_append_components(DO_COMPONENTS FileSystem)
+  #do_append_components(DO_COMPONENTS ImageDrawing)
   # Image processing
-  do_append_components(DO_COMPONENTS ImageProcessing)
+  #do_append_components(DO_COMPONENTS ImageProcessing)
   # Geometry
-  do_append_components(DO_COMPONENTS Geometry)
+  #do_append_components(DO_COMPONENTS Geometry)
   # Feature detection and description
-  do_append_components(DO_COMPONENTS Features)
-  do_append_components(DO_COMPONENTS FeatureDetectors)
-  do_append_components(DO_COMPONENTS FeatureDescriptors)
+  #do_append_components(DO_COMPONENTS Features)
+  #do_append_components(DO_COMPONENTS FeatureDetectors)
+  #do_append_components(DO_COMPONENTS FeatureDescriptors)
   # Feature matching
-  do_append_components(DO_COMPONENTS Match)
-  do_append_components(DO_COMPONENTS FeatureMatching)
+  #do_append_components(DO_COMPONENTS Match)
+  #do_append_components(DO_COMPONENTS FeatureMatching)
   
   # DEBUG: Print the list of component libraries
   do_step_message("Currently available component libraries:")

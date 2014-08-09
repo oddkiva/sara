@@ -1,11 +1,11 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO++, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
@@ -15,7 +15,7 @@
 #ifndef DO_CORE_MULTIARRAY_HPP
 #define DO_CORE_MULTIARRAY_HPP
 
-#include "Locator.hpp"
+#include "ArrayIterators.hpp"
 #include <iostream>
 #include <numeric>
 
@@ -42,9 +42,9 @@ namespace DO {
     static const bool is_scalar = true; //!< STL-like typedef.
   };
 
-  //! \brief The specialized element traits class when the entry is a non square 
+  //! \brief The specialized element traits class when the entry is a non square
   //! matrix. Again the matrix is viewed as a 'super-scalar'.
-  //! However, super-scalar operations will be regular point-wise matrix 
+  //! However, super-scalar operations will be regular point-wise matrix
   //! operations.
   //! Therefore this applies for row-vector and column vector.
   template <typename T, int M, int N>
@@ -52,8 +52,8 @@ namespace DO {
   {
     const static bool is_square_matrix = (M == N); //!< STL-like typedef.
     typedef typename Meta::Choose<
-      is_square_matrix, 
-      Matrix<T, N, N>, 
+      is_square_matrix,
+      Matrix<T, N, N>,
       Array<T, M, N> >::Type value_type; //!< STL-like typedef.
     typedef size_t size_type; //!< STL-like typedef.
     typedef value_type * pointer; //!< STL-like typedef.
@@ -83,22 +83,21 @@ namespace DO {
 
   /*!
     \brief The N-dimensional array class.
-    
+
     \todo:
     - prefer shallow copy in copy constructor and in the assignment operator
     - add 'MultiArray MultiArray::clone() const' method.
       (Performance still seems acceptable even if deep copies are always done.)
     - **DOUBLE-CHECK** all existing image-based algorithm.
-    - Extract boost::shared_pointer with bcp to get the job done.
    */
-  template <typename T, int N, int StorageOrder = RowMajor>
+  template <typename T, int N, int StorageOrder_ = ColMajor>
   class MultiArray
   {
   private: /* STL-like interface. */
-    typedef Offset<N, StorageOrder> storage_index;
     typedef MultiArray self_type;
 
   public: /* STL-like interface. */
+    enum { StorageOrder = StorageOrder_ };
     typedef std::size_t size_type;          //!< STL typedef.
     typedef std::ptrdiff_t difference_type; //!< STL typedef.
     typedef T value_type;                   //!< STL typedef.
@@ -110,18 +109,16 @@ namespace DO {
     typedef const T * const_iterator;       //!< STL typedef.
 
     //! Vector type.
-    typedef Matrix<int, N, 1> coords_type, vector_type;
+    typedef Matrix<int, N, 1> vector_type;
 
     //! N-dimensional iterator.
-    typedef RangeIterator<false, T, N, StorageOrder> range_iterator;
+    typedef ArrayIterator<false, T, N, StorageOrder> array_iterator;
     //! N-dimensional subrange iterator.
-    typedef SubrangeIterator<false, T, N, StorageOrder> subrange_iterator;
+    typedef SubarrayIterator<false, T, N, StorageOrder> subarray_iterator;
      //! Immutable N-dimensional iterator.
-    typedef RangeIterator<true, T, N, StorageOrder> const_range_iterator;
+    typedef ArrayIterator<true, T, N, StorageOrder> const_array_iterator;
     //! Immutable N-dimensional subrange iterator.
-    typedef SubrangeIterator<true, T, N, StorageOrder> const_subrange_iterator;
-    //! Iterator over the coordinates.
-    typedef CoordsIterator<N> coords_iterator;
+    typedef SubarrayIterator<true, T, N, StorageOrder> const_subarray_iterator;
 
     //! Immutable matrix view for linear algebra.
     typedef Map<const Array<typename ElementTraits<T>::value_type, Dynamic, 1> >
@@ -139,118 +136,111 @@ namespace DO {
   public: /* interface */
     //! Default constructor that constructs an empty N-dimensional array.
     inline MultiArray()
-      : begin_(0)
-      , end_(0)
-      , sizes_(vector_type::Zero())
-      , strides_(vector_type::Zero())
-      , is_wrapped_data_(false)
-    {}
+    { initialize(vector_type::Zero()); }
     //! Constructor that wraps plain data with its known sizes.
     inline MultiArray(value_type *data, const vector_type& sizes,
-                      bool getOwnership = false)
+                      bool get_data_ownership = false)
       : begin_(data)
       , end_(data+compute_size(sizes))
       , sizes_(sizes), strides_(compute_strides(sizes))
-      , is_wrapped_data_(!getOwnership)
+      , has_data_ownership_(get_data_ownership)
     {}
-    //! \brief Default constructor that allocates an N-dimensional array with 
+    //! \brief Default constructor that allocates an N-dimensional array with
     //! the specified sizes.
     inline explicit MultiArray(const vector_type& sizes)
-      : begin_(new T[compute_size(sizes)])
-      , end_(begin_ + compute_size(sizes))
-      , sizes_(sizes), strides_(compute_strides(sizes))
-      , is_wrapped_data_(false)
-    {}
-    //! \brief Default constructor that allocates a 2D array with 
+    { initialize(sizes); }
+    //! \brief Default constructor that allocates a 2D array with
     //! the specified rows and columns.
     inline MultiArray(int rows, int cols)
-      : begin_(new T[rows*cols])
-      , end_(begin_ + rows*cols)
-      , sizes_(rows, cols)
-      , strides_(compute_strides(vector_type(rows, cols)))
-      , is_wrapped_data_(false)
-    {}
-    //! \brief Default constructor that allocates a 3D array with 
+    { 
+      DO_STATIC_ASSERT(N == 2, MULTIARRAY_MUST_BE_TWO_DIMENSIONAL);
+      initialize(Vector2i(rows, cols));
+    }
+    //! \brief Default constructor that allocates a 3D array with
     //! the specified rows, columns and depth.
     inline MultiArray(int rows, int cols, int depth)
-      : begin_(new T[rows*cols*depth])
-      , end_(begin_ + rows*cols*depth)
-      , sizes_(rows, cols, depth)
-      , strides_(compute_strides(vector_type(rows, cols, depth)))
-      , is_wrapped_data_(false)
-    {}
+    {
+      DO_STATIC_ASSERT(N == 3, MULTIARRAY_MUST_BE_THREE_DIMENSIONAL);
+      initialize(Vector3i(rows, cols, depth));
+    }
     //! Copy constructor that makes a deep copy of the source array.
-    inline MultiArray(const self_type& M)
-      : begin_(new T[M.size()])
-      , end_(begin_ + M.size())
-      , sizes_(M.sizes())
-      , strides_(M.strides())
-      , is_wrapped_data_(false)
-    { std::copy(M.data(), M.data() + M.size(), begin_); }
-    //! \brief Copy constructor that recopies the data source array with 
+    inline MultiArray(const self_type& other)
+    {
+      initialize(other.sizes_);
+      std::copy(other.begin_, other.end_, begin_);
+    }
+    //! \brief Copy constructor that recopies the data source array with
     //! appropriate type casting.
     template <typename T2>
-    inline MultiArray(const MultiArray<T2, N, StorageOrder>& M)
-      : begin_(new T[M.size()])
-      , end_(begin_ + M.size())
-      , sizes_(M.sizes())
-      , strides_(M.strides())
-      , is_wrapped_data_(false)
-    { std::transform(M.begin(), M.end(), begin(), Cast()); }
+    inline MultiArray(const MultiArray<T2, N, StorageOrder>& other)
+    {
+      initialize(other.sizes());
+      std::transform(other.begin(), other.end(), begin_, Cast());
+    }
 
     //! Destructor.
     inline ~MultiArray()
-    { 
-      if (!is_wrapped_data_ && begin_) 
+    {
+      if (has_data_ownership_ && begin_)
         delete [] begin_;
     }
 
     //! \brief Assignment operator uses the copy-swap idiom.
-    self_type& operator=(self_type M)
+    self_type& operator=(self_type other)
     {
-      swap(M);
+      swap(other);
       return *this;
     }
     //! \brief Assignment operator that recopies the content of the source array
     //! with appropriate type casting.
     template <typename T2>
-    const self_type& operator=(const MultiArray<T2, N, StorageOrder>& M)
+    const self_type& operator=(const MultiArray<T2, N, StorageOrder>& other)
     {
-      if (is_wrapped_data_)
+      if (!has_data_ownership_)
       {
         std::cerr << "Fatal Error: using the assignment operator on wrapped data is not allowed!" << std::endl;
         std::cerr << "Terminating !" << std::endl;
         exit(-1);
       }
       // Free memory.
-      delete[] begin_;
+      if (begin_)
+        delete[] begin_;
       // Copy everything.
-      begin_ = new T[M.size()];
-      sizes_ = M.sizes();
-      end_ = begin_ + M.size();
-      strides_ = M.strides();
-      std::transform(M.begin(), M.end(), begin_, Cast());
+      initialize(other.sizes());
+      std::transform(other.begin(), other.end(), begin_, Cast());
       return *this;
     }
 
     //! Mutable referencing operator.
-    inline reference operator()(const coords_type& c)
-    { return begin_[offset(c)]; }
+    inline reference operator()(const vector_type& pos)
+    { return begin_[offset(pos)]; }
     //! Mutable referencing operator.
     inline reference operator()(int i, int j)
-    { return begin_[offset(i, j)]; }
+    {
+      DO_STATIC_ASSERT(N == 2, MULTIARRAY_MUST_BE_TWO_DIMENSIONAL);
+      return begin_[offset(Vector2i(i, j))];
+    }
     //! Mutable referencing operator.
     inline reference operator()(int i, int j, int k)
-    { return begin_[offset(i, j, k)]; }
+    {
+      DO_STATIC_ASSERT(N == 3, MULTIARRAY_MUST_BE_THREE_DIMENSIONAL);
+      return begin_[offset(Vector3i(i, j, k))];
+    }
     //! Non-mutable referencing operator.
-    inline const_reference operator()(const coords_type& c) const
-    { return begin_[offset(c)]; }
+    inline const_reference operator()(const vector_type& pos) const
+    { return begin_[offset(pos)]; }
     //! Non-mutable referencing operator.
     inline const_reference operator()(int i, int j) const
-    { return begin_[offset(i, j)]; }
+    {
+      DO_STATIC_ASSERT(N == 2, MULTIARRAY_MUST_BE_TWO_DIMENSIONAL);
+      return begin_[offset(Vector2i(i, j))];
+    }
     //! Non-mutable referencing operator.
     inline const_reference operator()(int i, int j, int k) const
-    { return begin_[offset(i, j, k)]; }
+    {
+      DO_STATIC_ASSERT(N == 3, MULTIARRAY_MUST_BE_THREE_DIMENSIONAL);
+      return begin_[offset(Vector3i(i, j, k))];
+    }
 
     //! Mutable POD accessor.
     inline pointer data()
@@ -298,100 +288,85 @@ namespace DO {
     inline int stride(int i) const
     { return strides_[i]; }
 
-    //! Mutable locator.
-    inline range_iterator begin_range(const coords_type& anchor = coords_type::Zero())
-    {
-      // if anchor is within bounds
-      range_iterator loc(begin_, coords_type::Zero(), begin_, end_, sizes_, strides_);
-      if (anchor != coords_type::Zero())
-        loc += anchor;
-      return loc;
-    }
-    inline range_iterator end_range()
-    { return range_iterator(end_, sizes(), begin_, end_, sizes_, strides_, true); }
-    //! Mutable subrange locator
-    inline subrange_iterator begin_subrange(const vector_type& start,
+    //! Mutable begin range iterator.
+    inline array_iterator begin_range()
+    { return array_iterator(false, begin_, vector_type::Zero(), sizes_, strides_); }
+    //! Mutable end range iterator.
+    inline array_iterator end_range()
+    { return array_iterator(true, end_, sizes_, sizes_, strides_); }
+    //! Mutable begin subrange iterator.
+    inline subarray_iterator begin_subrange(const vector_type& start,
                                             const vector_type& end)
+    { return subarray_iterator(false, begin_, start, end, strides_, sizes_); }
+    //! Mutable begin subrange iterator.
+    inline subarray_iterator end_subrange()
     {
-      return subrange_iterator(
-        begin_, start, start, end, false,
-        begin_+offset(start), sizes_, strides_);
+      return subarray_iterator(
+        true, begin_, sizes_, sizes_, strides_, sizes_);
     }
-    inline subrange_iterator end_subrange()
+    //! Immutable begin range iterator.
+    inline const_array_iterator begin_range() const
     {
-      return subrange_iterator(
-        begin_, sizes_, sizes_, sizes_, true,
-        end_, sizes_, strides_);
+      return const_array_iterator(
+        false, begin_, vector_type::Zero(), sizes_, strides_);
     }
-    //! Immutable locator.
-    inline const_range_iterator begin_range(const coords_type& anchor = coords_type::Zero()) const
-    {
-      // if anchor is within bounds
-      const_range_iterator loc(begin_, coords_type::Zero(), begin_, end_, sizes_, strides_);
-      if (anchor != coords_type::Zero())
-        loc += anchor;
-      return loc;
-    }
-    inline const_range_iterator end_range() const
-    { return const_range_iterator(end_, sizes_, begin_, end_, sizes_, strides_, true); }
-    //! Mutable subrange locator
-    inline const_subrange_iterator begin_subrange(const vector_type& start,
+    //! Immutable end range iterator.
+    inline const_array_iterator end_range() const
+    { return const_array_iterator(true, end_, sizes_, sizes_, strides_); }
+    //! Immutable begin subrange iterator.
+    inline const_subarray_iterator begin_subrange(const vector_type& start,
                                                   const vector_type& end) const
     {
-      return const_subrange_iterator(
-        begin_, start, start, end, false,
-        begin_+offset(start), sizes_, strides_);
+      return const_subarray_iterator(
+        false, begin_, start, end, strides_, sizes_);
     }
-    inline const_subrange_iterator end_subrange() const
+    //! Immutable end subrange iterator.
+    inline const_subarray_iterator end_subrange() const
     {
-      return const_subrange_iterator(
-        begin_, sizes_, sizes_, sizes_, true,
-        end_, sizes_, strides_);
+        return const_subarray_iterator(
+          true, begin_, sizes_, sizes_, strides_, sizes_);
     }
-    //! Coords iterator.
-    inline coords_iterator begin_coords() const
-    { return coords_iterator(coords_type::Zero(), (sizes_.array()-1).matrix()); }
-    inline coords_iterator end_coords() const
-    { return coords_iterator(); }
 
     //! Resizing method.
     inline bool resize(const vector_type& sizes)
     {
-      if (is_wrapped_data_)
+      if (!has_data_ownership_)
       {
         std::cerr << "data is wrapped! Not resizing" << std::endl;
         return false;
       }
-      
+
       if (!begin_)
         delete[] begin_;
-
-      begin_ = new T[compute_size(sizes)];
-      end_ = begin_ + compute_size(sizes);
-      sizes_ = sizes;
-      strides_ = compute_strides(sizes);
+      initialize(sizes);
       return true;
     }
     //! Resizing method.
     inline bool resize(int rows, int cols)
-    { return resize(vector_type(rows, cols)); }
+    {
+      DO_STATIC_ASSERT(N == 2, MULTIARRAY_MUST_BE_TWO_DIMENSIONAL);
+      return resize(vector_type(rows, cols));
+    }
     //! Resizing method.
     inline bool resize(int rows, int cols, int depth)
-    { return resize(vector_type(rows, cols, depth)); }
+    {
+      DO_STATIC_ASSERT(N == 3, MULTIARRAY_MUST_BE_THREE_DIMENSIONAL);
+      return resize(vector_type(rows, cols, depth));
+    }
 
     //! Non-mutable array view for linear algebra with Eigen 3.
     inline const_array_view_type array() const
     {
       return const_array_view_type( reinterpret_cast<
         const typename ElementTraits<T>::const_pointer>(data()),
-        size()); 
+        size());
     }
     //! Mutable array view for linear algebra with Eigen 3.
     inline array_view_type array()
     {
       return array_view_type( reinterpret_cast<
         typename ElementTraits<T>::pointer>(data()),
-        size()); 
+        size());
     }
     //! Non-mutable matrix view for linear algebra with Eigen 3.
     inline const_matrix_view_type matrix() const
@@ -410,15 +385,6 @@ namespace DO {
         rows(), cols());
     }
 
-    //! Debugging methods.
-    inline void check_sizes_and_strides() const
-    {
-      std::cout << "Multiarray size = "
-        << Map<const Matrix<int, 1, N> >(sizes_.data()) << std::endl;
-      std::cout << "Multiarray strides = " 
-        << Map<const Matrix<int, 1, N> >(strides_.data()) << std::endl;
-    }
-
     //! Swap arrays.
     self_type& swap(self_type& other)
     {
@@ -427,7 +393,7 @@ namespace DO {
       swap(end_, other.end_);
       swap(sizes_, other.sizes_);
       swap(strides_, other.strides_);
-      swap(is_wrapped_data_, other.is_wrapped_data_);
+      swap(has_data_ownership_, other.has_data_ownership_);
       return *this;
     }
 
@@ -435,11 +401,7 @@ namespace DO {
     //! \brief Stride computing method called in the construction and
     //! resizing of the array.
     inline vector_type compute_strides(const vector_type& sizes)
-    {
-      vector_type strides;
-      storage_index::eval_strides(strides.data(), sizes.data());
-      return strides;
-    }
+    { return StrideComputer<StorageOrder>::eval(sizes); }
     //! \brief Raw size computing method called in the construction and
     //! resizing of the array.
     inline int compute_size(const vector_type& sizes) const
@@ -448,19 +410,20 @@ namespace DO {
         1, std::multiplies<int>());
     }
     //! Offset computing method.
-    inline int offset(const coords_type& c) const
+    inline int offset(const vector_type& pos) const
+    { return jump(pos, strides_); }
+    //! Construction routine.
+    inline void initialize(const vector_type& sizes)
     {
-      // Complexities are comparable: no significant performance discrepancy.
-      // Both exploit loop unrolling.
-      //return Offset2<N>::eval(c.data(), strides_.data());
-      return storage_index::eval(c.data(), sizes_.data());
+      sizes_ = sizes;
+      bool empty = (sizes == vector_type::Zero());
+      strides_ = empty ? sizes : compute_strides(sizes);
+
+      has_data_ownership_ = true;
+      size_t raw_size = compute_size(sizes);
+      begin_ = empty ? 0 : new T[raw_size];
+      end_ = empty ? 0 : begin_ + raw_size;
     }
-    //! Offset computing method.
-    inline int offset(int i, int j) const
-    { return storage_index::eval(i, j, sizes_[0], sizes_[1]); }
-    //! Offset computing method.
-    inline int offset(int i, int j, int k) const
-    { return storage_index::eval(i, j, k, sizes_[0], sizes_[1], sizes_[2]); }
     //! \brief Casting functor
     struct Cast
     {
@@ -470,13 +433,13 @@ namespace DO {
     };
 
   private: /* data members. */
-    value_type *begin_; //!< first element of the data.
-    value_type *end_; //!< first element of the data.
-    vector_type sizes_; //!< vector of size along each dimension.
-    vector_type strides_; //!< vector of stride for each dimension.
-    //! \brief flag that checks if the array wraps some data. It is used for 
+    value_type *begin_;       //!< first element of the data.
+    value_type *end_;         //!< last element of the data.
+    vector_type sizes_;       //!< vector of size along each dimension.
+    vector_type strides_;     //!< vector of stride for each dimension.
+    //! \brief flag that checks if the array wraps some data. It is used for
     //! deallocation.
-    bool is_wrapped_data_;
+    bool has_data_ownership_;
   };
 
   //! output stream operator
