@@ -17,7 +17,6 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 add_library(Graphics_Tests_Common
             event_scheduler.hpp event_scheduler.cpp)
-target_link_libraries(Graphics_Test_Common ${Qt5_LIBRARIES})
 set_property(TARGET Graphics_Tests_Common
              PROPERTY FOLDER "DO Tests/${TestGroupName}")
 set(CMAKE_AUTOMOC OFF)
