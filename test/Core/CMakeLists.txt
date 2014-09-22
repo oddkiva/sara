@@ -16,7 +16,10 @@ do_test(Core_EigenExtension test_EigenExtension.cpp "${DO_LIBRARIES}"
 
 do_test(Core_Pixel "colorspace.hpp;pixel.hpp;test_pixel.cpp"
         "${DO_LIBRARIES}" ${TestGroupName})
-        
+
+do_test(Core_Pixel_PackedPixel "colorspace.hpp;packed_pixel.hpp;test_packed_pixel.cpp"
+        "${DO_LIBRARIES}" ${TestGroupName})
+
 do_test(Core_Pixel_ChannelConversion
         "channel_conversion.hpp;test_channel_conversion.cpp"
         "${DO_LIBRARIES}" ${TestGroupName})
