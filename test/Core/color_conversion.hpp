@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 
-#include <DO/Core/Meta.hpp>
+#include <DO/Core/StaticAssert.hpp>
 #include <DO/Core/EigenExtension.hpp>
 
 #include "pixel.hpp"
