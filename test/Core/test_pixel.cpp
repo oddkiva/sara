@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "colorspace.hpp"
 #include "pixel.hpp"
 
 
