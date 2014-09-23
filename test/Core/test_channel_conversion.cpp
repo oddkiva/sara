@@ -37,7 +37,7 @@ typedef testing::Types<
 
 // ========================================================================== //
 // Test convert_channel function from integer type to floating-point type.
-template <class ChannelType>
+template <typename ChannelType>
 class TestConvertChannelIntToFloat : public testing::Test {};
 TYPED_TEST_CASE_P(TestConvertChannelIntToFloat);
 TYPED_TEST_P(TestConvertChannelIntToFloat,
@@ -83,7 +83,7 @@ INSTANTIATE_TYPED_TEST_CASE_P(Core_Pixel_ChannelConversion,
 
 // ========================================================================== //
 // Test channel conversion from floating-point type to integer type.
-template <class ChannelType>
+template <typename ChannelType>
 class TestConvertChannelFloatToInt : public testing::Test {};
 TYPED_TEST_CASE_P(TestConvertChannelFloatToInt);
 TYPED_TEST_P(TestConvertChannelFloatToInt,
