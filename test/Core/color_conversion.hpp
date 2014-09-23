@@ -94,7 +94,7 @@ namespace DO {
 
   //! \brief Convert color from gray to RGB.
   template <typename T>
-  inline void convert_color(T& src, Pixel<T, Rgb>& dst)
+  inline void convert_color(T src, Pixel<T, Rgb>& dst)
   {
     gray_to_rgb(src, dst);
   }
@@ -103,7 +103,7 @@ namespace DO {
   template <typename T>
   inline void convert_color(const Pixel<T, Rgb>& src, Pixel<T, Yuv>& dst)
   {
-    rgb_to_yuv(src.template cast<U>(), dst);
+    rgb_to_yuv(src, dst);
   }
 
   //! \brief Convert color from YUV to RGB.
