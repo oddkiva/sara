@@ -6,8 +6,6 @@
 #include <DO/Core/EigenExtension.hpp>
 #include <DO/Core/Meta.hpp>
 
-#include "colorspace.hpp"
-
 
 // Pixel data structures.
 namespace DO {

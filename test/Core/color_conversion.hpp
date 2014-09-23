@@ -4,6 +4,7 @@
 #include <DO/Core/StaticAssert.hpp>
 #include <DO/Core/EigenExtension.hpp>
 
+#include "colorspace.hpp"
 #include "pixel.hpp"
 
 
