@@ -37,9 +37,9 @@ namespace DO {
       !std::numeric_limits<T>::is_integer,
       CONVERSION_FROM_GRAY_TO_RGB_IS_SUPPORTED_ONLY_FOR_FLOATING_POINT_TYPE);
 
-    yuv[0] = 0.299*rgb[0] + 0.587*rgb[1] + 0.114*rgb[2];
-    yuv[1] = 0.492*(rgb[2] - yuv[0]);
-    yuv[2] = 0.877*(rgb[0] - yuv[0]);
+    yuv[0] = T(0.299)*rgb[0] + T(0.587)*rgb[1] + T(0.114)*rgb[2];
+    yuv[1] = T(0.492)*(rgb[2] - yuv[0]);
+    yuv[2] = T(0.877)*(rgb[0] - yuv[0]);
   }
 
   //! Convert YUV color to RGB color.

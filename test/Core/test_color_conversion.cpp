@@ -109,9 +109,9 @@ TYPED_TEST_P(TestConvertColorConversion, test_rgb_to_yuv)
     Vec3(0, 0, 1)
   };
   const Vec3 expected_yuv[] = {
-    Vec3(0.299, 0.492*(0-0.299), 0.877*(1-0.299)),
-    Vec3(0.587, 0.492*(0-0.587), 0.877*(0-0.587)),
-    Vec3(0.114, 0.492*(1-0.114), 0.877*(0-0.114))
+    Vec3(T(0.299), T(0.492*(0-0.299)), T(0.877*(1-0.299))),
+    Vec3(T(0.587), T(0.492*(0-0.587)), T(0.877*(0-0.587))),
+    Vec3(T(0.114), T(0.492*(1-0.114)), T(0.877*(0-0.114)))
   };
   // Using the explicit function.
   for (int i = 0; i < 3; ++i)
@@ -136,14 +136,14 @@ TYPED_TEST_P(TestConvertColorConversion, test_yuv_to_rgb)
   typedef TypeParam T;
   typedef Matrix<T, 3, 1> Vec3;
   const Vec3 yuv[] = {
-    Vec3(1, 0    , 0    ),
-    Vec3(0, 0.436, 0    ),
-    Vec3(0, 0    , 0.615)
+    Vec3(T(1), T(0)    , T(0)    ),
+    Vec3(T(0), T(0.436), T(0)    ),
+    Vec3(T(0), T(0)    , T(0.615))
   };
   const Vec3 expected_rgb[] = {
-    Vec3(1            ,  1            , 1            ),
-    Vec3(0            , -0.39465*0.436, 2.03211*0.436),
-    Vec3(1.13983*0.615, -0.58060*0.615, 0            )
+    Vec3(T(1)            , T(1)             , T(1)            ),
+    Vec3(T(0)            , T(-0.39465*0.436), T(2.03211*0.436)),
+    Vec3(T(1.13983*0.615), T(-0.58060*0.615), T(0)            )
   };
   // Using the explicit function.
   for (int i = 0; i < 3; ++i)
