@@ -1,11 +1,10 @@
 ﻿#pragma once
 
 
-#include <DO/Core/StaticAssert.hpp>
 #include <DO/Core/EigenExtension.hpp>
-
-#include "Colorspace.hpp"
-#include "Pixel.hpp"
+#include <DO/Core/StaticAssert.hpp>
+#include <DO/Core/Pixel/Colorspace.hpp>
+#include <DO/Core/Pixel/Pixel.hpp>
 
 
 // Color space conversion with floating-point values.
