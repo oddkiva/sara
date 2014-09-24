@@ -62,6 +62,13 @@ namespace DO {
     gray = yuv[0];
   }
 
+  //! Convert gray color to YUV color.
+  template <typename T>
+  inline void gray_to_yuv(T gray, Matrix<T, 3, 1>& yuv)
+  {
+    yuv << gray, 0, 0;
+  }
+  
 }
 
 // Unified API.
@@ -120,7 +127,7 @@ namespace DO {
   template <> struct ConvertColorToGray<Rgb>
   {
     template <typename T>
-    static inline void apply(const Matrix<T,3,1>& src, T& dst)
+    static inline void apply(const Matrix<T, 3, 1>& src, T& dst)
     {
       rgb_to_gray(src, dst);
     }
@@ -130,10 +137,16 @@ namespace DO {
   template <> struct ConvertColorToGray<Yuv>
   {
     template <typename T>
-    static inline void apply(const Matrix<T,3,1>& src, T& dst)
+    static inline void apply(const Matrix<T, 3, 1>& src, T& dst)
     {
       yuv_to_gray(src, dst);
     }
   };
 
+  //! \brief Convert gray color to YUV color.
+  template <typename T>
+  inline void convert_color(T src, Pixel<T, Yuv>& dst)
+  {
+    gray_to_yuv<T>(src, dst);
+  }
 }
