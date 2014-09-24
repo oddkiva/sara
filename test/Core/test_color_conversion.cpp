@@ -37,6 +37,24 @@ TYPED_TEST_CASE_P(TestConvertColorConversion);
 
 
 // ========================================================================== //
+// RGB <-> RGBA.
+TEST(TestConvertColorConversionBetweenRGB, test_rgb_to_rgba)
+{
+    Pixel<double, Rgb> rgb(1,1,1);
+    Pixel<double, Rgba> rgba;
+    convert_color(rgb, rgba);
+    EXPECT_EQ(Vector4d(1,1,1,1), rgba);
+}
+
+TEST(TestConvertColorConversionBetweenRGB, test_rgb_to_rgba)
+{
+    Pixel<double, Rgba> rgba(1,1,1,1);
+    Pixel<double, Rgb> rgb;
+    convert_color(rgba, rgb);
+    EXPECT_EQ(Vector3d(1,1,1), rgb);
+}
+
+// ========================================================================== //
 // RGB <-> grayscale.
 TYPED_TEST_P(TestConvertColorConversion, test_rgb_to_gray)
 {
@@ -113,7 +131,6 @@ TYPED_TEST_P(TestConvertColorConversion, test_rgb_to_yuv)
   }
 }
 
-
 TYPED_TEST_P(TestConvertColorConversion, test_yuv_to_rgb)
 {
   typedef TypeParam T;
@@ -148,7 +165,7 @@ TYPED_TEST_P(TestConvertColorConversion, test_yuv_to_rgb)
 
 
 // ========================================================================== //
-// YUV -> Gray
+// YUV <-> Gray
 TYPED_TEST_P(TestConvertColorConversion, test_yuv_to_gray)
 {
   typedef TypeParam T;
@@ -167,6 +184,25 @@ TYPED_TEST_P(TestConvertColorConversion, test_yuv_to_gray)
   }
 }
 
+TYPED_TEST_P(TestConvertColorConversion, test_gray_to_yuv)
+{
+  typedef TypeParam T;
+  typedef Matrix<T, 3, 1> Vec3;
+  T gray = T(0.5);
+  {
+    Vec3 yuv;
+    const Vec3 expected_yuv(0.5, 0, 0);
+    gray_to_yuv(gray, yuv);
+    EXPECT_EQ(expected_yuv, yuv);
+  }
+  {
+    Pixel<T, Yuv> yuv;
+    const Pixel<T, Yuv> expected_yuv(0.5, 0, 0);
+    convert_color(gray, yuv);
+    EXPECT_EQ(expected_yuv, yuv);
+  }
+}
+
 
 // ========================================================================== //
 // Register all typed tests and instantiate them.
@@ -175,7 +211,8 @@ REGISTER_TYPED_TEST_CASE_P(TestConvertColorConversion,
                            test_gray_to_rgb,
                            test_rgb_to_yuv,
                            test_yuv_to_rgb,
-                           test_yuv_to_gray);
+                           test_yuv_to_gray,
+                           test_gray_to_yuv);
 INSTANTIATE_TYPED_TEST_CASE_P(Core_Pixel_ColorConversion,
                               TestConvertColorConversion,
                               FloatingPointChannelTypes);

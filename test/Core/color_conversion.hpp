@@ -69,7 +69,7 @@ namespace DO {
 
   //! Color conversion from RGBA to RGB.
   template <typename T>
-  void convert_color(Pixel<T, Rgba>& src, const Pixel<T, Rgb>& dst)
+  void convert_color(const Pixel<T, Rgba>& src, Pixel<T, Rgb>& dst)
   {
     for (int i = 0; i < 3; ++i)
       dst[i] = src[i];
@@ -77,7 +77,7 @@ namespace DO {
 
   //! Pixel conversion from RGB to RGBA.
   template <typename T>
-  void convert_color(Pixel<T, Rgb>& src, const Pixel<T, Rgba>& dst)
+  void convert_color(const Pixel<T, Rgb>& src, Pixel<T, Rgba>& dst)
   {
     using namespace std;
     for (int i = 0; i < 3; ++i)
