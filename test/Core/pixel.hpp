@@ -39,7 +39,10 @@ namespace DO {
     }
 
     //! Copy constructor.
-    inline Pixel(const base_type& x) : base_type(x) {}
+    inline Pixel(const base_type& x)
+      : base_type(x)
+    {
+    }
 
     //! Assignment operator.
     template <typename _OtherDerived>
