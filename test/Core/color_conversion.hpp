@@ -84,21 +84,14 @@ namespace DO {
       dst[i] = src[i];
     dst[3] = numeric_limits<T>::is_integer ? numeric_limits<T>::max() : T(1);
   }
-
-  //! \brief Convert color from RGB to gray.
-  template <typename T>
-  inline void convert_color(const Pixel<T, Rgb>& src, T& dst)
-  {
-    rgb_to_gray(src, dst);
-  }
-
+  
   //! \brief Convert color from gray to RGB.
   template <typename T>
   inline void convert_color(T src, Pixel<T, Rgb>& dst)
   {
     gray_to_rgb(src, dst);
   }
- 
+
   //! \brief Convert color from RGB to YUV.
   template <typename T>
   inline void convert_color(const Pixel<T, Rgb>& src, Pixel<T, Yuv>& dst)
@@ -112,5 +105,35 @@ namespace DO {
   {
     yuv_to_rgb(src, dst);
   }
+
+  //! \brief Generic color converter to grayscale.
+  template <typename ColorSpace> struct ConvertColorToGray;
+  
+  //! \brief Generic color conversion function to grayscale.
+  template <typename T, typename ColorSpace>
+  inline void convert_color(const Pixel<T, ColorSpace>& src, T& dst)
+  {
+    ConvertColorToGray<ColorSpace>::template apply<T>(src, dst);
+  }
+  
+  //! \brief Convert color from RGB to gray.
+  template <> struct ConvertColorToGray<Rgb>
+  {
+    template <typename T>
+    static inline void apply(const Matrix<T,3,1>& src, T& dst)
+    {
+      rgb_to_gray(src, dst);
+    }
+  };
+  
+  //! \brief Convert YUV color to gray color.
+  template <> struct ConvertColorToGray<Yuv>
+  {
+    template <typename T>
+    static inline void apply(const Matrix<T,3,1>& src, T& dst)
+    {
+      yuv_to_gray(src, dst);
+    }
+  };
 
 }

@@ -148,12 +148,34 @@ TYPED_TEST_P(TestConvertColorConversion, test_yuv_to_rgb)
 
 
 // ========================================================================== //
+// YUV -> Gray
+TYPED_TEST_P(TestConvertColorConversion, test_yuv_to_gray)
+{
+  typedef TypeParam T;
+  typedef Matrix<T, 3, 1> Vec3;
+  const Vec3 yuv(1, 0, 0);
+  {
+    T gray;
+    yuv_to_gray(yuv, gray);
+    EXPECT_EQ(1, gray);
+  }
+  {
+    Pixel<T, Yuv> yuv_pixel(yuv);
+    T gray;
+    convert_color<T, Yuv>(yuv, gray);
+    EXPECT_EQ(1, gray);
+  }
+}
+
+
+// ========================================================================== //
 // Register all typed tests and instantiate them.
 REGISTER_TYPED_TEST_CASE_P(TestConvertColorConversion,
                            test_rgb_to_gray,
                            test_gray_to_rgb,
                            test_rgb_to_yuv,
-                           test_yuv_to_rgb);
+                           test_yuv_to_rgb,
+                           test_yuv_to_gray);
 INSTANTIATE_TYPED_TEST_CASE_P(Core_Pixel_ColorConversion,
                               TestConvertColorConversion,
                               FloatingPointChannelTypes);
