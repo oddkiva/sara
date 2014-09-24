@@ -38,7 +38,7 @@ TYPED_TEST_CASE_P(TestConvertColorConversion);
 
 // ========================================================================== //
 // RGB <-> RGBA.
-TEST(TestConvertColorConversionBetweenRGB, test_rgb_to_rgba)
+TEST(TestConvertColorConversion, test_rgb_to_rgba)
 {
     Pixel<double, Rgb> rgb(1,1,1);
     Pixel<double, Rgba> rgba;
@@ -46,7 +46,7 @@ TEST(TestConvertColorConversionBetweenRGB, test_rgb_to_rgba)
     EXPECT_EQ(Vector4d(1,1,1,1), rgba);
 }
 
-TEST(TestConvertColorConversionBetweenRGB, test_rgb_to_rgba)
+TEST(TestConvertColorConversion, test_rgba_to_rgb)
 {
     Pixel<double, Rgba> rgba(1,1,1,1);
     Pixel<double, Rgb> rgb;
