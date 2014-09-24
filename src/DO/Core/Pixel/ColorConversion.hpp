@@ -3,7 +3,7 @@
 
 #include <DO/Core/EigenExtension.hpp>
 #include <DO/Core/StaticAssert.hpp>
-#include <DO/Core/Pixel/Colorspace.hpp>
+#include <DO/Core/Pixel/ColorSpace.hpp>
 #include <DO/Core/Pixel/Pixel.hpp>
 
 
