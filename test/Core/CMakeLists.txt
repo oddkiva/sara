@@ -17,7 +17,7 @@ do_test(Core_EigenExtension
         test_EigenExtension.cpp
         "${DO_LIBRARIES}" ${TestGroupName})
 
-do_test(Core_Pixel
+do_test(Core_Pixel_Class
         test_pixel.cpp
         "${DO_LIBRARIES}" ${TestGroupName})
         
