@@ -429,10 +429,10 @@ namespace DO {
       DO_STATIC_ASSERT(N == 3, DATA_MUST_BE_THREE_DIMENSIONAL);
       return operator()(vector_type(i, j, k));
     }
-    //! Special access operator (mostly for the hessian matrix).
+    //! Special access operator (mostly for the Hessian matrix).
     inline reference delta(int i, int di, int j, int dj) const
     { return *(cur_ptr_ + strides_[i]*di + strides_[j]*dj); }
-    //! Special access operator (mostly for the hessian matrix).
+    //! Special access operator (mostly for the Hessian matrix).
     template<int I, int J>
     inline reference delta(int di, int dj) const
     {
