@@ -10,6 +10,7 @@
 // Pixel data structures.
 namespace DO {
 
+  //! \brief Simple pixel class implemented as a vector.
   template <typename _T, typename _ColorSpace>
   class Pixel : public Matrix<_T, _ColorSpace::size, 1>
   {

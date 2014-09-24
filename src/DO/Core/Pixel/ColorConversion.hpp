@@ -4,8 +4,8 @@
 #include <DO/Core/StaticAssert.hpp>
 #include <DO/Core/EigenExtension.hpp>
 
-#include "colorspace.hpp"
-#include "pixel.hpp"
+#include "Colorspace.hpp"
+#include "Pixel.hpp"
 
 
 // Color space conversion with floating-point values.

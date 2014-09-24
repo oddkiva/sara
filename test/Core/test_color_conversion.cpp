@@ -15,9 +15,10 @@
 
 #include <gtest/gtest.h>
 
+#include <DO/Core/Pixel/Pixel.hpp>
+#include <DO/Core/Pixel/ColorConversion.hpp>
+
 #include "AssertHelpers.hpp"
-#include "pixel.hpp"
-#include "color_conversion.hpp"
 
 
 using namespace std;

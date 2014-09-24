@@ -15,8 +15,8 @@
 
 #include <gtest/gtest.h>
 
-#include "colorspace.hpp"
-#include "pixel.hpp"
+#include <DO/Core/Pixel/ColorSpace.hpp>
+#include <DO/Core/Pixel/Pixel.hpp>
 
 
 using namespace std;

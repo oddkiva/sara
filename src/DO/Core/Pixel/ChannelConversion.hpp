@@ -1,11 +1,10 @@
 #pragma once
 
-
 #include <DO/Core/StaticAssert.hpp>
-#include "colorspace.hpp"
+#include <DO/Core/EigenExtension.hpp>
 
 
-// Channel conversion.
+// Channel conversion from a type to another.
 namespace DO {
 
   //! \brief Convert integral channel value to floating-point value.
@@ -56,7 +55,7 @@ namespace DO {
 } /* namespace DO */
 
 
-// Gray channel conversion.
+// Unified API for channel conversion.
 namespace DO {
 
   //! \brief Convert a double gray value to a float gray value. 

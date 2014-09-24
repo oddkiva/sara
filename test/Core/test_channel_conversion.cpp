@@ -15,8 +15,8 @@
 
 #include <gtest/gtest.h>
 
-#include "pixel.hpp"
-#include "channel_conversion.hpp"
+#include <DO/Core/Pixel/ChannelConversion.hpp>
+#include <DO/Core/Pixel/Pixel.hpp>
 
 
 using namespace std;
