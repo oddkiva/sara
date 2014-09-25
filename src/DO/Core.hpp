@@ -30,7 +30,6 @@
 // Image and color data structures
 #include "Core/Pixel.hpp"
 #include "Core/Image.hpp"
-#include "Core/Subimage.hpp"
 // Tree data structures
 #include "Core/Tree.hpp"
 // Timer classes
