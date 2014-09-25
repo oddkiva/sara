@@ -45,6 +45,14 @@ do_test(Core_MultiArray
         test_multiarray.cpp
         "${DO_LIBRARIES}" ${TestGroupName})
 
+do_test(Core_Image_Class
+        test_image_class.cpp
+        "${DO_LIBRARIES}" ${TestGroupName})
+        
+do_test(Core_Image_Operations
+        test_image_operations.cpp
+        "${DO_LIBRARIES}" ${TestGroupName})
+
 do_test(Core_Tree
         test_Tree.cpp
         "${DO_LIBRARIES}" ${TestGroupName})
