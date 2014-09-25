@@ -7,6 +7,22 @@
 // Channel conversion from a type to another.
 namespace DO {
 
+  //! \brief Return maximum value for channel of type 'T'.
+  template <typename T>
+  inline T channel_min_value()
+  {
+    using std::numeric_limits;
+    return numeric_limits<T>::is_integer ? numeric_limits<T>::min() : T(0);
+  }
+
+  //! \brief Return maximum value for channel of type.
+  template <typename T>
+  inline T channel_max_value()
+  {
+    using std::numeric_limits;
+    return numeric_limits<T>::is_integer ? numeric_limits<T>::max() : T(1);
+  }
+
   //! \brief Convert integral channel value to floating-point value.
   template <typename Int, typename Float>
   inline Float float_normalized_channel(Int src)
