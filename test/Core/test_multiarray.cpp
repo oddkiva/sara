@@ -188,16 +188,6 @@ TEST(TestMultiArray, test_copy_constructor)
   MultiArray<int, 2>::const_iterator b = B.begin();
   for ( ; a != A.end(); ++a, ++b)
     ASSERT_EQ(*a, *b);
-
-  vector<int> raw_data(36, 10);
-  bool acquire_ownership = false;
-  MultiArray<int, 2> C(raw_data.data(), Vector2i(4, 9), acquire_ownership);
-  EXPECT_THROW(C = A, runtime_error);
-
-  int *raw_data_2 = new int[36];
-  bool acquire_ownership_2 = true;
-  MultiArray<int, 2> D(raw_data_2, Vector2i(4, 9), acquire_ownership_2);
-  EXPECT_NO_THROW(D = A);
 }
 
 TEST(TestMultiArray, test_copy_constructor_from_different_multiarray_type)

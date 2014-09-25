@@ -144,11 +144,6 @@ namespace DO {
     //! \brief Assignment operator uses the copy-swap idiom.
     self_type& operator=(self_type other)
     {
-      if (!has_data_ownership_)
-      {
-        const char *msg = "Error: deep copy on wrapped data is not allowed!";
-        throw std::runtime_error("msg");
-      }
       swap(other);
       return *this;
     }
