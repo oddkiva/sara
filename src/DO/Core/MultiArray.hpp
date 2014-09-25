@@ -15,8 +15,8 @@
 #define DO_CORE_MULTIARRAY_HPP
 
 
-#include <DO/Core/MultiArray/MultiArray.hpp>
 #include <DO/Core/MultiArray/ElementTraits.hpp>
+#include <DO/Core/MultiArray/MultiArray.hpp>
 
 
 #endif /* DO_CORE_MULTIARRAY_HPP */
