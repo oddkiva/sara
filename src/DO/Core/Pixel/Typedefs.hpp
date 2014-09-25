@@ -2,26 +2,9 @@
 
 namespace DO {
 
-    //! \defgroup ColorTypes Color typedefs
+  //! \defgroup ColorTypes Color typedefs
   //! @{
 
-  // ======================================================================== //
-  //! self-explanatory.
-  typedef unsigned char gray8;
-  //! self-explanatory.
-  typedef char gray8s;
-  //! self-explanatory.
-  typedef unsigned short gray16;
-  //! self-explanatory.
-  typedef short gray16s;
-  //! self-explanatory.
-  typedef unsigned int gray32;
-  //! self-explanatory.
-  typedef int gray32s;
-  //! self-explanatory.
-  typedef float gray32f;
-  //! self-explanatory.
-  typedef double gray64f;
 
   // ======================================================================== //
   //! Macro for generic color typedefs
