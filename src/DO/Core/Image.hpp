@@ -117,28 +117,6 @@ namespace DO {
     { return Filter<Color, N>(*this)(param); }
   };
 
-  // ====================================================================== //
-  // Construct image views from row major multi-array.
-  //! \todo Check this functionality...
-#define DEFINE_IMAGE_VIEW_FROM_COLMAJOR_MULTIARRAY(Colorspace)          \
-  /*! \brief Reinterpret column-major matrix as an image. */            \
-  template <typename T>                                                 \
-  inline Image<Color<T, Colorspace>, Colorspace::size>                  \
-  as##Colorspace##Image(const MultiArray<Matrix<T,3,1>,                 \
-                                         Colorspace::size,              \
-                                         ColMajor>& M)                  \
-  {                                                                     \
-    return Image<Color<T, Colorspace> >(                                \
-      reinterpret_cast<Color<T, Colorspace> *>(M.data()),               \
-      M.sizes() );                                                      \
-  }
-
-  DEFINE_IMAGE_VIEW_FROM_COLMAJOR_MULTIARRAY(Rgb)
-  DEFINE_IMAGE_VIEW_FROM_COLMAJOR_MULTIARRAY(Rgba)
-  DEFINE_IMAGE_VIEW_FROM_COLMAJOR_MULTIARRAY(Cmyk)
-  DEFINE_IMAGE_VIEW_FROM_COLMAJOR_MULTIARRAY(Yuv)
-#undef DEFINE_IMAGE_VIEW_FROM_COLMAJOR_MULTIARRAY
-
 
   // ====================================================================== //
   // Generic image conversion function.
