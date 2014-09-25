@@ -177,39 +177,26 @@ namespace DO {
     }
   }
 
-  //! Macro that defines min-max value functions for a specific grayscale 
-  //! color types.
-#define DEFINE_FINDMINMAX_GRAY(T)                               \
-  /*! \brief Find min and max grayscale values of the image. */ \
-  template <int N>                                              \
-  inline void findMinMax(T& min, T& max, const Image<T, N>& src)\
-  {                                                             \
-    const T *src_first = src.data();                            \
-    const T *src_last = src_first + src.size();                 \
-                                                                \
-    min = *std::min_element(src_first, src_last);               \
-    max = *std::max_element(src_first, src_last);               \
+  /*! \brief Find min and max grayscale values of the image. */
+  template <typename T, int N>
+  inline void findMinMax(T& min, T& max, const Image<T, N>& src)
+  {
+    const T *src_first = src.data();
+    const T *src_last = src_first + src.size();
+    min = *std::min_element(src_first, src_last);
+    max = *std::max_element(src_first, src_last);
   }
-
-  DEFINE_FINDMINMAX_GRAY(unsigned char)
-  DEFINE_FINDMINMAX_GRAY(char)
-  DEFINE_FINDMINMAX_GRAY(unsigned short)
-  DEFINE_FINDMINMAX_GRAY(short)
-  DEFINE_FINDMINMAX_GRAY(unsigned int)
-  DEFINE_FINDMINMAX_GRAY(int)
-  DEFINE_FINDMINMAX_GRAY(float)
-  DEFINE_FINDMINMAX_GRAY(double)
-#undef DEFINE_FINDMINMAX_GRAY
 
 
   // ====================================================================== //
   // Image rescaling functions
   //! \brief color rescaling function.
   template <typename T, typename Layout, int N>
-  inline Image<Pixel<T,Layout>, N> colorRescale(
-    const Image<Pixel<T,Layout>, N>& src,
-    const Pixel<T, Layout>& a = black<T>(),
-    const Pixel<T, Layout>& b = white<T>())
+  inline
+  Image<Pixel<T,Layout>, N>
+  colorRescale(const Image<Pixel<T,Layout>, N>& src,
+               const Matrix<T, Layout::size, 1>& a = black<T>(),
+               const Matrix<T, Layout::size, 1>& b = white<T>())
   {
     Image<Pixel<T,Layout>, N> dst(src.sizes());
 
