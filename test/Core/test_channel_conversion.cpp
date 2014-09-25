@@ -9,9 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <limits>
 #include <stdint.h>
-#include <vector>
 
 #include <gtest/gtest.h>
 
@@ -171,6 +169,7 @@ void test_channel_conversion_between_integer_types()
     EXPECT_EQ(expected_dst_values[i], actual_dst_value);
   }
 }
+
 TEST(TestConvertChannel, test_convert_channel_between_integers)
 {
   test_channel_conversion_between_integer_types<int8_t, int16_t>();
@@ -253,9 +252,6 @@ TEST(TestConvertChannel, test_convert_channel_between_integers)
   test_channel_conversion_between_integer_types<uint64_t, uint32_t>();
 }
 
-
-// ========================================================================== //
-// Test channel conversion between integer type.
 
 // ========================================================================== //
 int main(int argc, char** argv) 

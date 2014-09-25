@@ -9,10 +9,6 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <limits>
-#include <stdint.h>
-#include <vector>
-
 #include <gtest/gtest.h>
 
 #include <DO/Core/Pixel/ColorSpace.hpp>
