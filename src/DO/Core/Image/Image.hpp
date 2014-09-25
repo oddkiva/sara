@@ -82,12 +82,6 @@ namespace DO {
     {
     }
 
-    //! Assignment operators.
-    inline const Image& operator=(const Image& I)
-    {
-      base_type::operator=(I); return *this;
-    }
-
     //! Constant width getter.
     inline int width() const
     {
