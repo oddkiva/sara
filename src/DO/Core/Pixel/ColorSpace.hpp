@@ -5,44 +5,6 @@
 #include <DO/Core/Meta.hpp>
 
 
-// Template meta-programming utilities.
-namespace DO { namespace Meta {
-
-  //! \brief Array of integers for template meta-programming.
-  template <int _Value0, int _Value1, int _Value2>
-  struct IntArray_3 {
-    enum {
-      value_0 = _Value0,
-      value_1 = _Value1,
-      value_2 = _Value2,
-      size = 3
-    };
-  };
-
-  //! \brief Getter class for the 'IntArray_3' class.
-  template <typename IntArray, int index> struct Get;
-
-  //! \brief Getter class for the element 0 of 'IntArray_3'.
-  template <typename IntArray> struct Get<IntArray, 0>
-  { enum { value = IntArray::value_0 }; };
-
-  //! \brief Getter class for the element 1 of 'IntArray_3'.
-  template <typename IntArray> struct Get<IntArray, 1>
-  { enum { value = IntArray::value_1 }; };
-
-  //! \brief Getter class for the element 2 of 'IntArray_3'.
-  template <typename IntArray> struct Get<IntArray, 2>
-  { enum { value = IntArray::value_2 }; };
-
-  //! \brief Getter class for the element 3 of 'IntArray_3'.
-  template <typename IntArray> struct Get<IntArray, 3>
-  { enum { value = IntArray::value_3 }; };
-  //! @}
-
-} /* namespace Meta */
-} /* namespace DO */
-
-
 // Color spaces and channel names.
 namespace DO {
 
