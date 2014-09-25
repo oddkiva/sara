@@ -28,7 +28,7 @@ namespace DO {
 
   //! \brief The specialized element traits class when the entry is a color.
   template <typename T, typename Layout>
-  struct ElementTraits<Color<T, Layout> >
+  struct ElementTraits<Pixel<T, Layout> >
   {
     typedef Array<T, Layout::size, 1> value_type; //!< STL-like typedef.
     typedef size_t size_type; //!< STL-like typedef.
@@ -183,11 +183,11 @@ namespace DO {
   // Find min and max values in images according to point-wise comparison.
   //! \brief Find min and max pixel values of the image.
   template <typename T, int N, typename Layout>
-  void findMinMax(Color<T, Layout>& min, Color<T, Layout>& max,
-                  const Image<Color<T, Layout>, N>& src)
+  void findMinMax(Pixel<T, Layout>& min, Pixel<T, Layout>& max,
+                  const Image<Pixel<T, Layout>, N>& src)
   {
-    const Color<T,Layout> *src_first = src.data();
-    const Color<T,Layout> *src_last = src_first + src.size();
+    const Pixel<T,Layout> *src_first = src.data();
+    const Pixel<T,Layout> *src_last = src_first + src.size();
 
     min = *src_first;
     max = *src_first;
@@ -228,19 +228,19 @@ namespace DO {
   // Image rescaling functions
   //! \brief color rescaling function.
   template <typename T, typename Layout, int N>
-  inline Image<Color<T,Layout>, N> colorRescale(
-    const Image<Color<T,Layout>, N>& src,
-    const Color<T, Layout>& a = black<T>(),
-    const Color<T, Layout>& b = white<T>())
+  inline Image<Pixel<T,Layout>, N> colorRescale(
+    const Image<Pixel<T,Layout>, N>& src,
+    const Pixel<T, Layout>& a = black<T>(),
+    const Pixel<T, Layout>& b = white<T>())
   {
-    Image<Color<T,Layout>, N> dst(src.sizes());
+    Image<Pixel<T,Layout>, N> dst(src.sizes());
 
-    const Color<T,Layout> *src_first = src.data();
-    const Color<T,Layout> *src_last = src_first + src.size();
-    Color<T,Layout> *dst_first  = dst.data();
+    const Pixel<T,Layout> *src_first = src.data();
+    const Pixel<T,Layout> *src_last = src_first + src.size();
+    Pixel<T,Layout> *dst_first  = dst.data();
 
-    Color<T,Layout> min(*src_first);
-    Color<T,Layout> max(*src_first);
+    Pixel<T,Layout> min(*src_first);
+    Pixel<T,Layout> max(*src_first);
     for ( ; src_first != src_last; ++src_first)
     {
       min = min.cwiseMin(*src_first);
