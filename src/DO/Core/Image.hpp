@@ -60,41 +60,64 @@ namespace DO {
     
     //! Default constructor.
     inline Image()
-      : base_type() {}
+      : base_type()
+    {
+    }
 
     //! Constructor with specified sizes.
     inline explicit Image(const vector_type& sizes)
-      : base_type(sizes) {}
+      : base_type(sizes)
+    {
+    }
 
     //! Constructor which wraps raw data.
     inline Image(Color *data, const vector_type& sizes,
-                 bool getOwnership = false)
-      : base_type(data, sizes, getOwnership) {}
+                 bool acquire_ownership = false)
+      : base_type(data, sizes, acquire_ownership)
+    {
+    }
 
     //! Constructor with specified sizes.
     inline Image(int width, int height)
-      : base_type(width, height) {}
+      : base_type(width, height)
+    {
+    }
 
     //! Constructor with specified sizes.
     inline Image(int width, int height, int depth)
-      : base_type(width, height, depth) {}
+      : base_type(width, height, depth)
+    {
+    }
 
     //! Copy constructor.
-    inline Image(const base_type& x)
-      : base_type(x) {}
+    inline Image(const base_type& other)
+      : base_type(other)
+    {
+    }
 
     //! Assignment operators.
     inline const Image& operator=(const Image& I)
-    { base_type::operator=(I); return *this;}
+    {
+      base_type::operator=(I); return *this;
+    }
 
     //! Constant width getter.
-    inline int width() const { return this->base_type::rows(); }
+    inline int width() const
+    {
+      return this->base_type::rows();
+    }
 
     //! Constant height getter.
-    inline int height() const {  return this->base_type::cols(); }
+    inline int height() const
+    {
+      return this->base_type::cols();
+    }
 
     //! Constant depth getter, which is only valid for 3D images.
-    inline int depth() const {  return this->base_type::depth(); }
+    inline int depth() const
+    {
+      return this->base_type::depth();
+    }
 
     //! Color conversion method.
     template <typename Color2>
@@ -107,14 +130,17 @@ namespace DO {
 
     //! Convenient helper for chaining filters.
     template <template<typename, int> class Filter>
-    inline typename Filter<Color, N>::ReturnType
-    compute() const
-    { return Filter<Color, N>(*this)(); }
+    inline typename Filter<Color, N>::ReturnType compute() const
+    {
+      return Filter<Color, N>(*this)();
+    }
 
     template <template<typename, int> class Filter>
     inline typename Filter<Color, N>::ReturnType
     compute(const typename Filter<Color, N>::ParamType& param) const
-    { return Filter<Color, N>(*this)(param); }
+    {
+      return Filter<Color, N>(*this)(param);
+    }
   };
 
 
