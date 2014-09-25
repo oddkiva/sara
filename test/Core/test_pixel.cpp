@@ -10,37 +10,26 @@
 // ========================================================================== //
 
 #include <gtest/gtest.h>
-#include <DO/Core/Timer.hpp>
-#include <DO/Core/DebugUtilities.hpp>
-#include <chrono>
-#include <thread>
 
-using namespace DO;
+#include <DO/Core/Pixel/ColorSpace.hpp>
+#include <DO/Core/Pixel/Pixel.hpp>
+
+
 using namespace std;
+using namespace DO;
 
-inline void milliSleep(unsigned milliseconds)
+
+TEST(Test_Pixel, test_rgb_32f)
 {
-  chrono::milliseconds duration(milliseconds);
-  this_thread::sleep_for(duration);
+  typedef Pixel<float, Rgb> Rgb32f;
+
+  Rgb32f red(1., 0, 0);
+  EXPECT_EQ(red.channel<R>(), 1.f);
+  EXPECT_EQ(red.channel<G>(), 0.f);
+  EXPECT_EQ(red.channel<B>(), 0.f);
+  EXPECT_EQ(red.num_channels(), 3);
 }
 
-TEST(DO_Core_Test, testTimer)
-{
-  Timer timer;
-  double elapsedTimeMs;
-  double elapsedTimeS;
-  unsigned sleepTimeMs = 580;
-
-  timer.restart();
-  milliSleep(sleepTimeMs);
-  elapsedTimeMs =  timer.elapsedMs();
-  EXPECT_NEAR(elapsedTimeMs, sleepTimeMs, 100);
-
-  timer.restart();
-  milliSleep(sleepTimeMs);
-  elapsedTimeS = timer.elapsed();
-  EXPECT_NEAR(elapsedTimeS, sleepTimeMs/1e3, 5e-3);
-}
 
 int main(int argc, char** argv) 
 {
