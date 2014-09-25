@@ -87,11 +87,11 @@ namespace DO {
 
     //! Constructor that wraps plain data with its known sizes.
     inline MultiArray(value_type *data, const vector_type& sizes,
-                      bool get_data_ownership = false)
+                      bool acquire_data_ownership = false)
       : begin_(data)
       , end_(data+compute_size(sizes))
       , sizes_(sizes), strides_(compute_strides(sizes))
-      , has_data_ownership_(get_data_ownership)
+      , has_data_ownership_(acquire_data_ownership)
     {
     }
 
@@ -144,6 +144,11 @@ namespace DO {
     //! \brief Assignment operator uses the copy-swap idiom.
     self_type& operator=(self_type other)
     {
+      if (!has_data_ownership_)
+      {
+        const char *msg = "Error: deep copy on wrapped data is not allowed!";
+        throw std::runtime_error("msg");
+      }
       swap(other);
       return *this;
     }
