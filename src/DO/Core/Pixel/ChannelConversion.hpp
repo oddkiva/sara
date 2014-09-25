@@ -1,4 +1,6 @@
-#pragma once
+#ifndef DO_CORE_PIXEL_CHANNELCONVERSION_HPP
+#define DO_CORE_PIXEL_CHANNELCONVERSION_HPP
+
 
 #include <DO/Core/StaticAssert.hpp>
 #include <DO/Core/EigenExtension.hpp>
@@ -132,3 +134,6 @@ namespace DO {
   }
 
 }
+
+
+#endif /* DO_CORE_PIXEL_COLORSPACE_HPP */

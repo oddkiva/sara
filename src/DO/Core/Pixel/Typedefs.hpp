@@ -1,4 +1,5 @@
-#pragma once
+#ifndef DO_CORE_PIXEL_TYPEDEFS_HPP
+#define DO_CORE_PIXEL_TYPEDEFS_HPP
 
 
 #include <DO/Core/Pixel/ChannelConversion.hpp>
@@ -165,3 +166,6 @@ namespace DO {
 
 
 } /* namespace DO */
+
+
+#endif /* DO_CORE_PIXEL_TYPEDEFS_HPP */

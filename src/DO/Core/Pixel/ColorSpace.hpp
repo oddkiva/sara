@@ -1,4 +1,5 @@
-#pragma once
+#ifndef DO_CORE_PIXEL_COLORSPACE_HPP
+#define DO_CORE_PIXEL_COLORSPACE_HPP
 
 
 #include <DO/Core/Meta.hpp>
@@ -96,3 +97,6 @@ namespace DO {
   //! @} ColorSpaces
 
 } /* namespace DO */
+
+
+#endif /* DO_CORE_PIXEL_COLORSPACE_HPP */

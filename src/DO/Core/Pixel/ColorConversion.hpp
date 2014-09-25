@@ -1,4 +1,5 @@
-﻿#pragma once
+﻿#ifndef DO_CORE_PIXEL_COLOR_CONVERSION_HPP
+#define DO_CORE_PIXEL_COLOR_CONVERSION_HPP
 
 
 #include <DO/Core/EigenExtension.hpp>
@@ -149,3 +150,6 @@ namespace DO {
     gray_to_yuv<T>(src, dst);
   }
 }
+
+
+#endif /* DO_CORE_PIXEL_COLOR_CONVERSION_HPP */

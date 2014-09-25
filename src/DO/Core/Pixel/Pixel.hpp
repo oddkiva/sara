@@ -1,4 +1,6 @@
-#pragma once
+#ifndef DO_CORE_PIXEL_PIXEL_HPP
+#define DO_CORE_PIXEL_PIXEL_HPP
+
 
 #include <functional>
 #include <stdexcept>
@@ -74,3 +76,6 @@ namespace DO {
   };
 
 }
+
+
+#endif /* DO_CORE_PIXEL_PIXEL_HPP */
