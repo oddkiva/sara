@@ -1,5 +1,9 @@
 #pragma once
 
+
+#include <DO/Core/Pixel/ChannelConversion.hpp>
+
+
 namespace DO {
 
   //! \defgroup ColorTypes Color typedefs
@@ -66,65 +70,65 @@ namespace DO {
   template <typename T> inline Matrix<T, 3, 1> white()
   { 
     return Matrix<T,3,1>(
-      ChannelTraits<T>::max(),
-      ChannelTraits<T>::max(),
-      ChannelTraits<T>::max() ); 
+      channel_max_value<T>(),
+      channel_max_value<T>(),
+      channel_max_value<T>() );
   }
   //! Black color function.
   template <typename T> inline Matrix<T, 3, 1> black()
   { 
     return Matrix<T,3,1>(
-      ChannelTraits<T>::min(),
-      ChannelTraits<T>::min(),
-      ChannelTraits<T>::min() ); 
+      channel_min_value<T>(),
+      channel_min_value<T>(),
+      channel_min_value<T>() );
   }
   //! Red color function.
   template <typename T> inline Matrix<T, 3, 1> red()
   {
     return Matrix<T,3,1>(
-      ChannelTraits<T>::max(),
-      ChannelTraits<T>::min(),
-      ChannelTraits<T>::min() ); 
+      channel_max_value<T>(),
+      channel_min_value<T>(),
+      channel_min_value<T>() );
   }
   //! Green color function.
   template <typename T> inline Matrix<T, 3, 1> green()
   {
     return Matrix<T,3,1>(
-      ChannelTraits<T>::min(),
-      ChannelTraits<T>::max(),
-      ChannelTraits<T>::min() );
+      channel_min_value<T>(),
+      channel_max_value<T>(),
+      channel_min_value<T>() );
   }
   //! Blue color function.
   template <typename T> inline Matrix<T, 3, 1> blue()
   {
     return Matrix<T,3,1>(
-      ChannelTraits<T>::min(),
-      ChannelTraits<T>::min(),
-      ChannelTraits<T>::max() ); 
+      channel_min_value<T>(),
+      channel_min_value<T>(),
+      channel_max_value<T>() );
   }
   //! Cyan color function.
   template <typename T> inline Matrix<T, 3, 1> cyan()
   {
     return Matrix<T,3,1>(
-      ChannelTraits<T>::min(),
-      ChannelTraits<T>::max(),
-      ChannelTraits<T>::max() ); 
+      channel_min_value<T>(),
+      channel_max_value<T>(),
+      channel_max_value<T>() );
   }
   //! Yellow color function.
   template <typename T> inline Matrix<T, 3, 1> yellow()
   {
     return Matrix<T,3,1>(
-      ChannelTraits<T>::max(),
-      ChannelTraits<T>::max(),
-      ChannelTraits<T>::min() ); 
+      channel_max_value<T>(),
+      channel_max_value<T>(),
+      channel_min_value<T>() );
   }
   //! Magenta color function.
   template <typename T> inline Matrix<T, 3, 1> magenta()
   {
     return Matrix<T,3,1>(
-      ChannelTraits<T>::max(),
-      ChannelTraits<T>::min(),
-      ChannelTraits<T>::max() ); 
+      channel_max_value<T>(),
+      channel_min_value<T>(),
+      channel_max_value<T>() );
   }
 
   //! Primary color definition.
@@ -155,7 +159,6 @@ namespace DO {
   DEFINE_COLOR_CONSTANT(Black, black)
   DEFINE_COLOR_CONSTANT(White, white)
 #undef DEFINE_COLOR_CONSTANT
-  //! @}
 
   //! @}
 
