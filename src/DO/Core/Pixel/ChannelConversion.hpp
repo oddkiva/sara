@@ -55,8 +55,8 @@ namespace DO {
     const Float delta_max = std::abs(src-float_max)/float_range;
     const Float delta_min = std::abs(src-float_min)/float_range;
     const Float eps = sizeof(Float) == 4 ?
-      Float(1e-5) : // 'Float' == 'float'
-      Float(1e-9);  // 'Float' == 'double'
+      Float(1e-5) : // i.e., if 'Float' == 'float'.
+      Float(1e-9);  // i.e., if 'Float' == 'double'.
 
     Int dst;
     if (delta_max <= eps)
