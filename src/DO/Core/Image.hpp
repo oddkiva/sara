@@ -135,7 +135,7 @@ namespace DO {
       T *dst_first  = dst.data();
 
       for ( ; src_first != src_last; ++src_first, ++dst_first)
-        convertColor(*dst_first, *src_first);
+        convert_color(*dst_first, *src_first);
     }
   };
 
