@@ -17,8 +17,6 @@
 
 #include "AssertHelpers.hpp"
 
-#include <vld.h>
-
 
 using namespace DO;
 using namespace std;
