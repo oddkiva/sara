@@ -59,6 +59,7 @@ TEST(TestPixelTypedefs, test_4d_colors_typedefs)
 
 TEST(TestPixelTypedefs, test_rgb_color_constants)
 {
+  // Check colors with signed char channels.
   EXPECT_EQ(Color3b(127, -128, -128), red<char>());
   EXPECT_EQ(Color3b(-128, 127, -128), green<char>());
   EXPECT_EQ(Color3b(-128, -128, 127), blue<char>());
@@ -67,6 +68,7 @@ TEST(TestPixelTypedefs, test_rgb_color_constants)
   EXPECT_EQ(Color3b(127, 127, -128), yellow<char>());
   EXPECT_EQ(Color3b(-128, -128, -128), black<char>());
 
+  // Check colors with unsigned char channels.
   EXPECT_EQ(Color3ub(255, 0, 0), Red8);
   EXPECT_EQ(Color3ub(0, 255, 0), Green8);
   EXPECT_EQ(Color3ub(0, 0, 255), Blue8);
@@ -75,6 +77,7 @@ TEST(TestPixelTypedefs, test_rgb_color_constants)
   EXPECT_EQ(Color3ub(255, 255, 0), Yellow8);
   EXPECT_EQ(Color3ub(0, 0, 0), Black8);
 
+  // Check colors
   EXPECT_EQ(Color3f(1, 0, 0), red<float>());
   EXPECT_EQ(Color3f(0, 1, 0), green<float>());
   EXPECT_EQ(Color3f(0, 0, 1), blue<float>());
