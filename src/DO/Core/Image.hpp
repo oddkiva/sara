@@ -239,45 +239,61 @@ namespace DO {
     return dst;
   }
 
-  //! Macro that defines a color rescaling function for a specific grayscale 
-  //! color type.
-#define DEFINE_RESCALE_GRAY(T)                                  \
-  /*! \brief Rescales color values properly for viewing. */     \
-  template <int N>                                              \
-  inline Image<T, N> colorRescale(const Image<T, N>& src,       \
-                                  T a = ColorTraits<T>::min(),  \
-                                  T b = ColorTraits<T>::max())  \
-  {                                                             \
-    Image<T, N> dst(src.sizes());                               \
-                                                                \
-    const T *src_first = src.data();                            \
-    const T *src_last = src_first + src.size();                 \
-    T *dst_first  = dst.data();                                 \
-                                                                \
-    T min = *std::min_element(src_first, src_last);             \
-    T max = *std::max_element(src_first, src_last);             \
-                                                                \
-    if (min == max)                                             \
-    {                                                           \
-      std::cerr << "Warning: min == max!" << std::endl;         \
-      return dst;                                               \
-    }                                                           \
-                                                                \
-    for ( ; src_first != src_last; ++src_first, ++dst_first)    \
-      *dst_first = a + (b-a)*(*src_first-min)/(max-min);        \
-                                                                \
-    return dst;                                                 \
+  //! \brief Return min color value.
+  template <typename T>
+  inline T color_min_value()
+  {
+    return channel_min_value<T>();
   }
 
-  DEFINE_RESCALE_GRAY(unsigned char)
-  DEFINE_RESCALE_GRAY(char)
-  DEFINE_RESCALE_GRAY(unsigned short)
-  DEFINE_RESCALE_GRAY(short)
-  DEFINE_RESCALE_GRAY(unsigned int)
-  DEFINE_RESCALE_GRAY(int)
-  DEFINE_RESCALE_GRAY(float)
-  DEFINE_RESCALE_GRAY(double)
-#undef DEFINE_RESCALE_GRAY
+  //! \brief Return max color value.
+  template <typename T>
+  inline T color_max_value()
+  {
+    return channel_max_value<T>();
+  }
+
+  //! \brief Return min color value.
+  template <typename T, int N>
+  inline Matrix<T, N, 1> color_min_value()
+  {
+    Matrix<T, N, 1> min;
+    min.fill(channel_min_value<T>());
+    return min;
+  }
+  
+  //! \brief Return max color value.
+  template <typename T, int N>
+  inline Matrix<T, N, 1> color_max_value()
+  {
+    Matrix<T, N, 1> min;
+    min.fill(channel_min_value<T>());
+    return min;
+  }
+
+  //! \brief Rescales color values properly for viewing purposes.
+  template <typename T, int N>
+  inline Image<T, N> colorRescale(const Image<T, N>& src,
+                                  const T& a = color_min_value<T>(),
+                                  const T& b = color_max_value<T>())
+  {
+    Image<T, N> dst(src.sizes());
+
+    const T *src_first = src.data();
+    const T *src_last = src_first + src.size();
+    T *dst_first  = dst.data();
+
+    T min = *std::min_element(src_first, src_last);
+    T max = *std::max_element(src_first, src_last);
+
+    if (min == max)
+      throw std::runtime_error("Error: cannot rescale image! min == max");
+
+    for ( ; src_first != src_last; ++src_first, ++dst_first)
+      *dst_first = a + (b-a)*(*src_first-min)/(max-min);
+
+    return dst;
+  }
 
   //! \brief color rescaling functor helper.
   template <typename T, int N>

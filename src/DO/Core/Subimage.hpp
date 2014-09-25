@@ -25,7 +25,7 @@ namespace DO {
                             const Matrix<int, N, 1>& b)
   {
     Image<T,N> dst(b-a);
-    dst.array().fill(ColorTraits<T>::zero());
+    dst.array().fill(color_min_value<T>());
     typedef typename Image<T, N>::const_subarray_iterator const_src_iterator;
     const_src_iterator src_it = src.begin_subrange(a, b);
     for (typename Image<T, N>::iterator dst_it = dst.begin();
@@ -45,7 +45,7 @@ namespace DO {
   Image<T> getImagePatch(const Image<T>& src, int x, int y, int w, int h)
   {
     Image<T> patch(w,h);
-    patch.array().fill(ColorTraits<T>::zero());
+    patch.array().fill(color_min_value<T>());
     for (int v = 0; v < h; ++v)
     {
       if (y+v < 0 || y+v > src.height()-1)
