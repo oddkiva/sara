@@ -7,7 +7,7 @@ namespace DO {
 
 
   // ======================================================================== //
-  //! Macro for generic color typedefs
+  //! Macro for generic color typedefs like in OpenGL.
 #define DEFINE_GENERIC_COLOR_TYPEDEFS(N)            \
   /*! \brief Color{NumChannels}{ChannelType} */     \
   typedef Matrix<unsigned char, N, 1> Color##N##ub; \
@@ -34,28 +34,29 @@ namespace DO {
   //! Macro for color typedefs.
 #define DEFINE_COLOR_TYPES(colorspace)                      \
   /*! \brief {ColorSpace}{BitDepthPerChannel} */            \
-  typedef Color<unsigned char, colorspace> colorspace##8;   \
-  /*! \brief {ColorSpace}{BitDepthPerChannel} */            \
-  typedef Color<unsigned short, colorspace> colorspace##16; \
-  /*! \brief {ColorSpace}{BitDepthPerChannel} */            \
-  typedef Color<unsigned int, colorspace> colorspace##32;   \
-  /*! \brief {ColorSpace}{BitDepthPerChannel} */            \
-  typedef Color<char, colorspace> colorspace##8s;           \
-  /*! \brief {ColorSpace}{BitDepthPerChannel} */            \
-  typedef Color<short, colorspace> colorspace##16s;         \
-  /*! \brief {ColorSpace}{BitDepthPerChannel} */            \
-  typedef Color<int, colorspace> colorspace##32s;           \
-  /*! \brief {ColorSpace}{BitDepthPerChannel} */            \
-  typedef Color<float, colorspace> colorspace##32f;         \
-  /*! \brief {ColorSpace}{BitDepthPerChannel} */            \
-  typedef Color<double, colorspace> colorspace##64f;
+  typedef Pixel<unsigned char, colorspace> colorspace##8;   \
+  /*! \brief {PixelSpace}{BitDepthPerChannel} */            \
+  typedef Pixel<unsigned short, colorspace> colorspace##16; \
+  /*! \brief {PixelSpace}{BitDepthPerChannel} */            \
+  typedef Pixel<unsigned int, colorspace> colorspace##32;   \
+  /*! \brief {PixelSpace}{BitDepthPerChannel} */            \
+  typedef Pixel<char, colorspace> colorspace##8s;           \
+  /*! \brief {PixelSpace}{BitDepthPerChannel} */            \
+  typedef Pixel<short, colorspace> colorspace##16s;         \
+  /*! \brief {PixelSpace}{BitDepthPerChannel} */            \
+  typedef Pixel<int, colorspace> colorspace##32s;           \
+  /*! \brief {PixelSpace}{BitDepthPerChannel} */            \
+  typedef Pixel<float, colorspace> colorspace##32f;         \
+  /*! \brief {PixelSpace}{BitDepthPerChannel} */            \
+  typedef Pixel<double, colorspace> colorspace##64f;
 
   DEFINE_COLOR_TYPES(Rgb)
   DEFINE_COLOR_TYPES(Rgba)
-  DEFINE_COLOR_TYPES(Cmyk)
   DEFINE_COLOR_TYPES(Yuv)
 #undef DEFINE_COLOR_TYPES
+
   //! @} ColorTypes
+
 
   // ======================================================================== //
   //! \defgroup PrimaryColors Primary Colors in RGB.
