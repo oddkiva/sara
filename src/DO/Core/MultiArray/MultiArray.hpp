@@ -156,7 +156,7 @@ namespace DO {
       if (!has_data_ownership_)
       {
         const char *msg = "Error: deep copy on wrapped data is not allowed!";
-        throw std::runtime_error("msg");
+        throw std::runtime_error(msg);
       }
       // Free memory.
       if (begin_)
