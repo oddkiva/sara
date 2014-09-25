@@ -2,13 +2,14 @@
 
 
 #include <DO/Core/Pixel/ChannelConversion.hpp>
+#include <DO/Core/Pixel/ColorSpace.hpp>
+#include <DO/Core/Pixel/Pixel.hpp>
 
 
 namespace DO {
 
   //! \defgroup ColorTypes Color typedefs
   //! @{
-
 
   // ======================================================================== //
   //! Macro for generic color typedefs like in OpenGL.
