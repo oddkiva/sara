@@ -29,6 +29,10 @@ do_test(Core_Pixel_ColorConversion
         test_color_conversion.cpp
         "${DO_LIBRARIES}" ${TestGroupName})
 
+do_test(Core_Pixel_Typedefs
+        test_pixel_typedefs.cpp
+        "${DO_LIBRARIES}" ${TestGroupName})
+
 do_test(Core_ArrayIterators_Basic_Functions
         test_array_iterator_basic_functions.cpp
         "${DO_LIBRARIES}" ${TestGroupName})
