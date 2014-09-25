@@ -87,13 +87,13 @@ namespace DO {
     inline const Image& operator=(const Image& I)
     { base_type::operator=(I); return *this;}
 
-    //! Constant width accessor.
+    //! Constant width getter.
     inline int width() const { return this->base_type::rows(); }
 
-    //! Constant height accessor.
+    //! Constant height getter.
     inline int height() const {  return this->base_type::cols(); }
 
-    //! Constant depth accessor (only for volumetric image.)
+    //! Constant depth getter, which is only valid for 3D images.
     inline int depth() const {  return this->base_type::depth(); }
 
     //! Color conversion method.
