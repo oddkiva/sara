@@ -10,7 +10,7 @@ include(${DO_USE_FILE})
 set(TestGroupName "Core")
 
 do_test(Core_Defines
-        test_Defines.cpp
+        test_core_defines_and_macros.cpp
         "${DO_LIBRARIES}" ${TestGroupName})
 
 do_test(Core_EigenExtension
