@@ -17,6 +17,7 @@
 
 #include <iostream>
 #include <numeric>
+#include <stdexcept>
 
 #include <DO/Core/ArrayIterators.hpp>
 #include <DO/Core/MultiArray/ElementTraits.hpp>
@@ -154,9 +155,8 @@ namespace DO {
     {
       if (!has_data_ownership_)
       {
-        std::cerr << "Fatal Error: using the assignment operator on wrapped data is not allowed!" << std::endl;
-        std::cerr << "Terminating !" << std::endl;
-        exit(-1);
+        const char *msg = "Error: deep copy on wrapped data is not allowed!";
+        throw std::runtime_error("msg");
       }
       // Free memory.
       if (begin_)
@@ -207,13 +207,13 @@ namespace DO {
       return begin_[offset(Vector3i(i, j, k))];
     }
 
-    //! Mutable POD accessor.
+    //! Mutable POD getter.
     inline pointer data()
     {
       return begin_;
     }
 
-    //! Non-mutable POD accessor.
+    //! Non-mutable POD getter.
     inline const_pointer data() const
     {
       return begin_;
