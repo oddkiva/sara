@@ -14,6 +14,8 @@
 #ifndef DO_CORE_MULTIARRAY_ELEMENTTRAITS_HPP
 #define DO_CORE_MULTIARRAY_ELEMENTTRAITS_HPP
 
+
+#include <DO/Core/Meta.hpp>
 #include <DO/Core/EigenExtension.hpp>
 
 
