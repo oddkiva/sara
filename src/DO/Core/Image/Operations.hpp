@@ -16,53 +16,24 @@
 #include <DO/Core/Image/Image.hpp>
 
 
+// Various utilities for image operations.
 namespace DO {
 
-  // ====================================================================== //
-  // Generic image conversion function.
-  //! \brief Generic image converter class.
-  template <typename T, typename U, int N>
-  struct ConvertImage {
-    //! Implementation of the image conversion.
-    static void apply(Image<T, N>& dst, const Image<U, N>& src)
-    {
-      if (dst.sizes() != src.sizes())
-        dst.resize(src.sizes());
-
-      const U *src_first = src.data();
-      const U *src_last = src_first + src.size();
-
-      T *dst_first  = dst.data();
-
-      for ( ; src_first != src_last; ++src_first, ++dst_first)
-        convert_color(*dst_first, *src_first);
-    }
-  };
-
-  //! \brief Specialized image converter class when the source and color types
-  //! are the same.
+  //! \brief Find min and max grayscale values of the image.
   template <typename T, int N>
-  struct ConvertImage<T,T,N> {
-    //! Implementation of the image conversion.
-    static void apply(Image<T, N>& dst, const Image<T, N>& src)
-    {
-      dst = src;
-    }
-  };
-
-  template <typename T, typename U, int N>
-  inline void convert(Image<T, N>& dst, const Image<U, N>& src)
+  inline void find_min_max(T& min, T& max, const Image<T, N>& src)
   {
-    ConvertImage<T,U,N>::apply(dst, src);
+    const T *src_first = src.data();
+    const T *src_last = src_first + src.size();
+    min = *std::min_element(src_first, src_last);
+    max = *std::max_element(src_first, src_last);
   }
 
-
-  // ====================================================================== //
-  // Find min and max values in images according to point-wise comparison.
   //! \brief Find min and max pixel values of the image.
   template <typename T, int N, typename Layout>
-  void findMinMax(Pixel<T, Layout>& min, Pixel<T, Layout>& max,
-    const Image<Pixel<T, Layout>, N>& src)
+  void find_min_max(Pixel<T, Layout>& min,
+                    Pixel<T, Layout>& max,
+                    const Image<Pixel<T, Layout>, N>& src)
   {
     const Pixel<T,Layout> *src_first = src.data();
     const Pixel<T,Layout> *src_last = src_first + src.size();
@@ -75,54 +46,6 @@ namespace DO {
       min = min.cwiseMin(*src_first);
       max = max.cwiseMax(*src_first);
     }
-  }
-
-  /*! \brief Find min and max grayscale values of the image. */
-  template <typename T, int N>
-  inline void findMinMax(T& min, T& max, const Image<T, N>& src)
-  {
-    const T *src_first = src.data();
-    const T *src_last = src_first + src.size();
-    min = *std::min_element(src_first, src_last);
-    max = *std::max_element(src_first, src_last);
-  }
-
-
-  // ====================================================================== //
-  // Image rescaling functions
-  //! \brief color rescaling function.
-  template <typename T, typename Layout, int N>
-  inline Image<Pixel<T,Layout>, N>
-  colorRescale(const Image<Pixel<T,Layout>, N>& src,
-               const Matrix<T, Layout::size, 1>& a = black<T>(),
-               const Matrix<T, Layout::size, 1>& b = white<T>())
-  {
-    Image<Pixel<T,Layout>, N> dst(src.sizes());
-
-    const Pixel<T,Layout> *src_first = src.data();
-    const Pixel<T,Layout> *src_last = src_first + src.size();
-    Pixel<T,Layout> *dst_first  = dst.data();
-
-    Pixel<T,Layout> min(*src_first);
-    Pixel<T,Layout> max(*src_first);
-    for ( ; src_first != src_last; ++src_first)
-    {
-      min = min.cwiseMin(*src_first);
-      max = max.cwiseMax(*src_first);
-    }
-
-    if (min == max)
-    {
-      std::cerr << "Warning: min == max!" << std::endl;
-      return dst;
-    }
-
-    for (src_first = src.data(); src_first != src_last; 
-      ++src_first, ++dst_first)
-      *dst_first = a + (*src_first-min).cwiseProduct(b-a).
-      cwiseQuotient(max-min);
-
-    return dst;
   }
 
   //! \brief Return min color value.
@@ -153,15 +76,63 @@ namespace DO {
   inline Matrix<T, N, 1> color_max_value()
   {
     Matrix<T, N, 1> min;
-    min.fill(channel_min_value<T>());
+    min.fill(channel_max_value<T>());
     return min;
   }
 
+}
+
+// Generic color conversion of images.
+namespace DO {
+
+  //! \brief Generic image converter class.
+  template <typename T, typename U, int N>
+  struct ConvertImage
+  {
+    //! \brief Implementation of the image conversion.
+    static void apply(Image<T, N>& dst, const Image<U, N>& src)
+    {
+      if (dst.sizes() != src.sizes())
+        dst.resize(src.sizes());
+
+      const U *src_first = src.data();
+      const U *src_last = src_first + src.size();
+
+      T *dst_first  = dst.data();
+
+      for ( ; src_first != src_last; ++src_first, ++dst_first)
+        convert_color(*dst_first, *src_first);
+    }
+  };
+
+  //! \brief Specialized image converter class.
+  template <typename T, int N>
+  struct ConvertImage<T, T, N>
+  {
+    //! \brief Implementation of the image conversion.
+    static void apply(Image<T, N>& dst, const Image<T, N>& src)
+    {
+      dst = src;
+    }
+  };
+
+
+  //! \brief Unified API for the image conversion.
+  template <typename T, typename U, int N>
+  inline void convert(Image<T, N>& dst, const Image<U, N>& src)
+  {
+    ConvertImage<T,U,N>::apply(dst, src);
+  }
+
+}
+
+// Image rescaling functions
+namespace DO {
   //! \brief Rescales color values properly for viewing purposes.
   template <typename T, int N>
-  inline Image<T, N> colorRescale(const Image<T, N>& src,
-    const T& a = color_min_value<T>(),
-    const T& b = color_max_value<T>())
+  inline Image<T, N> color_rescale(const Image<T, N>& src,
+                                   const T& a = color_min_value<T>(),
+                                   const T& b = color_max_value<T>())
   {
     Image<T, N> dst(src.sizes());
 
@@ -181,13 +152,50 @@ namespace DO {
     return dst;
   }
 
+
+  //! \brief color rescaling function.
+  template <typename T, typename Layout, int N>
+  inline Image<Pixel<T,Layout>, N>
+  color_rescale(const Image<Pixel<T,Layout>, N>& src,
+                const Matrix<T, Layout::size, 1>& a = color_min_value<T, N>(),
+                const Matrix<T, Layout::size, 1>& b = color_max_value<T, N>())
+  {
+    Image<Pixel<T,Layout>, N> dst(src.sizes());
+
+    const Pixel<T,Layout> *src_first = src.data();
+    const Pixel<T,Layout> *src_last = src_first + src.size();
+    Pixel<T,Layout> *dst_first  = dst.data();
+
+    Pixel<T,Layout> min(*src_first);
+    Pixel<T,Layout> max(*src_first);
+    for ( ; src_first != src_last; ++src_first)
+    {
+      min = min.cwiseMin(*src_first);
+      max = max.cwiseMax(*src_first);
+    }
+
+    if (min == max)
+    {
+      std::cerr << "Warning: min == max!" << std::endl;
+      return dst;
+    }
+
+    for (src_first = src.data(); src_first != src_last; 
+      ++src_first, ++dst_first)
+      *dst_first = a + (*src_first-min).cwiseProduct(b-a).
+      cwiseQuotient(max-min);
+
+    return dst;
+  }
+
+
   //! \brief color rescaling functor helper.
   template <typename T, int N>
   struct ColorRescale
   {
     typedef Image<T, N> ReturnType;
     ColorRescale(const Image<T, N>& src) : src_(src) {}
-    ReturnType operator()() const { return colorRescale(src_); }
+    ReturnType operator()() const { return color_rescale(src_); }
     const Image<T, N>& src_;
   };
 
