@@ -136,12 +136,15 @@ namespace DO {
   //! \ingroup Image
   //! @{
 
-  //! \brief Rescales color values properly for viewing purposes.
+  //! \brief Rescale color values properly for viewing purposes.
   template <typename T, int N>
   inline Image<T, N> color_rescale(const Image<T, N>& src,
                                    const T& a = color_min_value<T>(),
                                    const T& b = color_max_value<T>())
   {
+    DO_STATIC_ASSERT(!std::numeric_limits<T>::is_integer,
+                     IMPLEMENTATION_NOT_SUPPORTED_FOR_INTEGER_TYPE);
+
     Image<T, N> dst(src.sizes());
 
     const T *src_first = src.data();
@@ -168,6 +171,9 @@ namespace DO {
     const Pixel<T, Layout>& a = color_min_value<T, Layout::size>(),
     const Pixel<T, Layout>& b = color_max_value<T, Layout::size>())
   {
+    DO_STATIC_ASSERT(!std::numeric_limits<T>::is_integer,
+                     IMPLEMENTATION_NOT_SUPPORTED_FOR_INTEGER_TYPE);
+
     Image<Pixel<T,Layout>, N> dst(src.sizes());
 
     const Pixel<T,Layout> *src_first = src.data();
