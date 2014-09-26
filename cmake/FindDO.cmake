@@ -49,7 +49,6 @@ if (NOT DO_FOUND)
   # TODO: Don't re-enable this components as long there are not properly
   # tested.
   #do_append_components(DO_COMPONENTS KDTree)
-  #do_append_components(DO_COMPONENTS FileSystem)
   #do_append_components(DO_COMPONENTS ImageDrawing)
   # Image processing
   #do_append_components(DO_COMPONENTS ImageProcessing)
