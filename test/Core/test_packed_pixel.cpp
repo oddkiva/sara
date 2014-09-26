@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 
-#include "packed_pixel.hpp"
+#include <DO/Core/Pixel/PackedPixel.hpp>
 
 
 using namespace std;
