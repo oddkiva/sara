@@ -15,6 +15,7 @@
 
 #include <DO/Core/StaticAssert.hpp>
 #include <DO/Core/EigenExtension.hpp>
+#include <DO/Core/Pixel/Pixel.hpp>
 
 
 // Channel conversion from a type to another.
@@ -144,6 +145,14 @@ namespace DO {
       convert_channel(src[i], dst[i]);
   }
 
+  //! \brief Convert channels from a pixel vector to another pixel vector.
+  template <typename T, typename U, typename ColorSpace>
+  inline void convert_channel(const Pixel<T, ColorSpace>& src,
+                              Pixel<U, ColorSpace>& dst)
+  {
+    for (int i = 0; i < ColorSpace::size; ++i)
+      convert_channel(src[i], dst[i]);
+  }
 }
 
 

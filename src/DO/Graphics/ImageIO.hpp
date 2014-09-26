@@ -70,21 +70,6 @@ namespace DO {
    */
   DO_EXPORT
   bool loadFromDialogBox(Image<Color3ub>& I); 
-  /*!
-    \brief Load image from a dialog box.
-    @param[in]  I image file.
-    \return true if image is successfully loaded.
-    \return false otherwise.
-   */
-  template <typename T>
-  bool loadFromDialogBox(Image<T>& I)
-  {
-    Image<Rgb8> tmp;
-    if (!loadFromDialogBox(tmp))
-      return false;
-    I = tmp.convert<T>();
-    return true;
-  }
 
   // ====================================================================== //
   // Image saving functions
