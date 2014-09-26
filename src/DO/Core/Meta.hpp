@@ -25,6 +25,38 @@
 
 namespace DO { namespace Meta {
 
+  //! \brief Static 3D array of integers.
+  template <int _Value0, int _Value1, int _Value2>
+  struct IntArray_3
+  {
+    enum {
+      value_0 = _Value0,
+      value_1 = _Value1,
+      value_2 = _Value2,
+      size = 3
+    };
+  };
+  
+  //! \brief Getter class for IntArray_3.
+  template <typename IntArray, int index> struct Get;
+  
+  //! \brief Specialized getter class for IntArray_3 for index 0.
+  template <typename IntArray> struct Get<IntArray, 0>
+  { enum { value = IntArray::value_0 }; };
+
+  //! \brief Specialized getter class for IntArray_3 for index 1.
+  template <typename IntArray> struct Get<IntArray, 1>
+  { enum { value = IntArray::value_1 }; };
+
+  //! \brief Specialized getter class for IntArray_3 for index 2.
+  template <typename IntArray> struct Get<IntArray, 2>
+  { enum { value = IntArray::value_2 }; };
+
+  //! \brief Specialized getter class for IntArray_3 for index 3.
+  template <typename IntArray> struct Get<IntArray, 3>
+  { enum { value = IntArray::value_3 }; };
+
+  
   //! 3D vector of types.
   template <typename T0_, typename T1_, typename T2_>
   struct Vector3 

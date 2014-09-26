@@ -14,13 +14,17 @@ do_test(Core_Defines
         "${DO_LIBRARIES}" ${TestGroupName})
 
 do_test(Core_EigenExtension
-        test_EigenExtension.cpp
+        test_eigen_extension.cpp
         "${DO_LIBRARIES}" ${TestGroupName})
 
 do_test(Core_Pixel_Class
         test_pixel.cpp
         "${DO_LIBRARIES}" ${TestGroupName})
-        
+
+do_test(Core_Pixel_PackedPixel
+        test_packed_pixel.cpp
+        "${DO_LIBRARIES}" ${TestGroupName})
+
 do_test(Core_Pixel_ChannelConversion
         test_channel_conversion.cpp
         "${DO_LIBRARIES}" ${TestGroupName})
@@ -54,9 +58,9 @@ do_test(Core_Image_Operations
         "${DO_LIBRARIES}" ${TestGroupName})
 
 do_test(Core_Tree
-        test_Tree.cpp
+        test_tree.cpp
         "${DO_LIBRARIES}" ${TestGroupName})
 
 do_test(Core_Timer
-        test_Timer.cpp
+        test_timer.cpp
         "${DO_LIBRARIES}" ${TestGroupName})
