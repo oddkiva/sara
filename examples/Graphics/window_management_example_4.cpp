@@ -4,7 +4,7 @@
 using namespace std;
 using namespace DO;
 
-int main()
+GRAPHICS_MAIN_SIMPLE()
 {
   // Open 6 windows aligned in 2x3 grid.
   vector<Window> windows;

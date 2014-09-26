@@ -159,9 +159,9 @@ void testAllScaling(const Image<Rgb8>& rgb8image)
   testScaling<Color>(rgb8image);
 
   TEST_SCALING(float);
-  TEST_SCALING(uchar);
-  TEST_SCALING(ushort);
-  TEST_SCALING(uint);
+  TEST_SCALING(unsigned char);
+  TEST_SCALING(unsigned short);
+  TEST_SCALING(unsigned int);
   TEST_SCALING(char);
   TEST_SCALING(short);
   TEST_SCALING(int);  
@@ -191,7 +191,7 @@ void testLinearFiltering(const Image<Rgb8>& rgb8image)
   Image<Color> I2(I);
 
   // Timing
-  HighResTimer t;
+  Timer t;
   double elapsed;
 
   // x-gradient
@@ -280,7 +280,7 @@ void testDiffAlgos(const Image<Rgb8>& rgb8image)
   Image<T> gn(I.sizes());
   Image<T> go(I.sizes());
   Image<T> lap(I.sizes());
-  HighResTimer t;
+  Timer t;
   double elapsed;
 
   // Gradient.
@@ -375,7 +375,7 @@ int main()
 {
   using namespace DO;
   Image<Rgb8> I;
-  if (!load(I, srcPath("Hydrangeas.jpg")))
+  if (!load(I, srcPath("../../datasets/sunflowerField.jpg")))
     return -1;
   viewImage(I);
 

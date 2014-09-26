@@ -23,14 +23,13 @@
 // Linear algebra imports and extension from Eigen3
 #include "Core/EigenExtension.hpp"
 // N-dimensional array and N-dimensional iterators
-#include "Core/Locator.hpp"
+#include "Core/ArrayIterators.hpp"
 #include "Core/MultiArray.hpp"
 // Sparse N-dimensional array
 #include "Core/SparseMultiArray.hpp"
 // Image and color data structures
-#include "Core/Color.hpp"
+#include "Core/Pixel.hpp"
 #include "Core/Image.hpp"
-#include "Core/Subimage.hpp"
 // Tree data structures
 #include "Core/Tree.hpp"
 // Timer classes
