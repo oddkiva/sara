@@ -120,8 +120,8 @@ macro(do_glob_directory _curdir)
   set(DO_${curdir_name}_MASTER_HEADER ${DO_SOURCE_DIR}/${curdir_name}.hpp)
   source_group("Master Header File" FILES ${DO_${curdir_name}_MASTER_HEADER})
   
-  list(APPEND DO_${curdir_name}_HEADER_FILES
-       ${${DO_${curdir_name}_MASTER_HEADER}})
+  list(APPEND DO_${curdir_name}_HEADER_FILES 
+       ${DO_${curdir_name}_MASTER_HEADER})
   
   message(STATUS "Master Header:\n ${DO_${curdir_name}_MASTER_HEADER}")
   message(STATUS "Header file list:\n ${DO_${curdir_name}_HEADER_FILES}")

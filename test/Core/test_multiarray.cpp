@@ -9,8 +9,12 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include <vector>
+
 #include <gtest/gtest.h>
+
 #include <DO/Core/MultiArray.hpp>
+
 #include "AssertHelpers.hpp"
 
 
@@ -43,7 +47,6 @@ TYPED_TEST_P(Test_multiarray_constructors,
 {
   typedef TypeParam MultiArray;
   typedef typename MultiArray::vector_type Vector;
-  typedef typename MultiArray::size_type size_type;
   typedef StrideComputer<MultiArray::StorageOrder> StrideComputer;
 
   // Create sizes, one for each dimension.
@@ -510,6 +513,7 @@ TEST(TestMultiArray, test_matrix_view_types)
 
   EXPECT_MATRIX_EQ(actual_A, expected_A);
 }
+
 
 // =============================================================================
 // Test runner.
