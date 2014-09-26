@@ -28,13 +28,19 @@ namespace DO {
     @{
    */
 
-  //! \brief Forward declaration of the generic image converter class.
-  template <typename SrcPixel, typename DstPixel, int N>
-  struct ImageConverter;
+  //! \brief Forward declaration of the image class.
+  template <typename Color, int N = 2> class Image;
 
+  //! \brief Forward declaration of the generic image converter class.
+  template <typename T, typename U, int N>
+  void convert_channel(const Image<T, N>& src, Image<U, N>& dst);
+
+  //! \brief Convert color of image.
+  template <typename T, typename U, int N>
+  void convert_color(const Image<T, N>& src, Image<U, N>& dst);
 
   //! \brief The image class.
-  template <typename Color, int N = 2>
+  template <typename Color, int N>
   class Image : public MultiArray<Color, N, ColMajor>
   {
     typedef MultiArray<Color, N, ColMajor> base_type;
@@ -100,17 +106,20 @@ namespace DO {
 
     //! Color conversion method.
     template <typename Color2>
-    Image<Color2, N> convert() const
+    Image<Color2, N> convert_color() const
     {
       Image<Color2, N> dst(base_type::sizes());
-      ImageConverter<Color, Color2>(dst, *this);
+      DO::convert_color(*this, dst);
       return dst;
     }
 
-    //! Dummy conversion method for consistent API.
-    const Image& convert() const
+    //! Color conversion method.
+    template <typename Color2>
+    Image<Color2, N> convert_channel() const
     {
-      return *this;
+      Image<Color2, N> dst(base_type::sizes());
+      DO::convert_channel(*this, dst);
+      return dst;
     }
 
     //! Convenient helper for chaining filters.
