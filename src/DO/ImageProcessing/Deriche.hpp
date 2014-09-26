@@ -14,7 +14,12 @@
 #ifndef DO_IMAGEPROCESSING_DERICHE_HPP
 #define DO_IMAGEPROCESSING_DERICHE_HPP
 
+
+#include "../Core/Image.hpp"
+
+
 namespace DO {
+
   /*!
     \ingroup ImageProcessing
     \defgroup Deriche Deriche Filter
@@ -25,13 +30,13 @@ namespace DO {
     @{
    */
 
-  //! \brief Applies Deriche filter with specified order $o$ to dimension $d$.
+  //! \brief Apply Deriche filter with specified order $o$ to dimension $d$.
   template <typename T, int N>
-  void inPlaceDeriche(Image<T, N>& I, 
-                      typename ColorTraits<T>::ChannelType sigma,
-                      int order, int d, bool neumann = true)
+  void inplace_deriche(Image<T, N>& I, 
+                       typename PixelTraits<T>::channel_type sigma,
+                       int order, int d, bool neumann = true)
   {
-    typedef typename ColorTraits<T>::ChannelType S;
+    typedef typename PixelTraits<T>::channel_type S;
 
     // Check the parameter values
     assert(sigma>0 && order>=0 && order<3 && d>=0 && d<N);
@@ -143,58 +148,66 @@ namespace DO {
     }
     delete [] Y;
   }
-  //! \brief Applies Deriche filter-based blurring.
+
+  //! \brief Apply Deriche blurring.
   template <typename T, int N>
-  void inPlaceDericheBlur(Image<T,N>&I,
-                          const Matrix<typename ColorTraits<T>::ChannelType, N, 1>& sigmas,
-                          bool neumann = true)
+  void inplace_deriche_blur(
+    Image<T, N>&I,
+    const Matrix<typename PixelTraits<T>::channel_type, N, 1>& sigmas,
+    bool neumann = true)
   {
     for (int i=0;i<N;i++)
-      inPlaceDeriche(I,sigmas[i], 0, i, neumann);
+      inplace_deriche(I,sigmas[i], 0, i, neumann);
   }
-  //! \brief Applies Deriche filter-based blurring.
+
+  //! \brief Apply Deriche blurring.
   template <typename T, int N>
-  void inPlaceDericheBlur(Image<T,N>& I,
-                          typename ColorTraits<T>::ChannelType sigma,
-                          bool neumann = true)
+  void inplace_deriche_blur(
+    Image<T,N>& I,
+    typename PixelTraits<T>::channel_type sigma,
+    bool neumann = true)
   {
-    typedef typename ColorTraits<T>::ChannelType S;
+    typedef typename PixelTraits<T>::channel_type S;
     Matrix<S, N, 1> Sigma; Sigma.fill(sigma);
-    inPlaceDericheBlur(I, Sigma, neumann);
+    inplace_deriche_blur(I, Sigma, neumann);
   }
-  //! \brief Returns the blurred image using Deriche filter.
+
+  //! \brief Return the blurred image using Deriche filter.
   template <typename T, int N>
-  Image<T,N> dericheBlur(const Image<T,N>& I,
-                         typename ColorTraits<T>::ChannelType sigma,
+  Image<T,N> deriche_blur(const Image<T,N>& I,
+                         typename PixelTraits<T>::channel_type sigma,
                          bool neumann = true)
   {
     Image<T,N> J(I);
-    inPlaceDericheBlur(J,sigma,neumann);
-    return J;
-  }
-  //! \brief Returns the blurred image using Deriche filter.
-  template <typename T, int N>
-  Image<T,N> dericheBlur(const Image<T,N>& I,
-                         const Matrix<typename ColorTraits<T>::ChannelType, N, 1>& sigmas,
-                         bool neumann = true)
-  {
-    Image<T,N> J=I.clone();
-    inPlaceDericheBlur(J,sigmas,neumann);
+    inplace_deriche_blur(J,sigma,neumann);
     return J;
   }
 
-  //! \brief Helper class to use Image<T,N>::compute<DericheBlur>(T sigma)
+  //! \brief Return the blurred image using Deriche filter.
+  template <typename T, int N>
+  Image<T,N> deriche_blur(
+    const Image<T,N>& I,
+    const Matrix<typename PixelTraits<T>::channel_type, N, 1>& sigmas,
+    bool neumann = true)
+  {
+    Image<T,N> J=I.clone();
+    inplace_deriche_blur(J,sigmas,neumann);
+    return J;
+  }
+
+  //! \brief Helper class to use: Image<T,N>::compute<DericheBlur>(T sigma)
   template <typename T, int N>
   struct DericheBlur
   {
     typedef Image<T, N> ReturnType;
-    typedef typename ColorTraits<T>::ChannelType ParamType;
+    typedef typename PixelTraits<T>::ChannelType ParamType;
     DericheBlur(const Image<T, N>& src) : src_(src) {}
-    ReturnType operator()(ParamType sigma) const { return dericheBlur(src_, sigma); }
+    ReturnType operator()(ParamType sigma) const { return deriche_blur(src_, sigma); }
     const Image<T, N>& src_;
   };
 
   //! @}
+
 } /* namespace DO */
 
 #endif /* DO_IMAGEPROCESSING_DERICHE_HPP */
