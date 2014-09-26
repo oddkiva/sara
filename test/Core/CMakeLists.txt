@@ -21,7 +21,8 @@ do_test(Core_Pixel_Class
         test_pixel.cpp
         "${DO_LIBRARIES}" ${TestGroupName})
 
-do_test(Core_Pixel_PackedPixel "colorspace.hpp;packed_pixel.hpp;test_packed_pixel.cpp"
+do_test(Core_Pixel_PackedPixel
+        test_packed_pixel.cpp
         "${DO_LIBRARIES}" ${TestGroupName})
 
 do_test(Core_Pixel_ChannelConversion
