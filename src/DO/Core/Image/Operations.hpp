@@ -163,10 +163,10 @@ namespace DO {
 
   //! \brief color rescaling function.
   template <typename T, typename Layout, int N>
-  inline Image<Pixel<T,Layout>, N>
-  color_rescale(const Image<Pixel<T,Layout>, N>& src,
-                const Matrix<T, Layout::size, 1>& a = color_min_value<T, N>(),
-                const Matrix<T, Layout::size, 1>& b = color_max_value<T, N>())
+  inline Image<Pixel<T,Layout>, N> color_rescale(
+    const Image<Pixel<T,Layout>, N>& src,
+    const Pixel<T, Layout>& a = color_min_value<T, Layout::size>(),
+    const Pixel<T, Layout>& b = color_max_value<T, Layout::size>())
   {
     Image<Pixel<T,Layout>, N> dst(src.sizes());
 
@@ -183,10 +183,7 @@ namespace DO {
     }
 
     if (min == max)
-    {
-      std::cerr << "Warning: min == max!" << std::endl;
-      return dst;
-    }
+      throw std::runtime_error("Error: cannot rescale image! min == max");
 
     for (src_first = src.data(); src_first != src_last; 
       ++src_first, ++dst_first)

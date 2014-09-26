@@ -77,6 +77,54 @@ TEST(TestImageConversion, test_color_min_max_value)
 }
 
 
+TEST(TestImageConversion, test_image_conversion)
+{
+  Image<Rgb8> rgb8_image(10, 10);
+  for (int y = 0; y < rgb8_image.height(); ++y)
+    for (int x = 0; x < rgb8_image.width(); ++x)
+      rgb8_image(x, y).fill(255);
+
+  Image<Rgb32f> rgb32f_image;
+  rgb32f_image = rgb8_image.convert_channel<Rgb32f>();
+  for (int y = 0; y < rgb32f_image.height(); ++y)
+    for (int x = 0; x < rgb32f_image.width(); ++x)
+      EXPECT_EQ(rgb32f_image(x, y), Vector3f::Ones());
+
+  Image<float> float_image;
+  float_image = rgb8_image
+    .convert_channel<Rgb32f>()
+    .convert_color<float>();
+  for (int y = 0; y < float_image.height(); ++y)
+    for (int x = 0; x < float_image.width(); ++x)
+      EXPECT_EQ(rgb32f_image(x, y), Vector3f::Ones());
+}
+
+
+TEST(TestImageConversion, test_image_color_rescale)
+{
+  Image<Rgb32f> rgb_image(10, 10);
+  for (int y = 0; y < rgb_image.height(); ++y)
+    for (int x = 0; x < rgb_image.width(); ++x)
+      rgb_image(x, y).fill(static_cast<float>(x+y));
+
+  rgb_image = color_rescale(rgb_image);
+  Rgb32f rgb_min, rgb_max;
+  find_min_max(rgb_min, rgb_max, rgb_image);
+  EXPECT_EQ(rgb_min, Vector3f::Zero());
+  EXPECT_EQ(rgb_max, Vector3f::Ones());
+
+  Image<float> float_image(10, 10);
+  for (int y = 0; y < float_image.height(); ++y)
+    for (int x = 0; x < float_image.width(); ++x)
+      float_image(x, y) = static_cast<float>(x+y);
+
+  float_image = color_rescale(float_image);
+  float float_min, float_max;
+  find_min_max(float_min, float_max, float_image);
+  EXPECT_EQ(float_min, 0);
+  EXPECT_EQ(float_max, 1);
+}
+
 // ========================================================================== //
 // Run the tests.
 int main(int argc, char** argv) 
