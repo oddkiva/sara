@@ -14,6 +14,7 @@
 
 
 #include <DO/Core/Image/Image.hpp>
+#include <DO/Core/Pixel/ColorConversion.hpp>
 
 
 // Various utilities for image operations.
@@ -92,32 +93,38 @@ namespace DO {
   //! \ingroup Image
   //! @{
 
-  //! \brief Generic image converter class.
-  template <typename SrcPixel, typename DstPixel, int N>
-  struct ConvertImage
+  //! \brief Convert channel type of image.
+  template <typename T, typename U, int N>
+  void convert_channel(const Image<T, N>& src, Image<U, N>& dst)
   {
-    //! \brief Implementation of the image conversion.
-    static void apply(const Image<SrcPixel, N>& src, Image<DstPixel, N>& dst)
-    {
-      if (dst.sizes() != src.sizes())
-        dst.resize(src.sizes());
+    if (dst.sizes() != src.sizes())
+      dst.resize(src.sizes());
 
-      const SrcPixel *src_first = src.data();
-      const SrcPixel *src_last = src_first + src.size();
+    const T *src_first = src.data();
+    const T *src_last = src_first + src.size();
 
-      DstPixel *dst_first = dst.data();
+    U *dst_first = dst.data();
 
-      for ( ; src_first != src_last; ++src_first, ++dst_first)
-        convert_color(*src_first, *dst_first);
-    }
-  };
-
-  //! \brief Unified API for the image conversion.
-  template <typename SrcPixel, typename DstPixel, int N>
-  inline void convert(const Image<SrcPixel, N>& src, Image<DstPixel, N>& dst)
-  {
-    ConvertImage<SrcPixel, DstPixel, N>::apply(src, dst);
+    for ( ; src_first != src_last; ++src_first, ++dst_first)
+      convert_channel(*src_first, *dst_first);
   }
+
+  //! \brief Convert color of image.
+  template <typename T, typename U, int N>
+  void convert_color(const Image<T, N>& src, Image<U, N>& dst)
+  {
+    if (dst.sizes() != src.sizes())
+      dst.resize(src.sizes());
+
+    const T *src_first = src.data();
+    const T *src_last = src_first + src.size();
+
+    U *dst_first = dst.data();
+
+    for ( ; src_first != src_last; ++src_first, ++dst_first)
+      convert_color(*src_first, *dst_first);
+  }
+
 
   //! @}
 }
