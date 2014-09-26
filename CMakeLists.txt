@@ -40,12 +40,6 @@ do_get_os_info()
 # Group projects by category.
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-# Set up code coverage for Debug mode.
-if (CMAKE_BUILD_TYPE STREQUAL "Debug" AND UNIX)
-  message("Setting up code coverage.")
-  include(CodeCoverage)
-endif ()
-
 # Set installation settings.
 include(DOInstall)
 
