@@ -15,7 +15,7 @@
 #define DO_CORE_ARRAYITERATORS_HPP
 
 
-#include <DO/Core/ArrayIterators/MultiArrayIterators.hpp>
+#include <DO/Core/ArrayIterators/ArrayIterators.hpp>
 
 
 #endif /* DO_CORE_ARRAYITERATORS_HPP */
