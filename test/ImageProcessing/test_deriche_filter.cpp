@@ -15,8 +15,6 @@
 #include <DO/Defines.hpp>
 #include <DO/ImageProcessing/Deriche.hpp>
 
-#include "utilities.hpp"
-
 
 using namespace std;
 using namespace DO;
