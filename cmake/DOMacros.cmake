@@ -64,7 +64,11 @@ endmacro (do_append_components)
 
 macro (do_create_common_variables _library_name)
   set(DO_${_library_name}_SOURCE_DIR ${DO_SOURCE_DIR}/${_library_name})
-  set(DO_${_library_name}_LIBRARIES DO_${_library_name})
+  if ("${DO_${_library_name}_SOURCE_FILES}" STREQUAL "")
+    set(DO_${_library_name}_LIBRARIES "")
+  else ()
+    set(DO_${_library_name}_LIBRARIES DO_${_library_name})
+  endif ()
 endmacro ()
 
 macro (do_include_internal_dirs _dep_list)
@@ -133,16 +137,18 @@ macro (do_append_library _library_name
                          _include_dirs
                          _hdr_files _src_files
                          _lib_dependencies)
-
-  # 1. Verbose
+  # 1. Verbose comment.
   message(STATUS "[DO] Creating project 'DO${_library_name}'")
-  # 2. Bookmark the project to make sure we don't try to add the library 
-  #    more than once.
+
+  # 2. Bookmark the project to make sure the library is created only once.
+  #    TODO: CLUNKY. Get rid of this ASAP!
   set_property(GLOBAL PROPERTY _DO_${_library_name}_INCLUDED 1)
+
   # 3. Include third-party library directories.
   if (NOT "${_include_dirs}" STREQUAL "")
     include_directories(${_include_dirs})
   endif ()
+
   # 4. Create the project:
   if (NOT "${_src_files}" STREQUAL "")
     # - Case 1: the project contains 'cpp' source files
@@ -163,6 +169,8 @@ macro (do_append_library _library_name
     #set_target_properties(DO_${_library_name} PROPERTIES LINKER_LANGUAGE CXX)
     add_custom_target(DO_${_library_name} SOURCES ${_hdr_files})
   endif ()
+
+  # 5. Put the library into the folder "DO Libraries".
   set_property(TARGET DO_${_library_name} PROPERTY FOLDER "DO Libraries")
 endmacro (do_append_library)
 
