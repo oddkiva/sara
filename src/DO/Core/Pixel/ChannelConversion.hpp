@@ -1,12 +1,41 @@
-#pragma once
+// ========================================================================== //
+// This file is part of DO++, a basic set of libraries in C++ for computer
+// vision.
+//
+// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
+#ifndef DO_CORE_PIXEL_CHANNELCONVERSION_HPP
+#define DO_CORE_PIXEL_CHANNELCONVERSION_HPP
 
 
 #include <DO/Core/StaticAssert.hpp>
-#include "colorspace.hpp"
+#include <DO/Core/EigenExtension.hpp>
+#include <DO/Core/Pixel/Pixel.hpp>
 
 
-// Channel conversion.
+// Channel conversion from a type to another.
 namespace DO {
+
+  //! \brief Return maximum value for channel of type 'T'.
+  template <typename T>
+  inline T channel_min_value()
+  {
+    using std::numeric_limits;
+    return numeric_limits<T>::is_integer ? numeric_limits<T>::min() : T(0);
+  }
+
+  //! \brief Return maximum value for channel of type.
+  template <typename T>
+  inline T channel_max_value()
+  {
+    using std::numeric_limits;
+    return numeric_limits<T>::is_integer ? numeric_limits<T>::max() : T(1);
+  }
 
   //! \brief Convert integral channel value to floating-point value.
   template <typename Int, typename Float>
@@ -40,8 +69,8 @@ namespace DO {
     const Float delta_max = std::abs(src-float_max)/float_range;
     const Float delta_min = std::abs(src-float_min)/float_range;
     const Float eps = sizeof(Float) == 4 ?
-      Float(1e-5) : // 'Float' == 'float'
-      Float(1e-9);  // 'Float' == 'double'
+      Float(1e-5) : // i.e., if 'Float' == 'float'.
+      Float(1e-9);  // i.e., if 'Float' == 'double'.
 
     Int dst;
     if (delta_max <= eps)
@@ -56,7 +85,7 @@ namespace DO {
 } /* namespace DO */
 
 
-// Gray channel conversion.
+// Unified API for channel conversion.
 namespace DO {
 
   //! \brief Convert a double gray value to a float gray value. 
@@ -116,4 +145,15 @@ namespace DO {
       convert_channel(src[i], dst[i]);
   }
 
+  //! \brief Convert channels from a pixel vector to another pixel vector.
+  template <typename T, typename U, typename ColorSpace>
+  inline void convert_channel(const Pixel<T, ColorSpace>& src,
+                              Pixel<U, ColorSpace>& dst)
+  {
+    for (int i = 0; i < ColorSpace::size; ++i)
+      convert_channel(src[i], dst[i]);
+  }
 }
+
+
+#endif /* DO_CORE_PIXEL_COLORSPACE_HPP */

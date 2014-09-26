@@ -1,10 +1,22 @@
-﻿#pragma once
+﻿// ========================================================================== //
+// This file is part of DO++, a basic set of libraries in C++ for computer
+// vision.
+//
+// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
+#ifndef DO_CORE_PIXEL_COLOR_CONVERSION_HPP
+#define DO_CORE_PIXEL_COLOR_CONVERSION_HPP
 
 
-#include <DO/Core/Meta.hpp>
 #include <DO/Core/EigenExtension.hpp>
-
-#include "pixel.hpp"
+#include <DO/Core/StaticAssert.hpp>
+#include <DO/Core/Pixel/ColorSpace.hpp>
+#include <DO/Core/Pixel/Pixel.hpp>
 
 
 // Color space conversion with floating-point values.
@@ -36,9 +48,9 @@ namespace DO {
       !std::numeric_limits<T>::is_integer,
       CONVERSION_FROM_GRAY_TO_RGB_IS_SUPPORTED_ONLY_FOR_FLOATING_POINT_TYPE);
 
-    yuv[0] = 0.299*rgb[0] + 0.587*rgb[1] + 0.114*rgb[2];
-    yuv[1] = 0.492*(rgb[2] - yuv[0]);
-    yuv[2] = 0.877*(rgb[0] - yuv[0]);
+    yuv[0] = T(0.299)*rgb[0] + T(0.587)*rgb[1] + T(0.114)*rgb[2];
+    yuv[1] = T(0.492)*(rgb[2] - yuv[0]);
+    yuv[2] = T(0.877)*(rgb[0] - yuv[0]);
   }
 
   //! Convert YUV color to RGB color.
@@ -61,6 +73,13 @@ namespace DO {
     gray = yuv[0];
   }
 
+  //! Convert gray color to YUV color.
+  template <typename T>
+  inline void gray_to_yuv(T gray, Matrix<T, 3, 1>& yuv)
+  {
+    yuv << gray, 0, 0;
+  }
+  
 }
 
 // Unified API.
@@ -68,7 +87,7 @@ namespace DO {
 
   //! Color conversion from RGBA to RGB.
   template <typename T>
-  void convert_color(Pixel<T, Rgba>& src, const Pixel<T, Rgb>& dst)
+  void convert_color(const Pixel<T, Rgba>& src, Pixel<T, Rgb>& dst)
   {
     for (int i = 0; i < 3; ++i)
       dst[i] = src[i];
@@ -76,33 +95,26 @@ namespace DO {
 
   //! Pixel conversion from RGB to RGBA.
   template <typename T>
-  void convert_color(Pixel<T, Rgb>& src, const Pixel<T, Rgba>& dst)
+  void convert_color(const Pixel<T, Rgb>& src, Pixel<T, Rgba>& dst)
   {
     using namespace std;
     for (int i = 0; i < 3; ++i)
       dst[i] = src[i];
     dst[3] = numeric_limits<T>::is_integer ? numeric_limits<T>::max() : T(1);
   }
-
-  //! \brief Convert color from RGB to gray.
-  template <typename T>
-  inline void convert_color(const Pixel<T, Rgb>& src, T& dst)
-  {
-    rgb_to_gray(src, dst);
-  }
-
+  
   //! \brief Convert color from gray to RGB.
   template <typename T>
-  inline void convert_color(T& src, Pixel<T, Rgb>& dst)
+  inline void convert_color(T src, Pixel<T, Rgb>& dst)
   {
     gray_to_rgb(src, dst);
   }
- 
+
   //! \brief Convert color from RGB to YUV.
   template <typename T>
   inline void convert_color(const Pixel<T, Rgb>& src, Pixel<T, Yuv>& dst)
   {
-    rgb_to_yuv(src.template cast<U>(), dst);
+    rgb_to_yuv(src, dst);
   }
 
   //! \brief Convert color from YUV to RGB.
@@ -112,4 +124,43 @@ namespace DO {
     yuv_to_rgb(src, dst);
   }
 
+  //! \brief Generic color converter to grayscale.
+  template <typename ColorSpace> struct ConvertColorToGray;
+  
+  //! \brief Generic color conversion function to grayscale.
+  template <typename T, typename ColorSpace>
+  inline void convert_color(const Pixel<T, ColorSpace>& src, T& dst)
+  {
+    ConvertColorToGray<ColorSpace>::template apply<T>(src, dst);
+  }
+  
+  //! \brief Convert color from RGB to gray.
+  template <> struct ConvertColorToGray<Rgb>
+  {
+    template <typename T>
+    static inline void apply(const Matrix<T, 3, 1>& src, T& dst)
+    {
+      rgb_to_gray(src, dst);
+    }
+  };
+  
+  //! \brief Convert YUV color to gray color.
+  template <> struct ConvertColorToGray<Yuv>
+  {
+    template <typename T>
+    static inline void apply(const Matrix<T, 3, 1>& src, T& dst)
+    {
+      yuv_to_gray(src, dst);
+    }
+  };
+
+  //! \brief Convert gray color to YUV color.
+  template <typename T>
+  inline void convert_color(T src, Pixel<T, Yuv>& dst)
+  {
+    gray_to_yuv<T>(src, dst);
+  }
 }
+
+
+#endif /* DO_CORE_PIXEL_COLOR_CONVERSION_HPP */

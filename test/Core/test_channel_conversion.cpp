@@ -9,14 +9,12 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <limits>
 #include <stdint.h>
-#include <vector>
 
 #include <gtest/gtest.h>
 
-#include "pixel.hpp"
-#include "channel_conversion.hpp"
+#include <DO/Core/Pixel/ChannelConversion.hpp>
+#include <DO/Core/Pixel/Pixel.hpp>
 
 
 using namespace std;
@@ -37,7 +35,7 @@ typedef testing::Types<
 
 // ========================================================================== //
 // Test convert_channel function from integer type to floating-point type.
-template <class ChannelType>
+template <typename ChannelType>
 class TestConvertChannelIntToFloat : public testing::Test {};
 TYPED_TEST_CASE_P(TestConvertChannelIntToFloat);
 TYPED_TEST_P(TestConvertChannelIntToFloat,
@@ -83,7 +81,7 @@ INSTANTIATE_TYPED_TEST_CASE_P(Core_Pixel_ChannelConversion,
 
 // ========================================================================== //
 // Test channel conversion from floating-point type to integer type.
-template <class ChannelType>
+template <typename ChannelType>
 class TestConvertChannelFloatToInt : public testing::Test {};
 TYPED_TEST_CASE_P(TestConvertChannelFloatToInt);
 TYPED_TEST_P(TestConvertChannelFloatToInt,
@@ -171,6 +169,7 @@ void test_channel_conversion_between_integer_types()
     EXPECT_EQ(expected_dst_values[i], actual_dst_value);
   }
 }
+
 TEST(TestConvertChannel, test_convert_channel_between_integers)
 {
   test_channel_conversion_between_integer_types<int8_t, int16_t>();
@@ -253,9 +252,6 @@ TEST(TestConvertChannel, test_convert_channel_between_integers)
   test_channel_conversion_between_integer_types<uint64_t, uint32_t>();
 }
 
-
-// ========================================================================== //
-// Test channel conversion between integer type.
 
 // ========================================================================== //
 int main(int argc, char** argv) 

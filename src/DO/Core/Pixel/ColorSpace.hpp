@@ -1,35 +1,19 @@
-#pragma once
+// ========================================================================== //
+// This file is part of DO++, a basic set of libraries in C++ for computer
+// vision.
+//
+// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
+#ifndef DO_CORE_PIXEL_COLORSPACE_HPP
+#define DO_CORE_PIXEL_COLORSPACE_HPP
 
 
 #include <DO/Core/Meta.hpp>
-
-
-// Template meta-programming utilities.
-namespace DO { namespace Meta {
-
-  template <int _Value0, int _Value1, int _Value2>
-  struct IntArray_3 {
-    enum {
-      value_0 = _Value0,
-      value_1 = _Value1,
-      value_2 = _Value2,
-      size = 3
-    };
-  };
-
-  template <typename IntArray, int index> struct Get;
-
-  template <typename IntArray> struct Get<IntArray, 0>
-  { enum { value = IntArray::value_0 }; };
-  template <typename IntArray> struct Get<IntArray, 1>
-  { enum { value = IntArray::value_1 }; };
-  template <typename IntArray> struct Get<IntArray, 2>
-  { enum { value = IntArray::value_2 }; };
-  template <typename IntArray> struct Get<IntArray, 3>
-  { enum { value = IntArray::value_3 }; };
-
-} /* namespace Meta */
-} /* namespace DO */
 
 
 // Color spaces and channel names.
@@ -86,3 +70,6 @@ namespace DO {
   //! @} ColorSpaces
 
 } /* namespace DO */
+
+
+#endif /* DO_CORE_PIXEL_COLORSPACE_HPP */

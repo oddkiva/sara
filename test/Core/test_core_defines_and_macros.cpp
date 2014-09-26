@@ -10,15 +10,19 @@
 // ========================================================================== //
 
 #include <gtest/gtest.h>
+
 #include <DO/Defines.hpp>
 
+
 using namespace std;
+
 
 TEST(DO_Core_Test, definesTest)
 {
   EXPECT_EQ(string(DO_VERSION), "1.0.0");
   EXPECT_TRUE( string(srcPath("")).find("test/Core") != string::npos );
 }
+
 
 int main(int argc, char** argv) 
 {

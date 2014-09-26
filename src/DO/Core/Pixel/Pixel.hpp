@@ -1,4 +1,17 @@
-#pragma once
+// ========================================================================== //
+// This file is part of DO++, a basic set of libraries in C++ for computer
+// vision.
+//
+// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
+#ifndef DO_CORE_PIXEL_PIXEL_HPP
+#define DO_CORE_PIXEL_PIXEL_HPP
+
 
 #include <functional>
 #include <stdexcept>
@@ -6,12 +19,11 @@
 #include <DO/Core/EigenExtension.hpp>
 #include <DO/Core/Meta.hpp>
 
-#include "colorspace.hpp"
-
 
 // Pixel data structures.
 namespace DO {
 
+  //! \brief Simple pixel class implemented as a vector.
   template <typename _T, typename _ColorSpace>
   class Pixel : public Matrix<_T, _ColorSpace::size, 1>
   {
@@ -41,7 +53,10 @@ namespace DO {
     }
 
     //! Copy constructor.
-    inline Pixel(const base_type& x) : base_type(x) {}
+    inline Pixel(const base_type& x)
+      : base_type(x)
+    {
+    }
 
     //! Assignment operator.
     template <typename _OtherDerived>
@@ -72,3 +87,6 @@ namespace DO {
   };
 
 }
+
+
+#endif /* DO_CORE_PIXEL_PIXEL_HPP */

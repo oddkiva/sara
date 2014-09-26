@@ -9,8 +9,12 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include <vector>
+
 #include <gtest/gtest.h>
+
 #include <DO/Core/MultiArray.hpp>
+
 #include "AssertHelpers.hpp"
 
 
@@ -509,6 +513,7 @@ TEST(TestMultiArray, test_matrix_view_types)
 
   EXPECT_MATRIX_EQ(actual_A, expected_A);
 }
+
 
 // =============================================================================
 // Test runner.

@@ -2,7 +2,7 @@
 // This file is part of DO++, a basic set of libraries in C++ for computer 
 // vision.
 //
-// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2014 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public 
 // License v. 2.0. If a copy of the MPL was not distributed with this file, 
@@ -11,26 +11,34 @@
 
 #include <gtest/gtest.h>
 
-#include <DO/Core/Pixel/ColorSpace.hpp>
-#include <DO/Core/Pixel/Pixel.hpp>
+#include <DO/Core/Image/Image.hpp>
 
 
 using namespace std;
 using namespace DO;
 
 
-TEST(Test_Pixel, test_rgb_32f)
+TEST(TestImageClass, test_2d_image_constructor)
 {
-  typedef Pixel<float, Rgb> Rgb32f;
+  Image<int> image(10, 20);
+  EXPECT_EQ(image.width(), 10);
+  EXPECT_EQ(image.height(), 20);
 
-  Rgb32f red(1., 0, 0);
-  EXPECT_EQ(red.channel<R>(), 1.f);
-  EXPECT_EQ(red.channel<G>(), 0.f);
-  EXPECT_EQ(red.channel<B>(), 0.f);
-  EXPECT_EQ(red.num_channels(), 3);
+  Image<int, 3> volume(5, 10, 20);
+  EXPECT_EQ(volume.width(), 5);
+  EXPECT_EQ(volume.height(), 10);
+  EXPECT_EQ(volume.depth(), 20);
+
+  Image<int, 3> volume2;
+  volume2 = volume;
+  EXPECT_EQ(volume2.width(), 5);
+  EXPECT_EQ(volume2.height(), 10);
+  EXPECT_EQ(volume2.depth(), 20);
 }
 
 
+// ========================================================================== //
+// Run the tests.
 int main(int argc, char** argv) 
 {
   testing::InitGoogleTest(&argc, argv); 

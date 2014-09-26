@@ -11,14 +11,15 @@
 
 //! @file
 
-#ifndef DO_CORE_IMAGE_HPP
-#define DO_CORE_IMAGE_HPP
+#ifndef DO_CORE_PIXEL_HPP
+#define DO_CORE_PIXEL_HPP
 
 
-#include <DO/Core/Pixel.hpp>
-#include <DO/Core/Image/Image.hpp>
-#include <DO/Core/Image/ElementTraits.hpp>
-#include <DO/Core/Image/Operations.hpp>
+#include "Pixel/ChannelConversion.hpp"
+#include "Pixel/ColorConversion.hpp"
+#include "Pixel/ColorSpace.hpp"
+#include "Pixel/Pixel.hpp"
+#include "Pixel/Typedefs.hpp"
 
 
-#endif /* DO_CORE_IMAGE_HPP */
+#endif /* DO_CORE_PIXEL_HPP */
