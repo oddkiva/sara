@@ -1,18 +1,30 @@
-#pragma once
+// ========================================================================== //
+// This file is part of DO++, a basic set of libraries in C++ for computer
+// vision.
+//
+// Copyright (C) 2014 David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
+#ifndef DO_CORE_PIXEL_PACKEDPIXEL_HPP
+#define DO_CORE_PIXEL_PACKEDPIXEL_HPP
+
 
 #include <functional>
 #include <stdexcept>
 
 #include <DO/Core/EigenExtension.hpp>
 #include <DO/Core/Meta.hpp>
-
-#include "colorspace.hpp"
+#include <DO/Core/Pixel/ColorSpace.hpp>
 
 
 // Pixel data structures.
 namespace DO {
 
-
+  //! \brief 3D packed pixel.
   template <typename _BitField, int _Sz0, int _Sz1, int _Sz2>
   struct PackedPixelBase_3
   {
@@ -44,6 +56,7 @@ namespace DO {
   };
 
 
+  //! \brief 4D packed pixel.
   template <typename _BitField, int _Sz0, int _Sz1, int _Sz2, int _Sz3>
   struct PackedPixelBase_4
   {
@@ -67,10 +80,10 @@ namespace DO {
     inline bool operator==(const PackedPixelBase_4& other) const
     {
       return
-        channel_0 == b._channel_0 &&
-        channel_1 == b._channel_1 &&
-        channel_2 == b._channel_2 &&
-        channel_3 == b._channel_3;
+        channel_0 == other._channel_0 &&
+        channel_1 == other._channel_1 &&
+        channel_2 == other._channel_2 &&
+        channel_3 == other._channel_3;
     }
 
     inline bool operator!=(const PackedPixelBase_4& other) const
@@ -78,7 +91,9 @@ namespace DO {
   };
 
 
+  //! \brief Channel getter.
   template <typename _PackedPixel, int _Index> struct Channel;
+  
 #define SPECIALIZE_CHANNEL(index)                               \
   template <typename _PackedPixel>                              \
   struct Channel<_PackedPixel, index>                           \
@@ -98,6 +113,7 @@ namespace DO {
   SPECIALIZE_CHANNEL(3)
 
 
+  //! \brief Color model.
   template <typename _ColorSpace, typename _ChannelOrder>
   struct ColorModel
   {
@@ -105,6 +121,7 @@ namespace DO {
     typedef _ChannelOrder channel_order_type;
   };
 
+  //! \brief Channel index getter.
   template <typename _ColorModel, typename _ChannelTag>
   struct ChannelIndex
   {
@@ -119,6 +136,7 @@ namespace DO {
     };
   };
 
+  //! \brief PackedPixel class.
   template <typename _PackedPixelBase, typename _ColorModel>
   class PackedPixel: protected _PackedPixelBase
   {
@@ -132,7 +150,9 @@ namespace DO {
     typedef typename _ColorModel::channel_order_type channel_order_type;
 
   public:
-    inline PackedPixel() {}
+    inline PackedPixel()
+    {
+    }
 
     inline PackedPixel(bitfield_type v0, bitfield_type v1, bitfield_type v2)
     {
@@ -183,17 +203,17 @@ namespace DO {
 
     inline void operator+=(const self_type& other)
     {
-      this->apply_op<std::plus<bitfield_type> >(other);
+      this->template apply_op<std::plus<bitfield_type> >(other);
     }
 
     inline void operator-=(const self_type& other)
     {
-      this->apply_op<std::minus<bitfield_type> >(other);
+      this->template apply_op<std::minus<bitfield_type> >(other);
     }
 
     inline void operator*=(bitfield_type other)
     {
-      this->apply_op<std::multiplies<bitfield_type> >(
+      this->template apply_op<std::multiplies<bitfield_type> >(
         self_type(other, other, other)
       );
     }
@@ -221,3 +241,7 @@ namespace DO {
 
 
 }
+
+
+
+#endif /* DO_CORE_PIXEL_PACKEDPIXEL_HPP */
