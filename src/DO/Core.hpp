@@ -28,9 +28,8 @@
 // Sparse N-dimensional array
 #include "Core/SparseMultiArray.hpp"
 // Image and color data structures
-#include "Core/Color.hpp"
+#include "Core/Pixel.hpp"
 #include "Core/Image.hpp"
-#include "Core/Subimage.hpp"
 // Tree data structures
 #include "Core/Tree.hpp"
 // Timer classes

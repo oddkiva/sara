@@ -9,16 +9,30 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-//! @file
+#include <gtest/gtest.h>
 
-#ifndef DO_CORE_IMAGE_HPP
-#define DO_CORE_IMAGE_HPP
-
-
-#include <DO/Core/Pixel.hpp>
-#include <DO/Core/Image/Image.hpp>
-#include <DO/Core/Image/ElementTraits.hpp>
-#include <DO/Core/Image/Operations.hpp>
+#include <DO/Core/Pixel/ColorSpace.hpp>
+#include <DO/Core/Pixel/Pixel.hpp>
 
 
-#endif /* DO_CORE_IMAGE_HPP */
+using namespace std;
+using namespace DO;
+
+
+TEST(Test_Pixel, test_rgb_32f)
+{
+  typedef Pixel<float, Rgb> Rgb32f;
+
+  Rgb32f red(1., 0, 0);
+  EXPECT_EQ(red.channel<R>(), 1.f);
+  EXPECT_EQ(red.channel<G>(), 0.f);
+  EXPECT_EQ(red.channel<B>(), 0.f);
+  EXPECT_EQ(red.num_channels(), 3);
+}
+
+
+int main(int argc, char** argv) 
+{
+  testing::InitGoogleTest(&argc, argv); 
+  return RUN_ALL_TESTS();
+}

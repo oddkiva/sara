@@ -9,16 +9,23 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-//! @file
+#include <gtest/gtest.h>
 
-#ifndef DO_CORE_IMAGE_HPP
-#define DO_CORE_IMAGE_HPP
-
-
-#include <DO/Core/Pixel.hpp>
-#include <DO/Core/Image/Image.hpp>
-#include <DO/Core/Image/ElementTraits.hpp>
-#include <DO/Core/Image/Operations.hpp>
+#include <DO/Defines.hpp>
 
 
-#endif /* DO_CORE_IMAGE_HPP */
+using namespace std;
+
+
+TEST(DO_Core_Test, definesTest)
+{
+  EXPECT_EQ(string(DO_VERSION), "1.0.0");
+  EXPECT_TRUE( string(srcPath("")).find("test/Core") != string::npos );
+}
+
+
+int main(int argc, char** argv) 
+{
+  testing::InitGoogleTest(&argc, argv); 
+  return RUN_ALL_TESTS();
+}
