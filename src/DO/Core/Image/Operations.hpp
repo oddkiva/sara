@@ -14,6 +14,7 @@
 
 
 #include <DO/Core/Image/Image.hpp>
+#include <DO/Core/Pixel/ChannelConversion.hpp>
 #include <DO/Core/Pixel/ColorConversion.hpp>
 
 
