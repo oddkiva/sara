@@ -28,15 +28,13 @@ namespace DO {
     @{
    */
 
-  //! The forward declaration of the image class.
-  template <typename Color, int N = 2> class Image;
+  //! \brief Forward declaration of the generic image converter class.
+  template <typename SrcPixel, typename DstPixel, int N>
+  struct ImageConverter;
 
-  //! \brief Helper function for color conversion.
-  template <typename T, typename U, int N>
-  void convert(Image<T, N>& dst, const Image<U, N>& src);
 
   //! \brief The image class.
-  template <typename Color, int N>
+  template <typename Color, int N = 2>
   class Image : public MultiArray<Color, N, ColMajor>
   {
     typedef MultiArray<Color, N, ColMajor> base_type;
@@ -105,8 +103,14 @@ namespace DO {
     Image<Color2, N> convert() const
     {
       Image<Color2, N> dst(base_type::sizes());
-      DO::convert(dst, *this);
+      ImageConverter<Color, Color2>(dst, *this);
       return dst;
+    }
+
+    //! Dummy conversion method for consistent API.
+    const Image& convert() const
+    {
+      return *this;
     }
 
     //! Convenient helper for chaining filters.

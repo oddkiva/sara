@@ -19,6 +19,9 @@
 // Various utilities for image operations.
 namespace DO {
 
+  //! \ingroup Image
+  //! @{
+
   //! \brief Find min and max grayscale values of the image.
   template <typename T, int N>
   inline void find_min_max(T& min, T& max, const Image<T, N>& src)
@@ -80,54 +83,51 @@ namespace DO {
     return min;
   }
 
+  //! @}
 }
 
 // Generic color conversion of images.
 namespace DO {
 
+  //! \ingroup Image
+  //! @{
+
   //! \brief Generic image converter class.
-  template <typename T, typename U, int N>
+  template <typename SrcPixel, typename DstPixel, int N>
   struct ConvertImage
   {
     //! \brief Implementation of the image conversion.
-    static void apply(Image<T, N>& dst, const Image<U, N>& src)
+    static void apply(const Image<SrcPixel, N>& src, Image<DstPixel, N>& dst)
     {
       if (dst.sizes() != src.sizes())
         dst.resize(src.sizes());
 
-      const U *src_first = src.data();
-      const U *src_last = src_first + src.size();
+      const SrcPixel *src_first = src.data();
+      const SrcPixel *src_last = src_first + src.size();
 
-      T *dst_first  = dst.data();
+      DstPixel *dst_first = dst.data();
 
       for ( ; src_first != src_last; ++src_first, ++dst_first)
-        convert_color(*dst_first, *src_first);
+        convert_color(*src_first, *dst_first);
     }
   };
-
-  //! \brief Specialized image converter class.
-  template <typename T, int N>
-  struct ConvertImage<T, T, N>
-  {
-    //! \brief Implementation of the image conversion.
-    static void apply(Image<T, N>& dst, const Image<T, N>& src)
-    {
-      dst = src;
-    }
-  };
-
 
   //! \brief Unified API for the image conversion.
-  template <typename T, typename U, int N>
-  inline void convert(Image<T, N>& dst, const Image<U, N>& src)
+  template <typename SrcPixel, typename DstPixel, int N>
+  inline void convert(const Image<SrcPixel, N>& src, Image<DstPixel, N>& dst)
   {
-    ConvertImage<T,U,N>::apply(dst, src);
+    ConvertImage<SrcPixel, DstPixel, N>::apply(src, dst);
   }
 
+  //! @}
 }
 
 // Image rescaling functions
 namespace DO {
+
+  //! \ingroup Image
+  //! @{
+
   //! \brief Rescales color values properly for viewing purposes.
   template <typename T, int N>
   inline Image<T, N> color_rescale(const Image<T, N>& src,
@@ -199,6 +199,7 @@ namespace DO {
     const Image<T, N>& src_;
   };
 
+  //! @}
 }
 
 
