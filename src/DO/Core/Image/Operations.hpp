@@ -143,7 +143,7 @@ namespace DO {
                                    const T& b = color_max_value<T>())
   {
     DO_STATIC_ASSERT(!std::numeric_limits<T>::is_integer,
-                     IMPLEMENTATION_NOT_SUPPORTED_FOR_INTEGER_TYPE);
+                     IMPLEMENTATION_NOT_SUPPORTED_FOR_INTEGER_TYPES);
 
     Image<T, N> dst(src.sizes());
 
@@ -172,7 +172,7 @@ namespace DO {
     const Pixel<T, Layout>& b = color_max_value<T, Layout::size>())
   {
     DO_STATIC_ASSERT(!std::numeric_limits<T>::is_integer,
-                     IMPLEMENTATION_NOT_SUPPORTED_FOR_INTEGER_TYPE);
+                     IMPLEMENTATION_NOT_SUPPORTED_FOR_INTEGER_TYPES);
 
     Image<Pixel<T,Layout>, N> dst(src.sizes());
 
