@@ -114,7 +114,7 @@ namespace DO {
 
     // filter init
     std::vector<T> output_signal(signal.size(axis));
-    typename std::vector<T>::iterator Y = output_signal.begin();
+    T *Y = &output_signal[0];
     const size_t offset = signal.stride(axis);
     const size_t nb = signal.size(axis);
 
