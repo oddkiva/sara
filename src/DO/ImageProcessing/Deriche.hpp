@@ -32,17 +32,22 @@ namespace DO {
 
   //! \brief Apply Deriche filter with specified order $o$ to dimension $d$.
   template <typename T, int N>
-  void inplace_deriche(Image<T, N>& I, 
+  void inplace_deriche(Image<T, N>& signal, 
                        typename PixelTraits<T>::channel_type sigma,
-                       int order, int d, bool neumann = true)
+                       int derivative_order, int axis, bool neumann = true)
   {
     typedef typename PixelTraits<T>::channel_type S;
 
-    // Check the parameter values
-    assert(sigma>0 && order>=0 && order<3 && d>=0 && d<N);
+    // Sanity check.
+    if (sigma <= 0)
+      throw std::runtime_error("sigma must be positive");
+    if (derivative_order < 0 || derivative_order >= 3)
+      throw std::runtime_error("derivative order must be between 0 and 2");
+    if (axis < 0 || axis >= N)
+      throw std::runtime_error("axis of derivative must be between 0 and N-1");
 
     // Compute the coefficients of the recursive filter
-    const S alpha = 1.695f/sigma;
+    const S alpha = static_cast<S>(1.695)/sigma;
     const S ea = std::exp(alpha);
     const S ema = std::exp(-alpha);
     const S em2a = ema*ema;
@@ -51,8 +56,8 @@ namespace DO {
 
     S ek,ekn,parity,a1,a2,a3,a4,g0,sumg1,sumg0;
 
-    switch(order) {
-
+    switch(derivative_order)
+    {
     // first-order derivative
     case 1:                 
       ek = -(1-ema)*(1-ema)*(1-ema)/(2*(ema+1)*ema);
@@ -60,7 +65,8 @@ namespace DO {
       a2 = ek*ema;
       a3 = -ek*ema;
       parity = -1;
-      if (neumann) {
+      if (neumann)
+      {
         sumg1 = (ek*ea) / ((ea-1)*(ea-1));
         g0 = 0;
         sumg0 = g0 + sumg1;
@@ -78,7 +84,8 @@ namespace DO {
       a3 = ekn*(1-ek*alpha)*ema;
       a4 = -ekn*em2a;
       parity = 1;
-      if (neumann) {
+      if (neumann)
+      {
         sumg1 = ekn/2;
         g0 = ekn;
         sumg0 = g0 + sumg1;
@@ -106,13 +113,14 @@ namespace DO {
     }
 
     // filter init
-    T *Y = new T[I.size(d)];
-    const size_t offset = I.stride(d);
-    const size_t nb = I.size(d);
+    std::vector<T> output_signal(signal.size(axis));
+    typename std::vector<T>::iterator Y = output_signal.begin();
+    const size_t offset = signal.stride(axis);
+    const size_t nb = signal.size(axis);
 
     typename Image<T, N>::iterator it;
 
-    for (it = I.begin(); it != I.end(); ++it)
+    for (it = signal.begin(); it != signal.end(); ++it)
     {
       T *ima = it;
       T I2(*ima); ima += offset;
@@ -121,12 +129,15 @@ namespace DO {
       *Y = Y2; ++Y;
       T Y1(g0*I1 + sumg1*I2);
       *Y = Y1; ++Y;
-      for (size_t i=2; i<nb; i++) {
+
+      for (size_t i=2; i<nb; i++)
+      {
         I1 = *ima; ima+=offset;
         T Y0(a1*I1 + a2*I2 + b1*Y1 + b2*Y2);
         *Y = Y0; ++Y;
         I2=I1; Y2=Y1; Y1=Y0;
       }
+
       ima -= offset;
       I2 = *ima;
       Y2 = Y1 = (parity*sumg1)*I2;
@@ -134,7 +145,9 @@ namespace DO {
       ima-=offset;
       I1 = *ima;
       *ima = *(--Y)+Y1;
-      for (size_t i=nb-3; ; i--) {
+
+      for (size_t i=nb-3; ; i--)
+      {
         T Y0(a3*I1+a4*I2+b1*Y1+b2*Y2);
         ima-=offset;
         I2=I1;
@@ -142,11 +155,11 @@ namespace DO {
         *ima=*(--Y)+Y0;
         Y2=Y1;
         Y1=Y0;
+
         if (i==0)
           break;
       }
     }
-    delete [] Y;
   }
 
   //! \brief Apply Deriche blurring.
