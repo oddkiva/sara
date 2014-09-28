@@ -186,35 +186,35 @@ namespace DO {
   //! \brief Apply Deriche blurring.
   template <typename T, int N>
   void inplace_deriche_blur(
-    Image<T, N>&I,
+    Image<T, N>& inout_signal,
     const Matrix<typename PixelTraits<T>::channel_type, N, 1>& sigmas,
     bool neumann = true)
   {
     for (int i = 0; i < N; ++i)
-      inplace_deriche(I,sigmas[i], 0, i, neumann);
+      inplace_deriche(inout_signal,sigmas[i], 0, i, neumann);
   }
 
   //! \brief Apply Deriche blurring.
   template <typename T, int N>
   void inplace_deriche_blur(
-    Image<T,N>& I,
+    Image<T,N>& inout_signal,
     typename PixelTraits<T>::channel_type sigma,
     bool neumann = true)
   {
     typedef typename PixelTraits<T>::channel_type S;
-    Matrix<S, N, 1> Sigma; Sigma.fill(sigma);
-    inplace_deriche_blur(I, Sigma, neumann);
+    Matrix<S, N, 1> sigmas; sigmas.fill(sigma);
+    inplace_deriche_blur(inout_signal, sigmas, neumann);
   }
 
   //! \brief Return the blurred image using Deriche filter.
   template <typename T, int N>
-  Image<T,N> deriche_blur(const Image<T,N>& I,
+  Image<T,N> deriche_blur(const Image<T,N>& in_signal,
                          typename PixelTraits<T>::channel_type sigma,
                          bool neumann = true)
   {
-    Image<T,N> J(I);
-    inplace_deriche_blur(J,sigma,neumann);
-    return J;
+    Image<T,N> out_signal(in_signal);
+    inplace_deriche_blur(out_signal, sigma, neumann);
+    return out_signal;
   }
 
   //! \brief Return the blurred image using Deriche filter.
@@ -224,7 +224,7 @@ namespace DO {
     const Matrix<typename PixelTraits<T>::channel_type, N, 1>& sigmas,
     bool neumann = true)
   {
-    Image<T,N> J=I.clone();
+    Image<T,N> J(I);
     inplace_deriche_blur(J,sigmas,neumann);
     return J;
   }
@@ -233,15 +233,15 @@ namespace DO {
   template <typename T, int N>
   struct DericheBlur
   {
-    typedef Image<T, N> ReturnType;
-    typedef typename PixelTraits<T>::ChannelType ParamType;
+    typedef Image<T, N> return_type;
+    typedef typename PixelTraits<T>::channel_type parameter_type;
     
-    DericheBlur(const Image<T, N>& src)
+    inline explicit DericheBlur(const Image<T, N>& src)
       : src_(src)
     {
     }
     
-    ReturnType operator()(ParamType sigma) const
+    inline return_type operator()(parameter_type sigma) const
     {
       return deriche_blur(src_, sigma);
     }
