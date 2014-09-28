@@ -14,7 +14,7 @@
 #include <DO/Core/Pixel/Pixel.hpp>
 #include <DO/Core/Pixel/ColorConversion.hpp>
 
-#include "AssertHelpers.hpp"
+#include "../AssertHelpers.hpp"
 
 
 using namespace std;
