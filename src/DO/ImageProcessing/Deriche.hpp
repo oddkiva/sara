@@ -15,7 +15,7 @@
 #define DO_IMAGEPROCESSING_DERICHE_HPP
 
 
-#include "../Core/Image.hpp"
+#include <DO/Core/Image.hpp>
 
 
 namespace DO {
@@ -32,7 +32,7 @@ namespace DO {
 
   //! \brief Apply Deriche filter with specified order $o$ to dimension $d$.
   template <typename T, int N>
-  void inplace_deriche(Image<T, N>& signal, 
+  void inplace_deriche(Image<T, N>& inout_signal, 
                        typename PixelTraits<T>::channel_type sigma,
                        int derivative_order, int axis, bool neumann = true)
   {
@@ -46,7 +46,10 @@ namespace DO {
     if (axis < 0 || axis >= N)
       throw std::runtime_error("axis of derivative must be between 0 and N-1");
 
-    // Compute the coefficients of the recursive filter
+    // Compute the coefficients of the recursive filter.
+    //
+    // The constant 1.695 is mysterious... Also found in CImg library.
+    // TODO: ask where this constant comes from.
     const S alpha = static_cast<S>(1.695)/sigma;
     const S ea = std::exp(alpha);
     const S ema = std::exp(-alpha);
@@ -54,7 +57,10 @@ namespace DO {
     const S b1 = 2*ema;
     const S b2 = -em2a;
 
-    S ek,ekn,parity,a1,a2,a3,a4,g0,sumg1,sumg0;
+    S ek, ekn;
+    S parity;
+    S a1, a2, a3, a4;
+    S g0, sumg1, sumg0;
 
     switch(derivative_order)
     {
@@ -112,52 +118,67 @@ namespace DO {
       break;
     }
 
-    // filter init
-    std::vector<T> output_signal(signal.size(axis));
-    typename std::vector<T>::iterator Y = output_signal.begin();
-    const size_t offset = signal.stride(axis);
-    const size_t nb = signal.size(axis);
+    // Initialize two temporary arrays.
+    const int size = inout_signal.size(axis);
+    const int step = inout_signal.stride(axis);
+    std::vector<T> y_causal(size);
+    std::vector<T> y_anticausal(size);
 
-    typename Image<T, N>::iterator it;
+    typedef typename Image<T, N>::vector_type Vector;
+    typedef typename Image<T, N>::subarray_iterator SubarrayIterator;
+    Vector start, end;
+    start = Vector::Zero();
+    end = inout_signal.sizes();
+    end[axis] = 1;
+    SubarrayIterator it = inout_signal.begin_subrange(start, end);
+    SubarrayIterator it_end = inout_signal.end_subrange();
 
-    for (it = signal.begin(); it != signal.end(); ++it)
+    // In 2D, we scan the beginning of each row/columns.
+    for ( ; it != it_end; ++it)
     {
-      T *ima = it;
-      T I2(*ima); ima += offset;
-      T I1(*ima); ima += offset;
-      T Y2(sumg0*I2);
-      *Y = Y2; ++Y;
-      T Y1(g0*I1 + sumg1*I2);
-      *Y = Y1; ++Y;
+      T *ptr = &(*it);
 
-      for (size_t i=2; i<nb; i++)
+      // Causal signal: i == 0.
+      T *forward_x[2] =  { ptr, ptr-step };
+      y_causal[0] = sumg0* *forward_x[0];
+
+      // Causal signal: i == 1.
+      for (int k = 0; k < 2; ++k)
+        forward_x[k] += step;
+      y_causal[1] = g0 * *forward_x[0] + sumg1 * *forward_x[1];
+
+      // Causal signal: i = 2 .. size-1
+      for (int i = 2; i < size; ++i)
       {
-        I1 = *ima; ima+=offset;
-        T Y0(a1*I1 + a2*I2 + b1*Y1 + b2*Y2);
-        *Y = Y0; ++Y;
-        I2=I1; Y2=Y1; Y1=Y0;
+        for (int k = 0; k < 2; ++k)
+          forward_x[k] += step;
+        y_causal[i] = a1 * *forward_x[0] + a2 * *forward_x[1]
+                    + b1 * y_causal[i-1] + b2 * y_causal[i-2];
       }
 
-      ima -= offset;
-      I2 = *ima;
-      Y2 = Y1 = (parity*sumg1)*I2;
-      *ima = *(--Y)+Y2;
-      ima-=offset;
-      I1 = *ima;
-      *ima = *(--Y)+Y1;
+      // Anti-causal signal: i == size-1
+      T *backward_x[2] =  { ptr + (size-1)*step, ptr + size*step };
+      y_anticausal[size-1] = parity * sumg1 * *backward_x[0];
 
-      for (size_t i=nb-3; ; i--)
+      // Anti-causal signal: i == size-2
+      for (int k = 0; k < 2; ++k)
+        forward_x[k] += step;
+      y_anticausal[size-2] = y_anticausal[size-1];
+
+      // Anti-causal signal: i == size-3 .. 0
+      for (int i = size-3; i >= 0; --i)
       {
-        T Y0(a3*I1+a4*I2+b1*Y1+b2*Y2);
-        ima-=offset;
-        I2=I1;
-        I1=*ima;
-        *ima=*(--Y)+Y0;
-        Y2=Y1;
-        Y1=Y0;
+        for (int k = 0; k < 2; ++k)
+          backward_x[k] -= step;
+        y_anticausal[i] = a3 * *backward_x[0] + a4 * *backward_x[1]
+                        + b1 * y_anticausal[i+1] + b2 * y_anticausal[i+2];
+      }
 
-        if (i==0)
-          break;
+      // Store the sum of the two signals.
+      for (int i = 0; i < size; ++i)
+      {
+        *ptr = y_causal[i] + y_anticausal[i];
+        ptr += step;
       }
     }
   }
@@ -169,7 +190,7 @@ namespace DO {
     const Matrix<typename PixelTraits<T>::channel_type, N, 1>& sigmas,
     bool neumann = true)
   {
-    for (int i=0;i<N;i++)
+    for (int i = 0; i < N; ++i)
       inplace_deriche(I,sigmas[i], 0, i, neumann);
   }
 
@@ -214,8 +235,17 @@ namespace DO {
   {
     typedef Image<T, N> ReturnType;
     typedef typename PixelTraits<T>::ChannelType ParamType;
-    DericheBlur(const Image<T, N>& src) : src_(src) {}
-    ReturnType operator()(ParamType sigma) const { return deriche_blur(src_, sigma); }
+    
+    DericheBlur(const Image<T, N>& src)
+      : src_(src)
+    {
+    }
+    
+    ReturnType operator()(ParamType sigma) const
+    {
+      return deriche_blur(src_, sigma);
+    }
+
     const Image<T, N>& src_;
   };
 
