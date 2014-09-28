@@ -7,11 +7,11 @@
 #include <gtest/gtest.h>
 
 
-template <typename T, int M, int N>
+template <typename Matrix1, typename Matrix2>
 ::testing::AssertionResult assert_matrix_equal(const char* m_expr,
                                                const char* n_expr,
-                                               const Eigen::Matrix<T, M, N>& m,
-                                               const Eigen::Matrix<T, M, N>& n)
+                                               const Matrix1& m,
+                                               const Matrix2& n)
 {
   if (m == n)
     return ::testing::AssertionSuccess();
@@ -23,15 +23,15 @@ template <typename T, int M, int N>
 }
 
 
-template <typename T, int M, int N>
+template <typename Matrix1, typename Matrix2>
 ::testing::AssertionResult assert_matrix_near(const char* m_expr,
                                               const char* n_expr,
                                               const char* abs_error_expr,
-                                              const Eigen::Matrix<T, M, N>& m,
-                                              const Eigen::Matrix<T, M, N>& n,
+                                              const Matrix1& m,
+                                              const Matrix2& n,
                                               double abs_error)
 {
-  T distance = (m-n).norm();
+  typename Matrix1::Scalar distance = (m-n).norm();
   if (distance < abs_error)
     return ::testing::AssertionSuccess();
 
