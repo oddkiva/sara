@@ -77,6 +77,21 @@ TEST_F(TestFilters, test_apply_row_based_filter)
                          static_cast<int>(_kernel.size()));
   EXPECT_MATRIX_EQ(true_matrix, dst_image.matrix());
 }
+
+
+TEST_F(TestFilters, test_apply_column_based_filter)
+{
+  Image<float> dst_image;
+  MatrixXf true_matrix(3, 3);
+  true_matrix.setZero();
+
+  apply_column_based_filter(_src_image, dst_image,
+                            &_kernel[0],
+                            static_cast<int>(_kernel.size()));
+  EXPECT_MATRIX_EQ(true_matrix, dst_image.matrix());
+}
+
+
 }
 
 
