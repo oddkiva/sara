@@ -107,6 +107,21 @@ TEST_F(TestFilters, test_apply_row_derivative)
   EXPECT_MATRIX_EQ(true_matrix, dst_image.matrix());
 }
 
+
+TEST_F(TestFilters, test_apply_column_derivative)
+{
+  Image<float> dst_image;
+  MatrixXf true_matrix(3, 3);
+  true_matrix.setZero();
+
+  apply_column_derivative(_src_image, dst_image);
+  EXPECT_MATRIX_EQ(true_matrix, dst_image.matrix());
+
+  dst_image = column_derivative(_src_image);
+  EXPECT_MATRIX_EQ(true_matrix, dst_image.matrix());
+}
+
+
 }
 
 
