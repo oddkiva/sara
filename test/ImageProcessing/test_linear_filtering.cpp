@@ -203,6 +203,23 @@ TEST_F(TestFilters, test_apply_2d_non_separable_filter)
 }
 
 
+TEST_F(TestFilters, test_apply_laplacian_filter)
+{
+  int width = 3, height = 4;
+  _src_image.resize(width, height);
+  _src_image.array().fill(1);
+  Image<float> dst_image;
+  MatrixXf true_matrix(height, width);
+  true_matrix.setZero();
+
+  apply_laplacian_filter(_src_image, dst_image);
+  EXPECT_MATRIX_NEAR(true_matrix, dst_image.matrix(), 1e-5);
+
+  dst_image = laplacian_filter(_src_image);
+  EXPECT_MATRIX_EQ(true_matrix, dst_image.matrix());
+}
+
+
 }
 
 
