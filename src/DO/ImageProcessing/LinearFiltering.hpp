@@ -392,7 +392,7 @@ namespace DO {
   inline Image<T> column_derivative(const Image<T>& src)
   {
     Image<T> dst(src.sizes());
-    applyColumnDerivative(src, dst);
+    apply_column_derivative(src, dst);
     return dst;
   }
 
@@ -458,9 +458,9 @@ namespace DO {
   template <typename T, int N> struct FilterName;                     \
   template <typename T> struct FilterName<T,2>                        \
   {                                                                   \
-    typedef Image<T> ReturnType;                                      \
+    typedef Image<T> return_type;                                     \
     inline FilterName(const Image<T>& src) : src_(src) {}             \
-    inline ReturnType operator()() const { return function(src_); }   \
+    inline return_type operator()() const { return function(src_); }  \
     const Image<T>& src_;                                             \
   }
 
@@ -469,10 +469,10 @@ namespace DO {
   template <typename T, int N> struct FilterName;                       \
   template <typename T> struct FilterName<T,2>                          \
   {                                                                     \
-    typedef Image<T> ReturnType;                                        \
-    typedef typename PixelTraits<T>::channel_type ParamType;             \
+    typedef Image<T> return_type;                                       \
+    typedef typename PixelTraits<T>::channel_type parameter_type;       \
     inline FilterName(const Image<T>& src) : src_(src) {}               \
-    inline ReturnType operator()(const ParamType& param) const          \
+    inline return_type operator()(const parameter_type& param) const    \
     { return function(src_, param); }                                   \
     const Image<T>& src_;                                               \
   }

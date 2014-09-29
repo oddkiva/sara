@@ -13,7 +13,6 @@
 #include <gtest/gtest.h>
 
 #include <DO/Defines.hpp>
-#include <DO/Core/DebugUtilities.hpp>
 #include <DO/ImageProcessing/LinearFiltering.hpp>
 
 #include "../AssertHelpers.hpp"
@@ -133,7 +132,10 @@ TEST_F(TestFilters, test_gaussian)
   EXPECT_MATRIX_NEAR(true_matrix, dst_image.matrix(), 1e-5);
 
   dst_image = gaussian(_src_image, 1.f);
-  EXPECT_MATRIX_EQ(true_matrix, dst_image.matrix());
+  EXPECT_MATRIX_NEAR(true_matrix, dst_image.matrix(), 1e-5);
+
+  dst_image = _src_image.compute<Gaussian>(1.f);
+  EXPECT_MATRIX_NEAR(true_matrix, dst_image.matrix(), 1e-5);
 }
 
 
@@ -149,6 +151,9 @@ TEST_F(TestFilters, test_sobel)
 
   dst_image = sobel(_src_image);
   EXPECT_MATRIX_EQ(true_matrix, dst_image.matrix());
+
+  dst_image = _src_image.compute<Sobel>();
+  EXPECT_MATRIX_NEAR(true_matrix, dst_image.matrix(), 1e-5);
 }
 
 
@@ -164,6 +169,9 @@ TEST_F(TestFilters, test_scharr)
 
   dst_image = scharr(_src_image);
   EXPECT_MATRIX_EQ(true_matrix, dst_image.matrix());
+
+  dst_image = _src_image.compute<Scharr>();
+  EXPECT_MATRIX_NEAR(true_matrix, dst_image.matrix(), 1e-5);
 }
 
 
@@ -179,6 +187,9 @@ TEST_F(TestFilters, test_prewitt)
 
   dst_image = prewitt(_src_image);
   EXPECT_MATRIX_EQ(true_matrix, dst_image.matrix());
+
+  dst_image = _src_image.compute<Prewitt>();
+  EXPECT_MATRIX_NEAR(true_matrix, dst_image.matrix(), 1e-5);
 }
 
 
@@ -234,6 +245,9 @@ TEST_F(TestFilters, test_roberts_cross)
 
   dst_image = roberts_cross(_src_image);
   EXPECT_MATRIX_EQ(true_matrix, dst_image.matrix());
+
+  dst_image = _src_image.compute<RobertsCross>();
+  EXPECT_MATRIX_NEAR(true_matrix, dst_image.matrix(), 1e-5);
 }
 
 
