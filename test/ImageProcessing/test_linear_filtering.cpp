@@ -42,15 +42,27 @@ TEST(TestLinearFiltering, test_convolve_array)
 }
 
 
-TEST(TestLinearFitering, test_apply_row_based_filter)
+class TestFilters : public testing::Test
 {
-  Image<float> image(3, 3);
-  image.matrix() << 1, 2, 3,
-                    1, 2, 3,
-                    1, 2, 3;
-  const float kernel[] = { -1./2, 0, 1./2 };
+protected:
+  Image<float> _src_image;
+  vector<float> _kernel;
 
-  apply_row_based_filter(image, image, kernel, 3);
+  TestFilters() : testing::Test()
+  {
+    _src_image.resize(3, 3);
+    _src_image.matrix() <<
+      1, 2, 3,
+      1, 2, 3,
+      1, 2, 3;
+
+    _kernel.resize(3);
+    _kernel[0] = -1./2;
+    _kernel[1] =  0;
+    _kernel[2] =  1./2;
+  }
+};
+
 
   MatrixXf true_matrix(3, 3);
   true_matrix << 0.5, 1, 0.5,
