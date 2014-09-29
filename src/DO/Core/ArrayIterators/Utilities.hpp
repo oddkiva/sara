@@ -51,6 +51,8 @@ namespace DO {
   //! StorageOrder must be either 'Eigen::RowMajor' or 'Eigen::ColMajor'.
   template <int StorageOrder> struct PositionDecrementer;
 
+  //! \brief Computes the strides from the sizes of an N-dimensional array.
+  //! Specialized class for 'Eigen::RowMajor'.
   template <> struct StrideComputer<RowMajor>
   {
     template <typename Index, int N>
@@ -67,6 +69,8 @@ namespace DO {
     }
   };
 
+  //! \brief Computes the strides from the sizes of an N-dimensional array.
+  //! Specialized class for 'Eigen::ColMajor'.
   template <> struct StrideComputer<ColMajor>
   {
     template <typename Index, int N>
@@ -83,6 +87,8 @@ namespace DO {
     }
   };
 
+  //! \brief Increment the current position in an N-dimensional array.
+  //! StorageOrder must be either 'Eigen::RowMajor'.
   template <> struct PositionIncrementer<RowMajor>
   {
     template <typename Index, int N>
@@ -110,6 +116,8 @@ namespace DO {
 
   };
 
+  //! \brief Increment the current position in an N-dimensional array.
+  //! StorageOrder must be either 'Eigen::ColMajor'.
   template <> struct PositionIncrementer<ColMajor>
   {
     template <typename Index, int N>
@@ -136,6 +144,8 @@ namespace DO {
     }
   };
 
+  //! \brief Decrement the current position in an N-dimensional array.
+  //! StorageOrder must be either 'Eigen::RowMajor'.
   template <> struct PositionDecrementer<RowMajor>
   {
     template <typename Index, int N>
@@ -164,6 +174,8 @@ namespace DO {
     }
   };
 
+  //! \brief Decrement the current position in an N-dimensional array.
+  //! StorageOrder must be either 'Eigen::ColMajor'.
   template <> struct PositionDecrementer<ColMajor>
   {
     template <typename Index, int N>
