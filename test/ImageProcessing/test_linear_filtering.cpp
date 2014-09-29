@@ -28,7 +28,9 @@ TEST(TestLinearFiltering, test_convolve_array)
   std::vector<float> signal(10, 1);
   std::vector<float> kernel(3, 1);
 
-  convolve_array(&signal[0], &kernel[0], signal.size()-2, kernel.size());
+  convolve_array(&signal[0], &kernel[0],
+                 static_cast<int>(signal.size())-2,
+                 static_cast<int>(kernel.size()));
 
   for (size_t i = 0; i != signal.size(); ++i)
   {
