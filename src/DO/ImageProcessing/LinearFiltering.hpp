@@ -100,7 +100,7 @@ namespace DO {
 
       // Compute the value by convolution
       for (int x = 0; x < w; ++x) {
-        dst(x,y) = ColorTraits<T>::zero();
+        dst(x,y) = color_min_value<T>();
         for (int k = 0; k < kernel_size; ++k)
           dst(x,y) += kernel[k]*buffer(x+k,0);
       }
@@ -145,7 +145,7 @@ namespace DO {
       // Compute the value by convolution
       for (int y = 0; y < h; ++y)
       {
-        dst(x,y) = ColorTraits<T>::zero();
+        dst(x,y) = color_min_value<T>();
         for (int k = 0; k < kernel_size; ++k)
           dst(x,y) += kernel[k]*buffer(y+k,0);
       }
@@ -568,10 +568,10 @@ namespace DO {
 
   //! \brief Apply Gaussian smoothing to image.
   template <typename T, typename S>
-  inline Image<T> gaussian(const Image<T>& src, S sigma, S gaussTruncate = S(4))
+  inline Image<T> gaussian(const Image<T>& src, S sigma, S gauss_truncate = S(4))
   {
     Image<T> dst(src.sizes());
-    applyGaussianFilter(dst, src, sigma, gaussTruncate);
+    apply_gaussian_filter(dst, src, sigma, gauss_truncate);
     return dst;
   }
 
