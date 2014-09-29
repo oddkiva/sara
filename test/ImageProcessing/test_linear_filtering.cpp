@@ -30,16 +30,32 @@ TEST(TestLinearFiltering, test_convolve_array)
 
   convolve_array(&signal[0], &kernel[0], signal.size()-2, kernel.size());
 
-  //for (int i = 0; i < 2; ++i)
-  //  ASSERT_EQ(signal[i], 1);
   for (size_t i = 0; i != signal.size(); ++i)
   {
-    CHECK(i);
     if (i > signal.size()-3)
       EXPECT_EQ(1, signal[i]);
     else
       EXPECT_EQ(3, signal[i]);
   }
+}
+
+
+TEST(TestLinearFitering, test_apply_row_based_filter)
+{
+  Image<float> image(3, 3);
+  image.matrix() << 1, 2, 3,
+                    1, 2, 3,
+                    1, 2, 3;
+  const float kernel[] = { -1./2, 0, 1./2 };
+
+  apply_row_based_filter(image, image, kernel, 3);
+
+  MatrixXf true_matrix(3, 3);
+  true_matrix << 0.5, 1, 0.5,
+                 0.5, 1, 0.5,
+                 0.5, 1, 0.5;
+
+  EXPECT_MATRIX_EQ(true_matrix, image.matrix());
 }
 
 
