@@ -152,6 +152,21 @@ TEST_F(TestFilters, test_apply_sobel_filter)
 }
 
 
+TEST_F(TestFilters, test_apply_scharr_filter)
+{
+  _src_image.array().fill(1);
+  Image<float> dst_image;
+  MatrixXf true_matrix(3, 3);
+  true_matrix.setZero();
+
+  apply_scharr_filter(_src_image, dst_image);
+  EXPECT_MATRIX_NEAR(true_matrix, dst_image.matrix(), 1e-5);
+
+  dst_image = scharr(_src_image);
+  EXPECT_MATRIX_EQ(true_matrix, dst_image.matrix());
+}
+
+
 }
 
 
