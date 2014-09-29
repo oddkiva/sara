@@ -355,14 +355,14 @@ namespace DO {
 
   //! \brief Apply Roberts-Cross filter.
   template <typename T>
-  void apply_roberts_cross_filter(Image<T>& dst, const Image<T>& src)
+  void apply_roberts_cross_filter(const Image<T>& src, Image<T>& dst)
   {
     typedef typename PixelTraits<T>::channel_type S;
-    S k1[] = { 
+    const S k1[] = { 
       S( 1), S( 0),
       S( 0), S(-1)
     };
-    S k2[] = { 
+    const S k2[] = { 
       S( 0), S( 1),
       S(-1), S( 0)
     };
@@ -370,8 +370,8 @@ namespace DO {
     if (dst.sizes() != src.sizes())
       dst.resize(src.sizes());
     Image<T> tmp;
-    apply_2d_non_separable_filter(tmp, src, k1, 2, 2);
-    apply_2d_non_separable_filter(dst, src, k2, 2, 2);
+    apply_2d_non_separable_filter(src, tmp, k1, 2, 2);
+    apply_2d_non_separable_filter(src, dst, k2, 2, 2);
     dst.array() = (dst.array().abs2()+ tmp.array().abs2()).sqrt();
   }
 
