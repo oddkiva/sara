@@ -117,7 +117,7 @@ namespace DO {
     {
       DO_STATIC_ASSERT(N == 2, MULTIARRAY_MUST_HAVE_TWO_DIMENSIONS);
       return const_matrix_view_type( reinterpret_cast<
-        typename ElementTraits<T>::const_pointer>(data()),
+        typename ElementTraits<Color>::const_pointer>(base_type::data()),
         base_type::cols(), base_type::rows() );
     }
 
@@ -126,7 +126,7 @@ namespace DO {
     {
       DO_STATIC_ASSERT(N == 2, MULTIARRAY_MUST_HAVE_TWO_DIMENSIONS);
       return matrix_view_type( reinterpret_cast<
-        typename ElementTraits<Color>::pointer>(data()),
+        typename ElementTraits<Color>::pointer>(base_type::data()),
         base_type::cols(), base_type::rows() );
     }
 
