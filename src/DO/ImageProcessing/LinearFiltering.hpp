@@ -277,14 +277,14 @@ namespace DO {
     const typename PixelTraits<T>::channel_type *kernel,
     int kernel_width, int kernel_height)
   {
-    typedef typename Image<T>::coords_type Coords;
+    typedef typename Image<T>::vector_type Vector;
     
     const int half_kw = kernel_width/2;
     const int half_kh = kernel_height/2;
     const int w = src.width();
     const int h = src.height();
 
-    Coords sizes(src.sizes()+Coords(half_kw*2, half_kh*2));
+    Vector sizes(src.sizes()+Vector(half_kw*2, half_kh*2));
     Image<T> work(sizes);
     const int workw = work.width();
     const int workh = work.height();
@@ -307,11 +307,11 @@ namespace DO {
         if (half_kw <= x && x < w+half_kw && y >= h+half_kh)
           work(x,y) = src(x-half_kw,h-1);
         // North-East
-        if (x >= w+half_kw && y >= h+half_kh)
+        if (x >= w+half_kw && y < half_kh)
           work(x,y) = src(w-1,0);
         // East
         if (x >= w+half_kw && half_kh <= y && y < h+half_kh)
-          work(x,y) = src(w-1,y-half_kh); 
+          work(x,y) = src(w-1,y-half_kh);
         // South-East
         if (x >= w+half_kw && y >= h+half_kh)
           work(x,y) = src(w-1,h-1);
