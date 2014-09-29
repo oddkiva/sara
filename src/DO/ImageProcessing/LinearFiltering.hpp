@@ -383,7 +383,7 @@ namespace DO {
   inline Image<T> row_derivative(const Image<T>& src)
   {
     Image<T> dst(src.sizes());
-    apply_row_derivative(dst, src);
+    apply_row_derivative(src, dst);
     return dst;
   }
 
@@ -392,7 +392,7 @@ namespace DO {
   inline Image<T> column_derivative(const Image<T>& src)
   {
     Image<T> dst(src.sizes());
-    applyColumnDerivative(dst, src);
+    applyColumnDerivative(src, dst);
     return dst;
   }
 
@@ -437,7 +437,7 @@ namespace DO {
   inline Image<T> roberts_cross(const Image<T>& src)
   {
     Image<T> dst(src.sizes());
-    apply_roberts_cross_filter(dst, src);
+    apply_roberts_cross_filter(src, dst);
     return dst;
   }
 
