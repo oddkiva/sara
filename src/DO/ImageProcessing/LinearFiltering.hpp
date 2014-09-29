@@ -14,6 +14,11 @@
 #ifndef DO_IMAGEPROCESSING_LINEARFILTERING_HPP
 #define DO_IMAGEPROCESSING_LINEARFILTERING_HPP
 
+
+#include <DO/Core/Image.hpp>
+#include <DO/Core/Pixel.hpp>
+
+
 namespace DO {
 
   /*!
@@ -23,42 +28,37 @@ namespace DO {
    */
 
   /*!
-    \brief "Convolves" a 1D signal \f$f\f$ (or 1D array), with a kernel \f$g\f$.
+    \brief Convolve a 1D signal \f$f\f$ (or 1D array), with a kernel \f$g\f$.
     @param[in,out]
       signal
       the 1D array containing the 1D signal \f$ f = (f_i)_{1\leq i \leq N}\f$,
       the resulting signal \f$f*g\f$ is stored in signal.
     @param[in]
       kernel
-      the "convolution" kernel \f$g = (g_i)_{1 \leq i \leq K}\f$.
-    @param[in] signalSz the signal size \f$N\f$.
-    @param[in] kernelSz the kernel size \f$K\f$.
+      the convolution kernel \f$g = (g_i)_{1 \leq i \leq K}\f$.
+    @param[in] signal_size the signal size \f$N\f$.
+    @param[in] kernel_size the kernel size \f$K\f$.
     
-    Note that to be mathematically correct, the kernel must be symmetric, which
-    is why every time, the term "convolution" is mentioned is put in quotes
-    See the implementation for details.
-    This function is used intensively in applyFastRowBasedFilter and 
-    applyFastColumnBasedFilter.
    */
   template <typename T>
-  void convolveArray(T *signal,
-                     const typename ColorTraits<T>::ChannelType *kernel,
-                     int signalSz, int kernelSz)
+  void convolve_array(T *signal,
+                     const typename PixelTraits<T>::channel_type *kernel,
+                     int signal_size, int kernel_size)
   {
-    T *bp;
-    T *b = signal;
-    const typename ColorTraits<T>::ChannelType *kp;
+    T *yj;
+    T *y = signal;
+    const typename PixelTraits<T>::channel_type *kj;
 
-    for (int i = 0; i < signalSz; ++i)
+    for (int i = 0; i < signal_size; ++i, ++y)
     {
-      bp = b;
-      kp = kernel;
+      yj = y;
+      kj = kernel;
 
-      T sum(ColorTraits<T>::zero());
-      for (int j = 0; j < kernelSz; j++)
-        sum += *bp++ * *kp++;
-      
-      *b++ = sum;
+      T sum(color_min_value<T>());
+      for (int j = 0; j < kernel_size; ++j, ++yj, ++kj)
+        sum += *yj * *kj;
+
+      *y = sum;
     }
   }
 
