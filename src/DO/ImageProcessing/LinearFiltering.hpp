@@ -15,6 +15,8 @@
 #define DO_IMAGEPROCESSING_LINEARFILTERING_HPP
 
 
+#include <vector>
+
 #include <DO/Core/Image.hpp>
 #include <DO/Core/Pixel.hpp>
 
@@ -87,6 +89,7 @@ namespace DO {
     if (dst.sizes() != src.sizes())
       dst.resize(w,h);
 
+    std::vector<T> buffer(w+half_size*2);
     for (int y = 0; y < h; ++y)
     {
       // Copy to work array and add padding.
@@ -97,12 +100,11 @@ namespace DO {
       for (int x = 0; x < half_size; ++x)
         buffer[w+half_size+x] = src(w-1,y);
 
-      convolve_array(buffer, kernel, w, kernel_size);
+      convolve_array(&buffer[0], kernel, w, kernel_size);
+
       for (int x = 0; x < w; ++x)
         dst(x,y) = buffer[x];
     }
-
-    delete[] buffer;
   }
 
   /*!
@@ -128,8 +130,7 @@ namespace DO {
     if (dst.sizes() != src.sizes())
       dst.resize(w,h);
 
-    T *buffer = new T[h+half_size*2];
-
+    std::vector<T> buffer(h+half_size*2);
     for (int x = 0; x < w; ++x)
     {
       for (int y = 0; y < half_size; ++y)
@@ -139,12 +140,11 @@ namespace DO {
       for (int y = 0; y < half_size; ++y)
         buffer[h+half_size+y] = src(x,h-1);
 
-      convolve_array(buffer, kernel, h, kernel_size);
+      convolve_array(&buffer[0], kernel, h, kernel_size);
+
       for (int y = 0; y < h; ++y)
         dst(x,y) = buffer[y];
     }
-
-    delete[] buffer;
   }
 
   //! brief Apply row-derivative to image.
