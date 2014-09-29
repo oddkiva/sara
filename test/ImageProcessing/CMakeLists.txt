@@ -13,3 +13,6 @@ do_test(ImageProcessing_Deriche test_deriche_filter.cpp
         
 do_test(ImageProcessing_Interpolation test_interpolation.cpp
         "${DO_LIBRARIES}" "ImageProcessing")
+
+do_test(ImageProcessing_LinearFiltering test_linear_filtering.cpp
+        "${DO_LIBRARIES}" "ImageProcessing")
