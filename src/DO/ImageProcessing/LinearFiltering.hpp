@@ -152,8 +152,8 @@ namespace DO {
   void apply_row_derivative(const Image<T>& src, Image<T>& dst)
   {
     typedef typename PixelTraits<T>::channel_type S;
-    S diff[] = { S(-1), S(0), S(1) };
-    apply_fast_row_based_filter(dst, src, diff, 3);
+    const S diff[] = { S(-1), S(0), S(1) };
+    apply_row_based_filter(src, dst, diff, 3);
   }
 
   //! \brief Apply column-derivative to image.
