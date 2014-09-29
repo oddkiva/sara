@@ -64,12 +64,19 @@ protected:
 };
 
 
+TEST_F(TestFilters, test_apply_row_based_filter)
+{
+  Image<float> dst_image;
   MatrixXf true_matrix(3, 3);
   true_matrix << 0.5, 1, 0.5,
                  0.5, 1, 0.5,
                  0.5, 1, 0.5;
 
-  EXPECT_MATRIX_EQ(true_matrix, image.matrix());
+  apply_row_based_filter(_src_image, dst_image,
+                         &_kernel[0],
+                         static_cast<int>(_kernel.size()));
+  EXPECT_MATRIX_EQ(true_matrix, dst_image.matrix());
+}
 }
 
 
