@@ -65,7 +65,7 @@ namespace DO {
   // ====================================================================== //
   // Linear filters.
   /*!
-    \brief Apply 1D filter to image rows. (Slow, deprecated).
+    \brief Apply 1D filter to image rows.
     @param[out] dst the row-filtered image.
     @param[in] src the input image
     @param[in] kernel the input kernel
@@ -82,95 +82,11 @@ namespace DO {
     const int w = src.width();
     const int h = src.height();
     const int half_size = kernel_size/2;
-    Image<T> buffer(w+half_size*2,1);
 
     // Resize if necessary.
     if (dst.sizes() != src.sizes())
       dst.resize(w,h);
 
-
-    for (int y = 0; y < h; ++y) {
-      // Copy to work array and add padding.
-      for (int x = 0; x < half_size; ++x)
-        buffer(x,0) = src(0,y);
-      for (int x = 0; x < w; ++x)
-        buffer(half_size+x,0) = src(x,y);
-      for (int x = 0; x < half_size; ++x)
-        buffer(w+half_size+x,0) = src(w-1,y);
-
-      // Compute the value by convolution
-      for (int x = 0; x < w; ++x) {
-        dst(x,y) = color_min_value<T>();
-        for (int k = 0; k < kernel_size; ++k)
-          dst(x,y) += kernel[k]*buffer(x+k,0);
-      }
-    }
-  }
-
-  /*!
-    \brief Apply 1D filter to image columns.
-    @param[out] dst the column-filtered image.
-    @param[in] src the input image
-    @param[in] kernel the input kernel
-    @param[in] kernel_size the kernel size
-    
-    Note that borders are replicated.
-   */
-  template <typename T>
-  void apply_column_based_filter(
-    const Image<T>& src, Image<T>& dst,
-    const typename PixelTraits<T>::channel_type *kernel,
-    int kernel_size)
-  {
-    const int w = src.width();
-    const int h = src.height();
-    const int halfSize = kernel_size/2;
-    
-    // Resize if necessary.
-    if (dst.sizes() != src.sizes())
-      dst.resize(w,h);
-
-    Image<T> buffer(h+halfSize*2,1);
-
-    for (int x = 0; x < w; ++x)
-    {
-      // Copy to work array and add padding.
-      for (int y = 0; y < halfSize; ++y)
-        buffer(y,0) = src(x,0);
-      for (int y = 0; y < h; ++y)
-        buffer(y+halfSize,0) = src(x,y);
-      for (int y = 0; y < halfSize; ++y)
-        buffer(h+halfSize+y,0) = src(x,h-1);
-
-      // Compute the value by convolution
-      for (int y = 0; y < h; ++y)
-      {
-        dst(x,y) = color_min_value<T>();
-        for (int k = 0; k < kernel_size; ++k)
-          dst(x,y) += kernel[k]*buffer(y+k,0);
-      }
-    }
-  }
-
-  /*!
-    \brief Apply 1D filter to image rows.
-    @param[out] dst the row-filtered image.
-    @param[in] src the input image
-    @param[in] kernel the input kernel
-    @param[in] kernel_size the kernel size
-
-    Note that borders are replicated.
-   */
-  template <typename T>
-  void apply_fast_row_based_filter(
-    Image<T>& dst, const Image<T>& src,
-    const typename PixelTraits<T>::channel_type *kernel,
-    int kernel_size)
-  {
-    const int w = src.width();
-    const int h = src.height();
-    const int half_size = kernel_size/2;
-    T *buffer = new T[w+half_size*2];
     for (int y = 0; y < h; ++y)
     {
       // Copy to work array and add padding.
