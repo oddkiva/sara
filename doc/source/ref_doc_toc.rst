@@ -9,7 +9,6 @@ Reference Documentation
    reference/FeatureDetectors
    reference/FeatureMatching
    reference/Features
-   reference/FileSystem
    reference/Geometry
    reference/Graphics
    reference/ImageDrawing
