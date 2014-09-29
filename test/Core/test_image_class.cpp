@@ -37,6 +37,23 @@ TEST(TestImageClass, test_2d_image_constructor)
 }
 
 
+TEST(TestImageClass, test_matrix_view)
+{
+  Image<int> A(2, 3);
+  A.matrix() <<
+    1, 2,
+    3, 4,
+    5, 6;
+
+  EXPECT_EQ(A(0, 0), 1);
+  EXPECT_EQ(A(1, 0), 2);
+  EXPECT_EQ(A(0, 1), 3);
+  EXPECT_EQ(A(1, 1), 4);
+  EXPECT_EQ(A(0, 2), 5);
+  EXPECT_EQ(A(1, 2), 6);
+}
+
+
 // ========================================================================== //
 // Run the tests.
 int main(int argc, char** argv) 
