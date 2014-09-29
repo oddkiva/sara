@@ -64,7 +64,7 @@ protected:
 };
 
 
-TEST_F(TestFilters, test_apply_row_based_filter)
+TEST_F(TestFilters, test_row_based_filter)
 {
   Image<float> dst_image;
   MatrixXf true_matrix(3, 3);
@@ -79,7 +79,7 @@ TEST_F(TestFilters, test_apply_row_based_filter)
 }
 
 
-TEST_F(TestFilters, test_apply_column_based_filter)
+TEST_F(TestFilters, test_column_based_filter)
 {
   Image<float> dst_image;
   MatrixXf true_matrix(3, 3);
@@ -92,7 +92,7 @@ TEST_F(TestFilters, test_apply_column_based_filter)
 }
 
 
-TEST_F(TestFilters, test_apply_row_derivative)
+TEST_F(TestFilters, test_row_derivative)
 {
   Image<float> dst_image;
   MatrixXf true_matrix(3, 3);
@@ -108,7 +108,7 @@ TEST_F(TestFilters, test_apply_row_derivative)
 }
 
 
-TEST_F(TestFilters, test_apply_column_derivative)
+TEST_F(TestFilters, test_column_derivative)
 {
   Image<float> dst_image;
   MatrixXf true_matrix(3, 3);
@@ -122,7 +122,7 @@ TEST_F(TestFilters, test_apply_column_derivative)
 }
 
 
-TEST_F(TestFilters, test_apply_gaussian_filter)
+TEST_F(TestFilters, test_gaussian)
 {
   _src_image.array().fill(1);
   Image<float> dst_image;
@@ -137,7 +137,7 @@ TEST_F(TestFilters, test_apply_gaussian_filter)
 }
 
 
-TEST_F(TestFilters, test_apply_sobel_filter)
+TEST_F(TestFilters, test_sobel)
 {
   _src_image.array().fill(1);
   Image<float> dst_image;
@@ -152,7 +152,7 @@ TEST_F(TestFilters, test_apply_sobel_filter)
 }
 
 
-TEST_F(TestFilters, test_apply_scharr_filter)
+TEST_F(TestFilters, test_scharr)
 {
   _src_image.array().fill(1);
   Image<float> dst_image;
@@ -167,7 +167,7 @@ TEST_F(TestFilters, test_apply_scharr_filter)
 }
 
 
-TEST_F(TestFilters, test_apply_prewitt_filter)
+TEST_F(TestFilters, test_prewitt)
 {
   _src_image.array().fill(1);
   Image<float> dst_image;
@@ -182,7 +182,7 @@ TEST_F(TestFilters, test_apply_prewitt_filter)
 }
 
 
-TEST_F(TestFilters, test_apply_2d_non_separable_filter)
+TEST_F(TestFilters, test_2d_non_separable_filter)
 {
   int width = 3, height = 4;
   _src_image.resize(width, height);
@@ -203,7 +203,7 @@ TEST_F(TestFilters, test_apply_2d_non_separable_filter)
 }
 
 
-TEST_F(TestFilters, test_apply_laplacian_filter)
+TEST_F(TestFilters, test_laplacian)
 {
   int width = 3, height = 4;
   _src_image.resize(width, height);
@@ -220,7 +220,7 @@ TEST_F(TestFilters, test_apply_laplacian_filter)
 }
 
 
-TEST_F(TestFilters, test_apply_roberts_cross_filter)
+TEST_F(TestFilters, test_roberts_cross)
 {
   int width = 3, height = 4;
   _src_image.resize(width, height);
