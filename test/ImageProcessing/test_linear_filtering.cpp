@@ -122,6 +122,21 @@ TEST_F(TestFilters, test_apply_column_derivative)
 }
 
 
+TEST_F(TestFilters, test_apply_gaussian_filter)
+{
+  _src_image.array().fill(1);
+  Image<float> dst_image;
+  MatrixXf true_matrix(3, 3);
+  true_matrix.setOnes();
+
+  apply_gaussian_filter(_src_image, dst_image, 1.f);
+  EXPECT_MATRIX_NEAR(true_matrix, dst_image.matrix(), 1e-5);
+
+  dst_image = gaussian(_src_image, 1.f);
+  EXPECT_MATRIX_EQ(true_matrix, dst_image.matrix());
+}
+
+
 }
 
 
