@@ -342,15 +342,15 @@ namespace DO {
 
   //! \brief Apply Laplacian filter (slow).
   template <typename T>
-  void apply_laplacian_filter(Image<T>& dst, const Image<T>& src)
+  void apply_laplacian_filter(const Image<T>& src, Image<T>& dst)
   {
     typedef typename PixelTraits<T>::channel_type S;
-    S kernel[9] = {
+    const S kernel[9] = {
       S(0), S( 1), S(0),
       S(1), S(-4), S(1),
       S(0), S( 1), S(0)
     };
-    apply_2d_non_separable_filter(dst, src, kernel, 3, 3);
+    apply_2d_non_separable_filter(src, dst, kernel, 3, 3);
   }
 
   //! \brief Apply Roberts-Cross filter.
@@ -537,7 +537,7 @@ namespace DO {
   inline Image<T> laplacian_filter(const Image<T>& src)
   {
     Image<T> dst(src.sizes());
-    apply_laplacian_filter(dst, src);
+    apply_laplacian_filter(src, dst);
     return dst;
   }
 
