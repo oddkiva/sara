@@ -41,7 +41,7 @@ namespace DO {
     typedef Matrix<T, M, N> pixel_type;
 
     template <typename U>
-    struct Cast { typedef Matrix<T, M, N> pixel_type; };
+    struct Cast { typedef Matrix<U, M, N> pixel_type; };
   };
 
   template <typename T, typename ColorSpace>
