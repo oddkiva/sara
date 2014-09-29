@@ -202,8 +202,8 @@ namespace DO {
     for (int i = 0; i < kernel_size; ++i)
       kernel[i] /= sum;
 
-    apply_fast_row_based_filter(dst, src, &kernel[0], kernel_size);
-    apply_fast_column_based_filter(dst, dst, &kernel[0], kernel_size);
+    apply_row_based_filter(src, dst, &kernel[0], kernel_size);
+    apply_column_based_filter(src, dst, &kernel[0], kernel_size);
         
     delete[] kernel;
   }
@@ -487,7 +487,7 @@ namespace DO {
   inline Image<T> gaussian(const Image<T>& src, S sigma, S gauss_truncate = S(4))
   {
     Image<T> dst(src.sizes());
-    apply_gaussian_filter(dst, src, sigma, gauss_truncate);
+    apply_gaussian_filter(src, dst, sigma, gauss_truncate);
     return dst;
   }
 
