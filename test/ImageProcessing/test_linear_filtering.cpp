@@ -182,6 +182,27 @@ TEST_F(TestFilters, test_apply_prewitt_filter)
 }
 
 
+TEST_F(TestFilters, test_apply_2d_non_separable_filter)
+{
+  int width = 3, height = 4;
+  _src_image.resize(width, height);
+  _src_image.array().fill(1);
+  float kernel_2d[] = 
+  {
+    1, 1, 1,
+    1, 1, 1,
+    1, 1, 1
+  };
+
+  Image<float> dst_image;
+  MatrixXf true_matrix(height, width);
+  true_matrix.fill(9);
+
+  apply_2d_non_separable_filter(_src_image, dst_image, kernel_2d, 3, 3);
+  EXPECT_MATRIX_NEAR(true_matrix, dst_image.matrix(), 1e-5);
+}
+
+
 }
 
 
