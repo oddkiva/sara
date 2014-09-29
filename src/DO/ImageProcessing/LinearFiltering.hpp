@@ -158,11 +158,11 @@ namespace DO {
 
   //! \brief Apply column-derivative to image.
   template <typename T>
-  void apply_column_derivative(Image<T>& dst, const Image<T>& src)
+  void apply_column_derivative(const Image<T>& src, Image<T>& dst)
   {
     typedef typename PixelTraits<T>::channel_type S;
-    S diff[] = { S(-1), S(0), S(1) };
-    apply_fast_column_based_filter(dst, src, diff, 3);
+    const S diff[] = { S(-1), S(0), S(1) };
+    apply_column_based_filter(src, dst, diff, 3);
   }
 
   //! \brief Apply Gaussian smoothing to image.
