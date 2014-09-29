@@ -149,7 +149,7 @@ namespace DO {
 
   //! brief Apply row-derivative to image.
   template <typename T>
-  void apply_row_derivative(const Image<T>& src, const Image<T>& dst)
+  void apply_row_derivative(const Image<T>& src, Image<T>& dst)
   {
     typedef typename PixelTraits<T>::channel_type S;
     S diff[] = { S(-1), S(0), S(1) };
