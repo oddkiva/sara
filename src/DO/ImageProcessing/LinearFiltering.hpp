@@ -210,18 +210,21 @@ namespace DO {
 
   //! \brief Apply Sobel filter to image.
   template <typename T>
-  void apply_sobel_filter(Image<T>& dst, const Image<T>& src)
+  void apply_sobel_filter(const Image<T>& src, Image<T>& dst)
   {
     typedef typename PixelTraits<T>::channel_type S;
-    S meanKernel[] = { S(1), S(2), S(1) };
-    S diffKernel[] = { S(1), S(0), S(-1) };
+    const S mean_kernel[] = { S(1), S(2), S(1) };
+    const S diff_kernel[] = { S(1), S(0), S(-1) };
 
-    Image<T> tmp(src.sizes());
-    apply_fast_row_based_filter(tmp, src, meanKernel, 3);
-    apply_fast_column_based_filter(tmp, tmp, diffKernel, 3);
-    apply_fast_row_based_filter(dst, src, diffKernel, 3);
-    apply_fast_column_based_filter(dst, dst, meanKernel, 3);
+    Image<T> tmp;
 
+    // Column derivative.
+    apply_row_based_filter(src, tmp, mean_kernel, 3);
+    apply_column_based_filter(tmp, tmp, diff_kernel, 3);
+    // Row-derivative.
+    apply_row_based_filter(src, dst, diff_kernel, 3);
+    apply_column_based_filter(dst, dst, mean_kernel, 3);
+    // Squared norm.
     dst.array() = (dst.array().abs2()+ tmp.array().abs2()).sqrt();
   }
 
@@ -496,7 +499,7 @@ namespace DO {
   inline Image<T> sobel(const Image<T>& src)
   {
     Image<T> dst(src.sizes());
-    apply_sobel_filter(dst, src);
+    apply_sobel_filter(src, dst);
     return dst;
   }
 
