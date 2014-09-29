@@ -348,32 +348,30 @@ namespace DO {
     }
 
     //! Resizing method.
-    inline bool resize(const vector_type& sizes)
+    inline void resize(const vector_type& sizes)
     {
       if (!has_data_ownership_)
-      {
-        std::cerr << "data is wrapped! Not resizing" << std::endl;
-        return false;
-      }
+        throw std::runtime_error("Error: data is wrapped! Cannot not resize");
 
-      if (!begin_)
+      if (sizes_ != sizes)
+      {
         delete[] begin_;
-      initialize(sizes);
-      return true;
+        initialize(sizes);
+      }
     }
 
     //! Resizing method.
-    inline bool resize(int rows, int cols)
+    inline void resize(int rows, int cols)
     {
       DO_STATIC_ASSERT(N == 2, MULTIARRAY_MUST_BE_TWO_DIMENSIONAL);
-      return resize(vector_type(rows, cols));
+      resize(vector_type(rows, cols));
     }
 
     //! Resizing method.
-    inline bool resize(int rows, int cols, int depth)
+    inline void resize(int rows, int cols, int depth)
     {
       DO_STATIC_ASSERT(N == 3, MULTIARRAY_MUST_BE_THREE_DIMENSIONAL);
-      return resize(vector_type(rows, cols, depth));
+      resize(vector_type(rows, cols, depth));
     }
 
     //! Non-mutable array view for linear algebra with Eigen 3.
@@ -436,12 +434,14 @@ namespace DO {
     inline int compute_size(const vector_type& sizes) const
     {
       return std::accumulate(sizes.data(), sizes.data()+N,
-        1, std::multiplies<int>());
+                             1, std::multiplies<int>());
     }
 
     //! Offset computing method.
     inline int offset(const vector_type& pos) const
-    { return jump(pos, strides_); }
+    {
+      return jump(pos, strides_);
+    }
 
     //! Construction routine.
     inline void initialize(const vector_type& sizes)
@@ -461,7 +461,8 @@ namespace DO {
     {
       //! Overloaded operator to get the job done.
       template <typename U>
-      inline T operator()(const U& u) const {
+      inline T operator()(const U& u) const
+      {
         return static_cast<T>(u);
       }
     };
