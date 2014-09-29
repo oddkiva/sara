@@ -47,7 +47,15 @@ namespace DO {
 
   public: /* interface */
     //! N-dimensional integral vector type.
-    typedef typename base_type::vector_type vector_type, Vector;
+    typedef typename base_type::vector_type vector_type;
+
+    //! Immutable matrix view for linear algebra.
+    typedef Map<const Matrix<typename ElementTraits<Color>::value_type,
+      Dynamic, Dynamic, RowMajor> > const_matrix_view_type;
+
+    //! Mutable matrix view for linear algebra.
+    typedef Map<Matrix<typename ElementTraits<Color>::value_type,
+      Dynamic, Dynamic, RowMajor> > matrix_view_type;
     
     //! Default constructor.
     inline Image()
@@ -104,6 +112,24 @@ namespace DO {
       return this->base_type::depth();
     }
 
+    //! Non-mutable matrix view for linear algebra with Eigen 3.
+    inline const_matrix_view_type matrix() const
+    {
+      DO_STATIC_ASSERT(N == 2, MULTIARRAY_MUST_HAVE_TWO_DIMENSIONS);
+      return const_matrix_view_type( reinterpret_cast<
+        typename ElementTraits<T>::const_pointer>(data()),
+        base_type::cols(), base_type::rows() );
+    }
+
+    //! Mutable matrix view for linear algebra with Eigen 3.
+    inline matrix_view_type matrix()
+    {
+      DO_STATIC_ASSERT(N == 2, MULTIARRAY_MUST_HAVE_TWO_DIMENSIONS);
+      return matrix_view_type( reinterpret_cast<
+        typename ElementTraits<Color>::pointer>(data()),
+        base_type::cols(), base_type::rows() );
+    }
+
     //! Color conversion method.
     template <typename Color2>
     Image<Color2, N> convert_color() const
@@ -124,7 +150,7 @@ namespace DO {
 
     //! Convenient helper for chaining filters.
     template <template<typename, int> class Filter>
-    inline typename Filter<Color, N>::ReturnType compute() const
+    inline typename Filter<Color, N>::return_type compute() const
     {
       return Filter<Color, N>(*this)();
     }

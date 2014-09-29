@@ -512,6 +512,11 @@ TEST(TestMultiArray, test_matrix_view_types)
                 3, 4;
 
   EXPECT_MATRIX_EQ(actual_A, expected_A);
+
+  EXPECT_EQ(A(0,0), 1);
+  EXPECT_EQ(A(0,1), 2);
+  EXPECT_EQ(A(1,0), 3);
+  EXPECT_EQ(A(1,1), 4);
 }
 
 
