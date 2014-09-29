@@ -159,10 +159,12 @@ namespace DO {
         throw std::runtime_error(msg);
       }
       // Free memory.
-      if (begin_)
+      if (sizes_ != other.sizes())
+      {
         delete[] begin_;
-      // Copy everything.
-      initialize(other.sizes());
+        // Copy everything.
+        initialize(other.sizes());
+      }
       std::transform(other.begin(), other.end(), begin_, Cast());
       return *this;
     }
