@@ -375,97 +375,6 @@ namespace DO {
     dst.array() = (dst.array().abs2()+ tmp.array().abs2()).sqrt();
   }
 
-  //! \brief Apply Kirsch filter.
-  template <typename T>
-  void apply_kirsch_filter(Image<T>& dst, const Image<T>& src)
-  {
-    typedef typename PixelTraits<T>::channel_type S;
-    DO_STATIC_ASSERT(
-      !std::numeric_limits<typename PixelTraits<T>::channel_type >::is_integer,
-      CHANNEL_TYPE_MUST_NOT_BE_INTEGRAL );
-    S h1[9] = {
-      S(-3)/S(15), S(-3)/S(15), S( 5)/S(15),
-      S(-3)/S(15), S( 0)      , S( 5)/S(15),
-      S(-3)/S(15), S(-3)/S(15), S( 5)/S(15)
-    };
-
-    S h2[9] = {
-      S(-3)/S(15), S(-3)/S(15), S(-3)/S(15),
-      S(-3)/S(15), S( 0)      , S(-3)/S(15),
-      S( 5)/S(15), S( 5)/S(15), S( 5)/S(15)
-    };
-
-    S h3[9] = {
-      S(-3)/S(15), S(-3)/S(15), S(-3)/S(15),
-      S( 5)/S(15), S( 0)      , S(-3)/S(15),
-      S( 5)/S(15), S( 5)/S(15), S(-3)/S(15)
-    };
-
-    S h4[9] = {
-      S( 5)/S(15), S( 5)/S(15), S(-3)/S(15),
-      S( 5)/S(15), S( 0)      , S(-3)/S(15),
-      S(-3)/S(15), S(-3)/S(15), S(-3)/S(15)
-    };
-
-    if (dst.sizes() != src.sizes())
-      dst.resize(src.sizes());
-    Image<T> tmp(src.sizes());
-    apply_2d_non_separable_filter(tmp, src, h1, 3, 3);
-    dst.array() = tmp.array().abs();
-    apply_2d_non_separable_filter(tmp, src, h2, 3, 3);
-    dst.array() += tmp.array().abs();
-    apply_2d_non_separable_filter(tmp, src, h3, 3, 3);
-    dst.array() += tmp.array().abs();
-    apply_2d_non_separable_filter(tmp, src, h4, 3, 3);
-    dst.array() += tmp.array().abs();
-    //dst.array().sqrt();
-  }
-
-  //! \brief Apply Robinson filter.
-  template <typename T>
-  void apply_robinson_filter(Image<T>& dst, const Image<T>& src)
-  {
-    typedef typename PixelTraits<T>::channel_type S;
-    DO_STATIC_ASSERT(
-      !std::numeric_limits<typename PixelTraits<T>::channel_type >::is_integer,
-      CHANNEL_TYPE_MUST_NOT_BE_INTEGRAL );
-    S h1[9] = {
-      S(-1)/S(5), S( 1)/S(5), S( 1)/S(5),
-      S(-1)/S(5), S(-2)/S(5), S( 1)/S(5),
-      S(-1)/S(5), S( 1)/S(5), S( 1)/S(5)
-    };
-
-    S h2[9] = {
-      S(-1)/S(5), S(-1)/S(5), S(-1)/S(5),
-      S( 1)/S(5), S(-2)/S(5), S( 1)/S(5),
-      S( 1)/S(5), S( 1)/S(5), S( 1)/S(5)
-    };
-
-    S h3[9] = {
-      S( 1)/S(5), S( 1)/S(5), S( 1)/S(5),
-      S(-1)/S(5), S(-2)/S(5), S( 1)/S(5),
-      S(-1)/S(5), S(-1)/S(5), S( 1)/S(5)
-    };
-
-    S h4[9] = {
-      S(-1)/S(5), S(-1)/S(5), S( 1)/S(5),
-      S(-1)/S(5), S(-2)/S(5), S( 1)/S(5),
-      S( 1)/S(5), S( 1)/S(5), S( 1)/S(5)
-    };
-
-    if (dst.sizes() != src.sizes())
-      dst.resize(src.sizes());
-    Image<T> tmp(src.sizes());
-    apply_2d_non_separable_filter(tmp, src, h1, 3, 3);
-    dst.array() = tmp.array().abs();
-    apply_2d_non_separable_filter(tmp, src, h2, 3, 3);
-    dst.array() += tmp.array().abs();
-    apply_2d_non_separable_filter(tmp, src, h3, 3, 3);
-    dst.array() += tmp.array().abs();
-    apply_2d_non_separable_filter(tmp, src, h4, 3, 3);
-    dst.array() += tmp.array().abs();
-    //dst.array().sqrt();
-  }
 
   // ====================================================================== //
   // Helper functions for linear filtering
@@ -541,24 +450,6 @@ namespace DO {
     return dst;
   }
 
-  //! \brief Apply Kirsch filter to image.
-  template <typename T>
-  inline Image<T> kirsch(const Image<T>& src)
-  {
-    Image<T> dst(src.sizes());
-    apply_kirsch_filter(dst, src);
-    return dst;
-  }
-
-  //! \brief Apply Robinson filter to image.
-  template <typename T>
-  inline Image<T> robinson(const Image<T>& src)
-  {
-    Image<T> dst(src.sizes());
-    apply_robinson_filter(dst, src);
-    return dst;
-  }  
-
 
   // ====================================================================== //
   // Helper 2D linear filtering functors
@@ -590,8 +481,6 @@ namespace DO {
   CREATE_2D_ONLY_FILTER_FUNCTOR(Scharr, scharr);
   CREATE_2D_ONLY_FILTER_FUNCTOR(Prewitt, prewitt);
   CREATE_2D_ONLY_FILTER_FUNCTOR(RobertsCross, roberts_cross);
-  CREATE_2D_ONLY_FILTER_FUNCTOR(Robinson, robinson);
-  CREATE_2D_ONLY_FILTER_FUNCTOR(Kirsch, kirsch);
   CREATE_2D_ONLY_FILTER_FUNCTOR_WITH_PARAM(Gaussian, gaussian);
 
 #undef CREATE_2D_ONLY_FILTER_FUNCTOR
