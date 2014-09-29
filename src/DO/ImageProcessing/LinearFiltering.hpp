@@ -117,8 +117,8 @@ namespace DO {
     Note that borders are replicated.
    */
   template <typename T>
-  void apply_fast_column_based_filter(
-    Image<T>& dst, const Image<T>& src,
+  void apply_column_based_filter(
+    const Image<T>& src, Image<T>& dst,
     const typename PixelTraits<T>::channel_type *kernel,
     int kernel_size)
   {
