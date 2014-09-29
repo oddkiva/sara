@@ -156,8 +156,8 @@ namespace DO {
     }
 
     template <template<typename, int> class Filter>
-    inline typename Filter<Color, N>::ReturnType
-    compute(const typename Filter<Color, N>::ParamType& param) const
+    inline typename Filter<Color, N>::return_type
+    compute(const typename Filter<Color, N>::parameter_type& param) const
     {
       return Filter<Color, N>(*this)(param);
     }

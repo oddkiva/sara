@@ -14,6 +14,13 @@
 #ifndef DO_IMAGEPROCESSING_INTERPOLATION_HPP
 #define DO_IMAGEPROCESSING_INTERPOLATION_HPP
 
+
+#include <stdexcept>
+
+#include <DO/Core/Image.hpp>
+#include <DO/Core/Pixel/PixelTraits.hpp>
+
+
 namespace DO {
 
   /*!
@@ -25,46 +32,48 @@ namespace DO {
   // ====================================================================== //
   // Interpolation
   //! \brief Interpolation function
-  template <typename T, int N, typename F> 
-  typename ColorTraits<T>::Color64f interpolate(const Image<T,N> &I,
-                                                const Matrix<F, N, 1>& xx)
+  template <typename T, int N>
+  typename PixelTraits<T>::template Cast<double>::pixel_type
+  interpolate(const Image<T, N>& image, const Matrix<double, N, 1>& pos)
   {
-    DO_STATIC_ASSERT(
-      !std::numeric_limits<F>::is_integer,
-      INTERPOLATION_NOT_ALLOWED_FROM_VECTOR_WITH_INTEGRAL_SCALAR_TYPE);
-    Matrix<F, N, 1> x(xx);
-    for (int i=0; i < N; ++i)
-    {
-      if (x[i]<0)
-        x[i] = 0.;
-      else if (x[i] > I.size(i)-1)
-        x[i] = static_cast<F>(I.size(i)-1);
-    }
+    typedef typename PixelTraits<T>::template Cast<double>::pixel_type
+      pixel_type;
+    typedef typename Image<T, N>::const_subarray_iterator
+      const_subarray_iterator;
 
-    Matrix<F, N, 1> a;
-    Matrix<int, N, 1> c;
-    for (int i = 0; i < N; ++i) {
-      c[i] = static_cast<int>(x[i]);
-      a[i] = x[i]-static_cast<F>(c[i]);
-    }
+    Matrix<double, N, 1> a, b;
+    a.setZero();
+    b = image.sizes().template cast<double>() - Matrix<double, N, 1>::Ones();
 
-    typedef typename ColorTraits<T>::Color64f Col64f;
-    Col64f val(ColorTraits<Col64f>::zero());
-    CoordsIterator<N> p(c, (c.array()+1).matrix()), end;
-    for ( ; p != end; ++p)
+    if ((pos - a).minCoeff() < 0 || (b - pos).minCoeff() <= 0)
+      throw std::range_error("Cannot interpolate: position is out of range");
+
+    Matrix<int, N, 1> start, end;
+    Matrix<double, N, 1> frac;
+    for (int i = 0; i < N; ++i)
     {
-      double f = 1.;
+      double ith_int_part;
+      frac[i] = std::modf(pos[i], &ith_int_part);
+      start[i] = static_cast<int>(ith_int_part);
+    }
+    end.array() = start.array() + 2;
+
+    pixel_type value(color_min_value<pixel_type>());
+    const_subarray_iterator it(image.begin_subrange(start, end));
+    const_subarray_iterator it_end(image.end_subrange());
+    for ( ; it != it_end; ++it)
+    {
+      double weight = 1.;
       for (int i = 0; i < N; ++i)
-        f *= ((*p)[i] == c[i]) ? (1.-a[i]) : a[i];
-      if (f==0)
-        continue;
-      Col64f pix;
-      convertColor(pix, I(*p));
-      val += pix*f;
+        weight *= (it.position()[i] == start[i]) ? (1.-frac[i]) : frac[i];
+      pixel_type color;
+      convert_channel(*it, color);
+      value += weight*color;
     }
-    return val;
+    return value;
   }
 
 }
+
 
 #endif /* DO_IMAGEPROCESSING_INTERPOLATION_HPP */

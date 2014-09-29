@@ -15,11 +15,12 @@
 #define DO_CORE_PIXEL_HPP
 
 
-#include "Pixel/ChannelConversion.hpp"
-#include "Pixel/ColorConversion.hpp"
-#include "Pixel/ColorSpace.hpp"
-#include "Pixel/Pixel.hpp"
-#include "Pixel/Typedefs.hpp"
+#include <DO/Core/Pixel/ChannelConversion.hpp>
+#include <DO/Core/Pixel/ColorConversion.hpp>
+#include <DO/Core/Pixel/ColorSpace.hpp>
+#include <DO/Core/Pixel/Pixel.hpp>
+#include <DO/Core/Pixel/PixelTraits.hpp>
+#include <DO/Core/Pixel/Typedefs.hpp>
 
 
 #endif /* DO_CORE_PIXEL_HPP */

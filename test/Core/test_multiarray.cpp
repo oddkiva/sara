@@ -15,7 +15,7 @@
 
 #include <DO/Core/MultiArray.hpp>
 
-#include "AssertHelpers.hpp"
+#include "../AssertHelpers.hpp"
 
 
 using namespace DO;

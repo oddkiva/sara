@@ -51,7 +51,7 @@ if (NOT DO_FOUND)
   #do_append_components(DO_COMPONENTS KDTree)
   #do_append_components(DO_COMPONENTS ImageDrawing)
   # Image processing
-  #do_append_components(DO_COMPONENTS ImageProcessing)
+  do_append_components(DO_COMPONENTS ImageProcessing)
   # Geometry
   #do_append_components(DO_COMPONENTS Geometry)
   # Feature detection and description

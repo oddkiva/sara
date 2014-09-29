@@ -4,6 +4,8 @@ if (POLICY CMP0011)
   cmake_policy(SET CMP0011 OLD)
 endif (POLICY CMP0011)
 
+
+# Retrieve the set of dependencies when linking projects with DO-CV.
 set(DO_LIBRARIES "")
 foreach (COMPONENT ${DO_USE_COMPONENTS})
   include(UseDO${COMPONENT})
@@ -14,6 +16,7 @@ foreach (COMPONENT ${DO_USE_COMPONENTS})
     set(DO_LIBRARIES "${DO_LIBRARIES};${DO_${COMPONENT}_LIBRARIES}")
   endif ()
 endforeach (COMPONENT)
+
 
 # Not stable yet.
 macro (do_use_modules TARGET COMPONENT_LIST)

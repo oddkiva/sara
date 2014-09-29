@@ -10,8 +10,11 @@
 // ========================================================================== //
 
 #include <gtest/gtest.h>
+
 #include <DO/Core/ArrayIterators.hpp>
-#include "AssertHelpers.hpp"
+
+#include "../AssertHelpers.hpp"
+
 
 using namespace DO;
 using namespace std;
