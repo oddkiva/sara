@@ -22,3 +22,6 @@ do_test(ImageProcessing_Differential test_differential.cpp
 
 do_test(ImageProcessing_Determinant test_determinant.cpp
         "${DO_LIBRARIES}" "ImageProcessing")
+
+do_test(ImageProcessing_LocalExtremum test_local_extremum.cpp
+        "${DO_LIBRARIES}" "ImageProcessing")
