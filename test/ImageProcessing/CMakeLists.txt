@@ -16,3 +16,6 @@ do_test(ImageProcessing_Interpolation test_interpolation.cpp
 
 do_test(ImageProcessing_LinearFiltering test_linear_filtering.cpp
         "${DO_LIBRARIES}" "ImageProcessing")
+
+do_test(ImageProcessing_Differential test_differential.cpp
+        "${DO_LIBRARIES}" "ImageProcessing")
