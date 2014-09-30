@@ -14,6 +14,10 @@
 #ifndef DO_IMAGEPROCESSING_DIFFERENTIAL_HPP
 #define DO_IMAGEPROCESSING_DIFFERENTIAL_HPP
 
+
+#include <DO/Core/Image.hpp>
+
+
 namespace DO {
 
   /*!
@@ -22,78 +26,6 @@ namespace DO {
     @{
    */
 
-  //! Internals.
-  template <int N, int Axis>
-  struct Differential
-  {
-    DO_STATIC_ASSERT(Axis >= 0 && Axis < N,
-      AXIS_MUST_NONNEGATIVE_AND_LESS_THAN_N);
-
-    template <bool IsConst, typename T, int StorageOrder>
-    static inline T
-    eval_partial_derivative(RangeIterator<IsConst, T, N, StorageOrder>& it)
-    {
-      return (it.template axis<Axis>()[1] - it.template axis<Axis>()[-1])
-        / static_cast<T>(2);
-    }
-
-    template <bool IsConst, typename T, int StorageOrder>
-    static inline T 
-    accumulate_neighbor_values(RangeIterator<IsConst, T, N, StorageOrder>& it)
-    {
-      return it.template axis<Axis>()[1]+it.template axis<Axis>()[-1]
-        + Differential<N, Axis-1>::accumulate_neighbor_values(it);
-    }
-
-    template <bool IsConst, typename T, int StorageOrder>
-    static inline void
-    eval_gradient(Matrix<T,N,1>& g, RangeIterator<IsConst,T,N,StorageOrder>& it)
-    {
-      g[Axis] = eval_partial_derivative(it);
-      Differential<N, Axis-1>::eval_gradient(g, it);
-    }
-
-    template <bool IsConst, typename T, int StorageOrder>
-    static inline T
-    eval_laplacian(RangeIterator<IsConst, T, N, StorageOrder>& loc)
-    { return accumulate_neighbor_values(loc) - 2*N*(*loc); }
-
-    template <bool IsConst, typename T, int StorageOrder>
-    static inline T
-    eval_divergence(RangeIterator<IsConst, Matrix<T,N,1>, N, StorageOrder>& it)
-    {
-      return eval_partial_derivative(it)
-        + Differential<N, Axis-1>::eval_divergence(it);
-    }
-  };
-
-  //! Internals.
-  template <int N>
-  struct Differential<N,0>
-  {
-    template <bool IsConst, typename T, int StorageOrder>
-    static inline T
-    eval_partial_derivative(RangeIterator<IsConst, T, N, StorageOrder>& it)
-    {
-      return (it.template axis<0>()[1] - it.template axis<0>()[-1])
-        / static_cast<T>(2);
-    }
-
-    template <bool IsConst, typename T, int StorageOrder>
-    static inline T
-    accumulate_neighbor_values(RangeIterator<IsConst, T, N, StorageOrder>& it)
-    { return it.template axis<0>()[1] + it.template axis<0>()[-1]; }
-
-    template <bool IsConst, typename T, int StorageOrder>
-    static inline void
-    eval_gradient(Matrix<T,N,1>& g, RangeIterator<IsConst,T,N,StorageOrder>& it)
-    { g[0] = eval_partial_derivative(it); }
-
-    template <bool IsConst, typename T, int StorageOrder>
-    static inline T
-    eval_divergence(RangeIterator<IsConst, Matrix<T,N,1>, N, StorageOrder>& it)
-    { return eval_partial_derivative(it); }
-  };
 
   //! Gradient functor class
   template <typename T, int N = 2>
