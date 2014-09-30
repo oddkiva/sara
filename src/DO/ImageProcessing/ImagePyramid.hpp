@@ -47,9 +47,9 @@ namespace DO {
 
       Here cameraSigma() thus corresponds to \f$\sigma_\textrm{camera}\f$.
      */
-    double cameraSigma() const
+    double sigma_camera() const
     {
-      return camera_sigma_;
+      return _sigma_camera;
     }
 
     /*!
@@ -60,9 +60,9 @@ namespace DO {
 
       Here initSigma() corresponds to \f$\sigma_0\f$.
      */
-    double initSigma() const
+    double sigma_initial() const
     {
-      return init_sigma_;
+      return _sigma_initial;
     }
 
     /*!
@@ -81,9 +81,9 @@ namespace DO {
 
       Here scaleGeomFactor() corresponds to the value \f$ k \f$.
      */
-    double scaleGeomFactor() const
+    double scale_geometric_factor() const
     {
-      return scale_geom_factor_;
+      return _scale_geometric_factor;
     }
 
     /*!
@@ -97,15 +97,15 @@ namespace DO {
       The number of scales in each octave is the integer \f$S\f$ such that 
       \f$k^S \sigma = 2 \sigma\f$, i.e., \f$ k= 2^{1/S} \f$.
      */
-    int numScalesPerOctave() const
+    int num_scales_per_octaves() const
     {
-      return num_scales_per_octave_;
+      return _num_scales_per_octave;
     }
 
     //! This controls the maximum number of octaves.
-    int imagePaddingSize() const
+    int image_padding_size() const
     {
-      return image_padding_size_;
+      return _image_padding_size;
     }
 
     /*!
@@ -113,34 +113,34 @@ namespace DO {
       \f$(1/2)^i\f$ is the rescaling factor of the downsampled image of octave 
       \f$i\f$.
      */
-    int initOctaveIndex() const
+    int first_octave_index() const
     {
-      return init_octave_index_;
+      return _first_octave_index;
     }
 
     //! \brief Constructor.
-    ImagePyramidParams(int init_octave_index = -1,
+    ImagePyramidParams(int first_octave_index = -1,
                        int num_scales_per_octave = 3+3,
-                       double scale_geom_factor = std::pow(2., 1./3.),
+                       double scale_geometric_factor = std::pow(2., 1./3.),
                        int image_padding_size = 1,
                        double camera_sigma = 0.5,
                        double init_sigma = 1.6)
     {
-      camera_sigma_ = camera_sigma;
-      init_sigma_ = init_sigma;
-      num_scales_per_octave_ = num_scales_per_octave;
-      scale_geom_factor_ = scale_geom_factor;
-      image_padding_size_ = image_padding_size;
-      init_octave_index_ = init_octave_index;
+      _sigma_camera = camera_sigma;
+      _sigma_initial = init_sigma;
+      _num_scales_per_octave = num_scales_per_octave;
+      _scale_geometric_factor = scale_geometric_factor;
+      _image_padding_size = image_padding_size;
+      _first_octave_index = first_octave_index;
     }
 
   private:
-    double camera_sigma_;
-    double init_sigma_;
-    int num_scales_per_octave_;
-    double scale_geom_factor_;
-    int image_padding_size_;
-    int init_octave_index_;
+    double _sigma_camera;
+    double _sigma_initial;
+    int _num_scales_per_octave;
+    double _scale_geometric_factor;
+    int _image_padding_size;
+    int _first_octave_index;
   };
 
 
@@ -160,101 +160,101 @@ namespace DO {
     // Constructor
     inline ImagePyramid() {}
     // Reset image pyramid with the following parameters.
-    void reset(int numOctaves,
-               int numScalesPerOctave,
-               scalar_type initSigma,
-               scalar_type scaleGeomFactor)
+    void reset(int num_octaves,
+               int num_scales_per_octave,
+               scalar_type sigma_initial,
+               scalar_type scale_geometric_factor)
     {
-      octaves_.clear();
-      oct_scaling_factors_.clear();
+      _octaves.clear();
+      _oct_scaling_factors.clear();
 
-      octaves_.resize(numOctaves);
-      oct_scaling_factors_.resize(numOctaves);
-      for (int o = 0; o < numOctaves; ++o)
-        octaves_[o].resize(numScalesPerOctave);
+      _octaves.resize(num_octaves);
+      _oct_scaling_factors.resize(num_octaves);
+      for (int o = 0; o < num_octaves; ++o)
+        _octaves[o].resize(num_scales_per_octave);
       
-      init_sigma_ = initSigma;
-      scale_geom_factor_ = scaleGeomFactor;
+      _sigma_initial = sigma_initial;
+      _scale_geometric_factor = scale_geometric_factor;
     }
 
     // Mutable accessors
     octave_type& operator()(int o)
     {
-      return octaves_[o];
+      return _octaves[o];
     }
 
     Image<Color, N>& operator()(int s, int o)
     {
-      return octaves_[o][s];
+      return _octaves[o][s];
     }
 
     Color& operator()(int x, int y, int s, int o)
     {
-      return octaves_[o][s](x,y);
+      return _octaves[o][s](x,y);
     }
 
-    scalar_type& octaveScalingFactor(int o)
+    scalar_type& octave_scaling_factor(int o)
     {
-      return oct_scaling_factors_[o];
+      return _oct_scaling_factors[o];
     }
 
     // Constant accessors.
     const octave_type& operator()(int o) const
     {
-      return octaves_[o];
+      return _octaves[o];
     }
 
     const Image<Color, N>& operator()(int s, int o) const
     {
-      return octaves_[o][s];
+      return _octaves[o][s];
     }
 
     const Color& operator()(int x, int y, int s, int o) const
     {
-      return octaves_[o][s](x,y);
+      return _octaves[o][s](x,y);
     }
 
-    scalar_type octaveScalingFactor(int o) const
+    scalar_type octave_scaling_factor(int o) const
     {
-      return oct_scaling_factors_[o];
+      return _oct_scaling_factors[o];
     }
 
     // Scale and smoothing query.
-    int numOctaves() const
+    int num_octaves() const
     {
-      return static_cast<int>(octaves_.size());
+      return static_cast<int>(_octaves.size());
     }
 
-    int numScalesPerOctave() const
+    int num_scales_per_octave() const
     {
-      return static_cast<int>(octaves_.front().size());
+      return static_cast<int>(_octaves.front().size());
     }
 
-    scalar_type initScale() const
+    scalar_type scale_initial() const
     {
-      return init_sigma_;
+      return _sigma_initial;
     }
 
-    scalar_type scaleGeomFactor() const
+    scalar_type scale_geometric_factor() const
     {
-      return scale_geom_factor_;
+      return _scale_geometric_factor;
     }
 
-    scalar_type octRelScale(int s) const
+    scalar_type relative_scale_to_octave(int s) const
     {
-      return pow(scale_geom_factor_, s)*init_sigma_;
+      return pow(_scale_geometric_factor, s)*_sigma_initial;
     }
 
     scalar_type scale(int s, int o) const
     {
-      return oct_scaling_factors_[o]*octRelScale(s);
+      return _oct_scaling_factors[o]*relative_scale_to_octave(s);
     }
 
   protected: /* data members */
-    scalar_type init_sigma_;
-    scalar_type scale_geom_factor_;
-    std::vector<octave_type> octaves_;
-    std::vector<scalar_type> oct_scaling_factors_;
+    scalar_type _sigma_initial;
+    scalar_type _scale_geometric_factor;
+    std::vector<octave_type> _octaves;
+    std::vector<scalar_type> _oct_scaling_factors;
   };
 
   //! @}
