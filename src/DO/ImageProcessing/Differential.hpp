@@ -155,79 +155,81 @@ namespace DO {
   template <typename T, int N = 2>
   struct Hessian
   {
-    typedef Matrix<int, N, 1> Coords, Vector;
-    typedef Image<T, N> ScalarField;
-    typedef Matrix<T, N, N> HessianMatrix;
-    typedef Image<HessianMatrix, N> HessianField, ReturnType;
-    typedef typename ScalarField::const_range_iterator ScalarIterator;
-    typedef typename HessianField::range_iterator MatrixIterator;
+    typedef Matrix<int, N, 1> coords_type;
+    typedef Image<T, N> scalar_field_type;
+    typedef Matrix<T, N, N> hessian_matrix_type;
+    typedef Image<hessian_matrix_type, N> hessian_field_type, return_type;
+    typedef typename scalar_field_type::const_array_iterator
+      const_scalar_iterator;
+    typedef typename hessian_field_type::array_iterator
+      hessian_field_iterator;
 
-    inline Hessian(const ScalarField& scalarField)
-      : scalar_field_(scalarField) {}
-
-    void operator()(HessianMatrix& H, const ScalarIterator& loc) const
+    inline Hessian(const scalar_field_type& scalar_field)
+      : _scalar_field(scalar_field)
     {
-      if (  loc.position().minCoeff() < 2 ||
-           (loc.sizes() - loc.position()).minCoeff() < 2 )
-      {
-        H.setZero();
-        return;
-      }
+    }
 
+    void operator()(hessian_matrix_type& H, const_scalar_iterator& it) const
+    {
       for (int i = 0; i < N; ++i)
+      {
         for (int j = i; j < N; ++j)
         {
           if (i == j)
-            H(i,i) = ( loc(delta(i,1)) - T(2)*(*loc) + loc(delta(i,-1)) )
-                   / static_cast<T>(4);
+          {
+            T next = it.position()[i] == it.sizes()[i]-1 ? *it : it.delta(i, 1);
+            T prev = it.position()[i] == 0 ? *it : it.delta(i,-1);
+
+            H(i,i) = next - T(2)*(*it) + prev;
+          }
           else
           {
-            H(i,j) = (  loc(delta(i,1,j, 1)) - loc(delta(i,-1,j, 1))
-                      - loc(delta(i,1,j,-1)) + loc(delta(i,-1,j,-1)) )
-                         / static_cast<T>(4);
+            int next_i = it.position()[i] == it.sizes()[i] - 1 ? 0 : 1;
+            int prev_i = it.position()[i] == 0 ? 0 : -1;
+            int next_j = it.position()[j] == it.sizes()[j] - 1 ? 0 : 1;
+            int prev_j = it.position()[j] == 0 ? 0 : -1;
+
+            H(i,j) =
+              (  it.delta(i,next_i,j,next_j) - it.delta(i,prev_i,j,next_j)
+               - it.delta(i,next_i,j,prev_j) + it.delta(i,prev_i,j,prev_j) )
+              / static_cast<T>(4);
+
             H(j,i) = H(i,j);
           }
         }
+      }
     }
 
-    inline void operator()(HessianMatrix& H, const Coords& p) const
+    inline void operator()(hessian_matrix_type& H,
+                           const coords_type& position) const
     {
-      ScalarIterator loc(scalar_field_.begin_range());
-      loc += p;
+      const_scalar_iterator loc(_scalar_field.begin_range());
+      loc += position;
       operator()(H, loc);
     }
 
-    void operator()(HessianField& dst) const
+    void operator()(hessian_field_type& hessian_field) const
     {
-      if (dst.sizes() != scalar_field_.sizes())
-        dst.resize(scalar_field_.sizes());
+      if (hessian_field.sizes() != _scalar_field.sizes())
+        hessian_field.resize(_scalar_field.sizes());
 
-      ScalarIterator src_loc(scalar_field_.begin_range());
-      ScalarIterator src_end(scalar_field_.end_range());
-      MatrixIterator dst_loc(dst.begin_range());
+      const_scalar_iterator src_loc(_scalar_field.begin_range());
+      const_scalar_iterator src_end(_scalar_field.end_range());
+      hessian_field_iterator dst_loc(hessian_field.begin_range());
       for ( ; src_loc != src_end; ++src_loc, ++dst_loc)
         operator()(*dst_loc, src_loc);
     };
 
-    HessianField operator()() const
+    hessian_field_type operator()() const
     {
-      HessianField hessianField;
-      operator()(hessianField);
-      return hessianField;
+      hessian_field_type hessian_field;
+      operator()(hessian_field);
+      return hessian_field;
     }
 
-    inline Coords delta(int i, int dx, int j, int dy) const
-    {
-      Coords unit(Coords::Zero());
-      unit[i] = dx; unit[j] = dy;
-      return unit;
-    }
-
-    inline Coords delta(int i, int dx) const
-    { return Coords::Unit(i)*dx; }
-
-    const ScalarField& scalar_field_;
+    const scalar_field_type& _scalar_field;
   };
+
 
   /*!
     \brief Gradient computation
