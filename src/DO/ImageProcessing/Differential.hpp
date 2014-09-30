@@ -94,46 +94,62 @@ namespace DO {
   template <typename T, int N = 2>
   struct Laplacian
   {
-    typedef Matrix<int, N, 1> Coords;
-    typedef Image<T, N> ScalarField, ReturnType;
-    typedef typename ScalarField::range_iterator RangeIterator;
-    typedef typename ScalarField::const_range_iterator ConstRangeIterator;
+    typedef Matrix<int, N, 1> coords_type;
+    typedef Image<T, N> scalar_field_type, return_type;
+    typedef typename scalar_field_type::array_iterator array_iterator;
+    typedef typename scalar_field_type::const_array_iterator
+      const_array_iterator;
 
-    inline Laplacian(const ScalarField& scalarField)
-      : scalar_field_(scalarField) {}
-
-    inline T operator()(ConstRangeIterator& loc) const
-    { return Differential<N, N-1>::eval_laplacian(loc); }
-
-    inline T operator()(const Coords& p) const
+    inline Laplacian(const scalar_field_type& scalar_field)
+      : _scalar_field(scalar_field)
     {
-      ConstRangeIterator loc(scalar_field_.begin_range());
-      loc += p;
+    }
+
+    inline T operator()(const_array_iterator& it) const
+    {
+      T value = 0;
+      for (int i = 0; i < N; ++i)
+      {
+        if (it.position()[i] == 0)
+          value += it.delta(i, 1) + *it; // Replicate the border
+        else if (it.position()[i] == it.sizes()[i] - 1)
+          value += *it + it.delta(i,-1); // Replicate the border
+        else
+          value += it.delta(i, 1) + it.delta(i,-1);
+      }
+      return value - 2*N*(*it);
+    }
+
+    inline T operator()(const coords_type& position) const
+    {
+      const_array_iterator loc(_scalar_field.begin_range());
+      loc += position;
       return this->operator()(loc);
     }
 
-    void operator()(ScalarField& dst) const
+    void operator()(scalar_field_type& laplacian_field) const
     {
-      if (dst.sizes() != scalar_field_.sizes())
-        dst.resize(scalar_field_.sizes());
+      if (laplacian_field.sizes() != _scalar_field.sizes())
+        laplacian_field.resize(_scalar_field.sizes());
 
-      ConstRangeIterator src_it(scalar_field_.begin_range());
-      ConstRangeIterator src_it_end(scalar_field_.end_range());
-      RangeIterator dst_it(dst.begin_range());
+      const_array_iterator src_it(_scalar_field.begin_range());
+      const_array_iterator src_it_end(_scalar_field.end_range());
+      array_iterator dst_it(laplacian_field.begin_range());
 
       for ( ; src_it != src_it_end; ++src_it, ++dst_it)
-        *dst_it = operator()(src_it);
-    };
-
-    ScalarField operator()() const
-    {
-      ScalarField lapField;
-      operator()(lapField);
-      return lapField;
+        *dst_it = this->operator()(src_it);
     }
 
-    const ScalarField& scalar_field_;
+    scalar_field_type operator()() const
+    {
+      scalar_field_type laplacian_field;
+      this->operator()(laplacian_field);
+      return laplacian_field;
+    }
+
+    const scalar_field_type& _scalar_field;
   };
+
 
   //! Hessian matrix functor class
   template <typename T, int N = 2>
