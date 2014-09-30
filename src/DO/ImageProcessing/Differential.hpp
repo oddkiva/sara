@@ -245,17 +245,19 @@ namespace DO {
     computeGradient(g, p);
     return g;
   }
+
   /*!
     \brief Gradient computation
     @param[in,out] dst gradient vector field
     @param[in] src scalar field
    */
   template <typename T, int N>
-  void gradient(Image<Matrix<T,N,1>, N>& dst, const Image<T, N>& src)
+  void gradient(const Image<Matrix<T,N,1>, N>& src, Image<T, N>& dst)
   {
     Gradient<T, N> computeGradient(src);
     computeGradient(dst);
   }
+
   /*!
     \brief Gradient computation
     @param[in] src scalar field
@@ -268,6 +270,7 @@ namespace DO {
     gradient(g, src);
     return g;
   }
+
   /*!
     \brief Laplacian computation
     @param[in] src input grayscale image.
@@ -280,17 +283,19 @@ namespace DO {
     Laplacian<T, N> computeLaplacian(src);
     return computeLaplacian(p);
   }
+
   /*!
     \brief Laplacian computation
     @param[in,out] dst Laplacian field.
     @param[in] src scalar field.
    */
   template <typename T, int N>
-  void laplacian(Image<T, N>& dst, const Image<T, N>& src)
+  void laplacian(const Image<T, N>& src, Image<T, N>& dst)
   {
     Laplacian<T, N> computeLaplacian(src);
     computeLaplacian(dst);
   }
+
   /*!
     \brief Laplacian computation
     @param[in] src scalar field.
@@ -303,6 +308,7 @@ namespace DO {
     laplacian(l, src);
     return l;
   }
+
   /*!
     \brief Hessian matrix computation
     @param[in] src scalar field.
@@ -317,24 +323,26 @@ namespace DO {
     computeHessian(H, p);
     return H;
   }
+
   /*!
     \brief Hessian matrix computation
     @param[in] src scalar field.
     @param[in,out] dst Hessian matrix field
    */
   template <typename T, int N>
-  void hessian(Image<Matrix<T,N,N> >& dst, const Image<T,N>& src)
+  void hessian(const Image<T,N>& src, Image<Matrix<T,N,N>, N>& dst)
   {
     Hessian<T, N> computeHessian(src);
     computeHessian(dst);
   }
+
   /*!
     \brief Hessian matrix computation
     @param[in] src scalar field.
     \return Hessian matrix field
    */
   template <typename T, int N>
-  Image<Matrix<T,N,N> > hessian(const Image<T,N>& src)
+  Image<Matrix<T,N,N> > hessian(const Image<T, N>& src)
   {
     Image<Matrix<T, N, N> > h;
     hessian(h, src);
@@ -344,5 +352,6 @@ namespace DO {
   //! @}
 
 } /* namespace DO */
+
 
 #endif /* DO_IMAGEPROCESSING_DIFFERENTIAL_HPP */
