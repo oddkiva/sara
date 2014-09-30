@@ -12,7 +12,6 @@
 
 #include <gtest/gtest.h>
 
-#include <DO/Defines.hpp>
 #include <DO/ImageProcessing/LinearFiltering.hpp>
 
 #include "../AssertHelpers.hpp"

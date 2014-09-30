@@ -326,19 +326,25 @@ namespace DO {
       return operator()(vector_type(i, j, k));
     }
 
-    //! Special access operator (mostly for the Hessian matrix).
-    inline reference delta(int i, int di, int j, int dj) const
+    //! Special access operator.
+    inline reference delta(int axis_i, int step_i) const
     {
-      return *(cur_ptr_ + strides_[i]*di + strides_[j]*dj);
+      return *(cur_ptr_ + strides_[axis_i]*step_i);
+    }
+
+    //! Special access operator (mostly for the Hessian matrix).
+    inline reference delta(int axis_i, int step_i, int axis_j, int step_j) const
+    {
+      return *(cur_ptr_ + strides_[axis_i]*step_i + strides_[axis_j]*step_j);
     }
 
     //! Special access operator (mostly for the Hessian matrix).
     template<int I, int J>
-    inline reference delta(int di, int dj) const
+    inline reference delta(int step_i, int step_j) const
     {
       DO_STATIC_ASSERT(I >= 0 && I < N && J >= 0 && J < N,
                        I_AND_J_MUST_BETWEEN_0_AND_N);
-      return *(cur_ptr_ + strides_[I]*di + strides_[J]*dj);
+      return *(cur_ptr_ + strides_[I]*step_i + strides_[J]*step_j);
     }
 
     //! Axis iterator getter.
