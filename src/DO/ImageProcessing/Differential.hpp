@@ -31,48 +31,64 @@ namespace DO {
   template <typename T, int N = 2>
   struct Gradient
   {
-    typedef T Scalar;
-    typedef Matrix<T, N, 1> Vector;
-    typedef Matrix<int, N, 1> Coords;
-    typedef Image<T, N> ScalarField;
-    typedef Image<Vector, N> VectorField, ReturnType;
-    typedef typename ScalarField::const_range_iterator ScalarIterator;
-    typedef typename VectorField::range_iterator VectorIterator;
+    typedef Matrix<int, N, 1> coords_type;
+    typedef Matrix<T, N, 1> gradient_type;
+    typedef Image<T, N> scalar_field_type;
+    typedef Image<gradient_type, N> gradient_field_type, return_type;
+    typedef typename scalar_field_type::const_array_iterator
+      const_scalar_field_iterator;
+    typedef typename gradient_field_type::array_iterator
+      gradient_field_iterator;
 
-    inline Gradient(const ScalarField& scalarField)
-      : scalar_field_(scalarField) {}
-
-    inline void operator()(Vector& g, ScalarIterator& loc) const
-    { Differential<N, N-1>::eval_gradient(g, loc); }
-
-    inline void operator()(Vector& g, const Coords& p) const
+    inline Gradient(const scalar_field_type& scalar_field)
+      : _scalar_field(scalar_field)
     {
-      ScalarIterator loc(scalar_field_.begin_range());
-      loc += p;
-      this->operator()(g, loc);
     }
 
-    void operator()(VectorField& dst) const
+    inline void operator()(gradient_type& gradient,
+                           const_scalar_field_iterator& it) const
     {
-      if (dst.sizes() != scalar_field_.sizes())
-        dst.resize(scalar_field_.sizes());
+      for (int i = 0; i < N; ++i)
+      {
+        if (it.position()[i] == 0)
+          gradient[i] = (it.delta(i, 1) - *it) / 2; // Replicate the border
+        else if (it.position()[i] == it.sizes()[i] - 1)
+          gradient[i] = (*it - it.delta(i,-1)) / 2; // Replicate the border
+        else
+          gradient[i] = (it.delta(i, 1) - it.delta(i,-1)) / 2;
+      }
+    }
 
-      ScalarIterator src_loc(scalar_field_.begin_range());
-      ScalarIterator src_loc_end(scalar_field_.end_range());
-      VectorIterator dst_loc(dst.begin_range());
-      for ( ; src_loc != src_loc_end; ++src_loc, ++dst_loc)
-        operator()(*dst_loc, src_loc);
+    inline void operator()(gradient_type& gradient,
+                           const coords_type& position) const
+    {
+      const_scalar_field_iterator it(_scalar_field.begin_range());
+      it += position;
+      this->operator()(gradient, it);
+    }
+
+    void operator()(gradient_field_type& gradient_field) const
+    {
+      if (gradient_field.sizes() != _scalar_field.sizes())
+        gradient_field.resize(_scalar_field.sizes());
+
+      const_scalar_field_iterator src_it(_scalar_field.begin_range());
+      const_scalar_field_iterator src_it_end(_scalar_field.end_range());
+      gradient_field_iterator dst_it(gradient_field.begin_range());
+      for ( ; src_it != src_it_end; ++src_it, ++dst_it)
+        operator()(*dst_it, src_it);
     };
 
-    VectorField operator()() const
+    gradient_field_type operator()() const
     {
-      VectorField gradField;
-      operator()(gradField);
-      return gradField;
+      gradient_field_type gradient_field;
+      operator()(gradient_field);
+      return gradient_field;
     }
 
-    const ScalarField& scalar_field_;
+    const scalar_field_type& _scalar_field;
   };
+
 
   //! Laplacian functor class
   template <typename T, int N = 2>
