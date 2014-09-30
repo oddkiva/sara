@@ -12,7 +12,6 @@
 
 #include <gtest/gtest.h>
 
-#include <DO/ImageProcessing/ImagePyramid.hpp>
 #include <DO/ImageProcessing/Extrema.hpp>
 
 
@@ -49,14 +48,14 @@ TEST(TestLocalExtremum, test_local_extremum)
   vector<Point2i> maxima;
   vector<Point2i> minima;
   
-  maxima = strictLocalMaxima(I);
+  maxima = strict_local_maxima(I);
   EXPECT_TRUE(maxima.empty());
-  maxima = localMaxima(I);
+  maxima = local_maxima(I);
   EXPECT_TRUE(maxima.size() == 8*8);
   
-  minima = strictLocalMinima(I);
+  minima = strict_local_minima(I);
   EXPECT_TRUE(minima.empty());
-  minima = localMinima(I);
+  minima = local_minima(I);
   EXPECT_TRUE(minima.size() == 8*8);
 
   I(1,1) = 10.f;
@@ -68,9 +67,9 @@ TEST(TestLocalExtremum, test_local_extremum)
   EXPECT_FALSE(LocalMin<float>()(1, 1, I));
   EXPECT_FALSE(StrictLocalMin<float>()(1, 1, I));
   
-  maxima = strictLocalMaxima(I);
+  maxima = strict_local_maxima(I);
   EXPECT_EQ(maxima.size(), 2);
-  minima = strictLocalMinima(I);
+  minima = strict_local_minima(I);
   EXPECT_TRUE(minima.empty());
 
   I.matrix() *= -1;
@@ -78,8 +77,8 @@ TEST(TestLocalExtremum, test_local_extremum)
   EXPECT_FALSE(less33(I(1,1), 1, 1, I, true));
   EXPECT_TRUE(StrictLocalMin<float>()(1, 1, I));
   EXPECT_TRUE(LocalMin<float>()(1, 1, I));
-  maxima = strictLocalMaxima(I);
-  minima = strictLocalMinima(I);
+  maxima = strict_local_maxima(I);
+  minima = strict_local_minima(I);
 
   EXPECT_TRUE(maxima.empty());
   EXPECT_EQ(minima.size(), 2);
@@ -105,16 +104,16 @@ TEST(TestLocalExtremum, test_local_scale_space_extremum)
   EXPECT_FALSE(StrictLocalScaleSpaceMin<double>()(1,1,1,0,I));
   
   vector<Point2i> maxima, minima;
-  maxima = strictLocalScaleSpaceMaxima(I,1,0);
-  minima = strictLocalScaleSpaceMinima(I,1,0);
+  maxima = strict_local_scale_space_maxima(I,1,0);
+  minima = strict_local_scale_space_minima(I,1,0);
   EXPECT_EQ(maxima.size(), 2);
   EXPECT_TRUE(minima.empty());
 
   // Local scale-space extrema test 2
   I(1,1,1,0) *= -1.f;
   I(7,7,1,0) *= -1.f;
-  maxima = strictLocalScaleSpaceMaxima(I,1,0);
-  minima = strictLocalScaleSpaceMinima(I,1,0);
+  maxima = strict_local_scale_space_maxima(I,1,0);
+  minima = strict_local_scale_space_minima(I,1,0);
   EXPECT_FALSE(LocalScaleSpaceMax<double>()(1,1,1,0,I));
   EXPECT_FALSE(StrictLocalScaleSpaceMax<double>()(1,1,1,0,I));
   EXPECT_TRUE(LocalScaleSpaceMin<double>()(1,1,1,0,I));
