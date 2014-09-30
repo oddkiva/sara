@@ -19,3 +19,6 @@ do_test(ImageProcessing_LinearFiltering test_linear_filtering.cpp
 
 do_test(ImageProcessing_Differential test_differential.cpp
         "${DO_LIBRARIES}" "ImageProcessing")
+
+do_test(ImageProcessing_Determinant test_determinant.cpp
+        "${DO_LIBRARIES}" "ImageProcessing")
