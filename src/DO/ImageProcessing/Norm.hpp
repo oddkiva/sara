@@ -118,19 +118,19 @@ namespace DO {
     return sNorm;
   }
 
-#define CREATE_NORM_FUNCTOR(Function, function)       \
-   /*! \brief Helper class to use Image<T,N>::compute<Function>() */ \
-  template <typename T, int N>                        \
-  struct Function                                     \
-  {                                                   \
-    typedef typename T::Scalar Scalar;                \
-    typedef Image<T, N> TField;                       \
-    typedef Image<Scalar, N> ScalarField, ReturnType; \
-    inline Function(const TField& tField)             \
-      : t_field_(tField) {}                           \
-    ReturnType operator()() const                     \
-    { return function(t_field_); }                    \
-    const TField& t_field_;                           \
+#define CREATE_NORM_FUNCTOR(Function, function)                       \
+   /*! \brief Helper class to use Image<T,N>::compute<Function>() */  \
+  template <typename T, int N>                                        \
+  struct Function                                                     \
+  {                                                                   \
+    typedef typename T::scalar_type scalar_type;                      \
+    typedef Image<T, N> TField;                                       \
+    typedef Image<scalar_type, N> scalar_field_type, return_type;     \
+    inline Function(const TField& tField)                             \
+      : t_field_(tField) {}                                           \
+    return_type operator()() const                                    \
+    { return function(t_field_); }                                    \
+    const TField& t_field_;                                           \
   }
 
   CREATE_NORM_FUNCTOR(SquaredNorm, squaredNorm);
