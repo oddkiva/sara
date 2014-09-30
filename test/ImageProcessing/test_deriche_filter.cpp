@@ -12,7 +12,6 @@
 
 #include <gtest/gtest.h>
 
-#include <DO/Defines.hpp>
 #include <DO/ImageProcessing/Deriche.hpp>
 
 #include "../AssertHelpers.hpp"

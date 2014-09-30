@@ -12,7 +12,6 @@
 
 #include <gtest/gtest.h>
 
-#include <DO/Defines.hpp>
 #include <DO/Core/DebugUtilities.hpp>
 #include <DO/ImageProcessing/Interpolation.hpp>
 
