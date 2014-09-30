@@ -27,7 +27,7 @@ namespace DO {
     @param[in, out] scalar field of squared norms
    */
   template <typename T, int M, int N, int D>
-  void squaredNorm(Image<T, D>& dst, const Image<Matrix<T,M,N>, D>& src)
+  void squared_norm(Image<T, D>& dst, const Image<Matrix<T,M,N>, D>& src)
   {
     if (dst.sizes() != src.sizes())
       dst.resize(src.sizes());
@@ -47,10 +47,10 @@ namespace DO {
     \return scalar field of squared norms
    */
   template <typename T, int M, int N, int D>
-  Image<T, D> squaredNorm(const Image<Matrix<T,M,N>, D>& src)
+  Image<T, D> squared_norm(const Image<Matrix<T,M,N>, D>& src)
   {
     Image<T, D> sqNorm;
-    squaredNorm(sqNorm, src);
+    squared_norm(sqNorm, src);
     return sqNorm;
   }
   /*!
@@ -59,7 +59,7 @@ namespace DO {
     @param[in, out] scalar field of norms
    */
   template <typename T, int M, int N, int D>
-  void blueNorm(Image<T, D>& dst, const Image<Matrix<T,M,N>, D>& src)
+  void blue_norm(Image<T, D>& dst, const Image<Matrix<T,M,N>, D>& src)
   {
     if (dst.sizes() != src.sizes())
       dst.resize(src.sizes());
@@ -79,10 +79,10 @@ namespace DO {
     \return scalar field of norms
    */
   template <typename T, int M, int N, int D>
-  Image<T, D> blueNorm(const Image<Matrix<T,M,N>, D>& src)
+  Image<T, D> blue_norm(const Image<Matrix<T,M,N>, D>& src)
   {
     Image<T, D> bNorm;
-    blueNorm(bNorm, src);
+    blue_norm(bNorm, src);
     return bNorm;
   }
   /*!
@@ -91,7 +91,7 @@ namespace DO {
     @param[in, out] scalar field of norms
    */
   template <typename T, int M, int N, int D>
-  void stableNorm(Image<T, D>& dst, const Image<Matrix<T,M,N>, D>& src)
+  void stable_norm(Image<T, D>& dst, const Image<Matrix<T,M,N>, D>& src)
   {
     if (dst.sizes() != src.sizes())
       dst.resize(src.sizes());
@@ -111,10 +111,10 @@ namespace DO {
     \return scalar field of norms
    */
   template <typename T, int M, int N, int D>
-  Image<T, D> stableNorm(const Image<Matrix<T,M,N>, D>& src)
+  Image<T, D> stable_norm(const Image<Matrix<T,M,N>, D>& src)
   {
     Image<T, D> sNorm;
-    stableNorm(sNorm, src);
+    stable_norm(sNorm, src);
     return sNorm;
   }
 
@@ -133,9 +133,9 @@ namespace DO {
     const TField& t_field_;                                           \
   }
 
-  CREATE_NORM_FUNCTOR(SquaredNorm, squaredNorm);
-  CREATE_NORM_FUNCTOR(BlueNorm, blueNorm);
-  CREATE_NORM_FUNCTOR(StableNorm, stableNorm);
+  CREATE_NORM_FUNCTOR(SquaredNorm, squared_norm);
+  CREATE_NORM_FUNCTOR(BlueNorm, blue_norm);
+  CREATE_NORM_FUNCTOR(StableNorm, stable_norm);
 
 #undef CREATE_NORM_FUNCTOR
 
