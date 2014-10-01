@@ -28,3 +28,6 @@ do_test(ImageProcessing_LocalExtremum test_local_extremum.cpp
 
 do_test(ImageProcessing_ImagePyramid test_image_pyramid.cpp
         "${DO_LIBRARIES}" "ImageProcessing")
+
+do_test(ImageProcessing_Norms test_norms.cpp
+        "${DO_LIBRARIES}" "ImageProcessing")
