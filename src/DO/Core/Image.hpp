@@ -19,6 +19,7 @@
 #include <DO/Core/Image/Image.hpp>
 #include <DO/Core/Image/ElementTraits.hpp>
 #include <DO/Core/Image/Operations.hpp>
+#include <DO/Core/Image/Subimage.hpp>
 
 
 #endif /* DO_CORE_IMAGE_HPP */

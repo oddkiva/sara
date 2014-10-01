@@ -11,63 +11,60 @@
 
 //! @file
 
-#ifndef DO_CORE_IMAGEPATCH_HPP
-#define DO_CORE_IMAGEPATCH_HPP
+#ifndef DO_CORE_IMAGE_SUBIMAGE_HPP
+#define DO_CORE_IMAGE_SUBIMAGE_HPP
 
-#include "Image.hpp"
+
+#include <DO/Core/Image/Image.hpp>
+#include <DO/Core/Pixel/ChannelConversion.hpp>
+
 
 namespace DO {
 
-  // \todo: test.
+  //! Get the subimage of an image.
   template <typename T, int N>
-  Image<T, N> getImagePatch(const Image<T, N>& src, 
-                            const Matrix<int, N, 1>& a,
-                            const Matrix<int, N, 1>& b)
+  Image<T, N> subimage(const Image<T, N>& src,
+                       const Matrix<int, N, 1>& begin_coords,
+                       const Matrix<int, N, 1>& end_coords)
   {
-    Image<T,N> dst(b-a);
-    dst.array().fill(color_min_value<T>());
-    typedef typename Image<T, N>::const_subarray_iterator const_src_iterator;
-    const_src_iterator src_it = src.begin_subrange(a, b);
+    Image<T,N> dst(begin_coords - end_coords);
+
+    typedef typename Image<T, N>::const_subarray_iterator const_subarray_iterator;
+    const_subarray_iterator src_it = src.begin_subrange(a, b);
+
     for (typename Image<T, N>::iterator dst_it = dst.begin();
          dst_it != dst.end(); ++dst_it, ++src_it)
     {
       // If a and b are coordinates out bounds.
-      if ((src_it.coords()-a).minCoeff() < 0 ||
-          (src_it.coords()-b).minCoeff() >= 0)
-        continue;
-      *dst_it = *src_it;
+      if ((src_it.position() - begin_coords).minCoeff() < 0 ||
+          (src_it.position() - end_coords).minCoeff() >= 0)
+        *dst_it = color_min_value<T>();
+      else
+        *dst_it = *src_it;
     }
     return dst;
   }
 
-  // No big fuss, it just works.
+  //! \brief Get the subimage of an image.
   template <typename T>
-  Image<T> getImagePatch(const Image<T>& src, int x, int y, int w, int h)
+  inline Image<T> subimage(const Image<T>& src, int top_left_x, int top_left_y,
+                    int width, int height)
   {
-    Image<T> patch(w,h);
-    patch.array().fill(color_min_value<T>());
-    for (int v = 0; v < h; ++v)
-    {
-      if (y+v < 0 || y+v > src.height()-1)
-        continue;
-      for (int u = 0; u < w; ++u)
-      {
-        if ( x+u < 0 || x+u > src.width()-1 )
-          continue;
-        patch(u,v) = src(x+u,y+v);
-      }
-    }
-    return patch;
+    Vector2i begin_coords(top_left_x, top_left_y);
+    Vector2i end_coords(top_left_x+width, top_left_y+height);
+    return subimage(src, begin_coords, end_coords);
   }
 
-  // Helper
+  //! \brief Get the subimage of an image.
   template <typename T>
-  inline Image<T> getImagePatch(const Image<T>& src, int x, int y, int r)
+  inline Image<T> subimage(const Image<T>& src, int center_x, int center_y,
+                           int radius)
   {
-    return getImagePatch(src, x-r, y-r, 2*r+1, 2*r+1);
+    return subimage(src, center_x-r, center_y-r, 2*r+1, 2*r+1);
   }
 
 } /* namespace DO */
 
 
-#endif /* DO_CORE_IMAGEPATCH_HPP */
+
+#endif /* DO_CORE_IMAGE_SUBIMAGE_HPP */
