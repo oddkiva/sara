@@ -22,7 +22,7 @@ using namespace DO;
 using namespace std;
 
 
-TEST(TestOrientation, test_squared_norm)
+TEST(TestOrientation, test_orientation)
 {
   Image<Vector2f> vector_field(3, 3);
   vector_field.matrix().fill(Vector2f::Ones());
