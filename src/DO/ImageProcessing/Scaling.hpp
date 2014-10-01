@@ -28,9 +28,10 @@ namespace DO {
   Image<T, N> upscale(const Image<T, N>& I, int fact)
   {
     Image<T, N> I1(I.sizes()*fact);
-    CoordsIterator<N> c(I1.begin_coords()), end;
-    for ( ; c != end; ++c)
-      I1(*c) = I((*c)/fact);
+    typename Image<T, N>::range_iterator it(I1.begin_range());
+    typename Image<T, N>::range_iterator end(I1.end_range());
+    for ( ; it != end; ++it)
+      *it = I(it.coords() / fact);
     return I1;
   }
 
@@ -38,9 +39,10 @@ namespace DO {
   Image<T, N> downscale(const Image<T, N>& I, int fact)
   {
     Image<T, N> I1(I.sizes()/fact);
-    CoordsIterator<N> c(I1.begin_coords()), end;
-    for ( ; c != end; ++c)
-      I1(*c) = I((*c)*fact);
+    typename Image<T, N>::range_iterator it(I1.begin_range());
+    typename Image<T, N>::range_iterator end(I1.end_range());
+    for ( ; it != end; ++it)
+      *it = I(it.position()*fact);
     return I1;
   }
 
@@ -82,11 +84,12 @@ namespace DO {
 
     // Create the new image by interpolating pixel values.
     Image<T, N> nI(newSizes);
-    CoordsIterator<N> r(nI.begin_coords()), end;
+    typename Image<T, N>::range_iterator r(nI.begin_range());
+    typename Image<T, N>::range_iterator end(nI.end_range());
     for ( ; r != end; ++r)
     {
-      Vectord x( r->template cast<double>().cwiseProduct(f) );
-      convertColor(nI(*r), interpolate(oriI, x));
+      Vectord x( r.coords()->template cast<double>().cwiseProduct(f) );
+      convertColor(*r, interpolate(oriI, x));
     }
 
     return nI;
@@ -127,11 +130,12 @@ namespace DO {
 
     // Create the new image by interpolation.
     Image<T,N> nI(newSizes);
-    CoordsIterator<N> r(nI.begin_coords()), end;
+    typename Image<T, N>::range_iterator r(nI.begin_range());
+    typename Image<T, N>::range_iterator end(nI.end_range());
     for ( ; r != end; ++r)
     {
-      Vectord x( r->template cast<double>().cwiseProduct(f) );
-      convertColor(nI(*r), interpolate(I, x));
+      Vectord x( r.position().template cast<double>().cwiseProduct(f) );
+      convertColor(*r, interpolate(I, x));
     }
     return nI;
   }

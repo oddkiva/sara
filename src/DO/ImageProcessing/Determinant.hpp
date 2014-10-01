@@ -14,6 +14,10 @@
 #ifndef DO_IMAGEPROCESSING_DETERMINANT_HPP
 #define DO_IMAGEPROCESSING_DETERMINANT_HPP
 
+
+#include <DO/Core/Image/Image.hpp>
+
+
 namespace DO {
 
   /*!
@@ -25,29 +29,30 @@ namespace DO {
   template <typename Matrix_, int N>
   struct Determinant
   {
-    typedef Matrix<int, N, 1> Coords;
-    typedef typename Matrix_::Scalar Scalar;
-    typedef Image<Matrix_, N> MatrixField;
-    typedef Image<Scalar, N> ScalarField, ReturnType;
+    typedef Matrix<int, N, 1> coords_type;
+    typedef typename Matrix_::Scalar scalar_type;
+    typedef Image<Matrix_, N> matrix_field_type;
+    typedef Image<scalar_type, N> scalar_field_type, return_type;
 
-    inline Determinant(const MatrixField& matrixField)
+    inline Determinant(const matrix_field_type& matrixField)
       : matrix_field_(matrixField) {}
 
-    ScalarField operator()() const
+    scalar_field_type operator()() const
     {
-      ScalarField det_field_(matrix_field_.sizes());
-      typename ScalarField::iterator dst = det_field_.begin();
-      typename MatrixField::const_iterator src = matrix_field_.begin();
+      scalar_field_type det_field_(matrix_field_.sizes());
+      typename scalar_field_type::iterator dst = det_field_.begin();
+      typename matrix_field_type::const_iterator src = matrix_field_.begin();
       for ( ; src != matrix_field_.end(); ++src, ++dst)
         *dst = src->determinant();
       return det_field_;
     }
 
-    const MatrixField& matrix_field_;
+    const matrix_field_type& matrix_field_;
   };
 
   //! @}
 
 } /* namespace DO */
+
 
 #endif /* DO_IMAGEPROCESSING_DETERMINANT_HPP */

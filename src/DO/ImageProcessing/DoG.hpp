@@ -24,17 +24,17 @@ namespace DO {
   //! Computes a pyramid of Gaussians.
   template <typename T>
   ImagePyramid<T>
-  gaussianPyramid(const Image<T>& image,
-                  const ImagePyramidParams& params = ImagePyramidParams())
+  gaussian_pyramid(const Image<T>& image,
+                   const ImagePyramidParams& params = ImagePyramidParams())
   {
-    typedef typename ImagePyramid<T>::Scalar Scalar;
+    typedef typename ImagePyramid<T>::scalar_type Scalar;
     // Resize the image with the appropriate factor.
-    Scalar resizeFactor = pow(2.f, -params.initOctaveIndex());
+    Scalar resizeFactor = pow(2.f, -params.first_octave_index());
     Image<T> I(enlarge(image, resizeFactor) );
     // Deduce the new camera sigma with respect to the dilated image.
-    Scalar cameraSigma = Scalar(params.cameraSigma())*resizeFactor;
+    Scalar cameraSigma = Scalar(params.scale_camera())*resizeFactor;
     // Blur the image so that its new sigma is equal to the initial sigma.
-    Scalar initSigma = Scalar(params.initSigma());
+    Scalar initSigma = Scalar(params.scale_initial());
     if (cameraSigma < initSigma)
     {
       Scalar sigma = sqrt(initSigma*initSigma - cameraSigma*cameraSigma);
@@ -43,15 +43,15 @@ namespace DO {
 
     // Deduce the maximum number of octaves.
     int l = std::min(image.width(), image.height());
-    int b = params.imagePaddingSize();
+    int b = params.image_padding_size();
     // l/2^k > 2b
     // 2^k < l/(2b)
     // k < log(l/(2b))/log(2)
     int numOctaves = static_cast<int>(log(l/(2.f*b))/log(2.f));
     
     // Shorten names.
-    Scalar k = Scalar(params.scaleGeomFactor());
-    int numScales = params.numScalesPerOctave();
+    Scalar k = Scalar(params.scale_geometric_factor());
+    int numScales = params.num_scales_per_octaves();
     int downscaleIndex = int( floor( log(Scalar(2))/log(k)) );
 
     // Create the image pyramid
@@ -63,8 +63,8 @@ namespace DO {
     for (int o = 0; o < numOctaves; ++o)
     {
       // Compute the octave scaling factor
-      G.octaveScalingFactor(o) = 
-        (o == 0) ? 1.f/resizeFactor : G.octaveScalingFactor(o-1)*2;
+      G.octave_scaling_factor(o) = 
+        (o == 0) ? 1.f/resizeFactor : G.octave_scaling_factor(o-1)*2;
 
       // Compute the gaussians in octave \f$o\f$
       Scalar sigma_s_1 = initSigma;
@@ -94,20 +94,21 @@ namespace DO {
     // Done!
     return G;
   }
+
   //! Computes a pyramid of difference of Gaussians from the Gaussian pyramid.
   template <typename T>
-  ImagePyramid<T> DoGPyramid(const ImagePyramid<T>& gaussians)
+  ImagePyramid<T> difference_of_gaussians_pyramid(const ImagePyramid<T>& gaussians)
   {
     ImagePyramid<T> D;
-    D.reset(gaussians.numOctaves(),
-            gaussians.numScalesPerOctave()-1,
-            gaussians.initScale(), 
-            gaussians.scaleGeomFactor());
+    D.reset(gaussians.num_octaves(),
+            gaussians.num_scales_per_octave()-1,
+            gaussians.scale_initial(), 
+            gaussians.scale_geometric_factor());
 
-    for (int o = 0; o < D.numOctaves(); ++o)
+    for (int o = 0; o < D.num_octaves(); ++o)
     {
-      D.octaveScalingFactor(o) = gaussians.octaveScalingFactor(o);
-      for (int s = 0; s < D.numScalesPerOctave(); ++s)
+      D.octave_scaling_factor(o) = gaussians.octave_scaling_factor(o);
+      for (int s = 0; s < D.num_scales_per_octave(); ++s)
       {
         D(s,o).resize(gaussians(s,o).sizes());
         D(s,o).array() = gaussians(s+1,o).array() - gaussians(s,o).array();
@@ -115,30 +116,32 @@ namespace DO {
     }
     return D;
   }
+
   //! Computes a pyramid of scale-normalized Laplacians of Gaussians from the 
   //! Gaussian pyramid.
   template <typename T>
-  ImagePyramid<T> LoGPyramid(const ImagePyramid<T>& gaussians)
+  ImagePyramid<T> laplacian_pyramid(const ImagePyramid<T>& gaussians)
   {
     ImagePyramid<T> LoG;
-    LoG.reset(gaussians.numOctaves(),
-              gaussians.numScalesPerOctave(),
-              gaussians.initScale(), 
-              gaussians.scaleGeomFactor());
+    LoG.reset(gaussians.num_octaves(),
+              gaussians.num_scales_per_octave(),
+              gaussians.scale_initial(), 
+              gaussians.scale_geometric_factor());
 
-    for (int o = 0; o < LoG.numOctaves(); ++o)
+    for (int o = 0; o < LoG.num_octaves(); ++o)
     {
-      LoG.octaveScalingFactor(o) = gaussians.octaveScalingFactor(o);
-      for (int s = 0; s < LoG.numScalesPerOctave(); ++s)
+      LoG.octave_scaling_factor(o) = gaussians.octave_scaling_factor(o);
+      for (int s = 0; s < LoG.num_scales_per_octave(); ++s)
       {
         LoG(s,o) = laplacian(gaussians(s,o));
         for (typename Image<T>::iterator it = LoG(s,o).begin();
              it != LoG(s,o).end(); ++it)
-          *it *= pow(gaussians.octRelScale(s), 2);
+          *it *= pow(gaussians.scale_relative_to_octave(s), 2);
       }
     }
     return LoG;
   }
+
   //! Computes the gradient vector of \f$I(x,y,\sigma)\f$ at \f$(x,y,\sigma)\f$, 
   //! where \f$\sigma = 2^{s/S + o}\f$ where \f$S\f$ is the number of scales per 
   //! octave.
@@ -162,6 +165,7 @@ namespace DO {
     d(2) = (I(x  ,y  ,s+1,o) - I(x  ,y  ,s-1,o)) / T(2);
     return d;
   }
+
   //! Computes the hessian matrix of \f$I(x,y,\sigma)\f$ at \f$(x,y,\sigma)\f$,
   //! where \f$\sigma = 2^{s/S + o}\f$ where \f$S\f$ is the number of scales 
   //! per octave.

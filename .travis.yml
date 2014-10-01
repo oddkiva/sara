@@ -22,8 +22,8 @@ install:
   # Use gcov 4.8
   - sudo ln -fs /usr/bin/gcov-4.8 /usr/bin/gcov
   - gcov --version
-  # Install Qt5.
-  - sudo apt-get install -qq qt5-qmake qtbase5-dev qtdeclarative5-dev libqt5webkit5-dev libsqlite3-dev
+  # Install Qt5
+  - sudo apt-get install -qq qtbase5-dev
 
 before_script:
   # Fake X server.

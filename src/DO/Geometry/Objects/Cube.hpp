@@ -16,7 +16,7 @@ namespace DO {
     friend bool inside(const Point3d& p, const Cube& cube)
     { return p.cwiseMin(cube.a_) == cube.a_ && p.cwiseMax(cube.b_) == cube.b_; }
 
-    friend bool area(const Cube& c)
+    friend double area(const Cube& c)
     { return std::pow((c.b_ - c.a_)(0), 3); }
   };
 

@@ -14,6 +14,10 @@
 #ifndef DO_IMAGEPROCESSING_SECONDMOMENTMATRIX_HPP
 #define DO_IMAGEPROCESSING_SECONDMOMENTMATRIX_HPP
 
+
+#include <DO/Core/Image/Image.hpp>
+
+
 namespace DO {
 
   /*!
@@ -32,10 +36,10 @@ namespace DO {
     typedef typename Vector::Scalar Scalar;
     typedef Matrix<Scalar, N, N> Moment;
     typedef Image<Vector, N> VectorField;
-    typedef Image<Moment, N> MomentField, ReturnType;
+    typedef Image<Moment, N> MomentField, return_type;
 
-    inline SecondMomentMatrix(const VectorField& gradientField)
-      : gradient_field_(gradientField) {}
+    inline SecondMomentMatrix(const VectorField& gradient_field)
+      : gradient_field_(gradient_field) {}
     
     MomentField operator()() const
     {
@@ -53,5 +57,6 @@ namespace DO {
   //! @}
 
 } /* namespace DO */
+
 
 #endif /* DO_IMAGEPROCESSING_SECONDMOMENTMATRIX_HPP */

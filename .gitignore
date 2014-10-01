@@ -175,22 +175,20 @@ pip-log.txt
 #############
 ## Project-specific files
 #############
-xml/
+cmake/DOVersion.cmake
 
-test/Core/tree.gv
-test/FeatureDetectors/test.haraffkey
-test/ImageProcessing/bench*.txt
-cmake/FindDO.cmake
 src/DO/Defines.hpp
+
 third-party/zlib/zconf.h
 third-party/libjpeg/jconfig.h
 third-party/libpng/pnglibconf.h
 third-party/libtiff/tif_config.h
 
+test/Core/tree.gv
+test/FeatureDetectors/test.haraffkey
+test/ImageProcessing/bench*.txt
 test/Features/test_copy.*
 
 test/Graphics/MARBIBM_write.TIF
 test/Graphics/flower_write.png
 test/Graphics/ksmall_write.jpg
-test/MikolajzcykDatasets/
-test/AKAZE/

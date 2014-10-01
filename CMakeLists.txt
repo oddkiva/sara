@@ -8,8 +8,8 @@ if (POLICY CMP0020)
 endif (POLICY CMP0020)
 
 # Configure DO++: put the versions.
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindDO.cmake.in
-               ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindDO.cmake @ONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/DOVersion.cmake.in
+               ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DOVersion.cmake @ONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/DO/Defines.hpp.in
                ${CMAKE_CURRENT_SOURCE_DIR}/src/DO/Defines.hpp @ONLY)
 
@@ -39,12 +39,6 @@ do_get_os_info()
 
 # Group projects by category.
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-
-# Set up code coverage for Debug mode.
-if (CMAKE_BUILD_TYPE STREQUAL "Debug" AND UNIX)
-  message("Setting up code coverage.")
-  include(CodeCoverage)
-endif ()
 
 # Set installation settings.
 include(DOInstall)

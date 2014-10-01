@@ -29,7 +29,7 @@ namespace DO {
     if (scaleOctavePairs)
     {
       scaleOctavePairs->clear();
-      scaleOctavePairs->reserve(1e4);
+      scaleOctavePairs->reserve(10000);
     }
 
     for (int o = 0; o < D.numOctaves(); ++o)
