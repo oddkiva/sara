@@ -32,7 +32,7 @@ TEST(TestSecondMomentMatrix, test_second_moment_matrix)
 
   Image<Matrix2f> moments;
   moments = vector_field.compute<SecondMomentMatrix>();
-  for (int i = 0; i != moments.size(); ++i)
+  for (size_t i = 0; i != moments.size(); ++i)
     EXPECT_MATRIX_NEAR(true_moments.array()[i], moments.array()[i], 1e-3);
 }
 
