@@ -37,5 +37,4 @@ after_success:
   - lcov --remove coverage.info 'usr/*' --output-file coverage.info
   - lcov --remove coverage.info 'third-party/*' --output-file coverage.info
   - lcov --remove coverage.info 'test/*' --output-file coverage.info
-  - lcov --remove coverage.info '*/build/*' --output-file coverage.info
   - coveralls-lcov coverage.info
