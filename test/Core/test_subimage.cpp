@@ -76,7 +76,7 @@ TEST_F(TestSubimage, test_subimage_out_of_bounds_1)
   EXPECT_MATRIX_EQ(true_subimage.matrix(), subimage.matrix());
 
   int cx = -2, cy = -2, r = 1;
-  subimage = get_subimage(image, x, y, r);
+  subimage = get_subimage(image, cx, cy, r);
   EXPECT_MATRIX_EQ(true_subimage.sizes(), subimage.sizes());
   EXPECT_MATRIX_EQ(true_subimage.matrix(), subimage.matrix());
 }
