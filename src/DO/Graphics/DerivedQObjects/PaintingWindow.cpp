@@ -453,7 +453,7 @@ namespace DO {
     }
   }
 
-  void PaintingWindow::paintEvent(QPaintEvent *event)
+  void PaintingWindow::paintEvent(QPaintEvent *)
   {    
     QPainter p(this);
     p.drawPixmap(0, 0, pixmap_);

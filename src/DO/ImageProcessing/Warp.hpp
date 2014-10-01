@@ -36,7 +36,7 @@ namespace DO {
     {
       // Get the corresponding coordinates in the source image.
       Vector3 H_p;
-      H_p = H * (Vector3() << dst_it.coords().template cast<S>(), S(1)).finished();
+      H_p = H * (Vector3() << dst_it.position().template cast<S>(), S(1)).finished();
       H_p /= H_p(2);
       // Check if the position is not in the image domain [0,w[ x [0,h[.
       bool posNotInImageDomain =

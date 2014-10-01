@@ -61,21 +61,11 @@ elseif (CMAKE_COMPILER_IS_GNUCXX)
   
   do_substep_message(
     "${CMAKE_CXX_COMPILER_ID} compiler version: ${GCC_VERSION}")
-  if (GCC_VERSION  VERSION_LESS 4.5)
-    message(FATAL_ERROR
-            "GNU compiler version lower than 4.5 are not supported anymore: "
-            "C++0x features (auto and lambda) are needed.")
-  elseif (GCC_VERSION  VERSION_LESS 4.7)
+  if (GCC_VERSION  VERSION_LESS 4.7)
     set(ENABLE_CXX11 "-std=c++0x")
   else ()
     set (ENABLE_CXX11 "-std=c++11")
   endif ()
-else ()
-  message("WARNING: Compiler '${CMAKE_CXX_COMPILER}' may not be supported "
-          "by DO-CV. Make sure that C++0x features are needed (auto and "
-          "lambda) and adjust the CMake variable 'ENABLE_CXX11'. Otherwise, "
-          "report back to me: david.ok8@gmail.com and I'll try to do what I "
-          "can.")
 endif ()
 
 if (UNIX)
