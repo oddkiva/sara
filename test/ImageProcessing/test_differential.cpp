@@ -46,7 +46,7 @@ TEST_F(TestDifferential, test_gradient)
 {
   Image<float>& f = _src_image;
   Vector2i x(1, 1);
-  Gradient<float> compute_gradient(_src_image);
+  Gradient<float> compute_gradient(f);
 
   Vector2f gradf_x;
   compute_gradient(gradf_x, x);
