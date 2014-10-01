@@ -12,8 +12,7 @@
 
 #include <gtest/gtest.h>
 
-#include <DO/Core/DebugUtilities.hpp>
-#include <DO/ImageProcessing/Interpolation.hpp>
+#include <DO/ImageProcessing/ImagePyramid.hpp>
 
 #include "../AssertHelpers.hpp"
 
@@ -57,7 +56,6 @@ TEST(TestInterpolation, test_interpolation)
 
   value = interpolate(f, Vector2d(0.5, 1.-eps));
   ASSERT_NEAR(0.5, value, 1e-7);
-
 
   f.matrix() <<
     0, 0,
