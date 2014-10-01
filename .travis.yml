@@ -5,18 +5,17 @@ compiler:
   - gcc
 
 before_install:
-  # Update apt repositories to get GNU compiler 4.8.
-  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
   # Update apt repositories to get Qt5.
   - sudo add-apt-repository --yes ppa:ubuntu-sdk-team/ppa
   - sudo apt-get update -qq
 
 install:
-  # Install GCC 4.8 for C++11 features.
-  - if [ "$CXX" = "g++" ]; then sudo apt-get install -qq g++-4.8; fi
-  - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
   # Install Qt5
   - sudo apt-get install -qq qtbase5-dev
+  # Install lcov for code coverage.
+  - sudo apt-get install lcov
+  # Install coveralls-lcov for code coverage.
+  - gem install coveralls-lcov
 
 before_script:
   # Fake X server
@@ -26,6 +25,15 @@ before_script:
 script:
   - mkdir build
   - cd build
-  - cmake ..
+  - cmake -DCMAKE_BUILD_TYPE=Debug ..
   - make -j 4
   - make verbose_test
+
+after_success:
+  - cd ..
+  - lcov --compat-libtool --directory build --base-directory=src --capture --output-file=coverage.info
+  - lcov --remove coverage.info 'usr/*' --output-file coverage.info
+  - lcov --remove coverage.info 'third-party/*' --output-file coverage.info
+  - lcov --remove coverage.info 'test/*' --output-file coverage.info
+  - lcov --remove coverage.info 'build/moc_*' --output-file coverage.info
+  - coveralls-lcov coverage.info

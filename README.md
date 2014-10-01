@@ -4,12 +4,11 @@ DO-CV: C++ Computer Vision Library
 DO-CV focuses on:
 
 1. having an **easy-to-use and simple API**,
-2. having **human-readable and efficient** implementations of computer vision
+2. having **easy-to-understand and efficient** implementations of computer vision
    algorithms,
 3. **rigorous testing**.
 
-If you share this vision, try it and feel free to become involved with the
-development of the libraries.
+Try it and feel free to become involved with the development of the libraries.
 
 You can rest assured that I dedicate lots of love to maintain DO-CV and make it
 evolve as much as my time and energy allow it.
@@ -20,8 +19,7 @@ DO-CV is licensed with the [Mozilla Public License version
 **Continuous integration status:**
 
 [![Build
-Status](https://travis-ci.org/DO-CV/DO-CV.png?branch=master)](https://travis-ci.org/DO-CV/DO-CV)
-
+Status](https://travis-ci.org/DO-CV/DO-CV.png?branch=master)](https://travis-ci.org/DO-CV/DO-CV) [![Coverage Status](https://img.shields.io/coveralls/DO-CV/DO-CV.svg)](https://coveralls.io/r/DO-CV/DO-CV?branch=develop)
 
 Documentation
 -------------

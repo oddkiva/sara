@@ -65,6 +65,8 @@ do_test(Core_Tree
         test_tree.cpp
         "${DO_LIBRARIES}" ${TestGroupName})
 
-do_test(Core_Timer
-        test_timer.cpp
-        "${DO_LIBRARIES}" ${TestGroupName})
+if (DEFINED ENABLE_CXX11 OR MSVC_VERSION GREATER 1500)
+  do_test(Core_Timer
+          test_timer.cpp
+          "${DO_LIBRARIES}" ${TestGroupName})
+endif ()
