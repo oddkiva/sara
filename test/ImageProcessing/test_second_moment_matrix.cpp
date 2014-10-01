@@ -13,7 +13,7 @@
 
 #include <gtest/gtest.h>
 
-#include <DO/ImageProcessing/Orientation.hpp>
+#include <DO/ImageProcessing/SecondMomentMatrix.hpp>
 
 #include "../AssertHelpers.hpp"
 
@@ -22,24 +22,18 @@ using namespace DO;
 using namespace std;
 
 
-TEST(TestOrientation, test_orientation)
+TEST(TestSecondMomentMatrix, test_second_moment_matrix)
 {
   Image<Vector2f> vector_field(3, 3);
   vector_field.matrix().fill(Vector2f::Ones());
 
-  Image<float> true_orientations(3, 3);
-  true_orientations.array().fill(static_cast<float>(M_PI_4));
+  Image<Matrix2f> true_moments(3, 3);
+  true_moments.array().fill(Matrix2f::Ones());
 
-  Image<float> orientations;
-
-  orientation(vector_field, orientations);
-  EXPECT_MATRIX_NEAR(true_orientations.matrix(), orientations.matrix(), 1e-3);
-
-  orientations = orientation(vector_field);
-  EXPECT_MATRIX_NEAR(true_orientations.matrix(), orientations.matrix(), 1e-3);
-
-  orientations = vector_field.compute<Orientation>();
-  EXPECT_MATRIX_NEAR(true_orientations.matrix(), orientations.matrix(), 1e-3);
+  Image<Matrix2f> moments;
+  moments = vector_field.compute<SecondMomentMatrix>();
+  for (int i = 0; i != moments.size(); ++i)
+    EXPECT_MATRIX_NEAR(true_moments.array()[i], moments.array()[i], 1e-3);
 }
 
 

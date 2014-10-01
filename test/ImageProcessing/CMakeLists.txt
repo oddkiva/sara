@@ -34,3 +34,6 @@ do_test(ImageProcessing_Norms test_norms.cpp
 
 do_test(ImageProcessing_Orientation test_orientation.cpp
         "${DO_LIBRARIES}" "ImageProcessing")
+
+do_test(ImageProcessing_SecondMomentMatrix test_second_moment_matrix.cpp
+        "${DO_LIBRARIES}" "ImageProcessing")
