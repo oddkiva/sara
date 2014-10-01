@@ -1,13 +1,3 @@
-# IMPORTANT NOTE:
-#
-# I have decided DO-CV will work on recent C++ compilers because C++11 features
-# are used. Code is much more elegant, more concise, easier to maintain.
-#
-# C++11 used features:
-# - auto
-# - lambda
-#
-
 do_step_message("Found ${CMAKE_CXX_COMPILER_ID} compiler:")
 
 # Visual C++ compiler
@@ -61,21 +51,11 @@ elseif (CMAKE_COMPILER_IS_GNUCXX)
   
   do_substep_message(
     "${CMAKE_CXX_COMPILER_ID} compiler version: ${GCC_VERSION}")
-  if (GCC_VERSION  VERSION_LESS 4.5)
-    message(FATAL_ERROR
-            "GNU compiler version lower than 4.5 are not supported anymore: "
-            "C++0x features (auto and lambda) are needed.")
-  elseif (GCC_VERSION  VERSION_LESS 4.7)
+  if (NOT GCC_VERSION  VERSION_LESS 4.5 AND GCC_VERSION  VERSION_LESS 4.7)
     set(ENABLE_CXX11 "-std=c++0x")
   else ()
     set (ENABLE_CXX11 "-std=c++11")
   endif ()
-else ()
-  message("WARNING: Compiler '${CMAKE_CXX_COMPILER}' may not be supported "
-          "by DO-CV. Make sure that C++0x features are needed (auto and "
-          "lambda) and adjust the CMake variable 'ENABLE_CXX11'. Otherwise, "
-          "report back to me: david.ok8@gmail.com and I'll try to do what I "
-          "can.")
 endif ()
 
 if (UNIX)
@@ -90,7 +70,9 @@ if (UNIX)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wunused-variable")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-long-long")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIE")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ENABLE_CXX11}")
+  if (DEFINED ENABLE_CXX11)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ENABLE_CXX11}")
+  endif ()
   # Additional flags for Release builds.
   set(CMAKE_CXX_RELEASE_FLAGS "-03 -ffast-math")
   # Additional flags for Debug builds, which include code coverage.
