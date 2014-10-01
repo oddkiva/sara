@@ -12,7 +12,7 @@
 
 #include <gtest/gtest.h>
 
-#include <DO/ImageProcessing/ImagePyramid.hpp>
+#include <DO/ImageProcessing/Interpolation.hpp>
 
 #include "../AssertHelpers.hpp"
 
