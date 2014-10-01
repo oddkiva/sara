@@ -14,6 +14,10 @@
 #ifndef DO_IMAGEPROCESSING_NORM_HPP
 #define DO_IMAGEPROCESSING_NORM_HPP
 
+
+#include <DO/Core/Image/Image.hpp>
+
+
 namespace DO {
   
   /*!
@@ -27,7 +31,7 @@ namespace DO {
     @param[in, out] scalar field of squared norms
    */
   template <typename T, int M, int N, int D>
-  void squared_norm(Image<T, D>& dst, const Image<Matrix<T,M,N>, D>& src)
+  void squared_norm(const Image<Matrix<T,M,N>, D>& src, Image<T, D>& dst)
   {
     if (dst.sizes() != src.sizes())
       dst.resize(src.sizes());
@@ -50,9 +54,9 @@ namespace DO {
   template <typename T, int M, int N, int D>
   Image<T, D> squared_norm(const Image<Matrix<T,M,N>, D>& src)
   {
-    Image<T, D> sqNorm;
-    squared_norm(sqNorm, src);
-    return sqNorm;
+    Image<T, D> squared_norm_image;
+    squared_norm(src, squared_norm_image);
+    return squared_norm_image;
   }
 
   /*!
@@ -61,7 +65,7 @@ namespace DO {
     @param[in, out] scalar field of norms
    */
   template <typename T, int M, int N, int D>
-  void blue_norm(Image<T, D>& dst, const Image<Matrix<T,M,N>, D>& src)
+  void blue_norm(const Image<Matrix<T,M,N>, D>& src, Image<T, D>& dst)
   {
     if (dst.sizes() != src.sizes())
       dst.resize(src.sizes());
@@ -84,9 +88,9 @@ namespace DO {
   template <typename T, int M, int N, int D>
   Image<T, D> blue_norm(const Image<Matrix<T,M,N>, D>& src)
   {
-    Image<T, D> bNorm;
-    blue_norm(bNorm, src);
-    return bNorm;
+    Image<T, D> blue_norm_image;
+    blue_norm(src, blue_norm_image);
+    return blue_norm_image;
   }
 
   /*!
@@ -95,7 +99,7 @@ namespace DO {
     @param[in, out] scalar field of norms
    */
   template <typename T, int M, int N, int D>
-  void stable_norm(Image<T, D>& dst, const Image<Matrix<T,M,N>, D>& src)
+  void stable_norm(const Image<Matrix<T,M,N>, D>& src, Image<T, D>& dst)
   {
     if (dst.sizes() != src.sizes())
       dst.resize(src.sizes());
@@ -118,9 +122,9 @@ namespace DO {
   template <typename T, int M, int N, int D>
   Image<T, D> stable_norm(const Image<Matrix<T,M,N>, D>& src)
   {
-    Image<T, D> sNorm;
-    stable_norm(sNorm, src);
-    return sNorm;
+    Image<T, D> stable_norm_image;
+    stable_norm(src, stable_norm_image);
+    return stable_norm_image;
   }
 
 #define CREATE_NORM_FUNCTOR(Function, function)                       \
@@ -128,14 +132,14 @@ namespace DO {
   template <typename T, int N>                                        \
   struct Function                                                     \
   {                                                                   \
-    typedef typename T::scalar_type scalar_type;                      \
-    typedef Image<T, N> TField;                                       \
+    typedef typename T::Scalar scalar_type;                           \
+    typedef Image<T, N> matrix_field_type;                            \
     typedef Image<scalar_type, N> scalar_field_type, return_type;     \
-    inline Function(const TField& tField)                             \
-      : t_field_(tField) {}                                           \
+    inline Function(const matrix_field_type& matrix_field)            \
+      : matrix_field_(matrix_field) {}                                \
     return_type operator()() const                                    \
-    { return function(t_field_); }                                    \
-    const TField& t_field_;                                           \
+    { return function(matrix_field_); }                               \
+    const matrix_field_type& matrix_field_;                           \
   }
 
   CREATE_NORM_FUNCTOR(SquaredNorm, squared_norm);
