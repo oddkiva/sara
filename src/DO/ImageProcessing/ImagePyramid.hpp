@@ -47,9 +47,9 @@ namespace DO {
 
       Here cameraSigma() thus corresponds to \f$\sigma_\textrm{camera}\f$.
      */
-    double sigma_camera() const
+    double scale_camera() const
     {
-      return _sigma_camera;
+      return _scale_camera;
     }
 
     /*!
@@ -60,9 +60,9 @@ namespace DO {
 
       Here initSigma() corresponds to \f$\sigma_0\f$.
      */
-    double sigma_initial() const
+    double scale_initial() const
     {
-      return _sigma_initial;
+      return _scale_initial;
     }
 
     /*!
@@ -97,7 +97,7 @@ namespace DO {
       The number of scales in each octave is the integer \f$S\f$ such that 
       \f$k^S \sigma = 2 \sigma\f$, i.e., \f$ k= 2^{1/S} \f$.
      */
-    int num_scales_per_octaves() const
+    int num_scales_per_octave() const
     {
       return _num_scales_per_octave;
     }
@@ -123,11 +123,11 @@ namespace DO {
                        int num_scales_per_octave = 3+3,
                        double scale_geometric_factor = std::pow(2., 1./3.),
                        int image_padding_size = 1,
-                       double camera_sigma = 0.5,
-                       double init_sigma = 1.6)
+                       double scale_camera = 0.5,
+                       double scale_initial = 1.6)
     {
-      _sigma_camera = camera_sigma;
-      _sigma_initial = init_sigma;
+      _scale_camera = scale_camera;
+      _scale_initial = scale_initial;
       _num_scales_per_octave = num_scales_per_octave;
       _scale_geometric_factor = scale_geometric_factor;
       _image_padding_size = image_padding_size;
@@ -135,8 +135,8 @@ namespace DO {
     }
 
   private:
-    double _sigma_camera;
-    double _sigma_initial;
+    double _scale_camera;
+    double _scale_initial;
     int _num_scales_per_octave;
     double _scale_geometric_factor;
     int _image_padding_size;
@@ -149,20 +149,27 @@ namespace DO {
     - the same number of scales in each octave
     - the same geometric progression factor in the scale in each octave
    */
-  template <typename Color, int N=2>
+  template <typename Pixel, int N=2>
   class ImagePyramid
   {
   public: /* member functions */
-    // Convenient alias
-    typedef std::vector<Image<Color, N> > octave_type;
-    typedef typename PixelTraits<Color>::channel_type scalar_type;
+    //! Convenient typedefs.
+    //! @{
+    typedef Pixel pixel_type;
+    typedef Image<Pixel> image_type;
+    typedef std::vector<Image<Pixel, N> > octave_type;
+    typedef typename PixelTraits<Pixel>::channel_type scalar_type;
+    //! @}
 
-    // Constructor
-    inline ImagePyramid() {}
-    // Reset image pyramid with the following parameters.
+    //! \brief Default constructor.
+    inline ImagePyramid()
+    {
+    }
+
+    //! \brief Reset image pyramid with the following parameters.
     void reset(int num_octaves,
                int num_scales_per_octave,
-               scalar_type sigma_initial,
+               scalar_type scale_initial,
                scalar_type scale_geometric_factor)
     {
       _octaves.clear();
@@ -173,85 +180,96 @@ namespace DO {
       for (int o = 0; o < num_octaves; ++o)
         _octaves[o].resize(num_scales_per_octave);
       
-      _sigma_initial = sigma_initial;
+      _scale_initial = scale_initial;
       _scale_geometric_factor = scale_geometric_factor;
     }
 
-    // Mutable accessors
+    //! \brief Mutable octave getter.
     octave_type& operator()(int o)
     {
       return _octaves[o];
     }
 
-    Image<Color, N>& operator()(int s, int o)
+    //! \brief Mutable image getter.
+    image_type& operator()(int s, int o)
     {
       return _octaves[o][s];
     }
 
-    Color& operator()(int x, int y, int s, int o)
+    //! \brief Mutable pixel getter.
+    pixel_type& operator()(int x, int y, int s, int o)
     {
       return _octaves[o][s](x,y);
     }
 
+    //! \brief Mutable getter of the octave scaling factor.
     scalar_type& octave_scaling_factor(int o)
     {
       return _oct_scaling_factors[o];
     }
 
-    // Constant accessors.
+    //! \brief Immutable octave getter.
     const octave_type& operator()(int o) const
     {
       return _octaves[o];
     }
 
-    const Image<Color, N>& operator()(int s, int o) const
+    //! \brief Immutable image getter.
+    const image_type& operator()(int s, int o) const
     {
       return _octaves[o][s];
     }
 
-    const Color& operator()(int x, int y, int s, int o) const
+    //! \brief Immutable pixel getter.
+    const pixel_type& operator()(int x, int y, int s, int o) const
     {
       return _octaves[o][s](x,y);
     }
 
+    //! \brief Immutable getter of the octave scaling factor.
     scalar_type octave_scaling_factor(int o) const
     {
       return _oct_scaling_factors[o];
     }
 
-    // Scale and smoothing query.
+    //! \brief Immutable getter of the number of octaves.
     int num_octaves() const
     {
       return static_cast<int>(_octaves.size());
     }
 
+    //! \brief Immutable getter of the number of scales per octave.
     int num_scales_per_octave() const
     {
       return static_cast<int>(_octaves.front().size());
     }
 
+    //! \brief Immutable getter of the initial scale.
     scalar_type scale_initial() const
     {
-      return _sigma_initial;
+      return _scale_initial;
     }
 
+    //! \brief Immutable getter of the scale geometric factor.
     scalar_type scale_geometric_factor() const
     {
       return _scale_geometric_factor;
     }
 
-    scalar_type relative_scale_to_octave(int s) const
+    //! \brief Immutable getter of the relative scale w.r.t. an octave.
+    scalar_type scale_relative_to_octave(int s) const
     {
-      return pow(_scale_geometric_factor, s)*_sigma_initial;
+      return pow(_scale_geometric_factor, s)*_scale_initial;
     }
 
+    //! \brief Immutable getter of the scale relative to an octave.
     scalar_type scale(int s, int o) const
     {
-      return _oct_scaling_factors[o]*relative_scale_to_octave(s);
+      return _oct_scaling_factors[o]*scale_relative_to_octave(s);
     }
 
   protected: /* data members */
-    scalar_type _sigma_initial;
+    scalar_type _scale_initial;
     scalar_type _scale_geometric_factor;
     std::vector<octave_type> _octaves;
     std::vector<scalar_type> _oct_scaling_factors;

@@ -41,6 +41,7 @@ namespace DO {
     for ( ; src_it != src_it_end; ++src_it, ++dst_it)
       *dst_it = src_it->squaredNorm();
   }
+
   /*!
     \brief Squared norm computation
     @param[in] src scalar field.
@@ -53,6 +54,7 @@ namespace DO {
     squared_norm(sqNorm, src);
     return sqNorm;
   }
+
   /*!
     \brief Blue norm computation
     @param[in] src scalar field.
@@ -73,6 +75,7 @@ namespace DO {
     for ( ; src_it != src_it_end; ++src_it, ++dst_it)
       *dst_it = src_it->blueNorm();
   }
+
   /*!
     \brief Blue norm computation
     @param[in] src scalar field.
@@ -85,6 +88,7 @@ namespace DO {
     blue_norm(bNorm, src);
     return bNorm;
   }
+
   /*!
     \brief Stable norm computation
     @param[in] src scalar field.
@@ -105,6 +109,7 @@ namespace DO {
     for ( ; src_it != src_it_end; ++src_it, ++dst_it)
       *dst_it = src_it->stableNorm();
   }
+
   /*!
     \brief Stable norm computation
     @param[in] src scalar field.
