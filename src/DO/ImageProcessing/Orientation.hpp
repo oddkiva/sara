@@ -14,6 +14,10 @@
 #ifndef DO_IMAGEPROCESSING_ORIENTATION_HPP
 #define DO_IMAGEPROCESSING_ORIENTATION_HPP
 
+
+#include <DO/Core/Image/Image.hpp>
+
+
 namespace DO {
 
   /*!
@@ -33,7 +37,7 @@ namespace DO {
       vector 'src(x,y)'
    */
   template <typename T>
-  void orientation(Image<T>& dst, const Image<Matrix<T,2,1> >& src)
+  void orientation(const Image<Matrix<T,2,1> >& src, Image<T>& dst)
   {
     if (dst.sizes() != src.sizes())
       dst.resize(src.sizes());
@@ -47,6 +51,7 @@ namespace DO {
     for ( ; src_it != src_it_end; ++src_it, ++dst_it)
       *dst_it = std::atan2(src_it->y(), src_it->x());
   }
+
   /*!
     \brief Computes an orientation field from a 2D vector field.
     @param[in] 
@@ -62,21 +67,29 @@ namespace DO {
   Image<T> orientation(const Image<Matrix<T,2,1> >& src)
   {
     Image<T> ori;
-    orientation(ori, src);
+    orientation(src, ori);
     return ori;
   }
 
   //! \brief Helper class to use Image<T,N>::compute<Orientation>()
   template <typename T, int N> struct Orientation;
-  //! \brief Helper class to use Image<T,N>::compute<Orientation>()
+
+  //! \brief Specialized class to use Image<T,N>::compute<Orientation>()
   template <typename T> struct Orientation<T,2>
   {
     typedef typename T::Scalar Scalar;
-    typedef Image<Scalar> ReturnType;
-    Orientation(const Image<T>& src)
-      : src_(src) {}
-    Image<Scalar> operator()() const
-    { return orientation(src_); }
+    typedef Image<Scalar> return_type;
+
+    inline Orientation(const Image<T>& src)
+      : src_(src)
+    {
+    }
+
+    inline Image<Scalar> operator()() const
+    {
+      return orientation(src_);
+    }
+
     const Image<T>& src_;
   };
 
