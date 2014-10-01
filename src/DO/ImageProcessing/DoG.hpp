@@ -32,9 +32,9 @@ namespace DO {
     Scalar resizeFactor = pow(2.f, -params.first_octave_index());
     Image<T> I(enlarge(image, resizeFactor) );
     // Deduce the new camera sigma with respect to the dilated image.
-    Scalar cameraSigma = Scalar(params.sigma_camera())*resizeFactor;
+    Scalar cameraSigma = Scalar(params.scale_camera())*resizeFactor;
     // Blur the image so that its new sigma is equal to the initial sigma.
-    Scalar initSigma = Scalar(params.sigma_initial());
+    Scalar initSigma = Scalar(params.scale_initial());
     if (cameraSigma < initSigma)
     {
       Scalar sigma = sqrt(initSigma*initSigma - cameraSigma*cameraSigma);
@@ -136,7 +136,7 @@ namespace DO {
         LoG(s,o) = laplacian(gaussians(s,o));
         for (typename Image<T>::iterator it = LoG(s,o).begin();
              it != LoG(s,o).end(); ++it)
-          *it *= pow(gaussians.relative_scale_to_octave(s), 2);
+          *it *= pow(gaussians.scale_relative_to_octave(s), 2);
       }
     }
     return LoG;
