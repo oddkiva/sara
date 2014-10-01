@@ -65,6 +65,8 @@ do_test(Core_Tree
         test_tree.cpp
         "${DO_LIBRARIES}" ${TestGroupName})
 
-do_test(Core_Timer
-        test_timer.cpp
-        "${DO_LIBRARIES}" ${TestGroupName})
+if (ENABLE_TIMER)
+  do_test(Core_Timer
+          test_timer.cpp
+          "${DO_LIBRARIES}" ${TestGroupName})
+endif ()
