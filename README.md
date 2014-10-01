@@ -20,9 +20,7 @@ DO-CV is licensed with the [Mozilla Public License version
 **Continuous integration status:**
 
 [![Build
-Status](https://travis-ci.org/DO-CV/DO-CV.png?branch=master)](https://travis-ci.org/DO-CV/DO-CV)
-
-[![Coverage Status](https://img.shields.io/coveralls/DO-CV/DO-CV.svg)](https://coveralls.io/r/DO-CV/DO-CV?branch=develop)
+Status](https://travis-ci.org/DO-CV/DO-CV.png?branch=master)](https://travis-ci.org/DO-CV/DO-CV) [![Coverage Status](https://img.shields.io/coveralls/DO-CV/DO-CV.svg)](https://coveralls.io/r/DO-CV/DO-CV?branch=develop)
 
 Documentation
 -------------
