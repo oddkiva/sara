@@ -57,6 +57,10 @@ do_test(Core_Image_Operations
         test_image_operations.cpp
         "${DO_LIBRARIES}" ${TestGroupName})
 
+do_test(Core_Subimage
+        test_subimage.cpp
+        "${DO_LIBRARIES}" ${TestGroupName})
+
 do_test(Core_Tree
         test_tree.cpp
         "${DO_LIBRARIES}" ${TestGroupName})
