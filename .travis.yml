@@ -12,6 +12,10 @@ before_install:
 install:
   # Install Qt5
   - sudo apt-get install -qq qtbase5-dev
+  # Install lcov for code coverage.
+  - sudo apt-get install lcov
+  # Install coveralls-lcov for code coverage.
+  - gem install coveralls-lcov
 
 before_script:
   # Fake X server
