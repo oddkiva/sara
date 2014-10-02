@@ -19,7 +19,6 @@
 
 #include <DO/Core/Image.hpp>
 #include <DO/Core/Pixel/PixelTraits.hpp>
-#include <DO/Core/DebugUtilities.hpp>
 
 
 namespace DO {
