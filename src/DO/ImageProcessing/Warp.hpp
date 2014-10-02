@@ -26,8 +26,7 @@ namespace DO {
     typedef Matrix<S, 3, 1> Vector3;
     typedef Matrix<S, 2, 1> Vector2;
 
-    typename Image<T>::range_iterator dst_it = dst.begin_range();
-    typename Image<T>::range_iterator dst_end = dst.end_range();
+    typename Image<T>::range_iterator dst_it = dst.begin_array();
     const Matrix3& H = homographyFromPatchToImg;
     
     bool isInsideSourceImage = true;

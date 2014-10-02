@@ -251,15 +251,11 @@ namespace DO {
     inline pointer operator->() const
     { return cur_ptr_; }
 
-  public: /* equality/inequality comparisons. */
+  public: /* comparison functions. */
     //! Equality operator.
     inline bool operator==(const self_type& other) const
     { 
-      if (stop_ && other.stop_ )
-        return true;
-      if (cur_ptr_ == other.cur_ptr_)
-        return true;
-      return false;
+      return cur_ptr_ == other.cur_ptr_;
     }
 
     //! Equality operator.
@@ -268,11 +264,7 @@ namespace DO {
       const ArrayIteratorBase<IsConst2, T, N, StorageOrder>& other
     ) const
     { 
-      if (stop_ && other.stop_)
-        return true;
-      if (cur_ptr_ == other.cur_ptr_)
-        return true;
-      return false;
+      return cur_ptr_ == other.cur_ptr_;
     }
 
     //! Equality operator.
@@ -392,6 +384,12 @@ namespace DO {
     inline const vector_type& sizes() const
     {
       return sizes_;
+    }
+
+    //! Check if the iteration process is finished.
+    inline bool end() const
+    {
+      return stop_;
     }
 
   protected: /* data members */

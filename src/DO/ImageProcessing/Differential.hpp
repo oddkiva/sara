@@ -62,7 +62,7 @@ namespace DO {
     inline void operator()(gradient_type& gradient,
                            const coords_type& position) const
     {
-      const_scalar_field_iterator it(_scalar_field.begin_range());
+      const_scalar_field_iterator it(_scalar_field.begin_array());
       it += position;
       this->operator()(gradient, it);
     }
@@ -72,10 +72,9 @@ namespace DO {
       if (gradient_field.sizes() != _scalar_field.sizes())
         gradient_field.resize(_scalar_field.sizes());
 
-      const_scalar_field_iterator src_it(_scalar_field.begin_range());
-      const_scalar_field_iterator src_it_end(_scalar_field.end_range());
-      gradient_field_iterator dst_it(gradient_field.begin_range());
-      for ( ; src_it != src_it_end; ++src_it, ++dst_it)
+      const_scalar_field_iterator src_it(_scalar_field.begin_array());
+      gradient_field_iterator dst_it(gradient_field.begin_array());
+      for ( ; !src_it.end(); ++src_it, ++dst_it)
         operator()(*dst_it, src_it);
     };
 
@@ -122,7 +121,7 @@ namespace DO {
 
     inline T operator()(const coords_type& position) const
     {
-      const_array_iterator loc(_scalar_field.begin_range());
+      const_array_iterator loc(_scalar_field.begin_array());
       loc += position;
       return this->operator()(loc);
     }
@@ -132,11 +131,10 @@ namespace DO {
       if (laplacian_field.sizes() != _scalar_field.sizes())
         laplacian_field.resize(_scalar_field.sizes());
 
-      const_array_iterator src_it(_scalar_field.begin_range());
-      const_array_iterator src_it_end(_scalar_field.end_range());
-      array_iterator dst_it(laplacian_field.begin_range());
+      const_array_iterator src_it(_scalar_field.begin_array());
+      array_iterator dst_it(laplacian_field.begin_array());
 
-      for ( ; src_it != src_it_end; ++src_it, ++dst_it)
+      for ( ; !src_it.end(); ++src_it, ++dst_it)
         *dst_it = this->operator()(src_it);
     }
 
@@ -203,7 +201,7 @@ namespace DO {
     inline void operator()(hessian_matrix_type& H,
                            const coords_type& position) const
     {
-      const_scalar_iterator loc(_scalar_field.begin_range());
+      const_scalar_iterator loc(_scalar_field.begin_array());
       loc += position;
       operator()(H, loc);
     }
@@ -213,10 +211,9 @@ namespace DO {
       if (hessian_field.sizes() != _scalar_field.sizes())
         hessian_field.resize(_scalar_field.sizes());
 
-      const_scalar_iterator src_loc(_scalar_field.begin_range());
-      const_scalar_iterator src_end(_scalar_field.end_range());
-      hessian_field_iterator dst_loc(hessian_field.begin_range());
-      for ( ; src_loc != src_end; ++src_loc, ++dst_loc)
+      const_scalar_iterator src_loc(_scalar_field.begin_array());
+      hessian_field_iterator dst_loc(hessian_field.begin_array());
+      for ( ; !src_loc.end(); ++src_loc, ++dst_loc)
         operator()(*dst_loc, src_loc);
     };
 

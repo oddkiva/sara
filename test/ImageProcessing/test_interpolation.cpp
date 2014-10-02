@@ -27,16 +27,13 @@ TEST(TestInterpolation, test_interpolation)
   f.matrix() <<
     0, 1,
     0, 1;
-  double eps = 1e-8;
   double value;
 
   for (int x = 0; x < 2; ++x)
   {
     for (int y = 0; y < 2; ++y)
     {
-      Vector2d p;
-      p.x() = x == 0 ? 0 : 1-eps;
-      p.y() = y == 0 ? 0 : 1-eps;
+      Vector2d p = Vector2i(x, y).cast<double>();
       value = interpolate(f, p);
       ASSERT_NEAR(f(x, y), value, 1e-7);
     }
@@ -54,7 +51,7 @@ TEST(TestInterpolation, test_interpolation)
   value = interpolate(f, Vector2d(0.5, 0.8));
   ASSERT_NEAR(0.5, value, 1e-7);
 
-  value = interpolate(f, Vector2d(0.5, 1.-eps));
+  value = interpolate(f, Vector2d(0.5, 1.));
   ASSERT_NEAR(0.5, value, 1e-7);
 
   f.matrix() <<
@@ -72,8 +69,21 @@ TEST(TestInterpolation, test_interpolation)
   value = interpolate(f, Vector2d(0.8, 0.5));
   ASSERT_NEAR(0.5, value, 1e-7);
 
-  value = interpolate(f, Vector2d(1.-eps, 0.5));
+  value = interpolate(f, Vector2d(1, 0.5));
   ASSERT_NEAR(0.5, value, 1e-7);
+}
+
+
+TEST(TestInterpolation, test_interpolation_2)
+{
+  Image<float> f(2, 2);
+  f.matrix() <<
+    0, 1,
+    1, 2;
+  double value;
+
+  value = interpolate(f, Vector2d(1, 1));
+  ASSERT_NEAR(2, value, 1e-7);
 }
 
 
