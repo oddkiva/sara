@@ -130,11 +130,10 @@ namespace DO {
     start = Vector::Zero();
     end = inout_signal.sizes();
     end[axis] = 1;
-    SubarrayIterator it = inout_signal.begin_subrange(start, end);
-    SubarrayIterator it_end = inout_signal.end_subrange();
+    SubarrayIterator it = inout_signal.begin_subarray(start, end);
 
     // In 2D, we scan the beginning of each row/columns.
-    for ( ; it != it_end; ++it)
+    for ( ; !it.end(); ++it)
     {
       T *ptr = &(*it);
 
