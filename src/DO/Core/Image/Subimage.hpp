@@ -29,11 +29,12 @@ namespace DO {
   {
     Image<T, N> dst(end_coords - begin_coords);
 
-    typedef typename Image<T, N>::const_subarray_iterator const_subarray_iterator;
-    const_subarray_iterator src_it = src.begin_subrange(begin_coords, end_coords);
+    typedef typename Image<T, N>::const_subarray_iterator
+      const_subarray_iterator;
+    const_subarray_iterator src_it(src.begin_subarray(begin_coords, end_coords));
 
-    for (typename Image<T, N>::iterator dst_it = dst.begin();
-         dst_it != dst.end(); ++dst_it, ++src_it)
+    typename Image<T, N>::iterator dst_it = dst.begin();
+    for ( ; dst_it != dst.end(); ++dst_it, ++src_it)
     {
       // If a and b are coordinates out bounds.
       if (src_it.position().minCoeff() < 0 ||

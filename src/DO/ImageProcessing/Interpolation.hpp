@@ -19,6 +19,7 @@
 
 #include <DO/Core/Image.hpp>
 #include <DO/Core/Pixel/PixelTraits.hpp>
+#include <DO/Core/DebugUtilities.hpp>
 
 
 namespace DO {
@@ -36,41 +37,57 @@ namespace DO {
   typename PixelTraits<T>::template Cast<double>::pixel_type
   interpolate(const Image<T, N>& image, const Matrix<double, N, 1>& pos)
   {
+    // Typedefs.
     typedef typename PixelTraits<T>::template Cast<double>::pixel_type
       pixel_type;
     typedef typename Image<T, N>::const_subarray_iterator
       const_subarray_iterator;
 
-    Matrix<double, N, 1> a, b;
-    a.setZero();
-    b = image.sizes().template cast<double>() - Matrix<double, N, 1>::Ones();
-
-    if ((pos - a).minCoeff() < 0 || (b - pos).minCoeff() <= 0)
-      throw std::range_error("Cannot interpolate: position is out of range");
-
+    // Find the smallest integral bounding box that encloses 'pos'.
     Matrix<int, N, 1> start, end;
     Matrix<double, N, 1> frac;
     for (int i = 0; i < N; ++i)
     {
+      if (pos[i] < 0 || pos[i] >= image.size(i))
+        throw std::range_error("Cannot interpolate: position is out of range");
+
       double ith_int_part;
       frac[i] = std::modf(pos[i], &ith_int_part);
       start[i] = static_cast<int>(ith_int_part);
     }
     end.array() = start.array() + 2;
 
-    pixel_type value(color_min_value<pixel_type>());
-    const_subarray_iterator it(image.begin_subrange(start, end));
-    const_subarray_iterator it_end(image.end_subrange());
-    for ( ; it != it_end; ++it)
+    // Compute the weighted sum.
+    const_subarray_iterator it(image.begin_subarray(start, end));
+
+    using namespace std;
+    printStage("Interpolation");
+    CHECK(pos.transpose());
+    cout << endl;
+
+    pixel_type interpolated_value(color_min_value<pixel_type>());
+    Matrix<int, N, 1> offset;
+    for ( ; !it.end(); ++it)
     {
       double weight = 1.;
       for (int i = 0; i < N; ++i)
+      {
         weight *= (it.position()[i] == start[i]) ? (1.-frac[i]) : frac[i];
+        offset[i] = it.position()[i] < image.size(i) ? 0 : -1;
+      }
+      cout << endl;
+
+      CHECK(it.position().transpose());
+      CHECK(offset.transpose());
+      CHECK(it(offset));
+
       pixel_type color;
-      convert_channel(*it, color);
-      value += weight*color;
+      convert_channel(it(offset), color);
+      interpolated_value += weight*color;
     }
-    return value;
+    cout << endl;
+    CHECK(interpolated_value);
+    return interpolated_value;
   }
 
 }
