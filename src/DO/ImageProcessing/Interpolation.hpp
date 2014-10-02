@@ -59,12 +59,6 @@ namespace DO {
 
     // Compute the weighted sum.
     const_subarray_iterator it(image.begin_subarray(start, end));
-
-    using namespace std;
-    printStage("Interpolation");
-    CHECK(pos.transpose());
-    cout << endl;
-
     pixel_type interpolated_value(color_min_value<pixel_type>());
     Matrix<int, N, 1> offset;
     for ( ; !it.end(); ++it)
@@ -75,18 +69,11 @@ namespace DO {
         weight *= (it.position()[i] == start[i]) ? (1.-frac[i]) : frac[i];
         offset[i] = it.position()[i] < image.size(i) ? 0 : -1;
       }
-      cout << endl;
-
-      CHECK(it.position().transpose());
-      CHECK(offset.transpose());
-      CHECK(it(offset));
 
       pixel_type color;
       convert_channel(it(offset), color);
       interpolated_value += weight*color;
     }
-    cout << endl;
-    CHECK(interpolated_value);
     return interpolated_value;
   }
 
