@@ -300,7 +300,7 @@ namespace DO {
     }
 
     //! Mutable begin subrange iterator.
-    inline subarray_iterator begin_subrange(const vector_type& start,
+    inline subarray_iterator begin_subarray(const vector_type& start,
                                             const vector_type& end)
     {
       return subarray_iterator(false, begin_, start, end, strides_, sizes_);
@@ -314,7 +314,7 @@ namespace DO {
     }
 
     //! Immutable begin subrange iterator.
-    inline const_subarray_iterator begin_subrange(const vector_type& start,
+    inline const_subarray_iterator begin_subarray(const vector_type& start,
                                                   const vector_type& end) const
     {
       return const_subarray_iterator(
