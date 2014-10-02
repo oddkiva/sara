@@ -294,7 +294,7 @@ namespace DO {
     }
 
     //! Mutable begin range iterator.
-    inline array_iterator begin_range()
+    inline array_iterator begin_array()
     {
       return array_iterator(false, begin_, vector_type::Zero(), sizes_, strides_);
     }
@@ -307,7 +307,7 @@ namespace DO {
     }
 
     //! Immutable begin range iterator.
-    inline const_array_iterator begin_range() const
+    inline const_array_iterator begin_array() const
     {
       return const_array_iterator(
         false, begin_, vector_type::Zero(), sizes_, strides_);
