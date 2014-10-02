@@ -387,7 +387,7 @@ namespace DO {
     }
 
     //! Check if the iteration process is finished.
-    inline bool stop() const
+    inline bool end() const
     {
       return stop_;
     }
