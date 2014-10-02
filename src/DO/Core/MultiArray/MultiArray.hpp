@@ -299,24 +299,11 @@ namespace DO {
       return array_iterator(false, begin_, vector_type::Zero(), sizes_, strides_);
     }
 
-    //! Mutable end range iterator.
-    inline array_iterator end_range()
-    {
-      return array_iterator(true, end_, sizes_, sizes_, strides_);
-    }
-
     //! Mutable begin subrange iterator.
     inline subarray_iterator begin_subrange(const vector_type& start,
                                             const vector_type& end)
     {
       return subarray_iterator(false, begin_, start, end, strides_, sizes_);
-    }
-
-    //! Mutable begin subrange iterator.
-    inline subarray_iterator end_subrange()
-    {
-      return subarray_iterator(
-        true, begin_, sizes_, sizes_, strides_, sizes_);
     }
 
     //! Immutable begin range iterator.
@@ -326,25 +313,12 @@ namespace DO {
         false, begin_, vector_type::Zero(), sizes_, strides_);
     }
 
-    //! Immutable end range iterator.
-    inline const_array_iterator end_range() const
-    {
-      return const_array_iterator(true, end_, sizes_, sizes_, strides_);
-    }
-
     //! Immutable begin subrange iterator.
     inline const_subarray_iterator begin_subrange(const vector_type& start,
                                                   const vector_type& end) const
     {
       return const_subarray_iterator(
         false, begin_, start, end, strides_, sizes_);
-    }
-
-    //! Immutable end subrange iterator.
-    inline const_subarray_iterator end_subrange() const
-    {
-        return const_subarray_iterator(
-          true, begin_, sizes_, sizes_, strides_, sizes_);
     }
 
     //! Resizing method.
