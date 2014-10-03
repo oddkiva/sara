@@ -170,7 +170,10 @@ namespace DO {
       position = dst_it.position()
         .template cast<double>()
         .cwiseProduct(scale_factor);
-      convert_channel(interpolate(image, position), *dst_it);
+      
+      DoublePixel double_pixel_value(interpolate(image, position));
+      *dst_it = PixelTraits<DoublePixel>::template Cast<ChannelType>::apply(
+        double_pixel_value);
     }
     return dst;
   }
