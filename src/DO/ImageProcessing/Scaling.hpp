@@ -103,9 +103,9 @@ namespace DO {
         .cast<double>()
         .cwiseProduct(scale_factors) );
 
-      DoublePixel double_pixel_value;
-      double_pixel_value = interpolate(double_src, position);
-      convert_channel(double_pixel_value, *dst_it);
+      DoublePixel double_pixel_value(interpolate(double_src, position));
+      *dst_it = PixelTraits<DoublePixel>::Cast<ChannelType>::apply(
+        double_pixel_value);
     }
 
     return dst;

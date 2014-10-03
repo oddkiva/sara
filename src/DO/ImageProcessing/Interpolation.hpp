@@ -38,11 +38,11 @@ namespace DO {
   {
     // Typedefs.
     typedef typename PixelTraits<T>::template Cast<double>::pixel_type
-      pixel_type;
+      DoublePixel;
     typedef typename Image<T, N>::const_subarray_iterator
       const_subarray_iterator;
 
-    // Find the smallest integral bounding box that encloses 'pos'.
+    // Find the smallest integral bounding box that encloses the position.
     Matrix<int, N, 1> start, end;
     Matrix<double, N, 1> frac;
     for (int i = 0; i < N; ++i)
@@ -58,7 +58,7 @@ namespace DO {
 
     // Compute the weighted sum.
     const_subarray_iterator it(image.begin_subarray(start, end));
-    pixel_type interpolated_value(color_min_value<pixel_type>());
+    DoublePixel interpolated_value(PixelTraits<DoublePixel>::min());
     Matrix<int, N, 1> offset;
     for ( ; !it.end(); ++it)
     {
@@ -69,9 +69,11 @@ namespace DO {
         offset[i] = it.position()[i] < image.size(i) ? 0 : -1;
       }
 
-      pixel_type color;
-      convert_channel(it(offset), color);
-      interpolated_value += weight*color;
+      const T& src_color = it(offset);
+      DoublePixel dst_color;
+
+      dst_color = PixelTraits<T>::Cast<double>::apply(it(offset));
+      interpolated_value += weight*dst_color;
     }
     return interpolated_value;
   }
