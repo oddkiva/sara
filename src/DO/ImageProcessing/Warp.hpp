@@ -15,45 +15,49 @@
 #define DO_IMAGEPROCESSING_WARP_HPP
 
 
+#include <DO/ImageProcessing/Interpolation.hpp>
+
+
 namespace DO {
   
   template <typename T, typename S>
-  bool warp(Image<T>& dst, const Image<T>& src,
-            const Matrix<S, 3, 3>& homographyFromPatchToImg,
-            const T& defaultFillColor = PixelTraits<T>::min(),
-            bool stopIfOutOfRange = false)
+  void warp(const Image<T>& src, Image<T>& dst,
+            const Matrix<S, 3, 3>& homography,
+            const T& default_fill_color = PixelTraits<T>::min())
   {
+    typedef typename PixelTraits<T>::template Cast<double>::pixel_type
+      DoublePixel;
+    typedef typename PixelTraits<T>::channel_type ChannelType;
     typedef Matrix<S, 3, 3> Matrix3;
     typedef Matrix<S, 3, 1> Vector3;
     typedef Matrix<S, 2, 1> Vector2;
 
-    typename Image<T>::range_iterator dst_it = dst.begin_array();
-    const Matrix3& H = homographyFromPatchToImg;
+    const Matrix3& H = homography;
     
-    bool isInsideSourceImage = true;
-
-    for ( ; !dst_it.end(); ++dst_it)
+    typename Image<T>::array_iterator it = dst.begin_array();
+    for ( ; !it.end(); ++it)
     {
-      // Get the corresponding coordinates in the source image.
+      // Get the corresponding coordinates in the source src.
       Vector3 H_p;
-      H_p = H * (Vector3() << dst_it.position().template cast<S>(), S(1)).finished();
+      H_p = H * (Vector3() << it.position().template cast<S>(), 1).finished();
       H_p /= H_p(2);
-      // Check if the position is not in the image domain [0,w[ x [0,h[.
-      bool posNotInImageDomain =
-        H_p.x() < S(0) || H_p.x() >= S(src.width()-1) ||
-        H_p.y() < S(0) || H_p.y() >= S(src.height()-1);
-      if (posNotInImageDomain && stopIfOutOfRange)
-        return false;
-      if (posNotInImageDomain && isInsideSourceImage)
-        isInsideSourceImage = false;
-      // Fill with either the default value or the interpolated value.
-      if (posNotInImageDomain)
-        *dst_it = defaultFillColor;
-      else
-        convertColor(*dst_it, interpolate(src, H_p.template head<2>().eval()));
-    }
 
-    return isInsideSourceImage;
+      // Check if the position is not in the src domain [0,w[ x [0,h[.
+      bool position_is_in_src_domain =
+        H_p.x() >= 0 || H_p.x() < S(src.width()) ||
+        H_p.y() >= 0 || H_p.y() < S(src.height());
+
+      // Fill with either the default value or the interpolated value.
+      if (position_is_in_src_domain)
+      {
+        Vector2 H_p_2(H_p.template head<2>());
+        DoublePixel pixel_value( interpolate(src, H_p_2) );
+        *it = PixelTraits<DoublePixel>::template Cast<ChannelType>::apply(
+          pixel_value);
+      }
+      else
+        *it = default_fill_color;
+    }
   }
 
 }
