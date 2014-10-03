@@ -165,7 +165,7 @@ void test_channel_conversion_between_integer_types()
   for (int i = 0; i < 2; ++i)
   {
     DstInt actual_dst_value;
-    convert_channel(test_src_values[i], actual_dst_value);
+    convert_channel(SrcInt(test_src_values[i]), actual_dst_value);
     EXPECT_EQ(expected_dst_values[i], actual_dst_value);
   }
 }
@@ -204,7 +204,7 @@ TEST(TestConvertChannel, test_convert_channel_between_integers)
 
   test_channel_conversion_between_integer_types<int64_t, int8_t>();
   test_channel_conversion_between_integer_types<int64_t, int16_t>();
-  test_channel_conversion_between_integer_types<int64_t, int64_t>();
+  test_channel_conversion_between_integer_types<int64_t, int32_t>();
 
   test_channel_conversion_between_integer_types<int64_t, uint8_t>();
   test_channel_conversion_between_integer_types<int64_t, uint16_t>();
