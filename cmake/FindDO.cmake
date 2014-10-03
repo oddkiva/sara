@@ -44,12 +44,14 @@ if (NOT DO_FOUND)
   # List the available component libraries in DO++
   # Foundational libraries
   do_append_components(DO_COMPONENTS Core)
+  do_append_components(DO_COMPONENTS ImageIO)
+  #do_append_components(DO_COMPONENTS ImageDrawing)
   do_append_components(DO_COMPONENTS Graphics)
 
   # TODO: Don't re-enable this components as long there are not properly
   # tested.
   #do_append_components(DO_COMPONENTS KDTree)
-  #do_append_components(DO_COMPONENTS ImageDrawing)
+
   # Image processing
   do_append_components(DO_COMPONENTS ImageProcessing)
   # Geometry
