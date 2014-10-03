@@ -302,7 +302,7 @@ namespace DO {
   Image<T, N> laplacian(const Image<T, N>& src)
   {
     Image<T, N> l;
-    laplacian(l, src);
+    laplacian(src, l);
     return l;
   }
 
