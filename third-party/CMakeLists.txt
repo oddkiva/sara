@@ -6,8 +6,7 @@ set(THIRDPARTY_FOLDER_NAME "DO Third-Party")
 # Disable any specific compiler flags for all third-party software.
 set (CMAKE_C_FLAGS "")
 set (CMAKE_CXX_FLAGS "")
-set (CMAKE_C_FLAGS_DEBUG "")
-set (CMAKE_CXX_FLAGS_DEBUG "")
+
 
 if (DO_BUILD_UNIT_TESTS)
   message(STATUS "  - Google Test")
