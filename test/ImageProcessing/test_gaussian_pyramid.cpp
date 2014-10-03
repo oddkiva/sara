@@ -1,86 +1,51 @@
-#include <gtest/gtest.h>
-#include <DO/ImageProcessing.hpp>
-#include <DO/Graphics.hpp>
+// ========================================================================== //
+// This file is part of DO++, a basic set of libraries in C++ for computer 
+// vision.
+//
+// Copyright (C) 2014 David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public 
+// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
 #include <exception>
+
+#include <gtest/gtest.h>
+
+#include <DO/ImageProcessing.hpp>
+
 
 using namespace DO;
 using namespace std;
 
+
 template <class ChannelType>
-class GaussPyrTest : public testing::Test
-{
-protected:
-  typedef testing::Test Base;
-  GaussPyrTest() : Base() {}
-};
+class TestGaussianPyramid : public testing::Test {};
 
-// For types Rgb32f, Rgb64f, the test compiles with MSVC10 but not with gcc.
-typedef testing::Types<float/*, double, Rgb32f, Rgb64f*/> ChannelTypes;
+typedef testing::Types<float, double, Rgb32f, Rgb64f> ChannelTypes;
 
-TYPED_TEST_CASE_P(GaussPyrTest);
+TYPED_TEST_CASE_P(TestGaussianPyramid);
 
-template <typename T>
-void displayImagePyramid(const ImagePyramid<T>& pyramid, bool rescale = false)
-{
-  for (int o = 0; o < pyramid.numOctaves(); ++o)
-  {
-    cout << "Octave " << o << endl;
-    for (int s = 0; s != int(pyramid(o).size()); ++s)
-    {
-      cout << "image " << s << endl;
-      cout << pyramid.octaveScalingFactor(o) << endl;
-      display(rescale ? colorRescale(pyramid(s,o)) : pyramid(s,o), 
-        0, 0, pyramid.octaveScalingFactor(o));
-      getKey();
-    }
-  }
-}
-
-static HighResTimer timer;
-inline void tic() { timer.restart(); }
-inline void toc(string task)
-{
-  double elapsed = timer.elapsedMs();
-  cout << task << " time = " << elapsed << " ms" << endl;
-}
-
-TYPED_TEST_P(GaussPyrTest, gaussianPyramidTest)
+TYPED_TEST_P(TestGaussianPyramid, test_gaussian_pyramid)
 {
   typedef TypeParam T;
-  Image<T> I;
-  ASSERT_TRUE(load(I, srcPath("sunflowerField.jpg")));
+  Image<T> I(16, 16);
+  I.matrix().fill(PixelTraits<T>::max());
 
-  openWindow(I.width(), I.height());
-  tic();
-  ImagePyramid<T> G(gaussianPyramid(I, ImagePyramidParams(-1)));
-  toc("Gaussian pyramid");
-  displayImagePyramid(G);
+  ImagePyramid<T> G(gaussian_pyramid(I, ImagePyramidParams(-1)));
+  
+  ImagePyramid<T> D(difference_of_gaussians_pyramid(G));
 
-  tic();
-  ImagePyramid<T> D(DoGPyramid(G));
-  toc("DoG pyramid");
-  displayImagePyramid(D, true);
-
-  tic();
-  ImagePyramid<T> L(LoGPyramid(G));
-  toc("LoG pyramid");
-  displayImagePyramid(L, true);
-
-  closeWindow();
+  ImagePyramid<T> L(laplacian_pyramid(G));
 }
 
-REGISTER_TYPED_TEST_CASE_P(GaussPyrTest, gaussianPyramidTest);
+REGISTER_TYPED_TEST_CASE_P(TestGaussianPyramid, test_gaussian_pyramid);
 INSTANTIATE_TYPED_TEST_CASE_P(DO_ImageProcessing_Pyramid_Test,
-                              GaussPyrTest, ChannelTypes);
+                              TestGaussianPyramid, ChannelTypes);
 
-//#undef main
-
-int main(/*int argc, char** argv*/)
+int main(int argc, char** argv)
 {
-  int argc = 0;
-  char **argv = 0;
-  testing::InitGoogleTest(&argc, argv); 
+  testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS(); 
-
-  return 0;
 }
