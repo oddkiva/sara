@@ -17,6 +17,7 @@
 
 #include <DO/Core/Image/Image.hpp>
 #include <DO/Core/Image/Operations.hpp>
+#include <DO/Core/Pixel/PixelTraits.hpp>
 
 
 namespace DO {
@@ -39,7 +40,7 @@ namespace DO {
       // If a and b are coordinates out bounds.
       if (src_it.position().minCoeff() < 0 ||
           (src_it.position() - src.sizes()).minCoeff() >= 0)
-        *dst_it = color_min_value<T>();
+        *dst_it = PixelTraits<T>::min();
       else
         *dst_it = *src_it;
     }
