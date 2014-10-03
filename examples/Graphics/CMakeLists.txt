@@ -4,18 +4,12 @@ if(POLICY CMP0020)
   cmake_policy(SET CMP0020 NEW)
 endif()
 
-project(DO_Graphics_example)
+project(DO_Graphics_Examples)
 
 message(STATUS "  - DO_Graphics_Examples")
 
 find_package(DO COMPONENTS Core Graphics REQUIRED)
 include(${DO_USE_FILE})
-
-# TODO: make precompiled support easier. This is not maintainable.
-# This should be along these lines:
-#set(SRCS example.cpp GraphicsExample.hpp)
-#do_add_msvc_precompiled_header("GraphicsExample.hpp"
-#                               SRCS "GraphicsExample_PCH")
 
 macro (do_add_example example)
   add_executable(${example} ${example}.cpp)
