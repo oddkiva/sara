@@ -11,8 +11,13 @@
 
 //! @file
 
-#ifndef DO_IMAGEPROCESSING_DOG_HPP
-#define DO_IMAGEPROCESSING_DOG_HPP
+#ifndef DO_IMAGEPROCESSING_GAUSSIANPYRAMID_HPP
+#define DO_IMAGEPROCESSING_GAUSSIANPYRAMID_HPP
+
+
+#include <DO/ImageProcessing/ImagePyramid.hpp>
+#include <DO/ImageProcessing/LinearFiltering.hpp>
+
 
 namespace DO {
 
@@ -206,4 +211,5 @@ namespace DO {
 
 } /* namespace DO */
 
-#endif /* DO_IMAGEPROCESSING_DOG_HPP */
+
+#endif /* DO_IMAGEPROCESSING_GAUSSIANPYRAMID_HPP */
