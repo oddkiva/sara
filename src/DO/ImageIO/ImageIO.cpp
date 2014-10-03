@@ -11,12 +11,11 @@
 
 #if defined(_WIN32) || defined(_WIN32_WCE)
 # define NOMINMAX
-// This is the best I found to solve the include problem with libjpeg...
 # include <windows.h>
 #endif
-#include <DO/ImageDrawing/ImageIO.hpp>
+#include <DO/ImageIO/ImageIO.hpp>
 #include <DO/Core/Image.hpp>
-#include <DO/ImageDrawing/ImageIOObjects.hpp>
+#include <DO/ImageIO/ImageIOObjects.hpp>
 
 using namespace std;
 
@@ -69,10 +68,10 @@ namespace DO {
       return true;
     if ( isPngFileExt(ext) &&
          PngFileReader(filePath)(data, w, h, d) )
-        return true;
+      return true;
     if ( isTiffFileExt(ext) &&
          TiffFileReader(filePath)(data, w, h, d) )
-        return true;
+      return true;
 
     cerr << "Image format: " << ext << " either currently unsupported or invalid" << endl;
     return false;
@@ -195,6 +194,15 @@ namespace DO {
       flip(image, int(info.Orientation));
 
     return true;
+  }
+
+  bool saveJpeg(const Image<Rgb8>& image, const std::string& filePath,
+                int quality)
+  {
+    JpegFileWriter jpegWriter(
+      reinterpret_cast<const unsigned char *>(image.data()),
+      image.width(), image.height(), 3);
+    return jpegWriter(filePath, quality);
   }
 
 } /* namespace DO */

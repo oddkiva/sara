@@ -201,15 +201,39 @@ namespace DO {
 
     png_init_io(png_ptr, file_);
     png_set_sig_bytes(png_ptr, 8);
-  
+
     png_read_info(png_ptr, info_ptr);
 
+    // Get width, height, bit-depth and color type.
     png_uint_32 pngWidth, pngHeight;
-    int bitDepth, colorType, interlaceType;
-    png_get_IHDR(png_ptr, info_ptr, &pngWidth, &pngHeight, &bitDepth, &colorType,
-                 &interlaceType, (int *)NULL, (int *)NULL);
+    int bitDepth;
+    int colorType;
+    png_get_IHDR(png_ptr, info_ptr, &pngWidth, &pngHeight, &bitDepth,
+                 &colorType, NULL, NULL, NULL);
 
+    // Expand images of all color-type to 8-bit.
+    if (colorType == PNG_COLOR_TYPE_PALETTE)
+      png_set_expand(png_ptr);
+    if (bitDepth < 8)
+      png_set_expand(png_ptr);
+    if (png_get_valid(png_ptr, info_ptr, PNG_INFO_tRNS))
+      png_set_expand(png_ptr);
+    if (bitDepth == 16) // convert 16-bit to 8-bit on the fly
+      png_set_strip_16(png_ptr);
+
+    // If required, set the gamma conversion.
+    double gamma;
+    if (png_get_gAMA(png_ptr, info_ptr, &gamma))
+      png_set_gamma(png_ptr, 2.2, gamma);
+
+    // The transformations are now registered, so update info_ptr data.
     png_read_update_info(png_ptr, info_ptr);
+
+    // Update width, height and new bit-depth and color type.
+    png_get_IHDR(png_ptr, info_ptr, &pngWidth, &pngHeight, &bitDepth,
+                 &colorType, NULL, NULL, NULL);
+
+    // Now we can safely get the data correctly.
     png_uint_32 rowbytes = (png_uint_32) png_get_rowbytes(png_ptr, info_ptr);
     png_byte channels = png_get_channels(png_ptr, info_ptr);
 
@@ -217,7 +241,7 @@ namespace DO {
     height = static_cast<int>(pngHeight);
     depth = static_cast<int>(channels);
     data = new unsigned char[width*height*depth];
-
+    
     vector<png_bytep> row_pointers(width*height);
     for (int y = 0; y < height; ++y)
       row_pointers[y] = static_cast<png_byte *>(data) + rowbytes*y;

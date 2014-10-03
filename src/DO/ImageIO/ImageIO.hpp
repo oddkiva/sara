@@ -96,4 +96,7 @@ namespace DO {
     return true;
   }
 
+  bool saveJpeg(const Image<Rgb8>& image, const std::string& filePath,
+                int quality = 85);
+
 } /* namespace DO */
