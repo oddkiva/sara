@@ -105,13 +105,13 @@ TEST(TestScaling, test_reduce)
   Image<float> dst;
 
   dst = reduce(src, Vector2i(2, 2));
-  EXPECT_MATRIX_EQ(true_dst.matrix(), dst.matrix());
+  EXPECT_LE((true_dst.matrix()-dst.matrix()).lpNorm<Infinity>(), 1);
 
   dst = reduce(src, 2, 2);
-  EXPECT_MATRIX_EQ(true_dst.matrix(), dst.matrix());
+  EXPECT_LE((true_dst.matrix()-dst.matrix()).lpNorm<Infinity>(), 1);
 
   dst = reduce(src, 2);
-  EXPECT_MATRIX_EQ(true_dst.matrix(), dst.matrix());
+  EXPECT_LE((true_dst.matrix()-dst.matrix()).lpNorm<Infinity>(), 1);
 }
 
 
