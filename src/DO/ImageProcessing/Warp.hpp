@@ -37,7 +37,7 @@ namespace DO {
     typename Image<T>::array_iterator it = dst.begin_array();
     for ( ; !it.end(); ++it)
     {
-      // Get the corresponding coordinates in the source src.
+      // Get the corresponding coordinates in the source image.
       Vector3 H_p;
       H_p = H * (Vector3() << it.position().template cast<S>(), 1).finished();
       H_p /= H_p(2);
