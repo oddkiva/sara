@@ -21,7 +21,7 @@ using namespace std;
 using namespace DO;
 
 
-TEST(TestInterpolation, test_interpolation)
+TEST(TestInterpolation, test_interpolation_with_float_1)
 {
   Image<float> f(2, 2);
   f.matrix() <<
@@ -74,7 +74,7 @@ TEST(TestInterpolation, test_interpolation)
 }
 
 
-TEST(TestInterpolation, test_interpolation_2)
+TEST(TestInterpolation, test_interpolation_with_float_2)
 {
   Image<float> f(2, 2);
   f.matrix() <<
@@ -84,6 +84,47 @@ TEST(TestInterpolation, test_interpolation_2)
 
   value = interpolate(f, Vector2d(1, 1));
   ASSERT_NEAR(2, value, 1e-7);
+}
+
+
+TEST(TestInterpolation, test_interpolation_with_vector2d)
+{
+  Image<Vector2f> f(2, 2);
+  f.matrix() <<
+    Vector2f::Zero(), Vector2f::Ones(),
+    Vector2f::Zero(), Vector2f::Ones();
+  Vector2f value;
+
+  for (int x = 0; x < 2; ++x)
+  {
+    for (int y = 0; y < 2; ++y)
+    {
+      Vector2d p = Vector2i(x, y).cast<double>();
+      value = interpolate(f, p);
+      ASSERT_MATRIX_NEAR(f(x, y), value, 1e-7);
+    }
+  }
+
+  value = interpolate(f, Vector2d(0.5, 0.0));
+  ASSERT_MATRIX_NEAR(Vector2f(0.5, 0.5), value, 1e-7);
+
+  value = interpolate(f, Vector2d(0.5, 0.2));
+  ASSERT_MATRIX_NEAR(Vector2f(0.5, 0.5), value, 1e-7);
+
+  value = interpolate(f, Vector2d(0.5, 0.1));
+  ASSERT_MATRIX_NEAR(Vector2f(0.5, 0.5), value, 1e-7);
+
+  value = interpolate(f, Vector2d(0.5, 0.8));
+  ASSERT_MATRIX_NEAR(Vector2f(0.5, 0.5), value, 1e-7);
+
+  value = interpolate(f, Vector2d(0.5, 1.));
+  ASSERT_MATRIX_NEAR(Vector2f(0.5, 0.5), value, 1e-7);
+
+  f.matrix() <<
+    Vector2f::Zero(), Vector2f::Zero(),
+    Vector2f::Ones(), Vector2f::Ones();
+  value = interpolate(f, Vector2d(0.2, 0.5));
+  ASSERT_MATRIX_NEAR(Vector2f(0.5, 0.5), value, 1e-7);
 }
 
 
