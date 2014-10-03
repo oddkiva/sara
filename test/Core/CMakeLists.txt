@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.6)
 
 project(DO_Core_tests)
 
-message(STATUS "  - DO_Core_tests")
+message(STATUS "  - DO_Core_Tests")
 
 find_package(DO COMPONENTS Core REQUIRED)
 include(${DO_USE_FILE})

@@ -4,7 +4,7 @@ if(POLICY CMP0020)
   cmake_policy(SET CMP0020 NEW)
 endif()
 
-project(DO_Graphics_example)
+project(DO_Graphics_Examples)
 
 message(STATUS "  - DO_Graphics_Examples")
 
