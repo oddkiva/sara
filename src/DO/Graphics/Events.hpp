@@ -12,7 +12,9 @@
 #ifndef DO_GRAPHICS_EVENTS_HPP
 #define DO_GRAPHICS_EVENTS_HPP
 
+
 #include <DO/Core/EigenExtension.hpp>
+
 
 namespace DO {
 
@@ -24,59 +26,65 @@ namespace DO {
     @{
    */
 
-  enum EventType { 
+  //! \brief I/O event types.
+  enum EventType
+  {
     NO_EVENT,
-    KEY_PRESSED /*= QEvent::KeyPress*/,
-    KEY_RELEASED /*= QEvent::KeyRelease*/,
-    MOUSE_PRESSED /*= QEvent::MouseButtonPress*/,
-    MOUSE_RELEASED /*= QEvent::MouseButtonRelease*/,
-    MOUSE_PRESSED_AND_MOVED /*= QEvent::MouseMove*/
+    KEY_PRESSED,            /*! QEvent::KeyPress */
+    KEY_RELEASED,           /*! QEvent::KeyRelease */
+    MOUSE_PRESSED,          /*! QEvent::MouseButtonPress */
+    MOUSE_RELEASED,         /*! QEvent::MouseButtonRelease */
+    MOUSE_PRESSED_AND_MOVED /*! QEvent::MouseMove */
   };
 
-  //! Values are copy-pasted from Qt's documentation.
-  enum KeyModifierType {
-    KEY_NOMODIFIER = 0x00000000,
-    KEY_SHIFT = 0x02000000,
-    KEY_CTRL = 0x04000000,
-    KEY_ALT = 0x08000000,
-    KEY_META = 0x10000000
+  //! Key modifiers values (copy-pasted from Qt's documentation).
+  enum KeyModifierType
+  {
+    KEY_NOMODIFIER  = 0x00000000,
+    KEY_SHIFT       = 0x02000000,
+    KEY_CTRL        = 0x04000000,
+    KEY_ALT         = 0x08000000,
+    KEY_META        = 0x10000000
   };
 
-  //! Values are copy-pasted from Qt's documentation.
-  enum KeyType {
-    KEY_UNKNOWN = 0x01ffffff,
+  //! Key type values (copy-pasted from Qt's documentation).
+  enum KeyType
+  {
+    KEY_UNKNOWN   = 0x01ffffff,
     // Special keys.
-    KEY_ESCAPE = 0x01000000,
-    KEY_TAB =	0x01000001,
-    KEY_BACKTAB = 0x01000002,	 
-    KEY_BACKSPACE = 0x01000003,	 
-    KEY_RETURN = 0x01000004,
-    KEY_ENTER = 0x01000005,
-    KEY_INSERT = 0x01000006,	 
-    KEY_DELETE = 0x01000007, 
-    KEY_PAUSE = 0x01000008,
-    KEY_PRINT = 0x01000009,
-    KEY_SYSREQ = 0x0100000a,
-    KEY_CLEAR = 0x0100000b,
-    KEY_HOME = 0x01000010,
-    KEY_END = 0x01000011,
+    KEY_ESCAPE    = 0x01000000,
+    KEY_TAB       =	0x01000001,
+    KEY_BACKTAB   = 0x01000002,
+    KEY_BACKSPACE = 0x01000003,
+    KEY_RETURN    = 0x01000004,
+    KEY_ENTER     = 0x01000005,
+    KEY_INSERT    = 0x01000006,
+    KEY_DELETE    = 0x01000007,
+    KEY_PAUSE     = 0x01000008,
+    KEY_PRINT     = 0x01000009,
+    KEY_SYSREQ    = 0x0100000a,
+    KEY_CLEAR     = 0x0100000b,
+    KEY_HOME      = 0x01000010,
+    KEY_END       = 0x01000011,
     // Arrow keys.
-    KEY_LEFT = 0x01000012,
-    KEY_UP = 0x01000013,
-    KEY_RIGHT = 0x01000014,
-    KEY_DOWN = 0x01000015,
-    KEY_PAGEUP = 0x01000016,
-    KEY_PAGEDOWN = 0x01000017
+    KEY_LEFT      = 0x01000012,
+    KEY_UP        = 0x01000013,
+    KEY_RIGHT     = 0x01000014,
+    KEY_DOWN      = 0x01000015,
+    KEY_PAGEUP    = 0x01000016,
+    KEY_PAGEDOWN  = 0x01000017
   };
 
-  //! Values are copy-pasted from Qt's documentation.
-  enum MouseButton {
-    MOUSE_NO_BUTTON = 0x00000000 /*Qt::NoButton*/,
-    MOUSE_LEFT_BUTTON = 0x00000001 /*Qt::LeftButton*/,
-    MOUSE_RIGHT_BUTTON = 0x00000002 /*Qt::RightButton*/,
-    MOUSE_MIDDLE_BUTTON = 0x00000004 /*Qt::MiddleButton*/,
+  //! Mouse button values (copy-pasted from Qt's documentation).
+  enum MouseButton
+  {
+    MOUSE_NO_BUTTON     = 0x00000000, /*! Qt::NoButton */
+    MOUSE_LEFT_BUTTON   = 0x00000001, /*! Qt::LeftButton */
+    MOUSE_RIGHT_BUTTON  = 0x00000002, /*! Qt::RightButton */
+    MOUSE_MIDDLE_BUTTON = 0x00000004  /*! Qt::MiddleButton */
   };
 
+  //! \brief I/O event structure.
   struct Event
   {
     EventType type;
@@ -86,6 +94,7 @@ namespace DO {
     int keyModifiers;
   };
 
+  //! \brief Helper function to return a "no-event" Event.
   inline Event noEvent()
   {
     Event e;
@@ -97,6 +106,7 @@ namespace DO {
     return e;
   }
 
+  //! \brief Helper function to return a "key-pressed" Event.
   inline Event keyPressed(int key, int keyModifiers = KEY_NOMODIFIER)
   {
     Event e;
@@ -108,6 +118,7 @@ namespace DO {
     return e;
   }
 
+  //! \brief Helper function to return a "key-released" Event.
   inline Event keyReleased(int key, int keyModifiers = KEY_NOMODIFIER)
   {
     Event e;
@@ -119,6 +130,7 @@ namespace DO {
     return e;
   }
 
+  //! \brief Helper function to return a "mouse-pressed" Event.
   inline Event mousePressed(int x, int y, int buttons,
                             int keyModifiers = KEY_NOMODIFIER)
   {
@@ -131,6 +143,7 @@ namespace DO {
     return e;
   }
 
+  //! \brief Helper function to return a "mouse-pressed" Event.
   inline Event mouseReleased(int x, int y, int buttons,
                              int keyModifiers = KEY_NOMODIFIER)
   {
@@ -143,6 +156,7 @@ namespace DO {
     return e;
   }
 
+  //! \brief Helper function to return a "mouse-moved" Event.
   inline Event mouseMoved(int x, int y, int buttons,
                           int keyModifiers = KEY_NOMODIFIER)
   {
@@ -156,5 +170,6 @@ namespace DO {
   }
 
 }  /* namespace DO */
+
 
 #endif /* DO_GRAPHICS_EVENTS_HPP */

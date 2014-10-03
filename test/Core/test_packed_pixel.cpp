@@ -25,7 +25,7 @@ using namespace DO;
 TEST(Test_PackedPixelBase_3, test_initialization)
 {
   typedef PackedPixelBase_3<uint16_t, 5, 6, 5> pixel_base_type;
-  ASSERT_EQ(sizeof(pixel_base_type), 2);
+  ASSERT_EQ(sizeof(pixel_base_type), 2u);
 
   pixel_base_type red = {31, 0, 0};
   ASSERT_EQ(*reinterpret_cast<uint16_t *>(&red), 0x001f);
@@ -61,36 +61,44 @@ TEST(Test_PackedPixelBase_3, test_initialization)
 
 TEST(Test_PackedPixelBase_4, test_initialization)
 {
-  typedef PackedPixelBase_4<uint8_t, 8, 8, 8, 8> pixel_base_type;
-  ASSERT_EQ(sizeof(pixel_base_type), 4);
+  typedef PackedPixelBase_4<uint8_t, 8, 8, 8, 8> rgba_pixel_type;
+  ASSERT_EQ(sizeof(rgba_pixel_type), 4u);
 
-  pixel_base_type cyan = {255, 0, 0, 0};
-  ASSERT_EQ(*reinterpret_cast<uint32_t *>(&cyan), 0xff);
-  ASSERT_EQ(cyan.channel_0, 255);
-  ASSERT_EQ(cyan.channel_1, 0);
-  ASSERT_EQ(cyan.channel_2, 0);
+  rgba_pixel_type red = {255, 0, 0, 255};
+  uint32_t true_red = 0xff0000ff;
+  ASSERT_EQ(*reinterpret_cast<uint32_t *>(&red), true_red);
+  ASSERT_EQ(red.channel_0, 255);
+  ASSERT_EQ(red.channel_1, 0);
+  ASSERT_EQ(red.channel_2, 0);
+  ASSERT_EQ(red.channel_3, 255);
 
-  pixel_base_type magenta = {0, 255, 0, 0};
-  ASSERT_EQ(*reinterpret_cast<uint16_t *>(&magenta), 0xff00);
-  ASSERT_EQ(magenta.channel_0, 0);
-  ASSERT_EQ(magenta.channel_1, 255);
-  ASSERT_EQ(magenta.channel_2, 0);
+  rgba_pixel_type green = {0, 255, 0, 255};
+  uint32_t true_green = 0xff00ff00;
+  ASSERT_EQ(*reinterpret_cast<uint32_t *>(&green), true_green);
+  ASSERT_EQ(green.channel_0, 0);
+  ASSERT_EQ(green.channel_1, 255);
+  ASSERT_EQ(green.channel_2, 0);
+  ASSERT_EQ(green.channel_3, 255);
 
-  pixel_base_type yellow = {0, 0, 255, 0};
-  ASSERT_EQ(*reinterpret_cast<uint32_t *>(&yellow), 0x00ff0000);
-  ASSERT_EQ(yellow.channel_0, 0);
-  ASSERT_EQ(yellow.channel_1, 0);
-  ASSERT_EQ(yellow.channel_2, 255);
+  rgba_pixel_type blue = {0, 0, 255, 255};
+  uint32_t true_blue = 0xffff0000;
+  ASSERT_EQ(*reinterpret_cast<uint32_t *>(&blue), true_blue);
+  ASSERT_EQ(blue.channel_0, 0);
+  ASSERT_EQ(blue.channel_1, 0);
+  ASSERT_EQ(blue.channel_2, 255);
+  ASSERT_EQ(blue.channel_3, 255);
 
-  pixel_base_type black = {0, 0, 0, 255};
-  ASSERT_EQ(*reinterpret_cast<uint32_t *>(&black), 0xff000000);
+  rgba_pixel_type black = {0, 0, 0, 255};
+  uint32_t true_black = 0xff000000;
+  ASSERT_EQ(*reinterpret_cast<uint32_t *>(&black), true_black);
   ASSERT_EQ(black.channel_0, 0);
   ASSERT_EQ(black.channel_1, 0);
   ASSERT_EQ(black.channel_2, 0);
   ASSERT_EQ(black.channel_3, 255);
 
-  pixel_base_type white = {255, 255, 255, 255};
-  ASSERT_EQ(*reinterpret_cast<uint32_t *>(&white), 0xffffffff);
+  rgba_pixel_type white = {255, 255, 255, 255};
+  uint32_t true_white = 0xffffffff;
+  ASSERT_EQ(*reinterpret_cast<uint32_t *>(&white), true_white);
   ASSERT_EQ(white.channel_0, 255);
   ASSERT_EQ(white.channel_1, 255);
   ASSERT_EQ(white.channel_2, 255);

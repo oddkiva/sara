@@ -6,7 +6,7 @@ endif()
 
 project(DO_Graphics_example)
 
-message(STATUS "  - DO_Graphics_example")
+message(STATUS "  - DO_Graphics_Examples")
 
 find_package(DO COMPONENTS Core Graphics REQUIRED)
 include(${DO_USE_FILE})

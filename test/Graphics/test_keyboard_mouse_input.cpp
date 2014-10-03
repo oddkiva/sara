@@ -124,7 +124,7 @@ TEST_F(TestKeyboardMouseInputOnSingleWindow, test_getEvent_with_input_key_event)
 
   EXPECT_EQ(event.type, KEY_PRESSED);
   EXPECT_EQ(event.key, expected_key);
-  EXPECT_EQ(event.keyModifiers, Qt::NoModifier);
+  EXPECT_EQ(event.keyModifiers, static_cast<int>(Qt::NoModifier));
 }
 
 TEST_F(TestKeyboardMouseInputOnSingleWindow, test_getEvent_with_input_mouse_event)
@@ -142,7 +142,7 @@ TEST_F(TestKeyboardMouseInputOnSingleWindow, test_getEvent_with_input_mouse_even
 
   EXPECT_EQ(event.type, MOUSE_RELEASED);
   EXPECT_EQ(event.buttons, 1);
-  EXPECT_EQ(event.keyModifiers, Qt::NoModifier);
+  EXPECT_EQ(event.keyModifiers, static_cast<int>(Qt::NoModifier));
 }
 
 class TestKeyboardMouseInputOnAnyWindow: public testing::Test
