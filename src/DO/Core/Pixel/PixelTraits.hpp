@@ -30,7 +30,15 @@ namespace DO {
     typedef T pixel_type;
 
     template <typename U>
-    struct Cast { typedef U pixel_type; };
+    struct Cast
+    {
+      typedef U pixel_type;
+
+      static inline U apply(T value)
+      {
+        return static_cast<U>(value);
+      }
+    };
   };
 
   template <typename T, int M, int N>
@@ -41,7 +49,15 @@ namespace DO {
     typedef Matrix<T, M, N> pixel_type;
 
     template <typename U>
-    struct Cast { typedef Matrix<U, M, N> pixel_type; };
+    struct Cast
+    {
+      typedef Matrix<U, M, N> pixel_type;
+
+      static inline Matrix<U, M, N> apply(const Matrix<T, M, N>& value)
+      {
+        return value.template cast<U>();
+      }
+    };
   };
 
   template <typename T, typename ColorSpace>
@@ -52,7 +68,15 @@ namespace DO {
     typedef Pixel<T, ColorSpace> pixel_type;
 
     template <typename U>
-    struct Cast { typedef Pixel<U, ColorSpace> pixel_type; };
+    struct Cast
+    {
+      typedef Pixel<U, ColorSpace> pixel_type;
+
+      static inline Pixel<U, ColorSpace> apply(const Pixel<T, ColorSpace>& value)
+      {
+        return value.template cast<U>();
+      }
+    };
   };
 
 }
