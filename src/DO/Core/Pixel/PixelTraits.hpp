@@ -17,6 +17,7 @@
 #include <stdexcept>
 
 #include <DO/Core/EigenExtension.hpp>
+#include <DO/Core/Pixel/ChannelConversion.hpp>
 #include <DO/Core/Pixel/Pixel.hpp>
 
 
@@ -29,6 +30,25 @@ namespace DO {
 
     typedef T pixel_type;
 
+    //! \brief Return zero color value.
+    static inline pixel_type zero()
+    {
+      return 0;
+    }
+
+    //! \brief Return min pixel value.
+    static inline pixel_type min()
+    {
+      return channel_min_value<T>();
+    }
+
+    //! \brief Return max pixel value.
+    static inline pixel_type max()
+    {
+      return channel_max_value<T>();
+    }
+
+    //! \brief Cast functor.
     template <typename U>
     struct Cast
     {
@@ -48,6 +68,31 @@ namespace DO {
 
     typedef Matrix<T, M, N> pixel_type;
 
+    //! \brief Return zero color value.
+    static inline pixel_type zero()
+    {
+      pixel_type zero;
+      zero.setZero();
+      return zero;
+    }
+
+    //! \brief Return min color value.
+    static inline pixel_type min()
+    {
+      pixel_type min;
+      min.fill(channel_min_value<T>());
+      return min;
+    }
+
+    //! \brief Return max color value.
+    static inline pixel_type max()
+    {
+      pixel_type max;
+      max.fill(channel_max_value<T>());
+      return max;
+    }
+
+    //! \brief Cast functor.
     template <typename U>
     struct Cast
     {
@@ -67,6 +112,31 @@ namespace DO {
 
     typedef Pixel<T, ColorSpace> pixel_type;
 
+    //! \brief Return zero color value.
+    static inline pixel_type zero()
+    {
+      pixel_type zero;
+      zero.setZero();
+      return zero;
+    }
+
+    //! \brief Return min color value.
+    static inline pixel_type min()
+    {
+      pixel_type min;
+      min.fill(channel_min_value<T>());
+      return min;
+    }
+
+    //! \brief Return max color value.
+    static inline pixel_type max()
+    {
+      pixel_type max;
+      max.fill(channel_max_value<T>());
+      return max;
+    }
+
+    //! \brief Cast functor.
     template <typename U>
     struct Cast
     {
