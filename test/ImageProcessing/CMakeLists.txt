@@ -40,3 +40,6 @@ do_test(ImageProcessing_SecondMomentMatrix test_second_moment_matrix.cpp
 
 do_test(ImageProcessing_Scaling test_scaling.cpp
         "${DO_LIBRARIES}" "ImageProcessing")
+
+do_test(ImageProcessing_GaussianPyramid test_gaussian_pyramid.cpp
+        "${DO_LIBRARIES}" "ImageProcessing")

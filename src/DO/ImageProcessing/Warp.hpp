@@ -14,12 +14,13 @@
 #ifndef DO_IMAGEPROCESSING_WARP_HPP
 #define DO_IMAGEPROCESSING_WARP_HPP
 
+
 namespace DO {
   
   template <typename T, typename S>
   bool warp(Image<T>& dst, const Image<T>& src,
             const Matrix<S, 3, 3>& homographyFromPatchToImg,
-            const T& defaultFillColor = ColorTraits<T>::min(),
+            const T& defaultFillColor = PixelTraits<T>::min(),
             bool stopIfOutOfRange = false)
   {
     typedef Matrix<S, 3, 3> Matrix3;
@@ -31,7 +32,7 @@ namespace DO {
     
     bool isInsideSourceImage = true;
 
-    for ( ; dst_it != dst_end; ++dst_it)
+    for ( ; !dst_it.end(); ++dst_it)
     {
       // Get the corresponding coordinates in the source image.
       Vector3 H_p;
@@ -56,5 +57,6 @@ namespace DO {
   }
 
 }
+
 
 #endif /* DO_IMAGEPROCESSING_WARP_HPP */

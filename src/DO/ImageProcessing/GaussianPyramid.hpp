@@ -11,8 +11,13 @@
 
 //! @file
 
-#ifndef DO_IMAGEPROCESSING_DOG_HPP
-#define DO_IMAGEPROCESSING_DOG_HPP
+#ifndef DO_IMAGEPROCESSING_GAUSSIANPYRAMID_HPP
+#define DO_IMAGEPROCESSING_GAUSSIANPYRAMID_HPP
+
+
+#include <DO/ImageProcessing/ImagePyramid.hpp>
+#include <DO/ImageProcessing/LinearFiltering.hpp>
+
 
 namespace DO {
 
@@ -51,7 +56,7 @@ namespace DO {
     
     // Shorten names.
     Scalar k = Scalar(params.scale_geometric_factor());
-    int numScales = params.num_scales_per_octaves();
+    int numScales = params.num_scales_per_octave();
     int downscaleIndex = int( floor( log(Scalar(2))/log(k)) );
 
     // Create the image pyramid
@@ -206,4 +211,5 @@ namespace DO {
 
 } /* namespace DO */
 
-#endif /* DO_IMAGEPROCESSING_DOG_HPP */
+
+#endif /* DO_IMAGEPROCESSING_GAUSSIANPYRAMID_HPP */

@@ -106,7 +106,7 @@ namespace DO {
 
     inline T operator()(const_array_iterator& it) const
     {
-      T value = 0;
+      T value = PixelTraits<T>::zero();
       for (int i = 0; i < N; ++i)
       {
         if (it.position()[i] == 0)
@@ -302,7 +302,7 @@ namespace DO {
   Image<T, N> laplacian(const Image<T, N>& src)
   {
     Image<T, N> l;
-    laplacian(l, src);
+    laplacian(src, l);
     return l;
   }
 

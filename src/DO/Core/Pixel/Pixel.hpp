@@ -53,8 +53,9 @@ namespace DO {
     }
 
     //! Copy constructor.
-    inline Pixel(const base_type& x)
-      : base_type(x)
+    template<typename OtherDerived>
+    inline Pixel(const Eigen::MatrixBase<OtherDerived>& other)
+      : base_type(other)
     {
     }
 
