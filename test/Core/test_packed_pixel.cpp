@@ -25,7 +25,7 @@ using namespace DO;
 TEST(Test_PackedPixelBase_3, test_initialization)
 {
   typedef PackedPixelBase_3<uint16_t, 5, 6, 5> pixel_base_type;
-  ASSERT_EQ(sizeof(pixel_base_type), 2);
+  ASSERT_EQ(sizeof(pixel_base_type), 2u);
 
   pixel_base_type red = {31, 0, 0};
   ASSERT_EQ(*reinterpret_cast<uint16_t *>(&red), 0x001f);

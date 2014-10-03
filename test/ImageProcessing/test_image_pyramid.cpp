@@ -68,7 +68,8 @@ TEST(TestImagePyramid, test_image_pyramid)
   EXPECT_EQ(scale_geometric_factor, pyramid.scale_geometric_factor());
 
   for (int i = 0; i < pyramid.num_octaves(); ++i)
-    EXPECT_EQ(pyramid(i).size(), pyramid.num_scales_per_octave());
+    EXPECT_EQ(pyramid(i).size(),
+              static_cast<size_t>(pyramid.num_scales_per_octave()));
 }
 
 

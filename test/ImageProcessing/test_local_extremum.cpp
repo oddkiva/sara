@@ -68,7 +68,7 @@ TEST(TestLocalExtremum, test_local_extremum)
   EXPECT_FALSE(StrictLocalMin<float>()(1, 1, I));
   
   maxima = strict_local_maxima(I);
-  EXPECT_EQ(maxima.size(), 2);
+  EXPECT_EQ(maxima.size(), 2u);
   minima = strict_local_minima(I);
   EXPECT_TRUE(minima.empty());
 
@@ -81,7 +81,7 @@ TEST(TestLocalExtremum, test_local_extremum)
   minima = strict_local_minima(I);
 
   EXPECT_TRUE(maxima.empty());
-  EXPECT_EQ(minima.size(), 2);
+  EXPECT_EQ(minima.size(), 2u);
 }
 
 
@@ -106,7 +106,7 @@ TEST(TestLocalExtremum, test_local_scale_space_extremum)
   vector<Point2i> maxima, minima;
   maxima = strict_local_scale_space_maxima(I,1,0);
   minima = strict_local_scale_space_minima(I,1,0);
-  EXPECT_EQ(maxima.size(), 2);
+  EXPECT_EQ(maxima.size(), 2u);
   EXPECT_TRUE(minima.empty());
 
   // Local scale-space extrema test 2
@@ -119,7 +119,7 @@ TEST(TestLocalExtremum, test_local_scale_space_extremum)
   EXPECT_TRUE(LocalScaleSpaceMin<double>()(1,1,1,0,I));
   EXPECT_TRUE(StrictLocalScaleSpaceMin<double>()(1,1,1,0,I));
   EXPECT_TRUE(maxima.empty());
-  EXPECT_TRUE(minima.size() == 2);
+  EXPECT_EQ(minima.size(), 2u);
 }
 
 

@@ -56,9 +56,9 @@ TYPED_TEST_P(Test_multiarray_constructors,
   // Compute the strides.
   Vector strides = StrideComputer::eval(sizes);
   // Compute the raw size of the multi-array.
-  int raw_size = accumulate(
+  size_t raw_size = static_cast<size_t>( accumulate(
     sizes.data(), sizes.data() + sizes.size(), 1,
-    multiplies<int>());
+    multiplies<int>()) );
   // Create the array with the right sizes.
   MultiArray multi_array(sizes);
 
@@ -111,7 +111,7 @@ TYPED_TEST_P(Test_multiarray_convenience_constructor_2d_and_getters, run)
   EXPECT_EQ(multi_array.rows(), 10);
   EXPECT_EQ(multi_array.cols(), 20);
   EXPECT_EQ(multi_array.strides(), StrideComputer::eval(Vector2i(10, 20)));
-  EXPECT_EQ(multi_array.size(), 10*20);
+  EXPECT_EQ(multi_array.size(), 10u*20u);
 }
 REGISTER_TYPED_TEST_CASE_P(
   Test_multiarray_convenience_constructor_2d_and_getters, run);
@@ -147,7 +147,7 @@ TYPED_TEST_P(Test_multiarray_convenience_constructor_3d_and_getters, run)
   EXPECT_EQ(multi_array.cols(), 20);
   EXPECT_EQ(multi_array.depth(), 50);
   EXPECT_EQ(multi_array.strides(), StrideComputer::eval(Vector3i(10, 20, 50)));
-  EXPECT_EQ(multi_array.size(), 10*20*50);
+  EXPECT_EQ(multi_array.size(), 10u*20u*50u);
 }
 REGISTER_TYPED_TEST_CASE_P(
   Test_multiarray_convenience_constructor_3d_and_getters, run);
