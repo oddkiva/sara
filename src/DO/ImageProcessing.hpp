@@ -24,23 +24,23 @@
 #include <exception>
 
 // Basic image processing functions.
-#include "ImageProcessing/LinearFiltering.hpp"
-#include "ImageProcessing/Deriche.hpp"
+#include <DO/ImageProcessing/LinearFiltering.hpp>
+#include <DO/ImageProcessing/Deriche.hpp>
 // Gradient, Laplacian, Hessian matrix, norm, orientation, second moment matrix.
-#include "ImageProcessing/Differential.hpp"
-#include "ImageProcessing/Determinant.hpp"
-#include "ImageProcessing/Norm.hpp"
-#include "ImageProcessing/Orientation.hpp"
-#include "ImageProcessing/SecondMomentMatrix.hpp"
+#include <DO/ImageProcessing/Differential.hpp>
+#include <DO/ImageProcessing/Determinant.hpp>
+#include <DO/ImageProcessing/Norm.hpp>
+#include <DO/ImageProcessing/Orientation.hpp>
+#include <DO/ImageProcessing/SecondMomentMatrix.hpp>
 // Interpolation (bilinear, trilinear)
-#include "ImageProcessing/Interpolation.hpp"
+#include <DO/ImageProcessing/Interpolation.hpp>
 // Reduce, enlarge, downscale, upscale,
-#include "ImageProcessing/Scaling.hpp"
-#include "ImageProcessing/Warp.hpp"
+#include <DO/ImageProcessing/Scaling.hpp>
+#include <DO/ImageProcessing/Warp.hpp>
 // Data structures and functions for feature detections.
-#include "ImageProcessing/ImagePyramid.hpp"
-#include "ImageProcessing/Extrema.hpp"
-#include "ImageProcessing/DoG.hpp"
+#include <DO/ImageProcessing/ImagePyramid.hpp>
+#include <DO/ImageProcessing/Extrema.hpp>
+#include <DO/ImageProcessing/GaussianPyramid.hpp>
 
 /*!
   \defgroup ImageProcessing Image Processing
