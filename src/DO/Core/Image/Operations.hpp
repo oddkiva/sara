@@ -36,13 +36,13 @@ namespace DO {
   }
 
   //! \brief Find min and max pixel values of the image.
-  template <typename T, int N, typename Layout>
-  void find_min_max(Pixel<T, Layout>& min,
-                    Pixel<T, Layout>& max,
-                    const Image<Pixel<T, Layout>, N>& src)
+  template <typename T, int N, typename ColorSpace>
+  void find_min_max(Pixel<T, ColorSpace>& min,
+                    Pixel<T, ColorSpace>& max,
+                    const Image<Pixel<T, ColorSpace>, N>& src)
   {
-    const Pixel<T,Layout> *src_first = src.data();
-    const Pixel<T,Layout> *src_last = src_first + src.size();
+    const Pixel<T,ColorSpace> *src_first = src.data();
+    const Pixel<T,ColorSpace> *src_last = src_first + src.size();
 
     min = *src_first;
     max = *src_first;
