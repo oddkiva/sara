@@ -56,7 +56,7 @@ namespace DO {
     
     // Shorten names.
     Scalar k = Scalar(params.scale_geometric_factor());
-    int numScales = params.num_scales_per_octaves();
+    int numScales = params.num_scales_per_octave();
     int downscaleIndex = int( floor( log(Scalar(2))/log(k)) );
 
     // Create the image pyramid
