@@ -22,7 +22,7 @@ namespace DO {
   
   template <typename T, typename S>
   void warp(const Image<T>& src, Image<T>& dst,
-            const Matrix<S, 3, 3>& homography,
+            const Matrix<S, 3, 3>& homography_from_dst_to_src,
             const T& default_fill_color = PixelTraits<T>::min())
   {
     typedef typename PixelTraits<T>::template Cast<double>::pixel_type
@@ -32,7 +32,7 @@ namespace DO {
     typedef Matrix<S, 3, 1> Vector3;
     typedef Matrix<S, 2, 1> Vector2;
 
-    const Matrix3& H = homography;
+    const Matrix3& H = homography_from_dst_to_src;
     
     typename Image<T>::array_iterator it = dst.begin_array();
     for ( ; !it.end(); ++it)
