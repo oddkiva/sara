@@ -43,3 +43,6 @@ do_test(ImageProcessing_Scaling test_scaling.cpp
 
 do_test(ImageProcessing_GaussianPyramid test_gaussian_pyramid.cpp
         "${DO_LIBRARIES}" "ImageProcessing")
+
+do_test(ImageProcessing_Warp test_image_warp.cpp
+        "${DO_LIBRARIES}" "ImageProcessing")
