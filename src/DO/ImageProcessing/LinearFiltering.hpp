@@ -56,7 +56,7 @@ namespace DO {
       yj = y;
       kj = kernel;
 
-      T sum(color_min_value<T>());
+      T sum(PixelTraits<T>::zero());
       for (int j = 0; j < kernel_size; ++j, ++yj, ++kj)
         sum += *yj * *kj;
 
@@ -330,7 +330,7 @@ namespace DO {
     {
       for (int x = 0; x < w; ++x)
       {
-        T val(color_min_value<T>());
+        T val(PixelTraits<T>::zero());
         for (int yy = 0; yy < kernel_height; ++yy)
           for (int xx = 0; xx < kernel_width; ++xx)
             val += work(x+xx, y+yy)

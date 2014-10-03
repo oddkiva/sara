@@ -51,32 +51,6 @@ TEST(TestImageConversion, test_find_min_max_for_3d_pixel)
 }
 
 
-TEST(TestImageConversion, test_color_min_max_value)
-{
-  EXPECT_EQ(numeric_limits<int>::min(), color_min_value<int>());
-  EXPECT_EQ(0, color_min_value<float>());
-
-  EXPECT_EQ(std::numeric_limits<int>::max(), color_max_value<int>());
-  EXPECT_EQ(1, color_max_value<float>());
-
-  Matrix<uint8_t, 3, 1> expected_black = Matrix<uint8_t, 3, 1>::Zero();
-  Matrix<uint8_t, 3, 1> actual_black = color_min_value<uint8_t, 3>();
-  EXPECT_EQ(expected_black, actual_black);
-
-  Vector3f expected_zeros = Vector3f::Zero();
-  Vector3f actual_zeros = color_min_value<float, 3>();
-  EXPECT_EQ(expected_zeros, actual_zeros);
-
-  Matrix<uint8_t, 3, 1> expected_black_3 = Matrix<uint8_t, 3, 1>::Zero();
-  Matrix<uint8_t, 3, 1> actual_black_3 = color_min_value<uint8_t, 3>();
-  EXPECT_EQ(expected_black_3, actual_black_3);
-
-  Vector3f expected_ones_3 = Vector3f::Zero();
-  Vector3f actual_ones_3 = color_min_value<float, 3>();
-  EXPECT_EQ(expected_ones_3, actual_ones_3);
-}
-
-
 TEST(TestImageConversion, test_image_conversion)
 {
   Image<Rgb8> rgb8_image(10, 10);

@@ -16,6 +16,7 @@
 #include <DO/Core/Image/Image.hpp>
 #include <DO/Core/Pixel/ChannelConversion.hpp>
 #include <DO/Core/Pixel/ColorConversion.hpp>
+#include <DO/Core/Pixel/PixelTraits.hpp>
 
 
 // Various utilities for image operations.
@@ -35,13 +36,13 @@ namespace DO {
   }
 
   //! \brief Find min and max pixel values of the image.
-  template <typename T, int N, typename Layout>
-  void find_min_max(Pixel<T, Layout>& min,
-                    Pixel<T, Layout>& max,
-                    const Image<Pixel<T, Layout>, N>& src)
+  template <typename T, int N, typename ColorSpace>
+  void find_min_max(Pixel<T, ColorSpace>& min,
+                    Pixel<T, ColorSpace>& max,
+                    const Image<Pixel<T, ColorSpace>, N>& src)
   {
-    const Pixel<T,Layout> *src_first = src.data();
-    const Pixel<T,Layout> *src_last = src_first + src.size();
+    const Pixel<T,ColorSpace> *src_first = src.data();
+    const Pixel<T,ColorSpace> *src_last = src_first + src.size();
 
     min = *src_first;
     max = *src_first;
@@ -53,40 +54,9 @@ namespace DO {
     }
   }
 
-  //! \brief Return min color value.
-  template <typename T>
-  inline T color_min_value()
-  {
-    return channel_min_value<T>();
-  }
-
-  //! \brief Return max color value.
-  template <typename T>
-  inline T color_max_value()
-  {
-    return channel_max_value<T>();
-  }
-
-  //! \brief Return min color value.
-  template <typename T, int N>
-  inline Matrix<T, N, 1> color_min_value()
-  {
-    Matrix<T, N, 1> min;
-    min.fill(channel_min_value<T>());
-    return min;
-  }
-
-  //! \brief Return max color value.
-  template <typename T, int N>
-  inline Matrix<T, N, 1> color_max_value()
-  {
-    Matrix<T, N, 1> min;
-    min.fill(channel_max_value<T>());
-    return min;
-  }
-
   //! @}
 }
+
 
 // Generic color conversion of images.
 namespace DO {
@@ -126,9 +96,9 @@ namespace DO {
       convert_color(*src_first, *dst_first);
   }
 
-
   //! @}
 }
+
 
 // Image rescaling functions
 namespace DO {
@@ -139,8 +109,8 @@ namespace DO {
   //! \brief Rescale color values properly for viewing purposes.
   template <typename T, int N>
   inline Image<T, N> color_rescale(const Image<T, N>& src,
-                                   const T& a = color_min_value<T>(),
-                                   const T& b = color_max_value<T>())
+                                   const T& a = PixelTraits<T>::min(),
+                                   const T& b = PixelTraits<T>::max())
   {
     DO_STATIC_ASSERT(!std::numeric_limits<T>::is_integer,
                      IMPLEMENTATION_NOT_SUPPORTED_FOR_INTEGER_TYPES);
@@ -165,23 +135,23 @@ namespace DO {
 
 
   //! \brief color rescaling function.
-  template <typename T, typename Layout, int N>
-  inline Image<Pixel<T,Layout>, N> color_rescale(
-    const Image<Pixel<T,Layout>, N>& src,
-    const Pixel<T, Layout>& a = color_min_value<T, Layout::size>(),
-    const Pixel<T, Layout>& b = color_max_value<T, Layout::size>())
+  template <typename T, typename ColorSpace, int N>
+  inline Image<Pixel<T, ColorSpace>, N> color_rescale(
+    const Image<Pixel<T, ColorSpace>, N>& src,
+    const Pixel<T, ColorSpace>& a = PixelTraits<Pixel<T, ColorSpace> >::min(),
+    const Pixel<T, ColorSpace>& b = PixelTraits<Pixel<T, ColorSpace> >::max())
   {
     DO_STATIC_ASSERT(!std::numeric_limits<T>::is_integer,
                      IMPLEMENTATION_NOT_SUPPORTED_FOR_INTEGER_TYPES);
 
-    Image<Pixel<T,Layout>, N> dst(src.sizes());
+    Image<Pixel<T,ColorSpace>, N> dst(src.sizes());
 
-    const Pixel<T,Layout> *src_first = src.data();
-    const Pixel<T,Layout> *src_last = src_first + src.size();
-    Pixel<T,Layout> *dst_first  = dst.data();
+    const Pixel<T, ColorSpace> *src_first = src.data();
+    const Pixel<T, ColorSpace> *src_last = src_first + src.size();
+    Pixel<T, ColorSpace> *dst_first  = dst.data();
 
-    Pixel<T,Layout> min(*src_first);
-    Pixel<T,Layout> max(*src_first);
+    Pixel<T, ColorSpace> min(*src_first);
+    Pixel<T, ColorSpace> max(*src_first);
     for ( ; src_first != src_last; ++src_first)
     {
       min = min.cwiseMin(*src_first);
