@@ -81,13 +81,14 @@ namespace DO {
     std::pair<double, double> min_max;
 
     // Determine the right blurring factor.
-    original_sizes = src.sizes().cast<double>();
-    scale_factors = original_sizes.cwiseQuotient(new_sizes.cast<double>());
+    original_sizes = src.sizes().template cast<double>();
+    scale_factors =
+      original_sizes.cwiseQuotient(new_sizes.template cast<double>());
     min_max = range(scale_factors);
     if (keep_ratio)
     {
       scale_factors.fill(min_max.second);
-      new_sizes = (original_sizes/min_max.second).cast<int>();
+      new_sizes = (original_sizes/min_max.second).template cast<int>();
     }
     sigmas = 1.5*((scale_factors.array().sqrt()-.99).matrix());
 
@@ -100,11 +101,11 @@ namespace DO {
     for ( ; !dst_it.end(); ++dst_it)
     {
       Matrix<double, N, 1> position( dst_it.position()
-        .cast<double>()
+        .template cast<double>()
         .cwiseProduct(scale_factors) );
 
       DoublePixel double_pixel_value(interpolate(double_src, position));
-      *dst_it = PixelTraits<DoublePixel>::Cast<ChannelType>::apply(
+      *dst_it = PixelTraits<DoublePixel>::template Cast<ChannelType>::apply(
         double_pixel_value);
     }
 
@@ -147,13 +148,13 @@ namespace DO {
     // Determine the right blurring factor.
     double_coords_type original_sizes(image.sizes().template cast<double>());
     double_coords_type scale_factor = original_sizes.cwiseQuotient(
-      new_sizes.cast<double>());
+      new_sizes.template cast<double>());
     std::pair<double, double> min_max = range(scale_factor);
 
     if (keep_ratio)
     {
       scale_factor.fill(min_max.second);
-      new_sizes = (original_sizes/min_max.second).cast<int>();
+      new_sizes = (original_sizes/min_max.second).template cast<int>();
     }
 
     // Create the new image by interpolation.
@@ -191,8 +192,8 @@ namespace DO {
   inline Image<T, N> enlarge(const Image<T, N>& image, double fact)  
   {
     Matrix<double, N, 1> new_sizes;
-    new_sizes = image.sizes().cast<double>()*fact;
-    return enlarge(image, new_sizes.cast<int>().eval());
+    new_sizes = image.sizes().template cast<double>()*fact;
+    return enlarge(image, new_sizes.template cast<int>().eval());
   }
 
   //! @} file

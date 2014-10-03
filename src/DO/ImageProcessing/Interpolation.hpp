@@ -69,10 +69,8 @@ namespace DO {
         offset[i] = it.position()[i] < image.size(i) ? 0 : -1;
       }
 
-      const T& src_color = it(offset);
       DoublePixel dst_color;
-
-      dst_color = PixelTraits<T>::Cast<double>::apply(it(offset));
+      dst_color = PixelTraits<T>::template Cast<double>::apply(it(offset));
       interpolated_value += weight*dst_color;
     }
     return interpolated_value;
