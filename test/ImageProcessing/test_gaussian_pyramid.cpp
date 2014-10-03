@@ -13,7 +13,7 @@
 
 #include <gtest/gtest.h>
 
-#include <DO/ImageProcessing.hpp>
+#include <DO/ImageProcessing/GaussianPyramid.hpp>
 
 
 using namespace DO;

@@ -16,7 +16,9 @@
 
 
 #include <DO/ImageProcessing/ImagePyramid.hpp>
+#include <DO/ImageProcessing/Differential.hpp>
 #include <DO/ImageProcessing/LinearFiltering.hpp>
+#include <DO/ImageProcessing/Scaling.hpp>
 
 
 namespace DO {
