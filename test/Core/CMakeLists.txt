@@ -33,6 +33,10 @@ do_test(Core_Pixel_ColorConversion
         test_color_conversion.cpp
         "${DO_LIBRARIES}" ${TestGroupName})
 
+do_test(Core_Pixel_Traits
+        test_pixel_traits.cpp
+        "${DO_LIBRARIES}" ${TestGroupName})
+
 do_test(Core_Pixel_Typedefs
         test_pixel_typedefs.cpp
         "${DO_LIBRARIES}" ${TestGroupName})
