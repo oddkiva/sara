@@ -1,4 +1,4 @@
-include_directories(${gtest_DIR}/include)
+include_directories(${DO_ThirdParty_DIR}/gtest/include)
 
 message(STATUS "")
 do_step_message("Appending test projects:")

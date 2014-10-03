@@ -1,4 +1,6 @@
-include_directories(${Eigen3_DIR} ${DO_INCLUDE_DIR})
+include_directories(
+  ${DO_INCLUDE_DIR}
+  ${DO_ThirdParty_DIR}/eigen)
 
 if (DO_USE_FROM_SOURCE)
   get_property(DO_ImageProcessing_ADDED GLOBAL PROPERTY _DO_ImageProcessing_INCLUDED)
