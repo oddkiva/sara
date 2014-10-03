@@ -143,11 +143,15 @@ namespace DO {
                              Matrix<int, N, 1> new_sizes,
                              bool keep_ratio = false)
   {
-    typedef Matrix<double, N, 1> double_coords_type;
+    // Typedefs.
+    typedef typename PixelTraits<T>::template Cast<double>::pixel_type
+      DoublePixel;
+    typedef typename PixelTraits<T>::channel_type ChannelType;
+    typedef Matrix<double, N, 1> DoubleCoords;
 
     // Determine the right blurring factor.
-    double_coords_type original_sizes(image.sizes().template cast<double>());
-    double_coords_type scale_factor = original_sizes.cwiseQuotient(
+    DoubleCoords original_sizes(image.sizes().template cast<double>());
+    DoubleCoords scale_factor = original_sizes.cwiseQuotient(
       new_sizes.template cast<double>());
     std::pair<double, double> min_max = range(scale_factor);
 
@@ -158,11 +162,11 @@ namespace DO {
     }
 
     // Create the new image by interpolation.
-    Image<T,N> dst(new_sizes);
+    Image<T, N> dst(new_sizes);
     typename Image<T, N>::array_iterator dst_it(dst.begin_array());
     for ( ; !dst_it.end(); ++dst_it)
     {
-      double_coords_type position;
+      DoubleCoords position;
       position = dst_it.position()
         .template cast<double>()
         .cwiseProduct(scale_factor);
