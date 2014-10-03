@@ -27,10 +27,10 @@ namespace DO {
    */
 
   //! \brief The specialized element traits class when the entry is a color.
-  template <typename T, typename Layout>
-  struct ElementTraits<Pixel<T, Layout> >
+  template <typename T, typename ColorSpace>
+  struct ElementTraits<Pixel<T, ColorSpace> >
   {
-    typedef Array<T, Layout::size, 1> value_type; //!< STL-like typedef.
+    typedef Array<T, ColorSpace::size, 1> value_type; //!< STL-like typedef.
     typedef size_t size_type; //!< STL-like typedef.
     typedef value_type * pointer; //!< STL-like typedef.
     typedef const value_type * const_pointer; //!< STL-like typedef.
