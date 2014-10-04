@@ -135,6 +135,36 @@ TEST(TestSmartConvertColor, test_rgb_to_yuv)
 }
 
 
+TEST(TestSmartConvertColor, test_gray_to_gray)
+{
+  double grayd = 1;
+  float grayf = 1;
+  uint8_t gray8u = UINT8_MAX;
+  int16_t gray16 = INT16_MAX;
+
+  double dst_grayd;
+  float dst_grayf;
+  uint8_t dst_gray8u;
+  int16_t dst_gray16;
+
+  smart_convert_color(grayd, dst_grayf);  EXPECT_NEAR(dst_grayf, 1, 1e-3);
+  smart_convert_color(grayd, dst_gray16); EXPECT_EQ(dst_gray16, INT16_MAX);
+  smart_convert_color(grayd, dst_gray8u); EXPECT_EQ(dst_gray8u, UINT8_MAX);
+
+  smart_convert_color(grayf, dst_grayd);  EXPECT_NEAR(dst_grayd, 1, 1e-3);
+  smart_convert_color(grayf, dst_gray16); EXPECT_EQ(dst_gray16, INT16_MAX);
+  smart_convert_color(grayf, dst_gray8u); EXPECT_EQ(dst_gray8u, UINT8_MAX);
+
+  smart_convert_color(gray16, dst_grayd);  EXPECT_NEAR(dst_grayd, 1, 1e-3);
+  smart_convert_color(gray16, dst_grayf);  EXPECT_NEAR(dst_grayf, 1, 1e-3);
+  smart_convert_color(gray16, dst_gray8u); EXPECT_EQ(dst_gray8u, UINT8_MAX);
+
+  smart_convert_color(gray8u, dst_grayd);  EXPECT_NEAR(dst_grayd, 1, 1e-3);
+  smart_convert_color(gray8u, dst_grayf);  EXPECT_NEAR(dst_grayf, 1, 1e-3);
+  smart_convert_color(gray8u, dst_gray16); EXPECT_EQ(dst_gray16, INT16_MAX);
+}
+
+
 int main(int argc, char** argv) 
 {
   testing::InitGoogleTest(&argc, argv); 
