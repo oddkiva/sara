@@ -20,6 +20,7 @@
 #include <DO/Core/Pixel/ColorSpace.hpp>
 #include <DO/Core/Pixel/Pixel.hpp>
 #include <DO/Core/Pixel/PixelTraits.hpp>
+#include <DO/Core/Pixel/SmartColorConversion.hpp>
 #include <DO/Core/Pixel/Typedefs.hpp>
 
 
