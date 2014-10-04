@@ -11,13 +11,18 @@
 
 #if defined(_WIN32) || defined(_WIN32_WCE)
 # define NOMINMAX
+
 // This is the best I found to solve the include problem with libjpeg...
 # include <windows.h>
 #endif
+
 #include <DO/Core.hpp>
-#include "ImageIOObjects.hpp"
+
+#include <DO/ImageIO/ImageIOObjects.hpp>
+
 
 using namespace std;
+
 
 namespace DO {
 
@@ -58,6 +63,12 @@ namespace DO {
       fclose(file_);
   }
 
+}
+
+
+// Jpeg I/O.
+namespace DO {
+
   METHODDEF(void) jpeg_error(j_common_ptr cinfo)
   {
     JpegErrorMessage *myerr = (JpegErrorMessage *) cinfo->err;
@@ -83,8 +94,8 @@ namespace DO {
     jpeg_destroy_decompress(&cinfo_);
   }
 
-  bool JpegFileReader::operator()(unsigned char *& data,
-                                  int& width, int& height, int& depth)
+  bool JpegFileReader::read(unsigned char *& data,
+                            int& width, int& height, int& depth)
   {
     // Read header file.
     if (!jpeg_read_header(&cinfo_, TRUE))
@@ -141,8 +152,7 @@ namespace DO {
     jpeg_destroy_compress(&cinfo_);
   }
 
-  bool JpegFileWriter::operator()(const string& filepath,
-                                  int quality)
+  bool JpegFileWriter::write(const string& filepath, int quality)
   {
     if (quality < 0 || quality > 100)
     {
@@ -172,6 +182,12 @@ namespace DO {
     return true;
   }
 
+}
+
+
+// PNG I/O.
+namespace DO {
+
   PngFileReader::PngFileReader(const string& filepath)
     : ImageFileReader(filepath, "rb")
   {
@@ -190,8 +206,8 @@ namespace DO {
     png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
   }
 
-  bool PngFileReader::operator()(unsigned char *& data,
-                                 int& width, int& height, int& depth)
+  bool PngFileReader::read(unsigned char *& data,
+                           int& width, int& height, int& depth)
   {
     png_byte header[8];
     if (fread(header, 1, 8, file_) != 8)
@@ -271,8 +287,7 @@ namespace DO {
     png_destroy_write_struct(&png_ptr, &info_ptr);
   }
 
-  bool PngFileWriter::operator()(const string& filepath,
-                                 int quality)
+  bool PngFileWriter::write(const string& filepath, int quality)
   {
     if (!openFile(&file_, filepath, "wb"))
       return false;
@@ -308,6 +323,12 @@ namespace DO {
     return true;
   }
 
+}
+
+
+// Tiff I/O.
+namespace DO {
+
   TiffFileReader::TiffFileReader(const std::string& filepath)
     : ImageFileReader(filepath, "r")
   {
@@ -322,8 +343,8 @@ namespace DO {
       TIFFClose(tiff_);
   }
 
-  bool TiffFileReader::operator()(unsigned char *& data,
-                                  int& width, int& height, int& depth)
+  bool TiffFileReader::read(unsigned char *& data,
+                            int& width, int& height, int& depth)
   {
     uint32 w, h;
     TIFFGetField(tiff_, TIFFTAG_IMAGEWIDTH, &w);
@@ -349,7 +370,7 @@ namespace DO {
       TIFFClose(out);
   }
 
-  bool TiffFileWriter::operator()(const std::string& filepath, int quality)
+  bool TiffFileWriter::write(const std::string& filepath, int quality)
   {
     // Open the TIFF file
     if((out = TIFFOpen(filepath.c_str(), "w")) == NULL){

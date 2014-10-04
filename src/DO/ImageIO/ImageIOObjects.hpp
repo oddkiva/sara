@@ -12,15 +12,19 @@
 #ifndef DO_IMAGEDRAWING_IMAGEIOOBJECTS_HPP
 #define DO_IMAGEDRAWING_IMAGEIOOBJECTS_HPP
 
+
 extern "C" {
 # include <jpeglib.h>
 # include <png.h>
-# include <libtiff/tiffio.h>
+# include <tiffio.h>
 # include <setjmp.h>
 }
+
 #include <string>
 #include <exception>
 
+
+// Base classes for image reading and writing.
 namespace DO {
 
   class FileError : public std::exception
@@ -50,8 +54,8 @@ namespace DO {
     ImageFileReader(const std::string& filepath, const std::string& mode)
       : FileHandler(filepath, mode) {};
     virtual ~ImageFileReader() {};
-    virtual bool operator()(unsigned char *& data,
-                            int& width, int& height, int& depth) = 0;
+    virtual bool read(unsigned char *& data,
+                      int& width, int& height, int& depth) = 0;
   };
 
   class ImageFileWriter : public FileHandler
@@ -66,8 +70,14 @@ namespace DO {
       , data_(data)
       , width_(width), height_(height), depth_(depth) {}
     virtual ~ImageFileWriter() {}
-    virtual bool operator()(const std::string& filepath, int quality) = 0;
+    virtual bool write(const std::string& filepath, int quality) = 0;
   };
+
+}
+
+
+// Jpeg I/O.
+namespace DO {
 
   struct JpegErrorMessage {
     struct jpeg_error_mgr pub;
@@ -82,7 +92,7 @@ namespace DO {
     //! TODO: make better exception?
     JpegFileReader(const std::string& filepath);
     ~JpegFileReader();
-    bool operator()(unsigned char *& data, int& width, int& height, int& depth);
+    bool read(unsigned char *& data, int& width, int& height, int& depth);
   };
 
   class JpegFileWriter : public ImageFileWriter
@@ -92,8 +102,14 @@ namespace DO {
   public:
     JpegFileWriter(const unsigned char *data, int width, int height, int depth);
     ~JpegFileWriter();
-    bool operator()(const std::string& filepath, int quality);
+    bool write(const std::string& filepath, int quality);
   };
+
+}
+
+
+// PNG I/O.
+namespace DO {
 
   class PngFileReader : public ImageFileReader
   {
@@ -102,7 +118,7 @@ namespace DO {
   public:
     PngFileReader(const std::string& filepath);
     ~PngFileReader();
-    bool operator()(unsigned char *& data, int& width, int& height, int& depth);
+    bool read(unsigned char *& data, int& width, int& height, int& depth);
   };
 
   class PngFileWriter : public ImageFileWriter
@@ -112,8 +128,14 @@ namespace DO {
   public:
     PngFileWriter(const unsigned char *data, int width, int height, int depth);
     ~PngFileWriter();
-    bool operator()(const std::string& filepath, int quality);
+    bool write(const std::string& filepath, int quality);
   };
+
+}
+
+
+// Tiff I/O.
+namespace DO {
 
   class TiffFileReader : public ImageFileReader
   {
@@ -121,7 +143,7 @@ namespace DO {
   public:
     TiffFileReader(const std::string& filepath);
     ~TiffFileReader();
-    bool operator()(unsigned char *& data, int& width, int& height, int& depth);
+    bool read(unsigned char *& data, int& width, int& height, int& depth);
   };
 
   class TiffFileWriter : public ImageFileWriter
@@ -130,10 +152,10 @@ namespace DO {
   public:
     TiffFileWriter(const unsigned char *data, int width, int height, int depth);
     ~TiffFileWriter();
-    //! Quick-and-dirty but it works.
-    bool operator()(const std::string& filepath, int quality);
+    bool write(const std::string& filepath, int quality);
   };
 
 } /* namespace DO */
+
 
 #endif /* DO_IMAGEDRAWING_IMAGEIOOBJECTS_HPP */
