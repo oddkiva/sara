@@ -9,86 +9,51 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Core/Timer.hpp>
-#include <DO/ImageDrawing.hpp>
-#include <DO/FileSystem.hpp>
-#include <DO/Graphics.hpp>
 #include <gtest/gtest.h>
+
+#include <DO/Core.hpp>
+#include <DO/ImageIO.hpp>
+
+#include "../AssertHelpers.hpp"
+
 
 using namespace DO;
 using namespace std;
 
-TEST(DO_ImageDrawing_Test, imageFileReadingTest)
+
+TEST(TestImageIO, test_image_reading)
 {
-  string filePaths[] = {
-    srcPath("../../datasets/ksmall.jpg"),
-    srcPath("../../datasets/stinkbug.png"),
-    srcPath("../../datasets/All.tif")
+  string filepaths[] =
+  {
+    srcPath("image.jpg"),
+    srcPath("image.png"),
+    srcPath("image.tif")
   };
 
-  HighResTimer timer;
-  double elapsed1, elapsed2;
+  Image<Rgb8> true_image(2, 2);
+  true_image(0,0) = White8; true_image(1,0) = Black8;
+  true_image(0,1) = Black8; true_image(1,1) = White8;
 
   for (int i = 0; i < 3; ++i)
   {
     Image<Rgb8> image;
 
-    timer.restart();
-    ASSERT_TRUE(imread(image, filePaths[i]));
-    ASSERT_NE(image.sizes(), Vector2i::Zero());
-    elapsed1 = timer.elapsedMs();
-    cout << "ImageIO loading time = " << elapsed1 << " ms" << endl;
-    viewImage(image);
+    EXPECT_TRUE(imread(image, filepaths[i]));
+    EXPECT_MATRIX_EQ(image.sizes(), Vector2i(2, 2));
 
-    timer.restart();
-    ASSERT_TRUE(load(image, filePaths[i]));
-    ASSERT_NE(image.sizes(), Vector2i::Zero());
-    elapsed2 = timer.elapsedMs();
-    cout << "Qt-based loading time = " << elapsed2 << " ms" << endl;
-    viewImage(image);
-
-    cout << "Speed factor = " << elapsed2/elapsed1 << endl << endl;
-
-    EXIFInfo exifInfo;
-    if (readExifInfo(exifInfo, filePaths[i]))
-      print(exifInfo);
+    for (int y = 0; y < true_image.width(); ++y)
+      for (int x = 0; x < true_image.width(); ++x)
+        EXPECT_MATRIX_EQ(true_image(x, y), image(x, y));
   }
+
 }
 
-TEST(DO_ImageDrawing_Test, imageExifOriTest)
+
+TEST(TestImageIO, test_read_exif_info)
 {
-  vector<string> filePaths;
-  getImageFilePaths(filePaths, "C:/data/David-Ok-Iphone4S");
-
-  HighResTimer timer;
-  double elapsed;
-
-  bool viewImageCollection = true;
-  if (viewImageCollection)
-  openGraphicsView(1024, 768);
-
-  for (size_t i = 0; i < filePaths.size(); ++i)
-  {
-    const string& filePath = filePaths[i];
-    Image<Rgb8> image;
-    EXIFInfo exifInfo;
-
-    timer.restart();
-    ASSERT_TRUE(imread(image, filePath));
-    elapsed = timer.elapsedMs();
-    cout << "Load time = " << elapsed << " ms" << endl;
-
-    ASSERT_NE(image.sizes(), Vector2i::Zero());
-    ASSERT_TRUE(readExifInfo(exifInfo, filePath));
-
-    if (viewImageCollection)
-      addImage(image, true);
-
-    print(exifInfo);
-  }
-
-  while (getKey() != KEY_ESCAPE && viewImageCollection);
-    closeWindow();
+  string filepath = srcPath("image.jpg");
+  EXIFInfo exif_info;
+  EXPECT_TRUE(read_exif_info(exif_info, filepath));
 }
 
 int main(int argc, char **argv)
