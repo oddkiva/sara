@@ -21,7 +21,7 @@ using namespace DO;
 using namespace std;
 
 
-TEST(TestImageIO, test_image_read_write)
+TEST(TestImageIO, test_rgb_image_read_write)
 {
   string filepaths[] =
   {
@@ -46,6 +46,25 @@ TEST(TestImageIO, test_image_read_write)
       for (int x = 0; x < true_image.height(); ++x)
         EXPECT_MATRIX_EQ(true_image(x, y), image(x, y));
   }
+}
+
+
+TEST(TestImageIO, test_grayscale_image_read_write)
+{
+  typedef unsigned char gray8u_t;
+  Image<gray8u_t> true_image(2, 2);
+  true_image.matrix() <<
+    255, 0,
+    0, 255;
+
+  string filepath = "image.jpg";
+  Image<unsigned char> image;
+  EXPECT_TRUE(imread(image, filepath));
+  EXPECT_MATRIX_EQ(image.sizes(), Vector2i(2, 2));
+
+  for (int y = 0; y < true_image.width(); ++y)
+    for (int x = 0; x < true_image.height(); ++x)
+      EXPECT_MATRIX_EQ(true_image(x, y), image(x, y));
 }
 
 
