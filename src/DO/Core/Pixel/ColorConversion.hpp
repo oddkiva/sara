@@ -23,8 +23,8 @@
 namespace DO {
 
   //! Convert RGB color to gray color.
-  template <typename T>
-  inline void rgb_to_gray(const Matrix<T, 3, 1>& rgb, T& gray)
+  template <typename T, int N>
+  inline void rgb_to_gray(const Matrix<T, N, 1>& rgb, T& gray)
   {
     DO_STATIC_ASSERT(
       !std::numeric_limits<T>::is_integer,
@@ -161,7 +161,17 @@ namespace DO {
       rgb_to_gray(src, dst);
     }
   };
-  
+
+  //! \brief Convert color from RGBA to gray.
+  template <> struct ConvertColorToGray<Rgba>
+  {
+    template <typename T>
+    static inline void apply(const Matrix<T, 4, 1>& src, T& dst)
+    {
+      rgb_to_gray(src, dst);
+    }
+  };
+
   //! \brief Convert YUV color to gray color.
   template <> struct ConvertColorToGray<Yuv>
   {
