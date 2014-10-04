@@ -98,7 +98,7 @@ namespace DO {
     return true;
   }
 
-  bool save_jpeg(const Image<Rgb8>& image, const std::string& filepath,
-                int quality = 85);
+  bool imwrite(const Image<Rgb8>& image, const std::string& filepath,
+               int quality = 85);
 
 } /* namespace DO */

@@ -271,13 +271,37 @@ namespace DO {
     return true;
   }
 
-  bool save_jpeg(const Image<Rgb8>& image, const std::string& filepath,
-                 int quality)
+  bool imwrite(const Image<Rgb8>& image, const std::string& filepath,
+                   int quality)
   {
-    JpegFileWriter jpeg_writer(
-      reinterpret_cast<const unsigned char *>(image.data()),
-      image.width(), image.height(), 3);
-    return jpeg_writer.write(filepath, quality);
+    string ext(file_ext(filepath));
+
+    if (is_jpeg_file_ext(ext))
+    {
+      JpegFileWriter jpeg_writer(
+        reinterpret_cast<const unsigned char *>(image.data()),
+        image.width(), image.height(), 3);
+      return jpeg_writer.write(filepath, quality);
+    }
+
+    if (is_png_file_ext(ext))
+    {
+      PngFileWriter png_writer(
+        reinterpret_cast<const unsigned char *>(image.data()),
+        image.width(), image.height(), 3);
+      return png_writer.write(filepath, quality);
+    }
+
+    if (is_tiff_file_ext(ext))
+    {
+      TiffFileWriter tiff_writer(
+        reinterpret_cast<const unsigned char *>(image.data()),
+        image.width(), image.height(), 3);
+      return tiff_writer.write(filepath, quality);
+    }
+
+    cout << ext << "is not a valid extension" << endl;
+    return false;
   }
 
 } /* namespace DO */
