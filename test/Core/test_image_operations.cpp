@@ -16,6 +16,8 @@
 #include <DO/Core/Image/Operations.hpp>
 #include <DO/Core/Pixel/Typedefs.hpp>
 
+#include "../AssertHelpers.hpp"
+
 
 using namespace std;
 using namespace DO;
@@ -51,26 +53,27 @@ TEST(TestImageConversion, test_find_min_max_for_3d_pixel)
 }
 
 
-TEST(TestImageConversion, test_image_conversion)
+TEST(TestImageConversion, test_smart_image_conversion)
 {
-  Image<Rgb8> rgb8_image(10, 10);
+  Image<Rgb8> rgb8_image(2, 2);
   for (int y = 0; y < rgb8_image.height(); ++y)
     for (int x = 0; x < rgb8_image.width(); ++x)
       rgb8_image(x, y).fill(255);
 
-  Image<Rgb32f> rgb32f_image;
-  rgb32f_image = rgb8_image.convert_channel<Rgb32f>();
-  for (int y = 0; y < rgb32f_image.height(); ++y)
-    for (int x = 0; x < rgb32f_image.width(); ++x)
-      EXPECT_EQ(rgb32f_image(x, y), Vector3f::Ones());
-
-  Image<float> float_image;
-  float_image = rgb8_image
-    .convert_channel<Rgb32f>()
-    .convert_color<float>();
+  Image<float> float_image = rgb8_image.convert<float>();
   for (int y = 0; y < float_image.height(); ++y)
     for (int x = 0; x < float_image.width(); ++x)
-      EXPECT_EQ(rgb32f_image(x, y), Vector3f::Ones());
+      EXPECT_EQ(float_image(x, y), 1.f);
+
+  Image<int> int_image = float_image.convert<int>();
+  for (int y = 0; y < int_image.height(); ++y)
+    for (int x = 0; x < int_image.width(); ++x)
+      EXPECT_EQ(int_image(x, y), INT_MAX);
+
+  Image<Rgb64f> rgb64f_image = int_image.convert<Rgb64f>();
+  for (int y = 0; y < rgb64f_image.height(); ++y)
+    for (int x = 0; x < rgb64f_image.width(); ++x)
+      EXPECT_MATRIX_NEAR(rgb64f_image(x, y), Vector3d::Ones(), 1e-7);
 }
 
 
@@ -98,6 +101,7 @@ TEST(TestImageConversion, test_image_color_rescale)
   EXPECT_EQ(float_min, 0);
   EXPECT_EQ(float_max, 1);
 }
+
 
 // ========================================================================== //
 // Run the tests.
