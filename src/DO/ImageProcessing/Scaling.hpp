@@ -73,7 +73,7 @@ namespace DO {
 
     // Convert in floating type scalar.
     Image<DoublePixel, N> double_src;
-    double_src = src.convert<DoublePixel>();
+    double_src = src.template convert<DoublePixel>();
 
     Matrix<double, N, 1> original_sizes;
     Matrix<double, N, 1> scale_factors;

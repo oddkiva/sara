@@ -139,7 +139,7 @@ namespace DO {
   inline void convert_color(const Pixel<T, SrcColSpace>& src,
                             Pixel<T, DstColSpace>& dst)
   {
-    ConvertColor<SrcColSpace, DstColSpace>::apply<T>(src, dst);
+    ConvertColor<SrcColSpace, DstColSpace>::template apply<T>(src, dst);
   }
 
   //! \brief Generic color converter to grayscale.
