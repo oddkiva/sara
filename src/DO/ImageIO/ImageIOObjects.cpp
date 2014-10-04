@@ -257,7 +257,7 @@ namespace DO {
     height = static_cast<int>(pngHeight);
     depth = static_cast<int>(channels);
     data = new unsigned char[width*height*depth];
-    
+
     vector<png_bytep> row_pointers(width*height);
     for (int y = 0; y < height; ++y)
       row_pointers[y] = static_cast<png_byte *>(data) + rowbytes*y;
