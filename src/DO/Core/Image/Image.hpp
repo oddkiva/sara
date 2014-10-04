@@ -31,13 +31,9 @@ namespace DO {
   //! \brief Forward declaration of the image class.
   template <typename Color, int N = 2> class Image;
 
-  //! \brief Forward declaration of the generic image converter class.
+  //! \brief Forward declaration of the generic color conversion function.
   template <typename T, typename U, int N>
-  void convert_channel(const Image<T, N>& src, Image<U, N>& dst);
-
-  //! \brief Convert color of image.
-  template <typename T, typename U, int N>
-  void convert_color(const Image<T, N>& src, Image<U, N>& dst);
+  void convert(const Image<T, N>& src, Image<U, N>& dst);
 
   //! \brief The image class.
   template <typename Color, int N>
@@ -132,19 +128,10 @@ namespace DO {
 
     //! Color conversion method.
     template <typename Color2>
-    Image<Color2, N> convert_color() const
+    Image<Color2, N> convert() const
     {
       Image<Color2, N> dst(base_type::sizes());
-      DO::convert_color(*this, dst);
-      return dst;
-    }
-
-    //! Color conversion method.
-    template <typename Color2>
-    Image<Color2, N> convert_channel() const
-    {
-      Image<Color2, N> dst(base_type::sizes());
-      DO::convert_channel(*this, dst);
+      DO::convert(*this, dst);
       return dst;
     }
 

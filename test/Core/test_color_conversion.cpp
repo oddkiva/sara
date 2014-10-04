@@ -29,13 +29,13 @@ typedef testing::Types<float, double> FloatingPointChannelTypes;
 // ========================================================================== //
 // Define the parameterized test case.
 template <typename ChannelType>
-class TestConvertColorConversion : public testing::Test {};
-TYPED_TEST_CASE_P(TestConvertColorConversion);
+class TestConvertColor : public testing::Test {};
+TYPED_TEST_CASE_P(TestConvertColor);
 
 
 // ========================================================================== //
 // RGB <-> RGBA.
-TEST(TestConvertColorConversion, test_rgb_to_rgba)
+TEST(TestConvertColor, test_rgb_to_rgba)
 {
     Pixel<double, Rgb> rgb(1,1,1);
     Pixel<double, Rgba> rgba;
@@ -43,7 +43,7 @@ TEST(TestConvertColorConversion, test_rgb_to_rgba)
     EXPECT_EQ(Vector4d(1,1,1,1), rgba);
 }
 
-TEST(TestConvertColorConversion, test_rgba_to_rgb)
+TEST(TestConvertColor, test_rgba_to_rgb)
 {
     Pixel<double, Rgba> rgba(1,1,1,1);
     Pixel<double, Rgb> rgb;
@@ -53,7 +53,7 @@ TEST(TestConvertColorConversion, test_rgba_to_rgb)
 
 // ========================================================================== //
 // RGB <-> grayscale.
-TYPED_TEST_P(TestConvertColorConversion, test_rgb_to_gray)
+TYPED_TEST_P(TestConvertColor, test_rgb_to_gray)
 {
   typedef TypeParam T;
   // Using the explicit function.
@@ -72,7 +72,7 @@ TYPED_TEST_P(TestConvertColorConversion, test_rgb_to_gray)
   }
 }
 
-TYPED_TEST_P(TestConvertColorConversion, test_gray_to_rgb)
+TYPED_TEST_P(TestConvertColor, test_gray_to_rgb)
 {
   // Using the explicit function.
   typedef TypeParam T;
@@ -96,7 +96,7 @@ TYPED_TEST_P(TestConvertColorConversion, test_gray_to_rgb)
 
 // ========================================================================== //
 // RGB <-> YUV.
-TYPED_TEST_P(TestConvertColorConversion, test_rgb_to_yuv)
+TYPED_TEST_P(TestConvertColor, test_rgb_to_yuv)
 {
   typedef TypeParam T;
   typedef Matrix<T, 3, 1> Vec3;
@@ -128,7 +128,7 @@ TYPED_TEST_P(TestConvertColorConversion, test_rgb_to_yuv)
   }
 }
 
-TYPED_TEST_P(TestConvertColorConversion, test_yuv_to_rgb)
+TYPED_TEST_P(TestConvertColor, test_yuv_to_rgb)
 {
   typedef TypeParam T;
   typedef Matrix<T, 3, 1> Vec3;
@@ -163,7 +163,7 @@ TYPED_TEST_P(TestConvertColorConversion, test_yuv_to_rgb)
 
 // ========================================================================== //
 // YUV <-> Gray
-TYPED_TEST_P(TestConvertColorConversion, test_yuv_to_gray)
+TYPED_TEST_P(TestConvertColor, test_yuv_to_gray)
 {
   typedef TypeParam T;
   typedef Matrix<T, 3, 1> Vec3;
@@ -181,7 +181,7 @@ TYPED_TEST_P(TestConvertColorConversion, test_yuv_to_gray)
   }
 }
 
-TYPED_TEST_P(TestConvertColorConversion, test_gray_to_yuv)
+TYPED_TEST_P(TestConvertColor, test_gray_to_yuv)
 {
   typedef TypeParam T;
   typedef Matrix<T, 3, 1> Vec3;
@@ -203,7 +203,7 @@ TYPED_TEST_P(TestConvertColorConversion, test_gray_to_yuv)
 
 // ========================================================================== //
 // Register all typed tests and instantiate them.
-REGISTER_TYPED_TEST_CASE_P(TestConvertColorConversion,
+REGISTER_TYPED_TEST_CASE_P(TestConvertColor,
                            test_rgb_to_gray,
                            test_gray_to_rgb,
                            test_rgb_to_yuv,
@@ -211,7 +211,7 @@ REGISTER_TYPED_TEST_CASE_P(TestConvertColorConversion,
                            test_yuv_to_gray,
                            test_gray_to_yuv);
 INSTANTIATE_TYPED_TEST_CASE_P(Core_Pixel_ColorConversion,
-                              TestConvertColorConversion,
+                              TestConvertColor,
                               FloatingPointChannelTypes);
 
 

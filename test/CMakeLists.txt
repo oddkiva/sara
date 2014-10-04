@@ -1,4 +1,4 @@
-include_directories(${gtest_DIR}/include)
+include_directories(${DO_ThirdParty_DIR}/gtest/include)
 
 message(STATUS "")
 do_step_message("Appending test projects:")
@@ -6,6 +6,7 @@ do_step_message("Appending test projects:")
 add_subdirectory(Core)
 add_subdirectory(Graphics)
 #add_subdirectory(ImageDrawing)
+add_subdirectory(ImageIO)
 
 #add_subdirectory(KDTree)
 add_subdirectory(ImageProcessing)

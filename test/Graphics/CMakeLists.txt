@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.6)
 
 project(DO_Graphics_test)
 
-message(STATUS "  - DO_Graphics_tests")
+message(STATUS "  - DO_Graphics_Tests")
 
 find_package(DO COMPONENTS Core Graphics REQUIRED)
 include(${DO_USE_FILE})

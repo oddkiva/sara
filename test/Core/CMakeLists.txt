@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.6)
 
 project(DO_Core_tests)
 
-message(STATUS "  - DO_Core_tests")
+message(STATUS "  - DO_Core_Tests")
 
 find_package(DO COMPONENTS Core REQUIRED)
 include(${DO_USE_FILE})
@@ -31,6 +31,10 @@ do_test(Core_Pixel_ChannelConversion
         
 do_test(Core_Pixel_ColorConversion
         test_color_conversion.cpp
+        "${DO_LIBRARIES}" ${TestGroupName})
+
+do_test(Core_Pixel_SmartColorConversion
+        test_smart_color_conversion.cpp
         "${DO_LIBRARIES}" ${TestGroupName})
 
 do_test(Core_Pixel_Traits

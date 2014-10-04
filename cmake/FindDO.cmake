@@ -33,23 +33,18 @@ if (NOT DO_FOUND)
   # Set third-party software directories
   set(DO_SOURCE_DIR ${DO_DIR}/src/DO)
   set(DO_ThirdParty_DIR ${DO_DIR}/third-party)
-  set(Eigen3_DIR ${DO_ThirdParty_DIR}/eigen)
-  set(gtest_DIR ${DO_ThirdParty_DIR}/gtest)
-  set(flann_DIR ${DO_ThirdParty_DIR}/flann)
-  set(antigrain_DIR ${DO_ThirdParty_DIR}/antigrain)
-  set(jpeg_DIR ${DO_ThirdParty_DIR}/libjpeg)
-  set(png_DIR ${DO_ThirdParty_DIR}/libpng)
-  set(tiff_DIR ${DO_ThirdParty_DIR}/libtiff)
   
   # List the available component libraries in DO++
   # Foundational libraries
   do_append_components(DO_COMPONENTS Core)
+  do_append_components(DO_COMPONENTS ImageIO)
+  #do_append_components(DO_COMPONENTS ImageDrawing)
   do_append_components(DO_COMPONENTS Graphics)
 
   # TODO: Don't re-enable this components as long there are not properly
   # tested.
   #do_append_components(DO_COMPONENTS KDTree)
-  #do_append_components(DO_COMPONENTS ImageDrawing)
+
   # Image processing
   do_append_components(DO_COMPONENTS ImageProcessing)
   # Geometry

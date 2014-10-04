@@ -9,11 +9,11 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_IMAGEDRAWING_HPP
-#define DO_IMAGEDRAWING_HPP
+#ifndef DO_IMAGEIO_HPP
+#define DO_IMAGEIO_HPP
 
 
-#include "ImageDrawing/ImagePainter.hpp"
+#include <DO/ImageIO/ImageIO.hpp>
 
 
-#endif /* DO_IMAGEDRAWING_HPP */
+#endif /* DO_IMAGEIO_HPP */

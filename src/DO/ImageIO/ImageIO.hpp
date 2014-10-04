@@ -16,36 +16,38 @@
 
 namespace DO {
 
-  bool readExifInfo(EXIFInfo& exifInfo, const std::string& filePath);
+  bool read_exif_info(EXIFInfo& exif_info, const std::string& file_path);
 
-  void print(const EXIFInfo& exifInfo);
+  std::ostream& operator<<(std::ostream& os, const EXIFInfo& exifInfo);
 
   template <typename T>
-  void flip(Image<T>& image, int exifOri)
+  void flip(Image<T>& image, int exif_orientation_code)
   {
     // 0: unspecified in EXIF data
     // 1: upper left of image
     // 9: undefined
-    if (exifOri == 0 || exifOri == 1 || exifOri == 9)
+    if (exif_orientation_code == 0 ||
+        exif_orientation_code == 1 ||
+        exif_orientation_code == 9)
       return;
-    
+
     Image<T> tmp;
     int w = image.width();
     int h = image.height();
 
     // 3: lower right of image
-    if (exifOri == 3)
+    if (exif_orientation_code == 3)
     {
-      tmp.resize(image.sizes());
+      tmp.resize(w, h);
       for (int y = 0; y < h; ++y)
         for (int x = 0; x < w; ++x)
           tmp(x,y) = image(w-1-x, h-1-y);
       image = tmp;
     }
     // 6: upper right of image
-    if (exifOri == 6)
+    if (exif_orientation_code == 6)
     {
-      tmp.resize(image.height(), image.width());
+      tmp.resize(h, w);
       // Transpose.
       for (int y = 0; y < image.height(); ++y)
         for (int x = 0; x < image.width(); ++x)
@@ -62,9 +64,9 @@ namespace DO {
       image = tmp;
     }
     // 8: lower left of image
-    if (exifOri == 8)
+    if (exif_orientation_code == 8)
     {
-      tmp.resize(image.height(), image.width());
+      tmp.resize(h, w);
       // Transpose.
       for (int y = 0; y < image.height(); ++y)
         for (int x = 0; x < image.width(); ++x)
@@ -82,18 +84,21 @@ namespace DO {
     }
   }
 
-  bool imread(Image<unsigned char>& image, const std::string& filePath);
+  bool imread(Image<unsigned char>& image, const std::string& filepath);
 
-  bool imread(Image<Rgb8>& image, const std::string& filePath);
+  bool imread(Image<Rgb8>& image, const std::string& filepath);
 
   template <typename T>
-  bool imread(Image<T>& image, const std::string& filePath)
+  bool imread(Image<T>& image, const std::string& filepath)
   {
     Image<Rgb8> rgb8image;
-    if (!imread(rgb8image, filePath))
+    if (!imread(rgb8image, filepath))
       return false;
     image = rgb8image.convert<T>();
     return true;
   }
+
+  bool imwrite(const Image<Rgb8>& image, const std::string& filepath,
+               int quality = 85);
 
 } /* namespace DO */
