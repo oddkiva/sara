@@ -82,46 +82,64 @@ namespace DO {
   
 }
 
-// Unified API.
+
+// Unified API for color conversion between the source and destination pixels
+// with the same channel type.
 namespace DO {
 
-  //! Color conversion from RGBA to RGB.
-  template <typename T>
-  void convert_color(const Pixel<T, Rgba>& src, Pixel<T, Rgb>& dst)
+  //! Generic color conversion functor.
+  template <typename SrcColSpace, typename DstColSpace> struct ConvertColor;
+
+  //! Pixel conversion from RGBA to RGB.
+  template <> struct ConvertColor<Rgba, Rgb>
   {
-    for (int i = 0; i < 3; ++i)
-      dst[i] = src[i];
-  }
+    template <typename T>
+    static inline void apply(const Pixel<T, Rgba>& src, Pixel<T, Rgb>& dst)
+    {
+      for (int i = 0; i < 3; ++i)
+        dst[i] = src[i];
+    }
+  };
 
   //! Pixel conversion from RGB to RGBA.
-  template <typename T>
-  void convert_color(const Pixel<T, Rgb>& src, Pixel<T, Rgba>& dst)
+  template <> struct ConvertColor<Rgb, Rgba>
   {
-    using namespace std;
-    for (int i = 0; i < 3; ++i)
-      dst[i] = src[i];
-    dst[3] = numeric_limits<T>::is_integer ? numeric_limits<T>::max() : T(1);
-  }
-  
-  //! \brief Convert color from gray to RGB.
-  template <typename T>
-  inline void convert_color(T src, Pixel<T, Rgb>& dst)
-  {
-    gray_to_rgb(src, dst);
-  }
+    template <typename T>
+    static inline void apply(const Pixel<T, Rgb>& src, Pixel<T, Rgba>& dst)
+    {
+      using namespace std;
+      for (int i = 0; i < 3; ++i)
+        dst[i] = src[i];
+      dst[3] = numeric_limits<T>::is_integer ? numeric_limits<T>::max() : T(1);
+    }
+  };
 
   //! \brief Convert color from RGB to YUV.
-  template <typename T>
-  inline void convert_color(const Pixel<T, Rgb>& src, Pixel<T, Yuv>& dst)
+  template <> struct ConvertColor<Rgb, Yuv>
   {
-    rgb_to_yuv(src, dst);
-  }
+    template <typename T>
+    static inline void apply(const Pixel<T, Rgb>& src, Pixel<T, Yuv>& dst)
+    {
+      rgb_to_yuv(src, dst);
+    }
+  };
 
   //! \brief Convert color from YUV to RGB.
-  template <typename T>
-  inline void convert_color(const Pixel<T, Yuv>& src, Pixel<T, Rgb>& dst)
+  template <> struct ConvertColor<Yuv, Rgb>
   {
-    yuv_to_rgb(src, dst);
+    template <typename T>
+    static inline void apply(const Pixel<T, Yuv>& src, Pixel<T, Rgb>& dst)
+    {
+      yuv_to_rgb(src, dst);
+    }
+  };
+
+  //! \brief Convert color from a colorspace to another
+  template <typename T, typename SrcColSpace, typename DstColSpace>
+  inline void convert_color(const Pixel<T, SrcColSpace>& src,
+                            Pixel<T, DstColSpace>& dst)
+  {
+    ConvertColor<SrcColSpace, DstColSpace>::apply<T>(src, dst);
   }
 
   //! \brief Generic color converter to grayscale.
@@ -154,13 +172,22 @@ namespace DO {
     }
   };
 
+  //! \brief Convert color from gray to RGB.
+  template <typename T>
+  inline void convert_color(T src, Pixel<T, Rgb>& dst)
+  {
+    gray_to_rgb(src, dst);
+  }
+
   //! \brief Convert gray color to YUV color.
   template <typename T>
   inline void convert_color(T src, Pixel<T, Yuv>& dst)
   {
     gray_to_yuv<T>(src, dst);
   }
+
 }
+
 
 
 #endif /* DO_CORE_PIXEL_COLOR_CONVERSION_HPP */
