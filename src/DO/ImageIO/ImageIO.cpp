@@ -60,14 +60,15 @@ namespace DO {
 }
 
 
-// Exif info.
+// Parsing of EXIF info.
 namespace DO {
 
   bool read_exif_info(EXIFInfo& exif_info, const std::string& file_path)
   {
     // Read the JPEG file into a buffer
     FILE *fp = fopen(file_path.c_str(), "rb");
-    if (!fp) { 
+    if (!fp)
+    { 
       cout << "Can't open file:" << endl << file_path << endl; 
       return false; 
     }
@@ -76,13 +77,14 @@ namespace DO {
     rewind(fp);
 
     vector<unsigned char> buf(fsize);
-    if (fread(&buf[0], 1, fsize, fp) != fsize) {
+    if (fread(&buf[0], 1, fsize, fp) != fsize)
+    {
       cout << "Can't read file: " << endl << file_path << endl;
       return false;
     }
     fclose(fp);
 
-    // Parse EXIF
+    // Parse EXIF info.
     int code = exif_info.parseFrom(&buf[0], fsize);
 
     return !code;
@@ -246,19 +248,26 @@ namespace DO {
     if (!imread(data, w, h, d, filepath))
       return false;
 
-    // Wrap data and get data ownership
+    // Wrap data and acquire data ownership.
+    bool acquire_data_ownership = true;
     if (d == 1)
-      image = Image<unsigned char>(&data[0], Vector2i(w,h), true).convert<Rgb8>();
+      image = Image<unsigned char>(&data[0],
+                                   Vector2i(w,h),
+                                   acquire_data_ownership
+                                   ).convert<Rgb8>();
     else if (d == 3)
-      image = Image<Rgb8>(reinterpret_cast<Rgb8 *>(&data[0]), Vector2i(w,h), true);
+      image = Image<Rgb8>(reinterpret_cast<Rgb8 *>(&data[0]),
+                          Vector2i(w,h),
+                          acquire_data_ownership);
     else if (d == 4)
-      image = Image<Rgba8>(reinterpret_cast<Rgba8 *>(&data[0]), Vector2i(w,h), true)
-        .convert<Rgb8>();
+      image = Image<Rgba8>(reinterpret_cast<Rgba8 *>(&data[0]),
+                           Vector2i(w,h),
+                           acquire_data_ownership
+                           ).convert<Rgb8>();
 
     EXIFInfo info;
     if (read_exif_info(info, filepath))
       flip(image, int(info.Orientation));
-
     return true;
   }
 
