@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.6)
 
 project(DO_Geometry_tests)
 
-message(STATUS "  - DO_Geometry_tests")
+message(STATUS "  - DO_Geometry_Tests")
 
 find_package(DO COMPONENTS Core Graphics Geometry REQUIRED)
 include(${DO_USE_FILE})

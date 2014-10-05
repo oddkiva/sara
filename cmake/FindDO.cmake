@@ -48,7 +48,7 @@ if (NOT DO_FOUND)
   # Image processing
   do_append_components(DO_COMPONENTS ImageProcessing)
   # Geometry
-  #do_append_components(DO_COMPONENTS Geometry)
+  do_append_components(DO_COMPONENTS Geometry)
   # Feature detection and description
   #do_append_components(DO_COMPONENTS Features)
   #do_append_components(DO_COMPONENTS FeatureDetectors)
