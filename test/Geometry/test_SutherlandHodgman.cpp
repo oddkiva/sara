@@ -21,7 +21,7 @@ int main()
   int w, h;
   w = h = 400;
 
-  HighResTimer timer;
+  Timer timer;
   double elapsed;
 
   openWindow(w,h);

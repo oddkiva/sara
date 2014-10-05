@@ -488,7 +488,7 @@ void compareComputationTimes(const Ellipse& e1, const Ellipse& e2,
                              double& worstSpeedGain,
                              vector<double>& speedGainHistory)
 {
-  HighResTimer t;
+  Timer t;
   int times = 100;
   // Approximate computation.
   t.restart();
