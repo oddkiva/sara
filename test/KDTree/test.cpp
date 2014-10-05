@@ -9,25 +9,14 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
+
 #include <DO/KDTree.hpp>
-#include <DO/Graphics.hpp>
+
 
 using namespace DO;
 using namespace std;
 
-void drawPoint(const MatrixXd& data, size_t i, double step, const Rgb8& c)
-{
-  Point2f p( (data.col(i)*step).cast<float>() );
-  fillCircle(p, 5.f, c);
-}
-
-void displayPoints(const MatrixXd& points, double step)
-{
-  clearWindow();
-  for (size_t i = 0; i != points.cols(); ++i)
-    drawPoint(points, i, step, Red8);
-}
 
 void testBatchKnnSearch(const MatrixXd& data, double step)
 {
@@ -38,24 +27,21 @@ void testBatchKnnSearch(const MatrixXd& data, double step)
   KDTree kdTree(data);
   vector<vector<int> > indices;
   vector<vector<double> > sqDists;
-  kdTree.knnSearch(queries, 10, indices, sqDists);
+  kdTree.knn_search(queries, 10, indices, sqDists);
 
   // Check visually.
   printStage("Check out the queries");
   for (int i = 0; i != data.cols(); ++i)
   {
-    displayPoints(data, step);
     cout << "p[" << i << "] = " << queries.col(i).transpose() << endl;
     for (size_t j = 0; j != indices[i].size(); ++j)
     {
       size_t indj = indices[i][j];
       cout << "knn["<< j << "]\tp[" << indj << "] = " << data.col(indj).transpose() << endl;
-      drawPoint(data, indj, step, Green8);
     }
-    drawPoint(queries, i, step, Blue8);
-    getKey();
   }
 }
+
 
 void testBatchKnnSearchWithQueryInData(const MatrixXd& data, double step)
 {
@@ -67,24 +53,21 @@ void testBatchKnnSearchWithQueryInData(const MatrixXd& data, double step)
   KDTree kdTree(data);
   vector<vector<int> > indices;
   vector<vector<double> > sqDists;
-  kdTree.knnSearch(queries, 10, indices, sqDists);
+  kdTree.knn_search(queries, 10, indices, sqDists);
 
   // Check visually.
   printStage("Check out the queries");
   for (int i = 0; i != data.cols(); ++i)
   {
-    displayPoints(data, step);
     cout << "p[" << i << "] = " << data.col(queries[i]).transpose() << endl;
     for (size_t j = 0; j != indices[i].size(); ++j)
     {
       size_t indj = indices[i][j];
       cout << "knn["<< j << "]\tp[" << indj << "] = " << data.col(indj).transpose() << endl;
-      drawPoint(data, indj, step, Green8);
     }
-    drawPoint(data, queries[i], step, Blue8);
-    getKey();
   }
 }
+
 
 int main() 
 {
@@ -97,10 +80,6 @@ int main()
 
   // View grid of points.
   const double step = 50;
-  openWindow(step*N, step*N);
-  setAntialiasing();
-  displayPoints(data, step);
-  
   //testBatchKnnSearch(data, step);
   testBatchKnnSearchWithQueryInData(data, step);
 
