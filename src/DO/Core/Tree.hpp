@@ -835,7 +835,7 @@ namespace DO {
     template <bool IsConst>
     class LeafIterator : public DepthFirstIterator<IsConst>
     {
-      template <bool IsConst> friend class LeafIterator;
+      template <bool IsConst2> friend class LeafIterator;
 
       typedef LeafIterator self_type;
       typedef DepthFirstIterator<IsConst> base_type;
