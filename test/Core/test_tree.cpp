@@ -35,6 +35,7 @@ typedef Tree<int>::const_leaf_iterator          const_leaf_iterator;
 typedef node_handle::node_pointer               node_pointer;
 typedef const_node_handle::node_pointer         const_node_pointer;
 
+
 // Test Node class.
 TEST(TestNode, test_constructor)
 {
@@ -108,6 +109,56 @@ TEST(TestTree, test_default_constructor)
   EXPECT_TRUE(tree.empty());
 }
 
+TEST(TestTree, test_copy)
+{
+  /*
+  We construct the following tree.
+                0
+               / \
+              /   \
+             /     \
+            /       \
+           /         \
+          1           2
+         / \         /  \
+        /   \       /    \
+       3     4     5      6
+      / \   / \   / \    / \
+     7   8 9  10 11  12 13  14
+  */
+
+  Tree<int> tree;
+  tree.set_root(0);
+  node_handle n0  = tree.begin();
+
+  node_handle n1  = tree.append_child(n0, 1);
+  node_handle n2  = tree.append_child(n0, 2);
+
+  node_handle n3  = tree.append_child(n1, 3);
+  node_handle n4  = tree.append_child(n1, 4);
+  node_handle n5  = tree.append_child(n2, 5);
+  node_handle n6  = tree.append_child(n2, 6);
+
+  node_handle n7  = tree.append_child(n3, 7);
+  node_handle n8  = tree.append_child(n3, 8);
+  node_handle n9  = tree.append_child(n4, 9);
+  node_handle n10 = tree.append_child(n4, 10);
+  node_handle n11 = tree.append_child(n5, 11);
+  node_handle n12 = tree.append_child(n5, 12);
+  node_handle n13 = tree.append_child(n6, 13);
+  node_handle n14 = tree.append_child(n6, 14);
+
+  Tree<int> clone(tree);
+
+  //breadth_first_iterator bfs_tree_it = tree.breadth_first_begin();
+  //breadth_first_iterator bfs_clone_it = clone.breadth_first_begin();
+  //for (int i = 0; i <= 14; ++i, ++bfs_tree_it, ++bfs_clone_it)
+  //{
+  //  EXPECT_EQ(*bfs_tree_it, i);
+  //  EXPECT_EQ(*bfs_clone_it, i);
+  //}
+
+}
 
 // Test basic functionalities.
 TEST(TestTree, test_set_root_and_empty)
@@ -263,24 +314,25 @@ TEST(TestTree, test_const_sibling_iterator)
 
 
 // Test depth-first iterator.
-TEST(TestTree, test_depth_first_iterator)
+TEST(TestDepthFirstIterator, test_depth_first_tree)
 {
   /*
-  We construct the following tree.
+    We construct the following tree.
 
-           0________
-          / \       \
-         1   5       12
-        /   /|\       \
-       2   6 7 8___    13
-      /       / \  \    \
-     3       9   10 11   14
-    /
-   4
+             0________
+            / \       \
+           1   5       12
+          /   /|\       \
+         2   6 7 8___    13
+        /       / \  \    \
+       3       9   10 11   14
+      /
+     4
 
-  */
+   */
 
   Tree<int> tree;
+
   tree.set_root(0);
   node_handle n0  = tree.begin();
   node_handle n1  = tree.append_child(n0, 1);
@@ -306,7 +358,7 @@ TEST(TestTree, test_depth_first_iterator)
     EXPECT_EQ(*const_dfs_it, i);
   }
   EXPECT_EQ(dfs_it, tree.depth_first_end());
-  EXPECT_EQ(const_dfs_it, tree.depth_first_rend());
+  EXPECT_EQ(const_dfs_it, tree.depth_first_end());
 
   dfs_it = tree.depth_first_rbegin();
   const_dfs_it = tree.depth_first_rbegin();
@@ -315,7 +367,7 @@ TEST(TestTree, test_depth_first_iterator)
     EXPECT_EQ(*dfs_it, i);
     EXPECT_EQ(*const_dfs_it, i);
   }
-  EXPECT_EQ(dfs_it, tree.depth_first_end());
+  EXPECT_EQ(dfs_it, tree.depth_first_rend());
   EXPECT_EQ(const_dfs_it, tree.depth_first_rend());
 }
 
@@ -426,13 +478,13 @@ TEST(TestTree, test_leaf_iterator)
   const_leaf_iterator const_leaf_it = tree.leaf_begin();
   for (int i = 7; i <= 14; ++i, ++leaf_it, ++const_leaf_it)
   {
-    cout << *leaf_it << endl;
-    //EXPECT_EQ(*leaf_it, i);
+    EXPECT_EQ(*leaf_it, i);
     EXPECT_EQ(*const_leaf_it, i);
   }
   EXPECT_EQ(leaf_it, tree.leaf_end());
   EXPECT_EQ(const_leaf_it, tree.leaf_end());
 }
+
 
 int main(int argc, char** argv) 
 {

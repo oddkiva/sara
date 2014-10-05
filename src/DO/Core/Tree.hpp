@@ -118,7 +118,7 @@ namespace DO {
         }
       }
 
-      return *this;      
+      return *this;
     }
 
     //! Equality operator.
@@ -839,6 +839,8 @@ namespace DO {
     template <bool IsConst>
     class LeafIterator : public DepthFirstIterator<IsConst>
     {
+      template <bool IsConst> friend class LeafIterator;
+
       typedef LeafIterator self_type;
       typedef DepthFirstIterator<IsConst> base_type;
       typedef typename base_type::node_pointer node_pointer;
@@ -854,13 +856,17 @@ namespace DO {
       inline LeafIterator(node_pointer node_ptr)
         : base_type(node_ptr)
       {
-        init();
+        if (!_node_ptr)
+          return;
+        while (_node_ptr->_first_child)
+          base_type::operator++();
       }
 
-      inline LeafIterator(const NodeHandle<false>& node)
-        : base_type(node.self())
+      inline LeafIterator(const LeafIterator<false>& node)
+        : base_type()
       {
-        init();
+        _node_ptr = node._node_ptr;
+        _root_node_ptr = node._root_node_ptr;
       }
 
       self_type& operator++()
@@ -900,15 +906,6 @@ namespace DO {
         LeafIterator prev(*this);
         operator--();
         return prev;
-      }
-
-    private:
-      void init()
-      {
-        if (!_node_ptr)
-          return;
-        while (_node_ptr->_first_child)
-          base_type::operator++();
       }
     };
 
