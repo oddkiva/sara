@@ -15,10 +15,12 @@
 #ifndef DO_CORE_TREE_HPP
 #define DO_CORE_TREE_HPP
 
-#include "Meta.hpp"
-#include <queue>
-#include <stack>
 #include <fstream>
+#include <queue>
+#include <map>
+#include <stack>
+
+#include <DO/Core/Meta.hpp>
 
 namespace DO {
 
@@ -73,6 +75,7 @@ namespace DO {
 
     //! Copy constructor.
     inline Tree(const Tree& t)
+      : _root_node_ptr(0)
     {
       *this = t;
     }
@@ -87,45 +90,46 @@ namespace DO {
     inline Tree& operator=(const Tree& t)
     {
       clear();
-      
-      const_node_handle src_node = t.begin();
-      set_root(*src_node);
-      node_handle dst_node = begin();
 
-      while (src_node != 0)
+      if (t.empty())
+        return *this;
+
+      // Mapping between source node and destination nodes.
+      std::map<const Node *, Node *> src_to_dst;
+
+      // Initialize the copy.
+      set_root(*t.begin());
+      src_to_dst[t.begin()] = begin();
+
+      // Loop.
+      const_depth_first_iterator src_node = ++t.depth_first_begin();
+      const_depth_first_iterator src_node_end = t.depth_first_end();
+      for ( ; src_node != src_node_end; ++src_node)
       {
-        if (src_node.first_child() != 0)
-        {
-          const_node_handle child = src_node.first_child();
-          dst_node = append_child(dst_node, *child);
-          src_node = child;
-        }
-        else
-        {
-          while (src_node.next_sibling() == 0 && src_node != t.begin())
-          {
-            src_node = src_node.parent();
-            dst_node = dst_node.parent();
-          }
-          if (src_node == t.begin())
-            src_node = 0;
-          else if (src_node.next_sibling() != 0)
-          {
-            const_node_handle sibling = src_node.next_sibling();
-            dst_node = insert_sibling_after(dst_node, *sibling);
-            src_node = sibling;
-          }
-        }
+        // Parent of the source node.
+        const Node *src_parent_node = src_node.parent();
+        // Parent of the destination node.
+        Node *dst_parent_node = src_to_dst[src_parent_node];
+
+        // Create the new node.
+        Node *dst_node = new Node(*src_node);
+
+        // Connect the parent and the new child.
+        dst_parent_node->append_child(dst_node);
+
+        // Update the mapping.
+        src_to_dst[src_node] = dst_node;
       }
 
       return *this;
     }
 
+#ifndef FIXME
     //! Equality operator.
     // \todo: you, dummy! That's false. Because equality can happen even if 
     // the tree structures differs. 
     // Check that each node also has the same number of children. Proof?
-    /*bool operator==(const Tree& t) const
+    bool operator==(const Tree& t) const
     {
       const_depth_first_iterator
         v1 = depth_first_begin(),
@@ -140,7 +144,8 @@ namespace DO {
       }
 
       return true;
-    }*/
+    }
+#endif
 
     //! Inequality operator.
     inline bool operator!=(const Tree& t) const
@@ -149,8 +154,10 @@ namespace DO {
     }
 
     //! Swap function.
-    inline void swap(const Tree& t)
-    { swap(_root_node_ptr, t._root_node_ptr); }
+    inline void swap(Tree& t)
+    {
+      std::swap(_root_node_ptr, t._root_node_ptr);
+    }
 
     //! Clear function.
     inline void clear()
@@ -161,7 +168,7 @@ namespace DO {
       std::stack<Node *> nodes;
       depth_first_iterator n = depth_first_begin();
       for ( ; n != depth_first_end(); ++n)
-        nodes.push(n.self());
+        nodes.push(n);
 
       while (!nodes.empty())
       {
@@ -192,11 +199,11 @@ namespace DO {
     inline node_handle insert_sibling_before(node_handle n, const T& v)
     {
       // If I am the root, not allowed.
-      if (!n.self() || n.parent() == node_handle())
+      if (!n || n.parent() == node_handle())
         throw NullNodeHandleException();
 
       node_handle sibling(new Node(v));
-      n.self()->insert_sibling_before(sibling.self());
+      n.self()->insert_sibling_before(sibling);
       return sibling;
     }
 
@@ -205,11 +212,11 @@ namespace DO {
     inline node_handle insert_sibling_after(node_handle n, const T& v)
     {
       // If I am the root, not allowed.
-      if (!n.self() || n.parent() == node_handle())
+      if (!n || n.parent() == node_handle())
         throw NullNodeHandleException();
 
       node_handle sibling(new Node(v));
-      n.self()->insert_sibling_after(sibling.self());
+      n.self()->insert_sibling_after(sibling);
       return sibling;
     }
 
@@ -219,7 +226,7 @@ namespace DO {
       if (n == node_handle())
         throw NullNodeHandleException();
       node_handle child(new Node(v));
-      n.self()->append_child(child.self());
+      n.self()->append_child(child);
       return child;
     }
 
@@ -229,29 +236,30 @@ namespace DO {
       if (n == node_handle())
         throw NullNodeHandleException();
       node_handle child(new Node(v));
-      n.self()->prepend_child(child.self());
+      n.self()->prepend_child(child);
       return child;
     }
 
     //! Append child tree to specified node.
     inline void append_child_tree(node_handle node, Tree& tree)
     {
-      node.self()->append_child(tree.begin().self());
+      node.self()->append_child(tree.begin());
     }
 
     //! Prepend child tree to specified node.
     inline void prepend_child_tree(node_handle node, Tree& tree)
     {
-      node.self()->prepend_child(tree.begin().self());
+      node.self()->prepend_child(tree.begin());
     }
 
+#ifdef FIXME
     //! Cut the tree at the specified node which becomes the root of the subtree.
     //! \todo: check if the implementation is correct.
     inline Tree cut_tree(node_handle node)
     {
-      node.parent().remove_child(node);
+      node.parent().self()->remove_child(node);
       Tree t;
-      t._root_node_ptr = node.self();
+      t._root_node_ptr = node;
       return t;
     }
 
@@ -259,11 +267,12 @@ namespace DO {
     //! \todo: check if the implementation is correct.
     inline void delete_subtree(node_handle node)
     {
-      node.parent().remove_child(node);
+      node.parent().self()->remove_child(node);
       Tree t;
       t._root_node_ptr = node.self();
       t.clear();
     }
+#endif
 
     //! Returns the root of the tree.
     inline node_handle begin()
@@ -566,6 +575,11 @@ namespace DO {
       {
       }
 
+      inline operator node_pointer()
+      {
+        return _node_ptr;
+      }
+
       inline reference operator*() const
       {
         if (!_node_ptr)
@@ -631,24 +645,6 @@ namespace DO {
       inline self_type last_child() const
       {
         return _node_ptr->_last_child;
-      }
-
-      inline bool is_first_child() const
-      {
-        if (!_node_ptr)
-          throw NullNodeHandleException();
-        if (!_node_ptr->_parent)
-          return true;
-        return _node_ptr == _node_ptr->_parent->_first_child;
-      }
-
-      inline bool is_last_child() const
-      {
-        if (!_node_ptr)
-          throw NullNodeHandleException();
-        if (!_node_ptr->_parent)
-          return true;
-        return _node_ptr == _node_ptr->_parent->_last_child;
       }
 
     protected:
@@ -809,7 +805,7 @@ namespace DO {
       }
 
       inline BreadthFirstIterator(const NodeHandle<false>& node)
-        : base_type(node.self())
+        : base_type(node)
       {
         _queue.push(node.self());
       }

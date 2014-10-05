@@ -109,6 +109,8 @@ TEST(TestTree, test_default_constructor)
   EXPECT_TRUE(tree.empty());
 }
 
+
+// Test copy.
 TEST(TestTree, test_copy)
 {
   /*
@@ -150,15 +152,98 @@ TEST(TestTree, test_copy)
 
   Tree<int> clone(tree);
 
-  //breadth_first_iterator bfs_tree_it = tree.breadth_first_begin();
-  //breadth_first_iterator bfs_clone_it = clone.breadth_first_begin();
-  //for (int i = 0; i <= 14; ++i, ++bfs_tree_it, ++bfs_clone_it)
-  //{
-  //  EXPECT_EQ(*bfs_tree_it, i);
-  //  EXPECT_EQ(*bfs_clone_it, i);
-  //}
-
+  breadth_first_iterator bfs_tree_it = tree.breadth_first_begin();
+  breadth_first_iterator bfs_clone_it = clone.breadth_first_begin();
+  for (int i = 0; i <= 14; ++i, ++bfs_tree_it, ++bfs_clone_it)
+  {
+    EXPECT_EQ(*bfs_tree_it, i);
+    EXPECT_EQ(*bfs_clone_it, i);
+  }
 }
+
+
+TEST(TestTree, test_swap)
+{
+  Tree<int> tree;
+  tree.set_root(0);
+  node_handle n0  = tree.begin();
+  node_handle n1  = tree.append_child(n0, 1);
+  node_handle n2  = tree.append_child(n0, 2);
+  node_handle n3  = tree.append_child(n1, 3);
+  node_handle n4  = tree.append_child(n1, 4);
+  node_handle n5  = tree.append_child(n2, 5);
+  node_handle n6  = tree.append_child(n2, 6);
+
+  Tree<int> another_tree;
+  another_tree.set_root(0);
+  n0  = another_tree.begin();
+  n1  = another_tree.append_child(n0, 1);
+  n2  = another_tree.append_child(n0, 2);
+
+  tree.swap(another_tree);
+
+  breadth_first_iterator it;
+  int num_vertices;
+
+  num_vertices = 0;
+  for (it = tree.breadth_first_begin(); 
+       it != tree.breadth_first_end(); ++it)
+    ++num_vertices;
+  EXPECT_EQ(num_vertices, 3);
+
+  num_vertices = 0;
+  for (it = another_tree.breadth_first_begin();
+       it != another_tree.breadth_first_end(); ++it)
+    ++num_vertices;
+  EXPECT_EQ(num_vertices, 7);
+}
+
+
+// Test cut_tree and delete_subtree
+// TODO.
+TEST(TestTree, test_cut_tree_and_delete_subtree)
+{
+   /*
+  We construct the following tree.
+                0
+               / \
+              /   \
+             /     \
+            /       \
+           /         \
+          1           2
+         / \         /  \
+        /   \       /    \
+       3     4     5      6
+      / \   / \   / \    / \
+     7   8 9  10 11  12 13  14
+  */
+
+  Tree<int> tree;
+  tree.set_root(0);
+  node_handle n0  = tree.begin();
+
+  node_handle n1  = tree.append_child(n0, 1);
+  node_handle n2  = tree.append_child(n0, 2);
+
+  node_handle n3  = tree.append_child(n1, 3);
+  node_handle n4  = tree.append_child(n1, 4);
+  node_handle n5  = tree.append_child(n2, 5);
+  node_handle n6  = tree.append_child(n2, 6);
+
+  node_handle n7  = tree.append_child(n3, 7);
+  node_handle n8  = tree.append_child(n3, 8);
+  node_handle n9  = tree.append_child(n4, 9);
+  node_handle n10 = tree.append_child(n4, 10);
+  node_handle n11 = tree.append_child(n5, 11);
+  node_handle n12 = tree.append_child(n5, 12);
+  node_handle n13 = tree.append_child(n6, 13);
+  node_handle n14 = tree.append_child(n6, 14);
+
+  //tree.cut_tree(n4);
+  //tree.delete_subtree(n2);
+}
+
 
 // Test basic functionalities.
 TEST(TestTree, test_set_root_and_empty)
