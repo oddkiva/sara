@@ -20,4 +20,3 @@ add_subdirectory(Geometry)
 #add_subdirectory(FeatureMatching)
 
 #add_subdirectory(VideoCapture)
-#add_subdirectory(ChamferDistance)
