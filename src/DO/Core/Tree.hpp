@@ -15,10 +15,12 @@
 #ifndef DO_CORE_TREE_HPP
 #define DO_CORE_TREE_HPP
 
-#include "Meta.hpp"
-#include <queue>
-#include <stack>
 #include <fstream>
+#include <queue>
+#include <map>
+#include <stack>
+
+#include <DO/Core/Meta.hpp>
 
 namespace DO {
 
@@ -38,7 +40,7 @@ namespace DO {
     class Node;
     class NullNodeHandleException : public std::exception {};
     template <bool IsConst> class NodeHandle;
-    template <bool IsConst> class ChildrenIterator;
+    template <bool IsConst> class SiblingIterator;
     template <bool IsConst> class DepthFirstIterator;
     template <bool IsConst> class BreadthFirstIterator;
     template <bool IsConst> class BreadthFirstIterator;
@@ -53,13 +55,13 @@ namespace DO {
 
     typedef Node node_type;
     typedef NodeHandle<false> node_handle;
-    typedef ChildrenIterator<false> children_iterator;
+    typedef SiblingIterator<false> sibling_iterator;
     typedef DepthFirstIterator<false> depth_first_iterator;
     typedef BreadthFirstIterator<false> breadth_first_iterator;
     typedef LeafIterator<false> leaf_iterator;
 
     typedef NodeHandle<true> const_node_handle;
-    typedef ChildrenIterator<true> const_children_iterator;
+    typedef SiblingIterator<true> const_sibling_iterator;
     typedef DepthFirstIterator<true> const_depth_first_iterator;
     typedef BreadthFirstIterator<true> const_breadth_first_iterator;
     typedef LeafIterator<true> const_leaf_iterator;
@@ -67,64 +69,67 @@ namespace DO {
   public: /* interface */
     //! Default constructor
     inline Tree()
-      : _root_node_ptr(0) {}
-
-    //! Constructor with root vertex.
-    inline Tree(const T& v)
-      : _root_node_ptr(new Node(v)) {}
+      : _root_node_ptr(0)
+    {
+    }
 
     //! Copy constructor.
     inline Tree(const Tree& t)
       : _root_node_ptr(0)
-    { *this = t; }
+    {
+      *this = t;
+    }
 
     //! Destructor.
     inline ~Tree()
-    { clear(); }
+    {
+      clear();
+    }
 
     //! Assignment operator.
     inline Tree& operator=(const Tree& t)
     {
       clear();
-      
-      const_node_handle src_node = t.begin();
-      set_root(*src_node);
-      node_handle dst_node = begin();
 
-      while (src_node != 0)
+      if (t.empty())
+        return *this;
+
+      // Mapping between source node and destination nodes.
+      std::map<const Node *, Node *> src_to_dst;
+
+      // Initialize the copy.
+      set_root(*t.begin());
+      src_to_dst[t.begin()] = begin();
+
+      // Loop.
+      const_depth_first_iterator src_node = ++t.depth_first_begin();
+      const_depth_first_iterator src_node_end = t.depth_first_end();
+      for ( ; src_node != src_node_end; ++src_node)
       {
-        if (src_node.first_child() != 0)
-        {
-          const_node_handle child = src_node.first_child();
-          dst_node = append_child(dst_node, *child);
-          src_node = child;
-        }
-        else
-        {
-          while (src_node.next_sibling() == 0 && src_node != t.begin())
-          {
-            src_node = src_node.parent();
-            dst_node = dst_node.parent();
-          }
-          if (src_node == t.begin())
-            src_node = 0;
-          else if (src_node.next_sibling() != 0)
-          {
-            const_node_handle sibling = src_node.next_sibling();
-            dst_node = insert_sibling_after(dst_node, *sibling);
-            src_node = sibling;
-          }
-        }
+        // Parent of the source node.
+        const Node *src_parent_node = src_node.parent();
+        // Parent of the destination node.
+        Node *dst_parent_node = src_to_dst[src_parent_node];
+
+        // Create the new node.
+        Node *dst_node = new Node(*src_node);
+
+        // Connect the parent and the new child.
+        dst_parent_node->append_child(dst_node);
+
+        // Update the mapping.
+        src_to_dst[src_node] = dst_node;
       }
 
-      return *this;      
+      return *this;
     }
 
+#ifndef FIXME
     //! Equality operator.
     // \todo: you, dummy! That's false. Because equality can happen even if 
     // the tree structures differs. 
     // Check that each node also has the same number of children. Proof?
-    /*bool operator==(const Tree& t) const
+    bool operator==(const Tree& t) const
     {
       const_depth_first_iterator
         v1 = depth_first_begin(),
@@ -139,15 +144,20 @@ namespace DO {
       }
 
       return true;
-    }*/
+    }
+#endif
 
     //! Inequality operator.
     inline bool operator!=(const Tree& t) const
-    { return !(*this == t); }
+    {
+      return !(*this == t);
+    }
 
     //! Swap function.
-    inline void swap(const Tree& t)
-    { swap(_root_node_ptr, t._root_node_ptr); }
+    inline void swap(Tree& t)
+    {
+      std::swap(_root_node_ptr, t._root_node_ptr);
+    }
 
     //! Clear function.
     inline void clear()
@@ -155,13 +165,10 @@ namespace DO {
       if (empty())
         return;
 
-      //std::cout << "Clearing" << std::endl;
       std::stack<Node *> nodes;
-      for (depth_first_iterator n = depth_first_begin(); n != depth_first_end(); ++n)
-      {
-        //std::cout << "Pushing " << *n << std::endl;
-        nodes.push(n());
-      }
+      depth_first_iterator n = depth_first_begin();
+      for ( ; n != depth_first_end(); ++n)
+        nodes.push(n);
 
       while (!nodes.empty())
       {
@@ -175,32 +182,28 @@ namespace DO {
 
     //! Returns if the tree is empty.
     inline bool empty() const
-    { return begin() == end(); }
+    {
+      return begin() == end();
+    }
 
     //! Set the root of the tree with value 'v'.
     inline void set_root(const T& v)
     {
       if (empty())
         _root_node_ptr = new Node;
-      _root_node_ptr->set_value(v);
+      _root_node_ptr->_value = v;
     }
 
     //! Insert a sibling with value 'v' before the specified node and returns
     //! the child node handle.
     inline node_handle insert_sibling_before(node_handle n, const T& v)
     {
-      // If the tree is empty
-      if (n == begin() && empty())
-      {
-        set_root(v);
-        return begin();
-      }
-      
-      if (n == node_handle())
+      // If I am the root, not allowed.
+      if (!n || n.parent() == node_handle())
         throw NullNodeHandleException();
 
       node_handle sibling(new Node(v));
-      n()->insert_sibling_before(sibling());
+      n.self()->insert_sibling_before(sibling);
       return sibling;
     }
 
@@ -208,18 +211,12 @@ namespace DO {
     //! the child node handle.
     inline node_handle insert_sibling_after(node_handle n, const T& v)
     {
-      // If the tree is empty
-      if (n == begin() && empty())
-      {
-        set_root(v);
-        return begin();
-      }
-
-      if (n == node_handle())
+      // If I am the root, not allowed.
+      if (!n || n.parent() == node_handle())
         throw NullNodeHandleException();
 
       node_handle sibling(new Node(v));
-      n()->insert_sibling_after(sibling());
+      n.self()->insert_sibling_after(sibling);
       return sibling;
     }
 
@@ -229,7 +226,7 @@ namespace DO {
       if (n == node_handle())
         throw NullNodeHandleException();
       node_handle child(new Node(v));
-      n()->append_child(child());
+      n.self()->append_child(child);
       return child;
     }
 
@@ -239,25 +236,30 @@ namespace DO {
       if (n == node_handle())
         throw NullNodeHandleException();
       node_handle child(new Node(v));
-      n()->prepend_child(child());
+      n.self()->prepend_child(child);
       return child;
     }
 
     //! Append child tree to specified node.
     inline void append_child_tree(node_handle node, Tree& tree)
-    { node()->append_child(tree.begin()()); }
+    {
+      node.self()->append_child(tree.begin());
+    }
 
     //! Prepend child tree to specified node.
     inline void prepend_child_tree(node_handle node, Tree& tree)
-    { node()->prepend_child(tree.begin()()); }
+    {
+      node.self()->prepend_child(tree.begin());
+    }
 
+#ifdef FIXME
     //! Cut the tree at the specified node which becomes the root of the subtree.
     //! \todo: check if the implementation is correct.
     inline Tree cut_tree(node_handle node)
     {
-      node.parent().remove_child(node);
+      node.parent().self()->remove_child(node);
       Tree t;
-      t._root_node_ptr = node();
+      t._root_node_ptr = node;
       return t;
     }
 
@@ -265,95 +267,186 @@ namespace DO {
     //! \todo: check if the implementation is correct.
     inline void delete_subtree(node_handle node)
     {
-      node.parent().remove_child(node);
+      node.parent().self()->remove_child(node);
       Tree t;
-      t._root_node_ptr = node();
+      t._root_node_ptr = node.self();
       t.clear();
     }
+#endif
 
     //! Returns the root of the tree.
     inline node_handle begin()
-    { return _root_node_ptr; }
+    {
+      return _root_node_ptr;
+    }
+
     //! Returns the last node of the tree.
     inline node_handle end()
-    { return 0; };
-
-    //! Returns the parent of the input node.
-    inline node_handle parent_of(node_handle v)
     {
-      if (v == node_handle())
-        throw NullNodeHandleException();
-      return v()->_parent;
-    }
+      return 0;
+    };
+
     //! Returns the first child iterator.
-    inline children_iterator children_begin(node_handle v)
-    { return children_iterator(v()); }
+    inline sibling_iterator children_begin(node_handle v)
+    {
+      return sibling_iterator(v.first_child());
+    }
+
     //! Returns the last child iterator.
-    inline children_iterator children_end()
-    { return children_iterator(); }
+    inline sibling_iterator children_rbegin(node_handle v)
+    {
+      return sibling_iterator(v.last_child());
+    }
+
+    //! Returns the last child iterator.
+    inline sibling_iterator children_end()
+    {
+      return sibling_iterator();
+    }
+
+    //! Returns the last child iterator.
+    inline sibling_iterator children_rend()
+    {
+      return sibling_iterator();
+    }
 
     //! Returns the first depth-first iterator.
     inline depth_first_iterator depth_first_begin()
-    { return depth_first_iterator(_root_node_ptr); }
+    {
+      return depth_first_iterator(_root_node_ptr);
+    }
+
+    //! Returns the first depth-first iterator.
+    inline depth_first_iterator depth_first_rbegin()
+    {
+      Node *last = _root_node_ptr;
+      while (last->_last_child)
+        last = last->_last_child;
+      return depth_first_iterator(last);
+    }
+
     //! Returns the last depth-first iterator.
     inline depth_first_iterator depth_first_end()
-    { return depth_first_iterator(); }
+    {
+      return depth_first_iterator();
+    }
+
+    //! Returns the last depth-first reverse iterator.
+    inline depth_first_iterator depth_first_rend()
+    {
+      return depth_first_end();
+    }
 
     //! Returns the first breadth-first iterator.
     inline breadth_first_iterator breadth_first_begin()
-    { return breadth_first_iterator(_root_node_ptr); }
+    {
+      return breadth_first_iterator(_root_node_ptr);
+    }
+
     //! Returns the last breadth-first iterator.
     inline breadth_first_iterator breadth_first_end()
-    { return breadth_first_iterator(); }
+    {
+      return breadth_first_iterator();
+    }
 
     //! Returns the first leaf iterator
     inline leaf_iterator leaf_begin()
-    { return leaf_iterator(_root_node_ptr); }
+    {
+      return leaf_iterator(_root_node_ptr);
+    }
+
     //! Returns the last leaf iterator.
     inline leaf_iterator leaf_end()
-    { return leaf_iterator(); }
+    {
+      return leaf_iterator();
+    }
 
     //! Returns the root of the tree (constant accessor).
     inline const_node_handle begin() const
-    { return _root_node_ptr; }
+    {
+      return _root_node_ptr;
+    }
+
     //! Returns the last node of the tree (constant access).
     inline const_node_handle end() const
-    { return 0; }
-
-    //! Returns the parent of the input node.
-    inline const_node_handle parent_of(node_handle v) const
     {
-      if (v == const_node_handle())
-        throw NullNodeHandleException();
-      return v()->_parent;
+      return 0;
     }
+
     //! Returns the first constant child iterator.
-    inline const_children_iterator children_begin(const_node_handle v) const
-    { return const_children_iterator(v()); }
+    inline const_sibling_iterator children_begin(const_node_handle v) const
+    {
+      return const_sibling_iterator(v.first_child());
+    }
+
+    //! Returns the last child iterator.
+    inline sibling_iterator children_rbegin(node_handle v) const
+    {
+      return sibling_iterator(v.last_child());
+    }
+
     //! Returns the last constant child iterator.
-    inline const_children_iterator children_end() const
-    { return const_children_iterator(); }
+    inline const_sibling_iterator children_end() const
+    {
+      return const_sibling_iterator();
+    }
+
+    //! Returns the last constant child iterator.
+    inline const_sibling_iterator children_rend() const
+    {
+      return const_sibling_iterator();
+    }
 
     //! Returns the first constant depth-first iterator.
     inline const_depth_first_iterator depth_first_begin() const
-    { return const_depth_first_iterator(_root_node_ptr); }
+    {
+      return const_depth_first_iterator(_root_node_ptr);
+    }
+
+    //! Returns the last const depth-first iterator.
+    inline depth_first_iterator depth_first_rbegin() const
+    {
+      const Node *last = _root_node_ptr;
+      while (last->_last_child)
+        last = last->_last_child;
+      return depth_first_iterator(last);
+    }
+
     //! Returns the last constant depth-first iterator.
     inline const_depth_first_iterator depth_first_end() const
-    { return const_depth_first_iterator(); }
+    {
+      return const_depth_first_iterator();
+    }
+
+    //! Returns the last const depth-first iterator.
+    inline depth_first_iterator depth_first_rend() const
+    {
+      return const_depth_first_iterator();
+    }
 
     //! Returns the first constant breadth-first iterator.
     inline const_breadth_first_iterator breadth_first_begin() const
-    { return const_breadth_first_iterator(_root_node_ptr); }
+    {
+      return const_breadth_first_iterator(_root_node_ptr);
+    }
+
     //! Returns the last constant breadth-first iterator.
     inline const_breadth_first_iterator breadth_first_end() const
-    { return const_breadth_first_iterator(); }
+    {
+      return const_breadth_first_iterator();
+    }
 
     //! Returns the first leaf iterator
     inline const_leaf_iterator leaf_begin() const
-    { return const_leaf_iterator(_root_node_ptr); }
+    {
+      return const_leaf_iterator(_root_node_ptr);
+    }
+
     //! Returns the last leaf iterator.
     inline const_leaf_iterator leaf_end() const
-    { return const_leaf_iterator(); }
+    {
+      return const_leaf_iterator();
+    }
 
   private: /* classes */
     // Node implementation.
@@ -376,30 +469,30 @@ namespace DO {
       {
       }
 
-      void set_value(const T& v)
-      { _value = v; }
-
       void insert_sibling_before(Node *sibling)
       {
+        sibling->_parent = this->_parent;
+        sibling->_prev_sibling = _prev_sibling;
+        sibling->_next_sibling = this;
+
         if (_prev_sibling)
           _prev_sibling->_next_sibling = sibling;
         else
           _parent->_first_child = sibling;
-        
         _prev_sibling = sibling;
-        sibling->_next_sibling = this;
-        sibling->_parent = this->_parent;
       }
 
       void insert_sibling_after(Node *sibling)
       {
+        sibling->_parent = this->_parent;
+        sibling->_prev_sibling = this;
+        sibling->_next_sibling = _next_sibling;
+
         if (_next_sibling)
           _next_sibling->_prev_sibling = sibling;
         else
           _parent->_last_child = sibling;
         _next_sibling = sibling;
-        sibling->_prev_sibling = this;
-        sibling->_parent = this->_parent;
       }
 
       void append_child(Node *child)
@@ -408,7 +501,7 @@ namespace DO {
         child->_prev_sibling = _last_child;
         child->_next_sibling = 0;
 
-        if (_first_child == 0)
+        if (!_first_child)
           _first_child = child;
         if (_last_child)
           _last_child->_next_sibling = child;
@@ -421,7 +514,7 @@ namespace DO {
         child->_prev_sibling = 0;
         child->_next_sibling = _first_child;
 
-        if (_last_child == 0)
+        if (!_last_child)
           _last_child = child;
         if (_first_child)
           _first_child->_prev_sibling = child;
@@ -462,21 +555,29 @@ namespace DO {
     template <bool IsConst>
     class NodeHandle
     {
+      template <bool IsConst2> friend class NodeHandle;
+
     public:
       // STL style typedefs.
       typedef NodeHandle self_type;
-      typedef typename Meta::Choose<IsConst, const Node *, Node *>::Type 
+      typedef typename Meta::Choose<IsConst, const Node *, Node *>::Type
         node_pointer;
       typedef typename Meta::Choose<IsConst, const T&, T&>::Type reference;
       typedef typename Meta::Choose<IsConst, const T *, T *>::Type pointer;
 
       inline NodeHandle(node_pointer node_ptr = 0)
         : _node_ptr(node_ptr)
-      {}
-
-      inline NodeHandle(const NodeHandle<false>& node)
-        : _node_ptr(node())
       {
+      }
+
+      inline NodeHandle(const NodeHandle<false>& other)
+        : _node_ptr(other._node_ptr)
+      {
+      }
+
+      inline operator node_pointer()
+      {
+        return _node_ptr;
       }
 
       inline reference operator*() const
@@ -493,55 +594,57 @@ namespace DO {
         return &(_node_ptr->_value);
       }
 
-      // Equality and difference comparisons
-      template <bool is_const_2>
-      inline bool operator==(const NodeHandle<is_const_2>& iter2) const
-      { return _node_ptr == iter2(); }
-
-      template <bool is_const_2>
-      inline bool operator!=(const NodeHandle<is_const_2>& iter2) const
-      { return _node_ptr != iter2(); }
-
-      inline bool operator==(node_pointer node) const
-      { return _node_ptr == node; }
-
-      inline bool operator!=(node_pointer node) const
-      { return _node_ptr != node; }
-
-      inline node_pointer operator()() const
-      { return _node_ptr; }
-
-      inline self_type parent() const
-      { return _node_ptr->_parent; }
-
-      inline self_type prev_sibling() const
-      { return _node_ptr->_prev_sibling; }
-
-      inline self_type next_sibling() const
-      { return _node_ptr->_next_sibling; }
-
-      inline self_type first_child() const
-      { return _node_ptr->_first_child; }
-
-      inline self_type last_child() const
-      { return _node_ptr->_last_child; }
-
-      inline bool is_first_child() const
+      // Comparison operators.
+      inline bool operator==(const self_type& other) const
       {
-        if (!_node_ptr)
-          throw NullNodeHandleException();
-        if (!_node_ptr->_parent)
-          return true;
-        return _node_ptr == _node_ptr->_parent->_first_child;
+        return _node_ptr == other._node_ptr;
       }
 
-      inline bool is_last_child() const
+      inline bool operator!=(const self_type& other) const
       {
-        if (!_node_ptr)
-          throw NullNodeHandleException();
-        if (!_node_ptr->_parent)
-          return true;
-        return _node_ptr == _node_ptr->_parent->_last_child;
+        return !this->operator==(other);
+      }
+
+      template <bool IsConst2>
+      inline bool operator==(const NodeHandle<IsConst2>& other) const
+      {
+        return _node_ptr == other._node_ptr;
+      }
+
+      template <bool IsConst2>
+      inline bool operator!=(const NodeHandle<IsConst2>& other) const
+      {
+        return !this->operator==<IsConst2>(other);
+      }
+
+      inline node_pointer self() const
+      {
+        return _node_ptr;
+      }
+
+      inline self_type parent() const
+      {
+        return _node_ptr->_parent;
+      }
+
+      inline self_type prev_sibling() const
+      {
+        return _node_ptr->_prev_sibling;
+      }
+
+      inline self_type next_sibling() const
+      {
+        return _node_ptr->_next_sibling;
+      }
+
+      inline self_type first_child() const
+      {
+        return _node_ptr->_first_child;
+      }
+
+      inline self_type last_child() const
+      {
+        return _node_ptr->_last_child;
       }
 
     protected:
@@ -550,22 +653,22 @@ namespace DO {
 
     // Children iterator implementation.
     template <bool IsConst>
-    class ChildrenIterator : public NodeHandle<IsConst>
+    class SiblingIterator : public NodeHandle<IsConst>
     {
-      typedef ChildrenIterator self_type;
+      typedef SiblingIterator self_type;
       typedef NodeHandle<IsConst> base_type;
       typedef typename base_type::node_pointer node_pointer;
       using base_type::_node_ptr;
 
     public:
-      inline ChildrenIterator()
-        : base_type(0) {}
+      inline SiblingIterator()
+        : base_type() {}
 
-      inline ChildrenIterator(node_pointer parent)
-        : base_type(parent->_first_child) {}
+      inline SiblingIterator(const Node *node)
+        : base_type(node) {}
       
-      inline ChildrenIterator(const NodeHandle<false>& node)
-        : base_type(node()->_first_child) {}
+      inline SiblingIterator(const NodeHandle<false>& node)
+        : base_type(node.self()) {}
 
       inline self_type& operator++()
       {
@@ -583,14 +686,14 @@ namespace DO {
 
       inline self_type operator++(int) const
       {
-        ChildrenIterator prev(*this);
+        SiblingIterator prev(*this);
         operator++();
         return prev;
       }
 
       inline self_type operator--(int) const
       {
-        ChildrenIterator prev(*this);
+        SiblingIterator prev(*this);
         operator--();
         return prev;
       }
@@ -609,19 +712,27 @@ namespace DO {
 
     public:
       inline DepthFirstIterator()
-        : base_type(0) {}
+        : base_type()
+      {
+      }
 
       inline DepthFirstIterator(node_pointer node_ptr)
-        : base_type(node_ptr), _root_node_ptr(node_ptr) {}
+        : base_type(node_ptr), _root_node_ptr(node_ptr)
+      {
+      }
 
       inline DepthFirstIterator(const NodeHandle<false>& node)
-        : base_type(node), _root_node_ptr(node()) {}
+        : base_type(node), _root_node_ptr(node.self())
+      {
+      }
 
       self_type& operator++()
       {
+        // End of depth-first search?
         if (_node_ptr == 0)
           return *this;
 
+        // Go to the first child.
         if (_node_ptr->_first_child)
           _node_ptr = _node_ptr->_first_child;
         else
@@ -683,15 +794,21 @@ namespace DO {
 
     public:
       inline BreadthFirstIterator()
-        : base_type(0) {}
+        : base_type()
+      {
+      }
 
       inline BreadthFirstIterator(node_pointer node_ptr)
         : base_type(node_ptr)
-      { _queue.push(node_ptr); }
+      {
+        _queue.push(node_ptr);
+      }
 
       inline BreadthFirstIterator(const NodeHandle<false>& node)
-        : base_type(node())
-      { _queue.push(node()); }
+        : base_type(node)
+      {
+        _queue.push(node.self());
+      }
 
       self_type& operator++()
       {
@@ -718,6 +835,8 @@ namespace DO {
     template <bool IsConst>
     class LeafIterator : public DepthFirstIterator<IsConst>
     {
+      template <bool IsConst2> friend class LeafIterator;
+
       typedef LeafIterator self_type;
       typedef DepthFirstIterator<IsConst> base_type;
       typedef typename base_type::node_pointer node_pointer;
@@ -726,18 +845,24 @@ namespace DO {
 
     public:
       inline LeafIterator()
-        : base_type() {}
+        : base_type()
+      {
+      }
 
       inline LeafIterator(node_pointer node_ptr)
         : base_type(node_ptr)
       {
-        init();
+        if (!_node_ptr)
+          return;
+        while (_node_ptr->_first_child)
+          base_type::operator++();
       }
 
-      inline LeafIterator(const NodeHandle<IsConst>& node)
-        : base_type(node())
+      inline LeafIterator(const LeafIterator<false>& node)
+        : base_type()
       {
-        init();
+        _node_ptr = node._node_ptr;
+        _root_node_ptr = node._root_node_ptr;
       }
 
       self_type& operator++()
@@ -750,7 +875,7 @@ namespace DO {
         return *this;
       }
 
-      self_type& operator--()
+      self_type& operator--() const
       {
         if (!_node_ptr)
           return *this;
@@ -778,15 +903,6 @@ namespace DO {
         operator--();
         return prev;
       }
-
-    private:
-      void init()
-      {
-        if (!_node_ptr)
-          return;
-        while (_node_ptr->_first_child)
-          base_type::operator++();
-      }
     };
 
   private: /* data members */
@@ -810,7 +926,7 @@ namespace DO {
 
     typedef typename Tree<T>::const_breadth_first_iterator
       const_breadth_first_iterator;
-    typedef typename Tree<T>::const_children_iterator const_children_iterator;
+    typedef typename Tree<T>::const_sibling_iterator const_children_iterator;
     for (const_breadth_first_iterator n = tree.breadth_first_begin();
          n != tree.breadth_first_end(); ++n)
     {
