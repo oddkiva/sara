@@ -14,8 +14,6 @@
 #include <DO/Defines.hpp>
 #include <DO/Core/Tree.hpp>
 
-#include <vld.h>
-
 
 using namespace DO;
 using namespace std;
@@ -61,6 +59,7 @@ TEST(TestNodeHandle, test_constructor)
   const_node_handle d;
   const_node_handle e(d);
   const_node_handle g(const_node_pointer(1));
+  e = d;
 
   // Immutable from mutable.
   const_node_handle f(a);
@@ -141,14 +140,14 @@ TEST(TestTree, test_copy)
   node_handle n5  = tree.append_child(n2, 5);
   node_handle n6  = tree.append_child(n2, 6);
 
-  node_handle n7  = tree.append_child(n3, 7);
-  node_handle n8  = tree.append_child(n3, 8);
-  node_handle n9  = tree.append_child(n4, 9);
-  node_handle n10 = tree.append_child(n4, 10);
-  node_handle n11 = tree.append_child(n5, 11);
-  node_handle n12 = tree.append_child(n5, 12);
-  node_handle n13 = tree.append_child(n6, 13);
-  node_handle n14 = tree.append_child(n6, 14);
+  tree.append_child(n3, 7);
+  tree.append_child(n3, 8);
+  tree.append_child(n4, 9);
+  tree.append_child(n4, 10);
+  tree.append_child(n5, 11);
+  tree.append_child(n5, 12);
+  tree.append_child(n6, 13);
+  tree.append_child(n6, 14);
 
   Tree<int> clone(tree);
 
@@ -169,10 +168,10 @@ TEST(TestTree, test_swap)
   node_handle n0  = tree.begin();
   node_handle n1  = tree.append_child(n0, 1);
   node_handle n2  = tree.append_child(n0, 2);
-  node_handle n3  = tree.append_child(n1, 3);
-  node_handle n4  = tree.append_child(n1, 4);
-  node_handle n5  = tree.append_child(n2, 5);
-  node_handle n6  = tree.append_child(n2, 6);
+  tree.append_child(n1, 3);
+  tree.append_child(n1, 4);
+  tree.append_child(n2, 5);
+  tree.append_child(n2, 6);
 
   Tree<int> another_tree;
   another_tree.set_root(0);
@@ -231,14 +230,14 @@ TEST(TestTree, test_cut_tree_and_delete_subtree)
   node_handle n5  = tree.append_child(n2, 5);
   node_handle n6  = tree.append_child(n2, 6);
 
-  node_handle n7  = tree.append_child(n3, 7);
-  node_handle n8  = tree.append_child(n3, 8);
-  node_handle n9  = tree.append_child(n4, 9);
-  node_handle n10 = tree.append_child(n4, 10);
-  node_handle n11 = tree.append_child(n5, 11);
-  node_handle n12 = tree.append_child(n5, 12);
-  node_handle n13 = tree.append_child(n6, 13);
-  node_handle n14 = tree.append_child(n6, 14);
+  tree.append_child(n3, 7);
+  tree.append_child(n3, 8);
+  tree.append_child(n4, 9);
+  tree.append_child(n4, 10);
+  tree.append_child(n5, 11);
+  tree.append_child(n5, 12);
+  tree.append_child(n6, 13);
+  tree.append_child(n6, 14);
 
   //tree.cut_tree(n4);
   //tree.delete_subtree(n2);
@@ -386,7 +385,7 @@ TEST(TestTree, test_const_sibling_iterator)
   tree.append_child(v0, 3);
 
   const Tree<int>& const_tree = tree;
-  const_sibling_iterator const_child = tree.children_begin(v0);
+  const_sibling_iterator const_child = const_tree.children_begin(v0);
   for (int i = 1; i <= 3; ++i, ++const_child)
     EXPECT_EQ(*const_child, i);
   EXPECT_EQ(const_child, tree.children_end());
@@ -423,17 +422,17 @@ TEST(TestDepthFirstIterator, test_depth_first_tree)
   node_handle n1  = tree.append_child(n0, 1);
   node_handle n2  = tree.append_child(n1, 2);
   node_handle n3  = tree.append_child(n2, 3);
-  node_handle n4  = tree.append_child(n3, 4);
+  tree.append_child(n3, 4);
   node_handle n5  = tree.append_child(n1, 5);
-  node_handle n6  = tree.append_child(n5, 6);
-  node_handle n7  = tree.append_child(n5, 7);
+  tree.append_child(n5, 6);
+  tree.append_child(n5, 7);
   node_handle n8  = tree.append_child(n5, 8);
-  node_handle n9  = tree.append_child(n8, 9);
-  node_handle n10 = tree.append_child(n8, 10);
-  node_handle n11 = tree.append_child(n8, 11);
+  tree.append_child(n8, 9);
+  tree.append_child(n8, 10);
+  tree.append_child(n8, 11);
   node_handle n12 = tree.append_child(n0, 12);
   node_handle n13 = tree.append_child(n12, 13);
-  node_handle n14 = tree.append_child(n13, 14);
+  tree.append_child(n13, 14);
 
   depth_first_iterator dfs_it = tree.depth_first_begin();
   const_depth_first_iterator const_dfs_it = tree.depth_first_begin();
@@ -488,14 +487,14 @@ TEST(TestTree, test_breadth_first_iterator)
   node_handle n5  = tree.append_child(n2, 5);
   node_handle n6  = tree.append_child(n2, 6);
 
-  node_handle n7  = tree.append_child(n3, 7);
-  node_handle n8  = tree.append_child(n3, 8);
-  node_handle n9  = tree.append_child(n4, 9);
-  node_handle n10 = tree.append_child(n4, 10);
-  node_handle n11 = tree.append_child(n5, 11);
-  node_handle n12 = tree.append_child(n5, 12);
-  node_handle n13 = tree.append_child(n6, 13);
-  node_handle n14 = tree.append_child(n6, 14);
+  tree.append_child(n3, 7);
+  tree.append_child(n3, 8);
+  tree.append_child(n4, 9);
+  tree.append_child(n4, 10);
+  tree.append_child(n5, 11);
+  tree.append_child(n5, 12);
+  tree.append_child(n6, 13);
+  tree.append_child(n6, 14);
 
   breadth_first_iterator bfs_it = tree.breadth_first_begin();
   const_breadth_first_iterator const_bfs_it = tree.breadth_first_begin();
@@ -540,14 +539,14 @@ TEST(TestTree, test_leaf_iterator)
   node_handle n5  = tree.append_child(n2, 5);
   node_handle n6  = tree.append_child(n2, 6);
 
-  node_handle n7  = tree.append_child(n3, 7);
-  node_handle n8  = tree.append_child(n3, 8);
-  node_handle n9  = tree.append_child(n4, 9);
-  node_handle n10 = tree.append_child(n4, 10);
-  node_handle n11 = tree.append_child(n5, 11);
-  node_handle n12 = tree.append_child(n5, 12);
-  node_handle n13 = tree.append_child(n6, 13);
-  node_handle n14 = tree.append_child(n6, 14);
+  tree.append_child(n3, 7);
+  tree.append_child(n3, 8);
+  tree.append_child(n4, 9);
+  tree.append_child(n4, 10);
+  tree.append_child(n5, 11);
+  tree.append_child(n5, 12);
+  tree.append_child(n6, 13);
+  tree.append_child(n6, 14);
 
   breadth_first_iterator bfs_it = tree.breadth_first_begin();
   const_breadth_first_iterator const_bfs_it = tree.breadth_first_begin();
