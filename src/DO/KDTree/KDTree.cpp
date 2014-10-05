@@ -37,9 +37,9 @@ namespace DO {
 
   // ======================================================================== //
   // k-NN search methods.
-  void KDTree::knnSearch(const double *query, size_t k,
-                         std::vector<int>& indices,
-                         std::vector<double>& sqDists)
+  void KDTree::knn_search(const double *query, size_t k,
+                          std::vector<int>& indices,
+                          std::vector<double>& sqDists)
   {
     flann::Matrix<double> q(const_cast<double *>(query), 1, data_.cols);
     std::vector<std::vector<int> > _indices;
@@ -49,10 +49,10 @@ namespace DO {
     sqDists = _sqDists[0];
   }
 
-  void KDTree::knnSearch(const MatrixXd& queries, size_t k,
-                         std::vector<std::vector<int> >& indices,
-                         std::vector<std::vector<double> >& sqDists,
-                         bool remove1NN)
+  void KDTree::knn_search(const MatrixXd& queries, size_t k,
+                          std::vector<std::vector<int> >& indices,
+                          std::vector<std::vector<double> >& sqDists,
+                          bool remove1NN)
   {
     if (queries.rows() != data_.cols)
     {
@@ -72,37 +72,37 @@ namespace DO {
       index_.knnSearch(q, indices, sqDists, k, search_params_);
   }
 
-  void KDTree::knnSearch(const MatrixXd& queries, size_t k,
-                         std::vector<std::vector<int> >& indices,
-                         bool remove1NN)
+  void KDTree::knn_search(const MatrixXd& queries, size_t k,
+                          std::vector<std::vector<int> >& indices,
+                          bool remove1NN)
   {
     std::vector<std::vector<double> > sqDists;
-    knnSearch(queries, k, indices, sqDists, remove1NN);
+    knn_search(queries, k, indices, sqDists, remove1NN);
   }
 
-  void KDTree::knnSearch(size_t i, size_t k,
-                        std::vector<int>& indices, std::vector<double>& sqDists)
+  void KDTree::knn_search(size_t i, size_t k,
+                          std::vector<int>& indices, std::vector<double>& sqDists)
   {
-    knnSearch(data_[i], k+1, indices, sqDists);
+    knn_search(data_[i], k+1, indices, sqDists);
     indices.erase(indices.begin());
     sqDists.erase(sqDists.begin());
   }
 
-  void KDTree::knnSearch(size_t i, size_t k, std::vector<int>& indices)
+  void KDTree::knn_search(size_t i, size_t k, std::vector<int>& indices)
   {
     std::vector<double> sqDists;
-    knnSearch(i, k, indices, sqDists);
+    knn_search(i, k, indices, sqDists);
   }
 
-  void KDTree::knnSearch(const std::vector<size_t>& queries, size_t k,
-                         std::vector<std::vector<int> >& indices,
-                         std::vector<std::vector<double> >& sqDists)
+  void KDTree::knn_search(const std::vector<size_t>& queries, size_t k,
+                          std::vector<std::vector<int> >& indices,
+                          std::vector<std::vector<double> >& sqDists)
   {
     MatrixXd Q(data_.cols, queries.size());
     for (size_t i = 0; i != queries.size(); ++i)
       for (size_t j = 0; j != data_.cols; ++j)
         Q(j,i) = data_[i][j];
-    knnSearch(Q, k+1, indices, sqDists);
+    knn_search(Q, k+1, indices, sqDists);
     for (size_t i = 0; i != indices.size(); ++i)
     {
       indices[i].erase(indices[i].begin());
@@ -110,18 +110,18 @@ namespace DO {
     }
   }
 
-  void KDTree::knnSearch(const std::vector<size_t>& queries, size_t k,
-                         std::vector<std::vector<int> >& indices)
+  void KDTree::knn_search(const std::vector<size_t>& queries, size_t k,
+                          std::vector<std::vector<int> >& indices)
   {
     std::vector<std::vector<double> > sqDists;
-    knnSearch(queries, k+1, indices, sqDists);
+    knn_search(queries, k+1, indices, sqDists);
   }
 
   // ======================================================================== //
   // Radius search methods.
-  int KDTree::radiusSearch(const double *query, double sqSearchRadius,
-                           std::vector<int>& indices,
-                           std::vector<double>& sqDists)
+  int KDTree::radius_search(const double *query, double sqSearchRadius,
+                            std::vector<int>& indices,
+                            std::vector<double>& sqDists)
   {   
     flann::Matrix<double> q(const_cast<double *>(query), 1, data_.cols);
     flann::Matrix<int> i(&indices[0], 1, indices.size());
@@ -132,10 +132,10 @@ namespace DO {
   }
 
   //! Basic radius search wrapped function.
-  void KDTree::radiusSearch(const MatrixXd& queries, double sqSearchRadius,
-                            std::vector<std::vector<int> >& indices,
-                            std::vector<std::vector<double> >& sqDists,
-                            bool remove1NN)
+  void KDTree::radius_search(const MatrixXd& queries, double sqSearchRadius,
+                             std::vector<std::vector<int> >& indices,
+                             std::vector<std::vector<double> >& sqDists,
+                             bool remove1NN)
   {
     if (queries.rows() != data_.cols)
     {
@@ -154,34 +154,34 @@ namespace DO {
     }
     else
       index_.radiusSearch(q, indices, sqDists,
-                          static_cast<float>(sqSearchRadius), search_params_);
+                           static_cast<float>(sqSearchRadius), search_params_);
   }
 
-  int KDTree::radiusSearch(size_t i, double sqSearchRadius,
+  int KDTree::radius_search(size_t i, double sqSearchRadius,
                            std::vector<int>& indices, std::vector<double>& sqDists)
   {
-    radiusSearch(data_[i], sqSearchRadius, indices, sqDists);
+    radius_search(data_[i], sqSearchRadius, indices, sqDists);
     indices.erase(indices.begin());
     sqDists.erase(sqDists.begin());
     return indices.size();
   }
 
-  int KDTree::radiusSearch(size_t i, double sqSearchRadius, std::vector<int>& indices)
+  int KDTree::radius_search(size_t i, double sqSearchRadius, std::vector<int>& indices)
   {
     std::vector<double> sqDists;
-    return radiusSearch(i, sqSearchRadius, indices, sqDists);
+    return radius_search(i, sqSearchRadius, indices, sqDists);
   }
 
-  void KDTree::radiusSearch(const std::vector<size_t>& queries,
-                            double sqSearchRadius,
-                            std::vector<std::vector<int> >& indices,
-                            std::vector<std::vector<double> >& sqDists)
+  void KDTree::radius_search(const std::vector<size_t>& queries,
+                             double sqSearchRadius,
+                             std::vector<std::vector<int> >& indices,
+                             std::vector<std::vector<double> >& sqDists)
   {
     MatrixXd Q(data_.cols, queries.size());
     for (size_t i = 0; i != queries.size(); ++i)
       for (size_t j = 0; j != data_.cols; ++j)
         Q(j,i) = data_[i][j];
-    radiusSearch(Q, sqSearchRadius, indices, sqDists);
+    radius_search(Q, sqSearchRadius, indices, sqDists);
     for (size_t i = 0; i != indices.size(); ++i)
     {
       indices[i].erase(indices[i].begin());
@@ -189,12 +189,12 @@ namespace DO {
     }
   }
 
-  void KDTree::radiusSearch(const std::vector<size_t>& queries,
-                            double sqSearchRadius,
-                            std::vector<std::vector<int> >& indices)
+  void KDTree::radius_search(const std::vector<size_t>& queries,
+                             double sqSearchRadius,
+                             std::vector<std::vector<int> >& indices)
   {
     std::vector<std::vector<double> > sqDists;
-    radiusSearch(queries, sqSearchRadius, indices, sqDists);
+    radius_search(queries, sqSearchRadius, indices, sqDists);
   }
 
 }
