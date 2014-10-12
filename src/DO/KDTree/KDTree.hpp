@@ -29,165 +29,126 @@ namespace DO {
   {
   public:
     //! Constructor.
-    KDTree(const MatrixXd& colMajorColStackedDataMatrix,
-           const flann::KDTreeIndexParams& indexParams
+    KDTree(const MatrixXd& data_matrix,
+           const flann::KDTreeIndexParams& index_params
              = flann::KDTreeIndexParams(1),
-           const flann::SearchParams& searchParams
+           const flann::SearchParams& search_params
              = flann::SearchParams(-1));
     
-    //! \brief Destructor
+    //! \brief Destructor.
     ~KDTree();
 
-    //! Basic k-NN search wrapped function.
-    template <int N>
-    void knn_search(const Matrix<double, N, 1>& query,
-                    size_t k,
-                    std::vector<int>& indices,
-                    std::vector<double>& sqDists,
-                    bool remove1NN = false)
+    //! k-NN search for a single query column vector.
+    template <int N, int Options, int MaxRows, int MaxCols>
+    void
+    knn_search(const Matrix<double, N, 1, Options, MaxRows, MaxCols>& query,
+               size_t num_nearest_neighbors,
+               std::vector<int>& nn_indices,
+               std::vector<double>& nn_squared_distances
+                 = std::vector<double>())
     {
-      if (data_.cols != query.size())
+      if (_row_major_data_matrix.cols != query.size())
         throw std::runtime_error("Dimension of query vector do not match \
                                  dimension of input feature space!");
-      if (remove1NN)
-      {
-        knn_search(query.data(), k+1, indices, sqDists);
-        indices.erase(indices.begin());
-        sqDists.erase(sqDists.begin());
-      }
-      else
-        knn_search(query.data(), k, indices, sqDists);
+      knn_search(query.data(), num_nearest_neighbors, nn_indices,
+                 nn_squared_distances);
     }
 
-    //! Basic k-NN search wrapped function.
+    //! Batch k-NN search for a set of query column vectors.
+    void knn_search(
+      const MatrixXd& query_column_vectors,
+      size_t num_nearest_neighbors,
+      std::vector<std::vector<int> >& nn_indices,
+      std::vector<std::vector<double> >& nn_squared_distances
+        = std::vector<std::vector<double> >());
+
+    //! k-NN search for a query vector living in the data. In this case, the
+    //! set of nearest neighbors does not include this query vector.
+    void knn_search(size_t query_vector_index,
+                    size_t num_nearest_neighbors,
+                    std::vector<int>& nn_indices,
+                    std::vector<double>& nn_squared_distances
+                      = std::vector<double>());
+
+    //! k-NN search for a set of query vectors living in the data. In this case,
+    //! Each set of nearest neighbors does not include their corresponding
+    //! query vector.
+    void knn_search(
+      const std::vector<size_t>& queries,
+      size_t num_nearest_neighbors,
+      std::vector<std::vector<int> >& nn_indices,
+      std::vector<std::vector<double> >& nn_squared_distances
+        = std::vector<std::vector<double> >());
+
+    //! Radius search for a single query column vector.
     template <int N, int Options, int MaxRows, int MaxCols>
-    void knn_search(const Matrix<double, N, 1, Options, MaxRows, MaxCols>& query,
-                    size_t k, std::vector<int>& indices,
-                    bool remove1NN = false)
+    int
+    radius_search(const Matrix<double, N, 1, Options, MaxRows, MaxCols>& query,
+                  double squared_search_radius,
+                  std::vector<int>& nn_indices,
+                  std::vector<double>& nn_squared_distances
+                    = std::vector<double>(),
+                  size_t max_num_nearest_neighbors
+                    = std::numeric_limits<size_t>::max())
     {
-      if (data_.cols != query.size())
-        throw std::runtime_error("Dimension of query vector do not match \
-                                 dimension of input feature space!");
-      std::vector<double> sqDists;
-      if (remove1NN)
-      {
-        knn_search(query.data(), k+1, indices, sqDists);
-        indices.erase(indices.begin());
-        sqDists.erase(sqDists.begin());
-      }
-      else
-        knn_search(query.data(), k, indices, sqDists);
-    }
-
-    //! Basic k-NN search  wrapped function.
-    void knn_search(const MatrixXd& queries, size_t k,
-                   std::vector<std::vector<int> >& indices,
-                   std::vector<std::vector<double> >& sqDists,
-                   bool remove1NN = false);
-
-    //! Basic k-NN search wrapped function.
-    void knn_search(const MatrixXd& queries, size_t k,
-                   std::vector<std::vector<int> >& indices,
-                   bool remove1NN = false);
-
-    //! In case the point query is a point in data, call this method preferably.
-    void knn_search(size_t i, size_t k,
-                    std::vector<int>& indices, std::vector<double>& sqDists);
-
-    //! In case the point query is a point in data, call this method preferably.
-    void knn_search(size_t i, size_t k, std::vector<int>& indices);
-
-    //! In case the point query is a point in data, call this method preferably.
-    void knn_search(const std::vector<size_t>& queries, size_t k,
-                    std::vector<std::vector<int> >& indices,
-                    std::vector<std::vector<double> >& sqDists);
-
-    //! In case the point query is a point in data, call this method preferably.
-    void knn_search(const std::vector<size_t>& queries, size_t k,
-                    std::vector<std::vector<int> >& indices);
-    
-    //! Basic radius search wrapped function.
-    template <int N>
-    size_t radius_search(const Matrix<double, N, 1>& query,
-                         double sqSearchRadius,
-                         std::vector<int>& indices,
-                         std::vector<double>& sqDists,
-                         bool remove1NN = false)
-    {
-      if (data_.cols != query.size())
+      if (_row_major_data_matrix.cols != query.size())
           throw std::runtime_error("Dimension of query vector do not match \
                                    dimension of input feature space!");
-      radius_search(query.data(), sqSearchRadius, indices, sqDists);
-      if (remove1NN)
-      {
-        indices.erase(indices.begin());
-        sqDists.erase(sqDists.begin());
-      }
-      return indices.size(); 
+
+      radius_search(query.data(), squared_search_radius, nn_indices,
+                    nn_squared_distances, max_num_nearest_neighbors);
+
+      return static_cast<int>(nn_indices.size());
     }
 
-    //! Basic radius search wrapped function.
-    template <int N, int Options, int MaxRows, int MaxCols>
-    size_t radius_search(const Matrix<double, N, 1>& query,
-                         double sqSearchRadius,
-                         std::vector<int>& indices,
-                         bool remove1NN = false)
-    {
-      if (data_.cols != query.size())
-          throw std::runtime_error("Dimension of query vector do not match \
-                                   dimension of input feature space!");
-      std::vector<double> sqDists;
-      radius_search(query.data(), sqSearchRadius, indices, sqDists);
-      if (remove1NN)
-      {
-        indices.erase(indices.begin());
-        sqDists.erase(sqDists.begin());
-      }
-      return indices.size();
-    }
+    //! Radius search for a set of of query column vectors.
+    void radius_search(const MatrixXd& queries,
+                       double squared_search_radius,
+                       std::vector<std::vector<int> >& nn_indices,
+                       std::vector<std::vector<double> >& nn_squared_distances
+                         = std::vector<std::vector<double> >(),
+                       size_t max_num_nearest_neighbors
+                         = std::numeric_limits<size_t>::max());
 
-    //! Basic radius search wrapped function.
-    void radius_search(const MatrixXd& queries, double sqSearchRadius,
-                       std::vector<std::vector<int> >& indices,
-                       std::vector<std::vector<double> >& sqDists,
-                       bool remove1NN = false);
+    //! Radius search for a query vector living in the data. In this case, the
+    //! set of nearest neighbors does not include this query vector.
+    int radius_search(size_t query_vector_index,
+                      double squared_search_radius,
+                      std::vector<int>& nn_indices,
+                      std::vector<double>& nn_squared_distances
+                        = std::vector<double>(),
+                      size_t max_num_nearest_neighbors
+                        = std::numeric_limits<size_t>::max());
 
-    //! Basic radius search wrapped function.
-    void radius_search(const MatrixXd& queries, double sqSearchRadius,
-                       std::vector<std::vector<int> >& indices,
-                       bool remove1NN);
-
-    //! In case the point query is a point in data, call this method preferably.
-    int radius_search(size_t i, double sqSearchRadius,
-                      std::vector<int>& indices, std::vector<double>& sqDists);
-
-    //! In case the point query is a point in data, call this method preferably.
-    int radius_search(size_t i, double sqSearchRadius,
-                      std::vector<int>& indices);
-
-    //! In case the point query is a point in data, call this method preferably.
-    void radius_search(const std::vector<size_t>& queries, double sqSearchRadius,
-                       std::vector<std::vector<int> >& indices,
-                       std::vector<std::vector<double> >& sqDists);
-
-    //! In case the point query is a point in data, call this method preferably.
+    //! Radius search for a set of query vectors living in the data. In this case,
+    //! Each set of nearest neighbors does not include their corresponding
+    //! query vector.
     void radius_search(const std::vector<size_t>& queries,
-                       double sqSearchRadius,
-                       std::vector<std::vector<int> >& indices);
+                       double squared_search_radius,
+                       std::vector<std::vector<int> >& nn_indices,
+                       std::vector<std::vector<double> >& nn_squared_distances
+                         = std::vector<std::vector<double> >(),
+                       size_t max_num_nearest_neighbors
+                         = std::numeric_limits<size_t>::max());
 
   private:
-    void knn_search(const double *query, size_t k,
-                    std::vector<int>& indices, std::vector<double>& sqDists);
+     void knn_search(const double *query_vector,
+                     size_t num_nearest_neighbors,
+                     std::vector<int>& nn_indices,
+                     std::vector<double>& nn_squared_distances);
 
-    int radius_search(const double *query, double sqSearchRadius,
-                      std::vector<int>& indices, std::vector<double>& sqDists);
+    int radius_search(const double *query_vector,
+                      double square_search_radius,
+                      std::vector<int>& nn_indices,
+                      std::vector<double>& nn_squared_distances,
+                      size_t max_num_nearest_neighbors);
 
   private:
-    bool wrapped_data_;
-    flann::Matrix<double> data_;
-    flann::Index<flann::L2<double> > index_;
-    flann::KDTreeIndexParams index_params_;
-    flann::SearchParams search_params_;
+    bool _has_data_ownership;
+    flann::Matrix<double> _row_major_data_matrix;
+    flann::Index<flann::L2<double> > _index;
+    flann::KDTreeIndexParams _index_params;
+    flann::SearchParams _search_params;
   };
 
 }
