@@ -42,7 +42,7 @@ namespace DO {
     template <int N, int Options, int MaxRows, int MaxCols>
     void knn_search(
       const Matrix<double, N, 1, Options, MaxRows, MaxCols>& query,
-      size_t num_nearest_neighbors,
+      int num_nearest_neighbors,
       std::vector<int>& nn_indices,
       std::vector<double>& nn_squared_distances)
     {
@@ -56,14 +56,14 @@ namespace DO {
     //! Batch k-NN search for a set of query column vectors.
     void knn_search(
       const MatrixXd& query_column_vectors,
-      size_t num_nearest_neighbors,
+      int num_nearest_neighbors,
       std::vector<std::vector<int> >& nn_indices,
       std::vector<std::vector<double> >& nn_squared_distances);
 
     //! k-NN search for a query vector living in the data. In this case, the
     //! set of nearest neighbors does not include this query vector.
     void knn_search(size_t query_vector_index,
-                    size_t num_nearest_neighbors,
+                    int num_nearest_neighbors,
                     std::vector<int>& nn_indices,
                     std::vector<double>& nn_squared_distances);
 
@@ -72,7 +72,7 @@ namespace DO {
     //! query vector.
     void knn_search(
       const std::vector<size_t>& queries,
-      size_t num_nearest_neighbors,
+      int num_nearest_neighbors,
       std::vector<std::vector<int> >& nn_indices,
       std::vector<std::vector<double> >& nn_squared_distances);
 
@@ -83,7 +83,7 @@ namespace DO {
       double squared_search_radius,
       std::vector<int>& nn_indices,
       std::vector<double>& nn_squared_distances,
-      size_t max_num_nearest_neighbors = std::numeric_limits<size_t>::max())
+      int max_num_nearest_neighbors = -1)
     {
       if (_row_major_data_matrix.cols != query.size())
           throw std::runtime_error("Dimension of query vector do not match \
@@ -100,8 +100,7 @@ namespace DO {
                        double squared_search_radius,
                        std::vector<std::vector<int> >& nn_indices,
                        std::vector<std::vector<double> >& nn_squared_distances,
-                       size_t max_num_nearest_neighbors
-                         = std::numeric_limits<size_t>::max());
+                       int max_num_nearest_neighbors = -1);
 
     //! Radius search for a query vector living in the data. In this case, the
     //! set of nearest neighbors does not include this query vector.
@@ -109,8 +108,7 @@ namespace DO {
                       double squared_search_radius,
                       std::vector<int>& nn_indices,
                       std::vector<double>& nn_squared_distances,
-                      size_t max_num_nearest_neighbors
-                        = std::numeric_limits<size_t>::max());
+                      int max_num_nearest_neighbors = -1);
 
     //! Radius search for a set of query vectors living in the data. In this case,
     //! Each set of nearest neighbors does not include their corresponding
@@ -119,12 +117,11 @@ namespace DO {
                        double squared_search_radius,
                        std::vector<std::vector<int> >& nn_indices,
                        std::vector<std::vector<double> >& nn_squared_distances,
-                       size_t max_num_nearest_neighbors
-                         = std::numeric_limits<size_t>::max());
+                       int max_num_nearest_neighbors = -1);
 
   private:
      void knn_search(const double *query_vector,
-                     size_t num_nearest_neighbors,
+                     int num_nearest_neighbors,
                      std::vector<int>& nn_indices,
                      std::vector<double>& nn_squared_distances);
 
@@ -132,7 +129,7 @@ namespace DO {
                       double squared_search_radius,
                       std::vector<int>& nn_indices,
                       std::vector<double>& nn_squared_distances,
-                      size_t max_num_nearest_neighbors);
+                      int max_num_nearest_neighbors);
 
   private:
     bool _has_data_ownership;

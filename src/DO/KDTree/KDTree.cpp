@@ -46,7 +46,7 @@ namespace DO {
   // ======================================================================== //
   // k-NN search methods.
   void KDTree::knn_search(const double *query_vector,
-                          size_t num_nearest_neighbors,
+                          int num_nearest_neighbors,
                           vector<int>& nn_indices,
                           vector<double>& nn_squared_distances)
   {
@@ -64,7 +64,7 @@ namespace DO {
   }
 
   void KDTree::knn_search(const MatrixXd& query_column_vectors,
-                          size_t num_nearest_neighbors,
+                          int num_nearest_neighbors,
                           vector<vector<int> >& nn_indices,
                           vector<vector<double> >& nn_squared_distances)
   {
@@ -82,7 +82,7 @@ namespace DO {
   }
 
   void KDTree::knn_search(size_t query_vector_index,
-                          size_t num_nearest_neighbors,
+                          int num_nearest_neighbors,
                           vector<int>& nn_indices,
                           vector<double>& nn_squared_distances)
   {
@@ -107,7 +107,7 @@ namespace DO {
   }
 
   void KDTree::knn_search(const vector<size_t>& query_vector_indices,
-                          size_t num_nearest_neighbors,
+                          int num_nearest_neighbors,
                           vector<vector<int> >& nn_indices,
                           vector<vector<double> >& nn_squared_distances)
   {
@@ -136,7 +136,7 @@ namespace DO {
                             double squared_search_radius,
                             vector<int>& nn_indices,
                             vector<double>& nn_squared_distances,
-                            size_t max_num_nearest_neighbors)
+                            int max_num_nearest_neighbors)
   {
     flann::Matrix<double> query_vector(
       const_cast<double *>(query_vector_data), 1, _row_major_data_matrix.cols);
@@ -145,7 +145,7 @@ namespace DO {
     vector<vector<double> > temp_nn_squared_distances;
 
     // Store the initial maximum number of neighbors.
-    size_t saved_max_neighbors = _search_params.max_neighbors;
+    int saved_max_neighbors = _search_params.max_neighbors;
     // Set the new value for the maximum number of neighbors.
     _search_params.max_neighbors = max_num_nearest_neighbors;
 
@@ -169,9 +169,10 @@ namespace DO {
                             double squared_search_radius,
                             vector<int>& nn_indices,
                             vector<double>& nn_squared_distances,
-                            size_t max_num_nearest_neighbors)
+                            int max_num_nearest_neighbors)
   {
-    if (max_num_nearest_neighbors != std::numeric_limits<size_t>::max())
+    if (max_num_nearest_neighbors != -1 &&
+        max_num_nearest_neighbors != std::numeric_limits<int>::max())
       ++max_num_nearest_neighbors;
 
     radius_search(_row_major_data_matrix[query_vector_index],
@@ -190,7 +191,7 @@ namespace DO {
                              double squared_search_radius,
                              vector<vector<int> >& nn_indices,
                              vector<vector<double> >& nn_squared_distances,
-                             size_t max_num_nearest_neighbors)
+                             int max_num_nearest_neighbors)
   {
     if (queries.rows() != _row_major_data_matrix.cols)
     {
@@ -199,7 +200,7 @@ namespace DO {
     }
 
     // Store the initial maximum number of neighbors.
-    size_t saved_max_neighbors = _search_params.max_neighbors;
+    int saved_max_neighbors = _search_params.max_neighbors;
     // Set the new value for the maximum number of neighbors.
     _search_params.max_neighbors = max_num_nearest_neighbors;
 
@@ -223,9 +224,10 @@ namespace DO {
                              double squared_search_radius,
                              vector<vector<int> >& nn_indices,
                              vector<vector<double> >& nn_squared_distances,
-                             size_t max_num_nearest_neighbors)
+                             int max_num_nearest_neighbors)
   {
-    if (max_num_nearest_neighbors != std::numeric_limits<size_t>::max())
+    if (max_num_nearest_neighbors != -1 &&
+        max_num_nearest_neighbors != std::numeric_limits<int>::max())
       ++max_num_nearest_neighbors;
 
     MatrixXd query_column_vectors(_row_major_data_matrix.cols,
