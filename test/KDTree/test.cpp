@@ -9,6 +9,11 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+//! TODO: this is a messy set of unit tests. It maybe worth reinstating Google
+//! mock in the library. We can compare easily vectors.
+
+#include <set>
+
 #include <gtest/gtest.h>
 
 #include <DO/KDTree.hpp>
@@ -16,6 +21,30 @@
 
 using namespace DO;
 using namespace std;
+
+
+inline vector<int> range(int begin, int end)
+{
+  vector<int> _range(end-begin);
+  for (int i = begin; i < end; ++i)
+    _range[i-begin] = i;
+  return _range;
+}
+
+inline vector<int> range(int end)
+{
+  return range(0, end);
+}
+
+template <typename T>
+inline set<T> to_set(const vector<T>& v)
+{
+  return set<T>(v.begin(), v.end());
+}
+
+// Define a macro that does something 'self.assertItemsEqual' in Python.
+#define EXPECT_ITEMS_EQ(vector1, vector2) \
+EXPECT_EQ(to_set(vector1), to_set(vector2))
 
 
 class TestKDTree : public testing::Test
@@ -57,18 +86,18 @@ TEST_F(TestKDTree, test_simple_knn_search)
   Vector2d query = Vector2d::Zero();
   size_t num_nearest_neighbors = num_points_in_circle;
 
-  vector<int> indices;
-  vector<double> squared_distances;
+  vector<int> nn_indices;
+  vector<double> nn_squared_distances;
 
-  tree.knn_search(query, num_nearest_neighbors, indices,
-                  squared_distances);
+  tree.knn_search(query, num_nearest_neighbors, nn_indices,
+                  nn_squared_distances);
 
-  EXPECT_EQ(indices.size(), num_nearest_neighbors);
-  for (size_t j = 0; j < indices.size(); ++j)
-  {
-    EXPECT_LE(indices[j], num_nearest_neighbors);
-    EXPECT_NEAR(squared_distances[j], 1., 1e-10);
-  }
+  // Check equality of items.
+  EXPECT_ITEMS_EQ(nn_indices, range(num_points_in_circle));
+
+  // Check the squared distances.
+  for (size_t j = 0; j < nn_indices.size(); ++j)
+    EXPECT_NEAR(nn_squared_distances[j], 1., 1e-10);
 }
 
 TEST_F(TestKDTree, test_simple_radius_search)
@@ -96,11 +125,9 @@ TEST_F(TestKDTree, test_simple_radius_search)
 
   EXPECT_EQ(nn_indices.size(), num_nearest_neighbors);
   EXPECT_EQ(num_found_neighbors, num_nearest_neighbors);
+  EXPECT_ITEMS_EQ(nn_indices, range(num_points_in_circle));
   for (size_t j = 0; j < nn_indices.size(); ++j)
-  {
-    EXPECT_LE(nn_indices[j], num_nearest_neighbors);
     EXPECT_NEAR(nn_squared_distances[j], 1., 1e-10);
-  }
 
 
   // Second use case: we want to limit the number of neighbors to return.
@@ -110,14 +137,11 @@ TEST_F(TestKDTree, test_simple_radius_search)
                                            nn_indices,
                                            nn_squared_distances,
                                            max_num_nearest_neighbors);
-
   EXPECT_EQ(nn_indices.size(), max_num_nearest_neighbors);
   EXPECT_EQ(num_found_neighbors, max_num_nearest_neighbors);
+  EXPECT_ITEMS_EQ(nn_indices, range(num_points_in_circle));
   for (size_t j = 0; j < nn_indices.size(); ++j)
-  {
-    EXPECT_LE(nn_indices[j], num_nearest_neighbors);
     EXPECT_NEAR(nn_squared_distances[j], 1., 1e-10);
-  }
 }
 
 
