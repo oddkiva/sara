@@ -60,7 +60,6 @@ TEST_F(TestKDTree, test_simple_knn_search)
   vector<int> indices;
   vector<double> squared_distances;
 
-  tree.knn_search(query, num_nearest_neighbors, indices);
   tree.knn_search(query, num_nearest_neighbors, indices,
                   squared_distances);
 
@@ -88,17 +87,7 @@ TEST_F(TestKDTree, test_simple_radius_search)
   int num_found_neighbors;
 
 
-  // First use case: we don't care about squared distances.
-  num_found_neighbors = tree.radius_search(
-    query,
-    squared_search_radius,
-    nn_indices);
-  EXPECT_EQ(nn_indices.size(), num_nearest_neighbors);
-  for (size_t j = 0; j < nn_indices.size(); ++j)
-    EXPECT_LE(nn_indices[j], num_nearest_neighbors);
-
-
-  // Second use case: we want to examine the squared distances.
+  // First use case: we want to examine the squared distances.
   num_found_neighbors = tree.radius_search(
     query,
     squared_search_radius,
@@ -114,7 +103,7 @@ TEST_F(TestKDTree, test_simple_radius_search)
   }
 
 
-  // Third use case: we want to limit the number of neighbors to return.
+  // Second use case: we want to limit the number of neighbors to return.
   size_t max_num_nearest_neighbors = 2;
   tree.radius_search(query, squared_search_radius, nn_indices,
                      nn_squared_distances, max_num_nearest_neighbors);
@@ -139,7 +128,6 @@ TEST_F(TestKDTree, test_simple_knn_search_with_query_point_in_data)
   vector<int> indices;
   vector<double> squared_distances;
 
-  tree.knn_search(query_index, num_nearest_neighbors, indices);
   tree.knn_search(query_index, num_nearest_neighbors, indices,
                   squared_distances);
 
@@ -166,17 +154,7 @@ TEST_F(TestKDTree, test_simple_radius_search_with_query_point_in_data)
   // Output data.
   int num_found_neighbors;
 
-  // First use case: we don't care about squared distances.
-  num_found_neighbors = tree.radius_search(
-    query,
-    squared_search_radius,
-    nn_indices);
-  EXPECT_EQ(nn_indices.size(), num_nearest_neighbors);
-  for (size_t j = 0; j < nn_indices.size(); ++j)
-    EXPECT_LE(nn_indices[j], num_nearest_neighbors);
-
-
-  // Second use case: we want to examine the squared distances.
+  // First use case: we want to examine the squared distances.
   num_found_neighbors = tree.radius_search(
     query,
     squared_search_radius,
@@ -192,7 +170,7 @@ TEST_F(TestKDTree, test_simple_radius_search_with_query_point_in_data)
   }
 
 
-  // Third use case: we want to limit the number of neighbors to return.
+  // Second use case: we want to limit the number of neighbors to return.
   size_t max_num_nearest_neighbors = 2;
   tree.radius_search(query, squared_search_radius, nn_indices,
                      nn_squared_distances, max_num_nearest_neighbors);
@@ -217,7 +195,6 @@ TEST_F(TestKDTree, test_batch_knn_search)
   vector<vector<int> > indices;
   vector<vector<double> > squared_distances;
 
-  tree.knn_search(queries, num_nearest_neighbors, indices);
   tree.knn_search(queries, num_nearest_neighbors, indices, squared_distances);
 
   EXPECT_EQ(indices.size(), num_queries);
@@ -244,21 +221,8 @@ TEST_F(TestKDTree, test_batch_radius_search)
   vector<vector<int> > nn_indices;
   vector<vector<double> > nn_squared_distances;
 
-  // First use case: we don't care about squared distances.
-  tree.radius_search(
-    queries,
-    squared_search_radius,
-    nn_indices);
-  EXPECT_EQ(nn_indices.size(), num_queries);
-  for (size_t i = 0; i < num_queries; ++i)
-  {
-    EXPECT_EQ(nn_indices[i].size(), num_queries);
-    for (size_t j = 0; j < nn_indices[i].size(); ++j)
-      EXPECT_LE(nn_indices[i][j], num_queries);
-  }
 
-
-  // Second use case: we want to examine the squared distances.
+  // First use case: we want to examine the squared distances.
   tree.radius_search(
     queries,
     squared_search_radius,
@@ -277,7 +241,7 @@ TEST_F(TestKDTree, test_batch_radius_search)
   }
 
 
-  // Third use case: we want to limit the number of neighbors to return.
+  // Second use case: we want to limit the number of neighbors to return.
   size_t max_num_nearest_neighbors = 2;
   tree.radius_search(queries, squared_search_radius, nn_indices,
                      nn_squared_distances, max_num_nearest_neighbors);
@@ -308,7 +272,6 @@ TEST_F(TestKDTree, test_batch_knn_search_with_query_point_in_data)
   vector<vector<int> > indices;
   vector<vector<double> > squared_distances;
 
-  tree.knn_search(queries, num_nearest_neighbors, indices);
   tree.knn_search(queries, num_nearest_neighbors, indices, squared_distances);
 
   EXPECT_EQ(indices.size(), num_queries);
@@ -337,21 +300,7 @@ TEST_F(TestKDTree, test_batch_radius_search_with_query_point_in_data)
   vector<vector<int> > nn_indices;
   vector<vector<double> > nn_squared_distances;
 
-  // First use case: we don't care about squared distances.
-  tree.radius_search(
-    queries,
-    squared_search_radius,
-    nn_indices);
-  EXPECT_EQ(nn_indices.size(), num_queries);
-  for (size_t i = 0; i < num_queries; ++i)
-  {
-    EXPECT_EQ(nn_indices[i].size(), num_queries-1);
-    for (size_t j = 0; j < nn_indices[i].size(); ++j)
-      EXPECT_LE(nn_indices[i][j], num_queries-1);
-  }
-
-
-  // Second use case: we want to examine the squared distances.
+  // First use case: we want to examine the squared distances.
   tree.radius_search(
     queries,
     squared_search_radius,
@@ -370,7 +319,7 @@ TEST_F(TestKDTree, test_batch_radius_search_with_query_point_in_data)
   }
 
 
-  // Third use case: we want to limit the number of neighbors to return.
+  // Second use case: we want to limit the number of neighbors to return.
   size_t max_num_nearest_neighbors = 2;
   tree.radius_search(queries, squared_search_radius, nn_indices,
     nn_squared_distances, max_num_nearest_neighbors);
