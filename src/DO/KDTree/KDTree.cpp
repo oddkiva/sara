@@ -162,7 +162,7 @@ namespace DO {
     // Restore the initial maximum number of neighbors.
     _search_params.max_neighbors = saved_max_neighbors;
 
-    return nn_indices.size();
+    return static_cast<int>(nn_indices.size());
   }
 
   int KDTree::radius_search(size_t query_vector_index,
@@ -173,14 +173,17 @@ namespace DO {
   {
     if (max_num_nearest_neighbors != std::numeric_limits<size_t>::max())
       ++max_num_nearest_neighbors;
+
     radius_search(_row_major_data_matrix[query_vector_index],
                   squared_search_radius,
                   nn_indices,
                   nn_squared_distances,
                   max_num_nearest_neighbors);
+
     nn_indices.erase(nn_indices.begin());
     nn_squared_distances.erase(nn_squared_distances.begin());
-    return nn_indices.size();
+
+    return static_cast<int>(nn_indices.size());
   }
 
   void KDTree::radius_search(const MatrixXd& queries,
