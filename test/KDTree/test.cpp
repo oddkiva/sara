@@ -35,7 +35,7 @@ protected:
     data.resize(2, num_points);
 
     const size_t& N = num_points_in_circle;
-    for (int i = 0; i < N; ++i)
+    for (size_t i = 0; i < N; ++i)
     {
       double theta = i / (2*N*M_PI);
       data.col(i) << cos(theta), sin(theta);
