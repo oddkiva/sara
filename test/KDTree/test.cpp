@@ -175,11 +175,14 @@ TEST_F(TestKDTree, test_simple_radius_search_with_query_point_in_data)
 
   // Second use case: we want to limit the number of neighbors to return.
   size_t max_num_nearest_neighbors = 2;
-  tree.radius_search(query, squared_search_radius, nn_indices,
-                     nn_squared_distances, max_num_nearest_neighbors);
+  num_found_neighbors = tree.radius_search(query,
+                                           squared_search_radius,
+                                           nn_indices,
+                                           nn_squared_distances,
+                                           max_num_nearest_neighbors);
 
   EXPECT_EQ(nn_indices.size(), max_num_nearest_neighbors);
-  EXPECT_EQ(num_found_neighbors, num_nearest_neighbors);
+  EXPECT_EQ(num_found_neighbors, max_num_nearest_neighbors);
   for (size_t j = 0; j < nn_indices.size(); ++j)
   {
     EXPECT_LE(nn_indices[j], num_nearest_neighbors);
