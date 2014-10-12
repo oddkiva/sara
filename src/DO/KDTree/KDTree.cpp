@@ -48,8 +48,7 @@ namespace DO {
   void KDTree::knn_search(const double *query_vector,
                           size_t num_nearest_neighbors,
                           vector<int>& nn_indices,
-                          vector<double>& nn_squared_distances
-                            = vector<double>())
+                          vector<double>& nn_squared_distances)
   {
     flann::Matrix<double> query_row_vectors(
       const_cast<double *>(query_vector), 1, _row_major_data_matrix.cols);
