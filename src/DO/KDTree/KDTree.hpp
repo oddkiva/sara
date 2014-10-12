@@ -129,7 +129,7 @@ namespace DO {
                      std::vector<double>& nn_squared_distances);
 
     int radius_search(const double *query_vector,
-                      double square_search_radius,
+                      double squared_search_radius,
                       std::vector<int>& nn_indices,
                       std::vector<double>& nn_squared_distances,
                       size_t max_num_nearest_neighbors);
