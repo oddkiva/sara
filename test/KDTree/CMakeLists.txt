@@ -7,4 +7,4 @@ message(STATUS "  - DO_KDTree_Tests")
 find_package(DO COMPONENTS KDTree REQUIRED)
 include(${DO_USE_FILE})
 
-do_test(KDTree test.cpp "${DO_LIBRARIES}" "KDTree")
+do_test(KDTree_KDTree test.cpp "${DO_LIBRARIES}" "KDTree")
