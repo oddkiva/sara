@@ -58,13 +58,13 @@ protected:
     const size_t& N = num_points_in_each_circle;
     for (size_t i = 0; i < N; ++i)
     {
-      double theta = i / (2*N*M_PI);
+      double theta = (2*i*M_PI) / N;
       data.col(i) << 2*cos(theta), 2*sin(theta);
     }
 
     for (size_t i = N; i < 2*N; ++i)
     {
-      double theta = i / (2*N*M_PI);
+      double theta = (2*(i-N)*M_PI) / N;
       data.col(i) << 10*cos(theta), 10*sin(theta);
     }
   }
