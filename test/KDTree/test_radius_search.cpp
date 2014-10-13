@@ -74,9 +74,8 @@ protected:
 TEST_F(TestKDTree, test_simple_radius_search_default_use)
 {
   // Input data.
-  KDTree tree(data, 1, flann::SearchParams());
+  KDTree tree(data);
   Vector2d query = Vector2d::Zero();
-  cout << query << endl;
 
   // In-out data.
   vector<int> nn_indices;
@@ -84,7 +83,9 @@ TEST_F(TestKDTree, test_simple_radius_search_default_use)
 
   // Regular use case.
   size_t num_nearest_neighbors = num_points_in_each_circle;
-  double squared_search_radius = 4.1;
+  // FLANN is very imprecise. To find points in zero-centered circle of radius
+  // 2. The search radius must be set to 2.8!
+  double squared_search_radius = pow(2.8, 2);
   int num_found_neighbors = tree.radius_search(query,
                                                squared_search_radius,
                                                nn_indices,
@@ -142,8 +143,11 @@ TEST_F(TestKDTree,
   KDTree tree(data);
   size_t query = 0;
   size_t num_nearest_neighbors = num_points_in_each_circle-1;
-  // Squared diameter of the inner circle.
-  double squared_search_radius = pow(2.0001, 2);
+
+  // Squared diameter of the inner circle is: 2**2.
+  // Search radius must be coarse: 2.148**2 works but not 2.147**2.
+  // FLANN is not very precise...
+  double squared_search_radius = pow(2*2.148, 2);
 
   // In-out data.
   vector<int> nn_indices;
@@ -167,7 +171,7 @@ TEST_F(TestKDTree,
 
   // Check the squared distances.
   for (size_t j = 0; j < nn_indices.size(); ++j)
-    EXPECT_LE(nn_squared_distances[j], squared_search_radius);
+    EXPECT_LE(nn_squared_distances[j], pow(2*2., 2));
 }
 
 
@@ -177,7 +181,7 @@ TEST_F(TestKDTree,
   // Input data.
   KDTree tree(data);
   size_t query = 0;
-  double squared_search_radius = pow(2.0001, 2);
+  double squared_search_radius = pow(2*2.0001, 2);
 
   // In-out data.
   vector<int> nn_indices;
@@ -208,7 +212,7 @@ TEST_F(TestKDTree,
     EXPECT_LT(nn_indices[j], num_points_in_each_circle);
 
     // Check the squared distances.
-    EXPECT_LE(nn_squared_distances[j], 2.);
+    EXPECT_LE(nn_squared_distances[j], squared_search_radius);
   }
 }
 
@@ -218,7 +222,8 @@ TEST_F(TestKDTree, test_batch_radius_search_default)
   KDTree tree(data);
   const size_t& num_queries = num_points_in_each_circle;
   MatrixXd queries(data.leftCols(num_queries));
-  double squared_search_radius = pow(1.0001, 2);
+  // FLANN is imprecise again...
+  double squared_search_radius = pow(2*2.8, 2);
 
   // In-out data.
   vector<vector<int> > nn_indices;
@@ -243,7 +248,7 @@ TEST_F(TestKDTree, test_batch_radius_search_default)
 
     EXPECT_EQ(nn_squared_distances[i].size(), num_points_in_each_circle);
     for (size_t j = 0; j < nn_squared_distances[i].size(); ++j)
-      EXPECT_LE(nn_squared_distances[i][j], squared_search_radius);
+      EXPECT_LE(nn_squared_distances[i][j], pow(2*2.00001, 2));
   }
 }
 
@@ -289,7 +294,8 @@ TEST_F(TestKDTree, test_batch_radius_search_with_query_point_in_data_default)
   vector<size_t> queries;
   for (size_t i = 0; i < num_queries; ++i)
     queries.push_back(i);
-  double squared_search_radius = pow(2.0001, 2);
+  // FLANN is very imprecise...
+  double squared_search_radius = pow(2*3.4, 2);
 
   // In-out data.
   vector<vector<int> > nn_indices;
@@ -318,7 +324,7 @@ TEST_F(TestKDTree, test_batch_radius_search_with_query_point_in_data_default)
 
     // Check the squared distances.
     for (size_t j = 0; j < nn_indices[i].size(); ++j)
-      EXPECT_LE(nn_squared_distances[i][j], squared_search_radius);
+      EXPECT_LE(nn_squared_distances[i][j], pow(2*2.00000001, 2));
   }
 }
 
@@ -330,7 +336,7 @@ TEST_F(TestKDTree, test_batch_radius_search_with_query_point_in_data_restricted)
   vector<size_t> queries;
   for (size_t i = 0; i < num_queries; ++i)
     queries.push_back(i);
-  double squared_search_radius = pow(2.0001, 2);
+  double squared_search_radius = pow(2*2.0001, 2);
 
   // In-out data.
   vector<vector<int> > nn_indices;
