@@ -85,7 +85,7 @@ namespace DO {
       std::vector<double>& nn_squared_distances,
       int max_num_nearest_neighbors = -1)
     {
-      if (_row_major_data_matrix.cols != query.size())
+      if (static_cast<int>(_row_major_data_matrix.cols) != query.size())
           throw std::runtime_error("Dimension of query vector do not match \
                                    dimension of input feature space!");
 
