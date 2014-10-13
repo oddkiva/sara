@@ -113,7 +113,7 @@ TEST_F(TestKDTree, test_simple_knn_search_with_query_point_in_data)
   // Check the squared distances of the neighbors.
   EXPECT_EQ(num_nearest_neighbors, squared_distances.size());
   for (size_t j = 0; j < squared_distances.size(); ++j)
-    EXPECT_LE(squared_distances[j], pow(2., 2));
+    EXPECT_LE(squared_distances[j], pow(2.+1e-5, 2));
 }
 
 
@@ -144,7 +144,7 @@ TEST_F(TestKDTree, test_batch_knn_search)
     // Check the squared distances.
     EXPECT_EQ(num_nearest_neighbors, squared_distances.size());
     for (size_t j = 0; j < squared_distances[i].size(); ++j)
-      EXPECT_LE(squared_distances[i][j], pow(2., 2));
+      EXPECT_LE(squared_distances[i][j], pow(2.+1e-5, 2));
   }
 }
 
@@ -183,7 +183,7 @@ TEST_F(TestKDTree, test_batch_knn_search_with_query_point_in_data)
     // Check the squared distances.
     EXPECT_EQ(squared_distances[i].size(), true_indices.size());
     for (size_t j = 0; j < indices[i].size(); ++j)
-      EXPECT_LE(squared_distances[i][j], pow(2., 2));
+      EXPECT_LE(squared_distances[i][j], pow(2.+1e-5, 2));
   }
 }
 
