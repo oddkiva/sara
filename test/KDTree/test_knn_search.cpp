@@ -58,13 +58,13 @@ protected:
     const size_t& N = num_points_in_each_circle;
     for (size_t i = 0; i < N; ++i)
     {
-      double theta = i / (2*N*M_PI);
+      double theta = (2*i*M_PI) / N;
       data.col(i) << cos(theta), sin(theta);
     }
 
     for (size_t i = N; i < 2*N; ++i)
     {
-      double theta = i / (2*N*M_PI);
+      double theta = (2*(i-N)*M_PI) / N;
       data.col(i) << 10*cos(theta), 10*sin(theta);
     }
   }
@@ -113,7 +113,7 @@ TEST_F(TestKDTree, test_simple_knn_search_with_query_point_in_data)
   // Check the squared distances of the neighbors.
   EXPECT_EQ(num_nearest_neighbors, squared_distances.size());
   for (size_t j = 0; j < squared_distances.size(); ++j)
-    EXPECT_LE(squared_distances[j], 2.);
+    EXPECT_LE(squared_distances[j], pow(2., 2));
 }
 
 
@@ -144,7 +144,7 @@ TEST_F(TestKDTree, test_batch_knn_search)
     // Check the squared distances.
     EXPECT_EQ(num_nearest_neighbors, squared_distances.size());
     for (size_t j = 0; j < squared_distances[i].size(); ++j)
-      EXPECT_LE(squared_distances[i][j], 2.);
+      EXPECT_LE(squared_distances[i][j], pow(2., 2));
   }
 }
 
@@ -183,7 +183,7 @@ TEST_F(TestKDTree, test_batch_knn_search_with_query_point_in_data)
     // Check the squared distances.
     EXPECT_EQ(squared_distances[i].size(), true_indices.size());
     for (size_t j = 0; j < indices[i].size(); ++j)
-      EXPECT_LE(squared_distances[i][j], 2.);
+      EXPECT_LE(squared_distances[i][j], pow(2., 2));
   }
 }
 
