@@ -18,6 +18,8 @@
 
 #include <DO/KDTree.hpp>
 
+#include "../AssertHelpers.hpp"
+
 
 using namespace DO;
 using namespace std;
@@ -35,16 +37,6 @@ inline vector<int> range(int end)
 {
   return range(0, end);
 }
-
-template <typename T>
-inline set<T> to_set(const vector<T>& v)
-{
-  return set<T>(v.begin(), v.end());
-}
-
-// Define a macro that does something 'self.assertItemsEqual' in Python.
-#define EXPECT_ITEMS_EQ(vector1, vector2) \
-EXPECT_EQ(to_set(vector1), to_set(vector2))
 
 
 class TestKDTree : public testing::Test
