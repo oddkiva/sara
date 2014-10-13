@@ -145,9 +145,8 @@ TEST_F(TestKDTree,
   size_t num_nearest_neighbors = num_points_in_each_circle-1;
 
   // Squared diameter of the inner circle is: 2**2.
-  // Search radius must be coarse: 2.148**2 works but not 2.147**2.
-  // FLANN is not very precise...
-  double squared_search_radius = pow(2*2.148, 2);
+  // Search radius must be coarse. FLANN is not very precise...
+  double squared_search_radius = pow(2*3, 2);
 
   // In-out data.
   vector<int> nn_indices;
@@ -223,7 +222,7 @@ TEST_F(TestKDTree, test_batch_radius_search_default)
   const size_t& num_queries = num_points_in_each_circle;
   MatrixXd queries(data.leftCols(num_queries));
   // FLANN is imprecise again...
-  double squared_search_radius = pow(2*2.8, 2);
+  double squared_search_radius = pow(2*3.5, 2);
 
   // In-out data.
   vector<vector<int> > nn_indices;
