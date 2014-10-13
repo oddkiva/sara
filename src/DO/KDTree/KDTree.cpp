@@ -193,7 +193,7 @@ namespace DO {
                              vector<vector<double> >& nn_squared_distances,
                              int max_num_nearest_neighbors)
   {
-    if (queries.rows() != _row_major_data_matrix.cols)
+    if (static_cast<size_t>(queries.rows()) != _row_major_data_matrix.cols)
     {
       std::string error_msg("queries.rows() != _row_major_data_matrix.cols");
       throw std::runtime_error(error_msg);
