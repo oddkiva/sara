@@ -86,7 +86,6 @@ TEST(TestPositionIncrementer, test_row_major_incrementer_2d)
       PositionIncrementer<RowMajor>::apply(coords, stop, start, end);
     }
   }
-  cout << coords << endl;
   EXPECT_TRUE(stop);
 }
 
@@ -104,7 +103,6 @@ TEST(TestPositionIncrementer, test_col_major_incrementer_2d)
       PositionIncrementer<ColMajor>::apply(coords, stop, start, end);
     }
   }
-  cout << coords << endl;
   EXPECT_TRUE(stop);
 }
 
@@ -123,7 +121,6 @@ TEST(TestPositionDecrementer, test_row_major_decrementer_2d)
       PositionDecrementer<RowMajor>::apply(coords, stop, start, end);
     }
   }
-  cout << coords << endl;
   EXPECT_TRUE(stop);
 }
 
@@ -142,7 +139,6 @@ TEST(TestPositionDecrementer, test_col_major_decrementer_2d)
       PositionDecrementer<ColMajor>::apply(coords, stop, start, end);
     }
   }
-  cout << coords << endl;
   EXPECT_TRUE(stop);
 }
 
