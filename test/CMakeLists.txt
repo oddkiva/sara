@@ -8,7 +8,7 @@ add_subdirectory(Graphics)
 #add_subdirectory(ImageDrawing)
 add_subdirectory(ImageIO)
 
-#add_subdirectory(KDTree)
+add_subdirectory(KDTree)
 add_subdirectory(ImageProcessing)
 add_subdirectory(Geometry)
 
