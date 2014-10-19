@@ -7,14 +7,14 @@ message(STATUS "  - DO_Geometry_Tests")
 find_package(DO COMPONENTS Core Graphics Geometry REQUIRED)
 include(${DO_USE_FILE})
 
-do_test(Geometry_PotPourri
-        test.cpp
+do_test(Geometry_BBox
+        test_bbox.cpp
         "${DO_LIBRARIES}" "Geometry")
 
 do_test(Geometry_SutherlandHodgman
-        test_SutherlandHodgman.cpp 
+        test_polygon_clipping_sutherland_hodgman.cpp 
         "${DO_LIBRARIES}" "Geometry")
 
-do_test(Geometry_Polynomial
-        test_Polynomial.cpp
+do_test(Geometry_PolynomialRoots
+        test_polynomial_roots.cpp
         "${DO_LIBRARIES}" "Geometry")
