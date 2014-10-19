@@ -11,6 +11,14 @@ do_test(Geometry_BBox
         test_bbox.cpp
         "${DO_LIBRARIES}" "Geometry")
 
+do_test(Geometry_Quad
+        test_quad.cpp
+        "${DO_LIBRARIES}" "Geometry")
+
+do_test(Geometry_Triangle
+        test_triangle.cpp
+        "${DO_LIBRARIES}" "Geometry")
+
 # Make it independent of the Graphics module!
 #do_test(Geometry_SutherlandHodgman
 #        test_polygon_clipping_sutherland_hodgman.cpp 
