@@ -40,8 +40,8 @@ TEST(TestPolynomialRoots, test_quadratic_polynomial_roots)
   }
 
   EXPECT_TRUE(realRoots);
-  EXPECT_NEAR(abs(P(x1)), 0., std::numeric_limits<double>::epsilon());
-  EXPECT_NEAR(abs(P(x2)), 0., std::numeric_limits<double>::epsilon());
+  EXPECT_NEAR(abs(P(x1)), 0., 1e-10);
+  EXPECT_NEAR(abs(P(x2)), 0., 1e-10);
 }
 
 TEST(TestPolynomialRoots, test_cubic_polynomial_roots)
