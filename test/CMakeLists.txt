@@ -1,4 +1,4 @@
-include_directories(${DO_ThirdParty_DIR}/gtest/include)
+include_directories(${DO_ThirdParty_DIR}/gtest/fused-src)
 
 message(STATUS "")
 do_step_message("Appending test projects:")
