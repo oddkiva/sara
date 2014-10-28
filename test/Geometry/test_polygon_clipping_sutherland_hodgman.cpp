@@ -11,7 +11,10 @@
 
 #include <gtest/gtest.h>
 
+#include <DO/Core/EigenExtension.hpp>
 #include <DO/Geometry/Algorithms/SutherlandHodgman.hpp>
+
+#include "../AssertHelpers.hpp"
 
 
 using namespace std;
@@ -86,33 +89,39 @@ TEST(TestSutherlandHodgmanPolygonClipping, test_clip_polygon_in_subject_polygon)
 
 TEST(TestSutherlandHodgmanPolygonClipping, test_interesecting_bboxes)
 {
-  vector<Point2d> clip_polygon;
-  vector<Point2d> subject_polygon;
-  vector<Point2d> result;
-
   // The clip polygon is a square.
+  vector<Point2d> clip_polygon;
   clip_polygon.push_back(Point2d(0, 0));
   clip_polygon.push_back(Point2d(1, 0));
   clip_polygon.push_back(Point2d(1, 1));
   clip_polygon.push_back(Point2d(0, 1));
 
   // The subject polygon is a triangle containing the clip polygon.
+  vector<Point2d> subject_polygon;
   subject_polygon.push_back(Point2d(0.5,  0.5));
   subject_polygon.push_back(Point2d(1.5,  0.5));
   subject_polygon.push_back(Point2d(1.5,  1.5));
   subject_polygon.push_back(Point2d(0.5,  1.5));
 
-  // The result of the implementation.
-  result = sutherlandHodgman(subject_polygon, clip_polygon);
+  // The actual result of the implementation.
+  vector<Point2d> actual_result;
+  actual_result = sutherlandHodgman(subject_polygon, clip_polygon);
 
   // The expected result is a smaller box.
   vector<Point2d> expected_result;
   expected_result.push_back(Point2d(0.5, 0.5));
   expected_result.push_back(Point2d(1.0, 0.5));
   expected_result.push_back(Point2d(1.0, 1.0));
-  expected_result.push_back(Point2d(1.0, 0.5));
+  expected_result.push_back(Point2d(0.5, 1.0));
 
-  // TODO: check that the result is still a bounding box enumerated  in a CCW manner..
+  // 1. Check that the points are identical.
+  EXPECT_ITEMS_EQ(expected_result, actual_result);
+
+  // 2. Check that the points are enumerated in a CCW manner..
+  const size_t N = actual_result.size();
+  const vector<Point2d>& P = actual_result;
+  for (size_t i = 0; i < N; ++i)
+    EXPECT_EQ(1, ccw(P[i], P[(i+1)%N], P[(i+2)%N]));
 }
 
 
