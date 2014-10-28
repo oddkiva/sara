@@ -83,7 +83,7 @@ if (MSVC)
   if (MSVC11)
     set(DO_LIB_DIR ${CMAKE_SOURCE_DIR}/packaged-libs/msvc11)
   endif ()
-  install(DIRECTORY ${DO_LIB_DIR}/
+  install(DIRECTORY ${DO_LIB_DIR}
           DESTINATION .
           COMPONENT Libraries)
 endif ()
