@@ -20,9 +20,9 @@ do_test(Geometry_Triangle
         "${DO_LIBRARIES}" "Geometry")
 
 # Make it independent of the Graphics module!
-#do_test(Geometry_SutherlandHodgman
-#        test_polygon_clipping_sutherland_hodgman.cpp 
-#        "${DO_LIBRARIES}" "Geometry")
+do_test(Geometry_SutherlandHodgman
+        test_polygon_clipping_sutherland_hodgman.cpp 
+        "${DO_LIBRARIES}" "Geometry")
 
 do_test(Geometry_PolynomialRoots
         test_polynomial_roots.cpp
