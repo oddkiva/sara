@@ -5,7 +5,7 @@
 #include <set>
 #include <vector>
 
-#include <Eigen/Core>
+#include <DO/Core/EigenExtension.hpp>
 
 #include <gtest/gtest.h>
 
@@ -59,6 +59,20 @@ template <typename T>
 inline std::set<T> to_std_set(const std::vector<T>& v)
 {
   return std::set<T>(v.begin(), v.end());
+}
+
+template <typename T, int M, int N, int Opts, int MaxRows, int MaxCols>
+inline
+std::set<
+  Eigen::Matrix<T, M, N, Opts, MaxRows, MaxCols>,
+  DO::LexicographicalOrder
+>
+to_std_set(const std::vector<Eigen::Matrix<T, M, N, Opts, MaxRows, MaxCols> >& v)
+{
+  return std::set<
+    Eigen::Matrix<T, M, N, Opts, MaxRows, MaxCols>,
+    DO::LexicographicalOrder
+  >(v.begin(), v.end());
 }
 
 // Define a macro that does something 'self.assertItemsEqual' in Python.
