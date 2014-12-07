@@ -14,6 +14,7 @@
 
 #include <DO/Geometry/Tools/MatrixBasedObject.hpp>
 
+
 namespace DO { namespace Projective {
 
   template <typename T, int N>
@@ -42,5 +43,6 @@ namespace DO { namespace Projective {
 
 } /* namespace Projective */
 } /* namespace DO */
+
 
 #endif /* DO_GEOMETRY_TOOLS_CONIC_HPP */
