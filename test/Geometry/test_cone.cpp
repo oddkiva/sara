@@ -1,113 +1,134 @@
-TEST(DO_Geometry_Test, coneTest)
-{
-  Vector2d alpha(1,0), beta(1,1); // generators of the cone
-  AffineCone2 convexK(alpha, beta, TestParams::center, AffineCone2::Convex, std::numeric_limits<double>::epsilon());
-  AffineCone2 bluntK(alpha, beta, TestParams::center, AffineCone2::Blunt, std::numeric_limits<double>::epsilon());
-  AffineCone2 convexPointedK(alpha, alpha, TestParams::center, AffineCone2::Convex);
-  AffineCone2 bluntPointedK(alpha, alpha, TestParams::center, AffineCone2::Blunt, std::numeric_limits<double>::epsilon());
-  AffineCone2 convexPointedK2(alpha, -alpha, TestParams::center, AffineCone2::Convex, std::numeric_limits<double>::epsilon());
-  AffineCone2 bluntPointedK2(alpha, -alpha, TestParams::center, AffineCone2::Blunt, std::numeric_limits<double>::epsilon());
+#include <DO/Geometry/Objects/Cone.hpp>
 
-  // ======================================================================== //
-  printStage("Convex affine cone testing");
-  auto convexPredicate = [&](const Point2d& p) {
-    return inside(p, convexK);
+#include "TestPolygon.hpp"
+
+
+using namespace DO;
+using namespace std;
+
+
+class TestAffineCone : public TestPolygon
+{
+protected:
+  // Generators of the 2D cone
+  Vector2d _alpha;
+  Vector2d _beta;
+  double _eps;
+
+  TestAffineCone() : TestPolygon()
+  {
+    _alpha << 1, 0;
+    _beta << 1, 1;
+    _eps = numeric_limits<double>::epsilon();
+  }
+};
+
+
+TEST_F(TestAffineCone, test_convex_affine_cone)
+{
+  AffineCone2 K(_alpha, _beta, _center, AffineCone2::Convex, _eps);
+
+  auto convex_predicate = [&](const Point2d& p) {
+    return inside(p, K);
   };
-  auto convexGroundTruth = [&](const Point2d& p) {
+
+  auto convex_ground_truth = [&](const Point2d& p) {
     return
-      p.x() > TestParams::w/2. &&
-      p.y() > TestParams::h/2. && 
+      p.x() > _width/2. &&
+      p.y() > _height/2. && 
       p.x() > p.y();
   };
-  sweepTest(convexPredicate, convexGroundTruth, TestParams::debug);
-  if (TestParams::debug)
-  {
-    drawAffineCone(convexK);
-    milliSleep(40);
-  }
 
-  // ======================================================================== //
-  printStage("Blunt affine cone testing");
-  auto bluntPredicate = [&](const Point2d& p) {
-    return inside(p, bluntK);
+  sweep_check(convex_predicate, convex_ground_truth);
+}
+
+
+TEST_F(TestAffineCone, test_blunt_affine_cone)
+{
+  AffineCone2 K(_alpha, _beta, _center, AffineCone2::Blunt, _eps);
+
+  auto blunt_predicate = [&](const Point2d& p) {
+    return inside(p, K);
   };
-  auto bluntGroundTruth = [&](const Point2d& p) {
+
+  auto blunt_ground_truth = [&](const Point2d& p) {
     return
-      p.x() >= TestParams::w/2. && 
-      p.y() >= TestParams::h/2. && 
+      p.x() >= _width/2. && 
+      p.y() >= _height/2. && 
       p.x() >= p.y();
   };
-  sweepTest(bluntPredicate, bluntGroundTruth, TestParams::debug);
-  if (TestParams::debug)
-  {
-    drawAffineCone(bluntK);
-    milliSleep(40);
-  }
 
-  // ======================================================================== //
-  printStage("Convex pointed affine cone testing");
-  auto convexPointedPredicate = [&](const Point2d& p) {
-    return inside(p, convexPointedK);
+  sweep_check(blunt_predicate, blunt_ground_truth);
+}
+
+
+TEST_F(TestAffineCone, test_convex_pointed_affine_cone)
+{
+  AffineCone2 K(_alpha, _alpha, _center, AffineCone2::Convex);
+
+  auto convex_pointed_predicate = [&](const Point2d& p) {
+    return inside(p, K);
   };
-  auto convexPointedGroundTruth = [&](const Point2d& p) {
+
+  auto convex_pointed_ground_truth = [&](const Point2d& p) {
     return false;
   };
-  sweepTest(convexPointedPredicate, convexPointedGroundTruth,
-    TestParams::debug);
-  if (TestParams::debug)
-  {
-    drawAffineCone(convexPointedK);
-    milliSleep(40);
-  }
 
-  // ======================================================================== //
-  printStage("Blunt pointed affine cone testing");
-  auto bluntPointedPredicate = [&](const Point2d& p) {
-    return inside(p, bluntPointedK);
+  sweep_check(convex_pointed_predicate, convex_pointed_ground_truth);
+}
+
+
+TEST_F(TestAffineCone, test_blunt_pointed_cone)
+{
+  AffineCone2 K(_alpha, _alpha, _center, AffineCone2::Blunt, _eps);
+
+  auto blunt_pointed_predicate = [&](const Point2d& p) {
+    return inside(p, K);
   };
-  auto bluntPointedGroundTruth = [&](const Point2d& p) {
+
+  auto blunt_pointed_ground_truth = [&](const Point2d& p) {
     return
-      p.x() >= TestParams::w/2. && 
-      p.y() == TestParams::h/2.;
+      p.x() >= _width/2. && 
+      p.y() == _height/2.;
   };
-  sweepTest(bluntPointedPredicate, bluntPointedGroundTruth,
-    TestParams::debug);
-  if (TestParams::debug)
-  {
-    drawAffineCone(bluntPointedK);
-    milliSleep(40);
-  }
 
-  // ======================================================================== //
-  printStage("Convex pointed affine cone testing: Case 2");
-  auto convexPointedPredicate2 = [&](const Point2d& p) {
-    return inside(p, convexPointedK2);
+  sweep_check(blunt_pointed_predicate, blunt_pointed_ground_truth);
+}
+
+
+// Degenerate case where the affine cone is actually empty.
+TEST_F(TestAffineCone, test_degenerate_convex_affine_cone)
+{
+  AffineCone2 K(_alpha, -_alpha, _center, AffineCone2::Convex, _eps);
+
+  auto convex_predicate = [&](const Point2d& p) {
+    return inside(p, K);
   };
-  auto convexPointedGroundTruth2 = [&](const Point2d& p) {
+
+  auto convex_ground_truth = [&](const Point2d& p) {
     return false;
   };
-  sweepTest(convexPointedPredicate2, convexPointedGroundTruth2,
-    TestParams::debug);
-  if (TestParams::debug)
-  {
-    drawAffineCone(convexPointedK2);
-    milliSleep(40);
-  }
 
-  // ======================================================================== //
-  printStage("Blunt pointed affine cone testing: Case 2");
-  auto bluntPointedPredicate2 = [&](const Point2d& p) {
-    return inside(p, bluntPointedK2);
-  };
-  auto bluntPointedGroundTruth2 = [&](const Point2d& p) {
-    return p.y() == TestParams::h/2.;
-  };
-  sweepTest(bluntPointedPredicate2, bluntPointedGroundTruth2,
-    TestParams::debug);
-  if (TestParams::debug)
-  {
-    drawAffineCone(bluntPointedK2);
-    milliSleep(40);
-  }
+  sweep_check(convex_predicate, convex_ground_truth);
+}
 
+
+// Degenerate case where the affine cone is actually a half-space.
+TEST_F(TestAffineCone, test_degenerate_blunt_pointed_affine_cone)
+{
+  AffineCone2 K(_alpha, -_alpha, _center, AffineCone2::Blunt, std::numeric_limits<double>::epsilon());
+  auto blunt_pointed_predicate = [&](const Point2d& p) {
+    return inside(p, K);
+  };
+  auto blunt_pointed_ground_truth = [&](const Point2d& p) {
+    return p.y() == _height/2.;
+  };
+  sweep_check(blunt_pointed_predicate, blunt_pointed_ground_truth);
+}
+
+
+int main(int argc, char **argv)
+{
+  testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }

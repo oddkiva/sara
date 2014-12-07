@@ -11,6 +11,10 @@ do_test(Geometry_BBox
         test_bbox.cpp
         "${DO_LIBRARIES}" "Geometry")
 
+do_test(Geometry_Cone
+        test_cone.cpp
+        "${DO_LIBRARIES}" "Geometry")
+
 do_test(Geometry_Quad
         test_quad.cpp
         "${DO_LIBRARIES}" "Geometry")
