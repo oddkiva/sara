@@ -19,6 +19,10 @@ do_test(Geometry_CSG
         test_csg.cpp
         "${DO_LIBRARIES}" "Geometry")
 
+do_test(Geometry_Ellipse
+        test_ellipse.cpp
+        "${DO_LIBRARIES}" "Geometry")
+
 do_test(Geometry_Quad
         test_quad.cpp
         "${DO_LIBRARIES}" "Geometry")

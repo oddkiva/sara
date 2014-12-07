@@ -120,7 +120,7 @@ namespace DO {
   typedef AffineCone<2> AffineCone2;
   typedef AffineCone<3> AffineCone3;
 
-  AffineCone2 affineCone2(double theta0, double theta1, const Point2d& vertex);
+  AffineCone2 affine_cone2(double theta0, double theta1, const Point2d& vertex);
 
 
 } /* namespace DO */

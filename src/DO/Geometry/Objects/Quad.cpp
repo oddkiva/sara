@@ -19,10 +19,10 @@ namespace DO {
 
   Quad::Quad(const BBox& bbox)
   {
-    v_[0] = bbox.topLeft();
-    v_[1] = bbox.topRight();
-    v_[2] = bbox.bottomRight();
-    v_[3] = bbox.bottomLeft();
+    v_[0] = bbox.top_left();
+    v_[1] = bbox.top_right();
+    v_[2] = bbox.bottom_right();
+    v_[3] = bbox.bottom_left();
   }
 
   Quad::Quad(const Point2d& a, const Point2d& b,

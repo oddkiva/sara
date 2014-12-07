@@ -15,66 +15,69 @@
 #include <DO/Core/EigenExtension.hpp>
 #include <DO/Core/StdVectorHelpers.hpp>
 
+
+namespace DO { namespace Detail {
+
+  static
+  inline
+  double squared_distance(const Point2d& a, const Point2d& b, const Point2d& x)
+  {
+    Matrix2d M;
+    M.col(0) = b-a;
+    M.col(1) = x-a;
+    return std::abs(M.determinant());
+  }
+
+  static
+  void ramer_douglas_peucker(std::vector<Point2d>& lines,
+                             const std::vector<Point2d>& contours,
+                             std::size_t begin, std::size_t end,
+                             double eps)
+  {
+    if (end-begin < 3)
+      return;
+
+    if (lines.empty() || lines.back() != contours[begin])
+      lines.push_back(contours[begin]);
+
+    std::size_t index = begin+1;
+    double maxDist = 0;
+    for (std::size_t i = begin+1; i != end-1; ++i)
+    {
+      double dist = squared_distance(contours[begin], contours[end-1],
+        contours[i]);
+      if (maxDist < dist)
+      {
+        index = i;
+        maxDist = dist;
+      }
+    }
+
+    if (maxDist > eps)
+    {
+      ramer_douglas_peucker(lines, contours, begin, index+1, eps);
+      ramer_douglas_peucker(lines, contours, index, end, eps);
+    }
+
+    lines.push_back(contours[end-1]);
+  }
+
+} /* namespace Detail */
+} /* namespace DO */
+
+
 namespace DO {
 
-  namespace internal {
-
-    static
-    inline
-    double squaredDistance(const Point2d& a, const Point2d& b, const Point2d& x)
-    {
-      Matrix2d M;
-      M.col(0) = b-a;
-      M.col(1) = x-a;
-      return std::abs(M.determinant());
-    }
-
-    static
-    void
-    ramerDouglasPeucker(std::vector<Point2d>& lines,
-                        const std::vector<Point2d>& contours,
-                        std::size_t begin, std::size_t end,
-                        double eps)
-    {
-      if (end-begin < 3)
-        return;
-
-      if (lines.empty() || lines.back() != contours[begin])
-        lines.push_back(contours[begin]);
-
-      std::size_t index = begin+1;
-      double maxDist = 0;
-      for (std::size_t i = begin+1; i != end-1; ++i)
-      {
-        double dist = squaredDistance(contours[begin], contours[end-1],
-                                      contours[i]);
-        if (maxDist < dist)
-        {
-          index = i;
-          maxDist = dist;
-        }
-      }
-
-      if (maxDist > eps)
-      {
-        ramerDouglasPeucker(lines, contours, begin, index+1, eps);
-        ramerDouglasPeucker(lines, contours, index, end, eps);
-      }
-
-      lines.push_back(contours[end-1]);
-    }
-
-  } /* namespace internal */
-
   std::vector<Point2d>
-  ramerDouglasPeucker(const std::vector<Point2d>& contours, double eps)
+  ramer_douglas_peucker(const std::vector<Point2d>& contours, double eps)
   {
     std::vector<Point2d> lines;
     lines.reserve(lines.size());
-    internal::ramerDouglasPeucker(lines, contours, 0, contours.size(), eps);
+    Detail::ramer_douglas_peucker(lines, contours, 0, contours.size(), eps);
     shrink_to_fit(lines);
     return lines;
   }
-}
+
+} /* namespace DO */
 
 #endif /* DO_GEOMETRY_ALGORITHMS_RAMERDOUGLASPEUCKER_HPP */

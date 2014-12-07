@@ -12,27 +12,36 @@
 #ifndef DO_GEOMETRY_BBOX_HPP
 #define DO_GEOMETRY_BBOX_HPP
 
+
 #include <stdexcept>
-#include <DO/Core/EigenExtension.hpp>
 #include <vector>
+
+#include <DO/Core/EigenExtension.hpp>
+
 
 namespace DO {
 
   class BBox
   {
-    Point2d tl_, br_;
+    Point2d _top_left, _bottom_right;
+
   public:
+    //! Default constructor.
     BBox() {}
-    BBox(const Point2d& topLeft, const Point2d& bottomRight)
-      : tl_(topLeft), br_(bottomRight)
+
+    //! Constructor from the BBox end points.
+    BBox(const Point2d& top_left, const Point2d& bottom_right)
+      : _top_left(top_left), _bottom_right(bottom_right)
     {
-      if ( tl_.x() > br_.x() ||
-           tl_.y() > br_.y() )
+      if ( _top_left.x() > _bottom_right.x() ||
+           _top_left.y() > _bottom_right.y() )
       {
         const char *msg = "Top-left and bottom-right corners are wrong!";
         throw std::logic_error(msg);
       }
     }
+
+    //! Constructor from a point set.
     BBox(const Point2d *begin, const Point2d *end)
     {
       if (!begin)
@@ -40,47 +49,50 @@ namespace DO {
         const char *msg = "The array of points seems wrong.";
         throw std::logic_error(msg);
       }
-      tl_ = br_ = *begin;
+      _top_left = _bottom_right = *begin;
       for (const Point2d *p = begin; p != end; ++p)
       {
-        tl_.x() = std::min(tl_.x(), p->x());
-        tl_.y() = std::min(tl_.y(), p->y());
-        br_.x() = std::max(br_.x(), p->x());
-        br_.y() = std::max(br_.y(), p->y());
+        _top_left.x() = std::min(_top_left.x(), p->x());
+        _top_left.y() = std::min(_top_left.y(), p->y());
+        _bottom_right.x() = std::max(_bottom_right.x(), p->x());
+        _bottom_right.y() = std::max(_bottom_right.y(), p->y());
       }
     }
+
+    //! Constructor from a point set.
     BBox(const std::vector<Point2d>& points);
 
-    Point2d& topLeft()     { return tl_; }
-    Point2d& bottomRight() { return br_; }
-    double& x1() { return  tl_.x(); }
-    double& y1() { return  tl_.y(); }
-    double& x2() { return  br_.x(); }
-    double& y2() { return  br_.y(); }
+    Point2d& top_left()     { return _top_left; }
+    Point2d& bottom_right() { return _bottom_right; }
+    double& x1() { return  _top_left.x(); }
+    double& y1() { return  _top_left.y(); }
+    double& x2() { return  _bottom_right.x(); }
+    double& y2() { return  _bottom_right.y(); }
 
-    const Point2d& topLeft()     const { return tl_; }
-    const Point2d& bottomRight() const { return br_; }
-    Point2d        topRight()    const { return tl_+Point2d(width(), 0); }
-    Point2d        bottomLeft()  const { return br_-Point2d(width(), 0); }
+    const Point2d& top_left()     const { return _top_left; }
+    const Point2d& bottom_right() const { return _bottom_right; }
+    Point2d        top_right()    const { return _top_left+Point2d(width(), 0); }
+    Point2d        bottom_left()  const { return _bottom_right-Point2d(width(), 0); }
 
-    double x1() const { return  tl_.x(); }
-    double y1() const { return  tl_.y(); }
-    double x2() const { return  br_.x(); }
-    double y2() const { return  br_.y(); }
+    double x1() const { return  _top_left.x(); }
+    double y1() const { return  _top_left.y(); }
+    double x2() const { return  _bottom_right.x(); }
+    double y2() const { return  _bottom_right.y(); }
 
-    double width() const  { return std::abs(br_.x() - tl_.x()); }
-    double height() const { return std::abs(br_.y() - tl_.y()); }
-    Vector2d sizes() const { return br_ - tl_; }
+    double width() const  { return std::abs(_bottom_right.x() - _top_left.x()); }
+    double height() const { return std::abs(_bottom_right.y() - _top_left.y()); }
+    Vector2d sizes() const { return _bottom_right - _top_left; }
 
-    Point2d center() const { return 0.5*(tl_ + br_); }
+    Point2d center() const { return 0.5*(_top_left + _bottom_right); }
 
     static BBox infinite()
     {
       BBox b;
-      b.topLeft().fill(-std::numeric_limits<double>::infinity());
-      b.bottomRight().fill(std::numeric_limits<double>::infinity());
+      b.top_left().fill(-std::numeric_limits<double>::infinity());
+      b.bottom_right().fill(std::numeric_limits<double>::infinity());
       return b;
     }
+
     static BBox zero()
     {
       BBox b(Point2d::Zero(), Point2d::Zero());
@@ -93,13 +105,13 @@ namespace DO {
   bool inside(const Point2d& p, const BBox& bbox);
   bool degenerate(const BBox& bbox, double eps = 1e-3);
   bool intersect(const BBox& bbox1, const BBox& bbox2);
-  double jaccardSimilarity(const BBox& bbox1, const BBox& bbox2);
-  double jaccardDistance(const BBox& bbox1, const BBox& bbox2);
+  double jaccard_similarity(const BBox& bbox1, const BBox& bbox2);
+  double jaccard_distance(const BBox& bbox1, const BBox& bbox2);
 
-  // I/O.
+  //! I/O.
   std::ostream& operator<<(std::ostream& os, const BBox& bbox);
 
-  // Intersection test.
+  //! Intersection test.
   BBox intersection(const BBox& bbox1, const BBox& bbox2);
   
 

@@ -26,7 +26,7 @@ namespace DO {
   }
 
   static
-  P2::Line lineFrom(const Vector2d& s, const Vector2d& e)
+  P2::Line line(const Point2d& s, const Point2d& e)
   {
     P2::Line l;
     l = P2::line(s, e);
@@ -36,7 +36,7 @@ namespace DO {
   
   // Polygon 'subject' can be a polygon of any type.
   // Polygon 'clip'  must be a convex polygon.
-  std::vector<Point2d> sutherlandHodgman(const std::vector<Point2d>& subject,
+  std::vector<Point2d> sutherland_hodgman(const std::vector<Point2d>& subject,
                                          const std::vector<Point2d>& clip)
   {
     std::vector<Point2d> in, out;
@@ -63,16 +63,16 @@ namespace DO {
           out.push_back(in[v2]);
         else if (ccw1 ==  1 && ccw2 == -1)
         {
-          clipLine = lineFrom(clip[e1], clip[e2]);
-          inLine = lineFrom(in[v1], in[v2]);
+          clipLine = line(clip[e1], clip[e2]);
+          inLine = line(in[v1], in[v2]);
 
           if ( intersection(clipLine, inLine, inter) )
             out.push_back(inter);
         }
         else if (ccw1 == -1 && ccw2 ==  1)
         {
-          clipLine = lineFrom(clip[e1], clip[e2]);
-          inLine = lineFrom(in[v1], in[v2]);
+          clipLine = line(clip[e1], clip[e2]);
+          inLine = line(in[v1], in[v2]);
           if ( intersection(clipLine, inLine, inter) )
             out.push_back(inter);
           out.push_back(in[v2]);

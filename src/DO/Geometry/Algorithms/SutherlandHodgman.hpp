@@ -29,7 +29,7 @@ namespace DO {
    - Polygon 'subject' must be a simple polygon, i.e., without holes.
    - Polygon 'clip' must be a convex polygon.
    */
-  std::vector<Point2d> sutherlandHodgman(const std::vector<Point2d>& subject,
+  std::vector<Point2d> sutherland_hodgman(const std::vector<Point2d>& subject,
                                          const std::vector<Point2d>& clip);
 
 } /* namespace DO */

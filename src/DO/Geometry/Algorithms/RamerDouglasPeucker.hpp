@@ -18,7 +18,7 @@
 namespace DO {
 
   std::vector<Point2d>
-  ramerDouglasPeucker(const std::vector<Point2d>& contours, double eps);
+  ramer_douglas_peucker(const std::vector<Point2d>& contours, double eps);
 
 }
 

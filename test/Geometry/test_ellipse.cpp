@@ -1,14 +1,28 @@
-TEST(DO_Geometry_Test, ellipseSegmentArea)
-{
-  Ellipse E(270, 150, toRadian(42.), TestParams::center);
-  Image<Rgb8> buffer(TestParams::w, TestParams::h);
+#include <DO/Geometry/Objects/Ellipse.hpp>
+#include <DO/Geometry/Objects/Triangle.hpp>
+#include <DO/Geometry/Tools/Utilities.hpp>
 
-  if (TestParams::debug)
+#include "TestPolygon.hpp"
+
+
+using namespace DO;
+using namespace std;
+
+
+class TestEllipse : public TestPolygon
+{
+protected:
+  TestEllipse() : TestPolygon()
   {
-    if (!getActiveWindow())
-      setAntialiasing(openWindow(TestParams::w, TestParams::h));
-    clearWindow();
+    _width = 300;
+    _height = 300;
   }
+};
+
+
+TEST_F(TestEllipse, test_segment_area)
+{
+  Ellipse E(270, 150, to_radian(42.), Point2d::Zero());
 
   try
   {
@@ -26,24 +40,20 @@ TEST(DO_Geometry_Test, ellipseSegmentArea)
         const Point2d& o = E.center();
         Triangle t(o, a, b);
 
-        auto insideSegment = [&](const Point2d& p) -> bool
-        { return (ccw(a,b,p) == -1) && inside(p, E); };
+        auto inside_segment = [&](const Point2d& p) -> bool {
+          return (ccw(a,b,p) == -1) && inside(p, E);
+        };
 
-        double segArea1 = sweepCountPixels(insideSegment, buffer);
-        double segArea2 = segmentArea(E, theta0, theta1);
-
-        if (TestParams::debug)
-        {
-          display(buffer);
-          drawTriangle(t, Green8, 3);
-        }
+        double segArea1 = sweep_count_pixels(inside_segment);
+        double segArea2 = segment_area(E, theta0, theta1);
 
         double absError = fabs(segArea1 -segArea2);
         double relError = absError/segArea1;
 
         const double thres = 0.1;
         EXPECT_NEAR(relError, 0, thres);
-        if (TestParams::debug && relError > thres)
+#if 0
+        if (relError > thres)
         {
           printStage("Numerical error");
           CHECK(i0);
@@ -55,13 +65,20 @@ TEST(DO_Geometry_Test, ellipseSegmentArea)
           CHECK(relError);
           getKey();
         }
+#endif
       }
     }
   }
   catch (exception& e)
   {
     cout << e.what() << endl;
-    getKey();
   }
 
+}
+
+
+int main(int argc, char **argv)
+{
+  testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }

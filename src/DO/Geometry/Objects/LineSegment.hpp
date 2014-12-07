@@ -40,11 +40,19 @@ namespace DO {
   };
 
   inline Vector2d dir(const LineSegment& s)
-  { return s.p2() - s.p1(); }
-  inline double squaredLength(const LineSegment& s)
-  { return (s.p2()-s.p1()).squaredNorm(); }
+  {
+    return s.p2() - s.p1();
+  }
+
+  inline double squared_length(const LineSegment& s)
+  {
+    return (s.p2()-s.p1()).squaredNorm();
+  }
+
   inline double length(const LineSegment& s)
-  { return (s.p2()-s.p1()).norm(); }
+  {
+    return (s.p2()-s.p1()).norm();
+  }
 
   /*!
     Intersection test between line segments.

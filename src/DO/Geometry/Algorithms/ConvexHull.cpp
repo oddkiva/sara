@@ -12,69 +12,73 @@
 #include <DO/Geometry/Tools/Utilities.hpp>
 #include <DO/Geometry/Algorithms/ConvexHull.hpp>
 
+
 using namespace std;
 
-namespace DO {
-  
-  namespace internal {
-    
-    static
-    inline bool compareYCoord(const PtCotg& p, const PtCotg& q)
-    {
-      if (p.first.y() < q.first.y())
-        return true;
-      if (p.first.y() == q.first.y() && p.first.x() < q.first.x())
-        return true;
-      return false;
-    }
-    
-    static
-    inline bool compareCotg(const std::pair<Point2d, double>& p,
-                            const std::pair<Point2d, double>& q)
-    {
-      return p.second > q.second;
-    }
-    
-    static
-    void sortPointsByPolarAngle(PtCotg *out, const Point2d *in, int numPoints)
-    {
-      // Copy.
-      for (int i = 0; i < numPoints; ++i)
-        out[i].first = in[i];
-      // Find origin and swap with first element.
-      PtCotg *origin;
-      origin = min_element(out, out+numPoints, compareYCoord);
-      swap(*origin, *out);
-      // Compute the polar angle w.r.t. origin and sort by polar angle.
-      out[0].second = numeric_limits<double>::infinity();
-      for (int i = 1; i < numPoints; ++i)
-      {
-        Vector2d diff(out[i].first - out[0].first);
-        out[i].second = diff.x()/diff.y();
-      }
-      // Compute the polar angle w.r.t. origin and sort by polar angle.
-      sort(out, out+numPoints, compareCotg);
-    }
-    
-    void sortPointsByPolarAngle(Point2d *inout, PtCotg *work, int numPoints)
-    {
-      sortPointsByPolarAngle(work, inout, numPoints);
-      for (int i = 0; i < numPoints; ++i)
-        inout[i] = work[i].first;
-    }
 
-  } /* namespace internal */
-
-  std::vector<Point2d> grahamScanConvexHull(const std::vector<Point2d>& points)
+namespace DO { namespace Detail {
+    
+  static
+  inline bool compare_y_coord(const PtCotg& p, const PtCotg& q)
   {
-    using namespace internal;
+    if (p.first.y() < q.first.y())
+      return true;
+    if (p.first.y() == q.first.y() && p.first.x() < q.first.x())
+      return true;
+    return false;
+  }
+
+  static
+  inline bool compare_cotan(const pair<Point2d, double>& p,
+                            const pair<Point2d, double>& q)
+  {
+    return p.second > q.second;
+  }
+
+  static
+  void sort_points_by_polar_angle(PtCotg *out, const Point2d *in, int numPoints)
+  {
+    // Copy.
+    for (int i = 0; i < numPoints; ++i)
+      out[i].first = in[i];
+    // Find origin and swap with first element.
+    PtCotg *origin;
+    origin = min_element(out, out+numPoints, compare_y_coord);
+    swap(*origin, *out);
+    // Compute the polar angle w.r.t. origin and sort by polar angle.
+    out[0].second = numeric_limits<double>::infinity();
+    for (int i = 1; i < numPoints; ++i)
+    {
+      Vector2d diff(out[i].first - out[0].first);
+      out[i].second = diff.x()/diff.y();
+    }
+    // Compute the polar angle w.r.t. origin and sort by polar angle.
+    sort(out, out+numPoints, compare_cotan);
+  }
+
+  void sort_points_by_polar_angle(Point2d *inout, PtCotg *work, int numPoints)
+  {
+    sort_points_by_polar_angle(work, inout, numPoints);
+    for (int i = 0; i < numPoints; ++i)
+      inout[i] = work[i].first;
+  }
+
+} /* namespace internal */
+} /* namespace DO */
+
+
+namespace DO {
+
+  vector<Point2d> graham_scan_convex_hull(const vector<Point2d>& points)
+  {
+    using namespace Detail;
     // Sanity check.
     if (points.size() < 3)
       return points;
-    using namespace internal;
+    using namespace Detail;
     // Sort by polar angle.
     vector<PtCotg> ptCotgs(points.size());
-    sortPointsByPolarAngle(&ptCotgs[0], &points[0], points.size());
+    sort_points_by_polar_angle(&ptCotgs[0], &points[0], points.size());
     // Weed out the points inside the convex hull.
     std::vector<Point2d> ch;
     ch.reserve(points.size());

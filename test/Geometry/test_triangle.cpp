@@ -28,7 +28,7 @@ TEST_F(TestTriangle, test_constructor_and_area_computation)
   EXPECT_NEAR(area(t1), 1e4/2., 1e-10);
 
   Triangle t2(Point2d(100,0), Point2d(0, 0), Point2d(100, 100));
-  EXPECT_NEAR(signedArea(t2), -1e4/2., 1e-10);
+  EXPECT_NEAR(signed_area(t2), -1e4/2., 1e-10);
 }
 
 TEST_F(TestTriangle, test_point_inside_triangle)

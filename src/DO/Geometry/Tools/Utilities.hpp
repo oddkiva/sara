@@ -24,23 +24,25 @@ namespace DO {
   //! Sign function.
   template <typename T>
   inline int signum(T val)
-  { return (T(0) < val) - (val < T(0)); }
+  {
+    return (T(0) < val) - (val < T(0));
+  }
 
   //! Degree to radian conversion.
   template <typename T>
-  inline T toRadian(T degree)
+  inline T to_radian(T degree)
   {
-    DO_STATIC_ASSERT( !std::numeric_limits<T>::is_integer, 
-      SCALAR_MUST_BE_OF_FLOATING_TYPE );
+    DO_STATIC_ASSERT(!std::numeric_limits<T>::is_integer, 
+                     SCALAR_MUST_BE_OF_FLOATING_TYPE);
     return degree*static_cast<T>(M_PI)/static_cast<T>(180);
   }
 
   //! Radian to degree conversion.
   template <typename T>
-  inline T toDegree(T radian)
+  inline T to_degree(T radian)
   {
-    DO_STATIC_ASSERT( !std::numeric_limits<T>::is_integer, 
-      SCALAR_MUST_BE_OF_FLOATING_TYPE );
+    DO_STATIC_ASSERT(!std::numeric_limits<T>::is_integer, 
+                     SCALAR_MUST_BE_OF_FLOATING_TYPE );
     return radian*static_cast<T>(180)/static_cast<T>(M_PI);
   }
 
@@ -57,7 +59,9 @@ namespace DO {
   template <typename T>
   inline T cross(const Matrix<T, 2, 1>& a, const Matrix<T, 2, 1>& b,
                  const Matrix<T, 2, 1>& c)
-  { return cross(Matrix<T,2,1>(b-a), Matrix<T,2,1>(c-a)); }
+  {
+    return cross(Matrix<T,2,1>(b-a), Matrix<T,2,1>(c-a));
+  }
 
   /*!
     Suppose the 'b-a' is an upfront vector.
@@ -69,10 +73,12 @@ namespace DO {
   template <typename T>
   inline int ccw(const Matrix<T, 2, 1>& a, const Matrix<T, 2, 1>& b,
                  const Matrix<T, 2, 1>& c)
-  { return signum( cross(a, b, c) ); }
+  {
+    return signum( cross(a, b, c) );
+  }
 
   template <typename T>
-  inline Matrix<T, 2, 1> unitVector2(T radian)
+  inline Matrix<T, 2, 1> unit_vector2(T radian)
   {
     DO_STATIC_ASSERT( !std::numeric_limits<T>::is_integer, 
       SCALAR_MUST_BE_OF_FLOATING_TYPE );
@@ -90,16 +96,16 @@ namespace DO {
   template <typename T>
   inline Matrix<T, 2, 2> isometry2(T radian, T scale)
   {
-    DO_STATIC_ASSERT( !std::numeric_limits<T>::is_integer, 
-      SCALAR_MUST_BE_OF_FLOATING_TYPE );
+    DO_STATIC_ASSERT(!std::numeric_limits<T>::is_integer, 
+                     SCALAR_MUST_BE_OF_FLOATING_TYPE);
     return Eigen::Rotation2D<T>(radian).toRotationMatrix()*scale;
   }
 
   template <typename T>
-  Matrix<T, 2, 2> linearTransform2(const Matrix<T, 2, 1>& p1,
-                                   const Matrix<T, 2, 1>& p2,
-                                   const Matrix<T, 2, 1>& q1,
-                                   const Matrix<T, 2, 1>& q2)
+  Matrix<T, 2, 2> linear_transform_2(const Matrix<T, 2, 1>& p1,
+                                     const Matrix<T, 2, 1>& p2,
+                                     const Matrix<T, 2, 1>& q1,
+                                     const Matrix<T, 2, 1>& q2)
   {
     Matrix<T, 4, 4> M;
     M << p1.x(), p1.y(),   T(0),   T(0),
@@ -120,12 +126,12 @@ namespace DO {
   }
 
   template <typename T>
-  Matrix<T, 3, 3> affineTransform2(const Matrix<T, 2, 1>& p1,
-                                   const Matrix<T, 2, 1>& p2,
-                                   const Matrix<T, 2, 1>& p3,
-                                   const Matrix<T, 2, 1>& q1,
-                                   const Matrix<T, 2, 1>& q2,
-                                   const Matrix<T, 2, 1>& q3)
+  Matrix<T, 3, 3> affine_transform_2(const Matrix<T, 2, 1>& p1,
+                                     const Matrix<T, 2, 1>& p2,
+                                     const Matrix<T, 2, 1>& p3,
+                                     const Matrix<T, 2, 1>& q1,
+                                     const Matrix<T, 2, 1>& q2,
+                                     const Matrix<T, 2, 1>& q3)
   {
     Matrix<T, 6, 6> M;
     M << p1.x(), p1.y(), T(1),   T(0),   T(0), T(0),
@@ -149,8 +155,10 @@ namespace DO {
   }
 
   template <typename T>
-  Matrix<T, 2, 2> linearPartFromAffineTransform2(const Matrix<T, 3, 3>& A)
-  { return A.template block<2,2>(0,0); }
+  Matrix<T, 2, 2> linear_part_from_affinity(const Matrix<T, 3, 3>& A)
+  {
+    return A.template block<2,2>(0,0);
+  }
 
   template <typename T>
   Matrix<T, 3, 3> homography(const Matrix<T, 2, 1>& p1,
@@ -187,8 +195,8 @@ namespace DO {
   }
 
   template <typename T>
-  Matrix<T, 2, 2> homographyJacobianMatrix(const Matrix<T, 3, 3>& H,
-                                           const Matrix<T, 2, 1>& x)
+  Matrix<T, 2, 2> homography_jacobian_matrix(const Matrix<T, 3, 3>& H,
+                                             const Matrix<T, 2, 1>& x)
   {
     Matrix<T, 2, 2> dH;
     const T u = H(0,0)*x[0] + H(0,1)*x[1] + H(0,2);
@@ -204,7 +212,7 @@ namespace DO {
   template <typename T>
   Matrix<T, 2, 1> apply(const Matrix<T, 3, 3> H, const Matrix<T, 2, 1>& p)
   {
-    Matrix<T, 3, 1> H_p(H*(Vector3f() << p, 1.f).finished()); //.block(0,0,2,1)
+    Matrix<T, 3, 1> H_p(H*(Vector3f() << p, 1.f).finished());
     H_p /= H_p(2);
     return H_p.block(0,0,2,1);
   }

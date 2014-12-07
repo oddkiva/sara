@@ -21,7 +21,8 @@ using namespace std;
 using namespace DO;
 
 
-TEST(TestSutherlandHodgmanPolygonClipping, test_subject_polygon_in_clip_polygon)
+TEST(TestSutherlandHodgmanPolygonClipping,
+     test_subject_polygon_in_clip_polygon)
 {
   vector<Point2d> clip_polygon;
   vector<Point2d> subject_polygon;
@@ -39,11 +40,12 @@ TEST(TestSutherlandHodgmanPolygonClipping, test_subject_polygon_in_clip_polygon)
   subject_polygon.push_back(Point2d(0.50, 0.75));
 
   // The resulting polygon must the subject polygon.
-  result = sutherlandHodgman(subject_polygon, clip_polygon);
+  result = sutherland_hodgman(subject_polygon, clip_polygon);
   EXPECT_EQ(result, subject_polygon);
 }
 
-TEST(TestSutherlandHodgmanPolygonClipping, test_subject_polygon_outside_of_clip_polygon)
+TEST(TestSutherlandHodgmanPolygonClipping,
+     test_subject_polygon_outside_of_clip_polygon)
 {
   vector<Point2d> clip_polygon;
   vector<Point2d> subject_polygon;
@@ -61,11 +63,12 @@ TEST(TestSutherlandHodgmanPolygonClipping, test_subject_polygon_outside_of_clip_
   subject_polygon.push_back(Point2d(4., 1.));
 
   // The resulting polygon must the empty polygon.
-  result = sutherlandHodgman(subject_polygon, clip_polygon);
+  result = sutherland_hodgman(subject_polygon, clip_polygon);
   EXPECT_TRUE(result.empty());
 }
 
-TEST(TestSutherlandHodgmanPolygonClipping, test_clip_polygon_in_subject_polygon)
+TEST(TestSutherlandHodgmanPolygonClipping,
+     test_clip_polygon_in_subject_polygon)
 {
   vector<Point2d> clip_polygon;
   vector<Point2d> subject_polygon;
@@ -83,7 +86,7 @@ TEST(TestSutherlandHodgmanPolygonClipping, test_clip_polygon_in_subject_polygon)
   subject_polygon.push_back(Point2d( 10., 10.));
 
   // The resulting polygon must the empty polygon.
-  result = sutherlandHodgman(subject_polygon, clip_polygon);
+  result = sutherland_hodgman(subject_polygon, clip_polygon);
   EXPECT_TRUE(result.empty());
 }
 
@@ -105,7 +108,7 @@ TEST(TestSutherlandHodgmanPolygonClipping, test_interesecting_bboxes)
 
   // The actual result of the implementation.
   vector<Point2d> actual_result;
-  actual_result = sutherlandHodgman(subject_polygon, clip_polygon);
+  actual_result = sutherland_hodgman(subject_polygon, clip_polygon);
 
   // The expected result is a smaller box.
   vector<Point2d> expected_result;

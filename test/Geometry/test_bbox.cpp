@@ -26,10 +26,10 @@ class TestBBox : public TestPolygon {};
 TEST_F(TestBBox, test_constructor_and_accessors)
 {
   BBox bbox(_p1, _p2);
-  EXPECT_EQ(bbox.topLeft(), Point2d(_a, _a));
-  EXPECT_EQ(bbox.topRight(), Point2d(_b, _a));
-  EXPECT_EQ(bbox.bottomRight(), Point2d(_b, _b));
-  EXPECT_EQ(bbox.bottomLeft(), Point2d(_a, _b));
+  EXPECT_EQ(bbox.top_left(), Point2d(_a, _a));
+  EXPECT_EQ(bbox.top_right(), Point2d(_b, _a));
+  EXPECT_EQ(bbox.bottom_right(), Point2d(_b, _b));
+  EXPECT_EQ(bbox.bottom_left(), Point2d(_a, _b));
 
   auto predicate = [&](const Point2d& p) {
     return inside(p, bbox);
@@ -51,8 +51,8 @@ TEST_F(TestBBox, test_constructor_from_point_set)
   };
 
   BBox bbox(points, points+3);
-  EXPECT_EQ(bbox.topLeft(), points[0]);
-  EXPECT_EQ(bbox.bottomRight(), points[2]);
+  EXPECT_EQ(bbox.top_left(), points[0]);
+  EXPECT_EQ(bbox.bottom_right(), points[2]);
 }
 
 TEST_F(TestBBox, test_point_inside_bbox)

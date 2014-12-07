@@ -17,8 +17,8 @@ namespace DO {
 
   std::ostream& operator<<(std::ostream& os, const BBox& bbox)
   {
-    os << "top-left: [" << bbox.topLeft().transpose() << "]" << endl;
-    os << "bottom-right: [" << bbox.bottomRight().transpose() << "]" << endl;
+    os << "top-left: [" << bbox.top_left().transpose() << "]" << endl;
+    os << "bottom-right: [" << bbox.bottom_right().transpose() << "]" << endl;
     return os;
   }
 
@@ -30,8 +30,8 @@ namespace DO {
   bool inside(const Point2d& p, const BBox& bbox)
   {
     return 
-      p.cwiseMin(bbox.topLeft()) == bbox.topLeft() &&
-      p.cwiseMax(bbox.bottomRight()) == bbox.bottomRight();
+      p.cwiseMin(bbox.top_left()) == bbox.top_left() &&
+      p.cwiseMax(bbox.bottom_right()) == bbox.bottom_right();
   }
 
   bool degenerate(const BBox& bbox, double eps)
@@ -45,7 +45,7 @@ namespace DO {
     return area(inter) > std::numeric_limits<double>::epsilon();
   }
 
-  double jaccardSimilarity(const BBox& bbox1, const BBox& bbox2)
+  double jaccard_similarity(const BBox& bbox1, const BBox& bbox2)
   {
     BBox inter(intersection(bbox1, bbox2));
     double interArea = area(inter);
@@ -53,28 +53,28 @@ namespace DO {
     return interArea/unionArea;
   }
 
-  double jaccardDistance(const BBox& bbox1, const BBox& bbox2)
+  double jaccard_distance(const BBox& bbox1, const BBox& bbox2)
   {
-    return 1. - jaccardSimilarity(bbox1, bbox2);
+    return 1. - jaccard_similarity(bbox1, bbox2);
   }
 
   static
-  void getCorners(Point2d& tl, Point2d& tr, Point2d& br, Point2d& bl,
+  void get_corners(Point2d& tl, Point2d& tr, Point2d& br, Point2d& bl,
                   const BBox& bbox)
   {
-    tl = bbox.topLeft();
-    tr = bbox.topRight();
-    br = bbox.bottomRight();
-    bl = bbox.bottomLeft();
+    tl = bbox.top_left();
+    tr = bbox.top_right();
+    br = bbox.bottom_right();
+    bl = bbox.bottom_left();
   }
 
   static
-  BBox intersectionOneWay(const BBox& bbox1, const BBox& bbox2)
+  BBox intersection_one_way(const BBox& bbox1, const BBox& bbox2)
   {
     Point2d tl1, tr1, br1, bl1;
     Point2d tl2, tr2, br2, bl2;
-    getCorners(tl1, tr1, br1, bl1, bbox1);
-    getCorners(tl2, tr2, br2, bl2, bbox2);
+    get_corners(tl1, tr1, br1, bl1, bbox1);
+    get_corners(tl2, tr2, br2, bl2, bbox2);
 
     // Case 1
     if (inside(tl2, bbox1))
@@ -112,10 +112,10 @@ namespace DO {
   BBox intersection(const BBox& bbox1, const BBox& bbox2)
   {
     BBox bbox(BBox::zero());
-    bbox = intersectionOneWay(bbox1, bbox2);
+    bbox = intersection_one_way(bbox1, bbox2);
     if (area(bbox) > std::numeric_limits<double>::epsilon())
       return bbox;
-    bbox = intersectionOneWay(bbox2, bbox1);
+    bbox = intersection_one_way(bbox2, bbox1);
     if (area(bbox) > std::numeric_limits<double>::epsilon())
       return bbox;
     return bbox;

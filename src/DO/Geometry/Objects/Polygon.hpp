@@ -25,29 +25,77 @@ namespace DO {
     typedef Vector3d Line;
     typedef Point * iterator;
     typedef const Point * const_iterator;
+
     //! Constructors
-    inline SmallPolygon() {}
-    inline SmallPolygon(const Point *vertices) { copy_vertices(vertices); }
-    inline SmallPolygon(const SmallPolygon& other) { copy(other); }
+    inline SmallPolygon()
+    {
+    }
+
+    inline SmallPolygon(const Point *vertices)
+    {
+      copy_vertices(vertices);
+    }
+
+    inline SmallPolygon(const SmallPolygon& other)
+    {
+      copy(other);
+    }
+
     //! Assignment operator
     inline SmallPolygon& operator=(const SmallPolygon& other)
-    { copy(other); return *this; }
-    //! Point accessors.
-    inline Point& operator[](int i) { return v_[i]; }
-    inline const Point& operator[](int i) const { return v_[i]; }
-    //! iterators
-    inline Point * begin() { return v_; }
-    inline Point * end()   { return v_+N; }
-    inline const Point * begin() const { return v_; }
-    inline const Point * end()   const { return v_+N; }
+    {
+      copy(other);
+      return *this;
+    }
 
-    inline int num_vertices() const { return N; }
+    //! Mutable point accessors.
+    inline Point& operator[](int i)
+    {
+      return v_[i];
+    }
+
+    //! Immutable point accessor
+    inline const Point& operator[](int i) const
+    {
+      return v_[i];
+    }
+
+    //! iterators
+    inline Point * begin()
+    {
+      return v_;
+    }
+
+    inline Point * end()
+    {
+      return v_+N;
+    }
+
+    inline const Point * begin() const
+    {
+      return v_;
+    }
+
+    inline const Point * end() const
+    {
+      return v_+N;
+    }
+
+    inline int num_vertices() const
+    {
+      return N;
+    }
 
   protected:
     inline void copy_vertices(const Point2d *vertices)
-    { std::copy(vertices, vertices+N, v_); }
+    {
+      std::copy(vertices, vertices+N, v_);
+    }
+
     inline void copy(const SmallPolygon& other)
-    { copy_vertices(other.v_); }
+    {
+      copy_vertices(other.v_);
+    }
 
   protected:
     Point v_[N];
@@ -65,9 +113,9 @@ namespace DO {
 
   //! Utility functions.
   template <int N>
-  double signedArea(const SmallPolygon<N>& polygon)
+  double signed_area(const SmallPolygon<N>& polygon)
   {
-    //! Computation derived from Green's formula
+    // Computation derived from Green's formula
     double A = 0.;
     for (int i1 = N-1, i2 = 0; i2 < N; i1=i2++)
     {
@@ -81,7 +129,9 @@ namespace DO {
   
   template <int N>
   inline double area(const SmallPolygon<N>& polygon)
-  { return std::abs(signedArea(polygon)); }
+  {
+    return std::abs(signed_area(polygon));
+  }
 
   //! Even-odd rule implementation.
   template <int N>

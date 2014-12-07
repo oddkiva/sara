@@ -21,8 +21,8 @@ namespace DO {
 
   void drawBBox(const BBox& b, const Color3ub& color, int penWidth)
   {
-    Point2i tl(b.topLeft().cast<int>());
-    Point2i br(b.bottomRight().cast<int>());
+    Point2i tl(b.top_left().cast<int>());
+    Point2i br(b.bottom_right().cast<int>());
     Point2i sz(br-tl);
     drawRect(tl.x(), tl.y(), sz.x(), sz.y(), color, penWidth);
   }
@@ -38,9 +38,9 @@ namespace DO {
   {
     // Ellipse...
     drawEllipse(e.center(), e.radius1(), e.radius2(),
-                toDegree(e.orientation()), col, penWidth);
+                to_degree(e.orientation()), col, penWidth);
     // Arrow...
-    Vector2d u(unitVector2(e.orientation()));
+    Vector2d u(unit_vector2(e.orientation()));
     u *= e.radius1()*1.1;
     Point2d a, b;
     a = e.center();

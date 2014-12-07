@@ -49,9 +49,10 @@ GRAPHICS_MAIN_SIMPLE()
   int numIter = 1000;
   timer.restart();
   for (int i = 0; i < numIter; ++i)
-    res = sutherlandHodgman(poly, clip);
+    res = sutherland_hodgman(poly, clip);
   elapsed = timer.elapsedMs()/numIter;
-  cout << "Intersection computation time = " << elapsed << " milliseconds" << endl;
+  cout << "Intersection computation time = " << elapsed << " milliseconds"
+       << endl;
  
   drawPoly(res, Green8,5);
   getKey();
