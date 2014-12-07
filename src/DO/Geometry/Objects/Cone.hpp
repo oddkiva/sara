@@ -60,7 +60,7 @@ namespace DO {
     {
       // Deal with the null vector.
       if (x.squaredNorm() < eps_*eps_)
-        return type_ & Blunt;
+        return (type_ & Blunt) != 0;
 
       // Otherwise decompose x w.r.t. to the basis.
       Vector2d theta;
@@ -74,7 +74,7 @@ namespace DO {
       {
         if (type_ & PositiveCosine && type_ & Blunt)
           return theta.minCoeff() > -eps_;
-        return type_ & Blunt;
+        return (type_ & Blunt) != 0;
       }
 
       // Generic case.
@@ -120,7 +120,7 @@ namespace DO {
   typedef AffineCone<2> AffineCone2;
   typedef AffineCone<3> AffineCone3;
 
-  AffineCone2 affineCone2(double theta0, double theta1, const Point2d& vertex);
+  AffineCone2 affine_cone2(double theta0, double theta1, const Point2d& vertex);
 
 
 } /* namespace DO */

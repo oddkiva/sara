@@ -17,13 +17,19 @@
 #include <DO/Core/EigenExtension.hpp>
 #include <DO/Geometry/Objects/Quad.hpp>
 
+
 namespace DO {
 
   //! Ellipse class
   class Ellipse
   {
   public:
-    Ellipse() {}
+    //! Default constructor.
+    Ellipse()
+    {
+    }
+
+    //! Constructor.
     Ellipse(double radius1, double radius2, double orientation,
             const Point2d& center)
       : a_(radius1), b_(radius2), o_(orientation), c_(center) {}
@@ -40,20 +46,24 @@ namespace DO {
 
     //! Get the radial vector at angle $\theta$ w.r.t. orientation $o$ of ellipse.
     Vector2d rho(double theta) const;
+
     //! Get point on ellipse at angle $\theta$ w.r.t. orientation $o$ of ellipse.
     Point2d operator()(double theta) const;
+
     /*!
       Retrieve relative orientation of point $p$ w.r.t. orientation 
       $o$ of ellipse.
      */
     friend double orientation(const Point2d& p, const Ellipse& e);
+
     //! Polar antiderivative.
-    friend inline double polarAntiderivative(const Ellipse& e, double theta)
+    friend inline double polar_antiderivative(const Ellipse& e, double theta)
     {
       const double y = (e.b_-e.a_)*sin(2*theta);
       const double x = (e.b_+e.a_) + (e.b_-e.a_)*cos(2*theta);
       return e.a_*e.b_*0.5*( theta - atan2(y,x) );
     }
+
     /*!
       This function should be used instead to compute the **positive** area 
       of an ellipse sector which we define as the region bounded by:
@@ -65,28 +75,40 @@ namespace DO {
       $\theta_0$ and $\theta_1$ are required to be in the range $]\pi, \pi]$ but
       it does not matter if $\theta_0 > \theta_1$.      
      */
-    friend double sectorArea(const Ellipse& e, double theta0, double theta1)
-    { return polarAntiderivative(e, theta1) - polarAntiderivative(e, theta0); }
+    friend double sector_area(const Ellipse& e, double theta0, double theta1)
+    {
+      return polar_antiderivative(e, theta1) - polar_antiderivative(e, theta0);
+    }
+
     /*!
       An elliptic segment is a region bounded by an arc and the chord connecting
       the arc's endpoints.
      */
-    friend double segmentArea(const Ellipse& e, double theta0, double theta1);
+    friend double segment_area(const Ellipse& e, double theta0, double theta1);
+
     //! Ellipse area.
     friend inline double area(const Ellipse& e)
-    { return M_PI*e.a_*e.b_; }
+    {
+      return M_PI*e.a_*e.b_;
+    }
+
     //! Shape matrix.
-    friend inline Matrix2d shapeMat(const Ellipse& e)
+    friend inline Matrix2d shape_matrix(const Ellipse& e)
     {
       const Eigen::Rotation2D<double> R(e.o_);
       Vector2d D( 1./(e.a_*e.a_), 1./(e.b_*e.b_) );
       return R.matrix()*D.asDiagonal()*R.matrix().transpose();
     }
+
     //! Checks if point is inside ellipse.
     friend inline bool inside(const Point2d& p, const Ellipse& e)
-    { return (p-e.c_).transpose()*shapeMat(e)*(p-e.c_) < 1.; }
+    {
+      return (p-e.c_).transpose()*shape_matrix(e)*(p-e.c_) < 1.;
+    }
+
     //! Compute rotated bbox of the ellispe.
-    friend Quad rotatedBBox(const Ellipse& e);
+    friend Quad oriented_bbox(const Ellipse& e);
+
     //! I/O.
     friend std::ostream& operator<<(std::ostream& os, const Ellipse& e);
 
@@ -97,8 +119,10 @@ namespace DO {
   };
 
   //! Compute the ellipse from the conic equation
-  Ellipse fromShapeMat(const Matrix2d& shapeMat, const Point2d& c);
+  Ellipse construct_from_shape_matrix(const Matrix2d& shapeMat,
+                                      const Point2d& c);
 
 } /* namespace DO */
+
 
 #endif /* DO_GEOMETRY_ELLIPSE_HPP */

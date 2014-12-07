@@ -19,11 +19,11 @@ namespace DO {
   template class AffineCone<2>;
   template class AffineCone<3>;
 
-  AffineCone2 affineCone2(double theta0, double theta1, const Point2d& vertex)
+  AffineCone2 affine_cone2(double theta0, double theta1, const Point2d& vertex)
   {
     Point2d u0, u1;
-    u0 = unitVector2(theta0);
-    u1 = unitVector2(theta1);
+    u0 = unit_vector2(theta0);
+    u1 = unit_vector2(theta1);
     return AffineCone2(u0, u1, vertex, AffineCone2::Convex);
   }
 

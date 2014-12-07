@@ -19,23 +19,42 @@
 
 namespace DO {
 
-  //! Compute the intersection union ratio approximately
-  std::vector<Point2d> approxIntersection(const Ellipse& e1, const Ellipse& e2, int n);
-  double approxJaccardSimilarity(const Ellipse& e1, const Ellipse& e2,
-                                 int n = 36, double limit = 1e9);
+  /*!
+   * Compute the approximate intersection-union ratio by approximating ellipses
+   * with polygons.
+   */
+  std::vector<Point2d> approximage_intersection(const Ellipse& e1,
+                                                const Ellipse& e2,
+                                                int ellipse_discretization);
 
-  //! Check polynomial solvers.
-  int computeIntersectionPoints(Point2d intersections[],
-                                const Ellipse& e1,
-                                const Ellipse& e2);
+  /*!
+   * Compute the approximate Jaccard distance by approximating ellipses with
+   * polygons.
+   */
+  double approximate_jaccard_similarity(const Ellipse& e1,
+                                        const Ellipse& e2,
+                                        int ellipse_discretization = 36,
+                                        double limit = 1e9);
+
+  //! Compute intersection points between two ellipses and return the number of
+  //! intersection points.
+  int compute_intersection_points(Point2d intersections[],
+                                  const Ellipse& e1,
+                                  const Ellipse& e2);
 
   /*!
     Compute the intersection union ratio exactly.
     CAUTION: Numerical issues are not totally solved. We are almost there...
     Investigation is still ongoing.
    */
-  double analyticIntersection(const Ellipse& e1, const Ellipse& e2);
-  double analyticJaccardSimilarity(const Ellipse& e1, const Ellipse& e2);
+  double analytic_intersection(const Ellipse& e1, const Ellipse& e2);
+
+  /*!
+    Compute the intersection union ratio exactly.
+    CAUTION: Numerical issues are not totally solved. We are almost there...
+    Investigation is still ongoing.
+   */
+  double analytic_jaccard_similarity(const Ellipse& e1, const Ellipse& e2);
 
 
 } /* namespace DO */

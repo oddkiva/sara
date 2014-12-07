@@ -10,8 +10,7 @@ add_subdirectory(ImageIO)
 
 add_subdirectory(KDTree)
 add_subdirectory(ImageProcessing)
-#add_subdirectory(MSER)
-#add_subdirectory(Geometry)
+add_subdirectory(Geometry)
 
 #add_subdirectory(Features)
 #add_subdirectory(FeatureDetectors)
@@ -21,4 +20,3 @@ add_subdirectory(ImageProcessing)
 #add_subdirectory(FeatureMatching)
 
 #add_subdirectory(VideoCapture)
-#add_subdirectory(ChamferDistance)

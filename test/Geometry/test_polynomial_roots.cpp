@@ -10,14 +10,16 @@
 // ========================================================================== //
 
 #include <gtest/gtest.h>
+
 #include <DO/Geometry/Tools/Polynomial.hpp>
 #include <DO/Geometry/Tools/PolynomialRoots.hpp>
-#include <DO/Graphics.hpp>
+
 
 using namespace std;
 using namespace DO;
 
-TEST(DO_Geometry_Test, testQuadraticPolynomialRoots)
+
+TEST(TestPolynomialRoots, test_quadratic_polynomial_roots)
 {
   bool verbose = false;
 
@@ -38,11 +40,11 @@ TEST(DO_Geometry_Test, testQuadraticPolynomialRoots)
   }
 
   EXPECT_TRUE(realRoots);
-  EXPECT_NEAR(abs(P(x1)), 0., std::numeric_limits<double>::epsilon());
-  EXPECT_NEAR(abs(P(x2)), 0., std::numeric_limits<double>::epsilon());
+  EXPECT_NEAR(abs(P(x1)), 0., 1e-10);
+  EXPECT_NEAR(abs(P(x2)), 0., 1e-10);
 }
 
-TEST(DO_Geometry_Test, testCubicPolynomialRoots)
+TEST(TestPolynomialRoots, test_cubic_polynomial_roots)
 {
   bool verbose = false;
 
@@ -77,7 +79,7 @@ TEST(DO_Geometry_Test, testCubicPolynomialRoots)
   }
 }
 
-TEST(DO_Geometry_Test, testQuarticPolynomialRoots)
+TEST(TestPolynomialRoots, test_quartic_polynomial_roots)
 {
   bool verbose = false;
 
@@ -115,6 +117,7 @@ TEST(DO_Geometry_Test, testQuarticPolynomialRoots)
     EXPECT_NEAR(abs(P(x4)), 0., eps);
   }
 }
+
 
 int main(int argc, char** argv) 
 {

@@ -26,16 +26,19 @@ namespace DO {
   // ======================================================================== //
   // Computation of intersecting points of intersecting ellipses
   // ======================================================================== //
-  void printConicEquation(double s[6])
+  void print_conic_equation(double s[6])
   {
     cout << s[0] << " + " << s[1] << " x + " << s[2] << " y + ";
     cout << s[3] << " x^2 + " << s[4] << " xy + " << s[5] << " y^2 = 0" << endl;
   }
 
-  void getConicEquation(double s[6], const Ellipse & e)
+  void conic_equation(double s[6], const Ellipse & e)
   {
-    const Matrix2d M(shapeMat(e));
-    s[0] = e.center().x()*M(0,0)*e.center().x() + 2*e.center().x()*M(0,1)*e.center().y() + e.center().y()*M(1,1)*e.center().y() - 1.0;
+    const Matrix2d M(shape_matrix(e));
+    s[0] = e.center().x()*M(0,0)*e.center().x()
+         + 2*e.center().x()*M(0,1)*e.center().y()
+         + e.center().y()*M(1,1)*e.center().y()
+         - 1.0;
     s[1] =-2.0*(M(0,0)*e.center().x() + M(0,1)*e.center().y());
     s[2] =-2.0*(M(1,0)*e.center().x() + M(1,1)*e.center().y());
     s[3] = M(0,0);
@@ -43,7 +46,7 @@ namespace DO {
     s[5] = M(1,1);
   }
 
-  Polynomial<double, 4> getQuarticEquation(const double s[6], const double t[6])
+  Polynomial<double, 4> quartic_equation(const double s[6], const double t[6])
   {
     double d[6][6];
     for(int i = 0; i < 6; ++i)
@@ -59,14 +62,14 @@ namespace DO {
     return u;
   }
 
-  void getSigmaPolynomial(double sigma[3], const double s[6], double y)
+  void sigma_polynomial(double sigma[3], const double s[6], double y)
   {
     sigma[0] = s[0]+s[2]*y+s[5]*y*y;
     sigma[1] = s[1]+s[4]*y;
     sigma[2] = s[3];
   }
 
-  inline double computeConicExpression(double x, double y, const double s[6])
+  inline double compute_conic_expression(double x, double y, const double s[6])
   {
     return s[0] + s[1]*x + s[2]*y + s[3]*x*x + s[4]*x*y + s[5]*y*y;
   }
@@ -74,20 +77,20 @@ namespace DO {
   // If imaginary part precision: 1e-6.
   // If the conic equation produces an almost zero value i.e.: 1e-3.
   // then we decide there is an intersection.
-  pair<bool, Point2d> isRootValid(const complex<double>& y,
-                                  const double s[6], const double t[6])
+  pair<bool, Point2d> is_real_root(const complex<double>& y,
+                                   const double s[6], const double t[6])
   {
     if ( abs(imag(y)) > 1e-2*abs(real(y)) )
       return make_pair(false, Point2d());
     const double realY = real(y);
     double sigma[3], tau[3];
-    getSigmaPolynomial(sigma, s, realY);
-    getSigmaPolynomial(tau, t, realY);
+    sigma_polynomial(sigma, s, realY);
+    sigma_polynomial(tau, t, realY);
     const double x = (sigma[2]*tau[0] - sigma[0]*tau[2])
       / (sigma[1]*tau[2] - sigma[2]*tau[1]);
 
-    if (fabs(computeConicExpression(x, realY, s)) < 1e-2 &&
-        fabs(computeConicExpression(x, realY, t)) < 1e-2)
+    if (fabs(compute_conic_expression(x, realY, s)) < 1e-2 &&
+        fabs(compute_conic_expression(x, realY, t)) < 1e-2)
     {
       /*cout << "QO(x,y) = " << computeConicExpression(x, realY, s) << endl;
       cout << "Q1(x,y) = " << computeConicExpression(x, realY, t) << endl;*/
@@ -97,7 +100,7 @@ namespace DO {
       return make_pair(false, Point2d());
   }
 
-  int computeIntersectionPoints(Point2d intersections[4],
+  int compute_intersection_points(Point2d intersections[4],
                                 const Ellipse & e1, const Ellipse & e2)
   {
     // Rescale ellipse to try to improve numerical accuracy.
@@ -110,10 +113,10 @@ namespace DO {
     ee2.center() -= center;
 
     double s[6], t[6];
-    getConicEquation(s, ee1);
-    getConicEquation(t, ee2);
+    conic_equation(s, ee1);
+    conic_equation(t, ee2);
     
-    Polynomial<double, 4> u(getQuarticEquation(s, t));
+    Polynomial<double, 4> u(quartic_equation(s, t));
 
     complex<double> y[4];
     roots(u, y[0], y[1], y[2], y[3]);
@@ -122,7 +125,7 @@ namespace DO {
     int numInter = 0;
     for(int i = 0; i < 4; ++i)
     {
-      pair<bool, Point2d> p(isRootValid(y[i], s, t));
+      pair<bool, Point2d> p(is_real_root(y[i], s, t));
       if(!p.first)
         continue;
       intersections[numInter] = p.second + center;
@@ -136,13 +139,13 @@ namespace DO {
     };
 
     auto it = unique(intersections, intersections+numInter, identicalPoints);
-    return it - intersections;
+    return static_cast<int>(it - intersections);
   }
 
   void orientation(double *ori, const Point2d *pts, int numPoints,
                    const Ellipse& e)
   {
-    const Vector2d u(unitVector2(e.orientation()));
+    const Vector2d u(unit_vector2(e.orientation()));
     const Vector2d v(-u(1), u(0));
     transform(pts, pts+numPoints, ori, [&](const Point2d& p) -> double
     {
@@ -151,15 +154,16 @@ namespace DO {
     });
   }
 
+
   // ======================================================================== //
   // Computation of the area of intersecting ellipses.
   // ======================================================================== //
-  double analyticIntersection(const Ellipse& E_0, const Ellipse& E_1)
+  double analytic_intersection(const Ellipse& E_0, const Ellipse& E_1)
   {
     // Find the intersection points of the two ellipses.
     Point2d interPts[4];
 #ifdef RESOLVED_NUMERICAL_ACCURACY
-    int numInter = computeIntersectionPoints(interPts, E_0, E_1);
+    int numInter = compute_intersection_points(interPts, E_0, E_1);
 #else
     /*if (numInter > 0)
     {
@@ -169,13 +173,13 @@ namespace DO {
       clearWindow();
       drawEllipse(E_0, Red8, 3);
       drawEllipse(E_1, Blue8, 3);
-      Quad Q_0(rotatedBBox(E_0));
-      Quad Q_1(rotatedBBox(E_1));
+      Quad Q_0(oriented_bbox(E_0));
+      Quad Q_1(oriented_bbox(E_1));
 
       BBox b0(&Q_0[0], &Q_0[0]+4);
       BBox b1(&Q_1[0], &Q_1[0]+4);
-      b0.topLeft() = b0.topLeft().cwiseMin(b1.topLeft());
-      b0.bottomRight() = b0.bottomRight().cwiseMax(b1.bottomRight());
+      b0.top_left() = b0.top_left().cwiseMin(b1.top_left());
+      b0.bottom_right() = b0.bottom_right().cwiseMax(b1.bottom_right());
 
       drawQuad(Q_0, Red8, 3);
       drawQuad(Q_1, Blue8, 3);
@@ -189,24 +193,24 @@ namespace DO {
 
       //min <-> max
       //-1 <-> 1
-      double xmin = b0.topLeft().x();
-      double ymin = b0.topLeft().y();
-      double xmax = b0.bottomRight().x();
-      double ymax = b0.bottomRight().y();
+      double xmin = b0.top_left().x();
+      double ymin = b0.top_left().y();
+      double xmax = b0.bottom_right().x();
+      double ymax = b0.bottom_right().y();
 
       Ellipse EE_0, EE_1;
-      Matrix2d S_0 = delta.asDiagonal()*shapeMat(E_0)*delta.asDiagonal();
-      Matrix2d S_1 = delta.asDiagonal()*shapeMat(E_1)*delta.asDiagonal();
+      Matrix2d S_0 = delta.asDiagonal()*shape_matrix(E_0)*delta.asDiagonal();
+      Matrix2d S_1 = delta.asDiagonal()*shape_matrix(E_1)*delta.asDiagonal();
 
-      CHECK(shapeMat(E_0));
+      CHECK(shape_matrix(E_0));
       CHECK(S_0);
 
 
       Vector2d c_0 = E_0.center() - center;
       Vector2d c_1 = E_1.center() - center;
-      EE_0 = fromShapeMat(S_0, c_0);
-      EE_1 = fromShapeMat(S_1, c_1);
-      int numInter = computeIntersectionPoints(interPts, EE_0, EE_1);
+      EE_0 = construct_from_shape_matrix(S_0, c_0);
+      EE_1 = construct_from_shape_matrix(S_1, c_1);
+      int numInter = compute_intersection_points(interPts, EE_0, EE_1);
 
       for (int i = 0; i < numInter; ++i)
         interPts[i] = delta.asDiagonal()*interPts[i] + center;
@@ -217,8 +221,8 @@ namespace DO {
 
     if (numInter > 2)
     {
-      internal::PtCotg work[4];
-      internal::sortPointsByPolarAngle(interPts, work, numInter);
+      Detail::PtCotg work[4];
+      Detail::sort_points_by_polar_angle(interPts, work, numInter);
     }
 
     // SPECIAL CASE.
@@ -254,8 +258,8 @@ namespace DO {
       if (psi_0 > psi_1)
         psi_1 += 2*M_PI;
 
-      area += min(segmentArea(E_0, theta_0, theta_1),
-                  segmentArea(E_1, psi_0, psi_1));
+      area += min(segment_area(E_0, theta_0, theta_1),
+                  segment_area(E_1, psi_0, psi_1));
     }
     // If the number of the intersection > 2, add the area of the polygon
     // whose vertices are p[0], p[1], ..., p[numInter].
@@ -273,18 +277,19 @@ namespace DO {
     return area;
   }
   
-  double analyticJaccardSimilarity(const Ellipse& e1, const Ellipse& e2)
+  double analytic_jaccard_similarity(const Ellipse& e1, const Ellipse& e2)
   {
-    double interArea = analyticIntersection(e1, e2);
+    double interArea = analytic_intersection(e1, e2);
     double unionArea = area(e1) + area(e2) - interArea;
     return interArea / unionArea;
   }
+
 
   // ======================================================================== //
   // Approximate computation of area of intersection ellipses.
   // ======================================================================== //
   std::vector<Point2d>
-  discretizeEllipse(const Ellipse& e, int n)
+  discretize_ellipse(const Ellipse& e, int n)
   {
     std::vector<Point2d> polygon;
     polygon.reserve(n);
@@ -306,27 +311,27 @@ namespace DO {
   }
   
   std::vector<Point2d>
-  approxIntersection(const Ellipse& e1, const Ellipse& e2, int n)
+  approximage_intersection(const Ellipse& e1, const Ellipse& e2, int n)
   {
-    std::vector<Point2d> p1(discretizeEllipse(e1,n));
-    std::vector<Point2d> p2(discretizeEllipse(e2,n));
+    std::vector<Point2d> p1(discretize_ellipse(e1,n));
+    std::vector<Point2d> p2(discretize_ellipse(e2,n));
 
     std::vector<Point2d> inter;
-    inter = sutherlandHodgman(p1, p2);
+    inter = sutherland_hodgman(p1, p2);
     if (inter.empty())
-      inter = sutherlandHodgman(p2, p1);
+      inter = sutherland_hodgman(p2, p1);
     return inter;
   }
   
-  double approxJaccardSimilarity(const Ellipse& e1, const Ellipse& e2,
+  double approximate_jaccard_similarity(const Ellipse& e1, const Ellipse& e2,
                                  int n, double limit)
   {
-    std::vector<Point2d> p1(discretizeEllipse(e1,n));
-    std::vector<Point2d> p2(discretizeEllipse(e2,n));
+    std::vector<Point2d> p1(discretize_ellipse(e1,n));
+    std::vector<Point2d> p2(discretize_ellipse(e2,n));
     std::vector<Point2d> inter;
-    inter = sutherlandHodgman(p1, p2);
+    inter = sutherland_hodgman(p1, p2);
     if (inter.empty())
-      inter = sutherlandHodgman(p2, p1);
+      inter = sutherland_hodgman(p2, p1);
     
 		if (!inter.empty())
 		{

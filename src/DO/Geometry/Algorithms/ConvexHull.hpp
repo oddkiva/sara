@@ -13,17 +13,20 @@
 
 #include <DO/Geometry/Objects/Polygon.hpp>
 
-namespace DO {
-  
-  namespace internal {
+namespace DO { namespace Detail {
 
     typedef std::pair<Point2d, double> PtCotg;
     
-    void sortPointsByPolarAngle(Point2d *points, PtCotg *workArray,
+    void sort_points_by_polar_angle(Point2d *points, PtCotg *workArray,
                                 int numPoints);
 
-  } /* namespace internal */
+} /* namespace Detail */
+} /* namespace DO */
 
-  std::vector<Point2d> grahamScanConvexHull(const std::vector<Point2d>& points);
+
+namespace DO {
+
+  std::vector<Point2d>
+  graham_scan_convex_hull(const std::vector<Point2d>& points);
 
 } /* namespace DO */
