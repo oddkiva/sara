@@ -12,33 +12,33 @@ using namespace DO;
 class TestPolygon : public testing::Test
 {
 protected:
-  int w;
-  int h;
-  double a;
-  double b;
-  Point2d p1;
-  Point2d p2;
-  Point2d center;
+  int _width;
+  int _height;
+  double _a;
+  double _b;
+  Point2d _p1;
+  Point2d _p2;
+  Point2d _center;
 
   TestPolygon()
   {
-    w = 512;
-    h = 512;
+    _width = 10;
+    _height = 10;
 
-    a = 0.25*w;
-    b = 0.75*h;
+    _a = 0.25*_width;
+    _b = 0.75*_height;
 
-    p1 = Point2d(a, a);
-    p2 = Point2d(b, b);
-    center = Point2d(w/2., h/2.);
+    _p1 = Point2d(_a, _a);
+    _p2 = Point2d(_b, _b);
+    _center = Point2d(_width/2., _height/2.);
   }
 
   template <typename TestPred, typename GroundTruth>
   void sweep_check(const TestPred& pred, const GroundTruth& ground_truth)
   {
-    for (int y = -h; y < h; ++y)
+    for (int y = -_height; y < _height; ++y)
     {
-      for (int x = -w; x < w; ++x)
+      for (int x = -_width; x < _width; ++x)
       {
         Point2d p(x,y);
         EXPECT_EQ(ground_truth(p), pred(p));
@@ -50,9 +50,9 @@ protected:
   int sweep_count_pixels(const TestPred& pred)
   {
     int quantity = 0;
-    for (int y = -h; y < h; ++y)
+    for (int y = -_height; y < _height; ++y)
     {
-      for (int x = -w; x < w; ++x)
+      for (int x = -_width; x < _width; ++x)
       {
         Point2d p(x,y);
         if (pred(p))
