@@ -41,7 +41,7 @@ TEST_F(TestEllipse, DISABLED_test_sector_area)
         double theta1 = i1*2*M_PI/steps;
 
         // Compute the sector area in a closed form.
-        double analyticSectorArea = sector_area(E, theta0, theta1);
+        double analytic_sector_area = sector_area(E, theta0, theta1);
 
         // Build constructive solid geometry.
         CSG::Singleton<AffineCone2> cone ( affine_cone2(
@@ -58,7 +58,7 @@ TEST_F(TestEllipse, DISABLED_test_sector_area)
         };
 
         // Use the lambda functors to estimate the elliptic sector area.
-        int estimated_sector_area;
+        double estimated_sector_area;
         if (i1 - i0 < steps/2)
           estimated_sector_area = sweep_count_pixels(inside_E_and_Cone);
         else if (abs(i1-i0) == steps/2)
@@ -67,8 +67,8 @@ TEST_F(TestEllipse, DISABLED_test_sector_area)
           estimated_sector_area = sweep_count_pixels(inside_E_minus_Cone);
 
         // Absolute error and relative error.
-        double abs_error = fabs(estimated_sector_area -analyticSectorArea);
-        double rel_error = abs_error/estimated_sector_area;
+        double abs_error = fabs(estimated_sector_area - analytic_sector_area);
+        double rel_error = abs_error / estimated_sector_area;
 
         double thres = 1e-1;
         EXPECT_NEAR(rel_error, 0, thres);
