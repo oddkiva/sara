@@ -136,7 +136,7 @@ namespace DO {
     };
 
     auto it = unique(intersections, intersections+numInter, identicalPoints);
-    return it - intersections;
+    return static_cast<int>(it - intersections);
   }
 
   void orientation(double *ori, const Point2d *pts, int numPoints,

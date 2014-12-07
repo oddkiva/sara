@@ -60,7 +60,7 @@ namespace DO {
     {
       // Deal with the null vector.
       if (x.squaredNorm() < eps_*eps_)
-        return type_ & Blunt;
+        return (type_ & Blunt) != 0;
 
       // Otherwise decompose x w.r.t. to the basis.
       Vector2d theta;
@@ -74,7 +74,7 @@ namespace DO {
       {
         if (type_ & PositiveCosine && type_ & Blunt)
           return theta.minCoeff() > -eps_;
-        return type_ & Blunt;
+        return (type_ & Blunt) != 0;
       }
 
       // Generic case.
