@@ -25,19 +25,19 @@ class TestBBox : public TestPolygon {};
 
 TEST_F(TestBBox, test_constructor_and_accessors)
 {
-  BBox bbox(p1, p2);
-  EXPECT_EQ(bbox.topLeft(), Point2d(a, a));
-  EXPECT_EQ(bbox.topRight(), Point2d(b, a));
-  EXPECT_EQ(bbox.bottomRight(), Point2d(b, b));
-  EXPECT_EQ(bbox.bottomLeft(), Point2d(a, b));
+  BBox bbox(_p1, _p2);
+  EXPECT_EQ(bbox.topLeft(), Point2d(_a, _a));
+  EXPECT_EQ(bbox.topRight(), Point2d(_b, _a));
+  EXPECT_EQ(bbox.bottomRight(), Point2d(_b, _b));
+  EXPECT_EQ(bbox.bottomLeft(), Point2d(_a, _b));
 
   auto predicate = [&](const Point2d& p) {
     return inside(p, bbox);
   };
   auto groundTruth = [&](const Point2d& p) {
     return 
-      p.cwiseMin(p1) == p1 && 
-      p.cwiseMax(p2) == p2;
+      p.cwiseMin(_p1) == _p1 && 
+      p.cwiseMax(_p2) == _p2;
   };
   sweep_check(predicate, groundTruth);
 }
@@ -46,8 +46,8 @@ TEST_F(TestBBox, test_constructor_from_point_set)
 {
   Point2d points[] = {
     Point2d::Zero(),
-    Point2d(a, a),
-    center
+    Point2d(_a, _a),
+    _center
   };
 
   BBox bbox(points, points+3);
@@ -57,12 +57,12 @@ TEST_F(TestBBox, test_constructor_from_point_set)
 
 TEST_F(TestBBox, test_point_inside_bbox)
 {
-  BBox bbox(p1, p2);
+  BBox bbox(_p1, _p2);
 
   Point2d points[] = {
     Point2d::Zero(),
-    Point2d(a, a),
-    center
+    Point2d(_a, _a),
+    _center
   };
   EXPECT_FALSE(inside(points[0], bbox));
   EXPECT_TRUE (inside(points[1], bbox));

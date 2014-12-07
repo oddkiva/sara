@@ -33,7 +33,7 @@ TEST_F(TestTriangle, test_constructor_and_area_computation)
 
 TEST_F(TestTriangle, test_point_inside_triangle)
 {
-  Triangle t(Point2d(50, 73), Point2d(350, 400), Point2d(25, 200));
+  Triangle t(Point2d(-3, -3), Point2d(4, -2), Point2d(0, 4));
 
   double exact_area = area(t);
   int pixel_area = sweep_count_pixels([&](Point2d& p) {

@@ -25,7 +25,7 @@ class TestQuad : public TestPolygon {};
 
 TEST_F(TestQuad, test_point_inside_quad)
 {
-  BBox bbox(p1, p2);
+  BBox bbox(_p1, _p2);
   Quad quad(bbox);
 
   EXPECT_NEAR(area(bbox), area(quad), 1e-10);
@@ -35,8 +35,8 @@ TEST_F(TestQuad, test_point_inside_quad)
   };
   auto groundTruth = [&](const Point2d& p) {
     return 
-      p1.x() <= p.x() && p.x() < p2.x() &&
-      p1.y() <= p.y() && p.y() < p2.y() ;
+      _p1.x() <= p.x() && p.x() < _p2.x() &&
+      _p1.y() <= p.y() && p.y() < _p2.y() ;
   };
   sweep_check(predicate, groundTruth);
 }
