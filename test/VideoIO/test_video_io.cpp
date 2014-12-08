@@ -17,9 +17,9 @@ using namespace DO;
 
 const size_t INBUF_SIZE = 4096;
 
-Yuv32s get_yuv_value(AVFrame *frame, int y, int w, int x) 
+Yuv8 yuv_pixel(AVFrame *frame, int x, int y) 
 {
-  Yuv32s yuv;
+  Yuv8 yuv;
   yuv(0) = frame->data[0][y*frame->linesize[0] + x];
   yuv(1) = frame->data[1][y/2*frame->linesize[1] + x/2];
   yuv(2) = frame->data[2][y/2*frame->linesize[2] + x/2];
@@ -37,7 +37,7 @@ unsigned char clamp(int value)
 }
 
 // Thanks to Wikipedia!
-Rgb8 to_rgb(const Yuv32s& yuv)
+Rgb8 convert(const Yuv8& yuv)
 {
   Rgb8 rgb;
   int C = yuv(0) - 16;
@@ -57,7 +57,6 @@ static int decode_write_frame(Image<Rgb8>& image,
                               AVPacket *pkt, int last)
 {
   int len, got_frame;
-  char buf[1024];
   len = avcodec_decode_video2(avctx, frame, &got_frame, pkt);
   if (len < 0) {
     fprintf(stderr, "Error while decoding frame %d\n", *frame_count);
@@ -79,8 +78,8 @@ static int decode_write_frame(Image<Rgb8>& image,
     for (int y = 0; y < h; ++y)
       for (int x = 0; x < w; ++x)
       {
-        Yuv32s yuv = get_yuv_value(frame, y, w, x);
-        image(x, y) = to_rgb(yuv);
+        Yuv8 yuv = yuv_pixel(frame, x, y);
+        image(x, y) = convert(yuv);
       }
 
     display(image);
@@ -172,21 +171,60 @@ static void decode_video(const string& filename)
 }
 
 
-GRAPHICS_MAIN_SIMPLE()
+namespace DO { namespace Detail {
+
+  class Codec
+  {
+  public:
+    Codec(AVCodecID codec_id = AV_CODEC_ID_MPEG1VIDEO)
+    {
+      if (_registered_all_codecs)
+        av_register_all();
+
+      /* find the mpeg1 video decoder */
+      _codec = avcodec_find_decoder(codec_id);
+      if (!_codec)
+        throw std::runtime_error("Cannot find codec");
+    }
+
+    operator AVCodec *() const
+    {
+      return _codec;
+    }
+
+  private:
+    AVCodec *_codec;
+    static bool _registered_all_codecs;
+  };
+  bool Codec::_registered_all_codecs = false;
+
+  class CodecContext 
+  {
+  public:
+    CodecContext(const Codec& codec)
+      : _context(nullptr)
+    {
+      _context = avcodec_alloc_context3(codec);
+      if (!_context)
+        throw runtime_error("Could not allocate video codec context");
+    }
+
+    ~CodecContext()
+    {
+      _context = avcodec_free_context(_context)
+    }
+
+  private:
+    AVCodecContext *_context;
+  };
+
+
+} /* namespace Detail */
+} /* namespace DO */
+
+
+namespace DO
 {
-  /* Register all the codecs. */
-  avcodec_register_all();
-
-
-  const string filename = srcPath("orion_1.mpg");
-  decode_video(filename);
-  return 0;
-}
-
-
-#if 0
-namespace DO {
-
   class VideoStream
   {
   public:
@@ -270,8 +308,18 @@ TEST_F(TestVideoIO, test_seek_frame)
 
 int main(int argc, char **argv)
 {
-  testing::initgoogletest(&argc, argv);
-  return run_all_tests();
+  testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }
 
-#endif
+
+//GRAPHICS_MAIN_SIMPLE()
+//{
+//  /* Register all the codecs. */
+//  avcodec_register_all();
+//
+//
+//  const string filename = srcPath("orion_1.mpg");
+//  decode_video(filename);
+//  return 0;
+//}
