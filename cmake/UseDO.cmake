@@ -30,7 +30,12 @@ macro (do_use_modules TARGET COMPONENT_LIST)
   else ()
     # Warn the user that precompiled libraries does not work for every build 
     # types...
-    message (WARNING "Precompiled libraries only work for DEBUG or RELEASE builds... If you want to use other build modes, you need to recompile DO++ from the sources. To do so, just insert at the top of the CMakeLists.txt: '(set DO_USE_FROM_SOURCE 1)'")
+    message (WARNING
+      "Precompiled libraries only work for DEBUG or RELEASE builds... If you"
+      "want to use other build modes, you need to recompile DO++ from the"
+      "sources. To do so, just insert at the top of the CMakeLists.txt:"
+      "'(set DO_USE_FROM_SOURCE 1)'"
+    )
 
     # Static or dynamic linking?
     if (DO_USE_STATIC_LIBS)
@@ -52,7 +57,7 @@ macro (do_use_modules TARGET COMPONENT_LIST)
         target_link_libraries(${TARGET} ${OPENGL_LIBRARIES})
       endif ()
       
-      # \todo: CHECK THAT AGAIN...
+      # TODO: CHECK THAT AGAIN...
       if (NOT "${${f}_LIBRARIES}" STREQUAL "" AND NOT DO_USE_STATIC_LIBS)
         if (WIN32)
           target_link_libraries(${TARGET} 
