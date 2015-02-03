@@ -32,17 +32,17 @@ protected:
 
   TestKeyboardMouseInputOnSingleWindow()
   {
-    test_window_ = openWindow(300, 300);
+    test_window_ = create_window(300, 300);
     global_scheduler->set_receiver(test_window_);
   }
 
   virtual ~TestKeyboardMouseInputOnSingleWindow()
   {
-    closeWindow(test_window_);
+    close_window(test_window_);
   }
 };
 
-TEST_F(TestKeyboardMouseInputOnSingleWindow, test_getMouse)
+TEST_F(TestKeyboardMouseInputOnSingleWindow, test_get_mouse)
 {
   Qt::MouseButton expected_qt_mouse_buttons[] = { 
     Qt::LeftButton,
@@ -67,10 +67,10 @@ TEST_F(TestKeyboardMouseInputOnSingleWindow, test_getMouse)
       QEvent::MouseButtonRelease, QPointF(expected_x, expected_y),
       input_qt_mouse_button, Qt::MouseButtons(input_qt_mouse_button), Qt::NoModifier
       );
-    emit getUserThread().sendEvent(&event, 10);
+    emit get_user_thread().sendEvent(&event, 10);
 
     int actual_x, actual_y;
-    int actual_button = getMouse(actual_x, actual_y);
+    int actual_button = get_mouse(actual_x, actual_y);
 
     EXPECT_EQ(actual_button, expected_button_code);
     EXPECT_EQ(actual_x, expected_x);
@@ -86,48 +86,48 @@ TEST_F(TestKeyboardMouseInputOnSingleWindow, test_click)
     QEvent::MouseButtonRelease, QPointF(expected_x, expected_y),
     expected_button, expected_button, Qt::NoModifier
   );
-  emit getUserThread().sendEvent(&event, 10);
+  emit get_user_thread().sendEvent(&event, 10);
 
   click();
 }
 
-TEST_F(TestKeyboardMouseInputOnSingleWindow, test_getKey)
+TEST_F(TestKeyboardMouseInputOnSingleWindow, test_get_key)
 {
   int expected_key = Qt::Key_A;
   QKeyEvent event(
     QEvent::KeyPress, expected_key, Qt::NoModifier
   );
-  emit getUserThread().sendEvent(&event, 10);
+  emit get_user_thread().sendEvent(&event, 10);
 
-  int actual_key = getKey();
+  int actual_key = get_key();
 
   EXPECT_EQ(actual_key, expected_key);
 }
 
-TEST_F(TestKeyboardMouseInputOnSingleWindow, test_getEvent_with_no_input_event)
+TEST_F(TestKeyboardMouseInputOnSingleWindow, test_get_event_with_no_input_event)
 {
   Event event;
-  getEvent(50, event);
+  get_event(50, event);
   EXPECT_EQ(event.type, NO_EVENT);
 }
 
-TEST_F(TestKeyboardMouseInputOnSingleWindow, test_getEvent_with_input_key_event)
+TEST_F(TestKeyboardMouseInputOnSingleWindow, test_get_event_with_input_key_event)
 {
   int expected_key = Qt::Key_A;
   QKeyEvent qt_event(
     QEvent::KeyPress, expected_key, Qt::NoModifier
   );
-  emit getUserThread().sendEvent(&qt_event, 5);
+  emit get_user_thread().sendEvent(&qt_event, 5);
 
   Event event;
-  getEvent(50, event);
+  get_event(50, event);
 
   EXPECT_EQ(event.type, KEY_PRESSED);
   EXPECT_EQ(event.key, expected_key);
   EXPECT_EQ(event.keyModifiers, static_cast<int>(Qt::NoModifier));
 }
 
-TEST_F(TestKeyboardMouseInputOnSingleWindow, test_getEvent_with_input_mouse_event)
+TEST_F(TestKeyboardMouseInputOnSingleWindow, test_get_event_with_input_mouse_event)
 {
   Qt::MouseButton expected_button = Qt::LeftButton;
   int expected_x = 150, expected_y = 150;
@@ -135,10 +135,10 @@ TEST_F(TestKeyboardMouseInputOnSingleWindow, test_getEvent_with_input_mouse_even
     QEvent::MouseButtonRelease, QPointF(expected_x, expected_y),
     expected_button, expected_button, Qt::NoModifier
   );
-  emit getUserThread().sendEvent(&qt_event, 5);
+  emit get_user_thread().sendEvent(&qt_event, 5);
 
   Event event;
-  getEvent(50, event);
+  get_event(50, event);
 
   EXPECT_EQ(event.type, MOUSE_RELEASED);
   EXPECT_EQ(event.buttons, 1);
@@ -155,7 +155,7 @@ protected:
     for (int i = 0; i < 2; ++i)
       for (int j = 0; j < 3; ++j)
         test_windows_.push_back(
-          openWindow(200, 200, toString(3*i+j), 300*j+300, 300*i+50)
+          create_window(200, 200, toString(3*i+j), 300*j+300, 300*i+50)
         );
   }
 
@@ -164,14 +164,14 @@ protected:
   }
 };
 
-TEST_F(TestKeyboardMouseInputOnAnyWindow, test_anyGetMouse)
+TEST_F(TestKeyboardMouseInputOnAnyWindow, test_any_get_mouse)
 {
   Qt::MouseButton expected_button = Qt::LeftButton;
   int expected_x = 150, expected_y = 150;
 
   for (auto wi : test_windows_)
   {
-    setActiveWindow(wi);
+    set_active_window(wi);
 
     for (auto wj : test_windows_)
     {
@@ -180,10 +180,10 @@ TEST_F(TestKeyboardMouseInputOnAnyWindow, test_anyGetMouse)
         QEvent::MouseButtonRelease, QPointF(expected_x, expected_y),
         expected_button, expected_button, Qt::NoModifier
       );
-      emit getUserThread().sendEvent(&event, 10);
+      emit get_user_thread().sendEvent(&event, 10);
 
       Point2i actual_position;
-      int actual_button = anyGetMouse(actual_position);
+      int actual_button = any_get_mouse(actual_position);
 
       EXPECT_EQ(actual_button, 1);
       EXPECT_EQ(actual_position.x(), expected_x);
@@ -192,14 +192,14 @@ TEST_F(TestKeyboardMouseInputOnAnyWindow, test_anyGetMouse)
   }
 }
 
-TEST_F(TestKeyboardMouseInputOnAnyWindow, test_anyClick)
+TEST_F(TestKeyboardMouseInputOnAnyWindow, test_any_click)
 {
   Qt::MouseButton expected_button = Qt::LeftButton;
   int expected_x = 150, expected_y = 150;
 
   for (auto wi : test_windows_)
   {
-    setActiveWindow(wi);
+    set_active_window(wi);
 
     for (auto wj : test_windows_)
     {
@@ -208,20 +208,20 @@ TEST_F(TestKeyboardMouseInputOnAnyWindow, test_anyClick)
         QEvent::MouseButtonRelease, QPointF(expected_x, expected_y),
         expected_button, expected_button, Qt::NoModifier
       );
-      emit getUserThread().sendEvent(&event, 10);
+      emit get_user_thread().sendEvent(&event, 10);
 
-      anyClick();
+      any_click();
     }
   }
 }
 
-TEST_F(TestKeyboardMouseInputOnAnyWindow, test_anyGetKey)
+TEST_F(TestKeyboardMouseInputOnAnyWindow, test_any_get_key)
 {
   int expected_key = Qt::Key_A;
 
   for (auto wi : test_windows_)
   {
-    setActiveWindow(wi);
+    set_active_window(wi);
 
     for (auto wj : test_windows_)
     {
@@ -229,9 +229,9 @@ TEST_F(TestKeyboardMouseInputOnAnyWindow, test_anyGetKey)
       QKeyEvent event(
         QEvent::KeyPress, expected_key, Qt::NoModifier
         );
-      emit getUserThread().sendEvent(&event, 10);
+      emit get_user_thread().sendEvent(&event, 10);
 
-      int actual_key = anyGetKey();
+      int actual_key = any_get_key();
 
       EXPECT_EQ(actual_key, expected_key);
     }
@@ -253,11 +253,11 @@ int main(int argc, char **argv)
   // Create an event scheduler on the GUI thread.
   global_scheduler = new EventScheduler;
   // Connect the user thread and the event scheduler.
-  QObject::connect(&getUserThread(), SIGNAL(sendEvent(QEvent *, int)),
+  QObject::connect(&get_user_thread(), SIGNAL(sendEvent(QEvent *, int)),
                    global_scheduler, SLOT(schedule_event(QEvent*, int)));
 
   // Run the worker thread 
-  gui_app_.registerUserMain(worker_thread_task);
+  gui_app_.register_user_main(worker_thread_task);
   int return_code = gui_app_.exec();
 
   // Cleanup and terminate

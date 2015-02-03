@@ -132,7 +132,7 @@ namespace DO {
 
   void OpenGLWindow::eventListeningTimerStopped()
   {
-    emit sendEvent(noEvent());
+    emit sendEvent(no_event());
   }
 
   void OpenGLWindow::initializeGL()
@@ -333,7 +333,7 @@ namespace DO {
     if (event_listening_timer_.isActive())
     {
       event_listening_timer_.stop();
-      emit sendEvent(keyPressed(event->key(), event->modifiers()));
+      emit sendEvent(key_pressed(event->key(), event->modifiers()));
     }
   }
 
@@ -343,7 +343,7 @@ namespace DO {
     if (event_listening_timer_.isActive())
     {
       event_listening_timer_.stop();
-      emit sendEvent(keyReleased(event->key(), event->modifiers()));
+      emit sendEvent(key_released(event->key(), event->modifiers()));
     }
   }
 

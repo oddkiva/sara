@@ -73,7 +73,7 @@ namespace GLObject {
     glPopAttrib();
   }
 
-  void Frame::genFrameList(GLuint *frameList,
+  void Frame::generate_gl_list(GLuint *frameList,
                            double axisLength,
                            double axisRadius)
   {
