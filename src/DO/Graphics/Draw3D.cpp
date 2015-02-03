@@ -14,9 +14,9 @@
 
 namespace DO {
 
-  void displayMesh(const SimpleTriangleMesh3f& mesh)
+  void display_mesh(const SimpleTriangleMesh3f& mesh)
   {
-    QMetaObject::invokeMethod(getActiveWindow(), "setMesh", 
+    QMetaObject::invokeMethod(active_window(), "setMesh", 
                               Qt::QueuedConnection,
                               Q_ARG(const SimpleTriangleMesh3f&, mesh));
   }

@@ -19,30 +19,30 @@
 namespace DO {
 
   //! Drawing functions
-  void drawLineSegment(const LineSegment& s, const Color3ub& c = Black8,
-                       int penWidth = 1);
-  void drawBBox(const BBox& bbox, const Color3ub& c, int penWidth = 1);
-  void drawPoly(const std::vector<Point2d>& p, const Color3ub& color,
-                int penWidth = 1);
-  void drawEllipse(const Ellipse& e, const Color3ub col, int penWidth = 1);
+  void draw_line_segment(const LineSegment& s, const Color3ub& c = Black8,
+                         int penWidth = 1);
+  void draw_bbox(const BBox& bbox, const Color3ub& c, int penWidth = 1);
+  void draw_poly(const std::vector<Point2d>& p, const Color3ub& color,
+                 int penWidth = 1);
+  void draw_ellipse(const Ellipse& e, const Color3ub col, int penWidth = 1);
   
   template <int N>
-  void drawPoly(const SmallPolygon<N>& poly, const Color3ub& color,
-                int penWidth = 1)
+  void draw_poly(const SmallPolygon<N>& poly, const Color3ub& color,
+                 int penWidth = 1)
   {
     for (int i1 = N-1, i2 = 0; i2 != N; i1=i2++)
-      drawLine(poly[i1], poly[i2], color, penWidth);
+      draw_line(poly[i1], poly[i2], color, penWidth);
   }
 
-  inline void drawTriangle(const Triangle& t, const Rgb8& col = Red8,
-                           int penWidth = 1)
-  { drawPoly(t, col, penWidth); }
+  inline void draw_triangle(const Triangle& t, const Rgb8& col = Red8,
+                            int penWidth = 1)
+  { draw_poly(t, col, penWidth); }
   
-  inline void drawQuad(const Quad& q, const Rgb8& col = Red8,
-                       int penWidth = 1)
-  { drawPoly(q, col, penWidth); }
+  inline void draw_quad(const Quad& q, const Rgb8& col = Red8,
+                        int penWidth = 1)
+  { draw_poly(q, col, penWidth); }
 
-  void drawAffineCone(const AffineCone2& K, double arrowLength = 50.,
-                          const Color3ub& color = Black8);
+  void draw_affine_cone(const AffineCone2& K, double arrowLength = 50.,
+                        const Color3ub& color = Black8);
 
 } /* namespace DO */

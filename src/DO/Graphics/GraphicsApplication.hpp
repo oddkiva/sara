@@ -33,7 +33,7 @@ namespace DO {
     class Impl;
     GraphicsApplication(int argc, char **argv);
     ~GraphicsApplication();
-    void registerUserMain(int (*userMain)(int, char **));
+    void register_user_main(int (*userMain)(int, char **));
     int exec();
 
   private:
@@ -58,7 +58,7 @@ int __main(int, char **);
 int main(int argc, char **argv)             \
 {                                           \
   DO::GraphicsApplication app(argc, argv);  \
-  app.registerUserMain(__main);             \
+  app.register_user_main(__main);           \
   return app.exec();                        \
 }                                           \
                                             \
@@ -69,7 +69,7 @@ int __main(int, char **)
 int main(int argc, char **argv)             \
 {                                           \
   DO::GraphicsApplication app(argc, argv);  \
-  app.registerUserMain(__main);             \
+  app.register_user_main(__main);           \
   app.exec();                               \
 }                                           \
                                             \

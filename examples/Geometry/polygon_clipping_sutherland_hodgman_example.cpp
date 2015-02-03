@@ -24,8 +24,8 @@ GRAPHICS_MAIN_SIMPLE()
   Timer timer;
   double elapsed;
 
-  openWindow(w,h);
-  setAntialiasing();
+  create_window(w,h);
+  set_antialiasing();
 
   std::vector<Point2d> poly, clip, res;
   {
@@ -42,9 +42,9 @@ GRAPHICS_MAIN_SIMPLE()
       clip.push_back(p);
     }
   }
-  drawPoly(poly, Red8);
-  drawPoly(clip, Blue8);
-  getKey();
+  draw_poly(poly, Red8);
+  draw_poly(clip, Blue8);
+  get_key();
 
   int numIter = 1000;
   timer.restart();
@@ -54,8 +54,8 @@ GRAPHICS_MAIN_SIMPLE()
   cout << "Intersection computation time = " << elapsed << " milliseconds"
        << endl;
  
-  drawPoly(res, Green8,5);
-  getKey();
+  draw_poly(res, Green8,5);
+  get_key();
 
   return 0;
 }

@@ -61,7 +61,7 @@ namespace DO {
     \return false otherwise.
    */
   DO_EXPORT
-  bool loadFromDialogBox(Image<Rgb8>& I);
+  bool load_from_dialog_box(Image<Rgb8>& I);
   /*!
     \brief Load image from a dialog box.
     @param[in]  I image file.
@@ -69,7 +69,7 @@ namespace DO {
     \return false otherwise.
    */
   DO_EXPORT
-  bool loadFromDialogBox(Image<Color3ub>& I); 
+  bool load_from_dialog_box(Image<Color3ub>& I); 
 
   // ====================================================================== //
   // Image saving functions

@@ -95,7 +95,7 @@ namespace DO {
   };
 
   //! \brief Helper function to return a "no-event" Event.
-  inline Event noEvent()
+  inline Event no_event()
   {
     Event e;
     e.type = NO_EVENT;
@@ -107,7 +107,7 @@ namespace DO {
   }
 
   //! \brief Helper function to return a "key-pressed" Event.
-  inline Event keyPressed(int key, int keyModifiers = KEY_NOMODIFIER)
+  inline Event key_pressed(int key, int keyModifiers = KEY_NOMODIFIER)
   {
     Event e;
     e.type = KEY_PRESSED;
@@ -119,7 +119,7 @@ namespace DO {
   }
 
   //! \brief Helper function to return a "key-released" Event.
-  inline Event keyReleased(int key, int keyModifiers = KEY_NOMODIFIER)
+  inline Event key_released(int key, int keyModifiers = KEY_NOMODIFIER)
   {
     Event e;
     e.type = KEY_RELEASED;
@@ -131,8 +131,8 @@ namespace DO {
   }
 
   //! \brief Helper function to return a "mouse-pressed" Event.
-  inline Event mousePressed(int x, int y, int buttons,
-                            int keyModifiers = KEY_NOMODIFIER)
+  inline Event mouse_pressed(int x, int y, int buttons,
+                             int keyModifiers = KEY_NOMODIFIER)
   {
     Event e;
     e.type = MOUSE_PRESSED;
@@ -144,8 +144,8 @@ namespace DO {
   }
 
   //! \brief Helper function to return a "mouse-pressed" Event.
-  inline Event mouseReleased(int x, int y, int buttons,
-                             int keyModifiers = KEY_NOMODIFIER)
+  inline Event mouse_released(int x, int y, int buttons,
+                              int keyModifiers = KEY_NOMODIFIER)
   {
     Event e;
     e.type = MOUSE_RELEASED;
@@ -157,8 +157,8 @@ namespace DO {
   }
 
   //! \brief Helper function to return a "mouse-moved" Event.
-  inline Event mouseMoved(int x, int y, int buttons,
-                          int keyModifiers = KEY_NOMODIFIER)
+  inline Event mouse_moved(int x, int y, int buttons,
+                           int keyModifiers = KEY_NOMODIFIER)
   {
     Event e;
     e.type = MOUSE_PRESSED_AND_MOVED;

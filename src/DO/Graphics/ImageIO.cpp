@@ -43,21 +43,21 @@ namespace DO {
     return true;
   }
 
-  bool loadFromDialogBox(Image<Rgb8>& image)
+  bool load_from_dialog_box(Image<Rgb8>& image)
   {
-    QMetaObject::invokeMethod(getGuiApp(), "getFileFromDialogBox",
+    QMetaObject::invokeMethod(gui_app(), "getFileFromDialogBox",
                               Qt::BlockingQueuedConnection);
     bool r = load(image, 
-                  getGuiApp()->dialogBoxInfo.filename.toLocal8Bit().constData());
+                  gui_app()->dialogBoxInfo.filename.toLocal8Bit().constData());
     return r;
   }
 
-  bool loadFromDialogBox(Image<Color3ub>& image)
+  bool load_from_dialog_box(Image<Color3ub>& image)
   {
-    QMetaObject::invokeMethod(getGuiApp(), "getFileFromDialogBox",
+    QMetaObject::invokeMethod(gui_app(), "getFileFromDialogBox",
                               Qt::BlockingQueuedConnection);
     bool r = load(image, 
-      std::string(getGuiApp()->dialogBoxInfo.filename.toLocal8Bit().constData()));
+      std::string(gui_app()->dialogBoxInfo.filename.toLocal8Bit().constData()));
     return r;
   }
 

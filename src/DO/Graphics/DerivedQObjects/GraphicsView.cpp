@@ -77,7 +77,7 @@ namespace DO {
 
   void GraphicsView::eventListeningTimerStopped()
   {
-    emit sendEvent(noEvent());
+    emit sendEvent(no_event());
   }
 
   void GraphicsView::mousePressEvent(QMouseEvent *event)
@@ -93,7 +93,7 @@ namespace DO {
     if (event_listening_timer_.isActive())
     {
       event_listening_timer_.stop();
-      sendEvent(mousePressed(event->x(), event->y(), event->buttons(), 
+      sendEvent(mouse_pressed(event->x(), event->y(), event->buttons(), 
         event->modifiers()));
     }
     // Handle the mouse press event as usual.
@@ -115,7 +115,7 @@ namespace DO {
     if (event_listening_timer_.isActive())
     {
       event_listening_timer_.stop();
-      sendEvent(mouseReleased(event->x(), event->y(), 
+      sendEvent(mouse_released(event->x(), event->y(), 
         event->button(), event->modifiers()));
     }
     // Handle the mouse release event as usual.
@@ -138,7 +138,7 @@ namespace DO {
     if (event_listening_timer_.isActive())
     {
       event_listening_timer_.stop();
-      emit sendEvent(keyPressed(event->key(), event->modifiers()));
+      emit sendEvent(key_pressed(event->key(), event->modifiers()));
     }
     QGraphicsView::keyPressEvent(event);
   }

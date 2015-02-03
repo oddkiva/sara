@@ -26,7 +26,7 @@ namespace DO {
     pimpl_ = 0;
   }
 
-  void GraphicsApplication::registerUserMain(int (*userMain)(int, char **))
+  void GraphicsApplication::register_user_main(int (*userMain)(int, char **))
   {
     pimpl_->userThread.registerUserMain(userMain);
   }

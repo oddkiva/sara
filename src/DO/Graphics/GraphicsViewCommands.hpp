@@ -35,11 +35,11 @@ namespace DO {
   //! - rescaled by hitting key \b + or key \b -,
   //! - selected and moved in the GraphicsView window using the mouse.
   DO_EXPORT
-  ImageItem addImage(const Image<Rgb8>& I, bool randomPos = false);
+  ImageItem add_image(const Image<Rgb8>& I, bool randomPos = false);
 
   //! \todo Not yet implemented I think. Check that.
   DO_EXPORT
-  void drawPoint(ImageItem pixItem, int x, int y, const Rgb8& c);
+  void draw_point(ImageItem pixItem, int x, int y, const Rgb8& c);
 
   //! @}
 
