@@ -10,14 +10,16 @@ extern "C" {
 # include <libavutil/file.h>
 }
 
+#ifdef _WIN32
+# include <vld.h>
+#endif
 
 using namespace std;
 using namespace DO;
 
 
-const size_t INBUF_SIZE = 4096;
-
-Yuv8 yuv_pixel(AVFrame *frame, int x, int y) 
+inline
+Yuv8 get_yuv_pixel(const AVFrame *frame, int x, int y) 
 {
   Yuv8 yuv;
   yuv(0) = frame->data[0][y*frame->linesize[0] + x];
@@ -36,7 +38,6 @@ unsigned char clamp(int value)
   return value;
 }
 
-// Thanks to Wikipedia!
 Rgb8 convert(const Yuv8& yuv)
 {
   Rgb8 rgb;
@@ -50,210 +51,175 @@ Rgb8 convert(const Yuv8& yuv)
 }
 
 
-static int decode_write_frame(Image<Rgb8>& image,
-                              AVCodecContext *avctx,
-                              AVFrame *frame,
-                              int *frame_count,
-                              AVPacket *pkt, int last)
-{
-  int len, got_frame;
-  len = avcodec_decode_video2(avctx, frame, &got_frame, pkt);
-  if (len < 0) {
-    fprintf(stderr, "Error while decoding frame %d\n", *frame_count);
-    return len;
-  }
+namespace DO {
 
-  if (got_frame) {
-    //printf("frame %d\n", *frame_count);
-    //fflush(stdout);
-
-    int w = avctx->width;
-    int h = avctx->height;
-    if (!getActiveWindow())
-      openWindow(w, h);
-
-    if (image.width() != w || image.height())
-      image.resize(w, h);
-
-    for (int y = 0; y < h; ++y)
-      for (int x = 0; x < w; ++x)
-      {
-        Yuv8 yuv = yuv_pixel(frame, x, y);
-        image(x, y) = convert(yuv);
-      }
-
-    display(image);
-    //milliSleep(20);
-
-    (*frame_count)++;
-  }
-  if (pkt->data) {
-    pkt->size -= len;
-    pkt->data += len;
-  }
-  return 0;
-}
-
-
-static void decode_video(const string& filename)
-{
-  AVCodec *codec = NULL;
-  AVCodecContext *context = NULL;
-  int frame_count;
-  AVFrame *frame;
-  uint8_t inbuf[INBUF_SIZE + FF_INPUT_BUFFER_PADDING_SIZE];
-  AVPacket packet;
-  av_init_packet(&packet);
-
-  // Set end of buffer to 0 (this ensures that no over-reading happens for
-  // damaged mpeg streams).
-  memset(inbuf + INBUF_SIZE, 0, FF_INPUT_BUFFER_PADDING_SIZE);
-
-  /* find the mpeg1 video decoder */
-  codec = avcodec_find_decoder(AV_CODEC_ID_MPEG1VIDEO);
-  if (!codec) {
-    fprintf(stderr, "Codec not found\n");
-    exit(1);
-  }
-  context = avcodec_alloc_context3(codec);
-  if (!context)
+  class VideoStream : public std::streambuf
   {
-    fprintf(stderr, "Could not allocate video codec context\n");
-    exit(1);
-  }
-  if (codec->capabilities & CODEC_CAP_TRUNCATED)
-    context->flags|= CODEC_FLAG_TRUNCATED; /* we do not send complete frames */
+    enum { VIDEO_BUFFER_SIZE = 4096 };
 
-  if (avcodec_open2(context, codec, NULL) < 0) {
-    fprintf(stderr, "Could not open codec\n");
-    exit(1);
-  }
-
-  // Read video file.
-  FILE *file = fopen(filename.c_str(), "rb");
-  if (!file)
-  {
-    fprintf(stderr, "Could not open %s\n", filename);
-    exit(1);
-  }
-
-  // Allocate frame.
-  frame = av_frame_alloc();
-  if (!frame) {
-    fprintf(stderr, "Could not allocate video frame\n");
-    exit(1);
-  }
-
-  Image<Rgb8> image;
-
-  // Read frame by frame.
-  frame_count = 0;
-  for ( ; ; )
-  {
-    packet.size = fread(inbuf, 1, INBUF_SIZE, file);
-    if (packet.size == 0)
-      break;
-
-    packet.data = inbuf;
-    while (packet.size > 0)
-      if (decode_write_frame(image, context, frame, &frame_count, &packet, 0) < 0)
-        exit(1);
-  }
-
-  packet.data = NULL;
-  packet.size = 0;
-
-  fclose(file);
-  avcodec_close(context);
-  av_free(context);
-  av_frame_free(&frame);
-  printf("\n");
-}
-
-
-namespace DO { namespace Detail {
-
-  class Codec
-  {
-  public:
-    Codec(AVCodecID codec_id = AV_CODEC_ID_MPEG1VIDEO)
-    {
-      if (_registered_all_codecs)
-        av_register_all();
-
-      /* find the mpeg1 video decoder */
-      _codec = avcodec_find_decoder(codec_id);
-      if (!_codec)
-        throw std::runtime_error("Cannot find codec");
-    }
-
-    operator AVCodec *() const
-    {
-      return _codec;
-    }
-
-  private:
-    AVCodec *_codec;
-    static bool _registered_all_codecs;
-  };
-  bool Codec::_registered_all_codecs = false;
-
-  class CodecContext 
-  {
-  public:
-    CodecContext(const Codec& codec)
-      : _context(nullptr)
-    {
-      _context = avcodec_alloc_context3(codec);
-      if (!_context)
-        throw runtime_error("Could not allocate video codec context");
-    }
-
-    ~CodecContext()
-    {
-      _context = avcodec_free_context(_context)
-    }
-
-  private:
-    AVCodecContext *_context;
-  };
-
-
-} /* namespace Detail */
-} /* namespace DO */
-
-
-namespace DO
-{
-  class VideoStream
-  {
   public:
     VideoStream()
     {
+      if (!_registered_all_codecs)
+      {
+        av_register_all();
+        _registered_all_codecs = true;
+      }
+      init();
     }
 
-    VideoStream(const string& filename)
+    VideoStream(const std::string& file_path)
+      : VideoStream()
+    {
+      open(file_path);
+    }
+
+    ~VideoStream()
+    {
+      close();
+    }
+
+    void open(const std::string& file_path)
+    {
+      _video_file = fopen(file_path.c_str(), "rb");
+      if (!_video_file)
+        throw std::runtime_error("Could not open file!");
+
+      _video_frame = av_frame_alloc();
+      if (!_video_frame)
+        throw std::runtime_error("Could not allocate video frame");
+
+      _video_frame_pos = 0;
+    }
+
+    void close()
+    {
+      if (_video_codec_context)
+      {
+        avcodec_close(_video_codec_context);
+        avcodec_free_context(&_video_codec_context);
+        _video_codec_context = nullptr;
+        _video_codec = nullptr;
+      }
+
+      if (_video_frame)
+      {
+        av_frame_free(&_video_frame);
+        _video_frame = nullptr;
+        _video_frame_pos = std::numeric_limits<size_t>::max();
+      }
+
+      if (_video_file)
+      {
+        fclose(_video_file);
+        _video_file = nullptr;
+      }
+    }
+
+    void seek(std::size_t frame_pos)
     {
     }
 
-    void seek(std::size_t frame_index)
+    bool decode(Image<Rgb8>& video_frame)
     {
-    }
+      int len, got_video_frame;
+      len = avcodec_decode_video2(_video_codec_context, _video_frame, &got_video_frame, &_video_packet);
+      if (len < 0)
+      {
+        fprintf(stderr, "Error while decoding frame %d\n", _video_frame_pos);
+        return false;
+      }
 
-    operator bool() const
-    {
+      if (got_video_frame)
+      {
+        int w = _video_codec_context->width;
+        int h = _video_codec_context->height;
+
+        if (video_frame.width() != w || video_frame.height() != h)
+          video_frame.resize(w, h);
+
+        for (int y = 0; y < h; ++y)
+        {
+          for (int x = 0; x < w; ++x)
+          {
+            Yuv8 yuv = get_yuv_pixel(_video_frame, x, y);
+            video_frame(x, y) = ::convert(yuv);
+          }
+        }
+
+        ++_video_frame_pos;
+      }
+      if (_video_packet.data) {
+        _video_packet.size -= len;
+        _video_packet.data += len;
+      }
+
       return true;
     }
 
+    bool read(Image<Rgb8>& video_frame)
+    {
+      _video_packet.size = fread(_video_buffer, 1, VIDEO_BUFFER_SIZE, _video_file);
+      if (_video_packet.size == 0)
+        return false;
+
+      _video_packet.data = _video_buffer;
+      while (_video_packet.size > 0)
+        if (!decode(video_frame))
+          return false;
+
+      return true;
+    }
+
+    friend inline VideoStream& operator>>(VideoStream& video_stream, Image<Rgb8>& video_frame)
+    {
+      if (!video_stream.read(video_frame))
+        throw runtime_error("Could not read video frame");
+      return video_stream;
+    }
+
+private:
+    void init()
+    {
+      // Set end of buffer to 0 (this ensures that no over-reading happens for
+      // damaged MPEG streams).
+      memset(_video_buffer + VIDEO_BUFFER_SIZE, 0, FF_INPUT_BUFFER_PADDING_SIZE);
+
+      // Initialize the video packet.
+      av_init_packet(&_video_packet);
+
+      // 1. Try to find video codec.
+      _video_codec = avcodec_find_decoder(AV_CODEC_ID_MPEG1VIDEO);
+      if (!_video_codec)
+        throw std::runtime_error("Could not find video codec!");
+
+      // 2. Allocate video codec context.
+      _video_codec_context = avcodec_alloc_context3(_video_codec);
+      if (!_video_codec_context)
+        throw std::runtime_error("Could not allocate video codec context!");
+
+      // 3. Set the settings for the video codec context.
+      if (_video_codec->capabilities & CODEC_CAP_TRUNCATED)
+        _video_codec_context->flags|= CODEC_FLAG_TRUNCATED; /* we do not send complete frames */
+
+      // 4. Open the video codec context.
+      if (avcodec_open2(_video_codec_context, _video_codec, NULL) < 0)
+        throw std::runtime_error("Could not open video codec context!");
+    }
+
   private:
-    size_t _current_index;
+    static bool _registered_all_codecs;
+
+    FILE *_video_file = nullptr;
+    AVCodec *_video_codec = nullptr;
+    AVCodecContext *_video_codec_context = nullptr;
+    AVFrame *_video_frame = nullptr;
+    size_t _video_frame_pos = std::numeric_limits<size_t>::max();
+    AVPacket _video_packet;
+    uint8_t _video_buffer[VIDEO_BUFFER_SIZE + FF_INPUT_BUFFER_PADDING_SIZE];
   };
 
-  template <typename T>
-  VideoStream& operator>>(VideoStream& in_video, Image<T>& frame)
-  {
-    return in_video;
-  }
+  bool VideoStream::_registered_all_codecs = false;
 
 }
 
@@ -261,7 +227,7 @@ namespace DO
 class TestVideoIO : public testing::Test
 {
 protected:
-  string video_filename;
+  std::string video_filename;
   VideoStream video_stream;
 
   TestVideoIO() : testing::Test()
@@ -269,57 +235,76 @@ protected:
     video_filename = srcPath("orion_1.mpg");
     cout << video_filename << endl;
   }
-
 };
 
 
-TEST_F(TestVideoIO, test_read_video)
+TEST_F(TestVideoIO, test_constructor)
 {
-  VideoStream video_stream(video_filename);
-  EXPECT_TRUE(video_stream);
+  VideoStream video_stream;
 }
 
+TEST_F(TestVideoIO, test_read_valid_video)
+{
+  VideoStream video_stream(video_filename);
+}
+
+TEST_F(TestVideoIO, test_read_video_with_wrong_filepath)
+{
+  EXPECT_THROW(VideoStream video_stream("orio_1.mpg"),
+               std::runtime_error);
+}
 
 TEST_F(TestVideoIO, test_read_frames_sequentially)
 {
   VideoStream video_stream(video_filename);
-  EXPECT_TRUE(video_stream);
-
+  VideoStream video_stream2(video_filename);
   Image<Rgb8> frame;
 
   for (int i = 0; i < 5; ++i)
+  {
     video_stream >> frame;
+    video_stream2 >> frame;
+  }
 }
-
 
 TEST_F(TestVideoIO, test_seek_frame)
 {
   VideoStream video_stream(video_filename);
-  EXPECT_TRUE(video_stream);
 
   size_t frame_index = 5;
   video_stream.seek(frame_index);
 
   Image<Rgb8> frame;
-  video_stream >> frame;
-
+  //video_stream >> frame;
 }
 
 
+//#define TEST_FEATURES
+#ifdef TEST_FEATURES
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
+#else
+GRAPHICS_MAIN_SIMPLE()
+{
+  const string video_filepath = srcPath("orion_1.mpg");
+  //const string video_filepath = "C:/Users/David/Desktop/STREAM/00102.MTS";
 
+  VideoStream video_stream(video_filepath);
+  Image<Rgb8> video_frame;
 
-//GRAPHICS_MAIN_SIMPLE()
-//{
-//  /* Register all the codecs. */
-//  avcodec_register_all();
-//
-//
-//  const string filename = srcPath("orion_1.mpg");
-//  decode_video(filename);
-//  return 0;
-//}
+  while (true)
+  {
+    if (!video_stream.read(video_frame))
+      break;
+    //video_stream >> video_frame;
+    if (!getActiveWindow())
+      openWindow(video_frame.sizes());
+    display(video_frame);
+  }
+
+  return 0;
+}
+#endif
