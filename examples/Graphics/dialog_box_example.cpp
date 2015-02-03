@@ -5,15 +5,15 @@ using namespace DO;
 
 GRAPHICS_MAIN_SIMPLE()
 {
-  Image<Rgb8> I;
-  if (!loadFromDialogBox(I))
+  Image<Rgb8> image;
+  if (!load_from_dialog_box(image))
     return EXIT_FAILURE;
 
-  openWindow(I.width(), I.height(), "Image loaded from dialog box");
-  display(I);
-  getKey();
+  create_window(image.width(), image.height(), "Image loaded from dialog box");
+  display(image);
+  get_key();
 
-  closeWindow();
+  close_window();
 
   return EXIT_SUCCESS;
 }

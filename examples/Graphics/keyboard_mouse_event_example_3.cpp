@@ -6,19 +6,19 @@ using namespace DO;
 GRAPHICS_MAIN_SIMPLE()
 {
   cout << "Advanced event handling" << endl;
-  Window W = openWindow(1024, 768);
-  setActiveWindow(W);
+  Window W = create_window(1024, 768);
+  set_active_window(W);
   Image<Color3ub> I;
   load(I, srcPath("../../datasets/ksmall.jpg"));
 
   Event ev;
   do {
-    getEvent(500,ev); // Wait an event (return if no event for 500ms)
+    get_event(500,ev); // Wait an event (return if no event for 500ms)
     switch (ev.type){
     case NO_EVENT:
       break;
     case MOUSE_PRESSED_AND_MOVED:
-      clearWindow();
+      clear_window();
       display(I, ev.mousePos-I.sizes()*3/8, 0.75);
       cout << "Mouse moved. Position = " << endl << ev.mousePos << endl;
       break;
@@ -29,7 +29,7 @@ GRAPHICS_MAIN_SIMPLE()
       cout << "Key " << ev.key << " released"<< endl;
       break;
     case MOUSE_PRESSED:
-      clearWindow();
+      clear_window();
       display(I, ev.mousePos-I.sizes()*3/8, 0.75);
       cout << "Button " << ev.buttons << " pressed"<< endl;
       break;
@@ -38,7 +38,7 @@ GRAPHICS_MAIN_SIMPLE()
       break;
     }
   } while (ev.type != KEY_PRESSED || ev.key != KEY_UP);
-  closeWindow(W);
+  close_window(W);
 
   return 0;
 }

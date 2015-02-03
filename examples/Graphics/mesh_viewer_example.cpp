@@ -5,28 +5,28 @@ using namespace DO;
 
 GRAPHICS_MAIN_SIMPLE()
 {
-  Window w = openGLWindow(300, 300);
-  setActiveWindow(w);
+  Window w = create_gl_window(300, 300);
+  set_active_window(w);
 
   SimpleTriangleMesh3f mesh;
   string filename = srcPath("../../datasets/pumpkin_tall_10k.obj");
-  if (!MeshReader().readObjFile(mesh, filename))
+  if (!MeshReader().read_object_file(mesh, filename))
   {
     cout << "Error reading mesh file:\n" << filename << endl;
-    closeWindow();
+    close_window();
     return EXIT_FAILURE;
   }
   cout << "Read " << filename << " successfully" << endl;
 
-  displayMesh(mesh);
+  display_mesh(mesh);
 
   bool quit = false;
   while (!quit)
   {
-    int c = getKey();
+    int c = get_key();
     quit = (c==KEY_ESCAPE || c==' ');
   }
-  closeWindow();
+  close_window();
 
   return EXIT_SUCCESS;
 }
