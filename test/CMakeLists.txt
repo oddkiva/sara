@@ -3,6 +3,12 @@ include_directories(${DO_ThirdParty_DIR}/gtest/include)
 message(STATUS "")
 do_step_message("Appending test projects:")
 
+if (WIN32)
+  find_package(VisualLeakDetector)
+  include_directories(${VLD_INCLUDE_DIR})
+  link_directories(${VLD_LINK_DIRECTORIES})
+endif ()
+
 add_subdirectory(Core)
 add_subdirectory(Graphics)
 #add_subdirectory(ImageDrawing)
