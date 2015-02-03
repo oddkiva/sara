@@ -2,7 +2,7 @@ do_step_message("Found ${CMAKE_CXX_COMPILER_ID} compiler:")
 
 # Visual C++ compiler
 if (MSVC)
-  add_definitions(-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE)
+  add_definitions(/D_SCL_SECURE_NO_WARNINGS /D_CRT_SECURE_NO_DEPRECATE)
   message(STATUS "  - NON-SECURE warnings are disabled.")
   add_definitions(/EHsc)
   message(STATUS
@@ -13,7 +13,7 @@ if (MSVC)
     message(STATUS
             "  - Using version 2012: setting '_VARIADIC_MAX=10' to compile "
             "'Google Test'")
-    add_definitions(/D _VARIADIC_MAX=10)
+    add_definitions(/D_VARIADIC_MAX=10)
   endif ()
 
 # Clang compiler
