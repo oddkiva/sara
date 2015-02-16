@@ -33,7 +33,7 @@ TEST_F(TestAffineCone, test_convex_affine_cone)
   auto convex_ground_truth = [&](const Point2d& p) {
     return
       p.x() > _width/2. &&
-      p.y() > _height/2. && 
+      p.y() > _height/2. &&
       p.x() > p.y();
   };
 
@@ -51,8 +51,8 @@ TEST_F(TestAffineCone, test_blunt_affine_cone)
 
   auto blunt_ground_truth = [&](const Point2d& p) {
     return
-      p.x() >= _width/2. && 
-      p.y() >= _height/2. && 
+      p.x() >= _width/2. &&
+      p.y() >= _height/2. &&
       p.x() >= p.y();
   };
 
@@ -87,7 +87,7 @@ TEST_F(TestAffineCone, test_blunt_pointed_cone)
 
   auto blunt_pointed_ground_truth = [&](const Point2d& p) {
     return
-      p.x() >= _width/2. && 
+      p.x() >= _width/2. &&
       p.y() == _height/2.;
   };
 
