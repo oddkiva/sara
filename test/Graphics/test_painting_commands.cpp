@@ -30,117 +30,117 @@ protected:
 
   TestPaintingCommands()
   {
-    test_window_ = openWindow(300, 300);
+    test_window_ = create_window(300, 300);
   }
 
   virtual ~TestPaintingCommands()
   {
-    closeWindow(test_window_);
+    close_window(test_window_);
   }
 };
 
-TEST_F(TestPaintingCommands, test_drawPoint)
+TEST_F(TestPaintingCommands, test_draw_point)
 {
-  EXPECT_TRUE(drawPoint(10, 10, Black8));
-  EXPECT_TRUE(drawPoint(10, 10, Color4ub(255, 0, 0, 0)));
-  EXPECT_TRUE(drawPoint(Point2f(10.f, 10.f), Red8));
+  EXPECT_TRUE(draw_point(10, 10, Black8));
+  EXPECT_TRUE(draw_point(10, 10, Color4ub(255, 0, 0, 0)));
+  EXPECT_TRUE(draw_point(Point2f(10.f, 10.f), Red8));
 }
 
-TEST_F(TestPaintingCommands, test_drawCircle)
+TEST_F(TestPaintingCommands, test_draw_circle)
 {
-  EXPECT_TRUE(drawCircle(10, 10, 5, Black8, 2));
-  EXPECT_TRUE(drawCircle(Point2i(10, 10), 5, Black8, 2));
-  EXPECT_TRUE(drawCircle(Point2f(10.f, 10.f), 5.f, Black8, 2));
-  EXPECT_TRUE(drawCircle(Point2d(10., 10.), 5., Black8, 2));
+  EXPECT_TRUE(draw_circle(10, 10, 5, Black8, 2));
+  EXPECT_TRUE(draw_circle(Point2i(10, 10), 5, Black8, 2));
+  EXPECT_TRUE(draw_circle(Point2f(10.f, 10.f), 5.f, Black8, 2));
+  EXPECT_TRUE(draw_circle(Point2d(10., 10.), 5., Black8, 2));
 }
 
-TEST_F(TestPaintingCommands, test_drawEllipse)
+TEST_F(TestPaintingCommands, test_draw_ellipse)
 {
-  EXPECT_TRUE(drawEllipse(10, 10, 50, 100, Black8, 2));
-  EXPECT_TRUE(drawEllipse(Point2f(10.f, 10.f), 5.f, 10.f, 40.f, Black8, 2));
-  EXPECT_TRUE(drawEllipse(Point2d(10., 10.), 5., 10., 40., Black8, 2));
+  EXPECT_TRUE(draw_ellipse(10, 10, 50, 100, Black8, 2));
+  EXPECT_TRUE(draw_ellipse(Point2f(10.f, 10.f), 5.f, 10.f, 40.f, Black8, 2));
+  EXPECT_TRUE(draw_ellipse(Point2d(10., 10.), 5., 10., 40., Black8, 2));
 }
 
-TEST_F(TestPaintingCommands, test_drawLine)
+TEST_F(TestPaintingCommands, test_draw_line)
 {
-  EXPECT_TRUE(drawLine(10, 10, 50, 100, Black8, 2));
-  EXPECT_TRUE(drawLine(Point2i(10, 10), Point2i(50, 100), Black8, 2));
-  EXPECT_TRUE(drawLine(Point2f(10, 10), Point2f(50, 100), Black8, 2));
-  EXPECT_TRUE(drawLine(Point2d(10, 10), Point2d(50, 100), Black8, 2));
+  EXPECT_TRUE(draw_line(10, 10, 50, 100, Black8, 2));
+  EXPECT_TRUE(draw_line(Point2i(10, 10), Point2i(50, 100), Black8, 2));
+  EXPECT_TRUE(draw_line(Point2f(10, 10), Point2f(50, 100), Black8, 2));
+  EXPECT_TRUE(draw_line(Point2d(10, 10), Point2d(50, 100), Black8, 2));
 }
 
-TEST_F(TestPaintingCommands, test_drawRect)
+TEST_F(TestPaintingCommands, test_draw_rect)
 {
-  EXPECT_TRUE(drawRect(10, 10, 50, 100, Black8, 2));
+  EXPECT_TRUE(draw_rect(10, 10, 50, 100, Black8, 2));
 }
 
-TEST_F(TestPaintingCommands, test_drawPoly)
+TEST_F(TestPaintingCommands, test_draw_poly)
 {
   int x[] = {10, 20};
   int y[] = {10, 20};
-  EXPECT_TRUE(drawPoly(x, y, 2, Black8, 2));
+  EXPECT_TRUE(draw_poly(x, y, 2, Black8, 2));
 
   Point2i poly[] = {Point2i(10, 10), Point2i(20, 20)};
-  EXPECT_TRUE(drawPoly(poly, 2, Red8, 1));
+  EXPECT_TRUE(draw_poly(poly, 2, Red8, 1));
 }
 
-TEST_F(TestPaintingCommands, test_drawString)
+TEST_F(TestPaintingCommands, test_draw_string)
 {
   EXPECT_TRUE(
-    drawString(10, 10, "example string", Red8, 14, 0.5,
+    draw_string(10, 10, "example string", Red8, 14, 0.5,
     true, false, false));
 }
 
-TEST_F(TestPaintingCommands, test_drawArrow)
+TEST_F(TestPaintingCommands, test_draw_arrow)
 {
-  EXPECT_TRUE(drawArrow(10, 10, 30, 30, Red8));
-  EXPECT_TRUE(drawArrow(10, 10, 30, 30, Red8, 1., 1., 1, 2));
-  EXPECT_TRUE(drawArrow(Point2f(10, 10), Point2f(30, 30), Red8, 3));
+  EXPECT_TRUE(draw_arrow(10, 10, 30, 30, Red8));
+  EXPECT_TRUE(draw_arrow(10, 10, 30, 30, Red8, 1., 1., 1, 2));
+  EXPECT_TRUE(draw_arrow(Point2f(10, 10), Point2f(30, 30), Red8, 3));
 }
 
-TEST_F(TestPaintingCommands, test_fillEllipse)
+TEST_F(TestPaintingCommands, test_fill_ellipse)
 {
-  EXPECT_TRUE(fillEllipse(10, 10, 50, 100, Black8));
-  EXPECT_TRUE(fillEllipse(Point2i(10, 10), 5, 10, Black8));
+  EXPECT_TRUE(fill_ellipse(10, 10, 50, 100, Black8));
+  EXPECT_TRUE(fill_ellipse(Point2i(10, 10), 5, 10, Black8));
 }
 
-TEST_F(TestPaintingCommands, test_fillRect)
+TEST_F(TestPaintingCommands, test_fill_rect)
 {
-  EXPECT_TRUE(fillRect(10, 10, 50, 100, Black8));
-  EXPECT_TRUE(fillRect(Point2i(10, 10), 50, 100, Black8));
+  EXPECT_TRUE(fill_rect(10, 10, 50, 100, Black8));
+  EXPECT_TRUE(fill_rect(Point2i(10, 10), 50, 100, Black8));
 }
 
-TEST_F(TestPaintingCommands, test_fillCircle)
+TEST_F(TestPaintingCommands, test_fill_circle)
 {
-  EXPECT_TRUE(fillCircle(10, 10, 2, Red8));
-  EXPECT_TRUE(fillCircle(Point2i(10, 10), 2, Red8));
-  EXPECT_TRUE(fillCircle(Point2f(10.f, 10.f), 2.f, Red8));
+  EXPECT_TRUE(fill_circle(10, 10, 2, Red8));
+  EXPECT_TRUE(fill_circle(Point2i(10, 10), 2, Red8));
+  EXPECT_TRUE(fill_circle(Point2f(10.f, 10.f), 2.f, Red8));
 }
 
-TEST_F(TestPaintingCommands, test_fillPoly)
+TEST_F(TestPaintingCommands, test_fill_poly)
 {
   int x[] = {10, 20};
   int y[] = {10, 20};
-  EXPECT_TRUE(fillPoly(x, y, 2, Black8));
+  EXPECT_TRUE(fill_poly(x, y, 2, Black8));
 
   Point2i poly[] = {Point2i(10, 10), Point2i(20, 20)};
-  EXPECT_TRUE(fillPoly(poly, 2, Red8));
+  EXPECT_TRUE(fill_poly(poly, 2, Red8));
 }
 
-TEST_F(TestPaintingCommands, test_putColorImage)
+TEST_F(TestPaintingCommands, test_put_color_image)
 {
   int w = 50, h = 50;
   std::vector<Color3ub> data(w*h, Red8);
-  EXPECT_TRUE(putColorImage(10, 10, data.data(), w, h, 2.));
-  EXPECT_TRUE(putColorImage(Point2i(10, 10), data.data(), w, h, 2.));
+  EXPECT_TRUE(put_color_image(10, 10, data.data(), w, h, 2.));
+  EXPECT_TRUE(put_color_image(Point2i(10, 10), data.data(), w, h, 2.));
 }
 
-TEST_F(TestPaintingCommands, test_putGreyImage)
+TEST_F(TestPaintingCommands, test_put_grey_image)
 {
   int w = 50, h = 50;
   std::vector<unsigned char> data(w*h, 0);
-  EXPECT_TRUE(putGreyImage(10, 10, data.data(), w, h, 2.));
-  EXPECT_TRUE(putGreyImage(Point2i(10, 10), data.data(), w, h, 2.));
+  EXPECT_TRUE(put_grey_image(10, 10, data.data(), w, h, 2.));
+  EXPECT_TRUE(put_grey_image(Point2i(10, 10), data.data(), w, h, 2.));
 }
 
 TEST_F(TestPaintingCommands, test_display)
@@ -156,27 +156,27 @@ TEST_F(TestPaintingCommands, test_display)
   EXPECT_TRUE(display(rgb_image, Point2i(0, 10), 1.4));
 }
 
-TEST_F(TestPaintingCommands, test_clearWindow)
+TEST_F(TestPaintingCommands, test_clear_window)
 {
-  EXPECT_TRUE(clearWindow());
+  EXPECT_TRUE(clear_window());
 }
 
-TEST_F(TestPaintingCommands, test_setAntialiasing)
+TEST_F(TestPaintingCommands, test_set_antialiasing)
 {
-  EXPECT_TRUE(setAntialiasing());
+  EXPECT_TRUE(set_antialiasing());
 }
 
-TEST_F(TestPaintingCommands, test_setTransparency)
+TEST_F(TestPaintingCommands, test_set_transparency)
 {
-  EXPECT_TRUE(setTransparency());
+  EXPECT_TRUE(set_transparency());
 }
 
-TEST_F(TestPaintingCommands, test_saveScreen)
+TEST_F(TestPaintingCommands, test_save_screen)
 {
   Image<Color3ub> image(50, 50);
   image.array().fill(Red8);
   EXPECT_TRUE(display(image, 0, 0, 1.4));
-  EXPECT_TRUE(saveScreen(getActiveWindow(), "test.png"));
+  EXPECT_TRUE(save_screen(active_window(), "test.png"));
 }
 
 template <class ColorType>
@@ -188,12 +188,12 @@ protected:
 
   TestTemplateDisplay(): Base()
   {
-    test_window_ = openWindow(300, 300);
+    test_window_ = create_window(300, 300);
   }
 
   virtual ~TestTemplateDisplay()
   {
-    closeWindow(test_window_);
+    close_window(test_window_);
   }
 };
 
@@ -228,17 +228,17 @@ int worker_thread_task(int argc, char **argv)
 int main(int argc, char **argv)
 {
   // Create Qt Application.
-  GraphicsApplication gui_app_(argc, argv);
+  GraphicsApplication gui_app(argc, argv);
 
   // Create an event scheduler on the GUI thread.
   global_scheduler = new EventScheduler;
   // Connect the user thread and the event scheduler.
-  QObject::connect(&getUserThread(), SIGNAL(sendEvent(QEvent *, int)),
+  QObject::connect(&get_user_thread(), SIGNAL(sendEvent(QEvent *, int)),
                    global_scheduler, SLOT(schedule_event(QEvent*, int)));
 
   // Run the worker thread
-  gui_app_.registerUserMain(worker_thread_task);
-  int return_code = gui_app_.exec();
+  gui_app.register_user_main(worker_thread_task);
+  int return_code = gui_app.exec();
 
   // Cleanup and terminate.
   delete global_scheduler;

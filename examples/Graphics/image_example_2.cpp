@@ -8,7 +8,7 @@ GRAPHICS_MAIN_SIMPLE()
   Image<Rgb8> image(300, 300);
   image.array().fill(White8);
 
-  openWindow(300, 300);
+  create_window(300, 300);
   display(image);
 
   for (int y = 0; y < 300; ++y)
@@ -16,15 +16,15 @@ GRAPHICS_MAIN_SIMPLE()
     for (int x = 0; x < 300; ++x)
     {
       Color3ub c(rand()%256, rand()%256, rand()%256);
-      drawPoint(image, x, y, c);
+      draw_point(image, x, y, c);
     }
   }
   display(image);
-  getKey();
+  get_key();
 
   image.array().fill(White8);
   display(image);
-  getKey();
+  get_key();
 
   for (int i = 0; i <10; ++i)
   {
@@ -34,11 +34,11 @@ GRAPHICS_MAIN_SIMPLE()
     w = rand()%300;
     h = rand()%300;
     Color3ub c(rand()%256, rand()%256, rand()%256);
-    fillRect(image, x, y, w, h, c);
+    fill_rect(image, x, y, w, h, c);
   }
   display(image);
-  getKey();
-  closeWindow();
+  get_key();
+  close_window();
 
   return 0;
 }

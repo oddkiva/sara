@@ -16,22 +16,22 @@ GRAPHICS_MAIN_SIMPLE()
   int w = I.width(), h = I.height();
   int x = 0, y = 0;
 
-  openWindow(2*w, h);
+  create_window(2*w, h);
 
   Timer drawTimer;
   drawTimer.restart();
   double elapsed;
   for (int i = 0; i < 1; ++i)
   {
-    clearWindow();
+    clear_window();
     for (int y = 0; y < h; ++y)
     {
       for (int x = 0; x < w; ++x)
       {
-        drawPoint(x, y, I(x,y));
-        drawPoint(w+x, y, I(x,y));
+        draw_point(x, y, I(x,y));
+        draw_point(w+x, y, I(x,y));
 #ifdef Q_OS_MAC
-        microSleep(10);
+        microsleep(10);
 #endif
       }
     }
@@ -44,12 +44,12 @@ GRAPHICS_MAIN_SIMPLE()
 
   int step = 2;
   Timer t;
-  clearWindow();
+  clear_window();
   while (true)
   {
-    microSleep(10);
+    microsleep(10);
     display(I, x, y);
-    clearWindow();
+    clear_window();
 
     x += step;
     if (x < 0 || x > w)
@@ -59,7 +59,7 @@ GRAPHICS_MAIN_SIMPLE()
     if (t.elapsed() > 2)
       break;
   }
-  closeWindow(getActiveWindow());
+  close_window(active_window());
 
   cout << "Finished!" << endl;
 

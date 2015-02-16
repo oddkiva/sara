@@ -26,14 +26,14 @@ namespace DO {
 
   // ======================================================================== //
   // Convenience functions
-  inline GraphicsApplication::Impl * getGuiApp()
+  inline GraphicsApplication::Impl * gui_app()
   { return qobject_cast<GraphicsApplication::Impl *>(qApp); }
 
-  inline UserThread& getUserThread()
-  { return getGuiApp()->userThread; }
+  inline UserThread& get_user_thread()
+  { return gui_app()->userThread; }
 
-  inline bool activeWindowIsVisible()
-  { return getGuiApp()->activeWindowIsVisible(); }
+  inline bool active_window_is_visible()
+  { return gui_app()->activeWindowIsVisible(); }
 
   //!@}
 

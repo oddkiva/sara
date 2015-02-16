@@ -117,7 +117,7 @@ namespace DO {
       qFatal("No registered user main!");
       return;
     }
-    userMain_(getGuiApp()->argc, getGuiApp()->argv);
+    userMain_(gui_app()->argc, gui_app()->argv);
     return;
   }
 

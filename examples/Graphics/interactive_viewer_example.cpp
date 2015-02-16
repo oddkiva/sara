@@ -8,17 +8,17 @@ GRAPHICS_MAIN_SIMPLE()
   Image<Rgb8> I;
   load(I, srcPath("../../datasets/ksmall.jpg"));
 
-  openGraphicsView(I.width(), I.height());
+  create_graphics_view(I.width(), I.height());
 
   for (int i = 0; i < 10; ++i)
   {
-    ImageItem image = addImage(I);
+    ImageItem image = add_image(I);
     if (!image)
       cerr << "Error image display" << endl;
   }
   
-  while (getKey() != KEY_ESCAPE);
-  closeWindow();
+  while (get_key() != KEY_ESCAPE);
+  close_window();
 
   return 0;
 }

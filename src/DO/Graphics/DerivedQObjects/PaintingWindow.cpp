@@ -382,7 +382,7 @@ namespace DO {
 
   void PaintingWindow::eventListeningTimerStopped()
   {
-    emit sendEvent(noEvent());
+    emit sendEvent(no_event());
   }
 
   void PaintingWindow::mouseMoveEvent(QMouseEvent *event)
@@ -392,7 +392,7 @@ namespace DO {
     if (event_listening_timer_.isActive())
     {
       event_listening_timer_.stop();
-      emit sendEvent(mouseMoved(event->x(), event->y(), event->buttons(),
+      emit sendEvent(mouse_moved(event->x(), event->y(), event->buttons(),
                      event->modifiers()));
     }
   }
@@ -410,7 +410,7 @@ namespace DO {
     if (event_listening_timer_.isActive())
     {
       event_listening_timer_.stop();
-      emit sendEvent(mousePressed(event->x(), event->y(), event->buttons(),
+      emit sendEvent(mouse_pressed(event->x(), event->y(), event->buttons(),
                      event->modifiers()));
     }
   }
@@ -428,7 +428,7 @@ namespace DO {
     if (event_listening_timer_.isActive())
     {
       event_listening_timer_.stop();
-      emit sendEvent(mouseReleased(event->x(), event->y(),
+      emit sendEvent(mouse_released(event->x(), event->y(),
                                    event->buttons(), event->modifiers()));
     }
   }
@@ -439,7 +439,7 @@ namespace DO {
     if (event_listening_timer_.isActive())
     {
       event_listening_timer_.stop();
-      emit sendEvent(keyPressed(event->key(), event->modifiers()));
+      emit sendEvent(key_pressed(event->key(), event->modifiers()));
     }
   }
 
@@ -449,7 +449,7 @@ namespace DO {
     if (event_listening_timer_.isActive())
     {
       event_listening_timer_.stop();
-      emit sendEvent(keyReleased(event->key(), event->modifiers()));
+      emit sendEvent(key_released(event->key(), event->modifiers()));
     }
   }
 

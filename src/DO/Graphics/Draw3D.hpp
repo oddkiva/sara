@@ -25,7 +25,7 @@ namespace DO {
 
   //! \brief Display a mesh in the active OpenGLWindow window.
   DO_EXPORT
-  void displayMesh(const SimpleTriangleMesh3f& mesh);
+  void display_mesh(const SimpleTriangleMesh3f& mesh);
 
   //! @}
 

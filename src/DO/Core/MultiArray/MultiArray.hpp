@@ -257,7 +257,7 @@ namespace DO {
       return end_ - begin_;
     }
 
-    //! Size getter along the i-th.
+    //! Size getter along the i-th dimension.
     int size(int i) const
     {
       return sizes_[i];

@@ -32,34 +32,34 @@ protected:
 
   TestSleepFunctions()
   {
-    test_window_ = openWindow(300, 300);
+    test_window_ = create_window(300, 300);
     global_scheduler->set_receiver(test_window_);
   }
 
   virtual ~TestSleepFunctions()
   {
-    closeWindow(test_window_);
+    close_window(test_window_);
   }
 };
 
-TEST_F(TestSleepFunctions, test_milliSleep)
+TEST_F(TestSleepFunctions, test_millisleep)
 {
   int delay_ms = 20;
   Timer timer;
   timer.restart();
-  milliSleep(delay_ms);
+  millisleep(delay_ms);
   double elapsed = timer.elapsedMs();
 
   double tol_ms = 1.;
   EXPECT_NEAR(elapsed, static_cast<double>(delay_ms), tol_ms);
 }
 
-TEST_F(TestSleepFunctions, test_microSleep)
+TEST_F(TestSleepFunctions, test_microsleep)
 {
   int delay_us = 100*1000; // 100 ms because 1000 us = 1 ms.
   Timer timer;
   timer.restart();
-  microSleep(delay_us);
+  microsleep(delay_us);
   double elapsed = timer.elapsedMs();
 
   double tol_us = 5;
@@ -82,11 +82,11 @@ int main(int argc, char **argv)
   // Create an event scheduler on the GUI thread.
   global_scheduler = new EventScheduler;
   // Connect the user thread and the event scheduler.
-  QObject::connect(&getUserThread(), SIGNAL(sendEvent(QEvent *, int)),
+  QObject::connect(&get_user_thread(), SIGNAL(sendEvent(QEvent *, int)),
                    global_scheduler, SLOT(schedule_event(QEvent*, int)));
 
   // Run the worker thread 
-  gui_app_.registerUserMain(worker_thread_task);
+  gui_app_.register_user_main(worker_thread_task);
   int return_code = gui_app_.exec();
 
   // Cleanup and terminate

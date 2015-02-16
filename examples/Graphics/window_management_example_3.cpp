@@ -5,20 +5,20 @@ using namespace DO;
 
 GRAPHICS_MAIN_SIMPLE()
 {
-  openWindow(300, 300);
-  getKey();
+  create_window(300, 300);
+  get_key();
 
   // We can get the active window with the following function.
-  Window w1 = getActiveWindow();
-  Window w2 = openWindow(100, 100);
-  setActiveWindow(w2);
-  getKey();
-  closeWindow(w2);
+  Window w1 = active_window();
+  Window w2 = create_window(100, 100);
+  set_active_window(w2);
+  get_key();
+  close_window(w2);
 
-  setActiveWindow(w1);
-  drawCircle(120, 120, 30, Red8);
-  getKey();
-  closeWindow();
+  set_active_window(w1);
+  draw_circle(120, 120, 30, Red8);
+  get_key();
+  close_window();
 
   return 0;
 }

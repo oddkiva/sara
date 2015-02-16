@@ -18,7 +18,7 @@
 using namespace DO;
 using namespace std;
 
-inline void milliSleep(unsigned milliseconds)
+inline void millisleep(unsigned milliseconds)
 {
   chrono::milliseconds duration(milliseconds);
   this_thread::sleep_for(duration);
@@ -27,19 +27,19 @@ inline void milliSleep(unsigned milliseconds)
 TEST(DO_Core_Test, testTimer)
 {
   Timer timer;
-  double elapsedTimeMs;
-  double elapsedTimeS;
-  unsigned sleepTimeMs = 580;
+  double elapsed_milliseconds;
+  double elapsed_seconds;
+  unsigned sleep_milliseconds = 580;
 
   timer.restart();
-  milliSleep(sleepTimeMs);
-  elapsedTimeMs =  timer.elapsedMs();
-  EXPECT_NEAR(elapsedTimeMs, sleepTimeMs, 100);
+  millisleep(sleep_milliseconds);
+  elapsed_milliseconds =  timer.elapsedMs();
+  EXPECT_NEAR(elapsed_milliseconds, sleep_milliseconds, 100);
 
   timer.restart();
-  milliSleep(sleepTimeMs);
-  elapsedTimeS = timer.elapsed();
-  EXPECT_NEAR(elapsedTimeS, sleepTimeMs/1e3, 5e-3);
+  millisleep(sleep_milliseconds);
+  elapsed_seconds = timer.elapsed();
+  EXPECT_NEAR(elapsed_seconds, sleep_milliseconds/1e3, 1.5e-2);
 }
 
 int main(int argc, char** argv) 
