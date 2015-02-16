@@ -18,6 +18,10 @@ namespace DO { namespace CSG {
   class Object
   {
   public:
+    virtual ~Object()
+    {
+    }
+
     virtual bool contains(const Point2d& p) const = 0;
   };
 

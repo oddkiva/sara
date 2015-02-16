@@ -37,9 +37,11 @@ namespace DO { namespace Projective {
     //! Evaluation at point 'x'
     inline T operator()(const Vec& x) const
     { return (*this)((HVec() << x, 1).finished()); }
-    //! I/O
-    friend std::ostream& operator<<(std::ostream& os,const Conic& P);
   };
+
+  //! I/O
+  template <typename T, int N>
+  std::ostream& operator<<(std::ostream& os, const Conic<T, N>& P);
 
 } /* namespace Projective */
 } /* namespace DO */
