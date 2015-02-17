@@ -300,8 +300,8 @@ GRAPHICS_MAIN_SIMPLE()
     if (!video_stream.read(video_frame))
       break;
     //video_stream >> video_frame;
-    if (!getActiveWindow())
-      openWindow(video_frame.sizes());
+    if (!active_window())
+      create_window(video_frame.sizes());
     display(video_frame);
   }
 
