@@ -1,0 +1,27 @@
+version: 1.0.{build}
+
+environment:
+  matrix:
+  - VS_VERSION: 11
+    VS_PLATFORM: win32
+  - VS_VERSION: 11
+    VS_PLATFORM: x64
+  - VS_VERSION: 12
+    VS_PLATFORM: win32
+  - VS_VERSION: 12
+    VS_PLATFORM: x64
+
+configuration:
+- Debug
+- Release
+
+before_build:
+- cmake -H. -Bbuild -G "Visual Studio %VS_VERSION%" -DCMAKE_GENERATOR_PLATFORM=%VS_PLATFORM%
+
+build:
+  project: build\DO-CV.sln
+  parallel: true
+  verbosity: detailed
+
+test_script:
+- cd build && ctest --verbose --build-config %CONFIGURATION%
