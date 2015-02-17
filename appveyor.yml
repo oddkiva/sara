@@ -12,7 +12,6 @@ install:
   - set PATH=%PATH%;%QT5_DIR%\bin
 
 configuration:
-- Debug
 - Release
 
 before_build:
