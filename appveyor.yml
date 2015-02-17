@@ -27,7 +27,7 @@ before_build:
 build:
   project: build\DO-CV.sln
   parallel: true
-  verbosity: detailed
+  verbosity: normal
 
 test_script:
 - cd build && ctest --verbose --build-config %CONFIGURATION%
