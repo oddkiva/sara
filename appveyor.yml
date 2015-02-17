@@ -1,15 +1,19 @@
 version: 1.0.{build}
 
+os: unstable
+
 environment:
   matrix:
-  - VS_VERSION: 11
-    VS_PLATFORM: win32
-  - VS_VERSION: 11
-    VS_PLATFORM: x64
   - VS_VERSION: 12
     VS_PLATFORM: win32
+    QTDIR: C:\Qt\5.4\msvc2013_32_opengl
   - VS_VERSION: 12
     VS_PLATFORM: x64
+    QTDIR: C:\Qt\5.4\msvc2013_64_opengl
+
+install:
+  - set QT5_DIR = %QTDIR%
+  - set PATH=%PATH%;%QT5_DIR%\bin
 
 configuration:
 - Debug
