@@ -20,6 +20,10 @@ configuration:
 - Release
 
 before_build:
+- echo %VS_VERSION%
+- echo %PATH%
+- echo %QT5_DIR%
+- dir %QT5_DIR%
 - cmake -H. -Bbuild -G "Visual Studio %VS_VERSION%" -DCMAKE_GENERATOR_PLATFORM=%VS_PLATFORM%
 
 build:
