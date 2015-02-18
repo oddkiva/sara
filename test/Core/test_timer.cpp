@@ -39,7 +39,7 @@ TEST(DO_Core_Test, testTimer)
   timer.restart();
   millisleep(sleep_milliseconds);
   elapsed_seconds = timer.elapsed();
-  EXPECT_NEAR(elapsed_seconds, sleep_milliseconds/1e3, 1.5e-2);
+  EXPECT_NEAR(elapsed_seconds, sleep_milliseconds/1e3, 5e-2);
 }
 
 int main(int argc, char** argv) 
