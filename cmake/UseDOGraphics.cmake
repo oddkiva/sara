@@ -43,11 +43,11 @@ macro (do_load_packages_for_graphics_library)
     list(APPEND CMAKE_PREFIX_PATH
          "C:/Program Files (x86)/Windows Kits/8.0/Lib/win8/um/x64")
   endif ()
-  if (DEFINED ENV{QT5_DIR})
+  if (DEFINED ENV{QTDIR})
     message(STATUS
-            "Found environment variable QT5_DIR = $ENV{QT5_DIR} and appending "
+            "Found environment variable QTDIR = $ENV{QTDIR} and appending "
             "it to CMAKE_MODULE_PATH")
-    list(APPEND CMAKE_PREFIX_PATH $ENV{QT5_DIR})
+    list(APPEND CMAKE_PREFIX_PATH $ENV{QTDIR})
   endif ()
   find_package(Qt5Widgets REQUIRED)
   find_package(Qt5OpenGL REQUIRED)
