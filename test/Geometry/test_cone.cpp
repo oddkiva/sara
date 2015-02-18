@@ -13,20 +13,18 @@ protected:
   // Generators of the 2D cone
   Vector2d _alpha;
   Vector2d _beta;
-  double _eps;
 
   TestAffineCone() : TestPolygon()
   {
     _alpha << 1, 0;
     _beta << 1, 1;
-    _eps = numeric_limits<double>::epsilon();
   }
 };
 
 
 TEST_F(TestAffineCone, test_convex_affine_cone)
 {
-  AffineCone2 K(_alpha, _beta, _center, AffineCone2::Convex, _eps);
+  AffineCone2 K(_alpha, _beta, _center, AffineCone2::Convex);
 
   auto convex_predicate = [&](const Point2d& p) {
     return inside(p, K);
@@ -35,7 +33,7 @@ TEST_F(TestAffineCone, test_convex_affine_cone)
   auto convex_ground_truth = [&](const Point2d& p) {
     return
       p.x() > _width/2. &&
-      p.y() > _height/2. && 
+      p.y() > _height/2. &&
       p.x() > p.y();
   };
 
@@ -45,7 +43,7 @@ TEST_F(TestAffineCone, test_convex_affine_cone)
 
 TEST_F(TestAffineCone, test_blunt_affine_cone)
 {
-  AffineCone2 K(_alpha, _beta, _center, AffineCone2::Blunt, _eps);
+  AffineCone2 K(_alpha, _beta, _center, AffineCone2::Blunt);
 
   auto blunt_predicate = [&](const Point2d& p) {
     return inside(p, K);
@@ -53,8 +51,8 @@ TEST_F(TestAffineCone, test_blunt_affine_cone)
 
   auto blunt_ground_truth = [&](const Point2d& p) {
     return
-      p.x() >= _width/2. && 
-      p.y() >= _height/2. && 
+      p.x() >= _width/2. &&
+      p.y() >= _height/2. &&
       p.x() >= p.y();
   };
 
@@ -71,6 +69,7 @@ TEST_F(TestAffineCone, test_convex_pointed_affine_cone)
   };
 
   auto convex_pointed_ground_truth = [&](const Point2d& p) {
+    (void) p;
     return false;
   };
 
@@ -80,7 +79,7 @@ TEST_F(TestAffineCone, test_convex_pointed_affine_cone)
 
 TEST_F(TestAffineCone, test_blunt_pointed_cone)
 {
-  AffineCone2 K(_alpha, _alpha, _center, AffineCone2::Blunt, _eps);
+  AffineCone2 K(_alpha, _alpha, _center, AffineCone2::Blunt);
 
   auto blunt_pointed_predicate = [&](const Point2d& p) {
     return inside(p, K);
@@ -88,7 +87,7 @@ TEST_F(TestAffineCone, test_blunt_pointed_cone)
 
   auto blunt_pointed_ground_truth = [&](const Point2d& p) {
     return
-      p.x() >= _width/2. && 
+      p.x() >= _width/2. &&
       p.y() == _height/2.;
   };
 
@@ -99,13 +98,14 @@ TEST_F(TestAffineCone, test_blunt_pointed_cone)
 // Degenerate case where the affine cone is actually empty.
 TEST_F(TestAffineCone, test_degenerate_convex_affine_cone)
 {
-  AffineCone2 K(_alpha, -_alpha, _center, AffineCone2::Convex, _eps);
+  AffineCone2 K(_alpha, -_alpha, _center, AffineCone2::Convex);
 
   auto convex_predicate = [&](const Point2d& p) {
     return inside(p, K);
   };
 
   auto convex_ground_truth = [&](const Point2d& p) {
+    (void) p;
     return false;
   };
 
@@ -116,7 +116,7 @@ TEST_F(TestAffineCone, test_degenerate_convex_affine_cone)
 // Degenerate case where the affine cone is actually a half-space.
 TEST_F(TestAffineCone, test_degenerate_blunt_pointed_affine_cone)
 {
-  AffineCone2 K(_alpha, -_alpha, _center, AffineCone2::Blunt, std::numeric_limits<double>::epsilon());
+  AffineCone2 K(_alpha, -_alpha, _center, AffineCone2::Blunt);
   auto blunt_pointed_predicate = [&](const Point2d& p) {
     return inside(p, K);
   };

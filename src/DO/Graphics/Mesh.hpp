@@ -95,8 +95,8 @@ namespace DO {
   public:
     /* WARNING: this function may not work because I just read the vertices and triangles */
     template <typename Vector>
-    bool readObjFile(SimpleMesh<Vector, Face3>& mesh,
-                     const std::string& fileName)
+    bool read_object_file(SimpleMesh<Vector, Face3>& mesh,
+                          const std::string& fileName)
     {
       // Attempt to read file.
       std::ifstream file(fileName.c_str());

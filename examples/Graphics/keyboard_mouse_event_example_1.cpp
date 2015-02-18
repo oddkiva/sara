@@ -7,17 +7,17 @@ GRAPHICS_MAIN_SIMPLE()
 {
   cout << "Basic mouse functions" << endl;
 
-  Window W = openWindow(512, 512, "Mouse");
-  drawString(10, 10, "Please click anywhere", Black8);
+  Window W = create_window(512, 512, "Mouse");
+  draw_string(10, 10, "Please click anywhere", Black8);
 
   click();  
 
-  drawString(10, 40, "click again (left=BLUE, middle=RED, right=done)",
+  draw_string(10, 40, "click again (left=BLUE, middle=RED, right=done)",
              Black8);
 
   int button;    
   Point2i p;
-  while ((button=getMouse(p)) != MOUSE_RIGHT_BUTTON)
+  while ((button=get_mouse(p)) != MOUSE_RIGHT_BUTTON)
   {
     Rgb8 color;
     if (button == MOUSE_LEFT_BUTTON)
@@ -26,10 +26,10 @@ GRAPHICS_MAIN_SIMPLE()
       color = Red8;
     else
       color = Black8;
-    fillCircle(p, 5, color);
+    fill_circle(p, 5, color);
   }
 
-  closeWindow(W);
+  close_window(W);
 
   return 0;
 }

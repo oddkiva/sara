@@ -62,8 +62,8 @@ namespace DO {
     @param[in]  c     RGB color.
    */
   DO_EXPORT
-  void drawPoint(Image<Rgb8>& image,
-                 int x, int y, const Color3ub& c);
+  void draw_point(Image<Rgb8>& image,
+                  int x, int y, const Color3ub& c);
   /*!
     \brief Draw circle on image.
     @param[in]  image    image.
@@ -73,8 +73,8 @@ namespace DO {
     @param[in]  penWidth width of the contour.
    */
   DO_EXPORT
-  void drawCircle(Image<Rgb8>& image,
-                  int xc, int yc, int r, const Color3ub& c, int penWidth = 1);
+  void draw_circle(Image<Rgb8>& image,
+                   int xc, int yc, int r, const Color3ub& c, int penWidth = 1);
   /*!
     \brief Draw line on image.
     @param[in]  image       image.
@@ -83,9 +83,9 @@ namespace DO {
     @param[in]  penWidth    width of the contour.
    */
   DO_EXPORT
-  void drawLine(Image<Rgb8>& image,
-                int x1, int y1, int x2, int y2, const Color3ub& c,
-                int penWidth = 1);
+  void draw_line(Image<Rgb8>& image,
+                 int x1, int y1, int x2, int y2, const Color3ub& c,
+                 int penWidth = 1);
   /*!
     \brief Draw rectangle on image.
     @param[in]  image     image.
@@ -94,9 +94,9 @@ namespace DO {
     @param[in]  penWidth  width of the contour.
    */
   DO_EXPORT
-  void drawRect(Image<Rgb8>& image,
-                int x, int y, int w, int h, const Color3ub& c,
-                int penWidth = 1);
+  void draw_rect(Image<Rgb8>& image,
+                 int x, int y, int w, int h, const Color3ub& c,
+                 int penWidth = 1);
   /*!
     \brief Draw color-filled rectangle on image.
     @param[in]  image     image.
@@ -104,8 +104,8 @@ namespace DO {
     @param[in]  c         RGB color.
    */
   DO_EXPORT
-  void fillRect(Image<Rgb8>& image,
-                int x, int y, int w, int h, const Color3ub& c);
+  void fill_rect(Image<Rgb8>& image,
+                 int x, int y, int w, int h, const Color3ub& c);
   /*!
     \brief Draw color-filled circle on image.
     @param[in]  image  image.
@@ -114,8 +114,8 @@ namespace DO {
     @param[in]  c      RGB color.
    */
   DO_EXPORT
-  void fillCircle(Image<Rgb8>& image,
-                  int x, int y, int r, const Color3ub& c);
+  void fill_circle(Image<Rgb8>& image,
+                   int x, int y, int r, const Color3ub& c);
 
   //! @}
 

@@ -17,7 +17,7 @@
 #include <algorithm>
 
 namespace DO {
-  
+
   template <int N>
   class Cone
   {
@@ -25,7 +25,7 @@ namespace DO {
     enum { Dimension = N };
     typedef Matrix<double, N, 2> Basis;
     typedef Matrix<double, N, 1> Vector;
-    
+
     enum Type {
       Convex = 0x1, Blunt = 0x2, Pointed = 0x4,
       PositiveCosine = 0x8
@@ -46,7 +46,7 @@ namespace DO {
           type_ |= PositiveCosine;
       }
     }
-    
+
     inline const Basis& basis() const { return basis_; }
     inline Vector alpha() const { return basis_.col(0); }
     inline Vector beta() const { return basis_.col(1); }
@@ -54,7 +54,7 @@ namespace DO {
     friend
     inline bool inside(const Vector& p, const Cone& K)
     { return K.contains(p); }
-    
+
   protected:
     bool contains(const Vector& x) const
     {
@@ -89,7 +89,7 @@ namespace DO {
     double eps_;
     unsigned char type_;
   };
-  
+
   template <int N>
   class AffineCone : public Cone<N>
   {
@@ -101,12 +101,11 @@ namespace DO {
     typedef typename Base::Vector Vector;
 
     inline AffineCone(const Vector& alpha, const Vector& beta,
-                      const Vector& vertex, Type type = Base::Convex,
-                      double eps = 1e-8)
+                      const Vector& vertex, Type type = Base::Convex)
       : Base(alpha, beta, type), vertex_(vertex) {}
 
     inline const Vector& vertex() const { return vertex_; }
-    
+
     friend
     inline bool inside(const Vector& p, const AffineCone& K)
     { return K.contains(Vector(p-K.vertex_)); }
@@ -114,7 +113,7 @@ namespace DO {
   private:
     Vector vertex_;
   };
-  
+
   typedef Cone<2> Cone2;
   typedef Cone<3> Cone3;
   typedef AffineCone<2> AffineCone2;

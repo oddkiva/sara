@@ -5,14 +5,14 @@ using namespace DO;
 
 GRAPHICS_MAIN_SIMPLE()
 {
-  Window w = openWindow(300, 300);
-  setActiveWindow(w);
+  Window w = create_window(300, 300);
+  set_active_window(w);
 
   Event e;
   do
   {
-    getEvent(1, e);
-    fillRect(rand()%300, rand()%300, rand()%50, rand()%50,
+    get_event(1, e);
+    fill_rect(rand()%300, rand()%300, rand()%50, rand()%50,
       Color3ub(rand()%256, rand()%256, rand()%256));
     //microSleep(100);  // TODO: sometimes if you don't put this, the program
                         // freezes in some machine. Investigate.
@@ -20,7 +20,7 @@ GRAPHICS_MAIN_SIMPLE()
 
   cout << "Finished!" << endl;
 
-  closeWindow(getActiveWindow());
+  close_window(active_window());
 
   return 0;
 }

@@ -37,7 +37,7 @@ namespace GLObject {
     Frame();
     ~Frame();
     void draw(double axisLength, double axisRadius);
-    static void genFrameList(GLuint *frameList,
+    static void generate_gl_list(GLuint *frameList,
                              double axisLength = defaultAxisLength,
                              double axisRadius = defaultAxisRadius);
   private:

@@ -168,11 +168,11 @@ namespace DO {
     /*if (numInter > 0)
     {
       CHECK(numInter);*/
-      if (!getActiveWindow())
-        setAntialiasing(openWindow(512, 512));
-      clearWindow();
-      drawEllipse(E_0, Red8, 3);
-      drawEllipse(E_1, Blue8, 3);
+      if (!active_window())
+        set_antialiasing(create_window(512, 512));
+      clear_window();
+      draw_ellipse(E_0, Red8, 3);
+      draw_ellipse(E_1, Blue8, 3);
       Quad Q_0(oriented_bbox(E_0));
       Quad Q_1(oriented_bbox(E_1));
 
@@ -181,10 +181,10 @@ namespace DO {
       b0.top_left() = b0.top_left().cwiseMin(b1.top_left());
       b0.bottom_right() = b0.bottom_right().cwiseMax(b1.bottom_right());
 
-      drawQuad(Q_0, Red8, 3);
-      drawQuad(Q_1, Blue8, 3);
-      drawBBox(b0, Green8, 3);
-      getKey();
+      draw_quad(Q_0, Red8, 3);
+      draw_quad(Q_1, Blue8, 3);
+      draw_bbox(b0, Green8, 3);
+      get_key();
       
       // now rescale the ellipse.
       Point2d center(b0.center());

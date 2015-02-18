@@ -16,35 +16,35 @@
 namespace DO {
 
   static GraphicsView *view()
-  { return qobject_cast<GraphicsView *>(getActiveWindow()); }  
+  { return qobject_cast<GraphicsView *>(active_window()); }  
   
   // ====================================================================== //
   //! Graphics view window control functions
-  Window openGraphicsView(int w, int h, const std::string& windowTitle,
+  Window create_graphics_view(int w, int h, const std::string& windowTitle,
                           int x, int y)
   {
-    QMetaObject::invokeMethod(getGuiApp(), "createWindow",
+    QMetaObject::invokeMethod(gui_app(), "createWindow",
                               Qt::BlockingQueuedConnection,
                               Q_ARG(int, 2),
                               Q_ARG(int, w), Q_ARG(int, h),
                               Q_ARG(const QString&,
                                     QString(windowTitle.c_str())),
                               Q_ARG(int, x), Q_ARG(int, y));
-    return getGuiApp()->createdWindows.back();
+    return gui_app()->createdWindows.back();
   }
 
   // ====================================================================== //
   //! Convenience graphics scene functions
-  QImage toQImage(const Image<Rgb8>& I)
+  QImage to_qimage(const Image<Rgb8>& image)
   {
-    return QImage(reinterpret_cast<const unsigned char*>(I.data()),
-                  I.width(), I.height(), I.width()*3,
+    return QImage(reinterpret_cast<const unsigned char*>(image.data()),
+                  image.width(), image.height(), image.width()*3,
                   QImage::Format_RGB888);
   }
 
-  QGraphicsPixmapItem *addImage(const Image<Rgb8>& I, bool randomPos)
+  QGraphicsPixmapItem *add_image(const Image<Rgb8>& I, bool randomPos)
   {
-    QImage tmp(toQImage(I));
+    QImage tmp(to_qimage(I));
     QMetaObject::invokeMethod(view(), "addImageItem",
                               Qt::BlockingQueuedConnection,
                               Q_ARG(const QImage&, tmp),
@@ -52,7 +52,7 @@ namespace DO {
     return qgraphicsitem_cast<QGraphicsPixmapItem *>(view()->lastAddedItem());
   }
 
-  void drawPoint(ImageItem pixItem, int x, int y, const Rgb8& c)
+  void draw_point(ImageItem pixItem, int x, int y, const Rgb8& c)
   {
     QMetaObject::invokeMethod(view(), "drawPoint",
                               Qt::QueuedConnection,

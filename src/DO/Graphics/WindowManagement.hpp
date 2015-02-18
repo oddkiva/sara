@@ -32,68 +32,68 @@ namespace DO {
 
   //! Window getter
   DO_EXPORT
-  Window getActiveWindow();
+  Window active_window();
   //! Window size getter.
   DO_EXPORT
-  Vector2i getWindowSizes(Window w);
+  Vector2i get_sizes(Window w);
   //! Window width getter.
   DO_EXPORT
-  inline int getWindowWidth(Window w) { return getWindowSizes(w)(0); }
+  inline int get_width(Window w) { return get_sizes(w)(0); }
   //! Window height getter.
   DO_EXPORT
-  inline int getWindowHeight(Window w) { return getWindowSizes(w)(1); }
+  inline int get_height(Window w) { return get_sizes(w)(1); }
 
   // ======================================================================= //
   // Windows handling function
   //! Open a PaintingWindow for 2D drawing.
   DO_EXPORT
-  Window openWindow(int w, int h, const std::string& windowTitle = "DO++",
-                    int x = -1, int y = -1);
-  inline Window openWindow(const Vector2i& sizes,
-                           const std::string& windowTitle = "DO++",
-                           int x = -1, int y = -1)
-  { return openWindow(sizes(0), sizes(1), windowTitle, x, y); }
+  Window create_window(int w, int h, const std::string& windowTitle = "DO++",
+                       int x = -1, int y = -1);
+  inline Window create_window(const Vector2i& sizes,
+                              const std::string& windowTitle = "DO++",
+                              int x = -1, int y = -1)
+  { return create_window(sizes(0), sizes(1), windowTitle, x, y); }
   //! Open a OpenGLWindow for 3D drawing.
   DO_EXPORT
-  Window openGLWindow(int w, int h, const std::string& windowTitle = "DO++",
+  Window create_gl_window(int w, int h, const std::string& windowTitle = "DO++",
                       int x = -1, int y = -1);
-  inline Window openGLWindow(const Vector2i& sizes,
+  inline Window create_gl_window(const Vector2i& sizes,
                              const std::string& windowTitle = "DO++",
                              int x = -1, int y = -1)
-  { return openGLWindow(sizes(0), sizes(1), windowTitle, x, y); }
+  { return create_gl_window(sizes(0), sizes(1), windowTitle, x, y); }
   //! Open a GraphicsView for interactive viewing.
   DO_EXPORT
-  Window openGraphicsView(int w, int h,
-                          const std::string& windowTitle = "DO++",
-                          int x = -1, int y = -1);
+  Window create_graphics_view(int w, int h,
+                              const std::string& windowTitle = "DO++",
+                              int x = -1, int y = -1);
   DO_EXPORT
-  inline Window openGraphicsView(const Vector2i& sizes,
+  inline Window create_graphics_view(const Vector2i& sizes,
                                  const std::string& windowTitle = "DO++",
                                  int x = -1, int y = -1)
-  { return openGraphicsView(sizes(0), sizes(1), windowTitle, x, y); }
+  { return create_graphics_view(sizes(0), sizes(1), windowTitle, x, y); }
   //! \brief Close the window **w** (regardless of its type). 
   //! By default, the active window is closed.
   DO_EXPORT
-  void closeWindow(Window w = getActiveWindow());
+  void close_window(Window w = active_window());
   //! Set the chosen window **w** as the current active window (regardless of
   //! its type).
   DO_EXPORT
-  void setActiveWindow(Window w);
+  void set_active_window(Window w);
   //! Resize the specified window **w** with the following parameters.
   DO_EXPORT
-  void resizeWindow(int width, int height, Window w = getActiveWindow());
+  void resize_window(int width, int height, Window w = active_window());
   //! Resize the specified window **w** with the following parameters.
-  inline void resizeWindow(const Vector2i& sizes, Window w = getActiveWindow())
-  { resizeWindow(sizes(0), sizes(1), w); }
+  inline void resize_window(const Vector2i& sizes, Window w = active_window())
+  { resize_window(sizes(0), sizes(1), w); }
 
   // ======================================================================= //
   // Temporizing functions
   //! Wait **msec** milliseconds before the window resumes its drawing.
   DO_EXPORT
-  void milliSleep(int msec);
+  void millisleep(int msec);
   //! Wait **usec** microseconds before the window resumes its drawing.
   DO_EXPORT
-  void microSleep(int usec);
+  void microsleep(int usec);
 
   // ======================================================================= //
   // I/O control functions
@@ -102,40 +102,40 @@ namespace DO {
   //! - Returns the clicked mouse button
   //! - store the click coordinates \f$(x,y)\f$.
   DO_EXPORT
-  int getMouse(int& x, int& y);
+  int get_mouse(int& x, int& y);
   //! \brief Wait for a click from the user (only on the *active* window)
   //! - Returns the clicked mouse button and 
   //! - Stores the click coordinates \f$p\f$.
-  inline int getMouse(Point2i& p)
-  { return getMouse(p.x(), p.y()); }
+  inline int get_mouse(Point2i& p)
+  { return get_mouse(p.x(), p.y()); }
   //! \brief Wait for a click from the user (only on the *active* window)
   //! - The user can click on any opened windows.
   //! - Returns the clicked mouse button
   //! - store the click coordinates \f$p\f$.
   DO_EXPORT
-  int anyGetMouse(Point2i& p);
+  int any_get_mouse(Point2i& p);
   //! Wait for a click from the user only on the *active* window.
   inline void click()
-  { Point2i p; getMouse(p); }
+  { Point2i p; get_mouse(p); }
   //! Wait for a click from the user on any opened windows.
-  inline void anyClick()
-  { Point2i p; anyGetMouse(p); }
+  inline void any_click()
+  { Point2i p; any_get_mouse(p); }
   //! \brief Wait for a hit key from the user.
   //! - Works only on the *active* window.
   //! - Returns the hit key.
   DO_EXPORT
-  int getKey();
+  int get_key();
   //! \brief Wait for a hit key from the user.
   //! - Works on any opened windows.
   //! - Returns the hit key.
   DO_EXPORT
-  int anyGetKey();
+  int any_get_key();
 
   // ======================================================================= //
   // Window event management
   //! Listens to events sent from the active window.
   DO_EXPORT
-  void getEvent(int ms, Event& e);
+  void get_event(int ms, Event& e);
 
   //! @}
 
