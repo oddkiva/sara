@@ -26,7 +26,7 @@ EventScheduler *global_scheduler;
 TEST(TestWindow, test_open_and_close_window)
 {
   QPointer<PaintingWindow> window = qobject_cast<PaintingWindow *>(
-    create_window(300, 300, "My Window", 10, 10)
+    create_window(300, 300, "My Window", 50, 50)
   );
   QPointer<QWidget> scroll_area(window->scrollArea());
 
@@ -38,45 +38,45 @@ TEST(TestWindow, test_open_and_close_window)
   // Check window title.
   EXPECT_EQ(scroll_area->windowTitle(), QString("My Window"));
   // Check window position.
-  EXPECT_EQ(window->x(), 10);
-  EXPECT_EQ(window->y(), 10);
+  EXPECT_EQ(window->x(), 50);
+  EXPECT_EQ(window->y(), 50);
 
   // Check that the widget gets destroyed when we close the window.
   close_window(window);
-  millisleep(10);
+  millisleep(50);
   EXPECT_TRUE(scroll_area.isNull());
   EXPECT_TRUE(window.isNull());
 }
 
 TEST(TestWindow, test_open_and_close_gl_window)
 {
-  QPointer<QWidget> window = create_gl_window(300, 300, "My Window", 10, 10);
+  QPointer<QWidget> window = create_gl_window(300, 300, "My Window", 50, 50);
 
   EXPECT_EQ(get_width(window), window->width());
   EXPECT_EQ(get_height(window), window->height());
   EXPECT_EQ(get_sizes(window),
             Vector2i(window->width(), window->height()));
   EXPECT_EQ(window->windowTitle(), QString("My Window"));
-  EXPECT_EQ(window->pos(), QPoint(10, 10));
+  EXPECT_EQ(window->pos(), QPoint(50, 50));
 
   close_window(window);
-  millisleep(10);
+  millisleep(50);
   EXPECT_TRUE(window.isNull());
 }
 
 TEST(TestWindow, test_open_and_close_graphics_view)
 {
-  QPointer<QWidget> window = create_graphics_view(300, 300, "My Window", 10, 10);
+  QPointer<QWidget> window = create_graphics_view(300, 300, "My Window", 50, 50);
 
   EXPECT_EQ(get_width(window), window->width());
   EXPECT_EQ(get_height(window), window->height());
   EXPECT_EQ(get_sizes(window),
             Vector2i(window->width(), window->height()));
   EXPECT_EQ(window->windowTitle(), QString("My Window"));
-  EXPECT_EQ(window->pos(), QPoint(10, 10));
+  EXPECT_EQ(window->pos(), QPoint(50, 50));
 
   close_window(window);
-  millisleep(10);
+  millisleep(50);
   EXPECT_TRUE(window.isNull());
 }
 
