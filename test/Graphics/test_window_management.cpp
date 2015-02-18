@@ -43,7 +43,7 @@ TEST(TestWindow, test_open_and_close_window)
 
   // Check that the widget gets destroyed when we close the window.
   close_window(window);
-  while (!scroll_area.isNull());
+  millisleep(10);
   EXPECT_TRUE(scroll_area.isNull());
   EXPECT_TRUE(window.isNull());
 }
@@ -60,7 +60,7 @@ TEST(TestWindow, test_open_and_close_gl_window)
   EXPECT_EQ(window->pos(), QPoint(10, 10));
 
   close_window(window);
-  while (!window.isNull());
+  millisleep(10);
   EXPECT_TRUE(window.isNull());
 }
 
@@ -76,7 +76,7 @@ TEST(TestWindow, test_open_and_close_graphics_view)
   EXPECT_EQ(window->pos(), QPoint(10, 10));
 
   close_window(window);
-  while (!window.isNull());
+  millisleep(10);
   EXPECT_TRUE(window.isNull());
 }
 
