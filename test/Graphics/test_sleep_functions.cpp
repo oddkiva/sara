@@ -44,13 +44,13 @@ protected:
 
 TEST_F(TestSleepFunctions, test_millisleep)
 {
-  int delay_ms = 20;
+  int delay_ms = 100;
   Timer timer;
   timer.restart();
   millisleep(delay_ms);
   double elapsed = timer.elapsedMs();
 
-  double tol_ms = 1.;
+  double tol_ms = 10.;
   EXPECT_NEAR(elapsed, static_cast<double>(delay_ms), tol_ms);
 }
 

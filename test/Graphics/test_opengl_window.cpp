@@ -57,6 +57,9 @@ protected: // data members.
   int mouse_buttons_type_id_;
   int event_type_id_;
 
+  int wait_ms_;
+  int event_time_ms_;
+
 protected: // methods.
   TestOpenGLWindowEvents()
   {
@@ -68,6 +71,14 @@ protected: // methods.
     event_scheduler_.set_receiver(test_window_);
     mouse_pos_ = QPoint(10, 10);
     key_ = Qt::Key_A;
+
+#ifdef _WIN32
+    wait_ms_ = 100;
+    event_time_ms_ = 10;
+#else
+    wait_ms_ = 10;
+    event_time_ms_ = 1;
+#endif
   }
 
   virtual ~TestOpenGLWindowEvents()
@@ -77,7 +88,7 @@ protected: // methods.
 
   void compare_key_event(QSignalSpy& spy) const
   {
-    spy.wait(500);
+    spy.wait(2*wait_ms_);
     EXPECT_EQ(spy.count(), 1);
 
     QList<QVariant> arguments = spy.takeFirst();
@@ -92,7 +103,7 @@ TEST_F(TestOpenGLWindowEvents, test_key_press_event)
   EXPECT_TRUE(spy.isValid());
 
   QKeyEvent event(QEvent::KeyPress, key_, Qt::NoModifier);
-  event_scheduler_.schedule_event(&event, 10);
+  event_scheduler_.schedule_event(&event, event_time_ms_);
 
   compare_key_event(spy);
 }
@@ -103,7 +114,7 @@ TEST_F(TestOpenGLWindowEvents, test_key_release_event)
   EXPECT_TRUE(spy.isValid());
 
   QKeyEvent event(QEvent::KeyRelease, key_, Qt::NoModifier);
-  event_scheduler_.schedule_event(&event, 10);
+  event_scheduler_.schedule_event(&event, event_time_ms_);
 
   compare_key_event(spy);
 }
@@ -114,7 +125,7 @@ TEST_F(TestOpenGLWindowEvents, test_send_no_event)
   EXPECT_TRUE(spy.isValid());
 
   QMetaObject::invokeMethod(test_window_, "waitForEvent",
-    Qt::AutoConnection, Q_ARG(int, 1));
+                            Qt::AutoConnection, Q_ARG(int, 1));
 
   // Nothing happens.
   EXPECT_TRUE(spy.wait(10));
@@ -132,24 +143,16 @@ TEST_F(TestOpenGLWindowEvents, test_send_pressed_key_event)
   QSignalSpy spy(test_window_, SIGNAL(sendEvent(Event)));
   EXPECT_TRUE(spy.isValid());
 
-#ifdef _WIN32
-  int wait_ms = 100;
-  int key_press_time_ms = 10;
-#else
-  int wait_ms = 10;
-  int key_press_time_ms = 1;
-#endif
-
   // Ask the testing window to wait.
   QMetaObject::invokeMethod(test_window_, "waitForEvent",
-                            Qt::AutoConnection, Q_ARG(int, wait_ms));
+                            Qt::AutoConnection, Q_ARG(int, wait_ms_));
 
   // Schedule a key press event.
   QKeyEvent qt_event(QEvent::KeyPress, key_, Qt::NoModifier);
-  event_scheduler_.schedule_event(&qt_event, key_press_time_ms);
+  event_scheduler_.schedule_event(&qt_event, event_time_ms_);
 
   // The spy waits for the events.
-  EXPECT_TRUE(spy.wait(2*wait_ms));
+  EXPECT_TRUE(spy.wait(2*wait_ms_));
 
   // Check that the spy received one key press event.
   EXPECT_EQ(spy.count(), 1);
@@ -169,24 +172,16 @@ TEST_F(TestOpenGLWindowEvents, test_send_released_key_event)
   QSignalSpy spy(test_window_, SIGNAL(sendEvent(Event)));
   EXPECT_TRUE(spy.isValid());
 
-#ifdef _WIN32
-  int wait_ms = 100;
-  int key_press_time_ms = 10;
-#else
-  int wait_ms = 10;
-  int key_press_time_ms = 1;
-#endif
-
-  // Ask the testing window to wait for 10 ms.
+  // Ask the testing window to wait for an event.
   QMetaObject::invokeMethod(test_window_, "waitForEvent",
-                            Qt::AutoConnection, Q_ARG(int, wait_ms));
+                            Qt::AutoConnection, Q_ARG(int, wait_ms_));
 
-  // Schedule a key press event 30 ms later.
+  // Schedule a key press event.
   QKeyEvent qt_event(QEvent::KeyRelease, key_, Qt::NoModifier);
-  event_scheduler_.schedule_event(&qt_event, key_press_time_ms);
+  event_scheduler_.schedule_event(&qt_event, event_time_ms_);
 
   // Check that the spy received one key press event.
-  EXPECT_TRUE(spy.wait(2*wait_ms));
+  EXPECT_TRUE(spy.wait(2*wait_ms_));
   EXPECT_EQ(spy.count(), 1);
 
   // Check the details of the key release event.
