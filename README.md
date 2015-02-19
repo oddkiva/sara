@@ -19,7 +19,8 @@ DO-CV is licensed with the [Mozilla Public License version
 **Continuous integration status:**
 
 [![Build
-Status](https://travis-ci.org/DO-CV/DO-CV.png?branch=master)](https://travis-ci.org/DO-CV/DO-CV) [![Coverage Status](https://coveralls.io/repos/DO-CV/DO-CV/badge.png?branch=develop)](https://coveralls.io/r/DO-CV/DO-CV?branch=develop)
+Status](https://travis-ci.org/DO-CV/DO-CV.png?branch=master)](https://travis-ci.org/DO-CV/DO-CV) <a href="https://ci.appveyor.com/project/davidok8/do-cv"><img src="https://ci.appveyor.com/api/projects/status/github/do-cv/do-cv?branch=develop&svg=true" alt="Build Status: Windows" height="18" /></a>
+[![Coverage Status](https://coveralls.io/repos/DO-CV/DO-CV/badge.png?branch=develop)](https://coveralls.io/r/DO-CV/DO-CV?branch=develop)
 
 Documentation
 -------------
