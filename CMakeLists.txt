@@ -50,7 +50,6 @@ add_subdirectory(third-party)
 if (DO_BUILD_UNIT_TESTS)
   enable_testing()
   add_subdirectory(test)
-  add_custom_target(verbose_test COMMAND ${CMAKE_CTEST_COMMAND} --verbose)
 endif ()
 
 # Setup unit test projects
