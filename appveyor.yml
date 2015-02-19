@@ -12,6 +12,7 @@ install:
   - set PATH=%QTDIR%\bin;%PATH%
 
 configuration:
+- Debug
 - Release
 
 before_build:
