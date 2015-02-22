@@ -22,9 +22,9 @@ namespace DO {
   */
 
   template <typename T>
-  bool readKeypoints(std::vector<OERegion>& features,
-                     DescriptorMatrix<T>& descriptors,
-                     const std::string& name)
+  bool read_keypoints(std::vector<OERegion>& features,
+                      DescriptorMatrix<T>& descriptors,
+                      const std::string& name)
   {
     using namespace std;
     ifstream file(name.c_str());
@@ -47,7 +47,7 @@ namespace DO {
     {
       OERegion& feat = features[i];
       file >> feat.coords();
-      file >> feat.shapeMat();
+      file >> feat.shape_matrix();
       file >> feat.orientation();
       file >> doubleFeatType;
       feat.type() = OERegion::Type(int(doubleFeatType));
@@ -66,9 +66,9 @@ namespace DO {
   }
 
   template <typename T>
-  bool writeKeypoints(const std::vector<OERegion>& features,
-                      const DescriptorMatrix<T>& descriptors,
-                      const std::string& name)
+  bool write_keypoints(const std::vector<OERegion>& features,
+                       const DescriptorMatrix<T>& descriptors,
+                       const std::string& name)
   {
     using namespace std;
     ofstream file(name.c_str());
@@ -83,7 +83,7 @@ namespace DO {
       const OERegion& feat = features[i];
 
       file << feat.x() << ' ' << feat.y() << ' ';
-      file << Map<const RowVector4f>(feat.shapeMat().data()) << ' ';
+      file << Map<const RowVector4f>(feat.shape_matrix().data()) << ' ';
       file << feat.orientation() << ' ';
       file << double(feat.type()) << ' ';
       

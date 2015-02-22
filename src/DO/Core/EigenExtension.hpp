@@ -151,8 +151,8 @@ namespace DO {
 
   //! Lexicographical comparison function for matrices.
   template <typename Derived>
-  inline bool lexCompare(const Eigen::MatrixBase<Derived>& m1,
-                         const Eigen::MatrixBase<Derived>& m2)
+  inline bool lexicographical_compare(const Eigen::MatrixBase<Derived>& m1,
+                                      const Eigen::MatrixBase<Derived>& m2)
   {
     int i = 0;
     while (i != m1.size())
@@ -171,7 +171,9 @@ namespace DO {
     template <typename Derived>
     inline bool operator()(const Eigen::MatrixBase<Derived>& m1,
                            const Eigen::MatrixBase<Derived>& m2) const
-    { return lexCompare(m1, m2); }
+    {
+       return lexicographical_compare(m1, m2);
+    }
   };
 
   //! @}

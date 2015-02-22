@@ -21,8 +21,8 @@ namespace DO {
     @{
   */
 
-  void drawOERegions(const std::vector<OERegion>& features, const Color3ub& c,
-                     float scale = 1.f, const Point2f& off = Point2f::Zero());
+  void draw_oe_regions(const std::vector<OERegion>& features, const Color3ub& c,
+                       float scale = 1.f, const Point2f& off = Point2f::Zero());
 
   //! @}
 

@@ -25,20 +25,32 @@ namespace DO {
   struct EqualDescriptor
   {
     EqualDescriptor(const DescriptorMatrix<T>& descriptors)
-      : descriptors_(descriptors) {}
+      : _descriptors(descriptors)
+    {
+    }
+
     inline bool operator()(int i1, int i2) const
-    { return descriptors_[i1] == descriptors_[i2]; }
-    const DescriptorMatrix<T>& descriptors_;
+    {
+       return _descriptors[i1] == _descriptors[i2];
+    }
+
+    const DescriptorMatrix<T>& _descriptors;
   };
 
   template <>
   struct EqualDescriptor<float>
   {
     EqualDescriptor(const DescriptorMatrix<float>& descriptors)
-      : descriptors_(descriptors) {}
+      : _descriptors(descriptors)
+    {
+    }
+
     inline bool operator()(int i1, int i2) const
-    { return (descriptors_[i1] - descriptors_[i2]).squaredNorm() < 1e-3; }
-    const DescriptorMatrix<float>& descriptors_;
+    {
+       return (_descriptors[i1] - _descriptors[i2]).squaredNorm() < 1e-3;
+    }
+
+    const DescriptorMatrix<float>& _descriptors;
   };
 
   template <typename T>
@@ -46,40 +58,47 @@ namespace DO {
   {
     CompareFeatures(const std::vector<OERegion>& features,
                     const DescriptorMatrix<T>& descriptors)
-      : features_(features)
-      , descriptors_(descriptors)
-      , equal_descriptors_(descriptors) {}
+      : _features(features)
+      , _descriptors(descriptors)
+      , _equal_descriptors(descriptors)
+    {
+    }
+
     inline bool operator()(int i1, int i2) const
     { 
-      if (lexCompare(descriptors_[i1], descriptors_[i2]))
+      if (DO::lexicographical_compare(_descriptors[i1], _descriptors[i2]))
         return true;
-      if (equal_descriptors_(i1, i2) &&
-          features_[i1].extremumValue() > features_[i2].extremumValue())
+      if (_equal_descriptors(i1, i2) &&
+          _features[i1].extremum_value() > _features[i2].extremum_value())
         return true;
       return false;
     }
-    const std::vector<OERegion>& features_;
-    const DescriptorMatrix<T>& descriptors_;
-    EqualDescriptor<T> equal_descriptors_;
+
+    const std::vector<OERegion>& _features;
+    const DescriptorMatrix<T>& _descriptors;
+    EqualDescriptor<T> _equal_descriptors;
   };
 
-  template<typename T> bool isfinite(T arg)
+  template<typename T>
+  inline bool isfinite(T arg)
   {
-    return arg == arg && 
+    return
+      arg == arg && 
       arg != std::numeric_limits<T>::infinity() &&
       arg != -std::numeric_limits<T>::infinity();
   }
 
-  void removeRedundancies(std::vector<OERegion>& features,
+  void remove_redundancies(std::vector<OERegion>& features,
                           DescriptorMatrix<float>& descriptors);
 
-  inline void removeRedundancies(Set<OERegion, RealDescriptor>& keys)
-  { removeRedundancies(keys.features, keys.descriptors); }
+  inline void remove_redundancies(Set<OERegion, RealDescriptor>& keys)
+  {
+     remove_redundancies(keys.features, keys.descriptors);
+  }
 
   //! @}
 
 } /* namespace DO */
-
 
 
 #endif /* DO_FEATURES_UTILITIES_HPP */

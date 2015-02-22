@@ -25,16 +25,16 @@ namespace DO {
     Vector2f c2(p1+Vector2f(cross_offset,0.f));
     Vector2f c3(p1-Vector2f(0.f,cross_offset));
     Vector2f c4(p1+Vector2f(0.f,cross_offset));
-    drawLine(c1, c2, Black8, 5);
-    drawLine(c3, c4, Black8, 5);
-    drawLine(c1, c2, c, 3);
-    drawLine(c3, c4, c, 3);
+    draw_line(c1, c2, Black8, 5);
+    draw_line(c3, c4, Black8, 5);
+    draw_line(c1, c2, c, 3);
+    draw_line(c3, c4, c, 3);
   }
 
   void OERegion::draw(const Color3ub& c, float z, const Point2f& off) const
   {
     // Solve characteristic equation to find eigenvalues
-    JacobiSVD<Matrix2f> svd(shapeMat(), ComputeFullU);
+    JacobiSVD<Matrix2f> svd(shape_matrix(), ComputeFullU);
     const Vector2f& D = svd.singularValues();
     const Matrix2f& U = svd.matrixU();
 
@@ -58,20 +58,20 @@ namespace DO {
     if (z*a > 1.f && z*b > 1.f && (p1-p2).squaredNorm() > 1.f)
     {
       // Contour of orientation line.
-      drawLine(p1, p2, Black8, 5);
+      draw_line(p1, p2, Black8, 5);
       // Contour of ellipse.
-      drawEllipse(p1, z*a, z*b, 180.f*ellOrient/float(M_PI), Black8, 5);
+      draw_ellipse(p1, z*a, z*b, 180.f*ellOrient/float(M_PI), Black8, 5);
       // Fill-in of orientation line.
-      drawLine(p1, p2, c, 3);
+      draw_line(p1, p2, c, 3);
       // Fill-in of ellipse.
-      drawEllipse(p1, z*a, z*b, 180.f*ellOrient/float(M_PI), c, 3);
+      draw_ellipse(p1, z*a, z*b, 180.f*ellOrient/float(M_PI), c, 3);
     }
     else
       InterestPoint::draw(c, z, off);
   }
 
-  void drawOERegions(const vector<OERegion>& features, const Color3ub& c,
-                     float scale, const Point2f& off)
+  void draw_oe_regions(const vector<OERegion>& features, const Color3ub& c,
+                       float scale, const Point2f& off)
   {
     for (size_t i = 0; i < features.size(); ++i)
       features[i].draw(c, scale, off);

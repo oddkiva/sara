@@ -23,8 +23,8 @@ namespace DO {
   template struct CompareFeatures<float>;
   
 
-  void removeRedundancies(vector<OERegion>& features,
-                          DescriptorMatrix<float>& descriptors)
+  void remove_redundancies(vector<OERegion>& features,
+                           DescriptorMatrix<float>& descriptors)
   { 
     if (features.size() != descriptors.size())
     {
@@ -42,7 +42,7 @@ namespace DO {
     for (int i = 0; i < indices.size(); ++i)
     {
       cout << descriptors[indices[i]].transpose() << endl << endl;
-      getKey();
+      get_key();
     }
 #endif
 
@@ -68,7 +68,7 @@ namespace DO {
       if (num > 1)
       {
         cout << "redundant = " << num << endl;
-        getKey();
+        get_key();
       }
 #endif
     }

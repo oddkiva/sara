@@ -20,12 +20,8 @@ namespace DO {
     os << "Feature type:\t";
     switch (type())
     {
-//#define PRINT_FEATURE_TYPE(x) \
-//    case PointFeature::x:     \
-//      os << #x << endl;       \
-//      break;
     case InterestPoint::DoG:
-      os << "DoG" << std::endl;
+      os << "DoG" << endl;
       break;
     case InterestPoint::HarAff:
       os << "Harris-Affine" << endl;
@@ -39,9 +35,9 @@ namespace DO {
     default:
       break;
     }
-    os << "position:\t" << coords().transpose() << endl;
-    os << "extremum type:\t" << extremumType() << endl;
-    os << "extremum value:\t" << extremumValue() << endl;
+    os << "Position:\t" << coords().transpose() << endl;
+    os << "Extremum type:\t" << extremum_type() << endl;
+    os << "Extremum value:\t" << extremum_value() << endl;
     return os;
   }
   
@@ -53,7 +49,7 @@ namespace DO {
   //! Computes and return the scale given an input orientation
   float OERegion::radius(float angle) const
   {
-    JacobiSVD<Matrix2f> svd(shape_matrix_, Eigen::ComputeFullU);
+    JacobiSVD<Matrix2f> svd(_shape_matrix, Eigen::ComputeFullU);
     const Vector2f radii(svd.singularValues().cwiseSqrt().cwiseInverse());
     const Matrix2f& U(svd.matrixU());
     //std::cout << theta/M_PI*180<< "degrees" << std::endl;
@@ -67,7 +63,7 @@ namespace DO {
 
   Matrix3f OERegion::affinity() const
   {
-    Matrix2f M = shapeMat();
+    Matrix2f M = shape_matrix();
     Matrix2f Q(Rotation2D<float>(orientation()).matrix());
     M = Q.transpose() * M * Q;
     Matrix2f R( Matrix2f(M.llt().matrixU()).inverse() );
@@ -79,24 +75,26 @@ namespace DO {
     return A;
   }
 
-  static inline float toDegree(float radian)
-  { return radian/float(M_PI)*180.f; }
+  static inline float to_degree(float radian)
+  {
+     return radian/float(M_PI)*180.f;
+  }
 
   ostream& OERegion::print(ostream& os) const
   {
     return InterestPoint::print(os) 
-      << "shape matrix:\n" << shapeMat() << endl
-      << "orientation:\t" << toDegree(orientation()) << " degrees" << endl;
+      << "shape matrix:\n" << shape_matrix() << endl
+      << "orientation:\t" << to_degree(orientation()) << " degrees" << endl;
   }
 
   istream& OERegion::read(istream& in)
   {
-    int featureType;
+    int feature_type;
     InterestPoint::read(in) 
-      >> shape_matrix_(0,0) >> shape_matrix_(0,1) 
-      >> shape_matrix_(1,0) >> shape_matrix_(1,1) 
-      >> orientation_ >> featureType;
-    type() = static_cast<Type>(featureType);
+      >> _shape_matrix(0,0) >> _shape_matrix(0,1) 
+      >> _shape_matrix(1,0) >> _shape_matrix(1,1) 
+      >> _orientation >> feature_type;
+    type() = static_cast<Type>(feature_type);
     return in;
   }
 

@@ -30,8 +30,8 @@ namespace DO {
     typedef F Feature;
     typedef D Descriptor;
     inline KeyRef(Feature& f, Descriptor& d) : f_(&f), d_(&d) {}
-    inline Feature& feat() const { return f_; }
-    inline Descriptor& desc() const { return d_; }
+    inline Feature& feature() const { return f_; }
+    inline Descriptor& descriptor() const { return d_; }
     KeyRef operator=(KeyRef key) const
     { f_ = key.f_; d_ = key.d_; return *this; }
   private:

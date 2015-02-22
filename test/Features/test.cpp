@@ -17,11 +17,11 @@
 using namespace DO;
 using namespace std;
 
-const bool drawFeatureCenterOnly = false;
+const bool draw_feature_center_only = false;
 const Rgb8& c = Cyan8;
 
-void checkAffineAdaptation(const Image<unsigned char>& image,
-                           const OERegion& f)
+void check_affine_adaptation(const Image<unsigned char>& image,
+                             const OERegion& f)
 {
   int w = image.width();
   int h = image.height();
@@ -37,9 +37,9 @@ void checkAffineAdaptation(const Image<unsigned char>& image,
   OERegion rg(f);
   rg.center().fill(patchSz/2.f);
   rg.orientation() = 0.f;
-  rg.shapeMat() = Matrix2f::Identity()*4.f / (r*r);
+  rg.shape_matrix() = Matrix2f::Identity()*4.f / (r*r);
 
-  Matrix3f A(f.affinity());
+  Matrix3d A(f.affinity().cast<double>());
   cout << "A=\n" << A << endl;
 
   for (int y = 0; y < patchSz; ++y)
@@ -48,10 +48,10 @@ void checkAffineAdaptation(const Image<unsigned char>& image,
     for (int x = 0; x < patchSz; ++x)
     {
       float u = 2*float(x-r)/r;
-      Point3f pp(u, v, 1.);
+      Point3d pp(u, v, 1.);
       pp = A*pp;
 
-      Point2f p;
+      Point2d p;
       p << pp(0), pp(1);
 
       if (p.x() < 0 || p.x() >= w || p.y() < 0 || p.y() >= h)
@@ -61,41 +61,41 @@ void checkAffineAdaptation(const Image<unsigned char>& image,
     }
   }
 
-  Window w1 = activeWindow();
-  Window w2 = openWindow(patchSz, patchSz);
-  setActiveWindow(w2);
-  setAntialiasing();
+  Window w1 = active_window();
+  Window w2 = create_window(patchSz, patchSz);
+  set_active_window(w2);
+  set_antialiasing();
   display(patch);
   rg.draw(Blue8);
-  milliSleep(1000);
-  closeWindow(w2);
+  millisleep(1000);
+  close_window(w2);
 
-  milliSleep(40);
-  setActiveWindow(w1);
+  millisleep(40);
+  set_active_window(w1);
 }
 
-void readFeatures(const Image<unsigned char>& image,
-                  const string& filepath)
+void read_features(const Image<unsigned char>& image,
+                   const string& filepath)
 {
   cout << "Reading DoG features... " << endl;
   vector<OERegion> features;
   DescriptorMatrix<float> descriptors;
 
   cout << "Reading keypoints..." << endl;
-  readKeypoints(features, descriptors, filepath);
+  read_keypoints(features, descriptors, filepath);
 
   for (int i = 0; i < 10; ++i)
-    checkAffineAdaptation(image, features[i]);
+    check_affine_adaptation(image, features[i]);
 
   string ext = filepath.substr(filepath.find_last_of("."), filepath.size());
   string name = filepath.substr(0, filepath.find_last_of("."));
   string copy_filepath = name + "_copy" + ext;
-  writeKeypoints(features, descriptors, name + "_copy" + ext);
+  write_keypoints(features, descriptors, name + "_copy" + ext);
 
   vector<OERegion> features2;
   DescriptorMatrix<float> descriptors2;
   cout << "Checking written file..." << endl;
-  readKeypoints(features2, descriptors2, copy_filepath);
+  read_keypoints(features2, descriptors2, copy_filepath);
 
   ASSERT_EQ(features.size(), features2.size());
   ASSERT_EQ(descriptors.size(), descriptors2.size());
@@ -114,25 +114,21 @@ void readFeatures(const Image<unsigned char>& image,
   // Draw features.
   cout << "Drawing features... ";
   display(image);
-  drawOERegions(features, Red8);
+  draw_oe_regions(features, Red8);
   cout << "done!" << endl;
-  milliSleep(1000);
+  millisleep(1000);
 }
 
-TEST(DO_Features_Test, testFeaturesIO)
+GRAPHICS_MAIN_SIMPLE()
 {
   Image<unsigned char> I;
   load(I, srcPath("../../datasets/obama_2.jpg"));
 
-  setActiveWindow(openWindow(I.width(), I.height()));
-  setAntialiasing(activeWindow());
-  readFeatures(I, srcPath("../../datasets/test.dogkey"));
-  readFeatures(I, srcPath("../../datasets/test.haraffkey"));
-  readFeatures(I, srcPath("../../datasets/test.mserkey"));
-}
+  set_active_window(create_window(I.width(), I.height()));
+  set_antialiasing(active_window());
+  read_features(I, srcPath("../../datasets/test.dogkey"));
+  read_features(I, srcPath("../../datasets/test.haraffkey"));
+  read_features(I, srcPath("../../datasets/test.mserkey"));
 
-int main()
-{
-  testing::InitGoogleTest(&guiApp()->argc, guiApp()->argv);
-  return RUN_ALL_TESTS();
+  return 0;
 }
