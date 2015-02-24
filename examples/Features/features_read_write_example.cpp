@@ -9,16 +9,18 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <gtest/gtest.h>
 #include <DO/Features.hpp>
 #include <DO/Graphics.hpp>
 #include <DO/ImageProcessing.hpp>
 
+
 using namespace DO;
 using namespace std;
 
+
 const bool draw_feature_center_only = false;
 const Rgb8& c = Cyan8;
+
 
 void check_affine_adaptation(const Image<unsigned char>& image,
                              const OERegion& f)
@@ -28,6 +30,7 @@ void check_affine_adaptation(const Image<unsigned char>& image,
   display(image);
   f.draw(Blue8);
 
+  Image<float> float_image(image.convert<float>());
 
   int r = 100;
   int patchSz = 2*r;
@@ -57,7 +60,7 @@ void check_affine_adaptation(const Image<unsigned char>& image,
       if (p.x() < 0 || p.x() >= w || p.y() < 0 || p.y() >= h)
         continue;
 
-      patch(x,y) = interpolate(image, p);
+      patch(x,y) = interpolate(float_image, p);
     }
   }
 
@@ -97,16 +100,6 @@ void read_features(const Image<unsigned char>& image,
   cout << "Checking written file..." << endl;
   read_keypoints(features2, descriptors2, copy_filepath);
 
-  ASSERT_EQ(features.size(), features2.size());
-  ASSERT_EQ(descriptors.size(), descriptors2.size());
-
-  for(int i = 0; i < 10; ++i)
-  {
-    ASSERT_EQ(features[i], features2[i]);
-    ASSERT_EQ(descriptors[i], descriptors2[i]);
-  }
-
-
   cout << "Printing the 10 first keypoints..." << endl;
   for(size_t i = 0; i < 10; ++i)
     cout << features[i] << endl;
@@ -122,13 +115,13 @@ void read_features(const Image<unsigned char>& image,
 GRAPHICS_MAIN_SIMPLE()
 {
   Image<unsigned char> I;
-  load(I, srcPath("../../datasets/obama_2.jpg"));
+  load(I, srcPath("obama_2.jpg"));
 
   set_active_window(create_window(I.width(), I.height()));
   set_antialiasing(active_window());
-  read_features(I, srcPath("../../datasets/test.dogkey"));
-  read_features(I, srcPath("../../datasets/test.haraffkey"));
-  read_features(I, srcPath("../../datasets/test.mserkey"));
+  read_features(I, srcPath("test.dogkey"));
+  read_features(I, srcPath("test.haraffkey"));
+  read_features(I, srcPath("test.mserkey"));
 
   return 0;
 }
