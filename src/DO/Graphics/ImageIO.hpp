@@ -51,7 +51,7 @@ namespace DO {
     Image<Rgb8> tmp;
     if (!load(tmp, name))
       return false;
-    convert(I, tmp);
+    convert(tmp, I);
     return true;
   }
   /*!
