@@ -115,13 +115,13 @@ void read_features(const Image<unsigned char>& image,
 GRAPHICS_MAIN_SIMPLE()
 {
   Image<unsigned char> I;
-  load(I, srcPath("obama_2.jpg"));
+  load(I, src_path("obama_2.jpg"));
 
   set_active_window(create_window(I.width(), I.height()));
   set_antialiasing(active_window());
-  read_features(I, srcPath("test.dogkey"));
-  read_features(I, srcPath("test.haraffkey"));
-  read_features(I, srcPath("test.mserkey"));
+  read_features(I, src_path("test.dogkey"));
+  read_features(I, src_path("test.haraffkey"));
+  read_features(I, src_path("test.mserkey"));
 
   return 0;
 }

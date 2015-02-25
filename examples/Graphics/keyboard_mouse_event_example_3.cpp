@@ -9,7 +9,7 @@ GRAPHICS_MAIN_SIMPLE()
   Window W = create_window(1024, 768);
   set_active_window(W);
   Image<Color3ub> I;
-  load(I, srcPath("../../datasets/ksmall.jpg"));
+  load(I, src_path("../../datasets/ksmall.jpg"));
 
   Event ev;
   do {
