@@ -1,11 +1,11 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO++, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
@@ -13,6 +13,10 @@
 
 #ifndef DO_FEATURES_UTILITIES_HPP
 #define DO_FEATURES_UTILITIES_HPP
+
+
+#include <DO/Features/Feature.hpp>
+
 
 namespace DO {
 
@@ -65,7 +69,7 @@ namespace DO {
     }
 
     inline bool operator()(int i1, int i2) const
-    { 
+    {
       if (DO::lexicographical_compare(_descriptors[i1], _descriptors[i2]))
         return true;
       if (_equal_descriptors(i1, i2) &&
@@ -83,7 +87,7 @@ namespace DO {
   inline bool isfinite(T arg)
   {
     return
-      arg == arg && 
+      arg == arg &&
       arg != std::numeric_limits<T>::infinity() &&
       arg != -std::numeric_limits<T>::infinity();
   }

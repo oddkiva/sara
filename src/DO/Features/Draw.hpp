@@ -14,6 +14,9 @@
 #ifndef DO_FEATURES_DRAW_HPP
 #define DO_FEATURES_DRAW_HPP
 
+#include <DO/Features/Feature.hpp>
+
+
 namespace DO {
 
   /*!
@@ -27,5 +30,6 @@ namespace DO {
   //! @}
 
 } /* namespace DO */
+
 
 #endif /* DO_AFFINECOVARIANTFEATURES_DRAW_H */

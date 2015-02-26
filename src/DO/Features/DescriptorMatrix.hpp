@@ -1,11 +1,11 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO++, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
@@ -13,6 +13,9 @@
 
 #ifndef DO_FEATUREDESCRIPTORS_DESCRIPTORMATRIX_HPP
 #define DO_FEATUREDESCRIPTORS_DESCRIPTORMATRIX_HPP
+
+#include <DO/Core/EigenExtension.hpp>
+
 
 namespace DO {
 
@@ -48,7 +51,7 @@ namespace DO {
     const_descriptor_type operator[](int i) const { return this->col(i); }
 
     void swap(DescriptorMatrix& other) { matrix_type::swap(other); }
-    void append(const DescriptorMatrix& other) 
+    void append(const DescriptorMatrix& other)
     {
       if ( dimension() != other.dimension() && matrix_type::size() != 0)
       {
@@ -70,5 +73,6 @@ namespace DO {
   //! @}
 
 } /* namespace DO */
+
 
 #endif /* DO_FEATUREDESCRIPTORS_DESCRIPTORMATRIX_HPP */
