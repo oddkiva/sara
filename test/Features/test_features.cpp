@@ -15,6 +15,8 @@
 #include <DO/Features/DescriptorMatrix.hpp>
 #include <DO/Features/IO.hpp>
 
+#include "../AssertHelpers.hpp"
+
 
 using namespace DO;
 using namespace std;
@@ -32,11 +34,11 @@ TEST(TestFeatures, test_interest_point)
 TEST(TestFeatures, test_oe_region_shape)
 {
   OERegion f(Point2f::Zero(), 1.f);
+  f.orientation() = 0;
   EXPECT_EQ(f.shape_matrix(), Matrix2f::Identity());
-  EXPECT_EQ(f.affinity(), Matrix3f::Identity());
+  EXPECT_MATRIX_NEAR(f.affinity(), Matrix3f::Identity(), 1e-3);
   EXPECT_EQ(f.radius(), 1.f);
 }
-
 
 TEST(TestFeatures, test_io)
 {
