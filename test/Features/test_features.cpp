@@ -20,6 +20,14 @@ using namespace DO;
 using namespace std;
 
 
+TEST(TestFeatures, test_oe_region_shape)
+{
+  OERegion f(Point2f::Zero(), 1.f);
+  EXPECT_EQ(f.shape_matrix(), Matrix2f::Identity());
+  EXPECT_EQ(f.radius(), 1.f);
+}
+
+
 TEST(TestFeatures, test_io)
 {
   const size_t num_features = 10;
