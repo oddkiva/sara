@@ -33,13 +33,13 @@ namespace DO {
     }
 
     vector<int> indices(features.size());
-    for (int i = 0; i < indices.size(); ++i)
+    for (size_t i = 0; i < indices.size(); ++i)
       indices[i] = i;
     CompareFeatures<float> compareDescriptors(features, descriptors);
     sort(indices.begin(), indices.end(), compareDescriptors);
 
 #ifdef DEBUG_LEXICOGRAPHICAL_ORDER
-    for (int i = 0; i < indices.size(); ++i)
+    for (size_t i = 0; i < indices.size(); ++i)
     {
       cout << descriptors[indices[i]].transpose() << endl << endl;
       get_key();
@@ -47,7 +47,7 @@ namespace DO {
 #endif
 
     EqualDescriptor<float> equalDescriptors(descriptors);
-    for (int i = 0; i != indices.size(); )
+    for (size_t i = 0; i != indices.size(); )
     {
 #ifdef DEBUG_REDUNDANCIES
       features[indices[i]].draw(Green8);
@@ -84,7 +84,7 @@ namespace DO {
     DescriptorMatrix<float> descriptors2(
       int(indices.size()), descriptors.dimension() );
 
-    for (int i = 0; i < indices.size(); ++i)
+    for (size_t i = 0; i < indices.size(); ++i)
     {
       features2[i] = features[indices[i]];
       descriptors2[i] = descriptors[indices[i]];

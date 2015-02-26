@@ -12,6 +12,8 @@
 #include <gtest/gtest.h>
 
 #include <DO/Features/Feature.hpp>
+#include <DO/Features/DescriptorMatrix.hpp>
+#include <DO/Features/IO.hpp>
 
 
 using namespace DO;
@@ -75,17 +77,8 @@ TEST(TestFeatures, test_io)
 }
 
 
-int worker_thread(int argc, char **argv)
+int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv); 
   return RUN_ALL_TESTS();
-}
-
-#undef main
-int main(int argc, char **argv)
-{
-  GraphicsApplication gui_app_(argc, argv);
-  gui_app_.register_user_main(worker_thread);
-  int return_code = gui_app_.exec();
-  return return_code;
 }

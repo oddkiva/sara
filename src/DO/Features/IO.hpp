@@ -15,7 +15,13 @@
 #define DO_FEATURES_IO_HPP
 
 
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <vector>
+
 #include <DO/Features/Feature.hpp>
+#include <DO/Features/DescriptorMatrix.hpp>
 
 
 namespace DO {
