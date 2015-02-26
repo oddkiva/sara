@@ -30,10 +30,10 @@ void check_affine_adaptation(const Image<unsigned char>& image,
   display(image);
   f.draw(Blue8);
 
-  Image<float> float_image(image.convert<float>());
+  Image<float> flt_image(image.convert<float>());
 
-  int r = 100;
-  int patchSz = 2*r;
+  float r = 100;
+  float patchSz = 2*r;
   Image<float> patch(w, h);
   patch.array().fill(0.f);
 
@@ -47,10 +47,10 @@ void check_affine_adaptation(const Image<unsigned char>& image,
 
   for (int y = 0; y < patchSz; ++y)
   {
-    float v = 2*float(y-r)/r;
+    float v = 2*(y-r)/r;
     for (int x = 0; x < patchSz; ++x)
     {
-      float u = 2*float(x-r)/r;
+      float u = 2*(x-r)/r;
       Point3d pp(u, v, 1.);
       pp = A*pp;
 
@@ -60,12 +60,13 @@ void check_affine_adaptation(const Image<unsigned char>& image,
       if (p.x() < 0 || p.x() >= w || p.y() < 0 || p.y() >= h)
         continue;
 
-      patch(x,y) = interpolate(float_image, p);
+      patch(x,y) = static_cast<float>(interpolate(flt_image, p));
     }
   }
 
   Window w1 = active_window();
-  Window w2 = create_window(patchSz, patchSz);
+  Window w2 = create_window(static_cast<int>(patchSz),
+                            static_cast<int>(patchSz));
   set_active_window(w2);
   set_antialiasing();
   display(patch);
