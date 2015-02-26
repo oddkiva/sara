@@ -33,33 +33,16 @@ namespace DO {
       return false;
     }
     
-    int num_features, descriptor_dimension;
-    file >> num_features >> descriptor_dimension;
+    int num_features, descriptor_dim;
+    file >> num_features >> descriptor_dim;
 
-    cout << "num_features = " << num_features << endl;
-    cout << "descriptor_dimension = " << descriptor_dimension << endl;
-    
     features.resize(num_features);
-    descriptors.resize(num_features, descriptor_dimension);
+    descriptors.resize(num_features, descriptor_dim);
 
-    double doubleFeatType;
     for (int i = 0; i < num_features; ++i)
     {
-      OERegion& feat = features[i];
-      file >> feat.coords();
-      file >> feat.shape_matrix();
-      file >> feat.orientation();
-      file >> doubleFeatType;
-      feat.type() = OERegion::Type(int(doubleFeatType));
-      for (int k = 0; k < descriptors.dimension(); ++k)
-        file >> descriptors[i](k);
-
-      /*cout 
-        << feat.coords().transpose() << " " 
-        << feat.shapeMat().row(0) << " " << feat.shapeMat().row(1) << " "
-        << feat.orientation() << " "
-        << int(feat.type()) << endl;
-      cout << descriptors[i].transpose() << endl;*/
+      file >> features[i];
+      file >> descriptors[i];
     }
     file.close();
     return true;

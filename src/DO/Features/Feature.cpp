@@ -91,9 +91,9 @@ namespace DO {
   {
     int feature_type;
     InterestPoint::read(in) 
-      >> _shape_matrix(0,0) >> _shape_matrix(0,1) 
-      >> _shape_matrix(1,0) >> _shape_matrix(1,1) 
-      >> _orientation >> feature_type;
+      >> _shape_matrix
+      >> _orientation
+      >> feature_type;
     type() = static_cast<Type>(feature_type);
     return in;
   }

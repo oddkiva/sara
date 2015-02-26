@@ -33,7 +33,7 @@ namespace DO {
     virtual std::istream& read(std::istream& in) = 0;
     friend std::ostream& operator<<(std::ostream& out, const VisualFeature& f)
     { return f.print(out); }
-    friend std::istream& operator<<(std::istream& in, VisualFeature& f)
+    friend std::istream& operator>>(std::istream& in, VisualFeature& f)
     { return f.read(in); }
   };
 
