@@ -1,11 +1,11 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO++, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
@@ -13,6 +13,10 @@
 
 #ifndef DO_FEATURES_IO_HPP
 #define DO_FEATURES_IO_HPP
+
+
+#include <DO/Features/Feature.hpp>
+
 
 namespace DO {
 
@@ -29,10 +33,10 @@ namespace DO {
     using namespace std;
     ifstream file(name.c_str());
     if (!file.is_open()) {
-      cerr << "Cant open file " << name << endl;    
+      cerr << "Cant open file " << name << endl;
       return false;
     }
-    
+
     int num_features, descriptor_dim;
     file >> num_features >> descriptor_dim;
 
@@ -58,7 +62,7 @@ namespace DO {
     using namespace std;
     ofstream file(name.c_str());
     if (!file.is_open()) {
-      cerr << "Cant open file" << std::endl;    
+      cerr << "Cant open file" << std::endl;
       return false;
     }
 
@@ -71,7 +75,7 @@ namespace DO {
       file << Map<const RowVector4f>(feat.shape_matrix().data()) << ' ';
       file << feat.orientation() << ' ';
       file << double(feat.type()) << ' ';
-      
+
       file << Map<const Matrix<T, 1, Dynamic> >(descriptors[static_cast<int>(i)].data(), 1, descriptors.dimension()) << endl;
     }
     file.close();
