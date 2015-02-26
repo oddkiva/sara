@@ -38,11 +38,13 @@ namespace DO {
 
     features.resize(num_features);
     descriptors.resize(num_features, descriptor_dim);
+    Matrix<T, Dynamic, 1> descriptor_i(descriptor_dim, 1);
 
     for (int i = 0; i < num_features; ++i)
     {
       file >> features[i];
-      file >> descriptors[i];
+      file >> descriptor_i;
+      descriptors[i] = descriptor_i;
     }
     file.close();
     return true;
