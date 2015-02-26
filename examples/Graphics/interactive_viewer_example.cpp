@@ -6,7 +6,7 @@ using namespace DO;
 GRAPHICS_MAIN_SIMPLE()
 {
   Image<Rgb8> I;
-  load(I, srcPath("../../datasets/ksmall.jpg"));
+  load(I, src_path("../../datasets/ksmall.jpg"));
 
   create_graphics_view(I.width(), I.height());
 
