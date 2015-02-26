@@ -11,14 +11,21 @@
 
 #include <gtest/gtest.h>
 
-#include <DO/Features.hpp>
-#include <DO/Graphics.hpp>
-#include <DO/ImageProcessing.hpp>
+#include <DO/Features/Feature.hpp>
 
 
 using namespace DO;
 using namespace std;
 
+
+TEST(TestFeatures, test_interest_point)
+{
+  InterestPoint f(Point2f::Ones());
+  EXPECT_EQ(f.coords(), Point2f::Ones());
+  EXPECT_EQ(f.center(), Point2f::Ones());
+  EXPECT_EQ(f.x(), 1.f);
+  EXPECT_EQ(f.y(), 1.f);
+}
 
 TEST(TestFeatures, test_oe_region_shape)
 {
