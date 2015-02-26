@@ -24,6 +24,7 @@ TEST(TestFeatures, test_oe_region_shape)
 {
   OERegion f(Point2f::Zero(), 1.f);
   EXPECT_EQ(f.shape_matrix(), Matrix2f::Identity());
+  EXPECT_EQ(f.affinity(), Matrix3f::Identity());
   EXPECT_EQ(f.radius(), 1.f);
 }
 

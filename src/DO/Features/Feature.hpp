@@ -1,11 +1,11 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO++, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
@@ -16,6 +16,10 @@
 #define DO_FEATURES_FEATURE_HPP
 
 #include <stdexcept>
+
+#include <DO/Core/Pixel.hpp>
+#include <DO/Core/EigenExtension.hpp>
+
 
 namespace DO {
 
@@ -83,7 +87,7 @@ namespace DO {
   };
 
   /*!
-    The 'OERegion' class stands for 'Oriented Elliptic Region' and is 
+    The 'OERegion' class stands for 'Oriented Elliptic Region' and is
     dedicated to store important geometric features such as:
     - DoG
     - Harris-Affine
@@ -101,8 +105,8 @@ namespace DO {
     //! Destructor.
     virtual ~OERegion() {}
     //! Constant/mutable shape matrix getters.
-    //! The shape matrix is the matrix $M$ that describes the ellipse 
-    //! $\varepsilon$, i.e.: 
+    //! The shape matrix is the matrix $M$ that describes the ellipse
+    //! $\varepsilon$, i.e.:
     //! $$ \varepsilon = \{ x \in R^2 : (x-c)^T M (x-c) = 1 \} $$
     //! where $c$ is the center of the region.
     const Matrix2f& shape_matrix() const { return _shape_matrix; }
@@ -116,7 +120,7 @@ namespace DO {
     float radius(float radian = 0.f) const;
     //! Returns the anisotropic scale at a given angle in radians.
     float scale(float radian = 0.f) const { return radius(radian); }
-    //! Get the affine transform $A$ that transforms the unit circle to that 
+    //! Get the affine transform $A$ that transforms the unit circle to that
     //! oriented ellipse of the region.
     //! We compute $A$ from a QR decomposition and by observing
     //! $M = (A^{-1})^T A^{-1}$ where $M$ is the shape matrix.
@@ -143,5 +147,6 @@ namespace DO {
 
   //! @file
 }
+
 
 #endif /* DO_FEATURES_FEATURE_HPP */
