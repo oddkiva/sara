@@ -27,7 +27,7 @@ script:
   - cd build
   - cmake -DCMAKE_BUILD_TYPE=Debug ..
   - make -j 4
-  - make verbose_test
+  - ctest --output-on-failure
 
 after_success:
   - cd ..

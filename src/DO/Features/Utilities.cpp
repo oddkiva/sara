@@ -1,11 +1,11 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO++, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
@@ -23,8 +23,8 @@ namespace DO {
   template struct CompareFeatures<float>;
   
 
-  void removeRedundancies(vector<OERegion>& features,
-                          DescriptorMatrix<float>& descriptors)
+  void remove_redundancies(vector<OERegion>& features,
+                           DescriptorMatrix<float>& descriptors)
   { 
     if (features.size() != descriptors.size())
     {
@@ -33,21 +33,21 @@ namespace DO {
     }
 
     vector<int> indices(features.size());
-    for (int i = 0; i < indices.size(); ++i)
+    for (size_t i = 0; i < indices.size(); ++i)
       indices[i] = i;
     CompareFeatures<float> compareDescriptors(features, descriptors);
     sort(indices.begin(), indices.end(), compareDescriptors);
 
 #ifdef DEBUG_LEXICOGRAPHICAL_ORDER
-    for (int i = 0; i < indices.size(); ++i)
+    for (size_t i = 0; i < indices.size(); ++i)
     {
       cout << descriptors[indices[i]].transpose() << endl << endl;
-      getKey();
+      get_key();
     }
 #endif
 
     EqualDescriptor<float> equalDescriptors(descriptors);
-    for (int i = 0; i != indices.size(); )
+    for (size_t i = 0; i != indices.size(); )
     {
 #ifdef DEBUG_REDUNDANCIES
       features[indices[i]].draw(Green8);
@@ -68,7 +68,7 @@ namespace DO {
       if (num > 1)
       {
         cout << "redundant = " << num << endl;
-        getKey();
+        get_key();
       }
 #endif
     }
@@ -84,7 +84,7 @@ namespace DO {
     DescriptorMatrix<float> descriptors2(
       int(indices.size()), descriptors.dimension() );
 
-    for (int i = 0; i < indices.size(); ++i)
+    for (size_t i = 0; i < indices.size(); ++i)
     {
       features2[i] = features[indices[i]];
       descriptors2[i] = descriptors[indices[i]];
@@ -99,5 +99,5 @@ namespace DO {
 #endif
   }
 
-  
+
 } /* namespace DO */

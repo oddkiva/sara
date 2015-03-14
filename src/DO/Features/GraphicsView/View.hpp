@@ -18,6 +18,7 @@
 #include <DO/Graphics.hpp>
 #include "GraphicsView/FeatureItem.h"
 
+
 namespace DO {
 
   /*!
@@ -144,5 +145,6 @@ namespace DO {
   //! @file
 
 } /* namespace DO */
+
 
 #endif /* DO_AFFINECOVARIANTFEATURES_VIEW_H */

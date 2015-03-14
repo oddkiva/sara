@@ -30,16 +30,22 @@ namespace DO {
     return true;
   }
 
-  bool load(Image<Rgb8>& I, const std::string& name)
+  bool load(Image<Rgb8>& image, const std::string& name)
   {
-    QImage image(QString(name.c_str()));
-    if (image.isNull())
+    QImage qimage(QString(name.c_str()));
+    if (qimage.isNull())
       return false;
-    image = image.convertToFormat(QImage::Format_RGB888);
-    I.resize(image.width(), image.height());
-    Rgb8 *dst = I.data();
-    Rgb8 *src = reinterpret_cast<Rgb8 *>(image.bits());
-    std::copy(src, src+image.width()*image.height(), dst);
+    qimage = qimage.convertToFormat(QImage::Format_RGB32);
+    if (qimage.format() != QImage::Format_RGB32)
+      throw std::runtime_error("Failed to convert image to format RGB32");
+    image.resize(qimage.width(), qimage.height());
+    const unsigned char *src = qimage.constBits();
+    for (Rgb8 *dst = image.data(); dst != image.end(); ++dst, src += 4)
+    {
+      (*dst)[0] = src[1];
+      (*dst)[1] = src[2];
+      (*dst)[2] = src[3];
+    }
     return true;
   }
 

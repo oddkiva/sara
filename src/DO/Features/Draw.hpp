@@ -14,6 +14,9 @@
 #ifndef DO_FEATURES_DRAW_HPP
 #define DO_FEATURES_DRAW_HPP
 
+#include <DO/Features/Feature.hpp>
+
+
 namespace DO {
 
   /*!
@@ -21,11 +24,12 @@ namespace DO {
     @{
   */
 
-  void drawOERegions(const std::vector<OERegion>& features, const Color3ub& c,
-                     float scale = 1.f, const Point2f& off = Point2f::Zero());
+  void draw_oe_regions(const std::vector<OERegion>& features, const Color3ub& c,
+                       float scale = 1.f, const Point2f& off = Point2f::Zero());
 
   //! @}
 
 } /* namespace DO */
+
 
 #endif /* DO_AFFINECOVARIANTFEATURES_DRAW_H */

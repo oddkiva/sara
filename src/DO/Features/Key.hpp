@@ -16,6 +16,9 @@
 
 #include <Eigen/StdVector>
 
+#include <DO/Features/Feature.hpp>
+
+
 namespace DO {
 
   /*!
@@ -30,10 +33,11 @@ namespace DO {
     typedef F Feature;
     typedef D Descriptor;
     inline KeyRef(Feature& f, Descriptor& d) : f_(&f), d_(&d) {}
-    inline Feature& feat() const { return f_; }
-    inline Descriptor& desc() const { return d_; }
+    inline Feature& feature() const { return f_; }
+    inline Descriptor& descriptor() const { return d_; }
     KeyRef operator=(KeyRef key) const
     { f_ = key.f_; d_ = key.d_; return *this; }
+
   private:
     Feature& f_;
     Descriptor& d_;
@@ -58,10 +62,15 @@ namespace DO {
     typedef KeyRef<const Feature, ConstDescriptor> Key;
     typedef KeyRef<const Feature, ConstDescriptor> ConstKey;
 
-    Key operator[](int i)
-    { return KeyRef<Feature, Descriptor>(features[i], descriptors[i]); }
-    ConstKey operator[](int i) const
-    { return KeyRef<const Feature, ConstDescriptor>(features[i], descriptors[i]); }
+    inline Key operator[](int i)
+    {
+      return KeyRef<Feature, Descriptor>(features[i], descriptors[i]);
+    }
+
+    inline ConstKey operator[](int i) const
+    {
+      return KeyRef<const Feature, ConstDescriptor>(features[i], descriptors[i]);
+    }
 
     inline size_t size() const
     {
@@ -92,5 +101,6 @@ namespace DO {
   //! @}
 
 } /* namespace DO */
+
 
 #endif /* DO_FEATURES_KEY_HPP */

@@ -238,7 +238,7 @@ TEST_F(TestKeyboardMouseInputOnAnyWindow, test_any_get_key)
   }
 }
 
-int worker_thread_task(int argc, char **argv)
+int worker_thread(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv); 
   return RUN_ALL_TESTS();
@@ -257,7 +257,7 @@ int main(int argc, char **argv)
                    global_scheduler, SLOT(schedule_event(QEvent*, int)));
 
   // Run the worker thread 
-  gui_app_.register_user_main(worker_thread_task);
+  gui_app_.register_user_main(worker_thread);
   int return_code = gui_app_.exec();
 
   // Cleanup and terminate

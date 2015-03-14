@@ -510,6 +510,9 @@ protected: // data members.
   int mouse_buttons_type_id_;
   int event_type_id_;
 
+  int wait_ms_;
+  int event_time_ms_;
+
 protected: // methods.
   TestPaintingWindowEvents()
   {
@@ -521,6 +524,9 @@ protected: // methods.
     event_scheduler_.set_receiver(test_window_);
     mouse_pos_ = QPoint(10, 10);
     key_ = Qt::Key_A;
+
+    wait_ms_ = 100;
+    event_time_ms_ = 10;
   }
 
   virtual ~TestPaintingWindowEvents()
@@ -531,7 +537,7 @@ protected: // methods.
   void compare_mouse_event(QSignalSpy& spy,
                            const QMouseEvent& expected_event) const
   {
-    spy.wait(100);
+    spy.wait(wait_ms_);
     EXPECT_EQ(spy.count(), 1);
 
     QList<QVariant> arguments = spy.takeFirst();
@@ -543,7 +549,7 @@ protected: // methods.
 
   void compare_key_event(QSignalSpy& spy) const
   {
-    spy.wait(100);
+    spy.wait(wait_ms_);
     EXPECT_EQ(spy.count(), 1);
 
     QList<QVariant> arguments = spy.takeFirst();
@@ -563,7 +569,7 @@ TEST_F(TestPaintingWindowEvents, test_mouse_move_event)
     QEvent::MouseMove, mouse_pos_,
     Qt::NoButton, Qt::NoButton, Qt::NoModifier
   );
-  event_scheduler_.schedule_event(&event, 10);
+  event_scheduler_.schedule_event(&event, event_time_ms_);
 
   compare_mouse_event(spy, event);
 }
@@ -578,7 +584,7 @@ TEST_F(TestPaintingWindowEvents, test_mouse_press_event)
     QEvent::MouseButtonPress, mouse_pos_,
     Qt::LeftButton, Qt::LeftButton, Qt::NoModifier
   );
-  event_scheduler_.schedule_event(&event, 10);
+  event_scheduler_.schedule_event(&event, event_time_ms_);
 
   compare_mouse_event(spy, event);
 }
@@ -593,7 +599,7 @@ TEST_F(TestPaintingWindowEvents, test_mouse_release_event)
     QEvent::MouseButtonRelease, mouse_pos_,
     Qt::LeftButton, Qt::LeftButton, Qt::NoModifier
     );
-  event_scheduler_.schedule_event(&event, 10);
+  event_scheduler_.schedule_event(&event, event_time_ms_);
 
   compare_mouse_event(spy, event);
 }
@@ -604,7 +610,7 @@ TEST_F(TestPaintingWindowEvents, test_key_press_event)
   EXPECT_TRUE(spy.isValid());
 
   QKeyEvent event(QEvent::KeyPress, key_, Qt::NoModifier);
-  event_scheduler_.schedule_event(&event, 10);
+  event_scheduler_.schedule_event(&event, event_time_ms_);
 
   compare_key_event(spy);
 }
@@ -615,7 +621,7 @@ TEST_F(TestPaintingWindowEvents, test_key_release_event)
   EXPECT_TRUE(spy.isValid());
 
   QKeyEvent event(QEvent::KeyRelease, key_, Qt::NoModifier);
-  event_scheduler_.schedule_event(&event, 10);
+  event_scheduler_.schedule_event(&event, event_time_ms_);
 
   compare_key_event(spy);
 }

@@ -7,8 +7,8 @@ using namespace DO;
 GRAPHICS_MAIN_SIMPLE()
 {
   Image<Color3ub> I;
-  cout << srcPath("../../datasets/ksmall.jpg") << endl;
-  if ( !load(I, srcPath("../../datasets/ksmall.jpg")) )
+  cout << src_path("../../datasets/ksmall.jpg") << endl;
+  if ( !load(I, src_path("../../datasets/ksmall.jpg")) )
   {
     cerr << "Error: could not open 'ksmall.jpg' file" << endl;
     return 1;

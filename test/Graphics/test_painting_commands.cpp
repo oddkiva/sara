@@ -218,12 +218,6 @@ int worker_thread(int argc, char **argv)
   return RUN_ALL_TESTS();
 }
 
-int worker_thread_task(int argc, char **argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
-
 #undef main
 int main(int argc, char **argv)
 {
@@ -237,7 +231,7 @@ int main(int argc, char **argv)
                    global_scheduler, SLOT(schedule_event(QEvent*, int)));
 
   // Run the worker thread
-  gui_app.register_user_main(worker_thread_task);
+  gui_app.register_user_main(worker_thread);
   int return_code = gui_app.exec();
 
   // Cleanup and terminate.

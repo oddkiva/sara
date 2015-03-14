@@ -44,13 +44,13 @@ protected:
 
 TEST_F(TestSleepFunctions, test_millisleep)
 {
-  int delay_ms = 20;
+  int delay_ms = 100;
   Timer timer;
   timer.restart();
   millisleep(delay_ms);
   double elapsed = timer.elapsedMs();
 
-  double tol_ms = 1.;
+  double tol_ms = 10.;
   EXPECT_NEAR(elapsed, static_cast<double>(delay_ms), tol_ms);
 }
 
@@ -67,7 +67,7 @@ TEST_F(TestSleepFunctions, test_microsleep)
 
 }
 
-int worker_thread_task(int argc, char **argv)
+int worker_thread(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv); 
   return RUN_ALL_TESTS();
@@ -86,7 +86,7 @@ int main(int argc, char **argv)
                    global_scheduler, SLOT(schedule_event(QEvent*, int)));
 
   // Run the worker thread 
-  gui_app_.register_user_main(worker_thread_task);
+  gui_app_.register_user_main(worker_thread);
   int return_code = gui_app_.exec();
 
   // Cleanup and terminate

@@ -19,7 +19,7 @@ add_subdirectory(KDTree)
 add_subdirectory(ImageProcessing)
 add_subdirectory(Geometry)
 
-#add_subdirectory(Features)
+add_subdirectory(Features)
 #add_subdirectory(FeatureDetectors)
 #add_subdirectory(FeatureDescriptors)
 

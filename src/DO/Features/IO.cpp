@@ -16,24 +16,24 @@
 
 namespace DO {
 
-  template bool readKeypoints<float>(
+  template bool read_keypoints<float>(
     std::vector<OERegion>& features,
     DescriptorMatrix<float>& descriptors,
     const std::string& name);
 
-  template bool readKeypoints<unsigned char>(
+  template bool read_keypoints<unsigned char>(
     std::vector<OERegion>& features,
     DescriptorMatrix<unsigned char>& descriptors,
     const std::string& name);
 
   template
-  bool writeKeypoints<float>(
+  bool write_keypoints<float>(
     const std::vector<OERegion>& features,
     const DescriptorMatrix<float>& descriptors,
     const std::string& name);
 
   template
-  bool writeKeypoints<unsigned char>(
+  bool write_keypoints<unsigned char>(
     const std::vector<OERegion>& features,
     const DescriptorMatrix<unsigned char>& descriptors,
     const std::string& name);
