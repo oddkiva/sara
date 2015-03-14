@@ -232,7 +232,7 @@ protected:
 
   TestVideoIO() : testing::Test()
   {
-    video_filename = srcPath("orion_1.mpg");
+    video_filename = src_path("orion_1.mpg");
     cout << video_filename << endl;
   }
 };
@@ -289,7 +289,7 @@ int main(int argc, char **argv)
 #else
 GRAPHICS_MAIN_SIMPLE()
 {
-  const string video_filepath = srcPath("orion_1.mpg");
+  const string video_filepath = src_path("orion_1.mpg");
   //const string video_filepath = "C:/Users/David/Desktop/STREAM/00102.MTS";
 
   VideoStream video_stream(video_filepath);
