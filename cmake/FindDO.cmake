@@ -38,6 +38,7 @@ if (NOT DO_FOUND)
   # Foundational libraries
   do_append_components(DO_COMPONENTS Core)
   do_append_components(DO_COMPONENTS ImageIO)
+  do_append_components(DO_COMPONENTS VideoIO)
   #do_append_components(DO_COMPONENTS ImageDrawing)
   do_append_components(DO_COMPONENTS Graphics)
 
