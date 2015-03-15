@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 2.6)
 
-if(POLICY CMP0020)
+if (POLICY CMP0020)
   cmake_policy(SET CMP0020 NEW)
-endif()
+endif ()
 
 project(DO_Features_Examples)
 
@@ -18,6 +18,6 @@ macro (do_add_example example)
                         COMPILE_DEFINITIONS DO_STATIC)
   target_link_libraries(${example} ${DO_LIBRARIES})
   set_property(TARGET ${example} PROPERTY FOLDER "DO Examples/Features")
-endmacro()
+endmacro ()
 
 do_add_example(features_read_write_example)
