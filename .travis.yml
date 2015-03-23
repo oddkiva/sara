@@ -10,8 +10,10 @@ before_install:
   - sudo apt-get update -qq
 
 install:
-  # Install Qt5
+  # Install the minimal set of Qt5 libraries.
   - sudo apt-get install -qq qtbase5-dev
+  # Install FFMPEG/Libav libraries.
+  - sudo apt-get install -qq libavcodec-dev libavformat-dev libavutil-dev
   # Install lcov for code coverage.
   - sudo apt-get install lcov
   # Install coveralls-lcov for code coverage.
