@@ -251,7 +251,7 @@ function (do_test _test_name _srcs _additional_lib_deps)
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/test"
   )
   add_test(${_test_name}
-           "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${_test_name}")
+           "${CMAKE_BINARY_DIR}/test/${_test_name}")
   
   if (DEFINED test_group_name)
     set_property(TARGET ${_test_name}
