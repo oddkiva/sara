@@ -31,7 +31,7 @@ namespace DO {
   {
   public:
     class Impl;
-    GraphicsApplication(int argc, char **argv);
+    GraphicsApplication(int& argc, char **argv);
     ~GraphicsApplication();
     void register_user_main(int (*userMain)(int, char **));
     int exec();

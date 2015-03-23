@@ -16,7 +16,7 @@
 namespace DO {
 
   GraphicsApplication::Impl::
-  Impl(int argc_, char **argv_)
+  Impl(int& argc_, char **argv_)
     : QApplication(argc_, argv_)
     , argc(argc_)
     , argv(argv_)

@@ -48,7 +48,7 @@ namespace DO {
     };
 
   public: /* methods */
-    Impl(int argc, char **argv);
+    Impl(int& argc, char **argv);
     virtual ~Impl();
 
   public slots:
@@ -65,7 +65,7 @@ namespace DO {
     void disconnectAllWindowsIOEventsToUserThread();
 
   public:
-    int argc;
+    int& argc;
     char **argv;
     UserThread userThread;
     QList<QPointer<QWidget> > createdWindows;

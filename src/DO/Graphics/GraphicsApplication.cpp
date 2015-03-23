@@ -14,7 +14,7 @@
 
 namespace DO {
 
-  GraphicsApplication::GraphicsApplication(int argc, char **argv)
+  GraphicsApplication::GraphicsApplication(int& argc, char **argv)
     : pimpl_(new GraphicsApplication::Impl(argc, argv))
   {
   }
