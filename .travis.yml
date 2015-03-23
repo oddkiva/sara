@@ -7,6 +7,8 @@ compiler:
 before_install:
   # Update apt repositories to get Qt5.
   - sudo add-apt-repository --yes ppa:ubuntu-sdk-team/ppa
+  # Update apt repositories to get the latest FFMPEG libraries.
+  - sudo add-apt-repository --yes ppa:jon-severinsson/ffmpeg
   - sudo apt-get update -qq
 
 install:
