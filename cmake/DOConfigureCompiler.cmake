@@ -18,6 +18,7 @@ if (MSVC)
 
 # Clang compiler
 elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  # Enable C++11.
   if (APPLE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
   else ()
@@ -51,10 +52,20 @@ elseif (CMAKE_COMPILER_IS_GNUCXX)
   
   do_substep_message(
     "${CMAKE_CXX_COMPILER_ID} compiler version: ${GCC_VERSION}")
+
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmessage-length=72")
+
+  # Enable C++11.
   if (NOT GCC_VERSION  VERSION_LESS 4.5 AND GCC_VERSION  VERSION_LESS 4.7)
     set(ENABLE_CXX11 "-std=c++0x")
   else ()
     set (ENABLE_CXX11 "-std=c++11")
+  endif ()
+
+  # Enable colors in gcc log output.
+  if (GCC_VERSION VERSION_GREATER 4.8)
+    do_substep_message("Enable colored output of GCC.")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color=always")
   endif ()
 endif ()
 
@@ -66,7 +77,6 @@ if (UNIX)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wnon-virtual-dtor")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wpointer-arith")
-  #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wundef")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wunused-variable")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-long-long")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIE")
