@@ -2,10 +2,14 @@ include_directories(
   ${DO_INCLUDE_DIR}
   ${DO_ThirdParty_DIR}/
   ${DO_ThirdParty_DIR}/eigen
-  ${DO_ThirdParty_DIR}/ffmpeg/include
 )
 
-link_directories(${DO_ThirdParty_DIR}/ffmpeg/lib)
+find_package(FFMPEG REQUIRED)
+
+include_directories(${FFMPEG_INCLUDE_DIR})
+if (MVSVC)
+  link_directories(${FFMPEG_LINK_DIR})
+endif ()
 
 
 if (DO_USE_FROM_SOURCE)
@@ -14,6 +18,6 @@ if (DO_USE_FROM_SOURCE)
     do_glob_directory(${DO_SOURCE_DIR}/VideoIO)
     do_create_common_variables("VideoIO")
     do_generate_library("VideoIO")
-    target_link_libraries(DO_VideoIO avcodec avdevice avformat avutil)
+    target_link_libraries(DO_VideoIO ${FFMPEG_LIBRARIES})
   endif ()
 endif ()
