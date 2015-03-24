@@ -27,6 +27,8 @@ install:
   - ./configure --enable-shared --disable-static --prefix=/usr/local
   - make -j4
   - sudo make install
+  - cd ..
+  - rm -rf ffmpeg-2.2.4
   # Install lcov for code coverage.
   - if [ "$CXX" == "g++" ]; then wget -O lcov.tar.gz http://downloads.sourceforge.net/ltp/lcov-1.11.tar.gz; fi
   - if [ "$CXX" == "g++" ]; then mkdir lcov; fi
