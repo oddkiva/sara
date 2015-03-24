@@ -7,7 +7,7 @@ include_directories(
 find_package(FFMPEG REQUIRED)
 
 include_directories(${FFMPEG_INCLUDE_DIR})
-if (MVSVC)
+if (MSVC)
   link_directories(${FFMPEG_LINK_DIR})
 endif ()
 

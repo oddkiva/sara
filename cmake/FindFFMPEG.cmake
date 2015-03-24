@@ -4,8 +4,8 @@ if (FFMPEG_LIBRARIES AND FFMPEG_INCLUDE_DIR)
 
 elseif (MSVC)
   set(FFMPEG_INCLUDE_DIR ${DO_ThirdParty_DIR}/ffmpeg/include)
-  set(FFMPEG_LINK_DIR ${DO_ThirdParty_DIR}/ffmpeg/bin)
-  set(FFMPEG_LIBRARIES libavcodec libavformat libavutil)
+  set(FFMPEG_LINK_DIR ${DO_ThirdParty_DIR}/ffmpeg/lib)
+  set(FFMPEG_LIBRARIES avcodec avformat avutil)
 
 else ()
   # use pkg-config to get the directories and then use these values
