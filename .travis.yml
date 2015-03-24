@@ -36,7 +36,7 @@ install:
   - if [ "$CXX" == "g++" ]; then cd ..; fi
   - if [ "$CXX" == "g++" ]; then rm -Rf lcov lcov.tar.gz; fi
   # Install coveralls-lcov for code coverage.
-  - if [ "$CXX" == "g++" ]; gem install coveralls-lcov; fi
+  - if [ "$CXX" == "g++" ]; then gem install coveralls-lcov; fi
 
 before_script:
   # Fake X server
