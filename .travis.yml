@@ -9,8 +9,6 @@ before_install:
   - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
   # Update apt repositories to get Qt5.
   - sudo add-apt-repository --yes ppa:ubuntu-sdk-team/ppa
-  # Update apt repositories to get the latest FFMPEG libraries.
-  - sudo add-apt-repository --yes ppa:jon-severinsson/ffmpeg
   - sudo apt-get update -qq
 
 install:
@@ -21,8 +19,14 @@ install:
   - if [ "$CXX" == "g++" ]; then sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-4.9 90; fi
   # Install the minimal set of Qt5 libraries.
   - sudo apt-get install -qq qtbase5-dev
-  # Install FFMPEG/Libav libraries.
-  - sudo apt-get install -qq libavcodec-dev libavformat-dev libavutil-dev
+  # Install FFMPEG libraries.
+  - sudo apt-get install yasm
+  - wget http://www.ffmpeg.org/releases/ffmpeg-2.2.4.tar.bz2
+  - tar -xjf ffmpeg-2.2.4.tar.bz2
+  - cd ffmpeg-2.2.4
+  - ./configure --enable-shared --disable-static --prefix=/usr/local
+  - make -j4
+  - sudo make install
   # Install lcov for code coverage.
   - if [ "$CXX" == "g++" ]; then wget -O lcov.tar.gz http://downloads.sourceforge.net/ltp/lcov-1.11.tar.gz; fi
   - if [ "$CXX" == "g++" ]; then mkdir lcov; fi
