@@ -9,6 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#define _USE_MATH_DEFINES
+
 extern "C" {
 # include <libavcodec/avcodec.h>
 # include <libavformat/avformat.h>
