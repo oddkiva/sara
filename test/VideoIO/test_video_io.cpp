@@ -4,11 +4,6 @@
 #include <DO/VideoIO.hpp>
 
 
-#ifdef _WIN32
-# include <vld.h>
-#endif
-
-
 using namespace DO;
 
 

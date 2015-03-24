@@ -6,8 +6,8 @@ find_path(
 
 if(NOT VLD_INSTALL_DIR)
   message(
-    FATAL_ERROR "VLD installation directory not found. Turn off the ENABLE_VLD "
-                "option to build the project."
+    FATAL_ERROR "VLD installation directory not found. Turn off the "
+                "DO_ENABLE_VLD option to build the project."
   )
 endif()
 

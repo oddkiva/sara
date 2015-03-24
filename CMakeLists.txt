@@ -24,6 +24,8 @@ option(DO_USE_STATIC_LIBS
        "Use DO++ static libraries"                  OFF)
 option(DO_BUILD_UNIT_TESTS
        "Build unit tests for DO++ libraries"        ON)
+option(DO_USE_VLD
+       "Enable Visual Leak Detector for unit tests" OFF)
 option(DO_BUILD_SAMPLE_PROGRAMS
        "Build sample programs using DO++ libraries" ON)
 option(DO_BUILD_SHARED_LIBS
