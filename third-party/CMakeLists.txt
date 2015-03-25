@@ -13,6 +13,15 @@ if (DO_BUILD_UNIT_TESTS)
   add_subdirectory(gtest)
   set_property(TARGET gtest PROPERTY FOLDER ${THIRDPARTY_FOLDER_NAME})
   set_property(TARGET gtest_main PROPERTY FOLDER ${THIRDPARTY_FOLDER_NAME})
+
+  if (WIN32)
+    file (COPY ${CMAKE_CURRENT_SOURCE_DIR}/ffmpeg/bin/
+          DESTINATION ${CMAKE_BINARY_DIR}/test/Debug)
+    file (COPY ${CMAKE_CURRENT_SOURCE_DIR}/ffmpeg/bin/
+          DESTINATION ${CMAKE_BINARY_DIR}/test/RelWithDebInfo)
+    file (COPY ${CMAKE_CURRENT_SOURCE_DIR}/ffmpeg/bin/
+          DESTINATION ${CMAKE_BINARY_DIR}/test/Release)
+  endif ()
 endif ()
 
 if (DO_BUILD_IMAGE_IO)
