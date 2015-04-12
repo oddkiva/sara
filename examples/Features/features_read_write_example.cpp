@@ -18,7 +18,6 @@ using namespace DO;
 using namespace std;
 
 
-const bool draw_feature_center_only = false;
 const Rgb8& c = Cyan8;
 
 
