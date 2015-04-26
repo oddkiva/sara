@@ -1,11 +1,11 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO++, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
@@ -16,12 +16,14 @@
 //! \brief Implementation from:
 //! http://stackoverflow.com/questions/1980012/boost-static-assert-without-boost
 
+
 //! Concatenation macro used for the implementation of DO_STATIC_ASSERT.
 #define CAT(arg1, arg2)   CAT1(arg1, arg2)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #define CAT1(arg1, arg2)  CAT2(arg1, arg2)
 #define CAT2(arg1, arg2)  arg1##arg2
 #endif
+
 
 /*!
   \ingroup Meta
@@ -49,6 +51,7 @@ struct CAT(__static_assertion_at_line_, __LINE__)                           \
   DO::Meta::StaticAssertion<static_cast<bool>((expression))>                \
     CAT(CAT(CAT(STATIC_ASSERTION_FAILED_AT_LINE_, __LINE__), _), message);  \
 }
+
 
 // Note that we wrap the non existing type inside a struct to avoid warning
 // messages about unused variables when static assertions are used at function

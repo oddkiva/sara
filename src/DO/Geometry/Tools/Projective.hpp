@@ -13,6 +13,7 @@
 
 #include <DO/Core/EigenExtension.hpp>
 
+
 namespace DO { namespace P2 {
 
     typedef Vector3d Line, Point;

@@ -77,7 +77,7 @@ TEST(TestPositionIncrementer, test_row_major_incrementer_2d)
   bool stop = false;
   Vector2i start(2, 3);
   Vector2i end(5, 10);
-  
+
   Vector2i coords(start);
   for (int i = start(0); i < end(0); ++i) {
     for (int j = start(1); j < end(1); ++j) {

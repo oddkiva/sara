@@ -1,11 +1,11 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO++, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
@@ -14,8 +14,10 @@
 #ifndef DO_UTILITIES_TIMER_HPP
 #define DO_UTILITIES_TIMER_HPP
 
-#include <DO/Defines.hpp>
 #include <iostream>
+
+#include <DO/Defines.hpp>
+
 
 namespace DO {
 
@@ -29,12 +31,16 @@ namespace DO {
   public: /* interface. */
     //! Default constructor
     Timer();
+
     //! Reset the timer to zero.
     void restart();
+
     //! Returns the elapsed time in seconds.
     double elapsed();
+
     //! Returns the elapsed time in milliseconds.
     double elapsedMs();
+
   private: /* data members. */
     double start_;
     double elapsed_;

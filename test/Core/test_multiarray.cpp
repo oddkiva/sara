@@ -65,7 +65,7 @@ TYPED_TEST_P(Test_multiarray_constructors,
   EXPECT_EQ(multi_array.sizes(), sizes);
   EXPECT_EQ(multi_array.strides(), strides);
   EXPECT_EQ(multi_array.size(), raw_size);
-  
+
   // Check size values in each dimension.
   for (int i = 0; i < sizes.size(); ++i)
     ASSERT_EQ(multi_array.size(i), sizes(i));
@@ -198,7 +198,7 @@ TEST(TestMultiArray, test_copy_constructor_from_different_multiarray_type)
     int value_a = 0;
     for ( ; a != A.end(); ++a, ++value_a)
       *a = value_a;
-  }  
+  }
 
   MultiArray<float, 2> B(A);
 
@@ -287,7 +287,7 @@ TEST(TestMultiArray, test_swap)
   }
 
   A.swap(B);
-  
+
   {
     MultiArray<int, 2>::iterator b = B.begin();
     int value_b = 0;

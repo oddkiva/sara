@@ -1,11 +1,11 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO++, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
@@ -22,14 +22,15 @@
 
 #include <DO/Core/Meta.hpp>
 
+
 namespace DO {
 
   //! \ingroup Core
   //! \defgroup Tree Tree
   //! @{
 
-  //! \brief The tree data structure is by definition an arborescence, in graph 
-  //! theory, i.e., an directed graph with a root vertex 'u' such that there is 
+  //! \brief The tree data structure is by definition an arborescence, in graph
+  //! theory, i.e., an directed graph with a root vertex 'u' such that there is
   //! a unique path from 'u' to any vertex 'v' in the tree.
   //!
   //! \todo: finish testing (cf. methods' description where TODO is present.).
@@ -126,8 +127,8 @@ namespace DO {
 
 #ifndef FIXME
     //! Equality operator.
-    // \todo: you, dummy! That's false. Because equality can happen even if 
-    // the tree structures differs. 
+    // \todo: you, dummy! That's false. Because equality can happen even if
+    // the tree structures differs.
     // Check that each node also has the same number of children. Proof?
     bool operator==(const Tree& t) const
     {
@@ -222,7 +223,7 @@ namespace DO {
 
     //! Append child to specified node and returns the child node handle.
     inline node_handle append_child(node_handle n, const T& v)
-    { 
+    {
       if (n == node_handle())
         throw NullNodeHandleException();
       node_handle child(new Node(v));
@@ -666,7 +667,7 @@ namespace DO {
 
       inline SiblingIterator(const Node *node)
         : base_type(node) {}
-      
+
       inline SiblingIterator(const NodeHandle<false>& node)
         : base_type(node.self()) {}
 
@@ -911,7 +912,7 @@ namespace DO {
 
   //! Save the tree content in GraphViz format
   template <typename T>
-  bool saveTree(const Tree<T>& tree, const std::string& name)
+  bool save_tree(const Tree<T>& tree, const std::string& name)
   {
     using namespace std;
 
@@ -943,7 +944,8 @@ namespace DO {
   }
 
   //! @}
- 
+
 }
+
 
 #endif /* DO_CORE_TREE_HPP */

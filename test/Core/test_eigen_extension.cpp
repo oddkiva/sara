@@ -1,11 +1,11 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO++, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
@@ -29,7 +29,7 @@ TEST(DO_Core_Test, eigenExtensionTest)
   // Initialize the matrices m and n.
   m.array().fill(a);
   n.array().fill(b);
-  
+
   for (int i = 0; i < m.rows(); ++i)
     for (int j = 0; j < m.cols(); ++j)
       EXPECT_EQ(m(i,j), a);
@@ -59,8 +59,8 @@ TEST(DO_Core_Test, eigenExtensionTest)
   (m.array() * n.array()) + n.array() / m.array();
 }
 
-int main(int argc, char** argv) 
+int main(int argc, char** argv)
 {
-  testing::InitGoogleTest(&argc, argv); 
+  testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
