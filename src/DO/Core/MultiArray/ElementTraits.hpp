@@ -30,39 +30,45 @@ namespace DO {
   template <typename T>
   struct ElementTraits
   {
-    typedef T value_type;               //!< STL-like typedef.
-    typedef size_t size_type;           //!< STL-like typedef.
-    typedef T * pointer;                //!< STL-like typedef.
-    typedef const T * const_pointer;    //!< STL-like typedef.
-    typedef T& reference;               //!< STL-like typedef.
-    typedef const T& const_reference;   //!< STL-like typedef.
-    typedef T * iterator;               //!< STL-like typedef.
-    typedef const T * const_iterator;   //!< STL-like typedef.
-    static const bool is_scalar = true; //!< STL-like typedef.
+    //! @{
+    //! STL-compatible interface.
+    typedef T value_type;
+    typedef size_t size_type;
+    typedef T * pointer;
+    typedef const T * const_pointer;
+    typedef T& reference;
+    typedef const T& const_reference;
+    typedef T * iterator;
+    typedef const T * const_iterator;
+    static const bool is_scalar = true;
+    //! @}
   };
 
   //! \brief The specialized element traits class when the entry is a matrix.
   //! Again the matrix is viewed as a scalar. Additions and subtractions between
-  //! matrices are OK but multiplication will be the point-wise matrix 
+  //! matrices are OK but multiplication will be the point-wise matrix
   //! multiplication.
   //!
   //! This may be questionable and this may change in the future.
   template <typename T, int M, int N>
   struct ElementTraits<Matrix<T, M, N> >
   {
-    const static bool is_square_matrix = (M == N);  //!< STL-like typedef.
+    //! @{
+    //! STL-compatible interface.
+    const static bool is_square_matrix = (M == N);
     typedef typename Meta::Choose<
       is_square_matrix,
       Matrix<T, N, N>,
-      Array<T, M, N> >::Type value_type;            //!< STL-like typedef.
-    typedef size_t size_type;                       //!< STL-like typedef.
-    typedef value_type * pointer;                   //!< STL-like typedef.
-    typedef const value_type * const_pointer;       //!< STL-like typedef.
-    typedef value_type& reference;                  //!< STL-like typedef.
-    typedef const value_type& const_reference;      //!< STL-like typedef.
-    typedef value_type * iterator;                  //!< STL-like typedef.
-    typedef const value_type * const_iterator;      //!< STL-like typedef.
-    static const bool is_scalar = false;            //!< STL-like typedef.
+      Array<T, M, N> >::Type value_type;
+    typedef size_t size_type;
+    typedef value_type * pointer;
+    typedef const value_type * const_pointer;
+    typedef value_type& reference;
+    typedef const value_type& const_reference;
+    typedef value_type * iterator;
+    typedef const value_type * const_iterator;
+    static const bool is_scalar = false;
+    //! @}
   };
 
   //! \brief The specialized element traits class when the entry is an array.
@@ -70,15 +76,18 @@ namespace DO {
   template <typename T, int M, int N>
   struct ElementTraits<Array<T, M, N> >
   {
-    typedef Array<T, M, N> value_type;          //!< STL-like typedef.
-    typedef size_t size_type;                   //!< STL-like typedef.
-    typedef value_type * pointer;               //!< STL-like typedef.
-    typedef const value_type * const_pointer;   //!< STL-like typedef.
-    typedef value_type& reference;              //!< STL-like typedef.
-    typedef const value_type& const_reference;  //!< STL-like typedef.
-    typedef value_type * iterator;              //!< STL-like typedef.
-    typedef const value_type * const_iterator;  //!< STL-like typedef.
-    static const bool is_scalar = false;        //!< STL-like typedef.
+    //! @{
+    //! STL-compatible interface.
+    typedef Array<T, M, N> value_type;
+    typedef size_t size_type;
+    typedef value_type * pointer;
+    typedef const value_type * const_pointer;
+    typedef value_type& reference;
+    typedef const value_type& const_reference;
+    typedef value_type * iterator;
+    typedef const value_type * const_iterator;
+    static const bool is_scalar = false;
+    //! @}
   };
 
   //! @}
