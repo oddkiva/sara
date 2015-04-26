@@ -12,8 +12,11 @@
 #ifndef DO_GEOMETRY_TOOLS_POLYNOMIAL_HPP
 #define DO_GEOMETRY_TOOLS_POLYNOMIAL_HPP
 
-#include <DO/Geometry/Tools/Utilities.hpp>
 #include <algorithm>
+#include <initializer_list>
+
+#include <DO/Geometry/Tools/Utilities.hpp>
+
 
 namespace DO {
 
@@ -22,23 +25,58 @@ namespace DO {
   class Monomial
   {
   public:
-    //! Default constructor
-    inline Monomial() {}
-    inline Monomial(T coeff, int degree) : coeff_(coeff), degree_(degree) {}
-    // Mutable accessor
-    inline T& coeff() { return coeff_; }
-    inline int& degree() { return degree_; }
-    // Immutable accessor
-    inline const T& coeff() const { return coeff_; }
-    inline int degree() const { return degree_; }
-    // Comparison operator
+    //! @{
+    //! Constructors.
+    inline Monomial()
+    {
+    }
+
+    inline Monomial(T coeff, int degree)
+      : _coeff(coeff)
+      , _degree(degree)
+    {
+    }
+    //! @}
+
+    //! @{
+    //! Accessor.
+    inline T& coeff()
+    {
+      return _coeff;
+    }
+
+    inline const T& coeff() const
+    {
+      return _coeff;
+    }
+
+    inline int& degree()
+    {
+      return _degree;
+    }
+
+    inline int degree() const
+    {
+      return _degree;
+    }
+    //! @}
+
+    //! @{
+    //! Comparison operator.
     inline bool operator==(const Monomial& other) const
-    { return coeff_ == other.coeff_ && degree_ == other.degree_; }
+    {
+      return _coeff == other._coeff && _degree == other._degree;
+    }
+
     inline bool operator!=(const Monomial& other) const
-    { return !operator==(other); }
+    {
+      return !operator==(other);
+    }
+    //! @}
+
   private:
-    T coeff_;
-    int degree_;
+    T _coeff;
+    int _degree;
   };
 
   //! Rudimentary polynomial class.
@@ -47,42 +85,85 @@ namespace DO {
   {
   public:
     enum { Degree = N };
-    //! Default constructor
-    inline Polynomial() {}
-    inline Polynomial(const T *coeff) { std::copy(coeff, coeff+N+1, coeff_); }
-    inline Polynomial(const Polynomial& P) { copy(P); }
-    //inline Polynomial(Polynomial&& P);
-    //! Assignment operator
-    Polynomial& operator=(const Polynomial& P) { copy(P); return *this; }
-    //! Coefficient accessor at given degree.
-    inline T& operator[](int degree) { return coeff_[degree]; }
-    inline const T& operator[](int degree) const { return coeff_[degree]; }
-    //! Evaluation at point 'x'
+
+    //! @{
+    //! Constructors.
+    inline Polynomial()
+    {
+    }
+
+    inline explicit Polynomial(T * coeff)
+    {
+      std::copy(coeff, coeff+N+1, _coeff);
+    }
+
+    inline Polynomial(std::initializer_list<T> list)
+    {
+      std::copy(list.begin(), list.end(), _coeff);
+    }
+
+    inline Polynomial(const Polynomial& P)
+    {
+      copy(P);
+    }
+    //! @}
+
+    //! Assign a new polynomial to the polynomial object.
+    Polynomial& operator=(const Polynomial& P)
+    {
+      copy(P);
+      return *this;
+    }
+
+    //! @{
+    //! Return the polynomial coefficient at degree 'i'.
+    inline T& operator[](int degree)
+    {
+      return _coeff[degree];
+    }
+
+    inline const T& operator[](int degree) const
+    {
+      return _coeff[degree];
+    }
+    //! @}
+
+    //! @{
+    //! Evaluate polynomial at point 'x'.
     inline T operator()(const T& x) const
     {
       T res = static_cast<T>(0);
       for (int i = 0; i <= N; ++i)
-        res += coeff_[i]*std::pow(x, i);
+        res += _coeff[i]*std::pow(x, i);
       return res;
     }
+
     inline std::complex<T> operator()(const std::complex<T>& x) const
     {
       std::complex<T> res;
       for (int i = 0; i <= N; ++i)
-        res += coeff_[i]*std::pow(x, i);
+        res += _coeff[i]*std::pow(x, i);
       return res;
     }
-    //! Comparison operator
+    //! @}
+
+    //! @{
+    //! Comparison operator.
     inline bool operator==(const Polynomial& other) const
     {
-      for (int i = 0; i < N; ++i)
-        if (coeff_[i] != other.coeff_[i])
+      for (int i = 0; i <= N; ++i)
+        if (_coeff[i] != other._coeff[i])
           return false;
       return true;
-    } 
+    }
+
     inline bool operator!=(const Polynomial& other) const
-    { return !operator=(other); }
-    //! I/O
+    {
+      return !operator=(other);
+    }
+    //! @}
+
+    //! I/O.
     friend std::ostream& operator<<(std::ostream& os,const Polynomial& P)
     {
       for(int i = N; i >= 0; --i)
@@ -92,18 +173,23 @@ namespace DO {
         else
           os << "-";
         os << std::abs(P[i]);
-        if (i > 0) 
+        if (i > 0)
           os << "X**" << i << " ";
       }
       return os;
     }
+
   private:
     inline void copy(const Polynomial& other)
-    { std::copy(other.coeff_, other.coeff_+N+1, coeff_); }
+    {
+      std::copy(other._coeff, other._coeff + N+1, _coeff);
+    }
+
   private:
-    T coeff_[N+1];
+    T _coeff[N+1];
   };
 
 } /* namespace DO */
+
 
 #endif /* DO_GEOMETRY_TOOLS_POLYNOMIAL_HPP */

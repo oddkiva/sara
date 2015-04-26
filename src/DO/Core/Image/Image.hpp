@@ -1,11 +1,11 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO++, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
@@ -21,135 +21,195 @@
 
 namespace DO {
 
-  // ======================================================================== //
   /*!
     \ingroup Core
     \defgroup Image Image
     @{
    */
 
-  //! \brief Forward declaration of the image class.
-  template <typename Color, int N = 2> class Image;
+  //! @{
+  //! \brief Forward declaration of the image classes.
+  template <typename PixelType, int N = 2> class Image;
+  template <typename PixelType, int N = 2> class ImageView;
+  //! @}
+
 
   //! \brief Forward declaration of the generic color conversion function.
   template <typename T, typename U, int N>
   void convert(const Image<T, N>& src, Image<U, N>& dst);
 
-  //! \brief The image class.
-  template <typename Color, int N>
-  class Image : public MultiArray<Color, N, ColMajor>
+
+  //! \brief The image base class.
+  template <typename MultiArrayType>
+  class ImageBase : public MultiArrayType
   {
-    typedef MultiArray<Color, N, ColMajor> base_type;
+  public:
+    using base_type = MultiArrayType;
+    using pixel_type = typename base_type::value_type;
+    using pointer = typename base_type::pointer;
+    using vector_type = typename base_type::vector_type;
+    using base_type::Dimension;
+
+    //! @{
+    //! Matrix views for linear algebra.
+    using const_matrix_view_type = Map<
+      const Matrix<typename ElementTraits<pixel_type>::value_type,
+      Dynamic, Dynamic, RowMajor>>;
+    using matrix_view_type = Map<
+      Matrix<typename ElementTraits<pixel_type>::value_type,
+      Dynamic, Dynamic, RowMajor>>;
+    //! @}
+
+  public:
+    //! Default image constructor.
+    inline ImageBase()
+      : base_type()
+    {
+    }
+
+    //! Image constructor.
+    inline ImageBase(pointer data, const vector_type& sizes)
+      : base_type(data, sizes)
+    {
+    }
+
+    //! @{
+    //! Image constructors with specified sizes.
+    inline explicit ImageBase(const vector_type& sizes)
+      : base_type(sizes)
+    {
+    }
+
+    inline ImageBase(int width, int height)
+      : base_type(width, height)
+    {
+    }
+
+    inline ImageBase(int width, int height, int depth)
+      : base_type(width, height, depth)
+    {
+    }
+    //! @}
+
+    //! Return image width.
+    inline int width() const
+    {
+      return this->base_type::rows();
+    }
+
+    //! Return image height.
+    inline int height() const
+    {
+      return this->base_type::cols();
+    }
+
+    //! Return image depth.
+    inline int depth() const
+    {
+      return this->base_type::depth();
+    }
+
+    //! @{
+    //! Return matrix view for linear algebra with Eigen libraries.
+    inline matrix_view_type matrix()
+    {
+      DO_STATIC_ASSERT(Dimension == 2, MULTIARRAY_MUST_HAVE_TWO_DIMENSIONS);
+      return matrix_view_type(
+        reinterpret_cast<
+        typename ElementTraits<pixel_type>::pointer>(base_type::data()),
+        height(), width() );
+    }
+
+    inline const_matrix_view_type matrix() const
+    {
+      DO_STATIC_ASSERT(Dimension == 2, MULTIARRAY_MUST_HAVE_TWO_DIMENSIONS);
+      return const_matrix_view_type(
+        reinterpret_cast<
+        typename ElementTraits<pixel_type>::const_pointer>(base_type::data()),
+        height(), width() );
+    }
+    //! @}
+  };
+
+
+  //! \brief The image view class.
+  template <typename T, int N>
+  class ImageView : public ImageBase<MultiArrayView<T, N, ColMajor>>
+  {
+    using base_type = ImageBase<MultiArrayView<T, N, ColMajor>>;
 
   public: /* interface */
-    //! N-dimensional integral vector type.
-    typedef typename base_type::vector_type vector_type;
+    using vector_type = typename base_type::vector_type;
 
-    //! Immutable matrix view for linear algebra.
-    typedef Map<const Matrix<typename ElementTraits<Color>::value_type,
-      Dynamic, Dynamic, RowMajor> > const_matrix_view_type;
+    inline ImageView(T *data, const vector_type& sizes)
+      : base_type(data, sizes)
+    {
+    }
+  };
 
-    //! Mutable matrix view for linear algebra.
-    typedef Map<Matrix<typename ElementTraits<Color>::value_type,
-      Dynamic, Dynamic, RowMajor> > matrix_view_type;
-    
+
+  //! \brief The image class.
+  template <typename T, int N>
+  class Image : public ImageBase<MultiArray<T, N, ColMajor>>
+  {
+    using base_type = ImageBase<MultiArray<T, N, ColMajor>>;
+
+  public: /* interface */
+    using vector_type = typename base_type::vector_type;
+
     //! Default constructor.
     inline Image()
       : base_type()
     {
     }
 
-    //! Constructor with specified sizes.
+    //! Constructor that takes ownership of data.
+    inline explicit Image(T *data, const vector_type& sizes)
+      : base_type(data, sizes)
+    {
+    }
+
+    //! @{
+    //! Constructors with specified sizes.
     inline explicit Image(const vector_type& sizes)
       : base_type(sizes)
     {
     }
 
-    //! Constructor which wraps raw data.
-    inline Image(Color *data, const vector_type& sizes,
-                 bool acquire_ownership = false)
-      : base_type(data, sizes, acquire_ownership)
-    {
-    }
-
-    //! Constructor with specified sizes.
     inline Image(int width, int height)
       : base_type(width, height)
     {
     }
 
-    //! Constructor with specified sizes.
     inline Image(int width, int height, int depth)
       : base_type(width, height, depth)
     {
     }
-
-    //! Copy constructor.
-    inline Image(const base_type& other)
-      : base_type(other)
-    {
-    }
-
-    //! Constant width getter.
-    inline int width() const
-    {
-      return this->base_type::rows();
-    }
-
-    //! Constant height getter.
-    inline int height() const
-    {
-      return this->base_type::cols();
-    }
-
-    //! Constant depth getter, which is only valid for 3D images.
-    inline int depth() const
-    {
-      return this->base_type::depth();
-    }
-
-    //! Non-mutable matrix view for linear algebra with Eigen 3.
-    inline const_matrix_view_type matrix() const
-    {
-      DO_STATIC_ASSERT(N == 2, MULTIARRAY_MUST_HAVE_TWO_DIMENSIONS);
-      return const_matrix_view_type( reinterpret_cast<
-        typename ElementTraits<Color>::const_pointer>(base_type::data()),
-        base_type::cols(), base_type::rows() );
-    }
-
-    //! Mutable matrix view for linear algebra with Eigen 3.
-    inline matrix_view_type matrix()
-    {
-      DO_STATIC_ASSERT(N == 2, MULTIARRAY_MUST_HAVE_TWO_DIMENSIONS);
-      return matrix_view_type( reinterpret_cast<
-        typename ElementTraits<Color>::pointer>(base_type::data()),
-        base_type::cols(), base_type::rows() );
-    }
+    //! @}
 
     //! Color conversion method.
-    template <typename Color2>
-    Image<Color2, N> convert() const
+    template <typename U>
+    Image<U, N> convert() const
     {
-      Image<Color2, N> dst(base_type::sizes());
+      Image<U, N> dst(base_type::sizes());
       DO::convert(*this, dst);
       return dst;
     }
 
     //! Convenient helper for chaining filters.
     template <template<typename, int> class Filter>
-    inline typename Filter<Color, N>::return_type compute() const
+    inline typename Filter<T, N>::return_type compute() const
     {
-      return Filter<Color, N>(*this)();
+      return Filter<T, N>(*this)();
     }
 
     template <template<typename, int> class Filter>
-    inline typename Filter<Color, N>::return_type
-    compute(const typename Filter<Color, N>::parameter_type& param) const
+    inline typename Filter<T, N>::return_type
+    compute(const typename Filter<T, N>::parameter_type& param) const
     {
-      return Filter<Color, N>(*this)(param);
+      return Filter<T, N>(*this)(param);
     }
   };
-
 
   //! @}
 

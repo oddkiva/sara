@@ -93,7 +93,7 @@ namespace DO {
 
   //! \brief Channel getter.
   template <typename _PackedPixel, int _Index> struct Channel;
-  
+
 #define SPECIALIZE_CHANNEL(index)                               \
   template <typename _PackedPixel>                              \
   struct Channel<_PackedPixel, index>                           \

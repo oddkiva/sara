@@ -1,11 +1,11 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO++, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
@@ -15,8 +15,10 @@
 #ifndef DO_CORE_SPARSEMULTIARRAY_HPP
 #define DO_CORE_SPARSEMULTIARRAY_HPP
 
-#include "EigenExtension.hpp"
 #include <map>
+
+#include <DO/Core/EigenExtension.hpp>
+
 
 namespace DO {
 
@@ -76,7 +78,7 @@ namespace DO {
       for(const_iterator i = i_begin, i_end = storage.end(); i != i_end;i++)
       {
         for(size_type n = 0;n < dimension;n++)
-        {      
+        {
           int& k_n = k[n];
           k_n = min(k_n,(i->first)[n]);
         }
@@ -97,7 +99,7 @@ namespace DO {
       for(const_iterator i = i_begin, i_end = storage.end(); i != i_end;i++)
       {
         for(size_type n = 0;n < dimension;n++)
-        {      
+        {
           int& k_n = k[n];
           k_n = max(k_n,(i->first)[n]);
         }
@@ -139,7 +141,7 @@ namespace DO {
     inline SparseMultiArray& operator=(const SparseMultiArray& a)
     { storage = a.storage; return *this; }
 
-    //! Equality operator.  
+    //! Equality operator.
     inline bool operator==(const SparseMultiArray& a) const
     { return storage == a.storage; }
 
@@ -173,7 +175,7 @@ namespace DO {
     //! End iterator.
     inline iterator end()
     { return storage.end(); }
-    
+
     //! Constant end iterator.
     inline const_iterator end() const
     { return storage.end(); }
@@ -185,5 +187,6 @@ namespace DO {
   //! @}
 
 } /* namespace DO */
+
 
 #endif /* DO_CORE_SPARSEMULTIARRAY_HPP */

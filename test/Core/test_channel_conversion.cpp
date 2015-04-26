@@ -1,11 +1,11 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO++, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2014 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
@@ -96,7 +96,7 @@ TYPED_TEST_P(TestConvertChannelFloatToInt,
     numeric_limits<Int>::min(),
     numeric_limits<Int>::max()
   };
-  
+
   for (int i = 0; i < 2; ++i)
   {
     {
@@ -128,7 +128,7 @@ REGISTER_TYPED_TEST_CASE_P(
 INSTANTIATE_TYPED_TEST_CASE_P(Core_Pixel_ChannelConversion,
                               TestConvertChannelFloatToInt,
                               IntegralChannelTypesRestricted);
- 
+
 
 // ========================================================================== //
 // Test channel conversion between floating-point type.
@@ -254,8 +254,8 @@ TEST(TestConvertChannel, test_convert_channel_between_integers)
 
 
 // ========================================================================== //
-int main(int argc, char** argv) 
+int main(int argc, char** argv)
 {
-  testing::InitGoogleTest(&argc, argv); 
+  testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

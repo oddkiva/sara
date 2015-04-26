@@ -35,7 +35,6 @@
 // Timer classes
 #include "Core/Timer.hpp"
 // Miscellaneous
-#include "Core/Stringify.hpp"
 #include "Core/StdVectorHelpers.hpp"
 #include "Core/DebugUtilities.hpp"
 

@@ -1,11 +1,11 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO++, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
@@ -24,7 +24,8 @@ namespace DO {
   //! \ingroup Image
   //! @{
 
-  //! \brief Find min and max grayscale values of the image.
+  //! @{
+  //! \brief Find min and max values of the image.
   template <typename T, int N>
   inline void find_min_max(T& min, T& max, const Image<T, N>& src)
   {
@@ -34,7 +35,6 @@ namespace DO {
     max = *std::max_element(src_first, src_last);
   }
 
-  //! \brief Find min and max pixel values of the image.
   template <typename T, int N, typename ColorSpace>
   void find_min_max(Pixel<T, ColorSpace>& min,
                     Pixel<T, ColorSpace>& max,
@@ -52,6 +52,7 @@ namespace DO {
       max = max.cwiseMax(*src_first);
     }
   }
+  //! @}
 
   //! @}
 }
@@ -89,7 +90,8 @@ namespace DO {
   //! \ingroup Image
   //! @{
 
-  //! \brief Rescale color values properly for viewing purposes.
+  //! @{
+  //! \brief Rescale color values.
   template <typename T, int N>
   inline Image<T, N> color_rescale(const Image<T, N>& src,
                                    const T& a = PixelTraits<T>::min(),
@@ -116,8 +118,6 @@ namespace DO {
     return dst;
   }
 
-
-  //! \brief color rescaling function.
   template <typename T, typename ColorSpace, int N>
   inline Image<Pixel<T, ColorSpace>, N> color_rescale(
     const Image<Pixel<T, ColorSpace>, N>& src,
@@ -144,7 +144,7 @@ namespace DO {
     if (min == max)
       throw std::runtime_error("Error: cannot rescale image! min == max");
 
-    for (src_first = src.data(); src_first != src_last; 
+    for (src_first = src.data(); src_first != src_last;
       ++src_first, ++dst_first)
       *dst_first = a + (*src_first-min).cwiseProduct(b-a).
       cwiseQuotient(max-min);
@@ -152,8 +152,6 @@ namespace DO {
     return dst;
   }
 
-
-  //! \brief color rescaling functor helper.
   template <typename T, int N>
   struct ColorRescale
   {
@@ -162,6 +160,7 @@ namespace DO {
     ReturnType operator()() const { return color_rescale(src_); }
     const Image<T, N>& src_;
   };
+  //! @}
 
   //! @}
 }

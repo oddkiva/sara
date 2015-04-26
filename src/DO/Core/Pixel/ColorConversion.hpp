@@ -30,7 +30,7 @@ namespace DO {
       !std::numeric_limits<T>::is_integer,
       CONVERSION_FROM_RGB_TO_GRAY_IS_SUPPORTED_ONLY_FOR_FLOATING_POINT_TYPE);
 
-    gray = T(0.2125)*rgb[0] + T(0.7154)*rgb[1] + T(0.0721)*rgb[2]; 
+    gray = T(0.2125)*rgb[0] + T(0.7154)*rgb[1] + T(0.0721)*rgb[2];
   }
 
   //! Convert Grayscale color to RGB color.
@@ -79,7 +79,7 @@ namespace DO {
   {
     yuv << gray, 0, 0;
   }
-  
+
 }
 
 
@@ -144,14 +144,14 @@ namespace DO {
 
   //! \brief Generic color converter to grayscale.
   template <typename ColorSpace> struct ConvertColorToGray;
-  
+
   //! \brief Generic color conversion function to grayscale.
   template <typename T, typename ColorSpace>
   inline void convert_color(const Pixel<T, ColorSpace>& src, T& dst)
   {
     ConvertColorToGray<ColorSpace>::template apply<T>(src, dst);
   }
-  
+
   //! \brief Convert color from RGB to gray.
   template <> struct ConvertColorToGray<Rgb>
   {

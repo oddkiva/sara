@@ -118,7 +118,7 @@ TEST_F(TestRangeIterator2D, test_equality_and_inequality_comparisons)
   EXPECT_EQ(image.begin_array(), image.begin_array()++);
   EXPECT_EQ(image.begin_array(), image.begin());
   EXPECT_EQ(image.begin_array(), image.data());
-  
+
   EXPECT_MATRIX_EQ(*image.begin_array(), *const_image.begin_array());
 
   // Inequalities.
@@ -139,7 +139,7 @@ protected:
   Vector2i start;
   Vector2i end;
 
-  TestSubrangeIterator2D() : TestIterator2D() 
+  TestSubrangeIterator2D() : TestIterator2D()
   {
     start << 1, 2;
     end << 4, 8;
@@ -264,7 +264,7 @@ TEST_F(TestAxisIterator2D, test_equality_and_inequality_comparisons)
   EXPECT_EQ(it.x(), image.begin());
   EXPECT_EQ(it.x(), image.data());
   EXPECT_EQ(it.x(), it.y());
-  
+
   EXPECT_EQ(it.x(), const_image.begin_array());
   EXPECT_EQ(it.x(), const_image.begin_array()++);
   EXPECT_EQ(it.x(), const_image.begin());
@@ -277,10 +277,10 @@ TEST_F(TestAxisIterator2D, test_equality_and_inequality_comparisons)
   EXPECT_NE(it.x(), ++image.begin_array());
   EXPECT_NE(it.x(), image.begin()+1);
   EXPECT_NE(it.x(), image.data()+1);
-  
+
   EXPECT_NE(it.x(), ++const_image.begin_array());
   EXPECT_NE(it.x(), const_image.begin()+1);
-  EXPECT_NE(it.x(), const_image.data()+1);  
+  EXPECT_NE(it.x(), const_image.data()+1);
 }
 
 TEST_F(TestAxisIterator2D, test_iterations)
@@ -293,11 +293,11 @@ TEST_F(TestAxisIterator2D, test_iterations)
 TEST_F(TestAxisIterator2D, test_arithmetic_operations)
 {
   Image::array_iterator it = image.begin_array();
-  
+
   // Addition.
   it.x()+=2;
   EXPECT_EQ(it, image.begin()+image.stride(0)*2);
-  
+
   // Subtraction.
   it.x()-=2;
   EXPECT_EQ(it, image.begin());

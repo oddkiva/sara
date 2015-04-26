@@ -9,16 +9,15 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-// STL.
 #include <vector>
-// Google Test.
+
 #include <gtest/gtest.h>
-// DO-CV.
-#include <DO/Core/Stringify.hpp>
+
 #include <DO/Graphics.hpp>
 #include <DO/Graphics/GraphicsUtilities.hpp>
-// Local class.
+
 #include "event_scheduler.hpp"
+
 
 using namespace DO;
 using namespace std;
@@ -155,7 +154,7 @@ protected:
     for (int i = 0; i < 2; ++i)
       for (int j = 0; j < 3; ++j)
         test_windows_.push_back(
-          create_window(200, 200, toString(3*i+j), 300*j+300, 300*i+50)
+          create_window(200, 200, to_string(3*i+j), 300*j+300, 300*i+50)
         );
   }
 

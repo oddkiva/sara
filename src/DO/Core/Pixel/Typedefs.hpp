@@ -81,7 +81,7 @@ namespace DO {
 
   //! White color function.
   template <typename T> inline Matrix<T, 3, 1> white()
-  { 
+  {
     return Matrix<T,3,1>(
       channel_max_value<T>(),
       channel_max_value<T>(),
@@ -89,7 +89,7 @@ namespace DO {
   }
   //! Black color function.
   template <typename T> inline Matrix<T, 3, 1> black()
-  { 
+  {
     return Matrix<T,3,1>(
       channel_min_value<T>(),
       channel_min_value<T>(),

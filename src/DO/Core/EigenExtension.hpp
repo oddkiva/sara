@@ -35,9 +35,10 @@
 //! Activate by default math constants.
 #define _USE_MATH_DEFINES
 
-//! Eigen dependencies.
-#include <Eigen/Eigen>
 #include <sstream>
+
+#include <Eigen/Eigen>
+
 
 //! \namespace Eigen
 //! \brief Some customized extension to interface for the Eigen library
@@ -53,27 +54,36 @@ namespace Eigen {
   template <typename T, int M, int N>
   struct NumTraits<Array<T, M, N> >
   {
-    typedef Array<T, M, N> Real;        //!< Eigen internals.
-    typedef Array<T, M, N> NonInteger;  //!< Eigen internals.
-    typedef Array<T, M, N> Nested;      //!< Eigen internals.
+    //! @{
+    //! Eigen internals.
+    typedef Array<T, M, N> Real;
+    typedef Array<T, M, N> NonInteger;
+    typedef Array<T, M, N> Nested;
 
     enum {
-      IsComplex = 0,                    //!< Eigen internals.
-      IsInteger = 0,                    //!< Eigen internals.
-      IsSigned = 0,                     //!< Eigen internals.
-      RequireInitialization = 1,        //!< Eigen internals.
-      ReadCost = 1,                     //!< Eigen internals.
-      AddCost = 1,                      //!< Eigen internals.
-      MulCost = 1                       //!< Eigen internals.
+      IsComplex = 0,
+      IsInteger = 0,
+      IsSigned = 0,
+      RequireInitialization = 1,
+      ReadCost = 1,
+      AddCost = 1,
+      MulCost = 1
     };
 
-    //! Eigen internals.
     inline static Real epsilon()
-    { Real r; r.fill(NumTraits<T>::epsilon()); return r; }
+    {
+      Real r;
+      r.fill(NumTraits<T>::epsilon());
+      return r;
+    }
 
-    //! Eigen internals.
     inline static Real dummy_precision()
-    { Real r; r.fill(NumTraits<T>::dummy_precision()); return r; }
+    {
+      Real r;
+      r.fill(NumTraits<T>::dummy_precision());
+      return r;
+    }
+    //! @}
   };
 
   //! \brief NumTraits template class specialization in case the scalar type
@@ -81,27 +91,36 @@ namespace Eigen {
   template <typename T, int M, int N>
   struct NumTraits<Matrix<T, M, N> >
   {
-    typedef Matrix<T, M, N> Real;       //!< Eigen internals.
-    typedef Matrix<T, M, N> NonInteger; //!< Eigen internals.
-    typedef Matrix<T, M, N> Nested;     //!< Eigen internals.
+    //! @{
+    //! Eigen internals.
+    typedef Matrix<T, M, N> Real;
+    typedef Matrix<T, M, N> NonInteger;
+    typedef Matrix<T, M, N> Nested;
 
     enum {
-      IsComplex = 0,                    //!< Eigen internals.
-      IsInteger = 0,                    //!< Eigen internals.
-      IsSigned = 0,                     //!< Eigen internals.
-      RequireInitialization = 1,        //!< Eigen internals.
-      ReadCost = 1,                     //!< Eigen internals.
-      AddCost = 1,                      //!< Eigen internals.
-      MulCost = 1                       //!< Eigen internals.
+      IsComplex = 0,
+      IsInteger = 0,
+      IsSigned = 0,
+      RequireInitialization = 1,
+      ReadCost = 1,
+      AddCost = 1,
+      MulCost = 1
     };
 
-    //! Eigen internals.
     inline static Real epsilon()
-    { Real r; r.fill(NumTraits<T>::epsilon()); return r; }
+    {
+      Real r;
+      r.fill(NumTraits<T>::epsilon());
+      return r;
+    }
 
-    //! Eigen internals.
     inline static Real dummy_precision()
-    { Real r; r.fill(NumTraits<T>::dummy_precision()); return r; }
+    {
+      Real r;
+      r.fill(NumTraits<T>::dummy_precision());
+      return r;
+    }
+    //! @}
   };
 
 }
@@ -118,26 +137,26 @@ namespace DO {
 
   using namespace Eigen;
 
-  // Point types with integral scalar type.
-  typedef Vector2i Point2i; //!< Self-explanatory
-  typedef Vector3i Point3i; //!< Self-explanatory
-  typedef Vector4i Point4i; //!< Self-explanatory
+  //! @{
+  //! Convenient typedef for geometric point types.
+  typedef Vector2i Point2i;
+  typedef Vector3i Point3i;
+  typedef Vector4i Point4i;
 
-  // Point types with single precision floating scalar type.
-  typedef Vector2f Point2f; //!< Self-explanatory
-  typedef Vector3f Point3f; //!< Self-explanatory
-  typedef Vector4f Point4f; //!< Self-explanatory
+  typedef Vector2f Point2f;
+  typedef Vector3f Point3f;
+  typedef Vector4f Point4f;
 
-  // Point types with double precision floating scalar type.
-  typedef Vector2d Point2d; //!< Self-explanatory
-  typedef Vector3d Point3d; //!< Self-explanatory
-  typedef Vector4d Point4d; //!< Self-explanatory
+  typedef Vector2d Point2d;
+  typedef Vector3d Point3d;
+  typedef Vector4d Point4d;
+  //! @}
 
-  //! 128-dimensional integral vector type.
+  //! @{
+  //! 128-dimensional vector type
   typedef Matrix<unsigned char, 128, 1> Vector128ub;
-
-  //! 128-dimensional single precision vector type.
   typedef Matrix<float, 128, 1> Vector128f;
+  //! @}
 
   //! I/O.
   template <typename Derived>
@@ -149,6 +168,7 @@ namespace DO {
     return in;
   }
 
+  //! @{
   //! Lexicographical comparison function for matrices.
   template <typename Derived>
   inline bool lexicographical_compare(const Eigen::MatrixBase<Derived>& m1,
@@ -164,7 +184,6 @@ namespace DO {
     return (i != m2.size());
   }
 
-  //! Lexicographical comparison functor for matrices.
   struct LexicographicalOrder
   {
     //! Implementation of the functor.
@@ -175,9 +194,11 @@ namespace DO {
        return lexicographical_compare(m1, m2);
     }
   };
+  //! @}
 
   //! @}
 
 } /* namespace DO */
+
 
 #endif /* DO_CORE_EIGENEXTENSION_HPP */

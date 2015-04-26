@@ -1,11 +1,11 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO++, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
@@ -15,9 +15,12 @@
 #define DO_GEOMETRY_UTILITIES_HPP
 
 #define _USE_MATH_DEFINES
+
+#include <cmath>
+
 #include <DO/Core/EigenExtension.hpp>
 #include <DO/Core/StaticAssert.hpp>
-#include <cmath>
+
 
 namespace DO {
 
@@ -32,7 +35,7 @@ namespace DO {
   template <typename T>
   inline T to_radian(T degree)
   {
-    DO_STATIC_ASSERT(!std::numeric_limits<T>::is_integer, 
+    DO_STATIC_ASSERT(!std::numeric_limits<T>::is_integer,
                      SCALAR_MUST_BE_OF_FLOATING_TYPE);
     return degree*static_cast<T>(M_PI)/static_cast<T>(180);
   }
@@ -41,7 +44,7 @@ namespace DO {
   template <typename T>
   inline T to_degree(T radian)
   {
-    DO_STATIC_ASSERT(!std::numeric_limits<T>::is_integer, 
+    DO_STATIC_ASSERT(!std::numeric_limits<T>::is_integer,
                      SCALAR_MUST_BE_OF_FLOATING_TYPE );
     return radian*static_cast<T>(180)/static_cast<T>(M_PI);
   }
@@ -80,7 +83,7 @@ namespace DO {
   template <typename T>
   inline Matrix<T, 2, 1> unit_vector2(T radian)
   {
-    DO_STATIC_ASSERT( !std::numeric_limits<T>::is_integer, 
+    DO_STATIC_ASSERT( !std::numeric_limits<T>::is_integer,
       SCALAR_MUST_BE_OF_FLOATING_TYPE );
     return Matrix<T, 2, 1>(std::cos(radian), std::sin(radian));
   }
@@ -88,7 +91,7 @@ namespace DO {
   template <typename T>
   inline Matrix<T, 2, 2> rotation2(T radian)
   {
-    DO_STATIC_ASSERT( !std::numeric_limits<T>::is_integer, 
+    DO_STATIC_ASSERT( !std::numeric_limits<T>::is_integer,
       SCALAR_MUST_BE_OF_FLOATING_TYPE );
     return Eigen::Rotation2D<T>(radian).toRotationMatrix();
   }
@@ -96,7 +99,7 @@ namespace DO {
   template <typename T>
   inline Matrix<T, 2, 2> isometry2(T radian, T scale)
   {
-    DO_STATIC_ASSERT(!std::numeric_limits<T>::is_integer, 
+    DO_STATIC_ASSERT(!std::numeric_limits<T>::is_integer,
                      SCALAR_MUST_BE_OF_FLOATING_TYPE);
     return Eigen::Rotation2D<T>(radian).toRotationMatrix()*scale;
   }
@@ -171,7 +174,7 @@ namespace DO {
                              const Matrix<T, 2, 1>& q4)
   {
     Matrix<T, 8, 8> M;
-    M << 
+    M <<
     p1.x(), p1.y(), T(1),   T(0),   T(0), T(0), -p1.x()*q1.x(), -p1.y()*q1.x(),
       T(0),   T(0), T(0), p1.x(), p1.y(), T(1), -p1.x()*q1.y(), -p1.y()*q1.y(),
     p2.x(), p2.y(), T(1),   T(0),   T(0), T(0), -p2.x()*q2.x(), -p2.y()*q2.x(),
@@ -202,10 +205,10 @@ namespace DO {
     const T u = H(0,0)*x[0] + H(0,1)*x[1] + H(0,2);
     const T v = H(1,0)*x[0] + H(1,1)*x[1] + H(1,2);
     const T w = H(2,0)*x[0] + H(2,1)*x[1] + H(2,2);
-    
+
     dH << (H(0,0)*w - H(2,0)*u)/(w*w), (H(1,0)*w - H(2,0)*u)/(w*w)
         (H(0,1)*w - H(2,1)*u)/(w*w), (H(1,1)*w - H(2,1)*u)/(w*w);
-    
+
     return dH;
   }
 
@@ -218,5 +221,6 @@ namespace DO {
   }
 
 } /* namespace DO */
+
 
 #endif /* DO_GEOMETRY_UTILITIES_HPP */

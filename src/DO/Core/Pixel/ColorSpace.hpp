@@ -24,7 +24,7 @@ namespace DO {
     \ingroup Core
     \defgroup Color Color
     @{
-  
+
     \defgroup ColorSpace Color spaces
     @{
    */
@@ -54,7 +54,7 @@ namespace DO {
   // Value channel name (HSV).
   /*struct V {};*/
 
-  
+
   // ======================================================================== //
   // Color space and layouts.
   //! Grayscale color space.

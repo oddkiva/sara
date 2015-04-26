@@ -289,6 +289,8 @@ namespace DO {
 
   bool PngFileWriter::write(const string& filepath, int quality)
   {
+    (void) quality;
+
     if (!openFile(&file_, filepath, "wb"))
       return false;
 
@@ -372,6 +374,8 @@ namespace DO {
 
   bool TiffFileWriter::write(const std::string& filepath, int quality)
   {
+    (void) quality;
+
     // Open the TIFF file
     if((out = TIFFOpen(filepath.c_str(), "w")) == NULL){
       std::cerr << "Unable to write tif file: " << filepath << std::endl;

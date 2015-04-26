@@ -9,8 +9,6 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#pragma warning (disable : 4267 4503)
-
 #include <DO/Geometry/Objects/Quad.hpp>
 
 using namespace std;

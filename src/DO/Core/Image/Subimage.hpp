@@ -1,11 +1,11 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO++, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
@@ -22,6 +22,7 @@
 
 namespace DO {
 
+  //! @{
   //! Get the subimage of an image.
   template <typename T, int N>
   Image<T, N> get_subimage(const Image<T, N>& src,
@@ -47,7 +48,6 @@ namespace DO {
     return dst;
   }
 
-  //! \brief Get the subimage of an image.
   template <typename T>
   inline Image<T> get_subimage(const Image<T>& src,
                                int top_left_x, int top_left_y,
@@ -58,13 +58,13 @@ namespace DO {
     return get_subimage(src, begin_coords, end_coords);
   }
 
-  //! \brief Get the subimage of an image.
   template <typename T>
   inline Image<T> get_subimage(const Image<T>& src, int center_x, int center_y,
                                int radius)
   {
     return get_subimage(src, center_x-radius, center_y-radius, 2*radius+1, 2*radius+1);
   }
+  //! @}
 
 } /* namespace DO */
 

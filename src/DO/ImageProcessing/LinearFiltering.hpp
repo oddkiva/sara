@@ -67,7 +67,7 @@ namespace DO {
   // ====================================================================== //
   // Linear filters.
   /*!
-    \brief Apply 1D filter to image rows.
+    \brief Apply 1D filter to each image row.
     @param[out] dst the row-filtered image.
     @param[in] src the input image
     @param[in] kernel the input kernel
@@ -108,7 +108,7 @@ namespace DO {
   }
 
   /*!
-    \brief Apply 1D filter to image columns. (Slow, deprecated).
+    \brief Apply 1D filter to each image column.
     @param[out] dst the column-filtered image.
     @param[in] src the input image
     @param[in] kernel the input kernel

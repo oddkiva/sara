@@ -29,7 +29,7 @@ namespace DO {
     return numeric_limits<T>::is_integer ? numeric_limits<T>::min() : T(0);
   }
 
-  //! \brief Return maximum value for channel of type.
+  //! \brief Return maximum value for channel of type 'T'.
   template <typename T>
   inline T channel_max_value()
   {
@@ -48,10 +48,10 @@ namespace DO {
     using std::numeric_limits;
     const Float float_min = static_cast<Float>(numeric_limits<Int>::min());
     const Float float_max = static_cast<Float>(numeric_limits<Int>::max());
-    const Float float_range = float_max - float_min; 
+    const Float float_range = float_max - float_min;
     return (static_cast<Float>(src) - float_min) / float_range;
   }
-  
+
   //! \brief Convert floating-point channel value to integer value.
   template <typename Int, typename Float>
   inline Int int_rescaled_channel(Float src)
@@ -63,9 +63,9 @@ namespace DO {
     using std::numeric_limits;
     const Float float_min = static_cast<Float>(numeric_limits<Int>::min());
     const Float float_max = static_cast<Float>(numeric_limits<Int>::max());
-    const Float float_range = float_max - float_min; 
+    const Float float_range = float_max - float_min;
     src = float_min + src * float_range;
-    
+
     const Float delta_max = std::abs(src-float_max)/float_range;
     const Float delta_min = std::abs(src-float_min)/float_range;
     const Float eps = sizeof(Float) == 4 ?
@@ -88,13 +88,13 @@ namespace DO {
 // Unified API for channel conversion.
 namespace DO {
 
-  //! \brief Convert a double gray value to a float gray value. 
+  //! \brief Convert a double gray value to a float gray value.
   inline void convert_channel(double src, float& dst)
   {
     dst = static_cast<float>(src);
   }
 
-  //! \brief Convert a float gray value to a double gray value. 
+  //! \brief Convert a float gray value to a double gray value.
   inline void convert_channel(float src, double& dst)
   {
     dst = static_cast<double>(src);

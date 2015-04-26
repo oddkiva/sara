@@ -9,16 +9,19 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#pragma once
+#ifndef DO_GEOMETRY_TOOLS_POLYNOMIALROOTS_HPP
+#define DO_GEOMETRY_TOOLS_POLYNOMIALROOTS_HPP
+
+#include <complex>
 
 #include <DO/Geometry/Tools/Polynomial.hpp>
-#include <complex>
+
 
 namespace DO {
 
   template <typename T>
   void roots(const Polynomial<T, 2>& P, std::complex<T>& x1,
-             std::complex<T>& x2, bool& realRoots)
+             std::complex<T>& x2, bool& real_roots)
   {
     const T& a = P[2];
     const T& b = P[1];
@@ -27,9 +30,9 @@ namespace DO {
     x1 = (-b - sqrt(std::complex<T>(delta))) / (2*a);
     x2 = (-b + sqrt(std::complex<T>(delta))) / (2*a);
     if(delta >= 0)
-      realRoots = true;
+      real_roots = true;
     else
-      realRoots = false;
+      real_roots = false;
   }
 
   // Discriminant precision: 1e-3.
@@ -152,3 +155,6 @@ namespace DO {
   }
 
 } /* namespace DO */
+
+
+#endif /* DO_GEOMETRY_TOOLS_POLYNOMIALROOTS_HPP */

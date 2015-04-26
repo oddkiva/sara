@@ -15,7 +15,6 @@
 #include <DO/Geometry/Tools/PolynomialRoots.hpp>
 #include <DO/Geometry/Tools/Utilities.hpp>
 #include <DO/Geometry/Graphics/DrawPolygon.hpp>
-#include <DO/Core/Stringify.hpp>
 #include <vector>
 #include <iostream>
 
@@ -191,13 +190,6 @@ namespace DO {
       Vector2d delta(b0.sizes() - center);
       delta = delta.cwiseAbs();
 
-      //min <-> max
-      //-1 <-> 1
-      double xmin = b0.top_left().x();
-      double ymin = b0.top_left().y();
-      double xmax = b0.bottom_right().x();
-      double ymax = b0.bottom_right().y();
-
       Ellipse EE_0, EE_1;
       Matrix2d S_0 = delta.asDiagonal()*shape_matrix(E_0)*delta.asDiagonal();
       Matrix2d S_1 = delta.asDiagonal()*shape_matrix(E_1)*delta.asDiagonal();
@@ -324,8 +316,10 @@ namespace DO {
   }
   
   double approximate_jaccard_similarity(const Ellipse& e1, const Ellipse& e2,
-                                 int n, double limit)
+                                        int n, double limit)
   {
+    (void) limit;
+
     std::vector<Point2d> p1(discretize_ellipse(e1,n));
     std::vector<Point2d> p2(discretize_ellipse(e2,n));
     std::vector<Point2d> inter;

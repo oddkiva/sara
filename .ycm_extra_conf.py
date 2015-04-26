@@ -26,6 +26,8 @@ flags = [
 # For a C project, you would set this to 'c' instead of 'c++'.
 '-x',
 'c++',
+# Mac OS X specific flags.
+"-isystem", "/Library/Developer/CommandLineTools/usr/include/c++/v1",
 # Qt5 defines.
 "-DQT_CORE_LIB",
 "-DQT_GUI_LIB",
