@@ -74,7 +74,7 @@ TEST_F(TestEllipse, DISABLED_test_sector_area)
         EXPECT_NEAR(rel_error, 0, thres);
         if (rel_error > thres)
         {
-          printStage("Numerical error");
+          print_stage("Numerical error");
           cout << i0 << "     " << i1 << endl;
           CHECK(abs(i1-i0));
           CHECK(analytic_sector_area);
@@ -126,7 +126,7 @@ TEST_F(TestEllipse, DISABLED_test_segment_area)
         EXPECT_NEAR(relError, 0, thres);
         if (relError > thres)
         {
-          printStage("Numerical error");
+          print_stage("Numerical error");
           CHECK(i0);
           CHECK(i1);
           CHECK(to_degree(theta0));

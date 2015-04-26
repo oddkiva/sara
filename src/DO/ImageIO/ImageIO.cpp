@@ -225,12 +225,12 @@ namespace DO {
 
     // Wrap data and get data ownership
     if (d == 1)
-      image = Image<unsigned char>(&data[0], Vector2i(w,h), true);
+      image = Image<unsigned char>(&data[0], Vector2i(w,h));
     if (d == 3)
-      image = Image<Rgb8>(reinterpret_cast<Rgb8 *>(&data[0]), Vector2i(w,h), true)
+      image = Image<Rgb8>(reinterpret_cast<Rgb8 *>(&data[0]), Vector2i(w,h))
         .convert<unsigned char>();
     if (d == 4)
-      image = Image<Rgba8>(reinterpret_cast<Rgba8 *>(&data[0]), Vector2i(w,h), true)
+      image = Image<Rgba8>(reinterpret_cast<Rgba8 *>(&data[0]), Vector2i(w,h))
         .convert<unsigned char>();
 
     EXIFInfo info;
@@ -249,21 +249,13 @@ namespace DO {
       return false;
 
     // Wrap data and acquire data ownership.
-    bool acquire_data_ownership = true;
     if (d == 1)
-      image = Image<unsigned char>(&data[0],
-                                   Vector2i(w,h),
-                                   acquire_data_ownership
-                                   ).convert<Rgb8>();
+      image = Image<unsigned char>(&data[0], Vector2i(w,h)).convert<Rgb8>();
     else if (d == 3)
-      image = Image<Rgb8>(reinterpret_cast<Rgb8 *>(&data[0]),
-                          Vector2i(w,h),
-                          acquire_data_ownership);
+      image = Image<Rgb8>(reinterpret_cast<Rgb8 *>(&data[0]), Vector2i(w,h));
     else if (d == 4)
       image = Image<Rgba8>(reinterpret_cast<Rgba8 *>(&data[0]),
-                           Vector2i(w,h),
-                           acquire_data_ownership
-                           ).convert<Rgb8>();
+                           Vector2i(w,h)).convert<Rgb8>();
 
     EXIFInfo info;
     if (read_exif_info(info, filepath))
@@ -272,7 +264,7 @@ namespace DO {
   }
 
   bool imwrite(const Image<Rgb8>& image, const std::string& filepath,
-                   int quality)
+               int quality)
   {
     string ext(file_ext(filepath));
 
