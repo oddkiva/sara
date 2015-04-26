@@ -62,6 +62,7 @@ namespace DO {
     //! @{
     //! Constructor with specified sizes.
     inline explicit MultiArray(const vector_type& sizes)
+      : base_type()
     {
       initialize(sizes);
     }
@@ -81,6 +82,7 @@ namespace DO {
     //! Copy constructor.
     //! Create a deep copy of the other MultiArray instance.
     inline MultiArray(const self_type& other)
+      : base_type()
     {
       initialize(other._sizes);
       std::copy(other._begin, other._end, _begin);
