@@ -1,4 +1,3 @@
-#include <DO/Core/Stringify.hpp>
 #include <DO/Graphics.hpp>
 
 using namespace std;
@@ -14,14 +13,14 @@ GRAPHICS_MAIN_SIMPLE()
     {
       windows.push_back(
         create_window(200, 200,
-                      "Window #" + toString(i*3+j),
+                      "Window #" + to_string(i*3+j),
                       300 * j + 300, 300 * i + 50));
       set_active_window(windows.back());
       fill_rect(0, 0,
                 get_width(windows.back()),
                 get_height(windows.back()),
                 Color3ub(rand()%255, rand()%255, rand()%255));
-      draw_string(100, 100, toString(i*3+j), Yellow8, 15);
+      draw_string(100, 100, to_string(i*3+j), Yellow8, 15);
       cout << "Pressed '" << char(any_get_key()) << "'" << endl;
     }
   }
