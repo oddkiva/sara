@@ -22,11 +22,12 @@
 namespace DO {
 
   //! \ingroup Core
-  //! \defgroup MultiArrayIterators Multi-array iterators.
+  //! \defgroup MultiArrayIterators ND-array iterator classes.
   //! @{
 
-  // ======================================================================== //
-  // Forward declaration of multidimensional iterators.
+
+  //! @{
+  //! MultiArray iterator classes.
   template <bool IsConst, typename T, int N, int StorageOrder>
   class ArrayIteratorBase;
 
@@ -38,10 +39,11 @@ namespace DO {
 
   template <bool IsConst, typename T, int Axis, int N>
   class AxisIterator;
+  //! @}
 
 
-  // ======================================================================== //
-  // Convenient typedefs.
+  //! @{
+  //! Convenient typedefs.
 #define ITERATOR_BASE_TYPE(IsConst)                       \
   std::iterator<                                          \
     std::random_access_iterator_tag, T, std::ptrdiff_t,   \
@@ -55,9 +57,9 @@ namespace DO {
   typedef typename base_type::pointer pointer;                    \
   typedef typename base_type::reference reference;                \
   typedef typename base_type::iterator_category iterator_category
+  //! @}
 
 
-  // ======================================================================== //
   //! \brief Axis iterator class for N-dimensional arrays.
   template <bool IsConst, typename T, int Axis, int N>
   class AxisIterator : public ITERATOR_BASE_TYPE(IsConst)
@@ -88,7 +90,8 @@ namespace DO {
       , cur_pos_(pos)
       , strides_(strides)
       , sizes_(sizes)
-    {}
+    {
+    }
 
   public: /* dereferencing, access functions. */
     //! Dereferencing operator.
@@ -108,7 +111,7 @@ namespace DO {
     {
       if (cur_pos_[Axis]+n < 0  || cur_pos_[Axis]+n >= sizes_[Axis])
         throw std::out_of_range("Axis iterator is out of range");
-      return *(cur_ptr_+strides_[Axis]*n); 
+      return *(cur_ptr_+strides_[Axis]*n);
     }
 
   public: /* comparison functions. */
@@ -171,7 +174,7 @@ namespace DO {
   public: /* iterator functionalities. */
     //! Prefix increment operator.
     inline self_type& operator++()
-    { 
+    {
       operator+=(1);
       return *this;
     }
@@ -207,7 +210,6 @@ namespace DO {
   };
 
 
-  // ======================================================================== //
   //! \brief Multidimensional iterator base class.
   //! The 'ArrayIteratorBase' class is a heavy object. It is mostly useful
   //! for differential calculus. When possible, prefer using more elementary
@@ -254,7 +256,7 @@ namespace DO {
   public: /* comparison functions. */
     //! Equality operator.
     inline bool operator==(const self_type& other) const
-    { 
+    {
       return cur_ptr_ == other.cur_ptr_;
     }
 
@@ -263,7 +265,7 @@ namespace DO {
     inline bool operator==(
       const ArrayIteratorBase<IsConst2, T, N, StorageOrder>& other
     ) const
-    { 
+    {
       return cur_ptr_ == other.cur_ptr_;
     }
 
@@ -346,7 +348,7 @@ namespace DO {
     inline AxisIterator<IsConst, T, Axis, N> axis()
     {
       return AxisIterator<IsConst, T, Axis, N>(
-        cur_ptr_, cur_pos_, strides_, sizes_); 
+        cur_ptr_, cur_pos_, strides_, sizes_);
     }
 
     //! X-axis iterator getter.
@@ -401,7 +403,6 @@ namespace DO {
   };
 
 
-  // ======================================================================== //
   //! \brief Multidimensional iterator class.
   //! The 'ArrayIterator' class is a heavy object. It is mostly useful for
   //! differential calculus. When possible, prefer using more elementary
@@ -414,7 +415,7 @@ namespace DO {
     typedef ArrayIterator self_type;
     typedef PositionIncrementer<StorageOrder> incrementer;
     typedef PositionDecrementer<StorageOrder> decrementer;
-    
+
     using base_type::cur_pos_;
     using base_type::cur_ptr_;
     using base_type::stop_;
@@ -470,7 +471,6 @@ namespace DO {
       return old;
     }
 
-  public: /* random jump methods. */
     //! Addition operator (slow).
     inline void operator+=(const vector_type& offset)
     {
@@ -489,7 +489,6 @@ namespace DO {
   };
 
 
-  // ======================================================================== //
   //! \brief Multidimensional iterator base class.
   //! The 'SubarrayIterator' class is a heavy object. It is mostly useful for
   //! differential calculus. When possible, prefer using more elementary
@@ -503,7 +502,7 @@ namespace DO {
     typedef SubarrayIterator self_type;
     typedef PositionIncrementer<StorageOrder> incrementer;
     typedef PositionDecrementer<StorageOrder> decrementer;
-    
+
     using base_type::stop_;
     using base_type::cur_pos_;
     using base_type::cur_ptr_;
@@ -589,5 +588,6 @@ namespace DO {
   //! @}
 
 } /* namespace DO */
+
 
 #endif /* DO_CORE_ARRAYITERATORS_MULTIARRAYITERATORS_HPP */
