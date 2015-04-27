@@ -520,6 +520,59 @@ TEST(TestMultiArray, test_matrix_view_types)
 }
 
 
+TEST(TestMultiArray, test_slices)
+{
+  using namespace std;
+
+  typedef Matrix<int, 5, 1> Vector5i;
+  typedef MultiArray<float, 5, RowMajor> RgbHistogramBlocks;
+  typedef MultiArrayView<float, 3, RowMajor> RgbHistogram;
+  typedef RgbHistogramBlocks::vector_type vector_type;
+
+  const Vector2i block_sizes(4, 4);
+  const Vector3i histogram_sizes(6, 6, 6);
+  vector_type sizes;
+  sizes << block_sizes, histogram_sizes;
+
+  RgbHistogramBlocks rgb_histogram_blocks(sizes);
+  for (int i = 0; i < rgb_histogram_blocks.size(0); ++i)
+  {
+    for (int j = 0; j < rgb_histogram_blocks.size(1); ++j)
+    {
+      Vector5i pos;
+      pos << i, j, 0, 0, 0;
+
+      // Read-only view of multi-array.
+      const RgbHistogram const_rgb_histogram(rgb_histogram_blocks[i][j]);
+      ASSERT_EQ(const_rgb_histogram.sizes(), const_rgb_histogram.sizes());
+      ASSERT_EQ(const_rgb_histogram.strides(), Vector3i(36, 6, 1));
+      ASSERT_EQ(rgb_histogram_blocks.data() + i * 4 * 6 * 6 * 6 + j * 6 * 6 * 6,
+        const_rgb_histogram.data());
+
+      // Read-write view of multi-array.
+      RgbHistogram rgb_histogram(rgb_histogram_blocks[i][j]);
+      for (int r = 0; r < rgb_histogram.size(0); ++r)
+        for (int g = 0; g < rgb_histogram.size(1); ++g)
+          for (int b = 0; b < rgb_histogram.size(2); ++b)
+            rgb_histogram(r, g, b) = i*rgb_histogram_blocks.size(1) + j;
+    }
+  }
+
+  typedef Matrix<int, 5, 1> Vector5i;
+  for (int i = 0; i < rgb_histogram_blocks.size(0); ++i)
+    for (int j = 0; j < rgb_histogram_blocks.size(1); ++j)
+      for (int r = 0; r < rgb_histogram_blocks.size(2); ++r)
+        for (int g = 0; g < rgb_histogram_blocks.size(3); ++g)
+          for (int b = 0; b < rgb_histogram_blocks.size(4); ++b)
+          {
+            Vector5i pos;
+            pos << i, j, r, g, b;
+            ASSERT_EQ(rgb_histogram_blocks(pos),
+              i*rgb_histogram_blocks.size(1) + j);
+          }
+}
+
+
 // =============================================================================
 // Test runner.
 int main(int argc, char** argv)
