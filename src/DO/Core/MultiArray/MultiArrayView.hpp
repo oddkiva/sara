@@ -75,10 +75,12 @@ namespace DO {
 
     //! @{
     //! Matrix views for linear algebra.
-    typedef Map<const Matrix<typename ElementTraits<T>::value_type,
-    Dynamic, Dynamic, StorageOrder> > const_matrix_view_type;
-    typedef Map<Matrix<typename ElementTraits<T>::value_type, Dynamic, Dynamic, StorageOrder> >
-    matrix_view_type;
+    typedef Map<
+      const Matrix<typename ElementTraits<T>::value_type,
+      Dynamic, Dynamic, StorageOrder> > const_matrix_view_type;
+    typedef Map<
+      Matrix<typename ElementTraits<T>::value_type, Dynamic, Dynamic,
+      StorageOrder> > matrix_view_type;
     //! @}
 
   public: /* methods */
@@ -203,17 +205,15 @@ namespace DO {
     inline slice_type operator[](int i)
     {
       slice_vector_type sizes(_sizes.tail(N-1));
-      slice_vector_type strides(_strides.tail(N-1));
       T * data = _begin + _strides[0] * i;
-      return slice_type(data, sizes, strides);
+      return slice_type(data, sizes);
     }
 
     inline const_slice_type operator[](int i) const
     {
       slice_vector_type slice_sizes(_sizes.tail(N-1));
-      slice_vector_type slice_strides(_strides.tail(N-1));
       const T * data = _begin + _strides[0] * i;
-      return const_slice_type(data, slice_sizes, slice_strides);
+      return const_slice_type(data, slice_sizes);
     }
     //! @}
 
