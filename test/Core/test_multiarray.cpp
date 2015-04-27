@@ -522,8 +522,6 @@ TEST(TestMultiArray, test_matrix_view_types)
 
 TEST(TestMultiArray, test_slices)
 {
-  using namespace std;
-
   typedef Matrix<int, 5, 1> Vector5i;
   typedef MultiArray<float, 5, RowMajor> RgbHistogramBlocks;
   typedef MultiArrayView<float, 3, RowMajor> RgbHistogram;
