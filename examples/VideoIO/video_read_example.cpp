@@ -2,7 +2,7 @@
 #include <DO/VideoIO.hpp>
 
 
-GRAPHICS_MAIN_SIMPLE()
+GRAPHICS_MAIN()
 {
   using namespace std;
   using namespace DO;

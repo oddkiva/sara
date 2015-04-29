@@ -16,7 +16,7 @@
 using namespace std;
 using namespace DO;
 
-GRAPHICS_MAIN_SIMPLE()
+GRAPHICS_MAIN()
 {
   int w, h;
   w = h = 400;

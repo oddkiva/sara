@@ -3,7 +3,7 @@
 using namespace std;
 using namespace DO;
 
-GRAPHICS_MAIN_SIMPLE()
+GRAPHICS_MAIN()
 {
   Window W = create_window(512, 512, "Bitmaps");
   // Array of bytes

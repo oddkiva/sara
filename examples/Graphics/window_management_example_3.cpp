@@ -3,7 +3,7 @@
 using namespace std;
 using namespace DO;
 
-GRAPHICS_MAIN_SIMPLE()
+GRAPHICS_MAIN()
 {
   create_window(300, 300);
   get_key();

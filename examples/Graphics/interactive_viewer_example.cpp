@@ -3,7 +3,7 @@
 using namespace std;
 using namespace DO;
 
-GRAPHICS_MAIN_SIMPLE()
+GRAPHICS_MAIN()
 {
   Image<Rgb8> I;
   load(I, src_path("../../datasets/ksmall.jpg"));

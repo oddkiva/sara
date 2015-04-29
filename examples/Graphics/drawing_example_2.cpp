@@ -3,7 +3,7 @@
 using namespace std;
 using namespace DO;
 
-GRAPHICS_MAIN_SIMPLE()
+GRAPHICS_MAIN()
 {
   // Open a 300x200 window.
   Window W = create_window(300, 200);

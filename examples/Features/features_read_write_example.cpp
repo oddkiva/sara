@@ -112,7 +112,7 @@ void read_features(const Image<unsigned char>& image,
   millisleep(1000);
 }
 
-GRAPHICS_MAIN_SIMPLE()
+GRAPHICS_MAIN()
 {
   Image<unsigned char> I;
   load(I, src_path("obama_2.jpg"));

@@ -3,7 +3,7 @@
 using namespace std;
 using namespace DO;
 
-GRAPHICS_MAIN_SIMPLE()
+GRAPHICS_MAIN()
 {
   cout << "Advanced event handling" << endl;
   Window W = create_window(1024, 768);
