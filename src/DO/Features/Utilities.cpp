@@ -34,7 +34,7 @@ namespace DO {
 
     vector<int> indices(features.size());
     for (size_t i = 0; i < indices.size(); ++i)
-      indices[i] = i;
+      indices[i] = int(i);
     CompareFeatures<float> compareDescriptors(features, descriptors);
     sort(indices.begin(), indices.end(), compareDescriptors);
 
