@@ -4,36 +4,46 @@
 #include <stdexcept>
 #include <vector>
 
-#include <Utilities/ErrorCheck.hpp>
-
-#include "Matrix.hpp"
+#include "MultiArrayView.hpp"
 
 
-namespace DO { namespace Device {
+namespace DO { namespace Shakti {
 
-
-  //! Only row-major ND-array for now.
-  template <typename T, int N>
-  class MultiArray
+  //! \brief ND-array class.
+  template <typename T, int N, typename Strides = RowMajorStrides>
+  class MultiArray : public MultiArrayView<T, N, Strides>
   {
-  public:
     using self_type = MultiArray;
-    using vector_type = Vector<int, N>;
+    using base_type = MultiArrayView<T, N, Strides>;
+    using strides_type = Strides;
+
+    using base_type::_data;
+    using base_type::_sizes;
+    using base_type::_strides;
 
   public:
+    using vector_type = typename base_type::vector_type;
+    using slice_vector_type = typename base_type::slice_vector_type;
+
+    using slice_type = typename base_type::slice_type;
+    using const_slice_type = const MultiArray<T, N-1, Strides>;
+
+  public:
+    //! @{
+    //! \brief Constructor.
     __host__
     inline MultiArray() = default;
 
     __host__
     inline MultiArray(const vector_type& sizes)
-      : MultiArray()
+      : base_type()
     {
       resize(sizes);
     }
 
     __host__
     inline MultiArray(const self_type& other)
-      : MultiArray()
+      : base_type()
     {
       resize(other._sizes);
       CHECK_CUDA_RUNTIME_ERROR(
@@ -41,57 +51,25 @@ namespace DO { namespace Device {
                    cudaMemcpyHostToDevice));
     }
 
+    __host__ __device__
+    inline MultiArray(self_type&& other)
+      : MultiArray()
+    {
+      _data = other._data;
+      other._data = nullptr;
+      _sizes = other._sizes;
+      _strides = other._strides;
+    }
+    //! @}
+
+    //! \brief Destructor.
     __host__
     inline ~MultiArray()
     {
       CHECK_CUDA_RUNTIME_ERROR(cudaFree(_data));
     }
 
-    __host__ __device__
-    inline vector_type sizes() const
-    {
-      return _sizes;
-    }
-
-    __host__ __device__
-    inline size_t size() const
-    {
-      size_t sz{1};
-      for (int i = 0; i < N; ++i)
-        sz *= _sizes(i);
-      return sz;
-    }
-
-    __host__ __device__
-    inline bool empty() const
-    {
-      return _data == nullptr;
-    }
-
-    __host__ __device__
-    inline T * data()
-    {
-      return _data;
-    }
-
-    __host__ __device__
-    inline const T * data() const
-    {
-      return _data;
-    }
-
-    __host__ __device__
-    inline const T& operator()(const vector_type& coords) const
-    {
-      return _data[offset(coords)];
-    }
-
-    __host__ __device__
-    inline T& operator()(const vector_type& coords)
-    {
-      return _data[offset(coords)];
-    }
-
+    //! Resize the multi-array.
     __host__
     inline void resize(const vector_type& sizes)
     {
@@ -101,41 +79,12 @@ namespace DO { namespace Device {
       CHECK_CUDA_RUNTIME_ERROR(cudaFree(_data));
 
       _sizes = sizes;
-      _strides(N-1) = 1;
-      for (int i = N - 2; i >= 0; --i)
-        _strides(i) = _strides(i+1) * _sizes(i+1);
+      _strides = strides_type::compute(sizes);
 
       size_t byte_size = sizeof(T) * size();
       CHECK_CUDA_RUNTIME_ERROR(cudaMalloc((void **)&_data, byte_size));
     }
-
-    __host__
-    inline void to_host_vector(std::vector<T>& host_vector) const
-    {
-      if (host_vector.size() != size())
-        host_vector.resize(size());
-
-      CHECK_CUDA_RUNTIME_ERROR(
-        cudaMemcpy(host_vector.data(), _data, sizeof(T) * size(),
-                   cudaMemcpyDeviceToHost));
-    }
-
-  protected:
-    __host__ __device__
-    inline size_t offset(const vector_type& coords) const
-    {
-      size_t index = 0;
-      for (int i = 0; i < N; ++i)
-        index += coords(i) * _strides(i);
-      return index;
-    }
-
-  private:
-    T *_data = nullptr;
-    vector_type _sizes = vector_type();
-    vector_type _strides = vector_type();
   };
 
-
-} /* namespace Device */
+} /* namespace Shakti */
 } /* namespace DO */

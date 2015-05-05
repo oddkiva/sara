@@ -6,7 +6,7 @@
 #include <Utilities/ErrorCheck.hpp>
 
 
-namespace DO { namespace Device {
+namespace DO { namespace Shakti {
 
   template <typename T, int M, int N>
   class Matrix
@@ -259,5 +259,5 @@ namespace DO { namespace Device {
   }
 
 
-} /* namespace Device */
+} /* namespace Shakti */
 } /* namespace DO */
