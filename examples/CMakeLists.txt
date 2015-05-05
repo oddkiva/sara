@@ -1,6 +1,6 @@
 find_package(CUDA QUIET)
 
-if (NOT CUDA_VERSION LESS 7)
+if (CUDA_TOOKIT_INCLUDE AND NOT CUDA_VERSION LESS 7)
   add_subdirectory(Shakti)
 endif ()
 
