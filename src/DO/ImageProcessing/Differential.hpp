@@ -316,8 +316,8 @@ namespace DO {
   Matrix<T,N,N> hessian(const Image<T, N>& src, const Matrix<int, N, 1>& p)
   {
     Matrix<T,N,N> H;
-    Hessian<T, N> computeHessian(src);
-    computeHessian(H, p);
+    Hessian<T, N> compute_hessian(src);
+    compute_hessian(H, p);
     return H;
   }
 
@@ -329,8 +329,8 @@ namespace DO {
   template <typename T, int N>
   void hessian(const Image<T,N>& src, Image<Matrix<T,N,N>, N>& dst)
   {
-    Hessian<T, N> computeHessian(src);
-    computeHessian(dst);
+    Hessian<T, N> compute_hessian(src);
+    compute_hessian(dst);
   }
 
   /*!
@@ -342,7 +342,8 @@ namespace DO {
   Image<Matrix<T,N,N> > hessian(const Image<T, N>& src)
   {
     Image<Matrix<T, N, N> > h;
-    hessian(h, src);
+    Hessian<T, N> compute_hessian(src);
+    compute_hessian(h);
     return h;
   }
 
