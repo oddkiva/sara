@@ -229,6 +229,14 @@ namespace DO { namespace Device {
   template <typename T, int N>
   using Vector = Matrix<T, N, 1>;
 
+  using Vector2i = Vector<int, 2>;
+  using Vector2f = Vector<float, 2>;
+  using Vector2d = Vector<double, 2>;
+
+  using Vector3i = Vector<int, 3>;
+  using Vector3f = Vector<float, 3>;
+  using Vector3d = Vector<double, 3>;
+
 
   template <typename T, int M, int N>
   std::ostream& operator<<(std::ostream& os, const Matrix<T, M, N>& m)
