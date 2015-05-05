@@ -30,8 +30,8 @@ namespace DO {
       StorageOrder = S
     };
 
-    //! STL-compatible interface.
     //! @{
+    //! \brief STL-compatible interface.
     typedef std::size_t size_type;
     typedef std::ptrdiff_t difference_type;
     typedef T value_type;
@@ -43,30 +43,32 @@ namespace DO {
     typedef const T * const_iterator;
     //! @}
 
-    //! Slice types.
     //! @{
+    //! \brief Slice type.
     typedef const MultiArrayView<T, N-1, S> const_slice_type;
     typedef MultiArrayView<T, N-1, S> slice_type;
     //! @}
 
-    //! Vector type.
+    //! @{
+    //! \brief Vector type.
     typedef Matrix<int, N, 1> vector_type;
     typedef Matrix<int, N-1, 1> slice_vector_type;
+    //! @}
 
     //! @{
-    //! N-dimensional iterator.
+    //! \brief N-dimensional iterator type.
     typedef ArrayIterator<false, T, N, StorageOrder> array_iterator;
     typedef ArrayIterator<true, T, N, StorageOrder> const_array_iterator;
     //! @}
 
     //! @{
-    //! N-dimensional subrange iterator.
+    //! \brief N-dimensional subrange iterator.
     typedef SubarrayIterator<false, T, N, StorageOrder> subarray_iterator;
     typedef SubarrayIterator<true, T, N, StorageOrder> const_subarray_iterator;
     //! @}
 
     //! @{
-    //! Array views for linear algebra.
+    //! \brief Array views for linear algebra.
     typedef Map<const Array<typename ElementTraits<T>::value_type, Dynamic, 1> >
       const_array_view_type;
     typedef Map<Array<typename ElementTraits<T>::value_type, Dynamic, 1> >
@@ -74,7 +76,7 @@ namespace DO {
     //! @}
 
     //! @{
-    //! Matrix views for linear algebra.
+    //! \brief Matrix views for linear algebra.
     typedef Map<
       const Matrix<typename ElementTraits<T>::value_type,
       Dynamic, Dynamic, StorageOrder> > const_matrix_view_type;
@@ -84,7 +86,7 @@ namespace DO {
     //! @}
 
   public: /* methods */
-    //! Default constructor.
+    //! \brief Default constructor.
     inline MultiArrayView()
       : _begin(nullptr)
       , _end(nullptr)
@@ -93,7 +95,7 @@ namespace DO {
     {
     }
 
-    //! Constructor that wraps plain data with its known sizes.
+    //! \brief Constructor that wraps plain data with its known sizes.
     inline MultiArrayView(value_type *data,
                           const vector_type& sizes)
       : _begin(data)
@@ -103,55 +105,55 @@ namespace DO {
     {
     }
 
-    //! Return the size vector of the MultiArray object.
+    //! \brief Return the size vector of the MultiArray object.
     const vector_type& sizes() const
     {
       return _sizes;
     }
 
-    //! Return the number of elements in the internal data array.
+    //! \brief Return the number of elements in the internal data array.
     size_type size() const
     {
       return _end - _begin;
     }
 
-    //! Return the size of the MultiArray object along the i-th dimension.
+    //! \brief Return the size of the MultiArray object along the i-th dimension.
     int size(int i) const
     {
       return _sizes[i];
     }
 
-    //! Return the number of rows.
+    //! \brief Return the number of rows.
     int rows() const
     {
       return _sizes[0];
     }
 
-    //! Return the number of cols.
+    //! \brief Return the number of cols.
     int cols() const
     {
       return _sizes[1];
     }
 
-    //! Return the depth size.
+    //! \brief Return the depth size.
     int depth() const
     {
       return _sizes[2];
     }
 
-    //! Return the stride vector of the MultiArray object.
+    //! \brief Return the stride vector of the MultiArray object.
     inline const vector_type& strides() const
     {
       return _strides;
     }
 
-    //! Return the stride value along the i-th dimension.
+    //! \brief Return the stride value along the i-th dimension.
     inline int stride(int i) const
     {
       return _strides[i];
     }
     //! @{
-    //! Return the array pointer
+    //! \brief Return the array pointer
     inline pointer data()
     {
       return _begin;
@@ -164,7 +166,7 @@ namespace DO {
     //! @}
 
     //! @{
-    //! Mutable reference operator.
+    //! \brief Return reference to the element at the given coordinates.
     inline reference operator()(const vector_type& pos)
     {
       return _begin[offset(pos)];
@@ -201,7 +203,7 @@ namespace DO {
     //! @}
 
     //! @{
-    //! Return the i-th slice of the MultiArray object.
+    //! \brief Return the i-th slice of the MultiArray object.
     inline slice_type operator[](int i)
     {
       slice_vector_type sizes(_sizes.tail(N-1));
@@ -218,7 +220,7 @@ namespace DO {
     //! @}
 
     //! @{
-    //! Return the begin iterator.
+    //! \brief Return the begin iterator.
     inline iterator begin()
     {
       return _begin;
@@ -231,7 +233,7 @@ namespace DO {
     //! @}
 
     //! @{
-    //! Return the end iterator.
+    //! \brief Return the end iterator.
     inline iterator end()
     {
       return _end;
@@ -244,7 +246,7 @@ namespace DO {
     //! @}
 
     //! @{
-    //! Return the array view for linear algebra with Eigen libraries.
+    //! \brief Return the array view for linear algebra with Eigen libraries.
     inline array_view_type array()
     {
       return array_view_type(reinterpret_cast<
@@ -261,7 +263,7 @@ namespace DO {
     //! @}
 
     //! @{
-    //! Return the matrix view for linear algebra with Eigen libraries.
+    //! \brief Return the matrix view for linear algebra with Eigen libraries.
     inline matrix_view_type matrix()
     {
       DO_STATIC_ASSERT(N == 2, MULTIARRAY_MUST_HAVE_TWO_DIMENSIONS);
@@ -280,7 +282,7 @@ namespace DO {
     //! @}
 
     //! @{
-    //! Return the begin iterator of the whole multi-array.
+    //! \brief Return the begin iterator of the whole multi-array.
     inline array_iterator begin_array()
     {
       return array_iterator(false, _begin, vector_type::Zero(), _sizes, _strides);
@@ -293,7 +295,7 @@ namespace DO {
     //! @}
 
     //! @{
-    //! Return the begin iterator of the sub-array.
+    //! \brief Return the begin iterator of the sub-array.
     inline subarray_iterator begin_subarray(const vector_type& start,
                                             const vector_type& end)
     {
@@ -308,13 +310,13 @@ namespace DO {
     //! @}
 
   protected:
-    //! Compute the strides according the size vector and storage order.
+    //! \brief Compute the strides according the size vector and storage order.
     inline vector_type compute_strides(const vector_type& sizes) const
     {
       return StrideComputer<StorageOrder>::eval(sizes);
     }
 
-    //! Compute the raw size needed to allocate the internal data.
+    //! \brief Compute the raw size needed to allocate the internal data.
     inline size_type compute_size(const vector_type& sizes) const
     {
       Matrix<size_type, N, 1> sz(sizes.template cast<size_type>());
@@ -322,7 +324,7 @@ namespace DO {
                              size_type(1), std::multiplies<size_type>());
     }
 
-    //! Compute the 1D index of the corresponding coordinates.
+    //! \brief Compute the 1D index of the corresponding coordinates.
     inline int offset(const vector_type& pos) const
     {
       return jump(pos, _strides);
