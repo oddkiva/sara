@@ -4,9 +4,9 @@ if (POLICY CMP0020)
   cmake_policy(SET CMP0020 NEW)
 endif ()
 
-project(DO_Cuda_Examples)
+project(DO_Shakti_Examples)
 
-message(STATUS "  - DO_Cuda_Examples")
+message(STATUS "  - DO_Shakti_Examples")
 
 find_package(CUDA REQUIRED)
 find_package(DO COMPONENTS Core Graphics REQUIRED)
@@ -70,7 +70,9 @@ function (cuda_add_example)
    if (NOT "${CUDA_SOURCE_FILES}" STREQUAL "")
      source_group("CUDA Source Files" REGULAR_EXPRESSION ".*\\.cu$")
      cuda_add_library(${EXAMPLE_NAME}_CUDA_AUX ${CUDA_SOURCE_FILES})
-     target_link_libraries(${EXAMPLE_NAME}_CUDA_AUX DO_Cuda_Utilities ${DO_LIBRARIES})
+     target_link_libraries(${EXAMPLE_NAME}_CUDA_AUX
+                           DO_Shakti_Utilities
+                           ${DO_LIBRARIES})
      # Group the unit test in the "Tests" folder.
      set_property(
        TARGET ${EXAMPLE_NAME}_CUDA_AUX PROPERTY FOLDER "CUDA Examples")
@@ -85,4 +87,4 @@ add_subdirectory(Utilities)
 
 file(GLOB cuda_test_SRC_FILES FILES *.cu *.cpp *.hpp)
 cuda_add_example(test ${cuda_test_SRC_FILES})
-target_link_libraries(test DO_Cuda_Utilities DO_Cuda_MultiArray)
+target_link_libraries(test DO_Shakti_Utilities DO_Shakti_MultiArray)
