@@ -12,9 +12,9 @@
 #include <cuda_gl_interop.h>
 
 
-namespace DO {
+namespace DO { namespace Shakti {
 
-  class CudaDevice
+  class Device
   {
   public: /* API. */
     int convert_sm_version_to_cores(int major, int minor) const;
@@ -29,7 +29,9 @@ namespace DO {
 
     void reset();
 
-    friend std::ostream& operator<<(std::ostream& os, const CudaDevice& info);
+    friend std::ostream& operator<<(std::ostream& os, const Device& info);
+
+    int warp_size() const { return properties.warpSize; }
 
   public: /* data members. */
     int id;
@@ -41,6 +43,8 @@ namespace DO {
 
   int get_num_cuda_devices();
 
-  std::vector<CudaDevice> get_cuda_devices();
+  std::vector<Device> get_devices();
 
+
+} /* namespace Shakti */
 } /* namespace DO */

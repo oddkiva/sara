@@ -8,9 +8,9 @@
 #include "ErrorCheck.hpp"
 
 
-namespace DO {
+namespace DO { namespace Shakti {
 
-  int CudaDevice::convert_sm_version_to_cores(int major, int minor) const
+  int Device::convert_sm_version_to_cores(int major, int minor) const
   {
     // Defines for GPU Architecture types (using the SM version to determine
     // the number of cores per SM
@@ -56,8 +56,7 @@ namespace DO {
     return gpu_arch_cores_per_sm[index - 1].cores;
   }
 
-
-  std::string CudaDevice::formatted_string() const
+  std::string Device::formatted_string() const
   {
     std::ostringstream os;
 
@@ -217,37 +216,31 @@ namespace DO {
     return os.str();
   }
 
-
-  std::pair<int, int> CudaDevice::version() const
+  std::pair<int, int> Device::version() const
   {
     return std::make_pair(properties.major, properties.minor);
   }
 
-
-  void CudaDevice::make_current_device()
+  void Device::make_current_device()
   {
     CHECK_CUDA_RUNTIME_ERROR(cudaSetDevice(id));
   }
 
-
-  void CudaDevice::make_current_gl_device()
+  void Device::make_current_gl_device()
   {
     CHECK_CUDA_RUNTIME_ERROR(cudaGLSetGLDevice(id));
   }
 
-
-  void CudaDevice::reset()
+  void Device::reset()
   {
     CHECK_CUDA_RUNTIME_ERROR(cudaDeviceReset());
   }
 
-
-  std::ostream& operator<<(std::ostream& os, const CudaDevice& info)
+  std::ostream& operator<<(std::ostream& os, const Device& info)
   {
     os << info.formatted_string() << "\n";
     return os;
   }
-
 
   int get_num_cuda_devices()
   {
@@ -267,11 +260,10 @@ namespace DO {
     return num_devices;
   }
 
-
-  std::vector<CudaDevice> get_cuda_devices()
+  std::vector<Device> get_devices()
   {
     int num_devices = get_num_cuda_devices();
-    std::vector<CudaDevice> devices(num_devices);
+    std::vector<Device> devices(num_devices);
 
     for (auto& device : devices)
     {
@@ -282,4 +274,5 @@ namespace DO {
     return devices;
   }
 
-}
+} /* namespace Shakti */
+} /* namespace DO */
