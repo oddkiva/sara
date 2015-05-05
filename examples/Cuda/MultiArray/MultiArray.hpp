@@ -81,7 +81,7 @@ namespace DO { namespace Shakti {
       _sizes = sizes;
       _strides = strides_type::compute(sizes);
 
-      size_t byte_size = sizeof(T) * size();
+      size_t byte_size = sizeof(T) * this->base_type::size();
       CHECK_CUDA_RUNTIME_ERROR(cudaMalloc((void **)&_data, byte_size));
     }
   };

@@ -11,6 +11,8 @@ message(STATUS "  - DO_Cuda_Examples")
 find_package(CUDA REQUIRED)
 find_package(DO COMPONENTS Core Graphics REQUIRED)
 
+set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-std=c++11)
+
 include(${DO_USE_FILE})
 
 include_directories(
@@ -68,7 +70,7 @@ function (cuda_add_example)
    if (NOT "${CUDA_SOURCE_FILES}" STREQUAL "")
      source_group("CUDA Source Files" REGULAR_EXPRESSION ".*\\.cu$")
      cuda_add_library(${EXAMPLE_NAME}_CUDA_AUX ${CUDA_SOURCE_FILES})
-	 target_link_libraries(${EXAMPLE_NAME}_CUDA_AUX DO_Cuda_Utilities ${DO_LIBRARIES})
+     target_link_libraries(${EXAMPLE_NAME}_CUDA_AUX DO_Cuda_Utilities ${DO_LIBRARIES})
      # Group the unit test in the "Tests" folder.
      set_property(
        TARGET ${EXAMPLE_NAME}_CUDA_AUX PROPERTY FOLDER "CUDA Examples")

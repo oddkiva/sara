@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include <stdexcept>
 #include <vector>
 
@@ -175,10 +176,12 @@ namespace DO { namespace Shakti {
     __host__ __device__
     inline Matrix operator*(const Matrix& other) const
     {
+      static_assert(M == N, "Matrices must be square!");
+
       Matrix res;
       for (int i = 0; i < M; ++i)
       {
-        for (int j = 0; j < O; ++j)
+        for (int j = 0; j < N; ++j)
         {
           T res(0);
           for (int k = 0; k < N; ++k)
@@ -210,7 +213,6 @@ namespace DO { namespace Shakti {
       for (int i = 0; i < M*N; ++i)
         res += _data[i] * other._data[i];
       return res;
- 
     }
 
   protected:
