@@ -11,7 +11,9 @@ message(STATUS "  - DO_Shakti_Examples")
 find_package(CUDA 7.0 REQUIRED)
 find_package(DO COMPONENTS Core Graphics REQUIRED)
 
-set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-std=c++11)
+if (NOT WIN32)
+  set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-std=c++11)
+endif ()
 
 include(${DO_USE_FILE})
 
