@@ -8,7 +8,7 @@ project(DO_Shakti_Examples)
 
 message(STATUS "  - DO_Shakti_Examples")
 
-find_package(CUDA REQUIRED)
+find_package(CUDA 7.0 REQUIRED)
 find_package(DO COMPONENTS Core Graphics REQUIRED)
 
 set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-std=c++11)
@@ -86,5 +86,5 @@ add_subdirectory(MultiArray)
 add_subdirectory(Utilities)
 
 file(GLOB cuda_test_SRC_FILES FILES *.cu *.cpp *.hpp)
-cuda_add_example(test ${cuda_test_SRC_FILES})
-target_link_libraries(test DO_Shakti_Utilities DO_Shakti_MultiArray)
+cuda_add_example(cuda_test ${cuda_test_SRC_FILES})
+target_link_libraries(cuda_test DO_Shakti_Utilities DO_Shakti_MultiArray)
