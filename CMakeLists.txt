@@ -1,17 +1,20 @@
 cmake_minimum_required(VERSION 2.8.7)
 
-project(DO-CV)
-set(DO_VERSION 1.0.0)
+set(DO_PROJECT_NAME Sara CACHE STRING "DO Project")
+project(DO_${DO_PROJECT_NAME})
+set(DO_${DO_PROJECT_NAME}_VERSION 1.0.0)
 
 if (POLICY CMP0020)
   cmake_policy(SET CMP0020 OLD)
 endif (POLICY CMP0020)
 
 # Configure DO++: put the versions.
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/DOVersion.cmake.in
-               ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DOVersion.cmake @ONLY)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/DO/Defines.hpp.in
-               ${CMAKE_CURRENT_SOURCE_DIR}/src/DO/Defines.hpp @ONLY)
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DO_${DO_PROJECT_NAME}_version.cmake.in
+  ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DO_${DO_PROJECT_NAME}_version.cmake @ONLY)
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/DO/${DO_PROJECT_NAME}/Defines.hpp.in
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/DO/${DO_PROJECT_NAME}/Defines.hpp @ONLY)
 
 # Set default build type to Release mode.
 set(CMAKE_BUILD_TYPE "Release" CACHE STRING
@@ -36,7 +39,7 @@ option(DO_BUILD_IMAGE_IO
 # Add DO-CV to the CMake module path.
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 find_package(DO REQUIRED)
-do_dissect_version()
+do_dissect_version(DO_${DO_PROJECT_NAME} ${DO_${DO_PROJECT_NAME}_VERSION})
 do_get_os_info()
 
 # Group projects by category.

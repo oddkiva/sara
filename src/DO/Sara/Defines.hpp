@@ -12,7 +12,7 @@
 #ifndef DO_DEFINES_HPP
 #define DO_DEFINES_HPP
 
-#define DO_VERSION "@DO_VERSION@"
+#define DO_SARA_VERSION "1.0.0"
 
 #if defined(_WIN32) || defined(_WIN32_WCE)
 # ifdef DO_EXPORTS

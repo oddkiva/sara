@@ -27,11 +27,11 @@ elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   set (ENABLE_CXX11 "-std=c++11")
 
 # GNU compiler
-elseif (CMAKE_COMPILER_IS_GNUCXX)               
+elseif (CMAKE_COMPILER_IS_GNUCXX)
   exec_program(${CMAKE_C_COMPILER}
                ARGS "-dumpversion"
                OUTPUT_VARIABLE _gcc_version_info)
-  string(REGEX REPLACE "^([0-9]+).*$" "\\1" 
+  string(REGEX REPLACE "^([0-9]+).*$" "\\1"
          GCC_MAJOR ${_gcc_version_info})
   string(REGEX REPLACE
          "^[0-9]+\\.([0-9]+).*$" "\\1"
@@ -49,7 +49,7 @@ elseif (CMAKE_COMPILER_IS_GNUCXX)
     set(GCC_MAJOR "")
   endif()
   set(GCC_VERSION "${GCC_MAJOR}.${GCC_MINOR}")
-  
+
   do_substep_message(
     "${CMAKE_CXX_COMPILER_ID} compiler version: ${GCC_VERSION}")
 

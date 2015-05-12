@@ -1,6 +1,6 @@
 # ==============================================================================
 # Debug and verbose functions
-# 
+#
 function (do_message _msg)
   message (STATUS "[DO] ${_msg}")
 endfunction (do_message _msg)
@@ -29,7 +29,7 @@ endfunction (do_list_files)
 
 # ==============================================================================
 # Useful macros
-# 
+#
 macro (do_get_os_info)
   string(REGEX MATCH "Linux" OS_IS_LINUX ${CMAKE_SYSTEM_NAME})
   set(DO_LIB_INSTALL_DIR "lib")
@@ -38,23 +38,22 @@ macro (do_get_os_info)
 endmacro (do_get_os_info)
 
 
-macro (do_dissect_version)
+macro (do_dissect_version PROJECT_NAME VERSION)
   # Find version components
   string(REGEX REPLACE "^([0-9]+).*" "\\1"
-         DO_VERSION_MAJOR "${DO_VERSION}")
+         ${PROJECT_NAME}_VERSION_MAJOR "${VERSION}")
   string(REGEX REPLACE "^[0-9]+\\.([0-9]+).*" "\\1"
-         DO_VERSION_MINOR "${DO_VERSION}")
+         ${PROJECT_NAME}_VERSION_MINOR "${VERSION}")
   string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+)" "\\1"
-         DO_VERSION_PATCH ${DO_VERSION})
-  string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.[0-9]+(.*)" "\\1"
-         DO_VERSION_CANDIDATE ${DO_VERSION})
-  set(DO_SOVERSION "${DO_VERSION_MAJOR}.${DO_VERSION_MINOR}")
+         ${PROJECT_NAME}_VERSION_PATCH ${VERSION})
+  set(${PROJECT_NAME}_SOVERSION
+      "${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}")
 endmacro (do_dissect_version)
 
 
 # ==============================================================================
 # Useful macros to add a new library with minimized effort.
-# 
+#
 macro (do_append_components _component_list _component)
   set(DO_${_component}_LIBRARIES DO_${_component})
   set(DO_${_component}_USE_FILE UseDO${_component})
@@ -93,25 +92,25 @@ macro (do_append_subdir_files _parentdir _child_dir _hdr_list_var _src_list_var)
 
   file(GLOB ${hdr_sublist_var} FILES ${_parentdir}/${_child_dir}/*.hpp)
   file(GLOB ${src_sublist_var} FILES ${_parentdir}/${_child_dir}/*.cpp)
-  
+
   source_group("${_child_dir}" FILES
                ${${hdr_sublist_var}} ${${src_sublist_var}})
   list(APPEND ${_hdr_list_var} ${${hdr_sublist_var}})
   list(APPEND ${_src_list_var} ${${src_sublist_var}})
-  
+
   message("${hdr_sublist_var} = ${${hdr_sublist_var}}")
 endmacro ()
 
 macro(do_glob_directory _curdir)
   message(STATUS "Parsing current source directory = ${_curdir}")
   file(GLOB curdir_children RELATIVE ${_curdir} ${_curdir}/*)
-  
+
   get_filename_component(curdir_name "${_curdir}" NAME)
   message("Directory name: ${curdir_name}")
-  
+
   file(GLOB DO_${curdir_name}_HEADER_FILES FILES ${_curdir}/*.hpp)
   file(GLOB DO_${curdir_name}_SOURCE_FILES FILES ${_curdir}/*.cpp)
-  
+
   foreach (child ${curdir_children})
     if (IS_DIRECTORY ${_curdir}/${child} AND NOT "${child}" STREQUAL "build")
       message("Parsing child directory = '${child}'")
@@ -120,13 +119,13 @@ macro(do_glob_directory _curdir)
                              DO_${curdir_name}_SOURCE_FILES)
     endif ()
   endforeach ()
-  
+
   set(DO_${curdir_name}_MASTER_HEADER ${DO_SOURCE_DIR}/${curdir_name}.hpp)
   source_group("Master Header File" FILES ${DO_${curdir_name}_MASTER_HEADER})
-  
-  list(APPEND DO_${curdir_name}_HEADER_FILES 
+
+  list(APPEND DO_${curdir_name}_HEADER_FILES
        ${DO_${curdir_name}_MASTER_HEADER})
-  
+
   message(STATUS "Master Header:\n ${DO_${curdir_name}_MASTER_HEADER}")
   message(STATUS "Header file list:\n ${DO_${curdir_name}_HEADER_FILES}")
   message(STATUS "Source file list:\n ${DO_${curdir_name}_SOURCE_FILES}")
@@ -164,7 +163,7 @@ macro (do_append_library _library_name
     # - Case 2: the project is a header-only library
     #   Specify the source files.
     #add_library(DO_${_library_name} STATIC ${_hdr_files})
-    message(STATUS 
+    message(STATUS
       "[DO] No linking needed for header-only project 'DO_${_library_name}'")
     #set_target_properties(DO_${_library_name} PROPERTIES LINKER_LANGUAGE CXX)
     add_custom_target(DO_${_library_name} SOURCES ${_hdr_files})
@@ -211,7 +210,7 @@ macro (do_generate_library _library_name)
       "${DO_${_library_name}_SOURCE_FILES}"
       "${DO_${_library_name}_LINK_LIBRARIES}"
     )
-    do_set_specific_target_properties(DO_${_library_name}_SHARED 
+    do_set_specific_target_properties(DO_${_library_name}_SHARED
                                       DO_EXPORTS "DO_${_library_name}")
   endif ()
 endmacro ()
@@ -252,7 +251,7 @@ function (do_test _test_name _srcs _additional_lib_deps)
   )
   add_test(${_test_name}
            "${CMAKE_BINARY_DIR}/test/${_test_name}")
-  
+
   if (DEFINED test_group_name)
     set_property(TARGET ${_test_name}
                  PROPERTY FOLDER "DO Tests/${test_group_name}")

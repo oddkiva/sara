@@ -2,7 +2,7 @@
 include(DOMacros)
 
 # Specify DO-CV version.
-include(DOVersion)
+include(DO_${DO_PROJECT_NAME}_version)
 
 ################################################################################
 # Debug message.
@@ -31,7 +31,7 @@ if (NOT DO_FOUND)
   message(STATUS "  - DO_DIR = '${DO_DIR}'")
 
   # Set third-party software directories
-  set(DO_SOURCE_DIR ${DO_DIR}/src/DO)
+  set(DO_SOURCE_DIR ${DO_DIR}/src/DO/Sara)
   set(DO_ThirdParty_DIR ${DO_DIR}/third-party)
   
   # List the available component libraries in DO++
@@ -39,7 +39,6 @@ if (NOT DO_FOUND)
   do_append_components(DO_COMPONENTS Core)
   do_append_components(DO_COMPONENTS ImageIO)
   do_append_components(DO_COMPONENTS VideoIO)
-  #do_append_components(DO_COMPONENTS ImageDrawing)
   do_append_components(DO_COMPONENTS Graphics)
 
   # KDTree for fast neighbor search.
