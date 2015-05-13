@@ -64,7 +64,7 @@ namespace DO { namespace Shakti {
       1
     };
   }
-  //! @} 
+  //! @}
 
   //! @{
   //! \brief Return the 1D-offset of the corresponding ND-coordinates.

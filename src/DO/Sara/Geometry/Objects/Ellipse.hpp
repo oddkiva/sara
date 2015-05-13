@@ -1,21 +1,21 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_GEOMETRY_ELLIPSE_HPP
-#define DO_GEOMETRY_ELLIPSE_HPP
+#ifndef DO_SARA_GEOMETRY_ELLIPSE_HPP
+#define DO_SARA_GEOMETRY_ELLIPSE_HPP
 
 #define _USE_MATH_DEFINES
 #include <cmath>
-#include <DO/Core/EigenExtension.hpp>
-#include <DO/Geometry/Objects/Quad.hpp>
+#include <DO/Sara/Core/EigenExtension.hpp>
+#include <DO/Sara/Geometry/Objects/Quad.hpp>
 
 
 namespace DO {
@@ -51,7 +51,7 @@ namespace DO {
     Point2d operator()(double theta) const;
 
     /*!
-      Retrieve relative orientation of point $p$ w.r.t. orientation 
+      Retrieve relative orientation of point $p$ w.r.t. orientation
       $o$ of ellipse.
      */
     friend double orientation(const Point2d& p, const Ellipse& e);
@@ -65,15 +65,15 @@ namespace DO {
     }
 
     /*!
-      This function should be used instead to compute the **positive** area 
+      This function should be used instead to compute the **positive** area
       of an ellipse sector which we define as the region bounded by:
       - the **counter-clockwise** oriented arc going **from** the endpoint
         $M(\theta0)$ **to** endpoint $M(\theta_1)$.
-      - line segments connecting the center of the ellipse and the endpoints 
+      - line segments connecting the center of the ellipse and the endpoints
         of the arc.
 
       $\theta_0$ and $\theta_1$ are required to be in the range $]\pi, \pi]$ but
-      it does not matter if $\theta_0 > \theta_1$.      
+      it does not matter if $\theta_0 > \theta_1$.
      */
     friend double sector_area(const Ellipse& e, double theta0, double theta1)
     {
@@ -125,4 +125,4 @@ namespace DO {
 } /* namespace DO */
 
 
-#endif /* DO_GEOMETRY_ELLIPSE_HPP */
+#endif /* DO_SARA_GEOMETRY_ELLIPSE_HPP */

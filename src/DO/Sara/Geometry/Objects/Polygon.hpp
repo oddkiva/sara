@@ -1,18 +1,18 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2014 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_GEOMETRY_POLYGON_HPP
-#define DO_GEOMETRY_POLYGON_HPP
+#ifndef DO_SARA_GEOMETRY_POLYGON_HPP
+#define DO_SARA_GEOMETRY_POLYGON_HPP
 
-#include <DO/Geometry/Tools/Projective.hpp>
+#include <DO/Sara/Geometry/Tools/Projective.hpp>
 #include <vector>
 
 namespace DO {
@@ -126,7 +126,7 @@ namespace DO {
     }
     return 0.5*A;
   }
-  
+
   template <int N>
   inline double area(const SmallPolygon<N>& polygon)
   {
@@ -154,9 +154,9 @@ namespace DO {
   {
     return area(poly) < eps;
   }
-  
+
   double area(const std::vector<Point2d>& polygon);
 
 } /* namespace DO */
 
-#endif /* DO_GEOMETRY_POLYGON_HPP */
+#endif /* DO_SARA_GEOMETRY_POLYGON_HPP */

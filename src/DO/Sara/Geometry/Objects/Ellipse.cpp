@@ -1,14 +1,14 @@
-#include <DO/Geometry/Tools/Utilities.hpp>
-#include <DO/Geometry/Objects/Ellipse.hpp>
-#include <DO/Geometry/Objects/Triangle.hpp>
-#include <DO/Geometry.hpp>
+#include <DO/Sara/Geometry/Tools/Utilities.hpp>
+#include <DO/Sara/Geometry/Objects/Ellipse.hpp>
+#include <DO/Sara/Geometry/Objects/Triangle.hpp>
+#include <DO/Sara/Geometry.hpp>
 #include <deque>
 
 using namespace std;
 
 namespace DO {
 
-  Vector2d Ellipse::rho(double theta) const 
+  Vector2d Ellipse::rho(double theta) const
   {
     Vector2d u(unit_vector2(theta));
     double& c = u(0);
@@ -17,7 +17,7 @@ namespace DO {
     return r*u;
   }
 
-  Point2d Ellipse::operator()(double theta) const 
+  Point2d Ellipse::operator()(double theta) const
   {
     return c_ + rotation2(o_)*rho(theta);
   }

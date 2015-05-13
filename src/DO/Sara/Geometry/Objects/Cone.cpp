@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2014 David Ok <david.ok8@gmail.com>
@@ -9,11 +9,11 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Geometry/Objects/Cone.hpp>
-#include <DO/Geometry/Tools/Utilities.hpp>
+#include <DO/Sara/Geometry/Objects/Cone.hpp>
+#include <DO/Sara/Geometry/Tools/Utilities.hpp>
 
 namespace DO {
-  
+
   template class Cone<2>;
   template class Cone<3>;
   template class AffineCone<2>;

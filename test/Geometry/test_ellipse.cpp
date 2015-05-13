@@ -1,9 +1,9 @@
-#include <DO/Core.hpp>
-#include <DO/Geometry/Objects/Cone.hpp>
-#include <DO/Geometry/Objects/CSG.hpp>
-#include <DO/Geometry/Objects/Ellipse.hpp>
-#include <DO/Geometry/Objects/Triangle.hpp>
-#include <DO/Geometry/Tools/Utilities.hpp>
+#include <DO/Sara/Core.hpp>
+#include <DO/Sara/Geometry/Objects/Cone.hpp>
+#include <DO/Sara/Geometry/Objects/CSG.hpp>
+#include <DO/Sara/Geometry/Objects/Ellipse.hpp>
+#include <DO/Sara/Geometry/Objects/Triangle.hpp>
+#include <DO/Sara/Geometry/Tools/Utilities.hpp>
 
 #include "TestPolygon.hpp"
 
@@ -50,10 +50,10 @@ TEST_F(TestEllipse, DISABLED_test_sector_area)
         auto E_minus_Cone = ell - E_and_Cone;
 
         // Use the CSGs to estimate the sector area by pixel counting.
-        auto inside_E_and_Cone = [&](const Point2d& p){ 
+        auto inside_E_and_Cone = [&](const Point2d& p){
           return E_and_Cone.contains(p);
         };
-        auto inside_E_minus_Cone = [&](const Point2d& p){ 
+        auto inside_E_minus_Cone = [&](const Point2d& p){
           return E_minus_Cone.contains(p);
         };
 

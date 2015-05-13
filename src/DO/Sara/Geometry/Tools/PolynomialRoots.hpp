@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2014 David Ok <david.ok8@gmail.com>
@@ -9,12 +9,12 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_GEOMETRY_TOOLS_POLYNOMIALROOTS_HPP
-#define DO_GEOMETRY_TOOLS_POLYNOMIALROOTS_HPP
+#ifndef DO_SARA_GEOMETRY_TOOLS_POLYNOMIALROOTS_HPP
+#define DO_SARA_GEOMETRY_TOOLS_POLYNOMIALROOTS_HPP
 
 #include <complex>
 
-#include <DO/Geometry/Tools/Polynomial.hpp>
+#include <DO/Sara/Geometry/Tools/Polynomial.hpp>
 
 
 namespace DO {
@@ -37,7 +37,7 @@ namespace DO {
 
   // Discriminant precision: 1e-3.
   template <typename T>
-  void roots(const Polynomial<T, 3>& P, std::complex<T>& z1, 
+  void roots(const Polynomial<T, 3>& P, std::complex<T>& z1,
              std::complex<T>& z2, std::complex<T>& z3,
              double eps = 1e-3)
   {
@@ -157,4 +157,4 @@ namespace DO {
 } /* namespace DO */
 
 
-#endif /* DO_GEOMETRY_TOOLS_POLYNOMIALROOTS_HPP */
+#endif /* DO_SARA_GEOMETRY_TOOLS_POLYNOMIALROOTS_HPP */

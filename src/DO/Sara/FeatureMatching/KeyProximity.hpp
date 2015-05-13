@@ -1,16 +1,16 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_FEATUREMATCHING_MATCHFILTERING_HPP
-#define DO_FEATUREMATCHING_MATCHFILTERING_HPP
+#ifndef DO_SARA_FEATUREMATCHING_MATCHFILTERING_HPP
+#define DO_SARA_FEATUREMATCHING_MATCHFILTERING_HPP
 
 namespace DO {
 
@@ -33,4 +33,4 @@ namespace DO {
 
 } /* namespace DO */
 
-#endif /* DO_FEATUREMATCHING_MATCHFILTERING_HPP */
+#endif /* DO_SARA_FEATUREMATCHING_MATCHFILTERING_HPP */

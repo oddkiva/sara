@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
@@ -9,13 +9,13 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_CORE_IMAGE_OPERATIONS_HPP
-#define DO_CORE_IMAGE_OPERATIONS_HPP
+#ifndef DO_SARA_CORE_IMAGE_OPERATIONS_HPP
+#define DO_SARA_CORE_IMAGE_OPERATIONS_HPP
 
 
-#include <DO/Core/Image/Image.hpp>
-#include <DO/Core/Pixel/SmartColorConversion.hpp>
-#include <DO/Core/Pixel/PixelTraits.hpp>
+#include <DO/Sara/Core/Image/Image.hpp>
+#include <DO/Sara/Core/Pixel/SmartColorConversion.hpp>
+#include <DO/Sara/Core/Pixel/PixelTraits.hpp>
 
 
 // Various utilities for image operations.
@@ -97,7 +97,7 @@ namespace DO {
                                    const T& a = PixelTraits<T>::min(),
                                    const T& b = PixelTraits<T>::max())
   {
-    DO_STATIC_ASSERT(!std::numeric_limits<T>::is_integer,
+    DO_SARA_STATIC_ASSERT(!std::numeric_limits<T>::is_integer,
                      IMPLEMENTATION_NOT_SUPPORTED_FOR_INTEGER_TYPES);
 
     Image<T, N> dst(src.sizes());
@@ -124,7 +124,7 @@ namespace DO {
     const Pixel<T, ColorSpace>& a = PixelTraits<Pixel<T, ColorSpace> >::min(),
     const Pixel<T, ColorSpace>& b = PixelTraits<Pixel<T, ColorSpace> >::max())
   {
-    DO_STATIC_ASSERT(!std::numeric_limits<T>::is_integer,
+    DO_SARA_STATIC_ASSERT(!std::numeric_limits<T>::is_integer,
                      IMPLEMENTATION_NOT_SUPPORTED_FOR_INTEGER_TYPES);
 
     Image<Pixel<T,ColorSpace>, N> dst(src.sizes());
@@ -166,4 +166,4 @@ namespace DO {
 }
 
 
-#endif /* DO_CORE_IMAGE_OPERATIONS_HPP */
+#endif /* DO_SARA_CORE_IMAGE_OPERATIONS_HPP */

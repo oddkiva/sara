@@ -3,7 +3,7 @@
 
 #include <gtest/gtest.h>
 
-#include <DO/Core/EigenExtension.hpp>
+#include <DO/Sara/Core/EigenExtension.hpp>
 
 
 using namespace DO;

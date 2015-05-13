@@ -1,11 +1,11 @@
-#ifndef DO_ASSERT_HELPERS_HPP
-#define DO_ASSERT_HELPERS_HPP
+#ifndef DO_SARA_ASSERT_HELPERS_HPP
+#define DO_SARA_ASSERT_HELPERS_HPP
 
 
 #include <set>
 #include <vector>
 
-#include <DO/Core/EigenExtension.hpp>
+#include <DO/Sara/Core/EigenExtension.hpp>
 
 #include <gtest/gtest.h>
 
@@ -80,4 +80,4 @@ to_std_set(const std::vector<Eigen::Matrix<T, M, N, Opts, MaxRows, MaxCols> >& v
   EXPECT_EQ(to_std_set(vector1), to_std_set(vector2))
 
 
-#endif /* DO_ASSERT_HELPERS_HPP */
+#endif /* DO_SARA_ASSERT_HELPERS_HPP */

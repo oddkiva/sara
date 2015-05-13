@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2015 David Ok <david.ok8@gmail.com>
@@ -9,11 +9,11 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_CORE_MULTIARRAY_MULTIARRAYVIEW_HPP
-#define DO_CORE_MULTIARRAY_MULTIARRAYVIEW_HPP
+#ifndef DO_SARA_CORE_MULTIARRAY_MULTIARRAYVIEW_HPP
+#define DO_SARA_CORE_MULTIARRAY_MULTIARRAYVIEW_HPP
 
-#include <DO/Core/ArrayIterators.hpp>
-#include <DO/Core/MultiArray/ElementTraits.hpp>
+#include <DO/Sara/Core/ArrayIterators.hpp>
+#include <DO/Sara/Core/MultiArray/ElementTraits.hpp>
 
 
 namespace DO {
@@ -174,13 +174,13 @@ namespace DO {
 
     inline reference operator()(int i, int j)
     {
-      DO_STATIC_ASSERT(N == 2, MULTIARRAY_MUST_BE_TWO_DIMENSIONAL);
+      DO_SARA_STATIC_ASSERT(N == 2, MULTIARRAY_MUST_BE_TWO_DIMENSIONAL);
       return _begin[offset(Vector2i(i, j))];
     }
 
     inline reference operator()(int i, int j, int k)
     {
-      DO_STATIC_ASSERT(N == 3, MULTIARRAY_MUST_BE_THREE_DIMENSIONAL);
+      DO_SARA_STATIC_ASSERT(N == 3, MULTIARRAY_MUST_BE_THREE_DIMENSIONAL);
       return _begin[offset(Vector3i(i, j, k))];
     }
 
@@ -191,13 +191,13 @@ namespace DO {
 
     inline const_reference operator()(int i, int j) const
     {
-      DO_STATIC_ASSERT(N == 2, MULTIARRAY_MUST_BE_TWO_DIMENSIONAL);
+      DO_SARA_STATIC_ASSERT(N == 2, MULTIARRAY_MUST_BE_TWO_DIMENSIONAL);
       return _begin[offset(Vector2i(i, j))];
     }
 
     inline const_reference operator()(int i, int j, int k) const
     {
-      DO_STATIC_ASSERT(N == 3, MULTIARRAY_MUST_BE_THREE_DIMENSIONAL);
+      DO_SARA_STATIC_ASSERT(N == 3, MULTIARRAY_MUST_BE_THREE_DIMENSIONAL);
       return _begin[offset(Vector3i(i, j, k))];
     }
     //! @}
@@ -266,7 +266,7 @@ namespace DO {
     //! \brief Return the matrix view for linear algebra with Eigen libraries.
     inline matrix_view_type matrix()
     {
-      DO_STATIC_ASSERT(N == 2, MULTIARRAY_MUST_HAVE_TWO_DIMENSIONS);
+      DO_SARA_STATIC_ASSERT(N == 2, MULTIARRAY_MUST_HAVE_TWO_DIMENSIONS);
       return matrix_view_type( reinterpret_cast<
                               typename ElementTraits<T>::pointer>(data()),
                               rows(), cols());
@@ -274,7 +274,7 @@ namespace DO {
 
     inline const_matrix_view_type matrix() const
     {
-      DO_STATIC_ASSERT(N == 2, MULTIARRAY_MUST_HAVE_TWO_DIMENSIONS);
+      DO_SARA_STATIC_ASSERT(N == 2, MULTIARRAY_MUST_HAVE_TWO_DIMENSIONS);
       return const_matrix_view_type( reinterpret_cast<
                                     typename ElementTraits<T>::const_pointer>(data()),
                                     rows(), cols());
@@ -340,4 +340,4 @@ namespace DO {
 } /* namespace DO */
 
 
-#endif /* DO_CORE_MULTIARRAY_MULTIARRAYVIEW_HPP */
+#endif /* DO_SARA_CORE_MULTIARRAY_MULTIARRAYVIEW_HPP */

@@ -1,18 +1,18 @@
 // ========================================================================= //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================= //
 
 //! @file
 
-#ifndef DO_GRAPHICS_PAINTINGWINDOW_HPP
-#define DO_GRAPHICS_PAINTINGWINDOW_HPP
+#ifndef DO_SARA_GRAPHICS_PAINTINGWINDOW_HPP
+#define DO_SARA_GRAPHICS_PAINTINGWINDOW_HPP
 
 
 #include <QScrollArea>
@@ -54,8 +54,8 @@ namespace DO {
     Q_OBJECT
 
   public:
-    PaintingWindow(int width, int height, 
-                   const QString& windowTitle = "DO++",
+    PaintingWindow(int width, int height,
+                   const QString& windowTitle = "DO-CV",
                    int x = -1, int y = -1,
                    QWidget* parent = 0);
     QScrollArea *scrollArea() { return scroll_area_; }
@@ -74,7 +74,7 @@ namespace DO {
     void drawCircle(int xc, int yc, int r, const QColor& c, int penWidth = 1);
     void drawCircle(const QPointF& center, qreal r, const QColor& c,
                     int penWidth = 1);
-    void drawEllipse(int x, int y, int w, int h, const QColor& c, 
+    void drawEllipse(int x, int y, int w, int h, const QColor& c,
                      int penWidth = 1);
     void drawEllipse(const QPointF& center, qreal r1, qreal r2, qreal degree,
                      const QColor& c, int penWidth = 1);
@@ -137,4 +137,4 @@ namespace DO {
 
 } /* namespace DO */
 
-#endif /* DO_GRAPHICS_PAINTINGWINDOW_HPP */
+#endif /* DO_SARA_GRAPHICS_PAINTINGWINDOW_HPP */

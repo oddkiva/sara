@@ -1,11 +1,11 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
@@ -16,7 +16,7 @@
 
 #include <gtest/gtest.h>
 
-#include <DO/KDTree.hpp>
+#include <DO/Sara/KDTree.hpp>
 
 #include "../AssertHelpers.hpp"
 
@@ -50,7 +50,7 @@ protected:
 
   TestKDTree()
   {
-    // We construct two sets in points. The first one lives in the 
+    // We construct two sets in points. The first one lives in the
     // zero-centered unit circle and the second in the zero-centered
     // circle with radius 10.
     _num_points_in_each_circle = 30;
@@ -277,7 +277,7 @@ TEST_F(TestKDTree, test_batch_radius_search_restricted)
   // Check the number of queries.
   EXPECT_EQ(nn_indices.size(), num_queries);
   EXPECT_EQ(nn_squared_distances.size(), num_queries);
-  
+
   for (size_t i = 0; i < num_queries; ++i)
   {
     EXPECT_EQ(nn_indices[i].size(), max_num_nearest_neighbors);
@@ -369,7 +369,7 @@ TEST_F(TestKDTree, test_batch_radius_search_with_query_point_in_data_restricted)
 }
 
 
-int main(int argc, char **argv) 
+int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

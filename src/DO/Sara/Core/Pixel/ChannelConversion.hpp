@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
@@ -9,13 +9,13 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_CORE_PIXEL_CHANNELCONVERSION_HPP
-#define DO_CORE_PIXEL_CHANNELCONVERSION_HPP
+#ifndef DO_SARA_CORE_PIXEL_CHANNELCONVERSION_HPP
+#define DO_SARA_CORE_PIXEL_CHANNELCONVERSION_HPP
 
 
-#include <DO/Core/StaticAssert.hpp>
-#include <DO/Core/EigenExtension.hpp>
-#include <DO/Core/Pixel/Pixel.hpp>
+#include <DO/Sara/Core/StaticAssert.hpp>
+#include <DO/Sara/Core/EigenExtension.hpp>
+#include <DO/Sara/Core/Pixel/Pixel.hpp>
 
 
 // Channel conversion from a type to another.
@@ -41,7 +41,7 @@ namespace DO {
   template <typename Int, typename Float>
   inline Float float_normalized_channel(Int src)
   {
-    DO_STATIC_ASSERT(
+    DO_SARA_STATIC_ASSERT(
       std::numeric_limits<Int>::is_integer,
       CHANNEL_CONVERSION_MUST_BE_FROM_INTEGER_TYPE_TO_FLOATING_POINT_TYPE);
 
@@ -56,7 +56,7 @@ namespace DO {
   template <typename Int, typename Float>
   inline Int int_rescaled_channel(Float src)
   {
-    DO_STATIC_ASSERT(
+    DO_SARA_STATIC_ASSERT(
       std::numeric_limits<Int>::is_integer,
       CHANNEL_CONVERSION_MUST_BE_FROM_FLOATING_POINT_TYPE_TO_INTEGER_TYPE);
 
@@ -156,4 +156,4 @@ namespace DO {
 }
 
 
-#endif /* DO_CORE_PIXEL_COLORSPACE_HPP */
+#endif /* DO_SARA_CORE_PIXEL_COLORSPACE_HPP */

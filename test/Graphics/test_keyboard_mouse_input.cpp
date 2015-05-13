@@ -1,11 +1,11 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2014 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
@@ -13,8 +13,8 @@
 
 #include <gtest/gtest.h>
 
-#include <DO/Graphics.hpp>
-#include <DO/Graphics/GraphicsUtilities.hpp>
+#include <DO/Sara/Graphics.hpp>
+#include <DO/Sara/Graphics/GraphicsUtilities.hpp>
 
 #include "event_scheduler.hpp"
 
@@ -43,12 +43,12 @@ protected:
 
 TEST_F(TestKeyboardMouseInputOnSingleWindow, test_get_mouse)
 {
-  Qt::MouseButton expected_qt_mouse_buttons[] = { 
+  Qt::MouseButton expected_qt_mouse_buttons[] = {
     Qt::LeftButton,
     Qt::MiddleButton,
     Qt::RightButton,
   };
-  
+
   int expected_button_codes[] = {
     MOUSE_LEFT_BUTTON,
     MOUSE_MIDDLE_BUTTON,
@@ -56,7 +56,7 @@ TEST_F(TestKeyboardMouseInputOnSingleWindow, test_get_mouse)
   };
 
   int expected_x = 150, expected_y = 150;
-  
+
   for (int i = 0; i < 3; ++i)
   {
     Qt::MouseButton input_qt_mouse_button = expected_qt_mouse_buttons[i];
@@ -239,7 +239,7 @@ TEST_F(TestKeyboardMouseInputOnAnyWindow, test_any_get_key)
 
 int worker_thread(int argc, char **argv)
 {
-  testing::InitGoogleTest(&argc, argv); 
+  testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
 
@@ -255,7 +255,7 @@ int main(int argc, char **argv)
   QObject::connect(&get_user_thread(), SIGNAL(sendEvent(QEvent *, int)),
                    global_scheduler, SLOT(schedule_event(QEvent*, int)));
 
-  // Run the worker thread 
+  // Run the worker thread
   gui_app_.register_user_main(worker_thread);
   int return_code = gui_app_.exec();
 

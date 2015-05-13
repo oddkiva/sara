@@ -1,22 +1,22 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
 //! @file
 //! \brief Master header file of the Graphics module.
 
-#ifndef DO_GRAPHICS_HPP
-#define DO_GRAPHICS_HPP
+#ifndef DO_SARA_GRAPHICS_HPP
+#define DO_SARA_GRAPHICS_HPP
 
-#include <DO/Defines.hpp>
-#include <DO/Core/Image.hpp>
+#include <DO/Sara/Defines.hpp>
+#include <DO/Sara/Core/Image.hpp>
 
 #include "Graphics/Events.hpp"
 #include "Graphics/GraphicsApplication.hpp"
@@ -37,7 +37,7 @@
 
 /*!
   \defgroup Graphics Graphics
-  \brief The Graphics module relies on the Qt 5 framework. 
+  \brief The Graphics module relies on the Qt 5 framework.
   It covers basic graphical features such as:
   - opening, closing a window,
   - draw 2D things,
@@ -46,4 +46,4 @@
  */
 
 
-#endif /* DO_GRAPHICS_HPP */
+#endif /* DO_SARA_GRAPHICS_HPP */

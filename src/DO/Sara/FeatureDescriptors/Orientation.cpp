@@ -1,16 +1,16 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
 #include <Eigen/StdVector>
-#include <DO/FeatureDescriptors.hpp>
+#include <DO/Sara/FeatureDescriptors.hpp>
 
 using namespace std;
 
@@ -24,7 +24,7 @@ namespace DO {
     , patch_truncation_factor_(patchTruncationFactor)
     , blur_factor_(blurFactor) {}
 
-  std::vector<float> 
+  std::vector<float>
   ComputeDominantOrientations::
   operator()(const Image<Vector2f>& gradients,
              float x, float y, float sigma) const

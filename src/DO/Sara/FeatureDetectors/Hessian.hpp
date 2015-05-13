@@ -1,18 +1,18 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
 //! @file
 
-#ifndef DO_FEATUREDETECTORS_HESSIAN_HPP
-#define DO_FEATUREDETECTORS_HESSIAN_HPP
+#ifndef DO_SARA_FEATUREDETECTORS_HESSIAN_HPP
+#define DO_SARA_FEATUREDETECTORS_HESSIAN_HPP
 
 namespace DO {
 
@@ -28,7 +28,7 @@ namespace DO {
     ImagePyramid<T> D;
     D.reset(gaussians.numOctaves(),
             gaussians.numScalesPerOctave(),
-            gaussians.initScale(), 
+            gaussians.initScale(),
             gaussians.scaleGeomFactor());
 
     for (int o = 0; o < D.numOctaves(); ++o)
@@ -41,7 +41,7 @@ namespace DO {
     }
     return D;
   }
-  
+
   //! Functor class to compute Hessian-Laplace maxima.
   class ComputeHessianLaplaceMaxima
   {
@@ -50,24 +50,24 @@ namespace DO {
       \brief Constructor
       @param[in]
         extremumThres
-        the response threshold which local maxima of the determinant of Hessian 
+        the response threshold which local maxima of the determinant of Hessian
         function must satisfy.
       @param[in]
         imgPaddingSz
         This variable indicates the minimum border size of the image.
-        Maxima of determinant of Hessians located in the border of width 
+        Maxima of determinant of Hessians located in the border of width
         'imgPaddingSz' are discarded.
       @param[in]
         numScales
-        This variable indicates the number of scales to search in order to 
+        This variable indicates the number of scales to search in order to
         select the characteristic scale of a corner.
       @param[in]
         extremumRefinementIter
-        This variable controls the number of iterations to refine the 
-        localization of DoG extrema in scale-space. The refinement process is 
+        This variable controls the number of iterations to refine the
+        localization of DoG extrema in scale-space. The refinement process is
         based on the function **DO::refineExtremum()**.
      */
-    ComputeHessianLaplaceMaxima(const ImagePyramidParams& pyrParams = 
+    ComputeHessianLaplaceMaxima(const ImagePyramidParams& pyrParams =
                                   ImagePyramidParams(-1, 3+1),
                                 float extremumThres = 1e-5f,
                                 int imgPaddingSz = 1,
@@ -83,16 +83,16 @@ namespace DO {
       \brief Localizes Hessian-Laplace maxima for a given image.
 
       This function does the following:
-      1. Constructs a gaussian pyramid \f$\nabla g_{\sigma(s,o)} * I\f$ from 
+      1. Constructs a gaussian pyramid \f$\nabla g_{\sigma(s,o)} * I\f$ from
       the image \f$I\f$, where \f$(s,o)\f$ are integers. Here:
       \f$\sigma(s,o) = 2^{s/S + o}\f$ where \f$S\f$ is the number of scales per
       octaves.
 
       2. Localize maxima in determinant of Hessians functions in each scale
          \f$\sigma(s,o)\f$.
-      
+
       \param[in, out] scaleOctavePairs a pointer to vector of scale and octave
-      index pairs \f$(s_i,o_i)\f$. This index pair corresponds to the determinant 
+      index pairs \f$(s_i,o_i)\f$. This index pair corresponds to the determinant
       of Hessians.
 
       \return set of Hessian-Laplace maxima in **std::vector<OERegion>** in each
@@ -103,9 +103,9 @@ namespace DO {
     /*!
       \brief Returns the Gaussian pyramid used to select characteristic scales
       for Hessian-Laplace interest points.
-      
+
       The Gaussian pyramid is available after calling the function method
-      **ComputeHessianLaplaceExtrema::operator()(I, scaleOctavePairs)** for 
+      **ComputeHessianLaplaceExtrema::operator()(I, scaleOctavePairs)** for
       the given image **I**.
 
       \return the Gaussian pyramid used to localize Hessian-Laplace extrema
@@ -114,14 +114,14 @@ namespace DO {
     const ImagePyramid<float>& gaussians() const
     { return gaussians_; }
     /*!
-      \brief Returns the pyramid of Hessian-Laplace functions used to localize 
+      \brief Returns the pyramid of Hessian-Laplace functions used to localize
       scale-space extrema of image **I**.
 
-      The pyramid of determinant of Hessians is available after calling the 
-      function method 
-      **ComputeHessianLaplaceExtrema::operator()(I, scaleOctavePairs)**, 
-      
-      \return the pyramid of determinant of Hessians used to localize 
+      The pyramid of determinant of Hessians is available after calling the
+      function method
+      **ComputeHessianLaplaceExtrema::operator()(I, scaleOctavePairs)**,
+
+      \return the pyramid of determinant of Hessians used to localize
       scale-space extrema of image **I**.
      */
     const ImagePyramid<float>& detOfHessians() const
@@ -138,7 +138,7 @@ namespace DO {
     ImagePyramid<float> det_hessians_;
   };
 
-  //! Functor class to compute local extrema of determinant of Hessians 
+  //! Functor class to compute local extrema of determinant of Hessians
   //! in scale space.
   class ComputeDoHExtrema
   {
@@ -147,24 +147,24 @@ namespace DO {
       \brief Constructor
       @param[in]
         extremumThres
-        the response threshold which local maxima of the determinant of Hessian 
+        the response threshold which local maxima of the determinant of Hessian
         function must satisfy.
       @param[in]
         imgPaddingSz
         This variable indicates the minimum border size of the image.
-        Maxima of determinant of Hessians located in the border of width 
+        Maxima of determinant of Hessians located in the border of width
         'imgPaddingSz' are discarded.
       @param[in]
         numScales
-        This variable indicates the number of scales to search in order to 
+        This variable indicates the number of scales to search in order to
         select the characteristic scale of a corner.
       @param[in]
         extremumRefinementIter
-        This variable controls the number of iterations to refine the 
-        localization of DoG extrema in scale-space. The refinement process is 
+        This variable controls the number of iterations to refine the
+        localization of DoG extrema in scale-space. The refinement process is
         based on the function **DO::refineExtremum()**.
      */
-    ComputeDoHExtrema(const ImagePyramidParams& pyrParams = 
+    ComputeDoHExtrema(const ImagePyramidParams& pyrParams =
                         ImagePyramidParams(-1, 3+2, pow(2.f, 1.f/3.f), 2),
                       float extremumThres = 1e-6f,
                       float edgeRatioThres = 10.f,
@@ -177,20 +177,20 @@ namespace DO {
       , extremum_refinement_iter_(extremumRefinementIter)
     {}
     /*!
-      \brief Localizes scale-space extrema of determinant of Hessians for a 
+      \brief Localizes scale-space extrema of determinant of Hessians for a
       given image.
 
       This function does the following:
-      1. Constructs a gaussian pyramid \f$\nabla g_{\sigma(s,o)} * I\f$ from 
+      1. Constructs a gaussian pyramid \f$\nabla g_{\sigma(s,o)} * I\f$ from
       the image \f$I\f$, where \f$(s,o)\f$ are integers. Here:
       \f$\sigma(s,o) = 2^{s/S + o}\f$ where \f$S\f$ is the number of scales per
       octaves.
 
       2. Localize extrema in determinant of Hessians functions in each scale
          \f$\sigma(s,o)\f$.
-      
+
       \param[in, out] scaleOctavePairs a pointer to vector of scale and octave
-      index pairs \f$(s_i,o_i)\f$. This index pair corresponds to the determinant 
+      index pairs \f$(s_i,o_i)\f$. This index pair corresponds to the determinant
       of Hessians.
 
       \return set of DoHs extrema in **std::vector<OERegion>** in each
@@ -200,9 +200,9 @@ namespace DO {
                                      std::vector<Point2i> *scaleOctavePairs = 0);
     /*!
       \brief Returns the Gaussian pyramid used to compute DoH extrema.
-      
+
       The Gaussian pyramid is available after calling the function method
-      **ComputeHessianLaplaceExtrema::operator()(I, scaleOctavePairs)** for 
+      **ComputeHessianLaplaceExtrema::operator()(I, scaleOctavePairs)** for
       the given image **I**.
 
       \return the Gaussian pyramid used to localize DoH extrema of image **I**.
@@ -210,14 +210,14 @@ namespace DO {
     const ImagePyramid<float>& gaussians() const
     { return gaussians_; }
     /*!
-      \brief Returns the pyramid of determinant of Hessians used to localize 
+      \brief Returns the pyramid of determinant of Hessians used to localize
       scale-space extrema of image **I**.
 
-      The pyramid of determinant of Hessians is available after calling the 
-      function method 
-      **ComputeHessianLaplaceExtrema::operator()(I, scaleOctavePairs)**, 
-      
-      \return the pyramid of determinant of Hessians used to localize 
+      The pyramid of determinant of Hessians is available after calling the
+      function method
+      **ComputeHessianLaplaceExtrema::operator()(I, scaleOctavePairs)**,
+
+      \return the pyramid of determinant of Hessians used to localize
       scale-space extrema of image **I**.
      */
     const ImagePyramid<float>& detOfHessians() const
@@ -238,4 +238,4 @@ namespace DO {
 
 } /* namespace DO */
 
-#endif /* DO_FEATUREDETECTORS_HESSIAN_HPP */
+#endif /* DO_SARA_FEATUREDETECTORS_HESSIAN_HPP */

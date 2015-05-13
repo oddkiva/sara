@@ -1,24 +1,24 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
 //! @file
 
-#ifndef DO_IMAGEPROCESSING_SCALING_HPP
-#define DO_IMAGEPROCESSING_SCALING_HPP
+#ifndef DO_SARA_IMAGEPROCESSING_SCALING_HPP
+#define DO_SARA_IMAGEPROCESSING_SCALING_HPP
 
 
-#include <DO/Core/Image/Image.hpp>
-#include <DO/Core/Image/Operations.hpp>
-#include <DO/ImageProcessing/Deriche.hpp>
-#include <DO/ImageProcessing/Interpolation.hpp>
+#include <DO/Sara/Core/Image/Image.hpp>
+#include <DO/Sara/Core/Image/Operations.hpp>
+#include <DO/Sara/ImageProcessing/Deriche.hpp>
+#include <DO/Sara/ImageProcessing/Interpolation.hpp>
 
 
 namespace DO {
@@ -64,7 +64,7 @@ namespace DO {
   //! \brief Reduce image.
   template <typename T, int N>
   Image<T, N> reduce(const Image<T, N>& src, Matrix<int, N, 1> new_sizes,
-                     bool keep_ratio=false)  
+                     bool keep_ratio=false)
   {
     // Typedefs.
     typedef typename PixelTraits<T>::template Cast<double>::pixel_type
@@ -111,7 +111,7 @@ namespace DO {
 
     return dst;
   }
-  
+
   //! \brief Reduce image.
   template <typename T>
   inline  Image<T, 2> reduce(const Image<T, 2>& image, int w, int h,
@@ -119,7 +119,7 @@ namespace DO {
   {
     return reduce(image, Vector2i(w,h), keep_ratio);
   }
-  
+
   //! \brief Reduce image.
   template <typename T>
   inline Image<T, 3> reduce(const Image<T, 3>& image, int w, int h, int d,
@@ -127,10 +127,10 @@ namespace DO {
   {
     return reduce(image, Vector3i(w,h,d), keep_ratio);
   }
-  
+
   //! \brief Reduce image.
   template <typename T,int N>
-  inline Image<T, N> reduce(const Image<T, N>& image, double fact)  
+  inline Image<T, N> reduce(const Image<T, N>& image, double fact)
   {
     Matrix<double, N, 1> new_sizes;
     new_sizes = image.sizes().template cast<double>() / fact;
@@ -170,7 +170,7 @@ namespace DO {
       position = dst_it.position()
         .template cast<double>()
         .cwiseProduct(scale_factor);
-      
+
       DoublePixel double_pixel_value(interpolate(image, position));
       *dst_it = PixelTraits<DoublePixel>::template Cast<ChannelType>::apply(
         double_pixel_value);
@@ -196,7 +196,7 @@ namespace DO {
 
   //! \brief Enlarge image.
   template <typename T,int N>
-  inline Image<T, N> enlarge(const Image<T, N>& image, double fact)  
+  inline Image<T, N> enlarge(const Image<T, N>& image, double fact)
   {
     Matrix<double, N, 1> new_sizes;
     new_sizes = image.sizes().template cast<double>()*fact;
@@ -207,4 +207,4 @@ namespace DO {
 }
 
 
-#endif /* DO_IMAGEPROCESSING_SCALING_HPP */
+#endif /* DO_SARA_IMAGEPROCESSING_SCALING_HPP */

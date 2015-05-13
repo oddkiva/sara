@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
@@ -18,8 +18,8 @@
   By default Eigen uses the *COLUMN-MAJOR* storage.
  */
 
-#ifndef DO_CORE_EIGENEXTENSION_HPP
-#define DO_CORE_EIGENEXTENSION_HPP
+#ifndef DO_SARA_CORE_EIGENEXTENSION_HPP
+#define DO_SARA_CORE_EIGENEXTENSION_HPP
 
 // To avoid compilation error with Eigen
 #if defined(_WIN32) || defined(_WIN32_WCE)
@@ -201,4 +201,4 @@ namespace DO {
 } /* namespace DO */
 
 
-#endif /* DO_CORE_EIGENEXTENSION_HPP */
+#endif /* DO_SARA_CORE_EIGENEXTENSION_HPP */

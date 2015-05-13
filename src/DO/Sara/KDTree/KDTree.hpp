@@ -1,19 +1,19 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_KDTREE_KDTREE_HPP
-#define DO_KDTREE_KDTREE_HPP
+#ifndef DO_SARA_KDTREE_KDTREE_HPP
+#define DO_SARA_KDTREE_KDTREE_HPP
 
 
-#include <DO/Core.hpp>
+#include <DO/Sara/Core.hpp>
 #include <flann/flann.hpp>
 
 
@@ -34,7 +34,7 @@ namespace DO {
              = flann::KDTreeIndexParams(1),
            const flann::SearchParams& search_params
              = flann::SearchParams(-1));
-    
+
     //! \brief Destructor.
     ~KDTree();
 
@@ -142,4 +142,4 @@ namespace DO {
 }
 
 
-#endif /* DO_KDTREE_KDTREE_HPP */
+#endif /* DO_SARA_KDTREE_KDTREE_HPP */

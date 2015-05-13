@@ -1,23 +1,23 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Graphics.hpp>
+#include <DO/Sara/Graphics.hpp>
 #include <QGraphicsItem>
 #include "GraphicsUtilities.hpp"
 
 namespace DO {
 
   static GraphicsView *view()
-  { return qobject_cast<GraphicsView *>(active_window()); }  
-  
+  { return qobject_cast<GraphicsView *>(active_window()); }
+
   // ====================================================================== //
   //! Graphics view window control functions
   Window create_graphics_view(int w, int h, const std::string& windowTitle,
@@ -58,7 +58,7 @@ namespace DO {
                               Qt::QueuedConnection,
                               Q_ARG(int, x),
                               Q_ARG(int, y),
-                              Q_ARG(const QColor&, 
+                              Q_ARG(const QColor&,
                                     QColor(c[0], c[1], c[2])),
                               Q_ARG(QGraphicsPixmapItem *, pixItem));
   }

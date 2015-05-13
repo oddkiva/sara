@@ -1,19 +1,19 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2014 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Graphics.hpp>
-#include <DO/Geometry.hpp>
+#include <DO/Sara/Graphics.hpp>
+#include <DO/Sara/Geometry.hpp>
 
 namespace DO {
-  
+
   void draw_line_segment(const LineSegment& s, const Color3ub& c, int penWidth)
   {
     draw_line(s.p1(), s.p2(), c, penWidth);

@@ -1,16 +1,16 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_MATCH_MATCH_HPP
-#define DO_MATCH_MATCH_HPP
+#ifndef DO_SARA_MATCH_MATCH_HPP
+#define DO_SARA_MATCH_MATCH_HPP
 
 namespace DO {
 
@@ -98,9 +98,9 @@ namespace DO {
 
   void drawMatches(const std::vector<Match>& matches, const Point2f& off2, float z = 1.f);
 
-  void checkMatches(const Image<Rgb8>& I1, const Image<Rgb8>& I2, 
+  void checkMatches(const Image<Rgb8>& I1, const Image<Rgb8>& I2,
                     const std::vector<Match>& matches, bool redrawEverytime = false, float z = 1.f);
 
 } /* namespace DO */
 
-#endif /* DO_MATCH_MATCH_HPP */
+#endif /* DO_SARA_MATCH_MATCH_HPP */

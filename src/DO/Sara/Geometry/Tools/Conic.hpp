@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2014 David Ok <david.ok8@gmail.com>
@@ -9,10 +9,10 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_GEOMETRY_TOOLS_CONIC_HPP
-#define DO_GEOMETRY_TOOLS_CONIC_HPP
+#ifndef DO_SARA_GEOMETRY_TOOLS_CONIC_HPP
+#define DO_SARA_GEOMETRY_TOOLS_CONIC_HPP
 
-#include <DO/Geometry/Tools/MatrixBasedObject.hpp>
+#include <DO/Sara/Geometry/Tools/MatrixBasedObject.hpp>
 
 
 namespace DO { namespace Projective {
@@ -47,4 +47,4 @@ namespace DO { namespace Projective {
 } /* namespace DO */
 
 
-#endif /* DO_GEOMETRY_TOOLS_CONIC_HPP */
+#endif /* DO_SARA_GEOMETRY_TOOLS_CONIC_HPP */

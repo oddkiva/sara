@@ -1,24 +1,24 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
 //! @file
 
-#ifndef DO_IMAGEPROCESSING_GAUSSIANPYRAMID_HPP
-#define DO_IMAGEPROCESSING_GAUSSIANPYRAMID_HPP
+#ifndef DO_SARA_IMAGEPROCESSING_GAUSSIANPYRAMID_HPP
+#define DO_SARA_IMAGEPROCESSING_GAUSSIANPYRAMID_HPP
 
 
-#include <DO/ImageProcessing/ImagePyramid.hpp>
-#include <DO/ImageProcessing/Differential.hpp>
-#include <DO/ImageProcessing/LinearFiltering.hpp>
-#include <DO/ImageProcessing/Scaling.hpp>
+#include <DO/Sara/ImageProcessing/ImagePyramid.hpp>
+#include <DO/Sara/ImageProcessing/Differential.hpp>
+#include <DO/Sara/ImageProcessing/LinearFiltering.hpp>
+#include <DO/Sara/ImageProcessing/Scaling.hpp>
 
 
 namespace DO {
@@ -55,7 +55,7 @@ namespace DO {
     // 2^k < l/(2b)
     // k < log(l/(2b))/log(2)
     int numOctaves = static_cast<int>(log(l/(2.f*b))/log(2.f));
-    
+
     // Shorten names.
     Scalar k = Scalar(params.scale_geometric_factor());
     int numScales = params.num_scales_per_octave();
@@ -70,7 +70,7 @@ namespace DO {
     for (int o = 0; o < numOctaves; ++o)
     {
       // Compute the octave scaling factor
-      G.octave_scaling_factor(o) = 
+      G.octave_scaling_factor(o) =
         (o == 0) ? 1.f/resizeFactor : G.octave_scaling_factor(o-1)*2;
 
       // Compute the gaussians in octave \f$o\f$
@@ -109,7 +109,7 @@ namespace DO {
     ImagePyramid<T> D;
     D.reset(gaussians.num_octaves(),
             gaussians.num_scales_per_octave()-1,
-            gaussians.scale_initial(), 
+            gaussians.scale_initial(),
             gaussians.scale_geometric_factor());
 
     for (int o = 0; o < D.num_octaves(); ++o)
@@ -124,7 +124,7 @@ namespace DO {
     return D;
   }
 
-  //! Computes a pyramid of scale-normalized Laplacians of Gaussians from the 
+  //! Computes a pyramid of scale-normalized Laplacians of Gaussians from the
   //! Gaussian pyramid.
   template <typename T>
   ImagePyramid<T> laplacian_pyramid(const ImagePyramid<T>& gaussians)
@@ -132,7 +132,7 @@ namespace DO {
     ImagePyramid<T> LoG;
     LoG.reset(gaussians.num_octaves(),
               gaussians.num_scales_per_octave(),
-              gaussians.scale_initial(), 
+              gaussians.scale_initial(),
               gaussians.scale_geometric_factor());
 
     for (int o = 0; o < LoG.num_octaves(); ++o)
@@ -149,8 +149,8 @@ namespace DO {
     return LoG;
   }
 
-  //! Computes the gradient vector of \f$I(x,y,\sigma)\f$ at \f$(x,y,\sigma)\f$, 
-  //! where \f$\sigma = 2^{s/S + o}\f$ where \f$S\f$ is the number of scales per 
+  //! Computes the gradient vector of \f$I(x,y,\sigma)\f$ at \f$(x,y,\sigma)\f$,
+  //! where \f$\sigma = 2^{s/S + o}\f$ where \f$S\f$ is the number of scales per
   //! octave.
   template <typename T>
   Matrix<T, 3, 1> gradient(const ImagePyramid<T>& I, int x, int y, int s, int o)
@@ -174,7 +174,7 @@ namespace DO {
   }
 
   //! Computes the hessian matrix of \f$I(x,y,\sigma)\f$ at \f$(x,y,\sigma)\f$,
-  //! where \f$\sigma = 2^{s/S + o}\f$ where \f$S\f$ is the number of scales 
+  //! where \f$\sigma = 2^{s/S + o}\f$ where \f$S\f$ is the number of scales
   //! per octave.
   template <typename T>
   Matrix<T, 3, 3> hessian(const ImagePyramid<T>& I, int x, int y, int s, int o)
@@ -197,7 +197,7 @@ namespace DO {
     // Iss
     H(2,2) = I(x,y,s+1,o) - T(2)*I(x,y,s,o) + I(x,y,s-1,o);
     // Ixy = Iyx
-    H(0,1) = H(1,0) = ( I(x+1,y+1,s,o) - I(x-1,y+1,s,o) 
+    H(0,1) = H(1,0) = ( I(x+1,y+1,s,o) - I(x-1,y+1,s,o)
                       - I(x+1,y-1,s,o) + I(x-1,y-1,s,o) ) / T(4);
     // Ixs = Isx
     H(0,2) = H(2,0) = ( I(x+1,y,s+1,o) - I(x-1,y,s+1,o)
@@ -214,4 +214,4 @@ namespace DO {
 } /* namespace DO */
 
 
-#endif /* DO_IMAGEPROCESSING_GAUSSIANPYRAMID_HPP */
+#endif /* DO_SARA_IMAGEPROCESSING_GAUSSIANPYRAMID_HPP */

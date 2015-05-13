@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
@@ -9,15 +9,15 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_CORE_STATICASSERT_HPP
-#define DO_CORE_STATICASSERT_HPP
+#ifndef DO_SARA_CORE_STATICASSERT_HPP
+#define DO_SARA_CORE_STATICASSERT_HPP
 
 //! @file
 //! \brief Implementation from:
 //! http://stackoverflow.com/questions/1980012/boost-static-assert-without-boost
 
 
-//! Concatenation macro used for the implementation of DO_STATIC_ASSERT.
+//! Concatenation macro used for the implementation of DO_SARA_STATIC_ASSERT.
 #define CAT(arg1, arg2)   CAT1(arg1, arg2)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #define CAT1(arg1, arg2)  CAT2(arg1, arg2)
@@ -35,7 +35,7 @@
 
   Usage:
 
-  DO_STATIC_ASSERT(expression, message); // **don't forget** the semi-colon!
+  DO_SARA_STATIC_ASSERT(expression, message); // **don't forget** the semi-colon!
 
   When the static assertion test fails, a compiler error message that somehow
   contains the "STATIC_ASSERTION_FAILED_AT_LINE_xxx_message" is generated.
@@ -43,9 +43,9 @@
   WARNING: message has to be a valid C++ identifier, that is to say it must not
   contain space characters, cannot start with a digit, etc.
 
-  DO_STATIC_ASSERT(true, this_message_will_never_be_displayed);
+  DO_SARA_STATIC_ASSERT(true, this_message_will_never_be_displayed);
  */
-#define DO_STATIC_ASSERT(expression, message)                               \
+#define DO_SARA_STATIC_ASSERT(expression, message)                               \
 struct CAT(__static_assertion_at_line_, __LINE__)                           \
 {                                                                           \
   DO::Meta::StaticAssertion<static_cast<bool>((expression))>                \
@@ -60,15 +60,15 @@ struct CAT(__static_assertion_at_line_, __LINE__)                           \
 
 namespace DO { namespace Meta {
 
-  //! Used for the implementation of DO_STATIC_ASSERT.
+  //! Used for the implementation of DO_SARA_STATIC_ASSERT.
   template <bool> struct StaticAssertion;
-  //! Used for the implementation of DO_STATIC_ASSERT.
+  //! Used for the implementation of DO_SARA_STATIC_ASSERT.
   template <> struct StaticAssertion<true> {};
-  //! Used for the implementation of DO_STATIC_ASSERT.
+  //! Used for the implementation of DO_SARA_STATIC_ASSERT.
   template<int i> struct StaticAssertionTest {};
 
 } /* namespace Meta */
 } /* namespace DO */
 
 
-#endif /* DO_CORE_STATICASSERT_HPP */
+#endif /* DO_SARA_CORE_STATICASSERT_HPP */

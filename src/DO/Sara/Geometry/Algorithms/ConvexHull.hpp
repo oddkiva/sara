@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2014 David Ok <david.ok8@gmail.com>
@@ -11,12 +11,12 @@
 
 #pragma once
 
-#include <DO/Geometry/Objects/Polygon.hpp>
+#include <DO/Sara/Geometry/Objects/Polygon.hpp>
 
 namespace DO { namespace Detail {
 
     typedef std::pair<Point2d, double> PtCotg;
-    
+
     void sort_points_by_polar_angle(Point2d *points, PtCotg *workArray,
                                 int numPoints);
 

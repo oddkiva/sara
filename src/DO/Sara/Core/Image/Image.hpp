@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
@@ -11,12 +11,12 @@
 
 //! @file
 
-#ifndef DO_CORE_IMAGE_IMAGE_HPP
-#define DO_CORE_IMAGE_IMAGE_HPP
+#ifndef DO_SARA_CORE_IMAGE_IMAGE_HPP
+#define DO_SARA_CORE_IMAGE_IMAGE_HPP
 
 
-#include <DO/Core/Image/ElementTraits.hpp>
-#include <DO/Core/MultiArray.hpp>
+#include <DO/Sara/Core/Image/ElementTraits.hpp>
+#include <DO/Sara/Core/MultiArray.hpp>
 
 
 namespace DO {
@@ -113,7 +113,7 @@ namespace DO {
     //! Return matrix view for linear algebra with Eigen libraries.
     inline matrix_view_type matrix()
     {
-      DO_STATIC_ASSERT(Dimension == 2, MULTIARRAY_MUST_HAVE_TWO_DIMENSIONS);
+      DO_SARA_STATIC_ASSERT(Dimension == 2, MULTIARRAY_MUST_HAVE_TWO_DIMENSIONS);
       return matrix_view_type(
         reinterpret_cast<
         typename ElementTraits<pixel_type>::pointer>(base_type::data()),
@@ -122,7 +122,7 @@ namespace DO {
 
     inline const_matrix_view_type matrix() const
     {
-      DO_STATIC_ASSERT(Dimension == 2, MULTIARRAY_MUST_HAVE_TWO_DIMENSIONS);
+      DO_SARA_STATIC_ASSERT(Dimension == 2, MULTIARRAY_MUST_HAVE_TWO_DIMENSIONS);
       return const_matrix_view_type(
         reinterpret_cast<
         typename ElementTraits<pixel_type>::const_pointer>(base_type::data()),
@@ -216,4 +216,4 @@ namespace DO {
 } /* namespace DO */
 
 
-#endif /* DO_CORE_IMAGE_IMAGE_HPP */
+#endif /* DO_SARA_CORE_IMAGE_IMAGE_HPP */

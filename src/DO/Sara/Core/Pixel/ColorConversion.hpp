@@ -1,5 +1,5 @@
 ﻿// ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
@@ -9,14 +9,14 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_CORE_PIXEL_COLOR_CONVERSION_HPP
-#define DO_CORE_PIXEL_COLOR_CONVERSION_HPP
+#ifndef DO_SARA_CORE_PIXEL_COLOR_CONVERSION_HPP
+#define DO_SARA_CORE_PIXEL_COLOR_CONVERSION_HPP
 
 
-#include <DO/Core/EigenExtension.hpp>
-#include <DO/Core/StaticAssert.hpp>
-#include <DO/Core/Pixel/ColorSpace.hpp>
-#include <DO/Core/Pixel/Pixel.hpp>
+#include <DO/Sara/Core/EigenExtension.hpp>
+#include <DO/Sara/Core/StaticAssert.hpp>
+#include <DO/Sara/Core/Pixel/ColorSpace.hpp>
+#include <DO/Sara/Core/Pixel/Pixel.hpp>
 
 
 // Color space conversion with floating-point values.
@@ -26,7 +26,7 @@ namespace DO {
   template <typename T, int N>
   inline void rgb_to_gray(const Matrix<T, N, 1>& rgb, T& gray)
   {
-    DO_STATIC_ASSERT(
+    DO_SARA_STATIC_ASSERT(
       !std::numeric_limits<T>::is_integer,
       CONVERSION_FROM_RGB_TO_GRAY_IS_SUPPORTED_ONLY_FOR_FLOATING_POINT_TYPE);
 
@@ -44,7 +44,7 @@ namespace DO {
   template <typename T>
   inline void rgb_to_yuv(const Matrix<T, 3, 1>& rgb, Matrix<T, 3, 1>& yuv)
   {
-    DO_STATIC_ASSERT(
+    DO_SARA_STATIC_ASSERT(
       !std::numeric_limits<T>::is_integer,
       CONVERSION_FROM_GRAY_TO_RGB_IS_SUPPORTED_ONLY_FOR_FLOATING_POINT_TYPE);
 
@@ -57,7 +57,7 @@ namespace DO {
   template <typename T>
   inline void yuv_to_rgb(const Matrix<T, 3, 1>& yuv, Matrix<T, 3, 1>& rgb)
   {
-    DO_STATIC_ASSERT(
+    DO_SARA_STATIC_ASSERT(
       !std::numeric_limits<T>::is_integer,
       CONVERSION_FROM_GRAY_TO_RGB_IS_SUPPORTED_ONLY_FOR_FLOATING_POINT_TYPE);
 
@@ -200,4 +200,4 @@ namespace DO {
 
 
 
-#endif /* DO_CORE_PIXEL_COLOR_CONVERSION_HPP */
+#endif /* DO_SARA_CORE_PIXEL_COLOR_CONVERSION_HPP */

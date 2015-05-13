@@ -1,11 +1,11 @@
-#ifndef DO_CORE_PIXEL_SMARTCOLORCONVERSION_HPP
-#define DO_CORE_PIXEL_SMARTCOLORCONVERSION_HPP
+#ifndef DO_SARA_CORE_PIXEL_SMARTCOLORCONVERSION_HPP
+#define DO_SARA_CORE_PIXEL_SMARTCOLORCONVERSION_HPP
 
 
-#include <DO/Core/Meta.hpp>
-#include <DO/Core/Pixel/ChannelConversion.hpp>
-#include <DO/Core/Pixel/ColorConversion.hpp>
-#include <DO/Core/StaticAssert.hpp>
+#include <DO/Sara/Core/Meta.hpp>
+#include <DO/Sara/Core/Pixel/ChannelConversion.hpp>
+#include <DO/Sara/Core/Pixel/ColorConversion.hpp>
+#include <DO/Sara/Core/StaticAssert.hpp>
 
 
 // Smart color conversion between colorspace regardless of the channel type.
@@ -151,11 +151,11 @@ namespace DO {
   inline void smart_convert_color(SrcGray src, DstGray& dst)
   {
     static const bool same_type = Meta::IsSame<SrcGray, DstGray>::value;
-    DO_STATIC_ASSERT(!same_type, THE_GRAYSCALE_TYPES_ARE_IDENTICAL);
+    DO_SARA_STATIC_ASSERT(!same_type, THE_GRAYSCALE_TYPES_ARE_IDENTICAL);
     convert_channel(src, dst);
   }
 
 }
 
 
-#endif /* DO_CORE_PIXEL_SMARTCOLORCONVERSION_HPP */
+#endif /* DO_SARA_CORE_PIXEL_SMARTCOLORCONVERSION_HPP */

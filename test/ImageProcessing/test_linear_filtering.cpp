@@ -1,18 +1,18 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
 
 #include <gtest/gtest.h>
 
-#include <DO/ImageProcessing/LinearFiltering.hpp>
+#include <DO/Sara/ImageProcessing/LinearFiltering.hpp>
 
 #include "../AssertHelpers.hpp"
 
@@ -197,7 +197,7 @@ TEST_F(TestFilters, test_2d_non_separable_filter)
   int width = 3, height = 4;
   _src_image.resize(width, height);
   _src_image.array().fill(1);
-  float kernel_2d[] = 
+  float kernel_2d[] =
   {
     1, 1, 1,
     1, 1, 1,
@@ -250,8 +250,8 @@ TEST_F(TestFilters, test_roberts_cross)
 }
 
 
-int main(int argc, char** argv) 
+int main(int argc, char** argv)
 {
-  testing::InitGoogleTest(&argc, argv); 
+  testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

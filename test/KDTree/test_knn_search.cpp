@@ -1,11 +1,11 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
@@ -16,7 +16,7 @@
 
 #include <gtest/gtest.h>
 
-#include <DO/KDTree.hpp>
+#include <DO/Sara/KDTree.hpp>
 
 #include "../AssertHelpers.hpp"
 
@@ -48,7 +48,7 @@ protected:
 
   TestKDTree()
   {
-    // We construct two sets in points. The first one lives in the 
+    // We construct two sets in points. The first one lives in the
     // zero-centered unit circle and the second in the zero-centered
     // circle with radius 10.
     num_points_in_each_circle = 20;

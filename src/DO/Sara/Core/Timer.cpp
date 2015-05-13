@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
@@ -11,7 +11,7 @@
 
 //! @file
 
-#include <DO/Core/Timer.hpp>
+#include <DO/Sara/Core/Timer.hpp>
 #ifdef _WIN32
 # include <windows.h>
 #else

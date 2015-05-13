@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
@@ -11,8 +11,8 @@
 
 //! @file
 
-#ifndef DO_FEATURES_IO_HPP
-#define DO_FEATURES_IO_HPP
+#ifndef DO_SARA_FEATURES_IO_HPP
+#define DO_SARA_FEATURES_IO_HPP
 
 
 #include <fstream>
@@ -20,8 +20,8 @@
 #include <string>
 #include <vector>
 
-#include <DO/Features/Feature.hpp>
-#include <DO/Features/DescriptorMatrix.hpp>
+#include <DO/Sara/Features/Feature.hpp>
+#include <DO/Sara/Features/DescriptorMatrix.hpp>
 
 
 namespace DO {
@@ -92,4 +92,4 @@ namespace DO {
 
 } /* namespace DO */
 
-#endif /* DO_FEATURES_IO_HPP */
+#endif /* DO_SARA_FEATURES_IO_HPP */

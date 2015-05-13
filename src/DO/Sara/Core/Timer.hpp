@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
@@ -11,12 +11,12 @@
 
 //! @file
 
-#ifndef DO_UTILITIES_TIMER_HPP
-#define DO_UTILITIES_TIMER_HPP
+#ifndef DO_SARA_UTILITIES_TIMER_HPP
+#define DO_SARA_UTILITIES_TIMER_HPP
 
 #include <iostream>
 
-#include <DO/Defines.hpp>
+#include <DO/Sara/Defines.hpp>
 
 
 namespace DO {
@@ -53,4 +53,4 @@ namespace DO {
 
 } /* namespace DO */
 
-#endif /* DO_UTILITIES_TIMER_HPP */
+#endif /* DO_SARA_UTILITIES_TIMER_HPP */

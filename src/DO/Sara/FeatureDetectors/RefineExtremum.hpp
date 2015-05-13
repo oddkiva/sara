@@ -1,18 +1,18 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
 //! @file
 
-#ifndef DO_FEATUREDETECTORS_REFINEEXTREMA_HPP
-#define DO_FEATUREDETECTORS_REFINEEXTREMA_HPP
+#ifndef DO_SARA_FEATUREDETECTORS_REFINEEXTREMA_HPP
+#define DO_SARA_FEATUREDETECTORS_REFINEEXTREMA_HPP
 
 namespace DO {
 
@@ -24,13 +24,13 @@ namespace DO {
 
   /*!
     \brief Test based on Harris-Stephens' idea on corner detection.
-    Basically the Hessian matrix \f$\mathbf{H}\f$ is estimated by finite 
+    Basically the Hessian matrix \f$\mathbf{H}\f$ is estimated by finite
     differentiation.
-    
+
     \f$(x,y)\f$ is on an edge if the Hessian matrix \f$\mathbf{H}\f$ satisfies
     the following criterion
     \f$
-      \frac{\mathrm{det}(\mathbf{H})}{\mathrm{tr}(\mathbf{H})} > 
+      \frac{\mathrm{det}(\mathbf{H})}{\mathrm{tr}(\mathbf{H})} >
       \frac{(r+1)^2}{r}
     \f$,
     where \f$r\f$ is the ratio between the eigenvalues of \f$\mathbf{H}\f$
@@ -47,13 +47,13 @@ namespace DO {
     @param[in] s scale index of the extrema
     @param[in] o octave index of the extrema
     @param[in]
-      imgPaddingSz 
-      This variable indicates the minimum border size of the image. DoG 
+      imgPaddingSz
+      This variable indicates the minimum border size of the image. DoG
       extrema that ends being located the border are not refined anymore.
     @param[in]
       numIter
-      This variable controls the number of iterations to refine the 
-      localization of DoG extrema in scale-space. The refinement process is 
+      This variable controls the number of iterations to refine the
+      localization of DoG extrema in scale-space. The refinement process is
       based on the function **DO::refineExtremum()**.
 
     Let \f$D : \mathbf{R}^3 \mapsto \mathbf{R}\f$ be the difference of gaussian
@@ -64,15 +64,15 @@ namespace DO {
     procedure seeks to minimize the following objective function iteratively:
     \f{eqnarray*}{
       \mathrm{minimize}_{\mathbf{h}}
-          D(\mathbf{x}) 
+          D(\mathbf{x})
         + D'(\mathbf{x})^T \mathbf{h}
         + 1/2 \mathbf{h}^T D''(\mathbf{x}) \mathbf{h}^T .
     \f}
-    In practice the gradient vector \f$D'(\mathbf{x})\f$ and hessian matrix 
-    \f$D''(\mathbf{x})\f$ are approximated by finite difference and one must check 
+    In practice the gradient vector \f$D'(\mathbf{x})\f$ and hessian matrix
+    \f$D''(\mathbf{x})\f$ are approximated by finite difference and one must check
     that the hessian matrix \f$D''(\mathbf{x})\f$ is indeed **positive-definite**.
 
-    Likewise, if \f$\mathbf{x}\f$ is a minimum, then one must check that 
+    Likewise, if \f$\mathbf{x}\f$ is a minimum, then one must check that
     \f$D''(\mathbf{x})\f$ is **negative-definite**.
 
     Otherwise, we cannot refine the position of the extremum.
@@ -82,22 +82,22 @@ namespace DO {
                       Point3f& pos, float& val,
                       int borderSz = 1, int numIter = 5);
   /*!
-    \brief This function refines the coordinates using the interpolation method 
+    \brief This function refines the coordinates using the interpolation method
     in [Lowe, IJCV 2004] and [Brown and Lowe, BMVC 2002].
-    
-    It refines the spatial coordinates \f$(x,y)\f$. However, there is no scale 
+
+    It refines the spatial coordinates \f$(x,y)\f$. However, there is no scale
     refinement here.
    */
   bool refineExtremum(const Image<float>& I, int x, int y, int type,
                       Point2f& pos, float& val,
                       int borderSz = 1, int numIter = 5);
   /*!
-    \brief Localizes all local extrema in scale-space at scale 
+    \brief Localizes all local extrema in scale-space at scale
     \f$\sigma = 2^{s/S+o}\f$.
     Note that the default parameters are suited for the DoG extrema.
    */
   std::vector<OERegion> localScaleSpaceExtrema(const ImagePyramid<float>& I,
-                                               int s, int o, 
+                                               int s, int o,
                                                float extremumThres = 0.03f,
                                                float edgeRatioThres = 10.f,
                                                int imgPaddingSz = 1,
@@ -116,8 +116,8 @@ namespace DO {
     \brief Localizes local maxima in space only and tries to assign a
     characteristic scale to each local maximum from the normalized Laplacian
     of Gaussians operator.
-    
-    This is mainly intended for Harris-Laplace and Hessian-Laplace interest 
+
+    This is mainly intended for Harris-Laplace and Hessian-Laplace interest
     points.
    */
   std::vector<OERegion> laplaceMaxima(const ImagePyramid<float>& function,
@@ -132,4 +132,4 @@ namespace DO {
 
 }
 
-#endif /* DO_FEATUREDETECTORS_REFINEEXTREMA_HPP */
+#endif /* DO_SARA_FEATUREDETECTORS_REFINEEXTREMA_HPP */

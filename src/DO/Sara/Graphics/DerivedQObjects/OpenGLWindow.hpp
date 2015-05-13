@@ -1,18 +1,18 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
 //! @file
 
-#ifndef DO_GRAPHICS_OPENGLWINDOW_HPP
-#define DO_GRAPHICS_OPENGLWINDOW_HPP
+#ifndef DO_SARA_GRAPHICS_OPENGLWINDOW_HPP
+#define DO_SARA_GRAPHICS_OPENGLWINDOW_HPP
 
 #include "../Mesh.hpp"
 #include "../Frame.hpp"
@@ -25,14 +25,14 @@
 #include <QTimer>
 
 namespace DO {
-  
+
   /*!
     \addtogroup GraphicsInternal
 
     @{
    */
 
-  //! \brief The TrackBall class is used the OpenGLWindow class to allow the 
+  //! \brief The TrackBall class is used the OpenGLWindow class to allow the
   //! user to view the 3D scene interactively.
   class TrackBall
   {
@@ -56,8 +56,8 @@ namespace DO {
     Q_OBJECT
 
   public:
-    OpenGLWindow(int width, int height, 
-                 const QString& windowTitle = "DO++",
+    OpenGLWindow(int width, int height,
+                 const QString& windowTitle = "DO-CV",
                  int x = -1, int y = -1,
                  QWidget* parent = 0);
 
@@ -95,7 +95,7 @@ namespace DO {
     Point3f center_;
     GLObject::Frame frame_;
     TrackBall trackball_;
-    
+
     SimpleTriangleMesh3f mesh_;
 
     QPoint last_pos_;
@@ -104,11 +104,11 @@ namespace DO {
     bool display_frame_;
 
     QTimer event_listening_timer_;
-    
+
   };
 
   //! @}
 
 } /* namespace DO */
 
-#endif /* DO_GRAPHICS_OPENGLWINDOW_HPP */
+#endif /* DO_SARA_GRAPHICS_OPENGLWINDOW_HPP */

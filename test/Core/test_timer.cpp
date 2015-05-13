@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
@@ -10,8 +10,8 @@
 // ========================================================================== //
 
 #include <gtest/gtest.h>
-#include <DO/Core/Timer.hpp>
-#include <DO/Core/DebugUtilities.hpp>
+#include <DO/Sara/Core/Timer.hpp>
+#include <DO/Sara/Core/DebugUtilities.hpp>
 #include <chrono>
 #include <thread>
 
@@ -24,7 +24,7 @@ inline void millisleep(unsigned milliseconds)
   this_thread::sleep_for(duration);
 }
 
-TEST(DO_Core_Test, testTimer)
+TEST(DO_SARA_Core_Test, testTimer)
 {
   Timer timer;
   double elapsed_milliseconds;

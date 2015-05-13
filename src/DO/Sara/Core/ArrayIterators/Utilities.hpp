@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
@@ -11,17 +11,17 @@
 
 //! @file
 
-#ifndef DO_CORE_ARRAYITERATORS_UTILITIES_HPP
-#define DO_CORE_ARRAYITERATORS_UTILITIES_HPP
+#ifndef DO_SARA_CORE_ARRAYITERATORS_UTILITIES_HPP
+#define DO_SARA_CORE_ARRAYITERATORS_UTILITIES_HPP
 
 
 #include <iterator>
 #include <sstream>
 #include <stdexcept>
 
-#include <DO/Core/EigenExtension.hpp>
-#include <DO/Core/Meta.hpp>
-#include <DO/Core/StaticAssert.hpp>
+#include <DO/Sara/Core/EigenExtension.hpp>
+#include <DO/Sara/Core/Meta.hpp>
+#include <DO/Sara/Core/StaticAssert.hpp>
 
 
 namespace DO {
@@ -34,7 +34,7 @@ namespace DO {
   inline Index jump(const Matrix<Index, N, 1>& offset,
                     const Matrix<Index, N, 1>& strides)
   {
-    DO_STATIC_ASSERT(std::numeric_limits<Index>::is_integer,
+    DO_SARA_STATIC_ASSERT(std::numeric_limits<Index>::is_integer,
                      INDEX_MUST_BE_INTEGRAL);
     return offset.dot(strides);
   }
@@ -58,8 +58,8 @@ namespace DO {
     template <typename Index, int N>
     static Matrix<Index, N, 1> eval(const Matrix<Index, N, 1>& sizes)
     {
-      DO_STATIC_ASSERT(N > 0, N_MUST_BE_POSITIVE);
-      DO_STATIC_ASSERT(std::numeric_limits<Index>::is_integer,
+      DO_SARA_STATIC_ASSERT(N > 0, N_MUST_BE_POSITIVE);
+      DO_SARA_STATIC_ASSERT(std::numeric_limits<Index>::is_integer,
                        INDEX_MUST_BE_INTEGRAL);
       Matrix<Index, N, 1> strides;
       strides[N-1] = 1;
@@ -76,8 +76,8 @@ namespace DO {
     template <typename Index, int N>
     static Matrix<Index, N, 1> eval(const Matrix<Index, N, 1>& sizes)
     {
-      DO_STATIC_ASSERT(N > 0, N_MUST_BE_POSITIVE);
-      DO_STATIC_ASSERT(std::numeric_limits<Index>::is_integer,
+      DO_SARA_STATIC_ASSERT(N > 0, N_MUST_BE_POSITIVE);
+      DO_SARA_STATIC_ASSERT(std::numeric_limits<Index>::is_integer,
                        INDEX_MUST_BE_INTEGRAL);
       Matrix<Index, N, 1> strides;
       strides[0] = 1;
@@ -209,4 +209,4 @@ namespace DO {
 } /* namespace DO */
 
 
-#endif /* DO_CORE_ARRAYITERATORS_UTILITIES_HPP */
+#endif /* DO_SARA_CORE_ARRAYITERATORS_UTILITIES_HPP */

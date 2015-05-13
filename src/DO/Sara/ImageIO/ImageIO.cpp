@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
@@ -17,9 +17,9 @@
 # include <windows.h>
 #endif
 
-#include <DO/ImageIO/ImageIO.hpp>
-#include <DO/Core/Image.hpp>
-#include <DO/ImageIO/ImageIOObjects.hpp>
+#include <DO/Sara/ImageIO/ImageIO.hpp>
+#include <DO/Sara/Core/Image.hpp>
+#include <DO/Sara/ImageIO/ImageIOObjects.hpp>
 
 
 using namespace std;
@@ -37,9 +37,9 @@ namespace DO {
 
   static inline bool is_jpeg_file_ext(const string& ext)
   {
-    return 
-      ext == ".jpg"  || 
-      ext == ".jpeg" || 
+    return
+      ext == ".jpg"  ||
+      ext == ".jpeg" ||
       ext == ".jpe"  ||
       ext == ".jfif" ||
       ext == ".jfi";
@@ -68,9 +68,9 @@ namespace DO {
     // Read the JPEG file into a buffer
     FILE *fp = fopen(file_path.c_str(), "rb");
     if (!fp)
-    { 
-      cout << "Can't open file:" << endl << file_path << endl; 
-      return false; 
+    {
+      cout << "Can't open file:" << endl << file_path << endl;
+      return false;
     }
     fseek(fp, 0, SEEK_END);
     unsigned long fsize = ftell(fp);
@@ -162,7 +162,7 @@ namespace DO {
     length = sprintf(&buffer[0], "35mm focal length : %u mm\n", exifInfo.FocalLengthIn35mm);
     exif_info_string += string(&buffer[0], &buffer[0]+length);
 
-    length = sprintf(&buffer[0], "GPS Latitude      : %f deg (%f deg, %f min, %f sec %c)\n", 
+    length = sprintf(&buffer[0], "GPS Latitude      : %f deg (%f deg, %f min, %f sec %c)\n",
       exifInfo.GeoLocation.Latitude,
       exifInfo.GeoLocation.LatComponents.degrees,
       exifInfo.GeoLocation.LatComponents.minutes,
@@ -170,7 +170,7 @@ namespace DO {
       exifInfo.GeoLocation.LatComponents.direction);
     exif_info_string += string(&buffer[0], &buffer[0]+length);
 
-    length = sprintf(&buffer[0], "GPS Longitude     : %f deg (%f deg, %f min, %f sec %c)\n", 
+    length = sprintf(&buffer[0], "GPS Longitude     : %f deg (%f deg, %f min, %f sec %c)\n",
       exifInfo.GeoLocation.Longitude,
       exifInfo.GeoLocation.LonComponents.degrees,
       exifInfo.GeoLocation.LonComponents.minutes,
@@ -201,7 +201,7 @@ namespace DO {
 
     string ext(file_ext(filepath));
 
-    if ( is_jpeg_file_ext(ext) && 
+    if ( is_jpeg_file_ext(ext) &&
          JpegFileReader(filepath).read(data, w, h, d) )
       return true;
     if ( is_png_file_ext(ext) &&

@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
@@ -11,9 +11,9 @@
 
 #include <gtest/gtest.h>
 
-#include <DO/Features/Feature.hpp>
-#include <DO/Features/DescriptorMatrix.hpp>
-#include <DO/Features/IO.hpp>
+#include <DO/Sara/Features/Feature.hpp>
+#include <DO/Sara/Features/DescriptorMatrix.hpp>
+#include <DO/Sara/Features/IO.hpp>
 
 #include "../AssertHelpers.hpp"
 
@@ -81,6 +81,6 @@ TEST(TestFeatures, test_io)
 
 int main(int argc, char **argv)
 {
-  testing::InitGoogleTest(&argc, argv); 
+  testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

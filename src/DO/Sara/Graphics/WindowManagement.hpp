@@ -1,18 +1,18 @@
 // ========================================================================= //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================= //
 
 //! @file
 
-#ifndef DO_GRAPHICS_WINDOWCONTROL_HPP
-#define DO_GRAPHICS_WINDOWCONTROL_HPP
+#ifndef DO_SARA_GRAPHICS_WINDOWCONTROL_HPP
+#define DO_SARA_GRAPHICS_WINDOWCONTROL_HPP
 
 #include "Events.hpp"
 
@@ -47,31 +47,31 @@ namespace DO {
   // Windows handling function
   //! Open a PaintingWindow for 2D drawing.
   DO_EXPORT
-  Window create_window(int w, int h, const std::string& windowTitle = "DO++",
+  Window create_window(int w, int h, const std::string& windowTitle = "DO-CV",
                        int x = -1, int y = -1);
   inline Window create_window(const Vector2i& sizes,
-                              const std::string& windowTitle = "DO++",
+                              const std::string& windowTitle = "DO-CV",
                               int x = -1, int y = -1)
   { return create_window(sizes(0), sizes(1), windowTitle, x, y); }
   //! Open a OpenGLWindow for 3D drawing.
   DO_EXPORT
-  Window create_gl_window(int w, int h, const std::string& windowTitle = "DO++",
+  Window create_gl_window(int w, int h, const std::string& windowTitle = "DO-CV",
                       int x = -1, int y = -1);
   inline Window create_gl_window(const Vector2i& sizes,
-                             const std::string& windowTitle = "DO++",
+                             const std::string& windowTitle = "DO-CV",
                              int x = -1, int y = -1)
   { return create_gl_window(sizes(0), sizes(1), windowTitle, x, y); }
   //! Open a GraphicsView for interactive viewing.
   DO_EXPORT
   Window create_graphics_view(int w, int h,
-                              const std::string& windowTitle = "DO++",
+                              const std::string& windowTitle = "DO-CV",
                               int x = -1, int y = -1);
   DO_EXPORT
   inline Window create_graphics_view(const Vector2i& sizes,
-                                 const std::string& windowTitle = "DO++",
+                                 const std::string& windowTitle = "DO-CV",
                                  int x = -1, int y = -1)
   { return create_graphics_view(sizes(0), sizes(1), windowTitle, x, y); }
-  //! \brief Close the window **w** (regardless of its type). 
+  //! \brief Close the window **w** (regardless of its type).
   //! By default, the active window is closed.
   DO_EXPORT
   void close_window(Window w = active_window());
@@ -97,14 +97,14 @@ namespace DO {
 
   // ======================================================================= //
   // I/O control functions
-  //! \brief Wait for a click from the user. 
+  //! \brief Wait for a click from the user.
   //! - Works only on the *active* window.
   //! - Returns the clicked mouse button
   //! - store the click coordinates \f$(x,y)\f$.
   DO_EXPORT
   int get_mouse(int& x, int& y);
   //! \brief Wait for a click from the user (only on the *active* window)
-  //! - Returns the clicked mouse button and 
+  //! - Returns the clicked mouse button and
   //! - Stores the click coordinates \f$p\f$.
   inline int get_mouse(Point2i& p)
   { return get_mouse(p.x(), p.y()); }
@@ -141,4 +141,4 @@ namespace DO {
 
 } /* namespace DO */
 
-#endif /* DO_GRAPHICS_WINDOWCONTROL_HPP */
+#endif /* DO_SARA_GRAPHICS_WINDOWCONTROL_HPP */

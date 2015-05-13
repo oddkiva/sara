@@ -1,5 +1,5 @@
-#include <DO/FeatureDetectors.hpp>
-#include <DO/Graphics.hpp>
+#include <DO/Sara/FeatureDetectors.hpp>
+#include <DO/Sara/Graphics.hpp>
 #include <algorithm>
 #include <cmath>
 
@@ -67,7 +67,7 @@ vector<OERegion> computeHarrisLaplaceAffineCorners(const Image<float>& I,
     toc();
 
   // 3. Rescale the kept features to original image dimensions.
-  size_t num_kept_features = 
+  size_t num_kept_features =
     std::accumulate(keepFeatures.begin(), keepFeatures.end(), 0);
 
   vector<OERegion> keptCorners;
@@ -81,7 +81,7 @@ vector<OERegion> computeHarrisLaplaceAffineCorners(const Image<float>& I,
       keptCorners.back().shapeMat() *= pow(fact,-2);
       keptCorners.back().coords() *= fact;
 
-    }    
+    }
   }
 
   CHECK(keptCorners.size());

@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2014 David Ok <david.ok8@gmail.com>
@@ -14,8 +14,8 @@
 
 #include <gtest/gtest.h>
 
-#include <DO/Core/Pixel/SmartColorConversion.hpp>
-#include <DO/Core/Pixel/Typedefs.hpp>
+#include <DO/Sara/Core/Pixel/SmartColorConversion.hpp>
+#include <DO/Sara/Core/Pixel/Typedefs.hpp>
 
 #include "../AssertHelpers.hpp"
 

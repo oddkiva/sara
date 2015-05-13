@@ -1,24 +1,24 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
 //! @file
 
-#ifndef DO_IMAGEPROCESSING_LINEARFILTERING_HPP
-#define DO_IMAGEPROCESSING_LINEARFILTERING_HPP
+#ifndef DO_SARA_IMAGEPROCESSING_LINEARFILTERING_HPP
+#define DO_SARA_IMAGEPROCESSING_LINEARFILTERING_HPP
 
 
 #include <vector>
 
-#include <DO/Core/Image.hpp>
-#include <DO/Core/Pixel.hpp>
+#include <DO/Sara/Core/Image.hpp>
+#include <DO/Sara/Core/Pixel.hpp>
 
 
 namespace DO {
@@ -40,7 +40,7 @@ namespace DO {
       the convolution kernel \f$g = (g_i)_{1 \leq i \leq K}\f$.
     @param[in] signal_size the signal size \f$N\f$.
     @param[in] kernel_size the kernel size \f$K\f$.
-    
+
    */
   template <typename T>
   void convolve_array(T *signal,
@@ -170,10 +170,10 @@ namespace DO {
   void apply_gaussian_filter(
     const Image<T>& src, Image<T>& dst,
     typename PixelTraits<T>::channel_type sigma,
-    typename PixelTraits<T>::channel_type gauss_truncate = 
+    typename PixelTraits<T>::channel_type gauss_truncate =
       typename PixelTraits<T>::channel_type(4))
   {
-    DO_STATIC_ASSERT(
+    DO_SARA_STATIC_ASSERT(
       !std::numeric_limits<typename PixelTraits<T>::channel_type >::is_integer,
       CHANNEL_TYPE_MUST_NOT_BE_INTEGRAL );
 
@@ -204,7 +204,7 @@ namespace DO {
 
     apply_row_based_filter(src, dst, &kernel[0], kernel_size);
     apply_column_based_filter(src, dst, &kernel[0], kernel_size);
-        
+
     delete[] kernel;
   }
 
@@ -255,7 +255,7 @@ namespace DO {
     typedef typename PixelTraits<T>::channel_type S;
     const S mean_kernel[] = { S( 1), S(1), S(1) };
     const S diff_kernel[] = { S(-1), S(0), S(1) };
-    
+
     Image<T> tmp;
 
     // Column derivative.
@@ -278,7 +278,7 @@ namespace DO {
     int kernel_width, int kernel_height)
   {
     typedef typename Image<T>::vector_type Vector;
-    
+
     const int half_kw = kernel_width/2;
     const int half_kh = kernel_height/2;
     const int w = src.width();
@@ -288,7 +288,7 @@ namespace DO {
     Image<T> work(sizes);
     const int workw = work.width();
     const int workh = work.height();
-    
+
     for (int y = 0; y < workh; ++y) {
       for (int x = 0; x < workw; ++x) {
         // North-West
@@ -358,11 +358,11 @@ namespace DO {
   void apply_roberts_cross_filter(const Image<T>& src, Image<T>& dst)
   {
     typedef typename PixelTraits<T>::channel_type S;
-    const S k1[] = { 
+    const S k1[] = {
       S( 1), S( 0),
       S( 0), S(-1)
     };
-    const S k2[] = { 
+    const S k2[] = {
       S( 0), S( 1),
       S(-1), S( 0)
     };
@@ -491,4 +491,4 @@ namespace DO {
 }
 
 
-#endif /* DO_IMAGEPROCESSING_LINEARFILTERING_HPP */
+#endif /* DO_SARA_IMAGEPROCESSING_LINEARFILTERING_HPP */

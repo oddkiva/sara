@@ -1,18 +1,18 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
 
 #include <gtest/gtest.h>
 
-#include <DO/ImageProcessing/Extrema.hpp>
+#include <DO/Sara/ImageProcessing/Extrema.hpp>
 
 
 using namespace DO;
@@ -47,12 +47,12 @@ TEST(TestLocalExtremum, test_local_extremum)
   EXPECT_FALSE(StrictLocalMin<float>()(1, 1, I));
   vector<Point2i> maxima;
   vector<Point2i> minima;
-  
+
   maxima = strict_local_maxima(I);
   EXPECT_TRUE(maxima.empty());
   maxima = local_maxima(I);
   EXPECT_TRUE(maxima.size() == 8*8);
-  
+
   minima = strict_local_minima(I);
   EXPECT_TRUE(minima.empty());
   minima = local_minima(I);
@@ -66,7 +66,7 @@ TEST(TestLocalExtremum, test_local_extremum)
   EXPECT_TRUE(StrictLocalMax<float>()(1, 1, I));
   EXPECT_FALSE(LocalMin<float>()(1, 1, I));
   EXPECT_FALSE(StrictLocalMin<float>()(1, 1, I));
-  
+
   maxima = strict_local_maxima(I);
   EXPECT_EQ(maxima.size(), 2u);
   minima = strict_local_minima(I);
@@ -102,7 +102,7 @@ TEST(TestLocalExtremum, test_local_scale_space_extremum)
   I(7,7,1,0) = 10.f;
   EXPECT_TRUE(StrictLocalScaleSpaceMax<double>()(1,1,1,0,I));
   EXPECT_FALSE(StrictLocalScaleSpaceMin<double>()(1,1,1,0,I));
-  
+
   vector<Point2i> maxima, minima;
   maxima = strict_local_scale_space_maxima(I,1,0);
   minima = strict_local_scale_space_minima(I,1,0);
@@ -125,6 +125,6 @@ TEST(TestLocalExtremum, test_local_scale_space_extremum)
 
 int main(int argc, char** argv)
 {
-  testing::InitGoogleTest(&argc, argv); 
-  return RUN_ALL_TESTS(); 
+  testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }

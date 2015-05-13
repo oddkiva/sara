@@ -1,15 +1,15 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/FeatureDetectors.hpp>
+#include <DO/Sara/FeatureDetectors.hpp>
 
 using namespace std;
 
@@ -18,19 +18,19 @@ namespace DO {
   bool onEdge(const Image<float>& I, int x, int y, float edgeRatio)
   {
     Matrix2f H( hessian(I, Point2i(x,y)) );
-    return pow(H.trace(), 2)*edgeRatio >= 
+    return pow(H.trace(), 2)*edgeRatio >=
            pow(edgeRatio+1.f, 2)*fabs(H.determinant());
   }
 
   bool refineExtremum(const ImagePyramid<float>& I, int x, int y, int s, int o,
-                      int type, Point3f& pos, float& val, int borderSz, 
+                      int type, Point3f& pos, float& val, int borderSz,
                       int numIter)
   {
     Vector3f Dprime; // gradient
     Matrix3f Dsecond; // hessian
     Vector3f h;
     Vector3f lambda;
-    
+
     pos = Vector3f(float(x),float(y),I.octRelScale(s));
 
     int i;
@@ -42,7 +42,7 @@ namespace DO {
           s < 1 || s >= static_cast<int>(I(o).size())-1)
         break;
 
-      // Estimate the gradient and the hessian matrix by central finite 
+      // Estimate the gradient and the hessian matrix by central finite
       // differentiation.
       Dprime = gradient(I,x,y,s,o);
       Dsecond = hessian(I,x,y,s,o);
@@ -57,11 +57,11 @@ namespace DO {
       //   the Hessian matrix $H$ must be ***positive-definite***.
       //
       // Otherwise:
-      // - either we are localizing a saddle point instead of an 
+      // - either we are localizing a saddle point instead of an
       //   extremum if $D''(\mathbf{x})$ is invertible;
-      // - or Newton's method is applicable if $D''(\mathbf{x})$ is not 
+      // - or Newton's method is applicable if $D''(\mathbf{x})$ is not
       //   invertible.
-      // Such case arises frequently and in that case, interpolation is not 
+      // Such case arises frequently and in that case, interpolation is not
       // done.
       SelfAdjointEigenSolver<Matrix3f> solver(Dsecond);
       lambda = solver.eigenvalues();
@@ -72,12 +72,12 @@ namespace DO {
         break;
       }
 
-      // $D''(\mathbf{x})$ is just a 3x3 matrix and computing its inverse is 
+      // $D''(\mathbf{x})$ is just a 3x3 matrix and computing its inverse is
       // thus cheap (cf. Eigen library.).
       h = -Dsecond.inverse()*Dprime;
 
-      // The interpolated extremum should be normally close to the initial 
-      // position which has integral coordinates. Otherwise, the estimates of 
+      // The interpolated extremum should be normally close to the initial
+      // position which has integral coordinates. Otherwise, the estimates of
       // the gradient and the Hessian matrix are bad.
       if (h.block(0,0,2,1).cwiseAbs().maxCoeff() > 1.5f)
       {
@@ -89,9 +89,9 @@ namespace DO {
         return false;
       }
 
-      // Contrary to what is said in the paper, Lowe's implementation 
-      // refines iteratively the position of extremum only w.r.t spatial 
-      // variables $x$ and $y$ while the scale variable $\sigma$ which is 
+      // Contrary to what is said in the paper, Lowe's implementation
+      // refines iteratively the position of extremum only w.r.t spatial
+      // variables $x$ and $y$ while the scale variable $\sigma$ which is
       // updated only once.
       if (h.block(0,0,2,1).cwiseAbs().minCoeff() > 0.6f)
       {
@@ -135,12 +135,12 @@ namespace DO {
       if (x < borderSz || x >= I.width()-borderSz  ||
           y < borderSz || y >= I.height()-borderSz )
         break;
-      
-      // Estimate the gradient and the hessian matrix by central finite 
+
+      // Estimate the gradient and the hessian matrix by central finite
       // differentiation.
       Dprime = gradient(I,Point2i(x,y));
       Dsecond = hessian(I,Point2i(x,y));
-      
+
       // The interpolation or refinement is done conservatively depending on the
       // quality of the Hessian matrix estimate.
       //
@@ -151,11 +151,11 @@ namespace DO {
       //   the Hessian matrix $H$ must be ***positive-definite***.
       //
       // Otherwise:
-      // - either we are localizing a saddle point instead of an 
+      // - either we are localizing a saddle point instead of an
       //   extremum if $D''(\mathbf{x})$ is invertible;
-      // - or Newton's method is applicable if $D''(\mathbf{x})$ is not 
+      // - or Newton's method is applicable if $D''(\mathbf{x})$ is not
       //   invertible.
-      // Such case arises frequently and in that case, interpolation is not 
+      // Such case arises frequently and in that case, interpolation is not
       // done.
       // We just need to check the determinant and the trace in 2D.
       if (Dsecond.determinant() <= 0.f || Dsecond.trace()*type >= 0.f)
@@ -163,13 +163,13 @@ namespace DO {
         Dprime.setZero();
         break;
       }
-      
-      // $D''(\mathbf{x})$ is just a 3x3 matrix and computing its inverse is 
+
+      // $D''(\mathbf{x})$ is just a 3x3 matrix and computing its inverse is
       // thus cheap (cf. Eigen library.).
       h = -Dsecond.inverse()*Dprime;
-      
-      // The interpolated extremum should be normally close to the initial 
-      // position which has integral coordinates. Otherwise, the estimates of 
+
+      // The interpolated extremum should be normally close to the initial
+      // position which has integral coordinates. Otherwise, the estimates of
       // the gradient and the Hessian matrix are bad.
       if (h.cwiseAbs().maxCoeff() > 1.5f)
       {
@@ -180,10 +180,10 @@ namespace DO {
 #endif
         return false;
       }
-      
-      // Contrary to what is said in the paper, Lowe's implementation 
-      // refines iteratively the position of extremum only w.r.t spatial 
-      // variables $x$ and $y$ while the scale variable $\sigma$ which is 
+
+      // Contrary to what is said in the paper, Lowe's implementation
+      // refines iteratively the position of extremum only w.r.t spatial
+      // variables $x$ and $y$ while the scale variable $\sigma$ which is
       // updated only once.
       if (h.cwiseAbs().minCoeff() > 0.6f)
       {
@@ -211,7 +211,7 @@ namespace DO {
   }
 
   vector<OERegion> localScaleSpaceExtrema(const ImagePyramid<float>& I,
-                                          int s, int o, 
+                                          int s, int o,
                                           float extremumThres,
                                           float edgeRatioThres,
                                           int imgPaddingSz,
@@ -241,7 +241,7 @@ namespace DO {
         if (local_max(x,y,s,o,I))
           type = 1; // maximum
         else if (local_min(x,y,s,o,I))
-          type = -1; // minimum 
+          type = -1; // minimum
         else
           continue;
 #ifndef STRICT_LOCAL_EXTREMA
@@ -258,7 +258,7 @@ namespace DO {
         /*if (!refineExtremum(I,x,y,s,o,type,pos,val,imgPaddingSz,refineIter))
           continue;*/
         refineExtremum(I,x,y,s,o,type,pos,val,imgPaddingSz,refineIter);
-        
+
         // Don't add if already marked.
         if (map(static_cast<int>(x), static_cast<int>(y)) == 1)
           continue;
@@ -280,7 +280,7 @@ namespace DO {
     return extrema;
   }
 
-  
+
   bool selectLaplaceScale(float& scale,
                           int x, int y, int s, int o,
                           const ImagePyramid<float>& gaussPyramid,
@@ -298,7 +298,7 @@ namespace DO {
     if ( x-patchRadius < 0 || x+patchRadius >= nearestGaussian.width() ||
          y-patchRadius < 0 || y+patchRadius >= nearestGaussian.height() )
       return false;
-  
+
     // First patch at the closest scale.
     Image<float> nearestPatch( getImagePatch(nearestGaussian,x,y,patchRadius) );
 //#define DEBUG_SELECT_SCALE
@@ -326,7 +326,7 @@ namespace DO {
     vector<Image<float> > patches(numScales+1);
     vector<float> scales(numScales+1);
     vector<float> LoGs(numScales+1);
-  
+
     float scaleCommonRatio = pow(2.f, 1.f/numScales);
     float nearestSigma = G.octRelScale(s-1);
 #ifdef DEBUG_SELECT_SCALE
@@ -339,7 +339,7 @@ namespace DO {
     // Start with the initial patch.
     scales[0] = G.octRelScale(s)/sqrt(2.f);
     float incSigma = sqrt(pow(scales[0], 2) - pow(nearestSigma, 2));
-    patches[0] = incSigma > 1e-3f ? 
+    patches[0] = incSigma > 1e-3f ?
       gaussian(nearestPatch, incSigma) :
       nearestPatch;
 #ifdef DEBUG_SELECT_SCALE
@@ -372,13 +372,13 @@ namespace DO {
     int i = 1;
     for ( ; i < numScales; ++i)
     {
-      // Is LoG(\mathbf{x},\sigma) an extremum                
-      isExtremum = (LoGs[i] <= LoGs[i-1] && LoGs[i] <= LoGs[i+1]) || 
+      // Is LoG(\mathbf{x},\sigma) an extremum
+      isExtremum = (LoGs[i] <= LoGs[i-1] && LoGs[i] <= LoGs[i+1]) ||
                    (LoGs[i] >= LoGs[i-1] && LoGs[i] >= LoGs[i+1]) ;
       if (isExtremum)
         break;
     }
- 
+
     // Refine the extremum.
     if (isExtremum)
     {

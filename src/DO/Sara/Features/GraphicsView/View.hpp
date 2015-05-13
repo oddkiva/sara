@@ -1,21 +1,21 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
 //! @file
 
-#ifndef DO_AFFINECOVARIANTFEATURES_VIEW_H
-#define DO_AFFINECOVARIANTFEATURES_VIEW_H
+#ifndef DO_SARA_AFFINECOVARIANTFEATURES_VIEW_H
+#define DO_SARA_AFFINECOVARIANTFEATURES_VIEW_H
 
-#include <DO/Core.hpp>
-#include <DO/Graphics.hpp>
+#include <DO/Sara/Core.hpp>
+#include <DO/Sara/Graphics.hpp>
 #include "GraphicsView/FeatureItem.h"
 
 
@@ -54,7 +54,7 @@ namespace DO {
       pixmap.fill(Qt::transparent);
       QPainter p(&pixmap);
       p.setPen(pen_);
-      p.setRenderHints(QPainter::Antialiasing | 
+      p.setRenderHints(QPainter::Antialiasing |
         QPainter::SmoothPixmapTransform);
       for(size_t i = 0; i != keys.size(); ++i)
         p.drawEllipse(keys[i].x(), keys[i].y(),
@@ -85,7 +85,7 @@ namespace DO {
           if (!vRect_Scene.contains(mapToScene(shapes_[i].center)) )
             continue;
 
-          painter->drawEllipse(shapes_[i].center, 
+          painter->drawEllipse(shapes_[i].center,
             shapes_[i].radius, shapes_[i].radius);
         }
         return;
@@ -147,4 +147,4 @@ namespace DO {
 } /* namespace DO */
 
 
-#endif /* DO_AFFINECOVARIANTFEATURES_VIEW_H */
+#endif /* DO_SARA_AFFINECOVARIANTFEATURES_VIEW_H */

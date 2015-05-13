@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
@@ -11,13 +11,13 @@
 
 //! @file
 
-#ifndef DO_CORE_MULTIARRAY_HPP
-#define DO_CORE_MULTIARRAY_HPP
+#ifndef DO_SARA_CORE_MULTIARRAY_HPP
+#define DO_SARA_CORE_MULTIARRAY_HPP
 
 
-#include <DO/Core/MultiArray/ElementTraits.hpp>
-#include <DO/Core/MultiArray/MultiArray.hpp>
-#include <DO/Core/MultiArray/MultiArrayView.hpp>
+#include <DO/Sara/Core/MultiArray/ElementTraits.hpp>
+#include <DO/Sara/Core/MultiArray/MultiArray.hpp>
+#include <DO/Sara/Core/MultiArray/MultiArrayView.hpp>
 
 
-#endif /* DO_CORE_MULTIARRAY_HPP */
+#endif /* DO_SARA_CORE_MULTIARRAY_HPP */

@@ -1,6 +1,6 @@
-#include <DO/Geometry/Objects/Cone.hpp>
-#include <DO/Geometry/Objects/Ellipse.hpp>
-#include <DO/Geometry/Objects/CSG.hpp>
+#include <DO/Sara/Geometry/Objects/Cone.hpp>
+#include <DO/Sara/Geometry/Objects/Ellipse.hpp>
+#include <DO/Sara/Geometry/Objects/CSG.hpp>
 
 #include "TestPolygon.hpp"
 

@@ -1,18 +1,18 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
 //! @file
 
-#ifndef DO_GRAPHICS_PAINTINGWINDOWCOMMANDS_HPP
-#define DO_GRAPHICS_PAINTINGWINDOWCOMMANDS_HPP
+#ifndef DO_SARA_GRAPHICS_PAINTINGWINDOWCOMMANDS_HPP
+#define DO_SARA_GRAPHICS_PAINTINGWINDOWCOMMANDS_HPP
 
 
 namespace DO {
@@ -254,7 +254,7 @@ namespace DO {
    */
   DO_EXPORT
   bool draw_arrow(int a, int b, int c, int d, const Color3ub& col,
-                  int arrowWidth = 8, int arrowHeight = 5, 
+                  int arrowWidth = 8, int arrowHeight = 5,
                   int style = 0, int width = 1);
   /*!
     \brief Draw an arrow in the active PaintingWindow window.
@@ -268,7 +268,7 @@ namespace DO {
    */
   inline bool draw_arrow(int x1, int y1, int x2, int y2, const Color3ub&  col,
                          double ta, double tl, int style, int width)
-  { 
+  {
     return draw_arrow(
       x1, y1, x2, y2, col,
       int(tl*cos(ta*3.14/180)), int(2*tl*sin(ta*3.14/180)),
@@ -533,11 +533,11 @@ namespace DO {
    */
   template <typename T>
   void view_image(const Image<T>& image,
-                  const std::string& windowTitle = "DO++",
+                  const std::string& windowTitle = "DO-CV",
                   double fact = 1.0)
   {
     QWidget *win = active_window() ? active_window() : 0;
-    
+
     set_active_window(
       create_window(image.width()*fact, image.height()*fact, windowTitle));
     display(image, 0, 0, fact);
@@ -550,7 +550,7 @@ namespace DO {
 
   // ======================================================================== //
   // Clearing commands
-  /*! 
+  /*!
     \brief Clear the window contents.
     \return true if the command is issued on the window successfully.
     \return false otherwise.
@@ -569,7 +569,7 @@ namespace DO {
   */
   DO_EXPORT
   bool set_antialiasing(Window w = active_window(), bool on = true);
-  /*! 
+  /*!
     \bug Buggy. Investigate...
     @param[in] w a PaintingWindow instance.
     @param[in] on boolean value which activates or deactivates antialiasing.
@@ -595,4 +595,4 @@ namespace DO {
 
 } /* namespace DO */
 
-#endif /* DO_GRAPHICS_PAINTINGWINDOWCOMMANDS_HPP */
+#endif /* DO_SARA_GRAPHICS_PAINTINGWINDOWCOMMANDS_HPP */

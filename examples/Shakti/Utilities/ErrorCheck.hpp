@@ -4,7 +4,7 @@
 
 #include <cuda_runtime_api.h>
 
-#include <DO/Core/StringFormat.hpp>
+#include <DO/Sara/Core/StringFormat.hpp>
 
 
 #define CHECK_CUDA_LAST_RUNTIME_ERROR(msg) \
