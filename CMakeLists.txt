@@ -30,8 +30,6 @@ option(DO_BUILD_SAMPLE_PROGRAMS
        "Build sample programs using DO++ libraries" ON)
 option(DO_BUILD_SHARED_LIBS
        "Build shared libraries for DO++ libraries"  OFF)
-option(DO_BUILD_IMAGE_IO
-       "Build third-party image I/O libraries"      ON)
 
 # Add DO-CV to the CMake module path.
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
