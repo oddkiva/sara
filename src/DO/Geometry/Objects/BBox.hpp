@@ -1,11 +1,11 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO++, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
@@ -23,11 +23,9 @@ namespace DO {
 
   class BBox
   {
-    Point2d _top_left, _bottom_right;
-
   public:
     //! Default constructor.
-    BBox() {}
+    BBox() = default;
 
     //! Constructor from the BBox end points.
     BBox(const Point2d& top_left, const Point2d& bottom_right)
@@ -60,7 +58,10 @@ namespace DO {
     }
 
     //! Constructor from a point set.
-    BBox(const std::vector<Point2d>& points);
+    BBox(const std::vector<Point2d>& points)
+      : BBox(&points.front(), &points.back())
+    {
+    }
 
     Point2d& top_left()     { return _top_left; }
     Point2d& bottom_right() { return _bottom_right; }
@@ -98,6 +99,11 @@ namespace DO {
       BBox b(Point2d::Zero(), Point2d::Zero());
       return b;
     }
+
+  private:
+    Point2d _top_left;
+    Point2d _bottom_right;
+
   };
 
   // Utility functions.
@@ -113,7 +119,7 @@ namespace DO {
 
   //! Intersection test.
   BBox intersection(const BBox& bbox1, const BBox& bbox2);
-  
+
 
 } /* namespace DO */
 
