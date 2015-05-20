@@ -5,7 +5,6 @@ project(DO_Geometry_tests)
 message(STATUS "  - DO_Geometry_Tests")
 
 find_package(DO COMPONENTS Core Geometry REQUIRED)
-include(${DO_USE_FILE})
 
 do_test(Geometry_BBox
         test_bbox.cpp

@@ -9,7 +9,6 @@ project(DO_Graphics_Examples)
 message(STATUS "  - DO_Graphics_Examples")
 
 find_package(DO COMPONENTS Core Graphics REQUIRED)
-include(${DO_USE_FILE})
 
 macro (do_add_example example)
   add_executable(${example} ${example}.cpp)

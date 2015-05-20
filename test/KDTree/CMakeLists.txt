@@ -5,7 +5,6 @@ project(DO_KDTree_Tests)
 message(STATUS "  - DO_KDTree_Tests")
 
 find_package(DO COMPONENTS KDTree REQUIRED)
-include(${DO_USE_FILE})
 
 do_test(KDTree_KNNSearch
         test_knn_search.cpp

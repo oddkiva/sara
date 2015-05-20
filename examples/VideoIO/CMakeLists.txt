@@ -9,7 +9,6 @@ project(DO_VideoIO_Examples)
 message(STATUS "  - DO_VideoIO_Examples")
 
 find_package(DO COMPONENTS Core Graphics VideoIO REQUIRED)
-include(${DO_USE_FILE})
 
 macro (do_add_example example)
   add_executable(${example} ${example}.cpp)

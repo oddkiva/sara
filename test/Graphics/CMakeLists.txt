@@ -5,8 +5,6 @@ project(DO_Graphics_test)
 message(STATUS "  - DO_Graphics_Tests")
 
 find_package(DO COMPONENTS Core Graphics REQUIRED)
-include(${DO_USE_FILE})
-
 find_package(Qt5Test REQUIRED)
 
 include_directories(${Qt5Test_INCLUDE_DIRS})
