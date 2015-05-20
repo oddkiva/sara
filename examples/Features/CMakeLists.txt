@@ -13,7 +13,7 @@ find_package(DO COMPONENTS Core Graphics Features REQUIRED)
 macro (do_add_example example)
   add_executable(${example} ${example}.cpp)
   set_target_properties(${example} PROPERTIES
-                        COMPILE_DEFINITIONS ${DO_DEFINITIONS})
+                        COMPILE_FLAGS ${DO_DEFINITIONS})
   target_link_libraries(${example} ${DO_LIBRARIES})
   set_property(TARGET ${example} PROPERTY FOLDER "DO Examples/Features")
 endmacro ()

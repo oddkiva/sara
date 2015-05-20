@@ -13,8 +13,7 @@ find_package(DO COMPONENTS Core Graphics VideoIO REQUIRED)
 macro (do_add_example example)
   add_executable(${example} ${example}.cpp)
   set_target_properties(${example} PROPERTIES
-                        COMPILE_FLAGS "-DSRCDIR=${CMAKE_CURRENT_SOURCE_DIR}"
-                        COMPILE_DEFINITIONS DO_STATIC)
+                        COMPILE_FLAGS ${DO_DEFINITIONS})
   target_link_libraries(${example} ${DO_LIBRARIES})
   set_property(TARGET ${example} PROPERTY FOLDER "DO Examples/VideoIO")
 endmacro ()
