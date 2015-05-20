@@ -59,7 +59,7 @@ namespace DO {
 
     //! Constructor from a point set.
     BBox(const std::vector<Point2d>& points)
-      : BBox(&points.front(), &points.back())
+      : BBox(&points.front(), &points.front() + points.size())
     {
     }
 

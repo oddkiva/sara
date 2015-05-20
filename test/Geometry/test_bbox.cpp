@@ -1,11 +1,11 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO++, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
@@ -14,6 +14,8 @@
 #include <DO/Geometry/Objects.hpp>
 
 #include "TestPolygon.hpp"
+
+#include "../AssertHelpers.hpp"
 
 
 using namespace std;
@@ -35,8 +37,8 @@ TEST_F(TestBBox, test_constructor_and_accessors)
     return inside(p, bbox);
   };
   auto groundTruth = [&](const Point2d& p) {
-    return 
-      p.cwiseMin(_p1) == _p1 && 
+    return
+      p.cwiseMin(_p1) == _p1 &&
       p.cwiseMax(_p2) == _p2;
   };
   sweep_check(predicate, groundTruth);
@@ -53,6 +55,11 @@ TEST_F(TestBBox, test_constructor_from_point_set)
   BBox bbox(points, points+3);
   EXPECT_EQ(bbox.top_left(), points[0]);
   EXPECT_EQ(bbox.bottom_right(), points[2]);
+
+  vector<Point2d> points_vector(points, points+3);
+  BBox bbox2(points_vector);
+  EXPECT_MATRIX_EQ(bbox.top_left(), bbox2.top_left());
+  EXPECT_MATRIX_EQ(bbox.bottom_right(), bbox2.bottom_right());
 }
 
 TEST_F(TestBBox, test_point_inside_bbox)
@@ -70,8 +77,8 @@ TEST_F(TestBBox, test_point_inside_bbox)
 }
 
 
-int main(int argc, char** argv) 
+int main(int argc, char** argv)
 {
-  testing::InitGoogleTest(&argc, argv); 
+  testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
