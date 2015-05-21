@@ -245,8 +245,7 @@ function (do_test _test_name _srcs _additional_lib_deps)
   set_target_properties(
     ${_test_name}
     PROPERTIES
-    COMPILE_FLAGS "-DSRCDIR=${CMAKE_CURRENT_SOURCE_DIR}"
-    COMPILE_DEFINITIONS DO_STATIC
+    COMPILE_FLAGS ${DO_DEFINITIONS}
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/test"
   )
   add_test(${_test_name}

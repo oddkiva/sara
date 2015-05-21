@@ -4,11 +4,12 @@ include(DOMacros)
 # Specify DO-CV version.
 include(DO_${DO_PROJECT_NAME}_version)
 
-################################################################################
+
 # Debug message.
 do_step_message("FindDO running for project '${PROJECT_NAME}'")
 
-################################################################################
+
+
 # Setup DO++ once for all for every test projects in the 'test' directory.
 if (NOT DO_FOUND)
   if (DEFINED ENV{DO_DIR} AND EXISTS "$ENV{DO_DIR}/cmake/FindDO.cmake") # Check if DO++ is installed
@@ -66,25 +67,24 @@ if (NOT DO_FOUND)
 
   # Set DO
   set(DO_FOUND TRUE)
-  set(DO_USE_FILE UseDO)
+
 endif ()
 
 
-
-
-################################################################################
-# Check that the requested libraries exists whenever:
+# Check that the requested libraries exists when, e.g.:
 # 'find_package(DO COMPONENTS Core Graphics ... REQUIRED)' is called.
 if (DO_FIND_COMPONENTS)
+
   # Configure compiler for the specific project.
   include (DOConfigureCompiler)
   
-  # DEBUG
+  # Verbose comment.
   do_step_message("Requested libraries by project '${PROJECT_NAME}':")
   foreach (component ${DO_FIND_COMPONENTS})
-   do_substep_message ("- ${component}")
+    do_substep_message ("- ${component}")
   endforeach (component)
 
+  # Check that all the components exist.
   set(DO_USE_COMPONENTS "")
   foreach (component ${DO_FIND_COMPONENTS})
     list(FIND DO_COMPONENTS ${component} COMPONENT_INDEX)
@@ -95,4 +95,28 @@ if (DO_FIND_COMPONENTS)
       list (APPEND DO_USE_COMPONENTS ${component})
     endif ()
   endforeach (component)
-endif (DO_FIND_COMPONENTS)
+
+  if (POLICY CMP0011)
+    cmake_policy(SET CMP0011 OLD)
+  endif (POLICY CMP0011)
+
+  # Retrieve the set of dependencies when linking projects with DO-CV.
+  set(DO_LIBRARIES "")
+  foreach (COMPONENT ${DO_USE_COMPONENTS})
+    include(UseDO${COMPONENT})
+    if ("${DO_LIBRARIES}" STREQUAL "" AND
+        NOT "${DO_${COMPONENT}_LIBRARIES}" STREQUAL "")
+      set (DO_LIBRARIES "${DO_${COMPONENT}_LIBRARIES}")
+    elseif (NOT "${DO_${COMPONENT}_LIBRARIES}" STREQUAL "")
+      set(DO_LIBRARIES "${DO_LIBRARIES};${DO_${COMPONENT}_LIBRARIES}")
+    endif ()
+  endforeach ()
+
+endif ()
+
+
+# List the compile flags needed by DO-CV.
+set(DO_DEFINITIONS "-DSRCDIR=${CMAKE_CURRENT_SOURCE_DIR}")
+if (DO_USE_FROM_SOURCE)
+  set(DO_DEFINITIONS "${DO_DEFINITIONS} -DDO_STATIC")
+endif ()
