@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
@@ -9,11 +9,11 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_IMAGEIO_HPP
-#define DO_IMAGEIO_HPP
+#ifndef DO_SARA_IMAGEIO_HPP
+#define DO_SARA_IMAGEIO_HPP
 
 
-#include <DO/ImageIO/ImageIO.hpp>
+#include <DO/Sara/ImageIO/ImageIO.hpp>
 
 
-#endif /* DO_IMAGEIO_HPP */
+#endif /* DO_SARA_IMAGEIO_HPP */

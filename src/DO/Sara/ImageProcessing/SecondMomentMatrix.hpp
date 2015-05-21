@@ -1,21 +1,21 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
 //! @file
 
-#ifndef DO_IMAGEPROCESSING_SECONDMOMENTMATRIX_HPP
-#define DO_IMAGEPROCESSING_SECONDMOMENTMATRIX_HPP
+#ifndef DO_SARA_IMAGEPROCESSING_SECONDMOMENTMATRIX_HPP
+#define DO_SARA_IMAGEPROCESSING_SECONDMOMENTMATRIX_HPP
 
 
-#include <DO/Core/Image/Image.hpp>
+#include <DO/Sara/Core/Image/Image.hpp>
 
 
 namespace DO {
@@ -26,7 +26,7 @@ namespace DO {
    */
 
   /*!
-    \brief Second-moment matrix helper class in order to use 
+    \brief Second-moment matrix helper class in order to use
     DO::Image<T>::compute<SecondMomentMatrix>()
    */
   template <typename Vector, int N>
@@ -40,7 +40,7 @@ namespace DO {
 
     inline SecondMomentMatrix(const VectorField& gradient_field)
       : gradient_field_(gradient_field) {}
-    
+
     MomentField operator()() const
     {
       MomentField M(gradient_field_.sizes());
@@ -59,4 +59,4 @@ namespace DO {
 } /* namespace DO */
 
 
-#endif /* DO_IMAGEPROCESSING_SECONDMOMENTMATRIX_HPP */
+#endif /* DO_SARA_IMAGEPROCESSING_SECONDMOMENTMATRIX_HPP */

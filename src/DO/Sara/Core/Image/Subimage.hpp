@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
@@ -11,13 +11,13 @@
 
 //! @file
 
-#ifndef DO_CORE_IMAGE_SUBIMAGE_HPP
-#define DO_CORE_IMAGE_SUBIMAGE_HPP
+#ifndef DO_SARA_CORE_IMAGE_SUBIMAGE_HPP
+#define DO_SARA_CORE_IMAGE_SUBIMAGE_HPP
 
 
-#include <DO/Core/Image/Image.hpp>
-#include <DO/Core/Image/Operations.hpp>
-#include <DO/Core/Pixel/PixelTraits.hpp>
+#include <DO/Sara/Core/Image/Image.hpp>
+#include <DO/Sara/Core/Image/Operations.hpp>
+#include <DO/Sara/Core/Pixel/PixelTraits.hpp>
 
 
 namespace DO {
@@ -70,4 +70,4 @@ namespace DO {
 
 
 
-#endif /* DO_CORE_IMAGE_SUBIMAGE_HPP */
+#endif /* DO_SARA_CORE_IMAGE_SUBIMAGE_HPP */

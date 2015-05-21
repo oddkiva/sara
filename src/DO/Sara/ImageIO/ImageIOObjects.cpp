@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
@@ -16,9 +16,9 @@
 # include <windows.h>
 #endif
 
-#include <DO/Core.hpp>
+#include <DO/Sara/Core.hpp>
 
-#include <DO/ImageIO/ImageIOObjects.hpp>
+#include <DO/Sara/ImageIO/ImageIOObjects.hpp>
 
 
 using namespace std;
@@ -191,7 +191,7 @@ namespace DO {
   PngFileReader::PngFileReader(const string& filepath)
     : ImageFileReader(filepath, "rb")
   {
-    png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, 
+    png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING,
                                                  NULL, NULL, NULL);
     if (!png_ptr)
       throw FileError(filepath, "rb");
@@ -264,7 +264,7 @@ namespace DO {
 
     png_read_image(png_ptr, &row_pointers[0]);
     png_read_end(png_ptr, NULL);
-  
+
     return true;
   }
 
@@ -321,7 +321,7 @@ namespace DO {
 
     png_write_image(png_ptr, &row_pointers[0]);
     png_write_end(png_ptr, NULL);
-  
+
     return true;
   }
 
@@ -355,7 +355,7 @@ namespace DO {
     height = h;
     depth = 4;
     data = new unsigned char[width*height*depth];
-    TIFFReadRGBAImageOriented(tiff_, w, h, reinterpret_cast<uint32 *>(data), 
+    TIFFReadRGBAImageOriented(tiff_, w, h, reinterpret_cast<uint32 *>(data),
                               ORIENTATION_TOPLEFT, 0);
     return true;
   }
@@ -381,21 +381,21 @@ namespace DO {
       std::cerr << "Unable to write tif file: " << filepath << std::endl;
       return false;
     }
-  
+
     // We need to set some values for basic tags before we can add any data
     TIFFSetField(out, TIFFTAG_IMAGEWIDTH, width_);
     TIFFSetField(out, TIFFTAG_IMAGELENGTH, height_);
     TIFFSetField(out, TIFFTAG_BITSPERSAMPLE, 8);
     TIFFSetField(out, TIFFTAG_SAMPLESPERPIXEL, depth_);
     TIFFSetField(out, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
-  
+
     TIFFSetField(out, TIFFTAG_COMPRESSION, COMPRESSION_DEFLATE);
     TIFFSetField(out, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
-  
+
     // Write the information to the file
     TIFFWriteEncodedStrip(out, 0, const_cast<unsigned char *>(&data_[0]),
                           width_*height_*depth_);
-  
+
     return true;
   }
 

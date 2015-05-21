@@ -81,9 +81,6 @@ function (cuda_add_example)
 endfunction ()
 
 
-add_subdirectory(MultiArray)
-add_subdirectory(Utilities)
-
 file(GLOB cuda_test_SRC_FILES FILES *.cu *.cpp *.hpp)
 cuda_add_example(cuda_test ${cuda_test_SRC_FILES})
 target_link_libraries(cuda_test DO_Shakti_Utilities DO_Shakti_MultiArray)

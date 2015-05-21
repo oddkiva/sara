@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2014 David Ok <david.ok8@gmail.com>
@@ -9,14 +9,14 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_GEOMETRY_TOOLS_HPP
-#define DO_GEOMETRY_TOOLS_HPP
+#ifndef DO_SARA_GEOMETRY_TOOLS_HPP
+#define DO_SARA_GEOMETRY_TOOLS_HPP
 
-#include <DO/Geometry/Tools/Utilities.hpp>
-#include <DO/Geometry/Tools/Metric.hpp>
-#include <DO/Geometry/Tools/Conic.hpp>
-#include <DO/Geometry/Tools/Polynomial.hpp>
-#include <DO/Geometry/Tools/PolynomialRoots.hpp>
-#include <DO/Geometry/Tools/Projective.hpp>
+#include <DO/Sara/Geometry/Tools/Utilities.hpp>
+#include <DO/Sara/Geometry/Tools/Metric.hpp>
+#include <DO/Sara/Geometry/Tools/Conic.hpp>
+#include <DO/Sara/Geometry/Tools/Polynomial.hpp>
+#include <DO/Sara/Geometry/Tools/PolynomialRoots.hpp>
+#include <DO/Sara/Geometry/Tools/Projective.hpp>
 
-#endif /* DO_GEOMETRY_TOOLS_HPP */
+#endif /* DO_SARA_GEOMETRY_TOOLS_HPP */

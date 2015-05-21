@@ -1,21 +1,21 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
 //! @file
 
-#ifndef DO_IMAGEPROCESSING_IMAGEPYRAMID_HPP
-#define DO_IMAGEPROCESSING_IMAGEPYRAMID_HPP
+#ifndef DO_SARA_IMAGEPROCESSING_IMAGEPYRAMID_HPP
+#define DO_SARA_IMAGEPROCESSING_IMAGEPYRAMID_HPP
 
 
-#include <DO/Core/Image.hpp>
+#include <DO/Sara/Core/Image.hpp>
 
 
 namespace DO {
@@ -32,16 +32,16 @@ namespace DO {
   {
   public:
     /*!
-      Let us consider an image \f$I\f$. In the scale-space framework, we work 
-      with the scale-space image function 
+      Let us consider an image \f$I\f$. In the scale-space framework, we work
+      with the scale-space image function
       \f$ I : (x,y,\sigma) \mapsto (g_\sigma * I)\ (x,y) \f$,
-      where \f$g_\sigma\f$ is the gaussian distribution with zero mean and 
+      where \f$g_\sigma\f$ is the gaussian distribution with zero mean and
       standard deviation \f$\sigma\f$.
 
-      We also denote by \f$ I_\sigma : (x,y) \mapsto I(x,y,\sigma) \f$ the 
+      We also denote by \f$ I_\sigma : (x,y) \mapsto I(x,y,\sigma) \f$ the
       image \f$I\f$ at scale \f$\sigma\f$.
       Note that the real image is \f$I_0: (x,y) \mapsto I(x,y)\f$.
-      Because of the spatial sampling, the camera captures the real image 
+      Because of the spatial sampling, the camera captures the real image
       \f$I_0\f$ with some blurring and the camera-acquired image is
       \f$I_{\sigma_\textrm{camera}}\f$.
 
@@ -53,9 +53,9 @@ namespace DO {
     }
 
     /*!
-      The image pyramid discretizes image function 
+      The image pyramid discretizes image function
       \f$(x,y,\sigma) \mapsto I(x,y,\sigma)\f$ in the scale-space.
-      With the discretization, the image pyramid will consist of a stack of 
+      With the discretization, the image pyramid will consist of a stack of
       blurred images \f$(I_{\sigma_i})_{1 \leq i \leq N}\f$.
 
       Here initSigma() corresponds to \f$\sigma_0\f$.
@@ -66,13 +66,13 @@ namespace DO {
     }
 
     /*!
-      The sequence \f$ (\sigma_i)_{1 \leq i \leq N} \f$ follows a geometric 
-      progression, i.e., \f$\sigma_i = k^i \sigma_0\f$. 
+      The sequence \f$ (\sigma_i)_{1 \leq i \leq N} \f$ follows a geometric
+      progression, i.e., \f$\sigma_i = k^i \sigma_0\f$.
 
-      Laplacians of Gaussians \f$ \nabla^2 I_{\sigma} \f$ can be approximated 
+      Laplacians of Gaussians \f$ \nabla^2 I_{\sigma} \f$ can be approximated
       efficiently with differences of Gaussians \f$ I_{k\sigma} - I_{\sigma} \f$
-      for each \f$ \sigma = \sigma_i \f$*without needing to renormalize*. 
-      
+      for each \f$ \sigma = \sigma_i \f$*without needing to renormalize*.
+
       Indeed:
       \f{eqnarray*}{
         \frac{\partial I_\sigma}{\partial \sigma} &=& \sigma \nabla^2 I_\sigma \\
@@ -87,14 +87,14 @@ namespace DO {
     }
 
     /*!
-      The smoothed image \f$I_{2\sigma}\f$ is equivalent to the downsampled 
-      image \f$I_{\sigma}\f$. Because of this observation, a pyramid of 
+      The smoothed image \f$I_{2\sigma}\f$ is equivalent to the downsampled
+      image \f$I_{\sigma}\f$. Because of this observation, a pyramid of
       gaussians is divided into octaves.
 
-      We call an octave a stack of \f$S\f$ blurred images \f$I_{\sigma_i}\f$ 
+      We call an octave a stack of \f$S\f$ blurred images \f$I_{\sigma_i}\f$
       separated by a constant factor \f$k\f$ in the scale space, i.e.,
       \f$ \sigma_{i+1} = k \sigma_i \f$.
-      The number of scales in each octave is the integer \f$S\f$ such that 
+      The number of scales in each octave is the integer \f$S\f$ such that
       \f$k^S \sigma = 2 \sigma\f$, i.e., \f$ k= 2^{1/S} \f$.
      */
     int num_scales_per_octave() const
@@ -110,7 +110,7 @@ namespace DO {
 
     /*!
       \todo. Improve explanation.
-      \f$(1/2)^i\f$ is the rescaling factor of the downsampled image of octave 
+      \f$(1/2)^i\f$ is the rescaling factor of the downsampled image of octave
       \f$i\f$.
      */
     int first_octave_index() const
@@ -179,7 +179,7 @@ namespace DO {
       _oct_scaling_factors.resize(num_octaves);
       for (int o = 0; o < num_octaves; ++o)
         _octaves[o].resize(num_scales_per_octave);
-      
+
       _scale_initial = scale_initial;
       _scale_geometric_factor = scale_geometric_factor;
     }
@@ -279,4 +279,4 @@ namespace DO {
 
 } /* namespace DO */
 
-#endif /* DO_IMAGEPROCESSING_IMAGEPYRAMID_HPP */
+#endif /* DO_SARA_IMAGEPROCESSING_IMAGEPYRAMID_HPP */

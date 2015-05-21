@@ -1,23 +1,23 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/FeatureDetectors.hpp>
-#include <DO/Core/StdVectorHelpers.hpp>
+#include <DO/Sara/FeatureDetectors.hpp>
+#include <DO/Sara/Core/StdVectorHelpers.hpp>
 
 using namespace std;
 
 namespace DO {
 
   Image<float> scaleAdaptedHarrisCornerness(const Image<float>& I,
-                                            float sigma_I, float sigma_D, 
+                                            float sigma_I, float sigma_D,
                                             float kappa)
   {
     Image<Matrix2f> M;
@@ -37,7 +37,7 @@ namespace DO {
     return cornerness;
   }
 
-  ImagePyramid<float> harrisCornernessPyramid(const Image<float>& image, 
+  ImagePyramid<float> harrisCornernessPyramid(const Image<float>& image,
                                               float kappa,
                                               const ImagePyramidParams& params)
   {
@@ -72,7 +72,7 @@ namespace DO {
     for (int o = 0; o < numOctaves; ++o)
     {
       // Compute the octave scaling factor
-      cornerness.octaveScalingFactor(o) = 
+      cornerness.octaveScalingFactor(o) =
         (o == 0) ? 1.f/resizeFactor : cornerness.octaveScalingFactor(o-1)*2;
 
       // Compute the gaussians in octave $o$

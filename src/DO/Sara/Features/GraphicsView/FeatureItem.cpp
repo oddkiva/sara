@@ -1,16 +1,16 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
 #include "FeatureItem.hpp"
-#include <DO/Core.hpp>
+#include <DO/Sara/Core.hpp>
 #include <QtGui>
 #include <QGraphicsItem>
 #include <QGraphicsEllipseItem>
@@ -131,7 +131,7 @@ namespace DO {
     if (!source_ || !target_)
       return;
 
-    QLineF line(mapFromItem(source_, 0, 0), 
+    QLineF line(mapFromItem(source_, 0, 0),
       mapFromItem(target_, 0, 0));
     qreal length = line.length();
 
@@ -145,7 +145,7 @@ namespace DO {
       targetPoint_ = line.p2() - edgeOffset;
     }
     else
-      sourcePoint_ = targetPoint_ = line.p1();              
+      sourcePoint_ = targetPoint_ = line.p1();
   }
 
   void MatchItem::mark()
@@ -189,7 +189,7 @@ namespace DO {
 
     // Draw the line itself
     painter->setPen(QPen(currentColor_, 2,
-      Qt::SolidLine, Qt::RoundCap, 
+      Qt::SolidLine, Qt::RoundCap,
       Qt::RoundJoin));
     painter->drawLine(line);
 
@@ -198,11 +198,11 @@ namespace DO {
     // Draw the arrows
     double angle = std::atan2(line.dy(), line.dx());
 
-    QPointF sourceArrowP1 = 
+    QPointF sourceArrowP1 =
       sourcePoint_
       + QPointF(cos(angle+Pi/12)*arrowSize_,
       sin(angle+Pi/12)*arrowSize_);
-    QPointF sourceArrowP2 = 
+    QPointF sourceArrowP2 =
       sourcePoint_
       + QPointF(cos(angle-Pi/12)*arrowSize_,
       sin(angle-Pi/12)*arrowSize_);
@@ -215,7 +215,7 @@ namespace DO {
       + QPointF(cos(angle+Pi+Pi/12)*arrowSize_,
       sin(angle+Pi+Pi/12)*arrowSize_);
 
-    painter->drawPolygon(QPolygonF() 
+    painter->drawPolygon(QPolygonF()
       << line.p1() << sourceArrowP1 << sourceArrowP2);
     painter->drawPolygon(QPolygonF()
       << line.p2() << targetArrowP1 << targetArrowP2);

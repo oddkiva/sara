@@ -1,18 +1,18 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2014 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
 #pragma once
 
-#include <DO/Graphics.hpp>
-#include <DO/Geometry/Objects.hpp>
+#include <DO/Sara/Graphics.hpp>
+#include <DO/Sara/Geometry/Objects.hpp>
 #include <vector>
 #include <string>
 
@@ -25,7 +25,7 @@ namespace DO {
   void draw_poly(const std::vector<Point2d>& p, const Color3ub& color,
                  int penWidth = 1);
   void draw_ellipse(const Ellipse& e, const Color3ub col, int penWidth = 1);
-  
+
   template <int N>
   void draw_poly(const SmallPolygon<N>& poly, const Color3ub& color,
                  int penWidth = 1)
@@ -37,7 +37,7 @@ namespace DO {
   inline void draw_triangle(const Triangle& t, const Rgb8& col = Red8,
                             int penWidth = 1)
   { draw_poly(t, col, penWidth); }
-  
+
   inline void draw_quad(const Quad& q, const Rgb8& col = Red8,
                         int penWidth = 1)
   { draw_poly(q, col, penWidth); }

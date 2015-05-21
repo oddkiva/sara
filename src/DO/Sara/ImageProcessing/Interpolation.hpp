@@ -1,24 +1,24 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
 //! @file
 
-#ifndef DO_IMAGEPROCESSING_INTERPOLATION_HPP
-#define DO_IMAGEPROCESSING_INTERPOLATION_HPP
+#ifndef DO_SARA_IMAGEPROCESSING_INTERPOLATION_HPP
+#define DO_SARA_IMAGEPROCESSING_INTERPOLATION_HPP
 
 
 #include <stdexcept>
 
-#include <DO/Core/Image.hpp>
-#include <DO/Core/Pixel/PixelTraits.hpp>
+#include <DO/Sara/Core/Image.hpp>
+#include <DO/Sara/Core/Pixel/PixelTraits.hpp>
 
 
 namespace DO {
@@ -79,4 +79,4 @@ namespace DO {
 }
 
 
-#endif /* DO_IMAGEPROCESSING_INTERPOLATION_HPP */
+#endif /* DO_SARA_IMAGEPROCESSING_INTERPOLATION_HPP */

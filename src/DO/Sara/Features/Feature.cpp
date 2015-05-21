@@ -1,15 +1,15 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Features.hpp>
+#include <DO/Sara/Features.hpp>
 
 using namespace std;
 
@@ -40,9 +40,9 @@ namespace DO {
     os << "Extremum value:\t" << extremum_value() << endl;
     return os;
   }
-  
+
   std::istream& InterestPoint::read(std::istream& in)
-  { 
+  {
     return in >> x() >> y();
   }
 
@@ -82,7 +82,7 @@ namespace DO {
 
   ostream& OERegion::print(ostream& os) const
   {
-    return InterestPoint::print(os) 
+    return InterestPoint::print(os)
       << "shape matrix:\n" << shape_matrix() << endl
       << "orientation:\t" << to_degree(orientation()) << " degrees" << endl;
   }
@@ -90,7 +90,7 @@ namespace DO {
   istream& OERegion::read(istream& in)
   {
     int feature_type;
-    InterestPoint::read(in) 
+    InterestPoint::read(in)
       >> _shape_matrix
       >> _orientation
       >> feature_type;

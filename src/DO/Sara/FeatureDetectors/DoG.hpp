@@ -1,18 +1,18 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
 //! @file
 
-#ifndef DO_FEATUREDETECTORS_DOG_HPP
-#define DO_FEATUREDETECTORS_DOG_HPP
+#ifndef DO_SARA_FEATUREDETECTORS_DOG_HPP
+#define DO_SARA_FEATUREDETECTORS_DOG_HPP
 
 namespace DO {
 
@@ -37,7 +37,7 @@ namespace DO {
           \right| (\mathbf{x})
         \f$
         must exceed.
-        Note that \f$ \sigma(s',o') = 2^{s'/S+o'}\f$  where \f$S\f$ is the 
+        Note that \f$ \sigma(s',o') = 2^{s'/S+o'}\f$  where \f$S\f$ is the
         number of scales per octave.
       @param[in]
         edgeRatioThres
@@ -52,12 +52,12 @@ namespace DO {
         We use the \f$r=10\f$ as stated in [Lowe, IJCV 2004].
       @param[in]
         imgPaddingSz
-        This variable indicates the minimum border size of the image. DoG 
+        This variable indicates the minimum border size of the image. DoG
         extrema located at the size-specified border are discarded.
       @param[in]
         extremumRefinementIter
-        This variable controls the number of iterations to refine the 
-        localization of DoG extrema in scale-space. The refinement process is 
+        This variable controls the number of iterations to refine the
+        localization of DoG extrema in scale-space. The refinement process is
         based on the function **DO::refineExtremum()**.
      */
     ComputeDoGExtrema(
@@ -76,15 +76,15 @@ namespace DO {
       \brief Localizes DoG extrema for a given image.
 
       This function does the following:
-      1. Constructs a gaussian pyramid \f$\nabla g_{\sigma(s,o)} * I\f$ from 
+      1. Constructs a gaussian pyramid \f$\nabla g_{\sigma(s,o)} * I\f$ from
       the image \f$I\f$, where \f$(s,o)\f$ are integers. Here:
       \f$\sigma(s,o) = 2^{s/S + o}\f$ where \f$S\f$ is the number of scales per
       octaves.
 
-      2. Localize extrema in each difference of Gaussians 
+      2. Localize extrema in each difference of Gaussians
       \f$\left( g_{\sigma(s+1,o)} - g_{\sigma(s,o)} \right) * I \f$
       where \f$(s,o)\f$ are scale and octave indices.
-      
+
       \param[in, out] scaleOctavePairs a pointer to vector of scale and octave
       index pairs \f$(s_i,o_i)\f$. This index pair corresponds to the difference
       of Gaussians
@@ -100,7 +100,7 @@ namespace DO {
     /*!
       \brief Returns the Gaussian pyramid used to localize scale-space extrema
       of image **I**.
-      
+
       The Gaussian pyramid is available after calling the function method
       **ComputeDoGExtrema::operator()(I, scaleOctavePairs)** for the given
       image **I**.
@@ -111,13 +111,13 @@ namespace DO {
     const ImagePyramid<float>& gaussians() const
     { return gaussians_; }
     /*!
-      \brief Returns the pyramid of difference of Gaussians used to localize 
+      \brief Returns the pyramid of difference of Gaussians used to localize
       scale-space extrema of image **I**.
 
-      The pyramid of difference of Gaussians is available after calling the 
-      function method **ComputeDoGExtrema::operator()(I, scaleOctavePairs)**, 
-      
-      \return the pyramid of difference of Gaussians used to localize 
+      The pyramid of difference of Gaussians is available after calling the
+      function method **ComputeDoGExtrema::operator()(I, scaleOctavePairs)**,
+
+      \return the pyramid of difference of Gaussians used to localize
       scale-space extrema of image **I**.
      */
     const ImagePyramid<float>& diffOfGaussians() const
@@ -136,4 +136,4 @@ namespace DO {
 
 } /* namespace DO */
 
-#endif /* DO_FEATUREDETECTORS_DOG_HPP */
+#endif /* DO_SARA_FEATUREDETECTORS_DOG_HPP */

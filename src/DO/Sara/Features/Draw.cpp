@@ -1,17 +1,17 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
 
-#include <DO/Features.hpp>
-#include <DO/Graphics.hpp>
+#include <DO/Sara/Features.hpp>
+#include <DO/Sara/Graphics.hpp>
 
 using namespace std;
 
@@ -50,7 +50,7 @@ namespace DO {
     // Orientation.
     float ellOrient = atan2(U(1,0), U(0,0));
     // Start and end points of orientation line.
-    Matrix2f L = affinity().block(0,0,2,2);    
+    Matrix2f L = affinity().block(0,0,2,2);
     Vector2f p1(z*(center()+off));
     Vector2f p2(p1 + z*L*Vector2f(1.f,0.f));
 

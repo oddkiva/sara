@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2014 David Ok <david.ok8@gmail.com>
@@ -9,15 +9,15 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Geometry/Tools/Utilities.hpp>
-#include <DO/Geometry/Algorithms/ConvexHull.hpp>
+#include <DO/Sara/Geometry/Tools/Utilities.hpp>
+#include <DO/Sara/Geometry/Algorithms/ConvexHull.hpp>
 
 
 using namespace std;
 
 
 namespace DO { namespace Detail {
-    
+
   static
   inline bool compare_y_coord(const PtCotg& p, const PtCotg& q)
   {

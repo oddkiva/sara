@@ -1,21 +1,21 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Graphics.hpp>
+#include <DO/Sara/Graphics.hpp>
 #include "GraphicsUtilities.hpp"
 
 namespace DO {
 
   QWidget * active_window()
-  { 
+  {
     return gui_app()->activeWindow;
   }
 
@@ -68,7 +68,7 @@ namespace DO {
 
   void resize_window(int width, int height, Window w)
   {
-    QMetaObject::invokeMethod(w, "resizeScreen", 
+    QMetaObject::invokeMethod(w, "resizeScreen",
                               Qt::BlockingQueuedConnection,
                               Q_ARG(int, width), Q_ARG(int, height));
   }
@@ -127,7 +127,7 @@ namespace DO {
   //! From active window only! I am lazy.
   void get_event(int ms, Event& e)
   {
-    QMetaObject::invokeMethod(active_window(), "waitForEvent", 
+    QMetaObject::invokeMethod(active_window(), "waitForEvent",
                               Qt::QueuedConnection,
                               Q_ARG(int, ms));
     get_user_thread().listenToWindowEvents();

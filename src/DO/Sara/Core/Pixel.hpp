@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
@@ -11,17 +11,17 @@
 
 //! @file
 
-#ifndef DO_CORE_PIXEL_HPP
-#define DO_CORE_PIXEL_HPP
+#ifndef DO_SARA_CORE_PIXEL_HPP
+#define DO_SARA_CORE_PIXEL_HPP
 
 
-#include <DO/Core/Pixel/ChannelConversion.hpp>
-#include <DO/Core/Pixel/ColorConversion.hpp>
-#include <DO/Core/Pixel/ColorSpace.hpp>
-#include <DO/Core/Pixel/Pixel.hpp>
-#include <DO/Core/Pixel/PixelTraits.hpp>
-#include <DO/Core/Pixel/SmartColorConversion.hpp>
-#include <DO/Core/Pixel/Typedefs.hpp>
+#include <DO/Sara/Core/Pixel/ChannelConversion.hpp>
+#include <DO/Sara/Core/Pixel/ColorConversion.hpp>
+#include <DO/Sara/Core/Pixel/ColorSpace.hpp>
+#include <DO/Sara/Core/Pixel/Pixel.hpp>
+#include <DO/Sara/Core/Pixel/PixelTraits.hpp>
+#include <DO/Sara/Core/Pixel/SmartColorConversion.hpp>
+#include <DO/Sara/Core/Pixel/Typedefs.hpp>
 
 
-#endif /* DO_CORE_PIXEL_HPP */
+#endif /* DO_SARA_CORE_PIXEL_HPP */

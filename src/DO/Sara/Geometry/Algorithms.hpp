@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2014 David Ok <david.ok8@gmail.com>
@@ -9,12 +9,12 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_GEOMETRY_ALGORITHMS_HPP
-#define DO_GEOMETRY_ALGORITHMS_HPP
+#ifndef DO_SARA_GEOMETRY_ALGORITHMS_HPP
+#define DO_SARA_GEOMETRY_ALGORITHMS_HPP
 
-#include <DO/Geometry/Algorithms/ConvexHull.hpp>
-#include <DO/Geometry/Algorithms/EllipseIntersection.hpp>
-#include <DO/Geometry/Algorithms/SutherlandHodgman.hpp>
-#include <DO/Geometry/Algorithms/RamerDouglasPeucker.hpp>
+#include <DO/Sara/Geometry/Algorithms/ConvexHull.hpp>
+#include <DO/Sara/Geometry/Algorithms/EllipseIntersection.hpp>
+#include <DO/Sara/Geometry/Algorithms/SutherlandHodgman.hpp>
+#include <DO/Sara/Geometry/Algorithms/RamerDouglasPeucker.hpp>
 
-#endif /* DO_GEOMETRY_ALGORITHMS_HPP */
+#endif /* DO_SARA_GEOMETRY_ALGORITHMS_HPP */

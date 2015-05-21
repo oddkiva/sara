@@ -1,15 +1,15 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Graphics.hpp>
+#include <DO/Sara/Graphics.hpp>
 #include "GraphicsUtilities.hpp"
 
 namespace DO {
@@ -23,7 +23,7 @@ namespace DO {
       return false;
     image = image.convertToFormat(QImage::Format_RGB888);
     I.resize(image.width(), image.height());
-    
+
     Color3ub *dst = I.data();
     Color3ub *src = reinterpret_cast<Color3ub *>(image.bits());
     std::copy(src, src+image.width()*image.height(), dst);
@@ -53,7 +53,7 @@ namespace DO {
   {
     QMetaObject::invokeMethod(gui_app(), "getFileFromDialogBox",
                               Qt::BlockingQueuedConnection);
-    bool r = load(image, 
+    bool r = load(image,
                   gui_app()->dialogBoxInfo.filename.toLocal8Bit().constData());
     return r;
   }
@@ -62,7 +62,7 @@ namespace DO {
   {
     QMetaObject::invokeMethod(gui_app(), "getFileFromDialogBox",
                               Qt::BlockingQueuedConnection);
-    bool r = load(image, 
+    bool r = load(image,
       std::string(gui_app()->dialogBoxInfo.filename.toLocal8Bit().constData()));
     return r;
   }
@@ -70,7 +70,7 @@ namespace DO {
   // ====================================================================== //
   //! Image saving functions
   static
-  bool saveColorImage(const std::string& name, const Color3ub *cols, 
+  bool saveColorImage(const std::string& name, const Color3ub *cols,
                       int w, int h, int quality)
   {
     return QImage(reinterpret_cast<const unsigned char*>(cols),
@@ -79,7 +79,7 @@ namespace DO {
   }
 
   static
-  bool saveGreyImage(const std::string& name, const unsigned char *g, 
+  bool saveGreyImage(const std::string& name, const unsigned char *g,
                      int w, int h, int quality)
   {
     QImage image(g, w, h, w, QImage::Format_Indexed8);

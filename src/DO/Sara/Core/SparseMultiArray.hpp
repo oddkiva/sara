@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
@@ -12,12 +12,12 @@
 //! @file
 //! \brief This contains the implementation of the sparse N-dimensional array class.
 
-#ifndef DO_CORE_SPARSEMULTIARRAY_HPP
-#define DO_CORE_SPARSEMULTIARRAY_HPP
+#ifndef DO_SARA_CORE_SPARSEMULTIARRAY_HPP
+#define DO_SARA_CORE_SPARSEMULTIARRAY_HPP
 
 #include <map>
 
-#include <DO/Core/EigenExtension.hpp>
+#include <DO/Sara/Core/EigenExtension.hpp>
 
 
 namespace DO {
@@ -189,4 +189,4 @@ namespace DO {
 } /* namespace DO */
 
 
-#endif /* DO_CORE_SPARSEMULTIARRAY_HPP */
+#endif /* DO_SARA_CORE_SPARSEMULTIARRAY_HPP */

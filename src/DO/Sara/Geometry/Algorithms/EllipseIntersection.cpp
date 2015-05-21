@@ -1,20 +1,20 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Geometry/Algorithms/EllipseIntersection.hpp>
-#include <DO/Geometry/Algorithms/ConvexHull.hpp>
-#include <DO/Geometry/Algorithms/SutherlandHodgman.hpp>
-#include <DO/Geometry/Tools/PolynomialRoots.hpp>
-#include <DO/Geometry/Tools/Utilities.hpp>
-#include <DO/Geometry/Graphics/DrawPolygon.hpp>
+#include <DO/Sara/Geometry/Algorithms/EllipseIntersection.hpp>
+#include <DO/Sara/Geometry/Algorithms/ConvexHull.hpp>
+#include <DO/Sara/Geometry/Algorithms/SutherlandHodgman.hpp>
+#include <DO/Sara/Geometry/Tools/PolynomialRoots.hpp>
+#include <DO/Sara/Geometry/Tools/Utilities.hpp>
+#include <DO/Sara/Geometry/Graphics/DrawPolygon.hpp>
 #include <vector>
 #include <iostream>
 
@@ -114,7 +114,7 @@ namespace DO {
     double s[6], t[6];
     conic_equation(s, ee1);
     conic_equation(t, ee2);
-    
+
     Polynomial<double, 4> u(quartic_equation(s, t));
 
     complex<double> y[4];
@@ -184,7 +184,7 @@ namespace DO {
       draw_quad(Q_1, Blue8, 3);
       draw_bbox(b0, Green8, 3);
       get_key();
-      
+
       // now rescale the ellipse.
       Point2d center(b0.center());
       Vector2d delta(b0.sizes() - center);
@@ -218,7 +218,7 @@ namespace DO {
     }
 
     // SPECIAL CASE.
-    // If there is at most one intersection point, then either one of the 
+    // If there is at most one intersection point, then either one of the
     // ellipse is included in the other.
     if (numInter < 2)
     {
@@ -227,7 +227,7 @@ namespace DO {
     }
 
     // GENERIC CASE
-    // Compute the relative orientation of the intersection points w.r.t. the 
+    // Compute the relative orientation of the intersection points w.r.t. the
     // ellipse orientation.
     double o_0[4];
     double o_1[4];
@@ -268,7 +268,7 @@ namespace DO {
 
     return area;
   }
-  
+
   double analytic_jaccard_similarity(const Ellipse& e1, const Ellipse& e2)
   {
     double interArea = analytic_intersection(e1, e2);
@@ -285,23 +285,23 @@ namespace DO {
   {
     std::vector<Point2d> polygon;
     polygon.reserve(n);
-    
+
     const Matrix2d Ro(rotation2(e.orientation()));
     Vector2d D( e.radius1(), e.radius2() );
-    
+
     for(int i = 0; i < n; ++i)
     {
       const double theta = 2.*M_PI*double(i)/n;
       const Matrix2d R(rotation2(theta));
       Point2d p(1.0, 0.0);
-      
+
       const Point2d p1(e.center() + Ro.matrix()*D.asDiagonal()*R.matrix()*p);
       polygon.push_back(p1);
     }
-    
+
     return polygon;
   }
-  
+
   std::vector<Point2d>
   approximage_intersection(const Ellipse& e1, const Ellipse& e2, int n)
   {
@@ -314,7 +314,7 @@ namespace DO {
       inter = sutherland_hodgman(p2, p1);
     return inter;
   }
-  
+
   double approximate_jaccard_similarity(const Ellipse& e1, const Ellipse& e2,
                                         int n, double limit)
   {
@@ -326,7 +326,7 @@ namespace DO {
     inter = sutherland_hodgman(p1, p2);
     if (inter.empty())
       inter = sutherland_hodgman(p2, p1);
-    
+
 		if (!inter.empty())
 		{
 			double interArea = area(inter);

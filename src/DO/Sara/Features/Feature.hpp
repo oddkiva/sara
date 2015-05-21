@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
@@ -12,13 +12,13 @@
 //! @file
 
 
-#ifndef DO_FEATURES_FEATURE_HPP
-#define DO_FEATURES_FEATURE_HPP
+#ifndef DO_SARA_FEATURES_FEATURE_HPP
+#define DO_SARA_FEATURES_FEATURE_HPP
 
 #include <stdexcept>
 
-#include <DO/Core/Pixel.hpp>
-#include <DO/Core/EigenExtension.hpp>
+#include <DO/Sara/Core/Pixel.hpp>
+#include <DO/Sara/Core/EigenExtension.hpp>
 
 
 namespace DO {
@@ -149,4 +149,4 @@ namespace DO {
 }
 
 
-#endif /* DO_FEATURES_FEATURE_HPP */
+#endif /* DO_SARA_FEATURES_FEATURE_HPP */

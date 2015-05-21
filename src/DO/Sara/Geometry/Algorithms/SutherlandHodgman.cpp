@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2014 David Ok <david.ok8@gmail.com>
@@ -9,7 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Geometry.hpp>
+#include <DO/Sara/Geometry.hpp>
 
 namespace DO {
 
@@ -33,7 +33,7 @@ namespace DO {
     l /= l.maxCoeff();
     return l;
   }
-  
+
   // Polygon 'subject' can be a polygon of any type.
   // Polygon 'clip'  must be a convex polygon.
   std::vector<Point2d> sutherland_hodgman(const std::vector<Point2d>& subject,
@@ -82,5 +82,5 @@ namespace DO {
 
     return out;
   }
-  
+
 }

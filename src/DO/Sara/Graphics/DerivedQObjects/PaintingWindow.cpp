@@ -1,11 +1,11 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
@@ -43,19 +43,19 @@ namespace DO {
     , painter_(&pixmap_)
   {
     setFocusPolicy(Qt::WheelFocus);
-    
+
     // Set event listener.
     event_listening_timer_.setSingleShot(true);
     connect(&event_listening_timer_, SIGNAL(timeout()),
             this, SLOT(eventListeningTimerStopped()));
-    
+
     // Move widget.
     if (x != -1 && y != -1)
       scroll_area_->move(x,y);
     scroll_area_->setWindowTitle(windowTitle);
     scroll_area_->setWidget(this);
     scroll_area_->setFocusProxy(this);
-    
+
     // Maximize if necessary.
     if ( width >= qApp->desktop()->width()   ||
          height >= qApp->desktop()->height() )
@@ -68,7 +68,7 @@ namespace DO {
     // Initialize the pixmap.
     pixmap_.fill();
     update();
-    
+
     // Show the widget.
     scroll_area_->show();
   }
@@ -110,7 +110,7 @@ namespace DO {
     update();
   }
 
-  void PaintingWindow::drawLine(const QPointF& p1, const QPointF& p2, 
+  void PaintingWindow::drawLine(const QPointF& p1, const QPointF& p2,
                                 const QColor& c, int penWidth)
   {
     painter_.setPen(QPen(c, penWidth));
@@ -212,7 +212,7 @@ namespace DO {
 
     QPainterPath path;
     QPolygonF pts;
-    
+
     qreal dx_norm = dx / norm;
     qreal dy_norm = dy / norm;
     qreal p1x = x1 + dx_norm*(norm-arrowWidth) + arrowHeight/2.*dy_norm;
@@ -231,7 +231,7 @@ namespace DO {
         pts << QPointF(x2, y2);
         pts << QPointF(p1x, p1y);
         sl = norm-(arrowWidth*.7);
-        pts << QPointF(x1 + dx_norm*sl + dy_norm*width, 
+        pts << QPointF(x1 + dx_norm*sl + dy_norm*width,
                        y1 + dy_norm*sl - dx_norm*width);
         pts << QPointF(x1 + dy_norm*width, y1 - dx_norm*width);
         pts << QPointF(x1 - dy_norm*width, y1 + dx_norm*width);
@@ -245,7 +245,7 @@ namespace DO {
         pts << QPointF(x2, y2);
         pts << QPointF(p1x, p1y);
         sl = norm-arrowWidth;
-        pts << QPointF(x1 + dx_norm*sl + dy_norm*width, 
+        pts << QPointF(x1 + dx_norm*sl + dy_norm*width,
                        y1 + dy_norm*sl - dx_norm*width);
         pts << QPointF(x1 + dy_norm*width, y1-dx_norm*width);
         pts << QPointF(x1 - dy_norm*width, y1+dx_norm*width);
@@ -257,7 +257,7 @@ namespace DO {
       default:
         break;
     }
-    
+
     update();
   }
 
@@ -288,7 +288,7 @@ namespace DO {
     update();
   }
 
-  void PaintingWindow::fillEllipse(int x, int y, int w, int h, 
+  void PaintingWindow::fillEllipse(int x, int y, int w, int h,
                                    const QColor& c)
   {
     QPainterPath path;
@@ -319,7 +319,7 @@ namespace DO {
     update();
   }
 
-  void PaintingWindow::fillRect(int x, int y, int w, int h, 
+  void PaintingWindow::fillRect(int x, int y, int w, int h,
                                 const QColor& c)
   {
     painter_.setPen(c);
@@ -363,7 +363,7 @@ namespace DO {
     pixmap_ = QPixmap(width, height);
     pixmap_.fill();
     painter_.begin(&pixmap_);
-    
+
     // Resize the window and the scroll area as follows.
     resize(width, height);
     if (width > qApp->desktop()->width() || height > qApp->desktop()->height())
@@ -401,7 +401,7 @@ namespace DO {
   {
 #ifdef Q_OS_MAC
     Qt::MouseButtons buttons = (event->modifiers() == Qt::ControlModifier &&
-                  event->buttons() == Qt::LeftButton) ? 
+                  event->buttons() == Qt::LeftButton) ?
     Qt::MiddleButton : event->buttons();
     emit pressedMouseButtons(event->x(), event->y(), buttons);
 #else
@@ -419,7 +419,7 @@ namespace DO {
   {
 #ifdef Q_OS_MAC
     Qt::MouseButtons buttons = (event->modifiers() == Qt::ControlModifier &&
-                                event->buttons() == Qt::LeftButton) ? 
+                                event->buttons() == Qt::LeftButton) ?
       Qt::MiddleButton : event->buttons();
     emit releasedMouseButtons(event->x(), event->y(), buttons);
 #else
@@ -454,7 +454,7 @@ namespace DO {
   }
 
   void PaintingWindow::paintEvent(QPaintEvent *)
-  {    
+  {
     QPainter p(this);
     p.drawPixmap(0, 0, pixmap_);
   }

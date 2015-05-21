@@ -1,11 +1,11 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
@@ -15,7 +15,7 @@
 #include <QtOpenGL>
 
 namespace DO {
-    
+
   GraphicsView::GraphicsView(int w, int h, const QString& windowTitle,
                              int x, int y, QWidget* parent)
     : QGraphicsView(parent)
@@ -32,7 +32,7 @@ namespace DO {
     setRenderHints(QPainter::Antialiasing);
     setDragMode(RubberBandDrag);
 
-    setWindowTitle(windowTitle);    
+    setWindowTitle(windowTitle);
     resize(w, h);
     move(x, y);
     show();
@@ -60,7 +60,7 @@ namespace DO {
   }
 
   void GraphicsView::drawPoint(int x, int y, const QColor& c,
-                               QGraphicsPixmapItem *item) 
+                               QGraphicsPixmapItem *item)
   {
     QPixmap pixmap(item->pixmap());
     QPainter p(&pixmap);
@@ -84,7 +84,7 @@ namespace DO {
   {
 #ifdef Q_OS_MAC
     Qt::MouseButtons buttons = (event->modifiers() == Qt::ControlModifier &&
-      event->buttons() == Qt::LeftButton) ? 
+      event->buttons() == Qt::LeftButton) ?
       Qt::MiddleButton : event->buttons();
     emit pressedMouseButtons(event->x(), event->y(), buttons);
 #else
@@ -93,7 +93,7 @@ namespace DO {
     if (event_listening_timer_.isActive())
     {
       event_listening_timer_.stop();
-      sendEvent(mouse_pressed(event->x(), event->y(), event->buttons(), 
+      sendEvent(mouse_pressed(event->x(), event->y(), event->buttons(),
         event->modifiers()));
     }
     // Handle the mouse press event as usual.
@@ -105,7 +105,7 @@ namespace DO {
     //qDebug() << "Released " << event->pos().x() << " " << event->pos().y();
 #ifdef Q_OS_MAC
     Qt::MouseButtons buttons = (event->modifiers() == Qt::ControlModifier &&
-      event->button() == Qt::LeftButton) ? 
+      event->button() == Qt::LeftButton) ?
       Qt::MiddleButton : event->button();
     emit releasedMouseButtons(event->x(), event->y(), buttons);
 #else
@@ -115,7 +115,7 @@ namespace DO {
     if (event_listening_timer_.isActive())
     {
       event_listening_timer_.stop();
-      sendEvent(mouse_released(event->x(), event->y(), 
+      sendEvent(mouse_released(event->x(), event->y(),
         event->button(), event->modifiers()));
     }
     // Handle the mouse release event as usual.

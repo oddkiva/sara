@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
@@ -11,12 +11,12 @@
 
 //! @file
 
-#ifndef DO_CORE_IMAGE_ELEMENTTRAITS_HPP
-#define DO_CORE_IMAGE_ELEMENTTRAITS_HPP
+#ifndef DO_SARA_CORE_IMAGE_ELEMENTTRAITS_HPP
+#define DO_SARA_CORE_IMAGE_ELEMENTTRAITS_HPP
 
 
-#include <DO/Core/MultiArray/ElementTraits.hpp>
-#include <DO/Core/Pixel/Pixel.hpp>
+#include <DO/Sara/Core/MultiArray/ElementTraits.hpp>
+#include <DO/Sara/Core/Pixel/Pixel.hpp>
 
 
 namespace DO {
@@ -46,4 +46,4 @@ namespace DO {
 }
 
 
-#endif /* DO_CORE_IMAGE_ELEMENTTRAITS_HPP */
+#endif /* DO_SARA_CORE_IMAGE_ELEMENTTRAITS_HPP */

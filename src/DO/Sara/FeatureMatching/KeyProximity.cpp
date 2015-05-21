@@ -1,15 +1,15 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/FeatureMatching.hpp>
+#include <DO/Sara/FeatureMatching.hpp>
 
 namespace DO {
 
@@ -23,7 +23,7 @@ namespace DO {
 
     float pixelDist2 = (f1.center() - f2.center()).squaredNorm();
 
-    return (pixelDist2 < sqPixDist) || 
+    return (pixelDist2 < sqPixDist) ||
       (sd1 < sqMetricDist) || (sd2 < sqMetricDist);
   }
 

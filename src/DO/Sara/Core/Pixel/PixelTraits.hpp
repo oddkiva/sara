@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
@@ -9,16 +9,16 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_CORE_PIXEL_PIXELTRAITS_HPP
-#define DO_CORE_PIXEL_PIXELTRAITS_HPP
+#ifndef DO_SARA_CORE_PIXEL_PIXELTRAITS_HPP
+#define DO_SARA_CORE_PIXEL_PIXELTRAITS_HPP
 
 
 #include <functional>
 #include <stdexcept>
 
-#include <DO/Core/EigenExtension.hpp>
-#include <DO/Core/Pixel/ChannelConversion.hpp>
-#include <DO/Core/Pixel/Pixel.hpp>
+#include <DO/Sara/Core/EigenExtension.hpp>
+#include <DO/Sara/Core/Pixel/ChannelConversion.hpp>
+#include <DO/Sara/Core/Pixel/Pixel.hpp>
 
 
 namespace DO {
@@ -152,4 +152,4 @@ namespace DO {
 }
 
 
-#endif /* DO_CORE_PIXEL_PIXELTRAITS_HPP */
+#endif /* DO_SARA_CORE_PIXEL_PIXELTRAITS_HPP */

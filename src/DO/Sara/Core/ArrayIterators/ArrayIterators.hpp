@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
@@ -12,11 +12,11 @@
 //! @file
 //! \brief Implementation of N-dimensional iterators.
 
-#ifndef DO_CORE_ARRAYITERATORS_MULTIARRAYITERATORS_HPP
-#define DO_CORE_ARRAYITERATORS_MULTIARRAYITERATORS_HPP
+#ifndef DO_SARA_CORE_ARRAYITERATORS_MULTIARRAYITERATORS_HPP
+#define DO_SARA_CORE_ARRAYITERATORS_MULTIARRAYITERATORS_HPP
 
 
-#include <DO/Core/ArrayIterators/Utilities.hpp>
+#include <DO/Sara/Core/ArrayIterators/Utilities.hpp>
 
 
 namespace DO {
@@ -64,7 +64,7 @@ namespace DO {
   template <bool IsConst, typename T, int Axis, int N>
   class AxisIterator : public ITERATOR_BASE_TYPE(IsConst)
   {
-    DO_STATIC_ASSERT(
+    DO_SARA_STATIC_ASSERT(
       Axis >= 0 && Axis < N,
       AXIS_MUST_BE_NONNEGATIVE_AND_LESS_THAN_N);
 
@@ -309,14 +309,14 @@ namespace DO {
     //! Special access operator in 2D.
     inline reference operator()(int i, int j) const
     {
-      DO_STATIC_ASSERT(N == 2, DATA_MUST_BE_TWO_DIMENSIONAL);
+      DO_SARA_STATIC_ASSERT(N == 2, DATA_MUST_BE_TWO_DIMENSIONAL);
       return operator()(vector_type(i, j));
     }
 
     //! Special access operator in 3D.
     inline reference operator()(int i, int j, int k) const
     {
-      DO_STATIC_ASSERT(N == 3, DATA_MUST_BE_THREE_DIMENSIONAL);
+      DO_SARA_STATIC_ASSERT(N == 3, DATA_MUST_BE_THREE_DIMENSIONAL);
       return operator()(vector_type(i, j, k));
     }
 
@@ -336,7 +336,7 @@ namespace DO {
     template<int I, int J>
     inline reference delta(int step_i, int step_j) const
     {
-      DO_STATIC_ASSERT(I >= 0 && I < N && J >= 0 && J < N,
+      DO_SARA_STATIC_ASSERT(I >= 0 && I < N && J >= 0 && J < N,
                        I_AND_J_MUST_BETWEEN_0_AND_N);
       return *(cur_ptr_ + strides_[I]*step_i + strides_[J]*step_j);
     }
@@ -410,7 +410,7 @@ namespace DO {
   template <bool IsConst, typename T, int N, int StorageOrder>
   class ArrayIterator : public ArrayIteratorBase<IsConst, T, N, StorageOrder>
   {
-    DO_STATIC_ASSERT(N >= 0, NUMBER_OF_DIMENSIONS_MUST_BE_NONNEGATIVE);
+    DO_SARA_STATIC_ASSERT(N >= 0, NUMBER_OF_DIMENSIONS_MUST_BE_NONNEGATIVE);
     typedef ArrayIteratorBase<IsConst, T, N, StorageOrder> base_type;
     typedef ArrayIterator self_type;
     typedef PositionIncrementer<StorageOrder> incrementer;
@@ -496,7 +496,7 @@ namespace DO {
   template <bool IsConst, typename T, int N, int StorageOrder = ColMajor>
   class SubarrayIterator : public ArrayIteratorBase<IsConst, T, N, StorageOrder>
   {
-    DO_STATIC_ASSERT(N >= 0, NUMBER_OF_DIMENSIONS_MUST_BE_NONNEGATIVE);
+    DO_SARA_STATIC_ASSERT(N >= 0, NUMBER_OF_DIMENSIONS_MUST_BE_NONNEGATIVE);
 
     typedef ArrayIteratorBase<IsConst, T, N, StorageOrder> base_type;
     typedef SubarrayIterator self_type;
@@ -590,4 +590,4 @@ namespace DO {
 } /* namespace DO */
 
 
-#endif /* DO_CORE_ARRAYITERATORS_MULTIARRAYITERATORS_HPP */
+#endif /* DO_SARA_CORE_ARRAYITERATORS_MULTIARRAYITERATORS_HPP */

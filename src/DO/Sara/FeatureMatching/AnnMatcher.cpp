@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
@@ -14,8 +14,8 @@
 # pragma warning ( disable : 4244 4267 4800 4305 4291 4996)
 #endif
 
-#include <DO/FeatureMatching.hpp>
-#include <DO/Core/Timer.hpp>
+#include <DO/Sara/FeatureMatching.hpp>
+#include <DO/Sara/Core/Timer.hpp>
 #include <flann/flann.hpp>
 
 //#define DEBUG_FLANN
@@ -147,7 +147,7 @@ namespace DO {
   }
 
   // Sort by indices and by score.
-  inline bool compareMatch(const Match& m1, const Match& m2) 
+  inline bool compareMatch(const Match& m1, const Match& m2)
   {
     if (m1.indX() < m2.indX())
       return true;

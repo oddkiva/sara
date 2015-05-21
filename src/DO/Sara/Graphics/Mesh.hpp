@@ -1,20 +1,20 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
 //! @file
 
-#ifndef DO_GRAPHICS_MESH_HPP
-#define DO_GRAPHICS_MESH_HPP
+#ifndef DO_SARA_GRAPHICS_MESH_HPP
+#define DO_SARA_GRAPHICS_MESH_HPP
 
-#include <DO/Core/EigenExtension.hpp>
+#include <DO/Sara/Core/EigenExtension.hpp>
 #include <fstream>
 #include <iostream>
 #include <vector>
@@ -31,7 +31,7 @@ namespace DO {
   typedef Array<size_t, 3, 1> Face3;
   //! \brief Quad face consisting of 4 vertex indices
   typedef Array<size_t, 4, 1> Face4;
-  
+
   //! \brief Simple mesh data structure.
   template <typename Vector_, typename Face_>
   class SimpleMesh
@@ -157,7 +157,7 @@ namespace DO {
       {
         std::vector<size_t>& vertexRing = vertex_rings_[r];
         std::sort(vertexRing.begin(), vertexRing.end());
-        typename std::vector<size_t>::iterator 
+        typename std::vector<size_t>::iterator
           it = std::unique(vertexRing.begin(), vertexRing.end());
         vertexRing.resize(it-vertexRing.begin());
       }
@@ -172,7 +172,7 @@ namespace DO {
         face_rings_[mesh.face(f)(0)].push_back(f);
         face_rings_[mesh.face(f)(1)].push_back(f);
         face_rings_[mesh.face(f)(2)].push_back(f);
-      }      
+      }
     }
 
     template<typename Vector, typename Face>
@@ -205,4 +205,4 @@ namespace DO {
 
 } /* namespace DO */
 
-#endif /* DO_GRAPHICS_MESH_HPP */
+#endif /* DO_SARA_GRAPHICS_MESH_HPP */

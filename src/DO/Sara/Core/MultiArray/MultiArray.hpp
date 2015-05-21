@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
@@ -12,14 +12,14 @@
 //! @file
 //! \brief This contains the implementation of the N-dimensional array class.
 
-#ifndef DO_CORE_MULTIARRAY_MULTIARRAY_HPP
-#define DO_CORE_MULTIARRAY_MULTIARRAY_HPP
+#ifndef DO_SARA_CORE_MULTIARRAY_MULTIARRAY_HPP
+#define DO_SARA_CORE_MULTIARRAY_MULTIARRAY_HPP
 
 #include <iostream>
 #include <numeric>
 #include <stdexcept>
 
-#include <DO/Core/MultiArray/MultiArrayView.hpp>
+#include <DO/Sara/Core/MultiArray/MultiArrayView.hpp>
 
 
 namespace DO {
@@ -139,13 +139,13 @@ namespace DO {
 
     inline void resize(int rows, int cols)
     {
-      DO_STATIC_ASSERT(N == 2, MULTIARRAY_MUST_BE_TWO_DIMENSIONAL);
+      DO_SARA_STATIC_ASSERT(N == 2, MULTIARRAY_MUST_BE_TWO_DIMENSIONAL);
       resize(vector_type(rows, cols));
     }
 
     inline void resize(int rows, int cols, int depth)
     {
-      DO_STATIC_ASSERT(N == 3, MULTIARRAY_MUST_BE_THREE_DIMENSIONAL);
+      DO_SARA_STATIC_ASSERT(N == 3, MULTIARRAY_MUST_BE_THREE_DIMENSIONAL);
       resize(vector_type(rows, cols, depth));
     }
     //! @}
@@ -201,4 +201,4 @@ namespace DO {
 }
 
 
-#endif /* DO_CORE_MULTIARRAY_MULTIARRAY_HPP */
+#endif /* DO_SARA_CORE_MULTIARRAY_MULTIARRAY_HPP */

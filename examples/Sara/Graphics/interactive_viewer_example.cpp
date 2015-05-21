@@ -1,4 +1,4 @@
-#include <DO/Graphics.hpp>
+#include <DO/Sara/Graphics.hpp>
 
 using namespace std;
 using namespace DO;
@@ -16,7 +16,7 @@ GRAPHICS_MAIN()
     if (!image)
       cerr << "Error image display" << endl;
   }
-  
+
   while (get_key() != KEY_ESCAPE);
   close_window();
 

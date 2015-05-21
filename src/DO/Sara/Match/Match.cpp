@@ -1,16 +1,16 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Match.hpp>
-#include <DO/Graphics.hpp>
+#include <DO/Sara/Match.hpp>
+#include <DO/Sara/Graphics.hpp>
 #include <fstream>
 #include <string>
 #include <sstream>
@@ -33,7 +33,7 @@ namespace DO {
     if (!file.is_open()) {
       std::cerr << "Cant open file" << fileName << std::endl;
       return false;
-    }    
+    }
 
     file << matches.size() << std::endl;
     for(vector<Match>::const_iterator m = matches.begin(); m != matches.end(); ++m)
@@ -57,7 +57,7 @@ namespace DO {
     std::size_t matchCount;
     file >> matchCount;
 
-    matches.reserve(matchCount);  
+    matches.reserve(matchCount);
     for (size_t i = 0; i < matchCount; ++i)
     {
       Match m;
@@ -73,7 +73,7 @@ namespace DO {
   }
 
   bool readMatches(
-    vector<Match>& matches, 
+    vector<Match>& matches,
     const vector<OERegion>& sKeys, const vector<OERegion>& tKeys,
     const string& fileName, float scoreT)
   {
@@ -89,7 +89,7 @@ namespace DO {
     std::size_t matchCount;
     file >> matchCount;
 
-    matches.reserve(matchCount);  
+    matches.reserve(matchCount);
     for (size_t i = 0; i < matchCount; ++i)
     {
       Match m;
@@ -128,7 +128,7 @@ namespace DO {
       drawMatch(*m, Color3ub(rand()%256, rand()%256, rand()%256), off2, z);
   }
 
-  void checkMatches(const Image<Rgb8>& I1, const Image<Rgb8>& I2, 
+  void checkMatches(const Image<Rgb8>& I1, const Image<Rgb8>& I2,
                     const vector<Match>& matches, bool redrawEverytime, float z)
   {
     Point2f off( float(I1.width()), 0.f );

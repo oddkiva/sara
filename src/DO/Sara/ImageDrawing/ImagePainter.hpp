@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
@@ -9,8 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_IMAGEDRAWING_IMAGEPAINTER_HPP
-#define DO_IMAGEDRAWING_IMAGEPAINTER_HPP
+#ifndef DO_SARA_IMAGEDRAWING_IMAGEPAINTER_HPP
+#define DO_SARA_IMAGEDRAWING_IMAGEPAINTER_HPP
 
 // Pixel format
 #include "agg_pixfmt_rgb.h"
@@ -41,7 +41,7 @@ namespace DO {
     void drawRectangle(double x1, double y1, double x2, double y2,
                        double penWidth, const Vector3d& rgb, double alpha);
     void drawEllipse(double cx, double cy, double rx, double ry,
-                     double penWidth, double oriRadian, const Vector3d& rgb, 
+                     double penWidth, double oriRadian, const Vector3d& rgb,
                      double alpha = 1);
     void drawCircle(double cx, double cy, double r, double penWidth,
                     const Vector3d& rgb, double alpha = 1)
@@ -56,7 +56,7 @@ namespace DO {
 
     // Some convenient typedefs.
     typedef agg::renderer_base<agg::pixfmt_rgb24> renderer_base_type;
-    typedef agg::renderer_scanline_aa_solid<renderer_base_type> 
+    typedef agg::renderer_scanline_aa_solid<renderer_base_type>
       renderer_scanline_type;
     typedef agg::rasterizer_scanline_aa<> rasterizer_scanline_type;
     // Rendering buffer data structure to which raw image data is attached.
@@ -73,4 +73,4 @@ namespace DO {
 
 } /* namespace DO */
 
-#endif /* DO_IMAGEDRAWING_IMAGEPAINTER_HPP */
+#endif /* DO_SARA_IMAGEDRAWING_IMAGEPAINTER_HPP */

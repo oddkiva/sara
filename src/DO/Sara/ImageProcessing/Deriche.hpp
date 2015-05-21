@@ -1,21 +1,21 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
 //! @file
 
-#ifndef DO_IMAGEPROCESSING_DERICHE_HPP
-#define DO_IMAGEPROCESSING_DERICHE_HPP
+#ifndef DO_SARA_IMAGEPROCESSING_DERICHE_HPP
+#define DO_SARA_IMAGEPROCESSING_DERICHE_HPP
 
 
-#include <DO/Core/Image.hpp>
+#include <DO/Sara/Core/Image.hpp>
 
 
 namespace DO {
@@ -32,7 +32,7 @@ namespace DO {
 
   //! \brief Apply Deriche filter with specified order $o$ to dimension $d$.
   template <typename T, int N>
-  void inplace_deriche(Image<T, N>& inout_signal, 
+  void inplace_deriche(Image<T, N>& inout_signal,
                        typename PixelTraits<T>::channel_type sigma,
                        int derivative_order, int axis, bool neumann = true)
   {
@@ -65,7 +65,7 @@ namespace DO {
     switch(derivative_order)
     {
     // first-order derivative
-    case 1:                 
+    case 1:
       ek = -(1-ema)*(1-ema)*(1-ema)/(2*(ema+1)*ema);
       a1 = a4 = 0;
       a2 = ek*ema;
@@ -82,7 +82,7 @@ namespace DO {
       break;
 
     // second-order derivative
-    case 2:               
+    case 2:
       ekn = ( -2*(-1+3*ea-3*ea*ea+ea*ea*ea)/(3*ea+1+3*ea*ea+ea*ea*ea) );
       ek = -(em2a-1)/(2*alpha*ema);
       a1 = ekn;
@@ -234,12 +234,12 @@ namespace DO {
   {
     typedef Image<T, N> return_type;
     typedef typename PixelTraits<T>::channel_type parameter_type;
-    
+
     inline explicit DericheBlur(const Image<T, N>& src)
       : src_(src)
     {
     }
-    
+
     inline return_type operator()(parameter_type sigma) const
     {
       return deriche_blur(src_, sigma);
@@ -252,4 +252,4 @@ namespace DO {
 
 } /* namespace DO */
 
-#endif /* DO_IMAGEPROCESSING_DERICHE_HPP */
+#endif /* DO_SARA_IMAGEPROCESSING_DERICHE_HPP */

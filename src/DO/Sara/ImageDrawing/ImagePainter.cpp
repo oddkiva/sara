@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
@@ -9,7 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/ImageDrawing.hpp>
+#include <DO/Sara/ImageDrawing.hpp>
 
 namespace DO {
 
@@ -33,7 +33,7 @@ namespace DO {
   }
 
   void ImagePainter::drawRectangle(double x1, double y1, double x2, double y2,
-                                   double penWidth, const Vector3d& rgb, 
+                                   double penWidth, const Vector3d& rgb,
                                    double alpha)
   {
     // Vectorial geometry.

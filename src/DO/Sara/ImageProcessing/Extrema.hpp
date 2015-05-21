@@ -1,21 +1,21 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
 //! @file
 
-#ifndef DO_IMAGEPROCESSING_EXTREMA_HPP
-#define DO_IMAGEPROCESSING_EXTREMA_HPP
+#ifndef DO_SARA_IMAGEPROCESSING_EXTREMA_HPP
+#define DO_SARA_IMAGEPROCESSING_EXTREMA_HPP
 
 
-#include <DO/ImageProcessing/ImagePyramid.hpp>
+#include <DO/Sara/ImageProcessing/ImagePyramid.hpp>
 
 
 namespace DO {
@@ -66,7 +66,7 @@ namespace DO {
                            const ImagePyramid<T, 2>& I) const
     {
       return compare_(I(x,y,s,o), x, y, I(s-1,o), true ) &&
-             compare_(I(x,y,s,o), x, y, I(s  ,o), false) && 
+             compare_(I(x,y,s,o), x, y, I(s  ,o), false) &&
              compare_(I(x,y,s,o), x, y, I(s+1,o), true );
     }
     CompareWithNeighborhood3<Compare, T> compare_;
@@ -195,4 +195,4 @@ namespace DO {
 
 } /* namespace DO */
 
-#endif /* DO_IMAGEPROCESSING_EXTREMA_HPP */
+#endif /* DO_SARA_IMAGEPROCESSING_EXTREMA_HPP */

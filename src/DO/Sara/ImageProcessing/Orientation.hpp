@@ -1,21 +1,21 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
 //! @file
 
-#ifndef DO_IMAGEPROCESSING_ORIENTATION_HPP
-#define DO_IMAGEPROCESSING_ORIENTATION_HPP
+#ifndef DO_SARA_IMAGEPROCESSING_ORIENTATION_HPP
+#define DO_SARA_IMAGEPROCESSING_ORIENTATION_HPP
 
 
-#include <DO/Core/Image/Image.hpp>
+#include <DO/Sara/Core/Image/Image.hpp>
 
 
 namespace DO {
@@ -27,13 +27,13 @@ namespace DO {
 
   /*!
     \brief Computes an orientation field from a 2D vector field.
-    @param[in] 
+    @param[in]
       src
-      an image in which each element **src(x,y)** are 2D vectors, i.e., a discretized 
+      an image in which each element **src(x,y)** are 2D vectors, i.e., a discretized
       2D vector field, e.g. image gradients.
     @param[in,out]
       dst
-      an image where each pixel **dst(x,y)** contains the orientation of the 2D 
+      an image where each pixel **dst(x,y)** contains the orientation of the 2D
       vector 'src(x,y)'
    */
   template <typename T>
@@ -54,13 +54,13 @@ namespace DO {
 
   /*!
     \brief Computes an orientation field from a 2D vector field.
-    @param[in] 
+    @param[in]
       src
-      an image in which each element **src(x,y)** are 2D vectors, i.e., a discretized 
+      an image in which each element **src(x,y)** are 2D vectors, i.e., a discretized
       2D vector field, e.g. image gradients.
     @param[out]
       dst
-      an image where each pixel **dst(x,y)** contains the orientation of the 2D 
+      an image where each pixel **dst(x,y)** contains the orientation of the 2D
       vector **src(x,y)**
    */
   template <typename T>
@@ -97,4 +97,4 @@ namespace DO {
 
 } /* namespace DO */
 
-#endif /* DO_IMAGEPROCESSING_ORIENTATION_HPP */
+#endif /* DO_SARA_IMAGEPROCESSING_ORIENTATION_HPP */

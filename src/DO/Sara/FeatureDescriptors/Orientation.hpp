@@ -1,18 +1,18 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
 //! @file
 
-#ifndef DO_FEATUREDESCRIPTORS_ORIENTATION_HPP
-#define DO_FEATUREDESCRIPTORS_ORIENTATION_HPP
+#ifndef DO_SARA_FEATUREDESCRIPTORS_ORIENTATION_HPP
+#define DO_SARA_FEATUREDESCRIPTORS_ORIENTATION_HPP
 
 namespace DO {
 
@@ -24,8 +24,8 @@ namespace DO {
 
   /*!
     \brief Computes the image gradients of image \f$I\f$ in polar coordinates.
-    
-    In each pixel \f$(x,y) \in [0,w[ \times [0,h[\f$, 
+
+    In each pixel \f$(x,y) \in [0,w[ \times [0,h[\f$,
     \f$\nabla I(x,y)\f$ is the 2D vector \f$(r,\theta)\f$ where:
     - \f$r = 2 ||\nabla I(x,y)||\f$,
     - \f$\theta = \mathrm{angle}( \nabla I(x,y) )\f$.
@@ -35,7 +35,7 @@ namespace DO {
   {
     Image<Matrix<T,2,1> > g;
     gradient(g, I);
-    for (typename Image<Matrix<T,2,1> >::iterator it = g.begin(); 
+    for (typename Image<Matrix<T,2,1> >::iterator it = g.begin();
          it != g.end(); ++it)
     {
       float r = 2*it->norm();
@@ -45,7 +45,7 @@ namespace DO {
     return g;
   }
   /*!
-    \brief Computes the image gradients in polar coordinates for each image in 
+    \brief Computes the image gradients in polar coordinates for each image in
     the pyramid.
    */
   template <typename T>
@@ -66,7 +66,7 @@ namespace DO {
     return pyramidOfGradients;
   }
   /*!
-    \brief  Computes the orientation histogram on a local patch around keypoint 
+    \brief  Computes the orientation histogram on a local patch around keypoint
     \f$(x,y,\sigma)\f$.
    */
   template <typename T, int N>
@@ -100,7 +100,7 @@ namespace DO {
 
         T mag = gradPolar(xi+u, yi+v)(0);
         T ori = gradPolar(xi+u, yi+v)(1);
-        // ori is in \f$]-\pi, \pi]\f$, so translate ori by \f$2*\pi\f$ if it is 
+        // ori is in \f$]-\pi, \pi]\f$, so translate ori by \f$2*\pi\f$ if it is
         // negative.
 #ifndef LOWE
         ori = ori < 0 ? ori+T(2.*M_PI) : ori;
@@ -113,7 +113,7 @@ namespace DO {
         if (binIndex < 0 || binIndex >= N)
         {
           std::ostringstream oss;
-          oss << "Orientation bin index out of range: " << binIndex 
+          oss << "Orientation bin index out of range: " << binIndex
               << " theta = " << ori << std::endl;
           std::cerr << oss.str() << std::endl;
           throw std::out_of_range(oss.str());
@@ -130,8 +130,8 @@ namespace DO {
   }
   /*!
     \brief This is used in [Lowe, IJCV 2004] to determine keypoint orientations.
-    
-    Basically, the histogram is convolved 6 times with the mean kernel 
+
+    Basically, the histogram is convolved 6 times with the mean kernel
     \f$[1/3, 1/3, 1/3]\f$.
    */
   template <typename T, int N>
@@ -153,11 +153,11 @@ namespace DO {
 
   /*!
     \brief  This is used in [Lowe, IJCV 2004] to find histogram peaks.
-    
+
     A histogram peak is by definition the index \f$i\f$ such that:
     - \f$h_{i} > h_{i+1}\f$
     - \f$h_{i} > h_{i-1}\f$
-    
+
     Only histogram peaks \f$i\f$ such that \f$h_i \geq 0.8 \max_j h_j\f$
    */
   template <typename T, int N>
@@ -175,7 +175,7 @@ namespace DO {
     return oriPeaks;
   }
   /*!
-    \brief Refine peaks as in [Lowe, IJCV 2004] by interpolation based on a 
+    \brief Refine peaks as in [Lowe, IJCV 2004] by interpolation based on a
     second-order Taylor approximation.
    */
   template <typename T, int N>
@@ -194,7 +194,7 @@ namespace DO {
     // Thus \f$h = -f'(x)/f''(x)\f$.
     T h = -fprime / fsecond;
     // Add the offset \f$h\f$ to get the refined orientation value.
-    // Note that we also add the 0.5f offset, because samples are assumed taken 
+    // Note that we also add the 0.5f offset, because samples are assumed taken
     // on the middle of the interval \f$[i, i+1)\f$.
     return T(i)+T(0.5)+h;
   }
@@ -219,7 +219,7 @@ namespace DO {
 
     std::vector<float> operator()(const Image<Vector2f>& gradients,
                                   float x, float y, float sigma) const;
-  
+
     std::vector<float> operator()(const ImagePyramid<Vector2f>& pyramid,
                                   const OERegion& extremum,
                                   const Point2i& scaleOctPair) const;
@@ -239,4 +239,4 @@ namespace DO {
 
 } /* namespace DO */
 
-#endif /* DO_FEATUREDESCRIPTORS_ORIENTATION_HPP */
+#endif /* DO_SARA_FEATUREDESCRIPTORS_ORIENTATION_HPP */
