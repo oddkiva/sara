@@ -48,8 +48,8 @@ before_script:
 script:
   - mkdir build
   - cd build
-  - cmake -DCMAKE_BUILD_TYPE=Debug ..
-  - make -j 4
+  - cmake -DCMAKE_BUILD_TYPE=Debug -DDO_BUILD_TESTS=ON -DDO_BUILD_SAMPLES=ON ..
+  - make -j4
   - ctest --output-on-failure
 
 after_success:
