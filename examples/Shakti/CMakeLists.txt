@@ -15,7 +15,6 @@ if (NOT WIN32)
   set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-std=c++11)
 endif ()
 
-include(${DO_USE_FILE})
 
 include_directories(
   ${CUDA_TOOLKIT_INCLUDE}
@@ -27,8 +26,7 @@ macro (do_add_example example)
   cuda_add_library(${example} ${example}.cu)
   source_group("CUDA Source Files" REGULAR_EXPRESSION ".*\\.cu$")
   set_target_properties(${example} PROPERTIES
-                        COMPILE_FLAGS "-DSRCDIR=${CMAKE_CURRENT_SOURCE_DIR}"
-                        COMPILE_DEFINITIONS DO_STATIC)
+                        COMPILE_FLAGS ${DO_DEFINITIONS})
   target_link_libraries(${example} ${DO_LIBRARIES})
   set_property(TARGET ${example} PROPERTY FOLDER "CUDA Examples")
 endmacro ()
@@ -63,8 +61,7 @@ function (cuda_add_example)
    set_property(TARGET ${EXAMPLE_NAME} PROPERTY FOLDER "CUDA Examples")
    set_target_properties(
      ${EXAMPLE_NAME} PROPERTIES
-     COMPILE_FLAGS "-DSRCDIR=${CMAKE_CURRENT_SOURCE_DIR}"
-     COMPILE_DEFINITIONS DO_STATIC
+     COMPILE_FLAGS ${DO_DEFINITIONS}
    )
 
    # Create an auxilliary library for CUDA based code.

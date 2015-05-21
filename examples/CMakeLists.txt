@@ -5,7 +5,4 @@ if (CUDA_FOUND)
   add_subdirectory(Shakti)
 endif ()
 
-add_subdirectory(Features)
-add_subdirectory(Geometry)
-add_subdirectory(Graphics)
-add_subdirectory(VideoIO)
+add_subdirectory(Sara)
