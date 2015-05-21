@@ -8,7 +8,7 @@ set (CMAKE_C_FLAGS "")
 set (CMAKE_CXX_FLAGS "")
 
 
-if (DO_BUILD_UNIT_TESTS)
+if (DO_BUILD_TESTS)
   message(STATUS "  - Google Test")
   add_subdirectory(gtest)
   set_property(TARGET gtest PROPERTY FOLDER ${THIRDPARTY_FOLDER_NAME})
