@@ -25,12 +25,12 @@ option(DO_USE_FROM_SOURCE
        "Use DO++ libraries from source"             ON)
 option(DO_USE_STATIC_LIBS
        "Use DO++ static libraries"                  OFF)
-option(DO_BUILD_UNIT_TESTS
-       "Build unit tests for DO++ libraries"        ON)
+option(DO_BUILD_TESTS
+       "Build unit tests for DO++ libraries"        OFF)
 option(DO_USE_VLD
        "Enable Visual Leak Detector for unit tests" OFF)
-option(DO_BUILD_SAMPLE_PROGRAMS
-       "Build sample programs using DO++ libraries" ON)
+option(DO_BUILD_SAMPLES
+       "Build sample programs using DO++ libraries" OFF)
 option(DO_BUILD_SHARED_LIBS
        "Build shared libraries for DO++ libraries"  OFF)
 
@@ -50,13 +50,13 @@ include(DOInstall)
 add_subdirectory(third-party)
 
 # Setup unit test projects
-if (DO_BUILD_UNIT_TESTS)
+if (DO_BUILD_TESTS)
   enable_testing()
   add_subdirectory(test)
 endif ()
 
 # Setup unit test projects
-if (DO_BUILD_SAMPLE_PROGRAMS)
+if (DO_BUILD_SAMPLES)
   add_subdirectory(examples)
 endif ()
 
