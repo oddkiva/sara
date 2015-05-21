@@ -5,7 +5,6 @@ project(DO_Core_tests)
 message(STATUS "  - DO_Core_Tests")
 
 find_package(DO COMPONENTS Core REQUIRED)
-include(${DO_USE_FILE})
 
 set(TestGroupName "Core")
 
