@@ -24,7 +24,7 @@ inline void millisleep(unsigned milliseconds)
   this_thread::sleep_for(duration);
 }
 
-TEST(DO_SARA_Core_Test, testTimer)
+TEST(DO_Sara_Core_Test, testTimer)
 {
   Timer timer;
   double elapsed_milliseconds;

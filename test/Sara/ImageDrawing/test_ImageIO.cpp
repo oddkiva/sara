@@ -18,7 +18,7 @@
 using namespace DO;
 using namespace std;
 
-TEST(DO_SARA_ImageDrawing_Test, imageFileReadingTest)
+TEST(DO_Sara_ImageDrawing_Test, imageFileReadingTest)
 {
   string filePaths[] = {
     srcPath("../../datasets/ksmall.jpg"),
@@ -55,7 +55,7 @@ TEST(DO_SARA_ImageDrawing_Test, imageFileReadingTest)
   }
 }
 
-TEST(DO_SARA_ImageDrawing_Test, imageExifOriTest)
+TEST(DO_Sara_ImageDrawing_Test, imageExifOriTest)
 {
   vector<string> filePaths;
   getImageFilePaths(filePaths, "C:/data/David-Ok-Iphone4S");

@@ -16,7 +16,7 @@
 using namespace DO;
 using namespace std;
 
-TEST(DO_SARA_Core_Test, eigenExtensionTest)
+TEST(DO_Sara_Core_Test, eigenExtensionTest)
 {
   typedef Matrix2f SuperScalar;
   typedef MultiArray<SuperScalar, 2> Mat2i;

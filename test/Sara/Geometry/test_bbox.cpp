@@ -1,9 +1,5 @@
 // ========================================================================== //
-<<<<<<< HEAD:test/Geometry/test_bbox.cpp
-// This file is part of DO++, a basic set of libraries in C++ for computer
-=======
 // This file is part of DO-CV, a basic set of libraries in C++ for computer
->>>>>>> fe4c24abba77106508d6b2a1113a7c567b633128:test/Sara/Geometry/test_bbox.cpp
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>

@@ -17,10 +17,10 @@
 using namespace std;
 
 
-TEST(DO_SARA_Core_Test, definesTest)
+TEST(DO_Sara_Core_Test, definesTest)
 {
-  EXPECT_EQ(string(DO_VERSION), "1.0.0");
-  EXPECT_TRUE(string(src_path("")).find("test/Core") != string::npos);
+  EXPECT_EQ(string(DO_SARA_VERSION), "1.0.0");
+  EXPECT_TRUE(string(src_path("")).find("test/Sara/Core") != string::npos);
 }
 
 
