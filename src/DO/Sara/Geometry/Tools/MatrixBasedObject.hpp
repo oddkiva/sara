@@ -13,7 +13,7 @@
 
 #include <DO/Sara/Core/EigenExtension.hpp>
 
-namespace DO { namespace Projective {
+namespace DO { namespace Sara { namespace Projective {
 
   //! Rudimentary polynomial class.
   template <typename T, int N>
@@ -75,5 +75,6 @@ namespace DO { namespace Projective {
   };
 
 
+} /* namespace Sara */
 } /* namespace Projective */
 } /* namespace DO */

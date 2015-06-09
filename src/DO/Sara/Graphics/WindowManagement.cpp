@@ -10,9 +10,11 @@
 // ========================================================================== //
 
 #include <DO/Sara/Graphics.hpp>
+
 #include "GraphicsUtilities.hpp"
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   QWidget * active_window()
   {
@@ -24,8 +26,6 @@ namespace DO {
     return Point2i(w->width(), w->height());
   }
 
-  // ====================================================================== //
-  //! Windows handling function
   Window create_window(int w, int h, const std::string& windowTitle,
                     int x, int y)
   {
@@ -73,8 +73,6 @@ namespace DO {
                               Q_ARG(int, width), Q_ARG(int, height));
   }
 
-  // ====================================================================== //
-  //! Temporizing functions
   void millisleep(int msec)
   {
     get_user_thread().milliSleep(msec);
@@ -85,8 +83,6 @@ namespace DO {
     get_user_thread().microSleep(usec);
   }
 
-  // ====================================================================== //
-  //! I/O control functions
   int get_mouse(int& x, int& y)
   {
     if (!active_window())
@@ -122,9 +118,6 @@ namespace DO {
     return k;
   }
 
-  // ====================================================================== //
-  //! Window event management
-  //! From active window only! I am lazy.
   void get_event(int ms, Event& e)
   {
     QMetaObject::invokeMethod(active_window(), "waitForEvent",
@@ -134,4 +127,5 @@ namespace DO {
     get_user_thread().getEvent(e);
   }
 
+} /* namespace Sara */
 } /* namespace DO */

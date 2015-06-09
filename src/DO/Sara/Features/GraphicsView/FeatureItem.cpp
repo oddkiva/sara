@@ -9,13 +9,16 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include "FeatureItem.hpp"
-#include <DO/Sara/Core.hpp>
-#include <QtGui>
 #include <QGraphicsItem>
 #include <QGraphicsEllipseItem>
+#include <QtGui>
 
-namespace DO {
+#include <DO/Sara/Core.hpp>
+
+#include "FeatureItem.hpp"
+
+
+namespace DO { namespace Sara {
 
   OERegionItem::OERegionItem(const OERegion& feature,
                              const QColor& color,
@@ -221,4 +224,5 @@ namespace DO {
       << line.p2() << targetArrowP1 << targetArrowP2);
   }
 
+} /* namespace Sara */
 } /* namespace DO */

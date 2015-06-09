@@ -16,7 +16,7 @@
 #include <DO/Sara/Core/MultiArray/ElementTraits.hpp>
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   template <typename T, int N, int S = ColMajor>
   class MultiArrayView
@@ -337,6 +337,7 @@ namespace DO {
     vector_type _strides; //!< vector of stride for each dimension.
   };
 
+} /* namespace Sara */
 } /* namespace DO */
 
 

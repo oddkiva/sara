@@ -11,9 +11,11 @@
 
 #include <DO/Sara/FeatureDetectors.hpp>
 
+
 using namespace std;
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   vector<OERegion>
   ComputeLoGExtrema::operator()(const Image<float>& I,
@@ -53,4 +55,5 @@ namespace DO {
     return extrema;
   }
 
+} /* namespace Sara */
 } /* namespace DO */

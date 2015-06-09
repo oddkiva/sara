@@ -14,7 +14,8 @@
 #ifndef DO_SARA_FEATUREDESCRIPTORS_ORIENTATION_HPP
 #define DO_SARA_FEATUREDESCRIPTORS_ORIENTATION_HPP
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   /*!
     \ingroup FeatureDesriptors
@@ -237,6 +238,7 @@ namespace DO {
   //! @}
 
 
+} /* namespace Sara */
 } /* namespace DO */
 
 #endif /* DO_SARA_FEATUREDESCRIPTORS_ORIENTATION_HPP */

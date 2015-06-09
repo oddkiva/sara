@@ -17,7 +17,7 @@
 #include <DO/Sara/Core/EigenExtension.hpp>
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   /*!
     \ingroup Features
@@ -72,6 +72,7 @@ namespace DO {
 
   //! @}
 
+} /* namespace Sara */
 } /* namespace DO */
 
 

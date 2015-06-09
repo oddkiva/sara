@@ -9,10 +9,12 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include "PaintingWindow.hpp"
 #include <QtWidgets>
 
-namespace DO {
+#include "PaintingWindow.hpp"
+
+
+namespace DO { namespace Sara {
 
   // ====================================================================== //
   // ScrollArea
@@ -459,4 +461,5 @@ namespace DO {
     p.drawPixmap(0, 0, pixmap_);
   }
 
+} /* namespace Sara */
 } /* namespace DO */

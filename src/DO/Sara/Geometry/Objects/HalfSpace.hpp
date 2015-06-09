@@ -1,6 +1,6 @@
 #pragma once
 
-namespace DO {
+namespace DO { namespace Sara {
 
   class HalfSpace3
   {
@@ -16,4 +16,5 @@ namespace DO {
     { return hs.n0.dot(p-hs.p0) <= 0; }
   };
 
-}
+} /* namespace Sara */
+} /* namespace DO */

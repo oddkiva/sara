@@ -14,11 +14,13 @@
 #ifndef DO_SARA_GRAPHICS_GRAPHICSVIEW_HPP
 #define DO_SARA_GRAPHICS_GRAPHICSVIEW_HPP
 
-#include "../Events.hpp"
 #include <QGraphicsView>
 #include <QTimer>
 
-namespace DO {
+#include "../Events.hpp"
+
+
+namespace DO { namespace Sara {
 
   /*!
     \addtogroup GraphicsInternal
@@ -69,6 +71,9 @@ namespace DO {
   };
 
   //! @}
+
+} /* namespace Sara */
 } /* namespace DO */
+
 
 #endif /* DO_SARA_GRAPHICS_GRAPHICSVIEW_HPP */

@@ -11,7 +11,8 @@
 
 #include <DO/Sara/Geometry.hpp>
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   bool intersection(const P2::Line& l1, const P2::Line& l2, Vector2d& u)
   {
@@ -83,4 +84,5 @@ namespace DO {
     return out;
   }
 
-}
+} /* namespace Sara */
+} /* namespace DO */

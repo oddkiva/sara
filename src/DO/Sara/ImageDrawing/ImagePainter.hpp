@@ -27,7 +27,8 @@
 #include "agg_path_storage.h"
 #include "agg_conv_stroke.h"
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   struct ImagePainter
   {
@@ -71,6 +72,8 @@ namespace DO {
     agg::scanline_p8 scanline;
   };
 
+} /* namespace Sara */
 } /* namespace DO */
+
 
 #endif /* DO_SARA_IMAGEDRAWING_IMAGEPAINTER_HPP */

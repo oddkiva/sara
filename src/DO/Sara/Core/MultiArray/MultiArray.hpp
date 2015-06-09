@@ -22,7 +22,7 @@
 #include <DO/Sara/Core/MultiArray/MultiArrayView.hpp>
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   //! The ND-array class.
   template <typename T, int N, int StorageOrder = ColMajor>
@@ -198,7 +198,8 @@ namespace DO {
 
   //! @}
 
-}
+} /* namespace Sara */
+} /* namespace DO */
 
 
 #endif /* DO_SARA_CORE_MULTIARRAY_MULTIARRAY_HPP */

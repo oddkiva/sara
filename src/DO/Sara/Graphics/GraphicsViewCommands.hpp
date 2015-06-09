@@ -14,10 +14,12 @@
 #ifndef DO_SARA_GRAPHICS_GRAPHICSVIEWCOMMANDS_HPP
 #define DO_SARA_GRAPHICS_GRAPHICSVIEWCOMMANDS_HPP
 
+
 class QGraphicsItem;
 class QGraphicsPixmapItem;
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   typedef QGraphicsItem * Item;
   typedef QGraphicsPixmapItem * ImageItem;
@@ -43,6 +45,8 @@ namespace DO {
 
   //! @}
 
+} /* namespace Sara */
 } /* namespace DO */
+
 
 #endif /* DO_SARA_GRAPHICS_GRAPHICSVIEWCOMMANDS_HPP */

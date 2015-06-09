@@ -16,7 +16,7 @@
 using namespace std;
 
 
-namespace DO { namespace Detail {
+namespace DO { namespace Sara { namespace Detail {
 
   static
   inline bool compare_y_coord(const PtCotg& p, const PtCotg& q)
@@ -63,22 +63,25 @@ namespace DO { namespace Detail {
       inout[i] = work[i].first;
   }
 
-} /* namespace internal */
+} /* namespace Detail */
+} /* namespace Sara */
 } /* namespace DO */
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   vector<Point2d> graham_scan_convex_hull(const vector<Point2d>& points)
   {
     using namespace Detail;
+
     // Sanity check.
     if (points.size() < 3)
       return points;
-    using namespace Detail;
+
     // Sort by polar angle.
     vector<PtCotg> ptCotgs(points.size());
     sort_points_by_polar_angle(&ptCotgs[0], &points[0], points.size());
+
     // Weed out the points inside the convex hull.
     std::vector<Point2d> ch;
     ch.reserve(points.size());
@@ -94,4 +97,5 @@ namespace DO {
     return ch;
   }
 
+} /* namespace Sara */
 } /* namespace DO */

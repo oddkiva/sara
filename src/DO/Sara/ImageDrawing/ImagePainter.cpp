@@ -11,7 +11,8 @@
 
 #include <DO/Sara/ImageDrawing.hpp>
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   void ImagePainter::drawLine(double x1, double y1, double x2, double y2,
                               double penWidth, const Vector3d& rgb,
@@ -117,4 +118,5 @@ namespace DO {
   }
 
 
+} /* namespace Sara */
 } /* namespace DO */

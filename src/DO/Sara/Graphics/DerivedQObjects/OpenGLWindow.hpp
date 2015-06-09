@@ -14,17 +14,19 @@
 #ifndef DO_SARA_GRAPHICS_OPENGLWINDOW_HPP
 #define DO_SARA_GRAPHICS_OPENGLWINDOW_HPP
 
-#include "../Mesh.hpp"
-#include "../Frame.hpp"
-#include "../Events.hpp"
 #include <QGLWidget>
-#include <QVector>
-#include <QVector3D>
 #include <QQuaternion>
 #include <QTime>
 #include <QTimer>
+#include <QVector>
+#include <QVector3D>
 
-namespace DO {
+#include "../Events.hpp"
+#include "../Frame.hpp"
+#include "../Mesh.hpp"
+
+
+namespace DO { namespace Sara {
 
   /*!
     \addtogroup GraphicsInternal
@@ -109,6 +111,8 @@ namespace DO {
 
   //! @}
 
+} /* namespace Sara */
 } /* namespace DO */
+
 
 #endif /* DO_SARA_GRAPHICS_OPENGLWINDOW_HPP */

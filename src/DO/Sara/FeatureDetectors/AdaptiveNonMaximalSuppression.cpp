@@ -13,7 +13,7 @@
 
 using namespace std;
 
-namespace DO {
+namespace DO { namespace Sara {
 
   // Greater comparison functor for the adaptive non maximal suppression
   // algorithm.
@@ -83,4 +83,6 @@ namespace DO {
     return ir;
   }
 
-}
+
+} /* namespace Sara */
+} /* namespace DO */

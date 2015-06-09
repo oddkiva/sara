@@ -11,9 +11,11 @@
 
 #include <DO/Sara/FeatureDetectors.hpp>
 
+
 using namespace std;
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   AdaptFeatureAffinelyToLocalShape::
   AdaptFeatureAffinelyToLocalShape()
@@ -258,4 +260,6 @@ namespace DO {
       cout << "The patch touches the image boundaries" << endl;
   }
 
+
+} /* namespace Sara */
 } /* namespace DO */

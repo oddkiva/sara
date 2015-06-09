@@ -14,13 +14,15 @@
 #ifndef DO_SARA_GRAPHICS_MESH_HPP
 #define DO_SARA_GRAPHICS_MESH_HPP
 
-#include <DO/Sara/Core/EigenExtension.hpp>
 #include <fstream>
 #include <iostream>
 #include <vector>
 #include <string>
 
-namespace DO {
+#include <DO/Sara/Core/EigenExtension.hpp>
+
+
+namespace DO { namespace Sara {
 
   /*!
     \addtogroup Draw3D
@@ -203,6 +205,8 @@ namespace DO {
 
   //! @}
 
+} /* namespace Sara */
 } /* namespace DO */
+
 
 #endif /* DO_SARA_GRAPHICS_MESH_HPP */

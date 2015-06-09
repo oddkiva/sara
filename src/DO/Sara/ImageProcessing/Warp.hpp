@@ -18,7 +18,7 @@
 #include <DO/Sara/ImageProcessing/Interpolation.hpp>
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   template <typename T, typename S>
   void warp(const Image<T>& src, Image<T>& dst,
@@ -60,7 +60,8 @@ namespace DO {
     }
   }
 
-}
+} /* namespace Sara */
+} /* namespace DO */
 
 
 #endif /* DO_SARA_IMAGEPROCESSING_WARP_HPP */

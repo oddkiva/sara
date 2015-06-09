@@ -1,12 +1,15 @@
+#include <deque>
+
 #include <DO/Sara/Geometry/Tools/Utilities.hpp>
 #include <DO/Sara/Geometry/Objects/Ellipse.hpp>
 #include <DO/Sara/Geometry/Objects/Triangle.hpp>
 #include <DO/Sara/Geometry.hpp>
-#include <deque>
+
 
 using namespace std;
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   Vector2d Ellipse::rho(double theta) const
   {
@@ -71,4 +74,6 @@ namespace DO {
       quad[i] = e.center()+ R*quad[i];
     return quad;
   }
-}
+
+} /* namespace Sara */
+} /* namespace DO */

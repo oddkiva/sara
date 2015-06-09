@@ -21,7 +21,7 @@
 #include <DO/Sara/Core/EigenExtension.hpp>
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   /*!
     \ingroup Features
@@ -145,8 +145,9 @@ namespace DO {
     float _orientation;
   };
 
-  //! @file
-}
+
+} /* namespace Sara */
+} /* namespace DO */
 
 
 #endif /* DO_SARA_FEATURES_FEATURE_HPP */

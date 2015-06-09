@@ -12,7 +12,8 @@
 #ifndef DO_SARA_FEATUREMATCHING_MATCHFILTERING_HPP
 #define DO_SARA_FEATUREMATCHING_MATCHFILTERING_HPP
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
 	class KeyProximity
 	{
@@ -31,6 +32,8 @@ namespace DO {
     float sqPixDist;
   };
 
+} /* namespace Sara */
 } /* namespace DO */
+
 
 #endif /* DO_SARA_FEATUREMATCHING_MATCHFILTERING_HPP */

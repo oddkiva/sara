@@ -11,17 +11,22 @@
 
 #pragma once
 
+#include <string>
+#include <vector>
+
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/Geometry/Objects.hpp>
-#include <vector>
-#include <string>
 
-namespace DO {
 
+namespace DO { namespace Sara {
+
+  //! @{
   //! Drawing functions
   void draw_line_segment(const LineSegment& s, const Color3ub& c = Black8,
                          int penWidth = 1);
+
   void draw_bbox(const BBox& bbox, const Color3ub& c, int penWidth = 1);
+
   void draw_poly(const std::vector<Point2d>& p, const Color3ub& color,
                  int penWidth = 1);
   void draw_ellipse(const Ellipse& e, const Color3ub col, int penWidth = 1);
@@ -36,13 +41,19 @@ namespace DO {
 
   inline void draw_triangle(const Triangle& t, const Rgb8& col = Red8,
                             int penWidth = 1)
-  { draw_poly(t, col, penWidth); }
+  {
+    draw_poly(t, col, penWidth);
+  }
 
   inline void draw_quad(const Quad& q, const Rgb8& col = Red8,
                         int penWidth = 1)
-  { draw_poly(q, col, penWidth); }
+  {
+    draw_poly(q, col, penWidth);
+  }
 
   void draw_affine_cone(const AffineCone2& K, double arrowLength = 50.,
                         const Color3ub& color = Black8);
+  //! @}
 
+} /* namespace Sara */
 } /* namespace DO */

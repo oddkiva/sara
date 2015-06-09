@@ -13,7 +13,8 @@
 
 #include <DO/Sara/Core/EigenExtension.hpp>
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   class LineSegment : private std::pair<Point2d, Point2d>
   {
@@ -60,4 +61,5 @@ namespace DO {
    */
   bool intersection(const LineSegment& s1, const LineSegment& s2, Point2d& p);
 
+} /* namespace Sara */
 } /* namespace DO */

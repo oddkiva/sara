@@ -10,9 +10,11 @@
 // ========================================================================== //
 
 #include <DO/Sara/Graphics.hpp>
+
 #include "GraphicsUtilities.hpp"
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   void display_mesh(const SimpleTriangleMesh3f& mesh)
   {
@@ -21,4 +23,5 @@ namespace DO {
                               Q_ARG(const SimpleTriangleMesh3f&, mesh));
   }
 
+} /* namespace Sara */
 } /* namespace DO */

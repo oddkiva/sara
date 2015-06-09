@@ -14,14 +14,17 @@
 # pragma warning ( disable : 4244 4267 4800 4305 4291 4996)
 #endif
 
+#include <flann/flann.hpp>
+
 #include <DO/Sara/FeatureMatching.hpp>
 #include <DO/Sara/Core/Timer.hpp>
-#include <flann/flann.hpp>
+
 
 //#define DEBUG_FLANN
 using namespace std;
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   //! Create FLANN matrix
   flann::Matrix<float> createFlannMatrix(const DescriptorMatrix<float>& descs)
@@ -209,4 +212,5 @@ namespace DO {
     return matches;
   }
 
-}
+} /* namespace Sara */
+} /* namespace DO */

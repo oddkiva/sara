@@ -14,7 +14,7 @@
 #include <DO/Sara/Core/EigenExtension.hpp>
 
 
-namespace DO { namespace P2 {
+namespace DO { namespace Sara { namespace P2 {
 
     typedef Vector3d Line, Point;
     typedef Point2d Point2;
@@ -39,4 +39,5 @@ namespace DO { namespace P2 {
     { return std::abs((p/p(2)).dot(l))/l.head(2).norm(); }
 
 } /* namespace P2 */
+} /* namespace Sara */
 } /* namespace DO */

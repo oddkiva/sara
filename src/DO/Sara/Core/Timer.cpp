@@ -11,14 +11,16 @@
 
 //! @file
 
-#include <DO/Sara/Core/Timer.hpp>
 #ifdef _WIN32
 # include <windows.h>
 #else
 # include <sys/time.h>
 #endif
 
-namespace DO {
+#include <DO/Sara/Core/Timer.hpp>
+
+
+namespace DO { namespace Sara {
 
   Timer::Timer()
     : elapsed_(0)
@@ -68,4 +70,5 @@ namespace DO {
     return elapsed() * 1000.;
   }
 
+} /* namespace Sara */
 } /* namespace DO */

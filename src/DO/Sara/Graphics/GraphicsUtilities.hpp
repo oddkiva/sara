@@ -16,7 +16,8 @@
 
 #include "DerivedQObjects/GraphicsApplicationImpl.hpp"
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   /*!
     \addtogroup GraphicsInternal
@@ -24,21 +25,28 @@ namespace DO {
     @{
    */
 
-  // ======================================================================== //
-  // Convenience functions
+  //! @{
+  //! Convenience functions.
   inline GraphicsApplication::Impl * gui_app()
-  { return qobject_cast<GraphicsApplication::Impl *>(qApp); }
+  {
+    return qobject_cast<GraphicsApplication::Impl *>(qApp);
+  }
 
   inline UserThread& get_user_thread()
-  { return gui_app()->userThread; }
+  {
+    return gui_app()->userThread;
+  }
 
   inline bool active_window_is_visible()
-  { return gui_app()->activeWindowIsVisible(); }
+  {
+    return gui_app()->activeWindowIsVisible();
+  }
+  //! @}
 
-  //!@}
+  //! @}
 
+} /* namespace Sara */
 } /* namespace DO */
 
-//! @}
 
 #endif /* DO_SARA_GRAPHICS_GRAPHICSUTILITIES_HPP */

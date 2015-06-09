@@ -12,9 +12,11 @@
 #include <DO/Sara/FeatureDetectors.hpp>
 #include <DO/Sara/Core/StdVectorHelpers.hpp>
 
+
 using namespace std;
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   Image<float> scaleAdaptedHarrisCornerness(const Image<float>& I,
                                             float sigma_I, float sigma_D,
@@ -145,4 +147,5 @@ namespace DO {
     return corners;
   }
 
+} /* namespace Sara */
 } /* namespace DO */

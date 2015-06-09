@@ -13,7 +13,8 @@
 
 using namespace std;
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   void drawScaleSpaceExtremum(const ImagePyramid<float>& I,
                               float x, float y, float s,
@@ -75,4 +76,5 @@ namespace DO {
     checkPatch(I, intRound(x)-r, intRound(y)-r, w, h, fact);
   }
 
+} /* namespace Sara */
 } /* namespace DO */

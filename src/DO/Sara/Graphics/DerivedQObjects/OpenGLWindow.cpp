@@ -1,17 +1,20 @@
-#include "OpenGLWindow.hpp"
 #include <QtOpenGL>
 #ifdef __APPLE__
 # include <OpenGL/GLU.h>
 #else
 # include <GL/glu.h>
 #endif
+
 #include "../Frame.hpp"
+
+#include "OpenGLWindow.hpp"
 
 #ifndef GL_MULTISAMPLE
 # define GL_MULTISAMPLE  0x809D
 #endif
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   // ====================================================================== //
   // TrackBall implementation
@@ -357,4 +360,5 @@ namespace DO {
     }
   }
 
+} /* namespace Sara */
 } /* namespace DO */

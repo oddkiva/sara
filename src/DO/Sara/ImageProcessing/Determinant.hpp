@@ -18,7 +18,7 @@
 #include <DO/Sara/Core/Image/Image.hpp>
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   /*!
     \ingroup Differential
@@ -52,6 +52,7 @@ namespace DO {
 
   //! @}
 
+} /* namespace Sara */
 } /* namespace DO */
 
 

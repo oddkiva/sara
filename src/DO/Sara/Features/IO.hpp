@@ -24,7 +24,7 @@
 #include <DO/Sara/Features/DescriptorMatrix.hpp>
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   /*!
     \ingroup Features
@@ -90,6 +90,7 @@ namespace DO {
 
   //! @}
 
+} /* namespace Sara */
 } /* namespace DO */
 
 #endif /* DO_SARA_FEATURES_IO_HPP */

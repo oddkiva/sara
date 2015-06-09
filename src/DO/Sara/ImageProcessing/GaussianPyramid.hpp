@@ -21,7 +21,7 @@
 #include <DO/Sara/ImageProcessing/Scaling.hpp>
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   /*!
     \ingroup ScaleSpace
@@ -211,6 +211,7 @@ namespace DO {
 
   //! @}
 
+} /* namespace Sara */
 } /* namespace DO */
 
 

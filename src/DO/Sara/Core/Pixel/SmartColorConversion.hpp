@@ -10,7 +10,7 @@
 
 // Smart color conversion between colorspace regardless of the channel type.
 // We will treat the grayscale conversion separately
-namespace DO {
+namespace DO { namespace Sara {
 
   //! \brief Smart color conversion from a colorspace to another.
   template <typename SrcColSpace, typename DstColSpace>
@@ -54,11 +54,13 @@ namespace DO {
     convert_channel(double_dst, dst);
   }
 
-}
+} /* namespace Sara */
+} /* namespace DO */
+
 
 // Smart color conversion from a colorspace to grayscale regardless of the
 // channel type.
-namespace DO {
+namespace DO { namespace Sara {
 
   //! \brief Convert from 'double' pixel to 'double' grayscale.
   template <typename ColorSpace>
@@ -97,12 +99,13 @@ namespace DO {
     convert_channel(double_dst, dst);
   }
 
-}
+} /* namespace Sara */
+} /* namespace DO */
 
 
 // Smart color conversion from grayscale to another colorspace regardless of
 // the channel type.
-namespace DO {
+namespace DO { namespace Sara {
 
   //! \brief Convert from 'double' grayscale to 'double' pixel.
   template <typename ColorSpace>
@@ -140,11 +143,12 @@ namespace DO {
     convert_channel(double_dst, dst);
   }
 
-}
+} /* namespace Sara */
+} /* namespace DO */
 
 
 // Smart color conversion from 'any' grayscale to 'any' grayscale.
-namespace DO {
+namespace DO { namespace Sara {
 
   //! \brief Convert from 'any' grayscale to 'any' grayscale.
   template <typename SrcGray, typename DstGray>
@@ -155,7 +159,8 @@ namespace DO {
     convert_channel(src, dst);
   }
 
-}
+} /* namespace Sara */
+} /* namespace DO */
 
 
 #endif /* DO_SARA_CORE_PIXEL_SMARTCOLORCONVERSION_HPP */

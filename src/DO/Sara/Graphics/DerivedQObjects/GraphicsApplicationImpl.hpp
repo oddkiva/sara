@@ -14,18 +14,21 @@
 #ifndef DO_SARA_GRAPHICS_GRAPHICSAPPLICATIONIMPL_HPP
 #define DO_SARA_GRAPHICS_GRAPHICSAPPLICATIONIMPL_HPP
 
-#include <DO/Sara/Graphics.hpp>
 #include <QApplication>
-#include <QPointer>
 #include <QPixmap>
+#include <QPointer>
 #include <QString>
 #include <QWidget>
+
+#include <DO/Sara/Graphics.hpp>
+
 #include "UserThread.hpp"
 #include "PaintingWindow.hpp"
 #include "OpenGLWindow.hpp"
 #include "GraphicsView.hpp"
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   //! \brief quick-and-dirty thing to read file from dialog box.
   //! \todo See if it can be done in a more elegant way.
@@ -76,6 +79,7 @@ namespace DO {
     QMutex mutex;
   };
 
+} /* namespace Sara */
 } /* namespace DO */
 
 #endif /* DO_SARA_GRAPHICS_GRAPHICSAPPLICATIONIMPL_HPP */

@@ -1,7 +1,8 @@
 #include <DO/Sara/Geometry/Objects/LineSegment.hpp>
 #include <DO/Sara/Geometry/Tools/Utilities.hpp>
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   bool intersection(const LineSegment& s1, const LineSegment& s2,
                     Point2d& u)
@@ -42,4 +43,5 @@ namespace DO {
     return true;
   }
 
+} /* namespace Sara */
 } /* namespace DO */

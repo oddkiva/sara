@@ -19,7 +19,7 @@
 #include <DO/Sara/Core/ArrayIterators/Utilities.hpp>
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   //! \ingroup Core
   //! \defgroup MultiArrayIterators ND-array iterator classes.
@@ -587,6 +587,7 @@ namespace DO {
 
   //! @}
 
+} /* namespace Sara */
 } /* namespace DO */
 
 

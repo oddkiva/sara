@@ -1,6 +1,6 @@
 #pragma once
 
-namespace DO {
+namespace DO { namespace Sara {
 
   class Cube
   {
@@ -20,4 +20,5 @@ namespace DO {
     { return std::pow((c.b_ - c.a_)(0), 3); }
   };
 
-}
+} /* namespace Sara */
+} /* namespace DO */

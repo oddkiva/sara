@@ -18,7 +18,7 @@
 #include <DO/Sara/Core/Pixel/Pixel.hpp>
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   //! \defgroup ColorTypes Color typedefs
   //! @{
@@ -176,6 +176,7 @@ namespace DO {
   //! @}
 
 
+} /* namespace Sara */
 } /* namespace DO */
 
 

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace DO {
+namespace DO { namespace Sara {
 
   class Sphere
   {
@@ -15,4 +15,5 @@ namespace DO {
     { return (x - S.c_).squaredNorm() < S.radius()*S.radius(); }
   };
 
-}
+} /* namespace Sara */
+} /* namespace DO */

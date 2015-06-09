@@ -14,7 +14,7 @@
 
 //! @file
 
-namespace DO {
+namespace DO { namespace Sara {
 
   /*!
     \ingroup Graphics
@@ -29,6 +29,7 @@ namespace DO {
 
   //! @}
 
+} /* namespace Sara */
 } /* namespace DO */
 
 #endif /* DO_SARA_GRAPHICS_DRAW3D_HPP */

@@ -17,7 +17,7 @@
 #include <DO/Sara/Features/Feature.hpp>
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   /*!
     \ingroup Features
@@ -29,6 +29,7 @@ namespace DO {
 
   //! @}
 
+} /* namespace Sara */
 } /* namespace DO */
 
 

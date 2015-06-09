@@ -14,7 +14,8 @@
 #ifndef DO_SARA_GRAPHICS_GRAPHICSAPPLICATION_HPP
 #define DO_SARA_GRAPHICS_GRAPHICSAPPLICATION_HPP
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   /*!
     \ingroup Graphics
@@ -42,7 +43,9 @@ namespace DO {
 
   //! @}
 
+} /* namespace Sara */
 } /* namespace DO */
+
 
 /*!
   \addtogroup GraphicsInternal

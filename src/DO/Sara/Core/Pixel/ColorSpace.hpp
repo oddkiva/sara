@@ -17,7 +17,7 @@
 
 
 // Color spaces and channel names.
-namespace DO {
+namespace DO { namespace Sara {
 
   // ======================================================================== //
   /*!
@@ -69,6 +69,7 @@ namespace DO {
   typedef Meta::Vector3<H,S,V> Hsv;
   //! @} ColorSpaces
 
+} /* namespace Sara */
 } /* namespace DO */
 
 

@@ -19,7 +19,7 @@
 #include <DO/Sara/Core/MultiArray.hpp>
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   /*!
     \ingroup Core
@@ -192,7 +192,7 @@ namespace DO {
     Image<U, N> convert() const
     {
       Image<U, N> dst(base_type::sizes());
-      DO::convert(*this, dst);
+      DO::Sara::convert(*this, dst);
       return dst;
     }
 
@@ -213,6 +213,7 @@ namespace DO {
 
   //! @}
 
+} /* namespace Sara */
 } /* namespace DO */
 
 

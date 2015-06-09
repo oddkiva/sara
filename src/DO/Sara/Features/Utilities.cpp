@@ -14,9 +14,11 @@
 
 //#define DEBUG_REDUNDANCIES
 
+
 using namespace std;
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   template struct EqualDescriptor<unsigned char>;
   template struct CompareFeatures<unsigned char>;
@@ -100,4 +102,5 @@ namespace DO {
   }
 
 
+} /* namespace Sara */
 } /* namespace DO */

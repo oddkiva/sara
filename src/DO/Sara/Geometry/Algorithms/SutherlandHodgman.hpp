@@ -15,7 +15,7 @@
 #include <DO/Sara/Geometry/Tools/Utilities.hpp>
 #include <DO/Sara/Geometry/Objects/Polygon.hpp>
 
-namespace DO {
+namespace DO { namespace Sara {
 
   /*!
     Intersection test between lines.
@@ -32,4 +32,5 @@ namespace DO {
   std::vector<Point2d> sutherland_hodgman(const std::vector<Point2d>& subject,
                                          const std::vector<Point2d>& clip);
 
+} /* namespace Sara */
 } /* namespace DO */

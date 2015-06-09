@@ -18,8 +18,7 @@
 #include <DO/Sara/Core/Pixel/PixelTraits.hpp>
 
 
-// Various utilities for image operations.
-namespace DO {
+namespace DO { namespace Sara {
 
   //! \ingroup Image
   //! @{
@@ -55,11 +54,13 @@ namespace DO {
   //! @}
 
   //! @}
-}
+ 
+} /* namespace Sara */
+} /* namespace DO */
 
 
 // Generic color conversion of images.
-namespace DO {
+namespace DO { namespace Sara {
 
   //! \ingroup Image
   //! @{
@@ -81,11 +82,13 @@ namespace DO {
   }
 
   //! @}
-}
+ 
+} /* namespace Sara */
+} /* namespace DO */
 
 
 // Image rescaling functions
-namespace DO {
+namespace DO { namespace Sara {
 
   //! \ingroup Image
   //! @{
@@ -163,7 +166,9 @@ namespace DO {
   //! @}
 
   //! @}
-}
+
+} /* namespace Sara */
+} /* namespace DO */
 
 
 #endif /* DO_SARA_CORE_IMAGE_OPERATIONS_HPP */

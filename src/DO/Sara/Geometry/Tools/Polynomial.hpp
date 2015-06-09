@@ -18,7 +18,7 @@
 #include <DO/Sara/Geometry/Tools/Utilities.hpp>
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   //! Monomial class.
   template <typename T>
@@ -189,6 +189,7 @@ namespace DO {
     T _coeff[N+1];
   };
 
+} /* namespace Sara */
 } /* namespace DO */
 
 

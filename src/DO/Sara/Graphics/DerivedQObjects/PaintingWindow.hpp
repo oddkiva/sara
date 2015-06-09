@@ -14,7 +14,6 @@
 #ifndef DO_SARA_GRAPHICS_PAINTINGWINDOW_HPP
 #define DO_SARA_GRAPHICS_PAINTINGWINDOW_HPP
 
-
 #include <QScrollArea>
 #include <QWidget>
 #include <QPainter>
@@ -25,7 +24,8 @@
 
 class QPixmap;
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   /*!
     \addtogroup GraphicsInternal
@@ -135,6 +135,8 @@ namespace DO {
 
   //! @}
 
+} /* namespace Sara */
 } /* namespace DO */
+
 
 #endif /* DO_SARA_GRAPHICS_PAINTINGWINDOW_HPP */

@@ -14,7 +14,8 @@
 #ifndef DO_SARA_FEATUREDESCRIPTORS_SIFT_HPP
 #define DO_SARA_FEATUREDESCRIPTORS_SIFT_HPP
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   /*!
     \ingroup FeatureDescriptors
@@ -294,6 +295,9 @@ namespace DO {
 
   //! @}
 
+
+} /* namespace Sara */
 } /* namespace DO */
+
 
 #endif /* DO_SARA_FEATUREDESCRIPTORS_SIFT_HPP */

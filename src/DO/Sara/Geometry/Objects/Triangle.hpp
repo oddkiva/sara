@@ -15,7 +15,8 @@
 #include <DO/Sara/Core/EigenExtension.hpp>
 #include <DO/Sara/Geometry/Objects/Polygon.hpp>
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   // Triangle (a,b,c) enumerated in CCW order.
   class Triangle : public SmallPolygon<3>
@@ -25,6 +26,8 @@ namespace DO {
     Triangle(const Point2d& a, const Point2d& b, const Point2d& c);
   };
 
+} /* namespace Sara */
 } /* namespace DO */
+
 
 #endif /* DO_SARA_TRIANGLE_HPP */

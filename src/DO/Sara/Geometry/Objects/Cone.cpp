@@ -12,7 +12,8 @@
 #include <DO/Sara/Geometry/Objects/Cone.hpp>
 #include <DO/Sara/Geometry/Tools/Utilities.hpp>
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   template class Cone<2>;
   template class Cone<3>;
@@ -27,4 +28,5 @@ namespace DO {
     return AffineCone2(u0, u1, vertex, AffineCone2::Convex);
   }
 
+} /* namespace Sara */
 } /* namespace DO */

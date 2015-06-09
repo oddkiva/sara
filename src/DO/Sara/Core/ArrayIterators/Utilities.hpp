@@ -24,7 +24,7 @@
 #include <DO/Sara/Core/StaticAssert.hpp>
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   //! \ingroup MultiArrayIterators
   //! @{
@@ -206,6 +206,7 @@ namespace DO {
 
   //! @}
 
+} /* namespace Sara */
 } /* namespace DO */
 
 

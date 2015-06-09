@@ -19,7 +19,7 @@
 
 
 // Channel conversion from a type to another.
-namespace DO {
+namespace DO { namespace Sara {
 
   //! \brief Return maximum value for channel of type 'T'.
   template <typename T>
@@ -82,11 +82,12 @@ namespace DO {
     return dst;
   }
 
+} /* namespace Sara */
 } /* namespace DO */
 
 
 // Unified API for channel conversion.
-namespace DO {
+namespace DO { namespace Sara {
 
   //! \brief Convert a double gray value to a float gray value.
   inline void convert_channel(double src, float& dst)
@@ -153,7 +154,9 @@ namespace DO {
     for (int i = 0; i < ColorSpace::size; ++i)
       convert_channel(src[i], dst[i]);
   }
-}
+
+} /* namespace Sara */
+} /* namespace DO */
 
 
 #endif /* DO_SARA_CORE_PIXEL_COLORSPACE_HPP */

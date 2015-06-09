@@ -9,12 +9,14 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Sara/Features.hpp>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 
-namespace DO {
+#include <DO/Sara/Features.hpp>
+
+
+namespace DO { namespace Sara {
 
   template bool read_keypoints<float>(
     std::vector<OERegion>& features,
@@ -38,4 +40,5 @@ namespace DO {
     const DescriptorMatrix<unsigned char>& descriptors,
     const std::string& name);
 
-}
+} /* namespace Sara */
+} /* namespace DO */

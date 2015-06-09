@@ -5,7 +5,7 @@
 #include <DO/Sara/Core/StringFormat.hpp>
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
    static std::string vformat(const char *format, va_list args)
    {
@@ -33,4 +33,5 @@ namespace DO {
       return formatted_message;
    }
 
-}
+} /* namespace Sara */
+} /* namespace DO */

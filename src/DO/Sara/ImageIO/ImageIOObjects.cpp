@@ -24,7 +24,7 @@
 using namespace std;
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   static bool openFile(FILE **file, const string& filepath, const string& mode)
   {
@@ -63,11 +63,12 @@ namespace DO {
       fclose(file_);
   }
 
-}
+} /* namespace Sara */
+} /* namespace DO */
 
 
 // Jpeg I/O.
-namespace DO {
+namespace DO { namespace Sara {
 
   METHODDEF(void) jpeg_error(j_common_ptr cinfo)
   {
@@ -182,11 +183,12 @@ namespace DO {
     return true;
   }
 
-}
+} /* namespace Sara */
+} /* namespace DO */
 
 
 // PNG I/O.
-namespace DO {
+namespace DO { namespace Sara {
 
   PngFileReader::PngFileReader(const string& filepath)
     : ImageFileReader(filepath, "rb")
@@ -399,4 +401,5 @@ namespace DO {
     return true;
   }
 
+} /* namespace Sara */
 } /* namespace DO */

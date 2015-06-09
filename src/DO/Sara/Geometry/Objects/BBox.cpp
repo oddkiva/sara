@@ -11,9 +11,11 @@
 
 #include <DO/Sara/Geometry/Objects/BBox.hpp>
 
+
 using namespace std;
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   std::ostream& operator<<(std::ostream& os, const BBox& bbox)
   {
@@ -121,4 +123,5 @@ namespace DO {
     return bbox;
   }
 
+} /* namespace Sara */
 } /* namespace DO */

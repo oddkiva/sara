@@ -11,9 +11,11 @@
 
 #include <DO/Sara/Features.hpp>
 
+
 using namespace std;
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   std::ostream& InterestPoint::print(std::ostream& os) const
   {
@@ -98,4 +100,5 @@ namespace DO {
     return in;
   }
 
+} /* namespace Sara */
 } /* namespace DO */

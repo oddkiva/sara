@@ -12,7 +12,7 @@
 #include <DO/Sara/Graphics.hpp>
 #include "GraphicsUtilities.hpp"
 
-namespace DO {
+namespace DO { namespace Sara {
 
   GraphicsApplication::GraphicsApplication(int& argc, char **argv)
     : pimpl_(new GraphicsApplication::Impl(argc, argv))
@@ -37,4 +37,5 @@ namespace DO {
     return pimpl_->exec();
   }
 
+} /* namespace Sara */
 } /* namespace DO */

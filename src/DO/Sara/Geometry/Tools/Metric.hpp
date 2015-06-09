@@ -14,7 +14,8 @@
 
 #include <Eigen/Eigen>
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   template <typename T, int N>
   class SquaredRefDistance
@@ -96,6 +97,7 @@ namespace DO {
     const SquaredDistance& squaredDistance_;
   };
 
+} /* namespace Sara */
 } /* namespace DO */
 
 #endif /* DO_SARA_GEOMETRY_TOOLS_METRIC_HPP */

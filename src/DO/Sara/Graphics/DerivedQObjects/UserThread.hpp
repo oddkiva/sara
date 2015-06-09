@@ -17,9 +17,11 @@
 #include <QThread>
 #include <QMutex>
 #include <QWaitCondition>
+
 #include "../Events.hpp"
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   /*!
     \addtogroup GraphicsInternal
@@ -74,6 +76,8 @@ namespace DO {
     Event event_;
   };
 
+} /* namespace Sara */
 } /* namespace DO */
+
 
 #endif /* DO_SARA_GRAPHICS_USERTHREAD_HPP */

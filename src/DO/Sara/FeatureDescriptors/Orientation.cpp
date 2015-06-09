@@ -10,11 +10,14 @@
 // ========================================================================== //
 
 #include <Eigen/StdVector>
+
 #include <DO/Sara/FeatureDescriptors.hpp>
+
 
 using namespace std;
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   ComputeDominantOrientations::
   ComputeDominantOrientations(float peakRatioThres,
@@ -101,4 +104,5 @@ namespace DO {
     so2.swap(scaleOctPairs);
   }
 
+} /* namespace Sara */
 } /* namespace DO */

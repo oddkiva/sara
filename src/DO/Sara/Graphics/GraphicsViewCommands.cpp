@@ -9,16 +9,18 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Sara/Graphics.hpp>
 #include <QGraphicsItem>
+
+#include <DO/Sara/Graphics.hpp>
+
 #include "GraphicsUtilities.hpp"
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   static GraphicsView *view()
   { return qobject_cast<GraphicsView *>(active_window()); }
 
-  // ====================================================================== //
   //! Graphics view window control functions
   Window create_graphics_view(int w, int h, const std::string& windowTitle,
                           int x, int y)
@@ -33,7 +35,7 @@ namespace DO {
     return gui_app()->createdWindows.back();
   }
 
-  // ====================================================================== //
+  //! @{
   //! Convenience graphics scene functions
   QImage to_qimage(const Image<Rgb8>& image)
   {
@@ -62,5 +64,7 @@ namespace DO {
                                     QColor(c[0], c[1], c[2])),
                               Q_ARG(QGraphicsPixmapItem *, pixItem));
   }
+  //! @}
 
+} /* namespace Sara */
 } /* namespace DO */

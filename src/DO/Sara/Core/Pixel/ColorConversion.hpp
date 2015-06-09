@@ -20,7 +20,7 @@
 
 
 // Color space conversion with floating-point values.
-namespace DO {
+namespace DO { namespace Sara {
 
   //! Convert RGB color to gray color.
   template <typename T, int N>
@@ -80,12 +80,13 @@ namespace DO {
     yuv << gray, 0, 0;
   }
 
-}
+} /* namespace Sara */
+} /* namspace DO */
 
 
 // Unified API for color conversion between the source and destination pixels
 // with the same channel type.
-namespace DO {
+namespace DO { namespace Sara {
 
   //! Generic color conversion functor.
   template <typename SrcColSpace, typename DstColSpace> struct ConvertColor;
@@ -196,8 +197,8 @@ namespace DO {
     gray_to_yuv<T>(src, dst);
   }
 
-}
-
+} /* namespace Sara */
+} /* namespace DO */
 
 
 #endif /* DO_SARA_CORE_PIXEL_COLOR_CONVERSION_HPP */

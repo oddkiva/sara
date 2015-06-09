@@ -12,11 +12,13 @@
 #ifndef DO_SARA_GEOMETRY_OBJECTS_CONE_HPP
 #define DO_SARA_GEOMETRY_OBJECTS_CONE_HPP
 
-#include <DO/Sara/Core/EigenExtension.hpp>
-#include <DO/Sara/Core/DebugUtilities.hpp>
 #include <algorithm>
 
-namespace DO {
+#include <DO/Sara/Core/EigenExtension.hpp>
+#include <DO/Sara/Core/DebugUtilities.hpp>
+
+
+namespace DO { namespace Sara {
 
   template <int N>
   class Cone
@@ -122,6 +124,7 @@ namespace DO {
   AffineCone2 affine_cone2(double theta0, double theta1, const Point2d& vertex);
 
 
+} /* namespace Sara */
 } /* namespace DO */
 
 #endif /* DO_SARA_GEOMETRY_OBJECTS_CONE_HPP */

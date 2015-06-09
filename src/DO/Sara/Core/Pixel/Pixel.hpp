@@ -21,7 +21,7 @@
 
 
 // Pixel data structures.
-namespace DO {
+namespace DO { namespace Sara {
 
   //! \brief Simple pixel class implemented as a vector.
   template <typename _T, typename _ColorSpace>
@@ -87,7 +87,8 @@ namespace DO {
     }
   };
 
-}
+} /* namespace Sara */
+} /* namespace DO */
 
 
 #endif /* DO_SARA_CORE_PIXEL_PIXEL_HPP */

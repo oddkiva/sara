@@ -15,7 +15,8 @@
 
 using namespace std;
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   void InterestPoint::draw(const Color3ub& c, float z, const Point2f& off) const
   {
@@ -77,4 +78,5 @@ namespace DO {
       features[i].draw(c, scale, off);
   }
 
+} /* namespace Sara */
 } /* namespace DO */

@@ -16,7 +16,7 @@
 #include <DO/Sara/Geometry/Objects/Polygon.hpp>
 #include <DO/Sara/Geometry/Objects/BBox.hpp>
 
-namespace DO {
+namespace DO { namespace Sara {
 
   class Quad : public SmallPolygon<4>
   {
@@ -27,6 +27,7 @@ namespace DO {
          const Point2d& c, const Point2d& d);
   };
 
+} /* namespace Sara */
 } /* namespace DO */
 
 #endif /* DO_SARA_GEOMETRY_QUAD_HPP */

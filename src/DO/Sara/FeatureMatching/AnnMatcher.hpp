@@ -13,8 +13,9 @@
 #ifndef DO_SARA_FEATUREMATCHING_ANNMATCHER_HPP
 #define DO_SARA_FEATUREMATCHING_ANNMATCHER_HPP
 
-namespace DO
-{
+
+namespace DO { namespace Sara {
+
 	class AnnMatcher
 	{
 	public:
@@ -43,6 +44,8 @@ namespace DO
     bool self_matching_;
 	};
 
+} /* namespace Sara */
 } /* namespace DO */
+
 
 #endif /* DO_SARA_FEATUREMATCHING_ANNMATCHER_HPP */

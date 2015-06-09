@@ -21,7 +21,7 @@
 #include <DO/Sara/Core/Pixel/Pixel.hpp>
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   template <typename T>
   struct PixelTraits
@@ -149,7 +149,8 @@ namespace DO {
     };
   };
 
-}
+} /* namespace Sara */
+} /* namespace DO */
 
 
 #endif /* DO_SARA_CORE_PIXEL_PIXELTRAITS_HPP */

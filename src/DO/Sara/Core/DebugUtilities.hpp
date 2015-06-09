@@ -19,7 +19,7 @@
 #define CHECK(x) std::cout << #x << " = " << x << std::endl
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   //! \ingroup Utility
   //! \brief Outputting program stage description on console.
@@ -38,6 +38,7 @@ namespace DO {
     std::cin.ignore();
   }
 
+} /* namespace Sara */
 } /* namespace DO */
 
 

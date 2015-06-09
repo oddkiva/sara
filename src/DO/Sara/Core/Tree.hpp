@@ -23,7 +23,7 @@
 #include <DO/Sara/Core/Meta.hpp>
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   //! \ingroup Core
   //! \defgroup Tree Tree
@@ -945,7 +945,9 @@ namespace DO {
 
   //! @}
 
-}
+
+} /* namespace Sara */
+} /* namespace DO */
 
 
 #endif /* DO_SARA_CORE_TREE_HPP */

@@ -12,7 +12,8 @@
 #ifndef DO_SARA_MATCH_MATCH_HPP
 #define DO_SARA_MATCH_MATCH_HPP
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   class Match
   {
@@ -101,6 +102,8 @@ namespace DO {
   void checkMatches(const Image<Rgb8>& I1, const Image<Rgb8>& I2,
                     const std::vector<Match>& matches, bool redrawEverytime = false, float z = 1.f);
 
+} /* namespace Sara */
 } /* namespace DO */
+
 
 #endif /* DO_SARA_MATCH_MATCH_HPP */

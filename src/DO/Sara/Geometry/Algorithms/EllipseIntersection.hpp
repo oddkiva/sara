@@ -12,12 +12,14 @@
 #pragma once
 
 #define _USE_MATH_DEFINES
-#include <DO/Sara/Geometry/Objects/Ellipse.hpp>
-#include <vector>
+
 #include <cmath>
+#include <vector>
+
+#include <DO/Sara/Geometry/Objects/Ellipse.hpp>
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   /*!
    * Compute the approximate intersection-union ratio by approximating ellipses
@@ -57,4 +59,5 @@ namespace DO {
   double analytic_jaccard_similarity(const Ellipse& e1, const Ellipse& e2);
 
 
+} /* namespace Sara */
 } /* namespace DO */

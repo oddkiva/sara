@@ -19,7 +19,7 @@
 #include <DO/Sara/Core/EigenExtension.hpp>
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   //! \ingroup MultiArray
   //! @{
@@ -92,7 +92,8 @@ namespace DO {
 
   //! @}
 
-}
+} /* namespace Sara */
+} /* namespace DO */
 
 
 #endif /* DO_SARA_CORE_MULTIARRAY_ELEMENTTRAITS_HPP */

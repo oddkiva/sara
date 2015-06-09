@@ -12,10 +12,12 @@
 #ifndef DO_SARA_GEOMETRY_POLYGON_HPP
 #define DO_SARA_GEOMETRY_POLYGON_HPP
 
-#include <DO/Sara/Geometry/Tools/Projective.hpp>
 #include <vector>
 
-namespace DO {
+#include <DO/Sara/Geometry/Tools/Projective.hpp>
+
+
+namespace DO { namespace Sara {
 
   template <int N>
   class SmallPolygon
@@ -157,6 +159,7 @@ namespace DO {
 
   double area(const std::vector<Point2d>& polygon);
 
+} /* namespace Sara */
 } /* namespace DO */
 
 #endif /* DO_SARA_GEOMETRY_POLYGON_HPP */

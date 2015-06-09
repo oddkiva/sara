@@ -13,7 +13,8 @@
 
 using namespace std;
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   vector<OERegion>
   ComputeHessianLaplaceMaxima::
@@ -96,4 +97,5 @@ namespace DO {
   }
 
 
+} /* namespace Sara */
 } /* namespace DO */

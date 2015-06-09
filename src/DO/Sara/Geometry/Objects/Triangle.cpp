@@ -11,7 +11,7 @@
 
 #include <DO/Sara/Geometry/Objects/Triangle.hpp>
 
-namespace DO {
+namespace DO { namespace Sara {
 
   Triangle::Triangle(const Point2d& a, const Point2d& b, const Point2d& c)
   {
@@ -20,4 +20,5 @@ namespace DO {
     v_[2] = c;
   }
 
-}
+} /* namespace Sara */
+} /* namespace DO */

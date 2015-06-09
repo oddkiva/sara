@@ -127,7 +127,7 @@ namespace Eigen {
 //! @}
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   /*!
     \ingroup Core
@@ -198,6 +198,7 @@ namespace DO {
 
   //! @}
 
+} /* namespace Sara */
 } /* namespace DO */
 
 

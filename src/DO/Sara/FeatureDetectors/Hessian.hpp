@@ -14,7 +14,8 @@
 #ifndef DO_SARA_FEATUREDETECTORS_HESSIAN_HPP
 #define DO_SARA_FEATUREDETECTORS_HESSIAN_HPP
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   /*!
     \ingroup InterestPoint
@@ -236,6 +237,8 @@ namespace DO {
 
   //! @}
 
+
+} /* namespace Sara */
 } /* namespace DO */
 
 #endif /* DO_SARA_FEATUREDETECTORS_HESSIAN_HPP */

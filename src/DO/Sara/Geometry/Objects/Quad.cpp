@@ -13,7 +13,7 @@
 
 using namespace std;
 
-namespace DO {
+namespace DO { namespace Sara {
 
   Quad::Quad(const BBox& bbox)
   {
@@ -32,4 +32,5 @@ namespace DO {
     v_[3] = d;
   }
 
+} /* namespace Sara */
 } /* namespace DO */

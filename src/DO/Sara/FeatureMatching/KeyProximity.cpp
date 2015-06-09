@@ -11,7 +11,8 @@
 
 #include <DO/Sara/FeatureMatching.hpp>
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   bool KeyProximity::operator()(const OERegion& f1, const OERegion& f2) const
   {
@@ -27,4 +28,5 @@ namespace DO {
       (sd1 < sqMetricDist) || (sd2 < sqMetricDist);
   }
 
+} /* namespace Sara */
 } /* namespace DO */

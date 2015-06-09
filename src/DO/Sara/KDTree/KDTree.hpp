@@ -17,7 +17,7 @@
 #include <flann/flann.hpp>
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   /*!
    *  N.B.: MatrixXd uses a *** COLUMN-MAJOR *** storage in the core library.
@@ -139,7 +139,8 @@ namespace DO {
     flann::SearchParams _search_params;
   };
 
-}
+} /* namespace Sara */
+} /* namespace DO */
 
 
 #endif /* DO_SARA_KDTREE_KDTREE_HPP */

@@ -11,9 +11,11 @@
 
 #include <DO/Sara/FeatureDetectors.hpp>
 
+
 using namespace std;
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   bool onEdge(const Image<float>& I, int x, int y, float edgeRatio)
   {
@@ -446,4 +448,5 @@ namespace DO {
     return corners;
   }
 
+} /* namespace Sara */
 } /* namespace DO */

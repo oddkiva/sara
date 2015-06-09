@@ -9,15 +9,18 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Sara/Match.hpp>
-#include <DO/Sara/Graphics.hpp>
 #include <fstream>
 #include <string>
 #include <sstream>
 
+#include <DO/Sara/Match.hpp>
+#include <DO/Sara/Graphics.hpp>
+
+
 using namespace std;
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   ostream & operator<<(ostream & os, const Match& m)
   {
@@ -143,4 +146,5 @@ namespace DO {
     }
   }
 
+} /* namespace Sara */
 } /* namespace DO */

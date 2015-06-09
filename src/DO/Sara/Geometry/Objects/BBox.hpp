@@ -19,7 +19,7 @@
 #include <DO/Sara/Core/EigenExtension.hpp>
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   class BBox
   {
@@ -140,6 +140,8 @@ namespace DO {
   BBox intersection(const BBox& bbox1, const BBox& bbox2);
 
 
+} /* namespace Sara */
 } /* namespace DO */
+
 
 #endif /* DO_SARA_GEOMETRY_BBOX_HPP */

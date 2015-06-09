@@ -22,7 +22,7 @@
 #include <DO/Sara/Core/StaticAssert.hpp>
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   //! Sign function.
   template <typename T>
@@ -220,6 +220,7 @@ namespace DO {
     return H_p.block(0,0,2,1);
   }
 
+} /* namespace Sara */
 } /* namespace DO */
 
 

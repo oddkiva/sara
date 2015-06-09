@@ -14,7 +14,8 @@
 
 #include <QGraphicsPixmapItem>
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   class ImageItem : public QGraphicsPixmapItem
   {
@@ -34,6 +35,8 @@ namespace DO {
     qreal scaleFactor;
   };
 
+} /* namespace Sara */
 } /* namespace DO */
+
 
 #endif /* DO_SARA_GRAPHICS2_PIXMAPITEM_HPP */

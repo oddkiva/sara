@@ -11,7 +11,8 @@
 
 #include <DO/Sara/Geometry/Objects/Polygon.hpp>
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   double area(const std::vector<Point2d>& polygon)
   {
@@ -28,4 +29,5 @@ namespace DO {
     return fabs(0.5*A);
   }
 
+} /* namespace Sara */
 } /* namespace DO */

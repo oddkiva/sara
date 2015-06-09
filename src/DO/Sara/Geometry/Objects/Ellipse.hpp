@@ -13,12 +13,14 @@
 #define DO_SARA_GEOMETRY_ELLIPSE_HPP
 
 #define _USE_MATH_DEFINES
+
 #include <cmath>
+
 #include <DO/Sara/Core/EigenExtension.hpp>
 #include <DO/Sara/Geometry/Objects/Quad.hpp>
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   //! Ellipse class
   class Ellipse
@@ -122,6 +124,7 @@ namespace DO {
   Ellipse construct_from_shape_matrix(const Matrix2d& shapeMat,
                                       const Point2d& c);
 
+} /* namespace Sara */
 } /* namespace DO */
 
 

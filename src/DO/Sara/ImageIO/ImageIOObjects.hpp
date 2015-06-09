@@ -25,7 +25,7 @@ extern "C" {
 
 
 // Base classes for image reading and writing.
-namespace DO {
+namespace DO { namespace Sara {
 
   class FileError : public std::exception
   {
@@ -73,11 +73,12 @@ namespace DO {
     virtual bool write(const std::string& filepath, int quality) = 0;
   };
 
-}
+} /* namespace Sara */
+} /* namespace DO */
 
 
 // Jpeg I/O.
-namespace DO {
+namespace DO { namespace Sara {
 
   struct JpegErrorMessage {
     struct jpeg_error_mgr pub;
@@ -105,11 +106,12 @@ namespace DO {
     bool write(const std::string& filepath, int quality);
   };
 
-}
+} /* namespace Sara */
+} /* namespace DO */
 
 
 // PNG I/O.
-namespace DO {
+namespace DO { namespace Sara {
 
   class PngFileReader : public ImageFileReader
   {
@@ -131,11 +133,12 @@ namespace DO {
     bool write(const std::string& filepath, int quality);
   };
 
-}
+} /* namespace Sara */
+} /* namespace DO */
 
 
 // Tiff I/O.
-namespace DO {
+namespace DO { namespace Sara {
 
   class TiffFileReader : public ImageFileReader
   {
@@ -155,6 +158,8 @@ namespace DO {
     bool write(const std::string& filepath, int quality);
   };
 
+
+} /* namespace Sara */
 } /* namespace DO */
 
 

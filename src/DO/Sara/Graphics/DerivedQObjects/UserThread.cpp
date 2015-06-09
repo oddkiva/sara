@@ -9,11 +9,14 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include "../GraphicsUtilities.hpp"
-#include "UserThread.hpp"
 #include <QDebug>
 
-namespace DO {
+#include "../GraphicsUtilities.hpp"
+
+#include "UserThread.hpp"
+
+
+namespace DO { namespace Sara {
 
   UserThread::UserThread(QObject* parent)
     : QThread(parent)
@@ -121,4 +124,5 @@ namespace DO {
     return;
   }
 
+} /* namespace Sara */
 } /* namespace DO */

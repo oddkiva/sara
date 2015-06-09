@@ -20,7 +20,7 @@
 using namespace std;
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   KDTree::KDTree(const MatrixXd& data_matrix,
                  const flann::KDTreeIndexParams& index_params,
@@ -250,4 +250,5 @@ namespace DO {
     }
   }
 
-}
+} /* namespace Sara */
+} /* namespace DO */

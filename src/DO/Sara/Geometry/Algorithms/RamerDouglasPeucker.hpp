@@ -15,11 +15,14 @@
 #include <DO/Sara/Core/EigenExtension.hpp>
 #include <DO/Sara/Core/StdVectorHelpers.hpp>
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   std::vector<Point2d>
   ramer_douglas_peucker(const std::vector<Point2d>& contours, double eps);
 
-}
+} /* namespace Sara */
+} /* namespace DO */
+
 
 #endif /* DO_SARA_GEOMETRY_ALGORITHMS_RAMERDOUGLASPEUCKER_HPP */

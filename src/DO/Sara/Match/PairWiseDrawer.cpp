@@ -12,7 +12,8 @@
 #include <DO/Sara/Match.hpp>
 #include <DO/Sara/Graphics.hpp>
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   void PairWiseDrawer::displayImages() const
   {
@@ -95,4 +96,6 @@ namespace DO {
       DO::drawLine(a, b, c);
     }
   }
-}
+
+} /* namespace Sara */
+} /* namespace DO */

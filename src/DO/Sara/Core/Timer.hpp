@@ -19,7 +19,7 @@
 #include <DO/Sara/Defines.hpp>
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   //! \ingroup Core
   //! \defgroup Utility Utility
@@ -51,6 +51,7 @@ namespace DO {
 
   //! @}
 
+} /* namespace Sara */
 } /* namespace DO */
 
 #endif /* DO_SARA_UTILITIES_TIMER_HPP */

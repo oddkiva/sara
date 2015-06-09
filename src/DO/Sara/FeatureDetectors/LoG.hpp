@@ -14,7 +14,8 @@
 #ifndef DO_SARA_FEATUREDETECTORS_LOG_HPP
 #define DO_SARA_FEATUREDETECTORS_LOG_HPP
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   /*!
     \ingroup FeatureDetectors
@@ -114,6 +115,7 @@ namespace DO {
     ImagePyramid<float> laplacians_of_gaussians_;
   };
 
+} /* namespace Sara */
 } /* namespace DO */
 
 #endif /* DO_SARA_FEATUREDETECTORS_LOG_HPP */

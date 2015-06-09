@@ -21,7 +21,7 @@
 #include <DO/Sara/ImageProcessing/Interpolation.hpp>
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   /*!
     \ingroup ImageProcessing
@@ -203,8 +203,10 @@ namespace DO {
     return enlarge(image, new_sizes.template cast<int>().eval());
   }
 
-  //! @} file
-}
+  //! @}
+ 
+} /* namespace Sara */
+} /* namespace DO */
 
 
 #endif /* DO_SARA_IMAGEPROCESSING_SCALING_HPP */

@@ -21,7 +21,7 @@
 #include <DO/Sara/Core/Pixel/PixelTraits.hpp>
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   /*!
     \ingroup ImageProcessing
@@ -76,7 +76,8 @@ namespace DO {
     return interpolated_value;
   }
 
-}
+} /* namespace Sara */
+} /* namespace DO */
 
 
 #endif /* DO_SARA_IMAGEPROCESSING_INTERPOLATION_HPP */

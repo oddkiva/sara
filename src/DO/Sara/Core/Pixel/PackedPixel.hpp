@@ -22,7 +22,7 @@
 
 
 // Pixel data structures.
-namespace DO {
+namespace DO { namespace Sara {
 
   //! \brief 3D packed pixel.
   template <typename _BitField, int _Sz0, int _Sz1, int _Sz2>
@@ -240,8 +240,8 @@ namespace DO {
   };
 
 
-}
-
+} /* namespace Sara */
+} /* namespace DO */
 
 
 #endif /* DO_SARA_CORE_PIXEL_PACKEDPIXEL_HPP */

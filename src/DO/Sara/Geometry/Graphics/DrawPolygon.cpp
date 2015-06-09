@@ -12,7 +12,8 @@
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/Geometry.hpp>
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   void draw_line_segment(const LineSegment& s, const Color3ub& c, int penWidth)
   {
@@ -62,4 +63,5 @@ namespace DO {
   }
 
 
+} /* namespace Sara */
 } /* namespace DO */

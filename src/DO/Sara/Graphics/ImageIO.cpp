@@ -10,12 +10,12 @@
 // ========================================================================== //
 
 #include <DO/Sara/Graphics.hpp>
+
 #include "GraphicsUtilities.hpp"
 
-namespace DO {
 
-  // ====================================================================== //
-  //! Image loading functions
+namespace DO { namespace Sara {
+
   bool load(Image<Color3ub>& I, const std::string& name)
   {
     QImage image(QString(name.c_str()));
@@ -67,8 +67,6 @@ namespace DO {
     return r;
   }
 
-  // ====================================================================== //
-  //! Image saving functions
   static
   bool saveColorImage(const std::string& name, const Color3ub *cols,
                       int w, int h, int quality)
@@ -92,10 +90,14 @@ namespace DO {
 
   bool save(const Image<unsigned char>& I, const std::string& name,
             int quality)
-  { return saveGreyImage(name, I.data(), I.width(), I.height(), quality); }
+  {
+    return saveGreyImage(name, I.data(), I.width(), I.height(), quality);
+  }
 
   bool save(const Image<Rgb8>& I, const std::string& name, int quality)
-  { return saveColorImage(name, I.data(), I.width(), I.height(), quality); }
+  {
+    return saveColorImage(name, I.data(), I.width(), I.height(), quality);
+  }
 
-
+} /* namespace Sara */
 } /* namespace DO */

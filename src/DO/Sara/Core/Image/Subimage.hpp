@@ -20,7 +20,7 @@
 #include <DO/Sara/Core/Pixel/PixelTraits.hpp>
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   //! @{
   //! Get the subimage of an image.
@@ -66,6 +66,7 @@ namespace DO {
   }
   //! @}
 
+} /* namespace Sara */
 } /* namespace DO */
 
 

@@ -11,10 +11,12 @@
 
 #pragma once
 
-#include <DO/Sara/Core/Image.hpp>
 #include <easyexif/exif.h>
 
-namespace DO {
+#include <DO/Sara/Core/Image.hpp>
+
+
+namespace DO { namespace Sara {
 
   bool read_exif_info(EXIFInfo& exif_info, const std::string& file_path);
 
@@ -101,4 +103,6 @@ namespace DO {
   bool imwrite(const Image<Rgb8>& image, const std::string& filepath,
                int quality = 85);
 
+
+} /* namespace Sara */
 } /* namespace DO */

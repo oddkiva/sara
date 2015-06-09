@@ -9,18 +9,21 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include <iostream>
+#include <vector>
+
 #include <DO/Sara/Geometry/Algorithms/EllipseIntersection.hpp>
 #include <DO/Sara/Geometry/Algorithms/ConvexHull.hpp>
 #include <DO/Sara/Geometry/Algorithms/SutherlandHodgman.hpp>
 #include <DO/Sara/Geometry/Tools/PolynomialRoots.hpp>
 #include <DO/Sara/Geometry/Tools/Utilities.hpp>
 #include <DO/Sara/Geometry/Graphics/DrawPolygon.hpp>
-#include <vector>
-#include <iostream>
+
 
 using namespace std;
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   // ======================================================================== //
   // Computation of intersecting points of intersecting ellipses
@@ -337,4 +340,5 @@ namespace DO {
 			return 0.;
   }
 
+} /* namespace Sara */
 } /* namespace DO */

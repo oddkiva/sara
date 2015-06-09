@@ -9,11 +9,13 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include "GraphicsApplicationImpl.hpp"
-#include <QFileDialog>
 #include <QDebug>
+#include <QFileDialog>
 
-namespace DO {
+#include "GraphicsApplicationImpl.hpp"
+
+
+namespace DO { namespace Sara {
 
   GraphicsApplication::Impl::
   Impl(int& argc_, char **argv_)
@@ -209,4 +211,5 @@ namespace DO {
     }
   }
 
+} /* namespace Sara */
 } /* namespace DO */

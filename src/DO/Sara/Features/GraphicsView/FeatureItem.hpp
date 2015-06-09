@@ -12,16 +12,19 @@
 #ifndef DO_SARA_AFFINECOVARIANTFEATURES_FEATUREITEM_HPP
 #define DO_SARA_AFFINECOVARIANTFEATURES_FEATUREITEM_HPP
 
-#include <QtGui>
-#include <QGraphicsItem>
+#include <cmath>
+
 #include <QGraphicsEllipseItem>
+#include <QGraphicsItem>
+#include <QtGui>
+
 #include <Eigen/Core>
 #include <Eigen/SVD>
-#include <cmath>
+
 #include <DO/Sara/Core.hpp>
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   class OERegionItem;
   class MatchItem;
@@ -94,6 +97,7 @@ namespace DO {
     QColor currentColor_;
   };
 
+} /* namespace Sara */
 } /* namespace DO */
 
 

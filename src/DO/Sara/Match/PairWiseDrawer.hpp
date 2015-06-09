@@ -12,7 +12,7 @@
 #ifndef DO_SARA_MATCH_PAIRWISEDRAWER_HPP
 #define DO_SARA_MATCH_PAIRWISEDRAWER_HPP
 
-namespace DO {
+namespace DO { namespace Sara {
 
   class Match;
 
@@ -110,6 +110,7 @@ namespace DO {
     float z1, z2;
   };
 
+} /* namespace Sara */
 } /* namespace DO */
 
 #endif /* DO_SARA_MATCH_PAIRWISEDRAWER_HPP */

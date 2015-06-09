@@ -14,9 +14,11 @@
 #ifndef DO_SARA_GRAPHICS_IMAGEDRAW_HPP
 #define DO_SARA_GRAPHICS_IMAGEDRAW_HPP
 
+
 class QImage;
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   /*!
     \ingroup Graphics
@@ -24,36 +26,6 @@ namespace DO {
 
     @{
    */
-
-#ifdef USE_IMAGE_PAINTER
-  // ====================================================================== //
-  // A transformation stack management like OpenGL.
-  class Painter : public QPainter
-  {
-    inline void beginImPaint(QImage& image) { begin(&image); }
-    inline void endImPaint(QImage& image) { end(); }
-
-    inline void pushImTransform(const QTransform& t)
-    { transformStack.push(t); }
-    inline void popImTransform()
-    {
-      QTransform newTransform( transform() * transformStack.pop().inverted() );
-      setTransform(newTransform);
-    }
-
-    inline void imTranslate(double x, double y)
-    { pushImTransform( QTransform::fromTranslate(qreal(x), qreal(y)) ); }
-    inline void imScale(double sx, double sy)
-    { pushImTransform( QTransform::fromScale(qreal(sx), qreal(sy)) ); }
-    inline void imRotate(double degree)
-    { QTransform r; r.rotate(degree); pushImTransform(r); }
-    inline void imRotateRadians(double radian)
-    { QTransform r; r.rotateRadians(radian); pushImTransform(r); }
-
-  private:
-    QStack<QTransform> transformStack;
-  };
-#endif
 
   /*!
     \brief Draw point on image.
@@ -119,6 +91,8 @@ namespace DO {
 
   //! @}
 
+} /* namespace Sara */
 } /* namespace DO */
+
 
 #endif /* DO_SARA_GRAPHICS_PAINTINGWINDOWCOMMANDS_HPP */

@@ -21,7 +21,7 @@ struct AVFormatContext;
 struct AVFrame;
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   class VideoStream : public std::streambuf
   {
@@ -63,7 +63,8 @@ namespace DO {
     size_t _video_frame_pos = std::numeric_limits<size_t>::max();
   };
 
-}
+} /* namespace Sara */
+} /* namespace DO */
 
 
 #endif /* VIDEOIO_VIDEOSTREAM_HPP */

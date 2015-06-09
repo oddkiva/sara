@@ -17,7 +17,7 @@
 #include <DO/Sara/Geometry/Tools/Polynomial.hpp>
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   template <typename T>
   void roots(const Polynomial<T, 2>& P, std::complex<T>& x1,
@@ -154,6 +154,7 @@ namespace DO {
     z4 -= a3/4;
   }
 
+} /* namespace Sara */
 } /* namespace DO */
 
 

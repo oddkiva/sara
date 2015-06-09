@@ -16,7 +16,7 @@
 #include <DO/Sara/Core/StdVectorHelpers.hpp>
 
 
-namespace DO { namespace Detail {
+namespace DO { namespace Sara { namespace Detail {
 
   static
   inline
@@ -63,10 +63,11 @@ namespace DO { namespace Detail {
   }
 
 } /* namespace Detail */
+} /* namespace Sara */
 } /* namespace DO */
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   std::vector<Point2d>
   ramer_douglas_peucker(const std::vector<Point2d>& contours, double eps)
@@ -78,6 +79,8 @@ namespace DO {
     return lines;
   }
 
+} /* namespace Sara */
 } /* namespace DO */
+
 
 #endif /* DO_SARA_GEOMETRY_ALGORITHMS_RAMERDOUGLASPEUCKER_HPP */

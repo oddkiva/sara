@@ -21,7 +21,7 @@ extern "C" {
 #include "VideoStream.hpp"
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   inline static Yuv8 get_yuv_pixel(const AVFrame *frame, int x, int y)
   {
@@ -195,4 +195,5 @@ namespace DO {
   }
 
 
+} /* namespace Sara */
 } /* namespace DO */

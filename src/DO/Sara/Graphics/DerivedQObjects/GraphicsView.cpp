@@ -9,12 +9,14 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include "GraphicsView.hpp"
-#include "PixmapItem.hpp"
 #include <QtGui>
 #include <QtOpenGL>
 
-namespace DO {
+#include "GraphicsView.hpp"
+#include "PixmapItem.hpp"
+
+
+namespace DO { namespace Sara {
 
   GraphicsView::GraphicsView(int w, int h, const QString& windowTitle,
                              int x, int y, QWidget* parent)
@@ -159,4 +161,5 @@ namespace DO {
     scale(scaleFactor, scaleFactor);
   }
 
+} /* namespace Sara */
 } /* namespace DO */

@@ -19,7 +19,7 @@
 #include "GraphicsView/FeatureItem.h"
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   /*!
     \ingroup Features
@@ -144,6 +144,7 @@ namespace DO {
 
   //! @file
 
+} /* namespace Sara */
 } /* namespace DO */
 
 

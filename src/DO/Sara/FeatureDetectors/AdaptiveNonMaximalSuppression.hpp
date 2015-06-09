@@ -14,7 +14,8 @@
 #ifndef DO_SARA_FEATUREDETECTORS_ADAPTIVENONMAXIMALSUPPRESSION_HPP
 #define DO_SARA_FEATUREDETECTORS_ADAPTIVENONMAXIMALSUPPRESSION_HPP
 
-namespace DO {
+
+namespace DO { namespace Sara {
 
   /*!
     \ingroup FeatureDetectors
@@ -71,6 +72,7 @@ namespace DO {
   adaptiveNonMaximalSuppression(const std::vector<OERegion>& features,
                                 float c_robust = 0.9f);
 
+} /* namespace Sara */
 } /* namespace DO */
 
 #endif /* DO_SARA_FEATUREDETECTORS_ADAPTIVENONMAXIMALSUPPRESSION_HPP */

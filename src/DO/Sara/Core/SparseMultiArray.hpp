@@ -20,7 +20,7 @@
 #include <DO/Sara/Core/EigenExtension.hpp>
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   //! \ingroup Core
   //! \defgroup SparseMultiArray SparseMultiArray
@@ -186,6 +186,7 @@ namespace DO {
 
   //! @}
 
+} /* namespace Sara */
 } /* namespace DO */
 
 

@@ -9,10 +9,12 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Sara/Graphics.hpp>
 #include <QtGui>
 
-namespace DO {
+#include <DO/Sara/Graphics.hpp>
+
+
+namespace DO { namespace Sara {
 
   static inline QImage to_qimage(Image<Rgb8>& image)
   {
@@ -81,4 +83,5 @@ namespace DO {
     p.fillPath(path, to_qcolor(c));
   }
 
+} /* namespace Sara */
 } /* namespace DO */

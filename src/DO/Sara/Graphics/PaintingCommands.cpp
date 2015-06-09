@@ -10,12 +10,12 @@
 // ========================================================================== //
 
 #include <DO/Sara/Graphics.hpp>
+
 #include "GraphicsUtilities.hpp"
 
-namespace DO {
 
-  // ====================================================================== //
-  //! Drawing commands
+namespace DO { namespace Sara {
+
   bool draw_point(int x, int y, const Color3ub& c)
   {
     return QMetaObject::invokeMethod(
@@ -220,8 +220,6 @@ namespace DO {
       Q_ARG(int, style), Q_ARG(int, width));
   }
 
-  // ====================================================================== //
-  //! Filling commands
   bool fill_ellipse(int x, int y, int w, int h, const Color3ub& c)
   {
     return QMetaObject::invokeMethod(
@@ -308,8 +306,6 @@ namespace DO {
     return fill_poly(poly, c);
   }
 
-  // ====================================================================== //
-  //! Image display commands
   static bool display(const QImage& image, int xoff, int yoff, double fact)
   {
     return QMetaObject::invokeMethod(
@@ -339,8 +335,6 @@ namespace DO {
     return display(image, x, y, fact);
   }
 
-  // ====================================================================== //
-  //! Clearing commands
   bool clear_window()
   {
     return QMetaObject::invokeMethod(
@@ -348,8 +342,6 @@ namespace DO {
       Qt::QueuedConnection);
   }
 
-  // ======================================================================== //
-  //! Painting options commands
   bool set_antialiasing(Window w, bool on)
   {
     return QMetaObject::invokeMethod(
@@ -377,4 +369,5 @@ namespace DO {
     return true;
   }
 
+} /* namespace Sara */
 } /* namespace DO */

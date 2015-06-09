@@ -13,7 +13,7 @@
 
 using namespace std;
 
-namespace DO {
+namespace DO { namespace Sara {
 
   vector<OERegion>
   ComputeDoGExtrema::operator()(const Image<float>& I,
@@ -53,4 +53,5 @@ namespace DO {
     return extrema;
   }
 
+} /* namespace Sara */
 } /* namespace DO */

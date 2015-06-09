@@ -26,7 +26,7 @@ using namespace std;
 
 
 // Utilities.
-namespace DO {
+namespace DO { namespace Sara {
 
   static inline string file_ext(const string& filepath)
   {
@@ -57,11 +57,12 @@ namespace DO {
       ext == ".tiff";
   }
 
-}
+} /* namespace Sara */
+} /* namespace DO */
 
 
 // Parsing of EXIF info.
-namespace DO {
+namespace DO { namespace Sara {
 
   bool read_exif_info(EXIFInfo& exif_info, const std::string& file_path)
   {
@@ -296,4 +297,5 @@ namespace DO {
     return false;
   }
 
+} /* namespace Sara */
 } /* namespace DO */
