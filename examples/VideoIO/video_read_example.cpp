@@ -5,7 +5,7 @@
 GRAPHICS_MAIN()
 {
   using namespace std;
-  using namespace DO;
+  using namespace DO::Sara;
 
   const string video_filepath = src_path("orion_1.mpg");
 

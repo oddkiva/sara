@@ -18,7 +18,7 @@
 
 
 using namespace std;
-using namespace DO;
+using namespace DO::Sara;
 
 
 TEST(TestLinearFiltering, test_convolve_array)

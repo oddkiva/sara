@@ -20,7 +20,7 @@
 
 
 using namespace std;
-using namespace DO;
+using namespace DO::Sara;
 
 
 TEST(TestImageConversion, test_find_min_max_for_1d_pixel)

@@ -13,7 +13,7 @@
 
 #include <DO/Sara/Geometry/Objects/Polygon.hpp>
 
-namespace DO { namespace Detail {
+namespace DO { namespace Sara { namespace Detail {
 
     typedef std::pair<Point2d, double> PtCotg;
 
@@ -21,12 +21,14 @@ namespace DO { namespace Detail {
                                 int numPoints);
 
 } /* namespace Detail */
+} /* namespace Sara */
 } /* namespace DO */
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   std::vector<Point2d>
   graham_scan_convex_hull(const std::vector<Point2d>& points);
 
+} /* namespace Sara */
 } /* namespace DO */

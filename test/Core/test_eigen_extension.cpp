@@ -13,7 +13,7 @@
 #include <DO/Sara/Core/EigenExtension.hpp>
 #include <DO/Sara/Core/MultiArray.hpp>
 
-using namespace DO;
+using namespace DO::Sara;
 using namespace std;
 
 TEST(DO_Sara_Core_Test, eigenExtensionTest)

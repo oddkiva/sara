@@ -24,7 +24,7 @@
   @}
  */
 
-namespace DO { namespace Meta {
+namespace DO { namespace Sara { namespace Meta {
 
   //! \brief Static 3D array of integers.
   template <int _Value0, int _Value1, int _Value2>
@@ -164,6 +164,7 @@ namespace DO { namespace Meta {
   //! @}
 
 } /* namespace Meta */
+} /* namespace Sara */
 } /* namespace DO */
 
 #endif /* DO_SARA_CORE_META_HPP */

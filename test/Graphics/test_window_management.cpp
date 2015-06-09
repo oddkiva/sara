@@ -9,19 +9,22 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-// Google Test.
 #include <gtest/gtest.h>
-// DO-CV.
+
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/Graphics/GraphicsUtilities.hpp>
+
 #include "event_scheduler.hpp"
 
-using namespace DO;
+
+using namespace DO::Sara;
+
 
 // N.B.: this is not needed but very **STRANGELY**, if we don't add this,
 // the program seg-faults in Travis CI. We need to sort this out because this
 // issue is completely both unfathomable and ridiculous.
 EventScheduler *global_scheduler;
+
 
 TEST(TestWindow, test_open_and_close_window)
 {

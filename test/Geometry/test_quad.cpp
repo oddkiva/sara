@@ -17,7 +17,7 @@
 
 
 using namespace std;
-using namespace DO;
+using namespace DO::Sara;
 
 
 class TestQuad : public TestPolygon {};

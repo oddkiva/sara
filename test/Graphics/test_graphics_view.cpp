@@ -9,20 +9,22 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-// Google Test.
 #include <gtest/gtest.h>
-// Qt libraries.
+
 #include <QtTest>
-// DO-CV libraries.
+
 #include <DO/Sara/Graphics/DerivedQObjects/GraphicsView.hpp>
-// Local libraries.
+
 #include "event_scheduler.hpp"
 
-Q_DECLARE_METATYPE(DO::Event)
+
+Q_DECLARE_METATYPE(DO::Sara::Event)
 Q_DECLARE_METATYPE(Qt::Key)
 Q_DECLARE_METATYPE(Qt::MouseButtons)
 
-using namespace DO;
+
+using namespace DO::Sara;
+
 
 TEST(TestGraphicsView, test_construction)
 {
@@ -112,7 +114,7 @@ TEST_F(TestGraphicsViewEvents, test_send_no_event)
   QVariant arg = arguments.at(0);
   arg.convert(event_type_id_);
   Event event(arguments.at(0).value<Event>());
-  EXPECT_EQ(event.type, DO::NO_EVENT);
+  EXPECT_EQ(event.type, DO::Sara::NO_EVENT);
 }
 
 TEST_F(TestGraphicsViewEvents, test_send_pressed_key_event)
@@ -148,7 +150,7 @@ TEST_F(TestGraphicsViewEvents, test_send_pressed_key_event)
   QVariant arg = arguments.at(0);
   arg.convert(event_type_id_);
   Event event(arguments.at(0).value<Event>());
-  EXPECT_EQ(event.type, DO::KEY_PRESSED);
+  EXPECT_EQ(event.type, DO::Sara::KEY_PRESSED);
   EXPECT_EQ(event.key, key_);
 }
 

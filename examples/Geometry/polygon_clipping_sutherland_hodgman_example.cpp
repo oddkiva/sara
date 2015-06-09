@@ -14,7 +14,8 @@
 #include <DO/Sara/Core/Timer.hpp>
 
 using namespace std;
-using namespace DO;
+using namespace DO::Sara;
+
 
 GRAPHICS_MAIN()
 {

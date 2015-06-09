@@ -9,21 +9,23 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-// STL.
 #include <iostream>
-// Google Test.
+
 #include <gtest/gtest.h>
-// DO-CV.
+
 #include <DO/Sara/Core.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/Graphics/GraphicsUtilities.hpp>
-// Local class.
+
 #include "event_scheduler.hpp"
 
-using namespace DO;
+
 using namespace std;
+using namespace DO::Sara;
+
 
 EventScheduler *global_scheduler;
+
 
 class TestSleepFunctions: public testing::Test
 {

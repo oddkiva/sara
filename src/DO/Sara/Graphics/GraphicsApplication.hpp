@@ -57,14 +57,14 @@ namespace DO { namespace Sara {
 //! \brief Some convenient hacks.
 int __main(int, char **);
 
-#define GRAPHICS_MAIN()                     \
-int main(int argc, char **argv)             \
-{                                           \
-  DO::GraphicsApplication app(argc, argv);  \
-  app.register_user_main(__main);           \
-  return app.exec();                        \
-}                                           \
-                                            \
+#define GRAPHICS_MAIN()                           \
+int main(int argc, char **argv)                   \
+{                                                 \
+  DO::Sara::GraphicsApplication app(argc, argv);  \
+  app.register_user_main(__main);                 \
+  return app.exec();                              \
+}                                                 \
+                                                  \
 int __main(int, char **)
 
 

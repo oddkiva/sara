@@ -15,7 +15,7 @@
 #include <DO/Sara/Geometry/Tools/MatrixBasedObject.hpp>
 
 
-namespace DO { namespace Projective {
+namespace DO { namespace Sara { namespace Projective {
 
   template <typename T, int N>
   class Conic : public MatrixBasedObject<T,N>
@@ -44,6 +44,7 @@ namespace DO { namespace Projective {
   std::ostream& operator<<(std::ostream& os, const Conic<T, N>& P);
 
 } /* namespace Projective */
+} /* namespace Sara */
 } /* namespace DO */
 
 

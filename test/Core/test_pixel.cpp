@@ -16,7 +16,7 @@
 
 
 using namespace std;
-using namespace DO;
+using namespace DO::Sara;
 
 
 TEST(Test_Pixel, test_rgb_32f)

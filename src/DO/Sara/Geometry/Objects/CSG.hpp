@@ -13,7 +13,7 @@
 
 #include <DO/Sara/Core/EigenExtension.hpp>
 
-namespace DO { namespace CSG {
+namespace DO { namespace Sara { namespace CSG {
 
   class Object
   {
@@ -84,4 +84,5 @@ namespace DO { namespace CSG {
   { return Union(&o1, &o2); }
 
 } /* namespace CSG */
+} /* namespace Sara */
 } /* namespace DO */

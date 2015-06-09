@@ -187,11 +187,12 @@ namespace DO { namespace Sara {
     return os;
   }
 
-}
+} /* namespace Sara */
+} /* namespace DO */
 
 
 // Image read/write.
-namespace DO {
+namespace DO { namespace Sara {
 
   static
   bool imread(unsigned char *& data, int& w, int& h, int& d,

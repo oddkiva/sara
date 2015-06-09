@@ -70,7 +70,7 @@ namespace DO { namespace Sara {
 
     inline bool operator()(int i1, int i2) const
     {
-      if (DO::lexicographical_compare(_descriptors[i1], _descriptors[i2]))
+      if (Sara::lexicographical_compare(_descriptors[i1], _descriptors[i2]))
         return true;
       if (_equal_descriptors(i1, i2) &&
           _features[i1].extremum_value() > _features[i2].extremum_value())

@@ -65,13 +65,13 @@ template <typename T, int M, int N, int Opts, int MaxRows, int MaxCols>
 inline
 std::set<
   Eigen::Matrix<T, M, N, Opts, MaxRows, MaxCols>,
-  DO::LexicographicalOrder
+  DO::Sara::LexicographicalOrder
 >
 to_std_set(const std::vector<Eigen::Matrix<T, M, N, Opts, MaxRows, MaxCols> >& v)
 {
   return std::set<
     Eigen::Matrix<T, M, N, Opts, MaxRows, MaxCols>,
-    DO::LexicographicalOrder
+    DO::Sara::LexicographicalOrder
   >(v.begin(), v.end());
 }
 

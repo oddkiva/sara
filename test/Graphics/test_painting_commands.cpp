@@ -9,19 +9,23 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-// STL.
 #include <vector>
-// Google Test.
+
 #include <gtest/gtest.h>
+
 #include <QTest>
-// DO-CV.
+
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/Graphics/GraphicsUtilities.hpp>
+
 #include "event_scheduler.cpp"
 
-using namespace DO;
+
+using namespace DO::Sara;
+
 
 EventScheduler *global_scheduler;
+
 
 class TestPaintingCommands: public testing::Test
 {

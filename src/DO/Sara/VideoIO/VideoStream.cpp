@@ -53,10 +53,11 @@ namespace DO { namespace Sara {
     return rgb;
   }
 
+} /* namespace Sara */
 } /* namespace DO */
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   bool VideoStream::_registered_all_codecs = false;
 
@@ -182,7 +183,7 @@ namespace DO {
           for (int x = 0; x < w; ++x)
           {
             Yuv8 yuv = get_yuv_pixel(_video_frame, x, y);
-            video_frame(x, y) = DO::convert(yuv);
+            video_frame(x, y) = Sara::convert(yuv);
           }
         }
 
@@ -193,7 +194,6 @@ namespace DO {
 
     return false;
   }
-
 
 } /* namespace Sara */
 } /* namespace DO */

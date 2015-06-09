@@ -4,7 +4,7 @@
 #include <DO/Sara/VideoIO.hpp>
 
 
-using namespace DO;
+using namespace DO::Sara;
 
 
 class TestVideoIO : public testing::Test

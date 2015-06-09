@@ -19,10 +19,12 @@
 #include "event_scheduler.hpp"
 
 
-using namespace DO;
+using namespace DO::Sara;
 using namespace std;
 
+
 EventScheduler *global_scheduler;
+
 
 class TestKeyboardMouseInputOnSingleWindow: public testing::Test
 {

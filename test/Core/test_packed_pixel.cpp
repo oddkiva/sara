@@ -19,7 +19,7 @@
 
 
 using namespace std;
-using namespace DO;
+using namespace DO::Sara;
 
 
 TEST(Test_PackedPixelBase_3, test_initialization)

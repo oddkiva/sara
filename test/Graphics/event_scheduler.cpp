@@ -1,6 +1,8 @@
-#include "event_scheduler.hpp"
 #include <QApplication>
 #include <QDebug>
+
+#include "event_scheduler.hpp"
+
 
 EventScheduler::EventScheduler()
   : receiver_(0)

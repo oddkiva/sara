@@ -18,7 +18,7 @@
 
 
 using namespace std;
-using namespace DO;
+using namespace DO::Sara;
 
 
 class TestDifferential : public testing::Test

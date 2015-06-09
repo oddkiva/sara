@@ -15,8 +15,8 @@
 #include <DO/Sara/ImageProcessing/Extrema.hpp>
 
 
-using namespace DO;
 using namespace std;
+using namespace DO::Sara;
 
 
 TEST(TestLocalExtremum, test_local_extremum)

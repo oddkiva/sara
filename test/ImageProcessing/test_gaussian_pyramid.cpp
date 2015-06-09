@@ -16,8 +16,8 @@
 #include <DO/Sara/ImageProcessing/GaussianPyramid.hpp>
 
 
-using namespace DO;
 using namespace std;
+using namespace DO::Sara;
 
 
 template <class ChannelType>

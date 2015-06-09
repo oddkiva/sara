@@ -18,8 +18,8 @@
 #include "../AssertHelpers.hpp"
 
 
-using namespace DO;
 using namespace std;
+using namespace DO::Sara;
 
 
 // =============================================================================
@@ -552,7 +552,7 @@ TEST(TestMultiArray, test_slices)
       for (int r = 0; r < rgb_histogram.size(0); ++r)
         for (int g = 0; g < rgb_histogram.size(1); ++g)
           for (int b = 0; b < rgb_histogram.size(2); ++b)
-            rgb_histogram(r, g, b) = i*rgb_histogram_blocks.size(1) + j;
+            rgb_histogram(r, g, b) = static_cast<float>(i*rgb_histogram_blocks.size(1) + j);
     }
   }
 

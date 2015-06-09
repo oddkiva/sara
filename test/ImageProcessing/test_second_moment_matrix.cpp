@@ -18,8 +18,8 @@
 #include "../AssertHelpers.hpp"
 
 
-using namespace DO;
 using namespace std;
+using namespace DO::Sara;
 
 
 TEST(TestSecondMomentMatrix, test_second_moment_matrix)

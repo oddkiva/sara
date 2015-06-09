@@ -15,7 +15,7 @@
 
 
 using namespace std;
-using namespace DO;
+using namespace DO::Sara;
 
 
 TEST(TestImageClass, test_2d_image_constructor)

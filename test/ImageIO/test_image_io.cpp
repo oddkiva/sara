@@ -17,8 +17,8 @@
 #include "../AssertHelpers.hpp"
 
 
-using namespace DO;
 using namespace std;
+using namespace DO::Sara;
 
 
 TEST(TestImageIO, test_rgb_image_read_write)

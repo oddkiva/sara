@@ -21,8 +21,8 @@
 #include "../AssertHelpers.hpp"
 
 
-using namespace DO;
 using namespace std;
+using namespace DO::Sara;
 
 
 inline vector<int> range(int begin, int end)

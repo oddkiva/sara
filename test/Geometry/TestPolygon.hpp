@@ -6,7 +6,7 @@
 #include <DO/Sara/Core/EigenExtension.hpp>
 
 
-using namespace DO;
+using namespace DO::Sara;
 
 
 class TestPolygon : public testing::Test

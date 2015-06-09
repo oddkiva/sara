@@ -21,7 +21,7 @@
 
 
 using namespace std;
-using namespace DO;
+using namespace DO::Sara;
 
 
 TEST(TestSmartConvertColor, test_rgb_to_gray)

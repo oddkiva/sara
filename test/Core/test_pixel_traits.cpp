@@ -17,7 +17,7 @@
 
 
 using namespace std;
-using namespace DO;
+using namespace DO::Sara;
 
 
 TEST(TestPixelTraits, test_pixel_traits_min_max_value)

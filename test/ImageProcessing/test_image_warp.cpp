@@ -20,7 +20,7 @@
 
 
 using namespace std;
-using namespace DO;
+using namespace DO::Sara;
 
 
 template <class ChannelType>

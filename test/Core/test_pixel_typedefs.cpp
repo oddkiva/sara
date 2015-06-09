@@ -18,7 +18,7 @@
 
 
 using namespace std;
-using namespace DO;
+using namespace DO::Sara;
 
 
 TEST(TestPixelTypedefs, test_3d_colors_typedefs)

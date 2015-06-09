@@ -14,8 +14,8 @@
 #include <DO/Sara/ImageProcessing.hpp>
 
 
-using namespace DO;
 using namespace std;
+using namespace DO::Sara;
 
 
 const Rgb8& c = Cyan8;

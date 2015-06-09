@@ -18,7 +18,8 @@
 
 
 using namespace std;
-using namespace DO;
+using namespace DO::Sara;
+
 
 TEST(TestDericheFilter, test_inplace_deriche)
 {

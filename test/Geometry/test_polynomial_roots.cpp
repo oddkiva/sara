@@ -16,7 +16,7 @@
 
 
 using namespace std;
-using namespace DO;
+using namespace DO::Sara;
 
 
 TEST(TestPolynomialRoots, test_quadratic_polynomial_roots)

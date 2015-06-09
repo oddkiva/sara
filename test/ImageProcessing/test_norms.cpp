@@ -17,8 +17,8 @@
 #include "../AssertHelpers.hpp"
 
 
-using namespace DO;
 using namespace std;
+using namespace DO::Sara;
 
 
 class TestNorms : public testing::Test

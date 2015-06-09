@@ -3,8 +3,8 @@
 #include "TestPolygon.hpp"
 
 
-using namespace DO;
 using namespace std;
+using namespace DO::Sara;
 
 
 class TestAffineCone : public TestPolygon

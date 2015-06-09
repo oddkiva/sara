@@ -18,8 +18,8 @@
 #include "../AssertHelpers.hpp"
 
 
-using namespace DO;
 using namespace std;
+using namespace DO::Sara;
 
 
 TEST(TestFeatures, test_interest_point)

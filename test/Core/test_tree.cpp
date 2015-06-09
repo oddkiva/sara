@@ -15,7 +15,7 @@
 #include <DO/Sara/Core/Tree.hpp>
 
 
-using namespace DO;
+using namespace DO::Sara;
 using namespace std;
 
 

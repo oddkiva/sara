@@ -19,7 +19,7 @@
 
 
 using namespace std;
-using namespace DO;
+using namespace DO::Sara;
 
 
 TEST(TestInterpolation, test_interpolation_with_float_1)

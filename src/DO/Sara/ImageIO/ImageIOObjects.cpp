@@ -327,11 +327,12 @@ namespace DO { namespace Sara {
     return true;
   }
 
-}
+} /* namespace Sara */
+} /* namespace DO */
 
 
 // Tiff I/O.
-namespace DO {
+namespace DO { namespace Sara {
 
   TiffFileReader::TiffFileReader(const std::string& filepath)
     : ImageFileReader(filepath, "r")
