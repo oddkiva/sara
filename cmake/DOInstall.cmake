@@ -3,30 +3,33 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 
-# Eigen 3
-do_message("Installing Eigen")
-install(DIRECTORY ${DO_ThirdParty_DIR}/eigen/Eigen
-        DESTINATION include
-        COMPONENT Eigen3)
-set(CPACK_COMPONENT_Eigen3_REQUIRED 1)
+# Install the sources.
+if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+  # Eigen 3
+  do_message("Installing Eigen")
+  install(DIRECTORY ${DO_ThirdParty_DIR}/eigen/Eigen
+    DESTINATION include
+    COMPONENT Eigen3)
+  set(CPACK_COMPONENT_Eigen3_REQUIRED 1)
 
-# DO++ source files
-install(FILES ${DO_DIR}/COPYING.README
-              ${DO_DIR}/COPYING.MPL2
-        DESTINATION share/DO/Sara
-        COMPONENT Sources)
-install(DIRECTORY ${DO_DIR}/cmake
-        DESTINATION share/DO/Sara
-        COMPONENT Sources)
-install(DIRECTORY ${DO_DIR}/src/DO
-        DESTINATION include/
-        COMPONENT Sources)
-install(FILES ${DO_SOURCE_DIR}/Defines.hpp
-        DESTINATION include/DO/Sara
-        COMPONENT Sources)
-set(CPACK_COMPONENT_Sources_REQUIRED 1)
+  # DO-Sara source files
+  install(FILES ${DO_DIR}/COPYING.README
+    ${DO_DIR}/COPYING.MPL2
+    DESTINATION share/DO/Sara
+    COMPONENT Sources)
+  install(DIRECTORY ${DO_DIR}/cmake
+    DESTINATION share/DO/Sara
+    COMPONENT Sources)
+  install(DIRECTORY ${DO_DIR}/src/DO
+    DESTINATION include/
+    COMPONENT Sources)
+  install(FILES ${DO_SOURCE_DIR}/Defines.hpp
+    DESTINATION include/DO/Sara
+    COMPONENT Sources)
+  set(CPACK_COMPONENT_Sources_REQUIRED 1)
+endif ()
 
-# DO++ component libraries
+# DO-Sara component libraries
 foreach (component ${DO_COMPONENTS})
   do_message("Installing DO.${component}")
   include(${DO_${component}_USE_FILE})
