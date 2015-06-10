@@ -4,7 +4,7 @@ project(DO_ImageProcessing_tests)
 
 message(STATUS "  - DO_ImageProcessing_tests")
 
-find_package(DO COMPONENTS Core ImageProcessing REQUIRED)
+find_package(DO_Sara COMPONENTS Core ImageProcessing REQUIRED)
 
 
 do_test(ImageProcessing_Deriche test_deriche_filter.cpp

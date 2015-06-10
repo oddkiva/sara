@@ -104,23 +104,23 @@ macro (do_append_subdir_files _parentdir _child_dir _hdr_list_var _src_list_var)
   list(APPEND ${_hdr_list_var} ${${hdr_sublist_var}})
   list(APPEND ${_src_list_var} ${${src_sublist_var}})
 
-  message("${hdr_sublist_var} = ${${hdr_sublist_var}}")
+  #message("${hdr_sublist_var} = ${${hdr_sublist_var}}")
 endmacro ()
 
 
 macro(do_glob_directory _curdir)
-  message(STATUS "Parsing current source directory = ${_curdir}")
+  #message(STATUS "Parsing current source directory = ${_curdir}")
   file(GLOB curdir_children RELATIVE ${_curdir} ${_curdir}/*)
 
   get_filename_component(curdir_name "${_curdir}" NAME)
-  message("Directory name: ${curdir_name}")
+  #message("Directory name: ${curdir_name}")
 
   file(GLOB DO_${curdir_name}_HEADER_FILES FILES ${_curdir}/*.hpp)
   file(GLOB DO_${curdir_name}_SOURCE_FILES FILES ${_curdir}/*.cpp)
 
   foreach (child ${curdir_children})
     if (IS_DIRECTORY ${_curdir}/${child} AND NOT "${child}" STREQUAL "build")
-      message("Parsing child directory = '${child}'")
+      #message("Parsing child directory = '${child}'")
       do_append_subdir_files(${_curdir} ${child}
                              DO_${curdir_name}_HEADER_FILES
                              DO_${curdir_name}_SOURCE_FILES)
@@ -133,9 +133,9 @@ macro(do_glob_directory _curdir)
   list(APPEND DO_${curdir_name}_HEADER_FILES
        ${DO_${curdir_name}_MASTER_HEADER})
 
-  message(STATUS "Master Header:\n ${DO_${curdir_name}_MASTER_HEADER}")
-  message(STATUS "Header file list:\n ${DO_${curdir_name}_HEADER_FILES}")
-  message(STATUS "Source file list:\n ${DO_${curdir_name}_SOURCE_FILES}")
+  #message(STATUS "Master Header:\n ${DO_${curdir_name}_MASTER_HEADER}")
+  #message(STATUS "Header file list:\n ${DO_${curdir_name}_HEADER_FILES}")
+  #message(STATUS "Source file list:\n ${DO_${curdir_name}_SOURCE_FILES}")
 endmacro()
 
 

@@ -8,7 +8,7 @@ project(DO_Features_Examples)
 
 message(STATUS "  - DO_Features_Examples")
 
-find_package(DO COMPONENTS Core Graphics Features REQUIRED)
+find_package(DO_Sara COMPONENTS Core Graphics Features REQUIRED)
 
 macro (do_add_example example)
   add_executable(${example} ${example}.cpp)

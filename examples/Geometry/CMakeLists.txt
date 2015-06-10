@@ -8,7 +8,7 @@ project(DO_Geometry_Examples)
 
 message(STATUS "  - DO_Geometry_Examples")
 
-find_package(DO COMPONENTS Core Graphics Geometry REQUIRED)
+find_package(DO_Sara COMPONENTS Core Graphics Geometry REQUIRED)
 
 macro (do_add_example example)
   add_executable(${example} ${example}.cpp)

@@ -4,7 +4,7 @@ project(DO_VideoCapture_test)
 
 message(STATUS "  - DO_VideoCapture_test")
 
-find_package(DO COMPONENTS Core ImageProcessing Graphics REQUIRED)
+find_package(DO_Sara COMPONENTS Core ImageProcessing Graphics REQUIRED)
 include(${DO_USE_FILE})
 
 find_package(Qt5Widgets REQUIRED)

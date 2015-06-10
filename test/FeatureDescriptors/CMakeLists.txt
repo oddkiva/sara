@@ -4,7 +4,7 @@ project(DO_FeatureDetectors_tests)
 
 message(STATUS "  - DO_FeatureDetectors_tests")
 
-find_package(DO COMPONENTS
+find_package(DO_Sara COMPONENTS
             Graphics Features FeatureDetectors FeatureDescriptors REQUIRED)
 include(${DO_USE_FILE})
 

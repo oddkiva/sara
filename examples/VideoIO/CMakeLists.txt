@@ -8,7 +8,7 @@ project(DO_VideoIO_Examples)
 
 message(STATUS "  - DO_VideoIO_Examples")
 
-find_package(DO COMPONENTS Core Graphics VideoIO REQUIRED)
+find_package(DO_Sara COMPONENTS Core Graphics VideoIO REQUIRED)
 
 macro (do_add_example example)
   add_executable(${example} ${example}.cpp)

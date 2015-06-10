@@ -4,7 +4,7 @@ project(DO_Geometry_tests)
 
 message(STATUS "  - DO_Geometry_Tests")
 
-find_package(DO COMPONENTS Core Geometry REQUIRED)
+find_package(DO_Sara COMPONENTS Core Geometry REQUIRED)
 
 do_test(Geometry_BBox
         test_bbox.cpp

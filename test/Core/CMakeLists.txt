@@ -4,7 +4,7 @@ project(DO_Core_tests)
 
 message(STATUS "  - DO_Core_Tests")
 
-find_package(DO COMPONENTS Core REQUIRED)
+find_package(DO_Sara COMPONENTS Core REQUIRED)
 
 set(TestGroupName "Core")
 
@@ -27,7 +27,7 @@ do_test(Core_Pixel_PackedPixel
 do_test(Core_Pixel_ChannelConversion
         test_channel_conversion.cpp
         "${DO_LIBRARIES}" ${TestGroupName})
-        
+
 do_test(Core_Pixel_ColorConversion
         test_color_conversion.cpp
         "${DO_LIBRARIES}" ${TestGroupName})
@@ -59,7 +59,7 @@ do_test(Core_MultiArray
 do_test(Core_Image_Class
         test_image_class.cpp
         "${DO_LIBRARIES}" ${TestGroupName})
-        
+
 do_test(Core_Image_Operations
         test_image_operations.cpp
         "${DO_LIBRARIES}" ${TestGroupName})
@@ -72,8 +72,6 @@ do_test(Core_Tree
         test_tree.cpp
         "${DO_LIBRARIES}" ${TestGroupName})
 
-if (DEFINED ENABLE_CXX11 OR MSVC_VERSION GREATER 1500)
-  do_test(Core_Timer
-          test_timer.cpp
-          "${DO_LIBRARIES}" ${TestGroupName})
-endif ()
+do_test(Core_Timer
+        test_timer.cpp
+        "${DO_LIBRARIES}" ${TestGroupName})

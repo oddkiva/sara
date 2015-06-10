@@ -2,8 +2,8 @@
 include(DOMacros)
 
 
-# Specify DO-CV version.
-include(DO_${DO_PROJECT_NAME}_version)
+# Specify DO-Sara version.
+include(DO_Sara_version)
 
 
 # Debug message.
@@ -11,30 +11,31 @@ do_step_message("FindDO running for project '${PROJECT_NAME}'")
 
 
 # Setup DO++ once for all for every test projects in the 'test' directory.
-if (NOT DO_FOUND)
-  if (DEFINED ENV{DO_DIR} AND EXISTS "$ENV{DO_DIR}/cmake/FindDO.cmake") # Check if DO++ is installed
-    string(REPLACE "\\" "/" DO_DIR "$ENV{DO_DIR}")
-    set(DO_INCLUDE_DIR ${DO_DIR}/include)
-  elseif (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindDO.cmake") # DO++ needs to be built or used from source
+if (NOT DO_Sara_FOUND)
+
+  # Do we build from source?
+  if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindDO_Sara.cmake")
+    # DO++ needs to be built or used from source
     message(STATUS "Building DO++ from source")
     set(DO_DIR ${CMAKE_CURRENT_SOURCE_DIR})
     set(DO_INCLUDE_DIR ${DO_DIR}/src)
-  elseif (DO_DIR AND EXISTS "${DO_DIR}/cmake/FindDO.cmake")
-    set(DO_INCLUDE_DIR ${DO_DIR}/src)
+
+  elseif (UNIX AND EXISTS "/usr/share/DO/Sara/cmake/FindDO_Sara.cmake")
     do_dissect_version()
     do_get_os_info()
+
   else ()
-    message(FATAL_ERROR "DO++ is not found!")
+    message(FATAL_ERROR "DO-Sara is not found!")
   endif ()
-  
+
   # DEBUG
-  do_step_message("Found DO libraries in directory:")
+  do_step_message("Found DO-Sara libraries in directory:")
   message(STATUS "  - DO_DIR = '${DO_DIR}'")
 
   # Set third-party software directories
   set(DO_SOURCE_DIR ${DO_DIR}/src/DO/Sara)
   set(DO_ThirdParty_DIR ${DO_DIR}/third-party)
-  
+
   # List the available component libraries in DO++
   # Foundational libraries
   do_append_components(DO_COMPONENTS Core)
@@ -55,38 +56,38 @@ if (NOT DO_FOUND)
   # Feature matching
   #do_append_components(DO_COMPONENTS Match)
   #do_append_components(DO_COMPONENTS FeatureMatching)
-  
+
   # DEBUG: Print the list of component libraries
   do_step_message("Currently available component libraries:")
   foreach (component ${DO_COMPONENTS})
     message (STATUS "  - ${component}")
   endforeach (component)
-  
+
   # Configure compiler for the specific project.
   include (DOConfigureCompiler)
 
-  # Set DO
-  set(DO_FOUND TRUE)
+  # Set DO_Sara as found.
+  set(DO_Sara_FOUND TRUE)
 
 endif ()
 
 
 # Check that the requested libraries exists when, e.g.:
-# 'find_package(DO COMPONENTS Core Graphics ... REQUIRED)' is called.
-if (DO_FIND_COMPONENTS)
-
+# 'find_package(DO_Sara COMPONENTS Core Graphics ... REQUIRED)' is called.
+if (DO_Sara_FIND_COMPONENTS)
+  message("HELLOOO")
   # Configure compiler for the specific project.
   include (DOConfigureCompiler)
-  
+
   # Verbose comment.
   do_step_message("Requested libraries by project '${PROJECT_NAME}':")
-  foreach (component ${DO_FIND_COMPONENTS})
+  foreach (component ${DO_Sara_FIND_COMPONENTS})
     do_substep_message ("- ${component}")
   endforeach (component)
 
   # Check that all the components exist.
   set(DO_USE_COMPONENTS "")
-  foreach (component ${DO_FIND_COMPONENTS})
+  foreach (component ${DO_Sara_FIND_COMPONENTS})
     list(FIND DO_COMPONENTS ${component} COMPONENT_INDEX)
     if (COMPONENT_INDEX EQUAL -1)
       message (FATAL_ERROR "[DO] ${component} does not exist!")
@@ -111,7 +112,6 @@ if (DO_FIND_COMPONENTS)
       set(DO_LIBRARIES "${DO_LIBRARIES};${DO_${COMPONENT}_LIBRARIES}")
     endif ()
   endforeach ()
-
 endif ()
 
 
