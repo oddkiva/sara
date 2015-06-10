@@ -15,22 +15,19 @@ install(FILES ${DO_DIR}/COPYING.README
               ${DO_DIR}/COPYING.MPL2
               ${DO_DIR}/CPACK_PACKAGING.README
               ${DO_DIR}/CMakeLists.txt
-        DESTINATION .
+        DESTINATION share/DO/Sara
         COMPONENT Sources)
 install(DIRECTORY ${DO_DIR}/cmake
-        DESTINATION .
+        DESTINATION share/DO/Sara
         COMPONENT Sources)
 install(DIRECTORY ${DO_DIR}/src
-        DESTINATION .
+        DESTINATION include
         COMPONENT Sources)
 install(DIRECTORY ${DO_DIR}/third-party
-        DESTINATION .
-        COMPONENT Sources)
-install(DIRECTORY ${DO_DIR}/test
-        DESTINATION .
+        DESTINATION include
         COMPONENT Sources)
 install(FILES ${DO_SOURCE_DIR}/Defines.hpp
-        DESTINATION include/DO
+        DESTINATION include/DO/Sara
         COMPONENT Sources)
 set(CPACK_COMPONENT_Sources_REQUIRED 1)
 
@@ -50,37 +47,29 @@ foreach (component ${DO_COMPONENTS})
 endforeach (component)
 
 
-if (MSVC)
-  if (MSVC9)
-    set(DO_LIB_DIR ${CMAKE_SOURCE_DIR}/packaged-libs/msvc9)
-  endif ()
-  if (MSVC10)
-    set(DO_LIB_DIR ${CMAKE_SOURCE_DIR}/packaged-libs/msvc10)
-  endif ()
-  if (MSVC11)
-    set(DO_LIB_DIR ${CMAKE_SOURCE_DIR}/packaged-libs/msvc11)
-  endif ()
-  install(DIRECTORY ${DO_LIB_DIR}
-          DESTINATION .
-          COMPONENT Libraries)
-endif ()
-
-
 # List all available components for installation.
 set(CPACK_COMPONENTS_ALL Eigen3 Sources Core Graphics Libraries)
 
-set(CPACK_PACKAGE_NAME "DO_Sara")
+
+set(CPACK_PACKAGE_NAME "libdo-sara")
 set(CPACK_PACKAGE_VENDOR "DO-CV")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY
-  "DO-CV - An easy-to-use C++ set of libraries for computer vision")
+    "DO-CV - An easy-to-use C++ set of libraries for computer vision")
 set(CPACK_RESOURCE_FILE_LICENSE "${DO_DIR}/COPYING.README")
 set(CPACK_PACKAGE_CONTACT "David OK")
 
-set(CPACK_PACKAGE_VERSION_MAJOR "${DO_VERSION_MAJOR}")
-set(CPACK_PACKAGE_VERSION_MINOR "${DO_VERSION_MINOR}")
-set(CPACK_PACKAGE_VERSION_PATCH "${DO_VERSION_PATCH}")
-set(CPACK_PACKAGE_VERSION "${DO_VERSION}")
-set(CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_NAME}-${DO_VERSION}")
+set(CPACK_PACKAGE_VERSION_MAJOR ${DO_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${DO_VERSION_MINOR})
+set(CPACK_PACKAGE_VERSION_PATCH ${DO_VERSION_PATCH})
+set(CPACK_PACKAGE_VERSION ${DO_SARA_VERSION})
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "DO/Sara")
+
+
+# Specific variables for Debian packages.
+set(CPACK_DEBIAN_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION})
+#set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+set(CPACK_DEBIAN_PACKAGE_DEPENDS
+    "cmake, libjpeg-dev, libpng-dev, libtiff5-dev, qtbase5-dev")
 
 if (WIN32)
   set(CPACK_GENERATOR NSIS)
