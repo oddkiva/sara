@@ -15,10 +15,12 @@ function (do_substep_message _msg)
   message ("     ${_msg}")
 endfunction (do_substep_message _msg)
 
+
 function (do_list_files _src_files _rel_path _extension)
   file(GLOB _src_files
        RELATIVE ${_rel_path}
        FILES_MATCHING PATTERN ${_extension})
+
   foreach (l ${LIST})
     set(l ${PATH}/l)
     message (l)
@@ -51,6 +53,7 @@ macro (do_dissect_version PROJECT_NAME VERSION)
 endmacro (do_dissect_version)
 
 
+
 # ==============================================================================
 # Useful macros to add a new library with minimized effort.
 #
@@ -70,6 +73,7 @@ macro (do_create_common_variables _library_name)
   endif ()
 endmacro ()
 
+
 macro (do_include_internal_dirs _dep_list)
   foreach (dep ${_dep_list})
     include(${DO_${dep}_USE_FILE})
@@ -77,12 +81,14 @@ macro (do_include_internal_dirs _dep_list)
   endforeach ()
 endmacro ()
 
+
 macro (do_set_internal_dependencies _library_name _dep_list)
   foreach (dep ${_dep_list})
     list(APPEND DO_${_library_name}_LINK_LIBRARIES ${DO_${dep}_LIBRARIES})
   endforeach ()
   message ("Dependencies: ${DO_${_library_name}_LINK_LIBRARIES}")
 endmacro ()
+
 
 macro (do_append_subdir_files _parentdir _child_dir _hdr_list_var _src_list_var)
   get_filename_component(parentdir_name "${_parentdir}" NAME)
@@ -100,6 +106,7 @@ macro (do_append_subdir_files _parentdir _child_dir _hdr_list_var _src_list_var)
 
   message("${hdr_sublist_var} = ${${hdr_sublist_var}}")
 endmacro ()
+
 
 macro(do_glob_directory _curdir)
   message(STATUS "Parsing current source directory = ${_curdir}")
@@ -131,6 +138,7 @@ macro(do_glob_directory _curdir)
   message(STATUS "Source file list:\n ${DO_${curdir_name}_SOURCE_FILES}")
 endmacro()
 
+
 macro (do_append_library _library_name
                          _library_type # shared or static
                          _include_dirs
@@ -150,22 +158,30 @@ macro (do_append_library _library_name
 
   # 4. Create the project:
   if (NOT "${_src_files}" STREQUAL "")
+
     # - Case 1: the project contains 'cpp' source files
     #   Specify the source files.
     add_library(DO_${_library_name} ${library_type} ${_hdr_files} ${_src_files})
-    # Link with external libraries
+
+    # Link with other libraries.
     message(
       STATUS "[DO] Linking project 'DO_${_library_name}' with "
              "'${_lib_dependencies}'"
     )
     target_link_libraries(DO_${_library_name} ${_lib_dependencies})
+
+    # Specify where to install the static library.
+    install(TARGETS DO_${_library_name}
+            LIBRARY DESTINATION lib/DO/Sara
+            ARCHIVE DESTINATION lib/DO/Sara)
+
   else ()
+
     # - Case 2: the project is a header-only library
     #   Specify the source files.
     #add_library(DO_${_library_name} STATIC ${_hdr_files})
     message(STATUS
       "[DO] No linking needed for header-only project 'DO_${_library_name}'")
-    #set_target_properties(DO_${_library_name} PROPERTIES LINKER_LANGUAGE CXX)
     add_custom_target(DO_${_library_name} SOURCES ${_hdr_files})
   endif ()
 
@@ -182,13 +198,15 @@ function (do_set_specific_target_properties _target _additional_compile_flags)
     set(_out_target_name ${_target})
   endif ()
 
-  set_target_properties(${_target} PROPERTIES
-                        VERSION ${DO_VERSION}
-                        SOVERSION ${DO_SOVERSION}
-                        COMPILE_DEFINITIONS ${_additional_compile_flags}
-                        OUTPUT_NAME_DEBUG   ${_out_target_name}-${DO_VERSION}-d
-                        OUTPUT_NAME_RELEASE ${_out_target_name}-${DO_VERSION})
+  set_target_properties(
+    ${_target} PROPERTIES
+    VERSION ${DO_${DO_PROJECT_NAME}_VERSION}
+    SOVERSION ${DO_${DO_PROJECT_NAME}_SOVERSION}
+    COMPILE_DEFINITIONS ${_additional_compile_flags}
+    OUTPUT_NAME ${_out_target_name}-${DO_${DO_PROJECT_NAME}_VERSION}
+    OUTPUT_NAME_DEBUG ${_out_target_name}-${DO_${DO_PROJECT_NAME}_VERSION}-d)
 endfunction (do_set_specific_target_properties)
+
 
 macro (do_generate_library _library_name)
   # Static library
@@ -214,6 +232,7 @@ macro (do_generate_library _library_name)
                                       DO_EXPORTS "DO_${_library_name}")
   endif ()
 endmacro ()
+
 
 
 # ==============================================================================

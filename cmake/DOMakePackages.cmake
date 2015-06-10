@@ -1,6 +1,3 @@
-
-
-
 # NSIS specific options
 
 # Installers for 32- vs. 64-bit CMake:
@@ -30,5 +27,6 @@ set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "
     DeleteRegValue HKCU \\\"Environment\\\" DOPLUSPLUS
     SendMessage \\\${HWND_BROADCAST} \\\${WM_WININICHANGE} 0 \\\"STR:Environment\\\" /TIMEOUT=5000
     ")
+
 # Go !!!
 include(CPack)

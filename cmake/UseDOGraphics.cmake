@@ -11,12 +11,12 @@ macro (do_list_graphics_source_files)
   # API header files
   file(GLOB DO_Graphics_API_HEADER_FILES
        ${DO_Graphics_SOURCE_DIR}/*.hpp)
-  source_group("API Header Files" 
+  source_group("API Header Files"
                FILES ${DO_Graphics_API_HEADER_FILES})
   # API source files
   file(GLOB DO_Graphics_API_SOURCE_FILES
        ${DO_Graphics_SOURCE_DIR}/*.cpp)
-  source_group("API Source Files" 
+  source_group("API Source Files"
                FILES ${DO_Graphics_API_SOURCE_FILES})
   # Derived QObjects header files
   file(GLOB DO_Graphics_DerivedQObjects_HEADER_FILES
@@ -92,13 +92,16 @@ if (DO_USE_FROM_SOURCE)
     # Static library
     add_library(DO_Graphics STATIC
                 ${DO_Graphics_FILES} ${DOGraphics_MOC_SOURCES})
-    #qt5_use_modules(DO_Graphics Widgets OpenGL)
     #target_link_libraries(DO_Graphics ${OPENGL_LIBRARIES})
     target_link_libraries(DO_Graphics
-                          ${Qt5Widgets_LIBRARIES}
-                          ${Qt5OpenGL_LIBRARIES}
+                          Qt5::Widgets
+                          Qt5::OpenGL
                           ${OPENGL_LIBRARIES})
     do_set_specific_target_properties(DO_Graphics DO_STATIC)
+    install(TARGETS DO_Graphics
+            ARCHIVE DESTINATION lib/DO/Sara
+            LIBRARY DESTINATION lib/DO/Sara)
+
     # See DOMacros.cmake for details on do_set_specific_target_properties.
     set_property(TARGET DO_Graphics PROPERTY FOLDER "DO Libraries")
 
@@ -106,11 +109,9 @@ if (DO_USE_FROM_SOURCE)
     if (DO_BUILD_SHARED_LIBS)
       add_library(DO_Graphics_SHARED SHARED
                   ${DO_Graphics_FILES} ${DOGraphics_MOC_SOURCES})
-      #qt5_use_modules(DO_Graphics_SHARED Widgets OpenGL)    
-      #target_link_libraries(DO_Graphics_SHARED ${OPENGL_LIBRARIES})
       target_link_libraries(DO_Graphics_SHARED
-                            ${Qt5Widgets_LIBRARIES}
-                            ${Qt5OpenGL_LIBRARIES}
+                            Qt5::Widgets
+                            Qt5::OpenGL
                             ${OPENGL_LIBRARIES})
       do_set_specific_target_properties(DO_Graphics_SHARED DO_EXPORTS)
       set_property(TARGET DO_Graphics_SHARED PROPERTY FOLDER "DO Libraries")

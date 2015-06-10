@@ -1,13 +1,13 @@
 # Load DO-specific macros
 include(DOMacros)
 
+
 # Specify DO-CV version.
 include(DO_${DO_PROJECT_NAME}_version)
 
 
 # Debug message.
 do_step_message("FindDO running for project '${PROJECT_NAME}'")
-
 
 
 # Setup DO++ once for all for every test projects in the 'test' directory.
