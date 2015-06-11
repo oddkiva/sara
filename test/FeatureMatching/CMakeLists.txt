@@ -10,4 +10,4 @@ find_package(
   FeatureMatching REQUIRED)
 include(${DO_USE_FILE})
 
-do_test(FeatureMatching test.cpp "${DO_LIBRARIES}" "FeatureMatching")
+do_test(FeatureMatching test.cpp "${DO_Sara_LIBRARIES}" "FeatureMatching")

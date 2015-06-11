@@ -8,10 +8,10 @@ find_package(DO_Sara COMPONENTS Graphics Features FeatureDetectors REQUIRED)
 include(${DO_USE_FILE})
 
 set(TEST_GROUP_NAME "FeatureDetectors")
-do_test(FeatureDetectors_LoG test_LoG.cpp "${DO_LIBRARIES}" ${TEST_GROUP_NAME})
-do_test(FeatureDetectors_DoG test_DoG.cpp "${DO_LIBRARIES}" ${TEST_GROUP_NAME})
-do_test(FeatureDetectors_Harris test_Harris.cpp "${DO_LIBRARIES}"
+do_test(FeatureDetectors_LoG test_LoG.cpp "${DO_Sara_LIBRARIES}" ${TEST_GROUP_NAME})
+do_test(FeatureDetectors_DoG test_DoG.cpp "${DO_Sara_LIBRARIES}" ${TEST_GROUP_NAME})
+do_test(FeatureDetectors_Harris test_Harris.cpp "${DO_Sara_LIBRARIES}"
         ${TEST_GROUP_NAME})
-do_test(FeatureDetectors_Hessian test_Hessian.cpp "${DO_LIBRARIES}"
+do_test(FeatureDetectors_Hessian test_Hessian.cpp "${DO_Sara_LIBRARIES}"
         ${TEST_GROUP_NAME})
-#do_unit_test(FeatureDetectors_AffineAdaptation test_AffineAdaptation.cpp "${DO_LIBRARIES}")
+#do_unit_test(FeatureDetectors_AffineAdaptation test_AffineAdaptation.cpp "${DO_Sara_LIBRARIES}")

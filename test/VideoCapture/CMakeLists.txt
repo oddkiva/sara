@@ -19,7 +19,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(SRCS main.cpp videosurface.cpp videowidget.cpp)
 set(HDRS videosurface.hpp videowidget.hpp)
-do_test(VideoCapture "${SRCS};${HDRS}" "${DO_LIBRARIES}" "VideoCapture")
+do_test(VideoCapture "${SRCS};${HDRS}" "${DO_Sara_LIBRARIES}" "VideoCapture")
 qt5_use_modules(DO_VideoCapture_test Widgets Multimedia MultimediaWidgets)
 
 set(CMAKE_AUTOMOC OFF)

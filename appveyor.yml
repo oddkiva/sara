@@ -19,5 +19,5 @@ before_build:
 
 build:
   parallel: true
-  project: build\DO-CV.sln
+  project: build\DO_Sara.sln
   verbosity: minimal

@@ -41,18 +41,18 @@ endif ()
 
 # Add the other necessary third-party libraries.
 include_directories(
-  ${DO_INCLUDE_DIR}
-  ${DO_ThirdParty_DIR}
-  ${DO_ThirdParty_DIR}/eigen
+  ${DO_Sara_INCLUDE_DIR}
+  ${DO_Sara_ThirdParty_DIR}
+  ${DO_Sara_ThirdParty_DIR}/eigen
 )
 
 
 if (DO_USE_FROM_SOURCE)
-  get_property(DO_ImageIO_ADDED GLOBAL PROPERTY _DO_ImageIO_INCLUDED)
-  if (NOT DO_ImageIO_ADDED)
-    do_glob_directory(${DO_SOURCE_DIR}/ImageIO)
+  get_property(DO_Sara_ImageIO_ADDED GLOBAL PROPERTY _DO_Sara_ImageIO_INCLUDED)
+  if (NOT DO_Sara_ImageIO_ADDED)
+    do_glob_directory(${DO_Sara_SOURCE_DIR}/ImageIO)
     do_create_common_variables("ImageIO")
     do_generate_library("ImageIO")
-    target_link_libraries(DO_ImageIO easyexif ${DO_ImageIO_THIRD_PARTY_LIBRARIES})
+    target_link_libraries(DO_Sara_ImageIO easyexif ${DO_ImageIO_THIRD_PARTY_LIBRARIES})
   endif ()
 endif ()

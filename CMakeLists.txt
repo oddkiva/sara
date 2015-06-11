@@ -38,7 +38,7 @@ do_get_os_info()
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # Set installation settings.
-include(DOInstall)
+include(do_installation_settings)
 
 # Build third-party software (google test, FLANN,...)
 add_subdirectory(third-party)
@@ -58,4 +58,4 @@ endif ()
 add_subdirectory(doc)
 
 # Make packages
-include(DOMakePackages)
+include(do_make_packages)

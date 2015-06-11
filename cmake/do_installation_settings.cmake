@@ -8,28 +8,28 @@ if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
   # Eigen 3
   do_message("Installing Eigen")
   install(DIRECTORY ${DO_ThirdParty_DIR}/eigen/Eigen
-    DESTINATION include
-    COMPONENT Eigen3)
+          DESTINATION include
+          COMPONENT Eigen3)
   set(CPACK_COMPONENT_Eigen3_REQUIRED 1)
 
-  # DO-Sara source files
-  install(FILES ${DO_DIR}/COPYING.README
-    ${DO_DIR}/COPYING.MPL2
-    DESTINATION share/DO/Sara
-    COMPONENT Sources)
-  install(DIRECTORY ${DO_DIR}/cmake
-    DESTINATION share/DO/Sara
-    COMPONENT Sources)
-  install(DIRECTORY ${DO_DIR}/src/DO
-    DESTINATION include/
-    COMPONENT Sources)
-  install(FILES ${DO_SOURCE_DIR}/Defines.hpp
-    DESTINATION include/DO/Sara
-    COMPONENT Sources)
+  # DO-${DO_PROJECT_NAME} source files
+  install(FILES ${DO_${DO_PROJECT_NAME}_DIR}/COPYING.README
+                ${DO_${DO_PROJECT_NAME}_DIR}/COPYING.MPL2
+          DESTINATION include/DO/${DO_PROJECT_NAME}
+          COMPONENT Sources)
+  install(DIRECTORY ${DO_${DO_PROJECT_NAME}_DIR}/cmake
+          DESTINATION include/DO/${DO_PROJECT_NAME}
+          COMPONENT Sources)
+  install(DIRECTORY ${DO_${DO_PROJECT_NAME}_DIR}/src/DO
+          DESTINATION include/
+          COMPONENT Sources)
+  install(FILES ${DO_${DO_PROJECT_NAME}_SOURCE_DIR}/Defines.hpp
+          DESTINATION include/DO/${DO_PROJECT_NAME}
+          COMPONENT Sources)
   set(CPACK_COMPONENT_Sources_REQUIRED 1)
 endif ()
 
-# DO-Sara component libraries
+# DO-${DO_PROJECT_NAME} component libraries
 foreach (component ${DO_COMPONENTS})
   do_message("Installing DO.${component}")
   include(${DO_${component}_USE_FILE})
@@ -48,14 +48,14 @@ endif ()
 set(CPACK_PACKAGE_VENDOR "DO-CV")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY
     "DO-CV - An easy-to-use C++ set of libraries for computer vision")
-set(CPACK_RESOURCE_FILE_LICENSE "${DO_DIR}/COPYING.README")
+set(CPACK_RESOURCE_FILE_LICENSE "${DO_${DO_PROJECT_NAME}_DIR}/COPYING.README")
 set(CPACK_PACKAGE_CONTACT "David OK")
 
-set(CPACK_PACKAGE_VERSION_MAJOR ${DO_Sara_VERSION_MAJOR})
-set(CPACK_PACKAGE_VERSION_MINOR ${DO_Sara_VERSION_MINOR})
-set(CPACK_PACKAGE_VERSION_PATCH ${DO_Sara_VERSION_PATCH})
-set(CPACK_PACKAGE_VERSION ${DO_Sara_VERSION})
-set(CPACK_PACKAGE_INSTALL_DIRECTORY "DO/Sara")
+set(CPACK_PACKAGE_VERSION_MAJOR ${DO_${DO_PROJECT_NAME}_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${DO_${DO_PROJECT_NAME}_VERSION_MINOR})
+set(CPACK_PACKAGE_VERSION_PATCH ${DO_${DO_PROJECT_NAME}_VERSION_PATCH})
+set(CPACK_PACKAGE_VERSION ${DO_${DO_PROJECT_NAME}_VERSION})
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "DO/${DO_PROJECT_NAME}")
 
 
 # Specific variables for Debian packages.
