@@ -199,5 +199,4 @@ namespace DO {
 }
 
 
-
 #endif /* DO_CORE_PIXEL_COLOR_CONVERSION_HPP */

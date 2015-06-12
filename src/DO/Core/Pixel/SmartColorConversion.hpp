@@ -12,6 +12,7 @@
 // We will treat the grayscale conversion separately
 namespace DO {
 
+  //! @{
   //! \brief Smart color conversion from a colorspace to another.
   template <typename SrcColSpace, typename DstColSpace>
   inline void smart_convert_color(const Pixel<double, SrcColSpace>& src,
@@ -20,27 +21,70 @@ namespace DO {
     convert_color<double>(src, dst);
   }
 
-  //! \brief Smart color conversion from a colorspace to another.
+  namespace internal {
+    //! @{
+    //! Generic color conversion functor.
+    template <typename SrcColSpace, typename DstColSpace>
+    struct SmartConvertColor;
+
+    //! Generic case.
+    template <typename SrcColSpace, typename DstColSpace>
+    struct SmartConvertColor
+    {
+      template <typename T>
+      static inline void apply(const Pixel<T, SrcColSpace>& src,
+                               Pixel<double, DstColSpace>& dst)
+      {
+        Pixel<double, SrcColSpace> double_src;
+        convert_channel(src, double_src);
+        convert_color(double_src, dst);
+      }
+
+      template <typename T>
+      static inline void apply(const Pixel<double, SrcColSpace>& src,
+                               Pixel<T, DstColSpace>& dst)
+      {
+        Pixel<double, DstColSpace> double_dst;
+        convert_color(src, double_dst);
+        convert_channel(double_dst, dst);
+      }
+    };
+
+    //! Corner case.
+    template <typename ColSpace>
+    struct SmartConvertColor<ColSpace, ColSpace>
+    {
+      template <typename T>
+      static inline void apply(const Pixel<T, ColSpace>& src,
+                               Pixel<double, ColSpace>& dst)
+      {
+        convert_channel(src, dst);
+      }
+
+      template <typename T>
+      static inline void apply(const Pixel<double, ColSpace>& src,
+                               Pixel<T, ColSpace>& dst)
+      {
+        convert_channel(src, dst);
+      }
+    };
+    //! @}
+  }
+
   template <typename SrcT, typename SrcColSpace, typename DstColSpace>
   inline void smart_convert_color(const Pixel<SrcT, SrcColSpace>& src,
                                   Pixel<double, DstColSpace>& dst)
   {
-    Pixel<double, SrcColSpace> double_src;
-    convert_channel(src, double_src);
-    convert_color(double_src, dst);
+    internal::SmartConvertColor<SrcColSpace, DstColSpace>::apply(src, dst);
   }
 
-  //! \brief Smart color conversion from a colorspace to another.
   template <typename DstT, typename SrcColSpace, typename DstColSpace>
   inline void smart_convert_color(const Pixel<double, SrcColSpace>& src,
                                   Pixel<DstT, DstColSpace>& dst)
   {
-    Pixel<double, DstColSpace> double_dst;
-    convert_color(src, double_dst);
-    convert_channel(double_dst, dst);
+    internal::SmartConvertColor<SrcColSpace, DstColSpace>::apply(src, dst);
   }
 
-  //! \brief Smart color conversion from a colorspace to another.
   template <
     typename SrcT, typename DstT, typename SrcColSpace, typename DstColSpace
   >
@@ -53,8 +97,10 @@ namespace DO {
     convert_color(double_src, double_dst);
     convert_channel(double_dst, dst);
   }
+  //! @}
 
 }
+
 
 // Smart color conversion from a colorspace to grayscale regardless of the
 // channel type.
@@ -143,7 +189,6 @@ namespace DO {
 }
 
 
-// Smart color conversion from 'any' grayscale to 'any' grayscale.
 namespace DO {
 
   //! \brief Convert from 'any' grayscale to 'any' grayscale.

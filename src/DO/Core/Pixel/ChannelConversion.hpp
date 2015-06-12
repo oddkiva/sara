@@ -21,7 +21,7 @@
 // Channel conversion from a type to another.
 namespace DO {
 
-  //! \brief Return maximum value for channel of type 'T'.
+  //! \brief Return minimum value for channel of type 'T'.
   template <typename T>
   inline T channel_min_value()
   {
