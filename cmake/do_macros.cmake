@@ -65,12 +65,17 @@ endmacro (do_append_components)
 
 
 macro (do_create_common_variables _library_name)
-  set(DO_${DO_PROJECT_NAME}_${_library_name}_SOURCE_DIR
-      ${DO_${DO_PROJECT_NAME}_SOURCE_DIR}/${_library_name})
+  set(
+    DO_${DO_PROJECT_NAME}_${_library_name}_SOURCE_DIR
+    ${DO_${DO_PROJECT_NAME}_SOURCE_DIR}/${_library_name}
+    CACHE STRING "Source directory")
   if ("${DO_${DO_PROJECT_NAME}_${_library_name}_SOURCE_FILES}" STREQUAL "")
-    set(DO_${DO_PROJECT_NAME}_${_library_name}_LIBRARIES "")
+    set(
+      DO_${DO_PROJECT_NAME}_${_library_name}_LIBRARIES ""
+      CACHE STRING "Library name")
   else ()
-    set(DO_${DO_PROJECT_NAME}_${_library_name}_LIBRARIES DO_${DO_PROJECT_NAME}_${_library_name})
+    set(DO_${DO_PROJECT_NAME}_${_library_name}_LIBRARIES
+      DO_${DO_PROJECT_NAME}_${_library_name} CACHE STRING "Library name")
   endif ()
 endmacro ()
 
@@ -88,7 +93,6 @@ macro (do_set_internal_dependencies _library_name _dep_list)
       APPEND DO_${DO_PROJECT_NAME}_${_library_name}_LINK_LIBRARIES
       ${DO_${DO_PROJECT_NAME}_${dep}_LIBRARIES})
   endforeach ()
-  #message ("Dependencies: ${DO_${DO_PROJECT_NAME}_${_library_name}_LINK_LIBRARIES}")
 endmacro ()
 
 

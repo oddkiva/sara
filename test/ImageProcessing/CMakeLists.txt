@@ -4,8 +4,6 @@ project(DO_ImageProcessing_tests)
 
 message(STATUS "  - DO_ImageProcessing_tests")
 
-message("DO_Sara_ImageProcessing_LIBRARIES = ${DO_Sara_ImageProcessing_LIBRARIES}")
-
 find_package(DO_Sara COMPONENTS Core ImageProcessing REQUIRED)
 
 

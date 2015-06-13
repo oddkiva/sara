@@ -103,6 +103,7 @@ if (DO_Sara_FIND_COMPONENTS)
   set(DO_Sara_LIBRARIES "")
   foreach (COMPONENT ${DO_Sara_USE_COMPONENTS})
     include(UseDOSara${COMPONENT})
+
     if ("${DO_Sara_LIBRARIES}" STREQUAL "" AND
         NOT "${DO_Sara_${COMPONENT}_LIBRARIES}" STREQUAL "")
       set (DO_Sara_LIBRARIES "${DO_Sara_${COMPONENT}_LIBRARIES}")

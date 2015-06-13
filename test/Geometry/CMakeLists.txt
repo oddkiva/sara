@@ -4,8 +4,6 @@ project(DO_Geometry_tests)
 
 message(STATUS "  - DO_Geometry_Tests")
 
-message("DO_Sara_ImageProcessing_LIBRARIES = ${DO_Sara_ImageProcessing_LIBRARIES}")
-
 find_package(DO_Sara COMPONENTS Core Geometry REQUIRED)
 
 do_test(Geometry_BBox
