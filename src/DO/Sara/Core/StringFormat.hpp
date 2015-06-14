@@ -4,8 +4,9 @@
 #include <string>
 
 
-namespace DO {
+namespace DO { namespace Sara {
 
   std::string format(const char *fmt, ...);
 
-}
+} /* namespace Sara */
+} /* namespace DO */

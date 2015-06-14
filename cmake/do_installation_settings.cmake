@@ -7,7 +7,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
   # Eigen 3
   do_message("Installing Eigen")
-  install(DIRECTORY ${DO_ThirdParty_DIR}/eigen/Eigen
+  install(DIRECTORY ${DO_Sara_ThirdParty_DIR}/eigen/Eigen
           DESTINATION include
           COMPONENT Eigen3)
   set(CPACK_COMPONENT_Eigen3_REQUIRED 1)

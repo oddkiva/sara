@@ -10,17 +10,19 @@ if (DEFINED ENV{QTDIR})
     "it to CMAKE_MODULE_PATH")
   list(APPEND CMAKE_PREFIX_PATH $ENV{QTDIR})
 endif ()
+
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5OpenGL REQUIRED)
 find_package(OpenGL REQUIRED)
 
-include_directories(${Qt5Widgets_INCLUDE_DIRS}
-  ${Qt5OpenGL_INCLUDE_DIRS})
-include(${DO_Sara_Core_USE_FILE})
 add_definitions(${Qt5Widgets_DEFINITIONS})
 set(CMAKE_CXX_FLAGS
   "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
 
+include_directories(
+  ${Qt5Widgets_INCLUDE_DIRS}
+  ${Qt5OpenGL_INCLUDE_DIRS}
+  ${DO_Sara_INCLUDE_DIR})
 
 if (DO_USE_FROM_SOURCE)
   get_property(DO_Sara_Graphics_ADDED GLOBAL PROPERTY _DO_Sara_Graphics_INCLUDED)

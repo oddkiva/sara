@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.7)
 
 set(DO_PROJECT_NAME Sara CACHE STRING "DO Project")
-project(DO_${DO_PROJECT_NAME})
+project(DO-${DO_PROJECT_NAME})
 set(DO_${DO_PROJECT_NAME}_VERSION 1.1.0)
 
 if (POLICY CMP0020)
@@ -22,9 +22,8 @@ set(CMAKE_BUILD_TYPE "Release" CACHE STRING
 
 # Set options.
 option(DO_USE_FROM_SOURCE "Use DO-Sara libraries from source" ON)
-option(DO_USE_STATIC_LIBS "Use DO-Sara static libraries" OFF)
-option(DO_BUILD_TESTS "Build unit tests for DO-Sara libraries" OFF)
 option(DO_USE_VLD "Enable Visual Leak Detector for unit tests" OFF)
+option(DO_BUILD_TESTS "Build unit tests for DO-Sara libraries" OFF)
 option(DO_BUILD_SAMPLES "Build sample programs using DO-Sara libraries" OFF)
 option(DO_BUILD_SHARED_LIBS "Build shared libraries for DO-Sara libraries"  OFF)
 

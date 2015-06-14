@@ -13,27 +13,18 @@ do_step_message("FindDO_Sara running for project '${PROJECT_NAME}'")
 # Setup DO++ once for all for every test projects in the 'test' directory.
 if (NOT DO_Sara_FOUND)
 
-  # Do we build from source?
   if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindDO_Sara.cmake")
     message(STATUS "Building DO-Sara from source")
-    set(DO_Sara_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-    set(DO_Sara_INCLUDE_DIR ${DO_Sara_DIR}/src)
 
-  elseif (DO_Sara_DIR)
-    do_dissect_version()
-    do_get_os_info()
+    # Convenience variables used later in 'UseDOSaraXXX.cmake' scripts.
+    set(DO_Sara_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE STRING "")
+    set(DO_Sara_INCLUDE_DIR ${DO_Sara_DIR}/src CACHE STRING "")
+    set(DO_Sara_SOURCE_DIR ${DO_Sara_DIR}/src/DO/Sara)
+    set(DO_Sara_ThirdParty_DIR ${DO_Sara_DIR}/third-party CACHE STRING "")
 
-  else ()
-    message(FATAL_ERROR "DO-Sara is not found!")
+    message("DO_Sara_SOURCE_DIR = ${DO_Sara_SOURCE_DIR}")
+
   endif ()
-
-  # DEBUG
-  do_step_message("Found DO-Sara libraries in directory:")
-  message(STATUS "  - DO_Sara_DIR = '${DO_Sara_DIR}'")
-
-  # Convenience variables used later in 'UseDOSaraXXX.cmake' scripts.
-  set(DO_Sara_SOURCE_DIR ${DO_Sara_DIR}/src/DO/Sara)
-  set(DO_Sara_ThirdParty_DIR ${DO_Sara_DIR}/third-party)
 
   # List the available component libraries in DO++
   # Foundational libraries
@@ -62,21 +53,25 @@ if (NOT DO_Sara_FOUND)
     message (STATUS "  - ${component}")
   endforeach (component)
 
-  # Configure compiler for the specific project.
-  include (do_configure_cxx_compiler)
-
   # Set DO_Sara as found.
   set(DO_Sara_FOUND TRUE)
 
 endif ()
 
 
-# Check that the requested libraries exists when, e.g.:
+# Configure compiler for the specific project.
+include (do_configure_cxx_compiler)
+
+
+# List the compile flags needed by DO-CV.
+set(DO_DEFINITIONS "-DSRCDIR=${CMAKE_CURRENT_SOURCE_DIR}")
+if (DO_USE_FROM_SOURCE)
+  set(DO_DEFINITIONS "${DO_DEFINITIONS} -DDO_STATIC")
+endif ()
+
+
 # 'find_package(DO_Sara COMPONENTS Core Graphics ... REQUIRED)' is called.
 if (DO_Sara_FIND_COMPONENTS)
-  # Configure compiler for the specific project.
-  include (do_configure_cxx_compiler)
-
   # Verbose comment.
   do_step_message("Requested libraries by project '${PROJECT_NAME}':")
   foreach (component ${DO_Sara_FIND_COMPONENTS})
@@ -99,24 +94,45 @@ if (DO_Sara_FIND_COMPONENTS)
     cmake_policy(SET CMP0011 OLD)
   endif (POLICY CMP0011)
 
+
   # Retrieve the set of dependencies when linking projects with DO-CV.
   set(DO_Sara_LIBRARIES "")
-  foreach (COMPONENT ${DO_Sara_USE_COMPONENTS})
-    include(UseDOSara${COMPONENT})
 
-    if ("${DO_Sara_LIBRARIES}" STREQUAL "" AND
-        NOT "${DO_Sara_${COMPONENT}_LIBRARIES}" STREQUAL "")
-      set (DO_Sara_LIBRARIES "${DO_Sara_${COMPONENT}_LIBRARIES}")
-    elseif (NOT "${DO_Sara_${COMPONENT}_LIBRARIES}" STREQUAL "")
-      set(DO_Sara_LIBRARIES "${DO_Sara_LIBRARIES};${DO_Sara_${COMPONENT}_LIBRARIES}")
-    endif ()
-  endforeach ()
-  message("DO_Sara_LIBRARIES = ${DO_Sara_LIBRARIES}")
-endif ()
+  if (DO_USE_FROM_SOURCE)
+    foreach (COMPONENT ${DO_Sara_USE_COMPONENTS})
+      include(UseDOSara${COMPONENT})
 
+      if ("${DO_Sara_LIBRARIES}" STREQUAL "" AND
+          NOT "${DO_Sara_${COMPONENT}_LIBRARIES}" STREQUAL "")
+        set (DO_Sara_LIBRARIES "${DO_Sara_${COMPONENT}_LIBRARIES}")
+      elseif (NOT "${DO_Sara_${COMPONENT}_LIBRARIES}" STREQUAL "")
+        set(DO_Sara_LIBRARIES "${DO_Sara_LIBRARIES};${DO_Sara_${COMPONENT}_LIBRARIES}")
+      endif ()
+    endforeach ()
+  else ()
+    foreach (COMPONENT ${DO_Sara_USE_COMPONENTS})
+      include(UseDOSara${COMPONENT})
 
-# List the compile flags needed by DO-CV.
-set(DO_DEFINITIONS "-DSRCDIR=${CMAKE_CURRENT_SOURCE_DIR}")
-if (DO_USE_FROM_SOURCE)
-  set(DO_DEFINITIONS "${DO_DEFINITIONS} -DDO_STATIC")
+      find_path(DO_Sara_${COMPONENT}_INCLUDE_DIR
+        NAMES ${COMPONENT}.hpp
+        PATHS /usr/include /usr/local/include /opt/local/include
+        PATH_SUFFIXES DO/Sara)
+
+      find_library(DO_Sara_${COMPONENT}_LIBRARIES
+        NAMES DO_Sara_${COMPONENT}-${DO_Sara_VERSION}
+        PATHS /usr/lib /usr/local/lib /opt/local/lib
+        PATH_SUFFIXES DO/Sara)
+
+      if (DO_Sara_${COMPONENT}_LIBRARIES)
+        list(APPEND DO_Sara_LIBRARIES ${DO_Sara_${COMPONENT}_LIBRARIES})
+      endif ()
+
+      if ("${COMPONENT}" STREQUAL "Graphics")
+        list(APPEND DO_Sara_LIBRARIES
+          Qt5::OpenGL Qt5::Widgets ${OPENGL_LIBRARIES})
+      endif ()
+    endforeach()
+    message("DO_Sara_LIBRARIES = ${DO_Sara_LIBRARIES}")
+  endif ()
+
 endif ()
