@@ -1,7 +1,7 @@
-DO-CV: C++ Computer Vision Library
+﻿Sara: C++ Computer Vision Library
 ==================================
 
-DO-CV focuses on:
+Sara focuses on:
 
 1. having an **easy-to-use and simple API**,
 2. having **easy-to-understand and efficient** implementations of computer vision
@@ -13,14 +13,14 @@ Try it and feel free to become involved with the development of the libraries.
 You can rest assured that I dedicate lots of love to maintain DO-CV and make it
 evolve as much as my time and energy allow it.
 
-DO-CV is licensed with the [Mozilla Public License version
+Sara is licensed with the [Mozilla Public License version
 2.0](https://github.com/DO-CV/DO-CV/raw/master/COPYING.MPL2).
 
 **Continuous integration status:**
 
-[![Build
-Status](https://travis-ci.org/DO-CV/DO-CV.svg?branch=develop)](https://travis-ci.org/DO-CV/DO-CV) <a href="https://ci.appveyor.com/project/davidok8/do-cv"><img src="https://ci.appveyor.com/api/projects/status/github/do-cv/do-cv?branch=develop&svg=true" alt="Build Status: Windows" /></a>
-[![Coverage Status](https://coveralls.io/repos/DO-CV/DO-CV/badge.svg?branch=develop)](https://coveralls.io/r/DO-CV/DO-CV?branch=develop)
+[![Build Status](https://travis-ci.org/DO-CV/sara.svg?branch=master)](https://travis-ci.org/DO-CV/sara)
+<a href="https://ci.appveyor.com/project/do-cv/sara"><img src="https://ci.appveyor.com/api/projects/status/github/do-cv/sara?branch=master&svg=true" alt="Build Status: Windows" /></a>
+[![Coverage Status](https://coveralls.io/repos/DO-CV/DO-CV/badge.svg?branch=master)](https://coveralls.io/r/DO-CV/DO-CV?branch=master)
 
 Documentation
 -------------
@@ -55,13 +55,20 @@ Build the libraries
 To build the libraries, run:
 
 ```
+  # Install the following packages.
   sudo apt-get install cmake
   sudo apt-get install -qq qtbase5-dev
 
+  # Build the library dependencies.
   mkdir build
   cd build
   cmake ..
   make  -j N  # N is the number of CPU cores you want to use.
 
+  # Run the tests to make sure everything is alright.
   make test
+
+  # Create the Debian package.
+  make package
+  # Then you can install the Debian package with Ubuntu Software Center.
 ```
