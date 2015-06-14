@@ -1,17 +1,17 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Core.hpp>
-#include <DO/Graphics.hpp>
-#include <DO/ImageProcessing.hpp>
+#include <DO/Sara/Core.hpp>
+#include <DO/Sara/Graphics.hpp>
+#include <DO/Sara/ImageProcessing.hpp>
 
 using namespace std;
 
@@ -31,8 +31,8 @@ void toc(ofstream& file)
 }
 
 template <typename T>
-void viewWithoutConversion(const Image<T>& I, 
-                           const std::string& windowTitle = "DO++")
+void viewWithoutConversion(const Image<T>& I,
+                           const std::string& windowTitle = "DO-CV")
 {
   // Original image.
   Window win = openWindow(I.width(), I.height(), windowTitle);
@@ -50,7 +50,7 @@ void benchmarkLocator(ofstream& file, const Matrix<int,N,1>& imSizes, int iter)
   typedef Matrix<int,N,1> Vector;
   Img image(imSizes);
   toc(file);
-  
+
   // Work variables.
   const Img& src = image;
   Img dst(imSizes);
@@ -166,7 +166,7 @@ void benchmarkLocator_ALL(const string& name, const Matrix<int,N,1>& imSizes,
     return;
 
 //#ifdef WIN32
-//  // Timing check (TODO: put this to DO_Core_test and check HighResTimer).
+//  // Timing check (TODO: put this to DO_SARA_Core_test and check HighResTimer).
 //  file << "// ======================== //" << endl;
 //  file << "Check 1000ms sleep time" << endl;
 //  tic();
@@ -214,7 +214,7 @@ void benchmarkLocator_ALL(const string& name, const Matrix<int,N,1>& imSizes,
   BENCHMARK_LOCATOR(Cmyk32s);
   BENCHMARK_LOCATOR(Cmyk32f);
   BENCHMARK_LOCATOR(Cmyk64f);
-  
+
   BENCHMARK_LOCATOR(Rgba8);
   BENCHMARK_LOCATOR(Rgba16);
   BENCHMARK_LOCATOR(Rgba32);

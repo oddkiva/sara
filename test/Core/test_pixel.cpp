@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
@@ -11,12 +11,12 @@
 
 #include <gtest/gtest.h>
 
-#include <DO/Core/Pixel/ColorSpace.hpp>
-#include <DO/Core/Pixel/Pixel.hpp>
+#include <DO/Sara/Core/Pixel/ColorSpace.hpp>
+#include <DO/Sara/Core/Pixel/Pixel.hpp>
 
 
 using namespace std;
-using namespace DO;
+using namespace DO::Sara;
 
 
 TEST(Test_Pixel, test_rgb_32f)

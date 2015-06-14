@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
@@ -9,13 +9,13 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Features.hpp>
-#include <DO/Graphics.hpp>
-#include <DO/ImageProcessing.hpp>
+#include <DO/Sara/Features.hpp>
+#include <DO/Sara/Graphics.hpp>
+#include <DO/Sara/ImageProcessing.hpp>
 
 
-using namespace DO;
 using namespace std;
+using namespace DO::Sara;
 
 
 const Rgb8& c = Cyan8;
@@ -112,7 +112,7 @@ void read_features(const Image<unsigned char>& image,
   millisleep(1000);
 }
 
-GRAPHICS_MAIN_SIMPLE()
+GRAPHICS_MAIN()
 {
   Image<unsigned char> I;
   load(I, src_path("obama_2.jpg"));

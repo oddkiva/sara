@@ -1,6 +1,6 @@
-#include <DO/FeatureDetectors.hpp>
-#include <DO/FeatureDescriptors.hpp>
-#include <DO/Graphics.hpp>
+#include <DO/Sara/FeatureDetectors.hpp>
+#include <DO/Sara/FeatureDescriptors.hpp>
+#include <DO/Sara/Graphics.hpp>
 
 using namespace DO;
 using namespace std;
@@ -218,7 +218,7 @@ int main()
 
   printStage("Detecting SIFT features");
   Set<OERegion, RealDescriptor> SIFTs = computeSIFT(image.convert<float>());
-  const vector<OERegion>& features = SIFTs.features; 
+  const vector<OERegion>& features = SIFTs.features;
 
   printStage("Removing existing redundancies");
   removeRedundancies(SIFTs);
@@ -233,7 +233,7 @@ int main()
   for (size_t i=0; i != features.size(); ++i)
     features[i].draw(features[i].extremumType() == OERegion::Max ? Red8 : Blue8);
   getKey();
-  
+
 
   return 0;
 }

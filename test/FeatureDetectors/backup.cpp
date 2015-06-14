@@ -8,9 +8,9 @@
     We introduce the notion of 'scale unit', i.e.,
     $1$ scale unit is equivalent $\sigma$ pixels in the image.
   */
-  /* 
-    Let us set some important constants needed for the computation of the 
-    normalized patch computation. 
+  /*
+    Let us set some important constants needed for the computation of the
+    normalized patch computation.
    */
   // Patch "radius"
   const int patchRadius = 20;
@@ -18,7 +18,7 @@
   const int patchSideLength = 2*patchRadius+1;
   // Gaussian smoothing is involved in the computation of gradients orientations
   // to compute dominant orientations and the SIFT descriptor.
-  const float gaussTruncFactor = 3.f; 
+  const float gaussTruncFactor = 3.f;
   // A normalized patch is composed of a grid of NxN square patches, i.e. bins,
   // centered on the feature
   const float binSideLength = 3.f; // side length of a bin in scale unit.

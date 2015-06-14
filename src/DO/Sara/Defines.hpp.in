@@ -1,0 +1,73 @@
+// ========================================================================== //
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// vision.
+//
+// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
+#ifndef DO_DEFINES_HPP
+#define DO_DEFINES_HPP
+
+#define DO_SARA_VERSION "@DO_Sara_VERSION@"
+
+#if defined(_WIN32) || defined(_WIN32_WCE)
+# ifdef DO_EXPORTS
+#   define DO_EXPORT __declspec(dllexport) /* We are building the libraries */
+# elif defined(DO_STATIC)
+#   define DO_EXPORT
+# else
+#   define DO_EXPORT __declspec(dllimport) /* We are using the libraries */
+# endif
+#else
+# define DO_EXPORT
+#endif
+
+#ifdef DO_DEPRECATED
+# undef DO_DEPRECATED
+#endif
+
+#ifdef __GNUC__
+# define DO_DEPRECATED __attribute__ ((deprecated))
+#elif defined(_MSC_VER)
+# define DO_DEPRECATED __declspec(deprecated)
+#else
+# pragma message("WARNING: You need to implement DO_DEPRECATED for this compiler")
+# define DO_DEPRECATED
+#endif
+
+/*!
+  \def srcPath(s)
+  \brief Returns the full path of a file when CMake is used.
+
+  To make the macro work properly, the file must be be put in the source
+  directory file.
+  \param s a C constant string which contains the file name
+  \return full path of the file
+
+  \def stringSrcPath(s)
+  \brief Returns the full path of a file when CMake is used.
+
+  To make the macro work properly, the file must be be put in the source
+  directory file.
+  \param s a C++ string which contains the file name
+  \return full path of the file
+ */
+#ifdef SRCDIR
+# define SP_STRINGIFY(s)  #s
+# define SP_EVAL(s) SP_STRINGIFY(s)
+# define src_path(s) (SP_EVAL(SRCDIR)"/" s)
+# define string_src_path(s) (SP_EVAL(SRCDIR)"/"+s)
+#else
+# define src_path(s) (s)
+# define string_src_path(s) (s)
+#endif
+
+//! @}
+
+
+
+#endif /* DO_DEFINES_HPP */

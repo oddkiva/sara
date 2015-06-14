@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2014 David Ok <david.ok8@gmail.com>
@@ -11,13 +11,13 @@
 
 #include <gtest/gtest.h>
 
-#include <DO/Core/Image/Subimage.hpp>
+#include <DO/Sara/Core/Image/Subimage.hpp>
 
 #include "../AssertHelpers.hpp"
 
 
 using namespace std;
-using namespace DO;
+using namespace DO::Sara;
 
 
 class TestSubimage : public testing::Test

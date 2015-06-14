@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
@@ -11,12 +11,12 @@
 
 #include <gtest/gtest.h>
 
-#include <DO/Geometry/Tools/Polynomial.hpp>
-#include <DO/Geometry/Tools/PolynomialRoots.hpp>
+#include <DO/Sara/Geometry/Tools/Polynomial.hpp>
+#include <DO/Sara/Geometry/Tools/PolynomialRoots.hpp>
 
 
 using namespace std;
-using namespace DO;
+using namespace DO::Sara;
 
 
 TEST(TestPolynomialRoots, test_quadratic_polynomial_roots)

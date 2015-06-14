@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
@@ -15,11 +15,11 @@
 
 #include <gtest/gtest.h>
 
-#include <DO/Core/Pixel/PackedPixel.hpp>
+#include <DO/Sara/Core/Pixel/PackedPixel.hpp>
 
 
 using namespace std;
-using namespace DO;
+using namespace DO::Sara;
 
 
 TEST(Test_PackedPixelBase_3, test_initialization)

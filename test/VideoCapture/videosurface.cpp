@@ -1,7 +1,7 @@
 #include "videosurface.hpp"
 
 #include <QtMultimedia>
-#include <DO/ImageProcessing.hpp>
+#include <DO/Sara/ImageProcessing.hpp>
 #include <queue>
 
 VideoWidgetSurface::
@@ -156,7 +156,7 @@ void VideoWidgetSurface::paint(QPainter *painter)
   inPlaceDeriche(workBuffer, 5.f, 0, 0);
   inPlaceDeriche(workBuffer, 5.f, 0, 1);
   //inPlaceColorRescale(work);
-  
+
   // Copy back to destination
   WorkBuffer::const_iterator const_work_pix = workBuffer.begin();
   Image<Rgb8>::iterator dst_pix = dst.begin();

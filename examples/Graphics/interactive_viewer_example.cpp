@@ -1,9 +1,9 @@
-#include <DO/Graphics.hpp>
+#include <DO/Sara/Graphics.hpp>
 
 using namespace std;
-using namespace DO;
+using namespace DO::Sara;
 
-GRAPHICS_MAIN_SIMPLE()
+GRAPHICS_MAIN()
 {
   Image<Rgb8> I;
   load(I, src_path("../../datasets/ksmall.jpg"));
@@ -16,7 +16,7 @@ GRAPHICS_MAIN_SIMPLE()
     if (!image)
       cerr << "Error image display" << endl;
   }
-  
+
   while (get_key() != KEY_ESCAPE);
   close_window();
 

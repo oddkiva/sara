@@ -1,5 +1,5 @@
-#include <DO/FeatureDetectors.hpp>
-#include <DO/Graphics.hpp>
+#include <DO/Sara/FeatureDetectors.hpp>
+#include <DO/Sara/Graphics.hpp>
 #include <algorithm>
 #include <cmath>
 
@@ -95,7 +95,7 @@ vector<OERegion> computeDoGAffineExtrema(const Image<float>& I,
     toc();
 
   // 3. Rescale the kept features to original image dimensions.
-  size_t num_kept_features = 
+  size_t num_kept_features =
     std::accumulate(keepFeatures.begin(), keepFeatures.end(), 0);
 
   vector<OERegion> keptDoGs;
@@ -109,7 +109,7 @@ vector<OERegion> computeDoGAffineExtrema(const Image<float>& I,
       keptDoGs.back().shapeMat() *= pow(fact,-2);
       keptDoGs.back().coords() *= fact;
 
-    }    
+    }
   }
 
   CHECK(keptDoGs.size());
@@ -122,7 +122,7 @@ void checkKeys(const Image<float>& I, const vector<OERegion>& features)
   display(I);
   setAntialiasing();
   for (size_t i = 0; i != features.size(); ++i)
-    features[i].draw(features[i].extremumType() == OERegion::Max ? 
+    features[i].draw(features[i].extremumType() == OERegion::Max ?
                      Red8 : Blue8);
   getKey();
 }
@@ -137,7 +137,7 @@ int main()
 
   openWindow(I.width(), I.height());
   vector<OERegion> features;
-  
+
   features = computeDoGExtrema(I);
   checkKeys(I, features);
 

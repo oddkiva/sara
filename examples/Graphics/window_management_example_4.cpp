@@ -1,9 +1,9 @@
-#include <DO/Graphics.hpp>
+#include <DO/Sara/Graphics.hpp>
 
 using namespace std;
-using namespace DO;
+using namespace DO::Sara;
 
-GRAPHICS_MAIN_SIMPLE()
+GRAPHICS_MAIN()
 {
   // Open 6 windows aligned in 2x3 grid.
   vector<Window> windows;
@@ -28,7 +28,7 @@ GRAPHICS_MAIN_SIMPLE()
   // Make the last window active.
   set_active_window(windows.back());
   // Click on any windows to continue.
-  any_click(); 
+  any_click();
 
   // Close the 6 windows in LIFO order.
   for (size_t i = 0; i < windows.size(); ++i)

@@ -3,10 +3,10 @@
 
 #include <gtest/gtest.h>
 
-#include <DO/Core/EigenExtension.hpp>
+#include <DO/Sara/Core/EigenExtension.hpp>
 
 
-using namespace DO;
+using namespace DO::Sara;
 
 
 class TestPolygon : public testing::Test
