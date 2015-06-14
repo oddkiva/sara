@@ -4,7 +4,7 @@ project(DO_Graphics_test)
 
 message(STATUS "  - DO_Graphics_Tests")
 
-find_package(DO COMPONENTS Core Graphics REQUIRED)
+find_package(DO_Sara COMPONENTS Core Graphics REQUIRED)
 find_package(Qt5Test REQUIRED)
 
 include_directories(${Qt5Test_INCLUDE_DIRS})
@@ -21,21 +21,21 @@ set(CMAKE_AUTOMOC OFF)
 set(CMAKE_INCLUDE_CURRENT_DIR OFF)
 
 do_test(Graphics_DerivedQObjects_PaintingWindow test_painting_window.cpp
-        "${DO_LIBRARIES};${Qt5Test_LIBRARIES};Graphics_Tests_Common"
+        "${DO_Sara_LIBRARIES};${Qt5Test_LIBRARIES};Graphics_Tests_Common"
         ${TestGroupName})
 do_test(Graphics_DerivedQObjects_OpenGLWindow test_opengl_window.cpp
-        "${DO_LIBRARIES};${Qt5Test_LIBRARIES};Graphics_Tests_Common"
+        "${DO_Sara_LIBRARIES};${Qt5Test_LIBRARIES};Graphics_Tests_Common"
         ${TestGroupName})
 do_test(Graphics_DerivedQObjects_GraphicsView test_graphics_view.cpp
-        "${DO_LIBRARIES};${Qt5Test_LIBRARIES};Graphics_Tests_Common"
+        "${DO_Sara_LIBRARIES};${Qt5Test_LIBRARIES};Graphics_Tests_Common"
         ${TestGroupName})
 
 do_test(Graphics_Window_Management test_window_management.cpp
-        "${DO_LIBRARIES};Graphics_Tests_Common" ${TestGroupName})
+        "${DO_Sara_LIBRARIES};Graphics_Tests_Common" ${TestGroupName})
 do_test(Graphics_Keyboard_Mouse_Input test_keyboard_mouse_input.cpp
-        "${DO_LIBRARIES};Graphics_Tests_Common" ${TestGroupName})
+        "${DO_Sara_LIBRARIES};Graphics_Tests_Common" ${TestGroupName})
 do_test(Graphics_Sleep_Functions test_sleep_functions.cpp
-        "${DO_LIBRARIES};Graphics_Tests_Common" ${TestGroupName})
+        "${DO_Sara_LIBRARIES};Graphics_Tests_Common" ${TestGroupName})
 do_test(Graphics_Painting_Commands test_painting_commands.cpp
-        "${DO_LIBRARIES};${Qt5Test_LIBRARIES};Graphics_Tests_Common"
+        "${DO_Sara_LIBRARIES};${Qt5Test_LIBRARIES};Graphics_Tests_Common"
         ${TestGroupName})

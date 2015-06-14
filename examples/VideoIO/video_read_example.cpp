@@ -1,11 +1,11 @@
-#include <DO/Graphics.hpp>
-#include <DO/VideoIO.hpp>
+#include <DO/Sara/Graphics.hpp>
+#include <DO/Sara/VideoIO.hpp>
 
 
-GRAPHICS_MAIN_SIMPLE()
+GRAPHICS_MAIN()
 {
   using namespace std;
-  using namespace DO;
+  using namespace DO::Sara;
 
   const string video_filepath = src_path("orion_1.mpg");
 

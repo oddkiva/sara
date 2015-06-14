@@ -1,0 +1,11 @@
+do_include_modules("Core;Geometry;Graphics")
+
+if (DO_USE_FROM_SOURCE)
+  get_property(DO_Sara_Features_ADDED GLOBAL PROPERTY _DO_Sara_Features_INCLUDED)
+  if (NOT DO_Sara_Features_ADDED)
+    do_glob_directory(${DO_Sara_SOURCE_DIR}/Features)
+    do_create_common_variables("Features")
+    do_set_internal_dependencies("Features" "Graphics")
+    do_generate_library("Features")
+  endif ()
+endif ()

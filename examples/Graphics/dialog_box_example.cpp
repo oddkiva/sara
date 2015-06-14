@@ -1,9 +1,9 @@
-#include <DO/Graphics.hpp>
+#include <DO/Sara/Graphics.hpp>
 
 using namespace std;
-using namespace DO;
+using namespace DO::Sara;
 
-GRAPHICS_MAIN_SIMPLE()
+GRAPHICS_MAIN()
 {
   Image<Rgb8> image;
   if (!load_from_dialog_box(image))

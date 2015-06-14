@@ -1,11 +1,11 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2014 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
@@ -13,11 +13,11 @@
 
 #include <gtest/gtest.h>
 
-#include <DO/ImageProcessing/GaussianPyramid.hpp>
+#include <DO/Sara/ImageProcessing/GaussianPyramid.hpp>
 
 
-using namespace DO;
 using namespace std;
+using namespace DO::Sara;
 
 
 template <class ChannelType>
@@ -34,18 +34,18 @@ TYPED_TEST_P(TestGaussianPyramid, test_gaussian_pyramid)
   I.matrix().fill(PixelTraits<T>::max());
 
   ImagePyramid<T> G(gaussian_pyramid(I, ImagePyramidParams(-1)));
-  
+
   ImagePyramid<T> D(difference_of_gaussians_pyramid(G));
 
   ImagePyramid<T> L(laplacian_pyramid(G));
 }
 
 REGISTER_TYPED_TEST_CASE_P(TestGaussianPyramid, test_gaussian_pyramid);
-INSTANTIATE_TYPED_TEST_CASE_P(DO_ImageProcessing_Pyramid_Test,
+INSTANTIATE_TYPED_TEST_CASE_P(DO_SARA_ImageProcessing_Pyramid_Test,
                               TestGaussianPyramid, ChannelTypes);
 
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS(); 
+  return RUN_ALL_TESTS();
 }

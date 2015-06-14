@@ -1,27 +1,30 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2014 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-// Google Test.
 #include <gtest/gtest.h>
-// DO-CV.
-#include <DO/Graphics.hpp>
-#include <DO/Graphics/GraphicsUtilities.hpp>
+
+#include <DO/Sara/Graphics.hpp>
+#include <DO/Sara/Graphics/GraphicsUtilities.hpp>
+
 #include "event_scheduler.hpp"
 
-using namespace DO;
+
+using namespace DO::Sara;
+
 
 // N.B.: this is not needed but very **STRANGELY**, if we don't add this,
 // the program seg-faults in Travis CI. We need to sort this out because this
 // issue is completely both unfathomable and ridiculous.
 EventScheduler *global_scheduler;
+
 
 TEST(TestWindow, test_open_and_close_window)
 {
@@ -119,7 +122,7 @@ TEST(TestWindow, test_resize_window)
 
 int worker_thread(int argc, char **argv)
 {
-  testing::InitGoogleTest(&argc, argv); 
+  testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
 
@@ -135,7 +138,7 @@ int main(int argc, char **argv)
   QObject::connect(&get_user_thread(), SIGNAL(sendEvent(QEvent *, int)),
                    global_scheduler, SLOT(schedule_event(QEvent*, int)));
 
-  // Run the worker thread 
+  // Run the worker thread
   gui_app_.register_user_main(worker_thread);
   int return_code = gui_app_.exec();
 

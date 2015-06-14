@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2014 David Ok <david.ok8@gmail.com>
@@ -13,12 +13,12 @@
 
 #include <gtest/gtest.h>
 
-#include <DO/Core/Meta.hpp>
-#include <DO/Core/Pixel/Typedefs.hpp>
+#include <DO/Sara/Core/Meta.hpp>
+#include <DO/Sara/Core/Pixel/Typedefs.hpp>
 
 
 using namespace std;
-using namespace DO;
+using namespace DO::Sara;
 
 
 TEST(TestPixelTypedefs, test_3d_colors_typedefs)

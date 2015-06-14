@@ -1,29 +1,31 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2014 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-// Google Test.
 #include <gtest/gtest.h>
-// Qt libraries.
+
 #include <QtTest>
+
 #include <QtWidgets>
-// DO-CV libraries.
-#include <DO/Graphics/DerivedQObjects/PaintingWindow.hpp>
-// Local libraries.
+
+#include <DO/Sara/Graphics/DerivedQObjects/PaintingWindow.hpp>
+
 #include "event_scheduler.hpp"
 
-Q_DECLARE_METATYPE(DO::Event)
+
+Q_DECLARE_METATYPE(DO::Sara::Event)
 Q_DECLARE_METATYPE(Qt::Key)
 Q_DECLARE_METATYPE(Qt::MouseButtons)
 
-using namespace DO;
+using namespace DO::Sara;
+
 
 TEST(TestPaintingWindowConstructors,
      test_construction_of_PaintingWindow_with_small_size)
@@ -109,7 +111,7 @@ protected: // methods
   }
 
 };
-  
+
 TEST_F(TestPaintingWindowDrawingMethods,
        test_drawPoint_using_integer_coordinates)
 {
@@ -641,7 +643,7 @@ TEST_F(TestPaintingWindowEvents, test_send_event)
   QVariant arg = arguments.at(0);
   arg.convert(event_type_id_);
   Event event(arguments.at(0).value<Event>());
-  EXPECT_EQ(event.type, DO::NO_EVENT);
+  EXPECT_EQ(event.type, DO::Sara::NO_EVENT);
 }
 
 

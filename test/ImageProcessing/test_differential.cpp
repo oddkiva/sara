@@ -1,24 +1,24 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
 
 #include <gtest/gtest.h>
 
-#include <DO/ImageProcessing/Differential.hpp>
+#include <DO/Sara/ImageProcessing/Differential.hpp>
 
 #include "../AssertHelpers.hpp"
 
 
 using namespace std;
-using namespace DO;
+using namespace DO::Sara;
 
 
 class TestDifferential : public testing::Test
@@ -116,8 +116,64 @@ TEST_F(TestDifferential, test_hessian)
   }
 }
 
+TEST_F(TestDifferential, test_laplacian_2)
+{
+  /*
+    We test the following function:
+    f(x,y) = x^2 + y^2
+    So the laplacian is a constant function, i.e.: tr(D^2 f) (x,y) = 4
+    for any (x,y).
+  */
+
+  Image<float> f(4,4);
+  f.matrix() <<
+    0,  1,  4,  9,
+    1,  2,  5, 10,
+    4,  5,  8, 13,
+    9, 10, 13, 18;
+
+  Image<float> laplacian_f;
+  laplacian_f = laplacian(f);
+
+  Matrix2f actual_central_block = laplacian_f.matrix().block<2, 2>(1, 1);
+  Matrix2f expected_central_block = 4 * Matrix2f::Ones();
+  EXPECT_MATRIX_EQ(expected_central_block, actual_central_block);
+}
+
+TEST_F(TestDifferential, test_hessian_2)
+{
+  /*
+    We test the following function:
+    f(x,y) = xy;
+    Thus the Hessian function should be equal to:
+    Hf(x,y) = [0 1
+               1 0]
+    at any point (x,y)
+  */
+
+  Image<float> f(4, 4);
+  f.matrix() <<
+    0, 0, 0, 0,
+    0, 1, 2, 3,
+    0, 2, 4, 6,
+    0, 3, 6, 9;
+
+  //Hessian<float> compute_hessian(f);
+  Image<Matrix2f> Hf = hessian(f);
+
+  Matrix2f expected_hessian;
+  expected_hessian <<
+    0, 1,
+    1, 0;
+  for (int y = 1; y < 3; ++y)
+    for (int x = 1; x < 3; ++x)
+      ASSERT_MATRIX_EQ(expected_hessian, Hf(x, y));
+}
+
+
+
 int main(int argc, char** argv)
 {
-  testing::InitGoogleTest(&argc, argv); 
+  testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

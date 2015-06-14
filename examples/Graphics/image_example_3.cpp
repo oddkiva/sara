@@ -1,10 +1,10 @@
-#include <DO/Core/Timer.hpp>
-#include <DO/Graphics.hpp>
+#include <DO/Sara/Core/Timer.hpp>
+#include <DO/Sara/Graphics.hpp>
 
 using namespace std;
-using namespace DO;
+using namespace DO::Sara;
 
-GRAPHICS_MAIN_SIMPLE()
+GRAPHICS_MAIN()
 {
   Image<Color3ub> I;
   cout << src_path("../../datasets/ksmall.jpg") << endl;

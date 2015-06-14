@@ -1,5 +1,5 @@
-#include <DO/Graphics.hpp>
-#include <DO/ImageProcessing.hpp>
+#include <DO/Sara/Graphics.hpp>
+#include <DO/Sara/ImageProcessing.hpp>
 
 using namespace DO;
 using namespace std;
@@ -39,7 +39,7 @@ int main()
     return -1;
   //I = colorRescale(dericheBlur(I, 50.f));
   openWindow(I.width(), I.height());
-  
+
   Matrix2f finalT;
   finalT.setIdentity();
 
@@ -51,7 +51,7 @@ int main()
     // Check the image.
     display(I);
     getKey();
-    
+
     diff.array() = I.array()-oldI.array();
     diff = colorRescale(diff);
     display(diff);
@@ -63,7 +63,7 @@ int main()
     for (Image<Matrix2f>::iterator M_it = M.begin(); M_it != M.end(); ++M_it)
       Sigma += *M_it;
     Sigma /= Sigma.norm();
-      
+
 
     // Get the SVD decomposition of the second order moment matrix.
     JacobiSVD<Matrix2f> svd(Sigma, ComputeFullU);

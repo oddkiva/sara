@@ -1,6 +1,6 @@
-#include <DO/FeatureDetectors.hpp>
-#include <DO/FeatureDescriptors.hpp>
-#include <DO/Graphics.hpp>
+#include <DO/Sara/FeatureDetectors.hpp>
+#include <DO/Sara/FeatureDescriptors.hpp>
+#include <DO/Sara/Graphics.hpp>
 
 using namespace DO;
 using namespace std;
@@ -114,7 +114,7 @@ int main()
   for (size_t i=0; i != features.size(); ++i)
     features[i].draw(features[i].extremumType() == OERegion::Max ? Red8 : Blue8);
   getKey();
-  
+
 
   return 0;
 }

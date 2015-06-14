@@ -1,9 +1,9 @@
-#include <DO/Graphics.hpp>
+#include <DO/Sara/Graphics.hpp>
 
 using namespace std;
-using namespace DO;
+using namespace DO::Sara;
 
-GRAPHICS_MAIN_SIMPLE()
+GRAPHICS_MAIN()
 {
   // Open a 300x200 window.
   Window W = create_window(300, 200);

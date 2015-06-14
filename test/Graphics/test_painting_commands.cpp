@@ -1,27 +1,31 @@
 // ========================================================================== //
-// This file is part of DO++, a basic set of libraries in C++ for computer 
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2014 David Ok <david.ok8@gmail.com>
 //
-// This Source Code Form is subject to the terms of the Mozilla Public 
-// License v. 2.0. If a copy of the MPL was not distributed with this file, 
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-// STL.
 #include <vector>
-// Google Test.
+
 #include <gtest/gtest.h>
+
 #include <QTest>
-// DO-CV.
-#include <DO/Graphics.hpp>
-#include <DO/Graphics/GraphicsUtilities.hpp>
+
+#include <DO/Sara/Graphics.hpp>
+#include <DO/Sara/Graphics/GraphicsUtilities.hpp>
+
 #include "event_scheduler.cpp"
 
-using namespace DO;
+
+using namespace DO::Sara;
+
 
 EventScheduler *global_scheduler;
+
 
 class TestPaintingCommands: public testing::Test
 {

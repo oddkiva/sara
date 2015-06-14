@@ -1,4 +1,4 @@
-include_directories(${DO_ThirdParty_DIR}/gtest/include)
+include_directories(${DO_Sara_ThirdParty_DIR}/gtest/include)
 
 message(STATUS "")
 do_step_message("Appending test projects:")

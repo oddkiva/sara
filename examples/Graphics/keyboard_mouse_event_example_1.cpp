@@ -1,21 +1,21 @@
-#include <DO/Graphics.hpp>
+#include <DO/Sara/Graphics.hpp>
 
 using namespace std;
-using namespace DO;
+using namespace DO::Sara;
 
-GRAPHICS_MAIN_SIMPLE()
+GRAPHICS_MAIN()
 {
   cout << "Basic mouse functions" << endl;
 
   Window W = create_window(512, 512, "Mouse");
   draw_string(10, 10, "Please click anywhere", Black8);
 
-  click();  
+  click();
 
   draw_string(10, 40, "click again (left=BLUE, middle=RED, right=done)",
              Black8);
 
-  int button;    
+  int button;
   Point2i p;
   while ((button=get_mouse(p)) != MOUSE_RIGHT_BUTTON)
   {

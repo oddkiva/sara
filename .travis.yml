@@ -46,11 +46,15 @@ before_script:
   - sh -e /etc/init.d/xvfb start
 
 script:
+  # Build libraries.
   - mkdir build
   - cd build
   - cmake -DCMAKE_BUILD_TYPE=Debug -DDO_BUILD_TESTS=ON -DDO_BUILD_SAMPLES=ON ..
   - make -j4
+  # Run tests.
   - ctest --output-on-failure
+  # Make package.
+  - make package
 
 after_success:
   - cd ..

@@ -1,10 +1,10 @@
-#include <DO/Geometry/Objects/Cone.hpp>
+#include <DO/Sara/Geometry/Objects/Cone.hpp>
 
 #include "TestPolygon.hpp"
 
 
-using namespace DO;
 using namespace std;
+using namespace DO::Sara;
 
 
 class TestAffineCone : public TestPolygon

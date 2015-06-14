@@ -1,9 +1,9 @@
-#include <DO/Graphics.hpp>
+#include <DO/Sara/Graphics.hpp>
 
 using namespace std;
-using namespace DO;
+using namespace DO::Sara;
 
-GRAPHICS_MAIN_SIMPLE()
+GRAPHICS_MAIN()
 {
   Window W = create_window(512, 512, "2D basics");
 
@@ -18,7 +18,7 @@ GRAPHICS_MAIN_SIMPLE()
   // size (100, 50).
   fill_rect(Point2i(400, 400), 100, 50, Green8);
 
-  // Draw an axis-aligned ellipse bounded by a rectangle whose top-left 
+  // Draw an axis-aligned ellipse bounded by a rectangle whose top-left
   // corner is (50,350) and size is (50, 90) using a cyan Pen with a 2-pixel
   // thickness.
   draw_ellipse(50, 350, 50, 90, Cyan8, 2);
@@ -44,7 +44,7 @@ GRAPHICS_MAIN_SIMPLE()
   // Draw a string.
   draw_string(50, 250, "a string", Red8);
   // Draw another string but with font size=18 and in italic.
-  draw_string(40, 270, "another string", Magenta8, 18, 0, true);   
+  draw_string(40, 270, "another string", Magenta8, 18, 0, true);
   // ... font size=24, rotation angle=-10, bold
   draw_string(30,300,"yet another string",Black8,24,-10,
              false,true);
@@ -68,7 +68,7 @@ GRAPHICS_MAIN_SIMPLE()
   draw_arrow(200, 450, 250, 400, Black8, 20, 20, 2);
   // Draw another arrow with tip: (angle,length)=(35,8) , style=0, width=2.
   // TODO: improve this **horrible** legacy API.
-  draw_arrow(200, 450, 150, 400, Green8, 35., 8., 0, 2); 
+  draw_arrow(200, 450, 150, 400, Green8, 35., 8., 0, 2);
 
   click();
   close_window(W);

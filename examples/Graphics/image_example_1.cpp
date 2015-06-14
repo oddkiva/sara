@@ -1,9 +1,9 @@
-#include <DO/Graphics.hpp>
+#include <DO/Sara/Graphics.hpp>
 
 using namespace std;
-using namespace DO;
+using namespace DO::Sara;
 
-GRAPHICS_MAIN_SIMPLE()
+GRAPHICS_MAIN()
 {
   Window W = create_window(512, 512, "Bitmaps");
   // Array of bytes
@@ -18,8 +18,8 @@ GRAPHICS_MAIN_SIMPLE()
   // An array of colors.
   // Color3ub = 3D color vector where each channel has a value in [0,255].
   Color3ub cols2[256*256];
-  for (int j = 0; j < 256; j++) 
-    for (int i = 0; i < 256; i++) 
+  for (int j = 0; j < 256; j++)
+    for (int i = 0; i < 256; i++)
       cols2[i+256*j]=Color3ub(i, (2*j)%256, (i+j)%256);  // RGB colors.
   // Display the bitmap from the following top-left corner (0,256)
   // TODO: rename this function.
@@ -27,8 +27,8 @@ GRAPHICS_MAIN_SIMPLE()
 
   // A grayscale image.
   unsigned char grey[256*256];
-  for (int j = 0; j < 256; ++j) 
-    for (int i = 0; i < 256; ++i) 
+  for (int j = 0; j < 256; ++j)
+    for (int i = 0; i < 256; ++i)
       grey[i+256*j] = static_cast<unsigned char>(128+127*sin((i+j)/10.));
   // Display the bitmap from the following top-left corner (0,256)
   // TODO: rename this function.
@@ -36,6 +36,6 @@ GRAPHICS_MAIN_SIMPLE()
 
   click();
   close_window(W);
-  
+
   return 0;
 }
