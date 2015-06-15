@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.7)
 
 set(DO_PROJECT_NAME Sara CACHE STRING "DO Project")
-project(DO-${DO_PROJECT_NAME})
+project(${DO_PROJECT_NAME})
 set(DO_${DO_PROJECT_NAME}_VERSION 1.1.0)
 
 if (POLICY CMP0020)
