@@ -1,4 +1,4 @@
-﻿Sara: C++ Computer Vision Library
+Sara: C++ Computer Vision Library
 ==================================
 
 Sara focuses on:
@@ -20,7 +20,7 @@ Sara is licensed with the [Mozilla Public License version
 
 [![Build Status](https://travis-ci.org/DO-CV/sara.svg?branch=master)](https://travis-ci.org/DO-CV/sara)
 <a href="https://ci.appveyor.com/project/do-cv/sara"><img src="https://ci.appveyor.com/api/projects/status/github/do-cv/sara?branch=master&svg=true" alt="Build Status: Windows" /></a>
-[![Coverage Status](https://coveralls.io/repos/DO-CV/DO-CV/badge.svg?branch=master)](https://coveralls.io/r/DO-CV/DO-CV?branch=master)
+[![Coverage Status](https://coveralls.io/repos/DO-CV/sara/badge.svg?branch=master)](https://coveralls.io/r/DO-CV/sara?branch=master)
 
 Documentation
 -------------
