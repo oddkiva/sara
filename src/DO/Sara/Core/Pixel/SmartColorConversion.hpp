@@ -12,16 +12,7 @@
 // We will treat the grayscale conversion separately
 namespace DO { namespace Sara {
 
-  //! @{
-  //! \brief Smart color conversion from a colorspace to another.
-  template <typename SrcColSpace, typename DstColSpace>
-  inline void smart_convert_color(const Pixel<double, SrcColSpace>& src,
-                                  Pixel<double, DstColSpace>& dst)
-  {
-    convert_color<double>(src, dst);
-  }
-
-  namespace internal {
+  namespace Detail {
     //! @{
     //! Generic color conversion functor.
     template <typename SrcColSpace, typename DstColSpace>
@@ -71,18 +62,27 @@ namespace DO { namespace Sara {
     //! @}
   }
 
+  //! @{
+  //! \brief Smart color conversion from a colorspace to another.
+  template <typename SrcColSpace, typename DstColSpace>
+  inline void smart_convert_color(const Pixel<double, SrcColSpace>& src,
+                                  Pixel<double, DstColSpace>& dst)
+  {
+    convert_color<double>(src, dst);
+  }
+
   template <typename SrcT, typename SrcColSpace, typename DstColSpace>
   inline void smart_convert_color(const Pixel<SrcT, SrcColSpace>& src,
                                   Pixel<double, DstColSpace>& dst)
   {
-    internal::SmartConvertColor<SrcColSpace, DstColSpace>::apply(src, dst);
+    Detail::SmartConvertColor<SrcColSpace, DstColSpace>::apply(src, dst);
   }
 
   template <typename DstT, typename SrcColSpace, typename DstColSpace>
   inline void smart_convert_color(const Pixel<double, SrcColSpace>& src,
                                   Pixel<DstT, DstColSpace>& dst)
   {
-    internal::SmartConvertColor<SrcColSpace, DstColSpace>::apply(src, dst);
+    Detail::SmartConvertColor<SrcColSpace, DstColSpace>::apply(src, dst);
   }
 
   template <
