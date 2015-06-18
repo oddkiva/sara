@@ -39,12 +39,12 @@ namespace DO { namespace Sara {
     if (qimage.format() != QImage::Format_RGB32)
       throw std::runtime_error("Failed to convert image to format RGB32");
     image.resize(qimage.width(), qimage.height());
-    const unsigned char *src = qimage.constBits();
-    for (Rgb8 *dst = image.data(); dst != image.end(); ++dst, src += 4)
+    const int *src = reinterpret_cast<const int *>(qimage.constBits());
+    for (Rgb8 *dst = image.data(); dst != image.end(); ++dst, ++src)
     {
-      (*dst)[0] = src[1];
-      (*dst)[1] = src[2];
-      (*dst)[2] = src[3];
+      (*dst)[0] = *src;
+      (*dst)[1] = *src >> 8;
+      (*dst)[2] = *src >> 16;
     }
     return true;
   }
