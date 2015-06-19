@@ -11,9 +11,13 @@
 
 #pragma once
 
+#include <DO/Sara/Defines.hpp>
+
 #include <DO/Sara/Core/EigenExtension.hpp>
+
 #include <DO/Sara/Geometry/Tools/Utilities.hpp>
 #include <DO/Sara/Geometry/Objects/Polygon.hpp>
+
 
 namespace DO { namespace Sara {
 
@@ -29,6 +33,7 @@ namespace DO { namespace Sara {
    - Polygon 'subject' must be a simple polygon, i.e., without holes.
    - Polygon 'clip' must be a convex polygon.
    */
+  DO_EXPORT
   std::vector<Point2d> sutherland_hodgman(const std::vector<Point2d>& subject,
                                          const std::vector<Point2d>& clip);
 

@@ -15,6 +15,7 @@
 #define DO_SARA_DEBUG_UTILITIES_HPP
 
 #include <iostream>
+#include <string>
 
 #define CHECK(x) std::cout << #x << " = " << x << std::endl
 

@@ -18,8 +18,9 @@
 #include <stdexcept>
 
 #include <DO/Sara/Defines.hpp>
-#include <DO/Sara/Core/Pixel.hpp>
+
 #include <DO/Sara/Core/EigenExtension.hpp>
+#include <DO/Sara/Core/Pixel.hpp>
 
 
 namespace DO { namespace Sara {
@@ -30,32 +31,41 @@ namespace DO { namespace Sara {
   */
 
   //! Abstract 'VisualFeature' class.
-  class VisualFeature
+  class DO_EXPORT VisualFeature
 {
   public:
     VisualFeature() {}
+
     virtual ~VisualFeature() {}
+
     virtual std::ostream& print(std::ostream& os) const = 0;
+
     virtual std::istream& read(std::istream& in) = 0;
+
     friend std::ostream& operator<<(std::ostream& out, const VisualFeature& f)
     { return f.print(out); }
+
     friend std::istream& operator>>(std::istream& in, VisualFeature& f)
     { return f.read(in); }
   };
 
+
   //! PointFeature for interest points
-  class InterestPoint : public VisualFeature
+  class DO_EXPORT InterestPoint : public VisualFeature
   {
   public:
     //! ID for each point feature type.
     enum Type { Harris, HarAff, HarLap, FAST, SUSAN,
                 DoG, LoG, DoH, MSER, HesAff, HesLap };
     enum ExtremumType { Min = -1, Saddle = 0,  Max = 1 };
+
     //! Constructors.
     InterestPoint() : VisualFeature() {}
     InterestPoint(const Point2f& coords) : _coords(coords) {}
+
     //! Destructor.
     virtual ~InterestPoint() {}
+
     //! Constant getters.
     float x() const { return _coords(0); }
     float y() const { return _coords(1); }
@@ -64,6 +74,7 @@ namespace DO { namespace Sara {
     Type type() const { return _type; }
     ExtremumType extremum_type() const { return _extremum_type; }
     float extremum_value() const { return _extremum_value; }
+
     //! Mutable getters.
     float& x() { return _coords(0); }
     float& y() { return _coords(1); }
@@ -72,21 +83,26 @@ namespace DO { namespace Sara {
     Type& type() { return _type; }
     ExtremumType& extremum_type() { return _extremum_type; }
     float& extremum_value() { return _extremum_value; }
+
     //! Equality operator.
     bool operator==(const InterestPoint& f) const
     { return coords() == f.coords(); }
+
     //! Drawing.
     void draw(const Color3ub& c, float scale = 1.f,
               const Point2f& offset = Point2f::Zero()) const;
+
     //! I/O.
     std::ostream& print(std::ostream& os) const;
     std::istream& read(std::istream& in);
+
   private:
     Point2f _coords;
     Type _type;
     ExtremumType _extremum_type;
     float _extremum_value;
   };
+
 
   /*!
     The 'OERegion' class stands for 'Oriented Elliptic Region' and is

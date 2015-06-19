@@ -14,8 +14,8 @@
 
 #include <algorithm>
 
+#include <DO/Sara/Defines.hpp>
 #include <DO/Sara/Core/EigenExtension.hpp>
-#include <DO/Sara/Core/DebugUtilities.hpp>
 
 
 namespace DO { namespace Sara {
@@ -121,6 +121,7 @@ namespace DO { namespace Sara {
   typedef AffineCone<2> AffineCone2;
   typedef AffineCone<3> AffineCone3;
 
+  DO_EXPORT
   AffineCone2 affine_cone2(double theta0, double theta1, const Point2d& vertex);
 
 
