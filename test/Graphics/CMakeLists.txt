@@ -16,7 +16,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 add_library(Graphics_Tests_Common
             event_scheduler.hpp event_scheduler.cpp)
 set_property(TARGET Graphics_Tests_Common
-             PROPERTY FOLDER "DO Tests/${TestGroupName}")
+             PROPERTY FOLDER "DO Sara Tests/${TestGroupName}")
 set(CMAKE_AUTOMOC OFF)
 set(CMAKE_INCLUDE_CURRENT_DIR OFF)
 

@@ -19,6 +19,8 @@
 #include <QPainter>
 #include <QTimer>
 
+#include <DO/Sara/Defines.hpp>
+
 #include "../Events.hpp"
 
 
@@ -49,7 +51,7 @@ namespace DO { namespace Sara {
   //! \brief QWidget-derived class on which we draw things.
   //! I choose not to use QGLWidget because of some weird viewing artifacts...
   //! Maybe later...
-  class PaintingWindow : public QWidget
+  class DO_EXPORT PaintingWindow : public QWidget
   {
     Q_OBJECT
 

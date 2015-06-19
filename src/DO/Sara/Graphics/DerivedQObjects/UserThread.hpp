@@ -18,6 +18,8 @@
 #include <QMutex>
 #include <QWaitCondition>
 
+#include <DO/Sara/Defines.hpp>
+
 #include "../Events.hpp"
 
 
@@ -30,7 +32,7 @@ namespace DO { namespace Sara {
    */
 
   //! \brief This is actually where we actually call the drawing commands.
-  class UserThread : public QThread
+  class DO_EXPORT UserThread : public QThread
   {
     Q_OBJECT
 

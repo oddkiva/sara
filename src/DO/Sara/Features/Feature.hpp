@@ -17,6 +17,7 @@
 
 #include <stdexcept>
 
+#include <DO/Sara/Defines.hpp>
 #include <DO/Sara/Core/Pixel.hpp>
 #include <DO/Sara/Core/EigenExtension.hpp>
 
@@ -29,7 +30,8 @@ namespace DO { namespace Sara {
   */
 
   //! Abstract 'VisualFeature' class.
-  class VisualFeature {
+  class VisualFeature
+{
   public:
     VisualFeature() {}
     virtual ~VisualFeature() {}
@@ -93,17 +95,20 @@ namespace DO { namespace Sara {
     - Harris-Affine
     - Hessian-Affine features and so on...
    */
-  class OERegion : public InterestPoint
+  class DO_EXPORT OERegion : public InterestPoint
   {
   public:
     //! Default constructor
     OERegion() : InterestPoint() {}
+
     //! Constructor for circular region.
     OERegion(const Point2f& coords, float scale)
       : InterestPoint(coords)
       , _shape_matrix(Matrix2f::Identity()*(pow(scale,-2))) {}
+
     //! Destructor.
     virtual ~OERegion() {}
+
     //! Constant/mutable shape matrix getters.
     //! The shape matrix is the matrix $M$ that describes the ellipse
     //! $\varepsilon$, i.e.:
@@ -111,20 +116,25 @@ namespace DO { namespace Sara {
     //! where $c$ is the center of the region.
     const Matrix2f& shape_matrix() const { return _shape_matrix; }
     Matrix2f& shape_matrix() { return _shape_matrix; }
+
     //! Constant/mutable orientation (in radian) getters.
     //! This completely determines the affine transformation that transforms the
     //! unit circle to the elliptic shape of the region.
     float orientation() const { return _orientation; }
     float& orientation() { return _orientation; }
+
     //! Returns the anisotropic radius at a given angle in radians.
     float radius(float radian = 0.f) const;
+
     //! Returns the anisotropic scale at a given angle in radians.
     float scale(float radian = 0.f) const { return radius(radian); }
+
     //! Get the affine transform $A$ that transforms the unit circle to that
     //! oriented ellipse of the region.
     //! We compute $A$ from a QR decomposition and by observing
     //! $M = (A^{-1})^T A^{-1}$ where $M$ is the shape matrix.
     Matrix3f affinity() const;
+
     //! Equality operator.
     bool operator==(const OERegion& other) const
     {
@@ -133,6 +143,7 @@ namespace DO { namespace Sara {
               orientation() == other.orientation() &&
               type() == other.type());
     };
+
     //! Drawing.
     void draw(const Color3ub& c, float scale = 1.f,
               const Point2f& offset = Point2f::Zero()) const;
