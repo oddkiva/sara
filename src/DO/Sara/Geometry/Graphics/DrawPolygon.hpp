@@ -14,7 +14,10 @@
 #include <string>
 #include <vector>
 
+#include <DO/Sara/Defines.hpp>
+
 #include <DO/Sara/Graphics.hpp>
+
 #include <DO/Sara/Geometry/Objects.hpp>
 
 
@@ -22,13 +25,18 @@ namespace DO { namespace Sara {
 
   //! @{
   //! Drawing functions
+  DO_EXPORT
   void draw_line_segment(const LineSegment& s, const Color3ub& c = Black8,
                          int penWidth = 1);
 
+  DO_EXPORT
   void draw_bbox(const BBox& bbox, const Color3ub& c, int penWidth = 1);
 
+  DO_EXPORT
   void draw_poly(const std::vector<Point2d>& p, const Color3ub& color,
                  int penWidth = 1);
+
+  DO_EXPORT
   void draw_ellipse(const Ellipse& e, const Color3ub col, int penWidth = 1);
 
   template <int N>
@@ -51,6 +59,7 @@ namespace DO { namespace Sara {
     draw_poly(q, col, penWidth);
   }
 
+  DO_EXPORT
   void draw_affine_cone(const AffineCone2& K, double arrowLength = 50.,
                         const Color3ub& color = Black8);
   //! @}

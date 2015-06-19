@@ -12,6 +12,8 @@
 #ifndef DO_SARA_GEOMETRY_GRAPHICS_HPP
 #define DO_SARA_GEOMETRY_GRAPHICS_HPP
 
+
 #include <DO/Sara/Geometry/Graphics/DrawPolygon.hpp>
+
 
 #endif /* DO_SARA_GEOMETRY_GRAPHICS_HPP */
