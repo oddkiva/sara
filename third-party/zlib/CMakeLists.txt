@@ -62,7 +62,7 @@ endif()
 
 set(ZLIB_PC ${CMAKE_CURRENT_BINARY_DIR}/zlib.pc)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/zlib.pc.cmakein
-		           ${ZLIB_PC} @ONLY)
+               ${ZLIB_PC} @ONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/zconf.h.cmakein
                ${CMAKE_CURRENT_SOURCE_DIR}/zconf.h @ONLY)
 include_directories(${CMAKE_SOURCE_DIR})
@@ -143,7 +143,7 @@ string(REGEX REPLACE ".*#define[ \t]+ZLIB_VERSION[ \t]+\"([-0-9A-Za-z.]+)\".*"
        "\\1" ZLIB_FULL_VERSION ${_zlib_h_contents})
 
 
-add_library(zlib STATIC ${ZLIB_SRCS} ${ZLIB_ASMS} ${ZLIB_PUBLIC_HDRS} 
+add_library(zlib STATIC ${ZLIB_SRCS} ${ZLIB_ASMS} ${ZLIB_PUBLIC_HDRS}
             ${ZLIB_PRIVATE_HDRS})
 set_target_properties(zlib PROPERTIES SOVERSION 1)
 
@@ -151,3 +151,10 @@ if(UNIX)
   # On unix-like platforms the library is almost always called libz
   set_target_properties(zlib PROPERTIES OUTPUT_NAME z)
 endif()
+
+if (WIN32)
+  install(TARGETS zlib
+          LIBRARY DESTINATION lib
+          ARCHIVE DESTINATION lib
+          COMPONENT ThirdParty)
+endif ()

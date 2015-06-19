@@ -21,6 +21,10 @@ if(CMAKE_COMPILER_IS_GNUCC)
     set_target_properties(flann_cpp_s PROPERTIES COMPILE_FLAGS -fPIC)
 endif()
 set_property(TARGET flann_cpp_s PROPERTY COMPILE_DEFINITIONS FLANN_STATIC)
+install(TARGETS flann_cpp_s
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        COMPONENT ThirdParty)
 
 
 ################################################################################
