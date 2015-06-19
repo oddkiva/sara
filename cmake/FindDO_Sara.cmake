@@ -65,9 +65,12 @@ include (do_configure_cxx_compiler)
 
 # List the compile flags needed by DO-CV.
 set(DO_DEFINITIONS "-DSRCDIR=${CMAKE_CURRENT_SOURCE_DIR}")
-if (DO_USE_FROM_SOURCE)
-  set(DO_DEFINITIONS "${DO_DEFINITIONS} -DDO_STATIC")
+if (DO_BUILD_SHARED_LIBS)
+  set(DO_COMPILE_FLAGS "-DDO_EXPORTS")
+elseif (DO_USE_FROM_SOURCE)
+  set(DO_COMPILE_FLAGS "-DDO_STATIC")
 endif ()
+
 
 
 # 'find_package(DO_Sara COMPONENTS Core Graphics ... REQUIRED)' is called.
