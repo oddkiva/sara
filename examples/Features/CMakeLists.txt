@@ -15,7 +15,7 @@ macro (do_add_example example)
   set_target_properties(${example} PROPERTIES
                         COMPILE_FLAGS ${DO_DEFINITIONS})
   target_link_libraries(${example} ${DO_Sara_LIBRARIES})
-  set_property(TARGET ${example} PROPERTY FOLDER "DO Examples/Features")
+  set_property(TARGET ${example} PROPERTY FOLDER "DO Sara Examples/Features")
 endmacro ()
 
 do_add_example(features_read_write_example)
