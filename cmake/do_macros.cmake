@@ -207,10 +207,12 @@ function (do_set_specific_target_properties _target _additional_compile_flags)
     ${_target} PROPERTIES
     VERSION ${DO_${DO_PROJECT_NAME}_VERSION}
     SOVERSION ${DO_${DO_PROJECT_NAME}_SOVERSION}
-    COMPILE_DEFINITIONS ${_additional_compile_flags}
     COMPILE_FLAGS ${DO_COMPILE_FLAGS}
     OUTPUT_NAME ${_out_target_name}-${DO_${DO_PROJECT_NAME}_VERSION}
     OUTPUT_NAME_DEBUG ${_out_target_name}-${DO_${DO_PROJECT_NAME}_VERSION}-d)
+  set_target_properties(
+    ${_target} PROPERTIES
+    COMPILE_FLAGS ${_additional_compile_flags})
 endfunction (do_set_specific_target_properties)
 
 
