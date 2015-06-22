@@ -42,9 +42,9 @@ namespace DO { namespace Sara {
     const int *src = reinterpret_cast<const int *>(qimage.constBits());
     for (Rgb8 *dst = image.data(); dst != image.end(); ++dst, ++src)
     {
-      (*dst)[0] = *src;
+      (*dst)[0] = *src >> 16;
       (*dst)[1] = *src >> 8;
-      (*dst)[2] = *src >> 16;
+      (*dst)[2] = *src;
     }
     return true;
   }
