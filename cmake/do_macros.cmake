@@ -169,8 +169,15 @@ macro (do_append_library _library_name
       "[DO] Linking project 'DO_${DO_PROJECT_NAME}_${_library_name}' with "
       "'${_lib_dependencies}'"
     )
-    target_link_libraries(DO_${DO_PROJECT_NAME}_${_library_name}
-                          ${_lib_dependencies})
+    target_link_libraries(
+      DO_${DO_PROJECT_NAME}_${_library_name} ${_lib_dependencies})
+    set_target_properties(
+      DO_${DO_PROJECT_NAME}_${_library_name}
+      PROPERTIES
+      VERSION ${DO_${DO_PROJECT_NAME}_VERSION}
+      SOVERSION ${DO_${DO_PROJECT_NAME}_SOVERSION}
+      OUTPUT_NAME DO_${DO_PROJECT_NAME}_${_library_name}-${DO_${DO_PROJECT_NAME}_VERSION}
+      OUTPUT_NAME_DEBUG DO_${DO_PROJECT_NAME}_${_library_name}-${DO_${DO_PROJECT_NAME}_VERSION}-d)
 
     # Specify where to install the static library.
     install(TARGETS DO_${DO_PROJECT_NAME}_${_library_name}
@@ -194,30 +201,7 @@ macro (do_append_library _library_name
 endmacro (do_append_library)
 
 
-function (do_set_specific_target_properties _target _additional_compile_flags)
-  set(extra_macro_args ${ARGN})
-  list(LENGTH extra_macro_args num_extra_args)
-  if (${num_extra_args} GREATER 0)
-    list(GET extra_macro_args 0 _out_target_name)
-  else ()
-    set(_out_target_name ${_target})
-  endif ()
-
-  set_target_properties(
-    ${_target} PROPERTIES
-    VERSION ${DO_${DO_PROJECT_NAME}_VERSION}
-    SOVERSION ${DO_${DO_PROJECT_NAME}_SOVERSION}
-    COMPILE_FLAGS ${DO_COMPILE_FLAGS}
-    OUTPUT_NAME ${_out_target_name}-${DO_${DO_PROJECT_NAME}_VERSION}
-    OUTPUT_NAME_DEBUG ${_out_target_name}-${DO_${DO_PROJECT_NAME}_VERSION}-d)
-  set_target_properties(
-    ${_target} PROPERTIES
-    COMPILE_FLAGS ${_additional_compile_flags})
-endfunction (do_set_specific_target_properties)
-
-
 macro (do_generate_library _library_name)
-  # Static library
   do_append_library(
     ${_library_name}
     "${DO_${DO_PROJECT_NAME}_SOURCE_DIR}"
@@ -225,8 +209,6 @@ macro (do_generate_library _library_name)
     "${DO_${DO_PROJECT_NAME}_${_library_name}_SOURCE_FILES}"
     "${DO_${DO_PROJECT_NAME}_${_library_name}_LINK_LIBRARIES}"
   )
-  do_set_specific_target_properties(
-    DO_${DO_PROJECT_NAME}_${_library_name} ${DO_DEFINITIONS})
 endmacro ()
 
 
