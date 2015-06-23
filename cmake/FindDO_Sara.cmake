@@ -115,12 +115,16 @@ if (DO_Sara_FIND_COMPONENTS)
 
       find_path(DO_Sara_${COMPONENT}_INCLUDE_DIR
         NAMES ${COMPONENT}.hpp
-        PATHS /usr/include /usr/local/include /opt/local/include
+        PATHS
+        /usr/include /usr/local/include /opt/local/include
+        "C:/Program\ Files/DO-Sara/include"
         PATH_SUFFIXES DO/Sara)
 
       find_library(DO_Sara_${COMPONENT}_LIBRARIES
         NAMES DO_Sara_${COMPONENT}-${DO_Sara_VERSION}
-        PATHS /usr/lib /usr/local/lib /opt/local/lib
+        PATHS
+        /usr/lib /usr/local/lib /opt/local/lib
+        "C:/Program\ Files/DO-Sara/lib"
         PATH_SUFFIXES DO/Sara)
 
       if (DO_Sara_${COMPONENT}_LIBRARIES)
