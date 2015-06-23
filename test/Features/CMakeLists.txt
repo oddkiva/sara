@@ -6,4 +6,8 @@ message(STATUS "  - DO_Features_tests")
 
 find_package(DO_Sara COMPONENTS Graphics Features ImageProcessing REQUIRED)
 
-do_test(Features_DataStructures test_features.cpp "${DO_Sara_LIBRARIES}" "Features")
+file(GLOB test_features_SOURCE_FILES FILES *.cpp)
+foreach (file ${test_features_SOURCE_FILES})
+  get_filename_component(filename "${file}" NAME_WE)
+  do_test(${filename} ${file} "${DO_Sara_LIBRARIES}" "Features")
+endforeach ()

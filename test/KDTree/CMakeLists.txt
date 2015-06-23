@@ -6,10 +6,9 @@ message(STATUS "  - DO_KDTree_Tests")
 
 find_package(DO_Sara COMPONENTS KDTree REQUIRED)
 
-do_test(KDTree_KNNSearch
-        test_knn_search.cpp
-        "${DO_Sara_LIBRARIES}" "KDTree")
+file(GLOB test_kdtree_SOURCE_FILES FILES *.cpp)
 
-do_test(KDTree_RadiusSearch
-        test_radius_search.cpp
-        "${DO_Sara_LIBRARIES}" "KDTree")
+foreach (file ${test_kdtree_SOURCE_FILES})
+  get_filename_component(filename "${file}" NAME_WE)
+  do_test(${filename} ${file} "${DO_Sara_LIBRARIES}" "KDTree")
+endforeach ()
