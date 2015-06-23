@@ -16,12 +16,13 @@
 #include <stdexcept>
 #include <vector>
 
+#include <DO/Sara/Defines.hpp>
 #include <DO/Sara/Core/EigenExtension.hpp>
 
 
 namespace DO { namespace Sara {
 
-  class BBox
+  class DO_EXPORT BBox
   {
   public:
     //! Default constructor.
@@ -125,19 +126,19 @@ namespace DO { namespace Sara {
 
   //! @{
   //! Utility functions.
-  double area(const BBox& bbox);
-  bool inside(const Point2d& p, const BBox& bbox);
-  bool degenerate(const BBox& bbox, double eps = 1e-3);
-  bool intersect(const BBox& bbox1, const BBox& bbox2);
-  double jaccard_similarity(const BBox& bbox1, const BBox& bbox2);
-  double jaccard_distance(const BBox& bbox1, const BBox& bbox2);
+  DO_EXPORT double area(const BBox& bbox);
+  DO_EXPORT bool inside(const Point2d& p, const BBox& bbox);
+  DO_EXPORT bool degenerate(const BBox& bbox, double eps = 1e-3);
+  DO_EXPORT bool intersect(const BBox& bbox1, const BBox& bbox2);
+  DO_EXPORT double jaccard_similarity(const BBox& bbox1, const BBox& bbox2);
+  DO_EXPORT double jaccard_distance(const BBox& bbox1, const BBox& bbox2);
   //! @}
 
   //! I/O.
-  std::ostream& operator<<(std::ostream& os, const BBox& bbox);
+  DO_EXPORT std::ostream& operator<<(std::ostream& os, const BBox& bbox);
 
   //! Return the intersection of two BBoxes.
-  BBox intersection(const BBox& bbox1, const BBox& bbox2);
+  DO_EXPORT BBox intersection(const BBox& bbox1, const BBox& bbox2);
 
 
 } /* namespace Sara */

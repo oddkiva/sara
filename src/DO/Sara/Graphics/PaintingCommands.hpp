@@ -140,6 +140,7 @@ namespace DO { namespace Sara {
     \return true if the command is issued on the window successfully.
     \return false otherwise.
    */
+  DO_EXPORT
   bool draw_ellipse(const Point2d& center, double r1, double r2, double degree,
                     const Color3ub& c, int penWidth);
   /*!

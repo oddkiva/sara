@@ -37,21 +37,6 @@ if (DO_USE_FROM_SOURCE)
       DO_Sara_Graphics
       Qt5::Widgets Qt5::OpenGL ${OPENGL_LIBRARIES})
 
-    install(TARGETS DO_Sara_Graphics
-            ARCHIVE DESTINATION lib/DO/Sara
-            LIBRARY DESTINATION lib/DO/Sara)
-
-    # Shared library
-    if (DO_BUILD_SHARED_LIBS)
-      add_library(
-        DO_Sara_Graphics_SHARED SHARED ${DO_Sara_Graphics_FILES})
-      target_link_libraries(
-        DO_Sara_Graphics_SHARED
-        Qt5::Widgets Qt5::OpenGL ${OPENGL_LIBRARIES})
-      do_set_specific_target_properties(DO_Sara_Graphics_SHARED DO_EXPORTS)
-      set_property(TARGET DO_Sara_Graphics_SHARED PROPERTY FOLDER "DO Sara Libraries")
-    endif ()
-
     set(CMAKE_AUTOMOC OFF)
     set(CMAKE_INCLUDE_CURRENT_DIR OFF)
   endif()

@@ -15,7 +15,7 @@ macro (do_add_example example)
   set_target_properties(${example} PROPERTIES
                         COMPILE_FLAGS ${DO_DEFINITIONS})
   target_link_libraries(${example} ${DO_Sara_LIBRARIES})
-  set_property(TARGET ${example} PROPERTY FOLDER "DO Examples/Graphics")
+  set_property(TARGET ${example} PROPERTY FOLDER "DO Sara Examples/Graphics")
 endmacro()
 
 # Window management examples.

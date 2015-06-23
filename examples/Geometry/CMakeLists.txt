@@ -15,7 +15,7 @@ macro (do_add_example example)
   set_target_properties(${example} PROPERTIES
                         COMPILE_FLAGS ${DO_DEFINITIONS})
   target_link_libraries(${example} ${DO_Sara_LIBRARIES})
-  set_property(TARGET ${example} PROPERTY FOLDER "DO Examples/Geometry")
+  set_property(TARGET ${example} PROPERTY FOLDER "DO Sara Examples/Geometry")
 endmacro()
 
 do_add_example(polygon_clipping_sutherland_hodgman_example)

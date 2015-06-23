@@ -6,4 +6,9 @@ message(STATUS "  - DO_ImageIO_Tests")
 
 find_package(DO_Sara COMPONENTS ImageIO REQUIRED)
 
-do_test(ImageIO_IO test_image_io.cpp "${DO_Sara_LIBRARIES}" "ImageIO")
+file(GLOB test_imageio_SOURCE_FILES FILES *.cpp)
+
+foreach (file ${test_imageio_SOURCE_FILES})
+  get_filename_component(filename "${file}" NAME_WE)
+  do_test(${filename} ${file} "${DO_Sara_LIBRARIES}" "ImageIO")
+endforeach ()

@@ -33,14 +33,6 @@ endfunction (do_list_files)
 # ==============================================================================
 # Useful macros
 #
-macro (do_get_os_info)
-  string(REGEX MATCH "Linux" OS_IS_LINUX ${CMAKE_SYSTEM_NAME})
-  set(DO_LIB_INSTALL_DIR "lib")
-  set(DO_INCLUDE_INSTALL_DIR
-      "include/DO-${DO_MAJOR_VERSION}.${DO_MINOR_VERSION}")
-endmacro (do_get_os_info)
-
-
 macro (do_dissect_version PROJECT_NAME VERSION)
   # Find version components
   string(REGEX REPLACE "^([0-9]+).*" "\\1"
@@ -146,7 +138,6 @@ endmacro()
 
 
 macro (do_append_library _library_name
-                         _library_type # shared or static
                          _include_dirs
                          _hdr_files _src_files
                          _lib_dependencies)
@@ -163,25 +154,36 @@ macro (do_append_library _library_name
 
   # 4. Create the project:
   if (NOT "${_src_files}" STREQUAL "")
-
     # - Case 1: the project contains 'cpp' source files
     #   Specify the source files.
-    add_library(DO_${DO_PROJECT_NAME}_${_library_name}
-                ${library_type} ${_hdr_files} ${_src_files})
+    if (DO_BUILD_SHARED_LIBS)
+      add_library(DO_${DO_PROJECT_NAME}_${_library_name}
+                  SHARED ${_hdr_files} ${_src_files})
+    else ()
+      add_library(DO_${DO_PROJECT_NAME}_${_library_name}
+                  STATIC ${_hdr_files} ${_src_files})
+    endif()
 
     # Link with other libraries.
     message(STATUS
       "[DO] Linking project 'DO_${DO_PROJECT_NAME}_${_library_name}' with "
       "'${_lib_dependencies}'"
     )
-    target_link_libraries(DO_${DO_PROJECT_NAME}_${_library_name}
-                          ${_lib_dependencies})
+    target_link_libraries(
+      DO_${DO_PROJECT_NAME}_${_library_name} ${_lib_dependencies})
+    set_target_properties(
+      DO_${DO_PROJECT_NAME}_${_library_name}
+      PROPERTIES
+      VERSION ${DO_${DO_PROJECT_NAME}_VERSION}
+      SOVERSION ${DO_${DO_PROJECT_NAME}_SOVERSION}
+      OUTPUT_NAME DO_${DO_PROJECT_NAME}_${_library_name}-${DO_${DO_PROJECT_NAME}_VERSION}
+      OUTPUT_NAME_DEBUG DO_${DO_PROJECT_NAME}_${_library_name}-${DO_${DO_PROJECT_NAME}_VERSION}-d)
 
     # Specify where to install the static library.
     install(TARGETS DO_${DO_PROJECT_NAME}_${_library_name}
             LIBRARY DESTINATION lib/DO/${DO_PROJECT_NAME}
-            ARCHIVE DESTINATION lib/DO/${DO_PROJECT_NAME})
-
+            ARCHIVE DESTINATION lib/DO/${DO_PROJECT_NAME}
+            COMPONENT Libraries)
   else ()
 
     # - Case 2: the project is a header-only library
@@ -198,50 +200,15 @@ macro (do_append_library _library_name
     FOLDER "DO ${DO_PROJECT_NAME} Libraries")
 endmacro (do_append_library)
 
-function (do_set_specific_target_properties _target _additional_compile_flags)
-  set(extra_macro_args ${ARGN})
-  list(LENGTH extra_macro_args num_extra_args)
-  if (${num_extra_args} GREATER 0)
-    list(GET extra_macro_args 0 _out_target_name)
-  else ()
-    set(_out_target_name ${_target})
-  endif ()
-
-  set_target_properties(
-    ${_target} PROPERTIES
-    VERSION ${DO_${DO_PROJECT_NAME}_VERSION}
-    SOVERSION ${DO_${DO_PROJECT_NAME}_SOVERSION}
-    COMPILE_DEFINITIONS ${_additional_compile_flags}
-    OUTPUT_NAME ${_out_target_name}-${DO_${DO_PROJECT_NAME}_VERSION}
-    OUTPUT_NAME_DEBUG ${_out_target_name}-${DO_${DO_PROJECT_NAME}_VERSION}-d)
-endfunction (do_set_specific_target_properties)
-
 
 macro (do_generate_library _library_name)
-  # Static library
   do_append_library(
-    ${_library_name} STATIC
+    ${_library_name}
     "${DO_${DO_PROJECT_NAME}_SOURCE_DIR}"
     "${DO_${DO_PROJECT_NAME}_${_library_name}_HEADER_FILES}"
     "${DO_${DO_PROJECT_NAME}_${_library_name}_SOURCE_FILES}"
     "${DO_${DO_PROJECT_NAME}_${_library_name}_LINK_LIBRARIES}"
   )
-  do_set_specific_target_properties(
-    DO_${DO_PROJECT_NAME}_${_library_name} DO_STATIC)
-
-  # Shared library
-  if (DO_BUILD_SHARED_LIBS)
-    do_append_library(
-      ${_library_name}_SHARED SHARED
-      "${DO_${DO_PROJECT_NAME}_SOURCE_DIR}"
-      "${DO_${DO_PROJECT_NAME}_${_library_name}_HEADER_FILES}"
-      "${DO_${DO_PROJECT_NAME}_${_library_name}_SOURCE_FILES}"
-      "${DO_${DO_PROJECT_NAME}_${_library_name}_LINK_LIBRARIES}"
-    )
-    do_set_specific_target_properties(
-      DO_${DO_PROJECT_NAME}_${_library_name}_SHARED
-      DO_EXPORTS "DO_${DO_PROJECT_NAME}_${_library_name}")
-  endif ()
 endmacro ()
 
 

@@ -1,9 +1,9 @@
-DO++ is primarily MPL2 licensed. See COPYING.MPL2 and these links:
+DO-CV is licensed with MPL2. See COPYING.MPL2 and these links:
   http://www.mozilla.org/MPL/2.0/
   http://www.mozilla.org/MPL/2.0/FAQ.html
 
 
-DO++ uses the following third-party libraries:
+DO-CV uses the following third-party libraries:
 - Eigen
   Eigen is a C++ template library for linear algebra: matrices, vectors, numerical solvers,
   and related algorithms.

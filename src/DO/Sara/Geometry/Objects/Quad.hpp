@@ -12,13 +12,17 @@
 #ifndef DO_SARA_GEOMETRY_QUAD_HPP
 #define DO_SARA_GEOMETRY_QUAD_HPP
 
+#include <DO/Sara/Defines.hpp>
+
 #include <DO/Sara/Core/EigenExtension.hpp>
+
 #include <DO/Sara/Geometry/Objects/Polygon.hpp>
 #include <DO/Sara/Geometry/Objects/BBox.hpp>
 
+
 namespace DO { namespace Sara {
 
-  class Quad : public SmallPolygon<4>
+  class DO_EXPORT Quad : public SmallPolygon<4>
   {
     typedef SmallPolygon<4> Base;
   public:

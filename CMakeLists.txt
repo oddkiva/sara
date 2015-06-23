@@ -31,7 +31,6 @@ option(DO_BUILD_SHARED_LIBS "Build shared libraries for DO-Sara libraries"  OFF)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 find_package(DO_Sara REQUIRED)
 do_dissect_version(DO_${DO_PROJECT_NAME} ${DO_${DO_PROJECT_NAME}_VERSION})
-do_get_os_info()
 
 # Group projects by category.
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -56,5 +55,5 @@ endif ()
 # Make documentation
 add_subdirectory(doc)
 
-# Make packages
-include(do_make_packages)
+# To create Windows installer and Linux packages.
+include(CPack)

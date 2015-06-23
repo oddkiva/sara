@@ -1,5 +1,7 @@
 #include <DO/Sara/Geometry/Objects/Cone.hpp>
 
+#include "../AssertHelpers.hpp"
+
 #include "TestPolygon.hpp"
 
 
@@ -74,6 +76,10 @@ TEST_F(TestAffineCone, test_convex_pointed_affine_cone)
   };
 
   sweep_check(convex_pointed_predicate, convex_pointed_ground_truth);
+
+  AffineCone2 K2 { affine_cone2(0, 0, _center)};
+  EXPECT_MATRIX_NEAR(K.basis(), K2.basis(), 1e-6);
+  EXPECT_EQ(K.vertex(), K2.vertex());
 }
 
 

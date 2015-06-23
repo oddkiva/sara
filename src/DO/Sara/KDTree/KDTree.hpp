@@ -12,7 +12,6 @@
 #ifndef DO_SARA_KDTREE_KDTREE_HPP
 #define DO_SARA_KDTREE_KDTREE_HPP
 
-
 #include <DO/Sara/Core.hpp>
 #include <flann/flann.hpp>
 
@@ -25,7 +24,7 @@ namespace DO { namespace Sara {
    *
    *  Therefore, data points are column vectors in MatrixXd !!
    */
-  class KDTree
+  class DO_EXPORT KDTree
   {
   public:
     //! Constructor.

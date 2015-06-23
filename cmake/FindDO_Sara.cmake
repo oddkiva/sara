@@ -65,8 +65,10 @@ include (do_configure_cxx_compiler)
 
 # List the compile flags needed by DO-CV.
 set(DO_DEFINITIONS "-DSRCDIR=${CMAKE_CURRENT_SOURCE_DIR}")
-if (DO_USE_FROM_SOURCE)
-  set(DO_DEFINITIONS "${DO_DEFINITIONS} -DDO_STATIC")
+if (DO_BUILD_SHARED_LIBS)
+  add_definitions("-DDO_EXPORTS")
+elseif (DO_USE_FROM_SOURCE)
+  add_definitions("-DDO_STATIC")
 endif ()
 
 

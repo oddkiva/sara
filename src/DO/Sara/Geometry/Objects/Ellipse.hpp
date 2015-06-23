@@ -16,14 +16,17 @@
 
 #include <cmath>
 
+#include <DO/Sara/Defines.hpp>
+
 #include <DO/Sara/Core/EigenExtension.hpp>
+
 #include <DO/Sara/Geometry/Objects/Quad.hpp>
 
 
 namespace DO { namespace Sara {
 
   //! Ellipse class
-  class Ellipse
+  class DO_EXPORT Ellipse
   {
   public:
     //! Default constructor.
@@ -56,6 +59,7 @@ namespace DO { namespace Sara {
       Retrieve relative orientation of point $p$ w.r.t. orientation
       $o$ of ellipse.
      */
+    DO_EXPORT
     friend double orientation(const Point2d& p, const Ellipse& e);
 
     //! Polar antiderivative.
@@ -86,6 +90,7 @@ namespace DO { namespace Sara {
       An elliptic segment is a region bounded by an arc and the chord connecting
       the arc's endpoints.
      */
+    DO_EXPORT
     friend double segment_area(const Ellipse& e, double theta0, double theta1);
 
     //! Ellipse area.
@@ -108,10 +113,12 @@ namespace DO { namespace Sara {
       return (p-e.c_).transpose()*shape_matrix(e)*(p-e.c_) < 1.;
     }
 
-    //! Compute rotated bbox of the ellispe.
+    //! Compute rotated bbox of the ellipse.
+    DO_EXPORT
     friend Quad oriented_bbox(const Ellipse& e);
 
     //! I/O.
+    DO_EXPORT
     friend std::ostream& operator<<(std::ostream& os, const Ellipse& e);
 
   private:
@@ -121,6 +128,7 @@ namespace DO { namespace Sara {
   };
 
   //! Compute the ellipse from the conic equation
+  DO_EXPORT
   Ellipse construct_from_shape_matrix(const Matrix2d& shapeMat,
                                       const Point2d& c);
 
