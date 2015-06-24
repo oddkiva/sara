@@ -1,3 +1,8 @@
+if(POLICY CMP0020)
+  cmake_policy(SET CMP0020 NEW)
+endif()
+
+
 # Load DO-specific macros
 include(do_macros)
 
