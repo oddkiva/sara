@@ -10,7 +10,7 @@ include(DO_Sara_version)
 do_step_message("FindDO_Sara running for project '${PROJECT_NAME}'")
 
 
-# Setup DO++ once for all for every test projects in the 'test' directory.
+# Setup DO-CV once for all for every test projects in the 'test' directory.
 if (NOT DO_Sara_FOUND)
 
   if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindDO_Sara.cmake")
@@ -67,9 +67,18 @@ include (do_configure_cxx_compiler)
 set(DO_DEFINITIONS "-DSRCDIR=${CMAKE_CURRENT_SOURCE_DIR}")
 if (DO_BUILD_SHARED_LIBS)
   add_definitions("-DDO_EXPORTS")
-elseif (DO_USE_FROM_SOURCE)
+elseif (DO_USE_FROM_SOURCE OR DO_USE_STATIC_LIBS)
   add_definitions("-DDO_STATIC")
 endif ()
+
+
+# Include directories.
+find_path(
+  DO_Sara_INCLUDE_DIRS
+  NAMES DO/Sara/Core.hpp DO/Sara/Defines.hpp DO/Sara/Graphics.hpp
+  PATHS
+  /usr/include /usr/local/include
+  "C:/Program Files/DO-Sara/include")
 
 
 # 'find_package(DO_Sara COMPONENTS Core Graphics ... REQUIRED)' is called.
@@ -117,12 +126,16 @@ if (DO_Sara_FIND_COMPONENTS)
 
       find_path(DO_Sara_${COMPONENT}_INCLUDE_DIR
         NAMES ${COMPONENT}.hpp
-        PATHS /usr/include /usr/local/include /opt/local/include
+        PATHS
+        /usr/include /usr/local/include /opt/local/include
+        "C:/Program Files/DO-Sara/include"
         PATH_SUFFIXES DO/Sara)
 
       find_library(DO_Sara_${COMPONENT}_LIBRARIES
         NAMES DO_Sara_${COMPONENT}-${DO_Sara_VERSION}
-        PATHS /usr/lib /usr/local/lib /opt/local/lib
+        PATHS
+        /usr/lib /usr/local/lib /opt/local/lib
+        "C:/Program Files/DO-Sara/lib"
         PATH_SUFFIXES DO/Sara)
 
       if (DO_Sara_${COMPONENT}_LIBRARIES)
@@ -133,6 +146,36 @@ if (DO_Sara_FIND_COMPONENTS)
         list(APPEND DO_Sara_LIBRARIES
           Qt5::OpenGL Qt5::Widgets ${OPENGL_LIBRARIES})
       endif ()
+
+      if ("${COMPONENT}" STREQUAL "ImageIO")
+        find_package(EasyEXIF)
+        if (WIN32)
+          find_library(JPEG_LIBRARY
+            NAMES jpeg
+            PATHS "C:/Program Files/DO-Sara/lib")
+          find_library(PNG_LIBRARY
+            NAMES png
+            PATHS "C:/Program Files/DO-Sara/lib")
+          find_library(TIFF_LIBRARY
+            NAMES tiff
+            PATHS "C:/Program Files/DO-Sara/lib")
+          find_library(ZLIB_LIBRARY
+            NAMES zlib
+            PATHS "C:/Program Files/DO-Sara/lib")
+        else ()
+          find_package(JPEG REQUIRED)
+          find_package(PNG REQUIRED)
+          find_package(TIFF REQUIRED)
+          find_package(ZLIB REQUIRED)
+        endif ()
+        list(APPEND
+          DO_Sara_LIBRARIES
+          ${EasyEXIF_LIBRARIES}
+          ${JPEG_LIBRARY} ${PNG_LIBRARY} ${TIFF_LIBRARY}
+          ${ZLIB_LIBRARY}
+        )
+      endif ()
+
     endforeach()
     message("DO_Sara_LIBRARIES = ${DO_Sara_LIBRARIES}")
   endif ()
