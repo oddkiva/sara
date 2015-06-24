@@ -12,6 +12,8 @@
 #ifndef VIDEOIO_VIDEOSTREAM_HPP
 #define VIDEOIO_VIDEOSTREAM_HPP
 
+#include <DO/Sara/Defines.hpp>
+
 #include <DO/Sara/Core/Image.hpp>
 
 
@@ -23,7 +25,7 @@ struct AVFrame;
 
 namespace DO { namespace Sara {
 
-  class VideoStream : public std::streambuf
+  class DO_EXPORT VideoStream : public std::streambuf
   {
   public:
     VideoStream();

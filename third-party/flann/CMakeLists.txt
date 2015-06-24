@@ -13,11 +13,11 @@ DISSECT_VERSION()
 GET_OS_INFO()
 
 ################################################################################
-# CMAKE_C_COMPILER_ID and CMAKE_CXX_COMPILER_ID are documented as internal 
+# CMAKE_C_COMPILER_ID and CMAKE_CXX_COMPILER_ID are documented as internal
 # variables subject to change at: http://www.cmake.org/cmake/help/v2.8.8/cmake.html#variable:CMAKE_LANG_COMPILER_ID
-# However, currently this seems the most robust way to detect the presence of 
+# However, currently this seems the most robust way to detect the presence of
 # the Clang compiler.
-# 
+#
 if (${CMAKE_C_COMPILER_ID} MATCHES "Clang")
   set(CMAKE_COMPILER_IS_CLANG 1)
 endif ()
@@ -29,7 +29,7 @@ endif ()
 
 ################################################################################
 # Build options: OpenMP and CUDA.
-# 
+#
 option(USE_OPENMP "Use OpenMP multi-threading" ON)
 option(BUILD_CUDA_LIB "Build CUDA library" OFF)
 
@@ -37,7 +37,7 @@ set(NVCC_COMPILER_BINDIR "" CACHE PATH  "Directory where nvcc should look for C+
 
 ################################################################################
 # OpenMP
-# 
+#
 if (USE_OPENMP AND NOT APPLE)
   find_package(OpenMP)
   if(OPENMP_FOUND)
@@ -52,7 +52,7 @@ endif()
 
 ################################################################################
 # CUDA support
-# 
+#
 if (BUILD_CUDA_LIB)
   find_package(CUDA)
   if (CUDA_FOUND)
@@ -67,7 +67,7 @@ endif(BUILD_CUDA_LIB)
 
 ################################################################################
 # Compiler specific flags
-# 
+#
 if (WIN32)
   if (MSVC)
     add_definitions("/W1 -D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS /bigobj")
@@ -79,6 +79,6 @@ endif (WIN32)
 
 ################################################################################
 # Add the project
-# 
+#
 include_directories(${PROJECT_SOURCE_DIR}/src/cpp)
 add_subdirectory(src)

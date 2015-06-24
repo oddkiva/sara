@@ -12,6 +12,8 @@
 #ifndef DO_SARA_GEOMETRY_TRIANGLE_HPP
 #define DO_SARA_GEOMETRY_TRIANGLE_HPP
 
+#include <DO/Sara/Defines.hpp>
+
 #include <DO/Sara/Core/EigenExtension.hpp>
 #include <DO/Sara/Geometry/Objects/Polygon.hpp>
 
@@ -19,7 +21,7 @@
 namespace DO { namespace Sara {
 
   // Triangle (a,b,c) enumerated in CCW order.
-  class Triangle : public SmallPolygon<3>
+  class DO_EXPORT Triangle : public SmallPolygon<3>
   {
   public:
     Triangle() : SmallPolygon<3>() {}

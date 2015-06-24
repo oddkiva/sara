@@ -65,3 +65,10 @@ endif(MSVC)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ../zlib)
 add_library(png STATIC ${libpng_sources})
 target_link_libraries(png zlib ${M_LIBRARY})
+
+if (WIN32)
+  install(TARGETS png
+          LIBRARY DESTINATION lib
+          ARCHIVE DESTINATION lib
+          COMPONENT ThirdParty)
+endif ()

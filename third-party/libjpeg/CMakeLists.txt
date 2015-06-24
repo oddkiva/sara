@@ -33,3 +33,9 @@ set (SRC jmemnobs.c jaricom.c jcapimin.c jcapistd.c jcarith.c jccoefct.c jccolor
   jinclude.h jmemsys.h jpegint.h jversion.h)
 
 add_library (jpeg ${SRC} ${HEADERS})
+if (WIN32)
+  install(TARGETS jpeg
+          LIBRARY DESTINATION lib
+          ARCHIVE DESTINATION lib
+          COMPONENT ThirdParty)
+endif ()

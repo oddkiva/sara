@@ -89,3 +89,9 @@ endif()
 
 add_library(tiff STATIC ${lib_srcs})
 target_link_libraries(tiff zlib)
+if (WIN32)
+  install(TARGETS tiff
+          LIBRARY DESTINATION lib
+          ARCHIVE DESTINATION lib
+          COMPONENT ThirdParty)
+endif ()

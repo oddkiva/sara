@@ -1,7 +1,7 @@
 message(STATUS "")
 do_step_message("Appending third-party libraries:")
 
-set(THIRDPARTY_FOLDER_NAME "DO Third-Party")
+set(THIRDPARTY_FOLDER_NAME "DO Sara Third-Party")
 
 # Disable any specific compiler flags for all third-party software.
 set (CMAKE_C_FLAGS "")

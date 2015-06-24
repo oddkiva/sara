@@ -21,6 +21,8 @@
 #include <QVector>
 #include <QVector3D>
 
+#include <DO/Sara/Defines.hpp>
+
 #include "../Events.hpp"
 #include "../Frame.hpp"
 #include "../Mesh.hpp"
@@ -53,7 +55,7 @@ namespace DO { namespace Sara {
   };
 
   //! \brief QGLWidget-derived class used to view 3D scenes.
-  class OpenGLWindow : public QGLWidget
+  class DO_EXPORT OpenGLWindow : public QGLWidget
   {
     Q_OBJECT
 

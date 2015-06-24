@@ -104,7 +104,7 @@ namespace DO { namespace Sara {
   }
 
   bool draw_ellipse(const Point2d& center, double r1, double r2, double degree,
-                   const Color3ub& c, int penWidth)
+                    const Color3ub& c, int penWidth)
   {
     return QMetaObject::invokeMethod(
       active_window(), "drawEllipse",
@@ -117,7 +117,7 @@ namespace DO { namespace Sara {
   }
 
   bool draw_line(int x1, int y1, int x2, int y2, const Color3ub& c,
-                int penWidth)
+                 int penWidth)
   {
     return QMetaObject::invokeMethod(
       active_window(), "drawLine",
@@ -141,7 +141,7 @@ namespace DO { namespace Sara {
   }
 
   bool draw_line(const Point2d& p1, const Point2d& p2, const Color3ub& c,
-                int penWidth)
+                 int penWidth)
   {
     return QMetaObject::invokeMethod(
       active_window(), "drawLine",
@@ -317,7 +317,7 @@ namespace DO { namespace Sara {
   }
 
   bool put_color_image(int x, int y, const Color3ub *data, int w, int h,
-                     double fact)
+                       double fact)
   {
     QImage image(reinterpret_cast<const uchar*>(data),
                  w, h, w*3, QImage::Format_RGB888);
@@ -325,7 +325,7 @@ namespace DO { namespace Sara {
   }
 
   bool put_grey_image(int x, int y, const uchar *data, int w, int h,
-                    double fact)
+                      double fact)
   {
     QImage image(data, w, h, w, QImage::Format_Indexed8);
     QVector<QRgb> colorTable(256);

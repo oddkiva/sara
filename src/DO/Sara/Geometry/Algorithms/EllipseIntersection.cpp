@@ -12,6 +12,8 @@
 #include <iostream>
 #include <vector>
 
+#include <DO/Sara/Core/DebugUtilities.hpp>
+
 #include <DO/Sara/Geometry/Algorithms/EllipseIntersection.hpp>
 #include <DO/Sara/Geometry/Algorithms/ConvexHull.hpp>
 #include <DO/Sara/Geometry/Algorithms/SutherlandHodgman.hpp>

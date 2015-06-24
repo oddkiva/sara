@@ -17,6 +17,8 @@
 #include <QGraphicsView>
 #include <QTimer>
 
+#include <DO/Sara/Defines.hpp>
+
 #include "../Events.hpp"
 
 
@@ -29,7 +31,7 @@ namespace DO { namespace Sara {
    */
 
   //! \brief QGraphicsView-derived class used to view interactively images.
-  class GraphicsView : public QGraphicsView
+  class DO_EXPORT GraphicsView : public QGraphicsView
   {
     Q_OBJECT
   public:
