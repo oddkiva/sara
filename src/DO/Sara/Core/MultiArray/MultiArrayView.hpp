@@ -12,6 +12,8 @@
 #ifndef DO_SARA_CORE_MULTIARRAY_MULTIARRAYVIEW_HPP
 #define DO_SARA_CORE_MULTIARRAY_MULTIARRAYVIEW_HPP
 
+#include <cstdint>
+
 #include <DO/Sara/Core/ArrayIterators.hpp>
 #include <DO/Sara/Core/MultiArray/ElementTraits.hpp>
 
@@ -32,68 +34,70 @@ namespace DO { namespace Sara {
 
     //! @{
     //! \brief STL-compatible interface.
-    typedef std::size_t size_type;
-    typedef std::ptrdiff_t difference_type;
-    typedef T value_type;
-    typedef T * pointer;
-    typedef const T * const_pointer;
-    typedef T& reference;
-    typedef const T& const_reference;
-    typedef T * iterator;
-    typedef const T * const_iterator;
+    using size_type = std::size_t;
+    using difference_type = std::ptrdiff_t;
+    using value_type = T;
+    using pointer = T *;
+    using const_pointer = const T *;
+    using reference = T&;
+    using const_reference = const T&;
+    using iterator = T *;
+    using const_iterator = const T *;
     //! @}
 
     //! @{
     //! \brief Slice type.
-    typedef const MultiArrayView<T, N-1, S> const_slice_type;
-    typedef MultiArrayView<T, N-1, S> slice_type;
+    using slice_type = MultiArrayView<T, N-1, S>;
+    using const_slice_type = const MultiArrayView<T, N-1, S>;
     //! @}
 
     //! @{
     //! \brief Vector type.
-    typedef Matrix<int, N, 1> vector_type;
-    typedef Matrix<int, N-1, 1> slice_vector_type;
+    using vector_type = Matrix<int, N, 1>;
+    using slice_vector_type = Matrix<int, N-1, 1>;
     //! @}
 
     //! @{
     //! \brief N-dimensional iterator type.
-    typedef ArrayIterator<false, T, N, StorageOrder> array_iterator;
-    typedef ArrayIterator<true, T, N, StorageOrder> const_array_iterator;
+    using array_iterator = ArrayIterator<false, T, N, StorageOrder>;
+    using const_array_iterator = ArrayIterator<true, T, N, StorageOrder>;
     //! @}
 
     //! @{
     //! \brief N-dimensional subrange iterator.
-    typedef SubarrayIterator<false, T, N, StorageOrder> subarray_iterator;
-    typedef SubarrayIterator<true, T, N, StorageOrder> const_subarray_iterator;
+    using subarray_iterator = SubarrayIterator<false, T, N, StorageOrder>;
+    using const_subarray_iterator = SubarrayIterator<true, T, N, StorageOrder>;
     //! @}
 
     //! @{
     //! \brief Array views for linear algebra.
-    typedef Map<const Array<typename ElementTraits<T>::value_type, Dynamic, 1> >
-      const_array_view_type;
-    typedef Map<Array<typename ElementTraits<T>::value_type, Dynamic, 1> >
-      array_view_type;
+    using array_view_type = Map<
+      Array<typename ElementTraits<T>::value_type, Dynamic, 1>
+    >;
+    using const_array_view_type = Map<
+      const Array<typename ElementTraits<T>::value_type, Dynamic, 1>
+    >;
     //! @}
 
     //! @{
     //! \brief Matrix views for linear algebra.
-    typedef Map<
-      const Matrix<typename ElementTraits<T>::value_type,
-      Dynamic, Dynamic, StorageOrder> > const_matrix_view_type;
-    typedef Map<
-      Matrix<typename ElementTraits<T>::value_type, Dynamic, Dynamic,
-      StorageOrder> > matrix_view_type;
+    using matrix_view_type = Map<
+      Matrix<
+        typename ElementTraits<T>::value_type, Dynamic, Dynamic, 
+        StorageOrder
+      >
+    >;
+    using const_matrix_view_type = Map<
+      const Matrix<
+        typename ElementTraits<T>::value_type,
+        Dynamic, Dynamic, StorageOrder
+      >
+    >;
     //! @}
 
   public: /* methods */
     //! \brief Default constructor.
-    inline MultiArrayView()
-      : _begin(nullptr)
-      , _end(nullptr)
-      , _sizes(vector_type::Zero())
-      , _strides(vector_type::Zero())
-    {
-    }
+    inline MultiArrayView() = default;
 
     //! \brief Constructor that wraps plain data with its known sizes.
     inline MultiArrayView(value_type *data,
@@ -206,16 +210,16 @@ namespace DO { namespace Sara {
     //! \brief Return the i-th slice of the MultiArray object.
     inline slice_type operator[](int i)
     {
-      slice_vector_type sizes(_sizes.tail(N-1));
+      slice_vector_type sizes{ _sizes.tail(N - 1) };
       T * data = _begin + _strides[0] * i;
-      return slice_type(data, sizes);
+      return slice_type{ data, sizes };
     }
 
     inline const_slice_type operator[](int i) const
     {
-      slice_vector_type slice_sizes(_sizes.tail(N-1));
+      slice_vector_type slice_sizes{ _sizes.tail(N - 1) };
       const T * data = _begin + _strides[0] * i;
-      return const_slice_type(data, slice_sizes);
+      return const_slice_type{ data, slice_sizes };
     }
     //! @}
 
@@ -249,16 +253,18 @@ namespace DO { namespace Sara {
     //! \brief Return the array view for linear algebra with Eigen libraries.
     inline array_view_type array()
     {
-      return array_view_type(reinterpret_cast<
-                             typename ElementTraits<T>::pointer>(data()),
-                             size());
+      return array_view_type {
+        reinterpret_cast<typename ElementTraits<T>::pointer>(data()),
+        static_cast<int64_t>(size())
+      };
     }
 
     inline const_array_view_type array() const
     {
-      return const_array_view_type(reinterpret_cast<
-                                   const typename ElementTraits<T>::const_pointer>(data()),
-                                   size());
+      return const_array_view_type {
+        reinterpret_cast<const typename ElementTraits<T>::const_pointer>(data()),
+        static_cast<int64_t>(size())
+      };
     }
     //! @}
 
@@ -287,12 +293,16 @@ namespace DO { namespace Sara {
     //! \brief Return the begin iterator of the whole multi-array.
     inline array_iterator begin_array()
     {
-      return array_iterator(false, _begin, vector_type::Zero(), _sizes, _strides);
+      return array_iterator {
+        false, _begin, vector_type::Zero(), _sizes, _strides
+      };
     }
 
     inline const_array_iterator begin_array() const
     {
-      return const_array_iterator(false, _begin, vector_type::Zero(), _sizes, _strides);
+      return const_array_iterator {
+        false, _begin, vector_type::Zero(), _sizes, _strides
+      };
     }
     //! @}
 
@@ -301,13 +311,17 @@ namespace DO { namespace Sara {
     inline subarray_iterator begin_subarray(const vector_type& start,
                                             const vector_type& end)
     {
-      return subarray_iterator(false, _begin, start, end, _strides, _sizes);
+      return subarray_iterator {
+        false, _begin, start, end, _strides, _sizes
+      };
     }
 
     inline const_subarray_iterator begin_subarray(const vector_type& start,
                                                   const vector_type& end) const
     {
-      return const_subarray_iterator(false, _begin, start, end, _strides, _sizes);
+      return const_subarray_iterator {
+        false, _begin, start, end, _strides, _sizes
+      };
     }
     //! @}
 
@@ -321,9 +335,9 @@ namespace DO { namespace Sara {
     //! \brief Compute the raw size needed to allocate the internal data.
     inline size_type compute_size(const vector_type& sizes) const
     {
-      Matrix<size_type, N, 1> sz(sizes.template cast<size_type>());
-      return std::accumulate(sz.data(), sz.data()+N,
-                             size_type(1), std::multiplies<size_type>());
+      Matrix<size_type, N, 1> sz{ sizes.template cast<size_type>() };
+      return std::accumulate(
+        sz.data(), sz.data()+N, size_type(1), std::multiplies<size_type>());
     }
 
     //! \brief Compute the 1D index of the corresponding coordinates.
@@ -333,10 +347,14 @@ namespace DO { namespace Sara {
     }
 
   protected: /* data members. */
-    value_type *_begin;   //!< first element of the data.
-    value_type *_end;     //!< last element of the data.
-    vector_type _sizes;   //!< vector of size along each dimension.
-    vector_type _strides; //!< vector of stride for each dimension.
+    //! \brief First element of the internal array.
+    value_type *_begin{ nullptr };
+    //! \brief Last element of the internal array.
+    value_type *_end{ nullptr };
+    //! \brief Sizes vector.
+    vector_type _sizes{ vector_type::Zero() };
+    //! \brief Strides vector.
+    vector_type _strides{ vector_type::Zero() };
   };
 
 } /* namespace Sara */

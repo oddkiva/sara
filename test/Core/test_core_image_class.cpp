@@ -11,7 +11,10 @@
 
 #include <gtest/gtest.h>
 
+#include <DO/Sara/Core/Pixel.hpp>
 #include <DO/Sara/Core/Image/Image.hpp>
+
+#include "../AssertHelpers.hpp"
 
 
 using namespace std;
@@ -20,26 +23,24 @@ using namespace DO::Sara;
 
 TEST(TestImageClass, test_2d_image_constructor)
 {
-  Image<int> image(10, 20);
+  Image<int> image{ 10, 20 };
   EXPECT_EQ(image.width(), 10);
   EXPECT_EQ(image.height(), 20);
 
-  Image<int, 3> volume(5, 10, 20);
+  Image<int, 3> volume{ 5, 10, 20 };
   EXPECT_EQ(volume.width(), 5);
   EXPECT_EQ(volume.height(), 10);
   EXPECT_EQ(volume.depth(), 20);
 
-  Image<int, 3> volume2;
-  volume2 = volume;
+  Image<int, 3> volume2{ volume };
   EXPECT_EQ(volume2.width(), 5);
   EXPECT_EQ(volume2.height(), 10);
   EXPECT_EQ(volume2.depth(), 20);
 }
 
-
 TEST(TestImageClass, test_matrix_view)
 {
-  Image<int> A(2, 3);
+  Image<int> A{ 2, 3 };
   A.matrix() <<
     1, 2,
     3, 4,
