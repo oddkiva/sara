@@ -19,7 +19,6 @@
 #include <cmath>
 
 #include <DO/Sara/Core/EigenExtension.hpp>
-#include <DO/Sara/Core/StaticAssert.hpp>
 
 
 namespace DO { namespace Sara {
@@ -35,8 +34,9 @@ namespace DO { namespace Sara {
   template <typename T>
   inline T to_radian(T degree)
   {
-    DO_SARA_STATIC_ASSERT(!std::numeric_limits<T>::is_integer,
-                     SCALAR_MUST_BE_OF_FLOATING_TYPE);
+    static_assert(
+      !std::numeric_limits<T>::is_integer,
+      "Scalar must be of floating type");
     return degree*static_cast<T>(M_PI)/static_cast<T>(180);
   }
 
@@ -44,8 +44,9 @@ namespace DO { namespace Sara {
   template <typename T>
   inline T to_degree(T radian)
   {
-    DO_SARA_STATIC_ASSERT(!std::numeric_limits<T>::is_integer,
-                     SCALAR_MUST_BE_OF_FLOATING_TYPE );
+    static_assert(
+      !std::numeric_limits<T>::is_integer,
+      "Scalar must be of floating type");
     return radian*static_cast<T>(180)/static_cast<T>(M_PI);
   }
 
@@ -83,24 +84,27 @@ namespace DO { namespace Sara {
   template <typename T>
   inline Matrix<T, 2, 1> unit_vector2(T radian)
   {
-    DO_SARA_STATIC_ASSERT( !std::numeric_limits<T>::is_integer,
-      SCALAR_MUST_BE_OF_FLOATING_TYPE );
+    static_assert(
+      !std::numeric_limits<T>::is_integer,
+      "Scalar must be of floating type");
     return Matrix<T, 2, 1>(std::cos(radian), std::sin(radian));
   }
 
   template <typename T>
   inline Matrix<T, 2, 2> rotation2(T radian)
   {
-    DO_SARA_STATIC_ASSERT( !std::numeric_limits<T>::is_integer,
-      SCALAR_MUST_BE_OF_FLOATING_TYPE );
+    static_assert(
+      !std::numeric_limits<T>::is_integer,
+      "Scalar must be of floating type");
     return Eigen::Rotation2D<T>(radian).toRotationMatrix();
   }
 
   template <typename T>
   inline Matrix<T, 2, 2> isometry2(T radian, T scale)
   {
-    DO_SARA_STATIC_ASSERT(!std::numeric_limits<T>::is_integer,
-                     SCALAR_MUST_BE_OF_FLOATING_TYPE);
+    static_assert(
+      !std::numeric_limits<T>::is_integer,
+      "Scalar must be of floating type");
     return Eigen::Rotation2D<T>(radian).toRotationMatrix()*scale;
   }
 

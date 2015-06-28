@@ -113,8 +113,9 @@ namespace DO { namespace Sara {
     //! Return matrix view for linear algebra with Eigen libraries.
     inline matrix_view_type matrix()
     {
-      DO_SARA_STATIC_ASSERT(Dimension == 2, MULTIARRAY_MUST_HAVE_TWO_DIMENSIONS);
-      return matrix_view_type(
+
+      static_assert(Dimension == 2, "MultiArray must be 2D");
+      return matrix_view_type {
         reinterpret_cast<
         typename ElementTraits<pixel_type>::pointer>(base_type::data()),
         height(), width() );
@@ -122,8 +123,8 @@ namespace DO { namespace Sara {
 
     inline const_matrix_view_type matrix() const
     {
-      DO_SARA_STATIC_ASSERT(Dimension == 2, MULTIARRAY_MUST_HAVE_TWO_DIMENSIONS);
-      return const_matrix_view_type(
+      static_assert(Dimension == 2, "MultiArray must be 2D");
+      return const_matrix_view_type {
         reinterpret_cast<
         typename ElementTraits<pixel_type>::const_pointer>(base_type::data()),
         height(), width() );

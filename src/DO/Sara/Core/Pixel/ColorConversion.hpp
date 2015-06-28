@@ -14,7 +14,6 @@
 
 
 #include <DO/Sara/Core/EigenExtension.hpp>
-#include <DO/Sara/Core/StaticAssert.hpp>
 #include <DO/Sara/Core/Pixel/ColorSpace.hpp>
 #include <DO/Sara/Core/Pixel/Pixel.hpp>
 
@@ -26,9 +25,9 @@ namespace DO { namespace Sara {
   template <typename T, int N>
   inline void rgb_to_gray(const Matrix<T, N, 1>& rgb, T& gray)
   {
-    DO_SARA_STATIC_ASSERT(
+    static_assert(
       !std::numeric_limits<T>::is_integer,
-      CONVERSION_FROM_RGB_TO_GRAY_IS_SUPPORTED_ONLY_FOR_FLOATING_POINT_TYPE);
+      "Conversion from rgb to gray is supported only for floating point type");
 
     gray = T(0.2125)*rgb[0] + T(0.7154)*rgb[1] + T(0.0721)*rgb[2];
   }
@@ -44,9 +43,9 @@ namespace DO { namespace Sara {
   template <typename T>
   inline void rgb_to_yuv(const Matrix<T, 3, 1>& rgb, Matrix<T, 3, 1>& yuv)
   {
-    DO_SARA_STATIC_ASSERT(
+    static_assert(
       !std::numeric_limits<T>::is_integer,
-      CONVERSION_FROM_GRAY_TO_RGB_IS_SUPPORTED_ONLY_FOR_FLOATING_POINT_TYPE);
+      "Conversion from gray to RGB is supported only for floating point type");
 
     yuv[0] = T(0.299)*rgb[0] + T(0.587)*rgb[1] + T(0.114)*rgb[2];
     yuv[1] = T(0.492)*(rgb[2] - yuv[0]);
@@ -57,9 +56,9 @@ namespace DO { namespace Sara {
   template <typename T>
   inline void yuv_to_rgb(const Matrix<T, 3, 1>& yuv, Matrix<T, 3, 1>& rgb)
   {
-    DO_SARA_STATIC_ASSERT(
+    static_assert(
       !std::numeric_limits<T>::is_integer,
-      CONVERSION_FROM_GRAY_TO_RGB_IS_SUPPORTED_ONLY_FOR_FLOATING_POINT_TYPE);
+      "Conversion from gray to RGB is supported only for floating point type");
 
     rgb[0] = yuv[0]                     + T(1.13983)*yuv[2];
     rgb[1] = yuv[0] - T(0.39465)*yuv[1] - T(0.58060)*yuv[2];

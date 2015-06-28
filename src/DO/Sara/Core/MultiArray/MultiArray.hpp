@@ -139,7 +139,7 @@ namespace DO { namespace Sara {
 
     inline void resize(int rows, int cols)
     {
-      DO_SARA_STATIC_ASSERT(N == 2, MULTIARRAY_MUST_BE_TWO_DIMENSIONAL);
+      static_assert(N == 2, "MultiArray must be 2D");
       resize(vector_type(rows, cols));
     }
 

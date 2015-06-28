@@ -64,9 +64,9 @@ namespace DO { namespace Sara {
   template <bool IsConst, typename T, int Axis, int N>
   class AxisIterator : public ITERATOR_BASE_TYPE(IsConst)
   {
-    DO_SARA_STATIC_ASSERT(
+    static_assert(
       Axis >= 0 && Axis < N,
-      AXIS_MUST_BE_NONNEGATIVE_AND_LESS_THAN_N);
+      "Axis must be nonnegative and less than N");
 
     // Friend classes.
     template <bool, typename, int, int> friend class AxisIterator;
@@ -309,14 +309,14 @@ namespace DO { namespace Sara {
     //! Special access operator in 2D.
     inline reference operator()(int i, int j) const
     {
-      DO_SARA_STATIC_ASSERT(N == 2, DATA_MUST_BE_TWO_DIMENSIONAL);
+      static_assert(N == 2, "Data must be 2D");
       return operator()(vector_type(i, j));
     }
 
     //! Special access operator in 3D.
     inline reference operator()(int i, int j, int k) const
     {
-      DO_SARA_STATIC_ASSERT(N == 3, DATA_MUST_BE_THREE_DIMENSIONAL);
+      static_assert(N == 3, "Data must be 3D");
       return operator()(vector_type(i, j, k));
     }
 
@@ -336,8 +336,9 @@ namespace DO { namespace Sara {
     template<int I, int J>
     inline reference delta(int step_i, int step_j) const
     {
-      DO_SARA_STATIC_ASSERT(I >= 0 && I < N && J >= 0 && J < N,
-                       I_AND_J_MUST_BETWEEN_0_AND_N);
+      static_assert(
+        I >= 0 && I < N && J >= 0 && J < N,
+        "I and J must between 0 and N");
       return *(cur_ptr_ + strides_[I]*step_i + strides_[J]*step_j);
     }
 
@@ -410,11 +411,11 @@ namespace DO { namespace Sara {
   template <bool IsConst, typename T, int N, int StorageOrder>
   class ArrayIterator : public ArrayIteratorBase<IsConst, T, N, StorageOrder>
   {
-    DO_SARA_STATIC_ASSERT(N >= 0, NUMBER_OF_DIMENSIONS_MUST_BE_NONNEGATIVE);
-    typedef ArrayIteratorBase<IsConst, T, N, StorageOrder> base_type;
-    typedef ArrayIterator self_type;
-    typedef PositionIncrementer<StorageOrder> incrementer;
-    typedef PositionDecrementer<StorageOrder> decrementer;
+    static_assert(N >= 0, "Number of dimensions must be nonnegative");
+    using base_type = ArrayIteratorBase<IsConst, T, N, StorageOrder>;
+    using self_type = ArrayIterator;
+    using incrementer = PositionIncrementer<StorageOrder>;
+    using decrementer = PositionDecrementer<StorageOrder>;
 
     using base_type::cur_pos_;
     using base_type::cur_ptr_;
@@ -496,7 +497,7 @@ namespace DO { namespace Sara {
   template <bool IsConst, typename T, int N, int StorageOrder = ColMajor>
   class SubarrayIterator : public ArrayIteratorBase<IsConst, T, N, StorageOrder>
   {
-    DO_SARA_STATIC_ASSERT(N >= 0, NUMBER_OF_DIMENSIONS_MUST_BE_NONNEGATIVE);
+    static_assert(N >= 0, "Number of dimensions must be nonnegative");
 
     typedef ArrayIteratorBase<IsConst, T, N, StorageOrder> base_type;
     typedef SubarrayIterator self_type;

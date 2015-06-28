@@ -100,8 +100,9 @@ namespace DO { namespace Sara {
                                    const T& a = PixelTraits<T>::min(),
                                    const T& b = PixelTraits<T>::max())
   {
-    DO_SARA_STATIC_ASSERT(!std::numeric_limits<T>::is_integer,
-                     IMPLEMENTATION_NOT_SUPPORTED_FOR_INTEGER_TYPES);
+    static_assert(
+      !std::numeric_limits<T>::is_integer,
+      "Color rescaling is not directly applicable on integer types");
 
     Image<T, N> dst(src.sizes());
 
@@ -127,8 +128,9 @@ namespace DO { namespace Sara {
     const Pixel<T, ColorSpace>& a = PixelTraits<Pixel<T, ColorSpace> >::min(),
     const Pixel<T, ColorSpace>& b = PixelTraits<Pixel<T, ColorSpace> >::max())
   {
-    DO_SARA_STATIC_ASSERT(!std::numeric_limits<T>::is_integer,
-                     IMPLEMENTATION_NOT_SUPPORTED_FOR_INTEGER_TYPES);
+    static_assert(
+      !std::numeric_limits<T>::is_integer,
+      "Color rescale is not directly applicable on integral types");
 
     Image<Pixel<T,ColorSpace>, N> dst(src.sizes());
 

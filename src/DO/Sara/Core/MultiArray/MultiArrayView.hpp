@@ -174,13 +174,13 @@ namespace DO { namespace Sara {
 
     inline reference operator()(int i, int j)
     {
-      DO_SARA_STATIC_ASSERT(N == 2, MULTIARRAY_MUST_BE_TWO_DIMENSIONAL);
+      static_assert(N == 2, "MultiArray must be 2D");
       return _begin[offset(Vector2i(i, j))];
     }
 
     inline reference operator()(int i, int j, int k)
     {
-      DO_SARA_STATIC_ASSERT(N == 3, MULTIARRAY_MUST_BE_THREE_DIMENSIONAL);
+      static_assert(N == 3, "MultiArray must be 3D");
       return _begin[offset(Vector3i(i, j, k))];
     }
 
@@ -191,13 +191,13 @@ namespace DO { namespace Sara {
 
     inline const_reference operator()(int i, int j) const
     {
-      DO_SARA_STATIC_ASSERT(N == 2, MULTIARRAY_MUST_BE_TWO_DIMENSIONAL);
+      static_assert(N == 2, "MultiArray must be 2D");
       return _begin[offset(Vector2i(i, j))];
     }
 
     inline const_reference operator()(int i, int j, int k) const
     {
-      DO_SARA_STATIC_ASSERT(N == 3, MULTIARRAY_MUST_BE_THREE_DIMENSIONAL);
+      static_assert(N == 3, "MultiArray must be 3D");
       return _begin[offset(Vector3i(i, j, k))];
     }
     //! @}
@@ -266,18 +266,20 @@ namespace DO { namespace Sara {
     //! \brief Return the matrix view for linear algebra with Eigen libraries.
     inline matrix_view_type matrix()
     {
-      DO_SARA_STATIC_ASSERT(N == 2, MULTIARRAY_MUST_HAVE_TWO_DIMENSIONS);
-      return matrix_view_type( reinterpret_cast<
-                              typename ElementTraits<T>::pointer>(data()),
-                              rows(), cols());
+      static_assert(N == 2, "MultiArray must be 2D");
+      return matrix_view_type {
+        reinterpret_cast<typename ElementTraits<T>::pointer>(data()),
+        rows(), cols()
+      };
     }
 
     inline const_matrix_view_type matrix() const
     {
-      DO_SARA_STATIC_ASSERT(N == 2, MULTIARRAY_MUST_HAVE_TWO_DIMENSIONS);
-      return const_matrix_view_type( reinterpret_cast<
-                                    typename ElementTraits<T>::const_pointer>(data()),
-                                    rows(), cols());
+      static_assert(N == 2, "MultiArray must be 2D");
+      return const_matrix_view_type {
+        reinterpret_cast<typename ElementTraits<T>::const_pointer>(data()),
+        rows(), cols()
+      };
     }
     //! @}
 

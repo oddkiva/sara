@@ -5,8 +5,6 @@
 #include <DO/Sara/Core/Meta.hpp>
 #include <DO/Sara/Core/Pixel/ChannelConversion.hpp>
 #include <DO/Sara/Core/Pixel/ColorConversion.hpp>
-#include <DO/Sara/Core/StaticAssert.hpp>
-
 
 // Smart color conversion between colorspace regardless of the channel type.
 // We will treat the grayscale conversion separately
@@ -200,7 +198,7 @@ namespace DO { namespace Sara {
   inline void smart_convert_color(SrcGray src, DstGray& dst)
   {
     static const bool same_type = Meta::IsSame<SrcGray, DstGray>::value;
-    DO_SARA_STATIC_ASSERT(!same_type, THE_GRAYSCALE_TYPES_ARE_IDENTICAL);
+    static_assert(!same_type, "Grayscale types are identical");
     convert_channel(src, dst);
   }
 

@@ -13,7 +13,6 @@
 #define DO_SARA_CORE_PIXEL_CHANNELCONVERSION_HPP
 
 
-#include <DO/Sara/Core/StaticAssert.hpp>
 #include <DO/Sara/Core/EigenExtension.hpp>
 #include <DO/Sara/Core/Pixel/Pixel.hpp>
 
@@ -41,9 +40,9 @@ namespace DO { namespace Sara {
   template <typename Int, typename Float>
   inline Float float_normalized_channel(Int src)
   {
-    DO_SARA_STATIC_ASSERT(
+    static_assert(
       std::numeric_limits<Int>::is_integer,
-      CHANNEL_CONVERSION_MUST_BE_FROM_INTEGER_TYPE_TO_FLOATING_POINT_TYPE);
+      "Channel conversion must be from integer type to floating point type");
 
     using std::numeric_limits;
     const Float float_min = static_cast<Float>(numeric_limits<Int>::min());
@@ -56,9 +55,9 @@ namespace DO { namespace Sara {
   template <typename Int, typename Float>
   inline Int int_rescaled_channel(Float src)
   {
-    DO_SARA_STATIC_ASSERT(
+    static_assert(
       std::numeric_limits<Int>::is_integer,
-      CHANNEL_CONVERSION_MUST_BE_FROM_FLOATING_POINT_TYPE_TO_INTEGER_TYPE);
+      "Channel conversion must be from floating point type to integer type");
 
     using std::numeric_limits;
     const Float float_min = static_cast<Float>(numeric_limits<Int>::min());
