@@ -87,13 +87,13 @@ namespace DO { namespace Sara {
       std::copy(other._begin, other._end, _begin);
     }
 
-    //! \brief Copy constructor.
-    //! Recopies the data of the other MultiArray with appropriate type casting.
-    template <typename T2>
-    inline MultiArray(const MultiArray<T2, N, StorageOrder>& other)
+    //! \brief Move constructor.
+    inline MultiArray(self_type&& other)
+      : _begin(std::move(other._begin))
+      , _end(std::move(other._end))
+      , _sizes(other._sizes)
+      , _strides(other._strides)
     {
-      initialize(other.sizes());
-      std::transform(other.begin(), other.end(), _begin, Cast());
     }
 
     //! \brief Destructor.
