@@ -54,8 +54,8 @@ TYPED_TEST_P(TestConvertChannelIntToFloat,
   {
     // Using the explicit named function.
     {
-      float flt_val = float_normalized_channel<Int, float>(channel_values[i]);
-      double dbl_val = float_normalized_channel<Int, double>(channel_values[i]);
+      float flt_val = to_normalized_float_channel<Int, float>(channel_values[i]);
+      double dbl_val = to_normalized_float_channel<Int, double>(channel_values[i]);
       EXPECT_EQ(flt_val, expected_float_values[i]);
       EXPECT_EQ(dbl_val, expected_double_values[i]);
     }
@@ -100,12 +100,12 @@ TYPED_TEST_P(TestConvertChannelFloatToInt,
   for (int i = 0; i < 2; ++i)
   {
     {
-      Int val = int_rescaled_channel<Int, float>(channel_values[i]);
+      Int val = to_rescaled_integral_channel<Int, float>(channel_values[i]);
       EXPECT_EQ(expected_int_values[i], val);
     }
 
     {
-      Int val = int_rescaled_channel<Int, double>(channel_values[i]);
+      Int val = to_rescaled_integral_channel<Int, double>(channel_values[i]);
       EXPECT_EQ(expected_int_values[i], val);
     }
 
@@ -165,7 +165,7 @@ void test_channel_conversion_between_integer_types()
   for (int i = 0; i < 2; ++i)
   {
     DstInt actual_dst_value;
-    convert_channel(SrcInt(test_src_values[i]), actual_dst_value);
+    convert_channel(test_src_values[i], actual_dst_value);
     EXPECT_EQ(expected_dst_values[i], actual_dst_value);
   }
 }

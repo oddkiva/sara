@@ -38,47 +38,45 @@ namespace DO { namespace Sara {
 
   //! \brief Convert integral channel value to floating-point value.
   template <typename Int, typename Float>
-  inline Float float_normalized_channel(Int src)
+  inline Float to_normalized_float_channel(Int src)
   {
     static_assert(
       std::numeric_limits<Int>::is_integer,
       "Channel conversion must be from integer type to floating point type");
 
     using std::numeric_limits;
-    const Float float_min = static_cast<Float>(numeric_limits<Int>::min());
-    const Float float_max = static_cast<Float>(numeric_limits<Int>::max());
-    const Float float_range = float_max - float_min;
+    const auto float_min = static_cast<Float>(numeric_limits<Int>::min());
+    const auto float_max = static_cast<Float>(numeric_limits<Int>::max());
+    const auto float_range = float_max - float_min;
     return (static_cast<Float>(src) - float_min) / float_range;
   }
 
   //! \brief Convert floating-point channel value to integer value.
   template <typename Int, typename Float>
-  inline Int int_rescaled_channel(Float src)
+  inline Int to_rescaled_integral_channel(Float src)
   {
     static_assert(
       std::numeric_limits<Int>::is_integer,
       "Channel conversion must be from floating point type to integer type");
 
     using std::numeric_limits;
-    const Float float_min = static_cast<Float>(numeric_limits<Int>::min());
-    const Float float_max = static_cast<Float>(numeric_limits<Int>::max());
-    const Float float_range = float_max - float_min;
+    auto float_min = static_cast<Float>(numeric_limits<Int>::min());
+    auto float_max = static_cast<Float>(numeric_limits<Int>::max());
+    auto float_range = float_max - float_min;
     src = float_min + src * float_range;
 
-    const Float delta_max = std::abs(src-float_max)/float_range;
-    const Float delta_min = std::abs(src-float_min)/float_range;
-    const Float eps = sizeof(Float) == 4 ?
+    const auto delta_max = std::abs(src - float_max) / float_range;
+    const auto delta_min = std::abs(src - float_min) / float_range;
+    const auto eps = sizeof(Float) == 4 ?
       Float(1e-5) : // i.e., if 'Float' == 'float'.
       Float(1e-9);  // i.e., if 'Float' == 'double'.
 
-    Int dst;
     if (delta_max <= eps)
-      dst = std::numeric_limits<Int>::max();
+      return std::numeric_limits<Int>::max();
     else if (delta_min <= eps)
-      dst = std::numeric_limits<Int>::min();
+      return std::numeric_limits<Int>::min();
     else
-      dst = static_cast<Int>(floor(src + 0.5));
-    return dst;
+      return static_cast<Int>(floor(src + 0.5));
   }
 
 } /* namespace Sara */
@@ -104,28 +102,28 @@ namespace DO { namespace Sara {
   template <typename Int>
   inline void convert_channel(Int src, float& dst)
   {
-    dst = float_normalized_channel<Int, float>(src);
+    dst = to_normalized_float_channel<Int, float>(src);
   }
 
   //! \brief Convert an integer gray value to a double gray value.
   template <typename Int>
   inline void convert_channel(Int src, double& dst)
   {
-    dst = float_normalized_channel<Int, double>(src);
+    dst = to_normalized_float_channel<Int, double>(src);
   }
 
   //! \brief Convert a float gray value to an integer gray value.
   template <typename Int>
   inline void convert_channel(float src, Int& dst)
   {
-    dst = int_rescaled_channel<Int, float>(src);
+    dst = to_rescaled_integral_channel<Int, float>(src);
   }
 
   //! \brief Convert a double gray value to a integer gray value.
   template <typename Int>
   inline void convert_channel(double src, Int& dst)
   {
-    dst = int_rescaled_channel<Int, double>(src);
+    dst = to_rescaled_integral_channel<Int, double>(src);
   }
 
   //! \brief Convert an integer gray value to another one.
@@ -133,8 +131,8 @@ namespace DO { namespace Sara {
   inline void convert_channel(SrcInt src, DstInt& dst)
   {
     dst =
-      int_rescaled_channel<DstInt, double> (
-      float_normalized_channel<SrcInt, double>(src) );
+      to_rescaled_integral_channel<DstInt, double> (
+      to_normalized_float_channel<SrcInt, double>(src) );
   }
 
   //! \brief Convert channels from a pixel vector to another pixel vector.
