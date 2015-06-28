@@ -190,30 +190,6 @@ TEST(TestMultiArray, test_copy_constructor)
     ASSERT_EQ(*a, *b);
 }
 
-TEST(TestMultiArray, test_copy_constructor_from_different_multiarray_type)
-{
-  MultiArray<int, 2> A(4, 9);
-  {
-    MultiArray<int, 2>::iterator a = A.begin();
-    int value_a = 0;
-    for ( ; a != A.end(); ++a, ++value_a)
-      *a = value_a;
-  }
-
-  MultiArray<float, 2> B(A);
-
-  EXPECT_EQ(A.size(), B.size());
-  EXPECT_MATRIX_EQ(A.sizes(), B.sizes());
-  EXPECT_MATRIX_EQ(A.strides(), B.strides());
-
-  {
-    MultiArray<int, 2>::const_iterator a = A.begin();
-    MultiArray<float, 2>::const_iterator b = B.begin();
-    for ( ; a != A.end(); ++a, ++b)
-      ASSERT_EQ(static_cast<float>(*a), *b);
-  }
-}
-
 TEST(TestMultiArray, test_assignment_operator)
 {
   MultiArray<int, 2> A(4, 9);
@@ -237,31 +213,6 @@ TEST(TestMultiArray, test_assignment_operator)
   MultiArray<int, 2>::const_iterator b = B.begin();
   for ( ; a != A.end(); ++a, ++b)
     ASSERT_EQ(*a, *b);
-}
-
-TEST(TestMultiArray, test_assignment_operator_from_different_multiarray_type)
-{
-  MultiArray<int, 2> A(4, 9);
-  {
-    MultiArray<int, 2>::iterator a = A.begin();
-    int value_a = 0;
-    for ( ; a != A.end(); ++a, ++value_a)
-      *a = value_a;
-  }
-
-  MultiArray<float, 2> B;
-  B = A;
-
-  EXPECT_EQ(A.size(), B.size());
-  EXPECT_MATRIX_EQ(A.sizes(), B.sizes());
-  EXPECT_MATRIX_EQ(A.strides(), B.strides());
-
-  {
-    MultiArray<int, 2>::const_iterator a = A.begin();
-    MultiArray<float, 2>::const_iterator b = B.begin();
-    for ( ; a != A.end(); ++a, ++b)
-      ASSERT_EQ(static_cast<float>(*a), *b);
-  }
 }
 
 

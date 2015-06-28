@@ -109,22 +109,6 @@ namespace DO { namespace Sara {
       return *this;
     }
 
-    //! \brief Assignment operator that recopies the content of the source array
-    //! with appropriate type casting.
-    template <typename T2>
-    const self_type& operator=(const MultiArray<T2, N, StorageOrder>& other)
-    {
-      // Free memory.
-      if (_sizes != other.sizes())
-      {
-        delete[] _begin;
-        // Copy everything.
-        initialize(other.sizes());
-      }
-      std::transform(other.begin(), other.end(), _begin, Cast());
-      return *this;
-    }
-
     //! @{
     //! \brief Resize the MultiArray object with the specified sizes.
     inline void resize(const vector_type& sizes)
@@ -173,16 +157,6 @@ namespace DO { namespace Sara {
       _end = empty ? 0 : _begin + raw_size;
     }
 
-    //! \brief Casting functor
-    struct Cast
-    {
-      //! Overloaded operator to get the job done.
-      template <typename U>
-      inline T operator()(const U& u) const
-      {
-        return static_cast<T>(u);
-      }
-    };
   };
 
   //! output stream operator
