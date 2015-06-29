@@ -53,40 +53,46 @@ namespace DO { namespace Sara {
     //! @{
     //! Matrix views for linear algebra.
     using const_matrix_view_type = Map<
-      const Matrix<typename ElementTraits<pixel_type>::value_type,
-      Dynamic, Dynamic, RowMajor>>;
+      const Matrix<
+        typename ElementTraits<pixel_type>::value_type,
+        Dynamic, Dynamic, RowMajor
+      >
+    >;
     using matrix_view_type = Map<
-      Matrix<typename ElementTraits<pixel_type>::value_type,
-      Dynamic, Dynamic, RowMajor>>;
+      Matrix<
+        typename ElementTraits<pixel_type>::value_type,
+        Dynamic, Dynamic, RowMajor
+      >
+    >;
     //! @}
 
   public:
     //! Default image constructor.
     inline ImageBase()
-      : base_type()
+      : base_type{}
     {
     }
 
     //! Image constructor.
     inline ImageBase(pointer data, const vector_type& sizes)
-      : base_type(data, sizes)
+      : base_type{ data, sizes }
     {
     }
 
     //! @{
     //! Image constructors with specified sizes.
     inline explicit ImageBase(const vector_type& sizes)
-      : base_type(sizes)
+      : base_type{ sizes }
     {
     }
 
     inline ImageBase(int width, int height)
-      : base_type(width, height)
+      : base_type{ width, height }
     {
     }
 
     inline ImageBase(int width, int height, int depth)
-      : base_type(width, height, depth)
+      : base_type{ width, height, depth }
     {
     }
     //! @}
@@ -113,22 +119,46 @@ namespace DO { namespace Sara {
     //! Return matrix view for linear algebra with Eigen libraries.
     inline matrix_view_type matrix()
     {
-      DO_SARA_STATIC_ASSERT(Dimension == 2, MULTIARRAY_MUST_HAVE_TWO_DIMENSIONS);
-      return matrix_view_type(
+
+      static_assert(Dimension == 2, "MultiArray must be 2D");
+      return matrix_view_type {
         reinterpret_cast<
         typename ElementTraits<pixel_type>::pointer>(base_type::data()),
-        height(), width() );
+        height(), width()
+      };
     }
 
     inline const_matrix_view_type matrix() const
     {
-      DO_SARA_STATIC_ASSERT(Dimension == 2, MULTIARRAY_MUST_HAVE_TWO_DIMENSIONS);
-      return const_matrix_view_type(
+      static_assert(Dimension == 2, "MultiArray must be 2D");
+      return const_matrix_view_type {
         reinterpret_cast<
         typename ElementTraits<pixel_type>::const_pointer>(base_type::data()),
-        height(), width() );
+        height(), width()
+      };
     }
     //! @}
+
+    template <typename Op>
+    inline ImageBase& pixelwise_transform_inplace(Op op)
+    {
+      for (auto pixel = base_type::begin(); pixel != base_type::end(); ++pixel)
+        op(*pixel);
+      return *this;
+    }
+
+    template <typename Op>
+    inline auto pixelwise_transform(Op op) const
+      -> Image<decltype(op(std::declval<pixel_type>())), Dimension>
+    {
+      using PixelType = decltype(op(std::declval<pixel_type>()));
+      Image<PixelType, Dimension> dst(this->sizes());
+      auto src_pixel = this->begin();
+      auto dst_pixel = dst.begin();
+      for ( ; src_pixel != this->end(); ++src_pixel, ++dst_pixel)
+        *dst_pixel = op(*src_pixel);
+      return dst;
+    }
   };
 
 
@@ -142,7 +172,7 @@ namespace DO { namespace Sara {
     using vector_type = typename base_type::vector_type;
 
     inline ImageView(T *data, const vector_type& sizes)
-      : base_type(data, sizes)
+      : base_type{ data, sizes }
     {
     }
   };
@@ -150,39 +180,39 @@ namespace DO { namespace Sara {
 
   //! \brief The image class.
   template <typename T, int N>
-  class Image : public ImageBase<MultiArray<T, N, ColMajor>>
+  class Image : public ImageBase < MultiArray<T, N, ColMajor> >
   {
-    using base_type = ImageBase<MultiArray<T, N, ColMajor>>;
+    using base_type = ImageBase < MultiArray<T, N, ColMajor> > ;
 
   public: /* interface */
     using vector_type = typename base_type::vector_type;
 
     //! Default constructor.
     inline Image()
-      : base_type()
+      : base_type{}
     {
     }
 
     //! Constructor that takes ownership of data.
     inline explicit Image(T *data, const vector_type& sizes)
-      : base_type(data, sizes)
+      : base_type{ data, sizes }
     {
     }
 
     //! @{
     //! Constructors with specified sizes.
     inline explicit Image(const vector_type& sizes)
-      : base_type(sizes)
+      : base_type{ sizes }
     {
     }
 
     inline Image(int width, int height)
-      : base_type(width, height)
+      : base_type{ width, height }
     {
     }
 
     inline Image(int width, int height, int depth)
-      : base_type(width, height, depth)
+      : base_type{ width, height, depth }
     {
     }
     //! @}
@@ -191,23 +221,22 @@ namespace DO { namespace Sara {
     template <typename U>
     Image<U, N> convert() const
     {
-      Image<U, N> dst(base_type::sizes());
-      DO::Sara::convert(*this, dst);
-      return dst;
+      Image<U, N> dst{ base_type::sizes() };
+      DO::Sara::convert(*this, dst); return dst;
     }
 
     //! Convenient helper for chaining filters.
     template <template<typename, int> class Filter>
     inline typename Filter<T, N>::return_type compute() const
     {
-      return Filter<T, N>(*this)();
+      return Filter<T, N>{ *this }();
     }
 
     template <template<typename, int> class Filter>
     inline typename Filter<T, N>::return_type
     compute(const typename Filter<T, N>::parameter_type& param) const
     {
-      return Filter<T, N>(*this)(param);
+      return Filter<T, N>{ *this }(param);
     }
   };
 

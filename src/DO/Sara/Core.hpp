@@ -19,7 +19,6 @@
 #include "Defines.hpp"
 // Template meta-programming
 #include "Core/Meta.hpp"
-#include "Core/StaticAssert.hpp"
 // Linear algebra imports and extension from Eigen3
 #include "Core/EigenExtension.hpp"
 // N-dimensional array and N-dimensional iterators

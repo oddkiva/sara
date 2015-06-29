@@ -173,9 +173,9 @@ namespace DO { namespace Sara {
     typename PixelTraits<T>::channel_type gauss_truncate =
       typename PixelTraits<T>::channel_type(4))
   {
-    DO_SARA_STATIC_ASSERT(
+    static_assert(
       !std::numeric_limits<typename PixelTraits<T>::channel_type >::is_integer,
-      CHANNEL_TYPE_MUST_NOT_BE_INTEGRAL );
+      "Channel type cannot be integral");
 
     typedef typename PixelTraits<T>::channel_type S;
 

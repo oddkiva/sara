@@ -86,7 +86,7 @@ TEST(TestScaling, test_enlarge)
   dst = enlarge(src, 2);
   EXPECT_MATRIX_EQ(true_dst.matrix(), dst.matrix());
 }
-
+ 
 
 TEST(TestScaling, test_reduce)
 {
@@ -105,13 +105,38 @@ TEST(TestScaling, test_reduce)
   Image<float> dst;
 
   dst = reduce(src, Vector2i(2, 2));
-  EXPECT_LE((true_dst.matrix()-dst.matrix()).lpNorm<Infinity>(), 1);
+  EXPECT_LE((true_dst.matrix()-dst.matrix()).lpNorm<Infinity>(), 0.4);
 
   dst = reduce(src, 2, 2);
-  EXPECT_LE((true_dst.matrix()-dst.matrix()).lpNorm<Infinity>(), 1);
+  EXPECT_LE((true_dst.matrix()-dst.matrix()).lpNorm<Infinity>(), 0.4);
 
   dst = reduce(src, 2);
-  EXPECT_LE((true_dst.matrix()-dst.matrix()).lpNorm<Infinity>(), 1);
+  EXPECT_LE((true_dst.matrix()-dst.matrix()).lpNorm<Infinity>(), 0.4);
+}
+
+TEST(TestScaling, test_reduce_2)
+{
+  auto lambda = [](double lambda) {
+    return Rgb64f{ lambda, lambda, lambda };
+  };
+  Image<Rgb64f> src(4, 4);
+  src(0, 0) = lambda(0); src(1, 0) = lambda(0.5); src(2, 0) = lambda(1); src(3, 0) = lambda(1);
+  src(0, 1) = lambda(1); src(1, 1) = lambda(1.5); src(2, 1) = lambda(2); src(3, 1) = lambda(2);
+  src(0, 2) = lambda(2); src(1, 2) = lambda(2.5); src(2, 2) = lambda(3); src(3, 2) = lambda(3);
+  src(0, 3) = lambda(2); src(1, 3) = lambda(2.5); src(2, 3) = lambda(3); src(3, 3) = lambda(3);
+
+  Image<Rgb64f> true_dst(2, 2);
+  true_dst.matrix();
+  true_dst(0, 0) = lambda(0); true_dst(1, 0) = lambda(1);
+  true_dst(0, 1) = lambda(2); true_dst(1, 1) = lambda(3);
+
+  Image<Rgb64f> dst;
+  dst = reduce(src, 2);
+
+  auto dst_pixel = dst.begin();
+  auto true_dst_pixel = true_dst.begin();
+  for (; dst_pixel != dst.end(); ++dst_pixel, ++true_dst_pixel)
+    EXPECT_LE((*true_dst_pixel - *dst_pixel).lpNorm<Infinity>(), 0.4);
 }
 
 

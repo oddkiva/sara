@@ -21,7 +21,6 @@
 
 #include <DO/Sara/Core/EigenExtension.hpp>
 #include <DO/Sara/Core/Meta.hpp>
-#include <DO/Sara/Core/StaticAssert.hpp>
 
 
 namespace DO { namespace Sara {
@@ -34,8 +33,9 @@ namespace DO { namespace Sara {
   inline Index jump(const Matrix<Index, N, 1>& offset,
                     const Matrix<Index, N, 1>& strides)
   {
-    DO_SARA_STATIC_ASSERT(std::numeric_limits<Index>::is_integer,
-                     INDEX_MUST_BE_INTEGRAL);
+    static_assert(
+      std::numeric_limits<Index>::is_integer,
+      "Index must be integral");
     return offset.dot(strides);
   }
 
@@ -58,9 +58,10 @@ namespace DO { namespace Sara {
     template <typename Index, int N>
     static Matrix<Index, N, 1> eval(const Matrix<Index, N, 1>& sizes)
     {
-      DO_SARA_STATIC_ASSERT(N > 0, N_MUST_BE_POSITIVE);
-      DO_SARA_STATIC_ASSERT(std::numeric_limits<Index>::is_integer,
-                       INDEX_MUST_BE_INTEGRAL);
+      static_assert(N > 0, "N must be positive");
+      static_assert(
+        std::numeric_limits<Index>::is_integer,
+        "Index must be integral");
       Matrix<Index, N, 1> strides;
       strides[N-1] = 1;
       for (int i = N-2; i >= 0; --i)
@@ -76,9 +77,10 @@ namespace DO { namespace Sara {
     template <typename Index, int N>
     static Matrix<Index, N, 1> eval(const Matrix<Index, N, 1>& sizes)
     {
-      DO_SARA_STATIC_ASSERT(N > 0, N_MUST_BE_POSITIVE);
-      DO_SARA_STATIC_ASSERT(std::numeric_limits<Index>::is_integer,
-                       INDEX_MUST_BE_INTEGRAL);
+      static_assert(N > 0, "N must be positive");
+      static_assert(
+        std::numeric_limits<Index>::is_integer,
+        "Index must be integral");
       Matrix<Index, N, 1> strides;
       strides[0] = 1;
       for (int i = 1; i < N; ++i)
