@@ -83,7 +83,7 @@ namespace DO { namespace Sara {
     //! \brief Matrix views for linear algebra.
     using matrix_view_type = Map<
       Matrix<
-        typename ElementTraits<T>::value_type, Dynamic, Dynamic, 
+        typename ElementTraits<T>::value_type, Dynamic, Dynamic,
         StorageOrder
       >
     >;
@@ -102,10 +102,10 @@ namespace DO { namespace Sara {
     //! \brief Constructor that wraps plain data with its known sizes.
     inline MultiArrayView(value_type *data,
                           const vector_type& sizes)
-      : _begin(data)
-      , _end(data+compute_size(sizes))
-      , _sizes(sizes)
-      , _strides(compute_strides(sizes))
+      : _begin{ data }
+      , _end{ data+compute_size(sizes) }
+      , _sizes{ sizes }
+      , _strides{ compute_strides(sizes) }
     {
     }
 

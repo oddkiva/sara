@@ -140,7 +140,7 @@ namespace DO { namespace Sara {
     //! @}
 
     template <typename Op>
-    inline ImageBase& pixelwise_transform_inplace(Op& op)
+    inline ImageBase& pixelwise_transform_inplace(Op op)
     {
       for (auto pixel = base_type::begin(); pixel != base_type::end(); ++pixel)
         op(*pixel);
@@ -148,7 +148,7 @@ namespace DO { namespace Sara {
     }
 
     template <typename Op>
-    inline auto pixelwise_transform(const Op& op) const
+    inline auto pixelwise_transform(Op op) const
       -> Image<decltype(op(std::declval<pixel_type>())), Dimension>
     {
       using PixelType = decltype(op(std::declval<pixel_type>()));
@@ -222,8 +222,7 @@ namespace DO { namespace Sara {
     Image<U, N> convert() const
     {
       Image<U, N> dst{ base_type::sizes() };
-      DO::Sara::convert(*this, dst);
-      return dst;
+      DO::Sara::convert(*this, dst); return dst;
     }
 
     //! Convenient helper for chaining filters.

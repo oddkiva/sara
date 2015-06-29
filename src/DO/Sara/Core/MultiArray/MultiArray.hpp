@@ -51,8 +51,8 @@ namespace DO { namespace Sara {
     }
 
     //! \brief Constructor that takes **ownership** of the data.
-    //! The data will be cleared upon destruction of the MultiArray object. 
-    //! Thus ensure sure that is really what you want. Otherwise construct a 
+    //! The data will be cleared upon destruction of the MultiArray object.
+    //! Thus ensure sure that is really what you want. Otherwise construct a
     //! MultiArrayView object instead.
     inline explicit MultiArray(T *data, const vector_type& sizes)
       : base_type(data, sizes)
@@ -89,11 +89,12 @@ namespace DO { namespace Sara {
 
     //! \brief Move constructor.
     inline MultiArray(self_type&& other)
-      : _begin(std::move(other._begin))
-      , _end(std::move(other._end))
-      , _sizes(other._sizes)
-      , _strides(other._strides)
+      : base_type{}
     {
+      std::swap(_begin, other._begin);
+      std::swap(_end, other._end);
+      _sizes = other._sizes;
+      _strides = other._strides;
     }
 
     //! \brief Destructor.
