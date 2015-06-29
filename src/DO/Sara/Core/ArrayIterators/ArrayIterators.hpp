@@ -86,10 +86,10 @@ namespace DO { namespace Sara {
                         vector_type& pos,
                         const vector_type& strides,
                         const vector_type& sizes)
-      : cur_ptr_{ ptr }
-      , cur_pos_{ pos }
-      , strides_{ strides }
-      , sizes_{ sizes }
+      : cur_ptr_(ptr)
+      , cur_pos_(pos)
+      , strides_(strides)
+      , sizes_(sizes)
     {
     }
 
@@ -237,11 +237,11 @@ namespace DO { namespace Sara {
                              const vector_type& strides,
                              const vector_type& sizes)
       : base_type{}
-      , stop_{ stop }
-      , cur_ptr_{ ptr }
-      , cur_pos_{ pos }
-      , strides_{ strides }
-      , sizes_{ sizes }
+      , stop_{stop}
+      , cur_ptr_(ptr)
+      , cur_pos_(pos)
+      , strides_(strides)
+      , sizes_(sizes)
     {
     }
 
