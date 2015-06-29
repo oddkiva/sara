@@ -1,9 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
 
-if(POLICY CMP0020)
-  cmake_policy(SET CMP0020 NEW)
-endif()
-
 project(DO_Geometry_Examples)
 
 message(STATUS "  - DO_Geometry_Examples")
