@@ -1,9 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
 
-if (POLICY CMP0020)
-  cmake_policy(SET CMP0020 NEW)
-endif ()
-
 project(DO_VideoIO_Examples)
 
 message(STATUS "  - DO_VideoIO_Examples")
