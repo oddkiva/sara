@@ -13,7 +13,8 @@ set(PATH_HINTS
     ${EasyEXIF_ROOT_DIR}
     "/usr"
     "/usr/local"
-    "C:/Program Files/DO-Sara")
+    "C:/Program Files/DO-Sara"
+    "C:/Program Files/DO-Sara-Debug")
 
 find_path(
 	EasyEXIF_INCLUDE_DIR exif.h
@@ -32,7 +33,7 @@ find_library(
   EasyEXIF_DEBUG_LIBRARY
   NAMES easyexif-d
 	PATHS ${PATH_HINTS}
-	PATH_SUFFIXES lib
+  PATH_SUFFIXES lib
 )
 
 find_library(

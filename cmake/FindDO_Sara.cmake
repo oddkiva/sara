@@ -140,7 +140,7 @@ if (DO_Sara_FIND_COMPONENTS)
         NAMES DO_Sara_${COMPONENT}-${DO_Sara_VERSION}-d
         PATHS
         /usr/lib /usr/local/lib /opt/local/lib
-        "C:/Program Files/DO-Sara/lib"
+        "C:/Program Files/DO-Sara-Debug/lib"
         PATH_SUFFIXES DO/Sara)
 
       find_library(DO_Sara_${COMPONENT}_RELEASE_LIBRARIES
@@ -174,7 +174,7 @@ if (DO_Sara_FIND_COMPONENTS)
           if (WIN32)
             find_library(${IMAGE_IO_LIB}_DEBUG_LIBRARY
               NAMES ${IMAGE_IO_LIB}-d
-              PATHS "C:/Program Files/DO-Sara/lib")
+              PATHS "C:/Program Files/DO-Sara-Debug/lib")
             find_library(${IMAGE_IO_LIB}_RELEASE_LIBRARY
               NAMES ${IMAGE_IO_LIB}
               PATHS "C:/Program Files/DO-Sara/lib")
