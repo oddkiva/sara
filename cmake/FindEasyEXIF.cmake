@@ -29,10 +29,19 @@ endif()
 include_directories("${EasyEXIF_INCLUDE_DIR}")
 
 find_library(
-	EasyEXIF_LIBRARY
+  EasyEXIF_DEBUG_LIBRARY
+  NAMES easyexif-d
+	PATHS ${PATH_HINTS}
+	PATH_SUFFIXES lib
+)
+
+find_library(
+  EasyEXIF_RELEASE_LIBRARY
   NAMES easyexif
 	PATHS ${PATH_HINTS}
 	PATH_SUFFIXES lib
 )
 
-set(EasyEXIF_LIBRARIES ${EasyEXIF_LIBRARY})
+set(EasyEXIF_LIBRARIES
+  debug ${EasyEXIF_DEBUG_LIBRARY}
+  optimized ${EasyEXIF_RELEASE_LIBRARY})

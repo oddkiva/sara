@@ -136,12 +136,24 @@ if (DO_Sara_FIND_COMPONENTS)
         "C:/Program Files/DO-Sara/include"
         PATH_SUFFIXES DO/Sara)
 
-      find_library(DO_Sara_${COMPONENT}_LIBRARIES
+      find_library(DO_Sara_${COMPONENT}_DEBUG_LIBRARIES
+        NAMES DO_Sara_${COMPONENT}-${DO_Sara_VERSION}-d
+        PATHS
+        /usr/lib /usr/local/lib /opt/local/lib
+        "C:/Program Files/DO-Sara/lib"
+        PATH_SUFFIXES DO/Sara)
+
+      find_library(DO_Sara_${COMPONENT}_RELEASE_LIBRARIES
         NAMES DO_Sara_${COMPONENT}-${DO_Sara_VERSION}
         PATHS
         /usr/lib /usr/local/lib /opt/local/lib
         "C:/Program Files/DO-Sara/lib"
         PATH_SUFFIXES DO/Sara)
+
+      set(DO_Sara_${COMPONENT}_LIBRARIES
+        debug ${DO_Sara_${COMPONENT}_DEBUG_LIBRARIES}
+        optimized ${DO_Sara_${COMPONENT}_RELEASE_LIBRARIES}
+        CACHE STRING "")
 
       if (DO_Sara_${COMPONENT}_LIBRARIES)
         list(APPEND DO_Sara_LIBRARIES ${DO_Sara_${COMPONENT}_LIBRARIES})
@@ -153,26 +165,31 @@ if (DO_Sara_FIND_COMPONENTS)
       endif ()
 
       if ("${COMPONENT}" STREQUAL "ImageIO")
+        # EXIF library
         find_package(EasyEXIF)
-        if (WIN32)
-          find_library(JPEG_LIBRARY
-            NAMES jpeg
-            PATHS "C:/Program Files/DO-Sara/lib")
-          find_library(PNG_LIBRARY
-            NAMES png
-            PATHS "C:/Program Files/DO-Sara/lib")
-          find_library(TIFF_LIBRARY
-            NAMES tiff
-            PATHS "C:/Program Files/DO-Sara/lib")
-          find_library(ZLIB_LIBRARY
-            NAMES zlib
-            PATHS "C:/Program Files/DO-Sara/lib")
-        else ()
-          find_package(JPEG REQUIRED)
-          find_package(PNG REQUIRED)
-          find_package(TIFF REQUIRED)
-          find_package(ZLIB REQUIRED)
-        endif ()
+
+        # JPEG, PNG, TIFF...
+        set(IMAGE_IO_LIBRARIES JPEG PNG TIFF ZLIB)
+        foreach (IMAGE_IO_LIB ${IMAGE_IO_LIBRARIES})
+          if (WIN32)
+            find_library(${IMAGE_IO_LIB}_DEBUG_LIBRARY
+              NAMES ${IMAGE_IO_LIB}-d
+              PATHS "C:/Program Files/DO-Sara/lib")
+            find_library(${IMAGE_IO_LIB}_RELEASE_LIBRARY
+              NAMES ${IMAGE_IO_LIB}
+              PATHS "C:/Program Files/DO-Sara/lib")
+            set(${IMAGE_IO_LIB}_LIBRARY
+              debug ${${IMAGE_IO_LIB}_DEBUG_LIBRARY}
+              optimized ${${IMAGE_IO_LIB}_RELEASE_LIBRARY})
+          else ()
+            find_package(JPEG REQUIRED)
+            find_package(PNG REQUIRED)
+            find_package(TIFF REQUIRED)
+            find_package(ZLIB REQUIRED)
+          endif ()
+        endforeach()
+
+        # Add these image I/O libraries to the dependencies.
         list(APPEND
           DO_Sara_LIBRARIES
           ${EasyEXIF_LIBRARIES}

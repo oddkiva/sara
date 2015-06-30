@@ -64,6 +64,9 @@ if(MSVC)
 endif(MSVC)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ../zlib)
 add_library(png STATIC ${libpng_sources})
+set_target_properties(png
+  PROPERTIES
+  OUTPUT_NAME_DEBUG png-d)
 target_link_libraries(png zlib ${M_LIBRARY})
 
 if (WIN32)

@@ -88,6 +88,9 @@ if(UNIX AND (CMAKE_COMPILER_IS_GNUCXX OR CV_ICC))
 endif()
 
 add_library(tiff STATIC ${lib_srcs})
+set_target_properties(tiff
+  PROPERTIES
+  OUTPUT_NAME_DEBUG tiff-d)
 target_link_libraries(tiff zlib)
 if (WIN32)
   install(TARGETS tiff
