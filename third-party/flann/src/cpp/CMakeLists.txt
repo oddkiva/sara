@@ -17,6 +17,9 @@ file(GLOB_RECURSE CU_SOURCES *.cu)
 # Create the static C++ library.
 # 
 add_library(flann_cpp_s STATIC ${CPP_SOURCES})
+set_target_properties(flann_cpp_s
+  PROPERTIES
+  OUTPUT_NAME_DEBUG flann_cpp_s-d)
 if(CMAKE_COMPILER_IS_GNUCC)
     set_target_properties(flann_cpp_s PROPERTIES COMPILE_FLAGS -fPIC)
 endif()
