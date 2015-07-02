@@ -30,7 +30,10 @@ namespace DO { namespace Sara {
 
   static inline string file_ext(const string& filepath)
   {
-    string ext( filepath.substr(filepath.find_last_of(".")) );
+    if (filepath.empty())
+      return string{};
+
+    string ext{ filepath.substr(filepath.find_last_of(".")) };
     transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
     return ext;
   }

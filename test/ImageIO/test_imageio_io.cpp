@@ -23,6 +23,11 @@ using namespace DO::Sara;
 
 TEST(TestImageIO, test_rgb_image_read_write)
 {
+  string blank_filepath{ "" };
+  Image<Rgb8> blank_image;
+  EXPECT_FALSE(imread(blank_image, blank_filepath));
+  EXPECT_MATRIX_EQ(blank_image.sizes(), Vector2i::Zero());
+
   string filepaths[] =
   {
     "image.jpg",
