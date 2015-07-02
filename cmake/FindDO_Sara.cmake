@@ -31,6 +31,8 @@ if (NOT DO_Sara_FOUND)
 
   endif ()
 
+  set(DO_PROJECT_NAME Sara)
+
   # List the available component libraries in DO++
   # Foundational libraries
   do_append_components(DO_Sara_COMPONENTS Core)
