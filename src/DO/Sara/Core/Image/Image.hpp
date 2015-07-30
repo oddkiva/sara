@@ -68,15 +68,11 @@ namespace DO { namespace Sara {
 
   public:
     //! Default image constructor.
-    inline ImageBase()
-      : base_type{}
-    {
-    }
+    inline ImageBase() = default;
 
     //! Image constructor.
     inline ImageBase(pointer data, const vector_type& sizes)
-      : base_type{ data, sizes }
-    {
+      : base_type{ data, sizes } {
     }
 
     //! @{
@@ -180,18 +176,15 @@ namespace DO { namespace Sara {
 
   //! \brief The image class.
   template <typename T, int N>
-  class Image : public ImageBase < MultiArray<T, N, ColMajor> >
+  class Image : public ImageBase<MultiArray<T, N, ColMajor>>
   {
-    using base_type = ImageBase < MultiArray<T, N, ColMajor> > ;
+    using base_type = ImageBase<MultiArray<T, N, ColMajor>>;
 
   public: /* interface */
     using vector_type = typename base_type::vector_type;
 
     //! Default constructor.
-    inline Image()
-      : base_type{}
-    {
-    }
+    inline Image() = default;
 
     //! Constructor that takes ownership of data.
     inline explicit Image(T *data, const vector_type& sizes)
