@@ -97,7 +97,9 @@ namespace DO { namespace Sara {
 
   public: /* methods */
     //! \brief Default constructor.
-    inline MultiArrayView() = default;
+    inline MultiArrayView()
+    {
+    }
 
     //! \brief Constructor that wraps plain data with its known sizes.
     inline MultiArrayView(value_type *data,
@@ -352,9 +354,9 @@ namespace DO { namespace Sara {
     //! \brief Last element of the internal array.
     value_type *_end{ nullptr };
     //! \brief Sizes vector.
-    vector_type _sizes = vector_type::Zero();
+    vector_type _sizes{ vector_type::Zero() };
     //! \brief Strides vector.
-    vector_type _strides = vector_type::Zero();
+    vector_type _strides{ vector_type::Zero() };
   };
 
 } /* namespace Sara */
