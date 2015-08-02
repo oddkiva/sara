@@ -156,13 +156,8 @@ macro (do_append_library _library_name
   if (NOT "${_src_files}" STREQUAL "")
     # - Case 1: the project contains 'cpp' source files
     #   Specify the source files.
-    if (DO_BUILD_SHARED_LIBS)
-      add_library(DO_${DO_PROJECT_NAME}_${_library_name}
-                  SHARED ${_hdr_files} ${_src_files})
-    else ()
-      add_library(DO_${DO_PROJECT_NAME}_${_library_name}
-                  STATIC ${_hdr_files} ${_src_files})
-    endif()
+    add_library(DO_${DO_PROJECT_NAME}_${_library_name}
+                ${_hdr_files} ${_src_files})
 
     # Link with other libraries.
     message(STATUS
@@ -244,6 +239,7 @@ function (do_test _test_name _srcs _additional_lib_deps)
     COMPILE_FLAGS ${DO_DEFINITIONS}
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/test"
   )
+
   add_test(${_test_name}
            "${CMAKE_BINARY_DIR}/test/${_test_name}")
 

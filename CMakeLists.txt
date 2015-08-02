@@ -27,6 +27,8 @@ option(DO_BUILD_TESTS "Build unit tests for DO-Sara libraries" OFF)
 option(DO_BUILD_SAMPLES "Build sample programs using DO-Sara libraries" OFF)
 option(DO_BUILD_SHARED_LIBS "Build shared libraries for DO-Sara libraries"  OFF)
 
+set(BUILD_SHARED_LIBS ${DO_BUILD_SHARED_LIBS})
+
 # Add DO-CV to the CMake module path.
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 find_package(DO_Sara REQUIRED)
