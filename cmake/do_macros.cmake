@@ -195,10 +195,11 @@ macro (do_append_library _library_name
     endif ()
 
     # Specify where to install the static library.
-    install(TARGETS DO_${DO_PROJECT_NAME}_${_library_name}
-            LIBRARY DESTINATION lib/DO/${DO_PROJECT_NAME}
-            ARCHIVE DESTINATION lib/DO/${DO_PROJECT_NAME}
-            COMPONENT Libraries)
+    install(
+      TARGETS DO_${DO_PROJECT_NAME}_${_library_name}
+      RUNTIME DESTINATION lib/DO/${DO_PROJECT_NAME} COMPONENT Libraries
+      LIBRARY DESTINATION lib/DO/${DO_PROJECT_NAME} COMPONENT Libraries
+      ARCHIVE DESTINATION lib/DO/${DO_PROJECT_NAME} COMPONENT Libraries)
   else ()
 
     # - Case 2: the project is a header-only library
