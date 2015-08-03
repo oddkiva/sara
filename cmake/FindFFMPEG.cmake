@@ -3,10 +3,15 @@ if (FFMPEG_LIBRARIES AND FFMPEG_INCLUDE_DIR)
   set(FFMPEG_FOUND TRUE)
 
 elseif (MSVC)
-  set(FFMPEG_INCLUDE_DIR ${DO_Sara_ThirdParty_DIR}/ffmpeg/include)
-  set(FFMPEG_LINK_DIR ${DO_Sara_ThirdParty_DIR}/ffmpeg/lib)
-  set(FFMPEG_LIBRARIES avcodec avformat avutil)
+  if (DO_USE_FROM_SOURCE)
+    set(FFMPEG_INCLUDE_DIR ${DO_Sara_ThirdParty_DIR}/ffmpeg/include)
+    set(FFMPEG_LINK_DIR ${DO_Sara_ThirdParty_DIR}/ffmpeg/lib)
+  else ()
+    set(FFMPEG_INCLUDE_DIR ${DO_Sara_DIR}/../../../include)
+    set(FFMPEG_LINK_DIR ${DO_Sara_DIR}/../../../lib)
+  endif ()
 
+  set(FFMPEG_LIBRARIES avcodec avformat avutil)
 else ()
   # use pkg-config to get the directories and then use these values
   # in the FIND_PATH() and FIND_LIBRARY() calls

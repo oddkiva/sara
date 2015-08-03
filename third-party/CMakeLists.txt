@@ -72,3 +72,8 @@ if (NOT TIFF_FOUND)
   add_subdirectory(libtiff)
   set_property(TARGET tiff PROPERTY FOLDER ${THIRDPARTY_FOLDER_NAME})
 endif ()
+
+if (WIN32)
+  message(STATUS "  - FFMpeg")
+  add_subdirectory(ffmpeg)
+endif ()
