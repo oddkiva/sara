@@ -173,6 +173,12 @@ macro (do_append_library _library_name
       SOVERSION ${DO_${DO_PROJECT_NAME}_SOVERSION}
       OUTPUT_NAME DO_${DO_PROJECT_NAME}_${_library_name}-${DO_${DO_PROJECT_NAME}_VERSION}
       OUTPUT_NAME_DEBUG DO_${DO_PROJECT_NAME}_${_library_name}-${DO_${DO_PROJECT_NAME}_VERSION}-d)
+    if (DO_BUILD_SHARED_LIBS)
+      set_target_properties(
+        DO_${DO_PROJECT_NAME}_${_library_name}
+        PROPERTIES
+        COMPILE_DEFINITIONS "DO_EXPORTS")
+    endif ()
 
     # Specify where to install the static library.
     install(TARGETS DO_${DO_PROJECT_NAME}_${_library_name}
