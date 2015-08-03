@@ -4,6 +4,8 @@
 bin/
 lib/
 build/
+build-static/
+build-shared/
 html/
 latex/
 
