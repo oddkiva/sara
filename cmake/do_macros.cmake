@@ -3,17 +3,17 @@
 #
 function (do_message _msg)
   message (STATUS "[DO] ${_msg}")
-endfunction (do_message _msg)
+endfunction ()
 
 
 function (do_step_message _msg)
   message ("[DO] ${_msg}")
-endfunction (do_step_message _msg)
+endfunction ()
 
 
 function (do_substep_message _msg)
   message ("     ${_msg}")
-endfunction (do_substep_message _msg)
+endfunction ()
 
 
 function (do_list_files _src_files _rel_path _extension)
@@ -26,7 +26,7 @@ function (do_list_files _src_files _rel_path _extension)
     message (l)
   endforeach ()
   message (${LIST})
-endfunction (do_list_files)
+endfunction ()
 
 
 
@@ -43,7 +43,7 @@ macro (do_dissect_version PROJECT_NAME VERSION)
          ${PROJECT_NAME}_VERSION_PATCH ${VERSION})
   set(${PROJECT_NAME}_SOVERSION
       "${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}")
-endmacro (do_dissect_version)
+endmacro ()
 
 
 
@@ -53,7 +53,7 @@ endmacro (do_dissect_version)
 macro (do_append_components _component_list _component)
   set(DO_${DO_PROJECT_NAME}_${_component}_USE_FILE UseDO${DO_PROJECT_NAME}${_component})
   list(APPEND "${_component_list}" ${_component})
-endmacro (do_append_components)
+endmacro ()
 
 
 macro (do_create_common_variables _library_name)
@@ -199,7 +199,7 @@ macro (do_append_library _library_name
   set_property(
     TARGET DO_${DO_PROJECT_NAME}_${_library_name} PROPERTY
     FOLDER "DO ${DO_PROJECT_NAME} Libraries")
-endmacro (do_append_library)
+endmacro ()
 
 
 macro (do_generate_library _library_name)
@@ -217,7 +217,7 @@ endmacro ()
 # ==============================================================================
 # Specific macro to add a unit test
 #
-function (do_test _test_name _srcs _additional_lib_deps)
+function (do_add_test _test_name _srcs _additional_lib_deps)
   if (POLICY CMP0020)
     cmake_policy(SET CMP0020 OLD)
   endif (POLICY CMP0020)
@@ -243,15 +243,15 @@ function (do_test _test_name _srcs _additional_lib_deps)
     ${_test_name}
     PROPERTIES
     COMPILE_FLAGS ${DO_DEFINITIONS}
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/test"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
   )
 
   add_test(${_test_name}
-           "${CMAKE_BINARY_DIR}/test/${_test_name}")
+           "${CMAKE_BINARY_DIR}/bin/${_test_name}")
 
   if (DEFINED test_group_name)
     set_property(
       TARGET ${_test_name}
       PROPERTY FOLDER "DO ${DO_PROJECT_NAME} Tests/${test_group_name}")
   endif ()
-endfunction (do_test)
+endfunction ()

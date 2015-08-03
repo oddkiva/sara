@@ -18,10 +18,12 @@ set_property(TARGET test_graphics_common
 set(CMAKE_AUTOMOC OFF)
 set(CMAKE_INCLUDE_CURRENT_DIR OFF)
 
+
 file(GLOB test_graphics_SOURCE_FILES FILES test_graphics_*.cpp)
 foreach (file ${test_graphics_SOURCE_FILES})
   get_filename_component(filename "${file}" NAME_WE)
-  do_test(${filename} ${file}
-          "${DO_Sara_LIBRARIES};${Qt5Test_LIBRARIES};test_graphics_common"
-		  "Graphics")
+  do_add_test(
+    ${filename} ${file}
+    "${DO_Sara_LIBRARIES};${Qt5Test_LIBRARIES};test_graphics_common"
+    "Graphics")
 endforeach ()

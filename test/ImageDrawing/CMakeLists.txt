@@ -7,4 +7,6 @@ message(STATUS "  - DO_ImageDrawing_tests")
 find_package(DO_Sara COMPONENTS Core ImageDrawing Graphics FileSystem REQUIRED)
 include(${DO_USE_FILE})
 
-do_test(ImageDrawing_ImageIO test_ImageIO.cpp "${DO_Sara_LIBRARIES}" "ImageDrawing")
+do_add_test(
+  ImageDrawing_ImageIO test_ImageIO.cpp "${DO_Sara_LIBRARIES}"
+  "ImageDrawing")
