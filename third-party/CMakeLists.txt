@@ -16,11 +16,11 @@ if (DO_BUILD_TESTS)
 
   if (WIN32)
     file (COPY ${CMAKE_CURRENT_SOURCE_DIR}/ffmpeg/bin/
-          DESTINATION ${CMAKE_BINARY_DIR}/test/Debug)
+          DESTINATION ${CMAKE_BINARY_DIR}/bin/Debug)
     file (COPY ${CMAKE_CURRENT_SOURCE_DIR}/ffmpeg/bin/
-          DESTINATION ${CMAKE_BINARY_DIR}/test/RelWithDebInfo)
+          DESTINATION ${CMAKE_BINARY_DIR}/bin/RelWithDebInfo)
     file (COPY ${CMAKE_CURRENT_SOURCE_DIR}/ffmpeg/bin/
-          DESTINATION ${CMAKE_BINARY_DIR}/test/Release)
+          DESTINATION ${CMAKE_BINARY_DIR}/bin/Release)
   endif ()
 endif ()
 

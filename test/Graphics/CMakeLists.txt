@@ -12,7 +12,8 @@ include_directories(${Qt5Test_INCLUDE_DIRS})
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 add_library(test_graphics_common
-            event_scheduler.hpp event_scheduler.cpp)
+            STATIC event_scheduler.hpp event_scheduler.cpp)
+target_link_libraries(test_graphics_common Qt5::Widgets)
 set_property(TARGET test_graphics_common
              PROPERTY FOLDER "DO Sara Tests/Graphics")
 set(CMAKE_AUTOMOC OFF)
