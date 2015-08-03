@@ -197,7 +197,7 @@ macro (do_append_library _library_name
     # Specify where to install the static library.
     install(
       TARGETS DO_${DO_PROJECT_NAME}_${_library_name}
-      RUNTIME DESTINATION lib/DO/${DO_PROJECT_NAME} COMPONENT Libraries
+      RUNTIME DESTINATION bin/DO/${DO_PROJECT_NAME} COMPONENT Libraries
       LIBRARY DESTINATION lib/DO/${DO_PROJECT_NAME} COMPONENT Libraries
       ARCHIVE DESTINATION lib/DO/${DO_PROJECT_NAME} COMPONENT Libraries)
   else ()
