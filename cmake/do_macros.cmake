@@ -187,12 +187,16 @@ macro (do_append_library _library_name
       OUTPUT_NAME ${_library_output_name}
       OUTPUT_NAME_DEBUG ${_library_output_name_debug})
 
+    # Set correct compile definitions when building the libraries.
     if (DO_BUILD_SHARED_LIBS)
-      set_target_properties(
-        DO_${DO_PROJECT_NAME}_${_library_name}
-        PROPERTIES
-        COMPILE_DEFINITIONS "DO_EXPORTS")
+      set(_library_defs "DO_EXPORTS")
+    else ()
+      set(_library_defs "DO_STATIC")
     endif ()
+    set_target_properties(
+      DO_${DO_PROJECT_NAME}_${_library_name}
+      PROPERTIES
+      COMPILE_DEFINITIONS ${_library_defs})
 
     # Specify where to install the static library.
     install(
@@ -254,6 +258,7 @@ function (do_add_test _test_name _srcs _additional_lib_deps)
   target_link_libraries(${_test_name}
                         ${_additional_lib_deps}
                         gtest)
+  
   set_target_properties(
     ${_test_name}
     PROPERTIES
