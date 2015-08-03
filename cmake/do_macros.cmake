@@ -166,13 +166,27 @@ macro (do_append_library _library_name
     )
     target_link_libraries(
       DO_${DO_PROJECT_NAME}_${_library_name} ${_lib_dependencies})
+
+    # Form the compiled library output name.
+    set(_library_output_basename
+        DO_${DO_PROJECT_NAME}_${_library_name}-${DO_${DO_PROJECT_NAME}_VERSION})
+    if (DO_BUILD_SHARED_LIBS)
+      set (_library_output_name "${_library_output_basename}")
+      set (_library_output_name_debug "${_library_output_basename}-d")
+    else ()
+      set (_library_output_name "${_library_output_basename}-s")
+      set (_library_output_name_debug "${_library_output_basename}-sd")
+    endif ()
+ 
+    # Specify output name and version.
     set_target_properties(
       DO_${DO_PROJECT_NAME}_${_library_name}
       PROPERTIES
       VERSION ${DO_${DO_PROJECT_NAME}_VERSION}
       SOVERSION ${DO_${DO_PROJECT_NAME}_SOVERSION}
-      OUTPUT_NAME DO_${DO_PROJECT_NAME}_${_library_name}-${DO_${DO_PROJECT_NAME}_VERSION}
-      OUTPUT_NAME_DEBUG DO_${DO_PROJECT_NAME}_${_library_name}-${DO_${DO_PROJECT_NAME}_VERSION}-d)
+      OUTPUT_NAME ${_library_output_name}
+      OUTPUT_NAME_DEBUG ${_library_output_name_debug})
+
     if (DO_BUILD_SHARED_LIBS)
       set_target_properties(
         DO_${DO_PROJECT_NAME}_${_library_name}
