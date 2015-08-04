@@ -1,4 +1,4 @@
-import os
+﻿import os
 import ycm_core
 from clang_helpers import PrepareClangFlags
 
@@ -52,7 +52,7 @@ flags = [
 "-I", "/usr/include/qt5/QtSql",
 # CUDA header directories.
 "-I", "/usr/local/cuda/include",
-# ZoneSense header directories.
+# Current header directories.
 "-I", "./src",
 # Third-party header directories.
 "-I", "./third-party/eigen",
