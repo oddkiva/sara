@@ -3,17 +3,17 @@
 #
 function (do_message _msg)
   message (STATUS "[DO] ${_msg}")
-endfunction (do_message _msg)
+endfunction ()
 
 
 function (do_step_message _msg)
   message ("[DO] ${_msg}")
-endfunction (do_step_message _msg)
+endfunction ()
 
 
 function (do_substep_message _msg)
   message ("     ${_msg}")
-endfunction (do_substep_message _msg)
+endfunction ()
 
 
 function (do_list_files _src_files _rel_path _extension)
@@ -26,7 +26,7 @@ function (do_list_files _src_files _rel_path _extension)
     message (l)
   endforeach ()
   message (${LIST})
-endfunction (do_list_files)
+endfunction ()
 
 
 
@@ -43,7 +43,7 @@ macro (do_dissect_version PROJECT_NAME VERSION)
          ${PROJECT_NAME}_VERSION_PATCH ${VERSION})
   set(${PROJECT_NAME}_SOVERSION
       "${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}")
-endmacro (do_dissect_version)
+endmacro ()
 
 
 
@@ -53,7 +53,7 @@ endmacro (do_dissect_version)
 macro (do_append_components _component_list _component)
   set(DO_${DO_PROJECT_NAME}_${_component}_USE_FILE UseDO${DO_PROJECT_NAME}${_component})
   list(APPEND "${_component_list}" ${_component})
-endmacro (do_append_components)
+endmacro ()
 
 
 macro (do_create_common_variables _library_name)
@@ -156,13 +156,8 @@ macro (do_append_library _library_name
   if (NOT "${_src_files}" STREQUAL "")
     # - Case 1: the project contains 'cpp' source files
     #   Specify the source files.
-    if (DO_BUILD_SHARED_LIBS)
-      add_library(DO_${DO_PROJECT_NAME}_${_library_name}
-                  SHARED ${_hdr_files} ${_src_files})
-    else ()
-      add_library(DO_${DO_PROJECT_NAME}_${_library_name}
-                  STATIC ${_hdr_files} ${_src_files})
-    endif()
+    add_library(DO_${DO_PROJECT_NAME}_${_library_name}
+                ${_hdr_files} ${_src_files})
 
     # Link with other libraries.
     message(STATUS
@@ -171,19 +166,44 @@ macro (do_append_library _library_name
     )
     target_link_libraries(
       DO_${DO_PROJECT_NAME}_${_library_name} ${_lib_dependencies})
+
+    # Form the compiled library output name.
+    set(_library_output_basename
+        DO_${DO_PROJECT_NAME}_${_library_name}-${DO_${DO_PROJECT_NAME}_VERSION})
+    if (DO_BUILD_SHARED_LIBS)
+      set (_library_output_name "${_library_output_basename}")
+      set (_library_output_name_debug "${_library_output_basename}-d")
+    else ()
+      set (_library_output_name "${_library_output_basename}-s")
+      set (_library_output_name_debug "${_library_output_basename}-sd")
+    endif ()
+ 
+    # Specify output name and version.
     set_target_properties(
       DO_${DO_PROJECT_NAME}_${_library_name}
       PROPERTIES
       VERSION ${DO_${DO_PROJECT_NAME}_VERSION}
       SOVERSION ${DO_${DO_PROJECT_NAME}_SOVERSION}
-      OUTPUT_NAME DO_${DO_PROJECT_NAME}_${_library_name}-${DO_${DO_PROJECT_NAME}_VERSION}
-      OUTPUT_NAME_DEBUG DO_${DO_PROJECT_NAME}_${_library_name}-${DO_${DO_PROJECT_NAME}_VERSION}-d)
+      OUTPUT_NAME ${_library_output_name}
+      OUTPUT_NAME_DEBUG ${_library_output_name_debug})
+
+    # Set correct compile definitions when building the libraries.
+    if (DO_BUILD_SHARED_LIBS)
+      set(_library_defs "DO_EXPORTS")
+    else ()
+      set(_library_defs "DO_STATIC")
+    endif ()
+    set_target_properties(
+      DO_${DO_PROJECT_NAME}_${_library_name}
+      PROPERTIES
+      COMPILE_DEFINITIONS ${_library_defs})
 
     # Specify where to install the static library.
-    install(TARGETS DO_${DO_PROJECT_NAME}_${_library_name}
-            LIBRARY DESTINATION lib/DO/${DO_PROJECT_NAME}
-            ARCHIVE DESTINATION lib/DO/${DO_PROJECT_NAME}
-            COMPONENT Libraries)
+    install(
+      TARGETS DO_${DO_PROJECT_NAME}_${_library_name}
+      RUNTIME DESTINATION bin COMPONENT Libraries
+      LIBRARY DESTINATION lib/DO/${DO_PROJECT_NAME} COMPONENT Libraries
+      ARCHIVE DESTINATION lib/DO/${DO_PROJECT_NAME} COMPONENT Libraries)
   else ()
 
     # - Case 2: the project is a header-only library
@@ -198,7 +218,7 @@ macro (do_append_library _library_name
   set_property(
     TARGET DO_${DO_PROJECT_NAME}_${_library_name} PROPERTY
     FOLDER "DO ${DO_PROJECT_NAME} Libraries")
-endmacro (do_append_library)
+endmacro ()
 
 
 macro (do_generate_library _library_name)
@@ -216,7 +236,7 @@ endmacro ()
 # ==============================================================================
 # Specific macro to add a unit test
 #
-function (do_test _test_name _srcs _additional_lib_deps)
+function (do_add_test _test_name _srcs _additional_lib_deps)
   if (POLICY CMP0020)
     cmake_policy(SET CMP0020 OLD)
   endif (POLICY CMP0020)
@@ -238,18 +258,20 @@ function (do_test _test_name _srcs _additional_lib_deps)
   target_link_libraries(${_test_name}
                         ${_additional_lib_deps}
                         gtest)
+  
   set_target_properties(
     ${_test_name}
     PROPERTIES
     COMPILE_FLAGS ${DO_DEFINITIONS}
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/test"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
   )
+
   add_test(${_test_name}
-           "${CMAKE_BINARY_DIR}/test/${_test_name}")
+           "${CMAKE_BINARY_DIR}/bin/${_test_name}")
 
   if (DEFINED test_group_name)
     set_property(
       TARGET ${_test_name}
       PROPERTY FOLDER "DO ${DO_PROJECT_NAME} Tests/${test_group_name}")
   endif ()
-endfunction (do_test)
+endfunction ()

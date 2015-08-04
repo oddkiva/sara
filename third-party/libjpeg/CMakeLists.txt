@@ -32,7 +32,7 @@ set (SRC jmemnobs.c jaricom.c jcapimin.c jcapistd.c jcarith.c jccoefct.c jccolor
   jidctflt.c jidctfst.c jidctint.c jquant1.c jquant2.c jutils.c jmemmgr.c jdct.h 
   jinclude.h jmemsys.h jpegint.h jversion.h)
 
-add_library(jpeg ${SRC} ${HEADERS})
+add_library(jpeg STATIC ${SRC} ${HEADERS})
 set_target_properties(jpeg
   PROPERTIES
   OUTPUT_NAME_DEBUG jpeg-d)

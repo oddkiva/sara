@@ -6,6 +6,9 @@ set(THIRDPARTY_FOLDER_NAME "DO Sara Third-Party")
 # Disable any specific compiler flags for all third-party software.
 set (CMAKE_C_FLAGS "")
 set (CMAKE_CXX_FLAGS "")
+if (UNIX AND DO_BUILD_SHARED_LIBS)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+endif ()
 
 
 if (DO_BUILD_TESTS)
@@ -16,11 +19,11 @@ if (DO_BUILD_TESTS)
 
   if (WIN32)
     file (COPY ${CMAKE_CURRENT_SOURCE_DIR}/ffmpeg/bin/
-          DESTINATION ${CMAKE_BINARY_DIR}/test/Debug)
+          DESTINATION ${CMAKE_BINARY_DIR}/bin/Debug)
     file (COPY ${CMAKE_CURRENT_SOURCE_DIR}/ffmpeg/bin/
-          DESTINATION ${CMAKE_BINARY_DIR}/test/RelWithDebInfo)
+          DESTINATION ${CMAKE_BINARY_DIR}/bin/RelWithDebInfo)
     file (COPY ${CMAKE_CURRENT_SOURCE_DIR}/ffmpeg/bin/
-          DESTINATION ${CMAKE_BINARY_DIR}/test/Release)
+          DESTINATION ${CMAKE_BINARY_DIR}/bin/Release)
   endif ()
 endif ()
 
@@ -71,4 +74,9 @@ if (NOT TIFF_FOUND)
   message(STATUS "  - libtiff")
   add_subdirectory(libtiff)
   set_property(TARGET tiff PROPERTY FOLDER ${THIRDPARTY_FOLDER_NAME})
+endif ()
+
+if (WIN32)
+  message(STATUS "  - FFMpeg")
+  add_subdirectory(ffmpeg)
 endif ()
