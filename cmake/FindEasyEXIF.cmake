@@ -43,6 +43,10 @@ find_library(
 	PATH_SUFFIXES lib
 )
 
-set(EasyEXIF_LIBRARIES
-  debug ${EasyEXIF_DEBUG_LIBRARY}
-  optimized ${EasyEXIF_RELEASE_LIBRARY})
+if (DO_USE_STATIC_LIBS)
+  set(EasyEXIF_LIBRARIES
+    debug ${EasyEXIF_DEBUG_LIBRARY}
+    optimized ${EasyEXIF_RELEASE_LIBRARY})
+else ()
+  set(EasyEXIF_LIBRARIES ${EasyEXIF_RELEASE_LIBRARY})
+endif ()

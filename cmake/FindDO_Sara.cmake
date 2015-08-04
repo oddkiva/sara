@@ -129,59 +129,58 @@ if (DO_Sara_FIND_COMPONENTS)
     foreach (COMPONENT ${DO_Sara_USE_COMPONENTS})
       include(UseDOSara${COMPONENT})
 
-      find_path(DO_Sara_${COMPONENT}_INCLUDE_DIR
-        NAMES ${COMPONENT}.hpp
-        PATHS
-        /usr/include /usr/local/include /opt/local/include
-        "C:/Program Files/DO-Sara/include"
-        PATH_SUFFIXES DO/Sara)
+      if (NOT COMPONENT STREQUAL "ImageProcessing")
+        find_path(DO_Sara_${COMPONENT}_INCLUDE_DIR
+          NAMES ${COMPONENT}.hpp
+          PATHS /usr/include /usr/local/include /opt/local/include
+                "C:/Program Files/DO-Sara/include"
+          PATH_SUFFIXES DO/Sara)
 
-      if (DO_USE_STATIC_LIBS)
-        set (_library_name "DO_Sara_${COMPONENT}-${DO_Sara_VERSION}-s")
-        set (_library_name_debug "DO_Sara_${COMPONENT}-${DO_Sara_VERSION}-sd")
-      else ()
-        set (_library_name "DO_Sara_${COMPONENT}-${DO_Sara_VERSION}")
-        set (_library_name_debug "DO_Sara_${COMPONENT}-${DO_Sara_VERSION}-d")
-      endif ()
+        if (DO_USE_STATIC_LIBS)
+          set (_library_name "DO_Sara_${COMPONENT}-${DO_Sara_VERSION}-s")
+          set (_library_name_debug "DO_Sara_${COMPONENT}-${DO_Sara_VERSION}-sd")
+        else ()
+          set (_library_name "DO_Sara_${COMPONENT}-${DO_Sara_VERSION}")
+          set (_library_name_debug "DO_Sara_${COMPONENT}-${DO_Sara_VERSION}-d")
+        endif ()
 
-      find_library(DO_Sara_${COMPONENT}_DEBUG_LIBRARIES
-        NAMES ${_library_name_debug}
-        PATHS
-        /usr/lib /usr/local/lib /opt/local/lib
-        "C:/Program Files/DO-Sara-Debug/lib"
-        PATH_SUFFIXES DO/Sara)
+        find_library(DO_Sara_${COMPONENT}_DEBUG_LIBRARIES
+          NAMES ${_library_name_debug}
+          PATHS /usr/lib /usr/local/lib /opt/local/lib
+                "C:/Program Files/DO-Sara-Debug/lib"
+          PATH_SUFFIXES DO/Sara)
 
-      find_library(DO_Sara_${COMPONENT}_RELEASE_LIBRARIES
-        NAMES ${_library_name}
-        PATHS
-        /usr/lib /usr/local/lib /opt/local/lib
-        "C:/Program Files/DO-Sara/lib"
-        PATH_SUFFIXES DO/Sara)
+        find_library(DO_Sara_${COMPONENT}_RELEASE_LIBRARIES
+          NAMES ${_library_name}
+          PATHS /usr/lib /usr/local/lib /opt/local/lib
+                "C:/Program Files/DO-Sara/lib"
+          PATH_SUFFIXES DO/Sara)
 
-      if (NOT DO_USE_STATIC_LIBS AND NOT DO_Sara_${COMPONENT}_DEBUG_LIBRARIES)
-        set(
-          DO_Sara_${COMPONENT}_LIBRARIES
-          ${DO_Sara_${COMPONENT}_RELEASE_LIBRARIES}
-          CACHE STRING "")
-      else ()
-        set(
-          DO_Sara_${COMPONENT}_LIBRARIES
-          debug ${DO_Sara_${COMPONENT}_DEBUG_LIBRARIES}
-          optimized ${DO_Sara_${COMPONENT}_RELEASE_LIBRARIES}
-          CACHE STRING "")
-      endif ()
+        if (NOT DO_USE_STATIC_LIBS AND NOT DO_Sara_${COMPONENT}_DEBUG_LIBRARIES)
+          set(
+            DO_Sara_${COMPONENT}_LIBRARIES
+            ${DO_Sara_${COMPONENT}_RELEASE_LIBRARIES}
+            CACHE STRING "")
+        else ()
+          set(DO_Sara_${COMPONENT}_LIBRARIES
+            debug ${DO_Sara_${COMPONENT}_DEBUG_LIBRARIES}
+            optimized ${DO_Sara_${COMPONENT}_RELEASE_LIBRARIES}
+            CACHE STRING "")
+        endif ()
 
-      if (DO_USE_STATIC_LIBS)
-        if (NOT DO_Sara_${COMPONENT}_DEBUG_LIBRARIES OR
-            NOT DO_Sara_${COMPONENT}_RELEASE_LIBRARIES)
+        if (DO_USE_STATIC_LIBS)
+          if (NOT DO_Sara_${COMPONENT}_DEBUG_LIBRARIES OR
+              NOT DO_Sara_${COMPONENT}_RELEASE_LIBRARIES)
+            message(FATAL_ERROR "DO_Sara_${COMPONENT} is missing!")
+          endif ()
+        elseif (NOT DO_Sara_${COMPONENT}_RELEASE_LIBRARIES)
           message(FATAL_ERROR "DO_Sara_${COMPONENT} is missing!")
         endif ()
-      elseif (NOT DO_Sara_${COMPONENT}_RELEASE_LIBRARIES)
-        message(FATAL_ERROR "DO_Sara_${COMPONENT} is missing!")
-      endif ()
 
-      if (DO_Sara_${COMPONENT}_LIBRARIES)
-        list(APPEND DO_Sara_LIBRARIES ${DO_Sara_${COMPONENT}_LIBRARIES})
+        if (DO_Sara_${COMPONENT}_LIBRARIES)
+          list(APPEND DO_Sara_LIBRARIES ${DO_Sara_${COMPONENT}_LIBRARIES})
+        endif ()
+
       endif ()
 
       if ("${COMPONENT}" STREQUAL "Graphics")
