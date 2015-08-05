@@ -202,9 +202,13 @@ if (DO_Sara_FIND_COMPONENTS)
             find_library(${IMAGE_IO_LIB}_RELEASE_LIBRARY
               NAMES ${IMAGE_IO_LIB}
               PATHS "C:/Program Files/DO-Sara/lib")
-            set(${IMAGE_IO_LIB}_LIBRARY
-              debug ${${IMAGE_IO_LIB}_DEBUG_LIBRARY}
-              optimized ${${IMAGE_IO_LIB}_RELEASE_LIBRARY})
+            if (DO_USE_STATIC_LIBS)
+              set(${IMAGE_IO_LIB}_LIBRARY
+                debug ${${IMAGE_IO_LIB}_DEBUG_LIBRARY}
+                optimized ${${IMAGE_IO_LIB}_RELEASE_LIBRARY})
+            elseif (NOT ${IMAGE_IO_LIB}_DEBUG_LIBRARY)
+              set(${IMAGE_IO_LIB}_LIBRARY ${${IMAGE_IO_LIB}_RELEASE_LIBRARY})
+            endif ()
           else ()
             find_package(JPEG REQUIRED)
             find_package(PNG REQUIRED)
