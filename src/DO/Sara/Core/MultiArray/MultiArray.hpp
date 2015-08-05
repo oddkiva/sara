@@ -45,10 +45,7 @@ namespace DO { namespace Sara {
 
   public: /* interface */
     //! \brief Default constructor that constructs an empty ND-array.
-    inline MultiArray()
-      : base_type{}
-    {
-    }
+    inline MultiArray() = default;
 
     //! \brief Constructor that takes **ownership** of the data.
     //! The data will be cleared upon destruction of the MultiArray object.

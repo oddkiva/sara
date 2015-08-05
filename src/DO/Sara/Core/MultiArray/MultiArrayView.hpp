@@ -97,7 +97,9 @@ namespace DO { namespace Sara {
 
   public: /* methods */
     //! \brief Default constructor.
-    inline MultiArrayView() = default;
+    inline MultiArrayView()
+    {
+    }
 
     //! \brief Constructor that wraps plain data with its known sizes.
     inline MultiArrayView(value_type *data,
