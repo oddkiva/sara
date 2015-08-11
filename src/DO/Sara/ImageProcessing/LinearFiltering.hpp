@@ -203,7 +203,7 @@ namespace DO { namespace Sara {
       kernel[i] /= sum;
 
     apply_row_based_filter(src, dst, &kernel[0], kernel_size);
-    apply_column_based_filter(src, dst, &kernel[0], kernel_size);
+    apply_column_based_filter(dst, dst, &kernel[0], kernel_size);
 
     delete[] kernel;
   }
