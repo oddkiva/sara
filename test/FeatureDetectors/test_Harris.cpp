@@ -6,7 +6,7 @@
 using namespace DO;
 using namespace std;
 
-static HighResTimer timer;
+static Timer timer;
 double elapsed = 0.0;
 void tic()
 {
@@ -15,7 +15,7 @@ void tic()
 
 void toc()
 {
-  elapsed = timer.elapsedMs();
+  elapsed = timer.elapsed_ms();
   cout << "Elapsed time = " << elapsed << " ms" << endl << endl;
 }
 
@@ -30,7 +30,7 @@ vector<OERegion> computeHarrisLaplaceAffineCorners(const Image<float>& I,
   // 1. Feature extraction.
   if (verbose)
   {
-    printStage("Localizing Harris-Laplace interest points");
+    print_stage("Localizing Harris-Laplace interest points");
     tic();
   }
   ComputeHarrisLaplaceCorners computeCorners;
@@ -46,7 +46,7 @@ vector<OERegion> computeHarrisLaplaceAffineCorners(const Image<float>& I,
   // 2. Affine shape adaptation
   if (verbose)
   {
-    printStage("Affine shape adaptation");
+    print_stage("Affine shape adaptation");
     tic();
   }
   AdaptFeatureAffinelyToLocalShape adaptShape;
@@ -59,7 +59,7 @@ vector<OERegion> computeHarrisLaplaceAffineCorners(const Image<float>& I,
     Matrix2f affAdaptTransformMat;
     if (adaptShape(affAdaptTransformMat, gaussPyr(s,o), corners[i]))
     {
-      corners[i].shapeMat() = affAdaptTransformMat*corners[i].shapeMat();
+      corners[i].shape_matrix() = affAdaptTransformMat*corners[i].shape_matrix();
       keepFeatures[i] = 1;
     }
   }
@@ -77,8 +77,8 @@ vector<OERegion> computeHarrisLaplaceAffineCorners(const Image<float>& I,
     if (keepFeatures[i] == 1)
     {
       keptCorners.push_back(corners[i]);
-      const float fact = harrisPyr.octaveScalingFactor(scaleOctPairs[i](1));
-      keptCorners.back().shapeMat() *= pow(fact,-2);
+      const float fact = harrisPyr.octave_scaling_factor(scaleOctPairs[i](1));
+      keptCorners.back().shape_matrix() *= pow(fact,-2);
       keptCorners.back().coords() *= fact;
 
     }
@@ -92,20 +92,20 @@ vector<OERegion> computeHarrisLaplaceAffineCorners(const Image<float>& I,
 void checkKeys(const Image<float>& I, const vector<OERegion>& features)
 {
   display(I);
-  setAntialiasing();
+  set_antialiasing();
   drawOERegions(features, Red8);
-  getKey();
+  get_key();
 }
 
 int main()
 {
   Image<float> I;
   string name;
-  name = srcPath("../../datasets/sunflowerField.jpg");
+  name = src_path("../../datasets/sunflowerField.jpg");
   if (!load(I, name))
     return -1;
 
-  openWindow(I.width(), I.height());
+  create_window(I.width(), I.height());
   vector<OERegion> features;
   features = computeHarrisLaplaceAffineCorners(I);
   checkKeys(I, features);

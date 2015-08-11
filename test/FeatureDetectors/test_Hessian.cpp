@@ -6,7 +6,7 @@
 using namespace DO;
 using namespace std;
 
-static HighResTimer timer;
+static Timer timer;
 double elapsed = 0.0;
 void tic()
 {
@@ -15,7 +15,7 @@ void tic()
 
 void toc()
 {
-  elapsed = timer.elapsedMs();
+  elapsed = timer.elapsed_ms();
   cout << "Elapsed time = " << elapsed << " ms" << endl << endl;
 }
 
@@ -25,7 +25,7 @@ vector<OERegion> computeHessianLaplaceAffineMaxima(const Image<float>& I,
   // 1. Feature extraction.
   if (verbose)
   {
-    printStage("Localizing Hessian-Laplace interest points");
+    print_stage("Localizing Hessian-Laplace interest points");
     tic();
   }
   ComputeHessianLaplaceMaxima computeDoHs;
@@ -41,7 +41,7 @@ vector<OERegion> computeHessianLaplaceAffineMaxima(const Image<float>& I,
   // 2. Affine shape adaptation
   if (verbose)
   {
-    printStage("Affine shape adaptation");
+    print_stage("Affine shape adaptation");
     tic();
   }
   AdaptFeatureAffinelyToLocalShape adaptShape;
@@ -54,7 +54,7 @@ vector<OERegion> computeHessianLaplaceAffineMaxima(const Image<float>& I,
     Matrix2f affAdaptTransformMat;
     if (adaptShape(affAdaptTransformMat, gaussPyr(s,o), heslapMaxima[i]))
     {
-      heslapMaxima[i].shapeMat() = affAdaptTransformMat*heslapMaxima[i].shapeMat();
+      heslapMaxima[i].shape_matrix() = affAdaptTransformMat*heslapMaxima[i].shape_matrix();
       keepFeatures[i] = 1;
     }
   }
@@ -73,8 +73,8 @@ vector<OERegion> computeHessianLaplaceAffineMaxima(const Image<float>& I,
     if (keepFeatures[i] == 1)
     {
       keptDoHs.push_back(heslapMaxima[i]);
-      const float fact = detHessians.octaveScalingFactor(scaleOctPairs[i](1));
-      keptDoHs.back().shapeMat() *= pow(fact,-2);
+      const float fact = detHessians.octave_scaling_factor(scaleOctPairs[i](1));
+      keptDoHs.back().shape_matrix() *= pow(fact,-2);
       keptDoHs.back().coords() *= fact;
     }
   }
@@ -88,7 +88,7 @@ vector<OERegion> computeDoHExtrema(const Image<float>& I,
   // 1. Feature extraction.
   if (verbose)
   {
-    printStage("Localizing DoH interest points");
+    print_stage("Localizing DoH interest points");
     tic();
   }
   ComputeDoHExtrema computeDoHs;
@@ -104,8 +104,8 @@ vector<OERegion> computeDoHExtrema(const Image<float>& I,
   // 2. Rescale feature points to original image dimensions.
   for (size_t i = 0; i != DoHs.size(); ++i)
   {
-    const float fact = detHessians.octaveScalingFactor(scaleOctPairs[i](1));
-    DoHs[i].shapeMat() *= pow(fact,-2);
+    const float fact = detHessians.octave_scaling_factor(scaleOctPairs[i](1));
+    DoHs[i].shape_matrix() *= pow(fact,-2);
     DoHs[i].coords() *= fact;
   }
 
@@ -118,7 +118,7 @@ vector<OERegion> computeDoHAffineExtrema(const Image<float>& I,
   // 1. Feature extraction.
   if (verbose)
   {
-    printStage("Localizing DoH affine interest points");
+    print_stage("Localizing DoH affine interest points");
     tic();
   }
   ComputeDoHExtrema computeDoHs;
@@ -135,7 +135,7 @@ vector<OERegion> computeDoHAffineExtrema(const Image<float>& I,
   // 2. Affine shape adaptation
   if (verbose)
   {
-    printStage("Affine shape adaptation");
+    print_stage("Affine shape adaptation");
     tic();
   }
   AdaptFeatureAffinelyToLocalShape adaptShape;
@@ -148,7 +148,7 @@ vector<OERegion> computeDoHAffineExtrema(const Image<float>& I,
     Matrix2f affAdaptTransformMat;
     if (adaptShape(affAdaptTransformMat, gaussPyr(s,o), DoHs[i]))
     {
-      DoHs[i].shapeMat() = affAdaptTransformMat*DoHs[i].shapeMat();
+      DoHs[i].shape_matrix() = affAdaptTransformMat*DoHs[i].shape_matrix();
       keepFeatures[i] = 1;
     }
   }
@@ -167,8 +167,8 @@ vector<OERegion> computeDoHAffineExtrema(const Image<float>& I,
     if (keepFeatures[i] == 1)
     {
       keptDoHs.push_back(DoHs[i]);
-      const float fact = detHessians.octaveScalingFactor(scaleOctPairs[i](1));
-      keptDoHs.back().shapeMat() *= pow(fact,-2);
+      const float fact = detHessians.octave_scaling_factor(scaleOctPairs[i](1));
+      keptDoHs.back().shape_matrix() *= pow(fact,-2);
       keptDoHs.back().coords() *= fact;
 
     }
@@ -180,22 +180,22 @@ vector<OERegion> computeDoHAffineExtrema(const Image<float>& I,
 void checkKeys(const Image<float>& I, const vector<OERegion>& features)
 {
   display(I);
-  setAntialiasing();
+  set_antialiasing();
   for (size_t i = 0; i != features.size(); ++i)
-    features[i].draw(features[i].extremumType() == OERegion::Max ?
+    features[i].draw(features[i].extremum_type() == OERegion::Max ?
                      Red8 : Blue8);
-  getKey();
+  get_key();
 }
 
 int main()
 {
   Image<float> I;
   string name;
-  name = srcPath("../../datasets/sunflowerField.jpg");
+  name = src_path("../../datasets/sunflowerField.jpg");
   if (!load(I, name))
     return -1;
 
-  openWindow(I.width(), I.height());
+  create_window(I.width(), I.height());
   vector<OERegion> features;
   features = computeHessianLaplaceAffineMaxima(I);
   checkKeys(I, features);

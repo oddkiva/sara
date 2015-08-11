@@ -48,8 +48,8 @@ if (NOT DO_Sara_FOUND)
   do_append_components(DO_Sara_COMPONENTS Geometry)
   # Feature detection and description
   do_append_components(DO_Sara_COMPONENTS Features)
-  #do_append_components(DO_Sara_COMPONENTS FeatureDetectors)
-  #do_append_components(DO_Sara_COMPONENTS FeatureDescriptors)
+  do_append_components(DO_Sara_COMPONENTS FeatureDetectors)
+  do_append_components(DO_Sara_COMPONENTS FeatureDescriptors)
   # Feature matching
   #do_append_components(DO_Sara_COMPONENTS Match)
   #do_append_components(DO_Sara_COMPONENTS FeatureMatching)

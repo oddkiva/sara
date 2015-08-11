@@ -6,7 +6,7 @@
 using namespace DO;
 using namespace std;
 
-static HighResTimer timer;
+static Timer timer;
 double elapsed = 0.0;
 void tic()
 {
@@ -15,7 +15,7 @@ void tic()
 
 void toc()
 {
-  elapsed = timer.elapsedMs();
+  elapsed = timer.elapsed_ms();
   cout << "Elapsed time = " << elapsed << " ms" << endl << endl;
 }
 
@@ -25,7 +25,7 @@ vector<OERegion> computeLoGExtrema(const Image<float>& I,
   // 1. Feature extraction.
   if (verbose)
   {
-    printStage("Localizing LoG extrema");
+    print_stage("Localizing LoG extrema");
     tic();
   }
   ImagePyramidParams pyrParams(0, 3+2);
@@ -41,9 +41,9 @@ vector<OERegion> computeLoGExtrema(const Image<float>& I,
   const ImagePyramid<float>& DoGPyr = computeLoGs.laplaciansOfGaussians();
   for (int i = 0; i < LoGs.size(); ++i)
   {
-    float octScaleFact = DoGPyr.octaveScalingFactor(scaleOctPairs[i](1));
+    float octScaleFact = DoGPyr.octave_scaling_factor(scaleOctPairs[i](1));
     LoGs[i].center() *= octScaleFact;
-    LoGs[i].shapeMat() /= pow(octScaleFact, 2);
+    LoGs[i].shape_matrix() /= pow(octScaleFact, 2);
   }
 
   return LoGs;
@@ -55,7 +55,7 @@ vector<OERegion> computeLoGAffineExtrema(const Image<float>& I,
   // 1. Feature extraction.
   if (verbose)
   {
-    printStage("Localizing LoG affine-adapted extrema");
+    print_stage("Localizing LoG affine-adapted extrema");
     tic();
   }
   ImagePyramidParams pyrParams(0);
@@ -73,7 +73,7 @@ vector<OERegion> computeLoGAffineExtrema(const Image<float>& I,
   // 2. Affine shape adaptation
   if (verbose)
   {
-    printStage("Affine shape adaptation");
+    print_stage("Affine shape adaptation");
     tic();
   }
   AdaptFeatureAffinelyToLocalShape adaptShape;
@@ -86,7 +86,7 @@ vector<OERegion> computeLoGAffineExtrema(const Image<float>& I,
     Matrix2f affAdaptTransformMat;
     if (adaptShape(affAdaptTransformMat, gaussPyr(s,o), LoGs[i]))
     {
-      LoGs[i].shapeMat() = affAdaptTransformMat*LoGs[i].shapeMat();
+      LoGs[i].shape_matrix() = affAdaptTransformMat*LoGs[i].shape_matrix();
       keepFeatures[i] = 1;
     }
   }
@@ -104,8 +104,8 @@ vector<OERegion> computeLoGAffineExtrema(const Image<float>& I,
     if (keepFeatures[i] == 1)
     {
       keptDoGs.push_back(LoGs[i]);
-      const float fact = dogPyr.octaveScalingFactor(scaleOctPairs[i](1));
-      keptDoGs.back().shapeMat() *= pow(fact,-2);
+      const float fact = dogPyr.octave_scaling_factor(scaleOctPairs[i](1));
+      keptDoGs.back().shape_matrix() *= pow(fact,-2);
       keptDoGs.back().coords() *= fact;
 
     }
@@ -119,22 +119,22 @@ vector<OERegion> computeLoGAffineExtrema(const Image<float>& I,
 void checkKeys(const Image<float>& I, const vector<OERegion>& features)
 {
   display(I);
-  setAntialiasing();
+  set_antialiasing();
   for (size_t i = 0; i != features.size(); ++i)
-    features[i].draw(features[i].extremumType() == OERegion::Max ?
+    features[i].draw(features[i].extremum_type() == OERegion::Max ?
                      Red8 : Blue8);
-  getKey();
+  get_key();
 }
 
 int main()
 {
   Image<float> I;
   string name;
-  name = srcPath("../../datasets/sunflowerField.jpg");
+  name = src_path("../../datasets/sunflowerField.jpg");
   if (!load(I, name))
     return -1;
 
-  openWindow(I.width(), I.height());
+  create_window(I.width(), I.height());
   vector<OERegion> features;
 
   features = computeLoGExtrema(I);

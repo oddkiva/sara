@@ -8,8 +8,8 @@ using namespace std;
 #ifdef CHECK_STEP_BY_STEP
 void testDoGSIFTKeypoints(const Image<float>& I)
 {
-  Window imageWin = openWindow(I.width(), I.height());
-  setAntialiasing();
+  Window imageWin = create_window(I.width(), I.height());
+  set_antialiasing();
 
   ImagePyramid<float> G(gaussianPyramid(I));
   //checkImagePyramid(G);
@@ -20,9 +20,9 @@ void testDoGSIFTKeypoints(const Image<float>& I)
   for (int o = 0; o < D.numOctaves(); ++o)
   {
     // Verbose.
-    printStage("Processing octave");
+    print_stage("Processing octave");
     cout << "Octave " << o << endl;
-    cout << "Octave scaling factor = " << D.octaveScalingFactor(o) << endl;
+    cout << "Octave scaling factor = " << D.octave_scaling_factor(o) << endl;
 
     // Be careful of the bounds. We go from 1 to N-1.
     for (int s = 1; s < D.numScalesPerOctave()-1; ++s)
@@ -30,14 +30,14 @@ void testDoGSIFTKeypoints(const Image<float>& I)
       vector<OERegion> extrema( localScaleSpaceExtrema(D,s,o) );
 
       // Verbose.
-      printStage("Detected extrema");
+      print_stage("Detected extrema");
       cout << "[" << s << "] sigma = " << D.scale(s,o) << endl;
       cout << "    num extrema = " << extrema.size() << endl;
 
       // Draw the keypoints.
       //display(I.convert<float>());
       drawExtrema(D, extrema, s, o);
-      getKey();
+      get_key();
 
       // Gradient in polar coordinates.
       Image<Vector2f> gradG( gradPolar(G(s,o)) );
@@ -55,7 +55,7 @@ void testDoGSIFTKeypoints(const Image<float>& I)
         checkPatch(G(s,o), extrema[i].x(), extrema[i].y(), extrema[i].scale());
 
         // Orientation histogram
-        printStage("Orientation histogram");
+        print_stage("Orientation histogram");
 #endif
         Array<float, 36, 1> oriHist;
         computeOrientationHistogram(
@@ -66,13 +66,13 @@ void testDoGSIFTKeypoints(const Image<float>& I)
         viewHistogram(oriHist);
         // Note that the peaks are shifted after smoothing.
 #ifdef DEBUG_ORI
-        printStage("Smoothing orientation histogram");
+        print_stage("Smoothing orientation histogram");
 #endif
         smoothHistogram_Lowe(oriHist);
         viewHistogram(oriHist);
         // Orientation peaks.
 #ifdef DEBUG_ORI
-        printStage("Localizing orientation peaks");
+        print_stage("Localizing orientation peaks");
 #endif
         vector<int> oriPeaks(findPeaks(oriHist));
 #ifdef DEBUG_ORI
@@ -81,7 +81,7 @@ void testDoGSIFTKeypoints(const Image<float>& I)
           cout << oriPeaks[k]*10 << endl;
 
         // Refine peaks.
-        printStage("Refining peaks");
+        print_stage("Refining peaks");
 #endif
         vector<float> refinedOriPeaks(refinePeaks(oriHist, oriPeaks) );
 #ifdef DEBUG_ORI
@@ -94,25 +94,25 @@ void testDoGSIFTKeypoints(const Image<float>& I)
         peaks *= float(M_PI)/36;
 
         setActiveWindow(imageWin);
-        printStage("Compute SIFT descriptor");
+        print_stage("Compute SIFT descriptor");
         for (int ori = 0; ori < refinedOriPeaks.size(); ++ori)
         {
           ComputeSIFTDescriptor<> computeSift;
 
-          printStage("Draw patch grid");
+          print_stage("Draw patch grid");
           computeSift.drawGrid(
             extrema[i].x(), extrema[i].y(), extrema[i].scale(),
-            peaks(ori), D.octaveScalingFactor(o), 3);
-          getKey();
+            peaks(ori), D.octave_scaling_factor(o), 3);
+          get_key();
 
-          printStage("Compute SIFT descriptor with specified orientation");
+          print_stage("Compute SIFT descriptor with specified orientation");
           Matrix<unsigned char, 128, 1> sift;
           sift = computeSift(
             extrema[i].x(), extrema[i].y(), extrema[i].scale(),
             peaks(ori), gradG);
         }
       }
-      getKey();
+      get_key();
     }
   }
 
@@ -123,7 +123,7 @@ void testDoGSIFTKeypoints(const Image<float>& I)
 Set<OERegion, RealDescriptor> computeSIFT(const Image<float>& image)
 {
   // Time everything.
-  HighResTimer timer;
+  Timer timer;
   double elapsed = 0.;
   double DoGDetTime, oriAssignTime, siftDescTime, gradGaussianTime;
 
@@ -133,67 +133,67 @@ Set<OERegion, RealDescriptor> computeSIFT(const Image<float>& image)
   DescriptorMatrix<float>& SIFTDescriptors = keys.descriptors;
 
   // 1. Feature extraction.
-  printStage("Computing DoG extrema");
+  print_stage("Computing DoG extrema");
   timer.restart();
   ImagePyramidParams pyrParams;//(0);
   ComputeDoGExtrema computeDoGs(pyrParams, 0.01f);
   vector<Point2i> scaleOctPairs;
   DoGs = computeDoGs(image, &scaleOctPairs);
-  DoGDetTime = timer.elapsedMs();
+  DoGDetTime = timer.elapsed_ms();
   elapsed += DoGDetTime;
   cout << "DoG detection time = " << DoGDetTime << " ms" << endl;
   cout << "DoGs.size() = " << DoGs.size() << endl;
 
   // 2. Feature orientation.
   // Prepare the computation of gradients on gaussians.
-  printStage("Computing gradients of Gaussians");
+  print_stage("Computing gradients of Gaussians");
   timer.restart();
   ImagePyramid<Vector2f> gradG;
   gradG = gradPolar(computeDoGs.gaussians());
-  gradGaussianTime = timer.elapsedMs();
+  gradGaussianTime = timer.elapsed_ms();
   elapsed += gradGaussianTime;
   cout << "gradient of Gaussian computation time = " << gradGaussianTime << " ms" << endl;
   cout << "DoGs.size() = " << DoGs.size() << endl;
 
 
   // Find dominant gradient orientations.
-  printStage("Assigning (possibly multiple) dominant orientations to DoG extrema");
+  print_stage("Assigning (possibly multiple) dominant orientations to DoG extrema");
   timer.restart();
   ComputeDominantOrientations assignOrientations;
   assignOrientations(gradG, DoGs, scaleOctPairs);
-  oriAssignTime = timer.elapsedMs();
+  oriAssignTime = timer.elapsed_ms();
   elapsed += oriAssignTime;
   cout << "orientation assignment time = " << oriAssignTime << " ms" << endl;
   cout << "DoGs.size() = " << DoGs.size() << endl;
 
 
   // 3. Feature description.
-  printStage("Describe DoG extrema with SIFT descriptors");
+  print_stage("Describe DoG extrema with SIFT descriptors");
   timer.restart();
   ComputeSIFTDescriptor<> computeSIFT;
   SIFTDescriptors = computeSIFT(DoGs, scaleOctPairs, gradG);
-  siftDescTime = timer.elapsedMs();
+  siftDescTime = timer.elapsed_ms();
   elapsed += siftDescTime;
   cout << "description time = " << siftDescTime << " ms" << endl;
   cout << "sifts.size() = " << SIFTDescriptors.size() << endl;
 
   // Summary in terms of computation time.
-  printStage("Total Detection/Description time");
+  print_stage("Total Detection/Description time");
   cout << "SIFT computation time = " << elapsed << " ms" << endl;
 
   // 4. Rescale  the feature position and scale $(x,y,\sigma)$ with the octave
   //    scale.
   for (size_t i = 0; i != DoGs.size(); ++i)
   {
-    float octScaleFact = gradG.octaveScalingFactor(scaleOctPairs[i](1));
+    float octScaleFact = gradG.octave_scaling_factor(scaleOctPairs[i](1));
     DoGs[i].center() *= octScaleFact;
-    DoGs[i].shapeMat() /= pow(octScaleFact, 2);
+    DoGs[i].shape_matrix() /= pow(octScaleFact, 2);
   }
 
   return keys;
 }
 
-bool checkDescriptors(const DescriptorMatrix<float>& descriptors)
+bool check_descriptors(const DescriptorMatrix<float>& descriptors)
 {
   for (int i = 0; i < descriptors.size(); ++i)
   {
@@ -213,26 +213,26 @@ bool checkDescriptors(const DescriptorMatrix<float>& descriptors)
 int main()
 {
   Image<float> image;
-  if (!load(image, srcPath("../../datasets/sunflowerField.jpg")))
+  if (!load(image, src_path("../../datasets/sunflowerField.jpg")))
     return -1;
 
-  printStage("Detecting SIFT features");
+  print_stage("Detecting SIFT features");
   Set<OERegion, RealDescriptor> SIFTs = computeSIFT(image.convert<float>());
   const vector<OERegion>& features = SIFTs.features;
 
-  printStage("Removing existing redundancies");
+  print_stage("Removing existing redundancies");
   removeRedundancies(SIFTs);
   CHECK(SIFTs.features.size());
   CHECK(SIFTs.descriptors.size());
 
   // Check the features visually.
-  printStage("Draw features");
-  openWindow(image.width(), image.height());
-  setAntialiasing();
+  print_stage("Draw features");
+  create_window(image.width(), image.height());
+  set_antialiasing();
   display(image);
   for (size_t i=0; i != features.size(); ++i)
-    features[i].draw(features[i].extremumType() == OERegion::Max ? Red8 : Blue8);
-  getKey();
+    features[i].draw(features[i].extremum_type() == OERegion::Max ? Red8 : Blue8);
+  get_key();
 
 
   return 0;

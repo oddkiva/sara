@@ -6,10 +6,10 @@ using namespace std;
 
 void createEllipse()
 {
-  openWindow(300, 300);
+  create_window(300, 300);
   fillRect(0, 0, 100, 100, Black8);
-  saveScreen(activeWindow(), srcPath("ellipse.png"));
-  getKey();
+  saveScreen(activeWindow(), src_path("ellipse.png"));
+  get_key();
   closeWindow();
 }
 
@@ -35,10 +35,10 @@ Image<float> warp(const Image<float>& I, const Matrix2f& T)
 int main()
 {
   Image<float> I;
-  if (!load(I, srcPath("ellipse.png")))
+  if (!load(I, src_path("ellipse.png")))
     return -1;
   //I = colorRescale(dericheBlur(I, 50.f));
-  openWindow(I.width(), I.height());
+  create_window(I.width(), I.height());
 
   Matrix2f finalT;
   finalT.setIdentity();
@@ -50,12 +50,12 @@ int main()
   {
     // Check the image.
     display(I);
-    getKey();
+    get_key();
 
     diff.array() = I.array()-oldI.array();
     diff = colorRescale(diff);
     display(diff);
-    getKey();
+    get_key();
 
     // Compute the second order moment matrix.
     Image<Matrix2f> M(I.compute<Gradient>().compute<SecondMomentMatrix>());
@@ -81,7 +81,7 @@ int main()
     float rmin = 1.f/sqrt(sv(1));
     float rmax = 1.f/sqrt(sv(0));
 
-    printStage("Iteration "+toString(i));
+    print_stage("Iteration "+toString(i));
     cout << "Sigma = " << endl << Sigma << endl << endl;
     cout << "U*S*U^T = " << endl <<  U*sv.asDiagonal()*U.transpose() << endl << endl;
     cout << "T = " << endl << T << endl << endl;
