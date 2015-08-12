@@ -23,8 +23,7 @@ Image<float> warp(const Image<float>& I, const Matrix2f& T)
   {
     for (int x = 0; x < warped_image.width(); ++x)
     {
-      Point2f p(x,y);
-      p = T*p;
+      auto p = Vector2d{ (T * Point2f{ x, y }).cast<double>() };
       if ( p.x() < 0 || p.x() >= I.width()-1  ||
            p.y() < 0 || p.y() >= I.height()-1 )
         continue;
@@ -34,9 +33,11 @@ Image<float> warp(const Image<float>& I, const Matrix2f& T)
   return warped_image;
 }
 
-int main()
+
+GRAPHICS_MAIN()
 {
   Image<float> I;
+  create_ellipse();
   if (!load(I, src_path("ellipse.png")))
     return -1;
   //I = color_rescale(dericheBlur(I, 50.f));
@@ -45,7 +46,8 @@ int main()
   Matrix2f finalT;
   finalT.setIdentity();
 
-  Image<float> oldI(I), diff(I);
+  Image<float> old_I{ I };
+  Image<float> diff{ I };
 
   const int iter = 1000;
   for (int i = 0; i < iter; ++i)
@@ -54,7 +56,7 @@ int main()
     display(I);
     get_key();
 
-    diff.array() = I.array()-oldI.array();
+    diff.array() = I.array() - old_I.array();
     diff = color_rescale(diff);
     display(diff);
     get_key();
@@ -83,7 +85,7 @@ int main()
     float rmin = 1.f/sqrt(sv(1));
     float rmax = 1.f/sqrt(sv(0));
 
-    print_stage("Iteration "+toString(i));
+    print_stage("Iteration " + to_string(i));
     cout << "Sigma = " << endl << Sigma << endl << endl;
     cout << "U*S*U^T = " << endl <<  U*sv.asDiagonal()*U.transpose() << endl << endl;
     cout << "T = " << endl << T << endl << endl;
@@ -96,7 +98,7 @@ int main()
     cout << "rmin = " << rmin << " rmax = " << rmax << endl;
     cout << "ratio = " << rmax/rmin << endl;
 
-    oldI = I;
+    old_I = I;
     I = warp(I, T);
   }
 

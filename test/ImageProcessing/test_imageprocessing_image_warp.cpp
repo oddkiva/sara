@@ -51,7 +51,7 @@ TYPED_TEST_P(TestImageWarp, test_image_warp)
 }
 
 REGISTER_TYPED_TEST_CASE_P(TestImageWarp, test_image_warp);
-INSTANTIATE_TYPED_TEST_CASE_P(DO_SARA_ImageProcessing_Warp,
+INSTANTIATE_TYPED_TEST_CASE_P(DO_Sara_ImageProcessing_Warp,
                               TestImageWarp, ChannelTypes);
 
 

@@ -95,11 +95,11 @@ void check_keys(const Image<float>& I, const vector<OERegion>& features)
 {
   display(I);
   set_antialiasing();
-  drawOERegions(features, Red8);
+  draw_oe_regions(features, Red8);
   get_key();
 }
 
-int main()
+GRAPHICS_MAIN()
 {
   Image<float> I;
   string name;

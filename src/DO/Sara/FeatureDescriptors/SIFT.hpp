@@ -40,7 +40,7 @@ namespace DO { namespace Sara {
 
     //! Computes the SIFT descriptor for keypoint \$(x,y,\sigma,\theta)\f$.
     SIFTDescriptor operator()(float x, float y, float sigma, float theta,
-                              const Image<Vector2f>& gradPolar) const
+      const Image<Vector2f>& gradPolar) const
     {
       const float pi = static_cast<float>(M_PI);
       /*
@@ -67,14 +67,14 @@ namespace DO { namespace Sara {
         In the image, each small square patch $P_{i,j}$ has a side length $l$
         proportional to the scale $\sigma$ of the keypoint, i.e.,
         $l = \lambda \sigma$.
-      */
+        */
       const float lambda = _bin_scale_unit_length;
       const float l = lambda*sigma;
       /*
         It is important to note that $\lambda$ is some 'universal' constant
         used for all SIFT descriptors to ensure the scale-invariance of the
         descriptor.
-      */
+        */
 
       /*
         Now in each image square patch $P_{i,j}$, we build a histogram of
@@ -84,20 +84,20 @@ namespace DO { namespace Sara {
 
         Let us initialize the SIFT descriptor consisting of the NxN histograms
         $\mathbf{h}_{i,j}$, each in $\mathbf{R}^O$ as follows.
-      */
+        */
       SIFTDescriptor h(SIFTDescriptor::Zero());
 
       /*
        In the rescaled and oriented coordinate frame bound to the patch $P(k)$,
        - keypoint $k$ is located at (0,0)
        - centers $C_{i,j}$ of patch $P_{i,j}$ are located at
-         $[ -(N+1)/2 + i, -(N+1)/2 + j ]$
+       $[ -(N+1)/2 + i, -(N+1)/2 + j ]$
 
-         For example for $N=4$, they are at:
-         (-1.5,-1.5) (-0.5,-1.5) (0.5,-1.5) (1.5,-1.5)
-         (-1.5,-0.5) (-0.5,-0.5) (0.5,-0.5) (1.5,-0.5)
-         (-1.5, 0.5) (-0.5, 0.5) (0.5, 0.5) (1.5, 0.5)
-         (-1.5, 1.5) (-0.5, 1.5) (0.5, 1.5) (1.5, 1.5)
+       For example for $N=4$, they are at:
+       (-1.5,-1.5) (-0.5,-1.5) (0.5,-1.5) (1.5,-1.5)
+       (-1.5,-0.5) (-0.5,-0.5) (0.5,-0.5) (1.5,-0.5)
+       (-1.5, 0.5) (-0.5, 0.5) (0.5, 0.5) (1.5, 0.5)
+       (-1.5, 1.5) (-0.5, 1.5) (0.5, 1.5) (1.5, 1.5)
 
        Gradients in $[x_i-1, x_i+1] \times [y_i-1, y_i+1]$ contributes
        to histogram $\mathbf{h}_{i,j}$, namely gradients in the square patch
@@ -109,16 +109,16 @@ namespace DO { namespace Sara {
 
        Therefore, to compute the SIFT descriptor we need to scan all the pixels
        on a larger circular image patch with radius $r$:
-      */
-      const float r = sqrt(2.f) * l * (N+1)/2.f;
+       */
+      const float r = sqrt(2.f) * l * (N + 1) / 2.f;
       /*
        In the above formula, notice:
        - the factor $\sqrt{2}$ because diagonal corners of the furthest patches
-         $P_{i,j}$ from the center $(x,y)$ must be in the circular patch.
+       $P_{i,j}$ from the center $(x,y)$ must be in the circular patch.
        - the factor $(N+1)/2$ because we have to include the gradients in larger
-         patches $Q_{i,j}$ for each $P_{i,j}$.
+       patches $Q_{i,j}$ for each $P_{i,j}$.
        It is recommended to make a drawing to convince oneself.
-      */
+       */
 
       // To build the SIFT descriptor, we do the following procedure:
       // - we work in the image reference frame;
@@ -128,12 +128,12 @@ namespace DO { namespace Sara {
       //   $P(x,y,\sigma,\theta)$ with inverse transform $T = 1/l R_\theta^T$
       Matrix2f T;
       T << cos(theta), sin(theta),
-          -sin(theta), cos(theta);
+        -sin(theta), cos(theta);
       T /= l;
       // Loop to perform interpolation
       const int rounded_r = int_round(r);
-      const float rounded_x = int_round(x);
-      const float rounded_y = int_round(y);
+      const float rounded_x = round(x);
+      const float rounded_y = round(y);
       for (int v = -rounded_r; v <= rounded_r; ++v)
       {
         for (int u = -rounded_r; u <= rounded_r; ++u)
@@ -194,7 +194,7 @@ namespace DO { namespace Sara {
     //! Helper member function.
     DescriptorMatrix<float>
     operator()(const std::vector<OERegion>& features,
-               const std::vector<Point2i>& scaleOctavePairs,
+               const std::vector<Point2i>& scale_octave_pairs,
                const ImagePyramid<Vector2f>& gradPolars) const
     {
       DescriptorMatrix<float> sifts(int(features.size()), Dim);
@@ -202,7 +202,7 @@ namespace DO { namespace Sara {
       {
         sifts[i] = this->operator()(
           features[i],
-          gradPolars(scaleOctavePairs[i](0), scaleOctavePairs[i](1)) );
+          gradPolars(scale_octave_pairs[i](0), scale_octave_pairs[i](1)) );
       }
       return sifts;
     }

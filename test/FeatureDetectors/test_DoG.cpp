@@ -131,7 +131,7 @@ void check_keys(const Image<float>& I, const vector<OERegion>& features)
   get_key();
 }
 
-int main()
+GRAPHICS_MAIN()
 {
   Image<float> I;
   string name;
