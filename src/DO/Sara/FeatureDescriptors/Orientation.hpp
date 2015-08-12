@@ -14,6 +14,8 @@
 #ifndef DO_SARA_FEATUREDESCRIPTORS_ORIENTATION_HPP
 #define DO_SARA_FEATUREDESCRIPTORS_ORIENTATION_HPP
 
+#include <DO/Sara/Defines.hpp>
+
 
 namespace DO { namespace Sara {
 
@@ -32,18 +34,16 @@ namespace DO { namespace Sara {
     - \f$\theta = \mathrm{angle}( \nabla I(x,y) )\f$.
    */
   template <typename T>
-  Image<Matrix<T,2,1>> gradient_polar_coordinates(const Image<T>& I)
+  Image<Matrix<T,2,1>> gradient_polar_coordinates(const Image<T>& f)
   {
-    Image<Matrix<T,2,1> > g;
-    gradient(g, I);
-    for (typename Image<Matrix<T,2,1> >::iterator it = g.begin();
-         it != g.end(); ++it)
+    Image<Matrix<T, 2, 1>> nabla_f{ gradient(f) };
+    for (auto it = nabla_f.begin(); it != nabla_f.end(); ++it)
     {
-      float r = 2*it->norm();
-      float theta = atan2(it->y(), it->x());
+      auto r = 2*it->norm();
+      auto theta = atan2(it->y(), it->x());
       *it << r, theta;
     }
-    return g;
+    return nabla_f;
   }
 
   /*!
@@ -76,7 +76,7 @@ namespace DO { namespace Sara {
   void compute_orientation_histogram(Array<T, N, 1>& orientation_histogram,
                                      const Image<Matrix<T,2,1>>& gradient_polar,
                                      T x, T y, T s,
-                                     int patch_truncation_factor = 3,
+                                     T patch_truncation_factor = T(3),
                                      T blur_factor = T(1.5))
   {
     // Weighted histogram of gradients.
@@ -90,12 +90,12 @@ namespace DO { namespace Sara {
     T sigma = s*blur_factor;
 
     // Patch radius on which the histogram of gradients is performed.
-    int patchRadius = int_round(sigma*patch_truncation_factor);
+    int patch_radius = int_round(sigma*patch_truncation_factor);
 
     // Accumulate the histogram of orientations.
-    for (int v = -patchRadius; v <= patchRadius; ++v)
+    for (int v = -patch_radius; v <= patch_radius; ++v)
     {
-      for (int u = -patchRadius; u <= patchRadius; ++u)
+      for (int u = -patch_radius; u <= patch_radius; ++u)
       {
         if ( xi+u < 0 || xi+u >= gradient_polar.width()  ||
              yi+v < 0 || yi+v >= gradient_polar.height() )
@@ -107,30 +107,30 @@ namespace DO { namespace Sara {
         // negative.
 #ifndef LOWE
         ori = ori < 0 ? ori+T(2.*M_PI) : ori;
-        int binIndex = floor(ori/T(2*M_PI) * T(N));
-        binIndex %= N;
+        int bin_index = floor(ori/T(2*M_PI) * T(N));
+        bin_index %= N;
 #else
-        int binIndex = int( (N * (ori + M_PI + 0.001f) / (2.0f * M_PI)) );
-        binIndex = std::min(binIndex, N - 1);
+        int bin_index = int( (N * (ori + M_PI + 0.001f) / (2.0f * M_PI)) );
+        bin_index = std::min(bin_index, N - 1);
 #endif
-        if (binIndex < 0 || binIndex >= N)
+        if (bin_index < 0 || bin_index >= N)
         {
           std::ostringstream oss;
-          oss << "Orientation bin index out of range: " << binIndex
+          oss << "Orientation bin index out of range: " << bin_index
               << " theta = " << ori << std::endl;
           std::cerr << oss.str() << std::endl;
           throw std::out_of_range(oss.str());
         }
 
-
         // Give more emphasis to gradient orientations that lie closer to the
         // keypoint location.
         T weight = exp(-(u*u+v*v)/(T(2)*sigma*sigma));
         // Also give more emphasis to gradient with large magnitude.
-        orientation_histogram( binIndex ) += weight*mag;
+        orientation_histogram( bin_index ) += weight*mag;
       }
     }
   }
+
   /*!
     \brief This is used in [Lowe, IJCV 2004] to determine keypoint orientations.
 
@@ -177,6 +177,7 @@ namespace DO { namespace Sara {
         orientation_peaks.push_back(i);
     return orientation_peaks;
   }
+
   /*!
     \brief Refine peaks as in [Lowe, IJCV 2004] by interpolation based on a
     second-order Taylor approximation.
@@ -214,7 +215,7 @@ namespace DO { namespace Sara {
   }
 
   //! \brief Basically a helper class.
-  class ComputeDominantOrientations
+  class DO_EXPORT ComputeDominantOrientations
   {
   public:
     ComputeDominantOrientations(float peak_ratio_thres = 0.8f,
