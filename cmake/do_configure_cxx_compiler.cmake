@@ -2,13 +2,18 @@ do_step_message("Found ${CMAKE_CXX_COMPILER_ID} compiler:")
 
 # Visual C++ compiler
 if (MSVC)
-  add_definitions(/D_SCL_SECURE_NO_WARNINGS /D_CRT_SECURE_NO_DEPRECATE)
-  message(STATUS "  - NON-SECURE warnings are disabled.")
+  add_definitions(
+    /D_SCL_SECURE_NO_WARNINGS
+    /D_CRT_SECURE_NO_DEPRECATE
+    /wd4251)
+  message(STATUS "  - Disabled annoying warnings in MSVC.")
+
   add_definitions(/EHsc)
   message(STATUS
           "  - Using /EHsc: catches C++ exceptions only and tells the "
           "compiler to assume that extern C functions never throw a C++ "
           "exception.")
+
   if (MSVC_VERSION EQUAL 1700)
     message(STATUS
             "  - Using version 2012: setting '_VARIADIC_MAX=10' to compile "
