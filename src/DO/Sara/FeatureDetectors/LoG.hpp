@@ -14,6 +14,8 @@
 #ifndef DO_SARA_FEATUREDETECTORS_LOG_HPP
 #define DO_SARA_FEATUREDETECTORS_LOG_HPP
 
+#include <DO/Sara/Defines.hpp>
+
 
 namespace DO { namespace Sara {
 
@@ -24,7 +26,7 @@ namespace DO { namespace Sara {
   */
 
   //! Functor class to compute LoG extrema
-  class ComputeLoGExtrema
+  class DO_EXPORT ComputeLoGExtrema
   {
   public:
     /*!
@@ -77,13 +79,13 @@ namespace DO { namespace Sara {
       \brief Localizes LoG extrema for a given image.
      */
     std::vector<OERegion> operator()(const Image<float>& I,
-                                     std::vector<Point2i> *scaleOctavePairs = 0);
+                                     std::vector<Point2i> *scale_octave_pairs = 0);
     /*!
       \brief Returns the Gaussian pyramid used to localize scale-space extrema
       of image **I**.
 
       The Gaussian pyramid is available after calling the function method
-      **ComputeDoGExtrema::operator()(I, scaleOctavePairs)** for the given
+      **ComputeDoGExtrema::operator()(I, scale_octave_pairs)** for the given
       image **I**.
 
       \return the Gaussian pyramid used to localize scale-space extrema
@@ -96,7 +98,7 @@ namespace DO { namespace Sara {
       scale-space extrema of image **I**.
 
       The pyramid of Laplacians of Gaussians is available after calling the
-      function method **ComputeDoGExtrema::operator()(I, scaleOctavePairs)**,
+      function method **ComputeDoGExtrema::operator()(I, scale_octave_pairs)**,
 
       \return the pyramid of Laplacians of Gaussians used to localize
       scale-space extrema of image **I**.

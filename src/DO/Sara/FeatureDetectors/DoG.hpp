@@ -14,6 +14,8 @@
 #ifndef DO_SARA_FEATUREDETECTORS_DOG_HPP
 #define DO_SARA_FEATUREDETECTORS_DOG_HPP
 
+#include <DO/Sara/Defines.hpp>
+
 
 namespace DO { namespace Sara {
 
@@ -24,7 +26,7 @@ namespace DO { namespace Sara {
   */
 
   //! Functor class to compute DoG extrema
-  class ComputeDoGExtrema
+  class DO_EXPORT ComputeDoGExtrema
   {
   public:
     /*!
@@ -62,17 +64,19 @@ namespace DO { namespace Sara {
         based on the function **DO::refineExtremum()**.
      */
     ComputeDoGExtrema(
-      const ImagePyramidParams& pyrParams = ImagePyramidParams(),
+      const ImagePyramidParams& pyr_params = ImagePyramidParams(),
       float extremum_thres = 0.01f,
-      float edgeRatioThres = 10.f,
+      float edge_ratio_thres = 10.f,
       int img_padding_sz = 1,
-      int extremumRefinementIter = 5)
-      : params_(pyrParams)
-      , extremum_thres_(extremum_thres)
-      , edge_ratio_thres_(edgeRatioThres)
-      , img_padding_sz_(img_padding_sz)
-      , extremum_refinement_iter_(extremumRefinementIter)
-    {}
+      int extremum_refinement_iter = 5)
+      : _params(pyr_params)
+      , _extremum_thres(extremum_thres)
+      , _edge_ratio_thres(edge_ratio_thres)
+      , _img_padding_sz(img_padding_sz)
+      , _extremum_refinement_iter(extremum_refinement_iter)
+    {
+    }
+
     /*!
       \brief Localizes DoG extrema for a given image.
 
@@ -86,7 +90,7 @@ namespace DO { namespace Sara {
       \f$\left( g_{\sigma(s+1,o)} - g_{\sigma(s,o)} \right) * I \f$
       where \f$(s,o)\f$ are scale and octave indices.
 
-      \param[in, out] scaleOctavePairs a pointer to vector of scale and octave
+      \param[in, out] scale_octave_pairs a pointer to vector of scale and octave
       index pairs \f$(s_i,o_i)\f$. This index pair corresponds to the difference
       of Gaussians
       \f$\left( g_{\sigma(s_i+1,o_i)} - g_{\sigma(s_i,o_i)} \right) * I\f$
@@ -97,46 +101,51 @@ namespace DO { namespace Sara {
       \f$\left( g_{\sigma(s+1,o)} - g_{\sigma(s,o)} \right) * I \f$.
      */
     std::vector<OERegion> operator()(const Image<float>& I,
-                                     std::vector<Point2i> *scaleOctavePairs = 0);
+                                     std::vector<Point2i> *scale_octave_pairs = 0);
+
     /*!
       \brief Returns the Gaussian pyramid used to localize scale-space extrema
       of image **I**.
 
       The Gaussian pyramid is available after calling the function method
-      **ComputeDoGExtrema::operator()(I, scaleOctavePairs)** for the given
+      **ComputeDoGExtrema::operator()(I, scale_octave_pairs)** for the given
       image **I**.
 
       \return the Gaussian pyramid used to localize scale-space extrema
       of image **I**.
      */
     const ImagePyramid<float>& gaussians() const
-    { return gaussians_; }
+    {
+      return _gaussians;
+    }
+
     /*!
       \brief Returns the pyramid of difference of Gaussians used to localize
       scale-space extrema of image **I**.
 
       The pyramid of difference of Gaussians is available after calling the
-      function method **ComputeDoGExtrema::operator()(I, scaleOctavePairs)**,
+      function method **ComputeDoGExtrema::operator()(I, scale_octave_pairs)**,
 
       \return the pyramid of difference of Gaussians used to localize
       scale-space extrema of image **I**.
      */
     const ImagePyramid<float>& diffOfGaussians() const
-    { return diff_of_gaussians_; }
+    { return _diff_of_gaussians; }
   private: /* data members. */
     // Parameters
-    ImagePyramidParams params_;
-    float extremum_thres_;
-    float edge_ratio_thres_;
-    int img_padding_sz_;
-    int extremum_refinement_iter_;
+    ImagePyramidParams _params;
+    float _extremum_thres;
+    float _edge_ratio_thres;
+    int _img_padding_sz;
+    int _extremum_refinement_iter;
     // Difference of Gaussians.
-    ImagePyramid<float> gaussians_;
-    ImagePyramid<float> diff_of_gaussians_;
+    ImagePyramid<float> _gaussians;
+    ImagePyramid<float> _diff_of_gaussians;
   };
 
 
 } /* namespace Sara */
 } /* namespace DO */
+
 
 #endif /* DO_SARA_FEATUREDETECTORS_DOG_HPP */

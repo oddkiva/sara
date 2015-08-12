@@ -1,6 +1,7 @@
 #include <DO/Sara/FeatureDetectors.hpp>
 #include <DO/Sara/FeatureDescriptors.hpp>
 #include <DO/Sara/Graphics.hpp>
+#include <DO/Sara/ImageIO.hpp>
 
 
 using namespace DO::Sara;
@@ -29,7 +30,7 @@ void testDoGSIFTKeypoints(const Image<float>& I)
     // Be careful of the bounds. We go from 1 to N-1.
     for (int s = 1; s < D.num_scales_per_octave()-1; ++s)
     {
-      vector<OERegion> extrema( localScaleSpaceExtrema(D,s,o) );
+      vector<OERegion> extrema( local_scale_space_extrema(D,s,o) );
 
       // Verbose.
       print_stage("Detected extrema");
@@ -122,7 +123,7 @@ void testDoGSIFTKeypoints(const Image<float>& I)
 }
 #endif
 
-Set<OERegion, RealDescriptor> computeSIFT(const Image<float>& image)
+Set<OERegion, RealDescriptor> compute_sift_keypoints(const Image<float>& image)
 {
   // Time everything.
   Timer timer;
@@ -201,7 +202,7 @@ bool check_descriptors(const DescriptorMatrix<float>& descriptors)
   {
     for (int j = 0; j < descriptors.dimension(); ++j)
     {
-      if (!DO::isfinite(descriptors[i](j)))
+      if (!isfinite(descriptors[i](j)))
       {
         cerr << "Not a finite number" << endl;
         return false;
@@ -212,27 +213,27 @@ bool check_descriptors(const DescriptorMatrix<float>& descriptors)
   return true;
 }
 
-int main()
+GRAPHICS_MAIN()
 {
   Image<float> image;
-  if (!load(image, src_path("../../datasets/sunflowerField.jpg")))
+  if (!imread(image, src_path("../../datasets/sunflowerField.jpg")))
     return -1;
 
   print_stage("Detecting SIFT features");
-  Set<OERegion, RealDescriptor> SIFTs = computeSIFT(image.convert<float>());
-  const vector<OERegion>& features = SIFTs.features;
+  Set<OERegion, RealDescriptor> sift_keys = compute_sift_keypoints(image);
+  const vector<OERegion>& features = sift_keys.features;
 
   print_stage("Removing existing redundancies");
-  removeRedundancies(SIFTs);
-  CHECK(SIFTs.features.size());
-  CHECK(SIFTs.descriptors.size());
+  remove_redundancies(sift_keys);
+  CHECK(sift_keys.features.size());
+  CHECK(sift_keys.descriptors.size());
 
   // Check the features visually.
   print_stage("Draw features");
   create_window(image.width(), image.height());
   set_antialiasing();
   display(image);
-  for (size_t i=0; i != features.size(); ++i)
+  for (size_t i = 0; i != features.size(); ++i)
     features[i].draw(features[i].extremum_type() == OERegion::Max ? Red8 : Blue8);
   get_key();
 

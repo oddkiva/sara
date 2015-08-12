@@ -19,19 +19,19 @@ namespace DO { namespace Sara {
 
   vector<OERegion>
   ComputeLoGExtrema::operator()(const Image<float>& I,
-                                vector<Point2i> *scaleOctavePairs)
+                                vector<Point2i> *scale_octave_pairs)
   {
     ImagePyramid<float>& G = gaussians_;
     ImagePyramid<float>& L = laplacians_of_gaussians_;
-    G = DO::gaussianPyramid(I, params_);
-    L = DO::LoGPyramid(G);
+    G = gaussian_pyramid(I, params_);
+    L = laplacian_pyramid(G);
 
     vector<OERegion> extrema;
     extrema.reserve(int(1e4));
-    if (scaleOctavePairs)
+    if (scale_octave_pairs)
     {
-      scaleOctavePairs->clear();
-      scaleOctavePairs->reserve(1e4);
+      scale_octave_pairs->clear();
+      scale_octave_pairs->reserve(1e4);
     }
 
     for (int o = 0; o < L.num_octaves(); ++o)
@@ -39,15 +39,15 @@ namespace DO { namespace Sara {
       // Be careful of the bounds. We go from 1 to N-1.
       for (int s = 1; s < L.num_scales_per_octave()-1; ++s)
       {
-        vector<OERegion> newExtrema(localScaleSpaceExtrema(
+        vector<OERegion> newExtrema(local_scale_space_extrema(
           L, s, o, extremum_thres_, edge_ratio_thres_,
           img_padding_sz_, extremum_refinement_iter_) );
         append(extrema, newExtrema);
 
-        if (scaleOctavePairs)
+        if (scale_octave_pairs)
         {
           for (size_t i = 0; i != newExtrema.size(); ++i)
-            scaleOctavePairs->push_back(Point2i(s,o));
+            scale_octave_pairs->push_back(Point2i(s,o));
         }
       }
     }

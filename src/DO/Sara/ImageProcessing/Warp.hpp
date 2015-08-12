@@ -50,7 +50,7 @@ namespace DO { namespace Sara {
       // Fill with either the default value or the interpolated value.
       if (position_is_in_src_domain)
       {
-        Vector2 H_p_2(H_p.template head<2>());
+        Vector2d H_p_2(H_p.template head<2>().template cast<double>());
         DoublePixel pixel_value( interpolate(src, H_p_2) );
         *it = PixelTraits<DoublePixel>::template Cast<ChannelType>::apply(
           pixel_value);

@@ -11,25 +11,27 @@
 
 #include <DO/Sara/FeatureDetectors.hpp>
 
+
 using namespace std;
+
 
 namespace DO { namespace Sara {
 
   vector<OERegion>
   ComputeDoGExtrema::operator()(const Image<float>& I,
-                                vector<Point2i> *scaleOctavePairs)
+                                vector<Point2i> *scale_octave_pairs)
   {
-    ImagePyramid<float>& G = gaussians_;
-    ImagePyramid<float>& D = diff_of_gaussians_;
-    G = DO::gaussianPyramid(I, params_);
-    D = DO::DoGPyramid(G);
+    ImagePyramid<float>& G = _gaussians;
+    ImagePyramid<float>& D = _diff_of_gaussians;
+    G = gaussian_pyramid(I, _params);
+    D = difference_of_gaussians_pyramid(G);
 
     vector<OERegion> extrema;
     extrema.reserve(int(1e4));
-    if (scaleOctavePairs)
+    if (scale_octave_pairs)
     {
-      scaleOctavePairs->clear();
-      scaleOctavePairs->reserve(10000);
+      scale_octave_pairs->clear();
+      scale_octave_pairs->reserve(10000);
     }
 
     for (int o = 0; o < D.num_octaves(); ++o)
@@ -37,15 +39,15 @@ namespace DO { namespace Sara {
       // Be careful of the bounds. We go from 1 to N-1.
       for (int s = 1; s < D.num_scales_per_octave()-1; ++s)
       {
-        vector<OERegion> newExtrema(localScaleSpaceExtrema(
-          D, s, o, extremum_thres_, edge_ratio_thres_,
-          img_padding_sz_, extremum_refinement_iter_) );
+        vector<OERegion> newExtrema(local_scale_space_extrema(
+          D, s, o, _extremum_thres, _edge_ratio_thres,
+          _img_padding_sz, _extremum_refinement_iter) );
         append(extrema, newExtrema);
 
-        if (scaleOctavePairs)
+        if (scale_octave_pairs)
         {
           for (size_t i = 0; i != newExtrema.size(); ++i)
-            scaleOctavePairs->push_back(Point2i(s,o));
+            scale_octave_pairs->push_back(Point2i(s,o));
         }
       }
     }

@@ -26,7 +26,7 @@ namespace DO { namespace Sara {
   };
 
   vector<pair<size_t, float> >
-  adaptiveNonMaximalSuppression(const vector<OERegion>& features,
+  adaptive_non_maximal_suppression(const vector<OERegion>& features,
                                 float c_robust)
   {
     // Create the ordered list sorted by decreasing strength.

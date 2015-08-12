@@ -49,9 +49,9 @@ namespace DO { namespace Sara {
   void highlight_patch(const ImagePyramid<float>& D,
                        float x, float y, float s, int o)
   {
-    const float magFactor = 3.f;
+    const float magnitude_factor = 3.f;
     float z = D.octave_scaling_factor(o);
-    int r = static_cast<int>(floor(1.5f*s*magFactor*z + 0.5f));
+    int r = static_cast<int>(floor(1.5f*s*magnitude_factor*z + 0.5f));
     x *= z;
     y *= z;
     draw_rect(int_round(x)-r, int_round(y)-r, 2*r+1, 2*r+1, Green8, 3);
@@ -60,7 +60,7 @@ namespace DO { namespace Sara {
   void check_patch(const Image<float>& I, int x, int y, int w, int h,
                    double fact)
   {
-    Image<float> patch(getImagePatch(I,x,y,w,h));
+    Image<float> patch(get_subimage(I,x,y,w,h));
     set_active_window(create_window(w*fact, h*fact, "Check image patch"));
     display(color_rescale(patch), 0, 0, fact);
     get_key();

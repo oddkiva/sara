@@ -24,10 +24,17 @@ namespace DO { namespace Sara {
    */
 
   template <typename T>
+  inline T round(T x)
+  {
+    return floor(x + T(0.5));
+  }
+
+  template <typename T>
   inline int int_round(T x)
   {
-    return static_cast<int>(floor(x+T(0.5)));
+    return static_cast<int>(round(x));
   }
+
 
   // Check the image pyramid.
   template <typename T>

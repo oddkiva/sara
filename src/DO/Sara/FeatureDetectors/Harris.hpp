@@ -14,6 +14,8 @@
 #ifndef DO_SARA_FEATUREDETECTORS_HARRIS_HPP
 #define DO_SARA_FEATUREDETECTORS_HARRIS_HPP
 
+#include <DO/Sara/Defines.hpp>
+
 
 namespace DO { namespace Sara {
 
@@ -39,11 +41,13 @@ namespace DO { namespace Sara {
       g_{\sigma_D} * \left[ \nabla I_{\sigma_I} \nabla I_{\sigma_I}^T \right]
     \f].
    */
+  DO_EXPORT
   Image<float> scale_adapted_harris_cornerness(const Image<float>& I,
                                                float sigma_I, float sigma_D,
                                                float kappa);
 
   //! Pyramid of Harris cornerness functions.
+  DO_EXPORT
   ImagePyramid<float> harris_cornerness_pyramid(
     const Image<float>& image,
     float kappa = 0.04f,
@@ -54,6 +58,7 @@ namespace DO { namespace Sara {
     Finds and stores local maxima in the image \f$I\f$ exceeding the specified
     threshold.
    */
+  DO_EXPORT
   std::vector<OERegion> local_maxima(const Image<float>& I, float thres);
 
   /*!
@@ -64,6 +69,7 @@ namespace DO { namespace Sara {
     is negative and attains a minimum either in the x-direction or the
     y-direction.
    */
+  DO_EXPORT
   bool local_min_x(int x, int y, Image<float>& I);
 
   /*!
@@ -74,10 +80,11 @@ namespace DO { namespace Sara {
     is negative and attains a minimum either in the x-direction or the
     y-direction.
    */
+  DO_EXPORT
   bool local_min_y(int x, int y, Image<float>& I);
 
   //! Functor class to compute Harris-Laplace corners.
-  class ComputeHarrisLaplaceCorners
+  class DO_EXPORT ComputeHarrisLaplaceCorners
   {
   public:
     /*!
@@ -133,7 +140,7 @@ namespace DO { namespace Sara {
       2. Localize extrema in Harris corner functions in each scale
          \f$\sigma(s,o)\f$.
 
-      \param[in, out] scaleOctavePairs a pointer to vector of scale and octave
+      \param[in, out] scale_octave_pairs a pointer to vector of scale and octave
       index pairs \f$(s_i,o_i)\f$. This index pair corresponds to the difference
       of Gaussians
       \f$\left( g_{\sigma(s_i+1,o_i)} - g_{\sigma(s_i,o_i)} \right) * I\f$
@@ -144,13 +151,13 @@ namespace DO { namespace Sara {
       \f$\left( g_{\sigma(s+1,o)} - g_{\sigma(s,o)} \right) * I \f$.
      */
     std::vector<OERegion> operator()(const Image<float>& I,
-                                     std::vector<Point2i> *scaleOctavePairs = 0);
+                                     std::vector<Point2i> *scale_octave_pairs = 0);
     /*!
       \brief Returns the Gaussian pyramid used to select characteristic scales
       for Harris-Laplace corners.
 
       The Gaussian pyramid is available after calling the function method
-      **ComputeHarrisLaplaceExtrema::operator()(I, scaleOctavePairs)** for
+      **ComputeHarrisLaplaceExtrema::operator()(I, scale_octave_pairs)** for
       the given image **I**.
 
       \return the Gaussian pyramid used to localize scale-space extrema
@@ -167,7 +174,7 @@ namespace DO { namespace Sara {
 
       The pyramid of Harris corner functions is available after calling the
       function method
-      **ComputeHarrisLaplaceExtrema::operator()(I, scaleOctavePairs)**,
+      **ComputeHarrisLaplaceExtrema::operator()(I, scale_octave_pairs)**,
 
       \return the pyramid of difference of Gaussians used to localize
       scale-space extrema of image **I**.

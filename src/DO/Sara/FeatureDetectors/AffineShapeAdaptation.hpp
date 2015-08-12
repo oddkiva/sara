@@ -14,6 +14,9 @@
 #ifndef DO_SARA_FEATUREDETECTORS_AFFINEADAPTATION_HPP
 #define DO_SARA_FEATUREDETECTORS_AFFINEADAPTATION_HPP
 
+#include <DO/Sara/Defines.hpp>
+#include <DO/Sara/Core/Image.hpp>
+
 
 namespace DO { namespace Sara {
 
@@ -36,7 +39,7 @@ namespace DO { namespace Sara {
     which is also the Mahalanobis distance reflecting the anisotropy of the
     local shape.
    */
-  class AdaptFeatureAffinelyToLocalShape
+  class DO_EXPORT AdaptFeatureAffinelyToLocalShape
   {
   public:
     /*!
@@ -44,6 +47,7 @@ namespace DO { namespace Sara {
      constructor.
      */
     AdaptFeatureAffinelyToLocalShape();
+
     /*!
       Estimates the local shape at some given point of an image.
       @param[in,out]
@@ -55,9 +59,10 @@ namespace DO { namespace Sara {
         feature
         the point on which we estimate the local shape in image I.
      */
-    bool operator()(Matrix2f& affAdaptTransfmMat,
-                    const Image<float>& I,
+    bool operator()(Matrix2f& affine_adaptation_transform,
+                    const Image<float>& image,
                     const OERegion& feature);
+
   private:
     /*!
       Returns:
@@ -65,9 +70,10 @@ namespace DO { namespace Sara {
       - false otherwise.
       If false is returned, then
      */
-    bool update_normalized_patch(const Image<float>& I,
-                               const OERegion& feature,
-                               const Matrix2f& T);
+    bool update_normalized_patch(const Image<float>& image,
+                                 const OERegion& feature,
+                                 const Matrix2f& affine_adaptation_transform);
+
     /*!
       Given a feature $(\mathbf{x}, \sigma)\f$, computes \f$\mathbf{x}\f$ at
       the second moment matrix \f$mu(x, \sigma)\f$ defined as
@@ -77,28 +83,32 @@ namespace DO { namespace Sara {
       \f]
      */
     Matrix2f compute_moment_matrix_from_patch();
+
     //! Find one linear transform associated to the second moment matrix.
-    Matrix2f compute_transform_from_moment_matrix(const Matrix2f& momentMatrix,
-                                              float& anisotropicRatio);
+    Matrix2f compute_transform_from_moment_matrix(const Matrix2f& moment_matrix,
+                                                  float& anisotropic_ratio);
+
     //! Normalize the transform
-    void rescale_transform(Matrix2f& T);
+    void rescale_transform(Matrix2f& transform);
+
   private: /* debugging methods. */
     void debug_create_window_to_view_patch();
     void debug_print_affine_adaptation_iteration(int iter);
     void debug_print_patch_touches_image_boundaries();
-    void debug_display_normalized_patch(float fact);
+    void debug_display_normalized_patch(float scale);
     void debug_check_weighted_patch(const Image<Vector2f>& gradients);
     void debug_check_moment_matrix_and_transform(const Matrix2f& mu,
-                                            const Matrix2f& delta_U,
-                                            float anisotropicRatio,
-                                            const Matrix2f& U);
+                                                 const Matrix2f& delta_U,
+                                                 float anisotropic_ratio,
+                                                 const Matrix2f& U);
     void debug_close_window_used_to_view_patch();
+
   private:
-    int patch_size_;
-    float gauss_trunc_factor_;
+    int _patch_size;
+    float _gauss_trunc_factor;
     int affine_adaptation_max_iter_;
     Image<float> _patch;
-    Image<float> gaussian_weight_;
+    Image<float> _gaussian_weights;
 
     float _patch_zoom_factor;
     bool _debug;

@@ -212,12 +212,12 @@ namespace DO { namespace Sara {
     return true;
   }
 
-  vector<OERegion> localScaleSpaceExtrema(const ImagePyramid<float>& I,
-                                          int s, int o,
-                                          float extremum_thres,
-                                          float edgeRatioThres,
-                                          int img_padding_sz,
-                                          int refine_iterations)
+  vector<OERegion> local_scale_space_extrema(const ImagePyramid<float>& I,
+                                             int s, int o,
+                                             float extremum_thres,
+                                             float edgeRatioThres,
+                                             int img_padding_sz,
+                                             int refine_iterations)
   {
     std::vector<OERegion> extrema;
     extrema.reserve(10000);
@@ -303,7 +303,7 @@ namespace DO { namespace Sara {
       return false;
 
     // First patch at the closest scale.
-    Image<float> nearestPatch(getImagePatch(nearest_gaussian, x, y, patch_radius));
+    Image<float> nearestPatch(get_subimage(nearest_gaussian, x, y, patch_radius));
     //#define DEBUG_SELECT_SCALE
 #ifdef DEBUG_SELECT_SCALE
     // verbose.
@@ -326,9 +326,9 @@ namespace DO { namespace Sara {
 #endif
     // Store the blurred patches, their associated scales and LoG values at the
     // patch centers.
-    vector<Image<float> > patches{ num_scales + 1 };
-    vector<float> scales{ num_scales + 1 };
-    vector<float> LoGs{ num_scales + 1 };
+    vector<Image<float>> patches(num_scales + 1);
+    vector<float> scales(num_scales + 1);
+    vector<float> LoGs(num_scales + 1);
 
     float scale_common_ratio = pow(2.f, 1.f/num_scales);
     float nearest_sigma = G.scale_relative_to_octave(s - 1);
@@ -370,7 +370,7 @@ namespace DO { namespace Sara {
       LoGs[i] = laplacian(patches[i], Point2i(patch_radius,patch_radius))
               * pow(scales[i], 2);
 
-    // Search local extremum
+    // Search local extremum.
     bool is_extremum = false;
     int i = 1;
     for ( ; i < num_scales; ++i)

@@ -14,6 +14,8 @@
 #ifndef DO_SARA_FEATUREDETECTORS_HESSIAN_HPP
 #define DO_SARA_FEATUREDETECTORS_HESSIAN_HPP
 
+#include <DO/Sara/Defines.hpp>
+
 
 namespace DO { namespace Sara {
 
@@ -44,7 +46,7 @@ namespace DO { namespace Sara {
   }
 
   //! Functor class to compute Hessian-Laplace maxima.
-  class ComputeHessianLaplaceMaxima
+  class DO_EXPORT ComputeHessianLaplaceMaxima
   {
   public:
     /*!
@@ -74,12 +76,14 @@ namespace DO { namespace Sara {
                                 int img_padding_sz = 1,
                                 int numScales = 10,
                                 int extremumRefinementIter = 5)
-      : pyr_params_(pyrParams)
-      , extremum_thres_(extremum_thres)
-      , img_padding_sz_(img_padding_sz)
-      , extremum_refinement_iter_(extremumRefinementIter)
-      , num_scales_(numScales)
-    {}
+      : _pyr_params(pyrParams)
+      , _extremum_thres(extremum_thres)
+      , _img_padding_sz(img_padding_sz)
+      , _extremum_refinement_iter(extremumRefinementIter)
+      , _num_scales(numScales)
+    {
+    }
+
     /*!
       \brief Localizes Hessian-Laplace maxima for a given image.
 
@@ -92,7 +96,7 @@ namespace DO { namespace Sara {
       2. Localize maxima in determinant of Hessians functions in each scale
          \f$\sigma(s,o)\f$.
 
-      \param[in, out] scaleOctavePairs a pointer to vector of scale and octave
+      \param[in, out] scale_octave_pairs a pointer to vector of scale and octave
       index pairs \f$(s_i,o_i)\f$. This index pair corresponds to the determinant
       of Hessians.
 
@@ -100,48 +104,55 @@ namespace DO { namespace Sara {
       scale-normalized determinant of Hessians.
      */
     std::vector<OERegion> operator()(const Image<float>& I,
-                                     std::vector<Point2i> *scaleOctavePairs = 0);
+                                     std::vector<Point2i> *scale_octave_pairs = 0);
+
     /*!
       \brief Returns the Gaussian pyramid used to select characteristic scales
       for Hessian-Laplace interest points.
 
       The Gaussian pyramid is available after calling the function method
-      **ComputeHessianLaplaceExtrema::operator()(I, scaleOctavePairs)** for
+      **ComputeHessianLaplaceExtrema::operator()(I, scale_octave_pairs)** for
       the given image **I**.
 
       \return the Gaussian pyramid used to localize Hessian-Laplace extrema
       of image **I**.
      */
     const ImagePyramid<float>& gaussians() const
-    { return gaussians_; }
+    {
+      return _gaussians;
+    }
+
     /*!
       \brief Returns the pyramid of Hessian-Laplace functions used to localize
       scale-space extrema of image **I**.
 
       The pyramid of determinant of Hessians is available after calling the
       function method
-      **ComputeHessianLaplaceExtrema::operator()(I, scaleOctavePairs)**,
+      **ComputeHessianLaplaceExtrema::operator()(I, scale_octave_pairs)**,
 
       \return the pyramid of determinant of Hessians used to localize
       scale-space extrema of image **I**.
      */
     const ImagePyramid<float>& detOfHessians() const
-    { return det_hessians_; }
+    {
+      return _det_hessians;
+    }
+
   private: /* data members. */
     // Parameters
-    ImagePyramidParams pyr_params_;
-    float extremum_thres_;
-    int img_padding_sz_;
-    int extremum_refinement_iter_;
-    int num_scales_;
+    ImagePyramidParams _pyr_params;
+    float _extremum_thres;
+    int _img_padding_sz;
+    int _extremum_refinement_iter;
+    int _num_scales;
     // Difference of Gaussians.
-    ImagePyramid<float> gaussians_;
-    ImagePyramid<float> det_hessians_;
+    ImagePyramid<float> _gaussians;
+    ImagePyramid<float> _det_hessians;
   };
 
   //! Functor class to compute local extrema of determinant of Hessians
   //! in scale space.
-  class ComputeDoHExtrema
+  class DO_EXPORT ComputeDoHExtrema
   {
   public:
     /*!
@@ -172,10 +183,10 @@ namespace DO { namespace Sara {
                       int img_padding_sz = 1,
                       int extremumRefinementIter = 2)
       : pyr_params_(pyrParams)
-      , extremum_thres_(extremum_thres)
-      , edge_ratio_thres_(edgeRatioThres)
-      , img_padding_sz_(img_padding_sz)
-      , extremum_refinement_iter_(extremumRefinementIter)
+      , _extremum_thres(extremum_thres)
+      , _edge_ratio_thres(edgeRatioThres)
+      , _img_padding_sz(img_padding_sz)
+      , _extremum_refinement_iter(extremumRefinementIter)
     {}
     /*!
       \brief Localizes scale-space extrema of determinant of Hessians for a
@@ -190,7 +201,7 @@ namespace DO { namespace Sara {
       2. Localize extrema in determinant of Hessians functions in each scale
          \f$\sigma(s,o)\f$.
 
-      \param[in, out] scaleOctavePairs a pointer to vector of scale and octave
+      \param[in, out] scale_octave_pairs a pointer to vector of scale and octave
       index pairs \f$(s_i,o_i)\f$. This index pair corresponds to the determinant
       of Hessians.
 
@@ -198,41 +209,41 @@ namespace DO { namespace Sara {
       scale-normalized determinant of Hessians.
      */
     std::vector<OERegion> operator()(const Image<float>& I,
-                                     std::vector<Point2i> *scaleOctavePairs = 0);
+                                     std::vector<Point2i> *scale_octave_pairs = 0);
     /*!
       \brief Returns the Gaussian pyramid used to compute DoH extrema.
 
       The Gaussian pyramid is available after calling the function method
-      **ComputeHessianLaplaceExtrema::operator()(I, scaleOctavePairs)** for
+      **ComputeHessianLaplaceExtrema::operator()(I, scale_octave_pairs)** for
       the given image **I**.
 
       \return the Gaussian pyramid used to localize DoH extrema of image **I**.
      */
     const ImagePyramid<float>& gaussians() const
-    { return gaussians_; }
+    { return _gaussians; }
     /*!
       \brief Returns the pyramid of determinant of Hessians used to localize
       scale-space extrema of image **I**.
 
       The pyramid of determinant of Hessians is available after calling the
       function method
-      **ComputeHessianLaplaceExtrema::operator()(I, scaleOctavePairs)**,
+      **ComputeHessianLaplaceExtrema::operator()(I, scale_octave_pairs)**,
 
       \return the pyramid of determinant of Hessians used to localize
       scale-space extrema of image **I**.
      */
     const ImagePyramid<float>& detOfHessians() const
-    { return det_hessians_; }
+    { return _det_hessians; }
   private: /* data members. */
     // Parameters
     ImagePyramidParams pyr_params_;
-    float extremum_thres_;
-    float edge_ratio_thres_;
-    int img_padding_sz_;
-    int extremum_refinement_iter_;
+    float _extremum_thres;
+    float _edge_ratio_thres;
+    int _img_padding_sz;
+    int _extremum_refinement_iter;
     // Difference of Gaussians.
-    ImagePyramid<float> gaussians_;
-    ImagePyramid<float> det_hessians_;
+    ImagePyramid<float> _gaussians;
+    ImagePyramid<float> _det_hessians;
   };
 
   //! @}
@@ -240,5 +251,6 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
+
 
 #endif /* DO_SARA_FEATUREDETECTORS_HESSIAN_HPP */

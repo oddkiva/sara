@@ -21,25 +21,25 @@ namespace DO { namespace Sara {
   AdaptFeatureAffinelyToLocalShape()
   {
     // Parameters
-    patch_size_ = 19;
-    gauss_trunc_factor_ = 3.f;
+    _patch_size = 19;
+    _gauss_trunc_factor = 3.f;
     affine_adaptation_max_iter_ = 10;
     // Debug only: view the magnified patch with the following zoom factor.
     _debug = false;
     _patch_zoom_factor = 2.f;
     // Memory allocation.
-    _patch.resize(patch_size_, patch_size_);
-    gaussian_weight_.resize(patch_size_, patch_size_);
+    _patch.resize(_patch_size, _patch_size);
+    _gaussian_weights.resize(_patch_size, _patch_size);
     // Precompute the Gaussian weight.
-    float sigma = (0.5f*patch_size_) / gauss_trunc_factor_;
-    float r = patch_size_/2.f;
-    for (int y = 0; y < patch_size_; ++y)
+    float sigma = (0.5f*_patch_size) / _gauss_trunc_factor;
+    float r = _patch_size/2.f;
+    for (int y = 0; y < _patch_size; ++y)
     {
-      for (int x = 0; x < patch_size_; ++x)
+      for (int x = 0; x < _patch_size; ++x)
       {
         float u = x-r;
         float v = y-r;
-        gaussian_weight_(x,y) = exp(-(u*u+v*v)/(2.f*sigma*sigma));
+        _gaussian_weights(x,y) = exp(-(u*u+v*v)/(2.f*sigma*sigma));
       }
     }
   }
@@ -47,8 +47,8 @@ namespace DO { namespace Sara {
   bool
   AdaptFeatureAffinelyToLocalShape::
   update_normalized_patch(const Image<float>& I,
-                        const OERegion& feature,
-                        const Matrix2f& T)
+                          const OERegion& f,
+                          const Matrix2f& T)
   {
     // The square image patch on which we estimate the second-moment matrix has
     // a side length $l$.
@@ -64,17 +64,18 @@ namespace DO { namespace Sara {
     // - $\mathbf{c}$ is the center of the feature,
     // - $r = l/2$.
     Matrix3f A;
-    float r = patch_size_/2.f;
-    float fact = gauss_trunc_factor_*feature.scale()/r;
+    float r = _patch_size/2.f;
+    float s = _gauss_trunc_factor*f.scale()/r;
 
-    A.block<2,2>(0,0) = T*fact;
-    A.col(2) << T*Point2f(-r,-r)*fact+feature.center(), 1.f;
+    A.block<2,2>(0,0) = T*s;
+    A.col(2) << T*Point2f(-r,-r)*s+f.center(), 1.f;
     A(2,0) = A(2,1) = 0.f;
 
-    bool success = warp(_patch, I, A, 0.f, true);
-    debug_display_normalized_patch(fact);
+    warp(I, _patch, A);
+    debug_display_normalized_patch(s);
 
-    return success;
+    // Make it buggy first.
+    return false;
   }
 
   Matrix2f
@@ -87,15 +88,15 @@ namespace DO { namespace Sara {
     // Estimate the second moment matrix.
     Matrix2f moment;
     moment.setZero();
-    for (int v = 0; v < patch_size_; ++v)
+    for (int v = 0; v < _patch_size; ++v)
     {
-      for (int u = 0; u < patch_size_; ++u)
+      for (int u = 0; u < _patch_size; ++u)
       {
         float Ix = gradients(u,v)(0);
         float Iy = gradients(u,v)(1);
-        moment(0,0) += gaussian_weight_(u,v)*Ix*Ix;
-        moment(1,1) += gaussian_weight_(u,v)*Iy*Iy;
-        moment(0,1) += gaussian_weight_(u,v)*Ix*Iy;
+        moment(0,0) += _gaussian_weights(u,v)*Ix*Ix;
+        moment(1,1) += _gaussian_weights(u,v)*Iy*Iy;
+        moment(0,1) += _gaussian_weights(u,v)*Ix*Iy;
       }
     }
     moment(1,0) = moment(0,1);
@@ -220,7 +221,7 @@ namespace DO { namespace Sara {
       // Check the weighted patch.
       Image<float> grad_magnitude( gradients.compute<SquaredNorm>() );
       Image<float> weighted_patch(gradients.sizes());
-      weighted_patch.array() = grad_magnitude.array().sqrt()*gaussian_weight_.array();
+      weighted_patch.array() = grad_magnitude.array().sqrt()*_gaussian_weights.array();
       weighted_patch = color_rescale(weighted_patch);
       display(weighted_patch, 0, 0, _patch_zoom_factor);
       get_key();
@@ -259,7 +260,6 @@ namespace DO { namespace Sara {
     if (_debug)
       cout << "The patch touches the image boundaries" << endl;
   }
-
 
 } /* namespace Sara */
 } /* namespace DO */

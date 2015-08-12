@@ -14,21 +14,18 @@
 #ifndef DO_SARA_FEATURES_HPP
 #define DO_SARA_FEATURES_HPP
 
-#include <DO/Sara/Core.hpp>
-
 #include <vector>
 
-// ========================================================================== //
-// Components
-//
+// Core
+#include <DO/Sara/Core/EigenExtension.hpp>
 // Data structures
-#include "Features/Feature.hpp"
-#include "Features/DescriptorMatrix.hpp"
-#include "Features/Key.hpp"
+#include <DO/Sara/Features/Feature.hpp>
+#include <DO/Sara/Features/DescriptorMatrix.hpp>
+#include <DO/Sara/Features/Key.hpp>
 // Utilities, View, I/O
-#include "Features/Utilities.hpp"
-#include "Features/Draw.hpp"
-#include "Features/IO.hpp"
+#include <DO/Sara/Features/Utilities.hpp>
+#include <DO/Sara/Features/Draw.hpp>
+#include <DO/Sara/Features/IO.hpp>
 
 //! \defgroup Features Features
 

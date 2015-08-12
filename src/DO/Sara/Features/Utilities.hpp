@@ -14,6 +14,7 @@
 #ifndef DO_SARA_FEATURES_UTILITIES_HPP
 #define DO_SARA_FEATURES_UTILITIES_HPP
 
+#include <DO/Sara/Defines.hpp>
 
 #include <DO/Sara/Features/Feature.hpp>
 
@@ -83,17 +84,9 @@ namespace DO { namespace Sara {
     EqualDescriptor<T> _equal_descriptors;
   };
 
-  template<typename T>
-  inline bool isfinite(T arg)
-  {
-    return
-      arg == arg &&
-      arg != std::numeric_limits<T>::infinity() &&
-      arg != -std::numeric_limits<T>::infinity();
-  }
-
+  DO_EXPORT
   void remove_redundancies(std::vector<OERegion>& features,
-                          DescriptorMatrix<float>& descriptors);
+                           DescriptorMatrix<float>& descriptors);
 
   inline void remove_redundancies(Set<OERegion, RealDescriptor>& keys)
   {

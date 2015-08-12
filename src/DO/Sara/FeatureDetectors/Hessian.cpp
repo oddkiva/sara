@@ -11,6 +11,7 @@
 
 #include <DO/Sara/FeatureDetectors.hpp>
 
+
 using namespace std;
 
 
@@ -18,82 +19,82 @@ namespace DO { namespace Sara {
 
   vector<OERegion>
   ComputeHessianLaplaceMaxima::
-  operator()(const Image<float>& I, vector<Point2i> *scaleOctavePairs)
+  operator()(const Image<float>& I, vector<Point2i> *scale_octave_pairs)
   {
-    ImagePyramid<float>& gaussPyr = gaussians_;
-    ImagePyramid<float>& detHessPyr = det_hessians_;
+    ImagePyramid<float>& gauss_pyr = _gaussians;
+    ImagePyramid<float>& det_hess_pyr = _det_hessians;
 
-    gaussPyr = DO::gaussianPyramid(I, pyr_params_);
-    detHessPyr = DoHPyramid(gaussPyr);
+    gauss_pyr = gaussian_pyramid(I, _pyr_params);
+    det_hess_pyr = DoHPyramid(gauss_pyr);
 
-    vector<OERegion> detHessMaxima;
-    detHessMaxima.reserve(int(1e4));
-    if (scaleOctavePairs)
+    vector<OERegion> det_hess_maxima;
+    det_hess_maxima.reserve(int(1e4));
+    if (scale_octave_pairs)
     {
-      scaleOctavePairs->clear();
-      scaleOctavePairs->reserve(1e4);
+      scale_octave_pairs->clear();
+      scale_octave_pairs->reserve(1e4);
     }
 
-    for (int o = 0; o < detHessPyr.num_octaves(); ++o)
+    for (int o = 0; o < det_hess_pyr.num_octaves(); ++o)
     {
       // Be careful of the bounds. We go from 1 to N-1.
-      for (int s = 1; s < detHessPyr.num_scales_per_octave(); ++s)
+      for (int s = 1; s < det_hess_pyr.num_scales_per_octave(); ++s)
       {
-        vector<OERegion> newDetHessMaxima(laplace_maxima(
-          detHessPyr, gaussPyr, s, o, extremum_thres_, img_padding_sz_,
-          num_scales_, extremum_refinement_iter_) );
+        vector<OERegion> new_det_hess_maxima(laplace_maxima(
+          det_hess_pyr, gauss_pyr, s, o, _extremum_thres, _img_padding_sz,
+          _num_scales, _extremum_refinement_iter) );
 
-        append(detHessMaxima, newDetHessMaxima);
+        append(det_hess_maxima, new_det_hess_maxima);
 
-        if (scaleOctavePairs)
+        if (scale_octave_pairs)
         {
-          for (size_t i = 0; i != newDetHessMaxima.size(); ++i)
-            scaleOctavePairs->push_back(Point2i(s,o));
+          for (size_t i = 0; i != new_det_hess_maxima.size(); ++i)
+            scale_octave_pairs->push_back(Point2i(s,o));
         }
       }
     }
-    shrink_to_fit(detHessMaxima);
-    return detHessMaxima;
+    shrink_to_fit(det_hess_maxima);
+    return det_hess_maxima;
   }
 
   vector<OERegion>
   ComputeDoHExtrema::
-  operator()(const Image<float>& I, vector<Point2i> *scaleOctavePairs)
+  operator()(const Image<float>& I, vector<Point2i> *scale_octave_pairs)
   {
-    ImagePyramid<float>& gaussPyr = gaussians_;
-    ImagePyramid<float>& detHessPyr = det_hessians_;
+    ImagePyramid<float>& gaussPyr = _gaussians;
+    ImagePyramid<float>& det_hess_pyr = _det_hessians;
 
-    gaussPyr = DO::gaussianPyramid(I, pyr_params_);
-    detHessPyr = DoHPyramid(gaussPyr);
+    gaussPyr = gaussian_pyramid(I, pyr_params_);
+    det_hess_pyr = DoHPyramid(gaussPyr);
 
-    vector<OERegion> detHessExtrema;
-    detHessExtrema.reserve(int(1e4));
-    if (scaleOctavePairs)
+    vector<OERegion> det_hess_extrema;
+    det_hess_extrema.reserve(int(1e4));
+    if (scale_octave_pairs)
     {
-      scaleOctavePairs->clear();
-      scaleOctavePairs->reserve(1e4);
+      scale_octave_pairs->clear();
+      scale_octave_pairs->reserve(1e4);
     }
 
-    for (int o = 0; o < detHessPyr.num_octaves(); ++o)
+    for (int o = 0; o < det_hess_pyr.num_octaves(); ++o)
     {
       // Be careful of the bounds. We go from 1 to N-1.
-      for (int s = 1; s < detHessPyr.num_scales_per_octave()-1; ++s)
+      for (int s = 1; s < det_hess_pyr.num_scales_per_octave()-1; ++s)
       {
-        vector<OERegion> newDetHessExtrema(localScaleSpaceExtrema(
-          detHessPyr, s, o, extremum_thres_, edge_ratio_thres_,
-          img_padding_sz_, extremum_refinement_iter_) );
+        vector<OERegion> new_det_hess_extrema(local_scale_space_extrema(
+          det_hess_pyr, s, o, _extremum_thres, _edge_ratio_thres,
+          _img_padding_sz, _extremum_refinement_iter) );
 
-        append(detHessExtrema, newDetHessExtrema);
+        append(det_hess_extrema, new_det_hess_extrema);
 
-        if (scaleOctavePairs)
+        if (scale_octave_pairs)
         {
-          for (size_t i = 0; i != newDetHessExtrema.size(); ++i)
-            scaleOctavePairs->push_back(Point2i(s,o));
+          for (size_t i = 0; i != new_det_hess_extrema.size(); ++i)
+            scale_octave_pairs->push_back(Point2i(s,o));
         }
       }
     }
-    shrink_to_fit(detHessExtrema);
-    return detHessExtrema;
+    shrink_to_fit(det_hess_extrema);
+    return det_hess_extrema;
   }
 
 
