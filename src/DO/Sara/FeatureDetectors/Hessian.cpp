@@ -34,12 +34,12 @@ namespace DO { namespace Sara {
       scaleOctavePairs->reserve(1e4);
     }
 
-    for (int o = 0; o < detHessPyr.numOctaves(); ++o)
+    for (int o = 0; o < detHessPyr.num_octaves(); ++o)
     {
       // Be careful of the bounds. We go from 1 to N-1.
-      for (int s = 1; s < detHessPyr.numScalesPerOctave(); ++s)
+      for (int s = 1; s < detHessPyr.num_scales_per_octave(); ++s)
       {
-        vector<OERegion> newDetHessMaxima(laplaceMaxima(
+        vector<OERegion> newDetHessMaxima(laplace_maxima(
           detHessPyr, gaussPyr, s, o, extremum_thres_, img_padding_sz_,
           num_scales_, extremum_refinement_iter_) );
 
@@ -74,10 +74,10 @@ namespace DO { namespace Sara {
       scaleOctavePairs->reserve(1e4);
     }
 
-    for (int o = 0; o < detHessPyr.numOctaves(); ++o)
+    for (int o = 0; o < detHessPyr.num_octaves(); ++o)
     {
       // Be careful of the bounds. We go from 1 to N-1.
-      for (int s = 1; s < detHessPyr.numScalesPerOctave()-1; ++s)
+      for (int s = 1; s < detHessPyr.num_scales_per_octave()-1; ++s)
       {
         vector<OERegion> newDetHessExtrema(localScaleSpaceExtrema(
           detHessPyr, s, o, extremum_thres_, edge_ratio_thres_,

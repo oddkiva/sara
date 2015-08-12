@@ -30,7 +30,7 @@ namespace DO { namespace Sara {
     /*!
       \brief Constructor
       @param[in]
-        extremumThres
+        extremum_thres
         the response threshold which the LoG extremum absolute value
         \f$
           \left|
@@ -52,7 +52,7 @@ namespace DO { namespace Sara {
         In terms of implementation, we use the function **DO::onEdge()**.
         We use the \f$r=10\f$ as stated in [Lowe, IJCV 2004].
       @param[in]
-        imgPaddingSz
+        img_padding_sz
         This variable indicates the minimum border size of the image. DoG
         extrema located at the size-specified border are discarded.
       @param[in]
@@ -63,14 +63,14 @@ namespace DO { namespace Sara {
      */
     ComputeLoGExtrema(
       const ImagePyramidParams& pyrParams = ImagePyramidParams(-1, 3+2),
-      float extremumThres = 0.01f,
+      float extremum_thres = 0.01f,
       float edgeRatioThres = 10.f,
-      int imgPaddingSz = 1,
+      int img_padding_sz = 1,
       int extremumRefinementIter = 5)
       : params_(pyrParams)
-      , extremum_thres_(extremumThres)
+      , extremum_thres_(extremum_thres)
       , edge_ratio_thres_(edgeRatioThres)
-      , img_padding_sz_(imgPaddingSz)
+      , img_padding_sz_(img_padding_sz)
       , extremum_refinement_iter_(extremumRefinementIter)
     {}
     /*!

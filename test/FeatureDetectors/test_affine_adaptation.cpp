@@ -1,35 +1,37 @@
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
 
-using namespace DO;
-using namespace std;
 
-void createEllipse()
+using namespace std;
+using namespace DO::Sara;
+
+
+void create_ellipse()
 {
   create_window(300, 300);
-  fillRect(0, 0, 100, 100, Black8);
-  saveScreen(activeWindow(), src_path("ellipse.png"));
+  fill_rect(0, 0, 100, 100, Black8);
+  save_screen(active_window(), src_path("ellipse.png"));
   get_key();
-  closeWindow();
+  close_window();
 }
 
 Image<float> warp(const Image<float>& I, const Matrix2f& T)
 {
-  Image<float> warpedI(300, 300);
-  warpedI.array().fill(0.f);
-  for (int y = 0; y < warpedI.height(); ++y)
+  Image<float> warped_image(300, 300);
+  warped_image.array().fill(0.f);
+  for (int y = 0; y < warped_image.height(); ++y)
   {
-    for (int x = 0; x < warpedI.width(); ++x)
+    for (int x = 0; x < warped_image.width(); ++x)
     {
       Point2f p(x,y);
       p = T*p;
       if ( p.x() < 0 || p.x() >= I.width()-1  ||
            p.y() < 0 || p.y() >= I.height()-1 )
         continue;
-      warpedI(x,y) = interpolate(I, p);
+      warped_image(x,y) = interpolate(I, p);
     }
   }
-  return warpedI;
+  return warped_image;
 }
 
 int main()
@@ -37,7 +39,7 @@ int main()
   Image<float> I;
   if (!load(I, src_path("ellipse.png")))
     return -1;
-  //I = colorRescale(dericheBlur(I, 50.f));
+  //I = color_rescale(dericheBlur(I, 50.f));
   create_window(I.width(), I.height());
 
   Matrix2f finalT;
@@ -53,7 +55,7 @@ int main()
     get_key();
 
     diff.array() = I.array()-oldI.array();
-    diff = colorRescale(diff);
+    diff = color_rescale(diff);
     display(diff);
     get_key();
 

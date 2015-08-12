@@ -20,12 +20,12 @@ using namespace std;
 namespace DO { namespace Sara {
 
   ComputeDominantOrientations::
-  ComputeDominantOrientations(float peakRatioThres,
+  ComputeDominantOrientations(float peak_ratio_thres,
                               float patchTruncationFactor,
                               float blurFactor)
-    : peak_ratio_thres_(peakRatioThres)
-    , patch_truncation_factor_(patchTruncationFactor)
-    , blur_factor_(blurFactor) {}
+    : _peak_ratio_thres(peak_ratio_thres)
+    , _patch_truncation_factor(patchTruncationFactor)
+    , _blur_factor(blurFactor) {}
 
   std::vector<float>
   ComputeDominantOrientations::
@@ -33,16 +33,16 @@ namespace DO { namespace Sara {
              float x, float y, float sigma) const
   {
     // Compute histogram of gradients as in [Lowe, IJCV 2004].
-    Array<float, 36, 1> oriHist;
-    computeOrientationHistogram(oriHist, gradients, x, y, sigma,
-                                patch_truncation_factor_, blur_factor_ );
+    Array<float, 36, 1> orientation_histogram;
+    compute_orientation_histogram(orientation_histogram, gradients, x, y, sigma,
+                                _patch_truncation_factor, _blur_factor );
 
     // Smooth as in [Lowe, IJCV 2004].
-    smoothHistogram_Lowe(oriHist);
-    vector<int> peaksInt(findPeaks(oriHist, peak_ratio_thres_));
+    lowe_smooth_histogram(orientation_histogram);
+    vector<int> peaksInt(find_peaks(orientation_histogram, _peak_ratio_thres));
 
     // Refine peaks as in [Lowe, IJCV 2004].
-    vector<float> peaks_(refinePeaks(oriHist, peaksInt));
+    vector<float> peaks_(refine_peaks(orientation_histogram, peaksInt));
 
     // Convert orientation to radian.
     for (size_t i = 0; i != peaks_.size(); ++i)

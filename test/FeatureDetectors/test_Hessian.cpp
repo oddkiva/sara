@@ -1,13 +1,17 @@
-#include <DO/Sara/FeatureDetectors.hpp>
-#include <DO/Sara/Graphics.hpp>
 #include <algorithm>
 #include <cmath>
 
-using namespace DO;
+#include <DO/Sara/FeatureDetectors.hpp>
+#include <DO/Sara/Graphics.hpp>
+
+
+using namespace DO::Sara;
 using namespace std;
+
 
 static Timer timer;
 double elapsed = 0.0;
+
 void tic()
 {
   timer.restart();
@@ -177,7 +181,7 @@ vector<OERegion> computeDoHAffineExtrema(const Image<float>& I,
   return keptDoHs;
 }
 
-void checkKeys(const Image<float>& I, const vector<OERegion>& features)
+void check_keys(const Image<float>& I, const vector<OERegion>& features)
 {
   display(I);
   set_antialiasing();
@@ -198,13 +202,13 @@ int main()
   create_window(I.width(), I.height());
   vector<OERegion> features;
   features = computeHessianLaplaceAffineMaxima(I);
-  checkKeys(I, features);
+  check_keys(I, features);
 
   features = computeDoHExtrema(I);
-  checkKeys(I, features);
+  check_keys(I, features);
 
   features = computeDoHAffineExtrema(I);
-  checkKeys(I, features);
+  check_keys(I, features);
 
   return 0;
 }

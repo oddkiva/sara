@@ -31,10 +31,13 @@ namespace DO { namespace Sara {
     enum { Dim = N*N*O };
     typedef Matrix<float, Dim, 1> SIFTDescriptor;
     //! Constructor.
-    ComputeSIFTDescriptor(float binScaleUnitLength = 3.f,
-                          float maxBinValue = 0.2f)
-      : bin_scale_unit_length_(binScaleUnitLength)
-      , max_bin_value_(maxBinValue) {}
+    ComputeSIFTDescriptor(float bin_scale_unit_length = 3.f,
+                          float max_bin_value = 0.2f)
+      : _bin_scale_unit_length(bin_scale_unit_length)
+      , _max_bin_value(max_bin_value)
+    {
+    }
+
     //! Computes the SIFT descriptor for keypoint \$(x,y,\sigma,\theta)\f$.
     SIFTDescriptor operator()(float x, float y, float sigma, float theta,
                               const Image<Vector2f>& gradPolar) const
@@ -65,7 +68,7 @@ namespace DO { namespace Sara {
         proportional to the scale $\sigma$ of the keypoint, i.e.,
         $l = \lambda \sigma$.
       */
-      const float lambda = bin_scale_unit_length_;
+      const float lambda = _bin_scale_unit_length;
       const float l = lambda*sigma;
       /*
         It is important to note that $\lambda$ is some 'universal' constant
@@ -128,9 +131,9 @@ namespace DO { namespace Sara {
           -sin(theta), cos(theta);
       T /= l;
       // Loop to perform interpolation
-      const int rounded_r = intRound(r);
-      const float rounded_x = intRound(x);
-      const float rounded_y = intRound(y);
+      const int rounded_r = int_round(r);
+      const float rounded_x = int_round(x);
+      const float rounded_y = int_round(y);
       for (int v = -rounded_r; v <= rounded_r; ++v)
       {
         for (int u = -rounded_r; u <= rounded_r; ++u)
@@ -180,10 +183,14 @@ namespace DO { namespace Sara {
       h = (h * 512.f).cwiseMin(Matrix<float, Dim, 1>::Ones()*255.f);
       return h;
     }
+
     //! Helper member function.
     SIFTDescriptor operator()(const OERegion& f,
                               const Image<Vector2f>& gradPolar) const
-    { return this->operator()(f.x(), f.y(), f.scale(), f.orientation(), gradPolar); }
+    {
+      return this->operator()(f.x(), f.y(), f.scale(), f.orientation(), gradPolar);
+    }
+
     //! Helper member function.
     DescriptorMatrix<float>
     operator()(const std::vector<OERegion>& features,
@@ -199,6 +206,7 @@ namespace DO { namespace Sara {
       }
       return sifts;
     }
+
   public: /* debugging functions. */
     //! Check the grid on which we are drawing.
     void drawGrid(float x, float y, float sigma, float theta,
@@ -216,16 +224,17 @@ namespace DO { namespace Sara {
         for (int u = 0; u < N+1; ++u)
           grid[u][v] = (Vector2f(x,y) + T*Vector2f(u-N/2.f,v-N/2.f))*octScaleFactor;
       for (int i = 0; i < N+1; ++i)
-        drawLine(grid[0][i], grid[N][i], Green8, penWidth);
+        draw_line(grid[0][i], grid[N][i], Green8, penWidth);
       for (int i = 0; i < N+1; ++i)
-        drawLine(grid[i][0], grid[i][N], Green8, penWidth);
+        draw_line(grid[i][0], grid[i][N], Green8, penWidth);
 
       Vector2f a(x,y);
       a *= octScaleFactor;
       Vector2f b;
       b = a+octScaleFactor*N/2.f*T*Vector2f(1,0);
-      drawLine(a, b, Red8, penWidth+2);
+      draw_line(a, b, Red8, penWidth+2);
     }
+
   private: /* member functions. */
     //! The accumulation function based on trilinear interpolation.
     void accumulate(SIFTDescriptor& h, const Vector2f& pos, float ori,
@@ -274,6 +283,7 @@ namespace DO { namespace Sara {
         }
       }
     }
+
     //! Normalize in a contrast-invariant way.
     void normalize(SIFTDescriptor& h)
     {
@@ -281,16 +291,19 @@ namespace DO { namespace Sara {
       h.normalize();
       // Clamp histogram bin values $h_i$ to 0.2 for enhanced robustness to
       // lighting change.
-      h = h.cwiseMin(SIFTDescriptor::Ones()*max_bin_value_);
+      h = h.cwiseMin(SIFTDescriptor::Ones()*_max_bin_value);
       // Renormalize again.
       h.normalize();
     }
     //! Helper access function.
     inline int at(int i, int j, int o) const
-    { return N*O*i + j*O + o; }
+    {
+      return N*O*i + j*O + o;
+    }
+
   private: /* data members. */
-    float bin_scale_unit_length_;
-    float max_bin_value_;
+    float _bin_scale_unit_length;
+    float _max_bin_value;
   };
 
   //! @}

@@ -39,11 +39,12 @@ namespace DO { namespace Sara {
       g_{\sigma_D} * \left[ \nabla I_{\sigma_I} \nabla I_{\sigma_I}^T \right]
     \f].
    */
-  Image<float> scaleAdaptedHarrisCornerness(const Image<float>& I,
-                                            float sigma_I, float sigma_D,
-                                            float kappa);
+  Image<float> scale_adapted_harris_cornerness(const Image<float>& I,
+                                               float sigma_I, float sigma_D,
+                                               float kappa);
+
   //! Pyramid of Harris cornerness functions.
-  ImagePyramid<float> harrisCornernessPyramid(
+  ImagePyramid<float> harris_cornerness_pyramid(
     const Image<float>& image,
     float kappa = 0.04f,
     const ImagePyramidParams& params = ImagePyramidParams(-1, 2+1, sqrt(2.f), 1));
@@ -53,7 +54,8 @@ namespace DO { namespace Sara {
     Finds and stores local maxima in the image \f$I\f$ exceeding the specified
     threshold.
    */
-  std::vector<OERegion> localMaxima(const Image<float>& I, float thres);
+  std::vector<OERegion> local_maxima(const Image<float>& I, float thres);
+
   /*!
     \brief Utility functions to locate edgels from the Harris-Stephens corner
     function.
@@ -62,7 +64,8 @@ namespace DO { namespace Sara {
     is negative and attains a minimum either in the x-direction or the
     y-direction.
    */
-  bool localMinX(int x, int y, Image<float>& I);
+  bool local_min_x(int x, int y, Image<float>& I);
+
   /*!
     \brief Utility functions to locate edgels from the Harris-Stephens corner
     function.
@@ -71,7 +74,7 @@ namespace DO { namespace Sara {
     is negative and attains a minimum either in the x-direction or the
     y-direction.
    */
-  bool localMinY(int x, int y, Image<float>& I);
+  bool local_min_y(int x, int y, Image<float>& I);
 
   //! Functor class to compute Harris-Laplace corners.
   class ComputeHarrisLaplaceCorners
@@ -85,11 +88,11 @@ namespace DO { namespace Sara {
         \f$\kappa\f$ range in \f$[0.04, 0.15]\f$. See description of
         function **scaleAdaptedHarrisCornerness** for details
       @param[in]
-        extremumThres
+        extremum_thres
         the response threshold which local maxima of the Harris cornerness
         function must satisfy.
       @param[in]
-        imgPaddingSz
+        img_padding_sz
         This variable indicates the minimum border size of the image. DoG
         extrema located at the size-specified border are discarded.
       @param[in]
@@ -105,17 +108,19 @@ namespace DO { namespace Sara {
     ComputeHarrisLaplaceCorners(const ImagePyramidParams& pyrParams =
                                   ImagePyramidParams(-1, 2+1, sqrt(2.f), 1),
                                 float kappa = 0.04f,
-                                float extremumThres = 1e-6f,
-                                int imgPaddingSz = 1,
+                                float extremum_thres = 1e-6f,
+                                int img_padding_sz = 1,
                                 int numScales = 10,
                                 int extremumRefinementIter = 5)
-      : pyr_params_(pyrParams)
-      , kappa_(kappa)
-      , extremum_thres_(extremumThres)
-      , img_padding_sz_(imgPaddingSz)
-      , extremum_refinement_iter_(extremumRefinementIter)
-      , num_scales_(numScales)
-    {}
+      : _pyr_params(pyrParams)
+      , _kappa(kappa)
+      , _extremum_thres(extremum_thres)
+      , _img_padding_sz(img_padding_sz)
+      , _extremum_refinement_iter(extremumRefinementIter)
+      , _num_scales(numScales)
+    {
+    }
+
     /*!
       \brief Localizes Harris cornerness local maxima for a given image.
 
@@ -152,7 +157,10 @@ namespace DO { namespace Sara {
       of image **I**.
      */
     const ImagePyramid<float>& gaussians() const
-    { return gaussians_; }
+    {
+      return _gaussians;
+    }
+
     /*!
       \brief Returns the pyramid of Harris corner functions used to localize
       scale-space extrema of image **I**.
@@ -165,24 +173,27 @@ namespace DO { namespace Sara {
       scale-space extrema of image **I**.
      */
     const ImagePyramid<float>& harris() const
-    { return harris_; }
+    {
+      return _harris;
+    }
+
   private: /* data members. */
     // Parameters
-    ImagePyramidParams pyr_params_;
-    float kappa_;
-    float extremum_thres_;
-    int img_padding_sz_;
-    int extremum_refinement_iter_;
-    int num_scales_;
+    ImagePyramidParams _pyr_params;
+    float _kappa;
+    float _extremum_thres;
+    int _img_padding_sz;
+    int _extremum_refinement_iter;
+    int _num_scales;
     // Difference of Gaussians.
-    ImagePyramid<float> gaussians_;
-    ImagePyramid<float> harris_;
+    ImagePyramid<float> _gaussians;
+    ImagePyramid<float> _harris;
   };
 
   //! @}
 
-
 } /* namespace Sara */
 } /* namespace DO */
+
 
 #endif /* DO_SARA_FEATUREDETECTORS_HARRIS_HPP */

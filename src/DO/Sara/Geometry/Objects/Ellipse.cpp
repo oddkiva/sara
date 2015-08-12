@@ -55,9 +55,9 @@ namespace DO { namespace Sara {
     return os;
   }
 
-  Ellipse construct_from_shape_matrix(const Matrix2d& shapeMat, const Point2d& c)
+  Ellipse construct_from_shape_matrix(const Matrix2d& shape_matrix, const Point2d& c)
   {
-    Eigen::JacobiSVD<Matrix2d> svd(shapeMat, Eigen::ComputeFullU);
+    Eigen::JacobiSVD<Matrix2d> svd(shape_matrix, Eigen::ComputeFullU);
     const Vector2d r = svd.singularValues().cwiseSqrt().cwiseInverse();
     const Matrix2d& U = svd.matrixU();
     double o = std::atan2(U(1,0), U(0,0));

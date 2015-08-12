@@ -27,15 +27,15 @@ namespace DO { namespace Sara {
   ImagePyramid<T> DoHPyramid(const ImagePyramid<T>& gaussians)
   {
     ImagePyramid<T> D;
-    D.reset(gaussians.numOctaves(),
-            gaussians.numScalesPerOctave(),
-            gaussians.initScale(),
-            gaussians.scaleGeomFactor());
+    D.reset(gaussians.num_octaves(),
+            gaussians.num_scales_per_octave(),
+            gaussians.scale_initial(),
+            gaussians.scale_geometric_factor());
 
-    for (int o = 0; o < D.numOctaves(); ++o)
+    for (int o = 0; o < D.num_octaves(); ++o)
     {
-      D.octaveScalingFactor(o) = gaussians.octaveScalingFactor(o);
-      for (int s = 0; s < D.numScalesPerOctave(); ++s)
+      D.octave_scaling_factor(o) = gaussians.octave_scaling_factor(o);
+      for (int s = 0; s < D.num_scales_per_octave(); ++s)
         D(s,o) = gaussians(s,o).
           template compute<Hessian>().
           template compute<Determinant>();
@@ -50,14 +50,14 @@ namespace DO { namespace Sara {
     /*!
       \brief Constructor
       @param[in]
-        extremumThres
+        extremum_thres
         the response threshold which local maxima of the determinant of Hessian
         function must satisfy.
       @param[in]
-        imgPaddingSz
+        img_padding_sz
         This variable indicates the minimum border size of the image.
         Maxima of determinant of Hessians located in the border of width
-        'imgPaddingSz' are discarded.
+        'img_padding_sz' are discarded.
       @param[in]
         numScales
         This variable indicates the number of scales to search in order to
@@ -70,13 +70,13 @@ namespace DO { namespace Sara {
      */
     ComputeHessianLaplaceMaxima(const ImagePyramidParams& pyrParams =
                                   ImagePyramidParams(-1, 3+1),
-                                float extremumThres = 1e-5f,
-                                int imgPaddingSz = 1,
+                                float extremum_thres = 1e-5f,
+                                int img_padding_sz = 1,
                                 int numScales = 10,
                                 int extremumRefinementIter = 5)
       : pyr_params_(pyrParams)
-      , extremum_thres_(extremumThres)
-      , img_padding_sz_(imgPaddingSz)
+      , extremum_thres_(extremum_thres)
+      , img_padding_sz_(img_padding_sz)
       , extremum_refinement_iter_(extremumRefinementIter)
       , num_scales_(numScales)
     {}
@@ -147,14 +147,14 @@ namespace DO { namespace Sara {
     /*!
       \brief Constructor
       @param[in]
-        extremumThres
+        extremum_thres
         the response threshold which local maxima of the determinant of Hessian
         function must satisfy.
       @param[in]
-        imgPaddingSz
+        img_padding_sz
         This variable indicates the minimum border size of the image.
         Maxima of determinant of Hessians located in the border of width
-        'imgPaddingSz' are discarded.
+        'img_padding_sz' are discarded.
       @param[in]
         numScales
         This variable indicates the number of scales to search in order to
@@ -167,14 +167,14 @@ namespace DO { namespace Sara {
      */
     ComputeDoHExtrema(const ImagePyramidParams& pyrParams =
                         ImagePyramidParams(-1, 3+2, pow(2.f, 1.f/3.f), 2),
-                      float extremumThres = 1e-6f,
+                      float extremum_thres = 1e-6f,
                       float edgeRatioThres = 10.f,
-                      int imgPaddingSz = 1,
+                      int img_padding_sz = 1,
                       int extremumRefinementIter = 2)
       : pyr_params_(pyrParams)
-      , extremum_thres_(extremumThres)
+      , extremum_thres_(extremum_thres)
       , edge_ratio_thres_(edgeRatioThres)
-      , img_padding_sz_(imgPaddingSz)
+      , img_padding_sz_(img_padding_sz)
       , extremum_refinement_iter_(extremumRefinementIter)
     {}
     /*!

@@ -32,7 +32,7 @@ namespace DO { namespace Sara {
     - \f$\theta = \mathrm{angle}( \nabla I(x,y) )\f$.
    */
   template <typename T>
-  Image<Matrix<T,2,1> > gradPolar(const Image<T>& I)
+  Image<Matrix<T,2,1>> gradient_polar_coordinates(const Image<T>& I)
   {
     Image<Matrix<T,2,1> > g;
     gradient(g, I);
@@ -45,62 +45,64 @@ namespace DO { namespace Sara {
     }
     return g;
   }
+
   /*!
     \brief Computes the image gradients in polar coordinates for each image in
     the pyramid.
    */
   template <typename T>
-  ImagePyramid<Matrix<T, 2, 1> > gradPolar(const ImagePyramid<T>& pyramid)
+  ImagePyramid<Matrix<T, 2, 1>> gradient_polar_coordinates(const ImagePyramid<T>& pyramid)
   {
-    ImagePyramid<Matrix<T, 2, 1> > pyramidOfGradients;
-    pyramidOfGradients.reset(
-      pyramid.numOctaves(),
-      pyramid.numScalesPerOctave(),
-      pyramid.initScale(),
-      pyramid.scaleGeomFactor() );
-    for (int o = 0; o < pyramid.numOctaves(); ++o)
+    ImagePyramid<Matrix<T, 2, 1> > gradient_pyramid;
+    gradient_pyramid.reset(
+      pyramid.num_octaves(),
+      pyramid.num_scales_per_octave(),
+      pyramid.scale_initial(),
+      pyramid.scale_geometric_factor() );
+    for (int o = 0; o < pyramid.num_octaves(); ++o)
     {
-      pyramidOfGradients.octaveScalingFactor(o) = pyramid.octaveScalingFactor(o);
-      for (int s = 0; s < pyramid.numScalesPerOctave(); ++s)
-        pyramidOfGradients(s,o) = gradPolar(pyramid(s,o));
+      gradient_pyramid.octave_scaling_factor(o) = pyramid.octave_scaling_factor(o);
+      for (int s = 0; s < pyramid.num_scales_per_octave(); ++s)
+        gradient_pyramid(s,o) = gradient_polar_coordinates(pyramid(s,o));
     }
-    return pyramidOfGradients;
+    return gradient_pyramid;
   }
+
   /*!
     \brief  Computes the orientation histogram on a local patch around keypoint
     \f$(x,y,\sigma)\f$.
    */
   template <typename T, int N>
-  void computeOrientationHistogram(Array<T, N, 1>& oriHist,
-                                   const Image<Matrix<T,2,1> >& gradPolar,
-                                   T x, T y, T s,
-                                   int patchTruncationFactor = 3,
-                                   T blurFactor = T(1.5))
+  void compute_orientation_histogram(Array<T, N, 1>& orientation_histogram,
+                                     const Image<Matrix<T,2,1>>& gradient_polar,
+                                     T x, T y, T s,
+                                     int patch_truncation_factor = 3,
+                                     T blur_factor = T(1.5))
   {
     // Weighted histogram of gradients.
-    oriHist.setZero();
+    orientation_histogram.setZero();
 
     // Rounding of the coordinates.
-    int xi = intRound(x);
-    int yi = intRound(y);
+    int xi = int_round(x);
+    int yi = int_round(y);
 
     // std deviation of the gaussian weight (cf. [Lowe, IJCV 2004])
-    T sigma = s*blurFactor;
+    T sigma = s*blur_factor;
 
     // Patch radius on which the histogram of gradients is performed.
-    int patchRadius = intRound(sigma*patchTruncationFactor);
+    int patchRadius = int_round(sigma*patch_truncation_factor);
 
     // Accumulate the histogram of orientations.
     for (int v = -patchRadius; v <= patchRadius; ++v)
     {
       for (int u = -patchRadius; u <= patchRadius; ++u)
       {
-        if ( xi+u < 0 || xi+u >= gradPolar.width()  ||
-             yi+v < 0 || yi+v >= gradPolar.height() )
+        if ( xi+u < 0 || xi+u >= gradient_polar.width()  ||
+             yi+v < 0 || yi+v >= gradient_polar.height() )
           continue;
 
-        T mag = gradPolar(xi+u, yi+v)(0);
-        T ori = gradPolar(xi+u, yi+v)(1);
+        T mag = gradient_polar(xi+u, yi+v)(0);
+        T ori = gradient_polar(xi+u, yi+v)(1);
         // ori is in \f$]-\pi, \pi]\f$, so translate ori by \f$2*\pi\f$ if it is
         // negative.
 #ifndef LOWE
@@ -125,7 +127,7 @@ namespace DO { namespace Sara {
         // keypoint location.
         T weight = exp(-(u*u+v*v)/(T(2)*sigma*sigma));
         // Also give more emphasis to gradient with large magnitude.
-        oriHist( binIndex ) += weight*mag;
+        orientation_histogram( binIndex ) += weight*mag;
       }
     }
   }
@@ -136,19 +138,19 @@ namespace DO { namespace Sara {
     \f$[1/3, 1/3, 1/3]\f$.
    */
   template <typename T, int N>
-  void smoothHistogram_Lowe(Array<T, N, 1>& oriHist)
+  void lowe_smooth_histogram(Array<T, N, 1>& orientation_histogram)
   {
     for (int iter = 0; iter < 6; ++iter)
     {
-      float first = oriHist(0);
-      float prev = oriHist(N-1);
+      float first = orientation_histogram(0);
+      float prev = orientation_histogram(N-1);
       for (int i = 0; i < N-1; ++i)
       {
-        float val = (prev+oriHist(i)+oriHist(i+1))/3.f;
-        prev = oriHist(i);
-        oriHist(i) = val;
+        float val = (prev+orientation_histogram(i)+orientation_histogram(i+1))/3.f;
+        prev = orientation_histogram(i);
+        orientation_histogram(i) = val;
       }
-      oriHist(N-1) = (prev+oriHist(N-1)+first)/3.f;
+      orientation_histogram(N-1) = (prev+orientation_histogram(N-1)+first)/3.f;
     }
   }
 
@@ -162,29 +164,29 @@ namespace DO { namespace Sara {
     Only histogram peaks \f$i\f$ such that \f$h_i \geq 0.8 \max_j h_j\f$
    */
   template <typename T, int N>
-  std::vector<int> findPeaks(const Array<T, N, 1>& oriHist,
-                             T peakRatioThres = T(0.8))
+  std::vector<int> find_peaks(const Array<T, N, 1>& orientation_histogram,
+                              T peak_ratio_thres = T(0.8))
   {
-    T max = oriHist.maxCoeff();
-    std::vector<int> oriPeaks;
-    oriPeaks.reserve(N);
+    T max = orientation_histogram.maxCoeff();
+    std::vector<int> orientation_peaks;
+    orientation_peaks.reserve(N);
     for (int i = 0; i < N; ++i)
-      if ( oriHist(i) >= peakRatioThres*max &&
-           oriHist(i) > oriHist((i-1+N)%N)     &&
-           oriHist(i) > oriHist((i+1)%N)       )
-        oriPeaks.push_back(i);
-    return oriPeaks;
+      if ( orientation_histogram(i) >= peak_ratio_thres*max &&
+           orientation_histogram(i) > orientation_histogram((i-1+N)%N)     &&
+           orientation_histogram(i) > orientation_histogram((i+1)%N)       )
+        orientation_peaks.push_back(i);
+    return orientation_peaks;
   }
   /*!
     \brief Refine peaks as in [Lowe, IJCV 2004] by interpolation based on a
     second-order Taylor approximation.
    */
   template <typename T, int N>
-  T refinePeak(const Array<T, N, 1>& oriHist, int i)
+  T refine_peak(const Array<T, N, 1>& orientation_histogram, int i)
   {
-    T y0 = oriHist( (i-1+N)%N );
-    T y1 = oriHist( i );
-    T y2 = oriHist( (i+1)%N );
+    T y0 = orientation_histogram( (i-1+N) % N );
+    T y1 = orientation_histogram( i );
+    T y2 = orientation_histogram( (i+1) % N );
     // Denote the orientation histogram function by \f$f\f$.
     // perform a 2nd-order Taylor approximation:
     // \f$f(x+h) = f(x) + f'(x)h + f''(x) h^2/2\f$
@@ -199,14 +201,15 @@ namespace DO { namespace Sara {
     // on the middle of the interval \f$[i, i+1)\f$.
     return T(i)+T(0.5)+h;
   }
+
   //! \brief Helper functions.
   template <typename T, int N>
-  std::vector<T> refinePeaks(const Array<T, N, 1>& oriHist,
-                             const std::vector<int>& ori)
+  std::vector<T> refine_peaks(const Array<T, N, 1>& orientation_histogram,
+                              const std::vector<int>& ori)
   {
     std::vector<T> oriT(ori.size());
     for (size_t i = 0; i < ori.size(); ++i)
-      oriT[i] = refinePeak<T,N>(oriHist, ori[i]);
+      oriT[i] = refine_peak<T,N>(orientation_histogram, ori[i]);
     return oriT;
   }
 
@@ -214,31 +217,31 @@ namespace DO { namespace Sara {
   class ComputeDominantOrientations
   {
   public:
-    ComputeDominantOrientations(float peakRatioThres = 0.8f,
-                                float patchTruncationFactor = 3.f,
-                                float blurFactor = 1.5f);
+    ComputeDominantOrientations(float peak_ratio_thres = 0.8f,
+                                float patch_truncation_factor = 3.f,
+                                float blur_factor = 1.5f);
 
     std::vector<float> operator()(const Image<Vector2f>& gradients,
                                   float x, float y, float sigma) const;
 
     std::vector<float> operator()(const ImagePyramid<Vector2f>& pyramid,
                                   const OERegion& extremum,
-                                  const Point2i& scaleOctPair) const;
+                                  const Point2i& scale_octave_pair) const;
 
     void operator()(const ImagePyramid<Vector2f>& pyramid,
                     std::vector<OERegion>& extrema,
-                    std::vector<Point2i>& scaleOctPairs) const;
+                    std::vector<Point2i>& scale_octave_pairs) const;
 
   private:
-    float peak_ratio_thres_;
-    float patch_truncation_factor_;
-    float blur_factor_;
+    float _peak_ratio_thres;
+    float _patch_truncation_factor;
+    float _blur_factor;
   };
 
   //! @}
 
-
 } /* namespace Sara */
 } /* namespace DO */
+
 
 #endif /* DO_SARA_FEATUREDESCRIPTORS_ORIENTATION_HPP */

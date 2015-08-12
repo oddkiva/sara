@@ -11,7 +11,9 @@
 
 #include <DO/Sara/FeatureDetectors.hpp>
 
+
 using namespace std;
+
 
 namespace DO { namespace Sara {
 
@@ -31,7 +33,7 @@ namespace DO { namespace Sara {
     vector<IndexScore> is(features.size()); // is = 'index-strength pairs'.
     // Notice that I readily multiply the scores by $c_\textrm{robust}$.
     for (size_t i = 0; i != features.size(); ++i)
-      is[i] = make_pair(i, c_robust*features[i].extremumValue());
+      is[i] = make_pair(i, c_robust*features[i].extremum_value());
     // Sort features by decreasing strength.
     CompareIndexScore cmp;
     sort(is.begin(), is.end(), cmp); // O(N log(N) )

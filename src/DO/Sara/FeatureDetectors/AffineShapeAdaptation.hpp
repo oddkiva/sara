@@ -65,7 +65,7 @@ namespace DO { namespace Sara {
       - false otherwise.
       If false is returned, then
      */
-    bool updateNormalizedPatch(const Image<float>& I,
+    bool update_normalized_patch(const Image<float>& I,
                                const OERegion& feature,
                                const Matrix2f& T);
     /*!
@@ -76,32 +76,32 @@ namespace DO { namespace Sara {
         (g_\sigma) * (\nabla I) (\nabla I)^T (\mathbf{x})
       \f]
      */
-    Matrix2f computeMomentMatrixFromPatch();
+    Matrix2f compute_moment_matrix_from_patch();
     //! Find one linear transform associated to the second moment matrix.
-    Matrix2f computeTransformFromMomentMatrix(const Matrix2f& momentMatrix,
+    Matrix2f compute_transform_from_moment_matrix(const Matrix2f& momentMatrix,
                                               float& anisotropicRatio);
     //! Normalize the transform
-    void rescaleTransform(Matrix2f& T);
+    void rescale_transform(Matrix2f& T);
   private: /* debugging methods. */
-    void debug_openWindowToViewPatch();
-    void debug_printAffineAdaptationIteration(int iter);
-    void debug_printPatchTouchesImageBoundaries();
-    void debug_displayNormalizedPatch(float fact);
-    void debug_checkWeightedPatch(const Image<Vector2f>& gradients);
-    void debug_checkMomentMatrixAndTransform(const Matrix2f& mu,
+    void debug_create_window_to_view_patch();
+    void debug_print_affine_adaptation_iteration(int iter);
+    void debug_print_patch_touches_image_boundaries();
+    void debug_display_normalized_patch(float fact);
+    void debug_check_weighted_patch(const Image<Vector2f>& gradients);
+    void debug_check_moment_matrix_and_transform(const Matrix2f& mu,
                                             const Matrix2f& delta_U,
                                             float anisotropicRatio,
                                             const Matrix2f& U);
-    void debug_closeWindowUsedToViewPatch();
+    void debug_close_window_used_to_view_patch();
   private:
     int patch_size_;
     float gauss_trunc_factor_;
     int affine_adaptation_max_iter_;
-    Image<float> patch_;
+    Image<float> _patch;
     Image<float> gaussian_weight_;
 
-    float patch_zoom_factor_;
-    bool debug_;
+    float _patch_zoom_factor;
+    bool _debug;
   };
 
   //! @}

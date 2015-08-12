@@ -39,7 +39,7 @@ namespace DO { namespace Sara {
     double elapsed();
 
     //! Returns the elapsed time in milliseconds.
-    double elapsedMs();
+    double elapsed_ms();
 
   private: /* data members. */
     double start_;

@@ -1,13 +1,17 @@
-#include <DO/Sara/FeatureDetectors.hpp>
-#include <DO/Sara/Graphics.hpp>
 #include <algorithm>
 #include <cmath>
 
-using namespace DO;
+#include <DO/Sara/FeatureDetectors.hpp>
+#include <DO/Sara/Graphics.hpp>
+
+
+using namespace DO::Sara;
 using namespace std;
+
 
 static Timer timer;
 double elapsed = 0.0;
+
 void tic()
 {
   timer.restart();
@@ -117,7 +121,7 @@ vector<OERegion> computeDoGAffineExtrema(const Image<float>& I,
   return keptDoGs;
 }
 
-void checkKeys(const Image<float>& I, const vector<OERegion>& features)
+void check_keys(const Image<float>& I, const vector<OERegion>& features)
 {
   display(I);
   set_antialiasing();
@@ -139,10 +143,10 @@ int main()
   vector<OERegion> features;
 
   features = computeDoGExtrema(I);
-  checkKeys(I, features);
+  check_keys(I, features);
 
   features = computeDoGAffineExtrema(I);
-  checkKeys(I, features);
+  check_keys(I, features);
 
   return 0;
 }

@@ -79,7 +79,7 @@ namespace DO { namespace Sara {
         I_{k\sigma} - I_{\sigma} &\approx& (k-1) \sigma^2 \nabla^2 I_\sigma
       \f}
 
-      Here scaleGeomFactor() corresponds to the value \f$ k \f$.
+      Here scale_geometric_factor() corresponds to the value \f$ k \f$.
      */
     double scale_geometric_factor() const
     {

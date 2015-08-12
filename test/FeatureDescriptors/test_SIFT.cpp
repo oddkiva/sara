@@ -2,8 +2,10 @@
 #include <DO/Sara/FeatureDescriptors.hpp>
 #include <DO/Sara/Graphics.hpp>
 
-using namespace DO;
+
+using namespace DO::Sara;
 using namespace std;
+
 
 #ifdef CHECK_STEP_BY_STEP
 void testDoGSIFTKeypoints(const Image<float>& I)
@@ -17,7 +19,7 @@ void testDoGSIFTKeypoints(const Image<float>& I)
   ImagePyramid<float> D(DoGPyramid(G));
   //checkImagePyramid(D, true);
 
-  for (int o = 0; o < D.numOctaves(); ++o)
+  for (int o = 0; o < D.num_octaves(); ++o)
   {
     // Verbose.
     print_stage("Processing octave");
@@ -25,7 +27,7 @@ void testDoGSIFTKeypoints(const Image<float>& I)
     cout << "Octave scaling factor = " << D.octave_scaling_factor(o) << endl;
 
     // Be careful of the bounds. We go from 1 to N-1.
-    for (int s = 1; s < D.numScalesPerOctave()-1; ++s)
+    for (int s = 1; s < D.num_scales_per_octave()-1; ++s)
     {
       vector<OERegion> extrema( localScaleSpaceExtrema(D,s,o) );
 
@@ -36,45 +38,45 @@ void testDoGSIFTKeypoints(const Image<float>& I)
 
       // Draw the keypoints.
       //display(I.convert<float>());
-      drawExtrema(D, extrema, s, o);
+      draw_extrema(D, extrema, s, o);
       get_key();
 
       // Gradient in polar coordinates.
-      Image<Vector2f> gradG( gradPolar(G(s,o)) );
+      Image<Vector2f> gradG( gradient_polar_coordinates(G(s,o)) );
 
       // Determine orientations.
-      drawExtrema(G, extrema, s, o, false);
+      draw_extrema(G, extrema, s, o, false);
       for (size_t i = 0; i != extrema.size(); ++i)
       {
 #define DEBUG_ORI
 #ifdef DEBUG_ORI
         // Draw the patch on the image.
-        highlightPatch(D, extrema[i].x(), extrema[i].y(), extrema[i].scale(), o);
+        highlight_patch(D, extrema[i].x(), extrema[i].y(), extrema[i].scale(), o);
 
         // Close-up on the image patch
-        checkPatch(G(s,o), extrema[i].x(), extrema[i].y(), extrema[i].scale());
+        check_patch(G(s,o), extrema[i].x(), extrema[i].y(), extrema[i].scale());
 
         // Orientation histogram
         print_stage("Orientation histogram");
 #endif
-        Array<float, 36, 1> oriHist;
-        computeOrientationHistogram(
-          oriHist, gradG,
+        Array<float, 36, 1> orientation_histogram;
+        compute_orientation_histogram(
+          orientation_histogram, gradG,
           extrema[i].x(),
           extrema[i].y(),
           extrema[i].scale());
-        viewHistogram(oriHist);
+        view_histogram(orientation_histogram);
         // Note that the peaks are shifted after smoothing.
 #ifdef DEBUG_ORI
         print_stage("Smoothing orientation histogram");
 #endif
-        smoothHistogram_Lowe(oriHist);
-        viewHistogram(oriHist);
+        lowe_smooth_histogram(orientation_histogram);
+        view_histogram(orientation_histogram);
         // Orientation peaks.
 #ifdef DEBUG_ORI
         print_stage("Localizing orientation peaks");
 #endif
-        vector<int> oriPeaks(findPeaks(oriHist));
+        vector<int> oriPeaks(find_peaks(orientation_histogram));
 #ifdef DEBUG_ORI
         cout << "Raw peaks" << endl;
         for (size_t k = 0; k != oriPeaks.size(); ++k)
@@ -83,7 +85,7 @@ void testDoGSIFTKeypoints(const Image<float>& I)
         // Refine peaks.
         print_stage("Refining peaks");
 #endif
-        vector<float> refinedOriPeaks(refinePeaks(oriHist, oriPeaks) );
+        vector<float> refinedOriPeaks(refine_peaks(orientation_histogram, oriPeaks) );
 #ifdef DEBUG_ORI
         cout << "Refined peaks" << endl;
         for (size_t k = 0; k != refinedOriPeaks.size(); ++k)
@@ -93,7 +95,7 @@ void testDoGSIFTKeypoints(const Image<float>& I)
         Map<ArrayXf> peaks(&refinedOriPeaks[0], refinedOriPeaks.size());
         peaks *= float(M_PI)/36;
 
-        setActiveWindow(imageWin);
+        set_active_window(imageWin);
         print_stage("Compute SIFT descriptor");
         for (int ori = 0; ori < refinedOriPeaks.size(); ++ori)
         {
@@ -149,7 +151,7 @@ Set<OERegion, RealDescriptor> computeSIFT(const Image<float>& image)
   print_stage("Computing gradients of Gaussians");
   timer.restart();
   ImagePyramid<Vector2f> gradG;
-  gradG = gradPolar(computeDoGs.gaussians());
+  gradG = gradient_polar_coordinates(computeDoGs.gaussians());
   gradGaussianTime = timer.elapsed_ms();
   elapsed += gradGaussianTime;
   cout << "gradient of Gaussian computation time = " << gradGaussianTime << " ms" << endl;

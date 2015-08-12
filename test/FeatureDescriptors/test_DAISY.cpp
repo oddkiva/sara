@@ -35,7 +35,7 @@ Set<OERegion, RealDescriptor> compute_daisy(const Image<float>& image)
   timer.restart();
   ImagePyramid<Vector2f> gradG;
   const ImagePyramid<float>& gaussPyr = computeDoGs.gaussians();
-  gradG = gradPolar(gaussPyr);
+  gradG = gradient_polar_coordinates(gaussPyr);
   gradGaussianTime = timer.elapsed_ms();
   elapsed += gradGaussianTime;
   cout << "gradient of Gaussian computation time = " << gradGaussianTime << " ms" << endl;

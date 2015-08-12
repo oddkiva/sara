@@ -25,10 +25,10 @@ namespace DO { namespace Sara {
     gauss_trunc_factor_ = 3.f;
     affine_adaptation_max_iter_ = 10;
     // Debug only: view the magnified patch with the following zoom factor.
-    debug_ = false;
-    patch_zoom_factor_ = 2.f;
+    _debug = false;
+    _patch_zoom_factor = 2.f;
     // Memory allocation.
-    patch_.resize(patch_size_, patch_size_);
+    _patch.resize(patch_size_, patch_size_);
     gaussian_weight_.resize(patch_size_, patch_size_);
     // Precompute the Gaussian weight.
     float sigma = (0.5f*patch_size_) / gauss_trunc_factor_;
@@ -46,7 +46,7 @@ namespace DO { namespace Sara {
 
   bool
   AdaptFeatureAffinelyToLocalShape::
-  updateNormalizedPatch(const Image<float>& I,
+  update_normalized_patch(const Image<float>& I,
                         const OERegion& feature,
                         const Matrix2f& T)
   {
@@ -71,19 +71,19 @@ namespace DO { namespace Sara {
     A.col(2) << T*Point2f(-r,-r)*fact+feature.center(), 1.f;
     A(2,0) = A(2,1) = 0.f;
 
-    bool success = warp(patch_, I, A, 0.f, true);
-    debug_displayNormalizedPatch(fact);
+    bool success = warp(_patch, I, A, 0.f, true);
+    debug_display_normalized_patch(fact);
 
     return success;
   }
 
   Matrix2f
   AdaptFeatureAffinelyToLocalShape::
-  computeMomentMatrixFromPatch()
+  compute_moment_matrix_from_patch()
   {
     Image<Vector2f> gradients;
-    gradients = patch_.compute<Gradient>();
-    debug_checkWeightedPatch(gradients);
+    gradients = _patch.compute<Gradient>();
+    debug_check_weighted_patch(gradients);
     // Estimate the second moment matrix.
     Matrix2f moment;
     moment.setZero();
@@ -105,16 +105,16 @@ namespace DO { namespace Sara {
 
   Matrix2f
   AdaptFeatureAffinelyToLocalShape::
-  computeTransformFromMomentMatrix(const Matrix2f& M,
-                                   float& anisotropicRatio)
+  compute_transform_from_moment_matrix(const Matrix2f& M,
+  float& anisotropicRatio)
   {
     // Get the SVD decomposition of the second order moment matrix.
     JacobiSVD<Matrix2f> svd(M, ComputeFullU);
-    Vector2f S = svd.singularValues();  // momentMatrix = U*S*V^T
-    Matrix2f U = svd.matrixU();         // rotation matrix
+    Vector2f S{ svd.singularValues() };  // momentMatrix = U*S*V^T
+    Matrix2f U{ svd.matrixU() };         // rotation matrix
     // Get the dilation factor for each axis.
-    Vector2f radii( S.cwiseSqrt().cwiseInverse() );
-    Matrix2f T( U*radii.asDiagonal()*U.transpose() );
+    Vector2f radii{ S.cwiseSqrt().cwiseInverse() };
+    Matrix2f T{ U*radii.asDiagonal() * U.transpose() };
     // Normalize w.r.t. to the largest axis radius.
     T *= 1.f/radii(1);
     // Store the anisotropic ratio.
@@ -125,7 +125,7 @@ namespace DO { namespace Sara {
 
   void
   AdaptFeatureAffinelyToLocalShape::
-  rescaleTransform(Matrix2f& T)
+  rescale_transform(Matrix2f& T)
   {
     JacobiSVD<Matrix2f> svd(T);
     Vector2f sv = svd.singularValues();
@@ -138,41 +138,41 @@ namespace DO { namespace Sara {
              const Image<float>& I,
              const OERegion& feature)
   {
-    debug_openWindowToViewPatch();
+    debug_create_window_to_view_patch();
     // The affine transform we want to estimate.
     Matrix2f U;
     U.setIdentity();
     // Iterative estimation from the image.
     for (int iter = 0; iter < affine_adaptation_max_iter_; ++iter)
     {
-      debug_printAffineAdaptationIteration(iter);
+      debug_print_affine_adaptation_iteration(iter);
       // Get the normalized patch.
-      if (!updateNormalizedPatch(I, feature, U))
+      if (!update_normalized_patch(I, feature, U))
       {
-        debug_printPatchTouchesImageBoundaries();
-        debug_closeWindowUsedToViewPatch();
+        debug_print_patch_touches_image_boundaries();
+        debug_close_window_used_to_view_patch();
         return false;
       }
       // Estimate shape matrix.
-      Matrix2f mu(computeMomentMatrixFromPatch());
+      Matrix2f mu(compute_moment_matrix_from_patch());
       // Deduce the linear transform.
       float anisotropicRatio;
-      Matrix2f delta_U(computeTransformFromMomentMatrix(mu, anisotropicRatio));
+      Matrix2f delta_U(compute_transform_from_moment_matrix(mu, anisotropicRatio));
       // Accumulate the transform.
       U = delta_U*U;
-      rescaleTransform(U);
-      debug_checkMomentMatrixAndTransform(mu, delta_U, anisotropicRatio, U);
+      rescale_transform(U);
+      debug_check_moment_matrix_and_transform(mu, delta_U, anisotropicRatio, U);
       // Instability check (cf. [Mikolajczyk & Schmid, ECCV 2002])
       if (1.f/anisotropicRatio > 6.f)
       {
-        debug_closeWindowUsedToViewPatch();
+        debug_close_window_used_to_view_patch();
         return false;
       }
       // Stopping criterion (cf. [Mikolajczyk & Schmid, ECCV 2002])
       if (1.f - anisotropicRatio < 0.05f)
         break;
     }
-    debug_closeWindowUsedToViewPatch();
+    debug_close_window_used_to_view_patch();
 
     // Return the shape matrix.
     affAdaptTransfmMat = U.inverse().transpose()*U.inverse();
@@ -181,68 +181,68 @@ namespace DO { namespace Sara {
 
   void
   AdaptFeatureAffinelyToLocalShape::
-  debug_openWindowToViewPatch()
+  debug_create_window_to_view_patch()
   {
     // Open window to visualize the patch.
-    if (debug_)
-      setActiveWindow( openWindow(
-      patch_.width()*patch_zoom_factor_,
-      patch_.height()*patch_zoom_factor_,
+    if (_debug)
+      set_active_window( create_window(
+      _patch.width()*_patch_zoom_factor,
+      _patch.height()*_patch_zoom_factor,
       "Image patch centered on the feature") );
   }
 
   void
   AdaptFeatureAffinelyToLocalShape::
-  debug_printAffineAdaptationIteration( int iter )
+  debug_print_affine_adaptation_iteration(int iter)
   {
-    if (debug_)
+    if (_debug)
       cout << endl << "Iteration " << iter << endl;
   }
 
   void
   AdaptFeatureAffinelyToLocalShape::
-  debug_displayNormalizedPatch(float fact)
+  debug_display_normalized_patch(float fact)
   {
-    if (debug_)
+    if (_debug)
     {
       cout << "Factor = " << fact << endl;
-      display(patch_, 0, 0, patch_zoom_factor_);
-      getKey();
+      display(_patch, 0, 0, _patch_zoom_factor);
+      get_key();
     }
   }
 
   void
   AdaptFeatureAffinelyToLocalShape::
-  debug_checkWeightedPatch(const Image<Vector2f>& gradients)
+  debug_check_weighted_patch(const Image<Vector2f>& gradients)
   {
-    if (debug_)
+    if (_debug)
     {
       // Check the weighted patch.
-      Image<float> gradMag( gradients.compute<SquaredNorm>() );
-      Image<float> weightedPatch(gradients.sizes());
-      weightedPatch.array() = gradMag.array().sqrt()*gaussian_weight_.array();
-      weightedPatch = colorRescale(weightedPatch);
-      display(weightedPatch, 0, 0, patch_zoom_factor_);
-      getKey();
+      Image<float> grad_magnitude( gradients.compute<SquaredNorm>() );
+      Image<float> weighted_patch(gradients.sizes());
+      weighted_patch.array() = grad_magnitude.array().sqrt()*gaussian_weight_.array();
+      weighted_patch = color_rescale(weighted_patch);
+      display(weighted_patch, 0, 0, _patch_zoom_factor);
+      get_key();
     }
   }
 
   void
   AdaptFeatureAffinelyToLocalShape::
-  debug_closeWindowUsedToViewPatch()
+  debug_close_window_used_to_view_patch()
   {
-    if (debug_)
-      closeWindow();
+    if (_debug)
+      close_window();
   }
 
   void
   AdaptFeatureAffinelyToLocalShape::
-  debug_checkMomentMatrixAndTransform(const Matrix2f& mu,
-                                     const Matrix2f& delta_U,
-                                     float anisotropicRatio,
-                                     const Matrix2f& U)
+  debug_check_moment_matrix_and_transform(const Matrix2f& mu,
+                                          const Matrix2f& delta_U,
+                                          float anisotropicRatio,
+                                          const Matrix2f& U)
   {
-    if (debug_)
+    if (_debug)
     {
       cout << "moment matrix = " << endl << mu << endl;
       cout << "delta_U = " << endl <<  delta_U << endl;
@@ -254,9 +254,9 @@ namespace DO { namespace Sara {
 
   void
   AdaptFeatureAffinelyToLocalShape::
-  debug_printPatchTouchesImageBoundaries()
+  debug_print_patch_touches_image_boundaries()
   {
-    if (debug_)
+    if (_debug)
       cout << "The patch touches the image boundaries" << endl;
   }
 

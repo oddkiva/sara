@@ -129,7 +129,7 @@ namespace DO { namespace Sara {
 
   //! Compute the ellipse from the conic equation
   DO_EXPORT
-  Ellipse construct_from_shape_matrix(const Matrix2d& shapeMat,
+  Ellipse construct_from_shape_matrix(const Matrix2d& shape_matrix,
                                       const Point2d& c);
 
 } /* namespace Sara */

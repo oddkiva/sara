@@ -34,10 +34,10 @@ namespace DO { namespace Sara {
       scaleOctavePairs->reserve(1e4);
     }
 
-    for (int o = 0; o < L.numOctaves(); ++o)
+    for (int o = 0; o < L.num_octaves(); ++o)
     {
       // Be careful of the bounds. We go from 1 to N-1.
-      for (int s = 1; s < L.numScalesPerOctave()-1; ++s)
+      for (int s = 1; s < L.num_scales_per_octave()-1; ++s)
       {
         vector<OERegion> newExtrema(localScaleSpaceExtrema(
           L, s, o, extremum_thres_, edge_ratio_thres_,

@@ -65,7 +65,7 @@ namespace DO { namespace Sara {
     return elapsed_;
   }
 
-  double Timer::elapsedMs()
+  double Timer::elapsed_ms()
   {
     return elapsed() * 1000.;
   }
