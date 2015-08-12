@@ -24,52 +24,51 @@ const Rgb8& c = Cyan8;
 void check_affine_adaptation(const Image<unsigned char>& image,
                              const OERegion& f)
 {
-  int w = image.width();
-  int h = image.height();
+  const auto w = image.width();
+  const auto h = image.height();
+  const auto r = 100.f;
+  const auto patch_sz = 2*r;
+
+  auto gray32f_image = image.convert<float>();
+  auto patch = Image<float>{ w, h };
+  patch.array().fill(0.f);
+
   display(image);
   f.draw(Blue8);
 
-  Image<float> flt_image(image.convert<float>());
+  auto region = OERegion{ f };
+  region.center().fill(patch_sz/2.f);
+  region.orientation() = 0.f;
+  region.shape_matrix() = Matrix2f::Identity()*4.f / (r*r);
 
-  float r = 100;
-  float patchSz = 2*r;
-  Image<float> patch(w, h);
-  patch.array().fill(0.f);
-
-  OERegion rg(f);
-  rg.center().fill(patchSz/2.f);
-  rg.orientation() = 0.f;
-  rg.shape_matrix() = Matrix2f::Identity()*4.f / (r*r);
-
-  Matrix3d A(f.affinity().cast<double>());
+  auto A = f.affinity();
   cout << "A=\n" << A << endl;
 
-  for (int y = 0; y < patchSz; ++y)
+  for (int y = 0; y < patch_sz; ++y)
   {
-    float v = 2*(y-r)/r;
-    for (int x = 0; x < patchSz; ++x)
-    {
-      float u = 2*(x-r)/r;
-      Point3d pp(u, v, 1.);
-      pp = A*pp;
+    auto v = float{ 2 * (y - r) / r };
 
-      Point2d p;
-      p << pp(0), pp(1);
+    for (int x = 0; x < patch_sz; ++x)
+    {
+      auto u = float{ 2 * (x - r) / r };
+
+      Point3f P{ A * Point3f{ u, v, 1. } };
+      Point2d p{ P.head(2).cast<double>() };
 
       if (p.x() < 0 || p.x() >= w || p.y() < 0 || p.y() >= h)
         continue;
 
-      patch(x,y) = static_cast<float>(interpolate(flt_image, p));
+      patch(x,y) = static_cast<float>(interpolate(gray32f_image, p));
     }
   }
 
-  Window w1 = active_window();
-  Window w2 = create_window(static_cast<int>(patchSz),
-                            static_cast<int>(patchSz));
+  auto w1 = active_window();
+  auto w2 = create_window(static_cast<int>(patch_sz),
+                          static_cast<int>(patch_sz));
   set_active_window(w2);
   set_antialiasing();
   display(patch);
-  rg.draw(Blue8);
+  region.draw(Blue8);
   millisleep(1000);
   close_window(w2);
 
@@ -81,7 +80,7 @@ void read_features(const Image<unsigned char>& image,
                    const string& filepath)
 {
   cout << "Reading DoG features... " << endl;
-  vector<OERegion> features;
+  auto features = vector<OERegion>{};
   DescriptorMatrix<float> descriptors;
 
   cout << "Reading keypoints..." << endl;
@@ -90,18 +89,18 @@ void read_features(const Image<unsigned char>& image,
   for (int i = 0; i < 10; ++i)
     check_affine_adaptation(image, features[i]);
 
-  string ext = filepath.substr(filepath.find_last_of("."), filepath.size());
-  string name = filepath.substr(0, filepath.find_last_of("."));
-  string copy_filepath = name + "_copy" + ext;
+  auto ext = filepath.substr(filepath.find_last_of("."), filepath.size());
+  auto name = filepath.substr(0, filepath.find_last_of("."));
+  auto copy_filepath = name + "_copy" + ext;
   write_keypoints(features, descriptors, name + "_copy" + ext);
 
-  vector<OERegion> features2;
+  auto features2 = vector<OERegion>{};
   DescriptorMatrix<float> descriptors2;
   cout << "Checking written file..." << endl;
   read_keypoints(features2, descriptors2, copy_filepath);
 
   cout << "Printing the 10 first keypoints..." << endl;
-  for(size_t i = 0; i < 10; ++i)
+  for(int i = 0; i < 10; ++i)
     cout << features[i] << endl;
 
   // Draw features.
@@ -111,6 +110,7 @@ void read_features(const Image<unsigned char>& image,
   cout << "done!" << endl;
   millisleep(1000);
 }
+
 
 GRAPHICS_MAIN()
 {

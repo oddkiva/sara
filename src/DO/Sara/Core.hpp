@@ -16,26 +16,26 @@
 #define DO_SARA_CORE_HPP
 
 // DO-CV specific defines.
-#include "Defines.hpp"
+#include <DO/Sara/Defines.hpp>
 // Template meta-programming
-#include "Core/Meta.hpp"
+#include <DO/Sara/Core/Meta.hpp>
 // Linear algebra imports and extension from Eigen3
-#include "Core/EigenExtension.hpp"
+#include <DO/Sara/Core/EigenExtension.hpp>
 // N-dimensional array and N-dimensional iterators
-#include "Core/ArrayIterators.hpp"
-#include "Core/MultiArray.hpp"
+#include <DO/Sara/Core/ArrayIterators.hpp>
+#include <DO/Sara/Core/MultiArray.hpp>
 // Sparse N-dimensional array
-#include "Core/SparseMultiArray.hpp"
+#include <DO/Sara/Core/SparseMultiArray.hpp>
 // Image and color data structures
-#include "Core/Pixel.hpp"
-#include "Core/Image.hpp"
+#include <DO/Sara/Core/Pixel.hpp>
+#include <DO/Sara/Core/Image.hpp>
 // Tree data structures
-#include "Core/Tree.hpp"
+#include <DO/Sara/Core/Tree.hpp>
 // Timer classes
-#include "Core/Timer.hpp"
+#include <DO/Sara/Core/Timer.hpp>
 // Miscellaneous
-#include "Core/StdVectorHelpers.hpp"
-#include "Core/DebugUtilities.hpp"
+#include <DO/Sara/Core/StdVectorHelpers.hpp>
+#include <DO/Sara/Core/DebugUtilities.hpp>
 
 
 /*!

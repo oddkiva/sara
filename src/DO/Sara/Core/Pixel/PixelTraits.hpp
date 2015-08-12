@@ -62,7 +62,7 @@ namespace DO { namespace Sara {
   };
 
   template <typename T, int M, int N>
-  struct PixelTraits<Matrix<T, M, N> >
+  struct PixelTraits<Matrix<T, M, N>>
   {
     typedef T channel_type;
 
@@ -106,7 +106,7 @@ namespace DO { namespace Sara {
   };
 
   template <typename T, typename ColorSpace>
-  struct PixelTraits<Pixel<T, ColorSpace> >
+  struct PixelTraits<Pixel<T, ColorSpace>>
   {
     typedef T channel_type;
 

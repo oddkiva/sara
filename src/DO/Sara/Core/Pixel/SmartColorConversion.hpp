@@ -6,8 +6,9 @@
 #include <DO/Sara/Core/Pixel/ChannelConversion.hpp>
 #include <DO/Sara/Core/Pixel/ColorConversion.hpp>
 
+
 // Smart color conversion between colorspace regardless of the channel type.
-// We will treat the grayscale conversion separately
+// We will treat the grayscale conversion separately.
 namespace DO { namespace Sara {
 
   namespace Detail {
