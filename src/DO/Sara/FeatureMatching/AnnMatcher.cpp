@@ -27,7 +27,7 @@ using namespace std;
 namespace DO { namespace Sara {
 
   //! Create FLANN matrix
-  flann::Matrix<float> createFlannMatrix(const DescriptorMatrix<float>& descs)
+  flann::Matrix<float> create_flann_matrix(const DescriptorMatrix<float>& descs)
   {
     if (descs.size() == 0)
     {
@@ -47,16 +47,19 @@ namespace DO { namespace Sara {
   }
 
   //! Find the nearest neighbors in the descriptor space using FLANN.
-  void
-  appendNearestNeighbors(size_t i1,
-                         const Set<OERegion, RealDescriptor>& keys1,
-                         const Set<OERegion, RealDescriptor>& keys2,
-                         vector<Match>& matches,
-                         const flann::Matrix<float>& data2,
-                         flann::Index<flann::L2<float> >& tree2,
-                         float sqRatioT, Match::MatchingDirection dir,
-                         bool selfMatching,  const KeyProximity& isRedundant, // self-matching
-                         vector<int>& vecIndices, vector<float>& vecDists, size_t maxNeighbors) // internal storage parameters
+  void append_nearest_neighbors(
+    size_t i1,
+    const Set<OERegion, RealDescriptor>& keys1,
+    const Set<OERegion, RealDescriptor>& keys2,
+    vector<Match>& matches,
+    const flann::Matrix<float>& data2,
+    flann::Index<flann::L2<float>>& tree2,
+    float squared_ratio_thres,
+    Match::MatchingDirection dir,
+    bool self_matching, const KeyProximity& is_redundant, // self-matching
+    vector<int>& vec_indices,
+    vector<float>& vec_dists,
+    size_t num_max_neighbors) // internal storage parameters
   {
     // Prepare the query matrix
     flann::Matrix<float> query(
@@ -64,14 +67,14 @@ namespace DO { namespace Sara {
       1, keys1.descriptors.dimension() );
 
     // Prepare the indices and distances.
-    flann::Matrix<int> indices(&vecIndices[0], 1, maxNeighbors);
-    flann::Matrix<float> dists(&vecDists[0], 1, maxNeighbors);
+    flann::Matrix<int> indices(&vec_indices[0], 1, num_max_neighbors);
+    flann::Matrix<float> dists(&vec_dists[0], 1, num_max_neighbors);
 
     // Create search parameters.
-    flann::SearchParams searchParams;
+    flann::SearchParams search_params;
 
     // Search the nearest neighbor.
-    tree2.knnSearch(query, indices, dists, 3, searchParams);
+    tree2.knnSearch(query, indices, dists, 3, search_params);
 
     // This is to avoid the source key matches with himself in case of intra image matching.
     const int startIndex = i1 == indices[0][1] ? 1 : 0;
@@ -87,11 +90,11 @@ namespace DO { namespace Sara {
     }
 
     // Determine the number of nearest neighbors.
-    if (sqRatioT > 1.f)
+    if (squared_ratio_thres > 1.f)
     {
       // Performs an adaptive radius search.
-      const float radius = (dists[0][startIndex])*sqRatioT;
-      K = tree2.radiusSearch(query, indices, dists, radius, searchParams);
+      const float radius = (dists[0][startIndex])*squared_ratio_thres;
+      K = tree2.radiusSearch(query, indices, dists, radius, search_params);
     }
 
     // Retrieve the right key points.
@@ -106,15 +109,15 @@ namespace DO { namespace Sara {
       int i2 = indices[0][rank];
 
       // Ignore the match if keys1 == keys2.
-      if (selfMatching && isRedundant(keys1.features[i1], keys2.features[i2]))
+      if (self_matching && is_redundant(keys1.features[i1], keys2.features[i2]))
         continue;
 
       Match m(&keys1.features[i1], &keys2.features[i2], score, dir, i1, i2);
       m.rank() = (startIndex == 0) ? rank+1 : rank;
       if(dir == Match::TargetToSource)
       {
-        swap(m.ptrX(), m.ptrY());
-        swap(m.indX(), m.indY());
+        swap(m.x_ptr(), m.y_ptr());
+        swap(m.x_idx(), m.y_idx());
       }
 
       matches.push_back(m);
@@ -123,58 +126,58 @@ namespace DO { namespace Sara {
 
   AnnMatcher::AnnMatcher(const Set<OERegion, RealDescriptor>& keys1,
                          const Set<OERegion, RealDescriptor>& keys2,
-                         float siftRatioT)
-    : keys1_(keys1)
-    , keys2_(keys2)
-    , sqRatioT(siftRatioT*siftRatioT)
-    , max_neighbors_(std::max(keys1.size(), keys2.size()))
-    , self_matching_(false)
+                         float sift_ratio_thres)
+    : _keys1(keys1)
+    , _keys2(keys2)
+    , _squared_ratio_thres(sift_ratio_thres*sift_ratio_thres)
+    , _max_neighbors(std::max(keys1.size(), keys2.size()))
+    , _self_matching(false)
   {
-    vec_indices_.resize(max_neighbors_);
-    vec_dists_.resize(max_neighbors_);
+    _vec_indices.resize(_max_neighbors);
+    _vec_dists.resize(_max_neighbors);
   }
 
   AnnMatcher::AnnMatcher(const Set<OERegion, RealDescriptor>& keys,
-                         float siftRatioT,
-                         float minMaxMetricDistT,
-                         float pixelDistT)
-    : keys1_(keys)
-    , keys2_(keys)
-    , sqRatioT(siftRatioT*siftRatioT)
-    , is_too_close_(minMaxMetricDistT, pixelDistT)
-    , max_neighbors_(keys.size())
-    , self_matching_(true)
+                         float sift_ratio_thres,
+                         float min_max_metric_dist_thres,
+                         float pixel_dist_thres)
+    : _keys1(keys)
+    , _keys2(keys)
+    , _squared_ratio_thres(sift_ratio_thres*sift_ratio_thres)
+    , _is_too_close(min_max_metric_dist_thres, pixel_dist_thres)
+    , _max_neighbors(keys.size())
+    , _self_matching(true)
   {
-    vec_indices_.resize(max_neighbors_);
-    vec_dists_.resize(max_neighbors_);
+    _vec_indices.resize(_max_neighbors);
+    _vec_dists.resize(_max_neighbors);
   }
 
   // Sort by indices and by score.
-  inline bool compareMatch(const Match& m1, const Match& m2)
+  inline bool compare_match(const Match& m1, const Match& m2)
   {
-    if (m1.indX() < m2.indX())
+    if (m1.x_idx() < m2.x_idx())
       return true;
-    if (m1.indX() == m2.indX() && m1.indY() < m2.indY())
+    if (m1.x_idx() == m2.x_idx() && m1.y_idx() < m2.y_idx())
       return true;
-    if (m1.indX() == m2.indX() && m1.indY() == m2.indY() && m1.score() < m2.score())
+    if (m1.x_idx() == m2.x_idx() && m1.y_idx() == m2.y_idx() && m1.score() < m2.score())
       return true;
     return false;
   }
 
-  inline bool compareByScore(const Match& m1, const Match& m2)
+  inline bool compare_by_score(const Match& m1, const Match& m2)
   {
     return m1.score() < m2.score();
   }
 
   //! Compute candidate matches using the Euclidean distance.
-  vector<Match> AnnMatcher::computeMatches()
+  vector<Match> AnnMatcher::compute_matches()
   {
     Timer t;
 
     flann::KDTreeIndexParams params(8);
     flann::Matrix<float> data1, data2;
-    data1 = createFlannMatrix(keys1_.descriptors);
-    data2 = createFlannMatrix(keys2_.descriptors);
+    data1 = create_flann_matrix(_keys1.descriptors);
+    data2 = create_flann_matrix(_keys2.descriptors);
 
     flann::Index<flann::L2<float> > tree1(data1, params);
     flann::Index<flann::L2<float> > tree2(data2, params);
@@ -186,26 +189,28 @@ namespace DO { namespace Sara {
     matches.reserve(1e5);
 
     t.restart();
-    for (int i1 = 0; i1 < keys1_.size(); ++i1)
+    for (int i1 = 0; i1 < _keys1.size(); ++i1)
     {
-      appendNearestNeighbors(
-        i1, keys1_, keys2_, matches, data2, tree2,
-        sqRatioT, Match::SourceToTarget,
-        self_matching_, is_too_close_, vec_indices_, vec_dists_, max_neighbors_);
+      append_nearest_neighbors(
+        i1, _keys1, _keys2, matches, data2, tree2,
+        _squared_ratio_thres, Match::SourceToTarget,
+        _self_matching, _is_too_close, _vec_indices,
+        _vec_dists, _max_neighbors);
     }
-    for (int i2 = 0; i2 < keys2_.size(); ++i2)
+
+    for (int i2 = 0; i2 < _keys2.size(); ++i2)
     {
-      appendNearestNeighbors(
-        i2, keys2_, keys1_, matches, data1, tree1,
-        sqRatioT, Match::TargetToSource,
-        self_matching_, is_too_close_, vec_indices_, vec_dists_, max_neighbors_);
+      append_nearest_neighbors(
+        i2, _keys2, _keys1, matches, data1, tree1,
+        _squared_ratio_thres, Match::TargetToSource,
+        _self_matching, _is_too_close, _vec_indices, _vec_dists, _max_neighbors);
     }
-    sort(matches.begin(), matches.end(), compareMatch);
+    sort(matches.begin(), matches.end(), compare_match);
 
     // Remove redundant matches in each consecutive group of identical matches.
     // We keep the one with the best score, which is the first one according to 'CompareMatch'.
     matches.resize(unique(matches.begin(), matches.end()) - matches.begin());
-    sort(matches.begin(), matches.end(), compareByScore);
+    sort(matches.begin(), matches.end(), compare_by_score);
 
     cout << "Computed " << matches.size() << " matches in " << t.elapsed() << " seconds." << endl;
 

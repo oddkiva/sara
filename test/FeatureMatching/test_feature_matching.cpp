@@ -9,15 +9,21 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_SARA_MATCH_HPP
-#define DO_SARA_MATCH_HPP
+#include <gtest/gtest.h>
 
-#include <vector>
-#include <cstdlib>
+#include <DO/Sara/FeatureMatching.hpp>
 
-#include <DO/Sara/Features.hpp>
 
-#include <DO/Sara/Match/Match.hpp>
-#include <DO/Sara/Match/PairWiseDrawer.hpp>
+using namespace std;
+using namespace DO::Sara;
 
-#endif /* DO_SARA_MATCH_HPP */
+
+TEST(TestFeatureMatching, test_me)
+{
+  EXPECT_FALSE(true);
+}
+
+int main(int argc, char **argv)
+{
+  return 0;
+}

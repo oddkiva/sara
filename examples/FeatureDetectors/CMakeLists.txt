@@ -13,7 +13,7 @@ macro (do_add_example example)
   target_link_libraries(${example} ${DO_Sara_LIBRARIES})
   set_property(TARGET ${example}
     PROPERTY
-    FOLDER "DO Sara Examples/FeaturesDetectors")
+    FOLDER "DO Sara Examples/FeatureDetectors")
 endmacro ()
 
 file(GLOB example_SOURCE_FILES FILES *example.cpp)

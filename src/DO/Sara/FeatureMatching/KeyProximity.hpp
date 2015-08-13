@@ -12,24 +12,31 @@
 #ifndef DO_SARA_FEATUREMATCHING_MATCHFILTERING_HPP
 #define DO_SARA_FEATUREMATCHING_MATCHFILTERING_HPP
 
+#include <DO/Sara/Defines.hpp>
+
 
 namespace DO { namespace Sara {
 
-	class KeyProximity
+	class DO_EXPORT KeyProximity
 	{
 	public:
 		KeyProximity(float metricDistT = .5f, float pixelDistT = 10.f)
-			: sqMetricDist(metricDistT*metricDistT)
-      , sqPixDist(pixelDistT*pixelDistT) {}
+			: _squared_metric_dist(metricDistT*metricDistT)
+      , _squared_dist_thres(pixelDistT*pixelDistT)
+    {
+    }
 
-    SquaredRefDistance<float, 2> mappedSquaredMetric(const OERegion& f) const
-    { return SquaredRefDistance<float, 2>(f.shapeMat()); }
+    SquaredRefDistance<float, 2>
+    mapped_squared_metric(const OERegion& f) const
+    {
+      return SquaredRefDistance<float, 2>(f.shape_matrix());
+    }
 
 		bool operator()(const OERegion& f1, const OERegion& f2) const;
 
   private:
-    float sqMetricDist;
-    float sqPixDist;
+    float _squared_metric_dist;
+    float _squared_dist_thres;
   };
 
 } /* namespace Sara */

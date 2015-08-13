@@ -16,16 +16,16 @@ namespace DO { namespace Sara {
 
   bool KeyProximity::operator()(const OERegion& f1, const OERegion& f2) const
   {
-    SquaredRefDistance<float, 2> m1(mappedSquaredMetric(f1));
-    SquaredRefDistance<float, 2> m2(mappedSquaredMetric(f1));
+    SquaredRefDistance<float, 2> m1(mapped_squared_metric(f1));
+    SquaredRefDistance<float, 2> m2(mapped_squared_metric(f1));
 
     float sd1 = m1(f1.center(), f2.center());
     float sd2 = m2(f1.center(), f2.center());
 
-    float pixelDist2 = (f1.center() - f2.center()).squaredNorm();
+    float squared_pixel_dist = (f1.center() - f2.center()).squaredNorm();
 
-    return (pixelDist2 < sqPixDist) ||
-      (sd1 < sqMetricDist) || (sd2 < sqMetricDist);
+    return (squared_pixel_dist < _squared_dist_thres) ||
+      (sd1 < _squared_metric_dist) || (sd2 < _squared_metric_dist);
   }
 
 } /* namespace Sara */

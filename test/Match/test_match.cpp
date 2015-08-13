@@ -12,12 +12,13 @@
 #include <DO/Sara/Match.hpp>
 
 using namespace std;
-using namespace DO;
+using namespace DO::Sara;
+
 
 int main()
 {
-  Match m(indexMatch(0, 1000));
-  cout << m.indexPair().transpose() << endl;
+  Match m(index_match(0, 1000));
+  cout << m.index_pair().transpose() << endl;
 
   return 0;
 }

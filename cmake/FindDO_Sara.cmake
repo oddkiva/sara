@@ -51,8 +51,8 @@ if (NOT DO_Sara_FOUND)
   do_append_components(DO_Sara_COMPONENTS FeatureDetectors)
   do_append_components(DO_Sara_COMPONENTS FeatureDescriptors)
   # Feature matching
-  #do_append_components(DO_Sara_COMPONENTS Match)
-  #do_append_components(DO_Sara_COMPONENTS FeatureMatching)
+  do_append_components(DO_Sara_COMPONENTS Match)
+  do_append_components(DO_Sara_COMPONENTS FeatureMatching)
 
   # DEBUG: Print the list of component libraries
   do_step_message("Currently available components in DO-Sara:")
