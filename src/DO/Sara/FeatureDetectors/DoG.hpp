@@ -129,8 +129,11 @@ namespace DO { namespace Sara {
       \return the pyramid of difference of Gaussians used to localize
       scale-space extrema of image **I**.
      */
-    const ImagePyramid<float>& diffOfGaussians() const
-    { return _diff_of_gaussians; }
+    const ImagePyramid<float>& diff_of_gaussians() const
+    {
+      return _diff_of_gaussians;
+    }
+
   private: /* data members. */
     // Parameters
     ImagePyramidParams _params;
