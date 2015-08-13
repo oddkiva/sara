@@ -122,16 +122,35 @@ TEST_F(TestFilters, test_column_derivative)
 
 TEST_F(TestFilters, test_gaussian)
 {
-  _src_image.array().fill(1);
-  Image<float> dst_image;
+  // Convolve with Dirac.
+  const auto n = _src_image.sizes()[0];
+  _src_image.array().fill(0.f);
+  _src_image(n / 2, n / 2) = 1.f;
+
   MatrixXf true_matrix(3, 3);
-  true_matrix.setOnes();
+  true_matrix <<
+    exp(-1.0f), exp(-0.5f), exp(-1.0f),
+    exp(-0.5f), exp(-0.0f), exp(-0.5f),
+    exp(-1.0f), exp(-0.5f), exp(-1.f);
+  true_matrix /= true_matrix.sum();
 
-  apply_gaussian_filter(_src_image, dst_image, 1.f);
+  auto dst_image = Image<float>{};
+ 
+  apply_gaussian_filter(_src_image, dst_image, 1.f, 1.f);
   EXPECT_MATRIX_NEAR(true_matrix, dst_image.matrix(), 1e-5);
 
-  dst_image = gaussian(_src_image, 1.f);
+  dst_image = gaussian(_src_image, 1.f, 1.f);
   EXPECT_MATRIX_NEAR(true_matrix, dst_image.matrix(), 1e-5);
+
+  // Last case.
+  _src_image.resize(9, 9); // 2 * 4 * 1 + 1 because of Gaussian truncation factor.
+  _src_image.array().fill(0.f);
+  _src_image(4, 4) = 1.f;
+  true_matrix.resize(9, 9);
+  for (int i = 0; i < 9; ++i)
+    for (int j = 0; j < 9; ++j)
+      true_matrix(i, j) = exp(-(pow(i - 4.f, 2) + pow(j - 4.f, 2)) / 2.f);
+  true_matrix /= true_matrix.sum();
 
   dst_image = _src_image.compute<Gaussian>(1.f);
   EXPECT_MATRIX_NEAR(true_matrix, dst_image.matrix(), 1e-5);
