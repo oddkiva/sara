@@ -24,36 +24,36 @@ using namespace DO::Sara;
 TEST(TestPixelTypedefs, test_3d_colors_typedefs)
 {
   // Color3XX with unsigned integer types.
-  ASSERT_TRUE(bool(Meta::IsSame<Color3ub, Matrix<unsigned char, 3, 1> >::value));
-  ASSERT_TRUE(bool(Meta::IsSame<Color3us, Matrix<unsigned short, 3, 1> >::value));
-  ASSERT_TRUE(bool(Meta::IsSame<Color3ui, Matrix<unsigned int, 3, 1> >::value));
+  ASSERT_TRUE(bool(std::is_same<Color3ub, Matrix<unsigned char, 3, 1> >::value));
+  ASSERT_TRUE(bool(std::is_same<Color3us, Matrix<unsigned short, 3, 1> >::value));
+  ASSERT_TRUE(bool(std::is_same<Color3ui, Matrix<unsigned int, 3, 1> >::value));
 
   // Color3X with signed integer types.
-  ASSERT_TRUE(bool(Meta::IsSame<Color3b, Matrix<char, 3, 1> >::value));
-  ASSERT_TRUE(bool(Meta::IsSame<Color3s, Matrix<short, 3, 1> >::value));
-  ASSERT_TRUE(bool(Meta::IsSame<Color3i, Matrix<int, 3, 1> >::value));
+  ASSERT_TRUE(bool(std::is_same<Color3b, Matrix<char, 3, 1> >::value));
+  ASSERT_TRUE(bool(std::is_same<Color3s, Matrix<short, 3, 1> >::value));
+  ASSERT_TRUE(bool(std::is_same<Color3i, Matrix<int, 3, 1> >::value));
 
   // Color3X with floating-point types.
-  ASSERT_TRUE(bool(Meta::IsSame<Color3f, Matrix<float, 3, 1> >::value));
-  ASSERT_TRUE(bool(Meta::IsSame<Color3d, Matrix<double, 3, 1> >::value));
+  ASSERT_TRUE(bool(std::is_same<Color3f, Matrix<float, 3, 1> >::value));
+  ASSERT_TRUE(bool(std::is_same<Color3d, Matrix<double, 3, 1> >::value));
 }
 
 
 TEST(TestPixelTypedefs, test_4d_colors_typedefs)
 {
   // Color4XX with unsigned integer types.
-  ASSERT_TRUE(bool(Meta::IsSame<Color4ub, Matrix<unsigned char, 4, 1> >::value));
-  ASSERT_TRUE(bool(Meta::IsSame<Color4us, Matrix<unsigned short, 4, 1> >::value));
-  ASSERT_TRUE(bool(Meta::IsSame<Color4ui, Matrix<unsigned int, 4, 1> >::value));
+  ASSERT_TRUE(bool(std::is_same<Color4ub, Matrix<unsigned char, 4, 1> >::value));
+  ASSERT_TRUE(bool(std::is_same<Color4us, Matrix<unsigned short, 4, 1> >::value));
+  ASSERT_TRUE(bool(std::is_same<Color4ui, Matrix<unsigned int, 4, 1> >::value));
 
   // Color4X with signed integer types.
-  ASSERT_TRUE(bool(Meta::IsSame<Color4b, Matrix<char, 4, 1> >::value));
-  ASSERT_TRUE(bool(Meta::IsSame<Color4s, Matrix<short, 4, 1> >::value));
-  ASSERT_TRUE(bool(Meta::IsSame<Color4i, Matrix<int, 4, 1> >::value));
+  ASSERT_TRUE(bool(std::is_same<Color4b, Matrix<char, 4, 1> >::value));
+  ASSERT_TRUE(bool(std::is_same<Color4s, Matrix<short, 4, 1> >::value));
+  ASSERT_TRUE(bool(std::is_same<Color4i, Matrix<int, 4, 1> >::value));
 
   // Color4X with floating-point types.
-  ASSERT_TRUE(bool(Meta::IsSame<Color4f, Matrix<float, 4, 1> >::value));
-  ASSERT_TRUE(bool(Meta::IsSame<Color4d, Matrix<double, 4, 1> >::value));
+  ASSERT_TRUE(bool(std::is_same<Color4f, Matrix<float, 4, 1> >::value));
+  ASSERT_TRUE(bool(std::is_same<Color4d, Matrix<double, 4, 1> >::value));
 }
 
 

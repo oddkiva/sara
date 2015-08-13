@@ -39,11 +39,11 @@ namespace DO { namespace Sara { namespace Meta {
   };
 
 
-  //! Getter class for IntArray_3.
+  //! \brief Getter class for IntArray_3.
   template <typename IntArray, int index> struct Get;
 
   //! @{
-  //! Specialized getter class for IntArray_3.
+  //! \brief Specialized getter class for IntArray_3.
   template <typename IntArray> struct Get<IntArray, 0>
   { enum { value = IntArray::value_0 }; };
 
@@ -58,7 +58,7 @@ namespace DO { namespace Sara { namespace Meta {
   //! @}
 
 
-  //! 3D vector of types.
+  //! \brief 3D vector of types.
   template <typename T0_, typename T1_, typename T2_>
   struct Vector3
   {
@@ -69,7 +69,7 @@ namespace DO { namespace Sara { namespace Meta {
   };
 
 
-  //! 4D vector of types.
+  //! \brief 4D vector of types.
   template <typename T0_, typename T1_, typename T2_, typename T3_>
   struct Vector4
   {
@@ -81,11 +81,11 @@ namespace DO { namespace Sara { namespace Meta {
   };
 
 
-  //! Accessor for vectors of types.
+  //! \brief Accessor for vectors of types.
   template <typename Vector, unsigned int i> struct At {};
 
   //! @{
-  //! Specialized index getter for Vector3.
+  //! \brief Specialized index getter for Vector3.
   template <typename Vector> struct At<Vector, 0>
   { typedef typename Vector::T0 Type; /*!< Return type at index 0. */};
 
@@ -100,11 +100,11 @@ namespace DO { namespace Sara { namespace Meta {
   //! @}
 
 
-  //! Index getter for vector of types.
+  //! \brief Index getter for vector of types.
   template <typename Vector, typename T> struct IndexOf {};
 
   //! @{
-  //! Specialized index getter for Vector3.
+  //! \brief Specialized index getter for Vector3.
   template <typename T0, typename T1, typename T2>
   struct IndexOf<Vector3<T0, T1, T2>, T0>
   { enum { value = 0 }; };
@@ -120,7 +120,7 @@ namespace DO { namespace Sara { namespace Meta {
 
 
   //! @{
-  //! Specialized index getter for Vector4.
+  //! \brief Specialized index getter for Vector4.
   template <typename T0, typename T1, typename T2, typename T3>
   struct IndexOf<Vector4<T0, T1, T2, T3>, T0>
   { enum { value = 0 }; };
@@ -140,17 +140,7 @@ namespace DO { namespace Sara { namespace Meta {
 
 
   //! @{
-  //! Type equality meta-function.
-  template <typename T, typename U>
-  struct IsSame { static const bool value = false; /*!< Default value. */};
-
-  template <typename T>
-  struct IsSame<T, T> { static const bool value = true;  /*!< Logically. */};
-  //! @}
-
-
-  //! @{
-  //! Choose meta-function.
+  //! \brief Choose meta-function.
   template <bool flag, typename IsTrue, typename IsFalse>
   struct Choose;
 
