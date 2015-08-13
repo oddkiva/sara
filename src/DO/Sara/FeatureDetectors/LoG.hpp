@@ -23,7 +23,7 @@ namespace DO { namespace Sara {
     \ingroup FeatureDetectors
     \defgroup InterestPoint Interest Point Detection
     @{
-  */
+   */
 
   //! Functor class to compute LoG extrema
   class DO_EXPORT ComputeLoGExtrema
