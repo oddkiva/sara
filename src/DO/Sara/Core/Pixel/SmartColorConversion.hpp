@@ -198,8 +198,8 @@ namespace DO { namespace Sara {
   template <typename SrcGray, typename DstGray>
   inline void smart_convert_color(SrcGray src, DstGray& dst)
   {
-    static const bool same_type = Meta::IsSame<SrcGray, DstGray>::value;
-    static_assert(!same_type, "Grayscale types are identical");
+    static_assert(!std::is_same<SrcGray, DstGray>::value,
+      "Source and destination grayscale types cannot be identical");
     convert_channel(src, dst);
   }
 

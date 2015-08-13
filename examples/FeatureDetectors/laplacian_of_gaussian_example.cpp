@@ -10,7 +10,6 @@ using namespace std;
 
 
 static Timer timer;
-double elapsed = 0.0;
 
 void tic()
 {
@@ -19,12 +18,12 @@ void tic()
 
 void toc()
 {
-  elapsed = timer.elapsed_ms();
+  auto elapsed = timer.elapsed_ms();
   cout << "Elapsed time = " << elapsed << " ms" << endl << endl;
 }
 
-vector<OERegion> computeLoGExtrema(const Image<float>& I,
-                                   bool verbose = true)
+vector<OERegion> compute_LoG_extrema(const Image<float>& I,
+                                     bool verbose = true)
 {
   // 1. Feature extraction.
   if (verbose)
@@ -42,7 +41,7 @@ vector<OERegion> computeLoGExtrema(const Image<float>& I,
   CHECK(LoGs.size());
 
   // 2. Rescale detected features to original image dimension.
-  const ImagePyramid<float>& DoGPyr = computeLoGs.laplaciansOfGaussians();
+  const auto& DoGPyr = computeLoGs.laplacians_of_gaussians();
   for (int i = 0; i < LoGs.size(); ++i)
   {
     float octScaleFact = DoGPyr.octave_scaling_factor(scaleOctPairs[i](1));
@@ -53,8 +52,8 @@ vector<OERegion> computeLoGExtrema(const Image<float>& I,
   return LoGs;
 }
 
-vector<OERegion> computeLoGAffineExtrema(const Image<float>& I,
-                                         bool verbose = true)
+vector<OERegion> compute_LoG_affine_extrema(const Image<float>& I,
+                                            bool verbose = true)
 {
   // 1. Feature extraction.
   if (verbose)
@@ -62,17 +61,18 @@ vector<OERegion> computeLoGAffineExtrema(const Image<float>& I,
     print_stage("Localizing LoG affine-adapted extrema");
     tic();
   }
-  ImagePyramidParams pyrParams(0);
-  ComputeLoGExtrema computeLoGs(pyrParams);
-  vector<OERegion> LoGs;
-  vector<Point2i> scaleOctPairs;
-  LoGs = computeLoGs(I, &scaleOctPairs);
+
+  ImagePyramidParams pyr_params(0);
+  ComputeLoGExtrema compute_LoGs(pyr_params);
+  auto LoGs = vector<OERegion>{};
+  auto scale_octave_pairs = vector<Point2i>{};
+  LoGs = compute_LoGs(I, &scale_octave_pairs);
   if (verbose)
     toc();
   CHECK(LoGs.size());
 
-  const ImagePyramid<float>& gaussPyr = computeLoGs.gaussians();
-  const ImagePyramid<float>& dogPyr = computeLoGs.laplaciansOfGaussians();
+  const auto& G = compute_LoGs.gaussians();
+  const auto& L = compute_LoGs.laplacians_of_gaussians();
 
   // 2. Affine shape adaptation
   if (verbose)
@@ -81,48 +81,48 @@ vector<OERegion> computeLoGAffineExtrema(const Image<float>& I,
     tic();
   }
   AdaptFeatureAffinelyToLocalShape adaptShape;
-  vector<int> keepFeatures(LoGs.size(), 0);
+  auto keep_features = vector<unsigned char>(LoGs.size(), 0);
   for (size_t i = 0; i != LoGs.size(); ++i)
   {
-    const int s = scaleOctPairs[i](0);
-    const int o = scaleOctPairs[i](1);
+    const int s = scale_octave_pairs[i](0);
+    const int o = scale_octave_pairs[i](1);
 
-    Matrix2f affAdaptTransformMat;
-    if (adaptShape(affAdaptTransformMat, gaussPyr(s,o), LoGs[i]))
+    Matrix2f affine_adapt_transform;
+    if (adaptShape(affine_adapt_transform, G(s,o), LoGs[i]))
     {
-      LoGs[i].shape_matrix() = affAdaptTransformMat*LoGs[i].shape_matrix();
-      keepFeatures[i] = 1;
+      LoGs[i].shape_matrix() = affine_adapt_transform*LoGs[i].shape_matrix();
+      keep_features[i] = 1;
     }
   }
   if (verbose)
     toc();
 
   // 3. Rescale the kept features to original image dimensions.
-  size_t num_kept_features =
-    std::accumulate(keepFeatures.begin(), keepFeatures.end(), 0);
+  size_t num_kept_features = std::accumulate(
+    keep_features.begin(), keep_features.end(), 0);
 
-  vector<OERegion> keptDoGs;
-  keptDoGs.reserve(num_kept_features);
-  for (size_t i = 0; i != keepFeatures.size(); ++i)
+  auto kept_DoGs = vector<OERegion>{};
+  kept_DoGs.reserve(num_kept_features);
+  for (size_t i = 0; i != keep_features.size(); ++i)
   {
-    if (keepFeatures[i] == 1)
+    if (keep_features[i] == 1)
     {
-      keptDoGs.push_back(LoGs[i]);
-      const float fact = dogPyr.octave_scaling_factor(scaleOctPairs[i](1));
-      keptDoGs.back().shape_matrix() *= pow(fact,-2);
-      keptDoGs.back().coords() *= fact;
+      kept_DoGs.push_back(LoGs[i]);
+      const float fact = L.octave_scaling_factor(scale_octave_pairs[i](1));
+      kept_DoGs.back().shape_matrix() *= pow(fact,-2);
+      kept_DoGs.back().coords() *= fact;
 
     }
   }
 
-  CHECK(keptDoGs.size());
+  CHECK(kept_DoGs.size());
 
-  return keptDoGs;
+  return kept_DoGs;
 }
 
-void check_keys(const Image<float>& I, const vector<OERegion>& features)
+void check_keys(const Image<float>& image, const vector<OERegion>& features)
 {
-  display(I);
+  display(image);
   set_antialiasing();
   for (size_t i = 0; i != features.size(); ++i)
     features[i].draw(features[i].extremum_type() == OERegion::Max ?
@@ -132,20 +132,17 @@ void check_keys(const Image<float>& I, const vector<OERegion>& features)
 
 GRAPHICS_MAIN()
 {
-  Image<float> I;
-  string name;
-  name = src_path("../../datasets/sunflowerField.jpg");
-  if (!load(I, name))
+  auto image = Image<float>{};
+  auto image_filepath = src_path("../../datasets/sunflowerField.jpg");
+  if (!load(image, image_filepath))
     return -1;
 
-  create_window(I.width(), I.height());
-  vector<OERegion> features;
+  create_window(image.width(), image.height());
+  auto features = compute_LoG_extrema(image);
+  check_keys(image, features);
 
-  features = computeLoGExtrema(I);
-  check_keys(I, features);
-
-  features = computeLoGAffineExtrema(I);
-  check_keys(I, features);
+  features = compute_LoG_affine_extrema(image);
+  check_keys(image, features);
 
   return 0;
 }

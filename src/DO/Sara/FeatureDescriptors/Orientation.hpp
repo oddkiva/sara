@@ -16,6 +16,8 @@
 
 #include <DO/Sara/Defines.hpp>
 
+#include <DO/Sara/Core/StringFormat.hpp>
+
 
 namespace DO { namespace Sara {
 
@@ -74,7 +76,7 @@ namespace DO { namespace Sara {
    */
   template <typename T, int N>
   void compute_orientation_histogram(Array<T, N, 1>& orientation_histogram,
-                                     const Image<Matrix<T,2,1>>& gradient_polar,
+                                     const Image<Matrix<T,2,1>>& grad_polar_coords,
                                      T x, T y, T s,
                                      T patch_truncation_factor = T(3),
                                      T blur_factor = T(1.5))
@@ -83,8 +85,8 @@ namespace DO { namespace Sara {
     orientation_histogram.setZero();
 
     // Rounding of the coordinates.
-    int xi = int_round(x);
-    int yi = int_round(y);
+    auto rounded_x = int_round(x);
+    auto rounded_y = int_round(y);
 
     // std deviation of the gaussian weight (cf. [Lowe, IJCV 2004])
     T sigma = s*blur_factor;
@@ -97,17 +99,17 @@ namespace DO { namespace Sara {
     {
       for (int u = -patch_radius; u <= patch_radius; ++u)
       {
-        if ( xi+u < 0 || xi+u >= gradient_polar.width()  ||
-             yi+v < 0 || yi+v >= gradient_polar.height() )
+        if (rounded_x + u < 0 || rounded_x + u >= grad_polar_coords.width() ||
+            rounded_y + v < 0 || rounded_y + v >= grad_polar_coords.height())
           continue;
 
-        T mag = gradient_polar(xi+u, yi+v)(0);
-        T ori = gradient_polar(xi+u, yi+v)(1);
+        auto mag = grad_polar_coords(rounded_x+u, rounded_y+v)(0);
+        auto ori = grad_polar_coords(rounded_x+u, rounded_y+v)(1);
         // ori is in \f$]-\pi, \pi]\f$, so translate ori by \f$2*\pi\f$ if it is
         // negative.
 #ifndef LOWE
         ori = ori < 0 ? ori+T(2.*M_PI) : ori;
-        int bin_index = floor(ori/T(2*M_PI) * T(N));
+        auto bin_index = static_cast<int>(floor(ori / T(2 * M_PI) * T(N)));
         bin_index %= N;
 #else
         int bin_index = int( (N * (ori + M_PI + 0.001f) / (2.0f * M_PI)) );
@@ -115,18 +117,18 @@ namespace DO { namespace Sara {
 #endif
         if (bin_index < 0 || bin_index >= N)
         {
-          std::ostringstream oss;
-          oss << "Orientation bin index out of range: " << bin_index
-              << " theta = " << ori << std::endl;
-          std::cerr << oss.str() << std::endl;
-          throw std::out_of_range(oss.str());
+          auto error_msg = Sara::format(
+            "Orientation bin index out of range: bin_index = %d, theta = %f\n",
+            bin_index, ori);
+          std::cerr << error_msg << std::endl;
+          throw std::out_of_range{ error_msg };
         }
 
         // Give more emphasis to gradient orientations that lie closer to the
         // keypoint location.
-        T weight = exp(-(u*u+v*v)/(T(2)*sigma*sigma));
+        auto weight = exp(-(u*u + v*v) / (T(2)*sigma*sigma));
         // Also give more emphasis to gradient with large magnitude.
-        orientation_histogram( bin_index ) += weight*mag;
+        orientation_histogram(bin_index) += weight*mag;
       }
     }
   }

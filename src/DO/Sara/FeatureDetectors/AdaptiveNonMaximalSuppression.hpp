@@ -14,6 +14,12 @@
 #ifndef DO_SARA_FEATUREDETECTORS_ADAPTIVENONMAXIMALSUPPRESSION_HPP
 #define DO_SARA_FEATUREDETECTORS_ADAPTIVENONMAXIMALSUPPRESSION_HPP
 
+#include <vector>
+#include <utility>
+
+#include <DO/Sara/Defines.hpp>
+#include <DO/Sara/Features/Feature.hpp>
+
 
 namespace DO { namespace Sara {
 
@@ -75,5 +81,6 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
+
 
 #endif /* DO_SARA_FEATUREDETECTORS_ADAPTIVENONMAXIMALSUPPRESSION_HPP */

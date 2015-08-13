@@ -201,7 +201,7 @@ namespace DO { namespace Sara {
     {
       // If I am the root, not allowed.
       if (!n || n.parent() == node_handle())
-        throw NullNodeHandleException();
+        throw NullNodeHandleException{};
 
       node_handle sibling(new Node(v));
       n.self()->insert_sibling_before(sibling);
@@ -214,7 +214,7 @@ namespace DO { namespace Sara {
     {
       // If I am the root, not allowed.
       if (!n || n.parent() == node_handle())
-        throw NullNodeHandleException();
+        throw NullNodeHandleException{};
 
       node_handle sibling(new Node(v));
       n.self()->insert_sibling_after(sibling);
@@ -225,7 +225,7 @@ namespace DO { namespace Sara {
     inline node_handle append_child(node_handle n, const T& v)
     {
       if (n == node_handle())
-        throw NullNodeHandleException();
+        throw NullNodeHandleException{};
       node_handle child(new Node(v));
       n.self()->append_child(child);
       return child;
@@ -235,7 +235,7 @@ namespace DO { namespace Sara {
     inline node_handle prepend_child(node_handle n, const T& v)
     {
       if (n == node_handle())
-        throw NullNodeHandleException();
+        throw NullNodeHandleException{};
       node_handle child(new Node(v));
       n.self()->prepend_child(child);
       return child;
@@ -584,14 +584,14 @@ namespace DO { namespace Sara {
       inline reference operator*() const
       {
         if (!_node_ptr)
-          throw NullNodeHandleException();
+          throw NullNodeHandleException{};
         return _node_ptr->_value;
       }
 
       inline pointer operator->() const
       {
         if (!_node_ptr)
-          throw NullNodeHandleException();
+          throw NullNodeHandleException{};
         return &(_node_ptr->_value);
       }
 

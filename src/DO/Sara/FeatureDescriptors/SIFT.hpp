@@ -30,7 +30,8 @@ namespace DO { namespace Sara {
   public: /* interface. */
     enum { Dim = N*N*O };
     typedef Matrix<float, Dim, 1> SIFTDescriptor;
-    //! Constructor.
+
+    //! \brief Constructor.
     ComputeSIFTDescriptor(float bin_scale_unit_length = 3.f,
                           float max_bin_value = 0.2f)
       : _bin_scale_unit_length(bin_scale_unit_length)
@@ -38,9 +39,9 @@ namespace DO { namespace Sara {
     {
     }
 
-    //! Computes the SIFT descriptor for keypoint \$(x,y,\sigma,\theta)\f$.
+    //! \brief Computes the SIFT descriptor for keypoint \$(x,y,\sigma,\theta)\f$.
     SIFTDescriptor operator()(float x, float y, float sigma, float theta,
-      const Image<Vector2f>& gradPolar) const
+                              const Image<Vector2f>& grad_polar_coords) const
     {
       const float pi = static_cast<float>(M_PI);
       /*
@@ -67,7 +68,7 @@ namespace DO { namespace Sara {
         In the image, each small square patch $P_{i,j}$ has a side length $l$
         proportional to the scale $\sigma$ of the keypoint, i.e.,
         $l = \lambda \sigma$.
-        */
+       */
       const float lambda = _bin_scale_unit_length;
       const float l = lambda*sigma;
       /*
@@ -84,40 +85,41 @@ namespace DO { namespace Sara {
 
         Let us initialize the SIFT descriptor consisting of the NxN histograms
         $\mathbf{h}_{i,j}$, each in $\mathbf{R}^O$ as follows.
-        */
+       */
       SIFTDescriptor h(SIFTDescriptor::Zero());
 
       /*
-       In the rescaled and oriented coordinate frame bound to the patch $P(k)$,
-       - keypoint $k$ is located at (0,0)
-       - centers $C_{i,j}$ of patch $P_{i,j}$ are located at
-       $[ -(N+1)/2 + i, -(N+1)/2 + j ]$
+        In the rescaled and oriented coordinate frame bound to the patch $P(k)$,
+        - keypoint $k$ is located at (0,0)
+        - centers $C_{i,j}$ of patch $P_{i,j}$ are located at
+          $[ -(N+1)/2 + i, -(N+1)/2 + j ]$
 
-       For example for $N=4$, they are at:
-       (-1.5,-1.5) (-0.5,-1.5) (0.5,-1.5) (1.5,-1.5)
-       (-1.5,-0.5) (-0.5,-0.5) (0.5,-0.5) (1.5,-0.5)
-       (-1.5, 0.5) (-0.5, 0.5) (0.5, 0.5) (1.5, 0.5)
-       (-1.5, 1.5) (-0.5, 1.5) (0.5, 1.5) (1.5, 1.5)
+        For example for $N=4$, they are at:
+          (-1.5,-1.5) (-0.5,-1.5) (0.5,-1.5) (1.5,-1.5)
+          (-1.5,-0.5) (-0.5,-0.5) (0.5,-0.5) (1.5,-0.5)
+          (-1.5, 0.5) (-0.5, 0.5) (0.5, 0.5) (1.5, 0.5)
+          (-1.5, 1.5) (-0.5, 1.5) (0.5, 1.5) (1.5, 1.5)
 
-       Gradients in $[x_i-1, x_i+1] \times [y_i-1, y_i+1]$ contributes
-       to histogram $\mathbf{h}_{i,j}$, namely gradients in the square patch
-       $Q_{i,j}$
-       - centered in $C_{i,j}$ as square patch $P_{i,j}$,
-       - with side length $2$.
-       That is because we want to do trilinear interpolation in order to make
-       SIFT robust to small shift in rotation, translation.
+        Gradients in $[x_i-1, x_i+1] \times [y_i-1, y_i+1]$ contributes
+        to histogram $\mathbf{h}_{i,j}$, namely gradients in the square patch
+        $Q_{i,j}$
+        - centered in $C_{i,j}$ as square patch $P_{i,j}$,
+        - with side length $2$.
+        That is because we want to do trilinear interpolation in order to make
+        SIFT robust to small shift in rotation, translation.
 
-       Therefore, to compute the SIFT descriptor we need to scan all the pixels
-       on a larger circular image patch with radius $r$:
+        Therefore, to compute the SIFT descriptor we need to scan all the pixels
+        on a larger circular image patch with radius $r$:
        */
       const float r = sqrt(2.f) * l * (N + 1) / 2.f;
       /*
-       In the above formula, notice:
-       - the factor $\sqrt{2}$ because diagonal corners of the furthest patches
-       $P_{i,j}$ from the center $(x,y)$ must be in the circular patch.
-       - the factor $(N+1)/2$ because we have to include the gradients in larger
-       patches $Q_{i,j}$ for each $P_{i,j}$.
-       It is recommended to make a drawing to convince oneself.
+        In the above formula, notice:
+        - the factor $\sqrt{2}$ because diagonal corners of the furthest patches
+          $P_{i,j}$ from the center $(x,y)$ must be in the circular patch.
+        - the factor $(N+1)/2$ because we have to include the gradients in larger
+          patches $Q_{i,j}$ for each $P_{i,j}$.
+
+        I recommend to make a drawing to convince oneself.
        */
 
       // To build the SIFT descriptor, we do the following procedure:
@@ -145,15 +147,15 @@ namespace DO { namespace Sara {
           /*pos.x() -= (x - rounded_x);
           pos.y() -= (y - rounded_y);*/
 
-          if ( rounded_x+u < 0 || rounded_x+u >= gradPolar.width()  ||
-               rounded_y+v < 0 || rounded_y+v >= gradPolar.height() )
+          if ( rounded_x+u < 0 || rounded_x+u >= grad_polar_coords.width()  ||
+               rounded_y+v < 0 || rounded_y+v >= grad_polar_coords.height() )
             continue;
 
           // Compute the Gaussian weight which gives more emphasis to gradient
           // closer to the center.
           float weight = exp(-pos.squaredNorm()/(2.f*pow(N/2.f, 2)));
-          float mag = gradPolar(rounded_x+u, rounded_y+v)(0);
-          float ori = gradPolar(rounded_x+u, rounded_y+v)(1) - theta;
+          float mag = grad_polar_coords(rounded_x+u, rounded_y+v)(0);
+          float ori = grad_polar_coords(rounded_x+u, rounded_y+v)(1) - theta;
           ori = ori < 0.f ? ori+2.f*pi : ori;
           ori *= float(O)/(2.f*pi);
 
@@ -209,8 +211,8 @@ namespace DO { namespace Sara {
 
   public: /* debugging functions. */
     //! Check the grid on which we are drawing.
-    void drawGrid(float x, float y, float sigma, float theta,
-                  float octScaleFactor, int penWidth = 1)
+    void draw_grid(float x, float y, float sigma, float theta,
+                   float octScaleFactor, int penWidth = 1)
     {
       const float lambda = 3.f;
       const float l = lambda*sigma;
@@ -295,6 +297,7 @@ namespace DO { namespace Sara {
       // Renormalize again.
       h.normalize();
     }
+
     //! Helper access function.
     inline int at(int i, int j, int o) const
     {

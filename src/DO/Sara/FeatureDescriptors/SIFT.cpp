@@ -11,6 +11,7 @@
 
 #include <DO/Sara/FeatureDescriptors.hpp>
 
+
 namespace DO { namespace Sara {
 
   template class ComputeSIFTDescriptor<>;

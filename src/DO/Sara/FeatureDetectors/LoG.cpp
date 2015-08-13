@@ -21,32 +21,34 @@ namespace DO { namespace Sara {
   ComputeLoGExtrema::operator()(const Image<float>& I,
                                 vector<Point2i> *scale_octave_pairs)
   {
-    ImagePyramid<float>& G = gaussians_;
-    ImagePyramid<float>& L = laplacians_of_gaussians_;
-    G = gaussian_pyramid(I, params_);
+    auto& G = _gaussians;
+    auto& L = _laplacians_of_gaussians;
+    G = gaussian_pyramid(I, _params);
     L = laplacian_pyramid(G);
 
-    vector<OERegion> extrema;
-    extrema.reserve(int(1e4));
+    auto extrema = vector<OERegion>{};
+    const auto preallocated_size = int(1e4);
+    extrema.reserve(preallocated_size);
     if (scale_octave_pairs)
     {
       scale_octave_pairs->clear();
-      scale_octave_pairs->reserve(1e4);
+      scale_octave_pairs->reserve(preallocated_size);
     }
 
     for (int o = 0; o < L.num_octaves(); ++o)
     {
       // Be careful of the bounds. We go from 1 to N-1.
-      for (int s = 1; s < L.num_scales_per_octave()-1; ++s)
+      for (int s = 1; s < L.num_scales_per_octave() - 1; ++s)
       {
-        vector<OERegion> newExtrema(local_scale_space_extrema(
-          L, s, o, extremum_thres_, edge_ratio_thres_,
-          img_padding_sz_, extremum_refinement_iter_) );
-        append(extrema, newExtrema);
+        auto new_extrema = local_scale_space_extrema(
+          L, s, o, _extremum_thres, _edge_ratio_thres,
+          _img_padding_sz, _extremum_refinement_iter);
+
+        append(extrema, new_extrema);
 
         if (scale_octave_pairs)
         {
-          for (size_t i = 0; i != newExtrema.size(); ++i)
+          for (size_t i = 0; i != new_extrema.size(); ++i)
             scale_octave_pairs->push_back(Point2i(s,o));
         }
       }

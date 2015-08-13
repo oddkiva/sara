@@ -110,7 +110,7 @@ namespace DO { namespace Sara {
     inline reference operator[](int n) const
     {
       if (cur_pos_[Axis]+n < 0  || cur_pos_[Axis]+n >= sizes_[Axis])
-        throw std::out_of_range("Axis iterator is out of range");
+        throw std::out_of_range{ "Axis iterator is out of range" };
       return *(cur_ptr_+strides_[Axis]*n);
     }
 
@@ -160,7 +160,7 @@ namespace DO { namespace Sara {
     inline void operator+=(int n)
     {
       if (cur_pos_[Axis]+n < 0  || cur_pos_[Axis]+n >= sizes_[Axis])
-        throw std::out_of_range("Axis iterator is out of range");
+        throw std::out_of_range{ "Axis iterator is out of range" };
       cur_ptr_ += strides_[Axis]*n;
       cur_pos_[Axis] += n;
     }
@@ -307,7 +307,7 @@ namespace DO { namespace Sara {
     {
       vector_type pos(cur_pos_ + offset);
       if (pos.minCoeff() < 0 || (pos-sizes_).minCoeff() >= 0)
-        throw std::out_of_range("Range iterator out of range!");
+        throw std::out_of_range{ "Range iterator out of range!" };
       return *(cur_ptr_ + jump(offset, strides_));
     }
 
@@ -482,7 +482,7 @@ namespace DO { namespace Sara {
     {
       vector_type pos(cur_pos_ + offset);
       if (pos.minCoeff() < 0 || (pos-sizes_).minCoeff() >= 0)
-        throw std::out_of_range("Range iterator out of range!");
+        throw std::out_of_range{ "Range iterator out of range!" };
       cur_ptr_ += jump(offset, strides_);
       cur_pos_ = pos;
     }
@@ -573,7 +573,7 @@ namespace DO { namespace Sara {
       {
         std::ostringstream msg;
         msg << "Subrange iterator out of range: pos = " << offset.transpose();
-        throw std::out_of_range(msg.str().c_str());
+        throw std::out_of_range{ msg.str() };
       }
       cur_pos_ = pos;
       cur_ptr_ += jump(offset, strides_);

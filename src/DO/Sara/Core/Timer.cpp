@@ -31,7 +31,7 @@ namespace DO { namespace Sara {
     {
       const char *msg = "Failed to initialize high resolution timer!";
       std::cerr << msg << std::endl;
-      throw std::runtime_error(msg);
+      throw std::runtime_error{ msg };
     }
     frequency_ = static_cast<double>(freq.QuadPart);
 #endif

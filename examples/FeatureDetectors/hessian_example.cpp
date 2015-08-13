@@ -10,7 +10,6 @@ using namespace std;
 
 
 static Timer timer;
-double elapsed = 0.0;
 
 void tic()
 {
@@ -19,11 +18,11 @@ void tic()
 
 void toc()
 {
-  elapsed = timer.elapsed_ms();
+  auto elapsed = timer.elapsed_ms();
   cout << "Elapsed time = " << elapsed << " ms" << endl << endl;
 }
 
-vector<OERegion> computeHessianLaplaceAffineMaxima(const Image<float>& I,
+vector<OERegion> compute_hessian_laplace_affine_maxima(const Image<float>& I,
                                                    bool verbose = true)
 {
   // 1. Feature extraction.
@@ -32,15 +31,15 @@ vector<OERegion> computeHessianLaplaceAffineMaxima(const Image<float>& I,
     print_stage("Localizing Hessian-Laplace interest points");
     tic();
   }
-  ComputeHessianLaplaceMaxima computeDoHs;
-  vector<OERegion> heslapMaxima;
-  vector<Point2i> scaleOctPairs;
-  heslapMaxima = computeDoHs(I, &scaleOctPairs);
+  ComputeHessianLaplaceMaxima compute_DoHs;
+  auto hessian_laplace_maxima = vector<OERegion>{};
+  auto scale_octave_pairs = vector<Point2i>{};
+  hessian_laplace_maxima = compute_DoHs(I, &scale_octave_pairs);
   if (verbose)
     toc();
 
-  const ImagePyramid<float>& gaussPyr = computeDoHs.gaussians();
-  const ImagePyramid<float>& detHessians = computeDoHs.detOfHessians();
+  const auto& G = compute_DoHs.gaussians();
+  const auto& DoHs = compute_DoHs.det_of_hessians();
 
   // 2. Affine shape adaptation
   if (verbose)
@@ -49,17 +48,17 @@ vector<OERegion> computeHessianLaplaceAffineMaxima(const Image<float>& I,
     tic();
   }
   AdaptFeatureAffinelyToLocalShape adaptShape;
-  vector<int> keepFeatures(heslapMaxima.size(), 0);
-  for (size_t i = 0; i != heslapMaxima.size(); ++i)
+  auto keep_features = vector<unsigned char>(hessian_laplace_maxima.size(), 0);
+  for (size_t i = 0; i != hessian_laplace_maxima.size(); ++i)
   {
-    const int s = scaleOctPairs[i](0);
-    const int o = scaleOctPairs[i](1);
+    const int s = scale_octave_pairs[i](0);
+    const int o = scale_octave_pairs[i](1);
 
-    Matrix2f affAdaptTransformMat;
-    if (adaptShape(affAdaptTransformMat, gaussPyr(s,o), heslapMaxima[i]))
+    Matrix2f affine_adapt_transform;
+    if (adaptShape(affine_adapt_transform, G(s,o), hessian_laplace_maxima[i]))
     {
-      heslapMaxima[i].shape_matrix() = affAdaptTransformMat*heslapMaxima[i].shape_matrix();
-      keepFeatures[i] = 1;
+      hessian_laplace_maxima[i].shape_matrix() = affine_adapt_transform*hessian_laplace_maxima[i].shape_matrix();
+      keep_features[i] = 1;
     }
   }
   if (verbose)
@@ -67,27 +66,27 @@ vector<OERegion> computeHessianLaplaceAffineMaxima(const Image<float>& I,
 
 
   // 3. Rescale the kept features to original image dimensions.
-  size_t num_kept_features =
-    std::accumulate(keepFeatures.begin(), keepFeatures.end(), 0);
+  auto num_kept_features = std::accumulate(
+    keep_features.begin(), keep_features.end(), 0);
 
-  vector<OERegion> keptDoHs;
-  keptDoHs.reserve(num_kept_features);
-  for (size_t i = 0; i != keepFeatures.size(); ++i)
+  auto kept_DoHs = vector<OERegion>{};
+  kept_DoHs.reserve(num_kept_features);
+  for (size_t i = 0; i != keep_features.size(); ++i)
   {
-    if (keepFeatures[i] == 1)
+    if (keep_features[i] == 1)
     {
-      keptDoHs.push_back(heslapMaxima[i]);
-      const float fact = detHessians.octave_scaling_factor(scaleOctPairs[i](1));
-      keptDoHs.back().shape_matrix() *= pow(fact,-2);
-      keptDoHs.back().coords() *= fact;
+      kept_DoHs.push_back(hessian_laplace_maxima[i]);
+      const float fact = DoHs.octave_scaling_factor(scale_octave_pairs[i](1));
+      kept_DoHs.back().shape_matrix() *= pow(fact,-2);
+      kept_DoHs.back().coords() *= fact;
     }
   }
 
-  return keptDoHs;
+  return kept_DoHs;
 }
 
-vector<OERegion> computeDoHExtrema(const Image<float>& I,
-  bool verbose = true)
+vector<OERegion> compute_DoH_extrema(const Image<float>& I,
+                                     bool verbose = true)
 {
   // 1. Feature extraction.
   if (verbose)
@@ -116,8 +115,8 @@ vector<OERegion> computeDoHExtrema(const Image<float>& I,
   return DoHs;
 }
 
-vector<OERegion> computeDoHAffineExtrema(const Image<float>& I,
-                                   bool verbose = true)
+vector<OERegion> compute_DoH_affine_extrema(const Image<float>& I,
+                                            bool verbose = true)
 {
   // 1. Feature extraction.
   if (verbose)
@@ -181,9 +180,9 @@ vector<OERegion> computeDoHAffineExtrema(const Image<float>& I,
   return keptDoHs;
 }
 
-void check_keys(const Image<float>& I, const vector<OERegion>& features)
+void check_keys(const Image<float>& image, const vector<OERegion>& features)
 {
-  display(I);
+  display(image);
   set_antialiasing();
   for (size_t i = 0; i != features.size(); ++i)
     features[i].draw(features[i].extremum_type() == OERegion::Max ?
@@ -193,22 +192,20 @@ void check_keys(const Image<float>& I, const vector<OERegion>& features)
 
 GRAPHICS_MAIN()
 {
-  Image<float> I;
-  string name;
-  name = src_path("../../datasets/sunflowerField.jpg");
-  if (!load(I, name))
+  auto image = Image<float>{};
+  auto image_filepath = src_path("../../datasets/sunflowerField.jpg");
+  if (!load(image, image_filepath))
     return -1;
 
-  create_window(I.width(), I.height());
-  vector<OERegion> features;
-  features = computeHessianLaplaceAffineMaxima(I);
-  check_keys(I, features);
+  create_window(image.width(), image.height());
+  auto features = compute_hessian_laplace_affine_maxima(image);
+  check_keys(image, features);
 
-  features = computeDoHExtrema(I);
-  check_keys(I, features);
+  features = compute_DoH_extrema(image);
+  check_keys(image, features);
 
-  features = computeDoHAffineExtrema(I);
-  check_keys(I, features);
+  features = compute_DoH_affine_extrema(image);
+  check_keys(image, features);
 
   return 0;
 }

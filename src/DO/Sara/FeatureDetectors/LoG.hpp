@@ -64,22 +64,25 @@ namespace DO { namespace Sara {
         based on the function **DO::refineExtremum()**.
      */
     ComputeLoGExtrema(
-      const ImagePyramidParams& pyrParams = ImagePyramidParams(-1, 3+2),
+      const ImagePyramidParams& pyr_params = ImagePyramidParams(-1, 3+2),
       float extremum_thres = 0.01f,
-      float edgeRatioThres = 10.f,
+      float edge_ratio_thres = 10.f,
       int img_padding_sz = 1,
-      int extremumRefinementIter = 5)
-      : params_(pyrParams)
-      , extremum_thres_(extremum_thres)
-      , edge_ratio_thres_(edgeRatioThres)
-      , img_padding_sz_(img_padding_sz)
-      , extremum_refinement_iter_(extremumRefinementIter)
-    {}
+      int extremum_refinement_iter = 5)
+      : _params(pyr_params)
+      , _extremum_thres(extremum_thres)
+      , _edge_ratio_thres(edge_ratio_thres)
+      , _img_padding_sz(img_padding_sz)
+      , _extremum_refinement_iter(extremum_refinement_iter)
+    {
+    }
+
     /*!
       \brief Localizes LoG extrema for a given image.
      */
     std::vector<OERegion> operator()(const Image<float>& I,
                                      std::vector<Point2i> *scale_octave_pairs = 0);
+
     /*!
       \brief Returns the Gaussian pyramid used to localize scale-space extrema
       of image **I**.
@@ -92,7 +95,10 @@ namespace DO { namespace Sara {
       of image **I**.
      */
     const ImagePyramid<float>& gaussians() const
-    { return gaussians_; }
+    {
+      return _gaussians;
+    }
+
     /*!
       \brief Returns the pyramid of Laplacians of Gaussians used to localize
       scale-space extrema of image **I**.
@@ -103,18 +109,26 @@ namespace DO { namespace Sara {
       \return the pyramid of Laplacians of Gaussians used to localize
       scale-space extrema of image **I**.
      */
-    const ImagePyramid<float>& laplaciansOfGaussians() const
-    { return laplacians_of_gaussians_; }
+    const ImagePyramid<float>& laplacians_of_gaussians() const
+    {
+      return _laplacians_of_gaussians;
+    }
+
   private: /* data members. */
-    // Parameters
-    ImagePyramidParams params_;
-    float extremum_thres_;
-    float edge_ratio_thres_;
-    int img_padding_sz_;
-    int extremum_refinement_iter_;
-    // Difference of Gaussians.
-    ImagePyramid<float> gaussians_;
-    ImagePyramid<float> laplacians_of_gaussians_;
+    //! @{
+    //! Parameters
+    ImagePyramidParams _params;
+    float _extremum_thres;
+    float _edge_ratio_thres;
+    int _img_padding_sz;
+    int _extremum_refinement_iter;
+    //! @}
+
+    //! @{
+    //! Gaussian-based image pyramids.
+    ImagePyramid<float> _gaussians;
+    ImagePyramid<float> _laplacians_of_gaussians;
+    //! @}
   };
 
 } /* namespace Sara */

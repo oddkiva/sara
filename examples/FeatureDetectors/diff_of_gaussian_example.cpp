@@ -10,7 +10,6 @@ using namespace std;
 
 
 static Timer timer;
-double elapsed = 0.0;
 
 void tic()
 {
@@ -19,12 +18,12 @@ void tic()
 
 void toc()
 {
-  elapsed = timer.elapsed_ms();
+  auto elapsed = timer.elapsed_ms();
   cout << "Elapsed time = " << elapsed << " ms" << endl << endl;
 }
 
 vector<OERegion> compute_dog_extrema(const Image<float>& I,
-                                   bool verbose = true)
+                                     bool verbose = true)
 {
   // 1. Feature extraction.
   if (verbose)
@@ -53,9 +52,8 @@ vector<OERegion> compute_dog_extrema(const Image<float>& I,
   return DoGs;
 }
 
-
 vector<OERegion> compute_dog_affine_extrema(const Image<float>& I,
-                                         bool verbose = true)
+                                            bool verbose = true)
 {
   // 1. Feature extraction.
   if (verbose)
@@ -63,17 +61,17 @@ vector<OERegion> compute_dog_affine_extrema(const Image<float>& I,
     print_stage("Localizing DoG affine-adapted extrema");
     tic();
   }
-  ImagePyramidParams pyrParams(0);
-  ComputeDoGExtrema computeDoGs(pyrParams);
-  vector<OERegion> DoGs;
-  vector<Point2i> scaleOctPairs;
-  DoGs = computeDoGs(I, &scaleOctPairs);
+  ImagePyramidParams pyr_params(0);
+  ComputeDoGExtrema compute_DoGs(pyr_params);
+  auto DoGs = vector<OERegion>{};
+  auto scale_octave_pairs = vector<Point2i>{};
+  DoGs = compute_DoGs(I, &scale_octave_pairs);
   if (verbose)
     toc();
   CHECK(DoGs.size());
 
-  const ImagePyramid<float>& gaussPyr = computeDoGs.gaussians();
-  const ImagePyramid<float>& dogPyr = computeDoGs.diff_of_gaussians();
+  const auto& G = compute_DoGs.gaussians();
+  const auto& D = compute_DoGs.diff_of_gaussians();
 
   // 2. Affine shape adaptation
   if (verbose)
@@ -81,49 +79,49 @@ vector<OERegion> compute_dog_affine_extrema(const Image<float>& I,
     print_stage("Affine shape adaptation");
     tic();
   }
-  AdaptFeatureAffinelyToLocalShape adaptShape;
-  vector<int> keepFeatures(DoGs.size(), 0);
+  AdaptFeatureAffinelyToLocalShape adapt_shape;
+  auto keep_features = vector<unsigned char>(DoGs.size(), 0);
   for (size_t i = 0; i != DoGs.size(); ++i)
   {
-    const int s = scaleOctPairs[i](0);
-    const int o = scaleOctPairs[i](1);
+    const int s = scale_octave_pairs[i](0);
+    const int o = scale_octave_pairs[i](1);
 
-    Matrix2f affAdaptTransformMat;
-    if (adaptShape(affAdaptTransformMat, gaussPyr(s,o), DoGs[i]))
+    Matrix2f affine_adaptation_transform;
+    if (adapt_shape(affine_adaptation_transform, G(s,o), DoGs[i]))
     {
-      DoGs[i].shape_matrix() = affAdaptTransformMat*DoGs[i].shape_matrix();
-      keepFeatures[i] = 1;
+      DoGs[i].shape_matrix() = affine_adaptation_transform*DoGs[i].shape_matrix();
+      keep_features[i] = 1;
     }
   }
   if (verbose)
     toc();
 
   // 3. Rescale the kept features to original image dimensions.
-  size_t num_kept_features =
-    std::accumulate(keepFeatures.begin(), keepFeatures.end(), 0);
+  auto num_kept_features = std::accumulate(
+    keep_features.begin(), keep_features.end(), 0);
 
-  vector<OERegion> keptDoGs;
-  keptDoGs.reserve(num_kept_features);
-  for (size_t i = 0; i != keepFeatures.size(); ++i)
+  auto kept_DoGs = vector<OERegion>{};
+  kept_DoGs.reserve(num_kept_features);
+  for (size_t i = 0; i != keep_features.size(); ++i)
   {
-    if (keepFeatures[i] == 1)
+    if (keep_features[i] == 1)
     {
-      keptDoGs.push_back(DoGs[i]);
-      const float fact = dogPyr.octave_scaling_factor(scaleOctPairs[i](1));
-      keptDoGs.back().shape_matrix() *= pow(fact,-2);
-      keptDoGs.back().coords() *= fact;
+      kept_DoGs.push_back(DoGs[i]);
+      const float fact = D.octave_scaling_factor(scale_octave_pairs[i](1));
+      kept_DoGs.back().shape_matrix() *= pow(fact,-2);
+      kept_DoGs.back().coords() *= fact;
 
     }
   }
 
-  CHECK(keptDoGs.size());
+  CHECK(kept_DoGs.size());
 
-  return keptDoGs;
+  return kept_DoGs;
 }
 
-void check_keys(const Image<float>& I, const vector<OERegion>& features)
+void check_keys(const Image<float>& image, const vector<OERegion>& features)
 {
-  display(I);
+  display(image);
   set_antialiasing();
   for (size_t i = 0; i != features.size(); ++i)
     features[i].draw(features[i].extremum_type() == OERegion::Max ?
@@ -133,20 +131,19 @@ void check_keys(const Image<float>& I, const vector<OERegion>& features)
 
 GRAPHICS_MAIN()
 {
-  Image<float> I;
-  string name;
-  name = src_path("../../datasets/sunflowerField.jpg");
-  if (!load(I, name))
+  auto image = Image<float>{};
+  auto name = src_path("../../datasets/sunflowerField.jpg");
+  if (!load(image, name))
     return -1;
 
-  create_window(I.width(), I.height());
+  create_window(image.width(), image.height());
   vector<OERegion> features;
 
-  features = compute_dog_extrema(I);
-  check_keys(I, features);
+  features = compute_dog_extrema(image);
+  check_keys(image, features);
 
-  features = compute_dog_affine_extrema(I);
-  check_keys(I, features);
+  features = compute_dog_affine_extrema(image);
+  check_keys(image, features);
 
   return 0;
 }

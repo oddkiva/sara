@@ -34,31 +34,63 @@ namespace DO { namespace Sara {
     typedef typename matrix_type::ConstColXpr const_descriptor_type;
 
   public:
-    DescriptorMatrix() {}
+    DescriptorMatrix() = default;
+
     DescriptorMatrix(int num_descriptors, int dimension)
-    { resize(num_descriptors, dimension); }
+    {
+      resize(num_descriptors, dimension);
+    }
 
-    void resize(int num_descriptors, int dimension)
-    { matrix_type::resize(dimension, num_descriptors); }
+    inline void resize(int num_descriptors, int dimension)
+    {
+      matrix_type::resize(dimension, num_descriptors);
+    }
 
-    matrix_type& matrix() { return *this; }
-    const matrix_type& matrix() const { return *this; }
+    inline matrix_type& matrix()
+    {
+      return *this;
+    }
 
-    int size() const { return static_cast<int>(matrix_type::cols()); }
-    int dimension() const { return static_cast<int>(matrix_type::rows()); }
+    inline const matrix_type& matrix() const
+    {
+      return *this;
+    }
 
-    descriptor_type operator[](int i) { return this->col(i); }
-    const_descriptor_type operator[](int i) const { return this->col(i); }
+    inline int size() const
+    {
+      return static_cast<int>(matrix_type::cols());
+    }
 
-    void swap(DescriptorMatrix& other) { matrix_type::swap(other); }
+    inline int dimension() const
+    {
+      return static_cast<int>(matrix_type::rows());
+    }
+
+    inline descriptor_type operator[](int i)
+    {
+      return this->col(i);
+    }
+
+    inline const_descriptor_type operator[](int i) const
+    {
+      return this->col(i);
+    }
+
+    inline void swap(DescriptorMatrix& other)
+    {
+      matrix_type::swap(other);
+    }
+
     void append(const DescriptorMatrix& other)
     {
-      if ( dimension() != other.dimension() && matrix_type::size() != 0)
+      if (dimension() != other.dimension() && matrix_type::size() != 0)
       {
         std::cerr << "Fatal: other descriptor matrix does not have same dimension" << std::endl;
         CHECK(dimension());
         CHECK(other.dimension());
-        throw 0;
+        throw std::runtime_error{
+          "Fatal: other descriptor matrix does not have same dimension"
+        };
       }
 
       int dim = other.dimension();

@@ -37,6 +37,7 @@ namespace DO { namespace Sara {
       display(color_rescale(pyramid(s,o)), 0, 0, pyramid.octave_scaling_factor(o));
     else
       display(pyramid(s,o), 0, 0, pyramid.octave_scaling_factor(o));
+
     for (size_t i = 0; i != extrema.size(); ++i)
     {
       draw_scale_space_extremum(
@@ -73,6 +74,7 @@ namespace DO { namespace Sara {
     int r = int(s*1.5f*magFactor + 0.5f);
     int w = 2*r+1;
     int h = 2*r+1;
+
     check_patch(I, int_round(x)-r, int_round(y)-r, w, h, fact);
   }
 

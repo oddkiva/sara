@@ -50,8 +50,10 @@ namespace DO { namespace Sara {
     // Resize the image with the appropriate factor.
     float resize_factor = pow(2.f, -params.first_octave_index());
     Image<float> I(enlarge(image, resize_factor) );
+
     // Deduce the new camera sigma with respect to the dilated image.
     float cameraSigma = float(params.scale_camera())*resize_factor;
+
     // Blur the image so that its new sigma is equal to the initial sigma.
     float scale_initial = float(params.scale_initial());
     if (cameraSigma < scale_initial)

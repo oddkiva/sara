@@ -135,15 +135,20 @@ namespace DO { namespace Sara {
     }
 
   private: /* data members. */
-    // Parameters
+    //! @{
+    //! Parameters
     ImagePyramidParams _params;
     float _extremum_thres;
     float _edge_ratio_thres;
     int _img_padding_sz;
     int _extremum_refinement_iter;
-    // Difference of Gaussians.
+    //! @}
+
+    //! @{
+    //! Difference of Gaussians.
     ImagePyramid<float> _gaussians;
     ImagePyramid<float> _diff_of_gaussians;
+    //! @}
   };
 
 

@@ -41,12 +41,12 @@ namespace DO { namespace Sara {
       x, y, sigma,
       _patch_truncation_factor, _blur_factor);
 
-    // Smooth as in [Lowe, IJCV 2004].
+    // Smooth histogram as in the initial implementation of [Lowe, IJCV 2004].
     lowe_smooth_histogram(orientation_histogram);
-    vector<int> peak_indices(find_peaks(orientation_histogram, _peak_ratio_thres));
+    auto peak_indices = find_peaks(orientation_histogram, _peak_ratio_thres);
 
     // Refine peaks as in [Lowe, IJCV 2004].
-    vector<float> peaks(refine_peaks(orientation_histogram, peak_indices));
+    auto peaks = refine_peaks(orientation_histogram, peak_indices);
 
     // Convert orientation to radian.
     for (size_t i = 0; i != peaks.size(); ++i)

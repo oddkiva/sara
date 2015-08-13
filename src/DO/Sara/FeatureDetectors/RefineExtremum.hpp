@@ -82,9 +82,9 @@ namespace DO { namespace Sara {
    */
   DO_EXPORT
   bool refine_extremum(const ImagePyramid<float>& I,
-                      int x, int y, int s, int o, int type,
-                      Point3f& pos, float& val,
-                      int borderSz = 1, int numIter = 5);
+                       int x, int y, int s, int o, int type,
+                       Point3f& pos, float& val,
+                       int border_size = 1, int num_iter = 5);
   /*!
     \brief This function refines the coordinates using the interpolation method
     in [Lowe, IJCV 2004] and [Brown and Lowe, BMVC 2002].
@@ -94,8 +94,8 @@ namespace DO { namespace Sara {
    */
   DO_EXPORT
   bool refine_extremum(const Image<float>& I, int x, int y, int type,
-                      Point2f& pos, float& val,
-                      int borderSz = 1, int numIter = 5);
+                       Point2f& pos, float& val,
+                       int border_size = 1, int num_iter = 5);
   /*!
     \brief Localizes all local extrema in scale-space at scale
     \f$\sigma = 2^{s/S+o}\f$.
@@ -103,11 +103,11 @@ namespace DO { namespace Sara {
    */
   DO_EXPORT
   std::vector<OERegion> local_scale_space_extrema(const ImagePyramid<float>& I,
-                                               int s, int o,
-                                               float extremum_thres = 0.03f,
-                                               float edgeRatioThres = 10.f,
-                                               int img_padding_sz = 1,
-                                               int refine_iterations = 5);
+                                                  int s, int o,
+                                                  float extremum_thres = 0.03f,
+                                                  float edge_ratio_thres = 10.f,
+                                                  int img_padding_sz = 1,
+                                                  int refine_iterations = 5);
 
   /*!
     Scale selection based on the normalized Laplacian of Gaussians
@@ -115,9 +115,9 @@ namespace DO { namespace Sara {
    */
   DO_EXPORT
   bool select_laplace_scale(float& scale,
-                          int x, int y, int s, int o,
-                          const ImagePyramid<float>& gaussPyramid,
-                          int numScales = 10);
+                            int x, int y, int s, int o,
+                            const ImagePyramid<float>& gauss_pyramid,
+                            int num_scales = 10);
 
   /*!
     \brief Localizes local maxima in space only and tries to assign a
@@ -129,12 +129,12 @@ namespace DO { namespace Sara {
    */
   DO_EXPORT
   std::vector<OERegion> laplace_maxima(const ImagePyramid<float>& function,
-                                      const ImagePyramid<float>& gaussPyramid,
-                                      int s, int o,
-                                      float extremum_thres = 1e-6f,
-                                      float img_padding_sz = 1,
-                                      float numScales = 10,
-                                      int refine_iterations = 5);
+                                       const ImagePyramid<float>& gaussian_pyramid,
+                                       int s, int o,
+                                       float extremum_thres = 1e-6f,
+                                       float img_padding_sz = 1,
+                                       float numScales = 10,
+                                       int refine_iterations = 5);
 
   //! @}
 

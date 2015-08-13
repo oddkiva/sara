@@ -133,7 +133,7 @@ namespace DO { namespace Sara {
       \return the pyramid of determinant of Hessians used to localize
       scale-space extrema of image **I**.
      */
-    const ImagePyramid<float>& detOfHessians() const
+    const ImagePyramid<float>& det_of_hessians() const
     {
       return _det_hessians;
     }
@@ -187,7 +187,9 @@ namespace DO { namespace Sara {
       , _edge_ratio_thres(edgeRatioThres)
       , _img_padding_sz(img_padding_sz)
       , _extremum_refinement_iter(extremumRefinementIter)
-    {}
+    {
+    }
+
     /*!
       \brief Localizes scale-space extrema of determinant of Hessians for a
       given image.
@@ -210,6 +212,7 @@ namespace DO { namespace Sara {
      */
     std::vector<OERegion> operator()(const Image<float>& I,
                                      std::vector<Point2i> *scale_octave_pairs = 0);
+
     /*!
       \brief Returns the Gaussian pyramid used to compute DoH extrema.
 
@@ -220,7 +223,10 @@ namespace DO { namespace Sara {
       \return the Gaussian pyramid used to localize DoH extrema of image **I**.
      */
     const ImagePyramid<float>& gaussians() const
-    { return _gaussians; }
+    {
+      return _gaussians;
+    }
+
     /*!
       \brief Returns the pyramid of determinant of Hessians used to localize
       scale-space extrema of image **I**.
@@ -233,7 +239,10 @@ namespace DO { namespace Sara {
       scale-space extrema of image **I**.
      */
     const ImagePyramid<float>& detOfHessians() const
-    { return _det_hessians; }
+    {
+      return _det_hessians;
+    }
+
   private: /* data members. */
     // Parameters
     ImagePyramidParams pyr_params_;

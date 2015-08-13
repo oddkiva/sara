@@ -24,12 +24,15 @@ namespace DO { namespace Sara {
     _patch_size = 19;
     _gauss_trunc_factor = 3.f;
     affine_adaptation_max_iter_ = 10;
+
     // Debug only: view the magnified patch with the following zoom factor.
     _debug = false;
     _patch_zoom_factor = 2.f;
+
     // Memory allocation.
     _patch.resize(_patch_size, _patch_size);
     _gaussian_weights.resize(_patch_size, _patch_size);
+
     // Precompute the Gaussian weight.
     float sigma = (0.5f*_patch_size) / _gauss_trunc_factor;
     float r = _patch_size/2.f;
@@ -113,13 +116,17 @@ namespace DO { namespace Sara {
     JacobiSVD<Matrix2f> svd(M, ComputeFullU);
     Vector2f S{ svd.singularValues() };  // momentMatrix = U*S*V^T
     Matrix2f U{ svd.matrixU() };         // rotation matrix
+
     // Get the dilation factor for each axis.
     Vector2f radii{ S.cwiseSqrt().cwiseInverse() };
     Matrix2f T{ U*radii.asDiagonal() * U.transpose() };
+
     // Normalize w.r.t. to the largest axis radius.
     T *= 1.f/radii(1);
+
     // Store the anisotropic ratio.
     anisotropicRatio = radii(0)/radii(1);
+
     // Ok, done.
     return T;
   }
@@ -140,13 +147,16 @@ namespace DO { namespace Sara {
              const OERegion& feature)
   {
     debug_create_window_to_view_patch();
+
     // The affine transform we want to estimate.
     Matrix2f U;
     U.setIdentity();
+
     // Iterative estimation from the image.
     for (int iter = 0; iter < affine_adaptation_max_iter_; ++iter)
     {
       debug_print_affine_adaptation_iteration(iter);
+
       // Get the normalized patch.
       if (!update_normalized_patch(I, feature, U))
       {
@@ -154,25 +164,31 @@ namespace DO { namespace Sara {
         debug_close_window_used_to_view_patch();
         return false;
       }
+
       // Estimate shape matrix.
       Matrix2f mu(compute_moment_matrix_from_patch());
+
       // Deduce the linear transform.
       float anisotropicRatio;
       Matrix2f delta_U(compute_transform_from_moment_matrix(mu, anisotropicRatio));
+
       // Accumulate the transform.
       U = delta_U*U;
       rescale_transform(U);
       debug_check_moment_matrix_and_transform(mu, delta_U, anisotropicRatio, U);
+
       // Instability check (cf. [Mikolajczyk & Schmid, ECCV 2002])
       if (1.f/anisotropicRatio > 6.f)
       {
         debug_close_window_used_to_view_patch();
         return false;
       }
+
       // Stopping criterion (cf. [Mikolajczyk & Schmid, ECCV 2002])
       if (1.f - anisotropicRatio < 0.05f)
         break;
     }
+
     debug_close_window_used_to_view_patch();
 
     // Return the shape matrix.
