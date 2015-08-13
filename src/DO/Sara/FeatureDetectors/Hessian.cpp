@@ -25,7 +25,7 @@ namespace DO { namespace Sara {
     ImagePyramid<float>& det_hess_pyr = _det_hessians;
 
     gauss_pyr = gaussian_pyramid(I, _pyr_params);
-    det_hess_pyr = DoHPyramid(gauss_pyr);
+    det_hess_pyr = det_of_hessian_pyramid(gauss_pyr);
 
     vector<OERegion> det_hess_maxima;
     det_hess_maxima.reserve(int(1e4));
@@ -65,7 +65,7 @@ namespace DO { namespace Sara {
     ImagePyramid<float>& det_hess_pyr = _det_hessians;
 
     gaussPyr = gaussian_pyramid(I, pyr_params_);
-    det_hess_pyr = DoHPyramid(gaussPyr);
+    det_hess_pyr = det_of_hessian_pyramid(gaussPyr);
 
     vector<OERegion> det_hess_extrema;
     det_hess_extrema.reserve(int(1e4));

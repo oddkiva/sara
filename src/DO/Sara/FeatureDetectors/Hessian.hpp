@@ -16,6 +16,12 @@
 
 #include <DO/Sara/Defines.hpp>
 
+#include <DO/Sara/Core/Image/Image.hpp>
+
+#include <DO/Sara/Features/Feature.hpp>
+
+#include <DO/Sara/ImageProcessing/ImagePyramid.hpp>
+
 
 namespace DO { namespace Sara {
 
@@ -26,7 +32,7 @@ namespace DO { namespace Sara {
 
   //! Computes a pyramid of determinant of Hessian from the Gaussian pyramid.
   template <typename T>
-  ImagePyramid<T> DoHPyramid(const ImagePyramid<T>& gaussians)
+  ImagePyramid<T> det_of_hessian_pyramid(const ImagePyramid<T>& gaussians)
   {
     ImagePyramid<T> D;
     D.reset(gaussians.num_octaves(),
@@ -139,15 +145,20 @@ namespace DO { namespace Sara {
     }
 
   private: /* data members. */
-    // Parameters
+    //! @{
+    //! Parameters
     ImagePyramidParams _pyr_params;
     float _extremum_thres;
     int _img_padding_sz;
     int _extremum_refinement_iter;
     int _num_scales;
-    // Difference of Gaussians.
+    //! @}
+
+    //! @{
+    //! Difference of Gaussians.
     ImagePyramid<float> _gaussians;
     ImagePyramid<float> _det_hessians;
+    //! @}
   };
 
   //! Functor class to compute local extrema of determinant of Hessians

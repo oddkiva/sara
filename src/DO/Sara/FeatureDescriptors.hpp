@@ -25,7 +25,7 @@
 //
 // Assign dominant orientations $\theta$ to image patch $(x,y,\sigma)$ using
 // Lowe's method (cf. [Lowe, IJCV 2004]).
-#include <DO/Sara/Orientation.hpp>
+#include <DO/Sara/FeatureDescriptors/Orientation.hpp>
 // Describe keypoint $(x,y,\sigma,\theta)$ with the SIFT descriptor (cf.
 // [Lowe, IJCV 2004]).
 #include <DO/Sara/FeatureDescriptors/SIFT.hpp>

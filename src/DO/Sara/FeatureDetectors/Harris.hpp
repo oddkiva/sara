@@ -16,6 +16,12 @@
 
 #include <DO/Sara/Defines.hpp>
 
+#include <DO/Sara/Core/Image/Image.hpp>
+
+#include <DO/Sara/Features/Feature.hpp>
+
+#include <DO/Sara/ImageProcessing/ImagePyramid.hpp>
+
 
 namespace DO { namespace Sara {
 

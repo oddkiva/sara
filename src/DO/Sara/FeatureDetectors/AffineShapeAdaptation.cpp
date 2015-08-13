@@ -142,8 +142,8 @@ namespace DO { namespace Sara {
 
   bool
   AdaptFeatureAffinelyToLocalShape::
-  operator()(Matrix2f& affAdaptTransfmMat,
-             const Image<float>& I,
+  operator()(Matrix2f& affine_adapt_transform,
+             const Image<float>& image,
              const OERegion& feature)
   {
     debug_create_window_to_view_patch();
@@ -158,7 +158,7 @@ namespace DO { namespace Sara {
       debug_print_affine_adaptation_iteration(iter);
 
       // Get the normalized patch.
-      if (!update_normalized_patch(I, feature, U))
+      if (!update_normalized_patch(image, feature, U))
       {
         debug_print_patch_touches_image_boundaries();
         debug_close_window_used_to_view_patch();
@@ -169,30 +169,30 @@ namespace DO { namespace Sara {
       Matrix2f mu(compute_moment_matrix_from_patch());
 
       // Deduce the linear transform.
-      float anisotropicRatio;
-      Matrix2f delta_U(compute_transform_from_moment_matrix(mu, anisotropicRatio));
+      float anisotropic_ratio;
+      Matrix2f delta_U(compute_transform_from_moment_matrix(mu, anisotropic_ratio));
 
       // Accumulate the transform.
       U = delta_U*U;
       rescale_transform(U);
-      debug_check_moment_matrix_and_transform(mu, delta_U, anisotropicRatio, U);
+      debug_check_moment_matrix_and_transform(mu, delta_U, anisotropic_ratio, U);
 
       // Instability check (cf. [Mikolajczyk & Schmid, ECCV 2002])
-      if (1.f/anisotropicRatio > 6.f)
+      if (1.f/anisotropic_ratio > 6.f)
       {
         debug_close_window_used_to_view_patch();
         return false;
       }
 
       // Stopping criterion (cf. [Mikolajczyk & Schmid, ECCV 2002])
-      if (1.f - anisotropicRatio < 0.05f)
+      if (1.f - anisotropic_ratio < 0.05f)
         break;
     }
 
     debug_close_window_used_to_view_patch();
 
     // Return the shape matrix.
-    affAdaptTransfmMat = U.inverse().transpose()*U.inverse();
+    affine_adapt_transform = U.inverse().transpose()*U.inverse();
     return true;
   }
 
