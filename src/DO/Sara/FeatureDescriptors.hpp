@@ -19,20 +19,16 @@
 #include <DO/Sara/ImageProcessing.hpp>
 
 // Utilities and debug.
-#include "FeatureDetectors/Debug.hpp"
+#include <DO/Sara/FeatureDetectors/Debug.hpp>
 
 // Feature description.
 //
 // Assign dominant orientations $\theta$ to image patch $(x,y,\sigma)$ using
 // Lowe's method (cf. [Lowe, IJCV 2004]).
-#include "FeatureDescriptors/Orientation.hpp"
+#include <DO/Sara/Orientation.hpp>
 // Describe keypoint $(x,y,\sigma,\theta)$ with the SIFT descriptor (cf.
 // [Lowe, IJCV 2004]).
-#include "FeatureDescriptors/SIFT.hpp"
-
-// DAISY descriptor.
-//#include "FeatureDescriptors/Experimental/Daisy.hpp"
-
+#include <DO/Sara/FeatureDescriptors/SIFT.hpp>
 
 
 //! \defgroup FeatureDescriptors

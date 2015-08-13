@@ -20,20 +20,20 @@
 #include <DO/Sara/ImageProcessing.hpp>
 
 // Utilities and debug.
-#include "FeatureDetectors/Debug.hpp"
+#include <DO/Sara/FeatureDetectors/Debug.hpp>
 
 // Extremum filtering and refining.
-#include "FeatureDetectors/RefineExtremum.hpp"
+#include <DO/Sara/FeatureDetectors/RefineExtremum.hpp>
 
 // Feature detection.
-#include "FeatureDetectors/LoG.hpp"
-#include "FeatureDetectors/DoG.hpp"
-#include "FeatureDetectors/Harris.hpp"
-#include "FeatureDetectors/Hessian.hpp"
+#include <DO/Sara/FeatureDetectors/LoG.hpp>
+#include <DO/Sara/FeatureDetectors/DoG.hpp>
+#include <DO/Sara/FeatureDetectors/Harris.hpp>
+#include <DO/Sara/FeatureDetectors/Hessian.hpp>
 //#include "FeatureDetectors/MSER.hpp"
 
 // Affine shape adaptation (cf. [Mikolajczyk & Schmid, ECCV 2002]).
-#include "FeatureDetectors/AffineShapeAdaptation.hpp"
+#include <DO/Sara/FeatureDetectors/AffineShapeAdaptation.hpp>
 
 //! \defgroup FeatureDetectors
 
