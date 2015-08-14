@@ -9,16 +9,24 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include <gtest/gtest.h>
+
 #include <DO/Sara/Match.hpp>
+
 
 using namespace std;
 using namespace DO::Sara;
 
 
-int main()
+TEST(TestMatch, test_make_index_match)
 {
-  Match m(make_index_match(0, 1000));
-  cout << m.index_pair().transpose() << endl;
+  auto m = make_index_match(0, 1000);
+  EXPECT_EQ(m.index_x(), 0);
+  EXPECT_EQ(m.index_y(), 1000);
+}
 
-  return 0;
+int main(int argc, char **argv)
+{
+  testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }
