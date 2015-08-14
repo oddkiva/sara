@@ -17,7 +17,7 @@ using namespace DO::Sara;
 
 int main()
 {
-  Match m(index_match(0, 1000));
+  Match m(make_index_match(0, 1000));
   cout << m.index_pair().transpose() << endl;
 
   return 0;

@@ -24,8 +24,8 @@ namespace DO { namespace Sara {
 
   ostream & operator<<(ostream & os, const Match& m)
   {
-    os << "source=" << m.x_pos().transpose()
-       << " target=" << m.y_pos().transpose() << endl;
+    os << "source=" << m.pos_x().transpose()
+       << " target=" << m.pos_y().transpose() << endl;
     os << "score=" << m.score() << " " << "rank=" << m.rank();
     return os;
   }
@@ -40,7 +40,7 @@ namespace DO { namespace Sara {
 
     file << matches.size() << endl;
     for(vector<Match>::const_iterator m = matches.begin(); m != matches.end(); ++m)
-      file << m->x_idx() << ' ' << m->y_idx() << ' '
+      file << m->index_x() << ' ' << m->index_y() << ' '
       << m->rank() << ' ' << m->score() << endl;
 
     return true;
@@ -67,7 +67,7 @@ namespace DO { namespace Sara {
     {
       Match m;
 
-      file >> m.x_idx() >> m.y_idx() >> m.rank() >> m.score();
+      file >> m.index_x() >> m.index_y() >> m.rank() >> m.score();
       if(m.score() > score_thres)
         break;
 
@@ -101,9 +101,9 @@ namespace DO { namespace Sara {
     {
       Match m;
 
-      file >> m.x_idx() >> m.y_idx() >> m.rank() >> m.score();
-      m.x_ptr() = &source_keys[m.x_idx()];
-      m.y_ptr() = &target_keys[m.y_idx()];
+      file >> m.index_x() >> m.index_y() >> m.rank() >> m.score();
+      m.ptr_x() = &source_keys[m.index_x()];
+      m.ptr_y() = &target_keys[m.index_y()];
 
       if(m.score() > score_thres)
         break;
@@ -126,8 +126,8 @@ namespace DO { namespace Sara {
   {
     m.x().draw(c, z);
     m.y().draw(c, z, off2);
-    Point2f p1(m.x_pos()*z);
-    Point2f p2((m.y_pos()+off2)*z);
+    Point2f p1(m.pos_x()*z);
+    Point2f p2((m.pos_y()+off2)*z);
     draw_line(p1, p2, c);
   }
 

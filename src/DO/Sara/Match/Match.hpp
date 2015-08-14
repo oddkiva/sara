@@ -27,65 +27,69 @@ namespace DO { namespace Sara {
   public:
     //! @{
     //! \brief Constructors.
-    inline Match()
-      : _x(0), _y(0)
-      , _target_rank(-1), _score(std::numeric_limits<float>::max())
-      , _matching_dir(SourceToTarget)
-      , _x_idx(-1), _y_idx(-1)
-    {
-    }
+    inline Match() = default;
 
     inline Match(const OERegion *x,
                  const OERegion *y,
                  float score = std::numeric_limits<float>::max(),
-                 MatchingDirection matchingDir = SourceToTarget,
-                 int indX = -1, int indY = -1)
+                 MatchingDirection matching_dir = SourceToTarget,
+                 int x_index = -1,
+                 int y_index = -1)
       : _x(x), _y(y)
       , _target_rank(-1), _score(score)
-      , _matching_dir(matchingDir), _x_idx(indX), _y_idx(indY)
+      , _matching_dir(matching_dir), _x_index(x_index), _y_index(y_index)
     {
     }
     //! @}
 
+    //! @{
     //! Constant accessors.
-    bool is_x_null() const { return _x == 0; }
+    bool is_x_null() const { return _x == nullptr; }
+    bool is_y_null() const { return _y == nullptr; }
 
-    bool is_y_null() const { return _y == 0; }
+    const OERegion& x() const
+    {
+      if (is_x_null())
+        throw std::runtime_error{ "x is null" };
+      return *_x;
+    }
 
-    const OERegion& x() const { if (is_x_null()) throw 0; return *_x; }
+    const OERegion& y() const
+    {
+      if (is_y_null())
+        throw std::runtime_error{ "y is null" };
+      return *_y;
+    }
 
-    const OERegion& y() const { if (is_y_null()) throw 0; return *_y; }
-
-    const Point2f& x_pos() const { return x().center(); }
-
-    const Point2f& y_pos() const { return y().center(); }
+    const Point2f& pos_x() const { return x().center(); }
+    const Point2f& pos_y() const { return y().center(); }
 
     int rank() const { return _target_rank; }
 
     float score() const { return _score; }
 
-    MatchingDirection matchingDir() const { return _matching_dir; }
+    MatchingDirection matching_direction() const { return _matching_dir; }
 
-    int x_idx() const { return _x_idx; }
+    int index_x() const { return _x_index; }
+    int index_y() const { return _y_index; }
 
-    int y_idx() const { return _y_idx; }
+    Vector2i index_pair() const { return Vector2i(_x_index, _y_index); }
+    //! @}
 
-    Vector2i index_pair() const { return Vector2i(_x_idx, _y_idx); }
-
+    //! @{
     //! Non-constant accessors.
-    const OERegion *& x_ptr() { return _x; }
-
-    const OERegion *& y_ptr() { return _y; }
+    const OERegion *& ptr_x() { return _x; }
+    const OERegion *& ptr_y() { return _y; }
 
     int& rank() { return _target_rank; }
 
     float& score() { return _score; }
 
-    MatchingDirection& matchingDir() { return _matching_dir; }
+    MatchingDirection& matching_direction() { return _matching_dir; }
 
-    int& x_idx() { return _x_idx; }
-
-    int& y_idx() { return _y_idx; }
+    int& index_x() { return _x_index; }
+    int& index_y() { return _y_index; }
+    //! @}
 
     //! Key match equality.
     bool operator==(const Match& m) const
@@ -94,17 +98,21 @@ namespace DO { namespace Sara {
     }
 
   private: /* data members */
-    const OERegion *_x;
-    const OERegion *_y;
-    int _target_rank;
-    float _score;
-    MatchingDirection _matching_dir;
-    int _x_idx, _y_idx;
+    const OERegion *_x{ nullptr };
+    const OERegion *_y{ nullptr };
+    int _target_rank{ -1 };
+    float _score{ std::numeric_limits<float>::max() };
+    MatchingDirection _matching_dir{ SourceToTarget };
+    int _x_index{ -1 };
+    int _y_index{ -1 };
   };
 
-  inline Match index_match(int i1, int i2)
+  inline Match make_index_match(int i1, int i2)
   {
-    return Match(0, 0, std::numeric_limits<float>::max(), Match::SourceToTarget, i1, i2);
+    return Match{
+      nullptr, nullptr,
+      std::numeric_limits<float>::max(), Match::SourceToTarget,
+      i1, i2 };
   }
 
   //! @{

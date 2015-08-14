@@ -92,7 +92,7 @@ namespace DO { namespace Sara {
     if(drawLine)
     {
       Vector2f a,b;
-      a = scale(0)*m.x_pos(); b = scale(1)*(m.y_pos()+offF(1));
+      a = scale(0)*m.pos_x(); b = scale(1)*(m.pos_y()+offF(1));
       Sara::draw_line(a, b, c);
     }
   }
