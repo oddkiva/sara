@@ -20,6 +20,8 @@
 
 #include <DO/Sara/Features/Feature.hpp>
 
+#include <DO/Sara/ImageProcessing/Determinant.hpp>
+#include <DO/Sara/ImageProcessing/Differential.hpp>
 #include <DO/Sara/ImageProcessing/ImagePyramid.hpp>
 
 
@@ -249,7 +251,7 @@ namespace DO { namespace Sara {
       \return the pyramid of determinant of Hessians used to localize
       scale-space extrema of image **I**.
      */
-    const ImagePyramid<float>& detOfHessians() const
+    const ImagePyramid<float>& det_of_hessians() const
     {
       return _det_hessians;
     }

@@ -16,7 +16,9 @@
 
 #include <DO/Sara/Defines.hpp>
 
+#include <DO/Sara/Features/DescriptorMatrix.hpp>
 #include <DO/Sara/Features/Feature.hpp>
+#include <DO/Sara/Features/Key.hpp>
 
 
 namespace DO { namespace Sara {
@@ -90,7 +92,7 @@ namespace DO { namespace Sara {
 
   inline void remove_redundancies(Set<OERegion, RealDescriptor>& keys)
   {
-     remove_redundancies(keys.features, keys.descriptors);
+    remove_redundancies(keys.features, keys.descriptors);
   }
 
   //! @}

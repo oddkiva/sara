@@ -22,7 +22,7 @@ void toc()
   cout << "Elapsed time = " << elapsed << " ms" << endl << endl;
 }
 
-vector<OERegion> compute_LoG_extrema(const Image<float>& I,
+vector<OERegion> compute_LoG_extrema(const Image<float>& image,
                                      bool verbose = true)
 {
   // 1. Feature extraction.
@@ -31,28 +31,27 @@ vector<OERegion> compute_LoG_extrema(const Image<float>& I,
     print_stage("Localizing LoG extrema");
     tic();
   }
-  ImagePyramidParams pyrParams(0, 3+2);
-  ComputeLoGExtrema computeLoGs(pyrParams);
-  vector<OERegion> LoGs;
-  vector<Point2i> scaleOctPairs;
-  LoGs = computeLoGs(I, &scaleOctPairs);
+  auto pyramid_params = ImagePyramidParams{ 0, 3+2 };
+  ComputeLoGExtrema computeLoGs{ pyramid_params };
+  auto scale_octave_pairs = vector<Point2i>{};
+  auto LoGs = computeLoGs(image, &scale_octave_pairs);
   if (verbose)
     toc();
   CHECK(LoGs.size());
 
   // 2. Rescale detected features to original image dimension.
-  const auto& DoGPyr = computeLoGs.laplacians_of_gaussians();
-  for (int i = 0; i < LoGs.size(); ++i)
+  const auto& L = computeLoGs.laplacians_of_gaussians();
+  for (size_t i = 0; i < LoGs.size(); ++i)
   {
-    float octScaleFact = DoGPyr.octave_scaling_factor(scaleOctPairs[i](1));
-    LoGs[i].center() *= octScaleFact;
-    LoGs[i].shape_matrix() /= pow(octScaleFact, 2);
+    float octave_scale_factor = L.octave_scaling_factor(scale_octave_pairs[i](1));
+    LoGs[i].center() *= octave_scale_factor;
+    LoGs[i].shape_matrix() /= pow(octave_scale_factor, 2);
   }
 
   return LoGs;
 }
 
-vector<OERegion> compute_LoG_affine_extrema(const Image<float>& I,
+vector<OERegion> compute_LoG_affine_extrema(const Image<float>& image,
                                             bool verbose = true)
 {
   // 1. Feature extraction.
@@ -62,11 +61,10 @@ vector<OERegion> compute_LoG_affine_extrema(const Image<float>& I,
     tic();
   }
 
-  ImagePyramidParams pyr_params(0);
-  ComputeLoGExtrema compute_LoGs(pyr_params);
-  auto LoGs = vector<OERegion>{};
+  auto pyramid_params = ImagePyramidParams{ 0 };
+  auto compute_LoGs = ComputeLoGExtrema{ pyramid_params };
   auto scale_octave_pairs = vector<Point2i>{};
-  LoGs = compute_LoGs(I, &scale_octave_pairs);
+  auto LoGs = compute_LoGs(image, &scale_octave_pairs);
   if (verbose)
     toc();
   CHECK(LoGs.size());
@@ -80,17 +78,17 @@ vector<OERegion> compute_LoG_affine_extrema(const Image<float>& I,
     print_stage("Affine shape adaptation");
     tic();
   }
-  AdaptFeatureAffinelyToLocalShape adaptShape;
+  auto adapt_shape = AdaptFeatureAffinelyToLocalShape{};
   auto keep_features = vector<unsigned char>(LoGs.size(), 0);
   for (size_t i = 0; i != LoGs.size(); ++i)
   {
-    const int s = scale_octave_pairs[i](0);
-    const int o = scale_octave_pairs[i](1);
+    const auto& s = scale_octave_pairs[i](0);
+    const auto& o = scale_octave_pairs[i](1);
 
     Matrix2f affine_adapt_transform;
-    if (adaptShape(affine_adapt_transform, G(s,o), LoGs[i]))
+    if (adapt_shape(affine_adapt_transform, G(s,o), LoGs[i]))
     {
-      LoGs[i].shape_matrix() = affine_adapt_transform*LoGs[i].shape_matrix();
+      LoGs[i].shape_matrix() = affine_adapt_transform * LoGs[i].shape_matrix();
       keep_features[i] = 1;
     }
   }
@@ -137,8 +135,8 @@ GRAPHICS_MAIN()
   if (!load(image, image_filepath))
     return -1;
 
-  create_window(image.width(), image.height());
   auto features = compute_LoG_extrema(image);
+  create_window(image.width(), image.height());
   check_keys(image, features);
 
   features = compute_LoG_affine_extrema(image);

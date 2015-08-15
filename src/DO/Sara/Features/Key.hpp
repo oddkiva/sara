@@ -16,13 +16,16 @@
 
 #include <Eigen/StdVector>
 
+#include <DO/Sara/Core/StdVectorHelpers.hpp>
+
+#include <DO/Sara/Features/DescriptorMatrix.hpp>
 #include <DO/Sara/Features/Feature.hpp>
 
 
 namespace DO { namespace Sara {
 
   /*!
-    \ingroup Features
+    \ingroup feature_types
     @{
   */
 
@@ -30,55 +33,84 @@ namespace DO { namespace Sara {
   class KeyRef
   {
   public:
-    typedef F Feature;
-    typedef D Descriptor;
-    inline KeyRef(Feature& f, Descriptor& d) : f_(&f), d_(&d) {}
-    inline Feature& feature() const { return f_; }
-    inline Descriptor& descriptor() const { return d_; }
+    using feature_type = F;
+    using Descriptor = D;
+
+    inline KeyRef(feature_type& f, Descriptor& d)
+      : _f(&f)
+      , _d(&d)
+    {
+    }
+
+    inline feature_type& feature() const
+    {
+      return _f;
+    }
+    inline Descriptor& descriptor() const
+    {
+      return _d;
+    }
+
     KeyRef operator=(KeyRef key) const
-    { f_ = key.f_; d_ = key.d_; return *this; }
+    {
+      _f = key._f;
+      _d = key._d;
+      return *this;
+    }
 
   private:
-    Feature& f_;
-    Descriptor& d_;
+    feature_type& _f;
+    Descriptor& _d;
   };
 
-  enum DescriptorType { RealDescriptor, BinaryDescriptor };
+
+  enum DescriptorType
+  {
+    RealDescriptor,
+    BinaryDescriptor
+  };
+
   template <DescriptorType> struct Bin;
-  template <> struct Bin<RealDescriptor> { typedef float Type; };
-  template <> struct Bin<BinaryDescriptor> { typedef unsigned char Type; };
+
+  template <>
+  struct Bin<RealDescriptor> { typedef float Type; };
+
+  template <>
+  struct Bin<BinaryDescriptor> { typedef unsigned char Type; };
+
 
   template <typename F, DescriptorType D>
   class Set
   {
   public:
-    typedef typename Bin<D>::Type BinType;
-    typedef F Feature;
-    typedef typename DescriptorMatrix<BinType>::descriptor_type
-      Descriptor;
-    typedef typename DescriptorMatrix<BinType>::const_descriptor_type
-      ConstDescriptor;
+    using bin_type = typename Bin<D>::Type;
+    using feature_type = F;
+    using descriptor_type =
+      typename DescriptorMatrix<bin_type>::descriptor_type;
+    using const_descriptor_type =
+      typename DescriptorMatrix<bin_type>::const_descriptor_type;
 
-    typedef KeyRef<const Feature, ConstDescriptor> Key;
-    typedef KeyRef<const Feature, ConstDescriptor> ConstKey;
+    using key_type = KeyRef<const feature_type, const_descriptor_type>;
+    using const_key_type = KeyRef<const feature_type, const_descriptor_type>;
 
-    inline Key operator[](int i)
+    inline key_type operator[](size_t i)
     {
-      return KeyRef<Feature, Descriptor>(features[i], descriptors[i]);
+      return KeyRef<feature_type, descriptor_type>(
+        features[i], descriptors[i]);
     }
 
-    inline ConstKey operator[](int i) const
+    inline const_key_type operator[](size_t i) const
     {
-      return KeyRef<const Feature, ConstDescriptor>(features[i], descriptors[i]);
+      return KeyRef<const feature_type, const_descriptor_type>(
+        features[i], descriptors[i]);
     }
 
     inline size_t size() const
     {
       if (features.size() != descriptors.size())
-      {
-        std::string msg("Number of features and number of descriptors don't match!");
-        throw std::runtime_error(msg.c_str());
-      }
+        throw std::runtime_error{
+          "Number of features and number of descriptors don't match!"
+        };
       return features.size();
     }
 
@@ -94,8 +126,8 @@ namespace DO { namespace Sara {
       descriptors.append(other.descriptors);
     }
 
-    std::vector<F> features;
-    DescriptorMatrix<BinType> descriptors;
+    std::vector<feature_type> features;
+    DescriptorMatrix<bin_type> descriptors;
   };
 
   //! @}
