@@ -25,17 +25,15 @@ namespace DO { namespace Sara {
             const Matrix<S, 3, 3>& homography_from_dst_to_src,
             const T& default_fill_color = PixelTraits<T>::min())
   {
-    typedef typename PixelTraits<T>::template Cast<double>::pixel_type
-      DoublePixel;
-    typedef typename PixelTraits<T>::channel_type ChannelType;
-    typedef Matrix<S, 3, 3> Matrix3;
-    typedef Matrix<S, 3, 1> Vector3;
-    typedef Matrix<S, 2, 1> Vector2;
+    using DoublePixel =
+      typename PixelTraits<T>::template Cast<double>::pixel_type;
+    using ChannelType = typename PixelTraits<T>::channel_type;
+    using Matrix3 = Matrix<S, 3, 3>;
+    using Vector3 = Matrix<S, 3, 1>;
 
     const Matrix3& H = homography_from_dst_to_src;
 
-    typename Image<T>::array_iterator it = dst.begin_array();
-    for ( ; !it.end(); ++it)
+    for (auto it = dst.begin_array(); !it.end(); ++it)
     {
       // Get the corresponding coordinates in the source image.
       Vector3 H_p;

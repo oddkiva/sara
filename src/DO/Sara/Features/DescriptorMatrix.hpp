@@ -28,24 +28,24 @@ namespace DO { namespace Sara {
   class DescriptorMatrix : private Matrix<T, Dynamic, Dynamic>
   {
   public:
-    typedef T bin_type;
-    typedef Matrix<T, Dynamic, Dynamic> matrix_type;
-    typedef typename matrix_type::ColXpr descriptor_type;
-    typedef typename matrix_type::ConstColXpr const_descriptor_type;
+    using bin_type = T;
+    using matrix_type = Matrix<T, Dynamic, Dynamic>;
+    using descriptor_type = typename matrix_type::ColXpr;
+    using const_descriptor_type = typename matrix_type::ConstColXpr;
 
   public:
+    //! @{
+    //! \brief Constructor.
     DescriptorMatrix() = default;
 
-    DescriptorMatrix(int num_descriptors, int dimension)
+    DescriptorMatrix(size_t num_descriptors, size_t dimension)
     {
       resize(num_descriptors, dimension);
     }
+    //! @}
 
-    inline void resize(int num_descriptors, int dimension)
-    {
-      matrix_type::resize(dimension, num_descriptors);
-    }
-
+    //! @{
+    //! \brief Accessors.
     inline matrix_type& matrix()
     {
       return *this;
@@ -56,49 +56,53 @@ namespace DO { namespace Sara {
       return *this;
     }
 
-    inline int size() const
+    inline size_t size() const
     {
-      return static_cast<int>(matrix_type::cols());
+      return matrix_type::cols();
     }
 
-    inline int dimension() const
+    inline size_t dimension() const
     {
-      return static_cast<int>(matrix_type::rows());
+      return matrix_type::rows();
     }
 
-    inline descriptor_type operator[](int i)
-    {
-      return this->col(i);
-    }
-
-    inline const_descriptor_type operator[](int i) const
+    inline descriptor_type operator[](size_t i)
     {
       return this->col(i);
     }
 
+    inline const_descriptor_type operator[](size_t i) const
+    {
+      return this->col(i);
+    }
+    //! @}
+
+    //! \brief Resize the descriptor matrix.
+    inline void resize(size_t num_descriptors, size_t dimension)
+    {
+      matrix_type::resize(dimension, num_descriptors);
+    }
+
+    //! \brief Swap data between `DescriptorMatrix` objects.
     inline void swap(DescriptorMatrix& other)
     {
       matrix_type::swap(other);
     }
 
+    //! \brief Append data from another `DescriptorMatrix` object.
     void append(const DescriptorMatrix& other)
     {
       if (dimension() != other.dimension() && matrix_type::size() != 0)
-      {
-        std::cerr << "Fatal: other descriptor matrix does not have same dimension" << std::endl;
-        CHECK(dimension());
-        CHECK(other.dimension());
         throw std::runtime_error{
           "Fatal: other descriptor matrix does not have same dimension"
         };
-      }
 
-      int dim = other.dimension();
+      size_t dim = other.dimension();
 
-      matrix_type tmp(dim, size() + other.size());
-      tmp.block(0, 0, dim, size()) = *this;
-      tmp.block(0, size(), dim, other.size()) = other;
-      matrix_type::swap(tmp);
+      matrix_type data{ dim, size() + other.size() };
+      data.block(0, 0, dim, size()) = *this;
+      data.block(0, size(), dim, other.size()) = other;
+      matrix_type::swap(data);
     }
   };
 

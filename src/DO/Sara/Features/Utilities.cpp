@@ -29,76 +29,35 @@ namespace DO { namespace Sara {
                            DescriptorMatrix<float>& descriptors)
   {
     if (features.size() != descriptors.size())
-    {
-      cerr << "Fatal: number of features and descriptors are not equal" << endl;
-      throw 0;
-    }
+      throw std::runtime_error{
+        "Fatal: number of features and descriptors are not equal"
+      };
 
-    vector<int> indices(features.size());
+    auto indices = vector<size_t>{ features.size() };
     for (size_t i = 0; i < indices.size(); ++i)
-      indices[i] = int(i);
-    CompareFeatures<float> compareDescriptors(features, descriptors);
-    sort(indices.begin(), indices.end(), compareDescriptors);
+      indices[i] = i;
 
-#ifdef DEBUG_LEXICOGRAPHICAL_ORDER
-    for (size_t i = 0; i < indices.size(); ++i)
-    {
-      cout << descriptors[indices[i]].transpose() << endl << endl;
-      get_key();
-    }
-#endif
+    CompareFeatures<float> compare_descriptors{ features, descriptors };
+    sort(indices.begin(), indices.end(), compare_descriptors);
 
-    EqualDescriptor<float> equalDescriptors(descriptors);
-    for (size_t i = 0; i != indices.size(); )
-    {
-#ifdef DEBUG_REDUNDANCIES
-      features[indices[i]].draw(Green8);
-      cout << features[indices[i]] << endl;
-#endif
-      int num;
-      for (num = 1;
-           num != indices.size()-i && equalDescriptors(indices[i], indices[i+num]);
-           ++num)
-      {
-#ifdef DEBUG_REDUNDANCIES
-        features[indices[i+num]].draw(Red8);
-        cout << features[indices[i+num]] << endl;
-#endif
-      }
-      i += num;
-#ifdef DEBUG_REDUNDANCIES
-      if (num > 1)
-      {
-        cout << "redundant = " << num << endl;
-        get_key();
-      }
-#endif
-    }
+    EqualDescriptor<float> equal_descriptors{ descriptors };
+    auto it = unique(indices.begin(), indices.end(), equal_descriptors);
 
-    indices.resize(
-      unique(indices.begin(), indices.end(), equalDescriptors)
-      - indices.begin() );
-#ifdef DEBUG_REDUNDANCIES
-    cout << indices.size() << endl;
-#endif
+    indices.resize(it - indices.begin());
 
-    vector<OERegion> features2(indices.size());
-    DescriptorMatrix<float> descriptors2(
-      int(indices.size()), descriptors.dimension() );
+    vector<OERegion> unique_features{ indices.size() };
+    DescriptorMatrix<float> unique_descriptors{
+      indices.size(), descriptors.dimension()
+    };
 
     for (size_t i = 0; i < indices.size(); ++i)
     {
-      features2[i] = features[indices[i]];
-      descriptors2[i] = descriptors[indices[i]];
+      unique_features[i] = features[indices[i]];
+      unique_descriptors[i] = descriptors[indices[i]];
     }
-    features.swap(features2);
-    descriptors.swap(descriptors2);
 
-#ifdef DEBUG_REDUNDANCIES
-#define CHECK(x) cout << #x << " = " << x << endl
-    CHECK(features.size());
-    CHECK(descriptors.size());
-#endif
+    features.swap(unique_features);
+    descriptors.swap(unique_descriptors);
   }
 
 
