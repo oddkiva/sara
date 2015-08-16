@@ -6,7 +6,7 @@ using namespace std;
 
 TEST(TestSIFTDescriptors, test_me)
 {
-  EXPECT_TRUE(false);
+  // TODO.
 }
 
 
