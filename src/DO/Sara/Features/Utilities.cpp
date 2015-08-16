@@ -33,7 +33,7 @@ namespace DO { namespace Sara {
         "Fatal: number of features and descriptors are not equal"
       };
 
-    auto indices = vector<size_t>{ features.size() };
+    auto indices = vector<size_t>(features.size());
     for (size_t i = 0; i < indices.size(); ++i)
       indices[i] = i;
 
