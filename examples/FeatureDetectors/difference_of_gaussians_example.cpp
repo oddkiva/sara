@@ -31,22 +31,21 @@ vector<OERegion> compute_dog_extrema(const Image<float>& I,
     print_stage("Localizing DoG extrema");
     tic();
   }
-  ImagePyramidParams pyrParams(0);
-  ComputeDoGExtrema computeDoGs(pyrParams);
-  vector<OERegion> DoGs;
-  vector<Point2i> scaleOctPairs;
-  DoGs = computeDoGs(I, &scaleOctPairs);
+  auto pyramid_params = ImagePyramidParams{ 0 };
+  auto compute_DoGs = ComputeDoGExtrema{ pyramid_params };
+  auto scale_octave_pairs = vector<Point2i>{};
+  auto DoGs = compute_DoGs(I, &scale_octave_pairs);
   if (verbose)
     toc();
   CHECK(DoGs.size());
 
   // 2. Rescale detected features to original image dimension.
-  const ImagePyramid<float>& DoGPyr = computeDoGs.diff_of_gaussians();
-  for (int i = 0; i < DoGs.size(); ++i)
+  const auto& DoG = compute_DoGs.diff_of_gaussians();
+  for (size_t i = 0; i < DoGs.size(); ++i)
   {
-    float octScaleFact = DoGPyr.octave_scaling_factor(scaleOctPairs[i](1));
-    DoGs[i].center() *= octScaleFact;
-    DoGs[i].shape_matrix() /= pow(octScaleFact, 2);
+    auto octave_scale_factor = DoG.octave_scaling_factor(scale_octave_pairs[i](1));
+    DoGs[i].center() *= octave_scale_factor;
+    DoGs[i].shape_matrix() /= pow(octave_scale_factor, 2);
   }
 
   return DoGs;
@@ -61,11 +60,11 @@ vector<OERegion> compute_dog_affine_extrema(const Image<float>& I,
     print_stage("Localizing DoG affine-adapted extrema");
     tic();
   }
-  ImagePyramidParams pyr_params(0);
-  ComputeDoGExtrema compute_DoGs(pyr_params);
-  auto DoGs = vector<OERegion>{};
+
+  auto pyramid_params = ImagePyramidParams{ 0 };
+  auto compute_DoGs = ComputeDoGExtrema{ pyramid_params };
   auto scale_octave_pairs = vector<Point2i>{};
-  DoGs = compute_DoGs(I, &scale_octave_pairs);
+  auto DoGs = compute_DoGs(I, &scale_octave_pairs);
   if (verbose)
     toc();
   CHECK(DoGs.size());
@@ -79,17 +78,17 @@ vector<OERegion> compute_dog_affine_extrema(const Image<float>& I,
     print_stage("Affine shape adaptation");
     tic();
   }
-  AdaptFeatureAffinelyToLocalShape adapt_shape;
+  auto adapt_shape = AdaptFeatureAffinelyToLocalShape{};
   auto keep_features = vector<unsigned char>(DoGs.size(), 0);
   for (size_t i = 0; i != DoGs.size(); ++i)
   {
-    const int s = scale_octave_pairs[i](0);
-    const int o = scale_octave_pairs[i](1);
+    const auto& s = scale_octave_pairs[i](0);
+    const auto& o = scale_octave_pairs[i](1);
 
     Matrix2f affine_adaptation_transform;
     if (adapt_shape(affine_adaptation_transform, G(s,o), DoGs[i]))
     {
-      DoGs[i].shape_matrix() = affine_adaptation_transform*DoGs[i].shape_matrix();
+      DoGs[i].shape_matrix() = affine_adaptation_transform * DoGs[i].shape_matrix();
       keep_features[i] = 1;
     }
   }
@@ -107,8 +106,8 @@ vector<OERegion> compute_dog_affine_extrema(const Image<float>& I,
     if (keep_features[i] == 1)
     {
       kept_DoGs.push_back(DoGs[i]);
-      const float fact = D.octave_scaling_factor(scale_octave_pairs[i](1));
-      kept_DoGs.back().shape_matrix() *= pow(fact,-2);
+      const auto fact = D.octave_scaling_factor(scale_octave_pairs[i](1));
+      kept_DoGs.back().shape_matrix() *= pow(fact, -2);
       kept_DoGs.back().coords() *= fact;
 
     }
@@ -131,19 +130,27 @@ void check_keys(const Image<float>& image, const vector<OERegion>& features)
 
 GRAPHICS_MAIN()
 {
-  auto image = Image<float>{};
-  auto name = src_path("../../datasets/sunflowerField.jpg");
-  if (!load(image, name))
-    return -1;
+  try
+  {
+    auto image = Image<float>{};
+    auto image_filepath = src_path("../../datasets/sunflowerField.jpg");
+    if (!load(image, image_filepath))
+      return -1;
 
-  create_window(image.width(), image.height());
-  vector<OERegion> features;
+    auto features = vector<OERegion>{};
 
-  features = compute_dog_extrema(image);
-  check_keys(image, features);
+    create_window(image.width(), image.height());
 
-  features = compute_dog_affine_extrema(image);
-  check_keys(image, features);
+    features = compute_dog_extrema(image);
+    check_keys(image, features);
+
+    features = compute_dog_affine_extrema(image);
+    check_keys(image, features);
+  }
+  catch (exception& e)
+  {
+    cout << e.what() << endl;
+  }
 
   return 0;
 }

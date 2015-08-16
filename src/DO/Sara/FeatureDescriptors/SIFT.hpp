@@ -134,8 +134,8 @@ namespace DO { namespace Sara {
       T /= l;
       // Loop to perform interpolation
       const int rounded_r = int_round(r);
-      const float rounded_x = round(x);
-      const float rounded_y = round(y);
+      const int rounded_x = int_round(x);
+      const int rounded_y = int_round(y);
       for (int v = -rounded_r; v <= rounded_r; ++v)
       {
         for (int u = -rounded_r; u <= rounded_r; ++u)

@@ -30,71 +30,159 @@ namespace DO { namespace Sara {
     @{
   */
 
-  //! Abstract 'VisualFeature' class.
+  //! \brief Abstract 'VisualFeature' class.
   class DO_EXPORT VisualFeature
-{
+  {
   public:
-    VisualFeature() {}
+    VisualFeature() = default;
 
-    virtual ~VisualFeature() {}
+    virtual ~VisualFeature()
+    {
+    }
 
     virtual std::ostream& print(std::ostream& os) const = 0;
 
     virtual std::istream& read(std::istream& in) = 0;
 
     friend std::ostream& operator<<(std::ostream& out, const VisualFeature& f)
-    { return f.print(out); }
+    {
+      return f.print(out);
+    }
 
     friend std::istream& operator>>(std::istream& in, VisualFeature& f)
-    { return f.read(in); }
+    {
+      return f.read(in);
+    }
   };
 
 
-  //! PointFeature for interest points
+  //! \brief PointFeature for interest points
   class DO_EXPORT InterestPoint : public VisualFeature
   {
   public:
-    //! ID for each point feature type.
-    enum Type { Harris, HarAff, HarLap, FAST, SUSAN,
-                DoG, LoG, DoH, MSER, HesAff, HesLap };
-    enum ExtremumType { Min = -1, Saddle = 0,  Max = 1 };
+    //! @{
+    //! \brief Feature type.
+    enum Type
+    {
+      Harris, HarAff, HarLap,
+      FAST, SUSAN,
+      DoG, LoG, DoH, MSER, HesAff, HesLap
+    };
 
-    //! Constructors.
-    InterestPoint() : VisualFeature() {}
-    InterestPoint(const Point2f& coords) : _coords(coords) {}
+    enum ExtremumType
+    {
+      Min = -1,
+      Saddle = 0,
+      Max = 1
+    };
+    //! @}
 
-    //! Destructor.
-    virtual ~InterestPoint() {}
+    //! @{
+    //! \brief Constructor.
+    InterestPoint() = default;
 
-    //! Constant getters.
-    float x() const { return _coords(0); }
-    float y() const { return _coords(1); }
-    const Point2f& coords() const { return _coords; }
-    const Point2f& center() const { return coords(); }
-    Type type() const { return _type; }
-    ExtremumType extremum_type() const { return _extremum_type; }
-    float extremum_value() const { return _extremum_value; }
+    InterestPoint(const Point2f& coords)
+      : _coords(coords)
+    {
+    }
+    //! @}
 
-    //! Mutable getters.
-    float& x() { return _coords(0); }
-    float& y() { return _coords(1); }
-    Point2f& coords() { return _coords; }
-    Point2f& center() { return coords(); }
-    Type& type() { return _type; }
-    ExtremumType& extremum_type() { return _extremum_type; }
-    float& extremum_value() { return _extremum_value; }
+    //! \brief Destructor.
+    virtual ~InterestPoint()
+    {
+    }
 
-    //! Equality operator.
+    //! @{
+    //! \brief Constant getters.
+    float x() const
+    {
+      return _coords(0);
+    }
+
+    float y() const
+    {
+      return _coords(1);
+    }
+
+    const Point2f& coords() const
+    {
+      return _coords;
+    }
+
+    const Point2f& center() const
+    {
+      return coords();
+    }
+
+    Type type() const
+    {
+      return _type;
+    }
+
+    ExtremumType extremum_type() const
+    {
+      return _extremum_type;
+    }
+
+    float extremum_value() const
+    {
+      return _extremum_value;
+    }
+    //! @}
+
+    //! \brief Mutable getters.
+    float& x()
+    {
+      return _coords(0);
+    }
+
+    float& y()
+    {
+      return _coords(1);
+    }
+
+    Point2f& coords()
+    {
+      return _coords;
+    }
+
+    Point2f& center()
+    {
+      return coords();
+    }
+
+    Type& type()
+    {
+      return _type;
+    }
+
+    ExtremumType& extremum_type()
+    {
+      return _extremum_type;
+    }
+
+    float& extremum_value()
+    {
+      return _extremum_value;
+    }
+    //! @}
+
+    //! \brief Equality operator.
     bool operator==(const InterestPoint& f) const
-    { return coords() == f.coords(); }
+    {
+      return coords() == f.coords();
+    }
 
-    //! Drawing.
+    //! \brief Draw feature.
     void draw(const Color3ub& c, float scale = 1.f,
               const Point2f& offset = Point2f::Zero()) const;
 
+    //! @{
     //! I/O.
     std::ostream& print(std::ostream& os) const;
+
     std::istream& read(std::istream& in);
+    //! @}
 
   private:
     Point2f _coords;
@@ -114,36 +202,61 @@ namespace DO { namespace Sara {
   class DO_EXPORT OERegion : public InterestPoint
   {
   public:
-    //! Default constructor
-    OERegion() : InterestPoint() {}
+    //! \brief Default constructor
+    OERegion() = default;
 
-    //! Constructor for circular region.
+    //! \brief Constructor for circular region.
     OERegion(const Point2f& coords, float scale)
-      : InterestPoint(coords)
-      , _shape_matrix(Matrix2f::Identity()*(pow(scale,-2))) {}
+      : InterestPoint{ coords }
+      , _shape_matrix{ Matrix2f::Identity()*(pow(scale,-2)) }
+    {
+    }
 
-    //! Destructor.
-    virtual ~OERegion() {}
+    //! \brief Destructor.
+    virtual ~OERegion()
+    {
+    }
 
-    //! Constant/mutable shape matrix getters.
+    //! @{
+    //! \brief Shape matrix accessor.
     //! The shape matrix is the matrix $M$ that describes the ellipse
     //! $\varepsilon$, i.e.:
     //! $$ \varepsilon = \{ x \in R^2 : (x-c)^T M (x-c) = 1 \} $$
     //! where $c$ is the center of the region.
-    const Matrix2f& shape_matrix() const { return _shape_matrix; }
-    Matrix2f& shape_matrix() { return _shape_matrix; }
+    const Matrix2f& shape_matrix() const
+    {
+      return _shape_matrix;
+    }
 
-    //! Constant/mutable orientation (in radian) getters.
+    Matrix2f& shape_matrix()
+    {
+      return _shape_matrix;
+    }
+    //! @}
+
+    //! @{
+    //! \brief Orientation (in radian) accessor.
     //! This completely determines the affine transformation that transforms the
     //! unit circle to the elliptic shape of the region.
-    float orientation() const { return _orientation; }
-    float& orientation() { return _orientation; }
+    float orientation() const
+    {
+      return _orientation;
+    }
 
-    //! Returns the anisotropic radius at a given angle in radians.
+    float& orientation()
+    {
+      return _orientation;
+    }
+    //! @}
+
+    //! \brief Return the anisotropic radius at a given angle in radians.
     float radius(float radian = 0.f) const;
 
-    //! Returns the anisotropic scale at a given angle in radians.
-    float scale(float radian = 0.f) const { return radius(radian); }
+    //! \brief Return the anisotropic scale at a given angle in radians.
+    float scale(float radian = 0.f) const
+    {
+      return radius(radian);
+    }
 
     //! Get the affine transform $A$ that transforms the unit circle to that
     //! oriented ellipse of the region.
@@ -151,7 +264,7 @@ namespace DO { namespace Sara {
     //! $M = (A^{-1})^T A^{-1}$ where $M$ is the shape matrix.
     Matrix3f affinity() const;
 
-    //! Equality operator.
+    //! \brief Compare two regions.
     bool operator==(const OERegion& other) const
     {
       return (coords() == other.coords() &&
@@ -160,15 +273,21 @@ namespace DO { namespace Sara {
               type() == other.type());
     };
 
-    //! Drawing.
+    //! \brief Draw the region.
     void draw(const Color3ub& c, float scale = 1.f,
               const Point2f& offset = Point2f::Zero()) const;
+
+    //! @{
     //! I/O
     std::ostream& print(std::ostream& os) const;
+
     std::istream& read(std::istream& in);
+    //! @}
 
   private:
+    //! \brief Shape matrix encoding the ellipticity of the region.
     Matrix2f _shape_matrix;
+    //! \brief Orientation of the region **after** shape normalization.
     float _orientation;
   };
 

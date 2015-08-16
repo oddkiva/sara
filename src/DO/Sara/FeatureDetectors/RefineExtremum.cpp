@@ -303,7 +303,7 @@ namespace DO { namespace Sara {
       return false;
 
     // First patch at the closest scale.
-    Image<float> nearestPatch(get_subimage(nearest_gaussian, x, y, patch_radius));
+    Image<float> nearest_patch(get_subimage(nearest_gaussian, x, y, patch_radius));
     //#define DEBUG_SELECT_SCALE
 #ifdef DEBUG_SELECT_SCALE
     // verbose.
@@ -314,14 +314,14 @@ namespace DO { namespace Sara {
     print(gauss_truncate_factor);
     print(increase_sigma_max);
     print(patch_radius);
-    print(nearestPatch.sizes().transpose());
+    print(nearest_patch.sizes().transpose());
     // Debug
-    double zoomFactor = 10.;
-    Window win = activeWindow() ? activeWindow() : 0;
+    double zoom_factor = 10.;
+    Window win = active_window() ? active_window() : 0;
     if (win)
-      set_active_window(create_window(zoomFactor*nearestPatch.width(),
-      zoomFactor*nearestPatch.height()) );
-    display(nearestPatch, 0, 0, zoomFactor);
+      set_active_window(create_window(zoom_factor*nearest_patch.width(),
+                                      zoom_factor*nearest_patch.height()) );
+    display(nearest_patch, 0, 0, zoom_factor);
     get_key();
 #endif
     // Store the blurred patches, their associated scales and LoG values at the
@@ -341,27 +341,27 @@ namespace DO { namespace Sara {
     //
     // Start with the initial patch.
     scales[0] = G.scale_relative_to_octave(s)/sqrt(2.f);
-    float incSigma = sqrt(pow(scales[0], 2) - pow(nearest_sigma, 2));
-    patches[0] = incSigma > 1e-3f ?
-      gaussian(nearestPatch, incSigma) :
-      nearestPatch;
+    float inc_sigma = sqrt(pow(scales[0], 2) - pow(nearest_sigma, 2));
+    patches[0] = inc_sigma > 1e-3f ?
+      gaussian(nearest_patch, inc_sigma) :
+      nearest_patch;
 #ifdef DEBUG_SELECT_SCALE
     print_stage("Print sigma of each patch");
     print(scales[0]);
-    print(incSigma);
-    display(patches[0], 0, 0, zoomFactor);
+    print(inc_sigma);
+    display(patches[0], 0, 0, zoom_factor);
     get_key();
 #endif
     // Loop for the rest of the patches.
     for (size_t i = 1; i < patches.size(); ++i)
     {
       scales[i] = scale_common_ratio*scales[i-1];
-      incSigma = sqrt(pow(scales[i],2) - pow(scales[i-1], 2));
-      patches[i] = gaussian(patches[i-1], incSigma);
+      inc_sigma = sqrt(pow(scales[i],2) - pow(scales[i-1], 2));
+      patches[i] = gaussian(patches[i-1], inc_sigma);
 #ifdef DEBUG_SELECT_SCALE
       print(scales[i]);
-      print(incSigma);
-      display(patches[i], 0, 0, zoomFactor);
+      print(inc_sigma);
+      display(patches[i], 0, 0, zoom_factor);
       get_key();
 #endif
     }

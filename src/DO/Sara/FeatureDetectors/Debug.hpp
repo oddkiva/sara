@@ -90,11 +90,11 @@ namespace DO { namespace Sara {
   {
     using namespace std;
     set_active_window(create_window(720, 200, "Histogram"));
-    int w = 720./histogram.size();
+    auto w = int_round(720. / histogram.size());
     float max = histogram.maxCoeff();
     for (int i = 0; i < histogram.size(); ++i)
     {
-      int h = histogram(i)/max*200;
+      auto h = histogram(i) / max * 200;
       fill_rect(i*w, 200-h, w, h, Blue8);
     }
     cout << histogram.transpose() << endl;

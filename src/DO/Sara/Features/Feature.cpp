@@ -55,20 +55,20 @@ namespace DO { namespace Sara {
     const Vector2f radii(svd.singularValues().cwiseSqrt().cwiseInverse());
     const Matrix2f& U(svd.matrixU());
     //std::cout << theta/M_PI*180<< "degrees" << std::endl;
-    Vector2f u(cos(angle), sin(angle));
-    Vector2f e1(U.col(0));
-    Vector2f e2(U.col(1));
-    float x = radii(0)*e1.dot(u);
-    float y = radii(1)*e2.dot(u);
+    Vector2f u{ cos(angle), sin(angle) };
+    auto e1 = U.col(0);
+    auto e2 = U.col(1);
+    auto x = radii(0)*e1.dot(u);
+    auto y = radii(1)*e2.dot(u);
     return sqrt(x*x+y*y);
   }
 
   Matrix3f OERegion::affinity() const
   {
-    Matrix2f M = shape_matrix();
-    Matrix2f Q(Rotation2D<float>(orientation()).matrix());
+    Matrix2f M{ shape_matrix() };
+    auto Q = Rotation2D<float>(orientation()).matrix();
     M = Q.transpose() * M * Q;
-    Matrix2f R( Matrix2f(M.llt().matrixU()).inverse() );
+    Matrix2f R{ Matrix2f{ M.llt().matrixU() }.inverse() };
 
     Matrix3f A;
     A.setZero();
@@ -79,7 +79,7 @@ namespace DO { namespace Sara {
 
   static inline float to_degree(float radian)
   {
-     return radian/float(M_PI)*180.f;
+     return radian / float(M_PI) * 180.f;
   }
 
   ostream& OERegion::print(ostream& os) const
