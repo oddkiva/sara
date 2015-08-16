@@ -23,14 +23,29 @@
 
 namespace DO { namespace Sara {
 
-  //! Sign function.
+  //! @{
+  //! \brief Rounding function.
+  template <typename T>
+  inline T round(T x)
+  {
+    return floor(x + T(0.5));
+  }
+
+  template <typename T>
+  inline int int_round(T x)
+  {
+    return static_cast<int>(round(x));
+  }
+  //! @}
+
+  //! \brief Sign function.
   template <typename T>
   inline int signum(T val)
   {
     return (T(0) < val) - (val < T(0));
   }
 
-  //! Degree to radian conversion.
+  //! \brief Degree to radian conversion.
   template <typename T>
   inline T to_radian(T degree)
   {
@@ -40,7 +55,7 @@ namespace DO { namespace Sara {
     return degree*static_cast<T>(M_PI)/static_cast<T>(180);
   }
 
-  //! Radian to degree conversion.
+  //! \brief Radian to degree conversion.
   template <typename T>
   inline T to_degree(T radian)
   {
@@ -50,7 +65,8 @@ namespace DO { namespace Sara {
     return radian*static_cast<T>(180)/static_cast<T>(M_PI);
   }
 
-  //! Check if the basis [u, v] is counter-clockwise.
+  //! @{
+  //! \brief Check if the basis [u, v] is counter-clockwise.
   template <typename T>
   inline T cross(const Matrix<T, 2, 1>& u, const Matrix<T, 2, 1>& v)
   {
@@ -66,6 +82,7 @@ namespace DO { namespace Sara {
   {
     return cross(Matrix<T,2,1>(b-a), Matrix<T,2,1>(c-a));
   }
+  //! @}
 
   /*!
     Suppose the 'b-a' is an upfront vector.
@@ -90,6 +107,8 @@ namespace DO { namespace Sara {
     return Matrix<T, 2, 1>(std::cos(radian), std::sin(radian));
   }
 
+  //! @{
+  //! \brief Geometric transforms.
   template <typename T>
   inline Matrix<T, 2, 2> rotation2(T radian)
   {
@@ -215,7 +234,9 @@ namespace DO { namespace Sara {
 
     return dH;
   }
+  //! @}
 
+  //! \brief Utility function.
   template <typename T>
   Matrix<T, 2, 1> apply(const Matrix<T, 3, 3> H, const Matrix<T, 2, 1>& p)
   {

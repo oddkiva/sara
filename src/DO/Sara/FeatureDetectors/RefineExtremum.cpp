@@ -128,7 +128,7 @@ namespace DO { namespace Sara {
     Matrix2f D_second; // hessian
     Vector2f h; // offset to estimate
 
-    pos = Vector2f(float(x),float(y));
+    pos << float(x), float(y);
 
     int i;
     for (i = 0; i < num_iter; ++i)
@@ -197,7 +197,7 @@ namespace DO { namespace Sara {
       break;
     }
 
-    pos << x, y;
+    pos << float(x), float(y);
     float oldval = I(x,y);
     float newval = oldval + 0.5f*D_prime.dot(h);
 
@@ -410,14 +410,14 @@ namespace DO { namespace Sara {
                                   const ImagePyramid<float>& gauss_pyramid,
                                   int s, int o,
                                   float extremum_thres,
-                                  float img_padding_sz,
+                                  int img_padding_sz,
                                   int num_scales,
                                   int refine_iterations)
   {
     LocalMax<float> local_max;
 
     vector<OERegion> corners;
-    corners.reserve(1e4);
+    corners.reserve(int(1e4));
     for (int y = img_padding_sz; y < function(s,o).height()-img_padding_sz; ++y)
     {
       for (int x = img_padding_sz; x < function(s,o).width()-img_padding_sz; ++x)

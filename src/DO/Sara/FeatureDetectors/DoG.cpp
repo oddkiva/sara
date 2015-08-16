@@ -18,15 +18,15 @@ using namespace std;
 namespace DO { namespace Sara {
 
   vector<OERegion>
-  ComputeDoGExtrema::operator()(const Image<float>& I,
+  ComputeDoGExtrema::operator()(const Image<float>& image,
                                 vector<Point2i> *scale_octave_pairs)
   {
-    ImagePyramid<float>& G = _gaussians;
-    ImagePyramid<float>& D = _diff_of_gaussians;
-    G = gaussian_pyramid(I, _params);
+    auto& G = _gaussians;
+    auto& D = _diff_of_gaussians;
+    G = gaussian_pyramid(image, _pyramid_params);
     D = difference_of_gaussians_pyramid(G);
 
-    vector<OERegion> extrema;
+    auto extrema = vector<OERegion>{};
     extrema.reserve(int(1e4));
     if (scale_octave_pairs)
     {
@@ -39,14 +39,14 @@ namespace DO { namespace Sara {
       // Be careful of the bounds. We go from 1 to N-1.
       for (int s = 1; s < D.num_scales_per_octave()-1; ++s)
       {
-        vector<OERegion> newExtrema(local_scale_space_extrema(
+        auto new_extrema = local_scale_space_extrema(
           D, s, o, _extremum_thres, _edge_ratio_thres,
-          _img_padding_sz, _extremum_refinement_iter) );
-        append(extrema, newExtrema);
+          _img_padding_sz, _extremum_refinement_iter);
+        append(extrema, new_extrema);
 
         if (scale_octave_pairs)
         {
-          for (size_t i = 0; i != newExtrema.size(); ++i)
+          for (size_t i = 0; i != new_extrema.size(); ++i)
             scale_octave_pairs->push_back(Point2i(s,o));
         }
       }

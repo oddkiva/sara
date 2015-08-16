@@ -49,33 +49,33 @@ namespace DO { namespace Sara {
         Note that \f$ \sigma(s',o') = 2^{s'/S+o'}\f$  where \f$S\f$ is the
         number of scales per octave.
       @param[in]
-        edgeRatioThres
+        edge_ratio_thres
         the Hessian matrix \f$\mathbf{H}\f$ at the local scale-space extremum
         must satisfy
         \f[
           \frac{\mathrm{det}(\mathbf{H})}{\mathrm{tr}(\mathbf{H}} >
           \frac{(r+1)^2}{r}
         \f]
-        where \f$r\f$ corresponds to the variable **edgeRatioThres**.
-        In terms of implementation, we use the function **DO::onEdge()**.
+        where \f$r\f$ corresponds to the variable **edge_ratio_thres**.
+        In terms of implementation, we use the function **DO::Sara::on_edge()**.
         We use the \f$r=10\f$ as stated in [Lowe, IJCV 2004].
       @param[in]
         img_padding_sz
         This variable indicates the minimum border size of the image. DoG
         extrema located at the size-specified border are discarded.
       @param[in]
-        extremumRefinementIter
+        extremum_refinement_iter
         This variable controls the number of iterations to refine the
         localization of DoG extrema in scale-space. The refinement process is
         based on the function **DO::refineExtremum()**.
      */
     ComputeDoGExtrema(
-      const ImagePyramidParams& pyr_params = ImagePyramidParams(),
+      const ImagePyramidParams& pyramid_params = ImagePyramidParams(),
       float extremum_thres = 0.01f,
       float edge_ratio_thres = 10.f,
       int img_padding_sz = 1,
       int extremum_refinement_iter = 5)
-      : _params(pyr_params)
+      : _pyramid_params(pyramid_params)
       , _extremum_thres(extremum_thres)
       , _edge_ratio_thres(edge_ratio_thres)
       , _img_padding_sz(img_padding_sz)
@@ -143,7 +143,7 @@ namespace DO { namespace Sara {
   private: /* data members. */
     //! @{
     //! Parameters
-    ImagePyramidParams _params;
+    ImagePyramidParams _pyramid_params;
     float _extremum_thres;
     float _edge_ratio_thres;
     int _img_padding_sz;

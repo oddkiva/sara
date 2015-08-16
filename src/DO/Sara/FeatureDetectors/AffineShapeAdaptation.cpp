@@ -11,6 +11,8 @@
 
 #include <DO/Sara/FeatureDetectors.hpp>
 
+#include <DO/Sara/Geometry/Tools/Utilities.hpp>
+
 
 using namespace std;
 
