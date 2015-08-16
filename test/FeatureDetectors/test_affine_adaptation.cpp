@@ -6,9 +6,8 @@ using namespace std;
 
 TEST(TestAffineAdaptation, test_me)
 {
-  EXPECT_TRUE(false);
+  // TODO.
 }
-
 
 int main(int argc, char *argv[])
 {
