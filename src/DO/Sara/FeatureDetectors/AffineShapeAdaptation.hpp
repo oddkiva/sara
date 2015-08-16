@@ -65,7 +65,17 @@ namespace DO { namespace Sara {
 
   private:
     /*!
-      Returns:
+      Return:
+      - true if the normalized patch does not touch the image boundaries.
+      - false otherwise.
+      If false is returned, then
+     */
+    bool warp_patch(const Image<float>& src,
+                    Image<float>& dst,
+                    const Matrix3f& homography_from_dst_to_src);
+
+    /*!
+      Return:
       - true if the normalized patch does not touch the image boundaries.
       - false otherwise.
       If false is returned, then

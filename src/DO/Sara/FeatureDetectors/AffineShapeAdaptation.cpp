@@ -34,17 +34,51 @@ namespace DO { namespace Sara {
     _gaussian_weights.resize(_patch_size, _patch_size);
 
     // Precompute the Gaussian weight.
-    float sigma = (0.5f*_patch_size) / _gauss_trunc_factor;
-    float r = _patch_size/2.f;
+    auto sigma = (0.5f*_patch_size) / _gauss_trunc_factor;
+    auto r = _patch_size / 2.f;
     for (int y = 0; y < _patch_size; ++y)
     {
       for (int x = 0; x < _patch_size; ++x)
       {
-        float u = x-r;
-        float v = y-r;
-        _gaussian_weights(x,y) = exp(-(u*u+v*v)/(2.f*sigma*sigma));
+        const auto u = x - r;
+        const auto v = y - r;
+        _gaussian_weights(x, y) = exp(-(u*u + v*v) / (2.f*sigma*sigma));
       }
     }
+  }
+
+  bool
+  AdaptFeatureAffinelyToLocalShape::warp_patch(
+    const Image<float>& image,
+    Image<float>& patch,
+    const Matrix3f& homography_from_dst_to_src)
+  {
+    const Matrix3f& H = homography_from_dst_to_src;
+
+    for (auto it = patch.begin_array(); !it.end(); ++it)
+    {
+      // Get the corresponding coordinates in the source image.
+      Vector3f H_P;
+      H_P = H * (Vector3f() << it.position().cast<float>(), 1).finished();
+      H_P /= H_P(2);
+
+      // Check if the position is not in the src domain [0,w[ x [0,h[.
+      bool position_is_in_image_domain =
+        H_P.x() >= 0 && H_P.x() < float(image.width()) &&
+        H_P.y() >= 0 && H_P.y() < float(image.height());
+
+      // Fill with either the default value or the interpolated value.
+      if (position_is_in_image_domain)
+      {
+        Vector2d H_p(H_P.template head<2>().template cast<double>());
+        auto pixel_value = interpolate(image, H_p);
+        *it = float(pixel_value);
+      }
+      else
+        return false;
+    }
+
+    return true;
   }
 
   bool
@@ -67,26 +101,24 @@ namespace DO { namespace Sara {
     // - $\mathbf{c}$ is the center of the feature,
     // - $r = l/2$.
     Matrix3f A;
-    float r = _patch_size/2.f;
-    float s = _gauss_trunc_factor*f.scale()/r;
+    auto r = _patch_size / 2.f;
+    auto s = _gauss_trunc_factor*f.scale() / r;
 
-    A.block<2,2>(0,0) = T*s;
-    A.col(2) << T*Point2f(-r,-r)*s+f.center(), 1.f;
-    A(2,0) = A(2,1) = 0.f;
+    A.block<2, 2>(0, 0) = T*s;
+    A.col(2) << T*Point2f(-r, -r)*s + f.center(), 1.f;
+    A.row(2).head(2).fill(0.f);
 
-    warp(I, _patch, A);
+    auto success = warp_patch(I, _patch, A);
     debug_display_normalized_patch(s);
 
-    // Make it buggy first.
-    return false;
+    return success;
   }
 
   Matrix2f
   AdaptFeatureAffinelyToLocalShape::
   compute_moment_matrix_from_patch()
   {
-    Image<Vector2f> gradients;
-    gradients = _patch.compute<Gradient>();
+    auto gradients = _patch.compute<Gradient>();
     debug_check_weighted_patch(gradients);
     // Estimate the second moment matrix.
     Matrix2f moment;
@@ -110,11 +142,11 @@ namespace DO { namespace Sara {
   Matrix2f
   AdaptFeatureAffinelyToLocalShape::
   compute_transform_from_moment_matrix(const Matrix2f& M,
-  float& anisotropicRatio)
+                                       float& anisotropic_ratio)
   {
     // Get the SVD decomposition of the second order moment matrix.
     JacobiSVD<Matrix2f> svd(M, ComputeFullU);
-    Vector2f S{ svd.singularValues() };  // momentMatrix = U*S*V^T
+    Vector2f S{ svd.singularValues() };  // moment matrix = U*S*V^T
     Matrix2f U{ svd.matrixU() };         // rotation matrix
 
     // Get the dilation factor for each axis.
@@ -122,10 +154,10 @@ namespace DO { namespace Sara {
     Matrix2f T{ U*radii.asDiagonal() * U.transpose() };
 
     // Normalize w.r.t. to the largest axis radius.
-    T *= 1.f/radii(1);
+    T *= 1.f / radii(1);
 
     // Store the anisotropic ratio.
-    anisotropicRatio = radii(0)/radii(1);
+    anisotropic_ratio = radii(0) / radii(1);
 
     // Ok, done.
     return T;
@@ -178,7 +210,7 @@ namespace DO { namespace Sara {
       debug_check_moment_matrix_and_transform(mu, delta_U, anisotropic_ratio, U);
 
       // Instability check (cf. [Mikolajczyk & Schmid, ECCV 2002])
-      if (1.f/anisotropic_ratio > 6.f)
+      if (1.f / anisotropic_ratio > 6.f)
       {
         debug_close_window_used_to_view_patch();
         return false;
@@ -202,10 +234,13 @@ namespace DO { namespace Sara {
   {
     // Open window to visualize the patch.
     if (_debug)
-      set_active_window( create_window(
-      _patch.width()*_patch_zoom_factor,
-      _patch.height()*_patch_zoom_factor,
-      "Image patch centered on the feature") );
+    {
+      auto window = create_window(
+        int_round(_patch.width()*_patch_zoom_factor),
+        int_round(_patch.height()*_patch_zoom_factor),
+        "Image patch centered on the feature");
+      set_active_window(window);
+    }
   }
 
   void
@@ -235,8 +270,8 @@ namespace DO { namespace Sara {
     if (_debug)
     {
       // Check the weighted patch.
-      Image<float> grad_magnitude( gradients.compute<SquaredNorm>() );
-      Image<float> weighted_patch(gradients.sizes());
+      auto grad_magnitude = gradients.compute<SquaredNorm>();
+      auto weighted_patch = Image<float>{ gradients.sizes() };
       weighted_patch.array() = grad_magnitude.array().sqrt()*_gaussian_weights.array();
       weighted_patch = color_rescale(weighted_patch);
       display(weighted_patch, 0, 0, _patch_zoom_factor);
@@ -256,16 +291,16 @@ namespace DO { namespace Sara {
   AdaptFeatureAffinelyToLocalShape::
   debug_check_moment_matrix_and_transform(const Matrix2f& mu,
                                           const Matrix2f& delta_U,
-                                          float anisotropicRatio,
+                                          float anisotropic_ratio,
                                           const Matrix2f& U)
   {
     if (_debug)
     {
       cout << "moment matrix = " << endl << mu << endl;
-      cout << "delta_U = " << endl <<  delta_U << endl;
-      if (1.f/anisotropicRatio > 6.f)
+      cout << "delta_U = " << endl << delta_U << endl;
+      if (1.f / anisotropic_ratio > 6.f)
         cout << "WARNING: delta_U has excessive anisotropy!" << endl;
-      cout << "U = " << endl <<  U << endl;
+      cout << "U = " << endl << U << endl;
     }
   }
 
