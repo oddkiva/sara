@@ -61,8 +61,9 @@ namespace DO { namespace Sara {
   void check_patch(const Image<float>& I, int x, int y, int w, int h,
                    double fact)
   {
-    Image<float> patch(get_subimage(I,x,y,w,h));
-    set_active_window(create_window(w*fact, h*fact, "Check image patch"));
+    auto patch = get_subimage(I,x,y,w,h);
+    auto window = create_window(int_round(w*fact), int_round(h*fact), "Check image patch");
+    set_active_window(window);
     display(color_rescale(patch), 0, 0, fact);
     get_key();
     close_window();
@@ -70,12 +71,12 @@ namespace DO { namespace Sara {
 
   void check_patch(const Image<float>& I, float x, float y, float s, double fact)
   {
-    const float magFactor = 3.f;
-    int r = int(s*1.5f*magFactor + 0.5f);
-    int w = 2*r+1;
-    int h = 2*r+1;
+    const auto scaling_factor = 3.f;
+    auto r = s * 1.5f * scaling_factor;
+    int w = 2 * int_round(r) + 1;
+    int h = 2 * int_round(r) + 1;
 
-    check_patch(I, int_round(x)-r, int_round(y)-r, w, h, fact);
+    check_patch(I, int_round(x - r), int_round(y - r), w, h, fact);
   }
 
 } /* namespace Sara */
