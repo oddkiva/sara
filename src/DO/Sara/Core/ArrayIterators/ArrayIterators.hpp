@@ -480,7 +480,7 @@ namespace DO { namespace Sara {
     //! Addition operator (slow).
     inline void operator+=(const vector_type& offset)
     {
-      vector_type pos(cur_pos_ + offset);
+      vector_type pos{ cur_pos_ + offset };
       if (pos.minCoeff() < 0 || (pos-sizes_).minCoeff() >= 0)
         throw std::out_of_range{ "Range iterator out of range!" };
       cur_ptr_ += jump(offset, strides_);

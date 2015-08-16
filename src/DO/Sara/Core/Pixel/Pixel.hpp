@@ -27,28 +27,28 @@ namespace DO { namespace Sara {
   template <typename _T, typename _ColorSpace>
   class Pixel : public Matrix<_T, _ColorSpace::size, 1>
   {
-    typedef Matrix<_T, _ColorSpace::size, 1> base_type;
+    using base_type = Matrix<_T, _ColorSpace::size, 1>;
 
   public:
     //! Channel type.
-    typedef _T channel_type;
-    typedef _ColorSpace color_space_type;
+    using channel_type = _T;
+    using color_space_type = _ColorSpace;
 
     //! Default constructor.
     inline Pixel()
-      : base_type()
+      : base_type{}
     {
     }
 
     //! Custom constructor.
     inline Pixel(_T x, _T y, _T z)
-      : base_type(x, y, z)
+      : base_type{ x, y, z }
     {
     }
 
     //! Custom constructor.
     inline Pixel(_T x, _T y, _T z, _T t)
-      : base_type(x, y, z, t)
+      : base_type{ x, y, z, t }
     {
     }
 
@@ -63,7 +63,8 @@ namespace DO { namespace Sara {
     template <typename _OtherDerived>
     inline Pixel& operator=(const Eigen::MatrixBase<_OtherDerived>& other)
     {
-      this->base_type::operator=(other); return *this;
+      this->base_type::operator=(other);
+      return *this;
     }
 
     //! Constant channel access function.

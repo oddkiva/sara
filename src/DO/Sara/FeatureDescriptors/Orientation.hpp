@@ -18,6 +18,8 @@
 
 #include <DO/Sara/Core/StringFormat.hpp>
 
+#include <DO/Sara/Geometry/Tools/Utilities.hpp>
+
 
 namespace DO { namespace Sara {
 

@@ -16,29 +16,22 @@
 
 #include <DO/Sara/Defines.hpp>
 
+#include <DO/Sara/Graphics.hpp>
+
+#include <DO/Sara/Geometry/Tools/Utilities.hpp>
+
+#include <DO/Sara/ImageProcessing/ImagePyramid.hpp>
+
 
 namespace DO { namespace Sara {
 
   /*!
     \ingroup FeatureDetectors
-    \defgroup UtilitiesDebug Utilities and Debug
+    \defgroup UtilitiesDebug Utilities for visual inspection of features.
     @{
    */
 
-  template <typename T>
-  inline T round(T x)
-  {
-    return floor(x + T(0.5));
-  }
-
-  template <typename T>
-  inline int int_round(T x)
-  {
-    return static_cast<int>(round(x));
-  }
-
-
-  // Check the image pyramid.
+  //! \brief Visually inspect the image pyramid.
   template <typename T>
   void display_image_pyramid(const ImagePyramid<T>& pyramid,
                              bool rescale = false)
@@ -62,7 +55,8 @@ namespace DO { namespace Sara {
     }
   }
 
-  // Check the local extrema.
+  //! @{
+  //! \brief Visually inspect local extrema.
   DO_EXPORT
   void draw_scale_space_extremum(const ImagePyramid<float>& I,
                                  float x, float y, float s,
@@ -71,7 +65,7 @@ namespace DO { namespace Sara {
   DO_EXPORT
   void draw_extrema(const ImagePyramid<float>& pyramid,
                     const std::vector<OERegion>& extrema,
-                    int s, int o, bool rescaleColor = true);
+                    int s, int o, bool rescale_color = true);
 
   DO_EXPORT
   void highlight_patch(const ImagePyramid<float>& D,
@@ -82,9 +76,11 @@ namespace DO { namespace Sara {
                    double fact = 50.);
 
   DO_EXPORT
-  void check_patch(const Image<float>& I,float x, float y, float s,
+  void check_patch(const Image<float>& I, float x, float y, float s,
                    double fact = 20.);
+  //! @}
 
+  //! \brief Visually inspect the descriptor.
   template <typename T, int N>
   void view_histogram(const Array<T, N, 1>& histogram)
   {
@@ -94,7 +90,7 @@ namespace DO { namespace Sara {
     float max = histogram.maxCoeff();
     for (int i = 0; i < histogram.size(); ++i)
     {
-      auto h = histogram(i) / max * 200;
+      auto h = int_round(histogram(i) / max * 200);
       fill_rect(i*w, 200-h, w, h, Blue8);
     }
     cout << histogram.transpose() << endl;

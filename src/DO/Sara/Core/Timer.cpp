@@ -29,8 +29,7 @@ namespace DO { namespace Sara {
     LARGE_INTEGER freq;
     if (!QueryPerformanceFrequency(&freq))
     {
-      const char *msg = "Failed to initialize high resolution timer!";
-      std::cerr << msg << std::endl;
+      auto msg = "Failed to initialize high resolution timer!";
       throw std::runtime_error{ msg };
     }
     frequency_ = static_cast<double>(freq.QuadPart);
