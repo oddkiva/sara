@@ -130,20 +130,27 @@ void check_keys(const Image<float>& image, const vector<OERegion>& features)
 
 GRAPHICS_MAIN()
 {
-  auto image = Image<float>{};
-  auto image_filepath = src_path("../../datasets/sunflowerField.jpg");
-  if (!load(image, image_filepath))
-    return -1;
+  try
+  {
+    auto image = Image<float>{};
+    auto image_filepath = src_path("../../datasets/sunflowerField.jpg");
+    if (!load(image, image_filepath))
+      return -1;
 
-  auto features = vector<OERegion>{};
+    auto features = vector<OERegion>{};
 
-  create_window(image.width(), image.height());
+    create_window(image.width(), image.height());
 
-  features = compute_dog_extrema(image);
-  check_keys(image, features);
+    features = compute_dog_extrema(image);
+    check_keys(image, features);
 
-  features = compute_dog_affine_extrema(image);
-  check_keys(image, features);
+    features = compute_dog_affine_extrema(image);
+    check_keys(image, features);
+  }
+  catch (exception& e)
+  {
+    cout << e.what() << endl;
+  }
 
   return 0;
 }
