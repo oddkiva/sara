@@ -44,7 +44,7 @@ namespace DO { namespace Sara {
     //! @{
     //! \brief STL-like interface
     using size_type = unsigned int;
-    using iterator = typename storage_type::iterator iterator;
+    using iterator = typename storage_type::iterator;
     using const_iterator = typename storage_type::const_iterator;
     using difference_type = typename storage_type::difference_type;
     using reference = value_type&;
