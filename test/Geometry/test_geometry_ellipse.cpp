@@ -5,6 +5,8 @@
 #include <DO/Sara/Geometry/Objects/Triangle.hpp>
 #include <DO/Sara/Geometry/Tools/Utilities.hpp>
 
+#include "../AssertHelpers.hpp"
+
 #include "TestPolygon.hpp"
 
 
@@ -143,6 +145,19 @@ TEST_F(TestEllipse, DISABLED_test_segment_area)
     cout << e.what() << endl;
   }
 
+}
+
+
+TEST_F(TestEllipse, test_rho)
+{
+  Ellipse E(250, 150, to_radian(75.), _center);
+
+  auto a = E.rho(0.);
+  auto b = E.rho(M_PI_2);
+  auto expected_a = Vector2d{ 250, 0 };
+  auto expected_b = Vector2d{ 0, 150 };
+  EXPECT_MATRIX_NEAR(a, expected_a, 1e-3);
+  EXPECT_MATRIX_NEAR(b, expected_b, 1e-3);
 }
 
 

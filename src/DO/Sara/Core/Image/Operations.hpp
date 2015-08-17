@@ -150,7 +150,11 @@ namespace DO { namespace Sara {
     }
 
     if (min == max)
-      throw std::runtime_error{ "Error: cannot rescale image! min == max" };
+    {
+      std::cout << "Warning: cannot rescale image! min == max" << std::endl;
+      std::cout << "No rescaling will be performed" << std::endl;
+      return src;
+    }
 
     for (src_first = src.data(); src_first != src_last;
       ++src_first, ++dst_first)

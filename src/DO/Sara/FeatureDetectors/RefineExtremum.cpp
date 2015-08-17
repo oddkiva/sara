@@ -19,7 +19,7 @@ namespace DO { namespace Sara {
 
   bool on_edge(const Image<float>& I, int x, int y, float edge_ratio)
   {
-    Matrix2f H( hessian(I, Point2i(x,y)) );
+    auto H = hessian(I, Point2i{x, y});
     return pow(H.trace(), 2)*edge_ratio >=
            pow(edge_ratio+1.f, 2)*fabs(H.determinant());
   }
@@ -33,7 +33,7 @@ namespace DO { namespace Sara {
     Vector3f h;
     Vector3f lambda;
 
-    pos = Vector3f(float(x),float(y),I.scale_relative_to_octave(s));
+    pos << float(x), float(y), I.scale_relative_to_octave(s);
 
     int i;
     for (i = 0; i < num_iter; ++i)
