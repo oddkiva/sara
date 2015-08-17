@@ -32,7 +32,7 @@ namespace DO { namespace Sara {
     if (scale_octave_pairs)
     {
       scale_octave_pairs->clear();
-      scale_octave_pairs->reserve(1e4);
+      scale_octave_pairs->reserve(int(1e4));
     }
 
     for (int o = 0; o < det_hess_pyr.num_octaves(); ++o)
@@ -72,7 +72,7 @@ namespace DO { namespace Sara {
     if (scale_octave_pairs)
     {
       scale_octave_pairs->clear();
-      scale_octave_pairs->reserve(1e4);
+      scale_octave_pairs->reserve(int(1e4));
     }
 
     for (int o = 0; o < det_hess_pyr.num_octaves(); ++o)

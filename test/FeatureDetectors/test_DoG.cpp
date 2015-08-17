@@ -23,8 +23,9 @@ TEST(TestExtremumRefinement, test_local_scale_space_extrema)
 
 TEST(TestDoG, test_compute_dog_extrema)
 {
+  // Create a centered gaussian.
   const auto N = 2 * 5 + 1;
-  Image<float> I{ N, N };
+  auto I = Image<float>{ N, N };
   I.array().fill(0);
 
   const auto xc = N / 2.f;
@@ -37,6 +38,7 @@ TEST(TestDoG, test_compute_dog_extrema)
 
   using namespace std;
 
+  // Create the detector of DoG extrema.
   const auto pyramid_params = ImagePyramidParams{};
   auto compute_DoGs = ComputeDoGExtrema{ pyramid_params };
 
@@ -44,6 +46,7 @@ TEST(TestDoG, test_compute_dog_extrema)
   auto features = compute_DoGs(I, &scale_octave_pairs);
   const auto& o_index = scale_octave_pairs[0](1);
 
+  // There should be only one extrema at only one scale.
   EXPECT_EQ(features.size(), 1);
   EXPECT_EQ(scale_octave_pairs.size(), 1);
 

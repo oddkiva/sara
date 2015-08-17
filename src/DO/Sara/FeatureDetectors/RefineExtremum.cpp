@@ -128,7 +128,7 @@ namespace DO { namespace Sara {
     Matrix2f D_second; // hessian
     Vector2f h; // offset to estimate
 
-    pos = Vector2f(float(x),float(y));
+    pos << float(x), float(y);
 
     int i;
     for (i = 0; i < num_iter; ++i)
@@ -197,7 +197,7 @@ namespace DO { namespace Sara {
       break;
     }
 
-    pos << x, y;
+    pos << float(x), float(y);
     float oldval = I(x,y);
     float newval = oldval + 0.5f*D_prime.dot(h);
 
@@ -299,7 +299,7 @@ namespace DO { namespace Sara {
 
     // Ensure the patch is inside the image.
     if (x - patch_radius < 0 || x + patch_radius >= nearest_gaussian.width() ||
-      y - patch_radius < 0 || y + patch_radius >= nearest_gaussian.height())
+        y - patch_radius < 0 || y + patch_radius >= nearest_gaussian.height())
       return false;
 
     // First patch at the closest scale.
@@ -330,7 +330,7 @@ namespace DO { namespace Sara {
     vector<float> scales(num_scales + 1);
     vector<float> LoGs(num_scales + 1);
 
-    float scale_common_ratio = pow(2.f, 1.f/num_scales);
+    float scale_common_ratio = pow(2.f, 1.f / num_scales);
     float nearest_sigma = G.scale_relative_to_octave(s - 1);
 #ifdef DEBUG_SELECT_SCALE
     print_stage("Print blur-related variables");
@@ -340,7 +340,7 @@ namespace DO { namespace Sara {
     // Compute the blurred patches and their associated scales.
     //
     // Start with the initial patch.
-    scales[0] = G.scale_relative_to_octave(s)/sqrt(2.f);
+    scales[0] = G.scale_relative_to_octave(s) / sqrt(2.f);
     float inc_sigma = sqrt(pow(scales[0], 2) - pow(nearest_sigma, 2));
     patches[0] = inc_sigma > 1e-3f ?
       gaussian(nearest_patch, inc_sigma) :
@@ -356,8 +356,8 @@ namespace DO { namespace Sara {
     for (size_t i = 1; i < patches.size(); ++i)
     {
       scales[i] = scale_common_ratio*scales[i-1];
-      inc_sigma = sqrt(pow(scales[i],2) - pow(scales[i-1], 2));
-      patches[i] = gaussian(patches[i-1], inc_sigma);
+      inc_sigma = sqrt(pow(scales[i], 2) - pow(scales[i - 1], 2));
+      patches[i] = gaussian(patches[i - 1], inc_sigma);
 #ifdef DEBUG_SELECT_SCALE
       print(scales[i]);
       print(inc_sigma);
@@ -376,8 +376,8 @@ namespace DO { namespace Sara {
     for ( ; i < num_scales; ++i)
     {
       // Is LoG(\mathbf{x},\sigma) an extremum
-      is_extremum = (LoGs[i] <= LoGs[i-1] && LoGs[i] <= LoGs[i+1]) ||
-                   (LoGs[i] >= LoGs[i-1] && LoGs[i] >= LoGs[i+1]) ;
+      is_extremum = (LoGs[i] <= LoGs[i - 1] && LoGs[i] <= LoGs[i + 1]) ||
+                    (LoGs[i] >= LoGs[i - 1] && LoGs[i] >= LoGs[i + 1]);
       if (is_extremum)
         break;
     }
@@ -390,13 +390,13 @@ namespace DO { namespace Sara {
       // Use a 2nd-order Taylor approximation:
       // $f(x+h) = f(x) + f'(x)h + f''(x) h^2/2$
       // We approximate $f'$ and $f''$ by finite difference.
-      float fprime = (LoGs[i+1]-LoGs[i-1]) / 2.f;
-      float fsecond = LoGs[i-1] - 2.f*LoGs[i] + LoGs[i+1];
+      float fprime = (LoGs[i + 1] - LoGs[i - 1]) / 2.f;
+      float fsecond = LoGs[i - 1] - 2.f*LoGs[i] + LoGs[i + 1];
       // Maximize w.r.t. to $h$, derive the expression.
       // Thus $h = -f'(x)/f''(x)$.
       float h = -fprime / fsecond;
       // OK, now the scale is:
-      scale = scales[i]*pow(scale_common_ratio, h);
+      scale = scales[i] * pow(scale_common_ratio, h);
     }
 #ifdef DEBUG_SELECT_SCALE
     closeWindow();
@@ -407,17 +407,17 @@ namespace DO { namespace Sara {
   }
 
   vector<OERegion> laplace_maxima(const ImagePyramid<float>& function,
-                                 const ImagePyramid<float>& gaussPyramid,
-                                 int s, int o,
-                                 float extremum_thres,
-                                 float img_padding_sz,
-                                 float numScales,
-                                 int refine_iterations)
+                                  const ImagePyramid<float>& gauss_pyramid,
+                                  int s, int o,
+                                  float extremum_thres,
+                                  int img_padding_sz,
+                                  int num_scales,
+                                  int refine_iterations)
   {
     LocalMax<float> local_max;
 
     vector<OERegion> corners;
-    corners.reserve(1e4);
+    corners.reserve(int(1e4));
     for (int y = img_padding_sz; y < function(s,o).height()-img_padding_sz; ++y)
     {
       for (int x = img_padding_sz; x < function(s,o).width()-img_padding_sz; ++x)
@@ -428,14 +428,16 @@ namespace DO { namespace Sara {
           continue;
         // Select the optimal scale using the normalized LoG.
         float scale = function.scale_relative_to_octave(s);
-        if (!select_laplace_scale(scale,x,y,s,o,gaussPyramid,numScales))
+        if (!select_laplace_scale(scale, x, y, s, o, gauss_pyramid, num_scales))
           continue;
         // Refine the spatial coordinates.
         float val = function(x,y,s,o);
         Point2f p(x,y);
         /*if (!refineExtremum(function(s,o),x,y,1,p,val,img_padding_sz,refine_iterations))
           continue;*/
-        refine_extremum(function(s,o),x,y,1,p,val,img_padding_sz,refine_iterations);
+        refine_extremum(
+          function(s, o), x, y, 1,
+          p, val, img_padding_sz, refine_iterations);
         // Store the extremum.
         OERegion c;
         c.center() = p;

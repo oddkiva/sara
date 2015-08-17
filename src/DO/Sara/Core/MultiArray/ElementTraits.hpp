@@ -32,14 +32,14 @@ namespace DO { namespace Sara {
   {
     //! @{
     //! STL-compatible interface.
-    typedef T value_type;
-    typedef size_t size_type;
-    typedef T * pointer;
-    typedef const T * const_pointer;
-    typedef T& reference;
-    typedef const T& const_reference;
-    typedef T * iterator;
-    typedef const T * const_iterator;
+    using value_type = T;
+    using size_type = size_t;
+    using pointer = T *;
+    using const_pointer = const T *;
+    using reference = T&;
+    using const_reference = const T&;
+    using iterator = T *;
+    using const_iterator = const T *;
     static const bool is_scalar = true;
     //! @}
   };
@@ -56,17 +56,17 @@ namespace DO { namespace Sara {
     //! @{
     //! STL-compatible interface.
     const static bool is_square_matrix = (M == N);
-    typedef typename Meta::Choose<
+    using value_type = typename Meta::Choose<
       is_square_matrix,
       Matrix<T, N, N>,
-      Array<T, M, N> >::Type value_type;
-    typedef size_t size_type;
-    typedef value_type * pointer;
-    typedef const value_type * const_pointer;
-    typedef value_type& reference;
-    typedef const value_type& const_reference;
-    typedef value_type * iterator;
-    typedef const value_type * const_iterator;
+      Array<T, M, N> >::Type;
+    using size_type = size_t;
+    using pointer = value_type *;
+    using const_pointer = const value_type *;
+    using reference = value_type&;
+    using const_reference = const value_type&;
+    using iterator = value_type *;
+    using const_iterator = const value_type *;
     static const bool is_scalar = false;
     //! @}
   };
@@ -78,14 +78,14 @@ namespace DO { namespace Sara {
   {
     //! @{
     //! STL-compatible interface.
-    typedef Array<T, M, N> value_type;
-    typedef size_t size_type;
-    typedef value_type * pointer;
-    typedef const value_type * const_pointer;
-    typedef value_type& reference;
-    typedef const value_type& const_reference;
-    typedef value_type * iterator;
-    typedef const value_type * const_iterator;
+    using value_type = Array<T, M, N>;
+    using size_type = size_t;
+    using pointer = value_type *;
+    using const_pointer = const value_type *;
+    using reference = value_type&;
+    using const_reference = const value_type&;
+    using iterator = value_type *;
+    using const_iterator = const value_type *;
     static const bool is_scalar = false;
     //! @}
   };

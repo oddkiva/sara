@@ -36,7 +36,7 @@ namespace DO { namespace Sara {
     {
     }
 
-    inline bool operator()(int i1, int i2) const
+    inline bool operator()(size_t i1, size_t i2) const
     {
        return _descriptors[i1] == _descriptors[i2];
     }
@@ -52,7 +52,7 @@ namespace DO { namespace Sara {
     {
     }
 
-    inline bool operator()(int i1, int i2) const
+    inline bool operator()(size_t i1, size_t i2) const
     {
        return (_descriptors[i1] - _descriptors[i2]).squaredNorm() < 1e-3;
     }
@@ -71,7 +71,7 @@ namespace DO { namespace Sara {
     {
     }
 
-    inline bool operator()(int i1, int i2) const
+    inline bool operator()(size_t i1, size_t i2) const
     {
       if (Sara::lexicographical_compare(_descriptors[i1], _descriptors[i2]))
         return true;

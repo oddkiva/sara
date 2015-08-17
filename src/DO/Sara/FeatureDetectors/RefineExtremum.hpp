@@ -132,8 +132,8 @@ namespace DO { namespace Sara {
                                        const ImagePyramid<float>& gaussian_pyramid,
                                        int s, int o,
                                        float extremum_thres = 1e-6f,
-                                       float img_padding_sz = 1,
-                                       float numScales = 10,
+                                       int img_padding_sz = 1,
+                                       int num_scales = 10,
                                        int refine_iterations = 5);
 
   //! @}
