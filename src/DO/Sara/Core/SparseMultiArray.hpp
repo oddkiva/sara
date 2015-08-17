@@ -31,51 +31,56 @@ namespace DO { namespace Sara {
   class SparseMultiArray
   {
   public:
-    typedef Matrix<int, N, 1> coord_type; //!< STL-like interface
-    typedef T                 value_type; //!< STL-like interface
-    typedef unsigned int      size_type; //!< STL-like interface
+    //! @{
+    //! \brief STL-like interface
+    using coord_type = Matrix<int, N, 1>;
+    using value_type = T;
+    //! @}
 
   private:
-    typedef std::map<coord_type, value_type, LexicographicalOrder> storage_type;
+    using storage_type = std::map<coord_type, value_type, LexicographicalOrder>;
+
+  public:
+    //! @{
+    //! \brief STL-like interface
+    using size_type = unsigned int;
+    using iterator = typename storage_type::iterator iterator;
+    using const_iterator = typename storage_type::const_iterator;
+    using difference_type = typename storage_type::difference_type;
+    using reference = value_type&;
+    using const_reference = const value_type&;
+    //! @}
 
   public: // STL-like interface
     //! Dimension
     static const size_type dimension = N;
-    //! iterator type.
-    typedef typename storage_type::iterator iterator;
-    //! const_iterator type.
-    typedef typename storage_type::const_iterator const_iterator;
-    //typedef typename storage_type::size_type size_type;
-    //! difference_type type.
-    typedef typename storage_type::difference_type difference_type;
-    //! reference type.
-    typedef value_type& reference;
-    //! const_reference type.
-    typedef const value_type& const_reference;
 
   public: // interface
     //! Default constructor.
-    inline SparseMultiArray()
-    {}
+    inline SparseMultiArray() = default;
 
     //! Copy constructor.
     inline SparseMultiArray(const SparseMultiArray& a)
-      : storage(a.storage) {}
+      : _storage(a._storage)
+    {
+    }
 
     //! Checks if the sparse multi-array is empty.
     inline bool empty() const
-    { return storage.empty(); }
+    {
+      return _storage.empty();
+    }
 
     //! Finds the minimum non-zero entry coordinates (in a lexicographical order).
     //! This function is computationally expensive.
     inline coord_type min_key() const
     {
-      const_iterator i_begin = storage.begin();
+      const_iterator i_begin = _storage.begin();
 
       coord_type k = i_begin->first;
 
       i_begin++;
-      for(const_iterator i = i_begin, i_end = storage.end(); i != i_end;i++)
+      for(const_iterator i = i_begin, i_end = _storage.end(); i != i_end;i++)
       {
         for(size_type n = 0;n < dimension;n++)
         {
@@ -91,12 +96,12 @@ namespace DO { namespace Sara {
     //! This function is computationally expensive.
     inline coord_type max_key() const
     {
-      const_iterator i_begin = storage.begin();
+      const_iterator i_begin = _storage.begin();
 
       coord_type k = i_begin->first;
 
       i_begin++;
-      for(const_iterator i = i_begin, i_end = storage.end(); i != i_end;i++)
+      for(const_iterator i = i_begin, i_end = _storage.end(); i != i_end;i++)
       {
         for(size_type n = 0;n < dimension;n++)
         {
@@ -119,45 +124,64 @@ namespace DO { namespace Sara {
 
     //! Returns the actual N-dimensional size of the sparse multi-array.
     inline coord_type all_actual_sizes() const
-    { return max_key()-min_key(); }
+    {
+      return max_key()-min_key();
+    }
 
     //! Returns the raw size of the storage data.
     inline size_type size() const
-    { return storage.size(); }
+    {
+      return _storage.size();
+    }
 
     //! Returns the capacity of the storage data.
     inline size_type max_size() const
-    { return storage.max_size(); }
+    {
+      return _storage.max_size();
+    }
 
     //! Efficient swapping of two 2D arrays.
     inline void swap(SparseMultiArray& a)
-    { storage.swap(a.storage); }
+    {
+      _storage.swap(a._storage);
+    }
 
     //! Erase all of the elements.
     inline void clear()
-    { storage.clear(); }
+    {
+      _storage.clear();
+    }
 
     //! Assignment operator.
     inline SparseMultiArray& operator=(const SparseMultiArray& a)
-    { storage = a.storage; return *this; }
+    {
+      _storage = a._storage;
+      return *this;
+    }
 
     //! Equality operator.
     inline bool operator==(const SparseMultiArray& a) const
-    { return storage == a.storage; }
+    {
+      return _storage == a._storage;
+    }
 
     //! Inequality operator.
     inline bool operator!=(const SparseMultiArray& a) const
-    { return !(*this == a); }
+    {
+      return !(*this == a);
+    }
 
     //! Mutable Access operator.
     inline value_type& operator[](const coord_type& k)
-    { return storage[k]; }
+    {
+      return _storage[k];
+    }
 
     //! Constant access operator.
     inline const value_type& operator[](const coord_type& k) const
     {
-      const_iterator i = storage.find(k);
-      if (i != storage.end())
+      const_iterator i = _storage.find(k);
+      if (i != _storage.end())
         return i->second;
 
       static value_type default_value = value_type();
@@ -166,22 +190,30 @@ namespace DO { namespace Sara {
 
     //! Begin iterator.
     inline iterator begin()
-    { return storage.begin(); }
+    {
+      return _storage.begin();
+    }
 
     //! Constant begin iterator.
     inline const_iterator begin() const
-    { return storage.begin(); }
+    {
+      return _storage.begin();
+    }
 
     //! End iterator.
     inline iterator end()
-    { return storage.end(); }
+    {
+      return _storage.end();
+    }
 
     //! Constant end iterator.
     inline const_iterator end() const
-    { return storage.end(); }
+    {
+      return _storage.end();
+    }
 
   private:
-    storage_type storage;
+    storage_type _storage;
   };
 
   //! @}

@@ -30,15 +30,18 @@ namespace DO { namespace Sara {
   template <typename T, typename ColorSpace>
   struct ElementTraits<Pixel<T, ColorSpace> >
   {
-    typedef Array<T, ColorSpace::size, 1> value_type; //!< STL-like typedef.
-    typedef size_t size_type; //!< STL-like typedef.
-    typedef value_type * pointer; //!< STL-like typedef.
-    typedef const value_type * const_pointer; //!< STL-like typedef.
-    typedef value_type& reference; //!< STL-like typedef.
-    typedef const value_type& const_reference; //!< STL-like typedef.
-    typedef value_type * iterator; //!< STL-like typedef.
-    typedef const value_type * const_iterator; //!< STL-like typedef.
-    static const bool is_scalar = false; //!< STL-like typedef.
+    //! @{
+    //! \brief STL-like typedefs.
+    using value_type = Array<T, ColorSpace::size, 1>;
+    using size_type = size_t;
+    using pointer = value_type *;
+    using const_pointer = const value_type *;
+    using reference = value_type&;
+    using const_reference = const value_type&;
+    using iterator = value_type *;
+    using const_iterator = const value_type *;
+    static const bool is_scalar = false;
+    //! @}
   };
 
   //! @}

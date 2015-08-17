@@ -25,7 +25,7 @@ TEST(TestDoG, test_compute_dog_extrema)
 {
   // Create a centered gaussian.
   const auto N = 2 * 5 + 1;
-  Image<float> I{ N, N };
+  auto I = Image<float>{ N, N };
   I.array().fill(0);
 
   const auto xc = N / 2.f;

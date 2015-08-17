@@ -28,7 +28,7 @@ namespace DO { namespace Sara {
    {
       va_list args;
       va_start(args, fmt);
-      std::string formatted_message = vformat(fmt, args);
+      auto formatted_message = vformat(fmt, args);
       va_end(args);
       return formatted_message;
    }
