@@ -147,10 +147,9 @@ TEST_F(TestEllipse, DISABLED_test_segment_area)
 
 }
 
-
 TEST_F(TestEllipse, test_rho)
 {
-  Ellipse E(250, 150, to_radian(75.), _center);
+  auto E = Ellipse{ 250, 150, to_radian(75.), _center };
 
   auto a = E.rho(0.);
   auto b = E.rho(M_PI_2);
@@ -160,6 +159,9 @@ TEST_F(TestEllipse, test_rho)
   EXPECT_MATRIX_NEAR(b, expected_b, 1e-3);
 }
 
+TEST_F(TestEllipse, test_orientation)
+{
+}
 
 int main(int argc, char **argv)
 {

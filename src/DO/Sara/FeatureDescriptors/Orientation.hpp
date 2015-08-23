@@ -94,12 +94,12 @@ namespace DO { namespace Sara {
     T sigma = s*blur_factor;
 
     // Patch radius on which the histogram of gradients is performed.
-    int patch_radius = int_round(sigma*patch_truncation_factor);
+    auto patch_radius = int_round(sigma*patch_truncation_factor);
 
     // Accumulate the histogram of orientations.
-    for (int v = -patch_radius; v <= patch_radius; ++v)
+    for (auto v = -patch_radius; v <= patch_radius; ++v)
     {
-      for (int u = -patch_radius; u <= patch_radius; ++u)
+      for (auto u = -patch_radius; u <= patch_radius; ++u)
       {
         if (rounded_x + u < 0 || rounded_x + u >= grad_polar_coords.width() ||
             rounded_y + v < 0 || rounded_y + v >= grad_polar_coords.height())

@@ -29,15 +29,15 @@ namespace DO { namespace Sara {
   class DO_EXPORT Ellipse
   {
   public:
-    //! Default constructor.
-    Ellipse()
-    {
-    }
+    //! \brief Default constructor.
+    Ellipse() = default;
 
-    //! Constructor.
+    //! \brief Constructor.
     Ellipse(double radius1, double radius2, double orientation,
             const Point2d& center)
-      : a_(radius1), b_(radius2), o_(orientation), c_(center) {}
+      : a_(radius1), b_(radius2), o_(orientation), c_(center)
+    {
+    }
 
     double radius1() const { return a_; }
     double radius2() const { return b_; }
@@ -49,20 +49,22 @@ namespace DO { namespace Sara {
     double& orientation() { return o_; }
     Point2d& center() { return c_; }
 
-    //! Get the radial vector at angle $\theta$ w.r.t. orientation $o$ of ellipse.
+    //! \brief Get the radial vector at angle $\theta$ w.r.t. orientation $o$
+    //! of ellipse.
     Vector2d rho(double theta) const;
 
-    //! Get point on ellipse at angle $\theta$ w.r.t. orientation $o$ of ellipse.
+    //! \brief Get point on ellipse at angle $\theta$ w.r.t. orientation $o$ of
+    //! ellipse.
     Point2d operator()(double theta) const;
 
     /*!
-      Retrieve relative orientation of point $p$ w.r.t. orientation
+      \brief Retrieve relative orientation of point $p$ w.r.t. orientation
       $o$ of ellipse.
      */
     DO_EXPORT
     friend double orientation(const Point2d& p, const Ellipse& e);
 
-    //! Polar antiderivative.
+    //! \brief Polar antiderivative.
     friend inline double polar_antiderivative(const Ellipse& e, double theta)
     {
       const double y = (e.b_-e.a_)*sin(2*theta);
@@ -93,7 +95,7 @@ namespace DO { namespace Sara {
     DO_EXPORT
     friend double segment_area(const Ellipse& e, double theta0, double theta1);
 
-    //! Ellipse area.
+    //! \brief Return the ellipse area.
     friend inline double area(const Ellipse& e)
     {
       return M_PI*e.a_*e.b_;
@@ -103,14 +105,14 @@ namespace DO { namespace Sara {
     friend inline Matrix2d shape_matrix(const Ellipse& e)
     {
       const Eigen::Rotation2D<double> R(e.o_);
-      Vector2d D( 1./(e.a_*e.a_), 1./(e.b_*e.b_) );
+      Vector2d D(1. / (e.a_*e.a_), 1. / (e.b_*e.b_));
       return R.matrix()*D.asDiagonal()*R.matrix().transpose();
     }
 
-    //! Checks if point is inside ellipse.
+    //! \brief Check whether the point is inside ellipse.
     friend inline bool inside(const Point2d& p, const Ellipse& e)
     {
-      return (p-e.c_).transpose()*shape_matrix(e)*(p-e.c_) < 1.;
+      return (p - e.c_).transpose()*shape_matrix(e)*(p - e.c_) < 1.;
     }
 
     //! Compute rotated bbox of the ellipse.
