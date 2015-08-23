@@ -35,19 +35,25 @@ namespace DO { namespace Sara {
     //! \brief Constructor.
     Ellipse(double radius1, double radius2, double orientation,
             const Point2d& center)
-      : a_(radius1), b_(radius2), o_(orientation), c_(center)
+      : _a(radius1)
+      , _b(radius2)
+      , _o(orientation)
+      , _c(center)
     {
     }
 
-    double radius1() const { return a_; }
-    double radius2() const { return b_; }
-    double orientation() const { return o_; }
-    const Point2d& center() const { return c_; }
+    //! @{
+    //! \brief Data member accessors.
+    double radius1() const { return _a; }
+    double radius2() const { return _b; }
+    double orientation() const { return _o; }
+    const Point2d& center() const { return _c; }
 
-    double& radius1() { return a_; }
-    double& radius2() { return b_; }
-    double& orientation() { return o_; }
-    Point2d& center() { return c_; }
+    double& radius1() { return _a; }
+    double& radius2() { return _b; }
+    double& orientation() { return _o; }
+    Point2d& center() { return _c; }
+    //! @}
 
     //! \brief Get the radial vector at angle $\theta$ w.r.t. orientation $o$
     //! of ellipse.
@@ -67,21 +73,21 @@ namespace DO { namespace Sara {
     //! \brief Polar antiderivative.
     friend inline double polar_antiderivative(const Ellipse& e, double theta)
     {
-      const double y = (e.b_-e.a_)*sin(2*theta);
-      const double x = (e.b_+e.a_) + (e.b_-e.a_)*cos(2*theta);
-      return e.a_*e.b_*0.5*( theta - atan2(y,x) );
+      const double y = (e._b-e._a)*sin(2*theta);
+      const double x = (e._b+e._a) + (e._b-e._a)*cos(2*theta);
+      return e._a*e._b*0.5*( theta - atan2(y,x) );
     }
 
     /*!
       This function should be used instead to compute the **positive** area
       of an ellipse sector which we define as the region bounded by:
       - the **counter-clockwise** oriented arc going **from** the endpoint
-        $M(\theta0)$ **to** endpoint $M(\theta_1)$.
+        $M(\theta0)$ **to** endpoint $M(\thet_a1)$.
       - line segments connecting the center of the ellipse and the endpoints
         of the arc.
 
-      $\theta_0$ and $\theta_1$ are required to be in the range $]\pi, \pi]$ but
-      it does not matter if $\theta_0 > \theta_1$.
+      $\thet_a0$ and $\thet_a1$ are required to be in the range $]\pi, \pi]$ but
+      it does not matter if $\thet_a0 > \thet_a1$.
      */
     friend double sector_area(const Ellipse& e, double theta0, double theta1)
     {
@@ -98,21 +104,21 @@ namespace DO { namespace Sara {
     //! \brief Return the ellipse area.
     friend inline double area(const Ellipse& e)
     {
-      return M_PI*e.a_*e.b_;
+      return M_PI*e._a*e._b;
     }
 
     //! Shape matrix.
     friend inline Matrix2d shape_matrix(const Ellipse& e)
     {
-      const Eigen::Rotation2D<double> R(e.o_);
-      Vector2d D(1. / (e.a_*e.a_), 1. / (e.b_*e.b_));
+      const Eigen::Rotation2D<double> R(e._o);
+      Vector2d D(1. / (e._a*e._a), 1. / (e._b*e._b));
       return R.matrix()*D.asDiagonal()*R.matrix().transpose();
     }
 
     //! \brief Check whether the point is inside ellipse.
     friend inline bool inside(const Point2d& p, const Ellipse& e)
     {
-      return (p - e.c_).transpose()*shape_matrix(e)*(p - e.c_) < 1.;
+      return (p - e._c).transpose()*shape_matrix(e)*(p - e._c) < 1.;
     }
 
     //! Compute rotated bbox of the ellipse.
@@ -124,9 +130,9 @@ namespace DO { namespace Sara {
     friend std::ostream& operator<<(std::ostream& os, const Ellipse& e);
 
   private:
-    double a_, b_;
-    double o_;
-    Point2d c_;
+    double _a, _b;
+    double _o;
+    Point2d _c;
   };
 
   //! Compute the ellipse from the conic equation
