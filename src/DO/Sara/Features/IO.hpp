@@ -84,7 +84,7 @@ namespace DO { namespace Sara {
       file << feat.x() << ' ' << feat.y() << ' ';
       file << Map<const RowVector4f>(feat.shape_matrix().data()) << ' ';
       file << feat.orientation() << ' ';
-      file << double(feat.type()) << ' ';
+      file << int(feat.type()) << ' ';
 
       file << Map<const Matrix<T, 1, Dynamic> >(
         descriptors[static_cast<int>(i)].data(),
