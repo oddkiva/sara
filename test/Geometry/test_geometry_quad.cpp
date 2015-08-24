@@ -23,21 +23,36 @@ using namespace DO::Sara;
 class TestQuad : public TestPolygon {};
 
 
+TEST_F(TestQuad, test_constructor)
+{
+  const Point2d a{ 0, 0 };
+  const Point2d b{ 1, 0 };
+  const Point2d c{ 1, 1 };
+  const Point2d d{ 0, 1 };
+
+  const auto q1 = Quad{ a, b, c, d };
+  const auto q2 = Quad{ BBox{ a, c } };
+
+  EXPECT_EQ(q1, q2);
+}
+
 TEST_F(TestQuad, test_point_inside_quad)
 {
-  BBox bbox(_p1, _p2);
-  Quad quad(bbox);
+  const auto bbox = BBox{ _p1, _p2 };
+  const auto quad = Quad{ bbox };
 
   EXPECT_NEAR(area(bbox), area(quad), 1e-10);
 
   auto predicate = [&](const Point2d& p) {
     return inside(p, quad);
   };
+
   auto groundTruth = [&](const Point2d& p) {
     return
       _p1.x() <= p.x() && p.x() < _p2.x() &&
       _p1.y() <= p.y() && p.y() < _p2.y() ;
   };
+
   sweep_check(predicate, groundTruth);
 }
 
