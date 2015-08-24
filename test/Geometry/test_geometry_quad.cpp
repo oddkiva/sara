@@ -20,6 +20,23 @@ using namespace std;
 using namespace DO::Sara;
 
 
+struct CoutRedirect
+{
+  CoutRedirect(std::streambuf * new_buffer)
+    : old(std::cout.rdbuf(new_buffer))
+  {
+  }
+
+  ~CoutRedirect()
+  {
+    std::cout.rdbuf(old);
+  }
+
+private:
+  std::streambuf * old;
+};
+
+
 class TestQuad : public TestPolygon {};
 
 
@@ -47,13 +64,13 @@ TEST_F(TestQuad, test_point_inside_quad)
     return inside(p, quad);
   };
 
-  auto groundTruth = [&](const Point2d& p) {
+  auto ground_truth = [&](const Point2d& p) {
     return
       _p1.x() <= p.x() && p.x() < _p2.x() &&
       _p1.y() <= p.y() && p.y() < _p2.y() ;
   };
 
-  sweep_check(predicate, groundTruth);
+  sweep_check(predicate, ground_truth);
 }
 
 int main(int argc, char** argv)
