@@ -203,9 +203,9 @@ Set<OERegion, RealDescriptor> compute_sift_keypoints(const Image<float>& image)
 
 bool check_descriptors(const DescriptorMatrix<float>& descriptors)
 {
-  for (int i = 0; i < descriptors.size(); ++i)
+  for (size_t i = 0; i < descriptors.size(); ++i)
   {
-    for (int j = 0; j < descriptors.dimension(); ++j)
+    for (size_t j = 0; j < descriptors.dimension(); ++j)
     {
       if (!isfinite(descriptors[i](j)))
       {

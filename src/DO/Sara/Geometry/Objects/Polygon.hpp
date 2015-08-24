@@ -25,6 +25,7 @@ namespace DO { namespace Sara {
     using self_type = SmallPolygon;
 
   public:
+    using size_type = std::size_t;
     using point_type = Point2d;
     using line_type = Vector3d;
     using iterator =  point_type *;
@@ -54,12 +55,12 @@ namespace DO { namespace Sara {
 
     //! @{
     //! \brief Point accessors.
-    inline point_type& operator[](int i)
+    inline point_type& operator[](size_type i)
     {
       return _v[i];
     }
 
-    inline const point_type& operator[](int i) const
+    inline const point_type& operator[](size_type i) const
     {
       return _v[i];
     }
@@ -137,7 +138,7 @@ namespace DO { namespace Sara {
   {
     // Computation derived from Green's formula
     double A = 0.;
-    for (int i1 = N-1, i2 = 0; i2 < N; i1=i2++)
+    for (std::size_t i1 = N-1, i2 = 0; i2 < N; i1=i2++)
     {
       Matrix2d M;
       M.col(0) = polygon[i1];
@@ -158,7 +159,7 @@ namespace DO { namespace Sara {
   bool inside(const Point2d& p, const SmallPolygon<N>& poly)
   {
     bool c = false;
-    for (int i = 0, j = N-1; i < N; j = i++)
+    for (std::size_t i = 0, j = N-1; i < N; j = i++)
     {
       if ( (poly[i].y() > p.y()) != (poly[j].y() > p.y()) &&
            (p.x() <   (poly[j].x()-poly[i].x()) * (p.y()-poly[i].y())

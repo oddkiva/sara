@@ -200,7 +200,7 @@ namespace DO { namespace Sara {
                const ImagePyramid<Vector2f>& gradient_polar_coords) const
     {
       DescriptorMatrix<float> sifts{ features.size(), Dim };
-      for (int i = 0; i < features.size(); ++i)
+      for (size_t i = 0; i < features.size(); ++i)
       {
         sifts[i] = this->operator()(
           features[i],
