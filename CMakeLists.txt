@@ -8,7 +8,7 @@ if (POLICY CMP0020)
   cmake_policy(SET CMP0020 OLD)
 endif (POLICY CMP0020)
 
-# Configure DO++: put the versions.
+# Set Sara Library version.
 configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DO_${DO_PROJECT_NAME}_version.cmake.in
   ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DO_${DO_PROJECT_NAME}_version.cmake @ONLY)
