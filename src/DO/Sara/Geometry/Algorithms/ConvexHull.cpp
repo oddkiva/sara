@@ -19,47 +19,44 @@ using namespace std;
 namespace DO { namespace Sara { namespace Detail {
 
   static
-  inline bool compare_y_coord(const PtCotg& p, const PtCotg& q)
-  {
-    if (p.first.y() < q.first.y())
-      return true;
-    if (p.first.y() == q.first.y() && p.first.x() < q.first.x())
-      return true;
-    return false;
-  }
-
-  static
-  inline bool compare_cotan(const pair<Point2d, double>& p,
-                            const pair<Point2d, double>& q)
-  {
-    return p.second > q.second;
-  }
-
-  static
-  void sort_points_by_polar_angle(PtCotg *out, const Point2d *in, int numPoints)
+  void sort_points_by_polar_angle(PtCotg *out, const Point2d *in, size_t num_points)
   {
     // Copy.
-    for (int i = 0; i < numPoints; ++i)
+    for (size_t i = 0; i < num_points; ++i)
       out[i].first = in[i];
+
     // Find origin and swap with first element.
     PtCotg *origin;
-    origin = min_element(out, out+numPoints, compare_y_coord);
+    origin = min_element(out, out + num_points, [](const PtCotg& p, const PtCotg& q)
+    {
+      if (p.first.y() < q.first.y())
+        return true;
+      if (p.first.y() == q.first.y() && p.first.x() < q.first.x())
+        return true;
+      return false;
+    });
+
     swap(*origin, *out);
     // Compute the polar angle w.r.t. origin and sort by polar angle.
     out[0].second = numeric_limits<double>::infinity();
-    for (int i = 1; i < numPoints; ++i)
+    for (size_t i = 1; i < num_points; ++i)
     {
       Vector2d diff(out[i].first - out[0].first);
       out[i].second = diff.x()/diff.y();
     }
     // Compute the polar angle w.r.t. origin and sort by polar angle.
-    sort(out, out+numPoints, compare_cotan);
+    sort(out, out+num_points, [](const pair<Point2d, double>& p,
+                                const pair<Point2d, double>& q)
+    {
+      return p.second > q.second;
+    });
+
   }
 
-  void sort_points_by_polar_angle(Point2d *inout, PtCotg *work, int numPoints)
+  void sort_points_by_polar_angle(Point2d *inout, PtCotg *work, size_t num_points)
   {
-    sort_points_by_polar_angle(work, inout, numPoints);
-    for (int i = 0; i < numPoints; ++i)
+    sort_points_by_polar_angle(work, inout, num_points);
+    for (size_t i = 0; i < num_points; ++i)
       inout[i] = work[i].first;
   }
 
@@ -79,22 +76,24 @@ namespace DO { namespace Sara {
       return points;
 
     // Sort by polar angle.
-    vector<PtCotg> ptCotgs(points.size());
-    sort_points_by_polar_angle(&ptCotgs[0], &points[0], points.size());
+    vector<PtCotg> point_cotangents_pairs(points.size());
+    sort_points_by_polar_angle(&point_cotangents_pairs[0], &points[0], points.size());
 
     // Weed out the points inside the convex hull.
-    std::vector<Point2d> ch;
-    ch.reserve(points.size());
-    ch.push_back(ptCotgs[0].first);
-    ch.push_back(ptCotgs[1].first);
-    for (size_t i = 2; i != ptCotgs.size(); ++i)
+    std::vector<Point2d> convex_hull;
+    convex_hull.reserve(points.size());
+    convex_hull.push_back(point_cotangents_pairs[0].first);
+    convex_hull.push_back(point_cotangents_pairs[1].first);
+    for (size_t i = 2; i != point_cotangents_pairs.size(); ++i)
     {
-      while (ccw(ch[ch.size()-2], ch[ch.size()-1], ptCotgs[i].first) <= 0)
-        ch.pop_back();
-      ch.push_back(ptCotgs[i].first);
+      while (ccw(convex_hull[convex_hull.size()-2],
+                 convex_hull[convex_hull.size()-1],
+                 point_cotangents_pairs[i].first) <= 0)
+        convex_hull.pop_back();
+      convex_hull.push_back(point_cotangents_pairs[i].first);
     }
 
-    return ch;
+    return convex_hull;
   }
 
 } /* namespace Sara */

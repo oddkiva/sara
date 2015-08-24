@@ -30,16 +30,16 @@ EventScheduler *global_scheduler;
 class TestPaintingCommands: public testing::Test
 {
 protected:
-  Window test_window_;
+  Window _test_window;
 
   TestPaintingCommands()
   {
-    test_window_ = create_window(300, 300);
+    _test_window = create_window(300, 300);
   }
 
   virtual ~TestPaintingCommands()
   {
-    close_window(test_window_);
+    close_window(_test_window);
   }
 };
 
@@ -92,7 +92,7 @@ TEST_F(TestPaintingCommands, test_draw_string)
 {
   EXPECT_TRUE(
     draw_string(10, 10, "example string", Red8, 14, 0.5,
-    true, false, false));
+                true, false, false));
 }
 
 TEST_F(TestPaintingCommands, test_draw_arrow)

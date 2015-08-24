@@ -30,13 +30,15 @@ namespace DO { namespace Sara {
 
     //! \brief Constructor from the BBox end points.
     BBox(const Point2d& top_left, const Point2d& bottom_right)
-      : _top_left(top_left), _bottom_right(bottom_right)
+      : _top_left(top_left)
+      , _bottom_right(bottom_right)
     {
       if ( _top_left.x() > _bottom_right.x() ||
            _top_left.y() > _bottom_right.y() )
       {
-        const char *msg = "Top-left and bottom-right corners are wrong!";
-        throw std::logic_error(msg);
+        throw std::logic_error{
+          "Top-left and bottom-right corners are wrong!"
+        };
       }
     }
 
@@ -49,6 +51,7 @@ namespace DO { namespace Sara {
         const char *msg = "The array of points seems wrong.";
         throw std::logic_error(msg);
       }
+
       _top_left = _bottom_right = *begin;
       for (const Point2d *p = begin; p != end; ++p)
       {
@@ -100,6 +103,21 @@ namespace DO { namespace Sara {
     Point2d center() const { return 0.5*(_top_left + _bottom_right); }
 
     //! @{
+    //! \brief Equality comparison operator.
+    bool inline operator==(const BBox& other) const
+    {
+      return
+        _top_left == other._top_left &&
+        _bottom_right == other._bottom_right;
+    }
+
+    bool inline operator!=(const BBox& other) const
+    {
+      return !this->operator==(other);
+    }
+    //! @}
+
+    //! @{
     //! \brief Convenience functions.
     static BBox infinite()
     {
@@ -111,8 +129,7 @@ namespace DO { namespace Sara {
 
     static BBox zero()
     {
-      BBox b(Point2d::Zero(), Point2d::Zero());
-      return b;
+      return BBox{ Point2d::Zero(), Point2d::Zero() };
     }
     //! @}
 

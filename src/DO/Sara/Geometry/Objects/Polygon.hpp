@@ -19,21 +19,23 @@
 
 namespace DO { namespace Sara {
 
-  template <int N>
+  template <std::size_t N>
   class SmallPolygon
   {
+    using self_type = SmallPolygon;
+
   public:
-    typedef Point2d Point;
-    typedef Vector3d Line;
-    typedef Point * iterator;
-    typedef const Point * const_iterator;
+    using size_type = std::size_t;
+    using point_type = Point2d;
+    using line_type = Vector3d;
+    using iterator =  point_type *;
+    using const_iterator = const point_type *;
 
+    //! @{
     //! Constructors
-    inline SmallPolygon()
-    {
-    }
+    SmallPolygon() = default;
 
-    inline SmallPolygon(const Point *vertices)
+    inline SmallPolygon(const point_type *vertices)
     {
       copy_vertices(vertices);
     }
@@ -42,69 +44,86 @@ namespace DO { namespace Sara {
     {
       copy(other);
     }
+    //! @}
 
-    //! Assignment operator
+    //! \brief Assignment operator
     inline SmallPolygon& operator=(const SmallPolygon& other)
     {
       copy(other);
       return *this;
     }
 
-    //! Mutable point accessors.
-    inline Point& operator[](int i)
+    //! @{
+    //! \brief Point accessors.
+    inline point_type& operator[](size_type i)
     {
-      return v_[i];
+      return _v[i];
     }
 
-    //! Immutable point accessor
-    inline const Point& operator[](int i) const
+    inline const point_type& operator[](size_type i) const
     {
-      return v_[i];
+      return _v[i];
+    }
+    //! @}
+
+    //! @{
+    //! \brief iterators.
+    inline point_type * begin()
+    {
+      return _v;
     }
 
-    //! iterators
-    inline Point * begin()
+    inline point_type * end()
     {
-      return v_;
+      return _v+N;
     }
 
-    inline Point * end()
+    inline const point_type * begin() const
     {
-      return v_+N;
+      return _v;
     }
 
-    inline const Point * begin() const
+    inline const point_type * end() const
     {
-      return v_;
+      return _v+N;
     }
+    //! @}
 
-    inline const Point * end() const
-    {
-      return v_+N;
-    }
-
-    inline int num_vertices() const
+    //! \brief return the number of vertices.
+    inline std::size_t num_vertices() const
     {
       return N;
     }
 
-  protected:
-    inline void copy_vertices(const Point2d *vertices)
+    //! \brief Equality comparison.
+    inline bool operator==(const self_type& other) const
     {
-      std::copy(vertices, vertices+N, v_);
+      return std::equal(_v, _v + N, other._v);
     }
 
-    inline void copy(const SmallPolygon& other)
+    //! \brief Inequality comparison.
+    inline bool operator!=(const self_type& other) const
     {
-      copy_vertices(other.v_);
+      return !this->operator==(other);
     }
 
   protected:
-    Point v_[N];
+    inline void copy_vertices(const_iterator vertices)
+    {
+      std::copy(vertices, vertices+N, _v);
+    }
+
+    inline void copy(const self_type& other)
+    {
+      copy_vertices(other._v);
+    }
+
+  protected:
+    point_type _v[N];
   };
 
   //! I/O ostream operator.
-  template <int N>
+  template <std::size_t N>
   std::ostream& operator<<(std::ostream& os, const SmallPolygon<N>& poly)
   {
     typename SmallPolygon<N>::const_iterator p = poly.begin();
@@ -114,12 +133,12 @@ namespace DO { namespace Sara {
   }
 
   //! Utility functions.
-  template <int N>
+  template <std::size_t N>
   double signed_area(const SmallPolygon<N>& polygon)
   {
     // Computation derived from Green's formula
     double A = 0.;
-    for (int i1 = N-1, i2 = 0; i2 < N; i1=i2++)
+    for (std::size_t i1 = N-1, i2 = 0; i2 < N; i1=i2++)
     {
       Matrix2d M;
       M.col(0) = polygon[i1];
@@ -129,18 +148,18 @@ namespace DO { namespace Sara {
     return 0.5*A;
   }
 
-  template <int N>
+  template <std::size_t N>
   inline double area(const SmallPolygon<N>& polygon)
   {
     return std::abs(signed_area(polygon));
   }
 
   //! Even-odd rule implementation.
-  template <int N>
+  template <std::size_t N>
   bool inside(const Point2d& p, const SmallPolygon<N>& poly)
   {
     bool c = false;
-    for (int i = 0, j = N-1; i < N; j = i++)
+    for (std::size_t i = 0, j = N-1; i < N; j = i++)
     {
       if ( (poly[i].y() > p.y()) != (poly[j].y() > p.y()) &&
            (p.x() <   (poly[j].x()-poly[i].x()) * (p.y()-poly[i].y())
@@ -150,7 +169,7 @@ namespace DO { namespace Sara {
     return c;
   }
 
-  template <int N>
+  template <std::size_t N>
   bool degenerate(const SmallPolygon<N>& poly,
                   double eps = std::numeric_limits<double>::epsilon())
   {

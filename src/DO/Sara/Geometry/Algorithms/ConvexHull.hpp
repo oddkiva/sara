@@ -18,7 +18,7 @@ namespace DO { namespace Sara { namespace Detail {
     typedef std::pair<Point2d, double> PtCotg;
 
     void sort_points_by_polar_angle(Point2d *points, PtCotg *workArray,
-                                int numPoints);
+                                    std::size_t num_points);
 
 } /* namespace Detail */
 } /* namespace Sara */

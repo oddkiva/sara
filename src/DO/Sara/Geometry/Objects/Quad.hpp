@@ -24,11 +24,14 @@ namespace DO { namespace Sara {
 
   class DO_EXPORT Quad : public SmallPolygon<4>
   {
-    typedef SmallPolygon<4> Base;
   public:
+    //! @{
+    //! \brief Constructors.
     Quad(const BBox& bbox);
+
     Quad(const Point2d& a, const Point2d& b,
          const Point2d& c, const Point2d& d);
+    //! @}
   };
 
 } /* namespace Sara */

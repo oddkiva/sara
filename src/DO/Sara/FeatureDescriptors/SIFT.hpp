@@ -29,7 +29,7 @@ namespace DO { namespace Sara {
   {
   public: /* interface. */
     enum { Dim = N*N*O };
-    typedef Matrix<float, Dim, 1> SIFTDescriptor;
+    using SIFTDescriptor = Matrix<float, Dim, 1>;
 
     //! \brief Constructor.
     ComputeSIFTDescriptor(float bin_scale_unit_length = 3.f,
@@ -86,7 +86,7 @@ namespace DO { namespace Sara {
         Let us initialize the SIFT descriptor consisting of the NxN histograms
         $\mathbf{h}_{i,j}$, each in $\mathbf{R}^O$ as follows.
        */
-      SIFTDescriptor h(SIFTDescriptor::Zero());
+      SIFTDescriptor h{ SIFTDescriptor::Zero() };
 
       /*
         In the rescaled and oriented coordinate frame bound to the patch $P(k)$,
@@ -130,7 +130,7 @@ namespace DO { namespace Sara {
       //   $P(x,y,\sigma,\theta)$ with inverse transform $T = 1/l R_\theta^T$
       Matrix2f T;
       T << cos(theta), sin(theta),
-        -sin(theta), cos(theta);
+          -sin(theta), cos(theta);
       T /= l;
       // Loop to perform interpolation
       const int rounded_r = int_round(r);
@@ -142,7 +142,7 @@ namespace DO { namespace Sara {
         {
           // Compute the coordinates in the rescaled and oriented coordinate
           // frame bound to patch $P(k)$.
-          Vector2f pos( T*Vector2f(u,v) );
+          Vector2f pos{ T*Vector2f(u, v) };
           // subpixel correction?
           /*pos.x() -= (x - rounded_x);
           pos.y() -= (y - rounded_y);*/
@@ -188,23 +188,23 @@ namespace DO { namespace Sara {
 
     //! Helper member function.
     SIFTDescriptor operator()(const OERegion& f,
-                              const Image<Vector2f>& gradPolar) const
+                              const Image<Vector2f>& grad_polar_coords) const
     {
-      return this->operator()(f.x(), f.y(), f.scale(), f.orientation(), gradPolar);
+      return this->operator()(f.x(), f.y(), f.scale(), f.orientation(), grad_polar_coords);
     }
 
     //! Helper member function.
     DescriptorMatrix<float>
     operator()(const std::vector<OERegion>& features,
                const std::vector<Point2i>& scale_octave_pairs,
-               const ImagePyramid<Vector2f>& gradPolars) const
+               const ImagePyramid<Vector2f>& gradient_polar_coords) const
     {
-      DescriptorMatrix<float> sifts(int(features.size()), Dim);
-      for (int i = 0; i < features.size(); ++i)
+      DescriptorMatrix<float> sifts{ features.size(), Dim };
+      for (size_t i = 0; i < features.size(); ++i)
       {
         sifts[i] = this->operator()(
           features[i],
-          gradPolars(scale_octave_pairs[i](0), scale_octave_pairs[i](1)) );
+          gradient_polar_coords(scale_octave_pairs[i](0), scale_octave_pairs[i](1)) );
       }
       return sifts;
     }
@@ -212,7 +212,7 @@ namespace DO { namespace Sara {
   public: /* debugging functions. */
     //! Check the grid on which we are drawing.
     void draw_grid(float x, float y, float sigma, float theta,
-                   float octScaleFactor, int penWidth = 1)
+                   float octave_scale_factor, int pen_width = 1)
     {
       const float lambda = 3.f;
       const float l = lambda*sigma;
@@ -224,17 +224,17 @@ namespace DO { namespace Sara {
       T *= l;
       for (int v = 0; v < N+1; ++v)
         for (int u = 0; u < N+1; ++u)
-          grid[u][v] = (Vector2f(x,y) + T*Vector2f(u-N/2.f,v-N/2.f))*octScaleFactor;
+          grid[u][v] = (Vector2f{ x, y } + T*Vector2f{ u - N / 2.f, v - N / 2.f })*octave_scale_factor;
       for (int i = 0; i < N+1; ++i)
-        draw_line(grid[0][i], grid[N][i], Green8, penWidth);
+        draw_line(grid[0][i], grid[N][i], Green8, pen_width);
       for (int i = 0; i < N+1; ++i)
-        draw_line(grid[i][0], grid[i][N], Green8, penWidth);
+        draw_line(grid[i][0], grid[i][N], Green8, pen_width);
 
       Vector2f a(x,y);
-      a *= octScaleFactor;
+      a *= octave_scale_factor;
       Vector2f b;
-      b = a+octScaleFactor*N/2.f*T*Vector2f(1,0);
-      draw_line(a, b, Red8, penWidth+2);
+      b = a + octave_scale_factor*N / 2.f*T*Vector2f(1, 0);
+      draw_line(a, b, Red8, pen_width+2);
     }
 
   private: /* member functions. */
@@ -264,23 +264,23 @@ namespace DO { namespace Sara {
       int orii = int(ori);
       for (int dy = 0; dy < 2; ++dy)
       {
-        int y = yi+dy;
+        int y = yi + dy;
         if (y < 0 || y >= N)
           continue;
-        float wy = (dy == 0) ? 1.f-yfrac : yfrac;
+        float wy = (dy == 0) ? 1.f - yfrac : yfrac;
         for (int dx = 0; dx < 2; ++dx)
         {
           int x = xi+dx;
           if (x < 0 || x >= N)
             continue;
-          float wx = (dx == 0) ? 1.f-xfrac : xfrac;
+          float wx = (dx == 0) ? 1.f - xfrac : xfrac;
           for (int dori = 0; dori < 2; ++dori)
           {
-            int o = (orii+dori)%O;
-            float wo = (dori == 0) ? 1.f-orifrac : orifrac;
+            int o = (orii + dori) % O;
+            float wo = (dori == 0) ? 1.f - orifrac : orifrac;
             // Trilinear interpolation:
             // SIFT(y,x,o) += wy*wx*wo*weight*mag;
-            h[at(y,x,o)] += wy*wx*wo*weight*mag;
+            h[at(y, x, o)] += wy*wx*wo*weight*mag;
           }
         }
       }
