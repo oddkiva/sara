@@ -20,10 +20,7 @@
 using namespace DO::Sara;
 
 
-// N.B.: this is not needed but very **STRANGELY**, if we don't add this,
-// the program seg-faults in Travis CI. We need to sort this out because this
-// issue is completely both unfathomable and ridiculous.
-EventScheduler *global_scheduler;
+EventScheduler * global_scheduler;
 
 
 TEST(TestWindow, test_open_and_close_window)

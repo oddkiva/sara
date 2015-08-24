@@ -93,11 +93,13 @@ namespace DO { namespace Sara {
   template <typename T, int N = 2>
   struct Laplacian
   {
-    typedef Matrix<int, N, 1> coords_type;
-    typedef Image<T, N> scalar_field_type, return_type;
-    typedef typename scalar_field_type::array_iterator array_iterator;
-    typedef typename scalar_field_type::const_array_iterator
-      const_array_iterator;
+    using coords_type = Matrix<int, N, 1>;
+    using scalar_field_type = Image<T, N>;
+    using array_iterator = typename scalar_field_type::array_iterator;
+    using const_array_iterator =
+      typename scalar_field_type::const_array_iterator;
+
+    using return_type = scalar_field_type;
 
     inline Laplacian(const scalar_field_type& scalar_field)
       : _scalar_field(scalar_field)
@@ -237,35 +239,24 @@ namespace DO { namespace Sara {
   template <typename T, int N>
   Matrix<T,N,1> gradient(const Image<T, N>& src, const Matrix<int, N, 1>& p)
   {
-    Matrix<T,N,1> g;
-    Gradient<T, N> computeGradient(src);
-    computeGradient(g, p);
+    Matrix<T, N, 1> g{};
+    Gradient<T, N> compute_gradient{ src };
+    compute_gradient(g, p);
     return g;
   }
 
   /*!
     \brief Gradient computation
-    @param[in,out] dst gradient vector field
-    @param[in] src scalar field
-   */
-  template <typename T, int N>
-  void gradient(const Image<Matrix<T,N,1>, N>& src, Image<T, N>& dst)
-  {
-    Gradient<T, N> computeGradient(src);
-    computeGradient(dst);
-  }
-
-  /*!
-    \brief Gradient computation
-    @param[in] src scalar field
+    @param[in] in scalar field
     \return gradient vector field
    */
   template <typename T, int N>
-  Image<Matrix<T,N,1>, N> gradient(const Image<T, N>& src)
+  Image<Matrix<T, N, 1>, N> gradient(const Image<T, N>& in)
   {
-    Image<Matrix<T,N,1>, N> g;
-    gradient(g, src);
-    return g;
+    Image<Matrix<T, N, 1>, N> out{};
+    Gradient<T, N> compute_gradient{ in };
+    compute_gradient(out);
+    return out;
   }
 
   /*!
@@ -273,41 +264,30 @@ namespace DO { namespace Sara {
     @param[in] src input grayscale image.
     @param[in] p position in the image.
     \return laplacian value
-   */
+  */
   template <typename T, int N>
   T laplacian(const Image<T, N>& src, const Matrix<int, N, 1>& p)
   {
-    Laplacian<T, N> computeLaplacian(src);
-    return computeLaplacian(p);
+    Laplacian<T, N> compute_laplacian(src);
+    return compute_laplacian(p);
   }
 
   /*!
     \brief Laplacian computation
-    @param[in,out] dst Laplacian field.
-    @param[in] src scalar field.
-   */
-  template <typename T, int N>
-  void laplacian(const Image<T, N>& src, Image<T, N>& dst)
-  {
-    Laplacian<T, N> computeLaplacian(src);
-    computeLaplacian(dst);
-  }
-
-  /*!
-    \brief Laplacian computation
-    @param[in] src scalar field.
+    @param[in] in scalar field.
     \return laplacian field.
    */
   template <typename T, int N>
-  Image<T, N> laplacian(const Image<T, N>& src)
+  Image<T, N> laplacian(const Image<T, N>& in)
   {
-    Image<T, N> l;
-    laplacian(src, l);
-    return l;
+    Image<T, N> out{};
+    Laplacian<T, N> compute_laplacian(in);
+    compute_laplacian(out);
+    return out;
   }
 
   /*!
-    \brief Hessian matrix computation
+    \brief Compute the Hessian matrix at a specified position.
     @param[in] src scalar field.
     @param[in] p position in the image.
     \return Hessian matrix.
@@ -315,36 +295,24 @@ namespace DO { namespace Sara {
   template <typename T, int N>
   Matrix<T,N,N> hessian(const Image<T, N>& src, const Matrix<int, N, 1>& p)
   {
-    Matrix<T,N,N> H;
-    Hessian<T, N> compute_hessian(src);
+    Matrix<T, N, N> H{};
+    Hessian<T, N> compute_hessian{ src };
     compute_hessian(H, p);
     return H;
   }
 
   /*!
-    \brief Hessian matrix computation
-    @param[in] src scalar field.
-    @param[in,out] dst Hessian matrix field
-   */
-  template <typename T, int N>
-  void hessian(const Image<T,N>& src, Image<Matrix<T,N,N>, N>& dst)
-  {
-    Hessian<T, N> compute_hessian(src);
-    compute_hessian(dst);
-  }
-
-  /*!
-    \brief Hessian matrix computation
-    @param[in] src scalar field.
+    \brief Compute the Hessian matrix field.
+    @param[in] in scalar field.
     \return Hessian matrix field
    */
   template <typename T, int N>
-  Image<Matrix<T,N,N> > hessian(const Image<T, N>& src)
+  Image<Matrix<T,N,N> > hessian(const Image<T, N>& in)
   {
-    Image<Matrix<T, N, N> > h;
-    Hessian<T, N> compute_hessian(src);
-    compute_hessian(h);
-    return h;
+    Image<Matrix<T, N, N> > out{};
+    Hessian<T, N> compute_hessian{ in };
+    compute_hessian(out);
+    return out;
   }
 
   //! @}

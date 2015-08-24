@@ -180,9 +180,9 @@ namespace DO { namespace Sara {
 
   //! \brief The image class.
   template <typename T, int N>
-  class Image : public ImageBase < MultiArray<T, N, ColMajor> >
+  class Image : public ImageBase<MultiArray<T, N, ColMajor>>
   {
-    using base_type = ImageBase < MultiArray<T, N, ColMajor> > ;
+    using base_type = ImageBase<MultiArray<T, N, ColMajor>>;
 
   public: /* interface */
     using vector_type = typename base_type::vector_type;

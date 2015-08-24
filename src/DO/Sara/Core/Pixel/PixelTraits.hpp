@@ -12,7 +12,6 @@
 #ifndef DO_SARA_CORE_PIXEL_PIXELTRAITS_HPP
 #define DO_SARA_CORE_PIXEL_PIXELTRAITS_HPP
 
-
 #include <functional>
 #include <stdexcept>
 
@@ -26,9 +25,9 @@ namespace DO { namespace Sara {
   template <typename T>
   struct PixelTraits
   {
-    typedef T channel_type;
+    using channel_type = T;
 
-    typedef T pixel_type;
+    using pixel_type = T;
 
     //! \brief Return zero color value.
     static inline pixel_type zero()
@@ -52,7 +51,7 @@ namespace DO { namespace Sara {
     template <typename U>
     struct Cast
     {
-      typedef U pixel_type;
+      using pixel_type = U;
 
       static inline U apply(T value)
       {
@@ -62,11 +61,11 @@ namespace DO { namespace Sara {
   };
 
   template <typename T, int M, int N>
-  struct PixelTraits<Matrix<T, M, N> >
+  struct PixelTraits<Matrix<T, M, N>>
   {
-    typedef T channel_type;
+    using channel_type = T;
 
-    typedef Matrix<T, M, N> pixel_type;
+    using pixel_type = Matrix<T, M, N>;
 
     //! \brief Return zero color value.
     static inline pixel_type zero()
@@ -96,7 +95,7 @@ namespace DO { namespace Sara {
     template <typename U>
     struct Cast
     {
-      typedef Matrix<U, M, N> pixel_type;
+      using pixel_type = Matrix<U, M, N>;
 
       static inline Matrix<U, M, N> apply(const Matrix<T, M, N>& value)
       {
@@ -106,11 +105,11 @@ namespace DO { namespace Sara {
   };
 
   template <typename T, typename ColorSpace>
-  struct PixelTraits<Pixel<T, ColorSpace> >
+  struct PixelTraits<Pixel<T, ColorSpace>>
   {
-    typedef T channel_type;
+    using channel_type = T;
 
-    typedef Pixel<T, ColorSpace> pixel_type;
+    using pixel_type = Pixel<T, ColorSpace>;
 
     //! \brief Return zero color value.
     static inline pixel_type zero()
@@ -140,7 +139,7 @@ namespace DO { namespace Sara {
     template <typename U>
     struct Cast
     {
-      typedef Pixel<U, ColorSpace> pixel_type;
+      using pixel_type = Pixel<U, ColorSpace>;
 
       static inline Pixel<U, ColorSpace> apply(const Pixel<T, ColorSpace>& value)
       {

@@ -36,9 +36,9 @@ protected:
   template <typename TestPred, typename GroundTruth>
   void sweep_check(const TestPred& pred, const GroundTruth& ground_truth)
   {
-    for (int y = -_height; y < _height; ++y)
+    for (int y = 0; y < _height; ++y)
     {
-      for (int x = -_width; x < _width; ++x)
+      for (int x = 0; x < _width; ++x)
       {
         Point2d p(x,y);
         EXPECT_EQ(ground_truth(p), pred(p));
@@ -50,9 +50,9 @@ protected:
   int sweep_count_pixels(const TestPred& pred)
   {
     int quantity = 0;
-    for (int y = -_height; y < _height; ++y)
+    for (int y = 0; y < _height; ++y)
     {
-      for (int x = -_width; x < _width; ++x)
+      for (int x = 0; x < _width; ++x)
       {
         Point2d p(x,y);
         if (pred(p))

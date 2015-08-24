@@ -27,10 +27,26 @@ namespace DO { namespace Sara {
    */
 
 
-  //! Image pyramid parameters which discretizes the Gaussian scale-space.
+  //! Image pyramid parameters used to discretize the Gaussian scale-space.
   class ImagePyramidParams
   {
   public:
+    //! \brief Constructor.
+    ImagePyramidParams(int first_octave_index = -1,
+                       int num_scales_per_octave = 3+3,
+                       double scale_geometric_factor = std::pow(2., 1./3.),
+                       int image_padding_size = 1,
+                       double scale_camera = 0.5,
+                       double scale_initial = 1.6)
+    {
+      _scale_camera = scale_camera;
+      _scale_initial = scale_initial;
+      _num_scales_per_octave = num_scales_per_octave;
+      _scale_geometric_factor = scale_geometric_factor;
+      _image_padding_size = image_padding_size;
+      _first_octave_index = first_octave_index;
+    }
+
     /*!
       Let us consider an image \f$I\f$. In the scale-space framework, we work
       with the scale-space image function
@@ -79,7 +95,7 @@ namespace DO { namespace Sara {
         I_{k\sigma} - I_{\sigma} &\approx& (k-1) \sigma^2 \nabla^2 I_\sigma
       \f}
 
-      Here scaleGeomFactor() corresponds to the value \f$ k \f$.
+      Here scale_geometric_factor() corresponds to the value \f$ k \f$.
      */
     double scale_geometric_factor() const
     {
@@ -102,7 +118,7 @@ namespace DO { namespace Sara {
       return _num_scales_per_octave;
     }
 
-    //! This controls the maximum number of octaves.
+    //! \brief This impacts the maximum number of octaves.
     int image_padding_size() const
     {
       return _image_padding_size;
@@ -116,22 +132,6 @@ namespace DO { namespace Sara {
     int first_octave_index() const
     {
       return _first_octave_index;
-    }
-
-    //! \brief Constructor.
-    ImagePyramidParams(int first_octave_index = -1,
-                       int num_scales_per_octave = 3+3,
-                       double scale_geometric_factor = std::pow(2., 1./3.),
-                       int image_padding_size = 1,
-                       double scale_camera = 0.5,
-                       double scale_initial = 1.6)
-    {
-      _scale_camera = scale_camera;
-      _scale_initial = scale_initial;
-      _num_scales_per_octave = num_scales_per_octave;
-      _scale_geometric_factor = scale_geometric_factor;
-      _image_padding_size = image_padding_size;
-      _first_octave_index = first_octave_index;
     }
 
   private:
@@ -162,9 +162,7 @@ namespace DO { namespace Sara {
     //! @}
 
     //! \brief Default constructor.
-    inline ImagePyramid()
-    {
-    }
+    inline ImagePyramid() = default;
 
     //! \brief Reset image pyramid with the following parameters.
     void reset(int num_octaves,
@@ -263,21 +261,30 @@ namespace DO { namespace Sara {
     }
 
     //! \brief Immutable getter of the scale relative to an octave.
+
     scalar_type scale(int s, int o) const
     {
       return _oct_scaling_factors[o]*scale_relative_to_octave(s);
     }
 
   protected: /* data members */
+    //! @{
+    //! \brief Parameters.
     scalar_type _scale_initial;
     scalar_type _scale_geometric_factor;
+    //! @}
+
+    //! @{
+    //! \brief Image data.
     std::vector<octave_type> _octaves;
     std::vector<scalar_type> _oct_scaling_factors;
+    //! @}
   };
 
   //! @}
 
 } /* namespace Sara */
 } /* namespace DO */
+
 
 #endif /* DO_SARA_IMAGEPROCESSING_IMAGEPYRAMID_HPP */

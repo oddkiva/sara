@@ -37,9 +37,10 @@ namespace DO { namespace Sara {
                       const std::string& name)
   {
     using namespace std;
-    ifstream file(name.c_str());
-    if (!file.is_open()) {
-      cerr << "Cant open file " << name << endl;
+    ifstream file{ name.c_str() };
+    if (!file.is_open())
+    {
+      cerr << "Can't open file " << name << endl;
       return false;
     }
 
@@ -56,7 +57,9 @@ namespace DO { namespace Sara {
       file >> descriptor_i;
       descriptors[i] = descriptor_i;
     }
+
     file.close();
+
     return true;
   }
 
@@ -66,9 +69,10 @@ namespace DO { namespace Sara {
                        const std::string& name)
   {
     using namespace std;
-    ofstream file(name.c_str());
-    if (!file.is_open()) {
-      cerr << "Cant open file" << std::endl;
+    ofstream file{ name.c_str() };
+    if (!file.is_open())
+    {
+      cerr << "Can't open file" << std::endl;
       return false;
     }
 
@@ -80,11 +84,15 @@ namespace DO { namespace Sara {
       file << feat.x() << ' ' << feat.y() << ' ';
       file << Map<const RowVector4f>(feat.shape_matrix().data()) << ' ';
       file << feat.orientation() << ' ';
-      file << double(feat.type()) << ' ';
+      file << int(feat.type()) << ' ';
 
-      file << Map<const Matrix<T, 1, Dynamic> >(descriptors[static_cast<int>(i)].data(), 1, descriptors.dimension()) << endl;
+      file << Map<const Matrix<T, 1, Dynamic> >(
+        descriptors[static_cast<int>(i)].data(),
+        1, descriptors.dimension() ) << endl;
     }
+
     file.close();
+
     return true;
   }
 
@@ -92,5 +100,6 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
+
 
 #endif /* DO_SARA_FEATURES_IO_HPP */

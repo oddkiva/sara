@@ -14,6 +14,12 @@
 #ifndef DO_SARA_FEATUREDETECTORS_ADAPTIVENONMAXIMALSUPPRESSION_HPP
 #define DO_SARA_FEATUREDETECTORS_ADAPTIVENONMAXIMALSUPPRESSION_HPP
 
+#include <vector>
+#include <utility>
+
+#include <DO/Sara/Defines.hpp>
+#include <DO/Sara/Features/Feature.hpp>
+
 
 namespace DO { namespace Sara {
 
@@ -68,11 +74,13 @@ namespace DO { namespace Sara {
     The adaptive non maximal suprression sorts feature points by suppression
     radius and so that we can keep those with the highest supression radius.
    */
+  DO_EXPORT
   std::vector<std::pair<size_t, float> >
-  adaptiveNonMaximalSuppression(const std::vector<OERegion>& features,
-                                float c_robust = 0.9f);
+  adaptive_non_maximal_suppression(const std::vector<OERegion>& features,
+                                   float c_robust = 0.9f);
 
 } /* namespace Sara */
 } /* namespace DO */
+
 
 #endif /* DO_SARA_FEATUREDETECTORS_ADAPTIVENONMAXIMALSUPPRESSION_HPP */

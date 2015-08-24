@@ -5,13 +5,11 @@ project(DO_FeatureDetectors_tests)
 message(STATUS "  - DO_FeatureDetectors_tests")
 
 find_package(DO_Sara COMPONENTS Graphics Features FeatureDetectors REQUIRED)
-include(${DO_USE_FILE})
 
 set(TEST_GROUP_NAME "FeatureDetectors")
-do_add_test(FeatureDetectors_LoG test_LoG.cpp "${DO_Sara_LIBRARIES}" ${TEST_GROUP_NAME})
-do_add_test(FeatureDetectors_DoG test_DoG.cpp "${DO_Sara_LIBRARIES}" ${TEST_GROUP_NAME})
-do_add_test(FeatureDetectors_Harris test_Harris.cpp "${DO_Sara_LIBRARIES}"
-        ${TEST_GROUP_NAME})
-do_add_test(FeatureDetectors_Hessian test_Hessian.cpp "${DO_Sara_LIBRARIES}"
-        ${TEST_GROUP_NAME})
-#do_unit_test(FeatureDetectors_AffineAdaptation test_AffineAdaptation.cpp "${DO_Sara_LIBRARIES}")
+file(GLOB test_feature_detectors_SOURCE_FILES FILES test_*.cpp)
+foreach (file ${test_feature_detectors_SOURCE_FILES})
+  get_filename_component(filename "${file}" NAME_WE)
+  do_add_test(${filename} ${file} "${DO_Sara_LIBRARIES}" "FeatureDetectors")
+endforeach ()
+

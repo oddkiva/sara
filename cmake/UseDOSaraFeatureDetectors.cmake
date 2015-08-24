@@ -4,10 +4,10 @@ include_directories(
 
 if (DO_USE_FROM_SOURCE)
   get_property(DO_Sara_FeatureDetectors_ADDED GLOBAL PROPERTY _DO_Sara_FeatureDetectors_INCLUDED)
-  if (NOT DO_Sara_FeaturesDetectors_ADDED)
+  if (NOT DO_Sara_FeatureDetectors_ADDED)
     do_glob_directory(${DO_Sara_SOURCE_DIR}/FeatureDetectors)
     do_create_common_variables("FeatureDetectors")
     do_set_internal_dependencies("FeatureDetectors" "Core;Features;Graphics")
-    do_generate_library("FeaturesDetectors")
+    do_generate_library("FeatureDetectors")
   endif ()
 endif ()

@@ -121,7 +121,7 @@ namespace DO { namespace Sara {
         {
           double x, y, z;
           ss >> x >> y >> z;
-          mesh.vertices().push_back(Vector(x, y, z));
+          mesh.vertices().push_back(Vector3d(x, y, z).cast<float>());
         }
         if(type=='f')
         {

@@ -54,7 +54,7 @@ namespace DO { namespace Sara {
     // l/2^k > 2b
     // 2^k < l/(2b)
     // k < log(l/(2b))/log(2)
-    int numOctaves = static_cast<int>(log(l/(2.f*b))/log(2.f));
+    int num_octaves = static_cast<int>(log(l/(2.f*b))/log(2.f));
 
     // Shorten names.
     Scalar k = Scalar(params.scale_geometric_factor());
@@ -63,11 +63,11 @@ namespace DO { namespace Sara {
 
     // Create the image pyramid
     ImagePyramid<T> G;
-    G.reset(numOctaves, numScales, initSigma, k);
+    G.reset(num_octaves, numScales, initSigma, k);
 
     //omp_set_num_threads(1);
 
-    for (int o = 0; o < numOctaves; ++o)
+    for (int o = 0; o < num_octaves; ++o)
     {
       // Compute the octave scaling factor
       G.octave_scaling_factor(o) =

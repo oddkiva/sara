@@ -37,7 +37,7 @@ private:
 TEST(DO_Sara_Core_Test, test_print_stage)
 {
   stringstream buffer;
-  CoutRedirect cout_redirect(buffer.rdbuf());
+  CoutRedirect cout_redirect{ buffer.rdbuf() };
   print_stage("Hello");
   auto text = buffer.str();
 

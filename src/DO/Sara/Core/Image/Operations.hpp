@@ -28,8 +28,8 @@ namespace DO { namespace Sara {
   template <typename T, int N>
   inline void find_min_max(T& min, T& max, const Image<T, N>& src)
   {
-    const T *src_first = src.data();
-    const T *src_last = src_first + src.size();
+    const auto *src_first = src.begin();
+    const auto *src_last = src.end();
     min = *std::min_element(src_first, src_last);
     max = *std::max_element(src_first, src_last);
   }
@@ -39,8 +39,8 @@ namespace DO { namespace Sara {
                     Pixel<T, ColorSpace>& max,
                     const Image<Pixel<T, ColorSpace>, N>& src)
   {
-    const Pixel<T,ColorSpace> *src_first = src.data();
-    const Pixel<T,ColorSpace> *src_last = src_first + src.size();
+    const auto *src_first = src.begin();
+    const auto *src_last = src.end();
 
     min = *src_first;
     max = *src_first;
@@ -72,8 +72,8 @@ namespace DO { namespace Sara {
     if (dst.sizes() != src.sizes())
       dst.resize(src.sizes());
 
-    const T *src_first = src.data();
-    const T *src_last = src_first + src.size();
+    const auto *src_first = src.data();
+    const auto *src_last = src.end();
 
     U *dst_first = dst.data();
 
@@ -104,18 +104,21 @@ namespace DO { namespace Sara {
       !std::numeric_limits<T>::is_integer,
       "Color rescaling is not directly applicable on integer types");
 
-    Image<T, N> dst(src.sizes());
+    const auto *src_first = src.begin();
+    const auto *src_last = src.end();
 
-    const T *src_first = src.data();
-    const T *src_last = src_first + src.size();
-    T *dst_first  = dst.data();
-
-    T min = *std::min_element(src_first, src_last);
-    T max = *std::max_element(src_first, src_last);
+    auto min = *std::min_element(src_first, src_last);
+    auto max = *std::max_element(src_first, src_last);
 
     if (min == max)
-      throw std::runtime_error("Error: cannot rescale image! min == max");
+    {
+      std::cout << "Warning: cannot rescale image! min == max" << std::endl;
+      std::cout << "No rescaling will be performed" << std::endl;
+      return src;
+    }
 
+    Image<T, N> dst{ src.sizes() };
+    T *dst_first = dst.begin();
     for ( ; src_first != src_last; ++src_first, ++dst_first)
       *dst_first = a + (b-a)*(*src_first-min)/(max-min);
 
@@ -132,14 +135,14 @@ namespace DO { namespace Sara {
       !std::numeric_limits<T>::is_integer,
       "Color rescale is not directly applicable on integral types");
 
-    Image<Pixel<T,ColorSpace>, N> dst(src.sizes());
+    Image<Pixel<T, ColorSpace>, N> dst{ src.sizes() };
 
-    const Pixel<T, ColorSpace> *src_first = src.data();
-    const Pixel<T, ColorSpace> *src_last = src_first + src.size();
-    Pixel<T, ColorSpace> *dst_first  = dst.data();
+    const auto *src_first = src.data();
+    const auto *src_last = src_first + src.size();
+    auto *dst_first  = dst.data();
 
-    Pixel<T, ColorSpace> min(*src_first);
-    Pixel<T, ColorSpace> max(*src_first);
+    auto min = *src_first;
+    auto max = *src_first;
     for ( ; src_first != src_last; ++src_first)
     {
       min = min.cwiseMin(*src_first);
@@ -147,7 +150,11 @@ namespace DO { namespace Sara {
     }
 
     if (min == max)
-      throw std::runtime_error("Error: cannot rescale image! min == max");
+    {
+      std::cout << "Warning: cannot rescale image! min == max" << std::endl;
+      std::cout << "No rescaling will be performed" << std::endl;
+      return src;
+    }
 
     for (src_first = src.data(); src_first != src_last;
       ++src_first, ++dst_first)
@@ -161,8 +168,17 @@ namespace DO { namespace Sara {
   struct ColorRescale
   {
     typedef Image<T, N> ReturnType;
-    ColorRescale(const Image<T, N>& src) : src_(src) {}
-    ReturnType operator()() const { return color_rescale(src_); }
+
+    ColorRescale(const Image<T, N>& src)
+      : src_(src)
+    {
+    }
+
+    ReturnType operator()() const
+    {
+      return color_rescale(src_);
+    }
+
     const Image<T, N>& src_;
   };
   //! @}

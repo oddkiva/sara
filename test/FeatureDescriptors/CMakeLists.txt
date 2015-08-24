@@ -1,13 +1,18 @@
 cmake_minimum_required(VERSION 2.6)
 
-project(DO_FeatureDetectors_tests)
+project(DO_FeatureDescriptors_tests)
 
-message(STATUS "  - DO_FeatureDetectors_tests")
+message(STATUS "  - DO_FeatureDescriptors_tests")
 
 find_package(DO_Sara COMPONENTS
-            Graphics Features FeatureDetectors FeatureDescriptors REQUIRED)
-include(${DO_USE_FILE})
+  Features FeatureDetectors FeatureDescriptors
+  Graphics ImageIO
+  REQUIRED)
 
-do_add_test(
-  FeatureDescriptors_SIFT test_SIFT.cpp "${DO_Sara_LIBRARIES}"
-  "FeatureDescriptors")
+file(GLOB test_feature_descriptors_SOURCE_FILES FILES test_sift.cpp)
+foreach (file ${test_feature_descriptors_SOURCE_FILES})
+  get_filename_component(filename "${file}" NAME_WE)
+  do_add_test(${filename} ${file} "${DO_Sara_LIBRARIES}"
+    "FeatureDescriptors")
+endforeach ()
+

@@ -39,7 +39,7 @@ namespace DO { namespace Sara {
     double elapsed();
 
     //! Returns the elapsed time in milliseconds.
-    double elapsedMs();
+    double elapsed_ms();
 
   private: /* data members. */
     double start_;
@@ -53,5 +53,6 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
+
 
 #endif /* DO_SARA_UTILITIES_TIMER_HPP */

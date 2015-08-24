@@ -14,8 +14,11 @@
 #ifndef DO_SARA_FEATURES_UTILITIES_HPP
 #define DO_SARA_FEATURES_UTILITIES_HPP
 
+#include <DO/Sara/Defines.hpp>
 
+#include <DO/Sara/Features/DescriptorMatrix.hpp>
 #include <DO/Sara/Features/Feature.hpp>
+#include <DO/Sara/Features/Key.hpp>
 
 
 namespace DO { namespace Sara {
@@ -33,7 +36,7 @@ namespace DO { namespace Sara {
     {
     }
 
-    inline bool operator()(int i1, int i2) const
+    inline bool operator()(size_t i1, size_t i2) const
     {
        return _descriptors[i1] == _descriptors[i2];
     }
@@ -49,7 +52,7 @@ namespace DO { namespace Sara {
     {
     }
 
-    inline bool operator()(int i1, int i2) const
+    inline bool operator()(size_t i1, size_t i2) const
     {
        return (_descriptors[i1] - _descriptors[i2]).squaredNorm() < 1e-3;
     }
@@ -68,7 +71,7 @@ namespace DO { namespace Sara {
     {
     }
 
-    inline bool operator()(int i1, int i2) const
+    inline bool operator()(size_t i1, size_t i2) const
     {
       if (Sara::lexicographical_compare(_descriptors[i1], _descriptors[i2]))
         return true;
@@ -83,21 +86,13 @@ namespace DO { namespace Sara {
     EqualDescriptor<T> _equal_descriptors;
   };
 
-  template<typename T>
-  inline bool isfinite(T arg)
-  {
-    return
-      arg == arg &&
-      arg != std::numeric_limits<T>::infinity() &&
-      arg != -std::numeric_limits<T>::infinity();
-  }
-
+  DO_EXPORT
   void remove_redundancies(std::vector<OERegion>& features,
-                          DescriptorMatrix<float>& descriptors);
+                           DescriptorMatrix<float>& descriptors);
 
   inline void remove_redundancies(Set<OERegion, RealDescriptor>& keys)
   {
-     remove_redundancies(keys.features, keys.descriptors);
+    remove_redundancies(keys.features, keys.descriptors);
   }
 
   //! @}

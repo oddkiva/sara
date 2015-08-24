@@ -51,7 +51,7 @@ GRAPHICS_MAIN()
   timer.restart();
   for (int i = 0; i < numIter; ++i)
     res = sutherland_hodgman(poly, clip);
-  elapsed = timer.elapsedMs()/numIter;
+  elapsed = timer.elapsed_ms()/numIter;
   cout << "Intersection computation time = " << elapsed << " milliseconds"
        << endl;
 

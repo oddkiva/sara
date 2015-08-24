@@ -43,16 +43,16 @@ namespace DO { namespace Sara {
 
   bool intersect(const BBox& bbox1, const BBox& bbox2)
   {
-    BBox inter(intersection(bbox1, bbox2));
+    auto inter = intersection(bbox1, bbox2);
     return area(inter) > std::numeric_limits<double>::epsilon();
   }
 
   double jaccard_similarity(const BBox& bbox1, const BBox& bbox2)
   {
-    BBox inter(intersection(bbox1, bbox2));
-    double interArea = area(inter);
-    double unionArea = area(bbox1) + area(bbox2) - interArea;
-    return interArea/unionArea;
+    const auto inter = intersection(bbox1, bbox2);
+    auto inter_area = area(inter);
+    auto union_area = area(bbox1) + area(bbox2) - inter_area;
+    return inter_area / union_area;
   }
 
   double jaccard_distance(const BBox& bbox1, const BBox& bbox2)
@@ -62,7 +62,7 @@ namespace DO { namespace Sara {
 
   static
   void get_corners(Point2d& tl, Point2d& tr, Point2d& br, Point2d& bl,
-                  const BBox& bbox)
+                   const BBox& bbox)
   {
     tl = bbox.top_left();
     tr = bbox.top_right();
@@ -85,6 +85,7 @@ namespace DO { namespace Sara {
       br = br1.cwiseMin(br2);
       return BBox(tl2, br);
     }
+
     // Case 2
     if (inside(br2, bbox1))
     {
@@ -92,6 +93,7 @@ namespace DO { namespace Sara {
       tl = tl1.cwiseMax(tl2);
       return BBox(tl, br2);
     }
+
     // Case 3
     if (inside(tr2, bbox1))
     {
@@ -100,6 +102,7 @@ namespace DO { namespace Sara {
       br << tr2.x(), min(br1.y(), br2.y());
       return BBox(tl, br);
     }
+
     // Case 4
     if (inside(bl2, bbox1))
     {
@@ -108,12 +111,13 @@ namespace DO { namespace Sara {
       br << min(br1.x(), br2.x()), bl2.y();
       return BBox(tl, br);
     }
-    return BBox(Point2d::Zero(), Point2d::Zero());
+
+    return BBox::zero();
   }
 
   BBox intersection(const BBox& bbox1, const BBox& bbox2)
   {
-    BBox bbox(BBox::zero());
+    auto bbox = BBox::zero();
     bbox = intersection_one_way(bbox1, bbox2);
     if (area(bbox) > std::numeric_limits<double>::epsilon())
       return bbox;

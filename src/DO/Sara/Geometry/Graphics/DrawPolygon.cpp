@@ -15,49 +15,49 @@
 
 namespace DO { namespace Sara {
 
-  void draw_line_segment(const LineSegment& s, const Color3ub& c, int penWidth)
+  void draw_line_segment(const LineSegment& s, const Color3ub& c, int pen_width)
   {
-    draw_line(s.p1(), s.p2(), c, penWidth);
+    draw_line(s.p1(), s.p2(), c, pen_width);
   }
 
-  void draw_bbox(const BBox& b, const Color3ub& color, int penWidth)
+  void draw_bbox(const BBox& b, const Color3ub& color, int pen_width)
   {
     Point2i tl(b.top_left().cast<int>());
     Point2i br(b.bottom_right().cast<int>());
     Point2i sz(br-tl);
-    draw_rect(tl.x(), tl.y(), sz.x(), sz.y(), color, penWidth);
+    draw_rect(tl.x(), tl.y(), sz.x(), sz.y(), color, pen_width);
   }
 
   void draw_poly(const std::vector<Point2d>& p, const Color3ub& color,
-                int penWidth)
+                int pen_width)
   {
     for (size_t i1 = 0, i2 = p.size()-1; i1 != p.size(); i2=i1++)
-      draw_line(p[i1], p[i2], color, penWidth);
+      draw_line(p[i1], p[i2], color, pen_width);
   }
 
-  void draw_ellipse(const Ellipse& e, const Color3ub col, int penWidth)
+  void draw_ellipse(const Ellipse& e, const Color3ub col, int pen_width)
   {
     // Ellipse...
     draw_ellipse(e.center(), e.radius1(), e.radius2(),
-                to_degree(e.orientation()), col, penWidth);
+                to_degree(e.orientation()), col, pen_width);
     // Arrow...
     Vector2d u(unit_vector2(e.orientation()));
     u *= e.radius1()*1.1;
     Point2d a, b;
     a = e.center();
     b = e.center() + u;
-    draw_arrow(a, b, col, penWidth);
+    draw_arrow(a, b, col, pen_width);
     // Center...
-    draw_circle(e.center(), 5., col, penWidth);
+    draw_circle(e.center(), 5., col, pen_width);
   }
 
-  void draw_affine_cone(const AffineCone2& K, double arrowLength,
+  void draw_affine_cone(const AffineCone2& K, double arrow_length,
                         const Color3ub& color)
   {
     const Point2d& v = K.vertex();
     Point2d a, b;
-    a = v + arrowLength*K.alpha();
-    b = v + arrowLength*K.beta();
+    a = v + arrow_length*K.alpha();
+    b = v + arrow_length*K.beta();
     draw_arrow(v, a, color);
     draw_arrow(v, b, color);
   }

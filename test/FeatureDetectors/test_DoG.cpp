@@ -1,148 +1,67 @@
-#include <DO/Sara/FeatureDetectors.hpp>
-#include <DO/Sara/Graphics.hpp>
-#include <algorithm>
-#include <cmath>
+#include <gtest/gtest.h>
 
-using namespace DO;
-using namespace std;
+#include <DO/Sara/FeatureDetectors/DoG.hpp>
 
-static HighResTimer timer;
-double elapsed = 0.0;
-void tic()
+
+using namespace DO::Sara;
+
+
+TEST(TestExtremumRefinement, test_on_edge)
 {
-  timer.restart();
+  // TODO.
 }
 
-void toc()
+TEST(TestExtremumRefinement, test_refine_extremum)
 {
-  elapsed = timer.elapsedMs();
-  cout << "Elapsed time = " << elapsed << " ms" << endl << endl;
+  // TODO.
 }
 
-vector<OERegion> computeDoGExtrema(const Image<float>& I,
-                                   bool verbose = true)
+TEST(TestExtremumRefinement, test_local_scale_space_extrema)
 {
-  // 1. Feature extraction.
-  if (verbose)
-  {
-    printStage("Localizing DoG extrema");
-    tic();
-  }
-  ImagePyramidParams pyrParams(0);
-  ComputeDoGExtrema computeDoGs(pyrParams);
-  vector<OERegion> DoGs;
-  vector<Point2i> scaleOctPairs;
-  DoGs = computeDoGs(I, &scaleOctPairs);
-  if (verbose)
-    toc();
-  CHECK(DoGs.size());
+  // TODO.
+}
 
-  // 2. Rescale detected features to original image dimension.
-  const ImagePyramid<float>& DoGPyr = computeDoGs.diffOfGaussians();
-  for (int i = 0; i < DoGs.size(); ++i)
-  {
-    float octScaleFact = DoGPyr.octaveScalingFactor(scaleOctPairs[i](1));
-    DoGs[i].center() *= octScaleFact;
-    DoGs[i].shapeMat() /= pow(octScaleFact, 2);
-  }
+TEST(TestDoG, test_compute_dog_extrema)
+{
+  // Create a centered gaussian.
+  const auto N = 2 * 5 + 1;
+  auto I = Image<float>{ N, N };
+  I.array().fill(0);
 
-  return DoGs;
+  const auto xc = N / 2.f;
+  const auto yc = N / 2.f;
+  const auto sigma = 1.5f;
+  for (int y = 0; y < N; ++y)
+    for (int x = 0; x < N; ++x)
+      I(x, y) = 1 / sqrt(2*float(M_PI)*pow(sigma, 2)) *
+                exp(-(pow(x - xc, 2) + pow(y - yc, 2)) / (2 * pow(sigma, 2)));
+
+  using namespace std;
+
+  // Create the detector of DoG extrema.
+  const auto pyramid_params = ImagePyramidParams{};
+  auto compute_DoGs = ComputeDoGExtrema{ pyramid_params };
+
+  auto scale_octave_pairs = vector<Point2i>{};
+  auto features = compute_DoGs(I, &scale_octave_pairs);
+  const auto& o_index = scale_octave_pairs[0](1);
+
+  // There should be only one extrema at only one scale.
+  EXPECT_EQ(features.size(), 1);
+  EXPECT_EQ(scale_octave_pairs.size(), 1);
+
+  const auto& f = features.front();
+  const auto& D = compute_DoGs.diff_of_gaussians();
+  const auto z = D.octave_scaling_factor(o_index);
+
+  EXPECT_NEAR(f.x()*z, xc, 1e-2);
+  EXPECT_NEAR(f.y()*z, yc, 1e-2);
+  EXPECT_NEAR(z, 0.5, 1e-2);
 }
 
 
-vector<OERegion> computeDoGAffineExtrema(const Image<float>& I,
-                                         bool verbose = true)
+int main(int argc, char *argv[])
 {
-  // 1. Feature extraction.
-  if (verbose)
-  {
-    printStage("Localizing DoG affine-adapted extrema");
-    tic();
-  }
-  ImagePyramidParams pyrParams(0);
-  ComputeDoGExtrema computeDoGs(pyrParams);
-  vector<OERegion> DoGs;
-  vector<Point2i> scaleOctPairs;
-  DoGs = computeDoGs(I, &scaleOctPairs);
-  if (verbose)
-    toc();
-  CHECK(DoGs.size());
-
-  const ImagePyramid<float>& gaussPyr = computeDoGs.gaussians();
-  const ImagePyramid<float>& dogPyr = computeDoGs.diffOfGaussians();
-
-  // 2. Affine shape adaptation
-  if (verbose)
-  {
-    printStage("Affine shape adaptation");
-    tic();
-  }
-  AdaptFeatureAffinelyToLocalShape adaptShape;
-  vector<int> keepFeatures(DoGs.size(), 0);
-  for (size_t i = 0; i != DoGs.size(); ++i)
-  {
-    const int s = scaleOctPairs[i](0);
-    const int o = scaleOctPairs[i](1);
-
-    Matrix2f affAdaptTransformMat;
-    if (adaptShape(affAdaptTransformMat, gaussPyr(s,o), DoGs[i]))
-    {
-      DoGs[i].shapeMat() = affAdaptTransformMat*DoGs[i].shapeMat();
-      keepFeatures[i] = 1;
-    }
-  }
-  if (verbose)
-    toc();
-
-  // 3. Rescale the kept features to original image dimensions.
-  size_t num_kept_features =
-    std::accumulate(keepFeatures.begin(), keepFeatures.end(), 0);
-
-  vector<OERegion> keptDoGs;
-  keptDoGs.reserve(num_kept_features);
-  for (size_t i = 0; i != keepFeatures.size(); ++i)
-  {
-    if (keepFeatures[i] == 1)
-    {
-      keptDoGs.push_back(DoGs[i]);
-      const float fact = dogPyr.octaveScalingFactor(scaleOctPairs[i](1));
-      keptDoGs.back().shapeMat() *= pow(fact,-2);
-      keptDoGs.back().coords() *= fact;
-
-    }
-  }
-
-  CHECK(keptDoGs.size());
-
-  return keptDoGs;
-}
-
-void checkKeys(const Image<float>& I, const vector<OERegion>& features)
-{
-  display(I);
-  setAntialiasing();
-  for (size_t i = 0; i != features.size(); ++i)
-    features[i].draw(features[i].extremumType() == OERegion::Max ?
-                     Red8 : Blue8);
-  getKey();
-}
-
-int main()
-{
-  Image<float> I;
-  string name;
-  name = srcPath("../../datasets/sunflowerField.jpg");
-  if (!load(I, name))
-    return -1;
-
-  openWindow(I.width(), I.height());
-  vector<OERegion> features;
-
-  features = computeDoGExtrema(I);
-  checkKeys(I, features);
-
-  features = computeDoGAffineExtrema(I);
-  checkKeys(I, features);
-
-  return 0;
+  testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }

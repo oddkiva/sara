@@ -22,6 +22,22 @@ using namespace std;
 using namespace DO::Sara;
 
 
+struct CoutRedirect
+{
+  CoutRedirect(std::streambuf * new_buffer)
+    : old(std::cout.rdbuf(new_buffer))
+  {
+  }
+
+  ~CoutRedirect()
+  {
+    std::cout.rdbuf(old);
+  }
+
+private:
+  std::streambuf * old;
+};
+
 class TestBBox : public TestPolygon {};
 
 
@@ -76,6 +92,37 @@ TEST_F(TestBBox, test_point_inside_bbox)
   EXPECT_TRUE (inside(points[2], bbox));
 }
 
+TEST_F(TestBBox, test_bbox_ostream)
+{
+  const auto bbox = BBox{};
+
+  stringstream buffer;
+  CoutRedirect cout_redirect{ buffer.rdbuf() };
+  cout << bbox << endl;
+
+  auto text = buffer.str();
+
+  EXPECT_NE(text.find("top-left: ["), string::npos);
+  EXPECT_NE(text.find("bottom-right: ["), string::npos);
+}
+
+TEST_F(TestBBox, test_bbox_degenerate)
+{
+  const auto bbox = BBox{};
+  EXPECT_TRUE(degenerate(bbox));
+}
+
+TEST_F(TestBBox, test_intersection)
+{
+  const auto b1 = BBox{ Point2d{ 0, 0 }, Point2d{ 1, 1 } };
+  const auto b2 = BBox{ Point2d{ 0.5, 0.5 }, Point2d{ 1.5, 1.5 } };
+
+  const auto inter = BBox{ Point2d{ 0.5, 0.5 }, Point2d{ 1, 1 } };
+  EXPECT_EQ(inter, intersection(b1, b2));
+
+  auto expected_jaccard_distance = 1 - area(inter) / (area(b1) + area(b2) - area(inter));
+  EXPECT_EQ(expected_jaccard_distance, jaccard_distance(b1, b2));
+}
 
 int main(int argc, char** argv)
 {

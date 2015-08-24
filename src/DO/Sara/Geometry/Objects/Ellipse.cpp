@@ -13,37 +13,38 @@ namespace DO { namespace Sara {
 
   Vector2d Ellipse::rho(double theta) const
   {
-    Vector2d u(unit_vector2(theta));
-    double& c = u(0);
-    double& s = u(1);
-    double r = (a_*b_) / sqrt(b_*b_*c*c + a_*a_*s*s);
+    const Vector2d u{ unit_vector2(theta) };
+    const auto& c = u(0);
+    const auto& s = u(1);
+    double r = (_a*_b) / sqrt(_b*_b*c*c + _a*_a*s*s);
     return r*u;
   }
 
   Point2d Ellipse::operator()(double theta) const
   {
-    return c_ + rotation2(o_)*rho(theta);
+    return _c + rotation2(_o)*rho(theta);
   }
 
   double orientation(const Point2d& p, const Ellipse& e)
   {
-    const Vector2d x(p-e.center());
-    const Vector2d u(unit_vector2(e.orientation()));
-    const Vector2d v(-u(1), u(0));
+    const Vector2d x{ p - e.center() };
+    const Vector2d u{ unit_vector2(e.orientation()) };
+    const Vector2d v{ -u(1), u(0) };
     return atan2(v.dot(x), u.dot(x));
   }
 
   double segment_area(const Ellipse& e, double theta0, double theta1)
   {
-    Point2d p0(e(theta0)), p1(e(theta1));
-    Triangle t(e.center(), p0, p1);
+    const Point2d p0{ e(theta0) };
+    const Point2d p1{ e(theta1) };
+    Triangle t{ e.center(), p0, p1 };
 
-    double triArea = area(t);
-    double sectArea = sector_area(e, theta0, theta1);
+    const auto triangle_area = area(t);
+    const auto sect_area = sector_area(e, theta0, theta1);
 
     if (abs(theta1 - theta0) < M_PI)
-      return sectArea - triArea;
-    return sectArea + triArea;
+      return sect_area - triangle_area;
+    return sect_area + triangle_area;
   }
 
   std::ostream& operator<<(std::ostream& os, const Ellipse& e)
@@ -55,9 +56,9 @@ namespace DO { namespace Sara {
     return os;
   }
 
-  Ellipse construct_from_shape_matrix(const Matrix2d& shapeMat, const Point2d& c)
+  Ellipse construct_from_shape_matrix(const Matrix2d& shape_matrix, const Point2d& c)
   {
-    Eigen::JacobiSVD<Matrix2d> svd(shapeMat, Eigen::ComputeFullU);
+    Eigen::JacobiSVD<Matrix2d> svd(shape_matrix, Eigen::ComputeFullU);
     const Vector2d r = svd.singularValues().cwiseSqrt().cwiseInverse();
     const Matrix2d& U = svd.matrixU();
     double o = std::atan2(U(1,0), U(0,0));
@@ -66,12 +67,12 @@ namespace DO { namespace Sara {
 
   Quad oriented_bbox(const Ellipse& e)
   {
-    Vector2d u(e.radius1(), e.radius2());
-    BBox bbox(-u, u);
-    Quad quad(bbox);
-    Matrix2d R( rotation2(e.orientation()) );
+    const Vector2d u{ e.radius1(), e.radius2() };
+    const BBox bbox{ -u, u };
+    Quad quad{ bbox };
+    Matrix2d R{ rotation2(e.orientation()) };
     for (int i = 0; i < 4; ++i)
-      quad[i] = e.center()+ R*quad[i];
+      quad[i] = e.center() + R*quad[i];
     return quad;
   }
 

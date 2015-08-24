@@ -33,7 +33,7 @@ TEST(DO_Sara_Core_Test, testTimer)
 
   timer.restart();
   millisleep(sleep_milliseconds);
-  elapsed_milliseconds =  timer.elapsedMs();
+  elapsed_milliseconds =  timer.elapsed_ms();
   EXPECT_NEAR(elapsed_milliseconds, sleep_milliseconds, 100);
 
   timer.restart();

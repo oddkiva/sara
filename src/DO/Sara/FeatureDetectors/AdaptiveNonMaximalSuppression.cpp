@@ -11,43 +11,49 @@
 
 #include <DO/Sara/FeatureDetectors.hpp>
 
+
 using namespace std;
+
 
 namespace DO { namespace Sara {
 
   // Greater comparison functor for the adaptive non maximal suppression
   // algorithm.
   typedef pair<size_t, float> IndexScore;
-  struct CompareIndexScore {
-    bool operator()(const IndexScore& lhs, const IndexScore& rhs) const
-    { return lhs.second > rhs.second; }
-  };
 
-  vector<pair<size_t, float> >
-  adaptiveNonMaximalSuppression(const vector<OERegion>& features,
+  vector<pair<size_t, float>>
+  adaptive_non_maximal_suppression(const vector<OERegion>& features,
                                 float c_robust)
   {
+    auto compare_index_score = [](const IndexScore& a, const IndexScore& b) {
+      return a.second > b.second;
+    };
+
     // Create the ordered list sorted by decreasing strength.
-    vector<IndexScore> is(features.size()); // is = 'index-strength pairs'.
+    auto idx_score_pairs = vector<IndexScore>{ features.size() };
+
     // Notice that I readily multiply the scores by $c_\textrm{robust}$.
     for (size_t i = 0; i != features.size(); ++i)
-      is[i] = make_pair(i, c_robust*features[i].extremumValue());
+      idx_score_pairs[i] = make_pair(i, c_robust*features[i].extremum_value());
+
     // Sort features by decreasing strength.
-    CompareIndexScore cmp;
-    sort(is.begin(), is.end(), cmp); // O(N log(N) )
+    sort(
+      idx_score_pairs.begin(), idx_score_pairs.end(),
+      compare_index_score); // (O(N * log N)
 
     // Compute the suppression radius.
-    vector<IndexScore> ir(features.size()); // ir = 'index radius size';
-    const float infty = std::numeric_limits<float>::infinity(); // shortcut.
-    for (size_t i = 0; i != is.size(); ++i)
+    vector<IndexScore> idx_sq_radius_pairs(features.size());
+    const auto infty = std::numeric_limits<float>::infinity();
+    for (size_t i = 0; i != idx_score_pairs.size(); ++i)
     {
       // Start from infinite (squared) radius.
-      float r = infty;
+      float squared_radius = infty;
       if (i == 0)
       {
-        ir[i] = make_pair(is[i].first, r);
+        idx_sq_radius_pairs[i] = make_pair(idx_score_pairs[i].first, squared_radius);
         continue;
       }
+
       // f(x_0) >= f(x_1) >= ... >= f(x_i) >= ... >= f(x_{N-1})
       // So:
       //  $f(x_i) > c f(x_{i+1}$
@@ -62,25 +68,31 @@ namespace DO { namespace Sara {
       //  (A_{i-1}) <=> f(x_i) < c f(x_{i-1}) ?
       //
       // If all (A_i) is false, return an infinite radius.
-      vector<IndexScore>::iterator
-        it = lower_bound(ir.begin(), ir.begin()+i, is[i], cmp); // O(log i)
-      if (it != ir.end())
+      auto it = lower_bound(
+        idx_sq_radius_pairs.begin(), idx_sq_radius_pairs.begin() + i,
+        idx_score_pairs[i], compare_index_score); // O(log i)
+
+      if (it != idx_sq_radius_pairs.end())
       {
-        size_t sz = it-ir.begin();
+        size_t sz = it-idx_sq_radius_pairs.begin();
         for (size_t j = 1; j != sz; ++j)
         {
-          const Point2f& xi = features[is[i].first].center();
-          const Point2f& xj = features[ir[j].first].center();
+          const Point2f& xi = features[idx_score_pairs[i].first].center();
+          const Point2f& xj = features[idx_sq_radius_pairs[j].first].center();
           float rr = (xi - xj).squaredNorm();
-          if (rr < r)
-            r = rr;
+          if (rr < squared_radius)
+            squared_radius = rr;
         } // O(i)
       }
-      ir[i] = make_pair(is[i].first, r);
+
+      idx_sq_radius_pairs[i] = make_pair(idx_score_pairs[i].first, squared_radius);
     }
 
-    sort(ir.begin(), ir.end(), cmp);
-    return ir;
+    sort(
+      idx_sq_radius_pairs.begin(), idx_sq_radius_pairs.end(),
+      compare_index_score);
+
+    return idx_sq_radius_pairs;
   }
 
 

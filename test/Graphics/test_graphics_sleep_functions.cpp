@@ -50,7 +50,7 @@ TEST_F(TestSleepFunctions, test_millisleep)
   Timer timer;
   timer.restart();
   millisleep(delay_ms);
-  double elapsed = timer.elapsedMs();
+  double elapsed = timer.elapsed_ms();
 
   double tol_ms = 10.;
   EXPECT_NEAR(elapsed, static_cast<double>(delay_ms), tol_ms);
@@ -62,7 +62,7 @@ TEST_F(TestSleepFunctions, test_microsleep)
   Timer timer;
   timer.restart();
   microsleep(delay_us);
-  double elapsed = timer.elapsedMs();
+  double elapsed = timer.elapsed_ms();
 
   double tol_us = 5;
   EXPECT_NEAR(elapsed, static_cast<double>(delay_us)*1e-3, tol_us);

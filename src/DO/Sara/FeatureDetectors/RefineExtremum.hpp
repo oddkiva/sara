@@ -37,7 +37,9 @@ namespace DO { namespace Sara {
     where \f$r\f$ is the ratio between the eigenvalues of \f$\mathbf{H}\f$
     and corresponds to the variable **edgeRatio**.
    */
-  bool onEdge(const Image<float>& I, int x, int y, float edgeRatio = 10.f);
+  DO_EXPORT
+  bool on_edge(const Image<float>& I, int x, int y, float edge_ratio = 10.f);
+
   /*!
     \brief Extremum position refinement in scale-space based on Newton's method.
     (cf. [Lowe, IJCV 2004] and [Brown and Lowe, BMVC 2002]).
@@ -48,7 +50,7 @@ namespace DO { namespace Sara {
     @param[in] s scale index of the extrema
     @param[in] o octave index of the extrema
     @param[in]
-      imgPaddingSz
+      img_padding_sz
       This variable indicates the minimum border size of the image. DoG
       extrema that ends being located the border are not refined anymore.
     @param[in]
@@ -78,10 +80,11 @@ namespace DO { namespace Sara {
 
     Otherwise, we cannot refine the position of the extremum.
    */
-  bool refineExtremum(const ImagePyramid<float>& I,
-                      int x, int y, int s, int o, int type,
-                      Point3f& pos, float& val,
-                      int borderSz = 1, int numIter = 5);
+  DO_EXPORT
+  bool refine_extremum(const ImagePyramid<float>& I,
+                       int x, int y, int s, int o, int type,
+                       Point3f& pos, float& val,
+                       int border_size = 1, int num_iter = 5);
   /*!
     \brief This function refines the coordinates using the interpolation method
     in [Lowe, IJCV 2004] and [Brown and Lowe, BMVC 2002].
@@ -89,29 +92,32 @@ namespace DO { namespace Sara {
     It refines the spatial coordinates \f$(x,y)\f$. However, there is no scale
     refinement here.
    */
-  bool refineExtremum(const Image<float>& I, int x, int y, int type,
-                      Point2f& pos, float& val,
-                      int borderSz = 1, int numIter = 5);
+  DO_EXPORT
+  bool refine_extremum(const Image<float>& I, int x, int y, int type,
+                       Point2f& pos, float& val,
+                       int border_size = 1, int num_iter = 5);
   /*!
     \brief Localizes all local extrema in scale-space at scale
     \f$\sigma = 2^{s/S+o}\f$.
     Note that the default parameters are suited for the DoG extrema.
    */
-  std::vector<OERegion> localScaleSpaceExtrema(const ImagePyramid<float>& I,
-                                               int s, int o,
-                                               float extremumThres = 0.03f,
-                                               float edgeRatioThres = 10.f,
-                                               int imgPaddingSz = 1,
-                                               int refineIter = 5);
+  DO_EXPORT
+  std::vector<OERegion> local_scale_space_extrema(const ImagePyramid<float>& I,
+                                                  int s, int o,
+                                                  float extremum_thres = 0.03f,
+                                                  float edge_ratio_thres = 10.f,
+                                                  int img_padding_sz = 1,
+                                                  int refine_iterations = 5);
 
   /*!
     Scale selection based on the normalized Laplacian of Gaussians
     for the simplified Harris-Laplace and Hessian-Laplace interest points.
    */
-  bool selectLaplaceScale(float& scale,
-                          int x, int y, int s, int o,
-                          const ImagePyramid<float>& gaussPyramid,
-                          int numScales = 10);
+  DO_EXPORT
+  bool select_laplace_scale(float& scale,
+                            int x, int y, int s, int o,
+                            const ImagePyramid<float>& gauss_pyramid,
+                            int num_scales = 10);
 
   /*!
     \brief Localizes local maxima in space only and tries to assign a
@@ -121,13 +127,14 @@ namespace DO { namespace Sara {
     This is mainly intended for Harris-Laplace and Hessian-Laplace interest
     points.
    */
-  std::vector<OERegion> laplaceMaxima(const ImagePyramid<float>& function,
-                                      const ImagePyramid<float>& gaussPyramid,
-                                      int s, int o,
-                                      float extremumThres = 1e-6f,
-                                      float imgPaddingSz = 1,
-                                      float numScales = 10,
-                                      int refineIter = 5);
+  DO_EXPORT
+  std::vector<OERegion> laplace_maxima(const ImagePyramid<float>& function,
+                                       const ImagePyramid<float>& gaussian_pyramid,
+                                       int s, int o,
+                                       float extremum_thres = 1e-6f,
+                                       int img_padding_sz = 1,
+                                       int num_scales = 10,
+                                       int refine_iterations = 5);
 
   //! @}
 

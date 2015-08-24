@@ -17,19 +17,19 @@ namespace DO { namespace Sara {
 
   Quad::Quad(const BBox& bbox)
   {
-    v_[0] = bbox.top_left();
-    v_[1] = bbox.top_right();
-    v_[2] = bbox.bottom_right();
-    v_[3] = bbox.bottom_left();
+    _v[0] = bbox.top_left();
+    _v[1] = bbox.top_right();
+    _v[2] = bbox.bottom_right();
+    _v[3] = bbox.bottom_left();
   }
 
   Quad::Quad(const Point2d& a, const Point2d& b,
              const Point2d& c, const Point2d& d)
   {
-    v_[0] = a;
-    v_[1] = b;
-    v_[2] = c;
-    v_[3] = d;
+    _v[0] = a;
+    _v[1] = b;
+    _v[2] = c;
+    _v[3] = d;
   }
 
 } /* namespace Sara */
