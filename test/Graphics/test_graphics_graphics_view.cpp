@@ -28,22 +28,23 @@ using namespace DO::Sara;
 
 TEST(TestGraphicsView, test_construction)
 {
-  int width = 300;
-  int height = 300;
-  QString windowName = "Graphics View Window";
-  int x = 200;
-  int y = 300;
+  const auto width = 300;
+  const auto height = 300;
+  const auto windowName = QString{ "Graphics View Window" };
+  const auto x = 200;
+  const auto y = 300;
 
-  GraphicsView *window = new GraphicsView(
+  auto window = new GraphicsView{
     width, height,
     windowName,
     x, y
-  );
+  };
 
   EXPECT_EQ(window->width(), width);
   EXPECT_EQ(window->height(), height);
   EXPECT_EQ(window->windowTitle(), windowName);
   EXPECT_TRUE(window->isVisible());
+  EXPECT_EQ(window->lastAddedItem(), nullptr);
 
   delete window;
 }
@@ -90,10 +91,10 @@ protected: // methods.
 
 TEST_F(TestGraphicsViewEvents, test_key_press_event)
 {
-  QSignalSpy spy(test_window_, SIGNAL(pressedKey(int)));
+  auto spy = QSignalSpy{ test_window_, SIGNAL(pressedKey(int)) };
   EXPECT_TRUE(spy.isValid());
 
-  QKeyEvent event(QEvent::KeyPress, key_, Qt::NoModifier);
+  auto event = QKeyEvent{ QEvent::KeyPress, key_, Qt::NoModifier };
   event_scheduler_.schedule_event(&event, 10);
 
   compare_key_event(spy);
@@ -101,7 +102,7 @@ TEST_F(TestGraphicsViewEvents, test_key_press_event)
 
 TEST_F(TestGraphicsViewEvents, test_send_no_event)
 {
-  QSignalSpy spy(test_window_, SIGNAL(sendEvent(Event)));
+  auto spy = QSignalSpy{ test_window_, SIGNAL(sendEvent(Event)) };
   EXPECT_TRUE(spy.isValid());
 
   QMetaObject::invokeMethod(test_window_, "waitForEvent",
@@ -110,25 +111,26 @@ TEST_F(TestGraphicsViewEvents, test_send_no_event)
   // Nothing happens.
   EXPECT_TRUE(spy.wait(10));
   EXPECT_EQ(spy.count(), 1);
-  QList<QVariant> arguments = spy.takeFirst();
-  QVariant arg = arguments.at(0);
+  auto arguments = spy.takeFirst();
+  auto arg = arguments.at(0);
   arg.convert(event_type_id_);
-  Event event(arguments.at(0).value<Event>());
+
+  const auto event = arguments.at(0).value<Event>();
   EXPECT_EQ(event.type, DO::Sara::NO_EVENT);
 }
 
 TEST_F(TestGraphicsViewEvents, test_send_pressed_key_event)
 {
   // Spy the sendEvent signal.
-  QSignalSpy spy(test_window_, SIGNAL(sendEvent(Event)));
+  auto spy = QSignalSpy{ test_window_, SIGNAL(sendEvent(Event)) };
   EXPECT_TRUE(spy.isValid());
 
 #ifdef _WIN32
-  int wait_ms = 100;
-  int key_press_time_ms = 10;
+  auto wait_ms = 100;
+  auto key_press_time_ms = 10;
 #else
-  int wait_ms = 10;
-  int key_press_time_ms = 1;
+  auto wait_ms = 10;
+  auto key_press_time_ms = 1;
 #endif
 
   // Ask the testing window to wait for an event.
@@ -146,10 +148,11 @@ TEST_F(TestGraphicsViewEvents, test_send_pressed_key_event)
   EXPECT_EQ(spy.count(), 1);
 
   // Check the details of the key press event.
-  QList<QVariant> arguments = spy.takeFirst();
-  QVariant arg = arguments.at(0);
+  auto arguments = spy.takeFirst();
+  auto arg = arguments.at(0);
   arg.convert(event_type_id_);
-  Event event(arguments.at(0).value<Event>());
+
+  const auto event = arguments.at(0).value<Event>();
   EXPECT_EQ(event.type, DO::Sara::KEY_PRESSED);
   EXPECT_EQ(event.key, key_);
 }

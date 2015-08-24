@@ -69,7 +69,7 @@ namespace DO { namespace Sara {
 
   private:
     QTimer event_listening_timer_;
-    QGraphicsItem *last_inserted_item_;
+    QGraphicsItem *last_inserted_item_{ nullptr };
   };
 
   //! @}
