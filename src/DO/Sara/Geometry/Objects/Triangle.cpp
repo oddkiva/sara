@@ -15,9 +15,9 @@ namespace DO { namespace Sara {
 
   Triangle::Triangle(const Point2d& a, const Point2d& b, const Point2d& c)
   {
-    v_[0] = a;
-    v_[1] = b;
-    v_[2] = c;
+    _v[0] = a;
+    _v[1] = b;
+    _v[2] = c;
   }
 
 } /* namespace Sara */
