@@ -29,14 +29,23 @@ namespace DO { namespace Sara {
 
   //! @{
   //! \brief Forward declaration of the image classes.
-  template <typename PixelType, int N = 2> class Image;
+  template <
+    typename PixelType, int N = 2,
+    template <typename> class Allocator = std::allocator
+  > class Image;
+
   template <typename PixelType, int N = 2> class ImageView;
   //! @}
 
 
   //! \brief Forward declaration of the generic color conversion function.
-  template <typename T, typename U, int N>
-  void convert(const Image<T, N>& src, Image<U, N>& dst);
+  template <
+    typename T, typename U, int N,
+    template <typename> class AllocatorT,
+    template <typename> class AllocatorU
+  >
+  void convert(const Image<T, N, AllocatorT>& src,
+               Image<U, N, AllocatorU>& dst);
 
 
   //! \brief The image base class.
@@ -179,10 +188,10 @@ namespace DO { namespace Sara {
 
 
   //! \brief The image class.
-  template <typename T, int N>
-  class Image : public ImageBase<MultiArray<T, N, ColMajor>>
+  template <typename T, int N, template <typename> class Allocator>
+  class Image : public ImageBase<MultiArray<T, N, ColMajor, Allocator>>
   {
-    using base_type = ImageBase<MultiArray<T, N, ColMajor>>;
+    using base_type = ImageBase<MultiArray<T, N, ColMajor, Allocator>>;
 
   public: /* interface */
     using vector_type = typename base_type::vector_type;
@@ -222,7 +231,8 @@ namespace DO { namespace Sara {
     Image<U, N> convert() const
     {
       Image<U, N> dst{ base_type::sizes() };
-      DO::Sara::convert(*this, dst); return dst;
+      DO::Sara::convert(*this, dst);
+      return dst;
     }
 
     //! Convenient helper for chaining filters.
