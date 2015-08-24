@@ -91,7 +91,7 @@ protected: // methods.
 
 TEST_F(TestGraphicsViewEvents, test_key_press_event)
 {
-  auto spy = QSignalSpy{ test_window_, SIGNAL(pressedKey(int)) };
+  QSignalSpy spy{ test_window_, SIGNAL(pressedKey(int)) };
   EXPECT_TRUE(spy.isValid());
 
   auto event = QKeyEvent{ QEvent::KeyPress, key_, Qt::NoModifier };
@@ -102,7 +102,7 @@ TEST_F(TestGraphicsViewEvents, test_key_press_event)
 
 TEST_F(TestGraphicsViewEvents, test_send_no_event)
 {
-  auto spy = QSignalSpy{ test_window_, SIGNAL(sendEvent(Event)) };
+  QSignalSpy spy{ test_window_, SIGNAL(sendEvent(Event)) };
   EXPECT_TRUE(spy.isValid());
 
   QMetaObject::invokeMethod(test_window_, "waitForEvent",
@@ -122,7 +122,7 @@ TEST_F(TestGraphicsViewEvents, test_send_no_event)
 TEST_F(TestGraphicsViewEvents, test_send_pressed_key_event)
 {
   // Spy the sendEvent signal.
-  auto spy = QSignalSpy{ test_window_, SIGNAL(sendEvent(Event)) };
+  QSignalSpy spy{ test_window_, SIGNAL(sendEvent(Event)) };
   EXPECT_TRUE(spy.isValid());
 
 #ifdef _WIN32
