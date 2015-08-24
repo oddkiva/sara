@@ -204,7 +204,7 @@ namespace DO { namespace Sara {
     data = 0;
     w = h = d = 0;
 
-    string ext(file_ext(filepath));
+    const auto ext = file_ext(filepath);
 
     if ( is_jpeg_file_ext(ext) &&
          JpegFileReader(filepath).read(data, w, h, d) )
