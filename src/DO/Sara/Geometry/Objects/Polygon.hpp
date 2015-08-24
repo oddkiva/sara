@@ -122,7 +122,7 @@ namespace DO { namespace Sara {
   };
 
   //! I/O ostream operator.
-  template <int N>
+  template <std::size_t N>
   std::ostream& operator<<(std::ostream& os, const SmallPolygon<N>& poly)
   {
     typename SmallPolygon<N>::const_iterator p = poly.begin();
@@ -132,7 +132,7 @@ namespace DO { namespace Sara {
   }
 
   //! Utility functions.
-  template <int N>
+  template <std::size_t N>
   double signed_area(const SmallPolygon<N>& polygon)
   {
     // Computation derived from Green's formula
@@ -147,14 +147,14 @@ namespace DO { namespace Sara {
     return 0.5*A;
   }
 
-  template <int N>
+  template <std::size_t N>
   inline double area(const SmallPolygon<N>& polygon)
   {
     return std::abs(signed_area(polygon));
   }
 
   //! Even-odd rule implementation.
-  template <int N>
+  template <std::size_t N>
   bool inside(const Point2d& p, const SmallPolygon<N>& poly)
   {
     bool c = false;
@@ -168,7 +168,7 @@ namespace DO { namespace Sara {
     return c;
   }
 
-  template <int N>
+  template <std::size_t N>
   bool degenerate(const SmallPolygon<N>& poly,
                   double eps = std::numeric_limits<double>::epsilon())
   {

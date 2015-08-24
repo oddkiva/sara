@@ -22,7 +22,7 @@ namespace DO { namespace Sara { namespace Detail {
   void sort_points_by_polar_angle(PtCotg *out, const Point2d *in, size_t num_points)
   {
     // Copy.
-    for (int i = 0; i < num_points; ++i)
+    for (size_t i = 0; i < num_points; ++i)
       out[i].first = in[i];
 
     // Find origin and swap with first element.
