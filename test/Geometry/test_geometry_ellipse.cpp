@@ -217,6 +217,24 @@ TEST_F(TestEllipse, test_segment_area)
 
 }
 
+TEST_F(TestEllipse, test_construct_from_shape_matrix)
+{
+  auto E = construct_from_shape_matrix(Matrix2d::Identity(), Vector2d::Zero());
+  EXPECT_MATRIX_NEAR(shape_matrix(E), Matrix2d::Identity(), 1e-8);
+  EXPECT_NEAR(E.radius1(), 1., 1e-8);
+  EXPECT_NEAR(E.radius2(), 1., 1e-8);
+  EXPECT_MATRIX_NEAR(E.center(), Point2d::Zero(), 1e-8);
+}
+
+TEST_F(TestEllipse, test_oriented_bbox)
+{
+  const auto E = Ellipse{ _a, _b, 0, Point2d::Zero() };
+  const auto actual_bbox = oriented_bbox(E);
+  const auto expected_bbox = Quad{ BBox{ -Point2d{ _a, _b }, Point2d{ _a, _b } } };
+  for (int i = 0; i < 4; ++i)
+    ASSERT_MATRIX_NEAR(expected_bbox[i], actual_bbox[i], 1e-8);
+}
+
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
