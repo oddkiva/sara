@@ -132,8 +132,9 @@ TEST_F(TestEllipse, test_sector_area)
     const auto steps = 18;
     const auto i0 = 0;
     const auto theta_0 = 2*M_PI*i0 / steps;
+    const auto num_tests = 2;
 
-    for (int i1 = i0 + 1; i1 <= i0 + steps/2; ++i1)
+    for (int i1 = i0 + 1; i1 < i0 + num_tests; ++i1)
     {
       auto theta_1 = 2*M_PI*i1  / steps;
 
@@ -186,8 +187,9 @@ TEST_F(TestEllipse, test_segment_area)
     const auto steps = 18;
     const auto i0 = 0;
     const auto theta_0 = 2*M_PI*i0 / steps;
+    const auto num_tests = 2;
 
-    for (int i1 = i0 + 1; i1 <= i0 + steps / 2; ++i1)
+    for (int i1 = i0 + 1; i1 < i0 + num_tests; ++i1)
     {
       const auto theta_1 = 2*M_PI*i1 / steps;
 
