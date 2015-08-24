@@ -16,6 +16,7 @@
 #define DO_SARA_CORE_MULTIARRAY_MULTIARRAY_HPP
 
 #include <iostream>
+#include <memory>
 #include <numeric>
 #include <stdexcept>
 
@@ -24,14 +25,18 @@
 
 namespace DO { namespace Sara {
 
-  //! The ND-array class.
-  template <typename T, int N, int StorageOrder = ColMajor>
+  //! \brief The ND-array class.
+  template <
+    typename T, int N, int StorageOrder = ColMajor,
+    template <typename> class Allocator = std::allocator
+  >
   class MultiArray : public MultiArrayView<T, N, StorageOrder>
   {
     //! @{
     //! Convenience typedefs.
     using self_type =  MultiArray;
     using base_type = MultiArrayView<T, N, StorageOrder>;
+    using allocator_type = Allocator<T>;
     //! @}
 
     using base_type::_begin;
@@ -45,10 +50,7 @@ namespace DO { namespace Sara {
 
   public: /* interface */
     //! \brief Default constructor that constructs an empty ND-array.
-    inline MultiArray()
-      : base_type{}
-    {
-    }
+    inline MultiArray() = default;
 
     //! \brief Constructor that takes **ownership** of the data.
     //! The data will be cleared upon destruction of the MultiArray object.
@@ -100,7 +102,7 @@ namespace DO { namespace Sara {
     //! \brief Destructor.
     inline ~MultiArray()
     {
-      delete [] _begin;
+      deallocate();
     }
 
     //! \brief Assignment operator uses the copy-swap idiom.
@@ -116,7 +118,7 @@ namespace DO { namespace Sara {
     {
       if (_sizes != sizes)
       {
-        delete[] _begin;
+        deallocate();
         initialize(sizes);
       }
     }
@@ -150,12 +152,23 @@ namespace DO { namespace Sara {
     inline void initialize(const vector_type& sizes)
     {
       _sizes = sizes;
-      bool empty = (sizes == vector_type::Zero());
+      auto empty = (sizes == vector_type::Zero());
       _strides = empty ? sizes : this->compute_strides(sizes);
 
-      size_t raw_size = this->compute_size(sizes);
-      _begin = empty ? 0 : new T[raw_size];
-      _end = empty ? 0 : _begin + raw_size;
+      auto num_elements = this->compute_size(sizes);
+      _begin = empty ? 0 : allocate(num_elements);
+      _end = empty ? 0 : _begin + num_elements;
+    }
+
+    inline T *allocate(std::size_t count)
+    {
+      return allocator_type{}.allocate(count);
+    }
+
+    inline void deallocate()
+    {
+      allocator_type{}.deallocate(_begin, _end - _begin);
+      _begin = nullptr;
     }
 
   };
