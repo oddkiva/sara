@@ -18,9 +18,14 @@ using namespace std;
 using namespace DO::Sara;
 
 
-TEST(TestFeatureMatching, test_me)
+TEST(TestFeatureMatching, test_ann_matching)
 {
-  EXPECT_FALSE(true);
+  Set<OERegion, RealDescriptor> keys1, keys2;
+
+  AnnMatcher matcher{ keys1, keys2, 0.6f };
+  //auto matches = matcher.compute_matches();
+
+  // TODO.
 }
 
 int main(int argc, char **argv)
