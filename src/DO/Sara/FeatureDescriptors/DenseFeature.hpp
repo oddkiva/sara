@@ -26,7 +26,7 @@
 namespace DO { namespace Sara {
 
   //! \brief Dense Feature Computer class.
-  template <typename BaseFeatureComputer = ComputeSIFTDescriptor>
+  template <typename BaseFeatureComputer = ComputeSIFTDescriptor<>>
   class DenseFeatureComputer
   {
   public:
