@@ -14,6 +14,16 @@
 #ifndef DO_SARA_FEATUREDESCRIPTORS_SIFT_HPP
 #define DO_SARA_FEATUREDESCRIPTORS_SIFT_HPP
 
+#include <DO/Sara/Core/EigenExtension.hpp>
+#include <DO/Sara/Core/Image/Image.hpp>
+
+#include <DO/Sara/Graphics.hpp>
+
+#include <DO/Sara/Features/DescriptorMatrix.hpp>
+#include <DO/Sara/Features/Feature.hpp>
+
+#include <DO/Sara/ImageProcessing/ImagePyramid.hpp>
+
 
 namespace DO { namespace Sara {
 
@@ -29,7 +39,7 @@ namespace DO { namespace Sara {
   {
   public: /* interface. */
     enum { Dim = N*N*O };
-    using SIFTDescriptor = Matrix<float, Dim, 1>;
+    using descriptor_type = Matrix<float, Dim, 1>;
 
     //! \brief Constructor.
     ComputeSIFTDescriptor(float bin_scale_unit_length = 3.f,
@@ -40,8 +50,8 @@ namespace DO { namespace Sara {
     }
 
     //! \brief Computes the SIFT descriptor for keypoint \$(x,y,\sigma,\theta)\f$.
-    SIFTDescriptor operator()(float x, float y, float sigma, float theta,
-                              const Image<Vector2f>& grad_polar_coords) const
+    descriptor_type operator()(float x, float y, float sigma, float theta,
+                               const Image<Vector2f>& grad_polar_coords) const
     {
       const float pi = static_cast<float>(M_PI);
       /*
@@ -86,7 +96,7 @@ namespace DO { namespace Sara {
         Let us initialize the SIFT descriptor consisting of the NxN histograms
         $\mathbf{h}_{i,j}$, each in $\mathbf{R}^O$ as follows.
        */
-      SIFTDescriptor h{ SIFTDescriptor::Zero() };
+      descriptor_type h{ descriptor_type::Zero() };
 
       /*
         In the rescaled and oriented coordinate frame bound to the patch $P(k)$,
@@ -186,9 +196,16 @@ namespace DO { namespace Sara {
       return h;
     }
 
+    //! \brief Computes the **upright** SIFT descriptor for keypoint \$(x,y,\sigma)\f$.
+    descriptor_type operator()(float x, float y, float sigma,
+                               const Image<Vector2f>& grad_polar_coords) const
+    {
+      return this->operator()(x, y, sigma, 0.f, grad_polar_coords);
+    }
+
     //! Helper member function.
-    SIFTDescriptor operator()(const OERegion& f,
-                              const Image<Vector2f>& grad_polar_coords) const
+    descriptor_type operator()(const OERegion& f,
+                               const Image<Vector2f>& grad_polar_coords) const
     {
       return this->operator()(f.x(), f.y(), f.scale(), f.orientation(), grad_polar_coords);
     }
@@ -239,7 +256,7 @@ namespace DO { namespace Sara {
 
   private: /* member functions. */
     //! The accumulation function based on trilinear interpolation.
-    void accumulate(SIFTDescriptor& h, const Vector2f& pos, float ori,
+    void accumulate(descriptor_type& h, const Vector2f& pos, float ori,
                     float weight, float mag) const
     {
       // By trilinear interpolation, we mean that in this translated coordinate
@@ -287,13 +304,13 @@ namespace DO { namespace Sara {
     }
 
     //! Normalize in a contrast-invariant way.
-    void normalize(SIFTDescriptor& h)
+    void normalize(descriptor_type& h)
     {
       // Euclidean normalization.
       h.normalize();
       // Clamp histogram bin values $h_i$ to 0.2 for enhanced robustness to
       // lighting change.
-      h = h.cwiseMin(SIFTDescriptor::Ones()*_max_bin_value);
+      h = h.cwiseMin(descriptor_type::Ones()*_max_bin_value);
       // Renormalize again.
       h.normalize();
     }

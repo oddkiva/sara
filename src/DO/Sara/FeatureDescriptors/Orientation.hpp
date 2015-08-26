@@ -16,9 +16,14 @@
 
 #include <DO/Sara/Defines.hpp>
 
+#include <DO/Sara/Core/Image/Image.hpp>
 #include <DO/Sara/Core/StringFormat.hpp>
 
+#include <DO/Sara/Features/Feature.hpp>
+
 #include <DO/Sara/Geometry/Tools/Utilities.hpp>
+
+#include <DO/Sara/ImageProcessing/ImagePyramid.hpp>
 
 
 namespace DO { namespace Sara {
@@ -167,6 +172,7 @@ namespace DO { namespace Sara {
 
     Only histogram peaks \f$i\f$ such that \f$h_i \geq 0.8 \max_j h_j\f$
    */
+#include <DO/Sara/Features/Feature.hpp>
   template <typename T, int N>
   std::vector<int> find_peaks(const Array<T, N, 1>& orientation_histogram,
                               T peak_ratio_thres = T(0.8))
