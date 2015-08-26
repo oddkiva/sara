@@ -29,6 +29,8 @@
 // Describe keypoint $(x,y,\sigma,\theta)$ with the SIFT descriptor (cf.
 // [Lowe, IJCV 2004]).
 #include <DO/Sara/FeatureDescriptors/SIFT.hpp>
+// Dense feature computation API.
+#include <DO/Sara/FeatureDescriptors/DenseFeature.hpp>
 
 
 //! \defgroup FeatureDescriptors
