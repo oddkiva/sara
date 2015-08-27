@@ -14,6 +14,8 @@
 
 #include <Eigen/Eigen>
 
+#include <DO/Sara/Core/EigenExtension.hpp>
+
 
 namespace DO { namespace Sara {
 
@@ -21,80 +23,118 @@ namespace DO { namespace Sara {
   class SquaredRefDistance
   {
   public:
-    typedef T Scalar;
-    typedef Eigen::Matrix<T, N, 1> Vector, Point;
-    typedef Eigen::Matrix<T, N, N> Matrix;
+    enum { Dim = N };
+
+    using Scalar = T;
+    using Vector = Eigen::Matrix<T, N, 1>;
+    using Matrix = Eigen::Matrix<T, N, N>;
 
   public:
-    inline SquaredRefDistance(const Matrix& m) : m_(m) {}
-    inline const Matrix& mappedMatrix() const { return m_; }
-    inline int dim() const { return N; }
-    inline T operator()(const Vector& a, const Vector& b) const
-    { return (b-a).dot(m_*(b-a)); }
-    inline bool isQuasiIsotropic(T threshold = 0.9) const
+    inline SquaredRefDistance(const Matrix& m)
+      : _covariance_matrix(m)
     {
-      Eigen::JacobiSVD<Matrix> svd(m_);
-      return (svd.singularValues()(N-1)/svd.singularValues(0)) < threshold;
+    }
+
+    inline const Matrix& covariance_matrix() const
+    {
+      return _covariance_matrix;
+    }
+
+    inline T operator()(const Vector& a, const Vector& b) const
+    {
+      return (b-a).dot(_covariance_matrix*(b-a));
+    }
+
+    inline bool is_quasi_isotropic(T threshold = 0.9) const
+    {
+      Eigen::JacobiSVD<Matrix> svd(_covariance_matrix);
+      const Vector S = svd.singularValues();
+      return S(N - 1) / S(0) > threshold;
     }
 
   private:
-    const Matrix& m_;
+    const Matrix& _covariance_matrix;
   };
 
   template <typename T, int N>
   class SquaredDistance
   {
   public:
-    typedef T Scalar;
-    typedef Eigen::Matrix<T, N, 1> Vector, Point;
-    typedef Eigen::Matrix<T, N, N> Matrix;
+    enum { Dim = N };
+
+    using Scalar = T;
+    using Vector = Eigen::Matrix<T, N, 1>;
+    using Matrix = Eigen::Matrix<T, N, N>;
 
   public:
-    inline SquaredDistance(const Matrix& m) : m_(m) {}
-    inline Matrix& mappedMatrix()
-    { return m_; }
-    inline const Matrix& mappedMatrix() const
-    { return m_; }
-    inline int dim() const
-    { return N; }
-    inline T operator()(const Vector& a, const Vector& b) const
-    { return (b-a).dot(m_*(b-a)); }
-    inline bool isQuasiIsotropic(T threshold = 0.9) const
+    inline SquaredDistance(const Matrix& m)
+      : _m(m)
     {
-      Eigen::JacobiSVD<Matrix> svd(m_);
-      return (svd.singularValues()(N-1)/svd.singularValues(0)) < threshold;
+    }
+
+    inline const Matrix& covariance_matrix() const
+    {
+      return _m;
+    }
+
+    inline T operator()(const Vector& a, const Vector& b) const
+    {
+      return (b-a).dot(_m*(b-a));
+    }
+
+    inline bool is_quasi_isotropic(T threshold = 0.9) const
+    {
+      Eigen::JacobiSVD<Matrix> svd(_m);
+      const Vector S = svd.singularValues();
+      return S(N - 1) / S(0) > threshold;
     }
 
   private:
-    const Matrix m_;
+    const Matrix _m;
   };
 
   template <typename SquaredMetric>
   class OpenBall
   {
   public:
-    typedef SquaredMetric SquaredDistance;
-    typedef typename SquaredDistance::Scalar T;
-    typedef typename SquaredDistance::Matrix Matrix;
-    typedef typename SquaredDistance::Vector Vector, Point;
+    using SquaredDistance = SquaredMetric;
+    using T = typename SquaredDistance::Scalar;
+    using Matrix = typename SquaredDistance::Matrix;
+    using Vector = typename SquaredDistance::Vector;
+    using Point = Vector;
 
     inline OpenBall(const Point& center, T radius,
                     const SquaredDistance& squaredDistance)
-      : center_(center), radius_(radius), squaredDistance_(squaredDistance) {}
+      : _center(center)
+      , _radius(radius)
+      , _squared_distance(squaredDistance)
+    {
+    }
 
     inline const Point& center() const
-    { return center_; }
+    {
+      return _center;
+    }
+
     inline T radius() const
-    { return radius_; }
-    inline const SquaredDistance& squaredDistance() const
-    { return squaredDistance_; }
-    inline bool isInside(const Point& x) const
-    { return squaredDistance(center_, x) < radius_*radius_; }
+    {
+      return _radius;
+    }
+
+    inline const SquaredDistance& squared_distance() const
+    {
+      return _squared_distance;
+    }
+
+    inline bool contains(const Point& x) const
+    {
+      return _squared_distance(x, _center) < _radius*_radius;
+    }
 
   private:
-    const Point& center_;
-    const T radius_;
-    const SquaredDistance& squaredDistance_;
+    const Point& _center;
+    const T _radius;
+    const SquaredDistance& _squared_distance;
   };
 
 } /* namespace Sara */
