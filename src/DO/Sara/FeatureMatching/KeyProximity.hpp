@@ -24,9 +24,10 @@ namespace DO { namespace Sara {
 	class DO_EXPORT KeyProximity
 	{
 	public:
-		KeyProximity(float metricDistT = .5f, float pixelDistT = 10.f)
-			: _squared_metric_dist(metricDistT*metricDistT)
-      , _squared_dist_thres(pixelDistT*pixelDistT)
+		KeyProximity(float metric_dist_thres = .5f,
+                 float pixel_dist_thres = 10.f)
+      : _squared_metric_dist{ metric_dist_thres*metric_dist_thres }
+      , _squared_dist_thres{ pixel_dist_thres*pixel_dist_thres }
     {
     }
 

@@ -11,8 +11,9 @@
 
 #include <gtest/gtest.h>
 
-#include <DO/Sara/Features/Feature.hpp>
 #include <DO/Sara/Features/DescriptorMatrix.hpp>
+#include <DO/Sara/Features/Feature.hpp>
+#include <DO/Sara/Features/Key.hpp>
 #include <DO/Sara/Features/IO.hpp>
 
 #include "../AssertHelpers.hpp"
@@ -78,6 +79,14 @@ TEST(TestFeatures, test_io)
   }
 }
 
+TEST(TestFeatures, test_set)
+{
+  Set<OERegion, RealDescriptor> set;
+  EXPECT_EQ(set.size(), 0);
+
+  set.features.resize(10);
+  EXPECT_THROW(set.size(), std::runtime_error);
+}
 
 int main(int argc, char **argv)
 {
