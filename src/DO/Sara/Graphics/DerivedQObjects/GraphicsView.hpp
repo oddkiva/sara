@@ -39,27 +39,21 @@ namespace DO { namespace Sara {
                  const QString& windowTitle = "DO-CV",
                  int x = -1, int y = -1,
                  QWidget* parent = 0);
-    void activateOpenGL();
 
-    QGraphicsItem *lastAddedItem() { return last_inserted_item_; }
+    QGraphicsItem *lastAddedItem() { return m_lastInsertedItem; }
 
   public slots:
     void addItem(QGraphicsItem *item, QGraphicsItem *parent = 0);
-    void addImageItem(const QImage& image, bool randomPos = false);
-    void drawPoint(int x, int y, const QColor& c, QGraphicsPixmapItem *item);
+    void addPixmapItem(const QImage& image, bool randomPos = false);
     void waitForEvent(int ms);
     void eventListeningTimerStopped();
 
   protected:
-    void mousePressEvent(QMouseEvent *event);
-    void mouseReleaseEvent(QMouseEvent *event);
     void wheelEvent(QWheelEvent *);
     void keyPressEvent(QKeyEvent *event);
     void closeEvent(QCloseEvent *event);
 
   signals:
-    void pressedMouseButtons(int x, int y, Qt::MouseButtons buttons);
-    void releasedMouseButtons(int x, int y, Qt::MouseButtons buttons);
     void pressedKey(int key);
     void releasedKey(int key);
     void sendEvent(Event e);
@@ -68,8 +62,8 @@ namespace DO { namespace Sara {
     void scaleView(qreal scaleFactor);
 
   private:
-    QTimer event_listening_timer_;
-    QGraphicsItem *last_inserted_item_{ nullptr };
+    QTimer m_eventListeningTimer;
+    QGraphicsItem *m_lastInsertedItem{ nullptr };
   };
 
   //! @}

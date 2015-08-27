@@ -5,9 +5,9 @@
 # include <GL/glu.h>
 #endif
 
-#include "../Frame.hpp"
+#include <DO/Sara/Graphics/Frame.hpp>
 
-#include "OpenGLWindow.hpp"
+#include <DO/Sara/Graphics/DerivedQObjects/OpenGLWindow.hpp>
 
 #ifndef GL_MULTISAMPLE
 # define GL_MULTISAMPLE  0x809D
@@ -81,15 +81,15 @@ namespace DO { namespace Sara {
                              int x, int y,
                              QWidget* parent)
     : QGLWidget(QGLFormat(QGL::SampleBuffers), parent)
-    , scale_(1.0f)
-    , background_color_(QColor::fromCmykF(0.39, 0.39, 0.0, 0.0))
-    , color_(QColor::fromCmykF(0.40, 0.0, 1.0, 0.0))
+    , m_scale(1.0f)
+    , m_backgroundColor(QColor::fromCmykF(0.39, 0.39, 0.0, 0.0))
+    , m_color(QColor::fromCmykF(0.40, 0.0, 1.0, 0.0))
   {
     setAttribute(Qt::WA_DeleteOnClose);
 
     // Set event listener.
-    event_listening_timer_.setSingleShot(true);
-    connect(&event_listening_timer_, SIGNAL(timeout()),
+    m_eventListeningTimer.setSingleShot(true);
+    connect(&m_eventListeningTimer, SIGNAL(timeout()),
             this, SLOT(eventListeningTimerStopped()));
 
     if(x != -1 && y != -1)
@@ -100,13 +100,13 @@ namespace DO { namespace Sara {
     // Needed to correctly mix OpenGL commands and QPainter drawing commands.
     setAutoFillBackground(false);
 
-    display_frame_ = false;
+    m_displayFrame = false;
   }
 
   void OpenGLWindow::setMesh(const SimpleTriangleMesh3f& mesh)
   {
-    mesh_ = mesh;
-    center_ = mesh.center();
+    m_mesh = mesh;
+    m_center = mesh.center();
     update();
   }
 
@@ -114,13 +114,13 @@ namespace DO { namespace Sara {
   {
     glBegin(GL_TRIANGLES);
     {
-      for(size_t t = 0; t != mesh_.faces().size(); ++t)
+      for(size_t t = 0; t != m_mesh.faces().size(); ++t)
       {
         for (int v = 0; v < 3; ++v)
         {
-          size_t vInd = mesh_.face(t)(v);
-          glNormal3fv(mesh_.normal(vInd).data());
-          glVertex3fv(mesh_.vertex(vInd).data());
+          size_t vInd = m_mesh.face(t)(v);
+          glNormal3fv(m_mesh.normal(vInd).data());
+          glVertex3fv(m_mesh.vertex(vInd).data());
         }
       }
     }
@@ -129,8 +129,8 @@ namespace DO { namespace Sara {
 
   void OpenGLWindow::waitForEvent(int ms)
   {
-    event_listening_timer_.setInterval(ms);
-    event_listening_timer_.start();
+    m_eventListeningTimer.setInterval(ms);
+    m_eventListeningTimer.start();
   }
 
   void OpenGLWindow::eventListeningTimerStopped()
@@ -141,7 +141,7 @@ namespace DO { namespace Sara {
   void OpenGLWindow::initializeGL()
   {
     // Set background color
-    qglClearColor(background_color_);
+    qglClearColor(m_backgroundColor);
 
     glShadeModel(GL_SMOOTH);  // Enable smooth shading
 
@@ -199,23 +199,23 @@ namespace DO { namespace Sara {
     // Display the world frame is at z=-15 w.r.t. the camera frame.
     //frame_.draw(5, 0.1);
     // Scale the model
-    glScalef(scale_, scale_, scale_);
+    glScalef(m_scale, m_scale, m_scale);
     // Rotate the model with the trackball.
     QMatrix4x4 m;
-    m.rotate(trackball_.rotation());
+    m.rotate(m_trackball.rotation());
     multMatrix(m);
     // Display the mesh.
     glPushMatrix();
     {
       // Center the model
-      glTranslatef(-center_.x(), -center_.y(), -center_.z());
+      glTranslatef(-m_center.x(), -m_center.y(), -m_center.z());
       // Draw the model
       displayMesh();
     }
     glPopMatrix();
     // Object-centered frame.
-    if (display_frame_)
-      frame_.draw(5, 0.1);
+    if (m_displayFrame)
+      m_frame.draw(5, 0.1);
 
     // Disable the following to properly display the drawing with QPainter.
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -276,7 +276,7 @@ namespace DO { namespace Sara {
 
     QPointF pos(normalizePos(event->localPos()));
     if (event->buttons() & Qt::LeftButton) {
-      trackball_.push(pos, trackball_.rotation());
+      m_trackball.push(pos, m_trackball.rotation());
       event->accept();
     }
     update();
@@ -290,7 +290,7 @@ namespace DO { namespace Sara {
 
     QPointF pos(normalizePos(event->localPos()));
     if (event->button() == Qt::LeftButton) {
-      trackball_.release(pos);
+      m_trackball.release(pos);
       event->accept();
     }
     update();
@@ -307,10 +307,10 @@ namespace DO { namespace Sara {
 
     QPointF pos(normalizePos(event->localPos()));
     if (event->buttons() & Qt::LeftButton) {
-      trackball_.move(pos);
+      m_trackball.move(pos);
       event->accept();
     } else {
-      trackball_.release(pos);
+      m_trackball.release(pos);
     }
     update();
   }
@@ -320,7 +320,7 @@ namespace DO { namespace Sara {
     QGLWidget::wheelEvent(event);
 
     if (!event->isAccepted()) {
-      event->delta() > 0 ? scale_ += 0.05f*scale_ : scale_ -= 0.05f*scale_;
+      event->delta() > 0 ? m_scale += 0.05f*m_scale : m_scale -= 0.05f*m_scale;
       update();
     }
   }
@@ -330,12 +330,12 @@ namespace DO { namespace Sara {
     emit pressedKey(event->key());
     if (event->key() == Qt::Key_F)
     {
-      display_frame_=!display_frame_;
+      m_displayFrame=!m_displayFrame;
       update();
     }
-    if (event_listening_timer_.isActive())
+    if (m_eventListeningTimer.isActive())
     {
-      event_listening_timer_.stop();
+      m_eventListeningTimer.stop();
       emit sendEvent(key_pressed(event->key(), event->modifiers()));
     }
   }
@@ -343,9 +343,9 @@ namespace DO { namespace Sara {
   void OpenGLWindow::keyReleaseEvent(QKeyEvent *event)
   {
     emit releasedKey(event->key());
-    if (event_listening_timer_.isActive())
+    if (m_eventListeningTimer.isActive())
     {
-      event_listening_timer_.stop();
+      m_eventListeningTimer.stop();
       emit sendEvent(key_released(event->key(), event->modifiers()));
     }
   }

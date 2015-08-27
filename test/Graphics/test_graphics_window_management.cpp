@@ -123,7 +123,6 @@ int worker_thread(int argc, char **argv)
   return RUN_ALL_TESTS();
 }
 
-#undef main
 int main(int argc, char **argv)
 {
   // Create Qt Application.

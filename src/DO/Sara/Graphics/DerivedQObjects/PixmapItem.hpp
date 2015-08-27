@@ -14,25 +14,36 @@
 
 #include <QGraphicsPixmapItem>
 
+#include <DO/Sara/Defines.hpp>
+
+
 
 namespace DO { namespace Sara {
 
-  class ImageItem : public QGraphicsPixmapItem
+  //! \brief Interactive pixmap item.
+  class DO_EXPORT GraphicsPixmapItem : public QGraphicsPixmapItem
   {
   public:
-    ImageItem(QGraphicsItem* parent = 0) : QGraphicsPixmapItem(parent) {}
-    ImageItem(const QPixmap& pixmap, QGraphicsItem* parent = 0)
+    //! @{
+    //! \brief Constructors.
+    GraphicsPixmapItem(QGraphicsItem* parent = 0)
+      : QGraphicsPixmapItem(parent)
+    {
+    }
+
+    GraphicsPixmapItem(const QPixmap& pixmap, QGraphicsItem* parent = 0)
       : QGraphicsPixmapItem(pixmap, parent)
-      , scaleFactor(1.0)
+      , m_scaleFactor(1.0)
     {
       setFlags(ItemIsMovable | ItemIsSelectable | ItemIsFocusable);
     }
+    //! @}
 
   protected:
     void keyPressEvent(QKeyEvent *event);
 
   private:
-    qreal scaleFactor;
+    qreal m_scaleFactor;
   };
 
 } /* namespace Sara */

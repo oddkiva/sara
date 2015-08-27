@@ -10,8 +10,7 @@
 // ========================================================================== //
 
 #include <DO/Sara/Graphics.hpp>
-
-#include "GraphicsUtilities.hpp"
+#include <DO/Sara/Graphics/GraphicsUtilities.hpp>
 
 
 namespace DO { namespace Sara {

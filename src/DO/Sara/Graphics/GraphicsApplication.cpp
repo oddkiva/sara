@@ -10,7 +10,7 @@
 // ========================================================================== //
 
 #include <DO/Sara/Graphics.hpp>
-#include "GraphicsUtilities.hpp"
+#include <DO/Sara/Graphics/GraphicsUtilities.hpp>
 
 namespace DO { namespace Sara {
 
@@ -28,12 +28,12 @@ namespace DO { namespace Sara {
 
   void GraphicsApplication::register_user_main(int (*userMain)(int, char **))
   {
-    pimpl_->userThread.registerUserMain(userMain);
+    pimpl_->m_userThread.registerUserMain(userMain);
   }
 
   int GraphicsApplication::exec()
   {
-    pimpl_->userThread.start();
+    pimpl_->m_userThread.start();
     return pimpl_->exec();
   }
 

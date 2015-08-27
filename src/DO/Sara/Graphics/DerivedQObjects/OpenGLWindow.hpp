@@ -84,9 +84,6 @@ namespace DO { namespace Sara {
     void closeEvent(QCloseEvent *event);
 
   signals:
-    void movedMouse(int x, int y, Qt::MouseButtons buttons);
-    void pressedMouseButtons(int x, int y, Qt::MouseButtons buttons);
-    void releasedMouseButtons(int x, int y, Qt::MouseButtons buttons);
     void pressedKey(int key);
     void releasedKey(int key);
     void sendEvent(Event e);
@@ -95,19 +92,20 @@ namespace DO { namespace Sara {
     QPointF normalizePos(const QPointF& localPos) const;
 
   private:
-    GLfloat scale_;
-    Point3f center_;
-    GLObject::Frame frame_;
-    TrackBall trackball_;
+    GLfloat m_scale;
+    Point3f m_center;
+    GLObject::Frame m_frame;
+    TrackBall m_trackball;
 
-    SimpleTriangleMesh3f mesh_;
+    SimpleTriangleMesh3f m_mesh;
 
-    QPoint last_pos_;
-    QColor background_color_, color_;
+    QPoint m_lastPos;
+    QColor m_backgroundColor;
+    QColor m_color;;
 
-    bool display_frame_;
+    bool m_displayFrame;
 
-    QTimer event_listening_timer_;
+    QTimer m_eventListeningTimer;
 
   };
 
