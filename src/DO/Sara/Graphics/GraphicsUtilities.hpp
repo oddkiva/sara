@@ -34,7 +34,7 @@ namespace DO { namespace Sara {
 
   inline UserThread& get_user_thread()
   {
-    return gui_app()->userThread;
+    return gui_app()->m_userThread;
   }
 
   inline bool active_window_is_visible()

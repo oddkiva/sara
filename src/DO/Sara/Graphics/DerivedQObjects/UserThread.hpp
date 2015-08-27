@@ -38,7 +38,8 @@ namespace DO { namespace Sara {
 
   public:
     UserThread(QObject* parent = 0);
-    void registerUserMain(int (*userMain)(int, char **)) { userMain_ = userMain; }
+
+    void registerUserMain(int (*userMain)(int, char **)) { m_userMain = userMain; }
 
   public: /* timing methods */
     void milliSleep(int msec) { msleep(msec); }
@@ -63,19 +64,19 @@ namespace DO { namespace Sara {
     void run();
 
   private:
-    int (*userMain_)(int, char **);
+    int (*m_userMain)(int, char **);
 
-    QMutex mutex_;
-    QWaitCondition condition_;
+    QMutex m_mutex;
+    QWaitCondition m_condition;
 
-    bool doWaitForClick_;
-    Qt::MouseButtons mouseButton_;
-    int mouseX_, mouseY_;
+    bool m_doWaitForClick;
+    Qt::MouseButtons m_mouseButton;
+    int m_mouseX, m_mouseY;
 
-    bool doWaitForKey_;
-    int key_;
+    bool m_doWaitForKey;
+    int m_key;
 
-    Event event_;
+    Event m_event;
   };
 
 } /* namespace Sara */

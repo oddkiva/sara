@@ -10,15 +10,14 @@
 // ========================================================================== //
 
 #include <DO/Sara/Graphics.hpp>
-
-#include "GraphicsUtilities.hpp"
+#include <DO/Sara/Graphics/GraphicsUtilities.hpp>
 
 
 namespace DO { namespace Sara {
 
   QWidget * active_window()
   {
-    return gui_app()->activeWindow;
+    return gui_app()->m_activeWindow;
   }
 
   Vector2i get_sizes(Window w)
@@ -36,7 +35,7 @@ namespace DO { namespace Sara {
                               Q_ARG(const QString&,
                                     QString(windowTitle.c_str())),
                               Q_ARG(int, x), Q_ARG(int, y));
-    return gui_app()->createdWindows.back();
+    return gui_app()->m_createdWindows.back();
   }
 
   Window create_gl_window(int w, int h, const std::string& windowTitle,
@@ -49,7 +48,7 @@ namespace DO { namespace Sara {
                               Q_ARG(const QString&,
                                     QString(windowTitle.c_str())),
                               Q_ARG(int, x), Q_ARG(int, y));
-    return gui_app()->createdWindows.back();
+    return gui_app()->m_createdWindows.back();
   }
 
   void close_window(Window w)

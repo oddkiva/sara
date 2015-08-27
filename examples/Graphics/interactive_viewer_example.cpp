@@ -12,8 +12,8 @@ GRAPHICS_MAIN()
 
   for (int i = 0; i < 10; ++i)
   {
-    ImageItem image = add_image(I);
-    if (!image)
+    auto image = add_image(I);
+    if (image == nullptr)
       cerr << "Error image display" << endl;
   }
 

@@ -13,25 +13,25 @@
 #include <QGraphicsView>
 #include <QStyleOptionGraphicsItem>
 
-#include "PixmapItem.hpp"
+#include <DO/Sara/Graphics/DerivedQObjects/PixmapItem.hpp>
 
 
 namespace DO { namespace Sara {
 
-  void ImageItem::keyPressEvent(QKeyEvent *event)
+  void GraphicsPixmapItem::keyPressEvent(QKeyEvent *event)
   {
     if (!isSelected())
       return;
 
     if (event->key() == Qt::Key_Plus)
     {
-      scaleFactor *= 1.1;
-      setScale(scaleFactor);
+      m_scaleFactor *= 1.1;
+      setScale(m_scaleFactor);
     }
     else if (event->key() == Qt::Key_Minus)
     {
-      scaleFactor /= 1.1;
-      setScale(scaleFactor);
+      m_scaleFactor /= 1.1;
+      setScale(m_scaleFactor);
     }
   }
 

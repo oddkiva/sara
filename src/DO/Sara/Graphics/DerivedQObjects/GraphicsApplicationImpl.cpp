@@ -12,7 +12,7 @@
 #include <QDebug>
 #include <QFileDialog>
 
-#include "GraphicsApplicationImpl.hpp"
+#include <DO/Sara/Graphics/DerivedQObjects/GraphicsApplicationImpl.hpp>
 
 
 namespace DO { namespace Sara {
@@ -20,10 +20,10 @@ namespace DO { namespace Sara {
   GraphicsApplication::Impl::
   Impl(int& argc_, char **argv_)
     : QApplication(argc_, argv_)
-    , argc(argc_)
-    , argv(argv_)
-    , activeWindow(0)
-    , mutex(QMutex::NonRecursive)
+    , m_argc(argc_)
+    , m_argv(argv_)
+    , m_activeWindow(0)
+    , m_mutex(QMutex::NonRecursive)
   {
     // Register painting data types.
     qRegisterMetaType<PaintingWindow *>("PaintingWindow *");
@@ -40,15 +40,15 @@ namespace DO { namespace Sara {
     qRegisterMetaType<Event>("Event");
 
     // Make sure you quit after the user thread is finished.
-    connect(&userThread, SIGNAL(finished()), this, SLOT(quit()));
+    connect(&m_userThread, SIGNAL(finished()), this, SLOT(quit()));
     setQuitOnLastWindowClosed(false);
   }
 
   GraphicsApplication::Impl::
   ~Impl()
   {
-    QList<QPointer<QWidget> >::iterator w = createdWindows.begin();
-    for ( ; w != createdWindows.end(); ++w)
+    QList<QPointer<QWidget> >::iterator w = m_createdWindows.begin();
+    for ( ; w != m_createdWindows.end(); ++w)
     {
       if (!w->isNull())
       {
@@ -67,16 +67,16 @@ namespace DO { namespace Sara {
                const QString& windowTitle, int x, int y)
   {
     if (windowType == PAINTING_WINDOW)
-      createdWindows << new PaintingWindow(w, h, windowTitle, x, y);
+      m_createdWindows << new PaintingWindow(w, h, windowTitle, x, y);
     if (windowType == OPENGL_WINDOW)
-      createdWindows << new OpenGLWindow(w, h, windowTitle, x, y);
+      m_createdWindows << new OpenGLWindow(w, h, windowTitle, x, y);
     if (windowType == GRAPHICS_VIEW)
-      createdWindows << new GraphicsView(w, h, windowTitle, x, y);
+      m_createdWindows << new GraphicsView(w, h, windowTitle, x, y);
 
-    if (createdWindows.size() == 1)
+    if (m_createdWindows.size() == 1)
     {
-      activeWindow = createdWindows.front();
-      setActiveWindow(activeWindow);
+      m_activeWindow = m_createdWindows.front();
+      setActiveWindow(m_activeWindow);
     }
   }
 
@@ -97,7 +97,7 @@ namespace DO { namespace Sara {
     disconnectAllWindowsIOEventsToUserThread();
 
     // This is now our current active window
-    activeWindow = w;
+    m_activeWindow = w;
     connectWindowIOEventsToUserThread(w);
   }
 
@@ -106,8 +106,8 @@ namespace DO { namespace Sara {
   closeWindow(QWidget *w)
    {
      QList<QPointer<QWidget> >::iterator wi = qFind(
-       createdWindows.begin(), createdWindows.end(), w);
-     if (wi == createdWindows.end())
+       m_createdWindows.begin(), m_createdWindows.end(), w);
+     if (wi == m_createdWindows.end())
      {
        qFatal("Could not find window!");
        quit();
@@ -128,14 +128,14 @@ namespace DO { namespace Sara {
        quit();
      }
 
-     createdWindows.erase(wi);
+     m_createdWindows.erase(wi);
    }
 
   void
   GraphicsApplication::Impl::
   getFileFromDialogBox()
   {
-    dialogBoxInfo.filename =
+    m_dialogBoxInfo.filename =
       QFileDialog::getOpenFileName(0, "Open File", "/home",
       "Images (*.png *.xpm *.jpg)");
   }
@@ -144,20 +144,20 @@ namespace DO { namespace Sara {
   GraphicsApplication::Impl::
   activeWindowIsVisible()
   {
-    mutex.lock();
-    if (activeWindow.isNull())
+    m_mutex.lock();
+    if (m_activeWindow.isNull())
     {
-      mutex.unlock();
+      m_mutex.unlock();
       qWarning() << "No active window!";
       return false;
     }
-    if (activeWindow->isHidden())
+    if (m_activeWindow->isHidden())
     {
-      mutex.unlock();
+      m_mutex.unlock();
       qWarning() << "Active window is hidden!";
       return false;
     }
-    mutex.unlock();
+    m_mutex.unlock();
     return true;
   }
 
@@ -167,25 +167,25 @@ namespace DO { namespace Sara {
   {
     // User thread listens to mouse events.
     connect(w, SIGNAL(releasedMouseButtons(int, int, Qt::MouseButtons)),
-            &userThread, SLOT(pressedMouseButtons(int, int, Qt::MouseButtons)));
+            &m_userThread, SLOT(pressedMouseButtons(int, int, Qt::MouseButtons)));
     // User thread listens to keyboard events.
     connect(w, SIGNAL(pressedKey(int)),
-            &userThread, SLOT(pressedKey(int)));
+            &m_userThread, SLOT(pressedKey(int)));
     // User thread listens to a generic event.
     connect(w, SIGNAL(sendEvent(Event)),
-            &userThread, SLOT(receivedEvent(Event)));
+            &m_userThread, SLOT(receivedEvent(Event)));
   }
 
   void
   GraphicsApplication::Impl::
   connectAllWindowsIOEventsToUserThread()
   {
-    QList<QPointer<QWidget> >::iterator w = createdWindows.begin();
-    for ( ; w != createdWindows.end(); )
+    QList<QPointer<QWidget> >::iterator w = m_createdWindows.begin();
+    for ( ; w != m_createdWindows.end(); )
     {
       if (w->isNull())
       {
-        w = createdWindows.erase(w);
+        w = m_createdWindows.erase(w);
         continue;
       }
       connectWindowIOEventsToUserThread(*w);
@@ -197,16 +197,16 @@ namespace DO { namespace Sara {
   GraphicsApplication::Impl::
   disconnectAllWindowsIOEventsToUserThread()
   {
-    QList<QPointer<QWidget> >::iterator w = createdWindows.begin();
-    for ( ; w != createdWindows.end(); )
+    QList<QPointer<QWidget> >::iterator w = m_createdWindows.begin();
+    for ( ; w != m_createdWindows.end(); )
     {
       if (w->isNull())
       {
-        w = createdWindows.erase(w);
+        w = m_createdWindows.erase(w);
         continue;
       }
-      disconnect(&userThread, 0, *w, 0);
-      disconnect(*w, 0, &userThread, 0);
+      disconnect(&m_userThread, 0, *w, 0);
+      disconnect(*w, 0, &m_userThread, 0);
       ++w;
     }
   }

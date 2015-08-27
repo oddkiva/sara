@@ -60,7 +60,7 @@ namespace DO { namespace Sara {
                    const QString& windowTitle = "DO-CV",
                    int x = -1, int y = -1,
                    QWidget* parent = 0);
-    QScrollArea *scrollArea() { return scroll_area_; }
+    QScrollArea *scrollArea() { return m_scrollArea; }
     QString windowTitle() const;
     int x() const;
     int y() const;
@@ -129,10 +129,10 @@ namespace DO { namespace Sara {
     void sendEvent(Event e);
 
   private:
-    QScrollArea *scroll_area_;
-    QPixmap  pixmap_;
-    QPainter painter_;
-    QTimer event_listening_timer_;
+    QScrollArea *m_scrollArea;
+    QPixmap  m_pixmap;
+    QPainter m_painter;
+    QTimer m_eventListeningTimer;
   };
 
   //! @}

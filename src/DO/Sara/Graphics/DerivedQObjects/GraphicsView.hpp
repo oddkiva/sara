@@ -41,12 +41,11 @@ namespace DO { namespace Sara {
                  QWidget* parent = 0);
     void activateOpenGL();
 
-    QGraphicsItem *lastAddedItem() { return last_inserted_item_; }
+    QGraphicsItem *lastAddedItem() { return m_lastInsertedItem; }
 
   public slots:
     void addItem(QGraphicsItem *item, QGraphicsItem *parent = 0);
-    void addImageItem(const QImage& image, bool randomPos = false);
-    void drawPoint(int x, int y, const QColor& c, QGraphicsPixmapItem *item);
+    void addPixmapItem(const QImage& image, bool randomPos = false);
     void waitForEvent(int ms);
     void eventListeningTimerStopped();
 
@@ -68,8 +67,8 @@ namespace DO { namespace Sara {
     void scaleView(qreal scaleFactor);
 
   private:
-    QTimer event_listening_timer_;
-    QGraphicsItem *last_inserted_item_{ nullptr };
+    QTimer m_eventListeningTimer;
+    QGraphicsItem *m_lastInsertedItem{ nullptr };
   };
 
   //! @}

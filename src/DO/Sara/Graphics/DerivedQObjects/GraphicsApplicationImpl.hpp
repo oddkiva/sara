@@ -68,15 +68,15 @@ namespace DO { namespace Sara {
     void disconnectAllWindowsIOEventsToUserThread();
 
   public:
-    int& argc;
-    char **argv;
-    UserThread userThread;
-    QList<QPointer<QWidget> > createdWindows;
-    QPointer<QWidget> activeWindow;
+    int& m_argc;
+    char **m_argv;
+    UserThread m_userThread;
+    QList<QPointer<QWidget> > m_createdWindows;
+    QPointer<QWidget> m_activeWindow;
 
-    DialogBoxInfo dialogBoxInfo;
+    DialogBoxInfo m_dialogBoxInfo;
 
-    QMutex mutex;
+    QMutex m_mutex;
   };
 
 } /* namespace Sara */

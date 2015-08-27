@@ -12,16 +12,17 @@
 #include <QGraphicsItem>
 
 #include <DO/Sara/Graphics.hpp>
-
-#include "GraphicsUtilities.hpp"
+#include <DO/Sara/Graphics/GraphicsUtilities.hpp>
 
 
 namespace DO { namespace Sara {
 
   static GraphicsView *view()
-  { return qobject_cast<GraphicsView *>(active_window()); }
+  {
+    return qobject_cast<GraphicsView *>(active_window());
+  }
 
-  //! Graphics view window control functions
+  // Graphics view window control functions.
   Window create_graphics_view(int w, int h, const std::string& windowTitle,
                           int x, int y)
   {
@@ -32,11 +33,9 @@ namespace DO { namespace Sara {
                               Q_ARG(const QString&,
                                     QString(windowTitle.c_str())),
                               Q_ARG(int, x), Q_ARG(int, y));
-    return gui_app()->createdWindows.back();
+    return gui_app()->m_createdWindows.back();
   }
 
-  //! @{
-  //! Convenience graphics scene functions
   QImage to_qimage(const Image<Rgb8>& image)
   {
     return QImage(reinterpret_cast<const unsigned char*>(image.data()),
@@ -53,18 +52,6 @@ namespace DO { namespace Sara {
                               Q_ARG(bool, randomPos));
     return qgraphicsitem_cast<QGraphicsPixmapItem *>(view()->lastAddedItem());
   }
-
-  void draw_point(ImageItem pixItem, int x, int y, const Rgb8& c)
-  {
-    QMetaObject::invokeMethod(view(), "drawPoint",
-                              Qt::QueuedConnection,
-                              Q_ARG(int, x),
-                              Q_ARG(int, y),
-                              Q_ARG(const QColor&,
-                                    QColor(c[0], c[1], c[2])),
-                              Q_ARG(QGraphicsPixmapItem *, pixItem));
-  }
-  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */
