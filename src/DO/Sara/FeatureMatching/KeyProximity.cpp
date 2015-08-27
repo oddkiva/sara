@@ -16,8 +16,8 @@ namespace DO { namespace Sara {
 
   bool KeyProximity::operator()(const OERegion& f1, const OERegion& f2) const
   {
-    SquaredRefDistance<float, 2> m1(mapped_squared_metric(f1));
-    SquaredRefDistance<float, 2> m2(mapped_squared_metric(f1));
+    SquaredRefDistance<float, 2> m1{ mapped_squared_metric(f1) };
+    SquaredRefDistance<float, 2> m2{ mapped_squared_metric(f2) };
 
     float sd1 = m1(f1.center(), f2.center());
     float sd2 = m2(f1.center(), f2.center());
