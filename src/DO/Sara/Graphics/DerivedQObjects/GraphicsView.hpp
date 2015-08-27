@@ -39,7 +39,6 @@ namespace DO { namespace Sara {
                  const QString& windowTitle = "DO-CV",
                  int x = -1, int y = -1,
                  QWidget* parent = 0);
-    void activateOpenGL();
 
     QGraphicsItem *lastAddedItem() { return m_lastInsertedItem; }
 
@@ -50,15 +49,11 @@ namespace DO { namespace Sara {
     void eventListeningTimerStopped();
 
   protected:
-    void mousePressEvent(QMouseEvent *event);
-    void mouseReleaseEvent(QMouseEvent *event);
     void wheelEvent(QWheelEvent *);
     void keyPressEvent(QKeyEvent *event);
     void closeEvent(QCloseEvent *event);
 
   signals:
-    void pressedMouseButtons(int x, int y, Qt::MouseButtons buttons);
-    void releasedMouseButtons(int x, int y, Qt::MouseButtons buttons);
     void pressedKey(int key);
     void releasedKey(int key);
     void sendEvent(Event e);

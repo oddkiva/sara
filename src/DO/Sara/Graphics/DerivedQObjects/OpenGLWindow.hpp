@@ -84,9 +84,6 @@ namespace DO { namespace Sara {
     void closeEvent(QCloseEvent *event);
 
   signals:
-    void movedMouse(int x, int y, Qt::MouseButtons buttons);
-    void pressedMouseButtons(int x, int y, Qt::MouseButtons buttons);
-    void releasedMouseButtons(int x, int y, Qt::MouseButtons buttons);
     void pressedKey(int key);
     void releasedKey(int key);
     void sendEvent(Event e);

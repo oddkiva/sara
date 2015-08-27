@@ -40,11 +40,6 @@ namespace DO { namespace Sara {
     show();
   }
 
-  void GraphicsView::activateOpenGL()
-  {
-    setViewport( new QGLWidget(QGLFormat(QGL::SampleBuffers)) );
-  }
-
   void GraphicsView::addItem(QGraphicsItem *item, QGraphicsItem *parent)
   {
     scene()->addItem(item);
@@ -70,48 +65,6 @@ namespace DO { namespace Sara {
   void GraphicsView::eventListeningTimerStopped()
   {
     emit sendEvent(no_event());
-  }
-
-  void GraphicsView::mousePressEvent(QMouseEvent *event)
-  {
-#ifdef Q_OS_MAC
-    Qt::MouseButtons buttons = (event->modifiers() == Qt::ControlModifier &&
-      event->buttons() == Qt::LeftButton) ?
-      Qt::MiddleButton : event->buttons();
-    emit pressedMouseButtons(event->x(), event->y(), buttons);
-#else
-    emit pressedMouseButtons(event->x(), event->y(), event->buttons());
-#endif
-    if (m_eventListeningTimer.isActive())
-    {
-      m_eventListeningTimer.stop();
-      sendEvent(mouse_pressed(event->x(), event->y(), event->buttons(),
-        event->modifiers()));
-    }
-    // Handle the mouse press event as usual.
-    QGraphicsView::mousePressEvent(event);
-  }
-
-  void GraphicsView::mouseReleaseEvent(QMouseEvent *event)
-  {
-    //qDebug() << "Released " << event->pos().x() << " " << event->pos().y();
-#ifdef Q_OS_MAC
-    Qt::MouseButtons buttons = (event->modifiers() == Qt::ControlModifier &&
-      event->button() == Qt::LeftButton) ?
-      Qt::MiddleButton : event->button();
-    emit releasedMouseButtons(event->x(), event->y(), buttons);
-#else
-    //qDebug() << int(event->button());
-    emit releasedMouseButtons(event->x(), event->y(), event->button());
-#endif
-    if (m_eventListeningTimer.isActive())
-    {
-      m_eventListeningTimer.stop();
-      sendEvent(mouse_released(event->x(), event->y(),
-        event->button(), event->modifiers()));
-    }
-    // Handle the mouse release event as usual.
-    QGraphicsView::mouseReleaseEvent(event);
   }
 
   void GraphicsView::wheelEvent(QWheelEvent *event)

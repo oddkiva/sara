@@ -23,33 +23,26 @@ namespace DO { namespace Sara {
   }
 
   // Graphics view window control functions.
-  Window create_graphics_view(int w, int h, const std::string& windowTitle,
-                          int x, int y)
+  Window create_graphics_view(int w, int h, const std::string& window_title,
+                              int x, int y)
   {
     QMetaObject::invokeMethod(gui_app(), "createWindow",
                               Qt::BlockingQueuedConnection,
                               Q_ARG(int, 2),
                               Q_ARG(int, w), Q_ARG(int, h),
                               Q_ARG(const QString&,
-                                    QString(windowTitle.c_str())),
+                                    QString(window_title.c_str())),
                               Q_ARG(int, x), Q_ARG(int, y));
     return gui_app()->m_createdWindows.back();
   }
 
-  QImage to_qimage(const Image<Rgb8>& image)
+  QGraphicsPixmapItem *add_pixmap(const Image<Rgb8>& image, bool random_pos)
   {
-    return QImage(reinterpret_cast<const unsigned char*>(image.data()),
-                  image.width(), image.height(), image.width()*3,
-                  QImage::Format_RGB888);
-  }
-
-  QGraphicsPixmapItem *add_image(const Image<Rgb8>& I, bool randomPos)
-  {
-    QImage tmp(to_qimage(I));
-    QMetaObject::invokeMethod(view(), "addImageItem",
+    QImage qimage{ as_QImage(image) };
+    QMetaObject::invokeMethod(view(), "addPixmapItem",
                               Qt::BlockingQueuedConnection,
-                              Q_ARG(const QImage&, tmp),
-                              Q_ARG(bool, randomPos));
+                              Q_ARG(const QImage&, qimage),
+                              Q_ARG(bool, random_pos));
     return qgraphicsitem_cast<QGraphicsPixmapItem *>(view()->lastAddedItem());
   }
 

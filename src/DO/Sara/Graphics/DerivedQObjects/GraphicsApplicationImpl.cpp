@@ -18,10 +18,10 @@
 namespace DO { namespace Sara {
 
   GraphicsApplication::Impl::
-  Impl(int& argc_, char **argv_)
-    : QApplication(argc_, argv_)
-    , m_argc(argc_)
-    , m_argv(argv_)
+  Impl(int& argc, char **argv)
+    : QApplication(argc, argv)
+    , m_argc(argc)
+    , m_argv(argv)
     , m_activeWindow(0)
     , m_mutex(QMutex::NonRecursive)
   {
@@ -34,7 +34,6 @@ namespace DO { namespace Sara {
 
     // Register graphics view data types.
     qRegisterMetaType<QGraphicsPixmapItem *>("QGraphicsPixmapItem *");
-    //qRegisterMetaType<QGraphicsItem *>("QGraphicsItem *");
 
     // Register Event data types
     qRegisterMetaType<Event>("Event");

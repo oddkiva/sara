@@ -41,6 +41,19 @@ namespace DO { namespace Sara {
   {
     return gui_app()->activeWindowIsVisible();
   }
+
+  inline QImage as_QImage(const Image<Rgb8>& image)
+  {
+    return QImage(
+      reinterpret_cast<const unsigned char *>(image.data()),
+      image.width(), image.height(), image.width() * 3,
+      QImage::Format_RGB888);
+  }
+
+  inline QColor to_QColor(const Color3ub& c)
+  {
+    return QColor{ c[0], c[1], c[2] };
+  }
   //! @}
 
   //! @}

@@ -34,7 +34,8 @@ namespace DO { namespace Sara {
   //! - rescaled by hitting key \b + or key \b -,
   //! - selected and moved in the GraphicsView window using the mouse.
   DO_EXPORT
-  QGraphicsPixmapItem * add_image(const Image<Rgb8>& I, bool random_pos = false);
+  QGraphicsPixmapItem * add_pixmap(const Image<Rgb8>& I,
+                                   bool random_pos = false);
 
   //! @}
 

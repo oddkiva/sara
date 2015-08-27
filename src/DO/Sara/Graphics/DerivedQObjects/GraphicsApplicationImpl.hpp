@@ -21,11 +21,10 @@
 #include <QWidget>
 
 #include <DO/Sara/Graphics.hpp>
-
-#include "UserThread.hpp"
-#include "PaintingWindow.hpp"
-#include "OpenGLWindow.hpp"
-#include "GraphicsView.hpp"
+#include <DO/Sara/Graphics/DerivedQObjects/UserThread.hpp>
+#include <DO/Sara/Graphics/DerivedQObjects/PaintingWindow.hpp>
+#include <DO/Sara/Graphics/DerivedQObjects/OpenGLWindow.hpp>
+#include <DO/Sara/Graphics/DerivedQObjects/GraphicsView.hpp>
 
 
 namespace DO { namespace Sara {
@@ -52,6 +51,7 @@ namespace DO { namespace Sara {
 
   public: /* methods */
     Impl(int& argc, char **argv);
+
     virtual ~Impl();
 
   public slots:

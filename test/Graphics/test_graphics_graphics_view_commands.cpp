@@ -48,7 +48,8 @@ TEST_F(TestGraphicsViewCommands, test_pixmap_item)
 {
   auto image = Image<Rgb8>{ 3, 3 };
   image.matrix().fill(Black8);
-  add_image(image);
+  auto pixmap = add_pixmap(image);
+  EXPECT_NE(pixmap, nullptr);
 }
 
 int worker_thread(int argc, char **argv)
