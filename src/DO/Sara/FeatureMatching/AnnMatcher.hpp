@@ -23,24 +23,31 @@ namespace DO { namespace Sara {
 	class DO_EXPORT AnnMatcher
 	{
 	public:
-    //! Constructors
+    //! @{
+    //! \brief Constructors.
     AnnMatcher(const Set<OERegion, RealDescriptor>& keys1,
                const Set<OERegion, RealDescriptor>& keys2,
                float sift_ratio_thres = 1.2f);
+
     AnnMatcher(const Set<OERegion, RealDescriptor>& keys,
                float sift_ratio_thres = 1.2f,
                float min_max_metric_dist_thres = 0.5f,
                float pixel_dist_thres = 10.f);
+    //! @}
 
+    //! @{
+    //! \brief Return matches.
     std::vector<Match> compute_matches();
+
 		std::vector<Match> compute_self_matches() { return compute_matches(); }
+    //! @}
 
 	private: /* data members */
-    //! Input parameters
+    //! Input parameters.
     const Set<OERegion, RealDescriptor>& _keys1;
     const Set<OERegion, RealDescriptor>& _keys2;
 		float _squared_ratio_thres;
-    //! Internals
+    //! Internals.
     KeyProximity _is_too_close;
     std::size_t _max_neighbors;
     std::vector<int> _vec_indices;
