@@ -12,8 +12,8 @@
 #include <QtGui>
 #include <QtOpenGL>
 
-#include "GraphicsView.hpp"
-#include "PixmapItem.hpp"
+#include <DO/Sara/Graphics/DerivedQObjects/GraphicsView.hpp>
+#include <DO/Sara/Graphics/DerivedQObjects/PixmapItem.hpp>
 
 
 namespace DO { namespace Sara {
@@ -25,8 +25,8 @@ namespace DO { namespace Sara {
     setScene(new QGraphicsScene(this));
 
     // Set event listener.
-    event_listening_timer_.setSingleShot(true);
-    connect(&event_listening_timer_, SIGNAL(timeout()),
+    m_eventListeningTimer.setSingleShot(true);
+    connect(&m_eventListeningTimer, SIGNAL(timeout()),
             this, SLOT(eventListeningTimerStopped()));
 
     setAttribute(Qt::WA_DeleteOnClose);
@@ -40,88 +40,31 @@ namespace DO { namespace Sara {
     show();
   }
 
-  void GraphicsView::activateOpenGL()
-  {
-    setViewport( new QGLWidget(QGLFormat(QGL::SampleBuffers)) );
-  }
-
   void GraphicsView::addItem(QGraphicsItem *item, QGraphicsItem *parent)
   {
     scene()->addItem(item);
-    last_inserted_item_ = item;
+    m_lastInsertedItem = item;
     if (parent)
-      last_inserted_item_->setParentItem(parent);
+      m_lastInsertedItem->setParentItem(parent);
   }
 
-  void GraphicsView::addImageItem(const QImage& image, bool randomPos)
+  void GraphicsView::addPixmapItem(const QImage& image, bool randomPos)
   {
-    last_inserted_item_ = new ImageItem(QPixmap::fromImage(image));
-    addItem(last_inserted_item_);
+    m_lastInsertedItem = new GraphicsPixmapItem(QPixmap::fromImage(image));
+    addItem(m_lastInsertedItem);
     if (randomPos)
-      last_inserted_item_->setPos(QPointF(qrand()%10240, qrand()%7680));
-  }
-
-  void GraphicsView::drawPoint(int x, int y, const QColor& c,
-                               QGraphicsPixmapItem *item)
-  {
-    QPixmap pixmap(item->pixmap());
-    QPainter p(&pixmap);
-    p.setPen(c);
-    p.drawPoint(x, y);
-    item->setPixmap(pixmap);
+      m_lastInsertedItem->setPos(QPointF(qrand()%10240, qrand()%7680));
   }
 
   void GraphicsView::waitForEvent(int ms)
   {
-    event_listening_timer_.setInterval(ms);
-    event_listening_timer_.start();
+    m_eventListeningTimer.setInterval(ms);
+    m_eventListeningTimer.start();
   }
 
   void GraphicsView::eventListeningTimerStopped()
   {
     emit sendEvent(no_event());
-  }
-
-  void GraphicsView::mousePressEvent(QMouseEvent *event)
-  {
-#ifdef Q_OS_MAC
-    Qt::MouseButtons buttons = (event->modifiers() == Qt::ControlModifier &&
-      event->buttons() == Qt::LeftButton) ?
-      Qt::MiddleButton : event->buttons();
-    emit pressedMouseButtons(event->x(), event->y(), buttons);
-#else
-    emit pressedMouseButtons(event->x(), event->y(), event->buttons());
-#endif
-    if (event_listening_timer_.isActive())
-    {
-      event_listening_timer_.stop();
-      sendEvent(mouse_pressed(event->x(), event->y(), event->buttons(),
-        event->modifiers()));
-    }
-    // Handle the mouse press event as usual.
-    QGraphicsView::mousePressEvent(event);
-  }
-
-  void GraphicsView::mouseReleaseEvent(QMouseEvent *event)
-  {
-    //qDebug() << "Released " << event->pos().x() << " " << event->pos().y();
-#ifdef Q_OS_MAC
-    Qt::MouseButtons buttons = (event->modifiers() == Qt::ControlModifier &&
-      event->button() == Qt::LeftButton) ?
-      Qt::MiddleButton : event->button();
-    emit releasedMouseButtons(event->x(), event->y(), buttons);
-#else
-    //qDebug() << int(event->button());
-    emit releasedMouseButtons(event->x(), event->y(), event->button());
-#endif
-    if (event_listening_timer_.isActive())
-    {
-      event_listening_timer_.stop();
-      sendEvent(mouse_released(event->x(), event->y(),
-        event->button(), event->modifiers()));
-    }
-    // Handle the mouse release event as usual.
-    QGraphicsView::mouseReleaseEvent(event);
   }
 
   void GraphicsView::wheelEvent(QWheelEvent *event)
@@ -137,9 +80,9 @@ namespace DO { namespace Sara {
   void GraphicsView::keyPressEvent(QKeyEvent *event)
   {
     emit pressedKey(event->key());
-    if (event_listening_timer_.isActive())
+    if (m_eventListeningTimer.isActive())
     {
-      event_listening_timer_.stop();
+      m_eventListeningTimer.stop();
       emit sendEvent(key_pressed(event->key(), event->modifiers()));
     }
     QGraphicsView::keyPressEvent(event);

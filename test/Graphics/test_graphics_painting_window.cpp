@@ -506,29 +506,29 @@ class TestPaintingWindowEvents: public testing::Test
 {
 protected: // data members.
   PaintingWindow *_test_window;
-  EventScheduler event_scheduler_;
-  QPoint mouse_pos_;
-  Qt::Key key_;
-  int mouse_buttons_type_id_;
-  int event_type_id_;
+  EventScheduler _event_scheduler;
+  QPoint _mouse_pos;
+  Qt::Key _key;
+  int _mouse_buttons_type_id;
+  int _event_type_id;
 
-  int wait_ms_;
-  int event_time_ms_;
+  int _wait_ms;
+  int _event_time_ms;
 
 protected: // methods.
   TestPaintingWindowEvents()
   {
-    mouse_buttons_type_id_ = qRegisterMetaType<Qt::MouseButtons>(
+    _mouse_buttons_type_id = qRegisterMetaType<Qt::MouseButtons>(
       "Qt::MouseButtons"
     );
-    event_type_id_ = qRegisterMetaType<Event>("Event");
+    _event_type_id = qRegisterMetaType<Event>("Event");
     _test_window = new PaintingWindow(300, 300);
-    event_scheduler_.set_receiver(_test_window);
-    mouse_pos_ = QPoint(10, 10);
-    key_ = Qt::Key_A;
+    _event_scheduler.set_receiver(_test_window);
+    _mouse_pos = QPoint(10, 10);
+    _key = Qt::Key_A;
 
-    wait_ms_ = 100;
-    event_time_ms_ = 10;
+    _wait_ms = 100;
+    _event_time_ms = 10;
   }
 
   virtual ~TestPaintingWindowEvents()
@@ -539,7 +539,7 @@ protected: // methods.
   void compare_mouse_event(QSignalSpy& spy,
                            const QMouseEvent& expected_event) const
   {
-    spy.wait(wait_ms_);
+    spy.wait(_wait_ms);
     EXPECT_EQ(spy.count(), 1);
 
     QList<QVariant> arguments = spy.takeFirst();
@@ -551,11 +551,11 @@ protected: // methods.
 
   void compare_key_event(QSignalSpy& spy) const
   {
-    spy.wait(wait_ms_);
+    spy.wait(_wait_ms);
     EXPECT_EQ(spy.count(), 1);
 
     QList<QVariant> arguments = spy.takeFirst();
-    EXPECT_EQ(arguments.at(0).toInt(), static_cast<int>(key_));
+    EXPECT_EQ(arguments.at(0).toInt(), static_cast<int>(_key));
   }
 
 };
@@ -568,10 +568,10 @@ TEST_F(TestPaintingWindowEvents, test_mouse_move_event)
   EXPECT_TRUE(spy.isValid());
 
   QMouseEvent event(
-    QEvent::MouseMove, mouse_pos_,
+    QEvent::MouseMove, _mouse_pos,
     Qt::NoButton, Qt::NoButton, Qt::NoModifier
   );
-  event_scheduler_.schedule_event(&event, event_time_ms_);
+  _event_scheduler.schedule_event(&event, _event_time_ms);
 
   compare_mouse_event(spy, event);
 }
@@ -583,10 +583,10 @@ TEST_F(TestPaintingWindowEvents, test_mouse_press_event)
   EXPECT_TRUE(spy.isValid());
 
   QMouseEvent event(
-    QEvent::MouseButtonPress, mouse_pos_,
+    QEvent::MouseButtonPress, _mouse_pos,
     Qt::LeftButton, Qt::LeftButton, Qt::NoModifier
   );
-  event_scheduler_.schedule_event(&event, event_time_ms_);
+  _event_scheduler.schedule_event(&event, _event_time_ms);
 
   compare_mouse_event(spy, event);
 }
@@ -598,10 +598,10 @@ TEST_F(TestPaintingWindowEvents, test_mouse_release_event)
   EXPECT_TRUE(spy.isValid());
 
   QMouseEvent event(
-    QEvent::MouseButtonRelease, mouse_pos_,
+    QEvent::MouseButtonRelease, _mouse_pos,
     Qt::LeftButton, Qt::LeftButton, Qt::NoModifier
     );
-  event_scheduler_.schedule_event(&event, event_time_ms_);
+  _event_scheduler.schedule_event(&event, _event_time_ms);
 
   compare_mouse_event(spy, event);
 }
@@ -611,8 +611,8 @@ TEST_F(TestPaintingWindowEvents, test_key_press_event)
   QSignalSpy spy(_test_window, SIGNAL(pressedKey(int)));
   EXPECT_TRUE(spy.isValid());
 
-  QKeyEvent event(QEvent::KeyPress, key_, Qt::NoModifier);
-  event_scheduler_.schedule_event(&event, event_time_ms_);
+  QKeyEvent event(QEvent::KeyPress, _key, Qt::NoModifier);
+  _event_scheduler.schedule_event(&event, _event_time_ms);
 
   compare_key_event(spy);
 }
@@ -622,8 +622,8 @@ TEST_F(TestPaintingWindowEvents, test_key_release_event)
   QSignalSpy spy(_test_window, SIGNAL(releasedKey(int)));
   EXPECT_TRUE(spy.isValid());
 
-  QKeyEvent event(QEvent::KeyRelease, key_, Qt::NoModifier);
-  event_scheduler_.schedule_event(&event, event_time_ms_);
+  QKeyEvent event(QEvent::KeyRelease, _key, Qt::NoModifier);
+  _event_scheduler.schedule_event(&event, _event_time_ms);
 
   compare_key_event(spy);
 }
@@ -641,7 +641,7 @@ TEST_F(TestPaintingWindowEvents, test_send_event)
   EXPECT_EQ(spy.count(), 1);
   QList<QVariant> arguments = spy.takeFirst();
   QVariant arg = arguments.at(0);
-  arg.convert(event_type_id_);
+  arg.convert(_event_type_id);
   Event event(arguments.at(0).value<Event>());
   EXPECT_EQ(event.type, DO::Sara::NO_EVENT);
 }

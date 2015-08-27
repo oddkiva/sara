@@ -11,33 +11,32 @@
 
 #include <QDebug>
 
-#include "../GraphicsUtilities.hpp"
-
-#include "UserThread.hpp"
+#include <DO/Sara/Graphics/DerivedQObjects/UserThread.hpp>
+#include <DO/Sara/Graphics/GraphicsUtilities.hpp>
 
 
 namespace DO { namespace Sara {
 
   UserThread::UserThread(QObject* parent)
     : QThread(parent)
-    , userMain_(0)
-    , doWaitForClick_(false)
-    , doWaitForKey_(false)
+    , m_userMain(0)
+    , m_doWaitForClick(false)
+    , m_doWaitForKey(false)
   {
   }
 
   int UserThread::getMouse(int& x, int& y)
   {
-    mutex_.lock();
-    doWaitForClick_ = true;
-    condition_.wait(&mutex_);
-    mutex_.unlock();
-    x = mouseX_; y = mouseY_;
-    if (mouseButton_ == Qt::LeftButton)
+    m_mutex.lock();
+    m_doWaitForClick = true;
+    m_condition.wait(&m_mutex);
+    m_mutex.unlock();
+    x = m_mouseX; y = m_mouseY;
+    if (m_mouseButton == Qt::LeftButton)
       return MOUSE_LEFT_BUTTON;
-    else if (mouseButton_ == Qt::MiddleButton)
+    else if (m_mouseButton == Qt::MiddleButton)
       return MOUSE_MIDDLE_BUTTON;
-    else if (mouseButton_ == Qt::RightButton)
+    else if (m_mouseButton == Qt::RightButton)
       return MOUSE_RIGHT_BUTTON;
     else
       return MOUSE_NO_BUTTON;
@@ -45,82 +44,82 @@ namespace DO { namespace Sara {
 
   int UserThread::getKey()
   {
-    mutex_.lock();
-    doWaitForKey_ = true;
-    condition_.wait(&mutex_);
-    mutex_.unlock();
-    return key_;
+    m_mutex.lock();
+    m_doWaitForKey = true;
+    m_condition.wait(&m_mutex);
+    m_mutex.unlock();
+    return m_key;
   }
 
   void UserThread::listenToWindowEvents()
   {
-    mutex_.lock();
-    condition_.wait(&mutex_);
-    mutex_.unlock();
+    m_mutex.lock();
+    m_condition.wait(&m_mutex);
+    m_mutex.unlock();
   }
 
   void UserThread::getEvent(Event& e)
   {
-    mutex_.lock();
-    e = event_;
-    mutex_.unlock();
+    m_mutex.lock();
+    e = m_event;
+    m_mutex.unlock();
   }
 
   void UserThread::pressedMouseButtons(int x, int y, Qt::MouseButtons buttons)
   {
-    mutex_.lock();
-    if (doWaitForClick_)
+    m_mutex.lock();
+    if (m_doWaitForClick)
     {
-      doWaitForClick_ = false;
-      mouseButton_ = buttons; mouseX_ = x; mouseY_ = y;
-      condition_.wakeOne();
+      m_doWaitForClick = false;
+      m_mouseButton = buttons; m_mouseX = x; m_mouseY = y;
+      m_condition.wakeOne();
     }
-    mutex_.unlock();
+    m_mutex.unlock();
   }
 
   void UserThread::pressedKey(int key)
   {
-    mutex_.lock();
-    if (doWaitForKey_)
+    m_mutex.lock();
+    if (m_doWaitForKey)
     {
-      doWaitForKey_ = false;
-      key_ = key;
-      condition_.wakeOne();
+      m_doWaitForKey = false;
+      m_key = key;
+      m_condition.wakeOne();
     }
-    mutex_.unlock();
+    m_mutex.unlock();
   }
 
   void UserThread::receivedEvent(Event e)
   {
-    mutex_.lock();
-    condition_.wakeOne();
-    event_ = e;
-    mutex_.unlock();
+    m_mutex.lock();
+    m_condition.wakeOne();
+    m_event = e;
+    m_mutex.unlock();
   }
 
   void UserThread::closedWindow()
   {
     // What to do in case the window was closed by the user and that
     // the program was expecting for a mouse click or a pressed key?
-    mutex_.lock();
-    if (doWaitForClick_ || doWaitForKey_)
+    m_mutex.lock();
+    if (m_doWaitForClick || m_doWaitForKey)
     {
       qDebug() << "Window closed unexpectedly while waiting for user input!";
-      condition_.wakeOne();
+      m_condition.wakeOne();
     }
     //qDebug() << "Closing window as requested!";
-    mutex_.unlock();
+    m_mutex.unlock();
   }
 
   void UserThread::run()
   {
     //qDebug("Running user thread!");
-    if (!userMain_)
+    if (!m_userMain)
     {
       qFatal("No registered user main!");
       return;
     }
-    userMain_(gui_app()->argc, gui_app()->argv);
+    m_userMain(gui_app()->m_argc, gui_app()->m_argv);
     return;
   }
 

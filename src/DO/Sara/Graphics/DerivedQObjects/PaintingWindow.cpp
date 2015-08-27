@@ -11,7 +11,7 @@
 
 #include <QtWidgets>
 
-#include "PaintingWindow.hpp"
+#include <DO/Sara/Graphics/DerivedQObjects/PaintingWindow.hpp>
 
 
 namespace DO { namespace Sara {
@@ -40,136 +40,136 @@ namespace DO { namespace Sara {
                                  const QString& windowTitle, int x, int y,
                                  QWidget* parent)
     : QWidget(parent)
-    , scroll_area_(new ScrollArea(parent))
-    , pixmap_(width, height)
-    , painter_(&pixmap_)
+    , m_scrollArea(new ScrollArea(parent))
+    , m_pixmap(width, height)
+    , m_painter(&m_pixmap)
   {
     setFocusPolicy(Qt::WheelFocus);
 
     // Set event listener.
-    event_listening_timer_.setSingleShot(true);
-    connect(&event_listening_timer_, SIGNAL(timeout()),
+    m_eventListeningTimer.setSingleShot(true);
+    connect(&m_eventListeningTimer, SIGNAL(timeout()),
             this, SLOT(eventListeningTimerStopped()));
 
     // Move widget.
     if (x != -1 && y != -1)
-      scroll_area_->move(x,y);
-    scroll_area_->setWindowTitle(windowTitle);
-    scroll_area_->setWidget(this);
-    scroll_area_->setFocusProxy(this);
+      m_scrollArea->move(x,y);
+    m_scrollArea->setWindowTitle(windowTitle);
+    m_scrollArea->setWidget(this);
+    m_scrollArea->setFocusProxy(this);
 
     // Maximize if necessary.
     if ( width >= qApp->desktop()->width()   ||
          height >= qApp->desktop()->height() )
-      scroll_area_->showMaximized();
+      m_scrollArea->showMaximized();
     // Resize the scroll area with the size plus a two-pixel offset.
     else
-      scroll_area_->resize(width+2, height+2);
+      m_scrollArea->resize(width+2, height+2);
     resize(width, height);
 
     // Initialize the pixmap.
-    pixmap_.fill();
+    m_pixmap.fill();
     update();
 
     // Show the widget.
-    scroll_area_->show();
+    m_scrollArea->show();
   }
 
   QString PaintingWindow::windowTitle() const
   {
-    return scroll_area_->windowTitle();
+    return m_scrollArea->windowTitle();
   }
 
   int PaintingWindow::x() const
   {
-    return scroll_area_->pos().x();
+    return m_scrollArea->pos().x();
   }
 
   int PaintingWindow::y() const
   {
-    return scroll_area_->pos().y();
+    return m_scrollArea->pos().y();
   }
 
   void PaintingWindow::drawPoint(int x, int y, const QColor& c)
   {
-    painter_.setPen(c);
-    painter_.drawPoint(x, y);
+    m_painter.setPen(c);
+    m_painter.drawPoint(x, y);
     update();
   }
 
   void PaintingWindow::drawPoint(const QPointF& p, const QColor& c)
   {
-    painter_.setPen(c);
-    painter_.drawPoint(p);
+    m_painter.setPen(c);
+    m_painter.drawPoint(p);
     update();
   }
 
   void PaintingWindow::drawLine(int x1, int y1, int x2, int y2,
                                 const QColor& c, int penWidth)
   {
-    painter_.setPen(QPen(c, penWidth));
-    painter_.drawLine(x1, y1, x2, y2);
+    m_painter.setPen(QPen(c, penWidth));
+    m_painter.drawLine(x1, y1, x2, y2);
     update();
   }
 
   void PaintingWindow::drawLine(const QPointF& p1, const QPointF& p2,
                                 const QColor& c, int penWidth)
   {
-    painter_.setPen(QPen(c, penWidth));
-    painter_.drawLine(p1, p2);
+    m_painter.setPen(QPen(c, penWidth));
+    m_painter.drawLine(p1, p2);
     update();
   }
 
   void PaintingWindow::drawCircle(int xc, int yc, int r, const QColor& c,
                                   int penWidth)
   {
-    painter_.setPen(QPen(c, penWidth));
-    painter_.drawEllipse(QPoint(xc, yc), r, r);
+    m_painter.setPen(QPen(c, penWidth));
+    m_painter.drawEllipse(QPoint(xc, yc), r, r);
     update();
   }
 
   void PaintingWindow::drawCircle(const QPointF& center, qreal r,
                                   const QColor& c, int penWidth)
   {
-    painter_.setPen(QPen(c, penWidth));
-    painter_.drawEllipse(QPointF(center.x(), center.y()), r, r);
+    m_painter.setPen(QPen(c, penWidth));
+    m_painter.drawEllipse(QPointF(center.x(), center.y()), r, r);
     update();
   }
 
   void PaintingWindow::drawEllipse(int x, int y, int w, int h,
                                    const QColor& c, int penWidth)
   {
-    painter_.setPen(QPen(c, penWidth));
-    painter_.drawEllipse(x, y, w, h);
+    m_painter.setPen(QPen(c, penWidth));
+    m_painter.drawEllipse(x, y, w, h);
     update();
   }
 
   void PaintingWindow::drawEllipse(const QPointF& center, qreal r1, qreal r2,
                                    qreal degree, const QColor& c, int penWidth)
   {
-    painter_.save();
-    painter_.setPen(QPen(c, penWidth));
-    painter_.translate(center);
-    painter_.rotate(degree);
-    painter_.translate(-r1, -r2);
-    painter_.drawEllipse(QRectF(0, 0, 2*r1, 2*r2));
-    painter_.restore();
+    m_painter.save();
+    m_painter.setPen(QPen(c, penWidth));
+    m_painter.translate(center);
+    m_painter.rotate(degree);
+    m_painter.translate(-r1, -r2);
+    m_painter.drawEllipse(QRectF(0, 0, 2*r1, 2*r2));
+    m_painter.restore();
     update();
   }
 
   void PaintingWindow::drawPoly(const QPolygonF& polygon, const QColor& c,
                                 int width)
   {
-    painter_.setPen(QPen(c, width));
-    painter_.drawPolygon(polygon);
+    m_painter.setPen(QPen(c, width));
+    m_painter.drawPolygon(polygon);
     update();
   }
 
   void PaintingWindow::drawRect(int x, int y, int w, int h, const QColor& c,
                                 int penWidth)
   {
-    painter_.setPen(QPen(c, penWidth));
-    painter_.drawRect(x, y, w, h);
+    m_painter.setPen(QPen(c, penWidth));
+    m_painter.drawRect(x, y, w, h);
     update();
   }
 
@@ -184,14 +184,14 @@ namespace DO { namespace Sara {
     font.setBold(bold);
     font.setUnderline(underline);
 
-    painter_.save();
-    painter_.setPen(color);
-    painter_.setFont(font);
+    m_painter.save();
+    m_painter.setPen(color);
+    m_painter.setFont(font);
 
-    painter_.translate(x, y);
-    painter_.rotate(qreal(orientation));
-    painter_.drawText(0, 0, text);
-    painter_.restore();
+    m_painter.translate(x, y);
+    m_painter.rotate(qreal(orientation));
+    m_painter.drawText(0, 0, text);
+    m_painter.restore();
     update();
   }
 
@@ -206,8 +206,8 @@ namespace DO { namespace Sara {
     double norm= qSqrt(dx*dx+dy*dy);
     if (norm < 0.999) // null vector
     {
-      painter_.setPen(QPen(col, width));
-      painter_.drawPoint(x1, y1);
+      m_painter.setPen(QPen(col, width));
+      m_painter.drawPoint(x1, y1);
       update();
       return;
     }
@@ -223,10 +223,10 @@ namespace DO { namespace Sara {
     qreal p2y = y1 + dy_norm*(norm-arrowWidth) + arrowHeight/2.*dx_norm;
     switch(style) {
       case 0:
-        painter_.setPen(QPen(col, width));
-        painter_.drawLine(x1, y1, x2, y2);
-        painter_.drawLine(x2, y2, int(p1x), int(p1y));
-        painter_.drawLine(x2, y2, int(p2x), int(p2y));
+        m_painter.setPen(QPen(col, width));
+        m_painter.drawLine(x1, y1, x2, y2);
+        m_painter.drawLine(x2, y2, int(p1x), int(p1y));
+        m_painter.drawLine(x2, y2, int(p2x), int(p2y));
         break;
       case 1:
         pts << QPointF(p2x, p2y);
@@ -240,7 +240,7 @@ namespace DO { namespace Sara {
         pts << QPointF(x1 + dx_norm*sl - dy_norm*width,
                        y1 + dy_norm*sl + dx_norm*width);
         path.addPolygon(pts);
-        painter_.fillPath(path, col);
+        m_painter.fillPath(path, col);
         break;
       case 2:
         pts << QPointF(p2x, p2y);
@@ -254,7 +254,7 @@ namespace DO { namespace Sara {
         pts << QPointF(x1 + dx_norm*sl - dy_norm*width,
                        y1 + dy_norm*sl + dx_norm*width);
         path.addPolygon(pts);
-        painter_.fillPath(path, col);
+        m_painter.fillPath(path, col);
         break;
       default:
         break;
@@ -266,11 +266,11 @@ namespace DO { namespace Sara {
   void PaintingWindow::display(const QImage& image, int xoff, int yoff,
                                double fact)
   {
-    painter_.translate(xoff, yoff);
-    painter_.scale(qreal(fact), qreal(fact));
-    painter_.drawImage(0, 0, image);
-    painter_.scale(qreal(1./fact), qreal(1./fact));
-    painter_.translate(-xoff, -yoff);
+    m_painter.translate(xoff, yoff);
+    m_painter.scale(qreal(fact), qreal(fact));
+    m_painter.drawImage(0, 0, image);
+    m_painter.scale(qreal(1./fact), qreal(1./fact));
+    m_painter.translate(-xoff, -yoff);
     update();
   }
 
@@ -278,7 +278,7 @@ namespace DO { namespace Sara {
   {
     QPainterPath path;
     path.addEllipse(qreal(x)-r/2., qreal(y)-r/2., qreal(r), qreal(r));
-    painter_.fillPath(path, c);
+    m_painter.fillPath(path, c);
     update();
   }
 
@@ -286,7 +286,7 @@ namespace DO { namespace Sara {
   {
     QPainterPath path;
     path.addEllipse(p, r, r);
-    painter_.fillPath(path, c);
+    m_painter.fillPath(path, c);
     update();
   }
 
@@ -295,21 +295,21 @@ namespace DO { namespace Sara {
   {
     QPainterPath path;
     path.addEllipse(qreal(x), qreal(y), qreal(w), qreal(h));
-    painter_.fillPath(path, c);
+    m_painter.fillPath(path, c);
     update();
   }
 
   void PaintingWindow::fillEllipse(const QPointF& p, qreal rx, qreal ry,
                                    qreal degree, const QColor& c)
   {
-    painter_.save();
-    painter_.translate(p);
-    painter_.rotate(degree);
-    painter_.translate(-rx, -ry);
+    m_painter.save();
+    m_painter.translate(p);
+    m_painter.rotate(degree);
+    m_painter.translate(-rx, -ry);
     QPainterPath path;
     path.addEllipse(0., 0., 2*rx, 2*ry);
-    painter_.fillPath(path, c);
-    painter_.restore();
+    m_painter.fillPath(path, c);
+    m_painter.restore();
     update();
   }
 
@@ -317,43 +317,43 @@ namespace DO { namespace Sara {
   {
     QPainterPath path;
     path.addPolygon(polygon);
-    painter_.fillPath(path, c);
+    m_painter.fillPath(path, c);
     update();
   }
 
   void PaintingWindow::fillRect(int x, int y, int w, int h,
                                 const QColor& c)
   {
-    painter_.setPen(c);
-    painter_.fillRect(x, y, w, h, c);
+    m_painter.setPen(c);
+    m_painter.fillRect(x, y, w, h, c);
     update();
   }
 
   void PaintingWindow::clear()
   {
-    pixmap_.fill();
+    m_pixmap.fill();
     update();
   }
 
   void PaintingWindow::setAntialiasing(bool on)
-  { painter_.setRenderHints(QPainter::Antialiasing, on); }
+  { m_painter.setRenderHints(QPainter::Antialiasing, on); }
 
   void PaintingWindow::setTransparency(bool on)
   {
     if (on)
-      painter_.setCompositionMode(QPainter::CompositionMode_Multiply);
+      m_painter.setCompositionMode(QPainter::CompositionMode_Multiply);
     else
-      painter_.setCompositionMode(QPainter::CompositionMode_Source);
+      m_painter.setCompositionMode(QPainter::CompositionMode_Source);
   }
 
   void PaintingWindow::saveScreen(const QString& filename)
   {
-    pixmap_.save(filename);
+    m_pixmap.save(filename);
   }
 
   void PaintingWindow::resizeScreen(int width, int height)
   {
-    if (pixmap_.width() == width && pixmap_.height() == height)
+    if (m_pixmap.width() == width && m_pixmap.height() == height)
       return;
     /*
        The following internal changes are critical to prevent Qt from crashing.
@@ -361,10 +361,10 @@ namespace DO { namespace Sara {
        2. Reinitialize the QPixmap with the new size.
        3. Now we can re-allow QPainter 'painter_' to re-use QPixmap 'pixmap_'.
      */
-    painter_.end();
-    pixmap_ = QPixmap(width, height);
-    pixmap_.fill();
-    painter_.begin(&pixmap_);
+    m_painter.end();
+    m_pixmap = QPixmap(width, height);
+    m_pixmap.fill();
+    m_painter.begin(&m_pixmap);
 
     // Resize the window and the scroll area as follows.
     resize(width, height);
@@ -373,13 +373,13 @@ namespace DO { namespace Sara {
       width = 800;
       height = 600;
     }
-    scroll_area_->resize(width+2, height+2);
+    m_scrollArea->resize(width+2, height+2);
   }
 
   void PaintingWindow::waitForEvent(int ms)
   {
-    event_listening_timer_.setInterval(ms);
-    event_listening_timer_.start();
+    m_eventListeningTimer.setInterval(ms);
+    m_eventListeningTimer.start();
   }
 
   void PaintingWindow::eventListeningTimerStopped()
@@ -391,9 +391,9 @@ namespace DO { namespace Sara {
   {
     emit movedMouse(event->x(), event->y(), event->buttons());
 
-    if (event_listening_timer_.isActive())
+    if (m_eventListeningTimer.isActive())
     {
-      event_listening_timer_.stop();
+      m_eventListeningTimer.stop();
       emit sendEvent(mouse_moved(event->x(), event->y(), event->buttons(),
                      event->modifiers()));
     }
@@ -409,9 +409,9 @@ namespace DO { namespace Sara {
 #else
     emit pressedMouseButtons(event->x(), event->y(), event->buttons());
 #endif
-    if (event_listening_timer_.isActive())
+    if (m_eventListeningTimer.isActive())
     {
-      event_listening_timer_.stop();
+      m_eventListeningTimer.stop();
       emit sendEvent(mouse_pressed(event->x(), event->y(), event->buttons(),
                      event->modifiers()));
     }
@@ -427,9 +427,9 @@ namespace DO { namespace Sara {
 #else
     emit releasedMouseButtons(event->x(), event->y(), event->button());
 #endif
-    if (event_listening_timer_.isActive())
+    if (m_eventListeningTimer.isActive())
     {
-      event_listening_timer_.stop();
+      m_eventListeningTimer.stop();
       emit sendEvent(mouse_released(event->x(), event->y(),
                                    event->buttons(), event->modifiers()));
     }
@@ -438,9 +438,9 @@ namespace DO { namespace Sara {
   void PaintingWindow::keyPressEvent(QKeyEvent *event)
   {
     emit pressedKey(event->key());
-    if (event_listening_timer_.isActive())
+    if (m_eventListeningTimer.isActive())
     {
-      event_listening_timer_.stop();
+      m_eventListeningTimer.stop();
       emit sendEvent(key_pressed(event->key(), event->modifiers()));
     }
   }
@@ -448,9 +448,9 @@ namespace DO { namespace Sara {
   void PaintingWindow::keyReleaseEvent(QKeyEvent *event)
   {
     emit releasedKey(event->key());
-    if (event_listening_timer_.isActive())
+    if (m_eventListeningTimer.isActive())
     {
-      event_listening_timer_.stop();
+      m_eventListeningTimer.stop();
       emit sendEvent(key_released(event->key(), event->modifiers()));
     }
   }
@@ -458,7 +458,7 @@ namespace DO { namespace Sara {
   void PaintingWindow::paintEvent(QPaintEvent *)
   {
     QPainter p(this);
-    p.drawPixmap(0, 0, pixmap_);
+    p.drawPixmap(0, 0, m_pixmap);
   }
 
 } /* namespace Sara */

@@ -5,15 +5,15 @@ using namespace DO::Sara;
 
 GRAPHICS_MAIN()
 {
-  Image<Rgb8> I;
-  load(I, src_path("../../datasets/ksmall.jpg"));
+  Image<Rgb8> image;
+  load(image, src_path("../../datasets/ksmall.jpg"));
 
-  create_graphics_view(I.width(), I.height());
+  create_graphics_view(image.width(), image.height());
 
   for (int i = 0; i < 10; ++i)
   {
-    ImageItem image = add_image(I);
-    if (!image)
+    auto pixmap = add_pixmap(image);
+    if (pixmap == nullptr)
       cerr << "Error image display" << endl;
   }
 

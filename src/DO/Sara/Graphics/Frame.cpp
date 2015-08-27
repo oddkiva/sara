@@ -9,7 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include "Frame.hpp"
+#include <DO/Sara/Graphics/Frame.hpp>
+
 
 namespace GLObject {
 

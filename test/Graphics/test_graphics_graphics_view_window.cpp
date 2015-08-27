@@ -53,29 +53,35 @@ TEST(TestGraphicsView, test_construction)
 class TestGraphicsViewEvents: public testing::Test
 {
 protected: // data members.
-  GraphicsView *test_window_;
-  EventScheduler event_scheduler_;
-  QPoint mouse_pos_;
-  Qt::Key key_;
-  int mouse_buttons_type_id_;
-  int event_type_id_;
+  GraphicsView *_test_window;
+  EventScheduler _event_scheduler;
+  QPoint _mouse_pos;
+  Qt::Key _key;
+  int _mouse_buttons_type_id;
+  int _event_type_id;
+
+  int _wait_ms;
+  int _event_time_ms;
 
 protected: // methods.
   TestGraphicsViewEvents()
   {
-    mouse_buttons_type_id_ = qRegisterMetaType<Qt::MouseButtons>(
+    _mouse_buttons_type_id = qRegisterMetaType<Qt::MouseButtons>(
       "Qt::MouseButtons"
       );
-    event_type_id_ = qRegisterMetaType<Event>("Event");
-    test_window_ = new GraphicsView(300, 300);
-    event_scheduler_.set_receiver(test_window_);
-    mouse_pos_ = QPoint(10, 10);
-    key_ = Qt::Key_A;
+    _event_type_id = qRegisterMetaType<Event>("Event");
+    _test_window = new GraphicsView(300, 300);
+    _event_scheduler.set_receiver(_test_window);
+    _mouse_pos = QPoint(10, 10);
+    _key = Qt::Key_A;
+
+    _wait_ms = 100;
+    _event_time_ms = 10;
   }
 
   virtual ~TestGraphicsViewEvents()
   {
-    delete test_window_;
+    delete _test_window;
   }
 
   void compare_key_event(QSignalSpy& spy) const
@@ -84,28 +90,28 @@ protected: // methods.
     EXPECT_EQ(spy.count(), 1);
 
     QList<QVariant> arguments = spy.takeFirst();
-    EXPECT_EQ(arguments.at(0).toInt(), static_cast<int>(key_));
+    EXPECT_EQ(arguments.at(0).toInt(), static_cast<int>(_key));
   }
 
 };
 
 TEST_F(TestGraphicsViewEvents, test_key_press_event)
 {
-  QSignalSpy spy{ test_window_, SIGNAL(pressedKey(int)) };
+  QSignalSpy spy{ _test_window, SIGNAL(pressedKey(int)) };
   EXPECT_TRUE(spy.isValid());
 
-  auto event = QKeyEvent{ QEvent::KeyPress, key_, Qt::NoModifier };
-  event_scheduler_.schedule_event(&event, 10);
+  auto event = QKeyEvent{ QEvent::KeyPress, _key, Qt::NoModifier };
+  _event_scheduler.schedule_event(&event, 10);
 
   compare_key_event(spy);
 }
 
 TEST_F(TestGraphicsViewEvents, test_send_no_event)
 {
-  QSignalSpy spy{ test_window_, SIGNAL(sendEvent(Event)) };
+  QSignalSpy spy{ _test_window, SIGNAL(sendEvent(Event)) };
   EXPECT_TRUE(spy.isValid());
 
-  QMetaObject::invokeMethod(test_window_, "waitForEvent",
+  QMetaObject::invokeMethod(_test_window, "waitForEvent",
     Qt::AutoConnection, Q_ARG(int, 1));
 
   // Nothing happens.
@@ -113,7 +119,7 @@ TEST_F(TestGraphicsViewEvents, test_send_no_event)
   EXPECT_EQ(spy.count(), 1);
   auto arguments = spy.takeFirst();
   auto arg = arguments.at(0);
-  arg.convert(event_type_id_);
+  arg.convert(_event_type_id);
 
   const auto event = arguments.at(0).value<Event>();
   EXPECT_EQ(event.type, DO::Sara::NO_EVENT);
@@ -122,7 +128,7 @@ TEST_F(TestGraphicsViewEvents, test_send_no_event)
 TEST_F(TestGraphicsViewEvents, test_send_pressed_key_event)
 {
   // Spy the sendEvent signal.
-  QSignalSpy spy{ test_window_, SIGNAL(sendEvent(Event)) };
+  QSignalSpy spy{ _test_window, SIGNAL(sendEvent(Event)) };
   EXPECT_TRUE(spy.isValid());
 
 #ifdef _WIN32
@@ -134,12 +140,12 @@ TEST_F(TestGraphicsViewEvents, test_send_pressed_key_event)
 #endif
 
   // Ask the testing window to wait for an event.
-  QMetaObject::invokeMethod(test_window_, "waitForEvent",
+  QMetaObject::invokeMethod(_test_window, "waitForEvent",
                             Qt::AutoConnection, Q_ARG(int, wait_ms));
 
   // Schedule a key press event later.
-  QKeyEvent qt_event(QEvent::KeyPress, key_, Qt::NoModifier);
-  event_scheduler_.schedule_event(&qt_event, key_press_time_ms);
+  QKeyEvent qt_event(QEvent::KeyPress, _key, Qt::NoModifier);
+  _event_scheduler.schedule_event(&qt_event, key_press_time_ms);
 
   // The spy waits for the event.
   EXPECT_TRUE(spy.wait(2*wait_ms));
@@ -150,13 +156,12 @@ TEST_F(TestGraphicsViewEvents, test_send_pressed_key_event)
   // Check the details of the key press event.
   auto arguments = spy.takeFirst();
   auto arg = arguments.at(0);
-  arg.convert(event_type_id_);
+  arg.convert(_event_type_id);
 
   const auto event = arguments.at(0).value<Event>();
   EXPECT_EQ(event.type, DO::Sara::KEY_PRESSED);
-  EXPECT_EQ(event.key, key_);
+  EXPECT_EQ(event.key, _key);
 }
-
 
 int main(int argc, char *argv[])
 {
