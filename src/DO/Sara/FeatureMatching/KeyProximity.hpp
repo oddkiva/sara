@@ -14,6 +14,10 @@
 
 #include <DO/Sara/Defines.hpp>
 
+#include <DO/Sara/Features/Feature.hpp>
+
+#include <DO/Sara/Geometry/Tools/Metric.hpp>
+
 
 namespace DO { namespace Sara {
 
