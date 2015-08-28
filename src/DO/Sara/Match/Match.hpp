@@ -44,51 +44,97 @@ namespace DO { namespace Sara {
 
     //! @{
     //! Constant accessors.
-    bool is_x_null() const { return _x == nullptr; }
-    bool is_y_null() const { return _y == nullptr; }
-
     const OERegion& x() const
     {
-      if (is_x_null())
+      if (_x == nullptr)
         throw std::runtime_error{ "x is null" };
       return *_x;
     }
 
     const OERegion& y() const
     {
-      if (is_y_null())
+      if (_y == nullptr)
         throw std::runtime_error{ "y is null" };
       return *_y;
     }
 
-    const Point2f& pos_x() const { return x().center(); }
-    const Point2f& pos_y() const { return y().center(); }
+    const Point2f& x_pos() const
+    {
+      return x().center();
+    }
 
-    int rank() const { return _target_rank; }
+    const Point2f& y_pos() const
+    {
+      return y().center();
+    }
 
-    float score() const { return _score; }
+    int rank() const
+    {
+      return _target_rank;
+    }
 
-    MatchingDirection matching_direction() const { return _matching_dir; }
+    float score() const
+    {
+      return _score;
+    }
 
-    int index_x() const { return _x_index; }
-    int index_y() const { return _y_index; }
+    MatchingDirection matching_direction() const
+    {
+      return _matching_dir;
+    }
 
-    Vector2i index_pair() const { return Vector2i(_x_index, _y_index); }
+    int x_index() const
+    {
+      return _x_index;
+    }
+
+    int y_index() const
+    {
+      return _y_index;
+    }
+
+    Vector2i index_pair() const
+    {
+      return Vector2i(_x_index, _y_index);
+    }
     //! @}
 
     //! @{
     //! Non-constant accessors.
-    const OERegion *& ptr_x() { return _x; }
-    const OERegion *& ptr_y() { return _y; }
+    const OERegion *& x_pointer()
+    {
+      return _x;
+    }
 
-    int& rank() { return _target_rank; }
+    const OERegion *& y_pointer()
+    {
+      return _y;
+    }
 
-    float& score() { return _score; }
+    int& rank()
+    {
+      return _target_rank;
+    }
 
-    MatchingDirection& matching_direction() { return _matching_dir; }
+    float& score()
+    {
+      return _score;
+    }
 
-    int& index_x() { return _x_index; }
-    int& index_y() { return _y_index; }
+    MatchingDirection& matching_direction()
+    {
+      return _matching_dir;
+    }
+
+    int& x_index()
+    {
+      return _x_index;
+    }
+
+    int& y_index()
+    {
+      return _y_index;
+    }
     //! @}
 
     //! Key match equality.

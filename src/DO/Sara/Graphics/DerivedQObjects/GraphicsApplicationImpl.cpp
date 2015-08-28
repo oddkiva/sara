@@ -165,8 +165,10 @@ namespace DO { namespace Sara {
   connectWindowIOEventsToUserThread(QWidget *w)
   {
     // User thread listens to mouse events.
-    connect(w, SIGNAL(releasedMouseButtons(int, int, Qt::MouseButtons)),
-            &m_userThread, SLOT(pressedMouseButtons(int, int, Qt::MouseButtons)));
+    if (qobject_cast<PaintingWindow *>(w))
+      connect(w, SIGNAL(releasedMouseButtons(int, int, Qt::MouseButtons)),
+              &m_userThread, SLOT(pressedMouseButtons(int, int,
+                                                      Qt::MouseButtons)));
     // User thread listens to keyboard events.
     connect(w, SIGNAL(pressedKey(int)),
             &m_userThread, SLOT(pressedKey(int)));

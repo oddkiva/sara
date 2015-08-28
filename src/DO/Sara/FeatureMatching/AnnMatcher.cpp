@@ -116,8 +116,8 @@ namespace DO { namespace Sara {
       m.rank() = (startIndex == 0) ? rank+1 : rank;
       if(dir == Match::TargetToSource)
       {
-        swap(m.ptr_x(), m.ptr_y());
-        swap(m.index_x(), m.index_y());
+        swap(m.x_pointer(), m.y_pointer());
+        swap(m.x_index(), m.y_index());
       }
 
       matches.push_back(m);
@@ -155,11 +155,11 @@ namespace DO { namespace Sara {
   // Sort by indices and by score.
   inline bool compare_match(const Match& m1, const Match& m2)
   {
-    if (m1.index_x() < m2.index_x())
+    if (m1.x_index() < m2.x_index())
       return true;
-    if (m1.index_x() == m2.index_x() && m1.index_y() < m2.index_y())
+    if (m1.x_index() == m2.x_index() && m1.y_index() < m2.y_index())
       return true;
-    if (m1.index_x() == m2.index_x() && m1.index_y() == m2.index_y() && m1.score() < m2.score())
+    if (m1.x_index() == m2.x_index() && m1.y_index() == m2.y_index() && m1.score() < m2.score())
       return true;
     return false;
   }

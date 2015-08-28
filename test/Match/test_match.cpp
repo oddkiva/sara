@@ -9,6 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include <limits>
+
 #include <gtest/gtest.h>
 
 #include <DO/Sara/Match.hpp>
@@ -17,12 +19,25 @@
 using namespace std;
 using namespace DO::Sara;
 
+TEST(TestMatch, test_default_constructor)
+{
+  auto m = Match{};
+  EXPECT_TRUE(m.x_pointer() == nullptr);
+  EXPECT_TRUE(m.y_pointer() == nullptr);
+  EXPECT_THROW(m.x(), runtime_error);
+  EXPECT_THROW(m.y(), runtime_error);
+  EXPECT_EQ(m.x_index(), -1);
+  EXPECT_EQ(m.y_index(), -1);
+  EXPECT_EQ(m.score(), numeric_limits<float>::max());
+  EXPECT_EQ(m.rank(), -1);
+  EXPECT_EQ(m.matching_direction(), Match::SourceToTarget);
+}
 
 TEST(TestMatch, test_make_index_match)
 {
   auto m = make_index_match(0, 1000);
-  EXPECT_EQ(m.index_x(), 0);
-  EXPECT_EQ(m.index_y(), 1000);
+  EXPECT_EQ(m.x_index(), 0);
+  EXPECT_EQ(m.y_index(), 1000);
 }
 
 int main(int argc, char **argv)

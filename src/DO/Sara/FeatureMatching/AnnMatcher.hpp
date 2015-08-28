@@ -39,7 +39,10 @@ namespace DO { namespace Sara {
     //! \brief Return matches.
     std::vector<Match> compute_matches();
 
-		std::vector<Match> compute_self_matches() { return compute_matches(); }
+		std::vector<Match> compute_self_matches()
+    {
+      return compute_matches();
+    }
     //! @}
 
 	private: /* data members */
