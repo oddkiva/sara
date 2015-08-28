@@ -16,24 +16,22 @@
 
 #include <flann/flann.hpp>
 
-#include <DO/Sara/FeatureMatching.hpp>
 #include <DO/Sara/Core/Timer.hpp>
 
+#include <DO/Sara/FeatureMatching.hpp>
 
-//#define DEBUG_FLANN
+
 using namespace std;
 
 
 namespace DO { namespace Sara {
 
   //! Create FLANN matrix
-  flann::Matrix<float> create_flann_matrix(const DescriptorMatrix<float>& descs)
+  flann::Matrix<float>
+  create_flann_matrix(const DescriptorMatrix<float>& descs)
   {
     if (descs.size() == 0)
-    {
-      std::cerr << "Error: list of key-points is empty!" << endl;
-      throw 0;
-    }
+      throw runtime_error{ "Error: list of key-points is empty!"};
 
     const int sz = descs.size();
     const int dim = descs.dimension();
@@ -42,7 +40,7 @@ namespace DO { namespace Sara {
     cout << "Number of descriptors = " << sz << endl;
     // Create a matrix that will contain a set of descriptors.
     flann::Matrix<float> matrix(
-      const_cast<float *>(descs.matrix().data()), sz, dim );
+      const_cast<float *>(descs.matrix().data()), sz, dim);
     return matrix;
   }
 
@@ -76,18 +74,15 @@ namespace DO { namespace Sara {
     // Search the nearest neighbor.
     tree2.knnSearch(query, indices, dists, 3, search_params);
 
-    // This is to avoid the source key matches with himself in case of intra image matching.
+    // This is to avoid the source key matches with himself in case of intra
+    // image matching.
     const int startIndex = i1 == indices[0][1] ? 1 : 0;
     const float bestScore = dists[0][startIndex]/dists[0][startIndex+1];
     int K = 1;
 
     // Sanity check.
     if (dists[0][2] < std::numeric_limits<float>::epsilon())
-    {
-      std::cerr << "AnnMatcher: All distances are 0!" << endl;
-      std::cerr << "AnnMatcher: Stopping the program voluntarily!" << endl;
-      throw 0;
-    }
+      throw runtime_error{ "AnnMatcher: All distances are 0!" };
 
     // Determine the number of nearest neighbors.
     if (squared_ratio_thres > 1.f)
@@ -152,18 +147,6 @@ namespace DO { namespace Sara {
     _vec_dists.resize(_max_neighbors);
   }
 
-  // Sort by indices and by score.
-  inline bool compare_match(const Match& m1, const Match& m2)
-  {
-    if (m1.x_index() < m2.x_index())
-      return true;
-    if (m1.x_index() == m2.x_index() && m1.y_index() < m2.y_index())
-      return true;
-    if (m1.x_index() == m2.x_index() && m1.y_index() == m2.y_index() && m1.score() < m2.score())
-      return true;
-    return false;
-  }
-
   //! Compute candidate matches using the Euclidean distance.
   vector<Match> AnnMatcher::compute_matches()
   {
@@ -200,15 +183,30 @@ namespace DO { namespace Sara {
         _squared_ratio_thres, Match::TargetToSource,
         _self_matching, _is_too_close, _vec_indices, _vec_dists, _max_neighbors);
     }
+
+    // Lexicographical comparison between matches.
+    auto compare_match = [](const Match& m1, const Match& m2)
+    {
+      if (m1.x_index() < m2.x_index())
+        return true;
+      if (m1.x_index() == m2.x_index() && m1.y_index() < m2.y_index())
+        return true;
+      if (m1.x_index() == m2.x_index() && m1.y_index() == m2.y_index() &&
+          m1.score() < m2.score())
+        return true;
+      return false;
+    };
     sort(matches.begin(), matches.end(), compare_match);
 
     // Remove redundant matches in each consecutive group of identical matches.
     // We keep the one with the best Lowe score.
     matches.resize(unique(matches.begin(), matches.end()) - matches.begin());
-    sort(matches.begin(), matches.end(), [&](const Match& m1, const Match& m2) {
-      return m1.score() < m2.score();
-    });
 
+    sort(matches.begin(), matches.end(),
+      [&](const Match& m1, const Match& m2) {
+        return m1.score() < m2.score();
+      }
+    );
 
     cout << "Computed " << matches.size() << " matches in " << t.elapsed() << " seconds." << endl;
 

@@ -56,6 +56,7 @@ flags = [
 "-I", "./src",
 # Third-party header directories.
 "-I", "./third-party/eigen",
+"-I", "./third-party/flann/src/cpp",
 "-I", "./third-party/gtest/include"
 ]
 
