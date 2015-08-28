@@ -41,7 +41,7 @@ namespace GLObject {
     ~Frame();
 
     //! \brief Draw frame in the window.
-    void draw(double axisLength, double axisRadius);
+    void draw(double axisLength,
               double axisRadius = defaultAxisRadius);
 
   private:
