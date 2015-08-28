@@ -164,11 +164,6 @@ namespace DO { namespace Sara {
     return false;
   }
 
-  inline bool compare_by_score(const Match& m1, const Match& m2)
-  {
-    return m1.score() < m2.score();
-  }
-
   //! Compute candidate matches using the Euclidean distance.
   vector<Match> AnnMatcher::compute_matches()
   {
@@ -208,9 +203,12 @@ namespace DO { namespace Sara {
     sort(matches.begin(), matches.end(), compare_match);
 
     // Remove redundant matches in each consecutive group of identical matches.
-    // We keep the one with the best score, which is the first one according to 'CompareMatch'.
+    // We keep the one with the best Lowe score.
     matches.resize(unique(matches.begin(), matches.end()) - matches.begin());
-    sort(matches.begin(), matches.end(), compare_by_score);
+    sort(matches.begin(), matches.end(), [&](const Match& m1, const Match& m2) {
+      return m1.score() < m2.score();
+    });
+
 
     cout << "Computed " << matches.size() << " matches in " << t.elapsed() << " seconds." << endl;
 
