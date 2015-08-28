@@ -31,6 +31,32 @@ TEST(TestMatch, test_default_constructor)
   EXPECT_EQ(m.score(), numeric_limits<float>::max());
   EXPECT_EQ(m.rank(), -1);
   EXPECT_EQ(m.matching_direction(), Match::SourceToTarget);
+
+  const auto& m2 = m;
+  EXPECT_TRUE(m2.x_pointer() == nullptr);
+  EXPECT_TRUE(m2.y_pointer() == nullptr);
+  EXPECT_THROW(m2.x(), runtime_error);
+  EXPECT_THROW(m2.y(), runtime_error);
+  EXPECT_EQ(m2.x_index(), -1);
+  EXPECT_EQ(m2.y_index(), -1);
+  EXPECT_EQ(m2.score(), numeric_limits<float>::max());
+  EXPECT_EQ(m2.rank(), -1);
+  EXPECT_EQ(m2.matching_direction(), Match::SourceToTarget);
+}
+
+TEST(TestMatch, test_custom_constructor)
+{
+  auto f_x = OERegion{};
+  auto f_y = OERegion{};
+  auto m = Match{ &f_x, &f_y, 0.5f };
+  const auto const_m = Match{ &f_x, &f_y, 0.5f };
+  EXPECT_EQ(m.x(), f_x);
+  EXPECT_EQ(m.y(), f_y);
+  EXPECT_EQ(const_m.x(), f_x);
+  EXPECT_EQ(const_m.y(), f_y);
+
+  auto m2 = Match{ &f_x, &f_y, 0.5f };
+  EXPECT_EQ(m, m2);
 }
 
 TEST(TestMatch, test_make_index_match)

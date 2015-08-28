@@ -23,6 +23,7 @@ namespace DO { namespace Sara {
   {
   public:
     enum MatchingDirection { SourceToTarget, TargetToSource };
+    enum Type { X = 0, Y = 1 };
 
   public:
     //! @{
@@ -44,6 +45,16 @@ namespace DO { namespace Sara {
 
     //! @{
     //! Constant accessors.
+    const OERegion * x_pointer() const
+    {
+      return _x;
+    }
+
+    const OERegion * y_pointer() const
+    {
+      return _y;
+    }
+
     const OERegion& x() const
     {
       if (_x == nullptr)
@@ -146,11 +157,11 @@ namespace DO { namespace Sara {
   private: /* data members */
     const OERegion *_x{ nullptr };
     const OERegion *_y{ nullptr };
+    int _x_index{ -1 };
+    int _y_index{ -1 };
     int _target_rank{ -1 };
     float _score{ std::numeric_limits<float>::max() };
     MatchingDirection _matching_dir{ SourceToTarget };
-    int _x_index{ -1 };
-    int _y_index{ -1 };
   };
 
   inline Match make_index_match(int i1, int i2)
