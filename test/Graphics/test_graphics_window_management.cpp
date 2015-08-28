@@ -20,9 +20,6 @@
 using namespace DO::Sara;
 
 
-EventScheduler * global_scheduler;
-
-
 TEST(TestWindow, test_open_and_close_window)
 {
   QPointer<PaintingWindow> window = qobject_cast<PaintingWindow *>(
@@ -128,17 +125,10 @@ int main(int argc, char **argv)
   // Create Qt Application.
   GraphicsApplication gui_app_(argc, argv);
 
-  // Create an event scheduler on the GUI thread.
-  global_scheduler = new EventScheduler;
-  // Connect the user thread and the event scheduler.
-  QObject::connect(&get_user_thread(), SIGNAL(sendEvent(QEvent *, int)),
-                   global_scheduler, SLOT(schedule_event(QEvent*, int)));
-
   // Run the worker thread
   gui_app_.register_user_main(worker_thread);
   int return_code = gui_app_.exec();
 
   // Cleanup and terminate.
-  delete global_scheduler;
   return return_code;
 }
