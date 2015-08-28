@@ -66,6 +66,30 @@ TEST(TestMatch, test_make_index_match)
   EXPECT_EQ(m.y_index(), 1000);
 }
 
+TEST(TestMatch, test_io)
+{
+  // Write dummy matches.
+  auto matches = vector<Match>(10);
+  for (size_t i = 0; i < matches.size(); ++i)
+    matches[i] = make_index_match(i, i, float(i));
+  EXPECT_TRUE(write_matches(matches, "match.txt"));
+
+  // Read the saved matches.
+  auto saved_matches = vector<Match>{};
+  EXPECT_TRUE(read_matches(saved_matches, "match.txt"));
+
+  // Compare the saved matches.
+  EXPECT_EQ(matches.size(), saved_matches.size());
+  for (size_t i = 0; i < saved_matches.size(); ++i)
+  {
+    ASSERT_EQ(saved_matches[i].x_pointer(), nullptr);
+    ASSERT_EQ(saved_matches[i].y_pointer(), nullptr);
+    ASSERT_EQ(matches[i].x_index(), saved_matches[i].x_index());
+    ASSERT_EQ(matches[i].y_index(), saved_matches[i].y_index());
+    ASSERT_EQ(matches[i].score(), saved_matches[i].score());
+  }
+}
+
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);

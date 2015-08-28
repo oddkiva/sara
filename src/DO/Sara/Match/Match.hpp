@@ -164,12 +164,13 @@ namespace DO { namespace Sara {
     MatchingDirection _matching_dir{ SourceToTarget };
   };
 
-  inline Match make_index_match(int i1, int i2)
+  inline Match make_index_match(int i1, int i2, float score = std::numeric_limits<float>::max())
   {
     return Match{
       nullptr, nullptr,
-      std::numeric_limits<float>::max(), Match::SourceToTarget,
-      i1, i2 };
+      score, Match::SourceToTarget,
+      i1, i2
+    };
   }
 
   //! @{

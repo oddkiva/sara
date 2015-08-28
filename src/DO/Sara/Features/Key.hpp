@@ -29,41 +29,6 @@ namespace DO { namespace Sara {
     @{
   */
 
-  template <typename F, typename D>
-  class KeyRef
-  {
-  public:
-    using feature_type = F;
-    using Descriptor = D;
-
-    inline KeyRef(feature_type& f, Descriptor& d)
-      : _f(&f)
-      , _d(&d)
-    {
-    }
-
-    inline feature_type& feature() const
-    {
-      return _f;
-    }
-    inline Descriptor& descriptor() const
-    {
-      return _d;
-    }
-
-    KeyRef operator=(KeyRef key) const
-    {
-      _f = key._f;
-      _d = key._d;
-      return *this;
-    }
-
-  private:
-    feature_type& _f;
-    Descriptor& _d;
-  };
-
-
   enum DescriptorType
   {
     RealDescriptor,
@@ -90,19 +55,10 @@ namespace DO { namespace Sara {
     using const_descriptor_type =
       typename DescriptorMatrix<bin_type>::const_descriptor_type;
 
-    using key_type = KeyRef<const feature_type, const_descriptor_type>;
-    using const_key_type = KeyRef<const feature_type, const_descriptor_type>;
-
-    inline key_type operator[](size_t i)
+    void resize(size_t num_keypoints, size_t descriptor_dimension)
     {
-      return KeyRef<feature_type, descriptor_type>(
-        features[i], descriptors[i]);
-    }
-
-    inline const_key_type operator[](size_t i) const
-    {
-      return KeyRef<const feature_type, const_descriptor_type>(
-        features[i], descriptors[i]);
+      features.resize(num_keypoints);
+      descriptors.resize(num_keypoints, descriptor_dimension);
     }
 
     inline size_t size() const
