@@ -22,24 +22,9 @@ using namespace std;
 using namespace DO::Sara;
 
 
-struct CoutRedirect
+class TestBBox : public TestPolygon
 {
-  CoutRedirect(std::streambuf * new_buffer)
-    : old(std::cout.rdbuf(new_buffer))
-  {
-  }
-
-  ~CoutRedirect()
-  {
-    std::cout.rdbuf(old);
-  }
-
-private:
-  std::streambuf * old;
 };
-
-class TestBBox : public TestPolygon {};
-
 
 TEST_F(TestBBox, test_constructor_and_accessors)
 {

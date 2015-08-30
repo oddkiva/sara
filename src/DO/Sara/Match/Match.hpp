@@ -16,6 +16,8 @@
 
 #include <DO/Sara/Core/Image.hpp>
 
+#include <DO/Sara/Features/Feature.hpp>
+
 
 namespace DO { namespace Sara {
 
@@ -37,8 +39,9 @@ namespace DO { namespace Sara {
                  int x_index = -1,
                  int y_index = -1)
       : _x(x), _y(y)
+      , _x_index(x_index), _y_index(y_index)
       , _target_rank(-1), _score(score)
-      , _matching_dir(matching_dir), _x_index(x_index), _y_index(y_index)
+      , _matching_dir(matching_dir)
     {
     }
     //! @}

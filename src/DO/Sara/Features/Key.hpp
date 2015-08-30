@@ -38,22 +38,28 @@ namespace DO { namespace Sara {
   template <DescriptorType> struct Bin;
 
   template <>
-  struct Bin<RealDescriptor> { typedef float Type; };
+  struct Bin<RealDescriptor> { using value_type = float; };
 
   template <>
-  struct Bin<BinaryDescriptor> { typedef unsigned char Type; };
+  struct Bin<BinaryDescriptor> { using value_type = unsigned char; };
 
 
   template <typename F, DescriptorType D>
   class Set
   {
   public:
-    using bin_type = typename Bin<D>::Type;
-    using feature_type = F;
+    using bin_type = typename Bin<D>::value_type;
+
     using descriptor_type =
       typename DescriptorMatrix<bin_type>::descriptor_type;
     using const_descriptor_type =
       typename DescriptorMatrix<bin_type>::const_descriptor_type;
+
+    using feature_type = F;
+    using feature_reference = F&;
+    using const_feature_reference = const F&;
+
+    Set() = default;
 
     void resize(size_t num_keypoints, size_t descriptor_dimension)
     {
@@ -81,6 +87,32 @@ namespace DO { namespace Sara {
       ::append(features, other.features);
       descriptors.append(other.descriptors);
     }
+
+    //! @{
+    //! \brief return the i-th feature. 'f' as in feature.
+    inline feature_reference f(size_t i)
+    {
+      return features[i];
+    }
+
+    inline const_feature_reference f(size_t i) const
+    {
+      return features[i];
+    }
+    //! @}
+
+    //! @{
+    //! \brief return the i-th feature descriptor. 'v' as in feature vector.
+    inline descriptor_type v(size_t i)
+    {
+      return descriptors[i];
+    }
+
+    inline const_descriptor_type v(size_t i) const
+    {
+      return descriptors[i];
+    }
+    //! @}
 
     std::vector<feature_type> features;
     DescriptorMatrix<bin_type> descriptors;

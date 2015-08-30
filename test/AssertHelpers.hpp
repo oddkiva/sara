@@ -80,4 +80,18 @@ to_std_set(const std::vector<Eigen::Matrix<T, M, N, Opts, MaxRows, MaxCols> >& v
   EXPECT_EQ(to_std_set(vector1), to_std_set(vector2))
 
 
+struct CoutRedirect {
+  CoutRedirect(std::streambuf * new_buffer)
+    : old(std::cout.rdbuf(new_buffer))
+  { }
+
+  ~CoutRedirect() {
+    std::cout.rdbuf(old);
+  }
+
+private:
+  std::streambuf * old;
+};
+
+
 #endif /* DO_SARA_ASSERT_HELPERS_HPP */

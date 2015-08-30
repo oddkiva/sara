@@ -62,14 +62,22 @@ namespace DO { namespace Sara {
   public:
     //! @{
     //! \brief Feature type.
-    enum Type
+    enum class Type : std::int8_t
     {
-      Harris, HarAff, HarLap,
-      FAST, SUSAN,
-      DoG, LoG, DoH, MSER, HesAff, HesLap
+      Harris,
+      HarAff,
+      HarLap,
+      FAST,
+      SUSAN,
+      DoG,
+      LoG,
+      DoH,
+      MSER,
+      HesAff,
+      HesLap
     };
 
-    enum ExtremumType
+    enum class ExtremumType : std::int8_t
     {
       Min = -1,
       Saddle = 0,

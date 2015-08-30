@@ -14,21 +14,6 @@ using namespace std;
 using namespace DO::Sara;
 
 
-struct CoutRedirect
-{
-  CoutRedirect(std::streambuf * new_buffer)
-    : old(std::cout.rdbuf(new_buffer))
-  { }
-
-  ~CoutRedirect() {
-    std::cout.rdbuf(old);
-  }
-
-private:
-  std::streambuf * old;
-};
-
-
 class TestEllipse : public TestPolygon
 {
 protected:

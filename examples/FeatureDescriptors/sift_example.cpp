@@ -51,7 +51,8 @@ void test_dog_sift_keypoints(const Image<float>& I)
 #define DEBUG_ORI
 #ifdef DEBUG_ORI
         // Draw the patch on the image.
-        highlight_patch(D, extrema[i].x(), extrema[i].y(), extrema[i].scale(), o);
+        highlight_patch(
+          D, extrema[i].x(), extrema[i].y(), extrema[i].scale(), o);
 
         // Close-up on the image patch
         check_patch(G(s,o), extrema[i].x(), extrema[i].y(), extrema[i].scale());
@@ -229,7 +230,7 @@ GRAPHICS_MAIN()
   const auto& features = keypoints.features;
 
   print_stage("Removing existing redundancies");
-  remove_redundancies(keypoints);
+  remove_redundant_features(keypoints);
   CHECK(keypoints.features.size());
   CHECK(keypoints.descriptors.size());
 
@@ -239,9 +240,13 @@ GRAPHICS_MAIN()
   set_antialiasing();
   display(image);
   for (size_t i = 0; i != features.size(); ++i)
-    features[i].draw(features[i].extremum_type() == OERegion::Max ? Red8 : Blue8);
+  {
+    const auto color =
+      features[i].extremum_type() == OERegion::ExtremumType::Max ?
+      Red8 : Blue8;
+    features[i].draw(color);
+  }
   get_key();
-
 
   return 0;
 }

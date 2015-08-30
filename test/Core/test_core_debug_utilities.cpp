@@ -15,23 +15,11 @@
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
 
+#include "../AssertHelpers.hpp"
+
 
 using namespace std;
 using namespace DO::Sara;
-
-
-struct CoutRedirect {
-  CoutRedirect(std::streambuf * new_buffer)
-    : old(std::cout.rdbuf(new_buffer))
-  { }
-
-  ~CoutRedirect() {
-    std::cout.rdbuf(old);
-  }
-
-private:
-  std::streambuf * old;
-};
 
 
 TEST(DO_Sara_Core_Test, test_print_stage)

@@ -43,10 +43,13 @@ namespace DO { namespace Sara {
 
     for (size_t i = 0; i != extrema.size(); ++i)
     {
+      const auto color =
+        extrema[i].extremum_type() == OERegion::ExtremumType::Max ?
+        Red8 : Blue8;
       draw_scale_space_extremum(
         pyramid,
         extrema[i].x(), extrema[i].y(), extrema[i].scale(),
-        o, extrema[i].extremum_type() == OERegion::Max?Red8:Blue8);
+        o, color);
     }
   }
 
@@ -72,7 +75,8 @@ namespace DO { namespace Sara {
     close_window();
   }
 
-  void check_patch(const Image<float>& I, float x, float y, float s, double fact)
+  void check_patch(const Image<float>& I, float x, float y, float s,
+                   double fact)
   {
     const auto scaling_factor = 3.f;
     auto r = s * 1.5f * scaling_factor;

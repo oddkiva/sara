@@ -12,40 +12,48 @@
 #include <DO/Sara/Features.hpp>
 #include <DO/Sara/Graphics.hpp>
 
-//#define DEBUG_REDUNDANCIES
-
 
 using namespace std;
 
 
 namespace DO { namespace Sara {
 
-  template struct EqualDescriptor<unsigned char>;
-  template struct CompareFeatures<unsigned char>;
-  template struct CompareFeatures<float>;
 
-
-  void remove_redundancies(vector<OERegion>& features,
-                           DescriptorMatrix<float>& descriptors)
+  void remove_redundant_features(vector<OERegion>& features,
+                                 DescriptorMatrix<float>& descriptors)
   {
     if (features.size() != descriptors.size())
       throw std::runtime_error{
-        "Fatal: number of features and descriptors are not equal"
+        "Fatal: the number of features and descriptors are not equal"
       };
 
-    auto indices = vector<size_t>(features.size());
+    // Equality lambda functor.
+    auto compare_equal = [&](size_t i1, size_t i2) {
+      return (descriptors[i1] - descriptors[i2]).squaredNorm() < 1e-3;
+    };
+
+    // Lexicographical comparison lambda functor.
+    auto compare_less = [&](size_t i1, size_t i2) {
+      if (Sara::lexicographical_compare(descriptors[i1], descriptors[i2]))
+        return true;
+      if (compare_equal(i1, i2) &&
+          features[i1].extremum_value() > features[i2].extremum_value())
+        return true;
+      return false;
+    };
+
+    // Remove redundant features.
+    //
+    // Sort.
+    auto indices = vector<size_t>{ features.size() };
     for (size_t i = 0; i < indices.size(); ++i)
       indices[i] = i;
-
-    CompareFeatures<float> compare_descriptors{ features, descriptors };
-    sort(indices.begin(), indices.end(), compare_descriptors);
-
-    EqualDescriptor<float> equal_descriptors{ descriptors };
-    auto it = unique(indices.begin(), indices.end(), equal_descriptors);
-
+    sort(indices.begin(), indices.end(), compare_less);
+    // Remove duplicates.
+    auto it = unique(indices.begin(), indices.end(), compare_less);
     indices.resize(it - indices.begin());
 
-    vector<OERegion> unique_features{ indices.size() };
+    auto unique_features = vector<OERegion>{ indices.size() };
     DescriptorMatrix<float> unique_descriptors{
       indices.size(), descriptors.dimension()
     };
@@ -56,6 +64,7 @@ namespace DO { namespace Sara {
       unique_descriptors[i] = descriptors[indices[i]];
     }
 
+    // Swap data.
     features.swap(unique_features);
     descriptors.swap(unique_descriptors);
   }

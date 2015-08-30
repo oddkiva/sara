@@ -11,10 +11,7 @@
 
 #include <gtest/gtest.h>
 
-#include <DO/Sara/Features/DescriptorMatrix.hpp>
-#include <DO/Sara/Features/Feature.hpp>
-#include <DO/Sara/Features/Key.hpp>
-#include <DO/Sara/Features/IO.hpp>
+#include <DO/Sara/Features.hpp>
 
 #include "../AssertHelpers.hpp"
 
@@ -23,50 +20,80 @@ using namespace std;
 using namespace DO::Sara;
 
 
-TEST(TestFeatures, test_interest_point)
+TEST(TestInterestPoint, test_methods)
 {
   InterestPoint f(Point2f::Ones());
+  f.type() = InterestPoint::Type::Harris;
+  f.extremum_type() = InterestPoint::ExtremumType::Saddle;
+  f.extremum_value() = 0.f;
   EXPECT_EQ(f.coords(), Point2f::Ones());
   EXPECT_EQ(f.center(), Point2f::Ones());
   EXPECT_EQ(f.x(), 1.f);
   EXPECT_EQ(f.y(), 1.f);
+  EXPECT_EQ(f.extremum_type(), InterestPoint::ExtremumType::Saddle);
+  EXPECT_EQ(f.extremum_value(), 0.f);
+  EXPECT_EQ(f.type(), InterestPoint::Type::Harris);
+
+  // Check output stream operator.
+  pair<InterestPoint::Type, string> types[] = {
+    make_pair(InterestPoint::Type::DoG, "DoG"),
+    make_pair(InterestPoint::Type::HarAff, "Harris-Affine"),
+    make_pair(InterestPoint::Type::HesAff, "Hessian-Affine"),
+    make_pair(InterestPoint::Type::MSER, "MSER"),
+    make_pair(InterestPoint::Type::SUSAN, "")
+  };
+  for (int i = 0; i < 5; ++i)
+  {
+    f.type() = types[i].first;
+    ostringstream oss;
+    oss << f;
+    auto str = oss.str();
+    EXPECT_TRUE(str.find(types[i].second) != string::npos);
+  }
 }
 
-TEST(TestFeatures, test_oe_region_shape)
+TEST(TestOERegion, test_methods)
 {
-  OERegion f(Point2f::Zero(), 1.f);
+  OERegion f{ Point2f::Zero(), 1.f };
   f.orientation() = 0;
   EXPECT_EQ(f.shape_matrix(), Matrix2f::Identity());
   EXPECT_MATRIX_NEAR(f.affinity(), Matrix3f::Identity(), 1e-3);
   EXPECT_EQ(f.radius(), 1.f);
+  EXPECT_EQ(f.scale(), 1.f);
+
+  // Check output stream operator.
+  ostringstream oss;
+  oss << f;
+  auto str = oss.str();
+  EXPECT_TRUE(str.find("shape matrix") != string::npos);
+  EXPECT_TRUE(str.find("orientation:\t0 degrees") != string::npos);
 }
 
-TEST(TestFeatures, test_io)
+TEST(TestIO, test_read_write)
 {
-  const size_t num_features = 10;
+  const auto num_features = size_t{ 10 };
 
   // Test construction.
-  vector<OERegion> features(num_features);
-  DescriptorMatrix<float> descriptors(num_features, 3);
+  auto features = vector<OERegion>{ num_features };
+  auto descriptors = DescriptorMatrix<float>{ num_features, 3 };
   for (size_t i = 0; i < num_features; ++i)
   {
     descriptors[i] = (Vector3f::Ones() * float(i)).eval();
     OERegion& f = features[i];
-    f.type() = OERegion::DoG;
+    f.type() = OERegion::Type::DoG;
     f.coords() = Point2f::Ones() * float(i);
     f.shape_matrix() = Matrix2f::Identity();
     f.orientation() = float(i);
-    f.extremum_type() = OERegion::Max;
+    f.extremum_type() = OERegion::ExtremumType::Max;
     f.extremum_value() = 0.f;
-    cout << f << endl;
   }
 
   // Test write function.
   write_keypoints(features, descriptors, "keypoints.txt");
 
   // Test read function.
-  vector<OERegion> features2;
-  DescriptorMatrix<float> descriptors2;
+  auto features2 = vector<OERegion>{};
+  auto descriptors2 = DescriptorMatrix<float>{};
   read_keypoints(features2, descriptors2, "keypoints.txt");
 
   ASSERT_EQ(features.size(), features2.size());
@@ -79,13 +106,63 @@ TEST(TestFeatures, test_io)
   }
 }
 
-TEST(TestFeatures, test_set)
+TEST(TestSet, test_methods)
 {
-  Set<OERegion, RealDescriptor> set;
+  // Test constructor.
+  auto set = Set<OERegion, RealDescriptor>{};
   EXPECT_EQ(set.size(), 0);
 
+  // Test resize function.
   set.features.resize(10);
   EXPECT_THROW(set.size(), std::runtime_error);
+
+  set.resize(10, 2);
+  EXPECT_EQ(set.size(), 10);
+  EXPECT_EQ(set.features.size(), 10);
+  EXPECT_EQ(set.descriptors.size(), 10); // Test swap.
+  auto set2 = Set<OERegion, RealDescriptor>{};
+  set2.resize(20, 2);
+
+  set.swap(set2);
+  EXPECT_EQ(set.size(), 20);
+  EXPECT_EQ(set2.size(), 10);
+
+  // Test append.
+  set.append(set2);
+  EXPECT_EQ(set.size(), 30);
+
+  // Test accessors.
+  const auto& const_set = set;
+
+  set.f(0).coords() = Point2f::Ones();
+  EXPECT_EQ(set.f(0).coords(), Point2f::Ones());
+  EXPECT_EQ(const_set.f(0).coords(), Point2f::Ones());
+
+  set.v(0) = Point2f::Ones();
+  EXPECT_EQ(set.v(0), Point2f::Ones());
+  EXPECT_EQ(const_set.v(0), Point2f::Ones());
+}
+
+TEST(TestSet, test_remove_redundant_features)
+{
+  auto set = Set<OERegion, RealDescriptor>{};
+
+  // Check corner case.
+  set.features.resize(10);
+  EXPECT_THROW(remove_redundant_features(set), runtime_error);
+
+  // Check normal case.
+  set.resize(5, 2);
+  set.descriptors[0] = Vector2f::Zero();
+  set.descriptors[0] = Vector2f::Zero();
+  set.descriptors[0] = Vector2f::Ones();
+  set.descriptors[0] = Vector2f::Ones();
+  set.descriptors[0] = Vector2f::Ones();
+
+  remove_redundant_features(set);
+  Matrix2f expected_descriptor_matrix;
+  expected_descriptor_matrix.col(0) = Vector2f::Zero();
+  expected_descriptor_matrix.col(1) = Vector2f::Ones();
 }
 
 int main(int argc, char **argv)
