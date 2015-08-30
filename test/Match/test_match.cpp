@@ -66,12 +66,19 @@ TEST(TestMatch, test_make_index_match)
   EXPECT_EQ(m.y_index(), 1000);
 }
 
-TEST(TestMatch, test_io)
+TEST(TestMatch, test_read_write)
 {
+  auto X = vector<OERegion>{ 10 };
+  auto Y = vector<OERegion>{ 10 };
+
   // Write dummy matches.
   auto matches = vector<Match>(10);
   for (size_t i = 0; i < matches.size(); ++i)
-    matches[i] = make_index_match(i, i, float(i));
+  {
+    matches[i] = Match{
+      &X[i], &Y[i], float(i), Match::SourceToTarget, int(i), int(i)
+    };
+  }
   EXPECT_TRUE(write_matches(matches, "match.txt"));
 
   // Read the saved matches.
@@ -88,6 +95,35 @@ TEST(TestMatch, test_io)
     ASSERT_EQ(matches[i].y_index(), saved_matches[i].y_index());
     ASSERT_EQ(matches[i].score(), saved_matches[i].score());
   }
+
+  // Read the saved matches.
+  auto saved_matches_2 = vector<Match>{};
+  EXPECT_TRUE(read_matches(saved_matches_2, X, Y, "match.txt"));
+  EXPECT_EQ(matches.size(), saved_matches_2.size());
+  for (size_t i = 0; i < saved_matches_2.size(); ++i)
+  {
+    ASSERT_EQ(&X[i], saved_matches_2[i].x_pointer());
+    ASSERT_EQ(&Y[i], saved_matches_2[i].y_pointer());
+    ASSERT_EQ(matches[i].x_index(), saved_matches_2[i].x_index());
+    ASSERT_EQ(matches[i].y_index(), saved_matches_2[i].y_index());
+    ASSERT_EQ(matches[i].score(), saved_matches_2[i].score());
+  }
+
+}
+
+TEST(TestMatch, test_ostream_operator)
+{
+  auto x = OERegion{ Point2f::Zero(), 1.f };
+  auto y = OERegion{ Point2f::Ones(), 1.f };
+
+  auto m = Match(&x, &y, 0.6f);
+
+  ostringstream os;
+  os << m;
+  auto str = os.str();
+  EXPECT_TRUE(str.find("source=") != string::npos);
+  EXPECT_TRUE(str.find("target=") != string::npos);
+  EXPECT_TRUE(str.find("score=") != string::npos);
 }
 
 int main(int argc, char **argv)
