@@ -13,16 +13,16 @@
 #include <DO/Sara/FeatureDescriptors.hpp>
 #include <DO/Sara/FeatureMatching.hpp>
 #include <DO/Sara/Graphics.hpp>
+#include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
 
 using namespace std;
 using namespace DO::Sara;
 
-//#define MSER_KEYS
-//#define HARRIS_KEYS
 
 string file1 = src_path("../../datasets/All.tif");
 string file2 = src_path("../../datasets/GuardOnBlonde.tif");
+
 
 Set<OERegion, RealDescriptor> compute_sift_keypoints(const Image<float>& image)
 {
@@ -100,17 +100,17 @@ Set<OERegion, RealDescriptor> compute_sift_keypoints(const Image<float>& image)
 }
 
 void load(Image<Rgb8>& image1, Image<Rgb8>& image2,
-  Set<OERegion, RealDescriptor>& keys1,
-  Set<OERegion, RealDescriptor>& keys2,
-  vector<Match>& matches)
+          Set<OERegion, RealDescriptor>& keys1,
+          Set<OERegion, RealDescriptor>& keys2,
+          vector<Match>& matches)
 {
   cout << "Loading images" << endl;
-  if (!load(image1, file1))
+  if (!imread(image1, file1))
   {
     cerr << "Error: cannot load image file 1: " << file1 << endl;
     return;
   }
-  if (!load(image2, file2))
+  if (!imread(image2, file2))
   {
     cerr << "Error: cannot load image file 2: " << file2 << endl;
     return;
@@ -136,7 +136,6 @@ void load(Image<Rgb8>& image1, Image<Rgb8>& image2,
   cout << matches.size() << " matches" << endl;
 }
 
-
 GRAPHICS_MAIN()
 {
   // Load images.
@@ -145,16 +144,16 @@ GRAPHICS_MAIN()
   vector<Match> matches;
   load(image1, image2, keys1, keys2, matches);
 
-  float scale = 1.0f;
-  int w = int((image1.width() + image2.width())*scale);
-  int h = max(image1.height(), image2.height());
-  Point2f off(float(image1.width()), 0.f);
+  auto scale = 1.0f;
+  auto w = int((image1.width() + image2.width())*scale);
+  auto h = max(image1.height(), image2.height());
+  auto off = Point2f{ float(image1.width()), 0.f };
 
   create_window(w, h);
   set_antialiasing();
   //checkMatches(image1, image2, matches, true, scale);
 
-  for (int i = 0; i < matches.size(); ++i)
+  for (size_t i = 0; i < matches.size(); ++i)
   {
     draw_image_pair(image1, image2, off, scale);
     draw_match(matches[i], Red8, off, scale);

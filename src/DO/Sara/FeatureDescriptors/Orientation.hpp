@@ -96,7 +96,7 @@ namespace DO { namespace Sara {
     auto rounded_y = int_round(y);
 
     // std deviation of the gaussian weight (cf. [Lowe, IJCV 2004])
-    T sigma = s*blur_factor;
+    auto sigma = s*blur_factor;
 
     // Patch radius on which the histogram of gradients is performed.
     auto patch_radius = int_round(sigma*patch_truncation_factor);
@@ -112,24 +112,12 @@ namespace DO { namespace Sara {
 
         auto mag = grad_polar_coords(rounded_x+u, rounded_y+v)(0);
         auto ori = grad_polar_coords(rounded_x+u, rounded_y+v)(1);
+
         // ori is in \f$]-\pi, \pi]\f$, so translate ori by \f$2*\pi\f$ if it is
         // negative.
-#ifndef LOWE
-        ori = ori < 0 ? ori+T(2.*M_PI) : ori;
-        auto bin_index = static_cast<int>(floor(ori / T(2 * M_PI) * T(N)));
+        ori = ori < 0 ? ori + T(2.*M_PI) : ori;
+        auto bin_index = int(floor(ori / T(2 * M_PI) * N));
         bin_index %= N;
-#else
-        int bin_index = int( (N * (ori + M_PI + 0.001f) / (2.0f * M_PI)) );
-        bin_index = std::min(bin_index, N - 1);
-#endif
-        if (bin_index < 0 || bin_index >= N)
-        {
-          auto error_msg = Sara::format(
-            "Orientation bin index out of range: bin_index = %d, theta = %f\n",
-            bin_index, ori);
-          std::cerr << error_msg << std::endl;
-          throw std::out_of_range{ error_msg };
-        }
 
         // Give more emphasis to gradient orientations that lie closer to the
         // keypoint location.
@@ -172,7 +160,6 @@ namespace DO { namespace Sara {
 
     Only histogram peaks \f$i\f$ such that \f$h_i \geq 0.8 \max_j h_j\f$
    */
-#include <DO/Sara/Features/Feature.hpp>
   template <typename T, int N>
   std::vector<int> find_peaks(const Array<T, N, 1>& orientation_histogram,
                               T peak_ratio_thres = T(0.8))
@@ -182,8 +169,8 @@ namespace DO { namespace Sara {
     orientation_peaks.reserve(N);
     for (int i = 0; i < N; ++i)
       if ( orientation_histogram(i) >= peak_ratio_thres*max &&
-           orientation_histogram(i) > orientation_histogram((i-1+N)%N)     &&
-           orientation_histogram(i) > orientation_histogram((i+1)%N)       )
+           orientation_histogram(i) > orientation_histogram((i - 1 + N) % N) &&
+           orientation_histogram(i) > orientation_histogram((i + 1) % N)     )
         orientation_peaks.push_back(i);
     return orientation_peaks;
   }

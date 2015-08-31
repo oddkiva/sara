@@ -152,17 +152,21 @@ TEST(TestSet, test_remove_redundant_features)
   EXPECT_THROW(remove_redundant_features(set), runtime_error);
 
   // Check normal case.
-  set.resize(5, 2);
+  set.resize(7, 2);
   set.descriptors[0] = Vector2f::Zero();
-  set.descriptors[0] = Vector2f::Zero();
-  set.descriptors[0] = Vector2f::Ones();
-  set.descriptors[0] = Vector2f::Ones();
-  set.descriptors[0] = Vector2f::Ones();
+  set.descriptors[1] = Vector2f::Zero();
+  set.descriptors[2] = Vector2f::Ones();
+  set.descriptors[3] = Vector2f::Ones();
+  set.descriptors[4] = Vector2f::Ones();
+  set.descriptors[5] = Vector2f::Zero();
+  set.descriptors[6] = Vector2f::Zero();
 
   remove_redundant_features(set);
   Matrix2f expected_descriptor_matrix;
   expected_descriptor_matrix.col(0) = Vector2f::Zero();
   expected_descriptor_matrix.col(1) = Vector2f::Ones();
+
+  EXPECT_MATRIX_EQ(expected_descriptor_matrix, set.descriptors.matrix());
 }
 
 int main(int argc, char **argv)

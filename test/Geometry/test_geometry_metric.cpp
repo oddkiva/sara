@@ -35,8 +35,8 @@ TYPED_TEST_P(TestSquaredDistanceAndOpenBall, test_computations)
   EXPECT_NEAR(d(b, a), A(0, 0), 1e-6f);
   EXPECT_NEAR(d(c, a), A(1, 1), 1e-6f);
 
-  OpenBall<Distance> ball{ Point2f::Zero(), 1.1f, d };
-  EXPECT_EQ(ball.center(), Point2f::Zero());
+  OpenBall<Distance> ball(Point2f::Zero(), 1.1f, d);
+  EXPECT_MATRIX_EQ(ball.center(), Point2f::Zero());
   EXPECT_EQ(ball.radius(), 1.1f);
   EXPECT_EQ(ball.squared_distance().covariance_matrix(), A);
   EXPECT_TRUE(ball.contains(a));

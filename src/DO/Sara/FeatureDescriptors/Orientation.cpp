@@ -51,16 +51,11 @@ namespace DO { namespace Sara {
     // Convert orientation to radian.
     for (size_t i = 0; i != peaks.size(); ++i)
     {
-#define LOWE
-#ifndef LOWE
       // Orientations in $[0, 2\pi[$
-      peaks[i] *= float(M_PI)/36.f;
+      peaks[i] *= float(M_PI) / 18.f;
       // Orientations in $[-\pi, \pi[$
       if (peaks[i] > float(M_PI))
         peaks[i] -= 2.f*float(M_PI);
-#else
-      peaks[i] = 2.0f * float(M_PI) * peaks[i] / 36.f - float(M_PI);
-#endif
     }
 
     return peaks;

@@ -104,10 +104,10 @@ namespace DO { namespace Sara {
     using Point = Vector;
 
     inline OpenBall(const Point& center, T radius,
-                    const SquaredDistance& squaredDistance)
+                    const SquaredDistance& squared_distance)
       : _center(center)
       , _radius(radius)
-      , _squared_distance(squaredDistance)
+      , _squared_distance(squared_distance)
     {
     }
 
@@ -132,12 +132,13 @@ namespace DO { namespace Sara {
     }
 
   private:
-    const Point& _center;
+    const Point _center;
     const T _radius;
     const SquaredDistance& _squared_distance;
   };
 
 } /* namespace Sara */
 } /* namespace DO */
+
 
 #endif /* DO_SARA_GEOMETRY_TOOLS_METRIC_HPP */

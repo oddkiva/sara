@@ -9,7 +9,10 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include <DO/Sara/Core/DebugUtilities.hpp>
+
 #include <DO/Sara/Features.hpp>
+
 #include <DO/Sara/Graphics.hpp>
 
 
@@ -45,15 +48,16 @@ namespace DO { namespace Sara {
     // Remove redundant features.
     //
     // Sort.
-    auto indices = vector<size_t>{ features.size() };
+    auto indices = vector<size_t>(features.size());
     for (size_t i = 0; i < indices.size(); ++i)
       indices[i] = i;
     sort(indices.begin(), indices.end(), compare_less);
+
     // Remove duplicates.
-    auto it = unique(indices.begin(), indices.end(), compare_less);
+    auto it = unique(indices.begin(), indices.end(), compare_equal);
     indices.resize(it - indices.begin());
 
-    auto unique_features = vector<OERegion>{ indices.size() };
+    auto unique_features = vector<OERegion>(indices.size());
     DescriptorMatrix<float> unique_descriptors{
       indices.size(), descriptors.dimension()
     };
