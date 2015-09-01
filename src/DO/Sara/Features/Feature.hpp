@@ -15,6 +15,7 @@
 #ifndef DO_SARA_FEATURES_FEATURE_HPP
 #define DO_SARA_FEATURES_FEATURE_HPP
 
+#include <cstdint>
 #include <stdexcept>
 
 #include <DO/Sara/Defines.hpp>
