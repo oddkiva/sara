@@ -28,12 +28,6 @@ if (DO_BUILD_TESTS)
 endif ()
 
 
-# For image drawing.
-message(STATUS "  - antigrain")
-add_subdirectory(antigrain)
-set_property(TARGET antigrain PROPERTY FOLDER ${THIRDPARTY_FOLDER_NAME})
-
-
 # EXIF reader.
 message(STATUS "  - easyexif")
 add_subdirectory(easyexif)

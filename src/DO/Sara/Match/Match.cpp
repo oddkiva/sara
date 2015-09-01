@@ -24,29 +24,65 @@ namespace DO { namespace Sara {
 
   ostream & operator<<(ostream & os, const Match& m)
   {
-    os << "source=" << m.posX().transpose()
-       << " target=" << m.posY().transpose() << std::endl;
+    os << "source=" << m.x_pos().transpose()
+       << " target=" << m.y_pos().transpose() << endl;
     os << "score=" << m.score() << " " << "rank=" << m.rank();
     return os;
   }
 
-  bool writeMatches(const vector<Match>& matches, const std::string& fileName)
+  bool write_matches(const vector<Match>& matches, const string& filepath)
   {
-    ofstream file(fileName.c_str());
+    ofstream file(filepath.c_str());
     if (!file.is_open()) {
-      std::cerr << "Cant open file" << fileName << std::endl;
+      cerr << "Cant open file" << filepath << endl;
       return false;
     }
 
-    file << matches.size() << std::endl;
-    for(vector<Match>::const_iterator m = matches.begin(); m != matches.end(); ++m)
-      file << m->indX() << ' ' << m->indY() << ' '
-      << m->rank() << ' ' << m->score() << std::endl;
+    file << matches.size() << endl;
+    for(auto m = matches.begin(); m != matches.end(); ++m)
+      file << m->x_index() << ' ' << m->y_index() << ' '
+           << m->rank() << ' ' << m->score() << endl;
 
     return true;
   }
 
-  bool readMatches(vector<Match>& matches, const std::string& fileName, float scoreT)
+  bool read_matches(vector<Match>& matches,
+                    const string& filepath,
+                    float score_thres)
+  {
+    if (!matches.empty())
+      matches.clear();
+
+    ifstream file(filepath.c_str());
+    if (!file.is_open())
+    {
+      cerr << "Cant open file: " << filepath << endl;
+      return false;
+    }
+
+    size_t match_count;
+    file >> match_count;
+
+    matches.reserve(match_count);
+    for (size_t i = 0; i < match_count; ++i)
+    {
+      Match m;
+
+      file >> m.x_index() >> m.y_index() >> m.rank() >> m.score();
+      if(m.score() > score_thres)
+        break;
+
+      matches.push_back(m);
+    }
+
+    return true;
+  }
+
+  bool read_matches(vector<Match>& matches,
+                    const vector<OERegion>& source_keys,
+                    const vector<OERegion>& target_keys,
+                    const string& fileName,
+                    float score_thres)
   {
     if (!matches.empty())
       matches.clear();
@@ -57,16 +93,19 @@ namespace DO { namespace Sara {
       return false;
     }
 
-    std::size_t matchCount;
-    file >> matchCount;
+    std::size_t match_count;
+    file >> match_count;
 
-    matches.reserve(matchCount);
-    for (size_t i = 0; i < matchCount; ++i)
+    matches.reserve(match_count);
+    for (size_t i = 0; i < match_count; ++i)
     {
       Match m;
 
-      file >> m.indX() >> m.indY() >> m.rank() >> m.score();
-      if(m.score() > scoreT)
+      file >> m.x_index() >> m.y_index() >> m.rank() >> m.score();
+      m.x_pointer() = &source_keys[m.x_index()];
+      m.y_pointer() = &target_keys[m.y_index()];
+
+      if(m.score() > score_thres)
         break;
 
       matches.push_back(m);
@@ -75,74 +114,42 @@ namespace DO { namespace Sara {
     return true;
   }
 
-  bool readMatches(
-    vector<Match>& matches,
-    const vector<OERegion>& sKeys, const vector<OERegion>& tKeys,
-    const string& fileName, float scoreT)
+  void draw_image_pair(const Image<Rgb8>& I1, const Image<Rgb8>& I2,
+                       const Point2f& off2, float scale)
   {
-    if (!matches.empty())
-      matches.clear();
-
-    std::ifstream file(fileName.c_str());
-    if (!file.is_open()) {
-      std::cerr << "Cant open file: " << fileName << std::endl;
-      return false;
-    }
-
-    std::size_t matchCount;
-    file >> matchCount;
-
-    matches.reserve(matchCount);
-    for (size_t i = 0; i < matchCount; ++i)
-    {
-      Match m;
-
-      file >> m.indX() >> m.indY() >> m.rank() >> m.score();
-      m.ptrX() = &sKeys[m.indX()];
-      m.ptrY() = &tKeys[m.indY()];
-
-      if(m.score() > scoreT)
-        break;
-
-      matches.push_back(m);
-    }
-
-    return true;
-  }
-
-  void drawImPair(const Image<Rgb8>& I1, const Image<Rgb8>& I2, const Point2f& off2, float scale)
-  {
-    display(I1, Point2f::Zero().cast<int>(), scale);
+    display(I1, Point2i::Zero(), scale);
     display(I2, (off2*scale).cast<int>(), scale);
   }
 
-  void drawMatch(const Match& m, const Color3ub& c, const Point2f& off2, float z)
+  void draw_match(const Match& m, const Color3ub& c, const Point2f& t,
+                  float z)
   {
     m.x().draw(c, z);
-    m.y().draw(c, z, off2);
-    Point2f p1(m.posX()*z);
-    Point2f p2((m.posY()+off2)*z);
-    drawLine(p1, p2, c);
+    m.y().draw(c, z, t);
+    Point2f p1 = m.x_pos()*z;
+    Point2f p2 = (m.y_pos() + t)*z;
+    draw_line(p1, p2, c);
   }
 
-  void drawMatches(const vector<Match>& matches, const Point2f& off2, float z)
+  void draw_matches(const vector<Match>& matches, const Point2f& off2, float z)
   {
-    for (vector<Match>::const_iterator m = matches.begin(); m != matches.end(); ++m)
-      drawMatch(*m, Color3ub(rand()%256, rand()%256, rand()%256), off2, z);
+    for (auto m = matches.begin(); m != matches.end(); ++m)
+      draw_match(*m, Color3ub(rand()%256, rand()%256, rand()%256), off2, z);
   }
 
-  void checkMatches(const Image<Rgb8>& I1, const Image<Rgb8>& I2,
-                    const vector<Match>& matches, bool redrawEverytime, float z)
+  void check_matches(const Image<Rgb8>& I1, const Image<Rgb8>& I2,
+                     const vector<Match>& matches,
+                     bool redraw_everytime, float z)
   {
-    Point2f off( float(I1.width()), 0.f );
-    drawImPairH(I1, I2);
-    for (vector<Match>::const_iterator m = matches.begin(); m != matches.end(); ++m)
+    Point2f off{ float(I1.width()), 0.f };
+    draw_image_pair(I1, I2);
+    for (auto m = matches.begin(); m != matches.end(); ++m)
     {
-      if (redrawEverytime)
-        drawImPairH(I1, I2, z);
-      drawMatch(*m, Color3ub(rand()%256, rand()%256, rand()%256), off, z);
+      if (redraw_everytime)
+        draw_image_pair(I1, I2, z);
+      draw_match(*m, Color3ub(rand()%256, rand()%256, rand()%256), off, z);
       cout << *m << endl;
-      getKey();
+      get_key();
     }
   }
 

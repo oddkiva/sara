@@ -16,8 +16,6 @@
 
 #include <DO/Sara/Defines.hpp>
 
-#include <DO/Sara/Features/DescriptorMatrix.hpp>
-#include <DO/Sara/Features/Feature.hpp>
 #include <DO/Sara/Features/Key.hpp>
 
 
@@ -28,72 +26,17 @@ namespace DO { namespace Sara {
     @{
   */
 
-  template <typename T>
-  struct EqualDescriptor
-  {
-    EqualDescriptor(const DescriptorMatrix<T>& descriptors)
-      : _descriptors(descriptors)
-    {
-    }
-
-    inline bool operator()(size_t i1, size_t i2) const
-    {
-       return _descriptors[i1] == _descriptors[i2];
-    }
-
-    const DescriptorMatrix<T>& _descriptors;
-  };
-
-  template <>
-  struct EqualDescriptor<float>
-  {
-    EqualDescriptor(const DescriptorMatrix<float>& descriptors)
-      : _descriptors(descriptors)
-    {
-    }
-
-    inline bool operator()(size_t i1, size_t i2) const
-    {
-       return (_descriptors[i1] - _descriptors[i2]).squaredNorm() < 1e-3;
-    }
-
-    const DescriptorMatrix<float>& _descriptors;
-  };
-
-  template <typename T>
-  struct CompareFeatures
-  {
-    CompareFeatures(const std::vector<OERegion>& features,
-                    const DescriptorMatrix<T>& descriptors)
-      : _features(features)
-      , _descriptors(descriptors)
-      , _equal_descriptors(descriptors)
-    {
-    }
-
-    inline bool operator()(size_t i1, size_t i2) const
-    {
-      if (Sara::lexicographical_compare(_descriptors[i1], _descriptors[i2]))
-        return true;
-      if (_equal_descriptors(i1, i2) &&
-          _features[i1].extremum_value() > _features[i2].extremum_value())
-        return true;
-      return false;
-    }
-
-    const std::vector<OERegion>& _features;
-    const DescriptorMatrix<T>& _descriptors;
-    EqualDescriptor<T> _equal_descriptors;
-  };
-
+  //! @{
+  //! \brief remove redundant features.
   DO_EXPORT
-  void remove_redundancies(std::vector<OERegion>& features,
-                           DescriptorMatrix<float>& descriptors);
+  void remove_redundant_features(std::vector<OERegion>& features,
+                                 DescriptorMatrix<float>& descriptors);
 
-  inline void remove_redundancies(Set<OERegion, RealDescriptor>& keys)
+  inline void remove_redundant_features(Set<OERegion, RealDescriptor>& keys)
   {
-    remove_redundancies(keys.features, keys.descriptors);
+    remove_redundant_features(keys.features, keys.descriptors);
   }
+  //! @}
 
   //! @}
 

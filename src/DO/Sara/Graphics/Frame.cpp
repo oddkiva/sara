@@ -74,16 +74,4 @@ namespace GLObject {
     glPopAttrib();
   }
 
-  void Frame::generate_gl_list(GLuint *frameList,
-                           double axisLength,
-                           double axisRadius)
-  {
-    *frameList = glGenLists(1);
-    Frame f;
-
-    glNewList(*frameList, GL_COMPILE);
-    f.draw(axisLength, axisRadius);
-    glEndList();
-  }
-
 } /* namespace GLObject */

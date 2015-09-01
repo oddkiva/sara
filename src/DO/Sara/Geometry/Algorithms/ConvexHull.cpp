@@ -19,7 +19,8 @@ using namespace std;
 namespace DO { namespace Sara { namespace Detail {
 
   static
-  void sort_points_by_polar_angle(PtCotg *out, const Point2d *in, size_t num_points)
+  void sort_points_by_polar_angle(PtCotg *out, const Point2d *in,
+                                  size_t num_points)
   {
     // Copy.
     for (size_t i = 0; i < num_points; ++i)
@@ -53,7 +54,8 @@ namespace DO { namespace Sara { namespace Detail {
 
   }
 
-  void sort_points_by_polar_angle(Point2d *inout, PtCotg *work, size_t num_points)
+  void sort_points_by_polar_angle(Point2d *inout, PtCotg *work,
+                                  size_t num_points)
   {
     sort_points_by_polar_angle(work, inout, num_points);
     for (size_t i = 0; i < num_points; ++i)

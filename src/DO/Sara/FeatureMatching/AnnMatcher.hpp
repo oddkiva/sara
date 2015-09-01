@@ -13,35 +13,49 @@
 #ifndef DO_SARA_FEATUREMATCHING_ANNMATCHER_HPP
 #define DO_SARA_FEATUREMATCHING_ANNMATCHER_HPP
 
+#include <DO/Sara/Defines.hpp>
+
+#include <DO/Sara/Features/Feature.hpp>
+
 
 namespace DO { namespace Sara {
 
-	class AnnMatcher
+	class DO_EXPORT AnnMatcher
 	{
 	public:
-    //! Constructors
+    //! @{
+    //! \brief Constructors.
     AnnMatcher(const Set<OERegion, RealDescriptor>& keys1,
                const Set<OERegion, RealDescriptor>& keys2,
-               float siftRatioT = 1.2f);
-    AnnMatcher(const Set<OERegion, RealDescriptor>& keys,
-               float siftRatioT = 1.2f,
-               float minMaxMetricDistT = 0.5f,
-               float pixelDistT = 10.f);
+               float sift_ratio_thres = 1.2f);
 
-    std::vector<Match> computeMatches();
-		std::vector<Match> computeSelfMatches() { return computeMatches(); }
+    AnnMatcher(const Set<OERegion, RealDescriptor>& keys,
+               float sift_ratio_thres = 1.2f,
+               float min_max_metric_dist_thres = 0.5f,
+               float pixel_dist_thres = 10.f);
+    //! @}
+
+    //! @{
+    //! \brief Return matches.
+    std::vector<Match> compute_matches();
+
+		std::vector<Match> compute_self_matches()
+    {
+      return compute_matches();
+    }
+    //! @}
 
 	private: /* data members */
-    //! Input parameters
-    const Set<OERegion, RealDescriptor>& keys1_;
-    const Set<OERegion, RealDescriptor>& keys2_;
-		float sqRatioT;
-    //! Internals
-    KeyProximity is_too_close_;
-    std::size_t max_neighbors_;
-    std::vector<int> vec_indices_;
-    std::vector<float> vec_dists_;
-    bool self_matching_;
+    //! Input parameters.
+    const Set<OERegion, RealDescriptor>& _keys1;
+    const Set<OERegion, RealDescriptor>& _keys2;
+		float _squared_ratio_thres;
+    //! Internals.
+    KeyProximity _is_too_close;
+    std::size_t _max_neighbors;
+    std::vector<int> _vec_indices;
+    std::vector<float> _vec_dists;
+    bool _self_matching;
 	};
 
 } /* namespace Sara */

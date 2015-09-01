@@ -17,6 +17,8 @@
 #include <DO/Sara/Core/EigenExtension.hpp>
 #include <DO/Sara/Core/Image/Image.hpp>
 
+#include <DO/Sara/Geometry/Tools/Utilities.hpp>
+
 #include <DO/Sara/Graphics.hpp>
 
 #include <DO/Sara/Features/DescriptorMatrix.hpp>

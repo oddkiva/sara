@@ -8,7 +8,7 @@ if (POLICY CMP0020)
   cmake_policy(SET CMP0020 OLD)
 endif (POLICY CMP0020)
 
-# Configure DO++: put the versions.
+# Set Sara Library version.
 configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DO_${DO_PROJECT_NAME}_version.cmake.in
   ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DO_${DO_PROJECT_NAME}_version.cmake @ONLY)
@@ -47,6 +47,32 @@ add_subdirectory(third-party)
 if (DO_BUILD_TESTS)
   enable_testing()
   add_subdirectory(test)
+
+  if (CMAKE_COMPILER_IS_GNUCXX)
+    find_program(LCOV_PATH lcov)
+    find_program(GCOV_PATH gcov-${GCC_MAJOR}.${GCC_MINOR})
+    find_program(GENHTML_PATH genhtml)
+
+    if (LCOV_PATH AND GCOV_PATH AND GENHTML_PATH)
+      add_custom_target(coverage
+        COMMAND ${LCOV_PATH} --gcov-tool=${GCOV_PATH} --compat-libtool
+                     --directory=${CMAKE_BINARY_DIR}
+                     --base-directory=${CMAKE_CURRENT_SOURCE_DIR}/src
+                     --capture
+                     --output-file=coverage.info
+        COMMAND ${LCOV_PATH} --remove coverage.info 'usr/*'
+                     --output-file coverage.info
+        COMMAND ${LCOV_PATH} --remove coverage.info 'third-party/*'
+                     --output-file coverage.info
+        COMMAND ${LCOV_PATH} --remove coverage.info 'test/*'
+                     --output-file coverage.info
+        COMMAND ${LCOV_PATH} --remove coverage.info '${CMAKE_BINARY_DIR}/moc_*'
+                     --output-file coverage.info
+        COMMAND ${GENHTML_PATH} coverage.info
+                  --output-directory=${CMAKE_BINARY_DIR}/coverage
+      )
+    endif ()
+  endif ()
 endif ()
 
 # Setup unit test projects

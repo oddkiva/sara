@@ -177,7 +177,7 @@ macro (do_append_library _library_name
       set (_library_output_name "${_library_output_basename}-s")
       set (_library_output_name_debug "${_library_output_basename}-sd")
     endif ()
- 
+
     # Specify output name and version.
     set_target_properties(
       DO_${DO_PROJECT_NAME}_${_library_name}
@@ -258,7 +258,7 @@ function (do_add_test _test_name _srcs _additional_lib_deps)
   target_link_libraries(${_test_name}
                         ${_additional_lib_deps}
                         gtest)
-  
+
   set_target_properties(
     ${_test_name}
     PROPERTIES

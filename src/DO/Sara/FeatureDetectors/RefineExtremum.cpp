@@ -122,7 +122,7 @@ namespace DO { namespace Sara {
   }
 
   bool refine_extremum(const Image<float>& I, int x, int y, int type,
-                      Point2f& pos, float& val, int border_sz, int num_iter)
+                       Point2f& pos, float& val, int border_sz, int num_iter)
   {
     Vector2f D_prime; // gradient
     Matrix2f D_second; // hessian
@@ -215,7 +215,7 @@ namespace DO { namespace Sara {
   vector<OERegion> local_scale_space_extrema(const ImagePyramid<float>& I,
                                              int s, int o,
                                              float extremum_thres,
-                                             float edgeRatioThres,
+                                             float edge_ratio_thres,
                                              int img_padding_sz,
                                              int refine_iterations)
   {
@@ -252,7 +252,7 @@ namespace DO { namespace Sara {
           continue;
 #endif
         // Reject early if located on edge.
-        if (on_edge(I(s,o),x,y,edgeRatioThres))
+        if (on_edge(I(s,o), x, y, edge_ratio_thres))
           continue;
         // Try to refine extremum.
         Point3f pos;
@@ -273,7 +273,8 @@ namespace DO { namespace Sara {
         OERegion dog(pos.head<2>(), pos.z());
 
         dog.extremum_value() = val;
-        dog.extremum_type() = type == 1 ? OERegion::Max : OERegion::Min;
+        dog.extremum_type() = type == 1 ?
+          OERegion::ExtremumType::Max : OERegion::ExtremumType::Min;
         extrema.push_back(dog);
         map(static_cast<int>(x), static_cast<int>(y)) = 1;
       }
@@ -283,11 +284,10 @@ namespace DO { namespace Sara {
   }
 
 
-  bool select_laplace_scale(
-    float& scale,
-    int x, int y, int s, int o,
-    const ImagePyramid<float>& gaussian_pyramid,
-    int num_scales)
+  bool select_laplace_scale(float& scale,
+                            int x, int y, int s, int o,
+                            const ImagePyramid<float>& gaussian_pyramid,
+                            int num_scales)
   {
     const ImagePyramid<float>& G = gaussian_pyramid;
 
@@ -443,7 +443,7 @@ namespace DO { namespace Sara {
         c.center() = p;
         c.shape_matrix() = Matrix2f::Identity()*pow(scale,-2);
         c.orientation() = 0.f;
-        c.extremum_type() = OERegion::Max;
+        c.extremum_type() = OERegion::ExtremumType::Max;
         c.extremum_value() = val;
         corners.push_back(c);
       }

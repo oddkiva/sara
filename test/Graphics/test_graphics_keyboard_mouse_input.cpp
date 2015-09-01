@@ -43,7 +43,8 @@ protected:
   }
 };
 
-TEST_F(TestKeyboardMouseInputOnSingleWindow, test_get_mouse)
+TEST_F(TestKeyboardMouseInputOnSingleWindow,
+       test_get_mouse)
 {
   Qt::MouseButton expected_qt_mouse_buttons[] = {
     Qt::LeftButton,
@@ -79,7 +80,8 @@ TEST_F(TestKeyboardMouseInputOnSingleWindow, test_get_mouse)
   }
 }
 
-TEST_F(TestKeyboardMouseInputOnSingleWindow, test_click)
+TEST_F(TestKeyboardMouseInputOnSingleWindow,
+       test_click)
 {
   Qt::MouseButton expected_button = Qt::LeftButton;
   int expected_x = 150, expected_y = 150;
@@ -92,7 +94,8 @@ TEST_F(TestKeyboardMouseInputOnSingleWindow, test_click)
   click();
 }
 
-TEST_F(TestKeyboardMouseInputOnSingleWindow, test_get_key)
+TEST_F(TestKeyboardMouseInputOnSingleWindow,
+       test_get_key)
 {
   int expected_key = Qt::Key_A;
   QKeyEvent event(
@@ -105,14 +108,16 @@ TEST_F(TestKeyboardMouseInputOnSingleWindow, test_get_key)
   EXPECT_EQ(actual_key, expected_key);
 }
 
-TEST_F(TestKeyboardMouseInputOnSingleWindow, test_get_event_with_no_input_event)
+TEST_F(TestKeyboardMouseInputOnSingleWindow,
+       test_get_event_with_no_input_event)
 {
   Event event;
   get_event(50, event);
   EXPECT_EQ(event.type, NO_EVENT);
 }
 
-TEST_F(TestKeyboardMouseInputOnSingleWindow, test_get_event_with_input_key_event)
+TEST_F(TestKeyboardMouseInputOnSingleWindow,
+       test_get_event_with_input_key_event)
 {
   int expected_key = Qt::Key_A;
   QKeyEvent qt_event(
@@ -128,12 +133,51 @@ TEST_F(TestKeyboardMouseInputOnSingleWindow, test_get_event_with_input_key_event
   EXPECT_EQ(event.keyModifiers, static_cast<int>(Qt::NoModifier));
 }
 
-TEST_F(TestKeyboardMouseInputOnSingleWindow, test_get_event_with_input_mouse_event)
+TEST_F(TestKeyboardMouseInputOnSingleWindow,
+       test_get_event_with_mouse_pressed_event)
+{
+  Qt::MouseButton expected_button = Qt::LeftButton;
+  int expected_x = 150, expected_y = 150;
+  QMouseEvent qt_event(
+    QEvent::MouseButtonPress, QPointF(expected_x, expected_y),
+    expected_button, expected_button, Qt::NoModifier
+  );
+  emit get_user_thread().sendEvent(&qt_event, 5);
+
+  Event event;
+  get_event(50, event);
+
+  EXPECT_EQ(event.type, MOUSE_PRESSED);
+  EXPECT_EQ(event.buttons, 1);
+  EXPECT_EQ(event.keyModifiers, static_cast<int>(Qt::NoModifier));
+}
+
+TEST_F(TestKeyboardMouseInputOnSingleWindow,
+       test_get_event_with_mouse_released_event)
 {
   Qt::MouseButton expected_button = Qt::LeftButton;
   int expected_x = 150, expected_y = 150;
   QMouseEvent qt_event(
     QEvent::MouseButtonRelease, QPointF(expected_x, expected_y),
+    expected_button, expected_button, Qt::NoModifier
+  );
+  emit get_user_thread().sendEvent(&qt_event, 5);
+
+  Event event;
+  get_event(50, event);
+
+  EXPECT_EQ(event.type, MOUSE_RELEASED);
+  EXPECT_EQ(event.buttons, 1);
+  EXPECT_EQ(event.keyModifiers, static_cast<int>(Qt::NoModifier));
+}
+
+TEST_F(TestKeyboardMouseInputOnSingleWindow,
+       test_get_event_with_mouse_moved_event)
+{
+  Qt::MouseButton expected_button = Qt::LeftButton;
+  int expected_x = 150, expected_y = 150;
+  QMouseEvent qt_event(
+    QEvent::MouseMove, QPointF(expected_x, expected_y),
     expected_button, expected_button, Qt::NoModifier
   );
   emit get_user_thread().sendEvent(&qt_event, 5);

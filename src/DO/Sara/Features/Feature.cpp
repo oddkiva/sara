@@ -17,28 +17,35 @@ using namespace std;
 
 namespace DO { namespace Sara {
 
+  template <typename Enumeration>
+  auto as_integer(Enumeration const value) ->
+    typename std::underlying_type<Enumeration>::type
+  {
+    return static_cast<typename std::underlying_type<Enumeration>::type>(value);
+  } 
+
   std::ostream& InterestPoint::print(std::ostream& os) const
   {
     os << "Feature type:\t";
     switch (type())
     {
-    case InterestPoint::DoG:
+    case InterestPoint::Type::DoG:
       os << "DoG" << endl;
       break;
-    case InterestPoint::HarAff:
+    case InterestPoint::Type::HarAff:
       os << "Harris-Affine" << endl;
       break;
-    case InterestPoint::HesAff:
+    case InterestPoint::Type::HesAff:
       os << "Hessian-Affine" << endl;
       break;
-    case InterestPoint::MSER:
+    case InterestPoint::Type::MSER:
       os << "MSER" << endl;
       break;
     default:
       break;
     }
     os << "Position:\t" << coords().transpose() << endl;
-    os << "Extremum type:\t" << extremum_type() << endl;
+    os << "Extremum type:\t" << as_integer(extremum_type()) << endl;
     os << "Extremum value:\t" << extremum_value() << endl;
     return os;
   }

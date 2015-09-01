@@ -12,11 +12,12 @@
 #ifndef DO_SARA_MATCH_HPP
 #define DO_SARA_MATCH_HPP
 
-#include <DO/Sara/Features.hpp>
 #include <vector>
 #include <cstdlib>
 
-#include "Match/Match.hpp"
-#include "Match/PairWiseDrawer.hpp"
+#include <DO/Sara/Features.hpp>
+
+#include <DO/Sara/Match/Match.hpp>
+#include <DO/Sara/Match/PairWiseDrawer.hpp>
 
 #endif /* DO_SARA_MATCH_HPP */

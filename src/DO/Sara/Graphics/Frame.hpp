@@ -34,12 +34,16 @@ namespace GLObject {
   class Frame
   {
   public:
+    //! \brief Default constructor.
     Frame();
+
+    //! \brief Destructor.
     ~Frame();
-    void draw(double axisLength, double axisRadius);
-    static void generate_gl_list(GLuint *frameList,
-                             double axisLength = defaultAxisLength,
-                             double axisRadius = defaultAxisRadius);
+
+    //! \brief Draw frame in the window.
+    void draw(double axisLength,
+              double axisRadius = defaultAxisRadius);
+
   private:
     GLUquadricObj * pQuadObj;
   };

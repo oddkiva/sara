@@ -183,7 +183,7 @@ void check_keys(const Image<float>& image, const vector<OERegion>& features)
   display(image);
   set_antialiasing();
   for (size_t i = 0; i != features.size(); ++i)
-    features[i].draw(features[i].extremum_type() == OERegion::Max ?
+    features[i].draw(features[i].extremum_type() == OERegion::ExtremumType::Max ?
                      Red8 : Blue8);
   get_key();
 }

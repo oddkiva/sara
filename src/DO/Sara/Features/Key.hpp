@@ -29,41 +29,6 @@ namespace DO { namespace Sara {
     @{
   */
 
-  template <typename F, typename D>
-  class KeyRef
-  {
-  public:
-    using feature_type = F;
-    using Descriptor = D;
-
-    inline KeyRef(feature_type& f, Descriptor& d)
-      : _f(&f)
-      , _d(&d)
-    {
-    }
-
-    inline feature_type& feature() const
-    {
-      return _f;
-    }
-    inline Descriptor& descriptor() const
-    {
-      return _d;
-    }
-
-    KeyRef operator=(KeyRef key) const
-    {
-      _f = key._f;
-      _d = key._d;
-      return *this;
-    }
-
-  private:
-    feature_type& _f;
-    Descriptor& _d;
-  };
-
-
   enum DescriptorType
   {
     RealDescriptor,
@@ -73,36 +38,33 @@ namespace DO { namespace Sara {
   template <DescriptorType> struct Bin;
 
   template <>
-  struct Bin<RealDescriptor> { typedef float Type; };
+  struct Bin<RealDescriptor> { using value_type = float; };
 
   template <>
-  struct Bin<BinaryDescriptor> { typedef unsigned char Type; };
+  struct Bin<BinaryDescriptor> { using value_type = unsigned char; };
 
 
   template <typename F, DescriptorType D>
   class Set
   {
   public:
-    using bin_type = typename Bin<D>::Type;
-    using feature_type = F;
+    using bin_type = typename Bin<D>::value_type;
+
     using descriptor_type =
       typename DescriptorMatrix<bin_type>::descriptor_type;
     using const_descriptor_type =
       typename DescriptorMatrix<bin_type>::const_descriptor_type;
 
-    using key_type = KeyRef<const feature_type, const_descriptor_type>;
-    using const_key_type = KeyRef<const feature_type, const_descriptor_type>;
+    using feature_type = F;
+    using feature_reference = F&;
+    using const_feature_reference = const F&;
 
-    inline key_type operator[](size_t i)
-    {
-      return KeyRef<feature_type, descriptor_type>(
-        features[i], descriptors[i]);
-    }
+    Set() = default;
 
-    inline const_key_type operator[](size_t i) const
+    void resize(size_t num_keypoints, size_t descriptor_dimension)
     {
-      return KeyRef<const feature_type, const_descriptor_type>(
-        features[i], descriptors[i]);
+      features.resize(num_keypoints);
+      descriptors.resize(num_keypoints, descriptor_dimension);
     }
 
     inline size_t size() const
@@ -125,6 +87,32 @@ namespace DO { namespace Sara {
       ::append(features, other.features);
       descriptors.append(other.descriptors);
     }
+
+    //! @{
+    //! \brief return the i-th feature. 'f' as in feature.
+    inline feature_reference f(size_t i)
+    {
+      return features[i];
+    }
+
+    inline const_feature_reference f(size_t i) const
+    {
+      return features[i];
+    }
+    //! @}
+
+    //! @{
+    //! \brief return the i-th feature descriptor. 'v' as in feature vector.
+    inline descriptor_type v(size_t i)
+    {
+      return descriptors[i];
+    }
+
+    inline const_descriptor_type v(size_t i) const
+    {
+      return descriptors[i];
+    }
+    //! @}
 
     std::vector<feature_type> features;
     DescriptorMatrix<bin_type> descriptors;

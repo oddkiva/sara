@@ -1,12 +1,13 @@
 cmake_minimum_required(VERSION 2.6)
 
-project(DO_FeatureDescriptors_Examples)
+project(DO_FeatureMatching_Examples)
 
-message(STATUS "  - DO_FeatureDescriptors_Examples")
+message(STATUS "  - DO_FeatureMatching_Examples")
 
 find_package(DO_Sara COMPONENTS
   Core Graphics ImageIO
-  Features FeatureDetectors FeatureDescriptors REQUIRED)
+  Features FeatureDetectors FeatureDescriptors
+  KDTree Match FeatureMatching REQUIRED)
 
 macro (do_add_example example)
   add_executable(${example} ${example}.cpp)
@@ -15,7 +16,7 @@ macro (do_add_example example)
   target_link_libraries(${example} ${DO_Sara_LIBRARIES})
   set_property(TARGET ${example}
     PROPERTY
-    FOLDER "DO Sara Examples/FeatureDescriptors")
+    FOLDER "DO Sara Examples/FeatureMatching")
 endmacro ()
 
-do_add_example(sift_example)
+do_add_example(matching_example)

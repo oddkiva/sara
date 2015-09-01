@@ -14,6 +14,7 @@
 #ifndef DO_SARA_FEATUREDESCRIPTORS_DESCRIPTORMATRIX_HPP
 #define DO_SARA_FEATUREDESCRIPTORS_DESCRIPTORMATRIX_HPP
 
+#include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/EigenExtension.hpp>
 
 

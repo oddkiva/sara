@@ -14,7 +14,7 @@
 
 #include <DO/Sara/Features.hpp>
 #include <DO/Sara/Geometry/Tools/Metric.hpp>
-#include <DO/Sara/Match.hpp>
+#include <DO/Sara/Match/Match.hpp>
 
 // Key Proximity
 #include "FeatureMatching/KeyProximity.hpp"

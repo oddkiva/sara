@@ -72,7 +72,7 @@ protected: // methods.
     _test_window = new OpenGLWindow(300, 300);
     _event_scheduler.set_receiver(_test_window);
     _mouse_pos = QPoint(10, 10);
-    _key = Qt::Key_A;
+    _key = Qt::Key_F;
 
 #ifdef _WIN32
     _wait_ms = 100;

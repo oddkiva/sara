@@ -1,11 +1,27 @@
+// ========================================================================== //
+// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// vision.
+//
+// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
 #include <DO/Sara/FeatureDetectors.hpp>
 #include <DO/Sara/FeatureDescriptors.hpp>
+#include <DO/Sara/FeatureMatching.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
+#include <DO/Sara/ImageProcessing.hpp>
 
-
-using namespace DO::Sara;
 using namespace std;
+using namespace DO::Sara;
+
+
+string file1 = src_path("../../datasets/All.tif");
+string file2 = src_path("../../datasets/GuardOnBlonde.tif");
 
 
 Set<OERegion, RealDescriptor> compute_sift_keypoints(const Image<float>& image)
@@ -83,51 +99,67 @@ Set<OERegion, RealDescriptor> compute_sift_keypoints(const Image<float>& image)
   return keys;
 }
 
-bool check_descriptors(const DescriptorMatrix<float>& descriptors)
+void load(Image<Rgb8>& image1, Image<Rgb8>& image2,
+          Set<OERegion, RealDescriptor>& keys1,
+          Set<OERegion, RealDescriptor>& keys2,
+          vector<Match>& matches)
 {
-  for (size_t i = 0; i < descriptors.size(); ++i)
+  cout << "Loading images" << endl;
+  if (!imread(image1, file1))
   {
-    for (size_t j = 0; j < descriptors.dimension(); ++j)
-    {
-      if (!isfinite(descriptors[i](j)))
-      {
-        cerr << "Not a finite number" << endl;
-        return false;
-      }
-    }
+    cerr << "Error: cannot load image file 1: " << file1 << endl;
+    return;
   }
-  cout << "OK all numbers are finite" << endl;
-  return true;
+  if (!imread(image2, file2))
+  {
+    cerr << "Error: cannot load image file 2: " << file2 << endl;
+    return;
+  }
+
+  cout << "Computing/Reading keypoints" << endl;
+  Set<OERegion, RealDescriptor> SIFTs1 = compute_sift_keypoints(image1.convert<float>());
+  Set<OERegion, RealDescriptor> SIFTs2 = compute_sift_keypoints(image2.convert<float>());
+  keys1.append(SIFTs1);
+  keys2.append(SIFTs2);
+  cout << "Image 1: " << keys1.size() << " keypoints" << endl;
+  cout << "Image 2: " << keys2.size() << " keypoints" << endl;
+
+  CHECK(keys1.features.size());
+  CHECK(keys1.descriptors.size());
+  CHECK(keys2.features.size());
+  CHECK(keys2.descriptors.size());
+
+  // Compute/read matches
+  cout << "Computing Matches" << endl;
+  AnnMatcher matcher(keys1, keys2, 1.0f);
+  matches = matcher.compute_matches();
+  cout << matches.size() << " matches" << endl;
 }
 
 GRAPHICS_MAIN()
 {
-  auto image = Image<float>{};
-  if (!imread(image, src_path("../../datasets/sunflowerField.jpg")))
-    return -1;
+  // Load images.
+  Image<Rgb8> image1, image2;
+  Set<OERegion, RealDescriptor> keys1, keys2;
+  vector<Match> matches;
+  load(image1, image2, keys1, keys2, matches);
 
-  print_stage("Detecting SIFT features");
-  auto keypoints = compute_sift_keypoints(image);
-  const auto& features = keypoints.features;
+  auto scale = 1.0f;
+  auto w = int((image1.width() + image2.width())*scale);
+  auto h = max(image1.height(), image2.height());
+  auto off = Point2f{ float(image1.width()), 0.f };
 
-  print_stage("Removing existing redundancies");
-  remove_redundant_features(keypoints);
-  CHECK(keypoints.features.size());
-  CHECK(keypoints.descriptors.size());
-
-  // Check the features visually.
-  print_stage("Draw features");
-  create_window(image.width(), image.height());
+  create_window(w, h);
   set_antialiasing();
-  display(image);
-  for (size_t i = 0; i != features.size(); ++i)
+  //checkMatches(image1, image2, matches, true, scale);
+
+  for (size_t i = 0; i < matches.size(); ++i)
   {
-    const auto color =
-      features[i].extremum_type() == OERegion::ExtremumType::Max ?
-      Red8 : Blue8;
-    features[i].draw(color);
+    draw_image_pair(image1, image2, off, scale);
+    draw_match(matches[i], Red8, off, scale);
+    cout << matches[i] << endl;
+    get_key();
   }
-  get_key();
 
   return 0;
 }
