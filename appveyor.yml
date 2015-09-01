@@ -17,7 +17,5 @@ configuration:
 before_build:
   - cmake -H. -Bbuild -G "Visual Studio %VS_VERSION%" -DCMAKE_GENERATOR_PLATFORM=%VS_PLATFORM% -DDO_BUILD_TESTS=ON -DDO_BUILD_SAMPLES=ON
 
-build:
-  parallel: true
-  project: build\Sara.sln
-  verbosity: minimal
+build_script:
+  - '"C:\Program Files (x86)\MSBuild\12.0\Bin\MSBuild.exe" build\Sara.sln /m /verbosity:minimal'
