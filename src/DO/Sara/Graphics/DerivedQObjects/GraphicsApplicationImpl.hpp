@@ -38,7 +38,7 @@ namespace DO { namespace Sara {
   };
 
   //! Private implementation of the class GraphicsApplication
-  class DO_EXPORT GraphicsApplication::Impl : public QApplication
+  class DO_SARA_EXPORT GraphicsApplication::Impl : public QApplication
   {
     Q_OBJECT
 

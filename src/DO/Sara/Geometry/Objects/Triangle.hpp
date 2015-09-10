@@ -21,7 +21,7 @@
 namespace DO { namespace Sara {
 
   // Triangle (a,b,c) enumerated in CCW order.
-  class DO_EXPORT Triangle : public SmallPolygon<3>
+  class DO_SARA_EXPORT Triangle : public SmallPolygon<3>
   {
   public:
     Triangle() : SmallPolygon<3>() {}

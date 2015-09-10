@@ -178,16 +178,16 @@ namespace DO { namespace Sara {
 
   //! @{
   //! I/O
-  DO_EXPORT
+  DO_SARA_EXPORT
   std::ostream & operator<<(std::ostream & os, const Match& m);
 
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool write_matches(const std::vector<Match>& matches, const std::string& fileName);
 
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool read_matches(std::vector<Match>& matches, const std::string& filepath, float score_thres = 10.f);
 
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool read_matches(std::vector<Match>& matches,
                     const std::vector<OERegion>& source_keys,
                     const std::vector<OERegion>& target_keys,
@@ -198,7 +198,7 @@ namespace DO { namespace Sara {
 
   //! @{
   //! View matches.
-  DO_EXPORT
+  DO_SARA_EXPORT
   void draw_image_pair(const Image<Rgb8>& I1, const Image<Rgb8>& I2,
                        const Point2f& off2, float scale = 1.0f);
 
@@ -214,15 +214,15 @@ namespace DO { namespace Sara {
     draw_image_pair(I1, I2, Point2f(0.f, I1.height()*scale), scale);
   }
 
-  DO_EXPORT
+  DO_SARA_EXPORT
   void draw_match(const Match& m, const Color3ub& c, const Point2f& off2,
                   float z = 1.f);
 
-  DO_EXPORT
+  DO_SARA_EXPORT
   void draw_matches(const std::vector<Match>& matches,
                     const Point2f& off2, float z = 1.f);
 
-  DO_EXPORT
+  DO_SARA_EXPORT
   void check_matches(const Image<Rgb8>& I1, const Image<Rgb8>& I2,
                      const std::vector<Match>& matches,
                      bool redraw_everytime = false, float z = 1.f);

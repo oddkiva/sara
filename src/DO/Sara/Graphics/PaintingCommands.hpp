@@ -33,7 +33,7 @@ namespace DO { namespace Sara {
     \return true if the command is issued on the window successfully.
     \return false otherwise.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool draw_point(int x, int y, const Color3ub& c);
   /*!
     \brief Draw a point in the active PaintingWindow window.
@@ -43,7 +43,7 @@ namespace DO { namespace Sara {
     \return true if the command is issued on the window successfully.
     \return false otherwise.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool draw_point(int x, int y, const Color4ub& c);
   /*!
     \brief Draw a point in the active PaintingWindow window.
@@ -52,7 +52,7 @@ namespace DO { namespace Sara {
     \return true if the command is issued on the window successfully.
     \return false otherwise.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool draw_point(const Point2f& p, const Color3ub& c);
   /*!
     \brief Draw a circle in the active PaintingWindow window.
@@ -65,7 +65,7 @@ namespace DO { namespace Sara {
     \return false otherwise.
 
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool draw_circle(int xc, int yc, int r, const Color3ub& c,
                    int penWidth = 1);
   /*!
@@ -87,7 +87,7 @@ namespace DO { namespace Sara {
     \return true if the command is issued on the window successfully.
     \return false otherwise.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool draw_circle(const Point2f& center, float r, const Color3ub& c,
                    int penWidth = 1);
   /*!
@@ -98,7 +98,7 @@ namespace DO { namespace Sara {
     \return true if the command is issued on the window successfully.
     \return false otherwise.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool draw_circle(const Point2d& center, double r, const Color3ub& c,
                    int penWidth = 1);
   /*!
@@ -112,7 +112,7 @@ namespace DO { namespace Sara {
     \return true if the command is issued on the window successfully.
     \return false otherwise.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool draw_ellipse(int x, int y, int w, int h, const Color3ub&c,
                     int penWidth = 1);
   /*!
@@ -126,7 +126,7 @@ namespace DO { namespace Sara {
     \return true if the command is issued on the window successfully.
     \return false otherwise.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool draw_ellipse(const Point2f& center, float r1, float r2, float degree,
                     const Color3ub& c, int penWidth = 1);
   /*!
@@ -140,7 +140,7 @@ namespace DO { namespace Sara {
     \return true if the command is issued on the window successfully.
     \return false otherwise.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool draw_ellipse(const Point2d& center, double r1, double r2, double degree,
                     const Color3ub& c, int penWidth);
   /*!
@@ -154,7 +154,7 @@ namespace DO { namespace Sara {
     \return true if the command is issued on the window successfully.
     \return false otherwise.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool draw_line(int x1, int y1, int x2, int y2, const Color3ub& c,
                  int penWidth = 1);
   /*!
@@ -166,7 +166,7 @@ namespace DO { namespace Sara {
     \return true if the command is issued on the window successfully.
     \return false otherwise.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   inline bool draw_line(const Point2i& p1, const Point2i& p2, const Color3ub&c,
                         int penWidth = 1)
   { return draw_line(p1.x(), p1.y(), p2.x(), p2.y(), c, penWidth); }
@@ -179,7 +179,7 @@ namespace DO { namespace Sara {
     \return true if the command is issued on the window successfully.
     \return false otherwise.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool draw_line(const Point2f& p1, const Point2f& p2, const Color3ub& c,
                  int penWidth = 1);
   /*!
@@ -191,7 +191,7 @@ namespace DO { namespace Sara {
     \return true if the command is issued on the window successfully.
     \return false otherwise.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool draw_line(const Point2d& p1, const Point2d& p2, const Color3ub& c,
                  int penWidth = 1);
   /*!
@@ -205,7 +205,7 @@ namespace DO { namespace Sara {
     \return true if the command is issued on the window successfully.
     \return false otherwise.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool draw_rect(int x, int y, int w, int h, const Color3ub& c,
                  int penWidth = 1);
   /*!
@@ -217,7 +217,7 @@ namespace DO { namespace Sara {
     \return true if the command is issued on the window successfully.
     \return false otherwise.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool draw_poly(const int x[], const int y[], int n, const Color3ub& c,
                  int width = 1);
   /*!
@@ -229,7 +229,7 @@ namespace DO { namespace Sara {
     \return true if the command is issued on the window successfully.
     \return false otherwise.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool draw_poly(const Point2i* p, int n, const Color3ub& c, int width = 1);
   /*!
     \brief Draw text in the active PaintingWindow window.
@@ -240,7 +240,7 @@ namespace DO { namespace Sara {
     \return true if the command is issued on the window successfully.
     \return false otherwise.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool draw_string(int x, int y, const std::string &s, const Color3ub& c,
                    int fontSize = 12, double alpha = 0, bool italic = false,
                    bool bold = false, bool underlined = false);
@@ -253,7 +253,7 @@ namespace DO { namespace Sara {
     \return true if the command is issued on the window successfully.
     \return false otherwise.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool draw_arrow(int a, int b, int c, int d, const Color3ub& col,
                   int arrowWidth = 8, int arrowHeight = 5,
                   int style = 0, int width = 1);
@@ -319,7 +319,7 @@ namespace DO { namespace Sara {
     \return true if the command is issued on the window successfully.
     \return false otherwise.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool fill_ellipse(int x, int y, int w, int h, const Color3ub& c);
   /*!
     \brief Draw a color-filled ellipse in the active PaintingWindow window.
@@ -339,7 +339,7 @@ namespace DO { namespace Sara {
     \return true if the command is issued on the window successfully.
     \return false otherwise.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool fill_ellipse(const Point2f& p, float rx, float ry, float degree,
                     const Color3ub& c);
   /*!
@@ -349,7 +349,7 @@ namespace DO { namespace Sara {
     \return true if the command is issued on the window successfully.
     \return false otherwise.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool fill_rect(int x, int y, int w, int h, const Color3ub& c);
   /*!
     \brief Draw a color-filled circle in the active PaintingWindow window.
@@ -368,7 +368,7 @@ namespace DO { namespace Sara {
     \return true if the command is issued on the window successfully.
     \return false otherwise.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool fill_circle(int x, int y, int r, const Color3ub& c);
   /*!
     \brief Draw a color-filled circle in the active PaintingWindow window.
@@ -388,7 +388,7 @@ namespace DO { namespace Sara {
     \return true if the command is issued on the window successfully.
     \return false otherwise.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool fill_circle(const Point2f& p, float r, const Color3ub& c);
   /*!
     \brief Draw a color-filled polygon in the active PaintingWindow window.
@@ -398,7 +398,7 @@ namespace DO { namespace Sara {
     \return true if the command is issued on the window successfully.
     \return false otherwise.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool fill_poly(const int x[], const int y[], int n, const Color3ub& c);
   /*!
     \brief Draw a color-filled polygon in the active PaintingWindow window.
@@ -408,7 +408,7 @@ namespace DO { namespace Sara {
     \return true if the command is issued on the window successfully.
     \return false otherwise.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool fill_poly(const Point2i *p, int n, const Color3ub& c);
 
   // ======================================================================== //
@@ -422,7 +422,7 @@ namespace DO { namespace Sara {
     \return true if the command is issued on the window successfully.
     \return false otherwise.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool put_color_image(int x, int y, const Color3ub *data, int w, int h,
                        double fact = 1.);
   /*!
@@ -446,7 +446,7 @@ namespace DO { namespace Sara {
     \return true if the command is issued on the window successfully.
     \return false otherwise.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool put_grey_image(int x, int y, const unsigned char *data, int w, int h,
                       double fact = 1.);
   /*!
@@ -556,7 +556,7 @@ namespace DO { namespace Sara {
     \return true if the command is issued on the window successfully.
     \return false otherwise.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool clear_window();
 
   // ======================================================================== //
@@ -568,7 +568,7 @@ namespace DO { namespace Sara {
     \return true if the antialiasing command is executed.
     \return false otherwise.
   */
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool set_antialiasing(Window w = active_window(), bool on = true);
   /*!
     \bug Buggy. Investigate...
@@ -577,7 +577,7 @@ namespace DO { namespace Sara {
     \return true if the transparency command is executed.
     \return false otherwise.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool set_transparency(Window w = active_window(), bool on = true);
 
   // ======================================================================== //
@@ -589,7 +589,7 @@ namespace DO { namespace Sara {
     \return true if save is successful.
     \return false otherwise.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool save_screen(Window w, const std::string& fileName);
 
   //! @}

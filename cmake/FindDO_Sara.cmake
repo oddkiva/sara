@@ -4,15 +4,15 @@ endif()
 
 
 # Load DO-specific macros
-include(do_macros)
+include(sara_macros)
 
 
 # Specify DO-Sara version.
-include(DO_Sara_version)
+include(sara_version)
 
 
 # Debug message.
-do_step_message("FindDO_Sara running for project '${PROJECT_NAME}'")
+sara_step_message("FindDO_Sara running for project '${PROJECT_NAME}'")
 
 
 # Setup DO-CV once for all for every test projects in the 'test' directory.
@@ -31,31 +31,29 @@ if (NOT DO_Sara_FOUND)
 
   endif ()
 
-  set(DO_PROJECT_NAME Sara)
-
   # List the available component libraries in DO++
   # Foundational libraries
-  do_append_components(DO_Sara_COMPONENTS Core)
-  do_append_components(DO_Sara_COMPONENTS ImageIO)
-  do_append_components(DO_Sara_COMPONENTS VideoIO)
-  do_append_components(DO_Sara_COMPONENTS Graphics)
+  sara_append_components(DO_Sara_COMPONENTS Core)
+  sara_append_components(DO_Sara_COMPONENTS ImageIO)
+  sara_append_components(DO_Sara_COMPONENTS VideoIO)
+  sara_append_components(DO_Sara_COMPONENTS Graphics)
 
   # KDTree for fast neighbor search.
-  do_append_components(DO_Sara_COMPONENTS KDTree)
+  sara_append_components(DO_Sara_COMPONENTS KDTree)
   # Image processing
-  do_append_components(DO_Sara_COMPONENTS ImageProcessing)
+  sara_append_components(DO_Sara_COMPONENTS ImageProcessing)
   # Geometry
-  do_append_components(DO_Sara_COMPONENTS Geometry)
+  sara_append_components(DO_Sara_COMPONENTS Geometry)
   # Feature detection and description
-  do_append_components(DO_Sara_COMPONENTS Features)
-  do_append_components(DO_Sara_COMPONENTS FeatureDetectors)
-  do_append_components(DO_Sara_COMPONENTS FeatureDescriptors)
+  sara_append_components(DO_Sara_COMPONENTS Features)
+  sara_append_components(DO_Sara_COMPONENTS FeatureDetectors)
+  sara_append_components(DO_Sara_COMPONENTS FeatureDescriptors)
   # Feature matching
-  do_append_components(DO_Sara_COMPONENTS Match)
-  do_append_components(DO_Sara_COMPONENTS FeatureMatching)
+  sara_append_components(DO_Sara_COMPONENTS Match)
+  sara_append_components(DO_Sara_COMPONENTS FeatureMatching)
 
   # DEBUG: Print the list of component libraries
-  do_step_message("Currently available components in DO-Sara:")
+  sara_step_message("Currently available components in DO-Sara:")
   foreach (component ${DO_Sara_COMPONENTS})
     message (STATUS "  - ${component}")
   endforeach (component)
@@ -67,13 +65,13 @@ endif ()
 
 
 # Configure compiler for the specific project.
-include (do_configure_cxx_compiler)
+include (sara_configure_cxx_compiler)
 
 
 # List the compile flags needed by DO-CV.
-set(DO_DEFINITIONS "-DSRCDIR=${CMAKE_CURRENT_SOURCE_DIR}")
-if (DO_USE_STATIC_LIBS OR NOT DO_BUILD_SHARED_LIBS)
-  add_definitions("-DDO_STATIC")
+set(SARA_DEFINITIONS "-DSRCDIR=${CMAKE_CURRENT_SOURCE_DIR}")
+if (SARA_USE_STATIC_LIBS OR NOT SARA_BUILD_SHARED_LIBS)
+  add_definitions("-DDO_SARA_STATIC")
 endif ()
 
 
@@ -81,17 +79,19 @@ endif ()
 find_path(
   DO_Sara_INCLUDE_DIRS
   NAMES DO/Sara/Core.hpp DO/Sara/Defines.hpp DO/Sara/Graphics.hpp
-  PATHS
-  /usr/include /usr/local/include
-  "C:/Program Files/DO-Sara/include")
+  PATHS /usr/include
+        /usr/local/include
+        "C:/Program Files/DO-Sara/include")
 
 
 # 'find_package(DO_Sara COMPONENTS Core Graphics ... REQUIRED)' is called.
-if (DO_Sara_FIND_COMPONENTS)
+if (NOT DO_Sara_FIND_COMPONENTS)
+  set(DO_Sara_USE_COMPONENTS ${DO_Sara_COMPONENTS})
+else ()
   # Verbose comment.
-  do_step_message("Requested libraries by project '${PROJECT_NAME}':")
+  sara_step_message("Requested libraries by project '${PROJECT_NAME}':")
   foreach (component ${DO_Sara_FIND_COMPONENTS})
-    do_substep_message ("- ${component}")
+    sara_substep_message ("- ${component}")
   endforeach (component)
 
   # Check that all the components exist.
@@ -99,7 +99,7 @@ if (DO_Sara_FIND_COMPONENTS)
   foreach (component ${DO_Sara_FIND_COMPONENTS})
     list(FIND DO_Sara_COMPONENTS ${component} COMPONENT_INDEX)
     if (COMPONENT_INDEX EQUAL -1)
-      message (FATAL_ERROR "[DO] ${component} does not exist!")
+      message (FATAL_ERROR "[Sara] ${component} does not exist!")
     else ()
       set(DO_Sara_${component}_FOUND TRUE)
       list (APPEND DO_Sara_USE_COMPONENTS ${component})
@@ -114,7 +114,7 @@ if (DO_Sara_FIND_COMPONENTS)
   # Retrieve the set of dependencies when linking projects with DO-CV.
   set(DO_Sara_LIBRARIES "")
 
-  if (DO_USE_FROM_SOURCE)
+  if (SARA_USE_FROM_SOURCE)
     foreach (COMPONENT ${DO_Sara_USE_COMPONENTS})
       include(UseDOSara${COMPONENT})
 

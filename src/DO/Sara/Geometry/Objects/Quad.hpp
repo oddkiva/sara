@@ -22,7 +22,7 @@
 
 namespace DO { namespace Sara {
 
-  class DO_EXPORT Quad : public SmallPolygon<4>
+  class DO_SARA_EXPORT Quad : public SmallPolygon<4>
   {
   public:
     //! @{

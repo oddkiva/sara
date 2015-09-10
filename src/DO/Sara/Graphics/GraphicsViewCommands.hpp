@@ -33,7 +33,7 @@ namespace DO { namespace Sara {
   //! The added window can be:
   //! - rescaled by hitting key \b + or key \b -,
   //! - selected and moved in the GraphicsView window using the mouse.
-  DO_EXPORT
+  DO_SARA_EXPORT
   QGraphicsPixmapItem * add_pixmap(const Image<Rgb8>& I,
                                    bool random_pos = false);
 

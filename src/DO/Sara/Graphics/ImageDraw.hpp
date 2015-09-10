@@ -33,7 +33,7 @@ namespace DO { namespace Sara {
     @param[in]  x,y   coordinates.
     @param[in]  c     RGB color.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   void draw_point(Image<Rgb8>& image,
                   int x, int y, const Color3ub& c);
   /*!
@@ -44,7 +44,7 @@ namespace DO { namespace Sara {
     @param[in]  c        RGB color.
     @param[in]  penWidth width of the contour.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   void draw_circle(Image<Rgb8>& image,
                    int xc, int yc, int r, const Color3ub& c, int penWidth = 1);
   /*!
@@ -54,7 +54,7 @@ namespace DO { namespace Sara {
     @param[in]  c           RGB color.
     @param[in]  penWidth    width of the contour.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   void draw_line(Image<Rgb8>& image,
                  int x1, int y1, int x2, int y2, const Color3ub& c,
                  int penWidth = 1);
@@ -65,7 +65,7 @@ namespace DO { namespace Sara {
     @param[in]  c         RGB color.
     @param[in]  penWidth  width of the contour.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   void draw_rect(Image<Rgb8>& image,
                  int x, int y, int w, int h, const Color3ub& c,
                  int penWidth = 1);
@@ -75,7 +75,7 @@ namespace DO { namespace Sara {
     @param[in]  x,y,w,h   start and end points of the line.
     @param[in]  c         RGB color.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   void fill_rect(Image<Rgb8>& image,
                  int x, int y, int w, int h, const Color3ub& c);
   /*!
@@ -85,7 +85,7 @@ namespace DO { namespace Sara {
     @param[in]  r      circle radius.
     @param[in]  c      RGB color.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   void fill_circle(Image<Rgb8>& image,
                    int x, int y, int r, const Color3ub& c);
 

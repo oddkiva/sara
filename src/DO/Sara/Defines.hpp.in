@@ -15,28 +15,28 @@
 #define DO_SARA_VERSION "@DO_Sara_VERSION@"
 
 #if defined(_WIN32) || defined(_WIN32_WCE)
-# ifdef DO_EXPORTS
-#   define DO_EXPORT __declspec(dllexport) /* We are building the libraries */
-# elif defined(DO_STATIC)
-#   define DO_EXPORT
+# ifdef DO_SARA_EXPORTS
+#   define DO_SARA_EXPORT __declspec(dllexport) /* We are building the libraries */
+# elif defined(DO_SARA_STATIC)
+#   define DO_SARA_EXPORT
 # else
-#   define DO_EXPORT __declspec(dllimport) /* We are using the libraries */
+#   define DO_SARA_EXPORT __declspec(dllimport) /* We are using the libraries */
 # endif
 #else
-# define DO_EXPORT
+# define DO_SARA_EXPORT
 #endif
 
-#ifdef DO_DEPRECATED
-# undef DO_DEPRECATED
+#ifdef DO_SARA_DEPRECATED
+# undef DO_SARA_DEPRECATED
 #endif
 
 #ifdef __GNUC__
-# define DO_DEPRECATED __attribute__ ((deprecated))
+# define DO_SARA_DEPRECATED __attribute__ ((deprecated))
 #elif defined(_MSC_VER)
-# define DO_DEPRECATED __declspec(deprecated)
+# define DO_SARA_DEPRECATED __declspec(deprecated)
 #else
-# pragma message("WARNING: You need to implement DO_DEPRECATED for this compiler")
-# define DO_DEPRECATED
+# pragma message("WARNING: You need to implement DO_SARA_DEPRECATED for this compiler")
+# define DO_SARA_DEPRECATED
 #endif
 
 /*!

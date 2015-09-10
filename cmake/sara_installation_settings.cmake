@@ -7,33 +7,33 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 # Install the sources.
 if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
   # Eigen 3
-  do_message("Installing Eigen")
+  sara_message("Installing Eigen")
   install(DIRECTORY ${DO_Sara_ThirdParty_DIR}/eigen/Eigen
           DESTINATION include
           COMPONENT ThirdParty)
   set(CPACK_COMPONENT_ThirdParty_REQUIRED 1)
 
-  # DO-${DO_PROJECT_NAME} source files
-  install(FILES ${DO_${DO_PROJECT_NAME}_DIR}/COPYING.README
-                ${DO_${DO_PROJECT_NAME}_DIR}/COPYING.MPL2
-          DESTINATION include/DO/${DO_PROJECT_NAME}
+  # DO-Sara source files
+  install(FILES ${DO_Sara_DIR}/COPYING.README
+                ${DO_Sara_DIR}/COPYING.MPL2
+          DESTINATION include/DO/Sara
           COMPONENT Sources)
-  install(DIRECTORY ${DO_${DO_PROJECT_NAME}_DIR}/cmake
-          DESTINATION include/DO/${DO_PROJECT_NAME}
+  install(DIRECTORY ${DO_Sara_DIR}/cmake
+          DESTINATION include/DO/Sara
           COMPONENT Sources)
-  install(DIRECTORY ${DO_${DO_PROJECT_NAME}_DIR}/src/DO
+  install(DIRECTORY ${DO_Sara_DIR}/src/DO
           DESTINATION include/
           COMPONENT Sources)
-  install(FILES ${DO_${DO_PROJECT_NAME}_SOURCE_DIR}/Defines.hpp
-          DESTINATION include/DO/${DO_PROJECT_NAME}
+  install(FILES ${DO_Sara_SOURCE_DIR}/Defines.hpp
+          DESTINATION include/DO/Sara
           COMPONENT Sources)
   set(CPACK_COMPONENT_Sources_REQUIRED 1)
 endif ()
 
-# DO-${DO_PROJECT_NAME} component libraries
-foreach (component ${DO_${DO_PROJECT_NAME}_COMPONENTS})
-  do_message("Installing DO_${DO_PROJECT_NAME}_${component}")
-  include(${DO_${DO_PROJECT_NAME}_${component}_USE_FILE})
+# DO-Sara component libraries
+foreach (component ${DO_Sara_COMPONENTS})
+  sara_message("Installing DO_Sara_${component}")
+  include(${DO_Sara_${component}_USE_FILE})
 endforeach (component)
 
 
@@ -46,7 +46,7 @@ if (WIN32)
 else()
   set(CPACK_PACKAGE_NAME "libDO-Sara")
 endif ()
-if (DO_BUILD_SHARED_LIBS)
+if (SARA_BUILD_SHARED_LIBS)
   set(CPACK_PACKAGE_NAME "${CPACK_PACKAGE_NAME}-shared")
 else ()
   set(CPACK_PACKAGE_NAME "${CPACK_PACKAGE_NAME}-static")
@@ -58,16 +58,16 @@ endif ()
 set(CPACK_PACKAGE_VENDOR "DO-CV")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY
     "DO-Sara: An easy-to-use C++ set of libraries for computer vision")
-set(CPACK_RESOURCE_FILE_LICENSE "${DO_${DO_PROJECT_NAME}_DIR}/COPYING.README")
+set(CPACK_RESOURCE_FILE_LICENSE "${DO_Sara_DIR}/COPYING.README")
 set(CPACK_PACKAGE_CONTACT "David OK")
 
-set(CPACK_PACKAGE_VERSION_MAJOR ${DO_${DO_PROJECT_NAME}_VERSION_MAJOR})
-set(CPACK_PACKAGE_VERSION_MINOR ${DO_${DO_PROJECT_NAME}_VERSION_MINOR})
-set(CPACK_PACKAGE_VERSION_PATCH ${DO_${DO_PROJECT_NAME}_VERSION_PATCH})
-set(CPACK_PACKAGE_VERSION ${DO_${DO_PROJECT_NAME}_VERSION})
-set(CPACK_PACKAGE_INSTALL_DIRECTORY "DO-${DO_PROJECT_NAME}")
+set(CPACK_PACKAGE_VERSION_MAJOR ${DO_Sara_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${DO_Sara_VERSION_MINOR})
+set(CPACK_PACKAGE_VERSION_PATCH ${DO_Sara_VERSION_PATCH})
+set(CPACK_PACKAGE_VERSION ${DO_Sara_VERSION})
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "DO-Sara")
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-  set(CPACK_PACKAGE_INSTALL_DIRECTORY "DO-${DO_PROJECT_NAME}-${CMAKE_BUILD_TYPE}")
+  set(CPACK_PACKAGE_INSTALL_DIRECTORY "DO-Sara-${CMAKE_BUILD_TYPE}")
 endif ()
 
 

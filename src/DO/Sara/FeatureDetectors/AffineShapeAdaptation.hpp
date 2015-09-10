@@ -39,7 +39,7 @@ namespace DO { namespace Sara {
     which is also the Mahalanobis distance reflecting the anisotropy of the
     local shape.
    */
-  class DO_EXPORT AdaptFeatureAffinelyToLocalShape
+  class DO_SARA_EXPORT AdaptFeatureAffinelyToLocalShape
   {
   public:
     /*!

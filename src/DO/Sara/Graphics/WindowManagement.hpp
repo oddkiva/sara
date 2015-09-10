@@ -33,24 +33,24 @@ namespace DO { namespace Sara {
    */
 
   //! \brief Return the active window.
-  DO_EXPORT
+  DO_SARA_EXPORT
   Window active_window();
 
   //! \brief Return the window sizes.
-  DO_EXPORT
+  DO_SARA_EXPORT
   Vector2i get_sizes(Window w);
 
   //! \brief Return the window width.
-  DO_EXPORT
+  DO_SARA_EXPORT
   inline int get_width(Window w) { return get_sizes(w)(0); }
 
   //! \brief Return the window height.
-  DO_EXPORT
+  DO_SARA_EXPORT
   inline int get_height(Window w) { return get_sizes(w)(1); }
 
   //! @{
   //! \brief Open a PaintingWindow for 2D drawing.
-  DO_EXPORT
+  DO_SARA_EXPORT
   Window create_window(int w, int h, const std::string& windowTitle = "DO-CV",
                        int x = -1, int y = -1);
 
@@ -64,7 +64,7 @@ namespace DO { namespace Sara {
 
   //! @{
   //! \brief Open a OpenGLWindow for 3D drawing.
-  DO_EXPORT
+  DO_SARA_EXPORT
   Window create_gl_window(int w, int h, const std::string& windowTitle = "DO-CV",
                       int x = -1, int y = -1);
   inline Window create_gl_window(const Vector2i& sizes,
@@ -77,11 +77,11 @@ namespace DO { namespace Sara {
 
   //! @{
   //! Open a GraphicsView for interactive viewing.
-  DO_EXPORT
+  DO_SARA_EXPORT
   Window create_graphics_view(int w, int h,
                               const std::string& windowTitle = "DO-CV",
                               int x = -1, int y = -1);
-  DO_EXPORT
+  DO_SARA_EXPORT
   inline Window create_graphics_view(const Vector2i& sizes,
                                  const std::string& windowTitle = "DO-CV",
                                  int x = -1, int y = -1)
@@ -92,17 +92,17 @@ namespace DO { namespace Sara {
 
   //! \brief Close the window **w** (regardless of its type).
   //! By default, the active window is closed.
-  DO_EXPORT
+  DO_SARA_EXPORT
   void close_window(Window w = active_window());
 
   //! Set the chosen window **w** as the current active window (regardless of
   //! its type).
-  DO_EXPORT
+  DO_SARA_EXPORT
   void set_active_window(Window w);
 
   //! @{
   //! Resize the specified window **w** with the following parameters.
-  DO_EXPORT
+  DO_SARA_EXPORT
   void resize_window(int width, int height, Window w = active_window());
 
   inline void resize_window(const Vector2i& sizes, Window w = active_window())
@@ -112,18 +112,18 @@ namespace DO { namespace Sara {
   //! @}
 
   //! Wait **msec** milliseconds before the window resumes its drawing.
-  DO_EXPORT
+  DO_SARA_EXPORT
   void millisleep(int msec);
 
   //! Wait **usec** microseconds before the window resumes its drawing.
-  DO_EXPORT
+  DO_SARA_EXPORT
   void microsleep(int usec);
 
   //! \brief Wait for a click from the user.
   //! - Works only on the *active* window.
   //! - Returns the clicked mouse button
   //! - store the click coordinates \f$(x,y)\f$.
-  DO_EXPORT
+  DO_SARA_EXPORT
   int get_mouse(int& x, int& y);
 
   //! \brief Wait for a click from the user (only on the *active* window)
@@ -138,7 +138,7 @@ namespace DO { namespace Sara {
   //! - The user can click on any opened windows.
   //! - Returns the clicked mouse button
   //! - store the click coordinates \f$p\f$.
-  DO_EXPORT
+  DO_SARA_EXPORT
   int any_get_mouse(Point2i& p);
 
   //! Wait for a click from the user only on the *active* window.
@@ -156,17 +156,17 @@ namespace DO { namespace Sara {
   //! \brief Wait for a hit key from the user.
   //! - Works only on the *active* window.
   //! - Returns the hit key.
-  DO_EXPORT
+  DO_SARA_EXPORT
   int get_key();
 
   //! \brief Wait for a hit key from the user.
   //! - Works on any opened windows.
   //! - Returns the hit key.
-  DO_EXPORT
+  DO_SARA_EXPORT
   int any_get_key();
 
   //! Listens to events sent from the active window.
-  DO_EXPORT
+  DO_SARA_EXPORT
   void get_event(int ms, Event& e);
 
   //! @}

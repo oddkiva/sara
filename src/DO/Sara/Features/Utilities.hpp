@@ -28,7 +28,7 @@ namespace DO { namespace Sara {
 
   //! @{
   //! \brief remove redundant features.
-  DO_EXPORT
+  DO_SARA_EXPORT
   void remove_redundant_features(std::vector<OERegion>& features,
                                  DescriptorMatrix<float>& descriptors);
 

@@ -54,7 +54,7 @@ namespace DO { namespace Sara {
   }
 
   //! Functor class to compute Hessian-Laplace maxima.
-  class DO_EXPORT ComputeHessianLaplaceMaxima
+  class DO_SARA_EXPORT ComputeHessianLaplaceMaxima
   {
   public:
     /*!
@@ -165,7 +165,7 @@ namespace DO { namespace Sara {
 
   //! Functor class to compute local extrema of determinant of Hessians
   //! in scale space.
-  class DO_EXPORT ComputeDoHExtrema
+  class DO_SARA_EXPORT ComputeDoHExtrema
   {
   public:
     /*!

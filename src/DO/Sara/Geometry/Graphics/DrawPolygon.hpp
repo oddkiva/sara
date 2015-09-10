@@ -25,18 +25,18 @@ namespace DO { namespace Sara {
 
   //! @{
   //! Drawing functions
-  DO_EXPORT
+  DO_SARA_EXPORT
   void draw_line_segment(const LineSegment& s, const Color3ub& c = Black8,
                          int pen_width = 1);
 
-  DO_EXPORT
+  DO_SARA_EXPORT
   void draw_bbox(const BBox& bbox, const Color3ub& c, int pen_width = 1);
 
-  DO_EXPORT
+  DO_SARA_EXPORT
   void draw_poly(const std::vector<Point2d>& p, const Color3ub& color,
                  int pen_width = 1);
 
-  DO_EXPORT
+  DO_SARA_EXPORT
   void draw_ellipse(const Ellipse& e, const Color3ub col, int pen_width = 1);
 
   template <std::size_t N>
@@ -59,7 +59,7 @@ namespace DO { namespace Sara {
     draw_poly(q, color, pen_width);
   }
 
-  DO_EXPORT
+  DO_SARA_EXPORT
   void draw_affine_cone(const AffineCone2& K, double arrow_length = 50.,
                         const Color3ub& color = Black8);
   //! @}

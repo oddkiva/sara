@@ -74,7 +74,7 @@ namespace DO { namespace Sara {
     The adaptive non maximal suprression sorts feature points by suppression
     radius and so that we can keep those with the highest supression radius.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   std::vector<std::pair<size_t, float> >
   adaptive_non_maximal_suppression(const std::vector<OERegion>& features,
                                    float c_robust = 0.9f);

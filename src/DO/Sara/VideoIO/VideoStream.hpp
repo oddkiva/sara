@@ -25,7 +25,7 @@ struct AVFrame;
 
 namespace DO { namespace Sara {
 
-  class DO_EXPORT VideoStream : public std::streambuf
+  class DO_SARA_EXPORT VideoStream : public std::streambuf
   {
   public:
     VideoStream();

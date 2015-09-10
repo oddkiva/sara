@@ -21,7 +21,7 @@
 
 namespace DO { namespace Sara {
 
-	class DO_EXPORT KeyProximity
+	class DO_SARA_EXPORT KeyProximity
 	{
 	public:
 		KeyProximity(float metric_dist_thres = .5f,

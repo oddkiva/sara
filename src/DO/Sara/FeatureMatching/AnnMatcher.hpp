@@ -20,7 +20,7 @@
 
 namespace DO { namespace Sara {
 
-	class DO_EXPORT AnnMatcher
+	class DO_SARA_EXPORT AnnMatcher
 	{
 	public:
     //! @{

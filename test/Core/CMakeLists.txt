@@ -12,5 +12,5 @@ file(GLOB test_core_SOURCE_FILES FILES *.cpp)
 
 foreach (file ${test_core_SOURCE_FILES})
   get_filename_component(filename "${file}" NAME_WE)
-  do_add_test(${filename} ${file} "${DO_Sara_LIBRARIES}" ${TestGroupName})
+  sara_add_test(${filename} ${file} "${DO_Sara_LIBRARIES}" ${TestGroupName})
 endforeach ()

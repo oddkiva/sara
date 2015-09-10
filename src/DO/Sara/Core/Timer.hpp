@@ -26,7 +26,7 @@ namespace DO { namespace Sara {
   //! @{
 
   //! \brief Timer class with microsecond accuracy.
-  class DO_EXPORT Timer
+  class DO_SARA_EXPORT Timer
   {
   public: /* interface. */
     //! Default constructor

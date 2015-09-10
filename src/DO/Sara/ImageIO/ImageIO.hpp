@@ -19,10 +19,10 @@
 
 namespace DO { namespace Sara {
 
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool read_exif_info(EXIFInfo& exif_info, const std::string& file_path);
 
-  DO_EXPORT
+  DO_SARA_EXPORT
   std::ostream& operator<<(std::ostream& os, const EXIFInfo& exifInfo);
 
   template <typename T>
@@ -89,10 +89,10 @@ namespace DO { namespace Sara {
     }
   }
 
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool imread(Image<unsigned char>& image, const std::string& filepath);
 
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool imread(Image<Rgb8>& image, const std::string& filepath);
 
   template <typename T>
@@ -105,7 +105,7 @@ namespace DO { namespace Sara {
     return true;
   }
 
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool imwrite(const Image<Rgb8>& image, const std::string& filepath,
                int quality = 85);
 

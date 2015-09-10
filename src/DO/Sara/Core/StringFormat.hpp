@@ -8,7 +8,7 @@
 
 namespace DO { namespace Sara {
 
-  DO_EXPORT
+  DO_SARA_EXPORT
   std::string format(const char *fmt, ...);
 
 } /* namespace Sara */

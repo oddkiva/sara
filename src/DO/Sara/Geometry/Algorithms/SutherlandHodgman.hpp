@@ -33,7 +33,7 @@ namespace DO { namespace Sara {
    - Polygon 'subject' must be a simple polygon, i.e., without holes.
    - Polygon 'clip' must be a convex polygon.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   std::vector<Point2d> sutherland_hodgman(const std::vector<Point2d>& subject,
                                          const std::vector<Point2d>& clip);
 

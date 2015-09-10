@@ -10,6 +10,6 @@ set(TEST_GROUP_NAME "FeatureDetectors")
 file(GLOB test_feature_detectors_SOURCE_FILES FILES test_*.cpp)
 foreach (file ${test_feature_detectors_SOURCE_FILES})
   get_filename_component(filename "${file}" NAME_WE)
-  do_add_test(${filename} ${file} "${DO_Sara_LIBRARIES}" "FeatureDetectors")
+  sara_add_test(${filename} ${file} "${DO_Sara_LIBRARIES}" "FeatureDetectors")
 endforeach ()
 

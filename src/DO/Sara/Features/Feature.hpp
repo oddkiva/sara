@@ -32,7 +32,7 @@ namespace DO { namespace Sara {
   */
 
   //! \brief Abstract 'VisualFeature' class.
-  class DO_EXPORT VisualFeature
+  class DO_SARA_EXPORT VisualFeature
   {
   public:
     VisualFeature() = default;
@@ -58,7 +58,7 @@ namespace DO { namespace Sara {
 
 
   //! \brief PointFeature for interest points
-  class DO_EXPORT InterestPoint : public VisualFeature
+  class DO_SARA_EXPORT InterestPoint : public VisualFeature
   {
   public:
     //! @{
@@ -208,7 +208,7 @@ namespace DO { namespace Sara {
     - Harris-Affine
     - Hessian-Affine features and so on...
    */
-  class DO_EXPORT OERegion : public InterestPoint
+  class DO_SARA_EXPORT OERegion : public InterestPoint
   {
   public:
     //! \brief Default constructor
