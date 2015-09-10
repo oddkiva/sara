@@ -22,6 +22,15 @@ Sara is licensed with the [Mozilla Public License version
 <a href="https://ci.appveyor.com/project/do-cv/sara"><img src="https://ci.appveyor.com/api/projects/status/github/do-cv/sara?branch=master&svg=true" alt="Build Status: Windows" /></a>
 [![Coverage Status](https://coveralls.io/repos/DO-CV/sara/badge.svg?branch=master)](https://coveralls.io/r/DO-CV/sara?branch=master)
 
+**Tested Compilers:**
+- Visual Studio 2013
+- gcc 4.8, 4.9
+- clang 3.5, 3.6
+
+**Sara loves C++11!!** and constantly exploits move semantics, type deduction
+with the `auto` keyword, `lambda` functions, curly-brace initialization styles.
+
+
 Documentation
 -------------
 
