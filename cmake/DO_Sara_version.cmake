@@ -1,1 +1,1 @@
-set(DO_Sara_VERSION 1.1.0)
+set(DO_Sara_VERSION 1.1.1)

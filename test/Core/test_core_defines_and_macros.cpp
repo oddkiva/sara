@@ -19,7 +19,7 @@ using namespace std;
 
 TEST(DO_Sara_Core_Test, definesTest)
 {
-  EXPECT_EQ(string(DO_SARA_VERSION), "1.1.0");
+  EXPECT_EQ(string(DO_SARA_VERSION), "1.1.1");
   EXPECT_TRUE(string(src_path("")).find("test/Core") != string::npos);
 }
 

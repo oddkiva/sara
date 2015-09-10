@@ -23,7 +23,7 @@ Sara is licensed with the [Mozilla Public License version
 [![Coverage Status](https://coveralls.io/repos/DO-CV/sara/badge.svg?branch=master)](https://coveralls.io/r/DO-CV/sara?branch=master)
 
 **Tested Compilers:**
-- Visual Studio 2013,
+- Visual Studio 2013
 - gcc 4.8, 4.9
 - clang 3.5, 3.6
 
