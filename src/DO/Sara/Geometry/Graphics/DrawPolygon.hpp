@@ -37,7 +37,7 @@ namespace DO { namespace Sara {
                  int pen_width = 1);
 
   DO_SARA_EXPORT
-  void draw_ellipse(const Ellipse& e, const Color3ub col, int pen_width = 1);
+  void draw_ellipse(const Ellipse& e, const Color3ub& col, int pen_width = 1);
 
   template <std::size_t N>
   void draw_poly(const SmallPolygon<N>& poly, const Color3ub& color,

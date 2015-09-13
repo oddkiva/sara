@@ -42,10 +42,9 @@ namespace DO { namespace Sara {
     double elapsed_ms();
 
   private: /* data members. */
-    double start_;
-    double elapsed_;
+    double _start;
 #if defined(_WIN32) || defined(_WIN32_WCE)
-    double frequency_;
+    double _frequency;
 #endif
   };
 

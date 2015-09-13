@@ -3,7 +3,7 @@ if (FFMPEG_LIBRARIES AND FFMPEG_INCLUDE_DIR)
   set(FFMPEG_FOUND TRUE)
 
 elseif (MSVC)
-  if (DO_USE_FROM_SOURCE)
+  if (SARA_USE_FROM_SOURCE)
     set(FFMPEG_INCLUDE_DIR ${DO_Sara_ThirdParty_DIR}/ffmpeg/include)
     set(FFMPEG_LINK_DIR ${DO_Sara_ThirdParty_DIR}/ffmpeg/lib)
   else ()
