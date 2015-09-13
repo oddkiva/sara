@@ -31,7 +31,7 @@ namespace DO { namespace Sara {
    */
 
   //! \brief QGraphicsView-derived class used to view interactively images.
-  class DO_EXPORT GraphicsView : public QGraphicsView
+  class DO_SARA_EXPORT GraphicsView : public QGraphicsView
   {
     Q_OBJECT
   public:

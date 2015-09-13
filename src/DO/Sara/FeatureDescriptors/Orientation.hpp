@@ -212,7 +212,7 @@ namespace DO { namespace Sara {
   }
 
   //! \brief Basically a helper class.
-  class DO_EXPORT ComputeDominantOrientations
+  class DO_SARA_EXPORT ComputeDominantOrientations
   {
   public:
     ComputeDominantOrientations(float peak_ratio_thres = 0.8f,

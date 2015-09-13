@@ -21,7 +21,7 @@
 namespace DO { namespace Sara {
 
   //! \brief Interactive pixmap item.
-  class DO_EXPORT GraphicsPixmapItem : public QGraphicsPixmapItem
+  class DO_SARA_EXPORT GraphicsPixmapItem : public QGraphicsPixmapItem
   {
   public:
     //! @{

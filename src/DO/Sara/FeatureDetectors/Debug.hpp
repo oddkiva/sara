@@ -57,25 +57,25 @@ namespace DO { namespace Sara {
 
   //! @{
   //! \brief Visually inspect local extrema.
-  DO_EXPORT
+  DO_SARA_EXPORT
   void draw_scale_space_extremum(const ImagePyramid<float>& I,
                                  float x, float y, float s,
                                  int o, const Rgb8& c);
 
-  DO_EXPORT
+  DO_SARA_EXPORT
   void draw_extrema(const ImagePyramid<float>& pyramid,
                     const std::vector<OERegion>& extrema,
                     int s, int o, bool rescale_color = true);
 
-  DO_EXPORT
+  DO_SARA_EXPORT
   void highlight_patch(const ImagePyramid<float>& D,
                        float x, float y, float s, int o);
 
-  DO_EXPORT
+  DO_SARA_EXPORT
   void check_patch(const Image<float>& I, int x, int y, int w, int h,
                    double fact = 50.);
 
-  DO_EXPORT
+  DO_SARA_EXPORT
   void check_patch(const Image<float>& I, float x, float y, float s,
                    double fact = 20.);
   //! @}

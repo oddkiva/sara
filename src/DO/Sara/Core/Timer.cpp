@@ -23,7 +23,6 @@
 namespace DO { namespace Sara {
 
   Timer::Timer()
-    : elapsed_(0)
   {
 #ifdef _WIN32
     LARGE_INTEGER freq;
@@ -32,36 +31,36 @@ namespace DO { namespace Sara {
       auto msg = "Failed to initialize high resolution timer!";
       throw std::runtime_error{ msg };
     }
-    frequency_ = static_cast<double>(freq.QuadPart);
+    _frequency = static_cast<double>(freq.QuadPart);
 #endif
+    restart();
   }
 
   void Timer::restart()
   {
 #ifdef _WIN32
-    LARGE_INTEGER li_start_;
-    QueryPerformanceCounter(&li_start_);
-    start_ = static_cast<double>(li_start_.QuadPart);
+    LARGE_INTEGER _li_start;
+    QueryPerformanceCounter(&_li_start);
+    _start = static_cast<double>(_li_start.QuadPart);
 #else
     timeval start;
     gettimeofday(&start, NULL);
-    start_ = start.tv_sec + start.tv_usec * 1e-6;
+    _start = start.tv_sec + start.tv_usec * 1e-6;
 #endif
   }
 
   double Timer::elapsed()
   {
 #ifdef _WIN32
-    LARGE_INTEGER end_;
-    QueryPerformanceCounter(&end_);
-    elapsed_ = (static_cast<double>(end_.QuadPart) - start_) / frequency_;
+    LARGE_INTEGER _end;
+    QueryPerformanceCounter(&_end);
+    return (static_cast<double>(_end.QuadPart) - _start) / _frequency;
 #else
     timeval end;
     gettimeofday(&end, NULL);
-    double end_ = end.tv_sec + end.tv_usec * 1e-6;
-    elapsed_ = end_ - start_;
+    double _end = end.tv_sec + end.tv_usec * 1e-6;
+    return _end - _start;
 #endif
-    return elapsed_;
   }
 
   double Timer::elapsed_ms()

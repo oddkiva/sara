@@ -24,7 +24,7 @@ namespace DO { namespace Sara {
    *
    *  Therefore, data points are column vectors in MatrixXd !!
    */
-  class DO_EXPORT KDTree
+  class DO_SARA_EXPORT KDTree
   {
   public:
     //! Constructor.

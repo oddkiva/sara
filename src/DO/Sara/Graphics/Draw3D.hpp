@@ -24,7 +24,7 @@ namespace DO { namespace Sara {
    */
 
   //! \brief Display a mesh in the active OpenGLWindow window.
-  DO_EXPORT
+  DO_SARA_EXPORT
   void display_mesh(const SimpleTriangleMesh3f& mesh);
 
   //! @}

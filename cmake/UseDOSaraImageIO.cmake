@@ -47,12 +47,12 @@ include_directories(
 )
 
 
-if (DO_USE_FROM_SOURCE)
+if (SARA_USE_FROM_SOURCE)
   get_property(DO_Sara_ImageIO_ADDED GLOBAL PROPERTY _DO_Sara_ImageIO_INCLUDED)
   if (NOT DO_Sara_ImageIO_ADDED)
-    do_glob_directory(${DO_Sara_SOURCE_DIR}/ImageIO)
-    do_create_common_variables("ImageIO")
-    do_generate_library("ImageIO")
+    sara_glob_directory(${DO_Sara_SOURCE_DIR}/ImageIO)
+    sara_create_common_variables("ImageIO")
+    sara_generate_library("ImageIO")
     target_link_libraries(DO_Sara_ImageIO easyexif ${DO_ImageIO_THIRD_PARTY_LIBRARIES})
   endif ()
 endif ()

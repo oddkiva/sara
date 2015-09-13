@@ -8,6 +8,7 @@ build-static/
 build-shared/
 html/
 latex/
+sara_version.cmake
 
 #################
 ## Eclipse

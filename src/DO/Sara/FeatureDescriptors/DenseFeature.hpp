@@ -69,7 +69,7 @@ namespace DO { namespace Sara {
     Helper function that computes the SIFT descriptor at each image pixel
     with scale equal to 'local_patch_size / 2'.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   Image<ComputeSIFTDescriptor<>::descriptor_type>
   compute_dense_sift(const Image<float>& image, int local_patch_size = 8);
 

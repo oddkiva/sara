@@ -47,13 +47,13 @@ namespace DO { namespace Sara {
       g_{\sigma_D} * \left[ \nabla I_{\sigma_I} \nabla I_{\sigma_I}^T \right]
     \f].
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   Image<float> scale_adapted_harris_cornerness(const Image<float>& I,
                                                float sigma_I, float sigma_D,
                                                float kappa);
 
   //! Pyramid of Harris cornerness functions.
-  DO_EXPORT
+  DO_SARA_EXPORT
   ImagePyramid<float> harris_cornerness_pyramid(
     const Image<float>& image,
     float kappa = 0.04f,
@@ -64,7 +64,7 @@ namespace DO { namespace Sara {
     Finds and stores local maxima in the image \f$I\f$ exceeding the specified
     threshold.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   std::vector<OERegion> local_maxima(const Image<float>& I, float thres);
 
   /*!
@@ -75,7 +75,7 @@ namespace DO { namespace Sara {
     is negative and attains a minimum either in the x-direction or the
     y-direction.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool local_min_x(int x, int y, Image<float>& I);
 
   /*!
@@ -86,11 +86,11 @@ namespace DO { namespace Sara {
     is negative and attains a minimum either in the x-direction or the
     y-direction.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool local_min_y(int x, int y, Image<float>& I);
 
   //! Functor class to compute Harris-Laplace corners.
-  class DO_EXPORT ComputeHarrisLaplaceCorners
+  class DO_SARA_EXPORT ComputeHarrisLaplaceCorners
   {
   public:
     /*!

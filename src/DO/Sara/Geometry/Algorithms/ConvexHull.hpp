@@ -31,7 +31,7 @@ namespace DO { namespace Sara { namespace Detail {
 
 namespace DO { namespace Sara {
 
-  DO_EXPORT
+  DO_SARA_EXPORT
   std::vector<Point2d>
   graham_scan_convex_hull(const std::vector<Point2d>& points);
 

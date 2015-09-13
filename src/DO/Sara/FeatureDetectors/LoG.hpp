@@ -32,7 +32,7 @@ namespace DO { namespace Sara {
    */
 
   //! Functor class to compute LoG extrema
-  class DO_EXPORT ComputeLoGExtrema
+  class DO_SARA_EXPORT ComputeLoGExtrema
   {
   public:
     /*!

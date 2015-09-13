@@ -37,7 +37,7 @@ namespace DO { namespace Sara {
     where \f$r\f$ is the ratio between the eigenvalues of \f$\mathbf{H}\f$
     and corresponds to the variable **edgeRatio**.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool on_edge(const Image<float>& I, int x, int y, float edge_ratio = 10.f);
 
   /*!
@@ -80,7 +80,7 @@ namespace DO { namespace Sara {
 
     Otherwise, we cannot refine the position of the extremum.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool refine_extremum(const ImagePyramid<float>& I,
                        int x, int y, int s, int o, int type,
                        Point3f& pos, float& val,
@@ -92,7 +92,7 @@ namespace DO { namespace Sara {
     It refines the spatial coordinates \f$(x,y)\f$. However, there is no scale
     refinement here.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool refine_extremum(const Image<float>& I, int x, int y, int type,
                        Point2f& pos, float& val,
                        int border_size = 1, int num_iter = 5);
@@ -101,7 +101,7 @@ namespace DO { namespace Sara {
     \f$\sigma = 2^{s/S+o}\f$.
     Note that the default parameters are suited for the DoG extrema.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   std::vector<OERegion> local_scale_space_extrema(const ImagePyramid<float>& I,
                                                   int s, int o,
                                                   float extremum_thres = 0.03f,
@@ -113,7 +113,7 @@ namespace DO { namespace Sara {
     Scale selection based on the normalized Laplacian of Gaussians
     for the simplified Harris-Laplace and Hessian-Laplace interest points.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool select_laplace_scale(float& scale,
                             int x, int y, int s, int o,
                             const ImagePyramid<float>& gauss_pyramid,
@@ -127,7 +127,7 @@ namespace DO { namespace Sara {
     This is mainly intended for Harris-Laplace and Hessian-Laplace interest
     points.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   std::vector<OERegion> laplace_maxima(const ImagePyramid<float>& function,
                                        const ImagePyramid<float>& gaussian_pyramid,
                                        int s, int o,

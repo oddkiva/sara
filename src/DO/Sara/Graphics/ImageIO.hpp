@@ -28,7 +28,7 @@ namespace DO { namespace Sara {
    */
 
   //! \brief Load image.
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool load(Image<Color3ub>& I, const std::string& name);
 
   /*!
@@ -38,7 +38,7 @@ namespace DO { namespace Sara {
     \return true if image is successfully loaded.
     \return false otherwise.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool load(Image<Rgb8>& I, const std::string& name);
 
   /*!
@@ -65,7 +65,7 @@ namespace DO { namespace Sara {
     \return false otherwise.
    */
 
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool load_from_dialog_box(Image<Rgb8>& I);
 
   /*!
@@ -74,7 +74,7 @@ namespace DO { namespace Sara {
     \return true if image is successfully loaded.
     \return false otherwise.
    */
-  DO_EXPORT
+  DO_SARA_EXPORT
   bool load_from_dialog_box(Image<Color3ub>& I);
 
   /*!

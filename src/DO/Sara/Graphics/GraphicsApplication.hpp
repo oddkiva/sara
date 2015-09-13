@@ -28,7 +28,7 @@ namespace DO { namespace Sara {
   //! \brief QApplication-derived class
   //! This graphic application establishes communication between the user
   //! drawing commands and the windows.
-  class DO_EXPORT GraphicsApplication
+  class DO_SARA_EXPORT GraphicsApplication
   {
   public:
     class Impl;

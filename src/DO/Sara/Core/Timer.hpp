@@ -26,7 +26,7 @@ namespace DO { namespace Sara {
   //! @{
 
   //! \brief Timer class with microsecond accuracy.
-  class DO_EXPORT Timer
+  class DO_SARA_EXPORT Timer
   {
   public: /* interface. */
     //! Default constructor
@@ -42,10 +42,9 @@ namespace DO { namespace Sara {
     double elapsed_ms();
 
   private: /* data members. */
-    double start_;
-    double elapsed_;
+    double _start;
 #if defined(_WIN32) || defined(_WIN32_WCE)
-    double frequency_;
+    double _frequency;
 #endif
   };
 

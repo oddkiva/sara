@@ -19,7 +19,7 @@ namespace DO { namespace Sara {
 
   class Match;
 
-  class DO_EXPORT PairWiseDrawer
+  class DO_SARA_EXPORT PairWiseDrawer
   {
   public:
     enum CatType { CatH, CatV };

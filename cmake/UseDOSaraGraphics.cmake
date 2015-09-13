@@ -26,15 +26,15 @@ include_directories(
   ${Qt5OpenGL_INCLUDE_DIRS}
   ${DO_Sara_INCLUDE_DIR})
 
-if (DO_USE_FROM_SOURCE)
+if (SARA_USE_FROM_SOURCE)
   get_property(DO_Sara_Graphics_ADDED GLOBAL PROPERTY _DO_Sara_Graphics_INCLUDED)
   if (NOT DO_Sara_Graphics_ADDED)
     set(CMAKE_AUTOMOC ON)
     set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-    do_glob_directory(${DO_Sara_SOURCE_DIR}/Graphics)
-    do_create_common_variables("Graphics")
-    do_generate_library("Graphics")
+    sara_glob_directory(${DO_Sara_SOURCE_DIR}/Graphics)
+    sara_create_common_variables("Graphics")
+    sara_generate_library("Graphics")
     target_link_libraries(
       DO_Sara_Graphics
       Qt5::Widgets Qt5::OpenGL ${OPENGL_LIBRARIES})

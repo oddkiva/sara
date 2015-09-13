@@ -43,7 +43,7 @@ find_library(
 	PATH_SUFFIXES lib
 )
 
-if (DO_USE_STATIC_LIBS)
+if (SHAKTI_USE_STATIC_LIBS)
   set(EasyEXIF_LIBRARIES
     debug ${EasyEXIF_DEBUG_LIBRARY}
     optimized ${EasyEXIF_RELEASE_LIBRARY})

@@ -1,4 +1,4 @@
-do_step_message("Found ${CMAKE_CXX_COMPILER_ID} compiler:")
+sara_step_message("Found ${CMAKE_CXX_COMPILER_ID} compiler:")
 
 # Visual C++ compiler
 if (MSVC)
@@ -55,7 +55,7 @@ elseif (CMAKE_COMPILER_IS_GNUCXX)
   endif()
   set(GCC_VERSION "${GCC_MAJOR}.${GCC_MINOR}")
 
-  do_substep_message(
+  sara_substep_message(
     "${CMAKE_CXX_COMPILER_ID} compiler version: ${GCC_VERSION}")
 
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmessage-length=72")
@@ -69,7 +69,7 @@ elseif (CMAKE_COMPILER_IS_GNUCXX)
 
   # Enable colors in gcc log output.
   if (GCC_VERSION VERSION_GREATER 4.8)
-    do_substep_message("Enable colored output of GCC.")
+    sara_substep_message("Enable colored output of GCC.")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color=always")
   endif ()
 endif ()
