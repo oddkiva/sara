@@ -1,5 +1,5 @@
 find_path(
-  VLD_INSTALL_DIR include/vld.h HINTS 
+  VLD_INSTALL_DIR include/vld.h HINTS
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Visual Leak Detector;InstallLocation]"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Visual Leak Detector;InstallLocation]"
 )
