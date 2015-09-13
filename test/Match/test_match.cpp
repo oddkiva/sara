@@ -76,7 +76,8 @@ TEST(TestMatch, test_read_write)
   for (size_t i = 0; i < matches.size(); ++i)
   {
     matches[i] = Match{
-      &X[i], &Y[i], float(i), Match::SourceToTarget, int(i), int(i)
+      &X[i], &Y[i], float(i), Match::Direction::SourceToTarget,
+      int(i), int(i)
     };
   }
   EXPECT_TRUE(write_matches(matches, "match.txt"));
