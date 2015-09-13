@@ -154,9 +154,8 @@ macro (sara_append_library _library_name
       DO_Sara_${_library_name} ${_lib_dependencies})
 
     # Form the compiled library output name.
-    set(_library_output_basename
-        DO_Sara_${_library_name}-${DO_Sara_VERSION})
-    if (DO_BUILD_SHARED_LIBS)
+    set(_library_output_basename DO_Sara_${_library_name}-${DO_Sara_VERSION})
+    if (SARA_BUILD_SHARED_LIBS)
       set (_library_output_name "${_library_output_basename}")
       set (_library_output_name_debug "${_library_output_basename}-d")
     else ()
@@ -174,7 +173,7 @@ macro (sara_append_library _library_name
       OUTPUT_NAME_DEBUG ${_library_output_name_debug})
 
     # Set correct compile definitions when building the libraries.
-    if (DO_BUILD_SHARED_LIBS)
+    if (SARA_BUILD_SHARED_LIBS)
       set(_library_defs "DO_SARA_EXPORTS")
     else ()
       set(_library_defs "DO_SARA_STATIC")
