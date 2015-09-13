@@ -24,8 +24,7 @@ namespace DO { namespace Sara {
   class Match
   {
   public:
-    enum MatchingDirection { SourceToTarget, TargetToSource };
-    enum Type { X = 0, Y = 1 };
+    enum class Direction { SourceToTarget, TargetToSource };
 
   public:
     //! @{
@@ -35,12 +34,13 @@ namespace DO { namespace Sara {
     inline Match(const OERegion *x,
                  const OERegion *y,
                  float score = std::numeric_limits<float>::max(),
-                 MatchingDirection matching_dir = SourceToTarget,
+                 Direction matching_dir = Direction::SourceToTarget,
                  int x_index = -1,
                  int y_index = -1)
       : _x(x), _y(y)
       , _x_index(x_index), _y_index(y_index)
-      , _target_rank(-1), _score(score)
+      , _rank(-1)
+      ,_score(score)
       , _matching_dir(matching_dir)
     {
     }
@@ -84,7 +84,7 @@ namespace DO { namespace Sara {
 
     int rank() const
     {
-      return _target_rank;
+      return _rank;
     }
 
     float score() const
@@ -92,7 +92,7 @@ namespace DO { namespace Sara {
       return _score;
     }
 
-    MatchingDirection matching_direction() const
+    Direction matching_direction() const
     {
       return _matching_dir;
     }
@@ -127,7 +127,7 @@ namespace DO { namespace Sara {
 
     int& rank()
     {
-      return _target_rank;
+      return _rank;
     }
 
     float& score()
@@ -135,7 +135,7 @@ namespace DO { namespace Sara {
       return _score;
     }
 
-    MatchingDirection& matching_direction()
+    Direction& matching_direction()
     {
       return _matching_dir;
     }
@@ -162,16 +162,17 @@ namespace DO { namespace Sara {
     const OERegion *_y{ nullptr };
     int _x_index{ -1 };
     int _y_index{ -1 };
-    int _target_rank{ -1 };
+    int _rank{ -1 };
     float _score{ std::numeric_limits<float>::max() };
-    MatchingDirection _matching_dir{ SourceToTarget };
+    Direction _matching_dir{ Direction::SourceToTarget };
   };
 
-  inline Match make_index_match(int i1, int i2, float score = std::numeric_limits<float>::max())
+  inline Match make_index_match(int i1, int i2,
+                                float score = std::numeric_limits<float>::max())
   {
     return Match{
       nullptr, nullptr,
-      score, Match::SourceToTarget,
+      score, Match::Direction::SourceToTarget,
       i1, i2
     };
   }
