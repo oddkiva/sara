@@ -27,8 +27,10 @@ Sara is licensed with the [Mozilla Public License version
 - gcc 4.8, 4.9
 - clang 3.5, 3.6
 
-**Sara loves C++11!!** and constantly exploits move semantics, type deduction
-with the `auto` keyword, `lambda` functions, curly-brace initialization styles.
+**Sara loves C++11!**
+
+Sara constantly uses move semantics, type deduction with the `auto` keyword,
+`lambda` functions, curly-brace initialization styles.
 
 
 Documentation
