@@ -76,9 +76,9 @@ namespace DO { namespace Sara {
 
     // This is to avoid the source key matches with himself in case of intra
     // image matching.
-    const int startIndex = i1 == indices[0][1] ? 1 : 0;
-    const float bestScore = dists[0][startIndex]/dists[0][startIndex+1];
-    int K = 1;
+    const auto start_index = i1 == indices[0][1] ? 1 : 0;
+    const auto best_score = dists[0][start_index]/dists[0][start_index+1];
+    auto K = 1;
 
     // Sanity check.
     if (dists[0][2] < std::numeric_limits<float>::epsilon())
@@ -88,27 +88,30 @@ namespace DO { namespace Sara {
     if (squared_ratio_thres > 1.f)
     {
       // Performs an adaptive radius search.
-      const float radius = (dists[0][startIndex])*squared_ratio_thres;
+      const auto radius = (dists[0][start_index])*squared_ratio_thres;
       K = tree2.radiusSearch(query, indices, dists, radius, search_params);
     }
 
     // Retrieve the right key points.
     for (int rank = 0; rank < K; ++rank)
     {
-      float score = 0.f;
-      if (rank == startIndex)
-        score = bestScore;
-      else if (rank > startIndex)
-        score = dists[0][rank] / dists[0][startIndex];
+      auto score = 0.f;
+      if (rank == start_index)
+        score = best_score;
+      else if (rank > start_index)
+        score = dists[0][rank] / dists[0][start_index];
 
-      int i2 = indices[0][rank];
+      if (score > squared_ratio_thres)
+        break;
+
+      auto i2 = indices[0][rank];
 
       // Ignore the match if keys1 == keys2.
       if (self_matching && is_redundant(keys1.features[i1], keys2.features[i2]))
         continue;
 
       Match m(&keys1.features[i1], &keys2.features[i2], score, dir, i1, i2);
-      m.rank() = (startIndex == 0) ? rank+1 : rank;
+      m.rank() = (start_index == 0) ? rank+1 : rank;
       if(dir == Match::TargetToSource)
       {
         swap(m.x_pointer(), m.y_pointer());
