@@ -46,8 +46,13 @@ TEST(TestMatch, test_default_constructor)
 
 TEST(TestMatch, test_custom_constructor)
 {
-  auto f_x = OERegion{};
-  auto f_y = OERegion{};
+  auto f_x = OERegion{ Point2f::Zero(), 1.f };
+  f_x.orientation() = 0.f;
+  f_x.type() = OERegion::Type::DoG;
+  auto f_y = OERegion{ Point2f::Ones(), 1.f };
+  f_y.orientation() = 0.f;
+  f_y.type() = OERegion::Type::DoG;
+
   auto m = Match{ &f_x, &f_y, 0.5f };
   const auto const_m = Match{ &f_x, &f_y, 0.5f };
   EXPECT_EQ(m.x(), f_x);
