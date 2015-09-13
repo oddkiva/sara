@@ -35,7 +35,7 @@ namespace DO { namespace Sara {
       draw_line(p[i1], p[i2], color, pen_width);
   }
 
-  void draw_ellipse(const Ellipse& e, const Color3ub col, int pen_width)
+  void draw_ellipse(const Ellipse& e, const Color3ub& col, int pen_width)
   {
     // Ellipse...
     draw_ellipse(e.center(), e.radius1(), e.radius2(),
