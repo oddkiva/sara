@@ -10,7 +10,7 @@
 // ========================================================================== //
 
 //! @file
-//! \brief This contains the implementation of the N-dimensional array class.
+//! \@brief This contains the implementation of the N-dimensional array class.
 
 #ifndef DO_SARA_CORE_MULTIARRAY_MULTIARRAY_HPP
 #define DO_SARA_CORE_MULTIARRAY_MULTIARRAY_HPP
@@ -25,7 +25,7 @@
 
 namespace DO { namespace Sara {
 
-  //! \brief The ND-array class.
+  //! \@brief The ND-array class.
   template <
     typename T, int N, int StorageOrder = ColMajor,
     template <typename> class Allocator = std::allocator
@@ -49,10 +49,10 @@ namespace DO { namespace Sara {
     using vector_type = typename base_type::vector_type;
 
   public: /* interface */
-    //! \brief Default constructor that constructs an empty ND-array.
+    //! \@brief Default constructor that constructs an empty ND-array.
     inline MultiArray() = default;
 
-    //! \brief Constructor that takes **ownership** of the data.
+    //! \@brief Constructor that takes **ownership** of the data.
     //! The data will be cleared upon destruction of the MultiArray object.
     //! Thus ensure sure that is really what you want. Otherwise construct a
     //! MultiArrayView object instead.
@@ -62,7 +62,7 @@ namespace DO { namespace Sara {
     }
 
     //! @{
-    //! \brief Constructor with specified sizes.
+    //! \@brief Constructor with specified sizes.
     inline explicit MultiArray(const vector_type& sizes)
       : base_type{}
     {
@@ -80,7 +80,7 @@ namespace DO { namespace Sara {
     }
     //! @}
 
-    //! \brief Copy constructor.
+    //! \@brief Copy constructor.
     //! Clone the other MultiArray instance.
     inline MultiArray(const self_type& other)
       : base_type{}
@@ -89,7 +89,7 @@ namespace DO { namespace Sara {
       std::copy(other._begin, other._end, _begin);
     }
 
-    //! \brief Move constructor.
+    //! \@brief Move constructor.
     inline MultiArray(self_type&& other)
       : base_type{}
     {
@@ -99,13 +99,13 @@ namespace DO { namespace Sara {
       _strides = other._strides;
     }
 
-    //! \brief Destructor.
+    //! \@brief Destructor.
     inline ~MultiArray()
     {
       deallocate();
     }
 
-    //! \brief Assignment operator uses the copy-swap idiom.
+    //! \@brief Assignment operator uses the copy-swap idiom.
     self_type& operator=(self_type other)
     {
       swap(other);
@@ -113,7 +113,7 @@ namespace DO { namespace Sara {
     }
 
     //! @{
-    //! \brief Resize the MultiArray object with the specified sizes.
+    //! \@brief Resize the MultiArray object with the specified sizes.
     inline void resize(const vector_type& sizes)
     {
       if (_sizes != sizes)
@@ -136,19 +136,25 @@ namespace DO { namespace Sara {
     }
     //! @}
 
-    //! \brief Swap multi-array objects.
-    self_type& swap(self_type& other)
+    //! @brief Destroy the content of the MultiArray object.
+    inline void clear()
+    {
+      deallocate();
+    }
+
+    //! @brief Swap multi-array objects.
+    inline void swap(self_type& other)
     {
       using std::swap;
       swap(_begin, other._begin);
       swap(_end, other._end);
       swap(_sizes, other._sizes);
       swap(_strides, other._strides);
-      return *this;
     }
 
   private: /* helper functions for offset computation. */
-    //! Allocate the internal array of the MultiArray object.
+    //! @{
+    //! @brief Allocate the internal array of the MultiArray object.
     inline void initialize(const vector_type& sizes)
     {
       _sizes = sizes;
@@ -164,19 +170,24 @@ namespace DO { namespace Sara {
     {
       return allocator_type{}.allocate(count);
     }
+    //! @}
 
+    //! @brief Deallocate the MultiArray object.
     inline void deallocate()
     {
       allocator_type{}.deallocate(_begin, _end - _begin);
       _begin = nullptr;
+      _end = nullptr;
+      _sizes = vector_type::Zero();
+      _strides = vector_type::Zero();
     }
 
   };
 
-  //! output stream operator
+  //! @brief Output stream operator.
   template <typename T, int N, int StorageOrder>
   std::ostream& operator<<(std::ostream& os,
-                           const MultiArray<T,N,StorageOrder>& M)
+                           const MultiArray<T, N, StorageOrder>& M)
   {
     os << M.sizes() << std::endl;
     os << M.array() << std::endl;

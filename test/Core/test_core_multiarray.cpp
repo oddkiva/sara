@@ -521,6 +521,18 @@ TEST(TestMultiArray, test_slices)
           }
 }
 
+//
+TEST(TestMultiArray, test_clear)
+{
+  MultiArray<int, 2> array(300, 300);
+  EXPECT_MATRIX_EQ(Vector2i(300, 300), array.sizes());
+
+  array.clear();
+  EXPECT_MATRIX_EQ(Vector2i::Zero(), array.sizes());
+  EXPECT_EQ(nullptr, array.data());
+  EXPECT_EQ(nullptr, array.begin());
+  EXPECT_EQ(nullptr, array.end());
+}
 
 // =============================================================================
 // Test runner.
