@@ -11,7 +11,7 @@ if (SARA_USE_FROM_SOURCE)
     sara_create_common_variables("FeatureMatching")
     sara_set_internal_dependencies(
       "FeatureMatching"
-      "Core;Features;Graphics;KDTree")
+      "Core;Features;Graphics;KDTree;Match")
     sara_generate_library("FeatureMatching")
   endif ()
 endif ()

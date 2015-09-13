@@ -29,7 +29,7 @@ TEST(TestFeatureMatching, test_ann_matching)
   keys1.descriptors[0] = Vector2f::Zero();
 
   keys2.resize(10, 2);
-  for (int i = 0; i < 10; ++i)
+  for (size_t i = 0; i < keys2.size(); ++i)
   {
     keys2.features[i].coords() = Point2f::Ones()*float(i);
     keys2.descriptors[i] = Vector2f::Ones()*float(i);
