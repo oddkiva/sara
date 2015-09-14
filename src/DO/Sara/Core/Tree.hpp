@@ -26,15 +26,17 @@
 
 namespace DO { namespace Sara {
 
-  //! @brief \ingroup Core
-  //! @brief \defgroup Tree Tree
-  //! @brief @{
+  //! \ingroup Core
+  //! \defgroup Tree Tree
+  //! @{
 
-  //! @brief \brief The tree data structure is by definition an arborescence, in graph
-  //! @brief theory, i.e., an directed graph with a root vertex 'u' such that there is
-  //! @brief a unique path from 'u' to any vertex 'v' in the tree.
+  //! @brief Tree data structure.
   //!
-  //! @brief \todo: finish testing (cf. methods' description where TODO is present.).
+  //! The tree data structure is by definition an arborescence, in graph
+  //! theory, i.e., an directed graph with a root vertex 'u' such that there is
+  //! a unique path from 'u' to any vertex 'v' in the tree.  !
+  //!
+  //! @todo: finish testing (cf. methods' description where TODO is present.).
   template <typename T>
   class Tree
   {
@@ -99,7 +101,7 @@ namespace DO { namespace Sara {
 
 #ifndef FIXME
     //! @brief Equality operator.
-    //! \todo: you, dummy! That's false. Because equality can happen even if
+    //! @todo: you, dummy! That's false. Because equality can happen even if
     //! the tree structures differs.
     //! Check that each node also has the same number of children. Proof?
     bool operator==(const Tree& t) const
@@ -227,7 +229,7 @@ namespace DO { namespace Sara {
 
 #ifdef FIXME
     //! @brief Cut the tree at the specified node which becomes the root of the subtree.
-    //! @brief \todo: check if the implementation is correct.
+    //! @todo: check if the implementation is correct.
     inline Tree cut_tree(node_handle node)
     {
       node.parent().self()->remove_child(node);
@@ -236,8 +238,8 @@ namespace DO { namespace Sara {
       return t;
     }
 
-    //! @brief @brief Delete the subtree at the specified node being the root of the subtree.
-    //! @brief \todo: check if the implementation is correct.
+    //! @brief Delete the subtree at the specified node being the root of the subtree.
+    //! @todo: check if the implementation is correct.
     inline void delete_subtree(node_handle node)
     {
       node.parent().self()->remove_child(node);
