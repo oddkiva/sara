@@ -19,19 +19,19 @@ using namespace DO::Sara;
 using namespace std;
 
 
-typedef Tree<int>::node_type                    node_type;
-typedef Tree<int>::node_handle                  node_handle;
-typedef Tree<int>::const_node_handle            const_node_handle;
-typedef Tree<int>::sibling_iterator             sibling_iterator;
-typedef Tree<int>::const_sibling_iterator       const_sibling_iterator;
-typedef Tree<int>::depth_first_iterator         depth_first_iterator;
-typedef Tree<int>::const_depth_first_iterator   const_depth_first_iterator;
-typedef Tree<int>::breadth_first_iterator       breadth_first_iterator;
-typedef Tree<int>::const_breadth_first_iterator const_breadth_first_iterator;
-typedef Tree<int>::leaf_iterator                leaf_iterator;
-typedef Tree<int>::const_leaf_iterator          const_leaf_iterator;
-typedef node_handle::node_pointer               node_pointer;
-typedef const_node_handle::node_pointer         const_node_pointer;
+using node_type = Tree<int>::node_type;
+using node_handle = Tree<int>::node_handle;
+using const_node_handle = Tree<int>::const_node_handle;
+using sibling_iterator = Tree<int>::sibling_iterator;
+using const_sibling_iterator = Tree<int>::const_sibling_iterator;
+using depth_first_iterator = Tree<int>::depth_first_iterator;
+using const_depth_first_iterator = Tree<int>::const_depth_first_iterator;
+using breadth_first_iterator = Tree<int>::breadth_first_iterator;
+using const_breadth_first_iterator = Tree<int>::const_breadth_first_iterator;
+using leaf_iterator = Tree<int>::leaf_iterator;
+using const_leaf_iterator = Tree<int>::const_leaf_iterator;
+using node_pointer = node_handle::node_pointer;
+using const_node_pointer = const_node_handle::node_pointer;
 
 
 // Test Node class.
@@ -568,7 +568,6 @@ TEST(TestTree, test_leaf_iterator)
   EXPECT_EQ(leaf_it, tree.leaf_end());
   EXPECT_EQ(const_leaf_it, tree.leaf_end());
 }
-
 
 int main(int argc, char** argv)
 {

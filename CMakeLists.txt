@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.7)
 
 project(Sara)
-set(DO_Sara_VERSION 1.1.1)
+set(DO_Sara_VERSION 1.1.2)
 
 if (POLICY CMP0020)
   cmake_policy(SET CMP0020 OLD)
