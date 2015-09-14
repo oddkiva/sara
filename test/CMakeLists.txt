@@ -34,7 +34,7 @@ if (CMAKE_COMPILER_IS_GNUCXX)
     add_custom_target(coverage
       COMMAND ${LCOV_PATH} --gcov-tool=${GCOV_PATH} --compat-libtool
                            --directory=${CMAKE_BINARY_DIR}
-                           --base-directory=${CMAKE_CURRENT_SOURCE_DIR}/src
+                           --base-directory=${DO_Sara_SOURCE_DIR}
                            --capture
                            --output-file=coverage.info
       COMMAND ${LCOV_PATH} --remove coverage.info 'usr/*'
