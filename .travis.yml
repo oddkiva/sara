@@ -63,4 +63,4 @@ after_success:
   - lcov --remove coverage.info 'third-party/*' --output-file coverage.info
   - lcov --remove coverage.info 'test/*' --output-file coverage.info
   - lcov --remove coverage.info 'build/moc_*' --output-file coverage.info
-  - coveralls-lcov coverage.info  - coveralls-lcov coverage.info
+  - coveralls-lcov coverage.info
