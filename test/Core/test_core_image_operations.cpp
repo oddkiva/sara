@@ -55,22 +55,27 @@ TEST(TestImageConversion, test_find_min_max_for_3d_pixel)
 
 TEST(TestImageConversion, test_smart_image_conversion)
 {
-  Image<Rgb8> rgb8_image(2, 2);
+  auto rgb8_image = Image<Rgb8>{2, 2};
   for (int y = 0; y < rgb8_image.height(); ++y)
     for (int x = 0; x < rgb8_image.width(); ++x)
       rgb8_image(x, y).fill(255);
 
-  Image<float> float_image = rgb8_image.convert<float>();
+  auto float_image = rgb8_image.convert<float>();
   for (int y = 0; y < float_image.height(); ++y)
     for (int x = 0; x < float_image.width(); ++x)
       EXPECT_EQ(float_image(x, y), 1.f);
 
-  Image<int> int_image = float_image.convert<int>();
+  auto int_image = float_image.convert<int>();
   for (int y = 0; y < int_image.height(); ++y)
     for (int x = 0; x < int_image.width(); ++x)
       EXPECT_EQ(int_image(x, y), INT_MAX);
 
-  Image<Rgb64f> rgb64f_image = int_image.convert<Rgb64f>();
+  auto rgb32f_image = rgb8_image.convert<Rgb64f>();
+  for (int y = 0; y < rgb32f_image.height(); ++y)
+    for (int x = 0; x < rgb32f_image.width(); ++x)
+      EXPECT_MATRIX_NEAR(rgb32f_image(x, y), Vector3d::Ones(), 1e-6f);
+
+  auto rgb64f_image = int_image.convert<Rgb64f>();
   for (int y = 0; y < rgb64f_image.height(); ++y)
     for (int x = 0; x < rgb64f_image.width(); ++x)
       EXPECT_MATRIX_NEAR(rgb64f_image(x, y), Vector3d::Ones(), 1e-7);

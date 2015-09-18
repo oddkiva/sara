@@ -96,6 +96,14 @@ namespace DO { namespace Sara {
     convert_color(double_src, double_dst);
     convert_channel(double_dst, dst);
   }
+
+  template <typename SrcT, typename DstT, typename ColSpace>
+  inline void smart_convert_color(const Pixel<SrcT, ColSpace>& src,
+                                  Pixel<DstT, ColSpace>& dst)
+  {
+    convert_channel(src, dst);
+  }
+
   //! @}
 
 } /* namespace Sara */

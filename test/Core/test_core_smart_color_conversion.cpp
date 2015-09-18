@@ -178,6 +178,14 @@ TEST(TestSmartConvertColor, test_gray_to_gray)
   smart_convert_color(gray8u, dst_gray16); EXPECT_EQ(dst_gray16, int16_max);
 }
 
+TEST(TestSmartConvertColor, test_corner_cases)
+{
+  Rgb8 src{ 0, 0, 255 };
+  Rgb32f dst;
+  smart_convert_color(src, dst);
+  EXPECT_MATRIX_EQ(Rgb32f(0, 0, 1.f), dst);
+}
+
 
 int main(int argc, char** argv)
 {
