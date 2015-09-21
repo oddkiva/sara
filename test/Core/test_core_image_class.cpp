@@ -56,11 +56,11 @@ TEST(TestImageClass, test_matrix_view)
 
 TEST(TestImageClass, test_pixelwise_transform)
 {
-  Image<Rgb8> image{ 2, 2 };
+  auto image = Image<Rgb8>{ 2, 2 };
   image(0, 0) = Rgb8{ 255, 0, 0 }; image(1, 0) = Rgb8{ 255, 0, 0 };
   image(0, 1) = Rgb8{ 0, 255, 0 }; image(1, 1) = Rgb8{ 0, 255, 0 };
 
-  Image<Rgb64f> result {
+  auto result = Image<Rgb64f>{
     image.pixelwise_transform([](const Rgb8& color)
     {
       Rgb64f color_64f;
