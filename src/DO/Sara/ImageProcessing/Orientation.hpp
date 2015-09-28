@@ -21,12 +21,12 @@
 namespace DO { namespace Sara {
 
   /*!
-    \ingroup Differential
+    @ingroup Differential
     @{
    */
 
   /*!
-    \brief Computes an orientation field from a 2D vector field.
+    @brief Computes an orientation field from a 2D vector field.
     @param[in]
       src
       an image in which each element **src(x,y)** are 2D vectors, i.e., a discretized
@@ -53,7 +53,7 @@ namespace DO { namespace Sara {
   }
 
   /*!
-    \brief Computes an orientation field from a 2D vector field.
+    @brief Computes an orientation field from a 2D vector field.
     @param[in]
       src
       an image in which each element **src(x,y)** are 2D vectors, i.e., a discretized
@@ -71,26 +71,20 @@ namespace DO { namespace Sara {
     return ori;
   }
 
-  //! \brief Helper class to use Image<T,N>::compute<Orientation>()
-  template <typename T, int N> struct Orientation;
-
-  //! \brief Specialized class to use Image<T,N>::compute<Orientation>()
-  template <typename T> struct Orientation<T,2>
+  //! @brief Specialized class to use Image<T,N>::compute<Orientation>()
+  struct Orientation
   {
-    typedef typename T::Scalar Scalar;
-    typedef Image<Scalar> return_type;
+    template <typename VectorField>
+    using Scalar = typename VectorField::pixel_type::Scalar;
 
-    inline Orientation(const Image<T>& src)
-      : src_(src)
+    template <typename VectorField>
+    using ReturnType = Image<Scalar<VectorField>>;
+
+    template <typename VectorField>
+    inline Image<Scalar<VectorField>> compute(const VectorField& in) const
     {
+      return orientation(in);
     }
-
-    inline Image<Scalar> operator()() const
-    {
-      return orientation(src_);
-    }
-
-    const Image<T>& src_;
   };
 
   //! @}

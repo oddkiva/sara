@@ -21,8 +21,8 @@
 namespace DO { namespace Sara {
 
   /*!
-    \ingroup ImageProcessing
-    \defgroup Differential Differential Calculus, Norms, and Other Stuff
+    @ingroup ImageProcessing
+    @defgroup Differential Differential Calculus, Norms, and Other Stuff
     @{
    */
 
@@ -231,10 +231,10 @@ namespace DO { namespace Sara {
 
 
   /*!
-    \brief Gradient computation
+    @brief Gradient computation
     @param[in] src input grayscale image.
     @param[in] p position in the image.
-    \return 2D gradient vector.
+    @return 2D gradient vector.
    */
   template <typename T, int N>
   Matrix<T,N,1> gradient(const Image<T, N>& src, const Matrix<int, N, 1>& p)
@@ -246,9 +246,9 @@ namespace DO { namespace Sara {
   }
 
   /*!
-    \brief Gradient computation
+    @brief Gradient computation
     @param[in] in scalar field
-    \return gradient vector field
+    @return gradient vector field
    */
   template <typename T, int N>
   Image<Matrix<T, N, 1>, N> gradient(const Image<T, N>& in)
@@ -260,10 +260,10 @@ namespace DO { namespace Sara {
   }
 
   /*!
-    \brief Laplacian computation
+    @brief Laplacian computation
     @param[in] src input grayscale image.
     @param[in] p position in the image.
-    \return laplacian value
+    @return laplacian value
   */
   template <typename T, int N>
   T laplacian(const Image<T, N>& src, const Matrix<int, N, 1>& p)
@@ -273,9 +273,9 @@ namespace DO { namespace Sara {
   }
 
   /*!
-    \brief Laplacian computation
+    @brief Laplacian computation
     @param[in] in scalar field.
-    \return laplacian field.
+    @return laplacian field.
    */
   template <typename T, int N>
   Image<T, N> laplacian(const Image<T, N>& in)
@@ -287,10 +287,10 @@ namespace DO { namespace Sara {
   }
 
   /*!
-    \brief Compute the Hessian matrix at a specified position.
+    @brief Compute the Hessian matrix at a specified position.
     @param[in] src scalar field.
     @param[in] p position in the image.
-    \return Hessian matrix.
+    @return Hessian matrix.
    */
   template <typename T, int N>
   Matrix<T,N,N> hessian(const Image<T, N>& src, const Matrix<int, N, 1>& p)
@@ -302,9 +302,9 @@ namespace DO { namespace Sara {
   }
 
   /*!
-    \brief Compute the Hessian matrix field.
+    @brief Compute the Hessian matrix field.
     @param[in] in scalar field.
-    \return Hessian matrix field
+    @return Hessian matrix field
    */
   template <typename T, int N>
   Image<Matrix<T,N,N> > hessian(const Image<T, N>& in)

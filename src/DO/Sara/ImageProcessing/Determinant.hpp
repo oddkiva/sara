@@ -26,28 +26,27 @@ namespace DO { namespace Sara {
    */
 
   //! \brief Helper class to use Image<T,N>::compute<Determinant>()
-  template <typename Matrix_, int N>
   struct Determinant
   {
-    typedef Matrix<int, N, 1> coords_type;
-    typedef typename Matrix_::Scalar scalar_type;
-    typedef Image<Matrix_, N> matrix_field_type;
-    typedef Image<scalar_type, N> scalar_field_type, return_type;
+    template <typename MatrixField>
+    using Matrix = typename MatrixField::pixel_type;
 
-    inline Determinant(const matrix_field_type& matrixField)
-      : matrix_field_(matrixField) {}
+    template <typename MatrixField>
+    using Scalar = typename Matrix<MatrixField>::Scalar;
 
-    scalar_field_type operator()() const
+    template <typename MatrixField>
+    using ReturnType = Image<Scalar<MatrixField>>;
+
+    template <typename MatrixField>
+    ReturnType<MatrixField> compute(const MatrixField& in) const
     {
-      scalar_field_type det_field_(matrix_field_.sizes());
-      typename scalar_field_type::iterator dst = det_field_.begin();
-      typename matrix_field_type::const_iterator src = matrix_field_.begin();
-      for ( ; src != matrix_field_.end(); ++src, ++dst)
-        *dst = src->determinant();
-      return det_field_;
+      ReturnType<MatrixField> out(in.sizes());
+      auto out_i = out.begin();
+      auto in_i = in.begin();
+      for ( ; in_i != in.end(); ++in_i, ++out_i)
+        *out_i = in_i->determinant();
+      return out;
     }
-
-    const matrix_field_type& matrix_field_;
   };
 
   //! @}

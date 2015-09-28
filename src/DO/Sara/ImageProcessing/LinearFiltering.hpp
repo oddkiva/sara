@@ -24,13 +24,13 @@
 namespace DO { namespace Sara {
 
   /*!
-    \ingroup ImageProcessing
-    \defgroup LinearFiltering 2D Linear Filtering
+    @ingroup ImageProcessing
+    @defgroup LinearFiltering 2D Linear Filtering
     @{
    */
 
   /*!
-    \brief Convolve a 1D signal \f$f\f$ (or 1D array), with a kernel \f$g\f$.
+    @brief Convolve a 1D signal \f$f\f$ (or 1D array), with a kernel \f$g\f$.
     @param[in,out]
       signal
       the 1D array containing the 1D signal \f$ f = (f_i)_{1\leq i \leq N}\f$,
@@ -67,7 +67,7 @@ namespace DO { namespace Sara {
   // ====================================================================== //
   // Linear filters.
   /*!
-    \brief Apply 1D filter to each image row.
+    @brief Apply 1D filter to each image row.
     @param[out] dst the row-filtered image.
     @param[in] src the input image
     @param[in] kernel the input kernel
@@ -108,7 +108,7 @@ namespace DO { namespace Sara {
   }
 
   /*!
-    \brief Apply 1D filter to each image column.
+    @brief Apply 1D filter to each image column.
     @param[out] dst the column-filtered image.
     @param[in] src the input image
     @param[in] kernel the input kernel
@@ -147,7 +147,7 @@ namespace DO { namespace Sara {
     }
   }
 
-  //! brief Apply row-derivative to image.
+  //! @brief Apply row-derivative to image.
   template <typename T>
   void apply_row_derivative(const Image<T>& src, Image<T>& dst)
   {
@@ -156,7 +156,7 @@ namespace DO { namespace Sara {
     apply_row_based_filter(src, dst, diff, 3);
   }
 
-  //! \brief Apply column-derivative to image.
+  //! @brief Apply column-derivative to image.
   template <typename T>
   void apply_column_derivative(const Image<T>& src, Image<T>& dst)
   {
@@ -165,7 +165,7 @@ namespace DO { namespace Sara {
     apply_column_based_filter(src, dst, diff, 3);
   }
 
-  //! \brief Apply Gaussian smoothing to image.
+  //! @brief Apply Gaussian smoothing to image.
   template <typename T>
   void apply_gaussian_filter(
     const Image<T>& src, Image<T>& dst,
@@ -208,7 +208,7 @@ namespace DO { namespace Sara {
     delete[] kernel;
   }
 
-  //! \brief Apply Sobel filter to image.
+  //! @brief Apply Sobel filter to image.
   template <typename T>
   void apply_sobel_filter(const Image<T>& src, Image<T>& dst)
   {
@@ -228,7 +228,7 @@ namespace DO { namespace Sara {
     dst.array() = (dst.array().abs2() + tmp.array().abs2()).sqrt();
   }
 
-  //! \brief Apply Scharr filter to image.
+  //! @brief Apply Scharr filter to image.
   template <typename T>
   void apply_scharr_filter(const Image<T>& src, Image<T>& dst)
   {
@@ -248,7 +248,7 @@ namespace DO { namespace Sara {
     dst.array() = (dst.array().abs2() + tmp.array().abs2()).sqrt();
   }
 
-  //! \brief Apply Prewitt filter to image.
+  //! @brief Apply Prewitt filter to image.
   template <typename T>
   void apply_prewitt_filter(const Image<T>& src, Image<T>& dst)
   {
@@ -270,7 +270,7 @@ namespace DO { namespace Sara {
 
   // ====================================================================== //
   // Non-separable filter functions.
-  //! \brief Apply 2D non separable filter to image.
+  //! @brief Apply 2D non separable filter to image.
   template <typename T>
   void apply_2d_non_separable_filter(
     const Image<T>& src, Image<T>& dst,
@@ -342,7 +342,7 @@ namespace DO { namespace Sara {
     }
   }
 
-  //! \brief Apply Laplacian filter (slow).
+  //! @brief Apply Laplacian filter (slow).
   template <typename T>
   void apply_laplacian_filter(const Image<T>& src, Image<T>& dst)
   {
@@ -355,7 +355,7 @@ namespace DO { namespace Sara {
     apply_2d_non_separable_filter(src, dst, kernel, 3, 3);
   }
 
-  //! \brief Apply Roberts-Cross filter.
+  //! @brief Apply Roberts-Cross filter.
   template <typename T>
   void apply_roberts_cross_filter(const Image<T>& src, Image<T>& dst)
   {
@@ -399,7 +399,7 @@ namespace DO { namespace Sara {
     return dst;
   }
 
-  //! \brief Apply Gaussian smoothing to image.
+  //! @brief Apply Gaussian smoothing to image.
   template <typename T, typename S>
   inline Image<T> gaussian(const Image<T>& src, S sigma, S gauss_truncate = S(4))
   {
@@ -408,7 +408,7 @@ namespace DO { namespace Sara {
     return dst;
   }
 
-  //! \brief Apply Sobel filter to image.
+  //! @brief Apply Sobel filter to image.
   template <typename T>
   inline Image<T> sobel(const Image<T>& src)
   {
@@ -417,7 +417,7 @@ namespace DO { namespace Sara {
     return dst;
   }
 
-  //! \brief Apply Scharr filter to image.
+  //! @brief Apply Scharr filter to image.
   template <typename T>
   inline Image<T> scharr(const Image<T>& src)
   {
@@ -426,7 +426,7 @@ namespace DO { namespace Sara {
     return dst;
   }
 
-  //! \brief Apply Prewitt filter to image.
+  //! @brief Apply Prewitt filter to image.
   template <typename T>
   inline Image<T> prewitt(const Image<T>& src)
   {
@@ -435,7 +435,7 @@ namespace DO { namespace Sara {
     return dst;
   }
 
-  //! \brief Apply Roberts-Cross filter to image.
+  //! @brief Apply Roberts-Cross filter to image.
   template <typename T>
   inline Image<T> roberts_cross(const Image<T>& src)
   {
@@ -444,7 +444,7 @@ namespace DO { namespace Sara {
     return dst;
   }
 
-  //! \brief Apply Laplacian filter to image (slow).
+  //! @brief Apply Laplacian filter to image (slow).
   template <typename T>
   inline Image<T> laplacian_filter(const Image<T>& src)
   {
@@ -457,44 +457,32 @@ namespace DO { namespace Sara {
   // ====================================================================== //
   // Helper 2D linear filtering functors
 #define CREATE_2D_ONLY_FILTER_FUNCTOR(FilterName, function)           \
-  /*! \brief Helper class to use Image<T,N>::compute<FilterName>() */ \
-  template <typename T, int N> struct FilterName;                     \
-  template <typename T> struct FilterName<T,2>                        \
+  /*! @brief Helper class to use Image<T,N>::compute<FilterName>() */ \
+  struct FilterName                                                   \
   {                                                                   \
-    using return_type = Image<T>;                                     \
+    template <typename Image>                                         \
+    using ReturnType = Image;                                         \
                                                                       \
-    inline FilterName(const Image<T>& src)                            \
-      : src_(src)                                                     \
+    template <typename Image>                                         \
+    inline ReturnType<Image> compute(const Image& in) const           \
     {                                                                 \
+      return function(in);                                            \
     }                                                                 \
-                                                                      \
-    inline return_type operator()() const                             \
-    {                                                                 \
-      return function(src_);                                          \
-    }                                                                 \
-                                                                      \
-    const Image<T>& src_;                                             \
   }
 
 #define CREATE_2D_ONLY_FILTER_FUNCTOR_WITH_PARAM(FilterName, function)  \
-  /*! \brief Helper class to use Image<T,N>::compute<FilterName>() */   \
-  template <typename T, int N> struct FilterName;                       \
-  template <typename T> struct FilterName<T,2>                          \
+  /*! @brief Helper class to use Image<T,N>::compute<FilterName>() */   \
+  struct FilterName                                                     \
   {                                                                     \
-    using return_type = Image<T>;                                       \
-    using parameter_type = typename PixelTraits<T>::channel_type;       \
+    template <typename Image>                                           \
+    using ReturnType = Image;                                           \
                                                                         \
-    inline FilterName(const Image<T>& src)                              \
-      : src_(src)                                                       \
+    template <typename Image, typename Param>                           \
+    inline ReturnType<Image> compute(const Image& in,                   \
+                                     const Param& param) const          \
     {                                                                   \
+      return function(in, param);                                       \
     }                                                                   \
-                                                                        \
-    inline return_type operator()(const parameter_type& param) const    \
-    {                                                                   \
-      return function(src_, param);                                     \
-    }                                                                   \
-                                                                        \
-    const Image<T>& src_;                                               \
   }
 
   CREATE_2D_ONLY_FILTER_FUNCTOR(Sobel, sobel);

@@ -16,17 +16,18 @@
 
 
 #include <DO/Sara/Core/Image/Image.hpp>
+#include <DO/Sara/Core/Pixel/PixelTraits.hpp>
 
 
 namespace DO { namespace Sara {
 
   /*!
-    \ingroup Differential
+    @ingroup Differential
     @{
    */
 
   /*!
-    \brief Squared norm computation
+    @brief Squared norm computation
     @param[in] src scalar field.
     @param[in, out] scalar field of squared norms
    */
@@ -47,9 +48,9 @@ namespace DO { namespace Sara {
   }
 
   /*!
-    \brief Squared norm computation
+    @brief Squared norm computation
     @param[in] src scalar field.
-    \return scalar field of squared norms
+    @return scalar field of squared norms
    */
   template <typename T, int M, int N, int D>
   Image<T, D> squared_norm(const Image<Matrix<T,M,N>, D>& src)
@@ -60,7 +61,7 @@ namespace DO { namespace Sara {
   }
 
   /*!
-    \brief Blue norm computation
+    @brief Blue norm computation
     @param[in] src scalar field.
     @param[in, out] scalar field of norms
    */
@@ -81,9 +82,9 @@ namespace DO { namespace Sara {
   }
 
   /*!
-    \brief Blue norm computation
+    @brief Blue norm computation
     @param[in] src scalar field.
-    \return scalar field of norms
+    @return scalar field of norms
    */
   template <typename T, int M, int N, int D>
   Image<T, D> blue_norm(const Image<Matrix<T,M,N>, D>& src)
@@ -94,7 +95,7 @@ namespace DO { namespace Sara {
   }
 
   /*!
-    \brief Stable norm computation
+    @brief Stable norm computation
     @param[in] src scalar field.
     @param[in, out] scalar field of norms
    */
@@ -115,9 +116,9 @@ namespace DO { namespace Sara {
   }
 
   /*!
-    \brief Stable norm computation
+    @brief Stable norm computation
     @param[in] src scalar field.
-    \return scalar field of norms
+    @return scalar field of norms
    */
   template <typename T, int M, int N, int D>
   Image<T, D> stable_norm(const Image<Matrix<T,M,N>, D>& src)
@@ -128,18 +129,26 @@ namespace DO { namespace Sara {
   }
 
 #define CREATE_NORM_FUNCTOR(Function, function)                       \
-   /*! \brief Helper class to use Image<T,N>::compute<Function>() */  \
-  template <typename T, int N>                                        \
+   /*! @brief Helper class to use Image<T,N>::compute<Function>() */  \
   struct Function                                                     \
   {                                                                   \
-    typedef typename T::Scalar scalar_type;                           \
-    typedef Image<T, N> matrix_field_type;                            \
-    typedef Image<scalar_type, N> scalar_field_type, return_type;     \
-    inline Function(const matrix_field_type& matrix_field)            \
-      : matrix_field_(matrix_field) {}                                \
-    return_type operator()() const                                    \
-    { return function(matrix_field_); }                               \
-    const matrix_field_type& matrix_field_;                           \
+    template <typename MatrixField>                                   \
+    struct Dimension {                                                \
+      enum { value = MatrixField::Dimension };                        \
+    };                                                                \
+                                                                      \
+    template <typename MatrixField>                                   \
+    using Scalar = typename MatrixField::pixel_type::Scalar;          \
+                                                                      \
+    template <typename MatrixField>                                   \
+    using ReturnType =                                                \
+      Image<Scalar<MatrixField>, Dimension<MatrixField>::value>;      \
+                                                                      \
+    template <typename MatrixField>                                   \
+    ReturnType<MatrixField> compute(const MatrixField& in) const      \
+    {                                                                 \
+      return function(in);                                            \
+    }                                                                 \
   }
 
   CREATE_NORM_FUNCTOR(SquaredNorm, squared_norm);

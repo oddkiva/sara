@@ -28,18 +28,18 @@ namespace DO { namespace Sara {
    */
 
   //! @{
-  //! \brief Forward declaration of the image classes.
+  //! @brief Forward declaration of the image classes.
   template <typename PixelType, int N = 2> class Image;
   template <typename PixelType, int N = 2> class ImageView;
   //! @}
 
 
-  //! \brief Forward declaration of the generic color conversion function.
+  //! @brief Forward declaration of the generic color conversion function.
   template <typename T, typename U, int N>
   void convert(const Image<T, N>& src, Image<U, N>& dst);
 
 
-  //! \brief The image base class.
+  //! @brief The image base class.
   template <typename MultiArrayType>
   class ImageBase : public MultiArrayType
   {
@@ -162,7 +162,7 @@ namespace DO { namespace Sara {
   };
 
 
-  //! \brief The image view class.
+  //! @brief The image view class.
   template <typename T, int N>
   class ImageView : public ImageBase<MultiArrayView<T, N, ColMajor>>
   {
@@ -178,7 +178,7 @@ namespace DO { namespace Sara {
   };
 
 
-  //! \brief The image class.
+  //! @brief The image class.
   template <typename T, int N>
   class Image : public ImageBase<MultiArray<T, N, ColMajor>>
   {
@@ -217,7 +217,7 @@ namespace DO { namespace Sara {
     }
     //! @}
 
-    //! Color conversion method.
+    //! @brief Converts image to the specified pixel format.
     template <typename U>
     Image<U, N> convert() const
     {
@@ -225,18 +225,11 @@ namespace DO { namespace Sara {
       DO::Sara::convert(*this, dst); return dst;
     }
 
-    //! Convenient helper for chaining filters.
-    template <template<typename, int> class Filter>
-    inline typename Filter<T, N>::return_type compute() const
+    template <typename Filter, typename... Params>
+    inline typename Filter::template ReturnType<Image<T, N>>
+    compute(const Params&... params) const
     {
-      return Filter<T, N>{ *this }();
-    }
-
-    template <template<typename, int> class Filter>
-    inline typename Filter<T, N>::return_type
-    compute(const typename Filter<T, N>::parameter_type& param) const
-    {
-      return Filter<T, N>{ *this }(param);
+      return Filter{}.compute(*this, params...);
     }
   };
 
