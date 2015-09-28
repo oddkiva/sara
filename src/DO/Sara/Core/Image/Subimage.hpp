@@ -23,7 +23,7 @@
 namespace DO { namespace Sara {
 
   //! @{
-  //! \brief Get the sub-image of an image.
+  //! @brief Get the sub-image of an image.
   template <typename T, int N>
   Image<T, N> get_subimage(const Image<T, N>& src,
                            const Matrix<int, N, 1>& begin_coords,

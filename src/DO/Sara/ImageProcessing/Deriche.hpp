@@ -21,8 +21,8 @@
 namespace DO { namespace Sara {
 
   /*!
-    \ingroup ImageProcessing
-    \defgroup Deriche Deriche Filter
+    @ingroup ImageProcessing
+    @defgroup Deriche Deriche Filter
     Deriche Infinite Impulse Response (IIR) filters which approximates
     - Gaussian smoothing
     - Gaussian smoothed first-order derivative
@@ -30,7 +30,7 @@ namespace DO { namespace Sara {
     @{
    */
 
-  //! \brief Apply Deriche filter with specified order $o$ to dimension $d$.
+  //! @brief Apply Deriche filter with specified order $o$ to dimension $d$.
   template <typename T, int N>
   void inplace_deriche(Image<T, N>& inout_signal,
                        typename PixelTraits<T>::channel_type sigma,
@@ -182,7 +182,7 @@ namespace DO { namespace Sara {
     }
   }
 
-  //! \brief Apply Deriche blurring.
+  //! @brief Apply Deriche blurring.
   template <typename T, int N>
   void inplace_deriche_blur(
     Image<T, N>& inout_signal,
@@ -193,7 +193,7 @@ namespace DO { namespace Sara {
       inplace_deriche(inout_signal,sigmas[i], 0, i, neumann);
   }
 
-  //! \brief Apply Deriche blurring.
+  //! @brief Apply Deriche blurring.
   template <typename T, int N>
   void inplace_deriche_blur(
     Image<T,N>& inout_signal,
@@ -205,7 +205,7 @@ namespace DO { namespace Sara {
     inplace_deriche_blur(inout_signal, sigmas, neumann);
   }
 
-  //! \brief Return the blurred image using Deriche filter.
+  //! @brief Return the blurred image using Deriche filter.
   template <typename T, int N>
   Image<T,N> deriche_blur(const Image<T,N>& in_signal,
                          typename PixelTraits<T>::channel_type sigma,
@@ -216,7 +216,7 @@ namespace DO { namespace Sara {
     return out_signal;
   }
 
-  //! \brief Return the blurred image using Deriche filter.
+  //! @brief Return the blurred image using Deriche filter.
   template <typename T, int N>
   Image<T,N> deriche_blur(
     const Image<T,N>& I,
@@ -228,24 +228,18 @@ namespace DO { namespace Sara {
     return J;
   }
 
-  //! \brief Helper class to use: Image<T,N>::compute<DericheBlur>(T sigma)
-  template <typename T, int N>
+  //! @brief Wrapper class to use: Image<T,N>::compute<DericheBlur>(T sigma)
   struct DericheBlur
   {
-    typedef Image<T, N> return_type;
-    typedef typename PixelTraits<T>::channel_type parameter_type;
+    template <typename Image>
+    using ReturnType = Image;
 
-    inline explicit DericheBlur(const Image<T, N>& src)
-      : src_(src)
+    template <typename Image, typename Sigma>
+    inline ReturnType<Image> operator()(const Image& src,
+                                        const Sigma& sigma) const
     {
+      return deriche_blur(src, sigma);
     }
-
-    inline return_type operator()(parameter_type sigma) const
-    {
-      return deriche_blur(src_, sigma);
-    }
-
-    const Image<T, N>& src_;
   };
 
   //! @}

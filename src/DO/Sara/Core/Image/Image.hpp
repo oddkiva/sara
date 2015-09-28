@@ -28,18 +28,18 @@ namespace DO { namespace Sara {
    */
 
   //! @{
-  //! \brief Forward declaration of the image classes.
+  //! @brief Forward declaration of the image classes.
   template <typename PixelType, int N = 2> class Image;
   template <typename PixelType, int N = 2> class ImageView;
   //! @}
 
 
-  //! \brief Forward declaration of the generic color conversion function.
+  //! @brief Forward declaration of the generic color conversion function.
   template <typename T, typename U, int N>
   void convert(const Image<T, N>& src, Image<U, N>& dst);
 
 
-  //! \brief The image base class.
+  //! @brief The image base class.
   template <typename MultiArrayType>
   class ImageBase : public MultiArrayType
   {
@@ -119,7 +119,6 @@ namespace DO { namespace Sara {
     //! Return matrix view for linear algebra with Eigen libraries.
     inline matrix_view_type matrix()
     {
-
       static_assert(Dimension == 2, "MultiArray must be 2D");
       return matrix_view_type {
         reinterpret_cast<
@@ -152,7 +151,7 @@ namespace DO { namespace Sara {
       -> Image<decltype(op(std::declval<pixel_type>())), Dimension>
     {
       using PixelType = decltype(op(std::declval<pixel_type>()));
-      Image<PixelType, Dimension> dst(this->sizes());
+      Image<PixelType, Dimension> dst{ this->sizes() };
       auto src_pixel = this->begin();
       auto dst_pixel = dst.begin();
       for ( ; src_pixel != this->end(); ++src_pixel, ++dst_pixel)
@@ -162,7 +161,7 @@ namespace DO { namespace Sara {
   };
 
 
-  //! \brief The image view class.
+  //! @brief The image view class.
   template <typename T, int N>
   class ImageView : public ImageBase<MultiArrayView<T, N, ColMajor>>
   {
@@ -178,7 +177,7 @@ namespace DO { namespace Sara {
   };
 
 
-  //! \brief The image class.
+  //! @brief The image class.
   template <typename T, int N>
   class Image : public ImageBase<MultiArray<T, N, ColMajor>>
   {
@@ -188,10 +187,7 @@ namespace DO { namespace Sara {
     using vector_type = typename base_type::vector_type;
 
     //! Default constructor.
-    inline Image()
-      : base_type{}
-    {
-    }
+    Image() = default;
 
     //! Constructor that takes ownership of data.
     inline explicit Image(T *data, const vector_type& sizes)
@@ -217,26 +213,20 @@ namespace DO { namespace Sara {
     }
     //! @}
 
-    //! Color conversion method.
+    //! @brief Converts image to the specified pixel format.
     template <typename U>
-    Image<U, N> convert() const
+    inline Image<U, N> convert() const
     {
-      Image<U, N> dst{ base_type::sizes() };
-      DO::Sara::convert(*this, dst); return dst;
+      auto dst = Image<U, N>{ base_type::sizes() };
+      DO::Sara::convert(*this, dst);
+      return dst;
     }
 
-    //! Convenient helper for chaining filters.
-    template <template<typename, int> class Filter>
-    inline typename Filter<T, N>::return_type compute() const
+    template <typename Filter, typename... Params>
+    inline typename Filter::template ReturnType<Image<T, N>>
+    compute(const Params&... params) const
     {
-      return Filter<T, N>{ *this }();
-    }
-
-    template <template<typename, int> class Filter>
-    inline typename Filter<T, N>::return_type
-    compute(const typename Filter<T, N>::parameter_type& param) const
-    {
-      return Filter<T, N>{ *this }(param);
+      return Filter{}(*this, params...);
     }
   };
 

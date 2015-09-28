@@ -44,16 +44,15 @@ protected:
 
 TEST_F(TestDifferential, test_gradient)
 {
-  Image<float>& f = _src_image;
+  auto& f = _src_image;
   Vector2i x(1, 1);
-  Gradient<float> compute_gradient(f);
+  auto compute_gradient = Gradient{};
 
   Vector2f gradf_x;
-  compute_gradient(gradf_x, x);
+  compute_gradient(gradf_x, f, x);
   EXPECT_MATRIX_NEAR(Vector2f(1,0), gradf_x, 1e-5);
 
-  Image<Vector2f> gradf;
-  compute_gradient(gradf);
+  auto gradf = compute_gradient(f);
   for (int y = 0; y < gradf.height(); ++y)
   {
     for (int x = 0; x < gradf.width(); ++x)
@@ -69,41 +68,42 @@ TEST_F(TestDifferential, test_gradient)
 
 TEST_F(TestDifferential, test_laplacian)
 {
-  Image<float>& f = _src_image;
+  auto& f = _src_image;
   f.matrix() <<
     1, 1, 1,
     1, 1, 1,
     1, 1, 1;
   Vector2i x(1, 1);
-  Laplacian<float> compute_laplacian(_src_image);
 
-  float laplacian_x = compute_laplacian(x);
+  auto compute_laplacian = Laplacian{};
+
+  auto laplacian_x = compute_laplacian(f, x);
   EXPECT_NEAR(0, laplacian_x, 1e-5);
 
   Image<float> laplacian;
   MatrixXf true_laplacian(3, 3);
   true_laplacian.setZero();
-  compute_laplacian(laplacian);
+
+  laplacian = compute_laplacian(f);
   EXPECT_MATRIX_NEAR(laplacian.matrix(), true_laplacian, 1e-5);
 }
 
 TEST_F(TestDifferential, test_hessian)
 {
-  Image<float>& f = _src_image;
+  auto& f = _src_image;
   f.matrix() <<
     1, 1, 1,
     1, 1, 1,
     1, 1, 1;
   Vector2i x(1, 1);
-  Hessian<float> compute_hessian(f);
+  Hessian compute_hessian;
 
   Matrix2f H_x;
   Matrix2f true_H_x = Matrix2f::Zero();
-  compute_hessian(H_x, x);
+  compute_hessian(H_x, f, x);
   EXPECT_MATRIX_NEAR(true_H_x, H_x, 1e-5);
 
-  Image<Matrix2f> hessian_f;
-  compute_hessian(hessian_f);
+  auto hessian_f = compute_hessian(f);
   for (int y = 0; y < hessian_f.height(); ++y)
   {
     for (int x = 0; x < hessian_f.width(); ++x)
@@ -125,15 +125,14 @@ TEST_F(TestDifferential, test_laplacian_2)
     for any (x,y).
   */
 
-  Image<float> f(4,4);
+  auto f = Image<float>{ 4, 4 };
   f.matrix() <<
     0,  1,  4,  9,
     1,  2,  5, 10,
     4,  5,  8, 13,
     9, 10, 13, 18;
 
-  Image<float> laplacian_f;
-  laplacian_f = laplacian(f);
+  auto laplacian_f = laplacian(f);
 
   Matrix2f actual_central_block = laplacian_f.matrix().block<2, 2>(1, 1);
   Matrix2f expected_central_block = 4 * Matrix2f::Ones();
@@ -151,15 +150,14 @@ TEST_F(TestDifferential, test_hessian_2)
     at any point (x,y)
   */
 
-  Image<float> f(4, 4);
+  auto f = Image<float>{ 4, 4 };
   f.matrix() <<
     0, 0, 0, 0,
     0, 1, 2, 3,
     0, 2, 4, 6,
     0, 3, 6, 9;
 
-  //Hessian<float> compute_hessian(f);
-  Image<Matrix2f> Hf = hessian(f);
+  auto Hf = hessian(f);
 
   Matrix2f expected_hessian;
   expected_hessian <<

@@ -65,8 +65,6 @@ namespace DO { namespace Sara {
     ImagePyramid<T> G;
     G.reset(num_octaves, numScales, initSigma, k);
 
-    //omp_set_num_threads(1);
-
     for (int o = 0; o < num_octaves; ++o)
     {
       // Compute the octave scaling factor
@@ -76,26 +74,13 @@ namespace DO { namespace Sara {
       // Compute the gaussians in octave \f$o\f$
       Scalar sigma_s_1 = initSigma;
       G(0,o) = o == 0 ? I : downscale(G(downscaleIndex,o-1), 2);
-//#define METHOD_1
-#ifdef METHOD_1
-#ifdef _OPENMP
-#pragma omp parallel for
-#endif
-      for (int s = 1; s < numScales; ++s)
-        G(s,o).resize(G(0,o).sizes());
-#ifdef _OPENMP
-# pragma omp parallel for
-#endif
-      for (int s = 1; s < numScales; ++s)
-        applyGaussianFilter(G(s,o), G(0,o), initSigma*sqrt(pow(k,2*s) -1.f));
-#else
+
       for (int s = 1; s < numScales; ++s)
       {
         Scalar sigma = sqrt(k*k*sigma_s_1*sigma_s_1 - sigma_s_1*sigma_s_1);
         G(s,o) = gaussian(G(s-1,o), sigma);
         sigma_s_1 *= k;
       }
-#endif
     }
 
     // Done!

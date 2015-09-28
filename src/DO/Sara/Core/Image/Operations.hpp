@@ -20,11 +20,11 @@
 
 namespace DO { namespace Sara {
 
-  //! \ingroup Image
+  //! @ingroup Image
   //! @{
 
   //! @{
-  //! \brief Find min and max values of the image.
+  //! @brief Find min and max values of the image.
   template <typename T, int N>
   inline void find_min_max(T& min, T& max, const Image<T, N>& src)
   {

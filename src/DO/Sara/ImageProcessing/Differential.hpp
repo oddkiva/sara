@@ -21,34 +21,37 @@
 namespace DO { namespace Sara {
 
   /*!
-    \ingroup ImageProcessing
-    \defgroup Differential Differential Calculus, Norms, and Other Stuff
+    @ingroup ImageProcessing
+    @defgroup Differential Differential Calculus, Norms, and Other Stuff
     @{
    */
 
 
-  //! Gradient functor class
-  template <typename T, int N = 2>
+  //! @brief Gradient functor class
   struct Gradient
   {
-    typedef Matrix<int, N, 1> coords_type;
-    typedef Matrix<T, N, 1> gradient_type;
-    typedef Image<T, N> scalar_field_type;
-    typedef Image<gradient_type, N> gradient_field_type, return_type;
-    typedef typename scalar_field_type::const_array_iterator
-      const_scalar_field_iterator;
-    typedef typename gradient_field_type::array_iterator
-      gradient_field_iterator;
+    template <typename Field>
+    struct Dimension { enum { value = Field::Dimension }; };
 
-    inline Gradient(const scalar_field_type& scalar_field)
-      : _scalar_field(scalar_field)
-    {
-    }
+    template <typename Field>
+    using Coords = Matrix<int, Dimension<Field>::value, 1>;
 
-    inline void operator()(gradient_type& gradient,
-                           const_scalar_field_iterator& it) const
+    template <typename Field>
+    using Scalar = typename Field::value_type;
+
+    template <typename Field>
+    using Vector = Matrix<Scalar<Field>, Dimension<Field>::value, 1>;
+
+    template <typename Field>
+    using ReturnType =
+      Image<Vector<Field>, Dimension<Field>::value>;
+
+    template <typename Field>
+    inline
+    void operator()(Vector<Field>& gradient,
+                    const typename Field::const_array_iterator& it) const
     {
-      for (int i = 0; i < N; ++i)
+      for (int i = 0; i < Dimension<Field>::value; ++i)
       {
         if (it.position()[i] == 0)
           gradient[i] = (it.delta(i, 1) - *it) / 2; // Replicate the border
@@ -59,56 +62,54 @@ namespace DO { namespace Sara {
       }
     }
 
-    inline void operator()(gradient_type& gradient,
-                           const coords_type& position) const
+    template <typename Field>
+    inline
+    void operator()(Vector<Field>& gradient,
+                    const Field& scalar_field,
+                    const Coords<Field>& position) const
     {
-      const_scalar_field_iterator it(_scalar_field.begin_array());
+      auto it = scalar_field.begin_array();
       it += position;
-      this->operator()(gradient, it);
+      operator()<Field>(gradient, it);
     }
 
-    void operator()(gradient_field_type& gradient_field) const
+    template <typename Field>
+    ReturnType<Field> operator()(const Field& in) const
     {
-      if (gradient_field.sizes() != _scalar_field.sizes())
-        gradient_field.resize(_scalar_field.sizes());
+      auto out = ReturnType<Field>{ in.sizes() };
 
-      const_scalar_field_iterator src_it(_scalar_field.begin_array());
-      gradient_field_iterator dst_it(gradient_field.begin_array());
-      for ( ; !src_it.end(); ++src_it, ++dst_it)
-        operator()(*dst_it, src_it);
-    };
+      auto in_i = in.begin_array();
+      auto out_i = out.begin_array();
+      for ( ; !in_i.end(); ++in_i, ++out_i)
+        operator()<Field>(*out_i, in_i);
 
-    gradient_field_type operator()() const
-    {
-      gradient_field_type gradient_field;
-      operator()(gradient_field);
-      return gradient_field;
+      return out;
     }
-
-    const scalar_field_type& _scalar_field;
   };
 
 
-  //! Laplacian functor class
-  template <typename T, int N = 2>
+  //! @brief Laplacian functor class
   struct Laplacian
   {
-    using coords_type = Matrix<int, N, 1>;
-    using scalar_field_type = Image<T, N>;
-    using array_iterator = typename scalar_field_type::array_iterator;
-    using const_array_iterator =
-      typename scalar_field_type::const_array_iterator;
+    template <typename Field>
+    struct Dimension { enum { value = Field::Dimension }; };
 
-    using return_type = scalar_field_type;
+    template <typename Field>
+    using Coords = Matrix<int, Dimension<Field>::value, 1>;
 
-    inline Laplacian(const scalar_field_type& scalar_field)
-      : _scalar_field(scalar_field)
+    template <typename Field>
+    using Scalar = typename Field::value_type;
+
+    template <typename Field>
+    using ReturnType = Field;
+
+    template <typename Field>
+    inline Scalar<Field>
+    operator()(typename Field::const_array_iterator& it) const
     {
-    }
+      const int N{ Dimension<Field>::value };
 
-    inline T operator()(const_array_iterator& it) const
-    {
-      T value = PixelTraits<T>::zero();
+      auto value = PixelTraits<Scalar<Field>>::zero();
       for (int i = 0; i < N; ++i)
       {
         if (it.position()[i] == 0)
@@ -121,73 +122,75 @@ namespace DO { namespace Sara {
       return value - 2*N*(*it);
     }
 
-    inline T operator()(const coords_type& position) const
+    template <typename Field>
+    inline Scalar<Field> operator()(const Field& scalar_field,
+                                    const Coords<Field>& position) const
     {
-      const_array_iterator loc(_scalar_field.begin_array());
+      auto loc =  scalar_field.begin_array();
       loc += position;
-      return this->operator()(loc);
+      return this->operator()<Field>(loc);
     }
 
-    void operator()(scalar_field_type& laplacian_field) const
+    template <typename Field>
+    ReturnType<Field> operator()(const Field& in) const
     {
-      if (laplacian_field.sizes() != _scalar_field.sizes())
-        laplacian_field.resize(_scalar_field.sizes());
+      auto out = ReturnType<Field>{ in.sizes() };
 
-      const_array_iterator src_it(_scalar_field.begin_array());
-      array_iterator dst_it(laplacian_field.begin_array());
+      auto in_i = in.begin_array();
+      auto out_i = out.begin_array();
+      for ( ; !in_i.end(); ++in_i, ++out_i)
+        *out_i = this->operator()<Field>(in_i);
 
-      for ( ; !src_it.end(); ++src_it, ++dst_it)
-        *dst_it = this->operator()(src_it);
+      return out;
     }
-
-    scalar_field_type operator()() const
-    {
-      scalar_field_type laplacian_field;
-      this->operator()(laplacian_field);
-      return laplacian_field;
-    }
-
-    const scalar_field_type& _scalar_field;
   };
 
 
-  //! Hessian matrix functor class
-  template <typename T, int N = 2>
+  //! @brief Hessian matrix functor class.
   struct Hessian
   {
-    typedef Matrix<int, N, 1> coords_type;
-    typedef Image<T, N> scalar_field_type;
-    typedef Matrix<T, N, N> hessian_matrix_type;
-    typedef Image<hessian_matrix_type, N> hessian_field_type, return_type;
-    typedef typename scalar_field_type::const_array_iterator
-      const_scalar_iterator;
-    typedef typename hessian_field_type::array_iterator
-      hessian_field_iterator;
+    template <typename Field>
+    struct Dimension { enum { value = Field::Dimension }; };
 
-    inline Hessian(const scalar_field_type& scalar_field)
-      : _scalar_field(scalar_field)
-    {
-    }
+    template <typename Field>
+    using Coords = Matrix<int, Dimension<Field>::value, 1>;
 
-    void operator()(hessian_matrix_type& H, const_scalar_iterator& it) const
+    template <typename Field>
+    using Scalar = typename Field::value_type;
+
+    template <typename Field>
+    using HessianMatrix = Eigen::Matrix<
+      Scalar<Field>, Dimension<Field>::value, Dimension<Field>::value>;
+
+    template <typename Field>
+    using ReturnType = Image<HessianMatrix<Field>, Dimension<Field>::value>;
+
+    template <typename Field>
+    void operator()(HessianMatrix<Field>& H,
+                    typename Field::const_array_iterator& it) const
     {
+      const int N{ Dimension<Field>::value };
+      using T = Scalar<Field>;
+
       for (int i = 0; i < N; ++i)
       {
         for (int j = i; j < N; ++j)
         {
           if (i == j)
           {
-            T next = it.position()[i] == it.sizes()[i]-1 ? *it : it.delta(i, 1);
-            T prev = it.position()[i] == 0 ? *it : it.delta(i,-1);
+            auto next = it.position()[i] == it.sizes()[i]-1 ?
+              *it : it.delta(i, 1);
+            auto prev = it.position()[i] == 0 ?
+              *it : it.delta(i,-1);
 
             H(i,i) = next - T(2)*(*it) + prev;
           }
           else
           {
-            int next_i = it.position()[i] == it.sizes()[i] - 1 ? 0 : 1;
-            int prev_i = it.position()[i] == 0 ? 0 : -1;
-            int next_j = it.position()[j] == it.sizes()[j] - 1 ? 0 : 1;
-            int prev_j = it.position()[j] == 0 ? 0 : -1;
+            auto next_i = it.position()[i] == it.sizes()[i] - 1 ? 0 : 1;
+            auto prev_i = it.position()[i] == 0 ? 0 : -1;
+            auto next_j = it.position()[j] == it.sizes()[j] - 1 ? 0 : 1;
+            auto prev_j = it.position()[j] == 0 ? 0 : -1;
 
             H(i,j) =
               (  it.delta(i,next_i,j,next_j) - it.delta(i,prev_i,j,next_j)
@@ -200,119 +203,102 @@ namespace DO { namespace Sara {
       }
     }
 
-    inline void operator()(hessian_matrix_type& H,
-                           const coords_type& position) const
+    template <typename Field>
+    inline void operator()(HessianMatrix<Field>& H,
+                           const Field& scalar_field,
+                           const Coords<Field>& position) const
     {
-      const_scalar_iterator loc(_scalar_field.begin_array());
+      auto loc = scalar_field.begin_array();
       loc += position;
-      operator()(H, loc);
+      operator()<Field>(H, loc);
     }
 
-    void operator()(hessian_field_type& hessian_field) const
+    template <typename Field>
+    ReturnType<Field> operator()(const Field& in) const
     {
-      if (hessian_field.sizes() != _scalar_field.sizes())
-        hessian_field.resize(_scalar_field.sizes());
+      auto out = ReturnType<Field>{ in.sizes() };
 
-      const_scalar_iterator src_loc(_scalar_field.begin_array());
-      hessian_field_iterator dst_loc(hessian_field.begin_array());
-      for ( ; !src_loc.end(); ++src_loc, ++dst_loc)
-        operator()(*dst_loc, src_loc);
+      auto in_i = in.begin_array();
+      auto out_i = out.begin_array();
+      for ( ; !out_i.end(); ++in_i, ++out_i)
+        operator()<Field>(*out_i, in_i);
+
+      return out;
     };
-
-    hessian_field_type operator()() const
-    {
-      hessian_field_type hessian_field;
-      operator()(hessian_field);
-      return hessian_field;
-    }
-
-    const scalar_field_type& _scalar_field;
   };
 
 
   /*!
-    \brief Gradient computation
-    @param[in] src input grayscale image.
-    @param[in] p position in the image.
-    \return 2D gradient vector.
+    @brief Gradient computation
+    @param[in] f input scalar field.
+    @param[in] x position in the image.
+    @return 2D gradient vector.
    */
   template <typename T, int N>
   Matrix<T,N,1> gradient(const Image<T, N>& src, const Matrix<int, N, 1>& p)
   {
-    Matrix<T, N, 1> g{};
-    Gradient<T, N> compute_gradient{ src };
-    compute_gradient(g, p);
+    auto g = Matrix<T, N, 1>{};
+    Gradient{}(g, src, p);
     return g;
   }
 
   /*!
-    \brief Gradient computation
+    @brief Gradient computation
     @param[in] in scalar field
-    \return gradient vector field
+    @return gradient vector field
    */
   template <typename T, int N>
-  Image<Matrix<T, N, 1>, N> gradient(const Image<T, N>& in)
+  inline Image<Matrix<T, N, 1>, N> gradient(const Image<T, N>& in)
   {
-    Image<Matrix<T, N, 1>, N> out{};
-    Gradient<T, N> compute_gradient{ in };
-    compute_gradient(out);
-    return out;
+    return Gradient{}(in);
   }
 
   /*!
-    \brief Laplacian computation
-    @param[in] src input grayscale image.
-    @param[in] p position in the image.
-    \return laplacian value
+    @brief Laplacian computation
+    @param[in] f input scalar field.
+    @param[in] x position in the image.
+    @return laplacian value
   */
   template <typename T, int N>
-  T laplacian(const Image<T, N>& src, const Matrix<int, N, 1>& p)
+  inline T laplacian(const Image<T, N>& f, const Matrix<int, N, 1>& x)
   {
-    Laplacian<T, N> compute_laplacian(src);
-    return compute_laplacian(p);
+    return Laplacian{}(f, x);
   }
 
   /*!
-    \brief Laplacian computation
+    @brief Laplacian computation
     @param[in] in scalar field.
-    \return laplacian field.
+    @return laplacian field.
    */
   template <typename T, int N>
-  Image<T, N> laplacian(const Image<T, N>& in)
+  inline Image<T, N> laplacian(const Image<T, N>& in)
   {
-    Image<T, N> out{};
-    Laplacian<T, N> compute_laplacian(in);
-    compute_laplacian(out);
-    return out;
+    return Laplacian{}(in);
   }
 
   /*!
-    \brief Compute the Hessian matrix at a specified position.
-    @param[in] src scalar field.
-    @param[in] p position in the image.
-    \return Hessian matrix.
+    @brief Compute the Hessian matrix at a specified position.
+    @param[in] f scalar field.
+    @param[in] x position in the image.
+    @return Hessian matrix.
    */
   template <typename T, int N>
-  Matrix<T,N,N> hessian(const Image<T, N>& src, const Matrix<int, N, 1>& p)
+  inline Matrix<T,N,N> hessian(const Image<T, N>& f, const Matrix<int, N, 1>& x)
   {
-    Matrix<T, N, N> H{};
-    Hessian<T, N> compute_hessian{ src };
-    compute_hessian(H, p);
-    return H;
+    auto H_f_x = Matrix<T, N, N>{};
+    Hessian{}(H_f_x, f, x);
+    return H_f_x;
   }
 
   /*!
-    \brief Compute the Hessian matrix field.
+    @brief Compute the Hessian matrix field.
     @param[in] in scalar field.
-    \return Hessian matrix field
+    @return Hessian matrix field
    */
   template <typename T, int N>
-  Image<Matrix<T,N,N> > hessian(const Image<T, N>& in)
+  inline Image<Matrix<T,N,N> > hessian(const Image<T, N>& in)
   {
-    Image<Matrix<T, N, N> > out{};
-    Hessian<T, N> compute_hessian{ in };
-    compute_hessian(out);
-    return out;
+    return Hessian{}(in);
   }
 
   //! @}

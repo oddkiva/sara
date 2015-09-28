@@ -21,37 +21,45 @@
 namespace DO { namespace Sara {
 
   /*!
-    \ingroup Differential
+    @ingroup Differential
     @{
    */
 
   /*!
-    \brief Second-moment matrix helper class in order to use
+    @brief Second-moment matrix helper class in order to use
     DO::Image<T>::compute<SecondMomentMatrix>()
    */
-  template <typename Vector, int N>
   struct SecondMomentMatrix
   {
-    typedef Matrix<int, N, 1> Coords;
-    typedef typename Vector::Scalar Scalar;
-    typedef Matrix<Scalar, N, N> Moment;
-    typedef Image<Vector, N> VectorField;
-    typedef Image<Moment, N> MomentField, return_type;
+    template <typename GradientField>
+    struct Dimension {
+      enum { value = GradientField::Dimension };
+    };
 
-    inline SecondMomentMatrix(const VectorField& gradient_field)
-      : gradient_field_(gradient_field) {}
+    template <typename GradientField>
+    using Scalar = typename GradientField::pixel_type::Scalar;
 
-    MomentField operator()() const
+    template <typename GradientField>
+    using Matrix = Eigen::Matrix<
+      Scalar<GradientField>,
+      Dimension<GradientField>::value,
+      Dimension<GradientField>::value>;
+
+    template <typename GradientField>
+    using ReturnType =
+      Image<Matrix<GradientField>, Dimension<GradientField>::value>;
+
+    template <typename GradientField>
+    ReturnType<GradientField>
+    operator()(const GradientField& gradient_field) const
     {
-      MomentField M(gradient_field_.sizes());
-      typename MomentField::iterator dst = M.begin();
-      typename VectorField::const_iterator src = gradient_field_.begin();
-      for ( ; src != gradient_field_.end(); ++src, ++dst)
+      auto moment_field = ReturnType<GradientField>{ gradient_field.sizes() };
+      auto dst = moment_field.begin();
+      auto src = gradient_field.begin();
+      for ( ; src != gradient_field.end(); ++src, ++dst)
         *dst = *src * src->transpose();
-      return M;
+      return moment_field;
     }
-
-    const VectorField& gradient_field_;
   };
 
   //! @}
