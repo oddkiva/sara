@@ -1,7 +1,9 @@
 Sara: C++ Computer Vision Library
 ==================================
 
-Sara focuses on:
+*Sara* (सार) is a hindi word meaning *essence*.
+
+*Sara* focuses on:
 
 1. having an **easy-to-use and simple API**,
 2. having **easy-to-understand and efficient** implementations of computer vision
@@ -10,8 +12,7 @@ Sara focuses on:
 
 Try it and feel free to become involved with the development of the libraries.
 
-You can rest assured that I dedicate lots of love to maintain DO-CV and make it
-evolve as much as my time and energy allow it.
+I dedicate lots of patience and love to maintain *Sara* and make it evolve as much as my time and energy allow it.
 
 Sara is licensed with the [Mozilla Public License version
 2.0](https://github.com/DO-CV/DO-CV/raw/master/COPYING.MPL2).
@@ -46,18 +47,20 @@ Also have a look at the legacy doxygen-based documentation
 Why yet another library?
 ------------------------
 
-I have written DO-CV during my PhD at the [IMAGINE
+I have written *Sara* (previously *DO-CV*) during my PhD at the [IMAGINE
 lab](http://imagine.enpc.fr/) in [Ecole des Ponts,
 ParisTech](http://www.enpc.fr).
 
-Historically, I started writing DO-CV before openCV came up with a new C++ API.
-I used openCV for the first time during my research internship at Siemens. That
+Historically, I started writing *Sara* before *openCV* came up with a new C++ API.
+I used *openCV* for the first time during my research internship at Siemens. That
 was in 2008 (quite some time, now that I think of it!). I was very frustrated
 with it. After a while, I started writing the library as a hobby to have a more
-easy-to-use library and also to gain a better mastery of the C++ language.
+easy-to-use library and also to gain a better mastery of the C++ language. Now,
+the library keeps evolving and can be reused for serious applications in the
+industry.
 
-Today openCV has evolved a lot. Despite that, openCV has yet to convince me to
-use it, API-wise. Another reason is that I also want to keep my library alive.
+Today openCV has evolved a lot but I still don't like its API, e.g.
+``cv::Ptr<T>``. And most importantly, I love to keep my library alive.
 
 
 Build the libraries
@@ -66,15 +69,28 @@ Build the libraries
 To build the libraries, run:
 
 ```
-  # Install the following packages.
-  sudo apt-get install cmake
-  sudo apt-get install -qq qtbase5-dev
+  # Install the following packages, which sara depends on
+  sudo apt-get install -qq \
+    cmake \
+    doxygen \
+    libjpeg8-dev \
+    libpng12-dev \
+    libtiff5-dev \
+    libavcodec-ffmpeg-dev \
+    libavformat-ffmpeg-dev \
+    libavutil-ffmpeg-dev \
+    qtbase5-dev \
+
+  # If you want python bindings.
+  sudo apt-get install -qq \
+    boost-python-dev \
+    python3-dev \
 
   # Build the library dependencies.
   mkdir build
   cd build
   cmake ..
-  make  -j N  # N is the number of CPU cores you want to use.
+  make  -j`nproc` # to use all the CPU
 
   # Run the tests to make sure everything is alright.
   make test

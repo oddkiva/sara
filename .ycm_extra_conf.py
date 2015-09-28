@@ -39,6 +39,8 @@ flags = [
 "-DQT_XML_LIB",
 "-fPIE",
 # Qt5 header directories.
+"-I", "/usr/include",
+"-I", "/usr/include/python3.4",
 "-I", "/usr/include/qt5",
 "-I", "/usr/include/qt5/QtQuick",
 "-I", "/usr/include/qt5/QtQml",
