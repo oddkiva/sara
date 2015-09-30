@@ -47,10 +47,12 @@ namespace DO { namespace Sara {
     ReturnType<MatrixField> operator()(const MatrixField& in) const
     {
       ReturnType<MatrixField> out{ in.sizes() };
+
       auto out_i = out.begin();
       auto in_i = in.begin();
       for ( ; in_i != in.end(); ++in_i, ++out_i)
         *out_i = in_i->determinant();
+
       return out;
     }
   };

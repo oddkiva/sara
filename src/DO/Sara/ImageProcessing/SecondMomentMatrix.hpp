@@ -54,10 +54,12 @@ namespace DO { namespace Sara {
     operator()(const GradientField& gradient_field) const
     {
       auto moment_field = ReturnType<GradientField>{ gradient_field.sizes() };
+
       auto dst = moment_field.begin();
       auto src = gradient_field.begin();
       for ( ; src != gradient_field.end(); ++src, ++dst)
         *dst = *src * src->transpose();
+
       return moment_field;
     }
   };

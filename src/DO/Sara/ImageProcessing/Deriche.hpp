@@ -186,8 +186,7 @@ namespace DO { namespace Sara {
   template <typename T, int N>
   void inplace_deriche_blur(
     Image<T, N>& inout_signal,
-    const Matrix<typename PixelTraits<T>::channel_type, N, 1>& sigmas,
-    bool neumann = true)
+    const Matrix<typename PixelTraits<T>::channel_type, N, 1>& sigmas, bool neumann = true)
   {
     for (int i = 0; i < N; ++i)
       inplace_deriche(inout_signal,sigmas[i], 0, i, neumann);

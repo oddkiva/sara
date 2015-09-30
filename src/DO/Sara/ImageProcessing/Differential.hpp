@@ -235,11 +235,11 @@ namespace DO { namespace Sara {
     @return 2D gradient vector.
    */
   template <typename T, int N>
-  Matrix<T,N,1> gradient(const Image<T, N>& src, const Matrix<int, N, 1>& p)
+  Matrix<T,N,1> gradient(const Image<T, N>& f, const Matrix<int, N, 1>& x)
   {
-    auto g = Matrix<T, N, 1>{};
-    Gradient{}(g, src, p);
-    return g;
+    auto Df_x = Matrix<T, N, 1>{};
+    Gradient{}(Df_x, f, x);
+    return Df_x;
   }
 
   /*!
@@ -285,9 +285,9 @@ namespace DO { namespace Sara {
   template <typename T, int N>
   inline Matrix<T,N,N> hessian(const Image<T, N>& f, const Matrix<int, N, 1>& x)
   {
-    auto H_f_x = Matrix<T, N, N>{};
-    Hessian{}(H_f_x, f, x);
-    return H_f_x;
+    auto Hf_x = Matrix<T, N, N>{};
+    Hessian{}(Hf_x, f, x);
+    return Hf_x;
   }
 
   /*!
