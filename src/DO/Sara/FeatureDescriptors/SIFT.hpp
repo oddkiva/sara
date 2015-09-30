@@ -30,12 +30,12 @@
 namespace DO { namespace Sara {
 
   /*!
-    \ingroup FeatureDescriptors
-    \defgroup Descriptors
+    @ingroup FeatureDescriptors
+    @defgroup Descriptors
     @{
    */
 
-  //! \brief Functor class used to compute the SIFT Descriptor at some location.
+  //! @brief Functor class used to compute the SIFT Descriptor at some location.
   template <int N=4, int O=8>
   class ComputeSIFTDescriptor
   {
@@ -43,7 +43,7 @@ namespace DO { namespace Sara {
     enum { Dim = N*N*O };
     using descriptor_type = Matrix<float, Dim, 1>;
 
-    //! \brief Constructor.
+    //! @brief Constructor.
     ComputeSIFTDescriptor(float bin_scale_unit_length = 3.f,
                           float max_bin_value = 0.2f)
       : _bin_scale_unit_length(bin_scale_unit_length)
@@ -51,7 +51,7 @@ namespace DO { namespace Sara {
     {
     }
 
-    //! \brief Computes the SIFT descriptor for keypoint \$(x,y,\sigma,\theta)\f$.
+    //! @brief Computes the SIFT descriptor for keypoint \$(x,y,\sigma,\theta)\f$.
     descriptor_type operator()(float x, float y, float sigma, float theta,
                                const Image<Vector2f>& grad_polar_coords) const
     {
@@ -198,7 +198,7 @@ namespace DO { namespace Sara {
       return h;
     }
 
-    //! \brief Computes the **upright** SIFT descriptor for keypoint \$(x,y,\sigma)\f$.
+    //! @brief Computes the **upright** SIFT descriptor for keypoint \$(x,y,\sigma)\f$.
     descriptor_type operator()(float x, float y, float sigma,
                                const Image<Vector2f>& grad_polar_coords) const
     {

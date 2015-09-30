@@ -31,7 +31,7 @@ namespace DO { namespace Sara {
     @{
    */
 
-  //! \brief This is actually where we actually call the drawing commands.
+  //! @brief This is actually where we actually call the drawing commands.
   class DO_SARA_EXPORT UserThread : public QThread
   {
     Q_OBJECT

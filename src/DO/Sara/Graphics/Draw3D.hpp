@@ -17,13 +17,13 @@
 namespace DO { namespace Sara {
 
   /*!
-    \ingroup Graphics
-    \defgroup Draw3D Drawing 3D
+    @ingroup Graphics
+    @defgroup Draw3D Drawing 3D
 
     @{
    */
 
-  //! \brief Display a mesh in the active OpenGLWindow window.
+  //! @brief Display a mesh in the active OpenGLWindow window.
   DO_SARA_EXPORT
   void display_mesh(const SimpleTriangleMesh3f& mesh);
 

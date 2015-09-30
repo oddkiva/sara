@@ -114,7 +114,7 @@ namespace DO { namespace Sara {
     }
   };
 
-  //! \brief Convert color from RGB to YUV.
+  //! @brief Convert color from RGB to YUV.
   template <> struct ConvertColor<Rgb, Yuv>
   {
     template <typename T>
@@ -124,7 +124,7 @@ namespace DO { namespace Sara {
     }
   };
 
-  //! \brief Convert color from YUV to RGB.
+  //! @brief Convert color from YUV to RGB.
   template <> struct ConvertColor<Yuv, Rgb>
   {
     template <typename T>
@@ -134,7 +134,7 @@ namespace DO { namespace Sara {
     }
   };
 
-  //! \brief Convert color from a colorspace to another
+  //! @brief Convert color from a colorspace to another
   template <typename T, typename SrcColSpace, typename DstColSpace>
   inline void convert_color(const Pixel<T, SrcColSpace>& src,
                             Pixel<T, DstColSpace>& dst)
@@ -142,17 +142,17 @@ namespace DO { namespace Sara {
     ConvertColor<SrcColSpace, DstColSpace>::template apply<T>(src, dst);
   }
 
-  //! \brief Generic color converter to grayscale.
+  //! @brief Generic color converter to grayscale.
   template <typename ColorSpace> struct ConvertColorToGray;
 
-  //! \brief Generic color conversion function to grayscale.
+  //! @brief Generic color conversion function to grayscale.
   template <typename T, typename ColorSpace>
   inline void convert_color(const Pixel<T, ColorSpace>& src, T& dst)
   {
     ConvertColorToGray<ColorSpace>::template apply<T>(src, dst);
   }
 
-  //! \brief Convert color from RGB to gray.
+  //! @brief Convert color from RGB to gray.
   template <> struct ConvertColorToGray<Rgb>
   {
     template <typename T>
@@ -162,7 +162,7 @@ namespace DO { namespace Sara {
     }
   };
 
-  //! \brief Convert color from RGBA to gray.
+  //! @brief Convert color from RGBA to gray.
   template <> struct ConvertColorToGray<Rgba>
   {
     template <typename T>
@@ -172,7 +172,7 @@ namespace DO { namespace Sara {
     }
   };
 
-  //! \brief Convert YUV color to gray color.
+  //! @brief Convert YUV color to gray color.
   template <> struct ConvertColorToGray<Yuv>
   {
     template <typename T>
@@ -182,14 +182,14 @@ namespace DO { namespace Sara {
     }
   };
 
-  //! \brief Convert color from gray to RGB.
+  //! @brief Convert color from gray to RGB.
   template <typename T>
   inline void convert_color(T src, Pixel<T, Rgb>& dst)
   {
     gray_to_rgb(src, dst);
   }
 
-  //! \brief Convert gray color to YUV color.
+  //! @brief Convert gray color to YUV color.
   template <typename T>
   inline void convert_color(T src, Pixel<T, Yuv>& dst)
   {

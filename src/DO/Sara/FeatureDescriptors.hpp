@@ -33,7 +33,7 @@
 #include <DO/Sara/FeatureDescriptors/DenseFeature.hpp>
 
 
-//! \defgroup FeatureDescriptors
+//! @defgroup FeatureDescriptors
 
 
 #endif /* DO_SARA_FEATUREDESCRIPTORS_HPP */

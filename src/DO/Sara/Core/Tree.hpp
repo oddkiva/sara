@@ -26,8 +26,8 @@
 
 namespace DO { namespace Sara {
 
-  //! \ingroup Core
-  //! \defgroup Tree Tree
+  //! @ingroup Core
+  //! @defgroup Tree Tree
   //! @{
 
   //! @brief Tree data structure.

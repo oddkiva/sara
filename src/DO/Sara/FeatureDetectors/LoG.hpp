@@ -26,8 +26,8 @@
 namespace DO { namespace Sara {
 
   /*!
-    \ingroup FeatureDetectors
-    \defgroup InterestPoint Interest Point Detection
+    @ingroup FeatureDetectors
+    @defgroup InterestPoint Interest Point Detection
     @{
    */
 
@@ -36,7 +36,7 @@ namespace DO { namespace Sara {
   {
   public:
     /*!
-      \brief Constructor
+      @brief Constructor
       @param[in]
         extremum_thres
         the response threshold which the LoG extremum absolute value
@@ -84,13 +84,13 @@ namespace DO { namespace Sara {
     }
 
     /*!
-      \brief Localizes LoG extrema for a given image.
+      @brief Localizes LoG extrema for a given image.
      */
     std::vector<OERegion> operator()(const Image<float>& I,
                                      std::vector<Point2i> *scale_octave_pairs = 0);
 
     /*!
-      \brief Returns the Gaussian pyramid used to localize scale-space extrema
+      @brief Returns the Gaussian pyramid used to localize scale-space extrema
       of image **I**.
 
       The Gaussian pyramid is available after calling the function method
@@ -106,7 +106,7 @@ namespace DO { namespace Sara {
     }
 
     /*!
-      \brief Returns the pyramid of Laplacians of Gaussians used to localize
+      @brief Returns the pyramid of Laplacians of Gaussians used to localize
       scale-space extrema of image **I**.
 
       The pyramid of Laplacians of Gaussians is available after calling the

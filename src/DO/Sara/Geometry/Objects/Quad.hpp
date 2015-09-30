@@ -26,7 +26,7 @@ namespace DO { namespace Sara {
   {
   public:
     //! @{
-    //! \brief Constructors.
+    //! @brief Constructors.
     Quad(const BBox& bbox);
 
     Quad(const Point2d& a, const Point2d& b,

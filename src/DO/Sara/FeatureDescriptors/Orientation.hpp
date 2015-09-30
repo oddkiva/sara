@@ -29,13 +29,13 @@
 namespace DO { namespace Sara {
 
   /*!
-    \ingroup FeatureDesriptors
-    \defgroup Orientation Dominant Orientation Assignment
+    @ingroup FeatureDesriptors
+    @defgroup Orientation Dominant Orientation Assignment
     @{
   */
 
   /*!
-    \brief Computes the image gradients of image \f$I\f$ in polar coordinates.
+    @brief Computes the image gradients of image \f$I\f$ in polar coordinates.
 
     In each pixel \f$(x,y) \in [0,w[ \times [0,h[\f$,
     \f$\nabla I(x,y)\f$ is the 2D vector \f$(r,\theta)\f$ where:
@@ -56,7 +56,7 @@ namespace DO { namespace Sara {
   }
 
   /*!
-    \brief Computes the image gradients in polar coordinates for each image in
+    @brief Computes the image gradients in polar coordinates for each image in
     the pyramid.
    */
   template <typename T>
@@ -78,7 +78,7 @@ namespace DO { namespace Sara {
   }
 
   /*!
-    \brief  Computes the orientation histogram on a local patch around keypoint
+    @brief  Computes the orientation histogram on a local patch around keypoint
     \f$(x,y,\sigma)\f$.
    */
   template <typename T, int N>
@@ -129,7 +129,7 @@ namespace DO { namespace Sara {
   }
 
   /*!
-    \brief This is used in [Lowe, IJCV 2004] to determine keypoint orientations.
+    @brief This is used in [Lowe, IJCV 2004] to determine keypoint orientations.
 
     Basically, the histogram is convolved 6 times with the mean kernel
     \f$[1/3, 1/3, 1/3]\f$.
@@ -152,7 +152,7 @@ namespace DO { namespace Sara {
   }
 
   /*!
-    \brief  This is used in [Lowe, IJCV 2004] to find histogram peaks.
+    @brief  This is used in [Lowe, IJCV 2004] to find histogram peaks.
 
     A histogram peak is by definition the index \f$i\f$ such that:
     - \f$h_{i} > h_{i+1}\f$
@@ -176,7 +176,7 @@ namespace DO { namespace Sara {
   }
 
   /*!
-    \brief Refine peaks as in [Lowe, IJCV 2004] by interpolation based on a
+    @brief Refine peaks as in [Lowe, IJCV 2004] by interpolation based on a
     second-order Taylor approximation.
    */
   template <typename T, int N>
@@ -200,7 +200,7 @@ namespace DO { namespace Sara {
     return T(i)+T(0.5)+h;
   }
 
-  //! \brief Helper functions.
+  //! @brief Helper functions.
   template <typename T, int N>
   std::vector<T> refine_peaks(const Array<T, N, 1>& orientation_histogram,
                               const std::vector<int>& ori)
@@ -211,7 +211,7 @@ namespace DO { namespace Sara {
     return oriT;
   }
 
-  //! \brief Basically a helper class.
+  //! @brief Basically a helper class.
   class DO_SARA_EXPORT ComputeDominantOrientations
   {
   public:

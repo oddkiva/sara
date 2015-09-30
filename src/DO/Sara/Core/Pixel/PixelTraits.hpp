@@ -29,25 +29,25 @@ namespace DO { namespace Sara {
 
     using pixel_type = T;
 
-    //! \brief Return zero color value.
+    //! @brief Return zero color value.
     static inline pixel_type zero()
     {
       return 0;
     }
 
-    //! \brief Return min pixel value.
+    //! @brief Return min pixel value.
     static inline pixel_type min()
     {
       return channel_min_value<T>();
     }
 
-    //! \brief Return max pixel value.
+    //! @brief Return max pixel value.
     static inline pixel_type max()
     {
       return channel_max_value<T>();
     }
 
-    //! \brief Cast functor.
+    //! @brief Cast functor.
     template <typename U>
     struct Cast
     {
@@ -67,7 +67,7 @@ namespace DO { namespace Sara {
 
     using pixel_type = Matrix<T, M, N>;
 
-    //! \brief Return zero color value.
+    //! @brief Return zero color value.
     static inline pixel_type zero()
     {
       pixel_type zero;
@@ -75,7 +75,7 @@ namespace DO { namespace Sara {
       return zero;
     }
 
-    //! \brief Return min color value.
+    //! @brief Return min color value.
     static inline pixel_type min()
     {
       pixel_type min;
@@ -83,7 +83,7 @@ namespace DO { namespace Sara {
       return min;
     }
 
-    //! \brief Return max color value.
+    //! @brief Return max color value.
     static inline pixel_type max()
     {
       pixel_type max;
@@ -91,7 +91,7 @@ namespace DO { namespace Sara {
       return max;
     }
 
-    //! \brief Cast functor.
+    //! @brief Cast functor.
     template <typename U>
     struct Cast
     {
@@ -111,7 +111,7 @@ namespace DO { namespace Sara {
 
     using pixel_type = Pixel<T, ColorSpace>;
 
-    //! \brief Return zero color value.
+    //! @brief Return zero color value.
     static inline pixel_type zero()
     {
       pixel_type zero;
@@ -119,7 +119,7 @@ namespace DO { namespace Sara {
       return zero;
     }
 
-    //! \brief Return min color value.
+    //! @brief Return min color value.
     static inline pixel_type min()
     {
       pixel_type min;
@@ -127,7 +127,7 @@ namespace DO { namespace Sara {
       return min;
     }
 
-    //! \brief Return max color value.
+    //! @brief Return max color value.
     static inline pixel_type max()
     {
       pixel_type max;
@@ -135,7 +135,7 @@ namespace DO { namespace Sara {
       return max;
     }
 
-    //! \brief Cast functor.
+    //! @brief Cast functor.
     template <typename U>
     struct Cast
     {

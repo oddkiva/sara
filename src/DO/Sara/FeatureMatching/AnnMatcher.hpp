@@ -24,7 +24,7 @@ namespace DO { namespace Sara {
 	{
 	public:
     //! @{
-    //! \brief Constructors.
+    //! @brief Constructors.
     AnnMatcher(const Set<OERegion, RealDescriptor>& keys1,
                const Set<OERegion, RealDescriptor>& keys2,
                float sift_ratio_thres = 1.2f);
@@ -36,7 +36,7 @@ namespace DO { namespace Sara {
     //! @}
 
     //! @{
-    //! \brief Return matches.
+    //! @brief Return matches.
     std::vector<Match> compute_matches();
 
 		std::vector<Match> compute_self_matches()

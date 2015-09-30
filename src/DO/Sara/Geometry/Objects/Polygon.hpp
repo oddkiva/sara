@@ -46,7 +46,7 @@ namespace DO { namespace Sara {
     }
     //! @}
 
-    //! \brief Assignment operator
+    //! @brief Assignment operator
     inline SmallPolygon& operator=(const SmallPolygon& other)
     {
       copy(other);
@@ -54,7 +54,7 @@ namespace DO { namespace Sara {
     }
 
     //! @{
-    //! \brief Point accessors.
+    //! @brief Point accessors.
     inline point_type& operator[](size_type i)
     {
       return _v[i];
@@ -67,7 +67,7 @@ namespace DO { namespace Sara {
     //! @}
 
     //! @{
-    //! \brief iterators.
+    //! @brief iterators.
     inline point_type * begin()
     {
       return _v;
@@ -89,19 +89,19 @@ namespace DO { namespace Sara {
     }
     //! @}
 
-    //! \brief return the number of vertices.
+    //! @brief return the number of vertices.
     inline std::size_t num_vertices() const
     {
       return N;
     }
 
-    //! \brief Equality comparison.
+    //! @brief Equality comparison.
     inline bool operator==(const self_type& other) const
     {
       return std::equal(_v, _v + N, other._v);
     }
 
-    //! \brief Inequality comparison.
+    //! @brief Inequality comparison.
     inline bool operator!=(const self_type& other) const
     {
       return !this->operator==(other);

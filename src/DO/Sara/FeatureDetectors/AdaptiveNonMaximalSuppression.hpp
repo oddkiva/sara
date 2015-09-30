@@ -24,13 +24,13 @@
 namespace DO { namespace Sara {
 
   /*!
-    \ingroup FeatureDetectors
-    \defgroup ANMS Adaptive Non Maximal Suppression
+    @ingroup FeatureDetectors
+    @defgroup ANMS Adaptive Non Maximal Suppression
     @{
   */
 
   /*!
-    \brief Adaptive non maximal suppression algorithm (cf. [Multi-Image
+    @brief Adaptive non maximal suppression algorithm (cf. [Multi-Image
     Matching using Multi-Scale Oriented Patches, Brown et al., CVPR 2005]).
 
     This is the naive implementation which is quadratic in the number of

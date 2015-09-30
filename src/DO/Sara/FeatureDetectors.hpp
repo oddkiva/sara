@@ -35,7 +35,7 @@
 // Affine shape adaptation (cf. [Mikolajczyk & Schmid, ECCV 2002]).
 #include <DO/Sara/FeatureDetectors/AffineShapeAdaptation.hpp>
 
-//! \defgroup FeatureDetectors
+//! @defgroup FeatureDetectors
 
 
 #endif /* DO_SARA_FEATUREDETECTORS_HPP */

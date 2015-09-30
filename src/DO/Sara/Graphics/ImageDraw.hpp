@@ -21,14 +21,14 @@ class QImage;
 namespace DO { namespace Sara {
 
   /*!
-    \ingroup Graphics
-    \defgroup ImageDrawing Drawing Image
+    @ingroup Graphics
+    @defgroup ImageDrawing Drawing Image
 
     @{
    */
 
   /*!
-    \brief Draw point on image.
+    @brief Draw point on image.
     @param[in]  image image.
     @param[in]  x,y   coordinates.
     @param[in]  c     RGB color.
@@ -37,7 +37,7 @@ namespace DO { namespace Sara {
   void draw_point(Image<Rgb8>& image,
                   int x, int y, const Color3ub& c);
   /*!
-    \brief Draw circle on image.
+    @brief Draw circle on image.
     @param[in]  image    image.
     @param[in]  xc,yc    circle center.
     @param[in]  r        circle radius.
@@ -48,7 +48,7 @@ namespace DO { namespace Sara {
   void draw_circle(Image<Rgb8>& image,
                    int xc, int yc, int r, const Color3ub& c, int penWidth = 1);
   /*!
-    \brief Draw line on image.
+    @brief Draw line on image.
     @param[in]  image       image.
     @param[in]  x1,y1,x2,y2 start and end points of the line.
     @param[in]  c           RGB color.
@@ -59,7 +59,7 @@ namespace DO { namespace Sara {
                  int x1, int y1, int x2, int y2, const Color3ub& c,
                  int penWidth = 1);
   /*!
-    \brief Draw rectangle on image.
+    @brief Draw rectangle on image.
     @param[in]  image     image.
     @param[in]  x,y,w,h   start and end points of the line.
     @param[in]  c         RGB color.
@@ -70,7 +70,7 @@ namespace DO { namespace Sara {
                  int x, int y, int w, int h, const Color3ub& c,
                  int penWidth = 1);
   /*!
-    \brief Draw color-filled rectangle on image.
+    @brief Draw color-filled rectangle on image.
     @param[in]  image     image.
     @param[in]  x,y,w,h   start and end points of the line.
     @param[in]  c         RGB color.
@@ -79,7 +79,7 @@ namespace DO { namespace Sara {
   void fill_rect(Image<Rgb8>& image,
                  int x, int y, int w, int h, const Color3ub& c);
   /*!
-    \brief Draw color-filled circle on image.
+    @brief Draw color-filled circle on image.
     @param[in]  image  image.
     @param[in]  x,y    circle center.
     @param[in]  r      circle radius.

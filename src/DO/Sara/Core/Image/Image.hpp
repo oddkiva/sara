@@ -22,8 +22,8 @@
 namespace DO { namespace Sara {
 
   /*!
-    \ingroup Core
-    \defgroup Image Image
+    @ingroup Core
+    @defgroup Image Image
     @{
    */
 
@@ -186,17 +186,17 @@ namespace DO { namespace Sara {
   public: /* interface */
     using vector_type = typename base_type::vector_type;
 
-    //! Default constructor.
+    //! @brief Default constructor.
     Image() = default;
 
-    //! Constructor that takes ownership of data.
+    //! @brief Constructor that takes ownership of data.
     inline explicit Image(T *data, const vector_type& sizes)
       : base_type{ data, sizes }
     {
     }
 
     //! @{
-    //! Constructors with specified sizes.
+    //! @brief Constructors with specified sizes.
     inline explicit Image(const vector_type& sizes)
       : base_type{ sizes }
     {

@@ -25,10 +25,10 @@
 
 namespace DO { namespace Sara {
 
-  //! \ingroup MultiArrayIterators
+  //! @ingroup MultiArrayIterators
   //! @{
 
-  //! \brief The offset computer class for N-dimensional arrays.
+  //! @brief The offset computer class for N-dimensional arrays.
   template <typename Index, int N>
   inline Index jump(const Matrix<Index, N, 1>& offset,
                     const Matrix<Index, N, 1>& strides)
@@ -39,19 +39,19 @@ namespace DO { namespace Sara {
     return offset.dot(strides);
   }
 
-  //! \brief Computes the strides from the sizes of an N-dimensional array.
+  //! @brief Computes the strides from the sizes of an N-dimensional array.
   //! StorageOrder must be either 'Eigen::RowMajor' or 'Eigen::ColMajor'.
   template <int StorageOrder> struct StrideComputer;
 
-  //! \brief Increment the current position in an N-dimensional array.
+  //! @brief Increment the current position in an N-dimensional array.
   //! StorageOrder must be either 'Eigen::RowMajor' or 'Eigen::ColMajor'.
   template <int StorageOrder> struct PositionIncrementer;
 
-  //! \brief Decrement the current position in an N-dimensional array.
+  //! @brief Decrement the current position in an N-dimensional array.
   //! StorageOrder must be either 'Eigen::RowMajor' or 'Eigen::ColMajor'.
   template <int StorageOrder> struct PositionDecrementer;
 
-  //! \brief Computes the strides from the sizes of an N-dimensional array.
+  //! @brief Computes the strides from the sizes of an N-dimensional array.
   //! Specialized class for 'Eigen::RowMajor'.
   template <> struct StrideComputer<RowMajor>
   {
@@ -70,7 +70,7 @@ namespace DO { namespace Sara {
     }
   };
 
-  //! \brief Computes the strides from the sizes of an N-dimensional array.
+  //! @brief Computes the strides from the sizes of an N-dimensional array.
   //! Specialized class for 'Eigen::ColMajor'.
   template <> struct StrideComputer<ColMajor>
   {
@@ -89,7 +89,7 @@ namespace DO { namespace Sara {
     }
   };
 
-  //! \brief Increment the current position in an N-dimensional array.
+  //! @brief Increment the current position in an N-dimensional array.
   //! StorageOrder must be either 'Eigen::RowMajor'.
   template <> struct PositionIncrementer<RowMajor>
   {
@@ -118,7 +118,7 @@ namespace DO { namespace Sara {
 
   };
 
-  //! \brief Increment the current position in an N-dimensional array.
+  //! @brief Increment the current position in an N-dimensional array.
   //! StorageOrder must be either 'Eigen::ColMajor'.
   template <> struct PositionIncrementer<ColMajor>
   {
@@ -146,7 +146,7 @@ namespace DO { namespace Sara {
     }
   };
 
-  //! \brief Decrement the current position in an N-dimensional array.
+  //! @brief Decrement the current position in an N-dimensional array.
   //! StorageOrder must be either 'Eigen::RowMajor'.
   template <> struct PositionDecrementer<RowMajor>
   {
@@ -176,7 +176,7 @@ namespace DO { namespace Sara {
     }
   };
 
-  //! \brief Decrement the current position in an N-dimensional array.
+  //! @brief Decrement the current position in an N-dimensional array.
   //! StorageOrder must be either 'Eigen::ColMajor'.
   template <> struct PositionDecrementer<ColMajor>
   {

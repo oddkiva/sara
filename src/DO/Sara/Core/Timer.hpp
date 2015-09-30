@@ -21,11 +21,11 @@
 
 namespace DO { namespace Sara {
 
-  //! \ingroup Core
-  //! \defgroup Utility Utility
+  //! @ingroup Core
+  //! @defgroup Utility Utility
   //! @{
 
-  //! \brief Timer class with microsecond accuracy.
+  //! @brief Timer class with microsecond accuracy.
   class DO_SARA_EXPORT Timer
   {
   public: /* interface. */

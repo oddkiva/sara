@@ -25,31 +25,31 @@ namespace DO { namespace Sara {
   typedef QWidget * Window;
 
   /*!
-    \ingroup Graphics
+    @ingroup Graphics
 
-    \defgroup WindowManagement Window management functions
-    \brief Open, close windows, wait for a click or a key, listen to events.
+    @defgroup WindowManagement Window management functions
+    @brief Open, close windows, wait for a click or a key, listen to events.
     @{
    */
 
-  //! \brief Return the active window.
+  //! @brief Return the active window.
   DO_SARA_EXPORT
   Window active_window();
 
-  //! \brief Return the window sizes.
+  //! @brief Return the window sizes.
   DO_SARA_EXPORT
   Vector2i get_sizes(Window w);
 
-  //! \brief Return the window width.
+  //! @brief Return the window width.
   DO_SARA_EXPORT
   inline int get_width(Window w) { return get_sizes(w)(0); }
 
-  //! \brief Return the window height.
+  //! @brief Return the window height.
   DO_SARA_EXPORT
   inline int get_height(Window w) { return get_sizes(w)(1); }
 
   //! @{
-  //! \brief Open a PaintingWindow for 2D drawing.
+  //! @brief Open a PaintingWindow for 2D drawing.
   DO_SARA_EXPORT
   Window create_window(int w, int h, const std::string& windowTitle = "DO-CV",
                        int x = -1, int y = -1);
@@ -63,7 +63,7 @@ namespace DO { namespace Sara {
   //! @}
 
   //! @{
-  //! \brief Open a OpenGLWindow for 3D drawing.
+  //! @brief Open a OpenGLWindow for 3D drawing.
   DO_SARA_EXPORT
   Window create_gl_window(int w, int h, const std::string& windowTitle = "DO-CV",
                       int x = -1, int y = -1);
@@ -90,7 +90,7 @@ namespace DO { namespace Sara {
   }
   //! @}
 
-  //! \brief Close the window **w** (regardless of its type).
+  //! @brief Close the window **w** (regardless of its type).
   //! By default, the active window is closed.
   DO_SARA_EXPORT
   void close_window(Window w = active_window());
@@ -119,14 +119,14 @@ namespace DO { namespace Sara {
   DO_SARA_EXPORT
   void microsleep(int usec);
 
-  //! \brief Wait for a click from the user.
+  //! @brief Wait for a click from the user.
   //! - Works only on the *active* window.
   //! - Returns the clicked mouse button
   //! - store the click coordinates \f$(x,y)\f$.
   DO_SARA_EXPORT
   int get_mouse(int& x, int& y);
 
-  //! \brief Wait for a click from the user (only on the *active* window)
+  //! @brief Wait for a click from the user (only on the *active* window)
   //! - Returns the clicked mouse button and
   //! - Stores the click coordinates \f$p\f$.
   inline int get_mouse(Point2i& p)
@@ -134,7 +134,7 @@ namespace DO { namespace Sara {
     return get_mouse(p.x(), p.y());
   }
 
-  //! \brief Wait for a click from the user (only on the *active* window)
+  //! @brief Wait for a click from the user (only on the *active* window)
   //! - The user can click on any opened windows.
   //! - Returns the clicked mouse button
   //! - store the click coordinates \f$p\f$.
@@ -153,13 +153,13 @@ namespace DO { namespace Sara {
     Point2i p; any_get_mouse(p);
   }
 
-  //! \brief Wait for a hit key from the user.
+  //! @brief Wait for a hit key from the user.
   //! - Works only on the *active* window.
   //! - Returns the hit key.
   DO_SARA_EXPORT
   int get_key();
 
-  //! \brief Wait for a hit key from the user.
+  //! @brief Wait for a hit key from the user.
   //! - Works on any opened windows.
   //! - Returns the hit key.
   DO_SARA_EXPORT
