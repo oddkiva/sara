@@ -12,7 +12,7 @@
 /*!
   @file
 
-  \brief Eigen matrices and vector typedefs.
+  @brief Eigen matrices and vector typedefs.
 
   VERY IMPORTANT:
   By default Eigen uses the *COLUMN-MAJOR* storage.
@@ -41,13 +41,13 @@
 
 
 //! \namespace Eigen
-//! \brief Some customized extension to interface for the Eigen library
+//! @brief Some customized extension to interface for the Eigen library
 //! Essentially template class specialization for array type instead of scalar.
 //! I wonder if this is very useful. But let's just put it for now.
 //! @{
 namespace Eigen {
 
-  //! \brief NumTraits template class specialization in case the scalar type
+  //! @brief NumTraits template class specialization in case the scalar type
   //! is actually an array.
   //! For example, when an Array<Matrix2d, 2, 2> type is instantiated,
   //! multiplication and addition operations are properly defined.
@@ -86,7 +86,7 @@ namespace Eigen {
     //! @}
   };
 
-  //! \brief NumTraits template class specialization in case the scalar type
+  //! @brief NumTraits template class specialization in case the scalar type
   //! is actually a matrix.
   template <typename T, int M, int N>
   struct NumTraits<Matrix<T, M, N> >
@@ -130,8 +130,8 @@ namespace Eigen {
 namespace DO { namespace Sara {
 
   /*!
-    \ingroup Core
-    \defgroup EigenTypedefs Eigen Integration
+    @ingroup Core
+    @defgroup EigenTypedefs Eigen Integration
     @{
    */
 

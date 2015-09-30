@@ -35,7 +35,7 @@ namespace DO { namespace Sara {
     @{
    */
 
-  //! \brief QScrollArea-derived class on which we embed the PaintingWindow
+  //! @brief QScrollArea-derived class on which we embed the PaintingWindow
   //! class in order to scroll the contents of the window properly.
   class ScrollArea : public QScrollArea
   {
@@ -48,7 +48,7 @@ namespace DO { namespace Sara {
     void closeEvent(QCloseEvent *event);
   };
 
-  //! \brief QWidget-derived class on which we draw things.
+  //! @brief QWidget-derived class on which we draw things.
   //! I choose not to use QGLWidget because of some weird viewing artifacts...
   //! Maybe later...
   class DO_SARA_EXPORT PaintingWindow : public QWidget

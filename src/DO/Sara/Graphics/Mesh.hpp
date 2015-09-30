@@ -29,12 +29,12 @@ namespace DO { namespace Sara {
     @{
    */
 
-  //! \brief Triangle face consisting of 3 vertex indices
+  //! @brief Triangle face consisting of 3 vertex indices
   typedef Array<size_t, 3, 1> Face3;
-  //! \brief Quad face consisting of 4 vertex indices
+  //! @brief Quad face consisting of 4 vertex indices
   typedef Array<size_t, 4, 1> Face4;
 
-  //! \brief Simple mesh data structure.
+  //! @brief Simple mesh data structure.
   template <typename Vector_, typename Face_>
   class SimpleMesh
   {
@@ -87,11 +87,11 @@ namespace DO { namespace Sara {
     std::vector<Face> f_;
   };
 
-  //! \brief Simple mesh data structure that should be used preferably for
+  //! @brief Simple mesh data structure that should be used preferably for
   //! OpenGL.
   typedef SimpleMesh<Point3f, Face3> SimpleTriangleMesh3f;
 
-  //! \brief Mesh reader (WARNING: still experimental!).
+  //! @brief Mesh reader (WARNING: still experimental!).
   class MeshReader
   {
   public:

@@ -28,7 +28,7 @@ namespace DO { namespace Sara {
     //! Default constructor.
     BBox() = default;
 
-    //! \brief Constructor from the BBox end points.
+    //! @brief Constructor from the BBox end points.
     BBox(const Point2d& top_left, const Point2d& bottom_right)
       : _top_left(top_left)
       , _bottom_right(bottom_right)
@@ -43,7 +43,7 @@ namespace DO { namespace Sara {
     }
 
     //! @{
-    //! \brief Constructor from a point set.
+    //! @brief Constructor from a point set.
     BBox(const Point2d *begin, const Point2d *end)
     {
       if (!begin)
@@ -69,7 +69,7 @@ namespace DO { namespace Sara {
     //! @}
 
     //! @{
-    //! \brief Return BBox vertex.
+    //! @brief Return BBox vertex.
     Point2d& top_left() { return _top_left; }
     Point2d& bottom_right() { return _bottom_right; }
 
@@ -80,7 +80,7 @@ namespace DO { namespace Sara {
     //! @}
 
     //! @{
-    //! \brief Return BBox coordinates.
+    //! @brief Return BBox coordinates.
     double& x1() { return  _top_left.x(); }
     double& y1() { return  _top_left.y(); }
     double& x2() { return  _bottom_right.x(); }
@@ -93,17 +93,17 @@ namespace DO { namespace Sara {
     //! @}
 
     //! @{
-    //! \brief Return BBox sizes.
+    //! @brief Return BBox sizes.
     double width() const  { return std::abs(_bottom_right.x() - _top_left.x()); }
     double height() const { return std::abs(_bottom_right.y() - _top_left.y()); }
     Vector2d sizes() const { return _bottom_right - _top_left; }
     //! @}
 
-    //! \brief Return BBox center.
+    //! @brief Return BBox center.
     Point2d center() const { return 0.5*(_top_left + _bottom_right); }
 
     //! @{
-    //! \brief Equality comparison operator.
+    //! @brief Equality comparison operator.
     bool inline operator==(const BBox& other) const
     {
       return
@@ -118,7 +118,7 @@ namespace DO { namespace Sara {
     //! @}
 
     //! @{
-    //! \brief Convenience functions.
+    //! @brief Convenience functions.
     static BBox infinite()
     {
       BBox b;

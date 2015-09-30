@@ -10,7 +10,7 @@
 // ========================================================================== //
 
 //! @file
-//! \brief Implementation of N-dimensional iterators.
+//! @brief Implementation of N-dimensional iterators.
 
 #ifndef DO_SARA_CORE_ARRAYITERATORS_MULTIARRAYITERATORS_HPP
 #define DO_SARA_CORE_ARRAYITERATORS_MULTIARRAYITERATORS_HPP
@@ -21,8 +21,8 @@
 
 namespace DO { namespace Sara {
 
-  //! \ingroup Core
-  //! \defgroup MultiArrayIterators ND-array iterator classes.
+  //! @ingroup Core
+  //! @defgroup MultiArrayIterators ND-array iterator classes.
   //! @{
 
 
@@ -60,7 +60,7 @@ namespace DO { namespace Sara {
   //! @}
 
 
-  //! \brief Axis iterator class for N-dimensional arrays.
+  //! @brief Axis iterator class for N-dimensional arrays.
   template <bool IsConst, typename T, int Axis, int N>
   class AxisIterator : public ITERATOR_BASE_TYPE(IsConst)
   {
@@ -210,7 +210,7 @@ namespace DO { namespace Sara {
   };
 
 
-  //! \brief Multidimensional iterator base class.
+  //! @brief Multidimensional iterator base class.
   //! The 'ArrayIteratorBase' class is a heavy object. It is mostly useful
   //! for differential calculus. When possible, prefer using more elementary
   //! iterator instead.
@@ -230,7 +230,7 @@ namespace DO { namespace Sara {
     using z_iterator = AxisIterator<IsConst, value_type, 2, N>;
 
   public: /* interface */
-    //! \brief Constructor
+    //! @brief Constructor
     inline ArrayIteratorBase(bool stop,
                              pointer ptr,
                              const vector_type& pos,
@@ -409,7 +409,7 @@ namespace DO { namespace Sara {
   };
 
 
-  //! \brief Multidimensional iterator class.
+  //! @brief Multidimensional iterator class.
   //! The 'ArrayIterator' class is a heavy object. It is mostly useful for
   //! differential calculus. When possible, prefer using more elementary
   //! iterator instead.
@@ -495,7 +495,7 @@ namespace DO { namespace Sara {
   };
 
 
-  //! \brief Multidimensional iterator base class.
+  //! @brief Multidimensional iterator base class.
   //! The 'SubarrayIterator' class is a heavy object. It is mostly useful for
   //! differential calculus. When possible, prefer using more elementary
   //! iterator instead.

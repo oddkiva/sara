@@ -22,12 +22,12 @@
 namespace DO { namespace Sara {
 
   /*!
-    \ingroup Features
+    @ingroup Features
     @{
   */
 
   //! @{
-  //! \brief remove redundant features.
+  //! @brief remove redundant features.
   DO_SARA_EXPORT
   void remove_redundant_features(std::vector<OERegion>& features,
                                  DescriptorMatrix<float>& descriptors);

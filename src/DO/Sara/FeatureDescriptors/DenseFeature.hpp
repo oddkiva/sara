@@ -25,20 +25,20 @@
 
 namespace DO { namespace Sara {
 
-  //! \brief Dense Feature Computer class.
+  //! @brief Dense Feature Computer class.
   template <typename BaseFeatureComputer = ComputeSIFTDescriptor<>>
   class DenseFeatureComputer
   {
   public:
     using descriptor_type = typename BaseFeatureComputer::descriptor_type;
 
-    //! \brief Default Constructor.
+    //! @brief Default Constructor.
     inline DenseFeatureComputer()
       : _compute_feature()
     {
     }
 
-    //! \brief Operator.
+    //! @brief Operator.
     Image<descriptor_type> operator()(const Image<float>& image, int patch_size = 8)
     {
       // Blur the image a little bit.

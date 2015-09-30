@@ -21,13 +21,13 @@
 namespace DO { namespace Sara {
 
   /*!
-    \ingroup FeatureDetectors
-    \defgroup AffineAdaptation Affine Shape Adaptation
+    @ingroup FeatureDetectors
+    @defgroup AffineAdaptation Affine Shape Adaptation
     @{
   */
 
   /*!
-    \brief Functor that adapts the feature scale to the local shape from the
+    @brief Functor that adapts the feature scale to the local shape from the
     second-moment matrix (cf. [Mikolajczyk & Schmid, ECCV 2002]).
 
     Given a feature \f$(\mathbf{x}, \sigma)\f$, the local affine shape adaptation

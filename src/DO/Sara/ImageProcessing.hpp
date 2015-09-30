@@ -10,7 +10,7 @@
 // ========================================================================== //
 
 //! @file
-//! \brief Master header file of the ImageProcessing module.
+//! @brief Master header file of the ImageProcessing module.
 
 #ifndef DO_SARA_IMAGEPROCESSING_HPP
 #define DO_SARA_IMAGEPROCESSING_HPP
@@ -43,8 +43,8 @@
 #include <DO/Sara/ImageProcessing/GaussianPyramid.hpp>
 
 /*!
-  \defgroup ImageProcessing Image Processing
-  \brief The Image Processing module is a header-only library.
+  @defgroup ImageProcessing Image Processing
+  @brief The Image Processing module is a header-only library.
   It covers basic image processing features such as:
   - Linear filtering (both separable and non-separable)
   - Gaussian blurring

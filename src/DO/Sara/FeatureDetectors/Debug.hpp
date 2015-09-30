@@ -26,12 +26,12 @@
 namespace DO { namespace Sara {
 
   /*!
-    \ingroup FeatureDetectors
-    \defgroup UtilitiesDebug Utilities for visual inspection of features.
+    @ingroup FeatureDetectors
+    @defgroup UtilitiesDebug Utilities for visual inspection of features.
     @{
    */
 
-  //! \brief Visually inspect the image pyramid.
+  //! @brief Visually inspect the image pyramid.
   template <typename T>
   void display_image_pyramid(const ImagePyramid<T>& pyramid,
                              bool rescale = false)
@@ -56,7 +56,7 @@ namespace DO { namespace Sara {
   }
 
   //! @{
-  //! \brief Visually inspect local extrema.
+  //! @brief Visually inspect local extrema.
   DO_SARA_EXPORT
   void draw_scale_space_extremum(const ImagePyramid<float>& I,
                                  float x, float y, float s,
@@ -80,7 +80,7 @@ namespace DO { namespace Sara {
                    double fact = 20.);
   //! @}
 
-  //! \brief Visually inspect the descriptor.
+  //! @brief Visually inspect the descriptor.
   template <typename T, int N>
   void view_histogram(const Array<T, N, 1>& histogram)
   {

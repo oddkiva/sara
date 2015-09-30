@@ -28,7 +28,7 @@ namespace DO { namespace Sara {
 
   public:
     //! @{
-    //! \brief Constructors.
+    //! @brief Constructors.
     inline Match() = default;
 
     inline Match(const OERegion *x,
