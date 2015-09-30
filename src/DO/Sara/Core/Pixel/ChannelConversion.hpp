@@ -73,10 +73,11 @@ namespace DO { namespace Sara {
 
     if (delta_max <= eps)
       return std::numeric_limits<Int>::max();
-    else if (delta_min <= eps)
+
+    if (delta_min <= eps)
       return std::numeric_limits<Int>::min();
-    else
-      return static_cast<Int>(floor(src + 0.5));
+
+    return static_cast<Int>(floor(src + 0.5));
   }
 
 } /* namespace Sara */
