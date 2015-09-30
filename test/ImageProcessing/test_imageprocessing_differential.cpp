@@ -45,14 +45,12 @@ protected:
 TEST_F(TestDifferential, test_gradient)
 {
   auto& f = _src_image;
-  Vector2i x(1, 1);
-  auto compute_gradient = Gradient{};
+  Vector2i x{ 1, 1 };
 
-  Vector2f gradf_x;
-  compute_gradient(gradf_x, f, x);
+  Vector2f gradf_x = gradient(f, x);
   EXPECT_MATRIX_NEAR(Vector2f(1,0), gradf_x, 1e-5);
 
-  auto gradf = compute_gradient(f);
+  auto gradf = gradient(f);
   for (int y = 0; y < gradf.height(); ++y)
   {
     for (int x = 0; x < gradf.width(); ++x)
@@ -73,19 +71,17 @@ TEST_F(TestDifferential, test_laplacian)
     1, 1, 1,
     1, 1, 1,
     1, 1, 1;
-  Vector2i x(1, 1);
+  Vector2i x{ 1, 1 };
 
-  auto compute_laplacian = Laplacian{};
-
-  auto laplacian_x = compute_laplacian(f, x);
+  auto laplacian_x = laplacian(f, x);
   EXPECT_NEAR(0, laplacian_x, 1e-5);
 
-  Image<float> laplacian;
-  MatrixXf true_laplacian(3, 3);
-  true_laplacian.setZero();
+  Image<float> delta_f;
+  auto true_delta_f = MatrixXf{ 3, 3 };
+  true_delta_f.setZero();
 
-  laplacian = compute_laplacian(f);
-  EXPECT_MATRIX_NEAR(laplacian.matrix(), true_laplacian, 1e-5);
+  delta_f = laplacian(f);
+  EXPECT_MATRIX_NEAR(delta_f.matrix(), true_delta_f, 1e-5);
 }
 
 TEST_F(TestDifferential, test_hessian)
@@ -96,14 +92,12 @@ TEST_F(TestDifferential, test_hessian)
     1, 1, 1,
     1, 1, 1;
   Vector2i x(1, 1);
-  Hessian compute_hessian;
 
-  Matrix2f H_x;
+  auto H_x = hessian(f, x);
   Matrix2f true_H_x = Matrix2f::Zero();
-  compute_hessian(H_x, f, x);
   EXPECT_MATRIX_NEAR(true_H_x, H_x, 1e-5);
 
-  auto hessian_f = compute_hessian(f);
+  auto hessian_f = hessian(f);
   for (int y = 0; y < hessian_f.height(); ++y)
   {
     for (int x = 0; x < hessian_f.width(); ++x)

@@ -47,10 +47,10 @@ namespace DO { namespace Sara {
       Image<Vector<Field>, Dimension<Field>::value>;
 
     template <typename Field>
-    inline
-    void operator()(Vector<Field>& gradient,
-                    const typename Field::const_array_iterator& it) const
+    inline Vector<Field>
+    operator()(const typename Field::const_array_iterator& it) const
     {
+      auto gradient = Vector<Field>{};
       for (int i = 0; i < Dimension<Field>::value; ++i)
       {
         if (it.position()[i] == 0)
@@ -60,28 +60,27 @@ namespace DO { namespace Sara {
         else
           gradient[i] = (it.delta(i, 1) - it.delta(i,-1)) / 2;
       }
+      return gradient;
     }
 
     template <typename Field>
-    inline
-    void operator()(Vector<Field>& gradient,
-                    const Field& scalar_field,
-                    const Coords<Field>& position) const
+    inline Vector<Field> operator()(const Field& scalar_field,
+                                    const Coords<Field>& position) const
     {
       auto it = scalar_field.begin_array();
       it += position;
-      operator()<Field>(gradient, it);
+      return operator()<Field>(it);
     }
 
     template <typename Field>
-    ReturnType<Field> operator()(const Field& in) const
+    inline ReturnType<Field> operator()(const Field& in) const
     {
       auto out = ReturnType<Field>{ in.sizes() };
 
       auto in_i = in.begin_array();
       auto out_i = out.begin_array();
       for ( ; !in_i.end(); ++in_i, ++out_i)
-        operator()<Field>(*out_i, in_i);
+        *out_i = operator()<Field>(in_i);
 
       return out;
     }
@@ -166,11 +165,13 @@ namespace DO { namespace Sara {
     using ReturnType = Image<HessianMatrix<Field>, Dimension<Field>::value>;
 
     template <typename Field>
-    void operator()(HessianMatrix<Field>& H,
-                    typename Field::const_array_iterator& it) const
+    HessianMatrix<Field>
+    operator()(typename Field::const_array_iterator& it) const
     {
       const int N{ Dimension<Field>::value };
       using T = Scalar<Field>;
+
+      auto H = HessianMatrix<Field>{};
 
       for (int i = 0; i < N; ++i)
       {
@@ -201,16 +202,17 @@ namespace DO { namespace Sara {
           }
         }
       }
+
+      return H;
     }
 
     template <typename Field>
-    inline void operator()(HessianMatrix<Field>& H,
-                           const Field& scalar_field,
-                           const Coords<Field>& position) const
+    inline HessianMatrix<Field> operator()(const Field& scalar_field,
+                                           const Coords<Field>& position) const
     {
       auto loc = scalar_field.begin_array();
       loc += position;
-      operator()<Field>(H, loc);
+      return operator()<Field>(loc);
     }
 
     template <typename Field>
@@ -221,7 +223,7 @@ namespace DO { namespace Sara {
       auto in_i = in.begin_array();
       auto out_i = out.begin_array();
       for ( ; !out_i.end(); ++in_i, ++out_i)
-        operator()<Field>(*out_i, in_i);
+        *out_i = operator()<Field>(in_i);
 
       return out;
     };
@@ -237,9 +239,7 @@ namespace DO { namespace Sara {
   template <typename T, int N>
   Matrix<T,N,1> gradient(const Image<T, N>& f, const Matrix<int, N, 1>& x)
   {
-    auto Df_x = Matrix<T, N, 1>{};
-    Gradient{}(Df_x, f, x);
-    return Df_x;
+    return Gradient{}(f, x);
   }
 
   /*!
@@ -285,9 +285,7 @@ namespace DO { namespace Sara {
   template <typename T, int N>
   inline Matrix<T,N,N> hessian(const Image<T, N>& f, const Matrix<int, N, 1>& x)
   {
-    auto Hf_x = Matrix<T, N, N>{};
-    Hessian{}(Hf_x, f, x);
-    return Hf_x;
+    return Hessian{}(f, x);
   }
 
   /*!

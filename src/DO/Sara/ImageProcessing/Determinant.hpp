@@ -37,7 +37,8 @@ namespace DO { namespace Sara {
     using Matrix = typename MatrixField::pixel_type;
 
     template <typename MatrixField>
-    using Scalar = typename Matrix<MatrixField>::Scalar;
+    using Scalar =
+      decltype(std::declval<Matrix<MatrixField>>().determinant());
 
     template <typename MatrixField>
     using ReturnType =
@@ -46,7 +47,7 @@ namespace DO { namespace Sara {
     template <typename MatrixField>
     ReturnType<MatrixField> operator()(const MatrixField& in) const
     {
-      ReturnType<MatrixField> out{ in.sizes() };
+      auto out = ReturnType<MatrixField>{ in.sizes() };
 
       auto out_i = out.begin();
       auto in_i = in.begin();
