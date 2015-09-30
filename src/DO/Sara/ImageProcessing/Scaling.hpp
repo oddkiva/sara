@@ -24,12 +24,12 @@
 namespace DO { namespace Sara {
 
   /*!
-    \ingroup ImageProcessing
-    \defgroup Scaling Reduce, enlarge, warp image...
+    @ingroup ImageProcessing
+    @defgroup Scaling Reduce, enlarge, warp image...
     @{
    */
 
-  //! \brief Upscale image.
+  //! @brief Upscale image.
   template <typename T, int N>
   Image<T, N> upscale(const Image<T, N>& src, int fact)
   {
@@ -40,7 +40,7 @@ namespace DO { namespace Sara {
     return dst;
   }
 
-  //! \brief Downscale image.
+  //! @brief Downscale image.
   template <typename T, int N>
   Image<T, N> downscale(const Image<T, N>& src, int fact)
   {
@@ -51,7 +51,7 @@ namespace DO { namespace Sara {
     return dst;
   }
 
-  //! \brief Find min and max coefficient of a vector.
+  //! @brief Find min and max coefficient of a vector.
   template <typename T, int N>
   inline std::pair<T, T> range(const Matrix<T, N, 1>& v)
   {
@@ -61,7 +61,7 @@ namespace DO { namespace Sara {
     );
   }
 
-  //! \brief Reduce image.
+  //! @brief Reduce image.
   template <typename T, int N>
   Image<T, N> reduce(const Image<T, N>& src, Matrix<int, N, 1> new_sizes,
                      bool keep_ratio = false)
@@ -117,7 +117,7 @@ namespace DO { namespace Sara {
     return dst;
   }
 
-  //! \brief Reduce image.
+  //! @brief Reduce image.
   template <typename T>
   inline  Image<T, 2> reduce(const Image<T, 2>& image, int w, int h,
                              bool keep_ratio = false)
@@ -125,7 +125,7 @@ namespace DO { namespace Sara {
     return reduce(image, Vector2i(w,h), keep_ratio);
   }
 
-  //! \brief Reduce image.
+  //! @brief Reduce image.
   template <typename T>
   inline Image<T, 3> reduce(const Image<T, 3>& image, int w, int h, int d,
                             bool keep_ratio = false)
@@ -133,7 +133,7 @@ namespace DO { namespace Sara {
     return reduce(image, Vector3i(w,h,d), keep_ratio);
   }
 
-  //! \brief Reduce image.
+  //! @brief Reduce image.
   template <typename T,int N>
   inline Image<T, N> reduce(const Image<T, N>& image, double fact)
   {
@@ -142,7 +142,7 @@ namespace DO { namespace Sara {
     return reduce(image, new_sizes.template cast<int>().eval());
   }
 
-  //! \brief Reduce image.
+  //! @brief Reduce image.
   template <typename T, int N>
   inline Image<T, N> enlarge(const Image<T, N>& image,
                              Matrix<int, N, 1> new_sizes,
@@ -183,7 +183,7 @@ namespace DO { namespace Sara {
     return dst;
   }
 
-  //! \brief Enlarge image.
+  //! @brief Enlarge image.
   template <typename T>
   inline Image<T, 2> enlarge(const Image<T, 2>& image, int w, int h,
                              bool keep_ratio = false)
@@ -191,7 +191,7 @@ namespace DO { namespace Sara {
     return enlarge(image, Point2i(w,h), keep_ratio);
   }
 
-  //! \brief Enlarge image.
+  //! @brief Enlarge image.
   template <typename T>
   inline Image<T, 3> enlarge(const Image<T, 3>& image, int w, int h, int d,
                              bool keep_ratio = false)
@@ -199,7 +199,7 @@ namespace DO { namespace Sara {
     return enlarge(image, Vector3i(w,h,d), keep_ratio);
   }
 
-  //! \brief Enlarge image.
+  //! @brief Enlarge image.
   template <typename T,int N>
   inline Image<T, N> enlarge(const Image<T, N>& image, double fact)
   {
@@ -209,7 +209,7 @@ namespace DO { namespace Sara {
   }
 
   //! @}
- 
+
 } /* namespace Sara */
 } /* namespace DO */
 

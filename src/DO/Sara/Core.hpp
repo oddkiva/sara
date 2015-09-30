@@ -10,7 +10,7 @@
 // ========================================================================== //
 
 //! @file
-//! \brief Master header file of the Core module.
+//! @brief Master header file of the Core module.
 
 #ifndef DO_SARA_CORE_HPP
 #define DO_SARA_CORE_HPP
@@ -41,10 +41,10 @@
 
 /*!
   \namespace DO
-  \brief The library namespace.
+  @brief The library namespace.
 
-  \defgroup Core Core
-  \brief Note that the Core module heavily relies on the
+  @defgroup Core Core
+  @brief Note that the Core module heavily relies on the
   <a href="http://eigen.tuxfamily.org/">Eigen</a> library (linear algebra).
 
   the Eigen namespace is directly imported inside the DO namespace for

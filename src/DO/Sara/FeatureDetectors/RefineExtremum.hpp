@@ -18,13 +18,13 @@
 namespace DO { namespace Sara {
 
   /*!
-    \ingroup FeatureDetectors
-    \defgroup ExtremumRefinement Extremum Localization Refinement
+    @ingroup FeatureDetectors
+    @defgroup ExtremumRefinement Extremum Localization Refinement
     @{
   */
 
   /*!
-    \brief Test based on Harris-Stephens' idea on corner detection.
+    @brief Test based on Harris-Stephens' idea on corner detection.
     Basically the Hessian matrix \f$\mathbf{H}\f$ is estimated by finite
     differentiation.
 
@@ -41,7 +41,7 @@ namespace DO { namespace Sara {
   bool on_edge(const Image<float>& I, int x, int y, float edge_ratio = 10.f);
 
   /*!
-    \brief Extremum position refinement in scale-space based on Newton's method.
+    @brief Extremum position refinement in scale-space based on Newton's method.
     (cf. [Lowe, IJCV 2004] and [Brown and Lowe, BMVC 2002]).
 
     @param[in] I the input gaussian pyramid
@@ -86,7 +86,7 @@ namespace DO { namespace Sara {
                        Point3f& pos, float& val,
                        int border_size = 1, int num_iter = 5);
   /*!
-    \brief This function refines the coordinates using the interpolation method
+    @brief This function refines the coordinates using the interpolation method
     in [Lowe, IJCV 2004] and [Brown and Lowe, BMVC 2002].
 
     It refines the spatial coordinates \f$(x,y)\f$. However, there is no scale
@@ -97,7 +97,7 @@ namespace DO { namespace Sara {
                        Point2f& pos, float& val,
                        int border_size = 1, int num_iter = 5);
   /*!
-    \brief Localizes all local extrema in scale-space at scale
+    @brief Localizes all local extrema in scale-space at scale
     \f$\sigma = 2^{s/S+o}\f$.
     Note that the default parameters are suited for the DoG extrema.
    */
@@ -120,7 +120,7 @@ namespace DO { namespace Sara {
                             int num_scales = 10);
 
   /*!
-    \brief Localizes local maxima in space only and tries to assign a
+    @brief Localizes local maxima in space only and tries to assign a
     characteristic scale to each local maximum from the normalized Laplacian
     of Gaussians operator.
 

@@ -29,10 +29,10 @@ namespace DO { namespace Sara {
   class DO_SARA_EXPORT Ellipse
   {
   public:
-    //! \brief Default constructor.
+    //! @brief Default constructor.
     Ellipse() = default;
 
-    //! \brief Constructor.
+    //! @brief Constructor.
     Ellipse(double radius1, double radius2, double orientation,
             const Point2d& center)
       : _a(radius1)
@@ -43,7 +43,7 @@ namespace DO { namespace Sara {
     }
 
     //! @{
-    //! \brief Data member accessors.
+    //! @brief Data member accessors.
     double radius1() const { return _a; }
     double radius2() const { return _b; }
     double orientation() const { return _o; }
@@ -55,22 +55,22 @@ namespace DO { namespace Sara {
     Point2d& center() { return _c; }
     //! @}
 
-    //! \brief Get the radial vector at angle $\theta$ w.r.t. orientation $o$
+    //! @brief Get the radial vector at angle $\theta$ w.r.t. orientation $o$
     //! of ellipse.
     Vector2d rho(double theta) const;
 
-    //! \brief Get point on ellipse at angle $\theta$ w.r.t. orientation $o$ of
+    //! @brief Get point on ellipse at angle $\theta$ w.r.t. orientation $o$ of
     //! ellipse.
     Point2d operator()(double theta) const;
 
     /*!
-      \brief Retrieve relative orientation of point $p$ w.r.t. orientation
+      @brief Retrieve relative orientation of point $p$ w.r.t. orientation
       $o$ of ellipse.
      */
     DO_SARA_EXPORT
     friend double orientation(const Point2d& p, const Ellipse& e);
 
-    //! \brief Polar antiderivative.
+    //! @brief Polar antiderivative.
     friend inline double polar_antiderivative(const Ellipse& e, double theta)
     {
       const double y = (e._b-e._a)*sin(2*theta);
@@ -101,7 +101,7 @@ namespace DO { namespace Sara {
     DO_SARA_EXPORT
     friend double segment_area(const Ellipse& e, double theta0, double theta1);
 
-    //! \brief Return the ellipse area.
+    //! @brief Return the ellipse area.
     friend inline double area(const Ellipse& e)
     {
       return M_PI*e._a*e._b;
@@ -115,7 +115,7 @@ namespace DO { namespace Sara {
       return R.matrix()*D.asDiagonal()*R.matrix().transpose();
     }
 
-    //! \brief Check whether the point is inside ellipse.
+    //! @brief Check whether the point is inside ellipse.
     friend inline bool inside(const Point2d& p, const Ellipse& e)
     {
       return (p - e._c).transpose()*shape_matrix(e)*(p - e._c) < 1.;

@@ -33,7 +33,7 @@ namespace DO { namespace Sara {
     };
 
     //! @{
-    //! \brief STL-compatible interface.
+    //! @brief STL-compatible interface.
     using size_type = std::size_t;
     using difference_type = std::ptrdiff_t;
     using value_type = T;
@@ -46,31 +46,31 @@ namespace DO { namespace Sara {
     //! @}
 
     //! @{
-    //! \brief Slice type.
+    //! @brief Slice type.
     using slice_type = MultiArrayView<T, N-1, S>;
     using const_slice_type = const MultiArrayView<T, N-1, S>;
     //! @}
 
     //! @{
-    //! \brief Vector type.
+    //! @brief Vector type.
     using vector_type = Matrix<int, N, 1>;
     using slice_vector_type = Matrix<int, N-1, 1>;
     //! @}
 
     //! @{
-    //! \brief N-dimensional iterator type.
+    //! @brief N-dimensional iterator type.
     using array_iterator = ArrayIterator<false, T, N, StorageOrder>;
     using const_array_iterator = ArrayIterator<true, T, N, StorageOrder>;
     //! @}
 
     //! @{
-    //! \brief N-dimensional subrange iterator.
+    //! @brief N-dimensional subrange iterator.
     using subarray_iterator = SubarrayIterator<false, T, N, StorageOrder>;
     using const_subarray_iterator = SubarrayIterator<true, T, N, StorageOrder>;
     //! @}
 
     //! @{
-    //! \brief Array views for linear algebra.
+    //! @brief Array views for linear algebra.
     using array_view_type = Map<
       Array<typename ElementTraits<T>::value_type, Dynamic, 1>
     >;
@@ -80,7 +80,7 @@ namespace DO { namespace Sara {
     //! @}
 
     //! @{
-    //! \brief Matrix views for linear algebra.
+    //! @brief Matrix views for linear algebra.
     using matrix_view_type = Map<
       Matrix<
         typename ElementTraits<T>::value_type, Dynamic, Dynamic,
@@ -96,10 +96,10 @@ namespace DO { namespace Sara {
     //! @}
 
   public: /* methods */
-    //! \brief Default constructor.
+    //! @brief Default constructor.
     inline MultiArrayView() = default;
 
-    //! \brief Constructor that wraps plain data with its known sizes.
+    //! @brief Constructor that wraps plain data with its known sizes.
     inline MultiArrayView(value_type *data,
                           const vector_type& sizes)
       : _begin{ data }
@@ -109,55 +109,55 @@ namespace DO { namespace Sara {
     {
     }
 
-    //! \brief Return the size vector of the MultiArray object.
+    //! @brief Return the size vector of the MultiArray object.
     const vector_type& sizes() const
     {
       return _sizes;
     }
 
-    //! \brief Return the number of elements in the internal data array.
+    //! @brief Return the number of elements in the internal data array.
     size_type size() const
     {
       return _end - _begin;
     }
 
-    //! \brief Return the size of the MultiArray object along the i-th dimension.
+    //! @brief Return the size of the MultiArray object along the i-th dimension.
     int size(int i) const
     {
       return _sizes[i];
     }
 
-    //! \brief Return the number of rows.
+    //! @brief Return the number of rows.
     int rows() const
     {
       return _sizes[0];
     }
 
-    //! \brief Return the number of cols.
+    //! @brief Return the number of cols.
     int cols() const
     {
       return _sizes[1];
     }
 
-    //! \brief Return the depth size.
+    //! @brief Return the depth size.
     int depth() const
     {
       return _sizes[2];
     }
 
-    //! \brief Return the stride vector of the MultiArray object.
+    //! @brief Return the stride vector of the MultiArray object.
     inline const vector_type& strides() const
     {
       return _strides;
     }
 
-    //! \brief Return the stride value along the i-th dimension.
+    //! @brief Return the stride value along the i-th dimension.
     inline int stride(int i) const
     {
       return _strides[i];
     }
     //! @{
-    //! \brief Return the array pointer
+    //! @brief Return the array pointer
     inline pointer data()
     {
       return _begin;
@@ -170,7 +170,7 @@ namespace DO { namespace Sara {
     //! @}
 
     //! @{
-    //! \brief Return reference to the element at the given coordinates.
+    //! @brief Return reference to the element at the given coordinates.
     inline reference operator()(const vector_type& pos)
     {
       return _begin[offset(pos)];
@@ -207,7 +207,7 @@ namespace DO { namespace Sara {
     //! @}
 
     //! @{
-    //! \brief Return the i-th slice of the MultiArray object.
+    //! @brief Return the i-th slice of the MultiArray object.
     inline slice_type operator[](int i)
     {
       slice_vector_type sizes{ _sizes.tail(N - 1) };
@@ -224,7 +224,7 @@ namespace DO { namespace Sara {
     //! @}
 
     //! @{
-    //! \brief Return the begin iterator.
+    //! @brief Return the begin iterator.
     inline iterator begin()
     {
       return _begin;
@@ -237,7 +237,7 @@ namespace DO { namespace Sara {
     //! @}
 
     //! @{
-    //! \brief Return the end iterator.
+    //! @brief Return the end iterator.
     inline iterator end()
     {
       return _end;
@@ -250,7 +250,7 @@ namespace DO { namespace Sara {
     //! @}
 
     //! @{
-    //! \brief Return the array view for linear algebra with Eigen libraries.
+    //! @brief Return the array view for linear algebra with Eigen libraries.
     inline array_view_type array()
     {
       return array_view_type {
@@ -269,7 +269,7 @@ namespace DO { namespace Sara {
     //! @}
 
     //! @{
-    //! \brief Return the matrix view for linear algebra with Eigen libraries.
+    //! @brief Return the matrix view for linear algebra with Eigen libraries.
     inline matrix_view_type matrix()
     {
       static_assert(N == 2, "MultiArray must be 2D");
@@ -290,7 +290,7 @@ namespace DO { namespace Sara {
     //! @}
 
     //! @{
-    //! \brief Return the begin iterator of the whole multi-array.
+    //! @brief Return the begin iterator of the whole multi-array.
     inline array_iterator begin_array()
     {
       return array_iterator {
@@ -307,7 +307,7 @@ namespace DO { namespace Sara {
     //! @}
 
     //! @{
-    //! \brief Return the begin iterator of the sub-array.
+    //! @brief Return the begin iterator of the sub-array.
     inline subarray_iterator begin_subarray(const vector_type& start,
                                             const vector_type& end)
     {
@@ -326,13 +326,13 @@ namespace DO { namespace Sara {
     //! @}
 
   protected:
-    //! \brief Compute the strides according the size vector and storage order.
+    //! @brief Compute the strides according the size vector and storage order.
     inline vector_type compute_strides(const vector_type& sizes) const
     {
       return StrideComputer<StorageOrder>::eval(sizes);
     }
 
-    //! \brief Compute the raw size needed to allocate the internal data.
+    //! @brief Compute the raw size needed to allocate the internal data.
     inline size_type compute_size(const vector_type& sizes) const
     {
       Matrix<size_type, N, 1> sz{ sizes.template cast<size_type>() };
@@ -340,20 +340,20 @@ namespace DO { namespace Sara {
         sz.data(), sz.data()+N, size_type(1), std::multiplies<size_type>());
     }
 
-    //! \brief Compute the 1D index of the corresponding coordinates.
+    //! @brief Compute the 1D index of the corresponding coordinates.
     inline int offset(const vector_type& pos) const
     {
       return jump(pos, _strides);
     }
 
   protected: /* data members. */
-    //! \brief First element of the internal array.
+    //! @brief First element of the internal array.
     value_type *_begin{ nullptr };
-    //! \brief Last element of the internal array.
+    //! @brief Last element of the internal array.
     value_type *_end{ nullptr };
-    //! \brief Sizes vector.
+    //! @brief Sizes vector.
     vector_type _sizes{ vector_type::Zero() };
-    //! \brief Strides vector.
+    //! @brief Strides vector.
     vector_type _strides{ vector_type::Zero() };
   };
 

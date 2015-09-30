@@ -20,12 +20,12 @@
 
 namespace DO { namespace Sara {
 
-  //! \brief Interactive pixmap item.
+  //! @brief Interactive pixmap item.
   class DO_SARA_EXPORT GraphicsPixmapItem : public QGraphicsPixmapItem
   {
   public:
     //! @{
-    //! \brief Constructors.
+    //! @brief Constructors.
     GraphicsPixmapItem(QGraphicsItem* parent = 0)
       : QGraphicsPixmapItem(parent)
     {
