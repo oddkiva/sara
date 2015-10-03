@@ -9,9 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_SARA_GEOMETRY_BBOX_HPP
-#define DO_SARA_GEOMETRY_BBOX_HPP
-
+#ifndef DO_SARA_GEOMETRY_OBJECTS_BBOX_HPP
+#define DO_SARA_GEOMETRY_OBJECTS_BBOX_HPP
 
 #include <stdexcept>
 #include <vector>
@@ -162,4 +161,4 @@ namespace DO { namespace Sara {
 } /* namespace DO */
 
 
-#endif /* DO_SARA_GEOMETRY_BBOX_HPP */
+#endif /* DO_SARA_GEOMETRY_OBJECTS_BBOX_HPP */

@@ -1,4 +1,8 @@
-#pragma once
+#ifndef DO_SARA_GEOMETRY_OBJECTS_CUBE_HPP
+#define DO_SARA_GEOMETRY_OBJECTS_CUBE_HPP
+
+#include <DO/Sara/Core/EigenExtension.hpp>
+
 
 namespace DO { namespace Sara {
 
@@ -36,3 +40,6 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
+
+
+#endif /* DO_SARA_GEOMETRY_OBJECTS_CUBE_HPP */

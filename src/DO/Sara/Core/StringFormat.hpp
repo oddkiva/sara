@@ -1,4 +1,5 @@
-#pragma once
+#ifndef DO_SARA_CORE_STRINGFORMAT_HPP
+#define DO_SARA_CORE_STRINGFORMAT_HPP
 
 #include <cstdarg>
 #include <string>
@@ -13,3 +14,6 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
+
+
+#endif /* DO_SARA_CORE_STRINGFORMAT_HPP */
