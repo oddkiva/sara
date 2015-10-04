@@ -37,11 +37,11 @@ TEST_F(TestTriangle, test_point_inside_triangle)
 
   double exact_area = area(t);
   int pixel_area = sweep_count_pixels([&](Point2d& p) {
-    return inside(p, t);
+    return t.contains(p);
   });
 
-  double relError = fabs(exact_area - pixel_area) / exact_area;
-  EXPECT_NEAR(relError, 0., 5e-2);
+  double rel_error = fabs(exact_area - pixel_area) / exact_area;
+  EXPECT_NEAR(rel_error, 0., 5e-2);
 }
 
 
