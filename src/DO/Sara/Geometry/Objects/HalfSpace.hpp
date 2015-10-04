@@ -38,9 +38,9 @@ namespace DO { namespace Sara {
     }
 
 
-    bool contains(const Point3d& p) const
+    bool contains(const Point3d& p, double eps = 0.) const
     {
-      return _n0.dot(p - _p0) <= 0;
+      return _n0.dot(p - _p0) <= eps;
     }
   };
 
