@@ -76,7 +76,7 @@ namespace DO { namespace Sara { namespace Projective {
     //! @brief Comparison operator.
     inline bool operator==(const MatrixBasedObject& other) const
     {
-      return _mat == other.mat_;
+      return _mat == other._mat;
     }
 
     inline bool operator!=(const MatrixBasedObject& other) const
@@ -88,7 +88,7 @@ namespace DO { namespace Sara { namespace Projective {
   private:
     inline void copy(const MatrixBasedObject& other)
     {
-      _mat = other.mat_;
+      _mat = other._mat;
     }
 
   protected:
@@ -127,7 +127,7 @@ namespace DO { namespace Sara { namespace Projective {
     //! @brief Evaluation at point 'x'.
     inline T operator()(const HVec& x) const
     {
-      return x.transpose()*mat_*x;
+      return x.transpose()*_mat*x;
     }
 
     inline T operator()(const Vec& x) const

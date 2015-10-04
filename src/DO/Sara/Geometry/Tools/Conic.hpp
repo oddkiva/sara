@@ -48,7 +48,7 @@ namespace DO { namespace Sara { namespace Projective {
     //! @brief Evaluation at point 'x'.
     inline T operator()(const HVec& x) const
     {
-      return x.transpose()*mat_*x;
+      return x.transpose()*_mat*x;
     }
 
     inline T operator()(const Vec& x) const
