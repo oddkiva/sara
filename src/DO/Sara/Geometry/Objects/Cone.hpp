@@ -33,63 +33,65 @@ namespace DO { namespace Sara {
       PositiveCosine = 0x8
     };
 
+    //! @brief Constructor.
     inline Cone(const Vector& alpha, const Vector& beta, Type type = Convex,
                 double eps = 1e-8)
-      : eps_(eps), type_(type)
+      : _eps{ eps }
+      , _type{ type }
     {
-      basis_.col(0) = alpha.normalized();
-      basis_.col(1) = beta.normalized();
-      FullPivLU<Basis> luSolver(basis_);
-      luSolver.setThreshold(eps_);
-      if (luSolver.rank() == 1)
+      _basis.col(0) = alpha.normalized();
+      _basis.col(1) = beta.normalized();
+      FullPivLU<Basis> lu_solver(_basis);
+      lu_solver.setThreshold(_eps);
+      if (lu_solver.rank() == 1)
       {
-        type_ |= Pointed;
-        if (basis_.col(0).dot(basis_.col(1)) > 0)
-          type_ |= PositiveCosine;
+        _type |= Pointed;
+        if (_basis.col(0).dot(_basis.col(1)) > 0)
+          _type |= PositiveCosine;
       }
     }
 
-    inline const Basis& basis() const { return basis_; }
-    inline Vector alpha() const { return basis_.col(0); }
-    inline Vector beta() const { return basis_.col(1); }
+    //! @{
+    //! @brief Data member accessor.
+    inline const Basis& basis() const { return _basis; }
 
-    friend
-    inline bool inside(const Vector& p, const Cone& K)
-    { return K.contains(p); }
+    inline Vector alpha() const { return _basis.col(0); }
 
-  protected:
+    inline Vector beta() const { return _basis.col(1); }
+    //! @}
+
     bool contains(const Vector& x) const
     {
       // Deal with the null vector.
-      if (x.squaredNorm() < eps_*eps_)
-        return (type_ & Blunt) != 0;
+      if (x.squaredNorm() < _eps*_eps)
+        return (_type & Blunt) != 0;
 
       // Otherwise decompose x w.r.t. to the basis.
       Vector2d theta;
-      theta = basis_.fullPivLu().solve(x);
-      double relError = (basis_*theta - x).squaredNorm() / x.squaredNorm();
-      if (relError > eps_)
+      theta = _basis.fullPivLu().solve(x);
+      double relError = (_basis*theta - x).squaredNorm() / x.squaredNorm();
+      if (relError > _eps)
         return false;
 
       // Deal with the degenerate cases (Pointed cone).
-      if (type_ & Pointed)
+      if (_type & Pointed)
       {
-        if (type_ & PositiveCosine && type_ & Blunt)
-          return theta.minCoeff() > -eps_;
-        return (type_ & Blunt) != 0;
+        if (_type & PositiveCosine && _type & Blunt)
+          return theta.minCoeff() > -_eps;
+        return (_type & Blunt) != 0;
       }
 
       // Generic case.
-      double minCoeff = theta.minCoeff();
-      if (type_ & Convex)
-        return minCoeff > eps_;
-      return minCoeff > -eps_;
+      double min_coeff = theta.minCoeff();
+      if (_type & Convex)
+        return min_coeff > _eps;
+      return min_coeff > -_eps;
     }
 
   protected:
-    Basis basis_;
-    double eps_;
-    unsigned char type_;
+    Basis _basis;
+    double _eps;
+    unsigned char _type;
   };
 
   template <int N>
@@ -104,22 +106,29 @@ namespace DO { namespace Sara {
 
     inline AffineCone(const Vector& alpha, const Vector& beta,
                       const Vector& vertex, Type type = Base::Convex)
-      : Base(alpha, beta, type), vertex_(vertex) {}
+      : Base{ alpha, beta, type }
+      , _vertex{ vertex }
+    {
+    }
 
-    inline const Vector& vertex() const { return vertex_; }
+    inline const Vector& vertex() const
+    {
+      return _vertex;
+    }
 
-    friend
-    inline bool inside(const Vector& p, const AffineCone& K)
-    { return K.contains(Vector(p-K.vertex_)); }
+    inline bool contains(const Vector& p) const
+    {
+      return Base::contains(Vector(p - _vertex));
+    }
 
   private:
-    Vector vertex_;
+    Vector _vertex;
   };
 
-  typedef Cone<2> Cone2;
-  typedef Cone<3> Cone3;
-  typedef AffineCone<2> AffineCone2;
-  typedef AffineCone<3> AffineCone3;
+  using Cone2 = Cone<2>;
+  using Cone3 = Cone<3>;
+  using AffineCone2 = AffineCone<2>;
+  using AffineCone3 = AffineCone<3>;
 
   DO_SARA_EXPORT
   AffineCone2 affine_cone2(double theta0, double theta1, const Point2d& vertex);

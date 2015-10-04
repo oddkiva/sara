@@ -30,60 +30,94 @@ namespace DO { namespace Sara { namespace CSG {
   template <typename Obj>
   class Singleton : public Object
   {
-    Obj obj_;
+    Obj _obj;
+
   public:
-    explicit Singleton(const Obj& obj) : obj_(obj) {}
+    explicit Singleton(const Obj& obj)
+      : _obj(obj)
+    {
+    }
+
     bool contains(const Point2d& p) const
-    { return inside(p, obj_); }
+    {
+      return _obj.contains(p);
+    }
   };
 
-  //! CSG object difference
+  //! @brief CSG object difference.
   class Difference : public Object
   {
-    const Object *o1_;
-    const Object *o2_;
+    const Object *_o1;
+    const Object *_o2;
+
   public:
     inline Difference(const Object *o1, const Object *o2)
-      : o1_(o1), o2_(o2) {}
+      : _o1(o1)
+      , _o2(o2)
+    {
+    }
+
     bool contains(const Point2d& p) const
-    { return o1_->contains(p) && !o2_->contains(p); }
+    {
+      return _o1->contains(p) && !_o2->contains(p);
+    }
   };
 
-  //! CSG object union
+  //! @brief CSG object union.
   class Union : public Object
   {
-    const Object *o1_;
-    const Object *o2_;
+    const Object *_o1;
+    const Object *_o2;
+
   public:
     inline Union(const Object *o1, const Object *o2)
-      : o1_(o1), o2_(o2) {}
+      : _o1(o1)
+      , _o2(o2)
+    {
+    }
+
     bool contains(const Point2d& p) const
-    { return o1_->contains(p) || o2_->contains(p); }
+    {
+      return _o1->contains(p) || _o2->contains(p);
+    }
   };
 
-  //! CSG object intersection
+  //! @brief CSG object intersection.
   class Intersection : public Object
   {
-    const Object *o1_;
-    const Object *o2_;
+    const Object *_o1;
+    const Object *_o2;
+
   public:
     inline Intersection(const Object *o1, const Object *o2)
-      : o1_(o1), o2_(o2) {}
+      : _o1(o1)
+      , _o2(o2)
+    {
+    }
+
     bool contains(const Point2d& p) const
-    { return o1_->contains(p) && o2_->contains(p); }
+    {
+      return _o1->contains(p) && _o2->contains(p);
+    }
   };
 
-  //! Difference of two objects
+  //! @brief Computes the difference of two objects.
   inline Difference operator-(const Object& o1, const Object& o2)
-  { return Difference(&o1, &o2); }
+  {
+    return Difference(&o1, &o2);
+  }
 
-  //! Intersection of two objects
+  //! @brief Computes the intersection of two objects.
   inline Intersection operator*(const Object& o1, const Object& o2)
-  { return Intersection(&o1, &o2); }
+  {
+    return Intersection(&o1, &o2);
+  }
 
-  //! Union of two objects
+  //! @brief Computes the union of two objects.
   inline Union operator+(const Object& o1, const Object& o2)
-  { return Union(&o1, &o2); }
+  {
+    return Union(&o1, &o2);
+  }
 
 } /* namespace CSG */
 } /* namespace Sara */

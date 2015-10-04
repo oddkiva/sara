@@ -19,15 +19,29 @@ namespace DO { namespace Sara {
 
   class Sphere
   {
-    Point3d c_;
-    double r_;
-  public:
-    Sphere(const Point3d& c, double r) : c_(c), r_(r) {}
-    const Point3d& center() const { return c_; }
-    double radius() const { return r_; }
+    Point3d _c;
+    double _r;
 
-    friend bool inside(const Point3d& x, const Sphere& S)
-    { return (x - S.c_).squaredNorm() < S.radius()*S.radius(); }
+  public:
+    Sphere(const Point3d& c, double r)
+      : _c(c), _r(r)
+    {
+    }
+
+    const Point3d& center() const
+    {
+      return _c;
+    }
+
+    double radius() const
+    {
+      return _r;
+    }
+
+    bool contains(const Point3d& x) const
+    {
+      return (x - _c).squaredNorm() < _r*_r;
+    }
   };
 
 } /* namespace Sara */

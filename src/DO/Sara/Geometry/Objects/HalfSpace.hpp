@@ -25,6 +25,19 @@ namespace DO { namespace Sara {
     }
     //! @}
 
+    //! @brief Returns the normal of the plane.
+    const Vector3d& normal() const
+    {
+      return _n0;
+    }
+
+    //! @brief Returns the reference point of the plane.
+    const Vector3d& point() const
+    {
+      return _p0;
+    }
+
+
     bool contains(const Point3d& p) const
     {
       return _n0.dot(p - _p0) <= 0;
