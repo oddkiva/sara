@@ -9,7 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#pragma once
+#ifndef DO_SARA_IMAGEIO_IMAGEIO_HPP
+#define DO_SARA_IMAGEIO_IMAGEIO_HPP
 
 #include <easyexif/exif.h>
 
@@ -112,3 +113,6 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
+
+
+#endif /* DO_SARA_IMAGEIO_IMAGEIO_HPP */

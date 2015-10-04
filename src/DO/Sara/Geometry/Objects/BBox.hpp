@@ -9,9 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_SARA_GEOMETRY_BBOX_HPP
-#define DO_SARA_GEOMETRY_BBOX_HPP
-
+#ifndef DO_SARA_GEOMETRY_OBJECTS_BBOX_HPP
+#define DO_SARA_GEOMETRY_OBJECTS_BBOX_HPP
 
 #include <stdexcept>
 #include <vector>
@@ -70,13 +69,35 @@ namespace DO { namespace Sara {
 
     //! @{
     //! @brief Return BBox vertex.
-    Point2d& top_left() { return _top_left; }
-    Point2d& bottom_right() { return _bottom_right; }
+    Point2d& top_left()
+    {
+      return _top_left;
+    }
 
-    const Point2d& top_left() const { return _top_left; }
-    const Point2d& bottom_right() const { return _bottom_right; }
-    Point2d top_right() const { return _top_left + Point2d(width(), 0); }
-    Point2d bottom_left() const { return _bottom_right - Point2d(width(), 0); }
+    Point2d& bottom_right()
+    {
+      return _bottom_right;
+    }
+
+    const Point2d& top_left() const
+    {
+      return _top_left;
+    }
+
+    const Point2d& bottom_right() const
+    {
+      return _bottom_right;
+    }
+
+    Point2d top_right() const
+    {
+      return _top_left + Point2d(width(), 0);
+    }
+
+    Point2d bottom_left() const
+    {
+      return _bottom_right - Point2d(width(), 0);
+    }
     //! @}
 
     //! @{
@@ -94,13 +115,27 @@ namespace DO { namespace Sara {
 
     //! @{
     //! @brief Return BBox sizes.
-    double width() const  { return std::abs(_bottom_right.x() - _top_left.x()); }
-    double height() const { return std::abs(_bottom_right.y() - _top_left.y()); }
-    Vector2d sizes() const { return _bottom_right - _top_left; }
+    double width() const
+    {
+      return std::abs(_bottom_right.x() - _top_left.x());
+    }
+
+    double height() const
+    {
+      return std::abs(_bottom_right.y() - _top_left.y());
+    }
+
+    Vector2d sizes() const
+    {
+      return _bottom_right - _top_left;
+    }
     //! @}
 
     //! @brief Return BBox center.
-    Point2d center() const { return 0.5*(_top_left + _bottom_right); }
+    Point2d center() const
+    {
+      return 0.5*(_top_left + _bottom_right);
+    }
 
     //! @{
     //! @brief Equality comparison operator.
@@ -142,7 +177,7 @@ namespace DO { namespace Sara {
   };
 
   //! @{
-  //! Utility functions.
+  //! @brief Utility functions.
   DO_SARA_EXPORT double area(const BBox& bbox);
   DO_SARA_EXPORT bool inside(const Point2d& p, const BBox& bbox);
   DO_SARA_EXPORT bool degenerate(const BBox& bbox, double eps = 1e-3);
@@ -151,10 +186,10 @@ namespace DO { namespace Sara {
   DO_SARA_EXPORT double jaccard_distance(const BBox& bbox1, const BBox& bbox2);
   //! @}
 
-  //! I/O.
+  //! @brief I/O.
   DO_SARA_EXPORT std::ostream& operator<<(std::ostream& os, const BBox& bbox);
 
-  //! Return the intersection of two BBoxes.
+  //! @brief Return the intersection of two BBoxes.
   DO_SARA_EXPORT BBox intersection(const BBox& bbox1, const BBox& bbox2);
 
 
@@ -162,4 +197,4 @@ namespace DO { namespace Sara {
 } /* namespace DO */
 
 
-#endif /* DO_SARA_GEOMETRY_BBOX_HPP */
+#endif /* DO_SARA_GEOMETRY_OBJECTS_BBOX_HPP */

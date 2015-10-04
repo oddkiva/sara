@@ -15,3 +15,5 @@ macro (sara_add_example example)
 endmacro()
 
 sara_add_example(polygon_clipping_sutherland_hodgman_example)
+
+add_subdirectory(raytracer)

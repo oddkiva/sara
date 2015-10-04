@@ -165,9 +165,9 @@ namespace DO { namespace Sara {
   double analytic_intersection(const Ellipse& E_0, const Ellipse& E_1)
   {
     // Find the intersection points of the two ellipses.
-    Point2d interPts[4];
+    Point2d inter_pts[4];
 #ifdef RESOLVED_NUMERICAL_ACCURACY
-    int numInter = compute_intersection_points(interPts, E_0, E_1);
+    int num_inter = compute_intersection_points(inter_pts, E_0, E_1);
 #else
     /*if (numInter > 0)
     {
@@ -207,27 +207,27 @@ namespace DO { namespace Sara {
       Vector2d c_1 = E_1.center() - center;
       EE_0 = construct_from_shape_matrix(S_0, c_0);
       EE_1 = construct_from_shape_matrix(S_1, c_1);
-      int numInter = compute_intersection_points(interPts, EE_0, EE_1);
+      int num_inter = compute_intersection_points(inter_pts, EE_0, EE_1);
 
-      for (int i = 0; i < numInter; ++i)
-        interPts[i] = delta.asDiagonal()*interPts[i] + center;
+      for (int i = 0; i < num_inter; ++i)
+        inter_pts[i] = delta.asDiagonal()*inter_pts[i] + center;
     /*}*/
 #endif
 
 
 
-    if (numInter > 2)
+    if (num_inter > 2)
     {
       Detail::PtCotg work[4];
-      Detail::sort_points_by_polar_angle(interPts, work, numInter);
+      Detail::sort_points_by_polar_angle(inter_pts, work, num_inter);
     }
 
     // SPECIAL CASE.
     // If there is at most one intersection point, then either one of the
     // ellipse is included in the other.
-    if (numInter < 2)
+    if (num_inter < 2)
     {
-      if (inside(E_1.center(), E_0) || inside(E_0.center(), E_1))
+      if (E_0.contains(E_1.center()) || E_1.contains(E_0.center()))
         return std::min(area(E_0), area(E_1));
     }
 
@@ -236,12 +236,12 @@ namespace DO { namespace Sara {
     // ellipse orientation.
     double o_0[4];
     double o_1[4];
-    orientation(o_0, interPts, numInter, E_0);
-    orientation(o_1, interPts, numInter, E_1);
+    orientation(o_0, inter_pts, num_inter, E_0);
+    orientation(o_1, inter_pts, num_inter, E_1);
 
     // Sum the segment areas.
     double area = 0;
-    for (int i = 0, j = numInter-1; i < numInter; j=i++)
+    for (int i = 0, j = num_inter-1; i < num_inter; j=i++)
     {
       double theta_0 = o_0[j];
       double theta_1 = o_0[i];
@@ -260,13 +260,13 @@ namespace DO { namespace Sara {
     }
     // If the number of the intersection > 2, add the area of the polygon
     // whose vertices are p[0], p[1], ..., p[numInter].
-    if (numInter > 2)
+    if (num_inter > 2)
     {
-      for (int i = 0, j = numInter-1; i < numInter; j=i++)
+      for (int i = 0, j = num_inter-1; i < num_inter; j=i++)
       {
         Matrix2d M;
-        M.col(0) = interPts[j];
-        M.col(1) = interPts[i];
+        M.col(0) = inter_pts[j];
+        M.col(1) = inter_pts[i];
         area += 0.5*M.determinant();
       }
     }

@@ -44,7 +44,7 @@ TEST(DO_Sara_Core_Test, eigenExtensionTest)
   // Check that matrix
   for (int i = 0; i < m.rows(); ++i)
     for (int j = 0; j < m.cols(); ++j)
-      EXPECT_TRUE(m(i,j) == (a+b).eval());
+      EXPECT_TRUE(m(i, j) == (a + b).eval());
 
   EXPECT_TRUE(m(0,0)*n(0,0) == (a+b)*b);
 

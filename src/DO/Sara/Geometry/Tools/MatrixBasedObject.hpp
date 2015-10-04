@@ -9,9 +9,11 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#pragma once
+#ifndef DO_SARA_GEOMETRY_TOOLS_MATRIXBASEDOBJECT_HPP
+#define DO_SARA_GEOMETRY_TOOLS_MATRIXBASEDOBJECT_HPP
 
 #include <DO/Sara/Core/EigenExtension.hpp>
+
 
 namespace DO { namespace Sara { namespace Projective {
 
@@ -21,60 +23,124 @@ namespace DO { namespace Sara { namespace Projective {
   {
   public:
     enum { Dimension = N };
-    typedef Matrix<T, N+1, N+1> Mat;
-    typedef Matrix<T, N+1, 1> HVec; // in projective space
-    typedef Matrix<T, N  , 1> Vec;  // in Euclidean space
-    //! Common constructors
-    inline MatrixBasedObject() {}
-    inline MatrixBasedObject(const MatrixBasedObject& other) { copy(other); }
-    inline MatrixBasedObject(const Mat& data) : mat_(data) {}
-    //! Assignment operator
+    using Mat = Matrix<T, N+1, N+1>;
+    using HVec = Matrix<T, N+1, 1>; // in projective space
+    using Vec = Matrix<T, N  , 1>;  // in Euclidean space
+
+    //! @{
+    //! @brief Common constructors
+    MatrixBasedObject() = default;
+
+    inline MatrixBasedObject(const MatrixBasedObject& other)
+    {
+      copy(other);
+    }
+
+    inline MatrixBasedObject(const Mat& data)
+      : _mat(data)
+    {
+    }
+    //! @}
+
+    //! @brief Assignment operator.
     MatrixBasedObject& operator=(const MatrixBasedObject& other)
-    { copy(other); return *this; }
-    //! Matrix accessor
-    inline Mat& matrix() { return mat_; }
-    inline const Mat& matrix() const { return mat_; }
-    //! Coefficient accessor
+    {
+      copy(other);
+      return *this;
+    }
+
+    //! @{
+    //! @brief Matrix accessor.
+    inline Mat& matrix()
+    {
+      return _mat;
+    }
+
+    inline const Mat& matrix() const { return _mat; }
+    //! @}
+
+    //! @{
+    //! @brief Coefficient accessor.
     inline T& operator()(int i, int j)
-    { return mat_(i,j); }
+    {
+      return _mat(i,j);
+    }
+
     inline T operator()(int i, int j) const
-    { return mat_(i,j); }
-    //! Comparison operator
+    {
+      return _mat(i,j);
+    }
+    //! @}
+
+    //! @{
+    //! @brief Comparison operator.
     inline bool operator==(const MatrixBasedObject& other) const
-    { return mat_ == other.mat_; }
+    {
+      return _mat == other._mat;
+    }
+
     inline bool operator!=(const MatrixBasedObject& other) const
-    { return !operator=(other); }
+    {
+      return !operator=(other);
+    }
+    //! @}
+
   private:
     inline void copy(const MatrixBasedObject& other)
-    { mat_ = other.mat_; }
+    {
+      _mat = other._mat;
+    }
+
   protected:
-    Mat mat_;
+    Mat _mat;
   };
 
 
   template <typename T, int N>
   class Homography : public MatrixBasedObject<T,N>
   {
-    typedef MatrixBasedObject<T,N> Base;
-    using Base::mat_;
+    using Base = MatrixBasedObject<T, N>;
+    using Base::_mat;
+
   public:
     using Base::Dimension;
-    typedef typename Base::Mat  Mat;
-    typedef typename Base::HVec HVec;
-    typedef typename Base::Vec  Vec;
-    //! Common constructors
-    inline Homography() : Base() {}
-    inline Homography(const Base& other) : Base(other) {}
-    inline Homography(const Mat& data) : Base(data) {}
-    //! Evaluation at point 'x'
+    using Mat = typename Base::Mat;
+    using HVec = typename Base::HVec;
+    using Vec = typename Base::Vec;
+
+    //! @{
+    //! @brief Common constructors
+    Homography() = default;
+
+    inline Homography(const Base& other)
+      : Base(other)
+    {
+    }
+
+    inline Homography(const Mat& data)
+      : Base(data)
+    {
+    }
+    //! @}
+
+    //! @{
+    //! @brief Evaluation at point 'x'.
     inline T operator()(const HVec& x) const
-    { return x.transpose()*mat_*x; }
-    //! Evaluation at point 'x'
+    {
+      return x.transpose()*_mat*x;
+    }
+
     inline T operator()(const Vec& x) const
-    { return (*this)((HVec() << x, 1).finished()); }
+    {
+      return (*this)((HVec() << x, 1).finished());
+    }
+    //! @}
   };
 
 
 } /* namespace Sara */
 } /* namespace Projective */
 } /* namespace DO */
+
+
+#endif /* DO_SARA_GEOMETRY_TOOLS_MATRIXBASEDOBJECT_HPP */

@@ -24,7 +24,8 @@ namespace DO { namespace Sara {
   class DO_SARA_EXPORT Triangle : public SmallPolygon<3>
   {
   public:
-    Triangle() : SmallPolygon<3>() {}
+    Triangle() = default;
+
     Triangle(const Point2d& a, const Point2d& b, const Point2d& c);
   };
 

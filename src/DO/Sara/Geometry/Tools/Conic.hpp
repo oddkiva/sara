@@ -20,26 +20,45 @@ namespace DO { namespace Sara { namespace Projective {
   template <typename T, int N>
   class Conic : public MatrixBasedObject<T,N>
   {
-    typedef MatrixBasedObject<T,N> Base;
-    using Base::mat_;
+    using Base = MatrixBasedObject<T, N>;
+    using Base::_mat;
+
   public:
     using Base::Dimension;
-    typedef typename Base::Mat  Mat;
-    typedef typename Base::HVec HVec;
-    typedef typename Base::Vec  Vec;
-    //! Common constructors
-    inline Conic() : Base() {}
-    inline Conic(const Base& other) : Base(other) {}
-    inline Conic(const Mat& data) : Base(data) {}
-    //! Evaluation at point 'x'
+    using Mat = typename Base::Mat;
+    using HVec = typename Base::HVec;
+    using Vec = typename Base::Vec;
+
+    //! @{
+    //! @brief Common constructors
+    Conic() = default;
+
+    inline Conic(const Base& other)
+      : Base(other)
+    {
+    }
+
+    inline Conic(const Mat& data)
+      : Base(data)
+    {
+    }
+    //! @}
+
+    //! @{
+    //! @brief Evaluation at point 'x'.
     inline T operator()(const HVec& x) const
-    { return x.transpose()*mat_*x; }
-    //! Evaluation at point 'x'
+    {
+      return x.transpose()*_mat*x;
+    }
+
     inline T operator()(const Vec& x) const
-    { return (*this)((HVec() << x, 1).finished()); }
+    {
+      return (*this)((HVec() << x, 1).finished());
+    }
+    //! @}
   };
 
-  //! I/O
+  //! @brief I/O.
   template <typename T, int N>
   std::ostream& operator<<(std::ostream& os, const Conic<T, N>& P);
 
