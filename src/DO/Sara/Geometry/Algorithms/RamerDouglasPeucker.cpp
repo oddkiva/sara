@@ -9,78 +9,72 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_SARA_GEOMETRY_ALGORITHMS_RAMERDOUGLASPEUCKER_HPP
-#define DO_SARA_GEOMETRY_ALGORITHMS_RAMERDOUGLASPEUCKER_HPP
-
-#include <DO/Sara/Core/EigenExtension.hpp>
-#include <DO/Sara/Core/StdVectorHelpers.hpp>
+#include <DO/Sara/Geometry.hpp>
 
 
-namespace DO { namespace Sara { namespace Detail {
+using namespace std;
 
-  static
-  inline
-  double squared_distance(const Point2d& a, const Point2d& b, const Point2d& x)
+
+namespace DO { namespace Sara { namespace detail {
+
+  double orthogonal_distance(const Point2d& a, const Point2d& b,
+                             const Point2d& x)
   {
-    Matrix2d M;
-    M.col(0) = b-a;
-    M.col(1) = x-a;
-    return std::abs(M.determinant());
+    auto M = Matrix2d{};
+    M.col(0) = (b - a).normalized();
+    M.col(1) = x - a;
+    return abs(M.determinant());
   }
 
-  static
-  void ramer_douglas_peucker(std::vector<Point2d>& lines,
-                             const std::vector<Point2d>& contours,
-                             std::size_t begin, std::size_t end,
-                             double eps)
+  vector<Point2d> ramer_douglas_peucker(const Point2d *in_first, const Point2d *in_last,
+                                        double eps)
   {
-    if (end-begin < 3)
-      return;
+    if (in_first == in_last)
+      return { *in_first };
 
-    if (lines.empty() || lines.back() != contours[begin])
-      lines.push_back(contours[begin]);
+    auto pivot = in_first;
+    auto pivot_dist = 0.;
 
-    std::size_t index = begin+1;
-    double maxDist = 0;
-    for (std::size_t i = begin+1; i != end-1; ++i)
+    for (auto p = in_first + 1; p != in_last + 1; ++p)
     {
-      double dist = squared_distance(contours[begin], contours[end-1],
-        contours[i]);
-      if (maxDist < dist)
+      auto dist = orthogonal_distance(*in_first, *in_last, *p);
+      if (pivot_dist < dist)
       {
-        index = i;
-        maxDist = dist;
+        pivot = p;
+        pivot_dist = dist;
       }
     }
 
-    if (maxDist > eps)
+    auto out = vector<Point2d>{};
+    if (pivot_dist > eps)
     {
-      ramer_douglas_peucker(lines, contours, begin, index+1, eps);
-      ramer_douglas_peucker(lines, contours, index, end, eps);
-    }
+      auto v1 = ramer_douglas_peucker(in_first, pivot, eps);
+      auto v2 = ramer_douglas_peucker(pivot, in_last, eps);
 
-    lines.push_back(contours[end-1]);
+      out.insert(out.end(), v1.begin(), v1.end());
+      if (!v2.empty())
+        out.insert(out.end(), v2.begin() + 1, v2.end());
+    }
+    else
+      out = { *in_first, *in_last };
+
+    return out;
   }
 
-} /* namespace Detail */
+} /* namespace detail */
 } /* namespace Sara */
 } /* namespace DO */
 
 
 namespace DO { namespace Sara {
 
-  std::vector<Point2d>
-  ramer_douglas_peucker(const std::vector<Point2d>& contours, double eps)
+  vector<Point2d>
+  ramer_douglas_peucker(const vector<Point2d>& contours, double eps)
   {
-    std::vector<Point2d> lines;
-    lines.reserve(lines.size());
-    Detail::ramer_douglas_peucker(lines, contours, 0, contours.size(), eps);
-    shrink_to_fit(lines);
-    return lines;
+    if (contours.empty())
+      return {};
+    return detail::ramer_douglas_peucker(&contours.front(), &contours.back(), eps);
   }
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_GEOMETRY_ALGORITHMS_RAMERDOUGLASPEUCKER_HPP */
