@@ -14,7 +14,7 @@
 
 #include <DO/Sara/Geometry/Algorithms/ConvexHull.hpp>
 #include <DO/Sara/Geometry/Algorithms/EllipseIntersection.hpp>
-#include <DO/Sara/Geometry/Algorithms/SutherlandHodgman.hpp>
 #include <DO/Sara/Geometry/Algorithms/RamerDouglasPeucker.hpp>
+#include <DO/Sara/Geometry/Algorithms/SutherlandHodgman.hpp>
 
 #endif /* DO_SARA_GEOMETRY_ALGORITHMS_HPP */

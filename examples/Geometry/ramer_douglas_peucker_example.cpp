@@ -28,35 +28,23 @@ GRAPHICS_MAIN()
   create_window(w, h);
   set_antialiasing();
 
-  std::vector<Point2d> poly, clip, res;
-  {
-    int step = 18;
-    for (int i = 0; i < step; ++i)
-    {
-      auto p = Point2d{
-        w / 2. + 100 * cos(i * 2 * M_PI / step),
-        h / 2. + 150 * sin(i * 2 * M_PI / step)
-      };
-      poly.push_back(p);
+  vector<Point2d> circle;
 
-      p.array() += 90;
-      clip.push_back(p);
-    }
-  }
-  draw_poly(poly, Red8);
-  draw_poly(clip, Blue8);
+  const Point2d c{ w / 2., h / 2. };
+  const double r{ h * 0.4 };
+
+  const int N{ 1000 };
+  for (int i = 0; i < N; ++i)
+    circle.push_back(Point2d{
+    c + r * Vector2d{ cos(2 * M_PI*i / N), sin(2 * M_PI*i / N) }
+  });
+
+  auto simplified_circle = ramer_douglas_peucker(circle, 5.);
+
+  draw_poly(circle, Red8, 2);
+  draw_poly(simplified_circle, Green8, 2);
   get_key();
 
-  auto num_iter = 1000;
-  timer.restart();
-  for (auto i = 0; i < num_iter; ++i)
-    res = sutherland_hodgman(poly, clip);
-  elapsed = timer.elapsed_ms() / num_iter;
-  cout << "Intersection computation time = " << elapsed << " milliseconds"
-       << endl;
-
-  draw_poly(res, Green8,5);
-  get_key();
 
   return 0;
 }
