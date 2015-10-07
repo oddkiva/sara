@@ -20,11 +20,11 @@
 
 namespace DO { namespace Sara {
 
-  //! \ingroup Image
+  //! @ingroup Image
   //! @{
 
   //! @{
-  //! \brief Find min and max values of the image.
+  //! @brief Find min and max values of the image.
   template <typename T, int N>
   inline void find_min_max(T& min, T& max, const Image<T, N>& src)
   {
@@ -62,15 +62,14 @@ namespace DO { namespace Sara {
 // Generic color conversion of images.
 namespace DO { namespace Sara {
 
-  //! \ingroup Image
+  //! @ingroup Image
   //! @{
 
-  //! \brief Convert color of image.
+  //! @brief Convert color of image.
   template <typename T, typename U, int N>
   void convert(const Image<T, N>& src, Image<U, N>& dst)
   {
-    if (dst.sizes() != src.sizes())
-      dst.resize(src.sizes());
+    dst.resize(src.sizes());
 
     const auto *src_first = src.data();
     const auto *src_last = src.end();
@@ -90,11 +89,11 @@ namespace DO { namespace Sara {
 // Image rescaling functions
 namespace DO { namespace Sara {
 
-  //! \ingroup Image
+  //! @ingroup Image
   //! @{
 
   //! @{
-  //! \brief Rescale color values.
+  //! @brief Rescale color values.
   template <typename T, int N>
   inline Image<T, N> color_rescale(const Image<T, N>& src,
                                    const T& a = PixelTraits<T>::min(),
@@ -164,23 +163,17 @@ namespace DO { namespace Sara {
     return dst;
   }
 
-  template <typename T, int N>
   struct ColorRescale
   {
-    typedef Image<T, N> ReturnType;
+    template <typename Image>
+    using ReturnType = Image;
 
-    ColorRescale(const Image<T, N>& src)
-      : src_(src)
+    template <typename Image>
+    ReturnType<Image> operator()(const Image& src) const
     {
+      return color_rescale(src);
     }
-
-    ReturnType operator()() const
-    {
-      return color_rescale(src_);
-    }
-
-    const Image<T, N>& src_;
-  };
+ };
   //! @}
 
   //! @}

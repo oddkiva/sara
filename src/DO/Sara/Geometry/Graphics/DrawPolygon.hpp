@@ -9,7 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#pragma once
+#ifndef DO_SARA_GEOMETRY_GRAPHICS_DRAWPOLYGON_HPP
+#define DO_SARA_GEOMETRY_GRAPHICS_DRAWPOLYGON_HPP
 
 #include <string>
 #include <vector>
@@ -66,3 +67,6 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
+
+
+#endif /* DO_SARA_GEOMETRY_GRAPHICS_DRAWPOLYGON_HPP */

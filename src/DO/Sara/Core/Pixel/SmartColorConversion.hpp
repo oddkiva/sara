@@ -12,15 +12,25 @@
 namespace DO { namespace Sara {
 
   namespace Detail {
+
     //! @{
     //! Generic color conversion functor.
     template <typename SrcColSpace, typename DstColSpace>
     struct SmartConvertColor;
 
-    //! Generic case.
+    //! Generic cases.
     template <typename SrcColSpace, typename DstColSpace>
     struct SmartConvertColor
     {
+      template <typename T>
+      static inline void apply(const Pixel<T, SrcColSpace>& src,
+                               Pixel<float, DstColSpace>& dst)
+      {
+        Pixel<float, SrcColSpace> float_src;
+        convert_channel(src, float_src);
+        convert_color(float_src, dst);
+      }
+
       template <typename T>
       static inline void apply(const Pixel<T, SrcColSpace>& src,
                                Pixel<double, DstColSpace>& dst)
@@ -28,6 +38,15 @@ namespace DO { namespace Sara {
         Pixel<double, SrcColSpace> double_src;
         convert_channel(src, double_src);
         convert_color(double_src, dst);
+      }
+
+      template <typename T>
+      static inline void apply(const Pixel<float, SrcColSpace>& src,
+                               Pixel<T, DstColSpace>& dst)
+      {
+        Pixel<float, DstColSpace> float_dst;
+        convert_color(src, float_dst);
+        convert_channel(float_dst, dst);
       }
 
       template <typename T>
@@ -40,7 +59,7 @@ namespace DO { namespace Sara {
       }
     };
 
-    //! Corner case.
+    //! Particular cases.
     template <typename ColSpace>
     struct SmartConvertColor<ColSpace, ColSpace>
     {
@@ -57,22 +76,75 @@ namespace DO { namespace Sara {
       {
         convert_channel(src, dst);
       }
+
+      template <typename T>
+      static inline void apply(const Pixel<T, ColSpace>& src,
+                               Pixel<float, ColSpace>& dst)
+      {
+        convert_channel(src, dst);
+      }
+
+      template <typename T>
+      static inline void apply(const Pixel<float, ColSpace>& src,
+                               Pixel<T, ColSpace>& dst)
+      {
+        convert_channel(src, dst);
+      }
     };
     //! @}
   }
 
   //! @{
-  //! \brief Smart color conversion from a colorspace to another.
+  //! @brief Smart color conversion from a colorspace to another.
+  template <typename SrcColSpace, typename DstColSpace>
+  inline void smart_convert_color(const Pixel<float, SrcColSpace>& src,
+                                  Pixel<float, DstColSpace>& dst)
+  {
+    convert_color(src, dst);
+  }
+
   template <typename SrcColSpace, typename DstColSpace>
   inline void smart_convert_color(const Pixel<double, SrcColSpace>& src,
                                   Pixel<double, DstColSpace>& dst)
   {
-    convert_color<double>(src, dst);
+    convert_color(src, dst);
+  }
+
+  template <typename SrcColSpace, typename DstColSpace>
+  inline void smart_convert_color(const Pixel<float, SrcColSpace>& src,
+                                  Pixel<double, DstColSpace>& dst)
+  {
+    Pixel<double, SrcColSpace> double_src;
+    convert_channel(src, double_src);
+    convert_color(double_src, dst);
+  }
+
+  template <typename SrcColSpace, typename DstColSpace>
+  inline void smart_convert_color(const Pixel<double, SrcColSpace>& src,
+                                  Pixel<float, DstColSpace>& dst)
+  {
+    Pixel<double, DstColSpace> double_dst;
+    convert_color(src, double_dst);
+    convert_channel(double_dst, dst);
+  }
+
+  template <typename SrcT, typename SrcColSpace, typename DstColSpace>
+  inline void smart_convert_color(const Pixel<SrcT, SrcColSpace>& src,
+                                  Pixel<float, DstColSpace>& dst)
+  {
+    Detail::SmartConvertColor<SrcColSpace, DstColSpace>::apply(src, dst);
   }
 
   template <typename SrcT, typename SrcColSpace, typename DstColSpace>
   inline void smart_convert_color(const Pixel<SrcT, SrcColSpace>& src,
                                   Pixel<double, DstColSpace>& dst)
+  {
+    Detail::SmartConvertColor<SrcColSpace, DstColSpace>::apply(src, dst);
+  }
+
+  template <typename DstT, typename SrcColSpace, typename DstColSpace>
+  inline void smart_convert_color(const Pixel<float, SrcColSpace>& src,
+                                  Pixel<DstT, DstColSpace>& dst)
   {
     Detail::SmartConvertColor<SrcColSpace, DstColSpace>::apply(src, dst);
   }
@@ -106,7 +178,7 @@ namespace DO { namespace Sara {
 // channel type.
 namespace DO { namespace Sara {
 
-  //! \brief Convert from 'double' pixel to 'double' grayscale.
+  //! @brief Convert from 'double' pixel to 'double' grayscale.
   template <typename ColorSpace>
   inline void smart_convert_color(const Pixel<double, ColorSpace>& src,
                                   double& dst)
@@ -114,7 +186,7 @@ namespace DO { namespace Sara {
     convert_color(src, dst);
   }
 
-  //! \brief Convert from 'double' pixel to 'any' grayscale.
+  //! @brief Convert from 'double' pixel to 'any' grayscale.
   template <typename T, typename ColorSpace>
   inline void smart_convert_color(const Pixel<double, ColorSpace>& src, T& dst)
   {
@@ -123,7 +195,7 @@ namespace DO { namespace Sara {
     convert_channel(double_dst, dst);
   }
 
-  //! \brief Convert from 'any' pixel to 'double' grayscale.
+  //! @brief Convert from 'any' pixel to 'double' grayscale.
   template <typename T, typename ColorSpace>
   inline void smart_convert_color(const Pixel<T, ColorSpace>& src, double& dst)
   {
@@ -132,7 +204,7 @@ namespace DO { namespace Sara {
     convert_color(double_src, dst);
   }
 
-  //! \brief Convert from 'any' pixel to 'any' grayscale.
+  //! @brief Convert from 'any' pixel to 'any' grayscale.
   template <typename T, typename U, typename ColorSpace>
   inline void smart_convert_color(const Pixel<T, ColorSpace>& src, U& dst)
   {
@@ -151,14 +223,14 @@ namespace DO { namespace Sara {
 // the channel type.
 namespace DO { namespace Sara {
 
-  //! \brief Convert from 'double' grayscale to 'double' pixel.
+  //! @brief Convert from 'double' grayscale to 'double' pixel.
   template <typename ColorSpace>
   inline void smart_convert_color(double src, Pixel<double, ColorSpace>& dst)
   {
     convert_color(src, dst);
   }
 
-  //! \brief Convert from 'double' grayscale to 'any' pixel.
+  //! @brief Convert from 'double' grayscale to 'any' pixel.
   template <typename T, typename ColorSpace>
   inline void smart_convert_color(double src, Pixel<T, ColorSpace>& dst)
   {
@@ -167,7 +239,7 @@ namespace DO { namespace Sara {
     convert_channel(double_dst, dst);
   }
 
-  //! \brief Convert from 'any' grayscale to 'double' pixel.
+  //! @brief Convert from 'any' grayscale to 'double' pixel.
   template <typename T, typename ColorSpace>
   inline void smart_convert_color(T src, Pixel<double, ColorSpace>& dst)
   {
@@ -176,7 +248,7 @@ namespace DO { namespace Sara {
     convert_color(double_src, dst);
   }
 
-  //! \brief Convert from 'any' grayscale to 'any' pixel.
+  //! @brief Convert from 'any' grayscale to 'any' pixel.
   template <typename T, typename U, typename ColorSpace>
   inline void smart_convert_color(T src, Pixel<U, ColorSpace>& dst)
   {
@@ -194,7 +266,7 @@ namespace DO { namespace Sara {
 // Smart color conversion from 'any' grayscale to 'any' grayscale.
 namespace DO { namespace Sara {
 
-  //! \brief Convert from 'any' grayscale to 'any' grayscale.
+  //! @brief Convert from 'any' grayscale to 'any' grayscale.
   template <typename SrcGray, typename DstGray>
   inline void smart_convert_color(SrcGray src, DstGray& dst)
   {

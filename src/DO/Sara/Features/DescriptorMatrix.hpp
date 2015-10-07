@@ -21,7 +21,7 @@
 namespace DO { namespace Sara {
 
   /*!
-    \ingroup Features
+    @ingroup Features
     @{
   */
 
@@ -36,7 +36,7 @@ namespace DO { namespace Sara {
 
   public:
     //! @{
-    //! \brief Constructor.
+    //! @brief Constructor.
     DescriptorMatrix() = default;
 
     DescriptorMatrix(size_t num_descriptors, size_t dimension)
@@ -46,7 +46,7 @@ namespace DO { namespace Sara {
     //! @}
 
     //! @{
-    //! \brief Accessors.
+    //! @brief Accessors.
     inline matrix_type& matrix()
     {
       return *this;
@@ -78,19 +78,19 @@ namespace DO { namespace Sara {
     }
     //! @}
 
-    //! \brief Resize the descriptor matrix.
+    //! @brief Resize the descriptor matrix.
     inline void resize(size_t num_descriptors, size_t dimension)
     {
       matrix_type::resize(dimension, num_descriptors);
     }
 
-    //! \brief Swap data between `DescriptorMatrix` objects.
+    //! @brief Swap data between `DescriptorMatrix` objects.
     inline void swap(DescriptorMatrix& other)
     {
       matrix_type::swap(other);
     }
 
-    //! \brief Append data from another `DescriptorMatrix` object.
+    //! @brief Append data from another `DescriptorMatrix` object.
     void append(const DescriptorMatrix& other)
     {
       if (dimension() != other.dimension() && matrix_type::size() != 0)

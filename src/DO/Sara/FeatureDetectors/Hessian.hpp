@@ -28,7 +28,7 @@
 namespace DO { namespace Sara {
 
   /*!
-    \ingroup InterestPoint
+    @ingroup InterestPoint
     @{
   */
 
@@ -58,7 +58,7 @@ namespace DO { namespace Sara {
   {
   public:
     /*!
-      \brief Constructor
+      @brief Constructor
       @param[in]
         extremum_thres
         the response threshold which local maxima of the determinant of Hessian
@@ -93,7 +93,7 @@ namespace DO { namespace Sara {
     }
 
     /*!
-      \brief Localizes Hessian-Laplace maxima for a given image.
+      @brief Localizes Hessian-Laplace maxima for a given image.
 
       This function does the following:
       1. Constructs a gaussian pyramid \f$\nabla g_{\sigma(s,o)} * I\f$ from
@@ -115,7 +115,7 @@ namespace DO { namespace Sara {
                                      std::vector<Point2i> *scale_octave_pairs = 0);
 
     /*!
-      \brief Returns the Gaussian pyramid used to select characteristic scales
+      @brief Returns the Gaussian pyramid used to select characteristic scales
       for Hessian-Laplace interest points.
 
       The Gaussian pyramid is available after calling the function method
@@ -131,7 +131,7 @@ namespace DO { namespace Sara {
     }
 
     /*!
-      \brief Returns the pyramid of Hessian-Laplace functions used to localize
+      @brief Returns the pyramid of Hessian-Laplace functions used to localize
       scale-space extrema of image **I**.
 
       The pyramid of determinant of Hessians is available after calling the
@@ -169,7 +169,7 @@ namespace DO { namespace Sara {
   {
   public:
     /*!
-      \brief Constructor
+      @brief Constructor
       @param[in]
         extremum_thres
         the response threshold which local maxima of the determinant of Hessian
@@ -204,7 +204,7 @@ namespace DO { namespace Sara {
     }
 
     /*!
-      \brief Localizes scale-space extrema of determinant of Hessians for a
+      @brief Localizes scale-space extrema of determinant of Hessians for a
       given image.
 
       This function does the following:
@@ -227,7 +227,7 @@ namespace DO { namespace Sara {
                                      std::vector<Point2i> *scale_octave_pairs = 0);
 
     /*!
-      \brief Returns the Gaussian pyramid used to compute DoH extrema.
+      @brief Returns the Gaussian pyramid used to compute DoH extrema.
 
       The Gaussian pyramid is available after calling the function method
       **ComputeHessianLaplaceExtrema::operator()(I, scale_octave_pairs)** for
@@ -241,7 +241,7 @@ namespace DO { namespace Sara {
     }
 
     /*!
-      \brief Returns the pyramid of determinant of Hessians used to localize
+      @brief Returns the pyramid of determinant of Hessians used to localize
       scale-space extrema of image **I**.
 
       The pyramid of determinant of Hessians is available after calling the

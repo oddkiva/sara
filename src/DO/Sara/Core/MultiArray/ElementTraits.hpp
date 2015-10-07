@@ -21,7 +21,7 @@
 
 namespace DO { namespace Sara {
 
-  //! \ingroup MultiArray
+  //! @ingroup MultiArray
   //! @{
 
   //! The generic traits class for the MultiArray element type.
@@ -44,7 +44,7 @@ namespace DO { namespace Sara {
     //! @}
   };
 
-  //! \brief The specialized element traits class when the entry is a matrix.
+  //! @brief The specialized element traits class when the entry is a matrix.
   //! Again the matrix is viewed as a scalar. Additions and subtractions between
   //! matrices are OK but multiplication will be the point-wise matrix
   //! multiplication.
@@ -71,7 +71,7 @@ namespace DO { namespace Sara {
     //! @}
   };
 
-  //! \brief The specialized element traits class when the entry is an array.
+  //! @brief The specialized element traits class when the entry is an array.
   //! Default "scalar" operations are point-wise matrix operations.
   template <typename T, int M, int N>
   struct ElementTraits<Array<T, M, N> >

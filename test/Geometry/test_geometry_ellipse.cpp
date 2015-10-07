@@ -128,7 +128,7 @@ TEST_F(TestEllipse, test_sector_area)
 
       // Build constructive solid geometry.
       CSG::Singleton<AffineCone2> cone{ affine_cone2(
-          theta_0+E.orientation(), theta_1+E.orientation(), E.center())
+        theta_0 + E.orientation(), theta_1 + E.orientation(), E.center())
       };
       auto E_and_Cone = ell*cone;
       auto E_minus_Cone = ell - E_and_Cone;
@@ -182,7 +182,7 @@ TEST_F(TestEllipse, test_segment_area)
       const Point2d b{ E(theta_1) };
 
       auto inside_segment = [&](const Point2d& p) {
-        return (ccw(a,b,p) == -1) && inside(p, E);
+        return (ccw(a,b,p) == -1) && E.contains(p);
       };
 
       const auto seg_area1 = sweep_count_pixels(inside_segment);

@@ -21,18 +21,18 @@ class QImage;
 namespace DO { namespace Sara {
 
   /*!
-    \ingroup Graphics
+    @ingroup Graphics
 
-    \defgroup ImageIO Image I/O
+    @defgroup ImageIO Image I/O
     @{
    */
 
-  //! \brief Load image.
+  //! @brief Load image.
   DO_SARA_EXPORT
   bool load(Image<Color3ub>& I, const std::string& name);
 
   /*!
-    \brief Load color image.
+    @brief Load color image.
     @param[out] I    RGB image with unsigned char channel type.
     @param[in]  name path of the image file.
     \return true if image is successfully loaded.
@@ -42,7 +42,7 @@ namespace DO { namespace Sara {
   bool load(Image<Rgb8>& I, const std::string& name);
 
   /*!
-    \brief Load image.
+    @brief Load image.
     @param[out] I    image where color is of type T.
     @param[in]  name path of the image file.
     \return true if image is successfully loaded.
@@ -59,7 +59,7 @@ namespace DO { namespace Sara {
   }
 
   /*!
-    \brief Load image from a dialog box.
+    @brief Load image from a dialog box.
     @param[in]  I image file.
     \return true if image is successfully loaded.
     \return false otherwise.
@@ -69,7 +69,7 @@ namespace DO { namespace Sara {
   bool load_from_dialog_box(Image<Rgb8>& I);
 
   /*!
-    \brief Load image from a dialog box.
+    @brief Load image from a dialog box.
     @param[in]  I image file.
     \return true if image is successfully loaded.
     \return false otherwise.
@@ -78,7 +78,7 @@ namespace DO { namespace Sara {
   bool load_from_dialog_box(Image<Color3ub>& I);
 
   /*!
-    \brief Save grayscale image.
+    @brief Save grayscale image.
     @param[in]  I image
     @param[in]  name path of the output image.
     @param[in]  quality image quality in \f$[0, 100]\f$.
@@ -89,7 +89,7 @@ namespace DO { namespace Sara {
                    int quality = 85);
 
   /*!
-    \brief Save color image.
+    @brief Save color image.
     @param[in]  I image
     @param[in]  name path of the output image.
     @param[in]  quality image quality in \f$[0, 100]\f$.

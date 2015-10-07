@@ -46,7 +46,7 @@ namespace DO { namespace Sara {
     }
     //! @}
 
-    //! \brief Assignment operator
+    //! @brief Assignment operator
     inline SmallPolygon& operator=(const SmallPolygon& other)
     {
       copy(other);
@@ -54,7 +54,7 @@ namespace DO { namespace Sara {
     }
 
     //! @{
-    //! \brief Point accessors.
+    //! @brief Point accessors.
     inline point_type& operator[](size_type i)
     {
       return _v[i];
@@ -67,7 +67,7 @@ namespace DO { namespace Sara {
     //! @}
 
     //! @{
-    //! \brief iterators.
+    //! @brief iterators.
     inline point_type * begin()
     {
       return _v;
@@ -75,7 +75,7 @@ namespace DO { namespace Sara {
 
     inline point_type * end()
     {
-      return _v+N;
+      return _v + N;
     }
 
     inline const point_type * begin() const
@@ -85,32 +85,46 @@ namespace DO { namespace Sara {
 
     inline const point_type * end() const
     {
-      return _v+N;
+      return _v + N;
     }
     //! @}
 
-    //! \brief return the number of vertices.
+    //! @brief return the number of vertices.
     inline std::size_t num_vertices() const
     {
       return N;
     }
 
-    //! \brief Equality comparison.
+    //! @brief Equality comparison.
     inline bool operator==(const self_type& other) const
     {
       return std::equal(_v, _v + N, other._v);
     }
 
-    //! \brief Inequality comparison.
+    //! @brief Inequality comparison.
     inline bool operator!=(const self_type& other) const
     {
       return !this->operator==(other);
     }
 
+    //! Even-odd rule implementation.
+    bool contains(const Point2d& p) const
+    {
+      bool c = false;
+      for (std::size_t i = 0, j = N - 1; i < N; j = i++)
+      {
+        if ((_v[i].y() > p.y()) != (_v[j].y() > p.y()) &&
+          (p.x() < (_v[j].x() - _v[i].x()) * (p.y() - _v[i].y())
+                 / (_v[j].y() - _v[i].y()) + _v[i].x()))
+          c = !c;
+      }
+      return c;
+    }
+
   protected:
     inline void copy_vertices(const_iterator vertices)
     {
-      std::copy(vertices, vertices+N, _v);
+      std::copy(vertices, vertices + N, _v);
     }
 
     inline void copy(const self_type& other)
@@ -132,7 +146,8 @@ namespace DO { namespace Sara {
     return os;
   }
 
-  //! Utility functions.
+  //! @{
+  //! @brief Utility functions.
   template <std::size_t N>
   double signed_area(const SmallPolygon<N>& polygon)
   {
@@ -154,21 +169,6 @@ namespace DO { namespace Sara {
     return std::abs(signed_area(polygon));
   }
 
-  //! Even-odd rule implementation.
-  template <std::size_t N>
-  bool inside(const Point2d& p, const SmallPolygon<N>& poly)
-  {
-    bool c = false;
-    for (std::size_t i = 0, j = N-1; i < N; j = i++)
-    {
-      if ( (poly[i].y() > p.y()) != (poly[j].y() > p.y()) &&
-           (p.x() <   (poly[j].x()-poly[i].x()) * (p.y()-poly[i].y())
-                    / (poly[j].y()-poly[i].y()) + poly[i].x()) )
-        c = !c;
-    }
-    return c;
-  }
-
   template <std::size_t N>
   bool degenerate(const SmallPolygon<N>& poly,
                   double eps = std::numeric_limits<double>::epsilon())
@@ -177,6 +177,7 @@ namespace DO { namespace Sara {
   }
 
   double area(const std::vector<Point2d>& polygon);
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

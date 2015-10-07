@@ -32,11 +32,11 @@ TEST(DO_Sara_Core_Test, eigenExtensionTest)
 
   for (int i = 0; i < m.rows(); ++i)
     for (int j = 0; j < m.cols(); ++j)
-      EXPECT_EQ(m(i,j), a);
+      EXPECT_TRUE(m(i,j) == a);
 
   for (int i = 0; i < n.rows(); ++i)
     for (int j = 0; j < n.cols(); ++j)
-      EXPECT_EQ(n(i,j), b);
+      EXPECT_TRUE(n(i,j) == b);
 
 
   // Double that matrix
@@ -44,16 +44,16 @@ TEST(DO_Sara_Core_Test, eigenExtensionTest)
   // Check that matrix
   for (int i = 0; i < m.rows(); ++i)
     for (int j = 0; j < m.cols(); ++j)
-      EXPECT_EQ(m(i,j), (a+b).eval());
+      EXPECT_TRUE(m(i, j) == (a + b).eval());
 
-  EXPECT_EQ(m(0,0)*n(0,0), (a+b)*b);
+  EXPECT_TRUE(m(0,0)*n(0,0) == (a+b)*b);
 
   // Double that matrix
   m.array() *= n.array();
   // Check that matrix
   for (int i = 0; i < m.rows(); ++i)
     for (int j = 0; j < m.cols(); ++j)
-      EXPECT_EQ(m(i,j), (a+b)*b);
+      EXPECT_TRUE(m(i,j) == (a+b)*b);
 
   m.matrix() += n.matrix();
   (m.array() * n.array()) + n.array() / m.array();

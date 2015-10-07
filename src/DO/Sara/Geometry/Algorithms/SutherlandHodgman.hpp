@@ -9,7 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#pragma once
+#ifndef DO_SARA_GEOMETRY_ALGORITHMS_SUTHERLANDHODGMAN_HPP
+#define DO_SARA_GEOMETRY_ALGORITHMS_SUTHERLANDHODGMAN_HPP
 
 #include <DO/Sara/Defines.hpp>
 
@@ -35,7 +36,10 @@ namespace DO { namespace Sara {
    */
   DO_SARA_EXPORT
   std::vector<Point2d> sutherland_hodgman(const std::vector<Point2d>& subject,
-                                         const std::vector<Point2d>& clip);
+                                          const std::vector<Point2d>& clip);
 
 } /* namespace Sara */
 } /* namespace DO */
+
+
+#endif /* DO_SARA_GEOMETRY_ALGORITHMS_SUTHERLANDHODGMAN_HPP */

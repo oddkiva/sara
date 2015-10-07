@@ -22,14 +22,14 @@ class QGraphicsPixmapItem;
 namespace DO { namespace Sara {
 
   /*!
-    \ingroup Graphics
-    \defgroup GraphicsView Graphics View
-    \brief This submodule is based Qt Graphics View technology allowing for
+    @ingroup Graphics
+    @defgroup GraphicsView Graphics View
+    @brief This submodule is based Qt Graphics View technology allowing for
     interactivity with added elements in a DO::GraphicsView window.
     @{
    */
 
-  //! \brief Add image \b I to the active GraphicsView window.
+  //! @brief Add image \b I to the active GraphicsView window.
   //! The added window can be:
   //! - rescaled by hitting key \b + or key \b -,
   //! - selected and moved in the GraphicsView window using the mouse.

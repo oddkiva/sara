@@ -20,27 +20,27 @@
 
 namespace DO { namespace Sara {
 
-  //! \defgroup ColorTypes Color typedefs
+  //! @defgroup ColorTypes Color typedefs
   //! @{
 
   // ======================================================================== //
   //! Macro for generic color typedefs like in OpenGL.
 #define DEFINE_GENERIC_COLOR_TYPEDEFS(N)            \
-  /*! \brief Color{NumChannels}{ChannelType} */     \
+  /*! @brief Color{NumChannels}{ChannelType} */     \
   typedef Matrix<unsigned char, N, 1> Color##N##ub; \
-  /*! \brief Color{NumChannels}{ChannelType} */     \
+  /*! @brief Color{NumChannels}{ChannelType} */     \
   typedef Matrix<char, N, 1> Color##N##b;           \
-  /*! \brief Color{NumChannels}{ChannelType} */     \
+  /*! @brief Color{NumChannels}{ChannelType} */     \
   typedef Matrix<unsigned short, N, 1> Color##N##us;\
-  /*! \brief Color{NumChannels}{ChannelType} */     \
+  /*! @brief Color{NumChannels}{ChannelType} */     \
   typedef Matrix<short, N, 1> Color##N##s;          \
-  /*! \brief Color{NumChannels}{ChannelType}. */    \
+  /*! @brief Color{NumChannels}{ChannelType}. */    \
   typedef Matrix<unsigned int, N, 1> Color##N##ui;  \
-  /*! \brief Color{NumChannels}{ChannelType} */     \
+  /*! @brief Color{NumChannels}{ChannelType} */     \
   typedef Matrix<int, N, 1> Color##N##i;            \
-  /*! \brief Color{NumChannels}{ChannelType} */     \
+  /*! @brief Color{NumChannels}{ChannelType} */     \
   typedef Matrix<float, N, 1> Color##N##f;          \
-  /*! \brief Color{NumChannels}{ChannelType} */     \
+  /*! @brief Color{NumChannels}{ChannelType} */     \
   typedef Matrix<double, N, 1> Color##N##d;
 
   DEFINE_GENERIC_COLOR_TYPEDEFS(3)
@@ -50,21 +50,21 @@ namespace DO { namespace Sara {
   // ======================================================================== //
   //! Macro for color typedefs.
 #define DEFINE_COLOR_TYPES(colorspace)                      \
-  /*! \brief {ColorSpace}{BitDepthPerChannel} */            \
+  /*! @brief {ColorSpace}{BitDepthPerChannel} */            \
   typedef Pixel<unsigned char, colorspace> colorspace##8;   \
-  /*! \brief {PixelSpace}{BitDepthPerChannel} */            \
+  /*! @brief {PixelSpace}{BitDepthPerChannel} */            \
   typedef Pixel<unsigned short, colorspace> colorspace##16; \
-  /*! \brief {PixelSpace}{BitDepthPerChannel} */            \
+  /*! @brief {PixelSpace}{BitDepthPerChannel} */            \
   typedef Pixel<unsigned int, colorspace> colorspace##32;   \
-  /*! \brief {PixelSpace}{BitDepthPerChannel} */            \
+  /*! @brief {PixelSpace}{BitDepthPerChannel} */            \
   typedef Pixel<char, colorspace> colorspace##8s;           \
-  /*! \brief {PixelSpace}{BitDepthPerChannel} */            \
+  /*! @brief {PixelSpace}{BitDepthPerChannel} */            \
   typedef Pixel<short, colorspace> colorspace##16s;         \
-  /*! \brief {PixelSpace}{BitDepthPerChannel} */            \
+  /*! @brief {PixelSpace}{BitDepthPerChannel} */            \
   typedef Pixel<int, colorspace> colorspace##32s;           \
-  /*! \brief {PixelSpace}{BitDepthPerChannel} */            \
+  /*! @brief {PixelSpace}{BitDepthPerChannel} */            \
   typedef Pixel<float, colorspace> colorspace##32f;         \
-  /*! \brief {PixelSpace}{BitDepthPerChannel} */            \
+  /*! @brief {PixelSpace}{BitDepthPerChannel} */            \
   typedef Pixel<double, colorspace> colorspace##64f;
 
   DEFINE_COLOR_TYPES(Rgb)
@@ -76,7 +76,7 @@ namespace DO { namespace Sara {
 
 
   // ======================================================================== //
-  //! \defgroup PrimaryColors Primary Colors in RGB.
+  //! @defgroup PrimaryColors Primary Colors in RGB.
   //! @{
 
   //! White color function.
@@ -146,21 +146,21 @@ namespace DO { namespace Sara {
 
   //! Primary color definition.
 #define DEFINE_COLOR_CONSTANT(Name, function)       \
-  /*! \brief Return primary color of type Rgb8. */  \
+  /*! @brief Return primary color of type Rgb8. */  \
   const Rgb8 Name##8(function<unsigned char>());    \
-  /*! \brief Return primary color of type Rgb8s. */ \
+  /*! @brief Return primary color of type Rgb8s. */ \
   const Rgb8s Name##8s(function<char>());           \
-  /*! \brief Return primary color of type Rgb16. */ \
+  /*! @brief Return primary color of type Rgb16. */ \
   const Rgb16 Name##16(function<unsigned short>()); \
-  /*! \brief Return primary color of type Rgb16s. */\
+  /*! @brief Return primary color of type Rgb16s. */\
   const Rgb16s Name##16s(function<short>());        \
-  /*! \brief Return primary color of type Rgb32. */ \
+  /*! @brief Return primary color of type Rgb32. */ \
   const Rgb32 Name##32(function<unsigned int>());   \
-  /*! \brief Return primary color of type Rgb32s. */\
+  /*! @brief Return primary color of type Rgb32s. */\
   const Rgb32s Name##32s(function<int>());          \
-  /*! \brief Return primary color of type Rgb32f. */\
+  /*! @brief Return primary color of type Rgb32f. */\
   const Rgb32f Name##32f(function<float>());        \
-  /*! \brief Return primary color of type Rgb64f. */\
+  /*! @brief Return primary color of type Rgb64f. */\
   const Rgb64f Name##64f(function<double>());
 
   DEFINE_COLOR_CONSTANT(Red, red)

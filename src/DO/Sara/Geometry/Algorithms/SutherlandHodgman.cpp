@@ -42,8 +42,8 @@ namespace DO { namespace Sara {
   {
     std::vector<Point2d> in, out;
     Point2d inter;
-    P2::Line clipLine;
-    P2::Line inLine;
+    P2::Line clip_line;
+    P2::Line in_line;
 
     // Initialize
     out = subject;
@@ -64,17 +64,17 @@ namespace DO { namespace Sara {
           out.push_back(in[v2]);
         else if (ccw1 ==  1 && ccw2 == -1)
         {
-          clipLine = line(clip[e1], clip[e2]);
-          inLine = line(in[v1], in[v2]);
+          clip_line = line(clip[e1], clip[e2]);
+          in_line = line(in[v1], in[v2]);
 
-          if ( intersection(clipLine, inLine, inter) )
+          if ( intersection(clip_line, in_line, inter) )
             out.push_back(inter);
         }
         else if (ccw1 == -1 && ccw2 ==  1)
         {
-          clipLine = line(clip[e1], clip[e2]);
-          inLine = line(in[v1], in[v2]);
-          if ( intersection(clipLine, inLine, inter) )
+          clip_line = line(clip[e1], clip[e2]);
+          in_line = line(in[v1], in[v2]);
+          if ( intersection(clip_line, in_line, inter) )
             out.push_back(inter);
           out.push_back(in[v2]);
         }

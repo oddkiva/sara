@@ -27,7 +27,7 @@
 namespace DO { namespace Sara {
 
   /*!
-    \ingroup Features
+    @ingroup Features
     @{
   */
 

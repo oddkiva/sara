@@ -18,15 +18,15 @@
 namespace DO { namespace Sara {
 
   /*!
-    \ingroup Graphics
-    \defgroup Draw2D Drawing 2D
+    @ingroup Graphics
+    @defgroup Draw2D Drawing 2D
     @{
   */
 
   // ======================================================================== //
   // Drawing commands
   /*!
-    \brief Draw a point in the active PaintingWindow window.
+    @brief Draw a point in the active PaintingWindow window.
     @param[in]  x coordinates.
     @param[in]  y coordinates.
     @param[in]  c RGB color in \f$[0, 255]^3\f$.
@@ -36,7 +36,7 @@ namespace DO { namespace Sara {
   DO_SARA_EXPORT
   bool draw_point(int x, int y, const Color3ub& c);
   /*!
-    \brief Draw a point in the active PaintingWindow window.
+    @brief Draw a point in the active PaintingWindow window.
     @param[in]  x coordinates.
     @param[in]  y coordinates.
     @param[in] c RGBA color in \f$[0, 255]^4\f$.
@@ -46,7 +46,7 @@ namespace DO { namespace Sara {
   DO_SARA_EXPORT
   bool draw_point(int x, int y, const Color4ub& c);
   /*!
-    \brief Draw a point in the active PaintingWindow window.
+    @brief Draw a point in the active PaintingWindow window.
     @param[in] p coordinates where each scalar is of float type.
     @param[in] c RGB color in \f$[0, 255]^3\f$.
     \return true if the command is issued on the window successfully.
@@ -55,7 +55,7 @@ namespace DO { namespace Sara {
   DO_SARA_EXPORT
   bool draw_point(const Point2f& p, const Color3ub& c);
   /*!
-    \brief Draw a circle in the active PaintingWindow window.
+    @brief Draw a circle in the active PaintingWindow window.
     @param[in] xc abscissa of the center.
     @param[in] yc ordinate of the center.
     @param[in] r radius.
@@ -69,7 +69,7 @@ namespace DO { namespace Sara {
   bool draw_circle(int xc, int yc, int r, const Color3ub& c,
                    int penWidth = 1);
   /*!
-    \brief Draw a circle in the active PaintingWindow window.
+    @brief Draw a circle in the active PaintingWindow window.
     @param[in] center circle center.
     @param[in] c RGB color in \f$[0, 255]^3\f$.
     @param[in] penWidth width of the contour.
@@ -80,7 +80,7 @@ namespace DO { namespace Sara {
                           int penWidth = 1)
   { return draw_circle(center.x(), center.y(), r, c, penWidth); }
   /*!
-    \brief Draw a circle in the active PaintingWindow window.
+    @brief Draw a circle in the active PaintingWindow window.
     @param[in] center circle center.
     @param[in] c RGB color in \f$[0, 255]^3\f$.
     @param[in] penWidth width of the contour.
@@ -91,7 +91,7 @@ namespace DO { namespace Sara {
   bool draw_circle(const Point2f& center, float r, const Color3ub& c,
                    int penWidth = 1);
   /*!
-    \brief Draw a circle in the active PaintingWindow window.
+    @brief Draw a circle in the active PaintingWindow window.
     @param[in] center circle center.
     @param[in] c RGB color in \f$[0, 255]^3\f$.
     @param[in] penWidth width of the contour.
@@ -102,7 +102,7 @@ namespace DO { namespace Sara {
   bool draw_circle(const Point2d& center, double r, const Color3ub& c,
                    int penWidth = 1);
   /*!
-    \brief Draw an axis-aligned ellipse in the active PaintingWindow window.
+    @brief Draw an axis-aligned ellipse in the active PaintingWindow window.
     @param[in] x x-coord of the top-left corner of the bounding box.
     @param[in] y y-coord of the top-left corner of the bounding box.
     @param[in] w width of the bounding box.
@@ -116,7 +116,7 @@ namespace DO { namespace Sara {
   bool draw_ellipse(int x, int y, int w, int h, const Color3ub&c,
                     int penWidth = 1);
   /*!
-    \brief Draw an oriented ellipse in the active PaintingWindow window.
+    @brief Draw an oriented ellipse in the active PaintingWindow window.
     @param[in] center ellipse center.
     @param[in] r1 first ellipse radius.
     @param[in] r2 second ellipse radius.
@@ -130,7 +130,7 @@ namespace DO { namespace Sara {
   bool draw_ellipse(const Point2f& center, float r1, float r2, float degree,
                     const Color3ub& c, int penWidth = 1);
   /*!
-    \brief Draw an oriented ellipse in the active PaintingWindow window.
+    @brief Draw an oriented ellipse in the active PaintingWindow window.
     @param[in] center ellipse center.
     @param[in] r1 first ellipse radius.
     @param[in] r2 second ellipse radius.
@@ -144,7 +144,7 @@ namespace DO { namespace Sara {
   bool draw_ellipse(const Point2d& center, double r1, double r2, double degree,
                     const Color3ub& c, int penWidth);
   /*!
-    \brief Draw a line in the active PaintingWindow window.
+    @brief Draw a line in the active PaintingWindow window.
     @param[in] x1 start point of the line.
     @param[in] y1 start point of the line.
     @param[in] x2 end point of the line.
@@ -158,7 +158,7 @@ namespace DO { namespace Sara {
   bool draw_line(int x1, int y1, int x2, int y2, const Color3ub& c,
                  int penWidth = 1);
   /*!
-    \brief Draw a line in the active PaintingWindow window.
+    @brief Draw a line in the active PaintingWindow window.
     @param[in] p1 start point of the line.
     @param[in] p2 end point of the line.
     @param[in] c RGB color in \f$[0, 255]^3\f$.
@@ -171,7 +171,7 @@ namespace DO { namespace Sara {
                         int penWidth = 1)
   { return draw_line(p1.x(), p1.y(), p2.x(), p2.y(), c, penWidth); }
     /*!
-    \brief Draw a line in the active PaintingWindow window.
+    @brief Draw a line in the active PaintingWindow window.
     @param[in] p1 start point of the line.
     @param[in] p2 end point of the line.
     @param[in] c RGB color in \f$[0, 255]^3\f$.
@@ -183,7 +183,7 @@ namespace DO { namespace Sara {
   bool draw_line(const Point2f& p1, const Point2f& p2, const Color3ub& c,
                  int penWidth = 1);
   /*!
-    \brief Draw a line in the active PaintingWindow window.
+    @brief Draw a line in the active PaintingWindow window.
     @param[in] p1 start point of the line.
     @param[in] p2 end point of the line.
     @param[in] c RGB color in \f$[0, 255]^3\f$.
@@ -195,7 +195,7 @@ namespace DO { namespace Sara {
   bool draw_line(const Point2d& p1, const Point2d& p2, const Color3ub& c,
                  int penWidth = 1);
   /*!
-    \brief Draw a rectangle in the active PaintingWindow window.
+    @brief Draw a rectangle in the active PaintingWindow window.
     @param[in] x abscissa of the top-left corner of the rectangle.
     @param[in] y ordinate of the top-left corner of the rectangle.
     @param[in] w width of the rectangle.
@@ -209,7 +209,7 @@ namespace DO { namespace Sara {
   bool draw_rect(int x, int y, int w, int h, const Color3ub& c,
                  int penWidth = 1);
   /*!
-    \brief Draw a polygon in the active PaintingWindow window.
+    @brief Draw a polygon in the active PaintingWindow window.
     @param[in] x,y array of vertices of the polygon.
     @param[in] n number of vertices in the polygon.
     @param[in] c RGB color in \f$[0, 255]^3\f$.
@@ -221,7 +221,7 @@ namespace DO { namespace Sara {
   bool draw_poly(const int x[], const int y[], int n, const Color3ub& c,
                  int width = 1);
   /*!
-    \brief Draw a polygon in the active PaintingWindow window.
+    @brief Draw a polygon in the active PaintingWindow window.
     @param[in] p array of vertices of the polygon.
     @param[in] n number of vertices in the polygon.
     @param[in] c RGB color in \f$[0, 255]^3\f$.
@@ -232,7 +232,7 @@ namespace DO { namespace Sara {
   DO_SARA_EXPORT
   bool draw_poly(const Point2i* p, int n, const Color3ub& c, int width = 1);
   /*!
-    \brief Draw text in the active PaintingWindow window.
+    @brief Draw text in the active PaintingWindow window.
     @param[in] x,y array of vertices of the polygon.
     @param[in] text text.
     @param[in] c RGB color in \f$[0, 255]^3\f$.
@@ -245,7 +245,7 @@ namespace DO { namespace Sara {
                    int fontSize = 12, double alpha = 0, bool italic = false,
                    bool bold = false, bool underlined = false);
   /*!
-    \brief Draw an arrow in the active PaintingWindow window.
+    @brief Draw an arrow in the active PaintingWindow window.
     @param[in] a,b,c,d start and end points of the arrow.
     @param[in] c RGB color in \f$[0, 255]^3\f$.
     @param[in] arrowWidth,arrowHeight arrow parameters.
@@ -258,7 +258,7 @@ namespace DO { namespace Sara {
                   int arrowWidth = 8, int arrowHeight = 5,
                   int style = 0, int width = 1);
   /*!
-    \brief Draw an arrow in the active PaintingWindow window.
+    @brief Draw an arrow in the active PaintingWindow window.
     @param[in] x1,y1,x2,y2 start and end points of the arrow.
     @param[in] col RGB color in \f$[0, 255]^3\f$.
     @param[in] ta,tl arrow parameters.
@@ -276,7 +276,7 @@ namespace DO { namespace Sara {
       style, width);
   }
   /*!
-    \brief Draw an arrow in the active PaintingWindow window.
+    @brief Draw an arrow in the active PaintingWindow window.
     @param[in] a start point of the arrow.
     @param[in] b end point of the arrow.
     @param[in] col RGB color in \f$[0, 255]^3\f$.
@@ -293,7 +293,7 @@ namespace DO { namespace Sara {
       col, 8, 5, 0, penWidth);
   }
   /*!
-    \brief Draw an arrow in the active PaintingWindow window.
+    @brief Draw an arrow in the active PaintingWindow window.
     @param[in] a start point of the arrow.
     @param[in] b end point of the arrow.
     @param[in] col RGBA color in \f$[0, 255]^4\f$.
@@ -313,7 +313,7 @@ namespace DO { namespace Sara {
   // ======================================================================== //
   // Filling commands
   /*!
-    \brief Draw a color-filled ellipse in the active PaintingWindow window.
+    @brief Draw a color-filled ellipse in the active PaintingWindow window.
     @param[in] x,y,w,h bounding box of the ellipse.
     @param[in] c RGB color in \f$[0, 255]^3\f$.
     \return true if the command is issued on the window successfully.
@@ -322,7 +322,7 @@ namespace DO { namespace Sara {
   DO_SARA_EXPORT
   bool fill_ellipse(int x, int y, int w, int h, const Color3ub& c);
   /*!
-    \brief Draw a color-filled ellipse in the active PaintingWindow window.
+    @brief Draw a color-filled ellipse in the active PaintingWindow window.
     @param[in] p,w,h bounding box of the ellipse.
     @param[in] c RGB color in \f$[0, 255]^3\f$.
     \return true if the command is issued on the window successfully.
@@ -331,7 +331,7 @@ namespace DO { namespace Sara {
   inline bool fill_ellipse(const Point2i& p, int w, int h, const Color3ub&c)
   { return fill_ellipse(p.x(), p.y(), w, h, c); }
   /*!
-    \brief Draw a color-filled ellipse in the active PaintingWindow window.
+    @brief Draw a color-filled ellipse in the active PaintingWindow window.
     @param[in] p ellipse center.
     @param[in] rx,ry ellipse radii.
     @param[in] degree ellipse orientation in degree.
@@ -343,7 +343,7 @@ namespace DO { namespace Sara {
   bool fill_ellipse(const Point2f& p, float rx, float ry, float degree,
                     const Color3ub& c);
   /*!
-    \brief Draw a color-filled circle in the active PaintingWindow window.
+    @brief Draw a color-filled circle in the active PaintingWindow window.
     @param[in] x,y,w,h rectangle parameters.
     @param[in] c RGB color in \f$[0, 255]^3\f$.
     \return true if the command is issued on the window successfully.
@@ -352,7 +352,7 @@ namespace DO { namespace Sara {
   DO_SARA_EXPORT
   bool fill_rect(int x, int y, int w, int h, const Color3ub& c);
   /*!
-    \brief Draw a color-filled circle in the active PaintingWindow window.
+    @brief Draw a color-filled circle in the active PaintingWindow window.
     @param[in] p,w,h rectangle parameters.
     @param[in] c RGB color in \f$[0, 255]^3\f$.
     \return true if the command is issued on the window successfully.
@@ -361,7 +361,7 @@ namespace DO { namespace Sara {
   inline bool fill_rect(const Point2i& p, int w, int h, const Color3ub&c)
   { return fill_rect(p.x(), p.y(), w, h, c); }
   /*!
-    \brief Draw a color-filled circle in the active PaintingWindow window.
+    @brief Draw a color-filled circle in the active PaintingWindow window.
     @param[in] x,y circle center.
     @param[in] r circle radius.
     @param[in] c RGB color in \f$[0, 255]^3\f$.
@@ -371,7 +371,7 @@ namespace DO { namespace Sara {
   DO_SARA_EXPORT
   bool fill_circle(int x, int y, int r, const Color3ub& c);
   /*!
-    \brief Draw a color-filled circle in the active PaintingWindow window.
+    @brief Draw a color-filled circle in the active PaintingWindow window.
     @param[in] p circle center.
     @param[in] r circle radius.
     @param[in] c RGB color in \f$[0, 255]^3\f$.
@@ -381,7 +381,7 @@ namespace DO { namespace Sara {
   inline bool fill_circle(const Point2i& p, int r, const Color3ub& c)
   { return fill_circle(p.x(), p.y(), r, c); }
   /*!
-    \brief Draw a color-filled circle in the active PaintingWindow window.
+    @brief Draw a color-filled circle in the active PaintingWindow window.
     @param[in] p circle center.
     @param[in] r circle radius.
     @param[in] c RGB color in \f$[0, 255]^3\f$.
@@ -391,7 +391,7 @@ namespace DO { namespace Sara {
   DO_SARA_EXPORT
   bool fill_circle(const Point2f& p, float r, const Color3ub& c);
   /*!
-    \brief Draw a color-filled polygon in the active PaintingWindow window.
+    @brief Draw a color-filled polygon in the active PaintingWindow window.
     @param[in] x,y array of vertices.
     @param[in] n number of vertices.
     @param[in] c RGB color in \f$[0, 255]^3\f$.
@@ -401,7 +401,7 @@ namespace DO { namespace Sara {
   DO_SARA_EXPORT
   bool fill_poly(const int x[], const int y[], int n, const Color3ub& c);
   /*!
-    \brief Draw a color-filled polygon in the active PaintingWindow window.
+    @brief Draw a color-filled polygon in the active PaintingWindow window.
     @param[in] p array of vertices.
     @param[in] n number of vertices.
     @param[in] c RGB color in \f$[0, 255]^3\f$.
@@ -414,7 +414,7 @@ namespace DO { namespace Sara {
   // ======================================================================== //
   // Image display commands
   /*!
-    \brief Draw an image in the active PaintingWindow window.
+    @brief Draw an image in the active PaintingWindow window.
     @param[in] x,y position of the top-left image corner.
     @param[in] data color image.
     @param[in] w,h image sizes
@@ -426,7 +426,7 @@ namespace DO { namespace Sara {
   bool put_color_image(int x, int y, const Color3ub *data, int w, int h,
                        double fact = 1.);
   /*!
-    \brief Draw a color image in the active PaintingWindow window.
+    @brief Draw a color image in the active PaintingWindow window.
     @param[in] p position of the top-left image corner.
     @param[in] data color image.
     @param[in] w,h image sizes
@@ -438,7 +438,7 @@ namespace DO { namespace Sara {
                               double fact = 1.)
   { return put_color_image(p.x(), p.y(), data, w, h, fact); }
   /*!
-    \brief Draw a grayscale image in the active PaintingWindow window.
+    @brief Draw a grayscale image in the active PaintingWindow window.
     @param[in] x,y position of the top-left image corner.
     @param[in] data color image.
     @param[in] w,h image sizes
@@ -450,7 +450,7 @@ namespace DO { namespace Sara {
   bool put_grey_image(int x, int y, const unsigned char *data, int w, int h,
                       double fact = 1.);
   /*!
-    \brief Draw a grayscale image in the active PaintingWindow window.
+    @brief Draw a grayscale image in the active PaintingWindow window.
     @param[in] p position of the top-left image corner.
     @param[in] data color image.
     @param[in] w,h image sizes
@@ -462,7 +462,7 @@ namespace DO { namespace Sara {
                              int w, int h, double fact = 1.)
   { return put_grey_image(p.x(), p.y(), data, w, h, fact); }
   /*!
-    \brief Draw a color image in the active PaintingWindow window.
+    @brief Draw a color image in the active PaintingWindow window.
     @param[in] image color image.
     @param[in] xoff,yoff position of the top-left image corner.
     @param[in] fact image viewing scale.
@@ -477,7 +477,7 @@ namespace DO { namespace Sara {
       image.width(), image.height(), fact);
   }
   /*!
-    \brief Draw a color image in the active PaintingWindow window.
+    @brief Draw a color image in the active PaintingWindow window.
     @param[in] image color image.
     @param[in] off position of the top-left image corner.
     @param[in] fact image viewing scale.
@@ -488,7 +488,7 @@ namespace DO { namespace Sara {
                       const Point2i& off = Point2i::Zero(), double fact = 1.)
   { return display(image, off.x(), off.y(), fact); }
   /*!
-    \brief Draw a color image in the active PaintingWindow window.
+    @brief Draw a color image in the active PaintingWindow window.
     @param[in] image color image.
     @param[in] off position of the top-left image corner.
     @param[in] fact image viewing scale.
@@ -504,7 +504,7 @@ namespace DO { namespace Sara {
       image.width(), image.height(), fact);
   }
   /*!
-    \brief Draw a color image in the active PaintingWindow window.
+    @brief Draw a color image in the active PaintingWindow window.
     @param[in] image color image.
     @param[in] off position of the top-left image corner.
     @param[in] fact image viewing scale.
@@ -515,7 +515,7 @@ namespace DO { namespace Sara {
                       const Point2i& off, double fact = 1.)
   { return display(image, off.x(), off.y(), fact); }
   /*!
-    \brief Draw an image in the active PaintingWindow window.
+    @brief Draw an image in the active PaintingWindow window.
     @param[in] image image.
     @param[in] xoff,yoff position of the top-left image corner.
     @param[in] fact image viewing scale.
@@ -527,7 +527,7 @@ namespace DO { namespace Sara {
                       double fact = 1.)
   { return display(image.template convert<Rgb8>(), xoff, yoff, fact); }
   /*!
-    \brief View an image in a new PaintingWindow window.
+    @brief View an image in a new PaintingWindow window.
     @param[in] image image.
     @param[in] windowTitle window title.
     @param[in] facto zoom factor.
@@ -552,7 +552,7 @@ namespace DO { namespace Sara {
   // ======================================================================== //
   // Clearing commands
   /*!
-    \brief Clear the window contents.
+    @brief Clear the window contents.
     \return true if the command is issued on the window successfully.
     \return false otherwise.
    */
@@ -562,7 +562,7 @@ namespace DO { namespace Sara {
   // ======================================================================== //
   // Painting options commands
   /*!
-    \brief Activate anti-aliased drawing.
+    @brief Activate anti-aliased drawing.
     @param[in] w a PaintingWindow instance.
     @param[in] on boolean value which activates or deactivates antialiasing.
     \return true if the antialiasing command is executed.
@@ -583,7 +583,7 @@ namespace DO { namespace Sara {
   // ======================================================================== //
   // Save screen command on window.
   /*!
-    \brief Save contents on the screen.
+    @brief Save contents on the screen.
     @param[in] w a PaintingWindow instance.
     @param[in] fileName a file name.
     \return true if save is successful.

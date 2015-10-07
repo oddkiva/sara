@@ -19,14 +19,14 @@
 namespace DO { namespace Sara {
 
   /*!
-    \ingroup Graphics
+    @ingroup Graphics
 
-    \defgroup Event Event handling functions
+    @defgroup Event Event handling functions
     \todo Investigate if it is useful. I don't remember.
     @{
    */
 
-  //! \brief I/O event types.
+  //! @brief I/O event types.
   enum EventType
   {
     NO_EVENT,
@@ -84,7 +84,7 @@ namespace DO { namespace Sara {
     MOUSE_MIDDLE_BUTTON = 0x00000004  /*! Qt::MiddleButton */
   };
 
-  //! \brief I/O event structure.
+  //! @brief I/O event structure.
   struct Event
   {
     EventType type;
@@ -94,7 +94,7 @@ namespace DO { namespace Sara {
     int keyModifiers;
   };
 
-  //! \brief Helper function to return a "no-event" Event.
+  //! @brief Helper function to return a "no-event" Event.
   inline Event no_event()
   {
     Event e;
@@ -106,7 +106,7 @@ namespace DO { namespace Sara {
     return e;
   }
 
-  //! \brief Helper function to return a "key-pressed" Event.
+  //! @brief Helper function to return a "key-pressed" Event.
   inline Event key_pressed(int key, int keyModifiers = KEY_NOMODIFIER)
   {
     Event e;
@@ -118,7 +118,7 @@ namespace DO { namespace Sara {
     return e;
   }
 
-  //! \brief Helper function to return a "key-released" Event.
+  //! @brief Helper function to return a "key-released" Event.
   inline Event key_released(int key, int keyModifiers = KEY_NOMODIFIER)
   {
     Event e;
@@ -130,7 +130,7 @@ namespace DO { namespace Sara {
     return e;
   }
 
-  //! \brief Helper function to return a "mouse-pressed" Event.
+  //! @brief Helper function to return a "mouse-pressed" Event.
   inline Event mouse_pressed(int x, int y, int buttons,
                              int keyModifiers = KEY_NOMODIFIER)
   {
@@ -143,7 +143,7 @@ namespace DO { namespace Sara {
     return e;
   }
 
-  //! \brief Helper function to return a "mouse-pressed" Event.
+  //! @brief Helper function to return a "mouse-pressed" Event.
   inline Event mouse_released(int x, int y, int buttons,
                               int keyModifiers = KEY_NOMODIFIER)
   {
@@ -156,7 +156,7 @@ namespace DO { namespace Sara {
     return e;
   }
 
-  //! \brief Helper function to return a "mouse-moved" Event.
+  //! @brief Helper function to return a "mouse-moved" Event.
   inline Event mouse_moved(int x, int y, int buttons,
                            int keyModifiers = KEY_NOMODIFIER)
   {

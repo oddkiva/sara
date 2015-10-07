@@ -24,7 +24,7 @@
 namespace DO { namespace Sara {
 
   /*!
-    \ingroup ScaleSpace
+    @ingroup ScaleSpace
     @{
    */
 
@@ -36,15 +36,15 @@ namespace DO { namespace Sara {
   {
     typedef typename ImagePyramid<T>::scalar_type Scalar;
     // Resize the image with the appropriate factor.
-    Scalar resizeFactor = pow(2.f, -params.first_octave_index());
-    Image<T> I(enlarge(image, resizeFactor) );
+    Scalar resize_factor = pow(2.f, -params.first_octave_index());
+    Image<T> I(enlarge(image, resize_factor) );
     // Deduce the new camera sigma with respect to the dilated image.
-    Scalar cameraSigma = Scalar(params.scale_camera())*resizeFactor;
+    Scalar camera_sigma = Scalar(params.scale_camera())*resize_factor;
     // Blur the image so that its new sigma is equal to the initial sigma.
-    Scalar initSigma = Scalar(params.scale_initial());
-    if (cameraSigma < initSigma)
+    Scalar init_sigma = Scalar(params.scale_initial());
+    if (camera_sigma < init_sigma)
     {
-      Scalar sigma = sqrt(initSigma*initSigma - cameraSigma*cameraSigma);
+      Scalar sigma = sqrt(init_sigma*init_sigma - camera_sigma*camera_sigma);
       I = gaussian(I, sigma);
     }
 
@@ -58,44 +58,29 @@ namespace DO { namespace Sara {
 
     // Shorten names.
     Scalar k = Scalar(params.scale_geometric_factor());
-    int numScales = params.num_scales_per_octave();
-    int downscaleIndex = int( floor( log(Scalar(2))/log(k)) );
+    int num_scales = params.num_scales_per_octave();
+    int downscale_index = int( floor( log(Scalar(2))/log(k)) );
 
     // Create the image pyramid
     ImagePyramid<T> G;
-    G.reset(num_octaves, numScales, initSigma, k);
-
-    //omp_set_num_threads(1);
+    G.reset(num_octaves, num_scales, init_sigma, k);
 
     for (int o = 0; o < num_octaves; ++o)
     {
       // Compute the octave scaling factor
       G.octave_scaling_factor(o) =
-        (o == 0) ? 1.f/resizeFactor : G.octave_scaling_factor(o-1)*2;
+        (o == 0) ? 1.f/resize_factor : G.octave_scaling_factor(o-1)*2;
 
       // Compute the gaussians in octave \f$o\f$
-      Scalar sigma_s_1 = initSigma;
-      G(0,o) = o == 0 ? I : downscale(G(downscaleIndex,o-1), 2);
-//#define METHOD_1
-#ifdef METHOD_1
-#ifdef _OPENMP
-#pragma omp parallel for
-#endif
-      for (int s = 1; s < numScales; ++s)
-        G(s,o).resize(G(0,o).sizes());
-#ifdef _OPENMP
-# pragma omp parallel for
-#endif
-      for (int s = 1; s < numScales; ++s)
-        applyGaussianFilter(G(s,o), G(0,o), initSigma*sqrt(pow(k,2*s) -1.f));
-#else
-      for (int s = 1; s < numScales; ++s)
+      Scalar sigma_s_1 = init_sigma;
+      G(0, o) = o == 0 ? I : downscale(G(downscale_index, o - 1), 2);
+
+      for (int s = 1; s < num_scales; ++s)
       {
         Scalar sigma = sqrt(k*k*sigma_s_1*sigma_s_1 - sigma_s_1*sigma_s_1);
         G(s,o) = gaussian(G(s-1,o), sigma);
         sigma_s_1 *= k;
       }
-#endif
     }
 
     // Done!
@@ -141,8 +126,7 @@ namespace DO { namespace Sara {
       for (int s = 0; s < LoG.num_scales_per_octave(); ++s)
       {
         LoG(s,o) = laplacian(gaussians(s,o));
-        for (typename Image<T>::iterator it = LoG(s,o).begin();
-             it != LoG(s,o).end(); ++it)
+        for (auto it = LoG(s, o).begin(); it != LoG(s,o).end(); ++it)
           *it *= pow(gaussians.scale_relative_to_octave(s), 2);
       }
     }

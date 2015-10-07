@@ -18,14 +18,14 @@
 namespace DO { namespace Sara {
 
   /*!
-    \ingroup Graphics
-    \defgroup GraphicsInternal Graphics Internals
-    \brief This contains the Qt-based internal implementation of the Graphics
+    @ingroup Graphics
+    @defgroup GraphicsInternal Graphics Internals
+    @brief This contains the Qt-based internal implementation of the Graphics
     module.
   @{
  */
 
-  //! \brief QApplication-derived class
+  //! @brief QApplication-derived class
   //! This graphic application establishes communication between the user
   //! drawing commands and the windows.
   class DO_SARA_EXPORT GraphicsApplication
@@ -54,7 +54,7 @@ namespace DO { namespace Sara {
  */
 
 // ====================================================================== //
-//! \brief Some convenient hacks.
+//! @brief Some convenient hacks.
 int __main(int, char **);
 
 #define GRAPHICS_MAIN()                           \

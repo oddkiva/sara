@@ -1,15 +1,21 @@
-#pragma once
+#ifndef DO_SARA_GEOMETRY_OBJECTS_CUBE_HPP
+#define DO_SARA_GEOMETRY_OBJECTS_CUBE_HPP
+
+#include <DO/Sara/Core/EigenExtension.hpp>
+
 
 namespace DO { namespace Sara {
 
   class Cube
   {
     Point3d _a, _b;
+
   public:
     Cube() = default;
 
     Cube(Vector3d& origin, double side)
-      : _a(origin), _b((origin.array()+side).matrix())
+      : _a{ origin }
+      , _b{ (origin.array() + side).matrix() }
     {
     }
 
@@ -23,9 +29,9 @@ namespace DO { namespace Sara {
       return _b;
     }
 
-    friend bool inside(const Point3d& p, const Cube& cube)
+    bool contains(const Point3d& p)
     {
-      return p.cwiseMin(cube._a) == cube._a && p.cwiseMax(cube._b) == cube._b;
+      return p.cwiseMin(_a) == _a && p.cwiseMax(_b) == _b;
     }
 
     friend double area(const Cube& c)
@@ -36,3 +42,6 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
+
+
+#endif /* DO_SARA_GEOMETRY_OBJECTS_CUBE_HPP */

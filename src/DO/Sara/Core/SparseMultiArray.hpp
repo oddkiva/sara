@@ -10,7 +10,7 @@
 // ========================================================================== //
 
 //! @file
-//! \brief This contains the implementation of the sparse N-dimensional array class.
+//! @brief This contains the implementation of the sparse N-dimensional array class.
 
 #ifndef DO_SARA_CORE_SPARSEMULTIARRAY_HPP
 #define DO_SARA_CORE_SPARSEMULTIARRAY_HPP
@@ -22,8 +22,8 @@
 
 namespace DO { namespace Sara {
 
-  //! \ingroup Core
-  //! \defgroup SparseMultiArray SparseMultiArray
+  //! @ingroup Core
+  //! @defgroup SparseMultiArray SparseMultiArray
   //! @{
 
   //! Sparse N-dimensional array class.
@@ -32,7 +32,7 @@ namespace DO { namespace Sara {
   {
   public:
     //! @{
-    //! \brief STL-like interface
+    //! @brief STL-like interface
     using coord_type = Matrix<int, N, 1>;
     using value_type = T;
     //! @}
@@ -42,7 +42,7 @@ namespace DO { namespace Sara {
 
   public:
     //! @{
-    //! \brief STL-like interface
+    //! @brief STL-like interface
     using size_type = unsigned int;
     using iterator = typename storage_type::iterator;
     using const_iterator = typename storage_type::const_iterator;

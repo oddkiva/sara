@@ -23,11 +23,10 @@ using namespace DO::Sara;
 
 TEST(TestDeterminant, test_determinant)
 {
-  Image<Matrix2f> tensor(3, 3);
+  auto tensor = Image<Matrix2f>{ 3, 3 };
   tensor.array().fill(Matrix2f::Ones());
 
-  Image<float> det;
-  det = tensor.compute<Determinant>();
+  auto det = tensor.compute<Determinant>();
 
   for (int i = 0; i < det.array().size(); ++i)
     EXPECT_NEAR(0, det.array()[i], 1e-5);

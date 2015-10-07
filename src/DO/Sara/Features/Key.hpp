@@ -25,7 +25,7 @@
 namespace DO { namespace Sara {
 
   /*!
-    \ingroup feature_types
+    @ingroup feature_types
     @{
   */
 
@@ -89,7 +89,7 @@ namespace DO { namespace Sara {
     }
 
     //! @{
-    //! \brief return the i-th feature. 'f' as in feature.
+    //! @brief return the i-th feature. 'f' as in feature.
     inline feature_reference f(size_t i)
     {
       return features[i];
@@ -102,7 +102,7 @@ namespace DO { namespace Sara {
     //! @}
 
     //! @{
-    //! \brief return the i-th feature descriptor. 'v' as in feature vector.
+    //! @brief return the i-th feature descriptor. 'v' as in feature vector.
     inline descriptor_type v(size_t i)
     {
       return descriptors[i];

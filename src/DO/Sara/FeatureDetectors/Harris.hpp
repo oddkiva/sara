@@ -26,7 +26,7 @@
 namespace DO { namespace Sara {
 
   /*!
-    \ingroup InterestPoint
+    @ingroup InterestPoint
     @{
   */
 
@@ -68,7 +68,7 @@ namespace DO { namespace Sara {
   std::vector<OERegion> local_maxima(const Image<float>& I, float thres);
 
   /*!
-    \brief Utility functions to locate edgels from the Harris-Stephens corner
+    @brief Utility functions to locate edgels from the Harris-Stephens corner
     function.
 
     A pixel \f$(x,y)\f$ is an edgel if its Harris-Stephens cornerness
@@ -79,7 +79,7 @@ namespace DO { namespace Sara {
   bool local_min_x(int x, int y, Image<float>& I);
 
   /*!
-    \brief Utility functions to locate edgels from the Harris-Stephens corner
+    @brief Utility functions to locate edgels from the Harris-Stephens corner
     function.
 
     A pixel \f$(x,y)\f$ is an edgel if its Harris-Stephens cornerness
@@ -94,7 +94,7 @@ namespace DO { namespace Sara {
   {
   public:
     /*!
-      \brief Constructor
+      @brief Constructor
       @param[in]
         kappa
         the user parameter in the Harris corner function. Good values of
@@ -135,7 +135,7 @@ namespace DO { namespace Sara {
     }
 
     /*!
-      \brief Localizes Harris cornerness local maxima for a given image.
+      @brief Localizes Harris cornerness local maxima for a given image.
 
       This function does the following:
       1. Constructs a gaussian pyramid \f$\nabla g_{\sigma(s,o)} * I\f$ from
@@ -159,7 +159,7 @@ namespace DO { namespace Sara {
     std::vector<OERegion> operator()(const Image<float>& I,
                                      std::vector<Point2i> *scale_octave_pairs = 0);
     /*!
-      \brief Returns the Gaussian pyramid used to select characteristic scales
+      @brief Returns the Gaussian pyramid used to select characteristic scales
       for Harris-Laplace corners.
 
       The Gaussian pyramid is available after calling the function method
@@ -175,7 +175,7 @@ namespace DO { namespace Sara {
     }
 
     /*!
-      \brief Returns the pyramid of Harris corner functions used to localize
+      @brief Returns the pyramid of Harris corner functions used to localize
       scale-space extrema of image **I**.
 
       The pyramid of Harris corner functions is available after calling the
