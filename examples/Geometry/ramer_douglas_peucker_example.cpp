@@ -22,16 +22,13 @@ GRAPHICS_MAIN()
   auto w = 400;
   auto h = 400;
 
-  auto timer = Timer{};
-  auto elapsed = double{};
-
   create_window(w, h);
   set_antialiasing();
 
-  vector<Point2d> circle;
+  auto circle = vector<Point2d>{};
 
   const Point2d c{ w / 2., h / 2. };
-  const double r{ h * 0.4 };
+  const auto r = double{ h * 0.4 };
 
   const int N{ 1000 };
   for (int i = 0; i < N; ++i)
