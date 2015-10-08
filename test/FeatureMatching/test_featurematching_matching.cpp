@@ -38,12 +38,12 @@ TEST(TestFeatureMatching, test_ann_matching)
   AnnMatcher matcher{ keys1, keys2, 0.6f };
   auto matches = matcher.compute_matches();
 
-  EXPECT_EQ(matches.size(), 1);
+  EXPECT_EQ(size_t{ 1 }, matches.size());
 
   const auto& m = matches.front();
-  EXPECT_EQ(m.x(), keys1.features[0]);
-  EXPECT_EQ(m.y(), keys2.features[0]);
-  EXPECT_EQ(m.score(), 0.f);
+  EXPECT_EQ(keys1.features[0], m.x());
+  EXPECT_EQ(keys2.features[0], m.y());
+  EXPECT_EQ(0.f, m.score());
 }
 
 int main(int argc, char **argv)
