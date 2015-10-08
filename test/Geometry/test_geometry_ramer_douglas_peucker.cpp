@@ -40,6 +40,16 @@ TEST(TestRamerDouglasPeucker, test_squared_distance_2)
   EXPECT_NEAR(detail::orthogonal_distance(a, b, x), sqrt(2.), 1e-8);
 }
 
+TEST(TestRamerDouglasPeucker, test_linesegment_simplification)
+{
+  const auto line = vector<Point2d>{
+    Point2d(191, 639),
+    Point2d(192, 639)
+  };
+
+  EXPECT_EQ(line, ramer_douglas_peucker(line, 0.1));
+}
+
 TEST(TestRamerDouglasPeucker, test_polylines_simplification)
 {
   const auto polylines = vector<Point2d>{
