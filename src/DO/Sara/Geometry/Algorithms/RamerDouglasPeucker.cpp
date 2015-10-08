@@ -69,11 +69,24 @@ namespace DO { namespace Sara { namespace detail {
 namespace DO { namespace Sara {
 
   vector<Point2d>
-  ramer_douglas_peucker(const vector<Point2d>& contours, double eps)
+  ramer_douglas_peucker(vector<Point2d> curve, double eps)
   {
-    if (contours.empty())
+    if (curve.empty())
       return {};
-    return detail::ramer_douglas_peucker(&contours.front(), &contours.back(), eps);
+
+    // Remove consecutive coincident points.
+    auto coincident = [](const Point2d& a, const Point2d& b) {
+      return (a - b).squaredNorm() < 1e-8;
+    };
+
+    const auto it = unique(curve.begin(), curve.end(), coincident);
+    curve.resize(it - curve.begin());
+
+    if (curve.size() > 1 && coincident(curve.front(), curve.back()))
+      curve.pop_back();
+
+    // Run the algorithm on the cleaned curve.
+    return detail::ramer_douglas_peucker(&curve.front(), &curve.back(), eps);
   }
 
 } /* namespace Sara */

@@ -30,7 +30,7 @@ namespace DO { namespace Sara {
 
   DO_SARA_EXPORT
   std::vector<Point2d>
-  ramer_douglas_peucker(const std::vector<Point2d>& contours, double eps);
+  ramer_douglas_peucker(std::vector<Point2d> contours, double eps);
 
 } /* namespace Sara */
 } /* namespace DO */
