@@ -22,8 +22,8 @@
 
 namespace DO { namespace Sara {
 
-  //! \ingroup Utility
-  //! \brief Outputting program stage description on console.
+  //! @ingroup Utility
+  //! @brief Outputting program stage description on console.
   inline void print_stage(const std::string& stageName)
   {
     std::cout << std::endl;
@@ -31,8 +31,8 @@ namespace DO { namespace Sara {
     std::cout << "// " << stageName << std::endl;
   }
 
-  //! \ingroup Utility
-  //! \brief Wait for return key on the console.
+  //! @ingroup Utility
+  //! @brief Wait for return key on the console.
   inline void wait_return_key()
   {
     std::cout << "Press RETURN key to continue...";

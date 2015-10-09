@@ -34,7 +34,7 @@ namespace DO { namespace Sara {
            const flann::SearchParams& search_params
              = flann::SearchParams(-1));
 
-    //! \brief Destructor.
+    //! @brief Destructor.
     ~KDTree();
 
     //! k-NN search for a single query column vector.

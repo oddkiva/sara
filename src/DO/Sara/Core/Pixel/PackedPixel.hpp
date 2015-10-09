@@ -24,7 +24,7 @@
 // Pixel data structures.
 namespace DO { namespace Sara {
 
-  //! \brief 3D packed pixel.
+  //! @brief 3D packed pixel.
   template <typename _BitField, int _Sz0, int _Sz1, int _Sz2>
   struct PackedPixelBase_3
   {
@@ -56,7 +56,7 @@ namespace DO { namespace Sara {
   };
 
 
-  //! \brief 4D packed pixel.
+  //! @brief 4D packed pixel.
   template <typename _BitField, int _Sz0, int _Sz1, int _Sz2, int _Sz3>
   struct PackedPixelBase_4
   {
@@ -91,7 +91,7 @@ namespace DO { namespace Sara {
   };
 
 
-  //! \brief Channel getter.
+  //! @brief Channel getter.
   template <typename _PackedPixel, int _Index> struct Channel;
 
 #define SPECIALIZE_CHANNEL(index)                               \
@@ -113,7 +113,7 @@ namespace DO { namespace Sara {
   SPECIALIZE_CHANNEL(3)
 
 
-  //! \brief Color model.
+  //! @brief Color model.
   template <typename _ColorSpace, typename _ChannelOrder>
   struct ColorModel
   {
@@ -121,7 +121,7 @@ namespace DO { namespace Sara {
     typedef _ChannelOrder channel_order_type;
   };
 
-  //! \brief Channel index getter.
+  //! @brief Channel index getter.
   template <typename _ColorModel, typename _ChannelTag>
   struct ChannelIndex
   {
@@ -136,7 +136,7 @@ namespace DO { namespace Sara {
     };
   };
 
-  //! \brief PackedPixel class.
+  //! @brief PackedPixel class.
   template <typename _PackedPixelBase, typename _ColorModel>
   class PackedPixel: protected _PackedPixelBase
   {

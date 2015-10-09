@@ -21,11 +21,11 @@ namespace DO { namespace Sara {
 
   // ======================================================================== //
   /*!
-    \ingroup Core
-    \defgroup Color Color
+    @ingroup Core
+    @defgroup Color Color
     @{
 
-    \defgroup ColorSpace Color spaces
+    @defgroup ColorSpace Color spaces
     @{
    */
   // RGB, RGBA color spaces.

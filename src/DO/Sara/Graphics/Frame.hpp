@@ -34,13 +34,13 @@ namespace GLObject {
   class Frame
   {
   public:
-    //! \brief Default constructor.
+    //! @brief Default constructor.
     Frame();
 
-    //! \brief Destructor.
+    //! @brief Destructor.
     ~Frame();
 
-    //! \brief Draw frame in the window.
+    //! @brief Draw frame in the window.
     void draw(double axisLength,
               double axisRadius = defaultAxisRadius);
 

@@ -27,6 +27,6 @@
 #include <DO/Sara/Features/Draw.hpp>
 #include <DO/Sara/Features/IO.hpp>
 
-//! \defgroup Features Features
+//! @defgroup Features Features
 
 #endif /* DO_SARA_FEATURES_HPP */

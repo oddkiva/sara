@@ -26,18 +26,18 @@ using namespace DO::Sara;
 
 TEST(TestSmartConvertColor, test_rgb_to_gray)
 {
-  const int16_t int16_max = numeric_limits<int16_t>::max();
-  const uint8_t uint8_max = numeric_limits<uint8_t>::max();
+  const auto int16_max = numeric_limits<int16_t>::max();
+  const auto uint8_max = numeric_limits<uint8_t>::max();
 
-  Pixel<double, Rgb> rgbd(1,1,1);
-  Pixel<float, Rgb> rgbf(1,1,1);
-  Pixel<int16_t, Rgb> rgb16; rgb16.fill(int16_max);
-  Pixel<uint8_t, Rgb> rgb8u; rgb8u.fill(uint8_max);
+  auto rgbd = Pixel<double, Rgb>{ 1., 1., 1. };
+  auto rgbf = Pixel<float, Rgb>{ 1.f, 1.f, 1.f };
+  auto rgb16 = Pixel<int16_t, Rgb>{}; rgb16.fill(int16_max);
+  auto rgb8u = Pixel<uint8_t, Rgb>{}; rgb8u.fill(uint8_max);
 
-  double grayd;
-  float grayf;
-  uint8_t gray8u;
-  int16_t gray16;
+  auto grayd = double{};
+  auto grayf = float{};
+  auto gray8u = uint8_t{};
+  auto gray16 = int16_t{};
 
   smart_convert_color(rgbd, grayd);  EXPECT_NEAR(grayd, 1, 1e-3);
   smart_convert_color(rgbd, grayf);  EXPECT_NEAR(grayf, 1, 1e-3);
@@ -63,23 +63,23 @@ TEST(TestSmartConvertColor, test_rgb_to_gray)
 
 TEST(TestSmartConvertColor, test_gray_to_rgb)
 {
-  const int16_t int16_max = numeric_limits<int16_t>::max();
-  const uint8_t uint8_max = numeric_limits<uint8_t>::max();
+  const auto int16_max = numeric_limits<int16_t>::max();
+  const auto uint8_max = numeric_limits<uint8_t>::max();
 
-  double grayd = 1;
-  float grayf = 1;
-  uint8_t gray8u = uint8_max;
-  int16_t gray16 = int16_max;
+  auto grayd = 1.;
+  auto grayf = 1.f;
+  auto gray8u = uint8_max;
+  auto gray16 = int16_max;
 
-  Pixel<double, Rgb> rgbd;
-  Pixel<float, Rgb> rgbf;
-  Pixel<int16_t, Rgb> rgb16;
-  Pixel<uint8_t, Rgb> rgb8u;
+  auto rgbd = Pixel<double, Rgb>{};
+  auto rgbf = Pixel<float, Rgb>{};
+  auto rgb16 = Pixel<int16_t, Rgb>{};
+  auto rgb8u = Pixel<uint8_t, Rgb>{};
 
-  Pixel<double, Rgb> true_rgbd = Vector3d::Ones();
-  Pixel<float, Rgb> true_rgbf = Vector3f::Ones();
-  Pixel<int16_t, Rgb> true_rgb16; true_rgb16.fill(int16_max);
-  Pixel<uint8_t, Rgb> true_rgb8u; true_rgb8u.fill(uint8_max);
+  auto true_rgbd = Pixel<double, Rgb>{ Vector3d::Ones() };
+  auto true_rgbf = Pixel<float, Rgb>{ Vector3f::Ones() };
+  auto true_rgb16 = Pixel<int16_t, Rgb>{}; true_rgb16.fill(int16_max);
+  auto true_rgb8u = Pixel<uint8_t, Rgb>{}; true_rgb8u.fill(uint8_max);
 
   smart_convert_color(grayd, rgbd);  EXPECT_MATRIX_NEAR(rgbd, true_rgbd, 1e-3);
   smart_convert_color(grayd, rgbf);  EXPECT_MATRIX_NEAR(rgbf, true_rgbf, 1e-3);
@@ -105,24 +105,24 @@ TEST(TestSmartConvertColor, test_gray_to_rgb)
 
 TEST(TestSmartConvertColor, test_rgb_to_yuv)
 {
-  const int16_t int16_max = numeric_limits<int16_t>::max();
-  const int16_t int16_min = numeric_limits<int16_t>::min();
-  const uint8_t uint8_max = numeric_limits<uint8_t>::max();
+  const auto int16_max = numeric_limits<int16_t>::max();
+  const auto int16_min = numeric_limits<int16_t>::min();
+  const auto uint8_max = numeric_limits<uint8_t>::max();
 
-  Pixel<double, Yuv> yuvd(1,0,0);
-  Pixel<float, Yuv> yuvf(1,0,0);
-  Pixel<int16_t, Yuv> yuv16(int16_max, int16_min, int16_min);
-  Pixel<uint8_t, Yuv> yuv8u(uint8_max, 0, 0);
+  auto yuvd = Pixel<double, Yuv>{ 1., 0., 0. };
+  auto yuvf = Pixel<float, Yuv>{ 1.f, 0.f, 0.f };
+  auto yuv16 = Pixel<int16_t, Yuv>{ int16_max, int16_min, int16_min };
+  auto yuv8u = Pixel<uint8_t, Yuv>{ uint8_max, 0, 0 };
 
-  Pixel<double, Rgb> rgbd;
-  Pixel<float, Rgb> rgbf;
-  Pixel<int16_t, Rgb> rgb16;
-  Pixel<uint8_t, Rgb> rgb8u;
+  auto rgbd = Pixel<double, Rgb>{};
+  auto rgbf = Pixel<float, Rgb>{};
+  auto rgb16 = Pixel<int16_t, Rgb>{};
+  auto rgb8u = Pixel<uint8_t, Rgb>{};
 
-  Pixel<double, Rgb> true_rgbd(1,1,1);
-  Pixel<float, Rgb> true_rgbf(1,1,1);
-  Pixel<int16_t, Rgb> true_rgb16; true_rgb16.fill(int16_max);
-  Pixel<uint8_t, Rgb> true_rgb8u; true_rgb8u.fill(uint8_max);
+  auto true_rgbd = Pixel<double, Rgb>{ 1., 1., 1. };
+  auto true_rgbf = Pixel<float, Rgb>{ 1.f, 1.f, 1.f };
+  auto true_rgb16 = Pixel<int16_t, Rgb>{}; true_rgb16.fill(int16_max);
+  auto true_rgb8u = Pixel<uint8_t, Rgb>{}; true_rgb8u.fill(uint8_max);
 
   smart_convert_color(yuvd, rgbd);  EXPECT_MATRIX_NEAR(rgbd, true_rgbd, 1e-3);
   smart_convert_color(yuvd, rgbf);  EXPECT_MATRIX_NEAR(rgbf, true_rgbf, 1e-3);
@@ -148,18 +148,18 @@ TEST(TestSmartConvertColor, test_rgb_to_yuv)
 
 TEST(TestSmartConvertColor, test_gray_to_gray)
 {
-  const int16_t int16_max = numeric_limits<int16_t>::max();
-  const uint8_t uint8_max = numeric_limits<uint8_t>::max();
+  const auto int16_max = numeric_limits<int16_t>::max();
+  const auto uint8_max = numeric_limits<uint8_t>::max();
 
-  double grayd = 1;
-  float grayf = 1;
-  uint8_t gray8u = uint8_max;
-  int16_t gray16 = int16_max;
+  auto grayd = 1.;
+  auto grayf = 1.f;
+  auto gray8u = uint8_max;
+  auto gray16 = int16_max;
 
-  double dst_grayd;
-  float dst_grayf;
-  uint8_t dst_gray8u;
-  int16_t dst_gray16;
+  auto dst_grayd = double{};
+  auto dst_grayf = float{};
+  auto dst_gray8u = uint8_t{};
+  auto dst_gray16 = int16_t{};
 
   smart_convert_color(grayd, dst_grayf);  EXPECT_NEAR(dst_grayf, 1, 1e-3);
   smart_convert_color(grayd, dst_gray16); EXPECT_EQ(dst_gray16, int16_max);
@@ -176,6 +176,34 @@ TEST(TestSmartConvertColor, test_gray_to_gray)
   smart_convert_color(gray8u, dst_grayd);  EXPECT_NEAR(dst_grayd, 1, 1e-3);
   smart_convert_color(gray8u, dst_grayf);  EXPECT_NEAR(dst_grayf, 1, 1e-3);
   smart_convert_color(gray8u, dst_gray16); EXPECT_EQ(dst_gray16, int16_max);
+}
+
+
+TEST(TestSmartConvertColor, test_corner_cases)
+{
+  {
+    auto src = Rgb8{ 0, 0, 255 };
+    auto dst = Rgb32f{};
+
+    smart_convert_color(src, dst);
+    EXPECT_MATRIX_EQ(Rgb32f(0, 0, 1), dst);
+  }
+
+  {
+    auto src = Rgb32f{ 0.f, 0.f, 1.f };
+    auto dst = Rgb64f{};
+
+    smart_convert_color(src, dst);
+    EXPECT_MATRIX_EQ(Rgb64f(0, 0, 1), dst);
+  }
+
+  {
+    auto src = Rgb64f{ 0., 0., 1. };
+    auto dst = Rgb32f{};
+
+    smart_convert_color(src, dst);
+    EXPECT_MATRIX_EQ(Rgb32f(0, 0, 1), dst);
+  }
 }
 
 

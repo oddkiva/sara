@@ -27,11 +27,11 @@
 namespace DO { namespace Sara {
 
   /*!
-    \ingroup Features
+    @ingroup Features
     @{
   */
 
-  //! \brief Abstract 'VisualFeature' class.
+  //! @brief Abstract 'VisualFeature' class.
   class DO_SARA_EXPORT VisualFeature
   {
   public:
@@ -57,12 +57,12 @@ namespace DO { namespace Sara {
   };
 
 
-  //! \brief PointFeature for interest points
+  //! @brief PointFeature for interest points
   class DO_SARA_EXPORT InterestPoint : public VisualFeature
   {
   public:
     //! @{
-    //! \brief Feature type.
+    //! @brief Feature type.
     enum class Type : std::int8_t
     {
       Harris,
@@ -87,7 +87,7 @@ namespace DO { namespace Sara {
     //! @}
 
     //! @{
-    //! \brief Constructor.
+    //! @brief Constructor.
     InterestPoint() = default;
 
     InterestPoint(const Point2f& coords)
@@ -96,13 +96,13 @@ namespace DO { namespace Sara {
     }
     //! @}
 
-    //! \brief Destructor.
+    //! @brief Destructor.
     virtual ~InterestPoint()
     {
     }
 
     //! @{
-    //! \brief Constant getters.
+    //! @brief Constant getters.
     float x() const
     {
       return _coords(0);
@@ -139,7 +139,7 @@ namespace DO { namespace Sara {
     }
     //! @}
 
-    //! \brief Mutable getters.
+    //! @brief Mutable getters.
     float& x()
     {
       return _coords(0);
@@ -176,13 +176,13 @@ namespace DO { namespace Sara {
     }
     //! @}
 
-    //! \brief Equality operator.
+    //! @brief Equality operator.
     bool operator==(const InterestPoint& f) const
     {
       return coords() == f.coords();
     }
 
-    //! \brief Draw feature.
+    //! @brief Draw feature.
     void draw(const Color3ub& c, float scale = 1.f,
               const Point2f& offset = Point2f::Zero()) const;
 
@@ -211,23 +211,23 @@ namespace DO { namespace Sara {
   class DO_SARA_EXPORT OERegion : public InterestPoint
   {
   public:
-    //! \brief Default constructor
+    //! @brief Default constructor
     OERegion() = default;
 
-    //! \brief Constructor for circular region.
+    //! @brief Constructor for circular region.
     OERegion(const Point2f& coords, float scale)
       : InterestPoint{ coords }
       , _shape_matrix{ Matrix2f::Identity()*(pow(scale,-2)) }
     {
     }
 
-    //! \brief Destructor.
+    //! @brief Destructor.
     virtual ~OERegion()
     {
     }
 
     //! @{
-    //! \brief Shape matrix accessor.
+    //! @brief Shape matrix accessor.
     //! The shape matrix is the matrix $M$ that describes the ellipse
     //! $\varepsilon$, i.e.:
     //! $$ \varepsilon = \{ x \in R^2 : (x-c)^T M (x-c) = 1 \} $$
@@ -244,7 +244,7 @@ namespace DO { namespace Sara {
     //! @}
 
     //! @{
-    //! \brief Orientation (in radian) accessor.
+    //! @brief Orientation (in radian) accessor.
     //! This completely determines the affine transformation that transforms the
     //! unit circle to the elliptic shape of the region.
     float orientation() const
@@ -258,10 +258,10 @@ namespace DO { namespace Sara {
     }
     //! @}
 
-    //! \brief Return the anisotropic radius at a given angle in radians.
+    //! @brief Return the anisotropic radius at a given angle in radians.
     float radius(float radian = 0.f) const;
 
-    //! \brief Return the anisotropic scale at a given angle in radians.
+    //! @brief Return the anisotropic scale at a given angle in radians.
     float scale(float radian = 0.f) const
     {
       return radius(radian);
@@ -273,7 +273,7 @@ namespace DO { namespace Sara {
     //! $M = (A^{-1})^T A^{-1}$ where $M$ is the shape matrix.
     Matrix3f affinity() const;
 
-    //! \brief Compare two regions.
+    //! @brief Compare two regions.
     bool operator==(const OERegion& other) const
     {
       return (coords() == other.coords() &&
@@ -282,7 +282,7 @@ namespace DO { namespace Sara {
               type() == other.type());
     };
 
-    //! \brief Draw the region.
+    //! @brief Draw the region.
     void draw(const Color3ub& c, float scale = 1.f,
               const Point2f& offset = Point2f::Zero()) const;
 
@@ -294,9 +294,9 @@ namespace DO { namespace Sara {
     //! @}
 
   private:
-    //! \brief Shape matrix encoding the ellipticity of the region.
+    //! @brief Shape matrix encoding the ellipticity of the region.
     Matrix2f _shape_matrix;
-    //! \brief Orientation of the region **after** shape normalization.
+    //! @brief Orientation of the region **after** shape normalization.
     float _orientation;
   };
 

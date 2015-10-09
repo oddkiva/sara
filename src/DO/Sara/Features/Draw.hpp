@@ -22,7 +22,7 @@
 namespace DO { namespace Sara {
 
   /*!
-    \ingroup Features
+    @ingroup Features
     @{
   */
   DO_SARA_EXPORT

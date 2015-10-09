@@ -61,7 +61,7 @@ TEST_F(TestQuad, test_point_inside_quad)
   EXPECT_NEAR(area(bbox), area(quad), 1e-10);
 
   auto predicate = [&](const Point2d& p) {
-    return inside(p, quad);
+    return quad.contains(p);
   };
 
   auto ground_truth = [&](const Point2d& p) {

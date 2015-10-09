@@ -10,7 +10,7 @@
 // ========================================================================== //
 
 //! @file
-//! \brief Master header file of the Graphics module.
+//! @brief Master header file of the Graphics module.
 
 #ifndef DO_SARA_GRAPHICS_HPP
 #define DO_SARA_GRAPHICS_HPP
@@ -36,8 +36,8 @@
 #include "Graphics/GraphicsViewCommands.hpp"
 
 /*!
-  \defgroup Graphics Graphics
-  \brief The Graphics module relies on the Qt 5 framework.
+  @defgroup Graphics Graphics
+  @brief The Graphics module relies on the Qt 5 framework.
   It covers basic graphical features such as:
   - opening, closing a window,
   - draw 2D things,

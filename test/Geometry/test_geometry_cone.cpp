@@ -29,7 +29,7 @@ TEST_F(TestAffineCone, test_convex_affine_cone)
   AffineCone2 K(_alpha, _beta, _center, AffineCone2::Convex);
 
   auto convex_predicate = [&](const Point2d& p) {
-    return inside(p, K);
+    return K.contains(p);
   };
 
   auto convex_ground_truth = [&](const Point2d& p) {
@@ -48,7 +48,7 @@ TEST_F(TestAffineCone, test_blunt_affine_cone)
   AffineCone2 K(_alpha, _beta, _center, AffineCone2::Blunt);
 
   auto blunt_predicate = [&](const Point2d& p) {
-    return inside(p, K);
+    return K.contains(p);
   };
 
   auto blunt_ground_truth = [&](const Point2d& p) {
@@ -67,7 +67,7 @@ TEST_F(TestAffineCone, test_convex_pointed_affine_cone)
   AffineCone2 K(_alpha, _alpha, _center, AffineCone2::Convex);
 
   auto convex_pointed_predicate = [&](const Point2d& p) {
-    return inside(p, K);
+    return K.contains(p);
   };
 
   auto convex_pointed_ground_truth = [&](const Point2d& p) {
@@ -88,7 +88,7 @@ TEST_F(TestAffineCone, test_blunt_pointed_cone)
   AffineCone2 K(_alpha, _alpha, _center, AffineCone2::Blunt);
 
   auto blunt_pointed_predicate = [&](const Point2d& p) {
-    return inside(p, K);
+    return K.contains(p);
   };
 
   auto blunt_pointed_ground_truth = [&](const Point2d& p) {
@@ -107,7 +107,7 @@ TEST_F(TestAffineCone, test_degenerate_convex_affine_cone)
   AffineCone2 K(_alpha, -_alpha, _center, AffineCone2::Convex);
 
   auto convex_predicate = [&](const Point2d& p) {
-    return inside(p, K);
+    return K.contains(p);
   };
 
   auto convex_ground_truth = [&](const Point2d& p) {
@@ -124,7 +124,7 @@ TEST_F(TestAffineCone, test_degenerate_blunt_pointed_affine_cone)
 {
   AffineCone2 K(_alpha, -_alpha, _center, AffineCone2::Blunt);
   auto blunt_pointed_predicate = [&](const Point2d& p) {
-    return inside(p, K);
+    return K.contains(p);
   };
   auto blunt_pointed_ground_truth = [&](const Point2d& p) {
     return p.y() == _height/2.;

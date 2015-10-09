@@ -22,16 +22,16 @@
 namespace DO { namespace Sara {
 
   /*!
-    \ingroup Image Image
+    @ingroup Image Image
     @{
    */
 
-  //! \brief The specialized element traits class when the entry is a color.
+  //! @brief The specialized element traits class when the entry is a color.
   template <typename T, typename ColorSpace>
   struct ElementTraits<Pixel<T, ColorSpace> >
   {
     //! @{
-    //! \brief STL-like typedefs.
+    //! @brief STL-like typedefs.
     using value_type = Array<T, ColorSpace::size, 1>;
     using size_type = size_t;
     using pointer = value_type *;

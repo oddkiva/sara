@@ -24,14 +24,14 @@
 namespace DO { namespace Sara {
 
   /*!
-    \ingroup ImageProcessing
-    \defgroup Interpolation Interpolation
+    @ingroup ImageProcessing
+    @defgroup Interpolation Interpolation
     @{
    */
 
   // ====================================================================== //
   // Interpolation
-  //! \brief Interpolation function
+  //! @brief Interpolation function
   template <typename T, int N>
   typename PixelTraits<T>::template Cast<double>::pixel_type
   interpolate(const Image<T, N>& image, const Matrix<double, N, 1>& pos)

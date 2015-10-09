@@ -19,13 +19,13 @@ using namespace DO::Sara;
 
 GRAPHICS_MAIN()
 {
-  int w, h;
-  w = h = 400;
+  auto w = 400;
+  auto h = 400;
 
-  Timer timer;
-  double elapsed;
+  auto timer = Timer{};
+  auto elapsed = double{};
 
-  create_window(w,h);
+  create_window(w, h);
   set_antialiasing();
 
   std::vector<Point2d> poly, clip, res;
@@ -33,10 +33,10 @@ GRAPHICS_MAIN()
     int step = 18;
     for (int i = 0; i < step; ++i)
     {
-      Point2d p;
-      p <<
-        w/2. + 100*cos(i*2*M_PI/step),
-        h/2. + 150*sin(i*2*M_PI/step);
+      auto p = Point2d{
+        w / 2. + 100 * cos(i * 2 * M_PI / step),
+        h / 2. + 150 * sin(i * 2 * M_PI / step)
+      };
       poly.push_back(p);
 
       p.array() += 90;
@@ -47,11 +47,11 @@ GRAPHICS_MAIN()
   draw_poly(clip, Blue8);
   get_key();
 
-  int numIter = 1000;
+  auto num_iter = 1000;
   timer.restart();
-  for (int i = 0; i < numIter; ++i)
+  for (auto i = 0; i < num_iter; ++i)
     res = sutherland_hodgman(poly, clip);
-  elapsed = timer.elapsed_ms()/numIter;
+  elapsed = timer.elapsed_ms() / num_iter;
   cout << "Intersection computation time = " << elapsed << " milliseconds"
        << endl;
 

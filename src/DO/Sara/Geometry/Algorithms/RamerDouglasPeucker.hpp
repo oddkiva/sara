@@ -12,14 +12,25 @@
 #ifndef DO_SARA_GEOMETRY_ALGORITHMS_RAMERDOUGLASPEUCKER_HPP
 #define DO_SARA_GEOMETRY_ALGORITHMS_RAMERDOUGLASPEUCKER_HPP
 
+#include <DO/Sara/Defines.hpp>
+
 #include <DO/Sara/Core/EigenExtension.hpp>
 #include <DO/Sara/Core/StdVectorHelpers.hpp>
 
 
 namespace DO { namespace Sara {
 
+  namespace detail {
+
+    DO_SARA_EXPORT
+    double orthogonal_distance(const Point2d& a, const Point2d& b,
+                               const Point2d& x);
+
+  }
+
+  DO_SARA_EXPORT
   std::vector<Point2d>
-  ramer_douglas_peucker(const std::vector<Point2d>& contours, double eps);
+  ramer_douglas_peucker(std::vector<Point2d> contours, double eps);
 
 } /* namespace Sara */
 } /* namespace DO */

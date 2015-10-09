@@ -36,7 +36,7 @@ namespace DO { namespace Sara {
     @{
    */
 
-  //! \brief The TrackBall class is used the OpenGLWindow class to allow the
+  //! @brief The TrackBall class is used the OpenGLWindow class to allow the
   //! user to view the 3D scene interactively.
   class TrackBall
   {
@@ -54,7 +54,7 @@ namespace DO { namespace Sara {
     bool pressed_;
   };
 
-  //! \brief QGLWidget-derived class used to view 3D scenes.
+  //! @brief QGLWidget-derived class used to view 3D scenes.
   class DO_SARA_EXPORT OpenGLWindow : public QGLWidget
   {
     Q_OBJECT
