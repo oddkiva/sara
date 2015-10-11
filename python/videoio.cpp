@@ -2,15 +2,45 @@
 
 #include <DO/Sara/VideoIO.hpp>
 
+#include "python.hpp"
+#include "videoio.hpp"
 
-using namespace std;
 
 namespace sara = DO::Sara;
 
+using namespace std;
+using namespace boost::python;
 
-BOOST_PYTHON_MODULE(sara)
+
+class VideoStream : sara::VideoStream
 {
-  using namespace boost::python;
+public:
+  VideoStream() = default;
+
+  object read()
+  {
+    using namespace sara;
+
+    auto video_frame = Image<Rgb8>{};
+    if (!sara::VideoStream::read(video_frame))
+      return object{};
+
+    auto data = video_frame.data();
+    auto ndims = 3;
+    npy_intp sizes[] = { video_frame.height(), video_frame.width(), 3 };
+    auto py_obj = PyArray_SimpleNewFromData(ndims, sizes, NPY_UINT8, data);
+
+    boost::python::handle<> handle{ py_obj };
+    boost::python::numeric::array arr{ handle };
+
+    return arr.copy();
+  }
+};
+
+void expose_videoio()
+{
+  boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
+  DO::Sara::python::import_numpy_array();
 
   // Create "sara.videoio" module name.
   string videoio_name{ extract<string>{
@@ -26,10 +56,10 @@ BOOST_PYTHON_MODULE(sara)
   scope().attr("videoio") = videoio_module;
   scope parent{ videoio_module };
 
-  class_<sara::VideoStream, boost::noncopyable>("VideoStream")
-    .def("open", &sara::VideoStream::open)
-    .def("close", &sara::VideoStream::close)
-    .def("seek", &sara::VideoStream::seek)
-    .def("read", &sara::VideoStream::read)
+  class_<VideoStream, boost::noncopyable>("VideoStream")
+    .def("open", &VideoStream::open)
+    .def("close", &VideoStream::close)
+    .def("seek", &VideoStream::seek)
+    .def("read", &VideoStream::read)
     ;
 }

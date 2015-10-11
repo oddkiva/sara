@@ -96,6 +96,20 @@ namespace DO { namespace Sara {
 
   //! @{
   //! @brief Smart color conversion from a colorspace to another.
+  template <typename ColSpace>
+  inline void smart_convert_color(const Pixel<float, ColSpace>& src,
+                                  Pixel<double, ColSpace>& dst)
+  {
+    convert_channel(src, dst);
+  }
+
+  template <typename ColSpace>
+  inline void smart_convert_color(const Pixel<double, ColSpace>& src,
+                                  Pixel<float, ColSpace>& dst)
+  {
+    convert_channel(src, dst);
+  }
+
   template <typename SrcColSpace, typename DstColSpace>
   inline void smart_convert_color(const Pixel<float, SrcColSpace>& src,
                                   Pixel<float, DstColSpace>& dst)

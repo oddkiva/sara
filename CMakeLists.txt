@@ -42,7 +42,7 @@ include(sara_installation_settings)
 # Build third-party software (google test, FLANN,...)
 add_subdirectory(third-party)
 
-#add_subdirectory(python)
+add_subdirectory(python)
 
 # Setup unit test projects
 if (SARA_BUILD_TESTS)

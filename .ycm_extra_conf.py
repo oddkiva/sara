@@ -62,6 +62,14 @@ flags = [
 "-I", "./third-party/gtest/include"
 ]
 
+
+try:
+    from numpy import get_include
+    flags.append("-I", get_include())
+except ImportError:
+    pass
+
+
 if compilation_database_folder:
   database = ycm_core.CompilationDatabase( compilation_database_folder )
 else:

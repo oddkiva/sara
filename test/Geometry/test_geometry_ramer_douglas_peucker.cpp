@@ -40,19 +40,52 @@ TEST(TestRamerDouglasPeucker, test_squared_distance_2)
   EXPECT_NEAR(detail::orthogonal_distance(a, b, x), sqrt(2.), 1e-8);
 }
 
-TEST(TestRamerDouglasPeucker, test_algorithm)
+TEST(TestRamerDouglasPeucker, test_linesegment_simplification)
 {
-  auto points = vector<Point2d>{
+  const auto line = vector<Point2d>{
+    Point2d(191, 639),
+    Point2d(192, 639)
+  };
+
+  EXPECT_EQ(line, ramer_douglas_peucker(line, 0.1));
+}
+
+TEST(TestRamerDouglasPeucker, test_polylines_simplification)
+{
+  const auto polylines = vector<Point2d>{
     Point2d(0, 0),
     Point2d(1, 0.25),
     Point2d(2, 0.5),
     Point2d(9, 0)
   };
 
-  auto expected_polylines = vector<Point2d>{
+  const auto expected_polylines = vector<Point2d>{
     Point2d(0, 0), Point2d(2, 0.5), Point2d(9, 0)
   };
-  EXPECT_EQ(expected_polylines, ramer_douglas_peucker(points, 0.1));
+  EXPECT_EQ(expected_polylines, ramer_douglas_peucker(polylines, 0.1));
+}
+
+TEST(TestRamerDouglasPeucker, test_square)
+{
+  const auto square = vector<Point2d>{
+    Point2d(0, 0),
+    Point2d(0.25, 0),
+    Point2d(0.5, 0),
+    Point2d(0.75, 0),
+    Point2d(1, 0),
+    Point2d(1, 1),
+    Point2d(0, 1),
+    Point2d(0, 0)
+  };
+
+  const auto expected_polygon = vector<Point2d>{
+    Point2d(0, 0),
+    Point2d(1, 0),
+    Point2d(1, 1),
+    Point2d(0, 1)
+  };
+
+  EXPECT_EQ(expected_polygon, ramer_douglas_peucker(square, 0.1));
 }
 
 int main(int argc, char** argv)

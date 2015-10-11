@@ -23,7 +23,7 @@ namespace DO { namespace Sara {
   template <typename T, int N, int S = ColMajor>
   class MultiArrayView
   {
-    typedef MultiArrayView self_type;
+    using self_type = MultiArrayView;
 
   public: /* typedefs. */
     //! Storage order.
@@ -107,6 +107,22 @@ namespace DO { namespace Sara {
       , _sizes{ sizes }
       , _strides{ compute_strides(sizes) }
     {
+    }
+
+    MultiArrayView(const MultiArrayView&) = delete;
+
+    MultiArrayView(MultiArrayView&& other)
+      : self_type{}
+    {
+      swap(other);
+    }
+
+    MultiArrayView& operator=(const MultiArrayView&) = delete;
+
+    MultiArrayView& operator=(MultiArrayView&& other)
+    {
+      swap(other);
+      return *this;
     }
 
     //! @brief Return the size vector of the MultiArray object.
@@ -324,6 +340,16 @@ namespace DO { namespace Sara {
       };
     }
     //! @}
+
+    //! @brief Swap multi-array objects.
+    inline void swap(self_type& other)
+    {
+      using std::swap;
+      swap(_begin, other._begin);
+      swap(_end, other._end);
+      swap(_sizes, other._sizes);
+      swap(_strides, other._strides);
+    }
 
   protected:
     //! @brief Compute the strides according the size vector and storage order.
