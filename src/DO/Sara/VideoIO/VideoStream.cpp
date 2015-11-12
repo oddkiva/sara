@@ -140,7 +140,7 @@ namespace DO { namespace Sara {
     if (_video_codec_context)
     {
       avcodec_close(_video_codec_context);
-#if (LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55,28,1))
+#if (LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 28, 1))
       avcodec_free_context(&_video_codec_context);
 #else
       av_freep(&_video_codec_context);
