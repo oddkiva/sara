@@ -140,7 +140,11 @@ namespace DO { namespace Sara {
     if (_video_codec_context)
     {
       avcodec_close(_video_codec_context);
+#if (LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55,28,1))
       avcodec_free_context(&_video_codec_context);
+#else
+      av_freep(&_video_codec_context);
+#endif
       _video_codec_context = nullptr;
       _video_codec = nullptr;
     }
@@ -165,7 +169,7 @@ namespace DO { namespace Sara {
     while (av_read_frame(_video_format_context, &_video_packet) >= 0)
     {
       length = avcodec_decode_video2(_video_codec_context, _video_frame,
-        &got_video_frame, &_video_packet);
+                                     &got_video_frame, &_video_packet);
 
       if (length < 0)
         return false;
