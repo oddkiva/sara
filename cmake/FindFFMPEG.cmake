@@ -17,7 +17,7 @@ else ()
   # in the FIND_PATH() and FIND_LIBRARY() calls
   find_package(PkgConfig)
   if (PKG_CONFIG_FOUND)
-    pkg_check_modules(_FFMPEG_AVCODEC REQUIRED libavcodec)
+    pkg_check_modules(_FFMPEG_AVCODEC REQUIRED libavcodec>=55.28.1)
     pkg_check_modules(_FFMPEG_AVFORMAT libavformat)
     pkg_check_modules(_FFMPEG_AVUTIL libavutil)
   endif (PKG_CONFIG_FOUND)

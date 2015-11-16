@@ -140,10 +140,7 @@ namespace DO { namespace Sara {
     if (_video_codec_context)
     {
       avcodec_close(_video_codec_context);
-      // For backward compatibility with older FFmpeg versions, don't use
-      //avcodec_free_context(&_video_codec_context);
-      // Instead call the following:
-      av_freep(&_video_codec_context);
+      avcodec_free_context(&_video_codec_context);
       _video_codec_context = nullptr;
       _video_codec = nullptr;
     }
