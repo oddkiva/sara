@@ -22,6 +22,7 @@ set(CMAKE_BUILD_TYPE "Release" CACHE STRING
 # Set options.
 option(SARA_USE_FROM_SOURCE "Use DO-Sara libraries from source" ON)
 option(SARA_USE_VLD "Enable Visual Leak Detector for unit tests" OFF)
+option(SARA_BUILD_VIDEOIO "Build Sara's Video I/O module" OFF)
 option(SARA_BUILD_TESTS "Build unit tests for DO-Sara libraries" OFF)
 option(SARA_BUILD_SAMPLES "Build sample programs using DO-Sara libraries" OFF)
 option(SARA_BUILD_SHARED_LIBS "Build shared libraries for DO-Sara libraries"  OFF)

@@ -5,4 +5,7 @@ add_subdirectory(FeatureMatching)
 add_subdirectory(Geometry)
 add_subdirectory(Graphics)
 add_subdirectory(ImageProcessing)
-add_subdirectory(VideoIO)
+
+if (SARA_BUILD_VIDEOIO)
+  add_subdirectory(VideoIO)
+endif ()

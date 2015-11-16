@@ -51,7 +51,7 @@ script:
   # Build libraries.
   - mkdir build
   - cd build
-  - cmake -DCMAKE_BUILD_TYPE=Debug -DSARA_BUILD_TESTS=ON -DSARA_BUILD_SAMPLES=ON ..
+  - cmake -DCMAKE_BUILD_TYPE=Debug -DSARA_BUILD_VIDEOIO=ON -DSARA_BUILD_TESTS=ON -DSARA_BUILD_SAMPLES=ON ..
   - make -j4
   # Run tests.
   - ctest --output-on-failure

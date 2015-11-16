@@ -35,7 +35,9 @@ if (NOT DO_Sara_FOUND)
   # Foundational libraries
   sara_append_components(DO_Sara_COMPONENTS Core)
   sara_append_components(DO_Sara_COMPONENTS ImageIO)
-  sara_append_components(DO_Sara_COMPONENTS VideoIO)
+  if (SARA_BUILD_VIDEOIO OR SARA_USE_VIDEOIO)
+    sara_append_components(DO_Sara_COMPONENTS VideoIO)
+  endif ()
   sara_append_components(DO_Sara_COMPONENTS Graphics)
 
   # KDTree for fast neighbor search.
