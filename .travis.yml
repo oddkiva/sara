@@ -12,6 +12,8 @@ before_install:
   - sudo apt-get update -qq
 
 install:
+  # Install RPM for packaging.
+  - sudo apt-get install rpm
   # Install gcc 4.9
   - if [ "$CXX" == "g++" ]; then sudo apt-get install -qq --force-yes g++-4.9; fi
   - if [ "$CXX" == "g++" ]; then sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.9 90; fi
