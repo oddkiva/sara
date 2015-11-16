@@ -59,7 +59,8 @@ set(CPACK_PACKAGE_VENDOR "DO-CV")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY
     "DO-Sara: An easy-to-use C++ set of libraries for computer vision")
 set(CPACK_RESOURCE_FILE_LICENSE "${DO_Sara_DIR}/COPYING.README")
-set(CPACK_PACKAGE_CONTACT "David OK")
+set(CPACK_PACKAGE_CONTACT "David OK <david.ok8@gmail.com>")
+set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
 
 set(CPACK_PACKAGE_VERSION_MAJOR ${DO_Sara_VERSION_MAJOR})
 set(CPACK_PACKAGE_VERSION_MINOR ${DO_Sara_VERSION_MINOR})
@@ -80,6 +81,13 @@ set(CPACK_DEBIAN_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION})
 set(CPACK_DEBIAN_PACKAGE_DEPENDS
     "cmake, libjpeg-dev, libpng-dev, libtiff5-dev, qtbase5-dev")
 
+
+# ============================================================================ #
+# Special configuration for RPM packages.
+#
+set(CPACK_RPM_PACKAGE_RELEASE ${BUILD_NUMBER})
+set(CPACK_RPM_PACKAGE_LICENSE "MPL v2")
+set(CPACK_RPM_PACKAGE_GROUP "Applications/Multimedia")
 
 
 # ============================================================================ #
@@ -111,5 +119,9 @@ set(CPACK_NSIS_DISPLAY_NAME ${CPACK_NSIS_PACKAGE_NAME})
 if (WIN32)
   set(CPACK_GENERATOR NSIS)
 elseif (UNIX)
-  set(CPACK_GENERATOR "DEB")
-endif()
+  if (EXISTS /etc/debian_version)
+    set(CPACK_GENERATOR "DEB;RPM")
+  else ()
+    set(CPACK_GENERATOR "RPM")
+  endif ()
+endif ()
