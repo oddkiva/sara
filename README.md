@@ -65,21 +65,66 @@ Build the libraries
 
 To build the libraries, run:
 
-```
-  # Install the following packages.
-  sudo apt-get install cmake
-  sudo apt-get install -qq qtbase5-dev
+1. Install the following packages:
 
-  # Build the library dependencies.
-  mkdir build
-  cd build
-  cmake ..
-  make  -j N  # N is the number of CPU cores you want to use.
+   - On Debian-based distributions:
+     ```
+     sudo apt-get install -qq \
+       cmake \
+       doxygen \
+       libjpeg8-dev \
+       libpng12-dev \
+       libtiff5-dev \
+       libavcodec-ffmpeg-dev \
+       libavformat-ffmpeg-dev \
+       libavutil-ffmpeg-dev \
+       qtbase5-dev
+     ```
 
-  # Run the tests to make sure everything is alright.
-  make test
+   - On Red Hat-based distributions:
+     ```
+     sudo yum install -y
+       cmake \
+       doxygen \
+       libjpeg-devel \
+       libpng-devel \
+       libtiff-devel \
+       ffmpeg \
+       ffmpeg-devel \
+       qt-devel
+     ```
 
-  # Create the Debian package.
-  make package
-  # Then you can install the Debian package with Ubuntu Software Center.
-```
+2. Build the library:
+
+   ```
+   mkdir build
+   cd build
+   cmake .. \
+     -DCMAKE_BUILD_TYPE=Release \
+     -DSARA_BUILD_SHARED_LIBS=ON \
+     -DSARA_BUILD_SAMPLES=ON \
+     -DSARA_BUILD_TESTS=ON
+   make  -j`nproc`  # to build with all your CPU cores.
+   ```
+
+3. Run the tests to make sure everything is alright.
+
+   ```
+   ctest --output-on-failure
+   ```
+
+4. Create DEB and RPM package.
+
+   ```
+   make package
+   ```
+
+5. Deploy by install the Debian package with Ubuntu Software Center, or type:
+
+   ```
+   # Debian-based distros:
+   sudo dpkg -i libDO-Sara-shared-{version}.deb
+
+   # Red Hat-based distros:
+   sudo rpm -i libDO-Sara-shared-{version}.deb
+   ```
