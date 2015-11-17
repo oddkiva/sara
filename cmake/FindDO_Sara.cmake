@@ -137,11 +137,11 @@ else ()
           PATH_SUFFIXES DO/Sara)
 
         if (DO_USE_STATIC_LIBS)
-          set (_library_name "DO_Sara_${COMPONENT}-${DO_Sara_VERSION}-s")
-          set (_library_name_debug "DO_Sara_${COMPONENT}-${DO_Sara_VERSION}-sd")
+          set (_library_name "DO_Sara_${COMPONENT}-s")
+          set (_library_name_debug "DO_Sara_${COMPONENT}-sd")
         else ()
-          set (_library_name "DO_Sara_${COMPONENT}-${DO_Sara_VERSION}")
-          set (_library_name_debug "DO_Sara_${COMPONENT}-${DO_Sara_VERSION}-d")
+          set (_library_name "DO_Sara_${COMPONENT}")
+          set (_library_name_debug "DO_Sara_${COMPONENT}-d")
         endif ()
 
         find_library(DO_Sara_${COMPONENT}_DEBUG_LIBRARIES
