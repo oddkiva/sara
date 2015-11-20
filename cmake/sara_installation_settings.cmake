@@ -89,6 +89,26 @@ set(CPACK_RPM_PACKAGE_RELEASE ${BUILD_NUMBER})
 set(CPACK_RPM_PACKAGE_LICENSE "MPL v2")
 set(CPACK_RPM_PACKAGE_GROUP "Applications/Multimedia")
 
+execute_process(COMMAND python -c
+  "from distutils.sysconfig import get_python_lib; print get_python_lib()"
+  OUTPUT_VARIABLE PYTHON_SITE_PACKAGES_DIR
+  OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST
+  /usr
+  /usr/include
+  /usr/lib
+  /usr/local
+  /usr/local/share
+  /usr/share
+  $ENV{WORKON_HOME}
+  $ENV{VIRTUAL_ENV}
+  $ENV{VIRTUAL_ENV}/lib
+  $ENV{VIRTUAL_ENV}/lib/python2
+  $ENV{VIRTUAL_ENV}/lib/python2.7
+  ${PYTHON_SITE_PACKAGES_DIR}
+  ${PYTHON_SITE_PACKAGES_DIR}/do)
+
 
 # ============================================================================ #
 # Special configuration for Windows installer using NSIS.
