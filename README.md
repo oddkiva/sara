@@ -1,6 +1,13 @@
 Sara: C++ Computer Vision Library
 ==================================
 
+[![Build Status](https://travis-ci.org/DO-CV/sara.svg?branch=master)](https://travis-ci.org/DO-CV/sara)
+<a href="https://ci.appveyor.com/project/do-cv/sara"><img src="https://ci.appveyor.com/api/projects/status/github/do-cv/sara?branch=master&svg=true" alt="Build Status: Windows" /></a>
+[![Coverage Status](https://coveralls.io/repos/DO-CV/sara/badge.svg?branch=master)](https://coveralls.io/r/DO-CV/sara?branch=master)
+[![License](https://img.shields.io/badge/license-MPL2-blue.svg)](LICENSE)
+
+Sara (सार) is a hindi word meaning essence.
+
 Sara focuses on:
 
 1. having an **easy-to-use and simple API**,
@@ -16,11 +23,6 @@ evolve as much as my time and energy allow it.
 Sara is licensed with the [Mozilla Public License version
 2.0](https://github.com/DO-CV/DO-CV/raw/master/COPYING.MPL2).
 
-**Continuous integration status:**
-
-[![Build Status](https://travis-ci.org/DO-CV/sara.svg?branch=master)](https://travis-ci.org/DO-CV/sara)
-<a href="https://ci.appveyor.com/project/do-cv/sara"><img src="https://ci.appveyor.com/api/projects/status/github/do-cv/sara?branch=master&svg=true" alt="Build Status: Windows" /></a>
-[![Coverage Status](https://coveralls.io/repos/DO-CV/sara/badge.svg?branch=master)](https://coveralls.io/r/DO-CV/sara?branch=master)
 
 **Tested Compilers:**
 - Visual Studio 2013
