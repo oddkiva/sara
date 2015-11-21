@@ -9,9 +9,10 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include <DO/Sara/Core/Timer.hpp>
+#include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Geometry.hpp>
 #include <DO/Sara/Graphics.hpp>
-#include <DO/Sara/Core/Timer.hpp>
 
 using namespace std;
 using namespace DO::Sara;
@@ -22,22 +23,19 @@ GRAPHICS_MAIN()
   auto w = 400;
   auto h = 400;
 
-  auto timer = Timer{};
-  auto elapsed = double{};
-
   create_window(w, h);
   set_antialiasing();
 
-  vector<Point2d> circle;
-
-  const Point2d c{ w / 2., h / 2. };
-  const double r{ h * 0.4 };
-
-  const int N{ 1000 };
-  for (int i = 0; i < N; ++i)
-    circle.push_back(Point2d{
-    c + r * Vector2d{ cos(2 * M_PI*i / N), sin(2 * M_PI*i / N) }
-  });
+  auto circle = vector<Point2d>{};
+  {
+    const Point2d c{ w / 2., h / 2. };
+    const auto r = h * 0.4;
+    const auto N = 1000;
+    for (int i = 0; i < N; ++i)
+      circle.push_back(Point2d{
+      c + r * Vector2d{ cos(2 * M_PI*i / N), sin(2 * M_PI*i / N) }
+    });
+  }
 
   auto simplified_circle = ramer_douglas_peucker(circle, 5.);
 
@@ -45,6 +43,27 @@ GRAPHICS_MAIN()
   draw_poly(simplified_circle, Green8, 2);
   get_key();
 
+
+  auto square = vector<Point2d>{};
+  {
+    for (int j = 0; j < 200; ++j)
+      square.push_back(Point2d(10 + j, 10));
+    for (int j = 0; j < 200; ++j)
+      square.push_back(Point2d(10 + 199, 10 + j));
+    for (int j = 0; j < 200; ++j)
+      square.push_back(Point2d(10 + 199 - j, 10 + 199));
+    for (int j = 0; j < 200; ++j)
+      square.push_back(Point2d(10, 10 + 199 - j));
+  }
+
+  auto simplified_square = ramer_douglas_peucker(square, 0.1);
+  CHECK(square.size());
+  CHECK(simplified_square.size());
+
+  clear_window();
+  draw_poly(square, Red8, 2);
+  draw_poly(simplified_square, Green8, 2);
+  get_key();
 
   return 0;
 }
