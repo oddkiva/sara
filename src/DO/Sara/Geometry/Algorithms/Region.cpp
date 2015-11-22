@@ -17,26 +17,26 @@ using namespace std;
 
 namespace DO { namespace Sara {
 
-  vector<Point2i>>
-  compute_superpixels_inner_boundary(const Image<int>& regions, int region_id)
+  vector<Point2i>
+  compute_region_inner_boundary(const Image<int>& regions, int region_id)
   {
 #ifndef CONNECTIVITY_4
     const Vector2i dirs[] = {
-      Vector2i(1, 0),
-      Vector2i(1, 1),
-      Vector2i(0, 1),
-      Vector2i(-1, 1),
-      Vector2i(-1, 0),
-      Vector2i(-1, -1),
-      Vector2i(0, -1),
-      Vector2i(1, -1)
+      Vector2i{ 1,  0 },
+      Vector2i{ 1,  1 },
+      Vector2i{ 0,  1 },
+      Vector2i{-1,  1 },
+      Vector2i{-1,  0 },
+      Vector2i{-1, -1 },
+      Vector2i{ 0, -1 },
+      Vector2i{ 1, -1 }
     };
 #else
     const Vector2i dirs[] = {
-      Vector2i(1, 0),
-      Vector2i(0, 1),
-      Vector2i(-1, 0),
-      Vector2i(0, -1),
+      Vector2i{ 1,  0 },
+      Vector2i{ 0,  1 },
+      Vector2i{-1,  0 },
+      Vector2i{ 0, -1 }
     };
 #endif
 
@@ -44,11 +44,11 @@ namespace DO { namespace Sara {
 
     // Find the starting point.
     auto start_point = Point2i{ -1, -1 };
-    for (int y = 0; y < labels.height(); ++y)
+    for (int y = 0; y < regions.height(); ++y)
     {
-      for (int x = 0; x < labels.width(); ++x)
+      for (int x = 0; x < regions.width(); ++x)
       {
-        if (labels(x, y) == int(label))
+        if (regions(x, y) == region_id)
         {
           start_point = Point2i(x, y);
           break;
@@ -78,30 +78,31 @@ namespace DO { namespace Sara {
         Point2i next_point{ current_point + dirs[(dir + d) % num_dirs] };
 
         if (next_point.minCoeff() < 0 ||
-          (labels.sizes() - next_point).minCoeff() <= 0)
+            (regions.sizes() - next_point).minCoeff() <= 0)
           continue;
 
-        if (labels(next_point) == int(label))
+        if (regions(next_point) == region_id)
         {
-          region_boundaries[label].push_back(next_point);
+          boundary.push_back(next_point);
           dir = (dir + d) % num_dirs;
           break;
         }
       }
     } while (boundary.back() != start_point);
-    boundary.pop_back();
+    if (boundary.size() > 1)
+      boundary.pop_back();
 
     return boundary;
   }
 
   vector<vector<Point2i>>
-  compute_region_inner_boundaries(const Image<int>& labels)
+  compute_region_inner_boundaries(const Image<int>& regions)
   {
-    const auto num_regions = labels.array().maxCoeff() + 1;
+    const auto num_regions = regions.array().maxCoeff() + 1;
     auto region_boundaries = vector<vector<Point2i>>(num_regions);
 
-    for (unsigned label = 0; label < num_regions; ++label)
-      region_boundaries[label] = compute_region_inner_boundary(labels, label);
+    for (auto region_id = 0; region_id < num_regions; ++region_id)
+      region_boundaries[region_id] = compute_region_inner_boundary(regions, region_id);
 
     return region_boundaries;
   }

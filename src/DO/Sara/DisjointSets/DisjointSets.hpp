@@ -21,7 +21,7 @@
 
 namespace DO { namespace Sara {
 
-  //! Extremely simple disjoint-set data structure.
+  //! @brief Disjoint-set data structure.
   class DO_SARA_EXPORT DisjointSets
   {
     class Node;
