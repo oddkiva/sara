@@ -154,7 +154,7 @@ macro (sara_append_library _library_name
       DO_Sara_${_library_name} ${_lib_dependencies})
 
     # Form the compiled library output name.
-    set(_library_output_basename DO_Sara_${_library_name}-${DO_Sara_VERSION})
+    set(_library_output_basename DO_Sara_${_library_name})
     if (SARA_BUILD_SHARED_LIBS)
       set (_library_output_name "${_library_output_basename}")
       set (_library_output_name_debug "${_library_output_basename}-d")
@@ -212,8 +212,7 @@ macro (sara_generate_library _library_name)
     "${DO_Sara_SOURCE_DIR}"
     "${DO_Sara_${_library_name}_HEADER_FILES}"
     "${DO_Sara_${_library_name}_SOURCE_FILES}"
-    "${DO_Sara_${_library_name}_LINK_LIBRARIES}"
-  )
+    "${DO_Sara_${_library_name}_LINK_LIBRARIES}")
 endmacro ()
 
 
@@ -248,8 +247,7 @@ function (sara_add_test _test_name _srcs _additional_lib_deps)
     ${_test_name}
     PROPERTIES
     COMPILE_FLAGS ${SARA_DEFINITIONS}
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-  )
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
   add_test(${_test_name}
            "${CMAKE_BINARY_DIR}/bin/${_test_name}")

@@ -165,7 +165,7 @@ namespace DO { namespace Sara {
     while (av_read_frame(_video_format_context, &_video_packet) >= 0)
     {
       length = avcodec_decode_video2(_video_codec_context, _video_frame,
-        &got_video_frame, &_video_packet);
+                                     &got_video_frame, &_video_packet);
 
       if (length < 0)
         return false;
