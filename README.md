@@ -6,7 +6,7 @@ Sara: C++ Computer Vision Library
 [![Coverage Status](https://coveralls.io/repos/DO-CV/sara/badge.svg?branch=master)](https://coveralls.io/r/DO-CV/sara?branch=master)
 [![License](https://img.shields.io/badge/license-MPL2-blue.svg)](LICENSE)
 
-**Sara** (सार) is a hindi word meaning **essence**.
+*Sara* (सार) is a Hindi word meaning *essence*.
 
 Sara focuses on:
 
