@@ -78,6 +78,8 @@ to_std_set(const std::vector<Eigen::Matrix<T, M, N, Opts, MaxRows, MaxCols> >& v
 // Define a macro that does something 'self.assertItemsEqual' in Python.
 #define EXPECT_ITEMS_EQ(vector1, vector2) \
   EXPECT_EQ(to_std_set(vector1), to_std_set(vector2))
+#define ASSERT_ITEMS_EQ(vector1, vector2) \
+  ASSERT_EQ(to_std_set(vector1), to_std_set(vector2))
 
 
 struct CoutRedirect {
