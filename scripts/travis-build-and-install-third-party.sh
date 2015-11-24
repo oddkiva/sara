@@ -13,7 +13,6 @@ if [ ! -d "$HOME/ffmpeg" ]; then
   make
   make install
   cd ..
-  rm $HOME/ffmpeg-$FFMPEG_VERSION.tar.bz2
 else
   echo "Using cached FFmpeg directory: $HOME/ffmpeg"
 fi
