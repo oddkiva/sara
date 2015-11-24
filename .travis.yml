@@ -3,7 +3,6 @@ language: cpp
 sudo: false
 
 cache:
-  apt: true
   directories:
   - $HOME/ffmpeg
   - $HOME/lcov
