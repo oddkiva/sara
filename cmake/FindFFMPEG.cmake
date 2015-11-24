@@ -12,7 +12,13 @@ elseif (MSVC)
   endif ()
 
   set(FFMPEG_LIBRARIES avcodec avformat avutil)
+
 else ()
+
+  if (SARA_FFMPEG_DIR)
+    set(ENV{PKG_CONFIG_PATH} "${SARA_FFMPEG_DIR}/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}")
+  endif ()
+
   # use pkg-config to get the directories and then use these values
   # in the FIND_PATH() and FIND_LIBRARY() calls
   find_package(PkgConfig)
@@ -26,26 +32,22 @@ else ()
     NAMES libavcodec/avcodec.h
     PATHS ${_FFMPEG_AVCODEC_INCLUDE_DIRS}
           /usr/include /usr/local/include /opt/local/include /sw/include
-    PATH_SUFFIXES ffmpeg libav
-  )
+    PATH_SUFFIXES ffmpeg libav)
 
   find_library(FFMPEG_LIBAVCODEC
     NAMES avcodec
     PATHS ${_FFMPEG_AVCODEC_LIBRARY_DIRS}
-          /usr/lib /usr/local/lib /opt/local/lib /sw/lib
-  )
+          /usr/lib /usr/local/lib /opt/local/lib /sw/lib)
 
   find_library(FFMPEG_LIBAVFORMAT
     NAMES avformat
     PATHS ${_FFMPEG_AVFORMAT_LIBRARY_DIRS}
-          /usr/lib /usr/local/lib /opt/local/lib /sw/lib
-  )
+          /usr/lib /usr/local/lib /opt/local/lib /sw/lib)
 
   find_library(FFMPEG_LIBAVUTIL
     NAMES avutil
     PATHS ${_FFMPEG_AVUTIL_LIBRARY_DIRS}
-          /usr/lib /usr/local/lib /opt/local/lib /sw/lib
-  )
+          /usr/lib /usr/local/lib /opt/local/lib /sw/lib)
 
   if (FFMPEG_LIBAVCODEC AND FFMPEG_LIBAVFORMAT)
     set(FFMPEG_FOUND TRUE)
@@ -57,9 +59,7 @@ else ()
     set(FFMPEG_LIBRARIES
       ${FFMPEG_LIBAVCODEC}
       ${FFMPEG_LIBAVFORMAT}
-      ${FFMPEG_LIBAVUTIL}
-    )
-
+      ${FFMPEG_LIBAVUTIL})
   endif (FFMPEG_FOUND)
 
   if (FFMPEG_FOUND)

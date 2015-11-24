@@ -1,48 +1,35 @@
 language: cpp
 
+sudo: false
+
+cache:
+  apt: true
+  directories:
+  - $HOME/ffmpeg
+  - $HOME/lcov
+
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    - ubuntu-sdk-team
+    packages:
+    - rpm
+    - gcc-4.9
+    - g++-4.9
+    - gcov-4.9
+    - qtbase5-dev
+    - yasm
+
 compiler:
-  #- clang
   - gcc
 
-before_install:
-  # To use gcc 4.9.
-  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-  # Update apt repositories to get Qt5.
-  - sudo add-apt-repository --yes ppa:ubuntu-sdk-team/ppa
-  - sudo apt-get update -qq
-
-install:
-  # Install RPM for packaging.
-  - sudo apt-get install rpm
-  # Install gcc 4.9
-  - if [ "$CXX" == "g++" ]; then sudo apt-get install -qq --force-yes g++-4.9; fi
-  - if [ "$CXX" == "g++" ]; then sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.9 90; fi
-  - if [ "$CXX" == "g++" ]; then sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 90; fi
-  - if [ "$CXX" == "g++" ]; then sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-4.9 90; fi
-  # Install the minimal set of Qt5 libraries.
-  - sudo apt-get install -qq qtbase5-dev
-  # Install FFMPEG libraries.
-  - sudo apt-get install yasm
-  - wget http://www.ffmpeg.org/releases/ffmpeg-2.6.1.tar.bz2
-  - tar -xjf ffmpeg-2.6.1.tar.bz2
-  - cd ffmpeg-2.6.1
-  - ./configure --enable-shared --disable-static --prefix=/usr/local
-  - make -j4
-  - sudo make install
-  - cd ..
-  - rm -rf ffmpeg-2.6.1
-  # Install lcov for code coverage.
-  - if [ "$CXX" == "g++" ]; then wget -O lcov.tar.gz http://downloads.sourceforge.net/ltp/lcov-1.11.tar.gz; fi
-  - if [ "$CXX" == "g++" ]; then mkdir lcov; fi
-  - if [ "$CXX" == "g++" ]; then tar -xzf lcov.tar.gz -C ./lcov --strip-components=1; fi
-  - if [ "$CXX" == "g++" ]; then cd lcov; fi
-  - if [ "$CXX" == "g++" ]; then sudo make install; fi
-  - if [ "$CXX" == "g++" ]; then cd ..; fi
-  - if [ "$CXX" == "g++" ]; then rm -Rf lcov lcov.tar.gz; fi
-  # Install coveralls-lcov for code coverage.
-  - if [ "$CXX" == "g++" ]; then gem install coveralls-lcov; fi
-
 before_script:
+  # Specify the GCC version we want to use.
+  - export CC=/usr/bin/gcc-4.9
+  - export CXX=/usr/bin/g++-4.9
+  # Build third
+  - ./scripts/travis-build-and-install-third-party.sh
   # Fake X server
   - export DISPLAY=:99.0
   - sh -e /etc/init.d/xvfb start
@@ -60,7 +47,7 @@ script:
 
 after_success:
   - cd ..
-  - lcov --compat-libtool --directory build --base-directory=src --capture --output-file=coverage.info
+  - lcov --gcov-tool=/usr/bin/gcov-4.9 --compat-libtool --directory build --base-directory=src --capture --output-file=coverage.info
   - lcov --remove coverage.info 'usr/*' --output-file coverage.info
   - lcov --remove coverage.info 'third-party/*' --output-file coverage.info
   - lcov --remove coverage.info 'test/*' --output-file coverage.info
