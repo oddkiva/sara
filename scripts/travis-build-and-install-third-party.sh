@@ -10,7 +10,7 @@ if [ ! -d "$HOME/ffmpeg/include" ]; then
   tar xvf $HOME/ffmpeg-$FFMPEG_VERSION.tar.bz2 -C $HOME/
   cd $HOME/ffmpeg-$FFMPEG_VERSION
   ./configure --enable-shared --disable-static --prefix=$HOME/ffmpeg
-  make
+  make -j`nproc`
   make install
   cd ..
 else
