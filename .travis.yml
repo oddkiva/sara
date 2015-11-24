@@ -18,7 +18,8 @@ addons:
     - g++-4.9
     - gcov-4.9
     - qtbase5-dev
-    - libqt5opengl-dev
+    - libqt5opengl5
+    - libqt5opengl5-dev
     - yasm
 
 compiler:
