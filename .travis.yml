@@ -52,7 +52,7 @@ script:
 
 after_success:
   - cd ..
-  - lcov --compat-libtool --directory build --base-directory=src --capture --output-file=coverage.info
+  - lcov --gcov-tool /usr/bin/gcov-4.9 --compat-libtool --directory build --base-directory=src --capture --output-file=coverage.info
   - lcov --remove coverage.info 'usr/*' --output-file coverage.info
   - lcov --remove coverage.info 'third-party/*' --output-file coverage.info
   - lcov --remove coverage.info 'test/*' --output-file coverage.info
