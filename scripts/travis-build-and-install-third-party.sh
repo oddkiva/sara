@@ -3,7 +3,7 @@
 set -e
 
 # Install FFmpeg.
-if [ ! -d "$HOME/ffmpeg" ]; then
+if [ ! -d "$HOME/ffmpeg/include" ]; then
   FFMPEG_VERSION="2.8.2"
   wget http://ffmpeg.org/releases/ffmpeg-$FFMPEG_VERSION.tar.bz2 \
     -O $HOME/ffmpeg-$FFMPEG_VERSION.tar.bz2
@@ -18,7 +18,7 @@ else
 fi
 
 # Install lcov for code coverage.
-if [ ! -d "$HOME/lcov" ]; then
+if [ ! -d "$HOME/lcov/bin" ]; then
   LCOV_VERSION="1.12"
   wget http://downloads.sourceforge.net/ltp/lcov-$LCOV_VERSION.tar.gz -O $HOME/lcov.tar.gz
   tar -xzf $HOME/lcov.tar.gz -C $HOME/lcov --strip-components=1
