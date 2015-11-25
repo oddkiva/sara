@@ -22,7 +22,6 @@ if [ ! -d "$HOME/lcov/bin" ]; then
   LCOV_VERSION="1.12"
   wget http://downloads.sourceforge.net/ltp/lcov-$LCOV_VERSION.tar.gz -O $HOME/lcov.tar.gz
   tar -xzf $HOME/lcov.tar.gz -C $HOME/lcov --strip-components=1
-  gem install coveralls-lcov
 else
   echo "Using cached lcov directory: $HOME/lcov"
 fi

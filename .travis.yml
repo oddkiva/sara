@@ -3,6 +3,7 @@ language: cpp
 sudo: false
 
 cache:
+  bundler: true
   directories:
   - $HOME/ffmpeg
   - $HOME/lcov
@@ -38,6 +39,7 @@ before_script:
 install:
   # Build and install third-party locally.
   - ./scripts/travis-build-and-install-third-party.sh
+  - bundle install
 
 script:
   # Build libraries.
