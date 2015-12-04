@@ -43,20 +43,22 @@ TEST(TestDisjointSets, test_on_image)
   auto disjoint_sets = DisjointSets{ regions.size(), adjacency_list };
   disjoint_sets.compute_connected_components();
   auto components = disjoint_sets.get_connected_components();
+  for (auto& component : components)
+    sort(component.begin(), component.end());
 
-  // Robustify the test because the components are enumerated in a peculiar way.
   auto true_components = vector<vector<size_t>>{
-    { 24 },
-    { 15, 16, 20, 21 },
-    { 4, 9 },
-    { 3, 8, 11, 12, 13, 14, 17, 18, 19, 22, 23 },
-    { 2, 6, 7 },
     { 0, 1, 5, 10 },
+    { 2, 6, 7 },
+    { 3, 8, 11, 12, 13, 14, 17, 18, 19, 22, 23 },
+    { 4, 9 },
+    { 15, 16, 20, 21 },
+    { 24 },
   };
 
   EXPECT_EQ(components.size(), true_components.size());
   for (size_t i = 0; i < components.size(); ++i)
-    ASSERT_ITEMS_EQ(true_components[i], components[i]);
+    EXPECT_NE(components.end(),
+              find(components.begin(), components.end(), true_components[i]));
 }
 
 
