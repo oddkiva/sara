@@ -2,12 +2,13 @@
 # Temporarily generated library folders
 #################
 bin/
-lib/
 build/
 build-static/
 build-shared/
+doc/source/xml/
 html/
 latex/
+lib/
 sara_version.cmake
 
 #################
