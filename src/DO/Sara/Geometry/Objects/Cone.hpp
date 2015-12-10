@@ -37,7 +37,7 @@ namespace DO { namespace Sara {
     inline Cone(const Vector& alpha, const Vector& beta, Type type = Convex,
                 double eps = 1e-8)
       : _eps{ eps }
-      , _type{ type }
+      , _type{ static_cast<unsigned char>(type) }
     {
       _basis.col(0) = alpha.normalized();
       _basis.col(1) = beta.normalized();
@@ -45,9 +45,9 @@ namespace DO { namespace Sara {
       lu_solver.setThreshold(_eps);
       if (lu_solver.rank() == 1)
       {
-        _type |= Pointed;
+        _type |= static_cast<unsigned char>(Pointed);
         if (_basis.col(0).dot(_basis.col(1)) > 0)
-          _type |= PositiveCosine;
+          _type |= static_cast<unsigned char>(PositiveCosine);
       }
     }
 
@@ -69,16 +69,17 @@ namespace DO { namespace Sara {
       // Otherwise decompose x w.r.t. to the basis.
       Vector2d theta;
       theta = _basis.fullPivLu().solve(x);
-      double relError = (_basis*theta - x).squaredNorm() / x.squaredNorm();
-      if (relError > _eps)
+      double rel_error = (_basis*theta - x).squaredNorm() / x.squaredNorm();
+      if (rel_error > _eps)
         return false;
 
       // Deal with the degenerate cases (Pointed cone).
       if (_type & Pointed)
       {
-        if (_type & PositiveCosine && _type & Blunt)
+        if (_type & static_cast<unsigned char>(PositiveCosine) &&
+            _type & static_cast<unsigned char>(Blunt))
           return theta.minCoeff() > -_eps;
-        return (_type & Blunt) != 0;
+        return (_type & static_cast<unsigned char>(Blunt)) != 0;
       }
 
       // Generic case.
