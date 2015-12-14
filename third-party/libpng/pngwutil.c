@@ -756,6 +756,7 @@ png_write_IHDR(png_structrp png_ptr, png_uint_32 width, png_uint_32 height,
     int interlace_type)
 {
    png_byte buf[13]; /* Buffer to store the IHDR info */
+   int png_status;
 
    png_debug(1, "in png_write_IHDR");
 
@@ -843,15 +844,16 @@ png_write_IHDR(png_structrp png_ptr, png_uint_32 width, png_uint_32 height,
     * 4. The filter_method is 64 and
     * 5. The color_type is RGB or RGBA
     */
-   if (
+   png_status = (filter_type != PNG_FILTER_TYPE_BASE);
 #ifdef PNG_MNG_FEATURES_SUPPORTED
-       !((png_ptr->mng_features_permitted & PNG_FLAG_MNG_FILTER_64) &&
-       ((png_ptr->mode&PNG_HAVE_PNG_SIGNATURE) == 0) &&
-       (color_type == PNG_COLOR_TYPE_RGB ||
-        color_type == PNG_COLOR_TYPE_RGB_ALPHA) &&
-       (filter_type == PNG_INTRAPIXEL_DIFFERENCING)) &&
+      png_status = (!((png_ptr->mng_features_permitted & PNG_FLAG_MNG_FILTER_64) &&
+                   ((png_ptr->mode&PNG_HAVE_PNG_SIGNATURE) == 0) &&
+                   (color_type == PNG_COLOR_TYPE_RGB ||
+                    color_type == PNG_COLOR_TYPE_RGB_ALPHA) &&
+                   (filter_type == PNG_INTRAPIXEL_DIFFERENCING)) &&
+                    png_status);
 #endif
-       filter_type != PNG_FILTER_TYPE_BASE)
+   if(png_status)
    {
       png_warning(png_ptr, "Invalid filter type specified");
       filter_type = PNG_FILTER_TYPE_BASE;
@@ -922,14 +924,17 @@ png_write_PLTE(png_structrp png_ptr, png_const_colorp palette,
    png_uint_32 i;
    png_const_colorp pal_ptr;
    png_byte buf[3];
+   int png_ptr_status;
 
    png_debug(1, "in png_write_PLTE");
 
    if ((
 #ifdef PNG_MNG_FEATURES_SUPPORTED
-       !(png_ptr->mng_features_permitted & PNG_FLAG_MNG_EMPTY_PLTE) &&
+   png_ptr_status = ((!(png_ptr->mng_features_permitted & PNG_FLAG_MNG_EMPTY_PLTE) && num_pal == 0) || num_pal > 256);
+#else
+   png_ptr_status = (num_pal == 0 || num_pal > 256);
 #endif
-       num_pal == 0) || num_pal > 256)
+   if(png_ptr_status)
    {
       if (png_ptr->color_type == PNG_COLOR_TYPE_PALETTE)
       {
@@ -1485,17 +1490,19 @@ void /* PRIVATE */
 png_write_bKGD(png_structrp png_ptr, png_const_color_16p back, int color_type)
 {
    png_byte buf[6];
+   int png_ptr_status;
 
    png_debug(1, "in png_write_bKGD");
 
    if (color_type == PNG_COLOR_TYPE_PALETTE)
    {
-      if (
+      png_ptr_status = (back->index >= png_ptr->num_palette);
 #ifdef PNG_MNG_FEATURES_SUPPORTED
-          (png_ptr->num_palette ||
-          (!(png_ptr->mng_features_permitted & PNG_FLAG_MNG_EMPTY_PLTE))) &&
+      png_ptr_status = ((png_ptr->num_palette ||
+                       (!(png_ptr->mng_features_permitted &
+                        PNG_FLAG_MNG_EMPTY_PLTE))) && png_ptr_status);
 #endif
-         back->index >= png_ptr->num_palette)
+      if(png_ptr_status)
       {
          png_warning(png_ptr, "Invalid background palette index");
          return;
