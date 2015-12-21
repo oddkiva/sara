@@ -10,6 +10,7 @@ cmake ../sara \
 
 make -j`nproc` && make test && make package
 
+dpkg-sig --sign builder ../sara-build-shared/libDO-Sara-shared-*.deb
 sudo cp ../sara-build-shared/libDO-Sara-shared-*.deb /usr/local/debs
 sudo update-local-debs
 sudo apt-get update
