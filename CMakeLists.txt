@@ -23,10 +23,16 @@ option(SARA_BUILD_SHARED_LIBS "Build shared libraries for DO-Sara libraries"  OF
 
 set(BUILD_SHARED_LIBS ${SARA_BUILD_SHARED_LIBS})
 
+
 # Add DO-CV to the CMake module path.
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-find_package(DO_Sara REQUIRED)
+
+# Set Sara Library version.
+include(sara_macros)
 sara_dissect_version()
+
+
+find_package(DO_Sara REQUIRED)
 
 # Group projects by category.
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)

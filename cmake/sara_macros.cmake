@@ -21,7 +21,6 @@ endfunction ()
 # Useful macros
 #
 macro (sara_dissect_version)
-
   # Retrieve the build number.
   execute_process(
     COMMAND git rev-list --count HEAD
@@ -42,14 +41,12 @@ macro (sara_dissect_version)
     "${DO_Sara_VERSION_MAJOR}.${DO_Sara_VERSION_MINOR}.${DO_Sara_BUILD_NUMBER}")
   set(DO_Sara_SOVERSION "${DO_Sara_VERSION_MAJOR}.${DO_Sara_VERSION_MINOR}")
 
-  # Set Sara Library version.
   configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sara_version.cmake.in
     ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sara_version.cmake @ONLY)
   configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/src/DO/Sara/Defines.hpp.in
     ${CMAKE_CURRENT_SOURCE_DIR}/src/DO/Sara/Defines.hpp @ONLY)
-
 endmacro ()
 
 
