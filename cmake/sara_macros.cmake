@@ -20,15 +20,36 @@ endfunction ()
 # ==============================================================================
 # Useful macros
 #
-macro (sara_dissect_version VERSION)
-  # Find version components
-  string(REGEX REPLACE "^([0-9]+).*" "\\1"
-         DO_Sara_VERSION_MAJOR "${VERSION}")
-  string(REGEX REPLACE "^[0-9]+\\.([0-9]+).*" "\\1"
-         DO_Sara_VERSION_MINOR "${VERSION}")
-  string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+)" "\\1"
-         DO_Sara_VERSION_PATCH ${VERSION})
+macro (sara_dissect_version)
+
+  # Retrieve the build number.
+  execute_process(
+    COMMAND git rev-list --count HEAD
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    OUTPUT_VARIABLE GIT_REV_NUMBER
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+  execute_process(
+    COMMAND git rev-parse --short HEAD
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    OUTPUT_VARIABLE GIT_COMMIT_HASH
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+  set (DO_Sara_BUILD_NUMBER "${GIT_REV_NUMBER}.r${GIT_COMMIT_HASH}")
+
+  # Build the version.
+  set(DO_Sara_VERSION
+    "${DO_Sara_VERSION_MAJOR}.${DO_Sara_VERSION_MINOR}.${DO_Sara_BUILD_NUMBER}")
   set(DO_Sara_SOVERSION "${DO_Sara_VERSION_MAJOR}.${DO_Sara_VERSION_MINOR}")
+
+  # Set Sara Library version.
+  configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sara_version.cmake.in
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sara_version.cmake @ONLY)
+  configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/DO/Sara/Defines.hpp.in
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/DO/Sara/Defines.hpp @ONLY)
+
 endmacro ()
 
 
