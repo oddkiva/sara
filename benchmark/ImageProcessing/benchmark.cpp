@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
@@ -32,7 +32,7 @@ void toc(ofstream& file)
 
 template <typename T>
 void viewWithoutConversion(const Image<T>& I,
-                           const std::string& windowTitle = "DO-CV")
+                           const std::string& windowTitle = "Sara")
 {
   // Original image.
   Window win = openWindow(I.width(), I.height(), windowTitle);

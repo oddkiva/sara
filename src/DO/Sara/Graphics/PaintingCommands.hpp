@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
@@ -534,7 +534,7 @@ namespace DO { namespace Sara {
    */
   template <typename T>
   void view_image(const Image<T>& image,
-                  const std::string& windowTitle = "DO-CV",
+                  const std::string& windowTitle = "Sara",
                   double fact = 1.0)
   {
     QWidget *win = active_window() ? active_window() : 0;

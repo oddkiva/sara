@@ -1,7 +1,7 @@
 Third-Party Libraries
 =====================
 
-DO-CV uses the following third-party libraries:
+Sara uses the following third-party libraries:
 
 - `Qt 5`_ is a cross-platform application and UI framework with APIs for C++
   programming.  `Qt 5`_ is licensed with `GNU Lesser General Public License
