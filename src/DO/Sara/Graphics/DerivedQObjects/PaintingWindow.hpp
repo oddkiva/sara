@@ -1,5 +1,5 @@
 // ========================================================================= //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
@@ -57,7 +57,7 @@ namespace DO { namespace Sara {
 
   public:
     PaintingWindow(int width, int height,
-                   const QString& windowTitle = "DO-CV",
+                   const QString& windowTitle = "Sara",
                    int x = -1, int y = -1,
                    QWidget* parent = 0);
     QScrollArea *scrollArea() { return m_scrollArea; }

@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2014 David Ok <david.ok8@gmail.com>
@@ -276,7 +276,7 @@ TEST_F(TestPaintingWindowDrawingMethods, test_drawPoly)
 TEST_F(TestPaintingWindowDrawingMethods, test_drawText)
 {
   // What text.
-  QString text("DO-CV is awesome!");
+  QString text("Sara is awesome!");
   // Where.
   int x = 130, y = 150;
   double orientation = 36.6;

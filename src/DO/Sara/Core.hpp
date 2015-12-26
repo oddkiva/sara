@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
@@ -15,7 +15,7 @@
 #ifndef DO_SARA_CORE_HPP
 #define DO_SARA_CORE_HPP
 
-// DO-CV specific defines.
+// Sara specific defines.
 #include <DO/Sara/Defines.hpp>
 // Template meta-programming
 #include <DO/Sara/Core/Meta.hpp>
