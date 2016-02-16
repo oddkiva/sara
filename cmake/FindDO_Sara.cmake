@@ -38,6 +38,9 @@ if (NOT DO_Sara_FOUND)
   sara_append_components(DO_Sara_COMPONENTS VideoIO)
   sara_append_components(DO_Sara_COMPONENTS Graphics)
 
+  # Connected component algorithm.
+  sara_append_components(DO_Sara_COMPONENTS DisjointSets)
+
   # KDTree for fast neighbor search.
   sara_append_components(DO_Sara_COMPONENTS KDTree)
   # Image processing

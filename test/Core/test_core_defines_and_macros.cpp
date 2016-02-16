@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
@@ -19,7 +19,7 @@ using namespace std;
 
 TEST(DO_Sara_Core_Test, test_defines)
 {
-  EXPECT_EQ(string(DO_SARA_VERSION), "1.1.2");
+  EXPECT_FALSE(string(DO_SARA_VERSION).empty());
   EXPECT_TRUE(string(src_path("")).find("test/Core") != string::npos);
 }
 
