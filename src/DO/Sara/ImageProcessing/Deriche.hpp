@@ -37,6 +37,7 @@ namespace DO { namespace Sara {
                        int derivative_order, int axis, bool neumann = true)
   {
     using S = typename PixelTraits<T>::channel_type;
+    using Vector = typename Image<T, N>::vector_type;
 
     // Sanity check.
     if (sigma <= 0)
@@ -50,12 +51,12 @@ namespace DO { namespace Sara {
     //
     // The constant 1.695 is mysterious... Also found in CImg library.
     // TODO: ask where this constant comes from.
-    const S alpha = static_cast<S>(1.695)/sigma;
-    const S ea = std::exp(alpha);
-    const S ema = std::exp(-alpha);
-    const S em2a = ema*ema;
-    const S b1 = 2*ema;
-    const S b2 = -em2a;
+    const auto alpha = static_cast<S>(1.695)/sigma;
+    const auto ea = std::exp(alpha);
+    const auto ema = std::exp(-alpha);
+    const auto em2a = ema*ema;
+    const auto b1 = 2*ema;
+    const auto b2 = -em2a;
 
     S ek, ekn;
     S parity;
@@ -119,24 +120,22 @@ namespace DO { namespace Sara {
     }
 
     // Initialize two temporary arrays.
-    const int size = inout_signal.size(axis);
-    const int step = inout_signal.stride(axis);
-    std::vector<T> y_causal(size);
-    std::vector<T> y_anticausal(size);
+    const auto size = inout_signal.size(axis);
+    const auto step = inout_signal.stride(axis);
+    auto y_causal = std::vector<T>(size);
+    auto y_anticausal = std::vector<T>(size);
 
-    using Vector = typename Image<T, N>::vector_type;
     auto start = Vector::Zero();
     auto end = inout_signal.sizes();
     end[axis] = 1;
-    auto it = inout_signal.begin_subarray(start, end);
 
     // In 2D, we scan the beginning of each row/columns.
-    for ( ; !it.end(); ++it)
+    for (auto it = inout_signal.begin_subarray(start, end); !it.end(); ++it)
     {
       auto ptr = &(*it);
 
       // Causal signal: i == 0.
-      T *forward_x[2] =  { ptr, ptr-step };
+      T *forward_x[2] =  { ptr, ptr - step };
       y_causal[0] = sumg0* *forward_x[0];
 
       // Causal signal: i == 1.
@@ -163,7 +162,7 @@ namespace DO { namespace Sara {
       y_anticausal[size-2] = y_anticausal[size-1];
 
       // Anti-causal signal: i == size-3 .. 0
-      for (auto i = size-3; i >= 0; --i)
+      for (auto i = size - 3; i >= 0; --i)
       {
         for (auto k = 0; k < 2; ++k)
           backward_x[k] -= step;
