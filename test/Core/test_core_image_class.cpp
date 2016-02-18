@@ -40,7 +40,7 @@ TEST(TestImageClass, test_2d_image_constructor)
 
 TEST(TestImageClass, test_matrix_view)
 {
-  Image<int> A{ 2, 3 };
+  auto A = Image<int>{ 2, 3 };
   A.matrix() <<
     1, 2,
     3, 4,
@@ -77,7 +77,7 @@ TEST(TestImageClass, test_pixelwise_transform)
 
 TEST(TestImageClass, test_pixelwise_transform_inplace)
 {
-  Image<Rgb8> image{ 2, 2 };
+  auto image = Image<Rgb8>{ 2, 2 };
   image(0, 0) = Rgb8{ 255, 0, 0 }; image(1, 0) = Rgb8{ 255, 0, 0 };
   image(0, 1) = Rgb8{ 0, 255, 0 }; image(1, 1) = Rgb8{ 0, 255, 0 };
 

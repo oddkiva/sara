@@ -38,11 +38,22 @@ namespace DO { namespace Sara {
 
     VideoStream& operator=(const VideoStream&) = delete;
 
+    int width() const;
+
+    int height() const;
+
+    Vector2i sizes() const
+    {
+      return Vector2i{ width(), height() };
+    }
+
     void open(const std::string& file_path);
 
     void close();
 
     void seek(std::size_t frame_pos);
+
+    bool read(Rgb8 *video_frame_data);
 
     bool read(Image<Rgb8>& video_frame);
 

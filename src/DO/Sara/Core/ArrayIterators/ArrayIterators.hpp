@@ -516,7 +516,8 @@ namespace DO { namespace Sara {
 
   public: /* typedefs. */
     TYPEDEF_ITERATOR_TYPES(base_type);
-    typedef Matrix<int, N, 1> coords_type, vector_type;
+    using coords_type = Matrix<int, N, 1>;
+    using vector_type = Matrix<int, N, 1>;
 
   public: /* constructors */
     //! Constructor

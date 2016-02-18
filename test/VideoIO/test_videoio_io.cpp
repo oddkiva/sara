@@ -27,7 +27,9 @@ TEST_F(TestVideoIO, test_empty_constructor)
 
 TEST_F(TestVideoIO, test_read_valid_video)
 {
-  VideoStream video_stream(video_filename);
+  VideoStream video_stream{ video_filename };
+  EXPECT_EQ(320, video_stream.width());
+  EXPECT_EQ(240, video_stream.height());
 }
 
 TEST_F(TestVideoIO, test_read_video_with_wrong_filepath)
@@ -38,23 +40,23 @@ TEST_F(TestVideoIO, test_read_video_with_wrong_filepath)
 
 TEST_F(TestVideoIO, test_read_frames_sequentially)
 {
-  VideoStream video_stream(video_filename);
-  Image<Rgb8> frame;
+  VideoStream video_stream{ video_filename };
+  auto frame = Image<Rgb8>{};
 
-  for (int i = 0; i < 3; ++i)
+  for (auto i = 0; i < 3; ++i)
     video_stream >> frame;
 }
 
 TEST_F(TestVideoIO, test_seek_frame)
 {
-  VideoStream video_stream(video_filename);
-  Image<Rgb8> frame;
+  VideoStream video_stream{ video_filename };
+  auto frame = Image<Rgb8>{};
 
-  for (int i = 0; i < 5; ++i)
+  for (auto i = 0; i < 5; ++i)
     video_stream >> frame;
 
-  VideoStream video_stream2(video_filename);
-  Image<Rgb8> frame2;
+  VideoStream video_stream2{ video_filename };
+  auto frame2 = Image<Rgb8>{};
 
   video_stream.seek(4);
   video_stream2.read(frame2);
