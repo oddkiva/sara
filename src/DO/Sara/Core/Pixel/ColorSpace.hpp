@@ -2,7 +2,7 @@
 // This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -60,13 +60,13 @@ namespace DO { namespace Sara {
   //! Grayscale color space.
   struct Gray {};
   //! RGB color space and layout.
-  typedef Meta::Vector3<R,G,B> Rgb;
+  using Rgb = Meta::Vector3<R,G,B>;
   //! RGBA color space and layout.
-  typedef Meta::Vector4<R,G,B,A> Rgba;
+  using Rgba = Meta::Vector4<R,G,B,A>;
   //! YUV color space and layout.
-  typedef Meta::Vector3<Y,U,V> Yuv;
+  using Yuv = Meta::Vector3<Y,U,V>;
   //! HSV color space and layout.
-  typedef Meta::Vector3<H,S,V> Hsv;
+  using Hsv = Meta::Vector3<H,S,V>;
   //! @} ColorSpaces
 
 } /* namespace Sara */

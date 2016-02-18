@@ -2,7 +2,7 @@
 // This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2015 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2015-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -24,7 +24,7 @@ using namespace DO::Sara;
 
 TEST(DO_Sara_Core_Test, test_print_stage)
 {
-  stringstream buffer;
+  stringstream buffer{};
   CoutRedirect cout_redirect{ buffer.rdbuf() };
   print_stage("Hello");
   auto text = buffer.str();

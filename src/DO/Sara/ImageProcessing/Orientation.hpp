@@ -2,7 +2,7 @@
 // This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -42,12 +42,9 @@ namespace DO { namespace Sara {
     if (dst.sizes() != src.sizes())
       dst.resize(src.sizes());
 
-    typedef typename Image<Matrix<T,2,1> >::const_iterator InputIterator;
-    typedef typename Image<T>::iterator OutputIterator;
-
-    InputIterator src_it(src.begin());
-    InputIterator src_it_end(src.end());
-    OutputIterator dst_it(dst.begin());
+    auto src_it = src.begin();
+    auto src_it_end = src.end();
+    auto  dst_it = dst.begin();
     for ( ; src_it != src_it_end; ++src_it, ++dst_it)
       *dst_it = std::atan2(src_it->y(), src_it->x());
   }
@@ -66,7 +63,7 @@ namespace DO { namespace Sara {
   template <typename T>
   Image<T> orientation(const Image<Matrix<T,2,1> >& src)
   {
-    Image<T> ori;
+    auto ori = Image<T>{};
     orientation(src, ori);
     return ori;
   }

@@ -2,7 +2,7 @@
 // This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2014 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2014-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -20,19 +20,19 @@ using namespace DO::Sara;
 using namespace std;
 
 
-// =============================================================================
+// ========================================================================== //
 // Test for the 2D case.
 class TestIterator2D : public testing::Test
 {
 protected:
-  typedef MultiArray<Vector2i, 2, RowMajor> Image;
+  using Image = MultiArray<Vector2i, 2, RowMajor>;
   Image image;
 
   TestIterator2D() : testing::Test()
   {
     image.resize(5, 10);
-    for (int i = 0; i < image.rows(); ++i)
-      for (int j = 0; j < image.cols(); ++j)
+    for (auto i = 0; i < image.rows(); ++i)
+      for (auto j = 0; j < image.cols(); ++j)
         image(i,j) = Vector2i(i,j);
   }
 
@@ -44,9 +44,11 @@ class TestRangeIterator2D : public TestIterator2D {};
 
 TEST_F(TestRangeIterator2D, test_row_major_prefix_increment)
 {
-  Image::array_iterator it(image.begin_array());
-  for (int i = 0; i < image.rows(); ++i) {
-    for (int j = 0; j < image.cols(); ++j) {
+  auto it = image.begin_array();
+  for (auto i = 0; i < image.rows(); ++i)
+  {
+    for (auto j = 0; j < image.cols(); ++j)
+    {
       ASSERT_MATRIX_EQ(*it, Vector2i(i,j));
       ASSERT_MATRIX_EQ(it.position(), Vector2i(i,j));
       ASSERT_EQ(
@@ -60,19 +62,21 @@ TEST_F(TestRangeIterator2D, test_row_major_prefix_increment)
 
 TEST_F(TestRangeIterator2D, test_row_major_postfix_increment)
 {
-  Image::array_iterator it(image.begin_array());
-  for (int i = 0; i < image.rows(); ++i)
-    for (int j = 0; j < image.cols(); ++j)
+  auto it = image.begin_array();
+  for (auto i = 0; i < image.rows(); ++i)
+    for (auto j = 0; j < image.cols(); ++j)
       ASSERT_MATRIX_EQ(*(it++), Vector2i(i,j));
 }
 
 TEST_F(TestRangeIterator2D, test_row_major_prefix_decrement)
 {
-  Image::array_iterator it(image.begin_array());
+  auto it = image.begin_array();
   it += image.sizes() - Vector2i::Ones();
 
-  for (int i = image.rows()-1; i >= 0; --i) {
-    for (int j = image.cols()-1; j >= 0; --j) {
+  for (auto i = image.rows()-1; i >= 0; --i)
+  {
+    for (auto j = image.cols()-1; j >= 0; --j)
+    {
       ASSERT_MATRIX_EQ(*it, Vector2i(i,j));
       ASSERT_MATRIX_EQ(it.position(), Vector2i(i,j));
       ASSERT_EQ(
@@ -86,32 +90,32 @@ TEST_F(TestRangeIterator2D, test_row_major_prefix_decrement)
 
 TEST_F(TestRangeIterator2D, test_row_major_postfix_decrement)
 {
-  Image::array_iterator it(image.begin_array());
+  auto it = image.begin_array();
   it += image.sizes() - Vector2i::Ones();
 
-  for (int i = image.rows()-1; i >= 0; --i)
-    for (int j = image.cols()-1; j >= 0; --j)
+  for (auto i = image.rows()-1; i >= 0; --i)
+    for (auto j = image.cols()-1; j >= 0; --j)
       ASSERT_MATRIX_EQ(*(it--), Vector2i(i,j));
 }
 
 TEST_F(TestRangeIterator2D, test_special_dereferencing_operator)
 {
-  Image::array_iterator it(image.begin_array());
+  auto it = image.begin_array();
   ASSERT_MATRIX_EQ(it(Vector2i(1,2)), Vector2i(1,2));
   ASSERT_MATRIX_EQ(it(1,2), Vector2i(1,2));
 }
 
 TEST_F(TestRangeIterator2D, test_const_multiarray_iterator)
 {
-  const Image& const_image = image;
-  Image::const_array_iterator it = const_image.begin_array();
+  const auto& const_image = image;
+  auto it = const_image.begin_array();
   while (!it.end())
     ++it;
 }
 
 TEST_F(TestRangeIterator2D, test_equality_and_inequality_comparisons)
 {
-  const Image& const_image = image;
+  const auto& const_image = image;
 
   // Equalities.
   EXPECT_EQ(image.begin_array(), const_image.begin_array());
@@ -149,9 +153,11 @@ protected:
 
 TEST_F(TestSubrangeIterator2D, test_row_major_prefix_increment)
 {
-  Image::subarray_iterator it(image.begin_subarray(start, end));
-  for (int i = start(0); i < end(0); ++i) {
-    for (int j = start(1); j < end(1); ++j) {
+  auto it = image.begin_subarray(start, end);
+  for (auto i = start(0); i < end(0); ++i)
+  {
+    for (auto j = start(1); j < end(1); ++j)
+    {
       ASSERT_MATRIX_EQ(*it, Vector2i(i,j));
       ASSERT_MATRIX_EQ(it.position(), Vector2i(i,j));
       ASSERT_EQ(
@@ -165,19 +171,21 @@ TEST_F(TestSubrangeIterator2D, test_row_major_prefix_increment)
 
 TEST_F(TestSubrangeIterator2D, test_row_major_postfix_increment)
 {
-  Image::subarray_iterator it(image.begin_subarray(start, end));
-  for (int i = start(0); i < end(0); ++i)
-    for (int j = start(1); j < end(1); ++j)
+  auto it = image.begin_subarray(start, end);
+  for (auto i = start(0); i < end(0); ++i)
+    for (auto j = start(1); j < end(1); ++j)
       ASSERT_MATRIX_EQ(*(it++), Vector2i(i,j));
 }
 
 TEST_F(TestSubrangeIterator2D, test_row_major_prefix_decrement)
 {
-  Image::subarray_iterator it(image.begin_subarray(start, end));
+  auto it = image.begin_subarray(start, end);
   it += end - start - Vector2i::Ones();
 
-  for (int i = end(0)-1; i >= start(0); --i) {
-    for (int j = end(1)-1; j >= start(1); --j) {
+  for (auto i = end(0)-1; i >= start(0); --i)
+  {
+    for (auto j = end(1)-1; j >= start(1); --j)
+    {
       ASSERT_MATRIX_EQ(*it, Vector2i(i,j));
       ASSERT_MATRIX_EQ(it.position(), Vector2i(i,j));
       ASSERT_EQ(
@@ -191,20 +199,20 @@ TEST_F(TestSubrangeIterator2D, test_row_major_prefix_decrement)
 
 TEST_F(TestSubrangeIterator2D, test_row_major_postfix_decrement)
 {
-  Image::subarray_iterator it(image.begin_subarray(start, end));
+  auto it = image.begin_subarray(start, end);
   it += end - start - Vector2i::Ones();
 
-  for (int i = end(0)-1; i >= start(0); --i)
-    for (int j = end(1)-1; j >= start(1); --j)
+  for (auto i = end(0)-1; i >= start(0); --i)
+    for (auto j = end(1)-1; j >= start(1); --j)
       ASSERT_MATRIX_EQ(*(it--), Vector2i(i,j));
 }
 
 TEST_F(TestSubrangeIterator2D, test_special_dereferencing_operator)
 {
-  Image::subarray_iterator it(image.begin_subarray(start, end));
+  auto it = image.begin_subarray(start, end);
 
-  Vector2i relative_position(2, -1);
-  Vector2i absolute_position = start + relative_position;
+  auto relative_position = Vector2i{ 2, -1 };
+  auto absolute_position = Vector2i{ start + relative_position };
 
   ASSERT_MATRIX_EQ(it(relative_position), absolute_position);
   ASSERT_MATRIX_EQ(it(relative_position), absolute_position);
@@ -213,7 +221,7 @@ TEST_F(TestSubrangeIterator2D, test_special_dereferencing_operator)
 TEST_F(TestSubrangeIterator2D, test_const_multiarray_iterator)
 {
   const Image& const_image = image;
-  Image::const_subarray_iterator it = const_image.begin_subarray(start, end);
+  auto it = const_image.begin_subarray(start, end);
   while (!it.end())
     ++it;
 }
@@ -256,7 +264,7 @@ class TestAxisIterator2D : public TestIterator2D {};
 TEST_F(TestAxisIterator2D, test_equality_and_inequality_comparisons)
 {
   const Image& const_image = image;
-  Image::array_iterator it = image.begin_array();
+  auto it = image.begin_array();
 
   // Check equalities.
   EXPECT_EQ(it.x(), image.begin_array());
@@ -285,26 +293,26 @@ TEST_F(TestAxisIterator2D, test_equality_and_inequality_comparisons)
 
 TEST_F(TestAxisIterator2D, test_iterations)
 {
-  Image::array_iterator it = image.begin_array();
-  EXPECT_EQ(++it.x(), image.begin()+image.stride(0));
+  auto it = image.begin_array();
+  EXPECT_EQ(++it.x(), image.begin() + image.stride(0));
   EXPECT_EQ(--it.x(), image.begin());
 }
 
 TEST_F(TestAxisIterator2D, test_arithmetic_operations)
 {
-  Image::array_iterator it = image.begin_array();
+  auto it = image.begin_array();
 
   // Addition.
-  it.x()+=2;
-  EXPECT_EQ(it, image.begin()+image.stride(0)*2);
+  it.x() += 2;
+  EXPECT_EQ(it, image.begin() + image.stride(0) * 2);
 
   // Subtraction.
-  it.x()-=2;
+  it.x() -= 2;
   EXPECT_EQ(it, image.begin());
 
   // Out of range.
-  EXPECT_THROW(it.x()-=1, std::out_of_range);
-  EXPECT_THROW(it.x()+=image.rows(), std::out_of_range);
+  EXPECT_THROW(it.x() -= 1, std::out_of_range);
+  EXPECT_THROW(it.x() += image.rows(), std::out_of_range);
 }
 
 
@@ -313,17 +321,17 @@ TEST_F(TestAxisIterator2D, test_arithmetic_operations)
 class TestIterators3D : public testing::Test
 {
 protected:
-  typedef MultiArray<Vector3i, 3, RowMajor> Volume;
+  using Volume = MultiArray<Vector3i, 3, RowMajor>;
   Volume volume;
 
   TestIterators3D()
     : testing::Test()
   {
     volume.resize(2, 5, 7);
-    for (int i = 0; i < volume.rows(); ++i)
-      for (int j = 0; j < volume.cols(); ++j)
-        for (int k = 0; k < volume.depth(); ++k)
-          volume(i,j,k) = Vector3i(i,j,k);
+    for (auto i = 0; i < volume.rows(); ++i)
+      for (auto j = 0; j < volume.cols(); ++j)
+        for (auto k = 0; k < volume.depth(); ++k)
+          volume(i,j,k) = Vector3i{ i, j, k };
   }
 
   virtual ~TestIterators3D() {}
@@ -331,10 +339,13 @@ protected:
 
 TEST_F(TestIterators3D, test_row_major_increment)
 {
-  Volume::array_iterator it(volume.begin_array());
-  for (int i = 0; i < volume.rows(); ++i) {
-    for (int j = 0; j < volume.cols(); ++j) {
-      for (int k = 0; k < volume.depth(); ++k) {
+  auto it = volume.begin_array();
+  for (auto i = 0; i < volume.rows(); ++i)
+  {
+    for (auto j = 0; j < volume.cols(); ++j)
+    {
+      for (auto k = 0; k < volume.depth(); ++k)
+      {
         ASSERT_MATRIX_EQ(*it, Vector3i(i,j,k));
         ASSERT_MATRIX_EQ(it.position(), Vector3i(i,j,k));
         ASSERT_EQ(
@@ -349,12 +360,15 @@ TEST_F(TestIterators3D, test_row_major_increment)
 
 TEST_F(TestIterators3D, test_row_major_decrement)
 {
-  Volume::array_iterator it(volume.begin_array());
+  auto it = volume.begin_array();
   it += volume.sizes() - Vector3i::Ones();
 
-  for (int i = volume.rows()-1; i >= 0; --i) {
-    for (int j = volume.cols()-1; j >= 0; --j) {
-      for (int k = volume.depth()-1; k >= 0; --k) {
+  for (auto i = volume.rows() - 1; i >= 0; --i)
+  {
+    for (auto j = volume.cols() - 1; j >= 0; --j)
+    {
+      for (auto k = volume.depth() - 1; k >= 0; --k)
+      {
         ASSERT_MATRIX_EQ(*it, Vector3i(i,j,k));
         ASSERT_MATRIX_EQ(it.position(), Vector3i(i,j,k));
         ASSERT_EQ(
@@ -369,23 +383,23 @@ TEST_F(TestIterators3D, test_row_major_decrement)
 
 TEST_F(TestIterators3D, test_special_dereferencing_operator)
 {
-  Volume::array_iterator it(volume.begin_array());
+  auto it = volume.begin_array();
   EXPECT_MATRIX_EQ(it(Vector3i(1,2,4)), Vector3i(1,2,4));
   EXPECT_MATRIX_EQ(it(1,2,4), Vector3i(1,2,4));
 }
 
 TEST_F(TestIterators3D, test_delta)
 {
-  Volume::array_iterator it(volume.begin_array());
+  auto it = volume.begin_array();
   const int X = 0;
   const int Y = 1;
   int dx = 1;
   int dy = 1;
 
-  EXPECT_MATRIX_EQ(it.delta(X, dx, Y, dy), Vector3i(0+dx, 0+dy, 0));
+  EXPECT_MATRIX_EQ(it.delta(X, dx, Y, dy), Vector3i(0 + dx, 0 + dy, 0));
 
-  Vector3i value = it.delta<X, Y>(dx, dy);
-  EXPECT_MATRIX_EQ(value, Vector3i(0+dx, 0+dy, 0));
+  auto value = it.delta<X, Y>(dx, dy);
+  EXPECT_MATRIX_EQ(value, Vector3i(0 + dx, 0 + dy, 0));
 }
 
 

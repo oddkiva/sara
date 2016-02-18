@@ -2,7 +2,7 @@
 // This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -37,12 +37,9 @@ namespace DO { namespace Sara {
     if (dst.sizes() != src.sizes())
       dst.resize(src.sizes());
 
-    typedef typename Image<Matrix<T,M,N>, D>::const_iterator InputIterator;
-    typedef typename Image<T, D>::iterator OutputIterator;
-
-    InputIterator src_it(src.begin());
-    InputIterator src_it_end(src.end());
-    OutputIterator dst_it(dst.begin());
+    auto src_it = src.begin();
+    auto src_it_end = src.end();
+    auto dst_it = dst.begin();
     for ( ; src_it != src_it_end; ++src_it, ++dst_it)
       *dst_it = src_it->squaredNorm();
   }
@@ -55,7 +52,7 @@ namespace DO { namespace Sara {
   template <typename T, int M, int N, int D>
   Image<T, D> squared_norm(const Image<Matrix<T,M,N>, D>& src)
   {
-    Image<T, D> squared_norm_image;
+    auto squared_norm_image = Image<T, D>{};
     squared_norm(src, squared_norm_image);
     return squared_norm_image;
   }
@@ -71,12 +68,9 @@ namespace DO { namespace Sara {
     if (dst.sizes() != src.sizes())
       dst.resize(src.sizes());
 
-    typedef typename Image<Matrix<T,M,N>, D>::const_iterator InputIterator;
-    typedef typename Image<T, D>::iterator OutputIterator;
-
-    InputIterator src_it(src.begin());
-    InputIterator src_it_end(src.end());
-    OutputIterator dst_it(dst.begin());
+    auto src_it = src.begin();
+    auto src_it_end = src.end();
+    auto dst_it = dst.begin();
     for ( ; src_it != src_it_end; ++src_it, ++dst_it)
       *dst_it = src_it->blueNorm();
   }
@@ -89,7 +83,7 @@ namespace DO { namespace Sara {
   template <typename T, int M, int N, int D>
   Image<T, D> blue_norm(const Image<Matrix<T,M,N>, D>& src)
   {
-    Image<T, D> blue_norm_image;
+    auto blue_norm_image = Image<T, D>{};
     blue_norm(src, blue_norm_image);
     return blue_norm_image;
   }
@@ -105,12 +99,9 @@ namespace DO { namespace Sara {
     if (dst.sizes() != src.sizes())
       dst.resize(src.sizes());
 
-    typedef typename Image<Matrix<T,M,N>, D>::const_iterator InputIterator;
-    typedef typename Image<T, D>::iterator OutputIterator;
-
-    InputIterator src_it(src.begin());
-    InputIterator src_it_end(src.end());
-    OutputIterator dst_it(dst.begin());
+    auto src_it = src.begin();
+    auto src_it_end = src.end();
+    auto dst_it = dst.begin();
     for ( ; src_it != src_it_end; ++src_it, ++dst_it)
       *dst_it = src_it->stableNorm();
   }
@@ -123,7 +114,7 @@ namespace DO { namespace Sara {
   template <typename T, int M, int N, int D>
   Image<T, D> stable_norm(const Image<Matrix<T,M,N>, D>& src)
   {
-    Image<T, D> stable_norm_image;
+    auto stable_norm_image = Image<T, D>{};
     stable_norm(src, stable_norm_image);
     return stable_norm_image;
   }

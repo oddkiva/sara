@@ -2,7 +2,7 @@
 // This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -22,7 +22,7 @@ class QWidget;
 
 namespace DO { namespace Sara {
 
-  typedef QWidget * Window;
+  using Window = QWidget *;
 
   /*!
     @ingroup Graphics
@@ -42,11 +42,17 @@ namespace DO { namespace Sara {
 
   //! @brief Return the window width.
   DO_SARA_EXPORT
-  inline int get_width(Window w) { return get_sizes(w)(0); }
+  inline int get_width(Window w)
+  {
+    return get_sizes(w)(0);
+  }
 
   //! @brief Return the window height.
   DO_SARA_EXPORT
-  inline int get_height(Window w) { return get_sizes(w)(1); }
+  inline int get_height(Window w)
+  {
+    return get_sizes(w)(1);
+  }
 
   //! @{
   //! @brief Open a PaintingWindow for 2D drawing.
@@ -67,6 +73,7 @@ namespace DO { namespace Sara {
   DO_SARA_EXPORT
   Window create_gl_window(int w, int h, const std::string& windowTitle = "Sara",
                       int x = -1, int y = -1);
+
   inline Window create_gl_window(const Vector2i& sizes,
                              const std::string& windowTitle = "Sara",
                              int x = -1, int y = -1)
@@ -81,6 +88,7 @@ namespace DO { namespace Sara {
   Window create_graphics_view(int w, int h,
                               const std::string& windowTitle = "Sara",
                               int x = -1, int y = -1);
+
   DO_SARA_EXPORT
   inline Window create_graphics_view(const Vector2i& sizes,
                                  const std::string& windowTitle = "Sara",

@@ -2,7 +2,7 @@
 // This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -18,32 +18,36 @@ using namespace std;
 
 TEST(DO_Sara_Core_Test, eigenExtensionTest)
 {
-  typedef Matrix2f SuperScalar;
-  typedef MultiArray<SuperScalar, 2> Mat2i;
-  SuperScalar a; a << 1, 2, 3, 4;
-  SuperScalar b; b << 1, 1, 2, 3;
+  using SuperScalar = Matrix2f;
+  using Mat2i = MultiArray<SuperScalar, 2>;
 
-  Mat2i m(2,2);
-  Mat2i n(2,2);
+  auto a = SuperScalar{};
+  a << 1, 2, 3, 4;
+
+  auto b = SuperScalar{};
+  b << 1, 1, 2, 3;
+
+  auto m = Mat2i{ 2, 2 };
+  auto n = Mat2i{ 2, 2 };
 
   // Initialize the matrices m and n.
   m.array().fill(a);
   n.array().fill(b);
 
-  for (int i = 0; i < m.rows(); ++i)
-    for (int j = 0; j < m.cols(); ++j)
+  for (auto i = 0; i < m.rows(); ++i)
+    for (auto j = 0; j < m.cols(); ++j)
       EXPECT_TRUE(m(i,j) == a);
 
-  for (int i = 0; i < n.rows(); ++i)
-    for (int j = 0; j < n.cols(); ++j)
+  for (auto i = 0; i < n.rows(); ++i)
+    for (auto j = 0; j < n.cols(); ++j)
       EXPECT_TRUE(n(i,j) == b);
 
 
   // Double that matrix
   m.array() += n.array();
   // Check that matrix
-  for (int i = 0; i < m.rows(); ++i)
-    for (int j = 0; j < m.cols(); ++j)
+  for (auto i = 0; i < m.rows(); ++i)
+    for (auto j = 0; j < m.cols(); ++j)
       EXPECT_TRUE(m(i, j) == (a + b).eval());
 
   EXPECT_TRUE(m(0,0)*n(0,0) == (a+b)*b);
@@ -51,8 +55,8 @@ TEST(DO_Sara_Core_Test, eigenExtensionTest)
   // Double that matrix
   m.array() *= n.array();
   // Check that matrix
-  for (int i = 0; i < m.rows(); ++i)
-    for (int j = 0; j < m.cols(); ++j)
+  for (auto i = 0; i < m.rows(); ++i)
+    for (auto j = 0; j < m.cols(); ++j)
       EXPECT_TRUE(m(i,j) == (a+b)*b);
 
   m.matrix() += n.matrix();

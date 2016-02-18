@@ -2,7 +2,7 @@
 // This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2015 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2015-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -38,11 +38,22 @@ namespace DO { namespace Sara {
 
     VideoStream& operator=(const VideoStream&) = delete;
 
+    int width() const;
+
+    int height() const;
+
+    Vector2i sizes() const
+    {
+      return Vector2i{ width(), height() };
+    }
+
     void open(const std::string& file_path);
 
     void close();
 
     void seek(std::size_t frame_pos);
+
+    bool read(Rgb8 *video_frame_data);
 
     bool read(Image<Rgb8>& video_frame);
 

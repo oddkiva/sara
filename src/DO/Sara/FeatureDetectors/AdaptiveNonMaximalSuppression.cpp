@@ -2,7 +2,7 @@
 // This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -19,7 +19,7 @@ namespace DO { namespace Sara {
 
   // Greater comparison functor for the adaptive non maximal suppression
   // algorithm.
-  typedef pair<size_t, float> IndexScore;
+  using IndexScore = pair<size_t, float>;
 
   vector<pair<size_t, float>>
   adaptive_non_maximal_suppression(const vector<OERegion>& features,

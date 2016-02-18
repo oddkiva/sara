@@ -2,7 +2,7 @@
 // This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2014 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2014-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -25,8 +25,8 @@ namespace DO { namespace Sara {
   {
   public:
     enum { Dimension = N };
-    typedef Matrix<double, N, 2> Basis;
-    typedef Matrix<double, N, 1> Vector;
+    using Basis = Matrix<double, N, 2>;
+    using Vector = Matrix<double, N, 1>;
 
     enum Type {
       Convex = 0x1, Blunt = 0x2, Pointed = 0x4,
@@ -98,12 +98,12 @@ namespace DO { namespace Sara {
   template <int N>
   class AffineCone : public Cone<N>
   {
-    typedef Cone<N> Base;
+    using Base = Cone<N>;
 
   public:
     enum { Dimension = Base::Dimension };
-    typedef typename Base::Type Type;
-    typedef typename Base::Vector Vector;
+    using Type = typename Base::Type;
+    using Vector = typename Base::Vector;
 
     inline AffineCone(const Vector& alpha, const Vector& beta,
                       const Vector& vertex, Type type = Base::Convex)
