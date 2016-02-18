@@ -20,7 +20,7 @@ namespace DO { namespace Sara {
   class LineSegment : private std::pair<Point2d, Point2d>
   {
   public:
-    typedef std::pair<Point2d, Point2d> Base;
+    using Base = std::pair<Point2d, Point2d>;
     LineSegment() {}
     LineSegment(const Base& pair) : Base(pair) {}
     LineSegment(const Point2d& p1, const Point2d& p2) : Base(p1, p2) {}

@@ -27,21 +27,21 @@ namespace DO { namespace Sara {
   //! Macro for generic color typedefs like in OpenGL.
 #define DEFINE_GENERIC_COLOR_TYPEDEFS(N)            \
   /*! @brief Color{NumChannels}{ChannelType} */     \
-  typedef Matrix<unsigned char, N, 1> Color##N##ub; \
+  using Color##N##ub = Matrix<unsigned char, N, 1>; \
   /*! @brief Color{NumChannels}{ChannelType} */     \
-  typedef Matrix<char, N, 1> Color##N##b;           \
+  using Color##N##b = Matrix<char, N, 1>;           \
   /*! @brief Color{NumChannels}{ChannelType} */     \
-  typedef Matrix<unsigned short, N, 1> Color##N##us;\
+  using Color##N##us = Matrix<unsigned short, N, 1>;\
   /*! @brief Color{NumChannels}{ChannelType} */     \
-  typedef Matrix<short, N, 1> Color##N##s;          \
+  using Color##N##s = Matrix<short, N, 1>;          \
   /*! @brief Color{NumChannels}{ChannelType}. */    \
-  typedef Matrix<unsigned int, N, 1> Color##N##ui;  \
+  using Color##N##ui = Matrix<unsigned int, N, 1>;  \
   /*! @brief Color{NumChannels}{ChannelType} */     \
-  typedef Matrix<int, N, 1> Color##N##i;            \
+  using Color##N##i = Matrix<int, N, 1>;            \
   /*! @brief Color{NumChannels}{ChannelType} */     \
-  typedef Matrix<float, N, 1> Color##N##f;          \
+  using Color##N##f = Matrix<float, N, 1>;          \
   /*! @brief Color{NumChannels}{ChannelType} */     \
-  typedef Matrix<double, N, 1> Color##N##d;
+  using Color##N##d = Matrix<double, N, 1>;
 
   DEFINE_GENERIC_COLOR_TYPEDEFS(3)
   DEFINE_GENERIC_COLOR_TYPEDEFS(4)
@@ -51,21 +51,21 @@ namespace DO { namespace Sara {
   //! Macro for color typedefs.
 #define DEFINE_COLOR_TYPES(colorspace)                      \
   /*! @brief {ColorSpace}{BitDepthPerChannel} */            \
-  typedef Pixel<unsigned char, colorspace> colorspace##8;   \
+  using colorspace##8 = Pixel<unsigned char, colorspace>;   \
   /*! @brief {PixelSpace}{BitDepthPerChannel} */            \
-  typedef Pixel<unsigned short, colorspace> colorspace##16; \
+  using colorspace##16 = Pixel<unsigned short, colorspace>; \
   /*! @brief {PixelSpace}{BitDepthPerChannel} */            \
-  typedef Pixel<unsigned int, colorspace> colorspace##32;   \
+  using colorspace##32 = Pixel<unsigned int, colorspace>;   \
   /*! @brief {PixelSpace}{BitDepthPerChannel} */            \
-  typedef Pixel<char, colorspace> colorspace##8s;           \
+  using colorspace##8s = Pixel<char, colorspace>;           \
   /*! @brief {PixelSpace}{BitDepthPerChannel} */            \
-  typedef Pixel<short, colorspace> colorspace##16s;         \
+  using colorspace##16s = Pixel<short, colorspace>;         \
   /*! @brief {PixelSpace}{BitDepthPerChannel} */            \
-  typedef Pixel<int, colorspace> colorspace##32s;           \
+  using colorspace##32s = Pixel<int, colorspace>;           \
   /*! @brief {PixelSpace}{BitDepthPerChannel} */            \
-  typedef Pixel<float, colorspace> colorspace##32f;         \
+  using colorspace##32f = Pixel<float, colorspace>;         \
   /*! @brief {PixelSpace}{BitDepthPerChannel} */            \
-  typedef Pixel<double, colorspace> colorspace##64f;
+  using colorspace##64f = Pixel<double, colorspace>;
 
   DEFINE_COLOR_TYPES(Rgb)
   DEFINE_COLOR_TYPES(Rgba)

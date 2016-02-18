@@ -36,7 +36,7 @@ namespace DO { namespace Sara {
                        typename PixelTraits<T>::channel_type sigma,
                        int derivative_order, int axis, bool neumann = true)
   {
-    typedef typename PixelTraits<T>::channel_type S;
+    using S = typename PixelTraits<T>::channel_type;
 
     // Sanity check.
     if (sigma <= 0)
@@ -124,32 +124,30 @@ namespace DO { namespace Sara {
     std::vector<T> y_causal(size);
     std::vector<T> y_anticausal(size);
 
-    typedef typename Image<T, N>::vector_type Vector;
-    typedef typename Image<T, N>::subarray_iterator SubarrayIterator;
-    Vector start, end;
-    start = Vector::Zero();
-    end = inout_signal.sizes();
+    using Vector = typename Image<T, N>::vector_type;
+    auto start = Vector::Zero();
+    auto end = inout_signal.sizes();
     end[axis] = 1;
-    SubarrayIterator it = inout_signal.begin_subarray(start, end);
+    auto it = inout_signal.begin_subarray(start, end);
 
     // In 2D, we scan the beginning of each row/columns.
     for ( ; !it.end(); ++it)
     {
-      T *ptr = &(*it);
+      auto ptr = &(*it);
 
       // Causal signal: i == 0.
       T *forward_x[2] =  { ptr, ptr-step };
       y_causal[0] = sumg0* *forward_x[0];
 
       // Causal signal: i == 1.
-      for (int k = 0; k < 2; ++k)
+      for (auto k = 0; k < 2; ++k)
         forward_x[k] += step;
       y_causal[1] = g0 * *forward_x[0] + sumg1 * *forward_x[1];
 
       // Causal signal: i = 2 .. size-1
-      for (int i = 2; i < size; ++i)
+      for (auto i = 2; i < size; ++i)
       {
-        for (int k = 0; k < 2; ++k)
+        for (auto k = 0; k < 2; ++k)
           forward_x[k] += step;
         y_causal[i] = a1 * *forward_x[0] + a2 * *forward_x[1]
                     + b1 * y_causal[i-1] + b2 * y_causal[i-2];
@@ -160,21 +158,21 @@ namespace DO { namespace Sara {
       y_anticausal[size-1] = parity * sumg1 * *backward_x[0];
 
       // Anti-causal signal: i == size-2
-      for (int k = 0; k < 2; ++k)
+      for (auto k = 0; k < 2; ++k)
         forward_x[k] += step;
       y_anticausal[size-2] = y_anticausal[size-1];
 
       // Anti-causal signal: i == size-3 .. 0
-      for (int i = size-3; i >= 0; --i)
+      for (auto i = size-3; i >= 0; --i)
       {
-        for (int k = 0; k < 2; ++k)
+        for (auto k = 0; k < 2; ++k)
           backward_x[k] -= step;
         y_anticausal[i] = a3 * *backward_x[0] + a4 * *backward_x[1]
                         + b1 * y_anticausal[i+1] + b2 * y_anticausal[i+2];
       }
 
       // Store the sum of the two signals.
-      for (int i = 0; i < size; ++i)
+      for (auto i = 0; i < size; ++i)
       {
         *ptr = y_causal[i] + y_anticausal[i];
         ptr += step;
@@ -186,9 +184,10 @@ namespace DO { namespace Sara {
   template <typename T, int N>
   void inplace_deriche_blur(
     Image<T, N>& inout_signal,
-    const Matrix<typename PixelTraits<T>::channel_type, N, 1>& sigmas, bool neumann = true)
+    const Matrix<typename PixelTraits<T>::channel_type, N, 1>& sigmas,
+    bool neumann = true)
   {
-    for (int i = 0; i < N; ++i)
+    for (auto i = 0; i < N; ++i)
       inplace_deriche(inout_signal,sigmas[i], 0, i, neumann);
   }
 
@@ -199,7 +198,7 @@ namespace DO { namespace Sara {
     typename PixelTraits<T>::channel_type sigma,
     bool neumann = true)
   {
-    typedef typename PixelTraits<T>::channel_type S;
+    using S = typename PixelTraits<T>::channel_type;
     Matrix<S, N, 1> sigmas; sigmas.fill(sigma);
     inplace_deriche_blur(inout_signal, sigmas, neumann);
   }
@@ -210,7 +209,7 @@ namespace DO { namespace Sara {
                          typename PixelTraits<T>::channel_type sigma,
                          bool neumann = true)
   {
-    Image<T,N> out_signal(in_signal);
+    auto out_signal = in_signal;
     inplace_deriche_blur(out_signal, sigma, neumann);
     return out_signal;
   }
@@ -222,7 +221,7 @@ namespace DO { namespace Sara {
     const Matrix<typename PixelTraits<T>::channel_type, N, 1>& sigmas,
     bool neumann = true)
   {
-    Image<T,N> J(I);
+    auto J = I;
     inplace_deriche_blur(J,sigmas,neumann);
     return J;
   }

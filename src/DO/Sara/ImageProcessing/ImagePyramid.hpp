@@ -155,10 +155,10 @@ namespace DO { namespace Sara {
   public: /* member functions */
     //! Convenient typedefs.
     //! @{
-    typedef Pixel pixel_type;
-    typedef Image<Pixel> image_type;
-    typedef std::vector<Image<Pixel, N> > octave_type;
-    typedef typename PixelTraits<Pixel>::channel_type scalar_type;
+    using pixel_type = Pixel;
+    using image_type = Image<Pixel>;
+    using octave_type = std::vector<Image<Pixel, N>>;
+    using scalar_type = typename PixelTraits<Pixel>::channel_type;
     //! @}
 
     //! @brief Default constructor.
