@@ -8,7 +8,7 @@
 #include <numpy/ndarrayobject.h>
 
 
-namespace DO { namespace Sara { namespace python {
+namespace DO { namespace Sara { namespace Python {
 
   inline
 #if (PY_VERSION_HEX < 0x03000000)
@@ -21,7 +21,7 @@ namespace DO { namespace Sara { namespace python {
     import_array();
   }
 
-} /* namespace python */
+} /* namespace Python */
 } /* namespace Sara */
 } /* namespace DO */
 
