@@ -81,6 +81,16 @@ namespace DO { namespace Sara {
     close();
   }
 
+  int VideoStream::width() const
+  {
+    return _video_codec_context->width;
+  }
+
+  int VideoStream::height() const
+  {
+    return _video_codec_context->height;
+  }
+
   void
   VideoStream::open(const std::string& file_path)
   {
@@ -157,10 +167,11 @@ namespace DO { namespace Sara {
   }
 
   bool
-  VideoStream::read(Image<Rgb8>& video_frame)
+  VideoStream::read(Rgb8 *video_frame_data)
   {
     AVPacket _video_packet;
-    int length, got_video_frame;
+    auto length = int{};
+    auto got_video_frame = int{};
 
     while (av_read_frame(_video_format_context, &_video_packet) >= 0)
     {
@@ -172,18 +183,16 @@ namespace DO { namespace Sara {
 
       if (got_video_frame)
       {
-        int w = _video_codec_context->width;
-        int h = _video_codec_context->height;
-
-        if (video_frame.width() != w || video_frame.height() != h)
-          video_frame.resize(w, h);
+        auto w = width();
+        auto h = height();
 
         for (int y = 0; y < h; ++y)
         {
           for (int x = 0; x < w; ++x)
           {
-            Yuv8 yuv = get_yuv_pixel(_video_frame, x, y);
-            video_frame(x, y) = Sara::convert(yuv);
+            auto yuv = get_yuv_pixel(_video_frame, x, y);
+            *video_frame_data = Sara::convert(yuv);
+            ++video_frame_data;
           }
         }
 
@@ -193,6 +202,13 @@ namespace DO { namespace Sara {
     }
 
     return false;
+  }
+
+  bool
+  VideoStream::read(Image<Rgb8>& video_frame)
+  {
+    video_frame.resize(sizes());
+    return read(video_frame.data());
   }
 
 } /* namespace Sara */

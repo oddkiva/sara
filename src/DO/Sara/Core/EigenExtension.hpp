@@ -56,9 +56,9 @@ namespace Eigen {
   {
     //! @{
     //! Eigen internals.
-    typedef Array<T, M, N> Real;
-    typedef Array<T, M, N> NonInteger;
-    typedef Array<T, M, N> Nested;
+    using Real = Array<T, M, N>;
+    using NonInteger = Array<T, M, N>;
+    using Nested = Array<T, M, N>;
 
     enum {
       IsComplex = 0,
@@ -93,9 +93,9 @@ namespace Eigen {
   {
     //! @{
     //! Eigen internals.
-    typedef Matrix<T, M, N> Real;
-    typedef Matrix<T, M, N> NonInteger;
-    typedef Matrix<T, M, N> Nested;
+    using Real = Matrix<T, M, N>;
+    using NonInteger = Matrix<T, M, N>;
+    using Nested = Matrix<T, M, N>;
 
     enum {
       IsComplex = 0,
@@ -138,24 +138,24 @@ namespace DO { namespace Sara {
   using namespace Eigen;
 
   //! @{
-  //! Convenient typedef for geometric point types.
-  typedef Vector2i Point2i;
-  typedef Vector3i Point3i;
-  typedef Vector4i Point4i;
+  //! Convenient aliases for geometric point types.
+  using Point2i = Vector2i;
+  using Point3i = Vector3i;
+  using Point4i = Vector4i;
 
-  typedef Vector2f Point2f;
-  typedef Vector3f Point3f;
-  typedef Vector4f Point4f;
+  using Point2f = Vector2f;
+  using Point3f = Vector3f;
+  using Point4f = Vector4f;
 
-  typedef Vector2d Point2d;
-  typedef Vector3d Point3d;
-  typedef Vector4d Point4d;
+  using Point2d = Vector2d;
+  using Point3d = Vector3d;
+  using Point4d = Vector4d;
   //! @}
 
   //! @{
   //! 128-dimensional vector type
-  typedef Matrix<unsigned char, 128, 1> Vector128ub;
-  typedef Matrix<float, 128, 1> Vector128f;
+  using Vector128ub = Matrix<unsigned char, 128, 1>;
+  using Vector128f = Matrix<float, 128, 1>;
   //! @}
 
   //! I/O.

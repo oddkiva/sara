@@ -19,7 +19,7 @@
 
 namespace DO { namespace Sara { namespace Detail {
 
-    typedef std::pair<Point2d, double> PtCotg;
+    using PtCotg = std::pair<Point2d, double>;
 
     void sort_points_by_polar_angle(Point2d *points, PtCotg *workArray,
                                     std::size_t num_points);

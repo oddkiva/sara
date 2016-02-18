@@ -21,7 +21,7 @@ using namespace DO::Sara;
 
 TEST(Test_Pixel, test_rgb_32f)
 {
-  typedef Pixel<float, Rgb> Rgb32f;
+  using Rgb32f = Pixel<float, Rgb>;
 
   Rgb32f red(1., 0, 0);
   EXPECT_EQ(red.channel<R>(), 1.f);

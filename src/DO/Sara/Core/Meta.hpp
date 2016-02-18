@@ -63,9 +63,9 @@ namespace DO { namespace Sara { namespace Meta {
   struct Vector3
   {
     enum { size = 3 };
-    typedef T0_ T0; //!< Element 0 is type T0.
-    typedef T1_ T1; //!< Element 1 is type T1.
-    typedef T2_ T2; //!< Element 2 is type T2.
+    using T0 = T0_; //!< Element 0 is type T0.
+    using T1 = T1_; //!< Element 1 is type T1.
+    using T2 = T2_; //!< Element 2 is type T2.
   };
 
 
@@ -74,10 +74,10 @@ namespace DO { namespace Sara { namespace Meta {
   struct Vector4
   {
     enum { size = 4 };
-    typedef T0_ T0; //!< Element 0 is type T0.
-    typedef T1_ T1; //!< Element 1 is type T1.
-    typedef T2_ T2; //!< Element 2 is type T2.
-    typedef T3_ T3; //!< Element 3 is type T3.
+    using T0 = T0_; //!< Element 0 is type T0.
+    using T1 = T1_; //!< Element 1 is type T1.
+    using T2 = T2_; //!< Element 2 is type T2.
+    using T3 = T3_; //!< Element 3 is type T3.
   };
 
 
@@ -87,16 +87,16 @@ namespace DO { namespace Sara { namespace Meta {
   //! @{
   //! @brief Specialized index getter for Vector3.
   template <typename Vector> struct At<Vector, 0>
-  { typedef typename Vector::T0 Type; /*!< Return type at index 0. */};
+  { using Type = typename Vector::T0; /*!< Return type at index 0. */};
 
   template <typename Vector> struct At<Vector, 1>
-  { typedef typename Vector::T1 Type; /*!< Return type at index 1. */};
+  { using Type = typename Vector::T1; /*!< Return type at index 1. */};
 
   template <typename Vector> struct At<Vector, 2>
-  { typedef typename Vector::T2 Type; /*!< Return type at index 2. */};
+  { using Type = typename Vector::T2; /*!< Return type at index 2. */};
 
   template <typename Vector> struct At<Vector, 3>
-  { typedef typename Vector::T3 Type; /*!< Return type at index 3. */};
+  { using Type = typename Vector::T3; /*!< Return type at index 3. */};
   //! @}
 
 
@@ -146,11 +146,11 @@ namespace DO { namespace Sara { namespace Meta {
 
   template <typename IsTrue, typename IsFalse>
   struct Choose<true, IsTrue, IsFalse>
-  { typedef IsTrue Type; /*!< Return type. */};
+  { using Type = IsTrue; /*!< Return type. */};
 
   template <typename IsTrue, typename IsFalse>
   struct Choose<false, IsTrue, IsFalse>
-  { typedef IsFalse Type; /*!< Return type. */};
+  { using Type = IsFalse; /*!< Return type. */};
   //! @}
 
 } /* namespace Meta */

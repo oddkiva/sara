@@ -23,7 +23,7 @@ namespace DO { namespace Sara {
   template <typename T, int N, int S = ColMajor>
   class MultiArrayView
   {
-    typedef MultiArrayView self_type;
+    using self_type = MultiArrayView;
 
   public: /* typedefs. */
     //! Storage order.

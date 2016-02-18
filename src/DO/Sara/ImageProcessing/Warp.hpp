@@ -28,28 +28,27 @@ namespace DO { namespace Sara {
     using DoublePixel =
       typename PixelTraits<T>::template Cast<double>::pixel_type;
     using ChannelType = typename PixelTraits<T>::channel_type;
-    using Matrix3 = Matrix<S, 3, 3>;
     using Vector3 = Matrix<S, 3, 1>;
 
-    const Matrix3& H = homography_from_dst_to_src;
+    const auto& H = homography_from_dst_to_src;
 
     for (auto it = dst.begin_array(); !it.end(); ++it)
     {
       // Get the corresponding coordinates in the source image.
-      Vector3 H_P;
+      auto H_P = Vector3{};
       H_P = H * (Vector3() << it.position().template cast<S>(), 1).finished();
       H_P /= H_P(2);
 
       // Check if the position is not in the src domain [0,w[ x [0,h[.
-      bool position_is_in_src_domain =
+      auto position_is_in_src_domain =
         H_P.x() >= 0 && H_P.x() < S(src.width()) &&
         H_P.y() >= 0 && H_P.y() < S(src.height());
 
       // Fill with either the default value or the interpolated value.
       if (position_is_in_src_domain)
       {
-        Vector2d H_p(H_P.template head<2>().template cast<double>());
-        DoublePixel pixel_value( interpolate(src, H_p) );
+        Vector2d H_p{ H_P.template head<2>().template cast<double>() };
+        auto pixel_value = interpolate(src, H_p);
         *it = PixelTraits<DoublePixel>::template Cast<ChannelType>::apply(
           pixel_value);
       }

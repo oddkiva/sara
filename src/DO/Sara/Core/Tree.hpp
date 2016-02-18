@@ -433,7 +433,7 @@ namespace DO { namespace Sara {
         return;
 
       // Mapping between source node and destination nodes.
-      std::map<const Node *, Node *> src_to_dst;
+      auto src_to_dst = std::map<const Node *, Node *>{};
 
       // Initialize the copy.
       set_root(*other.begin());
@@ -533,8 +533,8 @@ namespace DO { namespace Sara {
       //! a subtree, since it may have descendants.
       void remove_child(Node *child)
       {
-        Node *prev_sibling = child->_prev_sibling;
-        Node *next_sibling = child->_next_sibling;
+        auto prev_sibling = child->_prev_sibling;
+        auto next_sibling = child->_next_sibling;
 
         // Modify myself, the parent of this child.
         if (_first_child == child)
@@ -850,9 +850,9 @@ namespace DO { namespace Sara {
     {
       template <bool IsConst2> friend class LeafIterator;
 
-      typedef LeafIterator self_type;
-      typedef DepthFirstIterator<IsConst> base_type;
-      typedef typename base_type::node_pointer node_pointer;
+      using self_type = LeafIterator;
+      using base_type = DepthFirstIterator<IsConst>;
+      using node_pointer = typename base_type::node_pointer;
       using base_type::_node_ptr;
       using base_type::_root_node_ptr;
 
@@ -926,8 +926,8 @@ namespace DO { namespace Sara {
   {
     using namespace std;
 
-    ofstream f(name.c_str());
-    if (!f.is_open())
+    ofstream f{ name };
+    if (!f)
     {
       cerr << "Error: cannot create file:\n" << name << endl;
       return false;
@@ -935,14 +935,11 @@ namespace DO { namespace Sara {
 
     f << "digraph G {" << endl;
 
-    typedef typename Tree<T>::const_breadth_first_iterator
-      const_breadth_first_iterator;
-    typedef typename Tree<T>::const_sibling_iterator const_children_iterator;
-    for (const_breadth_first_iterator n = tree.breadth_first_begin();
+    for (auto n = tree.breadth_first_begin();
          n != tree.breadth_first_end(); ++n)
     {
-      const_children_iterator child = tree.children_begin(n);
-      const_children_iterator end = tree.children_end();
+      auto child = tree.children_begin(n);
+      auto end = tree.children_end();
       for ( ; child != end; ++child)
         f << "\t" << *n << " -> " << *child << ";" << endl;
     }

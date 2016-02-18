@@ -28,7 +28,7 @@ namespace DO { namespace Sara {
   template <typename _BitField, int _Sz0, int _Sz1, int _Sz2>
   struct PackedPixelBase_3
   {
-    typedef _BitField bitfield_type;
+    using bitfield_type = _BitField;
     enum { num_channels = 3 };
     _BitField channel_0 : _Sz0;
     _BitField channel_1 : _Sz1;
@@ -52,7 +52,9 @@ namespace DO { namespace Sara {
     }
 
     inline bool operator!=(const PackedPixelBase_3& other) const
-    { return !(*this == other);}
+    {
+      return !(*this == other);
+    }
   };
 
 
@@ -60,7 +62,7 @@ namespace DO { namespace Sara {
   template <typename _BitField, int _Sz0, int _Sz1, int _Sz2, int _Sz3>
   struct PackedPixelBase_4
   {
-    typedef _BitField bitfield_type;
+    using bitfield_type = _BitField;
     enum { num_channels = 4 };
     _BitField channel_0 : _Sz0;
     _BitField channel_1 : _Sz1;
@@ -99,7 +101,7 @@ namespace DO { namespace Sara {
   struct Channel<_PackedPixel, index>                           \
   {                                                             \
     Channel(_PackedPixel& p) : _p(p) {}                         \
-    typedef typename _PackedPixel::bitfield_type bitfield_type; \
+    using bitfield_type = typename _PackedPixel::bitfield_type; \
     bitfield_type operator=(bitfield_type value)                \
     { _p.channel_##index = value; }                             \
     bool operator==(bitfield_type value) const                  \
@@ -117,17 +119,17 @@ namespace DO { namespace Sara {
   template <typename _ColorSpace, typename _ChannelOrder>
   struct ColorModel
   {
-    typedef _ColorSpace color_space_type;
-    typedef _ChannelOrder channel_order_type;
+    using color_space_type = _ColorSpace;
+    using channel_order_type = _ChannelOrder;
   };
 
   //! @brief Channel index getter.
   template <typename _ColorModel, typename _ChannelTag>
   struct ChannelIndex
   {
-    typedef typename _ColorModel::color_space_type color_space_type;
-    typedef typename _ColorModel::channel_order_type channel_order_type;
-    typedef _ChannelTag channel_tag_type;
+    using color_space_type = typename _ColorModel::color_space_type;
+    using channel_order_type = typename _ColorModel::channel_order_type;
+    using channel_tag_type = _ChannelTag;
 
     enum
     {
@@ -140,19 +142,17 @@ namespace DO { namespace Sara {
   template <typename _PackedPixelBase, typename _ColorModel>
   class PackedPixel: protected _PackedPixelBase
   {
-    typedef _PackedPixelBase base_type;
-    typedef PackedPixel self_type;
+    using base_type = _PackedPixelBase;
+    using self_type = PackedPixel;
 
   public:
-    typedef typename base_type::bitfield_type bitfield_type;
-    typedef _ColorModel color_layout_type;
-    typedef typename _ColorModel::color_space_type color_space_type;
-    typedef typename _ColorModel::channel_order_type channel_order_type;
+    using bitfield_type = typename base_type::bitfield_type;
+    using color_layout_type = _ColorModel;
+    using color_space_type = typename _ColorModel::color_space_type;
+    using channel_order_type = typename _ColorModel::channel_order_type;
 
   public:
-    inline PackedPixel()
-    {
-    }
+    PackedPixel() = default;
 
     inline PackedPixel(bitfield_type v0, bitfield_type v1, bitfield_type v2)
     {

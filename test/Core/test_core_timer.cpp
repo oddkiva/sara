@@ -26,10 +26,10 @@ inline void millisleep(unsigned milliseconds)
 
 TEST(DO_Sara_Core_Test, testTimer)
 {
-  Timer timer;
-  double elapsed_milliseconds;
-  double elapsed_seconds;
-  unsigned sleep_milliseconds = 580;
+  Timer timer{};
+  auto elapsed_milliseconds = double{};
+  auto elapsed_seconds = double{};
+  auto sleep_milliseconds = unsigned{ 580 };
 
   timer.restart();
   millisleep(sleep_milliseconds);

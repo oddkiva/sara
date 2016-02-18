@@ -19,7 +19,7 @@ namespace DO { namespace Sara {
 
   // Greater comparison functor for the adaptive non maximal suppression
   // algorithm.
-  typedef pair<size_t, float> IndexScore;
+  using IndexScore = pair<size_t, float>;
 
   vector<pair<size_t, float>>
   adaptive_non_maximal_suppression(const vector<OERegion>& features,

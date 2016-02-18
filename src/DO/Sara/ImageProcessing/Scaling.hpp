@@ -33,9 +33,8 @@ namespace DO { namespace Sara {
   template <typename T, int N>
   Image<T, N> upscale(const Image<T, N>& src, int fact)
   {
-    Image<T, N> dst(src.sizes()*fact);
-    typename Image<T, N>::array_iterator it(dst.begin_array());
-    for ( ; !it.end(); ++it)
+    auto dst = Image<T, N>(src.sizes() * fact);
+    for (auto it = dst.begin_array() ; !it.end(); ++it)
       *it = src(it.position() / fact);
     return dst;
   }
@@ -44,9 +43,8 @@ namespace DO { namespace Sara {
   template <typename T, int N>
   Image<T, N> downscale(const Image<T, N>& src, int fact)
   {
-    Image<T, N> dst(src.sizes()/fact);
-    typename Image<T, N>::array_iterator it(dst.begin_array());
-    for ( ; !it.end(); ++it)
+    auto dst = Image<T, N>(src.sizes() / fact);
+    for (auto it = dst.begin_array(); !it.end(); ++it)
       *it = src(it.position()*fact);
     return dst;
   }
@@ -72,17 +70,15 @@ namespace DO { namespace Sara {
     using Cast = typename PixelTraits<T>::template Cast<double>;
 
     // Convert scalar values to double type.
-    Image<DoublePixel, N> double_src{
-      src.pixelwise_transform([](const T& pixel) {
-        return Cast::apply(pixel);
-      })
-    };
+    auto double_src = src.pixelwise_transform([](const T& pixel) {
+      return Cast::apply(pixel);
+    });
 
     Matrix<double, N, 1> original_sizes{ src.sizes().template cast<double>() };
     Matrix<double, N, 1> scale_factors{
       original_sizes.cwiseQuotient(new_sizes.template cast<double>())
     };
-    std::pair<double, double> min_max{ range(scale_factors) };
+    auto min_max = range(scale_factors);
 
     if (keep_ratio)
     {
@@ -99,7 +95,7 @@ namespace DO { namespace Sara {
     inplace_deriche_blur(double_src, sigmas);
 
     // Create the new image by interpolating pixel values.
-    Image<T, N> dst{ new_sizes };
+    auto dst = Image<T, N>{ new_sizes };
     auto dst_it = dst.begin_array();
     for ( ; !dst_it.end(); ++dst_it)
     {
@@ -119,7 +115,7 @@ namespace DO { namespace Sara {
 
   //! @brief Reduce image.
   template <typename T>
-  inline  Image<T, 2> reduce(const Image<T, 2>& image, int w, int h,
+  inline Image<T, 2> reduce(const Image<T, 2>& image, int w, int h,
                              bool keep_ratio = false)
   {
     return reduce(image, Vector2i(w,h), keep_ratio);
