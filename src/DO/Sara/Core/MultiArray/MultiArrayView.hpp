@@ -351,6 +351,21 @@ namespace DO { namespace Sara {
       swap(_strides, other._strides);
     }
 
+    //! @{
+    //! @brief Equality comparison.
+    inline bool operator==(const self_type& other) const
+    {
+      if (_sizes != other._sizes)
+        return false;
+      return std::equal(_begin, _end, other._begin);
+    }
+
+    inline bool operator!=(const self_type& other) const
+    {
+      return !(*this == other);
+    }
+    //! @}
+
   protected:
     //! @brief Compute the strides according the size vector and storage order.
     inline vector_type compute_strides(const vector_type& sizes) const

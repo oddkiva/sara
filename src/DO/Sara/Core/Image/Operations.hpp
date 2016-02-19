@@ -54,7 +54,7 @@ namespace DO { namespace Sara {
   //! @}
 
   //! @}
- 
+
 } /* namespace Sara */
 } /* namespace DO */
 
@@ -66,22 +66,22 @@ namespace DO { namespace Sara {
   //! @{
 
   //! @brief Convert color of image.
-  template <typename T, typename U, int N>
-  void convert(const Image<T, N>& src, Image<U, N>& dst)
+  template <typename SrcImageBase, typename DstImageBase>
+  void convert(const SrcImageBase& src, DstImageBase& dst)
   {
-    dst.resize(src.sizes());
+    if (src.sizes() != dst.sizes())
+      throw std::runtime_error{ "Error: image sizes are not equal!" };
 
-    const auto *src_first = src.data();
+    const auto *src_first = src.begin();
     const auto *src_last = src.end();
-
-    U *dst_first = dst.data();
+    auto dst_first = dst.begin();
 
     for ( ; src_first != src_last; ++src_first, ++dst_first)
       smart_convert_color(*src_first, *dst_first);
   }
 
   //! @}
- 
+
 } /* namespace Sara */
 } /* namespace DO */
 

@@ -30,13 +30,14 @@ namespace DO { namespace Sara {
   //! @{
   //! @brief Forward declaration of the image classes.
   template <typename PixelType, int N = 2> class Image;
+
   template <typename PixelType, int N = 2> class ImageView;
   //! @}
 
 
   //! @brief Forward declaration of the generic color conversion function.
-  template <typename T, typename U, int N>
-  void convert(const Image<T, N>& src, Image<U, N>& dst);
+  template <typename SrcImageBase, typename DstImageBase>
+  void convert(const SrcImageBase& src, DstImageBase& dst);
 
 
   //! @brief The image base class.
@@ -222,6 +223,7 @@ namespace DO { namespace Sara {
       return dst;
     }
 
+    //! @brief Perform custom filtering on the image.
     template <typename Filter, typename... Params>
     inline typename Filter::template ReturnType<Image<T, N>>
     compute(const Params&... params) const

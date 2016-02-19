@@ -55,6 +55,30 @@ TEST(TestImageConversion, test_find_min_max_for_3d_pixel)
 }
 
 
+TEST(TestImageConversion, test_genericity_of_color_conversion)
+{
+  double src_data[] = {
+    0., 0.,
+    1., 1.
+  };
+
+  const auto src_image = ImageView<double>{ src_data, Vector2i{ 2, 2} };
+  auto dst_image = Image<unsigned char>{};
+
+  EXPECT_THROW(convert(src_image, dst_image), std::runtime_error);
+
+  dst_image.resize(src_image.sizes());
+  EXPECT_NO_THROW(convert(src_image, dst_image));
+
+  auto expected_dst_image = Image<unsigned char>{ Vector2i{ 2, 2 } };
+  expected_dst_image.matrix() <<
+      0,   0,
+    255, 255;
+
+  EXPECT_EQ(expected_dst_image, dst_image);
+}
+
+
 TEST(TestImageConversion, test_smart_image_conversion)
 {
   auto rgb8_image = Image<Rgb8>{2, 2};
