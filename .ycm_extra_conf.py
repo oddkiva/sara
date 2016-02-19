@@ -38,9 +38,12 @@ flags = [
 "-DQT_WIDGETS_LIB",
 "-DQT_XML_LIB",
 "-fPIE",
+# Python include directories.
+"-I", "/usr/include/python2.7",
+"-I", ("/home/david/virtualenvs/mirriad-vr-python2/local/"
+       "lib/python2.7/site-packages/numpy/core/include"),
 # Qt5 header directories.
 "-I", "/usr/include",
-"-I", "/usr/include/python3.4",
 "-I", "/usr/include/qt5",
 "-I", "/usr/include/qt5/QtQuick",
 "-I", "/usr/include/qt5/QtQml",
@@ -59,15 +62,8 @@ flags = [
 # Third-party header directories.
 "-I", "./third-party/eigen",
 "-I", "./third-party/flann/src/cpp",
-"-I", "./third-party/gtest/include"
+"-I", "./third-party/gtest/include",
 ]
-
-
-try:
-    from numpy import get_include
-    flags.append("-I", get_include())
-except ImportError:
-    pass
 
 
 if compilation_database_folder:
