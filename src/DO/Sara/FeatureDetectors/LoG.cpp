@@ -18,7 +18,7 @@ using namespace std;
 namespace DO { namespace Sara {
 
   vector<OERegion>
-  ComputeLoGExtrema::operator()(const Image<float>& I,
+  ComputeLoGExtrema::operator()(const ImageView<float>& I,
                                 vector<Point2i> *scale_octave_pairs)
   {
     auto& G = _gaussians;
@@ -35,14 +35,14 @@ namespace DO { namespace Sara {
       scale_octave_pairs->reserve(preallocated_size);
     }
 
-    for (int o = 0; o < L.num_octaves(); ++o)
+    for (auto o = 0; o < L.num_octaves(); ++o)
     {
       // Be careful of the bounds. We go from 1 to N-1.
-      for (int s = 1; s < L.num_scales_per_octave() - 1; ++s)
+      for (auto s = 1; s < L.num_scales_per_octave() - 1; ++s)
       {
         auto new_extrema = local_scale_space_extrema(
-          L, s, o, _extremum_thres, _edge_ratio_thres,
-          _img_padding_sz, _extremum_refinement_iter);
+            L, s, o, _extremum_thres, _edge_ratio_thres, _img_padding_sz,
+            _extremum_refinement_iter);
 
         append(extrema, new_extrema);
 

@@ -18,7 +18,7 @@ using namespace std;
 namespace DO { namespace Sara {
 
   vector<OERegion>
-  ComputeDoGExtrema::operator()(const Image<float>& image,
+  ComputeDoGExtrema::operator()(const ImageView<float>& image,
                                 vector<Point2i> *scale_octave_pairs)
   {
     auto& G = _gaussians;

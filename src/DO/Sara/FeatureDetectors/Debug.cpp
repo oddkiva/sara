@@ -64,7 +64,7 @@ namespace DO { namespace Sara {
     draw_rect(int_round(x)-r, int_round(y)-r, 2*r+1, 2*r+1, Green8, 3);
   }
 
-  void check_patch(const Image<float>& I, int x, int y, int w, int h,
+  void check_patch(const ImageView<float>& I, int x, int y, int w, int h,
                    double fact)
   {
     auto patch = get_subimage(I,x,y,w,h);
@@ -75,7 +75,7 @@ namespace DO { namespace Sara {
     close_window();
   }
 
-  void check_patch(const Image<float>& I, float x, float y, float s,
+  void check_patch(const ImageView<float>& I, float x, float y, float s,
                    double fact)
   {
     const auto scaling_factor = 3.f;

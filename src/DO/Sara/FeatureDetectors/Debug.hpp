@@ -72,11 +72,11 @@ namespace DO { namespace Sara {
                        float x, float y, float s, int o);
 
   DO_SARA_EXPORT
-  void check_patch(const Image<float>& I, int x, int y, int w, int h,
+  void check_patch(const ImageView<float>& I, int x, int y, int w, int h,
                    double fact = 50.);
 
   DO_SARA_EXPORT
-  void check_patch(const Image<float>& I, float x, float y, float s,
+  void check_patch(const ImageView<float>& I, float x, float y, float s,
                    double fact = 20.);
   //! @}
 

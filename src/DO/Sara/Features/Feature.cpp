@@ -19,10 +19,10 @@ namespace DO { namespace Sara {
 
   template <typename Enumeration>
   auto as_integer(Enumeration const value) ->
-    typename std::underlying_type<Enumeration>::type
+      typename std::underlying_type<Enumeration>::type
   {
     return static_cast<typename std::underlying_type<Enumeration>::type>(value);
-  } 
+  }
 
   std::ostream& InterestPoint::print(std::ostream& os) const
   {
@@ -98,7 +98,7 @@ namespace DO { namespace Sara {
 
   istream& OERegion::read(istream& in)
   {
-    int feature_type;
+    auto feature_type = int{};
     InterestPoint::read(in)
       >> _shape_matrix
       >> _orientation

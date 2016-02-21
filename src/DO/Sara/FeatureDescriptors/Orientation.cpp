@@ -31,15 +31,13 @@ namespace DO { namespace Sara {
 
   std::vector<float>
   ComputeDominantOrientations::
-  operator()(const Image<Vector2f>& gradients,
+  operator()(const ImageView<Vector2f>& gradients,
              float x, float y, float sigma) const
   {
     // Compute histogram of gradients as in [Lowe, IJCV 2004].
-    Array<float, 36, 1> orientation_histogram;
-    compute_orientation_histogram(
-      orientation_histogram, gradients,
-      x, y, sigma,
-      _patch_truncation_factor, _blur_factor);
+    auto orientation_histogram = Array<float, 36, 1>{};
+    compute_orientation_histogram(orientation_histogram, gradients, x, y, sigma,
+                                  _patch_truncation_factor, _blur_factor);
 
     // Smooth histogram as in the initial implementation of [Lowe, IJCV 2004].
     lowe_smooth_histogram(orientation_histogram);
@@ -67,11 +65,11 @@ namespace DO { namespace Sara {
              const OERegion& extremum,
              const Point2i& scale_octave_pair) const
   {
-    const int& s_index = scale_octave_pair(0);
-    const int& o_index = scale_octave_pair(1);
-    float x = extremum.x();
-    float y = extremum.y();
-    float s = pyramid.scale_relative_to_octave(s_index);
+    const auto& s_index = scale_octave_pair(0);
+    const auto& o_index = scale_octave_pair(1);
+    auto x = extremum.x();
+    auto y = extremum.y();
+    auto s = pyramid.scale_relative_to_octave(s_index);
     return this->operator()(pyramid(s_index, o_index), x, y, s);
   }
 
@@ -82,13 +80,16 @@ namespace DO { namespace Sara {
              vector<Point2i>& scale_octave_pairs) const
   {
     using namespace std;
-    vector<OERegion> e2;
-    vector<Point2i> so2;
-    e2.reserve(extrema.size()*2);
-    so2.reserve(extrema.size()*2);
+
+    auto e2 = vector<OERegion>{};
+    auto so2 = vector<Point2i>{};
+
+    e2.reserve(extrema.size() * 2);
+    so2.reserve(extrema.size() * 2);
+
     for (size_t i = 0; i != extrema.size(); ++i)
     {
-      vector<float> orientations;
+      auto orientations = vector<float>{};
       orientations = this->operator()(pyramid, extrema[i], scale_octave_pairs[i]);
       for (size_t o = 0; o != orientations.size(); ++o)
       {
