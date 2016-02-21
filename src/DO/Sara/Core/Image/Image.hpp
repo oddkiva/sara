@@ -38,8 +38,8 @@ namespace DO { namespace Sara {
 
 
   //! @brief Forward declaration of the generic color conversion function.
-  template <typename SrcImageBase, typename DstImageBase>
-  void convert(const SrcImageBase& src, DstImageBase& dst);
+  template <typename SrcImageView, typename DstImageView>
+  void convert(const SrcImageView& src, DstImageView& dst);
 
 
   //! @brief The image base class.
