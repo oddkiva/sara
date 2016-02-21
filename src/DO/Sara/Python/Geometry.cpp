@@ -16,7 +16,7 @@ namespace sara = DO::Sara;
  */
 bp::list compute_region_inner_boundaries(PyObject *regions)
 {
-  auto compute_inner_region
+  return bp::list{};
 }
 
 

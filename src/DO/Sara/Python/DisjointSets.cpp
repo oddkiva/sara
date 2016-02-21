@@ -40,8 +40,6 @@ bp::list compute_adjacency_list_2d(PyObject *labels)
 
 void expose_disjoint_sets()
 {
-  using DO::Sara::Python::import_numpy_array;
-
   bp::numeric::array::set_module_and_type("numpy", "ndarray");
   import_numpy_array();
 

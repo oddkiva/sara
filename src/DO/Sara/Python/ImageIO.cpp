@@ -34,8 +34,6 @@ bp::object imread(const std::string& filepath)
 
 void expose_image_io()
 {
-  using DO::Sara::Python::import_numpy_array;
-
   bp::numeric::array::set_module_and_type("numpy", "ndarray");
   import_numpy_array();
 
