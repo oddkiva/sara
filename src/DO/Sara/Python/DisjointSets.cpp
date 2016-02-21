@@ -2,8 +2,8 @@
 
 #include <DO/Sara/DisjointSets.hpp>
 
-#include "disjoint_sets.hpp"
-#include "python.hpp"
+#include <DO/Sara/Python/DisjointSets.hpp>
+#include <DO/Sara/Python/Numpy.hpp>
 
 
 namespace bp = boost::python;
@@ -36,8 +36,6 @@ bp::list compute_adjacency_list_2d(PyObject *labels)
 
   return adj_pylist;
 }
-
-
 
 
 void expose_disjoint_sets()

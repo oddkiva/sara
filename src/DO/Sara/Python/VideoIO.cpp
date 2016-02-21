@@ -3,8 +3,8 @@
 
 #include <DO/Sara/VideoIO.hpp>
 
-#include "python.hpp"
-#include "video_io.hpp"
+#include <DO/Sara/Python/Numpy.hpp>
+#include <DO/Sara/Python/VideoIO.hpp>
 
 
 namespace bp = boost::python;
@@ -34,6 +34,7 @@ public:
     return bp::make_tuple(height(), width(), 3);
   }
 };
+
 
 void expose_video_io()
 {

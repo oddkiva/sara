@@ -1,8 +1,8 @@
 #include <boost/python.hpp>
 
-#include "disjoint_sets.hpp"
-#include "image_io.hpp"
-#include "video_io.hpp"
+#include <DO/Sara/Python/DisjointSets.hpp>
+#include <DO/Sara/Python/ImageIO.hpp>
+#include <DO/Sara/Python/VideoIO.hpp>
 
 
 BOOST_PYTHON_MODULE(sara)
