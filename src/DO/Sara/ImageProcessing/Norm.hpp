@@ -29,13 +29,15 @@ namespace DO { namespace Sara {
   /*!
     @brief Squared norm computation
     @param[in] src scalar field.
-    @param[in, out] scalar field of squared norms
+    @param[in, out] dst scalar field of squared norms
    */
   template <typename T, int M, int N, int D>
-  void squared_norm(const Image<Matrix<T,M,N>, D>& src, Image<T, D>& dst)
+  void squared_norm(const ImageView<Matrix<T,M,N>, D>& src, ImageView<T, D>& dst)
   {
-    if (dst.sizes() != src.sizes())
-      dst.resize(src.sizes());
+    if (src.sizes() != dst.sizes())
+      throw std::domain_error{
+        "Source and destination image sizes are not equal!"
+      };
 
     auto src_it = src.begin();
     auto src_it_end = src.end();
@@ -50,9 +52,9 @@ namespace DO { namespace Sara {
     @return scalar field of squared norms
    */
   template <typename T, int M, int N, int D>
-  Image<T, D> squared_norm(const Image<Matrix<T,M,N>, D>& src)
+  Image<T, D> squared_norm(const ImageView<Matrix<T,M,N>, D>& src)
   {
-    auto squared_norm_image = Image<T, D>{};
+    auto squared_norm_image = Image<T, D>{ src.sizes() };
     squared_norm(src, squared_norm_image);
     return squared_norm_image;
   }
@@ -63,10 +65,12 @@ namespace DO { namespace Sara {
     @param[in, out] scalar field of norms
    */
   template <typename T, int M, int N, int D>
-  void blue_norm(const Image<Matrix<T,M,N>, D>& src, Image<T, D>& dst)
+  void blue_norm(const ImageView<Matrix<T,M,N>, D>& src, ImageView<T, D>& dst)
   {
-    if (dst.sizes() != src.sizes())
-      dst.resize(src.sizes());
+    if (src.sizes() != dst.sizes())
+      throw std::domain_error{
+        "Source and destination image sizes are not equal!"
+      };
 
     auto src_it = src.begin();
     auto src_it_end = src.end();
@@ -81,9 +85,9 @@ namespace DO { namespace Sara {
     @return scalar field of norms
    */
   template <typename T, int M, int N, int D>
-  Image<T, D> blue_norm(const Image<Matrix<T,M,N>, D>& src)
+  Image<T, D> blue_norm(const ImageView<Matrix<T,M,N>, D>& src)
   {
-    auto blue_norm_image = Image<T, D>{};
+    auto blue_norm_image = Image<T, D>{ src.sizes() };
     blue_norm(src, blue_norm_image);
     return blue_norm_image;
   }
@@ -94,10 +98,12 @@ namespace DO { namespace Sara {
     @param[in, out] scalar field of norms
    */
   template <typename T, int M, int N, int D>
-  void stable_norm(const Image<Matrix<T,M,N>, D>& src, Image<T, D>& dst)
+  void stable_norm(const ImageView<Matrix<T,M,N>, D>& src, ImageView<T, D>& dst)
   {
-    if (dst.sizes() != src.sizes())
-      dst.resize(src.sizes());
+    if (src.sizes() != dst.sizes())
+      throw std::domain_error{
+        "Source and destination image sizes are not equal!"
+      };
 
     auto src_it = src.begin();
     auto src_it_end = src.end();
@@ -112,9 +118,9 @@ namespace DO { namespace Sara {
     @return scalar field of norms
    */
   template <typename T, int M, int N, int D>
-  Image<T, D> stable_norm(const Image<Matrix<T,M,N>, D>& src)
+  Image<T, D> stable_norm(const ImageView<Matrix<T,M,N>, D>& src)
   {
-    auto stable_norm_image = Image<T, D>{};
+    auto stable_norm_image = Image<T, D>{ src.sizes() };
     stable_norm(src, stable_norm_image);
     return stable_norm_image;
   }
@@ -132,13 +138,12 @@ namespace DO { namespace Sara {
     using Scalar = typename MatrixField::pixel_type::Scalar;          \
                                                                       \
     template <typename MatrixField>                                   \
-    using ReturnType =                                                \
-      Image<Scalar<MatrixField>, Dimension<MatrixField>::value>;      \
+    using OutPixel = typename MatrixField::pixel_type::Scalar;        \
                                                                       \
-    template <typename MatrixField>                                   \
-    ReturnType<MatrixField> operator()(const MatrixField& in) const   \
+    template <typename SrcField, typename DstField>                   \
+    void operator()(const SrcField& src, DstField& dst) const         \
     {                                                                 \
-      return function(in);                                            \
+      return function(src, dst);                                      \
     }                                                                 \
   }
 

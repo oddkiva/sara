@@ -37,10 +37,12 @@ namespace DO { namespace Sara {
       vector 'src(x,y)'
    */
   template <typename T>
-  void orientation(const Image<Matrix<T,2,1> >& src, Image<T>& dst)
+  void orientation(const ImageView<Matrix<T,2,1> >& src, ImageView<T>& dst)
   {
-    if (dst.sizes() != src.sizes())
-      dst.resize(src.sizes());
+    if (src.sizes() != dst.sizes())
+      throw std::domain_error{
+        "Source and destination image sizes are not equal!"
+      };
 
     auto src_it = src.begin();
     auto src_it_end = src.end();
@@ -61,9 +63,9 @@ namespace DO { namespace Sara {
       vector **src(x,y)**
    */
   template <typename T>
-  Image<T> orientation(const Image<Matrix<T,2,1> >& src)
+  Image<T> orientation(const ImageView<Matrix<T,2,1> >& src)
   {
-    auto ori = Image<T>{};
+    auto ori = Image<T>{ src.sizes() };
     orientation(src, ori);
     return ori;
   }
@@ -71,16 +73,13 @@ namespace DO { namespace Sara {
   //! @brief Specialized class to use Image<T,N>::compute<Orientation>()
   struct Orientation
   {
-    template <typename VectorField>
-    using Scalar = typename VectorField::pixel_type::Scalar;
+    template <typename SrcImageView>
+    using OutPixel = typename SrcImageView::pixel_type::Scalar;
 
-    template <typename VectorField>
-    using ReturnType = Image<Scalar<VectorField>>;
-
-    template <typename VectorField>
-    inline Image<Scalar<VectorField>> operator()(const VectorField& in) const
+    template <typename SrcImageView, typename DstImageView>
+    inline void operator()(const SrcImageView& src, DstImageView& dst) const
     {
-      return orientation(in);
+      return orientation(src, dst);
     }
   };
 

@@ -84,26 +84,6 @@ TEST(TestDericheFilter, test_inplace_deriche_blur)
 }
 
 
-TEST(TestDericheFilter, test_place_deriche_blur)
-{
-  Image<float> in_signal(10,10);
-  in_signal.array().fill(1);
-
-  MatrixXf true_matrix(10, 10);
-  true_matrix.fill(1);
-
-  Image<float> out_signal;
-
-  Vector2f sigmas = Vector2f::Ones();
-  out_signal = deriche_blur(in_signal, sigmas);
-  EXPECT_MATRIX_NEAR(out_signal.matrix(), true_matrix, 1e-5);
-
-  float sigma = 1;
-  out_signal = deriche_blur(in_signal, sigma);
-  EXPECT_MATRIX_NEAR(out_signal.matrix(), true_matrix, 1e-5);
-}
-
-
 TEST(TestDericheFilter, test_convenience_deriche_blur)
 {
   Image<float> in_signal(10,10);
@@ -112,7 +92,11 @@ TEST(TestDericheFilter, test_convenience_deriche_blur)
   MatrixXf true_matrix(10, 10);
   true_matrix.fill(1);
 
-  Image<float> out_signal = in_signal.compute<DericheBlur>(1);
+  auto out_signal = in_signal.compute<DericheBlur>(1, true);
+  EXPECT_MATRIX_NEAR(out_signal.matrix(), true_matrix, 1e-5);
+
+  out_signal.clear();
+  out_signal = in_signal.compute<DericheBlur>(1);
   EXPECT_MATRIX_NEAR(out_signal.matrix(), true_matrix, 1e-5);
 }
 

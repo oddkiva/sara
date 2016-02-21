@@ -32,7 +32,7 @@ namespace DO { namespace Sara {
 
   //! @brief Apply Deriche filter with specified order $o$ to dimension $d$.
   template <typename T, int N>
-  void inplace_deriche(Image<T, N>& inout_signal,
+  void inplace_deriche(ImageView<T, N>& inout_signal,
                        typename PixelTraits<T>::channel_type sigma,
                        int derivative_order, int axis, bool neumann = true)
   {
@@ -182,9 +182,9 @@ namespace DO { namespace Sara {
   //! @brief Apply Deriche blurring.
   template <typename T, int N>
   void inplace_deriche_blur(
-    Image<T, N>& inout_signal,
-    const Matrix<typename PixelTraits<T>::channel_type, N, 1>& sigmas,
-    bool neumann = true)
+      ImageView<T, N>& inout_signal,
+      const Matrix<typename PixelTraits<T>::channel_type, N, 1>& sigmas,
+      bool neumann = true)
   {
     for (auto i = 0; i < N; ++i)
       inplace_deriche(inout_signal,sigmas[i], 0, i, neumann);
@@ -192,50 +192,52 @@ namespace DO { namespace Sara {
 
   //! @brief Apply Deriche blurring.
   template <typename T, int N>
-  void inplace_deriche_blur(
-    Image<T,N>& inout_signal,
-    typename PixelTraits<T>::channel_type sigma,
-    bool neumann = true)
+  void inplace_deriche_blur(ImageView<T, N>& inout_signal,
+                            typename PixelTraits<T>::channel_type sigma,
+                            bool neumann = true)
   {
     using S = typename PixelTraits<T>::channel_type;
-    Matrix<S, N, 1> sigmas; sigmas.fill(sigma);
+    auto sigmas = Matrix<S, N, 1>{};
+    sigmas.fill(sigma);
     inplace_deriche_blur(inout_signal, sigmas, neumann);
   }
 
   //! @brief Return the blurred image using Deriche filter.
   template <typename T, int N>
-  Image<T,N> deriche_blur(const Image<T,N>& in_signal,
-                         typename PixelTraits<T>::channel_type sigma,
-                         bool neumann = true)
+  Image<T, N> deriche_blur(const ImageView<T, N>& in_signal,
+                           typename PixelTraits<T>::channel_type sigma,
+                           bool neumann = true)
   {
-    auto out_signal = in_signal;
+    auto out_signal = Image<T, N>{ in_signal };
     inplace_deriche_blur(out_signal, sigma, neumann);
     return out_signal;
   }
 
   //! @brief Return the blurred image using Deriche filter.
   template <typename T, int N>
-  Image<T,N> deriche_blur(
-    const Image<T,N>& I,
-    const Matrix<typename PixelTraits<T>::channel_type, N, 1>& sigmas,
-    bool neumann = true)
+  Image<T, N> deriche_blur(
+      const ImageView<T, N>& I,
+      const Matrix<typename PixelTraits<T>::channel_type, N, 1>& sigmas,
+      bool neumann = true)
+
   {
     auto J = I;
-    inplace_deriche_blur(J,sigmas,neumann);
+    inplace_deriche_blur(J, sigmas, neumann);
     return J;
   }
 
   //! @brief Wrapper class to use: Image<T,N>::compute<DericheBlur>(T sigma)
   struct DericheBlur
   {
-    template <typename Image>
-    using ReturnType = Image;
+    template <typename SrcImageView>
+    using OutPixel = typename SrcImageView::pixel_type;
 
-    template <typename Image, typename Sigma>
-    inline ReturnType<Image> operator()(const Image& src,
-                                        const Sigma& sigma) const
+    template <typename SrcImageView, typename DstImageView, typename Sigma>
+    inline void operator()(const SrcImageView& src, DstImageView& dst,
+                           const Sigma& sigma, bool neumann = true) const
     {
-      return deriche_blur(src, sigma);
+      dst.copy(src);
+      inplace_deriche_blur(dst, sigma, neumann);
     }
   };
 
@@ -243,5 +245,6 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
+
 
 #endif /* DO_SARA_IMAGEPROCESSING_DERICHE_HPP */
