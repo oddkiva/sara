@@ -17,7 +17,7 @@ namespace DO { namespace Sara {
 
   bool load(Image<Color3ub>& I, const std::string& name)
   {
-    QImage image(QString(name.c_str()));
+    QImage image{ QString(name.c_str()) };
     if (image.isNull())
       return false;
     image = image.convertToFormat(QImage::Format_RGB888);
@@ -76,9 +76,9 @@ namespace DO { namespace Sara {
   bool saveColorImage(const std::string& name, const Color3ub *cols,
                       int w, int h, int quality)
   {
-    return QImage(reinterpret_cast<const unsigned char*>(cols),
-                  w, h, w*3, QImage::Format_RGB888).
-      save(QString(name.c_str()), 0, quality);
+    return QImage(reinterpret_cast<const unsigned char*>(cols), w, h, w * 3,
+                  QImage::Format_RGB888)
+        .save(QString(name.c_str()), 0, quality);
   }
 
   static

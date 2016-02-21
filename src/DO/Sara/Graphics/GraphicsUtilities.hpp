@@ -42,7 +42,7 @@ namespace DO { namespace Sara {
     return gui_app()->activeWindowIsVisible();
   }
 
-  inline QImage as_QImage(const Image<Rgb8>& image)
+  inline QImage as_QImage(const ImageView<Rgb8>& image)
   {
     return QImage(
       reinterpret_cast<const unsigned char *>(image.data()),

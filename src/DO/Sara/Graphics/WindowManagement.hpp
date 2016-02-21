@@ -14,7 +14,7 @@
 #ifndef DO_SARA_GRAPHICS_WINDOWCONTROL_HPP
 #define DO_SARA_GRAPHICS_WINDOWCONTROL_HPP
 
-#include "Events.hpp"
+#include <DO/Sara/Graphics/Events.hpp>
 
 
 class QWidget;
@@ -173,7 +173,7 @@ namespace DO { namespace Sara {
   DO_SARA_EXPORT
   int any_get_key();
 
-  //! Listens to events sent from the active window.
+  //! @Brief Listen to events sent from the active window.
   DO_SARA_EXPORT
   void get_event(int ms, Event& e);
 
