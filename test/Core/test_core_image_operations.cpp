@@ -65,7 +65,7 @@ TEST(TestImageConversion, test_genericity_of_color_conversion)
   const auto src_image = ImageView<double>{ src_data, Vector2i{ 2, 2} };
   auto dst_image = Image<unsigned char>{};
 
-  EXPECT_THROW(convert(src_image, dst_image), std::runtime_error);
+  EXPECT_THROW(convert(src_image, dst_image), std::domain_error);
 
   dst_image.resize(src_image.sizes());
   EXPECT_NO_THROW(convert(src_image, dst_image));
