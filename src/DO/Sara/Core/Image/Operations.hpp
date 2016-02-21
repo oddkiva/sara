@@ -71,7 +71,9 @@ namespace DO { namespace Sara {
   void convert(const SrcImageBase& src, DstImageBase& dst)
   {
     if (src.sizes() != dst.sizes())
-      throw std::runtime_error{ "Error: image sizes are not equal!" };
+      throw std::domain_error{
+        "Color conversion error: image sizes are not equal!"
+      };
 
     const auto *src_first = src.begin();
     const auto *src_last = src.end();

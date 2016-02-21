@@ -135,13 +135,12 @@ GRAPHICS_MAIN()
     auto image = Image<float>{};
     auto image_filepath = src_path("../../datasets/sunflowerField.jpg");
     if (!load(image, image_filepath))
-      return -1;
+      return EXIT_FAILURE;
 
-    auto features = vector<OERegion>{};
-
+    cout << "Loaded image successfully" << endl;
     create_window(image.width(), image.height());
 
-    features = compute_dog_extrema(image);
+    auto features = compute_dog_extrema(image);
     check_keys(image, features);
 
     features = compute_dog_affine_extrema(image);
@@ -152,5 +151,5 @@ GRAPHICS_MAIN()
     cout << e.what() << endl;
   }
 
-  return 0;
+  return EXIT_SUCCESS;
 }
