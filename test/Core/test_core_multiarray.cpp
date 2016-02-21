@@ -599,6 +599,42 @@ TEST(TestMultiArray, test_equality_comparison)
 }
 
 
+TEST(TestMultiArray, test_cwise_transform)
+{
+  auto m = MultiArray<int, 2>{ 2, 2 };
+  m.matrix() <<
+    0, 2,
+    1, 3;
+
+  auto result = m.cwise_transform([](int x) -> Vector3i {
+    return Vector3i::Ones() * x;
+  });
+
+  EXPECT_MATRIX_EQ(Vector3i::Zero(), result(0, 0));
+  EXPECT_MATRIX_EQ(Vector3i::Ones() * 1, result(1, 0));
+  EXPECT_MATRIX_EQ(Vector3i::Ones() * 2, result(0, 1));
+  EXPECT_MATRIX_EQ(Vector3i::Ones() * 3, result(1, 1));
+}
+
+
+TEST(TestMultiArray, test_cwise_transform_inplace)
+{
+  auto m = MultiArray<int, 2>{ 2, 2 };
+  m.matrix() <<
+    0, 4,
+    2, 6;
+
+  m.cwise_transform_inplace([](int& color) {
+    color /= 2;
+  });
+
+  EXPECT_MATRIX_EQ(0, m(0, 0));
+  EXPECT_MATRIX_EQ(1, m(1, 0));
+  EXPECT_MATRIX_EQ(2, m(0, 1));
+  EXPECT_MATRIX_EQ(3, m(1, 1));
+}
+
+
 // =============================================================================
 // Test runner.
 int main(int argc, char** argv)

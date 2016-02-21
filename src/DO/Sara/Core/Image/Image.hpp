@@ -29,9 +29,11 @@ namespace DO { namespace Sara {
 
   //! @{
   //! @brief Forward declaration of the image classes.
-  template <typename PixelType, int N = 2> class Image;
-
   template <typename PixelType, int N = 2> class ImageView;
+
+  template <typename PixelType, int N = 2,
+            template <typename> class Allocator = std::allocator>
+  using Image = MultiArrayBase<ImageView<PixelType, N>, Allocator>;
   //! @}
 
 
@@ -41,12 +43,15 @@ namespace DO { namespace Sara {
 
 
   //! @brief The image base class.
-  template <typename MultiArrayType>
-  class ImageBase : public MultiArrayType
+  template <typename PixelType, int N>
+  class ImageView : public MultiArrayView<PixelType, N, ColMajor>
   {
+    using base_type = MultiArrayView<PixelType, N, ColMajor>;
+    using self_type = ImageView;
+
   public:
-    using base_type = MultiArrayType;
-    using pixel_type = typename base_type::value_type;
+    using value_type = PixelType;
+    using pixel_type = PixelType;
     using pointer = typename base_type::pointer;
     using vector_type = typename base_type::vector_type;
     using base_type::Dimension;
@@ -59,6 +64,7 @@ namespace DO { namespace Sara {
         Dynamic, Dynamic, RowMajor
       >
     >;
+
     using matrix_view_type = Map<
       Matrix<
         typename ElementTraits<pixel_type>::value_type,
@@ -69,30 +75,30 @@ namespace DO { namespace Sara {
 
   public:
     //! Default image constructor.
-    inline ImageBase()
+    inline ImageView()
       : base_type{}
     {
     }
 
     //! Image constructor.
-    inline ImageBase(pointer data, const vector_type& sizes)
+    inline ImageView(pointer data, const vector_type& sizes)
       : base_type{ data, sizes }
     {
     }
 
     //! @{
     //! Image constructors with specified sizes.
-    inline explicit ImageBase(const vector_type& sizes)
+    inline explicit ImageView(const vector_type& sizes)
       : base_type{ sizes }
     {
     }
 
-    inline ImageBase(int width, int height)
+    inline ImageView(int width, int height)
       : base_type{ width, height }
     {
     }
 
-    inline ImageBase(int width, int height, int depth)
+    inline ImageView(int width, int height, int depth)
       : base_type{ width, height, depth }
     {
     }
@@ -101,19 +107,13 @@ namespace DO { namespace Sara {
     //! Return image width.
     inline int width() const
     {
-      return this->base_type::rows();
+      return base_type::rows();
     }
 
     //! Return image height.
     inline int height() const
     {
-      return this->base_type::cols();
-    }
-
-    //! Return image depth.
-    inline int depth() const
-    {
-      return this->base_type::depth();
+      return base_type::cols();
     }
 
     //! @{
@@ -121,96 +121,23 @@ namespace DO { namespace Sara {
     inline matrix_view_type matrix()
     {
       static_assert(Dimension == 2, "MultiArray must be 2D");
-      return matrix_view_type {
-        reinterpret_cast<
-        typename ElementTraits<pixel_type>::pointer>(base_type::data()),
-        height(), width()
+      return matrix_view_type{
+        reinterpret_cast<typename ElementTraits<pixel_type>::pointer>(
+            base_type::data()),
+        height(),
+        width()
       };
     }
 
     inline const_matrix_view_type matrix() const
     {
       static_assert(Dimension == 2, "MultiArray must be 2D");
-      return const_matrix_view_type {
-        reinterpret_cast<
-        typename ElementTraits<pixel_type>::const_pointer>(base_type::data()),
-        height(), width()
+      return const_matrix_view_type{
+        reinterpret_cast<typename ElementTraits<pixel_type>::const_pointer>(
+            base_type::data()),
+        height(),
+        width()
       };
-    }
-    //! @}
-
-    template <typename Op>
-    inline ImageBase& pixelwise_transform_inplace(Op op)
-    {
-      for (auto pixel = base_type::begin(); pixel != base_type::end(); ++pixel)
-        op(*pixel);
-      return *this;
-    }
-
-    template <typename Op>
-    inline auto pixelwise_transform(Op op) const
-      -> Image<decltype(op(std::declval<pixel_type>())), Dimension>
-    {
-      using PixelType = decltype(op(std::declval<pixel_type>()));
-      Image<PixelType, Dimension> dst{ this->sizes() };
-      auto src_pixel = this->begin();
-      auto dst_pixel = dst.begin();
-      for ( ; src_pixel != this->end(); ++src_pixel, ++dst_pixel)
-        *dst_pixel = op(*src_pixel);
-      return dst;
-    }
-  };
-
-
-  //! @brief The image view class.
-  template <typename T, int N>
-  class ImageView : public ImageBase<MultiArrayView<T, N, ColMajor>>
-  {
-    using base_type = ImageBase<MultiArrayView<T, N, ColMajor>>;
-
-  public: /* interface */
-    using vector_type = typename base_type::vector_type;
-
-    inline ImageView(T *data, const vector_type& sizes)
-      : base_type{ data, sizes }
-    {
-    }
-  };
-
-
-  //! @brief The image class.
-  template <typename T, int N>
-  class Image : public ImageBase<MultiArray<T, N, ColMajor>>
-  {
-    using base_type = ImageBase<MultiArray<T, N, ColMajor>>;
-
-  public: /* interface */
-    using vector_type = typename base_type::vector_type;
-
-    //! @brief Default constructor.
-    Image() = default;
-
-    //! @brief Constructor that takes ownership of data.
-    inline explicit Image(T *data, const vector_type& sizes)
-      : base_type{ data, sizes }
-    {
-    }
-
-    //! @{
-    //! @brief Constructors with specified sizes.
-    inline explicit Image(const vector_type& sizes)
-      : base_type{ sizes }
-    {
-    }
-
-    inline Image(int width, int height)
-      : base_type{ width, height }
-    {
-    }
-
-    inline Image(int width, int height, int depth)
-      : base_type{ width, height, depth }
-    {
     }
     //! @}
 
@@ -218,21 +145,43 @@ namespace DO { namespace Sara {
     template <typename U>
     inline Image<U, N> convert() const
     {
-      auto dst = Image<U, N>{ base_type::sizes() };
+      auto dst = Image<U, Dimension>{ base_type::sizes() };
       DO::Sara::convert(*this, dst);
       return dst;
     }
 
     //! @brief Perform custom filtering on the image.
     template <typename Filter, typename... Params>
-    inline typename Filter::template ReturnType<Image<T, N>>
-    compute(const Params&... params) const
+    inline auto compute(const Params&... params) const
+        -> Image<typename Filter::template OutPixel<self_type>, N>
     {
-      return Filter{}(*this, params...);
+      using OutPixel = typename Filter::template OutPixel<self_type>;
+      auto dst = Image<OutPixel, N>{ base_type::sizes() };
+      Filter{}(*this, dst, params...);
+      return dst;
+    }
+
+    //! @brief Perform coefficient-wise transform.
+    template <typename Op>
+    inline auto cwise_transform(Op op) const
+        -> Image<decltype(op(std::declval<value_type>())), N>
+    {
+      using Pixel = decltype(op(std::declval<value_type>()));
+
+      auto dst = Image<Pixel, N>{ this->sizes() };
+
+      auto src_pixel = this->begin();
+      auto dst_pixel = dst.begin();
+      for ( ; src_pixel != this->end(); ++src_pixel, ++dst_pixel)
+        *dst_pixel = op(*src_pixel);
+
+      return dst;
     }
   };
 
+
   //! @}
+
 
 } /* namespace Sara */
 } /* namespace DO */

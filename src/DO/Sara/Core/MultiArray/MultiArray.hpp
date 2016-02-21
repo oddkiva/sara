@@ -25,18 +25,14 @@
 
 namespace DO { namespace Sara {
 
-  //! @brief The ND-array class.
-  template <
-    typename T, int N, int StorageOrder = ColMajor,
-    template <typename> class Allocator = std::allocator
-  >
-  class MultiArray : public MultiArrayView<T, N, StorageOrder>
+  //! @brief The multidimensional array class.
+  template <typename MultiArrayView, template <typename> class Allocator>
+  class MultiArrayBase : public MultiArrayView
   {
     //! @{
     //! Convenience typedefs.
-    using self_type =  MultiArray;
-    using base_type = MultiArrayView<T, N, StorageOrder>;
-    using allocator_type = Allocator<T>;
+    using self_type =  MultiArrayBase;
+    using base_type = MultiArrayView;
     //! @}
 
     using base_type::_begin;
@@ -46,57 +42,67 @@ namespace DO { namespace Sara {
 
   public:
     using base_type::Dimension;
+    using base_type::StorageOrder;
+
+    using value_type = typename base_type::value_type;
+    using pointer = typename base_type::pointer;
     using vector_type = typename base_type::vector_type;
+    using allocator_type = Allocator<value_type>;
 
   public: /* interface */
     //! @brief Default constructor that constructs an empty ND-array.
-    inline MultiArray() = default;
+    inline MultiArrayBase() = default;
 
     //! @brief Constructor that takes **ownership** of the data.
     //! The data will be cleared upon destruction of the MultiArray object.
     //! Thus ensure sure that is **really** what you want. Otherwise construct a
     //! MultiArrayView object instead.
-    inline explicit MultiArray(T *data, const vector_type& sizes)
+    inline explicit MultiArrayBase(value_type* data, const vector_type& sizes)
       : base_type(data, sizes)
     {
     }
 
     //! @{
     //! @brief Constructor with specified sizes.
-    inline explicit MultiArray(const vector_type& sizes)
+    inline explicit MultiArrayBase(const vector_type& sizes)
       : base_type{}
     {
       initialize(sizes);
     }
 
-    inline explicit MultiArray(int rows, int cols)
-      : MultiArray{ vector_type{ rows, cols } }
+    inline explicit MultiArrayBase(int rows, int cols)
+      : self_type{ vector_type{ rows, cols } }
     {
     }
 
-    inline explicit MultiArray(int rows, int cols, int depth)
-      : MultiArray{ vector_type{ rows, cols, depth } }
+    inline explicit MultiArrayBase(int rows, int cols, int depth)
+      : self_type{ vector_type{ rows, cols, depth } }
     {
     }
     //! @}
 
     //! @brief Copy constructor.
-    //! Clone the other MultiArray instance.
-    inline MultiArray(const self_type& other)
+    //! Clone the other MultiArrayView instance.
+    inline MultiArrayBase(const base_type& other)
       : base_type{}
     {
-      initialize(other._sizes);
-      std::copy(other._begin, other._end, _begin);
+      initialize(other.sizes());
+      base_type::copy(other);
+    }
+
+    inline MultiArrayBase(const self_type& other)
+      : self_type{ base_type(other) }
+    {
     }
 
     //! @brief Move constructor.
-    inline MultiArray(self_type&& other)
+    inline MultiArrayBase(self_type&& other)
       : base_type{ std::move(other) }
     {
     }
 
     //! @brief Destructor.
-    inline ~MultiArray()
+    inline ~MultiArrayBase()
     {
       deallocate();
     }
@@ -121,13 +127,13 @@ namespace DO { namespace Sara {
 
     inline void resize(int rows, int cols)
     {
-      static_assert(N == 2, "MultiArray must be 2D");
-      resize(vector_type(rows, cols));
+      static_assert(Dimension == 2, "MultiArray must be 2D");
+      resize(vector_type{ rows, cols });
     }
 
     inline void resize(int rows, int cols, int depth)
     {
-      static_assert(N == 3, "MultiArray must be 3D");
+      static_assert(Dimension == 3, "MultiArray must be 3D");
       resize(vector_type(rows, cols, depth));
     }
     //! @}
@@ -145,14 +151,14 @@ namespace DO { namespace Sara {
     {
       _sizes = sizes;
       auto empty = (sizes == vector_type::Zero());
-      _strides = empty ? sizes : this->compute_strides(sizes);
+      _strides = empty ? sizes : base_type::compute_strides(sizes);
 
-      auto num_elements = this->compute_size(sizes);
+      auto num_elements = base_type::compute_size(sizes);
       _begin = empty ? 0 : allocate(num_elements);
       _end = empty ? 0 : _begin + num_elements;
     }
 
-    inline T *allocate(std::size_t count)
+    inline pointer allocate(std::size_t count)
     {
       return allocator_type{}.allocate(count);
     }
@@ -170,15 +176,6 @@ namespace DO { namespace Sara {
 
   };
 
-  //! @brief Output stream operator.
-  template <typename T, int N, int StorageOrder>
-  std::ostream& operator<<(std::ostream& os,
-                           const MultiArray<T, N, StorageOrder>& M)
-  {
-    os << M.sizes() << std::endl;
-    os << M.array() << std::endl;
-    return os;
-  }
 
   //! @}
 

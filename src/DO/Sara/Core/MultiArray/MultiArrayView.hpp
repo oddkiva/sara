@@ -20,7 +20,22 @@
 
 namespace DO { namespace Sara {
 
-  template <typename T, int N, int S = ColMajor>
+  //! @{
+  //! @brief Forward declaration of the multi-dimensional array classes.
+  template <typename T, int N, int StorageOrder = ColMajor>
+  class MultiArrayView;
+
+  template <typename MultiArrayView, template <typename> class Allocator>
+  class MultiArrayBase;
+
+  template <typename T, int N, int StorageOrder = ColMajor,
+            template <typename> class Allocator = std::allocator>
+  using MultiArray =
+      MultiArrayBase<MultiArrayView<T, N, StorageOrder>, Allocator>;
+  //! @}
+
+
+  template <typename T, int N, int S>
   class MultiArrayView
   {
     using self_type = MultiArrayView;
@@ -71,12 +86,10 @@ namespace DO { namespace Sara {
 
     //! @{
     //! @brief Array views for linear algebra.
-    using array_view_type = Map<
-      Array<typename ElementTraits<T>::value_type, Dynamic, 1>
-    >;
-    using const_array_view_type = Map<
-      const Array<typename ElementTraits<T>::value_type, Dynamic, 1>
-    >;
+    using array_view_type =
+        Map<Array<typename ElementTraits<T>::value_type, Dynamic, 1>>;
+    using const_array_view_type =
+        Map<const Array<typename ElementTraits<T>::value_type, Dynamic, 1>>;
     //! @}
 
     //! @{
@@ -99,30 +112,25 @@ namespace DO { namespace Sara {
     //! @brief Default constructor.
     inline MultiArrayView() = default;
 
+    //! @brief Copy constructor.
+    inline MultiArrayView(const self_type&) = default;
+
+    //! @brief Move constructor.
+    inline MultiArrayView(self_type&&) = default;
+
     //! @brief Constructor that wraps plain data with its known sizes.
-    inline MultiArrayView(value_type *data,
-                          const vector_type& sizes)
+    inline MultiArrayView(value_type *data, const vector_type& sizes)
       : _begin{ data }
-      , _end{ data+compute_size(sizes) }
+      , _end{ data + compute_size(sizes) }
       , _sizes{ sizes }
       , _strides{ compute_strides(sizes) }
     {
     }
 
-    MultiArrayView(const MultiArrayView&) = delete;
-
-    MultiArrayView(MultiArrayView&& other)
-      : self_type{}
+    //! @brief Copy assignment operator.
+    self_type& operator=(self_type other)
     {
       swap(other);
-    }
-
-    MultiArrayView& operator=(const MultiArrayView&) = delete;
-
-    MultiArrayView& operator=(MultiArrayView&& other)
-    {
-      swap(other);
-      return *this;
     }
 
     //! @brief Return the size vector of the MultiArray object.
@@ -269,7 +277,7 @@ namespace DO { namespace Sara {
     //! @brief Return the array view for linear algebra with Eigen libraries.
     inline array_view_type array()
     {
-      return array_view_type {
+      return array_view_type{
         reinterpret_cast<typename ElementTraits<T>::pointer>(data()),
         static_cast<int64_t>(size())
       };
@@ -277,8 +285,9 @@ namespace DO { namespace Sara {
 
     inline const_array_view_type array() const
     {
-      return const_array_view_type {
-        reinterpret_cast<const typename ElementTraits<T>::const_pointer>(data()),
+      return const_array_view_type{
+        reinterpret_cast<const typename ElementTraits<T>::const_pointer>(
+            data()),
         static_cast<int64_t>(size())
       };
     }
@@ -289,7 +298,7 @@ namespace DO { namespace Sara {
     inline matrix_view_type matrix()
     {
       static_assert(N == 2, "MultiArray must be 2D");
-      return matrix_view_type {
+      return matrix_view_type{
         reinterpret_cast<typename ElementTraits<T>::pointer>(data()),
         rows(), cols()
       };
@@ -298,7 +307,7 @@ namespace DO { namespace Sara {
     inline const_matrix_view_type matrix() const
     {
       static_assert(N == 2, "MultiArray must be 2D");
-      return const_matrix_view_type {
+      return const_matrix_view_type{
         reinterpret_cast<typename ElementTraits<T>::const_pointer>(data()),
         rows(), cols()
       };
@@ -309,14 +318,14 @@ namespace DO { namespace Sara {
     //! @brief Return the begin iterator of the whole multi-array.
     inline array_iterator begin_array()
     {
-      return array_iterator {
+      return array_iterator{
         false, _begin, vector_type::Zero(), _sizes, _strides
       };
     }
 
     inline const_array_iterator begin_array() const
     {
-      return const_array_iterator {
+      return const_array_iterator{
         false, _begin, vector_type::Zero(), _sizes, _strides
       };
     }
@@ -327,15 +336,13 @@ namespace DO { namespace Sara {
     inline subarray_iterator begin_subarray(const vector_type& start,
                                             const vector_type& end)
     {
-      return subarray_iterator {
-        false, _begin, start, end, _strides, _sizes
-      };
+      return subarray_iterator{ false, _begin, start, end, _strides, _sizes };
     }
 
     inline const_subarray_iterator begin_subarray(const vector_type& start,
                                                   const vector_type& end) const
     {
-      return const_subarray_iterator {
+      return const_subarray_iterator{
         false, _begin, start, end, _strides, _sizes
       };
     }
@@ -366,6 +373,43 @@ namespace DO { namespace Sara {
     }
     //! @}
 
+    //! @brief Copy contents.
+    inline void copy(const self_type& other) const
+    {
+      if (_sizes != other._sizes)
+        throw std::domain_error{
+          "Source and destination image sizes are not equal!"
+        };
+
+      std::copy(other._begin, other._end, _begin);
+    }
+
+    //! @brief Perform coefficient-wise transform in place.
+    template <typename Op>
+    inline self_type& cwise_transform_inplace(Op op)
+    {
+      for (auto pixel = begin(); pixel != end(); ++pixel)
+        op(*pixel);
+      return *this;
+    }
+
+    //! @brief Perform coefficient-wise transform.
+    template <typename Op>
+    inline auto cwise_transform(Op op) const
+        -> MultiArray<decltype(op(std::declval<value_type>())), N, S>
+    {
+      using ValueType = decltype(op(std::declval<value_type>()));
+
+      auto dst = MultiArray<ValueType, N, S>{ sizes() };
+
+      auto src_pixel = begin();
+      auto dst_pixel = dst.begin();
+      for ( ; src_pixel != end(); ++src_pixel, ++dst_pixel)
+        *dst_pixel = op(*src_pixel);
+
+      return dst;
+    }
+
   protected:
     //! @brief Compute the strides according the size vector and storage order.
     inline vector_type compute_strides(const vector_type& sizes) const
@@ -377,8 +421,8 @@ namespace DO { namespace Sara {
     inline size_type compute_size(const vector_type& sizes) const
     {
       Matrix<size_type, N, 1> sz{ sizes.template cast<size_type>() };
-      return std::accumulate(
-        sz.data(), sz.data()+N, size_type(1), std::multiplies<size_type>());
+      return std::accumulate(sz.data(), sz.data() + N, size_type(1),
+                             std::multiplies<size_type>());
     }
 
     //! @brief Compute the 1D index of the corresponding coordinates.
@@ -397,6 +441,18 @@ namespace DO { namespace Sara {
     //! @brief Strides vector.
     vector_type _strides{ vector_type::Zero() };
   };
+
+
+  //! @brief Output stream operator.
+  template <typename T, int N, int StorageOrder>
+  std::ostream& operator<<(std::ostream& os,
+                           const MultiArrayView<T, N, StorageOrder>& M)
+  {
+    os << M.sizes() << std::endl;
+    os << M.array() << std::endl;
+    return os;
+  }
+
 
 } /* namespace Sara */
 } /* namespace DO */
