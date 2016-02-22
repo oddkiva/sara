@@ -131,6 +131,7 @@ namespace DO { namespace Sara {
     self_type& operator=(self_type other)
     {
       swap(other);
+      return *this;
     }
 
     //! @brief Return the size vector of the MultiArray object.
