@@ -191,6 +191,7 @@ TEST_F(TestFilters, test_sobel)
   EXPECT_THROW(apply_sobel_filter(_src_image, dst_image), domain_error);
 
   dst_image.resize(_src_image.sizes());
+  apply_sobel_filter(_src_image, dst_image);
   EXPECT_MATRIX_NEAR(true_matrix, dst_image.matrix(), 1e-5);
 
   dst_image.clear();
