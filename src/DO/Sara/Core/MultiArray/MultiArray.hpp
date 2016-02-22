@@ -57,15 +57,14 @@ namespace DO { namespace Sara {
     //! The data will be cleared upon destruction of the MultiArray object.
     //! Thus ensure sure that is **really** what you want. Otherwise construct a
     //! MultiArrayView object instead.
-    inline explicit MultiArrayBase(value_type* data, const vector_type& sizes)
-      : base_type(data, sizes)
+    inline explicit MultiArrayBase(value_type *data, const vector_type& sizes)
     {
+      this->base_type::operator=(base_type{ data, sizes });
     }
 
     //! @{
     //! @brief Constructor with specified sizes.
     inline explicit MultiArrayBase(const vector_type& sizes)
-      : base_type{}
     {
       initialize(sizes);
     }
@@ -84,7 +83,6 @@ namespace DO { namespace Sara {
     //! @brief Copy constructor.
     //! Clone the other MultiArrayView instance.
     inline MultiArrayBase(const base_type& other)
-      : base_type{}
     {
       initialize(other.sizes());
       base_type::copy(other);
@@ -97,8 +95,8 @@ namespace DO { namespace Sara {
 
     //! @brief Move constructor.
     inline MultiArrayBase(self_type&& other)
-      : base_type{ std::move(other) }
     {
+      base_type::swap(other);
     }
 
     //! @brief Destructor.

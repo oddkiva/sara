@@ -116,7 +116,10 @@ namespace DO { namespace Sara {
     inline MultiArrayView(const self_type&) = default;
 
     //! @brief Move constructor.
-    inline MultiArrayView(self_type&&) = default;
+    inline MultiArrayView(self_type&& other)
+    {
+      swap(other);
+    }
 
     //! @brief Constructor that wraps plain data with its known sizes.
     inline explicit MultiArrayView(value_type *data, const vector_type& sizes)
