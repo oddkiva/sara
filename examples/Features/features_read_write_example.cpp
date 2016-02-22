@@ -114,7 +114,7 @@ void read_features(const Image<unsigned char>& image,
 
 GRAPHICS_MAIN()
 {
-  Image<unsigned char> I;
+  auto I = Image<unsigned char>{};
   load(I, src_path("obama_2.jpg"));
 
   set_active_window(create_window(I.width(), I.height()));

@@ -49,13 +49,11 @@ namespace DO { namespace Sara {
     }
   }
 
-  bool
-  AdaptFeatureAffinelyToLocalShape::warp_patch(
-    const Image<float>& image,
-    Image<float>& patch,
-    const Matrix3f& homography_from_dst_to_src)
+  bool AdaptFeatureAffinelyToLocalShape::warp_patch(
+      const Image<float>& image, Image<float>& patch,
+      const Matrix3f& homography_from_dst_to_src)
   {
-    const Matrix3f& H = homography_from_dst_to_src;
+    const auto& H = homography_from_dst_to_src;
 
     for (auto it = patch.begin_array(); !it.end(); ++it)
     {

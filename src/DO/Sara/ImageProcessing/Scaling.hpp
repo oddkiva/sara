@@ -15,7 +15,7 @@
 #define DO_SARA_IMAGEPROCESSING_SCALING_HPP
 
 
-#include <DO/Sara/Core/Image/Image.hpp>
+#include <DO/Sara/Core/MultiArray/MultiArray.hpp>
 #include <DO/Sara/Core/Image/Operations.hpp>
 #include <DO/Sara/ImageProcessing/Deriche.hpp>
 #include <DO/Sara/ImageProcessing/Interpolation.hpp>
@@ -24,14 +24,14 @@
 namespace DO { namespace Sara {
 
   /*!
-    @ingroup ImageProcessing
+    @ingroup MultiArrayProcessing
     @defgroup Scaling Reduce, enlarge, warp image...
     @{
    */
 
   //! @brief Upscale image.
   template <typename T, int N>
-  Image<T, N> upscale(const Image<T, N>& src, int fact)
+  Image<T, N> upscale(const ImageView<T, N>& src, int fact)
   {
     auto dst = Image<T, N>(src.sizes() * fact);
     for (auto it = dst.begin_array() ; !it.end(); ++it)
@@ -41,7 +41,7 @@ namespace DO { namespace Sara {
 
   //! @brief Downscale image.
   template <typename T, int N>
-  Image<T, N> downscale(const Image<T, N>& src, int fact)
+  Image<T, N> downscale(const ImageView<T, N>& src, int fact)
   {
     auto dst = Image<T, N>(src.sizes() / fact);
     for (auto it = dst.begin_array(); !it.end(); ++it)
@@ -53,15 +53,13 @@ namespace DO { namespace Sara {
   template <typename T, int N>
   inline std::pair<T, T> range(const Matrix<T, N, 1>& v)
   {
-    return std::make_pair(
-      *std::min_element(v.data(), v.data()+N),
-      *std::max_element(v.data(), v.data()+N)
-    );
+    return { *std::min_element(v.data(), v.data() + N),
+             *std::max_element(v.data(), v.data() + N) };
   }
 
   //! @brief Reduce image.
   template <typename T, int N>
-  Image<T, N> reduce(const Image<T, N>& src, Matrix<int, N, 1> new_sizes,
+  Image<T, N> reduce(const ImageView<T, N>& src, Matrix<int, N, 1> new_sizes,
                      bool keep_ratio = false)
   {
     // Typedefs.
@@ -70,12 +68,12 @@ namespace DO { namespace Sara {
     using Cast = typename PixelTraits<T>::template Cast<double>;
 
     // Convert scalar values to double type.
-    auto double_src = src.pixelwise_transform([](const T& pixel) {
+    auto double_src = src.cwise_transform([](const T& pixel) {
       return Cast::apply(pixel);
     });
 
-    Matrix<double, N, 1> original_sizes{ src.sizes().template cast<double>() };
-    Matrix<double, N, 1> scale_factors{
+    auto original_sizes = src.sizes().template cast<double>();
+    auto scale_factors = Matrix<double, N, 1>{
       original_sizes.cwiseQuotient(new_sizes.template cast<double>())
     };
     auto min_max = range(scale_factors);
@@ -87,7 +85,7 @@ namespace DO { namespace Sara {
     }
 
     // Determine the right blurring factor using the following formula.
-    Matrix<double, N, 1> sigmas {
+    auto sigmas = Matrix<double, N, 1>{
       1.5*((scale_factors.array().sqrt() - .99).matrix())
     };
 
@@ -99,13 +97,13 @@ namespace DO { namespace Sara {
     auto dst_it = dst.begin_array();
     for ( ; !dst_it.end(); ++dst_it)
     {
-      Matrix<double, N, 1> position{ dst_it
+      auto position = Matrix<double, N, 1>{ dst_it
         .position()
         .template cast<double>()
         .cwiseProduct(scale_factors)
       };
 
-      DoublePixel double_pixel_value{ interpolate(double_src, position) };
+      auto double_pixel_value = interpolate(double_src, position);
       *dst_it = PixelTraits<DoublePixel>::template Cast<ChannelType>::apply(
         double_pixel_value);
     }
@@ -115,23 +113,23 @@ namespace DO { namespace Sara {
 
   //! @brief Reduce image.
   template <typename T>
-  inline Image<T, 2> reduce(const Image<T, 2>& image, int w, int h,
-                             bool keep_ratio = false)
+  inline Image<T, 2> reduce(const ImageView<T, 2>& image, int w, int h,
+                            bool keep_ratio = false)
   {
-    return reduce(image, Vector2i(w,h), keep_ratio);
+    return reduce(image, Vector2i{ w, h }, keep_ratio);
   }
 
   //! @brief Reduce image.
   template <typename T>
-  inline Image<T, 3> reduce(const Image<T, 3>& image, int w, int h, int d,
+  inline Image<T, 3> reduce(const ImageView<T, 3>& image, int w, int h, int d,
                             bool keep_ratio = false)
   {
-    return reduce(image, Vector3i(w,h,d), keep_ratio);
+    return reduce(image, Vector3i{ w, h, d }, keep_ratio);
   }
 
   //! @brief Reduce image.
-  template <typename T,int N>
-  inline Image<T, N> reduce(const Image<T, N>& image, double fact)
+  template <typename T, int N>
+  inline Image<T, N> reduce(const ImageView<T, N>& image, double fact)
   {
     Matrix<double, N, 1> new_sizes;
     new_sizes = image.sizes().template cast<double>() / fact;
@@ -140,21 +138,20 @@ namespace DO { namespace Sara {
 
   //! @brief Reduce image.
   template <typename T, int N>
-  inline Image<T, N> enlarge(const Image<T, N>& image,
+  inline Image<T, N> enlarge(const ImageView<T, N>& image,
                              Matrix<int, N, 1> new_sizes,
                              bool keep_ratio = false)
   {
     // Typedefs.
     using DoublePixel = typename PixelTraits<T>::template Cast<double>::pixel_type;
     using ChannelType = typename PixelTraits<T>::channel_type;
-    using DoubleCoords = Matrix<double, N, 1>;
 
     // Determine the right blurring factor.
-    DoubleCoords original_sizes { image.sizes().template cast<double>() };
-    DoubleCoords scale_factor {
+    auto original_sizes = image.sizes().template cast<double>();
+    auto scale_factor = Matrix<double, N, 1>{
       original_sizes.cwiseQuotient(new_sizes.template cast<double>())
     };
-    std::pair<double, double> min_max { range(scale_factor) };
+    auto min_max = range(scale_factor);
 
     if (keep_ratio)
     {
@@ -163,44 +160,44 @@ namespace DO { namespace Sara {
     }
 
     // Create the new image by interpolation.
-    Image<T, N> dst { new_sizes };
-    auto dst_it = dst.begin_array();
-    for ( ; !dst_it.end(); ++dst_it)
-    {
-      DoubleCoords position;
-      position = dst_it.position()
-        .template cast<double>()
-        .cwiseProduct(scale_factor);
+    auto dst = Image<T, N>{ new_sizes };
 
-      DoublePixel double_pixel_value { interpolate(image, position) };
+    for (auto dst_it = dst.begin_array(); !dst_it.end(); ++dst_it)
+    {
+      auto position = Matrix<double, N, 1>{ dst_it.position()
+        .template cast<double>()
+        .cwiseProduct(scale_factor)
+      };
+
+      auto double_pixel_value = interpolate(image, position);
+
       *dst_it = PixelTraits<DoublePixel>::template Cast<ChannelType>::apply(
-        double_pixel_value);
+          double_pixel_value);
     }
     return dst;
   }
 
   //! @brief Enlarge image.
   template <typename T>
-  inline Image<T, 2> enlarge(const Image<T, 2>& image, int w, int h,
-                             bool keep_ratio = false)
+  inline Image<T, 2> enlarge(const ImageView<T, 2>& image,
+                             int w, int h, bool keep_ratio = false)
   {
     return enlarge(image, Point2i(w,h), keep_ratio);
   }
 
   //! @brief Enlarge image.
   template <typename T>
-  inline Image<T, 3> enlarge(const Image<T, 3>& image, int w, int h, int d,
+  inline Image<T, 3> enlarge(const ImageView<T, 3>& image, int w, int h, int d,
                              bool keep_ratio = false)
   {
     return enlarge(image, Vector3i(w,h,d), keep_ratio);
   }
 
   //! @brief Enlarge image.
-  template <typename T,int N>
-  inline Image<T, N> enlarge(const Image<T, N>& image, double fact)
+  template <typename T, int N>
+  inline Image<T, N> enlarge(const ImageView<T, N>& image, double fact)
   {
-    Matrix<double, N, 1> new_sizes;
-    new_sizes = image.sizes().template cast<double>()*fact;
+    auto new_sizes = image.sizes().template cast<double>() * fact;
     return enlarge(image, new_sizes.template cast<int>().eval());
   }
 

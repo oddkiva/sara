@@ -33,7 +33,7 @@ TEST(TestImageConversion, test_find_min_max_for_1d_pixel)
 
   auto min = int{};
   auto max = int{};
-  find_min_max(min, max, image);
+  tie(min, max) = find_min_max(image);
   EXPECT_EQ(0, min);
   EXPECT_EQ(9+19, max);
 }
@@ -49,9 +49,33 @@ TEST(TestImageConversion, test_find_min_max_for_3d_pixel)
 
   auto min = Rgb8{};
   auto max = Rgb8{};
-  find_min_max(min, max, image);
+  tie(min, max) = find_min_max(image);
   EXPECT_EQ(Rgb8(0, 0, 0), min);
   EXPECT_EQ(Rgb8(28, 28, 28), max);
+}
+
+
+TEST(TestImageConversion, test_genericity_of_color_conversion)
+{
+  double src_data[] = {
+    0., 0.,
+    1., 1.
+  };
+
+  const auto src_image = ImageView<double>{ src_data, Vector2i{ 2, 2} };
+  auto dst_image = Image<unsigned char>{};
+
+  EXPECT_THROW(convert(src_image, dst_image), std::domain_error);
+
+  dst_image.resize(src_image.sizes());
+  EXPECT_NO_THROW(convert(src_image, dst_image));
+
+  auto expected_dst_image = Image<unsigned char>{ Vector2i{ 2, 2 } };
+  expected_dst_image.matrix() <<
+      0,   0,
+    255, 255;
+
+  EXPECT_EQ(expected_dst_image, dst_image);
 }
 
 
@@ -94,7 +118,7 @@ TEST(TestImageConversion, test_image_color_rescale)
   rgb_image = color_rescale(rgb_image);
   auto rgb_min = Rgb32f{};
   auto rgb_max = Rgb32f{};
-  find_min_max(rgb_min, rgb_max, rgb_image);
+  tie(rgb_min, rgb_max) = find_min_max(rgb_image);
   EXPECT_EQ(rgb_min, Vector3f::Zero());
   EXPECT_EQ(rgb_max, Vector3f::Ones());
 
@@ -106,7 +130,7 @@ TEST(TestImageConversion, test_image_color_rescale)
   float_image = color_rescale(float_image);
   auto float_min = float{};
   auto float_max = float{};
-  find_min_max(float_min, float_max, float_image);
+  tie(float_min, float_max) = find_min_max(float_image);
   EXPECT_EQ(float_min, 0);
   EXPECT_EQ(float_max, 1);
 }

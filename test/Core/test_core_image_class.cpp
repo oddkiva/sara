@@ -46,49 +46,11 @@ TEST(TestImageClass, test_matrix_view)
     3, 4,
     5, 6;
 
-  EXPECT_EQ(A(0, 0), 1);
-  EXPECT_EQ(A(1, 0), 2);
-  EXPECT_EQ(A(0, 1), 3);
-  EXPECT_EQ(A(1, 1), 4);
-  EXPECT_EQ(A(0, 2), 5);
-  EXPECT_EQ(A(1, 2), 6);
+  EXPECT_EQ(A(0, 0), 1); EXPECT_EQ(A(1, 0), 2);
+  EXPECT_EQ(A(0, 1), 3); EXPECT_EQ(A(1, 1), 4);
+  EXPECT_EQ(A(0, 2), 5); EXPECT_EQ(A(1, 2), 6);
 }
 
-TEST(TestImageClass, test_pixelwise_transform)
-{
-  auto image = Image<Rgb8>{ 2, 2 };
-  image(0, 0) = Rgb8{ 255, 0, 0 }; image(1, 0) = Rgb8{ 255, 0, 0 };
-  image(0, 1) = Rgb8{ 0, 255, 0 }; image(1, 1) = Rgb8{ 0, 255, 0 };
-
-  auto result = Image<Rgb64f>{
-    image.pixelwise_transform([](const Rgb8& color)
-    {
-      Rgb64f color_64f;
-      smart_convert_color(color, color_64f);
-      color_64f = color_64f.cwiseProduct(color_64f);
-      return color_64f;
-    })
-  };
-  EXPECT_MATRIX_NEAR(result(0, 0), Rgb64f(1., 0., 0.), 1e-8);
-  EXPECT_MATRIX_NEAR(result(1, 0), Rgb64f(1., 0., 0.), 1e-8);
-  EXPECT_MATRIX_NEAR(result(0, 1), Rgb64f(0., 1., 0.), 1e-8);
-  EXPECT_MATRIX_NEAR(result(1, 1), Rgb64f(0., 1., 0.), 1e-8);
-}
-
-TEST(TestImageClass, test_pixelwise_transform_inplace)
-{
-  auto image = Image<Rgb8>{ 2, 2 };
-  image(0, 0) = Rgb8{ 255, 0, 0 }; image(1, 0) = Rgb8{ 255, 0, 0 };
-  image(0, 1) = Rgb8{ 0, 255, 0 }; image(1, 1) = Rgb8{ 0, 255, 0 };
-
-  image.pixelwise_transform_inplace([](Rgb8& color) {
-    color /= 2;
-  });
-  EXPECT_MATRIX_EQ(image(0, 0), Rgb8(127, 0, 0));
-  EXPECT_MATRIX_EQ(image(1, 0), Rgb8(127, 0, 0));
-  EXPECT_MATRIX_EQ(image(0, 1), Rgb8(0, 127, 0));
-  EXPECT_MATRIX_EQ(image(1, 1), Rgb8(0, 127, 0));
-}
 
 // ========================================================================== //
 // Run the tests.

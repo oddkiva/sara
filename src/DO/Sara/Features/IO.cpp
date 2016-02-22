@@ -18,27 +18,24 @@
 
 namespace DO { namespace Sara {
 
-  template bool read_keypoints<float>(
-    std::vector<OERegion>& features,
-    DescriptorMatrix<float>& descriptors,
-    const std::string& name);
+  template bool read_keypoints<float>(std::vector<OERegion>& features,
+                                      DescriptorMatrix<float>& descriptors,
+                                      const std::string& name);
 
-  template bool read_keypoints<unsigned char>(
-    std::vector<OERegion>& features,
-    DescriptorMatrix<unsigned char>& descriptors,
-    const std::string& name);
+  template bool
+  read_keypoints<unsigned char>(std::vector<OERegion>& features,
+                                DescriptorMatrix<unsigned char>& descriptors,
+                                const std::string& name);
 
-  template
-  bool write_keypoints<float>(
-    const std::vector<OERegion>& features,
-    const DescriptorMatrix<float>& descriptors,
-    const std::string& name);
+  template bool
+  write_keypoints<float>(const std::vector<OERegion>& features,
+                         const DescriptorMatrix<float>& descriptors,
+                         const std::string& name);
 
-  template
-  bool write_keypoints<unsigned char>(
-    const std::vector<OERegion>& features,
-    const DescriptorMatrix<unsigned char>& descriptors,
-    const std::string& name);
+  template bool write_keypoints<unsigned char>(
+      const std::vector<OERegion>& features,
+      const DescriptorMatrix<unsigned char>& descriptors,
+      const std::string& name);
 
 } /* namespace Sara */
 } /* namespace DO */

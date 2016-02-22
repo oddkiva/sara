@@ -30,7 +30,7 @@ namespace DO { namespace Sara {
   template <template <typename> class Compare, typename T>
   struct CompareWithNeighborhood3
   {
-    bool operator()(T val, int x, int y, const Image<T>& I,
+    bool operator()(T val, int x, int y, const ImageView<T>& I,
                     bool compareWithCenter) const
     {
       for (int v=-1; v <= 1; ++v)
@@ -45,6 +45,7 @@ namespace DO { namespace Sara {
       }
       return true;
     }
+
     Compare<T> _compare;
   };
 
@@ -52,10 +53,11 @@ namespace DO { namespace Sara {
   template <template <typename> class Compare, typename T>
   struct LocalExtremum
   {
-    inline bool operator()(int x, int y, const Image<T>& I) const
+    inline bool operator()(int x, int y, const ImageView<T>& I) const
     {
-      return _compare(I(x,y), x, y, I, false);
+      return _compare(I(x, y), x, y, I, false);
     }
+
     CompareWithNeighborhood3<Compare, T> _compare;
   };
 
@@ -70,15 +72,16 @@ namespace DO { namespace Sara {
              _compare(I(x,y,s,o), x, y, I(s  ,o), false) &&
              _compare(I(x,y,s,o), x, y, I(s+1,o), true );
     }
+
     CompareWithNeighborhood3<Compare, T> _compare;
   };
 
   //! @brief Get local spatial extrema.
   template <template <typename> class Compare, typename T>
-  std::vector<Point2i> local_extrema(const Image<T>& I)
+  std::vector<Point2i> local_extrema(const ImageView<T>& I)
   {
     LocalExtremum<Compare, T> local_extremum;
-    std::vector<Point2i> extrema;
+    auto extrema = std::vector<Point2i>{};
     for (int y = 1; y < I.height()-1; ++y)
       for (int x = 1; x < I.width()-1; ++x)
         if (local_extremum(x,y,I))
@@ -92,7 +95,7 @@ namespace DO { namespace Sara {
                                                  int s, int o)
   {
     LocalScaleSpaceExtremum<Compare, T> local_extremum;
-    std::vector<Point2i> extrema;
+    auto extrema = std::vector<Point2i>{};
     for (int y = 1; y < I(s,o).height()-1; ++y)
       for (int x = 1; x < I(s,o).width()-1; ++x)
         if (local_extremum(x,y,s,o,I))
@@ -134,28 +137,28 @@ namespace DO { namespace Sara {
 
   //! @brief Get local spatial maxima.
   template <typename T>
-  inline std::vector<Point2i> local_maxima(const Image<T>& I)
+  inline std::vector<Point2i> local_maxima(const ImageView<T>& I)
   {
     return local_extrema<std::greater_equal, T>(I);
   }
 
   //! @brief Get local spatial minima.
   template <typename T>
-  inline std::vector<Point2i> local_minima(const Image<T>& I)
+  inline std::vector<Point2i> local_minima(const ImageView<T>& I)
   {
     return local_extrema<std::less_equal, T>(I);
   }
 
   //! @brief Get strict local spatial maxima.
   template <typename T>
-  inline std::vector<Point2i> strict_local_maxima(const Image<T>& I)
+  inline std::vector<Point2i> strict_local_maxima(const ImageView<T>& I)
   {
     return local_extrema<std::greater, T>(I);
   }
 
   //! @brief Get strict local spatial minima.
   template <typename T>
-  inline std::vector<Point2i> strict_local_minima(const Image<T>& I)
+  inline std::vector<Point2i> strict_local_minima(const ImageView<T>& I)
   {
     return local_extrema<std::less, T>(I);
   }

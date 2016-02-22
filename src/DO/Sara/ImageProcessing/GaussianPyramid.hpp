@@ -31,7 +31,7 @@ namespace DO { namespace Sara {
   //! Computes a pyramid of Gaussians.
   template <typename T>
   ImagePyramid<T>
-  gaussian_pyramid(const Image<T>& image,
+  gaussian_pyramid(const ImageView<T>& image,
                    const ImagePyramidParams& params = ImagePyramidParams())
   {
     using Scalar = typename ImagePyramid<T>::scalar_type;
@@ -117,7 +117,7 @@ namespace DO { namespace Sara {
   template <typename T>
   ImagePyramid<T> laplacian_pyramid(const ImagePyramid<T>& gaussians)
   {
-    ImagePyramid<T> LoG;
+    auto LoG = ImagePyramid<T>{};
     LoG.reset(gaussians.num_octaves(),
               gaussians.num_scales_per_octave(),
               gaussians.scale_initial(),

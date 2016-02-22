@@ -43,8 +43,7 @@ namespace DO { namespace Sara {
     using Vector = Matrix<Scalar<Field>, Dimension<Field>::value, 1>;
 
     template <typename Field>
-    using ReturnType =
-      Image<Vector<Field>, Dimension<Field>::value>;
+    using OutPixel = Vector<Field>;
 
     template <typename Field>
     inline Vector<Field>
@@ -72,17 +71,18 @@ namespace DO { namespace Sara {
       return operator()<Field>(it);
     }
 
-    template <typename Field>
-    inline ReturnType<Field> operator()(const Field& in) const
+    template <typename SrcField, typename DstField>
+    void operator()(const SrcField& src, DstField& dst) const
     {
-      auto out = ReturnType<Field>{ in.sizes() };
+      if (src.sizes() != dst.sizes())
+        throw std::domain_error{
+          "Source and destination image sizes are not equal!"
+        };
 
-      auto in_i = in.begin_array();
-      auto out_i = out.begin_array();
+      auto in_i = src.begin_array();
+      auto out_i = dst.begin();
       for ( ; !in_i.end(); ++in_i, ++out_i)
-        *out_i = operator()<Field>(in_i);
-
-      return out;
+        *out_i = operator()<SrcField>(in_i);
     }
   };
 
@@ -100,7 +100,7 @@ namespace DO { namespace Sara {
     using Scalar = typename Field::value_type;
 
     template <typename Field>
-    using ReturnType = Field;
+    using OutPixel = typename Field::value_type;
 
     template <typename Field>
     inline Scalar<Field>
@@ -130,17 +130,18 @@ namespace DO { namespace Sara {
       return this->operator()<Field>(loc);
     }
 
-    template <typename Field>
-    ReturnType<Field> operator()(const Field& in) const
+    template <typename SrcField, typename DstField>
+    void operator()(const SrcField& src, DstField& dst) const
     {
-      auto out = ReturnType<Field>{ in.sizes() };
+      if (src.sizes() != dst.sizes())
+        throw std::domain_error{
+          "Source and destination image sizes are not equal!"
+        };
 
-      auto in_i = in.begin_array();
-      auto out_i = out.begin_array();
+      auto in_i = src.begin_array();
+      auto out_i = dst.begin();
       for ( ; !in_i.end(); ++in_i, ++out_i)
-        *out_i = this->operator()<Field>(in_i);
-
-      return out;
+        *out_i = this->operator()<SrcField>(in_i);
     }
   };
 
@@ -162,7 +163,7 @@ namespace DO { namespace Sara {
       Scalar<Field>, Dimension<Field>::value, Dimension<Field>::value>;
 
     template <typename Field>
-    using ReturnType = Image<HessianMatrix<Field>, Dimension<Field>::value>;
+    using OutPixel = HessianMatrix<Field>;
 
     template <typename Field>
     HessianMatrix<Field>
@@ -193,10 +194,11 @@ namespace DO { namespace Sara {
             auto next_j = it.position()[j] == it.sizes()[j] - 1 ? 0 : 1;
             auto prev_j = it.position()[j] == 0 ? 0 : -1;
 
-            H(i,j) =
-              (  it.delta(i,next_i,j,next_j) - it.delta(i,prev_i,j,next_j)
-               - it.delta(i,next_i,j,prev_j) + it.delta(i,prev_i,j,prev_j) )
-              / static_cast<T>(4);
+            H(i, j) = (it.delta(i, next_i, j, next_j) -
+                       it.delta(i, prev_i, j, next_j) -
+                       it.delta(i, next_i, j, prev_j) +
+                       it.delta(i, prev_i, j, prev_j)) /
+                      static_cast<T>(4);
 
             H(j,i) = H(i,j);
           }
@@ -215,17 +217,18 @@ namespace DO { namespace Sara {
       return operator()<Field>(loc);
     }
 
-    template <typename Field>
-    ReturnType<Field> operator()(const Field& in) const
+    template <typename SrcField, typename DstField>
+    void operator()(const SrcField& src, DstField& dst) const
     {
-      auto out = ReturnType<Field>{ in.sizes() };
+      if (src.sizes() != dst.sizes())
+        throw std::domain_error{
+          "Source and destination image sizes are not equal!"
+        };
 
-      auto in_i = in.begin_array();
-      auto out_i = out.begin_array();
-      for ( ; !out_i.end(); ++in_i, ++out_i)
-        *out_i = operator()<Field>(in_i);
-
-      return out;
+      auto src_i = src.begin_array();
+      auto dst_i = dst.begin();
+      for ( ; !src_i.end(); ++src_i, ++dst_i)
+        *dst_i = operator()<SrcField>(src_i);
     };
   };
 
@@ -237,7 +240,7 @@ namespace DO { namespace Sara {
     @return 2D gradient vector.
    */
   template <typename T, int N>
-  Matrix<T,N,1> gradient(const Image<T, N>& f, const Matrix<int, N, 1>& x)
+  Matrix<T,N,1> gradient(const ImageView<T, N>& f, const Matrix<int, N, 1>& x)
   {
     return Gradient{}(f, x);
   }
@@ -248,9 +251,11 @@ namespace DO { namespace Sara {
     @return gradient vector field
    */
   template <typename T, int N>
-  inline Image<Matrix<T, N, 1>, N> gradient(const Image<T, N>& in)
+  inline Image<Matrix<T, N, 1>, N> gradient(const ImageView<T, N>& in)
   {
-    return Gradient{}(in);
+    auto out = Image<Matrix<T, N, 1>, N>{ in.sizes() };
+    Gradient{}(in, out);
+    return out;
   }
 
   /*!
@@ -260,7 +265,7 @@ namespace DO { namespace Sara {
     @return laplacian value
   */
   template <typename T, int N>
-  inline T laplacian(const Image<T, N>& f, const Matrix<int, N, 1>& x)
+  inline T laplacian(const ImageView<T, N>& f, const Matrix<int, N, 1>& x)
   {
     return Laplacian{}(f, x);
   }
@@ -271,9 +276,11 @@ namespace DO { namespace Sara {
     @return laplacian field.
    */
   template <typename T, int N>
-  inline Image<T, N> laplacian(const Image<T, N>& in)
+  inline Image<T, N> laplacian(const ImageView<T, N>& in)
   {
-    return Laplacian{}(in);
+    auto out = Image<T, N>{ in.sizes() };
+    Laplacian{}(in, out);
+    return out;
   }
 
   /*!
@@ -283,7 +290,8 @@ namespace DO { namespace Sara {
     @return Hessian matrix.
    */
   template <typename T, int N>
-  inline Matrix<T,N,N> hessian(const Image<T, N>& f, const Matrix<int, N, 1>& x)
+  inline Matrix<T, N, N> hessian(const ImageView<T, N>& f,
+                                 const Matrix<int, N, 1>& x)
   {
     return Hessian{}(f, x);
   }
@@ -294,9 +302,11 @@ namespace DO { namespace Sara {
     @return Hessian matrix field
    */
   template <typename T, int N>
-  inline Image<Matrix<T,N,N> > hessian(const Image<T, N>& in)
+  inline Image<Matrix<T, N, N>> hessian(const ImageView<T, N>& in)
   {
-    return Hessian{}(in);
+    auto out = Image<Matrix<T, N, N>>{ in.sizes() };
+    Hessian{}(in, out);
+    return out;
   }
 
   //! @}

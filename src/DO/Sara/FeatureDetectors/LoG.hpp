@@ -86,7 +86,7 @@ namespace DO { namespace Sara {
     /*!
       @brief Localizes LoG extrema for a given image.
      */
-    std::vector<OERegion> operator()(const Image<float>& I,
+    std::vector<OERegion> operator()(const ImageView<float>& I,
                                      std::vector<Point2i> *scale_octave_pairs = 0);
 
     /*!

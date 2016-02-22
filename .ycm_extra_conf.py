@@ -38,7 +38,12 @@ flags = [
 "-DQT_WIDGETS_LIB",
 "-DQT_XML_LIB",
 "-fPIE",
+# Python include directories.
+"-I", "/usr/include/python2.7",
+"-I", ("/home/david/virtualenvs/mirriad-vr-python2/local/"
+       "lib/python2.7/site-packages/numpy/core/include"),
 # Qt5 header directories.
+"-I", "/usr/include",
 "-I", "/usr/include/qt5",
 "-I", "/usr/include/qt5/QtQuick",
 "-I", "/usr/include/qt5/QtQml",
@@ -57,8 +62,9 @@ flags = [
 # Third-party header directories.
 "-I", "./third-party/eigen",
 "-I", "./third-party/flann/src/cpp",
-"-I", "./third-party/gtest/include"
+"-I", "./third-party/gtest/include",
 ]
+
 
 if compilation_database_folder:
   database = ycm_core.CompilationDatabase( compilation_database_folder )

@@ -1,0 +1,153 @@
+---
+Language:        Cpp
+
+# We want to format the 'public' keyword as follows:
+#
+# class Foo
+# {
+# public: // <- indentation style of 'public' keyword
+#   Foo() = default;
+# };
+AccessModifierOffset: -2
+
+# TODO: understand what these means.
+AlignAfterOpenBracket: true
+AlignEscapedNewlinesLeft: false
+
+# We want:
+#
+# int aaa = bbbbbbbbbbbbbbb +
+#           ccccccccccccccc;
+AlignOperands:   true
+
+# We want aligned trailing comments, e.g.:
+# void someFunction()
+# {
+#     doWork();     // Does something
+#     doMoreWork(); // Does something else
+# }                 // ^
+#                   // |
+#                   // |----- aligned trailing comments
+AlignTrailingComments: true
+
+# We want to allow declaring functions as follows:
+#
+# someFunction(foo,
+#              bar,
+#              baz);
+AllowAllParametersOfDeclarationOnNextLine: true
+
+# Don't allow:
+# if (a) { return; }
+#
+# We want:
+#
+# if (a)
+#   return;
+AllowShortBlocksOnASingleLine: false
+
+# Pretty clear.
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+
+# Do not enforce the following definition declaration style:
+# int
+# function()
+# {
+#   return 0;
+# }
+#
+# Rather the following should also be considered correct:
+# int function()
+# {
+#   return 0;
+# }
+AlwaysBreakAfterDefinitionReturnType: false
+AlwaysBreakTemplateDeclarations: true
+
+# TODO: understand what these means.
+AlwaysBreakBeforeMultilineStrings: false
+BreakBeforeBinaryOperators: None
+BreakBeforeTernaryOperators: true
+BreakConstructorInitializersBeforeComma: true
+BinPackParameters: true
+BinPackArguments: true
+
+# Line size.
+ColumnLimit:     80
+
+ConstructorInitializerAllOnOneLineOrOnePerLine: false
+ConstructorInitializerIndentWidth: 2
+DerivePointerAlignment: false
+ExperimentalAutoDetectBinPacking: false
+IndentCaseLabels: false
+IndentWrappedFunctionNames: false
+IndentFunctionDeclarationAfterType: false
+
+# We want to allow 2 empty lines in order to organize the code as follows:
+#
+# #include <vector>
+#
+# #include <boost/python.hpp>
+#
+# #include <DO/Sara/Core.hpp>
+#
+#
+# using namespace std;
+# using namespace DO::Sara;
+#
+#
+# int main()
+# {
+#   return 0;
+# }
+MaxEmptyLinesToKeep: 2
+
+KeepEmptyLinesAtTheStartOfBlocks: true
+NamespaceIndentation: Inner
+ObjCBlockIndentWidth: 2
+ObjCSpaceAfterProperty: false
+ObjCSpaceBeforeProtocolList: true
+PenaltyBreakBeforeFirstCallParameter: 19
+PenaltyBreakComment: 300
+PenaltyBreakString: 1000
+PenaltyBreakFirstLessLess: 120
+PenaltyExcessCharacter: 1000000
+PenaltyReturnTypeOnItsOwnLine: 60
+PointerAlignment: Left
+SpacesBeforeTrailingComments: 2
+Cpp11BracedListStyle: false
+Standard:        Cpp11
+IndentWidth:     2
+TabWidth:        2
+UseTab:          Never
+BreakBeforeBraces: Allman
+
+# Pretty clear
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+SpacesInAngles:  false
+SpaceInEmptyParentheses: false
+
+# We want:
+# (int *) data;
+# Not:
+# (int *)data;
+# ( int* ) data;
+# ( int * ) data;
+# and so on.
+SpacesInCStyleCastParentheses: false
+SpaceAfterCStyleCast: true
+
+SpacesInContainerLiterals: true
+SpaceBeforeAssignmentOperators: true
+
+ContinuationIndentWidth: 4
+CommentPragmas:  '^ IWYU pragma:'
+ForEachMacros:   [ foreach, Q_FOREACH, BOOST_FOREACH ]
+SpaceBeforeParens: ControlStatements
+DisableFormat:   false
+...
+

@@ -14,6 +14,7 @@
 
 //! @file
 
+
 namespace DO { namespace Sara {
 
   /*!
@@ -31,5 +32,6 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
+
 
 #endif /* DO_SARA_GRAPHICS_DRAW3D_HPP */

@@ -54,7 +54,7 @@ namespace DO { namespace Sara {
     Image<Rgb8> tmp;
     if (!load(tmp, name))
       return false;
-    convert(tmp, I);
+    I = tmp.convert<T>();
     return true;
   }
 

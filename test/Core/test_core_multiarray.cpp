@@ -523,7 +523,6 @@ TEST(TestMultiArray, test_slices)
           }
 }
 
-//
 TEST(TestMultiArray, test_clear)
 {
   auto array = MultiArray<int, 2>{ 300, 300 };
@@ -535,6 +534,106 @@ TEST(TestMultiArray, test_clear)
   EXPECT_EQ(nullptr, array.begin());
   EXPECT_EQ(nullptr, array.end());
 }
+
+
+TEST(TestMultiArray, test_equality_comparison)
+{
+  int data[] = {
+    0, 1,
+    2, 3
+  };
+  auto sizes = Vector2i{ 2, 2 };
+
+  {
+    auto matrix_view = MultiArrayView<int, 2, RowMajor>{ data, sizes };
+
+    auto m1 = MultiArray<int, 2, RowMajor>{ sizes };
+    m1.matrix() <<
+      0, 1,
+      2, 3;
+
+    // Be careful of this one!
+    auto m2 = MultiArray<int, 2, RowMajor>{ sizes };
+    m2.matrix() <<
+      0, 2,
+      1, 3;
+
+    // Different sizes.
+    auto m3 = MultiArray<int, 2, RowMajor>{ 3, 2 };
+    m3.matrix() <<
+      0, 0,
+      0, 1,
+      2, 3;
+
+    EXPECT_EQ(matrix_view, m1);
+    EXPECT_NE(matrix_view, m2);
+    EXPECT_NE(matrix_view, m3);
+  }
+
+  {
+    auto matrix_view = MultiArrayView<int, 2, ColMajor>{ data, sizes };
+
+    // What we should read.
+    auto m1 = MultiArray<int, 2, ColMajor>{ sizes };
+    m1.matrix() <<
+      0, 2,
+      1, 3;
+
+    // Be careful of this one!
+    auto m2 = MultiArray<int, 2, ColMajor>{ sizes };
+    m2.matrix() <<
+      0, 1,
+      2, 3;
+
+    // Different sizes.
+    auto m3 = MultiArray<int, 2, ColMajor>{ 3, 2 };
+    m3.matrix() <<
+      0, 0,
+      0, 1,
+      2, 3;
+
+    EXPECT_EQ(matrix_view, m1);
+    EXPECT_NE(matrix_view, m2);
+    EXPECT_NE(matrix_view, m3);
+  }
+}
+
+
+TEST(TestMultiArray, test_cwise_transform)
+{
+  auto m = MultiArray<int, 2>{ 2, 2 };
+  m.matrix() <<
+    0, 2,
+    1, 3;
+
+  auto result = m.cwise_transform([](int x) -> Vector3i {
+    return Vector3i::Ones() * x;
+  });
+
+  EXPECT_MATRIX_EQ(Vector3i::Zero(), result(0, 0));
+  EXPECT_MATRIX_EQ(Vector3i::Ones() * 1, result(1, 0));
+  EXPECT_MATRIX_EQ(Vector3i::Ones() * 2, result(0, 1));
+  EXPECT_MATRIX_EQ(Vector3i::Ones() * 3, result(1, 1));
+}
+
+
+TEST(TestMultiArray, test_cwise_transform_inplace)
+{
+  auto m = MultiArray<int, 2>{ 2, 2 };
+  m.matrix() <<
+    0, 4,
+    2, 6;
+
+  m.cwise_transform_inplace([](int& color) {
+    color /= 2;
+  });
+
+  EXPECT_MATRIX_EQ(0, m(0, 0));
+  EXPECT_MATRIX_EQ(1, m(1, 0));
+  EXPECT_MATRIX_EQ(2, m(0, 1));
+  EXPECT_MATRIX_EQ(3, m(1, 1));
+}
+
 
 // =============================================================================
 // Test runner.

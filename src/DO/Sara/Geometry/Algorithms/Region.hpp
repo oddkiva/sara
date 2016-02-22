@@ -21,11 +21,11 @@ namespace DO { namespace Sara {
 
   DO_SARA_EXPORT
   std::vector<Point2i>
-  compute_region_inner_boundary(const Image<int>& regions, int region_id);
+  compute_region_inner_boundary(const ImageView<int>& regions, int region_id);
 
   DO_SARA_EXPORT
   std::vector<std::vector<Point2i>>
-  compute_region_inner_boundaries(const Image<int>& regions);
+  compute_region_inner_boundaries(const ImageView<int>& regions);
 
 } /* namespace Sara */
 } /* namespace DO */

@@ -18,7 +18,7 @@ using namespace std;
 namespace DO { namespace Sara {
 
   vector<Point2i>
-  compute_region_inner_boundary(const Image<int>& regions, int region_id)
+  compute_region_inner_boundary(const ImageView<int>& regions, int region_id)
   {
 #ifndef CONNECTIVITY_4
     const Vector2i dirs[] = {
@@ -96,7 +96,7 @@ namespace DO { namespace Sara {
   }
 
   vector<vector<Point2i>>
-  compute_region_inner_boundaries(const Image<int>& regions)
+  compute_region_inner_boundaries(const ImageView<int>& regions)
   {
     const auto num_regions = regions.array().maxCoeff() + 1;
     auto region_boundaries = vector<vector<Point2i>>(num_regions);

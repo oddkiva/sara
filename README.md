@@ -19,8 +19,8 @@ The design of *Sara* libraries is driven by the KISS principle.
 
 Try it and feel free to become involved with the development of the libraries.
 
-I dedicate lots of love to maintain *Sara* and make it evolve as much as my time
-and energy allow it.
+I dedicate lots of patience and love to maintain* Sara*and make it evolve as
+much as my time and energy allow it.
 
 *Sara* is licensed with the [Mozilla Public License version
 2.0](https://github.com/DO-CV/DO-CV/raw/master/COPYING.MPL2).
@@ -73,7 +73,9 @@ what?)
 I used openCV for the first time during my research internship at Siemens. That
 was in 2008 (quite some time, now that I think of it!). I was very frustrated
 with it. After a while, I started writing the library as a hobby to have a more
-easy-to-use library and also to gain a better mastery of the C++ language.
+easy-to-use library and also to gain a better mastery of the C++ language. Now,
+the library keeps evolving and can be reused for serious applications in the
+industry.
 
 Today openCV has evolved a lot. Despite that openCV has yet to convince me to
 use it, API-wise. Besides, not everybody in the industry uses *openCV*.
@@ -100,6 +102,11 @@ To build the libraries, run:
        libavformat-ffmpeg-dev \
        libavutil-ffmpeg-dev \
        qtbase5-dev
+
+     # To install Python bindings.
+     sudo apt-get install -qq \
+       boost-python-dev \
+       python3-dev
      ```
 
    - On Red Hat-based distributions:
@@ -113,6 +120,11 @@ To build the libraries, run:
        ffmpeg \
        ffmpeg-devel \
        qt-devel
+
+     # To install Python bindings.
+     sudo apt-get install -qq \
+       boost-python-devel \
+       python3-devel
      ```
 
 2. Build the library:

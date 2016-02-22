@@ -21,7 +21,7 @@
 namespace DO { namespace Sara {
 
   template <typename T, typename S>
-  void warp(const Image<T>& src, Image<T>& dst,
+  void warp(const ImageView<T>& src, ImageView<T>& dst,
             const Matrix<S, 3, 3>& homography_from_dst_to_src,
             const T& default_fill_color = PixelTraits<T>::min())
   {
