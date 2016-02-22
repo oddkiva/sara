@@ -17,7 +17,7 @@ using namespace std;
 
 namespace DO { namespace Sara {
 
-  vector<vector<size_t>> compute_adjacency_list_2d(const Image<int>& labels)
+  vector<vector<size_t>> compute_adjacency_list_2d(const ImageView<int>& labels)
   {
     const auto size = labels.size();
     const int dx[4] = { 1, 0,-1, 0 };

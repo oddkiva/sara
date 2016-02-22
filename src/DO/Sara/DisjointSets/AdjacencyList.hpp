@@ -67,7 +67,7 @@ namespace DO { namespace Sara {
 
   DO_SARA_EXPORT
   std::vector<std::vector<std::size_t>>
-  compute_adjacency_list_2d(const Image<int>& labels);
+  compute_adjacency_list_2d(const ImageView<int>& labels);
 
 
 } /* namespace Sara */
