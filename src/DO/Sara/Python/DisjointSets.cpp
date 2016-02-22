@@ -14,13 +14,7 @@ bp::list compute_adjacency_list_2d(PyObject *labels)
 {
   using namespace sara;
 
-  auto numpy_array = reinterpret_cast<PyArrayObject *>(labels);
-  auto data = reinterpret_cast<int *>(PyArray_DATA(numpy_array));
-  auto shape = PyArray_SHAPE(numpy_array);
-  const auto& h = shape[0];
-  const auto& w = shape[1];
-
-  auto im = ImageView<int, 2>{ data, Vector2i{ w, h } };
+  auto im = image_view_2d<int>(labels);
   auto adj_list = compute_adjacency_list_2d(im);
 
   auto adj_pylist = bp::list{};
@@ -35,6 +29,34 @@ bp::list compute_adjacency_list_2d(PyObject *labels)
   }
 
   return adj_pylist;
+}
+
+
+bp::list compute_connected_components(PyObject *labels)
+{
+  using namespace sara;
+
+  const auto im = image_view_2d<int>(labels);
+
+  auto adj_list_data = compute_adjacency_list_2d(im);
+  AdjacencyList adj_list{ adj_list_data };
+
+  auto disjoint_sets = DisjointSets{ im.size(), adj_list };
+  disjoint_sets.compute_connected_components();
+  const auto components = disjoint_sets.get_connected_components();
+
+  auto components_pylist = bp::list{};
+  for (const auto& component : components)
+  {
+    auto component_pylist = bp::list{};
+
+    for (const auto& vertex : component)
+      component_pylist.append(vertex);
+
+    components_pylist.append(component_pylist);
+  }
+
+  return components_pylist;
 }
 
 

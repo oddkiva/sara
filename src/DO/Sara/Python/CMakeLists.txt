@@ -25,6 +25,7 @@ target_link_libraries(sara
   ${Boost_LIBRARIES}
   ${PYTHON_LIBRARIES}
   DO_Sara_DisjointSets
+  DO_Sara_Geometry
   DO_Sara_ImageIO
   DO_Sara_VideoIO)
 
