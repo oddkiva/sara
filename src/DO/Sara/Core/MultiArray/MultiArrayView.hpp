@@ -119,7 +119,7 @@ namespace DO { namespace Sara {
     inline MultiArrayView(self_type&&) = default;
 
     //! @brief Constructor that wraps plain data with its known sizes.
-    inline MultiArrayView(value_type *data, const vector_type& sizes)
+    inline explicit MultiArrayView(value_type *data, const vector_type& sizes)
       : _begin{ data }
       , _end{ data + compute_size(sizes) }
       , _sizes{ sizes }
