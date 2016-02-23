@@ -45,7 +45,7 @@ include(sara_installation_settings)
 add_subdirectory(third-party)
 
 if (SARA_BUILD_PYTHON_BINDINGS)
-  add_subdirectory(src/DO/Sara/Python)
+  add_subdirectory(python)
 endif ()
 
 # Setup unit test projects

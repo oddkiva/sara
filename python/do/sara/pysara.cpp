@@ -6,7 +6,7 @@
 #include <DO/Sara/Python/VideoIO.hpp>
 
 
-BOOST_PYTHON_MODULE(sara)
+BOOST_PYTHON_MODULE(pysara)
 {
   using namespace std;
 
