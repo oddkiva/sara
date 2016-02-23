@@ -167,11 +167,17 @@ namespace DO { namespace Sara {
   }
 
   bool
-  VideoStream::read(Rgb8 *video_frame_data)
+  VideoStream::read(ImageView<Rgb8>& video_frame)
   {
+    if (video_frame.sizes() != sizes())
+      throw std::domain_error{
+        "Video frame sizes and video stream sizes are not equal!"
+      };
+
     AVPacket _video_packet;
     auto length = int{};
     auto got_video_frame = int{};
+    auto video_frame_data = video_frame.data();
 
     while (av_read_frame(_video_format_context, &_video_packet) >= 0)
     {
@@ -204,12 +210,6 @@ namespace DO { namespace Sara {
     return false;
   }
 
-  bool
-  VideoStream::read(Image<Rgb8>& video_frame)
-  {
-    video_frame.resize(sizes());
-    return read(video_frame.data());
-  }
 
 } /* namespace Sara */
 } /* namespace DO */

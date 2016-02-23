@@ -38,10 +38,17 @@ TEST_F(TestVideoIO, test_read_video_with_wrong_filepath)
                std::runtime_error);
 }
 
-TEST_F(TestVideoIO, test_read_frames_sequentially)
+TEST_F(TestVideoIO, test_read_valid_video_with_invalid_image_frame)
 {
   VideoStream video_stream{ video_filename };
   auto frame = Image<Rgb8>{};
+  EXPECT_THROW(video_stream.read(frame), std::domain_error);
+}
+
+TEST_F(TestVideoIO, test_read_frames_sequentially)
+{
+  VideoStream video_stream{ video_filename };
+  auto frame = Image<Rgb8>{ video_stream.sizes() };
 
   for (auto i = 0; i < 3; ++i)
     video_stream >> frame;
@@ -50,13 +57,13 @@ TEST_F(TestVideoIO, test_read_frames_sequentially)
 TEST_F(TestVideoIO, test_seek_frame)
 {
   VideoStream video_stream{ video_filename };
-  auto frame = Image<Rgb8>{};
+  auto frame = Image<Rgb8>{ video_stream.sizes() };
 
   for (auto i = 0; i < 5; ++i)
     video_stream >> frame;
 
   VideoStream video_stream2{ video_filename };
-  auto frame2 = Image<Rgb8>{};
+  auto frame2 = Image<Rgb8>{ video_stream.sizes() };
 
   video_stream.seek(4);
   video_stream2.read(frame2);

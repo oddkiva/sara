@@ -3,8 +3,8 @@
 
 #include <DO/Sara/VideoIO.hpp>
 
-#include <DO/Sara/Python/Numpy.hpp>
-#include <DO/Sara/Python/VideoIO.hpp>
+#include "Numpy.hpp"
+#include "VideoIO.hpp"
 
 
 namespace bp = boost::python;
@@ -17,14 +17,11 @@ using namespace std;
 class VideoStream : public sara::VideoStream
 {
 public:
-  void read_rgb_frame(PyArrayObject *inout)
+  void read_rgb_frame(PyObject *inout)
   {
     using namespace sara;
 
-    auto numpy_array = reinterpret_cast<PyArrayObject *>(inout);
-    auto data = reinterpret_cast<Rgb8 *>(PyArray_DATA(numpy_array));
-
-    Image<Rgb8> image{ data, sizes() };
+    auto image = image_view_2d<Rgb8>(inout);
     if (!read(image))
       throw std::runtime_error{ "Error: could not read image frame" };
   }

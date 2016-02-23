@@ -26,7 +26,8 @@ namespace DO { namespace Sara { namespace detail {
     return abs(M.determinant());
   }
 
-  vector<Point2d> ramer_douglas_peucker(const Point2d *in_first, const Point2d *in_last,
+  vector<Point2d> ramer_douglas_peucker(const Point2d *in_first,
+                                        const Point2d *in_last,
                                         double eps)
   {
     if (in_first == in_last)
@@ -68,8 +69,7 @@ namespace DO { namespace Sara { namespace detail {
 
 namespace DO { namespace Sara {
 
-  vector<Point2d>
-  ramer_douglas_peucker(vector<Point2d> curve, double eps)
+  vector<Point2d> ramer_douglas_peucker(vector<Point2d> curve, double eps)
   {
     if (curve.empty())
       return {};

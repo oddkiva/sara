@@ -53,12 +53,10 @@ namespace DO { namespace Sara {
 
     void seek(std::size_t frame_pos);
 
-    bool read(Rgb8 *video_frame_data);
-
-    bool read(Image<Rgb8>& video_frame);
+    bool read(ImageView<Rgb8>& video_frame);
 
     friend inline VideoStream& operator>>(VideoStream& video_stream,
-                                          Image<Rgb8>& video_frame)
+                                          ImageView<Rgb8>& video_frame)
     {
       if (!video_stream.read(video_frame))
         video_frame = Image<Rgb8>();
