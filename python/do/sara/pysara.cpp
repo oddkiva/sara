@@ -1,9 +1,9 @@
 #include <boost/python.hpp>
 
-#include <DO/Sara/Python/DisjointSets.hpp>
-#include <DO/Sara/Python/Geometry.hpp>
-#include <DO/Sara/Python/ImageIO.hpp>
-#include <DO/Sara/Python/VideoIO.hpp>
+#include "DisjointSets.hpp"
+#include "Geometry.hpp"
+#include "ImageIO.hpp"
+#include "VideoIO.hpp"
 
 
 BOOST_PYTHON_MODULE(pysara)
