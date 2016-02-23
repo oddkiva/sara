@@ -34,7 +34,7 @@ namespace DO { namespace Sara {
     const auto& h = shape[0];
     const auto& w = shape[1];
 
-    return ImageView<T>{ data, Vector2i{ h, w } };
+    return ImageView<T>{ data, Vector2i{ w, h } };
   }
 
 } /* namespace Sara */

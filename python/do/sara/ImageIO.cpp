@@ -2,8 +2,8 @@
 
 #include <DO/Sara/ImageIO.hpp>
 
-#include <DO/Sara/Python/ImageIO.hpp>
-#include <DO/Sara/Python/Numpy.hpp>
+#include "ImageIO.hpp"
+#include "Numpy.hpp"
 
 
 namespace bp = boost::python;

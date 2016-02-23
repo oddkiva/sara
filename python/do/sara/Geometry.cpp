@@ -2,8 +2,8 @@
 
 #include <DO/Sara/Geometry.hpp>
 
-#include <DO/Sara/Python/Geometry.hpp>
-#include <DO/Sara/Python/Numpy.hpp>
+#include "Geometry.hpp"
+#include "Numpy.hpp"
 
 
 namespace bp = boost::python;

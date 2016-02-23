@@ -2,8 +2,8 @@
 
 #include <DO/Sara/DisjointSets.hpp>
 
-#include <DO/Sara/Python/DisjointSets.hpp>
-#include <DO/Sara/Python/Numpy.hpp>
+#include "DisjointSets.hpp"
+#include "Numpy.hpp"
 
 
 namespace bp = boost::python;
