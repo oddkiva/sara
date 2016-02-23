@@ -17,7 +17,7 @@ cmake ../sara \
   -DSARA_BUILD_SAMPLES=ON
 
 # Build the library.
-make -j`nproc` && make test && make package
+make -j`nproc` && make test && make pytest && make package
 
 # Register the package to the local debian repository.
 dpkg-sig --sign builder ../sara-build-shared/libDO-Sara-shared-*.deb
