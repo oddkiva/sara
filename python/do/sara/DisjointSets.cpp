@@ -66,4 +66,5 @@ void expose_disjoint_sets()
   import_numpy_array();
 
   bp::def("compute_adjacency_list_2d", &compute_adjacency_list_2d);
+  bp::def("compute_connected_components", &compute_connected_components);
 }

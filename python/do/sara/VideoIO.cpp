@@ -17,7 +17,7 @@ using namespace std;
 class VideoStream : public sara::VideoStream
 {
 public:
-  void read_rgb_frame(PyArrayObject *inout)
+  void read_rgb_frame(PyObject *inout)
   {
     using namespace sara;
 

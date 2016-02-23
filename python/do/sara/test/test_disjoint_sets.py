@@ -21,7 +21,7 @@ class TestDisjointSets(TestCase):
                             [4, 4, 2, 2, 5]],
                            dtype=np.int32)
         components = compute_connected_components(regions)
-        self.assertEqual(
+        self.assertItemsEqual(
             [[0, 1, 5, 10],
              [2, 6, 7],
              [3, 8, 11, 12, 13, 14, 17, 18, 19, 22, 23],

@@ -21,12 +21,10 @@ bp::list compute_region_inner_boundaries(PyObject *regions)
   for (const auto& region_poly : region_polygons)
   {
     auto poly = bp::list{};
-    for (const auto& vertex : region_poly)
+    for (const auto& v : region_poly)
     {
-      auto v_list = bp::list{};
-      v_list.append(vertex.x());
-      v_list.append(vertex.y());
-      poly.append(v_list);
+      auto point = bp::make_tuple(v.x(), v.y());
+      poly.append(point);
     }
 
     polys.append(poly);
