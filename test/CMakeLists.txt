@@ -27,6 +27,10 @@ add_subdirectory(FeatureDescriptors)
 add_subdirectory(Match)
 add_subdirectory(FeatureMatching)
 
+if (SARA_BUILD_PYTHON_BINDINGS)
+  add_subdirectory(Python)
+endif ()
+
 if (CMAKE_COMPILER_IS_GNUCXX)
   find_program(LCOV_PATH lcov)
   find_program(GCOV_PATH gcov-${GCC_MAJOR}.${GCC_MINOR})

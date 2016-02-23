@@ -4,17 +4,13 @@ import numpy as np
 
 from unittest import TestCase
 
-import do.sara as sara
+from do.sara import compute_adjacency_list_2d
 
 
-# class TestDisjointSets(TestCase):
-# 
-#     def test_disjoint_sets(self):
-A = np.array(
-    [[0, 1],
-     [0, 1]],
-    dtype=np.int32)
+class TestDisjointSets(TestCase):
 
-print("hello")
-import ipdb; ipdb.set_trace()
-print(sara.compute_adjacency_list_2d(A))
+    def test_compute_adjacency_list_2d(self):
+        regions = np.array([[0, 1], [0, 1]], dtype=np.int32)
+
+        adj_list = compute_adjacency_list_2d(regions)
+        self.assertEqual(adj_list, [[2], [3], [0], [1]])
