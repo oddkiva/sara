@@ -127,12 +127,17 @@ TEST(TestImageConversion, test_image_color_rescale)
     for (auto x = 0; x < float_image.width(); ++x)
       float_image(x, y) = static_cast<float>(x+y);
 
-  float_image = color_rescale(float_image);
+  auto rescaled_float_image1 = color_rescale(float_image);
   auto float_min = float{};
   auto float_max = float{};
-  tie(float_min, float_max) = find_min_max(float_image);
+  tie(float_min, float_max) = find_min_max(rescaled_float_image1);
   EXPECT_EQ(float_min, 0);
   EXPECT_EQ(float_max, 1);
+
+  auto rescaled_float_image2 = float_image.compute<ColorRescale>(1.f, 2.f);
+  tie(float_min, float_max) = find_min_max(rescaled_float_image2);
+  EXPECT_EQ(float_min, 1.f);
+  EXPECT_EQ(float_max, 2.f);
 }
 
 
