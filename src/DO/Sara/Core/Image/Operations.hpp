@@ -176,8 +176,8 @@ namespace DO { namespace Sara {
     template <typename SrcImageView>
     using OutPixel = typename SrcImageView::pixel_type;
 
-    template <typename SrcImageView, typename DstImageView, typename Pixel>
-    void operator()(const SrcImageView& src, DstImageView& dst,
+    template <typename Pixel, int N>
+    void operator()(const ImageView<Pixel, N>& src, ImageView<Pixel, N>& dst,
                     const Pixel& a = PixelTraits<Pixel>::min(),
                     const Pixel& b = PixelTraits<Pixel>::max()) const
     {
