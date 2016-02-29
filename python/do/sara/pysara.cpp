@@ -13,5 +13,5 @@ BOOST_PYTHON_MODULE(pysara)
   expose_disjoint_sets();
   expose_geometry();
   expose_image_io();
-  expose_video_io();
+  //expose_video_io();
 }
