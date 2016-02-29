@@ -1,8 +1,8 @@
 // ========================================================================== //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -28,33 +28,25 @@ namespace DO { namespace Sara {
   //! @brief Helper class to use Image<T,N>::compute<Determinant>().
   struct Determinant
   {
-    template <typename MatrixField>
-    struct Dimension {
-      enum { value = MatrixField::Dimension };
-    };
+    template <typename SrcImageView>
+    using Matrix = typename SrcImageView::pixel_type;
 
-    template <typename MatrixField>
-    using Matrix = typename MatrixField::pixel_type;
+    template <typename SrcImageView>
+    using OutPixel =
+        decltype(std::declval<Matrix<SrcImageView>>().determinant());
 
-    template <typename MatrixField>
-    using Scalar =
-      decltype(std::declval<Matrix<MatrixField>>().determinant());
-
-    template <typename MatrixField>
-    using ReturnType =
-      Image<Scalar<MatrixField>, Dimension<MatrixField>::value>;
-
-    template <typename MatrixField>
-    ReturnType<MatrixField> operator()(const MatrixField& in) const
+    template <typename SrcImageView, typename DstImageView>
+    inline void operator()(const SrcImageView& src, DstImageView& dst) const
     {
-      auto out = ReturnType<MatrixField>{ in.sizes() };
+      if (src.sizes() != dst.sizes())
+        throw std::domain_error{
+          "Source and destination image sizes are not equal!"
+        };
 
-      auto out_i = out.begin();
-      auto in_i = in.begin();
-      for ( ; in_i != in.end(); ++in_i, ++out_i)
-        *out_i = in_i->determinant();
-
-      return out;
+      auto dst_i = dst.begin();
+      auto src_i = src.begin();
+      for ( ; src_i != src.end(); ++src_i, ++dst_i)
+        *dst_i = src_i->determinant();
     }
   };
 

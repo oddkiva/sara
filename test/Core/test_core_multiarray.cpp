@@ -1,8 +1,8 @@
 // ========================================================================== //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -31,7 +31,7 @@ TYPED_TEST_CASE_P(Test_multiarray_constructors);
 TYPED_TEST_P(Test_multiarray_constructors,
              test_default_constructor_and_base_getters)
 {
-  typedef TypeParam MultiArray;
+  using MultiArray = TypeParam;
   MultiArray multi_array;
   EXPECT_FALSE(multi_array.data());
   EXPECT_FALSE(multi_array.begin());
@@ -45,32 +45,34 @@ TYPED_TEST_P(Test_multiarray_constructors,
 TYPED_TEST_P(Test_multiarray_constructors,
              test_constructor_with_sizes_and_base_getters)
 {
-  typedef TypeParam MultiArray;
-  typedef typename MultiArray::vector_type Vector;
-  typedef StrideComputer<MultiArray::StorageOrder> StrideComputer;
+  using MultiArray = TypeParam;
+  using Vector = typename MultiArray::vector_type;
+  using StrideComputer = StrideComputer<MultiArray::StorageOrder>;
 
   // Create sizes, one for each dimension.
-  Vector sizes;
-  for (int i = 0; i < sizes.size(); ++i)
+  auto sizes = Vector{};
+  for (auto i = 0; i < sizes.size(); ++i)
     sizes(i) = (i+1)*10;
+
   // Compute the strides.
   Vector strides = StrideComputer::eval(sizes);
+
   // Compute the raw size of the multi-array.
-  size_t raw_size = static_cast<size_t>( accumulate(
+  auto raw_size = static_cast<size_t>( accumulate(
     sizes.data(), sizes.data() + sizes.size(), 1,
     multiplies<int>()) );
   // Create the array with the right sizes.
-  MultiArray multi_array(sizes);
+  auto multi_array = MultiArray{ sizes };
 
   EXPECT_EQ(multi_array.sizes(), sizes);
   EXPECT_EQ(multi_array.strides(), strides);
   EXPECT_EQ(multi_array.size(), raw_size);
 
   // Check size values in each dimension.
-  for (int i = 0; i < sizes.size(); ++i)
+  for (auto i = 0; i < sizes.size(); ++i)
     ASSERT_EQ(multi_array.size(i), sizes(i));
   // Check stride values in each dimension.
-  for (int i = 0; i < sizes.size(); ++i)
+  for (auto i = 0; i < sizes.size(); ++i)
     ASSERT_EQ(multi_array.stride(i), strides(i));
 }
 
@@ -78,7 +80,7 @@ REGISTER_TYPED_TEST_CASE_P(Test_multiarray_constructors,
                            test_default_constructor_and_base_getters,
                            test_constructor_with_sizes_and_base_getters);
 
-typedef testing::Types<
+using Test_multiarray_constructors_types = testing::Types<
   MultiArray<unsigned char, 2, ColMajor>,
   MultiArray<unsigned char, 2, RowMajor>,
   MultiArray<unsigned char, 3, ColMajor>,
@@ -87,7 +89,7 @@ typedef testing::Types<
   MultiArray<unsigned char, 4, RowMajor>,
   MultiArray<unsigned char, 5, ColMajor>,
   MultiArray<unsigned char, 5, RowMajor>
-> Test_multiarray_constructors_types;
+>;
 INSTANTIATE_TYPED_TEST_CASE_P(TestMultiArray,
                               Test_multiarray_constructors,
                               Test_multiarray_constructors_types);
@@ -102,10 +104,10 @@ TYPED_TEST_CASE_P(Test_multiarray_convenience_constructor_2d_and_getters);
 
 TYPED_TEST_P(Test_multiarray_convenience_constructor_2d_and_getters, run)
 {
-  typedef TypeParam MultiArray;
-  typedef StrideComputer<MultiArray::StorageOrder> StrideComputer;
+  using MultiArray = TypeParam;
+  using StrideComputer = StrideComputer<MultiArray::StorageOrder>;
 
-  MultiArray multi_array(10, 20);
+  MultiArray multi_array{ 10, 20 };
 
   EXPECT_EQ(multi_array.sizes(), Vector2i(10, 20));
   EXPECT_EQ(multi_array.rows(), 10);
@@ -116,12 +118,12 @@ TYPED_TEST_P(Test_multiarray_convenience_constructor_2d_and_getters, run)
 REGISTER_TYPED_TEST_CASE_P(
   Test_multiarray_convenience_constructor_2d_and_getters, run);
 
-typedef testing::Types<
+using Test_multiarray_convenience_constructor_2d_types = testing::Types<
   MultiArray<int, 2, ColMajor>,
   MultiArray<int, 2, RowMajor>,
   MultiArray<float, 2, ColMajor>,
   MultiArray<float, 2, RowMajor>
-> Test_multiarray_convenience_constructor_2d_types;
+>;
 INSTANTIATE_TYPED_TEST_CASE_P(
     TestMultiArray,
     Test_multiarray_convenience_constructor_2d_and_getters,
@@ -137,10 +139,10 @@ TYPED_TEST_CASE_P(Test_multiarray_convenience_constructor_3d_and_getters);
 
 TYPED_TEST_P(Test_multiarray_convenience_constructor_3d_and_getters, run)
 {
-  typedef TypeParam MultiArray;
-  typedef StrideComputer<MultiArray::StorageOrder> StrideComputer;
+  using MultiArray = TypeParam;
+  using StrideComputer = StrideComputer<MultiArray::StorageOrder>;
 
-  MultiArray multi_array(10, 20, 50);
+  MultiArray multi_array{ 10, 20, 50 };
 
   EXPECT_EQ(multi_array.sizes(), Vector3i(10, 20, 50));
   EXPECT_EQ(multi_array.rows(), 10);
@@ -152,31 +154,30 @@ TYPED_TEST_P(Test_multiarray_convenience_constructor_3d_and_getters, run)
 REGISTER_TYPED_TEST_CASE_P(
   Test_multiarray_convenience_constructor_3d_and_getters, run);
 
-typedef testing::Types<
+using Test_multiarray_convenience_constructor_3d_types = testing::Types<
   MultiArray<int, 3, ColMajor>,
   MultiArray<int, 3, RowMajor>,
   MultiArray<float, 3, ColMajor>,
   MultiArray<float, 3, RowMajor>
-> Test_multiarray_convenience_constructor_3d_types;
+>;
 INSTANTIATE_TYPED_TEST_CASE_P(
-    TestMultiArray,
-    Test_multiarray_convenience_constructor_3d_and_getters,
-    Test_multiarray_convenience_constructor_3d_types);
+  TestMultiArray,
+  Test_multiarray_convenience_constructor_3d_and_getters,
+  Test_multiarray_convenience_constructor_3d_types);
 
 
 // =============================================================================
 // Tests on copy constructors.
 TEST(TestMultiArray, test_copy_constructor)
 {
-  MultiArray<int, 2> A(4, 9);
+  auto A = MultiArray<int, 2>{ 4, 9 };
   {
-    MultiArray<int, 2>::iterator a = A.begin();
-    int value_a = 0;
-    for ( ; a != A.end(); ++a, ++value_a)
+    auto value_a = 0;
+    for (auto a = A.begin() ; a != A.end(); ++a, ++value_a)
       *a = value_a;
   }
 
-  MultiArray<int, 2> B(A);
+  auto B = A;
 
   EXPECT_NE(A.data(), B.data());
   EXPECT_NE(A.begin(), B.begin());
@@ -184,23 +185,22 @@ TEST(TestMultiArray, test_copy_constructor)
   EXPECT_MATRIX_EQ(A.sizes(), B.sizes());
   EXPECT_MATRIX_EQ(A.strides(), B.strides());
 
-  MultiArray<int, 2>::const_iterator a = A.begin();
-  MultiArray<int, 2>::const_iterator b = B.begin();
+  auto a = A.begin();
+  auto b = B.begin();
   for ( ; a != A.end(); ++a, ++b)
     ASSERT_EQ(*a, *b);
 }
 
 TEST(TestMultiArray, test_assignment_operator)
 {
-  MultiArray<int, 2> A(4, 9);
+  auto A = MultiArray<int, 2>{ 4, 9 };
   {
-    MultiArray<int, 2>::iterator a = A.begin();
-    int value_a = 0;
-    for ( ; a != A.end(); ++a, ++value_a)
+    auto value_a = 0;
+    for (auto a = A.begin(); a != A.end(); ++a, ++value_a)
       *a = value_a;
   }
 
-  MultiArray<int, 2> B;
+  auto B = MultiArray<int, 2>{};
   B = A;
 
   EXPECT_NE(A.data(), B.data());
@@ -209,8 +209,8 @@ TEST(TestMultiArray, test_assignment_operator)
   EXPECT_MATRIX_EQ(A.sizes(), B.sizes());
   EXPECT_MATRIX_EQ(A.strides(), B.strides());
 
-  MultiArray<int, 2>::const_iterator a = A.begin();
-  MultiArray<int, 2>::const_iterator b = B.begin();
+  auto a = A.begin();
+  auto b = B.begin();
   for ( ; a != A.end(); ++a, ++b)
     ASSERT_EQ(*a, *b);
 }
@@ -220,36 +220,32 @@ TEST(TestMultiArray, test_assignment_operator)
 // Test on swap operation.
 TEST(TestMultiArray, test_swap)
 {
-  MultiArray<int, 2> A(2, 3);
-  MultiArray<int, 2> B(5, 4);
+  auto A = MultiArray<int, 2>{ 2, 3 };
+  auto B = MultiArray<int, 2>{ 5, 4 };
 
   {
-    MultiArray<int, 2>::iterator a = A.begin();
-    int value_a = 0;
-    for ( ; a != A.end(); ++a, ++value_a)
+    auto value_a = 0;
+    for (auto a = A.begin(); a != A.end(); ++a, ++value_a)
       *a = value_a;
   }
 
   {
-    MultiArray<int, 2>::iterator b = B.begin();
-    int value_b = 1;
-    for ( ; b != B.end(); ++b, ++value_b)
+    auto value_b = 1;
+    for (auto b = B.begin(); b != B.end(); ++b, ++value_b)
       *b = value_b;
   }
 
   A.swap(B);
 
   {
-    MultiArray<int, 2>::iterator b = B.begin();
-    int value_b = 0;
-    for ( ; b != B.end(); ++b, ++value_b)
+    auto value_b = 0;
+    for (auto b = B.begin(); b != B.end(); ++b, ++value_b)
       ASSERT_EQ(*b, value_b);
   }
 
   {
-    MultiArray<int, 2>::iterator a = A.begin();
-    int value_a = 1;
-    for ( ; a != A.end(); ++a, ++value_a)
+    auto value_a = 1;
+    for (auto a = A.begin(); a != A.end(); ++a, ++value_a)
       ASSERT_EQ(*a, value_a);
   }
 }
@@ -263,14 +259,18 @@ TYPED_TEST_CASE_P(TestOperatorOverloadingND);
 TYPED_TEST_P(TestOperatorOverloadingND, test_operator_overloading)
 {
   // Read-write overloaded operators.
-  typedef TypeParam VectorField;
-  Vector4i sizes(3, 5, 7, 9);
-  VectorField vector_field(sizes);
-  for (int i = 0; i < vector_field.size(0); ++i) {
-    for (int j = 0; j < vector_field.size(1); ++j) {
-      for (int k = 0; k < vector_field.size(2); ++k) {
-        for (int l = 0; l < vector_field.size(3); ++l) {
-          Vector4i pos(i,j,k,l);
+  using VectorField = TypeParam;
+  auto sizes = Vector4i{ 3, 5, 7, 9 };
+  auto vector_field = VectorField{ sizes };
+  for (auto i = 0; i < vector_field.size(0); ++i)
+  {
+    for (auto j = 0; j < vector_field.size(1); ++j)
+    {
+      for (auto k = 0; k < vector_field.size(2); ++k)
+      {
+        for (auto l = 0; l < vector_field.size(3); ++l)
+        {
+          auto pos = Vector4i{ i, j, k, l };
           vector_field(pos) = pos;
         }
       }
@@ -278,12 +278,16 @@ TYPED_TEST_P(TestOperatorOverloadingND, test_operator_overloading)
   }
 
   // Read-only overloaded operators.
-  const VectorField& const_vector_field = vector_field;
-  for (int i = 0; i < const_vector_field.size(0); ++i) {
-    for (int j = 0; j < const_vector_field.size(1); ++j) {
-      for (int k = 0; k < const_vector_field.size(2); ++k) {
-        for (int l = 0; l < const_vector_field.size(3); ++l) {
-          Vector4i pos(i,j,k,l);
+  const auto& const_vector_field = vector_field;
+  for (auto i = 0; i < vector_field.size(0); ++i)
+  {
+    for (auto j = 0; j < vector_field.size(1); ++j)
+    {
+      for (auto k = 0; k < vector_field.size(2); ++k)
+      {
+        for (auto l = 0; l < vector_field.size(3); ++l)
+        {
+          auto pos = Vector4i{ i, j, k, l };
           ASSERT_MATRIX_EQ(const_vector_field(pos), pos);
         }
       }
@@ -294,10 +298,10 @@ TYPED_TEST_P(TestOperatorOverloadingND, test_operator_overloading)
 REGISTER_TYPED_TEST_CASE_P(TestOperatorOverloadingND,
                            test_operator_overloading);
 
-typedef testing::Types<
+using Array4DTypes = testing::Types<
   MultiArray<Vector4i, 4, ColMajor>,
   MultiArray<Vector4i, 4, RowMajor>
-> Array4DTypes;
+>;
 INSTANTIATE_TYPED_TEST_CASE_P(TestMultiArray,
                               TestOperatorOverloadingND,
                               Array4DTypes);
@@ -311,26 +315,26 @@ TYPED_TEST_CASE_P(TestOperatorOverloading2D);
 TYPED_TEST_P(TestOperatorOverloading2D, test_operator_overloading)
 {
   // Read-write overloaded operators.
-  typedef TypeParam VectorField;
-  VectorField vector_field(10, 20);
-  for (int i = 0; i < vector_field.rows(); ++i)
-    for (int j = 0; j < vector_field.cols(); ++j)
+  using VectorField = TypeParam;
+  auto vector_field = VectorField{ 10, 20 };
+  for (auto i = 0; i < vector_field.rows(); ++i)
+    for (auto j = 0; j < vector_field.cols(); ++j)
         vector_field(i,j) = Vector2i(i,j);
 
   // Read-only overloaded operators.
-  const VectorField& const_vector_field = vector_field;
-  for (int i = 0; i < const_vector_field.rows(); ++i)
-    for (int j = 0; j < const_vector_field.cols(); ++j)
+  const auto& const_vector_field = vector_field;
+  for (auto i = 0; i < const_vector_field.rows(); ++i)
+    for (auto j = 0; j < const_vector_field.cols(); ++j)
       ASSERT_MATRIX_EQ(const_vector_field(i,j), Vector2i(i,j));
 }
 
 REGISTER_TYPED_TEST_CASE_P(TestOperatorOverloading2D,
                            test_operator_overloading);
 
-typedef testing::Types<
+using Array2DTypes = testing::Types<
   MultiArray<Vector2i, 2, ColMajor>,
   MultiArray<Vector2i, 2, RowMajor>
-> Array2DTypes;
+>;
 INSTANTIATE_TYPED_TEST_CASE_P(TestMultiArray,
                               TestOperatorOverloading2D,
                               Array2DTypes);
@@ -343,27 +347,27 @@ class TestOperatorOverloading3D : public testing::Test {};
 TYPED_TEST_CASE_P(TestOperatorOverloading3D);
 TYPED_TEST_P(TestOperatorOverloading3D, test_operator_overloading)
 {
-  typedef TypeParam VectorField;
-  VectorField vector_field(5, 10, 20);
-  for (int i = 0; i < vector_field.rows(); ++i)
-    for (int j = 0; j < vector_field.cols(); ++j)
-      for (int k = 0; k < vector_field.depth(); ++k)
+  using VectorField = TypeParam;
+  auto vector_field = VectorField{ 5, 10, 20 };
+  for (auto i = 0; i < vector_field.rows(); ++i)
+    for (auto j = 0; j < vector_field.cols(); ++j)
+      for (auto k = 0; k < vector_field.depth(); ++k)
         vector_field(i,j,k) = Vector3i(i,j,k);
 
   const VectorField& const_vector_field = vector_field;
-  for (int i = 0; i < const_vector_field.rows(); ++i)
-    for (int j = 0; j < const_vector_field.cols(); ++j)
-      for (int k = 0; k < const_vector_field.depth(); ++k)
+  for (auto i = 0; i < const_vector_field.rows(); ++i)
+    for (auto j = 0; j < const_vector_field.cols(); ++j)
+      for (auto k = 0; k < const_vector_field.depth(); ++k)
         ASSERT_MATRIX_EQ(const_vector_field(i,j,k), Vector3i(i,j,k));
 }
 
 REGISTER_TYPED_TEST_CASE_P(TestOperatorOverloading3D,
                            test_operator_overloading);
 
-typedef testing::Types<
+using Array3DTypes = testing::Types<
   MultiArray<Vector3i, 3, ColMajor>,
   MultiArray<Vector3i, 3, RowMajor>
-> Array3DTypes;
+>;
 INSTANTIATE_TYPED_TEST_CASE_P(TestMultiArray,
                               TestOperatorOverloading3D,
                               Array3DTypes);
@@ -373,8 +377,8 @@ INSTANTIATE_TYPED_TEST_CASE_P(TestMultiArray,
 // Tests on resize operator.
 TEST(TestMultiArray, test_resize)
 {
-  typedef MultiArray<char, 4> Array4;
-  Array4 multi_array;
+  using Array4 = MultiArray<char, 4>;
+  auto multi_array = Array4{};
   EXPECT_FALSE(multi_array.data());
   EXPECT_FALSE(multi_array.begin());
   EXPECT_FALSE(multi_array.end());
@@ -394,8 +398,8 @@ TEST(TestMultiArray, test_resize)
 
 TEST(TestMultiArray, test_resize_2d)
 {
-  typedef MultiArray<char, 2> Array2;
-  Array2 multi_array;
+  using Array2 = MultiArray<char, 2>;
+  auto multi_array = Array2{};
   EXPECT_FALSE(multi_array.data());
   EXPECT_FALSE(multi_array.begin());
   EXPECT_FALSE(multi_array.end());
@@ -414,8 +418,8 @@ TEST(TestMultiArray, test_resize_2d)
 
 TEST(TestMultiArray, test_resize_3d)
 {
-  typedef MultiArray<char, 3> Array3;
-  Array3 multi_array;
+  using Array3 = MultiArray<char, 3>;
+  auto multi_array = Array3{};
   EXPECT_FALSE(multi_array.data());
   EXPECT_FALSE(multi_array.begin());
   EXPECT_FALSE(multi_array.end());
@@ -437,28 +441,28 @@ TEST(TestMultiArray, test_resize_3d)
 // Tests on array and matrix views.
 TEST(TestMultiArray, test_array_view_types)
 {
-  typedef MultiArray<int, 2> Array2;
-  Array2 A(2,2);
+  using Array2 = MultiArray<int, 2>;
+  auto A = Array2{ 2, 2 };
   A.array() << 1, 2, 3, 4;
 
-  Array4i actual_A;
-  Array4i expected_A;
+  auto actual_A = Array4i{};
+  auto expected_A = Array4i{};
   actual_A = A.array();
   expected_A << 1, 2, 3, 4;
 
-  for (int i = 0; i < actual_A.size(); ++i)
+  for (auto i = 0; i < actual_A.size(); ++i)
     ASSERT_EQ(actual_A(i), expected_A(i));
 }
 
 TEST(TestMultiArray, test_matrix_view_types)
 {
-  typedef MultiArray<float, 2> Matrix2;
-  Matrix2 A(2,2);
+  using Matrix2 = MultiArray<float, 2>;
+  auto A = Matrix2{ 2, 2 };
   A.matrix() << 1, 2,
                 3, 4;
-  Matrix2f actual_A = A.matrix();
+  auto actual_A = A.matrix();
 
-  Matrix2f expected_A;
+  auto expected_A = Matrix2f{};
   expected_A << 1, 2,
                 3, 4;
 
@@ -473,33 +477,32 @@ TEST(TestMultiArray, test_matrix_view_types)
 
 TEST(TestMultiArray, test_slices)
 {
-  typedef Matrix<int, 5, 1> Vector5i;
-  typedef MultiArray<float, 5, RowMajor> RgbHistogramBlocks;
-  typedef MultiArrayView<float, 3, RowMajor> RgbHistogram;
-  typedef RgbHistogramBlocks::vector_type vector_type;
+  using Vector5i = Matrix<int, 5, 1>;
+  using RgbHistogramBlocks = MultiArray<float, 5, RowMajor>;
+  using vector_type = RgbHistogramBlocks::vector_type;
 
-  const Vector2i block_sizes(4, 4);
-  const Vector3i histogram_sizes(6, 6, 6);
-  vector_type sizes;
+  const auto block_sizes = Vector2i{ 4, 4 };
+  const Vector3i histogram_sizes{ 6, 6, 6 };
+  auto sizes = vector_type{};
   sizes << block_sizes, histogram_sizes;
 
-  RgbHistogramBlocks rgb_histogram_blocks(sizes);
-  for (int i = 0; i < rgb_histogram_blocks.size(0); ++i)
+  auto rgb_histogram_blocks = RgbHistogramBlocks{ sizes };
+  for (auto i = 0; i < rgb_histogram_blocks.size(0); ++i)
   {
-    for (int j = 0; j < rgb_histogram_blocks.size(1); ++j)
+    for (auto j = 0; j < rgb_histogram_blocks.size(1); ++j)
     {
-      Vector5i pos;
+      auto pos = Vector5i{};
       pos << i, j, 0, 0, 0;
 
       // Read-only view of multi-array.
-      const RgbHistogram const_rgb_histogram(rgb_histogram_blocks[i][j]);
+      const auto const_rgb_histogram = rgb_histogram_blocks[i][j];
       ASSERT_EQ(const_rgb_histogram.sizes(), const_rgb_histogram.sizes());
       ASSERT_EQ(const_rgb_histogram.strides(), Vector3i(36, 6, 1));
       ASSERT_EQ(rgb_histogram_blocks.data() + i * 4 * 6 * 6 * 6 + j * 6 * 6 * 6,
-        const_rgb_histogram.data());
+                const_rgb_histogram.data());
 
       // Read-write view of multi-array.
-      RgbHistogram rgb_histogram(rgb_histogram_blocks[i][j]);
+      auto rgb_histogram = rgb_histogram_blocks[i][j];
       for (int r = 0; r < rgb_histogram.size(0); ++r)
         for (int g = 0; g < rgb_histogram.size(1); ++g)
           for (int b = 0; b < rgb_histogram.size(2); ++b)
@@ -507,24 +510,22 @@ TEST(TestMultiArray, test_slices)
     }
   }
 
-  typedef Matrix<int, 5, 1> Vector5i;
-  for (int i = 0; i < rgb_histogram_blocks.size(0); ++i)
-    for (int j = 0; j < rgb_histogram_blocks.size(1); ++j)
-      for (int r = 0; r < rgb_histogram_blocks.size(2); ++r)
-        for (int g = 0; g < rgb_histogram_blocks.size(3); ++g)
-          for (int b = 0; b < rgb_histogram_blocks.size(4); ++b)
+  for (auto i = 0; i < rgb_histogram_blocks.size(0); ++i)
+    for (auto j = 0; j < rgb_histogram_blocks.size(1); ++j)
+      for (auto r = 0; r < rgb_histogram_blocks.size(2); ++r)
+        for (auto g = 0; g < rgb_histogram_blocks.size(3); ++g)
+          for (auto b = 0; b < rgb_histogram_blocks.size(4); ++b)
           {
-            Vector5i pos;
+            auto pos = Vector5i{};
             pos << i, j, r, g, b;
             ASSERT_EQ(rgb_histogram_blocks(pos),
               i*rgb_histogram_blocks.size(1) + j);
           }
 }
 
-//
 TEST(TestMultiArray, test_clear)
 {
-  MultiArray<int, 2> array(300, 300);
+  auto array = MultiArray<int, 2>{ 300, 300 };
   EXPECT_MATRIX_EQ(Vector2i(300, 300), array.sizes());
 
   array.clear();
@@ -533,6 +534,106 @@ TEST(TestMultiArray, test_clear)
   EXPECT_EQ(nullptr, array.begin());
   EXPECT_EQ(nullptr, array.end());
 }
+
+
+TEST(TestMultiArray, test_equality_comparison)
+{
+  int data[] = {
+    0, 1,
+    2, 3
+  };
+  auto sizes = Vector2i{ 2, 2 };
+
+  {
+    auto matrix_view = MultiArrayView<int, 2, RowMajor>{ data, sizes };
+
+    auto m1 = MultiArray<int, 2, RowMajor>{ sizes };
+    m1.matrix() <<
+      0, 1,
+      2, 3;
+
+    // Be careful of this one!
+    auto m2 = MultiArray<int, 2, RowMajor>{ sizes };
+    m2.matrix() <<
+      0, 2,
+      1, 3;
+
+    // Different sizes.
+    auto m3 = MultiArray<int, 2, RowMajor>{ 3, 2 };
+    m3.matrix() <<
+      0, 0,
+      0, 1,
+      2, 3;
+
+    EXPECT_EQ(matrix_view, m1);
+    EXPECT_NE(matrix_view, m2);
+    EXPECT_NE(matrix_view, m3);
+  }
+
+  {
+    auto matrix_view = MultiArrayView<int, 2, ColMajor>{ data, sizes };
+
+    // What we should read.
+    auto m1 = MultiArray<int, 2, ColMajor>{ sizes };
+    m1.matrix() <<
+      0, 2,
+      1, 3;
+
+    // Be careful of this one!
+    auto m2 = MultiArray<int, 2, ColMajor>{ sizes };
+    m2.matrix() <<
+      0, 1,
+      2, 3;
+
+    // Different sizes.
+    auto m3 = MultiArray<int, 2, ColMajor>{ 3, 2 };
+    m3.matrix() <<
+      0, 0,
+      0, 1,
+      2, 3;
+
+    EXPECT_EQ(matrix_view, m1);
+    EXPECT_NE(matrix_view, m2);
+    EXPECT_NE(matrix_view, m3);
+  }
+}
+
+
+TEST(TestMultiArray, test_cwise_transform)
+{
+  auto m = MultiArray<int, 2>{ 2, 2 };
+  m.matrix() <<
+    0, 2,
+    1, 3;
+
+  auto result = m.cwise_transform([](int x) -> Vector3i {
+    return Vector3i::Ones() * x;
+  });
+
+  EXPECT_MATRIX_EQ(Vector3i::Zero(), result(0, 0));
+  EXPECT_MATRIX_EQ(Vector3i::Ones() * 1, result(1, 0));
+  EXPECT_MATRIX_EQ(Vector3i::Ones() * 2, result(0, 1));
+  EXPECT_MATRIX_EQ(Vector3i::Ones() * 3, result(1, 1));
+}
+
+
+TEST(TestMultiArray, test_cwise_transform_inplace)
+{
+  auto m = MultiArray<int, 2>{ 2, 2 };
+  m.matrix() <<
+    0, 4,
+    2, 6;
+
+  m.cwise_transform_inplace([](int& color) {
+    color /= 2;
+  });
+
+  EXPECT_MATRIX_EQ(0, m(0, 0));
+  EXPECT_MATRIX_EQ(1, m(1, 0));
+  EXPECT_MATRIX_EQ(2, m(0, 1));
+  EXPECT_MATRIX_EQ(3, m(1, 1));
+}
+
 
 // =============================================================================
 // Test runner.

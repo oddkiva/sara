@@ -1,8 +1,8 @@
 // ========================================================================== //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -18,22 +18,22 @@
 #include <DO/Sara/Defines.hpp>
 #include <DO/Sara/Core/Image.hpp>
 
-#include "Graphics/Events.hpp"
-#include "Graphics/GraphicsApplication.hpp"
-#include "Graphics/WindowManagement.hpp"
-#include "Graphics/PaintingCommands.hpp"
-#include "Graphics/ImageIO.hpp"
-#include "Graphics/ImageDraw.hpp"
+#include <DO/Sara/Graphics/Events.hpp>
+#include <DO/Sara/Graphics/GraphicsApplication.hpp>
+#include <DO/Sara/Graphics/WindowManagement.hpp>
+#include <DO/Sara/Graphics/PaintingCommands.hpp>
+#include <DO/Sara/Graphics/ImageIO.hpp>
+#include <DO/Sara/Graphics/ImageDraw.hpp>
 
 // The following are still experimental but can be extended very easily.
 
 // 3D viewer (still experimental and little features.)
 // \todo: see if we need to separate the Mesh from the Graphics module.
-#include "Graphics/Mesh.hpp"
-#include "Graphics/Draw3D.hpp"
+#include <DO/Sara/Graphics/Mesh.hpp>
+#include <DO/Sara/Graphics/Draw3D.hpp>
 
 // Graphics view for interactive viewing (very little features for now.)
-#include "Graphics/GraphicsViewCommands.hpp"
+#include <DO/Sara/Graphics/GraphicsViewCommands.hpp>
 
 /*!
   @defgroup Graphics Graphics

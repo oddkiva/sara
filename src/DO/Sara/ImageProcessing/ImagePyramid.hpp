@@ -1,8 +1,8 @@
 // ========================================================================== //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -155,10 +155,10 @@ namespace DO { namespace Sara {
   public: /* member functions */
     //! Convenient typedefs.
     //! @{
-    typedef Pixel pixel_type;
-    typedef Image<Pixel> image_type;
-    typedef std::vector<Image<Pixel, N> > octave_type;
-    typedef typename PixelTraits<Pixel>::channel_type scalar_type;
+    using pixel_type = Pixel;
+    using image_type = Image<Pixel>;
+    using octave_type = std::vector<Image<Pixel, N>>;
+    using scalar_type = typename PixelTraits<Pixel>::channel_type;
     //! @}
 
     //! @brief Default constructor.

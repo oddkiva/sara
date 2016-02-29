@@ -1,8 +1,8 @@
 // ========================================================================== //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -26,10 +26,10 @@ inline void millisleep(unsigned milliseconds)
 
 TEST(DO_Sara_Core_Test, testTimer)
 {
-  Timer timer;
-  double elapsed_milliseconds;
-  double elapsed_seconds;
-  unsigned sleep_milliseconds = 580;
+  Timer timer{};
+  auto elapsed_milliseconds = double{};
+  auto elapsed_seconds = double{};
+  auto sleep_milliseconds = unsigned{ 580 };
 
   timer.restart();
   millisleep(sleep_milliseconds);

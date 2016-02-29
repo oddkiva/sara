@@ -1,8 +1,8 @@
 // ========================================================================== //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -18,7 +18,7 @@ using namespace std;
 namespace DO { namespace Sara {
 
   vector<OERegion>
-  ComputeDoGExtrema::operator()(const Image<float>& image,
+  ComputeDoGExtrema::operator()(const ImageView<float>& image,
                                 vector<Point2i> *scale_octave_pairs)
   {
     auto& G = _gaussians;

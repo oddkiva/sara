@@ -1,8 +1,8 @@
 // ========================================================================== //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -51,15 +51,20 @@ TEST_F(TestDifferential, test_gradient)
   EXPECT_MATRIX_NEAR(Vector2f(1,0), gradf_x, 1e-5);
 
   auto gradf = gradient(f);
+  auto gradf_2 = f.compute<Gradient>();
   for (int y = 0; y < gradf.height(); ++y)
   {
     for (int x = 0; x < gradf.width(); ++x)
     {
-      Vector2f true_gradf;
+      auto true_gradf = Vector2f{};
       true_gradf[0] = x == 1 ? 1 : 0.5f;
       true_gradf[1] = 0;
-      Vector2f gradf_xy = gradf(x, y);
+
+      const auto& gradf_xy = gradf(x, y);
+      const auto& gradf_xy_2 = gradf_2(x, y);
+
       EXPECT_MATRIX_NEAR(true_gradf, gradf_xy, 1e-5);
+      EXPECT_MATRIX_NEAR(true_gradf, gradf_xy_2, 1e-5);
     }
   }
 }
@@ -76,11 +81,15 @@ TEST_F(TestDifferential, test_laplacian)
   auto laplacian_x = laplacian(f, x);
   EXPECT_NEAR(0, laplacian_x, 1e-5);
 
-  Image<float> delta_f;
   auto true_delta_f = MatrixXf{ 3, 3 };
   true_delta_f.setZero();
 
+  auto delta_f = Image<float>{};
   delta_f = laplacian(f);
+  EXPECT_MATRIX_NEAR(delta_f.matrix(), true_delta_f, 1e-5);
+
+  delta_f.clear();
+  delta_f = _src_image.compute<Laplacian>();
   EXPECT_MATRIX_NEAR(delta_f.matrix(), true_delta_f, 1e-5);
 }
 
@@ -98,14 +107,17 @@ TEST_F(TestDifferential, test_hessian)
   EXPECT_MATRIX_NEAR(true_H_x, H_x, 1e-5);
 
   auto hessian_f = hessian(f);
+  auto hessian_f_2 = f.compute<Hessian>();
+
   for (int y = 0; y < hessian_f.height(); ++y)
   {
     for (int x = 0; x < hessian_f.width(); ++x)
     {
-      Matrix2f true_hessian;
-      true_hessian.setZero();
-      Matrix2f hessian = hessian_f(x, y);
+      const auto true_hessian = Matrix2f::Zero();
+      const auto& hessian = hessian_f(x, y);
+      const auto& hessian_2 = hessian_f_2(x, y);
       EXPECT_MATRIX_NEAR(true_hessian, hessian, 1e-5);
+      EXPECT_MATRIX_NEAR(true_hessian, hessian_2, 1e-5);
     }
   }
 }
@@ -127,10 +139,14 @@ TEST_F(TestDifferential, test_laplacian_2)
     9, 10, 13, 18;
 
   auto laplacian_f = laplacian(f);
+  auto laplacian_f_2 = f.compute<Laplacian>();
 
   Matrix2f actual_central_block = laplacian_f.matrix().block<2, 2>(1, 1);
+  Matrix2f actual_central_block_2 = laplacian_f_2.matrix().block<2, 2>(1, 1);
   Matrix2f expected_central_block = 4 * Matrix2f::Ones();
   EXPECT_MATRIX_EQ(expected_central_block, actual_central_block);
+  EXPECT_MATRIX_EQ(expected_central_block, actual_central_block_2);
+
 }
 
 TEST_F(TestDifferential, test_hessian_2)
@@ -152,6 +168,7 @@ TEST_F(TestDifferential, test_hessian_2)
     0, 3, 6, 9;
 
   auto Hf = hessian(f);
+  auto Hf_2 = f.compute<Hessian>();
 
   Matrix2f expected_hessian;
   expected_hessian <<
@@ -159,7 +176,10 @@ TEST_F(TestDifferential, test_hessian_2)
     1, 0;
   for (int y = 1; y < 3; ++y)
     for (int x = 1; x < 3; ++x)
+    {
       ASSERT_MATRIX_EQ(expected_hessian, Hf(x, y));
+      ASSERT_MATRIX_EQ(expected_hessian, Hf_2(x, y));
+    }
 }
 
 

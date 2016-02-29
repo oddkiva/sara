@@ -1,8 +1,8 @@
 // ========================================================================== //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -53,9 +53,9 @@ namespace DO { namespace Sara {
 
     //! @brief Computes the SIFT descriptor for keypoint \$(x,y,\sigma,\theta)\f$.
     descriptor_type operator()(float x, float y, float sigma, float theta,
-                               const Image<Vector2f>& grad_polar_coords) const
+                               const ImageView<Vector2f>& grad_polar_coords) const
     {
-      const float pi = static_cast<float>(M_PI);
+      const auto pi = static_cast<float>(M_PI);
       /*
         The oriented keypoint is denoted by $k = (x,y,\sigma,\theta)$.
         SIFT describes keypoint $k$ in a similarity-invariant manner.
@@ -81,8 +81,8 @@ namespace DO { namespace Sara {
         proportional to the scale $\sigma$ of the keypoint, i.e.,
         $l = \lambda \sigma$.
        */
-      const float lambda = _bin_scale_unit_length;
-      const float l = lambda*sigma;
+      const auto lambda = _bin_scale_unit_length;
+      const auto l = lambda * sigma;
       /*
         It is important to note that $\lambda$ is some 'universal' constant
         used for all SIFT descriptors to ensure the scale-invariance of the
@@ -123,7 +123,7 @@ namespace DO { namespace Sara {
         Therefore, to compute the SIFT descriptor we need to scan all the pixels
         on a larger circular image patch with radius $r$:
        */
-      const float r = sqrt(2.f) * l * (N + 1) / 2.f;
+      const auto r = sqrt(2.f) * l * (N + 1) / 2.f;
       /*
         In the above formula, notice:
         - the factor $\sqrt{2}$ because diagonal corners of the furthest patches
@@ -140,7 +140,7 @@ namespace DO { namespace Sara {
       //   where $(u,v) \in [-r,r]^2$;
       // - we retrieve its coordinates in the oriented frame of the patch
       //   $P(x,y,\sigma,\theta)$ with inverse transform $T = 1/l R_\theta^T$
-      Matrix2f T;
+      auto T = Matrix2f{};
       T << cos(theta), sin(theta),
           -sin(theta), cos(theta);
       T /= l;
@@ -148,13 +148,13 @@ namespace DO { namespace Sara {
       const int rounded_r = int_round(r);
       const int rounded_x = int_round(x);
       const int rounded_y = int_round(y);
-      for (int v = -rounded_r; v <= rounded_r; ++v)
+      for (auto v = -rounded_r; v <= rounded_r; ++v)
       {
-        for (int u = -rounded_r; u <= rounded_r; ++u)
+        for (auto u = -rounded_r; u <= rounded_r; ++u)
         {
           // Compute the coordinates in the rescaled and oriented coordinate
           // frame bound to patch $P(k)$.
-          Vector2f pos{ T*Vector2f(u, v) };
+          auto pos = Vector2f{ T*Vector2f(u, v) };
           // subpixel correction?
           /*pos.x() -= (x - rounded_x);
           pos.y() -= (y - rounded_y);*/
@@ -165,19 +165,19 @@ namespace DO { namespace Sara {
 
           // Compute the Gaussian weight which gives more emphasis to gradient
           // closer to the center.
-          float weight = exp(-pos.squaredNorm()/(2.f*pow(N/2.f, 2)));
-          float mag = grad_polar_coords(rounded_x+u, rounded_y+v)(0);
-          float ori = grad_polar_coords(rounded_x+u, rounded_y+v)(1) - theta;
-          ori = ori < 0.f ? ori+2.f*pi : ori;
-          ori *= float(O)/(2.f*pi);
+          auto weight = exp(-pos.squaredNorm() / (2.f * pow(N / 2.f, 2)));
+          auto mag = grad_polar_coords(rounded_x + u, rounded_y + v)(0);
+          auto ori = grad_polar_coords(rounded_x + u, rounded_y + v)(1) - theta;
+          ori = ori < 0.f ? ori + 2.f * pi : ori;
+          ori *= float(O) / (2.f * pi);
 
           // The coordinate frame is centered in the patch center, thus:
           // $(x,y)$ is in $[-(N+1)/2, (N+1)/2]^2$.
           //
           // Change the coordinate frame so that $(x,y)$ is in $[-1, N]^2$. Thus,
           // translate by $[ (N-1)/2, (N-1)/2 ]$.
-          pos.array() += N/2.f - 0.5f;
-          if (pos.minCoeff() <= -1.f  || pos.maxCoeff() >= static_cast<float>(N))
+          pos.array() += N / 2.f - 0.5f;
+          if (pos.minCoeff() <= -1.f || pos.maxCoeff() >= static_cast<float>(N))
             continue;
           // In the translated coordinate frame, note that for $N=4$ the centers
           // are now located at:
@@ -200,14 +200,14 @@ namespace DO { namespace Sara {
 
     //! @brief Computes the **upright** SIFT descriptor for keypoint \$(x,y,\sigma)\f$.
     descriptor_type operator()(float x, float y, float sigma,
-                               const Image<Vector2f>& grad_polar_coords) const
+                               const ImageView<Vector2f>& grad_polar_coords) const
     {
       return this->operator()(x, y, sigma, 0.f, grad_polar_coords);
     }
 
     //! Helper member function.
     descriptor_type operator()(const OERegion& f,
-                               const Image<Vector2f>& grad_polar_coords) const
+                               const ImageView<Vector2f>& grad_polar_coords) const
     {
       return this->operator()(f.x(), f.y(), f.scale(), f.orientation(), grad_polar_coords);
     }
@@ -233,26 +233,28 @@ namespace DO { namespace Sara {
     void draw_grid(float x, float y, float sigma, float theta,
                    float octave_scale_factor, int pen_width = 1)
     {
-      const float lambda = 3.f;
-      const float l = lambda*sigma;
+      const auto lambda = 3.f;
+      const auto l = lambda * sigma;
       Vector2f grid[N+1][N+1];
-      Matrix2f T;
+
+      auto T = Matrix2f{};
       theta = 0;
       T << cos(theta),-sin(theta),
            sin(theta), cos(theta);
       T *= l;
-      for (int v = 0; v < N+1; ++v)
-        for (int u = 0; u < N+1; ++u)
+
+      for (auto v = 0; v < N+1; ++v)
+        for (auto u = 0; u < N+1; ++u)
           grid[u][v] = (Vector2f{ x, y } + T*Vector2f{ u - N / 2.f, v - N / 2.f })*octave_scale_factor;
-      for (int i = 0; i < N+1; ++i)
+      for (auto i = 0; i < N+1; ++i)
         draw_line(grid[0][i], grid[N][i], Green8, pen_width);
-      for (int i = 0; i < N+1; ++i)
+      for (auto i = 0; i < N+1; ++i)
         draw_line(grid[i][0], grid[i][N], Green8, pen_width);
 
-      Vector2f a(x,y);
+      auto a = Vector2f{ x, y };
       a *= octave_scale_factor;
-      Vector2f b;
-      b = a + octave_scale_factor*N / 2.f*T*Vector2f(1, 0);
+      auto b = Vector2f{};
+      b = a + octave_scale_factor * N / 2.f * T * Vector2f{ 1.f, 0.f };
       draw_line(a, b, Red8, pen_width+2);
     }
 
@@ -275,28 +277,30 @@ namespace DO { namespace Sara {
       //
       // Note that a gradient at the boundary like $(-1,-1)$ contributes only
       // to P_{0,0}.
-      float xfrac = pos.x() - floor(pos.x());
-      float yfrac = pos.y() - floor(pos.y());
-      float orifrac = ori - floor(ori);
-      int xi = int(pos.x());
-      int yi = int(pos.y());
-      int orii = int(ori);
-      for (int dy = 0; dy < 2; ++dy)
+      auto xfrac = pos.x() - floor(pos.x());
+      auto yfrac = pos.y() - floor(pos.y());
+      auto orifrac = ori - floor(ori);
+      auto xi = int(pos.x());
+      auto yi = int(pos.y());
+      auto orii = int(ori);
+
+      for (auto dy = 0; dy < 2; ++dy)
       {
-        int y = yi + dy;
+        auto y = yi + dy;
         if (y < 0 || y >= N)
           continue;
-        float wy = (dy == 0) ? 1.f - yfrac : yfrac;
-        for (int dx = 0; dx < 2; ++dx)
+
+        auto wy = (dy == 0) ? 1.f - yfrac : yfrac;
+        for (auto dx = 0; dx < 2; ++dx)
         {
-          int x = xi+dx;
+          auto x = xi+dx;
           if (x < 0 || x >= N)
             continue;
-          float wx = (dx == 0) ? 1.f - xfrac : xfrac;
-          for (int dori = 0; dori < 2; ++dori)
+          auto wx = (dx == 0) ? 1.f - xfrac : xfrac;
+          for (auto dori = 0; dori < 2; ++dori)
           {
-            int o = (orii + dori) % O;
-            float wo = (dori == 0) ? 1.f - orifrac : orifrac;
+            auto o = (orii + dori) % O;
+            auto wo = (dori == 0) ? 1.f - orifrac : orifrac;
             // Trilinear interpolation:
             // SIFT(y,x,o) += wy*wx*wo*weight*mag;
             h[at(y, x, o)] += wy*wx*wo*weight*mag;

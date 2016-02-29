@@ -1,8 +1,8 @@
 // ========================================================================== //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -43,9 +43,9 @@ namespace DO { namespace Sara {
     - \f$\theta = \mathrm{angle}( \nabla I(x,y) )\f$.
    */
   template <typename T>
-  Image<Matrix<T,2,1>> gradient_polar_coordinates(const Image<T>& f)
+  Image<Matrix<T,2,1>> gradient_polar_coordinates(const ImageView<T>& f)
   {
-    Image<Matrix<T, 2, 1>> nabla_f{ gradient(f) };
+    auto nabla_f = Image<Matrix<T, 2, 1>>{ gradient(f) };
     for (auto it = nabla_f.begin(); it != nabla_f.end(); ++it)
     {
       auto r = 2*it->norm();
@@ -62,12 +62,13 @@ namespace DO { namespace Sara {
   template <typename T>
   ImagePyramid<Matrix<T, 2, 1>> gradient_polar_coordinates(const ImagePyramid<T>& pyramid)
   {
-    ImagePyramid<Matrix<T, 2, 1> > gradient_pyramid;
+    auto gradient_pyramid = ImagePyramid<Matrix<T, 2, 1>>{};
     gradient_pyramid.reset(
       pyramid.num_octaves(),
       pyramid.num_scales_per_octave(),
       pyramid.scale_initial(),
       pyramid.scale_geometric_factor() );
+
     for (int o = 0; o < pyramid.num_octaves(); ++o)
     {
       gradient_pyramid.octave_scaling_factor(o) = pyramid.octave_scaling_factor(o);
@@ -83,7 +84,7 @@ namespace DO { namespace Sara {
    */
   template <typename T, int N>
   void compute_orientation_histogram(Array<T, N, 1>& orientation_histogram,
-                                     const Image<Matrix<T,2,1>>& grad_polar_coords,
+                                     const ImageView<Matrix<T,2,1>>& grad_polar_coords,
                                      T x, T y, T s,
                                      T patch_truncation_factor = T(3),
                                      T blur_factor = T(1.5))
@@ -219,7 +220,7 @@ namespace DO { namespace Sara {
                                 float patch_truncation_factor = 3.f,
                                 float blur_factor = 1.5f);
 
-    std::vector<float> operator()(const Image<Vector2f>& gradients,
+    std::vector<float> operator()(const ImageView<Vector2f>& gradients,
                                   float x, float y, float sigma) const;
 
     std::vector<float> operator()(const ImagePyramid<Vector2f>& pyramid,

@@ -1,8 +1,8 @@
 // ========================================================================== //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -40,27 +40,18 @@ namespace DO { namespace Sara {
     using Scalar = typename GradientField::pixel_type::Scalar;
 
     template <typename GradientField>
-    using Matrix = Eigen::Matrix<
-      Scalar<GradientField>,
-      Dimension<GradientField>::value,
-      Dimension<GradientField>::value>;
+    using OutPixel =
+        Eigen::Matrix<Scalar<GradientField>, Dimension<GradientField>::value,
+                      Dimension<GradientField>::value>;
 
-    template <typename GradientField>
-    using ReturnType =
-      Image<Matrix<GradientField>, Dimension<GradientField>::value>;
-
-    template <typename GradientField>
-    ReturnType<GradientField>
-    operator()(const GradientField& gradient_field) const
+    template <typename GradientField, typename MatrixField>
+    void operator()(const GradientField& gradient_field,
+                    MatrixField& moment_field) const
     {
-      auto moment_field = ReturnType<GradientField>{ gradient_field.sizes() };
-
       auto dst = moment_field.begin();
       auto src = gradient_field.begin();
       for ( ; src != gradient_field.end(); ++src, ++dst)
         *dst = *src * src->transpose();
-
-      return moment_field;
     }
   };
 

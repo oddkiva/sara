@@ -1,8 +1,8 @@
 // ========================================================================== //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -64,7 +64,7 @@ namespace DO { namespace Sara {
     draw_rect(int_round(x)-r, int_round(y)-r, 2*r+1, 2*r+1, Green8, 3);
   }
 
-  void check_patch(const Image<float>& I, int x, int y, int w, int h,
+  void check_patch(const ImageView<float>& I, int x, int y, int w, int h,
                    double fact)
   {
     auto patch = get_subimage(I,x,y,w,h);
@@ -75,7 +75,7 @@ namespace DO { namespace Sara {
     close_window();
   }
 
-  void check_patch(const Image<float>& I, float x, float y, float s,
+  void check_patch(const ImageView<float>& I, float x, float y, float s,
                    double fact)
   {
     const auto scaling_factor = 3.f;

@@ -1,8 +1,8 @@
 // ========================================================================== //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -17,7 +17,7 @@ using namespace std;
 
 namespace DO { namespace Sara {
 
-  bool on_edge(const Image<float>& I, int x, int y, float edge_ratio)
+  bool on_edge(const ImageView<float>& I, int x, int y, float edge_ratio)
   {
     auto H = hessian(I, Point2i{x, y});
     return pow(H.trace(), 2)*edge_ratio >=
@@ -121,12 +121,12 @@ namespace DO { namespace Sara {
     return true;
   }
 
-  bool refine_extremum(const Image<float>& I, int x, int y, int type,
+  bool refine_extremum(const ImageView<float>& I, int x, int y, int type,
                        Point2f& pos, float& val, int border_sz, int num_iter)
   {
-    Vector2f D_prime; // gradient
-    Matrix2f D_second; // hessian
-    Vector2f h; // offset to estimate
+    auto D_prime = Vector2f{}; // gradient
+    auto D_second = Matrix2f{}; // hessian
+    auto h = Vector2f{}; // offset to estimate
 
     pos << float(x), float(y);
 
@@ -140,8 +140,8 @@ namespace DO { namespace Sara {
 
       // Estimate the gradient and the hessian matrix by central finite
       // differentiation.
-      D_prime = gradient(I, Point2i(x,y));
-      D_second = hessian(I, Point2i(x,y));
+      D_prime = gradient(I, Point2i{ x, y });
+      D_second = hessian(I, Point2i{ x, y });
 
       // The interpolation or refinement is done conservatively depending on the
       // quality of the Hessian matrix estimate.
@@ -168,7 +168,7 @@ namespace DO { namespace Sara {
 
       // $D''(\mathbf{x})$ is just a 3x3 matrix and computing its inverse is
       // thus cheap (cf. Eigen library.).
-      h = -D_second.inverse()*D_prime;
+      h = -D_second.inverse() * D_prime;
 
       // The interpolated extremum should be normally close to the initial
       // position which has integral coordinates. Otherwise, the estimates of
@@ -198,8 +198,8 @@ namespace DO { namespace Sara {
     }
 
     pos << float(x), float(y);
-    float oldval = I(x,y);
-    float newval = oldval + 0.5f*D_prime.dot(h);
+    float oldval = I(x, y);
+    float newval = oldval + 0.5f * D_prime.dot(h);
 
     if ( (type==1 && oldval <= newval) || (type==-1 && oldval >= newval) )
     {
@@ -219,10 +219,10 @@ namespace DO { namespace Sara {
                                              int img_padding_sz,
                                              int refine_iterations)
   {
-    std::vector<OERegion> extrema;
+    auto extrema = std::vector<OERegion>{};
     extrema.reserve(10000);
 
-    Image<int> map(I(s,o).sizes());
+    auto map = Image<int>{ I(s,o).sizes() };
     map.array().setZero();
 
 //#define STRICT_LOCAL_EXTREMA
@@ -255,8 +255,8 @@ namespace DO { namespace Sara {
         if (on_edge(I(s,o), x, y, edge_ratio_thres))
           continue;
         // Try to refine extremum.
-        Point3f pos;
-        float val;
+        auto pos = Point3f{};
+        auto val = float{};
         /*if (!refineExtremum(I,x,y,s,o,type,pos,val,img_padding_sz,refine_iterations))
           continue;*/
         refine_extremum(I,x,y,s,o,type,pos,val,img_padding_sz,refine_iterations);
@@ -270,7 +270,7 @@ namespace DO { namespace Sara {
           continue;
 #endif
         // Store the DoG extremum.
-        OERegion dog(pos.head<2>(), pos.z());
+        auto dog = OERegion(pos.head<2>(), pos.z());
 
         dog.extremum_value() = val;
         dog.extremum_type() = type == 1 ?
@@ -289,13 +289,14 @@ namespace DO { namespace Sara {
                             const ImagePyramid<float>& gaussian_pyramid,
                             int num_scales)
   {
-    const ImagePyramid<float>& G = gaussian_pyramid;
+    const auto& G = gaussian_pyramid;
 
     // Fetch the following data.
-    const Image<float>& nearest_gaussian = G(s - 1, o);
-    float gauss_truncate_factor = 4.f;
-    float increase_sigma_max = sqrt(2.f);
-    int patch_radius = int(ceil(increase_sigma_max*gauss_truncate_factor)); // patch radius
+    const auto& nearest_gaussian = G(s - 1, o);
+    const auto gauss_truncate_factor = 4.f;
+    const auto increase_sigma_max = sqrt(2.f);
+    const auto patch_radius =
+        int(ceil(increase_sigma_max * gauss_truncate_factor));
 
     // Ensure the patch is inside the image.
     if (x - patch_radius < 0 || x + patch_radius >= nearest_gaussian.width() ||
@@ -303,7 +304,8 @@ namespace DO { namespace Sara {
       return false;
 
     // First patch at the closest scale.
-    Image<float> nearest_patch(get_subimage(nearest_gaussian, x, y, patch_radius));
+    auto nearest_patch = get_subimage(nearest_gaussian, x, y, patch_radius);
+
     //#define DEBUG_SELECT_SCALE
 #ifdef DEBUG_SELECT_SCALE
     // verbose.
@@ -315,8 +317,9 @@ namespace DO { namespace Sara {
     print(increase_sigma_max);
     print(patch_radius);
     print(nearest_patch.sizes().transpose());
+
     // Debug
-    double zoom_factor = 10.;
+    auto zoom_factor = 10.;
     Window win = active_window() ? active_window() : 0;
     if (win)
       set_active_window(create_window(zoom_factor*nearest_patch.width(),
@@ -324,27 +327,31 @@ namespace DO { namespace Sara {
     display(nearest_patch, 0, 0, zoom_factor);
     get_key();
 #endif
+
     // Store the blurred patches, their associated scales and LoG values at the
     // patch centers.
-    vector<Image<float>> patches(num_scales + 1);
-    vector<float> scales(num_scales + 1);
-    vector<float> LoGs(num_scales + 1);
+    auto patches = vector<Image<float>>(num_scales + 1);
+    auto scales = vector<float>(num_scales + 1);
+    auto LoGs = vector<float>(num_scales + 1);
 
-    float scale_common_ratio = pow(2.f, 1.f / num_scales);
-    float nearest_sigma = G.scale_relative_to_octave(s - 1);
+    auto scale_common_ratio = pow(2.f, 1.f / num_scales);
+    auto nearest_sigma = G.scale_relative_to_octave(s - 1);
+
 #ifdef DEBUG_SELECT_SCALE
     print_stage("Print blur-related variables");
     print(scale_common_ratio);
     print(nearest_sigma);
 #endif
+
     // Compute the blurred patches and their associated scales.
     //
     // Start with the initial patch.
     scales[0] = G.scale_relative_to_octave(s) / sqrt(2.f);
-    float inc_sigma = sqrt(pow(scales[0], 2) - pow(nearest_sigma, 2));
+    auto inc_sigma = sqrt(pow(scales[0], 2) - pow(nearest_sigma, 2));
     patches[0] = inc_sigma > 1e-3f ?
       gaussian(nearest_patch, inc_sigma) :
       nearest_patch;
+
 #ifdef DEBUG_SELECT_SCALE
     print_stage("Print sigma of each patch");
     print(scales[0]);
@@ -352,6 +359,7 @@ namespace DO { namespace Sara {
     display(patches[0], 0, 0, zoom_factor);
     get_key();
 #endif
+
     // Loop for the rest of the patches.
     for (size_t i = 1; i < patches.size(); ++i)
     {
@@ -365,14 +373,15 @@ namespace DO { namespace Sara {
       get_key();
 #endif
     }
+
     // Compute the scale normalized LoG values in each patch centers
     for (size_t i = 0; i != patches.size(); ++i)
       LoGs[i] = laplacian(patches[i], Point2i(patch_radius,patch_radius))
               * pow(scales[i], 2);
 
     // Search local extremum.
-    bool is_extremum = false;
-    int i = 1;
+    auto is_extremum = false;
+    auto i = 1;
     for ( ; i < num_scales; ++i)
     {
       // Is LoG(\mathbf{x},\sigma) an extremum
@@ -390,19 +399,22 @@ namespace DO { namespace Sara {
       // Use a 2nd-order Taylor approximation:
       // $f(x+h) = f(x) + f'(x)h + f''(x) h^2/2$
       // We approximate $f'$ and $f''$ by finite difference.
-      float fprime = (LoGs[i + 1] - LoGs[i - 1]) / 2.f;
-      float fsecond = LoGs[i - 1] - 2.f*LoGs[i] + LoGs[i + 1];
+      auto fprime = (LoGs[i + 1] - LoGs[i - 1]) / 2.f;
+      auto fsecond = LoGs[i - 1] - 2.f*LoGs[i] + LoGs[i + 1];
       // Maximize w.r.t. to $h$, derive the expression.
       // Thus $h = -f'(x)/f''(x)$.
-      float h = -fprime / fsecond;
+      auto h = -fprime / fsecond;
+
       // OK, now the scale is:
       scale = scales[i] * pow(scale_common_ratio, h);
     }
+
 #ifdef DEBUG_SELECT_SCALE
     closeWindow();
     if (win)
       set_active_window(win);
 #endif
+
     return is_extremum;
   }
 
@@ -416,9 +428,10 @@ namespace DO { namespace Sara {
   {
     LocalMax<float> local_max;
 
-    vector<OERegion> corners;
+    auto corners = vector<OERegion>{};
     corners.reserve(int(1e4));
-    for (int y = img_padding_sz; y < function(s,o).height()-img_padding_sz; ++y)
+
+    for (auto y = img_padding_sz; y < function(s,o).height()-img_padding_sz; ++y)
     {
       for (int x = img_padding_sz; x < function(s,o).width()-img_padding_sz; ++x)
       {
@@ -426,20 +439,25 @@ namespace DO { namespace Sara {
           continue;
         if ( function(x,y,s,o) < extremum_thres )
           continue;
+
         // Select the optimal scale using the normalized LoG.
-        float scale = function.scale_relative_to_octave(s);
+        auto scale = function.scale_relative_to_octave(s);
+
         if (!select_laplace_scale(scale, x, y, s, o, gauss_pyramid, num_scales))
           continue;
+
         // Refine the spatial coordinates.
-        float val = function(x,y,s,o);
-        Point2f p(x,y);
+        auto val = function(x, y, s, o);
+        auto p = Point2f(x, y);
+
         /*if (!refineExtremum(function(s,o),x,y,1,p,val,img_padding_sz,refine_iterations))
           continue;*/
-        refine_extremum(
-          function(s, o), x, y, 1,
-          p, val, img_padding_sz, refine_iterations);
+
+        refine_extremum(function(s, o), x, y, 1, p, val, img_padding_sz,
+                        refine_iterations);
+
         // Store the extremum.
-        OERegion c;
+        auto c = OERegion{};
         c.center() = p;
         c.shape_matrix() = Matrix2f::Identity()*pow(scale,-2);
         c.orientation() = 0.f;
@@ -448,6 +466,7 @@ namespace DO { namespace Sara {
         corners.push_back(c);
       }
     }
+
     return corners;
   }
 

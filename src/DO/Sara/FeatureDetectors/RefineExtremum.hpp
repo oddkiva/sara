@@ -1,8 +1,8 @@
 // ========================================================================== //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -38,7 +38,7 @@ namespace DO { namespace Sara {
     and corresponds to the variable **edgeRatio**.
    */
   DO_SARA_EXPORT
-  bool on_edge(const Image<float>& I, int x, int y, float edge_ratio = 10.f);
+  bool on_edge(const ImageView<float>& I, int x, int y, float edge_ratio = 10.f);
 
   /*!
     @brief Extremum position refinement in scale-space based on Newton's method.
@@ -93,7 +93,7 @@ namespace DO { namespace Sara {
     refinement here.
    */
   DO_SARA_EXPORT
-  bool refine_extremum(const Image<float>& I, int x, int y, int type,
+  bool refine_extremum(const ImageView<float>& I, int x, int y, int type,
                        Point2f& pos, float& val,
                        int border_size = 1, int num_iter = 5);
   /*!

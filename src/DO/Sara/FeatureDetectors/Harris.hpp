@@ -1,8 +1,8 @@
 // ========================================================================== //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -48,14 +48,14 @@ namespace DO { namespace Sara {
     \f].
    */
   DO_SARA_EXPORT
-  Image<float> scale_adapted_harris_cornerness(const Image<float>& I,
+  Image<float> scale_adapted_harris_cornerness(const ImageView<float>& I,
                                                float sigma_I, float sigma_D,
                                                float kappa);
 
   //! Pyramid of Harris cornerness functions.
   DO_SARA_EXPORT
   ImagePyramid<float> harris_cornerness_pyramid(
-    const Image<float>& image,
+    const ImageView<float>& image,
     float kappa = 0.04f,
     const ImagePyramidParams& params = ImagePyramidParams(-1, 2+1, sqrt(2.f), 1));
 
@@ -65,7 +65,7 @@ namespace DO { namespace Sara {
     threshold.
    */
   DO_SARA_EXPORT
-  std::vector<OERegion> local_maxima(const Image<float>& I, float thres);
+  std::vector<OERegion> local_maxima(const ImageView<float>& I, float thres);
 
   /*!
     @brief Utility functions to locate edgels from the Harris-Stephens corner
@@ -76,7 +76,7 @@ namespace DO { namespace Sara {
     y-direction.
    */
   DO_SARA_EXPORT
-  bool local_min_x(int x, int y, Image<float>& I);
+  bool local_min_x(int x, int y, ImageView<float>& I);
 
   /*!
     @brief Utility functions to locate edgels from the Harris-Stephens corner
@@ -87,7 +87,7 @@ namespace DO { namespace Sara {
     y-direction.
    */
   DO_SARA_EXPORT
-  bool local_min_y(int x, int y, Image<float>& I);
+  bool local_min_y(int x, int y, ImageView<float>& I);
 
   //! Functor class to compute Harris-Laplace corners.
   class DO_SARA_EXPORT ComputeHarrisLaplaceCorners
@@ -119,11 +119,10 @@ namespace DO { namespace Sara {
         based on the function **DO::refineExtremum()**.
      */
     ComputeHarrisLaplaceCorners(const ImagePyramidParams& pyrParams =
-                                  ImagePyramidParams(-1, 2+1, sqrt(2.f), 1),
+                                    ImagePyramidParams(-1, 2 + 1, sqrt(2.f), 1),
                                 float kappa = 0.04f,
                                 float extremum_thres = 1e-6f,
-                                int img_padding_sz = 1,
-                                int numScales = 10,
+                                int img_padding_sz = 1, int numScales = 10,
                                 int extremumRefinementIter = 5)
       : _pyr_params(pyrParams)
       , _kappa(kappa)
@@ -156,7 +155,7 @@ namespace DO { namespace Sara {
       difference of Gaussians
       \f$\left( g_{\sigma(s+1,o)} - g_{\sigma(s,o)} \right) * I \f$.
      */
-    std::vector<OERegion> operator()(const Image<float>& I,
+    std::vector<OERegion> operator()(const ImageView<float>& I,
                                      std::vector<Point2i> *scale_octave_pairs = 0);
     /*!
       @brief Returns the Gaussian pyramid used to select characteristic scales

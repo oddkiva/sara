@@ -1,8 +1,8 @@
 // ========================================================================== //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -19,10 +19,10 @@ namespace DO { namespace Sara {
 
   template <typename Enumeration>
   auto as_integer(Enumeration const value) ->
-    typename std::underlying_type<Enumeration>::type
+      typename std::underlying_type<Enumeration>::type
   {
     return static_cast<typename std::underlying_type<Enumeration>::type>(value);
-  } 
+  }
 
   std::ostream& InterestPoint::print(std::ostream& os) const
   {
@@ -98,7 +98,7 @@ namespace DO { namespace Sara {
 
   istream& OERegion::read(istream& in)
   {
-    int feature_type;
+    auto feature_type = int{};
     InterestPoint::read(in)
       >> _shape_matrix
       >> _orientation

@@ -1,8 +1,8 @@
 // ========================================================================== //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -30,17 +30,18 @@ namespace DO { namespace Sara {
    */
 
   //! @brief Triangle face consisting of 3 vertex indices
-  typedef Array<size_t, 3, 1> Face3;
+  using Face3 = Array<size_t, 3, 1>;
   //! @brief Quad face consisting of 4 vertex indices
-  typedef Array<size_t, 4, 1> Face4;
+  using Face4 = Array<size_t, 4, 1>;
 
   //! @brief Simple mesh data structure.
   template <typename Vector_, typename Face_>
   class SimpleMesh
   {
   public:
-    typedef Vector_ Vector, Point;
-    typedef Face_ Face;
+    using Vector = Vector_;
+    using Point = Vector_;
+    using Face = Face_;
 
     std::vector<Point>& vertices() { return v_; }
     std::vector<Vector>& normals() { return n_; }
@@ -89,7 +90,7 @@ namespace DO { namespace Sara {
 
   //! @brief Simple mesh data structure that should be used preferably for
   //! OpenGL.
-  typedef SimpleMesh<Point3f, Face3> SimpleTriangleMesh3f;
+  using SimpleTriangleMesh3f = SimpleMesh<Point3f, Face3>;
 
   //! @brief Mesh reader (WARNING: still experimental!).
   class MeshReader

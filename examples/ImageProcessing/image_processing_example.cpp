@@ -19,15 +19,14 @@ GRAPHICS_MAIN()
   get_key();
 
   // Pixelwise operations.
-  auto res = Image<Rgb64f>{
-    image.pixelwise_transform([](const Rgb8& color)
-    {
-      Rgb64f color_64f;
-      smart_convert_color(color, color_64f);
-      color_64f = color_64f.cwiseProduct(color_64f);
-      return color_64f;
-    })
-  };
+  auto res = image.cwise_transform([](const Rgb8& color) {
+    Rgb64f color_64f;
+    smart_convert_color(color, color_64f);
+    color_64f =
+    color_64f.cwiseProduct(color_64f);
+    return color_64f;
+  });
+
   display(res);
   get_key();
 

@@ -1,8 +1,8 @@
 // ========================================================================== //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -23,6 +23,7 @@ using namespace DO::Sara;
 TEST(TestInterestPoint, test_methods)
 {
   InterestPoint f(Point2f::Ones());
+
   f.type() = InterestPoint::Type::Harris;
   f.extremum_type() = InterestPoint::ExtremumType::Saddle;
   f.extremum_value() = 0.f;
@@ -109,7 +110,7 @@ TEST(TestIO, test_read_write)
 TEST(TestSet, test_methods)
 {
   // Test constructor.
-  auto set = Set<OERegion, RealDescriptor>{};
+  Set<OERegion, RealDescriptor> set;
   EXPECT_EQ(set.size(), 0);
 
   // Test resize function.
@@ -120,7 +121,8 @@ TEST(TestSet, test_methods)
   EXPECT_EQ(set.size(), 10);
   EXPECT_EQ(set.features.size(), 10);
   EXPECT_EQ(set.descriptors.size(), 10); // Test swap.
-  auto set2 = Set<OERegion, RealDescriptor>{};
+
+  Set<OERegion, RealDescriptor> set2;
   set2.resize(20, 2);
 
   set.swap(set2);
@@ -145,7 +147,7 @@ TEST(TestSet, test_methods)
 
 TEST(TestSet, test_remove_redundant_features)
 {
-  auto set = Set<OERegion, RealDescriptor>{};
+  Set<OERegion, RealDescriptor> set;
 
   // Check corner case.
   set.features.resize(10);

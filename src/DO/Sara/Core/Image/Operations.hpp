@@ -1,8 +1,8 @@
 // ========================================================================== //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -26,35 +26,36 @@ namespace DO { namespace Sara {
   //! @{
   //! @brief Find min and max values of the image.
   template <typename T, int N>
-  inline void find_min_max(T& min, T& max, const Image<T, N>& src)
+  inline std::pair<T, T> find_min_max(const ImageView<T, N>& src)
   {
     const auto *src_first = src.begin();
     const auto *src_last = src.end();
-    min = *std::min_element(src_first, src_last);
-    max = *std::max_element(src_first, src_last);
+    return { *std::min_element(src_first, src_last),
+             *std::max_element(src_first, src_last) };
   }
 
   template <typename T, int N, typename ColorSpace>
-  void find_min_max(Pixel<T, ColorSpace>& min,
-                    Pixel<T, ColorSpace>& max,
-                    const Image<Pixel<T, ColorSpace>, N>& src)
+  std::pair<Pixel<T, ColorSpace>, Pixel<T, ColorSpace>>
+  find_min_max(const ImageView<Pixel<T, ColorSpace>, N> &src)
   {
     const auto *src_first = src.begin();
     const auto *src_last = src.end();
 
-    min = *src_first;
-    max = *src_first;
+    auto min = *src_first;
+    auto max = *src_first;
 
     for ( ; src_first != src_last; ++src_first)
     {
       min = min.cwiseMin(*src_first);
       max = max.cwiseMax(*src_first);
     }
+
+    return { min, max };
   }
   //! @}
 
   //! @}
- 
+
 } /* namespace Sara */
 } /* namespace DO */
 
@@ -66,22 +67,24 @@ namespace DO { namespace Sara {
   //! @{
 
   //! @brief Convert color of image.
-  template <typename T, typename U, int N>
-  void convert(const Image<T, N>& src, Image<U, N>& dst)
+  template <typename SrcImageBase, typename DstImageBase>
+  void convert(const SrcImageBase& src, DstImageBase& dst)
   {
-    dst.resize(src.sizes());
+    if (src.sizes() != dst.sizes())
+      throw std::domain_error{
+        "Color conversion error: image sizes are not equal!"
+      };
 
-    const auto *src_first = src.data();
+    const auto *src_first = src.begin();
     const auto *src_last = src.end();
-
-    U *dst_first = dst.data();
+    auto dst_first = dst.begin();
 
     for ( ; src_first != src_last; ++src_first, ++dst_first)
       smart_convert_color(*src_first, *dst_first);
   }
 
   //! @}
- 
+
 } /* namespace Sara */
 } /* namespace DO */
 
@@ -95,85 +98,92 @@ namespace DO { namespace Sara {
   //! @{
   //! @brief Rescale color values.
   template <typename T, int N>
-  inline Image<T, N> color_rescale(const Image<T, N>& src,
-                                   const T& a = PixelTraits<T>::min(),
-                                   const T& b = PixelTraits<T>::max())
+  inline void color_rescale(const ImageView<T, N>& src, ImageView<T, N>& dst,
+                            const T& a = PixelTraits<T>::min(),
+                            const T& b = PixelTraits<T>::max())
   {
     static_assert(
-      !std::numeric_limits<T>::is_integer,
-      "Color rescaling is not directly applicable on integer types");
+        !std::numeric_limits<T>::is_integer,
+        "Color rescaling is not directly applicable on integer types");
 
-    const auto *src_first = src.begin();
-    const auto *src_last = src.end();
+    if (src.sizes() != dst.sizes())
+      throw std::domain_error{
+        "Source and destination image sizes are not equal!"
+      };
 
-    auto min = *std::min_element(src_first, src_last);
-    auto max = *std::max_element(src_first, src_last);
+    auto min = T{};
+    auto max = T{};
+    std::tie(min, max) = find_min_max(src);
 
     if (min == max)
     {
       std::cout << "Warning: cannot rescale image! min == max" << std::endl;
       std::cout << "No rescaling will be performed" << std::endl;
-      return src;
+      return;
     }
 
-    Image<T, N> dst{ src.sizes() };
-    T *dst_first = dst.begin();
-    for ( ; src_first != src_last; ++src_first, ++dst_first)
-      *dst_first = a + (b-a)*(*src_first-min)/(max-min);
-
-    return dst;
+    dst.copy(src);
+    dst.cwise_transform_inplace([&a, &b, &min, &max](T& pixel) {
+      pixel = a + (b - a) * (pixel - min) / (max - min);
+    });
   }
 
   template <typename T, typename ColorSpace, int N>
-  inline Image<Pixel<T, ColorSpace>, N> color_rescale(
-    const Image<Pixel<T, ColorSpace>, N>& src,
-    const Pixel<T, ColorSpace>& a = PixelTraits<Pixel<T, ColorSpace> >::min(),
-    const Pixel<T, ColorSpace>& b = PixelTraits<Pixel<T, ColorSpace> >::max())
+  inline void color_rescale(
+      const ImageView<Pixel<T, ColorSpace>, N>& src,
+      ImageView<Pixel<T, ColorSpace>, N>& dst,
+      const Pixel<T, ColorSpace>& a = PixelTraits<Pixel<T, ColorSpace>>::min(),
+      const Pixel<T, ColorSpace>& b = PixelTraits<Pixel<T, ColorSpace>>::max())
   {
-    static_assert(
-      !std::numeric_limits<T>::is_integer,
-      "Color rescale is not directly applicable on integral types");
+    static_assert(!std::numeric_limits<T>::is_integer,
+                  "Color rescale is not directly applicable on integral types");
 
-    Image<Pixel<T, ColorSpace>, N> dst{ src.sizes() };
+    if (src.sizes() != dst.sizes())
+      throw std::domain_error{
+        "Source and destination image sizes are not equal!"
+      };
 
-    const auto *src_first = src.data();
-    const auto *src_last = src_first + src.size();
-    auto *dst_first  = dst.data();
-
-    auto min = *src_first;
-    auto max = *src_first;
-    for ( ; src_first != src_last; ++src_first)
-    {
-      min = min.cwiseMin(*src_first);
-      max = max.cwiseMax(*src_first);
-    }
+    using PixelType = Pixel<T, ColorSpace>;
+    auto min = PixelType{};
+    auto max = PixelType{};
+    std::tie(min, max) = find_min_max(src);
 
     if (min == max)
     {
       std::cout << "Warning: cannot rescale image! min == max" << std::endl;
       std::cout << "No rescaling will be performed" << std::endl;
-      return src;
+      return;
     }
 
-    for (src_first = src.data(); src_first != src_last;
-      ++src_first, ++dst_first)
-      *dst_first = a + (*src_first-min).cwiseProduct(b-a).
-      cwiseQuotient(max-min);
+    dst.copy(src);
+    dst.cwise_transform_inplace([&a, &b, &min, &max](PixelType& pixel) {
+      pixel = a + (pixel - min).cwiseProduct(b - a).cwiseQuotient(max - min);
+    });
+  }
 
-    return dst;
+  template <typename T, int N>
+  inline Image<T, N> color_rescale(const ImageView<T, N>& in,
+                                   const T& a = PixelTraits<T>::min(),
+                                   const T& b = PixelTraits<T>::max())
+  {
+    auto out = Image<T, N>{ in.sizes() };
+    color_rescale(in, out, a, b);
+    return out;
   }
 
   struct ColorRescale
   {
-    template <typename Image>
-    using ReturnType = Image;
+    template <typename SrcImageView>
+    using OutPixel = typename SrcImageView::pixel_type;
 
-    template <typename Image>
-    ReturnType<Image> operator()(const Image& src) const
+    template <typename Pixel, int N>
+    void operator()(const ImageView<Pixel, N>& src, ImageView<Pixel, N>& dst,
+                    const Pixel& a = PixelTraits<Pixel>::min(),
+                    const Pixel& b = PixelTraits<Pixel>::max()) const
     {
-      return color_rescale(src);
+      color_rescale(src, dst, a, b);
     }
- };
+  };
   //! @}
 
   //! @}

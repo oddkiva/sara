@@ -1,8 +1,8 @@
 // ========================================================================== //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -78,12 +78,10 @@ namespace DO { namespace Sara {
         localization of DoG extrema in scale-space. The refinement process is
         based on the function **DO::refineExtremum()**.
      */
-    ComputeHessianLaplaceMaxima(const ImagePyramidParams& pyrParams =
-                                  ImagePyramidParams(-1, 3+1),
-                                float extremum_thres = 1e-5f,
-                                int img_padding_sz = 1,
-                                int numScales = 10,
-                                int extremumRefinementIter = 5)
+    ComputeHessianLaplaceMaxima(
+        const ImagePyramidParams& pyrParams = ImagePyramidParams(-1, 3 + 1),
+        float extremum_thres = 1e-5f, int img_padding_sz = 1,
+        int numScales = 10, int extremumRefinementIter = 5)
       : _pyr_params(pyrParams)
       , _extremum_thres(extremum_thres)
       , _img_padding_sz(img_padding_sz)
@@ -111,7 +109,7 @@ namespace DO { namespace Sara {
       \return set of Hessian-Laplace maxima in **std::vector<OERegion>** in each
       scale-normalized determinant of Hessians.
      */
-    std::vector<OERegion> operator()(const Image<float>& I,
+    std::vector<OERegion> operator()(const ImageView<float>& I,
                                      std::vector<Point2i> *scale_octave_pairs = 0);
 
     /*!
@@ -190,7 +188,7 @@ namespace DO { namespace Sara {
         based on the function **DO::refineExtremum()**.
      */
     ComputeDoHExtrema(const ImagePyramidParams& pyrParams =
-                        ImagePyramidParams(-1, 3+2, pow(2.f, 1.f/3.f), 2),
+                          ImagePyramidParams(-1, 3 + 2, pow(2.f, 1.f / 3.f), 2),
                       float extremum_thres = 1e-6f,
                       float edgeRatioThres = 10.f,
                       int img_padding_sz = 1,
@@ -223,7 +221,7 @@ namespace DO { namespace Sara {
       \return set of DoHs extrema in **std::vector<OERegion>** in each
       scale-normalized determinant of Hessians.
      */
-    std::vector<OERegion> operator()(const Image<float>& I,
+    std::vector<OERegion> operator()(const ImageView<float>& I,
                                      std::vector<Point2i> *scale_octave_pairs = 0);
 
     /*!

@@ -1,8 +1,8 @@
 // ========================================================================== //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2014 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2014-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -23,14 +23,14 @@ using namespace DO::Sara;
 
 // ========================================================================== //
 // Define the set of integral channel types, which we will test.
-typedef testing::Types<
+using IntegralChannelTypes = testing::Types<
   int8_t, int16_t, int32_t, int64_t,
   uint8_t, uint16_t, uint32_t, uint64_t
-> IntegralChannelTypes;
+>;
 
-typedef testing::Types<
+using IntegralChannelTypesRestricted = testing::Types<
   int8_t, int16_t, uint8_t, uint16_t
-> IntegralChannelTypesRestricted;
+>;
 
 
 // ========================================================================== //
@@ -41,29 +41,29 @@ TYPED_TEST_CASE_P(TestConvertChannelIntToFloat);
 TYPED_TEST_P(TestConvertChannelIntToFloat,
              test_convert_channel_from_integer_type_to_floating_point_type)
 {
-  typedef TypeParam Int;
+  using Int = TypeParam;
 
   const Int channel_values[] = {
     numeric_limits<Int>::min(),
     numeric_limits<Int>::max()
   };
-  const float expected_float_values[] = {0, 1};
-  const double expected_double_values[] = {0, 1};
+  const float expected_float_values[] = { 0, 1 };
+  const double expected_double_values[] = { 0, 1 };
 
-  for (int i = 0; i < 2; ++i)
+  for (auto i = 0; i < 2; ++i)
   {
     // Using the explicit named function.
     {
-      float flt_val = to_normalized_float_channel<Int, float>(channel_values[i]);
-      double dbl_val = to_normalized_float_channel<Int, double>(channel_values[i]);
+      auto flt_val = to_normalized_float_channel<Int, float>(channel_values[i]);
+      auto dbl_val = to_normalized_float_channel<Int, double>(channel_values[i]);
       EXPECT_EQ(flt_val, expected_float_values[i]);
       EXPECT_EQ(dbl_val, expected_double_values[i]);
     }
 
     // Using the unified API.
     {
-      float flt_val;
-      double dbl_val;
+      auto flt_val = float{};
+      auto dbl_val = double{};
       convert_channel(channel_values[i], flt_val);
       convert_channel(channel_values[i], dbl_val);
       EXPECT_EQ(expected_float_values[i], flt_val);
@@ -87,10 +87,10 @@ TYPED_TEST_CASE_P(TestConvertChannelFloatToInt);
 TYPED_TEST_P(TestConvertChannelFloatToInt,
              test_convert_channel_from_floating_point_type_to_integer_type)
 {
-  typedef TypeParam Int;
+  using Int = TypeParam;
 
-  const float eps = 1e-6f;
-  const float channel_values[] = {eps, 1-eps};
+  const auto eps = 1e-6f;
+  const float channel_values[] = { eps, 1 - eps };
 
   const Int expected_int_values[] = {
     numeric_limits<Int>::min(),
@@ -100,23 +100,23 @@ TYPED_TEST_P(TestConvertChannelFloatToInt,
   for (int i = 0; i < 2; ++i)
   {
     {
-      Int val = to_rescaled_integral_channel<Int, float>(channel_values[i]);
+      auto val = to_rescaled_integral_channel<Int, float>(channel_values[i]);
       EXPECT_EQ(expected_int_values[i], val);
     }
 
     {
-      Int val = to_rescaled_integral_channel<Int, double>(channel_values[i]);
+      auto val = to_rescaled_integral_channel<Int, double>(channel_values[i]);
       EXPECT_EQ(expected_int_values[i], val);
     }
 
     {
-      Int val;
+      auto val = Int{};
       convert_channel(channel_values[i], val);
       EXPECT_EQ(expected_int_values[i], val);
     }
 
     {
-      Int val;
+      auto val = Int{};
       convert_channel(static_cast<double>(channel_values[i]), val);
       EXPECT_EQ(expected_int_values[i], val);
     }
@@ -136,11 +136,11 @@ TEST(TestConvertChannel, test_convert_channel_between_float)
 {
   for (int i = 0; i < 2; ++i)
   {
-    double double_converted_value;
+    auto double_converted_value = double{};
     convert_channel(float(i), double_converted_value);
     EXPECT_EQ(static_cast<double>(i), double_converted_value);
 
-    float float_converted_value;
+    auto float_converted_value = float{};
     convert_channel(double(i), float_converted_value);
     EXPECT_EQ(static_cast<float>(i), float_converted_value);
   }
@@ -164,7 +164,7 @@ void test_channel_conversion_between_integer_types()
 
   for (int i = 0; i < 2; ++i)
   {
-    DstInt actual_dst_value;
+    auto actual_dst_value = DstInt{};
     convert_channel(test_src_values[i], actual_dst_value);
     EXPECT_EQ(expected_dst_values[i], actual_dst_value);
   }

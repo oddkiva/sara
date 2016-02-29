@@ -1,8 +1,8 @@
 // ========================================================================== //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -70,11 +70,11 @@ namespace DO { namespace Sara {
         based on the function **DO::refineExtremum()**.
      */
     ComputeDoGExtrema(
-      const ImagePyramidParams& pyramid_params = ImagePyramidParams(),
-      float extremum_thres = 0.01f,
-      float edge_ratio_thres = 10.f,
-      int img_padding_sz = 1,
-      int extremum_refinement_iter = 5)
+        const ImagePyramidParams& pyramid_params = ImagePyramidParams(),
+        float extremum_thres = 0.01f,
+        float edge_ratio_thres = 10.f,
+        int img_padding_sz = 1,
+        int extremum_refinement_iter = 5)
       : _pyramid_params(pyramid_params)
       , _extremum_thres(extremum_thres)
       , _edge_ratio_thres(edge_ratio_thres)
@@ -106,7 +106,7 @@ namespace DO { namespace Sara {
       difference of Gaussians
       \f$\left( g_{\sigma(s+1,o)} - g_{\sigma(s,o)} \right) * I \f$.
      */
-    std::vector<OERegion> operator()(const Image<float>& I,
+    std::vector<OERegion> operator()(const ImageView<float>& I,
                                      std::vector<Point2i> *scale_octave_pairs = 0);
 
     /*!

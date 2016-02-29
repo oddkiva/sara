@@ -1,8 +1,8 @@
 // ========================================================================== //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2015 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2015-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -81,6 +81,16 @@ namespace DO { namespace Sara {
     close();
   }
 
+  int VideoStream::width() const
+  {
+    return _video_codec_context->width;
+  }
+
+  int VideoStream::height() const
+  {
+    return _video_codec_context->height;
+  }
+
   void
   VideoStream::open(const std::string& file_path)
   {
@@ -157,10 +167,17 @@ namespace DO { namespace Sara {
   }
 
   bool
-  VideoStream::read(Image<Rgb8>& video_frame)
+  VideoStream::read(ImageView<Rgb8>& video_frame)
   {
+    if (video_frame.sizes() != sizes())
+      throw std::domain_error{
+        "Video frame sizes and video stream sizes are not equal!"
+      };
+
     AVPacket _video_packet;
-    int length, got_video_frame;
+    auto length = int{};
+    auto got_video_frame = int{};
+    auto video_frame_data = video_frame.data();
 
     while (av_read_frame(_video_format_context, &_video_packet) >= 0)
     {
@@ -172,18 +189,16 @@ namespace DO { namespace Sara {
 
       if (got_video_frame)
       {
-        int w = _video_codec_context->width;
-        int h = _video_codec_context->height;
-
-        if (video_frame.width() != w || video_frame.height() != h)
-          video_frame.resize(w, h);
+        auto w = width();
+        auto h = height();
 
         for (int y = 0; y < h; ++y)
         {
           for (int x = 0; x < w; ++x)
           {
-            Yuv8 yuv = get_yuv_pixel(_video_frame, x, y);
-            video_frame(x, y) = Sara::convert(yuv);
+            auto yuv = get_yuv_pixel(_video_frame, x, y);
+            *video_frame_data = Sara::convert(yuv);
+            ++video_frame_data;
           }
         }
 
@@ -194,6 +209,7 @@ namespace DO { namespace Sara {
 
     return false;
   }
+
 
 } /* namespace Sara */
 } /* namespace DO */

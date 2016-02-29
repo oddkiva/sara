@@ -1,8 +1,8 @@
 // ========================================================================== //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -17,7 +17,7 @@ namespace DO { namespace Sara {
 
   bool load(Image<Color3ub>& I, const std::string& name)
   {
-    QImage image(QString(name.c_str()));
+    QImage image{ QString(name.c_str()) };
     if (image.isNull())
       return false;
     image = image.convertToFormat(QImage::Format_RGB888);
@@ -76,9 +76,9 @@ namespace DO { namespace Sara {
   bool saveColorImage(const std::string& name, const Color3ub *cols,
                       int w, int h, int quality)
   {
-    return QImage(reinterpret_cast<const unsigned char*>(cols),
-                  w, h, w*3, QImage::Format_RGB888).
-      save(QString(name.c_str()), 0, quality);
+    return QImage(reinterpret_cast<const unsigned char*>(cols), w, h, w * 3,
+                  QImage::Format_RGB888)
+        .save(QString(name.c_str()), 0, quality);
   }
 
   static

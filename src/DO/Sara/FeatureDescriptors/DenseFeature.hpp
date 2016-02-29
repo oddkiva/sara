@@ -1,8 +1,8 @@
 // ========================================================================== //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2015 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2015-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -39,7 +39,7 @@ namespace DO { namespace Sara {
     }
 
     //! @brief Operator.
-    Image<descriptor_type> operator()(const Image<float>& image, int patch_size = 8)
+    Image<descriptor_type> operator()(const ImageView<float>& image, int patch_size = 8)
     {
       // Blur the image a little bit.
       // By default, sigma is '1.6' and is justified in A-SIFT paper [Morel, Yu].
@@ -71,7 +71,7 @@ namespace DO { namespace Sara {
    */
   DO_SARA_EXPORT
   Image<ComputeSIFTDescriptor<>::descriptor_type>
-  compute_dense_sift(const Image<float>& image, int local_patch_size = 8);
+  compute_dense_sift(const ImageView<float>& image, int local_patch_size = 8);
 
 } /* namespace Sara */
 } /* namespace DO */

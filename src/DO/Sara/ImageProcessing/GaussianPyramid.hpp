@@ -1,8 +1,8 @@
 // ========================================================================== //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -31,17 +31,20 @@ namespace DO { namespace Sara {
   //! Computes a pyramid of Gaussians.
   template <typename T>
   ImagePyramid<T>
-  gaussian_pyramid(const Image<T>& image,
+  gaussian_pyramid(const ImageView<T>& image,
                    const ImagePyramidParams& params = ImagePyramidParams())
   {
-    typedef typename ImagePyramid<T>::scalar_type Scalar;
+    using Scalar = typename ImagePyramid<T>::scalar_type;
+
     // Resize the image with the appropriate factor.
-    Scalar resize_factor = pow(2.f, -params.first_octave_index());
-    Image<T> I(enlarge(image, resize_factor) );
+    auto resize_factor = pow(2.f, -params.first_octave_index());
+    auto I = enlarge(image, resize_factor);
+
     // Deduce the new camera sigma with respect to the dilated image.
-    Scalar camera_sigma = Scalar(params.scale_camera())*resize_factor;
+    auto camera_sigma = Scalar(params.scale_camera())*resize_factor;
+
     // Blur the image so that its new sigma is equal to the initial sigma.
-    Scalar init_sigma = Scalar(params.scale_initial());
+    auto init_sigma = Scalar(params.scale_initial());
     if (camera_sigma < init_sigma)
     {
       Scalar sigma = sqrt(init_sigma*init_sigma - camera_sigma*camera_sigma);
@@ -49,23 +52,23 @@ namespace DO { namespace Sara {
     }
 
     // Deduce the maximum number of octaves.
-    int l = std::min(image.width(), image.height());
-    int b = params.image_padding_size();
+    auto l = std::min(image.width(), image.height());
+    auto b = params.image_padding_size();
     // l/2^k > 2b
     // 2^k < l/(2b)
     // k < log(l/(2b))/log(2)
-    int num_octaves = static_cast<int>(log(l/(2.f*b))/log(2.f));
+    auto num_octaves = static_cast<int>(log(l/(2.f*b))/log(2.f));
 
     // Shorten names.
-    Scalar k = Scalar(params.scale_geometric_factor());
-    int num_scales = params.num_scales_per_octave();
-    int downscale_index = int( floor( log(Scalar(2))/log(k)) );
+    auto k = Scalar(params.scale_geometric_factor());
+    auto num_scales = params.num_scales_per_octave();
+    auto downscale_index = int( floor( log(Scalar(2))/log(k)) );
 
     // Create the image pyramid
-    ImagePyramid<T> G;
+    auto G = ImagePyramid<T>{};
     G.reset(num_octaves, num_scales, init_sigma, k);
 
-    for (int o = 0; o < num_octaves; ++o)
+    for (auto o = 0; o < num_octaves; ++o)
     {
       // Compute the octave scaling factor
       G.octave_scaling_factor(o) =
@@ -75,9 +78,9 @@ namespace DO { namespace Sara {
       Scalar sigma_s_1 = init_sigma;
       G(0, o) = o == 0 ? I : downscale(G(downscale_index, o - 1), 2);
 
-      for (int s = 1; s < num_scales; ++s)
+      for (auto s = 1; s < num_scales; ++s)
       {
-        Scalar sigma = sqrt(k*k*sigma_s_1*sigma_s_1 - sigma_s_1*sigma_s_1);
+        auto sigma = sqrt(k*k*sigma_s_1*sigma_s_1 - sigma_s_1*sigma_s_1);
         G(s,o) = gaussian(G(s-1,o), sigma);
         sigma_s_1 *= k;
       }
@@ -91,16 +94,16 @@ namespace DO { namespace Sara {
   template <typename T>
   ImagePyramid<T> difference_of_gaussians_pyramid(const ImagePyramid<T>& gaussians)
   {
-    ImagePyramid<T> D;
+    auto D = ImagePyramid<T>{};
     D.reset(gaussians.num_octaves(),
             gaussians.num_scales_per_octave()-1,
             gaussians.scale_initial(),
             gaussians.scale_geometric_factor());
 
-    for (int o = 0; o < D.num_octaves(); ++o)
+    for (auto o = 0; o < D.num_octaves(); ++o)
     {
       D.octave_scaling_factor(o) = gaussians.octave_scaling_factor(o);
-      for (int s = 0; s < D.num_scales_per_octave(); ++s)
+      for (auto s = 0; s < D.num_scales_per_octave(); ++s)
       {
         D(s,o).resize(gaussians(s,o).sizes());
         D(s,o).array() = gaussians(s+1,o).array() - gaussians(s,o).array();
@@ -114,16 +117,16 @@ namespace DO { namespace Sara {
   template <typename T>
   ImagePyramid<T> laplacian_pyramid(const ImagePyramid<T>& gaussians)
   {
-    ImagePyramid<T> LoG;
+    auto LoG = ImagePyramid<T>{};
     LoG.reset(gaussians.num_octaves(),
               gaussians.num_scales_per_octave(),
               gaussians.scale_initial(),
               gaussians.scale_geometric_factor());
 
-    for (int o = 0; o < LoG.num_octaves(); ++o)
+    for (auto o = 0; o < LoG.num_octaves(); ++o)
     {
       LoG.octave_scaling_factor(o) = gaussians.octave_scaling_factor(o);
-      for (int s = 0; s < LoG.num_scales_per_octave(); ++s)
+      for (auto s = 0; s < LoG.num_scales_per_octave(); ++s)
       {
         LoG(s,o) = laplacian(gaussians(s,o));
         for (auto it = LoG(s, o).begin(); it != LoG(s,o).end(); ++it)

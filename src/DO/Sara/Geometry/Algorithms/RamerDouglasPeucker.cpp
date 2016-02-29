@@ -1,8 +1,8 @@
 // ========================================================================== //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2014 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2014-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -26,7 +26,8 @@ namespace DO { namespace Sara { namespace detail {
     return abs(M.determinant());
   }
 
-  vector<Point2d> ramer_douglas_peucker(const Point2d *in_first, const Point2d *in_last,
+  vector<Point2d> ramer_douglas_peucker(const Point2d *in_first,
+                                        const Point2d *in_last,
                                         double eps)
   {
     if (in_first == in_last)
@@ -68,8 +69,7 @@ namespace DO { namespace Sara { namespace detail {
 
 namespace DO { namespace Sara {
 
-  vector<Point2d>
-  ramer_douglas_peucker(vector<Point2d> curve, double eps)
+  vector<Point2d> ramer_douglas_peucker(vector<Point2d> curve, double eps)
   {
     if (curve.empty())
       return {};

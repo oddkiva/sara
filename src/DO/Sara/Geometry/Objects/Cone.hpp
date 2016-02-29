@@ -1,8 +1,8 @@
 // ========================================================================== //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2014 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2014-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -25,8 +25,8 @@ namespace DO { namespace Sara {
   {
   public:
     enum { Dimension = N };
-    typedef Matrix<double, N, 2> Basis;
-    typedef Matrix<double, N, 1> Vector;
+    using Basis = Matrix<double, N, 2>;
+    using Vector = Matrix<double, N, 1>;
 
     enum Type {
       Convex = 0x1, Blunt = 0x2, Pointed = 0x4,
@@ -37,7 +37,7 @@ namespace DO { namespace Sara {
     inline Cone(const Vector& alpha, const Vector& beta, Type type = Convex,
                 double eps = 1e-8)
       : _eps{ eps }
-      , _type{ type }
+      , _type{ static_cast<unsigned char>(type) }
     {
       _basis.col(0) = alpha.normalized();
       _basis.col(1) = beta.normalized();
@@ -45,9 +45,9 @@ namespace DO { namespace Sara {
       lu_solver.setThreshold(_eps);
       if (lu_solver.rank() == 1)
       {
-        _type |= Pointed;
+        _type |= static_cast<unsigned char>(Pointed);
         if (_basis.col(0).dot(_basis.col(1)) > 0)
-          _type |= PositiveCosine;
+          _type |= static_cast<unsigned char>(PositiveCosine);
       }
     }
 
@@ -69,16 +69,17 @@ namespace DO { namespace Sara {
       // Otherwise decompose x w.r.t. to the basis.
       Vector2d theta;
       theta = _basis.fullPivLu().solve(x);
-      double relError = (_basis*theta - x).squaredNorm() / x.squaredNorm();
-      if (relError > _eps)
+      double rel_error = (_basis*theta - x).squaredNorm() / x.squaredNorm();
+      if (rel_error > _eps)
         return false;
 
       // Deal with the degenerate cases (Pointed cone).
       if (_type & Pointed)
       {
-        if (_type & PositiveCosine && _type & Blunt)
+        if (_type & static_cast<unsigned char>(PositiveCosine) &&
+            _type & static_cast<unsigned char>(Blunt))
           return theta.minCoeff() > -_eps;
-        return (_type & Blunt) != 0;
+        return (_type & static_cast<unsigned char>(Blunt)) != 0;
       }
 
       // Generic case.
@@ -97,12 +98,12 @@ namespace DO { namespace Sara {
   template <int N>
   class AffineCone : public Cone<N>
   {
-    typedef Cone<N> Base;
+    using Base = Cone<N>;
 
   public:
     enum { Dimension = Base::Dimension };
-    typedef typename Base::Type Type;
-    typedef typename Base::Vector Vector;
+    using Type = typename Base::Type;
+    using Vector = typename Base::Vector;
 
     inline AffineCone(const Vector& alpha, const Vector& beta,
                       const Vector& vertex, Type type = Base::Convex)

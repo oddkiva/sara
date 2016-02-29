@@ -20,15 +20,33 @@ endfunction ()
 # ==============================================================================
 # Useful macros
 #
-macro (sara_dissect_version VERSION)
-  # Find version components
-  string(REGEX REPLACE "^([0-9]+).*" "\\1"
-         DO_Sara_VERSION_MAJOR "${VERSION}")
-  string(REGEX REPLACE "^[0-9]+\\.([0-9]+).*" "\\1"
-         DO_Sara_VERSION_MINOR "${VERSION}")
-  string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+)" "\\1"
-         DO_Sara_VERSION_PATCH ${VERSION})
+macro (sara_dissect_version)
+  # Retrieve the build number.
+  execute_process(
+    COMMAND git rev-list --count HEAD
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    OUTPUT_VARIABLE GIT_REV_NUMBER
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+  execute_process(
+    COMMAND git rev-parse --short HEAD
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    OUTPUT_VARIABLE GIT_COMMIT_HASH
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+  set (DO_Sara_BUILD_NUMBER "${GIT_REV_NUMBER}.r${GIT_COMMIT_HASH}")
+
+  # Build the version.
+  set(DO_Sara_VERSION
+    "${DO_Sara_VERSION_MAJOR}.${DO_Sara_VERSION_MINOR}.${DO_Sara_BUILD_NUMBER}")
   set(DO_Sara_SOVERSION "${DO_Sara_VERSION_MAJOR}.${DO_Sara_VERSION_MINOR}")
+
+  configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sara_version.cmake.in
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sara_version.cmake @ONLY)
+  configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/DO/Sara/Defines.hpp.in
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/DO/Sara/Defines.hpp @ONLY)
 endmacro ()
 
 
@@ -154,7 +172,7 @@ macro (sara_append_library _library_name
       DO_Sara_${_library_name} ${_lib_dependencies})
 
     # Form the compiled library output name.
-    set(_library_output_basename DO_Sara_${_library_name}-${DO_Sara_VERSION})
+    set(_library_output_basename DO_Sara_${_library_name})
     if (SARA_BUILD_SHARED_LIBS)
       set (_library_output_name "${_library_output_basename}")
       set (_library_output_name_debug "${_library_output_basename}-d")
@@ -212,8 +230,7 @@ macro (sara_generate_library _library_name)
     "${DO_Sara_SOURCE_DIR}"
     "${DO_Sara_${_library_name}_HEADER_FILES}"
     "${DO_Sara_${_library_name}_SOURCE_FILES}"
-    "${DO_Sara_${_library_name}_LINK_LIBRARIES}"
-  )
+    "${DO_Sara_${_library_name}_LINK_LIBRARIES}")
 endmacro ()
 
 
@@ -248,8 +265,7 @@ function (sara_add_test _test_name _srcs _additional_lib_deps)
     ${_test_name}
     PROPERTIES
     COMPILE_FLAGS ${SARA_DEFINITIONS}
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-  )
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
   add_test(${_test_name}
            "${CMAKE_BINARY_DIR}/bin/${_test_name}")

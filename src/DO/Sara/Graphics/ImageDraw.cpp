@@ -1,8 +1,8 @@
 // ========================================================================== //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -17,7 +17,7 @@
 
 namespace DO { namespace Sara {
 
-  void draw_point(Image<Rgb8>& image, int x, int y, const Color3ub& c)
+  void draw_point(ImageView<Rgb8>& image, int x, int y, const Color3ub& c)
   {
     QImage qimage(as_QImage(image));
     QPainter p(&qimage);
@@ -25,7 +25,7 @@ namespace DO { namespace Sara {
     p.drawPoint(x, y);
   }
 
-  void draw_circle(Image<Rgb8>& image,
+  void draw_circle(ImageView<Rgb8>& image,
                    int xc, int yc, int r, const Color3ub& c, int penWidth)
   {
     QImage qimage(as_QImage(image));
@@ -34,7 +34,7 @@ namespace DO { namespace Sara {
     p.drawEllipse(QPoint(xc, yc), r, r);
   }
 
-  void draw_line(Image<Rgb8>& image,
+  void draw_line(ImageView<Rgb8>& image,
                  int x1, int y1, int x2, int y2, const Color3ub& c,
                  int penWidth)
   {
@@ -44,7 +44,7 @@ namespace DO { namespace Sara {
     p.drawLine(x1, y1, x2, y2);
   }
 
-  void draw_rect(Image<Rgb8>& image,
+  void draw_rect(ImageView<Rgb8>& image,
                  int x, int y, int w, int h, const Color3ub& c,
                  int penWidth)
   {
@@ -54,7 +54,7 @@ namespace DO { namespace Sara {
     p.drawRect(x, y, w, h);
   }
 
-  void fill_rect(Image<Rgb8>& image,
+  void fill_rect(ImageView<Rgb8>& image,
                  int x, int y, int w, int h, const Color3ub& c)
   {
     QImage qimage(as_QImage(image));
@@ -62,7 +62,7 @@ namespace DO { namespace Sara {
     p.fillRect(x, y, w, h, to_QColor(c));
   }
 
-  void fill_circle(Image<Rgb8>& image,
+  void fill_circle(ImageView<Rgb8>& image,
                    int x, int y, int r, const Color3ub& c)
   {
     QImage qimage(as_QImage(image));

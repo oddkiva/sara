@@ -1,8 +1,8 @@
 // ========================================================================== //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -33,46 +33,49 @@ namespace DO { namespace Sara {
   // Interpolation
   //! @brief Interpolation function
   template <typename T, int N>
-  typename PixelTraits<T>::template Cast<double>::pixel_type
-  interpolate(const Image<T, N>& image, const Matrix<double, N, 1>& pos)
+  auto interpolate(const ImageView<T, N>& image,
+                   const Matrix<double, N, 1>& pos)
+
+      -> typename PixelTraits<T>::template Cast<double>::pixel_type
   {
     // Typedefs.
-    typedef typename PixelTraits<T>::template Cast<double>::pixel_type
-      DoublePixel;
-    typedef typename Image<T, N>::const_subarray_iterator
-      const_subarray_iterator;
+    using DoublePixel =
+        typename PixelTraits<T>::template Cast<double>::pixel_type;
 
     // Find the smallest integral bounding box that encloses the position.
-    Matrix<int, N, 1> start, end;
-    Matrix<double, N, 1> frac;
+    auto start = Matrix<int, N, 1>{};
+    auto end = Matrix<int, N, 1>{};
+    auto frac = Matrix<double, N, 1>{};
     for (int i = 0; i < N; ++i)
     {
       if (pos[i] < 0 || pos[i] >= image.size(i))
-        throw std::range_error("Cannot interpolate: position is out of range");
+        throw std::out_of_range{
+          "Cannot interpolate: position is out of image domain"
+        };
 
-      double ith_int_part;
+      auto ith_int_part = double{};
       frac[i] = std::modf(pos[i], &ith_int_part);
       start[i] = static_cast<int>(ith_int_part);
     }
     end.array() = start.array() + 2;
 
     // Compute the weighted sum.
-    const_subarray_iterator it(image.begin_subarray(start, end));
-    DoublePixel interpolated_value(PixelTraits<DoublePixel>::min());
-    Matrix<int, N, 1> offset;
+    auto it = image.begin_subarray(start, end);
+    auto interpolated_value = PixelTraits<DoublePixel>::min();
+    auto offset = Matrix<int, N, 1>{};
     for ( ; !it.end(); ++it)
     {
-      double weight = 1.;
-      for (int i = 0; i < N; ++i)
+      auto weight = 1.;
+      for (auto i = 0; i < N; ++i)
       {
-        weight *= (it.position()[i] == start[i]) ? (1.-frac[i]) : frac[i];
+        weight *= (it.position()[i] == start[i]) ? (1. - frac[i]) : frac[i];
         offset[i] = it.position()[i] < image.size(i) ? 0 : -1;
       }
 
-      DoublePixel dst_color;
-      dst_color = PixelTraits<T>::template Cast<double>::apply(it(offset));
-      interpolated_value += weight*dst_color;
+      auto dst_color = PixelTraits<T>::template Cast<double>::apply(it(offset));
+      interpolated_value += weight * dst_color;
     }
+
     return interpolated_value;
   }
 

@@ -1,8 +1,8 @@
 // ========================================================================== //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -32,11 +32,12 @@ namespace DO { namespace Sara {
 
   //! @brief Apply Deriche filter with specified order $o$ to dimension $d$.
   template <typename T, int N>
-  void inplace_deriche(Image<T, N>& inout_signal,
+  void inplace_deriche(ImageView<T, N>& inout_signal,
                        typename PixelTraits<T>::channel_type sigma,
                        int derivative_order, int axis, bool neumann = true)
   {
-    typedef typename PixelTraits<T>::channel_type S;
+    using S = typename PixelTraits<T>::channel_type;
+    using Vector = typename Image<T, N>::vector_type;
 
     // Sanity check.
     if (sigma <= 0)
@@ -50,12 +51,12 @@ namespace DO { namespace Sara {
     //
     // The constant 1.695 is mysterious... Also found in CImg library.
     // TODO: ask where this constant comes from.
-    const S alpha = static_cast<S>(1.695)/sigma;
-    const S ea = std::exp(alpha);
-    const S ema = std::exp(-alpha);
-    const S em2a = ema*ema;
-    const S b1 = 2*ema;
-    const S b2 = -em2a;
+    const auto alpha = static_cast<S>(1.695)/sigma;
+    const auto ea = std::exp(alpha);
+    const auto ema = std::exp(-alpha);
+    const auto em2a = ema*ema;
+    const auto b1 = 2*ema;
+    const auto b2 = -em2a;
 
     S ek, ekn;
     S parity;
@@ -119,37 +120,33 @@ namespace DO { namespace Sara {
     }
 
     // Initialize two temporary arrays.
-    const int size = inout_signal.size(axis);
-    const int step = inout_signal.stride(axis);
-    std::vector<T> y_causal(size);
-    std::vector<T> y_anticausal(size);
+    const auto size = inout_signal.size(axis);
+    const auto step = inout_signal.stride(axis);
+    auto y_causal = std::vector<T>(size);
+    auto y_anticausal = std::vector<T>(size);
 
-    typedef typename Image<T, N>::vector_type Vector;
-    typedef typename Image<T, N>::subarray_iterator SubarrayIterator;
-    Vector start, end;
-    start = Vector::Zero();
-    end = inout_signal.sizes();
+    auto start = Vector::Zero();
+    auto end = inout_signal.sizes();
     end[axis] = 1;
-    SubarrayIterator it = inout_signal.begin_subarray(start, end);
 
     // In 2D, we scan the beginning of each row/columns.
-    for ( ; !it.end(); ++it)
+    for (auto it = inout_signal.begin_subarray(start, end); !it.end(); ++it)
     {
-      T *ptr = &(*it);
+      auto ptr = &(*it);
 
       // Causal signal: i == 0.
-      T *forward_x[2] =  { ptr, ptr-step };
+      T *forward_x[2] =  { ptr, ptr - step };
       y_causal[0] = sumg0* *forward_x[0];
 
       // Causal signal: i == 1.
-      for (int k = 0; k < 2; ++k)
+      for (auto k = 0; k < 2; ++k)
         forward_x[k] += step;
       y_causal[1] = g0 * *forward_x[0] + sumg1 * *forward_x[1];
 
       // Causal signal: i = 2 .. size-1
-      for (int i = 2; i < size; ++i)
+      for (auto i = 2; i < size; ++i)
       {
-        for (int k = 0; k < 2; ++k)
+        for (auto k = 0; k < 2; ++k)
           forward_x[k] += step;
         y_causal[i] = a1 * *forward_x[0] + a2 * *forward_x[1]
                     + b1 * y_causal[i-1] + b2 * y_causal[i-2];
@@ -160,21 +157,21 @@ namespace DO { namespace Sara {
       y_anticausal[size-1] = parity * sumg1 * *backward_x[0];
 
       // Anti-causal signal: i == size-2
-      for (int k = 0; k < 2; ++k)
+      for (auto k = 0; k < 2; ++k)
         forward_x[k] += step;
       y_anticausal[size-2] = y_anticausal[size-1];
 
       // Anti-causal signal: i == size-3 .. 0
-      for (int i = size-3; i >= 0; --i)
+      for (auto i = size - 3; i >= 0; --i)
       {
-        for (int k = 0; k < 2; ++k)
+        for (auto k = 0; k < 2; ++k)
           backward_x[k] -= step;
         y_anticausal[i] = a3 * *backward_x[0] + a4 * *backward_x[1]
                         + b1 * y_anticausal[i+1] + b2 * y_anticausal[i+2];
       }
 
       // Store the sum of the two signals.
-      for (int i = 0; i < size; ++i)
+      for (auto i = 0; i < size; ++i)
       {
         *ptr = y_causal[i] + y_anticausal[i];
         ptr += step;
@@ -185,59 +182,62 @@ namespace DO { namespace Sara {
   //! @brief Apply Deriche blurring.
   template <typename T, int N>
   void inplace_deriche_blur(
-    Image<T, N>& inout_signal,
-    const Matrix<typename PixelTraits<T>::channel_type, N, 1>& sigmas, bool neumann = true)
+      ImageView<T, N>& inout_signal,
+      const Matrix<typename PixelTraits<T>::channel_type, N, 1>& sigmas,
+      bool neumann = true)
   {
-    for (int i = 0; i < N; ++i)
+    for (auto i = 0; i < N; ++i)
       inplace_deriche(inout_signal,sigmas[i], 0, i, neumann);
   }
 
   //! @brief Apply Deriche blurring.
   template <typename T, int N>
-  void inplace_deriche_blur(
-    Image<T,N>& inout_signal,
-    typename PixelTraits<T>::channel_type sigma,
-    bool neumann = true)
+  void inplace_deriche_blur(ImageView<T, N>& inout_signal,
+                            typename PixelTraits<T>::channel_type sigma,
+                            bool neumann = true)
   {
-    typedef typename PixelTraits<T>::channel_type S;
-    Matrix<S, N, 1> sigmas; sigmas.fill(sigma);
+    using S = typename PixelTraits<T>::channel_type;
+    auto sigmas = Matrix<S, N, 1>{};
+    sigmas.fill(sigma);
     inplace_deriche_blur(inout_signal, sigmas, neumann);
   }
 
   //! @brief Return the blurred image using Deriche filter.
   template <typename T, int N>
-  Image<T,N> deriche_blur(const Image<T,N>& in_signal,
-                         typename PixelTraits<T>::channel_type sigma,
-                         bool neumann = true)
+  Image<T, N> deriche_blur(const ImageView<T, N>& in_signal,
+                           typename PixelTraits<T>::channel_type sigma,
+                           bool neumann = true)
   {
-    Image<T,N> out_signal(in_signal);
+    auto out_signal = Image<T, N>{ in_signal };
     inplace_deriche_blur(out_signal, sigma, neumann);
     return out_signal;
   }
 
   //! @brief Return the blurred image using Deriche filter.
   template <typename T, int N>
-  Image<T,N> deriche_blur(
-    const Image<T,N>& I,
-    const Matrix<typename PixelTraits<T>::channel_type, N, 1>& sigmas,
-    bool neumann = true)
+  Image<T, N> deriche_blur(
+      const ImageView<T, N>& I,
+      const Matrix<typename PixelTraits<T>::channel_type, N, 1>& sigmas,
+      bool neumann = true)
+
   {
-    Image<T,N> J(I);
-    inplace_deriche_blur(J,sigmas,neumann);
+    auto J = I;
+    inplace_deriche_blur(J, sigmas, neumann);
     return J;
   }
 
   //! @brief Wrapper class to use: Image<T,N>::compute<DericheBlur>(T sigma)
   struct DericheBlur
   {
-    template <typename Image>
-    using ReturnType = Image;
+    template <typename SrcImageView>
+    using OutPixel = typename SrcImageView::pixel_type;
 
-    template <typename Image, typename Sigma>
-    inline ReturnType<Image> operator()(const Image& src,
-                                        const Sigma& sigma) const
+    template <typename SrcImageView, typename DstImageView, typename Sigma>
+    inline void operator()(const SrcImageView& src, DstImageView& dst,
+                           const Sigma& sigma, bool neumann = true) const
     {
-      return deriche_blur(src, sigma);
+      dst.copy(src);
+      inplace_deriche_blur(dst, sigma, neumann);
     }
   };
 
@@ -245,5 +245,6 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
+
 
 #endif /* DO_SARA_IMAGEPROCESSING_DERICHE_HPP */

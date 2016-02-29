@@ -16,6 +16,8 @@ if (SARA_BUILD_VIDEOIO)
   add_subdirectory(VideoIO)
 endif ()
 
+add_subdirectory(DisjointSets)
+
 add_subdirectory(KDTree)
 add_subdirectory(ImageProcessing)
 add_subdirectory(Geometry)

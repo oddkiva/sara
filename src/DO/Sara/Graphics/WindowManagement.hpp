@@ -1,8 +1,8 @@
 // ========================================================================= //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -14,7 +14,7 @@
 #ifndef DO_SARA_GRAPHICS_WINDOWCONTROL_HPP
 #define DO_SARA_GRAPHICS_WINDOWCONTROL_HPP
 
-#include "Events.hpp"
+#include <DO/Sara/Graphics/Events.hpp>
 
 
 class QWidget;
@@ -22,7 +22,7 @@ class QWidget;
 
 namespace DO { namespace Sara {
 
-  typedef QWidget * Window;
+  using Window = QWidget *;
 
   /*!
     @ingroup Graphics
@@ -42,20 +42,26 @@ namespace DO { namespace Sara {
 
   //! @brief Return the window width.
   DO_SARA_EXPORT
-  inline int get_width(Window w) { return get_sizes(w)(0); }
+  inline int get_width(Window w)
+  {
+    return get_sizes(w)(0);
+  }
 
   //! @brief Return the window height.
   DO_SARA_EXPORT
-  inline int get_height(Window w) { return get_sizes(w)(1); }
+  inline int get_height(Window w)
+  {
+    return get_sizes(w)(1);
+  }
 
   //! @{
   //! @brief Open a PaintingWindow for 2D drawing.
   DO_SARA_EXPORT
-  Window create_window(int w, int h, const std::string& windowTitle = "DO-CV",
+  Window create_window(int w, int h, const std::string& windowTitle = "Sara",
                        int x = -1, int y = -1);
 
   inline Window create_window(const Vector2i& sizes,
-                              const std::string& windowTitle = "DO-CV",
+                              const std::string& windowTitle = "Sara",
                               int x = -1, int y = -1)
   {
     return create_window(sizes(0), sizes(1), windowTitle, x, y);
@@ -65,10 +71,11 @@ namespace DO { namespace Sara {
   //! @{
   //! @brief Open a OpenGLWindow for 3D drawing.
   DO_SARA_EXPORT
-  Window create_gl_window(int w, int h, const std::string& windowTitle = "DO-CV",
+  Window create_gl_window(int w, int h, const std::string& windowTitle = "Sara",
                       int x = -1, int y = -1);
+
   inline Window create_gl_window(const Vector2i& sizes,
-                             const std::string& windowTitle = "DO-CV",
+                             const std::string& windowTitle = "Sara",
                              int x = -1, int y = -1)
   {
     return create_gl_window(sizes(0), sizes(1), windowTitle, x, y);
@@ -79,11 +86,12 @@ namespace DO { namespace Sara {
   //! Open a GraphicsView for interactive viewing.
   DO_SARA_EXPORT
   Window create_graphics_view(int w, int h,
-                              const std::string& windowTitle = "DO-CV",
+                              const std::string& windowTitle = "Sara",
                               int x = -1, int y = -1);
+
   DO_SARA_EXPORT
   inline Window create_graphics_view(const Vector2i& sizes,
-                                 const std::string& windowTitle = "DO-CV",
+                                 const std::string& windowTitle = "Sara",
                                  int x = -1, int y = -1)
   {
     return create_graphics_view(sizes(0), sizes(1), windowTitle, x, y);
@@ -165,7 +173,7 @@ namespace DO { namespace Sara {
   DO_SARA_EXPORT
   int any_get_key();
 
-  //! Listens to events sent from the active window.
+  //! @Brief Listen to events sent from the active window.
   DO_SARA_EXPORT
   void get_event(int ms, Event& e);
 

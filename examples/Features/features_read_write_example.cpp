@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
 // Copyright (C) 2013 David Ok <david.ok8@gmail.com>
@@ -114,7 +114,7 @@ void read_features(const Image<unsigned char>& image,
 
 GRAPHICS_MAIN()
 {
-  Image<unsigned char> I;
+  auto I = Image<unsigned char>{};
   load(I, src_path("obama_2.jpg"));
 
   set_active_window(create_window(I.width(), I.height()));

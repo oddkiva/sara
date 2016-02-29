@@ -1,8 +1,8 @@
 // ========================================================================= //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -57,11 +57,14 @@ namespace DO { namespace Sara {
 
   public:
     PaintingWindow(int width, int height,
-                   const QString& windowTitle = "DO-CV",
+                   const QString& windowTitle = "Sara",
                    int x = -1, int y = -1,
                    QWidget* parent = 0);
+
     QScrollArea *scrollArea() { return m_scrollArea; }
+
     QString windowTitle() const;
+
     int x() const;
     int y() const;
 
@@ -87,9 +90,11 @@ namespace DO { namespace Sara {
                   qreal orientation, bool italic, bool bold, bool underline);
     void drawArrow(int x1, int y1, int x2, int y2, const QColor&  color,
                    int arrowWidth, int arrowHeight, int style, int width);
+
     // Display image
     void display(const QImage& image, int xoff = 0, int yoff = 0,
                  double fact = 1.);
+
     // fillXXX
     void fillCircle(int x, int y, int r, const QColor& c);
     void fillCircle(const QPointF& p, qreal r, const QColor& c);
@@ -98,13 +103,17 @@ namespace DO { namespace Sara {
                      const QColor& c);
     void fillPoly(const QPolygonF& polygon, const QColor& c);
     void fillRect(int x, int y, int w, int h, const QColor& c);
+
     // Clear window.
     void clear();
+
     // Painting modes.
     void setAntialiasing(bool on = true);
     void setTransparency(bool on = true);
+
     // Save screen.
     void saveScreen(const QString& filename);
+
     // Resize screen.
     void resizeScreen(int width, int height);
 

@@ -1,8 +1,8 @@
 // ========================================================================== //
-// This file is part of DO-CV, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -37,17 +37,16 @@ namespace DO { namespace Sara {
       vector 'src(x,y)'
    */
   template <typename T>
-  void orientation(const Image<Matrix<T,2,1> >& src, Image<T>& dst)
+  void orientation(const ImageView<Matrix<T,2,1> >& src, ImageView<T>& dst)
   {
-    if (dst.sizes() != src.sizes())
-      dst.resize(src.sizes());
+    if (src.sizes() != dst.sizes())
+      throw std::domain_error{
+        "Source and destination image sizes are not equal!"
+      };
 
-    typedef typename Image<Matrix<T,2,1> >::const_iterator InputIterator;
-    typedef typename Image<T>::iterator OutputIterator;
-
-    InputIterator src_it(src.begin());
-    InputIterator src_it_end(src.end());
-    OutputIterator dst_it(dst.begin());
+    auto src_it = src.begin();
+    auto src_it_end = src.end();
+    auto  dst_it = dst.begin();
     for ( ; src_it != src_it_end; ++src_it, ++dst_it)
       *dst_it = std::atan2(src_it->y(), src_it->x());
   }
@@ -64,9 +63,9 @@ namespace DO { namespace Sara {
       vector **src(x,y)**
    */
   template <typename T>
-  Image<T> orientation(const Image<Matrix<T,2,1> >& src)
+  Image<T> orientation(const ImageView<Matrix<T,2,1> >& src)
   {
-    Image<T> ori;
+    auto ori = Image<T>{ src.sizes() };
     orientation(src, ori);
     return ori;
   }
@@ -74,16 +73,13 @@ namespace DO { namespace Sara {
   //! @brief Specialized class to use Image<T,N>::compute<Orientation>()
   struct Orientation
   {
-    template <typename VectorField>
-    using Scalar = typename VectorField::pixel_type::Scalar;
+    template <typename SrcImageView>
+    using OutPixel = typename SrcImageView::pixel_type::Scalar;
 
-    template <typename VectorField>
-    using ReturnType = Image<Scalar<VectorField>>;
-
-    template <typename VectorField>
-    inline Image<Scalar<VectorField>> operator()(const VectorField& in) const
+    template <typename SrcImageView, typename DstImageView>
+    inline void operator()(const SrcImageView& src, DstImageView& dst) const
     {
-      return orientation(in);
+      return orientation(src, dst);
     }
   };
 
