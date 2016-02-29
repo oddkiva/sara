@@ -19,7 +19,14 @@ include_directories(
   ${NUMPY_INCLUDE_DIRS}
   ${PYTHON_INCLUDE_DIRS})
 
+if (SARA_BUILD_VIDEOIO)
+  add_definitions(-DPYSARA_BUILD_VIDEOIO)
+endif ()
+
 file(GLOB pysara_SRC_FILES FILES *.cpp)
+if (NOT SARA_BUILD_VIDEOIO)
+  list(REMOVE_ITEM pysara_SRC_FILES "${CMAKE_CURRENT_SOURCE_DIR}/VideoIO.cpp")
+endif ()
 
 python_add_module(pysara ${pysara_SRC_FILES})
 
@@ -28,8 +35,11 @@ target_link_libraries(pysara
   ${PYTHON_LIBRARIES}
   DO_Sara_DisjointSets
   DO_Sara_Geometry
-  DO_Sara_ImageIO
-  DO_Sara_VideoIO)
+  DO_Sara_ImageIO)
+if (SARA_BUILD_VIDEOIO)
+  target_link_libraries(pysara DO_Sara_VideoIO)
+endif ()
+
 
 
 # ============================================================================ #
