@@ -90,7 +90,7 @@ set(CPACK_RPM_PACKAGE_LICENSE "MPL v2")
 set(CPACK_RPM_PACKAGE_GROUP "Applications/Multimedia")
 
 execute_process(COMMAND python -c
-  "from distutils.sysconfig import get_python_lib; print get_python_lib()"
+  "from distutils.sysconfig import get_python_lib; print(get_python_lib())"
   OUTPUT_VARIABLE PYTHON_SITE_PACKAGES_DIR
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 
