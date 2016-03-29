@@ -2,13 +2,19 @@
 
 set -e
 
-# Create the build directory.
-if [ -d "../sara-build" ]; then
-  rm -rf ../sara-build
+if [[ $# == 0 ]]; then
+  sara_build_dir="sara-build"
+else
+  sara_build_dir=$1
 fi
-mkdir ../sara-build
 
-cd ../sara-build
+# Create the build directory.
+if [ -d "../${sara_build_dir}" ]; then
+  rm -rf ../${sara_build_dir}
+fi
+mkdir ../${sara_build_dir}
+
+cd ../${sara_build_dir}
 {
   # Generate makefile project.
   cmake ../sara \
