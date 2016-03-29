@@ -1,3 +1,5 @@
+import six
+
 from unittest import TestCase
 
 import numpy as np
@@ -30,4 +32,4 @@ class TestRegionInnerBoundary(TestCase):
         # A boundary is an ordered set of vertices.
         actual_boundaries = [set(vertices) for vertices in actual_boundaries]
 
-        self.assertItemsEqual(true_boundaries, actual_boundaries)
+        six.assertCountEqual(self, true_boundaries, actual_boundaries)
