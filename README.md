@@ -19,7 +19,7 @@ The design of *Sara* libraries is driven by the KISS principle.
 
 Try it and feel free to become involved with the development of the libraries.
 
-I dedicate lots of patience and love to maintain* Sara*and make it evolve as
+I dedicate lots of patience and love to maintain *Sara* and make it evolve as
 much as my time and energy allow it.
 
 *Sara* is licensed with the [Mozilla Public License version
