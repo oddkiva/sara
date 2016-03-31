@@ -20,22 +20,18 @@ using namespace std;
 using namespace DO::Sara;
 
 
-string file1 = src_path("../../datasets/All.tif");
-string file2 = src_path("../../datasets/GuardOnBlonde.tif");
+const auto file1 = src_path("../../datasets/All.tif");
+const auto file2 = src_path("../../datasets/GuardOnBlonde.tif");
 
 
 Set<OERegion, RealDescriptor> compute_sift_keypoints(const Image<float>& image)
 {
   // Time everything.
-  Timer timer;
-  double elapsed = 0.;
-  double dog_detection_time;
-  double ori_assign_time;
-  double sift_description_time;
-  double grad_gaussian_time;
+  auto timer = Timer{};
+  auto elapsed = 0.;
 
   // We describe the work flow of the feature detection and description.
-  Set<OERegion, RealDescriptor> keys;
+  auto keys = Set<OERegion, RealDescriptor>{};
   auto& DoGs = keys.features;
   auto& SIFTDescriptors = keys.descriptors;
 
@@ -43,10 +39,10 @@ Set<OERegion, RealDescriptor> compute_sift_keypoints(const Image<float>& image)
   print_stage("Computing DoG extrema");
   timer.restart();
   ImagePyramidParams pyr_params;//(0);
-  ComputeDoGExtrema compute_DoGs(pyr_params, 0.01f);
+  ComputeDoGExtrema compute_DoGs{ pyr_params, 0.01f };
   auto scale_octave_pairs = vector<Point2i>{};
   DoGs = compute_DoGs(image, &scale_octave_pairs);
-  dog_detection_time = timer.elapsed_ms();
+  auto dog_detection_time = timer.elapsed_ms();
   elapsed += dog_detection_time;
   cout << "DoG detection time = " << dog_detection_time << " ms" << endl;
   cout << "DoGs.size() = " << DoGs.size() << endl;
@@ -56,7 +52,7 @@ Set<OERegion, RealDescriptor> compute_sift_keypoints(const Image<float>& image)
   print_stage("Computing gradients of Gaussians");
   timer.restart();
   auto nabla_G = gradient_polar_coordinates(compute_DoGs.gaussians());
-  grad_gaussian_time = timer.elapsed_ms();
+  auto grad_gaussian_time = timer.elapsed_ms();
   elapsed += grad_gaussian_time;
   cout << "gradient of Gaussian computation time = " << grad_gaussian_time << " ms" << endl;
   cout << "DoGs.size() = " << DoGs.size() << endl;
@@ -67,7 +63,7 @@ Set<OERegion, RealDescriptor> compute_sift_keypoints(const Image<float>& image)
   timer.restart();
   ComputeDominantOrientations assign_dominant_orientations;
   assign_dominant_orientations(nabla_G, DoGs, scale_octave_pairs);
-  ori_assign_time = timer.elapsed_ms();
+  auto ori_assign_time = timer.elapsed_ms();
   elapsed += ori_assign_time;
   cout << "orientation assignment time = " << ori_assign_time << " ms" << endl;
   cout << "DoGs.size() = " << DoGs.size() << endl;
@@ -78,7 +74,7 @@ Set<OERegion, RealDescriptor> compute_sift_keypoints(const Image<float>& image)
   timer.restart();
   ComputeSIFTDescriptor<> compute_sift;
   SIFTDescriptors = compute_sift(DoGs, scale_octave_pairs, nabla_G);
-  sift_description_time = timer.elapsed_ms();
+  auto sift_description_time = timer.elapsed_ms();
   elapsed += sift_description_time;
   cout << "description time = " << sift_description_time << " ms" << endl;
   cout << "sifts.size() = " << SIFTDescriptors.size() << endl;
@@ -117,8 +113,8 @@ void load(Image<Rgb8>& image1, Image<Rgb8>& image2,
   }
 
   cout << "Computing/Reading keypoints" << endl;
-  Set<OERegion, RealDescriptor> SIFTs1 = compute_sift_keypoints(image1.convert<float>());
-  Set<OERegion, RealDescriptor> SIFTs2 = compute_sift_keypoints(image2.convert<float>());
+  auto SIFTs1 = compute_sift_keypoints(image1.convert<float>());
+  auto SIFTs2 = compute_sift_keypoints(image2.convert<float>());
   keys1.append(SIFTs1);
   keys2.append(SIFTs2);
   cout << "Image 1: " << keys1.size() << " keypoints" << endl;
@@ -131,7 +127,7 @@ void load(Image<Rgb8>& image1, Image<Rgb8>& image2,
 
   // Compute/read matches
   cout << "Computing Matches" << endl;
-  AnnMatcher matcher(keys1, keys2, 1.0f);
+  AnnMatcher matcher{ keys1, keys2, 1.0f };
   matches = matcher.compute_matches();
   cout << matches.size() << " matches" << endl;
 }
@@ -139,9 +135,11 @@ void load(Image<Rgb8>& image1, Image<Rgb8>& image2,
 GRAPHICS_MAIN()
 {
   // Load images.
-  Image<Rgb8> image1, image2;
-  Set<OERegion, RealDescriptor> keys1, keys2;
-  vector<Match> matches;
+  auto image1 = Image<Rgb8>{};
+  auto image2 = Image<Rgb8>{};
+  auto keys1 = Set<OERegion, RealDescriptor>{};
+  auto keys2 = Set<OERegion, RealDescriptor>{};
+  auto matches = vector<Match>{};
   load(image1, image2, keys1, keys2, matches);
 
   auto scale = 1.0f;
