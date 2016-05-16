@@ -7,7 +7,7 @@ using namespace std;
 using namespace DO::Sara;
 
 
-TEST(TestSIFTDescriptors, test_me)
+TEST(TestSIFTDescriptors, DISABLED_test_me)
 {
   const int N{ 5 };
 
