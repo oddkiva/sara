@@ -1,24 +1,20 @@
 language: cpp
 
-sudo: false
+sudo: required
+dist: trusty
 
 cache:
   bundler: true
   directories:
   - $HOME/ffmpeg
-  - $HOME/lcov
 
 addons:
   apt:
     sources:
-    - ubuntu-toolchain-r-test
     - ubuntu-sdk-team
     packages:
-    - rpm
-    - gcc-4.9
-    - g++-4.9
-    - gcov-4.9
     - qtbase5-dev
+    - lcov
     - libqt5opengl5
     - libqt5opengl5-dev
     - yasm
@@ -27,11 +23,6 @@ compiler:
   - gcc
 
 before_script:
-  # Specify the GCC version we want to use.
-  - export CC=/usr/bin/gcc-4.9
-  - export CXX=/usr/bin/g++-4.9
-  # Use specific lcov.
-  - export PATH=$HOME/lcov/bin:$PATH
   # Fake X server
   - export DISPLAY=:99.0
   - sh -e /etc/init.d/xvfb start
@@ -54,7 +45,7 @@ script:
 
 after_success:
   - cd ..
-  - lcov --gcov-tool /usr/bin/gcov-4.9 --compat-libtool --directory build --base-directory=src --capture --output-file=coverage.info
+  - lcov --compat-libtool --directory build --base-directory=src --capture --output-file=coverage.info
   - lcov --remove coverage.info 'usr/*' --output-file coverage.info
   - lcov --remove coverage.info 'third-party/*' --output-file coverage.info
   - lcov --remove coverage.info 'test/*' --output-file coverage.info
