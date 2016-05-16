@@ -37,7 +37,7 @@ if (NOT DO_Sara_FOUND)
 
   # Image and Video I/O.
   sara_append_components(DO_Sara_COMPONENTS ImageIO)
-  if (DO_SARA_BUILD_VIDEOIO)
+  if (SARA_BUILD_VIDEOIO)
     sara_append_components(DO_Sara_COMPONENTS VideoIO)
   endif ()
 
