@@ -23,15 +23,30 @@ option(SARA_BUILD_TESTS "Build unit tests for DO-Sara libraries" OFF)
 option(SARA_BUILD_SAMPLES "Build sample programs using DO-Sara libraries" OFF)
 option(SARA_BUILD_SHARED_LIBS "Build shared libraries for DO-Sara libraries"  OFF)
 
+if (SARA_INSTALL_DIR)
+  message("DO-Sara libraries will all be put in ${SARA_INSTALL_DIR}")
+else ()
+  set(SARA_INSTALL_DIR "")
+endif ()
+
 set(BUILD_SHARED_LIBS ${SARA_BUILD_SHARED_LIBS})
 
 
-# Add DO-CV to the CMake module path.
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
-# Set Sara Library version.
+# Configure templates.
+configure_file(
+  cmake/FindDO_Sara.cmake.in
+  ${CMAKE_BINARY_DIR}/cmake/FindDO_Sara.cmake @ONLY)
+file(COPY cmake
+     DESTINATION ${CMAKE_BINARY_DIR})
+
+# Add DO-Sara to the CMake module path.
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR}/cmake)
+
+# Set Sara library version.
 include(sara_macros)
 sara_dissect_version()
+
 
 
 find_package(DO_Sara REQUIRED)

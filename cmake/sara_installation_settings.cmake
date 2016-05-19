@@ -19,12 +19,12 @@ if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
           DESTINATION include/DO/Sara
           COMPONENT Sources)
   install(DIRECTORY ${DO_Sara_DIR}/cmake
-          DESTINATION include/DO/Sara
+          DESTINATION share/DO/Sara
           COMPONENT Sources)
   install(DIRECTORY ${DO_Sara_DIR}/src/DO
           DESTINATION include/
           COMPONENT Sources)
-  install(FILES ${DO_Sara_SOURCE_DIR}/Defines.hpp
+  install(FILES ${CMAKE_BINARY_DIR}/src/DO/Sara/Defines.hpp
           DESTINATION include/DO/Sara
           COMPONENT Sources)
   set(CPACK_COMPONENT_Sources_REQUIRED 1)

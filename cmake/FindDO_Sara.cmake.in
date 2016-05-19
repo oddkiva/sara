@@ -17,7 +17,7 @@ sara_step_message("FindDO_Sara running for project '${PROJECT_NAME}'")
 # Setup DO-CV once for all for every test projects in the 'test' directory.
 #
 if (NOT DO_Sara_FOUND)
-  if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindDO_Sara.cmake")
+  if (EXISTS "${CMAKE_BINARY_DIR}/cmake/FindDO_Sara.cmake")
     message(STATUS "Building DO-Sara from source")
 
     # Convenience variables used later in 'UseDOSaraXXX.cmake' scripts.
@@ -88,8 +88,9 @@ endif ()
 find_path(
   DO_Sara_INCLUDE_DIRS
   NAMES DO/Sara/Core.hpp DO/Sara/Defines.hpp DO/Sara/Graphics.hpp
-  PATHS /usr/include
+  PATHS @SARA_INSTALL_DIR@/include
         /usr/local/include
+        /usr/include
         "C:/Program Files/DO-Sara/include")
 
 
@@ -99,7 +100,6 @@ find_path(
 #
 if (NOT DO_Sara_FIND_COMPONENTS)
   set(DO_Sara_USE_COMPONENTS ${DO_Sara_COMPONENTS})
-
 else ()
 
   # Verbose comment.
@@ -134,7 +134,7 @@ else ()
   endif (POLICY CMP0011)
 
 
-  # Retrieve the set of dependencies when linking projects with DO-CV.
+  # Retrieve the set of dependencies when linking projects with Sara.
   set(DO_Sara_LIBRARIES "")
 
   if (SARA_USE_FROM_SOURCE)
@@ -155,7 +155,9 @@ else ()
       if (NOT COMPONENT STREQUAL "ImageProcessing")
         find_path(DO_Sara_${COMPONENT}_INCLUDE_DIR
           NAMES ${COMPONENT}.hpp
-          PATHS /usr/include /usr/local/include /opt/local/include
+          PATHS @SARA_INSTALL_DIR@/include
+                /usr/local/include
+                /usr/include
                 "C:/Program Files/DO-Sara/include"
           PATH_SUFFIXES DO/Sara)
 
@@ -169,13 +171,17 @@ else ()
 
         find_library(DO_Sara_${COMPONENT}_DEBUG_LIBRARIES
           NAMES ${_library_name_debug}
-          PATHS /usr/lib /usr/local/lib /opt/local/lib
+          PATHS @SARA_INSTALL_DIR@/lib
+                /usr/local/lib
+                /usr/lib
                 "C:/Program Files/DO-Sara-Debug/lib"
           PATH_SUFFIXES DO/Sara)
 
         find_library(DO_Sara_${COMPONENT}_RELEASE_LIBRARIES
           NAMES ${_library_name}
-          PATHS /usr/lib /usr/local/lib /opt/local/lib
+          PATHS @SARA_INSTALL_DIR@/lib
+                /usr/local/lib
+                /usr/lib
                 "C:/Program Files/DO-Sara/lib"
           PATH_SUFFIXES DO/Sara)
 
@@ -212,41 +218,16 @@ else ()
       endif ()
 
       if ("${COMPONENT}" STREQUAL "ImageIO")
-        # EXIF library
-        find_package(EasyEXIF)
+        # EXIF library.
+        find_package(EasyEXIF REQUIRED)
 
-        # JPEG, PNG, TIFF...
-        set(IMAGE_IO_LIBRARIES JPEG PNG TIFF ZLIB)
-        foreach (IMAGE_IO_LIB ${IMAGE_IO_LIBRARIES})
-          if (WIN32)
-            find_library(${IMAGE_IO_LIB}_DEBUG_LIBRARY
-              NAMES ${IMAGE_IO_LIB}-d
-              PATHS "C:/Program Files/DO-Sara-Debug/lib")
-            find_library(${IMAGE_IO_LIB}_RELEASE_LIBRARY
-              NAMES ${IMAGE_IO_LIB}
-              PATHS "C:/Program Files/DO-Sara/lib")
-            if (NOT DO_USE_STATIC_LIBS AND NOT ${IMAGE_IO_LIB}_DEBUG_LIBRARY)
-              set(${IMAGE_IO_LIB}_LIBRARY ${${IMAGE_IO_LIB}_RELEASE_LIBRARY})
-            else ()
-              set(${IMAGE_IO_LIB}_LIBRARY
-                debug ${${IMAGE_IO_LIB}_DEBUG_LIBRARY}
-                optimized ${${IMAGE_IO_LIB}_RELEASE_LIBRARY})
-            endif ()
-          else ()
-            find_package(JPEG REQUIRED)
-            find_package(PNG REQUIRED)
-            find_package(TIFF REQUIRED)
-            find_package(ZLIB REQUIRED)
-          endif ()
-        endforeach()
+        # JPEG, PNG, TIFF image I/O.
+        find_package(ThirdPartyImageIO REQUIRED)
 
-        # Add these image I/O libraries to the dependencies.
-        list(APPEND
-          DO_Sara_LIBRARIES
+        # Add these to the dependencies.
+        list(APPEND DO_Sara_LIBRARIES
           ${EasyEXIF_LIBRARIES}
-          ${JPEG_LIBRARY} ${PNG_LIBRARY} ${TIFF_LIBRARY}
-          ${ZLIB_LIBRARY}
-        )
+          ${ThirdPartyImageIO_LIBRARIES})
       endif ()
 
     endforeach()
