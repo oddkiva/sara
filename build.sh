@@ -10,7 +10,6 @@ function build_library()
   cmake_options+="-DSARA_BUILD_SHARED_LIBS=ON "
   cmake_options+="-DSARA_BUILD_TESTS=ON "
   cmake_options+="-DSARA_BUILD_SAMPLES=ON "
-  cmake_options+="-DSARA_INSTALL_DIR=/usr/local/david"
 
   # Generate makefile project.
   cmake ../sara ${cmake_options}
