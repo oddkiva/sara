@@ -1,33 +1,26 @@
 #!/bin/bash
+set -ex
 
-set -e
 
-if [[ $# == 0 ]]; then
-  sara_build_dir="sara-build"
-else
-  sara_build_dir=$1
-fi
-
-# Create the build directory.
-if [ -d "../${sara_build_dir}" ]; then
-  rm -rf ../${sara_build_dir}
-fi
-mkdir ../${sara_build_dir}
-
-cd ../${sara_build_dir}
+function build_library()
 {
+  local cmake_options="-DCMAKE_BUILD_TYPE=Release "
+  cmake_options+="-DSARA_BUILD_VIDEOIO=ON "
+  cmake_options+="-DSARA_BUILD_PYTHON_BINDINGS=ON "
+  cmake_options+="-DSARA_BUILD_SHARED_LIBS=ON "
+  cmake_options+="-DSARA_BUILD_TESTS=ON "
+  cmake_options+="-DSARA_BUILD_SAMPLES=ON "
+  cmake_options+="-DSARA_INSTALL_DIR=/usr/local/david"
+
   # Generate makefile project.
-  cmake ../sara \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DSARA_BUILD_VIDEOIO=ON \
-    -DSARA_BUILD_PYTHON_BINDINGS=ON \
-    -DSARA_BUILD_SHARED_LIBS=ON \
-    -DSARA_BUILD_TESTS=ON \
-    -DSARA_BUILD_SAMPLES=ON
+  cmake ../sara ${cmake_options}
 
   # Build the library.
   make -j`nproc` && make test && make pytest && make package
+}
 
+function install_package()
+{
   if [ -f "/etc/debian_version" ]; then
     # Register the package to the local debian repository.
     dpkg-sig --sign builder libDO-Sara-shared-*.deb
@@ -39,5 +32,26 @@ cd ../${sara_build_dir}
     rpm_package_name=$(echo `ls *.rpm`)
     sudo rpm -ivh --force ${rpm_package_name}
   fi
+}
+
+
+if [[ $# == 0 ]]; then
+  sara_build_dir="sara-build"
+else
+  sara_build_dir=$1
+fi
+
+# Create the build directory.
+if [ -d "../${sara_build_dir}" ]; then
+  rm -rf ../${sara_build_dir}
+fi
+
+mkdir ../${sara_build_dir}
+
+
+cd ../${sara_build_dir}
+{
+  build_library
+  install_package
 }
 cd ..

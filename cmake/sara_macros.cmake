@@ -205,9 +205,9 @@ macro (sara_append_library _library_name
     # Specify where to install the static library.
     install(
       TARGETS DO_Sara_${_library_name}
-      RUNTIME DESTINATION bin COMPONENT Libraries
-      LIBRARY DESTINATION lib/DO/Sara COMPONENT Libraries
-      ARCHIVE DESTINATION lib/DO/Sara COMPONENT Libraries)
+      RUNTIME DESTINATION ${SARA_INSTALL_DIR}/bin COMPONENT Libraries
+      LIBRARY DESTINATION ${SARA_INSTALL_DIR}/lib/DO/Sara COMPONENT Libraries
+      ARCHIVE DESTINATION ${SARA_INSTALL_DIR}/lib/DO/Sara COMPONENT Libraries)
   else ()
 
     # - Case 2: the project is a header-only library
