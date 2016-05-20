@@ -23,8 +23,7 @@ option(SARA_BUILD_TESTS "Build unit tests for DO-Sara libraries" OFF)
 option(SARA_BUILD_SAMPLES "Build sample programs using DO-Sara libraries" OFF)
 option(SARA_BUILD_SHARED_LIBS "Build shared libraries for DO-Sara libraries"  OFF)
 
-set (SARA_INSTALL_DIR "" CACHE STRING "Optional: Specify a directory path if \
-want to install Sara C++ and Python libraries in a self-contained directory.")
+set (SARA_INSTALL_DIR "" CACHE STRING "Optional: Specify a directory path if want to install Sara C++ and Python libraries in a self-contained directory.")
 if (SARA_INSTALL_DIR)
   message("DO-Sara libraries will be installed in ${SARA_INSTALL_DIR}")
 endif ()
