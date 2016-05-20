@@ -4,7 +4,7 @@ project(Sara)
 
 # Set the version major and minor manually.
 set(DO_Sara_VERSION_MAJOR 1)
-set(DO_Sara_VERSION_MINOR 1)
+set(DO_Sara_VERSION_MINOR 2)
 
 if (POLICY CMP0020)
   cmake_policy(SET CMP0020 OLD)
