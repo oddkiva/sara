@@ -7,11 +7,11 @@ set_target_properties(easyexif PROPERTIES OUTPUT_NAME_DEBUG easyexif-d)
 
 if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
   install(DIRECTORY ${DO_Sara_ThirdParty_DIR}/easyexif
-          DESTINATION include
+          DESTINATION ${SARA_INSTALL_DIR}/include
           COMPONENT ThirdParty)
 endif ()
 install(
   TARGETS easyexif
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION ${SARA_INSTALL_DIR}/lib
+  ARCHIVE DESTINATION ${SARA_INSTALL_DIR}/lib
   COMPONENT ThirdParty)
