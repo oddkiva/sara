@@ -27,6 +27,8 @@ set (SARA_INSTALL_DIR "" CACHE STRING "Optional: Specify a directory path if \
 want to install Sara C++ and Python libraries in a self-contained directory.")
 if (SARA_INSTALL_DIR)
   message("DO-Sara libraries will be installed in ${SARA_INSTALL_DIR}")
+else ()
+  set (SARA_INSTALL_DIR "/usr")
 endif ()
 
 set(BUILD_SHARED_LIBS ${SARA_BUILD_SHARED_LIBS})
