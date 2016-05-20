@@ -50,7 +50,8 @@ execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 
-if (SARA_INSTALL_DIR)
+# N.B.: this is a kludge here until we find a better implementation.
+if (NOT SARA_INSTALL_DIR STREQUAL /usr)
   set(SARA_PYTHON_INSTALL_DIR ${SARA_INSTALL_DIR}/python)
 else ()
   set(SARA_PYTHON_INSTALL_DIR ${PYTHON_SITE_PACKAGES_DIR})
