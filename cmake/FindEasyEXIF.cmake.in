@@ -11,36 +11,35 @@
 
 set(PATH_HINTS
     ${EasyEXIF_ROOT_DIR}
-    "/usr"
+    @SARA_INTALL_DIR@
     "/usr/local"
+    "/usr"
     "C:/Program Files/DO-Sara"
     "C:/Program Files/DO-Sara-Debug")
 
-find_path(
-	EasyEXIF_INCLUDE_DIR exif.h
-	PATHS ${PATH_HINTS}
-	PATH_SUFFIXES include/easyexif
-)
+find_path(EasyEXIF_INCLUDE_DIR exif.h
+          PATHS ${PATH_HINTS}
+          PATH_SUFFIXES include/easyexif)
+
 if(NOT EasyEXIF_INCLUDE_DIR)
   message(FATAL_ERROR
     "EasyEXIF include directory not found. "
-		"Set EasyEXIF_ROOT_DIR for the EasyEXIF install dir."
-	)
+    "Set EasyEXIF_ROOT_DIR for the EasyEXIF install dir.")
 endif()
 include_directories("${EasyEXIF_INCLUDE_DIR}")
 
 find_library(
   EasyEXIF_DEBUG_LIBRARY
   NAMES easyexif-d
-	PATHS ${PATH_HINTS}
+  PATHS ${PATH_HINTS}
   PATH_SUFFIXES lib
 )
 
 find_library(
   EasyEXIF_RELEASE_LIBRARY
   NAMES easyexif
-	PATHS ${PATH_HINTS}
-	PATH_SUFFIXES lib
+  PATHS ${PATH_HINTS}
+  PATH_SUFFIXES lib
 )
 
 if (SHAKTI_USE_STATIC_LIBS)
