@@ -32,13 +32,13 @@ set(BUILD_SHARED_LIBS ${SARA_BUILD_SHARED_LIBS})
 
 # Generate files from templates: the generated files are needed in order to
 # build and deploy Sara.
-configure_file(cmake/FindDO_Sara.cmake.in
-               ${CMAKE_BINARY_DIR}/cmake/FindDO_Sara.cmake @ONLY)
+configure_file(cmake/DO_SaraConfig.cmake.in
+               ${CMAKE_BINARY_DIR}/cmake/DO_SaraConfig.cmake @ONLY)
 file(COPY cmake DESTINATION ${CMAKE_BINARY_DIR})
 
 
 # Add DO-Sara to the CMake module path.
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR}/cmake)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 # Set Sara library version.
 include(sara_macros)

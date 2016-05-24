@@ -18,8 +18,8 @@ if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
                 ${DO_Sara_DIR}/COPYING.MPL2
           DESTINATION ${SARA_INSTALL_DIR}/include/DO/Sara
           COMPONENT Sources)
-  install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cmake/
-          DESTINATION ${SARA_INSTALL_DIR}/share/cmake/Modules
+  install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cmake
+          DESTINATION ${SARA_INSTALL_DIR}/share/DO_Sara
           COMPONENT Sources)
   install(DIRECTORY ${DO_Sara_DIR}/src/DO
           DESTINATION ${SARA_INSTALL_DIR}/include
