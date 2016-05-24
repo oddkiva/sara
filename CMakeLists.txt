@@ -23,21 +23,22 @@ option(SARA_BUILD_TESTS "Build unit tests for DO-Sara libraries" OFF)
 option(SARA_BUILD_SAMPLES "Build sample programs using DO-Sara libraries" OFF)
 option(SARA_BUILD_SHARED_LIBS "Build shared libraries for DO-Sara libraries"  OFF)
 
-set (SARA_INSTALL_DIR /usr CACHE STRING "Optional: Specify a directory path if want to install Sara C++ and Python libraries in a self-contained directory.")
+set(SARA_INSTALL_DIR /usr CACHE STRING
+  "Optional: Specify a directory path if want to install Sara C++ and Python libraries in a self-contained directory.")
 
 set(BUILD_SHARED_LIBS ${SARA_BUILD_SHARED_LIBS})
 
 
 
-# Configure templates.
-configure_file(
-  cmake/FindDO_Sara.cmake.in
-  ${CMAKE_BINARY_DIR}/cmake/FindDO_Sara.cmake @ONLY)
-file(COPY cmake
-     DESTINATION ${CMAKE_BINARY_DIR})
+# Generate files from templates: the generated files are needed in order to
+# build and deploy Sara.
+configure_file(cmake/DO_SaraConfig.cmake.in
+               ${CMAKE_BINARY_DIR}/cmake/DO_SaraConfig.cmake @ONLY)
+file(COPY cmake DESTINATION ${CMAKE_BINARY_DIR})
+
 
 # Add DO-Sara to the CMake module path.
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR}/cmake)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 # Set Sara library version.
 include(sara_macros)
