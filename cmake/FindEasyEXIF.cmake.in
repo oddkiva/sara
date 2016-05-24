@@ -12,8 +12,6 @@
 set(PATH_HINTS
     ${EasyEXIF_ROOT_DIR}
     @SARA_INTALL_DIR@
-    "/usr/local"
-    "/usr"
     "C:/Program Files/DO-Sara"
     "C:/Program Files/DO-Sara-Debug")
 
