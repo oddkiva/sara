@@ -1,6 +1,6 @@
 # USAGE: find_package(EasyEXIF)
 #
-#  This macro tries to locate the EasyEXIF library.
+#  This script tries to locate the EasyEXIF library.
 #
 #  Uses the following variables to hint at paths:
 #  - EasyEXIF_ROOT_DIR: EasyEXIF install dir.
@@ -42,10 +42,10 @@ find_library(
   PATH_SUFFIXES lib
 )
 
-if (SHAKTI_USE_STATIC_LIBS)
+if (DO_USE_STATIC_LIBS)
   set(EasyEXIF_LIBRARIES
-    debug ${EasyEXIF_DEBUG_LIBRARY}
-    optimized ${EasyEXIF_RELEASE_LIBRARY})
+      debug ${EasyEXIF_DEBUG_LIBRARY}
+      optimized ${EasyEXIF_RELEASE_LIBRARY})
 else ()
   set(EasyEXIF_LIBRARIES ${EasyEXIF_RELEASE_LIBRARY})
 endif ()

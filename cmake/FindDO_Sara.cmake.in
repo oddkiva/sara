@@ -85,13 +85,13 @@ endif ()
 
 
 # Include directories.
-find_path(
-  DO_Sara_INCLUDE_DIRS
+find_path(DO_Sara_INCLUDE_DIRS
   NAMES DO/Sara/Core.hpp DO/Sara/Defines.hpp DO/Sara/Graphics.hpp
-  PATHS @SARA_INSTALL_DIR@/include
-        /usr/local/include
-        /usr/include
-        "C:/Program Files/DO-Sara/include")
+  PATHS @SARA_INSTALL_DIR@
+        /usr/local
+        /usr
+        "C:/Program Files/DO-Sara"
+  PATH_SUFFIXES include)
 
 
 
@@ -145,21 +145,23 @@ else ()
           NOT "${DO_Sara_${COMPONENT}_LIBRARIES}" STREQUAL "")
         set (DO_Sara_LIBRARIES "${DO_Sara_${COMPONENT}_LIBRARIES}")
       elseif (NOT "${DO_Sara_${COMPONENT}_LIBRARIES}" STREQUAL "")
-        set(DO_Sara_LIBRARIES "${DO_Sara_LIBRARIES};${DO_Sara_${COMPONENT}_LIBRARIES}")
+        set(DO_Sara_LIBRARIES
+          "${DO_Sara_LIBRARIES};${DO_Sara_${COMPONENT}_LIBRARIES}")
       endif ()
     endforeach ()
   else ()
+
     foreach (COMPONENT ${DO_Sara_USE_COMPONENTS})
       include(UseDOSara${COMPONENT})
 
       if (NOT COMPONENT STREQUAL "ImageProcessing")
         find_path(DO_Sara_${COMPONENT}_INCLUDE_DIR
           NAMES ${COMPONENT}.hpp
-          PATHS @SARA_INSTALL_DIR@/include
-                /usr/local/include
-                /usr/include
-                "C:/Program Files/DO-Sara/include"
-          PATH_SUFFIXES DO/Sara)
+          PATHS @SARA_INSTALL_DIR@
+                /usr/local
+                /usr
+                "C:/Program Files/DO-Sara"
+          PATH_SUFFIXES include/DO/Sara)
 
         if (DO_USE_STATIC_LIBS)
           set (_library_name "DO_Sara_${COMPONENT}-s")
@@ -171,23 +173,22 @@ else ()
 
         find_library(DO_Sara_${COMPONENT}_DEBUG_LIBRARIES
           NAMES ${_library_name_debug}
-          PATHS @SARA_INSTALL_DIR@/lib
-                /usr/local/lib
-                /usr/lib
-                "C:/Program Files/DO-Sara-Debug/lib"
-          PATH_SUFFIXES DO/Sara)
+          PATHS @SARA_INSTALL_DIR@
+                /usr/local
+                /usr
+                "C:/Program Files/DO-Sara-Debug"
+          PATH_SUFFIXES lib/DO/Sara)
 
         find_library(DO_Sara_${COMPONENT}_RELEASE_LIBRARIES
           NAMES ${_library_name}
-          PATHS @SARA_INSTALL_DIR@/lib
-                /usr/local/lib
-                /usr/lib
-                "C:/Program Files/DO-Sara/lib"
-          PATH_SUFFIXES DO/Sara)
+          PATHS @SARA_INSTALL_DIR@
+                /usr/local
+                /usr
+                "C:/Program Files/DO-Sara"
+          PATH_SUFFIXES lib/DO/Sara)
 
         if (NOT DO_USE_STATIC_LIBS AND NOT DO_Sara_${COMPONENT}_DEBUG_LIBRARIES)
-          set(
-            DO_Sara_${COMPONENT}_LIBRARIES
+          set(DO_Sara_${COMPONENT}_LIBRARIES
             ${DO_Sara_${COMPONENT}_RELEASE_LIBRARIES}
             CACHE STRING "")
         else ()

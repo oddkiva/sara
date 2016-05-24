@@ -43,8 +43,7 @@ endif ()
 include_directories(
   ${DO_Sara_INCLUDE_DIR}
   ${DO_Sara_ThirdParty_DIR}
-  ${DO_Sara_ThirdParty_DIR}/eigen
-)
+  ${DO_Sara_ThirdParty_DIR}/eigen)
 
 
 if (SARA_USE_FROM_SOURCE)
