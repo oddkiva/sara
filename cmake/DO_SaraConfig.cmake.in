@@ -3,9 +3,9 @@ if (POLICY CMP0020)
 endif()
 
 
+# Append additional CMake module scripts.
 list(APPEND CMAKE_MODULE_PATH
   @SARA_INSTALL_DIR@/share/DO_Sara/cmake)
-
 
 # Load DO-specific macros
 include(sara_macros)
