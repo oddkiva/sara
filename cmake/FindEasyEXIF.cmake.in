@@ -11,7 +11,7 @@
 
 set(PATH_HINTS
     ${EasyEXIF_ROOT_DIR}
-    @SARA_INTALL_DIR@
+    @SARA_INSTALL_DIR@
     "C:/Program Files/DO-Sara"
     "C:/Program Files/DO-Sara-Debug")
 
