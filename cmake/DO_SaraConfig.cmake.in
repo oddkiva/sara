@@ -1,3 +1,4 @@
+# TODO: document me.
 if (POLICY CMP0020)
   cmake_policy(SET CMP0020 NEW)
 endif()
@@ -13,16 +14,101 @@ include(sara_macros)
 # Specify DO-Sara version.
 include(sara_version)
 
+
+
+# ============================================================================ #
+# Additional macros.
+macro (sara_check_requested_components)
+  # This macro defines one variable:
+  # - DO_Sara_USE_COMPONENTS which lists all the compiled compiled libraries we
+  #   want to use.
+
+  set(DO_Sara_USE_COMPONENTS "")
+
+  foreach (COMPONENT ${DO_Sara_FIND_COMPONENTS})
+
+    # By default, mark the requested component as not found.
+    set(DO_Sara_${COMPONENT}_FOUND FALSE)
+
+    # Now check if the requested component exists.
+    list(FIND DO_Sara_COMPONENTS ${COMPONENT} COMPONENT_INDEX)
+    if (NOT COMPONENT_INDEX EQUAL -1)
+      set(DO_Sara_${COMPONENT}_FOUND TRUE)
+      list (APPEND DO_Sara_USE_COMPONENTS ${COMPONENT})
+    endif ()
+
+    # Stop if REQUIRED option was given.
+    if (NOT DO_Sara_${COMPONENT}_FOUND AND DO_Sara_FIND_REQUIRED)
+      message (FATAL_ERROR "[Sara] ${COMPONENT} does not exist!")
+    endif ()
+
+  endforeach ()
+endmacro ()
+
+macro (sara_find_compiled_component_library COMPONENT)
+  # This macro defines two variables:
+  # - DO_Sara_${COMPONENT}_INCLUDE_DIR
+  # - DO_Sara_${COMPONENT}_LIBRARIES
+
+  find_path(DO_Sara_${COMPONENT}_INCLUDE_DIR
+    NAMES ${COMPONENT}.hpp
+    PATHS @SARA_INSTALL_DIR@
+    "C:/Program Files/DO-Sara"
+    PATH_SUFFIXES include/DO/Sara)
+
+  if (DO_USE_STATIC_LIBS)
+    set (_library_name "DO_Sara_${COMPONENT}-s")
+    set (_library_name_debug "DO_Sara_${COMPONENT}-sd")
+  else ()
+    set (_library_name "DO_Sara_${COMPONENT}")
+    set (_library_name_debug "DO_Sara_${COMPONENT}-d")
+  endif ()
+
+  find_library(DO_Sara_${COMPONENT}_DEBUG_LIBRARIES
+    NAMES ${_library_name_debug}
+    PATHS @SARA_INSTALL_DIR@
+    "C:/Program Files/DO-Sara-Debug"
+    PATH_SUFFIXES lib/DO/Sara)
+
+  find_library(DO_Sara_${COMPONENT}_RELEASE_LIBRARIES
+    NAMES ${_library_name}
+    PATHS @SARA_INSTALL_DIR@
+    "C:/Program Files/DO-Sara"
+    PATH_SUFFIXES lib/DO/Sara)
+
+  if (NOT DO_USE_STATIC_LIBS AND NOT DO_Sara_${COMPONENT}_DEBUG_LIBRARIES)
+    set(DO_Sara_${COMPONENT}_LIBRARIES
+      ${DO_Sara_${COMPONENT}_RELEASE_LIBRARIES}
+      CACHE STRING "")
+  else ()
+    set(DO_Sara_${COMPONENT}_LIBRARIES
+      debug ${DO_Sara_${COMPONENT}_DEBUG_LIBRARIES}
+      optimized ${DO_Sara_${COMPONENT}_RELEASE_LIBRARIES}
+      CACHE STRING "")
+  endif ()
+
+  if (DO_USE_STATIC_LIBS)
+    if (NOT DO_Sara_${COMPONENT}_DEBUG_LIBRARIES OR
+        NOT DO_Sara_${COMPONENT}_RELEASE_LIBRARIES)
+      message(FATAL_ERROR "DO_Sara_${COMPONENT} is missing!")
+    endif ()
+  elseif (NOT DO_Sara_${COMPONENT}_RELEASE_LIBRARIES)
+    message(FATAL_ERROR "DO_Sara_${COMPONENT} is missing!")
+  endif ()
+endmacro ()
+
+
+
+# ============================================================================ #
 # Debug message.
 sara_step_message("FindDO_Sara running for project '${PROJECT_NAME}'")
 
 
 
 # ============================================================================ #
-# Setup DO-CV once for all for every test projects in the 'test' directory.
+# List the available component libraries in Sara libraries.
 #
 if (NOT DO_Sara_FOUND)
-  # List the available component libraries in Sara libraries.
 
   # Foundational libraries.
   sara_append_components(DO_Sara_COMPONENTS Core)
@@ -92,117 +178,62 @@ find_path(DO_Sara_INCLUDE_DIRS
 if (NOT DO_Sara_FIND_COMPONENTS)
   set(DO_Sara_USE_COMPONENTS ${DO_Sara_COMPONENTS})
 else ()
-
   # Verbose comment.
   sara_step_message("Requested libraries by project '${PROJECT_NAME}':")
   foreach (component ${DO_Sara_FIND_COMPONENTS})
     sara_substep_message ("- ${component}")
   endforeach (component)
 
-  # Check that all components exist.
-  set(DO_Sara_USE_COMPONENTS "")
-  foreach (component ${DO_Sara_FIND_COMPONENTS})
-
-    # By default, mark the requested component as not found.
-    set(DO_Sara_${component}_FOUND FALSE)
-
-    # Now check if the requested component exists.
-    list(FIND DO_Sara_COMPONENTS ${component} COMPONENT_INDEX)
-    if (NOT COMPONENT_INDEX EQUAL -1)
-      set(DO_Sara_${component}_FOUND TRUE)
-      list (APPEND DO_Sara_USE_COMPONENTS ${component})
-    endif ()
-
-    # Stop if REQUIRED option was given.
-    if (NOT DO_Sara_${component}_FOUND AND DO_Sara_FIND_REQUIRED)
-      message (FATAL_ERROR "[Sara] ${component} does not exist!")
-    endif ()
-
-  endforeach (component)
-
-  if (POLICY CMP0011)
-    cmake_policy(SET CMP0011 OLD)
-  endif (POLICY CMP0011)
-
-
-  # Retrieve the set of dependencies when linking projects with Sara.
-  set(DO_Sara_LIBRARIES "")
-
-  foreach (COMPONENT ${DO_Sara_USE_COMPONENTS})
-    include(UseDOSara${COMPONENT})
-
-    if (NOT COMPONENT STREQUAL "ImageProcessing")
-      find_path(DO_Sara_${COMPONENT}_INCLUDE_DIR
-        NAMES ${COMPONENT}.hpp
-        PATHS @SARA_INSTALL_DIR@
-              "C:/Program Files/DO-Sara"
-        PATH_SUFFIXES include/DO/Sara)
-
-      if (DO_USE_STATIC_LIBS)
-        set (_library_name "DO_Sara_${COMPONENT}-s")
-        set (_library_name_debug "DO_Sara_${COMPONENT}-sd")
-      else ()
-        set (_library_name "DO_Sara_${COMPONENT}")
-        set (_library_name_debug "DO_Sara_${COMPONENT}-d")
-      endif ()
-
-      find_library(DO_Sara_${COMPONENT}_DEBUG_LIBRARIES
-        NAMES ${_library_name_debug}
-        PATHS @SARA_INSTALL_DIR@
-              "C:/Program Files/DO-Sara-Debug"
-        PATH_SUFFIXES lib/DO/Sara)
-
-      find_library(DO_Sara_${COMPONENT}_RELEASE_LIBRARIES
-        NAMES ${_library_name}
-        PATHS @SARA_INSTALL_DIR@
-              "C:/Program Files/DO-Sara"
-        PATH_SUFFIXES lib/DO/Sara)
-
-      if (NOT DO_USE_STATIC_LIBS AND NOT DO_Sara_${COMPONENT}_DEBUG_LIBRARIES)
-        set(DO_Sara_${COMPONENT}_LIBRARIES
-          ${DO_Sara_${COMPONENT}_RELEASE_LIBRARIES}
-          CACHE STRING "")
-      else ()
-        set(DO_Sara_${COMPONENT}_LIBRARIES
-            debug ${DO_Sara_${COMPONENT}_DEBUG_LIBRARIES}
-            optimized ${DO_Sara_${COMPONENT}_RELEASE_LIBRARIES}
-            CACHE STRING "")
-      endif ()
-
-      if (DO_USE_STATIC_LIBS)
-        if (NOT DO_Sara_${COMPONENT}_DEBUG_LIBRARIES OR
-            NOT DO_Sara_${COMPONENT}_RELEASE_LIBRARIES)
-          message(FATAL_ERROR "DO_Sara_${COMPONENT} is missing!")
-        endif ()
-      elseif (NOT DO_Sara_${COMPONENT}_RELEASE_LIBRARIES)
-        message(FATAL_ERROR "DO_Sara_${COMPONENT} is missing!")
-      endif ()
-
-      if (DO_Sara_${COMPONENT}_LIBRARIES)
-        list(APPEND DO_Sara_LIBRARIES ${DO_Sara_${COMPONENT}_LIBRARIES})
-      endif ()
-
-    endif ()
-
-    if ("${COMPONENT}" STREQUAL "Graphics")
-      list(APPEND DO_Sara_LIBRARIES
-        Qt5::OpenGL Qt5::Widgets ${OPENGL_LIBRARIES})
-    endif ()
-
-    if ("${COMPONENT}" STREQUAL "ImageIO")
-      # EXIF library.
-      find_package(EasyEXIF REQUIRED)
-
-      # JPEG, PNG, TIFF image I/O.
-      find_package(ThirdPartyImageIO REQUIRED)
-
-      # Add these to the dependencies.
-      list(APPEND DO_Sara_LIBRARIES
-        ${EasyEXIF_LIBRARIES}
-        ${ThirdPartyImageIO_LIBRARIES})
-    endif ()
-
-  endforeach()
-  message("DO_Sara_LIBRARIES = ${DO_Sara_LIBRARIES}")
-
+  # Check that the requested components exist and defines the variable
+  # 'DO_Sara_USE_COMPONENTS' accordingly.
+  sara_check_requested_components()
 endif ()
+
+
+# TODO: document this policy.
+if (POLICY CMP0011)
+  cmake_policy(SET CMP0011 OLD)
+endif (POLICY CMP0011)
+
+
+# Retrieve the set of dependencies when linking projects with Sara.
+set(DO_Sara_LIBRARIES "")
+
+foreach (COMPONENT ${DO_Sara_USE_COMPONENTS})
+  # Reuse existing component-specific CMake script.
+  include(UseDOSara${COMPONENT})
+
+  # TODO: when there is more than one header-only library:
+  # 1. create a specific list of compiled libraries
+  # 2. check if the library is in the list of compiled compiled library.
+  if (NOT COMPONENT STREQUAL "ImageProcessing")
+    sara_find_compiled_component_library(${COMPONENT})
+
+    # Update the list of compiled component libraries we want to use.
+    if (DO_Sara_${COMPONENT}_LIBRARIES)
+      list(APPEND DO_Sara_LIBRARIES ${DO_Sara_${COMPONENT}_LIBRARIES})
+    endif ()
+  endif ()
+
+  if ("${COMPONENT}" STREQUAL "Graphics")
+    list(APPEND DO_Sara_LIBRARIES
+      Qt5::OpenGL Qt5::Widgets ${OPENGL_LIBRARIES})
+  endif ()
+
+  if ("${COMPONENT}" STREQUAL "ImageIO")
+    # EXIF library.
+    find_package(EasyEXIF REQUIRED)
+
+    # JPEG, PNG, TIFF image I/O.
+    find_package(ThirdPartyImageIO REQUIRED)
+
+    # Add these to the dependencies.
+    list(APPEND DO_Sara_LIBRARIES
+      ${EasyEXIF_LIBRARIES}
+      ${ThirdPartyImageIO_LIBRARIES})
+  endif ()
+endforeach()
+
+
+# Debug message.
+message("DO_Sara_LIBRARIES = ${DO_Sara_LIBRARIES}")
