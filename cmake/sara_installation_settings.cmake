@@ -13,20 +13,25 @@ if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
           COMPONENT ThirdParty)
   set(CPACK_COMPONENT_ThirdParty_REQUIRED 1)
 
-  # DO-Sara source files
+  # License files.
   install(FILES ${DO_Sara_DIR}/COPYING.README
                 ${DO_Sara_DIR}/COPYING.MPL2
           DESTINATION ${SARA_INSTALL_DIR}/include/DO/Sara
           COMPONENT Sources)
+
+  # CMake scripts.
   install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cmake
           DESTINATION ${SARA_INSTALL_DIR}/share/DO_Sara
+          COMPONENT Sources)
+
+  # Source files.
+  install(FILES ${CMAKE_BINARY_DIR}/src/DO/Sara/Defines.hpp
+          DESTINATION ${SARA_INSTALL_DIR}/include/DO/Sara
           COMPONENT Sources)
   install(DIRECTORY ${DO_Sara_DIR}/src/DO
           DESTINATION ${SARA_INSTALL_DIR}/include
           COMPONENT Sources)
-  install(FILES ${CMAKE_BINARY_DIR}/src/DO/Sara/Defines.hpp
-          DESTINATION ${SARA_INSTALL_DIR}/include/DO/Sara
-          COMPONENT Sources)
+
   set(CPACK_COMPONENT_Sources_REQUIRED 1)
 endif ()
 

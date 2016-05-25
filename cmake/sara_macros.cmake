@@ -46,7 +46,7 @@ macro (sara_dissect_version)
     ${CMAKE_BINARY_DIR}/cmake/sara_version.cmake @ONLY)
   configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sara_version.cmake.in
-    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sara_version.cmake @ONLY)
+    ${CMAKE_BINARY_DIR}/cmake/sara_version.cmake @ONLY)
   configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/src/DO/Sara/Defines.hpp.in
     ${CMAKE_BINARY_DIR}/src/DO/Sara/Defines.hpp @ONLY)
