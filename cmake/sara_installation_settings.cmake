@@ -107,9 +107,17 @@ list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST
   /usr
   /usr/include
   /usr/lib
-  /usr/local
-  /usr/local/share
   /usr/share
+  /usr/local
+  /usr/local/include
+  /usr/local/lib
+  /usr/local/share
+  ${SARA_INSTALL_DIR}
+  ${SARA_INSTALL_DIR}/include
+  ${SARA_INSTALL_DIR}/lib
+  ${SARA_INSTALL_DIR}/share
+  ${SARA_INSTALL_DIR}/python
+  ${SARA_INSTALL_DIR}/python/do
   $ENV{WORKON_HOME}
   $ENV{VIRTUAL_ENV}
   $ENV{VIRTUAL_ENV}/lib
