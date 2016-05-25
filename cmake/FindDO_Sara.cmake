@@ -14,7 +14,7 @@ sara_step_message("FindDO_Sara running for project '${PROJECT_NAME}'")
 
 
 # ============================================================================ #
-# Setup DO-CV once for all for every test projects in the 'test' directory.
+# Setup Sara once for all for every test projects in the 'test' directory.
 #
 if (NOT DO_Sara_FOUND)
 
