@@ -20,6 +20,10 @@ if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
           COMPONENT Sources)
 
   # CMake scripts.
+  configure_file(cmake/DO_SaraConfig.cmake.in
+                 ${CMAKE_BINARY_DIR}/cmake/DO_SaraConfig.cmake @ONLY)
+  file(COPY cmake DESTINATION ${CMAKE_BINARY_DIR})
+
   install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cmake
           DESTINATION ${SARA_INSTALL_DIR}/share/DO_Sara
           COMPONENT Sources)
