@@ -52,7 +52,9 @@ execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
 
 # N.B.: this is a kludge here until we find a better implementation.
 if (NOT SARA_INSTALL_DIR STREQUAL /usr)
-  set(SARA_PYTHON_INSTALL_DIR ${SARA_INSTALL_DIR}/python)
+  set(PYTHON_VERSION ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
+  set(SARA_PYTHON_INSTALL_DIR
+    ${SARA_INSTALL_DIR}/lib/python${PYTHON_VERSION}/site-packages)
 else ()
   set(SARA_PYTHON_INSTALL_DIR ${PYTHON_SITE_PACKAGES_DIR})
 endif ()
