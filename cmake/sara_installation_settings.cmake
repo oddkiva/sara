@@ -35,7 +35,7 @@ if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
        cmake/FindVisualLeakDetector.cmake)
   file(COPY ${SARA_CMAKE_SCRIPTS} DESTINATION ${CMAKE_BINARY_DIR}/cmake)
 
-  install(FILES ${SARA_CMAKE_SCRIPTS}
+  install(DIRECTORY ${CMAKE_BINARY_DIR}/cmake
           DESTINATION share/DO_Sara
           COMPONENT Sources)
 
