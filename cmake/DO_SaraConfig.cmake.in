@@ -101,7 +101,7 @@ endif ()
 # 'find_package(DO_Sara COMPONENTS Core Graphics... [REQUIRED|QUIET])'
 #
 # Debug message.
-sara_step_message("FindDO_Sara running for project '${PROJECT_NAME}'")
+sara_step_message("DO_SaraConfig.cmake running for project '${PROJECT_NAME}'")
 
 # List the compile flags needed by Sara.
 set(SARA_DEFINITIONS "-DSRCDIR=${CMAKE_CURRENT_SOURCE_DIR}")
