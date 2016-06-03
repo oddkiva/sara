@@ -54,28 +54,106 @@ macro (sara_dissect_version)
 endmacro ()
 
 
-
-# ==============================================================================
-# Useful macros to add a new library with minimized effort.
-#
 macro (sara_append_components _component_list _component)
   set(DO_Sara_${_component}_USE_FILE UseDOSara${_component})
   list(APPEND "${_component_list}" ${_component})
 endmacro ()
 
 
+macro (sara_populate_available_components)
+  # This macro populates the list of components and stores it in the following
+  # variable:
+  # - DO_Sara_COMPONENTS
+  # For each component ${COMPONENT} in ${DO_Sara_COMPONENTS}, we define the
+  # following variable:
+  # - DO_Sara_${COMPONENT}_USE_FILE
+
+  # Foundational libraries.
+  sara_append_components(DO_Sara_COMPONENTS Core)
+  sara_append_components(DO_Sara_COMPONENTS Graphics)
+
+  # Image and Video I/O.
+  sara_append_components(DO_Sara_COMPONENTS ImageIO)
+  if (SARA_BUILD_VIDEOIO)
+    sara_append_components(DO_Sara_COMPONENTS VideoIO)
+  endif ()
+
+  # Image processing.
+  sara_append_components(DO_Sara_COMPONENTS ImageProcessing)
+
+  # Feature detection and description.
+  sara_append_components(DO_Sara_COMPONENTS Features)
+  sara_append_components(DO_Sara_COMPONENTS FeatureDetectors)
+  sara_append_components(DO_Sara_COMPONENTS FeatureDescriptors)
+
+  # Feature matching.
+  sara_append_components(DO_Sara_COMPONENTS Match)
+  sara_append_components(DO_Sara_COMPONENTS FeatureMatching)
+
+  # Disjoint sets.
+  sara_append_components(DO_Sara_COMPONENTS DisjointSets)
+
+  # Geometry.
+  sara_append_components(DO_Sara_COMPONENTS Geometry)
+
+  # KDTree for fast neighbor search.
+  sara_append_components(DO_Sara_COMPONENTS KDTree)
+
+  # DEBUG: Print the list of component libraries.
+  sara_step_message("Currently available components in Sara:")
+  foreach (component ${DO_Sara_COMPONENTS})
+    sara_substep_message ("- ${component}")
+  endforeach (component)
+endmacro ()
+
+
+macro (sara_check_requested_components)
+  # This macro defines one variable:
+  # - DO_Sara_USE_COMPONENTS which lists all the compiled compiled libraries we
+  #   want to use.
+
+  sara_step_message("Requested libraries by project '${PROJECT_NAME}':")
+  foreach (component ${DO_Sara_FIND_COMPONENTS})
+    message ("      - ${component}")
+  endforeach (component)
+
+  set(DO_Sara_USE_COMPONENTS "")
+
+  foreach (COMPONENT ${DO_Sara_FIND_COMPONENTS})
+    # By default, mark the requested component as not found.
+    set(DO_Sara_${COMPONENT}_FOUND FALSE)
+
+    # Now check if the requested component exists.
+    list(FIND DO_Sara_COMPONENTS ${COMPONENT} COMPONENT_INDEX)
+    if (NOT COMPONENT_INDEX EQUAL -1)
+      set(DO_Sara_${COMPONENT}_FOUND TRUE)
+      list (APPEND DO_Sara_USE_COMPONENTS ${COMPONENT})
+    endif ()
+
+    # Stop if REQUIRED option was given.
+    if (NOT DO_Sara_${COMPONENT}_FOUND AND DO_Sara_FIND_REQUIRED)
+      message (FATAL_ERROR "[Sara] ${COMPONENT} does not exist!")
+    endif ()
+  endforeach ()
+endmacro ()
+
+
+
+# ==============================================================================
+# Utility macros to easily add a new C++ library.
+#
 macro (sara_create_common_variables _library_name)
-  set(
-    DO_Sara_${_library_name}_SOURCE_DIR
+  set(DO_Sara_${_library_name}_SOURCE_DIR
     ${DO_Sara_SOURCE_DIR}/${_library_name}
     CACHE STRING "Source directory")
+
   if ("${DO_Sara_${_library_name}_SOURCE_FILES}" STREQUAL "")
-    set(
-      DO_Sara_${_library_name}_LIBRARIES ""
+    set(DO_Sara_${_library_name}_LIBRARIES ""
       CACHE STRING "Library name")
   else ()
     set(DO_Sara_${_library_name}_LIBRARIES
-      DO_Sara_${_library_name} CACHE STRING "Library name")
+      DO_Sara_${_library_name}
+      CACHE STRING "Library name")
   endif ()
 endmacro ()
 
@@ -89,8 +167,7 @@ endmacro ()
 
 macro (sara_set_internal_dependencies _library_name _dep_list)
   foreach (dep ${_dep_list})
-    list(
-      APPEND DO_Sara_${_library_name}_LINK_LIBRARIES
+    list(APPEND DO_Sara_${_library_name}_LINK_LIBRARIES
       ${DO_Sara_${dep}_LIBRARIES})
   endforeach ()
 endmacro ()
@@ -147,10 +224,11 @@ endmacro()
 
 macro (sara_append_library _library_name
                            _include_dirs
-                           _hdr_files _src_files
+                           _hdr_files
+                           _src_files
                            _lib_dependencies)
   # 1. Verbose comment.
-  message(STATUS "[Sara] Creating project 'DO_Sara_${_library_name}'")
+  sara_message("[Sara] Creating project 'DO_Sara_${_library_name}'")
 
   # 2. Bookmark the project to make sure the library is created only once.
   set_property(GLOBAL PROPERTY _DO_Sara_${_library_name}_INCLUDED 1)
@@ -164,16 +242,13 @@ macro (sara_append_library _library_name
   if (NOT "${_src_files}" STREQUAL "")
     # - Case 1: the project contains 'cpp' source files
     #   Specify the source files.
-    add_library(DO_Sara_${_library_name}
-                ${_hdr_files} ${_src_files})
+    add_library(DO_Sara_${_library_name} ${_hdr_files} ${_src_files})
 
     # Link with other libraries.
-    message(STATUS
-      "[DO] Linking project 'DO_Sara_${_library_name}' with "
-      "'${_lib_dependencies}'"
-    )
-    target_link_libraries(
-      DO_Sara_${_library_name} ${_lib_dependencies})
+    sara_step_message("Linking project 'DO_Sara_${_library_name}' with "
+                      "'${_lib_dependencies}'")
+
+    target_link_libraries( DO_Sara_${_library_name} ${_lib_dependencies})
 
     # Form the compiled library output name.
     set(_library_output_basename DO_Sara_${_library_name})
@@ -186,13 +261,11 @@ macro (sara_append_library _library_name
     endif ()
 
     # Specify output name and version.
-    set_target_properties(
-      DO_Sara_${_library_name}
-      PROPERTIES
-      VERSION ${DO_Sara_VERSION}
-      SOVERSION ${DO_Sara_SOVERSION}
-      OUTPUT_NAME ${_library_output_name}
-      OUTPUT_NAME_DEBUG ${_library_output_name_debug})
+    set_target_properties(DO_Sara_${_library_name}
+      PROPERTIES VERSION ${DO_Sara_VERSION}
+                 SOVERSION ${DO_Sara_SOVERSION}
+                 OUTPUT_NAME ${_library_output_name}
+                 OUTPUT_NAME_DEBUG ${_library_output_name_debug})
 
     # Set correct compile definitions when building the libraries.
     if (SARA_BUILD_SHARED_LIBS)
@@ -200,17 +273,15 @@ macro (sara_append_library _library_name
     else ()
       set(_library_defs "DO_SARA_STATIC")
     endif ()
-    set_target_properties(
-      DO_Sara_${_library_name}
-      PROPERTIES
-      COMPILE_DEFINITIONS ${_library_defs})
+    set_target_properties(DO_Sara_${_library_name}
+      PROPERTIES COMPILE_DEFINITIONS ${_library_defs})
 
     # Specify where to install the static library.
     install(
       TARGETS DO_Sara_${_library_name}
-      RUNTIME DESTINATION ${SARA_INSTALL_DIR}/bin COMPONENT Libraries
-      LIBRARY DESTINATION ${SARA_INSTALL_DIR}/lib/DO/Sara COMPONENT Libraries
-      ARCHIVE DESTINATION ${SARA_INSTALL_DIR}/lib/DO/Sara COMPONENT Libraries)
+      RUNTIME DESTINATION bin COMPONENT Libraries
+      LIBRARY DESTINATION lib COMPONENT Libraries
+      ARCHIVE DESTINATION lib COMPONENT Libraries)
   else ()
 
     # - Case 2: the project is a header-only library
@@ -229,8 +300,7 @@ endmacro ()
 
 
 macro (sara_generate_library _library_name)
-  sara_append_library(
-    ${_library_name}
+  sara_append_library(${_library_name}
     "${DO_Sara_SOURCE_DIR}"
     "${DO_Sara_${_library_name}_HEADER_FILES}"
     "${DO_Sara_${_library_name}_SOURCE_FILES}"
@@ -261,18 +331,14 @@ function (sara_add_test _test_name _srcs _additional_lib_deps)
 
   # Create the unit test project
   add_executable(${_test_name} ${_srcs_var})
-  target_link_libraries(${_test_name}
-                        ${_additional_lib_deps}
-                        gtest)
+  target_link_libraries(${_test_name} ${_additional_lib_deps} gtest)
 
-  set_target_properties(
-    ${_test_name}
+  set_target_properties(${_test_name}
     PROPERTIES
     COMPILE_FLAGS ${SARA_DEFINITIONS}
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
-  add_test(${_test_name}
-           "${CMAKE_BINARY_DIR}/bin/${_test_name}")
+  add_test(${_test_name} "${CMAKE_BINARY_DIR}/bin/${_test_name}")
 
   if (DEFINED test_group_name)
     set_property(
