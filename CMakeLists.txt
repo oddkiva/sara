@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.7)
+cmake_minimum_required(VERSION 2.8.12)
 
 project(Sara)
 
@@ -15,29 +15,31 @@ set(CMAKE_BUILD_TYPE "Release" CACHE STRING
     "Build type options are: Debug, Release")
 
 # Set options.
-option(SARA_USE_FROM_SOURCE "Use DO-Sara libraries from source" ON)
 option(SARA_USE_VLD "Enable Visual Leak Detector for unit tests" OFF)
 option(SARA_BUILD_VIDEOIO "Build Sara's Video I/O module" OFF)
 option(SARA_BUILD_PYTHON_BINDINGS "Build Python bindings" OFF)
 option(SARA_BUILD_TESTS "Build unit tests for DO-Sara libraries" OFF)
 option(SARA_BUILD_SAMPLES "Build sample programs using DO-Sara libraries" OFF)
-option(SARA_BUILD_SHARED_LIBS "Build shared libraries for DO-Sara libraries"  OFF)
+option(SARA_BUILD_SHARED_LIBS "Build shared libraries for DO-Sara libraries" OFF)
+option(SARA_SELF_CONTAINED_INSTALLATION
+  "Install C++ and Python libraries in a single self contained directory" OFF)
 
-set(SARA_INSTALL_DIR /usr CACHE STRING
-  "Optional: Specify a directory path if want to install Sara C++ and Python libraries in a self-contained directory.")
 
+# Set the following internal switches to build Sara.
+set(SARA_USE_FROM_SOURCE TRUE CACHE INTERNAL "Build Sara libraries")
 set(BUILD_SHARED_LIBS ${SARA_BUILD_SHARED_LIBS})
 
-# Add DO-Sara to the CMake module path.
+
+# Add Sara to the CMake module path.
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
-# Set Sara library version.
+# Configure Sara library version.
 include(sara_macros)
 sara_dissect_version()
 
-
-
+# We are ready to build Sara.
 find_package(DO_Sara REQUIRED)
+
 
 # Group projects by category.
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)

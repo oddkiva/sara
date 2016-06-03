@@ -25,12 +25,12 @@ if(CMAKE_COMPILER_IS_GNUCC)
 endif()
 set_property(TARGET flann_cpp_s PROPERTY COMPILE_DEFINITIONS FLANN_STATIC)
 install(TARGETS flann_cpp_s
-        LIBRARY DESTINATION ${SARA_INSTALL_DIR}/lib
-        ARCHIVE DESTINATION ${SARA_INSTALL_DIR}/lib
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
         COMPONENT ThirdParty)
 if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
   install(DIRECTORY ${DO_Sara_ThirdParty_DIR}/flann/src/cpp/flann
-          DESTINATION ${SARA_INSTALL_DIR}/include
+          DESTINATION include
           COMPONENT ThirdParty)
 endif ()
 

@@ -3,37 +3,48 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
+if (SARA_SELF_CONTAINED_INSTALLATION)
+  set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+endif ()
+
 
 # Install the sources.
 if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
   # Eigen 3
   sara_message("Installing Eigen")
   install(DIRECTORY ${DO_Sara_ThirdParty_DIR}/eigen/Eigen
-          DESTINATION ${SARA_INSTALL_DIR}/include
+          DESTINATION include
           COMPONENT ThirdParty)
   set(CPACK_COMPONENT_ThirdParty_REQUIRED 1)
 
   # License files.
   install(FILES ${DO_Sara_DIR}/COPYING.README
                 ${DO_Sara_DIR}/COPYING.MPL2
-          DESTINATION ${SARA_INSTALL_DIR}/include/DO/Sara
+          DESTINATION include/DO/Sara
           COMPONENT Sources)
 
   # CMake scripts.
   configure_file(cmake/DO_SaraConfig.cmake.in
                  ${CMAKE_BINARY_DIR}/cmake/DO_SaraConfig.cmake @ONLY)
-  file(COPY cmake DESTINATION ${CMAKE_BINARY_DIR})
+  file(GLOB SARA_CMAKE_SCRIPTS
+       cmake/UseDO*.cmake
+       cmake/sara_*.cmake
+       cmake/FindEasyEXIF.cmake
+       cmake/FindFFMPEG.cmake
+       cmake/FindThirdPartyImageIO.cmake
+       cmake/FindVisualLeakDetector.cmake)
+  file(COPY ${SARA_CMAKE_SCRIPTS} DESTINATION ${CMAKE_BINARY_DIR}/cmake)
 
-  install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cmake
-          DESTINATION ${SARA_INSTALL_DIR}/share/DO_Sara
+  install(DIRECTORY ${CMAKE_BINARY_DIR}/cmake
+          DESTINATION share/DO_Sara
           COMPONENT Sources)
 
   # Source files.
   install(FILES ${CMAKE_BINARY_DIR}/src/DO/Sara/Defines.hpp
-          DESTINATION ${SARA_INSTALL_DIR}/include/DO/Sara
+          DESTINATION include/DO/Sara
           COMPONENT Sources)
   install(DIRECTORY ${DO_Sara_DIR}/src/DO
-          DESTINATION ${SARA_INSTALL_DIR}/include
+          DESTINATION include
           COMPONENT Sources)
 
   set(CPACK_COMPONENT_Sources_REQUIRED 1)
@@ -55,18 +66,20 @@ if (WIN32)
 else()
   set(CPACK_PACKAGE_NAME "libDO-Sara")
 endif ()
+
 if (SARA_BUILD_SHARED_LIBS)
   set(CPACK_PACKAGE_NAME "${CPACK_PACKAGE_NAME}-shared")
 else ()
   set(CPACK_PACKAGE_NAME "${CPACK_PACKAGE_NAME}-static")
 endif ()
+
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
   set(CPACK_PACKAGE_NAME "${CPACK_PACKAGE_NAME}-dbg")
 endif ()
 
 set(CPACK_PACKAGE_VENDOR "DO-CV")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY
-    "DO-Sara: An easy-to-use C++ set of libraries for computer vision")
+    "Sara: An easy-to-use C++ set of libraries for computer vision")
 set(CPACK_RESOURCE_FILE_LICENSE "${DO_Sara_DIR}/COPYING.README")
 set(CPACK_PACKAGE_CONTACT "David OK <david.ok8@gmail.com>")
 set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
@@ -98,7 +111,7 @@ set(CPACK_RPM_PACKAGE_RELEASE ${DO_Sara_VERSION})
 set(CPACK_RPM_PACKAGE_LICENSE "MPL v2")
 set(CPACK_RPM_PACKAGE_GROUP "Applications/Multimedia")
 
-execute_process(COMMAND python -c
+execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
   "from distutils.sysconfig import get_python_lib; print(get_python_lib())"
   OUTPUT_VARIABLE PYTHON_SITE_PACKAGES_DIR
   OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -112,10 +125,10 @@ list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST
   /usr/local/include
   /usr/local/lib
   /usr/local/share
-  ${SARA_INSTALL_DIR}
-  ${SARA_INSTALL_DIR}/include
-  ${SARA_INSTALL_DIR}/lib
-  ${SARA_INSTALL_DIR}/share
+  ${CMAKE_INSTALL_PREFIX}
+  ${CMAKE_INSTALL_PREFIX}/include
+  ${CMAKE_INSTALL_PREFIX}/lib
+  ${CMAKE_INSTALL_PREFIX}/share
   $ENV{WORKON_HOME}
   $ENV{VIRTUAL_ENV}
   $ENV{VIRTUAL_ENV}/lib
