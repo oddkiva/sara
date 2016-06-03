@@ -5,7 +5,6 @@ set -ex
 function build_library()
 {
   local cmake_options="-DCMAKE_BUILD_TYPE=Release "
-  cmake_options+="-DCMAKE_INSTALL_PREFIX=/usr "
   cmake_options+="-DSARA_BUILD_VIDEOIO=ON "
   cmake_options+="-DSARA_BUILD_PYTHON_BINDINGS=ON "
   cmake_options+="-DSARA_BUILD_SHARED_LIBS=ON "
