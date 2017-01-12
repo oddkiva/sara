@@ -1,5 +1,12 @@
 include_directories(${DO_Sara_ThirdParty_DIR}/gtest/include)
 
+# Use boost unit test framework.
+set(Boost_USE_STATIC_LIBS OFF)
+set(Boost_USE_MULTITHREADED ON)
+find_package(Boost COMPONENTS unit_test_framework REQUIRED)
+include_directories(${Boost_INCLUDE_DIR})
+
+
 message(STATUS "")
 sara_step_message("Appending test projects:")
 

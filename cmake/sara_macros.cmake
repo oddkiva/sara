@@ -331,14 +331,17 @@ function (sara_add_test _test_name _srcs _additional_lib_deps)
 
   # Create the unit test project
   add_executable(${_test_name} ${_srcs_var})
-  target_link_libraries(${_test_name} ${_additional_lib_deps} gtest)
+  target_link_libraries(${_test_name} ${_additional_lib_deps}
+                        gtest
+                        ${Boost_LIBRARIES})
+  target_compile_definitions(${_test_name} PRIVATE -DBOOST_TEST_DYN_LINK)
 
   set_target_properties(${_test_name}
     PROPERTIES
     COMPILE_FLAGS ${SARA_DEFINITIONS}
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
-  add_test(${_test_name} "${CMAKE_BINARY_DIR}/bin/${_test_name}")
+  add_test(NAME ${_test_name} COMMAND $<TARGET_FILE:${_test_name}>)
 
   if (DEFINED test_group_name)
     set_property(
