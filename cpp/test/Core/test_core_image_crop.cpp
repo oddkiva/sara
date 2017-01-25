@@ -11,7 +11,7 @@
 
 #include <gtest/gtest.h>
 
-#include <DO/Sara/Core/Image/Subimage.hpp>
+#include <DO/Sara/Core/Image/Operations.hpp>
 
 #include "../AssertHelpers.hpp"
 
@@ -20,13 +20,13 @@ using namespace std;
 using namespace DO::Sara;
 
 
-class TestSubimage : public testing::Test
+class TestImageCrop : public testing::Test
 {
 protected:
   Image<float> image;
   Vector2i sizes;
 
-  TestSubimage()
+  TestImageCrop()
   {
     sizes << 3, 4;
     image.resize(sizes);
@@ -39,11 +39,11 @@ protected:
 };
 
 
-TEST_F(TestSubimage, test_subimage_within_bounds)
+TEST_F(TestImageCrop, test_crop_image_within_bounds)
 {
   auto a = Vector2i{ 1, 1 };
   auto b = Vector2i{ 3, 2 };
-  auto subimage = get_subimage(image, a, b);
+  auto subimage = crop(image, a, b);
 
   auto true_subimage = Image<float, 2>{ 2, 1 };
   true_subimage.matrix() << 2, 2;
@@ -52,17 +52,17 @@ TEST_F(TestSubimage, test_subimage_within_bounds)
 
   auto x = 1, y = 1;
   auto w = 2, h = 1;
-  subimage = get_subimage(image, x, y, w, h);
+  subimage = crop(image, x, y, w, h);
   EXPECT_MATRIX_EQ(true_subimage.sizes(), subimage.sizes());
   EXPECT_MATRIX_EQ(true_subimage.matrix(), subimage.matrix());
 }
 
 
-TEST_F(TestSubimage, test_subimage_out_of_bounds_1)
+TEST_F(TestImageCrop, test_crop_image_out_of_bounds_1)
 {
   auto a = Vector2i{ -3, -3 };
   auto b = Vector2i{ 0, 0 };
-  auto subimage = get_subimage(image, a, b);
+  auto subimage = crop(image, a, b);
 
   auto true_subimage = Image<float, 2>{ 3, 3 };
   true_subimage.matrix().fill(0);
@@ -71,22 +71,22 @@ TEST_F(TestSubimage, test_subimage_out_of_bounds_1)
 
   auto x = -3, y = -3;
   auto w =  3, h =  3;
-  subimage = get_subimage(image, x, y, w, h);
+  subimage = crop(image, x, y, w, h);
   EXPECT_MATRIX_EQ(true_subimage.sizes(), subimage.sizes());
   EXPECT_MATRIX_EQ(true_subimage.matrix(), subimage.matrix());
 
   auto cx = -2, cy = -2, r = 1;
-  subimage = get_subimage(image, cx, cy, r);
+  subimage = crop(image, cx, cy, r);
   EXPECT_MATRIX_EQ(true_subimage.sizes(), subimage.sizes());
   EXPECT_MATRIX_EQ(true_subimage.matrix(), subimage.matrix());
 }
 
 
-TEST_F(TestSubimage, test_subimage_out_of_bounds_2)
+TEST_F(TestImageCrop, test_crop_image_out_of_bounds_2)
 {
   auto a = Vector2i{ -1, -1 };
   auto b = Vector2i{ 2, 3 };
-  auto subimage = get_subimage(image, a, b);
+  auto subimage = crop(image, a, b);
 
   auto true_subimage = Image<float, 2>{ 3, 4 };
   true_subimage.matrix() <<
@@ -99,7 +99,7 @@ TEST_F(TestSubimage, test_subimage_out_of_bounds_2)
 
   auto x = -1, y = -1;
   auto w =  3, h =  4;
-  subimage = get_subimage(image, x, y, w, h);
+  subimage = crop(image, x, y, w, h);
   EXPECT_MATRIX_EQ(true_subimage.sizes(), subimage.sizes());
   EXPECT_MATRIX_EQ(true_subimage.matrix(), subimage.matrix());
 }

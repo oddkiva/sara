@@ -9,9 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_SARA_CORE_IMAGE_OPERATIONS_HPP
-#define DO_SARA_CORE_IMAGE_OPERATIONS_HPP
-
+#pragma once
 
 #include <DO/Sara/Core/Image/Image.hpp>
 #include <DO/Sara/Core/Pixel/SmartColorConversion.hpp>
@@ -89,7 +87,7 @@ namespace DO { namespace Sara {
 } /* namespace DO */
 
 
-// Image rescaling functions
+// Image rescaling functions.
 namespace DO { namespace Sara {
 
   //! @ingroup Image
@@ -188,13 +186,79 @@ namespace DO { namespace Sara {
 
   //! @}
 
+} /* namespace Sara */
+} /* namespace DO */
+
+
+// Image crop functions.
+namespace DO { namespace Sara {
 
   //! @{
-  //! @brief Get the sub-image of an image.
+  //! @brief Crop an image unsafely without checking the domain range.
   template <typename T, int N>
   Image<T, N> crop(const ImageView<T, N>& src,
                    const typename ImageView<T, N>::vector_type& begin_coords,
                    const typename ImageView<T, N>::vector_type& end_coords)
+  {
+    auto dst = Image<T, N>{ end_coords - begin_coords };
+
+    auto src_it = src.begin_subarray(begin_coords, end_coords);
+    for (auto dst_it = dst.begin() ; dst_it != dst.end(); ++dst_it, ++src_it)
+      *dst_it = *src_it;
+
+    return dst;
+  }
+
+  template <typename T>
+  inline Image<T> crop(const ImageView<T>& src, int top_left_x,
+                            int top_left_y, int width, int height)
+  {
+    auto begin_coords = Vector2i{ top_left_x, top_left_y };
+    auto end_coords = Vector2i{ top_left_x + width, top_left_y + height };
+    return crop(src, begin_coords, end_coords);
+  }
+
+  template <typename T>
+  inline Image<T> crop(const ImageView<T>& src, int center_x, int center_y,
+                            int radius)
+  {
+    return crop(src, center_x - radius, center_y - radius, 2 * radius + 1,
+                2 * radius + 1);
+  }
+
+
+  struct Crop
+  {
+    template <typename SrcImageView>
+    using OutPixel = typename SrcImageView::pixel_type;
+
+    template <typename ImageView_>
+    using Coords = typename ImageView_::coord_type;
+
+    template <typename Pixel, int N>
+    void operator()(const ImageView<Pixel, N>& src, ImageView<Pixel, N>& dst,
+                    const Coords<ImageView<Pixel, N>>& begin_coords,
+                    const Coords<ImageView<Pixel, N>>& end_coords) const
+    {
+      dst = crop(src, begin_coords, end_coords);
+    }
+
+    template <typename Pixel>
+    void operator()(const ImageView<Pixel>& src, ImageView<Pixel>& dst,
+                    int top_left_x, int top_left_y, int width, int height) const
+    {
+      dst = crop(src, top_left_x, top_left_y, width, height);
+    }
+  };
+  //! @}
+
+  //! @{
+  //! @brief Crop safely an image by checking the domain range.
+  template <typename T, int N>
+  Image<T, N>
+  safe_crop(const ImageView<T, N>& src,
+            const typename ImageView<T, N>::vector_type& begin_coords,
+            const typename ImageView<T, N>::vector_type& end_coords)
   {
     auto dst = Image<T, N>{ end_coords - begin_coords };
 
@@ -213,25 +277,47 @@ namespace DO { namespace Sara {
   }
 
   template <typename T>
-  inline Image<T> crop(const ImageView<T>& src, int top_left_x, int top_left_y,
-                       int width, int height)
+  inline Image<T> safe_crop(const ImageView<T>& src, int top_left_x,
+                            int top_left_y, int width, int height)
   {
-    Vector2i begin_coords{ top_left_x, top_left_y };
-    Vector2i end_coords{ top_left_x + width, top_left_y + height };
-    return get_subimage(src, begin_coords, end_coords);
+    auto begin_coords = Vector2i{ top_left_x, top_left_y };
+    auto end_coords = Vector2i{ top_left_x + width, top_left_y + height };
+    return crop(src, begin_coords, end_coords);
   }
 
   template <typename T>
-  inline Image<T> crop(const ImageView<T>& src, int center_x, int center_y,
-                       int radius)
+  inline Image<T> safe_crop(const ImageView<T>& src, int center_x, int center_y,
+                            int radius)
   {
-    return get_subimage(src, center_x - radius, center_y - radius,
-                        2 * radius + 1, 2 * radius + 1);
+    return crop(src, center_x - radius, center_y - radius, 2 * radius + 1,
+                2 * radius + 1);
   }
+
+
+  struct SafeCrop
+  {
+    template <typename SrcImageView>
+    using OutPixel = typename SrcImageView::pixel_type;
+
+    template <typename ImageView_>
+    using Coords = typename ImageView_::coord_type;
+
+    template <typename Pixel, int N>
+    void operator()(const ImageView<Pixel, N>& src, ImageView<Pixel, N>& dst,
+                    const Coords<ImageView<Pixel, N>>& begin_coords,
+                    const Coords<ImageView<Pixel, N>>& end_coords) const
+    {
+      dst = safe_crop(src, begin_coords, end_coords);
+    }
+
+    template <typename Pixel>
+    void operator()(const ImageView<Pixel>& src, ImageView<Pixel>& dst,
+                    int top_left_x, int top_left_y, int width, int height) const
+    {
+      dst = crop(src, top_left_x, top_left_y, width, height);
+    }
+  };
   //! @}
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_CORE_IMAGE_OPERATIONS_HPP */

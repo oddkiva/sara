@@ -58,11 +58,11 @@ flags = [
 # CUDA header directories.
 "-I", "/usr/local/cuda/include",
 # Current header directories.
-"-I", "./src",
+"-I", "./cpp/src",
 # Third-party header directories.
-"-I", "./third-party/eigen",
-"-I", "./third-party/flann/src/cpp",
-"-I", "./third-party/gtest/include",
+"-I", "./cpp/third-party/eigen",
+"-I", "./cpp/third-party/flann/src/cpp",
+"-I", "./cpp/third-party/gtest/include",
 ]
 
 
