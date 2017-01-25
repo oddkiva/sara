@@ -47,22 +47,15 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 # Set installation settings.
 include(sara_installation_settings)
 
-# Build third-party software (google test, FLANN,...)
-add_subdirectory(third-party)
-
-if (SARA_BUILD_PYTHON_BINDINGS)
-  add_subdirectory(python)
-endif ()
-
-# Setup unit test projects
+# Enable testing before building the library.
 if (SARA_BUILD_TESTS)
   enable_testing()
-  add_subdirectory(test)
 endif ()
 
-# Setup unit test projects
-if (SARA_BUILD_SAMPLES)
-  add_subdirectory(examples)
+# Build the libraries.
+add_subdirectory(cpp)
+if (SARA_BUILD_PYTHON_BINDINGS)
+  add_subdirectory(python)
 endif ()
 
 # Make documentation

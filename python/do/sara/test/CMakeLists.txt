@@ -17,7 +17,7 @@ add_custom_command(TARGET copy_pysara_module
   ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/do)
 
 # Copy pysara.[so, dll] to the runtime output directory.
-get_target_property(pysara_LIBRARY_PATH pysara LOCATION)
+set(pysara_LIBRARY_PATH $<TARGET_FILE:pysara>)
 add_custom_command(TARGET copy_pysara_module
   COMMAND ${CMAKE_COMMAND} -E
   copy ${pysara_LIBRARY_PATH} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})

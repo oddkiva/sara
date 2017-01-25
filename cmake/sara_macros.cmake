@@ -48,8 +48,8 @@ macro (sara_dissect_version)
     ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sara_version.cmake.in
     ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sara_version.cmake @ONLY)
   configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/DO/Sara/Defines.hpp.in
-    ${CMAKE_BINARY_DIR}/src/DO/Sara/Defines.hpp @ONLY)
+    ${CMAKE_CURRENT_SOURCE_DIR}/cpp/src/DO/Sara/Defines.hpp.in
+    ${CMAKE_BINARY_DIR}/cpp/src/DO/Sara/Defines.hpp @ONLY)
   include_directories(${CMAKE_BINARY_DIR}/src)
 endmacro ()
 
@@ -329,7 +329,7 @@ function (sara_add_test _test_name _srcs _additional_lib_deps)
     list(GET extra_macro_args 0 test_group_name)
   endif ()
 
-  # Create the unit test project
+  # Create the unit test project.
   add_executable(${_test_name} ${_srcs_var})
   target_link_libraries(${_test_name} ${_additional_lib_deps} gtest)
 
@@ -338,7 +338,7 @@ function (sara_add_test _test_name _srcs _additional_lib_deps)
     COMPILE_FLAGS ${SARA_DEFINITIONS}
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
-  add_test(${_test_name} "${CMAKE_BINARY_DIR}/bin/${_test_name}")
+  add_test(NAME ${_test_name} COMMAND $<TARGET_FILE:${_test_name}>)
 
   if (DEFINED test_group_name)
     set_property(

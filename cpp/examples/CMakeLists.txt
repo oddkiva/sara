@@ -1,0 +1,11 @@
+add_subdirectory(Features)
+add_subdirectory(FeatureDescriptors)
+add_subdirectory(FeatureDetectors)
+add_subdirectory(FeatureMatching)
+add_subdirectory(Geometry)
+add_subdirectory(Graphics)
+add_subdirectory(ImageProcessing)
+
+if (SARA_BUILD_VIDEOIO)
+  add_subdirectory(VideoIO)
+endif ()
