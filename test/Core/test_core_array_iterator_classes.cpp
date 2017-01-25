@@ -9,7 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE "Core/ArrayIterators/Iterator Classes"
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/Core/MultiArray.hpp>
 
@@ -123,7 +124,7 @@ TEST_F(TestRangeIterator2D, test_equality_and_inequality_comparisons)
   EXPECT_EQ(image.begin_array(), image.begin());
   EXPECT_EQ(image.begin_array(), image.data());
 
-  EXPECT_MATRIX_EQ(*image.begin_array(), *const_image.begin_array());
+  BOOST_REQUIRE_EQUAL(*image.begin_array(), *const_image.begin_array());
 
   // Inequalities.
   EXPECT_NE(image.begin_array(), ++image.begin_array());
@@ -240,7 +241,7 @@ TEST_F(TestSubrangeIterator2D, test_equality_and_inequality_comparisons)
   EXPECT_EQ(image.begin_subarray(Vector2i::Zero(), image.sizes()),
             image.data());
 
-  EXPECT_MATRIX_EQ(*image.begin_subarray(Vector2i::Zero(), image.sizes()),
+  BOOST_REQUIRE_EQUAL(*image.begin_subarray(Vector2i::Zero(), image.sizes()),
                    *const_image.begin_array());
 
   // Inequalities.
@@ -279,7 +280,7 @@ TEST_F(TestAxisIterator2D, test_equality_and_inequality_comparisons)
   EXPECT_EQ(it.x(), const_image.data());
   EXPECT_EQ(it.x(), const_image.begin_array().y());
 
-  EXPECT_MATRIX_EQ(*it.x(), *it.y());
+  BOOST_REQUIRE_EQUAL(*it.x(), *it.y());
 
   // Inequalities.
   EXPECT_NE(it.x(), ++image.begin_array());
@@ -384,8 +385,8 @@ TEST_F(TestIterators3D, test_row_major_decrement)
 TEST_F(TestIterators3D, test_special_dereferencing_operator)
 {
   auto it = volume.begin_array();
-  EXPECT_MATRIX_EQ(it(Vector3i(1,2,4)), Vector3i(1,2,4));
-  EXPECT_MATRIX_EQ(it(1,2,4), Vector3i(1,2,4));
+  BOOST_REQUIRE_EQUAL(it(Vector3i(1,2,4)), Vector3i(1,2,4));
+  BOOST_REQUIRE_EQUAL(it(1,2,4), Vector3i(1,2,4));
 }
 
 TEST_F(TestIterators3D, test_delta)
@@ -396,15 +397,8 @@ TEST_F(TestIterators3D, test_delta)
   int dx = 1;
   int dy = 1;
 
-  EXPECT_MATRIX_EQ(it.delta(X, dx, Y, dy), Vector3i(0 + dx, 0 + dy, 0));
+  BOOST_REQUIRE_EQUAL(it.delta(X, dx, Y, dy), Vector3i(0 + dx, 0 + dy, 0));
 
   auto value = it.delta<X, Y>(dx, dy);
-  EXPECT_MATRIX_EQ(value, Vector3i(0 + dx, 0 + dy, 0));
-}
-
-
-int main(int argc, char** argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+  BOOST_REQUIRE_EQUAL(value, Vector3i(0 + dx, 0 + dy, 0));
 }
