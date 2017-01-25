@@ -11,15 +11,10 @@
 
 //! @file
 
-#ifndef DO_SARA_CORE_IMAGE_HPP
-#define DO_SARA_CORE_IMAGE_HPP
-
+#pragma once
 
 #include <DO/Sara/Core/Pixel.hpp>
 #include <DO/Sara/Core/Image/Image.hpp>
 #include <DO/Sara/Core/Image/ElementTraits.hpp>
 #include <DO/Sara/Core/Image/Operations.hpp>
 #include <DO/Sara/Core/Image/Subimage.hpp>
-
-
-#endif /* DO_SARA_CORE_IMAGE_HPP */

@@ -12,8 +12,7 @@
 //! @file
 //! @brief This contains the implementation of the tree data structure.
 
-#ifndef DO_SARA_CORE_TREE_HPP
-#define DO_SARA_CORE_TREE_HPP
+#pragma once
 
 #include <fstream>
 #include <iostream>
@@ -955,6 +954,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_CORE_TREE_HPP */

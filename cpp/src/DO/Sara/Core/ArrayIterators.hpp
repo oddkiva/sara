@@ -11,11 +11,6 @@
 
 //! @file
 
-#ifndef DO_SARA_CORE_ARRAYITERATORS_HPP
-#define DO_SARA_CORE_ARRAYITERATORS_HPP
-
+#pragma once
 
 #include <DO/Sara/Core/ArrayIterators/ArrayIterators.hpp>
-
-
-#endif /* DO_SARA_CORE_ARRAYITERATORS_HPP */

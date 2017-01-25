@@ -12,8 +12,7 @@
 //! @file
 //! @brief This contains the implementation of the sparse N-dimensional array class.
 
-#ifndef DO_SARA_CORE_SPARSEMULTIARRAY_HPP
-#define DO_SARA_CORE_SPARSEMULTIARRAY_HPP
+#pragma once
 
 #include <map>
 
@@ -220,6 +219,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_CORE_SPARSEMULTIARRAY_HPP */

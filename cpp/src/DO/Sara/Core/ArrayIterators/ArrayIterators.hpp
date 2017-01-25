@@ -12,9 +12,7 @@
 //! @file
 //! @brief Implementation of N-dimensional iterators.
 
-#ifndef DO_SARA_CORE_ARRAYITERATORS_MULTIARRAYITERATORS_HPP
-#define DO_SARA_CORE_ARRAYITERATORS_MULTIARRAYITERATORS_HPP
-
+#pragma once
 
 #include <DO/Sara/Core/ArrayIterators/Utilities.hpp>
 
@@ -596,6 +594,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_CORE_ARRAYITERATORS_MULTIARRAYITERATORS_HPP */

@@ -9,8 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef VIDEOIO_VIDEOSTREAM_HPP
-#define VIDEOIO_VIDEOSTREAM_HPP
+#pragma once
 
 #include <DO/Sara/Defines.hpp>
 
@@ -76,6 +75,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* VIDEOIO_VIDEOSTREAM_HPP */

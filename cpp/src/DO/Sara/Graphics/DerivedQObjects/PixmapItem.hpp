@@ -9,8 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_SARA_GRAPHICS_PIXMAPITEM_HPP
-#define DO_SARA_GRAPHICS_PIXMAPITEM_HPP
+#pragma once
 
 #include <QGraphicsPixmapItem>
 
@@ -48,6 +47,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_GRAPHICS2_PIXMAPITEM_HPP */

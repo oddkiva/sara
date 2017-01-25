@@ -11,9 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_FEATURES_IO_HPP
-#define DO_SARA_FEATURES_IO_HPP
-
+#pragma once
 
 #include <fstream>
 #include <iostream>
@@ -100,6 +98,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_FEATURES_IO_HPP */

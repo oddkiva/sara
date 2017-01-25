@@ -18,8 +18,7 @@
   By default Eigen uses the *COLUMN-MAJOR* storage.
  */
 
-#ifndef DO_SARA_CORE_EIGENEXTENSION_HPP
-#define DO_SARA_CORE_EIGENEXTENSION_HPP
+#pragma once
 
 // To avoid compilation error with Eigen
 #if defined(_WIN32) || defined(_WIN32_WCE)
@@ -200,6 +199,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_CORE_EIGENEXTENSION_HPP */

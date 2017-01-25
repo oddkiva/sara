@@ -11,8 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_STDVECTORHELPERS_HPP
-#define DO_SARA_STDVECTORHELPERS_HPP
+#pragma once
 
 #include <vector>
 
@@ -31,6 +30,3 @@ inline void shrink_to_fit(std::vector<T>& v)
   std::vector<T>(v).swap(v);
 }
 //! @}
-
-
-#endif /* DO_SARA_STDVECTORHELPERS_HPP */

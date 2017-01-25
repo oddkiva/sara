@@ -11,8 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_GRAPHICS_GRAPHICSUTILITIES_HPP
-#define DO_SARA_GRAPHICS_GRAPHICSUTILITIES_HPP
+#pragma once
 
 #include "DerivedQObjects/GraphicsApplicationImpl.hpp"
 
@@ -60,6 +59,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_GRAPHICS_GRAPHICSUTILITIES_HPP */

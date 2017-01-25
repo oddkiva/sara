@@ -9,8 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_SARA_CORE_PIXEL_PIXELTRAITS_HPP
-#define DO_SARA_CORE_PIXEL_PIXELTRAITS_HPP
+#pragma once
 
 #include <functional>
 #include <stdexcept>
@@ -150,6 +149,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_CORE_PIXEL_PIXELTRAITS_HPP */

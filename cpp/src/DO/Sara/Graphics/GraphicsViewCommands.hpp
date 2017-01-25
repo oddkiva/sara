@@ -11,8 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_GRAPHICS_GRAPHICSVIEWCOMMANDS_HPP
-#define DO_SARA_GRAPHICS_GRAPHICSVIEWCOMMANDS_HPP
+#pragma once
 
 
 class QGraphicsItem;
@@ -41,6 +40,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_GRAPHICS_GRAPHICSVIEWCOMMANDS_HPP */

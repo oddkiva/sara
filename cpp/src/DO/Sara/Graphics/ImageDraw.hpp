@@ -11,8 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_GRAPHICS_IMAGEDRAW_HPP
-#define DO_SARA_GRAPHICS_IMAGEDRAW_HPP
+#pragma once
 
 
 class QImage;
@@ -93,6 +92,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_GRAPHICS_PAINTINGWINDOWCOMMANDS_HPP */

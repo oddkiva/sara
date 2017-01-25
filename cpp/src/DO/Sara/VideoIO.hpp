@@ -9,11 +9,6 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_SARA_VIDEOIO_HPP
-#define DO_SARA_VIDEOIO_HPP
-
+#pragma once
 
 #include <DO/Sara/VideoIO/VideoStream.hpp>
-
-
-#endif /* DO_SARA_VIDEOIO_HPP */

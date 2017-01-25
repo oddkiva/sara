@@ -11,8 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_FEATUREDETECTORS_LOG_HPP
-#define DO_SARA_FEATUREDETECTORS_LOG_HPP
+#pragma once
 
 #include <DO/Sara/Defines.hpp>
 
@@ -139,5 +138,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-#endif /* DO_SARA_FEATUREDETECTORS_LOG_HPP */

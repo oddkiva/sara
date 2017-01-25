@@ -11,8 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_GRAPHICS_GRAPHICSAPPLICATION_HPP
-#define DO_SARA_GRAPHICS_GRAPHICSAPPLICATION_HPP
+#pragma once
 
 
 namespace DO { namespace Sara {
@@ -66,6 +65,3 @@ int main(int argc, char **argv)                   \
 }                                                 \
                                                   \
 int __main(int, char **)
-
-
-#endif /* DO_SARA_GRAPHICS_GRAPHICSAPPLICATION_HPP */

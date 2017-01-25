@@ -11,9 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_IMAGEPROCESSING_EXTREMA_HPP
-#define DO_SARA_IMAGEPROCESSING_EXTREMA_HPP
-
+#pragma once
 
 #include <DO/Sara/ImageProcessing/ImagePyramid.hpp>
 
@@ -199,5 +197,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-#endif /* DO_SARA_IMAGEPROCESSING_EXTREMA_HPP */

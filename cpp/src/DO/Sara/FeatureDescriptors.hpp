@@ -11,8 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_FEATUREDESCRIPTORS_HPP
-#define DO_SARA_FEATUREDESCRIPTORS_HPP
+#pragma once
 
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/Features.hpp>
@@ -34,6 +33,3 @@
 
 
 //! @defgroup FeatureDescriptors
-
-
-#endif /* DO_SARA_FEATUREDESCRIPTORS_HPP */

@@ -11,8 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_GRAPHICS_USERTHREAD_HPP
-#define DO_SARA_GRAPHICS_USERTHREAD_HPP
+#pragma once
 
 #include <QThread>
 #include <QMutex>
@@ -81,6 +80,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_GRAPHICS_USERTHREAD_HPP */

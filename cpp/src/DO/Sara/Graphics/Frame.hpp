@@ -9,8 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_SARA_GRAPHICS_FRAME_HPP
-#define DO_SARA_GRAPHICS_FRAME_HPP
+#pragma once
 
 #include <QtOpenGL>
 #ifdef __APPLE__
@@ -51,5 +50,3 @@ namespace GLObject {
 
 
 }
-
-#endif /* DO_SARA_GRAPHICS_FRAME_HPP */

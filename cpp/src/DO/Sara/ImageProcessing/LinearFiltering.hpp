@@ -11,9 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_IMAGEPROCESSING_LINEARFILTERING_HPP
-#define DO_SARA_IMAGEPROCESSING_LINEARFILTERING_HPP
-
+#pragma once
 
 #include <vector>
 
@@ -496,6 +494,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_IMAGEPROCESSING_LINEARFILTERING_HPP */

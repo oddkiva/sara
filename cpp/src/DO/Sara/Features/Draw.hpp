@@ -11,8 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_FEATURES_DRAW_HPP
-#define DO_SARA_FEATURES_DRAW_HPP
+#pragma once
 
 #include <DO/Sara/Defines.hpp>
 
@@ -35,6 +34,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_AFFINECOVARIANTFEATURES_DRAW_H */

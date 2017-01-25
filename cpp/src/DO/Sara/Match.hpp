@@ -9,8 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_SARA_MATCH_HPP
-#define DO_SARA_MATCH_HPP
+#pragma once
 
 #include <vector>
 #include <cstdlib>
@@ -19,5 +18,3 @@
 
 #include <DO/Sara/Match/Match.hpp>
 #include <DO/Sara/Match/PairWiseDrawer.hpp>
-
-#endif /* DO_SARA_MATCH_HPP */

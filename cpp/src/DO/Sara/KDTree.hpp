@@ -9,9 +9,6 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_SARA_KDTREE_HPP
-#define DO_SARA_KDTREE_HPP
+#pragma once
 
 #include "KDTree/KDTree.hpp"
-
-#endif /* DO_SARA_KDTREE_KDTREE_HPP */

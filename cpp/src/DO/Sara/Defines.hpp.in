@@ -9,8 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_DEFINES_HPP
-#define DO_DEFINES_HPP
+#pragma once
 
 #define DO_SARA_VERSION "@DO_Sara_VERSION@"
 
@@ -67,7 +66,3 @@
 #endif
 
 //! @}
-
-
-
-#endif /* DO_DEFINES_HPP */

@@ -11,8 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_FEATURES_KEY_HPP
-#define DO_SARA_FEATURES_KEY_HPP
+#pragma once
 
 #include <Eigen/StdVector>
 
@@ -122,6 +121,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_FEATURES_KEY_HPP */

@@ -11,9 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_CORE_IMAGE_ELEMENTTRAITS_HPP
-#define DO_SARA_CORE_IMAGE_ELEMENTTRAITS_HPP
-
+#pragma once
 
 #include <DO/Sara/Core/MultiArray/ElementTraits.hpp>
 #include <DO/Sara/Core/Pixel/Pixel.hpp>
@@ -48,6 +46,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_CORE_IMAGE_ELEMENTTRAITS_HPP */

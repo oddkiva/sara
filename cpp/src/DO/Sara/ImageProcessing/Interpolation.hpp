@@ -11,9 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_IMAGEPROCESSING_INTERPOLATION_HPP
-#define DO_SARA_IMAGEPROCESSING_INTERPOLATION_HPP
-
+#pragma once
 
 #include <stdexcept>
 
@@ -81,6 +79,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_IMAGEPROCESSING_INTERPOLATION_HPP */

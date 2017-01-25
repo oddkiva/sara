@@ -9,8 +9,9 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_SARA_GEOMETRY_TOOLS_CONIC_HPP
-#define DO_SARA_GEOMETRY_TOOLS_CONIC_HPP
+//! @file
+
+#pragma once
 
 #include <DO/Sara/Geometry/Tools/MatrixBasedObject.hpp>
 
@@ -65,6 +66,3 @@ namespace DO { namespace Sara { namespace Projective {
 } /* namespace Projective */
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_GEOMETRY_TOOLS_CONIC_HPP */

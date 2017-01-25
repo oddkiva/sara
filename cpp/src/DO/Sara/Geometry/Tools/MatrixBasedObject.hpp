@@ -9,8 +9,9 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_SARA_GEOMETRY_TOOLS_MATRIXBASEDOBJECT_HPP
-#define DO_SARA_GEOMETRY_TOOLS_MATRIXBASEDOBJECT_HPP
+//! @file
+
+#pragma once
 
 #include <DO/Sara/Core/EigenExtension.hpp>
 
@@ -141,6 +142,3 @@ namespace DO { namespace Sara { namespace Projective {
 } /* namespace Sara */
 } /* namespace Projective */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_GEOMETRY_TOOLS_MATRIXBASEDOBJECT_HPP */

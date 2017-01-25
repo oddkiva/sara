@@ -11,9 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_CORE_ARRAYITERATORS_UTILITIES_HPP
-#define DO_SARA_CORE_ARRAYITERATORS_UTILITIES_HPP
-
+#pragma once
 
 #include <iterator>
 #include <sstream>
@@ -210,6 +208,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_CORE_ARRAYITERATORS_UTILITIES_HPP */

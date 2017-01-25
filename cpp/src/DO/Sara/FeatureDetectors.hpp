@@ -11,8 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_FEATUREDETECTORS_HPP
-#define DO_SARA_FEATUREDETECTORS_HPP
+#pragma once
 
 #include <DO/Sara/Defines.hpp>
 #include <DO/Sara/Graphics.hpp>
@@ -36,6 +35,3 @@
 #include <DO/Sara/FeatureDetectors/AffineShapeAdaptation.hpp>
 
 //! @defgroup FeatureDetectors
-
-
-#endif /* DO_SARA_FEATUREDETECTORS_HPP */

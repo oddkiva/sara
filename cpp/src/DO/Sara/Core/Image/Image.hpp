@@ -14,7 +14,6 @@
 #ifndef DO_SARA_CORE_IMAGE_IMAGE_HPP
 #define DO_SARA_CORE_IMAGE_IMAGE_HPP
 
-
 #include <DO/Sara/Core/Image/ElementTraits.hpp>
 #include <DO/Sara/Core/MultiArray.hpp>
 
@@ -151,7 +150,7 @@ namespace DO { namespace Sara {
     }
 
     //! @{
-    //! @brief Perform custom image filter on the image.
+    //! @brief Perform custom filtering on the image.
     template <typename Filter, typename... Params>
     inline auto transform(const Params&... params) const
         -> Image<typename Filter::template OutPixel<self_type>, N>
@@ -188,7 +187,6 @@ namespace DO { namespace Sara {
       return dst;
     }
   };
-
 
   //! @}
 

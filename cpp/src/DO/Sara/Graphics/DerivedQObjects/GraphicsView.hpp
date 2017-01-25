@@ -11,8 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_GRAPHICS_GRAPHICSVIEW_HPP
-#define DO_SARA_GRAPHICS_GRAPHICSVIEW_HPP
+#pragma once
 
 #include <QGraphicsView>
 #include <QTimer>
@@ -70,6 +69,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_GRAPHICS_GRAPHICSVIEW_HPP */
