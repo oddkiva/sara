@@ -17,7 +17,7 @@ if (NOT DO_Sara_FOUND)
   include(sara_version)
 
   # Configure compiler for the specific project.
-  include (sara_configure_cxx_compiler)
+  include(sara_configure_cxx_compiler)
 
   # List the available components.
   sara_populate_available_components()
