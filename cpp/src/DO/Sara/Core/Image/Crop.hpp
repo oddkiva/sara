@@ -23,12 +23,11 @@
 namespace DO { namespace Sara {
 
   //! @{
-  //! @brief Get the sub-image of an image.
+  //! @brief Crop an image.
   template <typename T, int N>
-  Image<T, N>
-  get_subimage(const ImageView<T, N>& src,
-               const typename ImageView<T, N>::vector_type& begin_coords,
-               const typename ImageView<T, N>::vector_type& end_coords)
+  Image<T, N> crop(const ImageView<T, N>& src,
+                   const typename ImageView<T, N>::vector_type& begin_coords,
+                   const typename ImageView<T, N>::vector_type& end_coords)
   {
     auto dst = Image<T, N>{ end_coords - begin_coords };
 
@@ -46,22 +45,40 @@ namespace DO { namespace Sara {
     return dst;
   }
 
-  template <typename T, int N>
-  inline Image<T, N> get_subimage(const ImageView<T, N>& src, int top_left_x,
-                                  int top_left_y, int width, int height)
+  template <typename T>
+  inline Image<T> crop(const ImageView<T>& src, int top_left_x, int top_left_y,
+                       int width, int height)
   {
-    Vector2i begin_coords{ top_left_x, top_left_y };
-    Vector2i end_coords{ top_left_x + width, top_left_y + height };
-    return get_subimage(src, begin_coords, end_coords);
+    auto begin_coords = Vector2i{ top_left_x, top_left_y };
+    auto end_coords = Vector2i{ top_left_x + width, top_left_y + height };
+    return crop(src, begin_coords, end_coords);
   }
 
-  template <typename T, int N>
-  inline Image<T, N> get_subimage(const ImageView<T, N>& src, int center_x,
-                                  int center_y, int radius)
+  template <typename T>
+  inline Image<T> crop(const ImageView<T>& src, int center_x, int center_y,
+                       int radius)
   {
-    return get_subimage(src, center_x - radius, center_y - radius,
-                        2 * radius + 1, 2 * radius + 1);
+    return crop(src, center_x - radius, center_y - radius, 2 * radius + 1,
+                2 * radius + 1);
   }
+
+
+  struct Crop
+  {
+    template <typename SrcImageView>
+    using OutPixel = typename SrcImageView::pixel_type;
+
+    template <typename ImageView_>
+    using Coords = typename ImageView_::coord_type;
+
+    template <typename Pixel, int N>
+    void operator()(const ImageView<Pixel, N>& src, ImageView<Pixel, N>& dst,
+                    const Coords<ImageView<Pixel, N>>& begin_coords,
+                    const Coords<ImageView<Pixel, N>>& end_coords) const
+    {
+      dst = crop(src, begin_coords, end_coords);
+    }
+  };
   //! @}
 
 } /* namespace Sara */
