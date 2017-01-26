@@ -322,12 +322,19 @@ namespace DO { namespace Sara {
       return safe_crop(src, begin_coords, end_coords);
     }
 
-    template <typename ImageView>
-    inline auto operator()(const ImageView& src, int top_left_x, int top_left_y,
+    template <typename T>
+    inline auto operator()(const ImageView<T>& src, int top_left_x, int top_left_y,
                            int width, int height) const
-        -> Image<Pixel<ImageView>>
+        -> Image<T>
     {
       return safe_crop(src, top_left_x, top_left_y, width, height);
+    }
+
+    template <typename T>
+    inline auto operator()(const ImageView<T>& src, int x, int y,
+                           int radius) const -> Image<T>
+    {
+      return safe_crop(src, x, y, radius);
     }
   };
   //! @}

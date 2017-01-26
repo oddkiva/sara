@@ -181,7 +181,7 @@ namespace DO { namespace Sara {
 
     //! @brief Apply inplace coefficient-wise operation.
     template <typename Op>
-    inline auto apply_inplace_cwise_op(Op op)
+    inline auto cwise_transform_op(Op op)
         -> self_type&
     {
       auto src_pixel = this->begin();
@@ -193,7 +193,7 @@ namespace DO { namespace Sara {
 
     //! @brief Apply coefficient-wise operation.
     template <typename Op>
-    inline auto apply_cwise_op(Op op) const
+    inline auto cwise_transform(Op op) const
         -> Image<decltype(op(std::declval<value_type>())), Dimension>
     {
       using Pixel = decltype(op(std::declval<value_type>()));
