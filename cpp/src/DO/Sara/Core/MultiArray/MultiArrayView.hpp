@@ -380,6 +380,9 @@ namespace DO { namespace Sara {
     //! @brief Copy contents.
     inline void copy(const self_type& other) const
     {
+      if (this == &other)
+        return;
+
       if (_sizes != other._sizes)
         throw std::domain_error{
           "Source and destination image sizes are not equal!"

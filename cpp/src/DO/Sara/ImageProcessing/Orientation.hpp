@@ -73,13 +73,14 @@ namespace DO { namespace Sara {
   //! @brief Specialized class to use Image<T,N>::compute<Orientation>()
   struct Orientation
   {
-    template <typename SrcImageView>
-    using OutPixel = typename SrcImageView::pixel_type::Scalar;
+    template <typename ImageView>
+    using Scalar = typename ImageView::pixel_type::Scalar;
 
-    template <typename SrcImageView, typename DstImageView>
-    inline void operator()(const SrcImageView& src, DstImageView& dst) const
+    template <typename ImageView>
+    inline auto operator()(const ImageView& in) const
+        -> Image<Scalar<ImageView>>
     {
-      return orientation(src, dst);
+      return orientation(in);
     }
   };
 

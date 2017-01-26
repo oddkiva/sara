@@ -47,8 +47,8 @@ namespace DO { namespace Sara {
       D.octave_scaling_factor(o) = gaussians.octave_scaling_factor(o);
       for (int s = 0; s < D.num_scales_per_octave(); ++s)
         D(s,o) = gaussians(s,o).
-          template compute<Hessian>().
-          template compute<Determinant>();
+          template apply<Hessian>().
+          template apply<Determinant>();
     }
     return D;
   }

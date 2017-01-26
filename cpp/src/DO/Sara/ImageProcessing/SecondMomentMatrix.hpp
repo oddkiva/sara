@@ -32,26 +32,27 @@ namespace DO { namespace Sara {
   struct SecondMomentMatrix
   {
     template <typename GradientField>
-    struct Dimension {
-      enum { value = GradientField::Dimension };
-    };
-
-    template <typename GradientField>
     using Scalar = typename GradientField::pixel_type::Scalar;
 
     template <typename GradientField>
-    using OutPixel =
-        Eigen::Matrix<Scalar<GradientField>, Dimension<GradientField>::value,
-                      Dimension<GradientField>::value>;
+    using Matrix =
+        Eigen::Matrix<Scalar<GradientField>, GradientField::Dimension,
+                      GradientField::Dimension>;
 
-    template <typename GradientField, typename MatrixField>
-    void operator()(const GradientField& gradient_field,
-                    MatrixField& moment_field) const
+    template <typename GradientField>
+    using MatrixField = Image<Matrix<GradientField>, GradientField::Dimension>;
+
+    template <typename GradientField>
+    auto operator()(const GradientField& in) -> MatrixField<GradientField>
     {
-      auto dst = moment_field.begin();
-      auto src = gradient_field.begin();
-      for ( ; src != gradient_field.end(); ++src, ++dst)
-        *dst = *src * src->transpose();
+      auto out = MatrixField<GradientField>{ in.sizes() };
+
+      auto out_i = out.begin();
+      auto in_i = in.begin();
+      for ( ; in_i != in.end(); ++in_i, ++out_i)
+        *out_i = *in_i * in_i->transpose();
+
+      return out;
     }
   };
 

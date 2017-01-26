@@ -28,25 +28,24 @@ namespace DO { namespace Sara {
   //! @brief Helper class to use Image<T,N>::compute<Determinant>().
   struct Determinant
   {
-    template <typename SrcImageView>
-    using Matrix = typename SrcImageView::pixel_type;
+    template <typename ImageView>
+    using Matrix = typename ImageView::pixel_type;
 
-    template <typename SrcImageView>
-    using OutPixel =
-        decltype(std::declval<Matrix<SrcImageView>>().determinant());
+    template <typename ImageView>
+    using Scalar = typename Matrix<ImageView>::Scalar;
 
-    template <typename SrcImageView, typename DstImageView>
-    inline void operator()(const SrcImageView& src, DstImageView& dst) const
+    template <typename ImageView>
+    inline auto operator()(const ImageView& src) const
+        -> Image<Scalar<ImageView>, ImageView::Dimension>
     {
-      if (src.sizes() != dst.sizes())
-        throw std::domain_error{
-          "Source and destination image sizes are not equal!"
-        };
+      auto dst = Image<Scalar<ImageView>, ImageView::Dimension>{ src.sizes() };
 
       auto dst_i = dst.begin();
       auto src_i = src.begin();
       for ( ; src_i != src.end(); ++src_i, ++dst_i)
         *dst_i = src_i->determinant();
+
+      return dst;
     }
   };
 

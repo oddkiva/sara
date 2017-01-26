@@ -118,7 +118,7 @@ namespace DO { namespace Sara {
   AdaptFeatureAffinelyToLocalShape::
   compute_moment_matrix_from_patch()
   {
-    auto gradients = _patch.compute<Gradient>();
+    auto gradients = _patch.apply<Gradient>();
     debug_check_weighted_patch(gradients);
     // Estimate the second moment matrix.
     Matrix2f moment;
@@ -270,7 +270,7 @@ namespace DO { namespace Sara {
     if (_debug)
     {
       // Check the weighted patch.
-      auto grad_magnitude = gradients.compute<SquaredNorm>();
+      auto grad_magnitude = gradients.apply<SquaredNorm>();
       auto weighted_patch = Image<float>{ gradients.sizes() };
       weighted_patch.array() = grad_magnitude.array().sqrt()*_gaussian_weights.array();
       weighted_patch = color_rescale(weighted_patch);
