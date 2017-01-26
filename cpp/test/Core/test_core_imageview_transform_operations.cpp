@@ -11,7 +11,7 @@
 
 #include <gtest/gtest.h>
 
-#include <DO/Sara/Core/Image/ImageViewTransformOperations.hpp>
+#include <DO/Sara/Core/Image/Operations.hpp>
 
 #include "../AssertHelpers.hpp"
 
@@ -43,7 +43,7 @@ TEST_F(TestImageViewTransformOperations, test_with_safe_crop_functor)
 {
   auto a = Vector2i{ 1, 1 };
   auto b = Vector2i{ 3, 2 };
-  auto subimage = image.transform<Crop>(image, a, b);
+  auto subimage = image.compute<SafeCrop>(a, b);
 
   auto true_subimage = Image<float, 2>{ 2, 1 };
   true_subimage.matrix() << 2, 2;
@@ -52,7 +52,7 @@ TEST_F(TestImageViewTransformOperations, test_with_safe_crop_functor)
 
   auto x = 1, y = 1;
   auto w = 2, h = 1;
-  subimage = get_subimage(image, x, y, w, h);
+  subimage = safe_crop(image, x, y, w, h);
   EXPECT_MATRIX_EQ(true_subimage.sizes(), subimage.sizes());
   EXPECT_MATRIX_EQ(true_subimage.matrix(), subimage.matrix());
 }
@@ -60,48 +60,31 @@ TEST_F(TestImageViewTransformOperations, test_with_safe_crop_functor)
 
 TEST_F(TestImageViewTransformOperations, test_with_safe_crop_lambda)
 {
+  auto safe_crop_ = [](const Image<float>& src,
+                       const Vector2i& a, const Vector2i& b)
+  {
+    return safe_crop(src, a, b);
+  };
+
   auto a = Vector2i{ -3, -3 };
   auto b = Vector2i{ 0, 0 };
-  auto subimage = image.transform(safe_crop, a, b);
+  auto cropped_image = image.compute(safe_crop_, a, b);
 
   auto true_subimage = Image<float, 2>{ 3, 3 };
   true_subimage.matrix().fill(0);
-  EXPECT_MATRIX_EQ(true_subimage.sizes(), subimage.sizes());
-  EXPECT_MATRIX_EQ(true_subimage.matrix(), subimage.matrix());
+  EXPECT_MATRIX_EQ(true_subimage.sizes(), cropped_image.sizes());
+  EXPECT_MATRIX_EQ(true_subimage.matrix(), cropped_image.matrix());
 
   auto x = -3, y = -3;
   auto w =  3, h =  3;
-  subimage = get_subimage(image, x, y, w, h);
-  EXPECT_MATRIX_EQ(true_subimage.sizes(), subimage.sizes());
-  EXPECT_MATRIX_EQ(true_subimage.matrix(), subimage.matrix());
+  cropped_image = safe_crop(image, x, y, w, h);
+  EXPECT_MATRIX_EQ(true_subimage.sizes(), cropped_image.sizes());
+  EXPECT_MATRIX_EQ(true_subimage.matrix(), cropped_image.matrix());
 
   auto cx = -2, cy = -2, r = 1;
-  subimage = get_subimage(image, cx, cy, r);
-  EXPECT_MATRIX_EQ(true_subimage.sizes(), subimage.sizes());
-  EXPECT_MATRIX_EQ(true_subimage.matrix(), subimage.matrix());
-}
-
-
-TEST_F(TestImageViewTransformOperations, test_subimage_out_of_bounds_2)
-{
-  auto a = Vector2i{ -1, -1 };
-  auto b = Vector2i{ 2, 3 };
-  auto subimage = get_subimage(image, a, b);
-
-  auto true_subimage = Image<float, 2>{ 3, 4 };
-  true_subimage.matrix() <<
-    0, 0, 0,
-    0, 1, 1,
-    0, 2, 2,
-    0, 3, 3;
-  EXPECT_MATRIX_EQ(true_subimage.sizes(), subimage.sizes());
-  EXPECT_MATRIX_EQ(true_subimage.matrix(), subimage.matrix());
-
-  auto x = -1, y = -1;
-  auto w =  3, h =  4;
-  subimage = get_subimage(image, x, y, w, h);
-  EXPECT_MATRIX_EQ(true_subimage.sizes(), subimage.sizes());
-  EXPECT_MATRIX_EQ(true_subimage.matrix(), subimage.matrix());
+  cropped_image = safe_crop(image, cx, cy, r);
+  EXPECT_MATRIX_EQ(true_subimage.sizes(), cropped_image.sizes());
+  EXPECT_MATRIX_EQ(true_subimage.matrix(), cropped_image.matrix());
 }
 
 

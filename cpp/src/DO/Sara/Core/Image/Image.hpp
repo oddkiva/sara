@@ -153,7 +153,7 @@ namespace DO { namespace Sara {
     //! @{
     //! @brief Perform custom image filter on the image.
     template <typename Filter, typename... Params>
-    inline auto transform(const Params&... params) const
+    inline auto compute(const Params&... params) const
         -> Image<typename Filter::template OutPixel<self_type>, N>
     {
       using OutPixel = typename Filter::template OutPixel<self_type>;
@@ -163,7 +163,7 @@ namespace DO { namespace Sara {
     }
 
     template <typename Filter, typename... Params>
-    inline auto transform(Filter filter, const Params&... params) const
+    inline auto compute(Filter filter, const Params&... params) const
         -> decltype(filter(std::declval<const ImageView>(),
                            std::declval<Params>()...))
     {

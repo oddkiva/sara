@@ -304,7 +304,7 @@ namespace DO { namespace Sara {
       return false;
 
     // First patch at the closest scale.
-    auto nearest_patch = get_subimage(nearest_gaussian, x, y, patch_radius);
+    auto nearest_patch = nearest_gaussian.compute<SafeCrop>(x, y, patch_radius);
 
     //#define DEBUG_SELECT_SCALE
 #ifdef DEBUG_SELECT_SCALE
