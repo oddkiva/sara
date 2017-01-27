@@ -177,18 +177,6 @@ namespace DO { namespace Sara {
     }
     //! @}
 
-    //! @brief Apply inplace coefficient-wise operation.
-    template <typename Op>
-    inline auto cwise_transform_op(Op op)
-        -> self_type&
-    {
-      auto src_pixel = this->begin();
-      for (; src_pixel != this->end(); ++src_pixel)
-        *src_pixel = op(*src_pixel);
-
-      return *this;
-    }
-
     //! @brief Apply coefficient-wise operation.
     template <typename Op>
     inline auto cwise_transform(Op op) const
