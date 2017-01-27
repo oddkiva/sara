@@ -17,4 +17,3 @@
 #include <DO/Sara/Core/Image/Image.hpp>
 #include <DO/Sara/Core/Image/ElementTraits.hpp>
 #include <DO/Sara/Core/Image/Operations.hpp>
-#include <DO/Sara/Core/Image/Subimage.hpp>

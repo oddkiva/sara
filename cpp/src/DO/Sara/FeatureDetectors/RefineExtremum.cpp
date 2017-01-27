@@ -19,17 +19,17 @@ namespace DO { namespace Sara {
 
   bool on_edge(const ImageView<float>& I, int x, int y, float edge_ratio)
   {
-    auto H = hessian(I, Point2i{x, y});
-    return pow(H.trace(), 2)*edge_ratio >=
-           pow(edge_ratio+1.f, 2)*fabs(H.determinant());
+    auto H = hessian(I, Point2i{ x, y });
+    return pow(H.trace(), 2) * edge_ratio >=
+           pow(edge_ratio + 1.f, 2) * fabs(H.determinant());
   }
 
   bool refine_extremum(const ImagePyramid<float>& I, int x, int y, int s, int o,
                        int type, Point3f& pos, float& val, int border_sz,
                        int num_iter)
   {
-    Vector3f D_prime; // gradient
-    Matrix3f D_second; // hessian
+    Vector3f D_prime;   // gradient
+    Matrix3f D_second;  // hessian
     Vector3f h;
     Vector3f lambda;
 
@@ -39,15 +39,15 @@ namespace DO { namespace Sara {
     for (i = 0; i < num_iter; ++i)
     {
       // Range check at each iteration. The first iteration should always be OK.
-      if (x < border_sz || x >= I(s,o).width() - border_sz  ||
-          y < border_sz || y >= I(s,o).height() - border_sz ||
-          s < 1 || s >= static_cast<int>(I(o).size()) - 1)
+      if (x < border_sz || x >= I(s, o).width() - border_sz || y < border_sz ||
+          y >= I(s, o).height() - border_sz || s < 1 ||
+          s >= static_cast<int>(I(o).size()) - 1)
         break;
 
       // Estimate the gradient and the hessian matrix by central finite
       // differentiation.
-      D_prime = gradient(I,x,y,s,o);
-      D_second = hessian(I,x,y,s,o);
+      D_prime = gradient(I, x, y, s, o);
+      D_second = hessian(I, x, y, s, o);
 
       // The interpolation or refinement is done conservatively depending on the
       // quality of the Hessian matrix estimate.
@@ -68,7 +68,7 @@ namespace DO { namespace Sara {
       SelfAdjointEigenSolver<Matrix3f> solver(D_second);
       lambda = solver.eigenvalues();
       // Not sure about numerical errors... But it might just work out for now.
-      if ((lambda*float(type)).maxCoeff() >= 0)
+      if ((lambda * float(type)).maxCoeff() >= 0)
       {
         h.setZero();
         break;
@@ -76,18 +76,18 @@ namespace DO { namespace Sara {
 
       // $D''(\mathbf{x})$ is just a 3x3 matrix and computing its inverse is
       // thus cheap (cf. Eigen library.).
-      h = - D_second.inverse() * D_prime;
+      h = -D_second.inverse() * D_prime;
 
       // The interpolated extremum should be normally close to the initial
       // position which has integral coordinates. Otherwise, the estimates of
       // the gradient and the Hessian matrix are bad.
-      if (h.block(0,0,2,1).cwiseAbs().maxCoeff() > 1.5f)
+      if (h.block(0, 0, 2, 1).cwiseAbs().maxCoeff() > 1.5f)
       {
-        //#define VERBOSE
-  #ifdef VERBOSE
+//#define VERBOSE
+#ifdef VERBOSE
         print_stage("Offset is too large: don't refine");
         cout << "offset = " << h.transpose() << endl;
-  #endif
+#endif
         return false;
       }
 
@@ -95,7 +95,7 @@ namespace DO { namespace Sara {
       // refines iteratively the position of extremum only w.r.t spatial
       // variables $x$ and $y$ while the scale variable $\sigma$ which is
       // updated only once.
-      if (h.block(0,0,2,1).cwiseAbs().minCoeff() > 0.6f)
+      if (h.block(0, 0, 2, 1).cwiseAbs().minCoeff() > 0.6f)
       {
         x += h(0) > 0 ? 1 : -1;
         y += h(1) > 0 ? 1 : -1;
@@ -107,10 +107,10 @@ namespace DO { namespace Sara {
     }
 
     pos = Vector3f{ float(x), float(y), I.scale_relative_to_octave(s) };
-    float oldval = I(x,y,s,o);
-    float newval = oldval + 0.5f*D_prime.dot(h);
+    float oldval = I(x, y, s, o);
+    float newval = oldval + 0.5f * D_prime.dot(h);
 
-    if ( (type==1 && oldval <= newval) || (type==-1 && oldval >= newval) )
+    if ((type == 1 && oldval <= newval) || (type == -1 && oldval >= newval))
     {
       pos += h;
       val = newval;
@@ -124,9 +124,9 @@ namespace DO { namespace Sara {
   bool refine_extremum(const ImageView<float>& I, int x, int y, int type,
                        Point2f& pos, float& val, int border_sz, int num_iter)
   {
-    auto D_prime = Vector2f{}; // gradient
-    auto D_second = Matrix2f{}; // hessian
-    auto h = Vector2f{}; // offset to estimate
+    auto D_prime = Vector2f{};   // gradient
+    auto D_second = Matrix2f{};  // hessian
+    auto h = Vector2f{};         // offset to estimate
 
     pos << float(x), float(y);
 
@@ -134,8 +134,8 @@ namespace DO { namespace Sara {
     for (i = 0; i < num_iter; ++i)
     {
       // Range check at each iteration. The first iteration should always be OK.
-      if (x < border_sz || x >= I.width() - border_sz  ||
-          y < border_sz || y >= I.height() - border_sz )
+      if (x < border_sz || x >= I.width() - border_sz || y < border_sz ||
+          y >= I.height() - border_sz)
         break;
 
       // Estimate the gradient and the hessian matrix by central finite
@@ -160,7 +160,7 @@ namespace DO { namespace Sara {
       // Such case arises frequently and in that case, interpolation is not
       // done.
       // We just need to check the determinant and the trace in 2D.
-      if (D_second.determinant() <= 0.f || D_second.trace()*type >= 0.f)
+      if (D_second.determinant() <= 0.f || D_second.trace() * type >= 0.f)
       {
         D_prime.setZero();
         break;
@@ -175,7 +175,7 @@ namespace DO { namespace Sara {
       // the gradient and the Hessian matrix are bad.
       if (h.cwiseAbs().maxCoeff() > 1.5f)
       {
-        //#define VERBOSE
+//#define VERBOSE
 #ifdef VERBOSE
         print_stage("Offset is too large: don't refine");
         cout << "offset = " << h.transpose() << endl;
@@ -201,7 +201,7 @@ namespace DO { namespace Sara {
     float oldval = I(x, y);
     float newval = oldval + 0.5f * D_prime.dot(h);
 
-    if ( (type==1 && oldval <= newval) || (type==-1 && oldval >= newval) )
+    if ((type == 1 && oldval <= newval) || (type == -1 && oldval >= newval))
     {
       pos += h;
       val = newval;
@@ -213,8 +213,7 @@ namespace DO { namespace Sara {
   }
 
   vector<OERegion> local_scale_space_extrema(const ImagePyramid<float>& I,
-                                             int s, int o,
-                                             float extremum_thres,
+                                             int s, int o, float extremum_thres,
                                              float edge_ratio_thres,
                                              int img_padding_sz,
                                              int refine_iterations)
@@ -222,7 +221,7 @@ namespace DO { namespace Sara {
     auto extrema = std::vector<OERegion>{};
     extrema.reserve(10000);
 
-    auto map = Image<int>{ I(s,o).sizes() };
+    auto map = Image<int>{ I(s, o).sizes() };
     map.array().setZero();
 
 //#define STRICT_LOCAL_EXTREMA
@@ -234,32 +233,34 @@ namespace DO { namespace Sara {
     LocalScaleSpaceExtremum<std::less_equal, float> local_min;
 #endif
 
-    for (int y = img_padding_sz; y < I(s,o).height() - img_padding_sz; ++y)
+    for (int y = img_padding_sz; y < I(s, o).height() - img_padding_sz; ++y)
     {
-      for (int x = img_padding_sz; x < I(s,o).width() - img_padding_sz; ++x)
+      for (int x = img_padding_sz; x < I(s, o).width() - img_padding_sz; ++x)
       {
         // Identify extremum type if it is one
         int type = 0;
-        if (local_max(x,y,s,o,I))
-          type = 1; // maximum
-        else if (local_min(x,y,s,o,I))
-          type = -1; // minimum
+        if (local_max(x, y, s, o, I))
+          type = 1;  // maximum
+        else if (local_min(x, y, s, o, I))
+          type = -1;  // minimum
         else
           continue;
 #ifndef STRICT_LOCAL_EXTREMA
         // Reject early.
-        if (std::abs(I(x,y,s,o)) < 0.8f*extremum_thres)
+        if (std::abs(I(x, y, s, o)) < 0.8f * extremum_thres)
           continue;
 #endif
         // Reject early if located on edge.
-        if (on_edge(I(s,o), x, y, edge_ratio_thres))
+        if (on_edge(I(s, o), x, y, edge_ratio_thres))
           continue;
         // Try to refine extremum.
         auto pos = Point3f{};
         auto val = float{};
-        /*if (!refineExtremum(I,x,y,s,o,type,pos,val,img_padding_sz,refine_iterations))
+        /*if
+          (!refineExtremum(I,x,y,s,o,type,pos,val,img_padding_sz,refine_iterations))
           continue;*/
-        refine_extremum(I,x,y,s,o,type,pos,val,img_padding_sz,refine_iterations);
+        refine_extremum(I, x, y, s, o, type, pos, val, img_padding_sz,
+                        refine_iterations);
 
         // Don't add if already marked.
         if (map(static_cast<int>(x), static_cast<int>(y)) == 1)
@@ -273,8 +274,8 @@ namespace DO { namespace Sara {
         auto dog = OERegion(pos.head<2>(), pos.z());
 
         dog.extremum_value() = val;
-        dog.extremum_type() = type == 1 ?
-          OERegion::ExtremumType::Max : OERegion::ExtremumType::Min;
+        dog.extremum_type() = type == 1 ? OERegion::ExtremumType::Max
+                                        : OERegion::ExtremumType::Min;
         extrema.push_back(dog);
         map(static_cast<int>(x), static_cast<int>(y)) = 1;
       }
@@ -284,8 +285,7 @@ namespace DO { namespace Sara {
   }
 
 
-  bool select_laplace_scale(float& scale,
-                            int x, int y, int s, int o,
+  bool select_laplace_scale(float& scale, int x, int y, int s, int o,
                             const ImagePyramid<float>& gaussian_pyramid,
                             int num_scales)
   {
@@ -304,14 +304,14 @@ namespace DO { namespace Sara {
       return false;
 
     // First patch at the closest scale.
-    auto nearest_patch = crop(nearest_gaussian, x, y, patch_radius);
+    auto nearest_patch = nearest_gaussian.compute<SafeCrop>(x, y, patch_radius);
 
-    //#define DEBUG_SELECT_SCALE
+//#define DEBUG_SELECT_SCALE
 #ifdef DEBUG_SELECT_SCALE
-    // verbose.
+// verbose.
 #define print(variable) cout << #variable << " = " << variable << endl
     print_stage("Check patch variable");
-    print(G.scale_relative_to_octave(s-1));
+    print(G.scale_relative_to_octave(s - 1));
     print(G.scale_relative_to_octave(s));
     print(gauss_truncate_factor);
     print(increase_sigma_max);
@@ -322,8 +322,8 @@ namespace DO { namespace Sara {
     auto zoom_factor = 10.;
     Window win = active_window() ? active_window() : 0;
     if (win)
-      set_active_window(create_window(zoom_factor*nearest_patch.width(),
-                                      zoom_factor*nearest_patch.height()) );
+      set_active_window(create_window(zoom_factor * nearest_patch.width(),
+                                      zoom_factor * nearest_patch.height()));
     display(nearest_patch, 0, 0, zoom_factor);
     get_key();
 #endif
@@ -348,9 +348,8 @@ namespace DO { namespace Sara {
     // Start with the initial patch.
     scales[0] = G.scale_relative_to_octave(s) / sqrt(2.f);
     auto inc_sigma = sqrt(pow(scales[0], 2) - pow(nearest_sigma, 2));
-    patches[0] = inc_sigma > 1e-3f ?
-      gaussian(nearest_patch, inc_sigma) :
-      nearest_patch;
+    patches[0] =
+        inc_sigma > 1e-3f ? gaussian(nearest_patch, inc_sigma) : nearest_patch;
 
 #ifdef DEBUG_SELECT_SCALE
     print_stage("Print sigma of each patch");
@@ -363,7 +362,7 @@ namespace DO { namespace Sara {
     // Loop for the rest of the patches.
     for (size_t i = 1; i < patches.size(); ++i)
     {
-      scales[i] = scale_common_ratio*scales[i-1];
+      scales[i] = scale_common_ratio * scales[i - 1];
       inc_sigma = sqrt(pow(scales[i], 2) - pow(scales[i - 1], 2));
       patches[i] = gaussian(patches[i - 1], inc_sigma);
 #ifdef DEBUG_SELECT_SCALE
@@ -376,13 +375,13 @@ namespace DO { namespace Sara {
 
     // Compute the scale normalized LoG values in each patch centers
     for (size_t i = 0; i != patches.size(); ++i)
-      LoGs[i] = laplacian(patches[i], Point2i(patch_radius,patch_radius))
-              * pow(scales[i], 2);
+      LoGs[i] = laplacian(patches[i], Point2i(patch_radius, patch_radius)) *
+                pow(scales[i], 2);
 
     // Search local extremum.
     auto is_extremum = false;
     auto i = 1;
-    for ( ; i < num_scales; ++i)
+    for (; i < num_scales; ++i)
     {
       // Is LoG(\mathbf{x},\sigma) an extremum
       is_extremum = (LoGs[i] <= LoGs[i - 1] && LoGs[i] <= LoGs[i + 1]) ||
@@ -400,7 +399,7 @@ namespace DO { namespace Sara {
       // $f(x+h) = f(x) + f'(x)h + f''(x) h^2/2$
       // We approximate $f'$ and $f''$ by finite difference.
       auto fprime = (LoGs[i + 1] - LoGs[i - 1]) / 2.f;
-      auto fsecond = LoGs[i - 1] - 2.f*LoGs[i] + LoGs[i + 1];
+      auto fsecond = LoGs[i - 1] - 2.f * LoGs[i] + LoGs[i + 1];
       // Maximize w.r.t. to $h$, derive the expression.
       // Thus $h = -f'(x)/f''(x)$.
       auto h = -fprime / fsecond;
@@ -420,10 +419,8 @@ namespace DO { namespace Sara {
 
   vector<OERegion> laplace_maxima(const ImagePyramid<float>& function,
                                   const ImagePyramid<float>& gauss_pyramid,
-                                  int s, int o,
-                                  float extremum_thres,
-                                  int img_padding_sz,
-                                  int num_scales,
+                                  int s, int o, float extremum_thres,
+                                  int img_padding_sz, int num_scales,
                                   int refine_iterations)
   {
     LocalMax<float> local_max;
@@ -431,13 +428,15 @@ namespace DO { namespace Sara {
     auto corners = vector<OERegion>{};
     corners.reserve(int(1e4));
 
-    for (auto y = img_padding_sz; y < function(s,o).height()-img_padding_sz; ++y)
+    for (auto y = img_padding_sz; y < function(s, o).height() - img_padding_sz;
+         ++y)
     {
-      for (int x = img_padding_sz; x < function(s,o).width()-img_padding_sz; ++x)
+      for (int x = img_padding_sz; x < function(s, o).width() - img_padding_sz;
+           ++x)
       {
-        if ( !local_max(x,y,function(s,o)) )
+        if (!local_max(x, y, function(s, o)))
           continue;
-        if ( function(x,y,s,o) < extremum_thres )
+        if (function(x, y, s, o) < extremum_thres)
           continue;
 
         // Select the optimal scale using the normalized LoG.
@@ -450,7 +449,8 @@ namespace DO { namespace Sara {
         auto val = function(x, y, s, o);
         auto p = Point2f(x, y);
 
-        /*if (!refineExtremum(function(s,o),x,y,1,p,val,img_padding_sz,refine_iterations))
+        /*if
+          (!refineExtremum(function(s,o),x,y,1,p,val,img_padding_sz,refine_iterations))
           continue;*/
 
         refine_extremum(function(s, o), x, y, 1, p, val, img_padding_sz,
@@ -459,7 +459,7 @@ namespace DO { namespace Sara {
         // Store the extremum.
         auto c = OERegion{};
         c.center() = p;
-        c.shape_matrix() = Matrix2f::Identity()*pow(scale,-2);
+        c.shape_matrix() = Matrix2f::Identity() * pow(scale, -2);
         c.orientation() = 0.f;
         c.extremum_type() = OERegion::ExtremumType::Max;
         c.extremum_value() = val;

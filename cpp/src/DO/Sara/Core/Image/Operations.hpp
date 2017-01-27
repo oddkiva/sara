@@ -12,8 +12,8 @@
 #pragma once
 
 #include <DO/Sara/Core/Image/Image.hpp>
-#include <DO/Sara/Core/Pixel/SmartColorConversion.hpp>
 #include <DO/Sara/Core/Pixel/PixelTraits.hpp>
+#include <DO/Sara/Core/Pixel/SmartColorConversion.hpp>
 
 
 namespace DO { namespace Sara {
@@ -26,23 +26,23 @@ namespace DO { namespace Sara {
   template <typename T, int N>
   inline std::pair<T, T> find_min_max(const ImageView<T, N>& src)
   {
-    const auto *src_first = src.begin();
-    const auto *src_last = src.end();
+    const auto* src_first = src.begin();
+    const auto* src_last = src.end();
     return { *std::min_element(src_first, src_last),
              *std::max_element(src_first, src_last) };
   }
 
   template <typename T, int N, typename ColorSpace>
   std::pair<Pixel<T, ColorSpace>, Pixel<T, ColorSpace>>
-  find_min_max(const ImageView<Pixel<T, ColorSpace>, N> &src)
+  find_min_max(const ImageView<Pixel<T, ColorSpace>, N>& src)
   {
-    const auto *src_first = src.begin();
-    const auto *src_last = src.end();
+    const auto* src_first = src.begin();
+    const auto* src_last = src.end();
 
     auto min = *src_first;
     auto max = *src_first;
 
-    for ( ; src_first != src_last; ++src_first)
+    for (; src_first != src_last; ++src_first)
     {
       min = min.cwiseMin(*src_first);
       max = max.cwiseMax(*src_first);
@@ -73,11 +73,11 @@ namespace DO { namespace Sara {
         "Color conversion error: image sizes are not equal!"
       };
 
-    const auto *src_first = src.begin();
-    const auto *src_last = src.end();
+    const auto* src_first = src.begin();
+    const auto* src_last = src.end();
     auto dst_first = dst.begin();
 
-    for ( ; src_first != src_last; ++src_first, ++dst_first)
+    for (; src_first != src_last; ++src_first, ++dst_first)
       smart_convert_color(*src_first, *dst_first);
   }
 
@@ -171,15 +171,26 @@ namespace DO { namespace Sara {
 
   struct ColorRescale
   {
-    template <typename SrcImageView>
-    using OutPixel = typename SrcImageView::pixel_type;
+    template <typename ImageView_>
+    using Pixel = typename ImageView_::pixel_type;
 
-    template <typename Pixel, int N>
-    void operator()(const ImageView<Pixel, N>& src, ImageView<Pixel, N>& dst,
-                    const Pixel& a = PixelTraits<Pixel>::min(),
-                    const Pixel& b = PixelTraits<Pixel>::max()) const
+    template <typename ImageView_>
+    void operator()(
+        const ImageView_& in, ImageView_& out,
+        const Pixel<ImageView_>& a = PixelTraits<Pixel<ImageView_>>::min(),
+        const Pixel<ImageView_>& b = PixelTraits<Pixel<ImageView_>>::max()) const
     {
-      color_rescale(src, dst, a, b);
+      color_rescale(in, out, a, b);
+    }
+
+    template <typename ImageView_>
+    inline auto operator()(
+        const ImageView_& in,
+        const Pixel<ImageView_>& a = PixelTraits<Pixel<ImageView_>>::min(),
+        const Pixel<ImageView_>& b = PixelTraits<Pixel<ImageView_>>::max()) const
+        -> Image<Pixel<ImageView_>, ImageView_::Dimension>
+    {
+      return color_rescale(in, a, b);
     }
   };
   //! @}
@@ -203,15 +214,15 @@ namespace DO { namespace Sara {
     auto dst = Image<T, N>{ end_coords - begin_coords };
 
     auto src_it = src.begin_subarray(begin_coords, end_coords);
-    for (auto dst_it = dst.begin() ; dst_it != dst.end(); ++dst_it, ++src_it)
+    for (auto dst_it = dst.begin(); dst_it != dst.end(); ++dst_it, ++src_it)
       *dst_it = *src_it;
 
     return dst;
   }
 
   template <typename T>
-  inline Image<T> crop(const ImageView<T>& src, int top_left_x,
-                            int top_left_y, int width, int height)
+  inline Image<T> crop(const ImageView<T>& src, int top_left_x, int top_left_y,
+                       int width, int height)
   {
     auto begin_coords = Vector2i{ top_left_x, top_left_y };
     auto end_coords = Vector2i{ top_left_x + width, top_left_y + height };
@@ -220,34 +231,35 @@ namespace DO { namespace Sara {
 
   template <typename T>
   inline Image<T> crop(const ImageView<T>& src, int center_x, int center_y,
-                            int radius)
+                       int radius)
   {
     return crop(src, center_x - radius, center_y - radius, 2 * radius + 1,
                 2 * radius + 1);
   }
 
-
   struct Crop
   {
-    template <typename SrcImageView>
-    using OutPixel = typename SrcImageView::pixel_type;
+    template <typename ImageView_>
+    using Pixel = typename ImageView_::pixel_type;
 
     template <typename ImageView_>
-    using Coords = typename ImageView_::coord_type;
+    using Coords = typename ImageView_::vector_type;
 
-    template <typename Pixel, int N>
-    void operator()(const ImageView<Pixel, N>& src, ImageView<Pixel, N>& dst,
-                    const Coords<ImageView<Pixel, N>>& begin_coords,
-                    const Coords<ImageView<Pixel, N>>& end_coords) const
+    template <typename ImageView_>
+    inline auto operator()(const ImageView_& src,
+                           const Coords<ImageView_>& begin_coords,
+                           const Coords<ImageView_>& end_coords) const
+        -> Image<Pixel<ImageView_>, ImageView_::Dimension>
     {
-      dst = crop(src, begin_coords, end_coords);
+      return crop(src, begin_coords, end_coords);
     }
 
-    template <typename Pixel>
-    void operator()(const ImageView<Pixel>& src, ImageView<Pixel>& dst,
-                    int top_left_x, int top_left_y, int width, int height) const
+    template <typename T>
+    inline auto operator()(const ImageView<T>& src, int top_left_x,
+                           int top_left_y, int width, int height) const
+        -> Image<T>
     {
-      dst = crop(src, top_left_x, top_left_y, width, height);
+      return crop(src, top_left_x, top_left_y, width, height);
     }
   };
   //! @}
@@ -263,7 +275,7 @@ namespace DO { namespace Sara {
     auto dst = Image<T, N>{ end_coords - begin_coords };
 
     auto src_it = src.begin_subarray(begin_coords, end_coords);
-    for (auto dst_it = dst.begin() ; dst_it != dst.end(); ++dst_it, ++src_it)
+    for (auto dst_it = dst.begin(); dst_it != dst.end(); ++dst_it, ++src_it)
     {
       // If a and b are coordinates out bounds.
       if (src_it.position().minCoeff() < 0 ||
@@ -282,39 +294,47 @@ namespace DO { namespace Sara {
   {
     auto begin_coords = Vector2i{ top_left_x, top_left_y };
     auto end_coords = Vector2i{ top_left_x + width, top_left_y + height };
-    return crop(src, begin_coords, end_coords);
+    return safe_crop(src, begin_coords, end_coords);
   }
 
   template <typename T>
   inline Image<T> safe_crop(const ImageView<T>& src, int center_x, int center_y,
                             int radius)
   {
-    return crop(src, center_x - radius, center_y - radius, 2 * radius + 1,
-                2 * radius + 1);
+    return safe_crop(src, center_x - radius, center_y - radius, 2 * radius + 1,
+                     2 * radius + 1);
   }
-
 
   struct SafeCrop
   {
-    template <typename SrcImageView>
-    using OutPixel = typename SrcImageView::pixel_type;
+    template <typename ImageView_>
+    using Pixel = typename ImageView_::pixel_type;
 
     template <typename ImageView_>
-    using Coords = typename ImageView_::coord_type;
+    using Coords = typename ImageView_::vector_type;
 
-    template <typename Pixel, int N>
-    void operator()(const ImageView<Pixel, N>& src, ImageView<Pixel, N>& dst,
-                    const Coords<ImageView<Pixel, N>>& begin_coords,
-                    const Coords<ImageView<Pixel, N>>& end_coords) const
+    template <typename ImageView_>
+    inline auto operator()(const ImageView_& src,
+                           const Coords<ImageView_>& begin_coords,
+                           const Coords<ImageView_>& end_coords) const
+        -> Image<Pixel<ImageView_>, ImageView_::Dimension>
     {
-      dst = safe_crop(src, begin_coords, end_coords);
+      return safe_crop(src, begin_coords, end_coords);
     }
 
-    template <typename Pixel>
-    void operator()(const ImageView<Pixel>& src, ImageView<Pixel>& dst,
-                    int top_left_x, int top_left_y, int width, int height) const
+    template <typename T>
+    inline auto operator()(const ImageView<T>& src, int top_left_x, int top_left_y,
+                           int width, int height) const
+        -> Image<T>
     {
-      dst = crop(src, top_left_x, top_left_y, width, height);
+      return safe_crop(src, top_left_x, top_left_y, width, height);
+    }
+
+    template <typename T>
+    inline auto operator()(const ImageView<T>& src, int x, int y,
+                           int radius) const -> Image<T>
+    {
+      return safe_crop(src, x, y, radius);
     }
   };
   //! @}

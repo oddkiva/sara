@@ -20,13 +20,13 @@ using namespace std;
 using namespace DO::Sara;
 
 
-class TestImageCrop : public testing::Test
+class TestImageViewTransformOperations : public testing::Test
 {
 protected:
   Image<float> image;
   Vector2i sizes;
 
-  TestImageCrop()
+  TestImageViewTransformOperations()
   {
     sizes << 3, 4;
     image.resize(sizes);
@@ -39,36 +39,36 @@ protected:
 };
 
 
-TEST_F(TestImageCrop, test_safe_crop_image_within_bounds)
+TEST_F(TestImageViewTransformOperations, test_with_safe_crop_functor)
 {
   auto a = Vector2i{ 1, 1 };
   auto b = Vector2i{ 3, 2 };
-  auto safe_cropped_image = safe_crop(image, a, b);
-  auto cropped_image = crop(image, a, b);
+  auto cropped_image = image.compute<SafeCrop>(a, b);
 
   auto true_cropped_image = Image<float, 2>{ 2, 1 };
   true_cropped_image.matrix() << 2, 2;
-  EXPECT_MATRIX_EQ(true_cropped_image.sizes(), safe_cropped_image.sizes());
-  EXPECT_MATRIX_EQ(true_cropped_image.matrix(), safe_cropped_image.matrix());
   EXPECT_MATRIX_EQ(true_cropped_image.sizes(), cropped_image.sizes());
   EXPECT_MATRIX_EQ(true_cropped_image.matrix(), cropped_image.matrix());
 
   auto x = 1, y = 1;
   auto w = 2, h = 1;
-  safe_cropped_image = safe_crop(image, x, y, w, h);
-  cropped_image = crop(image, x, y, w, h);
-  EXPECT_MATRIX_EQ(true_cropped_image.sizes(), safe_cropped_image.sizes());
-  EXPECT_MATRIX_EQ(true_cropped_image.matrix(), safe_cropped_image.matrix());
+  cropped_image = safe_crop(image, x, y, w, h);
   EXPECT_MATRIX_EQ(true_cropped_image.sizes(), cropped_image.sizes());
   EXPECT_MATRIX_EQ(true_cropped_image.matrix(), cropped_image.matrix());
 }
 
 
-TEST_F(TestImageCrop, test_safe_crop_image_out_of_bounds_1)
+TEST_F(TestImageViewTransformOperations, test_with_safe_crop_lambda)
 {
+  auto safe_crop_ = [](const Image<float>& src,
+                       const Vector2i& a, const Vector2i& b)
+  {
+    return safe_crop(src, a, b);
+  };
+
   auto a = Vector2i{ -3, -3 };
   auto b = Vector2i{ 0, 0 };
-  auto cropped_image = safe_crop(image, a, b);
+  auto cropped_image = image.compute(safe_crop_, a, b);
 
   auto true_cropped_image = Image<float, 2>{ 3, 3 };
   true_cropped_image.matrix().fill(0);
@@ -83,29 +83,6 @@ TEST_F(TestImageCrop, test_safe_crop_image_out_of_bounds_1)
 
   auto cx = -2, cy = -2, r = 1;
   cropped_image = safe_crop(image, cx, cy, r);
-  EXPECT_MATRIX_EQ(true_cropped_image.sizes(), cropped_image.sizes());
-  EXPECT_MATRIX_EQ(true_cropped_image.matrix(), cropped_image.matrix());
-}
-
-
-TEST_F(TestImageCrop, test_safe_crop_image_out_of_bounds_2)
-{
-  auto a = Vector2i{ -1, -1 };
-  auto b = Vector2i{ 2, 3 };
-  auto cropped_image = safe_crop(image, a, b);
-
-  auto true_cropped_image = Image<float, 2>{ 3, 4 };
-  true_cropped_image.matrix() <<
-    0, 0, 0,
-    0, 1, 1,
-    0, 2, 2,
-    0, 3, 3;
-  EXPECT_MATRIX_EQ(true_cropped_image.sizes(), cropped_image.sizes());
-  EXPECT_MATRIX_EQ(true_cropped_image.matrix(), cropped_image.matrix());
-
-  auto x = -1, y = -1;
-  auto w =  3, h =  4;
-  cropped_image = safe_crop(image, x, y, w, h);
   EXPECT_MATRIX_EQ(true_cropped_image.sizes(), cropped_image.sizes());
   EXPECT_MATRIX_EQ(true_cropped_image.matrix(), cropped_image.matrix());
 }

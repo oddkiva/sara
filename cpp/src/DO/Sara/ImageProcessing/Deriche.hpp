@@ -227,8 +227,16 @@ namespace DO { namespace Sara {
   //! @brief Wrapper class to use: Image<T,N>::compute<DericheBlur>(T sigma)
   struct DericheBlur
   {
-    template <typename SrcImageView>
-    using OutPixel = typename SrcImageView::pixel_type;
+    template <typename ImageView>
+    using Pixel = typename ImageView::pixel_type;
+
+    template <typename ImageView, typename Sigma>
+    inline auto operator()(const ImageView& src, const Sigma& sigma,
+                           bool neumann = true) const
+        -> Image<Pixel<ImageView>, ImageView::Dimension>
+    {
+      return deriche_blur(src, sigma, neumann);
+    }
 
     template <typename SrcImageView, typename DstImageView, typename Sigma>
     inline void operator()(const SrcImageView& src, DstImageView& dst,

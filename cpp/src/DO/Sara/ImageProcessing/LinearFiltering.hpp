@@ -102,7 +102,7 @@ namespace DO { namespace Sara {
       convolve_array(&buffer[0], kernel, w, kernel_size);
 
       for (int x = 0; x < w; ++x)
-        dst(x,y) = buffer[x];
+        dst(x, y) = buffer[x];
     }
   }
 
@@ -128,7 +128,7 @@ namespace DO { namespace Sara {
 
     const auto w = src.width();
     const auto h = src.height();
-    const auto half_size = kernel_size/2;
+    const auto half_size = kernel_size / 2;
 
     auto buffer = std::vector<T>(h + half_size * 2);
     for (int x = 0; x < w; ++x)
@@ -143,7 +143,7 @@ namespace DO { namespace Sara {
       convolve_array(&buffer[0], kernel, h, kernel_size);
 
       for (int y = 0; y < h; ++y)
-        dst(x,y) = buffer[y];
+        dst(x, y) = buffer[y];
     }
   }
 
@@ -231,8 +231,8 @@ namespace DO { namespace Sara {
   void apply_scharr_filter(const ImageView<T>& src, ImageView<T>& dst)
   {
     using S = typename PixelTraits<T>::channel_type;
-    const S mean_kernel[] = { S( 3), S(10), S(3) };
-    const S diff_kernel[] = { S(-1),  S(0), S(1) };
+    const S mean_kernel[] = { S(3), S(10), S(3) };
+    const S diff_kernel[] = { S(-1), S(0), S(1) };
 
     auto tmp = Image<T>{ src.sizes() };
 
@@ -251,7 +251,7 @@ namespace DO { namespace Sara {
   void apply_prewitt_filter(const ImageView<T>& src, ImageView<T>& dst)
   {
     using S = typename PixelTraits<T>::channel_type;
-    const S mean_kernel[] = { S( 1), S(1), S(1) };
+    const S mean_kernel[] = { S(1), S(1), S(1) };
     const S diff_kernel[] = { S(-1), S(0), S(1) };
 
     auto tmp = Image<T>{ src.sizes() };
@@ -334,8 +334,7 @@ namespace DO { namespace Sara {
         auto val = PixelTraits<T>::zero();
         for (int yy = 0; yy < kernel_height; ++yy)
           for (int xx = 0; xx < kernel_width; ++xx)
-            val += work(x + xx, y + yy)
-                 * kernel[yy*kernel_width + xx];
+            val += work(x + xx, y + yy) * kernel[yy * kernel_width + xx];
         dst(x, y) = val;
       }
     }
@@ -397,7 +396,8 @@ namespace DO { namespace Sara {
 
   //! @brief Apply Gaussian smoothing to image.
   template <typename T, typename S>
-  inline Image<T> gaussian(const ImageView<T>& src, S sigma, S gauss_truncate = S(4))
+  inline Image<T> gaussian(const ImageView<T>& src, S sigma,
+                           S gauss_truncate = S(4))
   {
     auto dst = Image<T>{ src.sizes() };
     apply_gaussian_filter(src, dst, sigma, gauss_truncate);
@@ -450,45 +450,47 @@ namespace DO { namespace Sara {
   }
 
 
-  // ======================================================================== //
-  // Helper 2D linear filtering functors
-#define CREATE_2D_ONLY_FILTER_FUNCTOR(FilterName, function)                   \
-  /*! @brief Helper class to use Image<T,N>::compute<FilterName>() */         \
-  struct FilterName                                                           \
-  {                                                                           \
-    template <typename SrcImageView>                                          \
-    using OutPixel = typename SrcImageView::pixel_type;                       \
-                                                                              \
-    template <typename SrcImageView, typename DstImageView>                   \
-    inline void operator()(const SrcImageView& src, DstImageView& dst) const  \
-    {                                                                         \
-      return function(src, dst);                                              \
-    }                                                                         \
+// ======================================================================== //
+// Helper 2D linear filtering functors
+#define CREATE_2D_FILTER_FUNCTOR(FilterName, function)                    \
+  /*! @brief Helper class to use Image<T,N>::compute<FilterName>() */          \
+  struct FilterName                                                            \
+  {                                                                            \
+    template <typename ImageView>                                              \
+    using Pixel = typename ImageView::pixel_type;                              \
+                                                                               \
+    template <typename ImageView>                                              \
+    inline auto operator()(const ImageView& in) const                          \
+        -> Image<Pixel<ImageView>>                                             \
+    {                                                                          \
+      return function(in);                                                     \
+    }                                                                          \
   }
 
-#define CREATE_2D_ONLY_FILTER_FUNCTOR_WITH_PARAM(FilterName, function)      \
-  /*! @brief Helper class to use Image<T,N>::compute<FilterName>() */       \
-  struct FilterName                                                         \
-  {                                                                         \
-    template <typename SrcImageView>                                        \
-    using OutPixel = typename SrcImageView::pixel_type;                     \
-                                                                            \
-    template <typename SrcImageView, typename DstImageView, typename Param> \
-    inline void operator()(const SrcImageView& src, DstImageView& dst,      \
-                           const Param& param) const                        \
-    {                                                                       \
-      return function(src, dst, param);                                     \
-    }                                                                       \
+#define CREATE_2D_FILTER_FUNCTOR_WITH_PARAM(FilterName, function)              \
+  /*! @brief Helper class to use Image<T,N>::compute<FilterName>() */          \
+  struct FilterName                                                            \
+  {                                                                            \
+    template <typename ImageView>                                              \
+    using Pixel = typename ImageView::pixel_type;                              \
+                                                                               \
+    template <typename ImageView, typename... Params>                          \
+    inline auto operator()(const ImageView& in,                                \
+                           const Params&... params) const                      \
+        -> Image<Pixel<ImageView>>                                             \
+    {                                                                          \
+      return function(in, params...);                                          \
+    }                                                                          \
   }
 
-  CREATE_2D_ONLY_FILTER_FUNCTOR(Sobel, apply_sobel_filter);
-  CREATE_2D_ONLY_FILTER_FUNCTOR(Scharr, apply_scharr_filter);
-  CREATE_2D_ONLY_FILTER_FUNCTOR(Prewitt, apply_prewitt_filter);
-  CREATE_2D_ONLY_FILTER_FUNCTOR(RobertsCross, apply_roberts_cross_filter);
-  CREATE_2D_ONLY_FILTER_FUNCTOR_WITH_PARAM(Gaussian, apply_gaussian_filter);
+  CREATE_2D_FILTER_FUNCTOR(Sobel, sobel);
+  CREATE_2D_FILTER_FUNCTOR(Scharr, scharr);
+  CREATE_2D_FILTER_FUNCTOR(Prewitt, prewitt);
+  CREATE_2D_FILTER_FUNCTOR(RobertsCross, roberts_cross);
+  CREATE_2D_FILTER_FUNCTOR_WITH_PARAM(Gaussian, gaussian);
 
-#undef CREATE_2D_ONLY_FILTER_FUNCTOR
-#undef CREATE_2D_ONLY_FILTER_FUNCTOR_WITH_PARAM
+#undef CREATE_2D_FILTER_FUNCTOR
+#undef CREATE_2D_FILTER_FUNCTOR_WITH_PARAM
 
   //! @}
 

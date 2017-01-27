@@ -128,20 +128,13 @@ namespace DO { namespace Sara {
   struct Function                                                     \
   {                                                                   \
     template <typename MatrixField>                                   \
-    struct Dimension {                                                \
-      enum { value = MatrixField::Dimension };                        \
-    };                                                                \
-                                                                      \
-    template <typename MatrixField>                                   \
     using Scalar = typename MatrixField::pixel_type::Scalar;          \
                                                                       \
-    template <typename MatrixField>                                   \
-    using OutPixel = typename MatrixField::pixel_type::Scalar;        \
-                                                                      \
-    template <typename SrcField, typename DstField>                   \
-    void operator()(const SrcField& src, DstField& dst) const         \
+    template <typename InField>                                       \
+    auto operator()(const InField& in) const                          \
+        -> Image<Scalar<InField>, InField::Dimension>                 \
     {                                                                 \
-      return function(src, dst);                                      \
+      return function(in);                                            \
     }                                                                 \
   }
 

@@ -66,11 +66,11 @@ namespace DO { namespace Sara {
   void check_patch(const ImageView<float>& I, int x, int y, int w, int h,
                    double fact)
   {
-    auto patch = crop(I, x, y, w, h);
+    auto patch = I.compute<SafeCrop>(x, y, w, h);
     auto window = create_window(int_round(w * fact), int_round(h * fact),
                                 "Check image patch");
     set_active_window(window);
-    display(color_rescale(patch), 0, 0, fact);
+    display(patch.compute<ColorRescale>(), 0, 0, fact);
     get_key();
     close_window();
   }
