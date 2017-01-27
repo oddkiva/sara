@@ -12,8 +12,7 @@
 //! @file
 //! @brief Master header file of the ImageProcessing module.
 
-#ifndef DO_SARA_IMAGEPROCESSING_HPP
-#define DO_SARA_IMAGEPROCESSING_HPP
+#pragma once
 
 #ifdef _OPENMP
 # include <omp.h>
@@ -58,6 +57,3 @@
   - Difference of Gaussians computation
   - Local extremum localization, including localization in scale-space.
  */
-
-
-#endif /* DO_SARA_IMAGEPROCESSING_HPP */

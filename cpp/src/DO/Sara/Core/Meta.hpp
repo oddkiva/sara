@@ -11,8 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_CORE_META_HPP
-#define DO_SARA_CORE_META_HPP
+#pragma once
 
 
 /*!
@@ -156,5 +155,3 @@ namespace DO { namespace Sara { namespace Meta {
 } /* namespace Meta */
 } /* namespace Sara */
 } /* namespace DO */
-
-#endif /* DO_SARA_CORE_META_HPP */

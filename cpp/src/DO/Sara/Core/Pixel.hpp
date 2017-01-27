@@ -11,9 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_CORE_PIXEL_HPP
-#define DO_SARA_CORE_PIXEL_HPP
-
+#pragma once
 
 #include <DO/Sara/Core/Pixel/ChannelConversion.hpp>
 #include <DO/Sara/Core/Pixel/ColorConversion.hpp>
@@ -22,6 +20,3 @@
 #include <DO/Sara/Core/Pixel/PixelTraits.hpp>
 #include <DO/Sara/Core/Pixel/SmartColorConversion.hpp>
 #include <DO/Sara/Core/Pixel/Typedefs.hpp>
-
-
-#endif /* DO_SARA_CORE_PIXEL_HPP */

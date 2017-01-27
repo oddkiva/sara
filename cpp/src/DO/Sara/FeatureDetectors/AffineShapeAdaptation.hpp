@@ -11,8 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_FEATUREDETECTORS_AFFINEADAPTATION_HPP
-#define DO_SARA_FEATUREDETECTORS_AFFINEADAPTATION_HPP
+#pragma once
 
 #include <DO/Sara/Defines.hpp>
 #include <DO/Sara/Core/Image.hpp>
@@ -128,6 +127,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_FEATUREDETECTORS_AFFINEADAPTATION_HPP */

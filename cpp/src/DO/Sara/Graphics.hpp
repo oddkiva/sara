@@ -12,8 +12,7 @@
 //! @file
 //! @brief Master header file of the Graphics module.
 
-#ifndef DO_SARA_GRAPHICS_HPP
-#define DO_SARA_GRAPHICS_HPP
+#pragma once
 
 #include <DO/Sara/Defines.hpp>
 #include <DO/Sara/Core/Image.hpp>
@@ -44,6 +43,3 @@
   - display a 3D mesh,
   - interactive viewing of images.
  */
-
-
-#endif /* DO_SARA_GRAPHICS_HPP */

@@ -11,9 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_IMAGEPROCESSING_IMAGEPYRAMID_HPP
-#define DO_SARA_IMAGEPROCESSING_IMAGEPYRAMID_HPP
-
+#pragma once
 
 #include <DO/Sara/Core/Image.hpp>
 
@@ -285,6 +283,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_IMAGEPROCESSING_IMAGEPYRAMID_HPP */

@@ -12,8 +12,7 @@
 //! @file
 //! @brief Master header file of the Core module.
 
-#ifndef DO_SARA_CORE_HPP
-#define DO_SARA_CORE_HPP
+#pragma once
 
 // Sara specific defines.
 #include <DO/Sara/Defines.hpp>
@@ -53,5 +52,3 @@
   So more specific information about the Eigen library, refer to:
   http://eigen.tuxfamily.org/dox/
  */
-
-#endif /* DO_SARA_CORE_HPP */

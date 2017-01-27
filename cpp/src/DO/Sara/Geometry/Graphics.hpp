@@ -9,11 +9,6 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_SARA_GEOMETRY_GRAPHICS_HPP
-#define DO_SARA_GEOMETRY_GRAPHICS_HPP
-
+#pragma once
 
 #include <DO/Sara/Geometry/Graphics/DrawPolygon.hpp>
-
-
-#endif /* DO_SARA_GEOMETRY_GRAPHICS_HPP */

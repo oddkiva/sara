@@ -9,9 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_SARA_CORE_PIXEL_CHANNELCONVERSION_HPP
-#define DO_SARA_CORE_PIXEL_CHANNELCONVERSION_HPP
-
+#pragma once
 
 #include <DO/Sara/Core/EigenExtension.hpp>
 #include <DO/Sara/Core/Pixel/Pixel.hpp>
@@ -156,6 +154,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_CORE_PIXEL_COLORSPACE_HPP */

@@ -9,8 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_SARA_GEOMETRY_HPP
-#define DO_SARA_GEOMETRY_HPP
+#pragma once
 
 //! Some useful mathematical tools.
 #include <DO/Sara/Geometry/Tools.hpp>
@@ -20,5 +19,3 @@
 #include <DO/Sara/Geometry/Algorithms.hpp>
 //! Graphics.
 #include <DO/Sara/Geometry/Graphics.hpp>
-
-#endif /* DO_SARA_GEOMETRY_HPP */

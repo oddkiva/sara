@@ -9,8 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_SARA_GEOMETRY_OBJECTS_HPP
-#define DO_SARA_GEOMETRY_OBJECTS_HPP
+#pragma once
 
 // 2D objects but their generalization to higher dimensions is straightforward.
 // \todo: see if generalization can be implemented easily by implementing a Kernel.
@@ -29,6 +28,3 @@
 
 // Constructive Solid Geometry.
 #include <DO/Sara/Geometry/Objects/CSG.hpp>
-
-
-#endif /* DO_SARA_GEOMETRY_OBJECTS_HPP */

@@ -9,8 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_SARA_GEOMETRY_TOOLS_HPP
-#define DO_SARA_GEOMETRY_TOOLS_HPP
+#pragma once
 
 #include <DO/Sara/Geometry/Tools/Utilities.hpp>
 #include <DO/Sara/Geometry/Tools/Metric.hpp>
@@ -18,5 +17,3 @@
 #include <DO/Sara/Geometry/Tools/Polynomial.hpp>
 #include <DO/Sara/Geometry/Tools/PolynomialRoots.hpp>
 #include <DO/Sara/Geometry/Tools/Projective.hpp>
-
-#endif /* DO_SARA_GEOMETRY_TOOLS_HPP */

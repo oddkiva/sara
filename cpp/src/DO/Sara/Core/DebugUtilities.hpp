@@ -11,8 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_DEBUG_UTILITIES_HPP
-#define DO_SARA_DEBUG_UTILITIES_HPP
+#pragma once
 
 #include <iostream>
 #include <string>
@@ -41,6 +40,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_DEBUG_UTILITIES_HPP */

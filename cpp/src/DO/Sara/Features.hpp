@@ -11,8 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_FEATURES_HPP
-#define DO_SARA_FEATURES_HPP
+#pragma once
 
 #include <vector>
 
@@ -28,5 +27,3 @@
 #include <DO/Sara/Features/IO.hpp>
 
 //! @defgroup Features Features
-
-#endif /* DO_SARA_FEATURES_HPP */

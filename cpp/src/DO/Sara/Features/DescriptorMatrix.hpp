@@ -11,8 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_FEATUREDESCRIPTORS_DESCRIPTORMATRIX_HPP
-#define DO_SARA_FEATUREDESCRIPTORS_DESCRIPTORMATRIX_HPP
+#pragma once
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/EigenExtension.hpp>
@@ -111,6 +110,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_FEATUREDESCRIPTORS_DESCRIPTORMATRIX_HPP */

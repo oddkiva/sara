@@ -11,8 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_FEATURES_UTILITIES_HPP
-#define DO_SARA_FEATURES_UTILITIES_HPP
+#pragma once
 
 #include <DO/Sara/Defines.hpp>
 
@@ -42,6 +41,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_FEATURES_UTILITIES_HPP */

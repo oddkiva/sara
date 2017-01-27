@@ -12,9 +12,7 @@
 //! @file
 //! \brief Master header file of Sara libraries.
 
-#ifndef DO_SARA_HPP
-#define DO_SARA_HPP
-
+#pragma once
 
 #include <DO/Sara/Core.hpp>
 #include <DO/Sara/Defines.hpp>
@@ -30,6 +28,3 @@
 #include <DO/Sara/KDTree.hpp>
 #include <DO/Sara/Match.hpp>
 #include <DO/Sara/VideoIO.hpp>
-
-
-#endif /* DO_SARA_HPP */

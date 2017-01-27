@@ -11,13 +11,8 @@
 
 //! @file
 
-#ifndef DO_SARA_CORE_MULTIARRAY_HPP
-#define DO_SARA_CORE_MULTIARRAY_HPP
-
+#pragma once
 
 #include <DO/Sara/Core/MultiArray/ElementTraits.hpp>
 #include <DO/Sara/Core/MultiArray/MultiArray.hpp>
 #include <DO/Sara/Core/MultiArray/MultiArrayView.hpp>
-
-
-#endif /* DO_SARA_CORE_MULTIARRAY_HPP */

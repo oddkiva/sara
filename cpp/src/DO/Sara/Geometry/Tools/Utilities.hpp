@@ -11,8 +11,7 @@
 
 //! @file \todo Refactor this file. It needs code review.
 
-#ifndef DO_SARA_GEOMETRY_UTILITIES_HPP
-#define DO_SARA_GEOMETRY_UTILITIES_HPP
+#pragma once
 
 #define _USE_MATH_DEFINES
 
@@ -247,6 +246,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_GEOMETRY_UTILITIES_HPP */

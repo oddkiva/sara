@@ -11,8 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_FEATUREDESCRIPTORS_ORIENTATION_HPP
-#define DO_SARA_FEATUREDESCRIPTORS_ORIENTATION_HPP
+#pragma once
 
 #include <DO/Sara/Defines.hpp>
 
@@ -241,6 +240,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_FEATUREDESCRIPTORS_ORIENTATION_HPP */

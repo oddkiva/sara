@@ -11,8 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_GRAPHICS_WINDOWCONTROL_HPP
-#define DO_SARA_GRAPHICS_WINDOWCONTROL_HPP
+#pragma once
 
 #include <DO/Sara/Graphics/Events.hpp>
 
@@ -181,6 +180,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_GRAPHICS_WINDOWCONTROL_HPP */

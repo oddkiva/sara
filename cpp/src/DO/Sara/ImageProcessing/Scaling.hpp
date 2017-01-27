@@ -11,9 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_IMAGEPROCESSING_SCALING_HPP
-#define DO_SARA_IMAGEPROCESSING_SCALING_HPP
-
+#pragma once
 
 #include <DO/Sara/Core/MultiArray/MultiArray.hpp>
 #include <DO/Sara/Core/Image/Operations.hpp>
@@ -205,6 +203,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_IMAGEPROCESSING_SCALING_HPP */

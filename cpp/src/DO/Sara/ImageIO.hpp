@@ -9,11 +9,6 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_SARA_IMAGEIO_HPP
-#define DO_SARA_IMAGEIO_HPP
-
+#pragma once
 
 #include <DO/Sara/ImageIO/ImageIO.hpp>
-
-
-#endif /* DO_SARA_IMAGEIO_HPP */

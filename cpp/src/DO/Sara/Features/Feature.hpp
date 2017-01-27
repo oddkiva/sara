@@ -11,9 +11,7 @@
 
 //! @file
 
-
-#ifndef DO_SARA_FEATURES_FEATURE_HPP
-#define DO_SARA_FEATURES_FEATURE_HPP
+#pragma once
 
 #include <cstdint>
 #include <stdexcept>
@@ -303,6 +301,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_FEATURES_FEATURE_HPP */

@@ -9,8 +9,9 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_SARA_FEATUREMATCHING_MATCHFILTERING_HPP
-#define DO_SARA_FEATUREMATCHING_MATCHFILTERING_HPP
+//! @file
+
+#pragma once
 
 #include <DO/Sara/Defines.hpp>
 
@@ -46,6 +47,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_FEATUREMATCHING_MATCHFILTERING_HPP */

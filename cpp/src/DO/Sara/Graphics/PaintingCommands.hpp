@@ -11,8 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_GRAPHICS_PAINTINGWINDOWCOMMANDS_HPP
-#define DO_SARA_GRAPHICS_PAINTINGWINDOWCOMMANDS_HPP
+#pragma once
 
 
 namespace DO { namespace Sara {
@@ -655,5 +654,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-#endif /* DO_SARA_GRAPHICS_PAINTINGWINDOWCOMMANDS_HPP */

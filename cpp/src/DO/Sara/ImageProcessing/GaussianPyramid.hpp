@@ -11,9 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_IMAGEPROCESSING_GAUSSIANPYRAMID_HPP
-#define DO_SARA_IMAGEPROCESSING_GAUSSIANPYRAMID_HPP
-
+#pragma once
 
 #include <DO/Sara/ImageProcessing/ImagePyramid.hpp>
 #include <DO/Sara/ImageProcessing/Differential.hpp>
@@ -200,6 +198,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_IMAGEPROCESSING_GAUSSIANPYRAMID_HPP */

@@ -12,8 +12,7 @@
 //! @file
 //! @brief This contains the implementation of the N-dimensional array class.
 
-#ifndef DO_SARA_CORE_MULTIARRAY_MULTIARRAY_HPP
-#define DO_SARA_CORE_MULTIARRAY_MULTIARRAY_HPP
+#pragma once
 
 #include <iostream>
 #include <memory>
@@ -179,6 +178,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_CORE_MULTIARRAY_MULTIARRAY_HPP */

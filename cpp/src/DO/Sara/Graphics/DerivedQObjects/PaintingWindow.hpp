@@ -11,8 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_GRAPHICS_PAINTINGWINDOW_HPP
-#define DO_SARA_GRAPHICS_PAINTINGWINDOW_HPP
+#pragma once
 
 #include <QScrollArea>
 #include <QWidget>
@@ -148,6 +147,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_GRAPHICS_PAINTINGWINDOW_HPP */

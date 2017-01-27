@@ -9,8 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_SARA_FEATUREMATCHING_HPP
-#define DO_SARA_FEATUREMATCHING_HPP
+#pragma once
 
 #include <DO/Sara/Features.hpp>
 #include <DO/Sara/Geometry/Tools/Metric.hpp>
@@ -21,6 +20,3 @@
 
 // Basic feature matching
 #include "FeatureMatching/AnnMatcher.hpp"
-
-
-#endif /* DO_SARA_FEATUREMATCHING_HPP */

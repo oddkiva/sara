@@ -11,8 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_UTILITIES_TIMER_HPP
-#define DO_SARA_UTILITIES_TIMER_HPP
+#pragma once
 
 #include <iostream>
 
@@ -52,6 +51,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_UTILITIES_TIMER_HPP */

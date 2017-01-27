@@ -11,8 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_GRAPHICS_GRAPHICSAPPLICATIONIMPL_HPP
-#define DO_SARA_GRAPHICS_GRAPHICSAPPLICATIONIMPL_HPP
+#pragma once
 
 #include <QApplication>
 #include <QPixmap>
@@ -81,5 +80,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-#endif /* DO_SARA_GRAPHICS_GRAPHICSAPPLICATIONIMPL_HPP */

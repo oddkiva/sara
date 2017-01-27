@@ -11,8 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_GRAPHICS_MESH_HPP
-#define DO_SARA_GRAPHICS_MESH_HPP
+#pragma once
 
 #include <fstream>
 #include <iostream>
@@ -208,6 +207,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_GRAPHICS_MESH_HPP */

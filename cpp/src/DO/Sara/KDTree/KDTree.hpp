@@ -9,8 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_SARA_KDTREE_KDTREE_HPP
-#define DO_SARA_KDTREE_KDTREE_HPP
+#pragma once
 
 #include <DO/Sara/Core.hpp>
 #include <flann/flann.hpp>
@@ -140,6 +139,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_KDTREE_KDTREE_HPP */

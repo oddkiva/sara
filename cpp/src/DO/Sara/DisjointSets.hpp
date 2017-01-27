@@ -12,11 +12,8 @@
 //! @file
 //! @brief Master header file of the DisjointSets module.
 
-#ifndef DO_SARA_DISJOINTSETS_HPP
-#define DO_SARA_DISJOINTSETS_HPP
+#pragma once
 
 #include <DO/Sara/Defines.hpp>
 #include <DO/Sara/DisjointSets/AdjacencyList.hpp>
 #include <DO/Sara/DisjointSets/DisjointSets.hpp>
-
-#endif /* DO_SARA_DISJOINTSETS_HPP */

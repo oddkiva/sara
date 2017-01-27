@@ -11,9 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_CORE_MULTIARRAY_ELEMENTTRAITS_HPP
-#define DO_SARA_CORE_MULTIARRAY_ELEMENTTRAITS_HPP
-
+#pragma once
 
 #include <DO/Sara/Core/Meta.hpp>
 #include <DO/Sara/Core/EigenExtension.hpp>
@@ -94,6 +92,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_CORE_MULTIARRAY_ELEMENTTRAITS_HPP */

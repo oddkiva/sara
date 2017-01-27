@@ -11,9 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_IMAGEPROCESSING_NORM_HPP
-#define DO_SARA_IMAGEPROCESSING_NORM_HPP
-
+#pragma once
 
 #include <DO/Sara/Core/Image/Image.hpp>
 #include <DO/Sara/Core/Pixel/PixelTraits.hpp>
@@ -150,6 +148,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_IMAGEPROCESSING_NORM_HPP */

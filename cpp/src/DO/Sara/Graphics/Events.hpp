@@ -9,9 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_SARA_GRAPHICS_EVENTS_HPP
-#define DO_SARA_GRAPHICS_EVENTS_HPP
-
+#pragma once
 
 #include <DO/Sara/Core/EigenExtension.hpp>
 
@@ -171,6 +169,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_GRAPHICS_EVENTS_HPP */

@@ -11,8 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_FEATUREDETECTORS_REFINEEXTREMA_HPP
-#define DO_SARA_FEATUREDETECTORS_REFINEEXTREMA_HPP
+#pragma once
 
 
 namespace DO { namespace Sara {
@@ -140,5 +139,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-#endif /* DO_SARA_FEATUREDETECTORS_REFINEEXTREMA_HPP */

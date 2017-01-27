@@ -11,8 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_GRAPHICS_OPENGLWINDOW_HPP
-#define DO_SARA_GRAPHICS_OPENGLWINDOW_HPP
+#pragma once
 
 #include <QGLWidget>
 #include <QQuaternion>
@@ -113,6 +112,3 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_GRAPHICS_OPENGLWINDOW_HPP */

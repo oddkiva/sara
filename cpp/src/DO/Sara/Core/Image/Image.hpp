@@ -11,9 +11,7 @@
 
 //! @file
 
-#ifndef DO_SARA_CORE_IMAGE_IMAGE_HPP
-#define DO_SARA_CORE_IMAGE_IMAGE_HPP
-
+#pragma once
 
 #include <DO/Sara/Core/Image/ElementTraits.hpp>
 #include <DO/Sara/Core/MultiArray.hpp>
@@ -209,12 +207,8 @@ namespace DO { namespace Sara {
     }
   };
 
-
   //! @}
 
 
 } /* namespace Sara */
 } /* namespace DO */
-
-
-#endif /* DO_SARA_CORE_IMAGE_IMAGE_HPP */
