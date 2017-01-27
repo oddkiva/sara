@@ -4,9 +4,9 @@ os: unstable
 
 environment:
   matrix:
-  - VS_VERSION: 12
+  - VS_VERSION: 15
     VS_PLATFORM: x64
-    QTDIR: C:\Qt\5.4\msvc2013_64_opengl
+    QTDIR: C:\Qt\5.7\msvc2015_64
 
 install:
   - set PATH=%QTDIR%\bin;%PATH%
