@@ -27,7 +27,7 @@ much as my time and energy allow it.
 
 
 **Tested Compilers:**
-- Visual Studio 2013
+- Visual Studio 2015
 - gcc 4.8, 4.9
 - clang 3.5, 3.6
 
@@ -50,8 +50,8 @@ documentation on at the [readthedocs.org](https://readthedocs.org/) but it is
 not up-to-date.
 
 Honestly you will be much better off consulting the [examples
-folder](https://github.com/DO-CV/sara/tree/master/examples) and the [test
-folder](https://github.com/DO-CV/sara/tree/master/test).
+folder](https://github.com/DO-CV/sara/tree/master/cpp/examples) and the [test
+folder](https://github.com/DO-CV/sara/tree/master/cpp/test).
 
 The codes are generally short and carefully so they should help you to get up to
 speed with the library usage.
