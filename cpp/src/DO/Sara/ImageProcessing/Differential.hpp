@@ -91,9 +91,6 @@ namespace DO { namespace Sara {
   struct Laplacian
   {
     template <typename Field>
-    using Coords = typename Field::vector_type;
-
-    template <typename Field>
     using Scalar = typename Field::value_type;
 
     template <typename Field>
@@ -121,7 +118,8 @@ namespace DO { namespace Sara {
 
     template <typename Field>
     inline auto operator()(const Field& scalar_field,
-                           const Coords<Field>& position) const -> Scalar<Field>
+                           const typename Field::vector_type& position) const
+        -> Scalar<Field>
     {
       auto out = Scalar<Field>{};
 

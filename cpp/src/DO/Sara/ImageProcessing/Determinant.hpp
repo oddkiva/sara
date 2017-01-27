@@ -28,17 +28,17 @@ namespace DO { namespace Sara {
   //! @brief Helper class to use Image<T,N>::compute<Determinant>().
   struct Determinant
   {
-    template <typename ImageView>
-    using Matrix = typename ImageView::pixel_type;
+    template <typename ImageView_>
+    using Matrix = typename ImageView_::pixel_type;
 
-    template <typename ImageView>
-    using Scalar = typename Matrix<ImageView>::Scalar;
+    template <typename ImageView_>
+    using Scalar = typename Matrix<ImageView_>::Scalar;
 
-    template <typename ImageView>
-    inline auto operator()(const ImageView& src) const
-        -> Image<Scalar<ImageView>, ImageView::Dimension>
+    template <typename ImageView_>
+    inline auto operator()(const ImageView_& src) const
+        -> Image<Scalar<ImageView_>, ImageView_::Dimension>
     {
-      auto dst = Image<Scalar<ImageView>, ImageView::Dimension>{ src.sizes() };
+      auto dst = Image<Scalar<ImageView_>, ImageView_::Dimension>{ src.sizes() };
 
       auto dst_i = dst.begin();
       auto src_i = src.begin();

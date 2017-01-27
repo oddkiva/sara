@@ -171,24 +171,24 @@ namespace DO { namespace Sara {
 
   struct ColorRescale
   {
-    template <typename ImageView>
-    using Pixel = typename ImageView::pixel_type;
+    template <typename ImageView_>
+    using Pixel = typename ImageView_::pixel_type;
 
-    template <typename ImageView>
+    template <typename ImageView_>
     void operator()(
-        const ImageView& in, ImageView& out,
-        const Pixel<ImageView>& a = PixelTraits<Pixel<ImageView>>::min(),
-        const Pixel<ImageView>& b = PixelTraits<Pixel<ImageView>>::max()) const
+        const ImageView_& in, ImageView_& out,
+        const Pixel<ImageView_>& a = PixelTraits<Pixel<ImageView_>>::min(),
+        const Pixel<ImageView_>& b = PixelTraits<Pixel<ImageView_>>::max()) const
     {
       color_rescale(in, out, a, b);
     }
 
-    template <typename ImageView>
+    template <typename ImageView_>
     inline auto operator()(
-        const ImageView& in,
-        const Pixel<ImageView>& a = PixelTraits<Pixel<ImageView>>::min(),
-        const Pixel<ImageView>& b = PixelTraits<Pixel<ImageView>>::max()) const
-        -> Image<Pixel<ImageView>, ImageView::Dimension>
+        const ImageView_& in,
+        const Pixel<ImageView_>& a = PixelTraits<Pixel<ImageView_>>::min(),
+        const Pixel<ImageView_>& b = PixelTraits<Pixel<ImageView_>>::max()) const
+        -> Image<Pixel<ImageView_>, ImageView_::Dimension>
     {
       return color_rescale(in, a, b);
     }
@@ -239,25 +239,25 @@ namespace DO { namespace Sara {
 
   struct Crop
   {
-    template <typename ImageView>
-    using Pixel = typename ImageView::pixel_type;
+    template <typename ImageView_>
+    using Pixel = typename ImageView_::pixel_type;
 
-    template <typename ImageView>
-    using Coords = typename ImageView::vector_type;
+    template <typename ImageView_>
+    using Coords = typename ImageView_::vector_type;
 
-    template <typename ImageView>
-    inline auto operator()(const ImageView& src,
-                           const Coords<ImageView>& begin_coords,
-                           const Coords<ImageView>& end_coords) const
-        -> Image<Pixel<ImageView>, ImageView::Dimension>
+    template <typename ImageView_>
+    inline auto operator()(const ImageView_& src,
+                           const Coords<ImageView_>& begin_coords,
+                           const Coords<ImageView_>& end_coords) const
+        -> Image<Pixel<ImageView_>, ImageView_::Dimension>
     {
       return crop(src, begin_coords, end_coords);
     }
 
-    template <typename Pixel_>
-    inline auto operator()(const ImageView<Pixel_>& src, int top_left_x,
+    template <typename T>
+    inline auto operator()(const ImageView<T>& src, int top_left_x,
                            int top_left_y, int width, int height) const
-        -> Image<Pixel_>
+        -> Image<T>
     {
       return crop(src, top_left_x, top_left_y, width, height);
     }
@@ -302,22 +302,22 @@ namespace DO { namespace Sara {
                             int radius)
   {
     return safe_crop(src, center_x - radius, center_y - radius, 2 * radius + 1,
-                2 * radius + 1);
+                     2 * radius + 1);
   }
 
   struct SafeCrop
   {
-    template <typename ImageView>
-    using Pixel = typename ImageView::pixel_type;
+    template <typename ImageView_>
+    using Pixel = typename ImageView_::pixel_type;
 
-    template <typename ImageView>
-    using Coords = typename ImageView::vector_type;
+    template <typename ImageView_>
+    using Coords = typename ImageView_::vector_type;
 
-    template <typename ImageView>
-    inline auto operator()(const ImageView& src,
-                           const Coords<ImageView>& begin_coords,
-                           const Coords<ImageView>& end_coords) const
-        -> Image<Pixel<ImageView>, ImageView::Dimension>
+    template <typename ImageView_>
+    inline auto operator()(const ImageView_& src,
+                           const Coords<ImageView_>& begin_coords,
+                           const Coords<ImageView_>& end_coords) const
+        -> Image<Pixel<ImageView_>, ImageView_::Dimension>
     {
       return safe_crop(src, begin_coords, end_coords);
     }
