@@ -29,7 +29,8 @@ namespace DO { namespace Sara {
 
   //! @{
   //! @brief Forward declaration of the image classes.
-  template <typename PixelType, int N = 2> class ImageView;
+  template <typename PixelType, int N = 2>
+  class ImageView;
 
   template <typename PixelType, int N = 2,
             template <typename> class Allocator = std::allocator>
@@ -58,19 +59,13 @@ namespace DO { namespace Sara {
 
     //! @{
     //! Matrix views for linear algebra.
-    using const_matrix_view_type = Map<
-      const Matrix<
-        typename ElementTraits<pixel_type>::value_type,
-        Dynamic, Dynamic, RowMajor
-      >
-    >;
+    using const_matrix_view_type =
+        Map<const Matrix<typename ElementTraits<pixel_type>::value_type,
+                         Dynamic, Dynamic, RowMajor>>;
 
-    using matrix_view_type = Map<
-      Matrix<
-        typename ElementTraits<pixel_type>::value_type,
-        Dynamic, Dynamic, RowMajor
-      >
-    >;
+    using matrix_view_type =
+        Map<Matrix<typename ElementTraits<pixel_type>::value_type, Dynamic,
+                   Dynamic, RowMajor>>;
     //! @}
 
   public:
@@ -105,66 +100,101 @@ namespace DO { namespace Sara {
     //! @}
 
     //! Return image width.
-    inline int width() const
+    inline auto width() const -> int
     {
       return base_type::rows();
     }
 
     //! Return image height.
-    inline int height() const
+    inline auto height() const -> int
     {
       return base_type::cols();
     }
 
     //! @{
     //! Return matrix view for linear algebra with Eigen libraries.
-    inline matrix_view_type matrix()
+    inline auto matrix() -> matrix_view_type
     {
       static_assert(Dimension == 2, "MultiArray must be 2D");
       return matrix_view_type{
         reinterpret_cast<typename ElementTraits<pixel_type>::pointer>(
             base_type::data()),
-        height(),
-        width()
+        height(), width()
       };
     }
 
-    inline const_matrix_view_type matrix() const
+    inline auto matrix() const -> const_matrix_view_type
     {
       static_assert(Dimension == 2, "MultiArray must be 2D");
       return const_matrix_view_type{
         reinterpret_cast<typename ElementTraits<pixel_type>::const_pointer>(
             base_type::data()),
-        height(),
-        width()
+        height(), width()
       };
     }
     //! @}
 
-    //! @brief Converts image to the specified pixel format.
-    template <typename U>
-    inline Image<U, N> convert() const
+    //! @brief Convert image to the specified pixel format.
+    template <typename Pixel>
+    inline auto convert() const -> Image<Pixel, Dimension>
     {
-      auto dst = Image<U, Dimension>{ base_type::sizes() };
+      auto dst = Image<Pixel, Dimension>{ base_type::sizes() };
       DO::Sara::convert(*this, dst);
       return dst;
     }
 
-    //! @brief Perform custom filtering on the image.
+    //! @{
+    //! @brief Apply inplace a filter to the image.
     template <typename Filter, typename... Params>
-    inline auto compute(const Params&... params) const
-        -> Image<typename Filter::template OutPixel<self_type>, N>
+    inline auto compute_inplace(const Params&... params) -> self_type&
     {
-      using OutPixel = typename Filter::template OutPixel<self_type>;
-      auto dst = Image<OutPixel, N>{ base_type::sizes() };
-      Filter{}(*this, dst, params...);
-      return dst;
+      Filter{}(*this, *this, params...);
+      return *this;
     }
 
-    //! @brief Perform coefficient-wise transform.
+    template <typename Filter, typename... Params>
+    inline auto compute_inplace(Filter filter, const Params&... params)
+        -> self_type&
+    {
+      return filter(*this, *this, params...);
+    }
+    //! @}
+
+    //! @{
+    //! @brief Apply a filter to the image.
+    template <typename Filter, typename... Params>
+    inline auto compute(const Params&... params) const
+        -> decltype(Filter{}(std::declval<const self_type>(),
+                             std::declval<const Params>()...))
+    {
+      return Filter{}(*this, params...);
+    }
+
+    template <typename Filter, typename... Params>
+    inline auto compute(Filter filter, const Params&... params) const
+        -> decltype(filter(std::declval<const self_type>(),
+                           std::declval<const Params>()...))
+    {
+      return filter(*this, params...);
+    }
+    //! @}
+
+    //! @brief Apply inplace coefficient-wise operation.
+    template <typename Op>
+    inline auto cwise_transform_op(Op op)
+        -> self_type&
+    {
+      auto src_pixel = this->begin();
+      for (; src_pixel != this->end(); ++src_pixel)
+        *src_pixel = op(*src_pixel);
+
+      return *this;
+    }
+
+    //! @brief Apply coefficient-wise operation.
     template <typename Op>
     inline auto cwise_transform(Op op) const
-        -> Image<decltype(op(std::declval<value_type>())), N>
+        -> Image<decltype(op(std::declval<value_type>())), Dimension>
     {
       using Pixel = decltype(op(std::declval<value_type>()));
 
@@ -172,7 +202,7 @@ namespace DO { namespace Sara {
 
       auto src_pixel = this->begin();
       auto dst_pixel = dst.begin();
-      for ( ; src_pixel != this->end(); ++src_pixel, ++dst_pixel)
+      for (; src_pixel != this->end(); ++src_pixel, ++dst_pixel)
         *dst_pixel = op(*src_pixel);
 
       return dst;

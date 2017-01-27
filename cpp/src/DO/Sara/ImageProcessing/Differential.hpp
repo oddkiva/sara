@@ -31,58 +31,58 @@ namespace DO { namespace Sara {
   struct Gradient
   {
     template <typename Field>
-    struct Dimension { enum { value = Field::Dimension }; };
-
-    template <typename Field>
-    using Coords = Matrix<int, Dimension<Field>::value, 1>;
+    using Coords = typename Field::vector_type;
 
     template <typename Field>
     using Scalar = typename Field::value_type;
 
     template <typename Field>
-    using Vector = Matrix<Scalar<Field>, Dimension<Field>::value, 1>;
+    using Vector = Matrix<Scalar<Field>, Field::Dimension, 1>;
 
     template <typename Field>
-    using OutPixel = Vector<Field>;
+    using GradientField = Image<Vector<Field>, Field::Dimension>;
 
     template <typename Field>
-    inline Vector<Field>
-    operator()(const typename Field::const_array_iterator& it) const
+    inline auto operator()(const typename Field::const_array_iterator& in,
+                           Vector<Field>& out) const -> void
     {
-      auto gradient = Vector<Field>{};
-      for (int i = 0; i < Dimension<Field>::value; ++i)
+      constexpr auto N = Field::Dimension;
+
+      for (auto i = 0; i < N; ++i)
       {
-        if (it.position()[i] == 0)
-          gradient[i] = (it.delta(i, 1) - *it) / 2; // Replicate the border
-        else if (it.position()[i] == it.sizes()[i] - 1)
-          gradient[i] = (*it - it.delta(i,-1)) / 2; // Replicate the border
+        if (in.position()[i] == 0)
+          out[i] = (in.delta(i, 1) - *in) / 2; // Replicate the border
+        else if (in.position()[i] == in.sizes()[i] - 1)
+          out[i] = (*in - in.delta(i,-1)) / 2; // Replicate the border
         else
-          gradient[i] = (it.delta(i, 1) - it.delta(i,-1)) / 2;
+          out[i] = (in.delta(i, 1) - in.delta(i,-1)) / 2;
       }
-      return gradient;
     }
 
     template <typename Field>
-    inline Vector<Field> operator()(const Field& scalar_field,
-                                    const Coords<Field>& position) const
+    inline auto operator()(const Field& scalar_field,
+                           const Coords<Field>& position) const -> Vector<Field>
     {
-      auto it = scalar_field.begin_array();
-      it += position;
-      return operator()<Field>(it);
+      auto out = Vector<Field>{};
+
+      auto in = scalar_field.begin_array();
+      in += position;
+      operator()<Field>(in, out);
+
+      return out;
     }
 
-    template <typename SrcField, typename DstField>
-    void operator()(const SrcField& src, DstField& dst) const
+    template <typename Field>
+    auto operator()(const Field& in) const -> GradientField<Field>
     {
-      if (src.sizes() != dst.sizes())
-        throw std::domain_error{
-          "Source and destination image sizes are not equal!"
-        };
+      auto out = GradientField<Field>{ in.sizes() };
 
-      auto in_i = src.begin_array();
-      auto out_i = dst.begin();
-      for ( ; !in_i.end(); ++in_i, ++out_i)
-        *out_i = operator()<SrcField>(in_i);
+      auto in_i = in.begin_array();
+      auto out_i = out.begin();
+      for (; !in_i.end(); ++in_i, ++out_i)
+        operator()<Field>(in_i, *out_i);
+
+      return out;
     }
   };
 
@@ -91,57 +91,65 @@ namespace DO { namespace Sara {
   struct Laplacian
   {
     template <typename Field>
-    struct Dimension { enum { value = Field::Dimension }; };
-
-    template <typename Field>
-    using Coords = Matrix<int, Dimension<Field>::value, 1>;
-
-    template <typename Field>
     using Scalar = typename Field::value_type;
 
     template <typename Field>
-    using OutPixel = typename Field::value_type;
+    using ScalarField = Image<Scalar<Field>, Field::Dimension>;
 
     template <typename Field>
-    inline Scalar<Field>
-    operator()(typename Field::const_array_iterator& it) const
+    inline auto operator()(typename Field::const_array_iterator& in,
+                           Scalar<Field>& out) const -> void
     {
-      const int N{ Dimension<Field>::value };
+      constexpr auto N = Field::Dimension;
 
       auto value = PixelTraits<Scalar<Field>>::zero();
-      for (int i = 0; i < N; ++i)
+      for (auto i = 0; i < N; ++i)
       {
-        if (it.position()[i] == 0)
-          value += it.delta(i, 1) + *it; // Replicate the border
-        else if (it.position()[i] == it.sizes()[i] - 1)
-          value += *it + it.delta(i,-1); // Replicate the border
+        if (in.position()[i] == 0)
+          value += in.delta(i, 1) + *in;  // Replicate the border
+        else if (in.position()[i] == in.sizes()[i] - 1)
+          value += *in + in.delta(i, -1);  // Replicate the border
         else
-          value += it.delta(i, 1) + it.delta(i,-1);
+          value += in.delta(i, 1) + in.delta(i, -1);
       }
-      return value - 2*N*(*it);
+
+      out = value - 2 * N * (*in);
     }
 
     template <typename Field>
-    inline Scalar<Field> operator()(const Field& scalar_field,
-                                    const Coords<Field>& position) const
+    inline auto operator()(const Field& scalar_field,
+                           const typename Field::vector_type& position) const
+        -> Scalar<Field>
     {
-      auto loc =  scalar_field.begin_array();
-      loc += position;
-      return this->operator()<Field>(loc);
+      auto out = Scalar<Field>{};
+
+      auto in =  scalar_field.begin_array();
+      in += position;
+      operator()<Field>(in, out);
+
+      return out;
     }
 
-    template <typename SrcField, typename DstField>
-    void operator()(const SrcField& src, DstField& dst) const
+    template <typename InField, typename OutField>
+    auto operator()(const InField& in, OutField& out) const -> void
     {
-      if (src.sizes() != dst.sizes())
+      if (in.sizes() != out.sizes())
         throw std::domain_error{
           "Source and destination image sizes are not equal!"
         };
 
-      auto in_i = src.begin_array();
-      auto out_i = dst.begin();
+      auto in_i = in.begin_array();
+      auto out_i = out.begin();
       for ( ; !in_i.end(); ++in_i, ++out_i)
-        *out_i = this->operator()<SrcField>(in_i);
+        operator()<InField>(in_i, *out_i);
+    }
+
+    template <typename Field>
+    auto operator()(const Field& in) const -> ScalarField<Field>
+    {
+      auto out = ScalarField<Field>{ in.sizes() };
+      operator()(in, out);
+      return out;
     }
   };
 
@@ -150,29 +158,24 @@ namespace DO { namespace Sara {
   struct Hessian
   {
     template <typename Field>
-    struct Dimension { enum { value = Field::Dimension }; };
-
-    template <typename Field>
-    using Coords = Matrix<int, Dimension<Field>::value, 1>;
+    using Coords = typename Field::vector_type;
 
     template <typename Field>
     using Scalar = typename Field::value_type;
 
     template <typename Field>
-    using HessianMatrix = Eigen::Matrix<
-      Scalar<Field>, Dimension<Field>::value, Dimension<Field>::value>;
+    using HessianMatrix =
+        Eigen::Matrix<Scalar<Field>, Field::Dimension, Field::Dimension>;
 
     template <typename Field>
-    using OutPixel = HessianMatrix<Field>;
+    using HessianField = Image<HessianMatrix<Field>, Field::Dimension>;
 
     template <typename Field>
-    HessianMatrix<Field>
-    operator()(typename Field::const_array_iterator& it) const
+    auto operator()(typename Field::const_array_iterator& in,
+                    HessianMatrix<Field>& out) const -> void
     {
-      const int N{ Dimension<Field>::value };
+      constexpr int N = Field::Dimension;
       using T = Scalar<Field>;
-
-      auto H = HessianMatrix<Field>{};
 
       for (int i = 0; i < N; ++i)
       {
@@ -180,55 +183,56 @@ namespace DO { namespace Sara {
         {
           if (i == j)
           {
-            auto next = it.position()[i] == it.sizes()[i]-1 ?
-              *it : it.delta(i, 1);
-            auto prev = it.position()[i] == 0 ?
-              *it : it.delta(i,-1);
+            auto next =
+                in.position()[i] == in.sizes()[i] - 1 ? *in : in.delta(i, 1);
+            auto prev = in.position()[i] == 0 ? *in : in.delta(i, -1);
 
-            H(i,i) = next - T(2)*(*it) + prev;
+            out(i, i) = next - T(2) * (*in) + prev;
           }
           else
           {
-            auto next_i = it.position()[i] == it.sizes()[i] - 1 ? 0 : 1;
-            auto prev_i = it.position()[i] == 0 ? 0 : -1;
-            auto next_j = it.position()[j] == it.sizes()[j] - 1 ? 0 : 1;
-            auto prev_j = it.position()[j] == 0 ? 0 : -1;
+            auto next_i = in.position()[i] == in.sizes()[i] - 1 ? 0 : 1;
+            auto prev_i = in.position()[i] == 0 ? 0 : -1;
+            auto next_j = in.position()[j] == in.sizes()[j] - 1 ? 0 : 1;
+            auto prev_j = in.position()[j] == 0 ? 0 : -1;
 
-            H(i, j) = (it.delta(i, next_i, j, next_j) -
-                       it.delta(i, prev_i, j, next_j) -
-                       it.delta(i, next_i, j, prev_j) +
-                       it.delta(i, prev_i, j, prev_j)) /
+            out(i, j) = (in.delta(i, next_i, j, next_j) -
+                       in.delta(i, prev_i, j, next_j) -
+                       in.delta(i, next_i, j, prev_j) +
+                       in.delta(i, prev_i, j, prev_j)) /
                       static_cast<T>(4);
 
-            H(j,i) = H(i,j);
+            out(j, i) = out(i, j);
           }
         }
       }
-
-      return H;
     }
 
     template <typename Field>
-    inline HessianMatrix<Field> operator()(const Field& scalar_field,
-                                           const Coords<Field>& position) const
+    inline auto operator()(const Field& scalar_field,
+                           const Coords<Field>& position) const
+        -> HessianMatrix<Field>
     {
-      auto loc = scalar_field.begin_array();
-      loc += position;
-      return operator()<Field>(loc);
+      auto out = HessianMatrix<Field>{};
+
+      auto in = scalar_field.begin_array();
+      in += position;
+      operator()<Field>(in, out);
+
+      return out;
     }
 
-    template <typename SrcField, typename DstField>
-    void operator()(const SrcField& src, DstField& dst) const
+    template <typename Field>
+    auto operator()(const Field& in) const -> HessianField<Field>
     {
-      if (src.sizes() != dst.sizes())
-        throw std::domain_error{
-          "Source and destination image sizes are not equal!"
-        };
+      auto out = HessianField<Field>{ in.sizes() };
 
-      auto src_i = src.begin_array();
-      auto dst_i = dst.begin();
-      for ( ; !src_i.end(); ++src_i, ++dst_i)
-        *dst_i = operator()<SrcField>(src_i);
+      auto in_i = in.begin_array();
+      auto out_i = out.begin();
+      for (; !in_i.end(); ++in_i, ++out_i)
+        operator()<Field>(in_i, *out_i);
+
+      return out;
     };
   };
 
@@ -253,9 +257,7 @@ namespace DO { namespace Sara {
   template <typename T, int N>
   inline Image<Matrix<T, N, 1>, N> gradient(const ImageView<T, N>& in)
   {
-    auto out = Image<Matrix<T, N, 1>, N>{ in.sizes() };
-    Gradient{}(in, out);
-    return out;
+    return Gradient{}(in);
   }
 
   /*!
@@ -278,9 +280,7 @@ namespace DO { namespace Sara {
   template <typename T, int N>
   inline Image<T, N> laplacian(const ImageView<T, N>& in)
   {
-    auto out = Image<T, N>{ in.sizes() };
-    Laplacian{}(in, out);
-    return out;
+    return Laplacian{}(in);
   }
 
   /*!
@@ -304,9 +304,7 @@ namespace DO { namespace Sara {
   template <typename T, int N>
   inline Image<Matrix<T, N, N>> hessian(const ImageView<T, N>& in)
   {
-    auto out = Image<Matrix<T, N, N>>{ in.sizes() };
-    Hessian{}(in, out);
-    return out;
+    return Hessian{}(in);
   }
 
   //! @}

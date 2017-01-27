@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of Sara, a basic set of libraries in C++ for computer
+// This file is part of Sara, a basic set of libraries in C++ for.applyr
 // vision.
 //
 // Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
