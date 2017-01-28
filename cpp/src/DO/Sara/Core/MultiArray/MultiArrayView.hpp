@@ -394,7 +394,7 @@ namespace DO { namespace Sara {
 
     //! @brief Perform coefficient-wise transform in place.
     template <typename Op>
-    inline self_type& cwise_transform_inplace(Op op)
+    inline auto cwise_transform_inplace(Op op) -> self_type&
     {
       for (auto pixel = begin(); pixel != end(); ++pixel)
         op(*pixel);
@@ -404,7 +404,8 @@ namespace DO { namespace Sara {
     //! @brief Perform coefficient-wise transform.
     template <typename Op>
     inline auto cwise_transform(Op op) const
-        -> MultiArray<decltype(op(std::declval<value_type>())), N, S>
+        -> MultiArray<decltype(op(std::declval<value_type>())), Dimension,
+                      StorageOrder>
     {
       using ValueType = decltype(op(std::declval<value_type>()));
 
