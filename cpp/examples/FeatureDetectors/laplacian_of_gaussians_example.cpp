@@ -131,7 +131,7 @@ void check_keys(const Image<float>& image, const vector<OERegion>& features)
 GRAPHICS_MAIN()
 {
   auto image = Image<float>{};
-  auto image_filepath = src_path("../../datasets/sunflowerField.jpg");
+  auto image_filepath = src_path("../../../data/sunflowerField.jpg");
   if (!load(image, image_filepath))
     return -1;
 

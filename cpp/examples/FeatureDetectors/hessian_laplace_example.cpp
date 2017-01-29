@@ -192,7 +192,7 @@ GRAPHICS_MAIN()
 {
   // Input.
   auto image = Image<float>{};
-  auto image_filepath = src_path("../../datasets/sunflowerField.jpg");
+  auto image_filepath = src_path("../../../data/sunflowerField.jpg");
   if (!load(image, image_filepath))
     return -1;
 
