@@ -14,20 +14,20 @@ add_custom_target(copy_pysara_module)
 add_custom_command(TARGET copy_pysara_module
   COMMAND ${CMAKE_COMMAND} -E
   copy_directory ${DO_Sara_DIR}/python/do
-  ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/do)
+  ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/do)
 
 # Copy pysara.[so, dll] to the runtime output directory.
 set(pysara_LIBRARY_PATH $<TARGET_FILE:pysara>)
 add_custom_command(TARGET copy_pysara_module
   COMMAND ${CMAKE_COMMAND} -E
-  copy ${pysara_LIBRARY_PATH} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+  copy ${pysara_LIBRARY_PATH} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 
 
 # ============================================================================ #
 # Run the unit tests.
 add_custom_target(pytest
   COMMAND ${NOSETESTS_EXECUTABLE} --with-coverage --cover-package=do
-  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  WORKING_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
   COMMENT "Running Python tests.")
 
 

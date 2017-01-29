@@ -12,7 +12,7 @@ GRAPHICS_MAIN()
     return EXIT_FAILURE;
 
   // Resize image.
-  create_window((image.sizes()*2).eval(), "Image loaded from dialog box");
+  create_window((image.sizes() * 2).eval(), "Image loaded from dialog box");
   display(enlarge(image, 2));
   display(image);
   display(reduce(image, 2));
