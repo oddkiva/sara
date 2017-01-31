@@ -31,7 +31,7 @@ add_subdirectory(FeatureMatching)
 
 if (CMAKE_COMPILER_IS_GNUCXX)
   find_program(LCOV_PATH lcov)
-  find_program(GCOV_PATH gcov-${GCC_MAJOR}.${GCC_MINOR})
+  find_program(GCOV_PATH gcov)
   find_program(GENHTML_PATH genhtml)
 
   if (LCOV_PATH AND GCOV_PATH AND GENHTML_PATH)
