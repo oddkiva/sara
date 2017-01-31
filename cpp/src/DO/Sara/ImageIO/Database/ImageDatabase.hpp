@@ -30,19 +30,50 @@ namespace DO { namespace Sara {
 
     inline ImageDatabaseIterator() = default;
 
-    inline auto operator++() -> ImageDatabaseIterator&
+    inline ImageDatabaseIterator(file_iterator f)
+      : _file_i{f}
+    {
+    }
+
+    inline auto operator++() -> self_type&
     {
       ++_file_i;
       return *this;
     }
 
-    inline auto operator--() -> ImageDatabaseIterator&
+    inline auto operator--() -> self_type&
     {
       --_file_i;
       return *this;
     }
 
-    inline auto operator->() -> const Image<Rgb8> *
+    inline auto operator+=(std::ptrdiff_t n) -> self_type&
+    {
+      _file_i += n;
+      return *this;
+    }
+
+    inline auto operator-=(std::ptrdiff_t n) -> self_type&
+    {
+      _file_i -= n;
+      return *this;
+    }
+
+    inline auto operator+(std::ptrdiff_t n) const -> self_type
+    {
+      auto it = *this;
+      it += n;
+      return it;
+    }
+
+    inline auto operator-(std::ptrdiff_t n) const -> self_type
+    {
+      auto it = *this;
+      it -= n;
+      return it;
+    }
+
+    inline auto operator->() -> const image_type *
     {
       if (_file_i != _file_read)
       {
@@ -52,7 +83,7 @@ namespace DO { namespace Sara {
       return &_image_read;
     }
 
-    inline auto operator*() -> const Image<Rgb8>&
+    inline auto operator*() -> const image_type&
     {
       if (_file_i != _file_read)
       {
@@ -72,16 +103,16 @@ namespace DO { namespace Sara {
       return !(operator==(other));
     }
 
-    friend auto begin(const std::vector<std::string>& image_filepaths)
-        -> ImageDatabaseIterator
+    inline friend auto begin(const std::vector<std::string>& image_filepaths)
+        -> self_type
     {
-      auto image_it = ImageDatabaseIterator{};
-      image_it._file_i = image_filepaths.begin();
-      return image_it;
+      auto it = self_type{};
+      it._file_i = image_filepaths.begin();
+      return it;
     }
 
-    friend auto end(const std::vector<std::string>& image_filepaths)
-        -> ImageDatabaseIterator
+    inline friend auto end(const std::vector<std::string>& image_filepaths)
+        -> self_type 
     {
       return ImageDatabaseIterator{};
     }
@@ -89,7 +120,7 @@ namespace DO { namespace Sara {
   private:
     file_iterator _file_i;
     file_iterator _file_read;
-    Image<Rgb8> _image_read;
+    image_type _image_read;
   };
 
 

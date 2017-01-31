@@ -60,6 +60,20 @@ namespace DO { namespace Sara {
       return *this;
     }
 
+    inline auto operator+=(std::ptrdiff_t n) -> TrainingSampleIterator&
+    {
+      _s.first += n;
+      _s.second += n;
+      return *this;
+    }
+
+    inline auto operator-=(std::ptrdiff_t n) -> TrainingSampleIterator&
+    {
+      _s.first -= n;
+      _s.second -= n;
+      return *this;
+    }
+
     inline auto operator->() const -> sample_iterator *
     {
       return &_s;
