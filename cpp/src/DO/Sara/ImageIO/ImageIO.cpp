@@ -19,6 +19,7 @@
 
 #include <DO/Sara/ImageIO/ImageIO.hpp>
 #include <DO/Sara/Core/Image.hpp>
+#include <DO/Sara/ImageIO/Exif.hpp>
 #include <DO/Sara/ImageIO/ImageIOObjects.hpp>
 
 
@@ -190,6 +191,7 @@ namespace DO { namespace Sara {
     return os;
   }
 
+
 } /* namespace Sara */
 } /* namespace DO */
 
@@ -238,9 +240,9 @@ namespace DO { namespace Sara {
       image = Image<Rgba8>(reinterpret_cast<Rgba8 *>(&data[0]), Vector2i(w,h))
         .convert<unsigned char>();
 
-    EXIFInfo info;
+    auto info = EXIFInfo{};
     if (read_exif_info(info, filepath))
-      flip(image, int(info.Orientation));
+      flip_from_exif(image, int(info.Orientation));
 
     return true;
   }
@@ -262,16 +264,16 @@ namespace DO { namespace Sara {
       image = Image<Rgba8>(reinterpret_cast<Rgba8 *>(&data[0]),
                            Vector2i(w,h)).convert<Rgb8>();
 
-    EXIFInfo info;
+    auto info = EXIFInfo{};
     if (read_exif_info(info, filepath))
-      flip(image, int(info.Orientation));
+      flip_from_exif(image, int(info.Orientation));
     return true;
   }
 
   bool imwrite(const Image<Rgb8>& image, const std::string& filepath,
                int quality)
   {
-    string ext(file_ext(filepath));
+    const auto ext = file_ext(filepath);
 
     if (is_jpeg_file_ext(ext))
     {
