@@ -60,9 +60,12 @@ flags = [
 # Current header directories.
 "-I", "./cpp/src",
 # Third-party header directories.
+"-I", "./cpp/third-party",
 "-I", "./cpp/third-party/eigen",
 "-I", "./cpp/third-party/flann/src/cpp",
 "-I", "./cpp/third-party/gtest/include",
+# Build directory.
+"-I", "../sara-build/cpp/src",
 ]
 
 
