@@ -115,6 +115,18 @@ namespace DO { namespace Sara {
     //! @brief Resize the MultiArray object with the specified sizes.
     inline void resize(const vector_type& sizes)
     {
+      // Boundary case: the size of the allocated memory has not changed.
+      // Optimize by:
+      // - not deallocating memory.
+      // - only changing the sizes and recompute the strides.
+      if (_end - _begin == base_type::compute_size(sizes))
+      {
+        _sizes = sizes;
+        _strides = base_type::compute_strides(sizes());
+        return;
+      }
+
+      // General case.
       if (_sizes != sizes)
       {
         deallocate();
@@ -146,11 +158,11 @@ namespace DO { namespace Sara {
     //! @brief Allocate the internal array of the MultiArray object.
     inline void initialize(const vector_type& sizes)
     {
-      _sizes = sizes;
-      auto empty = (sizes == vector_type::Zero());
-      _strides = empty ? sizes : base_type::compute_strides(sizes);
+      const auto empty = (sizes == vector_type::Zero());
+      const auto num_elements = empty ? 0 : base_type::compute_size(sizes);
 
-      auto num_elements = base_type::compute_size(sizes);
+      _sizes = sizes;
+      _strides = empty ? sizes : base_type::compute_strides(sizes);
       _begin = empty ? 0 : allocate(num_elements);
       _end = empty ? 0 : _begin + num_elements;
     }
