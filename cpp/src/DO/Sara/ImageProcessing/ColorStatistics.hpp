@@ -30,7 +30,6 @@ namespace DO { namespace Sara {
     return tensor;
   }
 
-
   template <typename ImageIterator>
   inline auto rgb_mean(ImageIterator first, ImageIterator last) -> Vector3d
   {
@@ -47,7 +46,7 @@ namespace DO { namespace Sara {
   }
 
   template <typename ImageIterator>
-  inine auto rgb_covariance(ImageIterator first, ImageIterator last,
+  inline auto rgb_covariance(ImageIterator first, ImageIterator last,
                             const Vector3d& mean) -> Matrix3d
   {
     auto cov = Matrix3d::Zero();

@@ -13,29 +13,44 @@
 
 #pragma once
 
+#include <random>
+
 #include <DO/Sara/Core/Image.hpp>
-#include <DO/Sara/ImageIO.hpp>
 
 
 namespace DO { namespace Sara {
 
-  
-  struct FancyColorPCA
+
+  struct NormalDistribution
   {
-    FancyColorPCA(const Matrix3d& U, const Vector3d& S)
-      : _U{U}
-      , _S{S}
+    NormalDistribution(std::random_device& rd)
+      : _gen(rd)
     {
     }
 
-    void operator()(Image<Rgb64f>& in, const Vector3d& alpha) const
+    float operator()()
     {
-      in.array() += _U * _S.asDiagonal() * alpha;
+      return _dist(_gen);
     }
 
-    Matrix3d _U;
-    Vector3d _S;
+    std::mt19937 _gen;
+    std::normal_distribution<float> _dist;
   };
+
+
+  template <int N>
+  Image<float, N> normal(const Matrix<int, N, 1>& sizes)
+  {
+    auto image = Image<float, N>{sizes};
+    auto dice = NormalDistribution{};
+    auto random = [&normal_dist](float& value) {
+      value = dice();
+    };
+    std::for_each(image.begin(), image.end(), random);
+    return image;
+  }
+
+
 
 
 } /* namespace Sara */
