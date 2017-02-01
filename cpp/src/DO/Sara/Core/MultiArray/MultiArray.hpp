@@ -119,10 +119,10 @@ namespace DO { namespace Sara {
       // Optimize by:
       // - not deallocating memory.
       // - only changing the sizes and recompute the strides.
-      if (_end - _begin == base_type::compute_size(sizes))
+      if (_end - _begin == std::ptrdiff_t(base_type::compute_size(sizes)))
       {
         _sizes = sizes;
-        _strides = base_type::compute_strides(sizes());
+        _strides = base_type::compute_strides(sizes);
         return;
       }
 
