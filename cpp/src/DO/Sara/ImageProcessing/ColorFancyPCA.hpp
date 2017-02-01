@@ -28,13 +28,13 @@ namespace DO { namespace Sara {
     {
     }
 
-    void operator()(Image<Rgb64f>& in, const Vector3d& alpha) const
+    void operator()(Image<Rgb32f>& in, const Vector3f& alpha) const
     {
-      in.array() += _U * _S.asDiagonal() * alpha;
+      in.array() += _U * _S.asDiagonal() * alpha.cast<double>();
     }
 
-    Matrix3d _U;
-    Vector3d _S;
+    Matrix3f _U;
+    Vector3f _S;
   };
 
 

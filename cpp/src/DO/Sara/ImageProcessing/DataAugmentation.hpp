@@ -14,13 +14,21 @@
 #pragma once
 
 #include <DO/Sara/Core/Image.hpp>
-#include <DO/Sara/ImageProcessing/Scaling.hpp>
+#include <DO/Sara/ImageProcessing/ColorFancyPCA.hpp>
+#include <DO/Sara/ImageProcessing/Flip.hpp>
+#include <DO/Sara/ImageProcessing/Resize.hpp>
 
 
 namespace DO { namespace Sara {
 
   struct ImageDataTransform
   {
+    enum FlipType
+    {
+      Horizontal,
+      Vertical
+    };
+
     enum TransformType
     {
       Zoom = 0,
@@ -30,13 +38,61 @@ namespace DO { namespace Sara {
       NumTransformTypes = 4
     };
 
+    void set_zoom(float z)
+    {
+      use_original = false;
+      this->apply_transform[Zoom] = true;
+      this->z = z;
+    }
+
+    void unset_zoom()
+    {
+      this->apply_transform[Zoom] = false;
+    }
+
+    void set_shift(Vector2i t)
+    {
+      use_original = false;
+      this->apply_transform[Shift] = true;
+      this->t = t;
+    }
+
+    void unset_shift()
+    {
+      this->apply_transform[Shift] = false;
+    }
+
+    void set_flip(FlipType flip_type)
+    {
+      use_original = false;
+      this->apply_transform[Flip] = true;
+      this->flip_type = flip_type;
+    }
+
+    void unset_flip()
+    {
+      this->apply_transform[Flip] = false;
+    }
+
+    void set_fancy_pca(Vector3f alpha)
+    {
+      use_original = false;
+      this->apply_transform[FancyPCA] = true;
+      this->alpha = alpha;
+    }
+
+    void unset_fancy_pca()
+    {
+      this->apply_transform[FancyPCA] = false;
+    }
+
     Image<Rgb32f> operator()(const Image<Rgb32f>& in) const
     {
       if (use_original)
         return reduce(in, out_sizes);
 
       // 1. Zoom
-      auto out = in; 
+      auto out = in;
       if (apply_transform[Zoom])
       {
         if (z < 1)
@@ -50,10 +106,15 @@ namespace DO { namespace Sara {
         out = crop(out, t, out_sizes);
 
       if (apply_transform[Flip])
-        flip(out, flip_type);
+      {
+        if (flip_type == Horizontal)
+          flip_horizontally(out);
+        else
+          flip_vertically(out);
+      }
 
       if (apply_transform[FancyPCA])
-        out = ColorFancyPCA{U, S}(out, alpha);
+        ColorFancyPCA{U, S}(out, alpha);
 
       return out;
     }
@@ -62,9 +123,9 @@ namespace DO { namespace Sara {
     Vector2i out_sizes;
 
     //! Use the original image.
-    bool use_original;
-    //! If not use, 
-    std::array<bool, NumTransformTypes> apply_transform;
+    bool use_original{true};
+    //! If not use,
+    std::array<bool, NumTransformTypes> apply_transform{false, false, false, false};
 
     //! @{
     //! \brief Geometric transformation.
@@ -82,7 +143,7 @@ namespace DO { namespace Sara {
     //! Color perturbation.
     Matrix3f U;
     Matrix3f S;
-    Vector3f alpha; 
+    Vector3f alpha;
     //! @}
   };
 
