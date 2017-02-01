@@ -15,7 +15,7 @@
 
 #include <DO/Sara/Defines.hpp>
 #include <DO/Sara/Core/Image.hpp>
-#include <DO/Sara/ImageProcessing/Reflections.hpp>
+#include <DO/Sara/ImageProcessing/Flip.hpp>
 
 
 namespace DO { namespace Sara {
@@ -42,7 +42,7 @@ namespace DO { namespace Sara {
   };
 
   template <typename T>
-  void make_upright(Image<T>& image, unsigned short exif_orientation_tag)
+  void make_upright_from_exif(Image<T>& image, unsigned short exif_orientation_tag)
   {
     switch (exif_orientation_tag)
     {
@@ -68,7 +68,7 @@ namespace DO { namespace Sara {
       break;
 
     case RotatedCCW_90:         // 6
-      rotated_cw_90(image);
+      rotate_cw_90(image);
       break;
 
     case Transversed:           // 7

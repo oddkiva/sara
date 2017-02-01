@@ -112,7 +112,7 @@ namespace DO { namespace Sara {
 
     auto info = EXIFInfo{};
     if (read_exif_info(info, filepath))
-      flip_from_exif_orientation_tag(image, info.Orientation);
+      make_upright_from_exif(image, info.Orientation);
 
     return true;
   }
@@ -136,7 +136,7 @@ namespace DO { namespace Sara {
 
     auto info = EXIFInfo{};
     if (read_exif_info(info, filepath))
-      flip_from_exif_orientation_tag(image, info.Orientation);
+      make_upright_from_exif(image, info.Orientation);
     return true;
   }
 

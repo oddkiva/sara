@@ -111,7 +111,7 @@ namespace DO { namespace Sara {
       return it;
     }
 
-    inline friend auto end(const std::vector<std::string>& image_filepaths)
+    inline friend auto end(const std::vector<std::string>&)
         -> self_type 
     {
       return ImageDatabaseIterator{};

@@ -13,6 +13,7 @@
 
 #include <DO/Sara/Core.hpp>
 #include <DO/Sara/ImageIO.hpp>
+#include <DO/Sara/ImageIO/Details/Exif.hpp>
 
 #include "../AssertHelpers.hpp"
 
@@ -123,16 +124,16 @@ TEST(TestImageIO, test_flip)
   Image<int> dst{ src };
   Image<int> expected_dst{};
 
-  flip(dst, 0);
+  make_upright_from_exif(dst, 0);
   EXPECT_MATRIX_EQ(dst.matrix(), src.matrix());
 
-  flip(dst, 1);
+  make_upright_from_exif(dst, 1);
   EXPECT_MATRIX_EQ(dst.matrix(), src.matrix());
 
-  flip(dst, 9);
+  make_upright_from_exif(dst, 9);
   EXPECT_MATRIX_EQ(dst.matrix(), src.matrix());
 
-  flip(dst, 3);
+  make_upright_from_exif(dst, 3);
   expected_dst.resize(3, 2);
   expected_dst.matrix() <<
     5, 4, 3,
@@ -140,7 +141,7 @@ TEST(TestImageIO, test_flip)
   EXPECT_MATRIX_EQ(expected_dst.matrix(), dst.matrix());
 
   dst = src;
-  flip(dst, 6);
+  make_upright_from_exif(dst, 6);
   expected_dst.resize(2, 3);
   expected_dst.matrix() <<
     3, 0,
@@ -149,7 +150,7 @@ TEST(TestImageIO, test_flip)
   EXPECT_MATRIX_EQ(dst.matrix(), expected_dst.matrix());
 
   dst = src;
-  flip(dst, 8);
+  make_upright_from_exif(dst, 8);
   expected_dst.resize(2, 3);
   expected_dst.matrix() <<
     2, 5,

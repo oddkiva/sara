@@ -16,7 +16,7 @@
 #include <DO/Sara/ImageProcessing/ImagePyramid.hpp>
 #include <DO/Sara/ImageProcessing/Differential.hpp>
 #include <DO/Sara/ImageProcessing/LinearFiltering.hpp>
-#include <DO/Sara/ImageProcessing/Scaling.hpp>
+#include <DO/Sara/ImageProcessing/Resize.hpp>
 
 
 namespace DO { namespace Sara {

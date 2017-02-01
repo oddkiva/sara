@@ -18,7 +18,7 @@
 
 #include <DO/Sara/Core.hpp>
 
-#include <DO/Sara/ImageIO/ImageIOObjects.hpp>
+#include <DO/Sara/ImageIO/Details/ImageIOObjects.hpp>
 
 
 using namespace std;

@@ -102,6 +102,7 @@ namespace DO { namespace Sara {
   }
   //! @}
 
+
   //! @{
   //! \brief Rotate image clockwise.
   template <typename T>
@@ -122,5 +123,6 @@ namespace DO { namespace Sara {
     rotate_ccw_90(image);
   }
   //! @}
+
 } /* namespace Sara */
 } /* namespace DO */

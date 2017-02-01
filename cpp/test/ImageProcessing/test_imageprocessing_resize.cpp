@@ -12,7 +12,7 @@
 
 #include <gtest/gtest.h>
 
-#include <DO/Sara/ImageProcessing/Scaling.hpp>
+#include <DO/Sara/ImageProcessing/Resize.hpp>
 
 #include "../AssertHelpers.hpp"
 

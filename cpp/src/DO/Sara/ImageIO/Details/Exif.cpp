@@ -9,7 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Sara/ImageIO/Exif.hpp>
+#include <DO/Sara/ImageIO/Details/Exif.hpp>
 
 
 using namespace std;
