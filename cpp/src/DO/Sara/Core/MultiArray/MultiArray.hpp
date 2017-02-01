@@ -58,7 +58,7 @@ namespace DO { namespace Sara {
     //! MultiArrayView object instead.
     inline explicit MultiArrayBase(value_type *data, const vector_type& sizes)
     {
-      this->base_type::operator=(base_type{ data, sizes });
+      this->base_type::operator=(base_type{data, sizes});
     }
 
     //! @{
@@ -69,12 +69,12 @@ namespace DO { namespace Sara {
     }
 
     inline explicit MultiArrayBase(int rows, int cols)
-      : self_type{ vector_type{ rows, cols } }
+      : self_type{vector_type{rows, cols}}
     {
     }
 
     inline explicit MultiArrayBase(int rows, int cols, int depth)
-      : self_type{ vector_type{ rows, cols, depth } }
+      : self_type{vector_type{rows, cols, depth}}
     {
     }
     //! @}
@@ -88,7 +88,7 @@ namespace DO { namespace Sara {
     }
 
     inline MultiArrayBase(const self_type& other)
-      : self_type{ base_type(other) }
+      : self_type{base_type(other)}
     {
     }
 
@@ -137,7 +137,7 @@ namespace DO { namespace Sara {
     inline void resize(int rows, int cols)
     {
       static_assert(Dimension == 2, "MultiArray must be 2D");
-      resize(vector_type{ rows, cols });
+      resize(vector_type{rows, cols});
     }
 
     inline void resize(int rows, int cols, int depth)
