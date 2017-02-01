@@ -26,7 +26,7 @@ namespace DO { namespace Sara {
   public:
     using self_type = ImageDatabaseIterator;
     using file_iterator = std::vector<std::string>::const_iterator;
-    using image_type = Image<Rgb8>;
+    using value_type = Image<Rgb8>;
 
     inline ImageDatabaseIterator() = default;
 
@@ -73,7 +73,7 @@ namespace DO { namespace Sara {
       return it;
     }
 
-    inline auto operator->() -> const image_type *
+    inline auto operator->() -> const value_type *
     {
       if (_file_i != _file_read)
       {
@@ -83,7 +83,7 @@ namespace DO { namespace Sara {
       return &_image_read;
     }
 
-    inline auto operator*() -> const image_type&
+    inline auto operator*() -> const value_type&
     {
       if (_file_i != _file_read)
       {
@@ -106,7 +106,7 @@ namespace DO { namespace Sara {
   private:
     file_iterator _file_i;
     file_iterator _file_read;
-    image_type _image_read;
+    value_type _image_read;
   };
 
 
