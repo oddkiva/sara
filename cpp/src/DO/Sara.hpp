@@ -10,7 +10,7 @@
 // ========================================================================== //
 
 //! @file
-//! \brief Master header file of Sara libraries.
+//! @brief Master header file of Sara libraries.
 
 #pragma once
 

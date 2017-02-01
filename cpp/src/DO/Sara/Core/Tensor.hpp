@@ -19,7 +19,7 @@
 namespace DO { namespace Sara {
 
   //! @{
-  //! \brief Tensor classes are simple aliases for MultiArray-based classes.
+  //! @brief Tensor classes are simple aliases for MultiArray-based classes.
   template <typename T, int Dimension, int StorageOrder = ColMajor>
   using TensorView = MultiArrayView<T, Dimension, StorageOrder>;
 
@@ -30,7 +30,7 @@ namespace DO { namespace Sara {
 
 
   //! @{
-  //! \brief Convert image data structures to tensor data structures.
+  //! @brief Convert image data structures to tensor data structures.
   template <typename T, int N>
   inline auto to_cwh_tensor(ImageView<T, N> in) -> TensorView<T, N, RowMajor>
   {
