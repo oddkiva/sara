@@ -26,7 +26,6 @@ class TestImageFlip : public testing::Test
 protected:
   Image<int> image;
 
-
   TestImageFlip() : testing::Test()
   {
     // Draw an 'F' letter.
