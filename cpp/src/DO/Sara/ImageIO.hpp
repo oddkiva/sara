@@ -12,3 +12,5 @@
 #pragma once
 
 #include <DO/Sara/ImageIO/ImageIO.hpp>
+
+#include <DO/Sara/ImageIO/Database/ImageDatabase.hpp>

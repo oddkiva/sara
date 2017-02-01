@@ -26,7 +26,7 @@ using namespace std;
 
 namespace DO { namespace Sara {
 
-  static bool openFile(FILE **file, const string& filepath, const string& mode)
+  static bool open_file(FILE **file, const string& filepath, const string& mode)
   {
   #ifdef WIN32
     return fopen_s(file, filepath.c_str(), mode.c_str()) == 0;
@@ -53,7 +53,7 @@ namespace DO { namespace Sara {
   FileHandler::FileHandler(const string& filepath,
                            const string& mode)
   {
-    if (!openFile(&file_, filepath, mode))
+    if (!open_file(&file_, filepath, mode))
       throw FileError(filepath, mode);
   }
 
@@ -161,7 +161,7 @@ namespace DO { namespace Sara {
       return false;
     }
 
-    if (!openFile(&file_, filepath, "wb"))
+    if (!open_file(&file_, filepath, "wb"))
       return false;
 
     jpeg_stdio_dest(&cinfo_, file_);
@@ -293,7 +293,7 @@ namespace DO { namespace Sara {
   {
     (void) quality;
 
-    if (!openFile(&file_, filepath, "wb"))
+    if (!open_file(&file_, filepath, "wb"))
       return false;
 
     png_init_io(png_ptr, file_);
