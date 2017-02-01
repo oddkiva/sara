@@ -24,9 +24,9 @@ using namespace DO::Sara;
 TEST(TestColorFancyPca, test)
 {
   auto image = Image<Rgb32f>{2, 2};
-  image.matrix().setZero();
+  image.matrix().fill(Rgb32f::Zero());
 
-  auto alpha = Vector3d::Ones().eval();
+  auto alpha = Vector3f::Ones().eval();
 
   auto fancy_pca = ColorFancyPCA{Matrix3f::Identity(), Vector3f::Ones()};
   image.compute_inplace(fancy_pca, alpha);

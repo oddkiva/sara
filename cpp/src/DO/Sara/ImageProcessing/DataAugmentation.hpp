@@ -114,7 +114,7 @@ namespace DO { namespace Sara {
       }
 
       if (apply_transform[FancyPCA])
-        ColorFancyPCA{U, S}(out, alpha);
+        ColorFancyPCA{U, S}(out, out, alpha);
 
       return out;
     }
@@ -125,7 +125,7 @@ namespace DO { namespace Sara {
     //! Use the original image.
     bool use_original{true};
     //! If not use,
-    std::array<bool, NumTransformTypes> apply_transform{false, false, false, false};
+    std::array<bool, NumTransformTypes> apply_transform{{false, false, false, false}};
 
     //! @{
     //! \brief Geometric transformation.
