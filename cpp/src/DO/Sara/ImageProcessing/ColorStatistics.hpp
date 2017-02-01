@@ -13,72 +13,93 @@
 
 #pragma once
 
-#include <DO/Sara/Core/Image.hpp>
-#include <DO/Sara/ImageIO.hpp>
+#include <DO/Sara/Core/Tensor.hpp>
 
 
 namespace DO { namespace Sara {
 
-  inline auto to_chw_tensor(const Image<Rgb64f>& in) -> Tensor<double, 3>
+
+  //! @brief Image iterator trait class.
+  template <typename Iterator>
+  struct ImageIteratorTraits
   {
-    auto tensor = Tensor<double, 3>{ 3, in.height(), in.width() };
-    for (int y = 0; y < in.height(); ++y)
-      for (int x = 0; x < in.width(); ++x)
-        for (int c = 0; c < 3; ++c)
-          tensor[c](y, x) = in(x, y)[c];
+    using iterator = Iterator;
+    using value_type = typename Iterator::value_type;
+    using pixel_type = typename value_type::pixel_type;
+    using channel_type = typename PixelTraits<pixel_type>::channel_type;
 
-    return tensor;
-  }
+    static const int num_channels = PixelTraits<pixel_type>::num_channels;
+  };
 
+  //! @brief Compute the sample color mean vector.
   template <typename ImageIterator>
-  inline auto rgb_mean(ImageIterator first, ImageIterator last) -> Vector3d
+  inline auto color_sample_mean_vector(ImageIterator first, ImageIterator last)
+      -> Matrix<double, ImageIteratorTraits<ImageIterator>::num_channels, 1>
   {
-    auto sum = Vector3d::Zero();
-    auto count = int{ 0 };
+    constexpr auto num_channels = ImageIteratorTraits<ImageIterator>::num_channels;
+    using out_vector_type = Matrix<double, num_channels, 1>;
+
+    auto sum = out_vector_type::Zero().eval();
+    auto count = int{0};
 
     for (; first != last; ++first)
     {
-      sum += first->array().sum();
+      const auto tensor = to_cwh_tensor(*first);
+      for (auto c = 0; c < num_channels; ++c)
+        sum[c] += tensor[c].array().template cast<double>().sum();
       count += first->size();
     };
 
     return sum / count;
   }
 
+  //! @brief Compute the color covariance matrix.
+  /*!
+   * Read wikipedia article:
+   * https://en.wikipedia.org/wiki/Sample_mean_and_covariance regarding Bessel's
+   * correction.
+   */
   template <typename ImageIterator>
-  inline auto rgb_covariance(ImageIterator first, ImageIterator last,
-                            const Vector3d& mean) -> Matrix3d
+  inline auto color_sample_covariance_matrix(
+      ImageIterator first, ImageIterator last,
+      const Matrix<double, ImageIteratorTraits<ImageIterator>::num_channels, 1>&
+          mean) -> Matrix3d
   {
-    auto cov = Matrix3d::Zero();
+    constexpr auto num_channels = ImageIteratorTraits<ImageIterator>::num_channels;
+    using out_matrix_type = Matrix<double, num_channels, num_channels>;
+
+    auto cov = out_matrix_type::Zero().eval();
+    auto count = int{0};
 
     for (; first != last; ++first)
     {
-      auto image = first->template convert<Rgb64f>();
-      image.array() -= mean;
+      const auto tensor = to_cwh_tensor(*first);
+      count += first->size();
 
-      const auto tensor = to_chw_tensor(image);
-
-      const auto rr = tensor[0].array().squared_norm();
-      const auto rg = (tensor[0].array() * tensor[1].array()).sum();
-      const auto rb = (tensor[0].array() * tensor[2].array()).sum();
-
-      const auto gg = tensor[1].array().squared_norm();
-      const auto gb = (tensor[1].array() * tensor[2].array()).sum();
-
-      const auto bb = tensor[2].array().squared_norm();
-
-      cov += (Matrix3d{} << rr, rg, rb,
-                            rg, gg, gb,
-                            rb, gb, bb).finished();
+      for (int i = 0; i < num_channels; ++i)
+        for (int j = i; j < num_channels; ++j)
+        {
+          auto t_i = tensor[i].array().template cast<double>() - mean(i);
+          auto t_j = tensor[j].array().template cast<double>() - mean(j);
+          cov(i, j) += (t_i * t_j).sum();
+        }
     }
 
-    return cov;
+    for (int i = 1; i < num_channels; ++i)
+      for (int j = 0; j < i; ++j)
+        cov(i, j) = cov(j, i);
+
+    // Divide (N-1) which is Bessel's correction.
+    return cov / (count - 1);
   }
 
-  inline auto rgb_pca(Matrix3d& cov) -> std::tuple<Matrix3d, Vector3d>
+  //! @brief Perform PCA on the color data.
+  template <typename T, int N>
+  inline auto color_pca(const Matrix<T, N, N>& covariance_matrix)
+      -> std::pair<Matrix<T, N, N>, Matrix<T, N, 1>>
   {
-    auto svd = Eigen::JacobiSVD<Matrix3d>{cov};
-    return { svd.matrixU(), svd.singularValues() };
+    auto svd = Eigen::JacobiSVD<Matrix<T, N, N>>{covariance_matrix, ComputeFullU};
+    return std::make_pair(svd.matrixU(), svd.singularValues());
   }
 
 } /* namespace Sara */
