@@ -114,50 +114,168 @@ TEST(TestImageIO, test_read_exif_info)
   pos = content.find("GPS Altitude");       EXPECT_NE(string::npos, pos);
 }
 
-TEST(TestImageIO, test_flip)
+
+class TestImageMakeUprightFromExif : public testing::Test
 {
-  Image<int> src{ 3, 2 };
-  src.matrix() <<
-    0, 1, 2,
-    3, 4, 5;
+protected:
+  Image<int> true_image;
 
-  Image<int> dst{ src };
-  Image<int> expected_dst{};
+  TestImageMakeUprightFromExif() : testing::Test()
+  {
+    // Draw an 'F' letter.
+    true_image.resize(4, 6);
+    true_image.matrix() <<
+      1, 1, 1, 1,
+      1, 0, 0, 0,
+      1, 1, 1, 0,
+      1, 0, 0, 0,
+      1, 0, 0, 0,
+      1, 0, 0, 0;
+  }
 
-  make_upright_from_exif(dst, 0);
-  EXPECT_MATRIX_EQ(dst.matrix(), src.matrix());
+  virtual ~TestImageMakeUprightFromExif() {}
+};
 
-  make_upright_from_exif(dst, 1);
-  EXPECT_MATRIX_EQ(dst.matrix(), src.matrix());
+TEST_F(TestImageMakeUprightFromExif, test_with_unspecified_tag)
+{
+  auto image = true_image;
 
-  make_upright_from_exif(dst, 9);
-  EXPECT_MATRIX_EQ(dst.matrix(), src.matrix());
+  static_assert(ExifOrientationTag::Unspecified == 0, "Must be 0");
 
-  make_upright_from_exif(dst, 3);
-  expected_dst.resize(3, 2);
-  expected_dst.matrix() <<
-    5, 4, 3,
-    2, 1, 0;
-  EXPECT_MATRIX_EQ(expected_dst.matrix(), dst.matrix());
-
-  dst = src;
-  make_upright_from_exif(dst, 6);
-  expected_dst.resize(2, 3);
-  expected_dst.matrix() <<
-    3, 0,
-    4, 1,
-    5, 2;
-  EXPECT_MATRIX_EQ(dst.matrix(), expected_dst.matrix());
-
-  dst = src;
-  make_upright_from_exif(dst, 8);
-  expected_dst.resize(2, 3);
-  expected_dst.matrix() <<
-    2, 5,
-    1, 4,
-    0, 3;
-  EXPECT_MATRIX_EQ(expected_dst.matrix(), dst.matrix());
+  make_upright_from_exif(image, ExifOrientationTag::Undefined);
+  ASSERT_MATRIX_EQ(true_image.matrix(), image.matrix());
 }
+
+TEST_F(TestImageMakeUprightFromExif, test_with_upright_tag)
+{
+  auto image = true_image;
+
+  static_assert(ExifOrientationTag::Upright == 1, "Must be 1");
+
+  make_upright_from_exif(image, ExifOrientationTag::Upright);
+  ASSERT_MATRIX_EQ(true_image.matrix(), image.matrix());
+}
+
+TEST_F(TestImageMakeUprightFromExif, test_with_flipped_horizontally_tag)
+{
+  auto image = Image<int>{4, 6};
+  image.matrix() <<
+      1, 1, 1, 1,
+      0, 0, 0, 1,
+      0, 1, 1, 1,
+      0, 0, 0, 1,
+      0, 0, 0, 1,
+      0, 0, 0, 1;
+
+  static_assert(ExifOrientationTag::FlippedHorizontally == 2, "Must be 2");
+  make_upright_from_exif(image, ExifOrientationTag::FlippedHorizontally);
+  ASSERT_MATRIX_EQ(true_image.matrix(), image.matrix());
+}
+
+TEST_F(TestImageMakeUprightFromExif, test_rotatedccw_180)
+{
+  auto image = Image<int>{4, 6};
+  image.matrix() <<
+      0, 0, 0, 1,
+      0, 0, 0, 1,
+      0, 0, 0, 1,
+      0, 1, 1, 1,
+      0, 0, 0, 1,
+      1, 1, 1, 1;
+
+  static_assert(ExifOrientationTag::RotatedCCW_180 == 3, "Must be 3");
+
+  make_upright_from_exif(image, ExifOrientationTag::RotatedCCW_180);
+  ASSERT_MATRIX_EQ(true_image.matrix(), image.matrix());
+}
+
+TEST_F(TestImageMakeUprightFromExif, test_flip_vertically)
+{
+  auto image = Image<int>{4, 6};
+  image.matrix() <<
+      1, 0, 0, 0,
+      1, 0, 0, 0,
+      1, 0, 0, 0,
+      1, 1, 1, 0,
+      1, 0, 0, 0,
+      1, 1, 1, 1;
+
+  static_assert(ExifOrientationTag::FlippedVertically == 4, "Must be 4");
+
+  make_upright_from_exif(image, ExifOrientationTag::FlippedVertically);
+  ASSERT_MATRIX_EQ(true_image.matrix(), image.matrix());
+}
+
+TEST_F(TestImageMakeUprightFromExif, test_transpose)
+{
+  auto image = Image<int>{6, 4};
+  image.matrix() <<
+      1, 1, 1, 1, 1, 1,
+      1, 0, 1, 0, 0, 0,
+      1, 0, 1, 0, 0, 0,
+      1, 0, 0, 0, 0, 0;
+
+  static_assert(ExifOrientationTag::Transposed == 5, "Must be 5");
+
+  make_upright_from_exif(image, ExifOrientationTag::Transposed);
+  ASSERT_MATRIX_EQ(true_image.matrix(), image.matrix());
+}
+
+TEST_F(TestImageMakeUprightFromExif, test_with_rotatedccw_90_tag)
+{
+  auto image = Image<int>{6, 4};
+  image.matrix() <<
+    1, 0, 0, 0, 0, 0,
+    1, 0, 1, 0, 0, 0,
+    1, 0, 1, 0, 0, 0,
+    1, 1, 1, 1, 1, 1;
+
+  static_assert(ExifOrientationTag::RotatedCCW_90 == 6, "Must be 6");
+
+  make_upright_from_exif(image, ExifOrientationTag::RotatedCCW_90);
+  ASSERT_MATRIX_EQ(true_image.matrix(), image.matrix());
+}
+
+TEST_F(TestImageMakeUprightFromExif, test_with_transverse_tag)
+{
+  auto image = Image<int>{6, 4};
+  image.matrix() <<
+      0, 0, 0, 0, 0, 1,
+      0, 0, 0, 1, 0, 1,
+      0, 0, 0, 1, 0, 1,
+      1, 1, 1, 1, 1, 1;
+
+  static_assert(ExifOrientationTag::Transversed == 7, "Must be 7");
+
+  make_upright_from_exif(image, ExifOrientationTag::Transversed);
+  ASSERT_MATRIX_EQ(true_image.matrix(), image.matrix());
+}
+
+TEST_F(TestImageMakeUprightFromExif, test_with_rotatedcw_90_tag)
+{
+  auto image = Image<int>{6, 4};
+  image.matrix() <<
+    1, 1, 1, 1, 1, 1,
+    0, 0, 0, 1, 0, 1,
+    0, 0, 0, 1, 0, 1,
+    0, 0, 0, 0, 0, 1;
+
+  static_assert(ExifOrientationTag::RotatedCW_90 == 8, "Must be 8");
+
+  make_upright_from_exif(image, ExifOrientationTag::RotatedCW_90);
+  ASSERT_MATRIX_EQ(true_image.matrix(), image.matrix());
+}
+
+TEST_F(TestImageMakeUprightFromExif, test_with_undefined_tag)
+{
+  auto image = true_image;
+
+  static_assert(ExifOrientationTag::Undefined == 9, "Must be 9");
+
+  make_upright_from_exif(image, ExifOrientationTag::Undefined);
+  ASSERT_MATRIX_EQ(true_image.matrix(), image.matrix());
+}
+
 
 int main(int argc, char **argv)
 {
