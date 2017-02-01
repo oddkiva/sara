@@ -103,25 +103,24 @@ namespace DO { namespace Sara {
       return !(operator==(other));
     }
 
-    inline friend auto begin(const std::vector<std::string>& image_filepaths)
-        -> self_type
-    {
-      auto it = self_type{};
-      it._file_i = image_filepaths.begin();
-      return it;
-    }
-
-    inline friend auto end(const std::vector<std::string>&)
-        -> self_type 
-    {
-      return ImageDatabaseIterator{};
-    }
-
   private:
     file_iterator _file_i;
     file_iterator _file_read;
     image_type _image_read;
   };
+
+
+  inline auto begin_image_db(const std::vector<std::string>& image_filepaths)
+      -> ImageDatabaseIterator
+  {
+    return ImageDatabaseIterator{image_filepaths.begin()};
+  }
+
+  inline auto end_image_db(const std::vector<std::string>& image_filepaths)
+      -> ImageDatabaseIterator
+  {
+    return ImageDatabaseIterator{image_filepaths.end()};
+  }
 
 
 } /* namespace Sara */
