@@ -42,6 +42,8 @@ flags = [
 "-I", "/usr/include/python2.7",
 "-I", ("/home/david/virtualenvs/mirriad-vr-python2/local/"
        "lib/python2.7/site-packages/numpy/core/include"),
+"-I", ("/home/david/sandbox/virtualenvs/docv-python3/"
+       "lib/python3.5/site-packages/numpy/core/include"),
 # Qt5 header directories.
 "-I", "/usr/include",
 "-I", "/usr/include/qt5",
