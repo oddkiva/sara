@@ -45,7 +45,7 @@ TEST(TestConversionImageToTensor, test_color_case)
 {
   auto image = Image<Rgb32f>{2, 3};
   auto m = image.matrix();
-  m.fill(Rgb32f{1.,1.,1.});
+  m.fill(Rgb32f{1.,2.,3.});
 
   m(0,0) *= 0; m(0,1) *= 1;
   m(1,0) *= 2; m(1,1) *= 3;
@@ -56,15 +56,25 @@ TEST(TestConversionImageToTensor, test_color_case)
   const auto g = tensor[1].matrix();
   const auto b = tensor[2].matrix();
 
-  auto true_channel_plane = Tensor<float, 2>{3, 2};
-  true_channel_plane.matrix() <<
+  auto true_r = Tensor<float, 2>{3, 2};
+  auto true_g = Tensor<float, 2>{3, 2};
+  auto true_b = Tensor<float, 2>{3, 2};
+  true_r.matrix() <<
     0, 1,
     2, 3,
     4, 5;
+  true_g.matrix() <<
+    0,  2,
+    4,  6,
+    8, 10;
+  true_b.matrix() <<
+     0,  3,
+     6,  9,
+    12, 15;
 
-  EXPECT_MATRIX_EQ(true_channel_plane.matrix(), r);
-  EXPECT_MATRIX_EQ(true_channel_plane.matrix(), g);
-  EXPECT_MATRIX_EQ(true_channel_plane.matrix(), b);
+  EXPECT_MATRIX_EQ(true_r.matrix(), r);
+  EXPECT_MATRIX_EQ(true_g.matrix(), g);
+  EXPECT_MATRIX_EQ(true_b.matrix(), b);
 }
 
 

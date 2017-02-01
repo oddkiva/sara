@@ -29,6 +29,8 @@ namespace DO { namespace Sara {
   //! @}
 
 
+  //! @{
+  //! \brief Convert image data structures to tensor data structures.
   template <typename T, int N>
   inline auto to_cwh_tensor(ImageView<T, N> in) -> TensorView<T, N, RowMajor>
   {
@@ -67,6 +69,7 @@ namespace DO { namespace Sara {
 
     return out;
   }
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

@@ -247,7 +247,7 @@ namespace DO { namespace Sara {
     inline const_slice_type operator[](int i) const
     {
       slice_vector_type slice_sizes{ _sizes.tail(N - 1) };
-      const T * data = _begin + _strides[0] * i;
+      T * data = _begin + _strides[0] * i;
       return const_slice_type{ data, slice_sizes };
     }
     //! @}
