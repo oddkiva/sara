@@ -9,6 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include <vector>
+
 #include <DO/Sara/ImageIO/Details/Exif.hpp>
 
 
