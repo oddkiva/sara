@@ -13,7 +13,7 @@
 
 #include <DO/Sara/Core.hpp>
 #include <DO/Sara/ImageIO.hpp>
-#include <DO/Sara/ImageIO/Database/ImageDatabase.hpp>
+#include <DO/Sara/ImageIO/Database/ImageDataSet.hpp>
 
 #include "../AssertHelpers.hpp"
 
@@ -26,14 +26,15 @@ TEST(TestImageDatabase, test_image_database_iterator)
 {
   auto db_dir = string{src_path("../../../data/")};
 
-  auto image_db = vector<string>{
+  auto image_list = vector<string>{
     db_dir + "/" + "All.tif",
     db_dir + "/" + "ksmall.jpg",
     db_dir + "/" + "stinkbug.png",
   };
 
-  auto image_it = begin_image_db(image_db);
-  auto image_end = end_image_db(image_db);
+  auto image_db = ImageDataSet{image_list};
+  auto image_it = image_db.begin();
+  auto image_end = image_db.end();
 
   ASSERT_TRUE(image_it->sizes() != Vector2i::Zero());
 
