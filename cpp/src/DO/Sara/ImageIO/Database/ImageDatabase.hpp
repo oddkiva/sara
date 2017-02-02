@@ -103,6 +103,11 @@ namespace DO { namespace Sara {
       return !(operator==(other));
     }
 
+    inline auto path() const -> const std::string&
+    {
+      return *_file_i;
+    }
+
   private:
     file_iterator _file_i;
     file_iterator _file_read;

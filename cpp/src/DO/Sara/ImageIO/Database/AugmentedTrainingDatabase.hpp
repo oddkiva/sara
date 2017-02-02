@@ -18,7 +18,7 @@
 namespace DO { namespace Sara {
 
   template <typename X, typename Y>
-  class TransformedTrainingSampleIterator : public TrainingSampleIterator<X, Y>
+  class TransformedTrainingSample : public TrainingSampleIterator<X, Y>
   {
   public:
     using x_type = typename TrainingSampleTraits<X, Y>::input_type;
@@ -34,9 +34,28 @@ namespace DO { namespace Sara {
       return y_type{};
     }
 
-  private:
-    TransformParameter _transform_param;
+    ImageDataTransform _transform;
   };
+
+
+  void write_to_csv_file(
+      const std::string& out_path,
+      std::vector<TransformedTrainingSample>& transformed_training_samples)
+  {
+    ofstream out{out_path};
+
+    if (!out)
+      throw std::runtime_error{"Could not create CSV file"};
+
+    for (const auto& s : transformed_training_samples)
+    {
+      out << s.x.path() << ";" << s.y.path() << ";";
+      out << int(s._use_original) << ";";
+      out << s.x.out_sizes << ";"
+      out << s.z << ";" << s.t << ";" << s.t.flip_type << ";" << s.alpha << "\n";
+    }
+  }
+
 
 } /* namespace Sara */
 } /* namespace DO */
