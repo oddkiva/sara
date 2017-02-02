@@ -12,7 +12,7 @@
 
 #include <gtest/gtest.h>
 
-#include <DO/Sara/ImageProcessing/Scaling.hpp>
+#include <DO/Sara/ImageProcessing/Resize.hpp>
 
 #include "../AssertHelpers.hpp"
 
@@ -21,7 +21,7 @@ using namespace std;
 using namespace DO::Sara;
 
 
-TEST(TestScaling, test_upscale)
+TEST(TestResize, test_upscale)
 {
   Image<float> src(2, 2);
   src.matrix() <<
@@ -41,7 +41,7 @@ TEST(TestScaling, test_upscale)
 }
 
 
-TEST(TestScaling, test_downscale)
+TEST(TestResize, test_downscale)
 {
   Image<float> src(4, 4);
   src.matrix() <<
@@ -61,7 +61,7 @@ TEST(TestScaling, test_downscale)
 }
 
 
-TEST(TestScaling, test_enlarge)
+TEST(TestResize, test_enlarge)
 {
   Image<float> src(2, 2);
   src.matrix() <<
@@ -88,7 +88,7 @@ TEST(TestScaling, test_enlarge)
 }
  
 
-TEST(TestScaling, test_reduce)
+TEST(TestResize, test_reduce)
 {
   Image<float> src(4, 4);
   src.matrix() <<
@@ -114,7 +114,7 @@ TEST(TestScaling, test_reduce)
   EXPECT_LE((true_dst.matrix()-dst.matrix()).lpNorm<Infinity>(), 0.4);
 }
 
-TEST(TestScaling, test_reduce_2)
+TEST(TestResize, test_reduce_2)
 {
   auto lambda = [](double lambda) {
     return Rgb64f{ lambda, lambda, lambda };

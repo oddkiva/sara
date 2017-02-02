@@ -43,7 +43,7 @@ namespace DO { namespace Sara {
   {
     auto dst = Image<T, N>(src.sizes() / fact);
     for (auto it = dst.begin_array(); !it.end(); ++it)
-      *it = src(it.position()*fact);
+      *it = src(it.position() * fact);
     return dst;
   }
 
@@ -61,7 +61,8 @@ namespace DO { namespace Sara {
                      bool keep_ratio = false)
   {
     // Typedefs.
-    using DoublePixel = typename PixelTraits<T>::template Cast<double>::pixel_type;
+    using DoublePixel =
+        typename PixelTraits<T>::template Cast<double>::pixel_type;
     using ChannelType = typename PixelTraits<T>::channel_type;
     using Cast = typename PixelTraits<T>::template Cast<double>;
 
@@ -79,7 +80,7 @@ namespace DO { namespace Sara {
     if (keep_ratio)
     {
       scale_factors.fill(min_max.second);
-      new_sizes = (original_sizes/min_max.second).template cast<int>();
+      new_sizes = (original_sizes / min_max.second).template cast<int>();
     }
 
     // Determine the right blurring factor using the following formula.
@@ -103,7 +104,7 @@ namespace DO { namespace Sara {
 
       auto double_pixel_value = interpolate(double_src, position);
       *dst_it = PixelTraits<DoublePixel>::template Cast<ChannelType>::apply(
-        double_pixel_value);
+          double_pixel_value);
     }
 
     return dst;
@@ -134,7 +135,7 @@ namespace DO { namespace Sara {
     return reduce(image, new_sizes.template cast<int>().eval());
   }
 
-  //! @brief Reduce image.
+  //! @brief Enlarge image.
   template <typename T, int N>
   inline Image<T, N> enlarge(const ImageView<T, N>& image,
                              Matrix<int, N, 1> new_sizes,

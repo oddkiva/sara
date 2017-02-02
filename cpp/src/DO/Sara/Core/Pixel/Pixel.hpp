@@ -59,7 +59,7 @@ namespace DO { namespace Sara {
 
     //! Assignment operator.
     template <typename _OtherDerived>
-    inline Pixel& operator=(const Eigen::MatrixBase<_OtherDerived>& other)
+    inline auto operator=(const Eigen::MatrixBase<_OtherDerived>& other) -> Pixel&
     {
       this->base_type::operator=(other);
       return *this;
@@ -67,20 +67,20 @@ namespace DO { namespace Sara {
 
     //! Constant channel access function.
     template <typename _ChannelTag>
-    inline const channel_type& channel() const
+    inline auto channel() const -> const channel_type&
     {
       return (*this)[Meta::IndexOf<_ColorSpace, _ChannelTag>::value];
     }
 
     //! Mutable channel access function.
     template <typename _ChannelTag>
-    inline channel_type& channel()
+    inline auto channel() -> channel_type&
     {
       return (*this)[Meta::IndexOf<_ColorSpace, _ChannelTag>::value];
     }
 
     //! Returns the number of channels.
-    int num_channels() const
+    static constexpr auto num_channels() -> int
     {
       return _ColorSpace::size;
     }

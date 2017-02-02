@@ -23,6 +23,7 @@
 // N-dimensional array and N-dimensional iterators
 #include <DO/Sara/Core/ArrayIterators.hpp>
 #include <DO/Sara/Core/MultiArray.hpp>
+#include <DO/Sara/Core/Tensor.hpp>
 // Sparse N-dimensional array
 #include <DO/Sara/Core/SparseMultiArray.hpp>
 // Image and color data structures

@@ -58,7 +58,7 @@ namespace DO { namespace Sara {
     //! MultiArrayView object instead.
     inline explicit MultiArrayBase(value_type *data, const vector_type& sizes)
     {
-      this->base_type::operator=(base_type{ data, sizes });
+      this->base_type::operator=(base_type{data, sizes});
     }
 
     //! @{
@@ -69,12 +69,12 @@ namespace DO { namespace Sara {
     }
 
     inline explicit MultiArrayBase(int rows, int cols)
-      : self_type{ vector_type{ rows, cols } }
+      : self_type{vector_type{rows, cols}}
     {
     }
 
     inline explicit MultiArrayBase(int rows, int cols, int depth)
-      : self_type{ vector_type{ rows, cols, depth } }
+      : self_type{vector_type{rows, cols, depth}}
     {
     }
     //! @}
@@ -88,7 +88,7 @@ namespace DO { namespace Sara {
     }
 
     inline MultiArrayBase(const self_type& other)
-      : self_type{ base_type(other) }
+      : self_type{base_type(other)}
     {
     }
 
@@ -115,6 +115,18 @@ namespace DO { namespace Sara {
     //! @brief Resize the MultiArray object with the specified sizes.
     inline void resize(const vector_type& sizes)
     {
+      // Boundary case: the size of the allocated memory has not changed.
+      // Optimize by:
+      // - not deallocating memory.
+      // - only changing the sizes and recompute the strides.
+      if (_end - _begin == std::ptrdiff_t(base_type::compute_size(sizes)))
+      {
+        _sizes = sizes;
+        _strides = base_type::compute_strides(sizes);
+        return;
+      }
+
+      // General case.
       if (_sizes != sizes)
       {
         deallocate();
@@ -125,7 +137,7 @@ namespace DO { namespace Sara {
     inline void resize(int rows, int cols)
     {
       static_assert(Dimension == 2, "MultiArray must be 2D");
-      resize(vector_type{ rows, cols });
+      resize(vector_type{rows, cols});
     }
 
     inline void resize(int rows, int cols, int depth)
@@ -146,11 +158,11 @@ namespace DO { namespace Sara {
     //! @brief Allocate the internal array of the MultiArray object.
     inline void initialize(const vector_type& sizes)
     {
-      _sizes = sizes;
-      auto empty = (sizes == vector_type::Zero());
-      _strides = empty ? sizes : base_type::compute_strides(sizes);
+      const auto empty = (sizes == vector_type::Zero());
+      const auto num_elements = empty ? 0 : base_type::compute_size(sizes);
 
-      auto num_elements = base_type::compute_size(sizes);
+      _sizes = sizes;
+      _strides = empty ? sizes : base_type::compute_strides(sizes);
       _begin = empty ? 0 : allocate(num_elements);
       _end = empty ? 0 : _begin + num_elements;
     }

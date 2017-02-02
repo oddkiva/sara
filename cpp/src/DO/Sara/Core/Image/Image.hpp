@@ -154,7 +154,8 @@ namespace DO { namespace Sara {
     inline auto compute_inplace(Filter filter, const Params&... params)
         -> self_type&
     {
-      return filter(*this, *this, params...);
+      filter(*this, *this, params...);
+      return *this;
     }
     //! @}
 

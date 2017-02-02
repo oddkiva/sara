@@ -25,21 +25,27 @@
 // Basic image processing functions.
 #include <DO/Sara/ImageProcessing/LinearFiltering.hpp>
 #include <DO/Sara/ImageProcessing/Deriche.hpp>
+
 // Gradient, Laplacian, Hessian matrix, norm, orientation, second moment matrix.
 #include <DO/Sara/ImageProcessing/Differential.hpp>
 #include <DO/Sara/ImageProcessing/Determinant.hpp>
 #include <DO/Sara/ImageProcessing/Norm.hpp>
 #include <DO/Sara/ImageProcessing/Orientation.hpp>
 #include <DO/Sara/ImageProcessing/SecondMomentMatrix.hpp>
-// Interpolation (bilinear, trilinear)
+
+// Interpolation (bilinear, trilinear).
 #include <DO/Sara/ImageProcessing/Interpolation.hpp>
-// Reduce, enlarge, downscale, upscale,
-#include <DO/Sara/ImageProcessing/Scaling.hpp>
+
+// Flip, reduce, enlarge, downscale, upscale.
+#include <DO/Sara/ImageProcessing/Flip.hpp>
+#include <DO/Sara/ImageProcessing/Resize.hpp>
 #include <DO/Sara/ImageProcessing/Warp.hpp>
+
 // Data structures and functions for feature detections.
 #include <DO/Sara/ImageProcessing/ImagePyramid.hpp>
 #include <DO/Sara/ImageProcessing/Extrema.hpp>
 #include <DO/Sara/ImageProcessing/GaussianPyramid.hpp>
+
 
 /*!
   @defgroup ImageProcessing Image Processing
