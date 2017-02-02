@@ -20,17 +20,17 @@
 
 namespace DO { namespace Sara {
 
-
-  class ImageDatabaseIterator
+  //! @brief Iterator class for image dataset.
+  class ImageDataSetIterator
   {
   public:
-    using self_type = ImageDatabaseIterator;
+    using self_type = ImageDataSetIterator;
     using file_iterator = std::vector<std::string>::const_iterator;
     using value_type = Image<Rgb8>;
 
-    inline ImageDatabaseIterator() = default;
+    inline ImageDataSetIterator() = default;
 
-    inline ImageDatabaseIterator(file_iterator f)
+    inline ImageDataSetIterator(file_iterator f)
       : _file_i{f}
     {
     }
@@ -115,17 +115,38 @@ namespace DO { namespace Sara {
   };
 
 
-  inline auto begin_image_db(const std::vector<std::string>& image_filepaths)
-      -> ImageDatabaseIterator
+  //! @brief Image dataset class.
+  class ImageDataSet
   {
-    return ImageDatabaseIterator{image_filepaths.begin()};
-  }
+  public:
+    using iterator = ImageDataSetIterator;
+    using value_type = ImageDataSetIterator::value_type;
 
-  inline auto end_image_db(const std::vector<std::string>& image_filepaths)
-      -> ImageDatabaseIterator
-  {
-    return ImageDatabaseIterator{image_filepaths.end()};
-  }
+    inline ImageDataSet(std::vector<std::string>& image_filepaths)
+      : _image_filepaths{image_filepaths}
+    {
+    }
+
+    void read_from_csv(const std::string& text_filepath);
+
+    inline auto begin() const -> ImageDataSetIterator
+    {
+      return ImageDataSetIterator{_image_filepaths.begin()};
+    }
+
+    inline auto end() const -> ImageDataSetIterator
+    {
+      return ImageDataSetIterator{_image_filepaths.end()};
+    }
+
+    inline auto operator[](std::ptrdiff_t i) const -> ImageDataSetIterator
+    {
+      return ImageDataSetIterator{_image_filepaths.begin() + i};
+    }
+
+  private:
+    std::vector<std::string>& _image_filepaths;
+  };
 
 
 } /* namespace Sara */
