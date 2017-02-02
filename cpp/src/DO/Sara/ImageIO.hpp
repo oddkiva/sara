@@ -13,4 +13,4 @@
 
 #include <DO/Sara/ImageIO/ImageIO.hpp>
 
-#include <DO/Sara/ImageIO/Database/ImageDatabase.hpp>
+#include <DO/Sara/ImageIO/Database/ImageDataSet.hpp>
