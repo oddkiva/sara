@@ -38,7 +38,7 @@ namespace DO { namespace Sara {
   };
 
 
-  void write_to_csv_file(
+  void write_to_csv(
       const std::string& out_path,
       std::vector<TransformedTrainingSample>& transformed_training_samples)
   {
@@ -49,11 +49,20 @@ namespace DO { namespace Sara {
 
     for (const auto& s : transformed_training_samples)
     {
-      out << s.x.path() << ";" << s.y.path() << ";";
-      out << int(s._use_original) << ";";
-      out << s.x.out_sizes << ";"
-      out << s.z << ";" << s.t << ";" << s.t.flip_type << ";" << s.alpha << "\n";
+      out << s.x.path() << ";" << s.y.path() << ";"
+          << int(s._use_original) << ";"
+          << "[" << s._transform.out_sizes << "]" << ";"
+          << s._transform.z << ";"
+          << "[" << s._transform.t[0] << "," << s._transform.t[1] << "]" << ";"
+          << s._transform.flip_type << ";"
+          << s._transform.alpha << "\n";
     }
+  }
+
+  std::vector<TransformedTrainingSample>
+  read_from_csv(const std::string& csv_path)
+  {
+    ifstream in{csv_path};
   }
 
 
