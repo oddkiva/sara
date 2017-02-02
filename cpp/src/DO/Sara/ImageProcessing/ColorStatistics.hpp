@@ -47,7 +47,7 @@ namespace DO { namespace Sara {
       const auto tensor = to_cwh_tensor(*first);
       for (auto c = 0; c < num_channels; ++c)
         sum[c] += tensor[c].array().template cast<double>().sum();
-      count += first->size();
+      count += static_cast<int>(first->size());
     };
 
     return sum / count;
@@ -74,7 +74,7 @@ namespace DO { namespace Sara {
     for (; first != last; ++first)
     {
       const auto tensor = to_cwh_tensor(*first);
-      count += first->size();
+      count += static_cast<int>(first->size());
 
       for (int i = 0; i < num_channels; ++i)
         for (int j = i; j < num_channels; ++j)
@@ -94,11 +94,12 @@ namespace DO { namespace Sara {
   }
 
   //! @brief Perform PCA on the color data.
-  template <typename T, int N>
-  inline auto color_pca(const Matrix<T, N, N>& covariance_matrix)
-      -> std::pair<Matrix<T, N, N>, Matrix<T, N, 1>>
+  template <typename _Matrix>
+  inline auto color_pca(const _Matrix& covariance_matrix)
+      -> std::pair<typename Eigen::JacobiSVD<_Matrix>::MatrixUType,
+                   typename Eigen::JacobiSVD<_Matrix>::SingularValuesType>
   {
-    auto svd = Eigen::JacobiSVD<Matrix<T, N, N>>{covariance_matrix, ComputeFullU};
+    auto svd = Eigen::JacobiSVD<_Matrix>{covariance_matrix, ComputeFullU};
     return std::make_pair(svd.matrixU(), svd.singularValues());
   }
 

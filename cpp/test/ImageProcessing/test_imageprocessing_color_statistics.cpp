@@ -67,7 +67,7 @@ TEST(TestColorStatistics, test_color_pca)
   const auto m = color_sample_mean_vector(images.begin(), images.end());
   const auto cov = color_sample_covariance_matrix(images.begin(), images.end(), m);
 
-  const auto pca = color_pca(cov);
+  auto pca = color_pca(cov);
   const auto& U = pca.first;
   const auto& S = pca.second;
 
