@@ -12,6 +12,7 @@
 
 #include <gtest/gtest.h>
 
+#include <DO/Sara/Core/Tensor.hpp>
 #include <DO/Sara/ImageProcessing/ColorFancyPCA.hpp>
 
 #include "../AssertHelpers.hpp"
@@ -29,7 +30,10 @@ TEST(TestColorFancyPca, test)
   auto alpha = Vector3f::Ones().eval();
 
   auto fancy_pca = ColorFancyPCA{Matrix3f::Identity(), Vector3f::Ones()};
-  image.compute_inplace(fancy_pca, alpha);
+  fancy_pca(image, alpha);
+
+  for (int i = 0; i < 3; ++i)
+    ASSERT_MATRIX_EQ(to_cwh_tensor(image)[0].matrix(), Matrix2f::Ones());
 }
 
 

@@ -23,6 +23,9 @@ namespace DO { namespace Sara {
 
   struct ImageDataTransform
   {
+  public:
+    //! @{
+    //! @brief Transform types.
     enum FlipType
     {
       Horizontal,
@@ -37,7 +40,12 @@ namespace DO { namespace Sara {
       FancyPCA = 3,
       NumTransformTypes = 4
     };
+    //! @}
 
+
+    // ===================================================================== //
+    //! @{
+    //! @brief Transform setters.
     void set_zoom(float z)
     {
       use_original = false;
@@ -55,11 +63,6 @@ namespace DO { namespace Sara {
       use_original = false;
       this->apply_transform[Shift] = true;
       this->t = t;
-    }
-
-    void unset_shift()
-    {
-      this->apply_transform[Shift] = false;
     }
 
     void set_flip(FlipType flip_type)
@@ -85,13 +88,18 @@ namespace DO { namespace Sara {
     {
       this->apply_transform[FancyPCA] = false;
     }
+    //! @}
 
-    Image<Rgb32f> operator()(const Image<Rgb32f>& in) const
+
+    // ===================================================================== //
+    //! @{
+    //! @brief Transform the image data.
+    template <typename T>
+    Image<T> extract_patch(const Image<T>& in) const
     {
       if (use_original)
         return reduce(in, out_sizes);
 
-      // 1. Zoom
       auto out = in;
       if (apply_transform[Zoom])
       {
@@ -101,9 +109,7 @@ namespace DO { namespace Sara {
           out = enlarge(in, z);
       }
 
-      // 2. Shift
-      if (apply_transform[Shift])
-        out = crop(out, t, out_sizes);
+      out = crop(out, t, t + out_sizes);
 
       if (apply_transform[Flip])
       {
@@ -113,37 +119,49 @@ namespace DO { namespace Sara {
           flip_vertically(out);
       }
 
-      if (apply_transform[FancyPCA])
-        ColorFancyPCA{U, S}(out, out, alpha);
-
       return out;
     }
 
-    //! Final size.
+    Image<Rgb32f> operator()(const Image<Rgb32f>& in) const
+    {
+      auto out = extract_patch(in);
+
+      if (apply_transform[FancyPCA])
+        ColorFancyPCA{U, S}(out, alpha);
+
+      return out;
+    }
+    //! @}
+
+
+    // ===================================================================== //
+    // Parameters
+    //
+    //! @{ Final size.
     Vector2i out_sizes;
 
-    //! Use the original image.
+    //! @{ Use the original image.
     bool use_original{true};
     //! If not use,
-    std::array<bool, NumTransformTypes> apply_transform{{false, false, false, false}};
+    std::array<bool, NumTransformTypes> apply_transform{
+        {false, false, false, false}};
 
     //! @{
-    //! \brief Geometric transformation.
-    //! Zoom factor.
-    float z;
-    //! Rotation angle.
-    float theta;
+    //! @brief Zoom factor.
+    float z{1.f};
+    //! @brief Rotation angle.
+    float theta{0.f};
     //! Translation vector.
-    Vector2i t;
-    //! Flip type.
-    FlipType flip_type;
+    Vector2i t{Vector2i::Zero()};
+    //! @brief Flip type.
+    FlipType flip_type{Horizontal};
     //! @}
 
     //! @{
-    //! Color perturbation.
-    Matrix3f U;
-    Matrix3f S;
-    Vector3f alpha;
+    //! @brief Color fancy PCA parameters.
+    Matrix3f U{Matrix3f::Identity()};
+    Vector3f S{Vector3f::Ones()};
+    Vector3f alpha{Vector3f::Zero()};
     //! @}
   };
 
@@ -160,6 +178,7 @@ namespace DO { namespace Sara {
   {
     return linspace(log(a), log(b), num_samples).array().exp().matrix();
   }
+
 
   auto augment(const VectorXf& zs,
                const VectorXf& thetas,

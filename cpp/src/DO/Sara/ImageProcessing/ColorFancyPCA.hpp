@@ -28,14 +28,9 @@ namespace DO { namespace Sara {
     {
     }
 
-    void operator()(const Image<Rgb32f>& in, Image<Rgb32f>& out, const Vector3f& alpha) const
+    void operator()(Image<Rgb32f>& out, const Vector3f& alpha) const
     {
-      out = in;
-      for (int i = 0; i < out.size(); ++i)
-      {
-        //Vector3f p = _U * _S.asDiagonal() * alpha;
-        //out.data()[i] += p;
-      }
+      out.array() = out.array() + _U * _S.asDiagonal() * alpha;
     }
 
     Matrix3f _U;

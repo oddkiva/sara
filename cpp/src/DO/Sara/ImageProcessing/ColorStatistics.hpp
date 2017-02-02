@@ -89,7 +89,7 @@ namespace DO { namespace Sara {
       for (int j = 0; j < i; ++j)
         cov(i, j) = cov(j, i);
 
-    // Divide (N-1) which is Bessel's correction.
+    // Divide by (N-1), cf. Bessel's correction.
     return cov / (count - 1);
   }
 
