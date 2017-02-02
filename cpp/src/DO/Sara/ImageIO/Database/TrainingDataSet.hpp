@@ -139,12 +139,12 @@ namespace DO { namespace Sara {
 
     auto x_begin() const -> ImageDataSetIterator
     {
-      return ImageDataSet{base_type::_x}.begin();
+      return ImageDataSetIterator{base_type::_x.begin()};
     }
 
     auto x_end() const -> ImageDataSetIterator
     {
-      return ImageDataSet{base_type::_x}.end();
+      return ImageDataSetIterator{base_type::_x.end()};
     }
 
     auto y_begin() const -> std::vector<int>::const_iterator
@@ -152,7 +152,7 @@ namespace DO { namespace Sara {
       return base_type::_y.begin();
     }
 
-    auto y_end() -> std::vector<int>::const_iterator
+    auto y_end() const -> std::vector<int>::const_iterator
     {
       return base_type::_y.begin();
     }
@@ -184,22 +184,22 @@ namespace DO { namespace Sara {
 
     auto x_begin() const -> ImageDataSetIterator
     {
-      return ImageDataSet{base_type::_x}.begin();
+      return ImageDataSetIterator{base_type::_x.begin()};
     }
 
     auto x_end() const -> ImageDataSetIterator
     {
-      return ImageDataSet{base_type::_x}.end();
+      return ImageDataSetIterator{base_type::_x.end()};
     }
 
     auto y_begin() const -> ImageDataSetIterator
     {
-      return ImageDataSetIterator{base_type::_y}.begin();
+      return ImageDataSetIterator{base_type::_y.begin()};
     }
 
-    auto y_end() -> ImageDataSetIterator
+    auto y_end() const -> ImageDataSetIterator
     {
-      return ImageDataSetIterator{base_type::_y}.end();
+      return ImageDataSetIterator{base_type::_y.end()};
     }
   };
 

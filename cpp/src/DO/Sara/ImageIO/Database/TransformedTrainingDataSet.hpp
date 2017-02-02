@@ -33,10 +33,10 @@ namespace DO { namespace Sara {
     using data_transform_type = typename TIterator::value_type;
     using self_type = TransformedTrainingDataSetIterator;
 
-    inline TrainingDataSetIterator() = default;
+    inline TransformedTrainingDataSetIterator() = default;
 
-    inline TrainingDataSetIterator(x_iterator x, y_iterator y,
-                                   data_transform_iterator t)
+    inline TransformedTrainingDataSetIterator(x_iterator x, y_iterator y,
+                                              data_transform_iterator t)
       : _x{x}
       , _y{y}
       , _t{t}
@@ -162,12 +162,12 @@ namespace DO { namespace Sara {
 
     auto x_begin() const -> ImageDataSetIterator
     {
-      return ImageDataSet{base_type::_x}.begin();
+      return ImageDataSetIterator{base_type::_x.begin()};
     }
 
     auto x_end() const -> ImageDataSetIterator
     {
-      return ImageDataSet(base_type::_x).end();
+      return ImageDataSetIterator{base_type::_x.end()};
     }
 
     auto y_begin() const -> std::vector<int>::const_iterator
