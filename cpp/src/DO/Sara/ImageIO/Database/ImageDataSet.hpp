@@ -123,7 +123,7 @@ namespace DO { namespace Sara {
     using value_type = ImageDataSetIterator::value_type;
 
     inline ImageDataSet(std::vector<std::string>& image_filepaths)
-      : _image_filepaths{image_filepaths}
+      : _image_filepaths(image_filepaths)
     {
     }
 
