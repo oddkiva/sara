@@ -67,12 +67,12 @@ namespace DO { namespace Sara {
       return *this;
     }
 
-    inline auto x() const -> const x_type&
+    inline auto x() -> const x_type&
     {
       return *_x;
     }
 
-    inline auto y() const -> const y_type&
+    inline auto y() -> const y_type&
     {
       return *_y;
     }
@@ -103,9 +103,6 @@ namespace DO { namespace Sara {
     using x_set_type = std::vector<XHandle>;
     using y_set_type = std::vector<YHandle>;
 
-    using x_iterator = typename x_set_type::const_iterator;
-    using y_iterator = typename y_set_type::const_iterator;
-
     inline TrainingDataSet() = default;
 
   protected:
@@ -120,12 +117,24 @@ namespace DO { namespace Sara {
     using base_type = TrainingDataSet<std::string, int>;
 
   public:
-    using iterator = TrainingDataSetIterator<typename base_type::x_iterator,
-                                             typename base_type::y_iterator>;
+    using x_iterator = ImageDataSetIterator;
+    using y_iterator = typename y_set_type::const_iterator;
+
+    using iterator = TrainingDataSetIterator<x_iterator, y_iterator>;
 
     inline ImageClassificationTrainingDataSet() = default;
 
     void read_from_csv(const std::string& csv_filepath);
+
+    void set_image_data_set(std::vector<std::string> image_filepaths)
+    {
+      _x = std::move(image_filepaths);
+    }
+
+    void set_label_set(std::vector<int> labels)
+    {
+      _y = std::move(labels);
+    }
 
     inline auto begin() const -> iterator
     {
@@ -137,24 +146,24 @@ namespace DO { namespace Sara {
       return iterator{x_end(), y_end()};
     }
 
-    auto x_begin() const -> ImageDataSetIterator
+    auto x_begin() const -> x_iterator
     {
-      return ImageDataSetIterator{base_type::_x.begin()};
+      return x_iterator{_x.begin()};
     }
 
-    auto x_end() const -> ImageDataSetIterator
+    auto x_end() const -> x_iterator
     {
-      return ImageDataSetIterator{base_type::_x.end()};
+      return x_iterator{_x.end()};
     }
 
-    auto y_begin() const -> std::vector<int>::const_iterator
+    auto y_begin() const -> y_iterator
     {
-      return base_type::_y.begin();
+      return _y.begin();
     }
 
-    auto y_end() const -> std::vector<int>::const_iterator
+    auto y_end() const -> y_iterator
     {
-      return base_type::_y.begin();
+      return _y.end();
     }
   };
 
@@ -165,8 +174,9 @@ namespace DO { namespace Sara {
     using base_type = TrainingDataSet<std::string, std::string>;
 
   public:
-    using iterator = TrainingDataSetIterator<typename base_type::x_iterator,
-                                             typename base_type::y_iterator>;
+    using x_iterator = ImageDataSetIterator;
+    using y_iterator = ImageDataSetIterator;
+    using iterator = TrainingDataSetIterator<x_iterator, y_iterator>;
 
     inline ImageSegmentationTrainingDataSet() = default;
 
@@ -184,22 +194,22 @@ namespace DO { namespace Sara {
 
     auto x_begin() const -> ImageDataSetIterator
     {
-      return ImageDataSetIterator{base_type::_x.begin()};
+      return ImageDataSetIterator{_x.begin()};
     }
 
     auto x_end() const -> ImageDataSetIterator
     {
-      return ImageDataSetIterator{base_type::_x.end()};
+      return ImageDataSetIterator{_x.end()};
     }
 
     auto y_begin() const -> ImageDataSetIterator
     {
-      return ImageDataSetIterator{base_type::_y.begin()};
+      return ImageDataSetIterator{_y.begin()};
     }
 
     auto y_end() const -> ImageDataSetIterator
     {
-      return ImageDataSetIterator{base_type::_y.end()};
+      return ImageDataSetIterator{_y.end()};
     }
   };
 

@@ -14,6 +14,7 @@
 #include <DO/Sara/Core.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageIO/Database/ImageDataSet.hpp>
+#include <DO/Sara/ImageIO/Database/TrainingDataSet.hpp>
 
 #include "../AssertHelpers.hpp"
 
@@ -24,7 +25,7 @@ using namespace DO::Sara;
 
 TEST(TestImageDatabase, test_image_database_iterator)
 {
-  auto db_dir = string{src_path("../../../data/")};
+  const auto db_dir = string{src_path("../../../data/")};
 
   auto image_list = vector<string>{
     db_dir + "/" + "All.tif",
@@ -32,17 +33,53 @@ TEST(TestImageDatabase, test_image_database_iterator)
     db_dir + "/" + "stinkbug.png",
   };
 
-  auto image_db = ImageDataSet{image_list};
+  const auto image_db = ImageDataSet{image_list};
   auto image_it = image_db.begin();
   auto image_end = image_db.end();
 
-  ASSERT_TRUE(image_it->sizes() != Vector2i::Zero());
+  EXPECT_TRUE(image_it->sizes() != Vector2i::Zero());
 
   size_t i = 0;
   for (; image_it != image_end; ++image_it)
     ++i;
-  ASSERT_EQ(i, 3);
+  EXPECT_EQ(i, 3);
 }
+
+TEST(TestTrainingDataSet, test_training_data_set_initialization)
+{
+  const auto db_dir = string{src_path("../../../data/")};
+
+  auto training_data_set = ImageClassificationTrainingDataSet{};
+  {
+    auto images = vector<string>{
+      db_dir + "/" + "All.tif",
+      db_dir + "/" + "ksmall.jpg",
+      db_dir + "/" + "stinkbug.png"
+    };
+    training_data_set.set_image_data_set(std::move(images));
+    EXPECT_EQ(images.size(), 0);
+  }
+
+  {
+    auto labels = vector<int>{0, 0, 1};
+    training_data_set.set_label_set(std::move(labels));
+    EXPECT_EQ(labels.size(), 0);
+  }
+
+  auto sample_i = training_data_set.begin();
+
+  EXPECT_NE(sample_i.x().sizes(), Vector2i::Zero());
+  EXPECT_EQ(sample_i.y(), 0);
+
+  ++sample_i;
+  EXPECT_NE(sample_i.x().sizes(), Vector2i::Zero());
+  EXPECT_EQ(sample_i.y(), 0);
+
+  ++sample_i;
+  EXPECT_NE(sample_i.x().sizes(), Vector2i::Zero());
+  EXPECT_EQ(sample_i.y(), 1);
+}
+
 
 int main(int argc, char **argv)
 {

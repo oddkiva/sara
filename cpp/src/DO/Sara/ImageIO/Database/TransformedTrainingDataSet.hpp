@@ -120,11 +120,6 @@ namespace DO { namespace Sara {
     using y_set_type = std::vector<YHandle>;
     using data_transform_set_type = std::vector<DataTransform>;
 
-    using x_iterator = typename x_set_type::const_iterator;
-    using y_iterator = typename y_set_type::const_iterator;
-    using data_transform_iterator =
-        typename data_transform_set_type::const_iterator;
-
     inline TransformedTrainingDataSet() = default;
 
   protected:
@@ -142,13 +137,27 @@ namespace DO { namespace Sara {
         TransformedTrainingDataSet<std::string, int, ImageDataTransform>;
 
   public:
-    using iterator = TransformedTrainingDataSetIterator<
-        typename base_type::x_iterator, typename base_type::y_iterator,
-        typename base_type::data_transform_iterator>;
+    using x_iterator = ImageDataSetIterator;
+    using y_iterator = typename y_set_type::const_iterator;
+    using data_transform_iterator =
+        typename data_transform_set_type::const_iterator;
+    using iterator =
+        TransformedTrainingDataSetIterator<x_iterator, y_iterator,
+                                           data_transform_iterator>;
 
     inline TransformedTrainingImageDataSet() = default;
 
     void read_from_csv(const std::string& csv_filepath);
+
+    void set_image_data_set(std::vector<std::string> image_filepaths)
+    {
+      _x = std::move(image_filepaths);
+    }
+
+    void set_label_set(std::vector<int> labels)
+    {
+      _y = std::move(labels);
+    }
 
     inline auto begin() const -> iterator
     {
@@ -162,32 +171,32 @@ namespace DO { namespace Sara {
 
     auto x_begin() const -> ImageDataSetIterator
     {
-      return ImageDataSetIterator{base_type::_x.begin()};
+      return ImageDataSetIterator{_x.begin()};
     }
 
     auto x_end() const -> ImageDataSetIterator
     {
-      return ImageDataSetIterator{base_type::_x.end()};
+      return ImageDataSetIterator{_x.end()};
     }
 
-    auto y_begin() const -> std::vector<int>::const_iterator
+    auto y_begin() const -> y_iterator
     {
-      return base_type::_y.begin();
+      return _y.begin();
     }
 
-    auto y_end() -> std::vector<int>::const_iterator
+    auto y_end() const -> y_iterator
     {
-      return base_type::_y.begin();
+      return _y.end();
     }
 
     auto data_transform_begin() const -> data_transform_iterator
     {
-      return base_type::_t.begin();
+      return _t.begin();
     }
 
     auto data_transform_end() const -> data_transform_iterator
     {
-      return base_type::_t.begin();
+      return _t.begin();
     }
   };
 
