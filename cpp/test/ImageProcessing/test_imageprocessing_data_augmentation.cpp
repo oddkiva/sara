@@ -35,9 +35,8 @@ TEST(TestDataAugmentation, test_zoom)
     6, 7, 8;
 
   auto out = t.extract_patch(in);
-  ASSERT_MATRIX_EQ(out.sizes(), t.out_sizes);
+  EXPECT_MATRIX_EQ(out.sizes(), t.out_sizes);
 }
-
 
 TEST(TestDataAugmentation, test_shift)
 {
@@ -58,19 +57,61 @@ TEST(TestDataAugmentation, test_shift)
     4, 5,
     7, 8;
 
-  ASSERT_MATRIX_EQ(true_out.matrix(), out.matrix());
+  EXPECT_MATRIX_EQ(true_out.matrix(), out.matrix());
 }
 
 TEST(TestDataAugmentation, test_flip)
 {
   auto t = ImageDataTransform{};
   t.set_flip(ImageDataTransform::Horizontal);
+  t.out_sizes = Vector2i::Ones() * 3;
+
+  auto in = Image<int>{3, 3};
+  in.matrix() <<
+    0, 1, 2,
+    3, 4, 5,
+    6, 7, 8;
+
+  auto out = t.extract_patch(in);
+
+  auto true_out = Image<int>{3, 3};
+  true_out.matrix() <<
+    2, 1, 0,
+    5, 4, 3,
+    8, 7, 6;
+
+  EXPECT_MATRIX_EQ(true_out.matrix(), out.matrix());
 }
 
 TEST(TestDataAugmentation, test_fancy_pca)
 {
   auto t = ImageDataTransform{};
-  t.set_fancy_pca(Vector3f::Ones());
+  t.set_fancy_pca(Vector3f::Zero());
+  t.out_sizes = Vector2i::Ones() * 3;
+
+  auto in = Image<Rgb32f>{3, 3};
+  in(0, 0) = Vector3f::Ones() * 0; in(1, 0) = Vector3f::Ones() * 1; in(2, 0) = Vector3f::Ones() * 2;
+  in(0, 1) = Vector3f::Ones() * 3; in(1, 1) = Vector3f::Ones() * 4; in(2, 1) = Vector3f::Ones() * 5;
+  in(0, 2) = Vector3f::Ones() * 6; in(1, 2) = Vector3f::Ones() * 7; in(2, 2) = Vector3f::Ones() * 8;
+
+  auto out = t(in);
+  auto out_tensor = to_cwh_tensor(out);
+
+  auto true_out_r = Image<float>{3, 3};
+  true_out_r.matrix() <<
+    0, 1, 2,
+    3, 4, 5,
+    6, 7, 8;
+
+  EXPECT_MATRIX_EQ(true_out_r.matrix(), out_tensor[0].matrix());
+}
+
+TEST(TestDataAugmentation, test_expand_zoom_transforms)
+{
+  auto in_sizes = Vector2i{480, 270};
+  auto out_sizes = Vector2i{448, 238};
+
+  auto z_ts = expand_zoom_transforms(in_sizes, out_sizes, 1 / 1.3f, 1.3f, 10);
 }
 
 int main(int argc, char** argv)

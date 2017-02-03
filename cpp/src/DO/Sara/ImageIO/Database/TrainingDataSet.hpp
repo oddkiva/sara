@@ -67,12 +67,22 @@ namespace DO { namespace Sara {
       return *this;
     }
 
-    inline auto x() -> const x_type&
+    inline auto x() -> x_iterator
+    {
+      return _x;
+    }
+
+    inline auto y() -> y_iterator
+    {
+      return _y;
+    }
+
+    inline auto x_ref() -> const x_type&
     {
       return *_x;
     }
 
-    inline auto y() -> const y_type&
+    inline auto y_ref() -> const y_type&
     {
       return *_y;
     }
@@ -117,7 +127,7 @@ namespace DO { namespace Sara {
     using base_type = TrainingDataSet<std::string, int>;
 
   public:
-    using x_iterator = ImageDataSetIterator;
+    using x_iterator = ImageDataSetIterator<Image<Rgb8>>;
     using y_iterator = typename y_set_type::const_iterator;
 
     using iterator = TrainingDataSetIterator<x_iterator, y_iterator>;
@@ -174,8 +184,8 @@ namespace DO { namespace Sara {
     using base_type = TrainingDataSet<std::string, std::string>;
 
   public:
-    using x_iterator = ImageDataSetIterator;
-    using y_iterator = ImageDataSetIterator;
+    using x_iterator = ImageDataSetIterator<Image<Rgb8>>;
+    using y_iterator = ImageDataSetIterator<Image<unsigned char>>;
     using iterator = TrainingDataSetIterator<x_iterator, y_iterator>;
 
     inline ImageSegmentationTrainingDataSet() = default;
@@ -192,24 +202,24 @@ namespace DO { namespace Sara {
       return iterator{x_end(), y_end()};
     }
 
-    auto x_begin() const -> ImageDataSetIterator
+    auto x_begin() const -> x_iterator
     {
-      return ImageDataSetIterator{_x.begin()};
+      return x_iterator{_x.begin()};
     }
 
-    auto x_end() const -> ImageDataSetIterator
+    auto x_end() const -> x_iterator
     {
-      return ImageDataSetIterator{_x.end()};
+      return x_iterator{_x.end()};
     }
 
-    auto y_begin() const -> ImageDataSetIterator
+    auto y_begin() const -> y_iterator
     {
-      return ImageDataSetIterator{_y.begin()};
+      return y_iterator{_y.begin()};
     }
 
-    auto y_end() const -> ImageDataSetIterator
+    auto y_end() const -> y_iterator
     {
-      return ImageDataSetIterator{_y.end()};
+      return y_iterator{_y.end()};
     }
   };
 

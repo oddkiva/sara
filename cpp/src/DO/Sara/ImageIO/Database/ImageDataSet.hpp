@@ -21,12 +21,16 @@
 namespace DO { namespace Sara {
 
   //! @brief Iterator class for image dataset.
-  class ImageDataSetIterator
+  template <typename _Image>
+  class ImageDataSetIterator;
+
+  template <typename T>
+  class ImageDataSetIterator<Image<T>>
   {
   public:
     using self_type = ImageDataSetIterator;
     using file_iterator = std::vector<std::string>::const_iterator;
-    using value_type = Image<Rgb8>;
+    using value_type = Image<T>;
 
     inline ImageDataSetIterator() = default;
 
@@ -108,6 +112,11 @@ namespace DO { namespace Sara {
       return *_file_i;
     }
 
+    inline std::ptrdiff_t operator-(const self_type& other) const
+    {
+      return _file_i - other._file_i;
+    }
+
   private:
     file_iterator _file_i;
     file_iterator _file_read;
@@ -116,36 +125,38 @@ namespace DO { namespace Sara {
 
 
   //! @brief Image dataset class.
+  template <typename _Image>
   class ImageDataSet
   {
   public:
-    using iterator = ImageDataSetIterator;
-    using value_type = ImageDataSetIterator::value_type;
+    using container_type = std::vector<std::string>;
+    using iterator = ImageDataSetIterator<_Image>;
+    using value_type = typename iterator::value_type;
 
-    inline ImageDataSet(std::vector<std::string>& image_filepaths)
-      : _image_filepaths(image_filepaths)
+    inline ImageDataSet(std::vector<std::string> image_filepaths)
+      : _image_filepaths{std::move(image_filepaths)}
     {
     }
 
-    void read_from_csv(const std::string& text_filepath);
+    static ImageDataSet read_from_csv(const std::string& text_filepath);
 
-    inline auto begin() const -> ImageDataSetIterator
+    inline auto begin() const -> iterator
     {
-      return ImageDataSetIterator{_image_filepaths.begin()};
+      return iterator{_image_filepaths.begin()};
     }
 
-    inline auto end() const -> ImageDataSetIterator
+    inline auto end() const -> iterator
     {
-      return ImageDataSetIterator{_image_filepaths.end()};
+      return iterator{_image_filepaths.end()};
     }
 
-    inline auto operator[](std::ptrdiff_t i) const -> ImageDataSetIterator
+    inline auto operator[](std::ptrdiff_t i) const -> iterator
     {
-      return ImageDataSetIterator{_image_filepaths.begin() + i};
+      return iterator{_image_filepaths.begin() + i};
     }
 
   private:
-    std::vector<std::string>& _image_filepaths;
+    container_type _image_filepaths;
   };
 
 

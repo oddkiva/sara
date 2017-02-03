@@ -27,22 +27,33 @@ TEST(TestImageDatabase, test_image_database_iterator)
 {
   const auto db_dir = string{src_path("../../../data/")};
 
-  auto image_list = vector<string>{
-    db_dir + "/" + "All.tif",
-    db_dir + "/" + "ksmall.jpg",
-    db_dir + "/" + "stinkbug.png",
-  };
-
-  const auto image_db = ImageDataSet{image_list};
+  const auto image_db = ImageDataSet<Image<Rgb8>>{{
+      db_dir + "/" + "All.tif",
+      db_dir + "/" + "ksmall.jpg",
+      db_dir + "/" + "stinkbug.png",
+  }};
   auto image_it = image_db.begin();
   auto image_end = image_db.end();
 
+  // Check we could read something.
+  EXPECT_NO_THROW(image_it.operator*());
+  EXPECT_NO_THROW(image_it.operator->());
+  EXPECT_NE(image_it->data(), nullptr);
   EXPECT_TRUE(image_it->sizes() != Vector2i::Zero());
+  EXPECT_EQ(image_it.path(), db_dir + "/" + "All.tif");
+
+  // Check iterator arithmetics.
+  EXPECT_EQ(image_end - image_it, 3);
 
   size_t i = 0;
   for (; image_it != image_end; ++image_it)
     ++i;
   EXPECT_EQ(i, 3);
+
+  for (; image_it != image_db.begin(); --image_it)
+    --i;
+  EXPECT_EQ(i, 0);
+  EXPECT_EQ(image_it, image_db.begin());
 }
 
 TEST(TestTrainingDataSet, test_training_data_set_initialization)
@@ -50,35 +61,29 @@ TEST(TestTrainingDataSet, test_training_data_set_initialization)
   const auto db_dir = string{src_path("../../../data/")};
 
   auto training_data_set = ImageClassificationTrainingDataSet{};
-  {
-    auto images = vector<string>{
+
+  training_data_set.set_image_data_set({
       db_dir + "/" + "All.tif",
       db_dir + "/" + "ksmall.jpg",
-      db_dir + "/" + "stinkbug.png"
-    };
-    training_data_set.set_image_data_set(std::move(images));
-    EXPECT_EQ(images.size(), 0);
-  }
+      db_dir + "/" + "stinkbug.png",
+  });
 
-  {
-    auto labels = vector<int>{0, 0, 1};
-    training_data_set.set_label_set(std::move(labels));
-    EXPECT_EQ(labels.size(), 0);
-  }
+  training_data_set.set_label_set({0, 0, 1});
 
   auto sample_i = training_data_set.begin();
 
-  EXPECT_NE(sample_i.x().sizes(), Vector2i::Zero());
-  EXPECT_EQ(sample_i.y(), 0);
+  EXPECT_NE(sample_i.x_ref().sizes(), Vector2i::Zero());
+  EXPECT_EQ(sample_i.y_ref(), 0);
 
   ++sample_i;
-  EXPECT_NE(sample_i.x().sizes(), Vector2i::Zero());
-  EXPECT_EQ(sample_i.y(), 0);
+  EXPECT_NE(sample_i.x_ref().sizes(), Vector2i::Zero());
+  EXPECT_EQ(sample_i.y_ref(), 0);
 
   ++sample_i;
-  EXPECT_NE(sample_i.x().sizes(), Vector2i::Zero());
-  EXPECT_EQ(sample_i.y(), 1);
+  EXPECT_NE(sample_i.x_ref().sizes(), Vector2i::Zero());
+  EXPECT_EQ(sample_i.y_ref(), 1);
 }
+
 
 
 int main(int argc, char **argv)

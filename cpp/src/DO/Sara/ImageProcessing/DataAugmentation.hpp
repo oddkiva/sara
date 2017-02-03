@@ -168,9 +168,9 @@ namespace DO { namespace Sara {
 
   VectorXf linspace(float a, float b, int num_samples)
   {
-    auto range = VectorXf{num_samples};
-    for (int i = 0; i <= num_samples; ++i)
-      range[i] = a + i / (b - a) * (num_samples - 1);
+    auto range = VectorXf(num_samples);
+    for (int i = 0; i < num_samples; ++i)
+      range[i] = a + (b - a) * i / (num_samples - 1);
     return range;
   }
 
@@ -180,15 +180,15 @@ namespace DO { namespace Sara {
   }
 
 
-  auto augment(const VectorXf& zs,
-               const VectorXf& thetas,
-               std::pair<int, int> offset_delta,
-               std::array<bool, 2> flip)
-      -> std::vector<ImageDataTransform>
-  {
-    return std::vector<ImageDataTransform>{};
-  }
+  auto expand_zoom_transforms(const Vector2i& in_image_sizes,
+                              const Vector2i& out_image_sizes, float zmin,
+                              float zmax, int num_samples)
+      -> std::vector<ImageDataTransform>;
 
+  auto expand_crop_transforms(const Vector2i& in_image_sizes,
+                              const Vector2i& out_image_sizes,
+                              int delta_x, int delta_y)
+      -> std::vector<ImageDataTransform>;
 
 } /* namespace Sara */
 } /* namespace DO */

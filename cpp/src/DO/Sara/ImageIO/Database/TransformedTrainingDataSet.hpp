@@ -75,17 +75,32 @@ namespace DO { namespace Sara {
       return *this;
     }
 
-    inline auto x() const -> const x_type&
+    inline auto x() const -> x_iterator
+    {
+      return _x;
+    }
+
+    inline auto y() const -> y_iterator
+    {
+      return _y;
+    }
+
+    inline auto t() const -> data_transform_iterator
+    {
+      return _t;
+    }
+
+    inline auto x_ref() const -> const x_type&
     {
       return *_x;
     }
 
-    inline auto y() const -> const y_type&
+    inline auto y_ref() const -> const y_type&
     {
       return *_y;
     }
 
-    inline auto t() const -> const data_transform_type&
+    inline auto t_ref() const -> const data_transform_type&
     {
       return *_t;
     }
@@ -137,7 +152,7 @@ namespace DO { namespace Sara {
         TransformedTrainingDataSet<std::string, int, ImageDataTransform>;
 
   public:
-    using x_iterator = ImageDataSetIterator;
+    using x_iterator = ImageDataSetIterator<Image<Rgb8>>;
     using y_iterator = typename y_set_type::const_iterator;
     using data_transform_iterator =
         typename data_transform_set_type::const_iterator;
