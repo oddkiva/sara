@@ -166,20 +166,6 @@ namespace DO { namespace Sara {
   };
 
 
-  VectorXf linspace(float a, float b, int num_samples)
-  {
-    auto range = VectorXf(num_samples);
-    for (int i = 0; i < num_samples; ++i)
-      range[i] = a + (b - a) * i / (num_samples - 1);
-    return range;
-  }
-
-  VectorXf logspace(float a, float b, int num_samples)
-  {
-    return linspace(log(a), log(b), num_samples).array().exp().matrix();
-  }
-
-
   auto expand_zoom_transforms(const Vector2i& in_image_sizes,
                               const Vector2i& out_image_sizes, float zmin,
                               float zmax, int num_samples)
