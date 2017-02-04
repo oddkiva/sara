@@ -13,6 +13,9 @@
 
 #pragma once
 
+#include <array>
+#include <vector>
+
 #include <DO/Sara/Core/Image.hpp>
 #include <DO/Sara/ImageProcessing/ColorFancyPCA.hpp>
 #include <DO/Sara/ImageProcessing/Flip.hpp>
@@ -165,26 +168,13 @@ namespace DO { namespace Sara {
     //! @}
   };
 
-
-  VectorXf linspace(float a, float b, int num_samples)
-  {
-    auto range = VectorXf(num_samples);
-    for (int i = 0; i < num_samples; ++i)
-      range[i] = a + (b - a) * i / (num_samples - 1);
-    return range;
-  }
-
-  VectorXf logspace(float a, float b, int num_samples)
-  {
-    return linspace(log(a), log(b), num_samples).array().exp().matrix();
-  }
-
-
+  DO_SARA_EXPORT
   auto expand_zoom_transforms(const Vector2i& in_image_sizes,
                               const Vector2i& out_image_sizes, float zmin,
                               float zmax, int num_samples)
       -> std::vector<ImageDataTransform>;
 
+  DO_SARA_EXPORT
   auto expand_crop_transforms(const Vector2i& in_image_sizes,
                               const Vector2i& out_image_sizes,
                               int delta_x, int delta_y)
