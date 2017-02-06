@@ -97,6 +97,13 @@ namespace DO { namespace Sara {
       return !(operator==(other));
     }
 
+    inline auto operator*()
+        -> decltype(std::make_pair(std::declval<const x_type>(),
+                                   std::declval<const y_type>()))
+    {
+      return std::make_pair(*_x, *_y);
+    }
+
   private:
     x_iterator _x;
     y_iterator _y;
@@ -186,6 +193,8 @@ namespace DO { namespace Sara {
     using base_type = TrainingDataSet<std::string, std::string>;
 
   public:
+    using x_set_type = typename base_type::x_set_type;
+    using y_set_type = typename base_type::y_set_type;
     using x_iterator = ImageDataSetIterator<Image<Rgb8>>;
     using y_iterator = ImageDataSetIterator<Image<int>>;
     using iterator = TrainingDataSetIterator<x_iterator, y_iterator>;
@@ -193,6 +202,16 @@ namespace DO { namespace Sara {
     inline ImageSegmentationTrainingDataSet() = default;
 
     void read_from_csv(const std::string& csv_filepath);
+
+    void set_image_data_set(x_set_type image_filepaths)
+    {
+      _x = std::move(image_filepaths);
+    }
+
+    void set_label_set(y_set_type labels)
+    {
+      _y = std::move(labels);
+    }
 
     inline auto begin() const -> iterator
     {

@@ -15,6 +15,7 @@
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageIO/Database/ImageDataSet.hpp>
 #include <DO/Sara/ImageIO/Database/TrainingDataSet.hpp>
+#include <DO/Sara/ImageIO/Database/TransformedTrainingDataSet.hpp>
 
 #include "../AssertHelpers.hpp"
 
@@ -56,7 +57,8 @@ TEST(TestImageDatabase, test_image_database_iterator)
   EXPECT_EQ(image_it, image_db.begin());
 }
 
-TEST(TestTrainingDataSet, test_training_data_set_initialization)
+TEST(TestTrainingDataSet,
+     test_image_classification_training_data_set_initialization)
 {
   const auto db_dir = string{src_path("../../../data/")};
 
@@ -85,6 +87,104 @@ TEST(TestTrainingDataSet, test_training_data_set_initialization)
 }
 
 
+TEST(TestTrainingDataSet, test_image_segmentation_training_data_set_initialization)
+{
+  const auto db_dir = string{src_path("../../../data/")};
+
+  auto training_data_set = ImageSegmentationTrainingDataSet{};
+
+  training_data_set.set_image_data_set({
+      db_dir + "/" + "All.tif",
+      db_dir + "/" + "ksmall.jpg",
+      db_dir + "/" + "stinkbug.png",
+  });
+
+  training_data_set.set_label_set({
+      db_dir + "/" + "All.tif",
+      db_dir + "/" + "ksmall.jpg",
+      db_dir + "/" + "stinkbug.png",
+  });
+
+  for (auto s = training_data_set.begin(), s_end = training_data_set.end();
+       s != s_end; ++s)
+  {
+    EXPECT_NE(s.x_ref().sizes(), Vector2i::Zero());
+    EXPECT_EQ(s.y_ref().sizes(), s.x_ref().sizes());
+  }
+
+  for (auto s : training_data_set)
+  {
+    EXPECT_NE(s.first.sizes(), Vector2i::Zero());
+    EXPECT_EQ(s.first.sizes(), s.second.sizes());
+  }
+}
+
+
+TEST(TestTransformedTrainingDataSet,
+     test_transformed_image_classification_training_data_set_initialization)
+{
+  const auto db_dir = string{src_path("../../../data/")};
+
+  auto training_data_set = TransformedImageClassificationTrainingDataSet{};
+
+  training_data_set.set_image_data_set({
+      db_dir + "/" + "All.tif",
+      db_dir + "/" + "ksmall.jpg",
+      db_dir + "/" + "stinkbug.png",
+  });
+
+  training_data_set.set_label_set({0, 0, 1});
+
+  training_data_set.set_data_transform_set(
+      {ImageDataTransform{}, ImageDataTransform{}, ImageDataTransform{}});
+
+  auto sample_i = training_data_set.begin();
+
+  EXPECT_NE(sample_i.x_ref().sizes(), Vector2i::Zero());
+  EXPECT_EQ(sample_i.y_ref(), 0);
+  EXPECT_TRUE(sample_i.t_ref().use_original);
+
+  ++sample_i;
+  EXPECT_NE(sample_i.x_ref().sizes(), Vector2i::Zero());
+  EXPECT_EQ(sample_i.y_ref(), 0);
+  EXPECT_TRUE(sample_i.t_ref().use_original);
+
+  ++sample_i;
+  EXPECT_NE(sample_i.x_ref().sizes(), Vector2i::Zero());
+  EXPECT_EQ(sample_i.y_ref(), 1);
+  EXPECT_TRUE(sample_i.t_ref().use_original);
+}
+
+TEST(TestTransformedTrainingDataSet,
+     test_transformed_image_segmentation_training_data_set_initialization)
+{
+  const auto db_dir = string{src_path("../../../data/")};
+
+  auto training_data_set = TransformedImageSegmentationTrainingDataSet{};
+
+  training_data_set.set_image_data_set({
+      db_dir + "/" + "All.tif",
+      db_dir + "/" + "ksmall.jpg",
+      db_dir + "/" + "stinkbug.png",
+  });
+
+  training_data_set.set_label_set({
+      db_dir + "/" + "All.tif",
+      db_dir + "/" + "ksmall.jpg",
+      db_dir + "/" + "stinkbug.png",
+  });
+
+  training_data_set.set_data_transform_set(
+      {ImageDataTransform{}, ImageDataTransform{}, ImageDataTransform{}});
+
+  for (auto s = training_data_set.begin(), s_end = training_data_set.end();
+       s != s_end; ++s)
+  {
+    EXPECT_NE(s.x_ref().sizes(), Vector2i::Zero());
+    EXPECT_EQ(s.y_ref().sizes(), s.x_ref().sizes());
+    EXPECT_TRUE(s.t_ref().use_original);
+  }
+}
 
 int main(int argc, char **argv)
 {
