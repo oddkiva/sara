@@ -136,6 +136,8 @@ namespace DO { namespace Sara {
 
     void read_from_csv(const std::string& csv_filepath);
 
+    void write_to_csv(const std::string& csv_filepath) const;
+
     void set_image_data_set(std::vector<std::string> image_filepaths)
     {
       _x = std::move(image_filepaths);
@@ -185,7 +187,7 @@ namespace DO { namespace Sara {
 
   public:
     using x_iterator = ImageDataSetIterator<Image<Rgb8>>;
-    using y_iterator = ImageDataSetIterator<Image<unsigned char>>;
+    using y_iterator = ImageDataSetIterator<Image<int>>;
     using iterator = TrainingDataSetIterator<x_iterator, y_iterator>;
 
     inline ImageSegmentationTrainingDataSet() = default;

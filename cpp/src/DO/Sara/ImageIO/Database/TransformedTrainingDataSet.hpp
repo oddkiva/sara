@@ -144,8 +144,7 @@ namespace DO { namespace Sara {
   };
 
 
-  // For classification tasks.
-  class TransformedTrainingImageDataSet
+  class TransformedImageClassificationTrainingDataSet
       : public TransformedTrainingDataSet<std::string, int, ImageDataTransform>
   {
     using base_type =
@@ -160,9 +159,11 @@ namespace DO { namespace Sara {
         TransformedTrainingDataSetIterator<x_iterator, y_iterator,
                                            data_transform_iterator>;
 
-    inline TransformedTrainingImageDataSet() = default;
+    inline TransformedImageClassificationTrainingDataSet() = default;
 
     void read_from_csv(const std::string& csv_filepath);
+
+    void write_to_csv(const std::string& csv_filepath) const;
 
     void set_image_data_set(std::vector<std::string> image_filepaths)
     {
@@ -172,6 +173,11 @@ namespace DO { namespace Sara {
     void set_label_set(std::vector<int> labels)
     {
       _y = std::move(labels);
+    }
+
+    void set_data_transform_set(std::vector<ImageDataTransform> transforms)
+    {
+      _t = std::move(transforms);
     }
 
     inline auto begin() const -> iterator
@@ -184,14 +190,14 @@ namespace DO { namespace Sara {
       return iterator{x_end(), y_end(), data_transform_end()};
     }
 
-    auto x_begin() const -> ImageDataSetIterator
+    auto x_begin() const -> x_iterator
     {
-      return ImageDataSetIterator{_x.begin()};
+      return x_iterator{_x.begin()};
     }
 
-    auto x_end() const -> ImageDataSetIterator
+    auto x_end() const -> x_iterator
     {
-      return ImageDataSetIterator{_x.end()};
+      return x_iterator{_x.end()};
     }
 
     auto y_begin() const -> y_iterator
@@ -202,6 +208,81 @@ namespace DO { namespace Sara {
     auto y_end() const -> y_iterator
     {
       return _y.end();
+    }
+
+    auto data_transform_begin() const -> data_transform_iterator
+    {
+      return _t.begin();
+    }
+
+    auto data_transform_end() const -> data_transform_iterator
+    {
+      return _t.begin();
+    }
+  };
+
+
+  class TransformedImageSegmentationTrainingDataSet
+      : public TransformedTrainingDataSet<std::string, std::string,
+                                          ImageDataTransform>
+  {
+    using base_type = TransformedTrainingDataSet<std::string, std::string,
+                                                 ImageDataTransform>;
+
+  public:
+    using x_iterator = ImageDataSetIterator<Image<Rgb8>>;
+    using y_iterator = ImageDataSetIterator<Image<int>>;
+    using data_transform_iterator =
+        typename data_transform_set_type::const_iterator;
+    using iterator =
+        TransformedTrainingDataSetIterator<x_iterator, y_iterator,
+                                           data_transform_iterator>;
+
+    inline TransformedImageSegmentationTrainingDataSet() = default;
+
+    void set_image_data_set(std::vector<std::string> image_filepaths)
+    {
+      _x = std::move(image_filepaths);
+    }
+
+    void set_label_set(std::vector<std::string> labels)
+    {
+      _y = std::move(labels);
+    }
+
+    void set_data_transform_set(std::vector<ImageDataTransform> transforms)
+    {
+      _t = std::move(transforms);
+    }
+
+    inline auto begin() const -> iterator
+    {
+      return iterator{x_begin(), y_begin(), data_transform_begin()};
+    }
+
+    inline auto end() const -> iterator
+    {
+      return iterator{x_end(), y_end(), data_transform_end()};
+    }
+
+    auto x_begin() const -> x_iterator
+    {
+      return x_iterator{_x.begin()};
+    }
+
+    auto x_end() const -> x_iterator
+    {
+      return x_iterator{_x.end()};
+    }
+
+    auto y_begin() const -> y_iterator
+    {
+      return y_iterator{_y.begin()};
+    }
+
+    auto y_end() const -> y_iterator
+    {
+      return y_iterator{_y.end()};
     }
 
     auto data_transform_begin() const -> data_transform_iterator

@@ -13,6 +13,10 @@
 
 #pragma once
 
+#include <array>
+#include <vector>
+
+#include <DO/Sara/Defines.hpp>
 #include <DO/Sara/Core/Image.hpp>
 #include <DO/Sara/ImageProcessing/ColorFancyPCA.hpp>
 #include <DO/Sara/ImageProcessing/Flip.hpp>
@@ -28,6 +32,7 @@ namespace DO { namespace Sara {
     //! @brief Transform types.
     enum FlipType
     {
+      None,
       Horizontal,
       Vertical
     };
@@ -42,9 +47,7 @@ namespace DO { namespace Sara {
     };
     //! @}
 
-
-    // ===================================================================== //
-    //! @{
+// ===================================================================== // ! @{
     //! @brief Transform setters.
     void set_zoom(float z)
     {
@@ -123,16 +126,7 @@ namespace DO { namespace Sara {
     }
 
     Image<Rgb32f> operator()(const Image<Rgb32f>& in) const
-    {
-      auto out = extract_patch(in);
-
-      if (apply_transform[FancyPCA])
-        ColorFancyPCA{U, S}(out, alpha);
-
-      return out;
-    }
     //! @}
-
 
     // ===================================================================== //
     // Parameters
@@ -166,15 +160,47 @@ namespace DO { namespace Sara {
   };
 
 
-  auto expand_zoom_transforms(const Vector2i& in_image_sizes,
-                              const Vector2i& out_image_sizes, float zmin,
-                              float zmax, int num_samples)
+  DO_SARA_EXPORT
+  auto compose_with_zooms(const Vector2i& in_image_sizes,
+                          const Vector2i& out_image_sizes,
+                          float zmin, float zmax, int num_scales,
+                          const ImageDataTransform& parent_t,
+                          bool ignore_zoom_factor_one = true)
       -> std::vector<ImageDataTransform>;
 
-  auto expand_crop_transforms(const Vector2i& in_image_sizes,
-                              const Vector2i& out_image_sizes,
-                              int delta_x, int delta_y)
+  DO_SARA_EXPORT
+  auto compose_with_shifts(const Vector2i& in_image_sizes,
+                           const Vector2i& out_image_sizes,
+                           const Vector2i& delta,
+                           const ImageDataTransform& parent_t)
       -> std::vector<ImageDataTransform>;
+
+  DO_SARA_EXPORT
+  auto compose_with_horizontal_flip(const ImageDataTransform& parent_t)
+      -> std::vector<ImageDataTransform>;
+
+  DO_SARA_EXPORT
+  auto compose_with_random_fancy_pca(const ImageDataTransform& parent_t,
+                                     int num_fancy_pca, float fancy_pca_std_dev)
+      -> std::vector<ImageDataTransform>;
+
+  DO_SARA_EXPORT
+  auto enumerate_image_data_transforms(const Vector2i& in_image_sizes,
+                                       const Vector2i& out_image_sizes,
+                                       float zmin, float zmax, int num_z,
+                                       const Vector2i& delta,
+                                       int num_fancy_pca,
+                                       float fancy_pca_std_dev)
+      -> std::vector<ImageDataTransform>;
+
+  DO_SARA_EXPORT
+  auto augment_dataset(const std::vector<int>& data_indices,
+                       const Vector2i& in_sz,
+                       const Vector2i& out_sz,
+                       float zmin, float zmax, int num_scales,
+                       const Vector2i& delta,
+                       int num_fancy_pca, float fancy_pca_std_dev)
+      -> std::vector<std::pair<int, ImageDataTransform>>;
 
 } /* namespace Sara */
 } /* namespace DO */
