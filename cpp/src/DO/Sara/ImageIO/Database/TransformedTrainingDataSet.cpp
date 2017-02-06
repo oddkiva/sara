@@ -49,7 +49,7 @@ namespace DO { namespace Sara {
 
     while (getline(csv_file, csv_row))
     {
-      split(csv_row, ";", back_insert(csv_cells));
+      split(csv_row, ';', back_inserter(csv_cells));
 
       _x.push_back(csv_cells[0]);
       _y.push_back(stoi(csv_cells[1]));

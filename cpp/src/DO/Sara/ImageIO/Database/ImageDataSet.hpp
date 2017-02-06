@@ -13,6 +13,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include <DO/Sara/Core/Image.hpp>
 
 #include <DO/Sara/ImageIO.hpp>

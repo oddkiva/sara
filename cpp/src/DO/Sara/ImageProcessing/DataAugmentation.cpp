@@ -58,7 +58,7 @@ namespace DO { namespace Sara {
       if (z_image_sizes.col(j).x() >= out_image_sizes.x() &&
           z_image_sizes.col(j).y() >= out_image_sizes.y())
       {
-        if (j == num_samples / 2 && num_samples % 2 == 1 &&
+        if (j == num_scales / 2 && num_scales % 2 == 1 &&
             ignore_zoom_factor_one)
           continue;
         auto child_t = parent_t;

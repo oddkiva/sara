@@ -66,7 +66,7 @@ TEST(TestDataAugmentation, test_flip)
   t.set_flip(ImageDataTransform::Horizontal);
   t.out_sizes = Vector2i::Ones() * 3;
 
-  const auto in = Image<int>{3, 3};
+  auto in = Image<int>{3, 3};
   in.matrix() <<
     0, 1, 2,
     3, 4, 5,
@@ -123,7 +123,7 @@ TEST(TestDataAugmentation, test_compose_with_shifts)
   const auto out_sizes = Vector2i{448, 238};
 
   const auto t = ImageDataTransform{};
-  const auto z_ts = compose_with_shifts(in_sizes, out_sizes, 1, 1, t);
+  const auto z_ts = compose_with_shifts(in_sizes, out_sizes, Vector2i::Ones(), t);
   EXPECT_EQ(z_ts.size(), 32*32);
 }
 
@@ -133,7 +133,7 @@ TEST(TestDataAugmentation, test_compose_with_horizontal_flip)
   const auto out_sizes = Vector2i{448, 238};
 
   const auto t = ImageDataTransform{};
-  const auto z_ts = compose_with_horizontal_flip(in_sizes, out_sizes, 1 / 1.3f, 1.3f, 10, t);
+  const auto z_ts = compose_with_horizontal_flip(t);
   EXPECT_EQ(z_ts.size(), 1);
 }
 
@@ -146,8 +146,7 @@ TEST(TestDataAugmentation, test_compose_with_random_pca)
   const auto num_samples = 10;
 
   const auto t = ImageDataTransform{};
-  const auto z_ts = compose_with_random_fancy_pca(
-      in_sizes, out_sizes, 1 / 1.3f, 1.3f, 10, std_dev, num_samples);
+  const auto z_ts = compose_with_random_fancy_pca(t, num_samples, std_dev);
   EXPECT_EQ(z_ts.size(), 10);
 }
 
@@ -158,7 +157,7 @@ TEST(TestDataAugmentation, test_enumerate_image_data_transforms)
 
   const auto t = ImageDataTransform{};
   const auto z_ts = enumerate_image_data_transforms(
-      in_sizes, out_sizes, 1 / 1.3f, 1.3f, 10);
+      in_sizes, out_sizes, 1 / 1.3f, 1.3f, 10, Vector2i::Ones(), 10, 0.5f);
 }
 
 
