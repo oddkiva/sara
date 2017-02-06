@@ -23,18 +23,17 @@ namespace DO { namespace Sara {
 
   struct NormalDistribution
   {
-    NormalDistribution(std::random_device& rd)
-      : _gen(rd)
+    NormalDistribution()
     {
     }
 
-    float operator()()
+    float operator()() const
     {
       return _dist(_gen);
     }
 
-    std::mt19937 _gen;
-    std::normal_distribution<float> _dist;
+    mutable std::mt19937 _gen;
+    mutable std::normal_distribution<float> _dist;
   };
 
 
@@ -43,13 +42,10 @@ namespace DO { namespace Sara {
   {
     auto image = Image<float, N>{sizes};
     auto dice = NormalDistribution{};
-    auto random = [&normal_dist](float& value) {
-      value = dice();
-    };
-    std::for_each(image.begin(), image.end(), random);
+    for (int i = 0; i < image.size(); ++i)
+      image.data()[i] = dice();
     return image;
   }
-
 
 
 

@@ -189,6 +189,7 @@ namespace DO { namespace Sara {
                                        const Vector2i& out_image_sizes,
                                        float zmin, float zmax, int num_z,
                                        const Vector2i& delta,
+                                       bool flip,
                                        int num_fancy_pca,
                                        float fancy_pca_std_dev)
       -> std::vector<ImageDataTransform>;
@@ -199,6 +200,7 @@ namespace DO { namespace Sara {
                        const Vector2i& out_sz,
                        float zmin, float zmax, int num_scales,
                        const Vector2i& delta,
+                       bool flip,
                        int num_fancy_pca, float fancy_pca_std_dev)
       -> std::vector<std::pair<int, ImageDataTransform>>;
 
