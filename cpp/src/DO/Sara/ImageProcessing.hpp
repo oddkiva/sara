@@ -46,6 +46,11 @@
 #include <DO/Sara/ImageProcessing/Extrema.hpp>
 #include <DO/Sara/ImageProcessing/GaussianPyramid.hpp>
 
+// Color perturbations.
+#include <DO/Sara/ImageProcessing/ColorFancyPCA.hpp>
+#include <DO/Sara/ImageProcessing/ColorJitter.hpp>
+#include <DO/Sara/ImageProcessing/ColorStatistics.hpp>
+
 
 /*!
   @defgroup ImageProcessing Image Processing

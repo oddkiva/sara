@@ -32,21 +32,39 @@ namespace DO { namespace Sara {
       return _dist(_gen);
     }
 
+    template <int M, int N>
+    void operator()(Matrix<float, M, N>& m) const
+    {
+      auto a = m.array();
+      for (auto i = long{0}, sz = a.size(); i < sz; ++i)
+        a[i] = _dist(_gen);
+    }
+
+    void operator()(MatrixXf& m) const
+    {
+      auto a = m.array();
+      for (auto i = long{0}, sz = a.size(); i < sz; ++i)
+        a(i) = _dist(_gen);
+    }
+
+    template <int N>
+    void operator()(Image<Rgb32f, N>& image) const
+    {
+      const auto randn_fill = [&](Rgb32f& v) {
+        v[0] = _dist(_gen);
+        v[1] = _dist(_gen);
+        v[2] = _dist(_gen);
+      };
+      image.cwise_transform_inplace(randn_fill);
+    }
+
     mutable std::mt19937 _gen;
     mutable std::normal_distribution<float> _dist;
   };
 
 
-  template <int N>
-  Image<float, N> normal(const Matrix<int, N, 1>& sizes)
-  {
-    auto image = Image<float, N>{sizes};
-    auto dice = NormalDistribution{};
-    for (int i = 0; i < image.size(); ++i)
-      image.data()[i] = dice();
-    return image;
-  }
-
+  void add_randn_noise(Image<Rgb32f>& image, float std_dev,
+                       const NormalDistribution& dist);
 
 
 } /* namespace Sara */
