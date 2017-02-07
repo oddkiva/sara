@@ -19,6 +19,7 @@
 #include <DO/Sara/Defines.hpp>
 #include <DO/Sara/Core/Image.hpp>
 #include <DO/Sara/ImageProcessing/ColorFancyPCA.hpp>
+#include <DO/Sara/ImageProcessing/ColorJitter.hpp>
 #include <DO/Sara/ImageProcessing/Flip.hpp>
 #include <DO/Sara/ImageProcessing/Resize.hpp>
 
@@ -181,7 +182,8 @@ namespace DO { namespace Sara {
 
   DO_SARA_EXPORT
   auto compose_with_random_fancy_pca(const ImageDataTransform& parent_t,
-                                     int num_fancy_pca, float fancy_pca_std_dev)
+                                     int num_fancy_pca, float fancy_pca_std_dev,
+                                     const NormalDistribution& randn)
       -> std::vector<ImageDataTransform>;
 
   DO_SARA_EXPORT
@@ -191,7 +193,8 @@ namespace DO { namespace Sara {
                                        const Vector2i& delta,
                                        bool flip,
                                        int num_fancy_pca,
-                                       float fancy_pca_std_dev)
+                                       float fancy_pca_std_dev,
+                                       const NormalDistribution& dist)
       -> std::vector<ImageDataTransform>;
 
   DO_SARA_EXPORT
@@ -201,7 +204,8 @@ namespace DO { namespace Sara {
                        float zmin, float zmax, int num_scales,
                        const Vector2i& delta,
                        bool flip,
-                       int num_fancy_pca, float fancy_pca_std_dev)
+                       int num_fancy_pca, float fancy_pca_std_dev,
+                       const NormalDistribution& randn)
       -> std::vector<std::pair<int, ImageDataTransform>>;
 
 } /* namespace Sara */

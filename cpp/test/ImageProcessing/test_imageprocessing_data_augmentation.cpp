@@ -153,7 +153,7 @@ TEST(TestDataTransformEnumeration, test_compose_with_horizontal_flip)
   const auto ts = compose_with_horizontal_flip(parent_t);
   EXPECT_EQ(ts.size(), 1);
   EXPECT_TRUE(ts[0].apply_transform[ImageDataTransform::Flip]);
-  EXPECT_TRUE(ts[0].flip_type);
+  EXPECT_EQ(ts[0].flip_type, ImageDataTransform::Horizontal);
 }
 
 TEST(TestDataTransformEnumeration, test_compose_with_random_pca)
@@ -165,7 +165,9 @@ TEST(TestDataTransformEnumeration, test_compose_with_random_pca)
   const auto num_samples = 10;
 
   const auto parent_t = ImageDataTransform{};
-  const auto ts = compose_with_random_fancy_pca(parent_t, num_samples, std_dev);
+  const auto dist = NormalDistribution{};
+  const auto ts =
+      compose_with_random_fancy_pca(parent_t, num_samples, std_dev, dist);
   EXPECT_EQ(ts.size(), 10);
 }
 
@@ -190,12 +192,14 @@ TEST(TestDataTransformEnumeration,
 
   const auto shift_delta = Vector2i::Ones();
 
+  const auto randn = NormalDistribution{};
+
   const auto ts = enumerate_image_data_transforms(
       in_sizes, out_sizes,
       z_range.min, z_range.max, z_range.size,
       shift_delta,
       false,
-      fancy_pca_params.num_samples, fancy_pca_params.std_dev);
+      fancy_pca_params.num_samples, fancy_pca_params.std_dev, randn);
 
   EXPECT_EQ(1, ts.size());
   EXPECT_TRUE(ts[0].use_original);
@@ -228,12 +232,15 @@ TEST(TestDataAugmentation, test_augment_database)
 
   const auto shift_delta = Vector2i::Ones();
 
+  const auto randn = NormalDistribution{};
+
   const auto augmented_data_set = augment_dataset(
       data_indices, in_sizes, out_sizes,
       z_range.min, z_range.max, z_range.size,
       Vector2i::Ones(),
       false,
-      0, 0.5f);
+      0, 0.5f,
+      randn);
 
   EXPECT_EQ(augmented_data_set.size(), 1);
 }
