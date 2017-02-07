@@ -117,8 +117,7 @@ TEST(TestDataTransformEnumeration, test_compose_with_zooms)
   const auto ts =
       compose_with_zooms(in_sizes, out_sizes, 1 / 1.3f, 1.3f, 10, parent_t);
 
-  EXPECT_GE(ts.size(), 5);
-  EXPECT_LE(ts.size(), 10);
+  EXPECT_EQ(ts.size(), 6); // counted manually.
 
   for (const auto& t : ts)
   {
@@ -226,7 +225,7 @@ TEST(TestDataAugmentation, test_augment_database)
 
   const struct
   {
-    int num_samples{10};
+    int num_samples{0};
     float std_dev{0.5f};
   } fancy_pca_params;
 
