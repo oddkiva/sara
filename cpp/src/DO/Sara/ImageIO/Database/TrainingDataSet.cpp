@@ -26,7 +26,9 @@ namespace DO { namespace Sara {
 
   void read_from_csv(ImageClassificationTrainingDataSet& data_set,
                      const std::string& csv_filepath)
-  { ifstream csv_file{csv_filepath}; if (!csv_file)
+  {
+    ifstream csv_file{csv_filepath};
+    if (!csv_file)
       throw std::runtime_error{
           string{"Cannot open CSV file: " + csv_filepath}.c_str()};
 
