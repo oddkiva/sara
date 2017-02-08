@@ -36,14 +36,14 @@ namespace DO { namespace Sara {
     void operator()(Matrix<float, M, N>& m) const
     {
       auto a = m.array();
-      for (auto i = long{0}, sz = a.size(); i < sz; ++i)
+      for (size_t i = decltype(a.size()){0}, sz = a.size(); i < sz; ++i)
         a[i] = _dist(_gen);
     }
 
     void operator()(MatrixXf& m) const
     {
       auto a = m.array();
-      for (auto i = long{0}, sz = a.size(); i < sz; ++i)
+      for (auto i = decltype(a.size()){0}, sz = a.size(); i < sz; ++i)
         a(i) = _dist(_gen);
     }
 
