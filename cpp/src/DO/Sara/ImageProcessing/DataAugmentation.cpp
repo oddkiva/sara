@@ -47,7 +47,7 @@ namespace DO { namespace Sara {
                           float zmin, float zmax, int num_scales,
                           const ImageDataTransform& parent_t,
                           bool ignore_zoom_factor_one)
-      -> std::vector<ImageDataTransform>
+      -> vector<ImageDataTransform>
   {
     const auto zs = logspace(zmin, zmax, num_scales);
     const auto z_image_sizes =
@@ -76,8 +76,11 @@ namespace DO { namespace Sara {
                            const Vector2i& out_image_sizes,
                            const Vector2i& delta,
                            const ImageDataTransform& parent_t)
-      -> std::vector<ImageDataTransform>
+      -> vector<ImageDataTransform>
   {
+    if (in_image_sizes == out_image_sizes)
+      return {};
+
     auto ts = vector<ImageDataTransform>{};
     for (int y = 0; y + out_image_sizes.y() < in_image_sizes.y();
          y += delta.y())
@@ -95,7 +98,7 @@ namespace DO { namespace Sara {
   }
 
   auto compose_with_horizontal_flip(const ImageDataTransform& parent_t)
-      -> std::vector<ImageDataTransform>
+      -> vector<ImageDataTransform>
   {
     auto child_t = parent_t;
     child_t.set_flip(ImageDataTransform::Horizontal);
@@ -105,16 +108,17 @@ namespace DO { namespace Sara {
   auto compose_with_random_fancy_pca(const ImageDataTransform& parent_t,
                                      int num_fancy_pca, float fancy_pca_std_dev,
                                      const NormalDistribution& randn)
-      -> std::vector<ImageDataTransform>
+      -> vector<ImageDataTransform>
   {
-    auto ts = std::vector<ImageDataTransform>{};
+    auto ts = vector<ImageDataTransform>{};
 
-    for (int i = 0; i < num_fancy_pca; ++i)
+    for (auto i = 0; i < num_fancy_pca; ++i)
     {
       auto alpha = Vector3f{};
       randn(alpha);
+      alpha *= fancy_pca_std_dev;
 
-      auto t = ImageDataTransform{};
+      auto t = parent_t;
       t.set_fancy_pca(alpha);
       ts.push_back(t);
     }
@@ -122,72 +126,84 @@ namespace DO { namespace Sara {
     return ts;
   }
 
-  auto enumerate_image_data_transforms(const Vector2i& in_sz,
-                                       const Vector2i& out_sz,
-                                       float zmin, float zmax, int num_scales,
-                                       const Vector2i& delta,
-                                       bool flip,
-                                       int num_fancy_pca_alpha,
-                                       float fancy_pca_std_dev,
-                                       const NormalDistribution& randn)
-      -> std::vector<ImageDataTransform>
+  auto enumerate_image_data_transforms(
+      const Vector2i& in_sz, const Vector2i& out_sz,
+      bool zoom, float zmin, float zmax, int num_scales,
+      bool shift, const Vector2i& delta,
+      bool flip,
+      bool fancy_pca, int num_fancy_pca_alpha, float fancy_pca_std_dev,
+      const NormalDistribution& randn)
+      -> vector<ImageDataTransform>
   {
-    auto ts = std::vector<ImageDataTransform>{};
+    auto ts = vector<ImageDataTransform>{};
 
     // Put the identity data transform.
     auto t0 = ImageDataTransform{};
     t0.out_sizes = out_sz;
     ts.push_back(t0);
+    auto range = make_pair(decltype(ts.size()){0}, ts.size());
 
-    // Fancy PCAs.
-    const auto t1 = compose_with_random_fancy_pca(t0, num_fancy_pca_alpha,
-                                                  fancy_pca_std_dev, randn);
-    append(ts, t1);
-
-    for (const auto& t1_i : t1)
+    if (fancy_pca)
     {
-      // Zooms.
-      const auto t2 = compose_with_zooms(in_sz, out_sz, zmin, zmax, num_scales, t1_i);
-      append(ts, t2);
+      const auto f_o_ts = compose_with_random_fancy_pca(t0, num_fancy_pca_alpha,
+                                                    fancy_pca_std_dev, randn);
+      append(ts, f_o_ts);
+      range = make_pair(range.first, ts.size());
+    }
 
-      // Shifts.
-      for (const auto& t2_i : t2)
+    if (zoom)
+    {
+      for (auto t = range.first, t_end = range.second; t != t_end; ++t)
       {
-        const auto t3 = compose_with_shifts(in_sz, out_sz, Vector2i::Ones(), t2_i);
-        append(ts, t3);
+        const auto z_o_ts =
+            compose_with_zooms(in_sz, out_sz, zmin, zmax, num_scales, ts[t]);
+        append(ts, z_o_ts);
+      }
+      range = make_pair(range.first, ts.size());
+    }
 
-        // Horiontal flip (only).
-        if (flip)
-        {
-          for (const auto& t3_i : t3)
-          {
-            const auto t4 = compose_with_horizontal_flip(t3_i);
-            append(ts, t4);
-          }
-        }
+    if (shift)
+    {
+      for (auto t = range.first, t_end = range.second; t != t_end; ++t)
+      {
+        const auto s_o_ts =
+            compose_with_shifts(in_sz, out_sz, Vector2i::Ones(), ts[t]);
+        append(ts, s_o_ts);
+      }
+      range = make_pair(range.first, ts.size());
+    }
+
+    if (flip)
+    {
+      for (auto t = range.first, t_end = range.second; t != t_end; ++t)
+      {
+        const auto f_o_ts = compose_with_horizontal_flip(ts[t]);
+        append(ts, f_o_ts);
       }
     }
 
     return ts;
   }
 
-  auto augment_dataset(const std::vector<int>& data_indices,
-                       const Vector2i& in_sz, const Vector2i& out_sz,
-                       float zmin, float zmax, int num_scales,
-                       const Vector2i& delta, bool flip, int num_fancy_pca,
-                       float fancy_pca_std_dev, const NormalDistribution& randn)
-      -> std::vector<std::pair<int, ImageDataTransform>>
+  auto augment_data(const std::vector<int>& data_indices,
+                    const Vector2i& in_sz, const Vector2i& out_sz,
+                    bool zoom, float zmin, float zmax, int num_scales,
+                    bool shift, const Vector2i& delta,
+                    bool flip,
+                    bool fancy_pca, int num_fancy_pca, float fancy_pca_std_dev,
+                    const NormalDistribution& randn)
+      -> vector<pair<int, ImageDataTransform>>
   {
-    auto augmented_data = std::vector<std::pair<int, ImageDataTransform>>{};
+    auto augmented_data = vector<pair<int, ImageDataTransform>>{};
 
     for (const auto i : data_indices)
     {
       const auto data_transforms = enumerate_image_data_transforms(
           in_sz, out_sz,
-          zmin, zmax, num_scales,
-          delta,
+          zoom, zmin, zmax, num_scales,
+          shift, delta,
           flip,
-          num_fancy_pca, fancy_pca_std_dev, randn);
+          fancy_pca, num_fancy_pca, fancy_pca_std_dev, randn);
 
       for (const auto t : data_transforms)
         augmented_data.push_back(make_pair(i, t));
