@@ -62,7 +62,7 @@ namespace DO { namespace Sara {
       this->apply_transform[Zoom] = false;
     }
 
-    void set_shift(Vector2i t)
+    void set_shift(const Vector2i& t)
     {
       use_original = false;
       this->apply_transform[Shift] = true;
@@ -81,7 +81,7 @@ namespace DO { namespace Sara {
       this->apply_transform[Flip] = false;
     }
 
-    void set_fancy_pca(Vector3f alpha)
+    void set_fancy_pca(const Vector3f& alpha)
     {
       use_original = false;
       this->apply_transform[FancyPCA] = true;

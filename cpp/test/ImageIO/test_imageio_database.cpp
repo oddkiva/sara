@@ -119,6 +119,23 @@ TEST(TestTrainingDataSet, test_image_segmentation_training_data_set_initializati
   }
 }
 
+TEST(TestTrainingDataSet,
+     test_image_classification_data_set_read_write_from_csv)
+{
+  const auto db_dir = string{src_path("../../../data/")};
+
+  auto training_data_set = ImageClassificationTrainingDataSet{};
+
+  training_data_set.set_image_data_set({
+      db_dir + "/" + "All.tif",
+      db_dir + "/" + "ksmall.jpg",
+      db_dir + "/" + "stinkbug.png",
+  });
+
+  training_data_set.set_label_set({0, 0, 1});
+
+}
+
 
 TEST(TestTransformedTrainingDataSet,
      test_transformed_image_classification_training_data_set_initialization)

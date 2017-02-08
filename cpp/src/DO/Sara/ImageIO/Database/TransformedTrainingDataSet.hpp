@@ -219,6 +219,14 @@ namespace DO { namespace Sara {
     {
       return _t.end();
     }
+
+    friend void
+    read_from_csv(TransformedImageClassificationTrainingDataSet& data_set,
+                  const std::string& csv_filepath);
+
+    friend void
+    write_to_csv(const TransformedImageClassificationTrainingDataSet& data_set,
+                 const std::string& csv_filepath);
   };
 
 
@@ -294,6 +302,16 @@ namespace DO { namespace Sara {
     {
       return _t.end();
     }
+
+    DO_SARA_EXPORT
+    friend void
+    read_from_csv(TransformedImageSegmentationTrainingDataSet& data_set,
+                  const std::string& csv_filepath);
+
+    DO_SARA_EXPORT
+    friend void
+    write_to_csv(const TransformedImageSegmentationTrainingDataSet& data_set,
+                 const std::string& csv_filepath);
   };
 
 

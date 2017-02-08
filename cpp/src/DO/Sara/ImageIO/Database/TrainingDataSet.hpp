@@ -14,6 +14,7 @@
 
 #include <tuple>
 
+#include <DO/Sara/Defines.hpp>
 #include <DO/Sara/ImageIO/Database/ImageDataSet.hpp>
 
 
@@ -141,10 +142,6 @@ namespace DO { namespace Sara {
 
     inline ImageClassificationTrainingDataSet() = default;
 
-    void read_from_csv(const std::string& csv_filepath);
-
-    void write_to_csv(const std::string& csv_filepath) const;
-
     void set_image_data_set(std::vector<std::string> image_filepaths)
     {
       _x = std::move(image_filepaths);
@@ -184,6 +181,12 @@ namespace DO { namespace Sara {
     {
       return _y.end();
     }
+
+    friend void read_from_csv(ImageClassificationTrainingDataSet& data_set,
+                              const std::string& csv_filepath);
+
+    friend void write_to_csv(const ImageClassificationTrainingDataSet& data_set,
+                             const std::string& csv_filepath);
   };
 
 
@@ -200,8 +203,6 @@ namespace DO { namespace Sara {
     using iterator = TrainingDataSetIterator<x_iterator, y_iterator>;
 
     inline ImageSegmentationTrainingDataSet() = default;
-
-    void read_from_csv(const std::string& csv_filepath);
 
     void set_image_data_set(x_set_type image_filepaths)
     {
@@ -242,6 +243,14 @@ namespace DO { namespace Sara {
     {
       return y_iterator{_y.end()};
     }
+
+    DO_SARA_EXPORT
+    friend void read_from_csv(ImageSegmentationTrainingDataSet& data_set,
+                              const std::string& csv_filepath);
+
+    DO_SARA_EXPORT
+    friend void write_to_csv(const ImageSegmentationTrainingDataSet& data_set,
+                             const std::string& csv_filepath);
   };
 
 } /* namespace Sara */

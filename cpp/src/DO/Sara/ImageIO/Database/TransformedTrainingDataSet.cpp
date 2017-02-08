@@ -36,7 +36,7 @@ namespace DO { namespace Sara {
     }
   }
 
-  void TransformedImageClassificationTrainingDataSet::read_from_csv(
+  void read_from_csv(TransformedImageClassificationTrainingDataSet& data_set,
       const std::string& csv_filepath)
   {
     ifstream csv_file{csv_filepath};
@@ -51,29 +51,32 @@ namespace DO { namespace Sara {
     {
       split(csv_row, ';', back_inserter(csv_cells));
 
-      _x.push_back(csv_cells[0]);
-      _y.push_back(stoi(csv_cells[1]));
+      data_set._x.push_back(csv_cells[0]);
+      data_set._y.push_back(stoi(csv_cells[1]));
 
-      auto z = std::stof(csv_cells[2]);
-      auto theta = std::stof(csv_cells[3]);
-      auto tx = std::stoi(csv_cells[4]);
-      auto ty = std::stoi(csv_cells[5]);
-      auto flip_type = csv_cells[6];
-      auto alpha =
-          Vector3f{stof(csv_cells[7]), stof(csv_cells[8]), stof(csv_cells[9])};
+      auto t = ImageDataTransform{};
+      t.set_zoom(std::stof(csv_cells[2]));
+      t.theta = std::stof(csv_cells[3]);
+      t.set_shift(Vector2i{std::stoi(csv_cells[4]), std::stoi(csv_cells[5])});
+      t.set_flip(csv_cells[6] == "H" ? ImageDataTransform::Horizontal
+                                     : ImageDataTransform::None);
+      t.set_fancy_pca(Vector3f{stof(csv_cells[7]), stof(csv_cells[8]), stof(csv_cells[9])});
+
+      data_set._t.push_back(t);
     }
   }
 
-  void TransformedImageClassificationTrainingDataSet::write_to_csv(
-      const std::string& csv_filepath) const
+  void write_to_csv(
+      const TransformedImageClassificationTrainingDataSet& data_set,
+      const std::string& csv_filepath)
   {
     ofstream csv_file{csv_filepath};
     if (!csv_file)
       throw std::runtime_error{
           string{"Cannot open CSV file: " + csv_filepath}.c_str()};
 
-    auto s = begin();
-    auto s_end = end();
+    auto s = data_set.begin();
+    auto s_end = data_set.end();
 
     for (; s != s_end; ++s)
       csv_file << s.x().path() << ";" << s.y_ref() << ";" << s.t_ref().z << ";"
