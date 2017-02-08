@@ -84,8 +84,13 @@ TEST(TestTrainingDataSet,
   ++sample_i;
   EXPECT_NE(sample_i.x_ref().sizes(), Vector2i::Zero());
   EXPECT_EQ(sample_i.y_ref(), 1);
-}
 
+  write_to_csv(training_data_set, "classification_dataset.csv");
+
+  auto training_data_set2 = ImageClassificationTrainingDataSet{};
+  read_from_csv(training_data_set2, "classification_dataset.csv");
+  EXPECT_EQ(training_data_set, training_data_set2);
+}
 
 TEST(TestTrainingDataSet, test_image_segmentation_training_data_set_initialization)
 {
@@ -117,23 +122,12 @@ TEST(TestTrainingDataSet, test_image_segmentation_training_data_set_initializati
     EXPECT_NE(s.first.sizes(), Vector2i::Zero());
     EXPECT_EQ(s.first.sizes(), s.second.sizes());
   }
-}
 
-TEST(TestTrainingDataSet,
-     test_image_classification_data_set_read_write_from_csv)
-{
-  const auto db_dir = string{src_path("../../../data/")};
+  write_to_csv(training_data_set, "segmentation_dataset.csv");
 
-  auto training_data_set = ImageClassificationTrainingDataSet{};
-
-  training_data_set.set_image_data_set({
-      db_dir + "/" + "All.tif",
-      db_dir + "/" + "ksmall.jpg",
-      db_dir + "/" + "stinkbug.png",
-  });
-
-  training_data_set.set_label_set({0, 0, 1});
-
+  auto training_data_set2 = ImageSegmentationTrainingDataSet{};
+  read_from_csv(training_data_set2, "segmentation_dataset.csv");
+  EXPECT_EQ(training_data_set, training_data_set2);
 }
 
 
@@ -170,6 +164,12 @@ TEST(TestTransformedTrainingDataSet,
   EXPECT_NE(sample_i.x_ref().sizes(), Vector2i::Zero());
   EXPECT_EQ(sample_i.y_ref(), 1);
   EXPECT_TRUE(sample_i.t_ref().use_original);
+
+  write_to_csv(training_data_set, "transformed_classification_dataset.csv");
+
+  auto training_data_set2 = TransformedImageClassificationTrainingDataSet{};
+  read_from_csv(training_data_set2, "transformed_classification_dataset.csv");
+  EXPECT_EQ(training_data_set, training_data_set2);
 }
 
 TEST(TestTransformedTrainingDataSet,
@@ -201,6 +201,12 @@ TEST(TestTransformedTrainingDataSet,
     EXPECT_EQ(s.y_ref().sizes(), s.x_ref().sizes());
     EXPECT_TRUE(s.t_ref().use_original);
   }
+
+  write_to_csv(training_data_set, "transformed_segmentation_dataset.csv");
+
+  auto training_data_set2 = TransformedImageSegmentationTrainingDataSet{};
+  read_from_csv(training_data_set2, "transformed_segmentation_dataset.csv");
+  EXPECT_EQ(training_data_set, training_data_set2);
 }
 
 int main(int argc, char **argv)

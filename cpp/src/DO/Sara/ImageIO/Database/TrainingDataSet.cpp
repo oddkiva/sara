@@ -32,18 +32,16 @@ namespace DO { namespace Sara {
       throw std::runtime_error{
           string{"Cannot open CSV file: " + csv_filepath}.c_str()};
 
+    data_set.clear();
+
     auto csv_row = string{};
-    auto x = string{};
-    auto y = int{};
-    auto sep = char{};
+    auto csv_cells = vector<string>(2);
 
     while (getline(csv_file, csv_row))
     {
-      istringstream csv_row_stream{csv_row};
-
-      csv_row_stream >> x >> sep >> y;
-      data_set._x.push_back(x);
-      data_set._y.push_back(y);
+      details::split(csv_row, ',', csv_cells.begin());
+      data_set._x.push_back(csv_cells[0]);
+      data_set._y.push_back(stoi(csv_cells[1]));
     }
   }
 
@@ -59,7 +57,7 @@ namespace DO { namespace Sara {
     auto s_end = data_set.end();
 
     for (; s != s_end; ++s)
-      csv_file << s.x().path() << ";" << s.y_ref() << "\n";
+      csv_file << s.x().path() << "," << s.y_ref() << "\n";
   }
 
   void read_from_csv(ImageSegmentationTrainingDataSet& data_set,
@@ -70,18 +68,16 @@ namespace DO { namespace Sara {
       throw std::runtime_error{
           string{"Cannot open CSV file: " + csv_filepath}.c_str()};
 
+    data_set.clear();
+
     auto csv_row = string{};
-    auto x = string{};
-    auto y = string{};
-    auto sep = char{};
+    auto csv_cells = vector<string>(2);
 
     while (getline(csv_file, csv_row))
     {
-      istringstream csv_row_stream{csv_row};
-
-      csv_row_stream >> x >> sep >> y;
-      data_set._x.push_back(x);
-      data_set._y.push_back(y);
+      details::split(csv_row, ',', csv_cells.begin());
+      data_set._x.push_back(csv_cells[0]);
+      data_set._y.push_back(csv_cells[1]);
     }
   }
 
@@ -97,7 +93,7 @@ namespace DO { namespace Sara {
     auto s_end = data_set.end();
 
     for (; s != s_end; ++s)
-      csv_file << s.x().path() << ";" << s.y().path() << "\n";
+      csv_file << s.x().path() << "," << s.y().path() << "\n";
   }
 
 } /* namespace Sara */

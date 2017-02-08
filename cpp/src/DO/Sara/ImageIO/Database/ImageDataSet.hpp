@@ -140,8 +140,6 @@ namespace DO { namespace Sara {
     {
     }
 
-    static ImageDataSet read_from_csv(const std::string& text_filepath);
-
     inline auto begin() const -> iterator
     {
       return iterator{_image_filepaths.begin()};

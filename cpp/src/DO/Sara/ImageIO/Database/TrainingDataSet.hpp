@@ -20,6 +20,18 @@
 
 namespace DO { namespace Sara {
 
+  namespace details {
+    template <typename Out>
+    void split(const std::string& s, char delim, Out result)
+    {
+      std::stringstream ss;
+      ss.str(s);
+      std::string item;
+      while (std::getline(ss, item, delim))
+        *(result++) = item;
+    }
+  }
+
 
   template <typename XIterator, typename YIterator>
   class TrainingDataSetIterator
@@ -122,6 +134,22 @@ namespace DO { namespace Sara {
     using y_set_type = std::vector<YHandle>;
 
     inline TrainingDataSet() = default;
+
+    inline void clear()
+    {
+      _x.clear();
+      _y.clear();
+    }
+
+    inline bool operator==(const TrainingDataSet& other) const
+    {
+      return _x == other._x && _y == other._y;
+    }
+
+    inline bool operator!=(const TrainingDataSet& other) const
+    {
+      return !(*this == other);
+    }
 
   protected:
     x_set_type _x;

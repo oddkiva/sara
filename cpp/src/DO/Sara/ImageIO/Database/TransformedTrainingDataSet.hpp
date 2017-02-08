@@ -137,6 +137,23 @@ namespace DO { namespace Sara {
 
     inline TransformedTrainingDataSet() = default;
 
+    inline void clear()
+    {
+      _x.clear();
+      _y.clear();
+      _t.clear();
+    }
+
+    inline bool operator==(const TransformedTrainingDataSet& other) const
+    {
+      return _x == other._x && _y == other._y && _t == other._t;
+    }
+
+    inline bool operator!=(const TransformedTrainingDataSet& other) const
+    {
+      return !(*this == other);
+    }
+
   protected:
     x_set_type _x;
     y_set_type _y;

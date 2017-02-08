@@ -130,6 +130,25 @@ namespace DO { namespace Sara {
     Image<Rgb32f> operator()(const Image<Rgb32f>& in) const;
     //! @}
 
+    inline bool operator==(const ImageDataTransform& other) const
+    {
+      return out_sizes == other.out_sizes &&
+        use_original == other.use_original &&
+        apply_transform == other.apply_transform &&
+        z == other.z &&
+        theta && other.theta &&
+        t == other.t &&
+        flip_type == other.flip_type &&
+        U == other.U &&
+        S == other.S &&
+        alpha == other.alpha;
+    }
+
+    inline bool operator!=(const ImageDataTransform& other) const
+    {
+      return !(*this == other);
+    }
+
     // ===================================================================== //
     // Parameters
     //
