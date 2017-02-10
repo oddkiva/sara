@@ -30,15 +30,39 @@ namespace DO { namespace Sara {
   using Tensor = MultiArray<T, N, StorageOrder, Allocator>;
   //! @}
 
+  //! @{
+  //! @brief Provide tensor views for image objects.
+  template <typename T, int N>
+  inline auto tensor_view(ImageView<T, N> in) ->TensorView<T, N, RowMajor>
+  {
+    auto out_sizes = in.sizes();
+    std::reverse(out_sizes.data(), out_sizes.data() + out_sizes.size());
+    return TensorView<T, N, RowMajor>{in.data(), out_sizes};
+  }
+
+  template <typename ChannelType, typename ColorSpace, int Dim>
+  inline auto tensor_view(ImageView<Pixel<ChannelType, ColorSpace>, Dim> in)
+      -> TensorView<ChannelType, Dim + 1, RowMajor>
+  {
+    using tensor_type = TensorView<ChannelType, Dim + 1, ColMajor>;
+    using tensor_sizes_type = typename tensor_type::vector_type;
+    constexpr auto num_channels = ColorSpace::size;
+
+    auto out_sizes =
+        (tensor_sizes_type{} << in.sizes(), num_channels).finished();
+    std::reverse(out_sizes.data(), out_sizes.data() + Dim);
+
+    return TensorView<ChannelType, Dim + 1, RowMajor>{
+        reinterpret_cast<ChannelType*>(in.data()), out_sizes};
+  }
+  //! @}
 
   //! @{
   //! @brief Convert image data structures to tensor data structures.
   template <typename T, int N>
   inline auto to_cwh_tensor(ImageView<T, N> in) -> TensorView<T, N, RowMajor>
   {
-    auto out_sizes = in.sizes();
-    std::reverse(out_sizes.data(), out_sizes.data() + N);
-    return TensorView<T, N, RowMajor>{in.data(), out_sizes};
+    return tensor_view(std::move(in));
   }
 
   template <typename ChannelType, typename ColorSpace, int Dim>
@@ -73,32 +97,6 @@ namespace DO { namespace Sara {
   }
   //! @}
 
-  //! @{
-  //! @brief Provide tensor views for image objects.
-  template <typename T, int N>
-  inline auto tensor_view(ImageView<T, N> in) ->TensorView<T, N, RowMajor>
-  {
-    auto out_sizes = in.sizes();
-    std::reverse(out_sizes.data(), out_sizes.data() + out_sizes.size());
-    return TensorView<T, N, RowMajor>{in.data(), out_sizes};
-  }
-
-  template <typename ChannelType, typename ColorSpace, int Dim>
-  inline auto tensor_view(ImageView<Pixel<ChannelType, ColorSpace>, Dim> in)
-      -> TensorView<ChannelType, Dim + 1, RowMajor>
-  {
-    using tensor_type = TensorView<ChannelType, Dim + 1, ColMajor>;
-    using tensor_sizes_type = typename tensor_type::vector_type;
-    constexpr auto num_channels = ColorSpace::size;
-
-    auto out_sizes =
-        (tensor_sizes_type{} << in.sizes(), num_channels).finished();
-    std::reverse(out_sizes.data(), out_sizes.data() + Dim);
-
-    return TensorView<ChannelType, Dim + 1, RowMajor>{
-        reinterpret_cast<ChannelType*>(in.data()), out_sizes};
-  }
-  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */
