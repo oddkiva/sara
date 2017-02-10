@@ -21,10 +21,13 @@
 
 namespace DO { namespace Sara {
 
-  struct NormalDistribution
+  class NormalDistribution
   {
-    NormalDistribution()
+  public:
+    NormalDistribution(bool seed_randomly = true)
     {
+      if (seed_randomly)
+        _gen = randomly_seeded_mersenne_twister();
     }
 
     float operator()() const
@@ -51,6 +54,19 @@ namespace DO { namespace Sara {
       image.cwise_transform_inplace(randn_pixel);
     }
 
+  private:
+    auto randomly_seeded_mersenne_twister() -> std::mt19937
+    {
+      constexpr auto N = std::mt19937::state_size;
+      unsigned random_data[N];
+      std::random_device source;
+      std::generate(std::begin(random_data), std::end(random_data),
+                    std::ref(source));
+      std::seed_seq seeds(std::begin(random_data), std::end(random_data));
+      return std::mt19937{seeds};
+    }
+
+  private:
     mutable std::mt19937 _gen;
     mutable std::normal_distribution<float> _dist;
   };
