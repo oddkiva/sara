@@ -26,7 +26,7 @@
 
 namespace DO { namespace Sara {
 
-  struct DO_SARA_EXPORT ImageDataTransform
+  struct ImageDataTransform
   {
   public:
     //! @{
@@ -127,6 +127,7 @@ namespace DO { namespace Sara {
       return out;
     }
 
+    DO_SARA_EXPORT
     Image<Rgb32f> operator()(const Image<Rgb32f>& in) const;
     //! @}
 

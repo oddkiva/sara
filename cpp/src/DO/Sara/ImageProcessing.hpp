@@ -17,10 +17,11 @@
 #ifdef _OPENMP
 # include <omp.h>
 #endif
-#include <DO/Sara/Core.hpp>
 
 #include <vector>
 #include <exception>
+
+#include <DO/Sara/Core.hpp>
 
 // Basic image processing functions.
 #include <DO/Sara/ImageProcessing/LinearFiltering.hpp>
@@ -50,6 +51,9 @@
 #include <DO/Sara/ImageProcessing/ColorFancyPCA.hpp>
 #include <DO/Sara/ImageProcessing/ColorJitter.hpp>
 #include <DO/Sara/ImageProcessing/ColorStatistics.hpp>
+
+// Data augmentation.
+#include <DO/Sara/ImageProcessing/DataAugmentation.hpp>
 
 
 /*!

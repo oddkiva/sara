@@ -28,7 +28,6 @@ namespace DO { namespace Sara {
     return out;
   }
 
-
   VectorXf linspace(float a, float b, int num_samples)
   {
     auto range = VectorXf(num_samples);

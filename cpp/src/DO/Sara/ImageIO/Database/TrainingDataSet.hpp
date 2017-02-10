@@ -192,12 +192,12 @@ namespace DO { namespace Sara {
 
     auto x_begin() const -> x_iterator
     {
-      return x_iterator{_x.begin()};
+      return x_iterator{_x.begin(), _x.end()};
     }
 
     auto x_end() const -> x_iterator
     {
-      return x_iterator{_x.end()};
+      return x_iterator{_x.end(), _x.end() };
     }
 
     auto y_begin() const -> y_iterator
@@ -210,9 +210,11 @@ namespace DO { namespace Sara {
       return _y.end();
     }
 
+    DO_SARA_EXPORT
     friend void read_from_csv(ImageClassificationTrainingDataSet& data_set,
                               const std::string& csv_filepath);
 
+    DO_SARA_EXPORT
     friend void write_to_csv(const ImageClassificationTrainingDataSet& data_set,
                              const std::string& csv_filepath);
   };
@@ -254,22 +256,22 @@ namespace DO { namespace Sara {
 
     auto x_begin() const -> x_iterator
     {
-      return x_iterator{_x.begin()};
+      return x_iterator{_x.begin(), _x.end() };
     }
 
     auto x_end() const -> x_iterator
     {
-      return x_iterator{_x.end()};
+      return x_iterator{_x.end(), _x.end() };
     }
 
     auto y_begin() const -> y_iterator
     {
-      return y_iterator{_y.begin()};
+      return y_iterator{_y.begin(), _y.end() };
     }
 
     auto y_end() const -> y_iterator
     {
-      return y_iterator{_y.end()};
+      return y_iterator{_y.end(), _y.end() };
     }
 
     DO_SARA_EXPORT

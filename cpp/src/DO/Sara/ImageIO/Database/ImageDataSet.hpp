@@ -36,8 +36,9 @@ namespace DO { namespace Sara {
 
     inline ImageDataSetIterator() = default;
 
-    inline ImageDataSetIterator(file_iterator f)
+    inline ImageDataSetIterator(file_iterator f, file_iterator f_read)
       : _file_i{f}
+      , _file_read{f_read}
     {
     }
 
@@ -142,17 +143,17 @@ namespace DO { namespace Sara {
 
     inline auto begin() const -> iterator
     {
-      return iterator{_image_filepaths.begin()};
+      return iterator{_image_filepaths.begin(), _image_filepaths.end()};
     }
 
     inline auto end() const -> iterator
     {
-      return iterator{_image_filepaths.end()};
+      return iterator{_image_filepaths.end(), _image_filepaths.end() };
     }
 
     inline auto operator[](std::ptrdiff_t i) const -> iterator
     {
-      return iterator{_image_filepaths.begin() + i};
+      return iterator{_image_filepaths.begin() + i, _image_filepaths.end()};
     }
 
   private:
