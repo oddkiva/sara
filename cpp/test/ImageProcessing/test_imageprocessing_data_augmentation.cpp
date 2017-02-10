@@ -157,7 +157,7 @@ TEST(TestDataTransformEnumeration, test_compose_with_random_pca)
   const auto num_samples = 10;
 
   const auto parent_t = ImageDataTransform{};
-  const auto dist = NormalDistribution{};
+  const auto dist = NormalDistribution{false};
   const auto ts =
       compose_with_random_fancy_pca(parent_t, num_samples, std_dev, dist);
   EXPECT_EQ(10u, ts.size());
@@ -174,7 +174,7 @@ TEST(TestDataTransformEnumeration,
   const auto shift_delta = Vector2i::Ones();
   const auto flip = false;
 
-  const auto randn = NormalDistribution{};
+  const auto randn = NormalDistribution{false};
 
   const auto ts = enumerate_image_data_transforms(
       in_sizes, out_sizes,
@@ -200,7 +200,7 @@ TEST(TestDataTransformEnumeration,
   const auto shift_delta = Vector2i::Ones();
   const auto flip = false;
 
-  const auto randn = NormalDistribution{};
+  const auto randn = NormalDistribution{false};
 
   const auto ts = enumerate_image_data_transforms(
       in_sizes, out_sizes,
@@ -231,7 +231,7 @@ TEST(TestDataTransformEnumeration,
   const auto shift_delta = Vector2i::Ones();
   const auto flip = false;
   const auto fancy_pca = false;
-  const auto randn = NormalDistribution{};
+  const auto randn = NormalDistribution{false};
 
   const auto ts = enumerate_image_data_transforms(
       in_sizes, out_sizes,
@@ -262,7 +262,7 @@ TEST(TestDataTransformEnumeration,
   const auto shift_delta = Vector2i::Ones();
   const auto flip = true;
   const auto fancy_pca = false;
-  const auto randn = NormalDistribution{};
+  const auto randn = NormalDistribution{false};
 
   const auto ts = enumerate_image_data_transforms(
       in_sizes, out_sizes,
@@ -290,7 +290,7 @@ TEST(TestDataTransformEnumeration,
   const auto shift_delta = Vector2i::Ones();
   const auto flip = false;
   const auto fancy_pca = true;
-  const auto randn = NormalDistribution{};
+  const auto randn = NormalDistribution{false};
 
   const auto ts = enumerate_image_data_transforms(
       in_sizes, out_sizes,
@@ -322,7 +322,7 @@ TEST(TestDataTransformEnumeration, test_all)
   const auto shift_delta = Vector2i::Ones();
   const auto flip = true;
   const auto fancy_pca = true;
-  const auto randn = NormalDistribution{};
+  const auto randn = NormalDistribution{false};
 
   const auto ts = enumerate_image_data_transforms(
       in_sizes, out_sizes,
@@ -357,7 +357,7 @@ TEST(TestDataAugmentation, test_augment_dataset)
   const auto flip = false;
   const auto fancy_pca = false;
 
-  const auto randn = NormalDistribution{};
+  const auto randn = NormalDistribution{false};
 
   const auto augmented_data = augment_data(
       data_indices,
