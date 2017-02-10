@@ -137,7 +137,6 @@ namespace DO { namespace Sara {
         use_original == other.use_original &&
         apply_transform == other.apply_transform &&
         z == other.z &&
-        theta && other.theta &&
         t == other.t &&
         flip_type == other.flip_type &&
         U == other.U &&
@@ -165,12 +164,10 @@ namespace DO { namespace Sara {
     //! @{
     //! @brief Zoom factor.
     float z{1.f};
-    //! @brief Rotation angle.
-    float theta{0.f};
     //! Translation vector.
     Vector2i t{Vector2i::Zero()};
     //! @brief Flip type.
-    FlipType flip_type{Horizontal};
+    FlipType flip_type{None};
     //! @}
 
     //! @{

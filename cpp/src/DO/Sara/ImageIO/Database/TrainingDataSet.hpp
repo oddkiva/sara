@@ -26,7 +26,7 @@ namespace DO { namespace Sara {
     {
       std::stringstream ss;
       ss.str(s);
-      std::string item;
+      auto item = std::string{};
       while (std::getline(ss, item, delim))
         *(result++) = item;
     }
