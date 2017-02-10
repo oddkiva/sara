@@ -13,6 +13,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include <DO/Sara/Core/Image.hpp>
 
 #include <DO/Sara/ImageIO.hpp>
@@ -20,18 +22,23 @@
 
 namespace DO { namespace Sara {
 
+  //! @brief Iterator class for image dataset.
+  template <typename _Image>
+  class ImageDataSetIterator;
 
-  class ImageDatabaseIterator
+  template <typename T>
+  class ImageDataSetIterator<Image<T>>
   {
   public:
-    using self_type = ImageDatabaseIterator;
+    using self_type = ImageDataSetIterator;
     using file_iterator = std::vector<std::string>::const_iterator;
-    using value_type = Image<Rgb8>;
+    using value_type = Image<T>;
 
-    inline ImageDatabaseIterator() = default;
+    inline ImageDataSetIterator() = default;
 
-    inline ImageDatabaseIterator(file_iterator f)
+    inline ImageDataSetIterator(file_iterator f, file_iterator f_read)
       : _file_i{f}
+      , _file_read{f_read}
     {
     }
 
@@ -103,6 +110,16 @@ namespace DO { namespace Sara {
       return !(operator==(other));
     }
 
+    inline auto path() const -> const std::string&
+    {
+      return *_file_i;
+    }
+
+    inline std::ptrdiff_t operator-(const self_type& other) const
+    {
+      return _file_i - other._file_i;
+    }
+
   private:
     file_iterator _file_i;
     file_iterator _file_read;
@@ -110,17 +127,38 @@ namespace DO { namespace Sara {
   };
 
 
-  inline auto begin_image_db(const std::vector<std::string>& image_filepaths)
-      -> ImageDatabaseIterator
+  //! @brief Image dataset class.
+  template <typename _Image>
+  class ImageDataSet
   {
-    return ImageDatabaseIterator{image_filepaths.begin()};
-  }
+  public:
+    using container_type = std::vector<std::string>;
+    using iterator = ImageDataSetIterator<_Image>;
+    using value_type = typename iterator::value_type;
 
-  inline auto end_image_db(const std::vector<std::string>& image_filepaths)
-      -> ImageDatabaseIterator
-  {
-    return ImageDatabaseIterator{image_filepaths.end()};
-  }
+    inline ImageDataSet(std::vector<std::string> image_filepaths)
+      : _image_filepaths{std::move(image_filepaths)}
+    {
+    }
+
+    inline auto begin() const -> iterator
+    {
+      return iterator{_image_filepaths.begin(), _image_filepaths.end()};
+    }
+
+    inline auto end() const -> iterator
+    {
+      return iterator{_image_filepaths.end(), _image_filepaths.end() };
+    }
+
+    inline auto operator[](std::ptrdiff_t i) const -> iterator
+    {
+      return iterator{_image_filepaths.begin() + i, _image_filepaths.end()};
+    }
+
+  private:
+    container_type _image_filepaths;
+  };
 
 
 } /* namespace Sara */

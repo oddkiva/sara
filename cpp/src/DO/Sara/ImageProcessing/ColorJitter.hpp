@@ -15,42 +15,49 @@
 
 #include <random>
 
+#include <DO/Sara/Defines.hpp>
 #include <DO/Sara/Core/Image.hpp>
 
 
 namespace DO { namespace Sara {
 
-
   struct NormalDistribution
   {
-    NormalDistribution(std::random_device& rd)
-      : _gen(rd)
+    NormalDistribution()
     {
     }
 
-    float operator()()
+    float operator()() const
     {
       return _dist(_gen);
     }
 
-    std::mt19937 _gen;
-    std::normal_distribution<float> _dist;
+    template <typename _Matrix>
+    inline void operator()(_Matrix& m) const
+    {
+      std::generate(m.data(), m.data() + m.size(), [&]() {
+        return _dist(_gen);
+      });
+    }
+
+    template <int N>
+    void operator()(Image<Rgb32f, N>& image) const
+    {
+      const auto randn_pixel = [&](Rgb32f& v) {
+        v[0] = _dist(_gen);
+        v[1] = _dist(_gen);
+        v[2] = _dist(_gen);
+      };
+      image.cwise_transform_inplace(randn_pixel);
+    }
+
+    mutable std::mt19937 _gen;
+    mutable std::normal_distribution<float> _dist;
   };
 
-
-  template <int N>
-  Image<float, N> normal(const Matrix<int, N, 1>& sizes)
-  {
-    auto image = Image<float, N>{sizes};
-    auto dice = NormalDistribution{};
-    auto random = [&normal_dist](float& value) {
-      value = dice();
-    };
-    std::for_each(image.begin(), image.end(), random);
-    return image;
-  }
-
-
+  DO_SARA_EXPORT
+  void add_randn_noise(Image<Rgb32f>& image, float std_dev,
+                       const NormalDistribution& dist);
 
 
 } /* namespace Sara */

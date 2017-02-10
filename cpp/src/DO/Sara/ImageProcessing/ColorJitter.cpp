@@ -1,6 +1,7 @@
 // ========================================================================== //
 // This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
+//
 // Copyright (C) 2017 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -12,31 +13,26 @@
 
 #pragma once
 
-#include <tuple>
+#include <random>
+
+#include <DO/Sara/ImageProcessing.hpp>
 
 
 namespace DO { namespace Sara {
 
-  template <typename X, typename Y>
-  class TransformedTrainingSampleIterator : public TrainingSampleIterator<X, Y>
+
+  void add_randn_noise(Image<Rgb32f>& image, float std_dev,
+                       const NormalDistribution& dist)
   {
-  public:
-    using x_type = typename TrainingSampleTraits<X, Y>::input_type;
-    using y_type = typename TrainingSampleTraits<X, Y>::label_type;
-
-    auto x() -> x_type
+    const auto noise = [&]()
     {
-      return x_type{};
-    }
+      auto out = Image<Rgb32f>{image.sizes()};
+      dist(out);
+      return out;
+    }();
+    image.array() += Vector3f{std_dev, std_dev, std_dev} * noise.array();
+  }
 
-    auto y() -> y_type
-    {
-      return y_type{};
-    }
-
-  private:
-    TransformParameter _transform_param;
-  };
 
 } /* namespace Sara */
 } /* namespace DO */
