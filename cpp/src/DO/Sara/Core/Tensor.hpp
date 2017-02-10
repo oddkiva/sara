@@ -76,23 +76,26 @@ namespace DO { namespace Sara {
   //! @{
   //! @brief Provide tensor views for image objects.
   template <typename T, int N>
-  inline auto transposed_tensor_view(ImageView<T, N> in) ->TensorView<T, N, ColMajor>
+  inline auto tensor_view(ImageView<T, N> in) ->TensorView<T, N, RowMajor>
   {
-    return TensorView<T, N, ColMajor>{in.data(), in.sizes()};
+    auto out_sizes = in.sizes();
+    std::reverse(out_sizes.data(), out_sizes.data() + out_sizes.size());
+    return TensorView<T, N, RowMajor>{in.data(), out_sizes};
   }
 
   template <typename ChannelType, typename ColorSpace, int Dim>
-  inline auto transposed_tensor_view(ImageView<Pixel<ChannelType, ColorSpace>, Dim> in)
-      -> TensorView<ChannelType, Dim + 1, ColMajor>
+  inline auto tensor_view(ImageView<Pixel<ChannelType, ColorSpace>, Dim> in)
+      -> TensorView<ChannelType, Dim + 1, RowMajor>
   {
     using tensor_type = TensorView<ChannelType, Dim + 1, ColMajor>;
     using tensor_sizes_type = typename tensor_type::vector_type;
     constexpr auto num_channels = ColorSpace::size;
 
     auto out_sizes =
-        (tensor_sizes_type{} << num_channels, in.sizes()).finished();
+        (tensor_sizes_type{} << in.sizes(), num_channels).finished();
+    std::reverse(out_sizes.data(), out_sizes.data() + Dim);
 
-    return TensorView<ChannelType, Dim + 1, ColMajor>{
+    return TensorView<ChannelType, Dim + 1, RowMajor>{
         reinterpret_cast<ChannelType*>(in.data()), out_sizes};
   }
   //! @}
