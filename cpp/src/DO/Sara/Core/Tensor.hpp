@@ -73,5 +73,29 @@ namespace DO { namespace Sara {
   }
   //! @}
 
+  //! @{
+  //! @brief Provide tensor views for image objects.
+  template <typename T, int N>
+  inline auto transposed_tensor_view(ImageView<T, N> in) ->TensorView<T, N, ColMajor>
+  {
+    return TensorView<T, N, ColMajor>{in.data(), in.sizes()};
+  }
+
+  template <typename ChannelType, typename ColorSpace, int Dim>
+  inline auto transposed_tensor_view(ImageView<Pixel<ChannelType, ColorSpace>, Dim> in)
+      -> TensorView<ChannelType, Dim + 1, ColMajor>
+  {
+    using tensor_type = TensorView<ChannelType, Dim + 1, ColMajor>;
+    using tensor_sizes_type = typename tensor_type::vector_type;
+    constexpr auto num_channels = ColorSpace::size;
+
+    auto out_sizes =
+        (tensor_sizes_type{} << num_channels, in.sizes()).finished();
+
+    return TensorView<ChannelType, Dim + 1, ColMajor>{
+        reinterpret_cast<ChannelType*>(in.data()), out_sizes};
+  }
+  //! @}
+
 } /* namespace Sara */
 } /* namespace DO */

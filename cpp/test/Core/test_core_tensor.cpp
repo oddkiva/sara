@@ -77,6 +77,40 @@ TEST(TestConversionImageToTensor, test_color_case)
   EXPECT_MATRIX_EQ(true_b.matrix(), b);
 }
 
+TEST(TestTensorViews, test_grayscale_case)
+{
+  auto image = Image<float>{2, 3};
+  image.matrix() <<
+    0, 1,
+    2, 3,
+    4, 5;
+
+  const auto tensor = transposed_tensor_view(image);
+  EXPECT_MATRIX_EQ(image.matrix(), tensor.matrix().transpose());
+}
+
+TEST(TestTensorView, test_color_case)
+{
+  auto image = Image<Rgb32f>{2, 3};
+  auto m = image.matrix();
+  m.fill(Rgb32f{1.,2.,3.});
+
+  m(0,0) *= 0; m(0,1) *= 1;
+  m(1,0) *= 2; m(1,1) *= 3;
+  m(2,0) *= 4; m(2,1) *= 5;
+
+  const auto t = transposed_tensor_view(image);
+
+  // Indexed by (c, x, y).
+  EXPECT_EQ(Rgb32f::num_channels(), t.size(0));
+  EXPECT_EQ(image.width(), t.size(1));
+  EXPECT_EQ(image.height(), t.size(2));
+
+  for (int y = 0; y < t.size(0); ++y)
+    for (int x = 0; x < t.size(1); ++x)
+      for (int c = 0; c < t.size(2); ++c)
+        ASSERT_EQ((c + 1) * (x + y * t.size(1)), t(c, x, y));
+}
 
 int main(int argc, char** argv)
 {
