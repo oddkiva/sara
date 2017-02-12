@@ -24,9 +24,9 @@ using namespace DO::Sara;
 
 TEST(TestImageIO, test_imread_fails)
 {
-  const auto blank_filepath = string{ "" };
+  const auto blank_filepath = string{""};
   auto blank_image = Image<Rgb8>{};
-  EXPECT_FALSE(imread(blank_image, blank_filepath));
+  EXPECT_THROW(imread(blank_image, blank_filepath), std::runtime_error);
   EXPECT_MATRIX_EQ(blank_image.sizes(), Vector2i::Zero());
 }
 
@@ -39,7 +39,7 @@ TEST(TestImageIO, test_rgb_image_read_write)
     "image.tif"
   };
 
-  auto true_image = Image<Rgb8>{ 2, 2 };
+  auto true_image = Image<Rgb8>{2, 2};
   true_image(0,0) = White8; true_image(1,0) = Black8;
   true_image(0,1) = Black8; true_image(1,1) = White8;
 
@@ -48,7 +48,7 @@ TEST(TestImageIO, test_rgb_image_read_write)
     imwrite(true_image, filepaths[i], 100);
 
     auto image = Image<Rgb8>{};
-    EXPECT_TRUE(imread(image, filepaths[i]));
+    EXPECT_NO_THROW(imread(image, filepaths[i]));
     EXPECT_MATRIX_EQ(image.sizes(), Vector2i(2, 2));
 
     for (int y = 0; y < true_image.width(); ++y)
@@ -59,20 +59,26 @@ TEST(TestImageIO, test_rgb_image_read_write)
 
 TEST(TestImageIO, test_grayscale_image_read_write)
 {
+  const string filepaths[] =
+  {
+    "image.jpg",
+    "image.png",
+    "image.tif"
+  };
+
   typedef unsigned char gray8u_t;
   auto true_image = Image<gray8u_t>{ 2, 2 };
   true_image.matrix() <<
     255, 0,
     0, 255;
 
-  auto filepath = string{ "image.jpg" };
-  auto image = Image<unsigned char>{};
-  EXPECT_TRUE(imread(image, filepath));
-  EXPECT_MATRIX_EQ(image.sizes(), Vector2i(2, 2));
-
-  for (int y = 0; y < true_image.width(); ++y)
-    for (int x = 0; x < true_image.height(); ++x)
-      EXPECT_MATRIX_EQ(true_image(x, y), image(x, y));
+  for (int i = 0; i < 3; ++i)
+  {
+    auto image = Image<unsigned char>{};
+    EXPECT_NO_THROW(imread(image, filepaths[i]));
+    EXPECT_MATRIX_EQ(image.sizes(), Vector2i(2, 2));
+    EXPECT_MATRIX_EQ(true_image.matrix(), image.matrix());
+  }
 }
 
 TEST(TestImageIO, test_read_exif_info)
