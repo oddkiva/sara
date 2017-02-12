@@ -11,8 +11,7 @@
 
 #if defined(_WIN32) || defined(_WIN32_WCE)
 # define NOMINMAX
-
-// This is the best I found to solve the include problem with libjpeg...
+// We need to include this the include problem with libjpeg in Windows platform.
 # include <windows.h>
 #endif
 
@@ -24,27 +23,7 @@
 using namespace std;
 
 
-namespace DO { namespace Sara {
-
-  FileError::FileError(const string& filepath, const string& mode)
-    : filepath_(filepath), mode_(mode)
-  {
-  }
-
-  const char * FileError::what() const throw()
-  {
-    ostringstream os;
-    os
-      << "Error: cannot read file:" << endl << filepath_ << endl
-      << "in mode " << mode_ << endl;
-    return os.str().c_str();
-  }
-
-} /* namespace Sara */
-} /* namespace DO */
-
-
-// Jpeg I/O.
+// JPEG I/O.
 namespace DO { namespace Sara {
 
   METHODDEF(void) jpeg_error(j_common_ptr cinfo)
@@ -62,7 +41,8 @@ namespace DO { namespace Sara {
     _jerr.pub.error_exit = &jpeg_error;
 
     if (setjmp(_jerr.setjmp_buffer))
-      throw FileError(filepath, "rb");
+      throw std::runtime_error{
+        format("Failed to read file %s", filepath).c_str()};
 
     // Create decompress structures.
     jpeg_create_decompress(&_cinfo);
@@ -72,11 +52,13 @@ namespace DO { namespace Sara {
 
     // Read header file.
     if (!jpeg_read_header(&_cinfo, TRUE))
-      throw FileError(filepath, "rb");
+      throw std::runtime_error{
+        format("Failed to read JPEG header of file %s", filepath).c_str()};
 
     // Start reading data.
     if (!jpeg_start_decompress(&_cinfo))
-      throw FileError(filepath, "rb");
+      throw std::runtime_error{
+      format("Failed to start JPEG decompression of file %s", filepath).c_str()};
   }
 
   JpegFileReader::~JpegFileReader()
@@ -84,10 +66,12 @@ namespace DO { namespace Sara {
     jpeg_destroy_decompress(&_cinfo);
   }
 
-  tuple<int, int, int> JpegFileReader::image_sizes() const
+  auto JpegFileReader::image_sizes() const -> std::tuple<int, int, int>
   {
-    return make_tuple(_cinfo.output_width, _cinfo.output_height,
-                      _cinfo.output_components);
+    return make_tuple(
+      static_cast<int>(_cinfo.output_width),
+      static_cast<int>(_cinfo.output_height),
+      static_cast<int>(_cinfo.output_components));
   }
 
   void JpegFileReader::read(unsigned char *data)
@@ -103,8 +87,7 @@ namespace DO { namespace Sara {
 
     // Wrap up file decompression.
     if (!jpeg_finish_decompress(&_cinfo))
-      throw std::runtime_error{
-          "Error reading file: Jpeg decompression not finished!"};
+      throw std::runtime_error{"Failed to finish JPEG file decompression"};
   }
 
   JpegFileWriter::JpegFileWriter(const unsigned char* data, int width,
@@ -128,7 +111,7 @@ namespace DO { namespace Sara {
     else if (_cinfo.input_components==1)
       _cinfo.in_color_space = JCS_GRAYSCALE;
     else
-      throw std::runtime_error{"Error: Unsupported number of components"};
+      throw std::runtime_error{"Unsupported color space for JPEG write"};
 
     // Prepare writing.
     jpeg_set_defaults(&_cinfo);
@@ -143,7 +126,7 @@ namespace DO { namespace Sara {
   {
     if (quality < 0 || quality > 100)
       throw std::runtime_error{
-          "Error: The quality parameter should be between 0 and 100"};
+          "Error: The JPEG quality parameter must be between 0 and 100"};
 
     _file_handle.open(filepath, "wb");
 
@@ -179,18 +162,20 @@ namespace DO { namespace Sara {
   {
     _png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
     if (!_png_ptr)
-      throw FileError(filepath, "rb");
+      throw std::runtime_error{"Failed to create PNG read structure!"};
 
     _info_ptr = png_create_info_struct(_png_ptr);
     if (!_info_ptr)
-      throw FileError(filepath, "rb");
+      throw std::runtime_error{"Failed to create PNG info structure!"};
 
     png_byte header[8];
     if (fread(header, 1, 8, _file_handle) != 8)
-      throw FileError(filepath, "rb");
+      throw std::runtime_error{
+        format("Failed to read PNG header in file %s!", filepath).c_str()};
 
     if (png_sig_cmp(header, 0, 8))
-      throw FileError(filepath, "rb");
+      throw std::runtime_error{
+      format("Incorrect PNG signature in file %s!", filepath).c_str()};
 
     png_init_io(_png_ptr, _file_handle);
     png_set_sig_bytes(_png_ptr, 8);
@@ -198,17 +183,17 @@ namespace DO { namespace Sara {
     png_read_info(_png_ptr, _info_ptr);
 
     // Get width, height, bit-depth and color type.
-    png_get_IHDR(_png_ptr, _info_ptr, &pngWidth, &pngHeight, &bitDepth,
-                 &colorType, NULL, NULL, NULL);
+    png_get_IHDR(_png_ptr, _info_ptr, &_width, &_height, &_bit_depth,
+                 &_color_type, NULL, NULL, NULL);
 
     // Expand images of all color-type to 8-bit.
-    if (colorType == PNG_COLOR_TYPE_PALETTE)
+    if (_color_type == PNG_COLOR_TYPE_PALETTE)
       png_set_expand(_png_ptr);
-    if (bitDepth < 8)
+    if (_bit_depth < 8)
       png_set_expand(_png_ptr);
     if (png_get_valid(_png_ptr, _info_ptr, PNG_INFO_tRNS))
       png_set_expand(_png_ptr);
-    if (bitDepth == 16) // convert 16-bit to 8-bit on the fly
+    if (_bit_depth == 16) // convert 16-bit to 8-bit on the fly
       png_set_strip_16(_png_ptr);
 
     // If required, set the gamma conversion.
@@ -220,8 +205,10 @@ namespace DO { namespace Sara {
     png_read_update_info(_png_ptr, _info_ptr);
 
     // Update width, height and new bit-depth and color type.
-    png_get_IHDR(_png_ptr, _info_ptr, &pngWidth, &pngHeight, &bitDepth,
-                 &colorType, NULL, NULL, NULL);
+    png_get_IHDR(_png_ptr, _info_ptr, &_width, &_height, &_bit_depth,
+                 &_color_type, NULL, NULL, NULL);
+
+    _channels = png_get_channels(_png_ptr, _info_ptr);
   }
 
   PngFileReader::~PngFileReader()
@@ -229,14 +216,13 @@ namespace DO { namespace Sara {
     png_destroy_read_struct(&_png_ptr, &_info_ptr, NULL);
   }
 
-  tuple<int, int, int> PngFileReader::image_sizes() const
+  auto PngFileReader::image_sizes() const -> std::tuple<int, int, int>
   {
-    png_get_IHDR(_png_ptr, _info_ptr, &pngWidth, &pngHeight, &bitDepth,
-                 &colorType, NULL, NULL, NULL);
-
-    png_byte channels = png_get_channels(_png_ptr, _info_ptr);
-
-    return make_tuple(pngWidth, pngHeight, channels);
+    return make_tuple(
+      static_cast<int>(_width),
+      static_cast<int>(_height),
+      static_cast<int>(_channels)
+    );
   }
 
   void PngFileReader::read(unsigned char *data)
@@ -244,8 +230,8 @@ namespace DO { namespace Sara {
     // Now we can safely get the data correctly.
     png_uint_32 rowbytes = (png_uint_32) png_get_rowbytes(_png_ptr, _info_ptr);
 
-    vector<png_bytep> row_pointers(pngWidth * pngHeight);
-    for (int y = 0; y < pngHeight; ++y)
+    vector<png_bytep> row_pointers(_width * _height);
+    for (auto y = 0u; y < _height; ++y)
       row_pointers[y] = static_cast<png_byte *>(data) + rowbytes*y;
 
     png_read_image(_png_ptr, &row_pointers[0]);
@@ -320,10 +306,11 @@ namespace DO { namespace Sara {
   {
     _tiff = TIFFOpen(filepath, "r");
     if (!_tiff)
-      throw FileError(filepath, "r");
+      throw std::runtime_error{
+        format("Failed to open file %s", filepath).c_str()};
 
-    TIFFGetField(_tiff, TIFFTAG_IMAGEWIDTH, &w);
-    TIFFGetField(_tiff, TIFFTAG_IMAGELENGTH, &h);
+    TIFFGetField(_tiff, TIFFTAG_IMAGEWIDTH, &_width);
+    TIFFGetField(_tiff, TIFFTAG_IMAGELENGTH, &_height);
   }
 
   TiffFileReader::~TiffFileReader()
@@ -332,10 +319,10 @@ namespace DO { namespace Sara {
       TIFFClose(_tiff);
   }
 
-  array<int, 3> TiffFileReader::image_sizes() const
+  auto TiffFileReader::image_sizes() const -> std::tuple<int, int, int>
   {
     constexpr auto depth = 4;
-    return {_width, _height, depth};
+    return make_tuple(_width, _height, depth);
   }
 
   void TiffFileReader::read(unsigned char *data)
@@ -356,9 +343,7 @@ namespace DO { namespace Sara {
 
   void TiffFileWriter::write(const char *filepath)
   {
-    // Open the TIFF file
     auto out = TIFFOpen(filepath, "w");
-
     if (out == NULL)
       throw std::runtime_error{"Could not create image file"};
 

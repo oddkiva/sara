@@ -26,19 +26,6 @@ extern "C" {
 // Base classes for image reading and writing.
 namespace DO { namespace Sara {
 
-  class FileError : public std::exception
-  {
-    std::string filepath_;
-    std::string mode_;
-
-  public:
-    FileError(const std::string& filepath, const std::string& mode);
-
-    virtual ~FileError() throw () {}
-
-    virtual const char * what() const throw();
-  };
-
   class FileHandle
   {
     FILE* _file{nullptr};
@@ -108,15 +95,15 @@ namespace DO { namespace Sara {
 
     JpegFileReader(const JpegFileReader&) = delete;
 
-    JpegFileReader& operator=(const JpegFileReader&) = delete;
-
     JpegFileReader(const char *filepath);
+
+    JpegFileReader& operator=(const JpegFileReader&) = delete;
 
     ~JpegFileReader();
 
-    std::tuple<int, int, int> image_sizes() const;
+    auto image_sizes() const -> std::tuple<int, int, int>;
 
-    void read_rgb_data(unsigned char * data);
+    void read(unsigned char * data);
   };
 
   class JpegFileWriter
@@ -137,9 +124,9 @@ namespace DO { namespace Sara {
 
     JpegFileWriter(const JpegFileWriter&) = delete;
 
-    JpegFileWriter& operator=(const JpegFileWriter&) = delete;
-
     JpegFileWriter(const unsigned char *data, int width, int height, int depth);
+
+    JpegFileWriter& operator=(const JpegFileWriter&) = delete;
 
     ~JpegFileWriter();
 
@@ -160,16 +147,23 @@ namespace DO { namespace Sara {
 
     FileHandle _file_handle;
 
-    png_uint_32 pngWidth, pngHeight;
-    int bitDepth;
-    int colorType;
+    png_uint_32 _width, _height;
+    png_byte _channels;
+    int _bit_depth;
+    int _color_type;
 
   public:
+    PngFileReader() = delete;
+
+    PngFileReader(const PngFileReader&) = delete;
+
     PngFileReader(const char *filepath);
+
+    PngFileReader& operator=(const PngFileReader&) = delete;
 
     ~PngFileReader();
 
-    std::tuple<int, int, int> image_sizes() const;
+    auto image_sizes() const -> std::tuple<int, int, int>;
 
     void read(unsigned char *data);
   };
@@ -190,8 +184,12 @@ namespace DO { namespace Sara {
 
   public:
     PngFileWriter() = delete;
+
     PngFileWriter(const PngFileWriter&) = delete;
+
     PngFileWriter(const unsigned char *data, int width, int height, int depth);
+
+    PngFileReader& operator=(const PngFileReader&) = delete;
 
     ~PngFileWriter();
 
@@ -216,25 +214,23 @@ namespace DO { namespace Sara {
 
     ~TiffFileReader();
 
-    std::array<int, 3> image_sizes() const;
+    auto image_sizes() const -> std::tuple<int, int, int>;
 
     void read(unsigned char *data);
   };
 
   class TiffFileWriter
   {
-    TIFF *out{nullptr};
-
     //! @brief Image data.
     const unsigned char *_data;
+
+    //! @brief Image sizes.
     int _width;
     int _height;
     int _depth;
 
   public:
     TiffFileWriter(const unsigned char *data, int width, int height, int depth);
-
-    ~TiffFileWriter();
 
     void write(const char *filepath);
   };
