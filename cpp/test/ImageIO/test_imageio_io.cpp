@@ -74,9 +74,8 @@ TEST(TestImageIO, test_grayscale_image_read_write)
 
   for (int i = 0; i < 3; ++i)
   {
-    auto filepath = string{"image.jpg"};
     auto image = Image<unsigned char>{};
-    EXPECT_NO_THROW(imread(image, filepath));
+    EXPECT_NO_THROW(imread(image, filepaths[i]));
     EXPECT_MATRIX_EQ(image.sizes(), Vector2i(2, 2));
     EXPECT_MATRIX_EQ(true_image.matrix(), image.matrix());
   }
