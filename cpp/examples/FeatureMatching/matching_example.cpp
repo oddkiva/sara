@@ -20,8 +20,8 @@ using namespace std;
 using namespace DO::Sara;
 
 
-const auto file1 = src_path("../../datasets/All.tif");
-const auto file2 = src_path("../../datasets/GuardOnBlonde.tif");
+const auto file1 = src_path("../../../data/All.tif");
+const auto file2 = src_path("../../../data/GuardOnBlonde.tif");
 
 
 Set<OERegion, RealDescriptor> compute_sift_keypoints(const Image<float>& image)
@@ -101,16 +101,8 @@ void load(Image<Rgb8>& image1, Image<Rgb8>& image2,
           vector<Match>& matches)
 {
   cout << "Loading images" << endl;
-  if (!imread(image1, file1))
-  {
-    cerr << "Error: cannot load image file 1: " << file1 << endl;
-    return;
-  }
-  if (!imread(image2, file2))
-  {
-    cerr << "Error: cannot load image file 2: " << file2 << endl;
-    return;
-  }
+  imread(image1, file1);
+  imread(image2, file2);
 
   cout << "Computing/Reading keypoints" << endl;
   auto SIFTs1 = compute_sift_keypoints(image1.convert<float>());

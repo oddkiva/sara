@@ -52,15 +52,6 @@ namespace DO { namespace Sara {
     //! @brief Default constructor that constructs an empty ND-array.
     inline MultiArrayBase() = default;
 
-    //! @brief Constructor that takes **ownership** of the data.
-    //! The data will be cleared upon destruction of the MultiArray object.
-    //! Thus ensure sure that is **really** what you want. Otherwise construct a
-    //! MultiArrayView object instead.
-    inline explicit MultiArrayBase(value_type *data, const vector_type& sizes)
-    {
-      this->base_type::operator=(base_type{data, sizes});
-    }
-
     //! @{
     //! @brief Constructor with specified sizes.
     inline explicit MultiArrayBase(const vector_type& sizes)

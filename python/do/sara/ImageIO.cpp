@@ -17,8 +17,7 @@ bp::object imread(const std::string& filepath)
   using namespace sara;
 
   auto image = Image<double>{};
-  if (!imread(image, filepath))
-    throw runtime_error{ "Cannot read image file: " + filepath };
+  imread(image, filepath);
 
   auto data = image.data();
   auto ndims = 2;

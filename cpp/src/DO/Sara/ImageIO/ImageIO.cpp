@@ -18,6 +18,7 @@
 #endif
 
 #include <DO/Sara/Core/Image.hpp>
+#include <DO/Sara/Core/StringFormat.hpp>
 
 #include <DO/Sara/ImageIO/ImageIO.hpp>
 #include <DO/Sara/ImageIO/Details/Exif.hpp>
@@ -69,108 +70,136 @@ namespace DO { namespace Sara {
 // Image read/write.
 namespace DO { namespace Sara {
 
-  static
-  bool imread(unsigned char *& data, int& w, int& h, int& d,
-              const string& filepath)
+  template <typename ImageFileReader>
+  void read_image_with(Image<unsigned char>& image, const char *filepath)
   {
-    data = 0;
-    w = h = d = 0;
+    ImageFileReader reader{filepath};
 
+    int w, h, d;
+    std::tie(w, h, d) = reader.image_sizes();
+    image.resize(w, h);
+
+    if (d == 1)
+    {
+      reader.read(image.data());
+    }
+    else if (d == 3)
+    {
+      auto tmp = Image<Rgb8>{ w, h };
+      reader.read(reinterpret_cast<unsigned char *>(tmp.data()));
+      image = tmp.convert<unsigned char>();
+    }
+    else if (d == 4)
+    {
+      auto tmp = Image<Rgba8>{w, h};
+      reader.read(reinterpret_cast<unsigned char *>(tmp.data()));
+      image = tmp.convert<unsigned char>();
+      return;
+    }
+    else
+      throw std::runtime_error{
+          "Unsupported number of input components in image file read!"};
+  }
+
+  template <typename ImageFileReader>
+  void read_image_with(Image<Rgb8>& image, const char *filepath)
+  {
+    ImageFileReader reader{filepath};
+
+    int w, h, d;
+    tie(w, h, d) = reader.image_sizes();
+    image.resize(w, h);
+
+    if (d == 1)
+    {
+      auto tmp = Image<unsigned char>{w, h};
+      reader.read(reinterpret_cast<unsigned char*>(tmp.data()));
+      image = tmp.convert<Rgb8>();
+    }
+    else if (d == 3)
+    {
+      reader.read(reinterpret_cast<unsigned char*>(image.data()));
+    }
+    else if (d == 4)
+    {
+      auto tmp = Image<Rgba8>{w, h};
+      reader.read(reinterpret_cast<unsigned char*>(tmp.data()));
+      image = tmp.convert<Rgb8>();
+    }
+    else
+      throw std::runtime_error{
+          "Unsupported number of input components in image file!"};
+  }
+
+  void imread(Image<unsigned char>& image, const std::string& filepath)
+  {
     const auto ext = file_ext(filepath);
 
-    if ( is_jpeg_file_ext(ext) &&
-         JpegFileReader(filepath).read(data, w, h, d) )
-      return true;
-    if ( is_png_file_ext(ext) &&
-         PngFileReader(filepath).read(data, w, h, d) )
-      return true;
-    if ( is_tiff_file_ext(ext) &&
-         TiffFileReader(filepath).read(data, w, h, d) )
-      return true;
-
-    cerr << "Image format: " << ext << " either currently unsupported or invalid" << endl;
-    return false;
-  }
-
-  bool imread(Image<unsigned char>& image, const std::string& filepath)
-  {
-    unsigned char *data;
-    int w, h, d;
-
-    if (!imread(data, w, h, d, filepath))
-      return false;
-
-    // Wrap data and get data ownership
-    if (d == 1)
-      image = Image<unsigned char>(&data[0], Vector2i(w,h));
-    if (d == 3)
-      image = Image<Rgb8>(reinterpret_cast<Rgb8 *>(&data[0]), Vector2i(w,h))
-        .convert<unsigned char>();
-    if (d == 4)
-      image = Image<Rgba8>(reinterpret_cast<Rgba8 *>(&data[0]), Vector2i(w,h))
-        .convert<unsigned char>();
+    if (is_jpeg_file_ext(ext))
+      read_image_with<JpegFileReader>(image, filepath.c_str());
+    else if (is_png_file_ext(ext))
+      read_image_with<PngFileReader>(image, filepath.c_str());
+    else if (is_tiff_file_ext(ext))
+      read_image_with<TiffFileReader>(image, filepath.c_str());
+    else
+      throw std::runtime_error{
+          format("Image format: %s is either unsupported or invalid",
+                 ext.c_str())
+              .c_str()};
 
     auto info = EXIFInfo{};
     if (read_exif_info(info, filepath))
       make_upright_from_exif(image, info.Orientation);
-
-    return true;
   }
 
-  bool imread(Image<Rgb8>& image, const std::string& filepath)
+  void imread(Image<Rgb8>& image, const std::string& filepath)
   {
-    unsigned char *data;
-    int w, h, d;
+    const auto ext = file_ext(filepath);
 
-    if (!imread(data, w, h, d, filepath))
-      return false;
-
-    // Wrap data and acquire data ownership.
-    if (d == 1)
-      image = Image<unsigned char>(&data[0], Vector2i(w,h)).convert<Rgb8>();
-    else if (d == 3)
-      image = Image<Rgb8>(reinterpret_cast<Rgb8 *>(&data[0]), Vector2i(w,h));
-    else if (d == 4)
-      image = Image<Rgba8>(reinterpret_cast<Rgba8 *>(&data[0]),
-                           Vector2i(w,h)).convert<Rgb8>();
+    if (is_jpeg_file_ext(ext))
+      read_image_with<JpegFileReader>(image, filepath.c_str());
+    else if (is_png_file_ext(ext))
+      read_image_with<PngFileReader>(image, filepath.c_str());
+    else if (is_tiff_file_ext(ext))
+      read_image_with<TiffFileReader>(image, filepath.c_str());
+    else
+      throw std::runtime_error{
+          format("Image format: %s is either unsupported or invalid",
+                 ext.c_str())
+              .c_str()};
 
     auto info = EXIFInfo{};
     if (read_exif_info(info, filepath))
       make_upright_from_exif(image, info.Orientation);
-    return true;
   }
 
-  bool imwrite(const Image<Rgb8>& image, const std::string& filepath,
+  void imwrite(const Image<Rgb8>& image, const std::string& filepath,
                int quality)
   {
     const auto ext = file_ext(filepath);
 
     if (is_jpeg_file_ext(ext))
     {
-      JpegFileWriter jpeg_writer(
-        reinterpret_cast<const unsigned char *>(image.data()),
-        image.width(), image.height(), 3);
-      return jpeg_writer.write(filepath, quality);
+      JpegFileWriter{reinterpret_cast<const unsigned char*>(image.data()),
+                     image.width(), image.height(), 3}
+          .write(filepath.c_str(), quality);
     }
 
-    if (is_png_file_ext(ext))
+    else if (is_png_file_ext(ext))
     {
-      PngFileWriter png_writer(
-        reinterpret_cast<const unsigned char *>(image.data()),
-        image.width(), image.height(), 3);
-      return png_writer.write(filepath, quality);
+      PngFileWriter{reinterpret_cast<const unsigned char*>(image.data()),
+                    image.width(), image.height(), 3}
+          .write(filepath.c_str());
     }
 
-    if (is_tiff_file_ext(ext))
+    else if (is_tiff_file_ext(ext))
     {
-      TiffFileWriter tiff_writer(
-        reinterpret_cast<const unsigned char *>(image.data()),
-        image.width(), image.height(), 3);
-      return tiff_writer.write(filepath, quality);
+      TiffFileWriter{reinterpret_cast<const unsigned char*>(image.data()),
+                     image.width(), image.height(), 3}
+          .write(filepath.c_str());
     }
-
-    cout << ext << "is not a valid extension" << endl;
-    return false;
+    else
+      throw std::runtime_error{"Not a supported or valid image format!"};
   }
 
 } /* namespace Sara */
