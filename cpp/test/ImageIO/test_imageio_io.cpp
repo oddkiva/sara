@@ -59,20 +59,27 @@ TEST(TestImageIO, test_rgb_image_read_write)
 
 TEST(TestImageIO, test_grayscale_image_read_write)
 {
+  const string filepaths[] =
+  {
+    "image.jpg",
+    "image.png",
+    "image.tif"
+  };
+
   typedef unsigned char gray8u_t;
   auto true_image = Image<gray8u_t>{ 2, 2 };
   true_image.matrix() <<
     255, 0,
     0, 255;
 
-  auto filepath = string{"image.jpg"};
-  auto image = Image<unsigned char>{};
-  EXPECT_NO_THROW(imread(image, filepath));
-  EXPECT_MATRIX_EQ(image.sizes(), Vector2i(2, 2));
-
-  for (int y = 0; y < true_image.width(); ++y)
-    for (int x = 0; x < true_image.height(); ++x)
-      EXPECT_MATRIX_EQ(true_image(x, y), image(x, y));
+  for (int i = 0; i < 3; ++i)
+  {
+    auto filepath = string{"image.jpg"};
+    auto image = Image<unsigned char>{};
+    EXPECT_NO_THROW(imread(image, filepath));
+    EXPECT_MATRIX_EQ(image.sizes(), Vector2i(2, 2));
+    EXPECT_MATRIX_EQ(true_image.matrix(), image.matrix());
+  }
 }
 
 TEST(TestImageIO, test_read_exif_info)
