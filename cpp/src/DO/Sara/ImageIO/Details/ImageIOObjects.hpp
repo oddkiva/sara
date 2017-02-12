@@ -40,8 +40,7 @@ namespace DO { namespace Sara {
 
     ~FileHandle()
     {
-      if (_file)
-        close();
+      close();
     }
 
     void open(const char *filepath, const char *mode)
@@ -50,14 +49,16 @@ namespace DO { namespace Sara {
       if (fopen_s(&_file, filepath, mode) != 0)
 #else
       _file = fopen(filepath, mode);
-      if (_file != 0)
+      if (_file == nullptr)
 #endif
-        throw std::runtime_error{"Error opening file!"};
+        throw std::runtime_error{
+           format("Error opening file '%s' in mode %s!", filepath, mode).c_str()};
     }
 
     void close()
     {
-      fclose(_file);
+      if (_file)
+        fclose(_file);
     }
 
     operator FILE *()
@@ -207,7 +208,6 @@ namespace DO { namespace Sara {
   {
     TIFF *_tiff;
     uint32 _width, _height;
-    FileHandle _file_handle;
 
   public:
     TiffFileReader(const char *filepath);

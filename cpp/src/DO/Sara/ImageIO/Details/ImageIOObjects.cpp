@@ -302,7 +302,6 @@ namespace DO { namespace Sara {
 namespace DO { namespace Sara {
 
   TiffFileReader::TiffFileReader(const char *filepath)
-    : _file_handle{filepath, "r"}
   {
     _tiff = TIFFOpen(filepath, "r");
     if (!_tiff)
@@ -328,7 +327,7 @@ namespace DO { namespace Sara {
   void TiffFileReader::read(unsigned char *data)
   {
     TIFFReadRGBAImageOriented(_tiff, _width, _height,
-                              reinterpret_cast<uint32*>(data),
+                              reinterpret_cast<uint32 *>(data),
                               ORIENTATION_TOPLEFT, 0);
   }
 

@@ -82,62 +82,53 @@ namespace DO { namespace Sara {
     if (d == 1)
     {
       reader.read(image.data());
-      return;
     }
-
-    if (d == 3)
+    else if (d == 3)
     {
       auto tmp = Image<Rgb8>{ w, h };
       reader.read(reinterpret_cast<unsigned char *>(tmp.data()));
       image = tmp.convert<unsigned char>();
-      return;
     }
-
-    if (d == 4)
+    else if (d == 4)
     {
       auto tmp = Image<Rgba8>{w, h};
       reader.read(reinterpret_cast<unsigned char *>(tmp.data()));
       image = tmp.convert<unsigned char>();
       return;
     }
-
-    throw std::runtime_error{
-      "Unsupported number of input components in image file read!" };
+    else
+      throw std::runtime_error{
+          "Unsupported number of input components in image file read!"};
   }
 
   template <typename ImageFileReader>
   void read_image_with(Image<Rgb8>& image, const char *filepath)
   {
-    ImageFileReader reader{ filepath };
+    ImageFileReader reader{filepath};
 
     int w, h, d;
-    std::tie(w, h, d) = reader.image_sizes();
+    tie(w, h, d) = reader.image_sizes();
     image.resize(w, h);
 
     if (d == 1)
     {
       auto tmp = Image<unsigned char>{w, h};
-      reader.read(reinterpret_cast<unsigned char *>(tmp.data()));
+      reader.read(reinterpret_cast<unsigned char*>(tmp.data()));
       image = tmp.convert<Rgb8>();
-      return;
     }
-
-    if (d == 3)
+    else if (d == 3)
     {
-      reader.read(reinterpret_cast<unsigned char *>(image.data()));
-      return;
+      reader.read(reinterpret_cast<unsigned char*>(image.data()));
     }
-
-    if (d == 4)
+    else if (d == 4)
     {
       auto tmp = Image<Rgba8>{w, h};
-      reader.read(reinterpret_cast<unsigned char *>(tmp.data()));
+      reader.read(reinterpret_cast<unsigned char*>(tmp.data()));
       image = tmp.convert<Rgb8>();
-      return;
     }
-
-    throw std::runtime_error{
-      "Unsupported number of input components in JPEG file read!" };
+    else
+      throw std::runtime_error{
+          "Unsupported number of input components in image file!"};
   }
 
   void imread(Image<unsigned char>& image, const std::string& filepath)
@@ -152,7 +143,9 @@ namespace DO { namespace Sara {
       read_image_with<TiffFileReader>(image, filepath.c_str());
     else
       throw std::runtime_error{
-          format("Image format: %s is either unsupported or invalid", ext).c_str()};
+          format("Image format: %s is either unsupported or invalid",
+                 ext.c_str())
+              .c_str()};
 
     auto info = EXIFInfo{};
     if (read_exif_info(info, filepath))
@@ -171,7 +164,9 @@ namespace DO { namespace Sara {
       read_image_with<TiffFileReader>(image, filepath.c_str());
     else
       throw std::runtime_error{
-          format("Image format: %s is either unsupported or invalid", ext).c_str()};
+          format("Image format: %s is either unsupported or invalid",
+                 ext.c_str())
+              .c_str()};
 
     auto info = EXIFInfo{};
     if (read_exif_info(info, filepath))
@@ -185,26 +180,23 @@ namespace DO { namespace Sara {
 
     if (is_jpeg_file_ext(ext))
     {
-      JpegFileWriter{
-        reinterpret_cast<const unsigned char *>(image.data()),
-        image.width(), image.height(), 3
-      }.write(filepath.c_str(), quality);
+      JpegFileWriter{reinterpret_cast<const unsigned char*>(image.data()),
+                     image.width(), image.height(), 3}
+          .write(filepath.c_str(), quality);
     }
 
     else if (is_png_file_ext(ext))
     {
-      PngFileWriter{
-        reinterpret_cast<const unsigned char *>(image.data()),
-        image.width(), image.height(), 3
-      }.write(filepath.c_str());
+      PngFileWriter{reinterpret_cast<const unsigned char*>(image.data()),
+                    image.width(), image.height(), 3}
+          .write(filepath.c_str());
     }
 
     else if (is_tiff_file_ext(ext))
     {
-      TiffFileWriter{
-        reinterpret_cast<const unsigned char *>(image.data()),
-        image.width(), image.height(), 3
-      }.write(filepath.c_str());
+      TiffFileWriter{reinterpret_cast<const unsigned char*>(image.data()),
+                     image.width(), image.height(), 3}
+          .write(filepath.c_str());
     }
     else
       throw std::runtime_error{"Not a supported or valid image format!"};

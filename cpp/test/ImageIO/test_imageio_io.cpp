@@ -39,13 +39,12 @@ TEST(TestImageIO, test_rgb_image_read_write)
     "image.tif"
   };
 
-  auto true_image = Image<Rgb8>{ 2, 2 };
+  auto true_image = Image<Rgb8>{2, 2};
   true_image(0,0) = White8; true_image(1,0) = Black8;
   true_image(0,1) = Black8; true_image(1,1) = White8;
 
-  for (int i = 2; i < 3; ++i)
+  for (int i = 0; i < 3; ++i)
   {
-    cout << i << endl;
     imwrite(true_image, filepaths[i], 100);
 
     auto image = Image<Rgb8>{};
@@ -66,7 +65,7 @@ TEST(TestImageIO, test_grayscale_image_read_write)
     255, 0,
     0, 255;
 
-  auto filepath = string{ "image.jpg" };
+  auto filepath = string{"image.jpg"};
   auto image = Image<unsigned char>{};
   EXPECT_NO_THROW(imread(image, filepath));
   EXPECT_MATRIX_EQ(image.sizes(), Vector2i(2, 2));
