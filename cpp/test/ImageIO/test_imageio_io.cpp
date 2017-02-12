@@ -24,9 +24,9 @@ using namespace DO::Sara;
 
 TEST(TestImageIO, test_imread_fails)
 {
-  const auto blank_filepath = string{ "" };
+  const auto blank_filepath = string{""};
   auto blank_image = Image<Rgb8>{};
-  EXPECT_FALSE(imread(blank_image, blank_filepath));
+  EXPECT_THROW(imread(blank_image, blank_filepath), std::runtime_error);
   EXPECT_MATRIX_EQ(blank_image.sizes(), Vector2i::Zero());
 }
 
@@ -43,12 +43,13 @@ TEST(TestImageIO, test_rgb_image_read_write)
   true_image(0,0) = White8; true_image(1,0) = Black8;
   true_image(0,1) = Black8; true_image(1,1) = White8;
 
-  for (int i = 0; i < 3; ++i)
+  for (int i = 2; i < 3; ++i)
   {
+    cout << i << endl;
     imwrite(true_image, filepaths[i], 100);
 
     auto image = Image<Rgb8>{};
-    EXPECT_TRUE(imread(image, filepaths[i]));
+    EXPECT_NO_THROW(imread(image, filepaths[i]));
     EXPECT_MATRIX_EQ(image.sizes(), Vector2i(2, 2));
 
     for (int y = 0; y < true_image.width(); ++y)
@@ -67,7 +68,7 @@ TEST(TestImageIO, test_grayscale_image_read_write)
 
   auto filepath = string{ "image.jpg" };
   auto image = Image<unsigned char>{};
-  EXPECT_TRUE(imread(image, filepath));
+  EXPECT_NO_THROW(imread(image, filepath));
   EXPECT_MATRIX_EQ(image.sizes(), Vector2i(2, 2));
 
   for (int y = 0; y < true_image.width(); ++y)
