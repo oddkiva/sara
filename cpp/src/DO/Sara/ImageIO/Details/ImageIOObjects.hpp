@@ -18,8 +18,9 @@ extern "C" {
 # include <setjmp.h>
 }
 
-#include <string>
+#include <array>
 #include <exception>
+#include <stdexcept>
 
 
 // Base classes for image reading and writing.
@@ -29,46 +30,53 @@ namespace DO { namespace Sara {
   {
     std::string filepath_;
     std::string mode_;
+
   public:
     FileError(const std::string& filepath, const std::string& mode);
+
     virtual ~FileError() throw () {}
+
     virtual const char * what() const throw();
   };
 
-  class FileHandler
+  class FileHandle
   {
-  protected:
-    FILE* file_;
-  public:
-    FileHandler() : file_(NULL) {}
-    FileHandler(const std::string& filepath, const std::string& mode);
-    virtual ~FileHandler();
-  };
+    FILE* _file{nullptr};
 
-  class ImageFileReader : public FileHandler
-  {
   public:
-    ImageFileReader() : FileHandler() {}
-    ImageFileReader(const std::string& filepath, const std::string& mode)
-      : FileHandler(filepath, mode) {};
-    virtual ~ImageFileReader() {};
-    virtual bool read(unsigned char *& data,
-                      int& width, int& height, int& depth) = 0;
-  };
+    FileHandle() = default;
 
-  class ImageFileWriter : public FileHandler
-  {
-  protected:
-    const unsigned char *data_;
-    const int width_, height_, depth_;
-  public:
-    ImageFileWriter(const unsigned char *data,
-                    int width, int height, int depth)
-      : FileHandler()
-      , data_(data)
-      , width_(width), height_(height), depth_(depth) {}
-    virtual ~ImageFileWriter() {}
-    virtual bool write(const std::string& filepath, int quality) = 0;
+    FileHandle(const char *filepath, const char *mode)
+    {
+      open(filepath, mode);
+    }
+
+    ~FileHandle()
+    {
+      if (_file)
+        close();
+    }
+
+    void open(const char *filepath, const char *mode)
+    {
+#ifdef WIN32
+      if (fopen_s(&_file, filepath, mode) != 0)
+#else
+      _file = fopen(filepath, mode);
+      if (_file != 0)
+#endif
+        throw std::runtime_error{"Error opening file!"};
+    }
+
+    void close()
+    {
+      fclose(_file);
+    }
+
+    operator FILE *()
+    {
+      return _file;
+    }
   };
 
 } /* namespace Sara */
@@ -78,30 +86,64 @@ namespace DO { namespace Sara {
 // Jpeg I/O.
 namespace DO { namespace Sara {
 
-  struct JpegErrorMessage {
-    struct jpeg_error_mgr pub;
+  struct jpeg_error_message_struct
+  {
+    jpeg_error_mgr pub;
     jmp_buf setjmp_buffer;
   };
 
-  class JpegFileReader : public ImageFileReader
+  class JpegFileReader
   {
-    struct jpeg_decompress_struct cinfo_;
-    struct JpegErrorMessage jerr_;
+    //! @{
+    //! @brief Decompressor structures.
+    jpeg_decompress_struct _cinfo;
+    jpeg_error_message_struct _jerr;
+    //! @}
+
+    //! @brief File handle.
+    FileHandle _file_handle;
+
   public:
-    //! TODO: make better exception?
-    JpegFileReader(const std::string& filepath);
+    JpegFileReader() = delete;
+
+    JpegFileReader(const JpegFileReader&) = delete;
+
+    JpegFileReader& operator=(const JpegFileReader&) = delete;
+
+    JpegFileReader(const char *filepath);
+
     ~JpegFileReader();
-    bool read(unsigned char *& data, int& width, int& height, int& depth);
+
+    std::tuple<int, int, int> image_sizes() const;
+
+    void read_rgb_data(unsigned char * data);
   };
 
-  class JpegFileWriter : public ImageFileWriter
+  class JpegFileWriter
   {
-    struct jpeg_compress_struct cinfo_;
-    struct jpeg_error_mgr jerr_;
+    //! @{
+    //! @brief Compressor structure.
+    jpeg_compress_struct _cinfo;
+    jpeg_error_mgr _jerr;
+    //! @}
+
+    FileHandle _file_handle;
+
+    //! @brief Image data.
+    const unsigned char *_data;
+
   public:
+    JpegFileWriter() = delete;
+
+    JpegFileWriter(const JpegFileWriter&) = delete;
+
+    JpegFileWriter& operator=(const JpegFileWriter&) = delete;
+
     JpegFileWriter(const unsigned char *data, int width, int height, int depth);
+
     ~JpegFileWriter();
-    bool write(const std::string& filepath, int quality);
+
+    void write(const char *filepath, int quality);
   };
 
 } /* namespace Sara */
@@ -111,24 +153,49 @@ namespace DO { namespace Sara {
 // PNG I/O.
 namespace DO { namespace Sara {
 
-  class PngFileReader : public ImageFileReader
+  class PngFileReader
   {
-    png_structp png_ptr;
-    png_infop info_ptr;
+    png_structp _png_ptr;
+    png_infop _info_ptr;
+
+    FileHandle _file_handle;
+
+    png_uint_32 pngWidth, pngHeight;
+    int bitDepth;
+    int colorType;
+
   public:
-    PngFileReader(const std::string& filepath);
+    PngFileReader(const char *filepath);
+
     ~PngFileReader();
-    bool read(unsigned char *& data, int& width, int& height, int& depth);
+
+    std::tuple<int, int, int> image_sizes() const;
+
+    void read(unsigned char *data);
   };
 
-  class PngFileWriter : public ImageFileWriter
+  class PngFileWriter
   {
-    png_structp png_ptr;
-    png_infop info_ptr;
+    png_structp _png_ptr;
+    png_infop _info_ptr;
+
+    //! @brief File handle.
+    FileHandle _file_handle;
+
+    //! @brief Image data.
+    const unsigned char *_data;
+    int _width;
+    int _height;
+    int _depth;
+
   public:
+    PngFileWriter() = delete;
+    PngFileWriter(const PngFileWriter&) = delete;
     PngFileWriter(const unsigned char *data, int width, int height, int depth);
+
     ~PngFileWriter();
-    bool write(const std::string& filepath, int quality);
+
+    void write(const char *filepath);
   };
 
 } /* namespace Sara */
@@ -138,22 +205,38 @@ namespace DO { namespace Sara {
 // Tiff I/O.
 namespace DO { namespace Sara {
 
-  class TiffFileReader : public ImageFileReader
+  class TiffFileReader
   {
-    TIFF *tiff_;
+    TIFF *_tiff;
+    uint32 _width, _height;
+    FileHandle _file_handle;
+
   public:
-    TiffFileReader(const std::string& filepath);
+    TiffFileReader(const char *filepath);
+
     ~TiffFileReader();
-    bool read(unsigned char *& data, int& width, int& height, int& depth);
+
+    std::array<int, 3> image_sizes() const;
+
+    void read(unsigned char *data);
   };
 
-  class TiffFileWriter : public ImageFileWriter
+  class TiffFileWriter
   {
-    TIFF *out;
+    TIFF *out{nullptr};
+
+    //! @brief Image data.
+    const unsigned char *_data;
+    int _width;
+    int _height;
+    int _depth;
+
   public:
     TiffFileWriter(const unsigned char *data, int width, int height, int depth);
+
     ~TiffFileWriter();
-    bool write(const std::string& filepath, int quality);
+
+    void write(const char *filepath);
   };
 
 

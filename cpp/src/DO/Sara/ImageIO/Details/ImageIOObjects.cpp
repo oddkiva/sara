@@ -26,16 +26,6 @@ using namespace std;
 
 namespace DO { namespace Sara {
 
-  static bool open_file(FILE **file, const string& filepath, const string& mode)
-  {
-  #ifdef WIN32
-    return fopen_s(file, filepath.c_str(), mode.c_str()) == 0;
-  #else
-    *file = fopen(filepath.c_str(), mode.c_str());
-    return *file != 0;
-  #endif
-  }
-
   FileError::FileError(const string& filepath, const string& mode)
     : filepath_(filepath), mode_(mode)
   {
@@ -50,19 +40,6 @@ namespace DO { namespace Sara {
     return os.str().c_str();
   }
 
-  FileHandler::FileHandler(const string& filepath,
-                           const string& mode)
-  {
-    if (!open_file(&file_, filepath, mode))
-      throw FileError(filepath, mode);
-  }
-
-  FileHandler::~FileHandler()
-  {
-    if (file_)
-      fclose(file_);
-  }
-
 } /* namespace Sara */
 } /* namespace DO */
 
@@ -72,115 +49,122 @@ namespace DO { namespace Sara {
 
   METHODDEF(void) jpeg_error(j_common_ptr cinfo)
   {
-    JpegErrorMessage *myerr = (JpegErrorMessage *) cinfo->err;
+    jpeg_error_message_struct *myerr = (jpeg_error_message_struct *) cinfo->err;
     (*cinfo->err->output_message) (cinfo);
     longjmp(myerr->setjmp_buffer, 1);
   }
 
-  JpegFileReader::JpegFileReader(const string& filepath)
-    : ImageFileReader(filepath, "rb")
+  JpegFileReader::JpegFileReader(const char *filepath)
+      : _file_handle{filepath, "rb"}
   {
-    cinfo_.err = jpeg_std_error(&jerr_.pub);
-    jerr_.pub.error_exit = &jpeg_error;
+    // Setup error handling.
+    _cinfo.err = jpeg_std_error(&_jerr.pub);
+    _jerr.pub.error_exit = &jpeg_error;
 
-    if (setjmp(jerr_.setjmp_buffer))
+    if (setjmp(_jerr.setjmp_buffer))
       throw FileError(filepath, "rb");
 
-    jpeg_create_decompress(&cinfo_);
-    jpeg_stdio_src(&cinfo_, file_);
+    // Create decompress structures.
+    jpeg_create_decompress(&_cinfo);
+
+    // We are reading a file.
+    jpeg_stdio_src(&_cinfo, _file_handle);
+
+    // Read header file.
+    if (!jpeg_read_header(&_cinfo, TRUE))
+      throw FileError(filepath, "rb");
+
+    // Start reading data.
+    if (!jpeg_start_decompress(&_cinfo))
+      throw FileError(filepath, "rb");
   }
 
   JpegFileReader::~JpegFileReader()
   {
-    jpeg_destroy_decompress(&cinfo_);
+    jpeg_destroy_decompress(&_cinfo);
   }
 
-  bool JpegFileReader::read(unsigned char *& data,
-                            int& width, int& height, int& depth)
+  tuple<int, int, int> JpegFileReader::image_sizes() const
   {
-    // Read header file.
-    if (!jpeg_read_header(&cinfo_, TRUE))
-      return false;
-    // Start reading data.
-    if (!jpeg_start_decompress(&cinfo_))
-      return false;
-    // Allocate image data.
-    width = cinfo_.output_width;
-    height = cinfo_.output_height;
-    depth = cinfo_.output_components;
-    data = new unsigned char[width*height*depth];
+    return make_tuple(_cinfo.output_width, _cinfo.output_height,
+                      _cinfo.output_components);
+  }
+
+  void JpegFileReader::read(unsigned char *data)
+  {
     // Scan lines.
-    const int row_stride = width * depth;
-    unsigned char *row = data;
-    while (cinfo_.output_scanline < cinfo_.output_height) {
+    const auto row_stride = _cinfo.output_width * _cinfo.output_components;
+    auto row = data;
+    while (_cinfo.output_scanline < _cinfo.output_height) {
       JSAMPROW scanline[] = { row };
-      jpeg_read_scanlines(&cinfo_, scanline, 1);
+      jpeg_read_scanlines(&_cinfo, scanline, 1);
       row += row_stride;
     }
-    // Stop reading data.
-    if (!jpeg_finish_decompress(&cinfo_))
-      return false;
 
-    return true;
+    // Wrap up file decompression.
+    if (!jpeg_finish_decompress(&_cinfo))
+      throw std::runtime_error{
+          "Error reading file: Jpeg decompression not finished!"};
   }
 
-  JpegFileWriter::JpegFileWriter(const unsigned char *data,
-                                 int width, int height, int depth)
-    : ImageFileWriter(data, width, height, depth)
+  JpegFileWriter::JpegFileWriter(const unsigned char* data, int width,
+                                 int height, int depth)
+    : _data{data}
   {
-    cinfo_.err = jpeg_std_error(&jerr_);
-    jpeg_create_compress(&cinfo_);
+    // Setup JPEG error handling.
+    _cinfo.err = jpeg_std_error(&_jerr);
+
+    // Create compressor structure.
+    jpeg_create_compress(&_cinfo);
+
     // Image dimensions.
-    cinfo_.image_width = width_;
-    cinfo_.image_height = height_;
-    cinfo_.input_components = depth_;
+    _cinfo.image_width = width;
+    _cinfo.image_height = height;
+    _cinfo.input_components = depth;
+
     // Color space.
-    if (cinfo_.input_components == 3)
-      cinfo_.in_color_space = JCS_RGB;
-    else if (cinfo_.input_components==1)
-      cinfo_.in_color_space = JCS_GRAYSCALE;
+    if (_cinfo.input_components == 3)
+      _cinfo.in_color_space = JCS_RGB;
+    else if (_cinfo.input_components==1)
+      _cinfo.in_color_space = JCS_GRAYSCALE;
     else
-    {
-      cerr << "Error: Unsupported number of components" << endl;
-      throw 0;
-    }
+      throw std::runtime_error{"Error: Unsupported number of components"};
+
     // Prepare writing.
-    jpeg_set_defaults(&cinfo_);
+    jpeg_set_defaults(&_cinfo);
   }
 
   JpegFileWriter::~JpegFileWriter()
   {
-    jpeg_destroy_compress(&cinfo_);
+    jpeg_destroy_compress(&_cinfo);
   }
 
-  bool JpegFileWriter::write(const string& filepath, int quality)
+  void JpegFileWriter::write(const char *filepath, int quality)
   {
     if (quality < 0 || quality > 100)
-    {
-      cerr << "Error: The quality parameter should be between 0 and 100" << endl;
-      return false;
-    }
+      throw std::runtime_error{
+          "Error: The quality parameter should be between 0 and 100"};
 
-    if (!open_file(&file_, filepath, "wb"))
-      return false;
+    _file_handle.open(filepath, "wb");
 
-    jpeg_stdio_dest(&cinfo_, file_);
-    jpeg_set_quality(&cinfo_, quality, TRUE);
-    jpeg_start_compress(&cinfo_, TRUE);
+    jpeg_stdio_dest(&_cinfo, _file_handle);
+    jpeg_set_quality(&_cinfo, quality, TRUE);
+    jpeg_start_compress(&_cinfo, TRUE);
 
-    const unsigned char *scanline_data = data_;
-    const int num_bytes_per_line = width_*depth_;
-    vector<JSAMPLE> buffer(num_bytes_per_line);
-    while (cinfo_.next_scanline < cinfo_.image_height) {
+    const auto num_bytes_per_line =
+        _cinfo.image_width * _cinfo.input_components;
+
+    auto scanline_data = _data;
+    auto buffer = vector<JSAMPLE>(num_bytes_per_line);
+
+    while (_cinfo.next_scanline < _cinfo.image_height) {
       JSAMPROW scanline[] = { &buffer[0] };
       copy(scanline_data, scanline_data+num_bytes_per_line, &buffer[0]);
-      jpeg_write_scanlines(&cinfo_, scanline, 1);
+      jpeg_write_scanlines(&_cinfo, scanline, 1);
       scanline_data += num_bytes_per_line;
     }
 
-    jpeg_finish_compress(&cinfo_);
-
-    return true;
+    jpeg_finish_compress(&_cinfo);
   }
 
 } /* namespace Sara */
@@ -190,117 +174,115 @@ namespace DO { namespace Sara {
 // PNG I/O.
 namespace DO { namespace Sara {
 
-  PngFileReader::PngFileReader(const string& filepath)
-    : ImageFileReader(filepath, "rb")
+  PngFileReader::PngFileReader(const char *filepath)
+    : _file_handle{filepath, "rb"}
   {
-    png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING,
-                                                 NULL, NULL, NULL);
-    if (!png_ptr)
+    _png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+    if (!_png_ptr)
       throw FileError(filepath, "rb");
 
-    info_ptr = png_create_info_struct(png_ptr);
-    if (!info_ptr)
+    _info_ptr = png_create_info_struct(_png_ptr);
+    if (!_info_ptr)
       throw FileError(filepath, "rb");
-  }
 
-  PngFileReader::~PngFileReader()
-  {
-    png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
-  }
-
-  bool PngFileReader::read(unsigned char *& data,
-                           int& width, int& height, int& depth)
-  {
     png_byte header[8];
-    if (fread(header, 1, 8, file_) != 8)
-      cerr << "fread failed." << endl;
+    if (fread(header, 1, 8, _file_handle) != 8)
+      throw FileError(filepath, "rb");
+
     if (png_sig_cmp(header, 0, 8))
-      return false;
+      throw FileError(filepath, "rb");
 
-    png_init_io(png_ptr, file_);
-    png_set_sig_bytes(png_ptr, 8);
+    png_init_io(_png_ptr, _file_handle);
+    png_set_sig_bytes(_png_ptr, 8);
 
-    png_read_info(png_ptr, info_ptr);
+    png_read_info(_png_ptr, _info_ptr);
 
     // Get width, height, bit-depth and color type.
-    png_uint_32 pngWidth, pngHeight;
-    int bitDepth;
-    int colorType;
-    png_get_IHDR(png_ptr, info_ptr, &pngWidth, &pngHeight, &bitDepth,
+    png_get_IHDR(_png_ptr, _info_ptr, &pngWidth, &pngHeight, &bitDepth,
                  &colorType, NULL, NULL, NULL);
 
     // Expand images of all color-type to 8-bit.
     if (colorType == PNG_COLOR_TYPE_PALETTE)
-      png_set_expand(png_ptr);
+      png_set_expand(_png_ptr);
     if (bitDepth < 8)
-      png_set_expand(png_ptr);
-    if (png_get_valid(png_ptr, info_ptr, PNG_INFO_tRNS))
-      png_set_expand(png_ptr);
+      png_set_expand(_png_ptr);
+    if (png_get_valid(_png_ptr, _info_ptr, PNG_INFO_tRNS))
+      png_set_expand(_png_ptr);
     if (bitDepth == 16) // convert 16-bit to 8-bit on the fly
-      png_set_strip_16(png_ptr);
+      png_set_strip_16(_png_ptr);
 
     // If required, set the gamma conversion.
     double gamma;
-    if (png_get_gAMA(png_ptr, info_ptr, &gamma))
-      png_set_gamma(png_ptr, 2.2, gamma);
+    if (png_get_gAMA(_png_ptr, _info_ptr, &gamma))
+      png_set_gamma(_png_ptr, 2.2, gamma);
 
-    // The transformations are now registered, so update info_ptr data.
-    png_read_update_info(png_ptr, info_ptr);
+    // The transformations are now registered, so update _info_ptr data.
+    png_read_update_info(_png_ptr, _info_ptr);
 
     // Update width, height and new bit-depth and color type.
-    png_get_IHDR(png_ptr, info_ptr, &pngWidth, &pngHeight, &bitDepth,
+    png_get_IHDR(_png_ptr, _info_ptr, &pngWidth, &pngHeight, &bitDepth,
                  &colorType, NULL, NULL, NULL);
-
-    // Now we can safely get the data correctly.
-    png_uint_32 rowbytes = (png_uint_32) png_get_rowbytes(png_ptr, info_ptr);
-    png_byte channels = png_get_channels(png_ptr, info_ptr);
-
-    width = static_cast<int>(pngWidth);
-    height = static_cast<int>(pngHeight);
-    depth = static_cast<int>(channels);
-    data = new unsigned char[width*height*depth];
-
-    vector<png_bytep> row_pointers(width*height);
-    for (int y = 0; y < height; ++y)
-      row_pointers[y] = static_cast<png_byte *>(data) + rowbytes*y;
-
-    png_read_image(png_ptr, &row_pointers[0]);
-    png_read_end(png_ptr, NULL);
-
-    return true;
   }
 
-  PngFileWriter::PngFileWriter(const unsigned char *data,
-                               int width, int height, int depth)
-    : ImageFileWriter(data, width, height, depth)
+  PngFileReader::~PngFileReader()
   {
-    png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING,
+    png_destroy_read_struct(&_png_ptr, &_info_ptr, NULL);
+  }
+
+  tuple<int, int, int> PngFileReader::image_sizes() const
+  {
+    png_get_IHDR(_png_ptr, _info_ptr, &pngWidth, &pngHeight, &bitDepth,
+                 &colorType, NULL, NULL, NULL);
+
+    png_byte channels = png_get_channels(_png_ptr, _info_ptr);
+
+    return make_tuple(pngWidth, pngHeight, channels);
+  }
+
+  void PngFileReader::read(unsigned char *data)
+  {
+    // Now we can safely get the data correctly.
+    png_uint_32 rowbytes = (png_uint_32) png_get_rowbytes(_png_ptr, _info_ptr);
+
+    vector<png_bytep> row_pointers(pngWidth * pngHeight);
+    for (int y = 0; y < pngHeight; ++y)
+      row_pointers[y] = static_cast<png_byte *>(data) + rowbytes*y;
+
+    png_read_image(_png_ptr, &row_pointers[0]);
+    png_read_end(_png_ptr, NULL);
+  }
+
+  PngFileWriter::PngFileWriter(const unsigned char* data, int width, int height,
+                               int depth)
+    : _data{data}
+    , _width{width}
+    , _height{height}
+    , _depth{depth}
+  {
+    _png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING,
                                       NULL, NULL, NULL);
-    if (!png_ptr)
+    if (!_png_ptr)
       throw 0;
 
-    info_ptr = png_create_info_struct(png_ptr);
-    if (!info_ptr)
+    _info_ptr = png_create_info_struct(_png_ptr);
+    if (!_info_ptr)
       throw 0;
   }
 
   PngFileWriter::~PngFileWriter()
   {
-    png_destroy_write_struct(&png_ptr, &info_ptr);
+    png_destroy_write_struct(&_png_ptr, &_info_ptr);
   }
 
-  bool PngFileWriter::write(const string& filepath, int quality)
+  void PngFileWriter::write(const char *filepath)
   {
-    (void) quality;
+    _file_handle.open(filepath, "wb");
 
-    if (!open_file(&file_, filepath, "wb"))
-      return false;
-
-    png_init_io(png_ptr, file_);
+    png_init_io(_png_ptr, _file_handle);
 
     // Color spaces are defined at png.h:841+.
-    char color_space;
-    switch(depth_)
+    auto color_space = char{};
+    switch(_depth)
     {
     case 4: color_space = PNG_COLOR_TYPE_RGBA;
       break;
@@ -309,22 +291,21 @@ namespace DO { namespace Sara {
     case 1: color_space = PNG_COLOR_TYPE_GRAY;
       break;
     default:
-      return false;
+      throw std::runtime_error{"Invalid color space!"};
     }
 
-    png_set_IHDR(png_ptr, info_ptr, width_, height_,
-                 8, color_space, PNG_INTERLACE_NONE,
-                 PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
-    png_write_info(png_ptr, info_ptr);
+    constexpr auto bit_depth = 8;
+    png_set_IHDR(_png_ptr, _info_ptr, _width, _height, bit_depth, color_space,
+                 PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE,
+                 PNG_FILTER_TYPE_BASE);
+    png_write_info(_png_ptr, _info_ptr);
 
-    vector<png_bytep> row_pointers(depth_*height_);
-    for (int y = 0; y < height_; ++y)
-      row_pointers[y] = (png_bytep) data_ + width_*depth_*y;
+    auto row_pointers = vector<png_bytep>(_depth * _height);
+    for (int y = 0; y < _height; ++y)
+      row_pointers[y] = (png_bytep) _data + _width * _depth * y;
 
-    png_write_image(png_ptr, &row_pointers[0]);
-    png_write_end(png_ptr, NULL);
-
-    return true;
+    png_write_image(_png_ptr, &row_pointers[0]);
+    png_write_end(_png_ptr, NULL);
   }
 
 } /* namespace Sara */
@@ -334,72 +315,70 @@ namespace DO { namespace Sara {
 // Tiff I/O.
 namespace DO { namespace Sara {
 
-  TiffFileReader::TiffFileReader(const std::string& filepath)
-    : ImageFileReader(filepath, "r")
+  TiffFileReader::TiffFileReader(const char *filepath)
+    : _file_handle{filepath, "r"}
   {
-    tiff_ = TIFFOpen(filepath.c_str(), "r");
-    if (!tiff_)
+    _tiff = TIFFOpen(filepath, "r");
+    if (!_tiff)
       throw FileError(filepath, "r");
+
+    TIFFGetField(_tiff, TIFFTAG_IMAGEWIDTH, &w);
+    TIFFGetField(_tiff, TIFFTAG_IMAGELENGTH, &h);
   }
 
   TiffFileReader::~TiffFileReader()
   {
-    if (tiff_)
-      TIFFClose(tiff_);
+    if (_tiff)
+      TIFFClose(_tiff);
   }
 
-  bool TiffFileReader::read(unsigned char *& data,
-                            int& width, int& height, int& depth)
+  array<int, 3> TiffFileReader::image_sizes() const
   {
-    uint32 w, h;
-    TIFFGetField(tiff_, TIFFTAG_IMAGEWIDTH, &w);
-    TIFFGetField(tiff_, TIFFTAG_IMAGELENGTH, &h);
-    width = w;
-    height = h;
-    depth = 4;
-    data = new unsigned char[width*height*depth];
-    TIFFReadRGBAImageOriented(tiff_, w, h, reinterpret_cast<uint32 *>(data),
+    constexpr auto depth = 4;
+    return {_width, _height, depth};
+  }
+
+  void TiffFileReader::read(unsigned char *data)
+  {
+    TIFFReadRGBAImageOriented(_tiff, _width, _height,
+                              reinterpret_cast<uint32*>(data),
                               ORIENTATION_TOPLEFT, 0);
-    return true;
   }
 
-  TiffFileWriter::TiffFileWriter(const unsigned char *data,
-                                 int width, int height, int depth)
-    : ImageFileWriter(data, width, height, depth), out(NULL)
+  TiffFileWriter::TiffFileWriter(const unsigned char* data, int width,
+                                 int height, int depth)
+    : _data{data}
+    , _width{width}
+    , _height{height}
+    , _depth{depth}
   {
   }
 
-  TiffFileWriter::~TiffFileWriter()
+  void TiffFileWriter::write(const char *filepath)
   {
-    if (out)
-      TIFFClose(out);
-  }
-
-  bool TiffFileWriter::write(const std::string& filepath, int quality)
-  {
-    (void) quality;
-
     // Open the TIFF file
-    if((out = TIFFOpen(filepath.c_str(), "w")) == NULL){
-      std::cerr << "Unable to write tif file: " << filepath << std::endl;
-      return false;
-    }
+    auto out = TIFFOpen(filepath, "w");
+
+    if (out == NULL)
+      throw std::runtime_error{"Could not create image file"};
 
     // We need to set some values for basic tags before we can add any data
-    TIFFSetField(out, TIFFTAG_IMAGEWIDTH, width_);
-    TIFFSetField(out, TIFFTAG_IMAGELENGTH, height_);
-    TIFFSetField(out, TIFFTAG_BITSPERSAMPLE, 8);
-    TIFFSetField(out, TIFFTAG_SAMPLESPERPIXEL, depth_);
+    TIFFSetField(out, TIFFTAG_IMAGEWIDTH, _width);
+    TIFFSetField(out, TIFFTAG_IMAGELENGTH, _height);
+
+    constexpr auto bit_depth = 8;
+    TIFFSetField(out, TIFFTAG_BITSPERSAMPLE, bit_depth);
+    TIFFSetField(out, TIFFTAG_SAMPLESPERPIXEL, _depth);
     TIFFSetField(out, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
 
     TIFFSetField(out, TIFFTAG_COMPRESSION, COMPRESSION_DEFLATE);
     TIFFSetField(out, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
 
     // Write the information to the file
-    TIFFWriteEncodedStrip(out, 0, const_cast<unsigned char *>(&data_[0]),
-                          width_*height_*depth_);
+    TIFFWriteEncodedStrip(out, 0, const_cast<unsigned char*>(&_data[0]),
+                          _width * _height * _depth);
 
-    return true;
+    TIFFClose(out);
   }
 
 } /* namespace Sara */
