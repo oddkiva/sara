@@ -103,8 +103,7 @@ bool check_descriptors(const DescriptorMatrix<float>& descriptors)
 GRAPHICS_MAIN()
 {
   auto image = Image<float>{};
-  if (!imread(image, src_path("../../datasets/sunflowerField.jpg")))
-    return -1;
+  imread(image, src_path("../../../data/sunflowerField.jpg"));
 
   print_stage("Detecting SIFT features");
   auto keypoints = compute_sift_keypoints(image);

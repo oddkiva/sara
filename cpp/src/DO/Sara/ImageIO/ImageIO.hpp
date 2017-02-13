@@ -18,23 +18,21 @@
 namespace DO { namespace Sara {
 
   DO_SARA_EXPORT
-  bool imread(Image<unsigned char>& image, const std::string& filepath);
+  void imread(Image<unsigned char>& image, const std::string& filepath);
 
   DO_SARA_EXPORT
-  bool imread(Image<Rgb8>& image, const std::string& filepath);
+  void imread(Image<Rgb8>& image, const std::string& filepath);
 
   template <typename T>
-  bool imread(Image<T>& image, const std::string& filepath)
+  inline void imread(Image<T>& image, const std::string& filepath)
   {
     Image<Rgb8> rgb8image;
-    if (!imread(rgb8image, filepath))
-      return false;
+    imread(rgb8image, filepath);
     image = rgb8image.convert<T>();
-    return true;
   }
 
   DO_SARA_EXPORT
-  bool imwrite(const Image<Rgb8>& image, const std::string& filepath,
+  void imwrite(const Image<Rgb8>& image, const std::string& filepath,
                int quality = 85);
 
 

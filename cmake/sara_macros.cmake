@@ -244,7 +244,9 @@ macro (sara_append_library _library_name
   if (NOT "${_src_files}" STREQUAL "")
     # - Case 1: the project contains 'cpp' source files
     #   Specify the source files.
-    add_library(DO_Sara_${_library_name} ${_hdr_files} ${_src_files})
+    add_library(DO_Sara_${_library_name}
+      ${DO_Sara_DIR}/cmake/UseDOSara${_library_name}.cmake
+      ${_hdr_files} ${_src_files})
 
     # Link with other libraries.
     sara_step_message("Linking project 'DO_Sara_${_library_name}' with "
