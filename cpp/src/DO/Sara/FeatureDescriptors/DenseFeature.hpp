@@ -38,23 +38,27 @@ namespace DO { namespace Sara {
     }
 
     //! @brief Operator.
-    Image<descriptor_type> operator()(const ImageView<float>& image, int patch_size = 8)
+    Image<descriptor_type> operator()(const ImageView<float>& image,
+                                      int patch_size = 8)
     {
       // Blur the image a little bit.
-      // By default, sigma is '1.6' and is justified in A-SIFT paper [Morel, Yu].
-      auto blurred_image = image.compute<DericheBlur>(1.6f);
+      // By default, sigma is '1.6' and is justified in A-SIFT paper [Morel,
+      // Yu].
+      const auto blurred_image = image.compute<DericheBlur>(1.6f);
 
       // Compute the image gradients in polar coordinates.
-      auto gradients = gradient_polar_coordinates(blurred_image);
+      const auto gradients = gradient_polar_coordinates(blurred_image);
 
       // Compute the feature vector in each pixel.
-      auto patch_radius = patch_size / 2;
-      auto features = Image<descriptor_type> { image.sizes() };
-      features.array().fill(descriptor_type::Zero());
+      const auto patch_radius = patch_size / 2;
+
+      auto features = Image<descriptor_type>{image.sizes()};
+      features.flat_array().fill(descriptor_type::Zero());
       for (auto y = patch_radius; y < image.height() - patch_radius; ++y)
         for (auto x = patch_radius; x < image.width() - patch_radius; ++x)
-          features(x, y) = _compute_feature(float(x), float(y), float(patch_radius),
-                                            gradients);
+          features(x, y) =
+              _compute_feature(static_cast<float>(x), static_cast<float>(y),
+                               static_cast<float>(patch_radius), gradients);
 
       return features;
     }

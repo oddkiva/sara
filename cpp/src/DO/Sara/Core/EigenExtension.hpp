@@ -39,7 +39,7 @@
 #include <Eigen/Eigen>
 
 
-//! \namespace Eigen
+//! @namespace Eigen
 //! @brief Some customized extension to interface for the Eigen library
 //! Essentially template class specialization for array type instead of scalar.
 //! I wonder if this is very useful. But let's just put it for now.
@@ -58,6 +58,7 @@ namespace Eigen {
     using Real = Array<T, M, N>;
     using NonInteger = Array<T, M, N>;
     using Nested = Array<T, M, N>;
+    using Literal = Array<T, M, N>;
 
     enum {
       IsComplex = 0,
@@ -95,6 +96,7 @@ namespace Eigen {
     using Real = Matrix<T, M, N>;
     using NonInteger = Matrix<T, M, N>;
     using Nested = Matrix<T, M, N>;
+    using Literal = Matrix<T, M, N>;
 
     enum {
       IsComplex = 0,
