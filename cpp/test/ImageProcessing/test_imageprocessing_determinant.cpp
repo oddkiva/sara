@@ -24,12 +24,12 @@ using namespace DO::Sara;
 TEST(TestDeterminant, test_determinant)
 {
   auto tensor = Image<Matrix2f>{ 3, 3 };
-  tensor.array().fill(Matrix2f::Ones());
+  tensor.flat_array().fill(Matrix2f::Ones());
 
   auto det = tensor.compute<Determinant>();
 
-  for (int i = 0; i < det.array().size(); ++i)
-    EXPECT_NEAR(0, det.array()[i], 1e-5);
+  for (int i = 0; i < det.flat_array().size(); ++i)
+    EXPECT_NEAR(0, det.flat_array()[i], 1e-5);
 }
 
 

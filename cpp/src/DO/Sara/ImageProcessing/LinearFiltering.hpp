@@ -42,8 +42,8 @@ namespace DO { namespace Sara {
    */
   template <typename T>
   void convolve_array(T *signal,
-                     const typename PixelTraits<T>::channel_type *kernel,
-                     int signal_size, int kernel_size)
+                      const typename PixelTraits<T>::channel_type *kernel,
+                      int signal_size, int kernel_size)
   {
     T *yj;
     auto *y = signal;
@@ -81,8 +81,7 @@ namespace DO { namespace Sara {
   {
     if (src.sizes() != dst.sizes())
       throw std::domain_error{
-        "Source and destination image sizes are not equal!"
-      };
+          "Source and destination image sizes are not equal!"};
 
     const auto w = src.width();
     const auto h = src.height();
@@ -118,13 +117,12 @@ namespace DO { namespace Sara {
   template <typename T>
   void
   apply_column_based_filter(const ImageView<T>& src, ImageView<T>& dst,
-                            const typename PixelTraits<T>::channel_type *kernel,
+                            const typename PixelTraits<T>::channel_type* kernel,
                             int kernel_size)
   {
     if (src.sizes() != dst.sizes())
       throw std::domain_error{
-        "Source and destination image sizes are not equal!"
-      };
+          "Source and destination image sizes are not equal!"};
 
     const auto w = src.width();
     const auto h = src.height();
@@ -152,7 +150,7 @@ namespace DO { namespace Sara {
   void apply_row_derivative(const ImageView<T>& src, ImageView<T>& dst)
   {
     using S = typename PixelTraits<T>::channel_type;
-    const S diff[] = { S(-1), S(0), S(1) };
+    const S diff[] = {S(-1), S(0), S(1)};
     apply_row_based_filter(src, dst, diff, 3);
   }
 
@@ -161,7 +159,7 @@ namespace DO { namespace Sara {
   void apply_column_derivative(const ImageView<T>& src, ImageView<T>& dst)
   {
     using S = typename PixelTraits<T>::channel_type;
-    const S diff[] = { S(-1), S(0), S(1) };
+    const S diff[] = {S(-1), S(0), S(1)};
     apply_column_based_filter(src, dst, diff, 3);
   }
 
@@ -211,10 +209,10 @@ namespace DO { namespace Sara {
   void apply_sobel_filter(const ImageView<T>& src, ImageView<T>& dst)
   {
     using S = typename PixelTraits<T>::channel_type;
-    const S mean_kernel[] = { S(1), S(2), S(1) };
-    const S diff_kernel[] = { S(1), S(0), S(-1) };
+    const S mean_kernel[] = {S(1), S(2), S(1)};
+    const S diff_kernel[] = {S(1), S(0), S(-1)};
 
-    auto tmp = Image<T>{ src.sizes() };
+    auto tmp = Image<T>{src.sizes()};
 
     // Column derivative.
     apply_row_based_filter(src, tmp, mean_kernel, 3);
@@ -223,7 +221,8 @@ namespace DO { namespace Sara {
     apply_row_based_filter(src, dst, diff_kernel, 3);
     apply_column_based_filter(dst, dst, mean_kernel, 3);
     // Squared norm.
-    dst.array() = (dst.array().abs2() + tmp.array().abs2()).sqrt();
+    dst.flat_array() =
+        (dst.flat_array().abs2() + tmp.flat_array().abs2()).sqrt();
   }
 
   //! @brief Apply Scharr filter to image.
@@ -231,10 +230,10 @@ namespace DO { namespace Sara {
   void apply_scharr_filter(const ImageView<T>& src, ImageView<T>& dst)
   {
     using S = typename PixelTraits<T>::channel_type;
-    const S mean_kernel[] = { S(3), S(10), S(3) };
-    const S diff_kernel[] = { S(-1), S(0), S(1) };
+    const S mean_kernel[] = {S(3), S(10), S(3)};
+    const S diff_kernel[] = {S(-1), S(0), S(1)};
 
-    auto tmp = Image<T>{ src.sizes() };
+    auto tmp = Image<T>{src.sizes()};
 
     // Column derivative.
     apply_row_based_filter(src, tmp, mean_kernel, 3);
@@ -243,7 +242,8 @@ namespace DO { namespace Sara {
     apply_row_based_filter(src, dst, diff_kernel, 3);
     apply_column_based_filter(dst, dst, mean_kernel, 3);
     // Squared norm.
-    dst.array() = (dst.array().abs2() + tmp.array().abs2()).sqrt();
+    dst.flat_array() =
+        (dst.flat_array().abs2() + tmp.flat_array().abs2()).sqrt();
   }
 
   //! @brief Apply Prewitt filter to image.
@@ -251,10 +251,10 @@ namespace DO { namespace Sara {
   void apply_prewitt_filter(const ImageView<T>& src, ImageView<T>& dst)
   {
     using S = typename PixelTraits<T>::channel_type;
-    const S mean_kernel[] = { S(1), S(1), S(1) };
-    const S diff_kernel[] = { S(-1), S(0), S(1) };
+    const S mean_kernel[] = {S(1), S(1), S(1)};
+    const S diff_kernel[] = {S(-1), S(0), S(1)};
 
-    auto tmp = Image<T>{ src.sizes() };
+    auto tmp = Image<T>{src.sizes()};
 
     // Column derivative.
     apply_row_based_filter(src, tmp, mean_kernel, 3);
@@ -263,7 +263,8 @@ namespace DO { namespace Sara {
     apply_row_based_filter(src, dst, diff_kernel, 3);
     apply_column_based_filter(dst, dst, mean_kernel, 3);
     // Squared norm.
-    dst.array() = (dst.array().abs2() + tmp.array().abs2()).sqrt();
+    dst.flat_array() =
+        (dst.flat_array().abs2() + tmp.flat_array().abs2()).sqrt();
   }
 
   // ====================================================================== //
@@ -272,13 +273,12 @@ namespace DO { namespace Sara {
   template <typename T>
   void apply_2d_non_separable_filter(
       const ImageView<T>& src, ImageView<T>& dst,
-      const typename PixelTraits<T>::channel_type *kernel,
-      int kernel_width, int kernel_height)
+      const typename PixelTraits<T>::channel_type* kernel, int kernel_width,
+      int kernel_height)
   {
     if (src.sizes() != dst.sizes())
       throw std::domain_error{
-        "Source and destination image sizes are not equal!"
-      };
+          "Source and destination image sizes are not equal!"};
 
     using Vector = typename Image<T>::vector_type;
 
@@ -287,8 +287,8 @@ namespace DO { namespace Sara {
     const auto w = src.width();
     const auto h = src.height();
 
-    auto sizes = Vector{ src.sizes() + Vector{ half_kw * 2, half_kh * 2 } };
-    auto work = Image<T>{ sizes };
+    auto sizes = Vector{src.sizes() + Vector{half_kw * 2, half_kh * 2}};
+    auto work = Image<T>{sizes};
     const auto work_w = work.width();
     const auto work_h = work.height();
 
@@ -367,10 +367,11 @@ namespace DO { namespace Sara {
       S(-1), S( 0)
     };
 
-    auto tmp = Image<T>{ src.sizes() };
+    auto tmp = Image<T>{src.sizes()};
     apply_2d_non_separable_filter(src, tmp, k1, 2, 2);
     apply_2d_non_separable_filter(src, dst, k2, 2, 2);
-    dst.array() = (dst.array().abs2() + tmp.array().abs2()).sqrt();
+    dst.flat_array() =
+        (dst.flat_array().abs2() + tmp.flat_array().abs2()).sqrt();
   }
 
 
@@ -380,7 +381,7 @@ namespace DO { namespace Sara {
   template <typename T>
   inline Image<T> row_derivative(const ImageView<T>& src)
   {
-    auto dst = Image<T>{ src.sizes() };
+    auto dst = Image<T>{src.sizes()};
     apply_row_derivative(src, dst);
     return dst;
   }
@@ -389,7 +390,7 @@ namespace DO { namespace Sara {
   template <typename T>
   inline Image<T> column_derivative(const ImageView<T>& src)
   {
-    auto dst = Image<T>{ src.sizes() };
+    auto dst = Image<T>{src.sizes()};
     apply_column_derivative(src, dst);
     return dst;
   }
@@ -399,7 +400,7 @@ namespace DO { namespace Sara {
   inline Image<T> gaussian(const ImageView<T>& src, S sigma,
                            S gauss_truncate = S(4))
   {
-    auto dst = Image<T>{ src.sizes() };
+    auto dst = Image<T>{src.sizes()};
     apply_gaussian_filter(src, dst, sigma, gauss_truncate);
     return dst;
   }
@@ -408,7 +409,7 @@ namespace DO { namespace Sara {
   template <typename T>
   inline Image<T> sobel(const ImageView<T>& src)
   {
-    auto dst = Image<T>{ src.sizes() };
+    auto dst = Image<T>{src.sizes()};
     apply_sobel_filter(src, dst);
     return dst;
   }
@@ -417,7 +418,7 @@ namespace DO { namespace Sara {
   template <typename T>
   inline Image<T> scharr(const ImageView<T>& src)
   {
-    auto dst = Image<T>{ src.sizes() };
+    auto dst = Image<T>{src.sizes()};
     apply_scharr_filter(src, dst);
     return dst;
   }
@@ -426,7 +427,7 @@ namespace DO { namespace Sara {
   template <typename T>
   inline Image<T> prewitt(const ImageView<T>& src)
   {
-    auto dst = Image<T>{ src.sizes() };
+    auto dst = Image<T>{src.sizes()};
     apply_prewitt_filter(src, dst);
     return dst;
   }
@@ -435,7 +436,7 @@ namespace DO { namespace Sara {
   template <typename T>
   inline Image<T> roberts_cross(const ImageView<T>& src)
   {
-    auto dst = Image<T>{ src.sizes() };
+    auto dst = Image<T>{src.sizes()};
     apply_roberts_cross_filter(src, dst);
     return dst;
   }
@@ -444,7 +445,7 @@ namespace DO { namespace Sara {
   template <typename T>
   inline Image<T> laplacian_filter(const ImageView<T>& src)
   {
-    auto dst = Image<T>{ src.sizes() };
+    auto dst = Image<T>{src.sizes()};
     apply_laplacian_filter(src, dst);
     return dst;
   }
@@ -452,7 +453,7 @@ namespace DO { namespace Sara {
 
 // ======================================================================== //
 // Helper 2D linear filtering functors
-#define CREATE_2D_FILTER_FUNCTOR(FilterName, function)                    \
+#define CREATE_2D_FILTER_FUNCTOR(FilterName, function)                         \
   /*! @brief Helper class to use Image<T,N>::compute<FilterName>() */          \
   struct FilterName                                                            \
   {                                                                            \
@@ -475,8 +476,7 @@ namespace DO { namespace Sara {
     using Pixel = typename ImageView::pixel_type;                              \
                                                                                \
     template <typename ImageView, typename... Params>                          \
-    inline auto operator()(const ImageView& in,                                \
-                           const Params&... params) const                      \
+    inline auto operator()(const ImageView& in, const Params&... params) const \
         -> Image<Pixel<ImageView>>                                             \
     {                                                                          \
       return function(in, params...);                                          \

@@ -98,7 +98,7 @@ namespace DO { namespace Sara {
   vector<vector<Point2i>>
   compute_region_inner_boundaries(const ImageView<int>& regions)
   {
-    const auto num_regions = regions.array().maxCoeff() + 1;
+    const auto num_regions = regions.flat_array().maxCoeff() + 1;
     auto region_boundaries = vector<vector<Point2i>>(num_regions);
 
     for (auto region_id = 0; region_id < num_regions; ++region_id)

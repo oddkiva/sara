@@ -22,7 +22,7 @@ using namespace DO::Sara;
 
 TEST(TestInterestPoint, test_methods)
 {
-  InterestPoint f(Point2f::Ones());
+  auto f = InterestPoint{Point2f::Ones()};
 
   f.type() = InterestPoint::Type::Harris;
   f.extremum_type() = InterestPoint::ExtremumType::Saddle;
@@ -37,13 +37,14 @@ TEST(TestInterestPoint, test_methods)
 
   // Check output stream operator.
   pair<InterestPoint::Type, string> types[] = {
-    make_pair(InterestPoint::Type::DoG, "DoG"),
-    make_pair(InterestPoint::Type::HarAff, "Harris-Affine"),
-    make_pair(InterestPoint::Type::HesAff, "Hessian-Affine"),
-    make_pair(InterestPoint::Type::MSER, "MSER"),
-    make_pair(InterestPoint::Type::SUSAN, "")
+      make_pair(InterestPoint::Type::DoG, "DoG"),
+      make_pair(InterestPoint::Type::HarAff, "Harris-Affine"),
+      make_pair(InterestPoint::Type::HesAff, "Hessian-Affine"),
+      make_pair(InterestPoint::Type::MSER, "MSER"),
+      make_pair(InterestPoint::Type::SUSAN, "")
   };
-  for (int i = 0; i < 5; ++i)
+
+  for (auto i = 0; i < 5; ++i)
   {
     f.type() = types[i].first;
     ostringstream oss;
@@ -55,7 +56,7 @@ TEST(TestInterestPoint, test_methods)
 
 TEST(TestOERegion, test_methods)
 {
-  OERegion f{ Point2f::Zero(), 1.f };
+  auto f = OERegion{Point2f::Zero(), 1.f};
   f.orientation() = 0;
   EXPECT_EQ(f.shape_matrix(), Matrix2f::Identity());
   EXPECT_MATRIX_NEAR(f.affinity(), Matrix3f::Identity(), 1e-3);
@@ -72,11 +73,11 @@ TEST(TestOERegion, test_methods)
 
 TEST(TestIO, test_read_write)
 {
-  const auto num_features = size_t{ 10 };
+  const auto num_features = size_t{10};
 
   // Test construction.
-  auto features = vector<OERegion>{ num_features };
-  auto descriptors = DescriptorMatrix<float>{ num_features, 3 };
+  auto features = vector<OERegion>{num_features};
+  auto descriptors = DescriptorMatrix<float>{num_features, 3};
   for (size_t i = 0; i < num_features; ++i)
   {
     descriptors[i] = (Vector3f::Ones() * float(i)).eval();
@@ -110,7 +111,7 @@ TEST(TestIO, test_read_write)
 TEST(TestSet, test_methods)
 {
   // Test constructor.
-  Set<OERegion, RealDescriptor> set;
+  auto set = Set<OERegion, RealDescriptor>{};
   EXPECT_EQ(set.size(), 0);
 
   // Test resize function.
@@ -120,9 +121,9 @@ TEST(TestSet, test_methods)
   set.resize(10, 2);
   EXPECT_EQ(set.size(), 10);
   EXPECT_EQ(set.features.size(), 10);
-  EXPECT_EQ(set.descriptors.size(), 10); // Test swap.
+  EXPECT_EQ(set.descriptors.size(), 10);  // Test swap.
 
-  Set<OERegion, RealDescriptor> set2;
+  auto set2 = Set<OERegion, RealDescriptor>{};
   set2.resize(20, 2);
 
   set.swap(set2);
@@ -147,7 +148,7 @@ TEST(TestSet, test_methods)
 
 TEST(TestSet, test_remove_redundant_features)
 {
-  Set<OERegion, RealDescriptor> set;
+  auto set = Set<OERegion, RealDescriptor>{};
 
   // Check corner case.
   set.features.resize(10);

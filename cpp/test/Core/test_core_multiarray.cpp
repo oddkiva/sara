@@ -443,11 +443,11 @@ TEST(TestMultiArray, test_array_view_types)
 {
   using Array2 = MultiArray<int, 2>;
   auto A = Array2{ 2, 2 };
-  A.array() << 1, 2, 3, 4;
+  A.flat_array() << 1, 2, 3, 4;
 
   auto actual_A = Array4i{};
   auto expected_A = Array4i{};
-  actual_A = A.array();
+  actual_A = A.flat_array();
   expected_A << 1, 2, 3, 4;
 
   for (auto i = 0; i < actual_A.size(); ++i)
