@@ -30,13 +30,64 @@ namespace DO { namespace Sara {
   using Tensor = MultiArray<T, N, StorageOrder, Allocator>;
   //! @}
 
+
+  //! @{
+  //! @brief Provide tensor views for generic ND-array objects.
+  /*!
+   * If a tensor coefficient is not a scalar but a matricial object, then the
+   * function converts a ND-array of matrices into (N+2)D-array of scalars,
+   * i.e.:
+   *
+   * ```
+   * auto m = MultiArray<Matrix2f, 2>{2, 2};
+   * m.flat_array().fill(Matrix2f::Identity());
+   *
+   * auto t = tensor_view(m);
+   *
+   * std::cout << "t(c,r,i,j) == m(i,j)(c,r) is "
+   *           << std::boolapha << t(c,r,i,j) == m(i,j)(c,r) << std::endl;
+   * // true.
+   *
+   * ```
+   */
+  template <typename T, int M, int N, int Dim, int StorageOrder>
+  inline auto tensor_view(MultiArrayView<Array<T, M, N>, Dim, StorageOrder> in)
+      -> MultiArrayView<T, Dim + 2, StorageOrder>
+  {
+    using tensor_type = TensorView<T, Dim + 2, StorageOrder>;
+    using tensor_sizes_type = typename tensor_type::vector_type;
+
+    const auto out_sizes =
+        StorageOrder == RowMajor
+            ? (tensor_sizes_type{} << in.sizes(), N, M).finished()
+            : (tensor_sizes_type{} << M, N, in.sizes()).finished();
+
+    return tensor_type{reinterpret_cast<T*>(in.data()), out_sizes};
+  }
+
+  template <typename T, int M, int N, int Dim, int StorageOrder>
+  inline auto tensor_view(MultiArrayView<Matrix<T, M, N>, Dim, StorageOrder> in)
+      -> MultiArrayView<T, Dim + 2, StorageOrder>
+  {
+    using tensor_type = TensorView<T, Dim + 2, StorageOrder>;
+    using tensor_sizes_type = typename tensor_type::vector_type;
+
+    const auto out_sizes =
+        StorageOrder == RowMajor
+            ? (tensor_sizes_type{} << in.sizes(), N, M).finished()
+            : (tensor_sizes_type{} << M, N, in.sizes()).finished();
+
+    return tensor_type{reinterpret_cast<T*>(in.data()), out_sizes};
+  }
+  //! @}
+
   //! @{
   //! @brief Provide tensor views for image objects.
   template <typename T, int N>
-  inline auto tensor_view(ImageView<T, N> in) ->TensorView<T, N, RowMajor>
+  inline auto tensor_view(ImageView<T, N> in) -> TensorView<T, N, RowMajor>
   {
     auto out_sizes = in.sizes();
-    std::reverse(out_sizes.data(), out_sizes.data() + out_sizes.size());
+    std::reverse(out_sizes.data(), out_sizes.data() + N);
     return TensorView<T, N, RowMajor>{in.data(), out_sizes};
   }
 
@@ -54,6 +105,32 @@ namespace DO { namespace Sara {
 
     return TensorView<ChannelType, Dim + 1, RowMajor>{
         reinterpret_cast<ChannelType*>(in.data()), out_sizes};
+  }
+
+  template <typename T, int M, int N, int Dim>
+  inline auto tensor_view(ImageView<Array<T, M, N>, Dim> in)
+      -> TensorView<T, Dim + 2, RowMajor>
+  {
+    using tensor_type = TensorView<T, Dim + 2, RowMajor>;
+    using tensor_sizes_type = typename tensor_type::vector_type;
+
+    auto out_sizes = (tensor_sizes_type{} << in.sizes(), N, M).finished();
+    std::reverse(out_sizes.data(), out_sizes.data() + Dim);
+
+    return tensor_type{reinterpret_cast<T*>(in.data()), out_sizes};
+  }
+
+  template <typename T, int M, int N, int Dim>
+  inline auto tensor_view(ImageView<Matrix<T, M, N>, Dim> in)
+      -> TensorView<T, Dim + 2, RowMajor>
+  {
+    using tensor_type = TensorView<T, Dim + 2, RowMajor>;
+    using tensor_sizes_type = typename tensor_type::vector_type;
+
+    auto out_sizes = (tensor_sizes_type{} << in.sizes(), N, M).finished();
+    std::reverse(out_sizes.data(), out_sizes.data() + Dim);
+
+    return tensor_type{reinterpret_cast<T*>(in.data()), out_sizes};
   }
   //! @}
 
