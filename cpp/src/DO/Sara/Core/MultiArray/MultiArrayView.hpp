@@ -416,7 +416,7 @@ namespace DO { namespace Sara {
     //! @brief Compute the raw size needed to allocate the internal data.
     inline size_type compute_size(const vector_type& sizes) const
     {
-      auto sz = sizes.template cast<size_type>();
+      auto sz = sizes.template cast<size_type>().eval();
       return std::accumulate(sz.data(), sz.data() + N, size_type(1),
                              std::multiplies<size_type>());
     }
