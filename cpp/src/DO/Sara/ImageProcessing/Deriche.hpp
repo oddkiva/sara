@@ -39,21 +39,21 @@ namespace DO { namespace Sara {
 
     // Sanity check.
     if (sigma <= 0)
-      throw std::runtime_error("sigma must be positive");
+      throw std::runtime_error{"sigma must be positive"};
     if (derivative_order < 0 || derivative_order >= 3)
-      throw std::runtime_error("derivative order must be between 0 and 2");
+      throw std::runtime_error{"derivative order must be between 0 and 2"};
     if (axis < 0 || axis >= N)
-      throw std::runtime_error("axis of derivative must be between 0 and N-1");
+      throw std::runtime_error{"axis of derivative must be between 0 and N-1"};
 
     // Compute the coefficients of the recursive filter.
     //
     // The constant 1.695 is mysterious... Also found in CImg library.
     // TODO: ask where this constant comes from.
-    const auto alpha = static_cast<S>(1.695)/sigma;
+    const auto alpha = static_cast<S>(1.695) / sigma;
     const auto ea = std::exp(alpha);
     const auto ema = std::exp(-alpha);
-    const auto em2a = ema*ema;
-    const auto b1 = 2*ema;
+    const auto em2a = ema * ema;
+    const auto b1 = 2 * ema;
     const auto b2 = -em2a;
 
     S ek, ekn;
@@ -65,7 +65,7 @@ namespace DO { namespace Sara {
     {
     // first-order derivative
     case 1:
-      ek = -(1-ema)*(1-ema)*(1-ema)/(2*(ema+1)*ema);
+      ek = -(1 - ema) * (1 - ema) * (1 - ema) / (2 * (ema + 1) * ema);
       a1 = a4 = 0;
       a2 = ek*ema;
       a3 = -ek*ema;
@@ -82,12 +82,13 @@ namespace DO { namespace Sara {
 
     // second-order derivative
     case 2:
-      ekn = ( -2*(-1+3*ea-3*ea*ea+ea*ea*ea)/(3*ea+1+3*ea*ea+ea*ea*ea) );
-      ek = -(em2a-1)/(2*alpha*ema);
+      ekn = (-2 * (-1 + 3 * ea - 3 * ea * ea + ea * ea * ea) /
+             (3 * ea + 1 + 3 * ea * ea + ea * ea * ea));
+      ek = -(em2a - 1) / (2 * alpha * ema);
       a1 = ekn;
-      a2 = -ekn*(1+ek*alpha)*ema;
-      a3 = ekn*(1-ek*alpha)*ema;
-      a4 = -ekn*em2a;
+      a2 = -ekn * (1 + ek * alpha) * ema;
+      a3 = ekn * (1 - ek * alpha) * ema;
+      a4 = -ekn * em2a;
       parity = 1;
       if (neumann)
       {
@@ -101,14 +102,15 @@ namespace DO { namespace Sara {
 
     // smoothing
     default:
-      ek = (1-ema)*(1-ema) / (1+2*alpha*ema - em2a);
+      ek = (1 - ema) * (1 - ema) / (1 + 2 * alpha * ema - em2a);
       a1 = ek;
-      a2 = ek*ema*(alpha-1);
-      a3 = ek*ema*(alpha+1);
-      a4 = -ek*em2a;
+      a2 = ek * ema * (alpha - 1);
+      a3 = ek * ema * (alpha + 1);
+      a4 = -ek * em2a;
       parity = 1;
-      if (neumann) {
-        sumg1 = ek*(alpha*ea+ea-1) / ((ea-1)*(ea-1));
+      if (neumann)
+      {
+        sumg1 = ek * (alpha * ea + ea - 1) / ((ea - 1) * (ea - 1));
         g0 = ek;
         sumg0 = g0 + sumg1;
       }
