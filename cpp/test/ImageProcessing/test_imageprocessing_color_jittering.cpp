@@ -71,7 +71,7 @@ TEST(TestNormalDistribution, test_randn_image)
 {
   const auto randn = NormalDistribution{false};
   auto image = Image<Rgb32f>{5, 5};
-  image.array().fill(Rgb32f::Zero());
+  image.flat_array().fill(Rgb32f::Zero());
 
   randn(image);
   for (const auto& pixel : image)
@@ -81,7 +81,7 @@ TEST(TestNormalDistribution, test_randn_image)
 TEST(TestNormalDistribution, test_add_randn_noise)
 {
   auto image = Image<Rgb32f>{5, 5};
-  image.array().fill(Rgb32f::Zero());
+  image.flat_array().fill(Rgb32f::Zero());
 
   const auto randn = NormalDistribution{false};
   add_randn_noise(image, 0.5, randn);

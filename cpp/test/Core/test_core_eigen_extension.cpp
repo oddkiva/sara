@@ -10,61 +10,62 @@
 // ========================================================================== //
 
 #include <gtest/gtest.h>
+
 #include <DO/Sara/Core/EigenExtension.hpp>
 #include <DO/Sara/Core/MultiArray.hpp>
+#include <DO/Sara/Core/Tensor.hpp>
+
 
 using namespace DO::Sara;
 using namespace std;
 
+
 TEST(DO_Sara_Core_Test, eigenExtensionTest)
 {
-  using SuperScalar = Matrix2f;
-  using Mat2i = MultiArray<SuperScalar, 2>;
+  using MatField = MultiArray<Matrix2f, 2>;
 
-  auto a = SuperScalar{};
-  a << 1, 2, 3, 4;
+  const auto a = (Matrix2f{} << 1, 2, 3, 4).finished();
 
-  auto b = SuperScalar{};
-  b << 1, 1, 2, 3;
+  const auto b = (Matrix2f{} << 1, 1, 2, 3).finished();
 
-  auto m = Mat2i{ 2, 2 };
-  auto n = Mat2i{ 2, 2 };
+  auto m = MatField{2, 2};
+  auto n = MatField{2, 2};
 
   // Initialize the matrices m and n.
-  m.array().fill(a);
-  n.array().fill(b);
+  m.flat_array().fill(a);
+  n.flat_array().fill(b);
 
   for (auto i = 0; i < m.rows(); ++i)
     for (auto j = 0; j < m.cols(); ++j)
-      EXPECT_TRUE(m(i,j) == a);
+      EXPECT_TRUE(m(i, j) == a);
 
   for (auto i = 0; i < n.rows(); ++i)
     for (auto j = 0; j < n.cols(); ++j)
-      EXPECT_TRUE(n(i,j) == b);
+      EXPECT_TRUE(n(i, j) == b);
 
 
   // Double that matrix
-  m.array() += n.array();
+  m.flat_array() += n.flat_array();
   // Check that matrix
   for (auto i = 0; i < m.rows(); ++i)
     for (auto j = 0; j < m.cols(); ++j)
       EXPECT_TRUE(m(i, j) == (a + b).eval());
 
-  EXPECT_TRUE(m(0,0)*n(0,0) == (a+b)*b);
+  EXPECT_TRUE(m(0, 0) * n(0, 0) == (a + b) * b);
 
   // Double that matrix
-  m.array() *= n.array();
+  m.flat_array() *= n.flat_array();
   // Check that matrix
   for (auto i = 0; i < m.rows(); ++i)
     for (auto j = 0; j < m.cols(); ++j)
-      EXPECT_TRUE(m(i,j) == (a+b)*b);
+      EXPECT_TRUE(m(i, j) == (a + b) * b);
 
   m.matrix() += n.matrix();
-  (m.array() * n.array()) + n.array() / m.array();
+  (tensor_view(m).flat_array() * tensor_view(n).flat_array()) +
+      tensor_view(n).flat_array() / tensor_view(m).flat_array();
 }
 
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
 }

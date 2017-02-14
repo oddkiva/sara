@@ -28,11 +28,11 @@ TEST(TestSecondMomentMatrix, test_second_moment_matrix)
   vector_field.matrix().fill(Vector2f::Ones());
 
   auto true_moments = Image<Matrix2f>{ 3, 3 };
-  true_moments.array().fill(Matrix2f::Ones());
+  true_moments.flat_array().fill(Matrix2f::Ones());
 
   auto moments = vector_field.compute<SecondMomentMatrix>();
   for (size_t i = 0; i != moments.size(); ++i)
-    EXPECT_MATRIX_NEAR(true_moments.array()[i], moments.array()[i], 1e-3);
+    EXPECT_MATRIX_NEAR(true_moments.flat_array()[i], moments.flat_array()[i], 1e-3);
 }
 
 

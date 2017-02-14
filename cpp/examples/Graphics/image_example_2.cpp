@@ -1,41 +1,53 @@
+#include <random>
+
 #include <DO/Sara/Graphics.hpp>
 
-using namespace std;
-using namespace DO::Sara;
 
 GRAPHICS_MAIN()
 {
-  Image<Rgb8> image(300, 300);
-  image.array().fill(White8);
+  using namespace std;
+  using namespace DO::Sara;
+
+  // Uniform distributions.
+  auto rng = std::mt19937{};
+  auto uni_0_255 = std::uniform_int_distribution<unsigned char>{};
+  auto uni_0_300 = std::uniform_int_distribution<int>{0, 300};
+
+  auto uniform_color_dist = [&]() {
+    return Color3ub{uni_0_255(rng), uni_0_255(rng), uni_0_255(rng)};
+  };
+
+  // Create a white image and display it on a window.
+  auto image = Image<Rgb8>{300, 300};
+  image.flat_array().fill(White8);
 
   create_window(300, 300);
   display(image);
+  get_key();
 
-  for (int y = 0; y < 300; ++y)
-  {
-    for (int x = 0; x < 300; ++x)
-    {
-      Color3ub c(rand()%256, rand()%256, rand()%256);
-      draw_point(image, x, y, c);
-    }
-  }
+  // Draw random colors on an image surface.
+  for (auto y = 0; y < image.height(); ++y)
+    for (auto x = 0; x < image.width(); ++x)
+      draw_point(image, x, y, uniform_color_dist());
+
   display(image);
   get_key();
 
-  image.array().fill(White8);
+
+  // Display random rectangles.
+  image.flat_array().fill(White8);
   display(image);
   get_key();
 
-  for (int i = 0; i <10; ++i)
+  for (int i = 0; i < 10; ++i)
   {
-    int x, y, w, h;
-    x = rand()%300;
-    y = rand()%300;
-    w = rand()%300;
-    h = rand()%300;
-    Color3ub c(rand()%256, rand()%256, rand()%256);
-    fill_rect(image, x, y, w, h, c);
+    const auto x = uni_0_300(rng);
+    const auto y = uni_0_300(rng);
+    const auto w = uni_0_300(rng);
+    const auto h = uni_0_300(rng);
+    fill_rect(image, x, y, w, h, uniform_color_dist());
   }
+
   display(image);
   get_key();
   close_window();

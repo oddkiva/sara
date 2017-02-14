@@ -21,7 +21,9 @@ using namespace DO::Sara;
 
 
 template <class ChannelType>
-class TestGaussianPyramid : public testing::Test {};
+class TestGaussianPyramid : public testing::Test
+{
+};
 
 typedef testing::Types<float, double, Rgb32f, Rgb64f> ChannelTypes;
 
@@ -29,22 +31,21 @@ TYPED_TEST_CASE_P(TestGaussianPyramid);
 
 TYPED_TEST_P(TestGaussianPyramid, test_gaussian_pyramid)
 {
-  typedef TypeParam T;
-  Image<T> I(16, 16);
+  using T = TypeParam;
+  auto I = Image<T>(16, 16);
+
   I.matrix().fill(PixelTraits<T>::max());
 
-  ImagePyramid<T> G(gaussian_pyramid(I, ImagePyramidParams(-1)));
-
-  ImagePyramid<T> D(difference_of_gaussians_pyramid(G));
-
-  ImagePyramid<T> L(laplacian_pyramid(G));
+  const auto G = gaussian_pyramid(I, ImagePyramidParams(-1));
+  const auto D = difference_of_gaussians_pyramid(G);
+  const auto L = laplacian_pyramid(G);
 }
 
 REGISTER_TYPED_TEST_CASE_P(TestGaussianPyramid, test_gaussian_pyramid);
 INSTANTIATE_TYPED_TEST_CASE_P(DO_SARA_ImageProcessing_Pyramid_Test,
                               TestGaussianPyramid, ChannelTypes);
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
