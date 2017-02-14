@@ -10,11 +10,11 @@ GRAPHICS_MAIN()
 
   // Uniform distributions.
   auto rng = std::mt19937{};
-  auto uni_0_255 = std::uniform_int_distribution<unsigned char>{};
-  auto uni_0_300 = std::uniform_int_distribution<int>{0, 300};
+  auto uni_0_255 = std::uniform_int_distribution<>{0, 255};
+  auto uni_0_300 = std::uniform_int_distribution<>{0, 300};
 
   auto uniform_color_dist = [&]() {
-    return Color3ub{uni_0_255(rng), uni_0_255(rng), uni_0_255(rng)};
+    return Color3ub(uni_0_255(rng), uni_0_255(rng), uni_0_255(rng));
   };
 
   // Create a white image and display it on a window.
