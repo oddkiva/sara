@@ -47,8 +47,8 @@ TEST(TestDoG, test_compute_dog_extrema)
   const auto& o_index = scale_octave_pairs[0](1);
 
   // There should be only one extrema at only one scale.
-  EXPECT_EQ(features.size(), 1);
-  EXPECT_EQ(scale_octave_pairs.size(), 1);
+  EXPECT_EQ(features.size(), 1u);
+  EXPECT_EQ(scale_octave_pairs.size(), 1u);
 
   const auto& f = features.front();
   const auto& D = compute_DoGs.diff_of_gaussians();

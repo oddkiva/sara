@@ -58,6 +58,7 @@ namespace Eigen {
     using Real = Array<T, M, N>;
     using NonInteger = Array<T, M, N>;
     using Nested = Array<T, M, N>;
+    using Literal = Array<T, M, N>;
 
     enum {
       IsComplex = 0,
@@ -95,6 +96,7 @@ namespace Eigen {
     using Real = Matrix<T, M, N>;
     using NonInteger = Matrix<T, M, N>;
     using Nested = Matrix<T, M, N>;
+    using Literal = Matrix<T, M, N>;
 
     enum {
       IsComplex = 0,
