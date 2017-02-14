@@ -23,21 +23,20 @@ namespace DO { namespace Sara {
                                                float kappa)
   {
     // Derive the smoothed function $g_{\sigma_I} * I$
-    auto M = I.
-      compute<Gaussian>(sigma_D).
-      compute<Gradient>().
-      compute<SecondMomentMatrix>().
-      compute<Gaussian>(sigma_I);
+    const auto M = I.compute<Gaussian>(sigma_D)
+                       .compute<Gradient>()
+                       .compute<SecondMomentMatrix>()
+                       .compute<Gaussian>(sigma_I);
 
     // Compute the cornerness function.
-    auto cornerness = Image<float>{ I.sizes() };
+    auto cornerness = Image<float>{I.sizes()};
     auto M_it = M.begin();
     auto c_it= cornerness.begin();
-    for ( ; c_it != cornerness.end(); ++c_it, ++M_it)
-      *c_it = M_it->determinant() - kappa*pow(M_it->trace(), 2);
+    for (; c_it != cornerness.end(); ++c_it, ++M_it)
+      *c_it = M_it->determinant() - kappa * pow(M_it->trace(), 2);
 
     // Normalize the cornerness function.
-    cornerness.array() *= pow(sigma_D, 2);
+    cornerness.flat_array() *= pow(sigma_D, 2);
     return cornerness;
   }
 
@@ -46,32 +45,33 @@ namespace DO { namespace Sara {
                                                 const ImagePyramidParams& params)
   {
     // Resize the image with the appropriate factor.
-    auto resize_factor = pow(2.f, -params.first_octave_index());
+    const auto resize_factor = pow(2.f, -params.first_octave_index());
     auto I = enlarge(image, resize_factor);
 
     // Deduce the new camera sigma with respect to the dilated image.
-    auto camera_sigma = float(params.scale_camera())*resize_factor;
+    const auto camera_sigma =
+        static_cast<float>(params.scale_camera()) * resize_factor;
 
     // Blur the image so that its new sigma is equal to the initial sigma.
-    auto scale_initial = float(params.scale_initial());
+    const auto scale_initial = static_cast<float>(params.scale_initial());
     if (camera_sigma < scale_initial)
     {
-      auto sigma =
+      const auto sigma =
           sqrt(scale_initial * scale_initial - camera_sigma * camera_sigma);
       I = deriche_blur(I, sigma);
     }
 
     // Deduce the maximum number of octaves.
-    auto l = std::min(image.width(), image.height());
-    auto b = params.image_padding_size();
+    const auto l = std::min(image.width(), image.height());
+    const auto b = params.image_padding_size();
     // l/2^k > 2b
     // 2^k < l/(2b)
     // k < log(l/(2b))/log(2)
-    auto num_octaves = static_cast<int>(log(l/(2.f*b))/log(2.f));
+    const auto num_octaves = static_cast<int>(log(l/(2.f*b))/log(2.f));
 
     // Shorten names.
-    auto num_scales = params.num_scales_per_octave();
-    auto k = float(params.scale_geometric_factor());
+    const auto num_scales = params.num_scales_per_octave();
+    const auto k = float(params.scale_geometric_factor());
 
     // Create the image pyramid
     auto cornerness = ImagePyramid<float>{};
@@ -80,17 +80,19 @@ namespace DO { namespace Sara {
     {
       // Compute the octave scaling factor
       cornerness.octave_scaling_factor(o) =
-        (o == 0) ? 1.f/resize_factor : cornerness.octave_scaling_factor(o-1)*2;
+          (o == 0) ? 1.f / resize_factor
+                   : cornerness.octave_scaling_factor(o - 1) * 2;
 
       // Compute the gaussians in octave $o$
       if (o != 0)
         I = downscale(I, 2);
 
-      for (int s = 0; s < num_scales; ++s)
+      for (auto s = 0; s < num_scales; ++s)
       {
         const auto sigma_I = cornerness.scale_relative_to_octave(s);
-        const auto sigma_D = sigma_I/sqrt(2.f);
-        cornerness(s,o) = scale_adapted_harris_cornerness(I, sigma_I, sigma_D, kappa);
+        const auto sigma_D = sigma_I / sqrt(2.f);
+        cornerness(s, o) =
+            scale_adapted_harris_cornerness(I, sigma_I, sigma_D, kappa);
       }
     }
 
@@ -100,7 +102,7 @@ namespace DO { namespace Sara {
   bool local_min_x(int x, int y, ImageView<float>& I)
   {
     for (int u = -1; u <= 1; ++u)
-      if (I(x,y) > I(x+u,y))
+      if (I(x, y) > I(x + u, y))
         return false;
     return true;
   }
@@ -108,7 +110,7 @@ namespace DO { namespace Sara {
   bool local_min_y(int x, int y, ImageView<float>& I)
   {
     for (int u = -1; u <= 1; ++u)
-      if (I(x,y) < I(x+u,y))
+      if (I(x, y) < I(x + u, y))
         return false;
     return true;
   }
@@ -145,7 +147,7 @@ namespace DO { namespace Sara {
         if (scale_octave_pairs)
         {
           for (size_t i = 0; i != new_corners.size(); ++i)
-            scale_octave_pairs->push_back(Point2i(s,o));
+            scale_octave_pairs->push_back(Point2i(s, o));
         }
       }
     }

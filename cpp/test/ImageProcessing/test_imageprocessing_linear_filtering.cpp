@@ -144,7 +144,7 @@ TEST_F(TestFilters, test_gaussian)
 {
   // Convolve with Dirac.
   const auto n = _src_image.sizes()[0];
-  _src_image.array().fill(0.f);
+  _src_image.flat_array().fill(0.f);
   _src_image(n / 2, n / 2) = 1.f;
 
   auto true_matrix = MatrixXf(3, 3);
@@ -168,7 +168,7 @@ TEST_F(TestFilters, test_gaussian)
 
   // Last case.
   _src_image.resize(9, 9); // 2 * 4 * 1 + 1 because of Gaussian truncation factor.
-  _src_image.array().fill(0.f);
+  _src_image.flat_array().fill(0.f);
   _src_image(4, 4) = 1.f;
   true_matrix.resize(9, 9);
   for (int i = 0; i < 9; ++i)
@@ -183,7 +183,7 @@ TEST_F(TestFilters, test_gaussian)
 
 TEST_F(TestFilters, test_sobel)
 {
-  _src_image.array().fill(1);
+  _src_image.flat_array().fill(1);
 
   auto true_matrix = MatrixXf::Zero(3, 3);
 
@@ -206,7 +206,7 @@ TEST_F(TestFilters, test_sobel)
 
 TEST_F(TestFilters, test_scharr)
 {
-  _src_image.array().fill(1);
+  _src_image.flat_array().fill(1);
 
   auto true_matrix = MatrixXf::Zero(3, 3);
 
@@ -229,7 +229,7 @@ TEST_F(TestFilters, test_scharr)
 
 TEST_F(TestFilters, test_prewitt)
 {
-  _src_image.array().fill(1);
+  _src_image.flat_array().fill(1);
 
   auto true_matrix = MatrixXf::Zero(3, 3);
 
@@ -254,7 +254,7 @@ TEST_F(TestFilters, test_2d_non_separable_filter)
 {
   auto width = 3, height = 4;
   _src_image.resize(width, height);
-  _src_image.array().fill(1);
+  _src_image.flat_array().fill(1);
 
   const float kernel_2d[] =
   {
@@ -282,7 +282,7 @@ TEST_F(TestFilters, test_laplacian)
 {
   auto width = 3, height = 4;
   _src_image.resize(width, height);
-  _src_image.array().fill(1);
+  _src_image.flat_array().fill(1);
 
   auto true_matrix = MatrixXf::Zero(height, width);
 
@@ -302,7 +302,7 @@ TEST_F(TestFilters, test_roberts_cross)
 {
   auto width = 3, height = 4;
   _src_image.resize(width, height);
-  _src_image.array().fill(1);
+  _src_image.flat_array().fill(1);
 
   auto true_matrix = MatrixXf::Zero(height, width);
 

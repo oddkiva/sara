@@ -23,14 +23,14 @@ using namespace DO::Sara;
 
 TEST(TestDericheFilter, test_inplace_deriche)
 {
-  Image<float> signal(10,10);
-  signal.array().fill(1);
+  auto signal = Image<float>{10, 10};
+  signal.flat_array().setOnes();
 
-  MatrixXf true_matrix(10, 10);
-  true_matrix.fill(1);
+  auto true_matrix = MatrixXf(10, 10);
+  true_matrix.setOnes();
 
-  int derivative_order;
-  int derivative_axis;
+  auto derivative_order = int{};
+  auto derivative_axis = int{};
 
   // Test the smoothing filter for the two axes.
   derivative_order = 0;
@@ -47,14 +47,14 @@ TEST(TestDericheFilter, test_inplace_deriche)
   // Test the first-order derivative filter for the two axes.
   derivative_order = 1;
   derivative_axis = 0;
-  signal.array().fill(1);
+  signal.flat_array().fill(1);
   true_matrix.fill(0);
   inplace_deriche(signal, 1.f, derivative_order, derivative_axis);
   EXPECT_MATRIX_NEAR(signal.matrix(), true_matrix, 1e-5);
 
   derivative_order = 1;
   derivative_axis = 1;
-  signal.array().fill(1);
+  signal.flat_array().fill(1);
   true_matrix.fill(0);
   inplace_deriche(signal, 1.f, derivative_order, derivative_axis);
   EXPECT_MATRIX_NEAR(signal.matrix(), true_matrix, 1e-5);
@@ -68,13 +68,13 @@ TEST(TestDericheFilter, test_inplace_deriche)
 
 TEST(TestDericheFilter, test_inplace_deriche_blur)
 {
-  Image<float> signal(10,10);
-  signal.array().fill(1);
+  auto signal = Image<float>{10, 10};
+  signal.flat_array().setOnes();
 
-  MatrixXf true_matrix(10, 10);
-  true_matrix.fill(1);
+  auto true_matrix = MatrixXf(10, 10);
+  true_matrix.setOnes();
 
-  Vector2f sigmas = Vector2f::Ones();
+  const auto sigmas = Vector2f::Ones().eval();
   inplace_deriche_blur(signal, sigmas);
   EXPECT_MATRIX_NEAR(signal.matrix(), true_matrix, 1e-5);
 
@@ -86,11 +86,11 @@ TEST(TestDericheFilter, test_inplace_deriche_blur)
 
 TEST(TestDericheFilter, test_convenience_deriche_blur)
 {
-  Image<float> in_signal(10,10);
-  in_signal.array().fill(1);
+  auto in_signal = Image<float>{10, 10};
+  in_signal.flat_array().setOnes();
 
-  MatrixXf true_matrix(10, 10);
-  true_matrix.fill(1);
+  auto true_matrix = MatrixXf(10, 10);
+  true_matrix.setOnes();
 
   auto out_signal = in_signal.compute<DericheBlur>(1, true);
   EXPECT_MATRIX_NEAR(out_signal.matrix(), true_matrix, 1e-5);

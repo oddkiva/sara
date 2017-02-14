@@ -27,44 +27,44 @@ void check_affine_adaptation(const Image<unsigned char>& image,
   const auto w = image.width();
   const auto h = image.height();
   const auto r = 100.f;
-  const auto patch_sz = 2*r;
+  const auto patch_sz = 2 * r;
 
   auto gray32f_image = image.convert<float>();
-  auto patch = Image<float>{ w, h };
-  patch.array().fill(0.f);
+  auto patch = Image<float>{w, h};
+  patch.flat_array().fill(0.f);
 
   display(image);
   f.draw(Blue8);
 
-  auto region = OERegion{ f };
-  region.center().fill(patch_sz/2.f);
+  auto region = OERegion{f};
+  region.center().fill(patch_sz / 2.f);
   region.orientation() = 0.f;
-  region.shape_matrix() = Matrix2f::Identity()*4.f / (r*r);
+  region.shape_matrix() = Matrix2f::Identity() * 4.f / (r * r);
 
   auto A = f.affinity();
   cout << "A=\n" << A << endl;
 
   for (int y = 0; y < patch_sz; ++y)
   {
-    auto v = float{ 2 * (y - r) / r };
+    const auto v = float{2 * (y - r) / r};
 
     for (int x = 0; x < patch_sz; ++x)
     {
-      auto u = float{ 2 * (x - r) / r };
+      const auto u = float{2 * (x - r) / r};
 
-      Point3f P{ A * Point3f{ u, v, 1. } };
-      Point2d p{ P.head(2).cast<double>() };
+      const auto P = Point3f{A * Point3f{u, v, 1.}};
+      const auto p = Point2d{P.head(2).cast<double>()};
 
       if (p.x() < 0 || p.x() >= w || p.y() < 0 || p.y() >= h)
         continue;
 
-      patch(x,y) = static_cast<float>(interpolate(gray32f_image, p));
+      patch(x, y) = static_cast<float>(interpolate(gray32f_image, p));
     }
   }
 
   auto w1 = active_window();
-  auto w2 = create_window(static_cast<int>(patch_sz),
-                          static_cast<int>(patch_sz));
+  auto w2 =
+      create_window(static_cast<int>(patch_sz), static_cast<int>(patch_sz));
   set_active_window(w2);
   set_antialiasing();
   display(patch);
@@ -76,8 +76,7 @@ void check_affine_adaptation(const Image<unsigned char>& image,
   set_active_window(w1);
 }
 
-void read_features(const Image<unsigned char>& image,
-                   const string& filepath)
+void read_features(const Image<unsigned char>& image, const string& filepath)
 {
   cout << "Reading DoG features... " << endl;
   auto features = vector<OERegion>{};
@@ -86,7 +85,7 @@ void read_features(const Image<unsigned char>& image,
   cout << "Reading keypoints..." << endl;
   read_keypoints(features, descriptors, filepath);
 
-  for (int i = 0; i < 10; ++i)
+  for (auto i = 0; i < 10; ++i)
     check_affine_adaptation(image, features[i]);
 
   auto ext = filepath.substr(filepath.find_last_of("."), filepath.size());
@@ -100,7 +99,7 @@ void read_features(const Image<unsigned char>& image,
   read_keypoints(features2, descriptors2, copy_filepath);
 
   cout << "Printing the 10 first keypoints..." << endl;
-  for(int i = 0; i < 10; ++i)
+  for (auto i = 0; i < 10; ++i)
     cout << features[i] << endl;
 
   // Draw features.

@@ -24,18 +24,18 @@ void Scene::generate_scene(Image<Rgb64f>& I, Image<double>& z_buffer) const
   if (z_buffer.width() != w || z_buffer.height() != h)
     z_buffer = Image<double>(w, h);
 
-  I.array().fill(Black64f);
-  z_buffer.array().fill(std::numeric_limits<double>::max());
+  I.flat_array().fill(Black64f);
+  z_buffer.flat_array().fill(std::numeric_limits<double>::max());
 
   for (int y = -h / 2; y < h / 2; ++y)
   {
     for (int x = -w / 2; x < w / 2; ++x)
     {
-      const Point3d p{ double(x), double(y), f };
-      Vector3d ray{ p - _camera_pos };
+      const auto p = Point3d{double(x), double(y), f};
+      auto ray = Vector3d{p - _camera_pos};
 
-      Point3d impact{ infinite_point };
-      Rgb64f reflection{ Black64f };
+      auto impact = Point3d{infinite_point};
+      auto reflection = Black64f;
 
       for (auto o = _objects.begin(); o != _objects.end(); ++o)
       {

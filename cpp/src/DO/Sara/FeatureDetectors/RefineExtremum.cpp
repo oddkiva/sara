@@ -28,15 +28,15 @@ namespace DO { namespace Sara {
                        int type, Point3f& pos, float& val, int border_sz,
                        int num_iter)
   {
-    Vector3f D_prime;   // gradient
-    Matrix3f D_second;  // hessian
-    Vector3f h;
-    Vector3f lambda;
+    auto D_prime = Vector3f{};   // gradient
+    auto D_second = Matrix3f{};  // hessian
+    auto h = Vector3f{};
+    auto lambda = Vector3f{};
 
     pos << float(x), float(y), I.scale_relative_to_octave(s);
 
-    int i;
-    for (i = 0; i < num_iter; ++i)
+    auto i = 0;
+    for (; i < num_iter; ++i)
     {
       // Range check at each iteration. The first iteration should always be OK.
       if (x < border_sz || x >= I(s, o).width() - border_sz || y < border_sz ||
@@ -106,9 +106,9 @@ namespace DO { namespace Sara {
       break;
     }
 
-    pos = Vector3f{ float(x), float(y), I.scale_relative_to_octave(s) };
-    float oldval = I(x, y, s, o);
-    float newval = oldval + 0.5f * D_prime.dot(h);
+    pos = Vector3f{float(x), float(y), I.scale_relative_to_octave(s)};
+    const auto oldval = I(x, y, s, o);
+    const auto newval = oldval + 0.5f * D_prime.dot(h);
 
     if ((type == 1 && oldval <= newval) || (type == -1 && oldval >= newval))
     {
@@ -222,7 +222,7 @@ namespace DO { namespace Sara {
     extrema.reserve(10000);
 
     auto map = Image<int>{ I(s, o).sizes() };
-    map.array().setZero();
+    map.flat_array().setZero();
 
 //#define STRICT_LOCAL_EXTREMA
 #ifdef STRICT_LOCAL_EXTREMA

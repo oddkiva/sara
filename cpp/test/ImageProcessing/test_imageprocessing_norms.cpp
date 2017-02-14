@@ -26,7 +26,8 @@ class TestNorms : public testing::Test
 protected:
   Image<Vector2f> vector_field;
 
-  TestNorms() : testing::Test()
+  TestNorms()
+    : testing::Test()
   {
     vector_field.resize(3, 3);
     vector_field.matrix().fill(Vector2f::Ones());
@@ -36,8 +37,8 @@ protected:
 
 TEST_F(TestNorms, test_squared_norm)
 {
-  auto true_squared_norm_image = Image<float>{ 3, 3 };
-  true_squared_norm_image.array().fill(2);
+  auto true_squared_norm_image = Image<float>{3, 3};
+  true_squared_norm_image.flat_array().fill(2);
 
   auto squared_norm_image = Image<float>{};
   EXPECT_THROW(squared_norm(vector_field, squared_norm_image), domain_error);
@@ -56,8 +57,8 @@ TEST_F(TestNorms, test_squared_norm)
 
 TEST_F(TestNorms, test_blue_norm)
 {
-  auto true_blue_norm_image = Image<float>{ 3, 3 };
-  true_blue_norm_image.array().fill(Vector2f::Ones().blueNorm());
+  auto true_blue_norm_image = Image<float>{3, 3};
+  true_blue_norm_image.flat_array().fill(Vector2f::Ones().blueNorm());
 
   auto blue_norm_image = Image<float>{};
   EXPECT_THROW(blue_norm(vector_field, blue_norm_image), domain_error);
@@ -73,8 +74,8 @@ TEST_F(TestNorms, test_blue_norm)
 
 TEST_F(TestNorms, test_stable_norm)
 {
-  auto true_stable_norm_image = Image<float>{ 3, 3 };
-  true_stable_norm_image.array().fill(Vector2f::Ones().stableNorm());
+  auto true_stable_norm_image = Image<float>{3, 3};
+  true_stable_norm_image.flat_array().fill(Vector2f::Ones().stableNorm());
 
   auto stable_norm_image = Image<float>{};
   EXPECT_THROW(stable_norm(vector_field, stable_norm_image), domain_error);
