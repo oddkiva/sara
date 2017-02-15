@@ -31,9 +31,6 @@
 # pragma warning ( disable : 4181 ) // "../Core/Locator.hpp(444) : warning C4181: qualifier applied to reference type; ignored"
 #endif
 
-//! Activate by default math constants.
-#define _USE_MATH_DEFINES
-
 #include <sstream>
 
 #include <Eigen/Eigen>

@@ -92,11 +92,11 @@ TEST(TestDericheFilter, test_convenience_deriche_blur)
   auto true_matrix = MatrixXf(10, 10);
   true_matrix.setOnes();
 
-  auto out_signal = in_signal.compute<DericheBlur>(1, true);
+  auto out_signal = in_signal.compute<DericheBlur>(1.f, true);
   EXPECT_MATRIX_NEAR(out_signal.matrix(), true_matrix, 1e-5);
 
   out_signal.clear();
-  out_signal = in_signal.compute<DericheBlur>(1);
+  out_signal = in_signal.compute<DericheBlur>(1.f);
   EXPECT_MATRIX_NEAR(out_signal.matrix(), true_matrix, 1e-5);
 }
 
