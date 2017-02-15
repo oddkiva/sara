@@ -9,8 +9,6 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#define _USE_MATH_DEFINES
-
 #include <gtest/gtest.h>
 
 #include <DO/Sara/ImageProcessing/SecondMomentMatrix.hpp>

@@ -68,31 +68,28 @@ namespace DO { namespace Sara {
 
   public:
     //! Default image constructor.
-    inline ImageView()
-      : base_type{}
-    {
-    }
+    inline ImageView() = default;
 
     //! Image constructor.
     inline ImageView(pointer data, const vector_type& sizes)
-      : base_type{ data, sizes }
+      : base_type{data, sizes}
     {
     }
 
     //! @{
     //! Image constructors with specified sizes.
     inline explicit ImageView(const vector_type& sizes)
-      : base_type{ sizes }
+      : base_type{sizes}
     {
     }
 
     inline ImageView(int width, int height)
-      : base_type{ width, height }
+      : base_type{width, height}
     {
     }
 
     inline ImageView(int width, int height, int depth)
-      : base_type{ width, height, depth }
+      : base_type{width, height, depth}
     {
     }
     //! @}
@@ -115,20 +112,18 @@ namespace DO { namespace Sara {
     {
       static_assert(Dimension == 2, "MultiArray must be 2D");
       return matrix_view_type{
-        reinterpret_cast<typename ElementTraits<pixel_type>::pointer>(
-            base_type::data()),
-        height(), width()
-      };
+          reinterpret_cast<typename ElementTraits<pixel_type>::pointer>(
+              base_type::data()),
+          height(), width()};
     }
 
     inline auto matrix() const -> const_matrix_view_type
     {
       static_assert(Dimension == 2, "MultiArray must be 2D");
       return const_matrix_view_type{
-        reinterpret_cast<typename ElementTraits<pixel_type>::const_pointer>(
-            base_type::data()),
-        height(), width()
-      };
+          reinterpret_cast<typename ElementTraits<pixel_type>::const_pointer>(
+              base_type::data()),
+          height(), width()};
     }
     //! @}
 
@@ -136,7 +131,7 @@ namespace DO { namespace Sara {
     template <typename Pixel>
     inline auto convert() const -> Image<Pixel, Dimension>
     {
-      auto dst = Image<Pixel, Dimension>{ base_type::sizes() };
+      auto dst = Image<Pixel, Dimension>{base_type::sizes()};
       DO::Sara::convert(*this, dst);
       return dst;
     }
@@ -185,7 +180,7 @@ namespace DO { namespace Sara {
     {
       using Pixel = decltype(op(std::declval<value_type>()));
 
-      auto dst = Image<Pixel, N>{ this->sizes() };
+      auto dst = Image<Pixel, N>{this->sizes()};
 
       auto src_pixel = this->begin();
       auto dst_pixel = dst.begin();

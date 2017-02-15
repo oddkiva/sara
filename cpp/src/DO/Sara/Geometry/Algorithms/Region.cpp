@@ -9,7 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Sara/Geometry/Algorithms.hpp>
+#include <DO/Sara/Geometry/Algorithms/Region.hpp>
 
 
 using namespace std;

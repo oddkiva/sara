@@ -31,9 +31,6 @@
 # pragma warning ( disable : 4181 ) // "../Core/Locator.hpp(444) : warning C4181: qualifier applied to reference type; ignored"
 #endif
 
-//! Activate by default math constants.
-#define _USE_MATH_DEFINES
-
 #include <sstream>
 
 #include <Eigen/Eigen>
@@ -58,6 +55,7 @@ namespace Eigen {
     using Real = Array<T, M, N>;
     using NonInteger = Array<T, M, N>;
     using Nested = Array<T, M, N>;
+    using Literal = Array<T, M, N>;
 
     enum {
       IsComplex = 0,
@@ -95,6 +93,7 @@ namespace Eigen {
     using Real = Matrix<T, M, N>;
     using NonInteger = Matrix<T, M, N>;
     using Nested = Matrix<T, M, N>;
+    using Literal = Matrix<T, M, N>;
 
     enum {
       IsComplex = 0,

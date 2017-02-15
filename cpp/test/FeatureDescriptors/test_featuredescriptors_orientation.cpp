@@ -73,7 +73,7 @@ TEST(TestComputeDominantOrientations, test_detect_single_peak)
     grad_polar_coords, c.x(), c.y(), 1.f
   );
 
-  EXPECT_EQ(dominant_orientations.size(), 1);
+  EXPECT_EQ(dominant_orientations.size(), 1u);
 
   auto& ori = dominant_orientations.front();
   EXPECT_NEAR(theta, ori, 1e-6f);
