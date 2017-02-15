@@ -177,7 +177,7 @@ public:
      * @param num_elements Number of elements to copy
      * @param sorted Indicates if results should be sorted
      */
-    void copy(size_t* indices, DistanceType* dists, size_t num_elements, bool sorted = true)
+    void copy(size_t* indices, DistanceType* dists, size_t num_elements, bool /*sorted = true*/)
     {
     	size_t n = std::min(count_, num_elements);
     	for (size_t i=0; i<n; ++i) {
@@ -278,7 +278,7 @@ public:
      * @param num_elements Number of elements to copy
      * @param sorted Indicates if results should be sorted
      */
-    void copy(size_t* indices, DistanceType* dists, size_t num_elements, bool sorted = true)
+    void copy(size_t* indices, DistanceType* dists, size_t num_elements, bool /*sorted = true*/)
     {
     	size_t n = std::min(count_, num_elements);
     	for (size_t i=0; i<n; ++i) {
@@ -682,7 +682,7 @@ public:
         return true;
     }
 
-    void addPoint(DistanceType dist, size_t index)
+    void addPoint(DistanceType dist, size_t /*index*/)
     {
         if (dist<radius) {
             count++;
@@ -739,7 +739,7 @@ public:
      * @param dist pointer to a C array of distances
      * @param n_neighbors the number of neighbors to copy
      */
-    void copy(size_t* indices, DistanceType* dist, int n_neighbors, bool sorted = true)
+    void copy(size_t* indices, DistanceType* dist, int n_neighbors, bool /*sorted = true*/)
     {
     	if (n_neighbors<0) n_neighbors = dist_indices_.size();
     	int i = 0;

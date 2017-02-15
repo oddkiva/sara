@@ -140,7 +140,7 @@ public:
 
     using BaseClass::buildIndex;
 
-    void addPoints(const Matrix<ElementType>& points, float rebuild_threshold = 2)
+    void addPoints(const Matrix<ElementType>& points, float /*rebuild_threshold = 2*/)
     {
         assert(points.cols==veclen_);
         extendDataset(points);
