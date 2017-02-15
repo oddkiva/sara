@@ -15,7 +15,11 @@ struct access
     template<typename Archive, typename T>
     static inline void serialize(Archive& ar, T& type)
     {
+#ifdef _WIN32
+        (void) type;
+#else
         type.serialize(ar);
+#endif
     }
 };
 
