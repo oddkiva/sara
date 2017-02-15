@@ -24,7 +24,7 @@
 using namespace DO::Sara;
 
 
-class TestPaintingCommands: public testing::Test
+class TestPaintingCommands : public testing::Test
 {
 protected:
   Window _test_window;
@@ -88,8 +88,7 @@ TEST_F(TestPaintingCommands, test_draw_poly)
 TEST_F(TestPaintingCommands, test_draw_string)
 {
   EXPECT_TRUE(
-    draw_string(10, 10, "example string", Red8, 14, 0.5,
-                true, false, false));
+      draw_string(10, 10, "example string", Red8, 14, 0.5, true, false, false));
 }
 
 TEST_F(TestPaintingCommands, test_draw_arrow)
@@ -130,29 +129,29 @@ TEST_F(TestPaintingCommands, test_fill_poly)
 
 TEST_F(TestPaintingCommands, test_put_color_image)
 {
-  int w = 50, h = 50;
-  std::vector<Color3ub> data(w*h, Red8);
+  const auto w = 50, h = 50;
+  const auto data = std::vector<Color3ub>(w * h, Red8);
   EXPECT_TRUE(put_color_image(10, 10, data.data(), w, h, 2.));
   EXPECT_TRUE(put_color_image(Point2i(10, 10), data.data(), w, h, 2.));
 }
 
 TEST_F(TestPaintingCommands, test_put_grey_image)
 {
-  int w = 50, h = 50;
-  std::vector<unsigned char> data(w*h, 0);
+  const auto w = 50, h = 50;
+  const auto data = std::vector<unsigned char>(w * h, 0);
   EXPECT_TRUE(put_grey_image(10, 10, data.data(), w, h, 2.));
   EXPECT_TRUE(put_grey_image(Point2i(10, 10), data.data(), w, h, 2.));
 }
 
 TEST_F(TestPaintingCommands, test_display)
 {
-  Image<Color3ub> image(50, 50);
-  image.array().fill(Red8);
+  auto image = Image<Color3ub>{50, 50};
+  image.flat_array().fill(Red8);
   EXPECT_TRUE(display(image, 0, 0, 1.4));
   EXPECT_TRUE(display(image, Point2i(0, 10), 1.4));
 
-  Image<Rgb8> rgb_image(50, 50);
-  rgb_image.array().fill(Red8);
+  auto rgb_image = Image<Rgb8>{50, 50};
+  rgb_image.flat_array().fill(Red8);
   EXPECT_TRUE(display(rgb_image, 0, 0, 1.4));
   EXPECT_TRUE(display(rgb_image, Point2i(0, 10), 1.4));
 }
@@ -174,8 +173,8 @@ TEST_F(TestPaintingCommands, test_set_transparency)
 
 TEST_F(TestPaintingCommands, test_save_screen)
 {
-  Image<Color3ub> image(50, 50);
-  image.array().fill(Red8);
+  auto image = Image<Color3ub>(50, 50);
+  image.flat_array().fill(Red8);
   EXPECT_TRUE(display(image, 0, 0, 1.4));
   EXPECT_TRUE(save_screen(active_window(), "test.png"));
 }
@@ -187,7 +186,8 @@ protected:
   typedef testing::Test Base;
   Window test_window_;
 
-  TestTemplateDisplay(): Base()
+  TestTemplateDisplay()
+    : Base()
   {
     test_window_ = create_window(300, 300);
   }
@@ -198,22 +198,21 @@ protected:
   }
 };
 
-typedef testing::Types<
-  unsigned char, unsigned short, unsigned int,
-  char, short, int, float, double
-> ColorTypes;
+typedef testing::Types<unsigned char, unsigned short, unsigned int, char, short,
+                       int, float, double>
+    ColorTypes;
 
 TYPED_TEST_CASE_P(TestTemplateDisplay);
 
 TYPED_TEST_P(TestTemplateDisplay, test_display)
 {
-  Image<TypeParam> image(20, 20);
-  image.array().fill(Red8);
+  auto image = Image<TypeParam>{20, 20};
+  image.flat_array().fill(Red8);
   EXPECT_TRUE(display(image, 0, 0, 1.4));
   EXPECT_TRUE(display(image, Point2i(0, 10), 1.4));
 }
 
-int worker_thread(int argc, char **argv)
+int worker_thread(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

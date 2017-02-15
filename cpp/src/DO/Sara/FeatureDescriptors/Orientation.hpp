@@ -44,11 +44,11 @@ namespace DO { namespace Sara {
   template <typename T>
   Image<Matrix<T,2,1>> gradient_polar_coordinates(const ImageView<T>& f)
   {
-    auto nabla_f = Image<Matrix<T, 2, 1>>{ gradient(f) };
+    auto nabla_f = gradient(f);
     for (auto it = nabla_f.begin(); it != nabla_f.end(); ++it)
     {
-      auto r = 2*it->norm();
-      auto theta = atan2(it->y(), it->x());
+      const auto r = 2 * it->norm();
+      const auto theta = atan2(it->y(), it->x());
       *it << r, theta;
     }
     return nabla_f;

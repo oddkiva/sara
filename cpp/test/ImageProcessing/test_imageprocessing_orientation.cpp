@@ -9,8 +9,6 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#define _USE_MATH_DEFINES
-
 #include <gtest/gtest.h>
 
 #include <DO/Sara/ImageProcessing/Orientation.hpp>
@@ -28,12 +26,12 @@ TEST(TestOrientation, test_orientation)
   vector_field.matrix().fill(Vector2f::Ones());
 
   Image<float> true_orientations(3, 3);
-  true_orientations.array().fill(static_cast<float>(M_PI_4));
+  true_orientations.flat_array().fill(static_cast<float>(M_PI_4));
 
   auto orientations = Image<float>{};
   EXPECT_THROW(orientation(vector_field, orientations), domain_error);
 
-  orientations = Image<float>{ vector_field.sizes() };
+  orientations = Image<float>{vector_field.sizes()};
   orientation(vector_field, orientations);
   EXPECT_MATRIX_NEAR(true_orientations.matrix(), orientations.matrix(), 1e-3);
 

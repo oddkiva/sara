@@ -88,9 +88,9 @@ namespace DO { namespace Sara {
 
     //! @{
     //! @brief Array views for linear algebra.
-    using array_view_type =
+    using flat_array_view_type =
         Map<Array<typename ElementTraits<T>::value_type, Dynamic, 1>>;
-    using const_array_view_type =
+    using const_flat_array_view_type =
         Map<const Array<typename ElementTraits<T>::value_type, Dynamic, 1>>;
     //! @}
 
@@ -235,15 +235,15 @@ namespace DO { namespace Sara {
     inline slice_type operator[](int i)
     {
       auto slice_sizes = _sizes.tail(N - 1).eval();
-      auto data = _begin + _strides[0] * i;
-      return slice_type{data, slice_sizes};
+      auto slice_data = _begin + _strides[0] * i;
+      return slice_type{slice_data, slice_sizes};
     }
 
     inline const_slice_type operator[](int i) const
     {
       auto slice_sizes = _sizes.tail(N - 1).eval();
-      auto data = _begin + _strides[0] * i;
-      return slice_type{data, slice_sizes};
+      auto slice_data = _begin + _strides[0] * i;
+      return slice_type{slice_data, slice_sizes};
     }
     //! @}
 
@@ -275,16 +275,16 @@ namespace DO { namespace Sara {
 
     //! @{
     //! @brief Return the array view for linear algebra with Eigen libraries.
-    inline array_view_type array()
+    inline flat_array_view_type flat_array()
     {
-      return array_view_type{
+      return flat_array_view_type{
           reinterpret_cast<typename ElementTraits<T>::pointer>(data()),
           static_cast<int64_t>(size())};
     }
 
-    inline const_array_view_type array() const
+    inline const_flat_array_view_type flat_array() const
     {
-      return const_array_view_type{
+      return const_flat_array_view_type{
           reinterpret_cast<const typename ElementTraits<T>::const_pointer>(
               data()),
           static_cast<int64_t>(size())};
@@ -429,13 +429,13 @@ namespace DO { namespace Sara {
 
   protected: /* data members. */
     //! @brief First element of the internal array.
-    value_type* _begin{nullptr};
+    value_type *_begin{nullptr};
     //! @brief Last element of the internal array.
-    value_type* _end{nullptr};
+    value_type *_end{nullptr};
     //! @brief Sizes vector.
-    vector_type _sizes{vector_type::Zero()};
+    vector_type _sizes{vector_type::Zero().eval()};
     //! @brief Strides vector.
-    vector_type _strides{vector_type::Zero()};
+    vector_type _strides{vector_type::Zero().eval()};
   };
 
 

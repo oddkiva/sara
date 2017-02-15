@@ -18,18 +18,17 @@ TEST(TestHarris, test_harris_cornerness_pyramid)
 
 TEST(TestHarris, test_me)
 {
-  const auto N = 2 * 10 + 1;
-  Image<float> I{ N, N };
-  I.array().fill(0);
+  constexpr auto N = 2 * 10 + 1;
+  auto I = Image<float>{N, N};
+  I.flat_array().fill(0);
   I(1, 1) = 1.f;
 
   ComputeHarrisLaplaceCorners compute_harris_laplace_corners{};
 
   auto features = compute_harris_laplace_corners(I, 0);
-
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

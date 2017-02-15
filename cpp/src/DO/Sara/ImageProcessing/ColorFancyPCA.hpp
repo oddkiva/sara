@@ -30,7 +30,7 @@ namespace DO { namespace Sara {
 
     void operator()(Image<Rgb32f>& out, const Vector3f& alpha) const
     {
-      out.array() = out.array() + _U * _S.asDiagonal() * alpha;
+      out.flat_array() = out.flat_array() + _U * _S.asDiagonal() * alpha;
     }
 
     Matrix3f _U;
