@@ -433,9 +433,9 @@ namespace DO { namespace Sara {
     //! @brief Last element of the internal array.
     value_type *_end{nullptr};
     //! @brief Sizes vector.
-    vector_type _sizes = vector_type::Zero();
+    vector_type _sizes{vector_type::Zero().eval()};
     //! @brief Strides vector.
-    vector_type _strides = vector_type::Zero();
+    vector_type _strides{vector_type::Zero().eval()};
   };
 
 
