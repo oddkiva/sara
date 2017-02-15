@@ -68,7 +68,8 @@ namespace DO { namespace Sara {
                           vector<vector<int> >& nn_indices,
                           vector<vector<double> >& nn_squared_distances)
   {
-    if (query_column_vectors.rows() != _row_major_data_matrix.cols)
+    if (static_cast<std::size_t>(query_column_vectors.rows()) !=
+        _row_major_data_matrix.cols)
     {
       std::string error_msg("queries.rows() != data_.cols");
       throw std::runtime_error(error_msg);

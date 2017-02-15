@@ -10,11 +10,7 @@
 
 //! @file
 
-#pragma once
-
-#include <tuple>
 #include <fstream>
-#include <sstream>
 
 #include <DO/Sara/ImageIO/Database/TrainingDataSet.hpp>
 
