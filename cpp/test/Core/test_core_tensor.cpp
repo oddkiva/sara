@@ -119,7 +119,7 @@ TEST(TestTensorView, test_matrix_case)
 
   auto img_elem = Matrix<float, M, N>{};
   std::iota(img_elem.data(), img_elem.data() + M * N, 0);
-  img.array().fill(img_elem);
+  img.flat_array().fill(img_elem);
 
   auto m = img.matrix();
   m(0,0) *= 0; m(0,1) *= 1;
@@ -160,7 +160,7 @@ TEST(TestTensorView, test_array_case)
 
   auto img_elem = Array<float, M, N>{};
   std::iota(img_elem.data(), img_elem.data() + M * N, 0);
-  img.array().fill(img_elem);
+  img.flat_array().fill(img_elem);
 
   auto m = img.matrix();
   m(0,0) *= 0; m(0,1) *= 1;
@@ -194,7 +194,7 @@ TEST(TestTensorView, test_array_case)
           EXPECT_EQ(img_elem(i, j) * (y * W + x), t(Vector4i{y, x, j, i}));
 }
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

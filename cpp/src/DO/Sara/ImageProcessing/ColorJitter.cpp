@@ -30,7 +30,8 @@ namespace DO { namespace Sara {
       dist(out);
       return out;
     }();
-    image.array() += Vector3f{std_dev, std_dev, std_dev} * noise.array();
+    image.flat_array() +=
+        Vector3f{std_dev, std_dev, std_dev} * noise.flat_array();
   }
 
 

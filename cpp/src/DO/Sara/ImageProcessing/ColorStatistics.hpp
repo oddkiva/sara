@@ -46,7 +46,7 @@ namespace DO { namespace Sara {
     {
       const auto tensor = to_cwh_tensor(*first);
       for (auto c = 0; c < num_channels; ++c)
-        sum[c] += tensor[c].array().template cast<double>().sum();
+        sum[c] += tensor[c].flat_array().template cast<double>().sum();
       count += static_cast<int>(first->size());
     };
 
@@ -79,8 +79,8 @@ namespace DO { namespace Sara {
       for (int i = 0; i < num_channels; ++i)
         for (int j = i; j < num_channels; ++j)
         {
-          auto t_i = tensor[i].array().template cast<double>() - mean(i);
-          auto t_j = tensor[j].array().template cast<double>() - mean(j);
+          auto t_i = tensor[i].flat_array().template cast<double>() - mean(i);
+          auto t_j = tensor[j].flat_array().template cast<double>() - mean(j);
           cov(i, j) += (t_i * t_j).sum();
         }
     }

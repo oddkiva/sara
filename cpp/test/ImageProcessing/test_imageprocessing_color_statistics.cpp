@@ -27,8 +27,8 @@ TEST(TestColorStatistics, test_color_mean)
     Image<Rgb64f>{2, 2}
   };
 
-  images[0].array().fill(Rgb64f::Zero());
-  images[1].array().fill(Rgb64f::Ones());
+  images[0].flat_array().fill(Rgb64f::Zero());
+  images[1].flat_array().fill(Rgb64f::Ones());
 
   const auto m = color_sample_mean_vector(images.begin(), images.end());
   EXPECT_MATRIX_EQ(m, (Vector3d::Ones() * 0.5).eval());
@@ -41,8 +41,8 @@ TEST(TestColorStatistics, test_color_covariance_matrix)
     Image<Rgb64f>{2, 2}
   };
 
-  images[0].array().fill(Rgb64f::Zero());
-  images[1].array().fill(Rgb64f::Ones());
+  images[0].flat_array().fill(Rgb64f::Zero());
+  images[1].flat_array().fill(Rgb64f::Ones());
 
 
   const auto m = color_sample_mean_vector(images.begin(), images.end());
@@ -59,8 +59,8 @@ TEST(TestColorStatistics, test_color_pca)
     Image<Rgb64f>{2, 2}
   };
 
-  images[0].array().fill(Rgb64f::Zero());
-  images[1].array().fill(Rgb64f::Ones());
+  images[0].flat_array().fill(Rgb64f::Zero());
+  images[1].flat_array().fill(Rgb64f::Ones());
 
 
   const auto m = color_sample_mean_vector(images.begin(), images.end());
