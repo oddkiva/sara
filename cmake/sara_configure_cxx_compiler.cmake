@@ -100,3 +100,9 @@ if (UNIX)
         "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
   endif ()
 endif ()
+
+# Activate OpenMP by default.
+find_package(OpenMP QUIET)
+if (OPENMP_FOUND)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+endif ()

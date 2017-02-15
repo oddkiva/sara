@@ -15,9 +15,11 @@ struct access
     template<typename Archive, typename T>
     static inline void serialize(Archive& ar, T& type)
     {
-      // (DAVID OK): I COMMENTED THIS.
-      // IT DOES NOT COMPILE WITH MSVC !!!!!!!!!!!!!!!!!!!!!!!
-        //type.serialize(ar);
+#ifdef _WIN32
+        (void) type;
+#else
+        type.serialize(ar);
+#endif
     }
 };
 
