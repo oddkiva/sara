@@ -52,7 +52,7 @@ namespace DO { namespace Sara {
     const Set<OERegion, RealDescriptor>& keys1,
     const Set<OERegion, RealDescriptor>& keys2,
     vector<Match>& matches,
-    const flann::Matrix<float>& data2,
+    const flann::Matrix<float>& /*data2*/,
     flann::Index<flann::L2<float>>& tree2,
     float squared_ratio_thres,
     Match::Direction dir,
@@ -222,14 +222,14 @@ namespace DO { namespace Sara {
     matches.reserve(1e5);
 
     t.restart();
-    for (int i1 = 0; i1 < _keys1.size(); ++i1)
+    for (auto i1 = 0u; i1 < _keys1.size(); ++i1)
       append_nearest_neighbors(
         i1, _keys1, _keys2, matches, data2, tree2,
         _squared_ratio_thres, Match::Direction::SourceToTarget,
         _self_matching, _is_too_close, _vec_indices, _vec_dists,
         _max_neighbors);
 
-    for (int i2 = 0; i2 < _keys2.size(); ++i2)
+    for (auto i2 = 0u; i2 < _keys2.size(); ++i2)
       append_nearest_neighbors(
         i2, _keys2, _keys1, matches, data1, tree1,
         _squared_ratio_thres, Match::Direction::TargetToSource,

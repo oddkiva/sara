@@ -11,11 +11,9 @@
 
 //! @file
 
-#pragma once
-
 #include <random>
 
-#include <DO/Sara/ImageProcessing.hpp>
+#include <DO/Sara/ImageProcessing/ColorJitter.hpp>
 
 
 namespace DO { namespace Sara {

@@ -111,27 +111,27 @@ TEST(TestSet, test_methods)
 {
   // Test constructor.
   Set<OERegion, RealDescriptor> set;
-  EXPECT_EQ(set.size(), 0);
+  EXPECT_EQ(set.size(), 0u);
 
   // Test resize function.
   set.features.resize(10);
   EXPECT_THROW(set.size(), std::runtime_error);
 
   set.resize(10, 2);
-  EXPECT_EQ(set.size(), 10);
-  EXPECT_EQ(set.features.size(), 10);
-  EXPECT_EQ(set.descriptors.size(), 10); // Test swap.
+  EXPECT_EQ(set.size(), 10u);
+  EXPECT_EQ(set.features.size(), 10u);
+  EXPECT_EQ(set.descriptors.size(), 10u); // Test swap.
 
   Set<OERegion, RealDescriptor> set2;
   set2.resize(20, 2);
 
   set.swap(set2);
-  EXPECT_EQ(set.size(), 20);
-  EXPECT_EQ(set2.size(), 10);
+  EXPECT_EQ(set.size(), 20u);
+  EXPECT_EQ(set2.size(), 10u);
 
   // Test append.
   set.append(set2);
-  EXPECT_EQ(set.size(), 30);
+  EXPECT_EQ(set.size(), 30u);
 
   // Test accessors.
   const auto& const_set = set;

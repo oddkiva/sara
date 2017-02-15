@@ -10,9 +10,6 @@
 
 //! @file
 
-#pragma once
-
-#include <tuple>
 #include <fstream>
 #include <sstream>
 

@@ -166,7 +166,7 @@ namespace DO { namespace Sara {
       for (auto t = range.first, t_end = range.second; t != t_end; ++t)
       {
         const auto s_o_ts =
-            compose_with_shifts(in_sz, out_sz, Vector2i::Ones(), ts[t]);
+            compose_with_shifts(in_sz, out_sz, delta, ts[t]);
         append(ts, s_o_ts);
       }
       range = make_pair(range.first, ts.size());

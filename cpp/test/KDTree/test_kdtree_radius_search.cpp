@@ -99,7 +99,7 @@ TEST_F(TestKDTree, test_simple_radius_search_default_use)
 
   // Check the number of neighbors.
   EXPECT_EQ(nn_indices.size(), num_nearest_neighbors);
-  EXPECT_EQ(num_found_neighbors, num_nearest_neighbors);
+  EXPECT_EQ(num_found_neighbors, static_cast<int>(num_nearest_neighbors));
 
   // Check the indices of the nearest neighbors.
   EXPECT_ITEMS_EQ(range(_num_points_in_each_circle), nn_indices);
@@ -132,12 +132,12 @@ TEST_F(TestKDTree, test_simple_radius_search_with_restricted_num_of_neighbors)
 
   // Check the number of nearest neighbors.
   EXPECT_EQ(nn_indices.size(), max_num_nearest_neighbors);
-  EXPECT_EQ(num_found_neighbors, max_num_nearest_neighbors);
+  EXPECT_EQ(num_found_neighbors, static_cast<int>(max_num_nearest_neighbors));
 
   // Check the contents of the containers.
   for (size_t j = 0; j < nn_indices.size(); ++j)
   {
-    EXPECT_LT(nn_indices[j], _num_points_in_each_circle);
+    EXPECT_LT(nn_indices[j], static_cast<int>(_num_points_in_each_circle));
     EXPECT_NEAR(nn_squared_distances[j], 4., 1e-10);
   }
 }
@@ -169,7 +169,7 @@ TEST_F(TestKDTree,
 
   // Check the number of neighbors.
   EXPECT_EQ(nn_indices.size(), num_nearest_neighbors);
-  EXPECT_EQ(num_found_neighbors, num_nearest_neighbors);
+  EXPECT_EQ(num_found_neighbors, static_cast<int>(num_nearest_neighbors));
 
   // Check the indices.
   EXPECT_ITEMS_EQ(nn_indices, range(1, _num_points_in_each_circle));
@@ -204,7 +204,7 @@ TEST_F(TestKDTree,
 
   // Check the number of indices.
   EXPECT_EQ(nn_indices.size(), max_num_nearest_neighbors);
-  EXPECT_EQ(num_found_neighbors, max_num_nearest_neighbors);
+  EXPECT_EQ(num_found_neighbors, static_cast<int>(max_num_nearest_neighbors));
 
   // Check the number of squared distances.
   EXPECT_EQ(nn_squared_distances.size(), max_num_nearest_neighbors);
@@ -214,7 +214,7 @@ TEST_F(TestKDTree,
   {
     // Check the index value.
     EXPECT_NE(nn_indices[j], 0);
-    EXPECT_LT(nn_indices[j], _num_points_in_each_circle);
+    EXPECT_LT(nn_indices[j], static_cast<int>(_num_points_in_each_circle));
 
     // Check the squared distances.
     EXPECT_LE(nn_squared_distances[j], squared_search_radius);
@@ -285,7 +285,7 @@ TEST_F(TestKDTree, test_batch_radius_search_restricted)
 
     for (size_t j = 0; j < nn_indices[i].size(); ++j)
     {
-      EXPECT_LT(nn_indices[i][j], _num_points_in_each_circle);
+      EXPECT_LT(nn_indices[i][j], static_cast<int>(_num_points_in_each_circle));
       EXPECT_LE(nn_squared_distances[i][j], squared_search_radius);
     }
   }
@@ -361,8 +361,8 @@ TEST_F(TestKDTree, test_batch_radius_search_with_query_point_in_data_restricted)
 
     for (size_t j = 0; j < nn_indices[i].size(); ++j)
     {
-      EXPECT_LT(nn_indices[i][j], _num_points_in_each_circle);
-      EXPECT_NE(nn_indices[i][j], i);
+      EXPECT_LT(nn_indices[i][j], static_cast<int>(_num_points_in_each_circle));
+      EXPECT_NE(nn_indices[i][j], static_cast<int>(i));
       EXPECT_LE(nn_squared_distances[i][j], squared_search_radius);
     }
   }

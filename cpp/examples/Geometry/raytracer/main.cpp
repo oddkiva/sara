@@ -36,15 +36,6 @@ void create_scene_2(Scene& scene)
   const auto c3 = Vector3d(200, 200, 500);
   const auto c4 = Vector3d(-100, 200, 200);
 
-  const auto n1 = Vector3d(1, 0, 0);
-  const auto p1 = Point3d(500, 0, 0);
-
-  const auto n2 = Vector3d(0, 1, 0);
-  const auto p2 = Point3d(0, 500, 0);
-
-  const auto n3 = Vector3d(0, 0, 1);
-  const auto p3 = Point3d(0, 0, 1000);
-
   scene.add_object(new ::Sphere(c1, 200, Yellow64f));
   scene.add_object(new ::Sphere(c2, 100, Red64f));
   scene.add_object(new ::Sphere(c3, 75, Green64f));
