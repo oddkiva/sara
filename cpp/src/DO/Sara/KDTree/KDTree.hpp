@@ -11,8 +11,11 @@
 
 #pragma once
 
-#include <DO/Sara/Core.hpp>
 #include <flann/flann.hpp>
+
+#include <DO/Sara/Defines.hpp>
+
+#include <DO/Sara/Core/EigenExtension.hpp>
 
 
 namespace DO { namespace Sara {
