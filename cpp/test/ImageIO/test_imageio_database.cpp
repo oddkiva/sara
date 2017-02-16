@@ -64,13 +64,13 @@ TEST(TestTrainingDataSet,
 
   auto training_data_set = ImageClassificationTrainingDataSet{};
 
-  training_data_set.set_image_data_set({
+  training_data_set.x = {
       db_dir + "/" + "All.tif",
       db_dir + "/" + "ksmall.jpg",
       db_dir + "/" + "stinkbug.png",
-  });
+  };
 
-  training_data_set.set_label_set({0, 0, 1});
+  training_data_set.y = {0, 0, 1};
 
   auto sample_i = training_data_set.begin();
 
@@ -98,17 +98,17 @@ TEST(TestTrainingDataSet, test_image_segmentation_training_data_set_initializati
 
   auto training_data_set = ImageSegmentationTrainingDataSet{};
 
-  training_data_set.set_image_data_set({
+  training_data_set.x = {
       db_dir + "/" + "All.tif",
       db_dir + "/" + "ksmall.jpg",
       db_dir + "/" + "stinkbug.png",
-  });
+  };
 
-  training_data_set.set_label_set({
+  training_data_set.y = {
       db_dir + "/" + "All.tif",
       db_dir + "/" + "ksmall.jpg",
       db_dir + "/" + "stinkbug.png",
-  });
+  };
 
   for (auto s = training_data_set.begin(), s_end = training_data_set.end();
        s != s_end; ++s)
@@ -138,13 +138,13 @@ TEST(TestTransformedTrainingDataSet,
 
   auto training_data_set = TransformedImageClassificationTrainingDataSet{};
 
-  training_data_set.set_image_data_set({
+  training_data_set.x = {
       db_dir + "/" + "All.tif",
       db_dir + "/" + "ksmall.jpg",
       db_dir + "/" + "stinkbug.png",
-  });
+  };
 
-  training_data_set.set_label_set({0, 0, 1});
+  training_data_set.y = {0, 0, 1};
 
   auto data_transforms = vector<ImageDataTransform>(3);
   {
@@ -159,7 +159,7 @@ TEST(TestTransformedTrainingDataSet,
     data_transforms[1].set_flip(ImageDataTransform::Horizontal);
   }
 
-  training_data_set.set_data_transform_set(std::move(data_transforms));
+  training_data_set.t = std::move(data_transforms);
 
   auto sample_i = training_data_set.begin();
 
@@ -237,17 +237,17 @@ TEST(TestTransformedTrainingDataSet,
 
   auto training_data_set = TransformedImageSegmentationTrainingDataSet{};
 
-  training_data_set.set_image_data_set({
+  training_data_set.x = {
       db_dir + "/" + "All.tif",
       db_dir + "/" + "ksmall.jpg",
       db_dir + "/" + "stinkbug.png",
-  });
+  };
 
-  training_data_set.set_label_set({
+  training_data_set.y = {
       db_dir + "/" + "All.tif",
       db_dir + "/" + "ksmall.jpg",
       db_dir + "/" + "stinkbug.png",
-  });
+  };
 
   auto data_transforms = vector<ImageDataTransform>(3);
   {
@@ -264,7 +264,7 @@ TEST(TestTransformedTrainingDataSet,
     data_transforms[2].set_zoom(2.f);
     data_transforms[2].set_flip(ImageDataTransform::Horizontal);
   }
-  training_data_set.set_data_transform_set(data_transforms);
+  training_data_set.t = data_transforms;
 
   for (auto s = training_data_set.begin(), s_end = training_data_set.end();
        s != s_end; ++s)

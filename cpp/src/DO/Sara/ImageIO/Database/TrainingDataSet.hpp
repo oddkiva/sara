@@ -137,13 +137,13 @@ namespace DO { namespace Sara {
 
     inline void clear()
     {
-      _x.clear();
-      _y.clear();
+      x.clear();
+      y.clear();
     }
 
     inline bool operator==(const TrainingDataSet& other) const
     {
-      return _x == other._x && _y == other._y;
+      return x == other.x && y == other.y;
     }
 
     inline bool operator!=(const TrainingDataSet& other) const
@@ -151,9 +151,8 @@ namespace DO { namespace Sara {
       return !(*this == other);
     }
 
-  protected:
-    x_set_type _x;
-    y_set_type _y;
+    x_set_type x;
+    y_set_type y;
   };
 
 
@@ -170,16 +169,6 @@ namespace DO { namespace Sara {
 
     inline ImageClassificationTrainingDataSet() = default;
 
-    void set_image_data_set(std::vector<std::string> image_filepaths)
-    {
-      _x = std::move(image_filepaths);
-    }
-
-    void set_label_set(std::vector<int> labels)
-    {
-      _y = std::move(labels);
-    }
-
     inline auto begin() const -> iterator
     {
       return iterator{x_begin(), y_begin()};
@@ -192,31 +181,23 @@ namespace DO { namespace Sara {
 
     auto x_begin() const -> x_iterator
     {
-      return x_iterator{_x.begin(), _x.end()};
+      return x_iterator{x.begin(), x.end()};
     }
 
     auto x_end() const -> x_iterator
     {
-      return x_iterator{_x.end(), _x.end() };
+      return x_iterator{x.end(), x.end()};
     }
 
     auto y_begin() const -> y_iterator
     {
-      return _y.begin();
+      return y.begin();
     }
 
     auto y_end() const -> y_iterator
     {
-      return _y.end();
+      return y.end();
     }
-
-    DO_SARA_EXPORT
-    friend void read_from_csv(ImageClassificationTrainingDataSet& data_set,
-                              const std::string& csv_filepath);
-
-    DO_SARA_EXPORT
-    friend void write_to_csv(const ImageClassificationTrainingDataSet& data_set,
-                             const std::string& csv_filepath);
   };
 
 
@@ -234,16 +215,6 @@ namespace DO { namespace Sara {
 
     inline ImageSegmentationTrainingDataSet() = default;
 
-    void set_image_data_set(x_set_type image_filepaths)
-    {
-      _x = std::move(image_filepaths);
-    }
-
-    void set_label_set(y_set_type labels)
-    {
-      _y = std::move(labels);
-    }
-
     inline auto begin() const -> iterator
     {
       return iterator{x_begin(), y_begin()};
@@ -256,32 +227,41 @@ namespace DO { namespace Sara {
 
     auto x_begin() const -> x_iterator
     {
-      return x_iterator{_x.begin(), _x.end() };
+      return x_iterator{x.begin(), x.end()};
     }
 
     auto x_end() const -> x_iterator
     {
-      return x_iterator{_x.end(), _x.end() };
+      return x_iterator{x.end(), x.end()};
     }
 
     auto y_begin() const -> y_iterator
     {
-      return y_iterator{_y.begin(), _y.end() };
+      return y_iterator{y.begin(), y.end()};
     }
 
     auto y_end() const -> y_iterator
     {
-      return y_iterator{_y.end(), _y.end() };
+      return y_iterator{y.end(), y.end()};
     }
-
-    DO_SARA_EXPORT
-    friend void read_from_csv(ImageSegmentationTrainingDataSet& data_set,
-                              const std::string& csv_filepath);
-
-    DO_SARA_EXPORT
-    friend void write_to_csv(const ImageSegmentationTrainingDataSet& data_set,
-                             const std::string& csv_filepath);
   };
+
+
+  DO_SARA_EXPORT
+  void read_from_csv(ImageClassificationTrainingDataSet& data_set,
+                     const std::string& csv_filepath);
+
+  DO_SARA_EXPORT
+  void write_to_csv(const ImageClassificationTrainingDataSet& data_set,
+                    const std::string& csv_filepath);
+
+  DO_SARA_EXPORT
+  void read_from_csv(ImageSegmentationTrainingDataSet& data_set,
+                     const std::string& csv_filepath);
+
+  DO_SARA_EXPORT
+  void write_to_csv(const ImageSegmentationTrainingDataSet& data_set,
+                    const std::string& csv_filepath);
 
 } /* namespace Sara */
 } /* namespace DO */

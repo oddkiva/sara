@@ -108,12 +108,12 @@ namespace DO { namespace Sara {
     {
       details::split(csv_row, ',', csv_cells.begin());
 
-      data_set._x.push_back(csv_cells[0]);
-      data_set._y.push_back(stoi(csv_cells[1]));
+      data_set.x.push_back(csv_cells[0]);
+      data_set.y.push_back(stoi(csv_cells[1]));
 
       auto t = ImageDataTransform{};
       parse_image_data_transform(t, csv_cells);
-      data_set._t.push_back(t);
+      data_set.t.push_back(t);
     }
   }
 
@@ -148,12 +148,12 @@ namespace DO { namespace Sara {
     {
       details::split(csv_row, ',', csv_cells.begin());
 
-      data_set._x.push_back(csv_cells[0]);
-      data_set._y.push_back(csv_cells[1]);
+      data_set.x.push_back(csv_cells[0]);
+      data_set.y.push_back(csv_cells[1]);
 
       auto t = ImageDataTransform{};
       parse_image_data_transform(t, csv_cells);
-      data_set._t.push_back(t);
+      data_set.t.push_back(t);
     }
   }
 

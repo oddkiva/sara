@@ -140,14 +140,14 @@ namespace DO { namespace Sara {
 
     inline void clear()
     {
-      _x.clear();
-      _y.clear();
-      _t.clear();
+      x.clear();
+      y.clear();
+      t.clear();
     }
 
     inline bool operator==(const TransformedTrainingDataSet& other) const
     {
-      return _x == other._x && _y == other._y && _t == other._t;
+      return x == other.x && y == other.y && t == other.t;
     }
 
     inline bool operator!=(const TransformedTrainingDataSet& other) const
@@ -155,10 +155,9 @@ namespace DO { namespace Sara {
       return !(*this == other);
     }
 
-  protected:
-    x_set_type _x;
-    y_set_type _y;
-    data_transform_set_type _t;
+    x_set_type x;
+    y_set_type y;
+    data_transform_set_type t;
   };
 
 
@@ -179,21 +178,6 @@ namespace DO { namespace Sara {
 
     inline TransformedImageClassificationTrainingDataSet() = default;
 
-    void set_image_data_set(std::vector<std::string> image_filepaths)
-    {
-      _x = std::move(image_filepaths);
-    }
-
-    void set_label_set(std::vector<int> labels)
-    {
-      _y = std::move(labels);
-    }
-
-    void set_data_transform_set(std::vector<ImageDataTransform> transforms)
-    {
-      _t = std::move(transforms);
-    }
-
     inline auto begin() const -> iterator
     {
       return iterator{x_begin(), y_begin(), data_transform_begin()};
@@ -206,43 +190,33 @@ namespace DO { namespace Sara {
 
     auto x_begin() const -> x_iterator
     {
-      return x_iterator{_x.begin(), _x.end() };
+      return x_iterator{x.begin(), x.end()};
     }
 
     auto x_end() const -> x_iterator
     {
-      return x_iterator{_x.end(), _x.end() };
+      return x_iterator{x.end(), x.end()};
     }
 
     auto y_begin() const -> y_iterator
     {
-      return _y.begin();
+      return y.begin();
     }
 
     auto y_end() const -> y_iterator
     {
-      return _y.end();
+      return y.end();
     }
 
     auto data_transform_begin() const -> data_transform_iterator
     {
-      return _t.begin();
+      return t.begin();
     }
 
     auto data_transform_end() const -> data_transform_iterator
     {
-      return _t.end();
+      return t.end();
     }
-
-    DO_SARA_EXPORT
-    friend void
-    read_from_csv(TransformedImageClassificationTrainingDataSet& data_set,
-                  const std::string& csv_filepath);
-
-    DO_SARA_EXPORT
-    friend void
-    write_to_csv(const TransformedImageClassificationTrainingDataSet& data_set,
-                 const std::string& csv_filepath);
   };
 
 
@@ -264,21 +238,6 @@ namespace DO { namespace Sara {
 
     inline TransformedImageSegmentationTrainingDataSet() = default;
 
-    void set_image_data_set(std::vector<std::string> image_filepaths)
-    {
-      _x = std::move(image_filepaths);
-    }
-
-    void set_label_set(std::vector<std::string> labels)
-    {
-      _y = std::move(labels);
-    }
-
-    void set_data_transform_set(std::vector<ImageDataTransform> transforms)
-    {
-      _t = std::move(transforms);
-    }
-
     inline auto begin() const -> iterator
     {
       return iterator{x_begin(), y_begin(), data_transform_begin()};
@@ -291,45 +250,51 @@ namespace DO { namespace Sara {
 
     auto x_begin() const -> x_iterator
     {
-      return x_iterator{_x.begin(), _x.end() };
+      return x_iterator{x.begin(), x.end()};
     }
 
     auto x_end() const -> x_iterator
     {
-      return x_iterator{_x.end(), _x.end() };
+      return x_iterator{x.end(), x.end()};
     }
 
     auto y_begin() const -> y_iterator
     {
-      return y_iterator{_y.begin(), _y.end() };
+      return y_iterator{y.begin(), y.end()};
     }
 
     auto y_end() const -> y_iterator
     {
-      return y_iterator{_y.end(), _y.end() };
+      return y_iterator{y.end(), y.end()};
     }
 
     auto data_transform_begin() const -> data_transform_iterator
     {
-      return _t.begin();
+      return t.begin();
     }
 
     auto data_transform_end() const -> data_transform_iterator
     {
-      return _t.end();
+      return t.end();
     }
-
-    DO_SARA_EXPORT
-    friend void
-    read_from_csv(TransformedImageSegmentationTrainingDataSet& data_set,
-                  const std::string& csv_filepath);
-
-    DO_SARA_EXPORT
-    friend void
-    write_to_csv(const TransformedImageSegmentationTrainingDataSet& data_set,
-                 const std::string& csv_filepath);
   };
 
+  DO_SARA_EXPORT
+  void read_from_csv(TransformedImageClassificationTrainingDataSet& data_set,
+                     const std::string& csv_filepath);
+
+  DO_SARA_EXPORT
+  void
+  write_to_csv(const TransformedImageClassificationTrainingDataSet& data_set,
+               const std::string& csv_filepath);
+
+  DO_SARA_EXPORT
+  void read_from_csv(TransformedImageSegmentationTrainingDataSet& data_set,
+                     const std::string& csv_filepath);
+
+  DO_SARA_EXPORT
+  void write_to_csv(const TransformedImageSegmentationTrainingDataSet& data_set,
+                    const std::string& csv_filepath);
 
 } /* namespace Sara */
 } /* namespace DO */
