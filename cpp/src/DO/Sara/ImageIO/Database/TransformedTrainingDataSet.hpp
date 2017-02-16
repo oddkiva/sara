@@ -91,12 +91,12 @@ namespace DO { namespace Sara {
       return _t;
     }
 
-    inline auto x_ref() -> const x_type&
+    inline auto x_ref() const -> const x_type&
     {
       return *_x;
     }
 
-    inline auto y_ref() -> const y_type&
+    inline auto y_ref() const -> const y_type&
     {
       return *_y;
     }
@@ -118,8 +118,8 @@ namespace DO { namespace Sara {
     }
 
   private:
-    x_iterator _x;
-    y_iterator _y;
+    mutable x_iterator _x;
+    mutable y_iterator _y;
     data_transform_iterator _t;
   };
 
