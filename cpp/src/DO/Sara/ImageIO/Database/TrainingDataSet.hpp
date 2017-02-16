@@ -80,22 +80,22 @@ namespace DO { namespace Sara {
       return *this;
     }
 
-    inline auto x() -> x_iterator
+    inline auto x() const -> x_iterator
     {
       return _x;
     }
 
-    inline auto y() -> y_iterator
+    inline auto y() const -> y_iterator
     {
       return _y;
     }
 
-    inline auto x_ref() -> const x_type&
+    inline auto x_ref() const -> const x_type&
     {
       return *_x;
     }
 
-    inline auto y_ref() -> const y_type&
+    inline auto y_ref() const -> const y_type&
     {
       return *_y;
     }
@@ -110,7 +110,7 @@ namespace DO { namespace Sara {
       return !(operator==(other));
     }
 
-    inline auto operator*()
+    inline auto operator*() const
         -> decltype(std::make_pair(std::declval<const x_type>(),
                                    std::declval<const y_type>()))
     {
@@ -118,8 +118,8 @@ namespace DO { namespace Sara {
     }
 
   private:
-    x_iterator _x;
-    y_iterator _y;
+    mutable x_iterator _x;
+    mutable y_iterator _y;
   };
 
 
