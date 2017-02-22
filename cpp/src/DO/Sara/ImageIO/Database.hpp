@@ -11,5 +11,6 @@
 
 #pragma once
 
-#include <DO/Sara/ImageIO/Database.hpp>
-#include <DO/Sara/ImageIO/ImageIO.hpp>
+#include <DO/Sara/ImageIO/Database/ImageDataSet.hpp>
+#include <DO/Sara/ImageIO/Database/TrainingDataSet.hpp>
+#include <DO/Sara/ImageIO/Database/TransformedTrainingDataSet.hpp>
