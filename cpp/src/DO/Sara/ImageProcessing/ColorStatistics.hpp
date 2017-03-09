@@ -29,6 +29,10 @@ namespace DO { namespace Sara {
     using channel_type = typename PixelTraits<pixel_type>::channel_type;
 
     static const int num_channels = PixelTraits<pixel_type>::num_channels;
+
+    using color_mean_type = Matrix<double, num_channels, 1>;
+    using color_covariance_matrix_type =
+        Matrix<double, num_channels, num_channels>;
   };
 
   //! @brief Compute the sample color mean vector.
@@ -40,14 +44,14 @@ namespace DO { namespace Sara {
     using out_vector_type = Matrix<double, num_channels, 1>;
 
     auto sum = out_vector_type::Zero().eval();
-    auto count = int{0};
+    auto count = 0ull;
 
     for (; first != last; ++first)
     {
       const auto tensor = to_cwh_tensor(*first);
       for (auto c = 0; c < num_channels; ++c)
         sum[c] += tensor[c].flat_array().template cast<double>().sum();
-      count += static_cast<int>(first->size());
+      count += first->size();
     };
 
     return sum / count;
@@ -69,12 +73,12 @@ namespace DO { namespace Sara {
     using out_matrix_type = Matrix<double, num_channels, num_channels>;
 
     auto cov = out_matrix_type::Zero().eval();
-    auto count = int{0};
+    auto count = 0ull;
 
     for (; first != last; ++first)
     {
       const auto tensor = to_cwh_tensor(*first);
-      count += static_cast<int>(first->size());
+      count += first->size();
 
       for (int i = 0; i < num_channels; ++i)
         for (int j = i; j < num_channels; ++j)
@@ -102,6 +106,61 @@ namespace DO { namespace Sara {
     auto svd = Eigen::JacobiSVD<_Matrix>{covariance_matrix, ComputeFullU};
     return std::make_pair(svd.matrixU(), svd.singularValues());
   }
+
+  template <typename ImageIterator>
+  inline auto
+  online_color_covariance(ImageIterator first, ImageIterator last) -> std::pair<
+      typename ImageIteratorTraits<ImageIterator>::color_mean_type,
+      typename ImageIteratorTraits<ImageIterator>::color_covariance_matrix_type>
+  {
+    constexpr auto num_channels =
+        ImageIteratorTraits<ImageIterator>::num_channels;
+    using mean_type = ImageIteratorTraits<ImageIterator>::color_mean_type;
+    using covariance_matrix_type =
+        ImageIteratorTraits<ImageIterator>::color_covariance_matrix_type;
+
+    auto s = mean_type::Zero().eval();
+    auto c = covariance_matrix_type::Zero().eval();
+    auto n = 0ull;
+
+    for (; first != last; ++first)
+    {
+      const auto si = first->array().template cast<double>().sum();
+      const auto ci = out_matrix_type::Zero().eval();
+
+      const auto ni = first->size();
+
+      const auto mi = (si / ni).eval();
+
+      const auto tensor = to_cwh_tensor(*first);
+      for (auto i = 0; i < num_channels; ++i)
+        for (auto j = i; j < num_channels; ++j)
+        {
+          const auto t_i =
+              (tensor[i].flat_array().template cast<double>() - mi(i)).sum();
+          const auto t_j =
+              (tensor[j].flat_array().template cast<double>() - mi(j)).sum();
+
+          // Use Bjorck's trick to increase numerical stability (cf. Chan,
+          // Golub and LeVeque).
+          const auto t_i_res = (tensor[i].flat_array().template cast<double> - mi(i))/ni;
+          const auto t_j_res = (tensor[j].flat_array().template cast<double> - mi(j))/ni;
+          ci(i, j) = (t_i * t_j).sum() - t_i_res * t_j_res;
+        }
+
+      for (int i = 1; i < num_channels; ++i)
+        for (int j = 0; j < i; ++j)
+          ci(i, j) = ci(j, i);
+
+      c = c + ci +
+          (ni * s / n - si) * (ni * s / n - si).transpose() * m / (n * (m + n));
+
+      n += ni;
+    }
+
+    return make_pair((s/n).eval(), (c/(n-1)).eval());
+  }
+
 
 } /* namespace Sara */
 } /* namespace DO */
