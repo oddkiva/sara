@@ -32,6 +32,9 @@ TEST(TestColorStatistics, test_color_mean)
 
   const auto m = color_sample_mean_vector(images.begin(), images.end());
   EXPECT_MATRIX_EQ(m, (Vector3d::Ones() * 0.5).eval());
+
+  const auto m1 = online_color_covariance(images.begin(), images.end()).first;
+  EXPECT_MATRIX_EQ(m1, (Vector3d::Ones() * 0.5).eval());
 }
 
 TEST(TestColorStatistics, test_color_covariance_matrix)
@@ -50,6 +53,9 @@ TEST(TestColorStatistics, test_color_covariance_matrix)
 
   const auto true_cov = (Matrix3d::Ones() * 0.25 * 8 / 7).eval();
   EXPECT_MATRIX_EQ(true_cov, cov);
+
+  const auto stats = online_color_covariance(images.begin(), images.end());
+  EXPECT_MATRIX_EQ(true_cov, stats.second);
 }
 
 TEST(TestColorStatistics, test_color_pca)
