@@ -43,11 +43,13 @@ namespace DO { namespace Sara {
     template <typename ImageIterator>
     inline auto color_sample_mean_vector(ImageIterator first,
                                          ImageIterator last)
-        -> Matrix<double, ImageIteratorTraits<ImageIterator>::num_channels, 1>
+        -> typename ImageIteratorTraits<ImageIterator>::color_mean_type
     {
       constexpr auto num_channels =
           ImageIteratorTraits<ImageIterator>::num_channels;
-      using out_vector_type = Matrix<double, num_channels, 1>;
+
+      using out_vector_type =
+          typename ImageIteratorTraits<ImageIterator>::color_mean_type;
 
       auto sum = out_vector_type::Zero().eval();
       auto count = 0ull;
@@ -75,12 +77,16 @@ namespace DO { namespace Sara {
     template <typename ImageIterator>
     inline auto color_sample_covariance_matrix(
         ImageIterator first, ImageIterator last,
-        const Matrix<double, ImageIteratorTraits<ImageIterator>::num_channels,
-                     1>& mean) -> Matrix3d
+        const typename ImageIteratorTraits<ImageIterator>::color_mean_type&
+            mean) ->
+        typename ImageIteratorTraits<
+            ImageIterator>::color_covariance_matrix_type
     {
       constexpr auto num_channels =
           ImageIteratorTraits<ImageIterator>::num_channels;
-      using out_matrix_type = Matrix<double, num_channels, num_channels>;
+
+      using out_matrix_type = typename ImageIteratorTraits<
+          ImageIterator>::color_covariance_matrix_type;
 
       auto cov = out_matrix_type::Zero().eval();
       auto count = 0ull;
