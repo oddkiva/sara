@@ -19,6 +19,10 @@ void * import_numpy_array()
 {
   /* Initialise numpy API and use 2/3 compatible return */
   import_array();
+
+#if (PY_VERSION_HEX >= 0x03000000)
+  return 0;
+#endif
 }
 
 

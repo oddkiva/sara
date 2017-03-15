@@ -125,13 +125,11 @@ foreach (COMPONENT ${DO_Sara_USE_COMPONENTS})
   # TODO: when there is more than one header-only library:
   # 1. create a specific list of compiled libraries
   # 2. check if the library is in the list of compiled compiled library.
-  if (NOT COMPONENT STREQUAL "ImageProcessing")
-    sara_find_compiled_component_library(${COMPONENT})
+  sara_find_compiled_component_library(${COMPONENT})
 
-    # Update the list of compiled component libraries we want to use.
-    if (DO_Sara_${COMPONENT}_LIBRARIES)
-      list(APPEND DO_Sara_LIBRARIES ${DO_Sara_${COMPONENT}_LIBRARIES})
-    endif ()
+  # Update the list of compiled component libraries we want to use.
+  if (DO_Sara_${COMPONENT}_LIBRARIES)
+    list(APPEND DO_Sara_LIBRARIES ${DO_Sara_${COMPONENT}_LIBRARIES})
   endif ()
 
   if ("${COMPONENT}" STREQUAL "Graphics")

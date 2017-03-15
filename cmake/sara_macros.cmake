@@ -47,10 +47,12 @@ macro (sara_dissect_version)
   configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sara_version.cmake.in
     ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sara_version.cmake @ONLY)
+
   configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/DO/Sara/Defines.hpp.in
-    ${CMAKE_BINARY_DIR}/src/DO/Sara/Defines.hpp @ONLY)
-  include_directories(${CMAKE_BINARY_DIR}/src)
+    ${CMAKE_CURRENT_SOURCE_DIR}/cpp/src/DO/Sara/Defines.hpp.in
+    ${CMAKE_BINARY_DIR}/cpp/src/DO/Sara/Defines.hpp @ONLY)
+
+  include_directories(${CMAKE_BINARY_DIR}/cpp/src)
 endmacro ()
 
 
@@ -242,7 +244,9 @@ macro (sara_append_library _library_name
   if (NOT "${_src_files}" STREQUAL "")
     # - Case 1: the project contains 'cpp' source files
     #   Specify the source files.
-    add_library(DO_Sara_${_library_name} ${_hdr_files} ${_src_files})
+    add_library(DO_Sara_${_library_name}
+      ${DO_Sara_DIR}/cmake/UseDOSara${_library_name}.cmake
+      ${_hdr_files} ${_src_files})
 
     # Link with other libraries.
     sara_step_message("Linking project 'DO_Sara_${_library_name}' with "
@@ -329,7 +333,7 @@ function (sara_add_test _test_name _srcs _additional_lib_deps)
     list(GET extra_macro_args 0 test_group_name)
   endif ()
 
-  # Create the unit test project
+  # Create the unit test project.
   add_executable(${_test_name} ${_srcs_var})
   target_link_libraries(${_test_name} ${_additional_lib_deps}
                         gtest

@@ -42,6 +42,8 @@ flags = [
 "-I", "/usr/include/python2.7",
 "-I", ("/home/david/virtualenvs/mirriad-vr-python2/local/"
        "lib/python2.7/site-packages/numpy/core/include"),
+"-I", ("/home/david/sandbox/virtualenvs/docv-python3/"
+       "lib/python3.5/site-packages/numpy/core/include"),
 # Qt5 header directories.
 "-I", "/usr/include",
 "-I", "/usr/include/qt5",
@@ -58,11 +60,14 @@ flags = [
 # CUDA header directories.
 "-I", "/usr/local/cuda/include",
 # Current header directories.
-"-I", "./src",
+"-I", "./cpp/src",
 # Third-party header directories.
-"-I", "./third-party/eigen",
-"-I", "./third-party/flann/src/cpp",
-"-I", "./third-party/gtest/include",
+"-I", "./cpp/third-party",
+"-I", "./cpp/third-party/eigen",
+"-I", "./cpp/third-party/flann/src/cpp",
+"-I", "./cpp/third-party/gtest/include",
+# Build directory.
+"-I", "../sara-build/cpp/src",
 ]
 
 

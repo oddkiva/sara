@@ -38,12 +38,13 @@ if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
           COMPONENT Sources)
 
   # Source files.
-  install(FILES ${CMAKE_BINARY_DIR}/src/DO/Sara/Defines.hpp
+  install(FILES ${CMAKE_BINARY_DIR}/cpp/src/DO/Sara/Defines.hpp
           DESTINATION include/DO/Sara
           COMPONENT Sources)
-  install(DIRECTORY ${DO_Sara_DIR}/src/DO
+  install(DIRECTORY ${DO_Sara_DIR}/cpp/src/DO
           DESTINATION include
-          COMPONENT Sources)
+          COMPONENT Sources
+          FILES_MATCHING PATTERN "*.hpp")
 
   set(CPACK_COMPONENT_Sources_REQUIRED 1)
 endif ()
@@ -159,6 +160,7 @@ endif()
 set(CPACK_NSIS_COMPRESSOR "/SOLID lzma")
 
 set(CPACK_NSIS_DISPLAY_NAME ${CPACK_NSIS_PACKAGE_NAME})
+
 
 # ============================================================================ #
 # Select package generator.

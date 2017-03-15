@@ -51,6 +51,6 @@ mkdir ../${sara_build_dir}
 cd ../${sara_build_dir}
 {
   build_library
-  install_package
+  #install_package
 }
 cd ..

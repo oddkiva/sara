@@ -5,9 +5,9 @@ if (NOT DO_Sara_FOUND)
 
   # Convenience variables used later in 'UseDOSaraXXX.cmake' scripts.
   set(DO_Sara_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE STRING "")
-  set(DO_Sara_INCLUDE_DIR ${DO_Sara_DIR}/src CACHE STRING "")
-  set(DO_Sara_SOURCE_DIR ${DO_Sara_DIR}/src/DO/Sara)
-  set(DO_Sara_ThirdParty_DIR ${DO_Sara_DIR}/third-party CACHE STRING "")
+  set(DO_Sara_INCLUDE_DIR ${DO_Sara_DIR}/cpp/src CACHE STRING "")
+  set(DO_Sara_SOURCE_DIR ${DO_Sara_DIR}/cpp/src/DO/Sara)
+  set(DO_Sara_ThirdParty_DIR ${DO_Sara_DIR}/cpp/third-party CACHE STRING "")
   sara_step_message("DO_Sara_SOURCE_DIR = ${DO_Sara_SOURCE_DIR}")
 
   # Load Sara specific macros
@@ -17,7 +17,7 @@ if (NOT DO_Sara_FOUND)
   include(sara_version)
 
   # Configure compiler for the specific project.
-  include (sara_configure_cxx_compiler)
+  include(sara_configure_cxx_compiler)
 
   # List the available components.
   sara_populate_available_components()

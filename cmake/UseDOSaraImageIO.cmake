@@ -51,6 +51,8 @@ if (SARA_USE_FROM_SOURCE)
   if (NOT DO_Sara_ImageIO_ADDED)
     sara_glob_directory(${DO_Sara_SOURCE_DIR}/ImageIO)
     sara_create_common_variables("ImageIO")
+    sara_set_internal_dependencies(
+      "ImageIO" "Core")
     sara_generate_library("ImageIO")
     target_link_libraries(DO_Sara_ImageIO easyexif ${DO_ImageIO_THIRD_PARTY_LIBRARIES})
   endif ()
