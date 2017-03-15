@@ -9,49 +9,48 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <stdint.h>
+#define BOOST_TEST_MODULE "Core/Pixel/Pixel Traits"
 
-#include <gtest/gtest.h>
+#include <cstdint>
 
-#include "Core/Pixel/PixelTraits.hpp"
+#include <boost/test/unit_test.hpp>
+
+#include <DO/Sara/Core/Pixel/PixelTraits.hpp>
 
 
 using namespace std;
 using namespace DO::Sara;
 
 
-TEST(TestPixelTraits, test_pixel_traits_min_max_value)
-{
-  EXPECT_EQ(numeric_limits<int>::min(), PixelTraits<int>::min());
-  EXPECT_EQ(0, PixelTraits<float>::min());
+BOOST_AUTO_TEST_SUITE(TestPixelTraits)
 
-  EXPECT_EQ(std::numeric_limits<int>::max(), PixelTraits<int>::max());
-  EXPECT_EQ(1, PixelTraits<float>::max());
+BOOST_AUTO_TEST_CASE(test_pixel_traits_min_max_value)
+{
+  BOOST_CHECK_EQUAL(numeric_limits<int>::min(), PixelTraits<int>::min());
+  BOOST_CHECK_EQUAL(0, PixelTraits<float>::min());
+
+  BOOST_CHECK_EQUAL(std::numeric_limits<int>::max(), PixelTraits<int>::max());
+  BOOST_CHECK_EQUAL(1, PixelTraits<float>::max());
 
   auto expected_black = Matrix<uint8_t, 3, 1>::Zero();
   auto actual_black = PixelTraits<Matrix<uint8_t, 3, 1> >::min();
-  EXPECT_EQ(expected_black, actual_black);
+  BOOST_CHECK_EQUAL(expected_black, actual_black);
 
   auto expected_zeros = Vector3f::Zero();
   auto actual_zeros = PixelTraits<Vector3f>::min();
-  EXPECT_EQ(expected_zeros, actual_zeros);
+  BOOST_CHECK_EQUAL(expected_zeros, actual_zeros);
 
   auto expected_black_3 = Matrix<uint8_t, 3, 1>::Zero();
   auto actual_black_3 = PixelTraits<Matrix<uint8_t, 3, 1> >::min();
-  EXPECT_EQ(expected_black_3, actual_black_3);
+  BOOST_CHECK_EQUAL(expected_black_3, actual_black_3);
 
   auto expected_zeros_3 = Vector3f::Zero();
   auto actual_zeros_3 = PixelTraits<Vector3f>::min();
-  EXPECT_EQ(expected_zeros_3, actual_zeros_3);
+  BOOST_CHECK_EQUAL(expected_zeros_3, actual_zeros_3);
 
   auto expected_ones_3 = Vector3f::Ones();
   auto actual_ones_3 = PixelTraits<Vector3f>::max();
-  EXPECT_EQ(expected_ones_3, actual_ones_3);
+  BOOST_CHECK_EQUAL(expected_ones_3, actual_ones_3);
 }
 
-
-int main(int argc, char **argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+BOOST_AUTO_TEST_SUITE_END()

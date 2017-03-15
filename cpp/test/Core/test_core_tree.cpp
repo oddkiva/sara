@@ -9,7 +9,9 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE "Core/Tree Class"
+
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/Defines.hpp>
 #include <DO/Sara/Core/Tree.hpp>
@@ -35,20 +37,26 @@ using const_node_pointer = const_node_handle::node_pointer;
 
 
 // Test Node class.
-TEST(TestNode, test_constructor)
+BOOST_AUTO_TEST_SUITE(TestTreeNode)
+
+BOOST_AUTO_TEST_CASE(test_constructor)
 {
   node_type v = 1;
-  EXPECT_EQ(v._value, 1);
-  EXPECT_EQ(v._parent, node_pointer(0));
-  EXPECT_EQ(v._prev_sibling, node_pointer(0));
-  EXPECT_EQ(v._next_sibling, node_pointer(0));
-  EXPECT_EQ(v._first_child, node_pointer(0));
-  EXPECT_EQ(v._last_child, node_pointer(0));
+  BOOST_CHECK_EQUAL(v._value, 1);
+  BOOST_CHECK_EQUAL(v._parent, node_pointer(0));
+  BOOST_CHECK_EQUAL(v._prev_sibling, node_pointer(0));
+  BOOST_CHECK_EQUAL(v._next_sibling, node_pointer(0));
+  BOOST_CHECK_EQUAL(v._first_child, node_pointer(0));
+  BOOST_CHECK_EQUAL(v._last_child, node_pointer(0));
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 
 // Test NodeHandle class.
-TEST(TestNodeHandle, test_constructor)
+BOOST_AUTO_TEST_SUITE(TestNodeHandle)
+
+BOOST_AUTO_TEST_CASE(test_constructor)
 {
   // Mutable.
   node_handle a;
@@ -66,51 +74,54 @@ TEST(TestNodeHandle, test_constructor)
   const_node_handle h(node_pointer(1));
 }
 
-TEST(TestNodeHandle, test_equality_operator)
+BOOST_AUTO_TEST_CASE(test_equality_operator)
 {
   // Between mutables.
   node_handle a;
   node_handle b = node_pointer(0);
-  EXPECT_EQ(a, b);
+  BOOST_CHECK(a == b);
 
   // Between immutables.
   const_node_handle c;
   const_node_handle d;
-  EXPECT_EQ(c, d);
+  BOOST_CHECK(c == d);
 
   // Between mutables and immutables.
-  EXPECT_EQ(a, c);
-  EXPECT_EQ(c, a);
+  BOOST_CHECK(a == c);
+  BOOST_CHECK(c == a);
 }
 
-TEST(TestNodeHandle, test_inequality_operator)
+BOOST_AUTO_TEST_CASE(test_inequality_operator)
 {
   // Between mutables.
   node_handle a;
   node_handle b = node_pointer(1);
-  EXPECT_NE(a, b);
+  BOOST_CHECK(a != b);
 
   // Between immutables.
   const_node_handle c;
   const_node_handle d = node_pointer(1);
-  EXPECT_NE(c, d);
+  BOOST_CHECK(c != d);
 
   // Between mutables and immutables.
-  EXPECT_NE(a, d);
-  EXPECT_NE(d, a);
+  BOOST_CHECK(a != d);
+  BOOST_CHECK(d != a);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 
 // Test constructors.
-TEST(TestTree, test_default_constructor)
+BOOST_AUTO_TEST_SUITE(TestTree)
+
+BOOST_AUTO_TEST_CASE(test_default_constructor)
 {
   Tree<int> tree;
-  EXPECT_TRUE(tree.empty());
+  BOOST_CHECK(tree.empty());
 }
 
-
 // Test copy.
-TEST(TestTree, test_copy)
+BOOST_AUTO_TEST_CASE(test_copy)
 {
   /*
   We construct the following tree.
@@ -155,13 +166,13 @@ TEST(TestTree, test_copy)
   breadth_first_iterator bfs_clone_it = clone.breadth_first_begin();
   for (int i = 0; i <= 14; ++i, ++bfs_tree_it, ++bfs_clone_it)
   {
-    EXPECT_EQ(*bfs_tree_it, i);
-    EXPECT_EQ(*bfs_clone_it, i);
+    BOOST_CHECK_EQUAL(*bfs_tree_it, i);
+    BOOST_CHECK_EQUAL(*bfs_clone_it, i);
   }
 }
 
 
-TEST(TestTree, test_swap)
+BOOST_AUTO_TEST_CASE(test_swap)
 {
   Tree<int> tree;
   tree.set_root(0);
@@ -188,19 +199,19 @@ TEST(TestTree, test_swap)
   for (it = tree.breadth_first_begin();
        it != tree.breadth_first_end(); ++it)
     ++num_vertices;
-  EXPECT_EQ(num_vertices, 3);
+  BOOST_CHECK_EQUAL(num_vertices, 3);
 
   num_vertices = 0;
   for (it = another_tree.breadth_first_begin();
        it != another_tree.breadth_first_end(); ++it)
     ++num_vertices;
-  EXPECT_EQ(num_vertices, 7);
+  BOOST_CHECK_EQUAL(num_vertices, 7);
 }
 
 
 // Test cut_tree and delete_subtree
 // TODO.
-TEST(TestTree, test_cut_tree_and_delete_subtree)
+BOOST_AUTO_TEST_CASE(test_cut_tree_and_delete_subtree)
 {
    /*
   We construct the following tree.
@@ -245,41 +256,41 @@ TEST(TestTree, test_cut_tree_and_delete_subtree)
 
 
 // Test basic functionalities.
-TEST(TestTree, test_set_root_and_empty)
+BOOST_AUTO_TEST_CASE(test_set_root_and_empty)
 {
   Tree<int> tree;
-  EXPECT_TRUE(tree.empty());
+  BOOST_CHECK(tree.empty());
   tree.set_root(1);
-  EXPECT_FALSE(tree.empty());
+  BOOST_CHECK(!tree.empty());
 }
 
-TEST(TestTree, test_begin)
-{
-  Tree<int> tree;
-  const Tree<int> & const_tree = tree;
-  EXPECT_EQ(tree.begin(), node_handle(0));
-  EXPECT_EQ(const_tree.begin(), node_handle(0));
-
-  tree.set_root(1);
-  EXPECT_NE(tree.begin(), node_handle(0));
-  EXPECT_NE(const_tree.begin(), node_handle(0));
-  EXPECT_EQ(*tree.begin(), 1);
-}
-
-TEST(TestTree, test_end)
+BOOST_AUTO_TEST_CASE(test_begin)
 {
   Tree<int> tree;
   const Tree<int> & const_tree = tree;
-
-  EXPECT_EQ(tree.end(), tree.begin());
-  EXPECT_EQ(const_tree.end(), tree.begin());
+  BOOST_CHECK(tree.begin() == node_handle(0));
+  BOOST_CHECK(const_tree.begin() == node_handle(0));
 
   tree.set_root(1);
-  EXPECT_NE(tree.end(), tree.begin());
-  EXPECT_NE(const_tree.end(), tree.begin());
+  BOOST_CHECK(tree.begin() != node_handle(0));
+  BOOST_CHECK(const_tree.begin() != node_handle(0));
+  BOOST_CHECK_EQUAL(*tree.begin(), 1);
 }
 
-TEST(TestTree, test_append_child)
+BOOST_AUTO_TEST_CASE(test_end)
+{
+  Tree<int> tree;
+  const Tree<int> & const_tree = tree;
+
+  BOOST_CHECK(tree.end() == tree.begin());
+  BOOST_CHECK(const_tree.end() == tree.begin());
+
+  tree.set_root(1);
+  BOOST_CHECK(tree.end() != tree.begin());
+  BOOST_CHECK(const_tree.end() != tree.begin());
+}
+
+BOOST_AUTO_TEST_CASE(test_append_child)
 {
   Tree<int> tree;
 
@@ -292,10 +303,10 @@ TEST(TestTree, test_append_child)
 
   sibling_iterator child = tree.children_begin(v0);
   for (int i = 1; i <= 3; ++i, ++child)
-    EXPECT_EQ(*child, i);
+    BOOST_CHECK_EQUAL(*child, i);
 }
 
-TEST(TestTree, test_prepend_child)
+BOOST_AUTO_TEST_CASE(test_prepend_child)
 {
   Tree<int> tree;
 
@@ -308,17 +319,17 @@ TEST(TestTree, test_prepend_child)
 
   sibling_iterator child = tree.children_begin(v0);
   for (int i = 3; i > 0; --i, ++child)
-    EXPECT_EQ(*child, i);
+    BOOST_CHECK_EQUAL(*child, i);
 }
 
-TEST(TestTree, test_insert_child_before)
+BOOST_AUTO_TEST_CASE(test_insert_child_before)
 {
   Tree<int> tree;
 
   tree.set_root(0);
 
   node_handle root = tree.begin();
-  EXPECT_THROW(tree.insert_sibling_before(root, 2), std::exception);
+  BOOST_CHECK_THROW(tree.insert_sibling_before(root, 2), std::exception);
 
   node_handle child1 = tree.append_child(root, 1);
   node_handle child2 = tree.append_child(root, 3);
@@ -327,17 +338,17 @@ TEST(TestTree, test_insert_child_before)
 
   sibling_iterator child = tree.children_begin(root);
   for (int i = 0; i <= 3; ++i, ++child)
-    EXPECT_EQ(*child, i);
+    BOOST_CHECK_EQUAL(*child, i);
 }
 
-TEST(TestTree, test_insert_child_after)
+BOOST_AUTO_TEST_CASE(test_insert_child_after)
 {
   Tree<int> tree;
 
   tree.set_root(0);
 
   node_handle root = tree.begin();
-  EXPECT_THROW(tree.insert_sibling_after(root, 2), std::exception);
+  BOOST_CHECK_THROW(tree.insert_sibling_after(root, 2), std::exception);
 
   node_handle child1 = tree.append_child(root, 1);
   node_handle child2 = tree.append_child(root, 3);
@@ -346,12 +357,12 @@ TEST(TestTree, test_insert_child_after)
 
   sibling_iterator child = tree.children_begin(root);
   for (int i = 1; i <= 4; ++i, ++child)
-    EXPECT_EQ(*child, i);
+    BOOST_CHECK_EQUAL(*child, i);
 }
 
 
 // Test sibling iterator.
-TEST(TestTree, test_sibling_iterator)
+BOOST_AUTO_TEST_CASE(test_sibling_iterator)
 {
   Tree<int> tree;
 
@@ -364,16 +375,16 @@ TEST(TestTree, test_sibling_iterator)
 
   sibling_iterator child = tree.children_begin(v0);
   for (int i = 1; i <= 3; ++i, ++child)
-    EXPECT_EQ(*child, i);
-  EXPECT_EQ(child, tree.children_end());
+    BOOST_CHECK_EQUAL(*child, i);
+  BOOST_CHECK(child == tree.children_end());
 
   child = tree.children_rbegin(v0);
   for (int i = 3; i >= 1; --i, --child)
-    EXPECT_EQ(*child, i);
-  EXPECT_EQ(child, tree.children_rend());
+    BOOST_CHECK_EQUAL(*child, i);
+  BOOST_CHECK(child == tree.children_rend());
 }
 
-TEST(TestTree, test_const_sibling_iterator)
+BOOST_AUTO_TEST_CASE(test_const_sibling_iterator)
 {
   Tree<int> tree;
 
@@ -387,18 +398,18 @@ TEST(TestTree, test_const_sibling_iterator)
   const Tree<int>& const_tree = tree;
   const_sibling_iterator const_child = const_tree.children_begin(v0);
   for (int i = 1; i <= 3; ++i, ++const_child)
-    EXPECT_EQ(*const_child, i);
-  EXPECT_EQ(const_child, tree.children_end());
+    BOOST_CHECK_EQUAL(*const_child, i);
+  BOOST_CHECK(const_child == tree.children_end());
 
   const_child = tree.children_rbegin(v0);
   for (int i = 3; i >= 1; --i, --const_child)
-    EXPECT_EQ(*const_child, i);
-  EXPECT_EQ(const_child, tree.children_rend());
+    BOOST_CHECK_EQUAL(*const_child, i);
+  BOOST_CHECK(const_child == tree.children_rend());
 }
 
 
 // Test depth-first iterator.
-TEST(TestDepthFirstIterator, test_depth_first_tree)
+BOOST_AUTO_TEST_CASE(test_depth_first_tree)
 {
   /*
     We construct the following tree.
@@ -438,26 +449,26 @@ TEST(TestDepthFirstIterator, test_depth_first_tree)
   const_depth_first_iterator const_dfs_it = tree.depth_first_begin();
   for (int i = 0; i <= 14; ++i, ++dfs_it, ++const_dfs_it)
   {
-    EXPECT_EQ(*dfs_it, i);
-    EXPECT_EQ(*const_dfs_it, i);
+    BOOST_CHECK_EQUAL(*dfs_it, i);
+    BOOST_CHECK_EQUAL(*const_dfs_it, i);
   }
-  EXPECT_EQ(dfs_it, tree.depth_first_end());
-  EXPECT_EQ(const_dfs_it, tree.depth_first_end());
+  BOOST_CHECK(dfs_it == tree.depth_first_end());
+  BOOST_CHECK(const_dfs_it == tree.depth_first_end());
 
   dfs_it = tree.depth_first_rbegin();
   const_dfs_it = tree.depth_first_rbegin();
   for (int i = 14; i >= 0; --i, --dfs_it, --const_dfs_it)
   {
-    EXPECT_EQ(*dfs_it, i);
-    EXPECT_EQ(*const_dfs_it, i);
+    BOOST_CHECK_EQUAL(*dfs_it, i);
+    BOOST_CHECK_EQUAL(*const_dfs_it, i);
   }
-  EXPECT_EQ(dfs_it, tree.depth_first_rend());
-  EXPECT_EQ(const_dfs_it, tree.depth_first_rend());
+  BOOST_CHECK(dfs_it == tree.depth_first_rend());
+  BOOST_CHECK(const_dfs_it == tree.depth_first_rend());
 }
 
 
 // Test breadth-first iterator.
-TEST(TestTree, test_breadth_first_iterator)
+BOOST_AUTO_TEST_CASE(test_breadth_first_iterator)
 {
   /*
   We construct the following tree.
@@ -500,16 +511,16 @@ TEST(TestTree, test_breadth_first_iterator)
   const_breadth_first_iterator const_bfs_it = tree.breadth_first_begin();
   for (int i = 0; i <= 14; ++i, ++bfs_it, ++const_bfs_it)
   {
-    EXPECT_EQ(*bfs_it, i);
-    EXPECT_EQ(*const_bfs_it, i);
+    BOOST_CHECK_EQUAL(*bfs_it, i);
+    BOOST_CHECK_EQUAL(*const_bfs_it, i);
   }
-  EXPECT_EQ(bfs_it, tree.breadth_first_end());
-  EXPECT_EQ(const_bfs_it, tree.breadth_first_end());
+  BOOST_CHECK(bfs_it == tree.breadth_first_end());
+  BOOST_CHECK(const_bfs_it == tree.breadth_first_end());
 }
 
 
 // Test leaf iterator.
-TEST(TestTree, test_leaf_iterator)
+BOOST_AUTO_TEST_CASE(test_leaf_iterator)
 {
   /*
   We construct the following tree.
@@ -552,25 +563,21 @@ TEST(TestTree, test_leaf_iterator)
   const_breadth_first_iterator const_bfs_it = tree.breadth_first_begin();
   for (int i = 0; i <= 14; ++i, ++bfs_it, ++const_bfs_it)
   {
-    EXPECT_EQ(*bfs_it, i);
-    EXPECT_EQ(*const_bfs_it, i);
+    BOOST_CHECK_EQUAL(*bfs_it, i);
+    BOOST_CHECK_EQUAL(*const_bfs_it, i);
   }
-  EXPECT_EQ(bfs_it, tree.breadth_first_end());
-  EXPECT_EQ(const_bfs_it, tree.breadth_first_end());
+  BOOST_CHECK(bfs_it == tree.breadth_first_end());
+  BOOST_CHECK(const_bfs_it == tree.breadth_first_end());
 
   leaf_iterator leaf_it = tree.leaf_begin();
   const_leaf_iterator const_leaf_it = tree.leaf_begin();
   for (int i = 7; i <= 14; ++i, ++leaf_it, ++const_leaf_it)
   {
-    EXPECT_EQ(*leaf_it, i);
-    EXPECT_EQ(*const_leaf_it, i);
+    BOOST_CHECK_EQUAL(*leaf_it, i);
+    BOOST_CHECK_EQUAL(*const_leaf_it, i);
   }
-  EXPECT_EQ(leaf_it, tree.leaf_end());
-  EXPECT_EQ(const_leaf_it, tree.leaf_end());
+  BOOST_CHECK(leaf_it == tree.leaf_end());
+  BOOST_CHECK(const_leaf_it == tree.leaf_end());
 }
 
-int main(int argc, char** argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+BOOST_AUTO_TEST_SUITE_END()

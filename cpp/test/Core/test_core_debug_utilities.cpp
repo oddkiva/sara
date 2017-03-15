@@ -9,9 +9,9 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <string>
+#define BOOST_TEST_MODULE "Core/Debug Utilities"
 
-#include <gtest/gtest.h>
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
 
@@ -22,19 +22,16 @@ using namespace std;
 using namespace DO::Sara;
 
 
-TEST(DO_Sara_Core_Test, test_print_stage)
+BOOST_AUTO_TEST_SUITE(TestDebugUtilities)
+
+BOOST_AUTO_TEST_CASE(test_print_stage)
 {
   stringstream buffer{};
   CoutRedirect cout_redirect{ buffer.rdbuf() };
   print_stage("Hello");
   auto text = buffer.str();
 
-  EXPECT_NE(text.find("Hello"), string::npos);
+  BOOST_CHECK(text.find("Hello") != string::npos);
 }
 
-
-int main(int argc, char** argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+BOOST_AUTO_TEST_SUITE_END()

@@ -10,11 +10,10 @@
 // ========================================================================== //
 
 #define BOOST_TEST_MODULE "Core/ArrayIterators/Basic Functions"
+
 #include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/Core/ArrayIterators.hpp>
-
-#include "../AssertHelpers.hpp"
 
 
 using namespace DO::Sara;

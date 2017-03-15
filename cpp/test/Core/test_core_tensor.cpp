@@ -9,47 +9,46 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#define BOOST_TEST_MODULE "Core/Tensor Views and Conversions"
+
 #include <vector>
 
-#include <gtest/gtest.h>
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/Core/Tensor.hpp>
-
-#include "../AssertHelpers.hpp"
 
 
 using namespace std;
 using namespace DO::Sara;
 
 
-TEST(TestConversionImageToTensor, test_grayscale_case)
+BOOST_AUTO_TEST_SUITE(TestConversionImageToTensor)
+
+BOOST_AUTO_TEST_CASE(test_grayscale_case)
 {
   auto image = Image<float>{2, 3};
-  image.matrix() <<
-    0, 1,
-    2, 3,
-    4, 5;
+  image.matrix() << 0, 1, 2, 3, 4, 5;
 
   const auto tensor = to_cwh_tensor(image);
 
   auto true_tensor = Tensor<float, 2>{3, 2};
-  true_tensor.matrix() <<
-    0, 1,
-    2, 3,
-    4, 5;
+  true_tensor.matrix() << 0, 1, 2, 3, 4, 5;
 
-  EXPECT_MATRIX_EQ(true_tensor.matrix(), tensor.matrix());
+  BOOST_CHECK_EQUAL(true_tensor.matrix(), tensor.matrix());
 }
 
-TEST(TestConversionImageToTensor, test_color_case)
+BOOST_AUTO_TEST_CASE(test_color_case)
 {
   auto image = Image<Rgb32f>{2, 3};
   auto m = image.matrix();
-  m.fill(Rgb32f{1.,2.,3.});
+  m.fill(Rgb32f{1., 2., 3.});
 
-  m(0,0) *= 0; m(0,1) *= 1;
-  m(1,0) *= 2; m(1,1) *= 3;
-  m(2,0) *= 4; m(2,1) *= 5;
+  m(0, 0) *= 0;
+  m(0, 1) *= 1;
+  m(1, 0) *= 2;
+  m(1, 1) *= 3;
+  m(2, 0) *= 4;
+  m(2, 1) *= 5;
 
   const auto tensor = to_cwh_tensor(image);
   const auto r = tensor[0].matrix();
@@ -59,60 +58,56 @@ TEST(TestConversionImageToTensor, test_color_case)
   auto true_r = Tensor<float, 2>{3, 2};
   auto true_g = Tensor<float, 2>{3, 2};
   auto true_b = Tensor<float, 2>{3, 2};
-  true_r.matrix() <<
-    0, 1,
-    2, 3,
-    4, 5;
-  true_g.matrix() <<
-    0,  2,
-    4,  6,
-    8, 10;
-  true_b.matrix() <<
-     0,  3,
-     6,  9,
-    12, 15;
+  true_r.matrix() << 0, 1, 2, 3, 4, 5;
+  true_g.matrix() << 0, 2, 4, 6, 8, 10;
+  true_b.matrix() << 0, 3, 6, 9, 12, 15;
 
-  EXPECT_MATRIX_EQ(true_r.matrix(), r);
-  EXPECT_MATRIX_EQ(true_g.matrix(), g);
-  EXPECT_MATRIX_EQ(true_b.matrix(), b);
+  BOOST_CHECK_EQUAL(true_r.matrix(), r);
+  BOOST_CHECK_EQUAL(true_g.matrix(), g);
+  BOOST_CHECK_EQUAL(true_b.matrix(), b);
 }
 
-TEST(TestTensorViews, test_grayscale_case)
+BOOST_AUTO_TEST_SUITE_END()
+
+
+BOOST_AUTO_TEST_SUITE(TestTensorViews)
+
+BOOST_AUTO_TEST_CASE(test_grayscale_case)
 {
   auto image = Image<float>{2, 3};
-  image.matrix() <<
-    0, 1,
-    2, 3,
-    4, 5;
+  image.matrix() << 0, 1, 2, 3, 4, 5;
 
   const auto tensor = tensor_view(image);
-  EXPECT_MATRIX_EQ(image.matrix(), tensor.matrix());
+  BOOST_CHECK_EQUAL(image.matrix(), tensor.matrix());
 }
 
-TEST(TestTensorView, test_color_case)
+BOOST_AUTO_TEST_CASE(test_color_case)
 {
   auto image = Image<Rgb32f>{2, 3};
   auto m = image.matrix();
-  m.fill(Rgb32f{1.,2.,3.});
+  m.fill(Rgb32f{1., 2., 3.});
 
-  m(0,0) *= 0; m(0,1) *= 1;
-  m(1,0) *= 2; m(1,1) *= 3;
-  m(2,0) *= 4; m(2,1) *= 5;
+  m(0, 0) *= 0;
+  m(0, 1) *= 1;
+  m(1, 0) *= 2;
+  m(1, 1) *= 3;
+  m(2, 0) *= 4;
+  m(2, 1) *= 5;
 
   const auto t = tensor_view(image);
 
   // Indexed by (y, x, c).
-  EXPECT_EQ(Rgb32f::num_channels(), t.size(2));
-  EXPECT_EQ(image.width(), t.size(1));
-  EXPECT_EQ(image.height(), t.size(0));
+  BOOST_CHECK_EQUAL(Rgb32f::num_channels(), t.size(2));
+  BOOST_CHECK_EQUAL(image.width(), t.size(1));
+  BOOST_CHECK_EQUAL(image.height(), t.size(0));
 
   for (int y = 0; y < t.size(0); ++y)
     for (int x = 0; x < t.size(1); ++x)
       for (int c = 0; c < t.size(2); ++c)
-        ASSERT_EQ((c + 1) * (x + y * t.size(1)), t(y, x, c));
+        BOOST_REQUIRE_EQUAL((c + 1) * (x + y * t.size(1)), t(y, x, c));
 }
 
-TEST(TestTensorView, test_matrix_case)
+BOOST_AUTO_TEST_CASE(test_matrix_case)
 {
   constexpr auto W = 2, H = 3, M = 2, N = 3;
   auto img = Image<Matrix<float, M, N>>{W, H};  // Indexed by (y, x, j, i).
@@ -122,9 +117,12 @@ TEST(TestTensorView, test_matrix_case)
   img.flat_array().fill(img_elem);
 
   auto m = img.matrix();
-  m(0,0) *= 0; m(0,1) *= 1;
-  m(1,0) *= 2; m(1,1) *= 3;
-  m(2,0) *= 4; m(2,1) *= 5;
+  m(0, 0) *= 0;
+  m(0, 1) *= 1;
+  m(1, 0) *= 2;
+  m(1, 1) *= 3;
+  m(2, 0) *= 4;
+  m(2, 1) *= 5;
   /*
    * [[0, 0, 0],  [[0, 2, 4],
    *  [0, 0, 0]]   [1, 3, 5]]
@@ -139,21 +137,21 @@ TEST(TestTensorView, test_matrix_case)
 
   const auto t = tensor_view(img);  // Indexed by (y, x, j, i).
 
-  EXPECT_EQ(M, t.size(3));
-  EXPECT_EQ(N, t.size(2));
-  EXPECT_EQ(W, t.size(1));
-  EXPECT_EQ(H, t.size(0));
-  EXPECT_EQ(img.width(), t.size(1));
-  EXPECT_EQ(img.height(), t.size(0));
+  BOOST_CHECK_EQUAL(M, t.size(3));
+  BOOST_CHECK_EQUAL(N, t.size(2));
+  BOOST_CHECK_EQUAL(W, t.size(1));
+  BOOST_CHECK_EQUAL(H, t.size(0));
+  BOOST_CHECK_EQUAL(img.width(), t.size(1));
+  BOOST_CHECK_EQUAL(img.height(), t.size(0));
 
   for (int y = 0; y < t.size(0); ++y)
     for (int x = 0; x < t.size(1); ++x)
       for (int j = 0; j < t.size(2); ++j)
         for (int i = 0; i < t.size(3); ++i)
-          ASSERT_EQ(img_elem(i, j) * (y * W + x), t(Vector4i{y, x, j, i}));
+          BOOST_REQUIRE_EQUAL(img_elem(i, j) * (y * W + x), t(Vector4i{y, x, j, i}));
 }
 
-TEST(TestTensorView, test_array_case)
+BOOST_AUTO_TEST_CASE(test_array_case)
 {
   constexpr auto W = 2, H = 3, M = 2, N = 3;
   auto img = Image<Array<float, M, N>>{W, H};  // Indexed by (y, x, j, i).
@@ -163,9 +161,12 @@ TEST(TestTensorView, test_array_case)
   img.flat_array().fill(img_elem);
 
   auto m = img.matrix();
-  m(0,0) *= 0; m(0,1) *= 1;
-  m(1,0) *= 2; m(1,1) *= 3;
-  m(2,0) *= 4; m(2,1) *= 5;
+  m(0, 0) *= 0;
+  m(0, 1) *= 1;
+  m(1, 0) *= 2;
+  m(1, 1) *= 3;
+  m(2, 0) *= 4;
+  m(2, 1) *= 5;
   /*
    * [[0, 0, 0],  [[0, 2, 4],
    *  [0, 0, 0]]   [1, 3, 5]]
@@ -180,22 +181,19 @@ TEST(TestTensorView, test_array_case)
 
   const auto t = tensor_view(img);  // Indexed by (y, x, j, i).
 
-  EXPECT_EQ(M, t.size(3));
-  EXPECT_EQ(N, t.size(2));
-  EXPECT_EQ(W, t.size(1));
-  EXPECT_EQ(H, t.size(0));
-  EXPECT_EQ(img.width(), t.size(1));
-  EXPECT_EQ(img.height(), t.size(0));
+  BOOST_CHECK_EQUAL(M, t.size(3));
+  BOOST_CHECK_EQUAL(N, t.size(2));
+  BOOST_CHECK_EQUAL(W, t.size(1));
+  BOOST_CHECK_EQUAL(H, t.size(0));
+  BOOST_CHECK_EQUAL(img.width(), t.size(1));
+  BOOST_CHECK_EQUAL(img.height(), t.size(0));
 
   for (int y = 0; y < t.size(0); ++y)
     for (int x = 0; x < t.size(1); ++x)
       for (int j = 0; j < t.size(2); ++j)
         for (int i = 0; i < t.size(3); ++i)
-          EXPECT_EQ(img_elem(i, j) * (y * W + x), t(Vector4i{y, x, j, i}));
+          BOOST_CHECK_EQUAL(img_elem(i, j) * (y * W + x),
+                            t(Vector4i{y, x, j, i}));
 }
 
-int main(int argc, char **argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+BOOST_AUTO_TEST_SUITE_END()
