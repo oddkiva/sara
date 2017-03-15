@@ -15,6 +15,7 @@ addons:
     packages:
     - qtbase5-dev
     - lcov
+    - libboost-test-dev
     - libqt5opengl5
     - libqt5opengl5-dev
     - yasm
