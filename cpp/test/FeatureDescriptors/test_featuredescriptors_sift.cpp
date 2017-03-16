@@ -1,4 +1,6 @@
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE "FeatureDescriptors/SIFT Descriptor"
+
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/FeatureDescriptors/SIFT.hpp>
 
@@ -7,14 +9,16 @@ using namespace std;
 using namespace DO::Sara;
 
 
-TEST(TestSIFTDescriptors, DISABLED_test_me)
+BOOST_AUTO_TEST_SUITE(TestSIFTDescriptors)
+
+BOOST_AUTO_TEST_CASE(test_computation)
 {
-  const int N{ 5 };
+  constexpr auto N{5};
 
-  auto grad_polar_coords = Image<Vector2f>{ N, N };
-  const Point2f c{ grad_polar_coords.sizes().cast<float>() / 2.f };
+  auto grad_polar_coords = Image<Vector2f>{N, N};
+  const Point2f c{grad_polar_coords.sizes().cast<float>() / 2.f};
 
-  const Vector2f g{ Vector2f::Zero() };
+  const Vector2f g{Vector2f::Zero()};
   const auto theta = atan2(0 - c.y(), 0 - c.x());
 
   // Set all gradients to zero except at coords (gx, gy).
@@ -29,9 +33,4 @@ TEST(TestSIFTDescriptors, DISABLED_test_me)
   // TODO.
 }
 
-
-int main(int argc, char *argv[])
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+BOOST_AUTO_TEST_SUITE_END()

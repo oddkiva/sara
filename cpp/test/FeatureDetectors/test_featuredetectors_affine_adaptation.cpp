@@ -1,16 +1,15 @@
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE "FeatureDescriptors/Affine Shape Adaptation"
+
+#include <boost/test/unit_test.hpp>
 
 
 using namespace std;
 
+BOOST_AUTO_TEST_SUITE(TestAffineShapeAdaptation)
 
-TEST(TestAffineAdaptation, test_me)
+BOOST_AUTO_TEST_CASE(test_me)
 {
   // TODO.
 }
 
-int main(int argc, char *argv[])
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+BOOST_AUTO_TEST_SUITE_END()

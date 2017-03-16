@@ -1,16 +1,18 @@
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE "FeatureDescriptors/Orientation"
+
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/FeatureDescriptors/Orientation.hpp>
-
-#include "../AssertHelpers.hpp"
 
 
 using namespace std;
 using namespace DO::Sara;
 
 
-TEST(TestOrientation, test_orientation_histogram)
+BOOST_AUTO_TEST_SUITE(TestComputeDominantOrientations)
+
+BOOST_AUTO_TEST_CASE(test_orientation_histogram)
 {
   const int N{ 5 };
   const int M{ N*N - 1 };
@@ -47,13 +49,12 @@ TEST(TestOrientation, test_orientation_histogram)
       expected_histogram.setZero();
       expected_histogram[theta_bin] = 1.f;
 
-      ASSERT_MATRIX_NEAR(expected_histogram, histogram.matrix(), 1e-6f);
+      BOOST_REQUIRE_SMALL((expected_histogram - histogram.matrix()).norm(), 1e-6f);
     }
   }
 }
 
-
-TEST(TestComputeDominantOrientations, test_detect_single_peak)
+BOOST_AUTO_TEST_CASE(test_detect_single_peak)
 {
   const int N{ 5 };
 
@@ -73,15 +74,10 @@ TEST(TestComputeDominantOrientations, test_detect_single_peak)
     grad_polar_coords, c.x(), c.y(), 1.f
   );
 
-  EXPECT_EQ(dominant_orientations.size(), 1u);
+  BOOST_CHECK_EQUAL(dominant_orientations.size(), 1u);
 
   auto& ori = dominant_orientations.front();
-  EXPECT_NEAR(theta, ori, 1e-6f);
+  BOOST_CHECK_SMALL(theta - ori, 1e-6f);
 }
 
-
-int main(int argc, char **argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+BOOST_AUTO_TEST_SUITE_END()

@@ -1,27 +1,35 @@
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE "FeatureDescriptors/Difference of Gaussians"
+
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/FeatureDetectors/DoG.hpp>
 
 
 using namespace DO::Sara;
 
+BOOST_AUTO_TEST_SUITE(TestExtremumRefinement)
 
-TEST(TestExtremumRefinement, test_on_edge)
+BOOST_AUTO_TEST_CASE(test_on_edge)
 {
   // TODO.
 }
 
-TEST(TestExtremumRefinement, test_refine_extremum)
+BOOST_AUTO_TEST_CASE(test_refine_extremum)
 {
   // TODO.
 }
 
-TEST(TestExtremumRefinement, test_local_scale_space_extrema)
+BOOST_AUTO_TEST_CASE(test_local_scale_space_extrema)
 {
   // TODO.
 }
 
-TEST(TestDoG, test_compute_dog_extrema)
+BOOST_AUTO_TEST_SUITE_END()
+
+
+BOOST_AUTO_TEST_SUITE(TestDoG)
+
+BOOST_AUTO_TEST_CASE(test_compute_dog_extrema)
 {
   // Create a centered gaussian.
   constexpr auto N = 2 * 5 + 1;
@@ -47,21 +55,16 @@ TEST(TestDoG, test_compute_dog_extrema)
   const auto& o_index = scale_octave_pairs[0](1);
 
   // There should be only one extrema at only one scale.
-  EXPECT_EQ(features.size(), 1u);
-  EXPECT_EQ(scale_octave_pairs.size(), 1u);
+  BOOST_CHECK_EQUAL(features.size(), 1u);
+  BOOST_CHECK_EQUAL(scale_octave_pairs.size(), 1u);
 
   const auto& f = features.front();
   const auto& D = compute_DoGs.diff_of_gaussians();
   const auto z = D.octave_scaling_factor(o_index);
 
-  EXPECT_NEAR(f.x() * z, xc, 1e-2);
-  EXPECT_NEAR(f.y() * z, yc, 1e-2);
-  EXPECT_NEAR(z, 0.5, 1e-2);
+  BOOST_CHECK_SMALL(f.x() * z - xc, 1e-2f);
+  BOOST_CHECK_SMALL(f.y() * z - yc, 1e-2f);
+  BOOST_CHECK_SMALL(z - 0.5, 1e-2);
 }
 
-
-int main(int argc, char **argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+BOOST_AUTO_TEST_SUITE_END()

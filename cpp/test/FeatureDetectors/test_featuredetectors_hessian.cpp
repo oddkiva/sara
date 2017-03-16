@@ -1,4 +1,6 @@
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE "FeatureDescriptors/Hessian Affine Detector"
+
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/FeatureDetectors/Hessian.hpp>
 
@@ -6,9 +8,11 @@
 using namespace DO::Sara;
 
 
-TEST(TestHessianLaplaceDetector, test_detection)
+BOOST_AUTO_TEST_SUITE(TestHessianAffineDetector)
+
+BOOST_AUTO_TEST_CASE(test_hessian_laplace_detector)
 {
-  const auto N = 2 * 10 + 1;
+  constexpr auto N = 2 * 10 + 1;
   auto I = Image<float>{N, N};
   I.flat_array().fill(0);
   I(1, 1) = 1.f;
@@ -18,7 +22,7 @@ TEST(TestHessianLaplaceDetector, test_detection)
   auto features = compute_hessian_laplace_maxima(I, 0);
 }
 
-TEST(TestDoHDetector, test_detection)
+BOOST_AUTO_TEST_CASE(test_determinant_of_hessian_detector)
 {
   constexpr auto N = 2 * 10 + 1;
   auto I = Image<float>{N, N};
@@ -30,8 +34,4 @@ TEST(TestDoHDetector, test_detection)
   auto features = compute_doh_maxima(I, 0);
 }
 
-int main(int argc, char **argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+BOOST_AUTO_TEST_SUITE_END()
