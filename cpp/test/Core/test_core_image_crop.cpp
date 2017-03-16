@@ -9,7 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#define BOOST_TEST_MODULE "Core/Image/Safe Crop"
+#define BOOST_TEST_MODULE "Core/Image/Crop"
 
 #include <boost/test/unit_test.hpp>
 

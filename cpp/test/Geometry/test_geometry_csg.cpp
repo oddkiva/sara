@@ -1,6 +1,21 @@
+// ========================================================================== //
+// This file is part of Sara, a basic set of libraries in C++ for computer
+// vision.
+//
+// Copyright (C) 2015-2017 David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
+#define BOOST_TEST_MODULE "Geometry/Objects/CSG"
+
+#include <boost/test/unit_test.hpp>
+
+#include <DO/Sara/Geometry/Objects/CSG.hpp>
 #include <DO/Sara/Geometry/Objects/Cone.hpp>
 #include <DO/Sara/Geometry/Objects/Ellipse.hpp>
-#include <DO/Sara/Geometry/Objects/CSG.hpp>
 
 #include "TestPolygon.hpp"
 
@@ -9,39 +24,34 @@ using namespace std;
 using namespace DO::Sara;
 
 
-class TestCSG : public TestPolygon
+class TestFixtureForCSG : public TestFixtureForPolygon
 {
-protected:
-  TestCSG() : TestPolygon()
+public:
+  TestFixtureForCSG()
+    : TestFixtureForPolygon()
   {
     _width = 15;
-    _height= 15;
+    _height = 15;
   }
 };
 
 
-TEST_F(TestCSG, test_intersection_ellipse_cone)
+BOOST_FIXTURE_TEST_SUITE(TestCSG, TestFixtureForCSG)
+
+BOOST_AUTO_TEST_CASE(test_intersection_ellipse_cone)
 {
-  Ellipse E(12., 12., 0., Point2d::Zero());
-  AffineCone2 K(Point2d(1,0), Point2d(0,1), Point2d::Zero());
+  const auto E = Ellipse{12., 12., 0., Point2d::Zero()};
+  const auto K = AffineCone2{Point2d{1, 0}, Point2d{0, 1}, Point2d::Zero()};
 
-  CSG::Singleton<Ellipse> ell(E);
-  CSG::Singleton<AffineCone2> cone(K);
-  auto inter = ell*cone;
+  const auto ell = CSG::Singleton<Ellipse>{E};
+  const auto cone = CSG::Singleton<AffineCone2>{K};
+  const auto inter = ell * cone;
 
-  int estimatedArea = sweep_count_pixels(
-    [&](const Point2d& p) {
-      return inter.contains(p);
-  });
+  auto estimated_area = static_cast<double>(
+      sweep_count_pixels([&](const Point2d& p) { return inter.contains(p); }));
 
-  double trueArea = area(E)/4.;
-  double relativeError = fabs(estimatedArea - trueArea)/trueArea;
-  EXPECT_NEAR(relativeError, 0, 1.5e-1);
+  const auto true_area = area(E) / 4.;
+  BOOST_CHECK_CLOSE(estimated_area, true_area, 16. /* percent */);
 }
 
-
-int main(int argc, char **argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+BOOST_AUTO_TEST_SUITE_END()

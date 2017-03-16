@@ -1,7 +1,6 @@
-#ifndef TEST_POLYGON_HPP
-#define TEST_POLYGON_HPP
+#pragma once
 
-#include <gtest/gtest.h>
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/Core/EigenExtension.hpp>
 
@@ -9,7 +8,7 @@
 using namespace DO::Sara;
 
 
-class TestPolygon : public testing::Test
+class TestFixtureForPolygon
 {
 protected:
   int _width;
@@ -20,7 +19,8 @@ protected:
   Point2d _p2;
   Point2d _center;
 
-  TestPolygon()
+public:
+  TestFixtureForPolygon()
   {
     _width = 10;
     _height = 10;
@@ -41,7 +41,7 @@ protected:
       for (int x = 0; x < _width; ++x)
       {
         Point2d p(x,y);
-        EXPECT_EQ(ground_truth(p), pred(p));
+        BOOST_REQUIRE_EQUAL(ground_truth(p), pred(p));
       }
     }
   }
@@ -62,6 +62,3 @@ protected:
     return quantity;
   }
 };
-
-
-#endif /* TEST_POLYGON_HPP */

@@ -1,7 +1,6 @@
-#ifndef DO_SARA_ASSERT_HELPERS_HPP
-#define DO_SARA_ASSERT_HELPERS_HPP
+#pragma once
 
-
+#include <iostream>
 #include <set>
 #include <vector>
 
@@ -76,10 +75,29 @@ to_std_set(const std::vector<Eigen::Matrix<T, M, N, Opts, MaxRows, MaxCols> >& v
 }
 
 // Define a macro that does something 'self.assertItemsEqual' in Python.
-#define EXPECT_ITEMS_EQ(vector1, vector2) \
+#define EXPECT_ITEMS_EQ(vector1, vector2)                                      \
   EXPECT_EQ(to_std_set(vector1), to_std_set(vector2))
-#define ASSERT_ITEMS_EQ(vector1, vector2) \
+#define ASSERT_ITEMS_EQ(vector1, vector2)                                      \
   ASSERT_EQ(to_std_set(vector1), to_std_set(vector2))
+
+
+#define BOOST_CHECK_ITEMS_EQUAL(collection1, collection2)                      \
+  BOOST_CHECK(to_std_set(collection1) == to_std_set(collection2))
+
+#define BOOST_REQUIRE_ITEMS_EQUAL(collection1, collection2)                    \
+  BOOST_REQUIRE(to_std_set(collection1) == to_std_set(collection2))
+
+#define BOOST_CHECK_SMALL_L2_DISTANCE(m1, m2, eps)                             \
+  BOOST_CHECK_SMALL((m1 - m2).norm(), eps)
+
+#define BOOST_REQUIRE_SMALL_L2_DISTANCE(m1, m2, eps)                           \
+  BOOST_REQUIRE_SMALL((m1 - m2).norm(), eps)
+
+#define BOOST_CHECK_CLOSE_L2_DISTANCE(m1, m2, eps)                             \
+  BOOST_CHECK_SMALL((m1 - m2).norm() / m1.norm(), eps)
+
+#define BOOST_REQUIRE_CLOSE_L2_DISTANCE(m1, m2, eps)                           \
+  BOOST_REQUIRE_SMALL((m1 - m2).norm() / m1.norm(), eps)
 
 
 struct CoutRedirect {
@@ -94,6 +112,3 @@ struct CoutRedirect {
 private:
   std::streambuf * old;
 };
-
-
-#endif /* DO_SARA_ASSERT_HELPERS_HPP */
