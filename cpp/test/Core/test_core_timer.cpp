@@ -41,12 +41,12 @@ BOOST_AUTO_TEST_CASE(test_timer)
   timer.restart();
   millisleep(sleep_milliseconds);
   elapsed_milliseconds =  timer.elapsed_ms();
-  BOOST_CHECK_CLOSE(elapsed_milliseconds, sleep_milliseconds, 100);
+  BOOST_CHECK_LE(std::abs(elapsed_milliseconds - sleep_milliseconds), 100);
 
   timer.restart();
   millisleep(sleep_milliseconds);
   elapsed_seconds = timer.elapsed();
-  BOOST_CHECK_CLOSE(elapsed_seconds, sleep_milliseconds/1e3, 5e-2);
+  BOOST_CHECK_LE(std::abs(elapsed_seconds - sleep_milliseconds / 1e3), 5e-2);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
