@@ -12,13 +12,13 @@
 //! TODO: this is a messy set of unit tests. It maybe worth reinstating Google
 //! mock in the library. We can compare easily vectors.
 
+#define BOOST_TEST_MODULE "KDTree/Radius Search"
+
 #include <set>
 
-#include <gtest/gtest.h>
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/KDTree.hpp>
-
-#include "../AssertHelpers.hpp"
 
 
 using namespace DO::Sara;
@@ -39,7 +39,7 @@ inline vector<int> range(int end)
 }
 
 
-class TestKDTree : public testing::Test
+class TestFixtureForKDTree
 {
 protected:
   MatrixXd _data;
@@ -48,7 +48,8 @@ protected:
   double _small_circle_radius;
   double _large_circle_radius;
 
-  TestKDTree()
+public:
+  TestFixtureForKDTree()
   {
     // We construct two sets in points. The first one lives in the
     // zero-centered unit circle and the second in the zero-centered
@@ -77,7 +78,9 @@ protected:
 };
 
 
-TEST_F(TestKDTree, test_simple_radius_search_default_use)
+BOOST_FIXTURE_TEST_SUITE(TestKDTree, TestFixtureForKDTree)
+
+BOOST_AUTO_TEST_CASE(test_simple_radius_search_default_use)
 {
   // Input data.
   KDTree tree(_data);
@@ -98,20 +101,20 @@ TEST_F(TestKDTree, test_simple_radius_search_default_use)
                                                nn_squared_distances);
 
   // Check the number of neighbors.
-  EXPECT_EQ(nn_indices.size(), num_nearest_neighbors);
-  EXPECT_EQ(num_found_neighbors, static_cast<int>(num_nearest_neighbors));
+  BOOST_CHECK_EQUAL(nn_indices.size(), num_nearest_neighbors);
+  BOOST_CHECK_EQUAL(num_found_neighbors, static_cast<int>(num_nearest_neighbors));
 
   // Check the indices of the nearest neighbors.
-  EXPECT_ITEMS_EQ(range(_num_points_in_each_circle), nn_indices);
+  BOOST_CHECK(range(_num_points_in_each_circle) == nn_indices);
 
   // Check the squared distances.
-  EXPECT_EQ(nn_squared_distances.size(), num_nearest_neighbors);
+  BOOST_CHECK_EQUAL(nn_squared_distances.size(), num_nearest_neighbors);
   for (size_t j = 0; j < nn_squared_distances.size(); ++j)
-    EXPECT_NEAR(nn_squared_distances[j], pow(_small_circle_radius, 2), 1e-10);
+    BOOST_REQUIRE_LT(nn_squared_distances[j] - pow(_small_circle_radius, 2), 1e-10);
 }
 
 
-TEST_F(TestKDTree, test_simple_radius_search_with_restricted_num_of_neighbors)
+BOOST_AUTO_TEST_CASE(test_simple_radius_search_with_restricted_num_of_neighbors)
 {
   // Input data.
   KDTree tree(_data);
@@ -131,19 +134,18 @@ TEST_F(TestKDTree, test_simple_radius_search_with_restricted_num_of_neighbors)
                                                max_num_nearest_neighbors);
 
   // Check the number of nearest neighbors.
-  EXPECT_EQ(nn_indices.size(), max_num_nearest_neighbors);
-  EXPECT_EQ(num_found_neighbors, static_cast<int>(max_num_nearest_neighbors));
+  BOOST_CHECK_EQUAL(nn_indices.size(), max_num_nearest_neighbors);
+  BOOST_CHECK_EQUAL(num_found_neighbors, static_cast<int>(max_num_nearest_neighbors));
 
   // Check the contents of the containers.
   for (size_t j = 0; j < nn_indices.size(); ++j)
   {
-    EXPECT_LT(nn_indices[j], static_cast<int>(_num_points_in_each_circle));
-    EXPECT_NEAR(nn_squared_distances[j], 4., 1e-10);
+    BOOST_REQUIRE_LT(nn_indices[j], static_cast<int>(_num_points_in_each_circle));
+    BOOST_REQUIRE_LT(nn_squared_distances[j] - 4., 1e-10);
   }
 }
 
-TEST_F(TestKDTree,
-       test_simple_radius_search_with_query_point_in_data_default)
+BOOST_AUTO_TEST_CASE(test_simple_radius_search_with_query_point_in_data_default)
 {
   // Input data.
   KDTree tree(_data);
@@ -168,20 +170,20 @@ TEST_F(TestKDTree,
                                            nn_squared_distances);
 
   // Check the number of neighbors.
-  EXPECT_EQ(nn_indices.size(), num_nearest_neighbors);
-  EXPECT_EQ(num_found_neighbors, static_cast<int>(num_nearest_neighbors));
+  BOOST_CHECK_EQUAL(nn_indices.size(), num_nearest_neighbors);
+  BOOST_CHECK_EQUAL(num_found_neighbors, static_cast<int>(num_nearest_neighbors));
 
   // Check the indices.
-  EXPECT_ITEMS_EQ(nn_indices, range(1, _num_points_in_each_circle));
+  BOOST_CHECK(nn_indices == range(1, _num_points_in_each_circle));
 
   // Check the squared distances.
   for (size_t j = 0; j < nn_indices.size(); ++j)
-    EXPECT_LE(nn_squared_distances[j], pow(2*2., 2));
+    BOOST_REQUIRE_LT(nn_squared_distances[j], pow(2*2., 2));
 }
 
 
-TEST_F(TestKDTree,
-       test_simple_radius_search_with_query_point_in_data_restricted)
+BOOST_AUTO_TEST_CASE(
+    test_simple_radius_search_with_query_point_in_data_restricted)
 {
   // Input data.
   KDTree tree(_data);
@@ -203,25 +205,25 @@ TEST_F(TestKDTree,
                                            max_num_nearest_neighbors);
 
   // Check the number of indices.
-  EXPECT_EQ(nn_indices.size(), max_num_nearest_neighbors);
-  EXPECT_EQ(num_found_neighbors, static_cast<int>(max_num_nearest_neighbors));
+  BOOST_CHECK_EQUAL(nn_indices.size(), max_num_nearest_neighbors);
+  BOOST_CHECK_EQUAL(num_found_neighbors, static_cast<int>(max_num_nearest_neighbors));
 
   // Check the number of squared distances.
-  EXPECT_EQ(nn_squared_distances.size(), max_num_nearest_neighbors);
+  BOOST_CHECK_EQUAL(nn_squared_distances.size(), max_num_nearest_neighbors);
 
   // Check the contents of the retrieval.
   for (size_t j = 0; j < nn_squared_distances.size(); ++j)
   {
     // Check the index value.
-    EXPECT_NE(nn_indices[j], 0);
-    EXPECT_LT(nn_indices[j], static_cast<int>(_num_points_in_each_circle));
+    BOOST_REQUIRE(nn_indices[j] != 0);
+    BOOST_REQUIRE_LT(nn_indices[j], static_cast<int>(_num_points_in_each_circle));
 
     // Check the squared distances.
-    EXPECT_LE(nn_squared_distances[j], squared_search_radius);
+    BOOST_REQUIRE_LT(nn_squared_distances[j], squared_search_radius);
   }
 }
 
-TEST_F(TestKDTree, test_batch_radius_search_default)
+BOOST_AUTO_TEST_CASE(test_batch_radius_search_default)
 {
   // Input data.
   KDTree tree(_data);
@@ -242,22 +244,22 @@ TEST_F(TestKDTree, test_batch_radius_search_default)
     nn_squared_distances);
 
   // Check the number of queries.
-  EXPECT_EQ(nn_indices.size(), num_queries);
-  EXPECT_EQ(nn_squared_distances.size(), num_queries);
+  BOOST_CHECK_EQUAL(nn_indices.size(), num_queries);
+  BOOST_CHECK_EQUAL(nn_squared_distances.size(), num_queries);
 
   // Check the content of the retrieval.
   for (size_t i = 0; i < num_queries; ++i)
   {
-    EXPECT_EQ(nn_indices[i].size(), _num_points_in_each_circle);
-    EXPECT_ITEMS_EQ(nn_indices[i], range(_num_points_in_each_circle));
+    BOOST_CHECK_EQUAL(nn_indices[i].size(), _num_points_in_each_circle);
+    BOOST_CHECK(nn_indices[i] == range(_num_points_in_each_circle));
 
-    EXPECT_EQ(nn_squared_distances[i].size(), _num_points_in_each_circle);
+    BOOST_CHECK_EQUAL(nn_squared_distances[i].size(), _num_points_in_each_circle);
     for (size_t j = 0; j < nn_squared_distances[i].size(); ++j)
-      EXPECT_LE(nn_squared_distances[i][j], pow(2*2.00001, 2));
+      BOOST_REQUIRE_LT(nn_squared_distances[i][j], pow(2*2.00001, 2));
   }
 }
 
-TEST_F(TestKDTree, test_batch_radius_search_restricted)
+BOOST_AUTO_TEST_CASE(test_batch_radius_search_restricted)
 {
   // Input data.
   KDTree tree(_data);
@@ -275,23 +277,23 @@ TEST_F(TestKDTree, test_batch_radius_search_restricted)
                      nn_squared_distances, max_num_nearest_neighbors);
 
   // Check the number of queries.
-  EXPECT_EQ(nn_indices.size(), num_queries);
-  EXPECT_EQ(nn_squared_distances.size(), num_queries);
+  BOOST_CHECK_EQUAL(nn_indices.size(), num_queries);
+  BOOST_CHECK_EQUAL(nn_squared_distances.size(), num_queries);
 
   for (size_t i = 0; i < num_queries; ++i)
   {
-    EXPECT_EQ(nn_indices[i].size(), max_num_nearest_neighbors);
-    EXPECT_EQ(nn_squared_distances[i].size(), max_num_nearest_neighbors);
+    BOOST_CHECK_EQUAL(nn_indices[i].size(), max_num_nearest_neighbors);
+    BOOST_CHECK_EQUAL(nn_squared_distances[i].size(), max_num_nearest_neighbors);
 
     for (size_t j = 0; j < nn_indices[i].size(); ++j)
     {
-      EXPECT_LT(nn_indices[i][j], static_cast<int>(_num_points_in_each_circle));
-      EXPECT_LE(nn_squared_distances[i][j], squared_search_radius);
+      BOOST_REQUIRE_LT(nn_indices[i][j], static_cast<int>(_num_points_in_each_circle));
+      BOOST_REQUIRE_LT(nn_squared_distances[i][j], squared_search_radius);
     }
   }
 }
 
-TEST_F(TestKDTree, test_batch_radius_search_with_query_point_in_data_default)
+BOOST_AUTO_TEST_CASE(test_batch_radius_search_with_query_point_in_data_default)
 {
   // Input data.
   KDTree tree(_data);
@@ -314,8 +316,8 @@ TEST_F(TestKDTree, test_batch_radius_search_with_query_point_in_data_default)
     nn_squared_distances);
 
   // Check the number of queries.
-  EXPECT_EQ(nn_indices.size(), num_queries);
-  EXPECT_EQ(nn_squared_distances.size(), num_queries);
+  BOOST_CHECK_EQUAL(nn_indices.size(), num_queries);
+  BOOST_CHECK_EQUAL(nn_squared_distances.size(), num_queries);
 
   // Check the contents of the retrieval.
   for (size_t i = 0; i < num_queries; ++i)
@@ -324,16 +326,17 @@ TEST_F(TestKDTree, test_batch_radius_search_with_query_point_in_data_default)
     true_indices.erase(true_indices.begin() + i);
 
     // Check the indices.
-    EXPECT_EQ(nn_indices[i].size(), _num_points_in_each_circle-1);
-    EXPECT_ITEMS_EQ(true_indices, nn_indices[i]);
+    BOOST_CHECK_EQUAL(nn_indices[i].size(), _num_points_in_each_circle-1);
+    BOOST_CHECK_EQUAL_COLLECTIONS(true_indices.begin(), true_indices.end(),
+                                  nn_indices[i].begin(), nn_indices[i].end());
 
     // Check the squared distances.
     for (size_t j = 0; j < nn_indices[i].size(); ++j)
-      EXPECT_LE(nn_squared_distances[i][j], pow(2*2.00000001, 2));
+      BOOST_REQUIRE_LT(nn_squared_distances[i][j], pow(2*2.00000001, 2));
   }
 }
 
-TEST_F(TestKDTree, test_batch_radius_search_with_query_point_in_data_restricted)
+BOOST_AUTO_TEST_CASE(test_batch_radius_search_with_query_point_in_data_restricted)
 {
   // Input data.
   KDTree tree(_data);
@@ -352,25 +355,20 @@ TEST_F(TestKDTree, test_batch_radius_search_with_query_point_in_data_restricted)
   tree.radius_search(queries, squared_search_radius, nn_indices,
     nn_squared_distances, max_num_nearest_neighbors);
 
-  EXPECT_EQ(nn_indices.size(), num_queries);
-  EXPECT_EQ(nn_squared_distances.size(), num_queries);
+  BOOST_CHECK_EQUAL(nn_indices.size(), num_queries);
+  BOOST_CHECK_EQUAL(nn_squared_distances.size(), num_queries);
   for (size_t i = 0; i < num_queries; ++i)
   {
-    EXPECT_EQ(nn_indices[i].size(), max_num_nearest_neighbors);
-    EXPECT_EQ(nn_squared_distances[i].size(), max_num_nearest_neighbors);
+    BOOST_CHECK_EQUAL(nn_indices[i].size(), max_num_nearest_neighbors);
+    BOOST_CHECK_EQUAL(nn_squared_distances[i].size(), max_num_nearest_neighbors);
 
     for (size_t j = 0; j < nn_indices[i].size(); ++j)
     {
-      EXPECT_LT(nn_indices[i][j], static_cast<int>(_num_points_in_each_circle));
-      EXPECT_NE(nn_indices[i][j], static_cast<int>(i));
-      EXPECT_LE(nn_squared_distances[i][j], squared_search_radius);
+      BOOST_REQUIRE_LT(nn_indices[i][j], static_cast<int>(_num_points_in_each_circle));
+      BOOST_REQUIRE(nn_indices[i][j] != static_cast<int>(i));
+      BOOST_REQUIRE_LT(nn_squared_distances[i][j], squared_search_radius);
     }
   }
 }
 
-
-int main(int argc, char **argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+BOOST_AUTO_TEST_SUITE_END()

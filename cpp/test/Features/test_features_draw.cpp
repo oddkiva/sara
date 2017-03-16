@@ -1,4 +1,7 @@
-#include <gtest/gtest.h>
+#define BOOST_TEST_NO_MAIN
+#define BOOST_TEST_MODULE "Features/Drawing Functions"
+
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/Features/Draw.hpp>
 
@@ -9,14 +12,17 @@ using namespace std;
 using namespace DO::Sara;
 
 
-TEST(TestOERegionDrawing, test_draw_method)
+BOOST_AUTO_TEST_SUITE(TestOERegionDrawing)
+
+BOOST_AUTO_TEST_CASE(test_draw_method)
 {
   create_window(300, 300);
-  auto f = OERegion{ Point2f{ 300 / 2.f, 300 / 2.f }, 1.f };
+  auto f = OERegion{Point2f{300 / 2.f, 300 / 2.f}, 1.f};
   f.draw(Red8);
+  close_window();
 }
 
-TEST(TestOERegionDrawing, test_draw_oe_regions)
+BOOST_AUTO_TEST_CASE(test_draw_oe_regions)
 {
   create_window(300, 300);
   auto features = vector<OERegion>{
@@ -24,12 +30,14 @@ TEST(TestOERegionDrawing, test_draw_oe_regions)
     OERegion{ Point2f{ 200.f, 300 / 2.f }, 1.f }
   };
   draw_oe_regions(features, Red8);
+  close_window();
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 int worker_thread(int argc, char **argv)
 {
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+  return boost::unit_test::unit_test_main([]() { return true; }, argc, argv);
 }
 
 int main(int argc, char **argv)
