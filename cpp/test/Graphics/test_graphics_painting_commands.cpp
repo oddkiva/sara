@@ -9,12 +9,15 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#define BOOST_TEST_NO_MAIN
+#define BOOST_TEST_MODULE "Graphics/Painting Commands"
+
 #include <vector>
 
-#include <gtest/gtest.h>
+#include <boost/mpl/list.hpp>
+#include <boost/test/unit_test.hpp>
 
-#include <QTest>
-
+#include <DO/Sara/Core.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/Graphics/GraphicsUtilities.hpp>
 
@@ -24,198 +27,182 @@
 using namespace DO::Sara;
 
 
-class TestPaintingCommands : public testing::Test
+class TestFixtureForPaintingCommands
 {
 protected:
   Window _test_window;
 
-  TestPaintingCommands()
+public:
+  TestFixtureForPaintingCommands()
   {
     _test_window = create_window(300, 300);
   }
 
-  virtual ~TestPaintingCommands()
+  ~TestFixtureForPaintingCommands()
   {
     close_window(_test_window);
   }
 };
 
-TEST_F(TestPaintingCommands, test_draw_point)
+BOOST_FIXTURE_TEST_SUITE(TestPaintingCommands, TestFixtureForPaintingCommands)
+
+BOOST_AUTO_TEST_CASE(test_draw_point)
 {
-  EXPECT_TRUE(draw_point(10, 10, Black8));
-  EXPECT_TRUE(draw_point(10, 10, Color4ub(255, 0, 0, 0)));
-  EXPECT_TRUE(draw_point(Point2f(10.f, 10.f), Red8));
+  BOOST_CHECK(draw_point(10, 10, Black8));
+  BOOST_CHECK(draw_point(10, 10, Color4ub(255, 0, 0, 0)));
+  BOOST_CHECK(draw_point(Point2f(10.f, 10.f), Red8));
 }
 
-TEST_F(TestPaintingCommands, test_draw_circle)
+BOOST_AUTO_TEST_CASE(test_draw_circle)
 {
-  EXPECT_TRUE(draw_circle(10, 10, 5, Black8, 2));
-  EXPECT_TRUE(draw_circle(Point2i(10, 10), 5, Black8, 2));
-  EXPECT_TRUE(draw_circle(Point2f(10.f, 10.f), 5.f, Black8, 2));
-  EXPECT_TRUE(draw_circle(Point2d(10., 10.), 5., Black8, 2));
+  BOOST_CHECK(draw_circle(10, 10, 5, Black8, 2));
+  BOOST_CHECK(draw_circle(Point2i(10, 10), 5, Black8, 2));
+  BOOST_CHECK(draw_circle(Point2f(10.f, 10.f), 5.f, Black8, 2));
+  BOOST_CHECK(draw_circle(Point2d(10., 10.), 5., Black8, 2));
 }
 
-TEST_F(TestPaintingCommands, test_draw_ellipse)
+BOOST_AUTO_TEST_CASE(test_draw_ellipse)
 {
-  EXPECT_TRUE(draw_ellipse(10, 10, 50, 100, Black8, 2));
-  EXPECT_TRUE(draw_ellipse(Point2f(10.f, 10.f), 5.f, 10.f, 40.f, Black8, 2));
-  EXPECT_TRUE(draw_ellipse(Point2d(10., 10.), 5., 10., 40., Black8, 2));
+  BOOST_CHECK(draw_ellipse(10, 10, 50, 100, Black8, 2));
+  BOOST_CHECK(draw_ellipse(Point2f(10.f, 10.f), 5.f, 10.f, 40.f, Black8, 2));
+  BOOST_CHECK(draw_ellipse(Point2d(10., 10.), 5., 10., 40., Black8, 2));
 }
 
-TEST_F(TestPaintingCommands, test_draw_line)
+BOOST_AUTO_TEST_CASE(test_draw_line)
 {
-  EXPECT_TRUE(draw_line(10, 10, 50, 100, Black8, 2));
-  EXPECT_TRUE(draw_line(Point2i(10, 10), Point2i(50, 100), Black8, 2));
-  EXPECT_TRUE(draw_line(Point2f(10, 10), Point2f(50, 100), Black8, 2));
-  EXPECT_TRUE(draw_line(Point2d(10, 10), Point2d(50, 100), Black8, 2));
+  BOOST_CHECK(draw_line(10, 10, 50, 100, Black8, 2));
+  BOOST_CHECK(draw_line(Point2i(10, 10), Point2i(50, 100), Black8, 2));
+  BOOST_CHECK(draw_line(Point2f(10, 10), Point2f(50, 100), Black8, 2));
+  BOOST_CHECK(draw_line(Point2d(10, 10), Point2d(50, 100), Black8, 2));
 }
 
-TEST_F(TestPaintingCommands, test_draw_rect)
+BOOST_AUTO_TEST_CASE(test_draw_rect)
 {
-  EXPECT_TRUE(draw_rect(10, 10, 50, 100, Black8, 2));
+  BOOST_CHECK(draw_rect(10, 10, 50, 100, Black8, 2));
 }
 
-TEST_F(TestPaintingCommands, test_draw_poly)
+BOOST_AUTO_TEST_CASE(test_draw_poly)
 {
   int x[] = {10, 20};
   int y[] = {10, 20};
-  EXPECT_TRUE(draw_poly(x, y, 2, Black8, 2));
+  BOOST_CHECK(draw_poly(x, y, 2, Black8, 2));
 
   Point2i poly[] = {Point2i(10, 10), Point2i(20, 20)};
-  EXPECT_TRUE(draw_poly(poly, 2, Red8, 1));
+  BOOST_CHECK(draw_poly(poly, 2, Red8, 1));
 }
 
-TEST_F(TestPaintingCommands, test_draw_string)
+BOOST_AUTO_TEST_CASE(test_draw_string)
 {
-  EXPECT_TRUE(
+  BOOST_CHECK(
       draw_string(10, 10, "example string", Red8, 14, 0.5, true, false, false));
 }
 
-TEST_F(TestPaintingCommands, test_draw_arrow)
+BOOST_AUTO_TEST_CASE(test_draw_arrow)
 {
-  EXPECT_TRUE(draw_arrow(10, 10, 30, 30, Red8));
-  EXPECT_TRUE(draw_arrow(10, 10, 30, 30, Red8, 1., 1., 1, 2));
-  EXPECT_TRUE(draw_arrow(Point2f(10, 10), Point2f(30, 30), Red8, 3));
+  BOOST_CHECK(draw_arrow(10, 10, 30, 30, Red8));
+  BOOST_CHECK(draw_arrow(10, 10, 30, 30, Red8, 1., 1., 1, 2));
+  BOOST_CHECK(draw_arrow(Point2f(10, 10), Point2f(30, 30), Red8, 3));
 }
 
-TEST_F(TestPaintingCommands, test_fill_ellipse)
+BOOST_AUTO_TEST_CASE(test_fill_ellipse)
 {
-  EXPECT_TRUE(fill_ellipse(10, 10, 50, 100, Black8));
-  EXPECT_TRUE(fill_ellipse(Point2i(10, 10), 5, 10, Black8));
+  BOOST_CHECK(fill_ellipse(10, 10, 50, 100, Black8));
+  BOOST_CHECK(fill_ellipse(Point2i(10, 10), 5, 10, Black8));
 }
 
-TEST_F(TestPaintingCommands, test_fill_rect)
+BOOST_AUTO_TEST_CASE(test_fill_rect)
 {
-  EXPECT_TRUE(fill_rect(10, 10, 50, 100, Black8));
-  EXPECT_TRUE(fill_rect(Point2i(10, 10), 50, 100, Black8));
+  BOOST_CHECK(fill_rect(10, 10, 50, 100, Black8));
+  BOOST_CHECK(fill_rect(Point2i(10, 10), 50, 100, Black8));
 }
 
-TEST_F(TestPaintingCommands, test_fill_circle)
+BOOST_AUTO_TEST_CASE(test_fill_circle)
 {
-  EXPECT_TRUE(fill_circle(10, 10, 2, Red8));
-  EXPECT_TRUE(fill_circle(Point2i(10, 10), 2, Red8));
-  EXPECT_TRUE(fill_circle(Point2f(10.f, 10.f), 2.f, Red8));
+  BOOST_CHECK(fill_circle(10, 10, 2, Red8));
+  BOOST_CHECK(fill_circle(Point2i(10, 10), 2, Red8));
+  BOOST_CHECK(fill_circle(Point2f(10.f, 10.f), 2.f, Red8));
 }
 
-TEST_F(TestPaintingCommands, test_fill_poly)
+BOOST_AUTO_TEST_CASE(test_fill_poly)
 {
   int x[] = {10, 20};
   int y[] = {10, 20};
-  EXPECT_TRUE(fill_poly(x, y, 2, Black8));
+  BOOST_CHECK(fill_poly(x, y, 2, Black8));
 
   Point2i poly[] = {Point2i(10, 10), Point2i(20, 20)};
-  EXPECT_TRUE(fill_poly(poly, 2, Red8));
+  BOOST_CHECK(fill_poly(poly, 2, Red8));
 }
 
-TEST_F(TestPaintingCommands, test_put_color_image)
+BOOST_AUTO_TEST_CASE(test_put_color_image)
 {
   const auto w = 50, h = 50;
   const auto data = std::vector<Color3ub>(w * h, Red8);
-  EXPECT_TRUE(put_color_image(10, 10, data.data(), w, h, 2.));
-  EXPECT_TRUE(put_color_image(Point2i(10, 10), data.data(), w, h, 2.));
+  BOOST_CHECK(put_color_image(10, 10, data.data(), w, h, 2.));
+  BOOST_CHECK(put_color_image(Point2i(10, 10), data.data(), w, h, 2.));
 }
 
-TEST_F(TestPaintingCommands, test_put_grey_image)
+BOOST_AUTO_TEST_CASE(test_put_grey_image)
 {
   const auto w = 50, h = 50;
   const auto data = std::vector<unsigned char>(w * h, 0);
-  EXPECT_TRUE(put_grey_image(10, 10, data.data(), w, h, 2.));
-  EXPECT_TRUE(put_grey_image(Point2i(10, 10), data.data(), w, h, 2.));
+  BOOST_CHECK(put_grey_image(10, 10, data.data(), w, h, 2.));
+  BOOST_CHECK(put_grey_image(Point2i(10, 10), data.data(), w, h, 2.));
 }
 
-TEST_F(TestPaintingCommands, test_display)
+BOOST_AUTO_TEST_CASE(test_display)
 {
   auto image = Image<Color3ub>{50, 50};
   image.flat_array().fill(Red8);
-  EXPECT_TRUE(display(image, 0, 0, 1.4));
-  EXPECT_TRUE(display(image, Point2i(0, 10), 1.4));
+  BOOST_CHECK(display(image, 0, 0, 1.4));
+  BOOST_CHECK(display(image, Point2i(0, 10), 1.4));
 
   auto rgb_image = Image<Rgb8>{50, 50};
   rgb_image.flat_array().fill(Red8);
-  EXPECT_TRUE(display(rgb_image, 0, 0, 1.4));
-  EXPECT_TRUE(display(rgb_image, Point2i(0, 10), 1.4));
+  BOOST_CHECK(display(rgb_image, 0, 0, 1.4));
+  BOOST_CHECK(display(rgb_image, Point2i(0, 10), 1.4));
 }
 
-TEST_F(TestPaintingCommands, test_clear_window)
+BOOST_AUTO_TEST_CASE(test_clear_window)
 {
-  EXPECT_TRUE(clear_window());
+  BOOST_CHECK(clear_window());
 }
 
-TEST_F(TestPaintingCommands, test_set_antialiasing)
+BOOST_AUTO_TEST_CASE(test_set_antialiasing)
 {
-  EXPECT_TRUE(set_antialiasing());
+  BOOST_CHECK(set_antialiasing());
 }
 
-TEST_F(TestPaintingCommands, test_set_transparency)
+BOOST_AUTO_TEST_CASE(test_set_transparency)
 {
-  EXPECT_TRUE(set_transparency());
+  BOOST_CHECK(set_transparency());
 }
 
-TEST_F(TestPaintingCommands, test_save_screen)
+BOOST_AUTO_TEST_CASE(test_save_screen)
 {
   auto image = Image<Color3ub>(50, 50);
   image.flat_array().fill(Red8);
-  EXPECT_TRUE(display(image, 0, 0, 1.4));
-  EXPECT_TRUE(save_screen(active_window(), "test.png"));
+  BOOST_CHECK(display(image, 0, 0, 1.4));
+  BOOST_CHECK(save_screen(active_window(), "test.png"));
 }
 
-template <class ColorType>
-class TestTemplateDisplay : public testing::Test
+
+using ColorTypes = boost::mpl::list<unsigned char, unsigned short, unsigned int,
+                                    char, short, int, float, double>;
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(test_generic_image_display, ColorType, ColorTypes)
 {
-protected:
-  typedef testing::Test Base;
-  Window test_window_;
-
-  TestTemplateDisplay()
-    : Base()
-  {
-    test_window_ = create_window(300, 300);
-  }
-
-  virtual ~TestTemplateDisplay()
-  {
-    close_window(test_window_);
-  }
-};
-
-typedef testing::Types<unsigned char, unsigned short, unsigned int, char, short,
-                       int, float, double>
-    ColorTypes;
-
-TYPED_TEST_CASE_P(TestTemplateDisplay);
-
-TYPED_TEST_P(TestTemplateDisplay, test_display)
-{
-  auto image = Image<TypeParam>{20, 20};
-  image.flat_array().fill(Red8);
-  EXPECT_TRUE(display(image, 0, 0, 1.4));
-  EXPECT_TRUE(display(image, Point2i(0, 10), 1.4));
+  auto image = Image<ColorType>{20, 20};
+  image.flat_array().fill(1);
+  BOOST_CHECK(display(image, 0, 0, 1.4));
+  BOOST_CHECK(display(image, 0, 0, 1.4));
 }
 
-int worker_thread(int argc, char** argv)
+BOOST_AUTO_TEST_SUITE_END()
+
+
+int worker_thread(int argc, char **argv)
 {
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+  return boost::unit_test::unit_test_main([]() { return true; }, argc, argv);
 }
 
 int main(int argc, char **argv)

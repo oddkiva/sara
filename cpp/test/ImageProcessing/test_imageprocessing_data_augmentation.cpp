@@ -2,27 +2,28 @@
 // This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2013-2017 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#define BOOST_TEST_MODULE "ImageProcessing/Data Augmentation"
 
-#include <gtest/gtest.h>
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/Core/Tensor.hpp>
 #include <DO/Sara/ImageProcessing/DataAugmentation.hpp>
-
-#include "../AssertHelpers.hpp"
 
 
 using namespace std;
 using namespace DO::Sara;
 
 
-TEST(TestImageDataTransform, test_zoom)
+BOOST_AUTO_TEST_SUITE(TestImageDataTransform)
+
+BOOST_AUTO_TEST_CASE(test_zoom)
 {
   auto t = ImageDataTransform{};
   t.set_zoom(2.f);
@@ -38,7 +39,7 @@ TEST(TestImageDataTransform, test_zoom)
   EXPECT_MATRIX_EQ(out.sizes(), t.out_sizes);
 }
 
-TEST(TestImageDataTransform, test_shift)
+BOOST_AUTO_TEST_CASE(test_shift)
 {
   auto t = ImageDataTransform{};
   t.set_shift(Vector2i::Ones());
@@ -60,7 +61,7 @@ TEST(TestImageDataTransform, test_shift)
   EXPECT_MATRIX_EQ(true_out.matrix(), out.matrix());
 }
 
-TEST(TestImageDataTransform, test_flip)
+BOOST_AUTO_TEST_CASE(test_flip)
 {
   auto t = ImageDataTransform{};
   t.set_flip(ImageDataTransform::Horizontal);
@@ -83,7 +84,7 @@ TEST(TestImageDataTransform, test_flip)
   EXPECT_MATRIX_EQ(true_out.matrix(), out.matrix());
 }
 
-TEST(TestImageDataTransform, test_fancy_pca)
+BOOST_AUTO_TEST_CASE(test_fancy_pca)
 {
   auto t = ImageDataTransform{};
   t.set_fancy_pca(Vector3f::Zero());
@@ -105,6 +106,9 @@ TEST(TestImageDataTransform, test_fancy_pca)
 
   EXPECT_MATRIX_EQ(true_out_r.matrix(), out_tensor[0].matrix());
 }
+
+BOOST_AUTO_TEST_SUITE_END()
+
 
 TEST(TestDataTransformEnumeration, test_compose_with_zooms)
 {
