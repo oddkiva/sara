@@ -19,8 +19,6 @@
 #include <DO/Sara/ImageIO/Database/TrainingDataSet.hpp>
 #include <DO/Sara/ImageIO/Database/TransformedTrainingDataSet.hpp>
 
-#include "../AssertHelpers.hpp"
-
 
 using namespace std;
 using namespace DO::Sara;
