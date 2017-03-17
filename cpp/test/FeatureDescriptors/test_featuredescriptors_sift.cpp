@@ -24,7 +24,7 @@ BOOST_AUTO_TEST_SUITE(TestSIFTDescriptors)
 
 BOOST_AUTO_TEST_CASE(test_computation)
 {
-  constexpr auto N{5};
+  constexpr int N{5};
 
   auto grad_polar_coords = Image<Vector2f>{N, N};
   const Point2f c{grad_polar_coords.sizes().cast<float>() / 2.f};
