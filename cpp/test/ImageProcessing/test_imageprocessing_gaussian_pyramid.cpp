@@ -9,9 +9,12 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#define BOOST_TEST_MODULE "ImageProcessing/Gaussian Pyramid"
+
 #include <exception>
 
-#include <gtest/gtest.h>
+#include <boost/mpl/list.hpp>
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/ImageProcessing/GaussianPyramid.hpp>
 
@@ -20,16 +23,12 @@ using namespace std;
 using namespace DO::Sara;
 
 
-template <class ChannelType>
-class TestGaussianPyramid : public testing::Test {};
+using ChannelTypes = boost::mpl::list<float, double, Rgb32f, Rgb64f>;
 
-typedef testing::Types<float, double, Rgb32f, Rgb64f> ChannelTypes;
+BOOST_AUTO_TEST_SUITE(TestGaussianPyramid)
 
-TYPED_TEST_CASE_P(TestGaussianPyramid);
-
-TYPED_TEST_P(TestGaussianPyramid, test_gaussian_pyramid)
+BOOST_AUTO_TEST_CASE_TEMPLATE(test_gaussian_pyramid, T, ChannelTypes)
 {
-  typedef TypeParam T;
   Image<T> I(16, 16);
   I.matrix().fill(PixelTraits<T>::max());
 
@@ -40,12 +39,4 @@ TYPED_TEST_P(TestGaussianPyramid, test_gaussian_pyramid)
   ImagePyramid<T> L(laplacian_pyramid(G));
 }
 
-REGISTER_TYPED_TEST_CASE_P(TestGaussianPyramid, test_gaussian_pyramid);
-INSTANTIATE_TYPED_TEST_CASE_P(DO_SARA_ImageProcessing_Pyramid_Test,
-                              TestGaussianPyramid, ChannelTypes);
-
-int main(int argc, char** argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+BOOST_AUTO_TEST_SUITE_END()

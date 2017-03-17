@@ -9,9 +9,12 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <vector>
+#define BOOST_TEST_NO_MAIN
+#define BOOST_TEST_MODULE "Graphics/Keyboard and Mouse Input"
 
-#include <gtest/gtest.h>
+#include <boost/test/unit_test.hpp>
+
+#include <vector>
 
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/Graphics/GraphicsUtilities.hpp>
@@ -26,37 +29,36 @@ using namespace std;
 EventScheduler *global_scheduler;
 
 
-class TestKeyboardMouseInputOnSingleWindow: public testing::Test
+class TestFixtureForKeyboardMouseInputOnSingleWindow
 {
 protected:
   Window test_window_;
 
-  TestKeyboardMouseInputOnSingleWindow()
+public:
+  TestFixtureForKeyboardMouseInputOnSingleWindow()
   {
     test_window_ = create_window(300, 300);
     global_scheduler->set_receiver(test_window_);
   }
 
-  virtual ~TestKeyboardMouseInputOnSingleWindow()
+  virtual ~TestFixtureForKeyboardMouseInputOnSingleWindow()
   {
     close_window(test_window_);
   }
 };
 
-TEST_F(TestKeyboardMouseInputOnSingleWindow,
-       test_get_mouse)
+
+BOOST_FIXTURE_TEST_SUITE(TestKeyboardMouseInputOnSingleWindow,
+                         TestFixtureForKeyboardMouseInputOnSingleWindow)
+
+BOOST_AUTO_TEST_CASE(test_get_mouse)
 {
   Qt::MouseButton expected_qt_mouse_buttons[] = {
-    Qt::LeftButton,
-    Qt::MiddleButton,
-    Qt::RightButton,
+      Qt::LeftButton, Qt::MiddleButton, Qt::RightButton,
   };
 
-  int expected_button_codes[] = {
-    MOUSE_LEFT_BUTTON,
-    MOUSE_MIDDLE_BUTTON,
-    MOUSE_RIGHT_BUTTON
-  };
+  int expected_button_codes[] = {MOUSE_LEFT_BUTTON, MOUSE_MIDDLE_BUTTON,
+                                 MOUSE_RIGHT_BUTTON};
 
   int expected_x = 150, expected_y = 150;
 
@@ -65,151 +67,138 @@ TEST_F(TestKeyboardMouseInputOnSingleWindow,
     Qt::MouseButton input_qt_mouse_button = expected_qt_mouse_buttons[i];
     int expected_button_code = expected_button_codes[i];
 
-    QMouseEvent event(
-      QEvent::MouseButtonRelease, QPointF(expected_x, expected_y),
-      input_qt_mouse_button, Qt::MouseButtons(input_qt_mouse_button), Qt::NoModifier
-      );
+    QMouseEvent event(QEvent::MouseButtonRelease,
+                      QPointF(expected_x, expected_y), input_qt_mouse_button,
+                      Qt::MouseButtons(input_qt_mouse_button), Qt::NoModifier);
     emit get_user_thread().sendEvent(&event, 10);
 
     int actual_x, actual_y;
     int actual_button = get_mouse(actual_x, actual_y);
 
-    EXPECT_EQ(actual_button, expected_button_code);
-    EXPECT_EQ(actual_x, expected_x);
-    EXPECT_EQ(actual_y, expected_y);
+    BOOST_CHECK_EQUAL(actual_button, expected_button_code);
+    BOOST_CHECK_EQUAL(actual_x, expected_x);
+    BOOST_CHECK_EQUAL(actual_y, expected_y);
   }
 }
 
-TEST_F(TestKeyboardMouseInputOnSingleWindow,
-       test_click)
+BOOST_AUTO_TEST_CASE(test_click)
 {
   Qt::MouseButton expected_button = Qt::LeftButton;
   int expected_x = 150, expected_y = 150;
-  QMouseEvent event(
-    QEvent::MouseButtonRelease, QPointF(expected_x, expected_y),
-    expected_button, expected_button, Qt::NoModifier
-  );
+  QMouseEvent event(QEvent::MouseButtonRelease, QPointF(expected_x, expected_y),
+                    expected_button, expected_button, Qt::NoModifier);
   emit get_user_thread().sendEvent(&event, 10);
 
   click();
 }
 
-TEST_F(TestKeyboardMouseInputOnSingleWindow,
-       test_get_key)
+BOOST_AUTO_TEST_CASE(test_get_key)
 {
   int expected_key = Qt::Key_A;
-  QKeyEvent event(
-    QEvent::KeyPress, expected_key, Qt::NoModifier
-  );
+  QKeyEvent event(QEvent::KeyPress, expected_key, Qt::NoModifier);
   emit get_user_thread().sendEvent(&event, 10);
 
   int actual_key = get_key();
 
-  EXPECT_EQ(actual_key, expected_key);
+  BOOST_CHECK_EQUAL(actual_key, expected_key);
 }
 
-TEST_F(TestKeyboardMouseInputOnSingleWindow,
-       test_get_event_with_no_input_event)
+BOOST_AUTO_TEST_CASE(test_get_event_with_no_input_event)
 {
   Event event;
   get_event(50, event);
-  EXPECT_EQ(event.type, NO_EVENT);
+  BOOST_CHECK_EQUAL(event.type, NO_EVENT);
 }
 
-TEST_F(TestKeyboardMouseInputOnSingleWindow,
-       test_get_event_with_input_key_event)
+BOOST_AUTO_TEST_CASE(test_get_event_with_input_key_event)
 {
   int expected_key = Qt::Key_A;
-  QKeyEvent qt_event(
-    QEvent::KeyPress, expected_key, Qt::NoModifier
-  );
+  QKeyEvent qt_event(QEvent::KeyPress, expected_key, Qt::NoModifier);
   emit get_user_thread().sendEvent(&qt_event, 5);
 
   Event event;
   get_event(50, event);
 
-  EXPECT_EQ(event.type, KEY_PRESSED);
-  EXPECT_EQ(event.key, expected_key);
-  EXPECT_EQ(event.keyModifiers, static_cast<int>(Qt::NoModifier));
+  BOOST_CHECK_EQUAL(event.type, KEY_PRESSED);
+  BOOST_CHECK_EQUAL(event.key, expected_key);
+  BOOST_CHECK_EQUAL(event.keyModifiers, static_cast<int>(Qt::NoModifier));
 }
 
-TEST_F(TestKeyboardMouseInputOnSingleWindow,
-       test_get_event_with_mouse_pressed_event)
+BOOST_AUTO_TEST_CASE(test_get_event_with_mouse_pressed_event)
 {
   Qt::MouseButton expected_button = Qt::LeftButton;
   int expected_x = 150, expected_y = 150;
-  QMouseEvent qt_event(
-    QEvent::MouseButtonPress, QPointF(expected_x, expected_y),
-    expected_button, expected_button, Qt::NoModifier
-  );
+  QMouseEvent qt_event(QEvent::MouseButtonPress,
+                       QPointF(expected_x, expected_y), expected_button,
+                       expected_button, Qt::NoModifier);
   emit get_user_thread().sendEvent(&qt_event, 5);
 
   Event event;
   get_event(50, event);
 
-  EXPECT_EQ(event.type, MOUSE_PRESSED);
-  EXPECT_EQ(event.buttons, 1);
-  EXPECT_EQ(event.keyModifiers, static_cast<int>(Qt::NoModifier));
+  BOOST_CHECK_EQUAL(event.type, MOUSE_PRESSED);
+  BOOST_CHECK_EQUAL(event.buttons, 1);
+  BOOST_CHECK_EQUAL(event.keyModifiers, static_cast<int>(Qt::NoModifier));
 }
 
-TEST_F(TestKeyboardMouseInputOnSingleWindow,
-       test_get_event_with_mouse_released_event)
+BOOST_AUTO_TEST_CASE(test_get_event_with_mouse_released_event)
 {
   Qt::MouseButton expected_button = Qt::LeftButton;
   int expected_x = 150, expected_y = 150;
-  QMouseEvent qt_event(
-    QEvent::MouseButtonRelease, QPointF(expected_x, expected_y),
-    expected_button, expected_button, Qt::NoModifier
-  );
+  QMouseEvent qt_event(QEvent::MouseButtonRelease,
+                       QPointF(expected_x, expected_y), expected_button,
+                       expected_button, Qt::NoModifier);
   emit get_user_thread().sendEvent(&qt_event, 5);
 
   Event event;
   get_event(50, event);
 
-  EXPECT_EQ(event.type, MOUSE_RELEASED);
-  EXPECT_EQ(event.buttons, 1);
-  EXPECT_EQ(event.keyModifiers, static_cast<int>(Qt::NoModifier));
+  BOOST_CHECK_EQUAL(event.type, MOUSE_RELEASED);
+  BOOST_CHECK_EQUAL(event.buttons, 1);
+  BOOST_CHECK_EQUAL(event.keyModifiers, static_cast<int>(Qt::NoModifier));
 }
 
-TEST_F(TestKeyboardMouseInputOnSingleWindow,
-       test_get_event_with_mouse_moved_event)
+BOOST_AUTO_TEST_CASE(test_get_event_with_mouse_moved_event)
 {
   Qt::MouseButton expected_button = Qt::LeftButton;
   int expected_x = 150, expected_y = 150;
-  QMouseEvent qt_event(
-    QEvent::MouseMove, QPointF(expected_x, expected_y),
-    expected_button, expected_button, Qt::NoModifier
-  );
+  QMouseEvent qt_event(QEvent::MouseMove, QPointF(expected_x, expected_y),
+                       expected_button, expected_button, Qt::NoModifier);
   emit get_user_thread().sendEvent(&qt_event, 5);
 
   Event event;
   get_event(50, event);
 
-  EXPECT_EQ(event.type, MOUSE_RELEASED);
-  EXPECT_EQ(event.buttons, 1);
-  EXPECT_EQ(event.keyModifiers, static_cast<int>(Qt::NoModifier));
+  BOOST_CHECK_EQUAL(event.type, MOUSE_PRESSED_AND_MOVED);
+  BOOST_CHECK_EQUAL(event.buttons, 1);
+  BOOST_CHECK_EQUAL(event.keyModifiers, static_cast<int>(Qt::NoModifier));
 }
 
-class TestKeyboardMouseInputOnAnyWindow: public testing::Test
+BOOST_AUTO_TEST_SUITE_END()
+
+
+class TestFixtureForKeyboardMouseInputOnAnyWindow
 {
 protected:
   vector<Window> test_windows_;
 
-  TestKeyboardMouseInputOnAnyWindow()
+  TestFixtureForKeyboardMouseInputOnAnyWindow()
   {
     for (int i = 0; i < 2; ++i)
       for (int j = 0; j < 3; ++j)
-        test_windows_.push_back(
-          create_window(200, 200, to_string(3*i+j), 300*j+300, 300*i+50)
-        );
+        test_windows_.push_back(create_window(200, 200, to_string(3 * i + j),
+                                              300 * j + 300, 300 * i + 50));
   }
 
-  virtual ~TestKeyboardMouseInputOnAnyWindow()
+  virtual ~TestFixtureForKeyboardMouseInputOnAnyWindow()
   {
   }
 };
 
-TEST_F(TestKeyboardMouseInputOnAnyWindow, test_any_get_mouse)
+BOOST_FIXTURE_TEST_SUITE(TestKeyboardMouseInputOnAnyWindow,
+                         TestFixtureForKeyboardMouseInputOnAnyWindow)
+
+BOOST_AUTO_TEST_CASE(test_any_get_mouse)
 {
   Qt::MouseButton expected_button = Qt::LeftButton;
   int expected_x = 150, expected_y = 150;
@@ -221,23 +210,22 @@ TEST_F(TestKeyboardMouseInputOnAnyWindow, test_any_get_mouse)
     for (auto wj : test_windows_)
     {
       global_scheduler->set_receiver(wj);
-      QMouseEvent event(
-        QEvent::MouseButtonRelease, QPointF(expected_x, expected_y),
-        expected_button, expected_button, Qt::NoModifier
-      );
+      QMouseEvent event(QEvent::MouseButtonRelease,
+                        QPointF(expected_x, expected_y), expected_button,
+                        expected_button, Qt::NoModifier);
       emit get_user_thread().sendEvent(&event, 10);
 
       Point2i actual_position;
       int actual_button = any_get_mouse(actual_position);
 
-      EXPECT_EQ(actual_button, 1);
-      EXPECT_EQ(actual_position.x(), expected_x);
-      EXPECT_EQ(actual_position.y(), expected_y);
+      BOOST_CHECK_EQUAL(actual_button, 1);
+      BOOST_CHECK_EQUAL(actual_position.x(), expected_x);
+      BOOST_CHECK_EQUAL(actual_position.y(), expected_y);
     }
   }
 }
 
-TEST_F(TestKeyboardMouseInputOnAnyWindow, test_any_click)
+BOOST_AUTO_TEST_CASE(test_any_click)
 {
   Qt::MouseButton expected_button = Qt::LeftButton;
   int expected_x = 150, expected_y = 150;
@@ -249,10 +237,9 @@ TEST_F(TestKeyboardMouseInputOnAnyWindow, test_any_click)
     for (auto wj : test_windows_)
     {
       global_scheduler->set_receiver(wj);
-      QMouseEvent event(
-        QEvent::MouseButtonRelease, QPointF(expected_x, expected_y),
-        expected_button, expected_button, Qt::NoModifier
-      );
+      QMouseEvent event(QEvent::MouseButtonRelease,
+                        QPointF(expected_x, expected_y), expected_button,
+                        expected_button, Qt::NoModifier);
       emit get_user_thread().sendEvent(&event, 10);
 
       any_click();
@@ -260,7 +247,7 @@ TEST_F(TestKeyboardMouseInputOnAnyWindow, test_any_click)
   }
 }
 
-TEST_F(TestKeyboardMouseInputOnAnyWindow, test_any_get_key)
+BOOST_AUTO_TEST_CASE(test_any_get_key)
 {
   int expected_key = Qt::Key_A;
 
@@ -271,25 +258,25 @@ TEST_F(TestKeyboardMouseInputOnAnyWindow, test_any_get_key)
     for (auto wj : test_windows_)
     {
       global_scheduler->set_receiver(wj);
-      QKeyEvent event(
-        QEvent::KeyPress, expected_key, Qt::NoModifier
-        );
+      QKeyEvent event(QEvent::KeyPress, expected_key, Qt::NoModifier);
       emit get_user_thread().sendEvent(&event, 10);
 
       int actual_key = any_get_key();
 
-      EXPECT_EQ(actual_key, expected_key);
+      BOOST_CHECK_EQUAL(actual_key, expected_key);
     }
   }
 }
 
-int worker_thread(int argc, char **argv)
+BOOST_AUTO_TEST_SUITE_END()
+
+
+int worker_thread(int argc, char** argv)
 {
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+  return boost::unit_test::unit_test_main([]() { return true; }, argc, argv);
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
   // Create Qt Application.
   GraphicsApplication gui_app_(argc, argv);
@@ -297,7 +284,7 @@ int main(int argc, char **argv)
   // Create an event scheduler on the GUI thread.
   global_scheduler = new EventScheduler;
   // Connect the user thread and the event scheduler.
-  QObject::connect(&get_user_thread(), SIGNAL(sendEvent(QEvent *, int)),
+  QObject::connect(&get_user_thread(), SIGNAL(sendEvent(QEvent*, int)),
                    global_scheduler, SLOT(schedule_event(QEvent*, int)));
 
   // Run the worker thread

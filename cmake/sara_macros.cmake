@@ -335,7 +335,9 @@ function (sara_add_test _test_name _srcs _additional_lib_deps)
 
   # Create the unit test project.
   add_executable(${_test_name} ${_srcs_var})
-  target_link_libraries(${_test_name} ${_additional_lib_deps} gtest)
+  target_link_libraries(${_test_name} ${_additional_lib_deps}
+                        ${Boost_LIBRARIES})
+  target_compile_definitions(${_test_name} PRIVATE -DBOOST_TEST_DYN_LINK)
 
   set_target_properties(${_test_name}
     PROPERTIES

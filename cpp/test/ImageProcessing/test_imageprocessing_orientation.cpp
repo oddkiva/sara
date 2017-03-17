@@ -9,7 +9,9 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE "ImageProcessing/Orientation"
+
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/ImageProcessing/Orientation.hpp>
 
@@ -20,7 +22,9 @@ using namespace std;
 using namespace DO::Sara;
 
 
-TEST(TestOrientation, test_orientation)
+BOOST_AUTO_TEST_SUITE(TestOrientation)
+
+BOOST_AUTO_TEST_CASE(test_orientation)
 {
   Image<Vector2f> vector_field(3, 3);
   vector_field.matrix().fill(Vector2f::Ones());
@@ -29,24 +33,22 @@ TEST(TestOrientation, test_orientation)
   true_orientations.flat_array().fill(static_cast<float>(M_PI_4));
 
   auto orientations = Image<float>{};
-  EXPECT_THROW(orientation(vector_field, orientations), domain_error);
+  BOOST_CHECK_THROW(orientation(vector_field, orientations), domain_error);
 
   orientations = Image<float>{vector_field.sizes()};
   orientation(vector_field, orientations);
-  EXPECT_MATRIX_NEAR(true_orientations.matrix(), orientations.matrix(), 1e-3);
+  BOOST_CHECK_SMALL_L2_DISTANCE(true_orientations.matrix(),
+                                orientations.matrix(), 1e-3f);
 
   orientations.clear();
   orientations = orientation(vector_field);
-  EXPECT_MATRIX_NEAR(true_orientations.matrix(), orientations.matrix(), 1e-3);
+  BOOST_CHECK_SMALL_L2_DISTANCE(true_orientations.matrix(),
+                                orientations.matrix(), 1e-3f);
 
   orientations.clear();
   orientations = vector_field.compute<Orientation>();
-  EXPECT_MATRIX_NEAR(true_orientations.matrix(), orientations.matrix(), 1e-3);
+  BOOST_CHECK_SMALL_L2_DISTANCE(true_orientations.matrix(),
+                                orientations.matrix(), 1e-3f);
 }
 
-
-int main(int argc, char** argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+BOOST_AUTO_TEST_SUITE_END()

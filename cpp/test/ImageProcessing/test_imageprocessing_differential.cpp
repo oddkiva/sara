@@ -9,8 +9,9 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#define BOOST_TEST_MODULE "ImageProcessing/Differential Operators"
 
-#include <gtest/gtest.h>
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/ImageProcessing/Differential.hpp>
 
@@ -21,34 +22,35 @@ using namespace std;
 using namespace DO::Sara;
 
 
-class TestDifferential : public testing::Test
+class TestFixtureForDifferentialOperators
 {
 protected:
   Image<float> _src_image;
   vector<float> _kernel;
 
-  TestDifferential() : testing::Test()
+public:
+  TestFixtureForDifferentialOperators()
   {
     _src_image.resize(3, 3);
-    _src_image.matrix() <<
-      1, 2, 3,
-      1, 2, 3,
-      1, 2, 3;
+    _src_image.matrix() << 1, 2, 3, 1, 2, 3, 1, 2, 3;
 
     _kernel.resize(3);
-    _kernel[0] = -1./2;
-    _kernel[1] =  0;
-    _kernel[2] =  1./2;
+    _kernel[0] = -1. / 2;
+    _kernel[1] = 0;
+    _kernel[2] = 1. / 2;
   }
 };
 
-TEST_F(TestDifferential, test_gradient)
+BOOST_FIXTURE_TEST_SUITE(TestDifferentialOperator,
+                         TestFixtureForDifferentialOperators)
+
+BOOST_AUTO_TEST_CASE(test_gradient)
 {
   auto& f = _src_image;
-  Vector2i x{ 1, 1 };
+  Vector2i x{1, 1};
 
   Vector2f gradf_x = gradient(f, x);
-  EXPECT_MATRIX_NEAR(Vector2f(1,0), gradf_x, 1e-5);
+  BOOST_CHECK_CLOSE_L2_DISTANCE(Vector2f(1, 0), gradf_x, 1e-5f);
 
   auto gradf = gradient(f);
   auto gradf_2 = f.compute<Gradient>();
@@ -63,37 +65,34 @@ TEST_F(TestDifferential, test_gradient)
       const auto& gradf_xy = gradf(x, y);
       const auto& gradf_xy_2 = gradf_2(x, y);
 
-      EXPECT_MATRIX_NEAR(true_gradf, gradf_xy, 1e-5);
-      EXPECT_MATRIX_NEAR(true_gradf, gradf_xy_2, 1e-5);
+      BOOST_CHECK_CLOSE_L2_DISTANCE(true_gradf, gradf_xy, 1e-5f);
+      BOOST_CHECK_CLOSE_L2_DISTANCE(true_gradf, gradf_xy_2, 1e-5f);
     }
   }
 }
 
-TEST_F(TestDifferential, test_laplacian)
+BOOST_AUTO_TEST_CASE(test_laplacian)
 {
   auto& f = _src_image;
-  f.matrix() <<
-    1, 1, 1,
-    1, 1, 1,
-    1, 1, 1;
-  Vector2i x{ 1, 1 };
+  f.matrix() << 1, 1, 1, 1, 1, 1, 1, 1, 1;
+  Vector2i x{1, 1};
 
   auto laplacian_x = laplacian(f, x);
-  EXPECT_NEAR(0, laplacian_x, 1e-5);
+  BOOST_CHECK_SMALL(laplacian_x, 1e-5f);
 
-  auto true_delta_f = MatrixXf{ 3, 3 };
+  auto true_delta_f = MatrixXf{3, 3};
   true_delta_f.setZero();
 
   auto delta_f = Image<float>{};
   delta_f = laplacian(f);
-  EXPECT_MATRIX_NEAR(delta_f.matrix(), true_delta_f, 1e-5);
+  BOOST_CHECK_SMALL_L2_DISTANCE(delta_f.matrix(), true_delta_f, 1e-5f);
 
   delta_f.clear();
   delta_f = _src_image.compute<Laplacian>();
-  EXPECT_MATRIX_NEAR(delta_f.matrix(), true_delta_f, 1e-5);
+  BOOST_CHECK_SMALL_L2_DISTANCE(delta_f.matrix(), true_delta_f, 1e-5f);
 }
 
-TEST_F(TestDifferential, test_hessian)
+BOOST_AUTO_TEST_CASE(test_hessian)
 {
   auto& f = _src_image;
   f.matrix() <<
@@ -104,7 +103,7 @@ TEST_F(TestDifferential, test_hessian)
 
   auto H_x = hessian(f, x);
   Matrix2f true_H_x = Matrix2f::Zero();
-  EXPECT_MATRIX_NEAR(true_H_x, H_x, 1e-5);
+  BOOST_CHECK_SMALL_L2_DISTANCE(true_H_x, H_x, 1e-5f);
 
   auto hessian_f = hessian(f);
   auto hessian_f_2 = f.compute<Hessian>();
@@ -116,13 +115,13 @@ TEST_F(TestDifferential, test_hessian)
       const auto true_hessian = Matrix2f::Zero();
       const auto& hessian = hessian_f(x, y);
       const auto& hessian_2 = hessian_f_2(x, y);
-      EXPECT_MATRIX_NEAR(true_hessian, hessian, 1e-5);
-      EXPECT_MATRIX_NEAR(true_hessian, hessian_2, 1e-5);
+      BOOST_CHECK_SMALL_L2_DISTANCE(true_hessian, hessian, 1e-5f);
+      BOOST_CHECK_SMALL_L2_DISTANCE(true_hessian, hessian_2, 1e-5f);
     }
   }
 }
 
-TEST_F(TestDifferential, test_laplacian_2)
+BOOST_AUTO_TEST_CASE(test_laplacian_2)
 {
   /*
     We test the following function:
@@ -144,12 +143,12 @@ TEST_F(TestDifferential, test_laplacian_2)
   Matrix2f actual_central_block = laplacian_f.matrix().block<2, 2>(1, 1);
   Matrix2f actual_central_block_2 = laplacian_f_2.matrix().block<2, 2>(1, 1);
   Matrix2f expected_central_block = 4 * Matrix2f::Ones();
-  EXPECT_MATRIX_EQ(expected_central_block, actual_central_block);
-  EXPECT_MATRIX_EQ(expected_central_block, actual_central_block_2);
+  BOOST_CHECK_EQUAL(expected_central_block, actual_central_block);
+  BOOST_CHECK_EQUAL(expected_central_block, actual_central_block_2);
 
 }
 
-TEST_F(TestDifferential, test_hessian_2)
+BOOST_AUTO_TEST_CASE(test_hessian_2)
 {
   /*
     We test the following function:
@@ -177,15 +176,9 @@ TEST_F(TestDifferential, test_hessian_2)
   for (int y = 1; y < 3; ++y)
     for (int x = 1; x < 3; ++x)
     {
-      ASSERT_MATRIX_EQ(expected_hessian, Hf(x, y));
-      ASSERT_MATRIX_EQ(expected_hessian, Hf_2(x, y));
+      BOOST_REQUIRE_EQUAL(expected_hessian, Hf(x, y));
+      BOOST_REQUIRE_EQUAL(expected_hessian, Hf_2(x, y));
     }
 }
 
-
-
-int main(int argc, char** argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+BOOST_AUTO_TEST_SUITE_END()

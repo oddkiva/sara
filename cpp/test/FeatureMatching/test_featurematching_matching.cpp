@@ -9,18 +9,20 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE "FeatureMatching/Approximate Nearest Neighbor-Based Matching"
+
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/FeatureMatching.hpp>
-
-#include "../AssertHelpers.hpp"
 
 
 using namespace std;
 using namespace DO::Sara;
 
 
-TEST(TestFeatureMatching, test_ann_matching)
+BOOST_AUTO_TEST_SUITE(TestFeatureMatching)
+
+BOOST_AUTO_TEST_CASE(test_ann_matching)
 {
   Set<OERegion, RealDescriptor> keys1, keys2;
 
@@ -38,16 +40,12 @@ TEST(TestFeatureMatching, test_ann_matching)
   AnnMatcher matcher{ keys1, keys2, 0.6f };
   auto matches = matcher.compute_matches();
 
-  EXPECT_EQ(size_t{ 1 }, matches.size());
+  BOOST_CHECK_EQUAL(1u, matches.size());
 
   const auto& m = matches.front();
-  EXPECT_EQ(keys1.features[0], m.x());
-  EXPECT_EQ(keys2.features[0], m.y());
-  EXPECT_EQ(0.f, m.score());
+  BOOST_CHECK_EQUAL(keys1.features[0], m.x());
+  BOOST_CHECK_EQUAL(keys2.features[0], m.y());
+  BOOST_CHECK_EQUAL(0.f, m.score());
 }
 
-int main(int argc, char **argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+BOOST_AUTO_TEST_SUITE_END()

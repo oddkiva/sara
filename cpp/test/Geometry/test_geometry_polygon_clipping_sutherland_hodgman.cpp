@@ -9,7 +9,10 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE                                                      \
+  "Geometry/Algorithms/Sutherland Hodgman Polygon Intersection Algorithm"
+
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/Core/EigenExtension.hpp>
 #include <DO/Sara/Geometry/Algorithms/SutherlandHodgman.hpp>
@@ -21,8 +24,9 @@ using namespace std;
 using namespace DO::Sara;
 
 
-TEST(TestSutherlandHodgmanPolygonClipping,
-     test_subject_polygon_in_clip_polygon)
+BOOST_AUTO_TEST_SUITE(TestSutherlandHodgmanPolygonClipping)
+
+BOOST_AUTO_TEST_CASE(test_subject_polygon_in_clip_polygon)
 {
   vector<Point2d> clip_polygon;
   vector<Point2d> subject_polygon;
@@ -41,11 +45,11 @@ TEST(TestSutherlandHodgmanPolygonClipping,
 
   // The resulting polygon must the subject polygon.
   result = sutherland_hodgman(subject_polygon, clip_polygon);
-  EXPECT_EQ(result, subject_polygon);
+  BOOST_CHECK_EQUAL_COLLECTIONS(result.begin(), result.end(),
+                                subject_polygon.begin(), subject_polygon.end());
 }
 
-TEST(TestSutherlandHodgmanPolygonClipping,
-     test_subject_polygon_outside_of_clip_polygon)
+BOOST_AUTO_TEST_CASE(test_subject_polygon_outside_of_clip_polygon)
 {
   vector<Point2d> clip_polygon;
   vector<Point2d> subject_polygon;
@@ -64,11 +68,10 @@ TEST(TestSutherlandHodgmanPolygonClipping,
 
   // The resulting polygon must the empty polygon.
   result = sutherland_hodgman(subject_polygon, clip_polygon);
-  EXPECT_TRUE(result.empty());
+  BOOST_CHECK(result.empty());
 }
 
-TEST(TestSutherlandHodgmanPolygonClipping,
-     test_clip_polygon_in_subject_polygon)
+BOOST_AUTO_TEST_CASE(test_clip_polygon_in_subject_polygon)
 {
   vector<Point2d> clip_polygon;
   vector<Point2d> subject_polygon;
@@ -87,10 +90,10 @@ TEST(TestSutherlandHodgmanPolygonClipping,
 
   // The resulting polygon must the empty polygon.
   result = sutherland_hodgman(subject_polygon, clip_polygon);
-  EXPECT_TRUE(result.empty());
+  BOOST_CHECK(result.empty());
 }
 
-TEST(TestSutherlandHodgmanPolygonClipping, test_interesecting_bboxes)
+BOOST_AUTO_TEST_CASE(test_interesecting_bboxes)
 {
   // The clip polygon is a square.
   vector<Point2d> clip_polygon;
@@ -118,18 +121,13 @@ TEST(TestSutherlandHodgmanPolygonClipping, test_interesecting_bboxes)
   expected_result.push_back(Point2d(0.5, 1.0));
 
   // 1. Check that the points are identical.
-  EXPECT_ITEMS_EQ(expected_result, actual_result);
+  BOOST_CHECK_ITEMS_EQUAL(expected_result, actual_result);
 
   // 2. Check that the points are enumerated in a CCW manner..
-  const size_t N = actual_result.size();
+  const auto N = actual_result.size();
   const vector<Point2d>& P = actual_result;
   for (size_t i = 0; i < N; ++i)
-    EXPECT_EQ(1, ccw(P[i], P[(i+1)%N], P[(i+2)%N]));
+    BOOST_REQUIRE_EQUAL(1, ccw(P[i], P[(i+1)%N], P[(i+2)%N]));
 }
 
-
-int main(int argc, char **argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+BOOST_AUTO_TEST_SUITE_END()

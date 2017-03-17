@@ -9,7 +9,9 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE "Geometry/Objects/Triangle"
+
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/Geometry/Objects.hpp>
 
@@ -20,18 +22,22 @@ using namespace std;
 using namespace DO::Sara;
 
 
-class TestTriangle : public TestPolygon {};
+class TestFixtureForTriangle : public TestFixtureForPolygon
+{
+};
 
-TEST_F(TestTriangle, test_constructor_and_area_computation)
+BOOST_FIXTURE_TEST_SUITE(TestTriangle, TestFixtureForTriangle)
+
+BOOST_AUTO_TEST_CASE(test_constructor_and_area_computation)
 {
   Triangle t1(Point2d(0,0), Point2d(100, 0), Point2d(100, 100));
-  EXPECT_NEAR(area(t1), 1e4/2., 1e-10);
+  BOOST_CHECK_CLOSE(area(t1), 1e4/2., 1e-3);
 
   Triangle t2(Point2d(100,0), Point2d(0, 0), Point2d(100, 100));
-  EXPECT_NEAR(signed_area(t2), -1e4/2., 1e-10);
+  BOOST_CHECK_CLOSE(signed_area(t2), -1e4/2., 1e-3);
 }
 
-TEST_F(TestTriangle, test_point_inside_triangle)
+BOOST_AUTO_TEST_CASE(test_point_inside_triangle)
 {
   Triangle t(Point2d(0, 1), Point2d(4, 0), Point2d(0, 4));
 
@@ -40,13 +46,7 @@ TEST_F(TestTriangle, test_point_inside_triangle)
     return t.contains(p);
   });
 
-  double rel_error = fabs(exact_area - pixel_area) / exact_area;
-  EXPECT_NEAR(rel_error, 0., 5e-2);
+  BOOST_CHECK_CLOSE(exact_area, pixel_area, 5e-2);
 }
 
-
-int main(int argc, char** argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+BOOST_AUTO_TEST_SUITE_END()

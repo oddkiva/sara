@@ -9,9 +9,12 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <gtest/gtest.h>
+#define BOOST_TEST_NO_MAIN
+#define BOOST_TEST_MODULE "Graphics/GraphicsView Window"
 
 #include <QtTest>
+
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/Graphics/DerivedQObjects/GraphicsView.hpp>
 
@@ -26,11 +29,13 @@ Q_DECLARE_METATYPE(Qt::MouseButtons)
 using namespace DO::Sara;
 
 
-TEST(TestGraphicsView, test_construction)
+BOOST_AUTO_TEST_SUITE(TestGraphicsView)
+
+BOOST_AUTO_TEST_CASE(test_construction)
 {
   const auto width = 300;
   const auto height = 300;
-  const auto windowName = QString{ "Graphics View Window" };
+  const auto windowName = QString{"Graphics View Window"};
   const auto x = 200;
   const auto y = 300;
 
@@ -40,19 +45,20 @@ TEST(TestGraphicsView, test_construction)
     x, y
   };
 
-  EXPECT_EQ(window->width(), width);
-  EXPECT_EQ(window->height(), height);
-  EXPECT_EQ(window->windowTitle(), windowName);
-  EXPECT_TRUE(window->isVisible());
-  EXPECT_EQ(window->lastAddedItem(), nullptr);
+  BOOST_CHECK_EQUAL(window->width(), width);
+  BOOST_CHECK_EQUAL(window->height(), height);
+  BOOST_CHECK(window->windowTitle() ==  windowName);
+  BOOST_CHECK(window->isVisible());
+  BOOST_CHECK(window->lastAddedItem() == nullptr);
 
-  delete window;
+  window->deleteLater();
 }
 
+BOOST_AUTO_TEST_SUITE_END()
 
-class TestGraphicsViewEvents: public testing::Test
+class TestFixtureForGraphicsViewEvents
 {
-protected: // data members.
+protected:
   GraphicsView *_test_window;
   EventScheduler _event_scheduler;
   QPoint _mouse_pos;
@@ -63,8 +69,8 @@ protected: // data members.
   int _wait_ms;
   int _event_time_ms;
 
-protected: // methods.
-  TestGraphicsViewEvents()
+public:
+  TestFixtureForGraphicsViewEvents()
   {
     _mouse_buttons_type_id = qRegisterMetaType<Qt::MouseButtons>(
       "Qt::MouseButtons"
@@ -79,26 +85,28 @@ protected: // methods.
     _event_time_ms = 10;
   }
 
-  virtual ~TestGraphicsViewEvents()
+  virtual ~TestFixtureForGraphicsViewEvents()
   {
-    delete _test_window;
+    _test_window->deleteLater();
   }
 
   void compare_key_event(QSignalSpy& spy) const
   {
     spy.wait(500);
-    EXPECT_EQ(spy.count(), 1);
+    BOOST_CHECK_EQUAL(spy.count(), 1);
 
     QList<QVariant> arguments = spy.takeFirst();
-    EXPECT_EQ(arguments.at(0).toInt(), static_cast<int>(_key));
+    BOOST_CHECK_EQUAL(arguments.at(0).toInt(), static_cast<int>(_key));
   }
-
 };
 
-TEST_F(TestGraphicsViewEvents, test_key_press_event)
+BOOST_FIXTURE_TEST_SUITE(TestGraphicsViewEvents,
+                         TestFixtureForGraphicsViewEvents)
+
+BOOST_AUTO_TEST_CASE(test_key_press_event)
 {
   QSignalSpy spy{ _test_window, SIGNAL(pressedKey(int)) };
-  EXPECT_TRUE(spy.isValid());
+  BOOST_CHECK(spy.isValid());
 
   auto event = QKeyEvent{ QEvent::KeyPress, _key, Qt::NoModifier };
   _event_scheduler.schedule_event(&event, 10);
@@ -106,30 +114,30 @@ TEST_F(TestGraphicsViewEvents, test_key_press_event)
   compare_key_event(spy);
 }
 
-TEST_F(TestGraphicsViewEvents, test_send_no_event)
+BOOST_AUTO_TEST_CASE(test_send_no_event)
 {
   QSignalSpy spy{ _test_window, SIGNAL(sendEvent(Event)) };
-  EXPECT_TRUE(spy.isValid());
+  BOOST_CHECK(spy.isValid());
 
   QMetaObject::invokeMethod(_test_window, "waitForEvent",
     Qt::AutoConnection, Q_ARG(int, 1));
 
   // Nothing happens.
-  EXPECT_TRUE(spy.wait(10));
-  EXPECT_EQ(spy.count(), 1);
+  BOOST_CHECK(spy.wait(10));
+  BOOST_CHECK_EQUAL(spy.count(), 1);
   auto arguments = spy.takeFirst();
   auto arg = arguments.at(0);
   arg.convert(_event_type_id);
 
   const auto event = arguments.at(0).value<Event>();
-  EXPECT_EQ(event.type, DO::Sara::NO_EVENT);
+  BOOST_CHECK_EQUAL(event.type, DO::Sara::NO_EVENT);
 }
 
-TEST_F(TestGraphicsViewEvents, test_send_pressed_key_event)
+BOOST_AUTO_TEST_CASE(test_send_pressed_key_event)
 {
   // Spy the sendEvent signal.
   QSignalSpy spy{ _test_window, SIGNAL(sendEvent(Event)) };
-  EXPECT_TRUE(spy.isValid());
+  BOOST_CHECK(spy.isValid());
 
 #ifdef _WIN32
   auto wait_ms = 100;
@@ -148,10 +156,10 @@ TEST_F(TestGraphicsViewEvents, test_send_pressed_key_event)
   _event_scheduler.schedule_event(&qt_event, key_press_time_ms);
 
   // The spy waits for the event.
-  EXPECT_TRUE(spy.wait(2*wait_ms));
+  BOOST_CHECK(spy.wait(2*wait_ms));
 
   // Check that the spy received one key press event.
-  EXPECT_EQ(spy.count(), 1);
+  BOOST_CHECK_EQUAL(spy.count(), 1);
 
   // Check the details of the key press event.
   auto arguments = spy.takeFirst();
@@ -159,15 +167,16 @@ TEST_F(TestGraphicsViewEvents, test_send_pressed_key_event)
   arg.convert(_event_type_id);
 
   const auto event = arguments.at(0).value<Event>();
-  EXPECT_EQ(event.type, DO::Sara::KEY_PRESSED);
-  EXPECT_EQ(event.key, _key);
+  BOOST_CHECK_EQUAL(event.type, DO::Sara::KEY_PRESSED);
+  BOOST_CHECK_EQUAL(event.key, _key);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 int main(int argc, char *argv[])
 {
   QApplication app(argc, argv);
   app.setAttribute(Qt::AA_Use96Dpi, true);
 
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+  return boost::unit_test::unit_test_main([]() { return true; }, argc, argv);
 }

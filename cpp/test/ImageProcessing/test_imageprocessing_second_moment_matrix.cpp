@@ -9,7 +9,9 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE "ImageProcessing/Second Moment Matrix"
+
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/ImageProcessing/SecondMomentMatrix.hpp>
 
@@ -20,7 +22,9 @@ using namespace std;
 using namespace DO::Sara;
 
 
-TEST(TestSecondMomentMatrix, test_second_moment_matrix)
+BOOST_AUTO_TEST_SUITE(TestSecondMomentMatrix)
+
+BOOST_AUTO_TEST_CASE(test_second_moment_matrix)
 {
   auto vector_field = Image<Vector2f>{3, 3};
   vector_field.matrix().fill(Vector2f::Ones());
@@ -30,13 +34,8 @@ TEST(TestSecondMomentMatrix, test_second_moment_matrix)
 
   auto moments = vector_field.compute<SecondMomentMatrix>();
   for (size_t i = 0; i != moments.size(); ++i)
-    EXPECT_MATRIX_NEAR(true_moments.flat_array()[i], moments.flat_array()[i],
-                       1e-3);
+    BOOST_REQUIRE_SMALL_L2_DISTANCE(true_moments.flat_array()[i],
+                                    moments.flat_array()[i], 1e-3f);
 }
 
-
-int main(int argc, char** argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+BOOST_AUTO_TEST_SUITE_END()

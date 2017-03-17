@@ -9,10 +9,12 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <gtest/gtest.h>
+#define BOOST_TEST_NO_MAIN
+#define BOOST_TEST_MODULE "Graphics/PaintingWindow Constructors"
+
+#include <boost/test/unit_test.hpp>
 
 #include <QtTest>
-
 #include <QtWidgets>
 
 #include <DO/Sara/Graphics/DerivedQObjects/PaintingWindow.hpp>
@@ -27,8 +29,9 @@ Q_DECLARE_METATYPE(Qt::MouseButtons)
 using namespace DO::Sara;
 
 
-TEST(TestPaintingWindowConstructors,
-     test_construction_of_PaintingWindow_with_small_size)
+BOOST_AUTO_TEST_SUITE(TestPaintingWindowConstructors)
+
+BOOST_AUTO_TEST_CASE(test_construction_of_PaintingWindow_with_small_size)
 {
   int width = 50;
   int height = 50;
@@ -36,84 +39,78 @@ TEST(TestPaintingWindowConstructors,
   int x = 200;
   int y = 300;
 
-  PaintingWindow *window = new PaintingWindow(
-    width, height,
-    windowName,
-    x, y
-  );
+  PaintingWindow* window = new PaintingWindow(width, height, windowName, x, y);
 
-  EXPECT_EQ(window->width(), width);
-  EXPECT_EQ(window->height(), height);
-  EXPECT_EQ(window->windowTitle(), windowName);
+  BOOST_CHECK_EQUAL(window->width(), width);
+  BOOST_CHECK_EQUAL(window->height(), height);
+  BOOST_CHECK(window->windowTitle() == windowName);
 #ifndef __APPLE__
   // Strangely, when we have 2 monitor screens, this fails on Mac OS X...
-  EXPECT_EQ(window->x(), x);
-  EXPECT_EQ(window->y(), y);
+  BOOST_CHECK_EQUAL(window->x(), x);
+  BOOST_CHECK_EQUAL(window->y(), y);
 #endif
-  EXPECT_TRUE(window->isVisible());
+  BOOST_CHECK(window->isVisible());
 
-  delete window->scrollArea();
+  window->scrollArea()->deleteLater();
 }
 
-TEST(TestPaintingWindowConstructors,
-     test_construction_of_PaintingWindow_with_size_larger_than_desktop)
+BOOST_AUTO_TEST_CASE(
+    test_construction_of_PaintingWindow_with_size_larger_than_desktop)
 {
   int width = qApp->desktop()->width();
   int height = qApp->desktop()->height();
 
-  PaintingWindow *window = new PaintingWindow(width, height);
+  PaintingWindow* window = new PaintingWindow(width, height);
 
-  EXPECT_TRUE(window->scrollArea()->isMaximized());
-  EXPECT_TRUE(window->isVisible());
+  BOOST_CHECK(window->scrollArea()->isMaximized());
+  BOOST_CHECK(window->isVisible());
 
   delete window->scrollArea();
 }
 
+BOOST_AUTO_TEST_SUITE_END()
 
-class TestPaintingWindowDrawingMethods: public testing::Test
+
+class TestFixtureForPaintingWindowDrawingMethods
 {
-protected: // data members
+protected:  // data members
   PaintingWindow *_test_window;
   QImage _true_image;
   QPainter _painter;
 
-protected: // methods
-  TestPaintingWindowDrawingMethods()
+public:
+  TestFixtureForPaintingWindowDrawingMethods()
   {
     _test_window = new PaintingWindow(300, 300);
-    _true_image =  QImage(_test_window->size(), QImage::Format_RGB32);
-  }
+    _true_image = QImage(_test_window->size(), QImage::Format_RGB32);
 
-  virtual ~TestPaintingWindowDrawingMethods()
-  {
-    delete _test_window->scrollArea();
-  }
-
-  virtual void SetUp()
-  {
     _test_window->setAntialiasing(false);
     _test_window->clear();
     _true_image.fill(Qt::white);
+
     _painter.begin(&_true_image);
   }
 
-  virtual void TearDown()
+  ~TestFixtureForPaintingWindowDrawingMethods()
   {
     _painter.end();
+
+    _test_window->scrollArea()->deleteLater();
   }
 
   QImage get_image_from_window()
   {
     QImage image(_test_window->size(), QImage::Format_RGB32);
-    _test_window->render(&image, QPoint(), QRegion(QRect(QPoint(),
-                         _test_window->size())));
+    _test_window->render(&image, QPoint(),
+                         QRegion(QRect(QPoint(), _test_window->size())));
     return image;
   }
-
 };
 
-TEST_F(TestPaintingWindowDrawingMethods,
-       test_drawPoint_using_integer_coordinates)
+BOOST_FIXTURE_TEST_SUITE(TestPaintingWindowDrawingMethods,
+                         TestFixtureForPaintingWindowDrawingMethods)
+
+BOOST_AUTO_TEST_CASE(test_drawPoint_using_integer_coordinates)
 {
   int x = 150, y = 100;
   QColor color(255, 0, 0);
@@ -123,11 +120,10 @@ TEST_F(TestPaintingWindowDrawingMethods,
   _painter.setPen(color);
   _painter.drawPoint(QPoint(x, y));
 
-  EXPECT_EQ(get_image_from_window(), _true_image);
+  BOOST_CHECK(get_image_from_window() == _true_image);
 }
 
-TEST_F(TestPaintingWindowDrawingMethods,
-       test_drawPoint_using_QPointF)
+BOOST_AUTO_TEST_CASE(test_drawPoint_using_QPointF)
 {
   double x = 150.95, y = 100.3333;
   QColor color(0, 225, 0);
@@ -137,11 +133,10 @@ TEST_F(TestPaintingWindowDrawingMethods,
   _painter.setPen(color);
   _painter.drawPoint(QPointF(x, y));
 
-  EXPECT_EQ(get_image_from_window(), _true_image);
+  BOOST_CHECK(get_image_from_window() == _true_image);
 }
 
-TEST_F(TestPaintingWindowDrawingMethods,
-       test_drawLine_using_integer_coordinates)
+BOOST_AUTO_TEST_CASE(test_drawLine_using_integer_coordinates)
 {
   int x1 = 100, y1 = 100;
   int x2 = 200, y2 = 240;
@@ -153,11 +148,10 @@ TEST_F(TestPaintingWindowDrawingMethods,
   _painter.setPen(QPen(color, thickness));
   _painter.drawLine(x1, y1, x2, y2);
 
-  EXPECT_EQ(get_image_from_window(), _true_image);
+  BOOST_CHECK(get_image_from_window() == _true_image);
 }
 
-TEST_F(TestPaintingWindowDrawingMethods,
-       test_drawLine_using_QPointF)
+BOOST_AUTO_TEST_CASE(test_drawLine_using_QPointF)
 {
   QPointF p1(100.350, 100.699);
   QPointF p2(203.645, 240.664);
@@ -169,11 +163,10 @@ TEST_F(TestPaintingWindowDrawingMethods,
   _painter.setPen(QPen(color, thickness));
   _painter.drawLine(p1, p2);
 
-  EXPECT_EQ(get_image_from_window(), _true_image);
+  BOOST_CHECK(get_image_from_window() == _true_image);
 }
 
-TEST_F(TestPaintingWindowDrawingMethods,
-       test_drawCircle_using_integer_coordinates)
+BOOST_AUTO_TEST_CASE(test_drawCircle_using_integer_coordinates)
 {
   int xc = 150, yc = 123;
   int r = 39;
@@ -185,11 +178,10 @@ TEST_F(TestPaintingWindowDrawingMethods,
   _painter.setPen(QPen(color, thickness));
   _painter.drawEllipse(QPoint(xc, yc), r, r);
 
-  EXPECT_EQ(get_image_from_window(), _true_image);
+  BOOST_CHECK(get_image_from_window() == _true_image);
 }
 
-TEST_F(TestPaintingWindowDrawingMethods,
-       test_drawCircle_using_QPointF)
+BOOST_AUTO_TEST_CASE(test_drawCircle_using_QPointF)
 {
   QPointF c(150.999, 123.231);
   int r = 39;
@@ -201,11 +193,10 @@ TEST_F(TestPaintingWindowDrawingMethods,
   _painter.setPen(QPen(color, thickness));
   _painter.drawEllipse(c, r, r);
 
-  EXPECT_EQ(get_image_from_window(), _true_image);
+  BOOST_CHECK(get_image_from_window() == _true_image);
 }
 
-TEST_F(TestPaintingWindowDrawingMethods,
-       test_drawEllipse_using_axis_aligned_bounding_box)
+BOOST_AUTO_TEST_CASE(test_drawEllipse_using_axis_aligned_bounding_box)
 {
   // Axis-aligned ellipse defined by the following axis-aligned bounding box.
   int x = 150, y = 123;
@@ -218,11 +209,10 @@ TEST_F(TestPaintingWindowDrawingMethods,
   _painter.setPen(QPen(color, thickness));
   _painter.drawEllipse(x, y, w, h);
 
-  EXPECT_EQ(get_image_from_window(), _true_image);
+  BOOST_CHECK(get_image_from_window() == _true_image);
 }
 
-TEST_F(TestPaintingWindowDrawingMethods,
-       test_drawEllipse_with_center_and_semi_axes_and_orientation)
+BOOST_AUTO_TEST_CASE(test_drawEllipse_with_center_and_semi_axes_and_orientation)
 {
   QPointF center(123.123, 156.123);
   qreal r1 = 100.13, r2 = 40.12;
@@ -236,12 +226,12 @@ TEST_F(TestPaintingWindowDrawingMethods,
   _painter.translate(center);
   _painter.rotate(oriDegree);
   _painter.translate(-r1, -r2);
-  _painter.drawEllipse(QRectF(0, 0, 2*r1, 2*r2));
+  _painter.drawEllipse(QRectF(0, 0, 2 * r1, 2 * r2));
 
-  EXPECT_EQ(get_image_from_window(), _true_image);
+  BOOST_CHECK(get_image_from_window() == _true_image);
 }
 
-TEST_F(TestPaintingWindowDrawingMethods, test_drawRect)
+BOOST_AUTO_TEST_CASE(test_drawRect)
 {
   int x = 150, y = 123;
   int w = 39, h = 100;
@@ -254,26 +244,26 @@ TEST_F(TestPaintingWindowDrawingMethods, test_drawRect)
   _painter.setPen(QPen(color, thickness));
   _painter.drawRect(x, y, w, h);
 
-  EXPECT_EQ(get_image_from_window(), _true_image);
+  BOOST_CHECK(get_image_from_window() == _true_image);
 }
 
-TEST_F(TestPaintingWindowDrawingMethods, test_drawPoly)
-  {
-    QPolygonF polygon;
-    polygon << QPointF(10, 10) << QPointF(250, 20) << QPointF(150, 258);
+BOOST_AUTO_TEST_CASE(test_drawPoly)
+{
+  QPolygonF polygon;
+  polygon << QPointF(10, 10) << QPointF(250, 20) << QPointF(150, 258);
 
-    QColor color(0, 255, 123);
-    int thickness = 4;
+  QColor color(0, 255, 123);
+  int thickness = 4;
 
-    _test_window->drawPoly(polygon, color, thickness);
+  _test_window->drawPoly(polygon, color, thickness);
 
-    _painter.setPen(QPen(color, thickness));
-    _painter.drawPolygon(polygon);
+  _painter.setPen(QPen(color, thickness));
+  _painter.drawPolygon(polygon);
 
-    EXPECT_EQ(get_image_from_window(), _true_image);
-  }
+  BOOST_CHECK(get_image_from_window() == _true_image);
+}
 
-TEST_F(TestPaintingWindowDrawingMethods, test_drawText)
+BOOST_AUTO_TEST_CASE(test_drawText)
 {
   // What text.
   QString text("Sara is awesome!");
@@ -287,8 +277,8 @@ TEST_F(TestPaintingWindowDrawingMethods, test_drawText)
   bool bold = true;
   bool underline = true;
 
-  _test_window->drawText(x, y, text, color, fontSize, orientation, italic,
-                         bold, underline);
+  _test_window->drawText(x, y, text, color, fontSize, orientation, italic, bold,
+                         underline);
 
   _painter.setPen(color);
 
@@ -303,11 +293,11 @@ TEST_F(TestPaintingWindowDrawingMethods, test_drawText)
   _painter.rotate(orientation);
   _painter.drawText(0, 0, text);
 
-  EXPECT_EQ(get_image_from_window(), _true_image);
+  BOOST_CHECK(get_image_from_window() == _true_image);
 }
 
 // TODO: make this test more exhaustive.
-TEST_F(TestPaintingWindowDrawingMethods, test_drawArrow)
+BOOST_AUTO_TEST_CASE(test_drawArrow)
 {
   int x1 = 150, y1 = 150;
   int x2 = 200, y2 = 200;
@@ -317,15 +307,15 @@ TEST_F(TestPaintingWindowDrawingMethods, test_drawArrow)
   int style = 0;
   int width = 3;
 
-  _test_window->drawArrow(x1, y1, x2, y2, color, arrowWidth, arrowHeight,
-                          style, width);
+  _test_window->drawArrow(x1, y1, x2, y2, color, arrowWidth, arrowHeight, style,
+                          width);
 
   auto image = get_image_from_window();
   for (int x = 150; x < 200; ++x)
-    EXPECT_EQ(image.pixel(x,x), color.rgb());
+    BOOST_CHECK_EQUAL(image.pixel(x, x), color.rgb());
 }
 
-TEST_F(TestPaintingWindowDrawingMethods, test_display)
+BOOST_AUTO_TEST_CASE(test_display)
 {
   int w = 20, h = 20;
   QImage patch(QSize(w, h), QImage::Format_RGB32);
@@ -338,14 +328,14 @@ TEST_F(TestPaintingWindowDrawingMethods, test_display)
   QImage image(get_image_from_window());
   for (int y = 0; y < image.height(); ++y)
     for (int x = 0; x < image.width(); ++x)
-      if ( x >= x_offset && x < x_offset+zoom_factor*w &&
-           y >= y_offset && y < y_offset+zoom_factor*h )
-        EXPECT_EQ(image.pixel(x, y), QColor(Qt::red).rgb());
+      if (x >= x_offset && x < x_offset + zoom_factor * w && y >= y_offset &&
+          y < y_offset + zoom_factor * h)
+        BOOST_CHECK_EQUAL(image.pixel(x, y), QColor(Qt::red).rgb());
       else
-        EXPECT_EQ(image.pixel(x, y), QColor(Qt::white).rgb());
+        BOOST_CHECK_EQUAL(image.pixel(x, y), QColor(Qt::white).rgb());
 }
 
-TEST_F(TestPaintingWindowDrawingMethods, test_fillCircle_using_integer_coordinates)
+BOOST_AUTO_TEST_CASE(test_fillCircle_using_integer_coordinates)
 {
   int xc = 150, yc = 123;
   int r = 39;
@@ -354,13 +344,13 @@ TEST_F(TestPaintingWindowDrawingMethods, test_fillCircle_using_integer_coordinat
   _test_window->fillCircle(xc, yc, r, color);
 
   QPainterPath path;
-  path.addEllipse(qreal(xc) - r/2., qreal(yc) - r/2., r, r);
+  path.addEllipse(qreal(xc) - r / 2., qreal(yc) - r / 2., r, r);
   _painter.fillPath(path, color);
 
-  EXPECT_EQ(get_image_from_window(), _true_image);
+  BOOST_CHECK(get_image_from_window() == _true_image);
 }
 
-TEST_F(TestPaintingWindowDrawingMethods, test_fillCircle_using_QPointF)
+BOOST_AUTO_TEST_CASE(test_fillCircle_using_QPointF)
 {
   QPointF c(150.999, 123.231);
   qreal r = 39;
@@ -372,11 +362,10 @@ TEST_F(TestPaintingWindowDrawingMethods, test_fillCircle_using_QPointF)
   path.addEllipse(c, r, r);
   _painter.fillPath(path, color);
 
-  EXPECT_EQ(get_image_from_window(), _true_image);
+  BOOST_CHECK(get_image_from_window() == _true_image);
 }
 
-TEST_F(TestPaintingWindowDrawingMethods,
-       test_fillEllipse_using_integer_coordinates)
+BOOST_AUTO_TEST_CASE(test_fillEllipse_using_integer_coordinates)
 {
   int xc = 150, yc = 123;
   int r1 = 39, r2 = 20;
@@ -388,10 +377,10 @@ TEST_F(TestPaintingWindowDrawingMethods,
   path.addEllipse(xc, yc, r1, r2);
   _painter.fillPath(path, color);
 
-  EXPECT_EQ(get_image_from_window(), _true_image);
+  BOOST_CHECK(get_image_from_window() == _true_image);
 }
 
-TEST_F(TestPaintingWindowDrawingMethods, test_fillEllipse_using_QPointF)
+BOOST_AUTO_TEST_CASE(test_fillEllipse_using_QPointF)
 {
   QPointF c(150.999, 123.231);
   qreal r1 = 39.01, r2 = 100.29;
@@ -401,16 +390,16 @@ TEST_F(TestPaintingWindowDrawingMethods, test_fillEllipse_using_QPointF)
   _test_window->fillEllipse(c, r1, r2, ori_degree, color);
 
   QPainterPath path;
-  path.addEllipse(0, 0, 2*r1, 2*r2);
+  path.addEllipse(0, 0, 2 * r1, 2 * r2);
   _painter.translate(c);
   _painter.rotate(ori_degree);
   _painter.translate(-r1, -r2);
   _painter.fillPath(path, color);
 
-  EXPECT_EQ(get_image_from_window(), _true_image);
+  BOOST_CHECK(get_image_from_window() == _true_image);
 }
 
-TEST_F(TestPaintingWindowDrawingMethods, test_fillPoly)
+BOOST_AUTO_TEST_CASE(test_fillPoly)
 {
   QPolygonF polygon;
   polygon << QPointF(10, 10) << QPointF(250, 20) << QPointF(150, 258);
@@ -423,10 +412,10 @@ TEST_F(TestPaintingWindowDrawingMethods, test_fillPoly)
   path.addPolygon(polygon);
   _painter.fillPath(path, color);
 
-  EXPECT_EQ(get_image_from_window(), _true_image);
+  BOOST_CHECK(get_image_from_window() == _true_image);
 }
 
-TEST_F(TestPaintingWindowDrawingMethods, test_fillRect)
+BOOST_AUTO_TEST_CASE(test_fillRect)
 {
   int x = 150, y = 123;
   int w = 39, h = 100;
@@ -439,20 +428,20 @@ TEST_F(TestPaintingWindowDrawingMethods, test_fillRect)
   path.addRect(x, y, w, h);
   _painter.fillPath(path, color);
 
-  EXPECT_EQ(get_image_from_window(), _true_image);
+  BOOST_CHECK(get_image_from_window() == _true_image);
 }
 
-TEST_F(TestPaintingWindowDrawingMethods, test_clear)
+BOOST_AUTO_TEST_CASE(test_clear)
 {
   _test_window->drawRect(100, 10, 20, 30, QColor(100, 200, 29), 1);
 
   // "_true_image" is a white image.
-  EXPECT_TRUE(get_image_from_window() != _true_image);
+  BOOST_CHECK(get_image_from_window() != _true_image);
   _test_window->clear();
-  EXPECT_EQ(get_image_from_window(), _true_image);
+  BOOST_CHECK(get_image_from_window() == _true_image);
 }
 
-TEST_F(TestPaintingWindowDrawingMethods, test_antialiasing)
+BOOST_AUTO_TEST_CASE(test_antialiasing)
 {
   int x = 150, y = 100, r = 10;
   int penWidth = 3;
@@ -465,15 +454,15 @@ TEST_F(TestPaintingWindowDrawingMethods, test_antialiasing)
   _painter.setPen(QPen(color, penWidth));
   _painter.drawEllipse(QPointF(x, y), r, r);
 
-  EXPECT_TRUE(get_image_from_window() != _true_image);
+  BOOST_CHECK(get_image_from_window() != _true_image);
 
   _test_window->clear();
   _test_window->setAntialiasing();
   _test_window->drawCircle(x, y, r, color, penWidth);
-  EXPECT_EQ(get_image_from_window(), _true_image);
+  BOOST_CHECK(get_image_from_window() == _true_image);
 }
 
-TEST_F(TestPaintingWindowDrawingMethods, test_saveScreen)
+BOOST_AUTO_TEST_CASE(test_saveScreen)
 {
   QPointF c(150.999, 123.231);
   qreal r1 = 39.01, r2 = 100.29;
@@ -484,28 +473,30 @@ TEST_F(TestPaintingWindowDrawingMethods, test_saveScreen)
   _test_window->saveScreen("test.png");
 
   QPainterPath path;
-  path.addEllipse(0, 0, 2*r1, 2*r2);
+  path.addEllipse(0, 0, 2 * r1, 2 * r2);
   _painter.translate(c);
   _painter.rotate(ori_degree);
   _painter.translate(-r1, -r2);
   _painter.fillPath(path, color);
 
   QImage image(QString("test.png"));
-  EXPECT_TRUE(!image.isNull());
-  EXPECT_EQ(image.size(), _true_image.size());
-  EXPECT_EQ(image, _true_image);
+  BOOST_CHECK(!image.isNull());
+  BOOST_CHECK(image.size() == _true_image.size());
+  BOOST_CHECK(image == _true_image);
 }
 
-TEST_F(TestPaintingWindowDrawingMethods, test_transparency)
+BOOST_AUTO_TEST_CASE(test_transparency)
 {
   // TODO: test transparency, which is buggy.
 }
 
+BOOST_AUTO_TEST_SUITE_END()
 
-class TestPaintingWindowEvents: public testing::Test
+
+class TestFixtureForPaintingWindowEvents
 {
-protected: // data members.
-  PaintingWindow *_test_window;
+protected:  // data members.
+  PaintingWindow* _test_window;
   EventScheduler _event_scheduler;
   QPoint _mouse_pos;
   Qt::Key _key;
@@ -515,12 +506,11 @@ protected: // data members.
   int _wait_ms;
   int _event_time_ms;
 
-protected: // methods.
-  TestPaintingWindowEvents()
+public:
+  TestFixtureForPaintingWindowEvents()
   {
-    _mouse_buttons_type_id = qRegisterMetaType<Qt::MouseButtons>(
-      "Qt::MouseButtons"
-    );
+    _mouse_buttons_type_id =
+        qRegisterMetaType<Qt::MouseButtons>("Qt::MouseButtons");
     _event_type_id = qRegisterMetaType<Event>("Event");
     _test_window = new PaintingWindow(300, 300);
     _event_scheduler.set_receiver(_test_window);
@@ -531,7 +521,7 @@ protected: // methods.
     _event_time_ms = 10;
   }
 
-  virtual ~TestPaintingWindowEvents()
+  ~TestFixtureForPaintingWindowEvents()
   {
     delete _test_window->scrollArea();
   }
@@ -540,76 +530,71 @@ protected: // methods.
                            const QMouseEvent& expected_event) const
   {
     spy.wait(_wait_ms);
-    EXPECT_EQ(spy.count(), 1);
+    BOOST_CHECK_EQUAL(spy.count(), 1);
 
     QList<QVariant> arguments = spy.takeFirst();
-    EXPECT_EQ(arguments.at(0).toInt(), expected_event.x());
-    EXPECT_EQ(arguments.at(1).toInt(), expected_event.y());
-    EXPECT_EQ(arguments.at(2).value<Qt::MouseButtons>(),
-              expected_event.buttons());
+    BOOST_CHECK_EQUAL(arguments.at(0).toInt(), expected_event.x());
+    BOOST_CHECK_EQUAL(arguments.at(1).toInt(), expected_event.y());
+    BOOST_CHECK_EQUAL(arguments.at(2).value<Qt::MouseButtons>(),
+                      expected_event.buttons());
   }
 
   void compare_key_event(QSignalSpy& spy) const
   {
     spy.wait(_wait_ms);
-    EXPECT_EQ(spy.count(), 1);
+    BOOST_CHECK_EQUAL(spy.count(), 1);
 
     QList<QVariant> arguments = spy.takeFirst();
-    EXPECT_EQ(arguments.at(0).toInt(), static_cast<int>(_key));
+    BOOST_CHECK_EQUAL(arguments.at(0).toInt(), static_cast<int>(_key));
   }
-
 };
 
-TEST_F(TestPaintingWindowEvents, test_mouse_move_event)
+BOOST_FIXTURE_TEST_SUITE(TestPaintingWindowEvents,
+                         TestFixtureForPaintingWindowEvents)
+
+BOOST_AUTO_TEST_CASE(test_mouse_move_event)
 {
   _test_window->setMouseTracking(true);
-  QSignalSpy spy(_test_window,
-                 SIGNAL(movedMouse(int, int, Qt::MouseButtons)));
-  EXPECT_TRUE(spy.isValid());
+  QSignalSpy spy(_test_window, SIGNAL(movedMouse(int, int, Qt::MouseButtons)));
+  BOOST_CHECK(spy.isValid());
 
-  QMouseEvent event(
-    QEvent::MouseMove, _mouse_pos,
-    Qt::NoButton, Qt::NoButton, Qt::NoModifier
-  );
+  QMouseEvent event(QEvent::MouseMove, _mouse_pos, Qt::NoButton, Qt::NoButton,
+                    Qt::NoModifier);
   _event_scheduler.schedule_event(&event, _event_time_ms);
 
   compare_mouse_event(spy, event);
 }
 
-TEST_F(TestPaintingWindowEvents, test_mouse_press_event)
+BOOST_AUTO_TEST_CASE(test_mouse_press_event)
 {
   QSignalSpy spy(_test_window,
                  SIGNAL(pressedMouseButtons(int, int, Qt::MouseButtons)));
-  EXPECT_TRUE(spy.isValid());
+  BOOST_CHECK(spy.isValid());
 
-  QMouseEvent event(
-    QEvent::MouseButtonPress, _mouse_pos,
-    Qt::LeftButton, Qt::LeftButton, Qt::NoModifier
-  );
+  QMouseEvent event(QEvent::MouseButtonPress, _mouse_pos, Qt::LeftButton,
+                    Qt::LeftButton, Qt::NoModifier);
   _event_scheduler.schedule_event(&event, _event_time_ms);
 
   compare_mouse_event(spy, event);
 }
 
-TEST_F(TestPaintingWindowEvents, test_mouse_release_event)
+BOOST_AUTO_TEST_CASE(test_mouse_release_event)
 {
   QSignalSpy spy(_test_window,
                  SIGNAL(releasedMouseButtons(int, int, Qt::MouseButtons)));
-  EXPECT_TRUE(spy.isValid());
+  BOOST_CHECK(spy.isValid());
 
-  QMouseEvent event(
-    QEvent::MouseButtonRelease, _mouse_pos,
-    Qt::LeftButton, Qt::LeftButton, Qt::NoModifier
-    );
+  QMouseEvent event(QEvent::MouseButtonRelease, _mouse_pos, Qt::LeftButton,
+                    Qt::LeftButton, Qt::NoModifier);
   _event_scheduler.schedule_event(&event, _event_time_ms);
 
   compare_mouse_event(spy, event);
 }
 
-TEST_F(TestPaintingWindowEvents, test_key_press_event)
+BOOST_AUTO_TEST_CASE(test_key_press_event)
 {
   QSignalSpy spy(_test_window, SIGNAL(pressedKey(int)));
-  EXPECT_TRUE(spy.isValid());
+  BOOST_CHECK(spy.isValid());
 
   QKeyEvent event(QEvent::KeyPress, _key, Qt::NoModifier);
   _event_scheduler.schedule_event(&event, _event_time_ms);
@@ -617,10 +602,10 @@ TEST_F(TestPaintingWindowEvents, test_key_press_event)
   compare_key_event(spy);
 }
 
-TEST_F(TestPaintingWindowEvents, test_key_release_event)
+BOOST_AUTO_TEST_CASE(test_key_release_event)
 {
   QSignalSpy spy(_test_window, SIGNAL(releasedKey(int)));
-  EXPECT_TRUE(spy.isValid());
+  BOOST_CHECK(spy.isValid());
 
   QKeyEvent event(QEvent::KeyRelease, _key, Qt::NoModifier);
   _event_scheduler.schedule_event(&event, _event_time_ms);
@@ -628,44 +613,48 @@ TEST_F(TestPaintingWindowEvents, test_key_release_event)
   compare_key_event(spy);
 }
 
-TEST_F(TestPaintingWindowEvents, test_send_event)
+BOOST_AUTO_TEST_CASE(test_send_event)
 {
   QSignalSpy spy(_test_window, SIGNAL(sendEvent(Event)));
-  EXPECT_TRUE(spy.isValid());
+  BOOST_CHECK(spy.isValid());
 
-  QMetaObject::invokeMethod(_test_window, "waitForEvent",
-                            Qt::AutoConnection, Q_ARG(int, 1));
+  QMetaObject::invokeMethod(_test_window, "waitForEvent", Qt::AutoConnection,
+                            Q_ARG(int, 1));
 
   // Nothing happens.
-  EXPECT_TRUE(spy.wait(10));
-  EXPECT_EQ(spy.count(), 1);
+  BOOST_CHECK(spy.wait(10));
+  BOOST_CHECK_EQUAL(spy.count(), 1);
   QList<QVariant> arguments = spy.takeFirst();
   QVariant arg = arguments.at(0);
   arg.convert(_event_type_id);
   Event event(arguments.at(0).value<Event>());
-  EXPECT_EQ(event.type, DO::Sara::NO_EVENT);
+  BOOST_CHECK_EQUAL(event.type, DO::Sara::NO_EVENT);
 }
 
+BOOST_AUTO_TEST_SUITE_END()
 
-TEST(TestPaintingWindowResizing,
-     test_construction_of_PaintingWindow_with_small_size)
+
+BOOST_AUTO_TEST_SUITE(TestPaintingWindowResizing)
+
+BOOST_AUTO_TEST_CASE(test_construction_of_PaintingWindow_with_small_size)
 {
-  PaintingWindow *window = new PaintingWindow(100, 100);
-  EXPECT_EQ(window->width(), 100);
-  EXPECT_EQ(window->height(), 100);
+  PaintingWindow* window = new PaintingWindow(100, 100);
+  BOOST_CHECK_EQUAL(window->width(), 100);
+  BOOST_CHECK_EQUAL(window->height(), 100);
 
   window->resizeScreen(150, 100);
-  EXPECT_EQ(window->width(), 150);
-  EXPECT_EQ(window->height(), 100);
+  BOOST_CHECK_EQUAL(window->width(), 150);
+  BOOST_CHECK_EQUAL(window->height(), 100);
 
-  delete window->scrollArea();
+  window->scrollArea()->deleteLater();
 }
 
-int main(int argc, char *argv[])
+BOOST_AUTO_TEST_SUITE_END()
+
+
+int main(int argc, char* argv[])
 {
   QApplication app(argc, argv);
   app.setAttribute(Qt::AA_Use96Dpi, true);
-
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+  return boost::unit_test::unit_test_main([]() { return true; }, argc, argv);
 }

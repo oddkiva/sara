@@ -9,7 +9,9 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE "Core/Extension of Eigen"
+
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/Core/EigenExtension.hpp>
 #include <DO/Sara/Core/MultiArray.hpp>
@@ -20,8 +22,9 @@ using namespace DO::Sara;
 using namespace std;
 
 
-TEST(TestMultiArrayWithEigenExtension,
-     test_arithmetic_operation_with_nonscalar_element)
+BOOST_AUTO_TEST_SUITE(TestMultiArrayWithEigenExtension)
+
+BOOST_AUTO_TEST_CASE(test_arithmetic_operation_with_nonscalar_element)
 {
   using MatField = MultiArray<Matrix2f, 2>;
 
@@ -38,11 +41,11 @@ TEST(TestMultiArrayWithEigenExtension,
 
   for (auto i = 0; i < m.rows(); ++i)
     for (auto j = 0; j < m.cols(); ++j)
-      EXPECT_TRUE(m(i, j) == a);
+      BOOST_CHECK(m(i, j) == a);
 
   for (auto i = 0; i < n.rows(); ++i)
     for (auto j = 0; j < n.cols(); ++j)
-      EXPECT_TRUE(n(i, j) == b);
+      BOOST_CHECK(n(i, j) == b);
 
 
   // Double that matrix
@@ -50,24 +53,20 @@ TEST(TestMultiArrayWithEigenExtension,
   // Check that matrix
   for (auto i = 0; i < m.rows(); ++i)
     for (auto j = 0; j < m.cols(); ++j)
-      EXPECT_TRUE(m(i, j) == (a + b).eval());
+      BOOST_CHECK(m(i, j) == (a + b).eval());
 
-  EXPECT_TRUE(m(0, 0) * n(0, 0) == (a + b) * b);
+  BOOST_CHECK(m(0, 0) * n(0, 0) == (a + b) * b);
 
   // Double that matrix
   m.flat_array() *= n.flat_array();
   // Check that matrix
   for (auto i = 0; i < m.rows(); ++i)
     for (auto j = 0; j < m.cols(); ++j)
-      EXPECT_TRUE(m(i, j) == (a + b) * b);
+      BOOST_CHECK(m(i, j) == (a + b) * b);
 
   m.matrix() += n.matrix();
   (tensor_view(m).flat_array() * tensor_view(n).flat_array()) +
       tensor_view(n).flat_array() / tensor_view(m).flat_array();
 }
 
-int main(int argc, char **argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+BOOST_AUTO_TEST_SUITE_END()
