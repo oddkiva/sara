@@ -9,8 +9,9 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#define BOOST_TEST_MODULE "ImageProcessing/Image Resize"
 
-#include <gtest/gtest.h>
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/ImageProcessing/Resize.hpp>
 
@@ -20,8 +21,9 @@
 using namespace std;
 using namespace DO::Sara;
 
+BOOST_AUTO_TEST_SUITE(TestImageResize)
 
-TEST(TestResize, test_upscale)
+BOOST_AUTO_TEST_CASE(test_upscale)
 {
   Image<float> src(2, 2);
   src.matrix() <<
@@ -37,11 +39,10 @@ TEST(TestResize, test_upscale)
     0, 0, 1, 1,
     2, 2, 3, 3,
     2, 2, 3, 3;
-  EXPECT_MATRIX_EQ(true_dst.matrix(), dst.matrix());
+  BOOST_CHECK_EQUAL(true_dst.matrix(), dst.matrix());
 }
 
-
-TEST(TestResize, test_downscale)
+BOOST_AUTO_TEST_CASE(test_downscale)
 {
   Image<float> src(4, 4);
   src.matrix() <<
@@ -57,11 +58,10 @@ TEST(TestResize, test_downscale)
   true_dst.matrix() <<
     0, 1,
     2, 3;
-  EXPECT_MATRIX_EQ(true_dst.matrix(), dst.matrix());
+  BOOST_CHECK_EQUAL(true_dst.matrix(), dst.matrix());
 }
 
-
-TEST(TestResize, test_enlarge)
+BOOST_AUTO_TEST_CASE(test_enlarge)
 {
   Image<float> src(2, 2);
   src.matrix() <<
@@ -78,17 +78,16 @@ TEST(TestResize, test_enlarge)
   Image<float> dst;
 
   dst = enlarge(src, Vector2i(4, 4));
-  EXPECT_MATRIX_EQ(true_dst.matrix(), dst.matrix());
+  BOOST_CHECK_EQUAL(true_dst.matrix(), dst.matrix());
 
   dst = enlarge(src, 4, 4);
-  EXPECT_MATRIX_EQ(true_dst.matrix(), dst.matrix());
+  BOOST_CHECK_EQUAL(true_dst.matrix(), dst.matrix());
 
   dst = enlarge(src, 2);
-  EXPECT_MATRIX_EQ(true_dst.matrix(), dst.matrix());
+  BOOST_CHECK_EQUAL(true_dst.matrix(), dst.matrix());
 }
- 
 
-TEST(TestResize, test_reduce)
+BOOST_AUTO_TEST_CASE(test_reduce)
 {
   Image<float> src(4, 4);
   src.matrix() <<
@@ -105,16 +104,16 @@ TEST(TestResize, test_reduce)
   Image<float> dst;
 
   dst = reduce(src, Vector2i(2, 2));
-  EXPECT_LE((true_dst.matrix()-dst.matrix()).lpNorm<Infinity>(), 0.4);
+  BOOST_CHECK_LE((true_dst.matrix()-dst.matrix()).lpNorm<Infinity>(), 0.4);
 
   dst = reduce(src, 2, 2);
-  EXPECT_LE((true_dst.matrix()-dst.matrix()).lpNorm<Infinity>(), 0.4);
+  BOOST_CHECK_LE((true_dst.matrix()-dst.matrix()).lpNorm<Infinity>(), 0.4);
 
   dst = reduce(src, 2);
-  EXPECT_LE((true_dst.matrix()-dst.matrix()).lpNorm<Infinity>(), 0.4);
+  BOOST_CHECK_LE((true_dst.matrix()-dst.matrix()).lpNorm<Infinity>(), 0.4);
 }
 
-TEST(TestResize, test_reduce_2)
+BOOST_AUTO_TEST_CASE(test_reduce_2)
 {
   auto lambda = [](double lambda) {
     return Rgb64f{ lambda, lambda, lambda };
@@ -136,12 +135,7 @@ TEST(TestResize, test_reduce_2)
   auto dst_pixel = dst.begin();
   auto true_dst_pixel = true_dst.begin();
   for (; dst_pixel != dst.end(); ++dst_pixel, ++true_dst_pixel)
-    EXPECT_LE((*true_dst_pixel - *dst_pixel).lpNorm<Infinity>(), 0.4);
+    BOOST_CHECK_LE((*true_dst_pixel - *dst_pixel).lpNorm<Infinity>(), 0.4);
 }
 
-
-int main(int argc, char** argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+BOOST_AUTO_TEST_SUITE_END()

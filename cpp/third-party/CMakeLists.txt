@@ -12,11 +12,6 @@ endif ()
 
 
 if (SARA_BUILD_TESTS)
-  message(STATUS "  - Google Test")
-  add_subdirectory(gtest)
-  set_property(TARGET gtest PROPERTY FOLDER ${THIRDPARTY_FOLDER_NAME})
-  set_property(TARGET gtest_main PROPERTY FOLDER ${THIRDPARTY_FOLDER_NAME})
-
   if (WIN32)
     file (COPY ${CMAKE_CURRENT_SOURCE_DIR}/ffmpeg/bin/
           DESTINATION ${CMAKE_BINARY_DIR}/bin/Debug)
