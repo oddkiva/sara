@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(test_empty_constructor)
 
 BOOST_AUTO_TEST_CASE(test_read_valid_video)
 {
-  VideoStream video_stream{ video_filename };
+  VideoStream video_stream{video_filename};
   BOOST_CHECK_EQUAL(320, video_stream.width());
   BOOST_CHECK_EQUAL(240, video_stream.height());
 }
@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(test_read_valid_video)
 BOOST_AUTO_TEST_CASE(test_read_video_with_wrong_filepath)
 {
   BOOST_CHECK_THROW(VideoStream _video_stream("orio_1.mpg"),
-               std::runtime_error);
+                    std::runtime_error);
 }
 
 BOOST_AUTO_TEST_CASE(test_read_valid_video_with_invalid_image_frame)
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(test_read_valid_video_with_invalid_image_frame)
 BOOST_AUTO_TEST_CASE(test_read_frames_sequentially)
 {
   VideoStream video_stream{video_filename};
-  auto frame = Image<Rgb8>{ video_stream.sizes() };
+  auto frame = Image<Rgb8>{video_stream.sizes()};
 
   for (auto i = 0; i < 3; ++i)
     video_stream >> frame;
@@ -61,20 +61,19 @@ BOOST_AUTO_TEST_CASE(test_read_frames_sequentially)
 
 BOOST_AUTO_TEST_CASE(test_seek_frame)
 {
-  VideoStream video_stream{ video_filename };
-  auto frame = Image<Rgb8>{ video_stream.sizes() };
+  VideoStream video_stream{video_filename};
+  auto frame = Image<Rgb8>{video_stream.sizes()};
 
   for (auto i = 0; i < 5; ++i)
     video_stream >> frame;
 
-  VideoStream video_stream2{ video_filename };
-  auto frame2 = Image<Rgb8>{ video_stream.sizes() };
+  VideoStream video_stream2{video_filename};
+  auto frame2 = Image<Rgb8>{video_stream.sizes()};
 
   video_stream.seek(4);
   video_stream2.read(frame2);
 
-  for (auto p = frame.begin(), p2 = frame2.begin(); p != frame.end();
-       ++p, ++p2)
+  for (auto p = frame.begin(), p2 = frame2.begin(); p != frame.end(); ++p, ++p2)
     BOOST_REQUIRE_EQUAL(*p, *p2);
 }
 

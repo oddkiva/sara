@@ -10,7 +10,7 @@ GRAPHICS_MAIN()
   const string video_filepath = src_path("orion_1.mpg");
 
   VideoStream video_stream(video_filepath);
-  Image<Rgb8> video_frame;
+  auto video_frame = Image<Rgb8>{video_stream.sizes()};
 
   while (true)
   {
