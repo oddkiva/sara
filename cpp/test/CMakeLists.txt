@@ -50,9 +50,9 @@ if (CMAKE_COMPILER_IS_GNUCXX)
                            --output-file=coverage.info
       COMMAND ${LCOV_PATH} --remove coverage.info 'usr/*'
                            --output-file coverage.info
-      COMMAND ${LCOV_PATH} --remove coverage.info 'third-party/*'
+      COMMAND ${LCOV_PATH} --remove coverage.info 'cpp/third-party/*'
                            --output-file coverage.info
-      COMMAND ${LCOV_PATH} --remove coverage.info 'test/*'
+      COMMAND ${LCOV_PATH} --remove coverage.info 'cpp/test/*'
                            --output-file coverage.info
       COMMAND ${LCOV_PATH} --remove coverage.info '${CMAKE_BINARY_DIR}/moc_*'
                            --output-file coverage.info

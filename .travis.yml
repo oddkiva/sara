@@ -52,3 +52,4 @@ after_success:
   - lcov --remove coverage.info 'cpp/test/*' --output-file coverage.info
   - lcov --remove coverage.info 'build/moc_*' --output-file coverage.info
   - coveralls-lcov coverage.info
+  - bash <(curl -s https://codecov.io/bash)
