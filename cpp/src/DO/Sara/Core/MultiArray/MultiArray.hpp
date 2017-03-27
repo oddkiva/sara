@@ -30,7 +30,7 @@ namespace DO { namespace Sara {
   {
     //! @{
     //! Convenience typedefs.
-    using self_type =  MultiArrayBase;
+    using self_type = MultiArrayBase;
     using base_type = MultiArrayView;
     //! @}
 
@@ -173,7 +173,6 @@ namespace DO { namespace Sara {
       _sizes = vector_type::Zero();
       _strides = vector_type::Zero();
     }
-
   };
 
 
