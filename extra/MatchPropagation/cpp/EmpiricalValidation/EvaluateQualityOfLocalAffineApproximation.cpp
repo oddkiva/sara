@@ -1,5 +1,5 @@
 // ========================================================================== //
-// This file is part of DO++ MatchPropagation which was presented in:
+// This file is part of Sara which was presented in:
 //
 //  Efficient and Scalable 4th-order Match Propagation
 //  David Ok, Renaud Marlet, and Jean-Yves Audibert.
@@ -8,14 +8,17 @@
 // Copyright (c) 2013. David Ok, Imagine (ENPC/CSTB).
 // ========================================================================== //
 
-#include "EvaluateQualityOfLocalAffineApproximation.hpp"
-#include "MatchNeighborhood.hpp"
-#include "GrowMultipleRegions.hpp"
 #ifdef _OPENMP
 # include <omp.h>
 #endif
 
+#include "EvaluateQualityOfLocalAffineApproximation.hpp"
+#include "MatchNeighborhood.hpp"
+#include "GrowMultipleRegions.hpp"
+
+
 using namespace std;
+
 
 namespace DO {
 
@@ -103,14 +106,14 @@ namespace DO {
 
   bool
   EvalQualityOfLocalAffApprox::
-  doTheJob(const vector<Match>& M, const vector<IndexDist>& sortedM,
-           const Matrix3f& H, size_t imgIndex, 
-           float squaredEll, float lb, float ub,
-           size_t numGrowths, size_t K, double rho_min,
-           const PairWiseDrawer *pDrawer) const
+  run(const vector<Match>& M, const vector<IndexDist>& sortedM,
+      const Matrix3f& H, size_t img_index, 
+      float squaredEll, float lb, float ub,
+      size_t numGrowths, size_t K, double rho_min,
+      const PairWiseDrawer *pDrawer) const
   {
-    string comment;
-    comment  = dataset().name() + ":\n\tpair 1-"+toString(imgIndex+1);
+    auto comment = std::string{};
+    comment = dataset().name() + ":\n\tpair 1-" + to_string(img_index + 1);
     comment += "\n\tfeatType = " + dataset().featType();
     comment += "\n\tsquaredEll = " + toString(squaredEll);
     comment += "\n\tK = " + toString(K);

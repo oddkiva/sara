@@ -24,42 +24,42 @@
 #include <DO/Sara/Match.hpp>
 
 
-namespace DO { namespace Sara { namespace Extensions {
+namespace DO { namespace Sara { namespace extra {
 
   class Rho_m
   {
   public:
     Rho_m(const Match& m)
-      : m_(m)
-      , Sigma_x_(m.x().shapeMat())
-      , Sigma_y_(m.y().shapeMat())
+      : _m(m)
+      , _Sigma_x(m.x().shapeMat())
+      , _Sigma_y(m.y().shapeMat())
     {
     }
 
-    float dx(const Match& m) const
+    auto dx(const Match& m) const -> float
     {
-      return (m.posX() - m_.posX()).dot(Sigma_x_ * (m.posX() - m_.posX()));
+      return (m.x_pos() - _m.x_pos()).dot(_Sigma_x * (m.x_pos() - _m.x_pos()));
     }
 
-    float dy(const Match& m) const
+    auto dy(const Match& m) const -> float
     {
-      return (m.posY() - m_.posY()).dot(Sigma_x_ * (m.posY() - m_.posY()));
+      return (m.y_pos() - _m.y_pos()).dot(_Sigma_x * (m.y_pos() - _m.y_pos()));
     }
 
-    float operator()(const Match& m) const
+    auto operator()(const Match& m) const -> float
     {
       float dxx = dx(m);
       float dyy = dy(m);
-      return std::min(dxx, dyy)/std::max(dxx, dyy);
+      return std::min(dxx, dyy) / std::max(dxx, dyy);
     }
 
   private:
-    const Match& m_;
-    const Matrix2f& Sigma_x_;
-    const Matrix2f& Sigma_y_;
+    const Match& _m;
+    const Matrix2f& _Sigma_x;
+    const Matrix2f& _Sigma_y;
   };
 
-  inline float rho(const Match& m1, const Match& m2)
+  inline auto rho(const Match& m1, const Match& m2) -> float
   {
     Rho_m rho_m1(m1), rho_m2(m2);
     return std::min(rho_m1(m2), rho_m2(m1));
@@ -70,27 +70,34 @@ namespace DO { namespace Sara { namespace Extensions {
 
   float square_isometric_radius(const Matrix2f& M);
 
+
   class ComputeN_K
   {
   public: /* interface. */
     ComputeN_K(const std::vector<Match>& matches,
                size_t neighborhoodMaxSize = 1e3,
-               const PairWiseDrawer *pDrawer = 0,
-               bool verbose = false);
+               const PairWiseDrawer* pDrawer = 0, bool verbose = false);
+
     ~ComputeN_K();
-    std::vector<size_t> operator()(size_t i, size_t K, double squaredRhoMin);
-    std::vector<std::vector<size_t> >
-    operator()(const std::vector<size_t>& indices,
-               size_t K, double squaredRhoMin);
-    std::vector<std::vector<size_t> > operator()(size_t K, double squaredRhoMin)
-    { return computeNeighborhoods(K, squaredRhoMin); }
-    void operator()(std::vector<std::vector<size_t> >& components,
-                    std::vector<size_t>& representers,
-                    const std::vector<Match>& matches,
-                    double thres)
+
+    auto operator()(size_t i, size_t K, double squaredRhoMin)
+        -> std::vector<size_t>;
+
+    auto operator()(const std::vector<size_t>& indices, size_t K,
+                    double squaredRhoMin) -> std::vector<std::vector<size_t>>;
+
+    auto operator()(size_t K, double squared_rho_min)
+        -> std::vector<std::vector<size_t>>
     {
-      getRedundancyComponentsAndRepresenters(components, representers, matches,
-                                             thres);
+      return computeNeighborhoods(K, squared_rho_min);
+    }
+
+    auto operator()(std::vector<std::vector<size_t>>& components,
+                    std::vector<size_t>& representers,
+                    const std::vector<Match>& matches, double thres) -> void
+    {
+      get_redundancy_components_and_representers(components, representers,
+                                                 matches, thres);
     }
 
   private: /* member functions. */
@@ -98,100 +105,131 @@ namespace DO { namespace Sara { namespace Extensions {
     typedef std::pair<Vector2f, size_t> PosIndex;
     typedef std::pair<Vector4f, size_t> MatchIndex;
     typedef std::pair<size_t, float> IndexScore;
+
     struct CompareByPos
     {
       inline bool operator()(const PosIndex& v1, const PosIndex& v2) const
-      { return lexCompare(v1.first, v2.first); }
+      {
+        return lexicographical_compare(v1.first, v2.first);
+      }
     };
+
     struct CompareByXY
     {
       inline bool operator()(const MatchIndex& m1, const MatchIndex& m2) const
-      { return lexCompare(m1.first, m2.first); }
+      {
+        return lexicographical_compare(m1.first, m2.first);
+      }
     };
+
     struct EqualIndexScore1
     {
       inline bool operator()(const IndexScore& i1, const IndexScore& i2) const
-      { return i1.first == i2.first; }
+      {
+        return i1.first == i2.first;
+      }
     };
+
     struct CompareIndexScore1
     {
       inline bool operator()(const IndexScore& i1, const IndexScore& i2) const
-      { return i1.first > i2.first; }
+      {
+        return i1.first > i2.first;
+      }
     };
+
     struct CompareIndexScore2
     {
       inline bool operator()(const IndexScore& i1, const IndexScore& i2) const
-      { return i1.second > i2.second; }
+      {
+        return i1.second > i2.second;
+      }
     };
+
     // 1. Sort matches by positions and match positions.
-    void createAndSortXY();
+    void create_and_sort_XY();
+
     // 2. Create data matrix for nearest neighbor search.
     size_t countUniquePositions(const std::vector<PosIndex>& X);
+
     size_t countUniquePosMatches();
+
     MatrixXd createPosMat(const std::vector<PosIndex>& X);
+
     void createXMat();
     void createYMat();
     void createXYMat();
-    std::vector<std::vector<size_t> >
+
+    std::vector<std::vector<size_t>>
     createPosToMatchTable(const std::vector<PosIndex>& X, const MatrixXd& xMat);
+
     // 3. Create lookup tables to find matches with corresponding positions.
     void createXToM();
     void createYToM();
     void createXYToM();
+
     // 4. Build kD-trees.
     void buildKDTrees();
+
     // 5. Compute neighborhoods with kD-tree data structures for efficient
     //    neighbor search.
-    std::vector<std::vector<size_t> > computeNeighborhoods(size_t K,
-                                                           double squaredRhoMin);
-    void getMatchesFromX(std::vector<IndexScore>& indexScores,
-                         size_t index,
+    std::vector<std::vector<size_t>> computeNeighborhoods(size_t K,
+                                                          double squaredRhoMin);
+
+    void getMatchesFromX(std::vector<IndexScore>& indexScores, size_t index,
                          const std::vector<int>& xIndices,
                          double squaredRhoMin);
-    void getMatchesFromY(std::vector<IndexScore>& indexScores,
-                         size_t index,
+
+    void getMatchesFromY(std::vector<IndexScore>& indexScores, size_t index,
                          const std::vector<int>& yIndices,
                          double squaredRhoMin);
+
     void keepBestScaleConsistentMatches(std::vector<size_t>& N_K_i,
-                                         std::vector<IndexScore>& indexScores,
-                                         size_t K);
+                                        std::vector<IndexScore>& indexScores,
+                                        size_t K);
+
     // 6. (Optional) Compute redundancies before computing the neighborhoods.
-    std::vector<std::vector<size_t> > computeRedundancies(double thres);
-    void getRedundancyComponentsAndRepresenters(std::vector<std::vector<size_t> >& components,
-                                                std::vector<size_t>& representers,
-                                                const std::vector<Match>& matches,
-                                                double thres);
+    std::vector<std::vector<size_t>> computeRedundancies(double thres);
+
+    void getRedundancyComponentsAndRepresenters(
+        std::vector<std::vector<size_t>>& components,
+        std::vector<size_t>& representers, const std::vector<Match>& matches,
+        double thres);
 
   private: /* data members. */
-    const std::vector<Match>& M_;
+    const std::vector<Match>& _M;
+
     // For profiling.
-    Timer timer_;
-    double elapsed_;
-    bool verbose_;
-    const PairWiseDrawer *drawer_ptr_;
+    Timer _timer;
+    double _elapsed;
+    bool _verbose;
+    const PairWiseDrawer *_drawer;
+
     // Internal allocation.
     size_t neighborhood_max_size_;
+
     // For internal computation.
-    std::vector<PosIndex> X_, Y_;
-    std::vector<MatchIndex> XY_;
-    MatrixXd X_mat_, Y_mat_, XY_mat_;
-    std::vector<std::vector<size_t> > X_to_M_, Y_to_M_, XY_to_M_;
+    std::vector<PosIndex> _X, _Y;
+    std::vector<MatchIndex> _XY;
+    MatrixXd _X_mat, _Y_mat, _XY_mat;
+    std::vector<std::vector<size_t>> _X_to_M, _Y_to_M, _XY_to_M;
+
     // KDTree
-    KDTree *x_index_ptr_;
-    KDTree *y_index_ptr_;
-    std::vector<int> x_indices_, y_indices_;
-    std::vector<double> sq_dists_;
-    std::vector<IndexScore> index_scores_;
-    EqualIndexScore1 equal_index_score_1_;
-    CompareIndexScore2 compare_index_score_1_;
-    CompareIndexScore2 compare_index_score_2_;
+    KDTree *_x_index_ptr;
+    KDTree *_y_index_ptr;
+    std::vector<int> _x_indices, _y_indices;
+    std::vector<double> _sq_dists;
+    std::vector<IndexScore> _index_scores;
+    EqualIndexScore1 _equal_index_score_1;
+    CompareIndexScore2 _compare_index_score_1;
+    CompareIndexScore2 _compare_index_score_2;
   };
 
   //! Symmetrized version of ComputeN_K.
-  std::vector<std::vector<size_t> >
-  compute_hat_N_K(const std::vector<std::vector<size_t> >& N_K);
+  std::vector<std::vector<size_t>>
+  compute_hat_N_K(const std::vector<std::vector<size_t>>& N_K);
 
 
-} /* namespace Extensions */
+} /* namespace extra */
 } /* namespace Sara */
 } /* namespace DO */
