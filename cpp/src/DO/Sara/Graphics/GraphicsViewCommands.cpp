@@ -38,7 +38,7 @@ namespace DO { namespace Sara {
 
   QGraphicsPixmapItem *add_pixmap(const Image<Rgb8>& image, bool random_pos)
   {
-    QImage qimage{ as_QImage(image) };
+    QImage qimage{as_QImage(image)};
     QMetaObject::invokeMethod(view(), "addPixmapItem",
                               Qt::BlockingQueuedConnection,
                               Q_ARG(const QImage&, qimage),
