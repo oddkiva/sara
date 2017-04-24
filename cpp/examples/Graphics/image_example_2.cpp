@@ -23,6 +23,7 @@ GRAPHICS_MAIN()
 
   create_window(300, 300);
   display(image);
+  cout << "Display white image" << endl;
   get_key();
 
   // Draw random colors on an image surface.
@@ -31,6 +32,7 @@ GRAPHICS_MAIN()
       draw_point(image, x, y, uniform_color_dist());
 
   display(image);
+  cout << "Display random pixels" << endl;
   get_key();
 
 
@@ -49,6 +51,7 @@ GRAPHICS_MAIN()
   }
 
   display(image);
+  cout << "Display random rectangles" << endl;
   get_key();
   close_window();
 
