@@ -33,7 +33,7 @@ using namespace std;
 #endif
 
 
-namespace DO { namespace Sara { namespace Extensions {
+namespace DO { namespace Sara {
 
   // ======================================================================== //
   // Constructor
@@ -629,6 +629,5 @@ namespace DO { namespace Sara { namespace Extensions {
     }
   }
 
-} /* namespace Extensions */
 } /* namespace Sara */
 } /* namespace DO */

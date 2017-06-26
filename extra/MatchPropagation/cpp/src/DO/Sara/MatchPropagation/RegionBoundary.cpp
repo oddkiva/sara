@@ -21,9 +21,10 @@
 
 using namespace std;
 
-namespace DO {
 
-  bool RegionBoundary::empty() const
+namespace DO { namespace Sara { namespace MatchPropagation {
+
+  auto RegionBoundary::empty() const -> bool
   {
     if (indices_.size() != lowe_score_index_pairs_.size())
     {
@@ -33,10 +34,11 @@ namespace DO {
       oss << "lowe_score_index_pairs_.size() == " << lowe_score_index_pairs_.size() << endl;
       throw std::runtime_error(oss.str());
     }
+
     return indices_.empty();
   }
 
-  size_t RegionBoundary::size() const
+  auto RegionBoundary::size() const -> size_t
   {
     if (indices_.size() != lowe_score_index_pairs_.size())
     {
@@ -46,41 +48,45 @@ namespace DO {
       oss << "lowe_score_index_pairs_.size() == " << lowe_score_index_pairs_.size() << endl;
       throw std::runtime_error(oss.str());
     }
+
     return indices_.size();
   }
 
-  const Match& RegionBoundary::top() const
+  auto RegionBoundary::top() const -> const Match&
   {
     if (empty())
     {
       const char *msg = "FATAL ERROR: Region Boundary is empty!";
       throw std::runtime_error(msg);
     }
+
     return M_[lowe_score_index_pairs_.begin()->second];
   }
 
-  bool RegionBoundary::find(size_t i) const
+  auto RegionBoundary::find(size_t i) const -> bool
   {
     return indices_.find(i) != indices_.end();
   }
 
-  bool RegionBoundary::insert(size_t i)
+  auto RegionBoundary::insert(size_t i) -> bool
   {
     if (find(i))
       return false;
+
     indices_.insert(i);
     lowe_score_index_pairs_.insert(make_pair(M_[i].score(), i));
+
     return true;
   }
 
-  void RegionBoundary::erase(size_t i)
+  auto RegionBoundary::erase(size_t i) -> void
   {
     if (!find(i))
       return;
+
     indices_.erase(i);
-    pair<multimap_type::iterator, multimap_type::iterator> ret;
-    ret = lowe_score_index_pairs_.equal_range(M_[i].score());
-    for (multimap_type::iterator it = ret.first ; it != ret.second; ++it)
+    auto ret = lowe_score_index_pairs_.equal_range(M_[i].score());
+    for (auto it = ret.first; it != ret.second; ++it)
     {
       if (it->second == i)
       {
@@ -90,27 +96,29 @@ namespace DO {
     }
   }
 
-  void RegionBoundary::erase(RegionBoundary::iterator m)
+  auto RegionBoundary::erase(RegionBoundary::iterator m) -> void
   {
     indices_.erase(m.index());
     lowe_score_index_pairs_.erase(m());
   };
 
-  vector<Match> RegionBoundary::matches() const
+  auto RegionBoundary::matches() const -> vector<Match>
   {
-    vector<Match> R;
+    auto R = vector<Match>{};
+
     R.reserve(indices_.size());
-    set<size_t>::const_iterator i;
-    for (i = indices_.begin(); i != indices_.end(); ++i)
+    for (auto i = indices_.begin(); i != indices_.end(); ++i)
       R.push_back(M_[*i]);
+
     return R;
   }
 
-  void RegionBoundary::view(const PairWiseDrawer& drawer) const
+  auto RegionBoundary::view(const PairWiseDrawer& drawer) const -> void
   {
-    set<size_t>::const_iterator i;
-    for (i = indices_.begin(); i != indices_.end(); ++i)
-      drawer.drawMatch(M_[*i]);
+    for (auto i = indices_.begin(); i != indices_.end(); ++i)
+      drawer.draw_match(M_[*i]);
   }
 
+} /* namespace MatchPropagation */
+} /* namespace Sara */
 } /* namespace DO */

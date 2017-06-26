@@ -15,34 +15,40 @@
 //  ACCV 2012, Daejeon, South Korea.
 //
 // Copyright (c) 2013. David Ok, Imagine (ENPC/CSTB).
-// ===========================================================================
+// ========================================================================== //
 
 #include "Region.hpp"
 
+
 using namespace std;
 
-namespace DO {
+
+namespace DO { namespace Sara { namespace MatchPropagation {
 
   vector<Match> Region::matches(const vector<Match>& M) const
   {
-    vector<Match> R;
+    auto R = vector<Match>{};
+
     R.reserve(indices.size());
     for (const_iterator i = begin(); i != end(); ++i)
       R.push_back(M[*i]);
+
     return R;
   }
 
-  bool Region::find(const Match &m, const vector<Match>& M) const
+  auto Region::find(const Match &m, const vector<Match>& M) const -> bool
   {
-    size_t index = &m - &M[0];
+    const auto index = size_t(&m - &M[0]);
     return find(index);
   }
 
   bool Region::insert(const Match& m, const vector<Match>& M)
   {
-    size_t index = &m - &M[0];
+    const auto index = size_t(&m - &M[0]);
+
     if (find(m, M))
       return false;
+
     insert(index);
     return true;
   }
@@ -50,17 +56,19 @@ namespace DO {
   void Region::view(const vector<Match>& M,
                     const PairWiseDrawer& drawer, const Rgb8& c) const
   {
-    for (const_iterator i = begin(); i != end(); ++i)
-      drawer.drawMatch(M[*i], c);
+    for (auto i = begin(); i != end(); ++i)
+      drawer.draw_match(M[*i], c);
   }
 
-  ostream& operator<<(ostream& os, const Region& R)
+  auto operator<<(ostream& os, const Region& R) -> ostream&
   {
     os << "Matches of the region:" << endl;
-    for (Region::const_iterator m = R.begin(); m != R.end(); ++m)
+    for (auto m = R.begin(); m != R.end(); ++m)
       os << *m << " ";
     os << endl;
     return os;
   }
 
+} /* namespace MatchPropagation */
+} /* namespace Sara */
 } /* namespace DO */

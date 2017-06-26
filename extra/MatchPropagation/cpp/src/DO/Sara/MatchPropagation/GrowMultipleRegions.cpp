@@ -25,7 +25,7 @@
 using namespace std;
 
 
-namespace DO { namespace Sara { namespace Extensions {
+namespace DO { namespace Sara {
 
   GrowMultipleRegions::GrowMultipleRegions(const vector<Match>& M,
                                            const GrowthParams& params,
@@ -196,6 +196,5 @@ namespace DO { namespace Sara { namespace Extensions {
     }
   }
 
-} /* namespace Extensions */
 } /* namespace Sara */
 } /* namespace DO */

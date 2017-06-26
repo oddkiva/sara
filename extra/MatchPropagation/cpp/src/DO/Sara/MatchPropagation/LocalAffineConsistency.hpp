@@ -24,7 +24,7 @@
 #include <DO/Sara/Geometry.hpp>
 
 
-namespace DO { namespace Sara { namespace Extensions {
+namespace DO { namespace Sara {
 
   void getTriangleAnglesDegree(double angles[3], const Point2d t[3]);
 
@@ -57,6 +57,5 @@ namespace DO { namespace Sara { namespace Extensions {
                        const OERegion& H_x, const OERegion& y,
                        bool approxEllInterArea = false);
 
-} /* namespace Extensions */
 } /* namespace Sara */
 } /* namespace DO */

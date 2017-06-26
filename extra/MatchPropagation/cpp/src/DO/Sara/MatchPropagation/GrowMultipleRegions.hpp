@@ -21,8 +21,8 @@
 
 #include "GrowRegion.hpp"
 
-namespace DO { namespace Sara { namespace Extensions {
 
+namespace DO { namespace Sara {
   class GrowMultipleRegions
   {
   public: /* interface. */
@@ -61,6 +61,5 @@ namespace DO { namespace Sara { namespace Extensions {
     int verbose_;
   };
 
-} /* namespace Extensions */
 } /* namespace Sara */
 } /* namespace DO */

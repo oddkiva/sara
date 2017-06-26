@@ -22,7 +22,7 @@
 #include "MatchNeighborhood.hpp"
 
 
-namespace DO { namespace Sara { namespace extra {
+namespace DO {  namespace Sara { namespace MatchPropagation {
 
   class DynamicMatchGraph
   {
@@ -69,7 +69,8 @@ namespace DO { namespace Sara { namespace extra {
       return _N_K[i];
     }
 
-    /*! This is used by the method:
+    /*!
+     *  This is used by the method:
      *  const std::vector<size_t>& DynamicMatchGraph::N_K(size_t i)
      *  in order to dynamically update $\mathcal{N}_K(m_i)$.
      */
@@ -110,7 +111,7 @@ namespace DO { namespace Sara { namespace extra {
       for (auto i = 0u; i != _N_K.size(); ++i)
         indices[i] = i;
       update_N_K(indices);
-      auto hat_N_K = compute_Hat_N_K(_N_K);
+      auto hat_N_K = compute_hat_N_K(_N_K);
       _N_K.swap(hat_N_K);
     }
 
@@ -141,9 +142,9 @@ namespace DO { namespace Sara { namespace extra {
     std::vector<char> _N_K_is_computed;
 
     //! @brief Match neighborhood compute functor.
-    ComputeN_K _compute_N_K;
+    NearestMatchNeighborhoodComputer _compute_N_K;
   };
 
-} /* namespace Extensions */
+} /* namespace MatchPropagation */
 } /* namespace Sara */
 } /* namespace DO */

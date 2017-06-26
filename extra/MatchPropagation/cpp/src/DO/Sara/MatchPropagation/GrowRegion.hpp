@@ -29,7 +29,7 @@
 #include "RegionGrowingAnalyzer.hpp"
 
 
-namespace DO { namespace Sara { namespace Extensions {
+namespace DO { namespace Sara {
 
   class GrowRegion
   {
@@ -175,6 +175,5 @@ namespace DO { namespace Sara { namespace Extensions {
     std::set<size_t> very_spurious_;
   };
 
-} /* namespace Extensions */
 } /* namespace Sara */
 } /* namespace DO */

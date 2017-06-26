@@ -25,7 +25,7 @@
 #include <DO/Sara/Match.hpp>
 
 
-namespace DO { namespace Sara { namespace Extensions {
+namespace DO { namespace Sara { namespace MatchPropagation {
 
   class RegionBoundary
   {
@@ -219,7 +219,6 @@ namespace DO { namespace Sara { namespace Extensions {
     const std::vector<Match>& M_;
   };
 
-
-} /* namespace Extensions */
+} /* namespace MatchPropagation */
 } /* namespace Sara */
 } /* namespace DO */

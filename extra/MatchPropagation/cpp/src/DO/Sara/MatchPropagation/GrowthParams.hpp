@@ -23,7 +23,7 @@
 #include <DO/Sara/Geometry/Tools/Utilities.hpp>
 
 
-namespace DO { namespace Sara { namespace Extensions {
+namespace DO { namespace Sara {
 
   //! @brief Simple criterion to test if the triangle is too flat.
   class TriangleFlatness
@@ -147,6 +147,5 @@ namespace DO { namespace Sara { namespace Extensions {
   };
 
 
-} /* namespace Extensions */
 } /* namespace Sara */
 } /* namespace DO */

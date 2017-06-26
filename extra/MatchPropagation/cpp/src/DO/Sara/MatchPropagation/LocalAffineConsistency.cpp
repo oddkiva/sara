@@ -25,7 +25,7 @@
 using namespace std;
 
 
-namespace DO { namespace Sara { namespace Extensions {
+namespace DO { namespace Sara {
 
   void getTriangleAnglesDegree(double angles[3], const Point2d t[3])
   {
@@ -162,6 +162,5 @@ namespace DO { namespace Sara { namespace Extensions {
     diff_angle_radian = angleDiffRadian(H_x, y);
   }
 
-} /* namespace Extensions */
 } /* namespace Sara */
 } /* namespace DO */

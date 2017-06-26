@@ -26,7 +26,7 @@
 #include "GrowMultipleRegions.hpp"
 
 
-//! \defgroup MatchPropagation
+//! @defgroup MatchPropagation
 
 
 #endif /* DO_MATCHPROPAGATION_HPP */

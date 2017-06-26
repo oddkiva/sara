@@ -28,7 +28,7 @@
 
 using namespace std;
 
-namespace DO { namespace Sara { namespace Extensions {
+namespace DO { namespace Sara {
 
   inline void ellRadii(float& a, float& b, const Matrix2f& M)
   {
@@ -918,6 +918,5 @@ namespace DO { namespace Sara { namespace Extensions {
     return hatNK;
   }
 
-} /* namespace Extensions */
 } /* namespace Sara */
 } /* namespace DO */
