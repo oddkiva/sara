@@ -9,7 +9,9 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE "Geometry/Algorithms/Region Inner Boundary"
+
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/Geometry/Algorithms.hpp>
 
@@ -20,37 +22,33 @@ using namespace std;
 using namespace DO::Sara;
 
 
-TEST(TestRegionInnerBoundary, test_compute_region_inner_boundary)
+BOOST_AUTO_TEST_SUITE(TestRegionInnerBoundary)
+
+BOOST_AUTO_TEST_CASE(test_compute_region_inner_boundary)
 {
-  auto regions = Image<int>{ 5, 5 };
+  auto regions = Image<int>{5, 5};
   regions.matrix() <<
-    0, 0, 1, 2, 3,
-    0, 1, 2, 2, 3,
-    0, 2, 2, 2, 2,
-    4, 4, 2, 2, 2,
-    4, 4, 2, 2, 5;
+      0, 0, 1, 2, 3,
+      0, 1, 2, 2, 3,
+      0, 2, 2, 2, 2,
+      4, 4, 2, 2, 2,
+      4, 4, 2, 2, 5;
 
-  auto true_boundaries = vector<vector<Point2i>>{
-    { Point2i{ 0, 2 }, Point2i{ 0, 1 }, Point2i{ 0, 0 }, Point2i{ 1, 0 } },
-    { Point2i{ 2, 0 }, Point2i{ 1, 1 } },
-    { Point2i{ 3, 0 }, Point2i{ 2, 1 }, Point2i{ 1, 2 }, Point2i{ 2, 3 },
-      Point2i{ 2, 4 }, Point2i{ 3, 4 }, Point2i{ 4, 3 }, Point2i{ 4, 2 },
-      Point2i{ 3, 1 } },
-    { Point2i{ 4, 0 }, Point2i{ 4, 1 } },
-    { Point2i{ 0, 3 }, Point2i{ 1, 3 }, Point2i{ 0, 4 }, Point2i{ 1, 4 } },
-    { Point2i{ 4, 4 } }
-  };
+  const auto true_boundaries = vector<vector<Point2i>>{
+      {Point2i{0, 2}, Point2i{0, 1}, Point2i{0, 0}, Point2i{1, 0}},
+      {Point2i{2, 0}, Point2i{1, 1}},
+      {Point2i{3, 0}, Point2i{2, 1}, Point2i{1, 2}, Point2i{2, 3},
+       Point2i{2, 4}, Point2i{3, 4}, Point2i{4, 3}, Point2i{4, 2},
+       Point2i{3, 1}},
+      {Point2i{4, 0}, Point2i{4, 1}},
+      {Point2i{0, 3}, Point2i{1, 3}, Point2i{0, 4}, Point2i{1, 4}},
+      {Point2i{4, 4}}};
 
-  auto actual_boundaries = compute_region_inner_boundaries(regions);
+  const auto actual_boundaries = compute_region_inner_boundaries(regions);
 
-  EXPECT_EQ(true_boundaries.size(), actual_boundaries.size());
-  for (size_t i = 0; i < true_boundaries.size(); ++i)
-    ASSERT_ITEMS_EQ(true_boundaries[i], actual_boundaries[i]);
+  BOOST_CHECK_EQUAL(true_boundaries.size(), actual_boundaries.size());
+  for (auto i = 0u; i < true_boundaries.size(); ++i)
+    BOOST_REQUIRE_ITEMS_EQUAL(true_boundaries[i], actual_boundaries[i]);
 }
 
-
-int main(int argc, char** argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+BOOST_AUTO_TEST_SUITE_END()

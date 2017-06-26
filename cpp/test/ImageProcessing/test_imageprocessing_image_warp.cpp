@@ -9,9 +9,12 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#define BOOST_TEST_MODULE "ImageProcessing/Image Warp"
+
 #include <exception>
 
-#include <gtest/gtest.h>
+#include <boost/mpl/list.hpp>
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/Core/Pixel/Typedefs.hpp>
 #include <DO/Sara/ImageProcessing/Warp.hpp>
@@ -23,16 +26,12 @@ using namespace std;
 using namespace DO::Sara;
 
 
-template <class ChannelType>
-class TestImageWarp : public testing::Test {};
+using ChannelTypes = boost::mpl::list<float, double>;
 
-typedef testing::Types<float, double> ChannelTypes;
+BOOST_AUTO_TEST_SUITE(TestImageWarp)
 
-TYPED_TEST_CASE_P(TestImageWarp);
-
-TYPED_TEST_P(TestImageWarp, test_image_warp)
+BOOST_AUTO_TEST_CASE_TEMPLATE(test_image_warp, T, ChannelTypes)
 {
-  typedef TypeParam T;
   Image<T> src(3, 3);
   src.matrix() <<
     0, 1, 2,
@@ -47,16 +46,8 @@ TYPED_TEST_P(TestImageWarp, test_image_warp)
 
   Image<T> dst(3, 3);
   warp(src, dst, homography);
-  EXPECT_MATRIX_NEAR(src.matrix(), dst.matrix(), 1e-7);
+  BOOST_CHECK_CLOSE_L2_DISTANCE(src.matrix(), dst.matrix(),
+                                static_cast<T>(1e-7));
 }
 
-REGISTER_TYPED_TEST_CASE_P(TestImageWarp, test_image_warp);
-INSTANTIATE_TYPED_TEST_CASE_P(DO_Sara_ImageProcessing_Warp,
-                              TestImageWarp, ChannelTypes);
-
-
-int main(int argc, char** argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+BOOST_AUTO_TEST_SUITE_END()

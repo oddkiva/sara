@@ -9,7 +9,9 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE "ImageIO/Image Database and Training Data Set"
+
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/Core.hpp>
 #include <DO/Sara/ImageIO.hpp>
@@ -17,56 +19,58 @@
 #include <DO/Sara/ImageIO/Database/TrainingDataSet.hpp>
 #include <DO/Sara/ImageIO/Database/TransformedTrainingDataSet.hpp>
 
-#include "../AssertHelpers.hpp"
-
 
 using namespace std;
 using namespace DO::Sara;
 
 
-TEST(TestImageDatabase, test_image_database_iterator)
+BOOST_AUTO_TEST_SUITE(TestImageDatabase)
+
+BOOST_AUTO_TEST_CASE(test_image_database_iterator)
 {
   const auto db_dir = string{src_path("../../../data/")};
 
   const auto image_db = ImageDataSet<Image<Rgb8>>{{
-      db_dir + "/" + "All.tif",
-      db_dir + "/" + "ksmall.jpg",
+      db_dir + "/" + "All.tif", db_dir + "/" + "ksmall.jpg",
       db_dir + "/" + "stinkbug.png",
   }};
   auto image_it = image_db.begin();
   auto image_end = image_db.end();
 
   // Check we could read something.
-  EXPECT_NO_THROW(image_it.operator*());
-  EXPECT_NO_THROW(image_it.operator->());
-  EXPECT_NE(image_it->data(), nullptr);
-  EXPECT_TRUE(image_it->sizes() != Vector2i::Zero());
-  EXPECT_EQ(image_it.path(), db_dir + "/" + "All.tif");
+  BOOST_CHECK_NO_THROW(image_it.operator*());
+  BOOST_CHECK_NO_THROW(image_it.operator->());
+  BOOST_CHECK(image_it->data() != nullptr);
+  BOOST_CHECK(image_it->sizes() != Vector2i::Zero());
+  BOOST_CHECK_EQUAL(image_it.path(), db_dir + "/" + "All.tif");
 
   // Check iterator arithmetics.
-  EXPECT_EQ(image_end - image_it, 3);
+  BOOST_CHECK_EQUAL(image_end - image_it, 3);
 
   size_t i = 0;
   for (; image_it != image_end; ++image_it)
     ++i;
-  EXPECT_EQ(i, 3u);
+  BOOST_CHECK_EQUAL(i, 3u);
 
   for (; image_it != image_db.begin(); --image_it)
     --i;
-  EXPECT_EQ(i, 0u);
-  EXPECT_EQ(image_it, image_db.begin());
+  BOOST_CHECK_EQUAL(i, 0u);
+  BOOST_CHECK(image_it == image_db.begin());
 }
 
-TEST(TestTrainingDataSet,
-     test_image_classification_training_data_set_initialization)
+BOOST_AUTO_TEST_SUITE_END()
+
+
+BOOST_AUTO_TEST_SUITE(TestTrainingDataSet)
+
+BOOST_AUTO_TEST_CASE(test_image_classification_training_data_set_initialization)
 {
   const auto db_dir = string{src_path("../../../data/")};
 
   auto training_data_set = ImageClassificationTrainingDataSet{};
 
   training_data_set.x = {
-      db_dir + "/" + "All.tif",
-      db_dir + "/" + "ksmall.jpg",
+      db_dir + "/" + "All.tif", db_dir + "/" + "ksmall.jpg",
       db_dir + "/" + "stinkbug.png",
   };
 
@@ -74,73 +78,74 @@ TEST(TestTrainingDataSet,
 
   auto sample_i = training_data_set.begin();
 
-  EXPECT_NE(sample_i.x_ref().sizes(), Vector2i::Zero());
-  EXPECT_EQ(sample_i.y_ref(), 0);
+  BOOST_CHECK(sample_i.x_ref().sizes() != Vector2i::Zero());
+  BOOST_CHECK_EQUAL(sample_i.y_ref(), 0);
 
   ++sample_i;
-  EXPECT_NE(sample_i.x_ref().sizes(), Vector2i::Zero());
-  EXPECT_EQ(sample_i.y_ref(), 0);
+  BOOST_CHECK(sample_i.x_ref().sizes() != Vector2i::Zero());
+  BOOST_CHECK_EQUAL(sample_i.y_ref(), 0);
 
   ++sample_i;
-  EXPECT_NE(sample_i.x_ref().sizes(), Vector2i::Zero());
-  EXPECT_EQ(sample_i.y_ref(), 1);
+  BOOST_CHECK(sample_i.x_ref().sizes() != Vector2i::Zero());
+  BOOST_CHECK_EQUAL(sample_i.y_ref(), 1);
 
   write_to_csv(training_data_set, "classification_dataset.csv");
 
   auto training_data_set2 = ImageClassificationTrainingDataSet{};
   read_from_csv(training_data_set2, "classification_dataset.csv");
-  EXPECT_EQ(training_data_set, training_data_set2);
+  BOOST_CHECK(training_data_set == training_data_set2);
 }
 
-TEST(TestTrainingDataSet, test_image_segmentation_training_data_set_initialization)
+BOOST_AUTO_TEST_CASE(test_image_segmentation_training_data_set_initialization)
 {
   const auto db_dir = string{src_path("../../../data/")};
 
   auto training_data_set = ImageSegmentationTrainingDataSet{};
 
   training_data_set.x = {
-      db_dir + "/" + "All.tif",
-      db_dir + "/" + "ksmall.jpg",
+      db_dir + "/" + "All.tif", db_dir + "/" + "ksmall.jpg",
       db_dir + "/" + "stinkbug.png",
   };
 
   training_data_set.y = {
-      db_dir + "/" + "All.tif",
-      db_dir + "/" + "ksmall.jpg",
+      db_dir + "/" + "All.tif", db_dir + "/" + "ksmall.jpg",
       db_dir + "/" + "stinkbug.png",
   };
 
   for (auto s = training_data_set.begin(), s_end = training_data_set.end();
        s != s_end; ++s)
   {
-    EXPECT_NE(s.x_ref().sizes(), Vector2i::Zero());
-    EXPECT_EQ(s.y_ref().sizes(), s.x_ref().sizes());
+    BOOST_CHECK(s.x_ref().sizes() != Vector2i::Zero());
+    BOOST_CHECK_EQUAL(s.y_ref().sizes(), s.x_ref().sizes());
   }
 
   for (auto s : training_data_set)
   {
-    EXPECT_NE(s.first.sizes(), Vector2i::Zero());
-    EXPECT_EQ(s.first.sizes(), s.second.sizes());
+    BOOST_CHECK(s.first.sizes() != Vector2i::Zero());
+    BOOST_CHECK_EQUAL(s.first.sizes(), s.second.sizes());
   }
 
   write_to_csv(training_data_set, "segmentation_dataset.csv");
 
   auto training_data_set2 = ImageSegmentationTrainingDataSet{};
   read_from_csv(training_data_set2, "segmentation_dataset.csv");
-  EXPECT_EQ(training_data_set, training_data_set2);
+  BOOST_CHECK(training_data_set == training_data_set2);
 }
 
+BOOST_AUTO_TEST_SUITE_END()
 
-TEST(TestTransformedTrainingDataSet,
-     test_transformed_image_classification_training_data_set_initialization)
+
+BOOST_AUTO_TEST_SUITE(TestTransformedTrainingDataSet)
+
+BOOST_AUTO_TEST_CASE(
+    test_transformed_image_classification_training_data_set_initialization)
 {
   const auto db_dir = string{src_path("../../../data/")};
 
   auto training_data_set = TransformedImageClassificationTrainingDataSet{};
 
   training_data_set.x = {
-      db_dir + "/" + "All.tif",
-      db_dir + "/" + "ksmall.jpg",
+      db_dir + "/" + "All.tif", db_dir + "/" + "ksmall.jpg",
       db_dir + "/" + "stinkbug.png",
   };
 
@@ -163,19 +168,19 @@ TEST(TestTransformedTrainingDataSet,
 
   auto sample_i = training_data_set.begin();
 
-  EXPECT_NE(sample_i.x_ref().sizes(), Vector2i::Zero());
-  EXPECT_EQ(sample_i.y_ref(), 0);
-  EXPECT_FALSE(sample_i.t_ref().use_original);
+  BOOST_CHECK(sample_i.x_ref().sizes() != Vector2i::Zero());
+  BOOST_CHECK_EQUAL(sample_i.y_ref(), 0);
+  BOOST_CHECK(!sample_i.t_ref().use_original);
 
   ++sample_i;
-  EXPECT_NE(sample_i.x_ref().sizes(), Vector2i::Zero());
-  EXPECT_EQ(sample_i.y_ref(), 0);
-  EXPECT_FALSE(sample_i.t_ref().use_original);
+  BOOST_CHECK(sample_i.x_ref().sizes() != Vector2i::Zero());
+  BOOST_CHECK_EQUAL(sample_i.y_ref(), 0);
+  BOOST_CHECK(!sample_i.t_ref().use_original);
 
   ++sample_i;
-  EXPECT_NE(sample_i.x_ref().sizes(), Vector2i::Zero());
-  EXPECT_EQ(sample_i.y_ref(), 1);
-  EXPECT_TRUE(sample_i.t_ref().use_original);
+  BOOST_CHECK(sample_i.x_ref().sizes() != Vector2i::Zero());
+  BOOST_CHECK_EQUAL(sample_i.y_ref(), 1);
+  BOOST_CHECK(sample_i.t_ref().use_original);
 
   write_to_csv(training_data_set, "transformed_classification_dataset.csv");
 
@@ -186,66 +191,66 @@ TEST(TestTransformedTrainingDataSet,
   {
     auto sample_i = training_data_set2.begin();
 
-    EXPECT_NE(sample_i.x_ref().sizes(), Vector2i::Zero());
-    EXPECT_EQ(sample_i.y_ref(), 0);
-    EXPECT_EQ(Vector2i(320, 240), sample_i.t_ref().out_sizes);
-    EXPECT_FALSE(sample_i.t_ref().use_original);
-    EXPECT_TRUE(sample_i.t_ref().apply_transform[ImageDataTransform::Zoom]);
-    EXPECT_TRUE(sample_i.t_ref().z == 1.3f);
-    EXPECT_TRUE(sample_i.t_ref().apply_transform[ImageDataTransform::Shift]);
-    EXPECT_TRUE(sample_i.t_ref().t == Vector2i(5, 5));
-    EXPECT_FALSE(sample_i.t_ref().apply_transform[ImageDataTransform::Flip]);
-    EXPECT_TRUE(sample_i.t_ref().flip_type == ImageDataTransform::None);
-    EXPECT_TRUE(sample_i.t_ref().apply_transform[ImageDataTransform::FancyPCA]);
-    EXPECT_MATRIX_EQ(sample_i.t_ref().alpha, Vector3f::Ones());
+    BOOST_CHECK(sample_i.x_ref().sizes() != Vector2i::Zero());
+    BOOST_CHECK_EQUAL(sample_i.y_ref(), 0);
+    BOOST_CHECK_EQUAL(Vector2i(320, 240), sample_i.t_ref().out_sizes);
+    BOOST_CHECK(!sample_i.t_ref().use_original);
+    BOOST_CHECK(sample_i.t_ref().apply_transform[ImageDataTransform::Zoom]);
+    BOOST_CHECK(sample_i.t_ref().z == 1.3f);
+    BOOST_CHECK(sample_i.t_ref().apply_transform[ImageDataTransform::Shift]);
+    BOOST_CHECK(sample_i.t_ref().t == Vector2i(5, 5));
+    BOOST_CHECK(!sample_i.t_ref().apply_transform[ImageDataTransform::Flip]);
+    BOOST_CHECK(sample_i.t_ref().flip_type == ImageDataTransform::None);
+    BOOST_CHECK(sample_i.t_ref().apply_transform[ImageDataTransform::FancyPCA]);
+    BOOST_CHECK_EQUAL(sample_i.t_ref().alpha, Vector3f::Ones());
 
     ++sample_i;
-    EXPECT_NE(sample_i.x_ref().sizes(), Vector2i::Zero());
-    EXPECT_EQ(sample_i.y_ref(), 0);
-    EXPECT_EQ(Vector2i(320, 240), sample_i.t_ref().out_sizes);
-    EXPECT_FALSE(sample_i.t_ref().use_original);
-    EXPECT_TRUE(sample_i.t_ref().apply_transform[ImageDataTransform::Zoom]);
-    EXPECT_TRUE(sample_i.t_ref().z == 0.8f);
-    EXPECT_FALSE(sample_i.t_ref().apply_transform[ImageDataTransform::Shift]);
-    EXPECT_TRUE(sample_i.t_ref().t == Vector2i::Zero());
-    EXPECT_TRUE(sample_i.t_ref().apply_transform[ImageDataTransform::Flip]);
-    EXPECT_TRUE(sample_i.t_ref().flip_type == ImageDataTransform::Horizontal);
-    EXPECT_FALSE(sample_i.t_ref().apply_transform[ImageDataTransform::FancyPCA]);
-    EXPECT_MATRIX_EQ(sample_i.t_ref().alpha, Vector3f::Zero());
+    BOOST_CHECK(sample_i.x_ref().sizes() != Vector2i::Zero());
+    BOOST_CHECK_EQUAL(sample_i.y_ref(), 0);
+    BOOST_CHECK_EQUAL(Vector2i(320, 240), sample_i.t_ref().out_sizes);
+    BOOST_CHECK(!sample_i.t_ref().use_original);
+    BOOST_CHECK(sample_i.t_ref().apply_transform[ImageDataTransform::Zoom]);
+    BOOST_CHECK(sample_i.t_ref().z == 0.8f);
+    BOOST_CHECK(!sample_i.t_ref().apply_transform[ImageDataTransform::Shift]);
+    BOOST_CHECK(sample_i.t_ref().t == Vector2i::Zero());
+    BOOST_CHECK(sample_i.t_ref().apply_transform[ImageDataTransform::Flip]);
+    BOOST_CHECK(sample_i.t_ref().flip_type == ImageDataTransform::Horizontal);
+    BOOST_CHECK(
+        !sample_i.t_ref().apply_transform[ImageDataTransform::FancyPCA]);
+    BOOST_CHECK_EQUAL(sample_i.t_ref().alpha, Vector3f::Zero());
 
     ++sample_i;
-    EXPECT_NE(sample_i.x_ref().sizes(), Vector2i::Zero());
-    EXPECT_EQ(sample_i.y_ref(), 1);
-    EXPECT_EQ(Vector2i(320, 240), sample_i.t_ref().out_sizes);
-    EXPECT_TRUE(sample_i.t_ref().use_original);
-    EXPECT_FALSE(sample_i.t_ref().apply_transform[ImageDataTransform::Zoom]);
-    EXPECT_TRUE(sample_i.t_ref().z == 1.f);
-    EXPECT_FALSE(sample_i.t_ref().apply_transform[ImageDataTransform::Shift]);
-    EXPECT_TRUE(sample_i.t_ref().t == Vector2i::Zero());
-    EXPECT_FALSE(sample_i.t_ref().apply_transform[ImageDataTransform::Flip]);
-    EXPECT_TRUE(sample_i.t_ref().flip_type == ImageDataTransform::None);
-    EXPECT_FALSE(sample_i.t_ref().apply_transform[ImageDataTransform::FancyPCA]);
-    EXPECT_MATRIX_EQ(sample_i.t_ref().alpha, Vector3f::Zero());
+    BOOST_CHECK_NE(sample_i.x_ref().sizes(), Vector2i::Zero());
+    BOOST_CHECK_EQUAL(sample_i.y_ref(), 1);
+    BOOST_CHECK_EQUAL(Vector2i(320, 240), sample_i.t_ref().out_sizes);
+    BOOST_CHECK(sample_i.t_ref().use_original);
+    BOOST_CHECK(!sample_i.t_ref().apply_transform[ImageDataTransform::Zoom]);
+    BOOST_CHECK(sample_i.t_ref().z == 1.f);
+    BOOST_CHECK(!sample_i.t_ref().apply_transform[ImageDataTransform::Shift]);
+    BOOST_CHECK(sample_i.t_ref().t == Vector2i::Zero());
+    BOOST_CHECK(!sample_i.t_ref().apply_transform[ImageDataTransform::Flip]);
+    BOOST_CHECK(sample_i.t_ref().flip_type == ImageDataTransform::None);
+    BOOST_CHECK(
+        !sample_i.t_ref().apply_transform[ImageDataTransform::FancyPCA]);
+    BOOST_CHECK_EQUAL(sample_i.t_ref().alpha, Vector3f::Zero());
   }
-  EXPECT_EQ(training_data_set, training_data_set2);
+  BOOST_CHECK(training_data_set == training_data_set2);
 }
 
-TEST(TestTransformedTrainingDataSet,
-     test_transformed_image_segmentation_training_data_set_initialization)
+BOOST_AUTO_TEST_CASE(
+    test_transformed_image_segmentation_training_data_set_initialization)
 {
   const auto db_dir = string{src_path("../../../data/")};
 
   auto training_data_set = TransformedImageSegmentationTrainingDataSet{};
 
   training_data_set.x = {
-      db_dir + "/" + "All.tif",
-      db_dir + "/" + "ksmall.jpg",
+      db_dir + "/" + "All.tif", db_dir + "/" + "ksmall.jpg",
       db_dir + "/" + "stinkbug.png",
   };
 
   training_data_set.y = {
-      db_dir + "/" + "All.tif",
-      db_dir + "/" + "ksmall.jpg",
+      db_dir + "/" + "All.tif", db_dir + "/" + "ksmall.jpg",
       db_dir + "/" + "stinkbug.png",
   };
 
@@ -269,20 +274,16 @@ TEST(TestTransformedTrainingDataSet,
   for (auto s = training_data_set.begin(), s_end = training_data_set.end();
        s != s_end; ++s)
   {
-    EXPECT_NE(s.x_ref().sizes(), Vector2i::Zero());
-    EXPECT_EQ(s.y_ref().sizes(), s.x_ref().sizes());
-    EXPECT_FALSE(s.t_ref().use_original);
+    BOOST_CHECK(s.x_ref().sizes() != Vector2i::Zero());
+    BOOST_CHECK_EQUAL(s.y_ref().sizes(), s.x_ref().sizes());
+    BOOST_CHECK(!s.t_ref().use_original);
   }
 
   write_to_csv(training_data_set, "transformed_segmentation_dataset.csv");
 
   auto training_data_set2 = TransformedImageSegmentationTrainingDataSet{};
   read_from_csv(training_data_set2, "transformed_segmentation_dataset.csv");
-  EXPECT_EQ(training_data_set, training_data_set2);
+  BOOST_CHECK(training_data_set == training_data_set2);
 }
 
-int main(int argc, char **argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+BOOST_AUTO_TEST_SUITE_END()

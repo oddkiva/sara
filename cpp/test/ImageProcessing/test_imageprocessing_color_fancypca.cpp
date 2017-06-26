@@ -9,19 +9,19 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE "ImageProcessing/Color Fancy PCA"
+
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/Core/Tensor.hpp>
 #include <DO/Sara/ImageProcessing/ColorFancyPCA.hpp>
-
-#include "../AssertHelpers.hpp"
 
 
 using namespace std;
 using namespace DO::Sara;
 
 
-TEST(TestColorFancyPca, test)
+BOOST_AUTO_TEST_CASE(test_color_fancy_pca)
 {
   auto image = Image<Rgb32f>{2, 2};
   image.matrix().fill(Rgb32f::Zero());
@@ -32,12 +32,5 @@ TEST(TestColorFancyPca, test)
   fancy_pca(image, alpha);
 
   for (int i = 0; i < 3; ++i)
-    ASSERT_MATRIX_EQ(to_cwh_tensor(image)[0].matrix(), Matrix2f::Ones());
-}
-
-
-int main(int argc, char** argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+    BOOST_CHECK_EQUAL(to_cwh_tensor(image)[0].matrix(), Matrix2f::Ones());
 }

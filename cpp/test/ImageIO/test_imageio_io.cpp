@@ -9,28 +9,30 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE "ImageIO/Read-Write Functions"
+
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/Core.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageIO/Details/Exif.hpp>
-
-#include "../AssertHelpers.hpp"
 
 
 using namespace std;
 using namespace DO::Sara;
 
 
-TEST(TestImageIO, test_imread_fails)
+BOOST_AUTO_TEST_SUITE(TestImageIO)
+
+BOOST_AUTO_TEST_CASE(test_imread_fails)
 {
   const auto blank_filepath = string{""};
   auto blank_image = Image<Rgb8>{};
-  EXPECT_THROW(imread(blank_image, blank_filepath), std::runtime_error);
-  EXPECT_MATRIX_EQ(blank_image.sizes(), Vector2i::Zero());
+  BOOST_CHECK_THROW(imread(blank_image, blank_filepath), std::runtime_error);
+  BOOST_CHECK_EQUAL(blank_image.sizes(), Vector2i::Zero());
 }
 
-TEST(TestImageIO, test_rgb_image_read_write)
+BOOST_AUTO_TEST_CASE(test_rgb_image_read_write)
 {
   const string filepaths[] =
   {
@@ -48,16 +50,16 @@ TEST(TestImageIO, test_rgb_image_read_write)
     imwrite(true_image, filepaths[i], 100);
 
     auto image = Image<Rgb8>{};
-    EXPECT_NO_THROW(imread(image, filepaths[i]));
-    EXPECT_MATRIX_EQ(image.sizes(), Vector2i(2, 2));
+    BOOST_REQUIRE_NO_THROW(imread(image, filepaths[i]));
+    BOOST_REQUIRE_EQUAL(image.sizes(), Vector2i(2, 2));
 
     for (int y = 0; y < true_image.width(); ++y)
       for (int x = 0; x < true_image.height(); ++x)
-        EXPECT_MATRIX_EQ(true_image(x, y), image(x, y));
+        BOOST_REQUIRE_EQUAL(true_image(x, y), image(x, y));
   }
 }
 
-TEST(TestImageIO, test_grayscale_image_read_write)
+BOOST_AUTO_TEST_CASE(test_grayscale_image_read_write)
 {
   const string filepaths[] =
   {
@@ -75,13 +77,13 @@ TEST(TestImageIO, test_grayscale_image_read_write)
   for (int i = 0; i < 3; ++i)
   {
     auto image = Image<unsigned char>{};
-    EXPECT_NO_THROW(imread(image, filepaths[i]));
-    EXPECT_MATRIX_EQ(image.sizes(), Vector2i(2, 2));
-    EXPECT_MATRIX_EQ(true_image.matrix(), image.matrix());
+    BOOST_CHECK_NO_THROW(imread(image, filepaths[i]));
+    BOOST_CHECK_EQUAL(image.sizes(), Vector2i(2, 2));
+    BOOST_CHECK_EQUAL(true_image.matrix(), image.matrix());
   }
 }
 
-TEST(TestImageIO, test_read_exif_info)
+BOOST_AUTO_TEST_CASE(test_read_exif_info)
 {
   auto filepath = string{ "image.jpg" };
   auto exif_info = EXIFInfo{};
@@ -93,40 +95,43 @@ TEST(TestImageIO, test_read_exif_info)
 
   auto pos = size_t{};
 
-  pos = content.find("Camera make");        EXPECT_NE(string::npos, pos);
-  pos = content.find("Camera model");       EXPECT_NE(string::npos, pos);
-  pos = content.find("Software");           EXPECT_NE(string::npos, pos);
-  pos = content.find("Bits per sample");    EXPECT_NE(string::npos, pos);
-  pos = content.find("Image width");        EXPECT_NE(string::npos, pos);
-  pos = content.find("Image height");       EXPECT_NE(string::npos, pos);
-  pos = content.find("Image description");  EXPECT_NE(string::npos, pos);
-  pos = content.find("Image orientation");  EXPECT_NE(string::npos, pos);
-  pos = content.find("Image copyright");    EXPECT_NE(string::npos, pos);
-  pos = content.find("Image date/time");    EXPECT_NE(string::npos, pos);
-  pos = content.find("Original date/time"); EXPECT_NE(string::npos, pos);
-  pos = content.find("Digitize date/time"); EXPECT_NE(string::npos, pos);
-  pos = content.find("Subsecond time");     EXPECT_NE(string::npos, pos);
-  pos = content.find("Exposure time");      EXPECT_NE(string::npos, pos);
-  pos = content.find("F-stop");             EXPECT_NE(string::npos, pos);
-  pos = content.find("ISO speed");          EXPECT_NE(string::npos, pos);
-  pos = content.find("Subject distance");   EXPECT_NE(string::npos, pos);
-  pos = content.find("Exposure bias");      EXPECT_NE(string::npos, pos);
-  pos = content.find("Flash used?");        EXPECT_NE(string::npos, pos);
-  pos = content.find("Metering mode");      EXPECT_NE(string::npos, pos);
-  pos = content.find("Lens focal length");  EXPECT_NE(string::npos, pos);
-  pos = content.find("35mm focal length");  EXPECT_NE(string::npos, pos);
-  pos = content.find("GPS Latitude");       EXPECT_NE(string::npos, pos);
-  pos = content.find("GPS Longitude");      EXPECT_NE(string::npos, pos);
-  pos = content.find("GPS Altitude");       EXPECT_NE(string::npos, pos);
+  pos = content.find("Camera make");        BOOST_CHECK_NE(string::npos, pos);
+  pos = content.find("Camera model");       BOOST_CHECK_NE(string::npos, pos);
+  pos = content.find("Software");           BOOST_CHECK_NE(string::npos, pos);
+  pos = content.find("Bits per sample");    BOOST_CHECK_NE(string::npos, pos);
+  pos = content.find("Image width");        BOOST_CHECK_NE(string::npos, pos);
+  pos = content.find("Image height");       BOOST_CHECK_NE(string::npos, pos);
+  pos = content.find("Image description");  BOOST_CHECK_NE(string::npos, pos);
+  pos = content.find("Image orientation");  BOOST_CHECK_NE(string::npos, pos);
+  pos = content.find("Image copyright");    BOOST_CHECK_NE(string::npos, pos);
+  pos = content.find("Image date/time");    BOOST_CHECK_NE(string::npos, pos);
+  pos = content.find("Original date/time"); BOOST_CHECK_NE(string::npos, pos);
+  pos = content.find("Digitize date/time"); BOOST_CHECK_NE(string::npos, pos);
+  pos = content.find("Subsecond time");     BOOST_CHECK_NE(string::npos, pos);
+  pos = content.find("Exposure time");      BOOST_CHECK_NE(string::npos, pos);
+  pos = content.find("F-stop");             BOOST_CHECK_NE(string::npos, pos);
+  pos = content.find("ISO speed");          BOOST_CHECK_NE(string::npos, pos);
+  pos = content.find("Subject distance");   BOOST_CHECK_NE(string::npos, pos);
+  pos = content.find("Exposure bias");      BOOST_CHECK_NE(string::npos, pos);
+  pos = content.find("Flash used?");        BOOST_CHECK_NE(string::npos, pos);
+  pos = content.find("Metering mode");      BOOST_CHECK_NE(string::npos, pos);
+  pos = content.find("Lens focal length");  BOOST_CHECK_NE(string::npos, pos);
+  pos = content.find("35mm focal length");  BOOST_CHECK_NE(string::npos, pos);
+  pos = content.find("GPS Latitude");       BOOST_CHECK_NE(string::npos, pos);
+  pos = content.find("GPS Longitude");      BOOST_CHECK_NE(string::npos, pos);
+  pos = content.find("GPS Altitude");       BOOST_CHECK_NE(string::npos, pos);
 }
 
+BOOST_AUTO_TEST_SUITE_END()
 
-class TestImageMakeUprightFromExif : public testing::Test
+
+class TestFixtureForImageMakeUprightFromExif
 {
 protected:
   Image<int> true_image;
 
-  TestImageMakeUprightFromExif() : testing::Test()
+public:
+  TestFixtureForImageMakeUprightFromExif()
   {
     // Draw an 'F' letter.
     true_image.resize(4, 6);
@@ -139,30 +144,32 @@ protected:
       1, 0, 0, 0;
   }
 
-  virtual ~TestImageMakeUprightFromExif() {}
+  virtual ~TestFixtureForImageMakeUprightFromExif() {}
 };
 
-TEST_F(TestImageMakeUprightFromExif, test_with_unspecified_tag)
+BOOST_FIXTURE_TEST_SUITE(TestImageMakeUprightFromExif, TestFixtureForImageMakeUprightFromExif)
+
+BOOST_AUTO_TEST_CASE(test_with_unspecified_tag)
 {
   auto image = true_image;
 
   static_assert(ExifOrientationTag::Unspecified == 0, "Must be 0");
 
   make_upright_from_exif(image, ExifOrientationTag::Undefined);
-  ASSERT_MATRIX_EQ(true_image.matrix(), image.matrix());
+  BOOST_CHECK_EQUAL(true_image.matrix(), image.matrix());
 }
 
-TEST_F(TestImageMakeUprightFromExif, test_with_upright_tag)
+BOOST_AUTO_TEST_CASE(test_with_upright_tag)
 {
   auto image = true_image;
 
   static_assert(ExifOrientationTag::Upright == 1, "Must be 1");
 
   make_upright_from_exif(image, ExifOrientationTag::Upright);
-  ASSERT_MATRIX_EQ(true_image.matrix(), image.matrix());
+  BOOST_CHECK_EQUAL(true_image.matrix(), image.matrix());
 }
 
-TEST_F(TestImageMakeUprightFromExif, test_with_flipped_horizontally_tag)
+BOOST_AUTO_TEST_CASE(test_with_flipped_horizontally_tag)
 {
   auto image = Image<int>{4, 6};
   image.matrix() <<
@@ -175,10 +182,10 @@ TEST_F(TestImageMakeUprightFromExif, test_with_flipped_horizontally_tag)
 
   static_assert(ExifOrientationTag::FlippedHorizontally == 2, "Must be 2");
   make_upright_from_exif(image, ExifOrientationTag::FlippedHorizontally);
-  ASSERT_MATRIX_EQ(true_image.matrix(), image.matrix());
+  BOOST_CHECK_EQUAL(true_image.matrix(), image.matrix());
 }
 
-TEST_F(TestImageMakeUprightFromExif, test_rotatedccw_180)
+BOOST_AUTO_TEST_CASE(test_rotatedccw_180)
 {
   auto image = Image<int>{4, 6};
   image.matrix() <<
@@ -192,10 +199,10 @@ TEST_F(TestImageMakeUprightFromExif, test_rotatedccw_180)
   static_assert(ExifOrientationTag::RotatedCCW_180 == 3, "Must be 3");
 
   make_upright_from_exif(image, ExifOrientationTag::RotatedCCW_180);
-  ASSERT_MATRIX_EQ(true_image.matrix(), image.matrix());
+  BOOST_CHECK_EQUAL(true_image.matrix(), image.matrix());
 }
 
-TEST_F(TestImageMakeUprightFromExif, test_flip_vertically)
+BOOST_AUTO_TEST_CASE(test_flip_vertically)
 {
   auto image = Image<int>{4, 6};
   image.matrix() <<
@@ -209,10 +216,10 @@ TEST_F(TestImageMakeUprightFromExif, test_flip_vertically)
   static_assert(ExifOrientationTag::FlippedVertically == 4, "Must be 4");
 
   make_upright_from_exif(image, ExifOrientationTag::FlippedVertically);
-  ASSERT_MATRIX_EQ(true_image.matrix(), image.matrix());
+  BOOST_CHECK_EQUAL(true_image.matrix(), image.matrix());
 }
 
-TEST_F(TestImageMakeUprightFromExif, test_transpose)
+BOOST_AUTO_TEST_CASE(test_transpose)
 {
   auto image = Image<int>{6, 4};
   image.matrix() <<
@@ -224,10 +231,10 @@ TEST_F(TestImageMakeUprightFromExif, test_transpose)
   static_assert(ExifOrientationTag::Transposed == 5, "Must be 5");
 
   make_upright_from_exif(image, ExifOrientationTag::Transposed);
-  ASSERT_MATRIX_EQ(true_image.matrix(), image.matrix());
+  BOOST_CHECK_EQUAL(true_image.matrix(), image.matrix());
 }
 
-TEST_F(TestImageMakeUprightFromExif, test_with_rotatedccw_90_tag)
+BOOST_AUTO_TEST_CASE(test_with_rotatedccw_90_tag)
 {
   auto image = Image<int>{6, 4};
   image.matrix() <<
@@ -239,10 +246,10 @@ TEST_F(TestImageMakeUprightFromExif, test_with_rotatedccw_90_tag)
   static_assert(ExifOrientationTag::RotatedCCW_90 == 6, "Must be 6");
 
   make_upright_from_exif(image, ExifOrientationTag::RotatedCCW_90);
-  ASSERT_MATRIX_EQ(true_image.matrix(), image.matrix());
+  BOOST_CHECK_EQUAL(true_image.matrix(), image.matrix());
 }
 
-TEST_F(TestImageMakeUprightFromExif, test_with_transverse_tag)
+BOOST_AUTO_TEST_CASE(test_with_transverse_tag)
 {
   auto image = Image<int>{6, 4};
   image.matrix() <<
@@ -254,10 +261,10 @@ TEST_F(TestImageMakeUprightFromExif, test_with_transverse_tag)
   static_assert(ExifOrientationTag::Transversed == 7, "Must be 7");
 
   make_upright_from_exif(image, ExifOrientationTag::Transversed);
-  ASSERT_MATRIX_EQ(true_image.matrix(), image.matrix());
+  BOOST_CHECK_EQUAL(true_image.matrix(), image.matrix());
 }
 
-TEST_F(TestImageMakeUprightFromExif, test_with_rotatedcw_90_tag)
+BOOST_AUTO_TEST_CASE(test_with_rotatedcw_90_tag)
 {
   auto image = Image<int>{6, 4};
   image.matrix() <<
@@ -269,22 +276,17 @@ TEST_F(TestImageMakeUprightFromExif, test_with_rotatedcw_90_tag)
   static_assert(ExifOrientationTag::RotatedCW_90 == 8, "Must be 8");
 
   make_upright_from_exif(image, ExifOrientationTag::RotatedCW_90);
-  ASSERT_MATRIX_EQ(true_image.matrix(), image.matrix());
+  BOOST_CHECK_EQUAL(true_image.matrix(), image.matrix());
 }
 
-TEST_F(TestImageMakeUprightFromExif, test_with_undefined_tag)
+BOOST_AUTO_TEST_CASE(test_with_undefined_tag)
 {
   auto image = true_image;
 
   static_assert(ExifOrientationTag::Undefined == 9, "Must be 9");
 
   make_upright_from_exif(image, ExifOrientationTag::Undefined);
-  ASSERT_MATRIX_EQ(true_image.matrix(), image.matrix());
+  BOOST_CHECK_EQUAL(true_image.matrix(), image.matrix());
 }
 
-
-int main(int argc, char **argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+BOOST_AUTO_TEST_SUITE_END()

@@ -9,8 +9,9 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#define BOOST_TEST_MODULE "ImageProcessing/Image Flip"
 
-#include <gtest/gtest.h>
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/ImageProcessing/Flip.hpp>
 
@@ -21,12 +22,13 @@ using namespace std;
 using namespace DO::Sara;
 
 
-class TestImageFlip : public testing::Test
+class TestFixtureForImageFlip
 {
 protected:
   Image<int> image;
 
-  TestImageFlip() : testing::Test()
+public:
+  TestFixtureForImageFlip()
   {
     // Draw an 'F' letter.
     image.resize(4, 6);
@@ -38,12 +40,11 @@ protected:
       1, 0, 0, 0,
       1, 0, 0, 0;
   }
-
-  virtual ~TestImageFlip() {}
 };
 
+BOOST_FIXTURE_TEST_SUITE(TestImageFlip, TestFixtureForImageFlip)
 
-TEST_F(TestImageFlip, test_flip_horizontally)
+BOOST_AUTO_TEST_CASE(test_flip_horizontally)
 {
   auto true_flipped_image = Image<int>{4, 6};
   true_flipped_image.matrix() <<
@@ -55,10 +56,10 @@ TEST_F(TestImageFlip, test_flip_horizontally)
       0, 0, 0, 1;
 
   flip_horizontally(image);
-  ASSERT_MATRIX_EQ(true_flipped_image.matrix(), image.matrix());
+  BOOST_REQUIRE_EQUAL(true_flipped_image.matrix(), image.matrix());
 }
 
-TEST_F(TestImageFlip, test_flip_vertically)
+BOOST_AUTO_TEST_CASE(test_flip_vertically)
 {
   auto true_flipped_image = Image<int>{4, 6};
   true_flipped_image.matrix() <<
@@ -70,10 +71,10 @@ TEST_F(TestImageFlip, test_flip_vertically)
       1, 1, 1, 1;
 
   flip_vertically(image);
-  ASSERT_MATRIX_EQ(true_flipped_image.matrix(), image.matrix());
+  BOOST_REQUIRE_EQUAL(true_flipped_image.matrix(), image.matrix());
 }
 
-TEST_F(TestImageFlip, test_transpose)
+BOOST_AUTO_TEST_CASE(test_transpose)
 {
   auto true_flipped_image = Image<int>{6, 4};
   true_flipped_image.matrix() <<
@@ -83,10 +84,10 @@ TEST_F(TestImageFlip, test_transpose)
       1, 0, 0, 0, 0, 0;
 
   transpose(image);
-  ASSERT_MATRIX_EQ(true_flipped_image.matrix(), image.matrix());
+  BOOST_REQUIRE_EQUAL(true_flipped_image.matrix(), image.matrix());
 }
 
-TEST_F(TestImageFlip, test_transverse)
+BOOST_AUTO_TEST_CASE(test_transverse)
 {
   auto true_flipped_image = Image<int>{6, 4};
   true_flipped_image.matrix() <<
@@ -96,10 +97,10 @@ TEST_F(TestImageFlip, test_transverse)
       1, 1, 1, 1, 1, 1; 
 
   transverse(image);
-  ASSERT_MATRIX_EQ(true_flipped_image.matrix(), image.matrix());
+  BOOST_REQUIRE_EQUAL(true_flipped_image.matrix(), image.matrix());
 }
 
-TEST_F(TestImageFlip, test_rotate_ccw_90)
+BOOST_AUTO_TEST_CASE(test_rotate_ccw_90)
 {
   auto true_flipped_image = Image<int>{6, 4};
   true_flipped_image.matrix() <<
@@ -109,10 +110,10 @@ TEST_F(TestImageFlip, test_rotate_ccw_90)
     1, 1, 1, 1, 1, 1;
 
   rotate_ccw_90(image);
-  ASSERT_MATRIX_EQ(true_flipped_image.matrix(), image.matrix());
+  BOOST_REQUIRE_EQUAL(true_flipped_image.matrix(), image.matrix());
 }
 
-TEST_F(TestImageFlip, test_rotate_ccw_180)
+BOOST_AUTO_TEST_CASE(test_rotate_ccw_180)
 {
   auto true_flipped_image = Image<int>{4, 6};
   true_flipped_image.matrix() <<
@@ -124,10 +125,10 @@ TEST_F(TestImageFlip, test_rotate_ccw_180)
       1, 1, 1, 1;
 
   rotate_ccw_180(image);
-  ASSERT_MATRIX_EQ(true_flipped_image.matrix(), image.matrix());
+  BOOST_REQUIRE_EQUAL(true_flipped_image.matrix(), image.matrix());
 }
 
-TEST_F(TestImageFlip, test_rotate_ccw_270)
+BOOST_AUTO_TEST_CASE(test_rotate_ccw_270)
 {
   auto true_flipped_image = Image<int>{6, 4};
   true_flipped_image.matrix() <<
@@ -137,10 +138,10 @@ TEST_F(TestImageFlip, test_rotate_ccw_270)
     0, 0, 0, 0, 0, 1;
 
   rotate_ccw_270(image);
-  ASSERT_MATRIX_EQ(true_flipped_image.matrix(), image.matrix());
+  BOOST_REQUIRE_EQUAL(true_flipped_image.matrix(), image.matrix());
 }
 
-TEST_F(TestImageFlip, test_rotate_cw_270)
+BOOST_AUTO_TEST_CASE(test_rotate_cw_270)
 {
   auto true_flipped_image = Image<int>{6, 4};
   true_flipped_image.matrix() <<
@@ -150,10 +151,10 @@ TEST_F(TestImageFlip, test_rotate_cw_270)
     1, 1, 1, 1, 1, 1;
 
   rotate_cw_270(image);
-  ASSERT_MATRIX_EQ(true_flipped_image.matrix(), image.matrix());
+  BOOST_REQUIRE_EQUAL(true_flipped_image.matrix(), image.matrix());
 }
 
-TEST_F(TestImageFlip, test_rotate_cw_180)
+BOOST_AUTO_TEST_CASE(test_rotate_cw_180)
 {
   auto true_flipped_image = Image<int>{4, 6};
   true_flipped_image.matrix() <<
@@ -165,10 +166,10 @@ TEST_F(TestImageFlip, test_rotate_cw_180)
       1, 1, 1, 1;
 
   rotate_cw_180(image);
-  ASSERT_MATRIX_EQ(true_flipped_image.matrix(), image.matrix());
+  BOOST_REQUIRE_EQUAL(true_flipped_image.matrix(), image.matrix());
 }
 
-TEST_F(TestImageFlip, test_rotate_cw_90)
+BOOST_AUTO_TEST_CASE(test_rotate_cw_90)
 {
   auto true_flipped_image = Image<int>{6, 4};
   true_flipped_image.matrix() <<
@@ -178,10 +179,7 @@ TEST_F(TestImageFlip, test_rotate_cw_90)
     0, 0, 0, 0, 0, 1;
 
   rotate_cw_90(image);
-  ASSERT_MATRIX_EQ(true_flipped_image.matrix(), image.matrix());
+  BOOST_REQUIRE_EQUAL(true_flipped_image.matrix(), image.matrix());
 }
-int main(int argc, char** argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+
+BOOST_AUTO_TEST_SUITE_END()

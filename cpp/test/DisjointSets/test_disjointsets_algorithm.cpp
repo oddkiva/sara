@@ -9,21 +9,23 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE "DisjointSets/Algorithms"
 
 #include <unordered_set>
 
+#include <boost/test/unit_test.hpp>
+
 #include <DO/Sara/DisjointSets/AdjacencyList.hpp>
 #include <DO/Sara/DisjointSets/DisjointSets.hpp>
-
-#include "../AssertHelpers.hpp"
 
 
 using namespace std;
 using namespace DO::Sara;
 
 
-TEST(TestDisjointSets, test_on_image)
+BOOST_AUTO_TEST_SUITE(TestDisjointSets)
+
+BOOST_AUTO_TEST_CASE(test_on_image)
 {
   auto regions = Image<int>{ 5, 5 };
   regions.matrix() <<
@@ -40,30 +42,27 @@ TEST(TestDisjointSets, test_on_image)
 
   // Compute the adjacency list using the 4-connectivity.
   auto adjacency_list = compute_adjacency_list_2d(regions);
-  auto disjoint_sets = DisjointSets{ regions.size(), adjacency_list };
+  auto disjoint_sets = DisjointSets{regions.size(), adjacency_list};
   disjoint_sets.compute_connected_components();
+
   auto components = disjoint_sets.get_connected_components();
   for (auto& component : components)
     sort(component.begin(), component.end());
 
   auto true_components = vector<vector<size_t>>{
-    { 0, 1, 5, 10 },
-    { 2, 6, 7 },
-    { 3, 8, 11, 12, 13, 14, 17, 18, 19, 22, 23 },
-    { 4, 9 },
-    { 15, 16, 20, 21 },
-    { 24 },
+    {0, 1, 5, 10},
+    {2, 6, 7},
+    {3, 8, 11, 12, 13, 14, 17, 18, 19, 22, 23},
+    {4, 9},
+    {15, 16, 20, 21},
+    {24},
   };
 
-  EXPECT_EQ(components.size(), true_components.size());
+  BOOST_CHECK_EQUAL(components.size(), true_components.size());
   for (size_t i = 0; i < components.size(); ++i)
-    EXPECT_NE(components.end(),
-              find(components.begin(), components.end(), true_components[i]));
+    BOOST_REQUIRE(
+      find(components.begin(), components.end(), true_components[i]) !=
+      components.end());
 }
 
-
-int main(int argc, char** argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+BOOST_AUTO_TEST_SUITE_END()

@@ -9,7 +9,10 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <gtest/gtest.h>
+#define BOOST_TEST_NO_MAIN
+#define BOOST_TEST_MODULE "Graphics/Window Management Functions"
+
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/Graphics/GraphicsUtilities.hpp>
@@ -20,107 +23,113 @@
 using namespace DO::Sara;
 
 
-TEST(TestWindow, test_open_and_close_window)
+BOOST_AUTO_TEST_SUITE(TestWindow)
+
+BOOST_AUTO_TEST_CASE(test_open_and_close_window)
 {
-  QPointer<PaintingWindow> window = qobject_cast<PaintingWindow *>(
-    create_window(300, 300, "My Window", 50, 50)
-  );
+  QPointer<PaintingWindow> window = qobject_cast<PaintingWindow*>(
+      create_window(300, 300, "My Window", 50, 50));
   QPointer<QWidget> scroll_area(window->scrollArea());
 
   // Check window dimensions.
-  EXPECT_EQ(get_width(window), window->width());
-  EXPECT_EQ(get_height(window), window->height());
-  EXPECT_EQ(get_sizes(window),
-            Vector2i(window->width(), window->height()));
+  BOOST_CHECK_EQUAL(get_width(window), window->width());
+  BOOST_CHECK_EQUAL(get_height(window), window->height());
+  BOOST_CHECK_EQUAL(get_sizes(window),
+                    Vector2i(window->width(), window->height()));
+
   // Check window title.
-  EXPECT_EQ(scroll_area->windowTitle(), QString("My Window"));
+  BOOST_CHECK(scroll_area->windowTitle() == QString("My Window"));
+
   // Check window position.
-  EXPECT_EQ(window->x(), 50);
-  EXPECT_EQ(window->y(), 50);
+  BOOST_CHECK_EQUAL(window->x(), 50);
+  BOOST_CHECK_EQUAL(window->y(), 50);
 
   // Check that the widget gets destroyed when we close the window.
   close_window(window);
   millisleep(50);
-  EXPECT_TRUE(scroll_area.isNull());
-  EXPECT_TRUE(window.isNull());
+  BOOST_CHECK(scroll_area.isNull());
+  BOOST_CHECK(window.isNull());
 }
 
-TEST(TestWindow, test_open_and_close_gl_window)
+BOOST_AUTO_TEST_CASE(test_open_and_close_gl_window)
 {
   QPointer<QWidget> window = create_gl_window(300, 300, "My Window", 50, 50);
 
-  EXPECT_EQ(get_width(window), window->width());
-  EXPECT_EQ(get_height(window), window->height());
-  EXPECT_EQ(get_sizes(window),
-            Vector2i(window->width(), window->height()));
-  EXPECT_EQ(window->windowTitle(), QString("My Window"));
-  EXPECT_EQ(window->pos(), QPoint(50, 50));
+  BOOST_CHECK_EQUAL(get_width(window), window->width());
+  BOOST_CHECK_EQUAL(get_height(window), window->height());
+  BOOST_CHECK_EQUAL(get_sizes(window),
+                    Vector2i(window->width(), window->height()));
+  BOOST_CHECK(window->windowTitle() == QString("My Window"));
+  BOOST_CHECK(window->pos() == QPoint(50, 50));
 
   close_window(window);
   millisleep(50);
-  EXPECT_TRUE(window.isNull());
+  BOOST_CHECK(window.isNull());
 }
 
-TEST(TestWindow, test_open_and_close_graphics_view)
+BOOST_AUTO_TEST_CASE(test_open_and_close_graphics_view)
 {
-  QPointer<QWidget> window = create_graphics_view(300, 300, "My Window", 50, 50);
+  QPointer<QWidget> window =
+      create_graphics_view(300, 300, "My Window", 50, 50);
 
-  EXPECT_EQ(get_width(window), window->width());
-  EXPECT_EQ(get_height(window), window->height());
-  EXPECT_EQ(get_sizes(window),
-            Vector2i(window->width(), window->height()));
-  EXPECT_EQ(window->windowTitle(), QString("My Window"));
-  EXPECT_EQ(window->pos(), QPoint(50, 50));
+  BOOST_CHECK_EQUAL(get_width(window), window->width());
+  BOOST_CHECK_EQUAL(get_height(window), window->height());
+  BOOST_CHECK_EQUAL(get_sizes(window),
+                    Vector2i(window->width(), window->height()));
+  BOOST_CHECK(window->windowTitle() == QString("My Window"));
+  BOOST_CHECK(window->pos() == QPoint(50, 50));
 
   close_window(window);
   millisleep(50);
-  EXPECT_TRUE(window.isNull());
+  BOOST_CHECK(window.isNull());
 }
 
-TEST(TestWindow, test_set_active_window)
+BOOST_AUTO_TEST_CASE(test_set_active_window)
 {
   Window w1 = create_window(300, 300, "My Window", 10, 10);
   Window w2 = create_gl_window(300, 300, "My GL Window", 10, 10);
   Window w3 = create_graphics_view(300, 300, "My Graphics View", 10, 10);
 
-  EXPECT_TRUE(w1);
-  EXPECT_TRUE(w2);
-  EXPECT_TRUE(w3);
+  BOOST_CHECK(w1);
+  BOOST_CHECK(w2);
+  BOOST_CHECK(w3);
 
-  EXPECT_EQ(w1, active_window());
+  BOOST_CHECK_EQUAL(w1, active_window());
 
   set_active_window(w2);
-  EXPECT_EQ(w2, active_window());
+  BOOST_CHECK_EQUAL(w2, active_window());
 
   set_active_window(w3);
-  EXPECT_EQ(w3, active_window());
+  BOOST_CHECK_EQUAL(w3, active_window());
 
   close_window(w1);
   close_window(w2);
   close_window(w3);
 }
 
-TEST(TestWindow, test_resize_window)
+BOOST_AUTO_TEST_CASE(test_resize_window)
 {
   Window w = create_window(300, 300, "My Window", 10, 10);
-  EXPECT_EQ(w, active_window());
-  EXPECT_EQ(get_sizes(w), Vector2i(300, 300));
+  BOOST_CHECK_EQUAL(w, active_window());
+  BOOST_CHECK_EQUAL(get_sizes(w), Vector2i(300, 300));
 
   fill_circle(100, 100, 30, Red8);
 
   resize_window(500, 500);
-  EXPECT_EQ(get_sizes(w), Vector2i(500, 500));
+  BOOST_CHECK_EQUAL(get_sizes(w), Vector2i(500, 500));
 
   fill_circle(100, 100, 30, Red8);
 }
 
-int worker_thread(int argc, char **argv)
+BOOST_AUTO_TEST_SUITE_END()
+
+
+int worker_thread(int argc, char** argv)
 {
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+  return boost::unit_test::unit_test_main([]() { return true; }, argc, argv);
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
   // Create Qt Application.
   GraphicsApplication gui_app_(argc, argv);

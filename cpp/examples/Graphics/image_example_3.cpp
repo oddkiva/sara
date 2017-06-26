@@ -1,14 +1,16 @@
 #include <DO/Sara/Core/Timer.hpp>
 #include <DO/Sara/Graphics.hpp>
 
+
 using namespace std;
 using namespace DO::Sara;
+
 
 GRAPHICS_MAIN()
 {
   Image<Color3ub> I;
-  cout << src_path("../../datasets/ksmall.jpg") << endl;
-  if ( !load(I, src_path("../../datasets/ksmall.jpg")) )
+  cout << src_path("../../../data/ksmall.jpg") << endl;
+  if (!load(I, src_path("../../../data/ksmall.jpg")))
   {
     cerr << "Error: could not open 'ksmall.jpg' file" << endl;
     return 1;
@@ -16,7 +18,7 @@ GRAPHICS_MAIN()
   int w = I.width(), h = I.height();
   int x = 0, y = 0;
 
-  create_window(2*w, h);
+  create_window(2 * w, h);
 
   Timer drawTimer;
   drawTimer.restart();
@@ -28,8 +30,8 @@ GRAPHICS_MAIN()
     {
       for (int x = 0; x < w; ++x)
       {
-        draw_point(x, y, I(x,y));
-        draw_point(w+x, y, I(x,y));
+        draw_point(x, y, I(x, y));
+        draw_point(w + x, y, I(x, y));
 #ifdef Q_OS_MAC
         microsleep(10);
 #endif

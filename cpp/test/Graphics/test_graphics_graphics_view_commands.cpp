@@ -9,7 +9,10 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <gtest/gtest.h>
+#define BOOST_TEST_NO_MAIN
+#define BOOST_TEST_MODULE "Graphics/Graphics View Commands"
+
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/Graphics/GraphicsUtilities.hpp>
@@ -20,39 +23,43 @@
 using namespace DO::Sara;
 
 
-class TestGraphicsViewCommands : public testing::Test
+class TestFixtureForGraphicsViewCommands
 {
 protected:
   Window _test_window;
 
-  TestGraphicsViewCommands()
+public:
+  TestFixtureForGraphicsViewCommands()
   {
     _test_window = create_graphics_view(300, 300);
   }
 
-  virtual ~TestGraphicsViewCommands()
+  virtual ~TestFixtureForGraphicsViewCommands()
   {
     close_window(_test_window);
   }
 };
 
-TEST_F(TestGraphicsViewCommands, test_view)
+BOOST_FIXTURE_TEST_SUITE(TestGraphicsViewCommands, TestFixtureForGraphicsViewCommands)
+
+BOOST_AUTO_TEST_CASE(test_view)
 {
-  EXPECT_EQ(active_window(), _test_window);
+  BOOST_CHECK_EQUAL(active_window(), _test_window);
 }
 
-TEST_F(TestGraphicsViewCommands, test_pixmap_item)
+BOOST_AUTO_TEST_CASE(test_pixmap_item)
 {
   auto image = Image<Rgb8>{ 3, 3 };
   image.matrix().fill(Black8);
   auto pixmap = add_pixmap(image);
-  EXPECT_NE(pixmap, nullptr);
+  BOOST_CHECK(pixmap != nullptr);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 int worker_thread(int argc, char **argv)
 {
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+  return boost::unit_test::unit_test_main([]() { return true; }, argc, argv);
 }
 
 int main(int argc, char **argv)
