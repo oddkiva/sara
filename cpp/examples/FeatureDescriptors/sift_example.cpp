@@ -111,8 +111,8 @@ GRAPHICS_MAIN()
 
   print_stage("Removing existing redundancies");
   remove_redundant_features(keypoints);
-  CHECK(keypoints.features.size());
-  CHECK(keypoints.descriptors.size());
+  SARA_CHECK(keypoints.features.size());
+  SARA_CHECK(keypoints.descriptors.size());
 
   // Check the features visually.
   print_stage("Draw features");

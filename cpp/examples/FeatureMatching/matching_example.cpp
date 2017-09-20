@@ -112,10 +112,10 @@ void load(Image<Rgb8>& image1, Image<Rgb8>& image2,
   cout << "Image 1: " << keys1.size() << " keypoints" << endl;
   cout << "Image 2: " << keys2.size() << " keypoints" << endl;
 
-  CHECK(keys1.features.size());
-  CHECK(keys1.descriptors.size());
-  CHECK(keys2.features.size());
-  CHECK(keys2.descriptors.size());
+  SARA_CHECK(keys1.features.size());
+  SARA_CHECK(keys1.descriptors.size());
+  SARA_CHECK(keys2.features.size());
+  SARA_CHECK(keys2.descriptors.size());
 
   // Compute/read matches
   cout << "Computing Matches" << endl;

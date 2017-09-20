@@ -13,12 +13,12 @@
 
 #pragma once
 
+#include <DO/Sara/Core/EigenExtension.hpp>
+#include <DO/Sara/Core/Meta.hpp>
+
 #include <iterator>
 #include <sstream>
 #include <stdexcept>
-
-#include <DO/Sara/Core/EigenExtension.hpp>
-#include <DO/Sara/Core/Meta.hpp>
 
 
 namespace DO { namespace Sara {

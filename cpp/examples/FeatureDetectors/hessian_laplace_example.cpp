@@ -99,7 +99,7 @@ vector<OERegion> compute_DoH_extrema(const Image<float>& image,
   auto DoHs = compute_DoHs(image, &scale_octave_pairs);
   if (verbose)
     toc();
-  CHECK(DoHs.size());
+  SARA_CHECK(DoHs.size());
 
   const auto& DoH = compute_DoHs.det_of_hessians();
 
@@ -128,7 +128,7 @@ vector<OERegion> compute_DoH_affine_extrema(const Image<float>& image,
   auto DoHs = compute_DoHs(image, &scale_octave_pairs);
   if (verbose)
     toc();
-  CHECK(DoHs.size());
+  SARA_CHECK(DoHs.size());
 
   const auto& G = compute_DoHs.gaussians();
   const auto& DoH = compute_DoHs.det_of_hessians();

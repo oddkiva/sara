@@ -57,8 +57,8 @@ GRAPHICS_MAIN()
   }
 
   auto simplified_square = ramer_douglas_peucker(square, 0.1);
-  CHECK(square.size());
-  CHECK(simplified_square.size());
+  SARA_CHECK(square.size());
+  SARA_CHECK(simplified_square.size());
 
   clear_window();
   draw_poly(square, Red8, 2);

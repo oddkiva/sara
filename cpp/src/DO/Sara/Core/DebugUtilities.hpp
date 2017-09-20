@@ -16,7 +16,7 @@
 #include <iostream>
 #include <string>
 
-#define CHECK(x) std::cout << #x << " = " << x << std::endl
+#define SARA_CHECK(x) std::cout << #x << " = " << x << std::endl
 
 
 namespace DO { namespace Sara {

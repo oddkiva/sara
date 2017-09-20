@@ -4,7 +4,8 @@ set -ex
 
 function build_library()
 {
-  local cmake_options="-DCMAKE_BUILD_TYPE=Release "
+  local cmake_options="-DCMAKE_BUILD_TYPE=${sara_build_type} "
+  cmake_options+="-DCMAKE_EXPORT_COMPILE_COMMANDS=1 "
   cmake_options+="-DSARA_BUILD_VIDEOIO=ON "
   cmake_options+="-DSARA_BUILD_PYTHON_BINDINGS=ON "
   cmake_options+="-DSARA_BUILD_SHARED_LIBS=ON "
@@ -34,11 +35,19 @@ function install_package()
 }
 
 
-if [[ $# == 0 ]]; then
+if [ -z ${1+x} ]; then
+  sara_build_type="Release"
+else
+  sara_build_type=$1
+fi
+echo "sara_build_type=${sara_build_type}"
+
+if [ -z ${2+x} ]; then
   sara_build_dir="sara-build"
 else
-  sara_build_dir=$1
+  sara_build_dir=$2
 fi
+echo "sara_build_dir=${sara_build_dir}"
 
 # Create the build directory.
 if [ -d "../${sara_build_dir}" ]; then
