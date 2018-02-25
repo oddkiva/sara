@@ -115,6 +115,7 @@ To build the libraries, run:
      sudo yum install -y
        cmake \
        doxygen \
+       libboost-test-dev \
        libjpeg-devel \
        libpng-devel \
        libtiff-devel \
@@ -124,8 +125,8 @@ To build the libraries, run:
 
      # To install Python bindings.
      sudo apt-get install -qq \
-       boost-python-devel \
-       python3-devel
+       libboost-python-dev \
+       libpython3-devel
      ```
 
 2. Build the library:
