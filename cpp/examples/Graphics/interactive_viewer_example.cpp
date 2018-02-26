@@ -6,7 +6,7 @@ using namespace DO::Sara;
 GRAPHICS_MAIN()
 {
   Image<Rgb8> image;
-  load(image, src_path("../../datasets/ksmall.jpg"));
+  load(image, src_path("../../../data/ksmall.jpg"));
 
   create_graphics_view(image.width(), image.height());
 

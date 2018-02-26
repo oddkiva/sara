@@ -9,7 +9,7 @@ GRAPHICS_MAIN()
   set_active_window(w);
 
   SimpleTriangleMesh3f mesh;
-  string filename = src_path("../../datasets/pumpkin_tall_10k.obj");
+  string filename = src_path("../../../data/pumpkin_tall_10k.obj");
   if (!MeshReader().read_object_file(mesh, filename))
   {
     cout << "Error reading mesh file:\n" << filename << endl;
