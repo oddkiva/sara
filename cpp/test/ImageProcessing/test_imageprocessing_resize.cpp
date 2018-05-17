@@ -159,7 +159,7 @@ BOOST_AUTO_TEST_CASE(test_resize)
   for (int y = 0; y < src.height(); ++y)
     src.matrix().row(y).fill(y);
 
-  // Check case 1: downscaling.
+  // Check case 1: inplace downscaling.
   {
     auto dst = Image<float>{2, 2};
     resize(src, dst);
@@ -172,7 +172,7 @@ BOOST_AUTO_TEST_CASE(test_resize)
     }
   }
 
-  // Check case 2: upscaling.
+  // Check case 2: inplace upscaling.
   {
     auto dst = Image<float>{8, 8};
     resize(src, dst);
@@ -192,7 +192,7 @@ BOOST_AUTO_TEST_CASE(test_resize)
                    1e-6);
   }
 
-  // Check case 3: mixed between downscaling and upscaling.
+  // Check case 3: inplace mixed between downscaling and upscaling.
   {
     auto dst = Image<float>{8, 2};
     resize(src, dst);
@@ -201,7 +201,7 @@ BOOST_AUTO_TEST_CASE(test_resize)
         1e-1f);
   }
 
-  // Check case 3 with different API.
+  // Check case 3: same thing but instead this creates a new resized image.
   {
     auto dst = resize(src, {8, 2});
     BOOST_CHECK_LE(
@@ -236,8 +236,10 @@ BOOST_AUTO_TEST_CASE(test_resize_while_preserving_ratio)
     BOOST_CHECK_LE((dst.matrix() - true_dst.matrix()).norm(), 1e-9);
 
     const auto& window = std::get<0>(resize_info);
+    // Top-left corner.
     BOOST_CHECK_EQUAL(window[0], 0);
     BOOST_CHECK_EQUAL(window[1], 1);
+    // Bottom-right corner.
     BOOST_CHECK_EQUAL(window[2], 8);
     BOOST_CHECK_EQUAL(window[3], 7);
 
@@ -245,9 +247,13 @@ BOOST_AUTO_TEST_CASE(test_resize_while_preserving_ratio)
     BOOST_CHECK_LE(std::abs(scale - 2), 1e-9);
 
     const auto& padding = std::get<2>(resize_info);
+    // Top padding.
     BOOST_CHECK_EQUAL(padding[0], 1);
+    // Bottom padding.
     BOOST_CHECK_EQUAL(padding[1], 1);
+    // Left padding.
     BOOST_CHECK_EQUAL(padding[2], 0);
+    // Right padding.
     BOOST_CHECK_EQUAL(padding[3], 0);
   }
 
