@@ -239,7 +239,7 @@ namespace DO { namespace Sara {
   }
   //! @}
 
-  // @brief Image rsizing functor that preserves the image size ratio.
+  // @brief Image resizing functor that preserves the image size ratio.
   struct SizeRatioPreservingImageResizer
   {
     using Window = RowVector4i;
