@@ -54,21 +54,30 @@ BOOST_AUTO_TEST_CASE(test_enlarge_on_image_views)
   auto src = Image<float>{5, 5};
   for (int y = 0; y < src.height(); ++y)
     src.matrix().row(y).fill(y);
+  src.matrix() <<
+    0, 0, 0, 0, 0,
+    1, 1, 1, 1, 1,
+    2, 2, 2, 2, 2,
+    3, 3, 3, 3, 3,
+    4, 4, 4, 4, 4;
 
   auto dst = Image<float>{5, 10};
   enlarge(src, dst);
 
-  for (int y = 0; y < dst.height() - 1; ++y)
-  {
-    auto true_value = RowVectorXf{10};
-    true_value.fill(y / 2.);
-    BOOST_CHECK_LE((true_value - dst.matrix().row(y)).norm(), 1e-6);
-  }
+  auto true_dst = Image<float>{5, 10};
+  true_dst.matrix() <<
+    0.0, 0.0, 0.0, 0.0, 0.0,
+    0.5, 0.5, 0.5, 0.5, 0.5,
+    1.0, 1.0, 1.0, 1.0, 1.0,
+    1.5, 1.5, 1.5, 1.5, 1.5,
+    2.0, 2.0, 2.0, 2.0, 2.0,
+    2.5, 2.5, 2.5, 2.5, 2.5,
+    3.0, 3.0, 3.0, 3.0, 3.0,
+    3.5, 3.5, 3.5, 3.5, 3.5,
+    4.0, 4.0, 4.0, 4.0, 4.0,
+    4.0, 4.0, 4.0, 4.0, 4.0;
 
-  // Check the last row.
-  BOOST_CHECK_LE(
-      (RowVectorXf::Ones(10) * 4 - dst.matrix().row(dst.height() - 1)).norm(),
-      1e-6);
+  BOOST_CHECK_LE((true_dst.matrix() - dst.matrix()).norm(), 1e-9);
 }
 
 BOOST_AUTO_TEST_CASE(test_enlarge)
@@ -77,7 +86,11 @@ BOOST_AUTO_TEST_CASE(test_enlarge)
   src.matrix() << 0, 1, 2, 3;
 
   auto true_dst = Image<float>{4, 4};
-  true_dst.matrix() << 0, 0.5, 1, 1, 1, 1.5, 2, 2, 2, 2.5, 3, 3, 2, 2.5, 3, 3;
+  true_dst.matrix() <<
+    0, 0.5, 1, 1,
+    1, 1.5, 2, 2,
+    2, 2.5, 3, 3,
+    2, 2.5, 3, 3;
 
   auto dst = Image<float>{};
 

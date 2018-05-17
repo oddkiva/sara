@@ -8,7 +8,7 @@ function install_python_packages_via_pip()
 
 function build_library()
 {
-  local cmake_options="-DCMAKE_BUILD_TYPE=Release "
+  local cmake_options="-DCMAKE_BUILD_TYPE=Debug "
   cmake_options+="-DCMAKE_PREFIX_PATH=/usr/local/Qt-5.10.0 "
   cmake_options+="-DSARA_BUILD_VIDEOIO=ON "
   cmake_options+="-DSARA_BUILD_PYTHON_BINDINGS=ON "
