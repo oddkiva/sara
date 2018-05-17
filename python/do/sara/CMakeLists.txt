@@ -5,11 +5,18 @@ find_package(PythonInterp REQUIRED)
 find_package(PythonLibs ${PYTHON_VERSION_STRING} EXACT REQUIRED)
 
 if (PYTHON_VERSION_MAJOR STREQUAL 3)
-  set(SARA_BOOST_PYTHON python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR})
+  set(SARA_BOOST_PYTHON python3)
 else ()
   set(SARA_BOOST_PYTHON python)
 endif ()
-find_package(Boost COMPONENTS ${SARA_BOOST_PYTHON} REQUIRED)
+
+find_package(Boost)
+
+if (Boost_VERSION VERSION_LESS 1.63)
+  find_package(Boost COMPONENTS ${SARA_BOOST_PYTHON} REQUIRED)
+else ()
+  find_package(Boost COMPONENTS ${SARA_BOOST_PYTHON} numpy3 REQUIRED)
+endif ()
 
 
 
@@ -40,7 +47,6 @@ target_link_libraries(pysara
 if (SARA_BUILD_VIDEOIO)
   target_link_libraries(pysara DO_Sara_VideoIO)
 endif ()
-
 
 
 # ============================================================================ #

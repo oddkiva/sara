@@ -7,6 +7,12 @@
 
 #include <numpy/ndarrayobject.h>
 
+#if BOOST_VERSION <= 106300
+# include <boost/python/numeric.hpp>
+#else
+# include <boost/python/numpy.hpp>
+#endif
+
 #include <DO/Sara/Core/Image.hpp>
 
 
@@ -38,7 +44,7 @@ namespace DO { namespace Sara {
     const auto& h = shape[0];
     const auto& w = shape[1];
 
-    return ImageView<T>{ data, Vector2i{ w, h } };
+    return ImageView<T>{data, Vector2i{w, h}};
   }
 
 } /* namespace Sara */
