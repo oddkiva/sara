@@ -221,13 +221,16 @@ namespace DO { namespace Sara {
   Matrix<T, 2, 2> homography_jacobian_matrix(const Matrix<T, 3, 3>& H,
                                              const Matrix<T, 2, 1>& x)
   {
-    Matrix<T, 2, 2> dH;
-    const T u = H(0,0)*x[0] + H(0,1)*x[1] + H(0,2);
-    const T v = H(1,0)*x[0] + H(1,1)*x[1] + H(1,2);
-    const T w = H(2,0)*x[0] + H(2,1)*x[1] + H(2,2);
+    const auto u = H(0,0)*x[0] + H(0,1)*x[1] + H(0,2);
+    const auto v = H(1,0)*x[0] + H(1,1)*x[1] + H(1,2);
+    const auto w = H(2,0)*x[0] + H(2,1)*x[1] + H(2,2);
 
-    dH << (H(0,0)*w - H(2,0)*u)/(w*w), (H(1,0)*w - H(2,0)*u)/(w*w)
-        (H(0,1)*w - H(2,1)*u)/(w*w), (H(1,1)*w - H(2,1)*u)/(w*w);
+    auto dH = Matrix<T, 2, 2>{};
+    dH <<  //
+        (H(0, 0) * w - H(2, 0) * u) / (w * w),
+        (H(1, 0) * w - H(2, 0) * u) / (w * w),
+        (H(0, 1) * w - H(2, 1) * u) / (w * w),
+        (H(1, 1) * w - H(2, 1) * u) / (w * w);
 
     return dH;
   }
@@ -235,11 +238,11 @@ namespace DO { namespace Sara {
 
   //! @brief Utility function.
   template <typename T>
-  Matrix<T, 2, 1> apply(const Matrix<T, 3, 3> H, const Matrix<T, 2, 1>& p)
+  Matrix<T, 2, 1> apply(const Matrix<T, 3, 3>& H, const Matrix<T, 2, 1>& p)
   {
-    Matrix<T, 3, 1> H_p(H*(Vector3f() << p, 1.f).finished());
+    const auto H_p = H * Matrix<T, 3, 1>{p.x(), p.y(), 1.f};
     H_p /= H_p(2);
-    return H_p.block(0,0,2,1);
+    return H_p.head(2);
   }
 
 } /* namespace Sara */
