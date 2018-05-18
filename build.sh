@@ -1,10 +1,15 @@
 #!/bin/bash
 set -ex
 
+function install_python_packages_via_pip()
+{
+  pip install numpy nose
+}
 
 function build_library()
 {
-  local cmake_options="-DCMAKE_BUILD_TYPE=Release "
+  local cmake_options="-DCMAKE_BUILD_TYPE=Debug "
+  cmake_options+="-DCMAKE_PREFIX_PATH=/usr/local/Qt-5.10.0 "
   cmake_options+="-DSARA_BUILD_VIDEOIO=ON "
   cmake_options+="-DSARA_BUILD_PYTHON_BINDINGS=ON "
   cmake_options+="-DSARA_BUILD_SHARED_LIBS=ON "
@@ -50,6 +55,7 @@ mkdir ../${sara_build_dir}
 
 cd ../${sara_build_dir}
 {
+  install_python_packages_via_pip
   build_library
   #install_package
 }

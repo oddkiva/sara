@@ -4,7 +4,7 @@ os: unstable
 
 environment:
   matrix:
-  - QTDIR: C:\Qt\5.7\msvc2015_64
+  - QTDIR: C:\Qt\5.10.1\msvc2015_64
 
 install:
   - set PATH=%QTDIR%\bin;%PATH%

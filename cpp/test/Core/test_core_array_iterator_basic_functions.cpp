@@ -24,32 +24,32 @@ BOOST_AUTO_TEST_SUITE(TestStrideComputer)
 
 BOOST_AUTO_TEST_CASE(test_row_major_strides_computation_2d)
 {
-  auto sizes = Vector2i{ 10, 20 };
-  auto strides = Vector2i{ 20, 1 };
+  auto sizes = Vector2i{10, 20};
+  auto strides = Vector2i{20, 1};
 
   BOOST_REQUIRE_EQUAL(StrideComputer<RowMajor>::eval(sizes), strides);
 }
 
 BOOST_AUTO_TEST_CASE(test_col_major_strides_computation_2d)
 {
-  auto sizes = Vector2i{ 10, 20 };
-  auto strides = Vector2i{ 1, 10 };
+  auto sizes = Vector2i{10, 20};
+  auto strides = Vector2i{1, 10};
 
   BOOST_REQUIRE_EQUAL(StrideComputer<ColMajor>::eval(sizes), strides);
 }
 
 BOOST_AUTO_TEST_CASE(test_row_major_stride_computation_3d)
 {
-  auto sizes = Vector3i{ 10, 20, 30 };
-  auto strides = Vector3i{ 20*30, 30, 1 };
+  auto sizes = Vector3i{10, 20, 30};
+  auto strides = Vector3i{20 * 30, 30, 1};
 
   BOOST_REQUIRE_EQUAL(StrideComputer<RowMajor>::eval(sizes), strides);
 }
 
 BOOST_AUTO_TEST_CASE(test_col_major_stride_computation_3d)
 {
-  auto sizes = Vector3i{ 10, 20, 30 };
-  auto strides = Vector3i{ 1, 10, 10*20 };
+  auto sizes = Vector3i{10, 20, 30};
+  auto strides = Vector3i{1, 10, 10 * 20};
 
   BOOST_REQUIRE_EQUAL(StrideComputer<ColMajor>::eval(sizes), strides);
 }
@@ -57,22 +57,21 @@ BOOST_AUTO_TEST_CASE(test_col_major_stride_computation_3d)
 BOOST_AUTO_TEST_SUITE_END()
 
 
-
 BOOST_AUTO_TEST_SUITE(TestJump)
 
 BOOST_AUTO_TEST_CASE(test_jump_2d)
 {
-  auto coords = Vector2i{ 2, 3 };
-  auto sizes = Vector2i{ 10, 20 };
+  auto coords = Vector2i{2, 3};
+  auto sizes = Vector2i{10, 20};
   auto strides = StrideComputer<RowMajor>::eval(sizes);
 
-  BOOST_REQUIRE_EQUAL(2*20+3, jump(coords, strides));
+  BOOST_REQUIRE_EQUAL(2 * 20 + 3, jump(coords, strides));
 }
 
 BOOST_AUTO_TEST_CASE(test_jump_3d)
 {
-  auto coords = Vector3i{ 2, 3, 4 };
-  auto sizes = Vector3i{ 10, 20, 30 };
+  auto coords = Vector3i{2, 3, 4};
+  auto sizes = Vector3i{10, 20, 30};
   auto strides = StrideComputer<RowMajor>::eval(sizes);
 
   BOOST_REQUIRE_EQUAL(jump(coords, strides), 2 * 20 * 30 + 3 * 30 + 4);
@@ -81,14 +80,13 @@ BOOST_AUTO_TEST_CASE(test_jump_3d)
 BOOST_AUTO_TEST_SUITE_END()
 
 
-
 BOOST_AUTO_TEST_SUITE(TestPositionIncrementer)
 
 BOOST_AUTO_TEST_CASE(test_row_major_incrementer_2d)
 {
   auto stop = false;
-  auto start = Vector2i{ 2, 3 };
-  auto end = Vector2i{ 5, 10 };
+  auto start = Vector2i{2, 3};
+  auto end = Vector2i{5, 10};
 
   auto coords = start;
   for (auto i = start(0); i < end(0); ++i)
@@ -96,7 +94,7 @@ BOOST_AUTO_TEST_CASE(test_row_major_incrementer_2d)
     for (auto j = start(1); j < end(1); ++j)
     {
       BOOST_REQUIRE(!stop);
-      BOOST_REQUIRE_EQUAL(coords, Vector2i(i,j));
+      BOOST_REQUIRE_EQUAL(coords, Vector2i(i, j));
       PositionIncrementer<RowMajor>::apply(coords, stop, start, end);
     }
   }
@@ -106,8 +104,8 @@ BOOST_AUTO_TEST_CASE(test_row_major_incrementer_2d)
 BOOST_AUTO_TEST_CASE(test_col_major_incrementer_2d)
 {
   auto stop = false;
-  auto start = Vector2i{ 2, 3 };
-  auto end = Vector2i{ 5, 10 };
+  auto start = Vector2i{2, 3};
+  auto end = Vector2i{5, 10};
 
   auto coords = start;
   for (auto j = start(1); j < end(1); ++j)
@@ -115,7 +113,7 @@ BOOST_AUTO_TEST_CASE(test_col_major_incrementer_2d)
     for (auto i = start(0); i < end(0); ++i)
     {
       BOOST_REQUIRE(!stop);
-      BOOST_REQUIRE_EQUAL(coords, Vector2i(i,j));
+      BOOST_REQUIRE_EQUAL(coords, Vector2i(i, j));
       PositionIncrementer<ColMajor>::apply(coords, stop, start, end);
     }
   }
@@ -125,17 +123,17 @@ BOOST_AUTO_TEST_CASE(test_col_major_incrementer_2d)
 BOOST_AUTO_TEST_CASE(test_row_major_decrementer_2d)
 {
   auto stop = false;
-  auto start = Vector2i{ 2, 3 };
-  auto end = Vector2i{ 5, 10 };
+  auto start = Vector2i{2, 3};
+  auto end = Vector2i{5, 10};
 
   auto coords = Vector2i{};
-  coords.array() = end.array()-1;
-  for (auto i = end(0)-1; i >= start(0); --i)
+  coords.array() = end.array() - 1;
+  for (auto i = end(0) - 1; i >= start(0); --i)
   {
-    for (auto j = end(1)-1; j >= start(1); --j)
+    for (auto j = end(1) - 1; j >= start(1); --j)
     {
       BOOST_REQUIRE(!stop);
-      BOOST_REQUIRE_EQUAL(coords, Vector2i(i,j));
+      BOOST_REQUIRE_EQUAL(coords, Vector2i(i, j));
       PositionDecrementer<RowMajor>::apply(coords, stop, start, end);
     }
   }
@@ -145,15 +143,17 @@ BOOST_AUTO_TEST_CASE(test_row_major_decrementer_2d)
 BOOST_AUTO_TEST_CASE(test_col_major_decrementer_2d)
 {
   bool stop = false;
-  auto start = Vector2i{ 2, 3 };
-  auto end = Vector2i{ 5, 10 };
+  auto start = Vector2i{2, 3};
+  auto end = Vector2i{5, 10};
 
   auto coords = Vector2i{};
-  coords.array() = end.array()-1;
-  for (int j = end(1)-1; j >= start(1); --j) {
-    for (int i = end(0)-1; i >= start(0); --i) {
+  coords.array() = end.array() - 1;
+  for (int j = end(1) - 1; j >= start(1); --j)
+  {
+    for (int i = end(0) - 1; i >= start(0); --i)
+    {
       BOOST_REQUIRE(!stop);
-      BOOST_REQUIRE_EQUAL(coords, Vector2i(i,j));
+      BOOST_REQUIRE_EQUAL(coords, Vector2i(i, j));
       PositionDecrementer<ColMajor>::apply(coords, stop, start, end);
     }
   }

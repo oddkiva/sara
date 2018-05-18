@@ -62,7 +62,14 @@ bp::list compute_connected_components(PyObject *labels)
 
 void expose_disjoint_sets()
 {
+#if BOOST_VERSION <= 106300
   bp::numeric::array::set_module_and_type("numpy", "ndarray");
+#else
+  Py_Initialize();
+  bp::numpy::initialize();
+#endif
+
+  // Import numpy array.
   import_numpy_array();
 
   bp::def("compute_adjacency_list_2d", &compute_adjacency_list_2d);

@@ -7,9 +7,11 @@ message(STATUS "  - DO_ImageProcessing_tests")
 find_package(DO_Sara COMPONENTS Core ImageProcessing REQUIRED)
 
 
+set(TestGroupName "Image Processing")
+
 file(GLOB test_imageprocessing_SOURCE_FILES FILES test_*.cpp)
 
 foreach (file ${test_imageprocessing_SOURCE_FILES})
   get_filename_component(filename "${file}" NAME_WE)
-  sara_add_test(${filename} ${file} "${DO_Sara_LIBRARIES}")
+  sara_add_test(${filename} ${file} "${DO_Sara_LIBRARIES}" ${TestGroupName})
 endforeach ()
