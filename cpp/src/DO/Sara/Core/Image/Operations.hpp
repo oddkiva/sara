@@ -272,7 +272,7 @@ namespace DO { namespace Sara {
             const typename ImageView<T, N>::vector_type& begin_coords,
             const typename ImageView<T, N>::vector_type& end_coords)
   {
-    auto dst = Image<T, N>{ end_coords - begin_coords };
+    auto dst = Image<T, N>{end_coords - begin_coords};
 
     auto src_it = src.begin_subarray(begin_coords, end_coords);
     for (auto dst_it = dst.begin(); dst_it != dst.end(); ++dst_it, ++src_it)
@@ -286,23 +286,6 @@ namespace DO { namespace Sara {
     }
 
     return dst;
-  }
-
-  template <typename T>
-  inline Image<T> safe_crop(const ImageView<T>& src, int top_left_x,
-                            int top_left_y, int width, int height)
-  {
-    auto begin_coords = Vector2i{ top_left_x, top_left_y };
-    auto end_coords = Vector2i{ top_left_x + width, top_left_y + height };
-    return safe_crop(src, begin_coords, end_coords);
-  }
-
-  template <typename T>
-  inline Image<T> safe_crop(const ImageView<T>& src, int center_x, int center_y,
-                            int radius)
-  {
-    return safe_crop(src, center_x - radius, center_y - radius, 2 * radius + 1,
-                     2 * radius + 1);
   }
 
   struct SafeCrop
@@ -320,21 +303,6 @@ namespace DO { namespace Sara {
         -> Image<Pixel<ImageView_>, ImageView_::Dimension>
     {
       return safe_crop(src, begin_coords, end_coords);
-    }
-
-    template <typename T>
-    inline auto operator()(const ImageView<T>& src, int top_left_x, int top_left_y,
-                           int width, int height) const
-        -> Image<T>
-    {
-      return safe_crop(src, top_left_x, top_left_y, width, height);
-    }
-
-    template <typename T>
-    inline auto operator()(const ImageView<T>& src, int x, int y,
-                           int radius) const -> Image<T>
-    {
-      return safe_crop(src, x, y, radius);
     }
   };
   //! @}
