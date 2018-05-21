@@ -1,8 +1,8 @@
 #pragma once
 
 #include <DO/Sara/Core/EigenExtension.hpp>
-#include <DO/Sara/Core/Tensor.hpp>
 #include <DO/Sara/Core/Image/Operations.hpp>
+#include <DO/Sara/Core/Tensor.hpp>
 
 
 namespace DO { namespace Sara {
@@ -31,24 +31,18 @@ namespace DO { namespace Sara {
 
   template <typename T, int N>
   auto vec(const TensorView_<T, N>& in)
-      -> Map<const Matrix<typename ElementTraits<T>::value_type,    
-             Dynamic, 1>>
+      -> Map<const Matrix<typename ElementTraits<T>::value_type, Dynamic, 1>>
   {
-    return {
-      reinterpret_cast<typename ElementTraits<T>::pointer>(in.data()),
-      static_cast<int64_t>(in.size())
-    };
+    return {reinterpret_cast<typename ElementTraits<T>::pointer>(in.data()),
+            static_cast<int64_t>(in.size())};
   }
 
   template <typename T, int N>
   auto vec(TensorView_<T, N>& in)
-      -> Map<const Matrix<typename ElementTraits<T>::value_type,    
-             Dynamic, 1>>
+      -> Map<const Matrix<typename ElementTraits<T>::value_type, Dynamic, 1>>
   {
-    return {
-      reinterpret_cast<typename ElementTraits<T>::pointer>(in.data()),
-      static_cast<int64_t>(in.size())
-    };
+    return {reinterpret_cast<typename ElementTraits<T>::pointer>(in.data()),
+            static_cast<int64_t>(in.size())};
   }
 
   template <typename T, int N>
@@ -62,13 +56,11 @@ namespace DO { namespace Sara {
   auto im2col(const TensorView_<T, N>& x, const Matrix<int, N, 1>& kernel_sizes)
       -> Tensor_<T, 2>
   {
-    const auto num_rows = std::accumulate(
-        x.sizes().data(),
-        x.sizes().data() + x.sizes().size(), 1,
-        std::multiplies<int>());
+    const auto num_rows =
+        std::accumulate(x.sizes().data(), x.sizes().data() + x.sizes().size(),
+                        1, std::multiplies<int>());
     const auto num_cols = std::accumulate(
-        kernel_sizes.data(),
-        kernel_sizes.data() + kernel_sizes.size(), 1,
+        kernel_sizes.data(), kernel_sizes.data() + kernel_sizes.size(), 1,
         std::multiplies<int>());
 
     auto phi_x = Tensor_<T, 2>{num_rows, num_cols};
