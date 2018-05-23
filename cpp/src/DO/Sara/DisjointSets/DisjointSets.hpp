@@ -74,6 +74,16 @@ namespace DO { namespace Sara {
       return parent - &_vertices[0];
     }
 
+    node_ptr node(vertex_type v)
+    {
+      return &_vertices[v];
+    }
+
+    vertex_type vertex(node_ptr n)
+    {
+      return n - &_vertices[0];
+    }
+
     void compute_connected_components();
 
     std::vector<std::vector<vertex_type>> get_connected_components() const;
