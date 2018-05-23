@@ -39,7 +39,7 @@ namespace DO { namespace Sara {
           labels(x, y) = labels(x, y - 1);
 
         // c = (x + 1, y - 1).
-        else if (x + 1 < w & y > 0 && values(x + 1, y - 1) == values(x, y))
+        else if (x + 1 < w && y > 0 && values(x + 1, y - 1) == values(x, y))
         {
           const auto c = labels(x + 1, y - 1);
           labels(x, y) = c;
