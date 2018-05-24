@@ -11,6 +11,8 @@
 
 #include <DO/Sara/DisjointSets/DisjointSets.hpp>
 
+#include <map>
+
 
 using namespace std;
 
@@ -18,16 +20,18 @@ using namespace std;
 namespace DO { namespace Sara {
 
   void
-  DisjointSets::compute_connected_components()
+  DisjointSets::compute_connected_components(const AdjacencyList& adj_list)
   {
+    _vertices.resize(adj_list.num_vertices());
+
     for (vertex_type v = 0; v != _vertices.size(); ++v)
       make_set(v);
 
     for (vertex_type u = 0; u != _vertices.size(); ++u)
     {
       adjacent_vertex_iterator v, v_end;
-      v     = _adj_list.out_vertices_begin(u);
-      v_end = _adj_list.out_vertices_end(u);
+      v     = adj_list.out_vertices_begin(u);
+      v_end = adj_list.out_vertices_end(u);
 
       for ( ; v != v_end; ++v)
         join(&_vertices[u], &_vertices[*v]);
@@ -37,7 +41,7 @@ namespace DO { namespace Sara {
   std::vector<std::vector<DisjointSets::vertex_type>>
   DisjointSets::get_connected_components() const
   {
-    unordered_map<vertex_type, vector<vertex_type>> table;
+    map<vertex_type, vector<vertex_type>> table;
     for (size_t v = 0; v != _vertices.size(); ++v)
     {
       size_t c = component(v);

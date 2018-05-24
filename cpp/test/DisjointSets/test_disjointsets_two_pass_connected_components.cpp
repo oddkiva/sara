@@ -2,7 +2,7 @@
 // This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2015-2016 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2015-2018 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -15,8 +15,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <DO/Sara/DisjointSets/AdjacencyList.hpp>
-#include <DO/Sara/DisjointSets/DisjointSets.hpp>
+#include <DO/Sara/DisjointSets/TwoPassConnectedComponents.hpp>
 
 
 using namespace std;
@@ -27,7 +26,7 @@ BOOST_AUTO_TEST_SUITE(TestDisjointSets)
 
 BOOST_AUTO_TEST_CASE(test_on_image)
 {
-  auto regions = Image<int>{ 5, 5 };
+  auto regions = Image<int>{5, 5};
   regions.matrix() <<
 //  0  1  2  3  4
     0, 0, 1, 2, 3,
@@ -40,16 +39,17 @@ BOOST_AUTO_TEST_CASE(test_on_image)
 // 20 21 22 23 24
     4, 4, 2, 2, 5;
 
-  auto adj_list_data = compute_adjacency_list_2d(regions);
-  const auto adj_list = AdjacencyList{adj_list_data};
+  auto labels = two_pass_connected_components(regions);
 
-  // Compute the adjacency list using the 4-connectivity.
-  auto disjoint_sets = DisjointSets{};
-  disjoint_sets.compute_connected_components(adj_list);
+  auto components_map = std::map<int, std::vector<size_t>>{};
+  for (auto y = 0; y < labels.height(); ++y)
+    for (auto x = 0; x < labels.width(); ++x)
+      components_map[labels(x, y)].push_back(x + y * labels.width());
 
-  auto components = disjoint_sets.get_connected_components();
-  for (auto& component : components)
-    sort(component.begin(), component.end());
+  auto components = vector<vector<size_t>>{};
+  for (const auto& c : components_map)
+    components.push_back(c.second);
+
 
   auto true_components = vector<vector<size_t>>{
     {0, 1, 5, 10},

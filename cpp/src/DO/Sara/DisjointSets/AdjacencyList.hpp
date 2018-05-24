@@ -34,6 +34,11 @@ namespace DO { namespace Sara {
     {
     }
 
+    size_type num_vertices() const
+    {
+      return _a.size();
+    }
+
     size_type out_degree(vertex_type v) const
     {
       return _a[v].size();
