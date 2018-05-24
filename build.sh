@@ -20,7 +20,10 @@ function build_library()
   cmake ../sara ${cmake_options}
 
   # Build the library.
-  make -j`nproc` && make test && make pytest && make package
+  make -j`nproc` VERBOSE=1
+  make test
+  make pytest
+  make package
 }
 
 function install_package()

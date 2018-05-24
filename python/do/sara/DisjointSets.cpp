@@ -41,8 +41,8 @@ bp::list compute_connected_components(PyObject* labels)
   auto adj_list_data = compute_adjacency_list_2d(im);
   AdjacencyList adj_list{adj_list_data};
 
-  auto disjoint_sets = DisjointSets{im.size(), adj_list};
-  disjoint_sets.compute_connected_components();
+  auto disjoint_sets = DisjointSets{};
+  disjoint_sets.compute_connected_components(adj_list);
   const auto components = disjoint_sets.get_connected_components();
 
   auto components_pylist = bp::list{};

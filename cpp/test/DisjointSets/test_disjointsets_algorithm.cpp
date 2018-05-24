@@ -40,10 +40,12 @@ BOOST_AUTO_TEST_CASE(test_on_image)
 // 20 21 22 23 24
     4, 4, 2, 2, 5;
 
+  auto adj_list_data = compute_adjacency_list_2d(regions);
+  const auto adj_list = AdjacencyList{adj_list_data};
+
   // Compute the adjacency list using the 4-connectivity.
-  auto adjacency_list = compute_adjacency_list_2d(regions);
-  auto disjoint_sets = DisjointSets{regions.size(), adjacency_list};
-  disjoint_sets.compute_connected_components();
+  auto disjoint_sets = DisjointSets{};
+  disjoint_sets.compute_connected_components(adj_list);
 
   auto components = disjoint_sets.get_connected_components();
   for (auto& component : components)
