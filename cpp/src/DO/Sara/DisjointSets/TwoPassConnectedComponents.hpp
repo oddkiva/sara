@@ -19,12 +19,7 @@ namespace DO { namespace Sara {
     // The disjoint sets is the data structure that we need.
     DisjointSets ds(values.size(), adj_list);
 
-    // Useful variables and functions.
-    constexpr auto bg = 0;
     const auto w = values.width();
-    const auto h = values.height();
-    auto vertex = [&](int x, int y) { return y * w + x; };
-
     auto last_label_id = 0;
 
     // First pass.
