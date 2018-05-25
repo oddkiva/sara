@@ -68,8 +68,8 @@ namespace DO { namespace Sara {
     const Matrix<T, N, 1> radius = kernel_sizes / 2;
     for (auto c = x.begin_array(); !c.end(); ++c)
     {
-      auto s = c.coords() - radius;
-      auto e = c.coords() + radius;
+      const auto s = c.coords() - radius;
+      const auto e = c.coords() + radius;
 
       phi_x.matrix().row(c) = vec(patch(x, s, e)).transpose();
     }

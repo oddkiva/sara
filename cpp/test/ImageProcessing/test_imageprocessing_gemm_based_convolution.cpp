@@ -11,7 +11,7 @@
 
 #define BOOST_TEST_MODULE "ImageProcessing/GEMM-based Convolution"
 
-#include <DO/Sara/Core/MultiArray.hpp>
+#include <DO/Sara/ImageProcessing/GemmBasedConvolution.hpp>
 
 #include <boost/test/unit_test.hpp>
 
@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_CASE(test_im2col)
   constexpr auto N = 4;
   constexpr auto H = 4;
   constexpr auto W = 3;
-  auto x = MultiArray<float, 3, RowMajor>{{N, H, W}};
+  auto x = Tensor_<float, 3>{{N, H, W}};
   x.flat_array() <<
     0, 0, 0,
     0, 0, 0,
@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE(test_im2col)
   constexpr auto kH = 3;
   constexpr auto kW = 3;
   auto phi_x = im2col(x, {kH, kW});
-  BOOST_CHECK(phi_x.sizes() == Vector2i{N * H * W, kH * kW});
+  BOOST_CHECK(phi_x.sizes() == Vector2i(N * H * W, kH * kW));
 
   auto true_phi_x = MatrixXf{N*H*W, kH*kW};
   true_phi_x <<
@@ -112,14 +112,14 @@ BOOST_AUTO_TEST_CASE(test_convolve)
   constexpr auto H = 4;
   constexpr auto W = 6;
   constexpr auto C = 3;
-  auto x = MultiArray<float, 4, RowMajor>{{N, C, H, W}};
-  x.flat_array() = 1.f;
+  auto x = Tensor_<float, 4>{{N, C, H, W}};
+  x.flat_array().fill(1.f);
 
   constexpr auto kN = 5;
   constexpr auto kH = 3;
   constexpr auto kW = 3;
   constexpr auto kC = 3;
-  auto k = MultiArray<float, 4, RowMajor>{{kN, kC, kH, kW}};
+  auto k = Tensor_<float, 4>{{kN, kC, kH, kW}};
 
   k.flat_array() <<
     // R
@@ -187,5 +187,6 @@ BOOST_AUTO_TEST_CASE(test_convolve)
     5, 5, 5,
     5, 5, 5;
 
-  const auto y = convolve(k, x);
+  auto y = x;
+  gemm_convolve(y, x, k);
 }

@@ -304,6 +304,18 @@ namespace DO { namespace Sara {
     {
       return safe_crop(src, begin_coords, end_coords);
     }
+
+    template <typename ImageView_>
+    inline auto operator()(const ImageView_& src,
+                           const Coords<ImageView_>& center, int radius) const
+        -> Image<Pixel<ImageView_>, ImageView_::Dimension>
+    {
+      auto b = center;
+      auto e = center;
+      b.array() -= radius;
+      e.array() += radius;
+      return safe_crop(src, b, e);
+    }
   };
   //! @}
 
