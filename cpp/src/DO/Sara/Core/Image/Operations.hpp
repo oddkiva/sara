@@ -211,7 +211,7 @@ namespace DO { namespace Sara {
                    const typename ImageView<T, N>::vector_type& begin_coords,
                    const typename ImageView<T, N>::vector_type& end_coords)
   {
-    auto dst = Image<T, N>{ end_coords - begin_coords };
+    auto dst = Image<T, N>{end_coords - begin_coords};
 
     auto src_it = src.begin_subarray(begin_coords, end_coords);
     for (auto dst_it = dst.begin(); dst_it != dst.end(); ++dst_it, ++src_it)
@@ -221,20 +221,14 @@ namespace DO { namespace Sara {
   }
 
   template <typename T>
-  inline Image<T> crop(const ImageView<T>& src, int top_left_x, int top_left_y,
-                       int width, int height)
+  inline Image<T> crop(const ImageView<T>& src, const Point2i& center,
+                       int l1_radius)
   {
-    auto begin_coords = Vector2i{ top_left_x, top_left_y };
-    auto end_coords = Vector2i{ top_left_x + width, top_left_y + height };
-    return crop(src, begin_coords, end_coords);
-  }
-
-  template <typename T>
-  inline Image<T> crop(const ImageView<T>& src, int center_x, int center_y,
-                       int radius)
-  {
-    return crop(src, center_x - radius, center_y - radius, 2 * radius + 1,
-                2 * radius + 1);
+    auto b = center;
+    auto e = center;
+    b.array() -= l1_radius;
+    e.array() += l1_radius;
+    return crop(src, b, e);
   }
 
   struct Crop
@@ -288,6 +282,19 @@ namespace DO { namespace Sara {
     return dst;
   }
 
+  template <typename T, int N>
+  Image<T, N>
+  safe_crop(const ImageView<T, N>& src,
+            const typename ImageView<T, N>::vector_type& center,
+            int l1_radius)
+  {
+    auto b = center;
+    auto e = center;
+    b.array() -= l1_radius;
+    e.array() += l1_radius;
+    return safe_crop(src, b, e);
+  }
+
   struct SafeCrop
   {
     template <typename ImageView_>
@@ -310,11 +317,7 @@ namespace DO { namespace Sara {
                            const Coords<ImageView_>& center, int radius) const
         -> Image<Pixel<ImageView_>, ImageView_::Dimension>
     {
-      auto b = center;
-      auto e = center;
-      b.array() -= radius;
-      e.array() += radius;
-      return safe_crop(src, b, e);
+      return safe_crop(src, center, radius);
     }
   };
   //! @}

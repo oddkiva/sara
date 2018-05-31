@@ -75,6 +75,12 @@ elseif (CMAKE_COMPILER_IS_GNUCXX)
     sara_substep_message("Enable colored output of GCC.")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color=always")
   endif ()
+
+  # Silence some annoying compiler warning in Eigen since gcc 7.0
+  if (GCC_VERSION VERSION_GREATER 7.0 OR
+      GCC_VERSION VERSION_EQUAL 7.0)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-int-in-bool-context")
+  endif ()
 endif ()
 
 if (UNIX)

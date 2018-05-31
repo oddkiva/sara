@@ -23,23 +23,42 @@ namespace DO { namespace Sara {
   }
 
   template <typename T, int N>
+  Image<T, N>
+  safe_crop2(const ImageView<T, N>& src,
+             const typename ImageView<T, N>::vector_type& begin_coords,
+             const typename ImageView<T, N>::vector_type& end_coords)
+  {
+    auto dst = Image<T, N>{end_coords - begin_coords};
+
+    auto src_it = src.begin_subarray(begin_coords, end_coords);
+
+    for (auto dst_it = dst.begin(); dst_it != dst.end(); ++dst_it, ++src_it)
+    {
+      // If a and b are coordinates out bounds.
+      if (src_it.position().minCoeff() < 0 ||
+          (src_it.position() - src.sizes()).minCoeff() >= 0)
+        *dst_it = PixelTraits<T>::min();
+      else
+        *dst_it = *src_it;
+    }
+
+    return dst;
+  }
+
+  template <typename T, int N>
   auto patch(const TensorView_<T, N>& in, const Matrix<int, N, 1>& beg,
              const Matrix<int, N, 1>& end) -> Image<T, N>
   {
-    return safe_crop(image_view(in), beg, end);
+    auto bb = beg;
+    auto ee = end;
+    std::reverse(bb.data(), bb.data() + N);
+    std::reverse(ee.data(), ee.data() + N);
+    return safe_crop2(image_view(in), bb, ee);
   }
 
-  template <typename T, int N>
-  auto vec(const TensorView_<T, N>& in)
-      -> Map<const Matrix<typename ElementTraits<T>::value_type, Dynamic, 1>>
-  {
-    return {reinterpret_cast<typename ElementTraits<T>::pointer>(in.data()),
-            static_cast<int64_t>(in.size())};
-  }
-
-  template <typename T, int N>
-  auto vec(TensorView_<T, N>& in)
-      -> Map<const Matrix<typename ElementTraits<T>::value_type, Dynamic, 1>>
+  template <typename T, int N, int StorageOrder>
+  auto vec(MultiArrayView<T, N, StorageOrder>& in)
+      -> Map<Matrix<typename ElementTraits<T>::value_type, Dynamic, 1>>
   {
     return {reinterpret_cast<typename ElementTraits<T>::pointer>(in.data()),
             static_cast<int64_t>(in.size())};
@@ -56,22 +75,34 @@ namespace DO { namespace Sara {
   auto im2col(const TensorView_<T, N>& x, const Matrix<int, N, 1>& kernel_sizes)
       -> Tensor_<T, 2>
   {
-    const auto num_rows =
-        std::accumulate(x.sizes().data(), x.sizes().data() + x.sizes().size(),
-                        1, std::multiplies<int>());
-    const auto num_cols = std::accumulate(
-        kernel_sizes.data(), kernel_sizes.data() + kernel_sizes.size(), 1,
-        std::multiplies<int>());
+    const auto num_rows = std::accumulate(
+        x.sizes().data(), x.sizes().data() + N, 1, std::multiplies<int>());
+    const auto num_cols =
+        std::accumulate(kernel_sizes.data(), kernel_sizes.data() + N, 1,
+                        std::multiplies<int>());
+
+    std::cout << num_rows << std::endl;
+    std::cout << num_cols << std::endl;
 
     auto phi_x = Tensor_<T, 2>{num_rows, num_cols};
 
-    const Matrix<T, N, 1> radius = kernel_sizes / 2;
+    const Matrix<int, N, 1> radius = kernel_sizes / 2;
     for (auto c = x.begin_array(); !c.end(); ++c)
     {
-      const auto s = c.coords() - radius;
-      const auto e = c.coords() + radius;
+      const auto r = jump(c.position(), c.strides());
+      std::cout << r << std::endl;
 
-      phi_x.matrix().row(c) = vec(patch(x, s, e)).transpose();
+      const Matrix<int, N, 1> s = c.position() - radius;
+      const Matrix<int, N, 1> e =
+          c.position() + radius + Matrix<int, N, 1>::Ones();
+      auto p = patch(x, s, e);
+
+      std::cout << c.position().transpose() << std::endl;
+      std::cout << p.matrix() << std::endl;
+
+      phi_x.matrix().row(r) = vec(p).transpose();
+      //std::cout << phi_x.matrix().row(r) << std::endl;
+      std::cout << std::endl;
     }
 
     return phi_x;
@@ -82,25 +113,7 @@ namespace DO { namespace Sara {
                      const TensorView_<T, N>& x, const TensorView_<T, N>& k)
   {
     auto phi_x = im2col(x, k.sizes());
-    kx.array() = reshape(phi_x.matrix() * k.vector(), x.sizes());
-  }
-
-  template <typename T>
-  void gemm_batch_convolve(ImageView<T, 4>& fg,  //
-                           const ImageView<T, 3>& f, const ImageView<T, 4>& g)
-  {
-    if (f.sizes().cwiseMax(g.sizes()) == f.sizes())
-    {
-      fg.matrix() =
-          im2col(f, g.sizes()) *
-          reshape_2d(g, {g.size(0), g.size(1) * g.size(2) * g.size(2)});
-    }
-    else
-    {
-      fg.matrix() =
-          im2col(g, f.sizes()) *
-          reshape_2d(f, {f.size(0), f.size(1) * f.size(2) * f.size(2)});
-    }
+    //kx.flat_array() = (phi_x.matrix() * k.vector()).array();
   }
 
 } /* namespace Sara */
