@@ -433,12 +433,12 @@ namespace DO { namespace Sara {
     using vector_reference = vector_type&;
 
   public:
-    inline ArrayIterator(bool stop,
-                         const pointer ptr,
-                         const vector_type& pos,
-                         const vector_type& sizes,
-                         const vector_type& strides)
-      : base_type{ stop, ptr, pos, strides, sizes }
+    inline ArrayIterator(bool stop,                   //
+                         const pointer ptr,           //
+                         const vector_type& pos,      //
+                         const vector_type& sizes,    //
+                         const vector_type& strides)  //
+      : base_type{stop, ptr, pos, strides, sizes}
     {
     }
 
