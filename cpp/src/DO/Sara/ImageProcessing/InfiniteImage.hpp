@@ -67,14 +67,16 @@ namespace DO { namespace Sara {
       for (auto i = 0; i < N; ++i)
       {
         const auto li = f.size(i);
+        static_assert(std::is_same<decltype(li), const int>::value, "");
 
         if (x[i] >= 0)
-          y[i] = x[i] % (2*li);
+          y[i] = x[i] % (2 * li);
         else
-          y[i] = -(std::abs(x[i]) % (2 * li));
+          y[i] = -(-x[i] % (2 * li));
       }
 
       // Second pass.
+      // Find the equivalent coordinate between [0, li[.
       for (auto i = 0; i < N; ++i)
       {
         const auto li = f.size(i);
@@ -103,25 +105,26 @@ namespace DO { namespace Sara {
     using vector_type = typename ArrayView::vector_type;
     using value_type = typename ArrayView::value_type;
 
-    InfiniteMultiArrayView(ArrayView&& f)
-      : f{std::forward(f)}
+    InfiniteMultiArrayView(const ArrayView& f, const Padding& pad)
+      : _f(f)
+      , _pad{pad}
     {
     }
 
     auto operator()(const vector_type& x) const -> value_type
     {
-      return pad.ad(f, x);
+      return _pad.at(_f, x);
     }
 
-    ArrayView&& f;
-    Padding pad;
+    const ArrayView& _f;
+    Padding _pad;
   };
 
   template <typename ArrayView, typename Padding>
-  inline auto make_infinite(ArrayView&& f, Padding pad)
+  inline auto make_infinite(const ArrayView& f, const Padding& pad)
       -> InfiniteMultiArrayView<ArrayView, Padding>
   {
-    return {f};
+    return {f, pad};
   }
 
   template <typename ArrayView>
