@@ -10,29 +10,31 @@ using namespace DO::Sara;
 GRAPHICS_MAIN()
 {
   auto image = Image<Rgb8>{};
-  imread(image, "/home/david/GitHub/DO-CV/sara/data/stinkbug.png");
+  imread(image, "/home/david/GitHub/DO-CV/sara/data/sunflowerField.jpg");
 
+  // Extend the image in an infinite domain with a mirror periodic padding.
   auto pad = PeriodicPadding{};
   auto inf_image = make_infinite(image, pad);
 
-  const auto repeat = 2;
   const auto border = Vector2i::Ones() * 50;
 
-  const Vector2i begin{-border};
+  const Vector2i begin = -border;
   const Vector2i end = image.sizes() + border;
-  cout << begin.transpose() << endl;
-  cout << end.transpose() << endl;
+
+  const auto repeat = 2;
+  const Vector2i begin = -repeat * image.sizes();
+  const Vector2i end = repeat * image.sizes();
 
   auto ext_image = Image<Rgb8>{end - begin};
-  cout << (end-begin).transpose() << endl;
 
   Timer t;
   double start, finish;
-  t.restart();
+  const auto num_iter = 10;
 
+  t.restart();
   start = t.elapsed_ms();
 
-  for (int i = 0; i < 10; ++i)
+  for (int i = 0; i < num_iter; ++i)
   {
     auto src_c = CoordsIterator<MultiArrayView<Rgb8, 2, ColMajor>>{begin, end};
     auto dst_i = ext_image.begin_array();
@@ -41,9 +43,8 @@ GRAPHICS_MAIN()
   }
 
   finish = t.elapsed_ms();
-  std::cout << (finish - start) / 10 << " ms" << std::endl;
+  std::cout << (finish - start) / num_iter << " ms" << std::endl;
 
-  // Resize image.
   create_window(ext_image.sizes());
   display(ext_image);
   get_key();
