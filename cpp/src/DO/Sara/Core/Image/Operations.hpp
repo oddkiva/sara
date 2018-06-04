@@ -273,7 +273,7 @@ namespace DO { namespace Sara {
     {
       // If a and b are coordinates out bounds.
       if (src_it.position().minCoeff() < 0 ||
-          (src_it.position() - src.sizes()).minCoeff() >= 0)
+          (src_it.position() - src.sizes()).maxCoeff() >= 0)
         *dst_it = PixelTraits<T>::min();
       else
         *dst_it = *src_it;
@@ -291,7 +291,7 @@ namespace DO { namespace Sara {
     auto b = center;
     auto e = center;
     b.array() -= l1_radius;
-    e.array() += l1_radius;
+    e.array() += l1_radius + 1;
     return safe_crop(src, b, e);
   }
 

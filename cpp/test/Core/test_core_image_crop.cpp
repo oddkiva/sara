@@ -87,6 +87,7 @@ BOOST_AUTO_TEST_CASE(test_safe_crop_image_out_of_bounds_1)
   cropped_image = safe_crop(image, c, r);
   BOOST_CHECK_EQUAL(true_cropped_image.sizes(), cropped_image.sizes());
   BOOST_CHECK_EQUAL(true_cropped_image.matrix(), cropped_image.matrix());
+
 }
 
 BOOST_AUTO_TEST_CASE(test_safe_crop_image_out_of_bounds_2)
@@ -110,5 +111,23 @@ BOOST_AUTO_TEST_CASE(test_safe_crop_image_out_of_bounds_2)
   BOOST_CHECK_EQUAL(true_cropped_image.sizes(), cropped_image.sizes());
   BOOST_CHECK_EQUAL(true_cropped_image.matrix(), cropped_image.matrix());
 }
+
+BOOST_AUTO_TEST_CASE(test_safe_crop_image_out_of_bounds_3)
+{
+  const auto a = Vector2i{-1, -1};
+  const auto b = Vector2i{4, 5};
+  const auto cropped_image = safe_crop(image, a, b);
+  auto true_cropped_image = Image<float, 2>{5, 6};
+  true_cropped_image.matrix() <<
+    0, 0, 0, 0, 0,
+    0, 1, 1, 1, 0,
+    0, 2, 2, 2, 0,
+    0, 3, 3, 3, 0,
+    0, 4, 4, 4, 0,
+    0, 0, 0, 0, 0;
+  BOOST_CHECK_EQUAL(true_cropped_image.sizes(), cropped_image.sizes());
+  BOOST_CHECK_EQUAL(true_cropped_image.matrix(), cropped_image.matrix());
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()
