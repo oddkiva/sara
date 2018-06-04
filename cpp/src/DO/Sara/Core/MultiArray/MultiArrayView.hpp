@@ -13,10 +13,11 @@
 
 #pragma once
 
-#include <cstdint>
-
 #include <DO/Sara/Core/ArrayIterators.hpp>
 #include <DO/Sara/Core/MultiArray/ElementTraits.hpp>
+
+#include <algorithm>
+#include <cstdint>
 
 
 namespace DO { namespace Sara {

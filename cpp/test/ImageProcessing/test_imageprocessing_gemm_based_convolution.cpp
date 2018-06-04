@@ -26,34 +26,30 @@ BOOST_AUTO_TEST_CASE(test_im2col)
   constexpr auto H = 4;
   constexpr auto W = 3;
   auto x = Tensor_<float, 3>{{N, H, W}};
-  x.flat_array() <<
+
+  auto plane = Tensor_<float, 2>{{H, W}};
+  plane.flat_array() <<
     0, 1, 2,
     3, 4, 5,
     6, 7, 8,
-    9,10,11,
+    9,10,11;
 
-    1, 1, 1,
-    1, 1, 1,
-    1, 1, 1,
-    1, 1, 1,
+  x.flat_array() <<            //
+      1 * plane.flat_array(),  //
+      2 * plane.flat_array(),  //
+      3 * plane.flat_array();
 
-    2, 2, 2,
-    2, 2, 2,
-    2, 2, 2,
-    2, 2, 2;
-
-  std::cout << "0\n" << x[0].matrix() << std::endl;
-  std::cout << "1\n" << x[1].matrix() << std::endl;
-  std::cout << "2\n" << x[2].matrix() << std::endl;
-
+  std::cout << "x[0].matrix() = \n" << x[0].matrix() << std::endl;
+  std::cout << "x[1].matrix() = \n" << x[1].matrix() << std::endl;
+  std::cout << "x[2].matrix() = \n" << x[2].matrix() << std::endl;
 
   constexpr auto kH = 3;
   constexpr auto kW = 3;
 
   auto phi_x = Tensor_<float, 2>{{N * H * W, kH * kW}};
-  std::cout << typeid(x[0]).name() << std::endl;
-  std::cout << x[0].sizes().transpose() << std::endl;
   auto phi_x_0 = im2col(x[0], {kH, kW});
+  auto phi_x_1 = im2col(x[1], {kH, kW});
+  auto phi_x_2 = im2col(x[2], {kH, kW});
 
   //BOOST_CHECK(phi_x.sizes() == Vector2i(N * H * W, kH * kW));
 
@@ -115,87 +111,87 @@ BOOST_AUTO_TEST_CASE(test_im2col)
   //BOOST_CHECK(phi_x.matrix() == true_phi_x);
 }
 
-//BOOST_AUTO_TEST_CASE(test_convolve)
-//{
-//  constexpr auto N = 10;
-//  constexpr auto H = 4;
-//  constexpr auto W = 6;
-//  constexpr auto C = 3;
-//  auto x = Tensor_<float, 4>{{N, C, H, W}};
-//  x.flat_array().fill(1.f);
-//
-//  constexpr auto kN = 5;
-//  constexpr auto kH = 3;
-//  constexpr auto kW = 3;
-//  constexpr auto kC = 3;
-//  auto k = Tensor_<float, 4>{{kN, kC, kH, kW}};
-//
-//  k.flat_array() <<
-//    // R
-//    1, 1, 1,
-//    1, 1, 1,
-//    1, 1, 1,
-//    // G
-//    1, 1, 1,
-//    1, 1, 1,
-//    1, 1, 1,
-//    // B
-//    1, 1, 1,
-//    1, 1, 1,
-//    1, 1, 1,
-//
-//    // R
-//    2, 2, 2,
-//    2, 2, 2,
-//    2, 2, 2,
-//    // G
-//    2, 2, 2,
-//    2, 2, 2,
-//    2, 2, 2,
-//    // B
-//    2, 2, 2,
-//    2, 2, 2,
-//    2, 2, 2,
-//
-//    // R
-//    3, 3, 3,
-//    3, 3, 3,
-//    3, 3, 3,
-//    // G
-//    3, 3, 3,
-//    3, 3, 3,
-//    3, 3, 3,
-//    // B
-//    3, 3, 3,
-//    3, 3, 3,
-//    3, 3, 3,
-//
-//    // R
-//    4, 4, 4,
-//    4, 4, 4,
-//    4, 4, 4,
-//    // G
-//    4, 4, 4,
-//    4, 4, 4,
-//    4, 4, 4,
-//    // B
-//    4, 4, 4,
-//    4, 4, 4,
-//    4, 4, 4,
-//
-//    // R
-//    5, 5, 5,
-//    5, 5, 5,
-//    5, 5, 5,
-//    // G
-//    5, 5, 5,
-//    5, 5, 5,
-//    5, 5, 5,
-//    // B
-//    5, 5, 5,
-//    5, 5, 5,
-//    5, 5, 5;
-//
-//  auto y = x;
-//  gemm_convolve(y, x, k);
-//}
+BOOST_AUTO_TEST_CASE(test_convolve)
+{
+  constexpr auto N = 10;
+  constexpr auto H = 4;
+  constexpr auto W = 6;
+  constexpr auto C = 3;
+  auto x = Tensor_<float, 4>{{N, C, H, W}};
+  x.flat_array().fill(1.f);
+
+  constexpr auto kN = 5;
+  constexpr auto kH = 3;
+  constexpr auto kW = 3;
+  constexpr auto kC = 3;
+  auto k = Tensor_<float, 4>{{kN, kC, kH, kW}};
+
+  k.flat_array() <<
+    // R
+    1, 1, 1,
+    1, 1, 1,
+    1, 1, 1,
+    // G
+    1, 1, 1,
+    1, 1, 1,
+    1, 1, 1,
+    // B
+    1, 1, 1,
+    1, 1, 1,
+    1, 1, 1,
+
+    // R
+    2, 2, 2,
+    2, 2, 2,
+    2, 2, 2,
+    // G
+    2, 2, 2,
+    2, 2, 2,
+    2, 2, 2,
+    // B
+    2, 2, 2,
+    2, 2, 2,
+    2, 2, 2,
+
+    // R
+    3, 3, 3,
+    3, 3, 3,
+    3, 3, 3,
+    // G
+    3, 3, 3,
+    3, 3, 3,
+    3, 3, 3,
+    // B
+    3, 3, 3,
+    3, 3, 3,
+    3, 3, 3,
+
+    // R
+    4, 4, 4,
+    4, 4, 4,
+    4, 4, 4,
+    // G
+    4, 4, 4,
+    4, 4, 4,
+    4, 4, 4,
+    // B
+    4, 4, 4,
+    4, 4, 4,
+    4, 4, 4,
+
+    // R
+    5, 5, 5,
+    5, 5, 5,
+    5, 5, 5,
+    // G
+    5, 5, 5,
+    5, 5, 5,
+    5, 5, 5,
+    // B
+    5, 5, 5,
+    5, 5, 5,
+    5, 5, 5;
+
+  auto y = x;
+  gemm_convolve(y, x, k);
+}

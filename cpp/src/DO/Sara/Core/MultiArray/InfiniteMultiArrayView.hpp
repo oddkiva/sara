@@ -14,7 +14,7 @@
 #pragma once
 
 #include <DO/Sara/Core/CoordinatesIterator.hpp>
-#include <DO/Sara/Core/MultiArray/MultiArrayView.hpp>
+#include <DO/Sara/Core/MultiArray.hpp>
 #include <DO/Sara/Core/Pixel/PixelTraits.hpp>
 
 
@@ -24,21 +24,30 @@ namespace DO { namespace Sara {
   class ConstantPadding
   {
   public:
-    ConstantPadding() = default;
+    ConstantPadding(T value)
+      : _value{value}
+    {
+    }
 
     template <int N, int O>
-    auto at(MultiArrayView<T, N, O>& f, const Matrix<int, N, 1>& x) const
-        -> const T&
+    auto at(const MultiArrayView<T, N, O>& f, const Matrix<int, N, 1>& x) const
+        -> T
     {
-      if (x.minCoeff() < 0 || (x - f.sizes()).minCoeff() >= 0)
-        return value;
+      if (x.minCoeff() < 0 || (x - f.sizes()).maxCoeff() >= 0)
+        return _value;
 
       return f(x);
     }
 
   private:
-    T value{PixelTraits<T>::min()};
+    T _value;
   };
+
+  template <typename T>
+  auto make_constant_padding(T&& value) -> ConstantPadding<T>
+  {
+    return {value};
+  }
 
   template <typename DF, typename F>
   class NeumannPadding
@@ -120,8 +129,8 @@ namespace DO { namespace Sara {
     using value_type = typename ArrayView::value_type;
 
   public:
-    inline InfiniteMultiArrayViewIterator(const ArrayView& f,
-                                          const vector_type& a,
+    inline InfiniteMultiArrayViewIterator(const ArrayView& f,    //
+                                          const vector_type& a,  //
                                           const vector_type& b)
       : _f{f}
       , _x{a, b}
@@ -129,7 +138,7 @@ namespace DO { namespace Sara {
     }
 
     //! Dereferencing operator.
-    inline const vector_type& operator*() const
+    inline value_type operator*() const
     {
       return _f(*_x);
     }
@@ -178,8 +187,15 @@ namespace DO { namespace Sara {
       return *this;
     }
 
-    inline bool end() const {
+    inline bool end() const
+    {
       return _x.end();
+    }
+
+
+    inline auto position() const -> const vector_type&
+    {
+      return *_x;
     }
 
   private:
@@ -194,6 +210,8 @@ namespace DO { namespace Sara {
   public:
     using vector_type = typename ArrayView::vector_type;
     using value_type = typename ArrayView::value_type;
+
+    enum { StorageOrder = ArrayView::StorageOrder };
 
     InfiniteMultiArrayView(const ArrayView& f, const Padding& pad)
       : _f(f)
