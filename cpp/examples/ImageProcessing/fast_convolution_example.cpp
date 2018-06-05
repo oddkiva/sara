@@ -14,6 +14,9 @@
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 
+#include <DO/Sara/Core/Tensor.hpp>
+#include <DO/Sara/ImageProcessing/GemmBasedConvolution.hpp>
+
 
 using namespace std;
 using namespace DO::Sara;
@@ -26,6 +29,10 @@ GRAPHICS_MAIN()
 
   auto kernel = Image<float>{10, 10};
   kernel.matrix() = MatrixXf::Ones(10, 10) / 100.f;
+
+  auto y = Image<float>{image.sizes()};
+  gemm_convolve(tensor_view(y), tensor_view(image), tensor_view(kernel));
+
 
   create_window(image.sizes());
   display(image);
