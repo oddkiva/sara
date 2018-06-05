@@ -13,7 +13,8 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <DO/Sara/ImageProcessing/InfiniteImage.hpp>
+#include <DO/Sara/Core/MultiArray/InfiniteMultiArrayView.hpp>
+#include <DO/Sara/Core/Image.hpp>
 
 #include "../AssertHelpers.hpp"
 
@@ -30,24 +31,20 @@ BOOST_AUTO_TEST_CASE(test_upscale)
     0, 1,
     2, 3;
 
+  auto pad = PeriodicPadding{};
+  auto inf_src = make_infinite(src, pad);
+
   const auto begin = Vector2i{-8, -8};
   const auto end = Vector2i{8, 8};
+
+  auto src_i = inf_src.begin_subarray(begin, end);
+
   auto dst = Image<float>{end-begin};
 
-  PeriodicPadding pad;
-  auto at = [&](const MultiArrayView<float, 2, ColMajor>& f, const Vector2i& x) -> float {
-    return pad.at(f, x);
-  };
+  auto dst_i = dst.begin();
+  for (; dst_i != dst.end(); ++src_i, ++dst_i)
+    *dst_i = *src_i;
 
-  auto src_c = CoordsIterator<MultiArrayView<float, 2, ColMajor>>{begin, end};
-  auto dst_i = dst.begin_array();
-  for (; !dst_i.end(); ++src_c, ++dst_i)
-  {
-    std::cout << src_c->transpose() << "   " << at(src, *src_c) << std::endl;
-    *dst_i = at(src, *src_c);
-  }
-
-  std::cout << std::endl;
   std::cout << "dst=\n" << dst.matrix() << std::endl;
 }
 

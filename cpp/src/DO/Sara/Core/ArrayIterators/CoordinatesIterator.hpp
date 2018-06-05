@@ -11,8 +11,9 @@
 
 //! @file
 
-#include <DO/Sara/Core/ArrayIterators.hpp>
-#include <DO/Sara/Core/MultiArray.hpp>
+#pragma once
+
+#include <DO/Sara/Core/ArrayIterators/Utilities.hpp>
 
 
 namespace DO { namespace Sara {

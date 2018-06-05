@@ -2,7 +2,7 @@
 // This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2014-2018 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2018 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -13,125 +13,24 @@
 
 #pragma once
 
-#include <DO/Sara/Core/CoordinatesIterator.hpp>
-#include <DO/Sara/Core/MultiArray.hpp>
-#include <DO/Sara/Core/Pixel/PixelTraits.hpp>
+#include <DO/Sara/Core/ArrayIterators/CoordinatesIterator.hpp>
+#include <DO/Sara/Core/MultiArray/Padding.hpp>
 
 
 namespace DO { namespace Sara {
 
-  template <typename T>
-  class ConstantPadding
-  {
-  public:
-    ConstantPadding(T value)
-      : _value{value}
-    {
-    }
-
-    template <int N, int O>
-    auto at(const MultiArrayView<T, N, O>& f, const Matrix<int, N, 1>& x) const
-        -> T
-    {
-      if (x.minCoeff() < 0 || (x - f.sizes()).maxCoeff() >= 0)
-        return _value;
-
-      return f(x);
-    }
-
-  private:
-    T _value;
-  };
-
-  template <typename T>
-  auto make_constant_padding(T&& value) -> ConstantPadding<T>
-  {
-    return {value};
-  }
-
-  template <typename DF, typename F>
-  class NeumannPadding
-  {
-  public:
-    NeumannPadding() = default;
-
-    template <int N, int O>
-    auto at(MultiArrayView<F, N, O>& f, const Matrix<int, N, 1>& x) const
-        -> const F&
-    {
-      if (x.minCoeff() < 0)
-        return f(x) + _df_x * x;
-
-      if ((x - f.sizes()).minCoeff() >= 0)
-        f(x) + _df_x * (x - f.sizes());
-
-      return f(x);
-    }
-
-  private:
-    DF _df_x;
-  };
-
-  class PeriodicPadding
-  {
-  public:
-    PeriodicPadding() = default;
-
-    template <typename T, int N, int O>
-    auto at(const MultiArrayView<T, N, O>& f, const Matrix<int, N, 1>& x) const
-        -> T
-    {
-      auto y = x;
-
-      // First pass.
-      // Find the equivalent coordinate between [-2 * li, 2 * li[.
-      for (auto i = 0; i < N; ++i)
-      {
-        const auto li = f.size(i);
-        static_assert(std::is_same<decltype(li), const int>::value, "");
-
-        if (x[i] >= 0)
-          y[i] = x[i] % (2 * li);
-        else
-          y[i] = -(-x[i] % (2 * li));
-      }
-
-      // Second pass.
-      // Find the equivalent coordinate between [0, li[.
-      for (auto i = 0; i < N; ++i)
-      {
-        const auto li = f.size(i);
-
-        if (0 <= y[i] && y[i] < li)
-          continue;
-
-        else if (y[i] >= li)
-          y[i] = 2 * li - y[i] - 1;
-
-        else if (-li <= y[i] && y[i] < 0)
-          y[i] = -y[i] - 1;
-
-        else if (y[i] < -li)
-          y[i] = y[i] + 2 * li;
-      }
-
-      return f(y);
-    }
-  };
-
-
   template <typename ArrayView>
-  class InfiniteMultiArrayViewIterator
+  class InfiniteArrayIterator
   {
   public:
-    using self_type = InfiniteMultiArrayViewIterator;
+    using self_type = InfiniteArrayIterator;
     using vector_type = typename ArrayView::vector_type;
     using value_type = typename ArrayView::value_type;
 
   public:
-    inline InfiniteMultiArrayViewIterator(const ArrayView& f,    //
-                                          const vector_type& a,  //
-                                          const vector_type& b)
+    inline InfiniteArrayIterator(const ArrayView& f,    //
+                                 const vector_type& a,  //
+                                 const vector_type& b)
       : _f{f}
       , _x{a, b}
     {
@@ -192,7 +91,6 @@ namespace DO { namespace Sara {
       return _x.end();
     }
 
-
     inline auto position() const -> const vector_type&
     {
       return *_x;
@@ -225,7 +123,7 @@ namespace DO { namespace Sara {
     }
 
     auto begin_subarray(const vector_type& a, const vector_type& b) const
-        -> InfiniteMultiArrayViewIterator<InfiniteMultiArrayView>
+        -> InfiniteArrayIterator<InfiniteMultiArrayView>
     {
       return {*this, a, b};
     }
@@ -234,6 +132,7 @@ namespace DO { namespace Sara {
     const ArrayView& _f;
     Padding _pad;
   };
+
 
   template <typename ArrayView, typename Padding>
   inline auto make_infinite(const ArrayView& f, const Padding& pad)

@@ -15,6 +15,8 @@
 #include <DO/Sara/Core/Pixel/PixelTraits.hpp>
 #include <DO/Sara/Core/Pixel/SmartColorConversion.hpp>
 
+#include <iostream>
+
 
 namespace DO { namespace Sara {
 

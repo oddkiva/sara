@@ -16,8 +16,8 @@
 #include <DO/Sara/Core/ArrayIterators.hpp>
 #include <DO/Sara/Core/MultiArray/ElementTraits.hpp>
 
-#include <algorithm>
 #include <cstdint>
+#include <numeric>
 
 
 namespace DO { namespace Sara {

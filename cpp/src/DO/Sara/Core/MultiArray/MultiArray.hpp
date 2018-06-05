@@ -14,11 +14,6 @@
 
 #pragma once
 
-#include <iostream>
-#include <memory>
-#include <numeric>
-#include <stdexcept>
-
 #include <DO/Sara/Core/MultiArray/MultiArrayView.hpp>
 
 
