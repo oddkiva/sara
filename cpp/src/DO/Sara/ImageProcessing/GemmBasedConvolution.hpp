@@ -41,6 +41,14 @@ namespace DO { namespace Sara {
             static_cast<int64_t>(in.size())};
   }
 
+  template <typename T, int N, int StorageOrder>
+  auto vec(const MultiArrayView<T, N, StorageOrder>& in)
+      -> Map<const Matrix<typename ElementTraits<T>::value_type, Dynamic, 1>>
+  {
+    return {reinterpret_cast<typename ElementTraits<T>::const_pointer>(in.data()),
+            static_cast<int64_t>(in.size())};
+  }
+
   template <typename T, int N>
   auto reshape_2d(TensorView_<T, N>& in, const Vector2i& shape)
       -> TensorView_<T, 2>
@@ -77,11 +85,11 @@ namespace DO { namespace Sara {
   }
 
   template <typename T, int N>
-  void gemm_convolve(TensorView_<T, N>& kx,  //
+  void gemm_convolve(TensorView_<T, N>& y,  //
                      const TensorView_<T, N>& x, const TensorView_<T, N>& k)
   {
     auto phi_x = im2col(x, k.sizes());
-    //kx.flat_array() = (phi_x.matrix() * k.vector()).array();
+    y.flat_array() = (phi_x.matrix() * vec(k)).array();
   }
 
 } /* namespace Sara */

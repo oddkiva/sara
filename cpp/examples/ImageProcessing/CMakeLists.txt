@@ -18,4 +18,4 @@ endmacro()
 
 sara_add_example(image_processing_example)
 sara_add_example(infinite_image_example)
-sara_add_example(fast_convolution_example)
+sara_add_example(gemm_based_convolution_example)
