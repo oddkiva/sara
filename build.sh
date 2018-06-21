@@ -20,7 +20,7 @@ function build_library()
   cmake ../sara ${cmake_options}
 
   # Build the library.
-  make -j$(nproc)
+  make -j$(nproc) VERBOSE=1
 
   # Run C++ tests.
   BOOST_TEST_LOG_LEVEL=all
