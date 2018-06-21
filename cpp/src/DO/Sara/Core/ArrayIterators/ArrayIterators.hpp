@@ -107,9 +107,9 @@ namespace DO { namespace Sara {
     //! Access operator.
     inline reference operator[](int n) const
     {
-      if (cur_pos_[Axis]+n < 0  || cur_pos_[Axis]+n >= sizes_[Axis])
-        throw std::out_of_range{ "Axis iterator is out of range" };
-      return *(cur_ptr_+strides_[Axis]*n);
+      if (cur_pos_[Axis] + n < 0 || cur_pos_[Axis] + n >= sizes_[Axis])
+        throw std::out_of_range{"Axis iterator is out of range"};
+      return *(cur_ptr_ + strides_[Axis] * n);
     }
 
   public: /* comparison functions. */
@@ -157,9 +157,9 @@ namespace DO { namespace Sara {
     //! Addition operator.
     inline void operator+=(int n)
     {
-      if (cur_pos_[Axis]+n < 0  || cur_pos_[Axis]+n >= sizes_[Axis])
-        throw std::out_of_range{ "Axis iterator is out of range" };
-      cur_ptr_ += strides_[Axis]*n;
+      if (cur_pos_[Axis] + n < 0 || cur_pos_[Axis] + n >= sizes_[Axis])
+        throw std::out_of_range{"Axis iterator is out of range"};
+      cur_ptr_ += strides_[Axis] * n;
       cur_pos_[Axis] += n;
     }
 
@@ -187,7 +187,7 @@ namespace DO { namespace Sara {
     //! Postfix increment operator.
     inline self_type operator++(int)
     {
-      AxisIterator old{ *this };
+      AxisIterator old{*this};
       operator++();
       return old;
     }
