@@ -109,9 +109,27 @@ namespace DO { namespace Sara {
 
     template <typename Index, int N>
     static inline void apply(Matrix<Index, N, 1>& coords, bool& stop,
+                             const Matrix<Index, N, 1>& start,
+                             const Matrix<Index, N, 1>& end,
+                             const Matrix<Index, N, 1>& strides)
+    {
+      for (int i = N-1; i >= 0; --i)
+      {
+        coords[i] += strides[i];
+        if (coords[i] < end[i])
+          return;
+        coords[i] = start[i];
+      }
+      if (coords[0] >= start[0])
+        stop = true;
+    }
+
+    template <typename Index, int N>
+    static inline void apply(Matrix<Index, N, 1>& coords, bool& stop,
                              const Matrix<Index, N, 1>& sizes)
     {
-      apply<Index, N>(coords, stop, Matrix<Index, N, 1>::Zero(), sizes);
+      constexpr auto zero = Matrix<Index, N, 1>::Zero();
+      apply<Index, N>(coords, stop, zero, sizes);
     }
 
   };
@@ -133,6 +151,23 @@ namespace DO { namespace Sara {
         coords[i] = start[i];
       }
       if (coords[N-1] == start[N-1])
+        stop = true;
+    }
+
+    template <typename Index, int N>
+    static inline void apply(Matrix<Index, N, 1>& coords, bool& stop,
+                             const Matrix<Index, N, 1>& start,
+                             const Matrix<Index, N, 1>& end,
+                             const Matrix<Index, N, 1>& strides)
+    {
+      for (int i = 0; i < N; ++i)
+      {
+        coords[i] += strides[i];
+        if (coords[i] < end[i])
+          return;
+        coords[i] = start[i];
+      }
+      if (coords[N-1] >= start[N-1])
         stop = true;
     }
 

@@ -20,7 +20,16 @@ function build_library()
   cmake ../sara ${cmake_options}
 
   # Build the library.
-  make -j`nproc` && make test && make pytest && make package
+  make -j$(nproc)
+
+  # Run C++ tests.
+  BOOST_TEST_LOG_LEVEL=all
+  BOOST_TEST_COLOR_OUTPUT=1
+  ctest --output-on-failure
+
+  # Run Python tests.
+  make pytest
+  make package
 }
 
 function install_package()

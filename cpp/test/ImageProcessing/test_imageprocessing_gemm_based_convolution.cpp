@@ -27,8 +27,8 @@ BOOST_AUTO_TEST_CASE(test_im2col)
   constexpr auto W = 3;
   auto x = Tensor_<float, 3>{{N, H, W}};
 
-  auto plane = Tensor_<float, 2>{{H, W}};
-  plane.flat_array() <<
+  auto plane = Tensor_<float, 2>{{H, 3}};
+  plane.matrix() <<
     0, 1, 2,
     3, 4, 5,
     6, 7, 8,
@@ -39,76 +39,32 @@ BOOST_AUTO_TEST_CASE(test_im2col)
       2 * plane.flat_array(),  //
       3 * plane.flat_array();
 
-  std::cout << "x[0].matrix() = \n" << x[0].matrix() << std::endl;
-  std::cout << "x[1].matrix() = \n" << x[1].matrix() << std::endl;
-  std::cout << "x[2].matrix() = \n" << x[2].matrix() << std::endl;
-
   constexpr auto kH = 3;
   constexpr auto kW = 3;
 
   auto phi_x = Tensor_<float, 2>{{N * H * W, kH * kW}};
-  auto phi_x_0 = im2col(x[0], {kH, kW});
-  auto phi_x_1 = im2col(x[1], {kH, kW});
-  auto phi_x_2 = im2col(x[2], {kH, kW});
+  auto phi_x_as_3d = phi_x.reshape(Vector3i{N, H* W, kH * kW});
 
-  //BOOST_CHECK(phi_x.sizes() == Vector2i(N * H * W, kH * kW));
+  // Apply im2col on each plane.
+  phi_x_as_3d[0] = im2col(x[0], {kH, kW});
+  phi_x_as_3d[1] = im2col(x[1], {kH, kW});
+  phi_x_as_3d[2] = im2col(x[2], {kH, kW});
 
-  //auto true_phi_x = MatrixXf{N*H*W, kH*kW};
-  //true_phi_x <<
-  //  // (0, 0)
-  //  // 0, 0, 0,
-  //  // 0, 0, 0,
-  //  // 0, 0, 0,
-  //  // (0, 1)
-  //  // 0, 0, 0,
-  //  // 0, 0, 0,
-  //  // 0, 0, 0,
-  //  // (0, 2)
-  //  // 0, 0, 0,
-  //  // 0, 0, 0,
-  //  // 0, 0, 0,
-  //  //
-  //  // And so on.
-  //  0, 0, 0,   0, 0, 0,   0, 0, 0,
-  //  0, 0, 0,   0, 0, 0,   0, 0, 0,
-  //  0, 0, 0,   0, 0, 0,   0, 0, 0,
-  //  0, 0, 0,   0, 0, 0,   0, 0, 0,
-  //  0, 0, 0,   0, 0, 0,   0, 0, 0,
-  //  0, 0, 0,   0, 0, 0,   0, 0, 0,
-  //  0, 0, 0,   0, 0, 0,   0, 0, 0,
-  //  0, 0, 0,   0, 0, 0,   0, 0, 0,
-  //  0, 0, 0,   0, 0, 0,   0, 0, 0,
-  //  0, 0, 0,   0, 0, 0,   0, 0, 0,
-  //  0, 0, 0,   0, 0, 0,   0, 0, 0,
-  //  0, 0, 0,   0, 0, 0,   0, 0, 0,
+  // Apply im2col on the whole batch.
+  auto phi_x_2 = im2col(x, {1, kH, kW});
 
-  //  1, 1, 1,   1, 1, 1,   1, 1, 1,
-  //  1, 1, 1,   1, 1, 1,   1, 1, 1,
-  //  1, 1, 1,   1, 1, 1,   1, 1, 1,
-  //  1, 1, 1,   1, 1, 1,   1, 1, 1,
-  //  1, 1, 1,   1, 1, 1,   1, 1, 1,
-  //  1, 1, 1,   1, 1, 1,   1, 1, 1,
-  //  1, 1, 1,   1, 1, 1,   1, 1, 1,
-  //  1, 1, 1,   1, 1, 1,   1, 1, 1,
-  //  1, 1, 1,   1, 1, 1,   1, 1, 1,
-  //  1, 1, 1,   1, 1, 1,   1, 1, 1,
-  //  1, 1, 1,   1, 1, 1,   1, 1, 1,
-  //  1, 1, 1,   1, 1, 1,   1, 1, 1,
+  BOOST_CHECK(phi_x.sizes() == phi_x_2.sizes());
+  BOOST_CHECK(phi_x.matrix() == phi_x_2.matrix());
 
-  //  2, 2, 2,   2, 2, 2,   2, 2, 2,
-  //  2, 2, 2,   2, 2, 2,   2, 2, 2,
-  //  2, 2, 2,   2, 2, 2,   2, 2, 2,
-  //  2, 2, 2,   2, 2, 2,   2, 2, 2,
-  //  2, 2, 2,   2, 2, 2,   2, 2, 2,
-  //  2, 2, 2,   2, 2, 2,   2, 2, 2,
-  //  2, 2, 2,   2, 2, 2,   2, 2, 2,
-  //  2, 2, 2,   2, 2, 2,   2, 2, 2,
-  //  2, 2, 2,   2, 2, 2,   2, 2, 2,
-  //  2, 2, 2,   2, 2, 2,   2, 2, 2,
-  //  2, 2, 2,   2, 2, 2,   2, 2, 2,
-  //  2, 2, 2,   2, 2, 2,   2, 2, 2;
+  auto sizes_5d = Matrix<int, 5, 1>{};
+  sizes_5d << N, H, W, kH, kW;
+  auto phi_x_as_5d = phi_x.reshape(sizes_5d);
 
-  //BOOST_CHECK(phi_x.matrix() == true_phi_x);
+  cout << phi_x_as_5d[0][0][2].matrix() << endl << endl;
+
+  cout << phi_x_as_5d[1][0][0].matrix() << endl << endl;
+  cout << phi_x_as_5d[1][2][1].matrix() << endl << endl;
+  cout << phi_x_as_5d[1][2][1].matrix() << endl << endl;
 }
 
 BOOST_AUTO_TEST_CASE(test_convolve)

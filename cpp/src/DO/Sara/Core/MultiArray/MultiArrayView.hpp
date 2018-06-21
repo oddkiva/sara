@@ -126,13 +126,6 @@ namespace DO { namespace Sara {
     {
     }
 
-    //! @brief Copy assignment operator.
-    self_type& operator=(self_type other)
-    {
-      swap(other);
-      return *this;
-    }
-
     //! @brief Return the size vector of the MultiArray object.
     const vector_type& sizes() const
     {
@@ -367,7 +360,14 @@ namespace DO { namespace Sara {
     }
     //! @}
 
-    //! @brief Copy contents.
+    //! @{
+    //! @brief Copy the source array deeply like std::copy.
+    /*!
+     *
+     *  Throws if the source array view sizes does not match the destination
+     *  array.
+     *
+     */
     inline void copy(const self_type& other) const
     {
       if (this == &other)
@@ -379,6 +379,13 @@ namespace DO { namespace Sara {
 
       std::copy(other._begin, other._end, _begin);
     }
+
+    self_type& operator=(self_type other)
+    {
+      copy(other);
+      return *this;
+    }
+    //! @}
 
     //! @brief Perform coefficient-wise transform in place.
     template <typename Op>
@@ -407,6 +414,16 @@ namespace DO { namespace Sara {
       return dst;
     }
 
+    template <int M>
+    inline auto reshape(const Matrix<int, M, 1>& new_sizes) const
+        -> MultiArrayView<T, M, StorageOrder>
+    {
+      if (compute_size(new_sizes) != size())
+        throw std::domain_error{"Invalid shape!"};
+      return MultiArrayView<T, M, StorageOrder>{const_cast<T*>(_begin),
+                                                new_sizes};
+    }
+
   protected:
     //! @brief Compute the strides according the size vector and storage order.
     inline vector_type compute_strides(const vector_type& sizes) const
@@ -415,10 +432,11 @@ namespace DO { namespace Sara {
     }
 
     //! @brief Compute the raw size needed to allocate the internal data.
-    inline size_type compute_size(const vector_type& sizes) const
+    template <int M>
+    inline size_type compute_size(const Matrix<int, M, 1>& sizes) const
     {
       auto sz = sizes.template cast<size_type>().eval();
-      return std::accumulate(sz.data(), sz.data() + N, size_type(1),
+      return std::accumulate(sz.data(), sz.data() + sz.size(), size_type(1),
                              std::multiplies<size_type>());
     }
 

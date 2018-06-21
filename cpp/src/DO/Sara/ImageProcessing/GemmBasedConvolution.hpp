@@ -85,6 +85,39 @@ namespace DO { namespace Sara {
   }
 
   template <typename T, int N>
+  auto im2col_with_strides(const TensorView_<T, N>& x, const Matrix<int, N, 1>& kernel_sizes,
+                           const Matrix<int, N, 1>& strides = Matrix<int, N, 1>::Ones())
+      -> Tensor_<T, 2>
+  {
+    auto sizes = Array<int, N, 1>{};
+    sizes = x.sizes().array() / strides.array();
+
+    const auto num_rows = std::accumulate(
+        sizes.data(), sizes.data() + sizes.size(), 1, std::multiplies<int>());
+
+    const auto num_cols =
+        std::accumulate(kernel_sizes.data(), kernel_sizes.data() + N, 1,
+                        std::multiplies<int>());
+
+    auto phi_x = Tensor_<T, 2>{num_rows, num_cols};
+
+    const Matrix<int, N, 1> radius = kernel_sizes / 2;
+    for (auto c = x.begin_array(); !c.end(); ++c)
+    {
+      const auto r = jump(c.position(), c.strides());
+
+      const Matrix<int, N, 1> s = c.position() - radius;
+      const Matrix<int, N, 1> e =
+          c.position() + radius + Matrix<int, N, 1>::Ones();
+      auto p = patch(x, s, e);
+
+      phi_x.matrix().row(r) = vec(p).transpose();
+    }
+
+    return phi_x;
+  }
+
+  template <typename T, int N>
   void gemm_convolve(TensorView_<T, N>& y,  //
                      const TensorView_<T, N>& x, const TensorView_<T, N>& k)
   {

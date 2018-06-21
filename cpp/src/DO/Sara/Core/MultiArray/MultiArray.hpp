@@ -90,6 +90,16 @@ namespace DO { namespace Sara {
       deallocate();
     }
 
+    inline auto const_view() const -> const base_type&
+    {
+      return *this;
+    }
+
+    inline auto view() -> base_type&
+    {
+      return *this;
+    }
+
     //! @brief Assignment operator uses the copy-swap idiom.
     self_type& operator=(self_type other)
     {
@@ -168,7 +178,6 @@ namespace DO { namespace Sara {
       _sizes = vector_type::Zero();
       _strides = vector_type::Zero();
     }
-
   };
 
 

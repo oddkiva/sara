@@ -48,30 +48,6 @@ namespace DO { namespace Sara {
   }
 
 
-  template <typename DF, typename F>
-  class NeumannPadding
-  {
-  public:
-    inline NeumannPadding() = default;
-
-    template <int N, int O>
-    inline auto at(MultiArrayView<F, N, O>& f, const Matrix<int, N, 1>& x) const
-        -> const F&
-    {
-      if (x.minCoeff() < 0)
-        return f(x) + _df_x * x;
-
-      if ((x - f.sizes()).minCoeff() >= 0)
-        f(x) + _df_x*(x - f.sizes());
-
-      return f(x);
-    }
-
-  private:
-    DF _df_x;
-  };
-
-
   class PeriodicPadding
   {
   public:
