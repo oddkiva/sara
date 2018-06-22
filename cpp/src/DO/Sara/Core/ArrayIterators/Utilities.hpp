@@ -210,7 +210,7 @@ namespace DO { namespace Sara {
     {
       for (int i = N - 1; i >= 0; --i)
       {
-        if (coords[i] > start[i] + steps[i])
+        if (coords[i] >= start[i] + steps[i])
         {
           coords[i] -= steps[i];
           return;
@@ -265,7 +265,7 @@ namespace DO { namespace Sara {
     {
       for (int i = 0; i < N; ++i)
       {
-        if (coords[i] > start[i] + steps[i])
+        if (coords[i] >= start[i] + steps[i])
         {
           coords[i] -= steps[i];
           return;
