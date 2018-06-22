@@ -212,6 +212,14 @@ namespace DO { namespace Sara {
       return {*this, a, b};
     }
 
+    auto begin_stepped_subarray(const vector_type& a,  //
+                                const vector_type& b,  //
+                                const vector_type& steps) const
+        -> InfiniteSteppedArrayIterator<InfiniteMultiArrayView>
+    {
+      return {*this, a, b, steps};
+    }
+
   private:
     const ArrayView& _f;
     Padding _pad;
