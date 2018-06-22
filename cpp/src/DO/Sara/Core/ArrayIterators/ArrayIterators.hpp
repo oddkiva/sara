@@ -128,21 +128,23 @@ namespace DO { namespace Sara {
     }
 
     //! Equality operator.
-    inline bool operator==(const T *ptr) const
+    inline bool operator==(const T* ptr) const
     {
       return cur_ptr_ == ptr;
     }
 
     //! Inequality operator.
     template <bool IsConst2, int Axis2>
-    inline bool operator!=(const AxisIterator<IsConst2, T, Axis2, N>& other) const
+    inline bool
+    operator!=(const AxisIterator<IsConst2, T, Axis2, N>& other) const
     {
       return !operator==(other);
     }
 
     //! Inequality operator.
     template <bool IsConst2, int StorageOrder>
-    inline bool operator!=(const ArrayIteratorBase<IsConst2, T, N, StorageOrder>& other) const
+    inline bool operator!=(
+        const ArrayIteratorBase<IsConst2, T, N, StorageOrder>& other) const
     {
       return !operator==(other);
     }
@@ -195,7 +197,7 @@ namespace DO { namespace Sara {
     //! Postfix decrement operator.
     inline self_type operator--(int)
     {
-      AxisIterator old{ *this };
+      AxisIterator old{*this};
       operator--();
       return old;
     }
@@ -522,10 +524,11 @@ namespace DO { namespace Sara {
                             const vector_type& end_pos,
                             const vector_type& strides,
                             const vector_type& sizes)
-      : base_type{ stop, ptr+jump(begin_pos, strides), begin_pos, strides, sizes }
-      , begin_{ ptr }
-      , begin_pos_{ begin_pos }
-      , end_pos_{ end_pos }
+      : base_type{stop, ptr + jump(begin_pos, strides), begin_pos, strides,
+                  sizes}
+      , begin_{ptr}
+      , begin_pos_{begin_pos}
+      , end_pos_{end_pos}
     {
     }
 
@@ -549,7 +552,7 @@ namespace DO { namespace Sara {
     //! Postfix increment operator.
     inline self_type operator++(int)
     {
-      self_type old{ *this };
+      self_type old{*this};
       operator++();
       return old;
     }
@@ -557,7 +560,7 @@ namespace DO { namespace Sara {
     //! Postfix increment operator.
     inline self_type operator--(int)
     {
-      self_type old{ *this };
+      self_type old{*this};
       operator--();
       return old;
     }
@@ -565,7 +568,7 @@ namespace DO { namespace Sara {
     //! Arithmetic operator (slow).
     inline void operator+=(const vector_type& offset)
     {
-      vector_type pos{ cur_pos_ + offset };
+      vector_type pos{cur_pos_ + offset};
       if ((pos-begin_pos_).minCoeff() < 0 || (pos-end_pos_).minCoeff() >= 0)
       {
         std::ostringstream msg;
@@ -657,6 +660,27 @@ namespace DO { namespace Sara {
       self_type old{*this};
       operator--();
       return old;
+    }
+
+    //! Arithmetic operator (slow).
+    inline void operator+=(const vector_type& offset)
+    {
+      const vector_type delta = offset.cwiseProduct(steps_);
+      const vector_type pos{cur_pos_ + delta};
+      if ((pos - begin_pos_).minCoeff() < 0 || (pos - end_pos_).minCoeff() >= 0)
+      {
+        std::ostringstream msg;
+        msg << "Subrange iterator out of range: pos = " << offset.transpose();
+        throw std::out_of_range{msg.str()};
+      }
+      cur_pos_ = pos;
+      cur_ptr_ += jump(delta, strides_);
+    }
+
+    //! Arithmetic operator (slow).
+    inline void operator-=(const vector_type& offset)
+    {
+      operator+=(-offset);
     }
 
   protected: /* data members. */

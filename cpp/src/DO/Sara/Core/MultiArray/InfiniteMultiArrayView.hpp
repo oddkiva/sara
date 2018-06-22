@@ -102,6 +102,90 @@ namespace DO { namespace Sara {
   };
 
 
+  template <typename ArrayView>
+  class InfiniteSteppedArrayIterator
+  {
+  public:
+    using self_type = InfiniteSteppedArrayIterator;
+    using vector_type = typename ArrayView::vector_type;
+    using value_type = typename ArrayView::value_type;
+
+  public:
+    inline InfiniteSteppedArrayIterator(const ArrayView& f,        //
+                                        const vector_type& a,      //
+                                        const vector_type& b,      //
+                                        const vector_type& steps)  //
+      : _f{f}
+      , _x{a, b, steps}
+    {
+    }
+
+    //! Dereferencing operator.
+    inline value_type operator*() const
+    {
+      return _f(*_x);
+    }
+
+    //! Prefix increment operator.
+    inline self_type& operator++()
+    {
+      ++_x;
+      return *this;
+    }
+
+    //! Prefix decrement operator.
+    inline self_type& operator--()
+    {
+      --_x;
+      return *this;
+    }
+
+    //! Postfix increment operator.
+    inline self_type operator++(int)
+    {
+      self_type old{*this};
+      operator++();
+      return old;
+    }
+
+    //! Postfix increment operator.
+    inline self_type operator--(int)
+    {
+      self_type old{*this};
+      operator--();
+      return old;
+    }
+
+    //! Arithmetic operator (slow).
+    inline self_type operator+=(const vector_type& offset)
+    {
+      _x += offset;
+      return *this;
+    }
+
+    //! Arithmetic operator (slow).
+    inline self_type operator-=(const vector_type& offset)
+    {
+      _x +=(-offset);
+      return *this;
+    }
+
+    inline bool end() const
+    {
+      return _x.end();
+    }
+
+    inline auto position() const -> const vector_type&
+    {
+      return *_x;
+    }
+
+  private:
+    const ArrayView& _f;
+    SteppedCoordinatesIterator<ArrayView> _x;
+  };
+
+
   template <typename ArrayView, typename Padding>
   class InfiniteMultiArrayView
   {

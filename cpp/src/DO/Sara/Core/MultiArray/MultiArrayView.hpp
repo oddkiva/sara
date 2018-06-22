@@ -88,6 +88,14 @@ namespace DO { namespace Sara {
     //! @}
 
     //! @{
+    //! @brief N-dimensional subrange iterator.
+    using stepped_nd_iterator =
+        SteppedSubarrayIterator<false, T, N, StorageOrder>;
+    using const_stepped_nd_iterator =
+        SteppedSubarrayIterator<true, T, N, StorageOrder>;
+    //! @}
+
+    //! @{
     //! @brief Array views for linear algebra.
     using flat_array_view_type =
         Map<Array<typename ElementTraits<T>::value_type, Dynamic, 1>>;
@@ -335,6 +343,26 @@ namespace DO { namespace Sara {
     }
     //! @}
 
+    //! @{
+    //! @brief Return the begin stepped iterator of the sub-array.
+    inline auto begin_stepped_subarray(const vector_type& start,
+                                       const vector_type& end,
+                                       const vector_type& steps)
+        -> stepped_nd_iterator
+    {
+      return {false, _begin, start, end, _strides, _sizes, steps};
+    }
+
+    inline auto begin_stepped_subarray(const vector_type& start,
+                                       const vector_type& end,
+                                       const vector_type& steps) const
+        -> const_stepped_nd_iterator
+    {
+      return {false, _begin, start, end, _strides, _sizes, steps};
+    }
+    //! @}
+
+    //! @}
     //! @brief Swap multi-array objects.
     inline void swap(self_type& other)
     {
