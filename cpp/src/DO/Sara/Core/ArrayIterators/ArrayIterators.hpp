@@ -266,8 +266,7 @@ namespace DO { namespace Sara {
     //! Equality operator.
     template <bool IsConst2>
     inline bool operator==(
-      const ArrayIteratorBase<IsConst2, T, N, StorageOrder>& other
-    ) const
+        const ArrayIteratorBase<IsConst2, T, N, StorageOrder>& other) const
     {
       return cur_ptr_ == other.cur_ptr_;
     }
@@ -287,8 +286,7 @@ namespace DO { namespace Sara {
     //! Inequality operator.
     template <bool IsConst2>
     inline bool operator!=(
-      const ArrayIteratorBase<IsConst2, T, N, StorageOrder>& other
-    ) const
+        const ArrayIteratorBase<IsConst2, T, N, StorageOrder>& other) const
     {
       return !this->operator==(other);
     }
@@ -590,6 +588,83 @@ namespace DO { namespace Sara {
     vector_type end_pos_;
   };
 
+  template <bool IsConst, typename T, int N, int StorageOrder = ColMajor>
+  class SteppedSubarrayIterator
+      : public ArrayIteratorBase<IsConst, T, N, StorageOrder>
+  {
+    static_assert(N >= 0, "Number of dimensions must be nonnegative");
+
+    using base_type = ArrayIteratorBase<IsConst, T, N, StorageOrder>;
+    using self_type = SteppedSubarrayIterator;
+    using incrementer = PositionIncrementer<StorageOrder>;
+    using decrementer = PositionDecrementer<StorageOrder>;
+
+    using base_type::stop_;
+    using base_type::cur_pos_;
+    using base_type::cur_ptr_;
+    using base_type::strides_;
+
+  public: /* typedefs. */
+    TYPEDEF_ITERATOR_TYPES(base_type);
+    using coords_type = Matrix<int, N, 1>;
+    using vector_type = Matrix<int, N, 1>;
+
+  public: /* constructors */
+    //! Constructor
+    inline SteppedSubarrayIterator(bool stop, pointer ptr,
+                                   const vector_type& begin_pos,
+                                   const vector_type& end_pos,
+                                   const vector_type& strides,
+                                   const vector_type& sizes,
+                                   const vector_type& steps)
+      : base_type{stop, ptr + jump(begin_pos, strides), begin_pos, strides,
+                  sizes}
+      , begin_{ptr}
+      , begin_pos_{begin_pos}
+      , end_pos_{end_pos}
+      , steps_{steps}
+    {
+    }
+
+  public: /* iterator functionalities. */
+    //! Prefix increment operator.
+    inline self_type& operator++()
+    {
+      incrementer::apply(cur_pos_, stop_, begin_pos_, end_pos_, steps_);
+      cur_ptr_ = begin_ + jump(cur_pos_, strides_);
+      return *this;
+    }
+
+    //! Prefix decrement operator.
+    inline self_type& operator--()
+    {
+      decrementer::apply(cur_pos_, stop_, begin_pos_, end_pos_, steps_);
+      cur_ptr_ = begin_ + jump(cur_pos_, strides_);
+      return *this;
+    }
+
+    //! Postfix increment operator.
+    inline self_type operator++(int)
+    {
+      self_type old{*this};
+      operator++();
+      return old;
+    }
+
+    //! Postfix increment operator.
+    inline self_type operator--(int)
+    {
+      self_type old{*this};
+      operator--();
+      return old;
+    }
+
+  protected: /* data members. */
+    pointer begin_;
+    vector_type begin_pos_;
+    vector_type end_pos_;
+    vector_type steps_;
+  };
   //! @}
 
 } /* namespace Sara */
