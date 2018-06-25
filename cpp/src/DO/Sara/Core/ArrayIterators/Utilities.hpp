@@ -13,12 +13,13 @@
 
 #pragma once
 
+#include <DO/Sara/Core/EigenExtension.hpp>
+#include <DO/Sara/Core/Meta.hpp>
+
 #include <iterator>
 #include <sstream>
 #include <stdexcept>
 
-#include <DO/Sara/Core/EigenExtension.hpp>
-#include <DO/Sara/Core/Meta.hpp>
 
 
 namespace DO { namespace Sara {
@@ -166,7 +167,7 @@ namespace DO { namespace Sara {
           return;
         coords[i] = start[i];
       }
-      if (coords[N - 1] >= start[N - 1])
+      if (coords[N - 1] == start[N - 1])
         stop = true;
     }
 

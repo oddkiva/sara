@@ -19,6 +19,36 @@ using namespace std;
 using namespace DO::Sara;
 
 
+template <typename T, int N, int O, typename Padding>
+void stepped_safe_crop(MultiArrayView<T, N, O>& dst,
+                       const MultiArrayView<T, N, O>& src,
+                       const Matrix<int, N, 1>& begin,
+                       const Matrix<int, N, 1>& end,
+                       const Matrix<int, N, 1>& steps,
+                       const Padding& padding)
+{
+  auto sizes = Matrix<int, N, 1>{};
+  for (int i = 0; i < N; ++i)
+  {
+    const auto modulo = (end[i] - begin[i]) % steps[i];
+    sizes[i] = (end[i] - begin[i]) / steps[i] + int(modulo != 0);
+  }
+
+  if (dst.sizes() != sizes)
+  {
+    std::ostringstream oss;
+    oss << "Invalid destination sizes which must be: " << sizes.transpose();
+    throw std::domain_error{oss.str()};
+  }
+
+  const auto inf_src = make_infinite(src, padding);
+  auto src_i = inf_src.begin_stepped_subarray(begin, end, steps);
+
+  for (auto dst_i = dst.begin(); dst_i != dst.end(); ++src_i, ++dst_i)
+    *dst_i = *src_i;
+}
+
+
 GRAPHICS_MAIN()
 {
   auto image = Image<Rgb8>{};
@@ -31,6 +61,7 @@ GRAPHICS_MAIN()
 
   const auto border = Vector2i::Ones() * 50;
 
+#ifdef STEPPED
   const Vector2i begin = -border;
   const Vector2i end = image.sizes() + border;
 
@@ -52,12 +83,39 @@ GRAPHICS_MAIN()
     auto src_c = inf_image.begin_subarray(begin, end);
     auto dst_i = ext_image.begin_array();
     for (; !dst_i.end(); ++src_c, ++dst_i)
-      //std::cout << src_c.coords().transpose() << std::endl;
       *dst_i = *src_c;
   }
 
   finish = t.elapsed_ms();
   std::cout << (finish - start) / num_iter << " ms" << std::endl;
+#else
+  const Vector2i begin = {0, 0};
+  const Vector2i end = image.sizes();
+  const Vector2i steps = {2, 3};
+
+  auto sizes = Vector2i{};
+  for (int i = 0; i < 2; ++i)
+  {
+    const auto modulo = (end[i] - begin[i]) % steps[i];
+    sizes[i] = (end[i] - begin[i]) / steps[i] + int(modulo != 0);
+  }
+  auto ext_image = Image<Rgb8>{sizes};
+
+  Timer t;
+  double start, finish;
+  const auto num_iter = 1;
+
+  t.restart();
+  start = t.elapsed_ms();
+
+  for (int i = 0; i < num_iter; ++i)
+  {
+    stepped_safe_crop(ext_image, image, begin, end, steps, pad);
+  }
+
+  finish = t.elapsed_ms();
+  std::cout << (finish - start) / num_iter << " ms" << std::endl;
+#endif
 
   create_window(ext_image.sizes());
   display(ext_image);
