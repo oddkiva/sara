@@ -180,6 +180,11 @@ namespace DO { namespace Sara {
       return *_x;
     }
 
+    inline auto stepped_subarray_sizes() const -> vector_type
+    {
+      return _x.stepped_subarray_sizes();
+    }
+
   private:
     const ArrayView& _f;
     SteppedCoordinatesIterator<ArrayView> _x;

@@ -126,33 +126,33 @@ namespace DO { namespace Sara {
     {
     }
 
-    //! Dereferencing operator.
+    //! @brief Dereferencing operator.
     inline const vector_type& operator*() const
     {
       return _p;
     }
 
-    //! Referencing operator.
+    //! @brief Referencing operator.
     inline const vector_type* operator->() const
     {
       return &_p;
     }
 
-    //! Prefix increment operator.
+    //! @brief Prefix increment operator.
     inline self_type& operator++()
     {
       incrementer::apply(_p, _stop, _begin, _end, _steps);
       return *this;
     }
 
-    //! Prefix decrement operator.
+    //! @brief Prefix decrement operator.
     inline self_type& operator--()
     {
       decrementer::apply(_p, _stop, _begin, _end, _steps);
       return *this;
     }
 
-    //! Postfix increment operator.
+    //! @brief Postfix increment operator.
     inline self_type operator++(int)
     {
       self_type old{*this};
@@ -160,7 +160,7 @@ namespace DO { namespace Sara {
       return old;
     }
 
-    //! Postfix increment operator.
+    //! @brief Postfix increment operator.
     inline self_type operator--(int)
     {
       self_type old{*this};
@@ -168,7 +168,7 @@ namespace DO { namespace Sara {
       return old;
     }
 
-    //! Arithmetic operator (slow).
+    //! @brief Arithmetic operator (slow).
     inline self_type operator+=(const vector_type& offset)
     {
       vector_type pos{_p + offset.cwiseProduct(_steps)};
@@ -176,7 +176,7 @@ namespace DO { namespace Sara {
       return *this;
     }
 
-    //! Arithmetic operator (slow).
+    //! @brief Arithmetic operator (slow).
     inline self_type operator-=(const vector_type& offset)
     {
       return operator+=(-offset);
@@ -185,6 +185,18 @@ namespace DO { namespace Sara {
     inline bool end() const
     {
       return _stop;
+    }
+
+    //! @brief Return the sizes of the stepped array.
+    inline vector_type stepped_subarray_sizes() const
+    {
+      auto sizes = vector_type{};
+      for (int i = 0; i < sizes.size(); ++i)
+      {
+        const auto modulo = (_end[i] - _begin[i]) % _steps[i];
+        sizes[i] = (_end[i] - _begin[i]) / _steps[i] + int(modulo != 0);
+      }
+      return sizes;
     }
 
   private:

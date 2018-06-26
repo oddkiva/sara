@@ -27,22 +27,17 @@ void stepped_safe_crop(MultiArrayView<T, N, O>& dst,
                        const Matrix<int, N, 1>& steps,
                        const Padding& padding)
 {
-  auto sizes = Matrix<int, N, 1>{};
-  for (int i = 0; i < N; ++i)
-  {
-    const auto modulo = (end[i] - begin[i]) % steps[i];
-    sizes[i] = (end[i] - begin[i]) / steps[i] + int(modulo != 0);
-  }
+  const auto inf_src = make_infinite(src, padding);
+  auto src_i = inf_src.begin_stepped_subarray(begin, end, steps);
 
+  const auto sizes = src_i.stepped_subarray_sizes();
   if (dst.sizes() != sizes)
   {
     std::ostringstream oss;
-    oss << "Invalid destination sizes which must be: " << sizes.transpose();
+    oss << "Error: destination sizes " << dst.sizes().transpose()
+        << "is invalid and must be: " << sizes.transpose();
     throw std::domain_error{oss.str()};
   }
-
-  const auto inf_src = make_infinite(src, padding);
-  auto src_i = inf_src.begin_stepped_subarray(begin, end, steps);
 
   for (auto dst_i = dst.begin(); dst_i != dst.end(); ++src_i, ++dst_i)
     *dst_i = *src_i;
@@ -91,7 +86,7 @@ GRAPHICS_MAIN()
 #else
   const Vector2i begin = {0, 0};
   const Vector2i end = image.sizes();
-  const Vector2i steps = {2, 3};
+  const Vector2i steps = {3, 3};
 
   auto sizes = Vector2i{};
   for (int i = 0; i < 2; ++i)

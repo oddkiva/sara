@@ -683,6 +683,18 @@ namespace DO { namespace Sara {
       operator+=(-offset);
     }
 
+    //! @brief Return the sizes of the stepped array.
+    inline vector_type stepped_subarray_sizes() const
+    {
+      auto sizes = vector_type{};
+      for (int i = 0; i < sizes.size(); ++i)
+      {
+        const auto modulo = (end_pos_[i] - begin_pos_[i]) % steps_[i];
+        sizes[i] = (end_pos_[i] - begin_pos_[i]) / steps_[i] + int(modulo != 0);
+      }
+      return sizes;
+    }
+
   protected: /* data members. */
     pointer begin_;
     vector_type begin_pos_;
