@@ -69,9 +69,10 @@ namespace DO { namespace Sara {
     auto phi_x = Tensor_<T, 2>{num_rows, num_cols};
 
     const Matrix<int, N, 1> radius = kernel_sizes / 2;
-    for (auto c = x.begin_array(); !c.end(); ++c)
+    int r = 0;
+    for (auto c = x.begin_array(); !c.end(); ++c, ++r)
     {
-      const auto r = jump(c.position(), c.strides());
+      //const auto r = jump(c.position(), c.strides());
 
       const Matrix<int, N, 1> s = c.position() - radius;
       const Matrix<int, N, 1> e =
@@ -85,12 +86,21 @@ namespace DO { namespace Sara {
   }
 
   template <typename T, int N>
-  auto im2col_with_strides(const TensorView_<T, N>& x, const Matrix<int, N, 1>& kernel_sizes,
-                           const Matrix<int, N, 1>& strides = Matrix<int, N, 1>::Ones())
+  auto
+  im2col_strided(const TensorView_<T, N>& x,
+                 const Matrix<int, N, 1>& kernel_sizes,
+                 const Matrix<int, N, 1>& strides = Matrix<int, N, 1>::Ones())
       -> Tensor_<T, 2>
   {
-    auto sizes = Array<int, N, 1>{};
-    sizes = x.sizes().array() / strides.array();
+    // Pad sizes must be odd.
+    const Matrix<int, N, 1> radius = kernel_sizes / 2;
+    const Matrix<int, N, 1> begin = Matrix<int, N, 1>::Zero() + radius;
+    const Matrix<int, N, 1> end = x.sizes() - radius;
+
+    // Initialize the strided subarray iterator.
+    auto xi = x.begin_stepped_subarray(begin, end, strides);
+
+    const auto sizes = xi.stepped_subarray_sizes();
 
     const auto num_rows = std::accumulate(
         sizes.data(), sizes.data() + sizes.size(), 1, std::multiplies<int>());
@@ -101,14 +111,11 @@ namespace DO { namespace Sara {
 
     auto phi_x = Tensor_<T, 2>{num_rows, num_cols};
 
-    const Matrix<int, N, 1> radius = kernel_sizes / 2;
-    for (auto c = x.begin_array(); !c.end(); ++c)
+    for (int r = 0; !xi.end(); ++xi, ++r)
     {
-      const auto r = jump(c.position(), c.strides());
-
-      const Matrix<int, N, 1> s = c.position() - radius;
-      const Matrix<int, N, 1> e =
-          c.position() + radius + Matrix<int, N, 1>::Ones();
+      const Matrix<int, N, 1> s = xi.position().cwiseQuotient(strides) - radius;
+      const Matrix<int, N, 1> e = xi.position().cwiseQuotient(strides) +
+                                  radius + Matrix<int, N, 1>::Ones();
       auto p = patch(x, s, e);
 
       phi_x.matrix().row(r) = vec(p).transpose();
@@ -122,6 +129,16 @@ namespace DO { namespace Sara {
                      const TensorView_<T, N>& x, const TensorView_<T, N>& k)
   {
     auto phi_x = im2col(x, k.sizes());
+    y.flat_array() = (phi_x.matrix() * vec(k)).array();
+  }
+
+  template <typename T, int N>
+  void gemm_convolve_strided(TensorView_<T, N>& y,  //
+                             const TensorView_<T, N>& x,
+                             const TensorView_<T, N>& k,
+                             const Matrix<int, N, 1>& strides)
+  {
+    auto phi_x = im2col_strided(x, k.sizes(), strides);
     y.flat_array() = (phi_x.matrix() * vec(k)).array();
   }
 

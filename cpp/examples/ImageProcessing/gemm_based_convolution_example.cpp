@@ -26,7 +26,7 @@ using namespace DO::Sara;
 GRAPHICS_MAIN()
 {
   auto image = Image<float>{};
-  imread(image, "/home/david/GitHub/DO-CV/sara/data/sunflowerField.jpg");
+  imread(image, "/home/david/GitHub/DO-CV/sara/data/ksmall.jpg");
 
   // Compute the size of the Gaussian kernel.
   auto gaussian_kernel = [](float sigma, int gauss_truncate)
@@ -61,13 +61,15 @@ GRAPHICS_MAIN()
     return kernel;
   };
 
-  auto kernel = gaussian_kernel(3.f, 2);
-  auto convolved_image = Image<float>{image.sizes()};
+  const auto kernel = gaussian_kernel(3.f, 2);
+  const Vector2i strides = Vector2i::Ones();
+
+  auto convolved_image = Image<float>{image.sizes() / 2};
 
   auto x = tensor_view(image);
   auto k = tensor_view(kernel);
   auto y = tensor_view(convolved_image);
-  gemm_convolve(y, x, k);
+  gemm_convolve_strided(y, x, k, strides);
 
   create_window(image.sizes());
   display(kernel.compute<ColorRescale>().compute<Resize>(kernel.sizes() * 20));
