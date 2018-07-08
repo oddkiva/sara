@@ -94,17 +94,17 @@ namespace DO { namespace Sara {
   {
     // Pad sizes must be odd.
     const Matrix<int, N, 1> radius = kernel_sizes / 2;
-    const Matrix<int, N, 1> begin = Matrix<int, N, 1>::Zero() + radius;
-    const Matrix<int, N, 1> end = x.sizes() - radius;
+    const Matrix<int, N, 1> begin = Matrix<int, N, 1>::Zero();
+    const Matrix<int, N, 1> end = x.sizes();
 
     // Initialize the strided subarray iterator.
     auto xi = x.begin_stepped_subarray(begin, end, strides);
 
     const auto sizes = xi.stepped_subarray_sizes();
 
+    // Compute the matrix dimensions.
     const auto num_rows = std::accumulate(
         sizes.data(), sizes.data() + sizes.size(), 1, std::multiplies<int>());
-
     const auto num_cols =
         std::accumulate(kernel_sizes.data(), kernel_sizes.data() + N, 1,
                         std::multiplies<int>());
@@ -113,9 +113,10 @@ namespace DO { namespace Sara {
 
     for (int r = 0; !xi.end(); ++xi, ++r)
     {
-      const Matrix<int, N, 1> s = xi.position().cwiseQuotient(strides) - radius;
-      const Matrix<int, N, 1> e = xi.position().cwiseQuotient(strides) +
-                                  radius + Matrix<int, N, 1>::Ones();
+      const Matrix<int, N, 1> s = xi.position() - radius;
+      const Matrix<int, N, 1> e =
+          xi.position() + radius + Matrix<int, N, 1>::Ones();
+
       auto p = patch(x, s, e);
 
       phi_x.matrix().row(r) = vec(p).transpose();
@@ -142,5 +143,22 @@ namespace DO { namespace Sara {
     y.flat_array() = (phi_x.matrix() * vec(k)).array();
   }
 
+  template <typename T, int N>
+  auto gemm_convolve_strided(const TensorView_<T, N>& x,
+                             const TensorView_<T, N>& k,
+                             const Matrix<int, N, 1>& strides)
+    -> Tensor_<T, N>
+  {
+    auto phi_x = im2col_strided(x, k.sizes(), strides);
+
+    const auto szs =
+        x.begin_stepped_subarray(Matrix<int, N, 1>::Zero(), x.sizes(), strides)
+            .stepped_subarray_sizes();
+
+    auto y = Tensor_<T, N>{szs};
+    y.flat_array() = (phi_x.matrix() * vec(k)).array();
+
+    return y;
+  }
 } /* namespace Sara */
 } /* namespace DO */
