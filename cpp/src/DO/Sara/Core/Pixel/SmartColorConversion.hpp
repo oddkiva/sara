@@ -99,8 +99,6 @@ namespace DO { namespace Sara {
       static inline void apply(const Pixel<float, ColSpace>& src,
                                Pixel<T, ColSpace>& dst)
       {
-        const Matrix<float, N, 1>& msrc = src;
-        const Matrix<T, N, 1>& mdst = dst;
         convert_channel(src, dst);
       }
     };
