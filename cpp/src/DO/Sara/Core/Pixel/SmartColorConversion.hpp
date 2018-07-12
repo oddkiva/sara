@@ -38,7 +38,7 @@ namespace DO { namespace Sara {
                                Pixel<float, DstColSpace>& dst)
       {
         Pixel<float, SrcColSpace> float_src;
-        convert_channel(src, float_src);
+        convert_channel<T, float, SrcColSpace>(src, float_src);
         convert_color(float_src, dst);
       }
 
@@ -47,7 +47,7 @@ namespace DO { namespace Sara {
                                Pixel<double, DstColSpace>& dst)
       {
         Pixel<double, SrcColSpace> double_src;
-        convert_channel(src, double_src);
+        convert_channel<T, double, SrcColSpace>(src, double_src);
         convert_color(double_src, dst);
       }
 
@@ -57,7 +57,7 @@ namespace DO { namespace Sara {
       {
         Pixel<float, DstColSpace> float_dst;
         convert_color(src, float_dst);
-        convert_channel(float_dst, dst);
+        convert_channel<float, T, DstColSpace>(float_dst, dst);
       }
 
       template <typename T>
@@ -66,7 +66,7 @@ namespace DO { namespace Sara {
       {
         Pixel<double, DstColSpace> double_dst;
         convert_color(src, double_dst);
-        convert_channel(double_dst, dst);
+        convert_channel<double, T, DstColSpace>(double_dst, dst);
       }
     };
 
@@ -78,21 +78,21 @@ namespace DO { namespace Sara {
       static inline void apply(const Pixel<T, ColSpace>& src,
                                Pixel<double, ColSpace>& dst)
       {
-        convert_channel(src, dst);
+        convert_channel<T, double, ColSpace>(src, dst);
       }
 
       template <typename T>
       static inline void apply(const Pixel<double, ColSpace>& src,
                                Pixel<T, ColSpace>& dst)
       {
-        convert_channel(src, dst);
+        convert_channel<double, T, ColSpace>(src, dst);
       }
 
       template <typename T>
       static inline void apply(const Pixel<T, ColSpace>& src,
                                Pixel<float, ColSpace>& dst)
       {
-        convert_channel(src, dst);
+        convert_channel<T, float, ColSpace>(src, dst);
       }
 
       template <typename T>
@@ -111,14 +111,14 @@ namespace DO { namespace Sara {
   inline void smart_convert_color(const Pixel<float, ColSpace>& src,
                                   Pixel<double, ColSpace>& dst)
   {
-    convert_channel(src, dst);
+    convert_channel<float, double, ColSpace>(src, dst);
   }
 
   template <typename ColSpace>
   inline void smart_convert_color(const Pixel<double, ColSpace>& src,
                                   Pixel<float, ColSpace>& dst)
   {
-    convert_channel(src, dst);
+    convert_channel<double, float, ColSpace>(src, dst);
   }
 
   template <typename SrcColSpace, typename DstColSpace>
@@ -140,7 +140,7 @@ namespace DO { namespace Sara {
                                   Pixel<double, DstColSpace>& dst)
   {
     Pixel<double, SrcColSpace> double_src;
-    convert_channel(src, double_src);
+    convert_channel<float, double, SrcColSpace>(src, double_src);
     convert_color(double_src, dst);
   }
 
@@ -150,7 +150,7 @@ namespace DO { namespace Sara {
   {
     Pixel<double, DstColSpace> double_dst;
     convert_color(src, double_dst);
-    convert_channel(double_dst, dst);
+    convert_channel<double, float, DstColSpace>(double_dst, dst);
   }
 
   template <typename SrcT, typename SrcColSpace, typename DstColSpace>
@@ -189,9 +189,9 @@ namespace DO { namespace Sara {
   {
     Pixel<double, SrcColSpace> double_src;
     Pixel<double, DstColSpace> double_dst;
-    convert_channel(src, double_src);
+    convert_channel<SrcT, double, SrcColSpace>(src, double_src);
     convert_color(double_src, double_dst);
-    convert_channel(double_dst, dst);
+    convert_channel<double, DstT, DstColSpace>(double_dst, dst);
   }
   //! @}
 
@@ -225,7 +225,7 @@ namespace DO { namespace Sara {
   inline void smart_convert_color(const Pixel<T, ColorSpace>& src, double& dst)
   {
     Pixel<double, ColorSpace> double_src;
-    convert_channel(src, double_src);
+    convert_channel<T, double, ColorSpace>(src, double_src);
     convert_color(double_src, dst);
   }
 
@@ -235,7 +235,7 @@ namespace DO { namespace Sara {
   {
     Pixel<double, ColorSpace> double_src;
     double double_dst;
-    convert_channel(src, double_src);
+    convert_channel<T, double, ColorSpace>(src, double_src);
     convert_color(double_src, double_dst);
     convert_channel(double_dst, dst);
   }
@@ -261,7 +261,7 @@ namespace DO { namespace Sara {
   {
     Pixel<double, ColorSpace> double_dst;
     convert_color(src, double_dst);
-    convert_channel(double_dst, dst);
+    convert_channel<double, T, ColorSpace>(double_dst, dst);
   }
 
   //! @brief Convert from 'any' grayscale to 'double' pixel.
@@ -281,7 +281,7 @@ namespace DO { namespace Sara {
     Pixel<double, ColorSpace> double_dst;
     convert_channel(src, double_src);
     convert_color(double_src, double_dst);
-    convert_channel(double_dst, dst);
+    convert_channel<double, U, ColorSpace>(double_dst, dst);
   }
 
 } /* namespace Sara */

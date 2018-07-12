@@ -77,7 +77,7 @@ namespace DO { namespace Sara {
     // Second pass.
     for (int y = 0; y < values.height(); ++y)
       for (int x = 0; x < values.width(); ++x)
-        labels(x, y) = ds.component(labels(x, y));
+        labels(x, y) = int(ds.component(labels(x, y)));
 
     return labels;
   }
