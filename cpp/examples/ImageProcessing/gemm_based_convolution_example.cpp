@@ -119,60 +119,6 @@ int test_grayscale_image()
   return EXIT_SUCCESS;
 }
 
-
-auto convolve_image_mean33(const Image<Rgb32f>& image)
-  -> Image<Rgb32f>
-{
-  // Get the 3D float row-major tensor view in HxWxC format.
-  auto x =
-      tensor_view(image).reshape(Vector4i{1, image.height(), image.width(), 3});
-
-
-  auto convolved_image = Image<Rgb32f>{image.sizes()};
-  auto yt = tensor_view(convolved_image)
-                .reshape(Vector4i{1, image.height(), image.width(), 3});
-
-
-  constexpr auto kH = 3;
-  constexpr auto kW = 3;
-  constexpr auto kC = 3;
-
-  auto phi_x = im2col_strided(x, {1, kH, kW, kC}, {1, 1, 1, kC}, {0, 0, 0, 1});
-  cout << "phi = " << phi_x.matrix().rows() << " " << phi_x.matrix().cols()  << endl;
-
-  //                   kH x kW x kI  kO
-  Tensor_<float, 2> k{{ 3 *  3 *  3,  3}};
-
-  // Average on the R channel.
-  k.matrix().col(0) <<
-    1, 0, 0,  1, 0, 0,  1, 0, 0,
-    1, 0, 0,  1, 0, 0,  1, 0, 0,
-    1, 0, 0,  1, 0, 0,  1, 0, 0;
-
-  // Average on the G channel.
-  k.matrix().col(1) <<
-    0, 1, 0,  0, 1, 0,  0, 1, 0,
-    0, 1, 0,  0, 1, 0,  0, 1, 0,
-    0, 1, 0,  0, 1, 0,  0, 1, 0;
-
-  // Average on the B channel.
-  k.matrix().col(2) <<
-    0, 0, 1,  0, 0, 1,  0, 0, 1,
-    0, 0, 1,  0, 0, 1,  0, 0, 1,
-    0, 0, 1,  0, 0, 1,  0, 0, 1;
-  k.flat_array() /= 9;
-
-  cout << "k = " << k.matrix().rows() << " " << k.matrix().cols()  << endl;
-  cout << k.matrix()  << endl;
-
-  auto y = Tensor_<float, 4>{{1, 3, image.height(), image.width()}};
-  y.flat_array() = (phi_x.matrix() * k.matrix()).array();
-
-  yt = transpose(y, {0, 2, 3, 1});
-
-  return convolved_image;
-}
-
 int test_rgb_image()
 {
   // Read an image.
@@ -188,26 +134,28 @@ int test_rgb_image()
   auto h = image.height();
   auto w = image.width();
 
-  auto kernel = gaussian_kernel(5.f, 2);
-  auto kw = kernel.width();
-  auto kh = kernel.height();
-  auto kc = 3;
-  auto ksz = kernel.size();
+  const auto kernel = gaussian_kernel(3.f, 2);
+  const auto kw = kernel.width();
+  const auto kh = kernel.height();
+  const auto kc = 3;
+  const auto ksz = kernel.size();
   auto k = Tensor_<float, 2>{{kh * kw * 3, 3}};
+  //                   R plane              G plane              B plane
   k.matrix().col(0) << kernel.flat_array(), VectorXf::Zero(ksz), VectorXf::Zero(ksz);
   k.matrix().col(1) << VectorXf::Zero(ksz), kernel.flat_array(), VectorXf::Zero(ksz);
   k.matrix().col(2) << VectorXf::Zero(ksz), VectorXf::Zero(ksz), kernel.flat_array();
 
-  auto phi_x = im2col_strided(x, {1, kc, kh, kw}, {1, kc, 1, 1}, {0, 1, 0, 0});
+  auto phi_x = im2col_strided(x, {1, kc, kh, kw}, {1, kc, 2, 2}, {0, 1, 0, 0});
 
-  auto y = Tensor_<float, 4>{{1, 3, h, w}};
+  auto y = Tensor_<float, 4>{{1, 3, h / 2, w / 2}};
   y.flat_array() = (phi_x.matrix() * k.matrix()).array();
 
   y = transpose(y, Vector4i{0, 2, 3, 1});
 
-  auto convolved_image = ImageView<Rgb32f>{reinterpret_cast<Rgb32f *>(y.data()), {w, h}};
+  auto convolved_image =
+      ImageView<Rgb32f>{reinterpret_cast<Rgb32f*>(y.data()), {w / 2, h / 2}};
 
-  create_window(convolved_image.sizes());
+  create_window(image.sizes());
   display(image);
   get_key();
   display(convolved_image);
