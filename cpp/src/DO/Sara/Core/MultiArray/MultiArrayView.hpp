@@ -182,6 +182,7 @@ namespace DO { namespace Sara {
     {
       return _strides[i];
     }
+
     //! @{
     //! @brief Return the array pointer
     inline pointer data()
