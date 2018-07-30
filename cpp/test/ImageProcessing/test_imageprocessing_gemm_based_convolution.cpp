@@ -59,6 +59,7 @@ void print_3d_array(const TensorView_<T, 3>& x)
   cout << "]" << endl;
 }
 
+
 BOOST_AUTO_TEST_CASE(test_im2col)
 {
   constexpr auto N = 3;
@@ -105,61 +106,6 @@ BOOST_AUTO_TEST_CASE(test_im2col)
   cout << phi_x_as_5d[1][2][1].matrix() << endl << endl;
   cout << phi_x_as_5d[1][2][1].matrix() << endl << endl;
 }
-
-//BOOST_AUTO_TEST_CASE(test_im2col_strided)
-//{
-//  constexpr auto N = 3;
-//  constexpr auto H = 10;
-//  constexpr auto W = 10;
-//  auto x = Tensor_<float, 3>{{N, H, W}};
-//
-//  auto plane = Tensor_<float, 2>{{H, 3}};
-//  plane.matrix() <<
-//     0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
-//    10,11,12,13,14,15,16,17,18,19,
-//    20,21,22,23,24,25,26,27,28,29,
-//    30,31,32,33,34,35,36,37,38,39,
-//    40,41,42,43,44,45,46,47,48,49,
-//    50,51,52,53,54,55,56,57,58,59,
-//    60,61,62,63,64,66,66,67,68,69,
-//    70,71,72,73,74,75,76,77,78,79,
-//    80,81,82,83,84,85,86,87,88,89,
-//    90,91,92,93,94,95,96,97,98,99;
-//
-//  x.flat_array() <<            //
-//      1 * plane.flat_array(),  //
-//      2 * plane.flat_array(),  //
-//      3 * plane.flat_array();
-//
-//  constexpr auto kH = 3;
-//  constexpr auto kW = 3;
-//
-//  Vector3i strides{2, 2, 1};
-//
-//  auto phi_x = Tensor_<float, 2>{{N * H * W / 4, kH * kW}};
-//  auto phi_x_as_3d = phi_x.reshape(Vector3i{N, H* W, kH * kW});
-//
-//  // Apply im2col on each plane.
-//  phi_x_as_3d[0] = im2col(x[0], {kH, kW});
-//  phi_x_as_3d[1] = im2col(x[1], {kH, kW});
-//  phi_x_as_3d[2] = im2col(x[2], {kH, kW});
-//
-//  // Apply im2col on the whole batch.
-//  auto phi_x_2 = im2col(x, {1, kH, kW});
-//
-//  BOOST_CHECK(phi_x.sizes() == phi_x_2.sizes());
-//  BOOST_CHECK(phi_x.matrix() == phi_x_2.matrix());
-//
-//  auto sizes_5d = Matrix<int, 5, 1>{};
-//  sizes_5d << N, H, W, kH, kW;
-//  auto phi_x_as_5d = phi_x.reshape(sizes_5d);
-//
-//  cout << phi_x_as_5d[0][0][2].matrix() << endl << endl;
-//
-//  cout << phi_x_as_5d[1][0][0].matrix() << endl << endl;
-//  cout << phi_x_as_5d[1][2][1].matrix() << endl << endl;
-//  cout << phi_x_as_5d[1][2][1].matrix() << endl << endl;
-//}
 
 BOOST_AUTO_TEST_CASE(test_im2col_strided_on_nhwc_tensor)
 {
@@ -335,11 +281,9 @@ BOOST_AUTO_TEST_CASE(test_convolve_strided_on_nhwc_tensor)
   for (int i = 1; i < N; ++i)
     x[i].flat_array() = x[0].flat_array(); //(i + 1) * x[i - 1].flat_array();
 
-
   constexpr auto kH = 3;
   constexpr auto kW = 3;
   constexpr auto kC = 3;
-
 
   auto phi_x = im2col_strided(x, {N, kH, kW, kC}, {1, 1, 1, kC}, {0, 0, 0, 1});
   cout << "phi = " << phi_x.matrix().rows() << " " << phi_x.matrix().cols()  << endl;
@@ -373,39 +317,10 @@ BOOST_AUTO_TEST_CASE(test_convolve_strided_on_nhwc_tensor)
   auto y = Tensor_<float, 4>{{N, C, H, W}};
   y.flat_array() = (phi_x.matrix() * k.matrix()).array();
 
-  // Transpose the data.
-  auto yt = Tensor_<float, 4>{{N, H, W, C}};
-  for (auto b = 0; b < N; ++b)
-    for (auto c = 0; c < C; ++c)
-      for (auto v = 0; v < H; ++v)
-        for (auto u = 0; u < W; ++u)
-          yt({b, v, u, c}) = y({b, c, v, u});
+  auto yt = y.transpose({0, 2, 3, 1});
 
   print_3d_array(y[0]);
   print_3d_array(yt[0]);
-}
-
-template <typename T, int N>
-Tensor_<T, N> transpose(const TensorView_<T, N>& x, const Matrix<int, N, 1>& order)
-{
-  Matrix<int, N, 1> out_sizes;
-  for (int i = 0; i < N; ++i)
-    out_sizes[i] = x.size(order[i]);
-
-  Tensor_<T, N> out{out_sizes};
-
-  auto in_c = x.begin_array();
-  Matrix<int, N, 1> out_c = Matrix<int, N, 1>::Zero();
-
-  for ( ; !in_c.end(); ++in_c)
-  {
-    for (int i = 0; i < N; ++i)
-      out_c[i] = in_c.position()[order[i]];
-
-    out(out_c) = *in_c;
-  }
-
-  return out;
 }
 
 BOOST_AUTO_TEST_CASE(test_convolve_strided_on_nchw_tensor)
@@ -449,8 +364,7 @@ BOOST_AUTO_TEST_CASE(test_convolve_strided_on_nchw_tensor)
 
   auto y = Tensor_<float, 4>{{N, C, H, W}};
   y.flat_array() = (phi_x.matrix() * k.matrix()).array();
-
-  y = transpose(y, Vector4i{0, 2, 3, 1});
+  y = y.transpose(Vector4i{0, 2, 3, 1});
 
   print_3d_array(y[0]);
 }
