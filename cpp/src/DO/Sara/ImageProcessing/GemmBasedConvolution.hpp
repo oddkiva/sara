@@ -50,45 +50,9 @@ namespace DO { namespace Sara {
   }
 
   template <typename T, int N>
-  auto reshape_2d(TensorView_<T, N>& in, const Vector2i& shape)
-      -> TensorView_<T, 2>
-  {
-    return {in.data(), shape};
-  }
-
-  template <typename T, int N>
-  auto im2col(const TensorView_<T, N>& x, const Matrix<int, N, 1>& kernel_sizes)
-      -> Tensor_<T, 2>
-  {
-    const auto num_rows = std::accumulate(
-        x.sizes().data(), x.sizes().data() + N, 1, std::multiplies<int>());
-    const auto num_cols =
-        std::accumulate(kernel_sizes.data(), kernel_sizes.data() + N, 1,
-                        std::multiplies<int>());
-
-    auto phi_x = Tensor_<T, 2>{num_rows, num_cols};
-
-    const Matrix<int, N, 1> radius = kernel_sizes / 2;
-    int r = 0;
-    for (auto c = x.begin_array(); !c.end(); ++c, ++r)
-    {
-      const Matrix<int, N, 1> s = c.position() - radius;
-      const Matrix<int, N, 1> e =
-          c.position() + radius + Matrix<int, N, 1>::Ones();
-      auto p = patch(x, s, e);
-
-      phi_x.matrix().row(r) = vec(p).transpose();
-    }
-
-    return phi_x;
-  }
-
-  template <typename T, int N>
-  auto
-  im2col_strided(const TensorView_<T, N>& x,
-                 const Matrix<int, N, 1>& kernel_sizes,
-                 const Matrix<int, N, 1>& strides = Matrix<int, N, 1>::Ones(),
-                 const Matrix<int, N, 1>& shift = Matrix<int, N, 1>::Zero())
+  auto im2col(const TensorView_<T, N>& x, const Matrix<int, N, 1>& kernel_sizes,
+              const Matrix<int, N, 1>& strides = Matrix<int, N, 1>::Ones(),
+              const Matrix<int, N, 1>& shift = Matrix<int, N, 1>::Zero())
       -> Tensor_<T, 2>
   {
     // Pad sizes must be odd.
@@ -125,39 +89,61 @@ namespace DO { namespace Sara {
   }
 
   template <typename T, int N>
-  void gemm_convolve(TensorView_<T, N>& y,  //
-                     const TensorView_<T, N>& x, const TensorView_<T, N>& k)
+  void
+  gemm_convolve(TensorView_<T, N>& y,                   //
+                const TensorView_<T, N>& x,             //
+                const TensorView_<T, N>& k_transposed,  //
+                const Matrix<int, N, 1>& strides,
+                const Matrix<int, N, 1>& offset = Matrix<int, N, 1>::Zero())
   {
-    auto phi_x = im2col(x, k.sizes());
-    y.flat_array() = (phi_x.matrix() * vec(k)).array();
+    const auto& kt_ = k_transposed;
+    Matrix<int, N, 1> k_sizes;
+    k_sizes << kt_.sizes()[N - 1], kt_.sizes().head(N - 1);
+
+    // Determine the sizes of the kernel.
+    const auto krows = std::accumulate(k_sizes.data() + 1, k_sizes.data() + N, 1,
+                                       std::multiplies<int>());
+    const auto kcols = k_sizes[0];
+    auto kt = k_transposed.reshape(Vector2i{krows, kcols});
+
+    // calculate the feature maps for each nd-pixel.
+    k_sizes[0] = 1;
+    auto phi_x = im2col(x, k_sizes, strides, offset);
+
+    y.flat_array() = (phi_x.matrix() * kt.matrix()).array();
   }
 
   template <typename T, int N>
-  void gemm_convolve_strided(TensorView_<T, N>& y,  //
-                             const TensorView_<T, N>& x,
-                             const TensorView_<T, N>& k,
-                             const Matrix<int, N, 1>& strides,
-                             const Matrix<int, N, 1>& offset = Matrix<int, N, 1>::Zero())
+  auto
+  gemm_convolve(const TensorView_<T, N>& x,
+                const TensorView_<T, N>& k_transposed,
+                const Matrix<int, N, 1>& strides,
+                const Matrix<int, N, 1>& offset = Matrix<int, N, 1>::Zero())
+      -> Tensor_<T, N>
   {
-    auto phi_x = im2col_strided(x, k.sizes(), strides, offset);
-    y.flat_array() = (phi_x.matrix() * vec(k)).array();
-  }
+    const auto& kt_ = k_transposed;
+    Matrix<int, N, 1> k_sizes;
+    k_sizes << kt_.sizes()[N - 1], kt_.sizes().head(N - 1);
 
-  template <typename T, int N>
-  auto gemm_convolve_strided(const TensorView_<T, N>& x,
-                             const TensorView_<T, N>& k,
-                             const Matrix<int, N, 1>& strides,
-                             const Matrix<int, N, 1>& offset = Matrix<int, N, 1>::Zero())
-    -> Tensor_<T, N>
-  {
-    auto phi_x = im2col_strided(x, k.sizes(), strides, offset);
+    // Determine the sizes of the kernel.
+    const auto krows = std::accumulate(k_sizes.data() + 1, k_sizes.data() + N, 1,
+                                       std::multiplies<int>());
+    const auto kcols = k_sizes[0];
+    auto kt = k_transposed.reshape(Vector2i{krows, kcols});
 
-    const auto szs =
+    // calculate the feature maps for each nd-pixel.
+    k_sizes[0] = 1;
+    auto phi_x = im2col(x, k_sizes, strides, offset);
+
+    // Determine the sizes of the convolutional output.
+    auto y_sizes =
         x.begin_stepped_subarray(Matrix<int, N, 1>::Zero(), x.sizes(), strides)
             .stepped_subarray_sizes();
+    y_sizes[1] = kcols;
 
-    auto y = Tensor_<T, N>{szs};
-    y.flat_array() = (phi_x.matrix() * vec(k)).array();
+    // Perform the convolution.
+    auto y = Tensor_<T, N>{y_sizes};
+    y.flat_array() = (phi_x.matrix() * kt.matrix()).array();
 
     return y;
   }

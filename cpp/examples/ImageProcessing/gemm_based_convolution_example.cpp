@@ -23,29 +23,6 @@ using namespace std;
 using namespace DO::Sara;
 
 
-template <typename T, int N>
-Tensor_<T, N> transpose(const TensorView_<T, N>& x, const Matrix<int, N, 1>& order)
-{
-  Matrix<int, N, 1> out_sizes;
-  for (int i = 0; i < N; ++i)
-    out_sizes[i] = x.size(order[i]);
-
-  Tensor_<T, N> out{out_sizes};
-
-  auto in_c = x.begin_array();
-  Matrix<int, N, 1> out_c = Matrix<int, N, 1>::Zero();
-
-  for ( ; !in_c.end(); ++in_c)
-  {
-    for (int i = 0; i < N; ++i)
-      out_c[i] = in_c.position()[order[i]];
-
-    out(out_c) = *in_c;
-  }
-
-  return out;
-}
-
 // Compute the size of the Gaussian kernel.
 auto gaussian_kernel(float sigma, int gauss_truncate)
   -> Image<float>
@@ -80,80 +57,48 @@ auto gaussian_kernel(float sigma, int gauss_truncate)
   return kernel;
 };
 
-int test_grayscale_image()
-{
-  auto image = Image<float>{};
-  imread(image, "/home/david/GitHub/DO-CV/sara/data/sunflowerField.jpg");
-
-  //const auto kernel = gaussian_kernel(3.f, 2);
-  auto kernel = Image<float>{3, 3};
-  kernel.matrix() = Matrix3f::Ones() / 9;
-
-  auto x = tensor_view(image);
-  auto k = tensor_view(kernel);
-
-#ifdef DEBUG
-  const Vector2i strides{4, 4};
-  const auto xi = x.begin_stepped_subarray(Vector2i::Zero(), x.sizes(), strides);
-  auto szs = xi.stepped_subarray_sizes();
-  std::reverse(szs.data(), szs.data() + szs.size());
-
-  auto convolved_image = Image<float>{szs};
-  auto y = tensor_view(convolved_image);
-
-  gemm_convolve_strided(y, x, k, strides);
-#else
-  // Stride in HxW order.
-  const Vector2i strides{2, 2};
-  auto y = gemm_convolve_strided(x, k, strides);
-
-  auto convolved_image = image_view(y);
-#endif
-
-  create_window(convolved_image.sizes());
-  //display(convolved_image.compute<ColorRescale>());
-  display(convolved_image);
-  get_key();
-  close_window();
-
-  return EXIT_SUCCESS;
-}
-
-int test_rgb_image()
+GRAPHICS_MAIN()
 {
   // Read an image.
   auto image = Image<Rgb32f>{};
-  imread(image, "/home/david/GitHub/DO-CV/sara/data/sunflowerField.jpg");
+  imread(image, "/home/david/GitHub/DO-CV/sara/data/ksmall.jpg");
 
-  auto image_tensor =
-      tensor_view(image).reshape(Vector4i{1, image.height(), image.width(), 3});
-  // N H W C -> N C H W
-  // 0 1 2 3    0 3 1 2
-  auto x = transpose(image_tensor, Vector4i{0, 3, 1, 2});
+  const auto w = image.width();
+  const auto h = image.height();
 
-  auto h = image.height();
-  auto w = image.width();
+  // Transpose the image from NHWC to NCHW storage order.
+  //                          0123    0312
+  auto x = tensor_view(image)
+               .reshape(Vector4i{1, h, w, 3})
+               .transpose({0, 3, 1, 2});
 
-  const auto kernel = gaussian_kernel(3.f, 2);
+  // Create the gaussian smoothing kernel for RGB color values.
+  const auto kernel = gaussian_kernel(3.f, 4);
   const auto kw = kernel.width();
   const auto kh = kernel.height();
-  const auto kc = 3;
+  const auto kin = 3;
+  const auto kout = 3;
   const auto ksz = kernel.size();
-  auto k = Tensor_<float, 2>{{kh * kw * 3, 3}};
+  auto kt = Tensor_<float, 4>{{kin, kh, kw, kout}};
+
+  // Fill in the data.
+  auto k = kt.reshape(Vector2i{kin * kh * kw, kout});
   //                   R plane              G plane              B plane
   k.matrix().col(0) << kernel.flat_array(), VectorXf::Zero(ksz), VectorXf::Zero(ksz);
   k.matrix().col(1) << VectorXf::Zero(ksz), kernel.flat_array(), VectorXf::Zero(ksz);
   k.matrix().col(2) << VectorXf::Zero(ksz), VectorXf::Zero(ksz), kernel.flat_array();
 
-  auto phi_x = im2col_strided(x, {1, kc, kh, kw}, {1, kc, 2, 2}, {0, 1, 0, 0});
-
-  auto y = Tensor_<float, 4>{{1, 3, h / 2, w / 2}};
-  y.flat_array() = (phi_x.matrix() * k.matrix()).array();
-
-  y = transpose(y, Vector4i{0, 2, 3, 1});
+  // Convolve the image using the GEMM BLAS routine.
+  auto y = gemm_convolve(
+      x,               // the signal
+      kt,              // the transposed kernel.
+      {1, kin, 2, 2},  // strides in the convolution
+      {0, 1, 0, 0});   // pay attention to the offset here for the C dimension.
+  // Transpose the tensor data back to NHWC storage order to view the image.
+  y = y.transpose({0, 2, 3, 1});
 
   auto convolved_image =
-      ImageView<Rgb32f>{reinterpret_cast<Rgb32f*>(y.data()), {w / 2, h / 2}};
+      ImageView<Rgb32f>{reinterpret_cast<Rgb32f*>(y.data()), {y.size(2), y.size(1)}};
 
   create_window(image.sizes());
   display(image);
@@ -163,10 +108,4 @@ int test_rgb_image()
   close_window();
 
   return EXIT_SUCCESS;
-}
-
-GRAPHICS_MAIN()
-{
-  //return test_grayscale_image();
-  return test_rgb_image();
 }
