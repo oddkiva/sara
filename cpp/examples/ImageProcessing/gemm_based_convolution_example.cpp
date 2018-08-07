@@ -57,6 +57,31 @@ auto gaussian_kernel(float sigma, int gauss_truncate)
   return kernel;
 };
 
+auto gaussian_tensor_nchw(float sigma, int gauss_truncate)
+  -> Tensor_<float, 4>
+{
+  const auto kim = gaussian_kernel(sigma, gauss_truncate);
+  auto k = kim.flat_array();
+
+  const auto kw = kim.width();
+  const auto kh = kim.height();
+  const auto ksz = kim.size();
+  const auto kin = 3;
+  const auto kout = 3;
+
+  auto kt = Tensor_<float, 4>{{kin, kh, kw, kout}};
+  auto z = VectorXf::Zero(ksz);
+
+  // Fill in the data.
+  auto ktr = kt.reshape(Vector2i{kin * kh * kw, kout});
+  // Plane               R  G  B
+  ktr.matrix().col(0) << k, z, z;
+  ktr.matrix().col(1) << z, k, z;
+  ktr.matrix().col(2) << z, z, k;
+
+  return kt;
+}
+
 GRAPHICS_MAIN()
 {
   // Read an image.
@@ -73,27 +98,14 @@ GRAPHICS_MAIN()
                .transpose({0, 3, 1, 2});
 
   // Create the gaussian smoothing kernel for RGB color values.
-  const auto kernel = gaussian_kernel(3.f, 4);
-  const auto kw = kernel.width();
-  const auto kh = kernel.height();
-  const auto kin = 3;
-  const auto kout = 3;
-  const auto ksz = kernel.size();
-  auto kt = Tensor_<float, 4>{{kin, kh, kw, kout}};
-
-  // Fill in the data.
-  auto k = kt.reshape(Vector2i{kin * kh * kw, kout});
-  //                   R plane              G plane              B plane
-  k.matrix().col(0) << kernel.flat_array(), VectorXf::Zero(ksz), VectorXf::Zero(ksz);
-  k.matrix().col(1) << VectorXf::Zero(ksz), kernel.flat_array(), VectorXf::Zero(ksz);
-  k.matrix().col(2) << VectorXf::Zero(ksz), VectorXf::Zero(ksz), kernel.flat_array();
+  auto kt = gaussian_tensor_nchw(3.f, 4);
 
   // Convolve the image using the GEMM BLAS routine.
   auto y = gemm_convolve(
-      x,               // the signal
-      kt,              // the transposed kernel.
-      {1, kin, 2, 2},  // strides in the convolution
-      {0, 1, 0, 0});   // pay attention to the offset here for the C dimension.
+      x,                      // the signal
+      kt,                     // the transposed kernel.
+      {1, kt.size(0), 2, 2},  // strides in the convolution
+      {0, 1, 0, 0});  // pay attention to the offset here for the C dimension.
   // Transpose the tensor data back to NHWC storage order to view the image.
   y = y.transpose({0, 2, 3, 1});
 
