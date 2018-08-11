@@ -88,6 +88,14 @@ namespace DO { namespace Sara {
     return phi_x;
   }
 
+  //! @{
+  //! @brief Apply the GEMM-based convolution.
+  /*! The implementation is valid only for interleaved data:
+   *  - NCHW,   image stored as interleaved channel.
+   *  - NCDHW,  volumic data stored as interleaved channel.
+   *  - NCTHW,  2d video interleaved planar data.
+   *  - NCTDHW  3d video interleaved planar data.
+   */
   template <typename T, int N>
   void
   gemm_convolve(TensorView_<T, N>& y,                   //
@@ -147,6 +155,7 @@ namespace DO { namespace Sara {
 
     return y;
   }
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */
