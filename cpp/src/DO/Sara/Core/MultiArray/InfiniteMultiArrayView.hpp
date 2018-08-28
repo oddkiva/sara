@@ -199,6 +199,7 @@ namespace DO { namespace Sara {
     using value_type = typename ArrayView::value_type;
 
     enum { StorageOrder = ArrayView::StorageOrder };
+    enum { Dimension = ArrayView::Dimension };
 
     inline InfiniteMultiArrayView(const ArrayView& f, const Padding& pad)
       : _f(f)

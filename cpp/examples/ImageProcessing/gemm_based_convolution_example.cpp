@@ -44,7 +44,7 @@ auto patch2(const MultiArrayView<T, N, O>& in,  //
     -> MultiArray<T, N, O>
 {
   auto dst = MultiArray<T, N, O>{end - beg};
-  safe_crop2(dst, in, begin, end, pad);
+  safe_crop2(dst, in, beg, end, pad);
   return dst;
 }
 
