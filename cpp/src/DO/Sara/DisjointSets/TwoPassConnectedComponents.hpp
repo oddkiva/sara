@@ -11,11 +11,14 @@
 
 #pragma once
 
+#include <DO/Sara/Defines.hpp>
+
 #include <DO/Sara/DisjointSets/DisjointSets.hpp>
 
 
 namespace DO { namespace Sara {
 
+  DO_SARA_EXPORT
   auto two_pass_connected_components(const ImageView<int, 2>& values)
       -> Image<int, 2>;
 
