@@ -88,6 +88,7 @@ namespace DO { namespace Sara {
     return phi_x;
   }
 
+
   //! @{
   //! @brief Apply the GEMM-based convolution.
   /*! The implementation is valid only for interleaved data:

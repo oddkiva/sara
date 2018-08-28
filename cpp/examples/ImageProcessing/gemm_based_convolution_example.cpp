@@ -22,6 +22,108 @@
 using namespace std;
 using namespace DO::Sara;
 
+template <typename T, int N, int O>
+void safe_crop2(MultiArrayView<T, N, O>& dst, const MultiArrayView<T, N, O>& src,
+               const Matrix<int, N, 1>& begin, const Matrix<int, N, 1>& end,
+               const PeriodicPadding& padding)
+{
+  if (dst.sizes() != end - begin)
+    throw std::domain_error{"Invalid destination sizes!"};
+
+  const auto inf_src = make_infinite(src, padding);
+  auto src_i = inf_src.begin_subarray(begin, end);
+
+  for (auto dst_i = dst.begin(); dst_i != dst.end(); ++src_i, ++dst_i)
+    *dst_i = *src_i;
+}
+
+template <typename T, int N, int O>
+auto patch2(const MultiArrayView<T, N, O>& in,  //
+            const Matrix<int, N, 1>& beg, const Matrix<int, N, 1>& end,
+            const PeriodicPadding& pad)
+    -> MultiArray<T, N, O>
+{
+  auto dst = MultiArray<T, N, O>{end - beg};
+  safe_crop2(dst, in, begin, end, pad);
+  return dst;
+}
+
+
+template <typename T, int N>
+auto im2col2(
+    const TensorView_<T, N>& x,             //
+    const Matrix<int, N, 1>& kernel_sizes,  //
+    const PeriodicPadding& padding,
+    const Matrix<int, N, 1>& strides = Matrix<int, N, 1>::Ones(),
+    const Matrix<int, N, 1>& shift = Matrix<int, N, 1>::Zero()) -> Tensor_<T, 2>
+{
+  // Pad sizes must be odd.
+  const Matrix<int, N, 1> radius = kernel_sizes / 2;
+  const Matrix<int, N, 1> begin = Matrix<int, N, 1>::Zero();
+  const Matrix<int, N, 1> end = x.sizes();
+
+  // Initialize the strided subarray iterator.
+  auto xi = x.begin_stepped_subarray(begin, end, strides);
+
+  const auto sizes = xi.stepped_subarray_sizes();
+
+  // Compute the matrix dimensions.
+  const auto num_rows = std::accumulate(
+      sizes.data(), sizes.data() + sizes.size(), 1, std::multiplies<int>());
+  const auto num_cols = std::accumulate(
+      kernel_sizes.data(), kernel_sizes.data() + N, 1, std::multiplies<int>());
+
+  auto phi_x = Tensor_<T, 2>{num_rows, num_cols};
+
+  for (int r = 0; !xi.end(); ++xi, ++r)
+  {
+    const Matrix<int, N, 1> s = xi.position() - radius + shift;
+    const Matrix<int, N, 1> e =
+        xi.position() + radius + Matrix<int, N, 1>::Ones() + shift;
+
+    auto p = patch2(x, s, e, padding);
+
+    phi_x.matrix().row(r) = vec(p).transpose();
+  }
+
+  return phi_x;
+}
+
+template <typename T, int N>
+auto gemm_convolve2(const TensorView_<T, N>& x,
+                   const TensorView_<T, N>& k_transposed,
+                   const PeriodicPadding& padding,
+                   const Matrix<int, N, 1>& strides,
+                   const Matrix<int, N, 1>& offset = Matrix<int, N, 1>::Zero())
+    -> Tensor_<T, N>
+{
+  const auto& kt_ = k_transposed;
+  Matrix<int, N, 1> k_sizes;
+  k_sizes << kt_.sizes()[N - 1], kt_.sizes().head(N - 1);
+
+  // Determine the sizes of the kernel.
+  const auto krows = std::accumulate(k_sizes.data() + 1, k_sizes.data() + N, 1,
+                                     std::multiplies<int>());
+  const auto kcols = k_sizes[0];
+  auto kt = k_transposed.reshape(Vector2i{krows, kcols});
+
+  // calculate the feature maps for each nd-pixel.
+  k_sizes[0] = 1;
+  auto phi_x = im2col2(x, k_sizes, padding, strides, offset);
+
+  // Determine the sizes of the convolutional output.
+  auto y_sizes =
+      x.begin_stepped_subarray(Matrix<int, N, 1>::Zero(), x.sizes(), strides)
+          .stepped_subarray_sizes();
+  y_sizes[1] = kcols;
+
+  // Perform the convolution.
+  auto y = Tensor_<T, N>{y_sizes};
+  y.flat_array() = (phi_x.matrix() * kt.matrix()).array();
+
+  return y;
+  }
+  //! @}
 
 // Compute the size of the Gaussian kernel.
 auto gaussian_kernel(float sigma, int gauss_truncate)
@@ -97,14 +199,17 @@ GRAPHICS_MAIN()
                .reshape(Vector4i{1, h, w, 3})
                .transpose({0, 3, 1, 2});
 
+  auto pad = PeriodicPadding{};
+
   // Create the gaussian smoothing kernel for RGB color values.
   auto kt = gaussian_tensor_nchw(3.f, 4);
 
   // Convolve the image using the GEMM BLAS routine.
-  auto y = gemm_convolve(
+  auto y = gemm_convolve2(
       x,                      // the signal
       kt,                     // the transposed kernel.
-      {1, kt.size(0), 2, 2},  // strides in the convolution
+      pad,                    // the padding type
+      {1, kt.size(0), 1, 1},  // strides in the convolution
       {0, 1, 0, 0});  // pay attention to the offset here for the C dimension.
   // Transpose the tensor data back to NHWC storage order to view the image.
   y = y.transpose({0, 2, 3, 1});
