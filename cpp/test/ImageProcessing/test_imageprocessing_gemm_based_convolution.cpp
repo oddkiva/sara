@@ -345,8 +345,7 @@ BOOST_AUTO_TEST_CASE(test_convolve_on_nchw_tensor)
 
   auto phi_x = im2col(x, {N, kC, kH, kW}, {1, kC, 1, 1}, {0, 1, 0, 0});
   // [N * C/kC * H/kH * W/kW, kC * kH * kW]
-  //cout << "phi = " << phi_x.matrix().rows() << " " << phi_x.matrix().cols()  << endl;
-  //cout << phi_x.matrix() << endl;
+  // cout << phi_x.matrix() << endl;
 
   //                   kC x kH x kW  kO
   Tensor_<float, 2> k{{ 3 *  3 *  3,  3}};
@@ -374,39 +373,4 @@ BOOST_AUTO_TEST_CASE(test_convolve_on_nchw_tensor)
 
   //y = y.transpose(Vector4i{0, 2, 3, 1});
   //print_3d_array(y[0]);
-}
-
-BOOST_AUTO_TEST_CASE(test_transposed_convolution)
-{
-  auto a = MatrixXf{3, 4};
-  a <<
-    0, 1, 2, 3,
-    4, 5, 6, 7,
-    8, 9,10,11;
-
-  auto aa = MatrixXf{6, 8};
-  a <<
-    0.0, 0.5, 1.0, 1.5, 2., 2.5, 3.0, 3.5,
-    2.0, 2.5, 3.0, 3.5,
-    4.0, 4.5, 5.0, 5.5;
-
-  /*
-   * 0
-   * 1
-   * 2
-   * 3
-   * 4
-   * 5
-   * 6
-   * 7
-   * 8
-   * 9
-   * 10
-   * 11
-   */
-
-  auto k = MatrixXf{};
-  k <<
-    1.0, 0.5
-
 }

@@ -22,38 +22,39 @@
 using namespace std;
 using namespace DO::Sara;
 
-template <typename T, int N, int O>
-void safe_crop2(MultiArrayView<T, N, O>& dst, const MultiArrayView<T, N, O>& src,
-               const Matrix<int, N, 1>& begin, const Matrix<int, N, 1>& end,
-               const PeriodicPadding& padding)
+
+template <typename DstArrayView, typename SrcArrayView>
+void safe_crop_generic(DstArrayView& dst, const SrcArrayView& src,
+                       const typename SrcArrayView::vector_type& begin,
+                       const typename SrcArrayView::vector_type& end)
 {
   if (dst.sizes() != end - begin)
     throw std::domain_error{"Invalid destination sizes!"};
 
-  const auto inf_src = make_infinite(src, padding);
-  auto src_i = inf_src.begin_subarray(begin, end);
+  auto src_i = src.begin_subarray(begin, end);
 
   for (auto dst_i = dst.begin(); dst_i != dst.end(); ++src_i, ++dst_i)
     *dst_i = *src_i;
 }
 
-template <typename T, int N, int O>
-auto patch2(const MultiArrayView<T, N, O>& in,  //
-            const Matrix<int, N, 1>& beg, const Matrix<int, N, 1>& end,
-            const PeriodicPadding& pad)
-    -> MultiArray<T, N, O>
+
+template <typename DstArrayView, typename SrcArrayView>
+void patch_generic(DstArrayView& dst,
+                   const SrcArrayView& src,
+                   const typename SrcArrayView::vector_type& begin,
+                   const typename SrcArrayView::vector_type& end)
 {
-  auto dst = MultiArray<T, N, O>{end - beg};
-  safe_crop2(dst, in, beg, end, pad);
-  return dst;
+  if (dst.sizes() != end - begin)
+    throw std::domain_error{"Invalid destination sizes on image patch extraction!"};
+  safe_crop_generic(dst, src, begin, end);
 }
 
 
-template <typename T, int N>
-auto im2col2(
+template <typename T, int N, typename Padding>
+auto im2col_generic(
     const TensorView_<T, N>& x,             //
     const Matrix<int, N, 1>& kernel_sizes,  //
-    const PeriodicPadding& padding,
+    const Padding& padding,
     const Matrix<int, N, 1>& strides = Matrix<int, N, 1>::Ones(),
     const Matrix<int, N, 1>& shift = Matrix<int, N, 1>::Zero()) -> Tensor_<T, 2>
 {
@@ -63,7 +64,8 @@ auto im2col2(
   const Matrix<int, N, 1> end = x.sizes();
 
   // Initialize the strided subarray iterator.
-  auto xi = x.begin_stepped_subarray(begin, end, strides);
+  auto infx = make_infinite(x, padding);
+  auto xi = infx.begin_stepped_subarray(begin, end, strides);
 
   const auto sizes = xi.stepped_subarray_sizes();
 
@@ -81,7 +83,8 @@ auto im2col2(
     const Matrix<int, N, 1> e =
         xi.position() + radius + Matrix<int, N, 1>::Ones() + shift;
 
-    auto p = patch2(x, s, e, padding);
+    auto p = Tensor_<T, N>{e - s};
+    patch_generic(p, infx, s, e);
 
     phi_x.matrix().row(r) = vec(p).transpose();
   }
@@ -89,12 +92,14 @@ auto im2col2(
   return phi_x;
 }
 
-template <typename T, int N>
-auto gemm_convolve2(const TensorView_<T, N>& x,
-                   const TensorView_<T, N>& k_transposed,
-                   const PeriodicPadding& padding,
-                   const Matrix<int, N, 1>& strides,
-                   const Matrix<int, N, 1>& offset = Matrix<int, N, 1>::Zero())
+
+template <typename T, int N, typename Padding>
+auto gemm_convolve_generic(
+    const TensorView_<T, N>& x,   //
+    const TensorView_<T, N>& k_transposed,
+    const Padding& padding,
+    const Matrix<int, N, 1>& strides,
+    const Matrix<int, N, 1>& offset = Matrix<int, N, 1>::Zero())
     -> Tensor_<T, N>
 {
   const auto& kt_ = k_transposed;
@@ -109,7 +114,7 @@ auto gemm_convolve2(const TensorView_<T, N>& x,
 
   // calculate the feature maps for each nd-pixel.
   k_sizes[0] = 1;
-  auto phi_x = im2col2(x, k_sizes, padding, strides, offset);
+  auto phi_x = im2col_generic(x, k_sizes, padding, strides, offset);
 
   // Determine the sizes of the convolutional output.
   auto y_sizes =
@@ -122,12 +127,11 @@ auto gemm_convolve2(const TensorView_<T, N>& x,
   y.flat_array() = (phi_x.matrix() * kt.matrix()).array();
 
   return y;
-  }
-  //! @}
+}
+
 
 // Compute the size of the Gaussian kernel.
-auto gaussian_kernel(float sigma, int gauss_truncate)
-  -> Image<float>
+auto gaussian_kernel(float sigma, int gauss_truncate) -> Image<float>
 {
   auto kernel_size = int(2 * gauss_truncate * sigma + 1);
   // Make sure the Gaussian kernel is at least of size 3 and is of odd size.
@@ -157,10 +161,9 @@ auto gaussian_kernel(float sigma, int gauss_truncate)
   kernel.flat_array() /= sum;
 
   return kernel;
-};
+}
 
-auto gaussian_tensor_nchw(float sigma, int gauss_truncate)
-  -> Tensor_<float, 4>
+auto gaussian_tensor_nchw(float sigma, int gauss_truncate) -> Tensor_<float, 4>
 {
   const auto kim = gaussian_kernel(sigma, gauss_truncate);
   auto k = kim.flat_array();
@@ -184,6 +187,7 @@ auto gaussian_tensor_nchw(float sigma, int gauss_truncate)
   return kt;
 }
 
+
 GRAPHICS_MAIN()
 {
   // Read an image.
@@ -199,16 +203,14 @@ GRAPHICS_MAIN()
                .reshape(Vector4i{1, h, w, 3})
                .transpose({0, 3, 1, 2});
 
-  auto pad = PeriodicPadding{};
-
   // Create the gaussian smoothing kernel for RGB color values.
-  auto kt = gaussian_tensor_nchw(3.f, 4);
+  auto kt = gaussian_tensor_nchw(5.f, 2);
 
   // Convolve the image using the GEMM BLAS routine.
-  auto y = gemm_convolve2(
+  auto y = gemm_convolve_generic(
       x,                      // the signal
       kt,                     // the transposed kernel.
-      pad,                    // the padding type
+      PeriodicPadding{},      // the padding type
       {1, kt.size(0), 1, 1},  // strides in the convolution
       {0, 1, 0, 0});  // pay attention to the offset here for the C dimension.
   // Transpose the tensor data back to NHWC storage order to view the image.
