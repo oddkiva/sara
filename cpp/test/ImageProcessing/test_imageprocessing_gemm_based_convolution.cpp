@@ -180,7 +180,7 @@ BOOST_AUTO_TEST_CASE(test_im2col_on_nhwc_tensor)
   for (int i = 1; i < N; ++i)
     x[i].flat_array() = x[0].flat_array(); //(i + 1) * x[i - 1].flat_array();
 
-  print_3d_array(x[0]);
+  //print_3d_array(x[0]);
 
   constexpr auto kH = 3;
   constexpr auto kW = 3;
@@ -267,8 +267,6 @@ BOOST_AUTO_TEST_CASE(test_convolve_on_nhwc_tensor)
   constexpr auto kC = 3;
 
   auto phi_x = im2col(x, {1, kH, kW, kC}, {1, 1, 1, kC}, {0, 0, 0, 1});
-  //cout << "phi = " << phi_x.matrix().rows() << " " << phi_x.matrix().cols()  << endl;
-  //cout << phi_x.matrix() << endl;
 
   //                   kH x kW x kI  kO
   Tensor_<float, 2> k{{ 3 *  3 *  3,  3}};
@@ -290,9 +288,6 @@ BOOST_AUTO_TEST_CASE(test_convolve_on_nhwc_tensor)
     0, 0, 1,  0, 0, 1,  0, 0, 1,
     0, 0, 1,  0, 0, 1,  0, 0, 1,
     0, 0, 1,  0, 0, 1,  0, 0, 1;
-
-  //cout << "k = " << k.matrix().rows() << " " << k.matrix().cols()  << endl;
-  //cout << k.matrix()  << endl;
 
   auto y = Tensor_<float, 4>{{N, C, H, W}};
   y.flat_array() = (phi_x.matrix() * k.matrix()).array();
@@ -373,4 +368,243 @@ BOOST_AUTO_TEST_CASE(test_convolve_on_nchw_tensor)
 
   //y = y.transpose(Vector4i{0, 2, 3, 1});
   //print_3d_array(y[0]);
+}
+
+auto square_toeplitz(const std::vector<float>& a)
+  -> MatrixXf
+{
+  const int m = a.size() / 2 + 1;
+  const int n = a.size() / 2 + 1;
+  MatrixXf A = MatrixXf::Zero(m, n);
+  for (int i = 0; i < m; ++i)
+    for (int j = 0; j < n; ++j)
+    {
+      A(i, j) = a[i - j + n - 1];
+    }
+  return A;
+}
+
+auto causal_toeplitz_coeff(const MatrixXf& kernel,  //
+                           int h,
+                           int w)  // Upper part is zero everywhere
+    -> std::vector<float>
+{
+  auto kh = kernel.rows();
+  auto kw = kernel.cols();
+
+  auto a = std::vector<float>(h * w, 0.f);
+  for (int y = 0; y < kh; ++y)
+    for (int x = 0; x < kw; ++x)
+      a[y*w + x] = kernel(y, x);
+
+  return a;
+}
+
+auto dense_causal_toeplitz(const std::vector<float>& t, int m, int n)
+    -> MatrixXf
+{
+  MatrixXf T = MatrixXf::Zero(m, n);
+  for (int i = 0; i < m; ++i)
+    for (int j = 0; j <= i; ++j)
+      T(i, j) = t[i - j];
+
+  return T;
+}
+
+template <typename DstArrayView, typename SrcArrayView>
+void safe_crop_generic(DstArrayView& dst, const SrcArrayView& src,
+                       const typename SrcArrayView::vector_type& begin,
+                       const typename SrcArrayView::vector_type& end)
+{
+  if (dst.sizes() != end - begin)
+    throw std::domain_error{"Invalid destination sizes!"};
+
+  auto src_i = src.begin_subarray(begin, end);
+
+  for (auto dst_i = dst.begin(); dst_i != dst.end(); ++src_i, ++dst_i)
+    *dst_i = *src_i;
+}
+
+BOOST_AUTO_TEST_CASE(test_toeplitz_matrix_construction)
+{
+  const std::vector<float> a = {-4, -3, -2, -1, 0, 1, 2, 3, 4};
+  const auto A = square_toeplitz(a);
+
+  const auto h = 3;
+  const auto w = 3;
+
+  const auto kh = 2;
+  const auto kw = 2;
+
+  const auto padded_h = 2 * (kh - 1) + h;
+  const auto padded_w = 2 * (kw - 1) + w;
+
+  const auto f = 2;
+  const auto nh = h * f;
+  const auto nw = w * f;
+
+  MatrixXf K = MatrixXf::Ones(kh, kw);
+  std::cout << "K =\n" << K << std::endl;
+
+  auto Tk_coeff = causal_toeplitz_coeff(K, padded_h, padded_w);
+  std::cout << "sparse_toeplitz(K) =\n" << std::endl;
+  for (const auto t : Tk_coeff)
+    std::cout << t << " ";
+  std::cout << std::endl;
+
+  auto Tk = dense_causal_toeplitz(Tk_coeff, padded_h * padded_w, nh * nw);
+  std::cout << "Dense Toeplitz(k) =" << std::endl;
+  std::cout << Tk << std::endl;
+
+  Tk /= kh * kw;
+
+  Tensor_<float, 2> x(h, w);
+  x.matrix() <<
+    1, 2, 3,
+    4, 5, 6,
+    7, 8, 9;
+  std::cout << "x =\n" << x.matrix() << std::endl;
+
+  //auto infx = make_infinite(x, make_constant_padding(0.f));
+  //auto beg = Vector2i{-kh + 1, -kw + 1};
+  //auto end = Vector2i{h + kh, w + kw};
+  //auto padded_x =
+  //    Tensor_<float, 2>{infx.begin_stepped_subarray(beg, end, Vector2i::Ones())
+  //                          .stepped_subarray_sizes()};
+  //safe_crop_generic(padded_x, infx, beg, end);
+  //std::cout << "padded_x =\n" << padded_x.matrix() << std::endl;
+  // TODO: create special padding.
+  Tensor_<float, 2> padded_x{h + (kh - 1) * 2, w + (kw - 1) * 2};
+  padded_x.matrix() <<
+    1, 1, 2, 3, 3,
+    1, 1, 2, 3, 3,
+    4, 4, 5, 6, 6,
+    7, 7, 8, 9, 9,
+    7, 7, 8, 9, 9;
+  std::cout << "padded_x =\n" << padded_x.matrix() << std::endl;
+
+
+  //auto vec_x = vec(padded_x);
+  //std::cout << "vec_x =\n" << vec_x << std::endl;
+
+  //RowVectorXf y = vec_x.transpose() * Tk;
+  //std::cout << "y=\n" << y << std::endl;
+
+  //Map<MatrixXf> Y(y.data(), nh, nw);
+  //std::cout << "Y=\n" << Y << std::endl;
+}
+
+BOOST_AUTO_TEST_CASE(test_block_toeplitz_matrix_construction)
+{
+  const auto h = 3;
+  const auto w = 3;
+
+  const auto kh = 2;
+  const auto kw = 2;
+
+  const auto padded_h = 2 * (kh - 1) + h;
+  const auto padded_w = 2 * (kw - 1) + w;
+
+  const auto f = 2;
+  const auto nh = h * f;
+  const auto nw = w * f;
+
+  MatrixXf K = MatrixXf::Ones(kh, kw);
+  std::cout << "K =\n" << K << std::endl;
+
+  Tensor_<float, 2> x(h, w);
+  x.matrix() <<
+    1, 2, 3,
+    4, 5, 6,
+    7, 8, 9;
+  std::cout << "x =\n" << x.matrix() << std::endl;
+
+  //auto infx = make_infinite(x, make_constant_padding(0.f));
+  //auto beg = Vector2i{-kh + 1, -kw + 1};
+  //auto end = Vector2i{h + kh, w + kw};
+  //auto padded_x =
+  //    Tensor_<float, 2>{infx.begin_stepped_subarray(beg, end, Vector2i::Ones())
+  //                          .stepped_subarray_sizes()};
+  //safe_crop_generic(padded_x, infx, beg, end);
+  //std::cout << "padded_x =\n" << padded_x.matrix() << std::endl;
+  // TODO: create special padding.
+  Tensor_<float, 2> padded_x{h + (kh - 1) * 2, w + (kw - 1) * 2};
+  padded_x.matrix() <<
+    1,  1, 2, 3,  3,
+    //
+    1,  1, 2, 3,  3,
+    4,  4, 5, 6,  6,
+    7,  7, 8, 9,  9,
+    //
+    7,  7, 8, 9,  9;
+  std::cout << "padded_x =\n" << padded_x.matrix() << std::endl;
+
+  auto vec_x = vec(padded_x);
+  std::cout << "vec_x =\n" << vec_x << std::endl;
+
+  MatrixXf Tk = MatrixXf::Zero(nh * nw, padded_h * padded_w);
+
+  // i = y * w * f + x * f; + frac;
+  // y  in [0,..., h-1]
+  // x  in [0,..., w-1]
+  // fy in [0,..., f-1]
+  // fx in [0,..., f-1]
+  for (int y = 0; y < h; ++y)
+  {
+    for (int fy = 0; fy < f; ++fy)
+    {
+      for (int x = 0; x < w; ++x)
+      {
+        for (int fx = 0; fx < f; ++fx)
+        {
+          auto i = (f * y + fy) * f * w + f * x + fx;
+
+          auto j1 = padded_w * y + x;
+          Tk(i, j1) = 1.;
+        }
+      }
+    }
+  }
+
+  for (int i = 0; i < Tk.rows(); ++i)
+  {
+    for (int j = 0; j < Tk.cols(); ++j)
+    {
+      if (i % f == 0)
+      {
+        // Apply the following stencil.
+        // 1.0 0.0 0.0 0.0 0.0
+        // 0.0 0.0 0.0 0.0 0.0
+        // 0.0 0.0 0.0 0.0 0.0
+        // 0.0 0.0 0.0 0.0 0.0
+        // 0.0 0.0 0.0 0.0 0.0
+        //
+        // 0.5 0.5 0.0 0.0 0.0
+        // 0.0 0.0 0.0 0.0 0.0
+        // 0.0 0.0 0.0 0.0 0.0
+        // 0.0 0.0 0.0 0.0 0.0
+        // 0.0 0.0 0.0 0.0 0.0
+
+        if (j == 
+        Tk(i, j) = 0.5;
+    }
+  }
+
+  // 0.5 0.0 0.0 0.0 0.0
+  // 0.5 0.0 0.0 0.0 0.0
+  // 0.0 0.0 0.0 0.0 0.0
+  // 0.0 0.0 0.0 0.0 0.0
+  // 0.0 0.0 0.0 0.0 0.0
+
+  // 0.25 0.25 0.0 0.0 0.0
+  // 0.25 0.25 0.0 0.0 0.0
+  // 0.00 0.00 0.0 0.0 0.0
+  // 0.00 0.00 0.0 0.0 0.0
+  // 0.00 0.00 0.0 0.0 0.0
+
+  RowVectorXf y = vec_x.transpose() * Tk;
+  std::cout << "y=\n" << y << std::endl;
+
+  Map<MatrixXf> Y(y.data(), nh, nw);
+  std::cout << "Y=\n" << Y << std::endl;
 }

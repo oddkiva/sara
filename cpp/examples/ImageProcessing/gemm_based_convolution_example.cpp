@@ -37,19 +37,6 @@ void safe_crop_generic(DstArrayView& dst, const SrcArrayView& src,
     *dst_i = *src_i;
 }
 
-
-template <typename DstArrayView, typename SrcArrayView>
-void patch_generic(DstArrayView& dst,
-                   const SrcArrayView& src,
-                   const typename SrcArrayView::vector_type& begin,
-                   const typename SrcArrayView::vector_type& end)
-{
-  if (dst.sizes() != end - begin)
-    throw std::domain_error{"Invalid destination sizes on image patch extraction!"};
-  safe_crop_generic(dst, src, begin, end);
-}
-
-
 template <typename T, int N, typename Padding>
 auto im2col_generic(
     const TensorView_<T, N>& x,             //
@@ -84,7 +71,7 @@ auto im2col_generic(
         xi.position() + radius + Matrix<int, N, 1>::Ones() + shift;
 
     auto p = Tensor_<T, N>{e - s};
-    patch_generic(p, infx, s, e);
+    safe_crop_generic(p, infx, s, e);
 
     phi_x.matrix().row(r) = vec(p).transpose();
   }
