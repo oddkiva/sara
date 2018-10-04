@@ -174,6 +174,74 @@ auto gaussian_tensor_nchw(float sigma, int gauss_truncate) -> Tensor_<float, 4>
   return kt;
 }
 
+auto upsample_2x2(const Image<Rgb32f>& image)
+  -> Image<Rgb32f>
+{
+  const auto h = image.height();
+  const auto w = image.width();
+
+  // Transpose the image into CHW format.
+  auto x = tensor_view(image)
+    .reshape(Vector3i{h, w, 3})
+    .transpose({2, 0, 1});
+  // Initialize the strided subarray iterator.
+  auto infx = make_infinite(x, PeriodicPadding{});
+
+  // Pad the image.
+  auto px = Tensor_<float, 3>{3, h + 1, w + 1};
+  safe_crop_generic(px, infx, Vector3i::Zero(),
+                    Vector3i{3, h + 1, w + 1});
+
+  const auto kh = 2;
+  const auto kw = 2;
+  auto k_base = Tensor_<float, 4>{Vector4i{kh, kw, kh, kw}};
+  k_base[0][0].matrix() <<
+    1, 0,
+    0, 0;
+  k_base[0][1].matrix() <<
+    0.5, 0.5,
+    0.0, 0.0;
+  k_base[1][0].matrix() <<
+    0.5, 0.0,
+    0.5, 0.0;
+  k_base[1][1].matrix() <<
+    0.25, 0.25,
+    0.25, 0.25;
+
+  const auto k_base_padded_shape = Vector4i{kh, kw, px.size(1), px.size(2)};
+  std::cout << k_base_padded_shape.transpose() << std::endl;
+  auto k_base_padded = Tensor_<float, 4>{k_base_padded_shape};
+  for (auto i = 0; i < kh; ++i)
+    for (auto j = 0; j < kw; ++j)
+      k_base_padded[i][j].matrix().bottomLeftCorner(kh, kw) =
+          k_base[i][j].matrix();
+
+  const auto K_shape =
+      Vector4i{kh * x.size(1), kw * x.size(2), px.size(1), px.size(2)};
+  std::cout << K_shape.transpose() << std::endl;
+
+  auto K = Tensor_<float, 4>{K_shape};
+  //K.flat_array().fill(0);
+  //for (int i = 0; i < kh * x.rows(); ++i)
+  //  for (int j = 0; j < kw * x.cols(); ++j)
+  //    K[i][j].matrix().block(i / kh, j / kw, kh, kw) =
+  //        k_base[i % kh][j % kw].matrix();
+
+  //auto h_K = kh * x.rows() * kw * x.cols();
+  //auto w_K = px.rows() * px.cols();
+  //auto k = K.reshape(Vector2i{h_K, w_K});
+
+  //auto out = Tensor_<float, 3>{{3, h * kh, w * kw}};
+  //auto out_reshaped = out.reshape(Vector2i{3, h * kh * w * kw});
+  //auto px_reshaped = px.reshape(Vector2i{3, (h + 1) * (w + 1)});
+  //out_reshaped.matrix() = k.matrix() * px_reshaped.matrix().transpose();
+  //out = out.transpose({1, 2, 0});
+
+  auto out_image = Image<Rgb32f>{w * kw, h * kh};
+  //tensor_view(out_image) = out;
+
+  return out_image;
+}
 
 GRAPHICS_MAIN()
 {
@@ -181,35 +249,44 @@ GRAPHICS_MAIN()
   auto image = Image<Rgb32f>{};
   imread(image, "/home/david/GitHub/DO-CV/sara/data/ksmall.jpg");
 
-  const auto w = image.width();
-  const auto h = image.height();
+  //const auto w = image.width();
+  //const auto h = image.height();
 
-  // Transpose the image from NHWC to NCHW storage order.
-  //                          0123    0312
-  auto x = tensor_view(image)
-               .reshape(Vector4i{1, h, w, 3})
-               .transpose({0, 3, 1, 2});
+  //// Transpose the image from NHWC to NCHW storage order.
+  ////                          0123    0312
+  //auto x = tensor_view(image)
+  //             .reshape(Vector4i{1, h, w, 3})
+  //             .transpose({0, 3, 1, 2});
 
-  // Create the gaussian smoothing kernel for RGB color values.
-  auto kt = gaussian_tensor_nchw(5.f, 2);
+  //// Create the gaussian smoothing kernel for RGB color values.
+  //auto kt = gaussian_tensor_nchw(8.f, 2);
 
-  // Convolve the image using the GEMM BLAS routine.
-  auto y = gemm_convolve_generic(
-      x,                      // the signal
-      kt,                     // the transposed kernel.
-      PeriodicPadding{},      // the padding type
-      {1, kt.size(0), 1, 1},  // strides in the convolution
-      {0, 1, 0, 0});  // pay attention to the offset here for the C dimension.
-  // Transpose the tensor data back to NHWC storage order to view the image.
-  y = y.transpose({0, 2, 3, 1});
+  //// Convolve the image using the GEMM BLAS routine.
+  //auto y = gemm_convolve_generic(
+  //    x,                      // the signal
+  //    kt,                     // the transposed kernel.
+  //    PeriodicPadding{},      // the padding type
+  //    //make_constant_padding(0.f),      // the padding type
+  //    {1, kt.size(0), 1, 1},  // strides in the convolution
+  //    {0, 1, 0, 0});  // pay attention to the offset here for the C dimension.
+  //// Transpose the tensor data back to NHWC storage order to view the image.
+  //y = y.transpose({0, 2, 3, 1});
 
-  auto convolved_image =
-      ImageView<Rgb32f>{reinterpret_cast<Rgb32f*>(y.data()), {y.size(2), y.size(1)}};
+  //auto convolved_image =
+  //    ImageView<Rgb32f>{reinterpret_cast<Rgb32f*>(y.data()), {y.size(2), y.size(1)}};
 
-  create_window(image.sizes());
+  //create_window(image.sizes());
+  //display(image);
+  //get_key();
+  //display(convolved_image);
+  //get_key();
+  //close_window();
+
+  auto image_resized = upsample_2x2(image);
+  create_window(image_resized.sizes());
   display(image);
   get_key();
-  display(convolved_image);
+  display(image_resized);
   get_key();
   close_window();
 

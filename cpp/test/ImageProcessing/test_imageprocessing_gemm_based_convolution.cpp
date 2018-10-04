@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE(test_im2col_on_nhw_tensor)
   // Apply im2col on each data of the batch.
   auto im2col_iterated = Tensor_<float, 2>{{N * H * W, kH * kW}};
   auto im2col_out_as_3d =
-      im2col_iterated.reshape(Vector3i{N, H * W, kH * kW});
+    im2col_iterated.reshape(Vector3i{N, H * W, kH * kW});
 
   im2col_out_as_3d[0] = im2col(x[0], {kH, kW});
   im2col_out_as_3d[1] = im2col(x[1], {kH, kW});
@@ -150,15 +150,15 @@ BOOST_AUTO_TEST_CASE(test_im2col_on_nhw_tensor)
 
   true_neighborhood <<
     2 * 3, 2 * 4, 2 * 5,
-    2 * 6, 2 * 7, 2 * 8,
-    2 * 9, 2 *10, 2 *11;
+      2 * 6, 2 * 7, 2 * 8,
+      2 * 9, 2 *10, 2 *11;
   BOOST_CHECK(phi_x_as_5d[1][2][1].matrix() == true_neighborhood);
   //cout << phi_x_as_5d[1][2][1].matrix() << endl << endl;
 
   true_neighborhood <<
     3 * 3, 3 * 4, 3 * 5,
-    3 * 6, 3 * 7, 3 * 8,
-    3 * 9, 3 *10, 3 *11;
+      3 * 6, 3 * 7, 3 * 8,
+      3 * 9, 3 *10, 3 *11;
   BOOST_CHECK(phi_x_as_5d[2][2][1].matrix() == true_neighborhood);
   //cout << phi_x_as_5d[2][2][1].matrix() << endl << endl;
 }
@@ -293,11 +293,11 @@ BOOST_AUTO_TEST_CASE(test_convolve_on_nhwc_tensor)
   y.flat_array() = (phi_x.matrix() * k.matrix()).array();
 
   /*
-    0,0,0,   1, 1, 1,   2, 2, 2,
-    3,3,3,   4, 4, 4,   5, 5, 5,
-    6,6,6,   7, 7, 7,   8, 8, 8,
-    9,9,9,  10,10,10,  11,11,11;
-   */
+     0,0,0,   1, 1, 1,   2, 2, 2,
+     3,3,3,   4, 4, 4,   5, 5, 5,
+     6,6,6,   7, 7, 7,   8, 8, 8,
+     9,9,9,  10,10,10,  11,11,11;
+     */
   MatrixXf true_plane{H, W};
   true_plane.matrix() <<
     0+0+0 + 0+0+1 + 0+3+4, 0+0+0 + 0+1+2 + 3+4+5, 0+0+0 + 1+2+0 + 4+5+0,
@@ -387,7 +387,7 @@ auto square_toeplitz(const std::vector<float>& a)
 auto causal_toeplitz_coeff(const MatrixXf& kernel,  //
                            int h,
                            int w)  // Upper part is zero everywhere
-    -> std::vector<float>
+  -> std::vector<float>
 {
   auto kh = kernel.rows();
   auto kw = kernel.cols();
@@ -401,7 +401,7 @@ auto causal_toeplitz_coeff(const MatrixXf& kernel,  //
 }
 
 auto dense_causal_toeplitz(const std::vector<float>& t, int m, int n)
-    -> MatrixXf
+  -> MatrixXf
 {
   MatrixXf T = MatrixXf::Zero(m, n);
   for (int i = 0; i < m; ++i)
@@ -494,117 +494,113 @@ BOOST_AUTO_TEST_CASE(test_toeplitz_matrix_construction)
   //std::cout << "Y=\n" << Y << std::endl;
 }
 
-BOOST_AUTO_TEST_CASE(test_block_toeplitz_matrix_construction)
+BOOST_AUTO_TEST_CASE(test_transpose_convolution)
 {
-  const auto h = 3;
-  const auto w = 3;
+  MatrixXf x(2, 2);
+  x <<
+    1, 2,
+    3, 4;
+
+  MatrixXf px(3, 3);
+  px <<
+    1, 2, 2,
+    3, 4, 4,
+    3, 4, 4;
 
   const auto kh = 2;
   const auto kw = 2;
+  auto k_base = Tensor_<float, 4>{Vector4i{kh, kw, kh, kw}};
+  k_base[0][0].matrix() <<
+    1, 0,
+    0, 0;
+  k_base[0][1].matrix() <<
+    0.5, 0.5,
+    0.0, 0.0;
+  k_base[1][0].matrix() <<
+    0.5, 0.0,
+    0.5, 0.0;
+  k_base[1][1].matrix() <<
+    0.25, 0.25,
+    0.25, 0.25;
 
-  const auto padded_h = 2 * (kh - 1) + h;
-  const auto padded_w = 2 * (kw - 1) + w;
 
-  const auto f = 2;
-  const auto nh = h * f;
-  const auto nw = w * f;
+  auto k_base_padded_shape = Vector4i{kh, kw, px.rows(), px.cols()};
+  auto k_base_padded = Tensor_<float, 4>{k_base_padded_shape};
+  for (auto i = 0; i < kh; ++i)
+    for (auto j = 0; j < kw; ++j)
+      k_base_padded[i][j].matrix().bottomLeftCorner(kh, kw) =
+          k_base[i][j].matrix();
 
-  MatrixXf K = MatrixXf::Ones(kh, kw);
-  std::cout << "K =\n" << K << std::endl;
 
-  Tensor_<float, 2> x(h, w);
-  x.matrix() <<
-    1, 2, 3,
-    4, 5, 6,
-    7, 8, 9;
-  std::cout << "x =\n" << x.matrix() << std::endl;
+  MatrixXf true_y(kh * x.rows(), kw * x.cols());
+  true_y <<
+    1.0, 1.5, 2.0, 2.0,
+    2.0, 2.5, 3.0, 3.0,
+    3.0, 3.5, 4.0, 4.0,
+    3.0, 3.5, 4.0, 4.0;
 
-  //auto infx = make_infinite(x, make_constant_padding(0.f));
-  //auto beg = Vector2i{-kh + 1, -kw + 1};
-  //auto end = Vector2i{h + kh, w + kw};
-  //auto padded_x =
-  //    Tensor_<float, 2>{infx.begin_stepped_subarray(beg, end, Vector2i::Ones())
-  //                          .stepped_subarray_sizes()};
-  //safe_crop_generic(padded_x, infx, beg, end);
-  //std::cout << "padded_x =\n" << padded_x.matrix() << std::endl;
-  // TODO: create special padding.
-  Tensor_<float, 2> padded_x{h + (kh - 1) * 2, w + (kw - 1) * 2};
-  padded_x.matrix() <<
-    1,  1, 2, 3,  3,
-    //
-    1,  1, 2, 3,  3,
-    4,  4, 5, 6,  6,
-    7,  7, 8, 9,  9,
-    //
-    7,  7, 8, 9,  9;
-  std::cout << "padded_x =\n" << padded_x.matrix() << std::endl;
+  // Manual construction of the kernel.
+  //
+  // MatrixXf k(h_k, w_k);
+  // k <<
+  // //r=0
+  //   1.00, 0.00, 0.00,   0.00, 0.00, 0.00,   0.00, 0.00, 0.00,  // 1.
+  //   0.50, 0.50, 0.00,   0.00, 0.00, 0.00,   0.00, 0.00, 0.00,  // 1.5
+  //   0.00, 1.00, 0.00,   0.00, 0.00, 0.00,   0.00, 0.00, 0.00,  // 2.
+  //   0.00, 0.50, 0.50,   0.00, 0.00, 0.00,   0.00, 0.00, 0.00,  // 2.
+  // //r=1
+  //   0.50, 0.00, 0.00,   0.50, 0.00, 0.00,   0.00, 0.00, 0.00,  // 2.
+  //   0.25, 0.25, 0.00,   0.25, 0.25, 0.00,   0.00, 0.00, 0.00,  // 2.5
+  //   0.00, 0.50, 0.00,   0.00, 0.50, 0.00,   0.00, 0.00, 0.00,  // 3.
+  //   0.00, 0.25, 0.25,   0.00, 0.25, 0.25,   0.00, 0.00, 0.00,  // 2.5
 
-  auto vec_x = vec(padded_x);
-  std::cout << "vec_x =\n" << vec_x << std::endl;
+  // //r=2
+  //   0.00, 0.00, 0.00,   1.00, 0.00, 0.00,   0.00, 0.00, 0.00,
+  //   0.00, 0.00, 0.00,   0.50, 0.50, 0.00,   0.00, 0.00, 0.00,
+  //   0.00, 0.00, 0.00,   0.00, 1.00, 0.00,   0.00, 0.00, 0.00,
+  //   0.00, 0.00, 0.00,   0.00, 0.50, 0.50,   0.00, 0.00, 0.00,
+  // //r=3
+  //   0.00, 0.00, 0.00,   0.50, 0.00, 0.00,   0.50, 0.00, 0.00,
+  //   0.00, 0.00, 0.00,   0.25, 0.25, 0.00,   0.25, 0.25, 0.00,
+  //   0.00, 0.00, 0.00,   0.00, 0.50, 0.00,   0.00, 0.50, 0.00,
+  //   0.00, 0.00, 0.00,   0.00, 0.25, 0.25,   0.00, 0.25, 0.25;
 
-  MatrixXf Tk = MatrixXf::Zero(nh * nw, padded_h * padded_w);
-
-  // i = y * w * f + x * f; + frac;
-  // y  in [0,..., h-1]
-  // x  in [0,..., w-1]
-  // fy in [0,..., f-1]
-  // fx in [0,..., f-1]
-  for (int y = 0; y < h; ++y)
+  // Better way of constructing the upsampling kernel.
+  auto K_shape = Vector4i{kh * x.rows(), kw * x.cols(), px.rows(), px.cols()};
+  auto K = Tensor_<float, 4>{K_shape};
+  K.flat_array().fill(0);
+  // Whole kernel.
+  for (int i = 0; i < kh * x.rows(); ++i)
   {
-    for (int fy = 0; fy < f; ++fy)
+    for (int j = 0; j < kw * x.cols(); ++j)
     {
-      for (int x = 0; x < w; ++x)
-      {
-        for (int fx = 0; fx < f; ++fx)
-        {
-          auto i = (f * y + fy) * f * w + f * x + fx;
-
-          auto j1 = padded_w * y + x;
-          Tk(i, j1) = 1.;
-        }
-      }
+      K[i][j].matrix().block(i / kh, j / kw, kh, kw) =
+          k_base[i % kh][j % kw].matrix();
     }
   }
 
-  for (int i = 0; i < Tk.rows(); ++i)
-  {
-    for (int j = 0; j < Tk.cols(); ++j)
-    {
-      if (i % f == 0)
-      {
-        // Apply the following stencil.
-        // 1.0 0.0 0.0 0.0 0.0
-        // 0.0 0.0 0.0 0.0 0.0
-        // 0.0 0.0 0.0 0.0 0.0
-        // 0.0 0.0 0.0 0.0 0.0
-        // 0.0 0.0 0.0 0.0 0.0
-        //
-        // 0.5 0.5 0.0 0.0 0.0
-        // 0.0 0.0 0.0 0.0 0.0
-        // 0.0 0.0 0.0 0.0 0.0
-        // 0.0 0.0 0.0 0.0 0.0
-        // 0.0 0.0 0.0 0.0 0.0
+  // Now the problem with the expanded kernel above is that it may take too much
+  // space. So we need to only multiply the kernel k_base_padded with the
+  // appropriate row.
+  // Easily parallelisable in CUDA and with OpenMP.
+  // y[kw * yw * y + kw * x, kw * yw * y + kw * w + kw] =
+  //  k_base_padded.matrix() * vec(padded_x.block(y, x, px.rows(), px.cols()))
 
-        if (j == 
-        Tk(i, j) = 0.5;
-    }
-  }
+  auto h_K = kh * x.rows() * kw * x.cols();
+  auto w_K = px.rows() * px.cols();
 
-  // 0.5 0.0 0.0 0.0 0.0
-  // 0.5 0.0 0.0 0.0 0.0
-  // 0.0 0.0 0.0 0.0 0.0
-  // 0.0 0.0 0.0 0.0 0.0
-  // 0.0 0.0 0.0 0.0 0.0
+  auto k = K.reshape(Vector2i{h_K, w_K}).matrix();
+  std::cout << k << std::endl;
 
-  // 0.25 0.25 0.0 0.0 0.0
-  // 0.25 0.25 0.0 0.0 0.0
-  // 0.00 0.00 0.0 0.0 0.0
-  // 0.00 0.00 0.0 0.0 0.0
-  // 0.00 0.00 0.0 0.0 0.0
 
-  RowVectorXf y = vec_x.transpose() * Tk;
-  std::cout << "y=\n" << y << std::endl;
+  // TODO: For the transpose convolution.
+  // - we need an offset parameter to place correctly the kernel. here the
+  // offset is 0.
+  // - we may need a stride parameter.
+  MatrixXf out;
+  out = k * Map<MatrixXf>(px.data(), px.rows() * px.cols(), 1);
 
-  Map<MatrixXf> Y(y.data(), nh, nw);
-  std::cout << "Y=\n" << Y << std::endl;
+  auto out_reshaped = Map<MatrixXf>(out.data(), kh * x.rows(), kw * x.cols());
+  std::cout << "out_reshaped=\n" << out_reshaped << std::endl;
+
 }

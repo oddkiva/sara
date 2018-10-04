@@ -1,6 +1,14 @@
 #!/bin/bash
 set -ex
 
+
+if [ -z "$1" ]; then
+  build_type=Release;
+else
+  build_type=$1;
+fi
+
+
 function install_python_packages_via_pip()
 {
   pip install numpy nose
@@ -8,10 +16,10 @@ function install_python_packages_via_pip()
 
 function build_library()
 {
-  local cmake_options="-DCMAKE_BUILD_TYPE=Debug "
-  cmake_options+="-DCMAKE_PREFIX_PATH=/usr/local/Qt-5.10.0 "
+  local cmake_options="-DCMAKE_BUILD_TYPE=${build_type} "
+  #cmake_options+="-DCMAKE_PREFIX_PATH=/usr/local/Qt-5.10.0 "
   cmake_options+="-DSARA_BUILD_VIDEOIO=ON "
-  cmake_options+="-DSARA_BUILD_PYTHON_BINDINGS=ON "
+  #cmake_options+="-DSARA_BUILD_PYTHON_BINDINGS=ON "
   cmake_options+="-DSARA_BUILD_SHARED_LIBS=ON "
   cmake_options+="-DSARA_BUILD_TESTS=ON "
   cmake_options+="-DSARA_BUILD_SAMPLES=ON "
@@ -48,11 +56,7 @@ function install_package()
 }
 
 
-if [[ $# == 0 ]]; then
-  sara_build_dir="sara-build"
-else
-  sara_build_dir=$1
-fi
+sara_build_dir="sara-build-${build_type}"
 
 # Create the build directory.
 if [ -d "../${sara_build_dir}" ]; then
