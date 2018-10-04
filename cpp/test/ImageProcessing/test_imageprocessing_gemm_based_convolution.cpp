@@ -494,7 +494,7 @@ BOOST_AUTO_TEST_CASE(test_toeplitz_matrix_construction)
   //std::cout << "Y=\n" << Y << std::endl;
 }
 
-BOOST_AUTO_TEST_CASE(test_transpose_convolution)
+BOOST_AUTO_TEST_CASE(test_transpose_convolution_naive)
 {
   MatrixXf x(2, 2);
   x <<
@@ -602,5 +602,94 @@ BOOST_AUTO_TEST_CASE(test_transpose_convolution)
 
   auto out_reshaped = Map<MatrixXf>(out.data(), kh * x.rows(), kw * x.cols());
   std::cout << "out_reshaped=\n" << out_reshaped << std::endl;
+
+}
+
+BOOST_AUTO_TEST_CASE(test_transpose_convolution_optimized)
+{
+  MatrixXf x(2, 2);
+  x <<
+    1, 2,
+    3, 4;
+
+  MatrixXf px(3, 3);
+  px <<
+    1, 2, 2,
+    3, 4, 4,
+    3, 4, 4;
+
+  const auto kh = 2;
+  const auto kw = 2;
+  auto k_base = Tensor_<float, 4>{Vector4i{kh, kw, kh, kw}};
+  k_base[0][0].matrix() <<
+    1, 0,
+    0, 0;
+  k_base[0][1].matrix() <<
+    0.5, 0.5,
+    0.0, 0.0;
+  k_base[1][0].matrix() <<
+    0.5, 0.0,
+    0.5, 0.0;
+  k_base[1][1].matrix() <<
+    0.25, 0.25,
+    0.25, 0.25;
+
+
+  auto k_base_padded_shape = Vector4i{kh, kw, px.rows(), px.cols()};
+  auto k_base_padded = Tensor_<float, 4>{k_base_padded_shape};
+  for (auto i = 0; i < kh; ++i)
+    for (auto j = 0; j < kw; ++j)
+      k_base_padded[i][j].matrix().bottomLeftCorner(kh, kw) =
+          k_base[i][j].matrix();
+
+
+  MatrixXf true_y(kh * x.rows(), kw * x.cols());
+  true_y <<
+    1.0, 1.5, 2.0, 2.0,
+    2.0, 2.5, 3.0, 3.0,
+    3.0, 3.5, 4.0, 4.0,
+    3.0, 3.5, 4.0, 4.0;
+
+  // Manual construction of the kernel.
+  //
+  // MatrixXf k(h_k, w_k);
+  // k <<
+  //
+  // |-----------------------------------------|
+  // | //r=0                                   |
+  // |   1.00, 0.00, 0.00,   0.00, 0.00, 0.00, |  0.00, 0.00, 0.00,  // 1.
+  // |   0.50, 0.50, 0.00,   0.00, 0.00, 0.00, |  0.00, 0.00, 0.00,  // 1.5
+  // |   0.00, 1.00, 0.00,   0.00, 0.00, 0.00, |  0.00, 0.00, 0.00,  // 2.
+  // |   0.00, 0.50, 0.50,   0.00, 0.00, 0.00, |  0.00, 0.00, 0.00,  // 2.
+  // | //r=1                                   |
+  // |   0.50, 0.00, 0.00,   0.50, 0.00, 0.00, |  0.00, 0.00, 0.00,  // 2.
+  // |   0.25, 0.25, 0.00,   0.25, 0.25, 0.00, |  0.00, 0.00, 0.00,  // 2.5
+  // |   0.00, 0.50, 0.00,   0.00, 0.50, 0.00, |  0.00, 0.00, 0.00,  // 3.
+  // |   0.00, 0.25, 0.25,   0.00, 0.25, 0.25, |  0.00, 0.00, 0.00,  // 2.5
+  // |-----------------------------------------|
+  //
+  // //r=2
+  //   0.00, 0.00, 0.00,   1.00, 0.00, 0.00,   0.00, 0.00, 0.00,
+  //   0.00, 0.00, 0.00,   0.50, 0.50, 0.00,   0.00, 0.00, 0.00,
+  //   0.00, 0.00, 0.00,   0.00, 1.00, 0.00,   0.00, 0.00, 0.00,
+  //   0.00, 0.00, 0.00,   0.00, 0.50, 0.50,   0.00, 0.00, 0.00,
+  // //r=3
+  //   0.00, 0.00, 0.00,   0.50, 0.00, 0.00,   0.50, 0.00, 0.00,
+  //   0.00, 0.00, 0.00,   0.25, 0.25, 0.00,   0.25, 0.25, 0.00,
+  //   0.00, 0.00, 0.00,   0.00, 0.50, 0.00,   0.00, 0.50, 0.00,
+  //   0.00, 0.00, 0.00,   0.00, 0.25, 0.25,   0.00, 0.25, 0.25;
+
+  // Better way of constructing the upsampling kernel.
+  auto K_block_shape = Vector2i{kh * px.rows(), kw * px.cols()};  // (2 * (h + pad_h), 2 * (w + pad_w))
+  auto K_block = Tensor_<float, 2>{K_block_shape};
+
+  // Now the problem with the expanded kernel above is that it may take too much
+  // space. So we need to only multiply the kernel k_base_padded with the
+  // appropriate row.
+  // Easily parallelisable in CUDA and with OpenMP.
+  // y[kw * yw * y + kw * x, kw * yw * y + kw * w + kw] =
+  //  k_base_padded.matrix() * vec(padded_x.block(y, x, px.rows(), px.cols()))
+
+
 
 }
