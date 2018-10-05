@@ -268,8 +268,7 @@ BOOST_AUTO_TEST_CASE(test_convolve_on_nhwc_tensor)
 
   auto phi_x = im2col(x, {1, kH, kW, kC}, {1, 1, 1, kC}, {0, 0, 0, 1});
 
-  //                   kH x kW x kI  kO
-  Tensor_<float, 2> k{{ 3 *  3 *  3,  3}};
+  Tensor_<float, 2> k{{kH * kW * kC, kC}};
 
   // Average on the R channel.
   k.matrix().col(0) <<
@@ -290,7 +289,8 @@ BOOST_AUTO_TEST_CASE(test_convolve_on_nhwc_tensor)
     0, 0, 1,  0, 0, 1,  0, 0, 1;
 
   auto y = Tensor_<float, 4>{{N, C, H, W}};
-  y.flat_array() = (phi_x.matrix() * k.matrix()).array();
+  auto y_reshaped = y.reshape(Vector2i{N * C, H * W});
+  y_reshaped.matrix() = (phi_x.matrix() * k.matrix()).transpose();
 
   /*
      0,0,0,   1, 1, 1,   2, 2, 2,
@@ -315,61 +315,61 @@ BOOST_AUTO_TEST_CASE(test_convolve_on_nhwc_tensor)
   //print_3d_array(yt[0]);
 }
 
-//BOOST_AUTO_TEST_CASE(test_convolve_on_nchw_tensor)
-//{
-//  constexpr auto N = 1;
-//  constexpr auto H = 4;
-//  constexpr auto W = 3;
-//  constexpr auto C = 3;
-//  auto x = Tensor_<float, 4>{{N, C, H, W}};
-//
-//  x[0].flat_array() <<
-//    0,   1,   2,
-//    3,   4,   5,
-//    6,   7,   8,
-//    9,  10,  11;
-//
-//  for (int i = 1; i < C; ++i)
-//    x[0][i].flat_array() = x[0][0].flat_array();
-//
-//
-//  constexpr auto kH = 3;
-//  constexpr auto kW = 3;
-//  constexpr auto kC = 3;
-//
-//
-//  auto phi_x = im2col(x, {N, kC, kH, kW}, {1, kC, 1, 1}, {0, 1, 0, 0});
-//  // [N * C/kC * H/kH * W/kW, kC * kH * kW]
-//  // cout << phi_x.matrix() << endl;
-//
-//  //                   kC x kH x kW  kO
-//  Tensor_<float, 2> k{{ 3 *  3 *  3,  3}};
-//  k.matrix().col(0) << VectorXf::Ones(9), VectorXf::Zero(9), VectorXf::Zero(9);
-//  k.matrix().col(1) << VectorXf::Zero(9), VectorXf::Ones(9), VectorXf::Zero(9);
-//  k.matrix().col(2) << VectorXf::Zero(9), VectorXf::Zero(9), VectorXf::Ones(9);
-//
-//  //cout << "k = " << k.matrix().rows() << " " << k.matrix().cols()  << endl;
-//  //cout << k.matrix()  << endl;
-//
-//  auto y = Tensor_<float, 4>{{N, C, H, W}};
-//  y.flat_array() = (phi_x.matrix() * k.matrix()).array();
-//
-//  MatrixXf true_plane{H, W};
-//  true_plane.matrix() <<
-//    0+0+0 + 0+0+1 + 0+3+4, 0+0+0 + 0+1+2 + 3+4+5, 0+0+0 + 1+2+0 + 4+5+0,
-//    0+0+1 + 0+3+4 + 0+6+7, 0+1+2 + 3+4+5 + 6+7+8, 1+2+0 + 4+5+0 + 7+8+0,
-//    0+3+4 + 0+6+7 + 0+9+10, 3+4+5 + 6+7+8 + 9+10+11, 4+5+0 + 7+8+0 + 10+11+0,
-//    0+6+7 + 0+9+10 + 0+0+0, 6+7+8 + 9+10+11 + 0+0+0, 7+8+0 + 10+11+0 + 0+0+0;
-//
-//  // Check each plane value.
-//  BOOST_CHECK(y[0][0].matrix() == true_plane);
-//  BOOST_CHECK(y[0][1].matrix() == true_plane);
-//  BOOST_CHECK(y[0][2].matrix() == true_plane);
-//
-//  //y = y.transpose(Vector4i{0, 2, 3, 1});
-//  //print_3d_array(y[0]);
-//}
-//
+BOOST_AUTO_TEST_CASE(test_convolve_on_nchw_tensor)
+{
+  constexpr auto N = 1;
+  constexpr auto H = 4;
+  constexpr auto W = 3;
+  constexpr auto C = 3;
+  auto x = Tensor_<float, 4>{{N, C, H, W}};
+
+  x[0][0].flat_array() <<
+    0,   1,   2,
+    3,   4,   5,
+    6,   7,   8,
+    9,  10,  11;
+
+  for (int i = 1; i < C; ++i)
+    x[0][i].flat_array() = x[0][0].flat_array();
+
+
+  constexpr auto kH = 3;
+  constexpr auto kW = 3;
+  constexpr auto kC = 3;
+
+
+  auto phi_x = im2col(x, {N, kC, kH, kW}, {1, kC, 1, 1}, {0, 1, 0, 0});
+  // [N * C/kC * H/kH * W/kW, kC * kH * kW]
+  // cout << phi_x.matrix() << endl;
+
+  //                   kC x kH x kW  kO
+  Tensor_<float, 2> k{{ 3 *  3 *  3,  3}};
+  k.matrix().col(0) << VectorXf::Ones(9), VectorXf::Zero(9), VectorXf::Zero(9);
+  k.matrix().col(1) << VectorXf::Zero(9), VectorXf::Ones(9), VectorXf::Zero(9);
+  k.matrix().col(2) << VectorXf::Zero(9), VectorXf::Zero(9), VectorXf::Ones(9);
+
+  //cout << "k = " << k.matrix().rows() << " " << k.matrix().cols()  << endl;
+  //cout << k.matrix()  << endl;
+
+  auto y = Tensor_<float, 4>{{N, C, H, W}};
+  y.reshape(Vector2i{N * C, H * W}).matrix() = (phi_x.matrix() * k.matrix()).transpose();
+
+  MatrixXf true_plane{H, W};
+  true_plane.matrix() <<
+    0+0+0 + 0+0+1 + 0+3+4, 0+0+0 + 0+1+2 + 3+4+5, 0+0+0 + 1+2+0 + 4+5+0,
+    0+0+1 + 0+3+4 + 0+6+7, 0+1+2 + 3+4+5 + 6+7+8, 1+2+0 + 4+5+0 + 7+8+0,
+    0+3+4 + 0+6+7 + 0+9+10, 3+4+5 + 6+7+8 + 9+10+11, 4+5+0 + 7+8+0 + 10+11+0,
+    0+6+7 + 0+9+10 + 0+0+0, 6+7+8 + 9+10+11 + 0+0+0, 7+8+0 + 10+11+0 + 0+0+0;
+
+  // Check each plane value.
+  BOOST_CHECK(y[0][0].matrix() == true_plane);
+  BOOST_CHECK(y[0][1].matrix() == true_plane);
+  BOOST_CHECK(y[0][2].matrix() == true_plane);
+
+  //y = y.transpose(Vector4i{0, 2, 3, 1});
+  //print_3d_array(y[0]);
+}
+
 //auto square_toeplitz(const std::vector<float>& a)
 //  -> MatrixXf
 //{
