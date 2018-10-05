@@ -233,6 +233,8 @@ auto upsample_2x2(const Image<Rgb32f>& image)
   std::cout << "y_reshaped.sizes() = " << y_reshaped.sizes().transpose()
             << std::endl;
 
+  std::cout << "x.sizes() = " << x.sizes().transpose() << std::endl;
+
   for (int i = 0; i < x.size(1); ++i)
   {
     y_reshaped.matrix().block(kh * kw * x.size(2) * i,  //
