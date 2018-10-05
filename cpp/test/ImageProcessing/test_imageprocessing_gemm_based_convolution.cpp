@@ -289,8 +289,8 @@ BOOST_AUTO_TEST_CASE(test_convolve_on_nhwc_tensor)
     0, 0, 1,  0, 0, 1,  0, 0, 1;
 
   auto y = Tensor_<float, 4>{{N, C, H, W}};
-  auto y_reshaped = y.reshape(Vector2i{N * C, H * W});
-  y_reshaped.matrix() = (phi_x.matrix() * k.matrix()).transpose();
+  y.reshape(Vector2i{N * C, H * W}).colmajor_view().matrix() =
+      phi_x.matrix() * k.matrix();
 
   /*
      0,0,0,   1, 1, 1,   2, 2, 2,
@@ -352,7 +352,13 @@ BOOST_AUTO_TEST_CASE(test_convolve_on_nchw_tensor)
   //cout << k.matrix()  << endl;
 
   auto y = Tensor_<float, 4>{{N, C, H, W}};
-  y.reshape(Vector2i{N * C, H * W}).matrix() = (phi_x.matrix() * k.matrix()).transpose();
+  // There is a technical issue.
+  // The 2D tensor is row-major but everything in Eigen is column-major by
+  // default.
+  // So don't transpose the matrix because its not optimal.
+  y.reshape(Vector2i{N * C, H * W})  //
+      .colmajor_view()
+      .matrix() = phi_x.matrix() * k.matrix();
 
   MatrixXf true_plane{H, W};
   true_plane.matrix() <<

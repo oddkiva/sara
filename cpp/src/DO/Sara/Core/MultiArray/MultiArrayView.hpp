@@ -478,6 +478,27 @@ namespace DO { namespace Sara {
       return out;
     }
 
+    //! @{
+    //! @brief Reverse the storage-order view.
+    inline auto colmajor_view() const -> MultiArrayView<T, N, ColMajor>
+    {
+      static_assert(StorageOrder == static_cast<int>(RowMajor),
+                    "Don't use this on a column-major MultiArrayView object");
+      auto sizes = this->_sizes;
+      std::reverse(sizes.data(), sizes.data() + sizes.size());
+      return MultiArrayView<T, N, ColMajor>{_begin, sizes};
+    }
+
+    inline auto rowmajor_view() const -> MultiArrayView<T, N, RowMajor>
+    {
+      static_assert(StorageOrder == static_cast<int>(ColMajor),
+                    "Don't use this on a row-major MultiArrayView object");
+      auto sizes = this->_sizes;
+      std::reverse(sizes.data(), sizes.data() + sizes.size());
+      return MultiArrayView<T, N, RowMajor>{_begin, sizes};
+    }
+    //! @}
+
   protected:
     //! @brief Compute the strides according the size vector and storage order.
     inline vector_type compute_strides(const vector_type& sizes) const

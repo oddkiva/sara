@@ -111,7 +111,9 @@ auto gemm_convolve_generic(
 
   // Perform the convolution.
   auto y = Tensor_<T, N>{y_sizes};
-  y.flat_array() = (phi_x.matrix() * kt.matrix()).array();
+  y.colmajor_view()                                                  //
+      .reshape(Vector2i{phi_x.matrix().rows(), kt.matrix().cols()})  //
+      .matrix() = phi_x.matrix() * kt.matrix();
 
   return y;
 }
