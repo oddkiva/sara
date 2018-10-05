@@ -191,12 +191,13 @@ auto upsample_2x2(const Image<Rgb32f>& image)
 
   // Pad the image.
   auto px = Tensor_<float, 3>{3, h + 1, w + 1};
-  safe_crop_generic(px, infx, Vector3i::Zero(),
+  safe_crop_generic(px, infx,          //
+                    Vector3i::Zero(),  //
                     Vector3i{3, h + 1, w + 1});
 
   const auto kh = 2;
   const auto kw = 2;
-  auto k_base = Tensor_<float, 4>{Vector4i{kh, kw, kh, kw}};
+  auto k_base = Tensor_<float, 4>{{kh, kw, kh, kw}};
   k_base[0][0].matrix() <<
     1, 0,
     0, 0;
@@ -211,7 +212,6 @@ auto upsample_2x2(const Image<Rgb32f>& image)
     0.25, 0.25;
 
   const auto k_base_padded_shape = Vector4i{kh, kw, px.size(1), px.size(2)};
-  std::cout << k_base_padded_shape.transpose() << std::endl;
   auto k_base_padded = Tensor_<float, 4>{k_base_padded_shape};
   for (auto i = 0; i < kh; ++i)
     for (auto j = 0; j < kw; ++j)
@@ -244,6 +244,7 @@ auto upsample_2x2(const Image<Rgb32f>& image)
 
   return out_image;
 }
+
 
 GRAPHICS_MAIN()
 {
