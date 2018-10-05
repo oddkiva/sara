@@ -59,7 +59,6 @@ void print_3d_array(const TensorView_<T, 3>& x)
   cout << "]" << endl;
 }
 
-template <typename T>
 void print_3d_array(const TensorView_<float, 3>& x)
 {
   cout << "[";
@@ -548,15 +547,14 @@ BOOST_AUTO_TEST_CASE(test_transpose_convolution_optimized)
   //   0.00, 0.00, 0.00,   0.00, 0.50, 0.00,   0.00, 0.50, 0.00,
   //   0.00, 0.00, 0.00,   0.00, 0.25, 0.25,   0.00, 0.25, 0.25;
 
-  // Better way of constructing the upsampling kernel.
-  auto K = Tensor_<float, 4>{{kh, kw * x.rows(), x.rows(), px.cols()}};
+  auto K = Tensor_<float, 4>{{kh, kw * x.rows(), kh, px.cols()}};
   K.flat_array().fill(0);
   for (int i = 0; i < kh; ++i)
     for (int j = 0; j < kw * x.rows(); ++j)
       K[i][j].matrix().block(i / kh, j / kw, kh, kw) =
           k[i % kh][j % kw].matrix();
 
-  auto K_reshaped = K.reshape(Vector2i{kh * kw * x.rows(), x.rows() * px.cols()});
+  auto K_reshaped = K.reshape(Vector2i{kh * kw * x.rows(), kh * px.cols()});
 
 
   auto y = Tensor_<float, 2>{{kh * x.rows(), kw * x.cols()}};

@@ -181,68 +181,76 @@ auto upsample_2x2(const Image<Rgb32f>& image)
 {
   const auto h = image.height();
   const auto w = image.width();
+  const auto d = 3;
 
   // Transpose the image into CHW format.
   auto x = tensor_view(image)
-    .reshape(Vector3i{h, w, 3})
+    .reshape(Vector3i{h, w, d})
     .transpose({2, 0, 1});
   // Initialize the strided subarray iterator.
   auto infx = make_infinite(x, PeriodicPadding{});
 
   // Pad the image.
-  auto px = Tensor_<float, 3>{3, h + 1, w + 1};
+  auto px = Tensor_<float, 3>{d, h + 1, w + 1};
   safe_crop_generic(px, infx,          //
                     Vector3i::Zero(),  //
-                    Vector3i{3, h + 1, w + 1});
+                    Vector3i{d, h + 1, w + 1});
 
   const auto kh = 2;
   const auto kw = 2;
-  auto k_base = Tensor_<float, 4>{{kh, kw, kh, kw}};
-  k_base[0][0].matrix() <<
+  auto k = Tensor_<float, 4>{{kh, kw, kh, kw}};
+  k[0][0].matrix() <<
     1, 0,
     0, 0;
-  k_base[0][1].matrix() <<
+  k[0][1].matrix() <<
     0.5, 0.5,
     0.0, 0.0;
-  k_base[1][0].matrix() <<
+  k[1][0].matrix() <<
     0.5, 0.0,
     0.5, 0.0;
-  k_base[1][1].matrix() <<
+  k[1][1].matrix() <<
     0.25, 0.25,
     0.25, 0.25;
 
-  const auto k_base_padded_shape = Vector4i{kh, kw, px.size(1), px.size(2)};
-  auto k_base_padded = Tensor_<float, 4>{k_base_padded_shape};
-  for (auto i = 0; i < kh; ++i)
-    for (auto j = 0; j < kw; ++j)
-      k_base_padded[i][j].matrix().bottomLeftCorner(kh, kw) =
-          k_base[i][j].matrix();
+  auto K = Tensor_<float, 4>{{kh, kw * x.size(1), kh, px.size(2)}};
+  K.flat_array().fill(0);
+  for (int i = 0; i < kh; ++i)
+    for (int j = 0; j < kw * x.size(1); ++j)
+      K[i][j].matrix().block(0, j / kw, kh, kw) =
+          k[i][j % kw].matrix();
 
-  const auto K_shape =
-      Vector4i{kh * x.size(1), kw * x.size(2), px.size(1), px.size(2)};
-  std::cout << K_shape.transpose() << std::endl;
+  auto K_reshaped = K.reshape(Vector2i{kh * kw * x.size(1), kh * px.size(2)});
+  std::cout << "K_reshaped.sizes() = " << K_reshaped.sizes().transpose()
+            << std::endl;
+  auto px_reshaped = px.reshape(Vector2i{d, px.size(1) * px.size(2)})  //
+                         .colmajor_view();
+  std::cout << "px_reshaped.sizes() = " << px_reshaped.sizes().transpose()
+            << std::endl;
 
-  auto K = Tensor_<float, 4>{K_shape};
-  //K.flat_array().fill(0);
-  //for (int i = 0; i < kh * x.rows(); ++i)
-  //  for (int j = 0; j < kw * x.cols(); ++j)
-  //    K[i][j].matrix().block(i / kh, j / kw, kh, kw) =
-  //        k_base[i % kh][j % kw].matrix();
+  auto y = Tensor_<float, 3>{{d, kh * x.size(1), kw * x.size(2)}};
+  auto y_reshaped = y.reshape(Vector2i{3, kh * x.size(1) * kw * x.size(2)})  //
+                        .colmajor_view();
+  std::cout << "y_reshaped.sizes() = " << y_reshaped.sizes().transpose()
+            << std::endl;
 
-  //auto h_K = kh * x.rows() * kw * x.cols();
-  //auto w_K = px.rows() * px.cols();
-  //auto k = K.reshape(Vector2i{h_K, w_K});
+  for (int i = 0; i < x.size(1); ++i)
+  {
+    y_reshaped.matrix().block(kh * kw * x.size(2) * i,  //
+                              0,                        //
+                              kh * kw * x.size(2),      //
+                              x.size(0)) =
+        K_reshaped.matrix() *
+        px_reshaped.matrix().block(px.size(2) * i,   //
+                                   0,                //
+                                   kw * px.size(2),  //
+                                   x.size(0));
+  }
 
-  //auto out = Tensor_<float, 3>{{3, h * kh, w * kw}};
-  //auto out_reshaped = out.reshape(Vector2i{3, h * kh * w * kw});
-  //auto px_reshaped = px.reshape(Vector2i{3, (h + 1) * (w + 1)});
-  //out_reshaped.matrix() = k.matrix() * px_reshaped.matrix().transpose();
-  //out = out.transpose({1, 2, 0});
 
-  auto out_image = Image<Rgb32f>{w * kw, h * kh};
-  //tensor_view(out_image) = out;
+  auto out = Image<Rgb32f>{kw * w, kh * h};
+  tensor_view(out) = y.transpose({1, 2, 0});
 
-  return out_image;
+  return out;
 }
 
 
