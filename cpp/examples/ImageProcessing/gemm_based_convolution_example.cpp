@@ -184,9 +184,7 @@ auto upsample_2x2(const Image<Rgb32f>& image)
   const auto d = 3;
 
   // Transpose the image into CHW format.
-  auto x = tensor_view(image)
-    .reshape(Vector3i{h, w, d})
-    .transpose({2, 0, 1});
+  auto x = tensor_view(image).transpose({2, 0, 1});
   // Initialize the strided subarray iterator.
   auto infx = make_infinite(x, PeriodicPadding{});
 

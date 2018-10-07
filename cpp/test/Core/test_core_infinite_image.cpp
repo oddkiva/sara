@@ -125,6 +125,34 @@ BOOST_AUTO_TEST_CASE(test_infinite_image_with_constant_padding)
   BOOST_CHECK(true_dst.matrix() == dst.matrix());
 }
 
+BOOST_AUTO_TEST_CASE(test_infinite_image_with_repeat_padding)
+{
+  auto src = Image<float>{2, 2};
+  src.matrix() <<
+    0, 1,
+    2, 3;
+
+  const auto begin = Vector2i{-2, -2};
+  const auto end = Vector2i{4, 4};
+  const auto padding = RepeatPadding{};
+
+  auto dst = Image<float>{end - begin};
+  safe_crop(dst, src, begin, end, padding);
+
+
+  auto true_dst = Image<float>{end - begin};
+  true_dst.matrix() <<
+    0, 0, 0, 1, 1, 1,
+    0, 0, 0, 1, 1, 1,
+    0, 0, 0, 1, 1, 1,
+    2, 2, 2, 3, 3, 3,
+    2, 2, 2, 3, 3, 3,
+    2, 2, 2, 3, 3, 3;
+
+  BOOST_CHECK(true_dst.matrix() == dst.matrix());
+  std::cout << dst.matrix() << std::endl;
+}
+
 BOOST_AUTO_TEST_CASE(test_infinite_image_with_periodic_padding_stepped_safe_crop)
 {
   auto src = Image<float>{2, 2};
