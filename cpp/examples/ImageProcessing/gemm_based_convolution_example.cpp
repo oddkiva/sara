@@ -194,6 +194,7 @@ auto upsample_2x2(const Image<Rgb32f>& image)
                     Vector3i::Zero(),  //
                     Vector3i{d, h + 1, w + 1});
 
+  // List the interpolation filters.
   const auto kh = 2;
   const auto kw = 2;
   auto k = Tensor_<float, 4>{{kh, kw, kh, kw}};
@@ -210,43 +211,32 @@ auto upsample_2x2(const Image<Rgb32f>& image)
     0.25, 0.25,
     0.25, 0.25;
 
-  auto K = Tensor_<float, 4>{{kh, kw * x.size(1), kh, px.size(2)}};
+  // Construct the block kernel.
+  auto K = Tensor_<float, 4>{{kh, kw * x.size(2), kw, px.size(2)}};
   K.flat_array().fill(0);
   for (int i = 0; i < kh; ++i)
-    for (int j = 0; j < kw * x.size(1); ++j)
+    for (int j = 0; j < kw * x.size(2); ++j)
       K[i][j].matrix().block(0, j / kw, kh, kw) =
           k[i][j % kw].matrix();
 
-  auto K_reshaped = K.reshape(Vector2i{kh * kw * x.size(1), kh * px.size(2)});
-  std::cout << "K_reshaped.sizes() = " << K_reshaped.sizes().transpose()
-            << std::endl;
-  auto px_reshaped = px.reshape(Vector2i{d, px.size(1) * px.size(2)})  //
-                         .colmajor_view();
-  std::cout << "px_reshaped.sizes() = " << px_reshaped.sizes().transpose()
-            << std::endl;
+  auto K_reshaped = K.reshape(Vector2i{kh * kw * x.size(2), kw * px.size(2)});
 
   auto y = Tensor_<float, 3>{{d, kh * x.size(1), kw * x.size(2)}};
-  auto y_reshaped = y.reshape(Vector2i{3, kh * x.size(1) * kw * x.size(2)})  //
-                        .colmajor_view();
-  std::cout << "y_reshaped.sizes() = " << y_reshaped.sizes().transpose()
-            << std::endl;
-
-  std::cout << "x.sizes() = " << x.sizes().transpose() << std::endl;
-  std::cout << kh * kw * x.size(2) << std::endl;
+  auto y_reshaped = y.reshape(Vector3i{d, kh * x.size(1), kw * x.size(2)});
 
   for (int i = 0; i < x.size(1); ++i)
   {
-    y_reshaped.matrix().block(kh * kw * x.size(2) * i,  //
-                              0,                        //
-                              kh * kw * x.size(2),      //
-                              x.size(0)) =
-        K_reshaped.matrix() *
-        px_reshaped.matrix().block(i * px.size(2),   //
-                                   0,                //
-                                   kh * px.size(2),  //
-                                   x.size(0));
-  }
+    for (int c = 0; c < 3; ++c)
+    {
+      auto vec_px_block =
+          Map<RowVectorXf>(px[c].begin() + i * px.size(2), kw * px.size(2));
 
+      auto vec_py_block = Map<RowVectorXf>(
+          y[c].begin() + kh * y.size(2) * i, kh * y.size(2));
+
+      vec_py_block = vec_px_block * K_reshaped.matrix().transpose();
+    }
+  }
 
   auto out = Image<Rgb32f>{kw * w, kh * h};
   tensor_view(out) = y.transpose({1, 2, 0});

@@ -150,7 +150,6 @@ BOOST_AUTO_TEST_CASE(test_infinite_image_with_repeat_padding)
     2, 2, 2, 3, 3, 3;
 
   BOOST_CHECK(true_dst.matrix() == dst.matrix());
-  std::cout << dst.matrix() << std::endl;
 }
 
 BOOST_AUTO_TEST_CASE(test_infinite_image_with_periodic_padding_stepped_safe_crop)

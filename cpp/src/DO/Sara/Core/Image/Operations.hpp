@@ -326,3 +326,37 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
+
+
+// Generic ND-Array crop functions.
+namespace DO { namespace Sara {
+
+  //! @TODO: rename this and add convenience class to have a more functional
+  //! API. Refactor code so that we can use Image and MultiArray objects
+  //! interchangeably.
+  template <typename T, int N, int O, typename Padding>
+  void stepped_safe_crop(MultiArrayView<T, N, O>& dst,
+                         const MultiArrayView<T, N, O>& src,
+                         const Matrix<int, N, 1>& begin,
+                         const Matrix<int, N, 1>& end,
+                         const Matrix<int, N, 1>& steps, const Padding& padding)
+  {
+    const auto inf_src = make_infinite(src, padding);
+    auto src_i = inf_src.begin_stepped_subarray(begin, end, steps);
+
+    const auto sizes = src_i.stepped_subarray_sizes();
+    if (dst.sizes() != sizes)
+    {
+      std::ostringstream oss;
+      oss << "Error: destination sizes " << dst.sizes().transpose()
+          << "is invalid and must be: " << sizes.transpose();
+      throw std::domain_error{oss.str()};
+    }
+
+    for (auto dst_i = dst.begin(); dst_i != dst.end(); ++src_i, ++dst_i)
+      *dst_i = *src_i;
+  }
+
+
+} /* namespace Sara */
+} /* namespace DO */

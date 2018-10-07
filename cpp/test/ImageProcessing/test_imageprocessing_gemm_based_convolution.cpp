@@ -547,14 +547,14 @@ BOOST_AUTO_TEST_CASE(test_transpose_convolution_optimized)
   //   0.00, 0.00, 0.00,   0.00, 0.50, 0.00,   0.00, 0.50, 0.00,
   //   0.00, 0.00, 0.00,   0.00, 0.25, 0.25,   0.00, 0.25, 0.25;
 
-  auto K = Tensor_<float, 4>{{kh, kw * x.rows(), kh, px.cols()}};
+  auto K = Tensor_<float, 4>{{kh, kw * x.rows(), kw, px.cols()}};
   K.flat_array().fill(0);
   for (int i = 0; i < kh; ++i)
     for (int j = 0; j < kw * x.rows(); ++j)
       K[i][j].matrix().block(i / kh, j / kw, kh, kw) =
           k[i % kh][j % kw].matrix();
 
-  auto K_reshaped = K.reshape(Vector2i{kh * kw * x.rows(), kh * px.cols()});
+  auto K_reshaped = K.reshape(Vector2i{kh * kw * x.rows(), kw * px.cols()});
 
 
   auto y = Tensor_<float, 2>{{kh * x.rows(), kw * x.cols()}};
@@ -563,7 +563,7 @@ BOOST_AUTO_TEST_CASE(test_transpose_convolution_optimized)
   for (int i = 0; i < x.rows(); ++i)
   {
     vec_y.segment(kh * kw * x.cols() * i, kh * kw * x.cols()) =
-        K_reshaped.matrix() * vec_px.segment(px.cols() * i, kw * px.cols());
+        K_reshaped.matrix() * vec_px.segment(i, kw * px.cols());
   }
 
   std::cout << y.matrix() << std::endl;
