@@ -188,16 +188,18 @@ auto upsample_2x2(const Image<Rgb32f>& image)
   // Initialize the strided subarray iterator.
   auto infx = make_infinite(x, PeriodicPadding{});
 
+  const auto kh = 10;
+  const auto kw = 10;
+
   // Pad the image.
-  auto px = Tensor_<float, 3>{d, h + 1, w + 1};
+  auto px = Tensor_<float, 3>{d, h + kh - 1, w + kw - 1};
   safe_crop_generic(px, infx,          //
                     Vector3i::Zero(),  //
-                    Vector3i{d, h + 1, w + 1});
+                    Vector3i{d, h + kh - 1, w + kw - 1});
 
   // List the interpolation filters.
-  const auto kh = 2;
-  const auto kw = 2;
   auto k = Tensor_<float, 4>{{kh, kw, kh, kw}};
+  k.flat_array().fill(0);
   k[0][0].matrix() <<
     1, 0,
     0, 0;
@@ -219,14 +221,14 @@ auto upsample_2x2(const Image<Rgb32f>& image)
       K[i][j].matrix().block(0, j / kw, kh, kw) =
           k[i][j % kw].matrix();
 
-  auto K_reshaped = K.reshape(Vector2i{kh * kw * x.size(2), kw * px.size(2)});
+  auto K_reshaped =
+      K.reshape(Vector2i{kh * kw * x.size(2), kw * px.size(2)}).colmajor_view();
 
   auto y = Tensor_<float, 3>{{d, kh * x.size(1), kw * x.size(2)}};
-  auto y_reshaped = y.reshape(Vector3i{d, kh * x.size(1), kw * x.size(2)});
 
   for (int i = 0; i < x.size(1); ++i)
   {
-    for (int c = 0; c < 3; ++c)
+    for (int c = 0; c < d; ++c)
     {
       auto vec_px_block =
           Map<RowVectorXf>(px[c].begin() + i * px.size(2), kw * px.size(2));
@@ -234,7 +236,7 @@ auto upsample_2x2(const Image<Rgb32f>& image)
       auto vec_py_block = Map<RowVectorXf>(
           y[c].begin() + kh * y.size(2) * i, kh * y.size(2));
 
-      vec_py_block = vec_px_block * K_reshaped.matrix().transpose();
+      vec_py_block = vec_px_block * K_reshaped.matrix();
     }
   }
 
