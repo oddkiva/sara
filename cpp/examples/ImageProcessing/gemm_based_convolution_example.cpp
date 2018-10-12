@@ -213,10 +213,12 @@ auto upsample(const Image<Rgb32f>& image, int kh, int kw)
 
   for (int a = 0; a < kh; ++a)
     for (int b = 0; b < kw; ++b)
-      for (int i = 0; i < 2; ++i)
-        for (int j = 0; j < 2; ++j)
-          k[a][b].matrix()(i, j) =
-              float((a + 1 - i) * (b + 1 - j)) / ((a + 1) * kw);
+    {
+      k[a][b].matrix()(0, 0) = float((kh - a) * (kw - b)) / (kh * kw);
+      k[a][b].matrix()(1, 1) = float(a * b) / (kh * kw);
+      k[a][b].matrix()(0, 1) = float(b * (kh - a)) / (kh * kw);
+      k[a][b].matrix()(1, 0) = float((kw - b) * a) / (kh * kw);
+    }
 
 
   auto K = k.reshape(Vector2i{kh * kw, 2 * 2});
@@ -288,7 +290,7 @@ GRAPHICS_MAIN()
   //get_key();
   //close_window();
 
-  auto image_resized = upsample(image, 3, 3);
+  auto image_resized = upsample(image, 2, 2);
   create_window(image_resized.sizes());
   display(image);
   get_key();
