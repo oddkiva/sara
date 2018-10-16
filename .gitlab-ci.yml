@@ -6,6 +6,8 @@ before_script:
   - apt-get install -y
        cmake
        doxygen
+       gcc
+       g++
        libjpeg8-dev
        libpng12-dev
        libtiff5-dev
