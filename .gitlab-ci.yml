@@ -3,18 +3,18 @@ image: ubuntu:16.04
 
 before_script:
   - apt-get update -qq
-  - apt-get install -y \
-       cmake \
-       doxygen \
-       libjpeg8-dev \
-       libpng12-dev \
-       libtiff5-dev \
-       libavcodec-ffmpeg-dev \
-       libavformat-ffmpeg-dev \
-       libavutil-ffmpeg-dev \
+  - apt-get install -y
+       cmake
+       doxygen
+       libjpeg8-dev
+       libpng12-dev
+       libtiff5-dev
+       libavcodec-ffmpeg-dev
+       libavformat-ffmpeg-dev
+       libavutil-ffmpeg-dev
        qtbase5-dev
-  - apt-get install -qq \
-       boost-python-dev \
+  - apt-get install -qq
+       boost-python-dev
        python3-dev
 
 job:
