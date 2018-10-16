@@ -21,10 +21,10 @@ job:
   script:
     - mkdir build
     - cd build
-    - cmake .. \
-       -DCMAKE_BUILD_TYPE=Debug \
-       -DSARA_BUILD_SHARED_LIBS=ON \
-       -DSARA_BUILD_SAMPLES=ON \
+    - cmake ..
+       -DCMAKE_BUILD_TYPE=Debug
+       -DSARA_BUILD_SHARED_LIBS=ON
+       -DSARA_BUILD_SAMPLES=ON
        -DSARA_BUILD_TESTS=ON
     - make  -j$(nproc)
     - ctest --output-on-failure
