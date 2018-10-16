@@ -14,7 +14,7 @@ before_script:
        libavutil-dev
        qtbase5-dev
   - apt-get install -qq
-       boost-python-dev
+       libboost-python-dev
        python3-dev
 
 job:
