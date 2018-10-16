@@ -9,9 +9,9 @@ before_script:
        libjpeg8-dev
        libpng12-dev
        libtiff5-dev
-       libavcodec-ffmpeg-dev
-       libavformat-ffmpeg-dev
-       libavutil-ffmpeg-dev
+       libavcodec-dev
+       libavformat-dev
+       libavutil-dev
        qtbase5-dev
   - apt-get install -qq
        boost-python-dev
