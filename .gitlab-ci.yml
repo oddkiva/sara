@@ -1,0 +1,26 @@
+before_script:
+  - apt-get update -qq && apt-get install -y 
+       cmake \
+       doxygen \
+       libjpeg8-dev \
+       libpng12-dev \
+       libtiff5-dev \
+       libavcodec-ffmpeg-dev \
+       libavformat-ffmpeg-dev \
+       libavutil-ffmpeg-dev \
+       qtbase5-dev
+  - apt-get install -qq \
+       boost-python-dev \
+       python3-dev
+
+script:
+  - mkdir build
+  - cd build
+  - cmake .. \
+     -DCMAKE_BUILD_TYPE=Debug \
+     -DSARA_BUILD_SHARED_LIBS=ON \
+     -DSARA_BUILD_SAMPLES=ON \
+     -DSARA_BUILD_TESTS=ON
+  - make  -j$(nproc)
+  - ctest --output-on-failure
+  - make package
