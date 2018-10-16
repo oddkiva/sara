@@ -8,6 +8,7 @@ before_script:
        doxygen
        gcc
        g++
+       libboost-test-dev
        libjpeg8-dev
        libpng12-dev
        libtiff5-dev
