@@ -51,12 +51,7 @@ GRAPHICS_MAIN()
   start = t.elapsed_ms();
 
   for (int i = 0; i < num_iter; ++i)
-  {
-    auto src_c = inf_image.begin_subarray(begin, end);
-    auto dst_i = ext_image.begin_array();
-    for (; !dst_i.end(); ++src_c, ++dst_i)
-      *dst_i = *src_c;
-  }
+    crop(ext_image, inf_image, begin, end);
 
   finish = t.elapsed_ms();
   std::cout << (finish - start) / num_iter << " ms" << std::endl;
@@ -80,7 +75,7 @@ GRAPHICS_MAIN()
   start = t.elapsed_ms();
 
   for (int i = 0; i < num_iter; ++i)
-    stepped_safe_crop(ext_image, image, begin, end, steps, pad);
+    crop(ext_image, inf_image, begin, end, steps);
 
   finish = t.elapsed_ms();
   std::cout << (finish - start) / num_iter << " ms" << std::endl;

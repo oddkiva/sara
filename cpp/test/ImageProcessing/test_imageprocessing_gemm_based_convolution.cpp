@@ -116,12 +116,12 @@ BOOST_AUTO_TEST_CASE(test_im2col_on_nhw_tensor)
   auto im2col_out_as_3d =
     im2col_iterated.reshape(Vector3i{N, H * W, kH * kW});
 
-  im2col_out_as_3d[0] = im2col(x[0], {kH, kW});
-  im2col_out_as_3d[1] = im2col(x[1], {kH, kW});
-  im2col_out_as_3d[2] = im2col(x[2], {kH, kW});
+  im2col_out_as_3d[0] = im2col(x[0], {kH, kW}, make_constant_padding(0.f));
+  im2col_out_as_3d[1] = im2col(x[1], {kH, kW}, make_constant_padding(0.f));
+  im2col_out_as_3d[2] = im2col(x[2], {kH, kW}, make_constant_padding(0.f));
 
   // Apply im2col on the whole batch.
-  auto im2col_batched = im2col(x, {1, kH, kW});
+  auto im2col_batched = im2col(x, {1, kH, kW}, make_constant_padding(0.f));
 
   BOOST_CHECK(im2col_iterated.sizes() == im2col_batched.sizes());
   BOOST_CHECK(im2col_iterated.matrix() == im2col_batched.matrix());
@@ -221,7 +221,8 @@ BOOST_AUTO_TEST_CASE(test_im2col_on_nhwc_tensor)
   // [[(y  , x-1, c), (y  , x-1, c+1), (y  , x-1, c+2)],
   //  [(y  , x  , c), (y  , x  , c+1), (y  , x  , c+2)],
   //  [(y  , x+1, c), (y  , x+1, c+1), (y  , x+1, c+2)]],
-  auto phi_x = im2col(x, {1, kH, kW, kC}, {1, 1, 1, 3}, {0, 0, 0, 1});
+  auto phi_x = im2col(x, {1, kH, kW, kC}, make_constant_padding(0.f),
+                      {1, 1, 1, 3}, {0, 0, 0, 1});
   BOOST_CHECK(phi_x.sizes() == Vector2i(N * H * W, kH * kW * kC));
 
   auto sizes_6d = Matrix<int, 6, 1>{};
@@ -265,7 +266,8 @@ BOOST_AUTO_TEST_CASE(test_convolve_on_nhwc_tensor)
   constexpr auto kW = 3;
   constexpr auto kC = 3;
 
-  auto phi_x = im2col(x, {1, kH, kW, kC}, {1, 1, 1, kC}, {0, 0, 0, 1});
+  auto phi_x = im2col(x, {1, kH, kW, kC}, make_constant_padding(0.f),
+                      {1, 1, 1, kC}, {0, 0, 0, 1});
 
   Tensor_<float, 2> k{{kH * kW * kC, kC}};
 
@@ -337,7 +339,8 @@ BOOST_AUTO_TEST_CASE(test_convolve_on_nchw_tensor)
   constexpr auto kC = 3;
 
 
-  auto phi_x = im2col(x, {N, kC, kH, kW}, {1, kC, 1, 1}, {0, 1, 0, 0});
+  auto phi_x = im2col(x, {N, kC, kH, kW}, make_constant_padding(0.f),
+                      {1, kC, 1, 1}, {0, 1, 0, 0});
   // [N * C/kC * H/kH * W/kW, kC * kH * kW]
   // cout << phi_x.matrix() << endl;
 
