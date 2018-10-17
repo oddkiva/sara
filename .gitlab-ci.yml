@@ -20,6 +20,7 @@ before_script:
       libboost-python-dev
       python3-dev
   - export DISPLAY=:0
+  - xhost +SI:localuser:gitlab-runner
 
 job:
   script:
