@@ -28,10 +28,10 @@ job:
     - mkdir build
     - cd build
     - cmake ..
-        -DCMAKE_BUILD_TYPE=Debug
-        -DSARA_BUILD_SHARED_LIBS=ON
-        -DSARA_BUILD_SAMPLES=ON
-        -DSARA_BUILD_TESTS=ON
+        -DCMAKE_BUILD_TYPE:STRING=Debug
+        -DSARA_BUILD_SHARED_LIBS:BOOL=ON
+        -DSARA_BUILD_SAMPLES:BOOL=ON
+        -DSARA_BUILD_TESTS:BOOL=ON
     - make  -j$(nproc)
-    - ctest --output-on-failure
+    - ctest --output-on-failure --exclude-regex "test_graphics_*|test_features_draw"
     - make package
