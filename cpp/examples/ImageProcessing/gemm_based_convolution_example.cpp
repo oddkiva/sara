@@ -27,7 +27,7 @@ void convolution_example()
 {
   // Read an image.
   auto image = Image<Rgb32f>{};
-  imread(image, "/home/david/GitHub/DO-CV/sara/data/ksmall.jpg");
+  imread(image, src_path("../../../data/ksmall.jpg"));
 
   const auto w = image.width();
   const auto h = image.height();
@@ -35,7 +35,7 @@ void convolution_example()
   // Transpose the image from NHWC to NCHW storage order.
   //                          0123    0312
   auto x = tensor_view(image)
-               .reshape(Vector4i{1, h, w, 3})
+               .reshape<4>({1, h, w, 3})
                .transpose({0, 3, 1, 2});
 
   // Create the gaussian smoothing kernel for RGB color values.
@@ -67,7 +67,7 @@ void convolution_transpose_example()
 {
   // Read an image.
   auto image = Image<Rgb32f>{};
-  imread(image, "/home/david/GitHub/DO-CV/sara/data/ksmall.jpg");
+  imread(image, src_path("../../../data/ksmall.jpg"));
 
   // Upsample the image.
   auto image_resized = upsample(image, 5, 4);

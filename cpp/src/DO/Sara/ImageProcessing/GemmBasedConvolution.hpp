@@ -149,7 +149,7 @@ namespace DO { namespace Sara {
     const auto krows = std::accumulate(k_sizes.data() + 1, k_sizes.data() + N,
                                        1, std::multiplies<int>());
     const auto kcols = k_sizes[0];
-    auto kt = k_transposed.reshape(Vector2i{krows, kcols});
+    auto kt = k_transposed.reshape<2>({krows, kcols});
 
     // calculate the feature maps for each nd-pixel.
     k_sizes[0] = 1;
@@ -164,7 +164,7 @@ namespace DO { namespace Sara {
     // Perform the convolution.
     auto y = Tensor_<T, N>{y_sizes};
     y.colmajor_view()                                                  //
-        .reshape(Vector2i{phi_x.matrix().rows(), kt.matrix().cols()})  //
+        .reshape<2>({phi_x.matrix().rows(), kt.matrix().cols()})  //
         .matrix() = phi_x.matrix() * kt.matrix();
 
     return y;
@@ -228,7 +228,7 @@ namespace DO { namespace Sara {
     auto z = VectorXf::Zero(ksz);
 
     // Fill in the data.
-    auto ktr = kt.reshape(Vector2i{kin * kh * kw, kout});
+    auto ktr = kt.reshape<2>({kin * kh * kw, kout});
     // Plane               R  G  B
     ktr.matrix().col(0) << k, z, z;
     ktr.matrix().col(1) << z, k, z;
@@ -283,7 +283,7 @@ namespace DO { namespace Sara {
       }
 
 
-    auto K = k.reshape(Vector2i{kh * kw, 2 * 2});
+    auto K = k.reshape<2>({kh * kw, 2 * 2});
     std::cout << K.matrix() << std::endl;
 
     auto y = Tensor_<float, 3>{{d, kh * h, kw * w}};
@@ -291,8 +291,8 @@ namespace DO { namespace Sara {
     auto y_block = Tensor_<float, 3>{{d, kh, kw}};
     auto x_block = Tensor_<float, 3>{{d, 2, 2}};
 
-    auto y_block_2 = y_block.reshape(Vector2i{d, kh * kw}).colmajor_view();
-    auto x_block_2 = x_block.reshape(Vector2i{d, 2 * 2}).colmajor_view();
+    auto y_block_2 = y_block.reshape<2>({d, kh * kw}).colmajor_view();
+    auto x_block_2 = x_block.reshape<2>({d, 2 * 2}).colmajor_view();
 
     for (int v = 0; v < h; ++v)
       for (int u = 0; u < w; ++u)
@@ -342,15 +342,15 @@ namespace DO { namespace Sara {
         k[a][b].matrix()(1, 0) = float((kw - b) * a) / (kh * kw);
       }
 
-    auto K = k.reshape(Vector2i{kh * kw, 2 * 2});
+    auto K = k.reshape<2>({kh * kw, 2 * 2});
 
     auto y = Tensor_<float, 3>{{d, kh * h, kw * w}};
 
     auto y_block = Tensor_<float, 3>{{d, kh, kw}};
     auto x_block = Tensor_<float, 3>{{d, 2, 2}};
 
-    auto y_block_2 = y_block.reshape(Vector2i{d, kh * kw}).colmajor_view();
-    auto x_block_2 = x_block.reshape(Vector2i{d, 2 * 2}).colmajor_view();
+    auto y_block_2 = y_block.reshape<2>({d, kh * kw}).colmajor_view();
+    auto x_block_2 = x_block.reshape<2>({d, 2 * 2}).colmajor_view();
 
     for (int v = 0; v < h; ++v)
       for (int u = 0; u < w; ++u)

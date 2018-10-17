@@ -22,7 +22,7 @@ using namespace DO::Sara;
 GRAPHICS_MAIN()
 {
   auto image = Image<Rgb8>{};
-  imread(image, "/home/david/GitHub/DO-CV/sara/data/sunflowerField.jpg");
+  imread(image, src_path("../../../data/sunflowerField.jpg"));
 
   // Extend the image in an infinite domain with a mirror periodic padding.
   //auto pad = ConstantPadding<Rgb8>(Black8);

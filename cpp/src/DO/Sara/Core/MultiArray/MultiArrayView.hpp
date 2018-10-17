@@ -128,7 +128,7 @@ namespace DO { namespace Sara {
     //! @brief Constructor that wraps plain data with its known sizes.
     inline explicit MultiArrayView(value_type *data, const vector_type& sizes)
       : _begin{data}
-      , _end{data + compute_size(sizes)}
+      , _end{data + compute_size<Dimension>(sizes)}
       , _sizes{sizes}
       , _strides{compute_strides(sizes)}
     {
@@ -448,7 +448,7 @@ namespace DO { namespace Sara {
     inline auto reshape(const Matrix<int, M, 1>& new_sizes) const
         -> MultiArrayView<T, M, StorageOrder>
     {
-      if (compute_size(new_sizes) != size())
+      if (compute_size<M>(new_sizes) != size())
         throw std::domain_error{"Invalid shape!"};
       return MultiArrayView<T, M, StorageOrder>{const_cast<T*>(_begin),
                                                 new_sizes};
