@@ -35,11 +35,11 @@ void convolution_example()
   // Transpose the image from NHWC to NCHW storage order.
   //                          0123    0312
   auto x = tensor_view(image)
-               .reshape<4>({1, h, w, 3})
+               .reshape(Vector4i{1, h, w, 3})
                .transpose({0, 3, 1, 2});
 
   // Create the gaussian smoothing kernel for RGB color values.
-  auto kt = gaussian_tensor_nchw(8.f, 2);
+  auto kt = gaussian_tensor_nchw(4.f, 2);
 
   // Convolve the image using the GEMM BLAS routine.
   auto y = gemm_convolve(

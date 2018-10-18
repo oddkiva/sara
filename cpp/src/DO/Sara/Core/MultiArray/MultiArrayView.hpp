@@ -444,13 +444,14 @@ namespace DO { namespace Sara {
     }
 
     //! @brief Reshape the array with the new sizes.
-    template <int M>
-    inline auto reshape(const Matrix<int, M, 1>& new_sizes) const
-        -> MultiArrayView<T, M, StorageOrder>
+    template <typename Array>
+    inline auto reshape(const Array& new_sizes) const
+        -> MultiArrayView<T, ElementTraits<Array>::size, StorageOrder>
     {
-      if (compute_size<M>(new_sizes) != size())
+      constexpr int D = ElementTraits<Array>::size;
+      if (compute_size<D>(new_sizes) != size())
         throw std::domain_error{"Invalid shape!"};
-      return MultiArrayView<T, M, StorageOrder>{const_cast<T*>(_begin),
+      return MultiArrayView<T, D, StorageOrder>{const_cast<T*>(_begin),
                                                 new_sizes};
     }
 
