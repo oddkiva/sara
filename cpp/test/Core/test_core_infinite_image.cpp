@@ -23,50 +23,6 @@ using namespace std;
 using namespace DO::Sara;
 
 
-template <typename T, int N, int O, typename Padding>
-void safe_crop(MultiArrayView<T, N, O>& dst, const MultiArrayView<T, N, O>& src,
-               const Matrix<int, N, 1>& begin, const Matrix<int, N, 1>& end,
-               const Padding& padding)
-{
-  if (dst.sizes() != end - begin)
-    throw std::domain_error{"Invalid destination sizes!"};
-
-  const auto inf_src = make_infinite(src, padding);
-  auto src_i = inf_src.begin_subarray(begin, end);
-
-  for (auto dst_i = dst.begin(); dst_i != dst.end(); ++src_i, ++dst_i)
-    *dst_i = *src_i;
-}
-
-template <typename T, int N, int O, typename Padding>
-void stepped_safe_crop(MultiArrayView<T, N, O>& dst,
-                       const MultiArrayView<T, N, O>& src,
-                       const Matrix<int, N, 1>& begin,
-                       const Matrix<int, N, 1>& end,
-                       const Matrix<int, N, 1>& steps,
-                       const Padding& padding)
-{
-  auto sizes = Matrix<int, N, 1>{};
-  for (int i = 0; i < N; ++i)
-  {
-    const auto modulo = (end[i] - begin[i]) % steps[i];
-    sizes[i] = (end[i] - begin[i]) / steps[i] + int(modulo != 0);
-  }
-
-  if (dst.sizes() != sizes)
-  {
-    std::ostringstream oss;
-    oss << "Invalid destination sizes which must be: " << sizes.transpose();
-    throw std::domain_error{oss.str()};
-  }
-
-  const auto inf_src = make_infinite(src, padding);
-  auto src_i = inf_src.begin_stepped_subarray(begin, end, steps);
-
-  for (auto dst_i = dst.begin(); dst_i != dst.end(); ++src_i, ++dst_i)
-    *dst_i = *src_i;
-}
-
 BOOST_AUTO_TEST_SUITE(TestInfiniteImage)
 
 BOOST_AUTO_TEST_CASE(test_infinite_image_with_periodic_padding)
@@ -81,7 +37,7 @@ BOOST_AUTO_TEST_CASE(test_infinite_image_with_periodic_padding)
   const auto padding = PeriodicPadding{};
 
   auto dst = Image<float>{end - begin};
-  safe_crop(dst, src, begin, end, padding);
+  crop(dst, src, begin, end);
 
 
   auto true_dst = Image<float>{end - begin};
@@ -110,7 +66,7 @@ BOOST_AUTO_TEST_CASE(test_infinite_image_with_constant_padding)
   const auto padding = make_constant_padding(0.f);
 
   auto dst = Image<float>{end - begin};
-  safe_crop(dst, src, begin, end, padding);
+  crop(dst, make_infinite(src, padding), begin, end);
 
 
   auto true_dst = Image<float>{end - begin};
@@ -137,7 +93,7 @@ BOOST_AUTO_TEST_CASE(test_infinite_image_with_repeat_padding)
   const auto padding = RepeatPadding{};
 
   auto dst = Image<float>{end - begin};
-  safe_crop(dst, src, begin, end, padding);
+  crop(dst, make_infinite(src, padding), begin, end);
 
 
   auto true_dst = Image<float>{end - begin};
@@ -165,7 +121,7 @@ BOOST_AUTO_TEST_CASE(test_infinite_image_with_periodic_padding_stepped_safe_crop
   const auto padding = PeriodicPadding{};
 
   auto dst = Image<float>{4, 4};
-  stepped_safe_crop(dst, src, begin, end, steps, padding);
+  crop(dst, make_infinite(src, padding), begin, end, steps);
 
   auto true_dst = Image<float>{4, 4};
   BOOST_CHECK(dst.sizes() == Vector2i(4, 4));
