@@ -15,6 +15,8 @@
 
 #include <DO/Sara/Core/MultiArray.hpp>
 
+#include <iostream>
+
 
 using namespace DO::Sara;
 using namespace std;
@@ -255,11 +257,95 @@ BOOST_AUTO_TEST_CASE(test_equality_and_inequality_comparisons)
 
 BOOST_AUTO_TEST_SUITE_END()
 
+class TestFixtureFor2DSteppedSubarrayIterators : public TestFixtureFor2DIterators
+{
+protected:
+  Vector2i start;
+  Vector2i end;
+  Vector2i steps;
+
+public:
+  TestFixtureFor2DSteppedSubarrayIterators()
+  {
+    start << 2, 3;
+    end << 6, 11;
+    steps << 2, 3;
+
+    image.resize(20, 20);
+    for (auto i = 0; i < image.rows(); ++i)
+      for (auto j = 0; j < image.cols(); ++j)
+        image(i, j) = Vector2i{i, j};
+  }
+};
+
+BOOST_FIXTURE_TEST_SUITE(Test2DSteppedSubarrayIterators,
+                         TestFixtureFor2DSteppedSubarrayIterators)
+
+BOOST_AUTO_TEST_CASE(test_row_major_prefix_increment)
+{
+  const auto true_visited_coords =
+      std::vector<Vector2i>{Vector2i{2, 3}, Vector2i{2, 6}, Vector2i{2, 9},
+                            Vector2i{4, 3}, Vector2i{4, 6}, Vector2i{4, 9}};
+  const auto true_visited_values = true_visited_coords;
+
+  auto true_visited_ptrs = std::vector<Vector2i *>{};
+  for (const auto& c : true_visited_coords)
+    true_visited_ptrs.push_back(image.data() + jump(c, image.strides()));
+
+  auto visited_values = std::vector<Vector2i>{};
+  auto visited_ptrs = std::vector<Vector2i *>{};
+  auto visited_coords = std::vector<Vector2i>{};
+
+  auto it = image.begin_stepped_subarray(start, end, steps);
+  for (; !it.end(); ++it)
+  {
+    visited_values.push_back(*it);
+    visited_coords.push_back(it.position());
+    visited_ptrs.push_back(it.operator->());
+  }
+
+  BOOST_CHECK(true_visited_coords == visited_coords);
+  BOOST_CHECK(true_visited_values == visited_values);
+  BOOST_CHECK(true_visited_ptrs == visited_ptrs);
+  BOOST_CHECK(it.end());
+}
+
+BOOST_AUTO_TEST_CASE(test_row_major_postfix_decrement)
+{
+  const auto true_visited_coords =
+      std::vector<Vector2i>{Vector2i{4, 9}, Vector2i{4, 6}, Vector2i{4, 3},
+                            Vector2i{2, 9}, Vector2i{2, 6}, Vector2i{2, 3}};
+  const auto true_visited_values = true_visited_coords;
+
+  auto true_visited_ptrs = std::vector<Vector2i *>{};
+  for (const auto& c : true_visited_coords)
+    true_visited_ptrs.push_back(image.data() + jump(c, image.strides()));
+
+  auto visited_values = std::vector<Vector2i>{};
+  auto visited_ptrs = std::vector<Vector2i *>{};
+  auto visited_coords = std::vector<Vector2i>{};
+
+  auto it = image.begin_stepped_subarray(start, end, steps);
+  it += Vector2i{1, 2};
+  for (; !it.end(); --it)
+  {
+    visited_values.push_back(*it);
+    visited_coords.push_back(it.position());
+    visited_ptrs.push_back(it.operator->());
+  }
+
+  BOOST_CHECK(true_visited_coords == visited_coords);
+  BOOST_CHECK(true_visited_values == visited_values);
+  BOOST_CHECK(true_visited_ptrs == visited_ptrs);
+  BOOST_CHECK(it.end());
+}
+
+BOOST_AUTO_TEST_SUITE_END()
 
 
- BOOST_FIXTURE_TEST_SUITE(Test2DAxisterators, TestFixtureFor2DIterators)
+BOOST_FIXTURE_TEST_SUITE(Test2DAxisterators, TestFixtureFor2DIterators)
 
- BOOST_AUTO_TEST_CASE(test_equality_and_inequality_comparisons)
+BOOST_AUTO_TEST_CASE(test_equality_and_inequality_comparisons)
 {
   const Image& const_image = image;
   auto it = image.begin_array();
@@ -289,14 +375,14 @@ BOOST_AUTO_TEST_SUITE_END()
   BOOST_CHECK(it.x() != const_image.data() + 1);
 }
 
- BOOST_AUTO_TEST_CASE(test_iterations)
+BOOST_AUTO_TEST_CASE(test_iterations)
 {
   auto it = image.begin_array();
   BOOST_CHECK(++it.x() == image.begin() + image.stride(0));
   BOOST_CHECK(--it.x() == image.begin());
 }
 
- BOOST_AUTO_TEST_CASE(test_arithmetic_operations)
+BOOST_AUTO_TEST_CASE(test_arithmetic_operations)
 {
   auto it = image.begin_array();
 
@@ -316,14 +402,13 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 
 
-
 class TestFixtureFor3DIterators
 {
- protected:
+protected:
   using Volume = MultiArray<Vector3i, 3, RowMajor>;
   Volume volume;
 
- public:
+public:
   TestFixtureFor3DIterators()
   {
     volume.resize(2, 5, 7);

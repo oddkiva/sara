@@ -66,7 +66,7 @@ namespace DO { namespace Sara {
   void check_patch(const ImageView<float>& I, int x, int y, int w, int h,
                    double fact)
   {
-    auto patch = I.compute<SafeCrop>(x, y, w, h);
+    auto patch = I.compute<SafeCrop>(Point2i{x, y}, Point2i{x + w, y + h});
     auto window = create_window(int_round(w * fact), int_round(h * fact),
                                 "Check image patch");
     set_active_window(window);

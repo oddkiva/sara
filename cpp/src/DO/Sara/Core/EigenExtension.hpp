@@ -31,9 +31,9 @@
 # pragma warning ( disable : 4181 ) // "../Core/Locator.hpp(444) : warning C4181: qualifier applied to reference type; ignored"
 #endif
 
-#include <sstream>
-
 #include <Eigen/Eigen>
+
+#include <sstream>
 
 
 //! \namespace Eigen

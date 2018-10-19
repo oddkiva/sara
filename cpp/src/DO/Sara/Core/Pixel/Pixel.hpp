@@ -11,11 +11,11 @@
 
 #pragma once
 
-#include <functional>
-#include <stdexcept>
-
 #include <DO/Sara/Core/EigenExtension.hpp>
 #include <DO/Sara/Core/Meta.hpp>
+
+#include <functional>
+#include <stdexcept>
 
 
 // Pixel data structures.

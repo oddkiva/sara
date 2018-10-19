@@ -4,7 +4,7 @@ project(DO_ImageProcessing_Examples)
 
 message(STATUS "  - DO_ImageProcessing_Examples")
 
-find_package(DO_Sara COMPONENTS Core Graphics ImageProcessing REQUIRED)
+find_package(DO_Sara COMPONENTS Core Graphics ImageIO ImageProcessing REQUIRED)
 
 macro (sara_add_example example)
   add_executable(${example} ${example}.cpp)
@@ -17,3 +17,5 @@ macro (sara_add_example example)
 endmacro()
 
 sara_add_example(image_processing_example)
+sara_add_example(infinite_image_example)
+sara_add_example(gemm_based_convolution_example)

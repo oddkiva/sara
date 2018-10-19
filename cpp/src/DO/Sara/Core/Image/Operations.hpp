@@ -15,6 +15,8 @@
 #include <DO/Sara/Core/Pixel/PixelTraits.hpp>
 #include <DO/Sara/Core/Pixel/SmartColorConversion.hpp>
 
+#include <iostream>
+
 
 namespace DO { namespace Sara {
 
@@ -211,7 +213,7 @@ namespace DO { namespace Sara {
                    const typename ImageView<T, N>::vector_type& begin_coords,
                    const typename ImageView<T, N>::vector_type& end_coords)
   {
-    auto dst = Image<T, N>{ end_coords - begin_coords };
+    auto dst = Image<T, N>{end_coords - begin_coords};
 
     auto src_it = src.begin_subarray(begin_coords, end_coords);
     for (auto dst_it = dst.begin(); dst_it != dst.end(); ++dst_it, ++src_it)
@@ -221,20 +223,14 @@ namespace DO { namespace Sara {
   }
 
   template <typename T>
-  inline Image<T> crop(const ImageView<T>& src, int top_left_x, int top_left_y,
-                       int width, int height)
+  inline Image<T> crop(const ImageView<T>& src, const Point2i& center,
+                       int l1_radius)
   {
-    auto begin_coords = Vector2i{ top_left_x, top_left_y };
-    auto end_coords = Vector2i{ top_left_x + width, top_left_y + height };
-    return crop(src, begin_coords, end_coords);
-  }
-
-  template <typename T>
-  inline Image<T> crop(const ImageView<T>& src, int center_x, int center_y,
-                       int radius)
-  {
-    return crop(src, center_x - radius, center_y - radius, 2 * radius + 1,
-                2 * radius + 1);
+    auto b = center;
+    auto e = center;
+    b.array() -= l1_radius;
+    e.array() += l1_radius;
+    return crop(src, b, e);
   }
 
   struct Crop
@@ -272,14 +268,14 @@ namespace DO { namespace Sara {
             const typename ImageView<T, N>::vector_type& begin_coords,
             const typename ImageView<T, N>::vector_type& end_coords)
   {
-    auto dst = Image<T, N>{ end_coords - begin_coords };
+    auto dst = Image<T, N>{end_coords - begin_coords};
 
     auto src_it = src.begin_subarray(begin_coords, end_coords);
     for (auto dst_it = dst.begin(); dst_it != dst.end(); ++dst_it, ++src_it)
     {
       // If a and b are coordinates out bounds.
       if (src_it.position().minCoeff() < 0 ||
-          (src_it.position() - src.sizes()).minCoeff() >= 0)
+          (src_it.position() - src.sizes()).maxCoeff() >= 0)
         *dst_it = PixelTraits<T>::min();
       else
         *dst_it = *src_it;
@@ -288,21 +284,17 @@ namespace DO { namespace Sara {
     return dst;
   }
 
-  template <typename T>
-  inline Image<T> safe_crop(const ImageView<T>& src, int top_left_x,
-                            int top_left_y, int width, int height)
+  template <typename T, int N>
+  Image<T, N>
+  safe_crop(const ImageView<T, N>& src,
+            const typename ImageView<T, N>::vector_type& center,
+            int l1_radius)
   {
-    auto begin_coords = Vector2i{ top_left_x, top_left_y };
-    auto end_coords = Vector2i{ top_left_x + width, top_left_y + height };
-    return safe_crop(src, begin_coords, end_coords);
-  }
-
-  template <typename T>
-  inline Image<T> safe_crop(const ImageView<T>& src, int center_x, int center_y,
-                            int radius)
-  {
-    return safe_crop(src, center_x - radius, center_y - radius, 2 * radius + 1,
-                     2 * radius + 1);
+    auto b = center;
+    auto e = center;
+    b.array() -= l1_radius;
+    e.array() += l1_radius + 1;
+    return safe_crop(src, b, e);
   }
 
   struct SafeCrop
@@ -322,22 +314,63 @@ namespace DO { namespace Sara {
       return safe_crop(src, begin_coords, end_coords);
     }
 
-    template <typename T>
-    inline auto operator()(const ImageView<T>& src, int top_left_x, int top_left_y,
-                           int width, int height) const
-        -> Image<T>
+    template <typename ImageView_>
+    inline auto operator()(const ImageView_& src,
+                           const Coords<ImageView_>& center, int radius) const
+        -> Image<Pixel<ImageView_>, ImageView_::Dimension>
     {
-      return safe_crop(src, top_left_x, top_left_y, width, height);
-    }
-
-    template <typename T>
-    inline auto operator()(const ImageView<T>& src, int x, int y,
-                           int radius) const -> Image<T>
-    {
-      return safe_crop(src, x, y, radius);
+      return safe_crop(src, center, radius);
     }
   };
   //! @}
+
+} /* namespace Sara */
+} /* namespace DO */
+
+
+// Generic ND-Array crop functions.
+namespace DO { namespace Sara {
+
+  template <typename DstArrayView, typename SrcArrayView>
+  void crop(DstArrayView& dst, const SrcArrayView& src,
+            const typename SrcArrayView::vector_type& begin,
+            const typename SrcArrayView::vector_type& end)
+  {
+    if (dst.sizes() != end - begin)
+    {
+      std::ostringstream oss;
+      oss << "Error: destination sizes " << dst.sizes().transpose()
+          << "is invalid and must be: " << (end - begin).transpose();
+      throw std::domain_error{oss.str()};
+    }
+
+    auto src_i = src.begin_subarray(begin, end);
+
+    for (auto dst_i = dst.begin(); dst_i != dst.end(); ++src_i, ++dst_i)
+      *dst_i = *src_i;
+  }
+
+  template <typename DstArrayView, typename SrcArrayView>
+  void crop(DstArrayView& dst, const SrcArrayView& src,
+            const typename SrcArrayView::vector_type& begin,
+            const typename SrcArrayView::vector_type& end,
+            const typename SrcArrayView::vector_type& strides)
+  {
+    auto src_i = src.begin_stepped_subarray(begin, end, strides);
+
+    const auto sizes = src_i.stepped_subarray_sizes();
+    if (dst.sizes() != sizes)
+    {
+      std::ostringstream oss;
+      oss << "Error: destination sizes " << dst.sizes().transpose()
+          << "is invalid and must be: " << sizes.transpose();
+      throw std::domain_error{oss.str()};
+    }
+
+    for (auto dst_i = dst.begin(); dst_i != dst.end(); ++src_i, ++dst_i)
+      *dst_i = *src_i;
+  }
+
 
 } /* namespace Sara */
 } /* namespace DO */
