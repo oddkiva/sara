@@ -23,74 +23,66 @@ using namespace std;
 using namespace DO::Sara;
 
 
-GRAPHICS_MAIN()
+void convolution_example()
 {
-  auto image = Image<float>{};
-  imread(image, "/home/david/GitHub/DO-CV/sara/data/sunflowerField.jpg");
+  // Read an image.
+  auto image = Image<Rgb32f>{};
+  imread(image, src_path("../../../data/ksmall.jpg"));
 
-  // Compute the size of the Gaussian kernel.
-  auto gaussian_kernel = [](float sigma, int gauss_truncate)
-  {
-    auto kernel_size = int(2 * gauss_truncate * sigma + 1);
-    // Make sure the Gaussian kernel is at least of size 3 and is of odd size.
-    kernel_size = std::max(3, kernel_size);
-    if (kernel_size % 2 == 0)
-      ++kernel_size;
+  const auto w = image.width();
+  const auto h = image.height();
 
-    // Create the 1D Gaussian kernel.
-    auto kernel = Image<float>(kernel_size, kernel_size);
-    auto sum = 0.f;
+  // Transpose the image from NHWC to NCHW storage order.
+  //                          0123    0312
+  auto x = tensor_view(image)
+               .reshape(Vector4i{1, h, w, 3})
+               .transpose({0, 3, 1, 2});
 
-    // Compute the value of the Gaussian and the normalizing factor.
-    for (int y = 0; y < kernel_size; ++y)
-    {
-      const auto v = float(y) - kernel_size / 2.f;
-      const auto ky = exp(-v * v / (2.f * sigma * sigma));
+  // Create the gaussian smoothing kernel for RGB color values.
+  auto kt = gaussian_tensor_nchw(4.f, 2);
 
-      for (int x = 0; x < kernel_size; ++x)
-      {
-        const auto u = float(x) - kernel_size / 2.f;
-        auto kx = exp(-u * u / (2.f * sigma * sigma));
-        kernel(x, y) = kx * ky;
-        sum += kernel(x, y);
-      }
-    }
+  // Convolve the image using the GEMM BLAS routine.
+  auto y = gemm_convolve(
+      x,                  // the signal
+      kt,                 // the transposed kernel.
+      PeriodicPadding{},  // the padding type
+      // make_constant_padding(0.f),      // the padding type
+      {1, kt.size(0), 1, 1},  // strides in the convolution
+      {0, 1, 0, 0});  // pay attention to the offset here for the C dimension.
+  // Transpose the tensor data back to NHWC storage order to view the image.
+  y = y.transpose({0, 2, 3, 1});
 
-    kernel.flat_array() /= sum;
+  auto convolved_image =
+      ImageView<Rgb32f>{reinterpret_cast<Rgb32f*>(y.data()), {y.size(2), y.size(1)}};
 
-    return kernel;
-  };
-
-  //const auto kernel = gaussian_kernel(3.f, 2);
-  auto kernel = Image<float>{3, 3};
-  kernel.matrix() = Matrix3f::Ones() / 9;
-
-  auto x = tensor_view(image);
-  auto k = tensor_view(kernel);
-
-#ifdef DEBUG
-  const Vector2i strides{4, 4};
-  const auto xi = x.begin_stepped_subarray(Vector2i::Zero(), x.sizes(), strides);
-  auto szs = xi.stepped_subarray_sizes();
-  std::reverse(szs.data(), szs.data() + szs.size());
-
-  auto convolved_image = Image<float>{szs};
-  auto y = tensor_view(convolved_image);
-
-  gemm_convolve_strided(y, x, k, strides);
-#else
-  // Stride in HxW order.
-  const Vector2i strides{2, 2};
-  auto y = gemm_convolve_strided(x, k, strides);
-
-  auto convolved_image = image_view(y);
-#endif
-
-  create_window(convolved_image.sizes());
-  //display(convolved_image.compute<ColorRescale>());
+  create_window(image.sizes());
+  display(image);
+  get_key();
   display(convolved_image);
   get_key();
   close_window();
+}
 
+void convolution_transpose_example()
+{
+  // Read an image.
+  auto image = Image<Rgb32f>{};
+  imread(image, src_path("../../../data/ksmall.jpg"));
+
+  // Upsample the image.
+  auto image_resized = upsample(image, 5, 4);
+
+  create_window(image_resized.sizes());
+  display(image);
+  get_key();
+  display(image_resized);
+  get_key();
+  close_window();
+}
+
+GRAPHICS_MAIN()
+{
+  convolution_example();
+  convolution_transpose_example();
   return EXIT_SUCCESS;
 }

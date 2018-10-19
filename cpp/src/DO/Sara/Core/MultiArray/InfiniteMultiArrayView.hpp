@@ -199,27 +199,28 @@ namespace DO { namespace Sara {
     using value_type = typename ArrayView::value_type;
 
     enum { StorageOrder = ArrayView::StorageOrder };
+    enum { Dimension = ArrayView::Dimension };
 
-    InfiniteMultiArrayView(const ArrayView& f, const Padding& pad)
+    inline InfiniteMultiArrayView(const ArrayView& f, const Padding& pad)
       : _f(f)
       , _pad{pad}
     {
     }
 
-    auto operator()(const vector_type& x) const -> value_type
+    inline auto operator()(const vector_type& x) const -> value_type
     {
       return _pad.at(_f, x);
     }
 
-    auto begin_subarray(const vector_type& a, const vector_type& b) const
+    inline auto begin_subarray(const vector_type& a, const vector_type& b) const
         -> InfiniteArrayIterator<InfiniteMultiArrayView>
     {
       return {*this, a, b};
     }
 
-    auto begin_stepped_subarray(const vector_type& a,  //
-                                const vector_type& b,  //
-                                const vector_type& steps) const
+    inline auto begin_stepped_subarray(const vector_type& a,  //
+                                       const vector_type& b,  //
+                                       const vector_type& steps) const
         -> InfiniteSteppedArrayIterator<InfiniteMultiArrayView>
     {
       return {*this, a, b, steps};

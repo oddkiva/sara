@@ -48,6 +48,22 @@ namespace DO { namespace Sara {
   }
 
 
+  class RepeatPadding
+  {
+  public:
+    inline RepeatPadding() = default;
+
+    template <typename T, int N, int O>
+    inline auto at(const MultiArrayView<T, N, O>& f,
+                   const Matrix<int, N, 1>& x) const -> T
+    {
+      Matrix<int, N, 1> y = x.cwiseMax(Matrix<int, N, 1>::Zero())
+                                .cwiseMin((f.sizes().array() - 1).matrix());
+      return f(y);
+    }
+  };
+
+
   class PeriodicPadding
   {
   public:

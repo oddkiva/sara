@@ -326,3 +326,51 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
+
+
+// Generic ND-Array crop functions.
+namespace DO { namespace Sara {
+
+  template <typename DstArrayView, typename SrcArrayView>
+  void crop(DstArrayView& dst, const SrcArrayView& src,
+            const typename SrcArrayView::vector_type& begin,
+            const typename SrcArrayView::vector_type& end)
+  {
+    if (dst.sizes() != end - begin)
+    {
+      std::ostringstream oss;
+      oss << "Error: destination sizes " << dst.sizes().transpose()
+          << "is invalid and must be: " << (end - begin).transpose();
+      throw std::domain_error{oss.str()};
+    }
+
+    auto src_i = src.begin_subarray(begin, end);
+
+    for (auto dst_i = dst.begin(); dst_i != dst.end(); ++src_i, ++dst_i)
+      *dst_i = *src_i;
+  }
+
+  template <typename DstArrayView, typename SrcArrayView>
+  void crop(DstArrayView& dst, const SrcArrayView& src,
+            const typename SrcArrayView::vector_type& begin,
+            const typename SrcArrayView::vector_type& end,
+            const typename SrcArrayView::vector_type& strides)
+  {
+    auto src_i = src.begin_stepped_subarray(begin, end, strides);
+
+    const auto sizes = src_i.stepped_subarray_sizes();
+    if (dst.sizes() != sizes)
+    {
+      std::ostringstream oss;
+      oss << "Error: destination sizes " << dst.sizes().transpose()
+          << "is invalid and must be: " << sizes.transpose();
+      throw std::domain_error{oss.str()};
+    }
+
+    for (auto dst_i = dst.begin(); dst_i != dst.end(); ++src_i, ++dst_i)
+      *dst_i = *src_i;
+  }
+
+
+} /* namespace Sara */
+} /* namespace DO */

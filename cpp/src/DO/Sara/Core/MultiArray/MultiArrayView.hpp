@@ -128,7 +128,7 @@ namespace DO { namespace Sara {
     //! @brief Constructor that wraps plain data with its known sizes.
     inline explicit MultiArrayView(value_type *data, const vector_type& sizes)
       : _begin{data}
-      , _end{data + compute_size(sizes)}
+      , _end{data + compute_size<Dimension>(sizes)}
       , _sizes{sizes}
       , _strides{compute_strides(sizes)}
     {
@@ -182,6 +182,7 @@ namespace DO { namespace Sara {
     {
       return _strides[i];
     }
+
     //! @{
     //! @brief Return the array pointer
     inline pointer data()
@@ -442,15 +443,62 @@ namespace DO { namespace Sara {
       return dst;
     }
 
-    template <int M>
-    inline auto reshape(const Matrix<int, M, 1>& new_sizes) const
-        -> MultiArrayView<T, M, StorageOrder>
+    //! @brief Reshape the array with the new sizes.
+    template <typename Array>
+    inline auto reshape(const Array& new_sizes) const
+        -> MultiArrayView<T, ElementTraits<Array>::size, StorageOrder>
     {
-      if (compute_size(new_sizes) != size())
+      constexpr int D = ElementTraits<Array>::size;
+      if (compute_size<D>(new_sizes) != size())
         throw std::domain_error{"Invalid shape!"};
-      return MultiArrayView<T, M, StorageOrder>{const_cast<T*>(_begin),
+      return MultiArrayView<T, D, StorageOrder>{const_cast<T*>(_begin),
                                                 new_sizes};
     }
+
+    //! @brief Transpose the array.
+    inline auto transpose(const vector_type& order) const
+      -> MultiArray<T, Dimension, StorageOrder>
+    {
+      auto out_sizes = vector_type{};
+      for (int i = 0; i < Dimension; ++i)
+        out_sizes[i] = this->size(order[i]);
+
+      auto out = MultiArray<T, Dimension, StorageOrder>{out_sizes};
+
+      auto in_it = begin_array();
+      vector_type out_coord = Matrix<int, N, 1>::Zero();
+
+      for (; !in_it.end(); ++in_it)
+      {
+        for (int i = 0; i < Dimension; ++i)
+          out_coord[i] = in_it.position()[order[i]];
+
+        out(out_coord) = *in_it;
+      }
+
+      return out;
+    }
+
+    //! @{
+    //! @brief Reverse the storage-order view.
+    inline auto colmajor_view() const -> MultiArrayView<T, N, ColMajor>
+    {
+      static_assert(StorageOrder == static_cast<int>(RowMajor),
+                    "Don't use this on a column-major MultiArrayView object");
+      auto sizes = this->_sizes;
+      std::reverse(sizes.data(), sizes.data() + sizes.size());
+      return MultiArrayView<T, N, ColMajor>{_begin, sizes};
+    }
+
+    inline auto rowmajor_view() const -> MultiArrayView<T, N, RowMajor>
+    {
+      static_assert(StorageOrder == static_cast<int>(ColMajor),
+                    "Don't use this on a row-major MultiArrayView object");
+      auto sizes = this->_sizes;
+      std::reverse(sizes.data(), sizes.data() + sizes.size());
+      return MultiArrayView<T, N, RowMajor>{_begin, sizes};
+    }
+    //! @}
 
   protected:
     //! @brief Compute the strides according the size vector and storage order.
