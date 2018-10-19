@@ -27,9 +27,10 @@ namespace DO { namespace Sara {
     {
     }
 
-    template <int N, int O>
-    inline auto at(const MultiArrayView<T, N, O>& f,
-                   const Matrix<int, N, 1>& x) const -> T
+    template <typename ArrayView>
+    inline auto at(const ArrayView& f,
+                   const typename ArrayView::vector_type& x) const
+        -> typename ArrayView::value_type
     {
       if (x.minCoeff() < 0 || (x - f.sizes()).maxCoeff() >= 0)
         return _value;
@@ -53,12 +54,14 @@ namespace DO { namespace Sara {
   public:
     inline RepeatPadding() = default;
 
-    template <typename T, int N, int O>
-    inline auto at(const MultiArrayView<T, N, O>& f,
-                   const Matrix<int, N, 1>& x) const -> T
+    template <typename ArrayView>
+    inline auto at(const ArrayView& f,
+                   const typename ArrayView::vector_type& x) const
+        -> typename ArrayView::value_type
     {
-      Matrix<int, N, 1> y = x.cwiseMax(Matrix<int, N, 1>::Zero())
-                                .cwiseMin((f.sizes().array() - 1).matrix());
+      using vector_type = typename ArrayView::vector_type;
+      vector_type y = x.cwiseMax(vector_type::Zero())
+                       .cwiseMin((f.sizes().array() - 1).matrix());
       return f(y);
     }
   };
@@ -69,10 +72,13 @@ namespace DO { namespace Sara {
   public:
     inline PeriodicPadding() = default;
 
-    template <typename T, int N, int O>
-    inline auto at(const MultiArrayView<T, N, O>& f,
-                   const Matrix<int, N, 1>& x) const -> T
+    template <typename ArrayView>
+    inline auto at(const ArrayView& f,
+                   const typename ArrayView::vector_type& x) const
+        -> typename ArrayView::value_type
     {
+      constexpr auto N = ArrayView::Dimension;
+
       auto y = x;
 
       // First pass.
