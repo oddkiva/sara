@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(test_infinite_image_with_periodic_padding)
   const auto padding = PeriodicPadding{};
 
   auto dst = Image<float>{end - begin};
-  crop(dst, src, begin, end);
+  crop(dst, make_infinite(src, padding), begin, end);
 
 
   auto true_dst = Image<float>{end - begin};
