@@ -9,32 +9,28 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#define BOOST_TEST_MODULE "ImageProcessing/Determinant"
 
-#include <gtest/gtest.h>
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/ImageProcessing/Determinant.hpp>
-
-#include "../AssertHelpers.hpp"
 
 
 using namespace std;
 using namespace DO::Sara;
 
 
-TEST(TestDeterminant, test_determinant)
+BOOST_AUTO_TEST_SUITE(TestDeterminant)
+
+BOOST_AUTO_TEST_CASE(test_determinant)
 {
-  auto tensor = Image<Matrix2f>{ 3, 3 };
+  auto tensor = Image<Matrix2f>{3, 3};
   tensor.flat_array().fill(Matrix2f::Ones());
 
   auto det = tensor.compute<Determinant>();
 
   for (int i = 0; i < det.flat_array().size(); ++i)
-    EXPECT_NEAR(0, det.flat_array()[i], 1e-5);
+    BOOST_REQUIRE_CLOSE(0, det.flat_array()[i], 1e-5);
 }
 
-
-int main(int argc, char** argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+BOOST_AUTO_TEST_SUITE_END()

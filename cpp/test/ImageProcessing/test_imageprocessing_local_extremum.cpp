@@ -9,8 +9,9 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#define BOOST_TEST_MODULE "ImageProcessing/Local Extrema"
 
-#include <gtest/gtest.h>
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/ImageProcessing/Extrema.hpp>
 
@@ -19,7 +20,9 @@ using namespace std;
 using namespace DO::Sara;
 
 
-TEST(TestLocalExtremum, test_local_extremum)
+BOOST_AUTO_TEST_SUITE(TestLocalExtremum)
+
+BOOST_AUTO_TEST_CASE(test_local_extremum)
 {
   // Simple test case.
   Image<float> I(10,10);
@@ -33,59 +36,60 @@ TEST(TestLocalExtremum, test_local_extremum)
   CompareWithNeighborhood3<less, float> less33;
 
   // Check local maximality
-  EXPECT_FALSE(greater33(I(1,1), 1, 1, I, true));
-  EXPECT_FALSE(greater33(I(1,1), 1, 1, I, false));
-  EXPECT_TRUE(greater_equal33(I(1,1),1,1,I,true));
-  EXPECT_TRUE(greater_equal33(I(1,1),1,1,I,false));
+  BOOST_CHECK(!greater33(I(1,1), 1, 1, I, true));
+  BOOST_CHECK(!greater33(I(1,1), 1, 1, I, false));
+  BOOST_CHECK(greater_equal33(I(1,1),1,1,I,true));
+  BOOST_CHECK(greater_equal33(I(1,1),1,1,I,false));
+
   // Check local minimality
-  EXPECT_FALSE(less33(I(1,1), 1, 1, I, true));
-  EXPECT_FALSE(less33(I(1,1), 1, 1, I, false));
-  EXPECT_TRUE(less_equal33(I(1,1),1,1,I,true));
-  EXPECT_TRUE(less_equal33(I(1,1),1,1,I,false));
+  BOOST_CHECK(!less33(I(1,1), 1, 1, I, true));
+  BOOST_CHECK(!less33(I(1,1), 1, 1, I, false));
+  BOOST_CHECK(less_equal33(I(1,1),1,1,I,true));
+  BOOST_CHECK(less_equal33(I(1,1),1,1,I,false));
+
   // Check that aliases are correctly defined.
-  EXPECT_FALSE(StrictLocalMax<float>()(1, 1, I));
-  EXPECT_FALSE(StrictLocalMin<float>()(1, 1, I));
+  BOOST_CHECK(!StrictLocalMax<float>()(1, 1, I));
+  BOOST_CHECK(!StrictLocalMin<float>()(1, 1, I));
   vector<Point2i> maxima;
   vector<Point2i> minima;
 
   maxima = strict_local_maxima(I);
-  EXPECT_TRUE(maxima.empty());
+  BOOST_CHECK(maxima.empty());
   maxima = local_maxima(I);
-  EXPECT_TRUE(maxima.size() == 8*8);
+  BOOST_CHECK(maxima.size() == 8*8);
 
   minima = strict_local_minima(I);
-  EXPECT_TRUE(minima.empty());
+  BOOST_CHECK(minima.empty());
   minima = local_minima(I);
-  EXPECT_TRUE(minima.size() == 8*8);
+  BOOST_CHECK(minima.size() == 8*8);
 
   I(1,1) = 10.f;
   I(7,7) = 10.f;
-  EXPECT_TRUE(greater33(I(1,1), 1, 1, I, false));
-  EXPECT_FALSE(greater33(I(1,1), 1, 1, I, true));
-  EXPECT_TRUE(LocalMax<float>()(1, 1, I));
-  EXPECT_TRUE(StrictLocalMax<float>()(1, 1, I));
-  EXPECT_FALSE(LocalMin<float>()(1, 1, I));
-  EXPECT_FALSE(StrictLocalMin<float>()(1, 1, I));
+  BOOST_CHECK(greater33(I(1,1), 1, 1, I, false));
+  BOOST_CHECK(!greater33(I(1,1), 1, 1, I, true));
+  BOOST_CHECK(LocalMax<float>()(1, 1, I));
+  BOOST_CHECK(StrictLocalMax<float>()(1, 1, I));
+  BOOST_CHECK(!LocalMin<float>()(1, 1, I));
+  BOOST_CHECK(!StrictLocalMin<float>()(1, 1, I));
 
   maxima = strict_local_maxima(I);
-  EXPECT_EQ(maxima.size(), 2u);
+  BOOST_CHECK_EQUAL(maxima.size(), 2u);
   minima = strict_local_minima(I);
-  EXPECT_TRUE(minima.empty());
+  BOOST_CHECK(minima.empty());
 
   I.matrix() *= -1;
-  EXPECT_TRUE(less33(I(1,1), 1, 1, I, false));
-  EXPECT_FALSE(less33(I(1,1), 1, 1, I, true));
-  EXPECT_TRUE(StrictLocalMin<float>()(1, 1, I));
-  EXPECT_TRUE(LocalMin<float>()(1, 1, I));
+  BOOST_CHECK(less33(I(1,1), 1, 1, I, false));
+  BOOST_CHECK(!less33(I(1,1), 1, 1, I, true));
+  BOOST_CHECK(StrictLocalMin<float>()(1, 1, I));
+  BOOST_CHECK(LocalMin<float>()(1, 1, I));
   maxima = strict_local_maxima(I);
   minima = strict_local_minima(I);
 
-  EXPECT_TRUE(maxima.empty());
-  EXPECT_EQ(minima.size(), 2u);
+  BOOST_CHECK(maxima.empty());
+  BOOST_CHECK_EQUAL(minima.size(), 2u);
 }
 
-
-TEST(TestLocalExtremum, test_local_scale_space_extremum)
+BOOST_AUTO_TEST_CASE(test_local_scale_space_extremum)
 {
   ImagePyramid<double> I;
   I.reset(1,3,1.6f,pow(2., 1./3.));
@@ -94,37 +98,32 @@ TEST(TestLocalExtremum, test_local_scale_space_extremum)
     I(i,0).resize(10,10);
     I(i,0).matrix().fill(1);
   }
-  EXPECT_FALSE(StrictLocalScaleSpaceMax<double>()(1,1,1,0,I));
-  EXPECT_FALSE(StrictLocalScaleSpaceMin<double>()(1,1,1,0,I));
+  BOOST_CHECK(!StrictLocalScaleSpaceMax<double>()(1,1,1,0,I));
+  BOOST_CHECK(!StrictLocalScaleSpaceMin<double>()(1,1,1,0,I));
 
   // Local scale-space extrema test 1
   I(1,1,1,0) = 10.f;
   I(7,7,1,0) = 10.f;
-  EXPECT_TRUE(StrictLocalScaleSpaceMax<double>()(1,1,1,0,I));
-  EXPECT_FALSE(StrictLocalScaleSpaceMin<double>()(1,1,1,0,I));
+  BOOST_CHECK(StrictLocalScaleSpaceMax<double>()(1,1,1,0,I));
+  BOOST_CHECK(!StrictLocalScaleSpaceMin<double>()(1,1,1,0,I));
 
   vector<Point2i> maxima, minima;
   maxima = strict_local_scale_space_maxima(I,1,0);
   minima = strict_local_scale_space_minima(I,1,0);
-  EXPECT_EQ(maxima.size(), 2u);
-  EXPECT_TRUE(minima.empty());
+  BOOST_CHECK_EQUAL(maxima.size(), 2u);
+  BOOST_CHECK(minima.empty());
 
   // Local scale-space extrema test 2
   I(1,1,1,0) *= -1.f;
   I(7,7,1,0) *= -1.f;
   maxima = strict_local_scale_space_maxima(I,1,0);
   minima = strict_local_scale_space_minima(I,1,0);
-  EXPECT_FALSE(LocalScaleSpaceMax<double>()(1,1,1,0,I));
-  EXPECT_FALSE(StrictLocalScaleSpaceMax<double>()(1,1,1,0,I));
-  EXPECT_TRUE(LocalScaleSpaceMin<double>()(1,1,1,0,I));
-  EXPECT_TRUE(StrictLocalScaleSpaceMin<double>()(1,1,1,0,I));
-  EXPECT_TRUE(maxima.empty());
-  EXPECT_EQ(minima.size(), 2u);
+  BOOST_CHECK(!LocalScaleSpaceMax<double>()(1,1,1,0,I));
+  BOOST_CHECK(!StrictLocalScaleSpaceMax<double>()(1,1,1,0,I));
+  BOOST_CHECK(LocalScaleSpaceMin<double>()(1,1,1,0,I));
+  BOOST_CHECK(StrictLocalScaleSpaceMin<double>()(1,1,1,0,I));
+  BOOST_CHECK(maxima.empty());
+  BOOST_CHECK_EQUAL(minima.size(), 2u);
 }
 
-
-int main(int argc, char** argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+BOOST_AUTO_TEST_SUITE_END()

@@ -10,7 +10,7 @@ namespace bp = boost::python;
 namespace sara = DO::Sara;
 
 
-bp::list compute_adjacency_list_2d(PyObject *labels)
+bp::list compute_adjacency_list_2d(PyObject* labels)
 {
   using namespace sara;
 
@@ -32,17 +32,17 @@ bp::list compute_adjacency_list_2d(PyObject *labels)
 }
 
 
-bp::list compute_connected_components(PyObject *labels)
+bp::list compute_connected_components(PyObject* labels)
 {
   using namespace sara;
 
   const auto im = image_view_2d<int>(labels);
 
   auto adj_list_data = compute_adjacency_list_2d(im);
-  AdjacencyList adj_list{ adj_list_data };
+  AdjacencyList adj_list{adj_list_data};
 
-  auto disjoint_sets = DisjointSets{ im.size(), adj_list };
-  disjoint_sets.compute_connected_components();
+  auto disjoint_sets = DisjointSets{};
+  disjoint_sets.compute_connected_components(adj_list);
   const auto components = disjoint_sets.get_connected_components();
 
   auto components_pylist = bp::list{};
@@ -62,7 +62,14 @@ bp::list compute_connected_components(PyObject *labels)
 
 void expose_disjoint_sets()
 {
+#if BOOST_VERSION <= 106300
   bp::numeric::array::set_module_and_type("numpy", "ndarray");
+#else
+  Py_Initialize();
+  bp::numpy::initialize();
+#endif
+
+  // Import numpy array.
   import_numpy_array();
 
   bp::def("compute_adjacency_list_2d", &compute_adjacency_list_2d);

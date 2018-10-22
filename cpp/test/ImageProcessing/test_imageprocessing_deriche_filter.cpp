@@ -9,8 +9,9 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#define BOOST_TEST_MODULE "ImageProcessing/Deriche Filter"
 
-#include <gtest/gtest.h>
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/ImageProcessing/Deriche.hpp>
 
@@ -21,7 +22,9 @@ using namespace std;
 using namespace DO::Sara;
 
 
-TEST(TestDericheFilter, test_inplace_deriche)
+BOOST_AUTO_TEST_SUITE(TestDericheFilter)
+
+BOOST_AUTO_TEST_CASE(test_inplace_deriche)
 {
   auto signal = Image<float>{10, 10};
   signal.flat_array().setOnes();
@@ -36,13 +39,12 @@ TEST(TestDericheFilter, test_inplace_deriche)
   derivative_order = 0;
   derivative_axis = 0;
   inplace_deriche(signal, 1.f, derivative_order, derivative_axis);
-  EXPECT_MATRIX_NEAR(signal.matrix(), true_matrix, 1e-5);
+  BOOST_CHECK_SMALL_L2_DISTANCE(signal.matrix(), true_matrix, 1e-5f);
 
   derivative_order = 0;
   derivative_axis = 1;
   inplace_deriche(signal, 1.f, derivative_order, derivative_axis);
-  EXPECT_MATRIX_NEAR(signal.matrix(), true_matrix, 1e-5);
-
+  BOOST_CHECK_SMALL_L2_DISTANCE(signal.matrix(), true_matrix, 1e-5f);
 
   // Test the first-order derivative filter for the two axes.
   derivative_order = 1;
@@ -50,14 +52,14 @@ TEST(TestDericheFilter, test_inplace_deriche)
   signal.flat_array().fill(1);
   true_matrix.fill(0);
   inplace_deriche(signal, 1.f, derivative_order, derivative_axis);
-  EXPECT_MATRIX_NEAR(signal.matrix(), true_matrix, 1e-5);
+  BOOST_CHECK_SMALL_L2_DISTANCE(signal.matrix(), true_matrix, 1e-5f);
 
   derivative_order = 1;
   derivative_axis = 1;
   signal.flat_array().fill(1);
   true_matrix.fill(0);
   inplace_deriche(signal, 1.f, derivative_order, derivative_axis);
-  EXPECT_MATRIX_NEAR(signal.matrix(), true_matrix, 1e-5);
+  BOOST_CHECK_SMALL_L2_DISTANCE(signal.matrix(), true_matrix, 1e-5f);
 
 
   // TODO: test the second-order derivative filter for the two axes.
@@ -65,8 +67,7 @@ TEST(TestDericheFilter, test_inplace_deriche)
   // But let's leave it for another PR.
 }
 
-
-TEST(TestDericheFilter, test_inplace_deriche_blur)
+BOOST_AUTO_TEST_CASE(test_inplace_deriche_blur)
 {
   auto signal = Image<float>{10, 10};
   signal.flat_array().setOnes();
@@ -76,15 +77,14 @@ TEST(TestDericheFilter, test_inplace_deriche_blur)
 
   const auto sigmas = Vector2f::Ones().eval();
   inplace_deriche_blur(signal, sigmas);
-  EXPECT_MATRIX_NEAR(signal.matrix(), true_matrix, 1e-5);
+  BOOST_CHECK_CLOSE_L2_DISTANCE(signal.matrix(), true_matrix, 1e-1f);
 
   float sigma = 1;
   inplace_deriche_blur(signal, sigma);
-  EXPECT_MATRIX_NEAR(signal.matrix(), true_matrix, 1e-5);
+  BOOST_CHECK_CLOSE_L2_DISTANCE(signal.matrix(), true_matrix, 1e-1f);
 }
 
-
-TEST(TestDericheFilter, test_convenience_deriche_blur)
+BOOST_AUTO_TEST_CASE(test_convenience_deriche_blur)
 {
   auto in_signal = Image<float>{10, 10};
   in_signal.flat_array().setOnes();
@@ -93,16 +93,11 @@ TEST(TestDericheFilter, test_convenience_deriche_blur)
   true_matrix.setOnes();
 
   auto out_signal = in_signal.compute<DericheBlur>(1.f, true);
-  EXPECT_MATRIX_NEAR(out_signal.matrix(), true_matrix, 1e-5);
+  BOOST_CHECK_CLOSE_L2_DISTANCE(out_signal.matrix(), true_matrix, 1e-1f);
 
   out_signal.clear();
   out_signal = in_signal.compute<DericheBlur>(1.f);
-  EXPECT_MATRIX_NEAR(out_signal.matrix(), true_matrix, 1e-5);
+  BOOST_CHECK_CLOSE_L2_DISTANCE(out_signal.matrix(), true_matrix, 1e-1f);
 }
 
-
-int main(int argc, char** argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+BOOST_AUTO_TEST_SUITE_END()

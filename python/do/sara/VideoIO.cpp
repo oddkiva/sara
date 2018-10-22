@@ -35,8 +35,12 @@ public:
 
 void expose_video_io()
 {
+#if BOOST_VERSION <= 106300
   bp::numeric::array::set_module_and_type("numpy", "ndarray");
-  import_numpy_array();
+#else
+  Py_Initialize();
+  bp::numpy::initialize();
+#endif
 
   bp::class_<VideoStream, boost::noncopyable>("VideoStream")
     .def("open", &VideoStream::open)

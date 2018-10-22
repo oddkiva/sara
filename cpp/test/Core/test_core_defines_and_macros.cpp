@@ -9,7 +9,9 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE "Core/Defines and Macros"
+
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/Defines.hpp>
 
@@ -17,15 +19,12 @@
 using namespace std;
 
 
-TEST(DO_Sara_Core_Test, test_defines)
+BOOST_AUTO_TEST_SUITE(TestDefinesAndMacros)
+
+BOOST_AUTO_TEST_CASE(test_defines_and_macros)
 {
-  EXPECT_FALSE(string(DO_SARA_VERSION).empty());
-  EXPECT_TRUE(string(src_path("")).find("test/Core") != string::npos);
+  BOOST_CHECK(!string(DO_SARA_VERSION).empty());
+  BOOST_CHECK(string(src_path("")).find("test/Core") != string::npos);
 }
 
-
-int main(int argc, char** argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+BOOST_AUTO_TEST_SUITE_END()

@@ -1,6 +1,7 @@
 Sara: C++ Computer Vision Library
 =================================
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/5980a04834a04289a35752401d502728)](https://www.codacy.com/app/davidok8/sara?utm_source=github.com&utm_medium=referral&utm_content=DO-CV/sara&utm_campaign=badger)
 [![Build Status](https://travis-ci.org/DO-CV/sara.svg?branch=master)](https://travis-ci.org/DO-CV/sara)
 <a href="https://ci.appveyor.com/project/do-cv/sara"><img src="https://ci.appveyor.com/api/projects/status/github/do-cv/sara?branch=master&svg=true" alt="Build Status: Windows" /></a>
 [![Coverage Status](https://coveralls.io/repos/DO-CV/sara/badge.svg?branch=master)](https://coveralls.io/r/DO-CV/sara?branch=master)
@@ -114,6 +115,7 @@ To build the libraries, run:
      sudo yum install -y
        cmake \
        doxygen \
+       libboost-test-dev \
        libjpeg-devel \
        libpng-devel \
        libtiff-devel \
@@ -123,8 +125,8 @@ To build the libraries, run:
 
      # To install Python bindings.
      sudo apt-get install -qq \
-       boost-python-devel \
-       python3-devel
+       libboost-python-dev \
+       libpython3-devel
      ```
 
 2. Build the library:

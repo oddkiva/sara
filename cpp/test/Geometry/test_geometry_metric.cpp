@@ -1,4 +1,18 @@
-#include <gtest/gtest.h>
+// ========================================================================== //
+// This file is part of Sara, a basic set of libraries in C++ for computer
+// vision.
+//
+// Copyright (C) 2015-2017 David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
+#define BOOST_TEST_MODULE "Geometry/Tools/Metric"
+
+#include <boost/mpl/list.hpp>
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/Geometry/Tools/Metric.hpp>
 
@@ -7,52 +21,34 @@
 
 using namespace DO::Sara;
 
-typedef testing::Types<
-  SquaredRefDistance<float, 2>,
-  SquaredDistance<float, 2>
-> DistanceTypes;
+using DistanceTypes =
+    boost::mpl::list<SquaredRefDistance<float, 2>, SquaredDistance<float, 2>>;
 
-template <typename DistanceType>
-class TestSquaredDistanceAndOpenBall : public testing::Test
-{
-};
+BOOST_AUTO_TEST_SUITE(TestSquaredDistanceAndOpenBall)
 
-TYPED_TEST_CASE_P(TestSquaredDistanceAndOpenBall);
-TYPED_TEST_P(TestSquaredDistanceAndOpenBall, test_computations)
+BOOST_AUTO_TEST_CASE_TEMPLATE(test_computations, Distance, DistanceTypes)
 {
-  using Distance = TypeParam;
   static_assert(Distance::Dim == 2, "Wrong dimension");
 
-  Matrix2f A = Matrix2f::Identity();
+  const Matrix2f A = Matrix2f::Identity();
 
-  Vector2f a = Vector2f::Zero();
-  Vector2f b = Vector2f{ 1.f, 0.f };
-  Vector2f c = Vector2f{ 0.f, 1.f };
+  const Vector2f a = Vector2f::Zero();
+  const Vector2f b = Vector2f{1.f, 0.f};
+  const Vector2f c = Vector2f{0.f, 1.f};
 
-  Distance d{ A };
-  EXPECT_MATRIX_EQ(d.covariance_matrix(), A);
-  EXPECT_TRUE(d.is_quasi_isotropic());
-  EXPECT_NEAR(d(b, a), A(0, 0), 1e-6f);
-  EXPECT_NEAR(d(c, a), A(1, 1), 1e-6f);
+  const auto d = Distance{A};
+  BOOST_CHECK_EQUAL(d.covariance_matrix(), A);
+  BOOST_CHECK(d.is_quasi_isotropic());
+  BOOST_CHECK_CLOSE(d(b, a), A(0, 0), 1e-6f);
+  BOOST_CHECK_CLOSE(d(c, a), A(1, 1), 1e-6f);
 
-  OpenBall<Distance> ball(Point2f::Zero(), 1.1f, d);
-  EXPECT_MATRIX_EQ(ball.center(), Point2f::Zero());
-  EXPECT_EQ(ball.radius(), 1.1f);
-  EXPECT_EQ(ball.squared_distance().covariance_matrix(), A);
-  EXPECT_TRUE(ball.contains(a));
-  EXPECT_TRUE(ball.contains(b));
-  EXPECT_TRUE(ball.contains(c));
+  const auto ball = OpenBall<Distance>{Point2f::Zero(), 1.1f, d};
+  BOOST_CHECK_EQUAL(ball.center(), Point2f::Zero());
+  BOOST_CHECK_EQUAL(ball.radius(), 1.1f);
+  BOOST_CHECK_EQUAL(ball.squared_distance().covariance_matrix(), A);
+  BOOST_CHECK(ball.contains(a));
+  BOOST_CHECK(ball.contains(b));
+  BOOST_CHECK(ball.contains(c));
 }
 
-REGISTER_TYPED_TEST_CASE_P(
-  TestSquaredDistanceAndOpenBall,
-  test_computations);
-INSTANTIATE_TYPED_TEST_CASE_P(Geometry_Tools_Metric,
-                              TestSquaredDistanceAndOpenBall,
-                              DistanceTypes);
-
-int main(int argc, char **argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+BOOST_AUTO_TEST_SUITE_END()

@@ -9,9 +9,13 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#define BOOST_TEST_NO_MAIN
+#define BOOST_TEST_MODULE "Graphics/Sleep Functions"
+
 #include <iostream>
 
-#include <gtest/gtest.h>
+#include <boost/mpl/list.hpp>
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/Core.hpp>
 #include <DO/Sara/Graphics.hpp>
@@ -24,23 +28,27 @@ using namespace std;
 using namespace DO::Sara;
 
 
-class TestSleepFunctions: public testing::Test
+class TestFixtureForSleepFunctions
 {
 protected:
   Window test_window_;
 
-  TestSleepFunctions()
+public:
+  TestFixtureForSleepFunctions()
   {
     test_window_ = create_window(300, 300);
   }
 
-  virtual ~TestSleepFunctions()
+  ~TestFixtureForSleepFunctions()
   {
     close_window(test_window_);
   }
 };
 
-TEST_F(TestSleepFunctions, test_millisleep)
+
+BOOST_FIXTURE_TEST_SUITE(TestSleepFunctions, TestFixtureForSleepFunctions)
+
+BOOST_AUTO_TEST_CASE(test_millisleep)
 {
   int delay_ms = 100;
   Timer timer;
@@ -49,10 +57,10 @@ TEST_F(TestSleepFunctions, test_millisleep)
   double elapsed = timer.elapsed_ms();
 
   double tol_ms = 10.;
-  EXPECT_NEAR(elapsed, static_cast<double>(delay_ms), tol_ms);
+  BOOST_CHECK_SMALL(elapsed - static_cast<double>(delay_ms), tol_ms);
 }
 
-TEST_F(TestSleepFunctions, test_microsleep)
+BOOST_AUTO_TEST_CASE(test_microsleep)
 {
   int delay_us = 100*1000; // 100 ms because 1000 us = 1 ms.
   Timer timer;
@@ -61,14 +69,14 @@ TEST_F(TestSleepFunctions, test_microsleep)
   double elapsed = timer.elapsed_ms();
 
   double tol_us = 5;
-  EXPECT_NEAR(elapsed, static_cast<double>(delay_us)*1e-3, tol_us);
-
+  BOOST_CHECK_SMALL(elapsed - static_cast<double>(delay_us) * 1e-3, tol_us);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 int worker_thread(int argc, char **argv)
 {
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+  return boost::unit_test::unit_test_main([]() { return true; }, argc, argv);
 }
 
 int main(int argc, char **argv)

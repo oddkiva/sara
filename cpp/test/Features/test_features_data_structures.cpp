@@ -9,31 +9,33 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE "Features/Data Structures"
+
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/Features.hpp>
-
-#include "../AssertHelpers.hpp"
 
 
 using namespace std;
 using namespace DO::Sara;
 
 
-TEST(TestInterestPoint, test_methods)
+BOOST_AUTO_TEST_SUITE(TestInterestPoint)
+
+BOOST_AUTO_TEST_CASE(test_methods)
 {
   InterestPoint f(Point2f::Ones());
 
   f.type() = InterestPoint::Type::Harris;
   f.extremum_type() = InterestPoint::ExtremumType::Saddle;
   f.extremum_value() = 0.f;
-  EXPECT_EQ(f.coords(), Point2f::Ones());
-  EXPECT_EQ(f.center(), Point2f::Ones());
-  EXPECT_EQ(f.x(), 1.f);
-  EXPECT_EQ(f.y(), 1.f);
-  EXPECT_EQ(f.extremum_type(), InterestPoint::ExtremumType::Saddle);
-  EXPECT_EQ(f.extremum_value(), 0.f);
-  EXPECT_EQ(f.type(), InterestPoint::Type::Harris);
+  BOOST_CHECK_EQUAL(f.coords(), Point2f::Ones());
+  BOOST_CHECK_EQUAL(f.center(), Point2f::Ones());
+  BOOST_CHECK_EQUAL(f.x(), 1.f);
+  BOOST_CHECK_EQUAL(f.y(), 1.f);
+  BOOST_CHECK(f.extremum_type() == InterestPoint::ExtremumType::Saddle);
+  BOOST_CHECK_EQUAL(f.extremum_value(), 0.f);
+  BOOST_CHECK(f.type() == InterestPoint::Type::Harris);
 
   // Check output stream operator.
   pair<InterestPoint::Type, string> types[] = {
@@ -43,34 +45,45 @@ TEST(TestInterestPoint, test_methods)
     make_pair(InterestPoint::Type::MSER, "MSER"),
     make_pair(InterestPoint::Type::SUSAN, "")
   };
+
   for (int i = 0; i < 5; ++i)
   {
     f.type() = types[i].first;
     ostringstream oss;
     oss << f;
     auto str = oss.str();
-    EXPECT_TRUE(str.find(types[i].second) != string::npos);
+    BOOST_CHECK(str.find(types[i].second) != string::npos);
   }
 }
 
-TEST(TestOERegion, test_methods)
+BOOST_AUTO_TEST_SUITE_END()
+
+
+BOOST_AUTO_TEST_SUITE(TestOrientedEllipticRegion)
+
+BOOST_AUTO_TEST_CASE(test_methods)
 {
-  OERegion f{ Point2f::Zero(), 1.f };
+  OERegion f{Point2f::Zero(), 1.f};
   f.orientation() = 0;
-  EXPECT_EQ(f.shape_matrix(), Matrix2f::Identity());
-  EXPECT_MATRIX_NEAR(f.affinity(), Matrix3f::Identity(), 1e-3);
-  EXPECT_EQ(f.radius(), 1.f);
-  EXPECT_EQ(f.scale(), 1.f);
+  BOOST_CHECK_EQUAL(f.shape_matrix(), Matrix2f::Identity());
+  BOOST_CHECK_SMALL((f.affinity() - Matrix3f::Identity()).norm(), 1e-3f);
+  BOOST_CHECK_EQUAL(f.radius(), 1.f);
+  BOOST_CHECK_EQUAL(f.scale(), 1.f);
 
   // Check output stream operator.
   ostringstream oss;
   oss << f;
-  auto str = oss.str();
-  EXPECT_TRUE(str.find("shape matrix") != string::npos);
-  EXPECT_TRUE(str.find("orientation:\t0 degrees") != string::npos);
+  const auto str = oss.str();
+  BOOST_CHECK(str.find("shape matrix") != string::npos);
+  BOOST_CHECK(str.find("orientation:\t0 degrees") != string::npos);
 }
 
-TEST(TestIO, test_read_write)
+BOOST_AUTO_TEST_SUITE_END()
+
+
+BOOST_AUTO_TEST_SUITE(TestIO)
+
+BOOST_AUTO_TEST_CASE(test_read_write)
 {
   const auto num_features = size_t{ 10 };
 
@@ -97,61 +110,66 @@ TEST(TestIO, test_read_write)
   auto descriptors2 = DescriptorMatrix<float>{};
   read_keypoints(features2, descriptors2, "keypoints.txt");
 
-  ASSERT_EQ(features.size(), features2.size());
-  ASSERT_EQ(descriptors.size(), descriptors2.size());
+  BOOST_REQUIRE_EQUAL(features.size(), features2.size());
+  BOOST_REQUIRE_EQUAL(descriptors.size(), descriptors2.size());
 
   for (size_t i = 0; i < num_features; ++i)
   {
-    ASSERT_EQ(features[i], features2[i]);
-    ASSERT_EQ(descriptors[i], descriptors2[i]);
+    BOOST_REQUIRE_EQUAL(features[i], features2[i]);
+    BOOST_REQUIRE_EQUAL(descriptors[i], descriptors2[i]);
   }
 }
 
-TEST(TestSet, test_methods)
+BOOST_AUTO_TEST_SUITE_END()
+
+
+BOOST_AUTO_TEST_SUITE(TestSet)
+
+BOOST_AUTO_TEST_CASE(test_methods)
 {
   // Test constructor.
   Set<OERegion, RealDescriptor> set;
-  EXPECT_EQ(set.size(), 0u);
+  BOOST_CHECK_EQUAL(set.size(), 0u);
 
   // Test resize function.
   set.features.resize(10);
-  EXPECT_THROW(set.size(), std::runtime_error);
+  BOOST_CHECK_THROW(set.size(), std::runtime_error);
 
   set.resize(10, 2);
-  EXPECT_EQ(set.size(), 10u);
-  EXPECT_EQ(set.features.size(), 10u);
-  EXPECT_EQ(set.descriptors.size(), 10u); // Test swap.
+  BOOST_CHECK_EQUAL(set.size(), 10u);
+  BOOST_CHECK_EQUAL(set.features.size(), 10u);
+  BOOST_CHECK_EQUAL(set.descriptors.size(), 10u); // Test swap.
 
   Set<OERegion, RealDescriptor> set2;
   set2.resize(20, 2);
 
   set.swap(set2);
-  EXPECT_EQ(set.size(), 20u);
-  EXPECT_EQ(set2.size(), 10u);
+  BOOST_CHECK_EQUAL(set.size(), 20u);
+  BOOST_CHECK_EQUAL(set2.size(), 10u);
 
   // Test append.
   set.append(set2);
-  EXPECT_EQ(set.size(), 30u);
+  BOOST_CHECK_EQUAL(set.size(), 30u);
 
   // Test accessors.
   const auto& const_set = set;
 
   set.f(0).coords() = Point2f::Ones();
-  EXPECT_EQ(set.f(0).coords(), Point2f::Ones());
-  EXPECT_EQ(const_set.f(0).coords(), Point2f::Ones());
+  BOOST_CHECK_EQUAL(set.f(0).coords(), Point2f::Ones());
+  BOOST_CHECK_EQUAL(const_set.f(0).coords(), Point2f::Ones());
 
   set.v(0) = Point2f::Ones();
-  EXPECT_EQ(set.v(0), Point2f::Ones());
-  EXPECT_EQ(const_set.v(0), Point2f::Ones());
+  BOOST_CHECK_EQUAL(set.v(0), Point2f::Ones());
+  BOOST_CHECK_EQUAL(const_set.v(0), Point2f::Ones());
 }
 
-TEST(TestSet, test_remove_redundant_features)
+BOOST_AUTO_TEST_CASE(test_remove_redundant_features)
 {
   Set<OERegion, RealDescriptor> set;
 
   // Check corner case.
   set.features.resize(10);
-  EXPECT_THROW(remove_redundant_features(set), runtime_error);
+  BOOST_CHECK_THROW(remove_redundant_features(set), runtime_error);
 
   // Check normal case.
   set.resize(7, 2);
@@ -168,11 +186,7 @@ TEST(TestSet, test_remove_redundant_features)
   expected_descriptor_matrix.col(0) = Vector2f::Zero();
   expected_descriptor_matrix.col(1) = Vector2f::Ones();
 
-  EXPECT_MATRIX_EQ(expected_descriptor_matrix, set.descriptors.matrix());
+  BOOST_CHECK_EQUAL(expected_descriptor_matrix, set.descriptors.matrix());
 }
 
-int main(int argc, char **argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+BOOST_AUTO_TEST_SUITE_END()

@@ -2,25 +2,25 @@
 // This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2015-2017 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2015-2018 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#define BOOST_TEST_MODULE "FeatureDescriptors/Affine Shape Adaptation"
+#pragma once
 
-#include <boost/test/unit_test.hpp>
+#include <DO/Sara/Defines.hpp>
+
+#include <DO/Sara/DisjointSets/DisjointSets.hpp>
 
 
-using namespace std;
+namespace DO { namespace Sara {
 
-BOOST_AUTO_TEST_SUITE(TestAffineShapeAdaptation)
+  DO_SARA_EXPORT
+  auto two_pass_connected_components(const ImageView<int, 2>& values)
+      -> Image<int, 2>;
 
-BOOST_AUTO_TEST_CASE(test_me)
-{
-  // TODO.
-}
-
-BOOST_AUTO_TEST_SUITE_END()
+} /* namespace Sara */
+} /* namespace DO */

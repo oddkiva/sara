@@ -40,13 +40,13 @@ namespace DO { namespace Sara {
 
     //! Custom constructor.
     inline Pixel(_T x, _T y, _T z)
-      : base_type{ x, y, z }
+      : base_type{x, y, z}
     {
     }
 
     //! Custom constructor.
     inline Pixel(_T x, _T y, _T z, _T t)
-      : base_type{ x, y, z, t }
+      : base_type{x, y, z, t}
     {
     }
 
