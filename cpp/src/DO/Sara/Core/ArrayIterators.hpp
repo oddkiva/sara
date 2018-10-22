@@ -14,3 +14,4 @@
 #pragma once
 
 #include <DO/Sara/Core/ArrayIterators/ArrayIterators.hpp>
+#include <DO/Sara/Core/ArrayIterators/CoordinatesIterator.hpp>

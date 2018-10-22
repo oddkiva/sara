@@ -31,7 +31,11 @@ public:
   {
     sizes << 3, 4;
     image.resize(sizes);
-    image.matrix() << 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4;
+    image.matrix() <<
+      1, 1, 1,
+      2, 2, 2,
+      3, 3, 3,
+      4, 4, 4;
   }
 };
 
@@ -40,8 +44,8 @@ BOOST_FIXTURE_TEST_SUITE(TestImageViewTransformOperations,
 
 BOOST_AUTO_TEST_CASE(test_with_safe_crop_functor)
 {
-  auto a = Vector2i{1, 1};
-  auto b = Vector2i{3, 2};
+  const auto a = Vector2i{1, 1};
+  const auto b = Vector2i{3, 2};
   auto cropped_image = image.compute<SafeCrop>(a, b);
 
   auto true_cropped_image = Image<float, 2>{2, 1};
@@ -49,9 +53,9 @@ BOOST_AUTO_TEST_CASE(test_with_safe_crop_functor)
   BOOST_CHECK_EQUAL(true_cropped_image.sizes(), cropped_image.sizes());
   BOOST_CHECK_EQUAL(true_cropped_image.matrix(), cropped_image.matrix());
 
-  auto x = 1, y = 1;
-  auto w = 2, h = 1;
-  cropped_image = safe_crop(image, x, y, w, h);
+  const auto x = 1, y = 1;
+  const auto w = 2, h = 1;
+  cropped_image = safe_crop(image, Point2i{x, y}, Point2i{x + w, y + h});
   BOOST_CHECK_EQUAL(true_cropped_image.sizes(), cropped_image.sizes());
   BOOST_CHECK_EQUAL(true_cropped_image.matrix(), cropped_image.matrix());
 }
@@ -73,12 +77,13 @@ BOOST_AUTO_TEST_CASE(test_with_safe_crop_lambda)
 
   auto x = -3, y = -3;
   auto w = 3, h = 3;
-  cropped_image = safe_crop(image, x, y, w, h);
+  cropped_image = safe_crop(image, Point2i{x, y}, Point2i{x + w, y + h});
   BOOST_CHECK_EQUAL(true_cropped_image.sizes(), cropped_image.sizes());
   BOOST_CHECK_EQUAL(true_cropped_image.matrix(), cropped_image.matrix());
 
-  auto cx = -2, cy = -2, r = 1;
-  cropped_image = safe_crop(image, cx, cy, r);
+  const auto center = Point2i{-2, -2};
+  const auto radius = 1;
+  cropped_image = safe_crop(image, center, radius);
   BOOST_CHECK_EQUAL(true_cropped_image.sizes(), cropped_image.sizes());
   BOOST_CHECK_EQUAL(true_cropped_image.matrix(), cropped_image.matrix());
 }

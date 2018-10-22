@@ -99,7 +99,8 @@ namespace DO { namespace Sara {
       static inline void apply(const Pixel<float, ColSpace>& src,
                                Pixel<T, ColSpace>& dst)
       {
-        convert_channel(src, dst);
+        for (auto i = 0; i < src.size(); ++i)
+          convert_channel(src[i], dst[i]);
       }
     };
     //! @}
