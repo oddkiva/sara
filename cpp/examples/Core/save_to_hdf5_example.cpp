@@ -1,4 +1,5 @@
 #include <DO/Sara/Core.hpp>
+#include <DO/Sara/Core/Tensor.hpp>
 
 #include <hdf5/serial/H5Cpp.h>
 
@@ -24,18 +25,20 @@ void write_data()
   const auto dataset =
       file.createDataSet(dataset_name, datatype, dataspace);
 
-  auto m = DO::Sara::MatrixXd{M, N};
+  auto m = DO::Sara::Tensor<double, 2, DO::Sara::RowMajor>{M, N};
   for (int i = 0; i < M; ++i)
     for (int j = 0; j < N; ++j)
-      m(i, j) = i * N + j;
-  std::cout << m << std::endl;
+      m.matrix()(i, j) = i * N + j;
+  std::cout << m.matrix() << std::endl;
 
   dataset.write(m.data(), H5::PredType::NATIVE_DOUBLE);
 }
 
 void read_data()
 {
-  auto m = DO::Sara::MatrixXd(M, N);
+  //DO::Sara::MatrixXd m = DO::Sara::MatrixXd::Zero(M, N);
+  DO::Sara::Tensor<double, 2, DO::Sara::RowMajor> m{M, N};
+  m.matrix().setZero();
 
   H5::Exception::dontPrint();
 
@@ -79,7 +82,7 @@ void read_data()
 
   dataset.read(m.data(), H5::PredType::NATIVE_DOUBLE, memspace, dataspace);
 
-  std::cout << "single_matrix = " << std::endl << m << std::endl;
+  std::cout << "single_matrix = " << std::endl << m.matrix() << std::endl;
 }
 
 int main()
