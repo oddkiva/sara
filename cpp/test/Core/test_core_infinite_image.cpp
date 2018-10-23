@@ -41,7 +41,6 @@ BOOST_AUTO_TEST_CASE(test_infinite_image_with_periodic_padding)
   auto dst = Image<float>{end - begin};
   crop(dst, inf_src, begin, end);
 
-
   auto true_dst = Image<float>{end - begin};
   true_dst.matrix() <<
     0, 1, 1, 0, 0, 1, 1, 0,   // -4
@@ -67,9 +66,10 @@ BOOST_AUTO_TEST_CASE(test_infinite_image_with_constant_padding)
   const auto end = Vector2i{4, 4};
   const auto padding = make_constant_padding(0.f);
 
-  auto dst = Image<float>{end - begin};
-  crop(dst, make_infinite(src, padding), begin, end);
+  const auto inf_src = make_infinite(src, padding);
 
+  auto dst = Image<float>{end - begin};
+  crop(dst, inf_src, begin, end);
 
   auto true_dst = Image<float>{end - begin};
   true_dst.matrix() <<
@@ -94,9 +94,10 @@ BOOST_AUTO_TEST_CASE(test_infinite_image_with_repeat_padding)
   const auto end = Vector2i{4, 4};
   const auto padding = RepeatPadding{};
 
-  auto dst = Image<float>{end - begin};
-  crop(dst, make_infinite(src, padding), begin, end);
+  const auto inf_src = make_infinite(src, padding);
 
+  auto dst = Image<float>{end - begin};
+  crop(dst, inf_src, begin, end);
 
   auto true_dst = Image<float>{end - begin};
   true_dst.matrix() <<
@@ -122,8 +123,10 @@ BOOST_AUTO_TEST_CASE(test_infinite_image_with_periodic_padding_stepped_safe_crop
   const auto steps = Vector2i{3, 3};
   const auto padding = PeriodicPadding{};
 
-  auto dst = Image<float>{4, 4};
-  crop(dst, make_infinite(src, padding), begin, end, steps);
+  const auto inf_src = make_infinite(src, padding);
+
+  auto dst = Image<float>{end - begin};
+  crop(dst, inf_src, begin, end);
 
   auto true_dst = Image<float>{4, 4};
   BOOST_CHECK(dst.sizes() == Vector2i(4, 4));
