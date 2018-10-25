@@ -1,3 +1,5 @@
+#include <memory>
+
 #include <DO/Sara/Core.hpp>
 #include <DO/Sara/Core/Tensor.hpp>
 
@@ -6,8 +8,7 @@
 #include <array>
 
 
-constexpr auto filepath = "matrix.h5";
-constexpr auto dataset_name = "single_matrix";
+constexpr auto filepath = "data.h5";
 constexpr auto rank = 2;
 constexpr auto M = 5;
 constexpr auto N = 6;
@@ -15,35 +16,74 @@ constexpr auto N = 6;
 
 void write_data()
 {
+  H5::Exception::dontPrint();
+
   auto file = H5::H5File{filepath, H5F_ACC_TRUNC};
-  auto dims = std::array<hsize_t, rank>{M, N};
 
-  const auto dataspace = H5::DataSpace{rank, dims.data()};
-  const auto datatype = H5::PredType::NATIVE_DOUBLE;
-  datatype.setOrder(H5T_ORDER_LE);
+  // Store the model.
+  {
+    auto models_group =
+        std::unique_ptr<H5::Group>(new H5::Group(file.createGroup("/models")));
 
-  const auto dataset =
-      file.createDataSet(dataset_name, datatype, dataspace);
+    const auto dims = std::array<hsize_t, rank>{M, N};
+    const auto dataspace = H5::DataSpace{rank, dims.data()};
+    const auto datatype = H5::PredType::NATIVE_DOUBLE;
+    datatype.setOrder(H5T_ORDER_LE);
 
-  auto m = DO::Sara::Tensor<double, 2, DO::Sara::RowMajor>{M, N};
-  for (int i = 0; i < M; ++i)
+    const auto dataset =
+      file.createDataSet("/models/weights", datatype, dataspace);
+
+    auto m = DO::Sara::Tensor<double, 2, DO::Sara::RowMajor>{M, N};
+    for (int i = 0; i < M; ++i)
+      for (int j = 0; j < N; ++j)
+        m.matrix()(i, j) = i * N + j;
+    std::cout << m.matrix() << std::endl;
+
+    dataset.write(m.data(), H5::PredType::NATIVE_DOUBLE);
+  }
+
+  // Store the training data.
+  {
+    auto data_group = std::unique_ptr<H5::Group>(
+        new H5::Group(file.createGroup("/data")));
+    auto train_group = std::unique_ptr<H5::Group>(
+        new H5::Group(file.createGroup("/data/train")));
+
+    const auto x_dims = std::array<hsize_t, rank>{M, N};
+    const auto x_dataspace = H5::DataSpace{rank, x_dims.data()};
+    const auto x_datatype = H5::PredType::NATIVE_DOUBLE;
+    x_datatype.setOrder(H5T_ORDER_LE);
+    const auto x_dataset = file.createDataSet("/data/train/x", x_datatype, x_dataspace);
+
+    const auto y_dims = std::array<hsize_t, rank>{1, N};
+    const auto y_dataspace = H5::DataSpace{rank, y_dims.data()};
+    const auto y_datatype = H5::PredType::NATIVE_INT;
+    y_datatype.setOrder(H5T_ORDER_LE);
+    const auto y_dataset = file.createDataSet("/data/train/y", y_datatype, y_dataspace);
+
+    auto x = DO::Sara::Tensor<double, 2, DO::Sara::RowMajor>{M, N};
+    for (int i = 0; i < M; ++i)
+      for (int j = 0; j < N; ++j)
+        x.matrix()(i, j) = i * N + j;
+
+    auto y = DO::Sara::Tensor<int, 2, DO::Sara::RowMajor>{1, N};
     for (int j = 0; j < N; ++j)
-      m.matrix()(i, j) = i * N + j;
-  std::cout << m.matrix() << std::endl;
+      y.matrix()(0, j) = j;
 
-  dataset.write(m.data(), H5::PredType::NATIVE_DOUBLE);
+    x_dataset.write(x.data(), H5::PredType::NATIVE_DOUBLE);
+    y_dataset.write(y.data(), H5::PredType::NATIVE_INT);
+  }
 }
 
 void read_data()
 {
-  //DO::Sara::MatrixXd m = DO::Sara::MatrixXd::Zero(M, N);
   DO::Sara::Tensor<double, 2, DO::Sara::RowMajor> m{M, N};
   m.matrix().setZero();
 
   H5::Exception::dontPrint();
 
   auto file = H5::H5File{filepath, H5F_ACC_RDONLY};
-  auto dataset = file.openDataSet(dataset_name);
+  auto dataset = file.openDataSet("weights");
 
   // Retrieve the data types (int, float, double...)?
   auto type_class = dataset.getTypeClass();
@@ -90,7 +130,7 @@ int main()
   try
   {
     write_data();
-    read_data();
+    //read_data();
   }
   catch (H5::FileIException& e)
   {
