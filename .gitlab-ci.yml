@@ -9,6 +9,7 @@ before_script:
       doxygen
       git
       libboost-test-dev
+      libhdf5-dev
       libjpeg8-dev
       libpng12-dev
       libtiff5-dev
