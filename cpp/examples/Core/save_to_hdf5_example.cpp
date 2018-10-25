@@ -16,6 +16,8 @@ constexpr auto N = 6;
 
 void write_data()
 {
+  std::cout << "Write" << std::endl;
+
   H5::Exception::dontPrint();
 
   auto file = H5::H5File{filepath, H5F_ACC_TRUNC};
@@ -37,12 +39,11 @@ void write_data()
     for (int i = 0; i < M; ++i)
       for (int j = 0; j < N; ++j)
         m.matrix()(i, j) = i * N + j;
-    std::cout << m.matrix() << std::endl;
 
     dataset.write(m.data(), H5::PredType::NATIVE_DOUBLE);
   }
 
-  // Store the training data.
+  // Store the train data.
   {
     auto data_group = std::unique_ptr<H5::Group>(
         new H5::Group(file.createGroup("/data")));
@@ -77,18 +78,18 @@ void write_data()
 
 void read_data()
 {
+  std::cout << "Read" << std::endl;
   DO::Sara::Tensor<double, 2, DO::Sara::RowMajor> m{M, N};
   m.matrix().setZero();
 
   H5::Exception::dontPrint();
 
   auto file = H5::H5File{filepath, H5F_ACC_RDONLY};
-  auto dataset = file.openDataSet("weights");
+  auto group = H5::Group(file.openGroup("models"));
+  auto dataset = H5::DataSet(group.openDataSet("weights"));
 
   // Retrieve the data types (int, float, double...)?
   auto type_class = dataset.getTypeClass();
-  //if (type_class != H5T_NATIVE_DOUBLE)
-  //  throw std::runtime_error{"Data type must be double!"};
   auto float_type = dataset.getFloatType();
 
   // Retrieve the data endianness.
@@ -122,7 +123,7 @@ void read_data()
 
   dataset.read(m.data(), H5::PredType::NATIVE_DOUBLE, memspace, dataspace);
 
-  std::cout << "single_matrix = " << std::endl << m.matrix() << std::endl;
+  std::cout << "weights = " << std::endl << m.matrix() << std::endl;
 }
 
 int main()
@@ -130,7 +131,7 @@ int main()
   try
   {
     write_data();
-    //read_data();
+    read_data();
   }
   catch (H5::FileIException& e)
   {
