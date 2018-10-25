@@ -1,6 +1,14 @@
 #!/bin/bash
 set -ex
 
+
+if [ -z "$1" ]; then
+  build_type=Release;
+else
+  build_type=$1;
+fi
+
+
 function install_python_packages_via_pip()
 {
   pip install numpy nose
@@ -12,7 +20,7 @@ function build_library()
   cmake_options+="-DCMAKE_EXPORT_COMPILE_COMMANDS=1 "
   cmake_options+="-DCMAKE_PREFIX_PATH=/usr/local/Qt-5.10.0 "
   cmake_options+="-DSARA_BUILD_VIDEOIO=ON "
-  cmake_options+="-DSARA_BUILD_PYTHON_BINDINGS=ON "
+  #cmake_options+="-DSARA_BUILD_PYTHON_BINDINGS=ON "
   cmake_options+="-DSARA_BUILD_SHARED_LIBS=ON "
   cmake_options+="-DSARA_BUILD_TESTS=ON "
   cmake_options+="-DSARA_BUILD_SAMPLES=ON "
@@ -21,7 +29,16 @@ function build_library()
   cmake ../sara ${cmake_options}
 
   # Build the library.
-  make -j`nproc` && make test && make pytest && make package
+  make -j$(nproc) VERBOSE=1
+
+  # Run C++ tests.
+  BOOST_TEST_LOG_LEVEL=all
+  BOOST_TEST_COLOR_OUTPUT=1
+  ctest --output-on-failure
+
+  # Run Python tests.
+  make pytest
+  make package
 }
 
 function install_package()
@@ -40,6 +57,7 @@ function install_package()
 }
 
 
+<<<<<<< HEAD
 if [ -z ${1+x} ]; then
   sara_build_type="Release"
 else
@@ -53,6 +71,9 @@ else
   sara_build_dir=$2
 fi
 echo "sara_build_dir=${sara_build_dir}"
+=======
+sara_build_dir="sara-build-${build_type}"
+>>>>>>> origin
 
 # Create the build directory.
 if [ -d "../${sara_build_dir}" ]; then

@@ -1,0 +1,30 @@
+cmake_minimum_required(VERSION 2.6)
+
+project(DO_Core_Examples)
+
+message(STATUS "  - DO_Core_Examples")
+
+
+find_package(DO_Sara COMPONENTS Core REQUIRED)
+find_package(HDF5 COMPONENTS CXX REQUIRED)
+
+
+include_directories(${HDF5_INCLUDE_DIRS})
+
+macro (sara_add_example example)
+  add_executable(${example} ${example}.cpp)
+  set_target_properties(${example} PROPERTIES
+                        COMPILE_FLAGS ${SARA_DEFINITIONS})
+  target_link_libraries(${example} ${DO_Sara_LIBRARIES})
+  set_property(TARGET ${example}
+    PROPERTY
+    FOLDER "DO Sara Examples/Core")
+endmacro ()
+
+sara_add_example(save_to_hdf5_example)
+#set_target_properties(save_to_hdf5_example
+#  PROPERTIES
+#  COMPILE_DEFINITIONS ${HDF5_DEFINITIONS})
+                    
+
+target_link_libraries(save_to_hdf5_example ${HDF5_LIBRARIES})

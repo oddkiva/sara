@@ -1,3 +1,4 @@
+add_subdirectory(Core)
 add_subdirectory(Features)
 add_subdirectory(FeatureDescriptors)
 add_subdirectory(FeatureDetectors)

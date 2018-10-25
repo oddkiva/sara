@@ -11,9 +11,9 @@
 
 #define BOOST_TEST_MODULE "Core/ArrayIterators/Basic Functions"
 
-#include <boost/test/unit_test.hpp>
-
 #include <DO/Sara/Core/ArrayIterators.hpp>
+
+#include <boost/test/unit_test.hpp>
 
 
 using namespace DO::Sara;
@@ -101,6 +101,32 @@ BOOST_AUTO_TEST_CASE(test_row_major_incrementer_2d)
   BOOST_REQUIRE(stop);
 }
 
+BOOST_AUTO_TEST_CASE(test_row_major_stepped_incrementer_2d)
+{
+  auto stop = false;
+  auto start = Vector2i{2, 3};
+  auto end = Vector2i{5, 10};
+  auto steps = Vector2i{2, 3};
+
+  auto coords = start;
+
+  auto true_visited_coords = std::vector<Vector2i>{
+    Vector2i{2, 3}, Vector2i{2, 6}, Vector2i{2, 9},
+    Vector2i{4, 3}, Vector2i{4, 6}, Vector2i{4, 9},
+  };
+
+  auto visited_coords = std::vector<Vector2i>{};
+  for (auto i = 0u; i < true_visited_coords.size(); ++i)
+  {
+    visited_coords.push_back(coords);
+    BOOST_REQUIRE(!stop);
+    PositionIncrementer<RowMajor>::apply(coords, stop, start, end, steps);
+  }
+  BOOST_REQUIRE(stop);
+
+  BOOST_REQUIRE(true_visited_coords == visited_coords);
+}
+
 BOOST_AUTO_TEST_CASE(test_col_major_incrementer_2d)
 {
   auto stop = false;
@@ -119,6 +145,34 @@ BOOST_AUTO_TEST_CASE(test_col_major_incrementer_2d)
   }
   BOOST_REQUIRE(stop);
 }
+
+BOOST_AUTO_TEST_CASE(test_col_major_stepped_incrementer_2d)
+{
+  auto stop = false;
+  auto start = Vector2i{2, 3};
+  auto end = Vector2i{5, 10};
+  auto steps = Vector2i{2, 3};
+
+  auto coords = start;
+
+  auto true_visited_coords = std::vector<Vector2i>{
+      Vector2i{2, 3}, Vector2i{4, 3},  // Col 0
+      Vector2i{2, 6}, Vector2i{4, 6},  // Col 1
+      Vector2i{2, 9}, Vector2i{4, 9},  // Col 2
+  };
+
+  auto visited_coords = std::vector<Vector2i>{};
+  for (auto i = 0u; i < true_visited_coords.size(); ++i)
+  {
+    visited_coords.push_back(coords);
+    BOOST_REQUIRE(!stop);
+    PositionIncrementer<ColMajor>::apply(coords, stop, start, end, steps);
+  }
+  BOOST_REQUIRE(stop);
+
+  BOOST_REQUIRE(true_visited_coords == visited_coords);
+}
+
 
 BOOST_AUTO_TEST_CASE(test_row_major_decrementer_2d)
 {
@@ -140,6 +194,32 @@ BOOST_AUTO_TEST_CASE(test_row_major_decrementer_2d)
   BOOST_REQUIRE(stop);
 }
 
+BOOST_AUTO_TEST_CASE(test_row_major_stepped_decrementer_2d)
+{
+  auto stop = false;
+  auto start = Vector2i{2, 3};
+  auto end = Vector2i{5, 10};
+  auto steps = Vector2i{2, 3};
+
+  auto coords = Vector2i{4, 9};
+
+  auto true_visited_coords = std::vector<Vector2i>{
+    Vector2i{4, 9}, Vector2i{4, 6}, Vector2i{4, 3},
+    Vector2i{2, 9}, Vector2i{2, 6}, Vector2i{2, 3},
+  };
+
+  auto visited_coords = std::vector<Vector2i>{};
+  for (auto i = 0u; i < true_visited_coords.size(); ++i)
+  {
+    visited_coords.push_back(coords);
+    BOOST_REQUIRE(!stop);
+    PositionDecrementer<RowMajor>::apply(coords, stop, start, end, steps);
+  }
+  BOOST_REQUIRE(stop);
+
+  BOOST_REQUIRE(true_visited_coords == visited_coords);
+}
+
 BOOST_AUTO_TEST_CASE(test_col_major_decrementer_2d)
 {
   bool stop = false;
@@ -159,5 +239,33 @@ BOOST_AUTO_TEST_CASE(test_col_major_decrementer_2d)
   }
   BOOST_REQUIRE(stop);
 }
+
+BOOST_AUTO_TEST_CASE(test_col_major_stepped_decrementer_2d)
+{
+  auto stop = false;
+  auto start = Vector2i{2, 3};
+  auto end = Vector2i{5, 10};
+  auto steps = Vector2i{2, 3};
+
+  auto coords = Vector2i{4, 9};
+
+  auto true_visited_coords = std::vector<Vector2i>{
+      Vector2i{4, 9}, Vector2i{2, 9}, // Col 2
+      Vector2i{4, 6}, Vector2i{2, 6}, // Col 1
+      Vector2i{4, 3}, Vector2i{2, 3}, // Col 0
+  };
+
+  auto visited_coords = std::vector<Vector2i>{};
+  for (auto i = 0u; i < true_visited_coords.size(); ++i)
+  {
+    visited_coords.push_back(coords);
+    BOOST_REQUIRE(!stop);
+    PositionDecrementer<ColMajor>::apply(coords, stop, start, end, steps);
+  }
+  BOOST_REQUIRE(stop);
+
+  BOOST_REQUIRE(true_visited_coords == visited_coords);
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()

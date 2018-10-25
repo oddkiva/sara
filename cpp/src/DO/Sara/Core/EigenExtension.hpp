@@ -33,6 +33,8 @@
 
 #include <Eigen/Eigen>
 
+#include <sstream>
+
 
 //! \namespace Eigen
 //! @brief Some customized extension to interface for the Eigen library

@@ -88,6 +88,14 @@ namespace DO { namespace Sara {
     //! @}
 
     //! @{
+    //! @brief N-dimensional subrange iterator.
+    using stepped_nd_iterator =
+        SteppedSubarrayIterator<false, T, N, StorageOrder>;
+    using const_stepped_nd_iterator =
+        SteppedSubarrayIterator<true, T, N, StorageOrder>;
+    //! @}
+
+    //! @{
     //! @brief Array views for linear algebra.
     using flat_array_view_type =
         Map<Array<typename ElementTraits<T>::value_type, Dynamic, 1>>;
@@ -120,17 +128,10 @@ namespace DO { namespace Sara {
     //! @brief Constructor that wraps plain data with its known sizes.
     inline explicit MultiArrayView(value_type *data, const vector_type& sizes)
       : _begin{data}
-      , _end{data + compute_size(sizes)}
+      , _end{data + compute_size<Dimension>(sizes)}
       , _sizes{sizes}
       , _strides{compute_strides(sizes)}
     {
-    }
-
-    //! @brief Copy assignment operator.
-    self_type& operator=(self_type other)
-    {
-      swap(other);
-      return *this;
     }
 
     //! @brief Return the size vector of the MultiArray object.
@@ -181,6 +182,7 @@ namespace DO { namespace Sara {
     {
       return _strides[i];
     }
+
     //! @{
     //! @brief Return the array pointer
     inline pointer data()
@@ -342,6 +344,26 @@ namespace DO { namespace Sara {
     }
     //! @}
 
+    //! @{
+    //! @brief Return the begin stepped iterator of the sub-array.
+    inline auto begin_stepped_subarray(const vector_type& start,
+                                       const vector_type& end,
+                                       const vector_type& steps)
+        -> stepped_nd_iterator
+    {
+      return {false, _begin, start, end, _strides, _sizes, steps};
+    }
+
+    inline auto begin_stepped_subarray(const vector_type& start,
+                                       const vector_type& end,
+                                       const vector_type& steps) const
+        -> const_stepped_nd_iterator
+    {
+      return {false, _begin, start, end, _strides, _sizes, steps};
+    }
+    //! @}
+
+    //! @}
     //! @brief Swap multi-array objects.
     inline void swap(self_type& other)
     {
@@ -367,7 +389,14 @@ namespace DO { namespace Sara {
     }
     //! @}
 
-    //! @brief Copy contents.
+    //! @{
+    //! @brief Copy the source array deeply like std::copy.
+    /*!
+     *
+     *  Throws if the source array view sizes does not match the destination
+     *  array.
+     *
+     */
     inline void copy(const self_type& other) const
     {
       if (this == &other)
@@ -379,6 +408,13 @@ namespace DO { namespace Sara {
 
       std::copy(other._begin, other._end, _begin);
     }
+
+    self_type& operator=(self_type other)
+    {
+      copy(other);
+      return *this;
+    }
+    //! @}
 
     //! @brief Perform coefficient-wise transform in place.
     template <typename Op>
@@ -407,6 +443,63 @@ namespace DO { namespace Sara {
       return dst;
     }
 
+    //! @brief Reshape the array with the new sizes.
+    template <typename Array>
+    inline auto reshape(const Array& new_sizes) const
+        -> MultiArrayView<T, ElementTraits<Array>::size, StorageOrder>
+    {
+      constexpr int D = ElementTraits<Array>::size;
+      if (compute_size<D>(new_sizes) != size())
+        throw std::domain_error{"Invalid shape!"};
+      return MultiArrayView<T, D, StorageOrder>{const_cast<T*>(_begin),
+                                                new_sizes};
+    }
+
+    //! @brief Transpose the array.
+    inline auto transpose(const vector_type& order) const
+      -> MultiArray<T, Dimension, StorageOrder>
+    {
+      auto out_sizes = vector_type{};
+      for (int i = 0; i < Dimension; ++i)
+        out_sizes[i] = this->size(order[i]);
+
+      auto out = MultiArray<T, Dimension, StorageOrder>{out_sizes};
+
+      auto in_it = begin_array();
+      vector_type out_coord = Matrix<int, N, 1>::Zero();
+
+      for (; !in_it.end(); ++in_it)
+      {
+        for (int i = 0; i < Dimension; ++i)
+          out_coord[i] = in_it.position()[order[i]];
+
+        out(out_coord) = *in_it;
+      }
+
+      return out;
+    }
+
+    //! @{
+    //! @brief Reverse the storage-order view.
+    inline auto colmajor_view() const -> MultiArrayView<T, N, ColMajor>
+    {
+      static_assert(StorageOrder == static_cast<int>(RowMajor),
+                    "Don't use this on a column-major MultiArrayView object");
+      auto sizes = this->_sizes;
+      std::reverse(sizes.data(), sizes.data() + sizes.size());
+      return MultiArrayView<T, N, ColMajor>{_begin, sizes};
+    }
+
+    inline auto rowmajor_view() const -> MultiArrayView<T, N, RowMajor>
+    {
+      static_assert(StorageOrder == static_cast<int>(ColMajor),
+                    "Don't use this on a row-major MultiArrayView object");
+      auto sizes = this->_sizes;
+      std::reverse(sizes.data(), sizes.data() + sizes.size());
+      return MultiArrayView<T, N, RowMajor>{_begin, sizes};
+    }
+    //! @}
+
   protected:
     //! @brief Compute the strides according the size vector and storage order.
     inline vector_type compute_strides(const vector_type& sizes) const
@@ -415,10 +508,11 @@ namespace DO { namespace Sara {
     }
 
     //! @brief Compute the raw size needed to allocate the internal data.
-    inline size_type compute_size(const vector_type& sizes) const
+    template <int M>
+    inline size_type compute_size(const Matrix<int, M, 1>& sizes) const
     {
       auto sz = sizes.template cast<size_type>().eval();
-      return std::accumulate(sz.data(), sz.data() + N, size_type(1),
+      return std::accumulate(sz.data(), sz.data() + sz.size(), size_type(1),
                              std::multiplies<size_type>());
     }
 
