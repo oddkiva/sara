@@ -203,7 +203,7 @@ namespace DO { namespace Sara {
 
     inline InfiniteMultiArrayView(const ArrayView& f, const Padding& pad)
       : _f(f)
-      , _pad{pad}
+      , _pad(pad)
     {
     }
 
