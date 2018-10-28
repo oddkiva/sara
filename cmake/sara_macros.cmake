@@ -70,7 +70,7 @@ macro (sara_populate_available_components)
   # following variable:
   # - DO_Sara_${COMPONENT}_USE_FILE
 
-  # Foundational libraries.
+  # Base libraries.
   sara_append_components(DO_Sara_COMPONENTS Core)
   sara_append_components(DO_Sara_COMPONENTS Graphics)
 
@@ -316,6 +316,9 @@ endmacro ()
 # ==============================================================================
 # Specific macro to add a unit test
 #
+# Bookmark the list of all unit tests in a global property.
+set_property(GLOBAL PROPERTY _DO_SARA_TESTS "")
+
 function (sara_add_test _test_name _srcs _additional_lib_deps)
   if (POLICY CMP0020)
     cmake_policy(SET CMP0020 OLD)
@@ -351,4 +354,9 @@ function (sara_add_test _test_name _srcs _additional_lib_deps)
       TARGET ${_test_name}
       PROPERTY FOLDER "DO Sara Tests/${test_group_name}")
   endif ()
+
+  get_property(DO_SARA_TESTS GLOBAL PROPERTY _DO_SARA_TESTS)
+  list(APPEND DO_SARA_TESTS ${_test_name})
+  set_property(GLOBAL PROPERTY _DO_SARA_TESTS "${DO_SARA_TESTS}")
+  sara_message("[Sara] ${DO_SARA_TESTS}")
 endfunction ()

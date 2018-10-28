@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(test_enlarge_on_image_views)
 {
   auto src = Image<float>{5, 5};
   for (int y = 0; y < src.height(); ++y)
-    src.matrix().row(y).fill(y);
+    src.matrix().row(y).fill(static_cast<float>(y));
   src.matrix() <<
     0, 0, 0, 0, 0,
     1, 1, 1, 1, 1,
@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE(test_reduce_on_image_views)
 {
   auto src = Image<float>{10, 10};
   for (int y = 0; y < 10; ++y)
-    src.matrix().row(y).fill(y);
+    src.matrix().row(y).fill(static_cast<float>(y));
 
   auto dst = Image<float>{10, 5};
   reduce(src, dst);
@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE(test_reduce_on_image_views)
   for (int y = 1; y < dst.height(); ++y)
   {
     auto true_value = RowVectorXf{10};
-    true_value.fill(y * 2);
+    true_value.fill(y * 2.f);
     BOOST_CHECK_LE(std::abs(true_value[0] - dst.matrix().row(y)[0]), 0.05);
   }
 }
@@ -170,7 +170,7 @@ BOOST_AUTO_TEST_CASE(test_resize)
 {
   auto src = Image<float>{4, 4};
   for (int y = 0; y < src.height(); ++y)
-    src.matrix().row(y).fill(y);
+    src.matrix().row(y).fill(static_cast<float>(y));
 
   // Check case 1: inplace downscaling.
   {
@@ -180,7 +180,7 @@ BOOST_AUTO_TEST_CASE(test_resize)
     for (int y = 1; y < dst.height(); ++y)
     {
       auto true_value = RowVectorXf{dst.width()};
-      true_value.fill(y * 2);
+      true_value.fill(y * 2.f);
       BOOST_CHECK_LE(std::abs(true_value[0] - dst.matrix().row(y)[0]), 0.05);
     }
   }
@@ -194,7 +194,7 @@ BOOST_AUTO_TEST_CASE(test_resize)
     for (int y = 0; y < dst.height() - 1; ++y)
     {
       auto true_value = RowVectorXf{dst.width()};
-      true_value.fill(y / 2.);
+      true_value.fill(y / 2.f);
       BOOST_CHECK_LE((true_value - dst.matrix().row(y)).norm(), 1e-6);
     }
 

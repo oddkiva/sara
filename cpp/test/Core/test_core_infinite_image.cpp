@@ -125,8 +125,11 @@ BOOST_AUTO_TEST_CASE(test_infinite_image_with_periodic_padding_stepped_safe_crop
 
   const auto inf_src = make_infinite(src, padding);
 
-  auto dst = Image<float>{end - begin};
-  crop(dst, inf_src, begin, end);
+  auto&& dst_sizes = inf_src  //
+                         .begin_stepped_subarray(begin, end, steps)
+                         .stepped_subarray_sizes();
+  auto dst = Image<float>{dst_sizes};
+  crop(dst, inf_src, begin, end, steps);
 
   auto true_dst = Image<float>{4, 4};
   BOOST_CHECK(dst.sizes() == Vector2i(4, 4));
