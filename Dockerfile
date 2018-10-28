@@ -32,4 +32,3 @@ RUN /root/travis-build-and-install-ffmpeg.sh
 COPY ./scripts/travis-build.sh \
      /root/travis-build.sh
 RUN git clone https://github.com/DO-CV/sara
-RUN git checkout enh-add-im2col
