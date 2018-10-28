@@ -15,7 +15,7 @@ if [ ! -d "${HOME}/ffmpeg/include" ]; then
   {
     ./configure --enable-shared --disable-static --prefix=$HOME/ffmpeg
 
-    make -j`nproc`
+    make -j$(nproc)
     make install
   }
   cd ..

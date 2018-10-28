@@ -1,11 +1,9 @@
 FROM ubuntu:14.04
 
-MAINTAINER "David OK" <david.ok8@gmail.com>
-
 
 # Install pre-requisites.
-RUN apt-get update -qq
-RUN apt-get install -y \
+RUN apt-get update -qq && \
+    apt-get install -y --no-install-recommends \
       build-essential \
       cmake \
       git \
@@ -18,7 +16,8 @@ RUN apt-get install -y \
       libqt5opengl5-dev \
       qtbase5-dev \
       wget \
-      yasm
+      yasm && \
+    rm -rf /var/lib/apt/lists/*
 
 # Build and install third-party software.
 COPY ./scripts/travis-build-and-install-ffmpeg.sh \

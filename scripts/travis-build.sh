@@ -31,8 +31,8 @@ function build_library()
   make -j$(nproc) VERBOSE=1
 
   # Run C++ tests.
-  BOOST_TEST_LOG_LEVEL=all
-  BOOST_TEST_COLOR_OUTPUT=1
+  export BOOST_TEST_LOG_LEVEL=all
+  export BOOST_TEST_COLOR_OUTPUT=1
   ctest --output-on-failure --exclude-regex \
     "test_graphics_*|test_features_draw"
 
