@@ -1,0 +1,8 @@
+[requires]
+boost/1.68.0@conan/stable
+
+[options]
+boost:shared=True
+
+[generators]
+cmake

@@ -1,6 +1,11 @@
 Sara: C++ Computer Vision Library
 =================================
 
+**I HAVE MOVED TO GITLAB, PLEASE GOTO: https://gitlab.com/DO-CV/sara**
+
+**SO LONG GITHUB!**
+
+
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/5980a04834a04289a35752401d502728)](https://www.codacy.com/app/davidok8/sara?utm_source=github.com&utm_medium=referral&utm_content=DO-CV/sara&utm_campaign=badger)
 [![Build Status](https://travis-ci.org/DO-CV/sara.svg?branch=master)](https://travis-ci.org/DO-CV/sara)
 <a href="https://ci.appveyor.com/project/do-cv/sara"><img src="https://ci.appveyor.com/api/projects/status/github/do-cv/sara?branch=master&svg=true" alt="Build Status: Windows" /></a>
