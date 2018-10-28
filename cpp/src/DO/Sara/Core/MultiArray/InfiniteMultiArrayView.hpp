@@ -31,8 +31,8 @@ namespace DO { namespace Sara {
     inline InfiniteArrayIterator(const ArrayView& f,    //
                                  const vector_type& a,  //
                                  const vector_type& b)
-      : _f{f}
-      , _x{a, b}
+      : _f(f)
+      , _x(a, b)
     {
     }
 
@@ -115,8 +115,8 @@ namespace DO { namespace Sara {
                                         const vector_type& a,      //
                                         const vector_type& b,      //
                                         const vector_type& steps)  //
-      : _f{f}
-      , _x{a, b, steps}
+      : _f(f)
+      , _x(a, b, steps)
     {
     }
 
