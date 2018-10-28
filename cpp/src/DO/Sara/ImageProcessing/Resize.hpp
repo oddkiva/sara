@@ -325,5 +325,24 @@ namespace DO { namespace Sara {
   };
   //! @}
 
+
+  //! @brief Convenience resize functor.
+  struct Resize
+  {
+    template <typename ImageView_>
+    using Pixel = typename ImageView_::pixel_type;
+
+    template <typename ImageView_>
+    using Vector = typename ImageView_::vector_type;
+
+    template <typename ImageView_, typename... Params>
+    inline auto operator()(const ImageView_& in,
+                           const Vector<ImageView_>& sizes) const
+        -> Image<Pixel<ImageView_>>
+    {
+      return resize(in, sizes);
+    }
+  };
+
 } /* namespace Sara */
 } /* namespace DO */
