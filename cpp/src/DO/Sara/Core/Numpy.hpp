@@ -116,8 +116,8 @@ namespace DO { namespace Sara {
 
     for (const auto& xi : x)
       if (xi.cols() != x.front().cols())
-        throw std::runtime_error{
-            "The number of columns are not equal for vstack!"};
+        throw std::runtime_error(
+            "The number of columns are not equal for vstack!");
 
     auto num_rows = 0;
     for (const auto& xi : x)

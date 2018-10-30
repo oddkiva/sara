@@ -30,7 +30,7 @@ before_script:
 
 install:
   # Build and install third-party locally.
-  - ./scripts/travis-build-and-install-third-party.sh
+  - ./scripts/travis-build-and-install-ffmpeg.sh
   - bundle install
 
 script:
@@ -38,7 +38,7 @@ script:
   - mkdir build
   - cd build
   - cmake -DCMAKE_BUILD_TYPE=Debug -DSARA_BUILD_TESTS=ON -DSARA_BUILD_SAMPLES=ON -DSARA_BUILD_VIDEOIO=ON -DSARA_FFMPEG_DIR=$HOME/ffmpeg ..
-  - make -j4
+  - make -j$(nproc)
   # Run tests.
   - ctest --output-on-failure
   # Make package.

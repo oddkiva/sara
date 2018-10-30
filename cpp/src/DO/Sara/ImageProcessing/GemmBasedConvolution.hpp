@@ -35,17 +35,6 @@ namespace DO { namespace Sara {
     return ImageView<T, N>{in.data(), out_sizes};
   }
 
-  template <typename T, int N>
-  auto patch(const TensorView_<T, N>& in, const Matrix<int, N, 1>& beg,
-             const Matrix<int, N, 1>& end) -> Image<T, N>
-  {
-    auto bb = beg;
-    auto ee = end;
-    std::reverse(bb.data(), bb.data() + N);
-    std::reverse(ee.data(), ee.data() + N);
-    return safe_crop(image_view(in), bb, ee);
-  }
-
   template <typename T, int N, int StorageOrder>
   auto vec(MultiArrayView<T, N, StorageOrder>& in)
       -> Map<Matrix<typename ElementTraits<T>::value_type, Dynamic, 1>>

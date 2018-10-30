@@ -15,6 +15,7 @@ set(CMAKE_BUILD_TYPE "Release" CACHE STRING
     "Build type options are: Debug, Release")
 
 # Set options.
+option(SARA_USE_CONAN "Use Conan package manager" OFF)
 option(SARA_USE_VLD "Enable Visual Leak Detector for unit tests" OFF)
 option(SARA_BUILD_VIDEOIO "Build Sara's Video I/O module" OFF)
 option(SARA_BUILD_PYTHON_BINDINGS "Build Python bindings" OFF)
@@ -28,6 +29,12 @@ option(SARA_SELF_CONTAINED_INSTALLATION
 # Set the following internal switches to build Sara.
 set(SARA_USE_FROM_SOURCE TRUE CACHE INTERNAL "Build Sara libraries")
 set(BUILD_SHARED_LIBS ${SARA_BUILD_SHARED_LIBS})
+
+
+if (WIN32 AND SARA_USE_CONAN)
+  include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+  conan_basic_setup()
+endif ()
 
 
 # Add Sara to the CMake module path.
