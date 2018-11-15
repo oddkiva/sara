@@ -13,25 +13,36 @@ namespace DO { namespace Sara {
   public:
     using matrix_type = typename base_type::matrix_type;
     using point_type = typename base_type::point_type;
+    using vector_type = point_type;
+
+    using motion_type = std::pair<matrix_type, vector_type>;
 
     EssentialMatrix() = default;
-
-    friend auto extract_candidate_camera_motions(const EssentialMatrix& E)
-        -> std::pair<std::array<matrix_type, 2>, std::array<point_type, 2>>
-    {
-      auto svd =
-          JacobiSVD<matrix_type>{E, Eigen::ComputeFullU | Eigen::ComputeFullV};
-
-      const auto U = svd.matrixU();
-      const auto W = svd.singularValues().diag();
-      const auto V = svd.matrixU();
-      const auto t = svd.matrixU().col(2);
-      return std::make_pair(
-          std::array<matrix_type, 2>{U * W * V.transpose(),
-                                     U * W.transpose() * V.transpose()},
-          std::array<point_type, 2>{t, -t});
-    }
   };
+
+
+  template <typename EssentialMatrix_>
+  auto extract_candidate_camera_motions(const EssentialMatrix_& E)
+      -> std::array<typename EssentialMatrix_::motion_type, 4>
+  {
+    using matrix_type = typename EssentialMatrix_::matrix_type;
+    using point_type = typename EssentialMatrix_::point_type;
+
+    auto svd =
+        JacobiSVD<matrix_type>{E, Eigen::ComputeFullU | Eigen::ComputeFullV};
+
+    const auto U = svd.matrixU();
+    const auto W = svd.singularValues().diag();
+    const auto V = svd.matrixU();
+    const auto t = svd.matrixU().col(2);
+
+    const auto R1 = U * W * V.transpose();
+    const auto R2 = U * W.transpose() * V.transpose();
+    const auto t1 = t;
+    const auto t2 = -t;
+
+    return {{R1, t1}, {R2, t1}, {R1, t2}, {R2, t2}};
+  }
 
 } /* namespace Sara */
 } /* namespace DO */

@@ -52,11 +52,19 @@ namespace DO { namespace Sara {
       return l;
     }
 
-    auto right_epipolar_line(const point_type& x1) -> line_type
+    auto right_epipolar_line(const point_type& x1) const -> line_type
     {
       line_type l = _m->transpose() * x1;
       l /= l(2);
       return l;
+    }
+
+    auto is_rank_2() const -> bool
+    {
+      auto svd = JacobiSVD<matrix_type>{_m};
+      const auto predicate =
+          svd.singularValues()(0) < std::numeric_limits<scalar_type>::epsilon();
+      return predicate;
     }
 
   protected:
