@@ -73,6 +73,8 @@ BOOST_AUTO_TEST_CASE(test_polynomial)
   auto P2 = trace(EEt) * E;
 
   auto P = P1 + P2;
+
+  auto Q = det(E);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

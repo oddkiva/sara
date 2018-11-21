@@ -17,6 +17,38 @@ namespace DO { namespace Sara {
     virtual ~Expression() = default;
   };
 
+  namespace v2 {
+    struct Symbol : public Expression
+    {
+      std::string name;
+      bool is_variable;
+
+      Symbol(const std::string& name, bool is_variable)
+        : name{name}
+        , is_variable{is_variable}
+      {
+      }
+
+      auto operator<(const Symbol& other) const -> bool
+      {
+        if (is_variable)
+          return name < other.name;
+        else
+          return false;
+      }
+    };
+
+    auto variable(const std::string& name) -> Symbol
+    {
+      return {name, true};
+    }
+
+    auto one(const std::string& name) -> Symbol
+    {
+      return {"1", false};
+    }
+  }
+
 
   class Variable : public Expression
   {
@@ -28,14 +60,14 @@ namespace DO { namespace Sara {
     {
     }
 
-    auto operator<(const Variable& other) const -> bool
-    {
-      return _name < other._name;
-    }
-
     auto name() const -> const std::string&
     {
       return _name;
+    }
+
+    auto operator<(const Variable& other) const -> bool
+    {
+      return _name < other._name;
     }
 
   private:
@@ -112,6 +144,7 @@ namespace DO { namespace Sara {
 
       return str;
     }
+
   private:
     std::map<Variable, int> exponents;
   };
@@ -133,6 +166,21 @@ namespace DO { namespace Sara {
           res.coeffs[i.first] = i.second;
         else
           res.coeffs[i.first] += i.second;
+      }
+
+      return res;
+    }
+
+    Polynomial operator-(const Polynomial& other) const
+    {
+      auto res = *this;
+
+      for (const auto& i : other.coeffs)
+      {
+        if (res.coeffs.find(i.first) == res.coeffs.end())
+          res.coeffs[i.first] = i.second;
+        else
+          res.coeffs[i.first] -= i.second;
       }
 
       return res;
@@ -166,6 +214,15 @@ namespace DO { namespace Sara {
       return res;
     }
 
+    Polynomial<double> operator()(int i, int j) const
+    {
+      auto res = Polynomial<double>{};
+      for (const auto& c : coeffs)
+        res.coeffs[c.first] = c.second(i, j);
+
+      return res;
+    }
+
     Polynomial t() const
     {
       auto res = *this;
@@ -176,16 +233,6 @@ namespace DO { namespace Sara {
 
     std::map<Monomial, Coeff> coeffs;
   };
-
-  template <typename Matrix_>
-  Polynomial<typename Matrix_::Scalar> trace(const Polynomial<Matrix_>& P)
-  {
-    using T = typename Matrix_::Scalar;
-    auto res = Polynomial<T>{};
-    for (auto& i : P.coeffs)
-      res.coeffs[i.first] = i.second.trace();
-    return res;
-  }
 
   template <typename Scalar_, typename Matrix_>
   Polynomial<Matrix_> operator*(const Polynomial<Scalar_>& P, Polynomial<Matrix_>& Q)
@@ -214,6 +261,37 @@ namespace DO { namespace Sara {
     }
 
     return res;
+  }
+
+  template <typename Matrix_>
+  Polynomial<typename Matrix_::Scalar> trace(const Polynomial<Matrix_>& P)
+  {
+    using T = typename Matrix_::Scalar;
+    auto res = Polynomial<T>{};
+    for (auto& i : P.coeffs)
+      res.coeffs[i.first] = i.second.trace();
+    return res;
+  }
+
+  template <typename T>
+  Polynomial<T> det(const Polynomial<Matrix<T, 2, 2>>& P)
+  {
+    return P(0, 0) * P(1, 1) - P(0, 1) * P(1, 0);
+  }
+
+  template <typename T>
+  Polynomial<T> det(const Polynomial<Matrix<T, 3, 3>>& P)
+  {
+    /*
+     * 00 01 02
+     * 10 11 12
+     * 20 21 22
+     */
+    auto det0 = P(1, 1) * P(2, 2) - P(2, 1) * P(1, 2);
+    auto det1 = P(1, 0) * P(2, 2) - P(2, 0) * P(1, 2);
+    auto det2 = P(1, 0) * P(2, 1) - P(2, 0) * P(1, 1);
+
+    return P(0, 0) * det0 - P(0, 1) * det1 + P(0, 2) * det2;
   }
 
 } /* namespace Sara */
