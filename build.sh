@@ -57,23 +57,7 @@ function install_package()
 }
 
 
-<<<<<<< HEAD
-if [ -z ${1+x} ]; then
-  sara_build_type="Release"
-else
-  sara_build_type=$1
-fi
-echo "sara_build_type=${sara_build_type}"
-
-if [ -z ${2+x} ]; then
-  sara_build_dir="sara-build"
-else
-  sara_build_dir=$2
-fi
-echo "sara_build_dir=${sara_build_dir}"
-=======
 sara_build_dir="sara-build-${build_type}"
->>>>>>> origin
 
 # Create the build directory.
 if [ -d "../${sara_build_dir}" ]; then
