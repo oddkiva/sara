@@ -26,17 +26,17 @@ BOOST_AUTO_TEST_SUITE(TestPolynomialCalculus)
 
 BOOST_AUTO_TEST_CASE(test_variable)
 {
-  auto x = Variable{"x"};
-  auto y = Variable{"y"};
+  auto x = variable("x");
+  auto y = variable("y");
 
   BOOST_CHECK(x < y);
 }
 
 BOOST_AUTO_TEST_CASE(test_monomial)
 {
-  auto x = Monomial{Variable{"x"}};
-  auto y = Monomial{Variable{"y"}};
-  auto z = Monomial{Variable{"z"}};
+  auto x = Monomial{variable("x")};
+  auto y = Monomial{variable("y")};
+  auto z = Monomial{variable("z")};
 
   auto x3 = x.pow(3);
   auto x2 = x.pow(2);
@@ -53,19 +53,33 @@ BOOST_AUTO_TEST_CASE(test_monomial)
 
 BOOST_AUTO_TEST_CASE(test_polynomial)
 {
-  auto x = Monomial{Variable{"x"}};
-  auto y = Monomial{Variable{"y"}};
-  auto z = Monomial{Variable{"z"}};
-  auto one = Monomial{Variable{}};
-
-  std::cout << one.to_string() << std::endl;
+  auto x = Monomial{variable("x")};
+  auto y = Monomial{variable("y")};
+  auto z = Monomial{variable("z")};
+  auto one_ = Monomial{one()};
 
   Matrix3d X, Y, Z, W;
+  X << 1, 0, 0,
+       0, 0, 0,
+       0, 0, 0;
+
+  Y << 0, 1, 0,
+       0, 0, 0,
+       0, 0, 0;
+
+  Z << 0, 0, 1,
+       0, 0, 0,
+       0, 0, 0;
+
+  W << 0, 0, 0,
+       1, 0, 0,
+       0, 0, 0;
+
   Polynomial<Matrix3d> E;
   E.coeffs[x] = X;
   E.coeffs[y] = Y;
   E.coeffs[z] = Z;
-  E.coeffs[one] = W;
+  E.coeffs[one_] = W;
 
   const auto EEt = E * E.t();
 
@@ -75,6 +89,8 @@ BOOST_AUTO_TEST_CASE(test_polynomial)
   auto P = P1 + P2;
 
   auto Q = det(E);
+
+  std::cout << Q.to_string() << std::endl;
 }
 
 BOOST_AUTO_TEST_SUITE_END()

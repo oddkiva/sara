@@ -24,11 +24,11 @@ namespace DO { namespace Sara {
   void imread(Image<Rgb8>& image, const std::string& filepath);
 
   template <typename T>
-  inline void imread(Image<T>& image, const std::string& filepath)
+  inline auto imread(const std::string& filepath) -> Image<T>
   {
-    Image<Rgb8> rgb8image;
-    imread(rgb8image, filepath);
-    image = rgb8image.convert<T>();
+    auto image = Image<Rgb8>{};
+    imread(image, filepath);
+    return image.convert<T>();
   }
 
   DO_SARA_EXPORT

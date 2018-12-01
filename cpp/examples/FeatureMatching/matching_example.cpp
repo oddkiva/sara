@@ -9,12 +9,13 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Sara/FeatureDetectors.hpp>
 #include <DO/Sara/FeatureDescriptors.hpp>
+#include <DO/Sara/FeatureDetectors.hpp>
 #include <DO/Sara/FeatureMatching.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
+
 
 using namespace std;
 using namespace DO::Sara;
@@ -38,8 +39,8 @@ Set<OERegion, RealDescriptor> compute_sift_keypoints(const Image<float>& image)
   // 1. Feature extraction.
   print_stage("Computing DoG extrema");
   timer.restart();
-  ImagePyramidParams pyr_params;//(0);
-  ComputeDoGExtrema compute_DoGs{ pyr_params, 0.01f };
+  ImagePyramidParams pyr_params;  //(0);
+  ComputeDoGExtrema compute_DoGs{pyr_params, 0.01f};
   auto scale_octave_pairs = vector<Point2i>{};
   DoGs = compute_DoGs(image, &scale_octave_pairs);
   auto dog_detection_time = timer.elapsed_ms();
@@ -54,12 +55,14 @@ Set<OERegion, RealDescriptor> compute_sift_keypoints(const Image<float>& image)
   auto nabla_G = gradient_polar_coordinates(compute_DoGs.gaussians());
   auto grad_gaussian_time = timer.elapsed_ms();
   elapsed += grad_gaussian_time;
-  cout << "gradient of Gaussian computation time = " << grad_gaussian_time << " ms" << endl;
+  cout << "gradient of Gaussian computation time = " << grad_gaussian_time
+       << " ms" << endl;
   cout << "DoGs.size() = " << DoGs.size() << endl;
 
 
   // Find dominant gradient orientations.
-  print_stage("Assigning (possibly multiple) dominant orientations to DoG extrema");
+  print_stage(
+      "Assigning (possibly multiple) dominant orientations to DoG extrema");
   timer.restart();
   ComputeDominantOrientations assign_dominant_orientations;
   assign_dominant_orientations(nabla_G, DoGs, scale_octave_pairs);
@@ -87,7 +90,8 @@ Set<OERegion, RealDescriptor> compute_sift_keypoints(const Image<float>& image)
   //    scale.
   for (size_t i = 0; i != DoGs.size(); ++i)
   {
-    auto octave_scale_factor = nabla_G.octave_scaling_factor(scale_octave_pairs[i](1));
+    auto octave_scale_factor =
+        nabla_G.octave_scaling_factor(scale_octave_pairs[i](1));
     DoGs[i].center() *= octave_scale_factor;
     DoGs[i].shape_matrix() /= pow(octave_scale_factor, 2);
   }
@@ -97,8 +101,7 @@ Set<OERegion, RealDescriptor> compute_sift_keypoints(const Image<float>& image)
 
 void load(Image<Rgb8>& image1, Image<Rgb8>& image2,
           Set<OERegion, RealDescriptor>& keys1,
-          Set<OERegion, RealDescriptor>& keys2,
-          vector<Match>& matches)
+          Set<OERegion, RealDescriptor>& keys2, vector<Match>& matches)
 {
   cout << "Loading images" << endl;
   imread(image1, file1);
@@ -119,7 +122,7 @@ void load(Image<Rgb8>& image1, Image<Rgb8>& image2,
 
   // Compute/read matches
   cout << "Computing Matches" << endl;
-  AnnMatcher matcher{ keys1, keys2, 1.0f };
+  AnnMatcher matcher{keys1, keys2, 1.0f};
   matches = matcher.compute_matches();
   cout << matches.size() << " matches" << endl;
 }
@@ -135,13 +138,13 @@ GRAPHICS_MAIN()
   load(image1, image2, keys1, keys2, matches);
 
   auto scale = 1.0f;
-  auto w = int((image1.width() + image2.width())*scale);
+  auto w = int((image1.width() + image2.width()) * scale);
   auto h = max(image1.height(), image2.height());
-  auto off = Point2f{ float(image1.width()), 0.f };
+  auto off = Point2f{float(image1.width()), 0.f};
 
   create_window(w, h);
   set_antialiasing();
-  //checkMatches(image1, image2, matches, true, scale);
+  // checkMatches(image1, image2, matches, true, scale);
 
   for (size_t i = 0; i < matches.size(); ++i)
   {
