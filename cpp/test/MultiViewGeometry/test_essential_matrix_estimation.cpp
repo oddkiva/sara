@@ -18,6 +18,9 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include <iomanip>
+#include <sstream>
+
 
 using namespace std;
 using namespace DO::Sara;
@@ -126,27 +129,27 @@ auto to_point_indices(const Tensor_<int, 2>& samples, const Tensor_<int, 2>& mat
   return point_indices;
 }
 
-auto to_coordinates(const Tensor_<int, 3>& pt_indices,
+auto to_coordinates(const Tensor_<int, 3>& point_indices,
                     const Tensor_<float, 2>& p1,
                     const Tensor_<float, 2>& p2)
-  -> Tensor_<float, 3>
+  -> Tensor_<float, 4>
 {
-  auto num_samples = pt_indices.size(0);
-  auto sample_size = pt_indices.size(1);
+  auto num_samples = point_indices.size(0);
+  auto sample_size = point_indices.size(1);
+  auto num_points = 2;
+  auto coords_dim = 2;
 
-  auto p = Tensor_<float, 3>{num_samples, sample_size, 4};
+  auto p =
+      Tensor_<float, 4>{{num_samples, sample_size, num_points, coords_dim}};
 
   for (auto s = 0; s < num_samples; ++s)
     for (auto m = 0; m < sample_size; ++m)
     {
-      auto p1_idx = pt_indices(s, m, 0);
-      auto p2_idx = pt_indices(s, m, 1);
+      auto p1_idx = point_indices(s, m, 0);
+      auto p2_idx = point_indices(s, m, 1);
 
-      p[s][m].flat_array().head(2) = p1[p1_idx].flat_array();
-      p[s][m].flat_array().head(2) = p1[p1_idx].flat_array();
-
-      p[s][m].flat_array().tail(2) = p2[p2_idx].flat_array();
-      p[s][m].flat_array().tail(2) = p2[p2_idx].flat_array();
+      p[s][m][0].flat_array() = p1[p1_idx].flat_array();
+      p[s][m][1].flat_array() = p2[p2_idx].flat_array();
     }
 
   return p;
@@ -260,11 +263,112 @@ BOOST_AUTO_TEST_CASE(test_to_point_indices)
   BOOST_CHECK(vec(point_indices) == vec(expected_point_indices));
 }
 
-BOOST_AUTO_TEST_CASE(test_to_coordinates)
+template <typename T>
+void print_3d_array(const TensorView_<T, 3>& x)
 {
-  throw std::runtime_error{"Untested"};
+  const auto max = x.flat_array().abs().maxCoeff();
+  std::stringstream ss;
+  ss << max;
+  const auto pad_size = ss.str().size();
+
+
+  cout << "[";
+  for (auto i = 0; i < x.size(0); ++i)
+  {
+    cout << "[";
+    for (auto j = 0; j < x.size(1); ++j)
+    {
+      cout << "[";
+      for (auto k = 0; k < x.size(2); ++k)
+      {
+        cout << std::setw(pad_size) << x(i,j,k);
+        if (k != x.size(2) - 1)
+          cout << ", ";
+      }
+      cout << "]";
+
+      if (j != x.size(1) - 1)
+        cout << ", ";
+      else
+        cout << "]";
+    }
+
+    if (i != x.size(0) - 1)
+      cout << ",\n ";
+  }
+  cout << "]" << endl;
 }
 
+BOOST_AUTO_TEST_CASE(test_to_coordinates)
+{
+  constexpr auto num_matches = 5;
+  constexpr auto num_samples = 2;
+  constexpr auto sample_size = 4;
+
+  const auto features1 = std::vector<OERegion>{{Point2f::Ones() * 0, 1.f},
+                                               {Point2f::Ones() * 1, 1.f},
+                                               {Point2f::Ones() * 2, 1.f}};
+  const auto features2 = std::vector<OERegion>{{Point2f::Ones() * 1, 1.f},
+                                               {Point2f::Ones() * 2, 1.f},
+                                               {Point2f::Ones() * 3, 1.f}};
+
+  const auto points1 = extract_centers(features1);
+  const auto points2 = extract_centers(features2);
+
+  auto matches = Tensor_<int, 2>{num_matches, 2};
+  matches.matrix() <<
+    0, 0,
+    1, 1,
+    2, 2,
+    0, 1,
+    1, 2;
+
+  auto samples = Tensor_<int, 2>{num_samples, sample_size};
+  samples.matrix() <<
+    0, 1, 2, 3,
+    1, 2, 3, 4;
+
+  const auto point_indices = to_point_indices(samples, matches);
+  const auto coords = to_coordinates(point_indices, points1, points2);
+
+  //                                        N            K            P  C
+  auto expected_coords = Tensor_<float, 4>{{num_samples, sample_size, 2, 2}};
+  expected_coords[0].flat_array() <<
+    0.f, 0.f, 1.f, 1.f,
+    1.f, 1.f, 2.f, 2.f,
+    2.f, 2.f, 3.f, 3.f,
+    0.f, 0.f, 2.f, 2.f;
+
+  expected_coords[1].flat_array() <<
+    1.f, 1.f, 2.f, 2.f,
+    2.f, 2.f, 3.f, 3.f,
+    0.f, 0.f, 2.f, 2.f,
+    1.f, 1.f, 3.f, 3.f;
+
+  BOOST_CHECK(vec(expected_coords) == vec(coords));
+  BOOST_CHECK(expected_coords.sizes() == coords.sizes());
+
+
+  const auto coords_t = coords.transpose({0, 2, 1, 3});
+  const auto sample1 = coords_t[0];
+
+  auto expected_sample1 = Tensor_<float, 3>{sample1.sizes()};
+  expected_sample1.flat_array() <<
+    // P1
+    0.f, 0.f,
+    1.f, 1.f,
+    2.f, 2.f,
+    0.f, 0.f,
+    // P2
+    1.f, 1.f,
+    2.f, 2.f,
+    3.f, 3.f,
+    2.f, 2.f;
+
+  //print_3d_array(expected_sample1);
+  //print_3d_array(sample1);
+  BOOST_CHECK(vec(expected_sample1) == vec(sample1));
+}
 
 BOOST_AUTO_TEST_CASE(test_compute_normalizer)
 {
