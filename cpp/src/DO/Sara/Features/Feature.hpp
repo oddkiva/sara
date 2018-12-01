@@ -214,8 +214,8 @@ namespace DO { namespace Sara {
 
     //! @brief Constructor for circular region.
     OERegion(const Point2f& coords, float scale)
-      : InterestPoint{ coords }
-      , _shape_matrix{ Matrix2f::Identity()*(pow(scale,-2)) }
+      : InterestPoint{coords}
+      , _shape_matrix{Matrix2f::Identity() * (pow(scale, -2))}
     {
     }
 
@@ -276,8 +276,7 @@ namespace DO { namespace Sara {
     {
       return (coords() == other.coords() &&
               shape_matrix() == other.shape_matrix() &&
-              orientation() == other.orientation() &&
-              type() == other.type());
+              orientation() == other.orientation() && type() == other.type());
     };
 
     //! @brief Draw the region.

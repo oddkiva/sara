@@ -35,6 +35,7 @@ add_subdirectory(FeatureDescriptors)
 
 add_subdirectory(Match)
 add_subdirectory(FeatureMatching)
+add_subdirectory(MultiViewGeometry)
 
 if (CMAKE_COMPILER_IS_GNUCXX)
   find_program(LCOV_PATH lcov)

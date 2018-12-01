@@ -54,6 +54,11 @@ namespace DO { namespace Sara {
       initialize(sizes);
     }
 
+    inline explicit MultiArrayBase(int size)
+      : self_type{vector_type{size}}
+    {
+    }
+
     inline explicit MultiArrayBase(int rows, int cols)
       : self_type{vector_type{rows, cols}}
     {

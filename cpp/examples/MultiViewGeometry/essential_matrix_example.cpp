@@ -9,7 +9,6 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-
 #include "sift.hpp"
 
 #include <DO/Sara/FeatureMatching.hpp>
@@ -65,105 +64,6 @@ void load(Image<Rgb8>& image1, Image<Rgb8>& image2,
 
   // Debug this.
   //write_matches(matches, data_dir + "/" + "0000_0001.match");
-}
-
-auto range(int n) -> VectorXi
-{
-  auto indices = VectorXi(n);
-  std::iota(indices.data(), indices.data() + indices.size(), 0);
-  return indices;
-}
-
-auto random_shuffle(const VectorXi& x) -> VectorXi
-{
-  VectorXi x_shuffled = x;
-  std::random_shuffle(x_shuffled.data(), x_shuffled.data() + x_shuffled.size());
-  return x_shuffled;
-}
-
-auto random_samples(int num_points, int sample_size, int num_samples)
-    -> MatrixXi
-{
-  auto indices = range(num_points);
-
-  MatrixXi samples(num_samples, sample_size);
-  for (int i = 0; i < sample_size; ++i)
-    samples.col(i) = random_shuffle(indices).head(num_samples);
-
-  samples.transposeInPlace();
-
-  return samples;
-}
-
-auto to_point_indices(const MatrixXi& samples, const vector<Match>& matches)
-  -> Tensor_<int, 3>
-{
-  auto num_samples = samples.cols();
-  auto sample_size = 5;
-
-  Tensor_<int, 3> pts_indices(num_samples, sample_size, 2);
-  for (auto s = 0; s < num_samples; ++s)
-    for (auto m = 0; m < sample_size; ++m)
-      for (auto p = 0; p < 2; ++p)
-      {
-        const auto match_index = samples(m, s);
-        const auto& match = matches[match_index];
-        auto p1 = match.x_index();
-        auto p2 = match.y_index();
-        pts_indices(s, m, 0) = p1;
-        pts_indices(s, m, 1) = p2;
-      }
-
-  return pts_indices;
-}
-
-auto to_coordinates(const Tensor_<int, 3>& samples,
-                    const Set<OERegion, RealDescriptor>& keys1,
-                    const Set<OERegion, RealDescriptor>& keys2)
-  -> std::pair<Tensor_<int, 3>, Tensor_<int, 3>>
-{
-  auto num_samples = samples.size(0);
-  auto sample_size = samples.size(1);
-
-  Tensor_<int, 3> p1(num_samples, sample_size, 2);
-  Tensor_<int, 3> p2(num_samples, sample_size, 2);
-
-  for (auto s = 0; s < num_samples; ++s)
-    for (auto m = 0; m < sample_size; ++m)
-    {
-      auto p1_idx = samples(s, m, 0);
-      auto p2_idx = samples(s, m, 1);
-
-      p1(s, m, 0) = keys1.f(p1_idx).x();
-      p1(s, m, 1) = keys1.f(p1_idx).y();
-
-      p2(s, m, 0) = keys2.f(p2_idx).x();
-      p2(s, m, 1) = keys2.f(p2_idx).y();
-    }
-
-  return make_pair(p1, p2);
-}
-
-auto extract_centers(const Set<OERegion, RealDescriptor>& keys) -> MatrixXf
-{
-  MatrixXf centers(3, keys.features.size());
-
-  for (auto i = 0; i < keys.size(); ++i)
-    centers.col(i) << keys.f(i).center(), 1.f;
-
-  return centers;
-}
-
-auto transform(const MatrixXd& K, const MatrixXd& X)
-  -> MatrixXd
-{
-  MatrixXd KX = K*X;
-  KX.rowwise() /= KX.row(2);
-  return KX;
-}
-
-void standardize(const MatrixXd& X)
-{
 }
 
 
