@@ -26,6 +26,72 @@ using namespace std;
 using namespace DO::Sara;
 
 
+template <typename T>
+void print_3d_array(const TensorView_<T, 3>& x)
+{
+  const auto max = x.flat_array().abs().maxCoeff();
+  std::stringstream ss;
+  ss << max;
+  const auto pad_size = ss.str().size();
+
+
+  cout << "[";
+  for (auto i = 0; i < x.size(0); ++i)
+  {
+    cout << "[";
+    for (auto j = 0; j < x.size(1); ++j)
+    {
+      cout << "[";
+      for (auto k = 0; k < x.size(2); ++k)
+      {
+        cout << std::setw(pad_size) << x(i,j,k);
+        if (k != x.size(2) - 1)
+          cout << ", ";
+      }
+      cout << "]";
+
+      if (j != x.size(1) - 1)
+        cout << ", ";
+      else
+        cout << "]";
+    }
+
+    if (i != x.size(0) - 1)
+      cout << ",\n ";
+  }
+  cout << "]" << endl;
+}
+
+void print_3d_array(const TensorView_<float, 3>& x)
+{
+  cout << "[";
+  for (auto i = 0; i < x.size(0); ++i)
+  {
+    cout << "[";
+    for (auto j = 0; j < x.size(1); ++j)
+    {
+      cout << "[";
+      for (auto k = 0; k < x.size(2); ++k)
+      {
+        cout << fixed << x(i,j,k);
+        if (k != x.size(2) - 1)
+          cout << ", ";
+      }
+      cout << "]";
+
+      if (j != x.size(1) - 1)
+        cout << ", ";
+      else
+        cout << "]";
+    }
+
+    if (i != x.size(0) - 1)
+      cout << ",\n ";
+  }
+  cout << "]" << endl;
+}
+
+
 void load(Image<Rgb8>& image1, Image<Rgb8>& image2,
           Set<OERegion, RealDescriptor>& keys1,
           Set<OERegion, RealDescriptor>& keys2,  //
@@ -106,16 +172,25 @@ auto random_samples(int num_samples, int sample_size, int num_data_points)
 // Data transformations.
 auto extract_centers(const std::vector<OERegion>& features) -> Tensor_<float, 2>
 {
-  auto centers = Tensor_<float, 2>(features.size(), 3);
+  auto centers = Tensor_<float, 2>{int(features.size()), 2};
   auto mat = centers.matrix();
 
   for (auto i = 0; i < centers.size(0); ++i)
-    mat.row(i) << features[i].x(), features[i].y(), 1.f;
+    mat.row(i) = features[i].center().transpose();
 
   return centers;
 }
 
-auto to_point_indices(const Tensor_<int, 2>& samples, const Tensor_<int, 2>& matches)
+auto homogeneous(const TensorView_<float, 2>& x)
+  -> Tensor_<float, 2>
+{
+  auto X = Tensor_<float, 2>(x.size(0), x.size(1) + 1);
+  X.matrix().leftCols(x.size(1)) = x.matrix();
+  X.matrix().col(x.size(1)).setOnes();
+  return X;
+}
+
+auto to_point_indices(const TensorView_<int, 2>& samples, const TensorView_<int, 2>& matches)
   -> Tensor_<int, 3>
 {
   const auto num_samples = samples.size(0);
@@ -134,10 +209,10 @@ auto to_coordinates(const Tensor_<int, 3>& point_indices,
                     const Tensor_<float, 2>& p2)
   -> Tensor_<float, 4>
 {
-  auto num_samples = point_indices.size(0);
-  auto sample_size = point_indices.size(1);
-  auto num_points = 2;
-  auto coords_dim = 2;
+  const auto num_samples = point_indices.size(0);
+  const auto sample_size = point_indices.size(1);
+  const auto num_points = 2;
+  const auto coords_dim = p1.size(1);
 
   auto p =
       Tensor_<float, 4>{{num_samples, sample_size, num_points, coords_dim}};
@@ -217,14 +292,22 @@ BOOST_AUTO_TEST_CASE(test_extract_centers)
                                         {Point2f::Ones() * 1, 1.f},
                                         {Point2f::Ones() * 2, 1.f}};
 
-  auto centers = extract_centers(features);
-  auto expected_centers = Tensor_<float, 2>{centers.sizes()};
-  expected_centers.matrix() <<
+  const auto x = extract_centers(features);
+  auto expected_x = Tensor_<float, 2>{x.sizes()};
+  expected_x.matrix() <<
+    0, 0,
+    1, 1,
+    2, 2;
+
+  BOOST_CHECK(x.matrix() == expected_x.matrix());
+
+  const auto X = homogeneous(x);
+  auto expected_X = Tensor_<float, 2>{X.sizes()};
+  expected_X.matrix() <<
     0, 0, 1,
     1, 1, 1,
     2, 2, 1;
-
-  BOOST_CHECK(centers.matrix() == expected_centers.matrix());
+  BOOST_CHECK(X.matrix() == expected_X.matrix());
 }
 
 BOOST_AUTO_TEST_CASE(test_to_point_indices)
@@ -261,42 +344,6 @@ BOOST_AUTO_TEST_CASE(test_to_point_indices)
     1, 1;
 
   BOOST_CHECK(vec(point_indices) == vec(expected_point_indices));
-}
-
-template <typename T>
-void print_3d_array(const TensorView_<T, 3>& x)
-{
-  const auto max = x.flat_array().abs().maxCoeff();
-  std::stringstream ss;
-  ss << max;
-  const auto pad_size = ss.str().size();
-
-
-  cout << "[";
-  for (auto i = 0; i < x.size(0); ++i)
-  {
-    cout << "[";
-    for (auto j = 0; j < x.size(1); ++j)
-    {
-      cout << "[";
-      for (auto k = 0; k < x.size(2); ++k)
-      {
-        cout << std::setw(pad_size) << x(i,j,k);
-        if (k != x.size(2) - 1)
-          cout << ", ";
-      }
-      cout << "]";
-
-      if (j != x.size(1) - 1)
-        cout << ", ";
-      else
-        cout << "]";
-    }
-
-    if (i != x.size(0) - 1)
-      cout << ",\n ";
-  }
-  cout << "]" << endl;
 }
 
 BOOST_AUTO_TEST_CASE(test_to_coordinates)
