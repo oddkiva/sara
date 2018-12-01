@@ -11,13 +11,13 @@
 
 #define BOOST_TEST_MODULE "ImageIO/Image Database and Training Data Set"
 
-#include <boost/test/unit_test.hpp>
-
 #include <DO/Sara/Core.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageIO/Database/ImageDataSet.hpp>
 #include <DO/Sara/ImageIO/Database/TrainingDataSet.hpp>
 #include <DO/Sara/ImageIO/Database/TransformedTrainingDataSet.hpp>
+
+#include <boost/test/unit_test.hpp>
 
 
 using namespace std;

@@ -68,6 +68,8 @@ flags = [
 "-I", "./cpp/third-party/gtest/include",
 # Build directory.
 "-I", "../sara-build/cpp/src",
+"-I", "../sara-build-Release/cpp/src",
+"-I", "../sara-build-Debug/cpp/src",
 ]
 
 

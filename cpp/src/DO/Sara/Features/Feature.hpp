@@ -13,13 +13,13 @@
 
 #pragma once
 
-#include <cstdint>
-#include <stdexcept>
-
 #include <DO/Sara/Defines.hpp>
 
 #include <DO/Sara/Core/EigenExtension.hpp>
 #include <DO/Sara/Core/Pixel.hpp>
+
+#include <cstdint>
+#include <stdexcept>
 
 
 namespace DO { namespace Sara {

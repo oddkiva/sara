@@ -26,8 +26,7 @@ using namespace DO::Sara;
 void convolution_example()
 {
   // Read an image.
-  auto image = Image<Rgb32f>{};
-  imread(image, src_path("../../../data/ksmall.jpg"));
+  auto image = imread<Rgb32f>(src_path("../../../data/ksmall.jpg"));
 
   const auto w = image.width();
   const auto h = image.height();
@@ -66,8 +65,7 @@ void convolution_example()
 void convolution_transpose_example()
 {
   // Read an image.
-  auto image = Image<Rgb32f>{};
-  imread(image, src_path("../../../data/ksmall.jpg"));
+  auto image = imread<Rgb32f>(src_path("../../../data/ksmall.jpg"));
 
   // Upsample the image.
   auto image_resized = upsample(image, 5, 4);

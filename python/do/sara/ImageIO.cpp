@@ -16,8 +16,7 @@ bp::object imread(const std::string& filepath)
 {
   using namespace sara;
 
-  auto image = Image<double>{};
-  imread(image, filepath);
+  auto image = imread(filepath);
 
   auto data = image.data();
 

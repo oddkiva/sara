@@ -1,6 +1,8 @@
 #include <DO/Sara/Core/Image.hpp>
+#include <DO/Sara/Features.hpp>
 #include <DO/Sara/FeatureDescriptors.hpp>
 #include <DO/Sara/FeatureDetectors.hpp>
+#include <DO/Sara/FeatureMatching.hpp>
 
 
 namespace DO { namespace Sara {

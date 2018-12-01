@@ -8,6 +8,8 @@ namespace DO { namespace Sara {
   Set<OERegion, RealDescriptor>
   compute_sift_keypoints(const Image<float>& image)
   {
+    using namespace std;
+
     // Time everything.
     auto timer = Timer{};
     auto elapsed = 0.;
@@ -20,7 +22,7 @@ namespace DO { namespace Sara {
     // 1. Feature extraction.
     print_stage("Computing DoG extrema");
     timer.restart();
-    ImagePyramidParams pyr_params;  //(0);
+    ImagePyramidParams pyr_params(0);
     ComputeDoGExtrema compute_DoGs{pyr_params, 0.01f};
     auto scale_octave_pairs = vector<Point2i>{};
     DoGs = compute_DoGs(image, &scale_octave_pairs);

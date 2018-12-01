@@ -104,8 +104,8 @@ void load(Image<Rgb8>& image1, Image<Rgb8>& image2,
           Set<OERegion, RealDescriptor>& keys2, vector<Match>& matches)
 {
   cout << "Loading images" << endl;
-  imread(image1, file1);
-  imread(image2, file2);
+  image1 = imread<Rgb8>(file1);
+  image2 = imread<Rgb8>(file2);
 
   cout << "Computing/Reading keypoints" << endl;
   auto SIFTs1 = compute_sift_keypoints(image1.convert<float>());
