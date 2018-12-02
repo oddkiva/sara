@@ -186,7 +186,11 @@ void estimate_fundamental_matrix(const Image<Rgb8>& image1,
   constexpr auto L = 8;
 
   const auto M = to_tensor(matches);
-  const auto S = random_samples(N, L, M.size(0));
+
+  //const auto S = random_samples(N, L, M.size(0));
+  auto S = Tensor_<int, 2>{{1, L}};
+  S[0] = range(8);
+
   const auto I = to_point_indices(S, M);
   const auto p = to_coordinates(I, p1, p2).transpose({0, 2, 1, 3});
   const auto P = to_coordinates(I, P1, P2).transpose({0, 2, 1, 3});
@@ -201,45 +205,71 @@ void estimate_fundamental_matrix(const Image<Rgb8>& image1,
   const Matrix<double, 3, 8> Xn = Pn[0][0].colmajor_view().matrix().cast<double>();
   const Matrix<double, 3, 8> Yn = Pn[0][1].colmajor_view().matrix().cast<double>();
 
+  std::cout << Xn << std::endl << std::endl;
+  std::cout << Yn << std::endl;
+
 
   auto F = FundamentalMatrix<>{};
   eight_point_fundamental_matrix(Xn, Yn, F);
 
-  // Unnormalize.
-  F.matrix() = T1.cast<double>().inverse().transpose() * F.matrix() *
-               T2.cast<double>().inverse();
 
+  std::cout << "Check normalized F..." << std::endl;
+  std::cout << "F = " << std::endl;
   std::cout << F.matrix() << std::endl;
+  std::cout << "Algebraic errors:" << std::endl;
+  for (int i = 0; i < 8; ++i)
+    std::cout << Xn.col(i).transpose() * F.matrix() * Yn.col(i) << std::endl;
 
-  // Projected X to the right.
-  Matrix<double, 3, 8> proj_X = F.matrix().transpose() * X;
-  proj_X.array().rowwise() /= proj_X.row(2).array();
-  std::cout << proj_X << std::endl;
+  // Unnormalize.
+  F.matrix() = T1.cast<double>().transpose() * F.matrix() * T2.cast<double>();
+
+  std::cout << "Check unnormalized F..." << std::endl;
+  std::cout << "F = " << std::endl;
+  std::cout << F.matrix() << std::endl;
+  std::cout << "Algebraic errors:" << std::endl;
+  for (int i = 0; i < 8; ++i)
+    std::cout << X.col(i).transpose() * F.matrix() * Y.col(i) << std::endl;
 
 
 
-  print_stage("Visualizing matches...");
-  auto scale = 1.f;
-  auto w = int((image1.width() + image2.width()) * scale);
-  auto h = max(image1.height(), image2.height()) * scale;
+  //// Projected X to the right.
+  //Matrix<double, 3, 8> proj_X = F.matrix().transpose() * X;
+  //proj_X.array().rowwise() /= proj_X.row(2).array();
+  //std::cout << "proj_X = " << std::endl;
+  //std::cout << proj_X << std::endl;
 
-  create_window(w, h);
-  set_antialiasing();
 
-  PairWiseDrawer drawer(image1, image2);
-  drawer.set_viz_params(1.f, 1.f, PairWiseDrawer::CatH);
-  drawer.display_images();
 
-  for (size_t i = 0; i < 8; ++i)
-  {
-    //drawer.draw_point(0,matches[i], Red8, true);
-    drawer.draw_point(0, x.col(i), Red8, 5); 
-    drawer.draw_point(1, y.col(i), Red8, 5); 
-    drawer.draw_line_from_eqn(1, proj_X.col(i).cast<float>(), Magenta8, 5);
-    //cout << matches[i] << endl;
-  }
+  //print_stage("Visualizing matches...");
+  //auto scale = 1.f;
+  //auto w = int((image1.width() + image2.width()) * scale);
+  //auto h = max(image1.height(), image2.height()) * scale;
 
-  get_key();
+  //create_window(w, h);
+  //set_antialiasing();
+
+  //PairWiseDrawer drawer(image1, image2);
+  //drawer.set_viz_params(1.f, 1.f, PairWiseDrawer::CatH);
+  //drawer.display_images();
+
+  //for (size_t i = 0; i < 8; ++i)
+  //{
+  //  drawer.draw_match(matches[i], Red8, true);
+
+  //  drawer.draw_point(0, x.col(i), Magenta8, 5);
+  //  drawer.draw_point(1, y.col(i), Magenta8, 5);
+
+  //  //drawer.draw_point(0, X.col(i).cast<float>().head(2), Magenta8, 5);
+  //  //drawer.draw_point(1, Y.col(i).cast<float>().head(2), Magenta8, 5);
+
+  //  //drawer.draw_point(0, (T1.inverse() * Xn.col(i).cast<float>()).head(2), Magenta8, 5);
+  //  //drawer.draw_point(1, (T2.inverse() * Yn.col(i).cast<float>()).head(2), Magenta8, 5);
+
+  //  drawer.draw_line_from_eqn(1, proj_X.col(i).cast<float>(), Magenta8, 5);
+  //  //cout << matches[i] << endl;
+  //}
+
+  //get_key();
 }
 
 void estimate_homography(const Set<OERegion, RealDescriptor>& keys1,
