@@ -92,6 +92,9 @@ macro (sara_populate_available_components)
   sara_append_components(DO_Sara_COMPONENTS Match)
   sara_append_components(DO_Sara_COMPONENTS FeatureMatching)
 
+  # Multiple view geometry.
+  sara_append_components(DO_Sara_COMPONENTS MultiViewGeometry)
+
   # Disjoint sets.
   sara_append_components(DO_Sara_COMPONENTS DisjointSets)
 

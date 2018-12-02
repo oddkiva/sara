@@ -12,9 +12,7 @@
 
 #define BOOST_TEST_MODULE "MultiViewGeometry/Essential Matrix"
 
-#include <DO/Sara/FeatureMatching.hpp>
-#include <DO/Sara/ImageIO.hpp>
-#include <DO/Sara/ImageProcessing/GemmBasedConvolution.hpp>
+#include <DO/Sara/MultiViewGeometry/Utilities.hpp>
 
 #include <boost/test/unit_test.hpp>
 
@@ -92,171 +90,6 @@ void print_3d_array(const TensorView_<float, 3>& x)
 }
 
 
-void load(Image<Rgb8>& image1, Image<Rgb8>& image2,
-          Set<OERegion, RealDescriptor>& keys1,
-          Set<OERegion, RealDescriptor>& keys2,  //
-          vector<Match>& matches)
-{
-  cout << "Loading images" << endl;
-
-  auto data_dir = std::string{"/home/david/Desktop/Datasets/sfm/castle_int"};
-  auto file1 = "0000.png";
-  auto file2 = "0001.png";
-
-  image1 = imread<Rgb8>(data_dir + "/" + file1);
-  image2 = imread<Rgb8>(data_dir + "/" + file2);
-
-#ifdef COMPUTE_KEYPOINTS
-  cout << "Computing/Reading keypoints" << endl;
-  auto sifts1 = compute_sift_keypoints(image1.convert<float>());
-  auto sifts2 = compute_sift_keypoints(image2.convert<float>());
-  keys1.append(sifts1);
-  keys2.append(sifts2);
-  cout << "Image 1: " << keys1.size() << " keypoints" << endl;
-  cout << "Image 2: " << keys2.size() << " keypoints" << endl;
-
-  write_keypoints(sifts1.features, sifts1.descriptors,
-                  data_dir + "/" + "0000.key");
-  write_keypoints(sifts2.features, sifts2.descriptors,
-                  data_dir + "/" + "0001.key");
-
-#else
-  read_keypoints(keys1.features, keys1.descriptors,
-                 data_dir + "/" + "0000.key");
-  read_keypoints(keys2.features, keys2.descriptors,
-                 data_dir + "/" + "0001.key");
-#endif
-
-  // Compute/read matches
-  cout << "Computing Matches" << endl;
-  AnnMatcher matcher{keys1, keys2, 1.0f};
-  matches = matcher.compute_matches();
-  cout << matches.size() << " matches" << endl;
-
-  // Debug this.
-  //write_matches(matches, data_dir + "/" + "0000_0001.match");
-}
-
-
-// NumPy-like interface for Tensors
-auto range(int n) -> Tensor_<int, 1>
-{
-  auto indices = Tensor_<int, 1>{n};
-  std::iota(indices.begin(), indices.end(), 0);
-  return indices;
-}
-
-auto random_shuffle(const Tensor_<int, 1>& x) -> Tensor_<int, 1>
-{
-  Tensor_<int, 1> x_shuffled = x;
-  std::random_shuffle(x_shuffled.begin(), x_shuffled.end());
-  return x_shuffled;
-}
-
-auto random_samples(int num_samples, int sample_size, int num_data_points)
-    -> Tensor_<int, 2>
-{
-  auto indices = range(num_data_points);
-
-  auto samples = Tensor_<int, 2>{sample_size, num_samples};
-  for (int i = 0; i < sample_size; ++i)
-    samples[i].flat_array() =
-        random_shuffle(indices).flat_array().head(num_samples);
-
-  samples = samples.transpose({1, 0});
-
-  return samples;
-}
-
-
-// Data transformations.
-auto extract_centers(const std::vector<OERegion>& features) -> Tensor_<float, 2>
-{
-  auto centers = Tensor_<float, 2>{int(features.size()), 2};
-  auto mat = centers.matrix();
-
-  for (auto i = 0; i < centers.size(0); ++i)
-    mat.row(i) = features[i].center().transpose();
-
-  return centers;
-}
-
-auto homogeneous(const TensorView_<float, 2>& x)
-  -> Tensor_<float, 2>
-{
-  auto X = Tensor_<float, 2>(x.size(0), x.size(1) + 1);
-  X.matrix().leftCols(x.size(1)) = x.matrix();
-  X.matrix().col(x.size(1)).setOnes();
-  return X;
-}
-
-auto to_point_indices(const TensorView_<int, 2>& samples, const TensorView_<int, 2>& matches)
-  -> Tensor_<int, 3>
-{
-  const auto num_samples = samples.size(0);
-  const auto sample_size = samples.size(1);
-
-  auto point_indices = Tensor_<int, 3>{num_samples, sample_size, 2};
-  for (auto s = 0; s < num_samples; ++s)
-    for (auto m = 0; m < sample_size; ++m)
-      point_indices[s][m].flat_array() = matches[samples(s, m)].flat_array();
-
-  return point_indices;
-}
-
-auto to_coordinates(const Tensor_<int, 3>& point_indices,
-                    const Tensor_<float, 2>& p1,
-                    const Tensor_<float, 2>& p2)
-  -> Tensor_<float, 4>
-{
-  const auto num_samples = point_indices.size(0);
-  const auto sample_size = point_indices.size(1);
-  const auto num_points = 2;
-  const auto coords_dim = p1.size(1);
-
-  auto p =
-      Tensor_<float, 4>{{num_samples, sample_size, num_points, coords_dim}};
-
-  for (auto s = 0; s < num_samples; ++s)
-    for (auto m = 0; m < sample_size; ++m)
-    {
-      auto p1_idx = point_indices(s, m, 0);
-      auto p2_idx = point_indices(s, m, 1);
-
-      p[s][m][0].flat_array() = p1[p1_idx].flat_array();
-      p[s][m][1].flat_array() = p2[p2_idx].flat_array();
-    }
-
-  return p;
-}
-
-
-// Point transformations.
-auto compute_normalizer(const Tensor_<float, 2>& X) -> Matrix3f
-{
-  const RowVector3f min = X.matrix().colwise().minCoeff();
-  const RowVector3f max = X.matrix().colwise().maxCoeff();
-
-  const Matrix2f scale = (max - min).cwiseInverse().head(2).asDiagonal();
-
-  Matrix3f T = Matrix3f::Zero();
-  T.topLeftCorner<2, 2>() = scale;
-  T.col(2) << -min.cwiseQuotient(max - min).transpose().head(2), 1.f;
-
-  return T;
-}
-
-auto apply_transform(const Matrix3f& T, const Tensor_<float, 2>& X)
-  -> Tensor_<float, 2>
-{
-  auto TX = Tensor_<float, 2>{X.sizes()};
-  auto TX_ = TX.colmajor_view().matrix();
-  TX_ = T * X.colmajor_view().matrix();
-  TX_.array().rowwise() /= TX_.array().row(2);
-  return TX;
-}
-
-
 BOOST_AUTO_TEST_SUITE(TestMultiViewGeometry)
 
 BOOST_AUTO_TEST_CASE(test_range)
@@ -268,7 +101,7 @@ BOOST_AUTO_TEST_CASE(test_range)
 BOOST_AUTO_TEST_CASE(test_random_shuffle)
 {
   auto a = range(4);
-  a = random_shuffle(a);
+  a = shuffle(a);
   BOOST_CHECK(vec(a) != Vector4i(0, 1, 2, 3));
 }
 
@@ -417,6 +250,7 @@ BOOST_AUTO_TEST_CASE(test_to_coordinates)
   BOOST_CHECK(vec(expected_sample1) == vec(sample1));
 }
 
+
 BOOST_AUTO_TEST_CASE(test_compute_normalizer)
 {
   auto X = Tensor_<float, 2>{3, 3};
@@ -444,9 +278,16 @@ BOOST_AUTO_TEST_CASE(test_apply_transform)
     2, 2, 1,
     3, 3, 1;
 
-  auto T = compute_normalizer(X);
+  // From Oxford affine covariant features dataset, graf, H1to5P homography.
+  auto H = Matrix3f{};
+  H <<
+    6.2544644e-01,  5.7759174e-02,  2.2201217e+02,
+    2.2240536e-01,  1.1652147e+00, -2.5605611e+01,
+    4.9212545e-04, -3.6542424e-05,  1.0000000e+00;
 
-  auto TX = apply_transform(T, X);
+  auto HX = apply_transform(H, X);
+
+  BOOST_CHECK(HX.matrix().col(2) == Vector3f::Ones());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -2,7 +2,8 @@ project(DO_MultiViewGeometry_test)
 
 message(STATUS "  - DO_MultiViewGeometry_Tests")
 
-find_package(DO_Sara COMPONENTS ImageIO FeatureMatching REQUIRED)
+find_package(DO_Sara
+  COMPONENTS ImageIO FeatureMatching MultiViewGeometry REQUIRED)
 
 file(GLOB test_multiviewgeometry_SOURCE_FILES FILES test_essential_matrix*.cpp)
 

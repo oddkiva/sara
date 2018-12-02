@@ -1,11 +1,10 @@
-project(DO_FeatureMatching_Examples)
+project(DO_MultiViewGeometry_Examples)
 
 message(STATUS "  - DO_FeatureMatching_Examples")
 
 find_package(DO_Sara COMPONENTS
-  Core Graphics ImageIO
-  Features FeatureDetectors FeatureDescriptors
-  KDTree Match FeatureMatching REQUIRED)
+  Core Graphics ImageIO Features FeatureDetectors FeatureDescriptors KDTree
+  Match FeatureMatching MultiViewGeometry REQUIRED)
 
 add_executable(essential_matrix_example
   essential_matrix_example.cpp
