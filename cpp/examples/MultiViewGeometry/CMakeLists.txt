@@ -6,14 +6,14 @@ find_package(DO_Sara COMPONENTS
   Core Graphics ImageIO Features FeatureDetectors FeatureDescriptors KDTree
   Match FeatureMatching MultiViewGeometry REQUIRED)
 
-add_executable(essential_matrix_example
-  essential_matrix_example.cpp
+add_executable(essential_matrix_estimation_example
+  essential_matrix_estimation_example.cpp
   sift.cpp sift.hpp)
 
-set_target_properties(essential_matrix_example PROPERTIES
+set_target_properties(essential_matrix_estimation_example PROPERTIES
   COMPILE_FLAGS ${SARA_DEFINITIONS})
-target_link_libraries(essential_matrix_example ${DO_Sara_LIBRARIES})
+target_link_libraries(essential_matrix_estimation_example ${DO_Sara_LIBRARIES})
 
-set_property(TARGET essential_matrix_example
+set_property(TARGET essential_matrix_estimation_example
   PROPERTY
   FOLDER "DO Sara Examples/MultiViewGeometry")

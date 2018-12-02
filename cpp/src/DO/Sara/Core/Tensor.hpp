@@ -32,6 +32,27 @@ namespace DO { namespace Sara {
 
 
   //! @{
+  //! @brief In this world everything, everything is **ROW-MAJOR** like in
+  //! TensorFlow.
+  template <typename T, int N>
+  using TensorView_ = TensorView<T, N, RowMajor>;
+
+  template <typename T, int N>
+  using Tensor_ = Tensor<T, N, RowMajor>;
+  //! @}
+
+
+  //! @brief Reinterpret the tensor view object  as an image view object.
+  template <typename T, int N>
+  auto image_view(TensorView_<T, N> in) -> ImageView<T, N>
+  {
+    auto out_sizes = in.sizes();
+    std::reverse(out_sizes.data(), out_sizes.data() + N);
+    return ImageView<T, N>{in.data(), out_sizes};
+  }
+
+
+  //! @{
   //! @brief Provide tensor views for generic ND-array objects.
   /*!
    * If a tensor coefficient is not a scalar but a matricial object, then the
@@ -80,6 +101,7 @@ namespace DO { namespace Sara {
     return tensor_type{reinterpret_cast<T*>(in.data()), out_sizes};
   }
   //! @}
+
 
   //! @{
   //! @brief Provide tensor views for image objects.
@@ -133,6 +155,7 @@ namespace DO { namespace Sara {
     return tensor_type{reinterpret_cast<T*>(in.data()), out_sizes};
   }
   //! @}
+
 
   //! @{
   //! @brief Convert image data structures to tensor data structures.

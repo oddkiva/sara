@@ -112,6 +112,21 @@ namespace DO { namespace Sara {
                          Dynamic, StorageOrder>>;
     //! @}
 
+    //! @{
+    //! @brief Vector views for linear algebra.
+    using vector_view_type =
+        Map<Matrix<typename ElementTraits<T>::value_type, Dynamic, 1>>;
+
+    using const_vector_view_type =
+        Map<const Matrix<typename ElementTraits<T>::value_type, Dynamic, 1>>;
+
+    using row_vector_view_type =
+        Map<Matrix<typename ElementTraits<T>::value_type, 1, Dynamic>>;
+
+    using const_row_vector_view_type =
+        Map<const Matrix<typename ElementTraits<T>::value_type, 1, Dynamic>>;
+    //! @}
+
   public: /* methods */
     //! @brief Default constructor.
     inline MultiArrayView() = default;
@@ -290,6 +305,36 @@ namespace DO { namespace Sara {
       return const_flat_array_view_type{
           reinterpret_cast<const typename ElementTraits<T>::const_pointer>(
               data()),
+          static_cast<int64_t>(size())};
+    }
+    //! @}
+
+    //! @{
+    //! @brief Apply the vectorization math operation and return a vector view
+    //! object ! for linear algebra with Eigen libraries.
+    inline auto vector() -> vector_view_type
+    {
+      return {reinterpret_cast<typename ElementTraits<T>::pointer>(data()),
+              static_cast<int64_t>(size())};
+    }
+
+    inline auto vector() const -> const_vector_view_type
+    {
+      return {
+          reinterpret_cast<typename ElementTraits<T>::const_pointer>(data()),
+          static_cast<int64_t>(size())};
+    }
+
+    inline auto row_vector() -> row_vector_view_type
+    {
+      return {reinterpret_cast<typename ElementTraits<T>::pointer>(data()),
+              static_cast<int64_t>(size())};
+    }
+
+    inline auto row_vector() const -> const_row_vector_view_type
+    {
+      return {
+          reinterpret_cast<typename ElementTraits<T>::const_pointer>(data()),
           static_cast<int64_t>(size())};
     }
     //! @}

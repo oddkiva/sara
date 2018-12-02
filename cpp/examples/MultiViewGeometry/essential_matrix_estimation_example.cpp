@@ -153,6 +153,50 @@ void estimate_essential_matrix(const Set<OERegion, RealDescriptor>& keys1,
   std::cout << I[0].matrix() << std::endl;
 }
 
+void estimate_fundamental_matrix(const Set<OERegion, RealDescriptor>& keys1,
+                                 const Set<OERegion, RealDescriptor>& keys2,
+                                 const vector<Match>& matches)
+{
+  // Convert.
+  auto to_tensor = [](const vector<Match>& matches) -> Tensor_<int, 2> {
+    auto match_tensor = Tensor_<int, 2>{int(matches.size()), 2};
+    for (auto i = 0u; i < matches.size(); ++i)
+      match_tensor[i].flat_array() << matches[i].x_index(),
+          matches[i].y_index();
+    return match_tensor;
+  };
+
+  const auto p1 = extract_centers(keys1.features);
+  const auto p2 = extract_centers(keys2.features);
+
+  auto P1 = homogeneous(p1);
+  auto P2 = homogeneous(p2);
+
+  //const auto K1 = read_internal_camera_parameters(data_dir + "/" + "0000.png.K");
+  //const auto K2 = read_internal_camera_parameters(data_dir + "/" + "0001.png.K");
+
+  //P1 = apply_transform(K1, P1);
+  //P2 = apply_transform(K2, P2);
+
+  auto T1 = compute_normalizer(P1);
+  auto T2 = compute_normalizer(P2);
+
+  const auto P1n = apply_transform(T1, P1);
+  const auto P2n = apply_transform(T2, P2);
+
+  //print_3d_array(P[0]);
+
+  constexpr auto N = 1000;
+  constexpr auto L = 8;
+
+  const auto M = to_tensor(matches);
+  const auto S = random_samples(N, L, M.size(0));
+  const auto I = to_point_indices(S, M);
+  const auto P = to_coordinates(I, p1, p2);
+
+  std::cout << I[0].matrix() << std::endl;
+}
+
 
 GRAPHICS_MAIN()
 {

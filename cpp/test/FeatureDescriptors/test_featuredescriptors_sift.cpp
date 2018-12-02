@@ -35,10 +35,10 @@ BOOST_AUTO_TEST_CASE(test_computation)
   // Set all gradients to zero except at coords (gx, gy).
   for (int y = 0; y < grad_polar_coords.height(); ++y)
     for (int x = 0; x < grad_polar_coords.width(); ++x)
-      grad_polar_coords(x,y) = Vector2f::Zero();
-  grad_polar_coords(0, 0) =  Vector2f{ 1.f, theta };
+      grad_polar_coords(x, y) = Vector2f::Zero();
+  grad_polar_coords(0, 0) = Vector2f{1.f, theta};
 
-  auto feature = OERegion{ c, 1.f };
+  auto feature = OERegion{c, 1.f};
   auto sift = ComputeSIFTDescriptor<>{}(feature, grad_polar_coords);
 
   // TODO.

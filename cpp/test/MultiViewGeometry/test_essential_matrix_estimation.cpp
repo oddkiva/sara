@@ -95,14 +95,14 @@ BOOST_AUTO_TEST_SUITE(TestMultiViewGeometry)
 BOOST_AUTO_TEST_CASE(test_range)
 {
   auto a = range(3);
-  BOOST_CHECK(vec(a) == Vector3i(0, 1, 2));
+  BOOST_CHECK(a.vector() == Vector3i(0, 1, 2));
 }
 
 BOOST_AUTO_TEST_CASE(test_random_shuffle)
 {
   auto a = range(4);
   a = shuffle(a);
-  BOOST_CHECK(vec(a) != Vector4i(0, 1, 2, 3));
+  BOOST_CHECK(a.vector() != Vector4i(0, 1, 2, 3));
 }
 
 BOOST_AUTO_TEST_CASE(test_random_samples)
@@ -176,7 +176,7 @@ BOOST_AUTO_TEST_CASE(test_to_point_indices)
     3, 3,
     1, 1;
 
-  BOOST_CHECK(vec(point_indices) == vec(expected_point_indices));
+  BOOST_CHECK(point_indices.vector() == expected_point_indices.vector());
 }
 
 BOOST_AUTO_TEST_CASE(test_to_coordinates)
@@ -225,7 +225,7 @@ BOOST_AUTO_TEST_CASE(test_to_coordinates)
     0.f, 0.f, 2.f, 2.f,
     1.f, 1.f, 3.f, 3.f;
 
-  BOOST_CHECK(vec(expected_coords) == vec(coords));
+  BOOST_CHECK(expected_coords.vector() == coords.vector());
   BOOST_CHECK(expected_coords.sizes() == coords.sizes());
 
 
@@ -247,7 +247,7 @@ BOOST_AUTO_TEST_CASE(test_to_coordinates)
 
   //print_3d_array(expected_sample1);
   //print_3d_array(sample1);
-  BOOST_CHECK(vec(expected_sample1) == vec(sample1));
+  BOOST_CHECK(expected_sample1.vector() == sample1.vector());
 }
 
 

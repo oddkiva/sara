@@ -20,37 +20,6 @@
 
 namespace DO { namespace Sara {
 
-  // In this world everything, everything is **ROW-MAJOR**.
-  template <typename T, int N>
-  using TensorView_ = TensorView<T, N, RowMajor>;
-
-  template <typename T, int N>
-  using Tensor_ = Tensor<T, N, RowMajor>;
-
-  template <typename T, int N>
-  auto image_view(TensorView_<T, N> in) -> ImageView<T, N>
-  {
-    auto out_sizes = in.sizes();
-    std::reverse(out_sizes.data(), out_sizes.data() + N);
-    return ImageView<T, N>{in.data(), out_sizes};
-  }
-
-  template <typename T, int N, int StorageOrder>
-  auto vec(MultiArrayView<T, N, StorageOrder>& in)
-      -> Map<Matrix<typename ElementTraits<T>::value_type, Dynamic, 1>>
-  {
-    return {reinterpret_cast<typename ElementTraits<T>::pointer>(in.data()),
-            static_cast<int64_t>(in.size())};
-  }
-
-  template <typename T, int N, int StorageOrder>
-  auto vec(const MultiArrayView<T, N, StorageOrder>& in)
-      -> Map<const Matrix<typename ElementTraits<T>::value_type, Dynamic, 1>>
-  {
-    return {reinterpret_cast<typename ElementTraits<T>::const_pointer>(in.data()),
-            static_cast<int64_t>(in.size())};
-  }
-
   //! @{
   //! @brief Reimplement the `im2col` function.
   template <typename T, int N, typename Padding>
@@ -90,7 +59,7 @@ namespace DO { namespace Sara {
       auto p = Tensor_<T, N>{e - s};
       crop(p, infx, s, e);
 
-      phi_x.matrix().row(r) = vec(p).transpose();
+      phi_x.matrix().row(r) = p.row_vector();
     }
 
     return phi_x;

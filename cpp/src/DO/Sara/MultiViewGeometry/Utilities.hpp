@@ -12,8 +12,9 @@
 #pragma once
 
 #include <DO/Sara/Defines.hpp>
+
+#include <DO/Sara/Core/Tensor.hpp>
 #include <DO/Sara/FeatureMatching.hpp>
-#include <DO/Sara/ImageProcessing/GemmBasedConvolution.hpp>
 
 
 namespace DO { namespace Sara {
