@@ -290,7 +290,7 @@ void estimate_fundamental_matrix(const Image<Rgb8>& image1,
       proj_X2 /= proj_X2(2);
 
 
-      if (std::abs(X1.transpose() * F.matrix() * X2) < 1e-3)
+      if (std::abs(X1.transpose() * F.matrix() * X2) < 1e-2)
       {
         drawer.draw_match(matches[i], Blue8, false);
         //drawer.draw_line_from_eqn(0, proj_X2.cast<float>(), Cyan8, 1);
