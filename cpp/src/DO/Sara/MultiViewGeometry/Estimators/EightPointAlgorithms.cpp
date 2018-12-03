@@ -27,8 +27,8 @@ namespace DO { namespace Sara {
       F.row(1) = vec_F.segment(3, 3).transpose();
       F.row(2) = vec_F.segment(6, 3).transpose();
 
-      SARA_CHECK(vec_F);
-      SARA_CHECK(F);
+      //SARA_CHECK(vec_F);
+      //SARA_CHECK(F);
     }
 
     // 2. Enforce the rank-2 constraint of the fundamental matrix.
@@ -38,6 +38,7 @@ namespace DO { namespace Sara {
       Vector3d D = svd.singularValues();
       D(2) = 0;
       F = svd.matrixU() * D.asDiagonal() * svd.matrixV().transpose();
+      F = F.normalized();
     }
   }
 
@@ -56,12 +57,21 @@ namespace DO { namespace Sara {
       M.row(2* i + 1) << zero,  u_i, - u_i * v_i.y();
     }
 
+    SARA_CHECK(M);
+
     const Matrix<double, 2, 4> y_euclidean = y.topRows<2>();
     const Map<const Matrix<double, 8, 1>> b{y_euclidean.data()};
+    SARA_CHECK(y_euclidean);
+    SARA_CHECK(b);
 
     const Matrix<double, 8, 1> h = M.colPivHouseholderQr().solve(b);
 
-    H << h, 1.0;
+    SARA_CHECK(h);
+
+    H.row(0) = h.segment(0, 3).transpose();
+    H.row(1) = h.segment(3, 3).transpose();
+    H.row(2) << h.segment(6, 2).transpose(), 1;
+    SARA_CHECK(H);
   }
 
 } /* namespace Sara */

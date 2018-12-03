@@ -291,52 +291,6 @@ BOOST_AUTO_TEST_CASE(test_apply_transform)
 }
 
 
-template <typename T>
-auto skew_symmetric_matrix(const Matrix<T, 3, 1>& a) -> Matrix<T, 3, 3>
-{
-  auto A = Matrix<T, 3, 3>{};
-  A <<
-     T(0), -a(2),  a(1),
-     a(2),  T(0), -a(0),
-    -a(1),  a(0),  T(0);
-
-  return A;
-}
-
-template <typename T>
-auto rotation_x(T theta) -> Matrix<T, 3, 3>
-{
-  auto R = Matrix<T, 3, 3>{};
-  R <<
-    T(1),             T(0),             T(0),
-    T(0),  std::cos(theta), -std::sin(theta),
-    T(0),  std::sin(theta),  std::cos(theta);
-  return R;
-}
-
-template <typename T>
-auto rotation_y(T phi) -> Matrix<T, 3, 3>
-{
-  auto R = Matrix<T, 3, 3>{};
-  R <<
-    std::cos(phi), T(0), -std::sin(phi),
-            T(0),  T(1),           T(0),
-    std::sin(phi), T(0), std::cos(phi);
-  return R;
-}
-
-template <typename T>
-auto rotation_z(T kappa) -> Matrix<T, 3, 3>
-{
-  auto R = Matrix<T, 3, 3>{};
-  R <<
-    std::cos(kappa), -std::sin(kappa), T(0),
-    std::sin(kappa),  std::cos(kappa), T(0),
-               T(0),             T(0), T(1);
-  return R;
-}
-
-
 BOOST_AUTO_TEST_CASE(test_skew_symmetric_matrix)
 {
   Vector3f t{1, 2, 3};

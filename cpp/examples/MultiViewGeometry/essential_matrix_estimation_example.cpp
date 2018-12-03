@@ -160,15 +160,32 @@ void estimate_fundamental_matrix(const Image<Rgb8>& image1,
                                  const Set<OERegion, RealDescriptor>& keys2,
                                  const vector<Match>& matches)
 {
-  // Convert.
-  auto to_tensor = [](const vector<Match>& matches) -> Tensor_<int, 2> {
-    auto match_tensor = Tensor_<int, 2>{int(matches.size()), 2};
-    for (auto i = 0u; i < matches.size(); ++i)
-      match_tensor[i].flat_array() << matches[i].x_index(),
-          matches[i].y_index();
-    return match_tensor;
-  };
+  // ==========================================================================
+  // Setup the visualization.
+  const auto scale = 1.f;
+  const auto w = int((image1.width() + image2.width()) * scale);
+  const auto h = max(image1.height(), image2.height()) * scale;
 
+  create_window(w, h);
+  set_antialiasing();
+
+  PairWiseDrawer drawer(image1, image2);
+  drawer.set_viz_params(scale, scale, PairWiseDrawer::CatH);
+
+
+  // ==========================================================================
+  // Generate random samples for RANSAC.
+  constexpr auto N = 1000;
+  constexpr auto L = 8;
+  const auto S = random_samples(N, L, int(matches.size()));
+  //auto S = Tensor_<int, 2>{{1, L}};
+  //S[0] = range(8);
+
+
+
+
+  // ==========================================================================
+  // Normalize the points.
   const auto p1 = extract_centers(keys1.features);
   const auto p2 = extract_centers(keys2.features);
 
@@ -178,113 +195,132 @@ void estimate_fundamental_matrix(const Image<Rgb8>& image1,
   auto T1 = compute_normalizer(P1);
   auto T2 = compute_normalizer(P2);
 
-  // Normalize the points.
   const auto P1n = apply_transform(T1, P1);
   const auto P2n = apply_transform(T2, P2);
 
-  constexpr auto N = 1000;
-  constexpr auto L = 8;
 
+
+
+  // ==========================================================================
+  // Prepare the data for RANSAC.
+  auto to_tensor = [](const vector<Match>& matches) -> Tensor_<int, 2> {
+    auto match_tensor = Tensor_<int, 2>{int(matches.size()), 2};
+    for (auto i = 0u; i < matches.size(); ++i)
+      match_tensor[i].flat_array() << matches[i].x_index(),
+          matches[i].y_index();
+    return match_tensor;
+  };
   const auto M = to_tensor(matches);
-
-  //const auto S = random_samples(N, L, M.size(0));
-  auto S = Tensor_<int, 2>{{1, L}};
-  S[0] = range(8);
-
   const auto I = to_point_indices(S, M);
   const auto p = to_coordinates(I, p1, p2).transpose({0, 2, 1, 3});
   const auto P = to_coordinates(I, P1, P2).transpose({0, 2, 1, 3});
   const auto Pn = to_coordinates(I, P1n, P2n).transpose({0, 2, 1, 3});
 
-  const Matrix<float, 2, 8> x = p[0][0].colmajor_view().matrix();
-  const Matrix<float, 2, 8> y = p[0][1].colmajor_view().matrix();
 
-  const Matrix<double, 3, 8> X = P[0][0].colmajor_view().matrix().cast<double>();
-  const Matrix<double, 3, 8> Y = P[0][1].colmajor_view().matrix().cast<double>();
+  for (auto n = 0; n < N; ++n)
+  {
+    // Extract the point
+    const Matrix<float, 2, 8> x = p[n][0].colmajor_view().matrix();
+    const Matrix<float, 2, 8> y = p[n][1].colmajor_view().matrix();
 
-  const Matrix<double, 3, 8> Xn = Pn[0][0].colmajor_view().matrix().cast<double>();
-  const Matrix<double, 3, 8> Yn = Pn[0][1].colmajor_view().matrix().cast<double>();
+    const Matrix<double, 3, 8> X =
+        P[n][0].colmajor_view().matrix().cast<double>();
+    const Matrix<double, 3, 8> Y =
+        P[n][1].colmajor_view().matrix().cast<double>();
 
-  std::cout << Xn << std::endl << std::endl;
-  std::cout << Yn << std::endl;
-
-
-  auto F = FundamentalMatrix<>{};
-  eight_point_fundamental_matrix(Xn, Yn, F);
-
-
-  std::cout << "Check normalized F..." << std::endl;
-  std::cout << "F = " << std::endl;
-  std::cout << F.matrix() << std::endl;
-  std::cout << "Algebraic errors:" << std::endl;
-  for (int i = 0; i < 8; ++i)
-    std::cout << Xn.col(i).transpose() * F.matrix() * Yn.col(i) << std::endl;
-
-  // Unnormalize.
-  F.matrix() = T1.cast<double>().transpose() * F.matrix() * T2.cast<double>();
-
-  std::cout << "Check unnormalized F..." << std::endl;
-  std::cout << "F = " << std::endl;
-  std::cout << F.matrix() << std::endl;
-  std::cout << "Algebraic errors:" << std::endl;
-  for (int i = 0; i < 8; ++i)
-    std::cout << X.col(i).transpose() * F.matrix() * Y.col(i) << std::endl;
+    const Matrix<double, 3, 8> Xn =
+        Pn[n][0].colmajor_view().matrix().cast<double>();
+    const Matrix<double, 3, 8> Yn =
+        Pn[n][1].colmajor_view().matrix().cast<double>();
+    //std::cout << Xn << std::endl << std::endl;
+    //std::cout << Yn << std::endl;
 
 
+    // 8-point algorithm
+    auto F = FundamentalMatrix<>{};
+    eight_point_fundamental_matrix(Xn, Yn, F);
 
-  //// Projected X to the right.
-  //Matrix<double, 3, 8> proj_X = F.matrix().transpose() * X;
-  //proj_X.array().rowwise() /= proj_X.row(2).array();
-  //std::cout << "proj_X = " << std::endl;
-  //std::cout << proj_X << std::endl;
+    //std::cout << "Check normalized F..." << std::endl;
+    //std::cout << "F = " << std::endl;
+    //std::cout << F.matrix() << std::endl;
+    //std::cout << "Algebraic errors:" << std::endl;
+    //for (int i = 0; i < 8; ++i)
+    //  std::cout << Xn.col(i).transpose() * F.matrix() * Yn.col(i) << std::endl;
 
 
+    // Unnormalize the fundamental matrix.
+    F.matrix() = T1.cast<double>().transpose() * F.matrix() * T2.cast<double>();
 
-  //print_stage("Visualizing matches...");
-  //auto scale = 1.f;
-  //auto w = int((image1.width() + image2.width()) * scale);
-  //auto h = max(image1.height(), image2.height()) * scale;
+    std::cout << "Check unnormalized F..." << std::endl;
+    std::cout << "F = " << std::endl;
+    std::cout << F.matrix() << std::endl;
+    std::cout << "Algebraic errors:" << std::endl;
+    for (int i = 0; i < 8; ++i)
+      std::cout << X.col(i).transpose() * F.matrix() * Y.col(i) << std::endl;
 
-  //create_window(w, h);
-  //set_antialiasing();
 
-  //PairWiseDrawer drawer(image1, image2);
-  //drawer.set_viz_params(1.f, 1.f, PairWiseDrawer::CatH);
-  //drawer.display_images();
+    // Projected X to the right.
+    Matrix<double, 3, 8> proj_X = F.matrix().transpose() * X;
+    proj_X.array().rowwise() /= proj_X.row(2).array();
 
-  //for (size_t i = 0; i < 8; ++i)
-  //{
-  //  drawer.draw_match(matches[i], Red8, true);
+    Matrix<double, 3, 8> proj_Y = F.matrix() * Y;
+    proj_Y.array().rowwise() /= proj_Y.row(2).array();
 
-  //  drawer.draw_point(0, x.col(i), Magenta8, 5);
-  //  drawer.draw_point(1, y.col(i), Magenta8, 5);
 
-  //  //drawer.draw_point(0, X.col(i).cast<float>().head(2), Magenta8, 5);
-  //  //drawer.draw_point(1, Y.col(i).cast<float>().head(2), Magenta8, 5);
+    // Display the result.
+    drawer.display_images();
 
-  //  //drawer.draw_point(0, (T1.inverse() * Xn.col(i).cast<float>()).head(2), Magenta8, 5);
-  //  //drawer.draw_point(1, (T2.inverse() * Yn.col(i).cast<float>()).head(2), Magenta8, 5);
+    for (size_t i = 0; i < 8; ++i)
+    {
+      drawer.draw_match(matches[S(n, i)], Red8, true);
 
-  //  drawer.draw_line_from_eqn(1, proj_X.col(i).cast<float>(), Magenta8, 5);
-  //  //cout << matches[i] << endl;
-  //}
+      drawer.draw_point(0, x.col(i), Magenta8, 5);
+      drawer.draw_point(1, y.col(i), Magenta8, 5);
 
-  //get_key();
+      drawer.draw_point(0, X.col(i).cast<float>().head(2), Magenta8, 5);
+      drawer.draw_point(1, Y.col(i).cast<float>().head(2), Magenta8, 5);
+
+      drawer.draw_line_from_eqn(0, proj_Y.col(i).cast<float>(), Magenta8, 1);
+      drawer.draw_line_from_eqn(1, proj_X.col(i).cast<float>(), Magenta8, 1);
+
+      // cout << matches[i] << endl;
+    }
+
+    get_key();
+  }
 }
 
-void estimate_homography(const Set<OERegion, RealDescriptor>& keys1,
+void estimate_homography(const Image<Rgb8>& image1, const Image<Rgb8>& image2,
+                         const Set<OERegion, RealDescriptor>& keys1,
                          const Set<OERegion, RealDescriptor>& keys2,
                          const vector<Match>& matches)
 {
-  // Convert.
-  auto to_tensor = [](const vector<Match>& matches) -> Tensor_<int, 2> {
-    auto match_tensor = Tensor_<int, 2>{int(matches.size()), 2};
-    for (auto i = 0u; i < matches.size(); ++i)
-      match_tensor[i].flat_array() << matches[i].x_index(),
-          matches[i].y_index();
-    return match_tensor;
-  };
+  // ==========================================================================
+  // Setup the visualization.
+  const auto scale = 1.f;
+  const auto w = int((image1.width() + image2.width()) * scale);
+  const auto h = max(image1.height(), image2.height()) * scale;
 
+  create_window(w, h);
+  set_antialiasing();
+
+  PairWiseDrawer drawer(image1, image2);
+  drawer.set_viz_params(scale, scale, PairWiseDrawer::CatH);
+
+
+  // ==========================================================================
+  // Generate random samples for RANSAC.
+  constexpr auto N = 1000;
+  constexpr auto L = 4;
+  const auto S = random_samples(N, L, int(matches.size()));
+  //auto S = Tensor_<int, 2>{{1, L}};
+  //S[0] = range(8);
+
+
+
+
+  // ==========================================================================
+  // Normalize the points.
   const auto p1 = extract_centers(keys1.features);
   const auto p2 = extract_centers(keys2.features);
 
@@ -297,13 +333,87 @@ void estimate_homography(const Set<OERegion, RealDescriptor>& keys1,
   const auto P1n = apply_transform(T1, P1);
   const auto P2n = apply_transform(T2, P2);
 
-  constexpr auto N = 1000;
-  constexpr auto L = 4;
 
+
+
+  // ==========================================================================
+  // Prepare the data for RANSAC.
+  auto to_tensor = [](const vector<Match>& matches) -> Tensor_<int, 2> {
+    auto match_tensor = Tensor_<int, 2>{int(matches.size()), 2};
+    for (auto i = 0u; i < matches.size(); ++i)
+      match_tensor[i].flat_array() << matches[i].x_index(),
+          matches[i].y_index();
+    return match_tensor;
+  };
   const auto M = to_tensor(matches);
-  const auto S = random_samples(N, L, M.size(0));
   const auto I = to_point_indices(S, M);
-  const auto P = to_coordinates(I, p1, p2);
+  const auto p = to_coordinates(I, p1, p2).transpose({0, 2, 1, 3});
+  const auto P = to_coordinates(I, P1, P2).transpose({0, 2, 1, 3});
+  const auto Pn = to_coordinates(I, P1n, P2n).transpose({0, 2, 1, 3});
+
+
+  for (auto n = 0; n < N; ++n)
+  {
+    // Extract the point
+    const Matrix<float, 2, 4> x = p[n][0].colmajor_view().matrix();
+    const Matrix<float, 2, 4> y = p[n][1].colmajor_view().matrix();
+
+    const Matrix<double, 3, 4> X =
+        P[n][0].colmajor_view().matrix().cast<double>();
+    const Matrix<double, 3, 4> Y =
+        P[n][1].colmajor_view().matrix().cast<double>();
+
+    const Matrix<double, 3, 4> Xn =
+        Pn[n][0].colmajor_view().matrix().cast<double>();
+    const Matrix<double, 3, 4> Yn =
+        Pn[n][1].colmajor_view().matrix().cast<double>();
+
+
+    // 4-point algorithm
+    auto H = Matrix3d{};
+    four_point_homography(Xn, Yn, H);
+
+    // Unnormalize the fundamental matrix.
+    H = T2.cast<double>().inverse() * H * T1.cast<double>();
+
+    std::cout << "Check H..." << std::endl;
+    std::cout << H << std::endl;
+
+    MatrixXd HX = H * X;
+    HX.array().rowwise() /= HX.row(2).array();
+
+    std::cout << "HX" << std::endl;
+    std::cout << HX << std::endl << std::endl;
+
+    std::cout << "Y" << std::endl;
+    std::cout << Y << std::endl << std::endl;
+
+    std::cout << "Algebraic errors:" << std::endl;
+    for (int i = 0; i < 4; ++i)
+      std::cout << (HX.col(i) - Y.col(i)).norm() << std::endl;
+    std::cout << std::endl;
+
+
+    // Display the result.
+    drawer.display_images();
+
+    for (size_t i = 0; i < 4; ++i)
+    {
+      drawer.draw_match(matches[S(n, i)], Red8, true);
+
+      drawer.draw_point(0, x.col(i), Magenta8, 5);
+      drawer.draw_point(1, y.col(i), Magenta8, 5);
+
+      drawer.draw_point(0, X.col(i).cast<float>().head(2), Magenta8, 5);
+      drawer.draw_point(1, Y.col(i).cast<float>().head(2), Magenta8, 5);
+
+      drawer.draw_point(1, HX.col(i).cast<float>().head(2), Blue8, 5);
+
+      // cout << matches[i] << endl;
+    }
+
+    get_key();
+  }
 }
 
 GRAPHICS_MAIN()
@@ -321,23 +431,7 @@ GRAPHICS_MAIN()
   const auto matches = compute_matches(keys1, keys2);
 
   estimate_fundamental_matrix(image1, image2, keys1, keys2, matches);
-
-  //print_stage("Visualizing matches...");
-  //auto scale = 0.25f;
-  //auto w = int((image1.width() + image2.width()) * scale);
-  //auto h = max(image1.height(), image2.height()) * scale;
-  //auto off = Point2f{float(image1.width()), 0.f};
-
-  //create_window(w, h);
-  //set_antialiasing();
-
-  //for (size_t i = 0; i < matches.size(); ++i)
-  //{
-  //  draw_image_pair(image1, image2, off, scale);
-  //  draw_match(matches[i], Red8, off, scale);
-  //  cout << matches[i] << endl;
-  //  get_key();
-  //}
+  //estimate_homography(image1, image2, keys1, keys2, matches);
 
   return 0;
 }
