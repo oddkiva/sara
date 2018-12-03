@@ -33,8 +33,13 @@ BOOST_AUTO_TEST_CASE(test_solve)
   auto F = FundamentalMatrix<>{};
   eight_point_fundamental_matrix(Xn, Yn, F);
 
+  std::cout << "Algebraic errors" << std::endl;
   for (int i = 0; i < 8; ++i)
+  {
     std::cout << Xn.col(i).transpose() * F.matrix() * Yn.col(i) << std::endl;
+    const double error = Xn.col(i).transpose() * F.matrix() * Yn.col(i);
+    BOOST_CHECK_LE(error, 1e-3);
+  }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

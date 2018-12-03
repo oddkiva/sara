@@ -14,10 +14,14 @@ namespace DO { namespace Sara {
     {
       Matrix<double, 8, 9> A;
       for (int i = 0; i < 8; ++i)
+      {
         A.row(i) <<                          //
-            x(i, 0) * y.col(i).transpose(),  //
-            x(i, 1) * y.col(i).transpose(),  //
-                 1  * y.col(i).transpose();
+            x(0, i) * y.col(i).transpose(),  //
+            x(1, i) * y.col(i).transpose(),  //
+            x(2, i) * y.col(i).transpose();
+
+        //std::cout << x.col(i).transpose() << " " << y.col(i).transpose() << std::endl;
+      }
 
       auto svd = Eigen::JacobiSVD<Matrix<double, 8, 9>>{A, Eigen::ComputeFullV};
       const Matrix<double, 8, 1> S = svd.singularValues();
@@ -26,9 +30,6 @@ namespace DO { namespace Sara {
       F.row(0) = vec_F.segment(0, 3).transpose();
       F.row(1) = vec_F.segment(3, 3).transpose();
       F.row(2) = vec_F.segment(6, 3).transpose();
-
-      SARA_CHECK(vec_F);
-      SARA_CHECK(F);
     }
 
     // 2. Enforce the rank-2 constraint of the fundamental matrix.
