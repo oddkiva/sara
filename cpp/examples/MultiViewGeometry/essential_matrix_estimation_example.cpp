@@ -162,7 +162,7 @@ void estimate_fundamental_matrix(const Image<Rgb8>& image1,
 {
   // ==========================================================================
   // Setup the visualization.
-  const auto scale = 1.f;
+  const auto scale = 0.25f;
   const auto w = int((image1.width() + image2.width()) * scale);
   const auto h = max(image1.height(), image2.height()) * scale;
 
@@ -250,6 +250,7 @@ void estimate_fundamental_matrix(const Image<Rgb8>& image1,
 
     // Unnormalize the fundamental matrix.
     F.matrix() = T1.cast<double>().transpose() * F.matrix() * T2.cast<double>();
+    F.matrix() = F.matrix().normalized();
 
     std::cout << "Check unnormalized F..." << std::endl;
     std::cout << "F = " << std::endl;
@@ -270,6 +271,34 @@ void estimate_fundamental_matrix(const Image<Rgb8>& image1,
     // Display the result.
     drawer.display_images();
 
+
+    for (size_t i = 0; i < matches.size(); ++i)
+    {
+      Vector3d X1;
+      X1.head(2) = matches[i].x_pos().cast<double>();
+      X1(2) = 1;
+
+      Vector3d X2;
+      X2.head(2) = matches[i].y_pos().cast<double>();
+      X2(2) = 1;
+
+
+      Vector3d proj_X1 = F.matrix().transpose() * X1;
+      proj_X1 /= proj_X1(2);
+
+      Vector3d proj_X2 = F.matrix() * X2;
+      proj_X2 /= proj_X2(2);
+
+
+      if (std::abs(X1.transpose() * F.matrix() * X2) < 1e-3)
+      {
+        drawer.draw_match(matches[i], Blue8, false);
+        //drawer.draw_line_from_eqn(0, proj_X2.cast<float>(), Cyan8, 1);
+        //drawer.draw_line_from_eqn(1, proj_X1.cast<float>(), Cyan8, 1);
+      }
+    };
+
+
     for (size_t i = 0; i < 8; ++i)
     {
       drawer.draw_match(matches[S(n, i)], Red8, true);
@@ -282,8 +311,6 @@ void estimate_fundamental_matrix(const Image<Rgb8>& image1,
 
       drawer.draw_line_from_eqn(0, proj_Y.col(i).cast<float>(), Magenta8, 1);
       drawer.draw_line_from_eqn(1, proj_X.col(i).cast<float>(), Magenta8, 1);
-
-      // cout << matches[i] << endl;
     }
 
     get_key();
@@ -297,7 +324,7 @@ void estimate_homography(const Image<Rgb8>& image1, const Image<Rgb8>& image2,
 {
   // ==========================================================================
   // Setup the visualization.
-  const auto scale = 1.f;
+  const auto scale = .25f;
   const auto w = int((image1.width() + image2.width()) * scale);
   const auto h = max(image1.height(), image2.height()) * scale;
 
@@ -397,6 +424,30 @@ void estimate_homography(const Image<Rgb8>& image1, const Image<Rgb8>& image2,
     // Display the result.
     drawer.display_images();
 
+    for (size_t i = 0; i < matches.size(); ++i)
+    {
+      Vector3d X1;
+      X1.head(2) = matches[i].x_pos().cast<double>();
+      X1(2) = 1;
+
+      Vector3d X2;
+      X2.head(2) = matches[i].y_pos().cast<double>();
+      X2(2) = 1;
+
+      Vector3d proj_X1 = H * X1;
+      proj_X1 /= proj_X1(2);
+
+      Vector3d proj_X2 = H.inverse() * X2;
+      proj_X2 /= proj_X2(2);
+
+
+      if ((X1 - proj_X2).norm() + (proj_X1 - X2).norm() < 2)
+      {
+        drawer.draw_match(matches[i], Blue8, false);
+        drawer.draw_point(0, proj_X2.head(2).cast<float>(), Cyan8, 5);
+        drawer.draw_point(1, proj_X1.head(2).cast<float>(), Cyan8, 5);
+      }
+    };
     for (size_t i = 0; i < 4; ++i)
     {
       drawer.draw_match(matches[S(n, i)], Red8, true);

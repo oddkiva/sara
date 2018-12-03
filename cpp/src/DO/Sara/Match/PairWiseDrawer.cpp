@@ -32,8 +32,8 @@ namespace DO { namespace Sara {
                                 const Color3ub& c, int penWidth) const
   {
     assert(i == 0 || i == 1);
-    Vector2f a( (pa+offF(i))*scale(i) );
-    Vector2f b( (pb+offF(i))*scale(i) );
+    Vector2f a((pa + offF(i)) * scale(i));
+    Vector2f b((pb + offF(i)) * scale(i));
     Sara::draw_line(a, b, c, penWidth);
   }
 
