@@ -1,5 +1,3 @@
-include_directories(${DO_Sara_ThirdParty_DIR}/gtest/include)
-
 # Use boost unit test framework.
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
@@ -16,6 +14,7 @@ if (WIN32 AND SARA_USE_VLD)
   link_directories(${VLD_LINK_DIRECTORIES})
 endif ()
 
+add_subdirectory(Clustering)
 add_subdirectory(Core)
 add_subdirectory(Graphics)
 add_subdirectory(ImageIO)

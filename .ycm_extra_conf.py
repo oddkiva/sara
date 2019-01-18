@@ -57,6 +57,8 @@ flags = [
 "-I", "/usr/include/qt5/QtWidgets",
 "-I", "/usr/include/qt5/QtXml",
 "-I", "/usr/include/qt5/QtSql",
+# Boost headers.
+"-I", "/opt/boost-1.66.0/include",
 # CUDA header directories.
 "-I", "/usr/local/cuda/include",
 # Current header directories.
