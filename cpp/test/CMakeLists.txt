@@ -16,7 +16,7 @@ if (WIN32 AND SARA_USE_VLD)
   link_directories(${VLD_LINK_DIRECTORIES})
 endif ()
 
-add_subdirectory(Clustering)
+#add_subdirectory(Clustering)
 add_subdirectory(Core)
 add_subdirectory(Graphics)
 add_subdirectory(ImageIO)
