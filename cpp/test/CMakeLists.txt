@@ -1,7 +1,9 @@
 # Use boost unit test framework.
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
-find_package(Boost COMPONENTS unit_test_framework REQUIRED)
+find_package(Boost
+  COMPONENTS filesystem serialization system unit_test_framework
+  REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 
 
