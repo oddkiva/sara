@@ -8,7 +8,7 @@ before_script:
       cmake
       doxygen
       git
-      libboost-test-dev
+      libboost-all-dev
       libhdf5-dev
       libjpeg8-dev
       libpng12-dev

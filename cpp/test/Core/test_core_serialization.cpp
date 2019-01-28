@@ -33,16 +33,19 @@ BOOST_AUTO_TEST_CASE(test_tensor_serialization)
 
   const auto file =
       (boost::filesystem::temp_directory_path() / "tensor").string();
+
+#ifdef DEBUG
   static_assert(std::is_same<decltype(file), const std::string>::value, "");
   std::cout << "temporary file = " << file << std::endl;
+#endif
+
   std::ofstream ofs{file};
   {
     boost::archive::binary_oarchive oa{ofs};
-    std::cout << "OK" << std::endl;
     oa << t_write;
   }
 
-  auto t_read = Tensor_<float, 3>{};
+  auto t_read = Tensor_<float, 3>{{2, 5, 1}};
   std::ifstream ifs{file};
   {
     boost::archive::binary_iarchive ia{ifs};
