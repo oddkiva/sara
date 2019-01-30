@@ -14,3 +14,11 @@ foreach (file ${test_core_SOURCE_FILES})
   get_filename_component(filename "${file}" NAME_WE)
   sara_add_test(${filename} ${file} "${DO_Sara_LIBRARIES}" ${TestGroupName})
 endforeach ()
+
+
+if (UNIX)
+  target_link_libraries(test_core_ipc_shm rt)
+  target_link_libraries(test_core_ipc_cond1 rt)
+  target_link_libraries(test_core_ipc_mutex1 rt)
+  target_link_libraries(test_core_ipc_mutex2 rt)
+endif ()
