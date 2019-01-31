@@ -26,6 +26,7 @@ struct Message {
   bip::interprocess_mutex mutex;
   bip::interprocess_condition cond_image_batch_refilled;
   bip::interprocess_condition cond_image_batch_processed;
+  bip::interprocess_condition cond_terminate_processing;
 
   int image_batch_filling_iter = -1;
   int image_batch_processing_iter = -1;
@@ -124,6 +125,8 @@ int main(int argc, char** argv)
       std::cout << std::endl << std::endl;
     };
 
+    bip::scoped_lock<bip::interprocess_mutex> lock(message->mutex);
+    message->cond_terminate_processing.wait(lock);
 
 
     segment.destroy<ipc_vector<int>>("image_shape");
@@ -150,9 +153,6 @@ int main(int argc, char** argv)
     while (true)
     {
       bip::scoped_lock<bip::interprocess_mutex> lock(message->mutex);
-      if (message->image_batch_processing_iter == message->num_iter)
-        break;
-
       if (message->image_batch_filling_iter <= message->image_batch_processing_iter)
       {
         std::cout << "[Process 2] Waiting for Process 1 to refill image data" << std::endl;
@@ -167,8 +167,13 @@ int main(int argc, char** argv)
       std::cout << "[Process 2] Notifying Process 1 that processing is finished" << std::endl;
       message->image_batch_processing_iter = message->image_batch_filling_iter;
       message->cond_image_batch_processed.notify_one();
-    }
 
+      if (message->image_batch_processing_iter == message->num_iter - 1)
+      {
+        message->cond_terminate_processing.notify_one();
+        break;
+      }
+    }
 
     std::cout << "Terminating child process" << std::endl;
   }
