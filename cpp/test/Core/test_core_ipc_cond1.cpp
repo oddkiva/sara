@@ -72,7 +72,7 @@ int main(int argc, char** argv)
     bip::allocator<float, bip::managed_shared_memory::segment_manager>
         float_allocator{segment.get_segment_manager()};
 
-    const auto num_iter = 10;
+    const auto num_iter = 100000;
 
     // Synchronisation between processes.
     auto message = segment.construct<Message>("message")();
@@ -103,6 +103,7 @@ int main(int argc, char** argv)
       std::cout << "[Process 1] Iteration " << i << std::endl;
       bip::scoped_lock<bip::interprocess_mutex> lock(message->mutex);
 
+
       // Fill with new image data.
       std::cout << "[Process 1] Refilling image data" << std::endl;
       std::fill(image_data->begin(), image_data->end(), i);
@@ -111,22 +112,28 @@ int main(int argc, char** argv)
       message->image_batch_filling_iter = i;
       message->cond_image_batch_refilled.notify_one();
 
+
       // Wait until the image is processed.
       if (message->image_batch_processing_iter != i)
       {
-        std::cout << "[Process 1] Waiting for Process 2 to complete" << std::endl;
+        std::cout << "[Process 1] Waiting for Process 2 to complete"
+          << std::endl;
         message->cond_image_batch_processed.wait(lock);
       }
 
       // Print the calculated descriptors.
-      std::cout << "[Process 1] Process 2 calculated descriptors" << std::endl;
+      std::cout << "[Process 1] Process 2 calculated descriptors"
+        << std::endl;
       for (auto i = 0; i < 10; ++i)
         std::cout << (*image_descriptors)[i] << " ";
       std::cout << std::endl << std::endl;
-    };
 
-    bip::scoped_lock<bip::interprocess_mutex> lock(message->mutex);
-    message->cond_terminate_processing.wait(lock);
+      if (message->image_batch_processing_iter == num_iter - 1)
+      {
+        std::cout << "[Process 1] Notifying Process 2 to terminate" << std::endl;
+        message->cond_terminate_processing.notify_one();
+      }
+    };
 
 
     segment.destroy<ipc_vector<int>>("image_shape");
@@ -149,33 +156,47 @@ int main(int argc, char** argv)
     auto image_view = DO::Sara::MultiArrayView<float, 2>{
         image_data->data(), {(*image_shape)[0], (*image_shape)[1]}};
 
-
     while (true)
     {
-      bip::scoped_lock<bip::interprocess_mutex> lock(message->mutex);
-      if (message->image_batch_filling_iter <= message->image_batch_processing_iter)
       {
-        std::cout << "[Process 2] Waiting for Process 1 to refill image data" << std::endl;
-        message->cond_image_batch_refilled.wait(lock);
+        bip::scoped_lock<bip::interprocess_mutex> lock(message->mutex);
+        if (message->image_batch_filling_iter <=
+            message->image_batch_processing_iter)
+        {
+          std::cout << "[Process 2] Waiting for Process 1 to refill image data"
+                    << std::endl;
+          message->cond_image_batch_refilled.wait(lock);
+        }
+
+        const auto value = (*image_data)[0];
+
+        std::cout << "[Process 2] Calculating descriptors" << std::endl;
+        std::fill(image_descriptors->begin(), image_descriptors->end(), value);
+
+        std::cout << "[Process 2] Notifying Process 1 that image processing is "
+                     "finished"
+                  << std::endl;
+        message->image_batch_processing_iter =
+            message->image_batch_filling_iter;
+        message->cond_image_batch_processed.notify_one();
       }
 
-      const auto value = (*image_data)[0];
-
-      std::cout << "[Process 2] Calculating descriptors" << std::endl;
-      std::fill(image_descriptors->begin(), image_descriptors->end(), value);
-
-      std::cout << "[Process 2] Notifying Process 1 that processing is finished" << std::endl;
-      message->image_batch_processing_iter = message->image_batch_filling_iter;
-      message->cond_image_batch_processed.notify_one();
-
-      if (message->image_batch_processing_iter == message->num_iter - 1)
       {
-        message->cond_terminate_processing.notify_one();
-        break;
+        bip::scoped_lock<bip::interprocess_mutex> lock(message->mutex);
+        if (message->image_batch_processing_iter == message->num_iter - 1)
+        {
+          std::cout << "[Process 2] Waiting for Process 1 to signal termination"
+                    << std::endl;
+          message->cond_terminate_processing.wait(lock);
+
+          std::cout << "[Process 2] Received signal from Process 1 to "
+                       "terminate process"
+                    << std::endl;
+          break;
+        }
       }
     }
 
-    std::cout << "Terminating child process" << std::endl;
   }
 
   return 0;
