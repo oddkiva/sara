@@ -46,6 +46,10 @@ target_link_libraries(pysara
   DO_Sara_ImageIO)
 if (SARA_BUILD_VIDEOIO)
   target_link_libraries(pysara DO_Sara_VideoIO)
+
+  if (UNIX)
+    target_link_libraries(pysara rt)
+  endif ()
 endif ()
 
 

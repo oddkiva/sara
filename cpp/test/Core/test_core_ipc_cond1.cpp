@@ -22,7 +22,8 @@ template <typename T>
 using ipc_vector = bip::vector<T, ipc_allocator<T>>;
 
 
-struct Message {
+struct Message
+{
   bip::interprocess_mutex mutex;
   bip::interprocess_condition cond_image_batch_refilled;
   bip::interprocess_condition cond_image_batch_processed;
@@ -31,6 +32,7 @@ struct Message {
   int image_batch_filling_iter = -1;
   int image_batch_processing_iter = -1;
   int num_iter = -1;
+  bool terminate_processing = false;
 
   //ipc_vector<int> *image_shape;
   //ipc_vector<float> *image_data;
@@ -96,19 +98,18 @@ int main(int argc, char** argv)
     });
     t.detach();
 
-
     // Loop where the two processes communicate.
     for (int i = 0; i < num_iter; ++i)
     {
-      std::cout << "[Process 1] Iteration " << i << std::endl;
+      std::cout << "[Process 1] Iteration " << i << "\n";  // std::endl;
       bip::scoped_lock<bip::interprocess_mutex> lock(message->mutex);
 
 
       // Fill with new image data.
-      std::cout << "[Process 1] Refilling image data" << std::endl;
+      //std::cout << "[Process 1] Refilling image data" << std::endl;
       std::fill(image_data->begin(), image_data->end(), i);
 
-      std::cout << "[Process 1] Refilled image data" << std::endl;
+      //std::cout << "[Process 1] Refilled image data" << std::endl;
       message->image_batch_filling_iter = i;
       message->cond_image_batch_refilled.notify_one();
 
@@ -116,14 +117,13 @@ int main(int argc, char** argv)
       // Wait until the image is processed.
       if (message->image_batch_processing_iter != i)
       {
-        std::cout << "[Process 1] Waiting for Process 2 to complete"
-          << std::endl;
+        //std::cout << "[Process 1] Waiting for Process 2 to complete"
+        //  << std::endl;
         message->cond_image_batch_processed.wait(lock);
       }
 
       // Print the calculated descriptors.
-      std::cout << "[Process 1] Process 2 calculated descriptors"
-        << std::endl;
+      std::cout << "[Process 1] Process 2 calculated descriptors" << std::endl;
       for (auto i = 0; i < 10; ++i)
         std::cout << (*image_descriptors)[i] << " ";
       std::cout << std::endl << std::endl;
@@ -163,8 +163,8 @@ int main(int argc, char** argv)
         if (message->image_batch_filling_iter <=
             message->image_batch_processing_iter)
         {
-          std::cout << "[Process 2] Waiting for Process 1 to refill image data"
-                    << std::endl;
+          //std::cout << "[Process 2] Waiting for Process 1 to refill image data"
+          //          << std::endl;
           message->cond_image_batch_refilled.wait(lock);
         }
 
@@ -179,6 +179,8 @@ int main(int argc, char** argv)
         message->image_batch_processing_iter =
             message->image_batch_filling_iter;
         message->cond_image_batch_processed.notify_one();
+
+        lock.unlock();
       }
 
       {
@@ -196,7 +198,6 @@ int main(int argc, char** argv)
         }
       }
     }
-
   }
 
   return 0;

@@ -16,8 +16,7 @@ bp::object imread(const std::string& filepath)
 {
   using namespace sara;
 
-  auto image = imread(filepath);
-
+  auto image = imread<double>(filepath);
   auto data = image.data();
 
 #if BOOST_VERSION <= 106300
