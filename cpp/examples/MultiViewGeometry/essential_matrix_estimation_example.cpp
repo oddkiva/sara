@@ -250,7 +250,7 @@ void estimate_fundamental_matrix(const Image<Rgb8>& image1,
 
     // Unnormalize the fundamental matrix.
     F.matrix() = T1.cast<double>().transpose() * F.matrix() * T2.cast<double>();
-    F.matrix() = F.matrix().normalized();
+    //F.matrix() = F.matrix().normalized();
 
     std::cout << "Check unnormalized F..." << std::endl;
     std::cout << "F = " << std::endl;
@@ -261,10 +261,10 @@ void estimate_fundamental_matrix(const Image<Rgb8>& image1,
 
 
     // Projected X to the right.
-    Matrix<double, 3, 8> proj_X = F.matrix().transpose() * X;
+    Matrix<double, 3, 8> proj_X = F.matrix() * X;
     proj_X.array().rowwise() /= proj_X.row(2).array();
 
-    Matrix<double, 3, 8> proj_Y = F.matrix() * Y;
+    Matrix<double, 3, 8> proj_Y = F.matrix().transpose() * Y;
     proj_Y.array().rowwise() /= proj_Y.row(2).array();
 
 

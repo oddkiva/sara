@@ -1,4 +1,5 @@
 #include "IPC.hpp"
+#include "Numpy.hpp"
 
 #include <boost/interprocess/containers/vector.hpp>
 #include <boost/interprocess/managed_shared_memory.hpp>
@@ -8,6 +9,9 @@
 #include <boost/interprocess/sync/scoped_lock.hpp>
 
 #include <boost/python.hpp>
+#include <boost/python/numpy.hpp>
+
+#include <iostream>
 
 
 namespace bip = boost::interprocess;
@@ -22,37 +26,28 @@ template <typename T>
 using ipc_vector = bip::vector<T, ipc_allocator<T>>;
 
 
+template <class T>
+bp::list to_py_list(const ipc_vector<T>& v)
+{
+  auto l = bp::list{};
+  for (const auto& c : v)
+    l.append(c);
+  return l;
+}
+
+
+namespace np = bp::numpy;
+
+
 class IpcMedium
 {
 public:
-  IpcMedium() = default;
-
   IpcMedium(const std::string& segment_name)
     : _segment{bip::open_only, segment_name.c_str()}
   {
   }
 
-  int image_batch_fill_iter()
-  {
-    return _image_batch_filling_iter;
-  }
-
-  int image_batch_processing_iter()
-  {
-    return _image_batch_processing_iter;
-  }
-
-  void set_image_batch_processing_iter(int iter)
-  {
-    _image_batch_processing_iter = iter;
-  }
-
   bip::managed_shared_memory _segment;
-
-  bip::interprocess_mutex _mutex;
-  bip::interprocess_condition _cond_image_batch_refilled;
-  bip::interprocess_condition _cond_image_batch_processed;
-  bip::interprocess_condition _cond_terminate_processing;
 
   int  _image_batch_filling_iter = -1;
   int  _image_batch_processing_iter = -1;
@@ -67,57 +62,34 @@ public:
   //  return DO::Sara::MultiArrayView<float, 2>{
   //      image_data->data(), {(*image_shape)[0], (*image_shape)[1]}};
   //}
-};
 
-
-class Lock
-{
-public:
-  Lock(IpcMedium& medium)
-    : _lock(medium._mutex)
+  bp::list image_shape(const std::string& name)
   {
+    auto image_shape = _segment.find<ipc_vector<int>>(name.c_str()).first;
+    return to_py_list(*image_shape);
   }
 
-  void lock() { _lock.lock(); }
-  void unlock() { _lock.unlock(); }
-  void release() { _lock.release(); }
+  //float * image_data(const std::string& name)
+  //{
+  //  auto image_data = _segment.find<ipc_vector<float>>(name.c_str()).first;
+  //  return image_data->data();
+  //}
 
-  bip::scoped_lock<bip::interprocess_mutex> _lock;
+  np::ndarray image_data(const std::string& name)
+  {
+    auto image_data = _segment.find<ipc_vector<float>>(name.c_str()).first;
+    return np::from_data(image_data->data(), np::dtype::get_builtin<float>(),
+                         bp::make_tuple(image_data->size()),
+                         bp::make_tuple(sizeof(float)),
+                         bp::object());
+  }
 };
-
-
-void wait_for_image_batch_refill(IpcMedium& medium, Lock& lock)
-{
-  medium._cond_image_batch_refilled.wait(lock._lock);
-}
-
-void wait_for_termination_signal(IpcMedium& medium, Lock& lock)
-{
-  medium._cond_terminate_processing.wait(lock._lock);
-}
-
-void notify_image_batch_processed(IpcMedium& medium)
-{
-  medium._cond_image_batch_processed.notify_one();
-}
 
 
 void expose_ipc()
 {
-  bp::class_<Lock, boost::noncopyable>("Lock", bp::init<IpcMedium&>())
-      .def("lock", &Lock::lock)
-      .def("unlock", &Lock::unlock)
-      .def("release", &Lock::release);
-
   bp::class_<IpcMedium, boost::noncopyable>("IpcMedium",
                                             bp::init<const std::string&>())
-      .def("image_batch_fill_iter", &IpcMedium::image_batch_fill_iter)
-      .def("image_batch_processing_iter",
-           &IpcMedium::image_batch_processing_iter)
-      .def("set_image_batch_processing_iter",
-           &IpcMedium::set_image_batch_processing_iter);
-
-  bp::def("wait_for_image_batch_refill", &wait_for_image_batch_refill);
-  bp::def("wait_for_termination_signal", &wait_for_termination_signal);
-  bp::def("notify_image_batch_processed", &notify_image_batch_processed);
+      .def("image_shape", &IpcMedium::image_shape)
+      .def("image_data", &IpcMedium::image_data);
 }

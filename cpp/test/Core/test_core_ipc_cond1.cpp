@@ -10,6 +10,8 @@
 #include <iostream>
 #include <thread>
 
+#include <zmq.h>
+
 
 namespace bip = boost::interprocess;
 
@@ -74,7 +76,7 @@ int main(int argc, char** argv)
     bip::allocator<float, bip::managed_shared_memory::segment_manager>
         float_allocator{segment.get_segment_manager()};
 
-    const auto num_iter = 100000;
+    const auto num_iter = 10;
 
     // Synchronisation between processes.
     auto message = segment.construct<Message>("message")();
@@ -91,7 +93,9 @@ int main(int argc, char** argv)
         "image_descriptors")(128, 0.f, float_allocator);
 
     // Start Process 2 by running a command in an asynchronous way.
-    auto command = std::string{argv[0]} + " 1";
+    auto command = std::string{"python "
+                               "/home/david/GitHub/DO-CV/sara-build-Debug/lib/"
+                               "do/sara/test/test_ipc_example.py"};
     std::thread t([&command]() {
       std::cout << "running " << command << std::endl;
       std::system(command.c_str());
@@ -102,36 +106,46 @@ int main(int argc, char** argv)
     for (int i = 0; i < num_iter; ++i)
     {
       std::cout << "[Process 1] Iteration " << i << "\n";  // std::endl;
-      bip::scoped_lock<bip::interprocess_mutex> lock(message->mutex);
-
-
-      // Fill with new image data.
-      //std::cout << "[Process 1] Refilling image data" << std::endl;
-      std::fill(image_data->begin(), image_data->end(), i);
-
-      //std::cout << "[Process 1] Refilled image data" << std::endl;
-      message->image_batch_filling_iter = i;
-      message->cond_image_batch_refilled.notify_one();
-
-
-      // Wait until the image is processed.
-      if (message->image_batch_processing_iter != i)
       {
-        //std::cout << "[Process 1] Waiting for Process 2 to complete"
-        //  << std::endl;
-        message->cond_image_batch_processed.wait(lock);
+        bip::scoped_lock<bip::interprocess_mutex> lock(message->mutex);
+
+        // Fill with new image data.
+        std::cout << "[Process 1] Refilling image data" << std::endl;
+        std::fill(image_data->begin(), image_data->end(), i);
+
+        std::cout << "[Process 1] Refilled image data" << std::endl;
+        message->image_batch_filling_iter = i;
+        message->cond_image_batch_refilled.notify_one();
       }
 
-      // Print the calculated descriptors.
-      std::cout << "[Process 1] Process 2 calculated descriptors" << std::endl;
-      for (auto i = 0; i < 10; ++i)
-        std::cout << (*image_descriptors)[i] << " ";
-      std::cout << std::endl << std::endl;
-
-      if (message->image_batch_processing_iter == num_iter - 1)
       {
-        std::cout << "[Process 1] Notifying Process 2 to terminate" << std::endl;
-        message->cond_terminate_processing.notify_one();
+        bip::scoped_lock<bip::interprocess_mutex> lock(message->mutex);
+
+        // Wait until the image is processed.
+        if (message->image_batch_processing_iter != i)
+        {
+          // std::cout << "[Process 1] Waiting for Process 2 to complete"
+          //  << std::endl;
+          message->cond_image_batch_processed.wait(lock);
+        }
+
+        // Print the calculated descriptors.
+        std::cout << "[Process 1] Process 2 calculated descriptors"
+                  << std::endl;
+        for (auto i = 0; i < 10; ++i)
+          std::cout << (*image_descriptors)[i] << " ";
+        std::cout << std::endl << std::endl;
+      }
+
+      {
+        bip::scoped_lock<bip::interprocess_mutex> lock(message->mutex);
+
+        if (message->image_batch_processing_iter == num_iter - 1)
+        {
+          std::cout << "[Process 1] Notifying Process 2 to terminate"
+                    << std::endl;
+          message->cond_terminate_processing.notify_one();
+        }
       }
     };
 
