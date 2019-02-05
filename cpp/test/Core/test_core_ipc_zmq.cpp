@@ -33,7 +33,6 @@ struct Message
 };
 
 
-
 int main(int argc, char** argv)
 {
   struct SharedMemoryRemover
@@ -86,41 +85,6 @@ int main(int argc, char** argv)
     std::system(command.c_str());
   });
   t.detach();
-
-
-  //// Loop where the two processes communicate.
-  //for (int i = 0; i < num_iter; ++i)
-  //{
-  //  std::cout << "[Process 1] Iteration " << i << "\n";  // std::endl;
-
-  //  // Fill with new image data.
-  //  std::cout << "[Process 1] Refilling image data" << std::endl;
-  //  std::fill(image_data->begin(), image_data->end(), i);
-
-  //  std::cout << "[Process 1] Refilled image data" << std::endl;
-  //  message->image_batch_filling_iter = i;
-
-
-  //  // Wait until the image is processed.
-  //  if (message->image_batch_processing_iter != i)
-  //  {
-  //    // std::cout << "[Process 1] Waiting for Process 2 to complete"
-  //    //  << std::endl;
-  //  }
-
-  //  // Print the calculated descriptors.
-  //  std::cout << "[Process 1] Process 2 calculated descriptors" << std::endl;
-  //  for (auto i = 0; i < 10; ++i)
-  //    std::cout << (*image_descriptors)[i] << " ";
-  //  std::cout << std::endl << std::endl;
-
-
-  //  if (message->image_batch_processing_iter == num_iter - 1)
-  //  {
-  //    std::cout << "[Process 1] Notifying Process 2 to terminate" << std::endl;
-  //  }
-  //}
-
 
   auto context = zmq_ctx_new();
   auto responder = zmq_socket(context, ZMQ_REP);

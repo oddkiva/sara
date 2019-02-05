@@ -13,6 +13,7 @@
 #include <zmq.h>
 
 
+namespace sara = DO::Sara;
 namespace bip = boost::interprocess;
 
 
@@ -35,17 +36,70 @@ struct Message
   int image_batch_processing_iter = -1;
   int num_iter = -1;
   bool terminate_processing = false;
-
-  //ipc_vector<int> *image_shape;
-  //ipc_vector<float> *image_data;
-
-  //auto image_view() const -> DO::Sara::MultiArrayView<float, 2>
-  //{
-  //  return DO::Sara::MultiArrayView<float, 2>{
-  //      image_data->data(), {(*image_shape)[0], (*image_shape)[1]}};
-  //}
 };
 
+
+template <typename T, int N>
+auto construct_tensor(bip::managed_shared_memory& segment,
+                      const std::string& name,
+                      const sara::Matrix<int, N, 1>& shape)
+    -> sara::MultiArrayView<T, N, sara::RowMajor>
+{
+  using dtype = T;
+
+  bip::allocator<int, bip::managed_shared_memory::segment_manager>
+      int_allocator{segment.get_segment_manager()};
+
+  bip::allocator<dtype, bip::managed_shared_memory::segment_manager>
+      dtype_allocator{segment.get_segment_manager()};
+
+  const auto tensor_shape_name = name + "_shape";
+  const auto tensor_data_name = name + "_data";
+
+  // Allocate image data in the memory segment.
+  segment.construct<ipc_vector<int>>(tensor_shape_name.c_str())(
+      shape.data(), shape.data() + shape.size(), int_allocator);
+  const auto tensor_size = std::accumulate(
+      shape.data(), shape.data() + shape.size(), 1, std::multiplies<int>());
+  auto tensor_vec = segment.construct<ipc_vector<T>>(tensor_data_name.c_str())(
+      tensor_size, static_cast<T>(1), dtype_allocator);
+  std::cout << "tensor_vec.size() = " << tensor_vec->size() << std::endl;
+
+  return sara::MultiArrayView<T, N, sara::RowMajor>{tensor_vec->data(), shape};
+}
+
+template <typename T, int N>
+auto find_tensor(bip::managed_shared_memory& segment,
+                 const std::string& name)
+  -> sara::MultiArrayView<T, N, sara::RowMajor>
+{
+  std::cout << "Find tensor name = " << name << std::endl;
+  const auto tensor_shape_name = name + "_shape";
+  const auto tensor_data_name = name + "_data";
+  auto tensor_shape =
+      segment.find<ipc_vector<int>>(tensor_shape_name.c_str()).first;
+  auto tensor_data =
+      segment.find<ipc_vector<T>>(tensor_data_name.c_str()).first;
+
+  auto tensor_shape_vector = sara::Matrix<int, N, 1>{};
+  std::copy(tensor_shape->begin(), tensor_shape->end(),
+            tensor_shape_vector.data());
+  std::cout << tensor_shape_vector.matrix().transpose() << std::endl;
+
+  return sara::MultiArrayView<float, 2, sara::RowMajor>{tensor_data->data(),
+                                                        tensor_shape_vector};
+}
+
+template <typename T>
+auto destroy_tensor(bip::managed_shared_memory& segment,
+                    const std::string& name)  //
+    -> void
+{
+  const auto tensor_shape_name = name + "_shape";
+  const auto tensor_data_name = name + "_data";
+  segment.destroy<ipc_vector<int>>(tensor_shape_name.c_str());
+  segment.destroy<ipc_vector<T>>(tensor_data_name.c_str());
+}
 
 
 int main(int argc, char** argv)
@@ -70,9 +124,6 @@ int main(int argc, char** argv)
     bip::allocator<Message, bip::managed_shared_memory::segment_manager>
       message_allocator{segment.get_segment_manager()};
 
-    bip::allocator<int, bip::managed_shared_memory::segment_manager>
-        int_allocator{segment.get_segment_manager()};
-
     bip::allocator<float, bip::managed_shared_memory::segment_manager>
         float_allocator{segment.get_segment_manager()};
 
@@ -82,11 +133,9 @@ int main(int argc, char** argv)
     auto message = segment.construct<Message>("message")();
     message->num_iter = num_iter;
 
-    // Allocate image data in the memory segment.
-    segment.construct<ipc_vector<int>>("image_shape")(
-        std::initializer_list<int>{3, 4}, int_allocator);
-    auto image_data = segment.construct<ipc_vector<float>>("image_data")(
-        3 * 4, 0.f, float_allocator);
+    // Allocate image in the memory segment.
+    auto image =
+        construct_tensor<float, 2>(segment, "image", DO::Sara::Vector2i{3, 4});
 
     // Allocate image descriptors data in the memory segment.
     auto image_descriptors = segment.construct<ipc_vector<float>>(
@@ -117,7 +166,7 @@ int main(int argc, char** argv)
 
       // Fill with new image data.
       std::cout << "[Process 1] Refilling image data" << std::endl;
-      std::fill(image_data->begin(), image_data->end(), i);
+      image.flat_array().fill(i);
 
       std::cout << "[Process 1] Refilled image data" << std::endl;
       message->image_batch_filling_iter = i;
@@ -145,9 +194,7 @@ int main(int argc, char** argv)
       }
     };
 
-
-    segment.destroy<ipc_vector<int>>("image_shape");
-    segment.destroy<ipc_vector<float>>("image_data");
+    destroy_tensor<float>(segment, "image");
     segment.destroy<ipc_vector<float>>("image_descriptors");
     segment.destroy<Message>("message");
   }
@@ -157,14 +204,12 @@ int main(int argc, char** argv)
 
     bip::managed_shared_memory segment{bip::open_only, "MySharedMemory"};
 
-    auto image_shape = segment.find<ipc_vector<int>>("image_shape").first;
-    auto image_data = segment.find<ipc_vector<float>>("image_data").first;
+    auto image_view = find_tensor<float, 2>(segment, "image");
+
     auto image_descriptors =
         segment.find<ipc_vector<float>>("image_descriptors").first;
     auto message = segment.find<Message>("message").first;
 
-    auto image_view = DO::Sara::MultiArrayView<float, 2>{
-        image_data->data(), {(*image_shape)[0], (*image_shape)[1]}};
 
     while (true)
     {
@@ -177,7 +222,8 @@ int main(int argc, char** argv)
         message->cond_image_batch_refilled.wait(lock);
       }
 
-      const auto value = (*image_data)[0];
+      const auto value = image_view.flat_array()[0];
+      std::cout << "[Process 2] image_view =\n" << image_view.matrix() << std::endl;
 
       std::cout << "[Process 2] Calculating descriptors" << std::endl;
       std::fill(image_descriptors->begin(), image_descriptors->end(), value);
