@@ -198,8 +198,6 @@ int main(int argc, char** argv)
   }
   else
   {
-    std::cout << "Running child process" << std::endl;
-
     bip::managed_shared_memory segment{bip::open_only, "MySharedMemory"};
 
     auto image_view = find_tensor<float, 2>(segment, "image");
