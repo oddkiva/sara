@@ -9,15 +9,6 @@ import zmq
 from do.sara import IpcMedium
 
 
-def get_image(ipc_medium):
-    image_shape = ipc_medium.image_shape("image_shape")
-    print('[Python] image_shape = ', ipc_medium.image_shape("image_shape"))
-
-    image_data = ipc_medium.image_data("image_data")
-    print('[Python] image_data = ', image_data)
-
-    return image_data
-
 class TestIPC(unittest.TestCase):
 
     def test_ipc_with_cpp(self):
@@ -33,9 +24,11 @@ class TestIPC(unittest.TestCase):
             socket.send(b"1")
 
 
-            image_data = get_image(ipc_medium)
+            image = ipc_medium.tensor("image")
+            print('[Python] before image =\n', image)
 
-            image_data[:] = -1
+            image[:] = -1
+            print('[Python] after image =\n', image)
 
             message = socket.recv()
             print('[Python] Received reply {} '.format(message))

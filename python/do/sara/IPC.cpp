@@ -47,42 +47,26 @@ public:
   {
   }
 
-  bip::managed_shared_memory _segment;
-
-  int  _image_batch_filling_iter = -1;
-  int  _image_batch_processing_iter = -1;
-  int  _num_iter = -1;
-  bool _terminate_processing = false;
-
-  //ipc_vector<int> *image_shape;
-  //ipc_vector<float> *image_data;
-
-  //auto image_view() const -> DO::Sara::MultiArrayView<float, 2>
-  //{
-  //  return DO::Sara::MultiArrayView<float, 2>{
-  //      image_data->data(), {(*image_shape)[0], (*image_shape)[1]}};
-  //}
-
-  bp::list image_shape(const std::string& name)
+  np::ndarray tensor(const std::string& name)
   {
-    auto image_shape = _segment.find<ipc_vector<int>>(name.c_str()).first;
-    return to_py_list(*image_shape);
-  }
+    const auto image_shape_name = name + "_shape";
+    const auto image_data_name = name + "_data";
 
-  //float * image_data(const std::string& name)
-  //{
-  //  auto image_data = _segment.find<ipc_vector<float>>(name.c_str()).first;
-  //  return image_data->data();
-  //}
+    auto image_shape =
+        _segment.find<ipc_vector<int>>(image_shape_name.c_str()).first;
+    auto image_data =
+        _segment.find<ipc_vector<float>>(image_data_name.c_str()).first;
 
-  np::ndarray image_data(const std::string& name)
-  {
-    auto image_data = _segment.find<ipc_vector<float>>(name.c_str()).first;
+    const auto shape = bp::tuple(to_py_list(*image_shape));
+    const auto strides =
+        bp::make_tuple(sizeof(float) * (*image_shape)[1], sizeof(float));
+
     return np::from_data(image_data->data(), np::dtype::get_builtin<float>(),
-                         bp::make_tuple(image_data->size()),
-                         bp::make_tuple(sizeof(float)),
-                         bp::object());
+                         shape, strides, bp::object());
   }
+
+private:
+  bip::managed_shared_memory _segment;
 };
 
 
@@ -90,6 +74,5 @@ void expose_ipc()
 {
   bp::class_<IpcMedium, boost::noncopyable>("IpcMedium",
                                             bp::init<const std::string&>())
-      .def("image_shape", &IpcMedium::image_shape)
-      .def("image_data", &IpcMedium::image_data);
+      .def("tensor", &IpcMedium::tensor);
 }
