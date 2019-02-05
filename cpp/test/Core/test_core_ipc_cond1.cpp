@@ -63,7 +63,6 @@ auto construct_tensor(bip::managed_shared_memory& segment,
       shape.data(), shape.data() + shape.size(), 1, std::multiplies<int>());
   auto tensor_vec = segment.construct<ipc_vector<T>>(tensor_data_name.c_str())(
       tensor_size, static_cast<T>(1), dtype_allocator);
-  std::cout << "tensor_vec.size() = " << tensor_vec->size() << std::endl;
 
   return sara::MultiArrayView<T, N, sara::RowMajor>{tensor_vec->data(), shape};
 }
@@ -73,7 +72,6 @@ auto find_tensor(bip::managed_shared_memory& segment,
                  const std::string& name)
   -> sara::MultiArrayView<T, N, sara::RowMajor>
 {
-  std::cout << "Find tensor name = " << name << std::endl;
   const auto tensor_shape_name = name + "_shape";
   const auto tensor_data_name = name + "_data";
   auto tensor_shape =
@@ -175,8 +173,8 @@ int main(int argc, char** argv)
       // Wait until the image is processed.
       if (message->image_batch_processing_iter != i)
       {
-        // std::cout << "[Process 1] Waiting for Process 2 to complete"
-        //  << std::endl;
+        std::cout << "[Process 1] Waiting for Process 2 to complete"
+                  << std::endl;
         message->cond_image_batch_processed.wait(lock);
       }
 
