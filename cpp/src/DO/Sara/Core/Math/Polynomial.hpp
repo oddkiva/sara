@@ -69,11 +69,11 @@ namespace DO { namespace Sara {
       std::vector<Symbol> vars;
       std::vector<Symbol> other_vars;
 
-      for (const auto& var: exponents)
+      for (const auto& var : exponents)
         for (auto i = 0; i < var.second; ++i)
           vars.push_back(var.first);
 
-      for (const auto& var: other.exponents)
+      for (const auto& var : other.exponents)
         for (auto i = 0; i < var.second; ++i)
           other_vars.push_back(var.first);
 
@@ -203,6 +203,24 @@ namespace DO { namespace Sara {
       return res;
     }
 
+    Polynomial operator*(const Monomial& q) const
+    {
+      auto res = Polynomial{};
+      for (const auto& c : coeffs)
+      {
+        const auto p = c.first * q;
+        res.coeffs[p] = c.second;
+      }
+      return *this;
+    }
+
+    Polynomial& operator*=(double scalar)
+    {
+      for (auto& c : coeffs)
+        coeffs[c.first] *= scalar;
+      return *this;
+    }
+
     Polynomial<double> operator()(int i, int j) const
     {
       auto res = Polynomial<double>{};
@@ -220,13 +238,23 @@ namespace DO { namespace Sara {
       return res;
     }
 
-    auto to_string() const -> std::string
+    auto to_string(double zero_thres = 1e-12) const -> std::string
     {
       auto str = std::string{};
       for (const auto& m : coeffs)
-        str +=  std::to_string(m.second) + "*" + m.first.to_string() + " + ";
-      str.pop_back();
-      str.pop_back();
+      {
+        if (std::abs(m.second) > zero_thres)
+          str += std::to_string(m.second) + "*" + m.first.to_string() + " + ";
+      }
+
+      if (str.size() >= 2)
+      {
+        str.pop_back();
+        str.pop_back();
+      }
+
+      if (str.empty())
+        str = "0";
 
       return str;
     }
