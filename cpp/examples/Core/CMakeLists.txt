@@ -8,6 +8,14 @@ message(STATUS "  - DO_Core_Examples")
 find_package(DO_Sara COMPONENTS Core REQUIRED)
 find_package(HDF5 COMPONENTS CXX REQUIRED)
 
+set(Boost_USE_STATIC_LIBS OFF)
+set(Boost_USE_MULTITHREADED ON)
+find_package(Boost
+  COMPONENTS filesystem serialization system unit_test_framework
+  REQUIRED)
+include_directories(${Boost_INCLUDE_DIR})
+find_package(Boost REQUIRED)
+
 
 include_directories(${HDF5_INCLUDE_DIRS})
 
@@ -25,10 +33,11 @@ sara_add_example(save_to_hdf5_example)
 #set_target_properties(save_to_hdf5_example
 #  PROPERTIES
 #  COMPILE_DEFINITIONS ${HDF5_DEFINITIONS})
-                    
+
 
 target_link_libraries(save_to_hdf5_example ${HDF5_LIBRARIES})
 
 
 sara_add_example(core_ipc_zmq_example)
+target_include_directories(core_ipc_zmq_example PRIVATE ${Boost_INCLUDE_DIR})
 target_link_libraries(core_ipc_zmq_example rt zmq)

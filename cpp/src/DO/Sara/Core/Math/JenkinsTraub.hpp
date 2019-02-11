@@ -3,27 +3,42 @@
 #include <DO/Sara/Core/EigenExtension.hpp>
 #include <DO/Sara/Core/Math/UnivariatePolynomial.hpp>
 
+#include <complex>
 #include <ctime>
 #include <memory>
 
 
 namespace DO { namespace Sara {
 
-  UnivariatePolynomial<double> K0(const UnivariatePolynomial<double>& P)
+  auto K0_(const UnivariatePolynomial<double>& P)
+      -> UnivariatePolynomial<double>
   {
-    auto K0 = UnivariatePolynomial<double>{P.degree()};
-    const auto n = K0.degree();
+    const auto n = P.degree();
+    auto K0 = UnivariatePolynomial<double>{n - 1};
 
-    for (int i = 0; i <= n; ++i)
-      K0[n - 1 - i] = ((n - 1 - i) * P[n - i]) / n;
+    for (int i = 0; i < n; ++i)
+      K0[n - 1 - i] = ((n - i) * P[n - i]) / n;
 
     return K0;
   }
 
-  auto K1(const UnivariatePolynomial<double>& K0,
-          const UnivariatePolynomial<double>& P,
-          const UnivariatePolynomial<double>& sigma,  //
-          std::complex<double>& s1, std::complex<double>& s2)
+  auto sigma_(const std::complex<double>& s1)
+    -> UnivariatePolynomial<double>
+  {
+    auto res = UnivariatePolynomial<double>{};
+    auto res_c = (Z - s1) * (Z - std::conj(s1));
+
+    res._coeff.resize(res_c._coeff.size());
+    for (auto i = 0u; i < res_c._coeff.size(); ++i)
+      res[i] = std::real(res_c[i]);
+
+    return res;
+  }
+
+  auto K1_(const UnivariatePolynomial<double>& K0,
+           const UnivariatePolynomial<double>& P,
+           const UnivariatePolynomial<double>& sigma,  //
+           std::complex<double>& s1, std::complex<double>& s2)
       -> UnivariatePolynomial<double>
   {
     Matrix2cd a, b, c, d;
@@ -46,6 +61,15 @@ namespace DO { namespace Sara {
     const auto db = b.determinant();
     const auto dc = c.determinant();
     const auto dd = d.determinant();
+
+    std::cout << "a =\n" << a << std::endl;
+    std::cout << "b =\n" << b << std::endl;
+    std::cout << "c =\n" << c << std::endl;
+    std::cout << "d =\n" << d << std::endl;
+    std::cout << "da = " << da << std::endl;
+    std::cout << "db = " << db << std::endl;
+    std::cout << "dc = " << dc << std::endl;
+    std::cout << "dd = " << dd << std::endl;
 
     return {};
   }

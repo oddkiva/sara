@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -124,25 +125,33 @@ namespace DO { namespace Sara {
 
     //! @brief Horner method evaluation.
     template <typename T>
-    coeff_type operator()(const T& z) const
+    auto operator()(const T& x0) const -> decltype(coeff_type{} + T{})
     {
-      auto b = _coeff[degree()];
+      using result_type = decltype(coeff_type{} + T{});
+      auto b = result_type(_coeff[degree()]);
       for (auto i = 1u; i < _coeff.size(); ++i)
-        b = _coeff[degree() - i] + b * z;
+        b = _coeff[degree() - i] + b * x0;
       return b;
     }
 
     auto to_string() const -> std::string
     {
       auto str = std::string{};
+      std::ostringstream oss;
       for (auto i = 0u; i < _coeff.size(); ++i)
       {
-        str += std::to_string(_coeff[degree() - i]) + " X^" +
-               std::to_string(degree() - i);
-        if (i < degree())
-          str += " + ";
+        oss << _coeff[degree() - i] <<  " X^" << (degree() - i);
+        if (int(i) < degree())
+          oss << " + ";
       }
-      return str;
+      return oss.str();
+    }
+
+    friend std::ostream& operator<<(std::ostream& os,
+                                    const UnivariatePolynomial& p)
+    {
+      os << p.to_string();
+      return os;
     }
 
     std::vector<coeff_type> _coeff;
