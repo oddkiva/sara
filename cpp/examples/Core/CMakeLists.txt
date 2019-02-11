@@ -28,3 +28,7 @@ sara_add_example(save_to_hdf5_example)
                     
 
 target_link_libraries(save_to_hdf5_example ${HDF5_LIBRARIES})
+
+
+sara_add_example(core_ipc_zmq_example)
+target_link_libraries(core_ipc_zmq_example rt zmq)

@@ -17,7 +17,7 @@ namespace DO { namespace Sara {
   {
     auto indices = range(num_data_points);
 
-    auto samples = Tensor_<int, 2>{sample_size, num_samples};
+    auto samples = Tensor_<int, 2>{{sample_size, num_samples}};
     for (int i = 0; i < sample_size; ++i)
       samples[i].flat_array() =
           shuffle(indices).flat_array().head(num_samples);
@@ -31,7 +31,7 @@ namespace DO { namespace Sara {
   auto extract_centers(const std::vector<OERegion>& features)
       -> Tensor_<float, 2>
   {
-    auto centers = Tensor_<float, 2>{int(features.size()), 2};
+    auto centers = Tensor_<float, 2>{{int(features.size()), 2}};
     auto mat = centers.matrix();
 
     for (auto i = 0; i < centers.size(0); ++i)
@@ -47,7 +47,7 @@ namespace DO { namespace Sara {
     const auto num_samples = samples.size(0);
     const auto sample_size = samples.size(1);
 
-    auto point_indices = Tensor_<int, 3>{num_samples, sample_size, 2};
+    auto point_indices = Tensor_<int, 3>{{num_samples, sample_size, 2}};
     for (auto s = 0; s < num_samples; ++s)
       for (auto m = 0; m < sample_size; ++m)
         point_indices[s][m].flat_array() = matches[samples(s, m)].flat_array();

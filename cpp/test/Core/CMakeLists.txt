@@ -18,5 +18,4 @@ endforeach ()
 
 if (UNIX)
   target_link_libraries(test_core_ipc_cond1 rt)
-  target_link_libraries(test_core_ipc_zmq rt zmq)
 endif ()

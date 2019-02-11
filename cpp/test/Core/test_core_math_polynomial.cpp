@@ -38,10 +38,10 @@ BOOST_AUTO_TEST_CASE(test_monomial)
   auto y = Monomial{variable("y")};
   auto z = Monomial{variable("z")};
 
-  auto x3 = x.pow(3);
-  auto x2 = x.pow(2);
+  auto x3 = x ^ 3;
+  auto x2 = x ^ 2;
   auto xy = x * y;
-  auto xy2z3 = x * y.pow(2) * z.pow(3);
+  auto xy2z3 = x * (y ^ 2) * (z ^ 3);
 
   std::cout << x.to_string() << std::endl;
   std::cout << y.to_string() << std::endl;

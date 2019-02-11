@@ -110,6 +110,11 @@ namespace DO { namespace Sara {
       return res;
     }
 
+    auto operator^(int exponent) const -> Monomial
+    {
+      return pow(exponent);
+    }
+
     auto pow(int exponent) const -> Monomial
     {
       auto res = *this;
