@@ -10,8 +10,6 @@
 #include <iostream>
 #include <thread>
 
-#include <zmq.h>
-
 
 namespace sara = DO::Sara;
 namespace bip = boost::interprocess;
