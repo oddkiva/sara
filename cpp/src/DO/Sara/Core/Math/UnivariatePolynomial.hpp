@@ -55,6 +55,11 @@ namespace DO { namespace Sara {
       return res;
     }
 
+    UnivariatePolynomial operator-(const coeff_type& other) const
+    {
+      return (*this) + (-other);
+    }
+
     UnivariatePolynomial operator-(const UnivariatePolynomial& other) const
     {
       auto res = UnivariatePolynomial{};
@@ -171,20 +176,20 @@ namespace DO { namespace Sara {
       return P;
     }
 
+    template <typename T>
+    inline auto to_polynomial() const -> UnivariatePolynomial<T>
+    {
+      auto P = UnivariatePolynomial<T>{};
+      P._coeff = std::vector<T>{exponent + 1, T(0)};
+      P[exponent] = T(1);
+      return P;
+    }
+
     int exponent{1};
   };
 
+  constexpr auto X = Monomial{};
   constexpr auto Z = Monomial{};
-
-
-  template <typename T>
-  UnivariatePolynomial<T> operator*(const T& a, const UnivariatePolynomial<T>& b)
-  {
-    auto res = b;
-    for (auto i = 0u; i < res._coeff.size(); ++i)
-      res[i] *= a;
-    return res;
-  }
 
 
   template <typename T>
@@ -198,13 +203,44 @@ namespace DO { namespace Sara {
   }
 
   template <typename T>
-  UnivariatePolynomial<T> operator-(const Monomial& a, const T& b)
+  auto operator-(const Monomial& a, const T& b) -> UnivariatePolynomial<T>
   {
     auto res = UnivariatePolynomial<T>{};
     res._coeff = std::vector<T>(a.exponent + 1, 0);
     res._coeff[a.exponent] = 1.;
     res._coeff[0] = -b;
     return res;
+  }
+
+  template <typename T>
+  auto operator*(const T& a, const UnivariatePolynomial<T>& b)
+      -> UnivariatePolynomial<T>
+  {
+    auto res = b;
+    for (auto i = 0u; i < res._coeff.size(); ++i)
+      res[i] *= a;
+    return res;
+  }
+
+  template <typename T>
+  auto operator*(const UnivariatePolynomial<T>& P, const Monomial& Q)
+      -> UnivariatePolynomial<T>
+  {
+    return P * Q.to_polynomial<T>();
+  }
+
+  template <typename T>
+  auto operator*(const Monomial& P, const UnivariatePolynomial<T>& Q)
+      -> UnivariatePolynomial<T>
+  {
+    return Q * P;
+  }
+
+  template <typename T>
+  auto operator/(const UnivariatePolynomial<T>& P, const Monomial& Q)
+      -> decltype(UnivariatePolynomial<T>{} / UnivariatePolynomial<T>{})
+  {
+    return P / Q.to_polynomial<T>();
   }
 
   template <typename T>
