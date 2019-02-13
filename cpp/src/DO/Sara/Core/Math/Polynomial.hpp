@@ -54,6 +54,7 @@ namespace DO { namespace Sara {
     return {"0", false};
   }
 
+
   class Monomial : public Expression
   {
   public:
@@ -108,11 +109,6 @@ namespace DO { namespace Sara {
       }
 
       return res;
-    }
-
-    auto operator^(int exponent) const -> Monomial
-    {
-      return pow(exponent);
     }
 
     auto pow(int exponent) const -> Monomial

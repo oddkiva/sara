@@ -180,7 +180,7 @@ namespace DO { namespace Sara {
     inline auto to_polynomial() const -> UnivariatePolynomial<T>
     {
       auto P = UnivariatePolynomial<T>{};
-      P._coeff = std::vector<T>{exponent + 1, T(0)};
+      P._coeff = std::vector<T>(exponent + 1, T(0));
       P[exponent] = T(1);
       return P;
     }
@@ -237,19 +237,19 @@ namespace DO { namespace Sara {
   }
 
   template <typename T>
-  auto operator/(const UnivariatePolynomial<T>& P, const Monomial& Q)
-      -> decltype(UnivariatePolynomial<T>{} / UnivariatePolynomial<T>{})
-  {
-    return P / Q.to_polynomial<T>();
-  }
-
-  template <typename T>
-  UnivariatePolynomial<T> operator*(const T& a, const Monomial& b)
+  auto operator*(const T& a, const Monomial& b) -> UnivariatePolynomial<T>
   {
     auto res = UnivariatePolynomial<T>{};
     res._coeff.resize(b.exponent + 1);
     res._coeff[b.exponent] = a;
     return res;
+  }
+
+  template <typename T>
+  auto operator/(const UnivariatePolynomial<T>& P, const Monomial& Q)
+      -> decltype(UnivariatePolynomial<T>{} / UnivariatePolynomial<T>{})
+  {
+    return P / Q.to_polynomial<T>();
   }
 
 } /* namespace Sara */
