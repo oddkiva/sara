@@ -38,9 +38,7 @@ namespace DO { namespace Sara {
 
     UnivariatePolynomial operator+(const UnivariatePolynomial& other) const
     {
-      auto res = UnivariatePolynomial{};
-      res._coeff = std::vector<coeff_type>(
-          std::max(this->degree(), other.degree()) + 1, 0);
+      auto res = UnivariatePolynomial{std::max(this->degree(), other.degree())};
       for (auto i = 0u; i < this->_coeff.size(); ++i)
         res[i] += (*this)[i];
       for (auto j = 0u; j < other._coeff.size(); ++j)
@@ -62,9 +60,7 @@ namespace DO { namespace Sara {
 
     UnivariatePolynomial operator-(const UnivariatePolynomial& other) const
     {
-      auto res = UnivariatePolynomial{};
-      res._coeff = std::vector<coeff_type>(
-          std::max(this->degree(), other.degree()) + 1, 0);
+      auto res = UnivariatePolynomial{std::max(this->degree(), other.degree())};
 
       for (auto i = 0u; i < this->_coeff.size(); ++i)
         res[i] += (*this)[i];
@@ -77,8 +73,7 @@ namespace DO { namespace Sara {
 
     UnivariatePolynomial operator*(const UnivariatePolynomial& other) const
     {
-      auto res = UnivariatePolynomial{};
-      res._coeff = std::vector<coeff_type>(this->degree() + other.degree() + 1, 0);
+      auto res = UnivariatePolynomial{degree() + other.degree()};
       for (auto i = 0u; i < this->_coeff.size(); ++i)
         for (auto j = 0u; j < other._coeff.size(); ++j)
         {
@@ -99,7 +94,7 @@ namespace DO { namespace Sara {
       auto a = *this;
       const auto& b = other;
 
-      auto q = UnivariatePolynomial{};
+      auto q = UnivariatePolynomial{degree() - other.degree()};
       q._coeff = std::vector<coeff_type>(degree() - other.degree() + 1, 0);
 
       auto qi = q;
@@ -118,6 +113,11 @@ namespace DO { namespace Sara {
       }
 
       return {q, a};
+    }
+
+    auto operator/(const coeff_type& other) const
+      -> UnivariatePolynomial
+    {
     }
 
     UnivariatePolynomial operator-() const
@@ -168,7 +168,8 @@ namespace DO { namespace Sara {
   public:
     Monomial() = default;
 
-    auto pow(int e) const -> UnivariatePolynomial<double>
+    template <typename T>
+    auto pow(int e) const -> UnivariatePolynomial<T>
     {
       auto P = UnivariatePolynomial<double>{};
       P._coeff = std::vector<double>(exponent * e + 1, 0);

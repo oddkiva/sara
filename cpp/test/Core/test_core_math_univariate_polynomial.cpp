@@ -27,6 +27,15 @@ using namespace DO::Sara;
 
 BOOST_AUTO_TEST_SUITE(TestUnivariatePolynomial)
 
+BOOST_AUTO_TEST_CASE(test_compute_moduli_lower_bound)
+{
+  auto P = 20. * (Z + 1.07) * (Z - 2.) * (Z + 3.) * (Z + 0.6);
+  cout << "P = " << P << endl;
+
+  auto x = compute_moduli_lower_bound(P);
+  cout << "x = " << x << endl;
+}
+
 BOOST_AUTO_TEST_CASE(test_polynomial_arithmetics)
 {
   auto P = (Z - 2.) * (Z - 2.) * (Z + 3.);
@@ -51,7 +60,6 @@ BOOST_AUTO_TEST_CASE(test_polynomial_arithmetics)
   // Everything is OK here.
 }
 
-
 BOOST_AUTO_TEST_CASE(test_newton_raphson)
 {
   auto P = (Z - 2.) * (Z - 2.) * (Z + 3.);
@@ -62,17 +70,6 @@ BOOST_AUTO_TEST_CASE(test_newton_raphson)
   z = newton_raphson(z, 100);
   cout << setprecision(12) << std::abs(z - 2) << endl;
 }
-
-
-BOOST_AUTO_TEST_CASE(test_compute_moduli_lower_bound)
-{
-  auto P = 20. * (Z + 1.07) * (Z - 2.) * (Z + 3.) * (Z + 0.6);
-  cout << "P = " << P << endl;
-
-  auto x = compute_moduli_lower_bound(P);
-  cout << "x = " << x << endl;
-}
-
 
 //BOOST_AUTO_TEST_CASE(test_jenkins_traub_sigma)
 //{
