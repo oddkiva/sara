@@ -1,6 +1,7 @@
 #pragma once
 
 #include <DO/Sara/Core/EigenExtension.hpp>
+#include <DO/Sara/Core/Math/NewtonRaphson.hpp>
 #include <DO/Sara/Core/Math/UnivariatePolynomial.hpp>
 
 #include <complex>
@@ -43,20 +44,20 @@ namespace DO { namespace Sara {
          0,   0, 1,  -1,
          1, -s1, 0,   0,
          0,   0, 1, -s1;
-        
+
     y << P(s1), P(s2), K0(s1), K0(s2);
-    Vector4cd x = M.solve(y);
+    Vector4cd x = M.colPivHouseholderQr().solve(y);
 
-    const auto a = std::re(x[0]);
-    const auto b = std::re(x[1]);
-    const auto c = std::re(x[2]);
-    const auto d = std::re(x[3]);
+    const auto a = std::real(x[0]);
+    const auto b = std::real(x[1]);
+    const auto c = std::real(x[2]);
+    const auto d = std::real(x[3]);
 
-    const auto u = - std::re(s1 + s2);
-    const auto v = - std::re(s1 * s2);
+    const auto u = - std::real(s1 + s2);
+    const auto v = - std::real(s1 * s2);
 
     auto Q_P = (P - b * (Z + u) + a) / sigma;
-    auto Q_K = (K - d * (Z + u) + c) / sigma;
+    auto Q_K = (K0 - d * (Z + u) + c) / sigma;
 
     auto m = (a*a + u*a*b + v*b*b) / (b*c - a*d);
     auto n = (a*c + u*a*d + v*b*d) / (b*c - a*d);
@@ -78,8 +79,18 @@ namespace DO { namespace Sara {
   }
 
   template <typename T>
-  auto compute_root_radius(const UnivariatePolynomial<T>& P) -> T
+  auto compute_moduli_lower_bound(const UnivariatePolynomial<T>& P) -> T
   {
+    auto Q = P;
+    Q[0] = -std::abs(Q[0] / Q[Q.degree()]);
+    for (int i = 1; i <= Q.degree(); ++i)
+      Q[i] = std::abs(Q[i] / Q[Q.degree()]);
+
+    auto x = T(1);
+    auto newton_raphson = NewtonRaphson<T>{Q};
+    x = newton_raphson(x, 50);
+
+    return x;
   }
 
 } /* namespace Sara */
