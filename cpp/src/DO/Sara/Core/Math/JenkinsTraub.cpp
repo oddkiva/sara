@@ -23,6 +23,25 @@ namespace DO { namespace Sara {
     return x;
   }
 
+  auto K1_no_shift_polynomial(const UnivariatePolynomial<double>& K0,
+                              const UnivariatePolynomial<double>& P)
+      -> UnivariatePolynomial<double>
+  {
+    // See stage 1 formula: no-shift process (page 556).
+    auto K1 = (K0 - (K0(0) / P(0)) * P) / Z;
+    return K1.first;
+  }
+
+  auto K1_fixed_shift_polynomial(const UnivariatePolynomial<double>& K0,
+                                 const UnivariatePolynomial<double>& P,
+                                 const UnivariatePolynomial<double>& sigma,
+                                 const std::complex<double>& s1,
+                                 const std::complex<double>& s2)
+      -> UnivariatePolynomial<double>
+  {
+    return K0[Z] + P[Z]
+  }
+
   auto K0_(const UnivariatePolynomial<double>& P)
       -> UnivariatePolynomial<double>
   {
@@ -43,6 +62,15 @@ namespace DO { namespace Sara {
     // See stage 1 formula: no-shift process (page 556).
     auto K1 = (K0 - (K0(0) / P(0)) * P) / Z;
     return K1.first;
+  }
+
+  auto K1_stage2(const UnivariatePolynomial<double>& K0,
+                 const UnivariatePolynomial<double>& P,
+                 const UnivariatePolynomial<double>& sigma,
+                 const std::complex<double>& s1, const std::complex<double>& s2)
+    -> UnivariatePolynomial<double>
+  {
+    return {};
   }
 
   //auto K1_stage2(const UnivariatePolynomial<double>& K0,

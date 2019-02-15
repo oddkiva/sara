@@ -27,48 +27,67 @@ using namespace DO::Sara;
 
 BOOST_AUTO_TEST_SUITE(TestUnivariatePolynomial)
 
-BOOST_AUTO_TEST_CASE(test_compute_moduli_lower_bound)
-{
-  auto P = 20. * (Z + 1.07) * (Z - 2.) * (Z + 3.) * (Z + 0.6);
-  cout << "P = " << P << endl;
-
-  auto x = compute_moduli_lower_bound(P);
-  cout << "x = " << x << endl;
-}
-
 BOOST_AUTO_TEST_CASE(test_polynomial_arithmetics)
 {
   auto P = (Z - 2.) * (Z - 2.) * (Z + 3.);
-  //cout << "P = " << P.to_string() << endl;
+  //cout << "P = " << P << endl;
 
   auto Q = Z + 3.;
-  //cout << "Q = " << Q.to_string() << endl;
+  //cout << "Q = " << Q << endl;
 
   auto res = P / Q;
   //cout << "Euclidean division P/Q" << endl;
-  //cout << "Quotient = " << res.first.to_string() << endl;
-  //cout << "Remainder = " << res.second.to_string() << endl;
-
-  //cout << (res.first * Q + res.second).to_string() << endl;
+  //cout << "Quotient = " << res.first << endl;
+  //cout << "Remainder = " << res.second << endl;
+  //cout << (res.first * Q + res.second) << endl;
+  BOOST_CHECK_EQUAL(res.first.degree(), 2);
+  BOOST_CHECK_EQUAL(res.second.degree(), 0);
 
   //cout << "P(2) = " << P(2) << endl;
-  //cout << "P(-3) = " << P(-3) << endl;
-  //cout << "P(-3.0000001) = " << P(-3.0000001) << endl;
-  //cout << "P(2.02) = " << P(2.02) << endl;
-  //cout << "P(2.1) = " << P(2.1) << endl;
+  BOOST_CHECK_CLOSE(P(2), 0, std::numeric_limits<double>::epsilon());
 
-  // Everything is OK here.
+  //cout << "P(-3) = " << P(-3) << endl;
+  BOOST_CHECK_CLOSE(P(-3), 0, std::numeric_limits<double>::epsilon());
+
+  //cout << "P(-3.0000001) = " << P(-3.0000001) << endl;
+  BOOST_CHECK_LE(std::abs(P(-3.0000001)), 1e-4);
+
+  //cout << "P(2.02) = " << P(2.02) << endl;
+
+  //cout << "P(2.1) = " << P(2.1) << endl;
 }
+
+BOOST_AUTO_TEST_SUITE_END()
+
+
+BOOST_AUTO_TEST_SUITE(TestJenkinsTraub)
 
 BOOST_AUTO_TEST_CASE(test_newton_raphson)
 {
   auto P = (Z - 2.) * (Z - 2.) * (Z + 3.);
-  cout << "P = " << P << endl;
+  //cout << "P = " << P << endl;
 
   auto z = 1.1;
   auto newton_raphson = NewtonRaphson<double>{P};
   z = newton_raphson(z, 100);
-  cout << setprecision(12) << std::abs(z - 2) << endl;
+  //cout << setprecision(12) << std::abs(z - 2) << endl;
+
+  BOOST_CHECK_CLOSE(z, 2, 1e-6);
+}
+
+BOOST_AUTO_TEST_CASE(test_compute_moduli_lower_bound)
+{
+  {
+    auto P = 20. * (Z + 1.07) * (Z - 2.) * (Z + 3.);
+    auto x = compute_moduli_lower_bound(P);
+    BOOST_CHECK_LE(x, 1.07);
+  }
+
+  {
+    auto P = 20. * (Z + 1.07) * (Z - 2.) * (Z + 3.) * (Z + 0.6);
+    auto x = compute_moduli_lower_bound(P);
+    BOOST_CHECK_LE(x, 0.6);
+  }
 }
 
 //BOOST_AUTO_TEST_CASE(test_jenkins_traub_sigma)

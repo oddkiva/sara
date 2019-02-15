@@ -162,7 +162,6 @@ namespace DO { namespace Sara {
     std::vector<coeff_type> _coeff;
   };
 
-
   class Monomial
   {
   public:

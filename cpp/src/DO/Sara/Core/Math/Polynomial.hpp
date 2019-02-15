@@ -1,59 +1,13 @@
 #pragma once
 
-#include <DO/Sara/Core/MultiArray.hpp>
+#include <DO/Sara/Core/EigenExtension.hpp>
+#include <DO/Sara/Core/Math/Symbol.hpp>
 
 #include <map>
-#include <stdexcept>
-#include <string>
 #include <vector>
 
 
 namespace DO { namespace Sara {
-
-  class Expression
-  {
-  public:
-    Expression() = default;
-    virtual ~Expression() = default;
-  };
-
-  struct Symbol : public Expression
-  {
-    const std::string name;
-    const bool is_variable;
-
-    Symbol(const std::string& name, bool is_variable)
-      : name{name}
-      , is_variable{is_variable}
-    {
-    }
-
-    auto operator<(const Symbol& other) const -> bool
-    {
-      return name < other.name;
-    }
-
-    auto operator==(const Symbol& other) const -> bool
-    {
-      return name == other.name;
-    }
-  };
-
-  auto variable(const std::string& name) -> Symbol
-  {
-    return {name, true};
-  }
-
-  auto one() -> Symbol
-  {
-    return {"1", false};
-  }
-
-  auto zero() -> Symbol
-  {
-    return {"0", false};
-  }
-
 
   class Monomial : public Expression
   {
