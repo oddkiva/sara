@@ -9,6 +9,7 @@
 
 namespace DO { namespace Sara {
 
+  // Cauchy's method to calculate the polynomial lower bound.
   auto compute_moduli_lower_bound(const UnivariatePolynomial<double>& P)
       -> double
   {
@@ -86,7 +87,6 @@ namespace DO { namespace Sara {
     return K1.first;
   }
 
-
   // This is the scaled recurrence formula (page 563).
   auto K0_polynomial(const UnivariatePolynomial<double>& P)
       -> UnivariatePolynomial<double>
@@ -94,193 +94,145 @@ namespace DO { namespace Sara {
     return derivative(P) / P.degree();
   }
 
-  // Return linear polynomial remainder of division of:
-  // - P  / sigma
-  // - K0 / sigma
-  //
-  // Used for stage 2 (fixed-shift process).
-  // TODO: For stage 2, P(s1) and P(s2) are evaluated only once.
-  //
-  // Used for stage 3 (variable-shift process).
-  // TODO: s1 and s2 are updated every time.
-  auto calculate_remainders(const UnivariatePolynomial<double>& P,
-                            const UnivariatePolynomial<double>& K0,
-                            const UnivariatePolynomial<double>& sigma,
-                            const std::complex<double>& s1)
-      -> std::pair<UnivariatePolynomial<double>, UnivariatePolynomial<double>>
+  // Fixed-shift process.
+  struct Stage2
   {
-    const auto s2 = std::conj(s1);
+    enum ConvergenceType : std::uint8_t
+    {
+      NoConvergence = 0,
+      LinearFactor = 1,
+      QuadraticFactor = 2
+    };
 
-    // See stage 2 formula (9.7) (page 563).
-    Matrix4cd M;
-    Vector4cd y;
+    //! @{
+    //! @brief parameters.
+    int M{5};
+    int L{20};
 
-    M << 1, -s2, 0,   0,
-         0,   0, 1,  -1,
-         1, -s1, 0,   0,
-         0,   0, 1, -s1;
+    std::random_device rd;
+    std::mt19937 gen;
+    std::uniform_real_distribution<> dist{0, 94.0};
+    double beta;
+    //! @}
 
-    y << P(s1), P(s2), K0(s1), K0(s2);
-    Vector4cd x = M.colPivHouseholderQr().solve(y);
+    //! The polynomial of which we want to find the roots.
+    UnivariatePolynomial<double>& P;
+    //! P(s1) and P(s2).
+    std::complex<double>& P_s1;
+    std::complex<double>& P_s2;
 
-    const auto a = std::real(x[0]);
-    const auto b = std::real(x[1]);
-    const auto c = std::real(x[2]);
-    const auto d = std::real(x[3]);
+    //! Quadratic real polynomial divisor.
+    UnivariatePolynomial<double>& sigma;
+    //! The roots of sigma.
+    std::complex<double>& s1;
+    std::complex<double>& s2;
 
-    const auto u = - std::real(s1 + s2);
+    //! Stage 2: fixed-shift polynomial.
+    //! Stage 3: variable-shift polynomial.
+    UnivariatePolynomial<double> K0;
+    UnivariatePolynomial<double> K1;
+    //! K0(s1) and K0(s2)
+    std::complex<double>& K0_s1;
+    std::complex<double>& K0_s2;
+    //! Auxiliary variables.
+    double a, b, c, d;
+    double u, v;
+    UnivariatePolynomial<double> Q_P, P_r;
+    UnivariatePolynomial<double> Q_K0, K0_r;
 
-    const auto P_remainder = b * (Z + u) + a;
-    const auto K0_remainder = d * (Z + u) + c;
+    //! Fixed-shift coefficients to update sigma.
+    MatrixXcd K1_{3, 2};
 
-    return {P_remainder, K0_remainder};
-  }
+    // 1. Determine moduli lower bound $\beta$.
+    auto determine_lower_bound() -> void
+    {
+      beta = compute_moduli_lower_bound(P);
+    }
 
+    // 2. Form polynomial sigma(z).
+    auto form_quadratic_divisor_sigma() -> void
+    {
+      constexpr auto i = std::complex<double>{0, 1};
 
-  //auto stage2(const UnivariatePolynomial<double>& K0_,
-  //            const UnivariatePolynomial<double>& P,
-  //            int L = 20) -> double
-  //{
-  //  const auto beta = compute_moduli_lower_bound(P);
-  //  const auto s1 = beta; //* std::exp(i*rand());
-  //  const auto s2 = std::conj(s1); //* std::exp(i*rand());
-  //  const auto sigma = sigma_(s1);
+      const auto phase = dist(rd);
+      s1 = beta * std::exp(i * phase);
+      s2 = std::conj(s1);
 
-  //  auto K0 = K0_;
-  //  auto K1 = K1_stage2(P, K0, sigma, s1, std::conj(s1));
-  //  auto K2 = K1_stage2(P, K1, sigma, s1, std::conj(s1));
-  //  auto K3 = K1_stage2(P, K2, sigma, s1, std::conj(s1));
-  //  auto K4 = K1_stage2(P, K3, sigma, s1, std::conj(s1));
+      sigma = Z.pow<double>(2) - 2 * std::real(s1) * Z + std::real(s1 * s2);
+    }
 
-  //  auto u = std::real(s1 + s2);
-  //  auto t0 = s1 - (a0 - b0 * s2) / (c0 - d0 * s2);
-  //  auto t1 = s1 - (a1 - b1 * s2) / (c1 - d1 * s2);
-  //  auto t2 = s1 - (a2 - b2 * s2) / (c2 - d2 * s2);
+    // 3.1 Evaluate the polynomial at divisor roots.
+    auto evaluate_polynomial_at_divisor_roots() -> void
+    {
+      P_s1 = P(s1);
+      P_s2 = P(s1);
+    }
 
-  //  for (int i = 0; i < L; ++i)
-  //  {
-  //    K0 = K1;
-  //    K1 = K2;
-  //    K2 = K1_stage2(P, K1, sigma, s1, std::conj(s1));
+    // 3.2 Evaluate the fixed-shift polynomial at divisor roots.
+    auto evaluate_shift_polynomial_at_divisor_roots() -> void
+    {
+      K0_s1 = K0(s1);
+      K0_s2 = K0(s1);
+    }
 
-  //    t0 = t1;
-  //    t1 = t2;
-  //    t2 = s1 - P(s1) / K2(s1);
+    // 3.3 Calculate coefficient of linear remainders (cf. formula 9.7).
+    auto calculate_coefficients_of_linear_remainders() -> void
+    {
+      // See stage 2 formula (9.7) (page 563).
+      Matrix4cd M;
+      Vector4cd y;
 
-  //    auto sigma_0 = sigma(K0, K1, K2, s1, s2);
-  //    auto sigma_1 = sigma(K1, K2, K3, s1, s2);
-  //    auto sigma_2 = sigma(K2, K3, K4, s1, s2);
+      M <<
+        1, -s2, 0,   0,
+        0,   0, 1, -s2,
+        1, -s1, 0,   0,
+        0,   0, 1, -s1;
 
-  //    const auto v0 = sigma_0[0];
-  //    const auto v1 = sigma_1[0];
-  //    const auto v2 = sigma_2[0];
+      y << P_s1, P_s2, K0_s1, K0_s2;
+      Vector4cd x = M.colPivHouseholderQr().solve(y);
 
-  //    // Convergence to rho_1?
-  //    if (std::abs(t1 - t0) <= 0.5 * t0 && std::abs(t2 - t1) <= 0.5 * t1)
-  //      return t2;
+      a = std::real(x[0]);
+      b = std::real(x[1]);
+      c = std::real(x[2]);
+      d = std::real(x[3]);
 
-  //    // Convergence of sigma(z) to (z - rho_1) * (z - rho_2)?
-  //    if (std::abs(v1 - v0) <= 0.5 * v0 && std::abs(v2 - v1) <= 0.5 * v1)
-  //      return t2;
-  //  }
+      u = -std::real(s1 + s2);
+      v = std::real(s1 * s2);
+    }
 
-  //  return std::numeric_limits<double>::infinity();
-  //}
+    // 3.4 Calculate the next fixed/variable-shift polynomial (cf. formula 9.8).
+    auto calculate_next_fixed_shit_polynomial() -> void
+    {
+      P_r = b * (Z + u) + a;
+      K0_r = c * (Z + u) + d;
 
-  //auto stage3(const UnivariatePolynomial<double>& K0_,
-  //            const UnivariatePolynomial<double>& P,
-  //            int L = 20) -> double
-  //{
-  //  const auto beta = compute_moduli_lower_bound(P);
-  //  const auto s1 = beta; //* std::exp(i*rand());
-  //  const auto s2 = std::conj(s1); //* std::exp(i*rand());
-  //  const auto sigma = sigma_(s1);
+      Q_P = ((P - P_r) / sigma).first;
+      Q_K0 = ((K0 - K0_r) / sigma).first;
 
-  //  auto K0 = K0_;
-  //  auto K1 = K1_stage2(P, K0, sigma, s1, std::conj(s1));
-  //  auto K2 = K1_stage2(P, K1, sigma, s1, std::conj(s1));
-  //  auto K3 = K1_stage2(P, K2, sigma, s1, std::conj(s1));
-  //  auto K4 = K1_stage2(P, K3, sigma, s1, std::conj(s1));
+      const auto c0 = b * c - a * d;
+      const auto c1 = (a * a + u * a * b + v * b * b) / c0;
+      const auto c2 = (a * c + u * a * d + v * b * d) / c0;
 
-  //  auto u = std::real(s1 + s2);
-  //  auto t0 = s1 - (a0 - b0 * s2) / (c0 - d0 * s2);
-  //  auto t1 = s1 - (a1 - b1 * s2) / (c1 - d1 * s2);
-  //  auto t2 = s1 - (a2 - b2 * s2) / (c2 - d2 * s2);
+      K1 = c1 * Q_K0 + (Z - c2) * Q_P + b;
+    }
 
-  //  for (int i = 0; i < L; ++i)
-  //  {
-  //    K0 = K1;
-  //    K1 = K2;
-  //    K2 = K1_stage2(P, K1, sigma, s1, std::conj(s1));
+    // 3.5 Calculate the new quadratic polynomial sigma (cf. formula 6.7).
+    auto calculate_next_quadratic_divisor() -> void
+    {
+      K1_(0, 0) = K1(s1);
+      K1_(0, 1) = K1(s2);
 
-  //    t0 = t1;
-  //    t1 = t2;
-  //    t2 = s1 - P(s1) / K2(s1);
+      K1_(1, 0) = (K1_(0, 0) - K1(0) / P(0) * P_s1) / s1;
+      K1_(1, 1) = (K1_(0, 1) - K1(0) / P(0) * P_s2) / s2;
 
-  //    auto sigma_0 = sigma(K0, K1, K2, s1, s2);
-  //    auto sigma_1 = sigma(K1, K2, K3, s1, s2);
-  //    auto sigma_2 = sigma(K2, K3, K4, s1, s2);
+      K1_(2, 0) = (K1_(1, 0) - K1(0) / P(0) * P_s1) / s1;
+      K1_(2, 1) = (K1_(1, 1) - K1(0) / P(0) * P_s2) / s2;
+    }
 
-  //    const auto v0 = sigma_0[0];
-  //    const auto v1 = sigma_1[0];
-  //    const auto v2 = sigma_2[0];
+    auto check_convergence_linear_factor() -> void;
+    auto check_convergence_quadratic_factor() -> void;
+  };
 
-  //    // Convergence to rho_1?
-  //    if (std::abs(t1 - t0) <= 0.5 * t0 && std::abs(t2 - t1) <= 0.5 * t1)
-  //      return t2;
-
-  //    // Convergence of sigma(z) to (z - rho_1) * (z - rho_2)?
-  //    if (std::abs(v1 - v0) <= 0.5 * v0 && std::abs(v2 - v1) <= 0.5 * v1)
-  //      return t2;
-  //  }
-
-  //  return std::numeric_limits<double>::infinity();
-  //}
-  //auto sigma_lambda(const UnivariatePolynomial<double>& K0,
-  //                  const UnivariatePolynomial<double>& K1,
-  //                  const UnivariatePolynomial<double>& K2,
-  //                  const std::complex<double>& s1,
-  //                  const std::complex<double>& s2)
-  //    -> UnivariatePolynomial<double>
-  //{
-  //  // Use a, b, c, d, u, v.
-  //  auto K0_s1 = c0 - d0 * s2, K0_s2 = c0 - d0 * s1;
-  //  auto K1_s1 = c1 - d1 * s2, K1_s2 = c1 - d1 * s1;
-  //  auto K2_s1 = c2 - d2 * s2, K2_s2 = c2 - d2 * s1;
-  //  const auto det = K1_s1 * K2_s2 - K1_s2 * K2_s1;
-
-  //  const auto m0 = K1_s1 * K2_s2 - K1_s2 * K2_s2;
-  //  const auto m1 = K0_s2 * K2_s1 - K0_s1 * K2_s2;
-  //  const auto m2 = K0_s1 * K1_s2 - K0_s2 * K1_s1;
-
-  //  const auto sigma = (m0 * Z.pow<std::complex<double>>(2) + m1 * Z + m2) / det;
-
-  //  return sigma;
-  //}
-
-
-  //sigma_lambda(
-
-
-
-  //auto stage3(const UnivariatePolynomial<double>& K0,
-  //            const UnivariatePolynomial<double>& sigma0,
-  //            const UnivariatePolynomial<double>& P) -> void
-  //{
-  //}
-
-
-  //auto sigma_(const std::complex<double>& s1) -> UnivariatePolynomial<double>
-  //{
-  //  auto res = UnivariatePolynomial<double>{};
-  //  auto res_c = (Z - s1) * (Z - std::conj(s1));
-
-  //  res._coeff.resize(res_c._coeff.size());
-  //  for (auto i = 0u; i < res_c._coeff.size(); ++i)
-  //    res[i] = std::real(res_c[i]);
-
-  //  return res;
-  //}
 
 } /* namespace Sara */
 } /* namespace DO */
