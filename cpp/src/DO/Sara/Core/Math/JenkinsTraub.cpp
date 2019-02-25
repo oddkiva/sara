@@ -219,20 +219,29 @@ namespace DO { namespace Sara {
     // 3.5 Calculate the new quadratic polynomial sigma (cf. formula 6.7).
     auto calculate_next_quadratic_divisor() -> void
     {
-      K1_(0, 0) = K1(s1);
-      K1_(0, 1) = K1(s2);
+      const auto b1 = -K0[0] / P[0];
+      const auto b2 = K0[1] + b1 * P[1] / P[0];
 
-      K1_(1, 0) = (K1_(0, 0) - K1(0) / P(0) * P_s1) / s1;
-      K1_(1, 1) = (K1_(0, 1) - K1(0) / P(0) * P_s2) / s2;
+      const auto a1 = b * c - a * d;
+      const auto a2 = a * c + u * a * d + v * b * d;
 
-      K1_(2, 0) = (K1_(1, 0) - K1(0) / P(0) * P_s1) / s1;
-      K1_(2, 1) = (K1_(1, 1) - K1(0) / P(0) * P_s2) / s2;
+      const auto c2 = b1 * a2;
+      const auto c3 = b1 * b1 * (a * a + u * a * b + v * b * b);
+      const auto c4 = v * b2 * a1 - c2 - c3;
+      const auto c1 = c * c + u * c * d + v * d * d +
+                      b1 * (a * c + u * b * c + v * b * d) - c4;
+
+      const auto delta_u = -(u * (c2 + c3) + v * (b1 * a1 + b2 * a2)) / c1;
+      const auto delta_v = v * c4 / c1;
+
+      sigma[0] = v + delta_v;
+      sigma[1] = u + delta_u;
+      sigma[2] = 1.0;
     }
 
     auto check_convergence_linear_factor() -> void;
     auto check_convergence_quadratic_factor() -> void;
   };
-
 
 } /* namespace Sara */
 } /* namespace DO */
