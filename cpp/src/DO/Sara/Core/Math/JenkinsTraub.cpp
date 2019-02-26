@@ -217,6 +217,7 @@ namespace DO { namespace Sara {
     }
 
     // 3.5 Calculate the new quadratic polynomial sigma (cf. formula 6.7).
+    // cf. formula from Jenkins PhD dissertation.
     auto calculate_next_quadratic_divisor() -> void
     {
       const auto b1 = -K0[0] / P[0];
@@ -239,8 +240,21 @@ namespace DO { namespace Sara {
       sigma[2] = 1.0;
     }
 
-    auto check_convergence_linear_factor() -> void;
-    auto check_convergence_quadratic_factor() -> void;
+    auto check_convergence_linear_factor() -> bool
+    {
+      const auto t0 = std::real(s1 - P_s1 / K0_s1);
+      const auto t1 = std::real(s1 - P_s1 / K1_s1);
+      const auto t2 = std::real(s1 - P_s1 / K2_s1);
+
+      return std::abs(t1 - t0) <= 0.5 * std::abs(t0) &&
+             std::abs(t2 - t1) <= 0.5 * std::abs(t1);
+    }
+
+    auto check_convergence_quadratic_factor() -> bool
+    {
+      return std::abs(v1 - v0) <= 0.5 * std::abs(v0) &&
+             std::abs(v2 - v1) <= 0.5 * std::abs(v1);
+    }
   };
 
 } /* namespace Sara */
