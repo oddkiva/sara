@@ -104,6 +104,8 @@ namespace DO { namespace Sara {
       QuadraticFactor = 2
     };
 
+    ConvergenceType cvg_type{NoConvergence};
+
     //! @{
     //! @brief parameters.
     int M{5};
@@ -144,7 +146,7 @@ namespace DO { namespace Sara {
     MatrixXcd K1_{3, 2};
 
     // 1. Determine moduli lower bound $\beta$.
-    auto determine_lower_bound() -> void
+    auto determine_moduli_lower_bound() -> void
     {
       beta = compute_moduli_lower_bound(P);
     }
@@ -201,7 +203,7 @@ namespace DO { namespace Sara {
     }
 
     // 3.4 Calculate the next fixed/variable-shift polynomial (cf. formula 9.8).
-    auto calculate_next_fixed_shit_polynomial() -> void
+    auto calculate_next_shift_polynomial() -> void
     {
       P_r = b * (Z + u) + a;
       K0_r = c * (Z + u) + d;
@@ -240,20 +242,122 @@ namespace DO { namespace Sara {
       sigma[2] = 1.0;
     }
 
-    auto check_convergence_linear_factor() -> bool
+    auto check_convergence_linear_factor(
+        const std::array<std::complex<double>, 3>& t) -> bool
     {
-      const auto t0 = std::real(s1 - P_s1 / K0_s1);
-      const auto t1 = std::real(s1 - P_s1 / K1_s1);
-      const auto t2 = std::real(s1 - P_s1 / K2_s1);
-
-      return std::abs(t1 - t0) <= 0.5 * std::abs(t0) &&
-             std::abs(t2 - t1) <= 0.5 * std::abs(t1);
+      return std::abs(t[1] - t[0]) <= std::abs(t[0]) / 2 &&
+             std::abs(t[2] - t[1]) <= std::abs(t[1]) / 2;
     }
 
-    auto check_convergence_quadratic_factor() -> bool
+    auto check_convergence_quadratic_factor(const std::array<double, 3>& v)
+        -> bool
     {
-      return std::abs(v1 - v0) <= 0.5 * std::abs(v0) &&
-             std::abs(v2 - v1) <= 0.5 * std::abs(v1);
+      return std::abs(v[1] - v[0]) <= std::abs(v[0]) / 2 &&
+             std::abs(v[2] - v[1]) <= std::abs(v[1]) / 2;
+    }
+
+    //! Accentuate smaller zeros.
+    auto stage1() -> void
+    {
+      K0 = K0_polynomial(P);
+      for (int i = 1; i < M; ++i)
+        K0 = K1_no_shift_polynomial(K0, P);
+    }
+
+    //! Determine convergence type.
+    auto stage2() -> void
+    {
+      determine_moduli_lower_bound();
+
+      // Stage 2 must be able to determine the convergence.
+      while (cvg_type == NoConvergence)
+      {
+        // Choose roots randomly on the circle of radius beta.
+        form_quadratic_divisor_sigma();
+
+        // Do it only once.
+        evaluate_polynomial_at_divisor_roots();
+
+        auto t = std::array<std::complex<double>, 3>{{0., 0., 0.}};
+        auto v = std::array<double, 3>{0, 0, 0};
+
+        // Determine convergence type.
+        for (int i = M; i < L; ++i)
+        {
+          evaluate_shift_polynomial_at_divisor_roots();
+
+          calculate_coefficients_of_linear_remainders();
+          calculate_next_shift_polynomial();
+
+          t[0] = t[1];
+          t[1] = t[2];
+          t[2] = s1 - P_s1 / K0_s1;
+
+          v[0] = v[1];
+          v[1] = v[2];
+          v[2] = sigma[2];
+
+          K0 = K1;
+
+          if (i < M + 3)
+            continue;
+
+          if (check_convergence_linear_factor(t))
+          {
+            cvg_type = LinearFactor;
+            break;
+          }
+
+          if (check_convergence_quadratic_factor(v))
+          {
+            cvg_type = QuadraticFactor;
+            break;
+          }
+        }
+
+        // The while loop will keep going if cvg_type is NoConvergence.
+      }
+    }
+
+    auto stage3() -> void
+    {
+      auto t = std::array<std::complex<double>, 3>{{0., 0., 0.}};
+      auto v = std::array<double, 3>{0, 0, 0};
+
+      evaluate_polynomial_at_divisor_roots();
+      evaluate_shift_polynomial_at_divisor_roots();
+      auto s_i = std::real(s1 - P_s1 / K0_s1);
+      auto v_i = sigma[2];
+
+      // Determine convergence type.
+      while (true)
+      {
+        evaluate_polynomial_at_divisor_roots();
+        evaluate_shift_polynomial_at_divisor_roots();
+
+        calculate_coefficients_of_linear_remainders();
+        calculate_next_shift_polynomial();
+        calculate_next_quadratic_divisor();
+
+        if (cvg_type == LinearFactor)
+        {
+          s_i -= -P(s_i) / K1(s_i);
+          // Check convergence.
+        }
+
+        if (cvg_type == QuadraticFactor)
+        {
+          v_i = sigma[2];
+          // Check convergence.
+        }
+
+        // Update K0.
+        K0 = K1;
+
+        //
+      }
+
+      // TODO: deflate polynomial and restart again.
     }
   };
 

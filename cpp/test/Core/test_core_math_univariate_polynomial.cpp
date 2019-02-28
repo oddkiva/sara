@@ -43,6 +43,11 @@ BOOST_AUTO_TEST_CASE(test_polynomial_arithmetics)
   BOOST_CHECK_EQUAL(res.first.degree(), 2);
   BOOST_CHECK_EQUAL(res.second.degree(), 0);
 
+  BOOST_CHECK_EQUAL((P / 2)[3], 0.5);
+
+  BOOST_CHECK_EQUAL(P(0), 12);
+  BOOST_CHECK_EQUAL(Q(0), 3);
+
   //cout << "P(2) = " << P(2) << endl;
   BOOST_CHECK_CLOSE(P(2), 0, std::numeric_limits<double>::epsilon());
 

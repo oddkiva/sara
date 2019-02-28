@@ -118,6 +118,10 @@ namespace DO { namespace Sara {
     auto operator/(const coeff_type& other) const
       -> UnivariatePolynomial
     {
+      auto res = *this;
+      for (auto& c: res._coeff)
+        c /= other;
+      return res;
     }
 
     UnivariatePolynomial operator-() const
@@ -132,6 +136,9 @@ namespace DO { namespace Sara {
     template <typename T>
     auto operator()(const T& x0) const -> decltype(coeff_type{} + T{})
     {
+      if (x0 == T(0))
+        return _coeff[0];
+
       using result_type = decltype(coeff_type{} + T{});
       auto b = result_type(_coeff[degree()]);
       for (auto i = 1u; i < _coeff.size(); ++i)
