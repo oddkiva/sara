@@ -1,6 +1,4 @@
-#include <DO/Sara/Core/EigenExtension.hpp>
-#include <DO/Sara/Core/Math/NewtonRaphson.hpp>
-#include <DO/Sara/Core/Math/UnivariatePolynomial.hpp>
+#include <DO/Sara/Core/Math/JenkinsTraub.hpp>
 
 #include <complex>
 #include <ctime>
@@ -94,65 +92,46 @@ namespace DO { namespace Sara {
     return derivative(P) / P.degree();
   }
 
-  // Fixed-shift process.
-  struct Stage2
-  {
-    enum ConvergenceType : std::uint8_t
+
+  namespace detail {
+
+    TargetPolynomial::TargetPolynomial(const UnivariatePolynomial<double>& P)
+      : P{P}
     {
-      NoConvergence = 0,
-      LinearFactor = 1,
-      QuadraticFactor = 2
-    };
-
-    ConvergenceType cvg_type{NoConvergence};
-
-    //! @{
-    //! @brief parameters.
-    int M{5};
-    int L{20};
-
-    std::random_device rd;
-    std::mt19937 gen;
-    std::uniform_real_distribution<> dist{0, 94.0};
-    double beta;
-    //! @}
-
-    //! The polynomial of which we want to find the roots.
-    UnivariatePolynomial<double>& P;
-    //! P(s1) and P(s2).
-    std::complex<double>& P_s1;
-    std::complex<double>& P_s2;
-
-    //! Quadratic real polynomial divisor.
-    UnivariatePolynomial<double>& sigma;
-    //! The roots of sigma.
-    std::complex<double>& s1;
-    std::complex<double>& s2;
-
-    //! Stage 2: fixed-shift polynomial.
-    //! Stage 3: variable-shift polynomial.
-    UnivariatePolynomial<double> K0;
-    UnivariatePolynomial<double> K1;
-    //! K0(s1) and K0(s2)
-    std::complex<double>& K0_s1;
-    std::complex<double>& K0_s2;
-    //! Auxiliary variables.
-    double a, b, c, d;
-    double u, v;
-    UnivariatePolynomial<double> Q_P, P_r;
-    UnivariatePolynomial<double> Q_K0, K0_r;
-
-    //! Fixed-shift coefficients to update sigma.
-    MatrixXcd K1_{3, 2};
-
-    // 1. Determine moduli lower bound $\beta$.
-    auto determine_moduli_lower_bound() -> void
-    {
-      beta = compute_moduli_lower_bound(P);
     }
 
-    // 2. Form polynomial sigma(z).
-    auto form_quadratic_divisor_sigma() -> void
+    auto TargetPolynomial::evaluate_at_divisor_roots(
+        const QuadraticRealDivisor& sigma) -> void
+    {
+      P_s1 = P(sigma.s1);
+      P_s2 = P(sigma.s2);
+    }
+
+
+    QuadraticRealDivisor::QuadraticRealDivisor(
+        const UnivariatePolynomial<double>& P)
+      : P{P}
+    {
+      beta = compute_moduli_lower_bound(P);
+      initialize_randomly();
+    }
+
+    QuadraticRealDivisor::operator const UnivariatePolynomial<double>&() const
+    {
+      return sigma;
+    }
+
+    auto QuadraticRealDivisor::u() const -> const double&
+    {
+      return sigma[1];
+    }
+
+    auto QuadraticRealDivisor::v() const -> const double&
+    {
+      return sigma[0];
+    }
+
+    auto QuadraticRealDivisor::initialize_randomly() -> void
     {
       constexpr auto i = std::complex<double>{0, 1};
 
@@ -163,23 +142,61 @@ namespace DO { namespace Sara {
       sigma = Z.pow<double>(2) - 2 * std::real(s1) * Z + std::real(s1 * s2);
     }
 
-    // 3.1 Evaluate the polynomial at divisor roots.
-    auto evaluate_polynomial_at_divisor_roots() -> void
+    auto QuadraticRealDivisor::update(const ShiftPolynomial& K) -> void
     {
-      P_s1 = P(s1);
-      P_s2 = P(s1);
+      const auto& K0 = K.K0;
+      const auto& a = K.a;
+      const auto& b = K.b;
+      const auto& c = K.c;
+      const auto& d = K.d;
+      const auto& u = this->u();
+      const auto& v = this->v();
+
+      const auto b1 = -K0[0] / P[0];
+      const auto b2 = K0[1] + b1 * P[1] / P[0];
+
+      const auto a1 = b * c - a * d;
+      const auto a2 = a * c + u * a * d + v * b * d;
+
+      const auto c2 = b1 * a2;
+      const auto c3 = b1 * b1 * (a * a + u * a * b + v * b * b);
+      const auto c4 = v * b2 * a1 - c2 - c3;
+      const auto c1 = c * c + u * c * d + v * d * d +
+                      b1 * (a * c + u * b * c + v * b * d) - c4;
+
+      const auto delta_u = -(u * (c2 + c3) + v * (b1 * a1 + b2 * a2)) / c1;
+      const auto delta_v = v * c4 / c1;
+
+      // sigma = Z.pow<double>(2) + (u + delta_u) * Z + v + delta_v;
+      sigma[0] = v + delta_v;
+      sigma[1] = u + delta_u;
+      sigma[2] = 1.;
     }
 
-    // 3.2 Evaluate the fixed-shift polynomial at divisor roots.
-    auto evaluate_shift_polynomial_at_divisor_roots() -> void
+
+    ShiftPolynomial::ShiftPolynomial(const UnivariatePolynomial<double>& P)
+      : P{P}
     {
-      K0_s1 = K0(s1);
-      K0_s2 = K0(s1);
     }
 
-    // 3.3 Calculate coefficient of linear remainders (cf. formula 9.7).
-    auto calculate_coefficients_of_linear_remainders() -> void
+    auto ShiftPolynomial::evaluate_at_divisor_roots(const QuadraticRealDivisor& sigma)
+        -> void
     {
+      K0_s1 = K0(sigma.s1);
+      K0_s2 = K0(sigma.s2);
+    }
+
+    auto ShiftPolynomial::calculate_coefficients_of_linear_remainders(
+        const TargetPolynomial& P,          //
+        const QuadraticRealDivisor& sigma)  //
+        -> void
+    {
+      const auto& s1 = sigma.s1;
+      const auto& s2 = sigma.s2;
+
+      const auto& P_s1 = P.P_s1;
+      const auto& P_s2 = P.P_s2;
+
       // See stage 2 formula (9.7) (page 563).
       Matrix4cd M;
       Vector4cd y;
@@ -197,14 +214,13 @@ namespace DO { namespace Sara {
       b = std::real(x[1]);
       c = std::real(x[2]);
       d = std::real(x[3]);
-
-      u = -std::real(s1 + s2);
-      v = std::real(s1 * s2);
     }
 
-    // 3.4 Calculate the next fixed/variable-shift polynomial (cf. formula 9.8).
-    auto calculate_next_shift_polynomial() -> void
+    auto ShiftPolynomial::update(const QuadraticRealDivisor& sigma) -> void
     {
+      const auto& v = sigma.u();
+      const auto& u = sigma.v();
+
       P_r = b * (Z + u) + a;
       K0_r = c * (Z + u) + d;
 
@@ -218,148 +234,50 @@ namespace DO { namespace Sara {
       K1 = c1 * Q_K0 + (Z - c2) * Q_P + b;
     }
 
-    // 3.5 Calculate the new quadratic polynomial sigma (cf. formula 6.7).
-    // cf. formula from Jenkins PhD dissertation.
-    auto calculate_next_quadratic_divisor() -> void
+  }  /* namespace detail */
+
+
+  //! Used for stage 2.
+  struct WeakConvergenceTest
+  {
+    enum ConvergenceType : std::uint8_t
     {
-      const auto b1 = -K0[0] / P[0];
-      const auto b2 = K0[1] + b1 * P[1] / P[0];
+      NoConvergence = 0,
+      LinearFactor = 1,
+      QuadraticFactor = 2
+    };
 
-      const auto a1 = b * c - a * d;
-      const auto a2 = a * c + u * a * d + v * b * d;
-
-      const auto c2 = b1 * a2;
-      const auto c3 = b1 * b1 * (a * a + u * a * b + v * b * b);
-      const auto c4 = v * b2 * a1 - c2 - c3;
-      const auto c1 = c * c + u * c * d + v * d * d +
-                      b1 * (a * c + u * b * c + v * b * d) - c4;
-
-      const auto delta_u = -(u * (c2 + c3) + v * (b1 * a1 + b2 * a2)) / c1;
-      const auto delta_v = v * c4 / c1;
-
-      sigma[0] = v + delta_v;
-      sigma[1] = u + delta_u;
-      sigma[2] = 1.0;
+    template <typename T>
+    inline auto impl(const std::array<T, 3>& seq) const -> bool
+    {
+      return std::abs(seq[1] - seq[0]) <= std::abs(seq[0]) / 2 &&
+             std::abs(seq[2] - seq[1]) <= std::abs(seq[1]) / 2;
     }
 
-    auto check_convergence_linear_factor(
-        const std::array<std::complex<double>, 3>& t) -> bool
+    auto linear_convergence(const std::array<double, 3>& t) const -> bool
     {
-      return std::abs(t[1] - t[0]) <= std::abs(t[0]) / 2 &&
-             std::abs(t[2] - t[1]) <= std::abs(t[1]) / 2;
+      return impl<double>(t);
     }
 
-    auto check_convergence_quadratic_factor(const std::array<double, 3>& v)
+    auto
+    quadratic_convergence(const std::array<std::complex<double>, 3>& t) const
         -> bool
     {
-      return std::abs(v[1] - v[0]) <= std::abs(v[0]) / 2 &&
-             std::abs(v[2] - v[1]) <= std::abs(v[1]) / 2;
-    }
-
-    //! Accentuate smaller zeros.
-    auto stage1() -> void
-    {
-      K0 = K0_polynomial(P);
-      for (int i = 1; i < M; ++i)
-        K0 = K1_no_shift_polynomial(K0, P);
-    }
-
-    //! Determine convergence type.
-    auto stage2() -> void
-    {
-      determine_moduli_lower_bound();
-
-      // Stage 2 must be able to determine the convergence.
-      while (cvg_type == NoConvergence)
-      {
-        // Choose roots randomly on the circle of radius beta.
-        form_quadratic_divisor_sigma();
-
-        // Do it only once.
-        evaluate_polynomial_at_divisor_roots();
-
-        auto t = std::array<std::complex<double>, 3>{{0., 0., 0.}};
-        auto v = std::array<double, 3>{0, 0, 0};
-
-        // Determine convergence type.
-        for (int i = M; i < L; ++i)
-        {
-          evaluate_shift_polynomial_at_divisor_roots();
-
-          calculate_coefficients_of_linear_remainders();
-          calculate_next_shift_polynomial();
-
-          t[0] = t[1];
-          t[1] = t[2];
-          t[2] = s1 - P_s1 / K0_s1;
-
-          v[0] = v[1];
-          v[1] = v[2];
-          v[2] = sigma[2];
-
-          K0 = K1;
-
-          if (i < M + 3)
-            continue;
-
-          if (check_convergence_linear_factor(t))
-          {
-            cvg_type = LinearFactor;
-            break;
-          }
-
-          if (check_convergence_quadratic_factor(v))
-          {
-            cvg_type = QuadraticFactor;
-            break;
-          }
-        }
-
-        // The while loop will keep going if cvg_type is NoConvergence.
-      }
-    }
-
-    auto stage3() -> void
-    {
-      auto t = std::array<std::complex<double>, 3>{{0., 0., 0.}};
-      auto v = std::array<double, 3>{0, 0, 0};
-
-      evaluate_polynomial_at_divisor_roots();
-      evaluate_shift_polynomial_at_divisor_roots();
-      auto s_i = std::real(s1 - P_s1 / K0_s1);
-      auto v_i = sigma[2];
-
-      // Determine convergence type.
-      while (true)
-      {
-        evaluate_polynomial_at_divisor_roots();
-        evaluate_shift_polynomial_at_divisor_roots();
-
-        calculate_coefficients_of_linear_remainders();
-        calculate_next_shift_polynomial();
-        calculate_next_quadratic_divisor();
-
-        if (cvg_type == LinearFactor)
-        {
-          s_i -= -P(s_i) / K1(s_i);
-          // Check convergence.
-        }
-
-        if (cvg_type == QuadraticFactor)
-        {
-          v_i = sigma[2];
-          // Check convergence.
-        }
-
-        // Update K0.
-        K0 = K1;
-
-        //
-      }
-
-      // TODO: deflate polynomial and restart again.
+      return impl<std::complex<double>>(t);
     }
   };
+
+
+  //! Accentuate smaller zeros.
+  auto stage1(UnivariatePolynomial<double>& K0,       //
+              const UnivariatePolynomial<double>& P,  //
+              int M)                                  //
+      -> void
+  {
+    K0 = K0_polynomial(P);
+    for (int i = 1; i < M; ++i)
+      K0 = K1_no_shift_polynomial(K0, P);
+  }
 
 } /* namespace Sara */
 } /* namespace DO */
