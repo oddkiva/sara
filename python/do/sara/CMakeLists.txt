@@ -46,7 +46,7 @@ target_link_libraries(pysara
 if (SARA_BUILD_VIDEOIO)
   target_link_libraries(pysara DO_Sara_VideoIO)
 
-  if (UNIX)
+  if (UNIX AND NOT APPLE)
     target_link_libraries(pysara rt)
   endif ()
 endif ()

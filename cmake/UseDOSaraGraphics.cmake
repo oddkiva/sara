@@ -11,8 +11,7 @@ if (DEFINED ENV{QTDIR})
   list(APPEND CMAKE_PREFIX_PATH $ENV{QTDIR})
 endif ()
 
-find_package(Qt5Widgets REQUIRED)
-find_package(Qt5OpenGL REQUIRED)
+find_package(Qt5 COMPONENTS Widgets OpenGL REQUIRED)
 find_package(OpenGL REQUIRED)
 
 add_definitions(${Qt5Widgets_DEFINITIONS})

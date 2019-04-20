@@ -16,6 +16,6 @@ foreach (file ${test_core_SOURCE_FILES})
 endforeach ()
 
 
-if (UNIX)
+if (UNIX AND NOT APPLE)
   target_link_libraries(test_core_ipc_cond1 rt)
 endif ()

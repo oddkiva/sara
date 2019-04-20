@@ -2,9 +2,11 @@
 #include <DO/Sara/Core/Math/NewtonRaphson.hpp>
 #include <DO/Sara/Core/Math/UnivariatePolynomial.hpp>
 
+#include <array>
 #include <complex>
 #include <ctime>
 #include <memory>
+#include <random>
 
 
 namespace DO { namespace Sara {
@@ -113,7 +115,7 @@ namespace DO { namespace Sara {
 
     std::random_device rd;
     std::mt19937 gen;
-    std::uniform_real_distribution<> dist{0, 94.0};
+    std::uniform_real_distribution<> dist{0.0, 94.0};
     double beta;
     //! @}
 

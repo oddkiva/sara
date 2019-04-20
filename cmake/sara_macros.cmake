@@ -23,18 +23,12 @@ endfunction ()
 macro (sara_dissect_version)
   # Retrieve the build number.
   execute_process(
-    COMMAND git rev-list --count HEAD
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    OUTPUT_VARIABLE GIT_REV_NUMBER
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-  execute_process(
     COMMAND git rev-parse --short HEAD
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     OUTPUT_VARIABLE GIT_COMMIT_HASH
     OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-  set (DO_Sara_BUILD_NUMBER "${GIT_REV_NUMBER}.r${GIT_COMMIT_HASH}")
+  set (DO_Sara_BUILD_NUMBER "r${GIT_COMMIT_HASH}")
 
   # Build the version.
   set(DO_Sara_VERSION
