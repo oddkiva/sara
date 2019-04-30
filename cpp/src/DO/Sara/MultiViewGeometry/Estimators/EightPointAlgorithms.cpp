@@ -1,5 +1,3 @@
-#pragma once
-
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/EigenExtension.hpp>
 
