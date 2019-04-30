@@ -1,11 +1,14 @@
-#include <memory>
-
 #include <DO/Sara/Core.hpp>
 #include <DO/Sara/Core/Tensor.hpp>
 
-#include <hdf5/serial/H5Cpp.h>
+#if defined(__APPLE__)
+# include <H5Cpp.h>
+#else
+# include <hdf5/serial/H5Cpp.h>
+#endif
 
 #include <array>
+#include <memory>
 
 
 constexpr auto filepath = "data.h5";
@@ -95,7 +98,8 @@ void read_data()
   // Retrieve the data endianness.
   auto order_string = H5std_string{};
   auto order = float_type.getOrder(order_string);
-  std::cout << order_string << std::endl;
+  std::cout << "order_string = " << order_string << std::endl;
+  std::cout << "order = " << order << std::endl;
 
   // Number of elements.
   auto size = float_type.getSize();
@@ -135,22 +139,22 @@ int main()
   }
   catch (H5::FileIException& e)
   {
-    e.printError();
+    e.printErrorStack();
     return -1;
   }
   catch (H5::DataSetIException& e)
   {
-    e.printError();
+    e.printErrorStack();
     return -1;
   }
   catch (H5::DataSpaceIException& e)
   {
-    e.printError();
+    e.printErrorStack();
     return -1;
   }
   catch (H5::DataTypeIException& e)
   {
-    e.printError();
+    e.printErrorStack();
     return -1;
   }
 

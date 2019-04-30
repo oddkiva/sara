@@ -25,6 +25,10 @@ function build_library()
   cmake_options+="-DSARA_BUILD_TESTS=ON "
   cmake_options+="-DSARA_BUILD_SAMPLES=ON "
 
+  if [ "$(uname -s)" == "Darwin" ]; then
+    cmake_options+="-DQt5_DIR=$(brew --prefix qt)/lib/cmake/Qt5 "
+  fi
+
   # Generate makefile project.
   cmake ../sara ${cmake_options}
 

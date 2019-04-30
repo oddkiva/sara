@@ -115,7 +115,7 @@ int main(int argc, char** argv)
     std::uint8_t buffer;
     zmq_recv(responder, &buffer, 1, 0);
     std::cout << "[C++] Received " << buffer << std::endl;
-    
+
     std::cout << "[C++] ";
     for (int i = 0; i < 10; ++i)
       std::cout << (*image_data)[i] << " ";
