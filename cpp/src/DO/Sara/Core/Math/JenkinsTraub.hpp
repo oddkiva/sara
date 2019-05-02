@@ -6,7 +6,6 @@
 #include <complex>
 #include <ctime>
 #include <memory>
-#include <random>
 
 
 namespace DO::Sara {
@@ -42,13 +41,6 @@ namespace DO::Sara {
 
       //! @brief Lower bound of root moduli of polynomial P.
       double beta;
-
-      //! @{
-      //! @brief Random engine to initialize the roots s1 and s2.
-      std::random_device rd;
-      std::mt19937 gen;
-      std::uniform_real_distribution<> dist{0, 94.0};
-      //! @}
 
       // 1. Determine moduli lower bound $\beta$.
       QuadraticRealDivisor(const UnivariatePolynomial<double>& P);
@@ -118,16 +110,6 @@ namespace DO::Sara {
                               const UnivariatePolynomial<double>& P)
       -> UnivariatePolynomial<double>;
 
-  auto K1_stage1(const UnivariatePolynomial<double>& K0,
-                 const UnivariatePolynomial<double>& P)
-      -> UnivariatePolynomial<double>;
-
-  auto K1_stage2(const UnivariatePolynomial<double>& K0,
-                 const UnivariatePolynomial<double>& P,
-                 const UnivariatePolynomial<double>& sigma,
-                 const std::complex<double>& s1, const std::complex<double>& s2)
-      -> UnivariatePolynomial<double>;
-
 
   struct JenkinsTraub
   {
@@ -145,11 +127,8 @@ namespace DO::Sara {
     int M{5};
     int L{20};
 
-    std::random_device rd;
-    std::mt19937 gen;
-    std::uniform_real_distribution<> dist{0.0, 94.0};
+    //! @brief Lower bound of root moduli of polynomial P.
     double beta;
-    //! @}
 
     //! The polynomial of which we want to find the roots.
     UnivariatePolynomial<double> P;
@@ -218,6 +197,7 @@ namespace DO::Sara {
     //! Determine convergence type.
     auto stage2() -> void;
 
+    double s_i;
     auto stage3() -> void;
   };
 

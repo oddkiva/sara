@@ -97,15 +97,29 @@ BOOST_AUTO_TEST_CASE(test_compute_moduli_lower_bound)
 
 BOOST_AUTO_TEST_CASE(test_jenkins_traub_stage_1)
 {
-  auto P = (Z - 2.) * (Z - 2.) * (Z + 3.);
+  auto P = //(Z - 0.000000123) * (Z - 0.0000001230001) * (Z - 0.00199999);// *
+           //(Z - 0.0021) * (Z - 0.0537) * (Z - 0.2) *
+           (Z - 1.0000001) *
+           (Z - 2.) *
+           (Z + 3.) *
+           (Z - 10.);
+
+  //auto P = (Z - 10.) * (Z - 200.) * (Z - 100000.);
+  auto max_coeff = 0.;
+  for (auto i = 0; i <= P.degree(); ++i)
+    max_coeff = std::max(max_coeff, P[i]);
+  P = P / max_coeff;
+
   cout << "P = " << P << endl;
   cout << "P(0) = " << P(0) << endl;
 
   JenkinsTraub rpoly{P};
   rpoly.stage1();
-
   rpoly.stage2();
   rpoly.stage3();
+  //auto newton_raphson = NewtonRaphson<double>{P};
+  //auto s = newton_raphson(rpoly.s_i, 50);
+  //cout << s << endl;
 }
 
 BOOST_AUTO_TEST_SUITE_END()
