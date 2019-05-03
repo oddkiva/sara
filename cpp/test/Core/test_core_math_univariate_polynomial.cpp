@@ -74,8 +74,8 @@ BOOST_AUTO_TEST_CASE(test_newton_raphson)
 
   auto z = 1.1;
   auto newton_raphson = NewtonRaphson<double>{P};
-  z = newton_raphson(z, 100);
-  //cout << setprecision(12) << std::abs(z - 2) << endl;
+  z = newton_raphson(z, 100, numeric_limits<double>::epsilon());
+  cout << setprecision(12) << std::abs(z - 2) << endl;
 
   BOOST_CHECK_CLOSE(z, 2, 1e-6);
 }
@@ -97,29 +97,39 @@ BOOST_AUTO_TEST_CASE(test_compute_moduli_lower_bound)
 
 BOOST_AUTO_TEST_CASE(test_jenkins_traub_stage_1)
 {
-  auto P = //(Z - 0.000000123) * (Z - 0.0000001230001) * (Z - 0.00199999);// *
-           //(Z - 0.0021) * (Z - 0.0537) * (Z - 0.2) *
-           (Z - 1.0000001) *
-           (Z - 2.) *
-           (Z + 3.) *
-           (Z - 10.);
+  //auto P = (Z - 0.000000123) * (Z - 0.0000001230001) * (Z - 0.00199999);// *
+  //         (Z - 0.0021) * (Z - 0.0537) * (Z - 0.2) *
+  //         (Z - 1.0000001) *
+  //         (Z - 2.) *
+  //         (Z + 3.) *
+  //         (Z - 10.);
 
-  //auto P = (Z - 10.) * (Z - 200.) * (Z - 100000.);
-  auto max_coeff = 0.;
-  for (auto i = 0; i <= P.degree(); ++i)
-    max_coeff = std::max(max_coeff, P[i]);
-  P = P / max_coeff;
+  //auto P = Z.pow<double>(7)             //
+  //         - 6.01 * Z.pow<double>(6)    //
+  //         + 12.54 * Z.pow<double>(5)   //
+  //         - 8.545 * Z.pow<double>(4)   //
+  //         - 5.505 * Z.pow<double>(3)   //
+  //         + 12.545 * Z.pow<double>(2)  //
+  //         - 8.035 * Z                  //
+  //         + 2.01;
 
-  cout << "P = " << P << endl;
-  cout << "P(0) = " << P(0) << endl;
+  //auto P =  //
+  //          //(Z.pow<double>(2) - 1. * Z + 0.5) *  //
+  //    //(Z - 1.) *  //
+  //    //(Z - 1.) *  //
+  //    (Z + 5.) *  //
+  //    (Z - 2.) *  //
+  //    (Z - 2.01) * (Z + 10000.);
+
+  auto P = //(Z - 1.23e-4) *  //
+           (Z - 1.23e-1) *  //
+           (Z - 1.23e+2) *  //
+           (Z - 1.23e+5);
 
   JenkinsTraub rpoly{P};
   rpoly.stage1();
   rpoly.stage2();
-  rpoly.stage3();
-  //auto newton_raphson = NewtonRaphson<double>{P};
-  //auto s = newton_raphson(rpoly.s_i, 50);
-  //cout << s << endl;
+  //rpoly.stage3();
 }
 
 BOOST_AUTO_TEST_SUITE_END()

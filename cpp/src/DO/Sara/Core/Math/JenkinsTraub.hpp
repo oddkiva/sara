@@ -126,6 +126,7 @@ namespace DO::Sara {
     //! @brief parameters.
     int M{5};
     int L{20};
+    int max_iter{10000000};
 
     //! @brief Lower bound of root moduli of polynomial P.
     double beta;
@@ -176,28 +177,62 @@ namespace DO::Sara {
     auto evaluate_shift_polynomial_at_divisor_roots() -> void;
 
     // 3.3 Calculate coefficient of linear remainders (cf. formula 9.7).
-    auto calculate_coefficients_of_linear_remainders() -> void;
+    auto calculate_coefficients_of_linear_remainders_of_P() -> void;
+    auto calculate_coefficients_of_linear_remainders_of_K() -> void;
 
     // 3.4 Calculate the next fixed/variable-shift polynomial (cf. formula 9.8).
     auto calculate_next_shift_polynomial() -> void;
 
     // 3.5 Calculate the new quadratic polynomial sigma (cf. formula 6.7).
     // cf. formula from Jenkins PhD dissertation.
-    auto calculate_next_quadratic_divisor() -> void;
+    auto calculate_next_shifted_quadratic_divisor() -> void;
 
-    auto check_convergence_linear_factor(
-        const std::array<std::complex<double>, 3>& t) -> bool;
+    template <typename T>
+    auto weak_convergence_predicate(const std::array<T, 3>& t) -> bool
+    {
+      return std::abs(t[1] - t[0]) <= std::abs(t[0]) / 2 &&
+             std::abs(t[2] - t[1]) <= std::abs(t[1]) / 2;
+    }
 
-    auto check_convergence_quadratic_factor(const std::array<double, 3>& v)
-        -> bool;
+    // Shamelessly taken from Rpoly++ written Chris Sweeney.
+    //
+    // Nikolajsen, Jorgen L. "New stopping criteria for iterative root finding."
+    // Royal Society open science (2014)
+    template <typename T>
+    auto nikolajsen_root_convergence_predicate(const std::array<T, 3>& roots)
+        -> bool
+    {
+      constexpr auto root_mag_tol = 1e-8;
+      constexpr auto abs_tol = 1e-14;
+      constexpr auto rel_tol = 1e-10;
+
+      const auto e_i = std::abs(roots[2] - roots[1]);
+      const auto e_i_minus_1 = std::abs(roots[1] - roots[0]);
+      const auto mag_root = std::abs(roots[1]);
+      if (e_i <= e_i_minus_1)
+      {
+        if (mag_root < root_mag_tol)
+          return e_i < abs_tol;
+        else
+          return e_i / mag_root <= rel_tol;
+      }
+
+      return false;
+    }
 
     //! Accentuate smaller zeros.
     auto stage1() -> void;
 
+    //! @{
+    //! @brief For stage 2 and 3.
+    UnivariatePolynomial<double> sigma_shifted;
+    double s_i;
+    double v_i;
+    //! @}
+
     //! Determine convergence type.
     auto stage2() -> void;
 
-    double s_i;
     auto stage3() -> void;
   };
 
