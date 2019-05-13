@@ -30,13 +30,19 @@ namespace DO { namespace Sara {
       -> double
   {
     auto Q = P;
-    Q[0] = -std::abs(Q[0] / Q[Q.degree()]);
+    Q[0] = -std::abs(Q[0]);
     for (int i = 1; i <= Q.degree(); ++i)
-      Q[i] = std::abs(Q[i] / Q[Q.degree()]);
+      Q[i] = std::abs(Q[i]);
+
+    std::cout << "Compute moduli lower bound" << std::endl;
+    std::cout << "P[X] = " << P << std::endl;
+    std::cout << "Q[X] = " << Q << std::endl;
 
     auto x = 1.;
     auto newton_raphson = NewtonRaphson<double>{Q};
-    x = newton_raphson(x, 100, 1e-3);
+    x = newton_raphson(x, 100, 1e-2);
+
+    cout << "root radius = " << x << endl;
 
     return x;
   }
@@ -69,10 +75,10 @@ namespace DO { namespace Sara {
   {
     beta = compute_moduli_lower_bound(P);
 
-#ifdef DEBUG_JT
+//#ifdef DEBUG_JT
     std::cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] "
               << "root radius of sigma = " << beta << std::endl;
-#endif
+//#endif
   }
 
   auto JenkinsTraub::form_quadratic_divisor_sigma() -> void
@@ -85,22 +91,24 @@ namespace DO { namespace Sara {
 
     sigma = Z.pow<double>(2) - 2 * std::real(s1) * Z + std::real(s1 * s2);
 
-#ifdef DEBUG_JT
+//#ifdef DEBUG_JT
     std::cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] "
               << "sigma[X] = " << sigma << endl;
     std::cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] "
               << "s1 = " << s1 << endl;
     std::cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] "
               << "s2 = " << s2 << endl;
-#endif
+//#endif
 
     u = sigma[1];
     v = sigma[0];
 
+#ifdef DEBUG_JT
     std::cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] "
               << "  u = " << u << endl;
     std::cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] "
               << "  v = " << v << endl;
+#endif
   }
 
   auto JenkinsTraub::evaluate_polynomial_at_divisor_roots() -> void
@@ -125,23 +133,35 @@ namespace DO { namespace Sara {
 
   auto JenkinsTraub::calculate_coefficients_of_linear_remainders_of_P() -> void
   {
+#ifdef DEBUG_JT
+    cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] "
+         << "P_r = " << P_r << endl;
+#endif
     b = P_r[1];
     a = P_r[0] - b * u;
 
 #ifdef DEBUG_JT
-    cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] " << "a = " << a << endl;
-    cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] " << "b = " << b << endl;
+    cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] "
+         << "a = " << a << endl;
+    cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] "
+         << "b = " << b << endl;
 #endif
   }
 
   auto JenkinsTraub::calculate_coefficients_of_linear_remainders_of_K() -> void
   {
+#ifdef DEBUG_JT
+    cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] "
+         << "K0_r = " << K0_r << endl;
     d = K0_r[1];
+#endif
     c = K0_r[0] - d * u;
 
 #ifdef DEBUG_JT
-    cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] " << "c = " << c << endl;
-    cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] " << "d = " << d << endl;
+    cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] "
+         << "c = " << c << endl;
+    cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] "
+         << "d = " << d << endl;
 #endif
   }
 
@@ -206,6 +226,7 @@ namespace DO { namespace Sara {
 
   auto JenkinsTraub::stage1() -> void
   {
+    cout << "P[X] = " << P << endl;
     cout << "[STAGE 1] " << endl;
     cout << "[ITER] " << 0 << endl;
     K0 = K0_polynomial(P);
@@ -239,8 +260,6 @@ namespace DO { namespace Sara {
       sigma_shifted = sigma;
       auto t = std::array<std::complex<double>, 3>{{0., 0., 0}};
       auto v = std::array<double, 3>{0, 0, 0};
-
-      K0 = K0 / K0[K0.degree()];
 
       // Determine convergence type.
       int i = M;
@@ -297,6 +316,7 @@ namespace DO { namespace Sara {
           cout << "v_i = " << v[2] << endl;
           break;
         }
+
       }
 
       L = i;
@@ -344,8 +364,12 @@ namespace DO { namespace Sara {
 
       if (cvg_type == LinearFactor)
       {
+        std::cout << "  P_r(s_i) = "
+                  << "P_r(" << s_i << ") = " << P_r(s_i) << std::endl;
+        std::cout << "  P(s_i) = "
+                  << "P(" << s_i << ") = " << P(s_i) << std::endl;
         s_i = s_i - P(s_i) / K1(s_i);
-        if (i % 100000 == 0)
+        //if (i % 100000 == 0)
           cout << "  s[" << i << "] = " << s_i << endl;
         z[0] = z[1];
         z[1] = z[2];
@@ -355,15 +379,24 @@ namespace DO { namespace Sara {
       if (cvg_type == QuadraticFactor)
       {
         v_i = sigma_shifted[2];
-        if (i % 100000 == 0)
+        //if (i % 100000 == 0)
           cout << "  v[" << i << "] = " << v_i << endl;
         z[0] = z[1];
         z[1] = z[2];
-        z[2] = std::abs(s1);
+        z[2] = std::abs(s1) + std::abs(s2);
       }
 
       // Update K0.
       K0 = K1;
+
+      if (std::isnan(z[2]))
+      {
+        cout << "Stopping prematuraly at iteration " << i << endl;
+        if (cvg_type == LinearFactor)
+          s_i = z[1];
+        // Finish
+        break;
+      }
 
       if (i < L + 3)
         continue;
@@ -381,8 +414,8 @@ namespace DO { namespace Sara {
     if (cvg_type == QuadraticFactor)
     {
       cout << "Sigma[X] = " << sigma_shifted << endl;
-      cout << "s1 = " << s1 << endl;
-      cout << "s2 = " << s2 << endl;
+      cout << "s1 = " << s1 << " P(s1) = " << P(s1) << endl;
+      cout << "s2 = " << s2 << " P(s2) = " << P(s2) << endl;
     }
   }
 

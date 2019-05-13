@@ -30,10 +30,11 @@ namespace DO { namespace Sara {
       auto x1 = x;
       for (auto i = 0; i < n; ++i)
       {
-        x0 = x1;
-        x1 -= p(x1) / p_prime(x1);
+        x1 = x0 - p(x0) / p_prime(x0);
         if (std::abs(x1 - x0) < eps)
           break;
+
+        x0 = x1;
       }
       return x1;
     }
