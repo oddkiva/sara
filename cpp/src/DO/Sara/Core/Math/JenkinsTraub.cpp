@@ -4,8 +4,13 @@
 
 #include <array>
 #include <ctime>
+#include <iomanip>
 #include <iostream>
 #include <memory>
+
+
+// #define SHOW_DEBUG_LOG
+#define LOG_DEBUG std::cout << "[" << __FUNCTION__ << ":" << __LINE__ << "] "
 
 
 using namespace std;
@@ -34,15 +39,19 @@ namespace DO { namespace Sara {
     for (int i = 1; i <= Q.degree(); ++i)
       Q[i] = std::abs(Q[i]);
 
-    std::cout << "Compute moduli lower bound" << std::endl;
-    std::cout << "P[X] = " << P << std::endl;
-    std::cout << "Q[X] = " << Q << std::endl;
+#ifdef SHOW_DEBUG_LOG
+    LOG_DEBUG << "Compute moduli lower bound" << std::endl;
+    LOG_DEBUG << "P[X] = " << P << std::endl;
+    LOG_DEBUG << "Q[X] = " << Q << std::endl;
+#endif
 
     auto x = 1.;
     auto newton_raphson = NewtonRaphson<double>{Q};
     x = newton_raphson(x, 100, 1e-2);
 
-    cout << "root radius = " << x << endl;
+#ifdef SHOW_DEBUG_LOG
+    LOG_DEBUG << "Moduli lower bound = " << x << endl;
+#endif
 
     return x;
   }
@@ -58,15 +67,12 @@ namespace DO { namespace Sara {
                               const UnivariatePolynomial<double>& P)
       -> UnivariatePolynomial<double>
   {
-#ifdef DEBUG_JT
-    std::cout << "[" << __FUNCTION__ << ":" << __LINE__ << "] "
-              << "P(0) = " << P(0) << std::endl;
-#endif
-
     // The two formula below are identical but the former might not very stable
     // numerically...
-    //auto K1 = ((K0 - (K0(0) / P(0)) * P) / Z).first;
+    //
+    // auto K1 = ((K0 - (K0(0) / P(0)) * P) / Z).first;
     auto K1 = ((K0 - K0(0)) / Z).first - (K0(0) / P(0)) * (P / Z).first;
+
     return K1;
   }
 
@@ -74,40 +80,29 @@ namespace DO { namespace Sara {
   auto JenkinsTraub::determine_moduli_lower_bound() -> void
   {
     beta = compute_moduli_lower_bound(P);
-
-//#ifdef DEBUG_JT
-    std::cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] "
-              << "root radius of sigma = " << beta << std::endl;
-//#endif
   }
 
   auto JenkinsTraub::form_quadratic_divisor_sigma() -> void
   {
     constexpr auto i = std::complex<double>{0, 1};
 
-    //const auto phase = dist(rd);
     s1 = beta * std::exp(i * 49. * M_PI / 180.);
     s2 = std::conj(s1);
 
     sigma = Z.pow<double>(2) - 2 * std::real(s1) * Z + std::real(s1 * s2);
 
-//#ifdef DEBUG_JT
-    std::cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] "
-              << "sigma[X] = " << sigma << endl;
-    std::cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] "
-              << "s1 = " << s1 << endl;
-    std::cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] "
-              << "s2 = " << s2 << endl;
-//#endif
+#ifdef SHOW_DEBUG_LOG
+    LOG_DEBUG << "sigma[X] = " << sigma << endl;
+    LOG_DEBUG << "s1 = " << s1 << endl;
+    LOG_DEBUG << "s2 = " << s2 << endl;
+#endif
 
     u = sigma[1];
     v = sigma[0];
 
-#ifdef DEBUG_JT
-    std::cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] "
-              << "  u = " << u << endl;
-    std::cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] "
-              << "  v = " << v << endl;
+#ifdef SHOW_DEBUG_LOG
+    LOG_DEBUG << "  u = " << u << endl;
+    LOG_DEBUG << "  v = " << v << endl;
 #endif
   }
 
@@ -115,9 +110,10 @@ namespace DO { namespace Sara {
   {
     P_s1 = P_r(s1);
     P_s2 = P_r(s2);
-#ifdef DEBUG_JT
-    cout << "  P(s1) = " << "P(" << s1 << ") = " << P_s1 << endl;
-    cout << "  P(s2) = " << "P(" << s2 << ") = " << P_s2 << endl;
+
+#ifdef SHOW_DEBUG_LOG
+    LOG_DEBUG << "  P(s1) = " << "P(" << s1 << ") = " << P_s1 << endl;
+    LOG_DEBUG << "  P(s2) = " << "P(" << s2 << ") = " << P_s2 << endl;
 #endif
   }
 
@@ -125,43 +121,40 @@ namespace DO { namespace Sara {
   {
     K0_s1 = K0_r(s2);
     K0_s2 = K0_r(s1);
-#ifdef DEBUG_JT
-    cout << "  K0(s1) = " << "K0(" << s1 << ") = " << K0_s1 << endl;
-    cout << "  K0(s2) = " << "K0(" << s2 << ") = " << K0_s2 << endl;
+
+#ifdef SHOW_DEBUG_LOG
+    LOG_DEBUG << "  K0(s1) = " << "K0(" << s1 << ") = " << K0_s1 << endl;
+    LOG_DEBUG << "  K0(s2) = " << "K0(" << s2 << ") = " << K0_s2 << endl;
 #endif
   }
 
   auto JenkinsTraub::calculate_coefficients_of_linear_remainders_of_P() -> void
   {
-#ifdef DEBUG_JT
-    cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] "
-         << "P_r = " << P_r << endl;
+#ifdef SHOW_DEBUG_LOG
+    LOG_DEBUG << "P_r = " << P_r << endl;
 #endif
+
     b = P_r[1];
     a = P_r[0] - b * u;
 
-#ifdef DEBUG_JT
-    cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] "
-         << "a = " << a << endl;
-    cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] "
-         << "b = " << b << endl;
+#ifdef SHOW_DEBUG_LOG
+    LOG_DEBUG << "a = " << a << endl;
+    LOG_DEBUG << "b = " << b << endl;
 #endif
   }
 
   auto JenkinsTraub::calculate_coefficients_of_linear_remainders_of_K() -> void
   {
-#ifdef DEBUG_JT
-    cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] "
-         << "K0_r = " << K0_r << endl;
-    d = K0_r[1];
+#ifdef SHOW_DEBUG_LOG
+    LOG_DEBUG << "K0_r = " << K0_r << endl;
 #endif
+
+    d = K0_r[1];
     c = K0_r[0] - d * u;
 
-#ifdef DEBUG_JT
-    cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] "
-         << "c = " << c << endl;
-    cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] "
-         << "d = " << d << endl;
+#ifdef SHOW_DEBUG_LOG
+    LOG_DEBUG << "c = " << c << endl;
+    LOG_DEBUG << "d = " << d << endl;
 #endif
   }
 
@@ -172,11 +165,9 @@ namespace DO { namespace Sara {
     const auto c2 = (a * c + u * a * d + v * b * d) / c0;
 
     K1 = c1 * Q_K0 + (Z - c2) * Q_P + b;
-    K1 = K1 / K1[K1.degree()];
 
-#ifdef DEBUG_JT
-    std::cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] "
-              << "K1 = " << K1 << std::endl;
+#ifdef SHOW_DEBUG_LOG
+    LOG_DEBUG << "K1 = " << K1 << std::endl;
 #endif
   }
 
@@ -195,19 +186,19 @@ namespace DO { namespace Sara {
     const auto c1 = c * c + u * c * d + v * d * d +
                     b1 * (a * c + u * b * c + v * b * d) - c4;
 
-#ifdef DEBUG_JT
-    cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] " << "b1 = " << b1 << endl;
-    cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] " << "b2 = " << b2 << endl;
+#ifdef SHOW_DEBUG_LOG
+    LOG_DEBUG << "b1 = " << b1 << endl;
+    LOG_DEBUG << "b2 = " << b2 << endl;
 
-    cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] " << "a1 = " << a1 << endl;
-    cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] " << "a2 = " << a2 << endl;
+    LOG_DEBUG << "a1 = " << a1 << endl;
+    LOG_DEBUG << "a2 = " << a2 << endl;
 
-    cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] " << "c2 = " << c2 << endl;
-    cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] " << "c3 = " << c3 << endl;
+    LOG_DEBUG << "c2 = " << c2 << endl;
+    LOG_DEBUG << "c3 = " << c3 << endl;
 
-    cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] " << "c4 = " << c4 << endl;
-    cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] " << "c1 = " << c1 << endl;
-    cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] " << "v * b2 * a1 = " << v * b2 * a1 << endl;
+    LOG_DEBUG << "c4 = " << c4 << endl;
+    LOG_DEBUG << "c1 = " << c1 << endl;
+    LOG_DEBUG << "v * b2 * a1 = " << v * b2 * a1 << endl;
 #endif
 
     const auto delta_u = -(u * (c2 + c3) + v * (b1 * a1 + b2 * a2)) / c1;
@@ -217,32 +208,31 @@ namespace DO { namespace Sara {
     sigma_shifted[1] = u + delta_u;
     sigma_shifted[2] = 1.0;
 
-#ifdef DEBUG_JT
-    cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] " << "delta_u = " << delta_u << endl;
-    cout << "  [" << __FUNCTION__ << ":" << __LINE__ << "] " << "delta_v = " << delta_v << endl;
+#ifdef SHOW_DEBUG_LOG
+    LOG_DEBUG << "delta_u = " << delta_u << endl;
+    LOG_DEBUG << "delta_v = " << delta_v << endl;
 #endif
   }
 
 
   auto JenkinsTraub::stage1() -> void
   {
-    cout << "P[X] = " << P << endl;
-    cout << "[STAGE 1] " << endl;
-    cout << "[ITER] " << 0 << endl;
+    LOG_DEBUG << "P[X] = " << P << endl;
+    LOG_DEBUG << "[STAGE 1] " << endl;
+
     K0 = K0_polynomial(P);
-    cout << "  K[0] = " << K0 << endl;
+    LOG_DEBUG << "[ITER] " << 0 << "  K[0] = " << K0 << endl;
 
     for (int i = 1; i < M; ++i)
     {
-      cout << "[ITER] " << i << endl;
       K0 = K1_no_shift_polynomial(K0, P);
-      cout << "  K[" << i << "] = " << K0 << endl;
+      LOG_DEBUG << "[ITER] " << i << "  K[" << i << "] = " << K0 << endl;
     }
   }
 
   auto JenkinsTraub::stage2() -> void
   {
-    cout << "[STAGE 2] " << endl;
+    LOG_DEBUG << "[STAGE 2] " << endl;
     determine_moduli_lower_bound();
 
     // Stage 2 must be able to determine the convergence.
@@ -252,8 +242,9 @@ namespace DO { namespace Sara {
       form_quadratic_divisor_sigma();
 
       std::tie(Q_P, P_r) = P / sigma;
-      cout << "  Q_P[X] = " << Q_P << endl;
-      cout << "  P_r[X] = " << P_r << endl;
+      LOG_DEBUG << "  Q_P[X] = " << Q_P << endl;
+      LOG_DEBUG << "  P_r[X] = " << P_r << endl;
+
       evaluate_polynomial_at_divisor_roots();
       calculate_coefficients_of_linear_remainders_of_P();
 
@@ -265,14 +256,14 @@ namespace DO { namespace Sara {
       int i = M;
       for ( ; i < L; ++i)
       {
-        cout << "[ITER] " << i << endl;
-
         std::tie(Q_K0, K0_r) = K0 / sigma;
-        cout << "  Ki[X] = " << K0 << endl;
-        cout << "  Q_Ki[X] = " << Q_K0 << endl;
-        cout << "  Ki_r[X] = " << K0_r << endl;
-        evaluate_shift_polynomial_at_divisor_roots();
 
+        LOG_DEBUG << "[ITER] " << i << endl;
+        LOG_DEBUG << "  K[" << i << "][X] = " << K0 << endl;
+        LOG_DEBUG << "  Q_K[" << i << "][X] = " << Q_K0 << endl;
+        LOG_DEBUG << "  K_r"<< i << "][X] = " << K0_r << endl;
+
+        evaluate_shift_polynomial_at_divisor_roots();
         calculate_coefficients_of_linear_remainders_of_K();
 
         t[0] = t[1];
@@ -288,13 +279,13 @@ namespace DO { namespace Sara {
 
         K0 = K1;
 
-        //cout << "  sigma[X] = " << sigma << endl;
-        cout << "  sigma_shifted[X] = " << sigma_shifted << endl;
-        cout << "  K[" << i << "] = " << K0 << endl;
+        LOG_DEBUG << "  sigma[X] = " << sigma << endl;
+        LOG_DEBUG << "  sigma_shifted[X] = " << sigma_shifted << endl;
+        LOG_DEBUG << "  K[" << i << "] = " << K0 << endl;
         for (int k = 0; k < 3; ++k)
-          cout << "  t[" << k << "] = " << t[k] << endl;
+          LOG_DEBUG << "  t[" << k << "] = " << t[k] << endl;
         for (int k = 0; k < 3; ++k)
-          cout << "  v[" << k << "] = " << v[k] << endl;
+          LOG_DEBUG << "  v[" << k << "] = " << v[k] << endl;
 
         if (i < M + 3)
           continue;
@@ -302,21 +293,24 @@ namespace DO { namespace Sara {
         if (weak_convergence_predicate(t))
         {
           cvg_type = LinearFactor;
-          cout << "Convergence to linear factor" << endl;
           s_i = std::real(t[2]);
-          cout << "s = " << s_i << endl;
+
+          LOG_DEBUG << "Convergence to linear factor" << endl;
+          LOG_DEBUG << "s = " << s_i << endl;
+
           break;
         }
 
         if (weak_convergence_predicate(v))
         {
           cvg_type = QuadraticFactor;
-          cout << "Convergence to quadratic factor" << endl;
           v_i = sigma_shifted[0];
-          cout << "v_i = " << v[2] << endl;
+
+          LOG_DEBUG << "Convergence to quadratic factor" << endl;
+          LOG_DEBUG << "v_i = " << v[2] << endl;
+
           break;
         }
-
       }
 
       L = i;
@@ -327,10 +321,10 @@ namespace DO { namespace Sara {
 
   auto JenkinsTraub::stage3() -> void
   {
-    cout << "[STAGE 3] " << endl;
+    LOG_DEBUG << "[STAGE 3] " << endl;
 
-    cout << "  s_i = " << s_i << endl;
-    cout << "  v_i = " << v_i << endl;
+    LOG_DEBUG << "  s_i = " << s_i << endl;
+    LOG_DEBUG << "  v_i = " << v_i << endl;
 
     int i = L;
 
@@ -358,32 +352,32 @@ namespace DO { namespace Sara {
       calculate_next_shift_polynomial();
       calculate_next_shifted_quadratic_divisor();
 
-      cout << "[ITER] " << i << endl;
-      cout << "  K[" << i << "] = " << K0 << endl;
-      cout << "  Sigma[" << i << "] = " << sigma_shifted << endl;
+      LOG_DEBUG << "[ITER] " << i << endl;
+      LOG_DEBUG << "  K[" << i << "] = " << K0 << endl;
+      LOG_DEBUG << "  Sigma[" << i << "] = " << sigma_shifted << endl;
 
       if (cvg_type == LinearFactor)
       {
-        std::cout << "  P_r(s_i) = "
-                  << "P_r(" << s_i << ") = " << P_r(s_i) << std::endl;
-        std::cout << "  P(s_i) = "
-                  << "P(" << s_i << ") = " << P(s_i) << std::endl;
         s_i = s_i - P(s_i) / K1(s_i);
-        //if (i % 100000 == 0)
-          cout << "  s[" << i << "] = " << s_i << endl;
         z[0] = z[1];
         z[1] = z[2];
         z[2] = s_i;
+
+        LOG_DEBUG << "  P_r(s_i) = "
+                  << "P_r(" << s_i << ") = " << P_r(s_i) << std::endl;
+        LOG_DEBUG << "  P(s_i) = "
+                  << "P(" << s_i << ") = " << P(s_i) << std::endl;
+        LOG_DEBUG << "  s[" << i << "] = " << s_i << endl;
       }
 
       if (cvg_type == QuadraticFactor)
       {
         v_i = sigma_shifted[2];
-        //if (i % 100000 == 0)
-          cout << "  v[" << i << "] = " << v_i << endl;
         z[0] = z[1];
         z[1] = z[2];
         z[2] = std::abs(s1) + std::abs(s2);
+
+        LOG_DEBUG << "  v[" << i << "] = " << v_i << endl;
       }
 
       // Update K0.
@@ -391,7 +385,7 @@ namespace DO { namespace Sara {
 
       if (std::isnan(z[2]))
       {
-        cout << "Stopping prematuraly at iteration " << i << endl;
+        LOG_DEBUG << "Stopping prematuraly at iteration " << i << endl;
         if (cvg_type == LinearFactor)
           s_i = z[1];
         // Finish
@@ -403,19 +397,19 @@ namespace DO { namespace Sara {
 
       if (nikolajsen_root_convergence_predicate(z))
       {
-        cout << "Converged at iteration " << i << endl;
+        LOG_DEBUG << "Converged at iteration " << i << endl;
         break;
       }
     }
 
     if (cvg_type == LinearFactor)
-      cout << "L[X] = X - " << s_i << endl;
+      LOG_DEBUG << "L[X] = X - " << setprecision(12) << s_i << endl;
 
     if (cvg_type == QuadraticFactor)
     {
-      cout << "Sigma[X] = " << sigma_shifted << endl;
-      cout << "s1 = " << s1 << " P(s1) = " << P(s1) << endl;
-      cout << "s2 = " << s2 << " P(s2) = " << P(s2) << endl;
+      LOG_DEBUG << "Sigma[X] = " << sigma_shifted << endl;
+      LOG_DEBUG << "s1 = " << s1 << " P(s1) = " << P(s1) << endl;
+      LOG_DEBUG << "s2 = " << s2 << " P(s2) = " << P(s2) << endl;
     }
   }
 

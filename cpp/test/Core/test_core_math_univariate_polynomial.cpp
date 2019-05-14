@@ -70,70 +70,73 @@ BOOST_AUTO_TEST_SUITE(TestJenkinsTraub)
 BOOST_AUTO_TEST_CASE(test_newton_raphson)
 {
   auto P = (Z - 2.) * (Z - 2.) * (Z + 3.);
-  //cout << "P = " << P << endl;
+  // cout << "P = " << P << endl;
 
   auto z = 1.1;
   auto newton_raphson = NewtonRaphson<double>{P};
   z = newton_raphson(z, 100, numeric_limits<double>::epsilon());
-  cout << setprecision(12) << std::abs(z - 2) << endl;
+  // cout << setprecision(12) << std::abs(z - 2) << endl;
 
   BOOST_CHECK_CLOSE(z, 2, 1e-6);
 }
 
-//BOOST_AUTO_TEST_CASE(test_compute_moduli_lower_bound)
-//{
-//  {
-//    auto P = 20. * (Z + 1.07) * (Z - 2.) * (Z + 3.);
-//    auto x = compute_moduli_lower_bound(P);
-//    BOOST_CHECK_LE(x, 1.07);
-//  }
-//
-//  {
-//    auto P = 20. * (Z + 1.07) * (Z - 2.) * (Z + 3.) * (Z + 0.6);
-//    auto x = compute_moduli_lower_bound(P);
-//    BOOST_CHECK_LE(x, 0.6);
-//  }
-//}
+BOOST_AUTO_TEST_CASE(test_compute_moduli_lower_bound)
+{
+  {
+    auto P = 20. * (Z + 1.07) * (Z - 2.) * (Z + 3.);
+    auto x = compute_moduli_lower_bound(P);
+    BOOST_CHECK(0 < x && x < 1.07);
+  }
 
-//BOOST_AUTO_TEST_CASE(test_jenkins_traub_1)
-//{
-//  auto P = (Z - 0.000000123) * (Z - 0.0000001230001) * (Z - 0.00199999);// *
-//           (Z - 0.0021) * (Z - 0.0537) * (Z - 0.2) *
-//           (Z - 1.0000001) *
-//           (Z - 2.) *
-//           (Z + 3.) *
-//           (Z - 10.);
-//
-//  //auto P = Z.pow<double>(7)             //
-//  //         - 6.01 * Z.pow<double>(6)    //
-//  //         + 12.54 * Z.pow<double>(5)   //
-//  //         - 8.545 * Z.pow<double>(4)   //
-//  //         - 5.505 * Z.pow<double>(3)   //
-//  //         + 12.545 * Z.pow<double>(2)  //
-//  //         - 8.035 * Z                  //
-//  //         + 2.01;
-//
-//  //auto P =  //
-//  //          //(Z.pow<double>(2) - 1. * Z + 0.5) *  //
-//  //    //(Z - 1.) *  //
-//  //    //(Z - 1.) *  //
-//  //    (Z - 1.9999) *      //
-//  //    (Z - 2.) *      //
-//  //    (Z - 2.01) *    //
-//  //    (Z + 5.) *      //
-//  //    (Z + 10000.) *  //
-//  //    (Z + 1000000.);
-//
-//  //auto P = (Z - 1.23e-4) *  //
-//  //         (Z - 1.23e-1) *  //
-//  //         (Z - 1.23e+2) *  //
-//  //         (Z - 1.23e+5);
-//
-//  JenkinsTraub rpoly{P};
-//  rpoly.stage1();
-//  rpoly.stage2();
-//  rpoly.stage3();
-//}
+  {
+    auto P = 20. * (Z + 1.07) * (Z - 2.) * (Z + 3.) * (Z + 0.6);
+    auto x = compute_moduli_lower_bound(P);
+    BOOST_CHECK(0 < x && x < 0.6);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(test_jenkins_traub_1)
+{
+  //auto P = (Z - 0.000000123) * (Z - 0.0000001230001) * (Z - 0.00199999);// *
+  //         (Z - 0.0021) * (Z - 0.0537) * (Z - 0.2) *
+  //         (Z - 1.0000001) *
+  //         (Z - 2.) *
+  //         (Z + 3.) *
+  //         (Z - 10.);
+
+  auto P = Z.pow<double>(7)             //
+           - 6.01 * Z.pow<double>(6)    //
+           + 12.54 * Z.pow<double>(5)   //
+           - 8.545 * Z.pow<double>(4)   //
+           - 5.505 * Z.pow<double>(3)   //
+           + 12.545 * Z.pow<double>(2)  //
+           - 8.035 * Z                  //
+           + 2.01;
+  P = (P / (Z.pow<double>(2) - 1. * Z + 0.5)).first;
+  //P = (P / (Z - 1.)).first;
+
+  //auto P =  //
+  //          //(Z.pow<double>(2) - 1. * Z + 0.5) *  //
+  //    //(Z - 1.) *  //
+  //    //(Z - 1.) *  //
+  //    (Z - 1.9999) *      //
+  //    (Z - 2.) *      //
+  //    (Z - 2.01) *    //
+  //    (Z + 5.) *      //
+  //    (Z + 10000.) *  //
+  //    (Z + 1000000.);
+
+  //auto P = (Z - 1.23e-4) *  //
+  //         (Z - 1.23e-1) *  //
+  //         (Z - 1.23e+2) *  //
+  //         (Z - 1.23e+5);
+
+  JenkinsTraub rpoly{P};
+  rpoly.stage1();
+  rpoly.stage2();
+  rpoly.stage3();
+  exit(1);
+}
 
 BOOST_AUTO_TEST_CASE(test_jenkins_traub_2)
 {
