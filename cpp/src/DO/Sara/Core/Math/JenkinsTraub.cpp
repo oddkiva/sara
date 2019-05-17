@@ -39,6 +39,28 @@ namespace DO { namespace Sara {
     for (int i = 1; i <= Q.degree(); ++i)
       Q[i] = std::abs(Q[i]);
 
+    /*
+     * Memento:
+     *
+     * If P(x) = 0 and x != 0, then with the triangle inequality:
+     *   |a_0| <= |a_n| |x|^n + ... + |a_1| |x|
+     *      0 <=  |a_n| |x|^n + ... + |a_1| |x| - |a_0|
+     *      0 <=  Q(|x|)
+     *
+     * Q is increasing for x > 0 because Q' is positive.
+     *
+     * It suffices to find one root beta of Q because if
+     * 0 == Q(beta) <= Q(|x|)
+     *
+     * Then beta <= |x| because Q is increasing.
+     *
+     * And we know beta > 0, because |a_0| is positive.
+     * Otherwise 0 would already be a root of P.
+     *
+     * So for efficiency, we need to deflate P first.
+     *
+     */
+
 #ifdef SHOW_DEBUG_LOG
     LOG_DEBUG << "Compute moduli lower bound" << std::endl;
     LOG_DEBUG << "P[X] = " << P << std::endl;
