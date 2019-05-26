@@ -63,8 +63,7 @@ namespace DO { namespace Sara { namespace v2 {
   };
 
 
-  template <bool IsVariable>
-  struct Symbol : public Expression<Symbol<IsVariable>>
+  struct Symbol : public Expression<Symbol>
   {
     const std::string name;
 
@@ -84,9 +83,22 @@ namespace DO { namespace Sara { namespace v2 {
     }
   };
 
-  using Variable = Symbol<true>;
+  template <typename T>
+  struct Placeholder : Symbol
+  {
+    T value;
+  };
 
-  using Constant = Symbol<false>;
+  template <typename T>
+  struct Variable : Placeholder<T>
+  {
+  };
+
+  template <typename T>
+  struct Constant : Placeholder<T>
+  {
+    const T value;
+  };
 
 
 } /* namespace v2 */

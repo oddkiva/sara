@@ -98,6 +98,24 @@ namespace DO { namespace Sara {
     return K1;
   }
 
+  auto K1_shift_polynomial(const UnivariatePolynomial<double>& K0,
+                           const UnivariatePolynomial<double>& P, double s_i,
+                           double P_si, double K0_si)
+      -> UnivariatePolynomial<double>
+  {
+    // The two formula below are identical but the former might not very stable
+    // numerically...
+    //
+    auto K1 = ((K0 - K0_si) / (Z - s_i)).first -
+              (K0_si / P_si) * ((P - P_si) / (Z - s_i)).first;
+
+    /*
+     * p(s) * k0(z) - p(s) * k0(s) - k0(s) * p(z) + k0(s) * p(s)
+     * p(s) * k0(z)                - k0(s) * p(z)
+     * */
+
+    return K1;
+  }
 
   auto JenkinsTraub::determine_moduli_lower_bound() -> void
   {
@@ -433,6 +451,68 @@ namespace DO { namespace Sara {
       LOG_DEBUG << "s1 = " << s1 << " P(s1) = " << P(s1) << endl;
       LOG_DEBUG << "s2 = " << s2 << " P(s2) = " << P(s2) << endl;
     }
+  }
+
+  auto JenkinsTraub::stage3_linear_shift() -> void
+  {
+    LOG_DEBUG << "[STAGE 3] " << endl;
+
+    LOG_DEBUG << "  s_i = " << s_i << endl;
+
+    int i = L;
+
+    auto z = std::array<double, 3>{0., 0., 0.};
+    auto P_si = double{};
+    auto K0_si = double{};
+
+    // Determine convergence type.
+    while (i < L + max_iter)
+    {
+      ++i;
+
+      std::tie(Q_P, P_r) = P / (Z - s_i);
+      P_s_i = P_r(s_i);
+
+      //calculate_next_shift_polynomial();
+      K1 = ...;
+
+      LOG_DEBUG << "[ITER] " << i << endl;
+      LOG_DEBUG << "  K[" << i << "] = " << K0 << endl;
+
+      s_i = s_i - P(s_i) / K1(s_i);
+      z[0] = z[1];
+      z[1] = z[2];
+      z[2] = s_i;
+
+      LOG_DEBUG << "  P_r(s_i) = "
+                << "P_r(" << s_i << ") = " << P_r(s_i) << std::endl;
+      LOG_DEBUG << "  P(s_i) = "
+                << "P(" << s_i << ") = " << P(s_i) << std::endl;
+      LOG_DEBUG << "  s[" << i << "] = " << s_i << endl;
+
+      // Update K0.
+      K0 = K1;
+
+      if (std::isnan(z[2]))
+      {
+        LOG_DEBUG << "Stopping prematuraly at iteration " << i << endl;
+        if (cvg_type == LinearFactor)
+          s_i = z[1];
+        // Finish
+        break;
+      }
+
+      if (i < L + 3)
+        continue;
+
+      if (nikolajsen_root_convergence_predicate(z))
+      {
+        LOG_DEBUG << "Converged at iteration " << i << endl;
+        break;
+      }
+    }
+LOG_DEBUG << "L[X] = X - " << setprecision(12) << s_i << endl;
+
   }
 
 } /* namespace Sara */
