@@ -65,6 +65,56 @@ namespace DO::Sara {
   }
 
 
+  auto quadratic_roots(UnivariatePolynomial<double>& P,
+                       std::complex<double>& s1, std::complex<double>& s2)
+      -> void
+  {
+    const auto& a = P[2];
+    const auto& b = P[1];
+    const auto& c = P[0];
+    const auto delta = std::complex<double>(b * b - 4 * a * c);
+    s1 = (-b + std::sqrt(delta)) / (2 * a);
+    s2 = (-b - std::sqrt(delta)) / (2 * a);
+  }
+
+
+  // Weak convergence test for stage 2 of the algorithm.
+  template <typename T>
+  auto weak_convergence_predicate(const std::array<T, 3>& t) -> bool
+  {
+    return std::abs(t[1] - t[0]) <= std::abs(t[0]) / 2 &&
+           std::abs(t[2] - t[1]) <= std::abs(t[1]) / 2;
+  }
+
+  // Strong convergence test for stage 3 of the algorithm.
+  //
+  // Shamelessly taken from Rpoly++ written Chris Sweeney.
+  //
+  // Nikolajsen, Jorgen L. "New stopping criteria for iterative root finding."
+  // Royal Society open science (2014)
+  template <typename T>
+  auto nikolajsen_root_convergence_predicate(const std::array<T, 3>& roots)
+      -> bool
+  {
+    constexpr auto root_mag_tol = 1e-8;
+    constexpr auto abs_tol = 1e-14;
+    constexpr auto rel_tol = 1e-10;
+
+    const auto e_i = std::abs(roots[2] - roots[1]);
+    const auto e_i_minus_1 = std::abs(roots[1] - roots[0]);
+    const auto mag_root = std::abs(roots[1]);
+    if (e_i <= e_i_minus_1)
+    {
+      if (mag_root < root_mag_tol)
+        return e_i < abs_tol;
+      else
+        return e_i / mag_root <= rel_tol;
+    }
+
+    return false;
+  }
+
+
   struct LinearFactor
   {
     auto initialize(double shift) -> void
@@ -312,6 +362,7 @@ namespace DO::Sara {
     return sigma_next;
   }
 
+
   struct JenkinsTraub
   {
     enum ConvergenceType : std::uint8_t
@@ -334,8 +385,14 @@ namespace DO::Sara {
 
     int M{5};
     int L{20};
+    int max_iter{10000000};
 
-    auto stage1() -> void
+    double si;
+    double vi;
+
+
+    // Apply zero shift polynomial.
+    auto stage1(int M) -> void
     {
       LOG_DEBUG << "P[X] = " << P << endl;
       LOG_DEBUG << "[STAGE 1] " << endl;
@@ -350,6 +407,7 @@ namespace DO::Sara {
       }
     }
 
+    // Apply fixed shift polynomial to determine convergence.
     auto stage2() -> void
     {
       LOG_DEBUG << "[STAGE 2] " << endl;
@@ -399,22 +457,23 @@ namespace DO::Sara {
 
           if (weak_convergence_predicate(t))
           {
-            cvg_type = LinearFactor;
-            s_i = std::real(t[2]);
+            cvg_type = LinearFactor_;
+            linear_factor.polynomial = Z - std::real(t[2]);
 
             LOG_DEBUG << "Convergence to linear factor" << endl;
-            LOG_DEBUG << "s = " << s_i << endl;
+            LOG_DEBUG << "  " << linear_factor.polynomial << endl;
 
             break;
           }
 
           if (weak_convergence_predicate(v))
           {
-            cvg_type = QuadraticFactor;
-            v_i = sigma_shifted[0];
+            cvg_type = QuadraticFactor_;
+            sigma0 = sigma1;
+            quadratic_roots(sigma0.polynomial, sigma0.roots[0],
+                            sigma0.roots[1]);
 
             LOG_DEBUG << "Convergence to quadratic factor" << endl;
-            LOG_DEBUG << "v_i = " << v[2] << endl;
 
             break;
           }
@@ -425,6 +484,126 @@ namespace DO::Sara {
         // The while loop will keep going if cvg_type is NoConvergence.
       }
     }
+
+    auto stage3_linear_factor() -> ConvergenceType
+    {
+      LOG_DEBUG << "[STAGE 3] " << endl;
+
+      LOG_DEBUG << "  linear_factor = " << linear_factor.polynomial << endl;
+
+      int i = L;
+
+      auto Q_P = UnivariatePolynomial<double>{};
+      auto R_P = UnivariatePolynomial<double>{};
+
+      auto& si = linear_factor.polynomial[0];
+      auto P_si = double{};
+      auto K0_si = double{};
+      auto K1_si = double{};
+
+      auto z = std::array<double, 3>{0., 0., 0.};
+
+      // Determine convergence type.
+      while (i < L + max_iter)
+      {
+        ++i;
+
+        std::tie(Q_P, R_P) = P / linear_factor.polynomial;
+        P_si = R_P(si);
+
+        // calculate_next_shift_polynomial();
+        K1 = next_linear_shift_polynomial(K0, P, si, P_si, K0_si);
+        K1_si = K1(si);
+
+        LOG_DEBUG << "[ITER] " << i << endl;
+        LOG_DEBUG << "  K[" << i << "] = " << K0 << endl;
+
+        si -= P_si / K1_si;
+        z[0] = z[1];
+        z[1] = z[2];
+        z[2] = si;
+
+        LOG_DEBUG << "  R_P(s_i) = "
+                  << "R_P(" << si << ") = " << P_si << std::endl;
+        LOG_DEBUG << "  P(s_i) = "
+                  << "P(" << si << ") = " << P(si) << std::endl;
+        LOG_DEBUG << "  s[" << i << "] = " << si << endl;
+
+        // Update K0.
+        K0 = K1;
+
+        if (std::isnan(z[2]))
+        {
+          LOG_DEBUG << "Stopping prematuraly at iteration " << i << endl;
+          break;
+        }
+
+        if (i < L + 3)
+          continue;
+
+        if (nikolajsen_root_convergence_predicate(z))
+        {
+          LOG_DEBUG << "Converged at iteration " << i << endl;
+          break;
+        }
+      }
+      LOG_DEBUG << "L[X] = " << linear_factor.polynomial << endl;
+    }
+
+    auto stage3_quadratic_factor() -> ConvergenceType
+    {
+      LOG_DEBUG << "[STAGE 3] " << endl;
+
+      int i = L;
+
+      auto z = std::array<double, 3>{0., 0., 0.};
+
+      // Determine convergence type.
+      while (i < L + max_iter)
+      {
+        ++i;
+
+        sigma0 = sigma1;
+        quadratic_roots(sigma0.polynomial, sigma0.roots[0], sigma0.roots[1]);
+
+        aux.update_target_polynomial_aux_vars(P, sigma0);
+        aux.update_shift_polynomial_aux_vars(K0, sigma0);
+
+        K1 = next_quadratic_shift_polymomial(sigma0, aux);
+        sigma1 = next_quadratic_factor(sigma0, P, K0, aux);
+
+        LOG_DEBUG << "[ITER] " << i << endl;
+        LOG_DEBUG << "  K[" << i << "] = " << K0 << endl;
+        LOG_DEBUG << "  Sigma[" << i << "] = " << sigma0.polynomial << endl;
+
+        z[0] = z[1];
+        z[1] = z[2];
+        z[2] = std::abs(sigma0.roots[0]) + std::abs(sigma0.roots[1]);
+
+        // Update K0.
+        K0 = K1;
+
+        if (std::isnan(z[2]))
+        {
+          LOG_DEBUG << "Stopping prematuraly at iteration " << i << endl;
+          break;
+        }
+
+        if (i < L + 3)
+          continue;
+
+        if (nikolajsen_root_convergence_predicate(z))
+        {
+          LOG_DEBUG << "Converged at iteration " << i << endl;
+          break;
+        }
+      }
+
+      LOG_DEBUG << "Sigma[X] = " << sigma1.polynomial << endl;
+      LOG_DEBUG << "s1 = " << sigma1.s1() << " P(s1) = " << P(sigma1.s1()) << endl;
+      LOG_DEBUG << "s2 = " << sigma1.s2() << " P(s2) = " << P(sigma1.s2()) << endl;
+    }
+
   };
 
 } /* namespace DO::Sara */
