@@ -136,7 +136,7 @@ namespace DO { namespace Sara {
     template <typename T>
     auto operator()(const T& x0) const -> decltype(coeff_type{} + T{})
     {
-      constexpr if (x0 == T(0))
+      if (x0 == T(0))
         return _coeff[0];
 
       using result_type = decltype(coeff_type{} + T{});

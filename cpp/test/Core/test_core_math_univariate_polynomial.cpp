@@ -80,40 +80,43 @@ BOOST_AUTO_TEST_CASE(test_newton_raphson)
   BOOST_CHECK_CLOSE(z, 2, 1e-6);
 }
 
-BOOST_AUTO_TEST_CASE(test_compute_moduli_lower_bound)
+BOOST_AUTO_TEST_CASE(test_compute_root_moduli_lower_bound)
 {
   {
     auto P = 20. * (Z + 1.07) * (Z - 2.) * (Z + 3.);
-    auto x = compute_moduli_lower_bound(P);
+    auto x = compute_root_moduli_lower_bound(P);
     BOOST_CHECK(0 < x && x < 1.07);
   }
 
   {
     auto P = 20. * (Z + 1.07) * (Z - 2.) * (Z + 3.) * (Z + 0.6);
-    auto x = compute_moduli_lower_bound(P);
+    auto x = compute_root_moduli_lower_bound(P);
     BOOST_CHECK(0 < x && x < 0.6);
   }
 }
 
 BOOST_AUTO_TEST_CASE(test_jenkins_traub_1)
 {
-  //auto P = (Z - 0.000000123) * (Z - 0.0000001230001) * (Z - 0.00199999);// *
-  //         (Z - 0.0021) * (Z - 0.0537) * (Z - 0.2) *
-  //         (Z - 1.0000001) *
-  //         (Z - 2.) *
-  //         (Z + 3.) *
-  //         (Z - 10.);
+  auto P = //(Z - 0.000000123) *                        //
+           (Z - 0.0000001230001) *                    //
+           (Z - 0.00199999) *                         //
+           (Z - 0.0021) * (Z - 0.0537) * (Z - 0.2) *  //
+           (Z - 1.0000001) *                          //
+           (Z - 2.) *                                 //
+           (Z + 3.) *                                 //
+           (Z - 10.);
 
-  auto P = Z.pow<double>(7)             //
-           - 6.01 * Z.pow<double>(6)    //
-           + 12.54 * Z.pow<double>(5)   //
-           - 8.545 * Z.pow<double>(4)   //
-           - 5.505 * Z.pow<double>(3)   //
-           + 12.545 * Z.pow<double>(2)  //
-           - 8.035 * Z                  //
-           + 2.01;
-  P = (P / (Z.pow<double>(2) - 1. * Z + 0.5)).first;
+  //auto P = Z.pow<double>(7)             //
+  //         - 6.01 * Z.pow<double>(6)    //
+  //         + 12.54 * Z.pow<double>(5)   //
+  //         - 8.545 * Z.pow<double>(4)   //
+  //         - 5.505 * Z.pow<double>(3)   //
+  //         + 12.545 * Z.pow<double>(2)  //
+  //         - 8.035 * Z                  //
+  //         + 2.01;
+  //P = (P / (Z.pow<double>(2) - 1. * Z + 0.5)).first;
   //P = (P / (Z - 1.)).first;
+  P = P / P[P.degree()];
 
   //auto P =  //
   //          //(Z.pow<double>(2) - 1. * Z + 0.5) *  //
@@ -134,33 +137,33 @@ BOOST_AUTO_TEST_CASE(test_jenkins_traub_1)
   JenkinsTraub rpoly{P};
   rpoly.stage1();
   rpoly.stage2();
-  rpoly.stage3();
-  exit(1);
+  rpoly.stage3_linear_factor();
+  //rpoly.stage3_quadratic_factor();
 }
 
-BOOST_AUTO_TEST_CASE(test_jenkins_traub_2)
-{
-  auto P =                                        //
-      (5.576312106019016) * Z.pow<double>(10) +   //
-      (18.62488243410351) * Z.pow<double>(9) +    //
-      (-105.89974320540716) * Z.pow<double>(8) +  //
-      (-562.5089223272787) * Z.pow<double>(7) +   //
-      (-692.3579951742573) * Z.pow<double>(6) +   //
-      (1909.2968243041091) * Z.pow<double>(5) +   //
-      (11474.831044766257) * Z.pow<double>(4) +   //
-      (25844.743360023815) * Z.pow<double>(3) +   //
-      (20409.84088622263) * Z.pow<double>(2) +    //
-      (-28342.548095425875) * Z +                 //
-      (-52412.8655144021);
-
-  P = P / P[P.degree()];
-
-  JenkinsTraub rpoly{P};
-  rpoly.M = 20;
-  rpoly.L = rpoly.M + 20;
-  rpoly.stage1();
-  rpoly.stage2();
-  rpoly.stage3();
-}
+//BOOST_AUTO_TEST_CASE(test_jenkins_traub_2)
+//{
+//  auto P =                                        //
+//      (5.576312106019016) * Z.pow<double>(10) +   //
+//      (18.62488243410351) * Z.pow<double>(9) +    //
+//      (-105.89974320540716) * Z.pow<double>(8) +  //
+//      (-562.5089223272787) * Z.pow<double>(7) +   //
+//      (-692.3579951742573) * Z.pow<double>(6) +   //
+//      (1909.2968243041091) * Z.pow<double>(5) +   //
+//      (11474.831044766257) * Z.pow<double>(4) +   //
+//      (25844.743360023815) * Z.pow<double>(3) +   //
+//      (20409.84088622263) * Z.pow<double>(2) +    //
+//      (-28342.548095425875) * Z +                 //
+//      (-52412.8655144021);
+//
+//  P = P / P[P.degree()];
+//
+//  JenkinsTraub rpoly{P};
+//  rpoly.M = 20;
+//  rpoly.L = rpoly.M + 20;
+//  rpoly.stage1();
+//  rpoly.stage2();
+//  rpoly.stage3();
+//}
 
 BOOST_AUTO_TEST_SUITE_END()

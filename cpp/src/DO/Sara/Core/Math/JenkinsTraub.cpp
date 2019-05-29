@@ -1,15 +1,12 @@
-#include <DO/Sara/Core/EigenExtension.hpp>
 #include <DO/Sara/Core/Math/JenkinsTraub.hpp>
 #include <DO/Sara/Core/Math/NewtonRaphson.hpp>
 
 #include <array>
-#include <ctime>
 #include <iomanip>
 #include <iostream>
-#include <memory>
 
 
-// #define SHOW_DEBUG_LOG
+#define SHOW_DEBUG_LOG
 #define LOG_DEBUG std::cout << "[" << __FUNCTION__ << ":" << __LINE__ << "] "
 
 
@@ -18,20 +15,7 @@ using namespace std;
 
 namespace DO { namespace Sara {
 
-  auto quadratic_roots(UnivariatePolynomial<double>& P,
-                       std::complex<double>& s1, std::complex<double>& s2)
-      -> void
-  {
-    const auto& a = P[2];
-    const auto& b = P[1];
-    const auto& c = P[0];
-    const auto delta = std::complex<double>(b * b - 4 * a * c);
-    s1 = (-b + std::sqrt(delta)) / (2 * a);
-    s2 = (-b - std::sqrt(delta)) / (2 * a);
-  }
-
-
-  auto compute_moduli_lower_bound(const UnivariatePolynomial<double>& P)
+  auto compute_root_moduli_lower_bound(const UnivariatePolynomial<double>& P)
       -> double
   {
     auto Q = P;
@@ -67,7 +51,7 @@ namespace DO { namespace Sara {
     LOG_DEBUG << "Q[X] = " << Q << std::endl;
 #endif
 
-    auto x = 1.;
+    auto x = -Q[0];
     auto newton_raphson = NewtonRaphson<double>{Q};
     x = newton_raphson(x, 100, 1e-2);
 
@@ -78,15 +62,107 @@ namespace DO { namespace Sara {
     return x;
   }
 
+  auto quadratic_roots(UnivariatePolynomial<double>& P)
+      -> std::array<std::complex<double>, 2>
+  {
+    const auto& a = P[2];
+    const auto& b = P[1];
+    const auto& c = P[0];
+    const auto delta = std::complex<double>(b * b - 4 * a * c);
 
-  auto K0_polynomial(const UnivariatePolynomial<double>& P)
+    return {(-b + std::sqrt(delta)) / (2 * a),
+            (-b - std::sqrt(delta)) / (2 * a)};
+  }
+
+
+  auto QuadraticFactor::initialize(const UnivariatePolynomial<double>& P,
+                                   double phase,
+                                   bool recalculate_root_moduli_lower_bound)
+      -> void
+  {
+    constexpr auto i = std::complex<double>{0, 1};
+
+    if (recalculate_root_moduli_lower_bound)
+      beta = compute_root_moduli_lower_bound(P);
+
+    auto& [s1, s2] = roots;
+    s1 = beta * std::exp(i * phase);
+    s2 = std::conj(s1);
+
+    const auto u = -2 * std::real(s1);
+    const auto v = std::real(s1 * s2);
+
+    polynomial = Z.pow<double>(2) + u * Z + v;
+
+#ifdef SHOW_DEBUG_LOG
+    LOG_DEBUG << "sigma[X] = " << polynomial << endl;
+    LOG_DEBUG << "s1 = " << this->s1() << endl;
+    LOG_DEBUG << "s2 = " << this->s2() << endl;
+    LOG_DEBUG << "u = " << this->u() << endl;
+    LOG_DEBUG << "v = " << this->v() << endl;
+#endif
+  }
+
+
+  auto AuxiliaryVariables::update_target_polynomial_aux_vars(
+      const UnivariatePolynomial<double>& P, const QuadraticFactor& sigma)
+      -> void
+  {
+    P_div_sigma = P / sigma.polynomial;
+    const auto& [Q_P, R_P] = P_div_sigma;
+
+    const auto& [s1, s2] = sigma.roots;
+    P_s1 = R_P(s1);
+    P_s2 = R_P(s2);
+
+    b = R_P[1];
+    a = R_P[0] - b * sigma.u();
+
+#ifdef SHOW_DEBUG_LOG
+    LOG_DEBUG << "R_P = " << R_P << endl;
+    LOG_DEBUG << "P(s1) = "
+              << "P(" << s1 << ") = " << P_s1 << endl;
+    LOG_DEBUG << "P(s2) = "
+              << "P(" << s2 << ") = " << P_s2 << endl;
+    LOG_DEBUG << "a = " << a << endl;
+    LOG_DEBUG << "b = " << b << endl;
+#endif
+  }
+
+  auto AuxiliaryVariables::update_shift_polynomial_aux_vars(
+      const UnivariatePolynomial<double>& K0, const QuadraticFactor& sigma)
+      -> void
+  {
+    K0_div_sigma = K0 / sigma.polynomial;
+    const auto& [Q_K0, R_K0] = K0_div_sigma;
+
+    const auto& [s1, s2] = sigma.roots;
+    K0_s1 = R_K0(s1);
+    K0_s2 = R_K0(s2);
+
+    d = R_K0[1];
+    c = R_K0[0] - d * sigma.u();
+
+#ifdef SHOW_DEBUG_LOG
+    LOG_DEBUG << "R_K0 = " << R_K0 << endl;
+    LOG_DEBUG << "K0(s1) = "
+              << "K0(" << s1 << ") = " << K0_s1 << endl;
+    LOG_DEBUG << "K0(s2) = "
+              << "K0(" << s2 << ") = " << K0_s2 << endl;
+    LOG_DEBUG << "c = " << c << endl;
+    LOG_DEBUG << "d = " << d << endl;
+#endif
+  }
+
+
+  auto initial_shift_polynomial(const UnivariatePolynomial<double>& P)
       -> UnivariatePolynomial<double>
   {
     return derivative(P) / P.degree();
   }
 
-  auto K1_no_shift_polynomial(const UnivariatePolynomial<double>& K0,
-                              const UnivariatePolynomial<double>& P)
+  auto next_zero_shift_polynomial(const UnivariatePolynomial<double>& K0,
+                                  const UnivariatePolynomial<double>& P)
       -> UnivariatePolynomial<double>
   {
     // The two formula below are identical but the former might not very stable
@@ -98,121 +174,68 @@ namespace DO { namespace Sara {
     return K1;
   }
 
-  auto K1_shift_polynomial(const UnivariatePolynomial<double>& K0,
-                           const UnivariatePolynomial<double>& P, double s_i,
-                           double P_si, double K0_si)
+  auto next_linear_shift_polynomial(const UnivariatePolynomial<double>& K0,
+                                    const UnivariatePolynomial<double>& P,
+                                    double s_i, double P_si, double K0_si)
       -> UnivariatePolynomial<double>
   {
-    // The two formula below are identical but the former might not very stable
-    // numerically...
-    //
     auto K1 = ((K0 - K0_si) / (Z - s_i)).first -
               (K0_si / P_si) * ((P - P_si) / (Z - s_i)).first;
 
     /*
-     * p(s) * k0(z) - p(s) * k0(s) - k0(s) * p(z) + k0(s) * p(s)
-     * p(s) * k0(z)                - k0(s) * p(z)
+     *    p(s) * k0(z) - p(s) * k0(s) - k0(s) * p(z) + k0(s) * p(s)
+     * =  p(s) * k0(z)                - k0(s) * p(z)
+     * =  |p(s)  k0(s)|
+     *    |p(z)  k0(z)|
+     *
      * */
 
     return K1;
   }
 
-  auto JenkinsTraub::determine_moduli_lower_bound() -> void
+  auto next_quadratic_shift_polymomial(const QuadraticFactor& sigma,
+                                       const AuxiliaryVariables& aux)
+    -> UnivariatePolynomial<double>
   {
-    beta = compute_moduli_lower_bound(P);
-  }
+    const auto& a = aux.a;
+    const auto& b = aux.b;
+    const auto& c = aux.c;
+    const auto& d = aux.d;
 
-  auto JenkinsTraub::form_quadratic_divisor_sigma() -> void
-  {
-    constexpr auto i = std::complex<double>{0, 1};
+    const auto& u = sigma.u();
+    const auto& v = sigma.v();
 
-    s1 = beta * std::exp(i * 49. * M_PI / 180.);
-    s2 = std::conj(s1);
-
-    sigma = Z.pow<double>(2) - 2 * std::real(s1) * Z + std::real(s1 * s2);
-
-#ifdef SHOW_DEBUG_LOG
-    LOG_DEBUG << "sigma[X] = " << sigma << endl;
-    LOG_DEBUG << "s1 = " << s1 << endl;
-    LOG_DEBUG << "s2 = " << s2 << endl;
-#endif
-
-    u = sigma[1];
-    v = sigma[0];
-
-#ifdef SHOW_DEBUG_LOG
-    LOG_DEBUG << "  u = " << u << endl;
-    LOG_DEBUG << "  v = " << v << endl;
-#endif
-  }
-
-  auto JenkinsTraub::evaluate_polynomial_at_divisor_roots() -> void
-  {
-    P_s1 = P_r(s1);
-    P_s2 = P_r(s2);
-
-#ifdef SHOW_DEBUG_LOG
-    LOG_DEBUG << "  P(s1) = " << "P(" << s1 << ") = " << P_s1 << endl;
-    LOG_DEBUG << "  P(s2) = " << "P(" << s2 << ") = " << P_s2 << endl;
-#endif
-  }
-
-  auto JenkinsTraub::evaluate_shift_polynomial_at_divisor_roots() -> void
-  {
-    K0_s1 = K0_r(s2);
-    K0_s2 = K0_r(s1);
-
-#ifdef SHOW_DEBUG_LOG
-    LOG_DEBUG << "  K0(s1) = " << "K0(" << s1 << ") = " << K0_s1 << endl;
-    LOG_DEBUG << "  K0(s2) = " << "K0(" << s2 << ") = " << K0_s2 << endl;
-#endif
-  }
-
-  auto JenkinsTraub::calculate_coefficients_of_linear_remainders_of_P() -> void
-  {
-#ifdef SHOW_DEBUG_LOG
-    LOG_DEBUG << "P_r = " << P_r << endl;
-#endif
-
-    b = P_r[1];
-    a = P_r[0] - b * u;
-
-#ifdef SHOW_DEBUG_LOG
-    LOG_DEBUG << "a = " << a << endl;
-    LOG_DEBUG << "b = " << b << endl;
-#endif
-  }
-
-  auto JenkinsTraub::calculate_coefficients_of_linear_remainders_of_K() -> void
-  {
-#ifdef SHOW_DEBUG_LOG
-    LOG_DEBUG << "K0_r = " << K0_r << endl;
-#endif
-
-    d = K0_r[1];
-    c = K0_r[0] - d * u;
-
-#ifdef SHOW_DEBUG_LOG
-    LOG_DEBUG << "c = " << c << endl;
-    LOG_DEBUG << "d = " << d << endl;
-#endif
-  }
-
-  auto JenkinsTraub::calculate_next_shift_polynomial() -> void
-  {
     const auto c0 = b * c - a * d;
     const auto c1 = (a * a + u * a * b + v * b * b) / c0;
     const auto c2 = (a * c + u * a * d + v * b * d) / c0;
 
-    K1 = c1 * Q_K0 + (Z - c2) * Q_P + b;
+    const auto& Q_P = aux.P_div_sigma.first;
+    const auto& Q_K0 = aux.K0_div_sigma.first;
+
+    auto K1 = c1 * Q_K0 + (Z - c2) * Q_P + b;
 
 #ifdef SHOW_DEBUG_LOG
     LOG_DEBUG << "K1 = " << K1 << std::endl;
 #endif
+
+    return K1;
   }
 
-  auto JenkinsTraub::calculate_next_shifted_quadratic_divisor() -> void
+
+  auto next_quadratic_factor(QuadraticFactor& sigma,
+                             const UnivariatePolynomial<double>& P,
+                             const UnivariatePolynomial<double>& K0,
+                             const AuxiliaryVariables& aux)
+    -> QuadraticFactor
   {
+    const auto& a = aux.a;
+    const auto& b = aux.b;
+    const auto& c = aux.c;
+    const auto& d = aux.d;
+
+    const auto& u = sigma.u();
+    const auto& v = sigma.v();
+
     const auto b1 = -K0[0] / P[0];
     const auto b2 = -(K0[1] + b1 * P[1]) / P[0];
 
@@ -225,6 +248,9 @@ namespace DO { namespace Sara {
     const auto c4 = v * b2 * a1 - c2 - c3;
     const auto c1 = c * c + u * c * d + v * d * d +
                     b1 * (a * c + u * b * c + v * b * d) - c4;
+
+    const auto delta_u = -(u * (c2 + c3) + v * (b1 * a1 + b2 * a2)) / c1;
+    const auto delta_v = v * c4 / c1;
 
 #ifdef SHOW_DEBUG_LOG
     LOG_DEBUG << "b1 = " << b1 << endl;
@@ -239,19 +265,16 @@ namespace DO { namespace Sara {
     LOG_DEBUG << "c4 = " << c4 << endl;
     LOG_DEBUG << "c1 = " << c1 << endl;
     LOG_DEBUG << "v * b2 * a1 = " << v * b2 * a1 << endl;
-#endif
 
-    const auto delta_u = -(u * (c2 + c3) + v * (b1 * a1 + b2 * a2)) / c1;
-    const auto delta_v = v * c4 / c1;
-
-    sigma_shifted[0] = v + delta_v;
-    sigma_shifted[1] = u + delta_u;
-    sigma_shifted[2] = 1.0;
-
-#ifdef SHOW_DEBUG_LOG
     LOG_DEBUG << "delta_u = " << delta_u << endl;
     LOG_DEBUG << "delta_v = " << delta_v << endl;
 #endif
+
+    auto sigma_next = sigma;
+    sigma_next.polynomial[0] += delta_v;
+    sigma_next.polynomial[1] += delta_u;
+
+    return sigma_next;
   }
 
 
@@ -260,67 +283,55 @@ namespace DO { namespace Sara {
     LOG_DEBUG << "P[X] = " << P << endl;
     LOG_DEBUG << "[STAGE 1] " << endl;
 
-    K0 = K0_polynomial(P);
+    K0 = initial_shift_polynomial(P);
     LOG_DEBUG << "[ITER] " << 0 << "  K[0] = " << K0 << endl;
 
     for (int i = 1; i < M; ++i)
     {
-      K0 = K1_no_shift_polynomial(K0, P);
+      K0 = next_zero_shift_polynomial(K0, P);
       LOG_DEBUG << "[ITER] " << i << "  K[" << i << "] = " << K0 << endl;
     }
   }
 
+  // Apply fixed shift polynomial to determine convergence.
   auto JenkinsTraub::stage2() -> void
   {
     LOG_DEBUG << "[STAGE 2] " << endl;
-    determine_moduli_lower_bound();
 
     // Stage 2 must be able to determine the convergence.
     while (cvg_type == NoConvergence)
     {
       // Choose roots randomly on the circle of radius beta.
-      form_quadratic_divisor_sigma();
+      sigma0.initialize(P, 49 * M_PI / 180., true);
 
-      std::tie(Q_P, P_r) = P / sigma;
-      LOG_DEBUG << "  Q_P[X] = " << Q_P << endl;
-      LOG_DEBUG << "  P_r[X] = " << P_r << endl;
+      aux.update_target_polynomial_aux_vars(P, sigma0);
 
-      evaluate_polynomial_at_divisor_roots();
-      calculate_coefficients_of_linear_remainders_of_P();
-
-      sigma_shifted = sigma;
       auto t = std::array<std::complex<double>, 3>{{0., 0., 0}};
       auto v = std::array<double, 3>{0, 0, 0};
 
       // Determine convergence type.
       int i = M;
-      for ( ; i < L; ++i)
+      for (; i < L; ++i)
       {
-        std::tie(Q_K0, K0_r) = K0 / sigma;
+        aux.update_shift_polynomial_aux_vars(K0, sigma0);
+        K1 = next_quadratic_shift_polymomial(sigma0, aux);
+        sigma1 = next_quadratic_factor(sigma0, P, K0, aux);
 
         LOG_DEBUG << "[ITER] " << i << endl;
         LOG_DEBUG << "  K[" << i << "][X] = " << K0 << endl;
-        LOG_DEBUG << "  Q_K[" << i << "][X] = " << Q_K0 << endl;
-        LOG_DEBUG << "  K_r"<< i << "][X] = " << K0_r << endl;
-
-        evaluate_shift_polynomial_at_divisor_roots();
-        calculate_coefficients_of_linear_remainders_of_K();
 
         t[0] = t[1];
         t[1] = t[2];
-        t[2] = s1 - P_s1 / K0_s1;
+        t[2] = sigma0.s1() - aux.P_s1 / aux.K0_s1;
 
         v[0] = v[1];
         v[1] = v[2];
-        v[2] = sigma_shifted[0];
-
-        calculate_next_shifted_quadratic_divisor();
-        calculate_next_shift_polynomial();
+        v[2] = sigma1.v();
 
         K0 = K1;
 
-        LOG_DEBUG << "  sigma[X] = " << sigma << endl;
-        LOG_DEBUG << "  sigma_shifted[X] = " << sigma_shifted << endl;
+        LOG_DEBUG << "  sigma0[X] = " << sigma0.polynomial << endl;
+        LOG_DEBUG << "  sigma1[X] = " << sigma1.polynomial << endl;
         LOG_DEBUG << "  K[" << i << "] = " << K0 << endl;
         for (int k = 0; k < 3; ++k)
           LOG_DEBUG << "  t[" << k << "] = " << t[k] << endl;
@@ -332,22 +343,22 @@ namespace DO { namespace Sara {
 
         if (weak_convergence_predicate(t))
         {
-          cvg_type = LinearFactor;
-          s_i = std::real(t[2]);
+          cvg_type = LinearFactor_;
+          linear_factor.polynomial = Z - std::real(t[2]);
 
           LOG_DEBUG << "Convergence to linear factor" << endl;
-          LOG_DEBUG << "s = " << s_i << endl;
+          LOG_DEBUG << "  " << linear_factor.polynomial << endl;
 
           break;
         }
 
         if (weak_convergence_predicate(v))
         {
-          cvg_type = QuadraticFactor;
-          v_i = sigma_shifted[0];
+          cvg_type = QuadraticFactor_;
+          sigma0 = sigma1;
+          sigma0.roots = quadratic_roots(sigma0.polynomial);
 
           LOG_DEBUG << "Convergence to quadratic factor" << endl;
-          LOG_DEBUG << "v_i = " << v[2] << endl;
 
           break;
         }
@@ -359,136 +370,51 @@ namespace DO { namespace Sara {
     }
   }
 
-  auto JenkinsTraub::stage3() -> void
+  // Apply variable shift polynomial.
+  auto JenkinsTraub::stage3_linear_factor() -> ConvergenceType
   {
-    LOG_DEBUG << "[STAGE 3] " << endl;
+    LOG_DEBUG << "[STAGE 3: Linear factor refinement] " << endl;
 
-    LOG_DEBUG << "  s_i = " << s_i << endl;
-    LOG_DEBUG << "  v_i = " << v_i << endl;
+    LOG_DEBUG << "  linear_factor = " << linear_factor.polynomial << endl;
 
     int i = L;
 
-    auto z = std::array<double, 3>{0., 0., 0.};
+    auto Q_P = UnivariatePolynomial<double>{};
+    auto R_P = UnivariatePolynomial<double>{};
 
-    // Determine convergence type.
-    while (i < L + max_iter)
-    {
-      ++i;
-
-      quadratic_roots(sigma_shifted, s1, s2);
-      {
-        u = sigma_shifted[1];
-        v = sigma_shifted[0];
-      }
-
-      std::tie(Q_P, P_r) = P / sigma_shifted;
-      evaluate_polynomial_at_divisor_roots();
-      calculate_coefficients_of_linear_remainders_of_P();
-
-      std::tie(Q_K0, K0_r) = K0 / sigma_shifted;
-      evaluate_shift_polynomial_at_divisor_roots();
-      calculate_coefficients_of_linear_remainders_of_K();
-
-      calculate_next_shift_polynomial();
-      calculate_next_shifted_quadratic_divisor();
-
-      LOG_DEBUG << "[ITER] " << i << endl;
-      LOG_DEBUG << "  K[" << i << "] = " << K0 << endl;
-      LOG_DEBUG << "  Sigma[" << i << "] = " << sigma_shifted << endl;
-
-      if (cvg_type == LinearFactor)
-      {
-        s_i = s_i - P(s_i) / K1(s_i);
-        z[0] = z[1];
-        z[1] = z[2];
-        z[2] = s_i;
-
-        LOG_DEBUG << "  P_r(s_i) = "
-                  << "P_r(" << s_i << ") = " << P_r(s_i) << std::endl;
-        LOG_DEBUG << "  P(s_i) = "
-                  << "P(" << s_i << ") = " << P(s_i) << std::endl;
-        LOG_DEBUG << "  s[" << i << "] = " << s_i << endl;
-      }
-
-      if (cvg_type == QuadraticFactor)
-      {
-        v_i = sigma_shifted[2];
-        z[0] = z[1];
-        z[1] = z[2];
-        z[2] = std::abs(s1) + std::abs(s2);
-
-        LOG_DEBUG << "  v[" << i << "] = " << v_i << endl;
-      }
-
-      // Update K0.
-      K0 = K1;
-
-      if (std::isnan(z[2]))
-      {
-        LOG_DEBUG << "Stopping prematuraly at iteration " << i << endl;
-        if (cvg_type == LinearFactor)
-          s_i = z[1];
-        // Finish
-        break;
-      }
-
-      if (i < L + 3)
-        continue;
-
-      if (nikolajsen_root_convergence_predicate(z))
-      {
-        LOG_DEBUG << "Converged at iteration " << i << endl;
-        break;
-      }
-    }
-
-    if (cvg_type == LinearFactor)
-      LOG_DEBUG << "L[X] = X - " << setprecision(12) << s_i << endl;
-
-    if (cvg_type == QuadraticFactor)
-    {
-      LOG_DEBUG << "Sigma[X] = " << sigma_shifted << endl;
-      LOG_DEBUG << "s1 = " << s1 << " P(s1) = " << P(s1) << endl;
-      LOG_DEBUG << "s2 = " << s2 << " P(s2) = " << P(s2) << endl;
-    }
-  }
-
-  auto JenkinsTraub::stage3_linear_shift() -> void
-  {
-    LOG_DEBUG << "[STAGE 3] " << endl;
-
-    LOG_DEBUG << "  s_i = " << s_i << endl;
-
-    int i = L;
-
-    auto z = std::array<double, 3>{0., 0., 0.};
+    auto si = -linear_factor.polynomial[0];
     auto P_si = double{};
     auto K0_si = double{};
+    auto K1_si = double{};
+
+    auto z = std::array<double, 3>{0., 0., 0.};
 
     // Determine convergence type.
     while (i < L + max_iter)
     {
       ++i;
 
-      std::tie(Q_P, P_r) = P / (Z - s_i);
-      P_s_i = P_r(s_i);
+      std::tie(Q_P, R_P) = P / linear_factor.polynomial;
+      P_si = R_P(si);
 
-      //calculate_next_shift_polynomial();
-      K1 = ...;
+      // calculate_next_shift_polynomial();
+      K1 = next_linear_shift_polynomial(K0, P, si, P_si, K0_si);
+      K1_si = K1(si);
 
       LOG_DEBUG << "[ITER] " << i << endl;
       LOG_DEBUG << "  K[" << i << "] = " << K0 << endl;
 
-      s_i = s_i - P(s_i) / K1(s_i);
+      si -= P_si / K1_si;
+      linear_factor.polynomial[0] = -si;
       z[0] = z[1];
       z[1] = z[2];
-      z[2] = s_i;
+      z[2] = si;
 
-      LOG_DEBUG << "  P_r(s_i) = "
-                << "P_r(" << s_i << ") = " << P_r(s_i) << std::endl;
+      LOG_DEBUG << "  R_P(s_i) = "
+                << "R_P(" << si << ") = " << P_si << std::endl;
       LOG_DEBUG << "  P(s_i) = "
-                << "P(" << s_i << ") = " << P(s_i) << std::endl;
-      LOG_DEBUG << "  s[" << i << "] = " << s_i << endl;
+                << "P(" << si << ") = " << P(si) << std::endl;
+      LOG_DEBUG << "  s[" << i << "] = " << si << endl;
 
       // Update K0.
       K0 = K1;
@@ -496,9 +422,6 @@ namespace DO { namespace Sara {
       if (std::isnan(z[2]))
       {
         LOG_DEBUG << "Stopping prematuraly at iteration " << i << endl;
-        if (cvg_type == LinearFactor)
-          s_i = z[1];
-        // Finish
         break;
       }
 
@@ -511,8 +434,67 @@ namespace DO { namespace Sara {
         break;
       }
     }
-LOG_DEBUG << "L[X] = X - " << setprecision(12) << s_i << endl;
+    LOG_DEBUG << "L[X] = " << linear_factor.polynomial << endl;
 
+    return ConvergenceType::LinearFactor_;
+  }
+
+  auto JenkinsTraub::stage3_quadratic_factor() -> ConvergenceType
+  {
+    LOG_DEBUG << "[STAGE 3: Quadratic factor refinement] " << endl;
+
+    int i = L;
+
+    auto z = std::array<double, 3>{0., 0., 0.};
+
+    // Determine convergence type.
+    while (i < L + max_iter)
+    {
+      ++i;
+
+      sigma0 = sigma1;
+      sigma0.roots = quadratic_roots(sigma0.polynomial);
+
+      aux.update_target_polynomial_aux_vars(P, sigma0);
+      aux.update_shift_polynomial_aux_vars(K0, sigma0);
+
+      K1 = next_quadratic_shift_polymomial(sigma0, aux);
+      sigma1 = next_quadratic_factor(sigma0, P, K0, aux);
+
+      LOG_DEBUG << "[ITER] " << i << endl;
+      LOG_DEBUG << "  K[" << i << "] = " << K0 << endl;
+      LOG_DEBUG << "  Sigma[" << i << "] = " << sigma0.polynomial << endl;
+
+      z[0] = z[1];
+      z[1] = z[2];
+      z[2] = std::abs(sigma0.roots[0]) + std::abs(sigma0.roots[1]);
+
+      // Update K0.
+      K0 = K1;
+
+      if (std::isnan(z[2]))
+      {
+        LOG_DEBUG << "Stopping prematuraly at iteration " << i << endl;
+        break;
+      }
+
+      if (i < L + 3)
+        continue;
+
+      if (nikolajsen_root_convergence_predicate(z))
+      {
+        LOG_DEBUG << "Converged at iteration " << i << endl;
+        break;
+      }
+    }
+
+    LOG_DEBUG << "Sigma[X] = " << sigma1.polynomial << endl;
+    LOG_DEBUG << "s1 = " << sigma1.s1() << " P(s1) = " << P(sigma1.s1())
+              << endl;
+    LOG_DEBUG << "s2 = " << sigma1.s2() << " P(s2) = " << P(sigma1.s2())
+              << endl;
+
+    return ConvergenceType::QuadraticFactor_;
   }
 
 } /* namespace Sara */
