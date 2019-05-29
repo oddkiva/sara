@@ -176,11 +176,19 @@ namespace DO { namespace Sara {
 
   auto next_linear_shift_polynomial(const UnivariatePolynomial<double>& K0,
                                     const UnivariatePolynomial<double>& P,
-                                    double s_i, double P_si, double K0_si)
+                                    const LinearFactor& linear_factor,
+                                    double P_si, double K0_si)
       -> UnivariatePolynomial<double>
   {
-    auto K1 = ((K0 - K0_si) / (Z - s_i)).first -
-              (K0_si / P_si) * ((P - P_si) / (Z - s_i)).first;
+    const auto& L = linear_factor.polynomial;
+    auto K1 = K0_si == 0 ? (K0 / L).first
+                         : ((K0 - K0_si) / L).first -
+                               (K0_si / P_si) * ((P - P_si) / L).first;
+
+#ifdef SHOW_DEBUG_LOG
+    LOG_DEBUG << "K0 = " << K0 << endl;
+    LOG_DEBUG << "K1 = " << K1 << endl;
+#endif
 
     /*
      *    p(s) * k0(z) - p(s) * k0(s) - k0(s) * p(z) + k0(s) * p(s)
@@ -375,7 +383,8 @@ namespace DO { namespace Sara {
   {
     LOG_DEBUG << "[STAGE 3: Linear factor refinement] " << endl;
 
-    LOG_DEBUG << "  linear_factor = " << linear_factor.polynomial << endl;
+    LOG_DEBUG << "  linear_factor = " << setprecision(12)
+              << linear_factor.polynomial << endl;
 
     int i = L;
 
@@ -390,40 +399,43 @@ namespace DO { namespace Sara {
     auto z = std::array<double, 3>{0., 0., 0.};
 
     // Determine convergence type.
-    while (i < L + max_iter)
+    while (i < L + 20) // max_iter)
     {
       ++i;
 
+      // Calculate auxiliary variables.
       std::tie(Q_P, R_P) = P / linear_factor.polynomial;
       P_si = R_P(si);
 
-      // calculate_next_shift_polynomial();
-      K1 = next_linear_shift_polynomial(K0, P, si, P_si, K0_si);
+      // Check if si is already a root of the polynomial.
+      if (std::abs(P_si) < 1e-14)
+        break;
+
+      // calculate_next shift polynomial.
+      K1 = next_linear_shift_polynomial(K0, P, linear_factor, P_si, K0_si);
+      if (K0._coeff == K1._coeff)
+      {
+        LOG_DEBUG << "No convergence because K0 == K1" << endl;
+        return ConvergenceType::NoConvergence;
+      }
+
       K1_si = K1(si);
 
       LOG_DEBUG << "[ITER] " << i << endl;
       LOG_DEBUG << "  K[" << i << "] = " << K0 << endl;
 
+      // Update the linear factor.
       si -= P_si / K1_si;
       linear_factor.polynomial[0] = -si;
+      LOG_DEBUG << "  linear_factor = " << linear_factor.polynomial << endl;
+
+      // Update the sequence of roots.
       z[0] = z[1];
       z[1] = z[2];
       z[2] = si;
 
-      LOG_DEBUG << "  R_P(s_i) = "
-                << "R_P(" << si << ") = " << P_si << std::endl;
-      LOG_DEBUG << "  P(s_i) = "
-                << "P(" << si << ") = " << P(si) << std::endl;
-      LOG_DEBUG << "  s[" << i << "] = " << si << endl;
-
       // Update K0.
       K0 = K1;
-
-      if (std::isnan(z[2]))
-      {
-        LOG_DEBUG << "Stopping prematuraly at iteration " << i << endl;
-        break;
-      }
 
       if (i < L + 3)
         continue;
@@ -434,7 +446,10 @@ namespace DO { namespace Sara {
         break;
       }
     }
+
     LOG_DEBUG << "L[X] = " << linear_factor.polynomial << endl;
+    LOG_DEBUG << "root = " << setprecision(12) << -linear_factor.polynomial[0]
+              << endl;
 
     return ConvergenceType::LinearFactor_;
   }
