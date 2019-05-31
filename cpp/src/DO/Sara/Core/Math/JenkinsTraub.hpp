@@ -11,9 +11,14 @@
 namespace DO { namespace Sara {
 
   //! @{
-  //! @brief Tools needed for Jenkins-Traub algorithm.
+  //! @brief Some basic tools needed for Jenkins-Traub algorithm.
   auto compute_root_moduli_lower_bound(const UnivariatePolynomial<double>& P)
       -> double;
+
+  auto linear_root(UnivariatePolynomial<double>& P) -> double
+  {
+    return -P[0] / P[1];
+  }
 
   auto quadratic_roots(UnivariatePolynomial<double>& P)
       -> std::array<std::complex<double>, 2>;
@@ -65,6 +70,7 @@ namespace DO { namespace Sara {
   //! @}
 
   //! @brief Polynomial decomposition variables in Jenkins-Traub algorithm.
+  //! This is used when the quadratic factor is involved.
   struct AuxiliaryVariables
   {
     //! @{
@@ -192,10 +198,9 @@ namespace DO { namespace Sara {
 
     int M{5};
     int L{20};
-    int max_iter{10000000};
-
-    double si;
-    double vi;
+    //! In practice, Jenkins-Traub algorithm converges very fast. So after that,
+    //! the convergence is considered to be stalling.
+    int max_iter{20};
 
     //! @brief Apply zero shift polynomial.
     auto stage1() -> void;
@@ -208,7 +213,11 @@ namespace DO { namespace Sara {
     //! @brief Apply variable shift polynomial to refine the factors very fast.
     auto stage3_linear_factor() -> ConvergenceType;
     auto stage3_quadratic_factor() -> ConvergenceType;
+    auto stage3(std::vector<std::complex<double>>& roots) -> ConvergenceType;
     //! @}
+
+    //! @brief Find all the roots.
+    std::vector<std::complex<double>> find_roots();
   };
 
 } /* namespace Sara */

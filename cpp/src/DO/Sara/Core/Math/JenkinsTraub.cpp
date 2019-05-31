@@ -6,7 +6,7 @@
 #include <iostream>
 
 
-#define SHOW_DEBUG_LOG
+//#define SHOW_DEBUG_LOG
 #define LOG_DEBUG std::cout << "[" << __FUNCTION__ << ":" << __LINE__ << "] "
 
 
@@ -68,10 +68,22 @@ namespace DO { namespace Sara {
     const auto& a = P[2];
     const auto& b = P[1];
     const auto& c = P[0];
-    const auto delta = std::complex<double>(b * b - 4 * a * c);
+    const auto sqrt_delta = std::sqrt(std::complex<double>(b * b - 4 * a * c));
 
-    return {(-b + std::sqrt(delta)) / (2 * a),
-            (-b - std::sqrt(delta)) / (2 * a)};
+    // For someone like me who has little expertise in numerical analysis.
+    //
+    // Thanks to Chris Sweeney who pointed out the article:
+    // http://people.csail.mit.edu/bkph/articles/Quadratics.pdf
+    //
+    // We can check:
+    //     x1 * x2 =  c / a  (1)
+    //     x1 + x2 = -b / a  (2)
+    if (b >= 0)
+      return {(-b - sqrt_delta) / (2 * a),  //
+              (2 * c) / (-b - sqrt_delta)};
+    else
+      return {(2 * c) / (-b + sqrt_delta),  //
+              (-b + sqrt_delta) / (2 * a)};
   }
 
 
@@ -171,6 +183,9 @@ namespace DO { namespace Sara {
     // auto K1 = ((K0 - (K0(0) / P(0)) * P) / Z).first;
     auto K1 = ((K0 - K0(0)) / Z).first - (K0(0) / P(0)) * (P / Z).first;
 
+    // Divide by the leading coefficient for better numeric accuracy.
+    K1 = K1 / K1[K1.degree()];
+
     return K1;
   }
 
@@ -186,6 +201,7 @@ namespace DO { namespace Sara {
                                (K0_si / P_si) * ((P - P_si) / L).first;
 
 #ifdef SHOW_DEBUG_LOG
+    LOG_DEBUG << "K0_si / P_si = " << K0_si / P_si << endl;
     LOG_DEBUG << "K0 = " << K0 << endl;
     LOG_DEBUG << "K1 = " << K1 << endl;
 #endif
@@ -197,6 +213,9 @@ namespace DO { namespace Sara {
      *    |p(z)  k0(z)|
      *
      * */
+
+    // Divide by the leading coefficient for better numeric accuracy.
+    K1 = K1 / K1[K1.degree()];
 
     return K1;
   }
@@ -225,6 +244,9 @@ namespace DO { namespace Sara {
 #ifdef SHOW_DEBUG_LOG
     LOG_DEBUG << "K1 = " << K1 << std::endl;
 #endif
+
+    // Divide by the leading coefficient for better numeric accuracy.
+    K1 = K1 / K1[K1.degree()];
 
     return K1;
   }
@@ -301,7 +323,6 @@ namespace DO { namespace Sara {
     }
   }
 
-  // Apply fixed shift polynomial to determine convergence.
   auto JenkinsTraub::stage2() -> void
   {
     LOG_DEBUG << "[STAGE 2] " << endl;
@@ -309,8 +330,10 @@ namespace DO { namespace Sara {
     // Stage 2 must be able to determine the convergence.
     while (cvg_type == NoConvergence)
     {
+      LOG_DEBUG << "P = " << P << endl;
       // Choose roots randomly on the circle of radius beta.
       sigma0.initialize(P, 49 * M_PI / 180., true);
+      LOG_DEBUG << "beta = " << sigma0.beta << endl;
 
       aux.update_target_polynomial_aux_vars(P, sigma0);
 
@@ -349,17 +372,7 @@ namespace DO { namespace Sara {
         if (i < M + 3)
           continue;
 
-        if (weak_convergence_predicate(t))
-        {
-          cvg_type = LinearFactor_;
-          linear_factor.polynomial = Z - std::real(t[2]);
-
-          LOG_DEBUG << "Convergence to linear factor" << endl;
-          LOG_DEBUG << "  " << linear_factor.polynomial << endl;
-
-          break;
-        }
-
+        // First test if we have convergence to a quadratic factor.
         if (weak_convergence_predicate(v))
         {
           cvg_type = QuadraticFactor_;
@@ -367,9 +380,20 @@ namespace DO { namespace Sara {
           sigma0.roots = quadratic_roots(sigma0.polynomial);
 
           LOG_DEBUG << "Convergence to quadratic factor" << endl;
-
-          break;
+          return;
         }
+
+        // Then test if we have convergence to a linear factor.
+        if (weak_convergence_predicate(t))
+        {
+          cvg_type = LinearFactor_;
+          linear_factor.polynomial = Z - std::real(t[2]);
+
+          LOG_DEBUG << "Convergence to linear factor" << endl;
+          LOG_DEBUG << "  " << linear_factor.polynomial << endl;
+          return;
+        }
+
       }
 
       L = i;
@@ -378,13 +402,10 @@ namespace DO { namespace Sara {
     }
   }
 
-  // Apply variable shift polynomial.
   auto JenkinsTraub::stage3_linear_factor() -> ConvergenceType
   {
     LOG_DEBUG << "[STAGE 3: Linear factor refinement] " << endl;
-
-    LOG_DEBUG << "  linear_factor = " << setprecision(12)
-              << linear_factor.polynomial << endl;
+    LOG_DEBUG << "  linear_factor = " << linear_factor.polynomial << endl;
 
     int i = L;
 
@@ -392,50 +413,61 @@ namespace DO { namespace Sara {
     auto R_P = UnivariatePolynomial<double>{};
 
     auto si = -linear_factor.polynomial[0];
+    auto K0_si = K0(si);
     auto P_si = double{};
-    auto K0_si = double{};
     auto K1_si = double{};
 
     auto z = std::array<double, 3>{0., 0., 0.};
 
     // Determine convergence type.
-    while (i < L + 20) // max_iter)
+    while (i < L + max_iter)
     {
       ++i;
+
+      if (std::isnan(si))
+      {
+        LOG_DEBUG << "si is nan" << endl;
+        return ConvergenceType::NoConvergence;
+      }
 
       // Calculate auxiliary variables.
       std::tie(Q_P, R_P) = P / linear_factor.polynomial;
       P_si = R_P(si);
-
       // Check if si is already a root of the polynomial.
-      if (std::abs(P_si) < 1e-14)
-        break;
-
-      // calculate_next shift polynomial.
-      K1 = next_linear_shift_polynomial(K0, P, linear_factor, P_si, K0_si);
-      if (K0._coeff == K1._coeff)
+      if (std::abs(P_si) < std::numeric_limits<double>::epsilon())
       {
-        LOG_DEBUG << "No convergence because K0 == K1" << endl;
-        return ConvergenceType::NoConvergence;
+        LOG_DEBUG << "Convergence: si = " << setprecision(16) << si
+                  << " is already a root" << std::endl;
+        LOG_DEBUG << "  P(si) = " << setprecision(16) << P(si) << std::endl;
+        LOG_DEBUG << "  eps = " << setprecision(16)
+                  << std::numeric_limits<double>::epsilon() << std::endl;
+        break;
       }
 
-      K1_si = K1(si);
+      // Calculate_next shift polynomial.
+      K1 = next_linear_shift_polynomial(K0, P, linear_factor, P_si, K0_si);
 
-      LOG_DEBUG << "[ITER] " << i << endl;
-      LOG_DEBUG << "  K[" << i << "] = " << K0 << endl;
+      // Calculate K1(si).
+      K1_si = K1(si);
 
       // Update the linear factor.
       si -= P_si / K1_si;
       linear_factor.polynomial[0] = -si;
+
+      LOG_DEBUG << "[ITER] " << i << endl;
       LOG_DEBUG << "  linear_factor = " << linear_factor.polynomial << endl;
+      LOG_DEBUG << "  K[" << i << "] = " << K0 << endl;
+      LOG_DEBUG << "  K[" << i + 1 << "] = " << K1 << endl;
+      LOG_DEBUG << "  si = " << setprecision(16) << si << endl;
 
       // Update the sequence of roots.
       z[0] = z[1];
       z[1] = z[2];
       z[2] = si;
 
-      // Update K0.
+      // Update K0 and K0(si) for the next iteration.
       K0 = K1;
+      K0_si = K1_si;
 
       if (i < L + 3)
         continue;
@@ -447,8 +479,8 @@ namespace DO { namespace Sara {
       }
     }
 
-    LOG_DEBUG << "L[X] = " << linear_factor.polynomial << endl;
-    LOG_DEBUG << "root = " << setprecision(12) << -linear_factor.polynomial[0]
+    LOG_DEBUG << "  L[X] = " << linear_factor.polynomial << endl;
+    LOG_DEBUG << "  root = " << setprecision(12) << -linear_factor.polynomial[0]
               << endl;
 
     return ConvergenceType::LinearFactor_;
@@ -462,54 +494,155 @@ namespace DO { namespace Sara {
 
     auto z = std::array<double, 3>{0., 0., 0.};
 
+    sigma1.roots = quadratic_roots(sigma1.polynomial);
+
     // Determine convergence type.
     while (i < L + max_iter)
     {
       ++i;
 
       sigma0 = sigma1;
-      sigma0.roots = quadratic_roots(sigma0.polynomial);
 
       aux.update_target_polynomial_aux_vars(P, sigma0);
       aux.update_shift_polynomial_aux_vars(K0, sigma0);
 
       K1 = next_quadratic_shift_polymomial(sigma0, aux);
       sigma1 = next_quadratic_factor(sigma0, P, K0, aux);
+      sigma1.roots = quadratic_roots(sigma1.polynomial);
 
       LOG_DEBUG << "[ITER] " << i << endl;
       LOG_DEBUG << "  K[" << i << "] = " << K0 << endl;
+      LOG_DEBUG << "  K[" << i + 1 << "] = " << K1 << endl;
       LOG_DEBUG << "  Sigma[" << i << "] = " << sigma0.polynomial << endl;
+      LOG_DEBUG << "  Sigma[" << i + 1 << "] = " << sigma1.polynomial << endl;
 
       z[0] = z[1];
-      z[1] = z[2];
-      z[2] = std::abs(sigma0.roots[0]) + std::abs(sigma0.roots[1]);
+      z[1] = sigma0.polynomial[0];
+      z[2] = sigma1.polynomial[0];
 
       // Update K0.
       K0 = K1;
 
-      if (std::isnan(z[2]))
+      if (std::isnan(z[2]) || std::isinf(z[2]))
       {
         LOG_DEBUG << "Stopping prematuraly at iteration " << i << endl;
-        break;
+        return ConvergenceType::NoConvergence;
       }
 
-      if (i < L + 3)
+      if (i < L + 2)
         continue;
 
       if (nikolajsen_root_convergence_predicate(z))
       {
         LOG_DEBUG << "Converged at iteration " << i << endl;
-        break;
+
+        // Check that the roots are truly conjugate...
+        if (std::abs(sigma1.roots[0].real() - sigma1.roots[1].real()) >
+            std::numeric_limits<double>::epsilon() * sigma1.roots[1].real())
+        {
+          LOG_DEBUG << "Skeptical about the root conjugacy..." << endl;
+          LOG_DEBUG << "  s1 = " << sigma1.s1() << " P(s1) = " << P(sigma1.s1())
+                    << endl;
+          LOG_DEBUG << "  s2 = " << sigma1.s2() << " P(s2) = " << P(sigma1.s2())
+                    << endl;
+          return ConvergenceType::NoConvergence;
+        }
+        else
+        {
+          LOG_DEBUG << "Sigma[X] = " << sigma1.polynomial << endl;
+          LOG_DEBUG << "s1 = " << sigma1.s1() << " P(s1) = " << P(sigma1.s1())
+                    << endl;
+          LOG_DEBUG << "s2 = " << sigma1.s2() << " P(s2) = " << P(sigma1.s2())
+                    << endl;
+
+          return ConvergenceType::QuadraticFactor_;
+        }
       }
     }
 
-    LOG_DEBUG << "Sigma[X] = " << sigma1.polynomial << endl;
-    LOG_DEBUG << "s1 = " << sigma1.s1() << " P(s1) = " << P(sigma1.s1())
-              << endl;
-    LOG_DEBUG << "s2 = " << sigma1.s2() << " P(s2) = " << P(sigma1.s2())
-              << endl;
+    return ConvergenceType::NoConvergence;
+  }
 
-    return ConvergenceType::QuadraticFactor_;
+  auto JenkinsTraub::stage3(vector<complex<double>>& roots)
+      -> JenkinsTraub::ConvergenceType
+  {
+    // Dirty post-processing not explained in the paper because the weak
+    // convergence test makes things quite artistic.
+    if (cvg_type == ConvergenceType::LinearFactor_)
+    {
+      if (stage3_linear_factor() == ConvergenceType::LinearFactor_)
+      {
+        const auto root = -linear_factor.polynomial[0];
+        roots.push_back(root);
+        return ConvergenceType::LinearFactor_;
+      }
+      else
+      {
+        return ConvergenceType::QuadraticFactor_;
+      }
+    }
+
+    else
+    {
+      if (stage3_quadratic_factor() == ConvergenceType::QuadraticFactor_)
+      {
+        auto qroots = quadratic_roots(sigma1.polynomial);
+        roots.insert(roots.end(), qroots.begin(), qroots.end());
+        return ConvergenceType::QuadraticFactor_;
+      }
+      else
+      {
+        LOG_DEBUG << "Falling back to linear shift iteration" << endl;
+
+        // Use sigma0 instead because sigma1 can be contain nan coefficients.
+        //
+        // Reorder roots.
+        if (std::abs(sigma0.roots[0].real()) > std::abs(sigma0.roots[1].real()))
+          std::swap(sigma0.roots[0], sigma0.roots[1]);
+        linear_factor.initialize(sigma0.roots[0].real());
+        stage3_linear_factor();
+
+        const auto root = -linear_factor.polynomial[0];
+        roots.push_back(root);
+        return ConvergenceType::LinearFactor_;
+      }
+    }
+  }
+
+  auto JenkinsTraub::find_roots() -> std::vector<std::complex<double>>
+  {
+    auto roots = std::vector<std::complex<double>>{};
+
+    while (P.degree() > 2)
+    {
+       stage1();
+
+       stage2();
+
+       if (stage3(roots) == ConvergenceType::LinearFactor_)
+         P = (P / linear_factor.polynomial).first;
+       else
+         P = (P / sigma1.polynomial).first;
+
+       // Restart.
+       cvg_type = ConvergenceType::NoConvergence;
+
+    }
+
+    if (P.degree() == 2)
+    {
+      LOG_DEBUG << "P = " << P << endl;
+      const auto qroots = quadratic_roots(P);
+      roots.insert(roots.end(), qroots.begin(), qroots.end());
+    }
+    else if (P.degree() == 1)
+    {
+      LOG_DEBUG << "P = " << P << endl;
+      auto root = -P[0] / P[1];
+      roots.push_back(root);
+    }
+
+    return roots;
   }
 
 } /* namespace Sara */
