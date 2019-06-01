@@ -3,6 +3,7 @@
 #include <DO/Sara/Core/EigenExtension.hpp>
 #include <DO/Sara/Core/Math/UnivariatePolynomial.hpp>
 
+#include <array>
 #include <complex>
 #include <ctime>
 #include <memory>
@@ -222,10 +223,11 @@ namespace DO { namespace Sara {
 
 
   //! @brief Find all the roots using Jenkins-Traub algorithm.
-  auto rpoly(const UnivariatePolynomial<double>& P)
+  auto rpoly(const UnivariatePolynomial<double>& P, int stage3_max_iter = 20)
   {
-    auto root_finder = JenkinsTraub{P / P[P.degree()]};
-    return root_finder.find_roots();
+    auto solver = JenkinsTraub{P / P[P.degree()]};
+    solver.max_iter = stage3_max_iter;
+    return solver.find_roots();
   };
 
 } /* namespace Sara */

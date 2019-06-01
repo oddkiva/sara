@@ -447,7 +447,7 @@ namespace DO { namespace Sara {
 #ifdef SHOW_DEBUG_LOG
         LOG_DEBUG << "  si is nan" << endl;
 #endif
-        return ConvergenceType::NoConvergence;
+        break;
       }
 
       // Calculate auxiliary variables.
@@ -464,7 +464,7 @@ namespace DO { namespace Sara {
         LOG_DEBUG << "    ε = " << setprecision(16)
                   << std::numeric_limits<double>::epsilon() << endl;
 #endif
-        break;
+        return ConvergenceType::LinearFactor_;
       }
 
       // Calculate_next shift polynomial.
@@ -483,6 +483,9 @@ namespace DO { namespace Sara {
       LOG_DEBUG << "  K[" << i + 1 << "] = " << K1 << endl;
       LOG_DEBUG << "  λ[X] = " << linear_factor.polynomial << endl;
       LOG_DEBUG << "  si = " << setprecision(16) << si << endl;
+      LOG_DEBUG << "  P(si) = " << setprecision(12) << P_si << endl;
+      LOG_DEBUG << "  epsilon = " << setprecision(12)
+                << std::numeric_limits<double>::epsilon() << endl;
 #endif
 
       // Update the sequence of roots.
@@ -504,12 +507,19 @@ namespace DO { namespace Sara {
         LOG_DEBUG << "    λ[X] = " << linear_factor.polynomial << endl;
         LOG_DEBUG << "    root = " << setprecision(12)
                   << -linear_factor.polynomial[0] << endl;
+        LOG_DEBUG << "    P(root) = " << setprecision(12) << P_si << endl;
+        LOG_DEBUG << "    epsilon = " << setprecision(12)
+                  << std::numeric_limits<double>::epsilon() << endl;
 #endif
-        break;
+        // Not very robust...
+        if (std::abs(P_si) > 1e-8)
+          break;
+        else
+          return ConvergenceType::LinearFactor_;
       }
     }
 
-    return ConvergenceType::LinearFactor_;
+    return ConvergenceType::NoConvergence;
   }
 
   auto JenkinsTraub::stage3_quadratic_factor() -> ConvergenceType
@@ -558,43 +568,51 @@ namespace DO { namespace Sara {
 #ifdef SHOW_DEBUG_LOG
         LOG_DEBUG << "Stopping prematuraly at iteration " << i << endl;
 #endif
-        return ConvergenceType::NoConvergence;
+        break;
       }
 
       if (i < L + 2)
         continue;
 
-      if (nikolajsen_root_convergence_predicate(z))
+      if (!nikolajsen_root_convergence_predicate(z))
+        continue;
+
+      if (std::abs(aux.P_s1) > 1e-12 ||
+          std::abs(aux.P_s2) > 1e-12)
       {
-        const auto abs_error = std::abs(sigma1.roots[0].real() - sigma1.roots[1].real());
-
 #ifdef SHOW_DEBUG_LOG
-        LOG_DEBUG << "  Converged at iteration " << i << endl;
-        LOG_DEBUG << "    σ[X] = " << sigma1.polynomial << endl;
-        LOG_DEBUG << "    s1 = " << sigma1.s1() << " P(s1) = " << P(sigma1.s1())
-                  << endl;
-        LOG_DEBUG << "    s2 = " << sigma1.s2() << " P(s2) = " << P(sigma1.s2())
-                  << endl;
-
-        LOG_DEBUG << "  Root conjugacy check" << endl;
-
-        LOG_DEBUG << "    " << abs_error / std::abs(sigma1.roots[1].real())
-                  << endl;
+        LOG_DEBUG << "  Skeptical about quadratic root evaluation" << endl;
 #endif
-
-        // Check that the roots are truly conjugate...
-        if (abs_error > 1e-3 * std::abs(sigma1.roots[1].real()))
-        {
-#ifdef SHOW_DEBUG_LOG
-          LOG_DEBUG << "  Skeptical about the root conjugacy..." << endl;
-#endif
-          return ConvergenceType::NoConvergence;
-        }
-        else
-        {
-          return ConvergenceType::QuadraticFactor_;
-        }
+        break;
       }
+
+      const auto abs_error =
+          std::abs(sigma1.roots[0].real() - sigma1.roots[1].real());
+
+#ifdef SHOW_DEBUG_LOG
+      LOG_DEBUG << "  Converged at iteration " << i << endl;
+      LOG_DEBUG << "    σ[X] = " << sigma1.polynomial << endl;
+      LOG_DEBUG << "    s1 = " << sigma1.s1() << " P(s1) = " << P(sigma1.s1())
+                << endl;
+      LOG_DEBUG << "    s2 = " << sigma1.s2() << " P(s2) = " << P(sigma1.s2())
+                << endl;
+
+      LOG_DEBUG << "  Root conjugacy check" << endl;
+
+      LOG_DEBUG << "    " << abs_error / std::abs(sigma1.roots[1].real())
+                << endl;
+#endif
+
+      // Check that the roots are truly conjugate...
+      if (abs_error > 1e-3 * std::abs(sigma1.roots[1].real()))
+      {
+#ifdef SHOW_DEBUG_LOG
+        LOG_DEBUG << "  Skeptical about the root conjugacy..." << endl;
+#endif
+        break;
+      }
+      else
+        return ConvergenceType::QuadraticFactor_;
     }
 
     return ConvergenceType::NoConvergence;
@@ -610,6 +628,9 @@ namespace DO { namespace Sara {
       if (stage3_linear_factor() == ConvergenceType::LinearFactor_)
       {
         const auto root = -linear_factor.polynomial[0];
+#ifdef SHOW_DEBUG_LOG
+        LOG_DEBUG << "root = " << root << endl;
+#endif
         roots.push_back(root);
         return ConvergenceType::LinearFactor_;
       }
@@ -620,37 +641,38 @@ namespace DO { namespace Sara {
       }
     }
 
+    if (stage3_quadratic_factor() == ConvergenceType::QuadraticFactor_)
+    {
+      auto qroots = quadratic_roots(sigma1.polynomial);
+#ifdef SHOW_DEBUG_LOG
+        LOG_DEBUG << "root0 = " << qroots[0] << endl;
+        LOG_DEBUG << "root1 = " << qroots[1] << endl;
+#endif
+      roots.insert(roots.end(), qroots.begin(), qroots.end());
+      return ConvergenceType::QuadraticFactor_;
+    }
     else
     {
-      if (stage3_quadratic_factor() == ConvergenceType::QuadraticFactor_)
-      {
-        auto qroots = quadratic_roots(sigma1.polynomial);
-        roots.insert(roots.end(), qroots.begin(), qroots.end());
-        return ConvergenceType::QuadraticFactor_;
-      }
-      else
-      {
 #ifdef SHOW_DEBUG_LOG
-        LOG_DEBUG << "Falling back to linear shift iteration" << endl;
+      LOG_DEBUG << "Falling back to linear shift iteration" << endl;
 #endif
 
-        // Use sigma0 instead because sigma1 can be contain nan coefficients.
-        //
-        // Reorder roots.
-        if (std::abs(sigma0.roots[0].real()) > std::abs(sigma0.roots[1].real()))
-          std::swap(sigma0.roots[0], sigma0.roots[1]);
-        linear_factor.initialize(sigma0.roots[0].real());
+      // Use sigma0 instead because sigma1 can be contain nan coefficients.
+      //
+      // Reorder roots.
+      if (std::abs(sigma0.roots[0].real()) > std::abs(sigma0.roots[1].real()))
+        std::swap(sigma0.roots[0], sigma0.roots[1]);
+      linear_factor.initialize(sigma0.roots[0].real());
 
-        if (stage3_linear_factor() != ConvergenceType::LinearFactor_)
-        {
-          LOG_DEBUG << "Uh oh: still no convergence..." << endl;
-          exit(1);
-        }
-
-        const auto root = -linear_factor.polynomial[0];
-        roots.push_back(root);
-        return ConvergenceType::LinearFactor_;
+      if (stage3_linear_factor() != ConvergenceType::LinearFactor_)
+      {
+        LOG_DEBUG << "Uh oh: still no convergence..." << endl;
+        exit(1);
       }
+
+      const auto root = -linear_factor.polynomial[0];
+      roots.push_back(root);
+      return ConvergenceType::LinearFactor_;
     }
   }
 

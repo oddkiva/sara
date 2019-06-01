@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE(test_jenkins_traub_2)
            - 8.035 * Z                  //
            + 2.01;
 
-  const auto roots = rpoly(P);
+  const auto roots = rpoly(P, 40);
 
   for (const auto& root: roots)
     cout << "P(" << setprecision(12) << root << ") = " << setprecision(12)
@@ -165,7 +165,7 @@ BOOST_AUTO_TEST_CASE(test_jenkins_traub_4)
       (-28342.548095425875) * Z +                 //
       (-52412.8655144021);
 
-  const auto roots = rpoly(P);
+  const auto roots = rpoly(P, 60);
 
   for (const auto& root: roots)
   {
