@@ -121,7 +121,7 @@ namespace DO { namespace Sara {
       -> void
   {
     P_div_sigma = P / sigma.polynomial;
-    const auto& [Q_P, R_P] = P_div_sigma;
+    const auto& R_P = P_div_sigma.second;
 
     const auto& [s1, s2] = sigma.roots;
     P_s1 = R_P(s1);
@@ -146,7 +146,7 @@ namespace DO { namespace Sara {
       -> void
   {
     K0_div_sigma = K0 / sigma.polynomial;
-    const auto& [Q_K0, R_K0] = K0_div_sigma;
+    const auto& R_K0 = K0_div_sigma.second;
 
     const auto& [s1, s2] = sigma.roots;
     K0_s1 = R_K0(s1);

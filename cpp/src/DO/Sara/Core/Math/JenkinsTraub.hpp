@@ -15,7 +15,7 @@ namespace DO { namespace Sara {
   auto compute_root_moduli_lower_bound(const UnivariatePolynomial<double>& P)
       -> double;
 
-  auto linear_root(UnivariatePolynomial<double>& P) -> double
+  auto linear_root(UnivariatePolynomial<double>& P)
   {
     return -P[0] / P[1];
   }
@@ -218,6 +218,14 @@ namespace DO { namespace Sara {
 
     //! @brief Find all the roots.
     std::vector<std::complex<double>> find_roots();
+  };
+
+
+  //! @brief Find all the roots using Jenkins-Traub algorithm.
+  auto rpoly(const UnivariatePolynomial<double>& P)
+  {
+    auto root_finder = JenkinsTraub{P / P[P.degree()]};
+    return root_finder.find_roots();
   };
 
 } /* namespace Sara */
