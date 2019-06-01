@@ -97,24 +97,29 @@ BOOST_AUTO_TEST_CASE(test_polynomial)
   auto Q = det(E);
   std::cout << "det(E) = " << Q.to_string() << std::endl;
 
+  auto index = [](char c) { return std::size_t(c - 'a'); };
+  auto letter = [](int c) { return char('a' + c); };
+  const auto num_equations = index('m') + 1;
+
   // As per Nister paper.
-  auto A = std::map<char, Polynomial<double>>{};
-  A['a'] = det(E);
+  auto A = std::vector<Polynomial<double>>{num_equations};
+  A[index('a')] = det(E);
   for (int i = 0; i < 3; ++i)
   {
     for (int j = 0; j < 3; ++j)
     {
-      char c = 'b' + 3 * i + j;
+      const auto c = index('b') + 3 * i + j;
       A[c] = P(i, j);
     }
   }
 
-  A['k'] = A['e'] - A['f'] * z;
-  A['l'] = A['g'] - A['h'] * z;
-  A['m'] = A['i'] - A['j'] * z;
+  A[index('k')] = A[index('e')] - A[index('f')] * z;
+  A[index('l')] = A[index('g')] - A[index('h')] * z;
+  A[index('m')] = A[index('i')] - A[index('j')] * z;
 
-  for (const auto& a : A)
-    std::cout << a.first << " = " << a.second.to_string() << std::endl;
+  for (auto i = 0u; i < A.size(); ++i)
+    std::cout << "A[" << letter(i) << "] = " << A[i].to_string() << std::endl;
+
 
   // Calculate <n> = det(B)
   // 1. Perform Gauss-Jordan elimination on A and stop four rows earlier.

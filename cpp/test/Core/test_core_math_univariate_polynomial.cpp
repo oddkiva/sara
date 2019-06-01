@@ -165,7 +165,12 @@ BOOST_AUTO_TEST_CASE(test_jenkins_traub_4)
       (-28342.548095425875) * Z +                 //
       (-52412.8655144021);
 
-  const auto roots = rpoly(P, 60);
+  //const auto roots = rpoly(P, 60);
+  auto solver = JenkinsTraub{P / P[P.degree()]};
+  solver.M = 20;
+  solver.L = 50;
+  solver.max_iter = 40;
+  const auto roots = solver.find_roots();
 
   for (const auto& root: roots)
   {
