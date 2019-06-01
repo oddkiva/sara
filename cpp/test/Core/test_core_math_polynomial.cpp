@@ -11,6 +11,7 @@
 
 #define BOOST_TEST_MODULE "Core/Math/Polynomial"
 
+#include <DO/Sara/Core/Tensor.hpp>
 #include <DO/Sara/Core/Math/Polynomial.hpp>
 
 #include <boost/test/unit_test.hpp>
@@ -113,12 +114,42 @@ BOOST_AUTO_TEST_CASE(test_polynomial)
     }
   }
 
-  A[index('k')] = A[index('e')] - A[index('f')] * z;
-  A[index('l')] = A[index('g')] - A[index('h')] * z;
-  A[index('m')] = A[index('i')] - A[index('j')] * z;
+  //A[index('k')] = A[index('e')] - A[index('f')] * z;
+  //A[index('l')] = A[index('g')] - A[index('h')] * z;
+  //A[index('m')] = A[index('i')] - A[index('j')] * z;
 
   for (auto i = 0u; i < A.size(); ++i)
     std::cout << "A[" << letter(i) << "] = " << A[i].to_string() << std::endl;
+
+  const Monomial monomials[] = {x.pow(3),
+                                y.pow(3),
+                                x.pow(2) * y,
+                                x * y.pow(2),
+                                x.pow(2) * z,
+                                x.pow(2),
+                                y.pow(2) * z,
+                                y.pow(2),
+                                x * y * z,
+                                x * y,
+                                x,
+                                y,
+                                one_};
+
+  // Reorder coefficient in polynomial of Z.
+  auto A1_ = std::vector<Polynomial<double>>{num_equations * num_equations};
+  auto A1 = TensorView_<Polynomial<double>, 2>{A1_.data(), Vector2i{13, 13}};
+  for (int i = 0; i < 10; ++i)
+  {
+    for (int j = 0; j < 10; ++j)
+    {
+      const auto& mj = monomials[j];
+      cout << i << ", " << j << " = " << letter(i) << ", " << monomials[j].to_string() << endl;
+      auto coeff = A[i].coeffs.find(mj);
+      if (coeff != A[i].coeffs.end())
+        A1(i, j).coeffs[one_] = coeff->second;
+      cout << "   " << A1(i, j).to_string() << endl;
+    }
+  }
 
 
   // Calculate <n> = det(B)
