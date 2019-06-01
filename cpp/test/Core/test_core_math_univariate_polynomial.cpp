@@ -108,15 +108,12 @@ BOOST_AUTO_TEST_CASE(test_jenkins_traub_1)
            (Z + 3.) *               //
            (Z - 10.);
 
-  P = P / P[P.degree()];
+  JenkinsTraub rpoly{P / P[P.degree()]};
 
-  JenkinsTraub rpoly{P};
-  //rpoly.M = 20;
-  //rpoly.L = 50;
   const auto roots = rpoly.find_roots();
   for (const auto& root: roots)
-    std::cout << "root = " << setprecision(12) << root << "   "
-              << "P(root) = " << setprecision(12) << P(root) << std::endl;
+    cout << "P(" << setprecision(12) << root << ") = " << setprecision(12)
+         << P(root) << std::endl;
 }
 
 BOOST_AUTO_TEST_CASE(test_jenkins_traub_2)
@@ -130,16 +127,12 @@ BOOST_AUTO_TEST_CASE(test_jenkins_traub_2)
            - 8.035 * Z                  //
            + 2.01;
 
-  P = P / P[P.degree()];
-
-  JenkinsTraub rpoly{P};
+  JenkinsTraub rpoly{P / P[P.degree()]};
   const auto roots = rpoly.find_roots();
 
   for (const auto& root: roots)
-  {
-    std::cout << "root = " << setprecision(12) << root << "   "
-              << "P(root) = " << setprecision(12) << P(root) << std::endl;
-  }
+    cout << "P(" << setprecision(12) << root << ") = " << setprecision(12)
+         << P(root) << std::endl;
 }
 
 BOOST_AUTO_TEST_CASE(test_jenkins_traub_3)
@@ -149,18 +142,15 @@ BOOST_AUTO_TEST_CASE(test_jenkins_traub_3)
            (Z - 1.23e+2) *  //
            (Z - 1.23e+5);
 
-  P = P / P[P.degree()];
-
-  JenkinsTraub rpoly{P};
+  JenkinsTraub rpoly{P / P[P.degree()]};
   const auto roots = rpoly.find_roots();
 
   for (const auto& root: roots)
   {
-    std::cout << "root = " << setprecision(12) << root << "   "
-              << "P(root) = " << setprecision(12) << P(root) << std::endl;
+    cout << "P(" << setprecision(12) << root << ") = " << setprecision(12)
+         << P(root) << std::endl;
     P = (P / (Z - root.real())).first;
   }
-  exit(1);
 }
 
 BOOST_AUTO_TEST_CASE(test_jenkins_traub_4)
@@ -179,13 +169,13 @@ BOOST_AUTO_TEST_CASE(test_jenkins_traub_4)
       (-52412.8655144021);
 
   JenkinsTraub rpoly{P / P[P.degree()]};
-  rpoly.M = 20;
-  rpoly.L = 50;
   const auto roots = rpoly.find_roots();
 
   for (const auto& root: roots)
-    std::cout << "root = " << setprecision(12) << root << "   "
-              << "P(root) = " << setprecision(12) << P(root) << std::endl;
+  {
+    cout << "P(" << setprecision(12) << root << ") = " << setprecision(12)
+         << P(root) << std::endl;
+  }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
