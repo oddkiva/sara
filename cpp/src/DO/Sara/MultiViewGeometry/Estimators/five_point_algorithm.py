@@ -3,10 +3,14 @@
 import sympy as sp
 from sympy.abc import x, y, z
 
-X = sp.Matrix(sp.symbols(' '.join(['X{}'.format(i) for i in range(9)]))).reshape(3, 3)
-Y = sp.Matrix(sp.symbols(' '.join(['Y{}'.format(i) for i in range(9)]))).reshape(3, 3)
-Z = sp.Matrix(sp.symbols(' '.join(['Z{}'.format(i) for i in range(9)]))).reshape(3, 3)
-W = sp.Matrix(sp.symbols(' '.join(['W{}'.format(i) for i in range(9)]))).reshape(3, 3)
+X = sp.Matrix(sp.symbols(
+    ' '.join( ['X{}'.format(i) for i in range(9)]))).reshape(3, 3)
+Y = sp.Matrix(sp.symbols(
+    ' '.join(['Y{}'.format(i) for i in range(9)]))).reshape(3, 3)
+Z = sp.Matrix(sp.symbols(
+    ' '.join(['Z{}'.format(i) for i in range(9)]))).reshape(3, 3)
+W = sp.Matrix(
+    sp.symbols(' '.join(['W{}'.format(i) for i in range(9)]))).reshape(3, 3)
 
 # Decompose the essential matrix into a 4 bases of the Null space.
 E = x * X + y * Y + z * Z + W
@@ -14,11 +18,11 @@ E = x * X + y * Y + z * Z + W
 # Write the equations.
 a = sp.det(E)
 b = 2 * E * E.T * E.trace() - (E * E.T).trace() * E
-CX = [a] + flatten(b)
+CX = [a] + sp.flatten(b)
 CX = sp.Matrix([sp.Poly(c, x, y, z) for c in CX])
 
 # The vector X which depends only on variables (x, y).
-X_= sp.Matrix([x**3, y**3, x**2 * y, x * y**2, x**2, y**2, x*y, x, y, 1])
+X_ = sp.Matrix([x**3, y**3, x**2 * y, x * y**2, x**2, y**2, x*y, x, y, 1])
 
 # The vector C which depends only on the variable 'z'.
 C = []
@@ -48,4 +52,4 @@ diff = D - CX
 diff = all([diff[i] in range(10)])
 
 # Calculate the determinant.
-det_C = Poly(C.det_LU_decomposition(method='lu'), z)
+det_C = sp.Poly(C.det_LU_decomposition(), z)

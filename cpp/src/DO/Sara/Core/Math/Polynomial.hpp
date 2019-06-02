@@ -7,7 +7,7 @@
 #include <vector>
 
 
-namespace DO { namespace Sara {
+namespace DO::Sara {
 
   class Monomial : public Expression
   {
@@ -100,7 +100,7 @@ namespace DO { namespace Sara {
   public:
     Polynomial() = default;
 
-    Polynomial operator+(const Polynomial& other) const
+    auto operator+(const Polynomial& other) const
     {
       auto res = *this;
 
@@ -115,7 +115,7 @@ namespace DO { namespace Sara {
       return res;
     }
 
-    Polynomial operator-(const Polynomial& other) const
+    auto operator-(const Polynomial& other) const
     {
       auto res = *this;
 
@@ -130,7 +130,7 @@ namespace DO { namespace Sara {
       return res;
     }
 
-    Polynomial operator*(const Polynomial& other) const
+    auto operator*(const Polynomial& other) const
     {
       auto res = Polynomial{};
 
@@ -158,7 +158,7 @@ namespace DO { namespace Sara {
       return res;
     }
 
-    Polynomial operator*(const Monomial& q) const
+    auto operator*(const Monomial& q) const
     {
       auto res = Polynomial{};
       for (const auto& c : coeffs)
@@ -169,14 +169,14 @@ namespace DO { namespace Sara {
       return *this;
     }
 
-    Polynomial& operator*=(double scalar)
+    auto operator*=(double scalar) -> Polynomial&
     {
       for (auto& c : coeffs)
         coeffs[c.first] *= scalar;
       return *this;
     }
 
-    Polynomial<double> operator()(int i, int j) const
+    auto operator()(int i, int j) const
     {
       auto res = Polynomial<double>{};
       for (const auto& c : coeffs)
@@ -185,7 +185,7 @@ namespace DO { namespace Sara {
       return res;
     }
 
-    Polynomial t() const
+    auto t() const
     {
       auto res = *this;
       for (auto& i : res.coeffs)
@@ -193,7 +193,7 @@ namespace DO { namespace Sara {
       return res;
     }
 
-    auto to_string(double zero_thres = 1e-12) const -> std::string
+    auto to_string(double zero_thres = 1e-12) const
     {
       auto str = std::string{};
       for (const auto& m : coeffs)
@@ -217,9 +217,24 @@ namespace DO { namespace Sara {
     std::map<Monomial, Coeff> coeffs;
   };
 
+  template <typename Coeff>
+  auto operator*(const Coeff& c, const Monomial& m)
+  {
+    auto res = Polynomial<Coeff>{};
+    res.coeffs[m] = c;
+    return res;
+  }
+
+  template <typename Coeff>
+  auto operator*(const Monomial& m, const Coeff& c)
+  {
+    auto res = Polynomial<Coeff>{};
+    res.coeffs[m] = c;
+    return res;
+  }
+
   template <typename Scalar_, typename Matrix_>
-  Polynomial<Matrix_> operator*(const Polynomial<Scalar_>& P,
-                                Polynomial<Matrix_>& Q)
+  auto operator*(const Polynomial<Scalar_>& P, Polynomial<Matrix_>& Q)
   {
     auto res = Polynomial<Matrix_>{};
 
@@ -248,7 +263,7 @@ namespace DO { namespace Sara {
   }
 
   template <typename Matrix_>
-  Polynomial<typename Matrix_::Scalar> trace(const Polynomial<Matrix_>& P)
+  auto trace(const Polynomial<Matrix_>& P)
   {
     using T = typename Matrix_::Scalar;
     auto res = Polynomial<T>{};
@@ -258,13 +273,13 @@ namespace DO { namespace Sara {
   }
 
   template <typename T>
-  Polynomial<T> det(const Polynomial<Matrix<T, 2, 2>>& P)
+  auto det(const Polynomial<Matrix<T, 2, 2>>& P)
   {
     return P(0, 0) * P(1, 1) - P(0, 1) * P(1, 0);
   }
 
   template <typename T>
-  Polynomial<T> det(const Polynomial<Matrix<T, 3, 3>>& P)
+  auto det(const Polynomial<Matrix<T, 3, 3>>& P)
   {
     /*
      * 00 01 02
@@ -278,5 +293,4 @@ namespace DO { namespace Sara {
     return P(0, 0) * det0 - P(0, 1) * det1 + P(0, 2) * det2;
   }
 
-} /* namespace Sara */
-} /* namespace DO */
+} /* namespace DO::Sara */
