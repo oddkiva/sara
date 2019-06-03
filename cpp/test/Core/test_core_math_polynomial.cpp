@@ -54,11 +54,6 @@ BOOST_AUTO_TEST_CASE(test_monomial)
 
 BOOST_AUTO_TEST_CASE(test_polynomial)
 {
-  auto x = Monomial{variable("x")};
-  auto y = Monomial{variable("y")};
-  auto z = Monomial{variable("z")};
-  auto one_ = Monomial{one()};
-
   Matrix3d X, Y, Z, W;
   X << 1, 0, 0,
        0, 0, 0,
@@ -76,26 +71,10 @@ BOOST_AUTO_TEST_CASE(test_polynomial)
        1, 0, 0,
        0, 0, 0;
 
-  auto E = x * X + y * Y + z * Z + one_ * W;
-
-  const auto EEt = E * E.t();
-
-  auto P1 = EEt * E;
-  auto P2 = trace(EEt) * E;
-  P2 *= -0.5;
-  auto P = P1 + P2;
-
-#ifdef DEBUG
-  const auto P00 = P(0, 0);
-  std::cout << "P00 has " << P00.coeffs.size() << " monomials" << std::endl;
-  for (const auto& c: P00.coeffs)
-    std::cout << "Monomial: " << c.first.to_string() << std::endl;
-#endif
-
-  auto Q = det(E);
-#ifdef DEBUG
-  std::cout << "det(E) = " << Q.to_string() << std::endl;
-#endif
+  auto x = Monomial{variable("x")};
+  auto y = Monomial{variable("y")};
+  auto z = Monomial{variable("z")};
+  auto one_ = Monomial{one()};
 
   const Monomial monomials[] = {x.pow(3), y.pow(3), x.pow(2) * y, x * y.pow(2),
                                 x.pow(2) * z, x.pow(2), y.pow(2) * z, y.pow(2),
@@ -107,33 +86,55 @@ BOOST_AUTO_TEST_CASE(test_polynomial)
                                 //
                                 one_, z, z.pow(2), z.pow(3)};
 
-  // ===========================================================================
-  // As per Nister paper.
-  //
-  Matrix<double, 10, 20> A;
-  A.setZero();
+  auto E = x * X + y * Y + z * Z + one_ * W;
 
-  // Save Q in the matrix.
-  for (int j = 0; j < 20; ++j)
-  {
-    auto coeff = Q.coeffs.find(monomials[j]);
-    if (coeff == Q.coeffs.end())
-      continue;
-    A(0, j) = coeff->second;
-  }
+  auto build_epipolar_constraints = [&](const Polynomial<Matrix3d>& E) {
+    const auto EEt = E * E.t();
+    auto P = EEt * E - 0.5 * trace(EEt) * E;
 
-  // Save P in the matrix.
-  for (int a = 0; a < 3; ++a)
-  {
-    for (int b = 0; b < 3; ++b)
+#ifdef DEBUG
+    const auto P00 = P(0, 0);
+    std::cout << "P00 has " << P00.coeffs.size() << " monomials" << std::endl;
+    for (const auto& c : P00.coeffs)
+      std::cout << "Monomial: " << c.first.to_string() << std::endl;
+#endif
+
+    auto Q = det(E);
+#ifdef DEBUG
+    std::cout << "det(E) = " << Q.to_string() << std::endl;
+#endif
+
+    // ===========================================================================
+    // As per Nister paper.
+    //
+    Matrix<double, 10, 20> A;
+    A.setZero();
+
+    // Save Q in the matrix.
+    for (int j = 0; j < 20; ++j)
     {
-      const auto i = 3 * a + b;
-      for (int j = 0; j < 20; ++j)
-        A(i, j) = P(a, b).coeffs[monomials[j]];
+      auto coeff = Q.coeffs.find(monomials[j]);
+      if (coeff == Q.coeffs.end())
+        continue;
+      A(0, j) = coeff->second;
     }
-  }
-  cout << "A =\n" << A << endl;
 
+    // Save P in the matrix.
+    for (int a = 0; a < 3; ++a)
+    {
+      for (int b = 0; b < 3; ++b)
+      {
+        const auto i = 3 * a + b;
+        for (int j = 0; j < 20; ++j)
+          A(i, j) = P(a, b).coeffs[monomials[j]];
+      }
+    }
+
+    return A;
+  };
+
+  auto A = build_epipolar_constraints(E);
+  cout << "A =\n" << A << endl;
 
   // ===========================================================================
   // 1. Perform Gauss-Jordan elimination on A and stop four rows earlier.
@@ -144,14 +145,8 @@ BOOST_AUTO_TEST_CASE(test_polynomial)
 
   // Calculate <n> = det(B)
   // 2. B is the right-bottom block after Gauss-Jordan elimination of A.
-  Matrix<double, 3, 10> B;
+  Matrix<double, 10, 10> B = U.block<10, 10>(0, 10);
   B.setZero();
-  RowVectorXd e = A.row(int('e' - 'a'));
-  RowVectorXd f = A.row(int('f' - 'a'));
-  RowVectorXd g = A.row(int('g' - 'a'));
-  RowVectorXd h = A.row(int('h' - 'a'));
-  RowVectorXd i = A.row(int('i' - 'a'));
-  RowVectorXd j = A.row(int('j' - 'a'));
 
   auto to_poly = [&monomials](const auto& row_vector) {
     auto p = Polynomial<double>{};
@@ -160,24 +155,32 @@ BOOST_AUTO_TEST_CASE(test_polynomial)
     return p;
   };
 
-  auto k = to_poly(e); auto k2 = (z * to_poly(f)); k = k - k2;
-  //auto l = to_poly(g.eval()) - z * to_poly(h.eval());
-  //auto m = to_poly(i.eval()) - z * to_poly(j.eval());
+  auto e = B.row(4/* 'e' - 'a' */);
+  auto f = B.row(5/* 'f' - 'a' */);
+  auto g = B.row(6/* 'g' - 'a' */);
+  auto h = B.row(7/* 'h' - 'a' */);
+  auto i = B.row(8/* 'i' - 'a' */);
+  auto j = B.row(9/* 'j' - 'a' */);
+
+  auto k = to_poly(e) - z * to_poly(f);
+  auto l = to_poly(g) - z * to_poly(h);
+  auto m = to_poly(i) - z * to_poly(j);
 
 
-  // 3. [x, y, 1]^T is a non-zero null vector in Null(B).
-  // 4. Therefore solve polynomial in z: det(B) = 0.
-  // 5. Use Sturm-sequences to bracket the root.
-  // 6. Recover x = p1(z) / p3(z), y = p2(z) / p3(z)
-  //    where p1, p2, p3 are obtained from expansion by minors in det(B).
-  // 7. to solve det(B) = 0, use sturm sequence to extract roots and polish the
-  //    roots.
-  // 8. Recover R and t from E.
-  //    E ~ U diag(1, 1, 0) V
-  //    t = [U(0,2), U(1,2), U(2, 2)]
-  //    R = U * D * V.transpose() or R = U * D.transpose() * V.transpose();
-  // 9. 4 possible second camera matrices.
-  //    Check cheirality.
+
+//  // 3. [x, y, 1]^T is a non-zero null vector in Null(B).
+//  // 4. Therefore solve polynomial in z: det(B) = 0.
+//  // 5. Use Sturm-sequences to bracket the root.
+//  // 6. Recover x = p1(z) / p3(z), y = p2(z) / p3(z)
+//  //    where p1, p2, p3 are obtained from expansion by minors in det(B).
+//  // 7. to solve det(B) = 0, use sturm sequence to extract roots and polish the
+//  //    roots.
+//  // 8. Recover R and t from E.
+//  //    E ~ U diag(1, 1, 0) V
+//  //    t = [U(0,2), U(1,2), U(2, 2)]
+//  //    R = U * D * V.transpose() or R = U * D.transpose() * V.transpose();
+//  // 9. 4 possible second camera matrices.
+//  //    Check cheirality.
 }
 
 BOOST_AUTO_TEST_SUITE_END()

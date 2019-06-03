@@ -115,7 +115,7 @@ namespace DO::Sara {
       return res;
     }
 
-    auto operator-(const Polynomial& other) const
+    auto operator-(const Polynomial& other) const -> Polynomial
     {
       auto res = *this;
 
@@ -217,6 +217,9 @@ namespace DO::Sara {
     std::map<Monomial, Coeff> coeffs;
   };
 
+
+  //! @{
+  //! @brief Multiply a coefficient by monomial and vice-versa.
   template <typename Coeff>
   auto operator*(const Coeff& c, const Monomial& m)
   {
@@ -228,15 +231,45 @@ namespace DO::Sara {
   template <typename Coeff>
   auto operator*(const Monomial& m, const Coeff& c)
   {
-    auto res = Polynomial<Coeff>{};
-    res.coeffs[m] = c;
+    return c * m;
+  }
+  //! @}
+
+
+  //! @{
+  //! @brief Multiply a coefficient by a polynomial and vice-versa.
+  template <typename Coeff>
+  auto operator*(const Coeff& a, const Polynomial<Coeff>& b)
+  {
+    auto res = b;
+    res *= a;
     return res;
   }
 
-  template <typename Scalar_, typename Matrix_>
-  auto operator*(const Polynomial<Scalar_>& P, Polynomial<Matrix_>& Q)
+  template <typename Coeff>
+  auto operator*(const Polynomial<Coeff>& b, const Coeff& a)
   {
-    auto res = Polynomial<Matrix_>{};
+    return b * a;
+  }
+  //! @}
+
+
+  //! @brief Multiply a monomial by a polynomial and vice-versa.
+  template <typename Coeff>
+  auto operator*(const Monomial& a, const Polynomial<Coeff>& b)
+  {
+    auto res = Polynomial<Coeff>{};
+    for (const auto& bi : b.coeffs)
+      res.coeffs[bi.first * a] = bi.second;
+    return res;
+  }
+
+
+  //! @brief Multiply a monomial by a polynomial and vice-versa.
+  template <typename T, int M, int N>
+  auto operator*(const Polynomial<T>& P, const Polynomial<Matrix<T, M, N>>& Q)
+  {
+    auto res = Polynomial<Matrix<T, M, N>>{};
 
     for (const auto& i : P.coeffs)
     {
@@ -262,6 +295,9 @@ namespace DO::Sara {
     return res;
   }
 
+
+  //! @{
+  //! @brief Usual linear algebra operators.
   template <typename Matrix_>
   auto trace(const Polynomial<Matrix_>& P)
   {
@@ -292,5 +328,6 @@ namespace DO::Sara {
 
     return P(0, 0) * det0 - P(0, 1) * det1 + P(0, 2) * det2;
   }
+  //! @}
 
 } /* namespace DO::Sara */
