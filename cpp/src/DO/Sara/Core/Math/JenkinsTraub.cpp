@@ -678,7 +678,27 @@ namespace DO::Sara::Univariate {
 
   auto JenkinsTraub::find_roots() -> std::vector<std::complex<double>>
   {
+    // Pre-process the polynomial.
+    P.remove_leading_zeros();
+
     auto roots = std::vector<std::complex<double>>{};
+
+    // Remove the zero roots.
+    LOG_DEBUG << "Remove zero roots" << endl;
+    auto degree = 0;
+    while (P[degree] == 0)
+    {
+      ++degree;
+      roots.push_back(0);
+    }
+
+    // Quickly deflate the polynomial.
+    auto coeff = std::vector<double>{};
+    coeff.insert(coeff.end(), P._coeff.begin() + degree, P._coeff.end());
+    P._coeff.swap(coeff);
+
+    // Divide the polynomial by its leading coefficients.
+    P = P / P[P.degree()];
 
     while (P.degree() > 2)
     {
@@ -713,32 +733,7 @@ namespace DO::Sara::Univariate {
   auto rpoly(const UnivariatePolynomial<double>& P, int stage3_max_iter)
     -> std::vector<std::complex<double>>
   {
-    auto P1 = P;
-
-    // Remove leading zeros.
-    LOG_DEBUG << "Removing leading zeros" << endl;
-    int degree = P1.degree();
-    while (std::abs(P1[degree]) < std::numeric_limits<double>::epsilon())
-    {
-      LOG_DEBUG << degree << endl;
-      --degree;
-    }
-    P1._coeff.resize(degree + 1);
-
-    // Remove zero root if there is any.
-    LOG_DEBUG << "Remove zero roots" << endl;
-    degree = 0;
-    while (P[degree] == 0)
-      ++degree;
-    auto coeff = std::vector<double>{};
-    coeff.insert(coeff.end(), P1._coeff.begin() + degree, P1._coeff.end());
-    P1._coeff.swap(coeff);
-
-
-    P1 = P1 / P1[P1.degree()];
-    LOG_DEBUG << "P = " << P1 << endl;
-
-    auto solver = JenkinsTraub{P1};
+    auto solver = JenkinsTraub{P};
     solver.max_iter = stage3_max_iter;
     return solver.find_roots();
   }

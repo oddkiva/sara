@@ -84,6 +84,14 @@ namespace DO::Sara::Univariate {
       return res;
     }
 
+    auto remove_leading_zeros()
+    {
+      auto d = degree();
+      while ((*this)[d] < std::numeric_limits<double>::epsilon())
+        --d;
+      _coeff.resize(d + 1);
+    }
+
     //! @brief Euclidean division.
     auto operator/(const UnivariatePolynomial& other) const
         -> std::pair<UnivariatePolynomial, UnivariatePolynomial>
