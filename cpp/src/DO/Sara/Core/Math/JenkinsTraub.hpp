@@ -224,10 +224,6 @@ namespace DO::Sara::Univariate {
 
   //! @brief Find all the roots using Jenkins-Traub algorithm.
   auto rpoly(const UnivariatePolynomial<double>& P, int stage3_max_iter = 20)
-  {
-    auto solver = JenkinsTraub{P / P[P.degree()]};
-    solver.max_iter = stage3_max_iter;
-    return solver.find_roots();
-  };
+      -> std::vector<std::complex<double>>;
 
 } /* namespace DO::Sara::Univariate */

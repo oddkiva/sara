@@ -710,4 +710,37 @@ namespace DO::Sara::Univariate {
     return roots;
   }
 
+  auto rpoly(const UnivariatePolynomial<double>& P, int stage3_max_iter)
+    -> std::vector<std::complex<double>>
+  {
+    auto P1 = P;
+
+    // Remove leading zeros.
+    LOG_DEBUG << "Removing leading zeros" << endl;
+    int degree = P1.degree();
+    while (std::abs(P1[degree]) < std::numeric_limits<double>::epsilon())
+    {
+      LOG_DEBUG << degree << endl;
+      --degree;
+    }
+    P1._coeff.resize(degree + 1);
+
+    // Remove zero root if there is any.
+    LOG_DEBUG << "Remove zero roots" << endl;
+    degree = 0;
+    while (P[degree] == 0)
+      ++degree;
+    auto coeff = std::vector<double>{};
+    coeff.insert(coeff.end(), P1._coeff.begin() + degree, P1._coeff.end());
+    P1._coeff.swap(coeff);
+
+
+    P1 = P1 / P1[P1.degree()];
+    LOG_DEBUG << "P = " << P1 << endl;
+
+    auto solver = JenkinsTraub{P1};
+    solver.max_iter = stage3_max_iter;
+    return solver.find_roots();
+  }
+
 } /* namespace DO::Sara::Univariate */
