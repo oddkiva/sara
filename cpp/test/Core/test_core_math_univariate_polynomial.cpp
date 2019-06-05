@@ -23,6 +23,7 @@
 
 using namespace std;
 using namespace DO::Sara;
+using namespace DO::Sara::Univariate;
 
 
 BOOST_AUTO_TEST_SUITE(TestUnivariatePolynomial)

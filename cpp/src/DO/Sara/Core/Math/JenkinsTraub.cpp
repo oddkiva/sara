@@ -13,7 +13,7 @@
 using namespace std;
 
 
-namespace DO { namespace Sara {
+namespace DO::Sara::Univariate {
 
   auto compute_root_moduli_lower_bound(const UnivariatePolynomial<double>& P)
       -> double
@@ -710,5 +710,4 @@ namespace DO { namespace Sara {
     return roots;
   }
 
-} /* namespace Sara */
-} /* namespace DO */
+} /* namespace DO::Sara::Univariate */

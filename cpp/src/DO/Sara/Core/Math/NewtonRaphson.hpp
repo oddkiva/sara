@@ -3,7 +3,7 @@
 #include <DO/Sara/Core/Math/UnivariatePolynomial.hpp>
 
 
-namespace DO { namespace Sara {
+namespace DO::Sara::Univariate {
 
   template <typename T>
   inline auto derivative(const UnivariatePolynomial<T>& P)
@@ -43,5 +43,4 @@ namespace DO { namespace Sara {
     UnivariatePolynomial<T> p_prime;
   };
 
-} /* namespace Sara */
-} /* namespace DO */
+} /* namespace DO::Sara::Univariate */

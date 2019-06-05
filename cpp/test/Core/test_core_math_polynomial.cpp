@@ -13,6 +13,7 @@
 
 #include <DO/Sara/Core/Tensor.hpp>
 #include <DO/Sara/Core/Math/Polynomial.hpp>
+#include <DO/Sara/Core/Math/JenkinsTraub.hpp>
 
 #include <boost/test/unit_test.hpp>
 
@@ -52,9 +53,11 @@ BOOST_AUTO_TEST_CASE(test_monomial)
   std::cout << xy2z3.to_string() << std::endl;
 }
 
+
 BOOST_AUTO_TEST_CASE(test_polynomial)
 {
-  Matrix3d X, Y, Z, W;
+  std::array<Matrix3d, 4> null_space_bases;
+  auto& [X, Y, Z, W] = null_space_bases;
   X << 1, 0, 0,
        0, 0, 0,
        0, 0, 0;
@@ -71,104 +74,12 @@ BOOST_AUTO_TEST_CASE(test_polynomial)
        1, 0, 0,
        0, 0, 0;
 
-  auto x = Monomial{variable("x")};
-  auto y = Monomial{variable("y")};
-  auto z = Monomial{variable("z")};
-  auto one_ = Monomial{one()};
+  auto solver = NisterFivePointAlgorithm{};
+  const auto E = solver.essential_matrix_expression(null_space_bases);
 
-  const Monomial monomials[] = {x.pow(3), y.pow(3), x.pow(2) * y, x * y.pow(2),
-                                x.pow(2) * z, x.pow(2), y.pow(2) * z, y.pow(2),
-                                x * y * z, x * y,
-                                //
-                                x, x * z, x * z.pow(2),
-                                //
-                                y, y * z, y * z.pow(2),
-                                //
-                                one_, z, z.pow(2), z.pow(3)};
-
-  auto E = x * X + y * Y + z * Z + one_ * W;
-
-  auto build_epipolar_constraints = [&](const Polynomial<Matrix3d>& E) {
-    const auto EEt = E * E.t();
-    auto P = EEt * E - 0.5 * trace(EEt) * E;
-
-#ifdef DEBUG
-    const auto P00 = P(0, 0);
-    std::cout << "P00 has " << P00.coeffs.size() << " monomials" << std::endl;
-    for (const auto& c : P00.coeffs)
-      std::cout << "Monomial: " << c.first.to_string() << std::endl;
-#endif
-
-    auto Q = det(E);
-#ifdef DEBUG
-    std::cout << "det(E) = " << Q.to_string() << std::endl;
-#endif
-
-    // ===========================================================================
-    // As per Nister paper.
-    //
-    Matrix<double, 10, 20> A;
-    A.setZero();
-
-    // Save Q in the matrix.
-    for (int j = 0; j < 20; ++j)
-    {
-      auto coeff = Q.coeffs.find(monomials[j]);
-      if (coeff == Q.coeffs.end())
-        continue;
-      A(0, j) = coeff->second;
-    }
-
-    // Save P in the matrix.
-    for (int a = 0; a < 3; ++a)
-    {
-      for (int b = 0; b < 3; ++b)
-      {
-        const auto i = 3 * a + b;
-        for (int j = 0; j < 20; ++j)
-          A(i, j) = P(a, b).coeffs[monomials[j]];
-      }
-    }
-
-    return A;
-  };
-
-  auto A = build_epipolar_constraints(E);
+  const auto A = solver.build_epipolar_constraints(E);
   cout << "A =\n" << A << endl;
 
-  // ===========================================================================
-  // 1. Perform Gauss-Jordan elimination on A and stop four rows earlier.
-  //    lower diagonal of A is zero (minus some block)
-  Eigen::FullPivLU<Matrix<double, 10, 20>> lu(A);
-  Matrix<double, 10, 20> U = lu.matrixLU().triangularView<Upper>();
-  cout << "U =\n" << U << endl;
-
-  // Calculate <n> = det(B)
-  // 2. B is the right-bottom block after Gauss-Jordan elimination of A.
-  Matrix<double, 10, 10> B = U.block<10, 10>(0, 10);
-  B.setZero();
-
-  auto to_poly = [&monomials](const auto& row_vector) {
-    auto p = Polynomial<double>{};
-    for (int i = 0; i < row_vector.size(); ++i)
-      p.coeffs[monomials[i]] = row_vector[i];
-    return p;
-  };
-
-  auto e = B.row(4/* 'e' - 'a' */);
-  auto f = B.row(5/* 'f' - 'a' */);
-  auto g = B.row(6/* 'g' - 'a' */);
-  auto h = B.row(7/* 'h' - 'a' */);
-  auto i = B.row(8/* 'i' - 'a' */);
-  auto j = B.row(9/* 'j' - 'a' */);
-
-  auto k = to_poly(e) - z * to_poly(f);
-  auto l = to_poly(g) - z * to_poly(h);
-  auto m = to_poly(i) - z * to_poly(j);
-
-
-
-//  // 3. [x, y, 1]^T is a non-zero null vector in Null(B).
 //  // 4. Therefore solve polynomial in z: det(B) = 0.
 //  // 5. Use Sturm-sequences to bracket the root.
 //  // 6. Recover x = p1(z) / p3(z), y = p2(z) / p3(z)

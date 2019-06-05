@@ -9,7 +9,7 @@
 #include <memory>
 
 
-namespace DO { namespace Sara {
+namespace DO::Sara::Univariate {
 
   //! @{
   //! @brief Some basic tools needed for Jenkins-Traub algorithm.
@@ -230,5 +230,4 @@ namespace DO { namespace Sara {
     return solver.find_roots();
   };
 
-} /* namespace Sara */
-} /* namespace DO */
+} /* namespace DO::Sara::Univariate */
