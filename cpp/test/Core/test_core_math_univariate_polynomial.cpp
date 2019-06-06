@@ -114,6 +114,8 @@ BOOST_AUTO_TEST_CASE(test_jenkins_traub_1)
   for (const auto& root: roots)
     cout << "P(" << setprecision(12) << root << ") = " << setprecision(12)
          << P(root) << std::endl;
+
+  BOOST_CHECK_EQUAL(roots.size(), 10);
 }
 
 BOOST_AUTO_TEST_CASE(test_jenkins_traub_2)
@@ -132,6 +134,8 @@ BOOST_AUTO_TEST_CASE(test_jenkins_traub_2)
   for (const auto& root: roots)
     cout << "P(" << setprecision(12) << root << ") = " << setprecision(12)
          << P(root) << std::endl;
+
+  BOOST_CHECK_EQUAL(roots.size(), 7);
 }
 
 BOOST_AUTO_TEST_CASE(test_jenkins_traub_3)
@@ -149,6 +153,8 @@ BOOST_AUTO_TEST_CASE(test_jenkins_traub_3)
          << P(root) << std::endl;
     P = (P / (Z - root.real())).first;
   }
+
+  BOOST_CHECK_EQUAL(roots.size(), 4);
 }
 
 BOOST_AUTO_TEST_CASE(test_jenkins_traub_4)
@@ -180,6 +186,34 @@ BOOST_AUTO_TEST_CASE(test_jenkins_traub_4)
     cout << "P(" << setprecision(12) << root << ") = " << setprecision(12)
          << P(root) << std::endl;
   }
+
+  BOOST_CHECK_EQUAL(roots.size(), 13);
+}
+
+BOOST_AUTO_TEST_CASE(test_jenkins_traub_5)
+{
+  auto P = 0. * X.pow<double>(10) +        //
+           0. * X.pow<double>(9) +         //
+           0. * X.pow<double>(8) +         //
+           -0.699225 * X.pow<double>(7) +  //
+           7.47436 * X.pow<double>(6) +    //
+           -20.5756 * X.pow<double>(5) +   //
+           27.5043 * X.pow<double>(4) +    //
+           -23.5995 * X.pow<double>(3) +   //
+           12.1456 * X.pow<double>(2) +    //
+           -2.43538 * X.pow<double>(1) +   //
+           0.159393;
+
+  auto solver = JenkinsTraub{P};
+  const auto roots = solver.find_roots();
+
+  for (const auto& root: roots)
+  {
+    cout << "P(" << setprecision(12) << root << ") = " << setprecision(12)
+         << P(root) << std::endl;
+  }
+
+  BOOST_CHECK_EQUAL(roots.size(), 7);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

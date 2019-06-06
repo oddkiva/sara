@@ -87,7 +87,7 @@ namespace DO::Sara::Univariate {
     auto remove_leading_zeros()
     {
       auto d = degree();
-      while ((*this)[d] < std::numeric_limits<double>::epsilon())
+      while (std::abs((*this)[d]) < std::numeric_limits<double>::epsilon())
         --d;
       _coeff.resize(d + 1);
     }

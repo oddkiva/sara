@@ -53,7 +53,6 @@ BOOST_AUTO_TEST_CASE(test_monomial)
   std::cout << xy2z3.to_string() << std::endl;
 }
 
-
 BOOST_AUTO_TEST_CASE(test_polynomial)
 {
   std::array<Matrix3d, 4> null_space_bases;
@@ -74,24 +73,17 @@ BOOST_AUTO_TEST_CASE(test_polynomial)
        1, 0, 0,
        0, 0, 0;
 
-  auto solver = NisterFivePointAlgorithm{};
-  const auto E = solver.essential_matrix_expression(null_space_bases);
+  const auto x = Monomial{variable("x")};
+  const auto y = Monomial{variable("y")};
+  const auto z = Monomial{variable("z")};
+  const auto one_ = Monomial{one()};
 
-  const auto A = solver.build_epipolar_constraints(E);
-  cout << "A =\n" << A << endl;
+  const auto E = x * X + y * Y + z * Z + one_ * W;
 
-//  // 4. Therefore solve polynomial in z: det(B) = 0.
-//  // 5. Use Sturm-sequences to bracket the root.
-//  // 6. Recover x = p1(z) / p3(z), y = p2(z) / p3(z)
-//  //    where p1, p2, p3 are obtained from expansion by minors in det(B).
-//  // 7. to solve det(B) = 0, use sturm sequence to extract roots and polish the
-//  //    roots.
-//  // 8. Recover R and t from E.
-//  //    E ~ U diag(1, 1, 0) V
-//  //    t = [U(0,2), U(1,2), U(2, 2)]
-//  //    R = U * D * V.transpose() or R = U * D.transpose() * V.transpose();
-//  // 9. 4 possible second camera matrices.
-//  //    Check cheirality.
+  const auto EEt = E * E.t();
+
+  const auto P = det(E);
+  const auto Q = EEt * E - 0.5 * trace(EEt) * E;
 }
 
 BOOST_AUTO_TEST_SUITE_END()

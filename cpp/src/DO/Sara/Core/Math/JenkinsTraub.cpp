@@ -530,7 +530,8 @@ namespace DO::Sara::Univariate {
 
     int i = L;
 
-    auto z = std::array<double, 3>{0., 0., 0.};
+    auto z1 = std::array<std::complex<double>, 3>{0., 0., 0.};
+    auto z2 = std::array<std::complex<double>, 3>{0., 0., 0.};
 
     sigma1.roots = quadratic_roots(sigma1.polynomial);
 
@@ -556,14 +557,23 @@ namespace DO::Sara::Univariate {
       LOG_DEBUG << "  Sigma[" << i + 1 << "] = " << sigma1.polynomial << endl;
 #endif
 
-      z[0] = z[1];
-      z[1] = sigma0.polynomial[0];
-      z[2] = sigma1.polynomial[0];
+      z1[0] = z1[1];
+      z1[1] = sigma0.roots[0];
+      z1[2] = sigma1.roots[0];
+
+      z2[0] = z2[1];
+      z2[1] = sigma0.roots[1];
+      z2[2] = sigma1.roots[1];
+
+      //const auto rel_step = std::abs((z[2] - z[1]) / z[2]);
+      //if (rel_step < 1e-2 && abs_P_s1_0
 
       // Update the shift polynomial for the next iteration.
       std::swap(K0, K1);
 
-      if (std::isnan(z[2]) || std::isinf(z[2]))
+      // Check that the quadratic factor does not contain NaN or Inf
+      // coefficients.
+      if (std::isnan(sigma1.polynomial[0]) || std::isinf(sigma1.polynomial[0]))
       {
 #ifdef SHOW_DEBUG_LOG
         LOG_DEBUG << "Stopping prematuraly at iteration " << i << endl;
@@ -574,16 +584,22 @@ namespace DO::Sara::Univariate {
       if (i < L + 2)
         continue;
 
-      if (!nikolajsen_root_convergence_predicate(z))
+      // Jenkins-Traub uses this criterion.
+      // if (!nikolajsen_root_convergence_predicate(z))
+      //
+      // This criterion is actually more robust.
+      if (!nikolajsen_root_convergence_predicate(z1) ||
+          !nikolajsen_root_convergence_predicate(z2))
         continue;
 
-      if (std::abs(aux.P_s1) > 1e-12 ||
-          std::abs(aux.P_s2) > 1e-12)
+      if (std::abs(aux.P_s1) > 1e-12 || std::abs(aux.P_s2) > 1e-12)
       {
 #ifdef SHOW_DEBUG_LOG
-        LOG_DEBUG << "  Skeptical about quadratic root evaluation" << endl;
+        LOG_DEBUG << "  Still skeptical about quadratic root evaluation" << endl;
+        LOG_DEBUG << "    |aux.P_s1| = " << std::abs(aux.P_s1) << endl;
+        LOG_DEBUG << "    |aux.P_s2| = " << std::abs(aux.P_s2) << endl;
 #endif
-        break;
+        continue;  // Still continue until we get no convergence.
       }
 
       const auto abs_error =
@@ -636,8 +652,17 @@ namespace DO::Sara::Univariate {
       }
       else
       {
-        LOG_DEBUG << "This case is not implemented" << endl;
-        exit(1);
+#ifdef SHOW_DEBUG_LOG
+        LOG_DEBUG << "Falling back to quadratic shift iterations." << endl;
+#endif
+        sigma1.polynomial = (Z - linear_factor.root()) * (Z - linear_factor.root());
+        if (stage3_quadratic_factor() != ConvergenceType::QuadraticFactor_)
+        {
+          LOG_DEBUG << "Uh oh: still no convergence..." << endl;
+          throw std::runtime_error{"Jenkins-Traub: stage3 fallback variable "
+                                   "shift iterations failed!"};
+          exit(1);
+        }
       }
     }
 
@@ -654,7 +679,7 @@ namespace DO::Sara::Univariate {
     else
     {
 #ifdef SHOW_DEBUG_LOG
-      LOG_DEBUG << "Falling back to linear shift iteration" << endl;
+      LOG_DEBUG << "Falling back to linear shift iterations" << endl;
 #endif
 
       // Use sigma0 instead because sigma1 can be contain nan coefficients.
@@ -667,6 +692,8 @@ namespace DO::Sara::Univariate {
       if (stage3_linear_factor() != ConvergenceType::LinearFactor_)
       {
         LOG_DEBUG << "Uh oh: still no convergence..." << endl;
+        throw std::runtime_error{
+            "Jenkins-Traub: stage3 fallback linear shift iterations failed!"};
         exit(1);
       }
 
@@ -684,7 +711,6 @@ namespace DO::Sara::Univariate {
     auto roots = std::vector<std::complex<double>>{};
 
     // Remove the zero roots.
-    LOG_DEBUG << "Remove zero roots" << endl;
     auto degree = 0;
     while (P[degree] == 0)
     {
@@ -705,6 +731,12 @@ namespace DO::Sara::Univariate {
        stage1();
 
        stage2();
+       if (cvg_type == ConvergenceType::NoConvergence)
+       {
+         LOG_DEBUG << "P = " << P << endl;
+         throw std::runtime_error{"Jenkins-Traub stage 2: weak convergence failed!"};
+         exit(1);
+       }
 
        if (stage3(roots) == ConvergenceType::LinearFactor_)
          P = (P / linear_factor.polynomial).first;
@@ -729,6 +761,7 @@ namespace DO::Sara::Univariate {
 
     return roots;
   }
+
 
   auto rpoly(const UnivariatePolynomial<double>& P, int stage3_max_iter)
     -> std::vector<std::complex<double>>
