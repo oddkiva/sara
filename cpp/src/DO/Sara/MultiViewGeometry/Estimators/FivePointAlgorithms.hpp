@@ -35,6 +35,10 @@ namespace DO { namespace Sara {
         -> Matrix<double, 10, 20>;
 
     auto solve_epipolar_constraints(const Matrix<double, 10, 20>& A)
+        -> std::vector<Vector3d>;
+
+    auto find_essential_matrices(const Matrix<double, 3, 5>& p,
+                                 const Matrix<double, 3, 5>& q)
         -> std::vector<Matrix3d>;
   };
 

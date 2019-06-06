@@ -4,8 +4,8 @@
 
 namespace DO { namespace Sara {
 
-  void eight_point_fundamental_matrix(const Matrix<double, 3, 8>& x,
-                                      const Matrix<double, 3, 8>& y,
+  void eight_point_fundamental_matrix(const Matrix<double, 3, 8>& p_left,
+                                      const Matrix<double, 3, 8>& p_right,
                                       Matrix3d& F)
   {
     // 1. solve the linear system from the 8-point correspondences.
@@ -14,9 +14,9 @@ namespace DO { namespace Sara {
       for (int i = 0; i < 8; ++i)
       {
         A.row(i) <<                          //
-            x(0, i) * y.col(i).transpose(),  //
-            x(1, i) * y.col(i).transpose(),  //
-            x(2, i) * y.col(i).transpose();
+            p_right(0, i) * p_left.col(i).transpose(),  //
+            p_right(1, i) * p_left.col(i).transpose(),  //
+            p_right(2, i) * p_left.col(i).transpose();
       }
 
       auto svd = Eigen::JacobiSVD<Matrix<double, 8, 9>>{A, Eigen::ComputeFullV};

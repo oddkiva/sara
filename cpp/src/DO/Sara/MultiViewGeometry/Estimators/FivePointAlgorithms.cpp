@@ -11,17 +11,17 @@ using namespace std;
 namespace DO { namespace Sara {
 
   auto
-  NisterFivePointAlgorithm::extract_null_space(const Matrix<double, 3, 5>& p,
-                                               const Matrix<double, 3, 5>& q)
+  NisterFivePointAlgorithm::extract_null_space(const Matrix<double, 3, 5>& p_left,
+                                               const Matrix<double, 3, 5>& p_right)
       -> std::array<Matrix3d, 4>
   {
     Matrix<double, 5, 9> A;
 
     for (int i = 0; i < 5; ++i)
-      A.row(i) <<                          //
-          p(i, 0) * q.col(i).transpose(),  //
-          p(i, 1) * q.col(i).transpose(),  //
-          q.col(i).transpose();
+      A.row(i) <<                                     //
+          p_right(i, 0) * p_left.col(i).transpose(),  //
+          p_right(i, 1) * p_left.col(i).transpose(),  //
+          p_right(i, 2) * p_left.col(i).transpose();
 
     LOG_DEBUG << "A = \n" << A << endl;
 
@@ -98,7 +98,7 @@ namespace DO { namespace Sara {
   }
 
   auto NisterFivePointAlgorithm::solve_epipolar_constraints(
-      const Matrix<double, 10, 20>& A) -> std::vector<Matrix3d>
+      const Matrix<double, 10, 20>& A) -> std::vector<Vector3d>
   {
     // ===========================================================================
     // 1. Perform Gauss-Jordan elimination on A and stop four rows earlier.
@@ -193,43 +193,85 @@ namespace DO { namespace Sara {
     B22[2] = m.coeffs[z.pow(2)];
     B22[3] = m.coeffs[z.pow(3)];
 
+    // Follows paragraph "3.2.4 Step 4: Determinant Expansion" in Nister's
+    // paper.
+    const auto p0 = B01 * B12 - B02 * B11;
+    const auto p1 = B02 * B11 - B00 * B12;
+    const auto p2 = B00 * B11 - B01 * B10;
 
-    const auto det0 = B11 * B22 - B21 * B12;
-    const auto det1 = B10 * B22 - B20 * B12;
-    const auto det2 = B10 * B21 - B20 * B11;
+    const auto n = p0 * B20 + p1 * B21 + p2 * B22;
+    LOG_DEBUG << "n = " << n << endl;
 
-    const auto det = B00 * det0 - B10 * det1 + B02 * det2;
-    LOG_DEBUG << "det = " << det << endl;
-
-    auto roots = rpoly(det);
+    auto roots = decltype(rpoly(n)){};
+    try {
+      roots = rpoly(n);
+    }
+    catch(exception& e)
+    {
+      LOG_DEBUG << "Polynomial solver failed: " << e.what() << endl;
+      // And it's OK because it seems that some correspondences are so wrong
+      // that the polynomial evaluation at the root estimate become very
+      // unstable numerically.
+    }
     LOG_DEBUG << "roots.size() = " << roots.size() << endl;
 
-    auto Bs = std::vector<Matrix3d>{};
-    for (const auto& root : roots)
+    auto xyzs = std::vector<Vector3d>{};
+    for (const auto& z_complex : roots)
     {
-      LOG_DEBUG << root << endl;
-      if (root.imag() != 0)
+      if (z_complex.imag() != 0)
         continue;
 
-      auto B = Matrix3d{};
-      B(0, 0) = B00(root.real());
-      B(0, 1) = B01(root.real());
-      B(0, 2) = B02(root.real());
+      const auto z = z_complex.real();
+      LOG_DEBUG << "z = " << z << endl;
 
-      B(1, 0) = B10(root.real());
-      B(1, 1) = B11(root.real());
-      B(1, 2) = B12(root.real());
+      const auto p0_z = p0(z);
+      const auto p1_z = p1(z);
+      const auto p2_z = p2(z);
 
-      B(2, 0) = B20(root.real());
-      B(2, 1) = B21(root.real());
-      B(2, 2) = B22(root.real());
+      const auto x = p0_z / p2_z;
+      const auto y = p1_z / p2_z;
 
-      Bs.push_back(B);
+      if (std::isnan(x) || std::isinf(x) ||
+          std::isnan(y) || std::isnan(y))
+        continue;
 
-      //auto xy1 = B.jacobiSvd().computeU();
+      xyzs.push_back({x, y, z});
     }
 
-    return Bs;
+    return xyzs;
+  }
+
+  auto NisterFivePointAlgorithm::find_essential_matrices(
+      const Matrix<double, 3, 5>& p, const Matrix<double, 3, 5>& q)
+      -> std::vector<Matrix3d>
+  {
+    const auto null_space = extract_null_space(p, q);
+    const auto& [X, Y, Z, W] = null_space;
+    std::cout << "X =\n" << X << std::endl;
+    std::cout << "Y =\n" << Y << std::endl;
+    std::cout << "Z =\n" << Z << std::endl;
+    std::cout << "W =\n" << W << std::endl;
+
+    auto E_expr = essential_matrix_expression(null_space);
+
+    auto A = build_epipolar_constraints(E_expr);
+
+    auto xyzs = solve_epipolar_constraints(A);
+    for (const auto& xyz : xyzs)
+      LOG_DEBUG << "xyz = " << xyz.transpose() << std::endl;
+
+    auto Es = std::vector<Matrix3d>{xyzs.size()};
+    for (auto i = 0u; i < xyzs.size(); ++i)
+    {
+      const auto& xyz = xyzs[i];
+      const auto& x = xyz[0];
+      const auto& y = xyz[1];
+      const auto& z = xyz[2];
+      Es[i] = x * X + y * Y + z * Z + W;
+      LOG_DEBUG << "E =\n" << Es[i] << endl;
+    };
+
+    return Es;
   }
 
 } /* namespace Sara */
