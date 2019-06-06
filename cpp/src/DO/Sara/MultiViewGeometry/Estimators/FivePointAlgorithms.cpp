@@ -201,12 +201,7 @@ namespace DO { namespace Sara {
     const auto det = B00 * det0 - B10 * det1 + B02 * det2;
     LOG_DEBUG << "det = " << det << endl;
 
-    //auto polynomial_solver = Univariate::JenkinsTraub{det};
-    //polynomial_solver.M = 20;
-    //polynomial_solver.L = 50;
-    //const auto roots = polynomial_solver.find_roots();
-    //const auto roots = rpoly(det, 100);
-
+    auto roots = rpoly(det);
     LOG_DEBUG << "roots.size() = " << roots.size() << endl;
 
     auto Bs = std::vector<Matrix3d>{};

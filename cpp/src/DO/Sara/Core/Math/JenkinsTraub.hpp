@@ -201,7 +201,8 @@ namespace DO::Sara::Univariate {
     int L{20};
     //! In practice, Jenkins-Traub algorithm converges very fast. So after that,
     //! the convergence is considered to be stalling.
-    int max_iter{20};
+    int stage3_max_iter{20};
+    double root_abs_tol{1e-12};
 
     //! @brief Apply zero shift polynomial.
     auto stage1() -> void;
@@ -218,12 +219,12 @@ namespace DO::Sara::Univariate {
     //! @}
 
     //! @brief Find all the roots.
-    std::vector<std::complex<double>> find_roots();
+    auto find_roots() -> std::vector<std::complex<double>>;
   };
 
 
   //! @brief Find all the roots using Jenkins-Traub algorithm.
-  auto rpoly(const UnivariatePolynomial<double>& P, int stage3_max_iter = 20)
-      -> std::vector<std::complex<double>>;
+  auto rpoly(const UnivariatePolynomial<double>& P, int stage3_max_iter = 20,
+             double root_abs_tol = 1e-12) -> std::vector<std::complex<double>>;
 
 } /* namespace DO::Sara::Univariate */

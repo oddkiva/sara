@@ -7,6 +7,9 @@
 
 
 //#define SHOW_DEBUG_LOG
+#ifdef SHOW_DEBUG_LOG
+constexpr auto verbose = false;
+#endif
 #define LOG_DEBUG std::cout << "[" << __FUNCTION__ << ":" << __LINE__ << "] "
 
 
@@ -131,13 +134,16 @@ namespace DO::Sara::Univariate {
     a = R_P[0] - b * sigma.u();
 
 #ifdef SHOW_DEBUG_LOG
-    LOG_DEBUG << "R_P = " << R_P << endl;
-    LOG_DEBUG << "P(s1) = "
-              << "P(" << s1 << ") = " << P_s1 << endl;
-    LOG_DEBUG << "P(s2) = "
-              << "P(" << s2 << ") = " << P_s2 << endl;
-    LOG_DEBUG << "a = " << a << endl;
-    LOG_DEBUG << "b = " << b << endl;
+    if (verbose)
+    {
+      LOG_DEBUG << "R_P = " << R_P << endl;
+      LOG_DEBUG << "P(s1) = "
+                << "P(" << s1 << ") = " << P_s1 << endl;
+      LOG_DEBUG << "P(s2) = "
+                << "P(" << s2 << ") = " << P_s2 << endl;
+      LOG_DEBUG << "a = " << a << endl;
+      LOG_DEBUG << "b = " << b << endl;
+    }
 #endif
   }
 
@@ -156,13 +162,16 @@ namespace DO::Sara::Univariate {
     c = R_K0[0] - d * sigma.u();
 
 #ifdef SHOW_DEBUG_LOG
-    LOG_DEBUG << "R_K0 = " << R_K0 << endl;
-    LOG_DEBUG << "K0(s1) = "
-              << "K0(" << s1 << ") = " << K0_s1 << endl;
-    LOG_DEBUG << "K0(s2) = "
-              << "K0(" << s2 << ") = " << K0_s2 << endl;
-    LOG_DEBUG << "c = " << c << endl;
-    LOG_DEBUG << "d = " << d << endl;
+    if (verbose)
+    {
+      LOG_DEBUG << "R_K0 = " << R_K0 << endl;
+      LOG_DEBUG << "K0(s1) = "
+                << "K0(" << s1 << ") = " << K0_s1 << endl;
+      LOG_DEBUG << "K0(s2) = "
+                << "K0(" << s2 << ") = " << K0_s2 << endl;
+      LOG_DEBUG << "c = " << c << endl;
+      LOG_DEBUG << "d = " << d << endl;
+    }
 #endif
   }
 
@@ -201,9 +210,12 @@ namespace DO::Sara::Univariate {
                                (K0_si / P_si) * ((P - P_si) / L).first;
 
 #ifdef SHOW_DEBUG_LOG
-    LOG_DEBUG << "K0_si / P_si = " << K0_si / P_si << endl;
-    LOG_DEBUG << "K0 = " << K0 << endl;
-    LOG_DEBUG << "K1 = " << K1 << endl;
+    if (verbose)
+    {
+      LOG_DEBUG << "K0_si / P_si = " << K0_si / P_si << endl;
+      LOG_DEBUG << "K0 = " << K0 << endl;
+      LOG_DEBUG << "K1 = " << K1 << endl;
+    }
 #endif
 
     /*
@@ -242,7 +254,8 @@ namespace DO::Sara::Univariate {
     auto K1 = c1 * Q_K0 + (Z - c2) * Q_P + b;
 
 #ifdef SHOW_DEBUG_LOG
-    LOG_DEBUG << "K1 = " << K1 << std::endl;
+    if (verbose)
+      LOG_DEBUG << "K1 = " << K1 << std::endl;
 #endif
 
     // Divide by the leading coefficient for better numeric accuracy.
@@ -283,21 +296,24 @@ namespace DO::Sara::Univariate {
     const auto delta_v = v * c4 / c1;
 
 #ifdef SHOW_DEBUG_LOG
-    LOG_DEBUG << "b1 = " << b1 << endl;
-    LOG_DEBUG << "b2 = " << b2 << endl;
+    if (verbose)
+    {
+      LOG_DEBUG << "b1 = " << b1 << endl;
+      LOG_DEBUG << "b2 = " << b2 << endl;
 
-    LOG_DEBUG << "a1 = " << a1 << endl;
-    LOG_DEBUG << "a2 = " << a2 << endl;
+      LOG_DEBUG << "a1 = " << a1 << endl;
+      LOG_DEBUG << "a2 = " << a2 << endl;
 
-    LOG_DEBUG << "c2 = " << c2 << endl;
-    LOG_DEBUG << "c3 = " << c3 << endl;
+      LOG_DEBUG << "c2 = " << c2 << endl;
+      LOG_DEBUG << "c3 = " << c3 << endl;
 
-    LOG_DEBUG << "c4 = " << c4 << endl;
-    LOG_DEBUG << "c1 = " << c1 << endl;
-    LOG_DEBUG << "v * b2 * a1 = " << v * b2 * a1 << endl;
+      LOG_DEBUG << "c4 = " << c4 << endl;
+      LOG_DEBUG << "c1 = " << c1 << endl;
+      LOG_DEBUG << "v * b2 * a1 = " << v * b2 * a1 << endl;
 
-    LOG_DEBUG << "delta_u = " << delta_u << endl;
-    LOG_DEBUG << "delta_v = " << delta_v << endl;
+      LOG_DEBUG << "delta_u = " << delta_u << endl;
+      LOG_DEBUG << "delta_v = " << delta_v << endl;
+    }
 #endif
 
     auto sigma_next = sigma;
@@ -436,9 +452,10 @@ namespace DO::Sara::Univariate {
     auto K1_si = double{};
 
     auto z = std::array<double, 3>{0., 0., 0.};
+    auto P_z = std::array<double, 3>{0., 0., 0.};
 
     // Determine convergence type.
-    while (i < L + max_iter)
+    while (i < L + stage3_max_iter)
     {
       ++i;
 
@@ -454,7 +471,7 @@ namespace DO::Sara::Univariate {
       std::tie(Q_P, R_P) = P / linear_factor.polynomial;
       P_si = R_P(si);
       // Check if si is already a root of the polynomial.
-      if (std::abs(P_si) < std::numeric_limits<double>::epsilon())
+      if (std::abs(P_si) < root_abs_tol)
       {
 #ifdef SHOW_DEBUG_LOG
         LOG_DEBUG << "  Convergence at iteration " << i << endl;
@@ -481,6 +498,10 @@ namespace DO::Sara::Univariate {
       LOG_DEBUG << "[ITER] " << i << endl;
       LOG_DEBUG << "  K[" << i << "] = " << K0 << endl;
       LOG_DEBUG << "  K[" << i + 1 << "] = " << K1 << endl;
+      LOG_DEBUG << "  P[X]               = " << P << endl;
+      LOG_DEBUG << "  (Q_P * λ + R_P)[X] = " << Q_P * linear_factor.polynomial + R_P << endl;
+      LOG_DEBUG << "  Q_P[X] = " << Q_P << endl;
+      LOG_DEBUG << "  R_P[X] = " << R_P << endl;
       LOG_DEBUG << "  λ[X] = " << linear_factor.polynomial << endl;
       LOG_DEBUG << "  si = " << setprecision(16) << si << endl;
       LOG_DEBUG << "  P(si) = " << setprecision(12) << P_si << endl;
@@ -488,10 +509,15 @@ namespace DO::Sara::Univariate {
                 << std::numeric_limits<double>::epsilon() << endl;
 #endif
 
-      // Update the sequence of roots.
+      // Update the sequence of root estimates.
       z[0] = z[1];
       z[1] = z[2];
       z[2] = si;
+
+      // Keep track of the P(root).
+      P_z[0] = P_z[1];
+      P_z[1] = P_z[2];
+      P_z[2] = P_si;
 
       // Update K0 and K0(si) for the next iteration.
       std::swap(K0, K1);
@@ -499,6 +525,20 @@ namespace DO::Sara::Univariate {
 
       if (i < L + 3)
         continue;
+
+#ifdef DO_SOMETHING_ABOUT_INSTABILITY
+      constexpr auto instability_factor = 1e5;
+      if (std::abs(P_z[1] - P_z[2]) > 1e5 * std::abs(P_z[1]))
+      {
+        LOG_DEBUG << "std::abs(P_z[1] - P_z[2]) = " << std::abs(P_z[1] - P_z[2])
+                  << " > " << instability_factor << " * std::abs(P_z[1]) = "  //
+                  << instability_factor << " * " << std::abs(P_z[1]) << " = "
+                  << instability_factor * std::abs(P_z[1]) << endl;
+
+        throw std::runtime_error{
+            "Uh oh: numerical instability in the root estimate!"};
+      }
+#endif
 
       if (nikolajsen_root_convergence_predicate(z))
       {
@@ -536,7 +576,7 @@ namespace DO::Sara::Univariate {
     sigma1.roots = quadratic_roots(sigma1.polynomial);
 
     // Determine convergence type.
-    while (i < L + max_iter)
+    while (i < L + stage3_max_iter)
     {
       ++i;
 
@@ -565,9 +605,6 @@ namespace DO::Sara::Univariate {
       z2[1] = sigma0.roots[1];
       z2[2] = sigma1.roots[1];
 
-      //const auto rel_step = std::abs((z[2] - z[1]) / z[2]);
-      //if (rel_step < 1e-2 && abs_P_s1_0
-
       // Update the shift polynomial for the next iteration.
       std::swap(K0, K1);
 
@@ -576,9 +613,27 @@ namespace DO::Sara::Univariate {
       if (std::isnan(sigma1.polynomial[0]) || std::isinf(sigma1.polynomial[0]))
       {
 #ifdef SHOW_DEBUG_LOG
-        LOG_DEBUG << "Stopping prematuraly at iteration " << i << endl;
+        LOG_DEBUG << "Stopping prematuraly because of NaN at iteration " << i << endl;
+        LOG_DEBUG << "Checking the roots" << endl;
+        LOG_DEBUG << "    |P_s1| = " << std::abs(aux.P_s1) << endl;
+        LOG_DEBUG << "    |P_s2| = " << std::abs(aux.P_s2) << endl;
 #endif
-        break;
+        if (std::abs(aux.P_s1) > root_abs_tol ||
+            std::abs(aux.P_s2) > root_abs_tol)
+        {
+#ifdef SHOW_DEBUG_LOG
+          LOG_DEBUG << "Roots are badly estimated!" << endl;
+#endif
+          break;
+        }
+        else
+        {
+#ifdef SHOW_DEBUG_LOG
+          LOG_DEBUG << "Roots are well estimated!" << endl;
+#endif
+          sigma1 = sigma0;
+          return ConvergenceType::QuadraticFactor_;
+        }
       }
 
       if (i < L + 2)
@@ -592,12 +647,13 @@ namespace DO::Sara::Univariate {
           !nikolajsen_root_convergence_predicate(z2))
         continue;
 
-      if (std::abs(aux.P_s1) > 1e-12 || std::abs(aux.P_s2) > 1e-12)
+      if (std::abs(aux.P_s1) > root_abs_tol ||
+          std::abs(aux.P_s2) > root_abs_tol)
       {
 #ifdef SHOW_DEBUG_LOG
         LOG_DEBUG << "  Still skeptical about quadratic root evaluation" << endl;
-        LOG_DEBUG << "    |aux.P_s1| = " << std::abs(aux.P_s1) << endl;
-        LOG_DEBUG << "    |aux.P_s2| = " << std::abs(aux.P_s2) << endl;
+        LOG_DEBUG << "    |P_s1| = " << std::abs(aux.P_s1) << endl;
+        LOG_DEBUG << "    |P_s2| = " << std::abs(aux.P_s2) << endl;
 #endif
         continue;  // Still continue until we get no convergence.
       }
@@ -615,7 +671,7 @@ namespace DO::Sara::Univariate {
 
       LOG_DEBUG << "  Root conjugacy check" << endl;
 
-      LOG_DEBUG << "    " << abs_error / std::abs(sigma1.roots[1].real())
+      LOG_DEBUG << "    rel_conjugacy_error = " << abs_error / std::abs(sigma1.roots[1].real())
                 << endl;
 #endif
 
@@ -659,9 +715,8 @@ namespace DO::Sara::Univariate {
         if (stage3_quadratic_factor() != ConvergenceType::QuadraticFactor_)
         {
           LOG_DEBUG << "Uh oh: still no convergence..." << endl;
-          throw std::runtime_error{"Jenkins-Traub: stage3 fallback variable "
+          throw std::runtime_error{"Jenkins-Traub: stage3 fallback quadratic "
                                    "shift iterations failed!"};
-          exit(1);
         }
       }
     }
@@ -694,7 +749,6 @@ namespace DO::Sara::Univariate {
         LOG_DEBUG << "Uh oh: still no convergence..." << endl;
         throw std::runtime_error{
             "Jenkins-Traub: stage3 fallback linear shift iterations failed!"};
-        exit(1);
       }
 
       const auto root = -linear_factor.polynomial[0];
@@ -735,7 +789,6 @@ namespace DO::Sara::Univariate {
        {
          LOG_DEBUG << "P = " << P << endl;
          throw std::runtime_error{"Jenkins-Traub stage 2: weak convergence failed!"};
-         exit(1);
        }
 
        if (stage3(roots) == ConvergenceType::LinearFactor_)
@@ -745,7 +798,6 @@ namespace DO::Sara::Univariate {
 
        // Restart.
        cvg_type = ConvergenceType::NoConvergence;
-
     }
 
     if (P.degree() == 2)
@@ -763,11 +815,13 @@ namespace DO::Sara::Univariate {
   }
 
 
-  auto rpoly(const UnivariatePolynomial<double>& P, int stage3_max_iter)
+  auto rpoly(const UnivariatePolynomial<double>& P, int stage3_max_iter,
+             double root_abs_tol)
     -> std::vector<std::complex<double>>
   {
     auto solver = JenkinsTraub{P};
-    solver.max_iter = stage3_max_iter;
+    solver.stage3_max_iter = stage3_max_iter;
+    solver.root_abs_tol = root_abs_tol;
     return solver.find_roots();
   }
 
