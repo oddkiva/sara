@@ -19,8 +19,7 @@ namespace DO { namespace Sara {
             p_right(2, i) * p_left.col(i).transpose();
       }
 
-      auto svd = Eigen::JacobiSVD<Matrix<double, 8, 9>>{A, Eigen::ComputeFullV};
-      const Matrix<double, 8, 1> S = svd.singularValues();
+      auto svd = Eigen::BDCSVD<Matrix<double, 8, 9>>{A, Eigen::ComputeFullV};
       const Matrix<double, 9, 1> vec_F = svd.matrixV().col(8).normalized();
 
       F.row(0) = vec_F.segment(0, 3).transpose();
@@ -30,8 +29,8 @@ namespace DO { namespace Sara {
 
     // 2. Enforce the rank-2 constraint of the fundamental matrix.
     {
-      auto svd = Eigen::JacobiSVD<Matrix3d>{F, Eigen::ComputeFullU |
-                                                   Eigen::ComputeFullV};
+      auto svd =
+          Eigen::BDCSVD<Matrix3d>{F, Eigen::ComputeFullU | Eigen::ComputeFullV};
       Vector3d D = svd.singularValues();
       D(2) = 0;
       F = svd.matrixU() * D.asDiagonal() * svd.matrixV().transpose();

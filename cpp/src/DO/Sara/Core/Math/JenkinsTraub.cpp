@@ -1,3 +1,4 @@
+#include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/Math/JenkinsTraub.hpp>
 #include <DO/Sara/Core/Math/NewtonRaphson.hpp>
 
@@ -10,7 +11,6 @@
 #ifdef SHOW_DEBUG_LOG
 constexpr auto verbose = false;
 #endif
-#define LOG_DEBUG std::cout << "[" << __FUNCTION__ << ":" << __LINE__ << "] "
 
 
 using namespace std;
@@ -49,9 +49,9 @@ namespace DO::Sara::Univariate {
      */
 
 #ifdef SHOW_DEBUG_LOG
-    LOG_DEBUG << "Compute moduli lower bound" << std::endl;
-    LOG_DEBUG << "P[X] = " << P << std::endl;
-    LOG_DEBUG << "Q[X] = " << Q << std::endl;
+    SARA_DEBUG << "Compute moduli lower bound" << std::endl;
+    SARA_DEBUG << "P[X] = " << P << std::endl;
+    SARA_DEBUG << "Q[X] = " << Q << std::endl;
 #endif
 
     auto x = -Q[0];
@@ -59,7 +59,7 @@ namespace DO::Sara::Univariate {
     x = newton_raphson(x, 100, 1e-2);
 
 #ifdef SHOW_DEBUG_LOG
-    LOG_DEBUG << "Moduli lower bound = " << x << endl;
+    SARA_DEBUG << "Moduli lower bound = " << x << endl;
 #endif
 
     return x;
@@ -110,11 +110,11 @@ namespace DO::Sara::Univariate {
     polynomial = Z.pow<double>(2) + u * Z + v;
 
 #ifdef SHOW_DEBUG_LOG
-    LOG_DEBUG << "sigma[X] = " << polynomial << endl;
-    LOG_DEBUG << "s1 = " << this->s1() << endl;
-    LOG_DEBUG << "s2 = " << this->s2() << endl;
-    LOG_DEBUG << "u = " << this->u() << endl;
-    LOG_DEBUG << "v = " << this->v() << endl;
+    SARA_DEBUG << "sigma[X] = " << polynomial << endl;
+    SARA_DEBUG << "s1 = " << this->s1() << endl;
+    SARA_DEBUG << "s2 = " << this->s2() << endl;
+    SARA_DEBUG << "u = " << this->u() << endl;
+    SARA_DEBUG << "v = " << this->v() << endl;
 #endif
   }
 
@@ -136,13 +136,13 @@ namespace DO::Sara::Univariate {
 #ifdef SHOW_DEBUG_LOG
     if (verbose)
     {
-      LOG_DEBUG << "R_P = " << R_P << endl;
-      LOG_DEBUG << "P(s1) = "
+      SARA_DEBUG << "R_P = " << R_P << endl;
+      SARA_DEBUG << "P(s1) = "
                 << "P(" << s1 << ") = " << P_s1 << endl;
-      LOG_DEBUG << "P(s2) = "
+      SARA_DEBUG << "P(s2) = "
                 << "P(" << s2 << ") = " << P_s2 << endl;
-      LOG_DEBUG << "a = " << a << endl;
-      LOG_DEBUG << "b = " << b << endl;
+      SARA_DEBUG << "a = " << a << endl;
+      SARA_DEBUG << "b = " << b << endl;
     }
 #endif
   }
@@ -164,13 +164,13 @@ namespace DO::Sara::Univariate {
 #ifdef SHOW_DEBUG_LOG
     if (verbose)
     {
-      LOG_DEBUG << "R_K0 = " << R_K0 << endl;
-      LOG_DEBUG << "K0(s1) = "
-                << "K0(" << s1 << ") = " << K0_s1 << endl;
-      LOG_DEBUG << "K0(s2) = "
-                << "K0(" << s2 << ") = " << K0_s2 << endl;
-      LOG_DEBUG << "c = " << c << endl;
-      LOG_DEBUG << "d = " << d << endl;
+      SARA_DEBUG << "R_K0 = " << R_K0 << endl;
+      SARA_DEBUG << "K0(s1) = "
+                 << "K0(" << s1 << ") = " << K0_s1 << endl;
+      SARA_DEBUG << "K0(s2) = "
+                 << "K0(" << s2 << ") = " << K0_s2 << endl;
+      SARA_DEBUG << "c = " << c << endl;
+      SARA_DEBUG << "d = " << d << endl;
     }
 #endif
   }
@@ -212,9 +212,9 @@ namespace DO::Sara::Univariate {
 #ifdef SHOW_DEBUG_LOG
     if (verbose)
     {
-      LOG_DEBUG << "K0_si / P_si = " << K0_si / P_si << endl;
-      LOG_DEBUG << "K0 = " << K0 << endl;
-      LOG_DEBUG << "K1 = " << K1 << endl;
+      SARA_DEBUG << "K0_si / P_si = " << K0_si / P_si << endl;
+      SARA_DEBUG << "K0 = " << K0 << endl;
+      SARA_DEBUG << "K1 = " << K1 << endl;
     }
 #endif
 
@@ -255,7 +255,7 @@ namespace DO::Sara::Univariate {
 
 #ifdef SHOW_DEBUG_LOG
     if (verbose)
-      LOG_DEBUG << "K1 = " << K1 << std::endl;
+      SARA_DEBUG << "K1 = " << K1 << std::endl;
 #endif
 
     // Divide by the leading coefficient for better numeric accuracy.
@@ -298,21 +298,21 @@ namespace DO::Sara::Univariate {
 #ifdef SHOW_DEBUG_LOG
     if (verbose)
     {
-      LOG_DEBUG << "b1 = " << b1 << endl;
-      LOG_DEBUG << "b2 = " << b2 << endl;
+      SARA_DEBUG << "b1 = " << b1 << endl;
+      SARA_DEBUG << "b2 = " << b2 << endl;
 
-      LOG_DEBUG << "a1 = " << a1 << endl;
-      LOG_DEBUG << "a2 = " << a2 << endl;
+      SARA_DEBUG << "a1 = " << a1 << endl;
+      SARA_DEBUG << "a2 = " << a2 << endl;
 
-      LOG_DEBUG << "c2 = " << c2 << endl;
-      LOG_DEBUG << "c3 = " << c3 << endl;
+      SARA_DEBUG << "c2 = " << c2 << endl;
+      SARA_DEBUG << "c3 = " << c3 << endl;
 
-      LOG_DEBUG << "c4 = " << c4 << endl;
-      LOG_DEBUG << "c1 = " << c1 << endl;
-      LOG_DEBUG << "v * b2 * a1 = " << v * b2 * a1 << endl;
+      SARA_DEBUG << "c4 = " << c4 << endl;
+      SARA_DEBUG << "c1 = " << c1 << endl;
+      SARA_DEBUG << "v * b2 * a1 = " << v * b2 * a1 << endl;
 
-      LOG_DEBUG << "delta_u = " << delta_u << endl;
-      LOG_DEBUG << "delta_v = " << delta_v << endl;
+      SARA_DEBUG << "delta_u = " << delta_u << endl;
+      SARA_DEBUG << "delta_v = " << delta_v << endl;
     }
 #endif
 
@@ -327,19 +327,19 @@ namespace DO::Sara::Univariate {
   auto JenkinsTraub::stage1() -> void
   {
 #ifdef SHOW_DEBUG_LOG
-    LOG_DEBUG << "[STAGE 1] " << endl;
+    SARA_DEBUG << "[STAGE 1] " << endl;
 #endif
 
     K0 = initial_shift_polynomial(P);
 #ifdef SHOW_DEBUG_LOG
-    LOG_DEBUG << "[ITER] " << 0 << "  K[0] = " << K0 << endl;
+    SARA_DEBUG << "[ITER] " << 0 << "  K[0] = " << K0 << endl;
 #endif
 
     for (int i = 1; i < M; ++i)
     {
       K0 = next_zero_shift_polynomial(K0, P);
 #ifdef SHOW_DEBUG_LOG
-      LOG_DEBUG << "[ITER] " << i << "  K[" << i << "] = " << K0 << endl;
+      SARA_DEBUG << "[ITER] " << i << "  K[" << i << "] = " << K0 << endl;
 #endif
     }
   }
@@ -347,7 +347,7 @@ namespace DO::Sara::Univariate {
   auto JenkinsTraub::stage2() -> void
   {
 #ifdef SHOW_DEBUG_LOG
-    LOG_DEBUG << "[STAGE 2] " << endl;
+    SARA_DEBUG << "[STAGE 2] " << endl;
 #endif
 
     // Stage 2 must be able to determine the convergence.
@@ -356,8 +356,8 @@ namespace DO::Sara::Univariate {
       // Choose roots randomly on the circle of radius beta.
       sigma0.initialize(P, 49 * M_PI / 180., true);
 #ifdef SHOW_DEBUG_LOG
-      LOG_DEBUG << "  Root moduli lower bound:" << endl;
-      LOG_DEBUG << "    β = " << sigma0.beta << endl;
+      SARA_DEBUG << "  Root moduli lower bound:" << endl;
+      SARA_DEBUG << "    β = " << sigma0.beta << endl;
 #endif
 
       aux.update_target_polynomial_aux_vars(P, sigma0);
@@ -382,15 +382,15 @@ namespace DO::Sara::Univariate {
         v[2] = sigma1.v();
 
 #ifdef SHOW_DEBUG_LOG
-        LOG_DEBUG << "[ITER] " << i << endl;
-        LOG_DEBUG << "  K[" << i << "] = " << K0 << endl;
-        LOG_DEBUG << "  K[" << i + 1 << "] = " << K1 << endl;
-        LOG_DEBUG << "  λ0[X] = " << sigma0.polynomial << endl;
-        LOG_DEBUG << "  λ1[X] = " << sigma1.polynomial << endl;
+        SARA_DEBUG << "[ITER] " << i << endl;
+        SARA_DEBUG << "  K[" << i << "] = " << K0 << endl;
+        SARA_DEBUG << "  K[" << i + 1 << "] = " << K1 << endl;
+        SARA_DEBUG << "  λ0[X] = " << sigma0.polynomial << endl;
+        SARA_DEBUG << "  λ1[X] = " << sigma1.polynomial << endl;
         for (int k = 0; k < 3; ++k)
-          LOG_DEBUG << "  t[" << k << "] = " << t[k] << endl;
+          SARA_DEBUG << "  t[" << k << "] = " << t[k] << endl;
         for (int k = 0; k < 3; ++k)
-          LOG_DEBUG << "  v[" << k << "] = " << v[k] << endl;
+          SARA_DEBUG << "  v[" << k << "] = " << v[k] << endl;
 #endif
 
         // Update the shift polynomial for the next iteration.
@@ -406,9 +406,9 @@ namespace DO::Sara::Univariate {
           sigma0 = sigma1;
           sigma0.roots = quadratic_roots(sigma0.polynomial);
 #ifdef SHOW_DEBUG_LOG
-          LOG_DEBUG << "  Weakly converged to quadratic factor at iteration " << i
+          SARA_DEBUG << "  Weakly converged to quadratic factor at iteration " << i
                     << endl;
-          LOG_DEBUG << "    σ[X] = " << sigma0.polynomial << endl;
+          SARA_DEBUG << "    σ[X] = " << sigma0.polynomial << endl;
 #endif
           return;
         }
@@ -419,9 +419,9 @@ namespace DO::Sara::Univariate {
           cvg_type = LinearFactor_;
           linear_factor.polynomial = Z - std::real(t[2]);
 #ifdef SHOW_DEBUG_LOG
-          LOG_DEBUG << "  Weakly converged to linear factor at iteration " << i
+          SARA_DEBUG << "  Weakly converged to linear factor at iteration " << i
                     << endl;
-          LOG_DEBUG << "    λ[X] = " << linear_factor.polynomial << endl;
+          SARA_DEBUG << "    λ[X] = " << linear_factor.polynomial << endl;
 #endif
           return;
         }
@@ -436,9 +436,9 @@ namespace DO::Sara::Univariate {
   auto JenkinsTraub::stage3_linear_factor() -> ConvergenceType
   {
 #ifdef SHOW_DEBUG_LOG
-    LOG_DEBUG << "[STAGE 3: Linear factor refinement] " << endl;
-    LOG_DEBUG << "  Initial linear factor:" << endl;
-    LOG_DEBUG << "    λ[X] = " << linear_factor.polynomial << endl;
+    SARA_DEBUG << "[STAGE 3: Linear factor refinement] " << endl;
+    SARA_DEBUG << "  Initial linear factor:" << endl;
+    SARA_DEBUG << "    λ[X] = " << linear_factor.polynomial << endl;
 #endif
 
     int i = L;
@@ -462,7 +462,7 @@ namespace DO::Sara::Univariate {
       if (std::isnan(si))
       {
 #ifdef SHOW_DEBUG_LOG
-        LOG_DEBUG << "  si is nan" << endl;
+        SARA_DEBUG << "  si is nan" << endl;
 #endif
         break;
       }
@@ -474,11 +474,11 @@ namespace DO::Sara::Univariate {
       if (std::abs(P_si) < root_abs_tol)
       {
 #ifdef SHOW_DEBUG_LOG
-        LOG_DEBUG << "  Convergence at iteration " << i << endl;
-        LOG_DEBUG << "    λ[X] = " << linear_factor.polynomial << endl;
-        LOG_DEBUG << "    si = " << setprecision(16) << si << endl;
-        LOG_DEBUG << "    P(si) = " << setprecision(16) << P(si) << endl;
-        LOG_DEBUG << "    ε = " << setprecision(16)
+        SARA_DEBUG << "  Convergence at iteration " << i << endl;
+        SARA_DEBUG << "    λ[X] = " << linear_factor.polynomial << endl;
+        SARA_DEBUG << "    si = " << setprecision(16) << si << endl;
+        SARA_DEBUG << "    P(si) = " << setprecision(16) << P(si) << endl;
+        SARA_DEBUG << "    ε = " << setprecision(16)
                   << std::numeric_limits<double>::epsilon() << endl;
 #endif
         return ConvergenceType::LinearFactor_;
@@ -495,17 +495,17 @@ namespace DO::Sara::Univariate {
       linear_factor.polynomial[0] = -si;
 
 #ifdef SHOW_DEBUG_LOG
-      LOG_DEBUG << "[ITER] " << i << endl;
-      LOG_DEBUG << "  K[" << i << "] = " << K0 << endl;
-      LOG_DEBUG << "  K[" << i + 1 << "] = " << K1 << endl;
-      LOG_DEBUG << "  P[X]               = " << P << endl;
-      LOG_DEBUG << "  (Q_P * λ + R_P)[X] = " << Q_P * linear_factor.polynomial + R_P << endl;
-      LOG_DEBUG << "  Q_P[X] = " << Q_P << endl;
-      LOG_DEBUG << "  R_P[X] = " << R_P << endl;
-      LOG_DEBUG << "  λ[X] = " << linear_factor.polynomial << endl;
-      LOG_DEBUG << "  si = " << setprecision(16) << si << endl;
-      LOG_DEBUG << "  P(si) = " << setprecision(12) << P_si << endl;
-      LOG_DEBUG << "  epsilon = " << setprecision(12)
+      SARA_DEBUG << "[ITER] " << i << endl;
+      SARA_DEBUG << "  K[" << i << "] = " << K0 << endl;
+      SARA_DEBUG << "  K[" << i + 1 << "] = " << K1 << endl;
+      SARA_DEBUG << "  P[X]               = " << P << endl;
+      SARA_DEBUG << "  (Q_P * λ + R_P)[X] = " << Q_P * linear_factor.polynomial + R_P << endl;
+      SARA_DEBUG << "  Q_P[X] = " << Q_P << endl;
+      SARA_DEBUG << "  R_P[X] = " << R_P << endl;
+      SARA_DEBUG << "  λ[X] = " << linear_factor.polynomial << endl;
+      SARA_DEBUG << "  si = " << setprecision(16) << si << endl;
+      SARA_DEBUG << "  P(si) = " << setprecision(12) << P_si << endl;
+      SARA_DEBUG << "  epsilon = " << setprecision(12)
                 << std::numeric_limits<double>::epsilon() << endl;
 #endif
 
@@ -526,29 +526,15 @@ namespace DO::Sara::Univariate {
       if (i < L + 3)
         continue;
 
-#ifdef DO_SOMETHING_ABOUT_INSTABILITY
-      constexpr auto instability_factor = 1e5;
-      if (std::abs(P_z[1] - P_z[2]) > 1e5 * std::abs(P_z[1]))
-      {
-        LOG_DEBUG << "std::abs(P_z[1] - P_z[2]) = " << std::abs(P_z[1] - P_z[2])
-                  << " > " << instability_factor << " * std::abs(P_z[1]) = "  //
-                  << instability_factor << " * " << std::abs(P_z[1]) << " = "
-                  << instability_factor * std::abs(P_z[1]) << endl;
-
-        throw std::runtime_error{
-            "Uh oh: numerical instability in the root estimate!"};
-      }
-#endif
-
       if (nikolajsen_root_convergence_predicate(z))
       {
 #ifdef SHOW_DEBUG_LOG
-        LOG_DEBUG << "  Converged at iteration " << i << endl;
-        LOG_DEBUG << "    λ[X] = " << linear_factor.polynomial << endl;
-        LOG_DEBUG << "    root = " << setprecision(12)
+        SARA_DEBUG << "  Converged at iteration " << i << endl;
+        SARA_DEBUG << "    λ[X] = " << linear_factor.polynomial << endl;
+        SARA_DEBUG << "    root = " << setprecision(12)
                   << -linear_factor.polynomial[0] << endl;
-        LOG_DEBUG << "    P(root) = " << setprecision(12) << P_si << endl;
-        LOG_DEBUG << "    epsilon = " << setprecision(12)
+        SARA_DEBUG << "    P(root) = " << setprecision(12) << P_si << endl;
+        SARA_DEBUG << "    epsilon = " << setprecision(12)
                   << std::numeric_limits<double>::epsilon() << endl;
 #endif
         // Not very robust...
@@ -565,7 +551,7 @@ namespace DO::Sara::Univariate {
   auto JenkinsTraub::stage3_quadratic_factor() -> ConvergenceType
   {
 #ifdef SHOW_DEBUG_LOG
-    LOG_DEBUG << "[STAGE 3: Quadratic factor refinement] " << endl;
+    SARA_DEBUG << "[STAGE 3: Quadratic factor refinement] " << endl;
 #endif
 
     int i = L;
@@ -590,11 +576,11 @@ namespace DO::Sara::Univariate {
       sigma1.roots = quadratic_roots(sigma1.polynomial);
 
 #ifdef SHOW_DEBUG_LOG
-      LOG_DEBUG << "[ITER] " << i << endl;
-      LOG_DEBUG << "  K[" << i << "] = " << K0 << endl;
-      LOG_DEBUG << "  K[" << i + 1 << "] = " << K1 << endl;
-      LOG_DEBUG << "  Sigma[" << i << "] = " << sigma0.polynomial << endl;
-      LOG_DEBUG << "  Sigma[" << i + 1 << "] = " << sigma1.polynomial << endl;
+      SARA_DEBUG << "[ITER] " << i << endl;
+      SARA_DEBUG << "  K[" << i << "] = " << K0 << endl;
+      SARA_DEBUG << "  K[" << i + 1 << "] = " << K1 << endl;
+      SARA_DEBUG << "  Sigma[" << i << "] = " << sigma0.polynomial << endl;
+      SARA_DEBUG << "  Sigma[" << i + 1 << "] = " << sigma1.polynomial << endl;
 #endif
 
       z1[0] = z1[1];
@@ -613,23 +599,23 @@ namespace DO::Sara::Univariate {
       if (std::isnan(sigma1.polynomial[0]) || std::isinf(sigma1.polynomial[0]))
       {
 #ifdef SHOW_DEBUG_LOG
-        LOG_DEBUG << "Stopping prematuraly because of NaN at iteration " << i << endl;
-        LOG_DEBUG << "Checking the roots" << endl;
-        LOG_DEBUG << "    |P_s1| = " << std::abs(aux.P_s1) << endl;
-        LOG_DEBUG << "    |P_s2| = " << std::abs(aux.P_s2) << endl;
+        SARA_DEBUG << "Stopping prematuraly because of NaN at iteration " << i << endl;
+        SARA_DEBUG << "Checking the roots" << endl;
+        SARA_DEBUG << "    |P_s1| = " << std::abs(aux.P_s1) << endl;
+        SARA_DEBUG << "    |P_s2| = " << std::abs(aux.P_s2) << endl;
 #endif
         if (std::abs(aux.P_s1) > root_abs_tol ||
             std::abs(aux.P_s2) > root_abs_tol)
         {
 #ifdef SHOW_DEBUG_LOG
-          LOG_DEBUG << "Roots are badly estimated!" << endl;
+          SARA_DEBUG << "Roots are badly estimated!" << endl;
 #endif
           break;
         }
         else
         {
 #ifdef SHOW_DEBUG_LOG
-          LOG_DEBUG << "Roots are well estimated!" << endl;
+          SARA_DEBUG << "Roots are well estimated!" << endl;
 #endif
           sigma1 = sigma0;
           return ConvergenceType::QuadraticFactor_;
@@ -651,9 +637,9 @@ namespace DO::Sara::Univariate {
           std::abs(aux.P_s2) > root_abs_tol)
       {
 #ifdef SHOW_DEBUG_LOG
-        LOG_DEBUG << "  Still skeptical about quadratic root evaluation" << endl;
-        LOG_DEBUG << "    |P_s1| = " << std::abs(aux.P_s1) << endl;
-        LOG_DEBUG << "    |P_s2| = " << std::abs(aux.P_s2) << endl;
+        SARA_DEBUG << "  Still skeptical about quadratic root evaluation" << endl;
+        SARA_DEBUG << "    |P_s1| = " << std::abs(aux.P_s1) << endl;
+        SARA_DEBUG << "    |P_s2| = " << std::abs(aux.P_s2) << endl;
 #endif
         continue;  // Still continue until we get no convergence.
       }
@@ -662,24 +648,24 @@ namespace DO::Sara::Univariate {
           std::abs(sigma1.roots[0].real() - sigma1.roots[1].real());
 
 #ifdef SHOW_DEBUG_LOG
-      LOG_DEBUG << "  Converged at iteration " << i << endl;
-      LOG_DEBUG << "    σ[X] = " << sigma1.polynomial << endl;
-      LOG_DEBUG << "    s1 = " << sigma1.s1() << " P(s1) = " << P(sigma1.s1())
-                << endl;
-      LOG_DEBUG << "    s2 = " << sigma1.s2() << " P(s2) = " << P(sigma1.s2())
-                << endl;
+      SARA_DEBUG << "  Converged at iteration " << i << endl;
+      SARA_DEBUG << "    σ[X] = " << sigma1.polynomial << endl;
+      SARA_DEBUG << "    s1 = " << sigma1.s1() << " P(s1) = " << P(sigma1.s1())
+                 << endl;
+      SARA_DEBUG << "    s2 = " << sigma1.s2() << " P(s2) = " << P(sigma1.s2())
+                 << endl;
 
-      LOG_DEBUG << "  Root conjugacy check" << endl;
+      SARA_DEBUG << "  Root conjugacy check" << endl;
 
-      LOG_DEBUG << "    rel_conjugacy_error = " << abs_error / std::abs(sigma1.roots[1].real())
-                << endl;
+      SARA_DEBUG << "    rel_conjugacy_error = "
+                 << abs_error / std::abs(sigma1.roots[1].real()) << endl;
 #endif
 
       // Check that the roots are truly conjugate...
       if (abs_error > 1e-3 * std::abs(sigma1.roots[1].real()))
       {
 #ifdef SHOW_DEBUG_LOG
-        LOG_DEBUG << "  Skeptical about the root conjugacy..." << endl;
+        SARA_DEBUG << "  Skeptical about the root conjugacy..." << endl;
 #endif
         break;
       }
@@ -701,7 +687,7 @@ namespace DO::Sara::Univariate {
       {
         const auto root = -linear_factor.polynomial[0];
 #ifdef SHOW_DEBUG_LOG
-        LOG_DEBUG << "root = " << root << endl;
+        SARA_DEBUG << "root = " << root << endl;
 #endif
         roots.push_back(root);
         return ConvergenceType::LinearFactor_;
@@ -709,12 +695,12 @@ namespace DO::Sara::Univariate {
       else
       {
 #ifdef SHOW_DEBUG_LOG
-        LOG_DEBUG << "Falling back to quadratic shift iterations." << endl;
+        SARA_DEBUG << "Falling back to quadratic shift iterations." << endl;
 #endif
         sigma1.polynomial = (Z - linear_factor.root()) * (Z - linear_factor.root());
         if (stage3_quadratic_factor() != ConvergenceType::QuadraticFactor_)
         {
-          LOG_DEBUG << "Uh oh: still no convergence..." << endl;
+          SARA_DEBUG << "Uh oh: still no convergence..." << endl;
           throw std::runtime_error{"Jenkins-Traub: stage3 fallback quadratic "
                                    "shift iterations failed!"};
         }
@@ -725,8 +711,8 @@ namespace DO::Sara::Univariate {
     {
       auto qroots = quadratic_roots(sigma1.polynomial);
 #ifdef SHOW_DEBUG_LOG
-        LOG_DEBUG << "root0 = " << qroots[0] << endl;
-        LOG_DEBUG << "root1 = " << qroots[1] << endl;
+        SARA_DEBUG << "root0 = " << qroots[0] << endl;
+        SARA_DEBUG << "root1 = " << qroots[1] << endl;
 #endif
       roots.insert(roots.end(), qroots.begin(), qroots.end());
       return ConvergenceType::QuadraticFactor_;
@@ -734,7 +720,7 @@ namespace DO::Sara::Univariate {
     else
     {
 #ifdef SHOW_DEBUG_LOG
-      LOG_DEBUG << "Falling back to linear shift iterations" << endl;
+      SARA_DEBUG << "Falling back to linear shift iterations" << endl;
 #endif
 
       // Use sigma0 instead because sigma1 can be contain nan coefficients.
@@ -746,7 +732,7 @@ namespace DO::Sara::Univariate {
 
       if (stage3_linear_factor() != ConvergenceType::LinearFactor_)
       {
-        LOG_DEBUG << "Uh oh: still no convergence..." << endl;
+        SARA_DEBUG << "Uh oh: still no convergence..." << endl;
         throw std::runtime_error{
             "Jenkins-Traub: stage3 fallback linear shift iterations failed!"};
       }
@@ -787,7 +773,7 @@ namespace DO::Sara::Univariate {
        stage2();
        if (cvg_type == ConvergenceType::NoConvergence)
        {
-         LOG_DEBUG << "P = " << P << endl;
+         SARA_DEBUG << "P = " << P << endl;
          throw std::runtime_error{"Jenkins-Traub stage 2: weak convergence failed!"};
        }
 

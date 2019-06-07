@@ -2,8 +2,7 @@
 #include <DO/Sara/MultiViewGeometry/Estimators/FivePointAlgorithms.hpp>
 
 
-#define LOG_DEBUG std::cout << "[" << __FUNCTION__ << ":" << __LINE__ << "] "
-
+#define SHOW_DEBUG_LOG
 
 using namespace std;
 
@@ -23,19 +22,26 @@ namespace DO { namespace Sara {
           p_right(i, 1) * p_left.col(i).transpose(),  //
           p_right(i, 2) * p_left.col(i).transpose();
 
-    LOG_DEBUG << "A = \n" << A << endl;
-
-    LOG_DEBUG << "svd = " << A.bdcSvd(Eigen::ComputeFullV).singularValues() << endl;  // K as Ker.
     // Calculate the bases of the null-space.
     MatrixXd K =
         A.bdcSvd(Eigen::ComputeFullV).matrixV().rightCols(4);  // K as Ker.
-    LOG_DEBUG << "K = \n" << K << endl;
 
     // The essential matrix lives in right null space K.
-    const Matrix3d X = Map<Matrix<double, 3, 3, RowMajor>>{K.col(0).data()};
-    const Matrix3d Y = Map<Matrix<double, 3, 3, RowMajor>>{K.col(1).data()};
-    const Matrix3d Z = Map<Matrix<double, 3, 3, RowMajor>>{K.col(2).data()};
-    const Matrix3d W = Map<Matrix<double, 3, 3, RowMajor>>{K.col(3).data()};
+    const auto X = Map<Matrix<double, 3, 3, RowMajor>>{K.col(0).data()};
+    const auto Y = Map<Matrix<double, 3, 3, RowMajor>>{K.col(1).data()};
+    const auto Z = Map<Matrix<double, 3, 3, RowMajor>>{K.col(2).data()};
+    const auto W = Map<Matrix<double, 3, 3, RowMajor>>{K.col(3).data()};
+
+#ifdef SHOW_DEBUG_LOG
+    SARA_DEBUG << "A = \n" << A << endl;
+    SARA_DEBUG << "V = \n" << A.bdcSvd(Eigen::ComputeFullV).matrixV() << endl;  // K as Ker.
+    SARA_DEBUG << "S = \n" << A.bdcSvd(Eigen::ComputeFullV).singularValues() << endl;  // K as Ker.
+    SARA_DEBUG << "K = \n" << K << endl;
+    SARA_DEBUG << "X = \n" << X << endl;
+    SARA_DEBUG << "Y = \n" << Y << endl;
+    SARA_DEBUG << "Z = \n" << Z << endl;
+    SARA_DEBUG << "W = \n" << W << endl;
+#endif
 
     return {X, Y, Z, W};
   }
@@ -54,17 +60,7 @@ namespace DO { namespace Sara {
     const auto EEt = E * E.t();
     auto P = EEt * E - 0.5 * trace(EEt) * E;
 
-#ifdef DEBUG
-    const auto P00 = P(0, 0);
-    std::cout << "P00 has " << P00.coeffs.size() << " monomials" << std::endl;
-    for (const auto& c : P00.coeffs)
-      std::cout << "Monomial: " << c.first.to_string() << std::endl;
-#endif
-
     auto Q = det(E);
-#ifdef DEBUG
-    std::cout << "det(E) = " << Q.to_string() << std::endl;
-#endif
 
     // ===========================================================================
     // As per Nister paper.
@@ -86,13 +82,15 @@ namespace DO { namespace Sara {
     {
       for (int b = 0; b < 3; ++b)
       {
-        const auto i = 3 * a + b;
+        const auto i = 3 * a + b + 1;
         for (int j = 0; j < 20; ++j)
           A(i, j) = P(a, b).coeffs[monomials[j]];
       }
     }
 
-    LOG_DEBUG << "Constraint matrix = \n" << A << endl;
+#ifdef SHOW_DEBUG_LOG
+    SARA_DEBUG << "Epipolar constraint matrix = \n" << A << endl;
+#endif
 
     return A;
   }
@@ -108,7 +106,9 @@ namespace DO { namespace Sara {
     // Calculate <n> = det(B)
     // 2. B is the right-bottom block after Gauss-Jordan elimination of A.
     Matrix<double, 10, 10> B = lu.solve(A.block<10, 10>(0, 10));
-    LOG_DEBUG << "B = " << B << endl;
+#ifdef SHOW_DEBUG_LOG
+    SARA_DEBUG << "B = " << B << endl;
+#endif
 
     auto to_poly = [this](const auto& row_vector) {
       auto p = Polynomial<double>{};
@@ -123,19 +123,23 @@ namespace DO { namespace Sara {
     auto h = B.row(7 /* 'h' - 'a' */);
     auto i = B.row(8 /* 'i' - 'a' */);
     auto j = B.row(9 /* 'j' - 'a' */);
-    LOG_DEBUG << "e = " << to_poly(e).to_string() << endl;
-    LOG_DEBUG << "f = " << to_poly(f).to_string() << endl;
-    LOG_DEBUG << "g = " << to_poly(g).to_string() << endl;
-    LOG_DEBUG << "h = " << to_poly(h).to_string() << endl;
-    LOG_DEBUG << "i = " << to_poly(i).to_string() << endl;
-    LOG_DEBUG << "j = " << to_poly(j).to_string() << endl;
+#ifdef SHOW_DEBUG_LOG
+    SARA_DEBUG << "e = " << to_poly(e).to_string() << endl;
+    SARA_DEBUG << "f = " << to_poly(f).to_string() << endl;
+    SARA_DEBUG << "g = " << to_poly(g).to_string() << endl;
+    SARA_DEBUG << "h = " << to_poly(h).to_string() << endl;
+    SARA_DEBUG << "i = " << to_poly(i).to_string() << endl;
+    SARA_DEBUG << "j = " << to_poly(j).to_string() << endl;
+#endif
 
     auto k = to_poly(e) - z * to_poly(f);
     auto l = to_poly(g) - z * to_poly(h);
     auto m = to_poly(i) - z * to_poly(j);
-    LOG_DEBUG << "k = " << k.to_string() << endl;
-    LOG_DEBUG << "l = " << l.to_string() << endl;
-    LOG_DEBUG << "m = " << m.to_string() << endl;
+#ifdef SHOW_DEBUG_LOG
+    SARA_DEBUG << "k = " << k.to_string() << endl;
+    SARA_DEBUG << "l = " << l.to_string() << endl;
+    SARA_DEBUG << "m = " << m.to_string() << endl;
+#endif
 
     // 3. [x, y, 1]^T is a non-zero null vector in Null(B).
     using Univariate::UnivariatePolynomial;
@@ -200,7 +204,9 @@ namespace DO { namespace Sara {
     const auto p2 = B00 * B11 - B01 * B10;
 
     const auto n = p0 * B20 + p1 * B21 + p2 * B22;
-    LOG_DEBUG << "n = " << n << endl;
+#ifdef SHOW_DEBUG_LOG
+    SARA_DEBUG << "n = " << n << endl;
+#endif
 
     auto roots = decltype(rpoly(n)){};
     try {
@@ -208,12 +214,14 @@ namespace DO { namespace Sara {
     }
     catch(exception& e)
     {
-      LOG_DEBUG << "Polynomial solver failed: " << e.what() << endl;
+      SARA_DEBUG << "Polynomial solver failed: " << e.what() << endl;
       // And it's OK because it seems that some correspondences are so wrong
       // that the polynomial evaluation at the root estimate become very
       // unstable numerically.
     }
-    LOG_DEBUG << "roots.size() = " << roots.size() << endl;
+#ifdef SHOW_DEBUG_LOG
+    SARA_DEBUG << "roots.size() = " << roots.size() << endl;
+#endif
 
     auto xyzs = std::vector<Vector3d>{};
     for (const auto& z_complex : roots)
@@ -222,7 +230,9 @@ namespace DO { namespace Sara {
         continue;
 
       const auto z = z_complex.real();
-      LOG_DEBUG << "z = " << z << endl;
+#ifdef SHOW_DEBUG_LOG
+      SARA_DEBUG << "z = " << z << endl;
+#endif
 
       const auto p0_z = p0(z);
       const auto p1_z = p1(z);
@@ -247,18 +257,22 @@ namespace DO { namespace Sara {
   {
     const auto null_space = extract_null_space(p, q);
     const auto& [X, Y, Z, W] = null_space;
+#ifdef SHOW_DEBUG_LOG
     std::cout << "X =\n" << X << std::endl;
     std::cout << "Y =\n" << Y << std::endl;
     std::cout << "Z =\n" << Z << std::endl;
     std::cout << "W =\n" << W << std::endl;
+#endif
 
     auto E_expr = essential_matrix_expression(null_space);
 
     auto A = build_epipolar_constraints(E_expr);
 
     auto xyzs = solve_epipolar_constraints(A);
+#ifdef SHOW_DEBUG_LOG
     for (const auto& xyz : xyzs)
-      LOG_DEBUG << "xyz = " << xyz.transpose() << std::endl;
+      SARA_DEBUG << "xyz = " << xyz.transpose() << std::endl;
+#endif
 
     auto Es = std::vector<Matrix3d>{xyzs.size()};
     for (auto i = 0u; i < xyzs.size(); ++i)
@@ -268,7 +282,9 @@ namespace DO { namespace Sara {
       const auto& y = xyz[1];
       const auto& z = xyz[2];
       Es[i] = x * X + y * Y + z * Z + W;
-      LOG_DEBUG << "E =\n" << Es[i] << endl;
+#ifdef SHOW_DEBUG_LOG
+      SARA_DEBUG << "E =\n" << Es[i] << endl;
+#endif
     };
 
     return Es;

@@ -29,7 +29,10 @@ const auto file1 = "0000.png";
 const auto file2 = "0001.png";
 
 
-void print_3d_array(const TensorView_<float, 3>& x)
+// =============================================================================
+// Miscellaneous utilities.
+//
+auto print_3d_array(const TensorView_<float, 3>& x)
 {
   cout << "[";
   for (auto i = 0; i < x.size(0); ++i)
@@ -58,8 +61,19 @@ void print_3d_array(const TensorView_<float, 3>& x)
   cout << "]" << endl;
 }
 
+auto to_tensor(const vector<Match>& matches)
+{
+  auto match_tensor = Tensor_<int, 2>{int(matches.size()), 2};
+  for (auto i = 0u; i < matches.size(); ++i)
+    match_tensor[i].flat_array() << matches[i].x_index(), matches[i].y_index();
+  return match_tensor;
+}
 
-Matrix3f read_internal_camera_parameters(const std::string& filepath)
+
+// =============================================================================
+// I/O utilities.
+//
+auto read_internal_camera_parameters(const std::string& filepath) -> Matrix3f
 {
   std::ifstream file{filepath};
   if (!file)
@@ -72,7 +86,10 @@ Matrix3f read_internal_camera_parameters(const std::string& filepath)
 }
 
 
-void compute_keypoints(Set<OERegion, RealDescriptor>& keys1,
+// =============================================================================
+// Feature detection and matching.
+//
+auto compute_keypoints(Set<OERegion, RealDescriptor>& keys1,
                        Set<OERegion, RealDescriptor>& keys2)
 {
   print_stage("Computing/Reading keypoints");
@@ -98,8 +115,12 @@ void compute_keypoints(Set<OERegion, RealDescriptor>& keys1,
 #endif
 }
 
-vector<Match> compute_matches(const Set<OERegion, RealDescriptor>& keys1,
-                              const Set<OERegion, RealDescriptor>& keys2)
+// TODO: by default a feature matcher should just return a tensor. It is
+// more cryptic but more powerful to manipulate data.
+//
+// Convert a set of matches to a tensor.
+auto compute_matches(const Set<OERegion, RealDescriptor>& keys1,
+                     const Set<OERegion, RealDescriptor>& keys2)
 {
   print_stage("Computing Matches");
   AnnMatcher matcher{keys1, keys2, 0.6f};
@@ -111,6 +132,9 @@ vector<Match> compute_matches(const Set<OERegion, RealDescriptor>& keys1,
 }
 
 
+// =============================================================================
+// Multiview geometry estimation.
+//
 void estimate_homography(const Image<Rgb8>& image1, const Image<Rgb8>& image2,
                          const Set<OERegion, RealDescriptor>& keys1,
                          const Set<OERegion, RealDescriptor>& keys2,
@@ -287,95 +311,59 @@ void estimate_fundamental_matrix(const Image<Rgb8>& image1,
   const auto S = random_samples(N, L, int(matches.size()));
 
 
-
   // ==========================================================================
-  // Normalize the points.
-  const auto p1 = extract_centers(keys1.features);
-  const auto p2 = extract_centers(keys2.features);
+  // Image coordinates.
+  const auto to_double = [](const float& src) { return double(src); };
+  const auto p1 = extract_centers(keys1.features).cwise_transform(to_double);
+  const auto p2 = extract_centers(keys2.features).cwise_transform(to_double);
 
-  auto P1 = homogeneous(p1);
-  auto P2 = homogeneous(p2);
+  const auto P1 = homogeneous(p1);
+  const auto P2 = homogeneous(p2);
 
-  auto T1 = compute_normalizer(P1);
-  auto T2 = compute_normalizer(P2);
+  // Normalization transformation.
+  const auto T1 = compute_normalizer(P1);
+  const auto T2 = compute_normalizer(P2);
 
+  // Normalized image coordinates.
   const auto P1n = apply_transform(T1, P1);
   const auto P2n = apply_transform(T2, P2);
 
 
-
-
   // ==========================================================================
   // Prepare the data for RANSAC.
-  auto to_tensor = [](const vector<Match>& matches) -> Tensor_<int, 2> {
-    auto match_tensor = Tensor_<int, 2>{int(matches.size()), 2};
-    for (auto i = 0u; i < matches.size(); ++i)
-      match_tensor[i].flat_array() << matches[i].x_index(),
-          matches[i].y_index();
-    return match_tensor;
-  };
   const auto M = to_tensor(matches);
   const auto I = to_point_indices(S, M);
   const auto p = to_coordinates(I, p1, p2).transpose({0, 2, 1, 3});
   const auto P = to_coordinates(I, P1, P2).transpose({0, 2, 1, 3});
   const auto Pn = to_coordinates(I, P1n, P2n).transpose({0, 2, 1, 3});
 
+  auto F_best = Matrix<double, 3, 3>{};
+  auto num_inliers_best = 0;
+  auto subset_best = 0;
+
+  auto algebraic_error = [](const auto& F, const auto& X, const auto& Y) {
+    return std::abs(Y.transpose() * F.matrix() * X);
+  };
+
+  auto inlier_predicate = [&](const auto& F, const auto& X, const auto& Y) {
+    return algebraic_error(F, X, Y) < 1e-2;
+  };
 
   for (auto n = 0; n < N; ++n)
   {
-    // Extract the point
-    const Matrix<float, 2, 8> x = p[n][0].colmajor_view().matrix();
-    const Matrix<float, 2, 8> y = p[n][1].colmajor_view().matrix();
+    // Extract the corresponding points.
+    const Matrix<double, 3, 8> Xn = Pn[n][0].colmajor_view().matrix();
+    const Matrix<double, 3, 8> Yn = Pn[n][1].colmajor_view().matrix();
 
-    const Matrix<double, 3, 8> X =
-        P[n][0].colmajor_view().matrix().cast<double>();
-    const Matrix<double, 3, 8> Y =
-        P[n][1].colmajor_view().matrix().cast<double>();
-
-    const Matrix<double, 3, 8> Xn =
-        Pn[n][0].colmajor_view().matrix().cast<double>();
-    const Matrix<double, 3, 8> Yn =
-        Pn[n][1].colmajor_view().matrix().cast<double>();
-    //std::cout << Xn << std::endl << std::endl;
-    //std::cout << Yn << std::endl;
-
-
-    // 8-point algorithm
+    // Estimate the fundamental matrix.
     auto F = FundamentalMatrix<>{};
     eight_point_fundamental_matrix(Xn, Yn, F);
 
-    //std::cout << "Check normalized F..." << std::endl;
-    //std::cout << "F = " << std::endl;
-    //std::cout << F.matrix() << std::endl;
-    //std::cout << "Algebraic errors:" << std::endl;
-    //for (int i = 0; i < 8; ++i)
-    //  std::cout << Xn.col(i).transpose() * F.matrix() * Yn.col(i) << std::endl;
-
-
     // Unnormalize the fundamental matrix.
-    F.matrix() = T1.cast<double>().transpose() * F.matrix() * T2.cast<double>();
-    //F.matrix() = F.matrix().normalized();
+    F.matrix() = T2.transpose() * F.matrix() * T1;
 
-    std::cout << "Check unnormalized F..." << std::endl;
-    std::cout << "F = " << std::endl;
-    std::cout << F.matrix() << std::endl;
-    std::cout << "Algebraic errors:" << std::endl;
-    for (int i = 0; i < 8; ++i)
-      std::cout << X.col(i).transpose() * F.matrix() * Y.col(i) << std::endl;
-
-
-    // Projected X to the right.
-    Matrix<double, 3, 8> proj_X = F.matrix() * X;
-    proj_X.array().rowwise() /= proj_X.row(2).array();
-
-    Matrix<double, 3, 8> proj_Y = F.matrix().transpose() * Y;
-    proj_Y.array().rowwise() /= proj_Y.row(2).array();
-
-
-    // Display the result.
-    drawer.display_images();
-
-
+    // Count the inliers.
+    auto num_inliers = 0;
     for (size_t i = 0; i < matches.size(); ++i)
     {
       Vector3d X1;
@@ -386,39 +374,83 @@ void estimate_fundamental_matrix(const Image<Rgb8>& image1,
       X2.head(2) = matches[i].y_pos().cast<double>();
       X2(2) = 1;
 
+      // inlier predicate.
+      if (!inlier_predicate(F, X1, X2))
+        continue;
 
-      Vector3d proj_X1 = F.matrix().transpose() * X1;
-      proj_X1 /= proj_X1(2);
-
-      Vector3d proj_X2 = F.matrix() * X2;
-      proj_X2 /= proj_X2(2);
-
-
-      if (std::abs(X1.transpose() * F.matrix() * X2) < 1e-2)
-      {
-        drawer.draw_match(matches[i], Blue8, false);
-        //drawer.draw_line_from_eqn(0, proj_X2.cast<float>(), Cyan8, 1);
-        //drawer.draw_line_from_eqn(1, proj_X1.cast<float>(), Cyan8, 1);
-      }
-    };
-
-
-    for (size_t i = 0; i < 8; ++i)
-    {
-      drawer.draw_match(matches[S(n, i)], Red8, true);
-
-      drawer.draw_point(0, x.col(i), Magenta8, 5);
-      drawer.draw_point(1, y.col(i), Magenta8, 5);
-
-      drawer.draw_point(0, X.col(i).cast<float>().head(2), Magenta8, 5);
-      drawer.draw_point(1, Y.col(i).cast<float>().head(2), Magenta8, 5);
-
-      drawer.draw_line_from_eqn(0, proj_Y.col(i).cast<float>(), Magenta8, 1);
-      drawer.draw_line_from_eqn(1, proj_X.col(i).cast<float>(), Magenta8, 1);
+      ++num_inliers;
     }
 
-    get_key();
+    if (num_inliers > num_inliers_best)
+    {
+      num_inliers_best = num_inliers;
+      F_best = F;
+      subset_best = n;
+    }
   }
+
+
+  // Display the result.
+  const auto& F = F_best;
+  const auto& n = subset_best;
+
+  SARA_CHECK(F);
+  SARA_CHECK(n);
+
+  // Extract the points.
+  const Matrix<double, 3, 8> X = P[n][0].colmajor_view().matrix();
+  const Matrix<double, 3, 8> Y = P[n][1].colmajor_view().matrix();
+
+  // Project X to the right image.
+  Matrix<double, 3, 8> proj_X = F.matrix() * X;
+  proj_X.array().rowwise() /= proj_X.row(2).array();
+
+  // Project Y to the left image.
+  Matrix<double, 3, 8> proj_Y = F.matrix().transpose() * Y;
+  proj_Y.array().rowwise() /= proj_Y.row(2).array();
+
+  drawer.display_images();
+
+  for (size_t i = 0; i < 8; ++i)
+  {
+    // Draw the best elemental subset drawn by RANSAC.
+    drawer.draw_match(matches[S(n, i)], Red8, true);
+
+    // Draw the corresponding epipolar lines.
+    drawer.draw_line_from_eqn(1, proj_X.col(i).cast<float>(), Magenta8, 1);
+    drawer.draw_line_from_eqn(0, proj_Y.col(i).cast<float>(), Magenta8, 1);
+  }
+
+  for (size_t i = 0; i < matches.size(); ++i)
+  {
+    Vector3d X1;
+    X1.head(2) = matches[i].x_pos().cast<double>();
+    X1(2) = 1;
+
+    Vector3d X2;
+    X2.head(2) = matches[i].y_pos().cast<double>();
+    X2(2) = 1;
+
+    // inlier predicate.
+    if (!inlier_predicate(F, X1, X2))
+      continue;
+
+    drawer.draw_match(matches[i], Blue8, false);
+
+    if (i % 50 == 0)
+    {
+      Vector3d proj_X1 = F.matrix() * X1;
+      proj_X1 /= proj_X1(2);
+
+      Vector3d proj_X2 = F.matrix().transpose() * X2;
+      proj_X2 /= proj_X2(2);
+
+      drawer.draw_line_from_eqn(0, proj_X2.cast<float>(), Cyan8, 1);
+      drawer.draw_line_from_eqn(1, proj_X1.cast<float>(), Cyan8, 1);
+    }
+  }
+
+  get_key();
 }
 
 void estimate_essential_matrix(const Image<Rgb8>& image1,
@@ -441,30 +473,20 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
   PairWiseDrawer drawer(image1, image2);
   drawer.set_viz_params(scale, scale, PairWiseDrawer::CatH);
 
-  // TODO: by default a feature matcher should just return a tensor. It is
-  // more cryptic but more powerful to manipulate data.
-  //
-  // Convert a set of matches to a tensor.
-  auto to_tensor = [](const vector<Match>& matches) -> Tensor_<int, 2> {
-    auto match_tensor = Tensor_<int, 2>{int(matches.size()), 2};
-    for (auto i = 0u; i < matches.size(); ++i)
-      match_tensor[i].flat_array() << matches[i].x_index(),
-          matches[i].y_index();
-    return match_tensor;
-  };
 
-  // Convert to double.
-  Matrix3d K1 = K1f.cast<double>();
-  Matrix3d K2 = K2f.cast<double>();
-
+  // ==========================================================================
   // Image coordinates.
   const auto to_double = [](const float& src) { return double(src); };
   const auto p1 = extract_centers(keys1.features).cwise_transform(to_double);
   const auto p2 = extract_centers(keys2.features).cwise_transform(to_double);
 
   // Camera coordinates.
-  auto P1 = apply_transform(K1.inverse().eval(), homogeneous(p1));
-  auto P2 = apply_transform(K2.inverse().eval(), homogeneous(p2));
+  const Matrix3d K1 = K1f.cast<double>();
+  const Matrix3d K2 = K2f.cast<double>();
+  const Matrix3d K1_inv = K1.inverse();
+  const Matrix3d K2_inv = K2.inverse();
+  const auto P1 = apply_transform(K1_inv, homogeneous(p1));
+  const auto P2 = apply_transform(K2_inv, homogeneous(p2));
 
   // Normalization transformation.
   auto T1 = compute_normalizer(P1);
@@ -474,9 +496,9 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
   const auto P1n = apply_transform(T1, P1);
   const auto P2n = apply_transform(T2, P2);
 
-  //print_3d_array(P[0]);
 
-  // RANSAC draws N groups of L matches.
+  // ==========================================================================
+  // Generate random samples for RANSAC.
   constexpr auto N = 1000;
   constexpr auto L = 5;
 
@@ -484,14 +506,14 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
   const auto M = to_tensor(matches);
   const auto card_M = M.size(0);
 
-  // The RANSAC procedure.
   // S is the list of N groups of L matches.
   const auto S = random_samples(N, L, card_M);
   // Remap a match index to a pair of point indices.
   const auto I = to_point_indices(S, M);
 
   // Pixel coordinates.
-  const auto p = to_coordinates(I, p1, p2).transpose({0, 2, 1, 3});
+  const auto p = to_coordinates(I, homogeneous(p1), homogeneous(p2))
+                     .transpose({0, 2, 1, 3});
   // Camera coordinates.
   const auto P = to_coordinates(I, P1, P2).transpose({0, 2, 1, 3});
   // Normalized camera coordinates.
@@ -500,25 +522,37 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
   // Nister 5-point algorithm.
   auto solver = NisterFivePointAlgorithm{};
 
+  auto F_best = Matrix<double, 3, 3>{};
+  auto E_best = Matrix<double, 3, 3>{};
+  auto num_inliers_best = 0;
+  auto subset_best = 0;
+
+  auto algebraic_error = [](const auto& E, const auto& X, const auto& Y) {
+    return std::abs(Y.transpose() * E * X);
+  };
+
+  auto inlier_predicate = [&](const auto& E, const auto& X, const auto& Y) {
+    return algebraic_error(E, X, Y) < 1e-2;
+  };
+
   for (auto n = 0; n < N; ++n)
   {
-    // Pixel coordinates of the 5 matches.
-    const Matrix<double, 2, L> x = p[n][0].colmajor_view().matrix();
-    const Matrix<double, 2, L> y = p[n][1].colmajor_view().matrix();
-
-    const Matrix<double, 3, L> X = P[n][0].colmajor_view().matrix();
-    const Matrix<double, 3, L> Y = P[n][1].colmajor_view().matrix();
-
+    // Normalized camera coordinates.
     const Matrix<double, 3, L> Xn = Pn[n][0].colmajor_view().matrix();
     const Matrix<double, 3, L> Yn = Pn[n][1].colmajor_view().matrix();
 
-    // 5-point algorithm.
-    const auto Es = solver.find_essential_matrices(Xn, Yn);
+    // Nister's 5-point algorithm.
+    auto Es = solver.find_essential_matrices(Xn, Yn);
+
+    // Unnormalize the essential matrices.
+    for (auto& E : Es)
+      E = T2.transpose() * E * T1;
+
     for (const auto& E: Es)
     {
-      // Display the result.
-      drawer.display_images();
+      const Matrix3d F = K2_inv * E * K1_inv;
 
+      auto num_inliers = 0;
       for (size_t i = 0; i < matches.size(); ++i)
       {
         // Image coordinates.
@@ -530,44 +564,151 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
         x2.head(2) = matches[i].y_pos().cast<double>();
         x2(2) = 1;
 
-        // Normalized camera coordinates
-        Vector3d X1n = T1 * K1.inverse() * x1;
-        Vector3d X2n = T1 * K1.inverse() * x2;
+        if (!inlier_predicate(F, x1, x2))
+          continue;
 
-        //Vector3d proj_X1 = E.transpose() * X1;
-        //proj_X1 /= proj_X1(2);
-
-        //Vector3d proj_X2 = E * X2;
-        //proj_X2 /= proj_X2(2);
-
-
-        if (std::abs(X2n.transpose() * E * X1n) < 1e-2)
-        {
-          drawer.draw_match(matches[i], Blue8, false);
-          //drawer.draw_line_from_eqn(0, proj_X2.cast<float>(), Cyan8, 1);
-          //drawer.draw_line_from_eqn(1, proj_X1.cast<float>(), Cyan8, 1);
-        }
-      };
-
-
-      for (size_t i = 0; i < L; ++i)
-      {
-        drawer.draw_match(matches[S(n, i)], Red8, true);
-
-        //drawer.draw_point(0, x.col(i).cast<float>(), Magenta8, 5);
-        //drawer.draw_point(1, y.col(i).cast<float>(), Magenta8, 5);
-
-        //drawer.draw_point(0, X.col(i).cast<float>().head(2), Magenta8, 5);
-        //drawer.draw_point(1, Y.col(i).cast<float>().head(2), Magenta8, 5);
-
-        // drawer.draw_line_from_eqn(0, proj_Y.col(i).cast<float>(), Magenta8,
-        // 1); drawer.draw_line_from_eqn(1, proj_X.col(i).cast<float>(),
-        // Magenta8, 1);
+        ++num_inliers;
       }
 
-      get_key();
+      if (num_inliers > num_inliers_best)
+      {
+        num_inliers_best = num_inliers;
+        E_best = E;
+        F_best = F;
+        subset_best = n;
+
+
+        // =====================================================================
+        // Visualize.
+        //
+        // Calculate the projected lines.
+        const Matrix<double, 3, L> x = p[n][0].colmajor_view().matrix();
+        const Matrix<double, 3, L> y = p[n][1].colmajor_view().matrix();
+        //
+        Matrix<double, 3, L> proj_x = F * x;
+        proj_x.array().rowwise() /= proj_x.row(2).array();
+        //
+        Matrix<double, 3, L> proj_y = F.transpose() * y;
+        proj_y.array().rowwise() /= proj_y.row(2).array();
+
+        // Redraw the best group of matches drawn by RANSAC.
+        drawer.display_images();
+        for (auto i = 0; i < L; ++i)
+        {
+          SARA_DEBUG << "x = " << matches[S(n, i)].x_pos().transpose() << endl;
+          SARA_DEBUG << "x = " << x.col(i).transpose() << endl;
+          SARA_DEBUG << "proj_x = " << proj_x.col(i).transpose() << endl;
+
+          SARA_DEBUG << "y = " << matches[S(n, i)].y_pos().transpose() << endl;
+          SARA_DEBUG << "y = " << y.col(i).transpose() << endl;
+          SARA_DEBUG << "proj_y = " << proj_y.col(i).transpose() << endl;
+
+          // Draw the corresponding epipolar lines.
+          drawer.draw_line_from_eqn(1, proj_x.col(i).cast<float>(), Magenta8,
+                                    1);
+          drawer.draw_line_from_eqn(0, proj_y.col(i).cast<float>(), Magenta8,
+                                    1);
+
+          drawer.draw_match(matches[S(n, i)], Red8, true);
+          drawer.draw_line_from_eqn(1, proj_x.col(i).cast<float>(), Magenta8,
+                                    1);
+          drawer.draw_line_from_eqn(0, proj_y.col(i).cast<float>(), Magenta8,
+                                    1);
+        }
+
+        // Show the inliers.
+        for (size_t i = 0; i < matches.size(); ++i)
+        {
+          Vector3d x1;
+          x1.head(2) = matches[i].x_pos().cast<double>();
+          x1(2) = 1;
+
+          Vector3d x2;
+          x2.head(2) = matches[i].y_pos().cast<double>();
+          x2(2) = 1;
+
+          // inlier predicate.
+          if (!inlier_predicate(E, K1_inv * x1, K2_inv * x2))
+            continue;
+
+          drawer.draw_match(matches[i], Blue8, false);
+
+          if (i % 50 == 0)
+          {
+            Vector3d proj_x1 = F.matrix() * x1;
+            proj_x1 /= proj_x1(2);
+
+            Vector3d proj_x2 = F.matrix().transpose() * x2;
+            proj_x2 /= proj_x2(2);
+
+            drawer.draw_line_from_eqn(0, proj_x2.cast<float>(), Cyan8, 1);
+            drawer.draw_line_from_eqn(1, proj_x1.cast<float>(), Cyan8, 1);
+          }
+        }
+      }
     }
   }
+
+
+  // Display the result.
+  const auto& F = F_best;
+  const auto& E = E_best;
+  const auto& n = subset_best;
+
+  SARA_CHECK(F);
+  SARA_CHECK(E);
+  SARA_CHECK(n);
+  SARA_CHECK(num_inliers_best);
+
+  drawer.display_images();
+
+  // Extract the points.
+  const Matrix<double, 3, L> x = p[n][0].colmajor_view().matrix();
+  const Matrix<double, 3, L> y = p[n][1].colmajor_view().matrix();
+
+  // Project X to the right image.
+  Matrix<double, 3, L> proj_x = F.matrix() * x;
+  proj_x.array().rowwise() /= proj_x.row(2).array();
+
+  // Project Y to the left image.
+  Matrix<double, 3, L> proj_y = F.matrix().transpose() * y;
+  proj_y.array().rowwise() /= proj_y.row(2).array();
+
+  for (size_t i = 0; i < L; ++i)
+  {
+    drawer.draw_match(matches[S(n, i)], Red8, true);
+  }
+
+  for (size_t i = 0; i < matches.size(); ++i)
+  {
+    Vector3d x1;
+    x1.head(2) = matches[i].x_pos().cast<double>();
+    x1(2) = 1;
+
+    Vector3d x2;
+    x2.head(2) = matches[i].y_pos().cast<double>();
+    x2(2) = 1;
+
+    // inlier predicate.
+    if (!inlier_predicate(E, K1_inv * x1, K2_inv * x2))
+      continue;
+
+    drawer.draw_match(matches[i], Blue8, false);
+
+    if (i % 50 == 0)
+    {
+      Vector3d proj_x1 = F.matrix() * x1;
+      proj_x1 /= proj_x1(2);
+
+      Vector3d proj_x2 = F.matrix().transpose() * x2;
+      proj_x2 /= proj_x2(2);
+
+      drawer.draw_line_from_eqn(0, proj_x2.cast<float>(), Cyan8, 1);
+      drawer.draw_line_from_eqn(1, proj_x1.cast<float>(), Cyan8, 1);
+    }
+  }
+
+  get_key();
 }
 
 
@@ -588,9 +729,9 @@ GRAPHICS_MAIN()
 
   const auto matches = compute_matches(keys1, keys2);
 
-  //estimate_homography(image1, image2, keys1, keys2, matches);
-  estimate_fundamental_matrix(image1, image2, keys1, keys2, matches);
-  //estimate_essential_matrix(image1, image2, K1, K2, keys1, keys2, matches);
+  // estimate_homography(image1, image2, keys1, keys2, matches);
+  // estimate_fundamental_matrix(image1, image2, keys1, keys2, matches);
+  estimate_essential_matrix(image1, image2, K1, K2, keys1, keys2, matches);
 
   return 0;
 }

@@ -303,4 +303,21 @@ BOOST_AUTO_TEST_CASE(test_skew_symmetric_matrix)
   BOOST_CHECK(skew_symmetric_matrix(t) == T);
 }
 
+
+using Matrix34d = Matrix<double, 3, 4>;
+
+auto generate_test_data()
+{
+  // 3D points.
+  MatrixXd X = MatrixXd::Random(3, 5);
+
+  Matrix3d R;
+  Vector3d t;
+  Matrix3d E;
+  Matrix34d P1, P2;
+  MatrixXd x1, x2;
+
+  return std::make_tuple(X, R, t, E, P1, P2, x1, x2);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
