@@ -12,7 +12,9 @@
 
 #define BOOST_TEST_MODULE "MultiViewGeometry/Essential Matrix"
 
+#include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/MultiViewGeometry/Utilities.hpp>
+#include <DO/Sara/MultiViewGeometry/Estimators/FivePointAlgorithms.hpp>
 
 #include <boost/test/unit_test.hpp>
 
@@ -306,18 +308,98 @@ BOOST_AUTO_TEST_CASE(test_skew_symmetric_matrix)
 
 using Matrix34d = Matrix<double, 3, 4>;
 
+Matrix3d rot_x(double angle) {
+    return Eigen::AngleAxisd(angle, Vector3d::UnitX()).toRotationMatrix();
+}
+
+Matrix3d rot_y(double angle) {
+    return Eigen::AngleAxisd(angle, Vector3d::UnitY()).toRotationMatrix();
+}
+
+Matrix3d rot_z(double angle) {
+    return Eigen::AngleAxisd(angle, Vector3d::UnitZ()).toRotationMatrix();
+}
+
+auto essential_matrix = [](auto R, auto t) -> Matrix3d {
+  return skew_symmetric_matrix(t) * R;
+};
+
+auto camera_matrix = [](auto K, auto R, auto t) -> Matrix34d {
+  Matrix34d Rt = Matrix34d::Zero();
+  Rt.topLeftCorner(3, 3) = R;
+  Rt.col(3) = t;
+  return K * Rt;
+};
+
+
 auto generate_test_data()
 {
   // 3D points.
-  MatrixXd X = MatrixXd::Random(3, 5);
+  MatrixXd X = MatrixXd::Random(3, 5);  // coefficients are in [-1, 1].
+  // Put the points in front of the cameras.
+  X.topRows(2).array() -= 0.5;      // (x, y) in [-0.5, 0.5]
+  X.row(2).array() += 1.0;  // z in [0, 2]
 
-  Matrix3d R;
-  Vector3d t;
-  Matrix3d E;
-  Matrix34d P1, P2;
-  MatrixXd x1, x2;
+  Matrix3d R = rot_z(0.3) * rot_x(0.1) * rot_y(0.2);
+  Vector3d t = Vector3d::Random();
 
-  return std::make_tuple(X, R, t, E, P1, P2, x1, x2);
+  const auto E = essential_matrix(R, t);
+
+  const auto C1 = camera_matrix(Matrix3d::Identity(), Matrix3d::Identity(),
+                                Vector3d::Zero());
+  const auto C2 = camera_matrix(Matrix3d::Identity(), R, t);
+  MatrixXd x1 = C1 * X; x1.array().rowwise() /= x1.row(2).array();
+  MatrixXd x2 = C2 * X; x2.array().rowwise() /= x2.row(2).array();
+
+  return std::make_tuple(X, R, t, E, C1, C2, x1, x2);
 }
+
+
+BOOST_AUTO_TEST_CASE(test_null_space_extraction)
+{
+  auto [X, R, t, E, C1, C2, x1, x2] = generate_test_data();
+  SARA_DEBUG << "3D points = \n" << X << endl;
+  SARA_DEBUG << "Left points = \n" << x1 << endl;
+  SARA_DEBUG << "Right points = \n" << x2 << endl;
+
+  auto solver = NisterFivePointAlgorithm{};
+
+  const auto null_space = solver.extract_null_space(x1, x2);
+  const auto& [A, B, C, D] = null_space;
+
+  for (auto j = 0; j < x1.cols(); ++j)
+  {
+    BOOST_CHECK_SMALL(double(x2.col(j).transpose() * A * x1.col(j)), 1e-6);
+    BOOST_CHECK_SMALL(double(x2.col(j).transpose() * B * x1.col(j)), 1e-6);
+    BOOST_CHECK_SMALL(double(x2.col(j).transpose() * C * x1.col(j)), 1e-6);
+    BOOST_CHECK_SMALL(double(x2.col(j).transpose() * D * x1.col(j)), 1e-6);
+  }
+
+  auto E_expr = solver.essential_matrix_expression(null_space);
+
+  auto M = solver.build_epipolar_constraints(E_expr);
+  SARA_DEBUG << "M = \n" << M << endl;
+
+  auto xyzs = solver.solve_epipolar_constraints(M);
+  // TODO: check that det(E) == 0.
+
+  //auto Es = std::vector<Matrix3d>{xyzs.size()};
+  //for (auto i = 0u; i < xyzs.size(); ++i)
+  //{
+  //  const auto& xyz = xyzs[i];
+  //  const auto& x = xyz[0];
+  //  const auto& y = xyz[1];
+  //  const auto& z = xyz[2];
+  //  Es[i] = x * A + y * B + z * C + D;
+
+  //  const auto& E = Es[i];
+  //  const auto EEt = E * E.transpose();
+  //  SARA_DEBUG << "det_E = " <<  E.determinant() << endl;
+  //  SARA_DEBUG << "2*EEt - trace(EEt) * E = " << 2. * EEt * E - EEt.trace() * E  << endl;
+  //}
+
+
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()

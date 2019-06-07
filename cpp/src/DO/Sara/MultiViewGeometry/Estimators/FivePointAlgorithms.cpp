@@ -1,8 +1,7 @@
 #include <DO/Sara/Core/Math/JenkinsTraub.hpp>
 #include <DO/Sara/MultiViewGeometry/Estimators/FivePointAlgorithms.hpp>
 
-
-#define SHOW_DEBUG_LOG
+//#define SHOW_DEBUG_LOG
 
 using namespace std;
 
@@ -18,30 +17,18 @@ namespace DO { namespace Sara {
 
     for (int i = 0; i < 5; ++i)
       A.row(i) <<                                     //
-          p_right(i, 0) * p_left.col(i).transpose(),  //
-          p_right(i, 1) * p_left.col(i).transpose(),  //
-          p_right(i, 2) * p_left.col(i).transpose();
+          p_right(0, i) * p_left.col(i).transpose(),  //
+          p_right(1, i) * p_left.col(i).transpose(),  //
+          p_right(2, i) * p_left.col(i).transpose();
 
-    // Calculate the bases of the null-space.
-    MatrixXd K =
-        A.bdcSvd(Eigen::ComputeFullV).matrixV().rightCols(4);  // K as Ker.
+    Matrix<double, 9, 4> K =
+        A.bdcSvd(Eigen::ComputeFullV).matrixV().rightCols(4);
 
     // The essential matrix lives in right null space K.
     const auto X = Map<Matrix<double, 3, 3, RowMajor>>{K.col(0).data()};
     const auto Y = Map<Matrix<double, 3, 3, RowMajor>>{K.col(1).data()};
     const auto Z = Map<Matrix<double, 3, 3, RowMajor>>{K.col(2).data()};
     const auto W = Map<Matrix<double, 3, 3, RowMajor>>{K.col(3).data()};
-
-#ifdef SHOW_DEBUG_LOG
-    SARA_DEBUG << "A = \n" << A << endl;
-    SARA_DEBUG << "V = \n" << A.bdcSvd(Eigen::ComputeFullV).matrixV() << endl;  // K as Ker.
-    SARA_DEBUG << "S = \n" << A.bdcSvd(Eigen::ComputeFullV).singularValues() << endl;  // K as Ker.
-    SARA_DEBUG << "K = \n" << K << endl;
-    SARA_DEBUG << "X = \n" << X << endl;
-    SARA_DEBUG << "Y = \n" << Y << endl;
-    SARA_DEBUG << "Z = \n" << Z << endl;
-    SARA_DEBUG << "W = \n" << W << endl;
-#endif
 
     return {X, Y, Z, W};
   }
@@ -74,7 +61,7 @@ namespace DO { namespace Sara {
       auto coeff = Q.coeffs.find(monomials[j]);
       if (coeff == Q.coeffs.end())
         continue;
-      A(0, j) = coeff->second;
+      A(9, j) = coeff->second;
     }
 
     // Save P in the matrix.
@@ -82,7 +69,7 @@ namespace DO { namespace Sara {
     {
       for (int b = 0; b < 3; ++b)
       {
-        const auto i = 3 * a + b + 1;
+        const auto i = 3 * a + b;
         for (int j = 0; j < 20; ++j)
           A(i, j) = P(a, b).coeffs[monomials[j]];
       }
@@ -285,7 +272,7 @@ namespace DO { namespace Sara {
 #ifdef SHOW_DEBUG_LOG
       SARA_DEBUG << "E =\n" << Es[i] << endl;
 #endif
-    };
+    }
 
     return Es;
   }
