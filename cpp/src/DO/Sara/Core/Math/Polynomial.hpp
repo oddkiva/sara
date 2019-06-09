@@ -89,6 +89,20 @@ namespace DO::Sara {
       return str;
     }
 
+    template <typename T>
+    auto eval(const std::map<Symbol, T>& values) const
+    {
+      auto val = T(1);
+      for (const auto x: exponents)
+      {
+        auto m = values.find(x.first);
+        if (m == values.end())
+          throw std::runtime_error{"Missing variable values!"};
+        val *= std::pow(m->second, x.second);
+      }
+      return val;
+    }
+
   private:
     std::map<Symbol, int> exponents;
   };
@@ -183,6 +197,15 @@ namespace DO::Sara {
         res.coeffs[c.first] = c.second(i, j);
 
       return res;
+    }
+
+    template <typename T>
+    auto eval(const std::map<Symbol, T>& values) const
+    {
+      auto val = T(0);
+      for (const auto x: coeffs)
+        val += x.first.template eval<T>(values) * x.second;
+      return val;
     }
 
     auto t() const

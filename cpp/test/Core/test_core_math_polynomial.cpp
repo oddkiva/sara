@@ -36,14 +36,18 @@ BOOST_AUTO_TEST_CASE(test_variable)
 
 BOOST_AUTO_TEST_CASE(test_monomial)
 {
-  auto x = Monomial{variable("x")};
-  auto y = Monomial{variable("y")};
-  auto z = Monomial{variable("z")};
+  const auto x_ = variable("x");
+  const auto y_ = variable("y");
+  const auto z_ = variable("z");
 
-  auto x3 = x.pow(3);
-  auto x2 = x.pow(2);
-  auto xy = x * y;
-  auto xy2z3 = x * y.pow(2) * z.pow(3);
+  const auto x = Monomial{x_};
+  const auto y = Monomial{y_};
+  const auto z = Monomial{z_};
+
+  const auto x3 = x.pow(3);
+  const auto x2 = x.pow(2);
+  const auto xy = x * y;
+  const auto xy2z3 = x * y.pow(2) * z.pow(3);
 
   std::cout << x.to_string() << std::endl;
   std::cout << y.to_string() << std::endl;
@@ -51,6 +55,16 @@ BOOST_AUTO_TEST_CASE(test_monomial)
   std::cout << x2.to_string() << std::endl;
   std::cout << x3.to_string() << std::endl;
   std::cout << xy2z3.to_string() << std::endl;
+
+  const auto x_eval = x.eval<double>({{x_, 1.}});
+  BOOST_CHECK_EQUAL(x_eval, 1.);
+
+  const auto xy2z3_eval = xy2z3.eval<double>({{x_, 1.}, {y_, 2.}, {z_, 3.}});
+  BOOST_CHECK_EQUAL(xy2z3_eval, 1 * 4 * 27);
+
+  const auto P = 1. * x3 + 1. * x2;
+  const auto P_eval = P.eval<double>({{x_, 1.}, {y_, 2.}});
+  BOOST_CHECK_EQUAL(P_eval, 2.);
 }
 
 BOOST_AUTO_TEST_CASE(test_polynomial)
