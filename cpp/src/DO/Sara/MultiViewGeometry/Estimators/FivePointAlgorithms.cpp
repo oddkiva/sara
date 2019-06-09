@@ -196,13 +196,15 @@ namespace DO { namespace Sara {
 #endif
 
     auto roots = decltype(rpoly(n)){};
-    try {
+    try
+    {
       roots = rpoly(n);
     }
-    catch(exception& e)
+    catch (exception& e)
     {
       SARA_DEBUG << "Polynomial solver failed: " << e.what() << endl;
-      // And it's OK because it seems that some correspondences are so wrong
+      // And it's OK because it seems that some correspondences are so
+      // wrong
       // that the polynomial evaluation at the root estimate become very
       // unstable numerically.
     }
@@ -228,8 +230,7 @@ namespace DO { namespace Sara {
       const auto x = p0_z / p2_z;
       const auto y = p1_z / p2_z;
 
-      if (std::isnan(x) || std::isinf(x) ||
-          std::isnan(y) || std::isnan(y))
+      if (std::isnan(x) || std::isinf(x) || std::isnan(y) || std::isnan(y))
         continue;
 
       xyzs.push_back({x, y, z});
@@ -255,23 +256,80 @@ namespace DO { namespace Sara {
 
     auto A = build_epipolar_constraints(E_expr);
 
-    auto xyzs = solve_epipolar_constraints(A);
-#ifdef SHOW_DEBUG_LOG
-    for (const auto& xyz : xyzs)
-      SARA_DEBUG << "xyz = " << xyz.transpose() << std::endl;
-#endif
+    //    auto xyzs = solve_epipolar_constraints(A);
+    //#ifdef SHOW_DEBUG_LOG
+    //    for (const auto& xyz : xyzs)
+    //      SARA_DEBUG << "xyz = " << xyz.transpose() << std::endl;
+    //#endif
+    //
+    //    auto Es = std::vector<Matrix3d>{xyzs.size()};
+    //    for (auto i = 0u; i < xyzs.size(); ++i)
+    //    {
+    //      const auto& xyz = xyzs[i];
+    //      const auto& x = xyz[0];
+    //      const auto& y = xyz[1];
+    //      const auto& z = xyz[2];
+    //      Es[i] = x * X + y * Y + z * Z + W;
+    //#ifdef SHOW_DEBUG_LOG
+    //      SARA_DEBUG << "E =\n" << Es[i] << endl;
+    //#endif
+    //    }
 
-    auto Es = std::vector<Matrix3d>{xyzs.size()};
-    for (auto i = 0u; i < xyzs.size(); ++i)
+    // ===========================================================================
+    // 1. Perform Gauss-Jordan elimination on A and stop four rows earlier.
+    //    lower diagonal of A is zero (minus some block)
+    Eigen::FullPivLU<Matrix<double, 10, 10>> lu(A.block<10, 10>(0, 0));
+
+    // Calculate <n> = det(B)
+    // 2. B is the right-bottom block after Gauss-Jordan elimination of A.
+    Matrix<double, 10, 10> B = lu.solve(A.block<10, 10>(0, 10));
+    SARA_DEBUG << "B =\n" << B << endl;
+
+
+    MatrixXd At = MatrixXd::Zero(10, 10);
+    At.block<3, 10>(0, 0) = B.block<3, 10>(0, 0);
+    At.row(3) = B.row(4);
+    At.row(4) = B.row(5);
+    At.row(5) = B.row(7);
+    At(6, 0) = At(7, 1) = At(8, 3) = At(9, 6) = -1;
+
+    SARA_DEBUG << "At =\n" << At << endl;
+
+    Eigen::EigenSolver<MatrixXd> eigensolver(At);
+    const auto& eigenvectors = eigensolver.eigenvectors();
+    const auto& eigenvalues = eigensolver.eigenvalues();
+
+
+    SARA_DEBUG << "U = \n" << eigenvectors << endl;
+    SARA_DEBUG << "D = \n" << eigenvalues << endl;
+
+
+    auto Es = std::vector<Matrix3d>{};
+    // Build essential matrices for the real solutions.
+    Es.reserve(10);
+    for (int s = 0; s < 10; ++s)
     {
-      const auto& xyz = xyzs[i];
-      const auto& x = xyz[0];
-      const auto& y = xyz[1];
-      const auto& z = xyz[2];
-      Es[i] = x * X + y * Y + z * Z + W;
-#ifdef SHOW_DEBUG_LOG
-      SARA_DEBUG << "E =\n" << Es[i] << endl;
-#endif
+      // Only consider real solutions.
+      if (eigenvalues(s).imag() != 0)
+        continue;
+
+      // SARA_DEBUG << "D(" << s << ") = " << eigenvalues(s) << endl;
+      // SARA_DEBUG << "U(" << s << ") =\n"
+      //            << eigenvectors.col(s).tail<4>().real() << endl;
+
+      Vector4d c = eigenvectors.col(s).tail<4>().real();
+      Matrix3d E = c(0) * null_space[0] + c(1) * null_space[1] +
+                   c(2) * null_space[2] + c(3) * null_space[3];
+
+      SARA_DEBUG << "E =\n" << E << endl;
+      SARA_DEBUG << "det(E) = " << E.determinant() << endl;
+      SARA_DEBUG << "||2.EEt * E - trace(EEt) * E|| = "
+                 << (2. * E * E.transpose() * E -
+                     (E * E.transpose()).trace() * E)
+                        .norm()
+                 << endl;
+
+      Es.emplace_back(E);
     }
 
     return Es;

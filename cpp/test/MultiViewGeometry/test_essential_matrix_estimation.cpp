@@ -364,41 +364,38 @@ BOOST_AUTO_TEST_CASE(test_null_space_extraction)
 
   auto solver = NisterFivePointAlgorithm{};
 
-  const auto null_space = solver.extract_null_space(x1, x2);
-  const auto& [A, B, C, D] = null_space;
-
-  for (auto j = 0; j < x1.cols(); ++j)
-  {
-    BOOST_CHECK_SMALL(double(x2.col(j).transpose() * A * x1.col(j)), 1e-6);
-    BOOST_CHECK_SMALL(double(x2.col(j).transpose() * B * x1.col(j)), 1e-6);
-    BOOST_CHECK_SMALL(double(x2.col(j).transpose() * C * x1.col(j)), 1e-6);
-    BOOST_CHECK_SMALL(double(x2.col(j).transpose() * D * x1.col(j)), 1e-6);
-  }
-
-  auto E_expr = solver.essential_matrix_expression(null_space);
-
-  auto M = solver.build_epipolar_constraints(E_expr);
-  SARA_DEBUG << "M = \n" << M << endl;
-
-  auto xyzs = solver.solve_epipolar_constraints(M);
-  // TODO: check that det(E) == 0.
-
-  //auto Es = std::vector<Matrix3d>{xyzs.size()};
-  //for (auto i = 0u; i < xyzs.size(); ++i)
+  //const auto null_space = solver.extract_null_space(x1, x2);
   //{
-  //  const auto& xyz = xyzs[i];
-  //  const auto& x = xyz[0];
-  //  const auto& y = xyz[1];
-  //  const auto& z = xyz[2];
-  //  Es[i] = x * A + y * B + z * C + D;
+  //  const auto& [A, B, C, D] = null_space;
 
-  //  const auto& E = Es[i];
-  //  const auto EEt = E * E.transpose();
-  //  SARA_DEBUG << "det_E = " <<  E.determinant() << endl;
-  //  SARA_DEBUG << "2*EEt - trace(EEt) * E = " << 2. * EEt * E - EEt.trace() * E  << endl;
+  //  for (auto j = 0; j < x1.cols(); ++j)
+  //  {
+  //    BOOST_CHECK_SMALL(double(x2.col(j).transpose() * A * x1.col(j)), 1e-6);
+  //    BOOST_CHECK_SMALL(double(x2.col(j).transpose() * B * x1.col(j)), 1e-6);
+  //    BOOST_CHECK_SMALL(double(x2.col(j).transpose() * C * x1.col(j)), 1e-6);
+  //    BOOST_CHECK_SMALL(double(x2.col(j).transpose() * D * x1.col(j)), 1e-6);
+  //  }
   //}
 
+  //auto E_expr = solver.essential_matrix_expression(null_space);
 
+  //for (int i = 0; i < 20; ++i)
+  //  SARA_DEBUG << "m[" << i << "] = " << solver.monomials[i].to_string()
+  //             << endl;
+
+  //auto M = solver.build_epipolar_constraints(E_expr);
+  //SARA_DEBUG << "M = \n" << M << endl;
+
+  auto Es = solver.find_essential_matrices(x1, x2);
+  for (const auto& E: Es)
+  {
+    SARA_DEBUG << "E =\n" << E << endl;
+    for (auto j = 0; j < x1.cols(); ++j)
+    {
+      BOOST_CHECK_SMALL(double(x2.col(j).transpose() * E * x1.col(j)), 1e-6);
+      SARA_DEBUG << "err[" << j << "] = " << x2.col(j).transpose() * E * x1.col(j) << endl;
+    }
+  }
 }
 
 
