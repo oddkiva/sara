@@ -9,6 +9,8 @@
 
 namespace DO::Sara {
 
+  //! @{
+  //! @brief These implementations assume commutativity of elements.
   class Monomial : public Expression
   {
   public:
@@ -239,6 +241,7 @@ namespace DO::Sara {
 
     std::map<Monomial, Coeff> coeffs;
   };
+  //! @}
 
 
   //! @{
