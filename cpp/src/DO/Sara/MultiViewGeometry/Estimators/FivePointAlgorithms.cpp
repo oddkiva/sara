@@ -8,9 +8,8 @@ using namespace std;
 
 namespace DO { namespace Sara {
 
-  auto
-  NisterFivePointAlgorithm::extract_null_space(const Matrix<double, 3, 5>& p_left,
-                                               const Matrix<double, 3, 5>& p_right)
+  auto NisterFivePointAlgorithm::extract_null_space(
+      const Matrix<double, 3, 5>& p_left, const Matrix<double, 3, 5>& p_right)
       -> std::array<Matrix3d, 4>
   {
     Matrix<double, 5, 9> A;
@@ -82,162 +81,162 @@ namespace DO { namespace Sara {
     return A;
   }
 
-  auto NisterFivePointAlgorithm::solve_epipolar_constraints(
-      const Matrix<double, 10, 20>& A) -> std::vector<Vector3d>
-  {
-    // ===========================================================================
-    // 1. Perform Gauss-Jordan elimination on A and stop four rows earlier.
-    //    lower diagonal of A is zero (minus some block)
-    Eigen::FullPivLU<Matrix<double, 10, 10>> lu(A.block<10, 10>(0, 0));
-
-    // Calculate <n> = det(B)
-    // 2. B is the right-bottom block after Gauss-Jordan elimination of A.
-    Matrix<double, 10, 10> B = lu.solve(A.block<10, 10>(0, 10));
-#ifdef SHOW_DEBUG_LOG
-    SARA_DEBUG << "B = " << B << endl;
-#endif
-
-    auto to_poly = [this](const auto& row_vector) {
-      auto p = Polynomial<double>{};
-      for (int i = 0; i < row_vector.size(); ++i)
-        p.coeffs[this->monomials[i + 10]] = row_vector[i];
-      return p;
-    };
-
-    auto e = B.row(4 /* 'e' - 'a' */);
-    auto f = B.row(5 /* 'f' - 'a' */);
-    auto g = B.row(6 /* 'g' - 'a' */);
-    auto h = B.row(7 /* 'h' - 'a' */);
-    auto i = B.row(8 /* 'i' - 'a' */);
-    auto j = B.row(9 /* 'j' - 'a' */);
-#ifdef SHOW_DEBUG_LOG
-    SARA_DEBUG << "e = " << to_poly(e).to_string() << endl;
-    SARA_DEBUG << "f = " << to_poly(f).to_string() << endl;
-    SARA_DEBUG << "g = " << to_poly(g).to_string() << endl;
-    SARA_DEBUG << "h = " << to_poly(h).to_string() << endl;
-    SARA_DEBUG << "i = " << to_poly(i).to_string() << endl;
-    SARA_DEBUG << "j = " << to_poly(j).to_string() << endl;
-#endif
-
-    auto k = to_poly(e) - z * to_poly(f);
-    auto l = to_poly(g) - z * to_poly(h);
-    auto m = to_poly(i) - z * to_poly(j);
-#ifdef SHOW_DEBUG_LOG
-    SARA_DEBUG << "k = " << k.to_string() << endl;
-    SARA_DEBUG << "l = " << l.to_string() << endl;
-    SARA_DEBUG << "m = " << m.to_string() << endl;
-#endif
-
-    // 3. [x, y, 1]^T is a non-zero null vector in Null(B).
-    using Univariate::UnivariatePolynomial;
-    auto B00 = UnivariatePolynomial<double>{3};
-    auto B01 = UnivariatePolynomial<double>{3};
-    auto B02 = UnivariatePolynomial<double>{3};
-
-    auto B10 = UnivariatePolynomial<double>{3};
-    auto B11 = UnivariatePolynomial<double>{3};
-    auto B12 = UnivariatePolynomial<double>{3};
-
-    auto B20 = UnivariatePolynomial<double>{4};
-    auto B21 = UnivariatePolynomial<double>{4};
-    auto B22 = UnivariatePolynomial<double>{4};
-
-    // 1st row.
-    B00[0] = k.coeffs[x];
-    B00[1] = k.coeffs[x * z];
-    B00[2] = k.coeffs[x * z.pow(2)];
-
-    B01[0] = k.coeffs[y];
-    B01[1] = k.coeffs[y * z];
-    B01[2] = k.coeffs[y * z.pow(2)];
-
-    B02[0] = k.coeffs[one_];
-    B02[1] = k.coeffs[z];
-    B02[2] = k.coeffs[z.pow(2)];
-    B02[3] = k.coeffs[z.pow(3)];
-
-    // 2nd row.
-    B10[0] = l.coeffs[x];
-    B10[1] = l.coeffs[x * z];
-    B10[2] = l.coeffs[x * z.pow(2)];
-
-    B11[0] = l.coeffs[y];
-    B11[1] = l.coeffs[y * z];
-    B11[2] = l.coeffs[y * z.pow(2)];
-
-    B12[0] = l.coeffs[one_];
-    B12[1] = l.coeffs[z];
-    B12[2] = l.coeffs[z.pow(2)];
-    B12[3] = l.coeffs[z.pow(3)];
-
-    // 3rd row.
-    B20[0] = m.coeffs[x];
-    B20[1] = m.coeffs[x * z];
-    B20[2] = m.coeffs[x * z.pow(2)];
-
-    B21[0] = m.coeffs[y];
-    B21[1] = m.coeffs[y * z];
-    B21[2] = m.coeffs[y * z.pow(2)];
-
-    B22[0] = m.coeffs[one_];
-    B22[1] = m.coeffs[z];
-    B22[2] = m.coeffs[z.pow(2)];
-    B22[3] = m.coeffs[z.pow(3)];
-
-    // Follows paragraph "3.2.4 Step 4: Determinant Expansion" in Nister's
-    // paper.
-    const auto p0 = B01 * B12 - B02 * B11;
-    const auto p1 = B02 * B11 - B00 * B12;
-    const auto p2 = B00 * B11 - B01 * B10;
-
-    const auto n = p0 * B20 + p1 * B21 + p2 * B22;
-#ifdef SHOW_DEBUG_LOG
-    SARA_DEBUG << "n = " << n << endl;
-#endif
-
-    auto roots = decltype(rpoly(n)){};
-    try
-    {
-      roots = rpoly(n);
-    }
-    catch (exception& e)
-    {
-      SARA_DEBUG << "Polynomial solver failed: " << e.what() << endl;
-      // And it's OK because it seems that some correspondences are so
-      // wrong
-      // that the polynomial evaluation at the root estimate become very
-      // unstable numerically.
-    }
-#ifdef SHOW_DEBUG_LOG
-    SARA_DEBUG << "roots.size() = " << roots.size() << endl;
-#endif
-
-    auto xyzs = std::vector<Vector3d>{};
-    for (const auto& z_complex : roots)
-    {
-      if (z_complex.imag() != 0)
-        continue;
-
-      const auto z = z_complex.real();
-#ifdef SHOW_DEBUG_LOG
-      SARA_DEBUG << "z = " << z << endl;
-#endif
-
-      const auto p0_z = p0(z);
-      const auto p1_z = p1(z);
-      const auto p2_z = p2(z);
-
-      const auto x = p0_z / p2_z;
-      const auto y = p1_z / p2_z;
-
-      if (std::isnan(x) || std::isinf(x) || std::isnan(y) || std::isnan(y))
-        continue;
-
-      xyzs.push_back({x, y, z});
-    }
-
-    return xyzs;
-  }
+//  auto NisterFivePointAlgorithm::solve_epipolar_constraints(
+//      const Matrix<double, 10, 20>& A) -> std::vector<Vector3d>
+//  {
+//    // ===========================================================================
+//    // 1. Perform Gauss-Jordan elimination on A and stop four rows earlier.
+//    //    lower diagonal of A is zero (minus some block)
+//    Eigen::FullPivLU<Matrix<double, 10, 10>> lu(A.block<10, 10>(0, 0));
+//
+//    // Calculate <n> = det(B)
+//    // 2. B is the right-bottom block after Gauss-Jordan elimination of A.
+//    Matrix<double, 10, 10> B = lu.solve(A.block<10, 10>(0, 10));
+//#ifdef SHOW_DEBUG_LOG
+//    SARA_DEBUG << "B = " << B << endl;
+//#endif
+//
+//    auto to_poly = [this](const auto& row_vector) {
+//      auto p = Polynomial<double>{};
+//      for (int i = 0; i < row_vector.size(); ++i)
+//        p.coeffs[this->monomials[i + 10]] = row_vector[i];
+//      return p;
+//    };
+//
+//    auto e = B.row(4 /* 'e' - 'a' */);
+//    auto f = B.row(5 /* 'f' - 'a' */);
+//    auto g = B.row(6 /* 'g' - 'a' */);
+//    auto h = B.row(7 /* 'h' - 'a' */);
+//    auto i = B.row(8 /* 'i' - 'a' */);
+//    auto j = B.row(9 /* 'j' - 'a' */);
+//#ifdef SHOW_DEBUG_LOG
+//    SARA_DEBUG << "e = " << to_poly(e).to_string() << endl;
+//    SARA_DEBUG << "f = " << to_poly(f).to_string() << endl;
+//    SARA_DEBUG << "g = " << to_poly(g).to_string() << endl;
+//    SARA_DEBUG << "h = " << to_poly(h).to_string() << endl;
+//    SARA_DEBUG << "i = " << to_poly(i).to_string() << endl;
+//    SARA_DEBUG << "j = " << to_poly(j).to_string() << endl;
+//#endif
+//
+//    auto k = to_poly(e) - z * to_poly(f);
+//    auto l = to_poly(g) - z * to_poly(h);
+//    auto m = to_poly(i) - z * to_poly(j);
+//#ifdef SHOW_DEBUG_LOG
+//    SARA_DEBUG << "k = " << k.to_string() << endl;
+//    SARA_DEBUG << "l = " << l.to_string() << endl;
+//    SARA_DEBUG << "m = " << m.to_string() << endl;
+//#endif
+//
+//    // 3. [x, y, 1]^T is a non-zero null vector in Null(B).
+//    using Univariate::UnivariatePolynomial;
+//    auto B00 = UnivariatePolynomial<double>{3};
+//    auto B01 = UnivariatePolynomial<double>{3};
+//    auto B02 = UnivariatePolynomial<double>{3};
+//
+//    auto B10 = UnivariatePolynomial<double>{3};
+//    auto B11 = UnivariatePolynomial<double>{3};
+//    auto B12 = UnivariatePolynomial<double>{3};
+//
+//    auto B20 = UnivariatePolynomial<double>{4};
+//    auto B21 = UnivariatePolynomial<double>{4};
+//    auto B22 = UnivariatePolynomial<double>{4};
+//
+//    // 1st row.
+//    B00[0] = k.coeffs[x];
+//    B00[1] = k.coeffs[x * z];
+//    B00[2] = k.coeffs[x * z.pow(2)];
+//
+//    B01[0] = k.coeffs[y];
+//    B01[1] = k.coeffs[y * z];
+//    B01[2] = k.coeffs[y * z.pow(2)];
+//
+//    B02[0] = k.coeffs[one_];
+//    B02[1] = k.coeffs[z];
+//    B02[2] = k.coeffs[z.pow(2)];
+//    B02[3] = k.coeffs[z.pow(3)];
+//
+//    // 2nd row.
+//    B10[0] = l.coeffs[x];
+//    B10[1] = l.coeffs[x * z];
+//    B10[2] = l.coeffs[x * z.pow(2)];
+//
+//    B11[0] = l.coeffs[y];
+//    B11[1] = l.coeffs[y * z];
+//    B11[2] = l.coeffs[y * z.pow(2)];
+//
+//    B12[0] = l.coeffs[one_];
+//    B12[1] = l.coeffs[z];
+//    B12[2] = l.coeffs[z.pow(2)];
+//    B12[3] = l.coeffs[z.pow(3)];
+//
+//    // 3rd row.
+//    B20[0] = m.coeffs[x];
+//    B20[1] = m.coeffs[x * z];
+//    B20[2] = m.coeffs[x * z.pow(2)];
+//
+//    B21[0] = m.coeffs[y];
+//    B21[1] = m.coeffs[y * z];
+//    B21[2] = m.coeffs[y * z.pow(2)];
+//
+//    B22[0] = m.coeffs[one_];
+//    B22[1] = m.coeffs[z];
+//    B22[2] = m.coeffs[z.pow(2)];
+//    B22[3] = m.coeffs[z.pow(3)];
+//
+//    // Follows paragraph "3.2.4 Step 4: Determinant Expansion" in Nister's
+//    // paper.
+//    const auto p0 = B01 * B12 - B02 * B11;
+//    const auto p1 = B02 * B11 - B00 * B12;
+//    const auto p2 = B00 * B11 - B01 * B10;
+//
+//    const auto n = p0 * B20 + p1 * B21 + p2 * B22;
+//#ifdef SHOW_DEBUG_LOG
+//    SARA_DEBUG << "n = " << n << endl;
+//#endif
+//
+//    auto roots = decltype(rpoly(n)){};
+//    try
+//    {
+//      roots = rpoly(n);
+//    }
+//    catch (exception& e)
+//    {
+//      SARA_DEBUG << "Polynomial solver failed: " << e.what() << endl;
+//      // And it's OK because it seems that some correspondences are so
+//      // wrong
+//      // that the polynomial evaluation at the root estimate become very
+//      // unstable numerically.
+//    }
+//#ifdef SHOW_DEBUG_LOG
+//    SARA_DEBUG << "roots.size() = " << roots.size() << endl;
+//#endif
+//
+//    auto xyzs = std::vector<Vector3d>{};
+//    for (const auto& z_complex : roots)
+//    {
+//      if (z_complex.imag() != 0)
+//        continue;
+//
+//      const auto z = z_complex.real();
+//#ifdef SHOW_DEBUG_LOG
+//      SARA_DEBUG << "z = " << z << endl;
+//#endif
+//
+//      const auto p0_z = p0(z);
+//      const auto p1_z = p1(z);
+//      const auto p2_z = p2(z);
+//
+//      const auto x = p0_z / p2_z;
+//      const auto y = p1_z / p2_z;
+//
+//      if (std::isnan(x) || std::isinf(x) || std::isnan(y) || std::isnan(y))
+//        continue;
+//
+//      xyzs.push_back({x, y, z});
+//    }
+//
+//    return xyzs;
+//  }
 
   auto NisterFivePointAlgorithm::find_essential_matrices(
       const Matrix<double, 3, 5>& p, const Matrix<double, 3, 5>& q)
@@ -299,10 +298,8 @@ namespace DO { namespace Sara {
     const auto& eigenvectors = eigensolver.eigenvectors();
     const auto& eigenvalues = eigensolver.eigenvalues();
 
-
-    SARA_DEBUG << "U = \n" << eigenvectors << endl;
-    SARA_DEBUG << "D = \n" << eigenvalues << endl;
-
+    //SARA_DEBUG << "U = \n" << eigenvectors << endl;
+    //SARA_DEBUG << "D = \n" << eigenvalues << endl;
 
     auto Es = std::vector<Matrix3d>{};
     // Build essential matrices for the real solutions.
@@ -320,14 +317,6 @@ namespace DO { namespace Sara {
       Vector4d c = eigenvectors.col(s).tail<4>().real();
       Matrix3d E = c(0) * null_space[0] + c(1) * null_space[1] +
                    c(2) * null_space[2] + c(3) * null_space[3];
-
-      SARA_DEBUG << "E =\n" << E << endl;
-      SARA_DEBUG << "det(E) = " << E.determinant() << endl;
-      SARA_DEBUG << "||2.EEt * E - trace(EEt) * E|| = "
-                 << (2. * E * E.transpose() * E -
-                     (E * E.transpose()).trace() * E)
-                        .norm()
-                 << endl;
 
       Es.emplace_back(E);
     }

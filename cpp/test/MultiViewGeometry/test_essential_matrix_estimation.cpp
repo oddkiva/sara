@@ -370,10 +370,10 @@ BOOST_AUTO_TEST_CASE(test_null_space_extraction)
 
     for (auto j = 0; j < x1.cols(); ++j)
     {
-      BOOST_CHECK_SMALL(double(x2.col(j).transpose() * A * x1.col(j)), 1e-6);
-      BOOST_CHECK_SMALL(double(x2.col(j).transpose() * B * x1.col(j)), 1e-6);
-      BOOST_CHECK_SMALL(double(x2.col(j).transpose() * C * x1.col(j)), 1e-6);
-      BOOST_CHECK_SMALL(double(x2.col(j).transpose() * D * x1.col(j)), 1e-6);
+      BOOST_CHECK_SMALL(double(x2.col(j).transpose() * A * x1.col(j)), 1e-8);
+      BOOST_CHECK_SMALL(double(x2.col(j).transpose() * B * x1.col(j)), 1e-8);
+      BOOST_CHECK_SMALL(double(x2.col(j).transpose() * C * x1.col(j)), 1e-8);
+      BOOST_CHECK_SMALL(double(x2.col(j).transpose() * D * x1.col(j)), 1e-8);
     }
   }
 
@@ -387,16 +387,69 @@ BOOST_AUTO_TEST_CASE(test_null_space_extraction)
   //SARA_DEBUG << "M = \n" << M << endl;
 
   auto Es = solver.find_essential_matrices(x1, x2);
-  for (const auto& Ei: Es)
+  auto Rs = std::vector<Matrix3d>{};
+  auto ts = std::vector<Vector3d>{};
+
+  for (const auto& E: Es)
   {
-    SARA_DEBUG << "E_candidate =\n" << Ei << endl;
-    SARA_DEBUG << "E_true =\n" << E << endl;
-    SARA_DEBUG << "norm(E_true - E_candidate) =\n" << (Ei - E).norm() << endl;
+    SARA_DEBUG << "E =\n" << E << endl;
+    SARA_DEBUG << "det(E) = " << E.determinant() << endl;
+    SARA_DEBUG
+        << "||2.EEt * E - trace(EEt) * E|| = "
+        << (2. * E * E.transpose() * E - (E * E.transpose()).trace() * E).norm()
+        << endl;
+    BOOST_CHECK_SMALL(E.determinant(), 1e-8);
+    BOOST_CHECK_SMALL(
+        (2. * E * E.transpose() * E - (E * E.transpose()).trace() * E).norm(),
+        1e-8);
+  }
+
+  for (auto& Ei: Es)
+  {
+    Eigen::BDCSVD<decltype(E)> svd(Ei, Eigen::ComputeFullU | Eigen::ComputeFullV);
+    Matrix3d U = svd.matrixU();
+    Matrix3d Vt = svd.matrixV().transpose();
+
+    if (U.determinant() < 0)
+      U.col(2) *= -1;
+
+    if (Vt.determinant() < 0)
+      Vt.col(2) *= -1;
+
+    Matrix3d D;
+    D << 0, 1, 0,
+        -1, 0, 0,
+         0, 0, 1;
+
+    Vector3d S; S << 1, 1, 0;
+
+    //Ei = U * S.asDiagonal() * Vt;
+
+    Matrix3d Ra = U * D * Vt;
+    Matrix3d Rb = U * D.transpose() * Vt;
+
+    //SARA_DEBUG << "E_candidate =\n" << Ei / Ei.norm()<< endl;
+    //SARA_DEBUG << "E_true =\n" << E / E.norm()<< endl;
+
+    //SARA_DEBUG << "norm(E_true - E_candidate) =\n" << (Ei.normalized() - E.normalized()).norm() << endl;
+    //SARA_DEBUG << "norm(E_true + E_candidate) =\n" << (-Ei.normalized() - E.normalized()).norm() << endl;
+
     for (auto j = 0; j < x1.cols(); ++j)
     {
       BOOST_CHECK_SMALL(double(x2.col(j).transpose() * Ei * x1.col(j)), 1e-6);
-      SARA_DEBUG << "err[" << j << "] = " << x2.col(j).transpose() * Ei * x1.col(j) << endl;
+      //SARA_DEBUG << "err[" << j << "] = " << x2.col(j).transpose() * Ei * x1.col(j) << endl;
     }
+
+    Rs.push_back(Ra);
+    Rs.push_back(Rb);
+    ts.push_back(U.col(2));
+
+    //SARA_DEBUG << "R = " << R << endl;
+    //SARA_DEBUG << "Ra = " << Ra << endl;
+    //SARA_DEBUG << "Rb = " << Rb << endl;
+
+    //SARA_DEBUG << "t_est = " << U.col(2) << endl;
+    //SARA_DEBUG << "t_true = " << t << endl;
   }
 }
 
