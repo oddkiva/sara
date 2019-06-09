@@ -364,18 +364,18 @@ BOOST_AUTO_TEST_CASE(test_null_space_extraction)
 
   auto solver = NisterFivePointAlgorithm{};
 
-  //const auto null_space = solver.extract_null_space(x1, x2);
-  //{
-  //  const auto& [A, B, C, D] = null_space;
+  const auto null_space = solver.extract_null_space(x1, x2);
+  {
+    const auto& [A, B, C, D] = null_space;
 
-  //  for (auto j = 0; j < x1.cols(); ++j)
-  //  {
-  //    BOOST_CHECK_SMALL(double(x2.col(j).transpose() * A * x1.col(j)), 1e-6);
-  //    BOOST_CHECK_SMALL(double(x2.col(j).transpose() * B * x1.col(j)), 1e-6);
-  //    BOOST_CHECK_SMALL(double(x2.col(j).transpose() * C * x1.col(j)), 1e-6);
-  //    BOOST_CHECK_SMALL(double(x2.col(j).transpose() * D * x1.col(j)), 1e-6);
-  //  }
-  //}
+    for (auto j = 0; j < x1.cols(); ++j)
+    {
+      BOOST_CHECK_SMALL(double(x2.col(j).transpose() * A * x1.col(j)), 1e-6);
+      BOOST_CHECK_SMALL(double(x2.col(j).transpose() * B * x1.col(j)), 1e-6);
+      BOOST_CHECK_SMALL(double(x2.col(j).transpose() * C * x1.col(j)), 1e-6);
+      BOOST_CHECK_SMALL(double(x2.col(j).transpose() * D * x1.col(j)), 1e-6);
+    }
+  }
 
   //auto E_expr = solver.essential_matrix_expression(null_space);
 
@@ -387,13 +387,15 @@ BOOST_AUTO_TEST_CASE(test_null_space_extraction)
   //SARA_DEBUG << "M = \n" << M << endl;
 
   auto Es = solver.find_essential_matrices(x1, x2);
-  for (const auto& E: Es)
+  for (const auto& Ei: Es)
   {
-    SARA_DEBUG << "E =\n" << E << endl;
+    SARA_DEBUG << "E_candidate =\n" << Ei << endl;
+    SARA_DEBUG << "E_true =\n" << E << endl;
+    SARA_DEBUG << "norm(E_true - E_candidate) =\n" << (Ei - E).norm() << endl;
     for (auto j = 0; j < x1.cols(); ++j)
     {
-      BOOST_CHECK_SMALL(double(x2.col(j).transpose() * E * x1.col(j)), 1e-6);
-      SARA_DEBUG << "err[" << j << "] = " << x2.col(j).transpose() * E * x1.col(j) << endl;
+      BOOST_CHECK_SMALL(double(x2.col(j).transpose() * Ei * x1.col(j)), 1e-6);
+      SARA_DEBUG << "err[" << j << "] = " << x2.col(j).transpose() * Ei * x1.col(j) << endl;
     }
   }
 }
