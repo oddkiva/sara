@@ -12,6 +12,7 @@ addons:
   apt:
     sources:
     - ubuntu-sdk-team
+    - ubuntu-toolchain-r-test
     packages:
     - g++-7
     - qtbase5-dev
