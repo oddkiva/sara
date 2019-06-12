@@ -20,6 +20,7 @@ addons:
     - qtbase5-dev
     - lcov
     - libboost-all-dev
+    - libhdf5-dev
     - libqt5opengl5
     - libqt5opengl5-dev
     - yasm
