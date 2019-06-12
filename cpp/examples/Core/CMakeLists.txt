@@ -6,7 +6,6 @@ message(STATUS "  - DO_Core_Examples")
 
 
 find_package(DO_Sara COMPONENTS Core REQUIRED)
-find_package(HDF5 COMPONENTS CXX REQUIRED)
 
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
@@ -29,13 +28,15 @@ macro (sara_add_example example)
     FOLDER "DO Sara Examples/Core")
 endmacro ()
 
-sara_add_example(save_to_hdf5_example)
-#set_target_properties(save_to_hdf5_example
-#  PROPERTIES
-#  COMPILE_DEFINITIONS ${HDF5_DEFINITIONS})
 
-
-target_link_libraries(save_to_hdf5_example ${HDF5_LIBRARIES})
+find_package(HDF5 COMPONENTS CXX)
+if (HDF5_FOUND)
+  sara_add_example(save_to_hdf5_example)
+  #set_target_properties(save_to_hdf5_example
+  #  PROPERTIES
+  #  COMPILE_DEFINITIONS ${HDF5_DEFINITIONS})
+  target_link_libraries(save_to_hdf5_example ${HDF5_LIBRARIES})
+endif ()
 
 
 if (SARA_USE_ZEROMQ)
