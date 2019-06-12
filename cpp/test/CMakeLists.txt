@@ -1,9 +1,9 @@
-include_directories(${DO_Sara_ThirdParty_DIR}/gtest/include)
-
 # Use boost unit test framework.
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
-find_package(Boost COMPONENTS unit_test_framework REQUIRED)
+find_package(Boost
+  COMPONENTS filesystem serialization system unit_test_framework
+  REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 
 
@@ -16,6 +16,7 @@ if (WIN32 AND SARA_USE_VLD)
   link_directories(${VLD_LINK_DIRECTORIES})
 endif ()
 
+#add_subdirectory(Clustering)
 add_subdirectory(Core)
 add_subdirectory(Graphics)
 add_subdirectory(ImageIO)
@@ -35,6 +36,7 @@ add_subdirectory(FeatureDescriptors)
 
 add_subdirectory(Match)
 add_subdirectory(FeatureMatching)
+add_subdirectory(MultiViewGeometry)
 
 if (CMAKE_COMPILER_IS_GNUCXX)
   find_program(LCOV_PATH lcov)

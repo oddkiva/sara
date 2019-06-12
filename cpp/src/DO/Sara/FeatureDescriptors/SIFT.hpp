@@ -39,20 +39,22 @@ namespace DO { namespace Sara {
   class ComputeSIFTDescriptor
   {
   public: /* interface. */
-    enum { Dim = N*N*O };
+    enum { Dim = N * N * O };
+
     using descriptor_type = Matrix<float, Dim, 1>;
 
     //! @brief Constructor.
     ComputeSIFTDescriptor(float bin_scale_unit_length = 3.f,
                           float max_bin_value = 0.2f)
-      : _bin_scale_unit_length(bin_scale_unit_length)
-      , _max_bin_value(max_bin_value)
+      : _bin_scale_unit_length{bin_scale_unit_length}
+      , _max_bin_value{max_bin_value}
     {
     }
 
     //! @brief Computes the SIFT descriptor for keypoint \$(x,y,\sigma,\theta)\f$.
-    descriptor_type operator()(float x, float y, float sigma, float theta,
-                               const ImageView<Vector2f>& grad_polar_coords) const
+    descriptor_type
+    operator()(float x, float y, float sigma, float theta,
+               const ImageView<Vector2f>& grad_polar_coords) const
     {
       const auto pi = static_cast<float>(M_PI);
       /*
@@ -97,7 +99,7 @@ namespace DO { namespace Sara {
         Let us initialize the SIFT descriptor consisting of the NxN histograms
         $\mathbf{h}_{i,j}$, each in $\mathbf{R}^O$ as follows.
        */
-      descriptor_type h{ descriptor_type::Zero() };
+      descriptor_type h{descriptor_type::Zero()};
 
       /*
         In the rescaled and oriented coordinate frame bound to the patch $P(k)$,
@@ -153,13 +155,13 @@ namespace DO { namespace Sara {
         {
           // Compute the coordinates in the rescaled and oriented coordinate
           // frame bound to patch $P(k)$.
-          auto pos = Vector2f{ T*Vector2f(u, v) };
+          auto pos = Vector2f{T * Vector2f(u, v)};
           // subpixel correction?
           /*pos.x() -= (x - rounded_x);
           pos.y() -= (y - rounded_y);*/
 
-          if ( rounded_x+u < 0 || rounded_x+u >= grad_polar_coords.width()  ||
-               rounded_y+v < 0 || rounded_y+v >= grad_polar_coords.height() )
+          if (rounded_x + u < 0 || rounded_x + u >= grad_polar_coords.width() ||
+              rounded_y + v < 0 || rounded_y + v >= grad_polar_coords.height())
             continue;
 
           // Compute the Gaussian weight which gives more emphasis to gradient
@@ -193,7 +195,7 @@ namespace DO { namespace Sara {
 
       h.normalize();
 
-      h = (h * 512.f).cwiseMin(Matrix<float, Dim, 1>::Ones()*255.f);
+      h = (h * 512.f).cwiseMin(Matrix<float, Dim, 1>::Ones() * 255.f);
       return h;
     }
 
@@ -217,12 +219,12 @@ namespace DO { namespace Sara {
                const std::vector<Point2i>& scale_octave_pairs,
                const ImagePyramid<Vector2f>& gradient_polar_coords) const
     {
-      DescriptorMatrix<float> sifts{ features.size(), Dim };
+      DescriptorMatrix<float> sifts{features.size(), Dim};
       for (size_t i = 0; i < features.size(); ++i)
       {
         sifts[i] = this->operator()(
-          features[i],
-          gradient_polar_coords(scale_octave_pairs[i](0), scale_octave_pairs[i](1)) );
+            features[i], gradient_polar_coords(scale_octave_pairs[i](0),
+                                               scale_octave_pairs[i](1)));
       }
       return sifts;
     }
@@ -292,7 +294,7 @@ namespace DO { namespace Sara {
         auto wy = (dy == 0) ? 1.f - yfrac : yfrac;
         for (auto dx = 0; dx < 2; ++dx)
         {
-          auto x = xi+dx;
+          auto x = xi + dx;
           if (x < 0 || x >= N)
             continue;
           auto wx = (dx == 0) ? 1.f - xfrac : xfrac;
@@ -301,8 +303,7 @@ namespace DO { namespace Sara {
             auto o = (orii + dori) % O;
             auto wo = (dori == 0) ? 1.f - orifrac : orifrac;
             // Trilinear interpolation:
-            // SIFT(y,x,o) += wy*wx*wo*weight*mag;
-            h[at(y, x, o)] += wy*wx*wo*weight*mag;
+            h[at(y, x, o)] += wy * wx * wo * weight * mag;
           }
         }
       }
@@ -315,7 +316,7 @@ namespace DO { namespace Sara {
       h.normalize();
       // Clamp histogram bin values $h_i$ to 0.2 for enhanced robustness to
       // lighting change.
-      h = h.cwiseMin(descriptor_type::Ones()*_max_bin_value);
+      h = h.cwiseMin(descriptor_type::Ones() * _max_bin_value);
       // Renormalize again.
       h.normalize();
     }
@@ -323,7 +324,7 @@ namespace DO { namespace Sara {
     //! Helper access function.
     inline int at(int i, int j, int o) const
     {
-      return N*O*i + j*O + o;
+      return N * O * i + j * O + o;
     }
 
   private: /* data members. */

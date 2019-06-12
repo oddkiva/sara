@@ -37,7 +37,7 @@ vector<OERegion> compute_LoG_extrema(const Image<float>& image,
   auto LoGs = computeLoGs(image, &scale_octave_pairs);
   if (verbose)
     toc();
-  CHECK(LoGs.size());
+  SARA_CHECK(LoGs.size());
 
   // 2. Rescale detected features to original image dimension.
   const auto& L = computeLoGs.laplacians_of_gaussians();
@@ -67,7 +67,7 @@ vector<OERegion> compute_LoG_affine_extrema(const Image<float>& image,
   auto LoGs = compute_LoGs(image, &scale_octave_pairs);
   if (verbose)
     toc();
-  CHECK(LoGs.size());
+  SARA_CHECK(LoGs.size());
 
   const auto& G = compute_LoGs.gaussians();
   const auto& L = compute_LoGs.laplacians_of_gaussians();
@@ -113,7 +113,7 @@ vector<OERegion> compute_LoG_affine_extrema(const Image<float>& image,
     }
   }
 
-  CHECK(kept_DoGs.size());
+  SARA_CHECK(kept_DoGs.size());
 
   return kept_DoGs;
 }

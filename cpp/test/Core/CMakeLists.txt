@@ -14,3 +14,8 @@ foreach (file ${test_core_SOURCE_FILES})
   get_filename_component(filename "${file}" NAME_WE)
   sara_add_test(${filename} ${file} "${DO_Sara_LIBRARIES}" ${TestGroupName})
 endforeach ()
+
+
+if (UNIX AND NOT APPLE)
+  target_link_libraries(test_core_ipc_cond1 rt)
+endif ()

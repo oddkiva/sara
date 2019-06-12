@@ -17,12 +17,17 @@ function install_python_packages_via_pip()
 function build_library()
 {
   local cmake_options="-DCMAKE_BUILD_TYPE=${build_type} "
-  #cmake_options+="-DCMAKE_PREFIX_PATH=/usr/local/Qt-5.10.0 "
+  cmake_options+="-DCMAKE_EXPORT_COMPILE_COMMANDS=1 "
+  cmake_options+="-DCMAKE_PREFIX_PATH=/opt/Qt5.10.1;/opt/boost-1.66.0 "
   cmake_options+="-DSARA_BUILD_VIDEOIO=ON "
-  #cmake_options+="-DSARA_BUILD_PYTHON_BINDINGS=ON "
+  cmake_options+="-DSARA_BUILD_PYTHON_BINDINGS=ON "
   cmake_options+="-DSARA_BUILD_SHARED_LIBS=ON "
   cmake_options+="-DSARA_BUILD_TESTS=ON "
   cmake_options+="-DSARA_BUILD_SAMPLES=ON "
+
+  if [ "$(uname -s)" == "Darwin" ]; then
+    cmake_options+="-DQt5_DIR=$(brew --prefix qt)/lib/cmake/Qt5 "
+  fi
 
   # Generate makefile project.
   cmake ../sara ${cmake_options}

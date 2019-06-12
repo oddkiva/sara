@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_computations, Distance, DistanceTypes)
 
   const auto d = Distance{A};
   BOOST_CHECK_EQUAL(d.covariance_matrix(), A);
-  BOOST_CHECK(d.is_quasi_isotropic());
+  BOOST_CHECK(is_quasi_isotropic(d));
   BOOST_CHECK_CLOSE(d(b, a), A(0, 0), 1e-6f);
   BOOST_CHECK_CLOSE(d(c, a), A(1, 1), 1e-6f);
 

@@ -13,14 +13,14 @@
 
 #pragma once
 
-#include <vector>
-
 // Core
 #include <DO/Sara/Core/EigenExtension.hpp>
+
 // Data structures
 #include <DO/Sara/Features/Feature.hpp>
 #include <DO/Sara/Features/DescriptorMatrix.hpp>
 #include <DO/Sara/Features/Key.hpp>
+
 // Utilities, View, I/O
 #include <DO/Sara/Features/Utilities.hpp>
 #include <DO/Sara/Features/Draw.hpp>

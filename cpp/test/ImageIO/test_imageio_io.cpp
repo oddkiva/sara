@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_CASE(test_imread_fails)
 {
   const auto blank_filepath = string{""};
   auto blank_image = Image<Rgb8>{};
-  BOOST_CHECK_THROW(imread(blank_image, blank_filepath), std::runtime_error);
+  BOOST_CHECK_THROW(imread<Rgb8>(blank_filepath), std::runtime_error);
   BOOST_CHECK_EQUAL(blank_image.sizes(), Vector2i::Zero());
 }
 
@@ -49,8 +49,7 @@ BOOST_AUTO_TEST_CASE(test_rgb_image_read_write)
   {
     imwrite(true_image, filepaths[i], 100);
 
-    auto image = Image<Rgb8>{};
-    BOOST_REQUIRE_NO_THROW(imread(image, filepaths[i]));
+    auto image = imread<Rgb8>(filepaths[i]);
     BOOST_REQUIRE_EQUAL(image.sizes(), Vector2i(2, 2));
 
     for (int y = 0; y < true_image.width(); ++y)
@@ -76,8 +75,7 @@ BOOST_AUTO_TEST_CASE(test_grayscale_image_read_write)
 
   for (int i = 0; i < 3; ++i)
   {
-    auto image = Image<unsigned char>{};
-    BOOST_CHECK_NO_THROW(imread(image, filepaths[i]));
+    auto image = imread<unsigned char>(filepaths[i]);
     BOOST_CHECK_EQUAL(image.sizes(), Vector2i(2, 2));
     BOOST_CHECK_EQUAL(true_image.matrix(), image.matrix());
   }

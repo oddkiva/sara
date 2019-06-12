@@ -3,6 +3,10 @@ sara_step_message("Found ${CMAKE_CXX_COMPILER_ID} compiler:")
 # By default, use the math constants defined in <cmath> header.
 add_definitions(-D_USE_MATH_DEFINES)
 
+# Drop older compiler support in favor of C++17... I know it may be a
+# controversial decision.
+set(CMAKE_CXX_STANDARD 17)
+
 # Visual C++ compiler
 if (MSVC)
   add_definitions(
@@ -23,16 +27,6 @@ if (MSVC)
             "'Google Test'")
     add_definitions(/D_VARIADIC_MAX=10)
   endif ()
-
-# Clang compiler
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  # Enable C++11.
-  if (APPLE)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
-  else ()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libstdc++")
-  endif ()
-  set (ENABLE_CXX11 "-std=c++11")
 
 # GNU compiler
 elseif (CMAKE_COMPILER_IS_GNUCXX)
@@ -63,13 +57,6 @@ elseif (CMAKE_COMPILER_IS_GNUCXX)
 
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmessage-length=72")
 
-  # Enable C++11.
-  if (NOT GCC_VERSION  VERSION_LESS 4.5 AND GCC_VERSION  VERSION_LESS 4.7)
-    set(ENABLE_CXX11 "-std=c++0x")
-  else ()
-    set (ENABLE_CXX11 "-std=c++11")
-  endif ()
-
   # Enable colors in gcc log output.
   if (GCC_VERSION VERSION_GREATER 4.8)
     sara_substep_message("Enable colored output of GCC.")
@@ -93,10 +80,10 @@ if (UNIX)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wunused-variable")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-long-long")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIE")
-  if (DEFINED ENABLE_CXX11)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ENABLE_CXX11}")
-  endif ()
-  # Additional flags for Release builds.
+  #if (DEFINED ENABLE_CXX11)
+  #  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ENABLE_CXX11}")
+  #endif ()
+  #Additional flags for Release builds.
   set(CMAKE_CXX_RELEASE_FLAGS "-03 -ffast-math")
   # Additional flags for Debug builds, which include code coverage.
   set(CMAKE_CXX_FLAGS_DEBUG

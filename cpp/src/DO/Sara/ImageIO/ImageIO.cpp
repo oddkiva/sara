@@ -42,7 +42,7 @@ namespace DO { namespace Sara {
   }
 
   static inline bool is_jpeg_file_ext(const string& ext)
-  {
+ {
     return
       ext == ".jpg"  ||
       ext == ".jpeg" ||
@@ -70,108 +70,112 @@ namespace DO { namespace Sara {
 // Image read/write.
 namespace DO { namespace Sara {
 
-  template <typename ImageFileReader>
-  void read_image_with(Image<unsigned char>& image, const char *filepath)
-  {
-    ImageFileReader reader{filepath};
+  namespace Detail {
 
-    int w, h, d;
-    std::tie(w, h, d) = reader.image_sizes();
-    image.resize(w, h);
-
-    if (d == 1)
+    template <typename ImageFileReader>
+    void read_image_with(Image<unsigned char>& image, const char* filepath)
     {
-      reader.read(image.data());
+      ImageFileReader reader{filepath};
+
+      int w, h, d;
+      std::tie(w, h, d) = reader.image_sizes();
+      image.resize(w, h);
+
+      if (d == 1)
+      {
+        reader.read(image.data());
+      }
+      else if (d == 3)
+      {
+        auto tmp = Image<Rgb8>{w, h};
+        reader.read(reinterpret_cast<unsigned char*>(tmp.data()));
+        image = tmp.convert<unsigned char>();
+      }
+      else if (d == 4)
+      {
+        auto tmp = Image<Rgba8>{w, h};
+        reader.read(reinterpret_cast<unsigned char*>(tmp.data()));
+        image = tmp.convert<unsigned char>();
+        return;
+      }
+      else
+        throw std::runtime_error{
+            "Unsupported number of input components in image file read!"};
     }
-    else if (d == 3)
+
+    template <typename ImageFileReader>
+    void read_image_with(Image<Rgb8>& image, const char* filepath)
     {
-      auto tmp = Image<Rgb8>{ w, h };
-      reader.read(reinterpret_cast<unsigned char *>(tmp.data()));
-      image = tmp.convert<unsigned char>();
+      ImageFileReader reader{filepath};
+
+      int w, h, d;
+      tie(w, h, d) = reader.image_sizes();
+      image.resize(w, h);
+
+      if (d == 1)
+      {
+        auto tmp = Image<unsigned char>{w, h};
+        reader.read(reinterpret_cast<unsigned char*>(tmp.data()));
+        image = tmp.convert<Rgb8>();
+      }
+      else if (d == 3)
+      {
+        reader.read(reinterpret_cast<unsigned char*>(image.data()));
+      }
+      else if (d == 4)
+      {
+        auto tmp = Image<Rgba8>{w, h};
+        reader.read(reinterpret_cast<unsigned char*>(tmp.data()));
+        image = tmp.convert<Rgb8>();
+      }
+      else
+        throw std::runtime_error{
+            "Unsupported number of input components in image file!"};
     }
-    else if (d == 4)
+
+    void imread(Image<unsigned char>& image, const std::string& filepath)
     {
-      auto tmp = Image<Rgba8>{w, h};
-      reader.read(reinterpret_cast<unsigned char *>(tmp.data()));
-      image = tmp.convert<unsigned char>();
-      return;
+      const auto ext = file_ext(filepath);
+
+      if (is_jpeg_file_ext(ext))
+        read_image_with<JpegFileReader>(image, filepath.c_str());
+      else if (is_png_file_ext(ext))
+        read_image_with<PngFileReader>(image, filepath.c_str());
+      else if (is_tiff_file_ext(ext))
+        read_image_with<TiffFileReader>(image, filepath.c_str());
+      else
+        throw std::runtime_error{
+            format("Image format: %s is either unsupported or invalid",
+                   ext.c_str())
+                .c_str()};
+
+      auto info = EXIFInfo{};
+      if (read_exif_info(info, filepath))
+        make_upright_from_exif(image, info.Orientation);
     }
-    else
-      throw std::runtime_error{
-          "Unsupported number of input components in image file read!"};
-  }
 
-  template <typename ImageFileReader>
-  void read_image_with(Image<Rgb8>& image, const char *filepath)
-  {
-    ImageFileReader reader{filepath};
-
-    int w, h, d;
-    tie(w, h, d) = reader.image_sizes();
-    image.resize(w, h);
-
-    if (d == 1)
+    void imread(Image<Rgb8>& image, const std::string& filepath)
     {
-      auto tmp = Image<unsigned char>{w, h};
-      reader.read(reinterpret_cast<unsigned char*>(tmp.data()));
-      image = tmp.convert<Rgb8>();
+      const auto ext = file_ext(filepath);
+
+      if (is_jpeg_file_ext(ext))
+        read_image_with<JpegFileReader>(image, filepath.c_str());
+      else if (is_png_file_ext(ext))
+        read_image_with<PngFileReader>(image, filepath.c_str());
+      else if (is_tiff_file_ext(ext))
+        read_image_with<TiffFileReader>(image, filepath.c_str());
+      else
+        throw std::runtime_error{
+            format("Image format: %s is either unsupported or invalid",
+                   ext.c_str())
+                .c_str()};
+
+      auto info = EXIFInfo{};
+      if (read_exif_info(info, filepath))
+        make_upright_from_exif(image, info.Orientation);
     }
-    else if (d == 3)
-    {
-      reader.read(reinterpret_cast<unsigned char*>(image.data()));
-    }
-    else if (d == 4)
-    {
-      auto tmp = Image<Rgba8>{w, h};
-      reader.read(reinterpret_cast<unsigned char*>(tmp.data()));
-      image = tmp.convert<Rgb8>();
-    }
-    else
-      throw std::runtime_error{
-          "Unsupported number of input components in image file!"};
-  }
 
-  void imread(Image<unsigned char>& image, const std::string& filepath)
-  {
-    const auto ext = file_ext(filepath);
-
-    if (is_jpeg_file_ext(ext))
-      read_image_with<JpegFileReader>(image, filepath.c_str());
-    else if (is_png_file_ext(ext))
-      read_image_with<PngFileReader>(image, filepath.c_str());
-    else if (is_tiff_file_ext(ext))
-      read_image_with<TiffFileReader>(image, filepath.c_str());
-    else
-      throw std::runtime_error{
-          format("Image format: %s is either unsupported or invalid",
-                 ext.c_str())
-              .c_str()};
-
-    auto info = EXIFInfo{};
-    if (read_exif_info(info, filepath))
-      make_upright_from_exif(image, info.Orientation);
-  }
-
-  void imread(Image<Rgb8>& image, const std::string& filepath)
-  {
-    const auto ext = file_ext(filepath);
-
-    if (is_jpeg_file_ext(ext))
-      read_image_with<JpegFileReader>(image, filepath.c_str());
-    else if (is_png_file_ext(ext))
-      read_image_with<PngFileReader>(image, filepath.c_str());
-    else if (is_tiff_file_ext(ext))
-      read_image_with<TiffFileReader>(image, filepath.c_str());
-    else
-      throw std::runtime_error{
-          format("Image format: %s is either unsupported or invalid",
-                 ext.c_str())
-              .c_str()};
-
-    auto info = EXIFInfo{};
-    if (read_exif_info(info, filepath))
-      make_upright_from_exif(image, info.Orientation);
-  }
+  } /* namespace Detail */
 
   void imwrite(const Image<Rgb8>& image, const std::string& filepath,
                int quality)

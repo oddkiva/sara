@@ -19,7 +19,7 @@ flags = [
 # a "-std=<something>".
 # For a C project, you would set this to something like 'c99' instead of
 # 'c++11'.
-'-std=c++11',
+'-std=c++17',
 # ...and the same thing goes for the magic -x option which specifies the
 # language that the files to be compiled are written in. This is mostly
 # relevant for c++ headers.
@@ -57,6 +57,8 @@ flags = [
 "-I", "/usr/include/qt5/QtWidgets",
 "-I", "/usr/include/qt5/QtXml",
 "-I", "/usr/include/qt5/QtSql",
+# Boost headers.
+"-I", "/opt/boost-1.66.0/include",
 # CUDA header directories.
 "-I", "/usr/local/cuda/include",
 # Current header directories.
@@ -68,6 +70,8 @@ flags = [
 "-I", "./cpp/third-party/gtest/include",
 # Build directory.
 "-I", "../sara-build/cpp/src",
+"-I", "../sara-build-Release/cpp/src",
+"-I", "../sara-build-Debug/cpp/src",
 ]
 
 

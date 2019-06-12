@@ -37,7 +37,7 @@ vector<OERegion> compute_dog_extrema(const Image<float>& I,
   auto DoGs = compute_DoGs(I, &scale_octave_pairs);
   if (verbose)
     toc();
-  CHECK(DoGs.size());
+  SARA_CHECK(DoGs.size());
 
   // 2. Rescale detected features to original image dimension.
   const auto& DoG = compute_DoGs.diff_of_gaussians();
@@ -67,7 +67,7 @@ vector<OERegion> compute_dog_affine_extrema(const Image<float>& I,
   auto DoGs = compute_DoGs(I, &scale_octave_pairs);
   if (verbose)
     toc();
-  CHECK(DoGs.size());
+  SARA_CHECK(DoGs.size());
 
   const auto& G = compute_DoGs.gaussians();
   const auto& D = compute_DoGs.diff_of_gaussians();
@@ -113,7 +113,7 @@ vector<OERegion> compute_dog_affine_extrema(const Image<float>& I,
     }
   }
 
-  CHECK(kept_DoGs.size());
+  SARA_CHECK(kept_DoGs.size());
 
   return kept_DoGs;
 }

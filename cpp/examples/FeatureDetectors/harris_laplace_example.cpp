@@ -85,7 +85,7 @@ vector<OERegion> compute_harris_laplace_affine_corners(const Image<float>& I,
     }
   }
 
-  CHECK(kept_corners.size());
+  SARA_CHECK(kept_corners.size());
   return kept_corners;
 }
 

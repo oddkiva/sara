@@ -47,20 +47,38 @@ namespace DO { namespace Sara {
     //! @brief Default constructor that constructs an empty ND-array.
     inline MultiArrayBase() = default;
 
+    inline explicit MultiArrayBase(const allocator_type& allocator)
+      : _allocator{allocator}
+    {
+    }
+
     //! @{
     //! @brief Constructor with specified sizes.
-    inline explicit MultiArrayBase(const vector_type& sizes)
+    inline explicit MultiArrayBase(
+        const vector_type& sizes,
+        const allocator_type& allocator = allocator_type{})
+      : _allocator{allocator}
     {
       initialize(sizes);
     }
 
-    inline explicit MultiArrayBase(int rows, int cols)
-      : self_type{vector_type{rows, cols}}
+    inline explicit MultiArrayBase(
+        int size, const allocator_type& allocator = allocator_type{})
+      : self_type{vector_type{size}, allocator}
     {
     }
 
-    inline explicit MultiArrayBase(int rows, int cols, int depth)
-      : self_type{vector_type{rows, cols, depth}}
+    inline explicit MultiArrayBase(
+        int width, int height,
+        const allocator_type& allocator = allocator_type{})
+      : self_type{vector_type{width, height}, allocator}
+    {
+    }
+
+    inline explicit MultiArrayBase(
+        int width, int height, int depth,
+        const allocator_type& allocator = allocator_type{})
+      : self_type{vector_type{width, height, depth}, allocator}
     {
     }
     //! @}
@@ -79,7 +97,7 @@ namespace DO { namespace Sara {
     }
 
     //! @brief Move constructor.
-    inline MultiArrayBase(self_type&& other)
+    inline MultiArrayBase(self_type&& other) noexcept
     {
       base_type::swap(other);
     }
@@ -167,19 +185,22 @@ namespace DO { namespace Sara {
 
     inline pointer allocate(std::size_t count)
     {
-      return allocator_type{}.allocate(count);
+      return _allocator.allocate(count);
     }
     //! @}
 
     //! @brief Deallocate the MultiArray object.
     inline void deallocate()
     {
-      allocator_type{}.deallocate(_begin, _end - _begin);
+      _allocator.deallocate(_begin, _end - _begin);
       _begin = nullptr;
       _end = nullptr;
       _sizes = vector_type::Zero();
       _strides = vector_type::Zero();
     }
+
+  private:
+    allocator_type _allocator{};
   };
 
 

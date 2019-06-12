@@ -48,45 +48,45 @@ namespace DO { namespace Sara {
     //! @brief Accessors.
     inline matrix_type& matrix()
     {
-      return *this;
+      return _data;
     }
 
     inline const matrix_type& matrix() const
     {
-      return *this;
+      return _data;
     }
 
     inline size_t size() const
     {
-      return matrix_type::cols();
+      return _data.cols();
     }
 
     inline size_t dimension() const
     {
-      return matrix_type::rows();
+      return _data.rows();
     }
 
     inline descriptor_type operator[](size_t i)
     {
-      return this->col(i);
+      return _data.col(i);
     }
 
     inline const_descriptor_type operator[](size_t i) const
     {
-      return this->col(i);
+      return _data.col(i);
     }
     //! @}
 
     //! @brief Resize the descriptor matrix.
     inline void resize(size_t num_descriptors, size_t dimension)
     {
-      matrix_type::resize(dimension, num_descriptors);
+      _data = matrix_type{dimension, num_descriptors};
     }
 
     //! @brief Swap data between `DescriptorMatrix` objects.
     inline void swap(DescriptorMatrix& other)
     {
-      matrix_type::swap(other);
+      _data.swap(other._data);
     }
 
     //! @brief Append data from another `DescriptorMatrix` object.
@@ -99,11 +99,14 @@ namespace DO { namespace Sara {
 
       size_t dim = other.dimension();
 
-      matrix_type data{ dim, size() + other.size() };
-      data.block(0, 0, dim, size()) = *this;
-      data.block(0, size(), dim, other.size()) = other;
-      matrix_type::swap(data);
+      matrix_type new_data{dim, size() + other.size()};
+      new_data.block(0, 0, dim, size()) = _data;
+      new_data.block(0, size(), dim, other.size()) = other._data;
+      _data.swap(new_data);
     }
+
+  private:
+    matrix_type _data;
   };
 
   //! @}

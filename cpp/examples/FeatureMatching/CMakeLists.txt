@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 2.6)
-
 project(DO_FeatureMatching_Examples)
 
 message(STATUS "  - DO_FeatureMatching_Examples")

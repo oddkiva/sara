@@ -1,4 +1,4 @@
-image: nvidia/cudagl:9.2-runtime-ubuntu16.04
+image: nvidia/cudagl:10.1-runtime-ubuntu18.04
 
 
 before_script:
@@ -8,10 +8,10 @@ before_script:
       cmake
       doxygen
       git
-      libboost-test-dev
+      libboost-all-dev
       libhdf5-dev
-      libjpeg8-dev
-      libpng12-dev
+      libjpeg-dev
+      libpng-dev
       libtiff5-dev
       libavcodec-dev
       libavformat-dev
@@ -34,5 +34,5 @@ job:
         -DSARA_BUILD_SAMPLES:BOOL=ON
         -DSARA_BUILD_TESTS:BOOL=ON
     - make  -j$(nproc)
-    - ctest --output-on-failure --exclude-regex "test_graphics_*|test_features_draw"
+    - ctest --output-on-failure --exclude-regex "test_graphics_*|test_features_draw|test_core_ipc_cond1"
     - make package

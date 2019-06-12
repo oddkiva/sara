@@ -487,8 +487,7 @@ BOOST_AUTO_TEST_CASE(test_transpose_convolution_naive)
   MatrixXf out;
   out = k * Map<MatrixXf>(px.data(), px.rows() * px.cols(), 1);
 
-  auto out_reshaped = Map<MatrixXf>(out.data(), kh * x.rows(), kw * x.cols());
-
+  //auto out_reshaped = Map<MatrixXf>(out.data(), kh * x.rows(), kw * x.cols());
 }
 
 BOOST_AUTO_TEST_CASE(test_transpose_convolution_optimized)
@@ -525,7 +524,7 @@ BOOST_AUTO_TEST_CASE(test_transpose_convolution_optimized)
   //
   // k <<
   //
-  // /-------------------------------------------------\
+  // /-------------------------------------------------|
   // | //r=0                                           |
   // | y[0,0]    1.00, 0.00, 0.00,   0.00, 0.00, 0.00, |  0.00, 0.00, 0.00,  // 1.
   // | y[0,1]    0.50, 0.50, 0.00,   0.00, 0.00, 0.00, |  0.00, 0.00, 0.00,  // 1.5
@@ -537,7 +536,7 @@ BOOST_AUTO_TEST_CASE(test_transpose_convolution_optimized)
   // | y[1,1]    0.25, 0.25, 0.00,   0.25, 0.25, 0.00, |  0.00, 0.00, 0.00,  // 2.5
   // | y[1,2]    0.00, 0.50, 0.00,   0.00, 0.50, 0.00, |  0.00, 0.00, 0.00,  // 3.
   // | y[1,3]    0.00, 0.25, 0.25,   0.00, 0.25, 0.25, |  0.00, 0.00, 0.00,  // 2.5
-  // \-------------------------------------------------/
+  // |-------------------------------------------------/
   //
   // //r=2
   //             0.00, 0.00, 0.00,   1.00, 0.00, 0.00,    0.00, 0.00, 0.00,
@@ -561,8 +560,8 @@ BOOST_AUTO_TEST_CASE(test_transpose_convolution_optimized)
 
 
   auto y = Tensor_<float, 2>{{kh * x.rows(), kw * x.cols()}};
-  auto vec_y = vec(y);
-  auto vec_px = vec(px);
+  auto vec_y = y.vector();
+  auto vec_px = px.vector();
   for (int i = 0; i < x.rows(); ++i)
   {
     vec_y.segment(kh * kw * x.cols() * i, kh * kw * x.cols()) =

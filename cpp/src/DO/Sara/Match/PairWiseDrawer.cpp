@@ -32,8 +32,8 @@ namespace DO { namespace Sara {
                                 const Color3ub& c, int penWidth) const
   {
     assert(i == 0 || i == 1);
-    Vector2f a( (pa+offF(i))*scale(i) );
-    Vector2f b( (pb+offF(i))*scale(i) );
+    Vector2f a((pa + offF(i)) * scale(i));
+    Vector2f b((pb + offF(i)) * scale(i));
     Sara::draw_line(a, b, c, penWidth);
   }
 
@@ -70,10 +70,10 @@ namespace DO { namespace Sara {
     assert(i == 0 || i ==1);
     Point2f a, b;
     a.x() = 0;
-    a.y() = -eqn[2]/eqn[1];
+    a.y() = -eqn[2] / eqn[1];
 
-    b.x() = (i==0) ? float(image1.width()) : float(image2.width());
-    b.y() = -( eqn[0]*b.x() + eqn[2] ) / eqn[1];
+    b.x() = (i == 0) ? float(image1.width()) : float(image2.width());
+    b.y() = -(eqn[0] * b.x() + eqn[2]) / eqn[1];
 
     draw_line(i, a, b, c, r);
   }

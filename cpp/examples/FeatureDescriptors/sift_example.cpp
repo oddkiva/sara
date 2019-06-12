@@ -102,8 +102,7 @@ bool check_descriptors(const DescriptorMatrix<float>& descriptors)
 
 GRAPHICS_MAIN()
 {
-  auto image = Image<float>{};
-  imread(image, src_path("../../../data/sunflowerField.jpg"));
+  auto image = imread<float>(src_path("../../../data/sunflowerField.jpg"));
 
   print_stage("Detecting SIFT features");
   auto keypoints = compute_sift_keypoints(image);
@@ -111,8 +110,8 @@ GRAPHICS_MAIN()
 
   print_stage("Removing existing redundancies");
   remove_redundant_features(keypoints);
-  CHECK(keypoints.features.size());
-  CHECK(keypoints.descriptors.size());
+  SARA_CHECK(keypoints.features.size());
+  SARA_CHECK(keypoints.descriptors.size());
 
   // Check the features visually.
   print_stage("Draw features");
