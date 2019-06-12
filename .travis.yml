@@ -25,11 +25,12 @@ addons:
     - libqt5opengl5
     - libqt5opengl5-dev
     - yasm
-  env:
-  - CXX=g++-7 CC=gcc-7
 
 compiler:
   - gcc
+env:
+  - CC=gcc-7
+  - CXX=g++-7
 
 install:
   # Build and install third-party locally.
