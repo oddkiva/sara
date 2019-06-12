@@ -26,13 +26,13 @@ addons:
     - libqt5opengl5-dev
     - yasm
 
-# compiler:
-#   - gcc
-
-env:
-  - CC=gcc-7 CXX=g++-7
+compiler:
+  - gcc
 
 install:
+  # Use gcc 7 and g++ 7.
+  - export CC=$(which gcc-7)
+  - export CXX=$(which g++-7)
   # Build and install third-party locally.
   - ./scripts/travis-build-and-install-ffmpeg.sh
   - bundle install
