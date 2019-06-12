@@ -14,7 +14,7 @@ configuration:
 - Release
 
 before_build:
-  - cmake -H. -Bbuild -G "Visual Studio 15 2017 Win64" -DSARA_BUILD_VIDEOIO=ON -DSARA_BUILD_TESTS=ON -DSARA_BUILD_SAMPLES=ON -DBOOST_ROOT="C:\Libraries\boost_1_63_0"
+  - cmake -H. -Bbuild -G "Visual Studio 15 2017 Win64" -DSARA_BUILD_VIDEOIO=ON -DSARA_BUILD_TESTS=ON -DSARA_BUILD_SAMPLES=ON -DBOOST_ROOT="C:\Libraries\boost_1_69_0"
 
 build_script:
   - '"C:\Program Files (x86)\MSBuild\15.0\Bin\MSBuild.exe" build\Sara.sln /m /verbosity:minimal'
