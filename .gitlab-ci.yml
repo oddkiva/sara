@@ -1,4 +1,4 @@
-image: nvidia/cudagl:9.2-runtime-ubuntu16.04
+image: nvidia/cudagl:10.1-runtime-ubuntu18.04
 
 
 before_script:
