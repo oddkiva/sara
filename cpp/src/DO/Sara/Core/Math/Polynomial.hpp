@@ -138,7 +138,7 @@ namespace DO::Sara {
       for (const auto& i : other.coeffs)
       {
         if (res.coeffs.find(i.first) == res.coeffs.end())
-          res.coeffs[i.first] = i.second;
+          res.coeffs[i.first] = -i.second;
         else
           res.coeffs[i.first] -= i.second;
       }
@@ -182,7 +182,7 @@ namespace DO::Sara {
         const auto p = c.first * q;
         res.coeffs[p] = c.second;
       }
-      return *this;
+      return res;
     }
 
     auto operator*=(double scalar) -> Polynomial&
@@ -199,6 +199,11 @@ namespace DO::Sara {
         res.coeffs[c.first] = c.second(i, j);
 
       return res;
+    }
+
+    auto operator==(const Polynomial& other) const
+    {
+      return coeffs == other.coeffs;
     }
 
     template <typename T>

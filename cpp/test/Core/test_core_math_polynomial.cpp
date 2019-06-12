@@ -61,10 +61,46 @@ BOOST_AUTO_TEST_CASE(test_monomial)
 
   const auto xy2z3_eval = xy2z3.eval<double>({{x_, 1.}, {y_, 2.}, {z_, 3.}});
   BOOST_CHECK_EQUAL(xy2z3_eval, 1 * 4 * 27);
+}
 
-  const auto P = 1. * x3 + 1. * x2;
-  const auto P_eval = P.eval<double>({{x_, 1.}, {y_, 2.}});
-  BOOST_CHECK_EQUAL(P_eval, 2.);
+BOOST_AUTO_TEST_CASE(test_polynomial_multiplication)
+{
+  const auto x_ = variable("x");
+  const auto y_ = variable("y");
+  const auto z_ = variable("z");
+
+  const auto x = Monomial{x_};
+  const auto y = Monomial{y_};
+  const auto z = Monomial{z_};
+
+  {
+    const auto P = (1. * x + 1. * y);
+    const auto Q = (1. * x - 1. * y);
+    const auto PQ = (1. * x.pow(2) - 1. * y.pow(2));
+    BOOST_CHECK(P * Q ==  PQ);
+    for (const auto& c: PQ.coeffs)
+      cout << c.first.to_string() << " " << c.second << endl;
+    std::cout << "P = " << P.to_string() << std::endl;
+    std::cout << "Q = " << Q.to_string() << std::endl;
+    std::cout << "P * Q = " << (P * Q).to_string() << std::endl;
+    std::cout << "PQ = " << PQ.to_string() << std::endl;
+    std::cout << "PQ - P*Q = " << (PQ - P * Q).to_string() << std::endl;
+  }
+
+  {
+    const auto P = (1. * x.pow(3) + 1. * x.pow(2));
+    const auto Q = (1. * y.pow(2) + 0.5 * z - 1. * x * y);
+    const auto PQ = P * Q;
+    std::cout << "P = " << P.to_string() << std::endl;
+    std::cout << "Q = " << Q.to_string() << std::endl;
+    std::cout << "P * Q = " << (P * Q).to_string() << std::endl;
+    /*
+     * x^3 y^2 + 0.5 x^3 z - x^4 y    4 + 0.5*2
+     * x^2 y^2 + 0.5 x^2 z - x^3 y
+     */
+    const auto PQ_eval = PQ.eval<double>({{x_, 1.}, {y_, 2.}, {z_, 1}});
+    BOOST_CHECK_EQUAL(PQ_eval, 2. * (4. + 0.5 * 1 - 1. * 2.));
+  }
 }
 
 BOOST_AUTO_TEST_CASE(test_polynomial)

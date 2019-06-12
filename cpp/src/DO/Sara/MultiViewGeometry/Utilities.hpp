@@ -16,6 +16,9 @@
 #include <DO/Sara/Core/Tensor.hpp>
 #include <DO/Sara/FeatureMatching.hpp>
 
+#include <algorithm>
+#include <random>
+
 
 namespace DO { namespace Sara {
 
@@ -34,7 +37,7 @@ namespace DO { namespace Sara {
   inline auto shuffle(const TensorView_<T, 1>& x) -> Tensor_<T, 1>
   {
     auto x_shuffled = x;
-    std::random_shuffle(x_shuffled.begin(), x_shuffled.end());
+    std::shuffle(x_shuffled.begin(), x_shuffled.end(), std::mt19937{});
     return x_shuffled;
   }
 

@@ -309,15 +309,15 @@ BOOST_AUTO_TEST_CASE(test_skew_symmetric_matrix)
 using Matrix34d = Matrix<double, 3, 4>;
 
 Matrix3d rot_x(double angle) {
-    return Eigen::AngleAxisd(angle, Vector3d::UnitX()).toRotationMatrix();
+  return Eigen::AngleAxisd(angle, Vector3d::UnitX()).toRotationMatrix();
 }
 
 Matrix3d rot_y(double angle) {
-    return Eigen::AngleAxisd(angle, Vector3d::UnitY()).toRotationMatrix();
+  return Eigen::AngleAxisd(angle, Vector3d::UnitY()).toRotationMatrix();
 }
 
 Matrix3d rot_z(double angle) {
-    return Eigen::AngleAxisd(angle, Vector3d::UnitZ()).toRotationMatrix();
+  return Eigen::AngleAxisd(angle, Vector3d::UnitZ()).toRotationMatrix();
 }
 
 auto essential_matrix = [](auto R, auto t) -> Matrix3d {
@@ -335,13 +335,15 @@ auto camera_matrix = [](auto K, auto R, auto t) -> Matrix34d {
 auto generate_test_data()
 {
   // 3D points.
-  MatrixXd X = MatrixXd::Random(3, 5);  // coefficients are in [-1, 1].
-  // Put the points in front of the cameras.
-  X.topRows(2).array() -= 0.5;      // (x, y) in [-0.5, 0.5]
-  X.row(2).array() += 1.0;  // z in [0, 2]
+  MatrixXd X(4, 5);  // coefficients are in [-1, 1].
+  X.topRows<3>() <<
+    -1.49998,   -0.5827,  -1.40591,  0.369386,  0.161931, //
+    -1.23692, -0.434466, -0.142271, -0.732996,  -1.43086, //
+     1.51121,  0.437918,   1.35859,   1.03883,  0.106923; //
+  X.bottomRows<1>().fill(1.);
 
   Matrix3d R = rot_z(0.3) * rot_x(0.1) * rot_y(0.2);
-  Vector3d t = Vector3d::Random();
+  Vector3d t{0.1, 0.2, 0.3};
 
   const auto E = essential_matrix(R, t);
 
@@ -364,94 +366,105 @@ BOOST_AUTO_TEST_CASE(test_null_space_extraction)
 
   auto solver = NisterFivePointAlgorithm{};
 
-  const auto null_space = solver.extract_null_space(x1, x2);
+  const auto Ker = solver.extract_null_space(x1, x2);
   {
-    const auto& [A, B, C, D] = null_space;
+    const auto [A, B, C, D] = solver.reshape_null_space(Ker);
 
     for (auto j = 0; j < x1.cols(); ++j)
     {
-      BOOST_CHECK_SMALL(double(x2.col(j).transpose() * A * x1.col(j)), 1e-8);
-      BOOST_CHECK_SMALL(double(x2.col(j).transpose() * B * x1.col(j)), 1e-8);
-      BOOST_CHECK_SMALL(double(x2.col(j).transpose() * C * x1.col(j)), 1e-8);
-      BOOST_CHECK_SMALL(double(x2.col(j).transpose() * D * x1.col(j)), 1e-8);
+      BOOST_CHECK_SMALL(double(x2.col(j).transpose() * A * x1.col(j)), 1e-12);
+      BOOST_CHECK_SMALL(double(x2.col(j).transpose() * B * x1.col(j)), 1e-12);
+      BOOST_CHECK_SMALL(double(x2.col(j).transpose() * C * x1.col(j)), 1e-12);
+      BOOST_CHECK_SMALL(double(x2.col(j).transpose() * D * x1.col(j)), 1e-12);
     }
-  }
-
-  //auto E_expr = solver.essential_matrix_expression(null_space);
-
-  //for (int i = 0; i < 20; ++i)
-  //  SARA_DEBUG << "m[" << i << "] = " << solver.monomials[i].to_string()
-  //             << endl;
-
-  //auto M = solver.build_epipolar_constraints(E_expr);
-  //SARA_DEBUG << "M = \n" << M << endl;
-
-  auto Es = solver.find_essential_matrices(x1, x2);
-  auto Rs = std::vector<Matrix3d>{};
-  auto ts = std::vector<Vector3d>{};
-
-  for (const auto& E: Es)
-  {
-    SARA_DEBUG << "E =\n" << E << endl;
-    SARA_DEBUG << "det(E) = " << E.determinant() << endl;
-    SARA_DEBUG
-        << "||2.EEt * E - trace(EEt) * E|| = "
-        << (2. * E * E.transpose() * E - (E * E.transpose()).trace() * E).norm()
-        << endl;
-    BOOST_CHECK_SMALL(E.determinant(), 1e-8);
-    BOOST_CHECK_SMALL(
-        (2. * E * E.transpose() * E - (E * E.transpose()).trace() * E).norm(),
-        1e-8);
-  }
-
-  for (auto& Ei: Es)
-  {
-    Eigen::BDCSVD<decltype(E)> svd(Ei, Eigen::ComputeFullU | Eigen::ComputeFullV);
-    Matrix3d U = svd.matrixU();
-    Matrix3d Vt = svd.matrixV().transpose();
-
-    if (U.determinant() < 0)
-      U.col(2) *= -1;
-
-    if (Vt.determinant() < 0)
-      Vt.col(2) *= -1;
-
-    Matrix3d D;
-    D << 0, 1, 0,
-        -1, 0, 0,
-         0, 0, 1;
-
-    Vector3d S; S << 1, 1, 0;
-
-    //Ei = U * S.asDiagonal() * Vt;
-
-    Matrix3d Ra = U * D * Vt;
-    Matrix3d Rb = U * D.transpose() * Vt;
-
-    //SARA_DEBUG << "E_candidate =\n" << Ei / Ei.norm()<< endl;
-    //SARA_DEBUG << "E_true =\n" << E / E.norm()<< endl;
-
-    //SARA_DEBUG << "norm(E_true - E_candidate) =\n" << (Ei.normalized() - E.normalized()).norm() << endl;
-    //SARA_DEBUG << "norm(E_true + E_candidate) =\n" << (-Ei.normalized() - E.normalized()).norm() << endl;
-
-    for (auto j = 0; j < x1.cols(); ++j)
-    {
-      BOOST_CHECK_SMALL(double(x2.col(j).transpose() * Ei * x1.col(j)), 1e-6);
-      //SARA_DEBUG << "err[" << j << "] = " << x2.col(j).transpose() * Ei * x1.col(j) << endl;
-    }
-
-    Rs.push_back(Ra);
-    Rs.push_back(Rb);
-    ts.push_back(U.col(2));
-
-    //SARA_DEBUG << "R = " << R << endl;
-    //SARA_DEBUG << "Ra = " << Ra << endl;
-    //SARA_DEBUG << "Rb = " << Rb << endl;
-
-    //SARA_DEBUG << "t_est = " << U.col(2) << endl;
-    //SARA_DEBUG << "t_true = " << t << endl;
   }
 }
 
+
+BOOST_AUTO_TEST_CASE(test_nister_five_point_algorithm)
+{
+  const auto [X, R, t, E, C1, C2, x1, x2] = generate_test_data();
+
+  auto solver = NisterFivePointAlgorithm{};
+
+  // 1. Extract the null space.
+  const auto E_bases = solver.extract_null_space(x1, x2);
+
+  // 2. Form the epipolar constraints.
+  const auto E_bases_reshaped = solver.reshape_null_space(E_bases);
+  const auto E_expr = solver.essential_matrix_expression(E_bases_reshaped);
+  const auto E_constraints = solver.build_essential_matrix_constraints(E_expr);
+
+  // 3. Solve the epipolar constraints.
+  const auto Es = solver.solve_essential_matrix_constraints(E_bases_reshaped,
+                                                            E_constraints);
+
+  // Check essential matrix constraints.
+  for (auto i = 0u; i < Es.size(); ++i)
+  {
+    const auto& Ei = Es[i];
+
+    //SARA_DEBUG << "i = " << i << endl;
+    //SARA_DEBUG << "Ein =\n" << Ei.normalized() << endl;
+    //SARA_DEBUG << "En =\n" << E.normalized() << endl;
+    //SARA_DEBUG << "norm(Ein - En) = "
+    //           << (Ei.normalized() - E.normalized()).norm() << endl;
+    //SARA_DEBUG << "norm(Ein + En) = "
+    //           << (Ei.normalized() + E.normalized()).norm() << endl;
+
+    BOOST_CHECK_SMALL(Ei.determinant(), 1e-12);
+    BOOST_CHECK_SMALL(
+        (2. * Ei * Ei.transpose() * Ei - (Ei * Ei.transpose()).trace() * Ei)
+            .norm(),
+        1e-10);
+
+    // Paranoid check.
+    for (auto j = 0; j < x1.cols(); ++j)
+      BOOST_CHECK_SMALL(double(x2.col(j).transpose() * Ei * x1.col(j)), 1e-12);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(test_stewenius_five_point_algorithm)
+{
+  const auto [X, R, t, E, C1, C2, x1, x2] = generate_test_data();
+
+  auto solver = SteweniusFivePointAlgorithm{};
+
+  // 1. Extract the null space.
+  const auto E_bases = solver.extract_null_space(x1, x2);
+
+  // 2. Form the epipolar constraints.
+  const auto E_bases_reshaped = solver.reshape_null_space(E_bases);
+  const auto E_expr = solver.essential_matrix_expression(E_bases_reshaped);
+  const auto E_constraints = solver.build_essential_matrix_constraints(E_expr);
+
+  // 3. Solve the epipolar constraints.
+  const auto Es =
+      solver.solve_essential_matrix_constraints(E_bases, E_constraints);
+
+  // Check essential matrix constraints.
+  for (auto i = 0u; i < Es.size(); ++i)
+  {
+    const auto& Ei = Es[i];
+
+    //SARA_DEBUG << "i = " << i << endl;
+    //SARA_DEBUG << "Ein =\n" << Ei.normalized() << endl;
+    //SARA_DEBUG << "En =\n" << E.normalized() << endl;
+    //SARA_DEBUG << "norm(Ein - En) = "
+    //           << (Ei.normalized() - E.normalized()).norm() << endl;
+    //SARA_DEBUG << "norm(Ein + En) = "
+    //           << (Ei.normalized() + E.normalized()).norm() << endl;
+
+    BOOST_CHECK_SMALL(Ei.determinant(), 1e-12);
+    BOOST_CHECK_SMALL(
+        (2. * Ei * Ei.transpose() * Ei - (Ei * Ei.transpose()).trace() * Ei)
+            .norm(),
+        1e-12);
+
+    // Paranoid check.
+    for (auto j = 0; j < x1.cols(); ++j)
+      BOOST_CHECK_SMALL(double(x2.col(j).transpose() * Ei * x1.col(j)), 1e-12);
+  }
+}
 
 BOOST_AUTO_TEST_SUITE_END()
