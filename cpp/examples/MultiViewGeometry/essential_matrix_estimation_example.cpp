@@ -360,7 +360,8 @@ void estimate_fundamental_matrix(const Image<Rgb8>& image1,
     eight_point_fundamental_matrix(Xn, Yn, F);
 
     // Unnormalize the fundamental matrix.
-    F.matrix() = T2.transpose() * F.matrix() * T1;
+    F.matrix() = T2.transpose() * F.matrix().normalized() * T1;
+    F.matrix() = F.matrix().normalized();
 
     // Count the inliers.
     auto num_inliers = 0;
@@ -532,11 +533,12 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
   };
 
   auto inlier_predicate = [&](const auto& E, const auto& X, const auto& Y) {
-    return algebraic_error(E, X, Y) < 1e-2;
+    return algebraic_error(E, X, Y) < 1e-3;
   };
 
   for (auto n = 0; n < N; ++n)
   {
+    SARA_DEBUG << n << endl;
     // Normalized camera coordinates.
     const Matrix<double, 3, L> Xn = Pn[n][0].colmajor_view().matrix();
     const Matrix<double, 3, L> Yn = Pn[n][1].colmajor_view().matrix();
@@ -546,11 +548,14 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
 
     // Unnormalize the essential matrices.
     for (auto& E : Es)
-      E = T2.transpose() * E * T1;
+    {
+      E = E.normalized();
+      E = (T2.transpose() * E * T1).normalized();
+    }
 
     for (const auto& E: Es)
     {
-      const Matrix3d F = K2_inv * E * K1_inv;
+      const Matrix3d F = (K2_inv.transpose() * E * K1_inv).normalized();
 
       auto num_inliers = 0;
       for (size_t i = 0; i < matches.size(); ++i)
@@ -576,7 +581,10 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
         E_best = E;
         F_best = F;
         subset_best = n;
-
+        SARA_CHECK(E_best);
+        SARA_CHECK(F_best);
+        SARA_CHECK(num_inliers_best);
+        SARA_CHECK(subset_best);
 
         // =====================================================================
         // Visualize.
@@ -590,31 +598,6 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
         //
         Matrix<double, 3, L> proj_y = F.transpose() * y;
         proj_y.array().rowwise() /= proj_y.row(2).array();
-
-        // Redraw the best group of matches drawn by RANSAC.
-        drawer.display_images();
-        for (auto i = 0; i < L; ++i)
-        {
-          SARA_DEBUG << "x = " << matches[S(n, i)].x_pos().transpose() << endl;
-          SARA_DEBUG << "x = " << x.col(i).transpose() << endl;
-          SARA_DEBUG << "proj_x = " << proj_x.col(i).transpose() << endl;
-
-          SARA_DEBUG << "y = " << matches[S(n, i)].y_pos().transpose() << endl;
-          SARA_DEBUG << "y = " << y.col(i).transpose() << endl;
-          SARA_DEBUG << "proj_y = " << proj_y.col(i).transpose() << endl;
-
-          // Draw the corresponding epipolar lines.
-          drawer.draw_line_from_eqn(1, proj_x.col(i).cast<float>(), Magenta8,
-                                    1);
-          drawer.draw_line_from_eqn(0, proj_y.col(i).cast<float>(), Magenta8,
-                                    1);
-
-          drawer.draw_match(matches[S(n, i)], Red8, true);
-          drawer.draw_line_from_eqn(1, proj_x.col(i).cast<float>(), Magenta8,
-                                    1);
-          drawer.draw_line_from_eqn(0, proj_y.col(i).cast<float>(), Magenta8,
-                                    1);
-        }
 
         // Show the inliers.
         for (size_t i = 0; i < matches.size(); ++i)
@@ -633,7 +616,7 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
 
           drawer.draw_match(matches[i], Blue8, false);
 
-          if (i % 50 == 0)
+          if (i % 20 == 0)
           {
             Vector3d proj_x1 = F.matrix() * x1;
             proj_x1 /= proj_x1(2);
@@ -643,12 +626,27 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
 
             drawer.draw_line_from_eqn(0, proj_x2.cast<float>(), Cyan8, 1);
             drawer.draw_line_from_eqn(1, proj_x1.cast<float>(), Cyan8, 1);
+            drawer.draw_match(matches[i], Yellow8, false);
           }
+        }
+
+        // Redraw the best group of matches drawn by RANSAC.
+        drawer.display_images();
+        for (auto i = 0; i < L; ++i)
+        {
+          // Draw the corresponding epipolar lines.
+          drawer.draw_line_from_eqn(1, proj_x.col(i).cast<float>(), Magenta8,
+                                    1);
+          drawer.draw_line_from_eqn(0, proj_y.col(i).cast<float>(), Magenta8,
+                                    1);
+          drawer.draw_match(matches[S(n, i)], Red8, true);
         }
       }
     }
   }
 
+
+  SARA_DEBUG << "FINAL RESULT" << endl;
 
   // Display the result.
   const auto& F = F_best;
@@ -674,11 +672,6 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
   Matrix<double, 3, L> proj_y = F.matrix().transpose() * y;
   proj_y.array().rowwise() /= proj_y.row(2).array();
 
-  for (size_t i = 0; i < L; ++i)
-  {
-    drawer.draw_match(matches[S(n, i)], Red8, true);
-  }
-
   for (size_t i = 0; i < matches.size(); ++i)
   {
     Vector3d x1;
@@ -697,6 +690,8 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
 
     if (i % 50 == 0)
     {
+      drawer.draw_match(matches[i], Yellow8, false);
+
       Vector3d proj_x1 = F.matrix() * x1;
       proj_x1 /= proj_x1(2);
 
@@ -706,6 +701,27 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
       drawer.draw_line_from_eqn(0, proj_x2.cast<float>(), Cyan8, 1);
       drawer.draw_line_from_eqn(1, proj_x1.cast<float>(), Cyan8, 1);
     }
+  }
+
+  for (size_t i = 0; i < L; ++i)
+  {
+    Vector3d x1;
+    x1.head(2) = matches[i].x_pos().cast<double>();
+    x1(2) = 1;
+
+    Vector3d x2;
+    x2.head(2) = matches[i].y_pos().cast<double>();
+    x2(2) = 1;
+
+    Vector3d proj_x1 = F.matrix() * x1;
+    proj_x1 /= proj_x1(2);
+
+    Vector3d proj_x2 = F.matrix().transpose() * x2;
+    proj_x2 /= proj_x2(2);
+
+    drawer.draw_match(matches[S(n, i)], Red8, true);
+    drawer.draw_line_from_eqn(0, proj_x2.cast<float>(), Magenta8, 1);
+    drawer.draw_line_from_eqn(1, proj_x1.cast<float>(), Magenta8, 1);
   }
 
   get_key();

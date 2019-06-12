@@ -412,7 +412,7 @@ BOOST_AUTO_TEST_CASE(test_nister_five_point_algorithm)
     //SARA_DEBUG << "norm(Ein + En) = "
     //           << (Ei.normalized() + E.normalized()).norm() << endl;
 
-    BOOST_CHECK_SMALL(Ei.determinant(), 1e-12);
+    BOOST_CHECK_SMALL(Ei.determinant(), 1e-10);
     BOOST_CHECK_SMALL(
         (2. * Ei * Ei.transpose() * Ei - (Ei * Ei.transpose()).trace() * Ei)
             .norm(),
