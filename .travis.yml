@@ -26,8 +26,9 @@ addons:
     - libqt5opengl5-dev
     - yasm
 
-compiler:
-  - gcc
+# compiler:
+#   - gcc
+
 env:
   - CC=gcc-7 CXX=g++-7
 
@@ -40,7 +41,7 @@ script:
   # Build libraries.
   - mkdir build
   - cd build
-  - cmake -DCMAKE_C_COMPILER=${CC} -DCMAKE_CXX_COMPILER=${CXX} -DCMAKE_BUILD_TYPE=Debug -DSARA_BUILD_TESTS=ON -DSARA_BUILD_SAMPLES=ON -DSARA_BUILD_VIDEOIO=ON -DSARA_FFMPEG_DIR=$HOME/ffmpeg ..
+  - cmake -DCMAKE_BUILD_TYPE=Debug -DSARA_BUILD_TESTS=ON -DSARA_BUILD_SAMPLES=ON -DSARA_BUILD_VIDEOIO=ON -DSARA_FFMPEG_DIR=$HOME/ffmpeg ..
   - make -j$(nproc)
   # Run tests.
   - xvfb-run ctest --output-on-failure
