@@ -805,6 +805,10 @@ namespace DO::Sara::Univariate {
              double root_abs_tol)
     -> std::vector<std::complex<double>>
   {
+    for (const auto& c: P._coeff)
+      if (std::isnan(c) || std::isinf(c))
+        throw std::runtime_error{"Polynomial contains nan or inf coefficients!"};
+
     auto solver = JenkinsTraub{P};
     solver.stage3_max_iter = stage3_max_iter;
     solver.root_abs_tol = root_abs_tol;

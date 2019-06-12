@@ -24,7 +24,7 @@ using namespace DO::Sara;
 
 
 const auto data_dir =
-    std::string{"/home/david/Desktop/Datasets/sfm/castle_int"};
+    std::string{"/Users/David/Desktop/Datasets/sfm/castle_int"};
 const auto file1 = "0000.png";
 const auto file2 = "0001.png";
 
@@ -599,6 +599,8 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
         Matrix<double, 3, L> proj_y = F.transpose() * y;
         proj_y.array().rowwise() /= proj_y.row(2).array();
 
+        drawer.display_images();
+
         // Show the inliers.
         for (size_t i = 0; i < matches.size(); ++i)
         {
@@ -611,10 +613,8 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
           x2(2) = 1;
 
           // inlier predicate.
-          if (!inlier_predicate(E, K1_inv * x1, K2_inv * x2))
+          if (!inlier_predicate(F, x1, x2))
             continue;
-
-          drawer.draw_match(matches[i], Blue8, false);
 
           if (i % 20 == 0)
           {
@@ -628,10 +628,12 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
             drawer.draw_line_from_eqn(1, proj_x1.cast<float>(), Cyan8, 1);
             drawer.draw_match(matches[i], Yellow8, false);
           }
+          else
+            drawer.draw_match(matches[i], Blue8, false);
+
         }
 
         // Redraw the best group of matches drawn by RANSAC.
-        drawer.display_images();
         for (auto i = 0; i < L; ++i)
         {
           // Draw the corresponding epipolar lines.
@@ -686,8 +688,6 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
     if (!inlier_predicate(E, K1_inv * x1, K2_inv * x2))
       continue;
 
-    drawer.draw_match(matches[i], Blue8, false);
-
     if (i % 50 == 0)
     {
       drawer.draw_match(matches[i], Yellow8, false);
@@ -701,6 +701,9 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
       drawer.draw_line_from_eqn(0, proj_x2.cast<float>(), Cyan8, 1);
       drawer.draw_line_from_eqn(1, proj_x1.cast<float>(), Cyan8, 1);
     }
+    else
+      drawer.draw_match(matches[i], Blue8, false);
+
   }
 
   for (size_t i = 0; i < L; ++i)

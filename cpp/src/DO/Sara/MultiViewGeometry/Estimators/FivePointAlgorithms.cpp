@@ -223,10 +223,16 @@ auto NisterFivePointAlgorithm::solve_essential_matrix_constraints(
 {
   // Perform the Gauss-Jordan elimination on A and stop four rows earlier (cf.
   // paragraph 3.2.3).
+#ifdef SHOW_DEBUG_LOG
+  SARA_DEBUG << "Gauss-Jordan elimination..." << endl;
+#endif
   Matrix<double, 10, 20> U = A;
   inplace_gauss_jordan_elimination(U);
 
   // Expand the determinant (cf. paragraph 3.2.4).
+#ifdef SHOW_DEBUG_LOG
+  SARA_DEBUG << "Determinant expansion..." << endl;
+#endif
   const auto B_mat = U.bottomRightCorner(6, 10);
   Univariate::UnivariatePolynomial<double> B[3][3];
   form_resultant_matrix(B_mat, B);
@@ -247,6 +253,9 @@ auto NisterFivePointAlgorithm::solve_essential_matrix_constraints(
   auto roots = decltype(rpoly(n)){};
   try
   {
+#ifdef SHOW_DEBUG_LOG
+    SARA_DEBUG << "Root extraction of " << n << endl;
+#endif
     roots = rpoly(n);
   }
   catch (exception& e)
@@ -254,6 +263,10 @@ auto NisterFivePointAlgorithm::solve_essential_matrix_constraints(
     // And it's OK because some the 5 correspondences may be really wrong.
     SARA_DEBUG << "Polynomial solver failed: " << e.what() << endl;
   }
+
+#ifdef SHOW_DEBUG_LOG
+  SARA_DEBUG << "Extraction of xyz" << endl;
+#endif
 
   auto xyzs = std::vector<Vector3d>{};
   for (const auto& z_complex : roots)
@@ -277,6 +290,9 @@ auto NisterFivePointAlgorithm::solve_essential_matrix_constraints(
   }
 
   // 4. Build essential matrices for the real solutions.
+#ifdef SHOW_DEBUG_LOG
+  SARA_DEBUG << "Extraction of essential matrices..." << endl;
+#endif
   auto Es = std::vector<Matrix3d>{};
   Es.reserve(10);
 
