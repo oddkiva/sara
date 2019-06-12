@@ -74,6 +74,10 @@ struct NisterFivePointAlgorithm : FivePointAlgorithmBase
   auto solve_essential_matrix_constraints(const std::array<Matrix3d, 4>&,
                                           const Matrix<double, 10, 20>&) const
       -> std::vector<Matrix3d>;
+
+  auto find_essential_matrices(const Matrix<double, 3, 5>& left,
+                               const Matrix<double, 3, 5>& right)
+      -> std::vector<Matrix3d>;
 };
 
 
@@ -109,6 +113,10 @@ struct SteweniusFivePointAlgorithm : FivePointAlgorithmBase
 
   auto solve_essential_matrix_constraints(const Matrix<double, 9, 4>&,
                                           const Matrix<double, 10, 20>&) const
+      -> std::vector<Matrix3d>;
+
+  auto find_essential_matrices(const Matrix<double, 3, 5>& left,
+                               const Matrix<double, 3, 5>& right)
       -> std::vector<Matrix3d>;
 };
 

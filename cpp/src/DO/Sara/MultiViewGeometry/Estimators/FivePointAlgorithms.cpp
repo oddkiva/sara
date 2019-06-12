@@ -287,6 +287,22 @@ auto NisterFivePointAlgorithm::solve_essential_matrix_constraints(
   return Es;
 }
 
+auto NisterFivePointAlgorithm::find_essential_matrices(
+    const Matrix<double, 3, 5>& x1, const Matrix<double, 3, 5>& x2)
+    -> std::vector<Matrix3d>
+{
+  // 1. Extract the null space.
+  const auto E_bases = extract_null_space(x1, x2);
+
+  // 2. Form the epipolar constraints.
+  const auto E_bases_reshaped = reshape_null_space(E_bases);
+  const auto E_expr = essential_matrix_expression(E_bases_reshaped);
+  const auto E_constraints = build_essential_matrix_constraints(E_expr);
+
+  // 3. Solve the epipolar constraints.
+  return solve_essential_matrix_constraints(E_bases_reshaped, E_constraints);
+}
+
 
 auto SteweniusFivePointAlgorithm::solve_essential_matrix_constraints(
     const Matrix<double, 9, 4>& E_bases, const Matrix<double, 10, 20>& M) const
@@ -338,6 +354,22 @@ auto SteweniusFivePointAlgorithm::solve_essential_matrix_constraints(
   }
 
   return Es;
+}
+
+auto SteweniusFivePointAlgorithm::find_essential_matrices(
+    const Matrix<double, 3, 5>& x1, const Matrix<double, 3, 5>& x2)
+    -> std::vector<Matrix3d>
+{
+  // 1. Extract the null space.
+  const auto E_bases = extract_null_space(x1, x2);
+
+  // 2. Form the epipolar constraints.
+  const auto E_bases_reshaped = reshape_null_space(E_bases);
+  const auto E_expr = essential_matrix_expression(E_bases_reshaped);
+  const auto E_constraints = build_essential_matrix_constraints(E_expr);
+
+  // 3. Solve the epipolar constraints.
+  return solve_essential_matrix_constraints(E_bases, E_constraints);
 }
 
 } /* namespace DO::Sara */
