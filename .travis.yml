@@ -19,7 +19,7 @@ addons:
     - g++-7
     - qtbase5-dev
     - lcov
-    - libboost-test-dev
+    - libboost-all-dev
     - libqt5opengl5
     - libqt5opengl5-dev
     - yasm
