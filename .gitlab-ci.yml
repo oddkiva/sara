@@ -10,8 +10,8 @@ before_script:
       git
       libboost-all-dev
       libhdf5-dev
-      libjpeg8-dev
-      libpng12-dev
+      libjpeg-dev
+      libpng-dev
       libtiff5-dev
       libavcodec-dev
       libavformat-dev
