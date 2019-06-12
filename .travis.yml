@@ -16,6 +16,7 @@ addons:
     - ubuntu-sdk-team
     - ubuntu-toolchain-r-test
     packages:
+    - gcc-7
     - g++-7
     - qtbase5-dev
     - lcov
@@ -25,7 +26,7 @@ addons:
     - libqt5opengl5-dev
     - yasm
   env:
-  - COMPILER="g++-7"
+  - CXX=g++-7 CC=gcc-7
 
 compiler:
   - gcc
@@ -39,7 +40,7 @@ script:
   # Build libraries.
   - mkdir build
   - cd build
-  - CXX=${COMPILER} cmake -DCMAKE_BUILD_TYPE=Debug -DSARA_BUILD_TESTS=ON -DSARA_BUILD_SAMPLES=ON -DSARA_BUILD_VIDEOIO=ON -DSARA_FFMPEG_DIR=$HOME/ffmpeg ..
+  - cmake -DCMAKE_BUILD_TYPE=Debug -DSARA_BUILD_TESTS=ON -DSARA_BUILD_SAMPLES=ON -DSARA_BUILD_VIDEOIO=ON -DSARA_FFMPEG_DIR=$HOME/ffmpeg ..
   - make -j$(nproc)
   # Run tests.
   - xvfb-run ctest --output-on-failure
