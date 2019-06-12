@@ -538,7 +538,6 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
 
   for (auto n = 0; n < N; ++n)
   {
-    SARA_DEBUG << n << endl;
     // Normalized camera coordinates.
     const Matrix<double, 3, L> Xn = Pn[n][0].colmajor_view().matrix();
     const Matrix<double, 3, L> Yn = Pn[n][1].colmajor_view().matrix();
