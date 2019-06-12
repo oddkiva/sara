@@ -1,7 +1,7 @@
 language: cpp
 
 sudo: required
-dist: trusty
+dist: xenial
 
 cache:
   bundler: true
@@ -13,12 +13,15 @@ addons:
     sources:
     - ubuntu-sdk-team
     packages:
+    - g++-7
     - qtbase5-dev
     - lcov
     - libboost-test-dev
     - libqt5opengl5
     - libqt5opengl5-dev
     - yasm
+  env:
+  - COMPILER="g++-7"
 
 compiler:
   - gcc
@@ -37,7 +40,7 @@ script:
   # Build libraries.
   - mkdir build
   - cd build
-  - cmake -DCMAKE_BUILD_TYPE=Debug -DSARA_BUILD_TESTS=ON -DSARA_BUILD_SAMPLES=ON -DSARA_BUILD_VIDEOIO=ON -DSARA_FFMPEG_DIR=$HOME/ffmpeg ..
+  - CXX=${COMPILER} cmake -DCMAKE_BUILD_TYPE=Debug -DSARA_BUILD_TESTS=ON -DSARA_BUILD_SAMPLES=ON -DSARA_BUILD_VIDEOIO=ON -DSARA_FFMPEG_DIR=$HOME/ffmpeg ..
   - make -j$(nproc)
   # Run tests.
   - ctest --output-on-failure

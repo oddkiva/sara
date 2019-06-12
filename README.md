@@ -32,17 +32,13 @@ much as my time and energy allow it.
 2.0](https://github.com/DO-CV/DO-CV/raw/master/COPYING.MPL2).
 
 
-**Tested Compilers:**
-- Visual Studio 2015
-- gcc 4.8, 4.9
-- clang 3.5, 3.6
+**As of June 12, 2019, Sara is now a C++ 17 only project.** The small
+improvements in the language made my life much easier and the code more
+pythonic.
 
-**Sara loves C++11!**
-
-*Sara* constantly uses move semantics, type deduction with the `auto` keyword,
-`lambda` functions, curly-brace initialization styles.
-
-I am waiting a little bit before migrating my code to **C++14**.
+**Supported compilers:**
+- Visual Studio 2017 and above
+- gcc 7 and above
 
 
 Documentation
