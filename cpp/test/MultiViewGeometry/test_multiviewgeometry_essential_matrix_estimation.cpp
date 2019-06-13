@@ -360,9 +360,9 @@ auto generate_test_data()
 BOOST_AUTO_TEST_CASE(test_null_space_extraction)
 {
   auto [X, R, t, E, C1, C2, x1, x2] = generate_test_data();
-  SARA_DEBUG << "3D points = \n" << X << endl;
-  SARA_DEBUG << "Left points = \n" << x1 << endl;
-  SARA_DEBUG << "Right points = \n" << x2 << endl;
+  //SARA_DEBUG << "3D points = \n" << X << endl;
+  //SARA_DEBUG << "Left points = \n" << x1 << endl;
+  //SARA_DEBUG << "Right points = \n" << x2 << endl;
 
   auto solver = NisterFivePointAlgorithm{};
 
@@ -559,8 +559,8 @@ BOOST_AUTO_TEST_CASE(test_extract_relative_motions_functions)
     const auto motion_found =
         std::find_if(motions.begin(), motions.end(), motion_equality_predicate);
     BOOST_CHECK(motion_found != motions.end());
-    SARA_DEBUG << motion_found->R - true_motion.R << endl;
-    SARA_DEBUG << motion_found->t - true_motion.t << endl;
+    //SARA_DEBUG << motion_found->R - true_motion.R << endl;
+    //SARA_DEBUG << motion_found->t - true_motion.t << endl;
   }
 
   {
@@ -568,8 +568,8 @@ BOOST_AUTO_TEST_CASE(test_extract_relative_motions_functions)
     const auto motion_found =
         std::find_if(motions.begin(), motions.end(), motion_equality_predicate);
     BOOST_CHECK(motion_found != motions.end());
-    SARA_DEBUG << motion_found->R - true_motion.R << endl;
-    SARA_DEBUG << motion_found->t - true_motion.t << endl;
+    //SARA_DEBUG << motion_found->R - true_motion.R << endl;
+    //SARA_DEBUG << motion_found->t - true_motion.t << endl;
   }
 }
 
