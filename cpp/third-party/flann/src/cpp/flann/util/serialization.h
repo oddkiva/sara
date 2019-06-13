@@ -1,9 +1,9 @@
 #ifndef SERIALIZATION_H_
 #define SERIALIZATION_H_
 
-#include <vector>
+#include <cstdio>
 #include <map>
-#include <stdio.h>
+#include <vector>
 
 namespace flann
 {

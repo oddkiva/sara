@@ -42,7 +42,11 @@
 #include <iomanip>
 #include <iostream>
 #include <random>
+#ifdef USE_UNORDERED_MAP
 #include <unordered_map>
+#else
+#include <map>
+#endif
 
 #include "flann/util/dynamic_bitset.h"
 #include "flann/util/matrix.h"
@@ -123,7 +127,11 @@ class LshTable
 public:
     /** A container of all the feature indices. Optimized for space
      */
+#if USE_UNORDERED_MAP
     typedef std::unordered_map<BucketKey, Bucket> BucketsSpace;
+#else
+    typedef std::map<BucketKey, Bucket> BucketsSpace;
+#endif
 
     /** A container of all the feature indices. Optimized for speed
      */
@@ -179,7 +187,9 @@ public:
      */
     void add(const std::vector< std::pair<size_t, ElementType*> >& features)
     {
+#ifdef USE_UNORDERED_MAP
         buckets_space_.rehash((buckets_space_.size() + features.size()) * 1.2);
+#endif
         // Add the features to the table
         for (size_t i = 0; i < features.size(); ++i) {
         	add(features[i].first, features[i].second);
@@ -353,8 +363,12 @@ inline LshTable<unsigned char>::LshTable(unsigned int feature_size, unsigned int
 
     // A bit brutal but fast to code
     std::vector<size_t> indices(feature_size * CHAR_BIT);
-    for (size_t i = 0; i < feature_size * CHAR_BIT; ++i) indices[i] = i;
-    std::random_shuffle(indices.begin(), indices.end());
+    for (size_t i = 0; i < feature_size * CHAR_BIT; ++i)
+        indices[i] = i;
+
+    std::random_device rd;
+    std::mt19937 g(rd());
+    std::shuffle(indices.begin(), indices.end(), g);
 
     // Generate a random set of order of subsignature_size_ bits
     for (unsigned int i = 0; i < key_size_; ++i) {
