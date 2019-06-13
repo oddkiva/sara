@@ -88,7 +88,9 @@ namespace DO { namespace Sara {
   auto skew_symmetric_matrix(const Matrix<T, 3, 1>& a) -> Matrix<T, 3, 3>
   {
     auto A = Matrix<T, 3, 3>{};
-    A << T(0), -a(2), a(1), a(2), T(0), -a(0), -a(1), a(0), T(0);
+    A <<  T(0), -a(2),  a(1),
+          a(2),  T(0), -a(0),
+         -a(1),  a(0),  T(0);
 
     return A;
   }
