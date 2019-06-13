@@ -44,7 +44,7 @@ script:
   - cmake -DCMAKE_BUILD_TYPE=Debug -DSARA_BUILD_TESTS=ON -DSARA_BUILD_SAMPLES=ON -DSARA_BUILD_VIDEOIO=ON -DSARA_FFMPEG_DIR=$HOME/ffmpeg ..
   - make -j$(nproc)
   # Run tests.
-  - xvfb-run ctest --output-on-failure
+  - ctest --output-on-failure
   # Make package.
   - make package
 
