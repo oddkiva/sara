@@ -16,7 +16,7 @@ namespace DO::Sara::Univariate {
   auto compute_root_moduli_lower_bound(const UnivariatePolynomial<double>& P)
       -> double;
 
-  auto linear_root(UnivariatePolynomial<double>& P)
+  inline auto linear_root(UnivariatePolynomial<double>& P)
   {
     return -P[0] / P[1];
   }
