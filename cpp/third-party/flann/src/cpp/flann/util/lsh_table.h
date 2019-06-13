@@ -36,17 +36,13 @@
 #define FLANN_LSH_TABLE_H_
 
 #include <algorithm>
-#include <iostream>
+#include <climits>
+#include <cmath>
+#include <cstddef>
 #include <iomanip>
-#include <limits.h>
-// TODO as soon as we use C++0x, use the code in USE_UNORDERED_MAP
-#if USE_UNORDERED_MAP
+#include <iostream>
+#include <random>
 #include <unordered_map>
-#else
-#include <map>
-#endif
-#include <math.h>
-#include <stddef.h>
 
 #include "flann/util/dynamic_bitset.h"
 #include "flann/util/matrix.h"
@@ -127,11 +123,7 @@ class LshTable
 public:
     /** A container of all the feature indices. Optimized for space
      */
-#if USE_UNORDERED_MAP
     typedef std::unordered_map<BucketKey, Bucket> BucketsSpace;
-#else
-    typedef std::map<BucketKey, Bucket> BucketsSpace;
-#endif
 
     /** A container of all the feature indices. Optimized for speed
      */
@@ -187,9 +179,7 @@ public:
      */
     void add(const std::vector< std::pair<size_t, ElementType*> >& features)
     {
-#if USE_UNORDERED_MAP
         buckets_space_.rehash((buckets_space_.size() + features.size()) * 1.2);
-#endif
         // Add the features to the table
         for (size_t i = 0; i < features.size(); ++i) {
         	add(features[i].first, features[i].second);
@@ -318,9 +308,9 @@ private:
     	if (speed_level_==kBitsetHash || speed_level_==kHash) {
     		ar & buckets_space_;
     	}
-		if (speed_level_==kBitsetHash) {
-			ar & key_bitset_;
-		}
+      if (speed_level_==kBitsetHash) {
+        ar & key_bitset_;
+      }
     }
     friend struct serialization::access;
 

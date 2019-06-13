@@ -6,10 +6,6 @@ project(Sara)
 set(DO_Sara_VERSION_MAJOR 1)
 set(DO_Sara_VERSION_MINOR 2)
 
-if (POLICY CMP0020)
-  cmake_policy(SET CMP0020 OLD)
-endif (POLICY CMP0020)
-
 # Set default build type to Release mode.
 set(CMAKE_BUILD_TYPE "Release" CACHE STRING
     "Build type options are: Debug, Release")

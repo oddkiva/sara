@@ -62,7 +62,7 @@ inline void seed_random(unsigned int seed)
  */
 inline double rand_double(double high = 1.0, double low = 0)
 {
-    return low + ((high-low) * (std::rand() / (RAND_MAX + 1.0)));
+    return low + ((high - low) * (std::rand() / (RAND_MAX + 1.0)));
 }
 
 /**
@@ -73,15 +73,8 @@ inline double rand_double(double high = 1.0, double low = 0)
  */
 inline int rand_int(int high = RAND_MAX, int low = 0)
 {
-    return low + (int) ( double(high-low) * (std::rand() / (RAND_MAX + 1.0)));
+    return low + (int) (double(high - low) * (std::rand() / (RAND_MAX + 1.0)));
 }
-
-
-class RandomGenerator
-{
-public:
-    ptrdiff_t operator() (ptrdiff_t i) { return rand_int(i); }
-};
 
 
 /**
@@ -111,14 +104,15 @@ public:
      */
     void init(int n)
     {
-        static RandomGenerator generator;
         // create and initialize an array of size n
         vals_.resize(n);
         size_ = n;
         for (int i = 0; i < size_; ++i) vals_[i] = i;
 
         // shuffle the elements in the array
-        std::random_shuffle(vals_.begin(), vals_.end(), generator);
+        std::random_device rd;
+        std::mt19937 g(rd());
+        std::shuffle(vals_.begin(), vals_.end(), g);
 
         counter_ = 0;
     }
@@ -142,5 +136,3 @@ public:
 }
 
 #endif //FLANN_RANDOM_H
-
-

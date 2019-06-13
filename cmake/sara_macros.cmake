@@ -317,10 +317,6 @@ endmacro ()
 set_property(GLOBAL PROPERTY _DO_SARA_TESTS "")
 
 function (sara_add_test _test_name _srcs _additional_lib_deps)
-  if (POLICY CMP0020)
-    cmake_policy(SET CMP0020 OLD)
-  endif (POLICY CMP0020)
-
   # Create a variable containing the list of source files
   set(_srcs_var ${_srcs})
 
