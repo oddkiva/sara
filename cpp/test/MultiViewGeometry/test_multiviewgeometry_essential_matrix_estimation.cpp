@@ -327,7 +327,7 @@ auto essential_matrix = [](auto R, auto t) -> Matrix3d {
 auto camera_matrix = [](auto K, auto R, auto t) -> Matrix34d {
   Matrix34d Rt = Matrix34d::Zero();
   Rt.topLeftCorner(3, 3) = R;
-  Rt.col(3) = t;
+  Rt.col(3) = -R * t;
   return K * Rt;
 };
 
