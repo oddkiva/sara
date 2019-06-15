@@ -158,19 +158,25 @@ def expand_hartley_sturm_poly():
     r_expanded = sp.expand(r)
     r_poly = sp.Poly(r_expanded, t)
 
-    for i in range(r_poly.degree()):
+    for i in range(r_poly.degree() + 1):
+        print(i)
         print(r_poly.coeff_monomial(t ** i))
 
     return r_poly
 
 def expand_hartley_sturm_poly_abs():
     a, b, c, d, fl, fr, t = sp.symbols('a b c d fl fr t')
-    r = t * ((a * t + b) ** 2 + fr ** 2 * (c * t + d) ** 2) ** 2 \
-         - (a * d - b * c) * (1 + t ** 2 * fl ** 2) ** 2 * (a * t + b) * (c * t + d)
+    A = 1
+    B = (a * d - b * c) ** 2 * (a * t + b) ** 2
+    C = (1 + t**2 * fl**2) ** 3
+    D = ((a*t + b) ** 2 + fr**2 * (c*t + d)**2)** 3
+    r = A * D - B * C
+
     r_expanded = sp.expand(r)
     r_poly = sp.Poly(r_expanded, t)
 
-    for i in range(r_poly.degree()):
+    for i in range(r_poly.degree() + 1):
+        print(i)
         print(r_poly.coeff_monomial(t ** i))
 
     return r_poly
@@ -198,6 +204,48 @@ def poly_hartley_sturm(a, b, c, d, fl, fr):
     r_coeff /= r_coeff[-1]
     return r_coeff
 
+def poly_abs_hartley_sturm(a, b, c, d, fl, fr):
+    r_coeff = np.array([
+        # 0
+        -a**2*b**2*d**2 + 2*a*b**3*c*d + b**6 - b**4*c**2 + 3*b**4*d**2*fr**2 +
+        3*b**2*d**4*fr**4 + d**6*fr**6,
+        # 1
+        -2*a**3*b*d**2 + 4*a**2*b**2*c*d + 6*a*b**5 - 2*a*b**3*c**2 +
+        12*a*b**3*d**2*fr**2 + 6*a*b*d**4*fr**4 + 6*b**4*c*d*fr**2 +
+        12*b**2*c*d**3*fr**4 + 6*c*d**5*fr**6,
+        # 2
+        -a**4*d**2 + 2*a**3*b*c*d + 15*a**2*b**4 - a**2*b**2*c**2 -
+        3*a**2*b**2*d**2*fl**2 + 18*a**2*b**2*d**2*fr**2 + 3*a**2*d**4*fr**4 +
+        6*a*b**3*c*d*fl**2 + 24*a*b**3*c*d*fr**2 + 24*a*b*c*d**3*fr**4 -
+        3*b**4*c**2*fl**2 + 3*b**4*c**2*fr**2 + 18*b**2*c**2*d**2*fr**4 +
+        15*c**2*d**4*fr**6,
+        # 3
+        20*a**3*b**3 - 6*a**3*b*d**2*fl**2 + 12*a**3*b*d**2*fr**2 +
+        12*a**2*b**2*c*d*fl**2 + 36*a**2*b**2*c*d*fr**2 + 12*a**2*c*d**3*fr**4
+        - 6*a*b**3*c**2*fl**2 + 12*a*b**3*c**2*fr**2 + 36*a*b*c**2*d**2*fr**4 +
+        12*b**2*c**3*d*fr**4 + 20*c**3*d**3*fr**6,
+        # 4
+        15*a**4*b**2 - 3*a**4*d**2*fl**2 + 3*a**4*d**2*fr**2 +
+        6*a**3*b*c*d*fl**2 + 24*a**3*b*c*d*fr**2 - 3*a**2*b**2*c**2*fl**2 +
+        18*a**2*b**2*c**2*fr**2 - 3*a**2*b**2*d**2*fl**4 +
+        18*a**2*c**2*d**2*fr**4 + 6*a*b**3*c*d*fl**4 + 24*a*b*c**3*d*fr**4 -
+        3*b**4*c**2*fl**4 + 3*b**2*c**4*fr**4 + 15*c**4*d**2*fr**6,
+        # 5
+        6*a**5*b + 6*a**4*c*d*fr**2 + 12*a**3*b*c**2*fr**2 -
+        6*a**3*b*d**2*fl**4 + 12*a**2*b**2*c*d*fl**4 + 12*a**2*c**3*d*fr**4 -
+        6*a*b**3*c**2*fl**4 + 6*a*b*c**4*fr**4 + 6*c**5*d*fr**6,
+        # 6
+        a**6 + 3*a**4*c**2*fr**2 - 3*a**4*d**2*fl**4 + 6*a**3*b*c*d*fl**4 -
+        3*a**2*b**2*c**2*fl**4 - a**2*b**2*d**2*fl**6 + 3*a**2*c**4*fr**4 +
+        2*a*b**3*c*d*fl**6 - b**4*c**2*fl**6 + c**6*fr**6,
+        # 7
+        -2*a**3*b*d**2*fl**6 + 4*a**2*b**2*c*d*fl**6 - 2*a*b**3*c**2*fl**6,
+        # 8
+        -a**4*d**2*fl**6 + 2*a**3*b*c*d*fl**6 - a**2*b**2*c**2*fl**6
+    ])
+    r_coeff /= r_coeff[-1]
+    return r_coeff
+
 def lambda_l(t, fl):
     return np.array([t * fl, 1, -t])
 
@@ -213,7 +261,7 @@ def err_r(t, a, b, c, d, fr):
 def reproj_err(t, a, b, c, d, fl, fr):
     return err_l(t, fl) + err_r(t, a, b, c, d, fr)
 
-def triangulate_hartley_sturm(el, er, xl, xr):
+def triangulate_hartley_sturm(el, er, xl, xr, method='poly_abs'):
     Tl = x_axis_rigid_alignment(xl, el / el[-1])
     Tr = x_axis_rigid_alignment(xr, er / er[-1])
 
@@ -239,17 +287,22 @@ def triangulate_hartley_sturm(el, er, xl, xr):
                   [-fl * d, c, d]])
     assert la.norm(F - E1) / la.norm(E1) < 1e-12
 
-    # r_poly = expand_hartley_sturm_poly()
-    r_coeff = poly_hartley_sturm(a, b, c, d, fl, fr)
+    if method == 'poly':
+        r_coeff = poly_hartley_sturm(a, b, c, d, fl, fr)
+    else:
+        r_coeff = poly_abs_hartley_sturm(a, b, c, d, fl, fr)
 
     roots = np.roots(r_coeff)
     ts = [r.real for r in roots if r.imag == 0]
+    print('roots =', roots)
+    print('ts = ', ts)
 
     # Minimize the univariate polynomial d(u, lambda(t)) + d(u', lambda'(t)) in t.
     # Find the zero of the derivative.
     errs = np.array([reproj_err(t, a, b, c, d, fl, fr) for t in ts])
     i = np.argmin(errs)
     ti = ts[i]
+    print('t = ', ti)
 
     line_l = lambda_l(ti, fl)
     line_r = lambda_r(ti, a, b, c, d, fr)
