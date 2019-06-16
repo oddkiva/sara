@@ -353,6 +353,9 @@ print('3D point relative estimation error = ', la.norm(X_est - X) / la.norm(X))
 
 
 el, er = extract_epipoles(E)
+assert la.norm(er / er[-1] - t.flatten() / t[-1]) / la.norm(t / t[-1]) < 1e-12
+tr1 = R.T.dot(t).flatten()
+assert la.norm(el / el[-1] - tr1  / tr1[-1]) / la.norm(tr1 / tr1[-1]) < 1e-6
 assert np.abs(er.dot(E).dot(el)) < 1e-12
 for i in range(5):
     print('[', i, ']')
