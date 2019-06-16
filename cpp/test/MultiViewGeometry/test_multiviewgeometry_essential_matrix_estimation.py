@@ -124,6 +124,12 @@ def benchmark_relative_motion_extraction_method(E):
 
 
 def triangulate_longuet_higgins(R, t, left, right):
+    """
+    Works only if correspoinding point lie exactly in the epipolar lines.
+    So apply:
+    - Hartley-Sturm triangulation method
+    - Lindstrom triangulation method
+    """
     num_points = left.shape[1]
     z = (R[0, :].dot(t) * np.ones(num_points) - R[2, :].dot(t) * right[0, :]) / \
         (R[0, :].dot(left) - R[2, :].dot(left) * right[0, :])
@@ -262,6 +268,16 @@ def reproj_err(t, a, b, c, d, fl, fr):
     return err_l(t, fl) + err_r(t, a, b, c, d, fr)
 
 def triangulate_hartley_sturm(el, er, xl, xr, method='poly_abs'):
+    """ Retrieve the 3D points from a set of point correspondences.
+
+    Hartley-Sturm's method finds the **globally** optimal 3D point but it is
+    not direct because we require finding the roots of a polynomial and finding
+    roots accurately is going to be iterative anyways.
+
+    Standard methods to compute the roots of a polynomial is done via
+    calculating the SVD of companion matrix or applying Jenkins-Traub RPOLY
+    algorithm.
+    """
     Tl = x_axis_rigid_alignment(xl, el / el[-1])
     Tr = x_axis_rigid_alignment(xr, er / er[-1])
 
@@ -324,6 +340,70 @@ def triangulate_hartley_sturm(el, er, xl, xr, method='poly_abs'):
     assert np.abs(xr1.dot(E).dot(xl1)) < 1e-6
 
     return xl1, xr1
+
+def triangulate_lindstrom_iterative(E, xl, xr, K=2):
+    """UNTESTED."""
+    S = np.array([[1, 0, 0],
+                  [0, 1, 0]])
+    xl0 = xl.copy()
+    xr0 = xr.copy()
+    xl1 = xl.copy()
+    xr1 = xr.copy()
+
+    nl0 = S.dot(E).dot(xl0)
+    nr0 = S.dot(E.T).dot(xr0)
+
+    c1 = xr0.dot(E).dot(xl0)
+
+    for k in range(K):
+        nl1 = S.dot(E).dot(xl0)
+        nr1 = S.dot(E.T).dot(xr0)
+
+        a1 = nr1.dot(E).dot(nl1)
+        b1 = 0.5 * (nl0.dot(nl1) + nr0.dot(nr1))
+        d1 = np.sqrt(b1 * b1 - a1 * c1)
+
+        l1 = c1 / (b1 + np.sign(b1) * d1)
+
+        dxr1 = l1 * nr1
+        dxl1 = l1 * nl1
+
+        xl1 = xl0 - S.T.dot(dxl1)
+        xr1 = xr0 - S.T.dot(dxr1)
+
+        xl0 = xl1
+        xr0 = xr1
+
+    return (xl1, xr1)
+
+def triangulate_lindstrom_two_iterations(E, xl, xr):
+    """UNTESTED."""
+    S = np.array([[1, 0, 0],
+                  [0, 1, 0]])
+    E1 = S.dot(E).dot(S.T)
+
+    nl = S.dot(E).dot(xl)
+    nr = S.dot(E.T).dot(xr)
+
+    a = nr1.dot(E).dot(nl)
+    b = 0.5 * (nl.dot(nl) + nr.dot(nr))
+    c = xr.dot(E).dot(xl)
+    d = np.sqrt(b * b - a * c)
+    l = c / (b + d)
+
+    dxl = l * nl
+    dxr = l * nr
+
+    nr -= E1.dot(dxl)
+    nl -= E1.T.dot(dxr)
+
+    l = l * (2 * d) / (nr.dot(nr) + nl.dot(nl))
+    dxl = l * nl
+    dxr = l * nr
+
+    xl1 = xl - S.T.dot(dxl)
+    xr1 = xr - S.T.dot(dxr)
+    return (xl1, xr1)
 
 
 X = np.array([[-1.49998, -0.582700, -1.405910,  0.369386,  0.161931],
