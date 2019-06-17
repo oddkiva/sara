@@ -20,12 +20,12 @@ using namespace DO::Sara;
 using namespace std;
 
 
-// Test Node class.
-BOOST_AUTO_TEST_SUITE(TestNeuralNetworks)
+BOOST_AUTO_TEST_SUITE(TestLayers)
 
-BOOST_AUTO_TEST_CASE(test_layers)
+BOOST_AUTO_TEST_CASE(test_conv2d)
 {
-  auto x = Variable<float>('x');
+  auto x = Placeholder<Tensor<float, 4>>('x');
+  auto conv2d = Conv2D{};
 }
 
 BOOST_AUTO_TEST_SUITE_END()

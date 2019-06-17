@@ -8,40 +8,25 @@
 
 namespace DO { namespace Sara {
 
-  template <typename Op>
-  struct Layer
-  {
-  };
-
-
-  class Conv2D : public Layer<Conv2D>
+  class Conv2D
   {
   public:
     Conv2D() = default;
 
   private:
-    Variable<Tensor_<float, 4>> _w;
-    Variable<Tensor_<float, 4>> _b;
-
-    std::shared_ptr<Tensor_<float, 4>> _x;
-    std::shared_ptr<Tensor_<float, 4>> _phi_x;
-
-    std::shared_ptr<Tensor_<float, 4>> _y;
+    Variable<TensorView_<float, 4>> _w;
+    Variable<TensorView_<float, 4>> _b;
   };
 
 
-  class Dense : public Layer<Dense>
+  class Dense
   {
   public:
     Dense() = default;
 
-
   private:
-    Tensor_<float, 4> _w;
-    Tensor_<float, 4> _b;
-
-    std::shared_ptr<Tensor_<float, 4>> _x;
-    std::shared_ptr<Tensor_<float, 4>> _y;
+    Variable<TensorView_<float, 4>> _w;
+    Variable<TensorView_<float, 4>> _b;
   };
 
 

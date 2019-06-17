@@ -21,48 +21,6 @@ namespace DO { namespace Sara {
   };
 
   template <typename EssentialMatrix_>
-  auto decompose(const EssentialMatrix_& E)
-  {
-    const auto Et = E.transpose();
-    const auto ea = Et.row(0);
-    const auto eb = Et.row(1);
-    const auto ec = Et.col(2);
-
-    const Vector3d eab = ea.cross(eb);
-    const Vector3d eac = ea.cross(ec);
-    const Vector3d ebc = eb.cross(ec);
-
-    const double mag_eab = eab.norm();
-    const double mag_eac = eac.norm();
-    const double mag_ebc = ebc.norm();
-
-    Vector3d va, vb, vc;
-    if (mag_eab > mag_eac && mag_eab > mag_ebc)
-    {
-      vc = eab / mag_eab;
-      va = ea.normalized();
-      vb = vc.cross(va);
-    }
-    else if (mag_eac > mag_eab && mag_eac > mag_ebc)
-    {
-      vc = -eac / mag_eab;
-      va = ea.normalized();
-    }
-    else if (mag_ebc > mag_eab && mag_ebc > mag_eab)
-    {
-    }
-
-    vb = vc.cross(va);
-
-    auto v = std::array<vec_mag_pair_type>{std::make_pair(eab, mag_eab),
-                                           std::make_pair(eac, mag_eac),
-                                           std::make_pair(ebc, mag_ebc)};
-    std::sort(std::begin(v), std::end(v),
-              [](const auto& a, const auto& b) { return a.second > b.second; });
-  }
-
-
-  template <typename EssentialMatrix_>
   auto extract_candidate_camera_motions(const EssentialMatrix_& E)
       -> std::array<typename EssentialMatrix_::motion_type, 4>
   {
