@@ -38,6 +38,8 @@ add_subdirectory(Match)
 add_subdirectory(FeatureMatching)
 add_subdirectory(MultiViewGeometry)
 
+add_subdirectory(NeuralNetworks)
+
 if (CMAKE_COMPILER_IS_GNUCXX)
   find_program(LCOV_PATH lcov)
   find_program(GCOV_PATH gcov)

@@ -1,19 +1,21 @@
 #pragma once
 
-#include <DO/Sara/Core/Expression/Expression.hpp>
+//#include <DO/Sara/Core/Expression/Expression.hpp>
 
 #include <string>
 
 
 namespace DO::Sara {
 
-  template <typename E>
-  using Expression = sara::expression::Expression<E>;
+  //template <typename E>
+  //using Expression = sara::expression::Expression<E>;
 
 
-  struct Symbol : public Expression<Symbol>
+  struct Symbol  // : public Expression<Symbol>
   {
-    const std::string name;
+    std::string name;
+
+    Symbol() = default;
 
     Symbol(const std::string& name)
       : name{name}
@@ -34,12 +36,15 @@ namespace DO::Sara {
   template <typename T>
   struct Placeholder : Symbol
   {
+    Placeholder() = default;
+
     T value;
   };
 
   template <typename T>
   struct Variable : Placeholder<T>
   {
+    Variable() = default;
   };
 
   template <typename T>
