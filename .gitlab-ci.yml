@@ -21,7 +21,7 @@ before_script:
       libboost-python-dev
       python3-dev
   - apt-get install -y xvfb
-  - Xvfb :1 -noreset &
+  - Xvfb :1 -noreset 1>/dev/null 2>&1 &
   - export DISPLAY=:1
 
 job:
@@ -34,5 +34,5 @@ job:
         -DSARA_BUILD_SAMPLES:BOOL=ON
         -DSARA_BUILD_TESTS:BOOL=ON
     - make  -j$(nproc)
-    - ctest --output-on-failure --exclude-regex "test_graphics_*|test_features_draw|test_core_ipc_cond1"
+    - DISPLAY=:1 ctest --output-on-failure --exclude-regex "test_core_ipc_cond1"
     - make package
