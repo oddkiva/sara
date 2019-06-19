@@ -1,6 +1,6 @@
 #pragma once
 
-#include <DO/Sara/Core/Expression/Terminals.hpp>
+#include <DO/Sara/Core/Expression/ForwardDeclarations.hpp>
 
 #include <type_traits>
 
@@ -38,7 +38,7 @@ namespace sara::expression {
   template <typename T>
   using calculate_expr_type_t = std::conditional_t<  //
       is_expr_v<T>,                                  //
-      T,                                             //
+      remove_ref_if_type_is_rvalue_ref_t<T>,         //
       wrap_as_terminal_t<T>                          //
       >;
   //! @}
