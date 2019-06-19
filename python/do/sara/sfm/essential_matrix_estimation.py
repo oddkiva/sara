@@ -7,7 +7,6 @@ from do.sara.sfm.geometry import cofactors, rotation, skew
 
 def essential_matrix(R, t):
     return skew(t).dot(R)
-    #return R.dot(skew(t))
 
 
 def camera_matrix(R, t):
