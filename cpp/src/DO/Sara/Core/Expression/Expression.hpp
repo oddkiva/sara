@@ -168,30 +168,30 @@ namespace sara::expression {
       };
     }
 
-    //template <typename R>
-    //inline auto operator/(R&& rhs) const & noexcept
-    //{
-    //  using lhs_type = decltype(derived());
-    //  using rhs_type = calculate_expr_type_t<R&&>;
+    template <typename R>
+    inline auto operator/(R&& rhs) const & noexcept
+    {
+      using lhs_type = decltype(derived());
+      using rhs_type = calculate_expr_type_t<R&&>;
 
-    //  return MulXpr<lhs_type, rhs_type>{
-    //      derived(),            //
-    //      std::forward<R>(rhs)  //
-    //  };
-    //}
+      return MulXpr<lhs_type, rhs_type>{
+          derived(),            //
+          std::forward<R>(rhs)  //
+      };
+    }
 
-    //template <typename R>
-    //inline auto operator/(R&& rhs) && noexcept
-    //{
-    //  using lhs_type = std::remove_reference_t<decltype(derived())>;
-    //  using rhs_type = calculate_expr_type_t<R&&>;
+    template <typename R>
+    inline auto operator/(R&& rhs) && noexcept
+    {
+      using lhs_type = std::remove_reference_t<decltype(derived())>;
+      using rhs_type = calculate_expr_type_t<R&&>;
 
-    //  return DivXpr<lhs_type, rhs_type>{
-    //      std::forward<lhs_type>(derived()),  //
-    //      std::forward<R>(rhs)                //
-    //  };
-    //}
-    ////! @}
+      return DivXpr<lhs_type, rhs_type>{
+          std::forward<lhs_type>(derived()),  //
+          std::forward<R>(rhs)                //
+      };
+    }
+    //! @}
 
 
     //! @{
@@ -208,17 +208,17 @@ namespace sara::expression {
       };
     }
 
-    //template <typename R>
-    //inline auto operator[](R&& rhs) const & noexcept
-    //{
-    //  using lhs_type = decltype(derived());
-    //  using rhs_type = calculate_expr_type_t<R&&>;
+    template <typename R>
+    inline auto operator[](R&& rhs) const & noexcept
+    {
+      using lhs_type = decltype(derived());
+      using rhs_type = calculate_expr_type_t<R&&>;
 
-    //  return SubscriptXpr<lhs_type, rhs_type>{
-    //      derived(),            //
-    //      std::forward<R>(rhs)  //
-    //  };
-    //}
+      return SubscriptXpr<lhs_type, rhs_type>{
+          derived(),            //
+          std::forward<R>(rhs)  //
+      };
+    }
 
     template <typename R>
     inline auto operator[](R&& rhs) && noexcept
@@ -233,8 +233,22 @@ namespace sara::expression {
     }
     //! @}
 
+    //! Function composition.
+    template <typename F>
+    inline auto circle(F&& f) const noexcept
+    {
+      using lhs_type = std::remove_reference_t<decltype(derived())>;
+      using rhs_type = calculate_expr_type_t<F&&>;
+
+      return FunComposeXpr<lhs_type, rhs_type>{
+          std::forward<lhs_type>(derived()),
+          std::forward<rhs_type>(f),
+      };
+    }
+
+    //! Evaluate function at variable x.
     template <typename X>
-    inline auto operator()(X&& x) & noexcept
+    inline auto operator()(X&& x) const noexcept
     {
       using lhs_type = std::remove_reference_t<decltype(derived())>;
       using rhs_type = calculate_expr_type_t<X&&>;

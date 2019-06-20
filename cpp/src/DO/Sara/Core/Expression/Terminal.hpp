@@ -16,15 +16,21 @@ namespace sara::expression {
     {
     }
 
-    auto eval() const
+    auto eval() const -> const T&
     {
       return value;
     }
 
     template <typename X>
-    auto eval(X&& x) const
+    auto eval_at(X&& x) const
     {
       return value(x);
+    }
+
+    template <typename Index>
+    auto at(Index&& i) const&
+    {
+      return value[i];
     }
 
     T value;

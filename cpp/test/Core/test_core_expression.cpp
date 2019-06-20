@@ -194,17 +194,37 @@ BOOST_AUTO_TEST_CASE(test_subscript)
 
     std::cout << type_name<decltype(coeff)>() << std::endl;
   }
+
+  {
+    auto x_ = std::valarray<float>(2.f, 10);
+    auto y_ = std::valarray<float>(2.f, 10);
+    auto x = make_terminal(x_);
+    auto y = make_terminal(y_);
+
+    auto coeff = (x + y)[1];
+    std::cout << type_name<decltype(coeff)>() << std::endl;
+  }
 }
 
 BOOST_AUTO_TEST_CASE(test_function_composition)
 {
   auto sin_ = make_terminal<double (*)(double)>(std::sin);
+  auto cos_ = make_terminal<double (*)(double)>(std::cos);
   auto log_ = make_terminal<double (*)(double)>(std::log);
   auto exp_ = make_terminal<double (*)(double)>(std::exp);
-  auto sin_pi_2 = sin_(M_PI / 2.);
-  auto log_exp = log_(exp_);
-  std::cout << "sin(pi/2) = " << type_name<decltype(sin_pi_2)>() << std::endl;
 
+  auto sin_pi_2 = sin_(M_PI / 2.);
   std::cout << "sin_pi_2.eval() = " << sin_pi_2.eval() << std::endl;
-  std::cout << "log_exp(pi_2).eval() = " << log_exp(M_PI / 2.).eval() << std::endl;
+
+  auto log_exp_sin_0 = log_.circle(exp_).circle(sin_)(0);
+  std::cout << "log_exp_sin_0.eval() = " << log_exp_sin_0.eval() << std::endl;
+
+  auto sum = sin_pi_2 + log_exp_sin_0;
+  std::cout << "sum = " << sum.eval() << std::endl;
+
+  auto sum_fn = sin_ + log_.circle(exp_).circle(sin_);
+  std::cout << "sum_fn(0).eval() = " << sum_fn(0).eval() << std::endl;
+
+  auto complex_fn = (sin_ + log_.circle(exp_).circle(sin_)) * cos_ - sin_ / exp_;
+  std::cout << "complex_fn(0).eval() = " << complex_fn(0).eval() << std::endl;
 }
