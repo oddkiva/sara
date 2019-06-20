@@ -233,18 +233,6 @@ namespace sara::expression {
     }
     //! @}
 
-    //! Function composition.
-    template <typename F>
-    inline auto circle(F&& f) const noexcept
-    {
-      using lhs_type = std::remove_reference_t<decltype(derived())>;
-      using rhs_type = calculate_expr_type_t<F&&>;
-
-      return FunComposeXpr<lhs_type, rhs_type>{
-          std::forward<lhs_type>(derived()),
-          std::forward<rhs_type>(f),
-      };
-    }
 
     //! Evaluate function at variable x.
     template <typename X>
@@ -256,6 +244,20 @@ namespace sara::expression {
       return FunXpr<lhs_type, rhs_type>{
           std::forward<lhs_type>(derived()),
           std::forward<rhs_type>(x),
+      };
+    }
+
+
+    //! Function composition.
+    template <typename F>
+    inline auto circle(F&& f) const noexcept
+    {
+      using lhs_type = std::remove_reference_t<decltype(derived())>;
+      using rhs_type = calculate_expr_type_t<F&&>;
+
+      return FunComposeXpr<lhs_type, rhs_type>{
+          std::forward<lhs_type>(derived()),
+          std::forward<rhs_type>(f),
       };
     }
   };
