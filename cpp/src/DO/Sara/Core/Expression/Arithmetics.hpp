@@ -29,7 +29,7 @@ namespace sara::expression {
 
     //! Evaluation function at variable x.
     template <typename X>
-    auto eval_at(X&& x) const
+    inline auto eval_at(X&& x) const
     {
       const auto& [f, g] = exprs;
 
@@ -41,7 +41,7 @@ namespace sara::expression {
 
     //! Get coefficient at index i.
     template <typename Index>
-    auto at(Index&& i) const
+    inline auto at(Index&& i) const
     {
       using index_expr_type = calculate_expr_type_t<decltype(i)>;
       const auto i_expr = std::forward<index_expr_type>(i);
@@ -73,7 +73,7 @@ namespace sara::expression {
 
     //! Evaluation function at variable x.
     template <typename X>
-    auto eval_at(X&& x) const
+    inline auto eval_at(X&& x) const
     {
       const auto& [f, g] = exprs;
 
@@ -85,7 +85,7 @@ namespace sara::expression {
 
     //! Get coefficient at index i.
     template <typename Index>
-    auto at(Index&& i) const
+    inline auto at(Index&& i) const
     {
       using index_expr_type = calculate_expr_type_t<decltype(i)>;
       const auto i_expr = std::forward<index_expr_type>(i);
@@ -116,7 +116,7 @@ namespace sara::expression {
     }
 
     template <typename X>
-    auto eval_at(X&& x) const
+    inline auto eval_at(X&& x) const
     {
       const auto& [f, g] = exprs;
 
@@ -128,7 +128,7 @@ namespace sara::expression {
 
     //! Get coefficient at index i.
     template <typename Index>
-    auto at(Index&& i) const
+    inline auto at(Index&& i) const
     {
       using index_expr_type = calculate_expr_type_t<decltype(i)>;
       const auto i_expr = std::forward<index_expr_type>(i);
@@ -159,7 +159,7 @@ namespace sara::expression {
     }
 
     template <typename X>
-    auto eval_at(X&& x) const
+    inline auto eval_at(X&& x) const
     {
       const auto& [f, g] = exprs;
 
@@ -171,7 +171,7 @@ namespace sara::expression {
 
     //! Get coefficient at index i.
     template <typename Index>
-    auto at(Index&& i) const
+    inline auto at(Index&& i) const
     {
       using index_expr_type = calculate_expr_type_t<decltype(i)>;
       auto&& i_expr = std::forward<index_expr_type>(i);
@@ -196,7 +196,7 @@ namespace sara::expression {
     }
 
     template <typename X>
-    auto eval_at(X&& x) const
+    inline auto eval_at(X&& x) const
     {
       const auto& [f, g] = exprs;
 
@@ -236,7 +236,7 @@ namespace sara::expression {
 
     //! Get coefficient at index i.
     template <typename Index>
-    auto at(Index&& i) const
+    inline auto at(Index&& i) const
     {
       using index_expr_type = calculate_expr_type_t<decltype(i)>;
       auto&& i_expr = std::forward<index_expr_type>(i);
