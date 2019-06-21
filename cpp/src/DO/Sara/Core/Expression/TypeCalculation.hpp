@@ -41,6 +41,13 @@ namespace sara::expression {
       remove_ref_if_type_is_rvalue_ref_t<T>,         //
       wrap_as_terminal_t<T>                          //
       >;
+
+  template <typename T>
+  using calculate_expr_type_2_t = std::conditional_t<
+      is_expr_v<T>,                                                     //
+      typename T::decayed_type,                                 //
+      wrap_as_terminal_t<std::remove_cv_t<std::remove_reference_t<T>>>  //
+      >;
   //! @}
 
 } /* namespace sara::expression */

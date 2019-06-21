@@ -9,9 +9,6 @@ namespace sara::expression {
   template <typename T>
   struct Terminal;
 
-  template <typename T>
-  struct Terminal;
-
   template <typename L, typename R>
   struct AddXpr;
 

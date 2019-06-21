@@ -13,6 +13,8 @@ namespace sara::expression {
     using tuple_type = std::tuple<L, R>;
     using lhs_type = typename std::tuple_element<0, tuple_type>::type;
     using rhs_type = typename std::tuple_element<1, tuple_type>::type;
+    using decayed_type = AddXpr<typename std::decay_t<lhs_type>::decayed_type,  //
+                                typename std::decay_t<rhs_type>::decayed_type>;
 
     std::tuple<L, R> exprs;
 
@@ -57,6 +59,9 @@ namespace sara::expression {
     using tuple_type = std::tuple<L, R>;
     using lhs_type = typename std::tuple_element<0, tuple_type>::type;
     using rhs_type = typename std::tuple_element<1, tuple_type>::type;
+    using decayed_type =
+        SubXpr<typename std::decay_t<lhs_type>::decayed_type,  //
+               typename std::decay_t<rhs_type>::decayed_type>;
 
     std::tuple<L, R> exprs;
 
@@ -101,6 +106,9 @@ namespace sara::expression {
     using tuple_type = std::tuple<L, R>;
     using lhs_type = typename std::tuple_element<0, tuple_type>::type;
     using rhs_type = typename std::tuple_element<1, tuple_type>::type;
+    using decayed_type =
+        MulXpr<typename std::decay_t<lhs_type>::decayed_type,  //
+               typename std::decay_t<rhs_type>::decayed_type>;
 
     std::tuple<L, R> exprs;
 
@@ -144,6 +152,9 @@ namespace sara::expression {
     using tuple_type = std::tuple<L, R>;
     using lhs_type = typename std::tuple_element<0, tuple_type>::type;
     using rhs_type = typename std::tuple_element<1, tuple_type>::type;
+    using decayed_type =
+        DivXpr<typename std::decay_t<lhs_type>::decayed_type,  //
+               typename std::decay_t<rhs_type>::decayed_type>;
 
     std::tuple<L, R> exprs;
 
@@ -188,6 +199,10 @@ namespace sara::expression {
     using lhs_type = typename std::tuple_element<0, tuple_type>::type;
     using rhs_type = typename std::tuple_element<1, tuple_type>::type;
 
+    using decayed_type =
+        FunComposeXpr<typename std::decay_t<lhs_type>::decayed_type,  //
+                      typename std::decay_t<rhs_type>::decayed_type>;
+
     std::tuple<L, R> exprs;
 
     inline constexpr FunComposeXpr(L&& l, R&& r) noexcept
@@ -217,6 +232,9 @@ namespace sara::expression {
     using tuple_type = std::tuple<L, R>;
     using lhs_type = typename std::tuple_element<0, tuple_type>::type;
     using rhs_type = typename std::tuple_element<1, tuple_type>::type;
+    using decayed_type =
+        FunXpr<typename std::decay_t<lhs_type>::decayed_type,  //
+               typename std::decay_t<rhs_type>::decayed_type>;
 
     std::tuple<L, R> exprs;
 

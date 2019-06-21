@@ -11,6 +11,10 @@ namespace sara::expression {
   template <typename T>
   struct Terminal : Expression<Terminal<T>>
   {
+    using decayed_type = Terminal<std::decay_t<T>>;
+
+    inline Terminal() = default;
+
     inline constexpr Terminal(T v)
       : value{v}
     {
@@ -36,9 +40,12 @@ namespace sara::expression {
     T value;
   };
 
+
   template <typename T>
   struct Terminal<T(T)> : Expression<Terminal<T(T)>>
   {
+    using decayed_type = Terminal<std::decay_t<T(T)>>;
+
     inline constexpr Terminal(std::function<T(T)> v)
       : value{v}
     {
