@@ -10,6 +10,13 @@ namespace sara::expression {
   {
     static constexpr auto name = ID;
 
+    inline Variable() = default;
+
+    inline constexpr Variable(T v)
+      : value{v}
+    {
+    }
+
     inline operator T&() & noexcept
     {
       return value;

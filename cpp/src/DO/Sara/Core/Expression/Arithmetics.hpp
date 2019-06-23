@@ -226,6 +226,7 @@ namespace sara::expression {
     }
   };
 
+
   template <typename L, typename R>
   struct FunXpr : Expression<FunXpr<L, R>>
   {
@@ -267,6 +268,7 @@ namespace sara::expression {
     }
   };
 
+
   template <typename L, typename R>
   struct SubscriptXpr : Expression<SubscriptXpr<L, R>>
   {
@@ -285,6 +287,22 @@ namespace sara::expression {
     {
       const auto& [x, i] = exprs;
       return x.at(i.eval());
+    }
+  };
+
+  template <typename E>
+  struct NegXpr : Expression<Expr<E>>
+  {
+    E expr;
+
+    inline NegXpr(E&& e) noexcept
+      : expr{std::forward<E>(e)}
+    {
+    }
+
+    inline auto eval() const
+    {
+      return -e.eval();
     }
   };
 

@@ -1,4 +1,5 @@
 #pragma once
+
 #include <DO/Sara/Core/Expression/Expression.hpp>
 #include <DO/Sara/Core/Expression/Arithmetics.hpp>
 #include <DO/Sara/Core/Expression/TypeCalculation.hpp>
@@ -18,11 +19,20 @@ namespace sara::expression {
   template <typename Expr, typename Var>
   struct Diff;
 
+
   template <typename Var>
   struct Diff<Var, Var> : Expression<Diff<Var, Var>>
   {
     using result_type = One;
   };
+
+  template <typename T1, typename T2, int ID1, int ID2>
+  struct Diff<Variable<T1, ID1>, Variable<T2, ID2>> : Expression<?
+  {
+    //using decayed_type= ;
+    using result_type = Zero<T2>;
+  };
+
 
   template <typename Expr, typename Var>
   using derivative_t = typename Diff<Expr, Var>::result_type;
