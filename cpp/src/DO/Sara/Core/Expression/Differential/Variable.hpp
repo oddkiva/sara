@@ -12,8 +12,8 @@ namespace sara::expression {
 
     inline Variable() = default;
 
-    inline constexpr Variable(T v)
-      : value{v}
+    inline constexpr Variable(T&& v)
+      : value{std::forward<T>(v)}
     {
     }
 

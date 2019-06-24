@@ -18,6 +18,8 @@ namespace sara::expression {
 
     std::tuple<L, R> exprs;
 
+    inline constexpr AddXpr() noexcept = default;
+
     inline constexpr AddXpr(L&& l, R&& r) noexcept
       : exprs{std::forward_as_tuple(l, r)}
     {
@@ -64,6 +66,8 @@ namespace sara::expression {
                typename std::decay_t<rhs_type>::decayed_type>;
 
     std::tuple<L, R> exprs;
+
+    inline constexpr SubXpr() noexcept = default;
 
     inline constexpr SubXpr(L&& l, R&& r) noexcept
       : exprs{std::forward_as_tuple(l, r)}
@@ -112,6 +116,8 @@ namespace sara::expression {
 
     std::tuple<L, R> exprs;
 
+    inline constexpr MulXpr() noexcept = default;
+
     inline constexpr MulXpr(L&& l, R&& r) noexcept
       : exprs{std::forward_as_tuple(l, r)}
     {
@@ -157,6 +163,8 @@ namespace sara::expression {
                typename std::decay_t<rhs_type>::decayed_type>;
 
     std::tuple<L, R> exprs;
+
+    inline constexpr DivXpr() noexcept = default;
 
     inline constexpr DivXpr(L&& l, R&& r) noexcept
       : exprs{std::forward_as_tuple(l, r)}
@@ -205,6 +213,8 @@ namespace sara::expression {
 
     std::tuple<L, R> exprs;
 
+    inline constexpr FunComposeXpr() noexcept = default;
+
     inline constexpr FunComposeXpr(L&& l, R&& r) noexcept
       : exprs{std::forward_as_tuple(l, r)}
     {
@@ -239,6 +249,8 @@ namespace sara::expression {
 
     std::tuple<L, R> exprs;
 
+    inline constexpr FunXpr() noexcept = default;
+
     inline constexpr FunXpr(L&& l, R&& r) noexcept
       : exprs{std::forward_as_tuple(l, r)}
     {
@@ -247,10 +259,9 @@ namespace sara::expression {
     inline auto eval() const
     {
       const auto& [f, x] = exprs;
-      using x_expr_type = calculate_expr_type_t<decltype(x)>;
-
-      auto&& x_expr = std::forward<x_expr_type>(x.eval());
-      return f.eval_at(x_expr.eval());
+      //using x_expr_type = std::remove_reference_t<rhs_type>;
+      //auto&& x_expr = std::forward<x_expr_type>(x.eval());
+      return f.eval_at(x.eval());//x_expr.eval());
     }
 
     //! Get coefficient at index i.
@@ -291,18 +302,21 @@ namespace sara::expression {
   };
 
   template <typename E>
-  struct NegXpr : Expression<Expr<E>>
+  struct NegXpr : Expression<NegXpr<E>>
   {
+    using decayed_type = NegXpr<typename std::decay_t<E>::decayed_type>;
     E expr;
 
-    inline NegXpr(E&& e) noexcept
+    inline constexpr NegXpr() noexcept = default;
+
+    inline constexpr NegXpr(E&& e) noexcept
       : expr{std::forward<E>(e)}
     {
     }
 
     inline auto eval() const
     {
-      return -e.eval();
+      return -expr.eval();
     }
   };
 

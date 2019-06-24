@@ -193,6 +193,26 @@ namespace sara::expression {
     }
     //! @}
 
+    //! @{
+    //! @brief Negation operation.
+    inline auto operator-() & noexcept
+    {
+      using this_type = decltype(derived());
+      return NegXpr<this_type>{derived()};
+    }
+
+    inline auto operator-() const & noexcept
+    {
+      using this_type = decltype(derived());
+      return NegXpr<this_type>{derived()};
+    }
+
+    inline auto operator-() && noexcept
+    {
+      using this_type = std::remove_reference_t<decltype(derived())>;
+      return NegXpr<this_type>{std::forward<this_type>(derived())};
+    }
+    //! @}
 
     //! @{
     //! @brief Subscript operation.

@@ -1,6 +1,7 @@
 #define BOOST_TEST_MODULE "Arithmetic Symbolic Calculus"
 #include <DO/Sara/Core/Expression.hpp>
 #include <DO/Sara/Core/Expression/Debug.hpp>
+#include <DO/Sara/Core/Expression/UsualFunctions.hpp>
 #include <DO/Sara/Core/Expression/Differential/Variable.hpp>
 #include <DO/Sara/Core/Expression/Differential/Rules.hpp>
 
@@ -129,7 +130,6 @@ BOOST_AUTO_TEST_CASE(test_add)
 
   {
     auto x_ = std::valarray<float>(2.f, 10);
-    auto x = make_terminal(x_);
 
     auto sum = make_terminal(x_) + make_terminal(1.f);
     static_assert(
@@ -228,66 +228,48 @@ BOOST_AUTO_TEST_CASE(test_function_composition)
   std::cout << "complex_fn(0).eval() = " << complex_fn(0).eval() << std::endl;
 }
 
-
-struct sin_t
+BOOST_AUTO_TEST_CASE(test_negate_operation)
 {
-  template <typename T>
-  inline auto operator()(T&& x) const
-  {
-    return std::sin(x);
-  }
-};
+  auto minus_sin = negate_.circle(sin_);
+  auto x = make_terminal(abc::x<double>{M_PI / 2.});
+  std::cout << "x = " << type_name<decltype(x)>() << std::endl;
+  std::cout << "minus_sin = " << type_name<decltype(minus_sin)>() << std::endl;
 
-struct cos_t
-{
-  template <typename T>
-  inline auto operator()(T&& x) const
-  {
-    return std::cos(x);
-  }
-};
-
-constexpr auto sin_ = sin_t{};
-
-template <typename X, typename Y>
-struct Diff<FunXpr<sin_t, X>, Y> : Expression<Diff<FunXpr<sin_t, X>, Y>>
-{
-  using result_type = decltype(FunXpr<cos_t, X>{} * derivative_t<X, Y>{});
-};
-
+  auto minus_sin_pi_2 = minus_sin(x);
+  std::cout << "minus_sin_pi_2 = " << type_name<decltype(minus_sin_pi_2)>() << std::endl;
+  std::cout << "minus_sin_pi_2.eval() = " << minus_sin_pi_2.eval() << std::endl;
+}
 
 BOOST_AUTO_TEST_CASE(test_differential)
 {
-  //auto sin_ = make_terminal<double (*)(double)>(std::sin);
-  //auto cos_ = make_terminal<double (*)(double)>(std::cos);
-  //auto log_ = make_terminal<double (*)(double)>(std::log);
-  //auto exp_ = make_terminal<double (*)(double)>(std::exp);
-  auto sin1 = make_terminal(sin_);
+  auto x = abc::x<double>{M_PI / 2.};
+  auto y = abc::y<double>{1.};
 
-  auto x = abc::x<double>{};
-  x.value = M_PI / 2;
-
-
-  std::cout << "sin1(x) = " << sin1(x).eval() << std::endl;
+  std::cout << "sin_(x) = " << sin_(x).eval() << std::endl;
 
   auto x_ = make_terminal(x);
+  auto y_ = make_terminal(y);
   auto one_ = make_terminal(One{});
 
-  static_assert(std::is_same<derivative_t<decltype(x_), decltype(x_)>,  //
-                             One>::value);
+  // Check that dx/dx = 1.
+  static_assert(std::is_same_v<calculate_expr_type_2_t<decltype(x_)>,
+                               Terminal<Variable<double, 'x'>>>);
+  //std::cout << type_name<calculate_expr_type_2_t<decltype(x_)>>() << std::endl;
+  static_assert(std::is_same_v<derivative_t<decltype(x_), decltype(x_)>,  //
+                               One>);
 
-  static_assert(std::is_same<calculate_expr_type_2_t<decltype(x_)>,
-                             Terminal<Variable<double, 'x'>>>::value);
-  std::cout << type_name<calculate_expr_type_2_t<decltype(x_)>>() << std::endl;
+  // Check the derivative of d(x + x)/dx = 2.
+  std::cout << type_name<calculate_expr_type_2_t<decltype(x_ + x_)>>()
+            << std::endl;
+  std::cout << type_name<derivative_t<decltype(x_ + x_), decltype(x_)>>()
+            << std::endl;
 
-  //std::cout << type_name<calculate_expr_type_2_t<decltype(x_ + x_)>>() << std::endl;
-  std::cout << type_name<derivative_t<decltype(x_ + x_), decltype(x_)>>() << std::endl;
+  //auto d_sin_x = derivative(sin_(x_), x_);
+  //std::cout << "d_sin_x = " << type_name<decltype(d_sin_x)>() << std::endl;
 
-  //static_assert(std::is_same<derivative_t<decltype(x_ + x_), decltype(x_)>,  //
-  //                           decltype(one_ + one_)>::value);
-
-  //auto sin_x = sin_(x);
-  //std::cout << "sin_x.eval() = " << sin_x.eval() << std::endl;
+  //auto d_cos_x = derivative(cos_(x_), x_);
+  //std::cout << "d_cos_x = " << type_name<decltype(d_cos_x)>() << std::endl;
+  //std::cout << "d_cos_x.eval() = " << d_cos_x.eval() << std::endl;
 
   //auto log_exp_sin_x = log_.circle(exp_).circle(sin_)(x);
   //std::cout << "log_exp_sin_x.eval() = " << log_exp_sin_x.eval() << std::endl;

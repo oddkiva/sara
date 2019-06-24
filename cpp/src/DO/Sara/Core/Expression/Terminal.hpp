@@ -20,7 +20,12 @@ namespace sara::expression {
     {
     }
 
-    auto eval() const -> const T&
+    auto eval() const & noexcept -> const T&
+    {
+      return value;
+    }
+
+    auto eval() && -> T
     {
       return value;
     }
@@ -55,9 +60,9 @@ namespace sara::expression {
   };
 
   template <typename T>
-  inline auto make_terminal(T&& t) -> Terminal<T>
+  inline constexpr auto make_terminal(T&& t) -> Terminal<T>
   {
-    return {t};
+    return {std::forward<T>(t)};
   }
 
 } /* namespace sara::expression */
