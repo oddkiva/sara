@@ -41,7 +41,7 @@ namespace DO { namespace Sara {
   public:
     //! @{
     //! @brief Feature type.
-    enum class Type : std::int8_t
+    enum class Type : std::uint8_t
     {
       Harris,
       HarAff,
