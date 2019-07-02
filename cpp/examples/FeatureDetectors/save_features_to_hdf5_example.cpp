@@ -26,12 +26,13 @@ void write_sfm_data()
 
   // Create dummy features.
   auto features = Tensor_<OERegion, 1>{4};
+  auto farray = features.flat_array();
   for (int i = 0; i < 4; ++i)
   {
-    features.data()[i].center() << i, i;
-    features.data()[i].shape_matrix = DO::Sara::Matrix2f::Ones() * (i + 0.5f);
-    features.data()[i].orientation = 30 * i;
-    features.data()[i].extremum_value = 10 * i;
+    farray(i).center() << i, i;
+    farray(i).shape_matrix = DO::Sara::Matrix2f::Ones() * (i + 0.5f);
+    farray(i).orientation = 30 * i;
+    farray(i).extremum_value = 10 * i;
   }
 
   auto dataset = h5file.write_dataset("0/features", features);

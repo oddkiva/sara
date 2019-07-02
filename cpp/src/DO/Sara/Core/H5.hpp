@@ -51,27 +51,10 @@ struct h5_native_type<double>
   }
 };
 
-template <typename T, int M, int N>
-constexpr auto calculate_h5_type(const Eigen::Matrix<T, M, N>&)
-{
-  const hsize_t dims[] = {M, N};
-  return H5::ArrayType{h5_native_type<T>::value(), 2, dims};
-}
+} /* namespace DO::Sara */
 
-template <typename T, int N>
-constexpr auto calculate_h5_type(const Eigen::Matrix<T, N, 1>&)
-{
-  const hsize_t dims[] = {N};
-  return H5::ArrayType{h5_native_type<T>::value(), 1, dims};
-}
 
-template <typename T, int N>
-constexpr auto calculate_h5_type(const Eigen::Matrix<T, 1, N>&)
-{
-  const hsize_t dims[] = {N};
-  return H5::ArrayType{h5_native_type<T>::value(), 1, dims};
-}
-
+namespace DO::Sara {
 
 template <typename T>
 struct CalculateH5Type;
@@ -153,6 +136,10 @@ struct CalculateH5Type<OERegion>
   }
 };
 
+} /* namespace DO::Sara */
+
+
+namespace DO::Sara {
 
 struct H5File
 {
