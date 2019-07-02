@@ -24,7 +24,7 @@ using namespace DO::Sara;
 
 
 const auto data_dir =
-    std::string{"/Users/David/Desktop/Datasets/sfm/castle_int"};
+    std::string{"/home/david/Desktop/Datasets/sfm/castle_int"};
 const auto file1 = "0000.png";
 const auto file2 = "0001.png";
 

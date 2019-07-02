@@ -27,7 +27,7 @@ namespace DO { namespace Sara {
   //! Computes and return the scale given an input orientation
   float OERegion::radius(float angle) const
   {
-    JacobiSVD<Matrix2f> svd(_shape_matrix, Eigen::ComputeFullU);
+    JacobiSVD<Matrix2f> svd(shape_matrix, Eigen::ComputeFullU);
     const Vector2f radii(svd.singularValues().cwiseSqrt().cwiseInverse());
     const Matrix2f& U(svd.matrixU());
     Vector2f u{cos(angle), sin(angle)};
@@ -40,8 +40,8 @@ namespace DO { namespace Sara {
 
   Matrix3f OERegion::affinity() const
   {
-    Matrix2f M = shape_matrix();
-    auto Q = Rotation2D<float>(orientation()).matrix();
+    Matrix2f M = shape_matrix;
+    auto Q = Rotation2D<float>(orientation).matrix();
     M = Q.transpose() * M * Q;
     Matrix2f R = Matrix2f{M.llt().matrixU()}.inverse();
 
@@ -60,7 +60,7 @@ namespace DO { namespace Sara {
   ostream& operator<<(ostream& os, const OERegion& f)
   {
     os << "Feature type:\t";
-    switch (f.type())
+    switch (f.type)
     {
     case OERegion::Type::DoG:
       os << "DoG" << endl;
@@ -77,19 +77,19 @@ namespace DO { namespace Sara {
     default:
       break;
     }
-    os << "Position:\t" << f._coords.transpose() << endl;
-    os << "Extremum type:\t" << as_integer(f.extremum_type()) << endl;
-    os << "Extremum value:\t" << f._extremum_value << endl;
-    os << "shape matrix:\n" << f.shape_matrix() << endl;
-    os << "orientation:\t" << to_degree(f.orientation()) << " degrees" << endl;
+    os << "Position:\t" << f.coords.transpose() << endl;
+    os << "Extremum type:\t" << as_integer(f.extremum_type) << endl;
+    os << "Extremum value:\t" << f.extremum_value << endl;
+    os << "shape matrix:\n" << f.shape_matrix << endl;
+    os << "orientation:\t" << to_degree(f.orientation) << " degrees" << endl;
     return os;
   }
 
   istream& operator>>(istream& in, OERegion& f)
   {
     auto feature_type = int{};
-    in >> f.x() >> f.y() >> f._shape_matrix >> f._orientation >> feature_type;
-    f.type() = static_cast<OERegion::Type>(feature_type);
+    in >> f.x() >> f.y() >> f.shape_matrix >> f.orientation >> feature_type;
+    f.type = static_cast<OERegion::Type>(feature_type);
     return in;
   }
 

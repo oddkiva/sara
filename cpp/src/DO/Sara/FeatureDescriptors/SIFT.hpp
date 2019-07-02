@@ -200,17 +200,20 @@ namespace DO { namespace Sara {
     }
 
     //! @brief Computes the **upright** SIFT descriptor for keypoint \$(x,y,\sigma)\f$.
-    descriptor_type operator()(float x, float y, float sigma,
-                               const ImageView<Vector2f>& grad_polar_coords) const
+    descriptor_type
+    operator()(float x, float y, float sigma,
+               const ImageView<Vector2f>& grad_polar_coords) const
     {
       return this->operator()(x, y, sigma, 0.f, grad_polar_coords);
     }
 
     //! Helper member function.
-    descriptor_type operator()(const OERegion& f,
-                               const ImageView<Vector2f>& grad_polar_coords) const
+    descriptor_type
+    operator()(const OERegion& f,
+               const ImageView<Vector2f>& grad_polar_coords) const
     {
-      return this->operator()(f.x(), f.y(), f.scale(), f.orientation(), grad_polar_coords);
+      return this->operator()(f.x(), f.y(), f.scale(), f.orientation,
+                              grad_polar_coords);
     }
 
     //! Helper member function.

@@ -8,6 +8,7 @@
 
 #include <array>
 #include <iostream>
+#include <memory>
 
 
 struct feature_t

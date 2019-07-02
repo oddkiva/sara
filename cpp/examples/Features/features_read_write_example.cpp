@@ -38,8 +38,8 @@ void check_affine_adaptation(const Image<unsigned char>& image,
 
   auto region = OERegion{f};
   region.center().fill(patch_sz / 2.f);
-  region.orientation() = 0.f;
-  region.shape_matrix() = Matrix2f::Identity() * 4.f / (r * r);
+  region.orientation = 0.f;
+  region.shape_matrix = Matrix2f::Identity() * 4.f / (r * r);
 
   auto A = f.affinity();
   cout << "A=\n" << A << endl;

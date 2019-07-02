@@ -54,10 +54,10 @@ vector<OERegion> compute_hessian_laplace_affine_maxima(const Image<float>& I,
     const auto& o = scale_octave_pairs[i](1);
 
     Matrix2f affine_adapt_transform;
-    if (adapt_shape(affine_adapt_transform, G(s,o), hessian_laplace_maxima[i]))
+    if (adapt_shape(affine_adapt_transform, G(s, o), hessian_laplace_maxima[i]))
     {
-      hessian_laplace_maxima[i].shape_matrix() =
-        affine_adapt_transform*hessian_laplace_maxima[i].shape_matrix();
+      hessian_laplace_maxima[i].shape_matrix =
+          affine_adapt_transform * hessian_laplace_maxima[i].shape_matrix;
       keep_features[i] = 1;
     }
   }
@@ -76,8 +76,8 @@ vector<OERegion> compute_hessian_laplace_affine_maxima(const Image<float>& I,
     {
       kept_DoHs.push_back(hessian_laplace_maxima[i]);
       const auto fact = DoHs.octave_scaling_factor(scale_octave_pairs[i](1));
-      kept_DoHs.back().shape_matrix() *= pow(fact,-2);
-      kept_DoHs.back().coords() *= fact;
+      kept_DoHs.back().shape_matrix *= pow(fact,-2);
+      kept_DoHs.back().coords *= fact;
     }
   }
 
@@ -107,8 +107,8 @@ vector<OERegion> compute_DoH_extrema(const Image<float>& image,
   for (size_t i = 0; i != DoHs.size(); ++i)
   {
     const auto fact = DoH.octave_scaling_factor(scale_octave_pairs[i](1));
-    DoHs[i].shape_matrix() *= pow(fact,-2);
-    DoHs[i].coords() *= fact;
+    DoHs[i].shape_matrix *= pow(fact, -2);
+    DoHs[i].coords *= fact;
   }
 
   return DoHs;
@@ -149,7 +149,7 @@ vector<OERegion> compute_DoH_affine_extrema(const Image<float>& image,
     Matrix2f affine_adapt_transform;
     if (adapt_shape(affine_adapt_transform, G(s,o), DoHs[i]))
     {
-      DoHs[i].shape_matrix() = affine_adapt_transform*DoHs[i].shape_matrix();
+      DoHs[i].shape_matrix = affine_adapt_transform * DoHs[i].shape_matrix;
       keep_features[i] = 1;
     }
   }
@@ -169,9 +169,8 @@ vector<OERegion> compute_DoH_affine_extrema(const Image<float>& image,
     {
       kept_DoHs.push_back(DoHs[i]);
       const auto fact = DoH.octave_scaling_factor(scale_octave_pairs[i](1));
-      kept_DoHs.back().shape_matrix() *= pow(fact,-2);
-      kept_DoHs.back().coords() *= fact;
-
+      kept_DoHs.back().shape_matrix *= pow(fact,-2);
+      kept_DoHs.back().coords *= fact;
     }
   }
 
@@ -183,8 +182,9 @@ void check_keys(const Image<float>& image, const vector<OERegion>& features)
   display(image);
   set_antialiasing();
   for (size_t i = 0; i != features.size(); ++i)
-    features[i].draw(features[i].extremum_type() == OERegion::ExtremumType::Max ?
-                     Red8 : Blue8);
+    features[i].draw(features[i].extremum_type == OERegion::ExtremumType::Max
+                         ? Red8
+                         : Blue8);
   get_key();
 }
 

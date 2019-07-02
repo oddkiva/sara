@@ -34,7 +34,8 @@ namespace DO { namespace Sara {
 
     // Notice that I readily multiply the scores by $c_\textrm{robust}$.
     for (size_t i = 0; i != features.size(); ++i)
-      idx_score_pairs[i] = make_pair(i, c_robust*features[i].extremum_value());
+      idx_score_pairs[i] =
+          make_pair(i, c_robust * features[i].extremum_value);
 
     // Sort features by decreasing strength.
     sort(idx_score_pairs.begin(), idx_score_pairs.end(),

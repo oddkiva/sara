@@ -52,11 +52,11 @@ BOOST_AUTO_TEST_CASE(test_default_constructor)
 BOOST_AUTO_TEST_CASE(test_custom_constructor)
 {
   auto f_x = OERegion{ Point2f::Zero(), 1.f };
-  f_x.orientation() = 0.f;
-  f_x.type() = OERegion::Type::DoG;
+  f_x.orientation = 0.f;
+  f_x.type = OERegion::Type::DoG;
   auto f_y = OERegion{ Point2f::Ones(), 1.f };
-  f_y.orientation() = 0.f;
-  f_y.type() = OERegion::Type::DoG;
+  f_y.orientation = 0.f;
+  f_y.type = OERegion::Type::DoG;
 
   auto m = Match{ &f_x, &f_y, 0.5f };
   const auto const_m = Match{ &f_x, &f_y, 0.5f };
@@ -78,8 +78,8 @@ BOOST_AUTO_TEST_CASE(test_make_index_match)
 
 BOOST_AUTO_TEST_CASE(test_read_write)
 {
-  auto X = vector<OERegion>{ 10 };
-  auto Y = vector<OERegion>{ 10 };
+  auto X = vector<OERegion>{10};
+  auto Y = vector<OERegion>{10};
 
   // Write dummy matches.
   auto matches = vector<Match>(10);

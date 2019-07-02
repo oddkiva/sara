@@ -43,9 +43,9 @@ namespace DO { namespace Sara {
 
     for (size_t i = 0; i != extrema.size(); ++i)
     {
-      const auto color =
-          extrema[i].extremum_type() == OERegion::ExtremumType::Max ? Red8
-                                                                    : Blue8;
+      const auto color = extrema[i].extremum_type == OERegion::ExtremumType::Max
+                             ? Red8
+                             : Blue8;
       draw_scale_space_extremum(pyramid, extrema[i].x(), extrema[i].y(),
                                 extrema[i].scale(), o, color);
     }

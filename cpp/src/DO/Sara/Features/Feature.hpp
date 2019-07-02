@@ -69,120 +69,46 @@ namespace DO { namespace Sara {
 
     //! @brief Constructor for circular region.
     OERegion(const Point2f& coords)
-      : _coords(coords)
+      : coords(coords)
     {
     }
 
     OERegion(const Point2f& coords, float scale)
-      : _coords{coords}
-      , _shape_matrix{Matrix2f::Identity() * (pow(scale, -2))}
+      : coords{coords}
+      , shape_matrix{Matrix2f::Identity() * (pow(scale, -2))}
     {
     }
 
     //! @{
-    //! @brief Constant getters.
-    float x() const
+    //! @brief Convenient getters.
+    auto x() const -> float
     {
-      return _coords(0);
+      return coords(0);
     }
 
-    float y() const
+    auto x()-> float&
     {
-      return _coords(1);
+      return coords(0);
     }
 
-    const Point2f& coords() const
+    auto y() const -> float
     {
-      return _coords;
+      return coords(1);
     }
 
-    const Point2f& center() const
+    auto y() -> float&
     {
-      return coords();
+      return coords(1);
     }
 
-    Type type() const
+    auto center() const -> const Point2f&
     {
-      return _type;
+      return coords;
     }
 
-    ExtremumType extremum_type() const
+    auto center() -> Point2f&
     {
-      return _extremum_type;
-    }
-
-    float extremum_value() const
-    {
-      return _extremum_value;
-    }
-    //! }
-
-    //! @brief Mutable getters.
-    float& x()
-    {
-      return _coords(0);
-    }
-
-    float& y()
-    {
-      return _coords(1);
-    }
-
-    Point2f& coords()
-    {
-      return _coords;
-    }
-
-    Point2f& center()
-    {
-      return coords();
-    }
-
-    Type& type()
-    {
-      return _type;
-    }
-
-    ExtremumType& extremum_type()
-    {
-      return _extremum_type;
-    }
-
-    float& extremum_value()
-    {
-      return _extremum_value;
-    }
-    //! @}
-
-    //! @{
-    //! @brief Shape matrix accessor.
-    //! The shape matrix is the matrix $M$ that describes the ellipse
-    //! $\varepsilon$, i.e.:
-    //! $$ \varepsilon = \{ x \in R^2 : (x-c)^T M (x-c) = 1 \} $$
-    //! where $c$ is the center of the region.
-    const Matrix2f& shape_matrix() const
-    {
-      return _shape_matrix;
-    }
-
-    Matrix2f& shape_matrix()
-    {
-      return _shape_matrix;
-    }
-    //! @}
-
-    //! @{
-    //! @brief Orientation (in radian) accessor.
-    //! This completely determines the affine transformation that transforms the
-    //! unit circle to the elliptic shape of the region.
-    float orientation() const
-    {
-      return _orientation;
-    }
-
-    float& orientation()
-    {
-      return _orientation;
+      return coords;
     }
     //! @}
 
@@ -204,9 +130,10 @@ namespace DO { namespace Sara {
     //! @brief Compare two regions.
     bool operator==(const OERegion& other) const
     {
-      return (coords() == other.coords() &&
-              shape_matrix() == other.shape_matrix() &&
-              orientation() == other.orientation() && type() == other.type());
+      return (coords == other.coords &&              //
+              shape_matrix == other.shape_matrix &&  //
+              orientation == other.orientation &&    //
+              type == other.type);
     };
 
     //! @brief Draw the region.
@@ -217,17 +144,33 @@ namespace DO { namespace Sara {
 
     friend std::istream& operator>>(std::istream&, OERegion&);
 
-  public:
-    Point2f _coords;
-    Type _type;
-    ExtremumType _extremum_type;
-    float _extremum_value;
+    //! @brief Center of the feature.
+    Point2f coords;
 
     //! @brief Shape matrix encoding the ellipticity of the region.
-    Matrix2f _shape_matrix;
+    //!
+    //! The shape matrix is the matrix $M$ that describes the ellipse
+    //! $\varepsilon$, i.e.:
+    //! $$ \varepsilon = \{ x \in R^2 : (x-c)^T M (x-c) = 1 \} $$
+    //! where $c$ is the center of the region.
+    Matrix2f shape_matrix;
+
     //! @brief Orientation of the region **after** shape normalization.
-    float _orientation;
+    //!
+    //! This completely determines the affine transformation that transforms the
+    //! unit circle to the elliptic shape of the region.
+    float orientation;
+
+    //! @{
+    //! @brief Characterization of the feature type.
+    float extremum_value;
+    Type type;
+    ExtremumType extremum_type;
+    //! @}
+
   };
+
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

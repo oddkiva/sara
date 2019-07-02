@@ -13,13 +13,14 @@
 
 #pragma once
 
+#include <DO/Sara/Features/Feature.hpp>
+#include <DO/Sara/Features/DescriptorMatrix.hpp>
+
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
 
-#include <DO/Sara/Features/Feature.hpp>
-#include <DO/Sara/Features/DescriptorMatrix.hpp>
 
 
 namespace DO { namespace Sara {
@@ -80,9 +81,9 @@ namespace DO { namespace Sara {
       const OERegion& feat = features[i];
 
       file << feat.x() << ' ' << feat.y() << ' ';
-      file << Map<const RowVector4f>(feat.shape_matrix().data()) << ' ';
-      file << feat.orientation() << ' ';
-      file << int(feat.type()) << ' ';
+      file << Map<const RowVector4f>(feat.shape_matrix.data()) << ' ';
+      file << feat.orientation << ' ';
+      file << int(feat.type) << ' ';
 
       file << Map<const Matrix<T, 1, Dynamic> >(
         descriptors[static_cast<int>(i)].data(),

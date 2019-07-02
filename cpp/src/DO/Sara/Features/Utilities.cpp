@@ -40,7 +40,7 @@ namespace DO { namespace Sara {
       if (Sara::lexicographical_compare(descriptors[i1], descriptors[i2]))
         return true;
       if (compare_equal(i1, i2) &&
-          features[i1].extremum_value() > features[i2].extremum_value())
+          features[i1].extremum_value > features[i2].extremum_value)
         return true;
       return false;
     };

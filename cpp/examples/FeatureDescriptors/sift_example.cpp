@@ -75,9 +75,10 @@ Set<OERegion, RealDescriptor> compute_sift_keypoints(const Image<float>& image)
   //    scale.
   for (size_t i = 0; i != DoGs.size(); ++i)
   {
-    auto octave_scale_factor = nabla_G.octave_scaling_factor(scale_octave_pairs[i](1));
+    auto octave_scale_factor =
+        nabla_G.octave_scaling_factor(scale_octave_pairs[i](1));
     DoGs[i].center() *= octave_scale_factor;
-    DoGs[i].shape_matrix() /= pow(octave_scale_factor, 2);
+    DoGs[i].shape_matrix /= pow(octave_scale_factor, 2);
   }
 
   return keys;
@@ -121,8 +122,7 @@ GRAPHICS_MAIN()
   for (size_t i = 0; i != features.size(); ++i)
   {
     const auto color =
-      features[i].extremum_type() == OERegion::ExtremumType::Max ?
-      Red8 : Blue8;
+        features[i].extremum_type == OERegion::ExtremumType::Max ? Red8 : Blue8;
     features[i].draw(color);
   }
   get_key();

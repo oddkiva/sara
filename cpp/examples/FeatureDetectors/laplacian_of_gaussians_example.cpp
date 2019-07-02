@@ -31,8 +31,8 @@ vector<OERegion> compute_LoG_extrema(const Image<float>& image,
     print_stage("Localizing LoG extrema");
     tic();
   }
-  auto pyramid_params = ImagePyramidParams{ 0, 3+2 };
-  ComputeLoGExtrema computeLoGs{ pyramid_params };
+  auto pyramid_params = ImagePyramidParams{0, 3 + 2};
+  ComputeLoGExtrema computeLoGs{pyramid_params};
   auto scale_octave_pairs = vector<Point2i>{};
   auto LoGs = computeLoGs(image, &scale_octave_pairs);
   if (verbose)
@@ -43,9 +43,10 @@ vector<OERegion> compute_LoG_extrema(const Image<float>& image,
   const auto& L = computeLoGs.laplacians_of_gaussians();
   for (size_t i = 0; i < LoGs.size(); ++i)
   {
-    float octave_scale_factor = L.octave_scaling_factor(scale_octave_pairs[i](1));
+    float octave_scale_factor =
+        L.octave_scaling_factor(scale_octave_pairs[i](1));
     LoGs[i].center() *= octave_scale_factor;
-    LoGs[i].shape_matrix() /= pow(octave_scale_factor, 2);
+    LoGs[i].shape_matrix /= pow(octave_scale_factor, 2);
   }
 
   return LoGs;
@@ -88,7 +89,7 @@ vector<OERegion> compute_LoG_affine_extrema(const Image<float>& image,
     Matrix2f affine_adapt_transform;
     if (adapt_shape(affine_adapt_transform, G(s,o), LoGs[i]))
     {
-      LoGs[i].shape_matrix() = affine_adapt_transform * LoGs[i].shape_matrix();
+      LoGs[i].shape_matrix = affine_adapt_transform * LoGs[i].shape_matrix;
       keep_features[i] = 1;
     }
   }
@@ -107,8 +108,8 @@ vector<OERegion> compute_LoG_affine_extrema(const Image<float>& image,
     {
       kept_DoGs.push_back(LoGs[i]);
       const float fact = L.octave_scaling_factor(scale_octave_pairs[i](1));
-      kept_DoGs.back().shape_matrix() *= pow(fact,-2);
-      kept_DoGs.back().coords() *= fact;
+      kept_DoGs.back().shape_matrix *= pow(fact,-2);
+      kept_DoGs.back().coords *= fact;
 
     }
   }
@@ -123,8 +124,9 @@ void check_keys(const Image<float>& image, const vector<OERegion>& features)
   display(image);
   set_antialiasing();
   for (size_t i = 0; i != features.size(); ++i)
-    features[i].draw(features[i].extremum_type() == OERegion::ExtremumType::Max ?
-                     Red8 : Blue8);
+    features[i].draw(features[i].extremum_type == OERegion::ExtremumType::Max
+                         ? Red8
+                         : Blue8);
   get_key();
 }
 

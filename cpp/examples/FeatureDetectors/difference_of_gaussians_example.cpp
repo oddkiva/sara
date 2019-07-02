@@ -45,7 +45,7 @@ vector<OERegion> compute_dog_extrema(const Image<float>& I,
   {
     auto octave_scale_factor = DoG.octave_scaling_factor(scale_octave_pairs[i](1));
     DoGs[i].center() *= octave_scale_factor;
-    DoGs[i].shape_matrix() /= pow(octave_scale_factor, 2);
+    DoGs[i].shape_matrix /= pow(octave_scale_factor, 2);
   }
 
   return DoGs;
@@ -88,7 +88,7 @@ vector<OERegion> compute_dog_affine_extrema(const Image<float>& I,
     Matrix2f affine_adaptation_transform;
     if (adapt_shape(affine_adaptation_transform, G(s,o), DoGs[i]))
     {
-      DoGs[i].shape_matrix() = affine_adaptation_transform * DoGs[i].shape_matrix();
+      DoGs[i].shape_matrix = affine_adaptation_transform * DoGs[i].shape_matrix;
       keep_features[i] = 1;
     }
   }
@@ -107,8 +107,8 @@ vector<OERegion> compute_dog_affine_extrema(const Image<float>& I,
     {
       kept_DoGs.push_back(DoGs[i]);
       const auto fact = D.octave_scaling_factor(scale_octave_pairs[i](1));
-      kept_DoGs.back().shape_matrix() *= pow(fact, -2);
-      kept_DoGs.back().coords() *= fact;
+      kept_DoGs.back().shape_matrix *= pow(fact, -2);
+      kept_DoGs.back().coords *= fact;
 
     }
   }
@@ -123,7 +123,7 @@ void check_keys(const Image<float>& image, const vector<OERegion>& features)
   display(image);
   set_antialiasing();
   for (size_t i = 0; i != features.size(); ++i)
-    features[i].draw(features[i].extremum_type() == OERegion::ExtremumType::Max ?
+    features[i].draw(features[i].extremum_type == OERegion::ExtremumType::Max ?
                      Red8 : Blue8);
   get_key();
 }

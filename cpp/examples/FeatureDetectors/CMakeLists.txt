@@ -26,4 +26,5 @@ foreach (file ${example_SOURCE_FILES})
   sara_add_example(${filename})
 endforeach ()
 
+target_include_directories(save_features_to_hdf5_example PRIVATE ${HDF5_INCLUDE_DIRS})
 target_link_libraries(save_features_to_hdf5_example ${HDF5_LIBRARIES})

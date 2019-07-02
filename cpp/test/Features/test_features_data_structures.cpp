@@ -26,16 +26,16 @@ BOOST_AUTO_TEST_CASE(test_methods)
 {
   auto f = OERegion{Point2f::Ones()};
 
-  f.type() = OERegion::Type::Harris;
-  f.extremum_type() = OERegion::ExtremumType::Saddle;
-  f.extremum_value() = 0.f;
-  BOOST_CHECK_EQUAL(f.coords(), Point2f::Ones());
+  f.type = OERegion::Type::Harris;
+  f.extremum_type = OERegion::ExtremumType::Saddle;
+  f.extremum_value = 0.f;
+  BOOST_CHECK_EQUAL(f.coords, Point2f::Ones());
   BOOST_CHECK_EQUAL(f.center(), Point2f::Ones());
   BOOST_CHECK_EQUAL(f.x(), 1.f);
   BOOST_CHECK_EQUAL(f.y(), 1.f);
-  BOOST_CHECK(f.extremum_type() == OERegion::ExtremumType::Saddle);
-  BOOST_CHECK_EQUAL(f.extremum_value(), 0.f);
-  BOOST_CHECK(f.type() == OERegion::Type::Harris);
+  BOOST_CHECK(f.extremum_type == OERegion::ExtremumType::Saddle);
+  BOOST_CHECK_EQUAL(f.extremum_value, 0.f);
+  BOOST_CHECK(f.type == OERegion::Type::Harris);
 
   // Check output stream operator.
   pair<OERegion::Type, string> types[] = {
@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(test_methods)
 
   for (int i = 0; i < 5; ++i)
   {
-    f.type() = types[i].first;
+    f.type = types[i].first;
     ostringstream oss;
     oss << f;
     auto str = oss.str();
@@ -64,8 +64,8 @@ BOOST_AUTO_TEST_SUITE(TestOrientedEllipticRegion)
 BOOST_AUTO_TEST_CASE(test_methods)
 {
   OERegion f{Point2f::Zero(), 1.f};
-  f.orientation() = 0;
-  BOOST_CHECK_EQUAL(f.shape_matrix(), Matrix2f::Identity());
+  f.orientation = 0;
+  BOOST_CHECK_EQUAL(f.shape_matrix, Matrix2f::Identity());
   BOOST_CHECK_SMALL((f.affinity() - Matrix3f::Identity()).norm(), 1e-3f);
   BOOST_CHECK_EQUAL(f.radius(), 1.f);
   BOOST_CHECK_EQUAL(f.scale(), 1.f);
@@ -94,12 +94,12 @@ BOOST_AUTO_TEST_CASE(test_read_write)
   {
     descriptors[i] = (Vector3f::Ones() * float(i)).eval();
     OERegion& f = features[i];
-    f.type() = OERegion::Type::DoG;
-    f.coords() = Point2f::Ones() * float(i);
-    f.shape_matrix() = Matrix2f::Identity();
-    f.orientation() = float(i);
-    f.extremum_type() = OERegion::ExtremumType::Max;
-    f.extremum_value() = 0.f;
+    f.type = OERegion::Type::DoG;
+    f.coords = Point2f::Ones() * float(i);
+    f.shape_matrix = Matrix2f::Identity();
+    f.orientation = float(i);
+    f.extremum_type = OERegion::ExtremumType::Max;
+    f.extremum_value = 0.f;
   }
 
   // Test write function.
@@ -154,9 +154,9 @@ BOOST_AUTO_TEST_CASE(test_methods)
   // Test accessors.
   const auto& const_set = set;
 
-  set.f(0).coords() = Point2f::Ones();
-  BOOST_CHECK_EQUAL(set.f(0).coords(), Point2f::Ones());
-  BOOST_CHECK_EQUAL(const_set.f(0).coords(), Point2f::Ones());
+  set.f(0).coords = Point2f::Ones();
+  BOOST_CHECK_EQUAL(set.f(0).coords, Point2f::Ones());
+  BOOST_CHECK_EQUAL(const_set.f(0).coords, Point2f::Ones());
 
   set.v(0) = Point2f::Ones();
   BOOST_CHECK_EQUAL(set.v(0), Point2f::Ones());

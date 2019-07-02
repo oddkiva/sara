@@ -26,12 +26,12 @@ namespace DO { namespace Sara {
     const auto& z = scale;
 
     // Solve characteristic equation to find eigenvalues
-    JacobiSVD<Matrix2f> svd(shape_matrix(), ComputeFullU);
+    auto svd = JacobiSVD<Matrix2f>{shape_matrix, ComputeFullU};
     const Vector2f& D = svd.singularValues();
     const Matrix2f& U = svd.matrixU();
 
     // Eigenvalues are l1 and l2.
-    const Vector2f radii{ D.cwiseSqrt().cwiseInverse() };
+    const Vector2f radii{D.cwiseSqrt().cwiseInverse()};
 
     const auto& a = radii(0);
     const auto& b = radii(1);
@@ -45,27 +45,29 @@ namespace DO { namespace Sara {
     Vector2f p2{ p1 + z * L * Vector2f{ 1.f, 0.f } };
 
     // Draw.
-    if (z*a > 1.f && z*b > 1.f && (p1 - p2).squaredNorm() > 1.f)
+    if (z * a > 1.f && z * b > 1.f && (p1 - p2).squaredNorm() > 1.f)
     {
       // Contour of orientation line.
       draw_line(p1, p2, Black8, 5);
       // Contour of ellipse.
-      draw_ellipse(p1, z*a, z*b, 180.f*ellipse_ori/float(M_PI), Black8, 5);
+      draw_ellipse(p1, z * a, z * b, 180.f * ellipse_ori / float(M_PI), Black8,
+                   5);
       // Fill-in of orientation line.
       draw_line(p1, p2, color, 3);
       // Fill-in of ellipse.
-      draw_ellipse(p1, z*a, z*b, 180.f*ellipse_ori/float(M_PI), color, 3);
+      draw_ellipse(p1, z * a, z * b, 180.f * ellipse_ori / float(M_PI), color,
+                   3);
     }
     else
     {
       const auto& z = scale;
       const auto cross_offset = 3.0f;
 
-      Vector2f p1{z * (center() + offset)};
-      Vector2f c1{p1 - Vector2f{cross_offset, 0.f}};
-      Vector2f c2{p1 + Vector2f{cross_offset, 0.f}};
-      Vector2f c3{p1 - Vector2f{0.f, cross_offset}};
-      Vector2f c4{p1 + Vector2f{0.f, cross_offset}};
+      Vector2f p1 = z * (center() + offset);
+      Vector2f c1 = p1 - Vector2f{cross_offset, 0.f};
+      Vector2f c2 = p1 + Vector2f{cross_offset, 0.f};
+      Vector2f c3 = p1 - Vector2f{0.f, cross_offset};
+      Vector2f c4 = p1 + Vector2f{0.f, cross_offset};
 
       draw_line(c1, c2, Black8, 5);
       draw_line(c3, c4, Black8, 5);
