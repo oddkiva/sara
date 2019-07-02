@@ -19,25 +19,6 @@ using namespace std;
 
 namespace DO { namespace Sara {
 
-  void InterestPoint::draw(const Color3ub& color,
-                           float scale,
-                           const Point2f& offset) const
-  {
-    const auto& z = scale;
-    const auto cross_offset = 3.0f;
-
-    Vector2f p1{ z * (center() + offset) };
-    Vector2f c1{ p1 - Vector2f{ cross_offset, 0.f } };
-    Vector2f c2{ p1 + Vector2f{ cross_offset, 0.f } };
-    Vector2f c3{ p1 - Vector2f{ 0.f,cross_offset } };
-    Vector2f c4{ p1 + Vector2f{ 0.f,cross_offset } };
-
-    draw_line(c1, c2, Black8, 5);
-    draw_line(c3, c4, Black8, 5);
-    draw_line(c1, c2, color, 3);
-    draw_line(c3, c4, color, 3);
-  }
-
   void OERegion::draw(const Color3ub& color,
                       float scale,
                       const Point2f& offset) const
@@ -76,7 +57,21 @@ namespace DO { namespace Sara {
       draw_ellipse(p1, z*a, z*b, 180.f*ellipse_ori/float(M_PI), color, 3);
     }
     else
-      InterestPoint::draw(color, z, offset);
+    {
+      const auto& z = scale;
+      const auto cross_offset = 3.0f;
+
+      Vector2f p1{z * (center() + offset)};
+      Vector2f c1{p1 - Vector2f{cross_offset, 0.f}};
+      Vector2f c2{p1 + Vector2f{cross_offset, 0.f}};
+      Vector2f c3{p1 - Vector2f{0.f, cross_offset}};
+      Vector2f c4{p1 + Vector2f{0.f, cross_offset}};
+
+      draw_line(c1, c2, Black8, 5);
+      draw_line(c3, c4, Black8, 5);
+      draw_line(c1, c2, color, 3);
+      draw_line(c3, c4, color, 3);
+    }
   }
 
   void draw_oe_regions(const vector<OERegion>& features,

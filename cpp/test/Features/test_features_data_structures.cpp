@@ -20,30 +20,30 @@ using namespace std;
 using namespace DO::Sara;
 
 
-BOOST_AUTO_TEST_SUITE(TestInterestPoint)
+BOOST_AUTO_TEST_SUITE(TestOERegion)
 
 BOOST_AUTO_TEST_CASE(test_methods)
 {
-  InterestPoint f(Point2f::Ones());
+  auto f = OERegion{Point2f::Ones()};
 
-  f.type() = InterestPoint::Type::Harris;
-  f.extremum_type() = InterestPoint::ExtremumType::Saddle;
+  f.type() = OERegion::Type::Harris;
+  f.extremum_type() = OERegion::ExtremumType::Saddle;
   f.extremum_value() = 0.f;
   BOOST_CHECK_EQUAL(f.coords(), Point2f::Ones());
   BOOST_CHECK_EQUAL(f.center(), Point2f::Ones());
   BOOST_CHECK_EQUAL(f.x(), 1.f);
   BOOST_CHECK_EQUAL(f.y(), 1.f);
-  BOOST_CHECK(f.extremum_type() == InterestPoint::ExtremumType::Saddle);
+  BOOST_CHECK(f.extremum_type() == OERegion::ExtremumType::Saddle);
   BOOST_CHECK_EQUAL(f.extremum_value(), 0.f);
-  BOOST_CHECK(f.type() == InterestPoint::Type::Harris);
+  BOOST_CHECK(f.type() == OERegion::Type::Harris);
 
   // Check output stream operator.
-  pair<InterestPoint::Type, string> types[] = {
-    make_pair(InterestPoint::Type::DoG, "DoG"),
-    make_pair(InterestPoint::Type::HarAff, "Harris-Affine"),
-    make_pair(InterestPoint::Type::HesAff, "Hessian-Affine"),
-    make_pair(InterestPoint::Type::MSER, "MSER"),
-    make_pair(InterestPoint::Type::SUSAN, "")
+  pair<OERegion::Type, string> types[] = {
+    make_pair(OERegion::Type::DoG, "DoG"),
+    make_pair(OERegion::Type::HarAff, "Harris-Affine"),
+    make_pair(OERegion::Type::HesAff, "Hessian-Affine"),
+    make_pair(OERegion::Type::MSER, "MSER"),
+    make_pair(OERegion::Type::SUSAN, "")
   };
 
   for (int i = 0; i < 5; ++i)

@@ -29,34 +29,14 @@ namespace DO { namespace Sara {
     @{
   */
 
-  //! @brief Abstract 'VisualFeature' class.
-  class DO_SARA_EXPORT VisualFeature
-  {
-  public:
-    VisualFeature() = default;
-
-    virtual ~VisualFeature()
-    {
-    }
-
-    virtual std::ostream& print(std::ostream& os) const = 0;
-
-    virtual std::istream& read(std::istream& in) = 0;
-
-    friend std::ostream& operator<<(std::ostream& out, const VisualFeature& f)
-    {
-      return f.print(out);
-    }
-
-    friend std::istream& operator>>(std::istream& in, VisualFeature& f)
-    {
-      return f.read(in);
-    }
-  };
-
-
-  //! @brief PointFeature for interest points
-  class DO_SARA_EXPORT InterestPoint : public VisualFeature
+  /*!
+    The 'OERegion' class stands for 'Oriented Elliptic Region' and is
+    dedicated to store important geometric features such as:
+    - DoG
+    - Harris-Affine
+    - Hessian-Affine features and so on...
+   */
+  class DO_SARA_EXPORT OERegion
   {
   public:
     //! @{
@@ -84,18 +64,18 @@ namespace DO { namespace Sara {
     };
     //! @}
 
-    //! @{
-    //! @brief Constructor.
-    InterestPoint() = default;
+    //! @brief Default constructor
+    OERegion() = default;
 
-    InterestPoint(const Point2f& coords)
+    //! @brief Constructor for circular region.
+    OERegion(const Point2f& coords)
       : _coords(coords)
     {
     }
-    //! @}
 
-    //! @brief Destructor.
-    virtual ~InterestPoint()
+    OERegion(const Point2f& coords, float scale)
+      : _coords{coords}
+      , _shape_matrix{Matrix2f::Identity() * (pow(scale, -2))}
     {
     }
 
@@ -135,7 +115,7 @@ namespace DO { namespace Sara {
     {
       return _extremum_value;
     }
-    //! @}
+    //! }
 
     //! @brief Mutable getters.
     float& x()
@@ -173,56 +153,6 @@ namespace DO { namespace Sara {
       return _extremum_value;
     }
     //! @}
-
-    //! @brief Equality operator.
-    bool operator==(const InterestPoint& f) const
-    {
-      return coords() == f.coords();
-    }
-
-    //! @brief Draw feature.
-    void draw(const Color3ub& c, float scale = 1.f,
-              const Point2f& offset = Point2f::Zero()) const;
-
-    //! @{
-    //! I/O.
-    std::ostream& print(std::ostream& os) const;
-
-    std::istream& read(std::istream& in);
-    //! @}
-
-  private:
-    Point2f _coords;
-    Type _type;
-    ExtremumType _extremum_type;
-    float _extremum_value;
-  };
-
-
-  /*!
-    The 'OERegion' class stands for 'Oriented Elliptic Region' and is
-    dedicated to store important geometric features such as:
-    - DoG
-    - Harris-Affine
-    - Hessian-Affine features and so on...
-   */
-  class DO_SARA_EXPORT OERegion : public InterestPoint
-  {
-  public:
-    //! @brief Default constructor
-    OERegion() = default;
-
-    //! @brief Constructor for circular region.
-    OERegion(const Point2f& coords, float scale)
-      : InterestPoint{coords}
-      , _shape_matrix{Matrix2f::Identity() * (pow(scale, -2))}
-    {
-    }
-
-    //! @brief Destructor.
-    virtual ~OERegion()
-    {
-    }
 
     //! @{
     //! @brief Shape matrix accessor.
@@ -283,20 +213,21 @@ namespace DO { namespace Sara {
     void draw(const Color3ub& c, float scale = 1.f,
               const Point2f& offset = Point2f::Zero()) const;
 
-    //! @{
-    //! I/O
-    std::ostream& print(std::ostream& os) const;
+    friend std::ostream& operator<<(std::ostream&, const OERegion&);
 
-    std::istream& read(std::istream& in);
-    //! @}
+    friend std::istream& operator>>(std::istream&, OERegion&);
 
-  private:
+  public:
+    Point2f _coords;
+    Type _type;
+    ExtremumType _extremum_type;
+    float _extremum_value;
+
     //! @brief Shape matrix encoding the ellipticity of the region.
     Matrix2f _shape_matrix;
     //! @brief Orientation of the region **after** shape normalization.
     float _orientation;
   };
-
 
 } /* namespace Sara */
 } /* namespace DO */

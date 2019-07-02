@@ -452,6 +452,7 @@ void estimate_fundamental_matrix(const Image<Rgb8>& image1,
   }
 
   get_key();
+  close_window();
 }
 
 void estimate_essential_matrix(const Image<Rgb8>& image1,
@@ -727,6 +728,7 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
   }
 
   get_key();
+  close_window();
 }
 
 
@@ -748,7 +750,7 @@ GRAPHICS_MAIN()
   const auto matches = compute_matches(keys1, keys2);
 
   // estimate_homography(image1, image2, keys1, keys2, matches);
-  // estimate_fundamental_matrix(image1, image2, keys1, keys2, matches);
+  estimate_fundamental_matrix(image1, image2, keys1, keys2, matches);
   estimate_essential_matrix(image1, image2, K1, K2, keys1, keys2, matches);
 
   return 0;
