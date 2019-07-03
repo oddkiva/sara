@@ -1,0 +1,13 @@
+include_directories(${DO_Sara_INCLUDE_DIR})
+
+if (SARA_USE_FROM_SOURCE)
+  get_property(DO_Sara_FileSystem_ADDED GLOBAL PROPERTY _DO_Sara_FileSystem_INCLUDED)
+  if (NOT DO_Sara_FileSystem_ADDED)
+    sara_glob_directory(${DO_Sara_SOURCE_DIR}/FileSystem)
+    sara_create_common_variables("FileSystem")
+    if (CMAKE_COMPILER_IS_GNUCXX)
+      sara_set_internal_dependencies("FileSystem" "stdc++fs")
+    endif ()
+    sara_generate_library("FileSystem")
+  endif ()
+endif ()

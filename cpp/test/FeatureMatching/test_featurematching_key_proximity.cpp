@@ -25,12 +25,12 @@ BOOST_AUTO_TEST_SUITE(TestKeyProximity)
 BOOST_AUTO_TEST_CASE(test_computations)
 {
   auto key_proximity_predicate = KeyProximity{};
-  auto f1 = OERegion{ Point2f{ 0.f, 0.f }, 1.f };
-  auto f2 = OERegion{ Point2f{ 0.f, 0.1f }, 1.1f };
+  auto f1 = OERegion{Point2f{0.f, 0.f}, 1.f};
+  auto f2 = OERegion{Point2f{0.f, 0.1f}, 1.1f};
 
   BOOST_CHECK_EQUAL(
-    key_proximity_predicate.mapped_squared_metric(f1).covariance_matrix(),
-    Matrix2f::Identity());
+      key_proximity_predicate.mapped_squared_metric(f1).covariance_matrix(),
+      Matrix2f::Identity());
 
   BOOST_CHECK(key_proximity_predicate(f1, f2));
 }

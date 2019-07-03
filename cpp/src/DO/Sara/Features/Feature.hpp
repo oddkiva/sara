@@ -167,7 +167,6 @@ namespace DO { namespace Sara {
     Type type;
     ExtremumType extremum_type;
     //! @}
-
   };
 
   //! @}

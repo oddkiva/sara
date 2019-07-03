@@ -68,7 +68,7 @@ namespace DO { namespace Sara {
                        const std::string& name)
   {
     using namespace std;
-    ofstream file{ name.c_str() };
+    ofstream file{name.c_str()};
     if (!file.is_open())
     {
       cerr << "Can't open file" << std::endl;

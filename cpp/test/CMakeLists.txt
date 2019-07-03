@@ -37,6 +37,7 @@ add_subdirectory(FeatureDescriptors)
 add_subdirectory(Match)
 add_subdirectory(FeatureMatching)
 add_subdirectory(MultiViewGeometry)
+add_subdirectory(SfM)
 
 add_subdirectory(NeuralNetworks)
 

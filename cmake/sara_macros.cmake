@@ -67,6 +67,7 @@ macro (sara_populate_available_components)
   # Base libraries.
   sara_append_components(DO_Sara_COMPONENTS Core)
   sara_append_components(DO_Sara_COMPONENTS Graphics)
+  sara_append_components(DO_Sara_COMPONENTS FileSystem)
 
   # Image and Video I/O.
   sara_append_components(DO_Sara_COMPONENTS ImageIO)
@@ -88,6 +89,7 @@ macro (sara_populate_available_components)
 
   # Multiple view geometry.
   sara_append_components(DO_Sara_COMPONENTS MultiViewGeometry)
+  sara_append_components(DO_Sara_COMPONENTS SfM)
 
   # Disjoint sets.
   sara_append_components(DO_Sara_COMPONENTS DisjointSets)

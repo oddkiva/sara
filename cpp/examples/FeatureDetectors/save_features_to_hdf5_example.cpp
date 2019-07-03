@@ -9,9 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-//! @file
-
-#include <DO/Sara/Core/H5.hpp>
+#include <DO/Sara/Core/HDF5.hpp>
 
 
 using namespace DO::Sara;
