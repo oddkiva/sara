@@ -9,15 +9,5 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Sara/Core/Image.hpp>
-#include <DO/Sara/FeatureDescriptors.hpp>
-#include <DO/Sara/FeatureDetectors.hpp>
-#include <DO/Sara/FeatureMatching.hpp>
-
-
-namespace DO::Sara {
-
-auto compute_sift_keypoints(const Image<float>& image)
-    -> Set<OERegion, RealDescriptor>;
-
-} /* namespace DO::Sara */
+//! @file
+//! @brief Master header file of the SfM module.
