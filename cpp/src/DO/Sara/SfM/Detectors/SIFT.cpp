@@ -14,7 +14,7 @@
 
 namespace DO::Sara {
 
-Set<OERegion, RealDescriptor> detect_sift_keypoints(const Image<float>& image)
+Set<OERegion, RealDescriptor> compute_sift_keypoints(const Image<float>& image)
 {
   using namespace std;
 

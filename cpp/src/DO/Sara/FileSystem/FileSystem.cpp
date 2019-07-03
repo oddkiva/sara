@@ -1,5 +1,3 @@
-#pragma once
-
 #include <DO/Sara/FileSystem/FileSystem.hpp>
 
 #include <algorithm>
