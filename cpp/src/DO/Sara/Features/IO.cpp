@@ -24,7 +24,7 @@ namespace DO { namespace Sara {
 
   template bool
   read_keypoints<std::uint8_t>(std::vector<OERegion>& features,
-                               TensorView_<std::uint8_t, 2>& descriptors,
+                               Tensor_<std::uint8_t, 2>& descriptors,
                                const std::string& name);
 
   template bool write_keypoints<float>(const std::vector<OERegion>& features,

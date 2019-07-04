@@ -20,9 +20,9 @@
 
 namespace DO { namespace Sara {
 
-	class DO_SARA_EXPORT AnnMatcher
-	{
-	public:
+  class DO_SARA_EXPORT AnnMatcher
+  {
+  public:
     //! @{
     //! @brief Constructors.
     AnnMatcher(const Set<OERegion, RealDescriptor>& keys1,
@@ -39,24 +39,24 @@ namespace DO { namespace Sara {
     //! @brief Return matches.
     std::vector<Match> compute_matches();
 
-		std::vector<Match> compute_self_matches()
+    std::vector<Match> compute_self_matches()
     {
       return compute_matches();
     }
     //! @}
 
-	private: /* data members */
+  private: /* data members */
     //! Input parameters.
     const Set<OERegion, RealDescriptor>& _keys1;
     const Set<OERegion, RealDescriptor>& _keys2;
-		float _squared_ratio_thres;
+    float _squared_ratio_thres;
     //! Internals.
     KeyProximity _is_too_close;
     std::size_t _max_neighbors;
     std::vector<int> _vec_indices;
     std::vector<float> _vec_dists;
     bool _self_matching;
-	};
+  };
 
 } /* namespace Sara */
 } /* namespace DO */

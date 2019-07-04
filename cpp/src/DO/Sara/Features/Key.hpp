@@ -16,7 +16,7 @@
 #include <Eigen/StdVector>
 
 #include <DO/Sara/Core/StdVectorHelpers.hpp>
-#include <DO/Sara/Core/Tensor.hpp>
+#include <DO/Sara/Core/Numpy.hpp>
 
 #include <DO/Sara/Features/Feature.hpp>
 
@@ -41,6 +41,10 @@ namespace DO { namespace Sara {
 
   template <>
   struct Bin<BinaryDescriptor> { using value_type = unsigned char; };
+
+
+  template <typename T>
+  using DescriptorMatrix = Tensor_<T, 2>;
 
 
   template <typename F, DescriptorType D>
@@ -102,12 +106,12 @@ namespace DO { namespace Sara {
     //! @brief return the i-th feature descriptor. 'v' as in feature vector.
     inline descriptor_type v(size_t i)
     {
-      return descriptors[i];
+      return descriptors.matrix().row(i);
     }
 
     inline const_descriptor_type v(size_t i) const
     {
-      return descriptors[i];
+      return descriptors.matrix().row(i);
     }
     //! @}
 

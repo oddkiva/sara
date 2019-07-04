@@ -139,7 +139,7 @@ namespace DO { namespace Sara {
 
 
   template <typename T, int O>
-  inline auto vstack(TensorView<T, 2, O>& x, TensorView<T, 2, O>& y)
+  inline auto vstack(const TensorView<T, 2, O>& x, const TensorView<T, 2, O>& y)
       -> Tensor<T, 2, O>
   {
     if (x.cols() != y.cols())

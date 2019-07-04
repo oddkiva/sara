@@ -30,7 +30,7 @@ namespace DO { namespace Sara {
     };
 
     // Create the ordered list sorted by decreasing strength.
-    auto idx_score_pairs = vector<IndexScore>{ features.size() };
+    auto idx_score_pairs = vector<IndexScore>{features.size()};
 
     // Notice that I readily multiply the scores by $c_\textrm{robust}$.
     for (size_t i = 0; i != features.size(); ++i)

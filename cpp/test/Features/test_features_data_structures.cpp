@@ -85,14 +85,15 @@ BOOST_AUTO_TEST_SUITE(TestIO)
 
 BOOST_AUTO_TEST_CASE(test_read_write)
 {
-  const auto num_features = size_t{ 10 };
+  const auto num_features = 10;
 
   // Test construction.
-  auto features = vector<OERegion>{ num_features };
-  auto descriptors = DescriptorMatrix<float>{ num_features, 3 };
+  auto features = vector<OERegion>(num_features);
+  auto descriptors = Tensor_<float, 2>{num_features, 3};
+  auto dmat = descriptors.matrix();
   for (size_t i = 0; i < num_features; ++i)
   {
-    descriptors[i] = (Vector3f::Ones() * float(i)).eval();
+    dmat.row(i) = (RowVector3f::Ones() * float(i)).eval();
     OERegion& f = features[i];
     f.type = OERegion::Type::DoG;
     f.coords = Point2f::Ones() * float(i);
@@ -107,7 +108,7 @@ BOOST_AUTO_TEST_CASE(test_read_write)
 
   // Test read function.
   auto features2 = vector<OERegion>{};
-  auto descriptors2 = DescriptorMatrix<float>{};
+  auto descriptors2 = Tensor_<float, 2>{};
   read_keypoints(features2, descriptors2, "keypoints.txt");
 
   BOOST_REQUIRE_EQUAL(features.size(), features2.size());
@@ -158,9 +159,9 @@ BOOST_AUTO_TEST_CASE(test_methods)
   BOOST_CHECK_EQUAL(set.f(0).coords, Point2f::Ones());
   BOOST_CHECK_EQUAL(const_set.f(0).coords, Point2f::Ones());
 
-  set.v(0) = Point2f::Ones();
-  BOOST_CHECK_EQUAL(set.v(0), Point2f::Ones());
-  BOOST_CHECK_EQUAL(const_set.v(0), Point2f::Ones());
+  set.v(0) = RowVector2f::Ones();
+  BOOST_CHECK_EQUAL(set.v(0), RowVector2f::Ones());
+  BOOST_CHECK_EQUAL(const_set.v(0), RowVector2f::Ones());
 }
 
 BOOST_AUTO_TEST_CASE(test_remove_redundant_features)

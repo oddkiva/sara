@@ -33,7 +33,7 @@ namespace DO { namespace Sara {
     // Equality lambda functor.
     auto compare_equal = [&](size_t i1, size_t i2) {
       return (descriptors.matrix().row(i1) - descriptors.matrix().row(i2))
-                 .squaredNorm() < 1e-3;
+                 .squaredNorm() < 1e-6;
     };
 
     auto dmat = descriptors.matrix();

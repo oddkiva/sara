@@ -585,7 +585,7 @@ namespace DO { namespace Sara {
                            const MultiArrayView<T, N, StorageOrder>& M)
   {
     os << M.sizes() << std::endl;
-    os << M.array() << std::endl;
+    os << M.flat_array() << std::endl;
     return os;
   }
 
