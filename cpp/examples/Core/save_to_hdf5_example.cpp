@@ -1,3 +1,8 @@
+// N.B.: there is an easy API that does this in a very few lines of code. But we
+// keep it as a code reference.
+//
+// #include <DO/Sara/Core/HDF5.hpp>  // will do the job and see unit tests.
+
 #include <DO/Sara/Core.hpp>
 #include <DO/Sara/Core/Tensor.hpp>
 
