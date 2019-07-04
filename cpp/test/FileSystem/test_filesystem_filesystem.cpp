@@ -12,6 +12,7 @@
 
 #define BOOST_TEST_MODULE "SfM/Filesytem Utilities"
 
+#include <DO/Sara/Defines.hpp>
 #include <DO/Sara/FileSystem.hpp>
 
 #include <boost/test/unit_test.hpp>
@@ -25,8 +26,15 @@ BOOST_AUTO_TEST_SUITE(TestSfMFileSystem)
 
 BOOST_AUTO_TEST_CASE(test_ls)
 {
-  auto images = sara::ls(
-      "/mnt/a1cc5981-3655-4f74-9c62-37253d79c82d/sfm/Alamo/images", ".jpg");
+  {
+    auto images = sara::ls(fs::temp_directory_path().string(), ".jpg");
+    BOOST_CHECK(images.empty());
+  }
+
+  {
+    auto images = sara::ls(src_path("../../../data/"), ".jpg");
+    BOOST_CHECK(!images.empty());
+  }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

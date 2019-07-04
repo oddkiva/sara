@@ -6,7 +6,8 @@
 #include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include <iostream>
+
+namespace fs = boost::filesystem;
 
 
 BOOST_AUTO_TEST_CASE(test_csv_read_write)
@@ -14,8 +15,7 @@ BOOST_AUTO_TEST_CASE(test_csv_read_write)
   using namespace DO::Sara;
   using tuple_type = std::tuple<int, std::string>;
 
-  const auto filepath =
-      (boost::filesystem::temp_directory_path() / "test.csv").string();
+  const auto filepath = (fs::temp_directory_path() / "test.csv").string();
 
   // Write data to CSV.
   {
@@ -39,4 +39,6 @@ BOOST_AUTO_TEST_CASE(test_csv_read_write)
     BOOST_CHECK_EQUAL(i1, 1);
     BOOST_CHECK_EQUAL(s1, "one");
   }
+
+  fs::remove(filepath);
 }

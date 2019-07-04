@@ -150,6 +150,11 @@ struct H5File
   {
   }
 
+  ~H5File()
+  {
+    file->close();
+  }
+
   auto group(const std::string& group_name)
   {
     auto group_it = groups.find(group_name);
@@ -186,20 +191,6 @@ struct H5File
     using vector_type = Eigen::Matrix<hsize_t, Rank, 1>;
 
     auto dataset = H5::DataSet(file->openDataSet(dataset_name));
-
-    // // Retrieve the data types (int, float, double...)?
-    // auto type_class = dataset.getTypeClass();
-    // auto float_type = dataset.getFloatType();
-
-    // // Retrieve the data endianness.
-    // auto order_string = H5std_string{};
-    // auto order = float_type.getOrder(order_string);
-    // std::cout << "order_string = " << order_string << std::endl;
-    // std::cout << "order = " << order << std::endl;
-
-    // // Number of elements in bytes.
-    // auto byte_size = float_type.getSize();
-    // std::cout << "file data byte size = " << byte_size << std::endl;
 
     // File data space.
     auto file_data_space = dataset.getSpace();

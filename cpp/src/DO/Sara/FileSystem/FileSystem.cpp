@@ -1,3 +1,4 @@
+#include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/FileSystem/FileSystem.hpp>
 
 #include <algorithm>
@@ -36,13 +37,11 @@ auto ls(const std::string& dirpath, const std::string& ext_filter)
                              " is not a folder!"};
 
   // Now parsing...
-  std::cout << "\nParsing file directory: '" << in_path.string() << "'"
-            << std::endl;
-  std::cout << "Found:" << std::endl;
+  SARA_DEBUG << "Parsing file directory: "
+             << "'" << fs::canonical(in_path).string() << "'" << std::endl;
 
   auto filepaths = std::vector<std::string>{};
 
-  auto file_count = 0u;
   auto end_iter = fs::directory_iterator{};
   for (auto dir_i = fs::directory_iterator{in_path}; dir_i != end_iter; ++dir_i)
   {
@@ -50,18 +49,21 @@ auto ls(const std::string& dirpath, const std::string& ext_filter)
       continue;
 
     auto ext = fs::extension(dir_i->path());
-
     std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+
     if (ext == ext_filter)
-    {
-      std::cout << "[" << file_count << "]  " << dir_i->path().filename()
-                << std::endl;
-
-      filepaths.push_back(dir_i->path().string());
-
-      ++file_count;
-    }
+      filepaths.push_back(fs::canonical(dir_i->path()).string());
   }
+
+  if (filepaths.empty())
+    SARA_DEBUG << "Did not found files with extension: " << ext_filter << std::endl;
+  else
+  {
+    SARA_DEBUG << "Found:" << std::endl;
+    for (auto i = 0u; i < filepaths.size(); ++i)
+      SARA_DEBUG << "[" << i << "]  " << filepaths[i] << std::endl;
+  }
+
 
   return filepaths;
 }
