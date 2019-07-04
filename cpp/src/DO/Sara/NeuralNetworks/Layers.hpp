@@ -17,6 +17,7 @@ namespace DO { namespace Sara {
     auto operator()(const Tensor_<float, 4>& x) const
     {
       constexpr auto N = 4;
+
       const Vector4i strides{1, w.size(0), 1, 1};
       const Vector4i offset{0, 1, 0, 0};
 
@@ -24,8 +25,9 @@ namespace DO { namespace Sara {
       auto grad_y = nabla_w(x);
 
       // Determine the sizes of the kernel.
-      Matrix<int, N, 1> k_sizes;
+      auto k_sizes = Matrix<int, N, 1>{};
       k_sizes << w.sizes()[N - 1], w.sizes().head(N - 1);
+
       const auto krows = std::accumulate(k_sizes.data() + 1, k_sizes.data() + N,
                                          1, std::multiplies<int>());
       const auto kcols = k_sizes[0];
@@ -39,7 +41,7 @@ namespace DO { namespace Sara {
 
       // Perform the convolution.
       auto y = Tensor_<float, 4>{y_sizes};
-      y.colmajor_view()                                                  //
+      y.colmajor_view()                                                   //
           .reshape(Vector2i{grad_y.matrix().rows(), kt.matrix().cols()})  //
           .matrix() = grad_y.matrix() * kt.matrix();
 
@@ -48,9 +50,10 @@ namespace DO { namespace Sara {
 
     auto nabla_w(const Tensor_<float, 4>& x) const
     {
+      constexpr auto N = 4;
+
       const Vector4i strides{1, w.size(0), 1, 1};
       const Vector4i offset{0, 1, 0, 0};
-      constexpr auto N = 4;
 
       // Determine the sizes of the kernel.
       Matrix<int, N, 1> k_sizes;
