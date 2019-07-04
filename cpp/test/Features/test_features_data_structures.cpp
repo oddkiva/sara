@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE(test_methods)
 {
   // Test constructor.
   KeypointList<OERegion, float> set;
-  BOOST_CHECK_EQUAL(set.size(), 0u);
+  BOOST_CHECK_EQUAL(size(set), 0);
 
   // Test resize function.
   features(set).resize(10);
@@ -193,8 +193,8 @@ BOOST_AUTO_TEST_CASE(test_remove_redundant_features)
 
   remove_redundant_features(features, descriptors);
   Matrix2f expected_descriptor_matrix;
-  expected_descriptor_matrix.col(0) = Vector2f::Zero();
-  expected_descriptor_matrix.col(1) = Vector2f::Ones();
+  expected_descriptor_matrix.row(0) = RowVector2f::Zero();
+  expected_descriptor_matrix.row(1) = RowVector2f::Ones();
 
   BOOST_CHECK_EQUAL(expected_descriptor_matrix, descriptors.matrix());
 }

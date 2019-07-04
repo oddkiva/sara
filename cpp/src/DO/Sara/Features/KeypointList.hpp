@@ -68,7 +68,7 @@ namespace DO { namespace Sara {
   }
 
   template <typename F, typename T>
-  inline auto resize(const KeypointList<F, T>& keys, int num, int dim)
+  inline auto resize(KeypointList<F, T>& keys, int num, int dim)
   {
     auto& [f, d] = keys;
     f.resize(num);
@@ -81,7 +81,10 @@ namespace DO { namespace Sara {
     const auto& [f1, d1] = keys1;
     const auto& [f2, d2] = keys2;
 
-    return std::make_tuple(::append(f1, f2), vstack(d1, d2));
+    auto f = f1;
+    ::append(f, f2);
+
+    return std::make_tuple(f1, vstack(d1, d2));
   }
 
 
