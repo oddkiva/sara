@@ -16,8 +16,8 @@ if (WIN32 AND SARA_USE_VLD)
   link_directories(${VLD_LINK_DIRECTORIES})
 endif ()
 
-#add_subdirectory(Clustering)
 add_subdirectory(Core)
+add_subdirectory(FileSystem)
 add_subdirectory(Graphics)
 add_subdirectory(ImageIO)
 if (SARA_BUILD_VIDEOIO)
@@ -37,7 +37,6 @@ add_subdirectory(FeatureDescriptors)
 add_subdirectory(Match)
 add_subdirectory(FeatureMatching)
 add_subdirectory(MultiViewGeometry)
-add_subdirectory(SfM)
 
 add_subdirectory(NeuralNetworks)
 
