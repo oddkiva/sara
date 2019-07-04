@@ -234,12 +234,7 @@ macro (sara_append_library _library_name
   # 2. Bookmark the project to make sure the library is created only once.
   set_property(GLOBAL PROPERTY _DO_Sara_${_library_name}_INCLUDED 1)
 
-  # 3. Include third-party library directories.
-  if (NOT "${_include_dirs}" STREQUAL "")
-    include_directories(${_include_dirs})
-  endif ()
-
-  # 4. Create the project:
+  # 3. Create the project:
   if (NOT "${_src_files}" STREQUAL "")
     # - Case 1: the project contains 'cpp' source files
     #   Specify the source files.
@@ -247,11 +242,17 @@ macro (sara_append_library _library_name
       ${DO_Sara_DIR}/cmake/UseDOSara${_library_name}.cmake
       ${_hdr_files} ${_src_files})
 
-    # Link with other libraries.
+    # 4. Include third-party library directories.
+    if (NOT "${_include_dirs}" STREQUAL "")
+      target_include_directories(DO_Sara_${_library_name} PRIVATE
+        ${_include_dirs})
+    endif ()
+
+    # 5. Link with other libraries.
     sara_step_message("Linking project 'DO_Sara_${_library_name}' with "
                       "'${_lib_dependencies}'")
 
-    target_link_libraries( DO_Sara_${_library_name} ${_lib_dependencies})
+    target_link_libraries(DO_Sara_${_library_name} ${_lib_dependencies})
 
     # Form the compiled library output name.
     set(_library_output_basename DO_Sara_${_library_name})

@@ -7,8 +7,7 @@ find_package(DO_Sara COMPONENTS
   Match FeatureMatching MultiViewGeometry REQUIRED)
 
 add_executable(essential_matrix_estimation_example
-  essential_matrix_estimation_example.cpp
-  sift.cpp sift.hpp)
+  essential_matrix_estimation_example.cpp)
 
 set_target_properties(essential_matrix_estimation_example PROPERTIES
   COMPILE_FLAGS ${SARA_DEFINITIONS})

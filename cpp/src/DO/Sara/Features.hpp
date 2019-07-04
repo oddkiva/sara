@@ -18,7 +18,7 @@
 
 // Data structures
 #include <DO/Sara/Features/Feature.hpp>
-#include <DO/Sara/Features/Key.hpp>
+#include <DO/Sara/Features/KeypointList.hpp>
 
 // Utilities, View, I/O
 #include <DO/Sara/Features/Utilities.hpp>

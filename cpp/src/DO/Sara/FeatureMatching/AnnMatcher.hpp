@@ -25,11 +25,11 @@ namespace DO { namespace Sara {
   public:
     //! @{
     //! @brief Constructors.
-    AnnMatcher(const Set<OERegion, RealDescriptor>& keys1,
-               const Set<OERegion, RealDescriptor>& keys2,
+    AnnMatcher(const KeypointList<OERegion, float>& keys1,
+               const KeypointList<OERegion, float>& keys2,
                float sift_ratio_thres = 1.2f);
 
-    AnnMatcher(const Set<OERegion, RealDescriptor>& keys,
+    AnnMatcher(const KeypointList<OERegion, float>& keys,
                float sift_ratio_thres = 1.2f,
                float min_max_metric_dist_thres = 0.5f,
                float pixel_dist_thres = 10.f);
@@ -47,8 +47,8 @@ namespace DO { namespace Sara {
 
   private: /* data members */
     //! Input parameters.
-    const Set<OERegion, RealDescriptor>& _keys1;
-    const Set<OERegion, RealDescriptor>& _keys2;
+    const KeypointList<OERegion, float>& _keys1;
+    const KeypointList<OERegion, float>& _keys2;
     float _squared_ratio_thres;
     //! Internals.
     KeyProximity _is_too_close;

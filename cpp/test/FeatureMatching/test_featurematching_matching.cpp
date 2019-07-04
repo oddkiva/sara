@@ -29,16 +29,16 @@ BOOST_AUTO_TEST_CASE(test_ann_matching)
 
   keys1.resize(1, 2);
   keys1.features[0].coords = Point2f::Zero();
-  keys1.descriptors[0] = Vector2f::Zero();
+  keys1.descriptors.matrix().row(0) = RowVector2f::Zero();
 
   keys2.resize(10, 2);
   for (size_t i = 0; i < keys2.size(); ++i)
   {
-    keys2.features[i].coords = Point2f::Ones()*float(i);
-    keys2.descriptors[i] = Vector2f::Ones()*float(i);
+    keys2.f(i).coords = Point2f::Ones() * float(i);
+    keys2.v(i).matrix() = RowVector2f::Ones() * float(i);
   }
 
-  AnnMatcher matcher{ keys1, keys2, 0.6f };
+  AnnMatcher matcher{keys1, keys2, 0.6f};
   auto matches = matcher.compute_matches();
 
   BOOST_CHECK_EQUAL(1u, matches.size());

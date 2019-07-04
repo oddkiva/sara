@@ -25,23 +25,27 @@ const auto file2 = src_path("../../../data/GuardOnBlonde.tif");
 
 
 void load(Image<Rgb8>& image1, Image<Rgb8>& image2,
-          Set<OERegion, RealDescriptor>& keys1,
-          Set<OERegion, RealDescriptor>& keys2, vector<Match>& matches)
+          KeypointList<OERegion, float>& keys1,
+          KeypointList<OERegion, float>& keys2,
+          vector<Match>& matches)
 {
   cout << "Loading images" << endl;
   image1 = imread<Rgb8>(file1);
   image2 = imread<Rgb8>(file2);
 
   cout << "Computing/Reading keypoints" << endl;
-  auto keys1 = compute_sift_keypoints(image1.convert<float>());
-  auto keys2 = compute_sift_keypoints(image2.convert<float>());
+  keys1 = compute_sift_keypoints(image1.convert<float>());
+  keys2 = compute_sift_keypoints(image2.convert<float>());
+
   auto& [features1, dmat1] = keys1;
   auto& [features2, dmat2] = keys2;
+
   cout << "Image 1: " << features1.size() << " keypoints" << endl;
   cout << "Image 2: " << features2.size() << " keypoints" << endl;
 
   SARA_CHECK(features1.size());
   SARA_CHECK(dmat1.size());
+
   SARA_CHECK(features2.size());
   SARA_CHECK(dmat2.size());
 
@@ -57,8 +61,8 @@ GRAPHICS_MAIN()
   // Load images.
   auto image1 = Image<Rgb8>{};
   auto image2 = Image<Rgb8>{};
-  auto keys1 = Set<OERegion, RealDescriptor>{};
-  auto keys2 = Set<OERegion, RealDescriptor>{};
+  auto keys1 = KeypointList<OERegion, float>{};
+  auto keys2 = KeypointList<OERegion, float>{};
   auto matches = vector<Match>{};
   load(image1, image2, keys1, keys2, matches);
 

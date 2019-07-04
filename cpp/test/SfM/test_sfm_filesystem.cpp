@@ -23,7 +23,7 @@ using namespace std;
 
 BOOST_AUTO_TEST_SUITE(TestSfMFileSystem)
 
-BOOST_AUTO_TEST_CASE(test_)
+BOOST_AUTO_TEST_CASE(test_ls)
 {
   auto images = sara::ls(
       "/mnt/a1cc5981-3655-4f74-9c62-37253d79c82d/sfm/Alamo/images", ".jpg");

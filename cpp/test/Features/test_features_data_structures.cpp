@@ -129,39 +129,46 @@ BOOST_AUTO_TEST_SUITE(TestSet)
 BOOST_AUTO_TEST_CASE(test_methods)
 {
   // Test constructor.
-  Set<OERegion, RealDescriptor> set;
+  KeypointList<OERegion, float> set;
   BOOST_CHECK_EQUAL(set.size(), 0u);
 
   // Test resize function.
-  set.features.resize(10);
-  BOOST_CHECK_THROW(set.size(), std::runtime_error);
+  features(set).resize(10);
+  BOOST_CHECK(!size_consistency_predicate(set));
 
-  set.resize(10, 2);
-  BOOST_CHECK_EQUAL(set.size(), 10u);
-  BOOST_CHECK_EQUAL(set.features.size(), 10u);
-  BOOST_CHECK_EQUAL(set.descriptors.size(), 10u); // Test swap.
+  resize(set, 10, 2);
+  BOOST_CHECK(size_consistency_predicate(set));
+  BOOST_CHECK_EQUAL(size(set), 10u);
+  BOOST_CHECK_EQUAL(features(set).size(), 10u);
+  BOOST_CHECK_EQUAL(descriptors(set).rows(), 10); // Test swap.
 
-  Set<OERegion, RealDescriptor> set2;
-  set2.resize(20, 2);
+  KeypointList<OERegion, float> set2;
+  resize(set2, 20, 2);
 
-  set.swap(set2);
-  BOOST_CHECK_EQUAL(set.size(), 20u);
-  BOOST_CHECK_EQUAL(set2.size(), 10u);
+  std::swap(set, set2);
+  BOOST_CHECK_EQUAL(size(set), 20);
+  BOOST_CHECK_EQUAL(size(set2), 10);
 
   // Test append.
-  set.append(set2);
-  BOOST_CHECK_EQUAL(set.size(), 30u);
+  set = stack(set, set2);
+  BOOST_CHECK_EQUAL(size(set), 30);
 
   // Test accessors.
   const auto& const_set = set;
 
-  set.f(0).coords = Point2f::Ones();
-  BOOST_CHECK_EQUAL(set.f(0).coords, Point2f::Ones());
-  BOOST_CHECK_EQUAL(const_set.f(0).coords, Point2f::Ones());
+  auto& [f, d] = set;
+  const auto& [fc, dc] = const_set;
 
-  set.v(0) = RowVector2f::Ones();
-  BOOST_CHECK_EQUAL(set.v(0), RowVector2f::Ones());
-  BOOST_CHECK_EQUAL(const_set.v(0), RowVector2f::Ones());
+  auto dmat = d.matrix();
+  auto dmatc = dc.matrix();
+
+  f[0].coords = Point2f::Ones();
+  BOOST_CHECK_EQUAL(f[0].coords, Point2f::Ones());
+  BOOST_CHECK_EQUAL(fc[0].coords, Point2f::Ones());
+
+  dmat.row(0) = RowVector2f::Ones();
+  BOOST_CHECK_EQUAL(dmat.row(0), RowVector2f::Ones());
+  BOOST_CHECK_EQUAL(dmatc.row(0), RowVector2f::Ones());
 }
 
 BOOST_AUTO_TEST_CASE(test_remove_redundant_features)

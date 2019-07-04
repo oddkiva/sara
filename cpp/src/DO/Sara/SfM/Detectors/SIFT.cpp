@@ -16,7 +16,7 @@
 namespace DO::Sara {
 
 auto compute_sift_keypoints(const Image<float>& image)
-    -> std::tuple<std::vector<OERegion>, Tensor_<float, 2>>
+    -> KeypointList<OERegion, float>
 {
   using namespace std;
 

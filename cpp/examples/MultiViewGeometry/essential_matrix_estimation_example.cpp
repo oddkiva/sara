@@ -9,14 +9,13 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include "sift.hpp"
-
 #include <DO/Sara/FeatureMatching.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/Match.hpp>
 #include <DO/Sara/MultiViewGeometry.hpp>
 #include <DO/Sara/MultiViewGeometry/Estimators/FivePointAlgorithms.hpp>
+#include <DO/Sara/SfM/Detectors/SIFT.hpp>
 
 
 using namespace std;
@@ -89,29 +88,29 @@ auto read_internal_camera_parameters(const std::string& filepath) -> Matrix3f
 // =============================================================================
 // Feature detection and matching.
 //
-auto compute_keypoints(Set<OERegion, RealDescriptor>& keys1,
-                       Set<OERegion, RealDescriptor>& keys2)
+auto compute_keypoints(KeypointList<OERegion, float>& keys1,
+                       KeypointList<OERegion, float>& keys2)
 {
   print_stage("Computing/Reading keypoints");
 
 #ifdef COMPUTE_KEYPOINTS
-  auto sifts1 = compute_sift_keypoints(image1.convert<float>());
-  auto sifts2 = compute_sift_keypoints(image2.convert<float>());
-  keys1.append(sifts1);
-  keys2.append(sifts2);
+  keys1 = compute_sift_keypoints(image1.convert<float>());
+  keys2 = compute_sift_keypoints(image2.convert<float>());
   cout << "Image 1: " << keys1.size() << " keypoints" << endl;
   cout << "Image 2: " << keys2.size() << " keypoints" << endl;
 
-  write_keypoints(sifts1.features, sifts1.descriptors,
-                  data_dir + "/" + "0000.key");
-  write_keypoints(sifts2.features, sifts2.descriptors,
-                  data_dir + "/" + "0001.key");
+  const auto& [f1, d1] = keys1;
+  const auto& [f2, d2] = keys2;
+
+  write_keypoints(f1, d1, data_dir + "/" + "0000.key");
+  write_keypoints(f2, d2, data_dir + "/" + "0001.key");
 
 #else
-  read_keypoints(keys1.features, keys1.descriptors,
-                 data_dir + "/" + "0000.key");
-  read_keypoints(keys2.features, keys2.descriptors,
-                 data_dir + "/" + "0001.key");
+  auto& [f1, d1] = keys1;
+  auto& [f2, d2] = keys2;
+
+  read_keypoints(f1, d1, data_dir + "/" + "0000.key");
+  read_keypoints(f2, d2, data_dir + "/" + "0001.key");
 #endif
 }
 
@@ -119,8 +118,8 @@ auto compute_keypoints(Set<OERegion, RealDescriptor>& keys1,
 // more cryptic but more powerful to manipulate data.
 //
 // Convert a set of matches to a tensor.
-auto compute_matches(const Set<OERegion, RealDescriptor>& keys1,
-                     const Set<OERegion, RealDescriptor>& keys2)
+auto compute_matches(const KeypointList<OERegion, float>& keys1,
+                     const KeypointList<OERegion, float>& keys2)
 {
   print_stage("Computing Matches");
   AnnMatcher matcher{keys1, keys2, 0.6f};
@@ -136,8 +135,8 @@ auto compute_matches(const Set<OERegion, RealDescriptor>& keys1,
 // Multiview geometry estimation.
 //
 void estimate_homography(const Image<Rgb8>& image1, const Image<Rgb8>& image2,
-                         const Set<OERegion, RealDescriptor>& keys1,
-                         const Set<OERegion, RealDescriptor>& keys2,
+                         const KeypointList<OERegion, float>& keys1,
+                         const KeypointList<OERegion, float>& keys2,
                          const vector<Match>& matches)
 {
   // ==========================================================================
@@ -166,8 +165,10 @@ void estimate_homography(const Image<Rgb8>& image1, const Image<Rgb8>& image2,
 
   // ==========================================================================
   // Normalize the points.
-  const auto p1 = extract_centers(keys1.features);
-  const auto p2 = extract_centers(keys2.features);
+  const auto& f1 = features(keys1);
+  const auto& f2 = features(keys2);
+  const auto p1 = extract_centers(f1);
+  const auto p2 = extract_centers(f2);
 
   auto P1 = homogeneous(p1);
   auto P2 = homogeneous(p2);
@@ -287,8 +288,8 @@ void estimate_homography(const Image<Rgb8>& image1, const Image<Rgb8>& image2,
 
 void estimate_fundamental_matrix(const Image<Rgb8>& image1,
                                  const Image<Rgb8>& image2,
-                                 const Set<OERegion, RealDescriptor>& keys1,
-                                 const Set<OERegion, RealDescriptor>& keys2,
+                                 const KeypointList<OERegion, float>& keys1,
+                                 const KeypointList<OERegion, float>& keys2,
                                  const vector<Match>& matches)
 {
   // ==========================================================================
@@ -314,8 +315,10 @@ void estimate_fundamental_matrix(const Image<Rgb8>& image1,
   // ==========================================================================
   // Image coordinates.
   const auto to_double = [](const float& src) { return double(src); };
-  const auto p1 = extract_centers(keys1.features).cwise_transform(to_double);
-  const auto p2 = extract_centers(keys2.features).cwise_transform(to_double);
+  const auto& f1 = features(keys1);
+  const auto& f2 = features(keys2);
+  const auto p1 = extract_centers(f1).cwise_transform(to_double);
+  const auto p2 = extract_centers(f2).cwise_transform(to_double);
 
   const auto P1 = homogeneous(p1);
   const auto P2 = homogeneous(p2);
@@ -459,8 +462,8 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
                                const Image<Rgb8>& image2,
                                const Matrix3f& K1f,
                                const Matrix3f& K2f,
-                               const Set<OERegion, RealDescriptor>& keys1,
-                               const Set<OERegion, RealDescriptor>& keys2,
+                               const KeypointList<OERegion, float>& keys1,
+                               const KeypointList<OERegion, float>& keys2,
                                const vector<Match>& matches)
 {
   // ==========================================================================
@@ -479,8 +482,10 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
   // ==========================================================================
   // Image coordinates.
   const auto to_double = [](const float& src) { return double(src); };
-  const auto p1 = extract_centers(keys1.features).cwise_transform(to_double);
-  const auto p2 = extract_centers(keys2.features).cwise_transform(to_double);
+  const auto& f1 = features(keys1);
+  const auto& f2 = features(keys2);
+  const auto p1 = extract_centers(f1).cwise_transform(to_double);
+  const auto p2 = extract_centers(f2).cwise_transform(to_double);
 
   // Camera coordinates.
   const Matrix3d K1 = K1f.cast<double>();
@@ -743,8 +748,8 @@ GRAPHICS_MAIN()
   const auto K1 = read_internal_camera_parameters(data_dir + "/" + "0000.png.K");
   const auto K2 = read_internal_camera_parameters(data_dir + "/" + "0001.png.K");
 
-  auto keys1 = Set<OERegion, RealDescriptor>{};
-  auto keys2 = Set<OERegion, RealDescriptor>{};
+  auto keys1 = KeypointList<OERegion, float>{};
+  auto keys2 = KeypointList<OERegion, float>{};
   compute_keypoints(keys1, keys2);
 
   const auto matches = compute_matches(keys1, keys2);

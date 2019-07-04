@@ -9,11 +9,11 @@ using namespace std;
 
 bool check_descriptors(const DescriptorMatrix<float>& descriptors)
 {
-  for (size_t i = 0; i < descriptors.size(); ++i)
+  for (auto i = 0; i < descriptors.rows(); ++i)
   {
-    for (size_t j = 0; j < descriptors.dimension(); ++j)
+    for (auto j = 0; j < descriptors.cols(); ++j)
     {
-      if (!isfinite(descriptors[i](j)))
+      if (!isfinite(descriptors(i, j)))
       {
         cerr << "Not a finite number" << endl;
         return false;
@@ -26,7 +26,8 @@ bool check_descriptors(const DescriptorMatrix<float>& descriptors)
 
 GRAPHICS_MAIN()
 {
-  auto image = imread<float>(src_path("../../../data/sunflowerField.jpg"));
+  const auto image_path = src_path("../../../data/sunflowerField.jpg");
+  const auto image = imread<float>(image_path);
 
   print_stage("Detecting SIFT features");
   auto [features, descriptors] = compute_sift_keypoints(image);

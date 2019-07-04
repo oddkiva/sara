@@ -5,7 +5,7 @@ message(STATUS "  - DO_FeatureMatching_Examples")
 find_package(DO_Sara COMPONENTS
   Core Graphics ImageIO
   Features FeatureDetectors FeatureDescriptors
-  KDTree Match FeatureMatching REQUIRED)
+  KDTree Match FeatureMatching SfM REQUIRED)
 
 macro (sara_add_example example)
   add_executable(${example} ${example}.cpp)
