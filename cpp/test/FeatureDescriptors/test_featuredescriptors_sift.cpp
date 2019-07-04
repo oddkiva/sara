@@ -16,7 +16,6 @@
 #include <boost/test/unit_test.hpp>
 
 
-
 using namespace std;
 using namespace DO::Sara;
 
@@ -28,9 +27,8 @@ BOOST_AUTO_TEST_CASE(test_computation)
   constexpr int N{5};
 
   auto grad_polar_coords = Image<Vector2f>{N, N};
-  const Point2f c{grad_polar_coords.sizes().cast<float>() / 2.f};
+  const Point2f c = grad_polar_coords.sizes().cast<float>() / 2.f;
 
-  const Vector2f g{Vector2f::Zero()};
   const auto theta = atan2(0 - c.y(), 0 - c.x());
 
   // Set all gradients to zero except at coords (gx, gy).
