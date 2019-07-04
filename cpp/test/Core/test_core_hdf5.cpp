@@ -3,11 +3,8 @@
 #include <DO/Sara/Core/HDF5.hpp>
 #include <DO/Sara/Core/Tensor.hpp>
 
-
 #include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
-
-#include <iostream>
 
 
 namespace fs = boost::filesystem;
@@ -47,8 +44,6 @@ BOOST_AUTO_TEST_CASE(test_hdf5_read_write_array)
       5, 6;
 
     BOOST_CHECK_EQUAL(array.matrix(), true_matrix);
-
-    std::cout << array.matrix() << std::endl;
   }
 
   fs::remove(filepath);

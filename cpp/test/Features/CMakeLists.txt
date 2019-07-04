@@ -11,3 +11,10 @@ foreach (file ${test_features_SOURCE_FILES})
   get_filename_component(filename "${file}" NAME_WE)
   sara_add_test(${filename} ${file} "${DO_Sara_LIBRARIES}" "Features")
 endforeach ()
+
+
+if (UNIX)
+  find_package(HDF5 COMPONENTS CXX REQUIRED)
+  target_include_directories(test_features_hdf5 PRIVATE ${HDF5_INCLUDE_DIRS})
+  target_link_libraries(test_features_hdf5 PRIVATE ${HDF5_LIBRARIES})
+endif ()

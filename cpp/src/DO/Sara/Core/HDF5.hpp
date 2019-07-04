@@ -195,20 +195,21 @@ struct H5File
     // File data space.
     auto file_data_space = dataset.getSpace();
     auto file_data_rank = file_data_space.getSimpleExtentNdims();
-    std::cout << "file data rank = " << file_data_rank << std::endl;
+    SARA_DEBUG << "file data rank = " << file_data_rank << std::endl;
 
     auto file_data_dims = vector_type{};
     file_data_space.getSimpleExtentDims(file_data_dims.data(), nullptr);
-    std::cout << "file data dims = " << file_data_dims.transpose() << std::endl;
+    SARA_DEBUG << "file data dims = " << file_data_dims.transpose()
+               << std::endl;
 
     // Select the portion of the file data.
     const vector_type file_offset = vector_type::Zero();
     const auto file_count = file_data_dims;
     file_data_space.selectHyperslab(H5S_SELECT_SET, file_count.data(),
                                     file_offset.data());
-    std::cout << "Selected src offset = " << file_offset.transpose()
-              << std::endl;
-    std::cout << "Selected src count = " << file_count.transpose() << std::endl;
+    SARA_DEBUG << "Selected src offset = " << file_offset.transpose()
+               << std::endl;
+    SARA_DEBUG << "Selected src count = " << file_count.transpose() << std::endl;
 
     // Select the portion of the destination data.
     const vector_type dst_offset = vector_type::Zero();
