@@ -8,13 +8,13 @@
 namespace sara = DO::Sara;
 
 
-int main(int, char**)
+void detect_keypoints()
 {
-  const auto dirpath = fs::path{"/Users/david/Desktop/Datasets/sfm/castle_int"};
+  const auto dirpath = fs::path{"/home/david/Desktop/Datasets/sfm/castle_int"};
   auto image_paths = sara::ls(dirpath.string(), ".png");
 
   auto h5_file = sara::H5File{
-      "/Users/david/Desktop/Datasets/sfm/castle_int.h5", H5F_ACC_TRUNC};
+      "/home/david/Desktop/Datasets/sfm/castle_int.h5", H5F_ACC_TRUNC};
 
   std::for_each(
       std::begin(image_paths), std::end(image_paths), [&](const auto& path) {
@@ -29,9 +29,41 @@ int main(int, char**)
 
         const auto& [f, v] = keys;
 
+        SARA_DEBUG << "Saving SIFT keypoints of " << path << "..." << std::endl;
         h5_file.write_dataset(group_name + "/" + "features", tensor_view(f));
         h5_file.write_dataset(group_name + "/" + "descriptors", v);
       });
 
-  return 0;
+}
+
+void read_keypoints()
+{
+  const auto dirpath = fs::path{"/home/david/Desktop/Datasets/sfm/castle_int"};
+  auto image_paths = sara::ls(dirpath.string(), ".png");
+
+  auto h5_file = sara::H5File{
+      "/home/david/Desktop/Datasets/sfm/castle_int.h5", H5F_ACC_RDONLY};
+
+  std::for_each(
+      std::begin(image_paths), std::end(image_paths), [&](const auto& path) {
+        SARA_DEBUG << "Reading image " << path << "..." << std::endl;
+        const auto image = sara::imread<float>(path);
+
+        const auto group_name = sara::basename(path);
+
+        auto features = sara::Tensor_<sara::OERegion, 1>{};
+        auto descriptors = sara::Tensor_<float, 2>{};
+
+        SARA_DEBUG << "Read DoG features for" << path << "..." << std::endl;
+        h5_file.read_dataset(group_name + "/" + "features", features);
+
+        SARA_DEBUG << "Read SIFT descriptors for " << path << "..." << std::endl;
+        h5_file.read_dataset(group_name + "/" + "descriptors", descriptors);
+      });
+}
+
+int main()
+{
+  //detect_keypoints();
+  read_keypoints();
 }
