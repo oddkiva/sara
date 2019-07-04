@@ -17,7 +17,7 @@ int main(int, char**)
       "/Users/david/Desktop/Datasets/sfm/castle_int.h5", H5F_ACC_TRUNC};
 
   std::for_each(std::begin(image_paths), std::end(image_paths),
-                [](const auto& path) {
+                [&](const auto& path) {
                   SARA_DEBUG << "Reading image " << path << "..." << std::endl;
                   auto image = sara::imread<float>(path);
 
@@ -27,16 +27,17 @@ int main(int, char**)
                   auto group_name = sara::basename(path);
                   h5_file.group(group_name);
 
-                  const auto features_view = sara ::TensorView_<Feature, 1>{
-                      keypoints.features.data(), keypoints.features.size()};
-                  path.write_dataset(basename + "/" + "features",
-                                     features_view);
+                  //const auto features_view = sara ::TensorView_<sara::OERegion, 1>{
+                  //    keypoints.features.data(), keypoints.features.size()};
+                  //path.write_dataset(group_name + "/" + "features",
+                  //                   features_view);
 
-                  const auto descriptors_view = sara::TensorView_<float, 2>{
-                      keypoints.descriptors.matrix().data(),
-                      {keypoints.descriptors.dimension(),
-                       keypoints.descriptors.size()}};
-                  path.write_dataset(basename + "/" + "descriptors", descriptors_view)
+                  //const auto descriptors_view = sara::TensorView_<float, 2>{
+                  //    keypoints.descriptors.matrix().data(),
+                  //    {keypoints.descriptors.dimension(),
+                  //     keypoints.descriptors.size()}};
+                  //path.write_dataset(group_name + "/" + "descriptors",
+                  //                   descriptors_view);
                 });
 
   return 0;

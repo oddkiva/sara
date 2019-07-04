@@ -165,28 +165,30 @@ BOOST_AUTO_TEST_CASE(test_methods)
 
 BOOST_AUTO_TEST_CASE(test_remove_redundant_features)
 {
-  Set<OERegion, RealDescriptor> set;
+  auto features = std::vector<OERegion>{};
+  auto descriptors = Tensor_<float, 2>{};
 
   // Check corner case.
-  set.features.resize(10);
-  BOOST_CHECK_THROW(remove_redundant_features(set), runtime_error);
+  features.resize(10);
+  BOOST_CHECK_THROW(remove_redundant_features(features, descriptors), runtime_error);
 
   // Check normal case.
-  set.resize(7, 2);
-  set.descriptors[0] = Vector2f::Zero();
-  set.descriptors[1] = Vector2f::Zero();
-  set.descriptors[2] = Vector2f::Ones();
-  set.descriptors[3] = Vector2f::Ones();
-  set.descriptors[4] = Vector2f::Ones();
-  set.descriptors[5] = Vector2f::Zero();
-  set.descriptors[6] = Vector2f::Zero();
+  features.resize(7);
+  descriptors.resize(7, 2);
+  descriptors.matrix().row(0) = Vector2f::Zero();
+  descriptors.matrix().row(1) = Vector2f::Zero();
+  descriptors.matrix().row(2) = Vector2f::Ones();
+  descriptors.matrix().row(3) = Vector2f::Ones();
+  descriptors.matrix().row(4) = Vector2f::Ones();
+  descriptors.matrix().row(5) = Vector2f::Zero();
+  descriptors.matrix().row(6) = Vector2f::Zero();
 
-  remove_redundant_features(set);
+  remove_redundant_features(features, descriptors);
   Matrix2f expected_descriptor_matrix;
   expected_descriptor_matrix.col(0) = Vector2f::Zero();
   expected_descriptor_matrix.col(1) = Vector2f::Ones();
 
-  BOOST_CHECK_EQUAL(expected_descriptor_matrix, set.descriptors.matrix());
+  BOOST_CHECK_EQUAL(expected_descriptor_matrix, descriptors.matrix());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
