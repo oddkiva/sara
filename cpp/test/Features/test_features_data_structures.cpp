@@ -183,13 +183,13 @@ BOOST_AUTO_TEST_CASE(test_remove_redundant_features)
   // Check normal case.
   features.resize(7);
   descriptors.resize(7, 2);
-  descriptors.matrix().row(0) = Vector2f::Zero();
-  descriptors.matrix().row(1) = Vector2f::Zero();
-  descriptors.matrix().row(2) = Vector2f::Ones();
-  descriptors.matrix().row(3) = Vector2f::Ones();
-  descriptors.matrix().row(4) = Vector2f::Ones();
-  descriptors.matrix().row(5) = Vector2f::Zero();
-  descriptors.matrix().row(6) = Vector2f::Zero();
+  descriptors.matrix().row(0) = RowVector2f::Zero();
+  descriptors.matrix().row(1) = RowVector2f::Zero();
+  descriptors.matrix().row(2) = RowVector2f::Ones();
+  descriptors.matrix().row(3) = RowVector2f::Ones();
+  descriptors.matrix().row(4) = RowVector2f::Ones();
+  descriptors.matrix().row(5) = RowVector2f::Zero();
+  descriptors.matrix().row(6) = RowVector2f::Zero();
 
   remove_redundant_features(features, descriptors);
   Matrix2f expected_descriptor_matrix;
