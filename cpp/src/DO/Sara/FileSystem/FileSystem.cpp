@@ -8,7 +8,7 @@ namespace DO::Sara {
 
 auto basename(const std::string& filepath) -> std::string
 {
-  return fs::path{filepath}.stem();
+  return fs::basename(filepath);
 }
 
 auto mkdir(const std::string& dirpath) -> void
@@ -20,13 +20,13 @@ auto mkdir(const std::string& dirpath) -> void
 
 auto cp(const std::string& from, const std::string& to) -> void
 {
-  fs::copy_file(from, to, fs::copy_options::overwrite_existing);
+  fs::copy_file(from, to, fs::copy_option::overwrite_if_exists);
 }
 
 auto ls(const std::string& dirpath, const std::string& ext_filter)
     -> std::vector<std::string>
 {
-  auto in_path = fs::path{fs::system_complete(fs::path(dirpath))};
+  auto in_path = fs::system_complete(fs::path{dirpath});
 
   if (!fs::exists(in_path))
     throw std::runtime_error{"Error: directory does not exist"};
@@ -49,7 +49,7 @@ auto ls(const std::string& dirpath, const std::string& ext_filter)
     if (!fs::is_regular_file(dir_i->status()))
       continue;
 
-    auto ext = std::string{fs::path{dir_i->path()}.extension()};
+    auto ext = fs::extension(dir_i->path());
 
     std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
     if (ext == ext_filter)

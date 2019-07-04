@@ -164,7 +164,7 @@ struct H5File
 
   template <typename T, int Rank>
   auto write_dataset(const std::string& dataset_name,
-                     const DO::Sara::Tensor_<T, Rank>& data)
+                     const DO::Sara::TensorView_<T, Rank>& data)
   {
     const auto data_type = CalculateH5Type<T>::value();
 

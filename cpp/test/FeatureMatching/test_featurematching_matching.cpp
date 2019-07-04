@@ -9,7 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#define BOOST_TEST_MODULE "FeatureMatching/Approximate Nearest Neighbor-Based Matching"
+#define BOOST_TEST_MODULE                                                      \
+  "FeatureMatching/Approximate Nearest Neighbor-Based Matching"
 
 #include <boost/test/unit_test.hpp>
 
