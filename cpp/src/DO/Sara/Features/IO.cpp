@@ -9,33 +9,32 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include <DO/Sara/Features.hpp>
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
-
-#include <DO/Sara/Features.hpp>
 
 
 namespace DO { namespace Sara {
 
   template bool read_keypoints<float>(std::vector<OERegion>& features,
-                                      DescriptorMatrix<float>& descriptors,
+                                      Tensor_<float, 2>& descriptors,
                                       const std::string& name);
 
   template bool
-  read_keypoints<unsigned char>(std::vector<OERegion>& features,
-                                DescriptorMatrix<unsigned char>& descriptors,
-                                const std::string& name);
+  read_keypoints<std::uint8_t>(std::vector<OERegion>& features,
+                               TensorView_<std::uint8_t, 2>& descriptors,
+                               const std::string& name);
+
+  template bool write_keypoints<float>(const std::vector<OERegion>& features,
+                                       const TensorView_<float, 2>& descriptors,
+                                       const std::string& name);
 
   template bool
-  write_keypoints<float>(const std::vector<OERegion>& features,
-                         const DescriptorMatrix<float>& descriptors,
-                         const std::string& name);
-
-  template bool write_keypoints<unsigned char>(
-      const std::vector<OERegion>& features,
-      const DescriptorMatrix<unsigned char>& descriptors,
-      const std::string& name);
+  write_keypoints<std::uint8_t>(const std::vector<OERegion>& features,
+                                const TensorView_<std::uint8_t, 2>& descriptors,
+                                const std::string& name);
 
 } /* namespace Sara */
 } /* namespace DO */

@@ -11,6 +11,7 @@
 
 #define BOOST_TEST_MODULE "Core/Numpy-like Functions"
 
+#include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/Numpy.hpp>
 
 #include <boost/test/unit_test.hpp>
@@ -47,6 +48,24 @@ BOOST_AUTO_TEST_CASE(test_vstack)
      Eigen::MatrixXi::Ones(5, 3) * 3;
 
   BOOST_CHECK(vstack_res == true_vstack_res);
+}
+
+BOOST_AUTO_TEST_CASE(test_vstack_tensors)
+{
+  auto t0 = Tensor<int, 2>{{1, 3}};
+  auto t1 = Tensor<int, 2>{{3, 3}};
+  t0.matrix() = Eigen::MatrixXi::Ones(1, 3);
+  t1.matrix() = Eigen::MatrixXi::Ones(3, 3) * 2;
+
+  auto vstack_res = vstack(t0, t1);
+
+  auto vstack_true = Eigen::MatrixXi(4, 3);
+  vstack_true <<                        //
+      Eigen::MatrixXi::Ones(1, 3),      //
+      Eigen::MatrixXi::Ones(3, 3) * 2;  //
+
+  SARA_DEBUG << "vstack =\n" << vstack_res.matrix() << std::endl;
+  BOOST_CHECK(vstack_res.matrix() == vstack_true);
 }
 
 BOOST_AUTO_TEST_CASE(test_meshgrid)

@@ -16,8 +16,8 @@
 #include <Eigen/StdVector>
 
 #include <DO/Sara/Core/StdVectorHelpers.hpp>
+#include <DO/Sara/Core/Tensor.hpp>
 
-#include <DO/Sara/Features/DescriptorMatrix.hpp>
 #include <DO/Sara/Features/Feature.hpp>
 
 
@@ -49,10 +49,8 @@ namespace DO { namespace Sara {
   public:
     using bin_type = typename Bin<D>::value_type;
 
-    using descriptor_type =
-      typename DescriptorMatrix<bin_type>::descriptor_type;
-    using const_descriptor_type =
-      typename DescriptorMatrix<bin_type>::const_descriptor_type;
+    using descriptor_type = Matrix<bin_type, 1, Dynamic>;
+    using const_descriptor_type = const Matrix<bin_type, 1, Dynamic>;
 
     using feature_type = F;
     using feature_reference = F&;
@@ -84,7 +82,7 @@ namespace DO { namespace Sara {
     inline void append(const Set& other)
     {
       ::append(features, other.features);
-      descriptors.append(other.descriptors);
+      descriptors = vstack(descriptors, other.descriptors);
     }
 
     //! @{
@@ -114,7 +112,7 @@ namespace DO { namespace Sara {
     //! @}
 
     std::vector<feature_type> features;
-    DescriptorMatrix<bin_type> descriptors;
+    Tensor_<bin_type, 2> descriptors;
   };
 
   //! @}

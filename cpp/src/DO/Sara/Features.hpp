@@ -18,7 +18,6 @@
 
 // Data structures
 #include <DO/Sara/Features/Feature.hpp>
-#include <DO/Sara/Features/DescriptorMatrix.hpp>
 #include <DO/Sara/Features/Key.hpp>
 
 // Utilities, View, I/O

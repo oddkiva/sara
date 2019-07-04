@@ -53,14 +53,16 @@ namespace DO { namespace Sara {
       DoH,
       MSER,
       HesAff,
-      HesLap
+      HesLap,
+      Undefined
     };
 
     enum class ExtremumType : std::int8_t
     {
       Min = -1,
       Saddle = 0,
-      Max = 1
+      Max = 1,
+      Undefined = -2
     };
     //! @}
 
@@ -145,7 +147,7 @@ namespace DO { namespace Sara {
     friend std::istream& operator>>(std::istream&, OERegion&);
 
     //! @brief Center of the feature.
-    Point2f coords;
+    Point2f coords{Point2f::Zero()};
 
     //! @brief Shape matrix encoding the ellipticity of the region.
     //!
@@ -153,19 +155,19 @@ namespace DO { namespace Sara {
     //! $\varepsilon$, i.e.:
     //! $$ \varepsilon = \{ x \in R^2 : (x-c)^T M (x-c) = 1 \} $$
     //! where $c$ is the center of the region.
-    Matrix2f shape_matrix;
+    Matrix2f shape_matrix{Matrix2f::Zero()};
 
     //! @brief Orientation of the region **after** shape normalization.
     //!
     //! This completely determines the affine transformation that transforms the
     //! unit circle to the elliptic shape of the region.
-    float orientation;
+    float orientation{0};
 
     //! @{
     //! @brief Characterization of the feature type.
-    float extremum_value;
-    Type type;
-    ExtremumType extremum_type;
+    float extremum_value{0};
+    Type type{Type::Undefined};
+    ExtremumType extremum_type{ExtremumType::Undefined};
     //! @}
   };
 

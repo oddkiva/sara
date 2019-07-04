@@ -14,6 +14,7 @@
 #pragma once
 
 #include <DO/Sara/Core/EigenExtension.hpp>
+#include <DO/Sara/Core/Tensor.hpp>
 
 
 namespace DO { namespace Sara {
@@ -34,7 +35,6 @@ namespace DO { namespace Sara {
       -> Eigen::Map<
           const Eigen::Matrix<typename Mat::Scalar, Eigen::Dynamic, 1>>
   {
-    using Scalar = typename Mat::Scalar;
     return {x.data(), x.size()};
   }
 
@@ -42,7 +42,6 @@ namespace DO { namespace Sara {
   inline auto flatten(Mat& x)
       -> Eigen::Map<Eigen::Matrix<typename Mat::Scalar, Eigen::Dynamic, 1>>
   {
-    using Scalar = typename Mat::Scalar;
     return {x.data(), x.size()};
   }
 
@@ -93,7 +92,7 @@ namespace DO { namespace Sara {
   auto vstack(const Mat& x, const Mat& y)  //
       -> Eigen::Matrix<typename Mat::Scalar, Eigen::Dynamic, Eigen::Dynamic>
   {
-    if (x.rows() != y.rows())
+    if (x.cols() != y.cols())
       throw std::runtime_error{
           "The number of columns are not equal for vstack!"};
 
@@ -136,6 +135,19 @@ namespace DO { namespace Sara {
     }
 
     return stack_x;
+  }
+
+
+  template <typename T, int O>
+  inline auto vstack(TensorView<T, 2, O>& x, TensorView<T, 2, O>& y)
+      -> Tensor<T, 2, O>
+  {
+    if (x.cols() != y.cols())
+      throw std::runtime_error{
+          "The number of columns are not equal for vstack!"};
+    auto xy = Tensor<T, 2, O>{{x.rows() + y.rows(), x.cols()}};
+    xy.matrix() << x.matrix(), y.matrix();
+    return xy;
   }
 
 } /* namespace Sara */

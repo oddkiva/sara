@@ -25,7 +25,7 @@ namespace DO { namespace Sara {
   void remove_redundant_features(vector<OERegion>& features,
                                  Tensor_<float, 2>& descriptors)
   {
-    if (features.size() != descriptors.rows())
+    if (features.size() != size_t(descriptors.rows()))
       throw std::runtime_error{
         "Fatal: the number of features and descriptors are not equal"
       };
