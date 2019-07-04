@@ -11,9 +11,10 @@
 
 #define BOOST_TEST_MODULE "FeatureDescriptors/SIFT Descriptor"
 
+#include <DO/Sara/FeatureDescriptors/SIFT.hpp>
+
 #include <boost/test/unit_test.hpp>
 
-#include <DO/Sara/FeatureDescriptors/SIFT.hpp>
 
 
 using namespace std;
@@ -41,7 +42,7 @@ BOOST_AUTO_TEST_CASE(test_computation)
   auto feature = OERegion{c, 1.f};
   auto sift = ComputeSIFTDescriptor<>{}(feature, grad_polar_coords);
 
-  // TODO.
+  BOOST_CHECK(sift.matrix() != decltype(sift)::Zero());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
