@@ -80,7 +80,7 @@ void read_features(const Image<unsigned char>& image, const string& filepath)
 {
   cout << "Reading DoG features... " << endl;
   auto features = vector<OERegion>{};
-  DescriptorMatrix<float> descriptors;
+  Tensor_<float, 2> descriptors;
 
   cout << "Reading keypoints..." << endl;
   read_keypoints(features, descriptors, filepath);
@@ -94,7 +94,7 @@ void read_features(const Image<unsigned char>& image, const string& filepath)
   write_keypoints(features, descriptors, name + "_copy" + ext);
 
   auto features2 = vector<OERegion>{};
-  DescriptorMatrix<float> descriptors2;
+  Tensor_<float, 2> descriptors2;
   cout << "Checking written file..." << endl;
   read_keypoints(features2, descriptors2, copy_filepath);
 

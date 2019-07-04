@@ -30,8 +30,14 @@ namespace DO { namespace Sara {
 
   */
 
-  template <typename T>
-  using DescriptorMatrix = Tensor_<T, 2>;
+  template <typename F>
+  inline auto tensor_view(const std::vector<F>& f)
+  {
+    using TensorView = TensorView_<F, 1>;
+    return TensorView{const_cast<F*>(f.data()),
+                      typename TensorView::vector_type{int(f.size())}};
+  }
+
 
   template <typename F, typename T>
   using KeypointList = std::tuple<std::vector<F>, Tensor_<T, 2>>;

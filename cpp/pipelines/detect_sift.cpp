@@ -16,29 +16,22 @@ int main(int, char**)
   auto h5_file = sara::H5File{
       "/Users/david/Desktop/Datasets/sfm/castle_int.h5", H5F_ACC_TRUNC};
 
-  std::for_each(std::begin(image_paths), std::end(image_paths),
-                [&](const auto& path) {
-                  SARA_DEBUG << "Reading image " << path << "..." << std::endl;
-                  auto image = sara::imread<float>(path);
+  std::for_each(
+      std::begin(image_paths), std::end(image_paths), [&](const auto& path) {
+        SARA_DEBUG << "Reading image " << path << "..." << std::endl;
+        const auto image = sara::imread<float>(path);
 
-                  SARA_DEBUG << "Computing SIFT keypoints " << path << "..." << std::endl;
-                  auto keypoints = sara::compute_sift_keypoints(image);
+        SARA_DEBUG << "Computing SIFT keypoints " << path << "..." << std::endl;
+        const auto keys = sara::compute_sift_keypoints(image);
 
-                  auto group_name = sara::basename(path);
-                  h5_file.group(group_name);
+        const auto group_name = sara::basename(path);
+        h5_file.group(group_name);
 
-                  //const auto features_view = sara ::TensorView_<sara::OERegion, 1>{
-                  //    keypoints.features.data(), keypoints.features.size()};
-                  //path.write_dataset(group_name + "/" + "features",
-                  //                   features_view);
+        const auto& [f, v] = keys;
 
-                  //const auto descriptors_view = sara::TensorView_<float, 2>{
-                  //    keypoints.descriptors.matrix().data(),
-                  //    {keypoints.descriptors.dimension(),
-                  //     keypoints.descriptors.size()}};
-                  //path.write_dataset(group_name + "/" + "descriptors",
-                  //                   descriptors_view);
-                });
+        h5_file.write_dataset(group_name + "/" + "features", tensor_view(f));
+        h5_file.write_dataset(group_name + "/" + "descriptors", v);
+      });
 
   return 0;
 }

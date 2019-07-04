@@ -7,7 +7,7 @@ using namespace DO::Sara;
 using namespace std;
 
 
-bool check_descriptors(const DescriptorMatrix<float>& descriptors)
+bool check_descriptors(const TensorView_<float, 2>& descriptors)
 {
   for (auto i = 0; i < descriptors.rows(); ++i)
   {
