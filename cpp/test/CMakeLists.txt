@@ -5,6 +5,7 @@ find_package(Boost
   COMPONENTS filesystem serialization system unit_test_framework
   REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
+add_definitions(-DBOOST_ALL_NO_LIB)
 
 
 message(STATUS "")
