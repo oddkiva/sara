@@ -123,11 +123,12 @@ namespace DO { namespace Sara {
 }
 
 
-
   // Data transformations.
+  DO_SARA_EXPORT
   auto extract_centers(const std::vector<OERegion>& features)
       -> Tensor_<float, 2>;
 
+  DO_SARA_EXPORT
   auto to_point_indices(const TensorView_<int, 2>& samples,
                         const TensorView_<int, 2>& matches)  //
       -> Tensor_<int, 3>;
