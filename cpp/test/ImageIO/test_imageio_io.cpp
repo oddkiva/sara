@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE(test_grayscale_image_read_write)
 
 BOOST_AUTO_TEST_CASE(test_read_exif_info)
 {
-  auto filepath = string{ "image.jpg" };
+  auto filepath = string{"image.jpg"};
   auto exif_info = EXIFInfo{};
   read_exif_info(exif_info, filepath);
 

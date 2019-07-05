@@ -12,6 +12,7 @@
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/HDF5.hpp>
 #include <DO/Sara/FileSystem.hpp>
+#include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/SfM/Detectors/SIFT.hpp>
 
@@ -22,7 +23,7 @@ namespace sara = DO::Sara;
 void detect_keypoints()
 {
   const auto dirpath = fs::path{"/home/david/Desktop/Datasets/sfm/castle_int"};
-  auto image_paths = sara::ls(dirpath.string(), ".png");
+  const auto image_paths = sara::ls(dirpath.string(), ".png");
 
   auto h5_file = sara::H5File{
       "/home/david/Desktop/Datasets/sfm/castle_int.h5", H5F_ACC_TRUNC};
@@ -52,8 +53,8 @@ void read_keypoints()
   const auto dirpath = fs::path{"/home/david/Desktop/Datasets/sfm/castle_int"};
   auto image_paths = sara::ls(dirpath.string(), ".png");
 
-  auto h5_file = sara::H5File{
-      "/home/david/Desktop/Datasets/sfm/castle_int.h5", H5F_ACC_RDONLY};
+  auto h5_file = sara::H5File{"/home/david/Desktop/Datasets/sfm/castle_int.h5",
+                              H5F_ACC_RDONLY};
 
   std::for_each(
       std::begin(image_paths), std::end(image_paths), [&](const auto& path) {
@@ -65,16 +66,34 @@ void read_keypoints()
         auto features = sara::Tensor_<sara::OERegion, 1>{};
         auto descriptors = sara::Tensor_<float, 2>{};
 
-        SARA_DEBUG << "Read DoG features for" << path << "..." << std::endl;
+        SARA_DEBUG << "Read DoG features for " << group_name << "..." << std::endl;
         h5_file.read_dataset(group_name + "/" + "features", features);
 
-        SARA_DEBUG << "Read SIFT descriptors for " << path << "..." << std::endl;
+        SARA_DEBUG << "Read SIFT descriptors for " << group_name << "..." << std::endl;
         h5_file.read_dataset(group_name + "/" + "descriptors", descriptors);
+
+
+        // Visual inspection.
+        if (!sara::active_window())
+        {
+          sara::create_window(image.sizes() / 2, group_name);
+          sara::set_antialiasing();
+        }
+
+        if (sara::get_sizes(sara::active_window()) != image.sizes() / 2)
+          sara::resize_window(image.sizes() / 2);
+
+        sara::display(image, 0, 0, 0.5);
+        sara::draw_oe_regions(features.begin(), features.end(), sara::Red8, 0.5f);
+        sara::get_key();
+        sara::close_window();
       });
 }
 
-int main()
+GRAPHICS_MAIN()
 {
   //detect_keypoints();
   read_keypoints();
+
+  return 0;
 }

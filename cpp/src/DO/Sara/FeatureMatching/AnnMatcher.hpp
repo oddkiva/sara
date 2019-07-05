@@ -15,7 +15,9 @@
 
 #include <DO/Sara/Defines.hpp>
 
-#include <DO/Sara/Features/Feature.hpp>
+#include <DO/Sara/FeatureMatching/KeyProximity.hpp>
+#include <DO/Sara/Features/KeypointList.hpp>
+#include <DO/Sara/Match/Match.hpp>
 
 
 namespace DO { namespace Sara {

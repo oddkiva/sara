@@ -10,13 +10,11 @@
 // ========================================================================== //
 
 #include <DO/Sara/Core/MultiArray/InfiniteMultiArrayView.hpp>
+#include <DO/Sara/Core/Tensor.hpp>
 #include <DO/Sara/Core/Timer.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
-
-#include <DO/Sara/Core/Tensor.hpp>
-#include <DO/Sara/ImageProcessing/GemmBasedConvolution.hpp>
 
 
 using namespace std;

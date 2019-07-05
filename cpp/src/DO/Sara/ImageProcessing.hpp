@@ -27,6 +27,9 @@
 #include <DO/Sara/ImageProcessing/LinearFiltering.hpp>
 #include <DO/Sara/ImageProcessing/Deriche.hpp>
 
+// GEMM-based convolution.
+#include <DO/Sara/ImageProcessing/GemmBasedConvolution.hpp>
+
 // Gradient, Laplacian, Hessian matrix, norm, orientation, second moment matrix.
 #include <DO/Sara/ImageProcessing/Differential.hpp>
 #include <DO/Sara/ImageProcessing/Determinant.hpp>

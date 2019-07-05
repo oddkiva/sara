@@ -40,9 +40,9 @@ namespace DO { namespace Sara {
     auto ellipse_ori = atan2(U(1,0), U(0,0));
 
     // Start and end points of orientation line.
-    Matrix2f L{ affinity().block(0, 0, 2, 2) };
-    Vector2f p1{ z * (center() + offset) };
-    Vector2f p2{ p1 + z * L * Vector2f{ 1.f, 0.f } };
+    Matrix2f L{affinity().block(0, 0, 2, 2)};
+    Vector2f p1{z * (center() + offset)};
+    Vector2f p2{p1 + z * L * Vector2f{1.f, 0.f}};
 
     // Draw.
     if (z * a > 1.f && z * b > 1.f && (p1 - p2).squaredNorm() > 1.f)
@@ -74,15 +74,6 @@ namespace DO { namespace Sara {
       draw_line(c1, c2, color, 3);
       draw_line(c3, c4, color, 3);
     }
-  }
-
-  void draw_oe_regions(const vector<OERegion>& features,
-                       const Color3ub& color,
-                       float scale,
-                       const Point2f& offset)
-  {
-    for (size_t i = 0; i < features.size(); ++i)
-      features[i].draw(color, scale, offset);
   }
 
 } /* namespace Sara */
