@@ -35,7 +35,7 @@ namespace DO::Sara::Univariate {
 
     int degree() const
     {
-      return _coeff.size() - 1;
+      return int(_coeff.size()) - 1;
     }
 
     UnivariatePolynomial operator+(const UnivariatePolynomial& other) const

@@ -142,8 +142,10 @@ namespace DO { namespace Sara {
     void draw(const Color3ub& c, float scale = 1.f,
               const Point2f& offset = Point2f::Zero()) const;
 
+    DO_SARA_EXPORT
     friend std::ostream& operator<<(std::ostream&, const OERegion&);
 
+    DO_SARA_EXPORT
     friend std::istream& operator>>(std::istream&, OERegion&);
 
     //! @brief Center of the feature.

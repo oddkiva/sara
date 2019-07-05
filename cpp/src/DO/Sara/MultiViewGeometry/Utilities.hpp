@@ -44,7 +44,7 @@ namespace DO { namespace Sara {
 
   // Geometry.
   template <typename T>
-  auto homogeneous(const TensorView_<T, 2>& x) -> Tensor_<T, 2>
+  inline auto homogeneous(const TensorView_<T, 2>& x) -> Tensor_<T, 2>
   {
     auto X = Tensor_<T, 2>(x.size(0), x.size(1) + 1);
     X.matrix().leftCols(x.size(1)) = x.matrix();
@@ -53,7 +53,7 @@ namespace DO { namespace Sara {
   }
 
   template <typename S>
-  auto compute_normalizer(const TensorView_<S, 2>& X) -> Matrix<S, 3, 3>
+  inline auto compute_normalizer(const TensorView_<S, 2>& X) -> Matrix<S, 3, 3>
   {
     const Matrix<S, 1, 3> min = X.matrix().colwise().minCoeff();
     const Matrix<S, 1, 3> max = X.matrix().colwise().maxCoeff();
@@ -70,7 +70,7 @@ namespace DO { namespace Sara {
   }
 
   template <typename S>
-  auto apply_transform(const Matrix<S, 3, 3>& T, const TensorView_<S, 2>& X)
+  inline auto apply_transform(const Matrix<S, 3, 3>& T, const TensorView_<S, 2>& X)
       -> Tensor_<S, 2>
   {
     auto TX = Tensor_<S, 2>{X.sizes()};
@@ -85,7 +85,7 @@ namespace DO { namespace Sara {
 
   // Elementary transformations.
   template <typename T>
-  auto skew_symmetric_matrix(const Matrix<T, 3, 1>& a) -> Matrix<T, 3, 3>
+  inline auto skew_symmetric_matrix(const Matrix<T, 3, 1>& a) -> Matrix<T, 3, 3>
   {
     auto A = Matrix<T, 3, 3>{};
     A <<  T(0), -a(2),  a(1),
@@ -96,7 +96,7 @@ namespace DO { namespace Sara {
   }
 
   template <typename T>
-  auto rotation_x(T theta) -> Matrix<T, 3, 3>
+  inline auto rotation_x(T theta) -> Matrix<T, 3, 3>
   {
     auto R = Matrix<T, 3, 3>{};
     R << T(1), T(0), T(0), T(0), std::cos(theta), -std::sin(theta), T(0),
@@ -105,7 +105,7 @@ namespace DO { namespace Sara {
   }
 
   template <typename T>
-  auto rotation_y(T phi) -> Matrix<T, 3, 3>
+  inline auto rotation_y(T phi) -> Matrix<T, 3, 3>
   {
     auto R = Matrix<T, 3, 3>{};
     R << std::cos(phi), T(0), -std::sin(phi), T(0), T(1), T(0), std::sin(phi),
@@ -114,14 +114,13 @@ namespace DO { namespace Sara {
   }
 
   template <typename T>
-  auto rotation_z(T kappa) -> Matrix<T, 3, 3>
+  inline auto rotation_z(T kappa) -> Matrix<T, 3, 3>
   {
     auto R = Matrix<T, 3, 3>{};
     R << std::cos(kappa), -std::sin(kappa), T(0), std::sin(kappa),
         std::cos(kappa), T(0), T(0), T(0), T(1);
     return R;
-}
-
+  }
 
   // Data transformations.
   DO_SARA_EXPORT
