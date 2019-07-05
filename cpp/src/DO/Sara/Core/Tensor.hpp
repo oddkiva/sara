@@ -42,6 +42,26 @@ namespace DO { namespace Sara {
   //! @}
 
 
+  //! @{
+  //! @brief View a std::vector as a rank-1 tensor.
+  template <typename T>
+  inline auto tensor_view(const std::vector<T>& v)
+  {
+    using TensorView = TensorView_<T, 1>;
+    return TensorView{const_cast<T*>(v.data()),
+                      typename TensorView::vector_type{int(v.size())}};
+  }
+
+  template <typename T>
+  inline auto tensor_view(std::vector<T>& v)
+  {
+    using TensorView = TensorView_<T, 1>;
+    return TensorView{v.data(),
+                      typename TensorView::vector_type{int(v.size())}};
+  }
+  //! @}
+
+
   //! @brief Reinterpret the tensor view object  as an image view object.
   template <typename T, int N>
   auto image_view(TensorView_<T, N> in) -> ImageView<T, N>

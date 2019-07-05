@@ -31,33 +31,32 @@
 namespace DO::Sara {
 
 template <typename T>
-struct h5_native_type;
+struct CalculateH5Type;
 
-template <>
-struct h5_native_type<float>
-{
-  static H5::PredType value()
-  {
-    return H5::PredType::NATIVE_FLOAT;
-  }
-};
-
-template <>
-struct h5_native_type<double>
-{
-  static H5::PredType value()
-  {
-    return H5::PredType::NATIVE_DOUBLE;
-  }
-};
-
-} /* namespace DO::Sara */
-
-
-namespace DO::Sara {
 
 template <typename T>
-struct CalculateH5Type;
+inline auto calculate_h5_type()
+{
+  return CalculateH5Type<T>::value();
+}
+
+template <>
+struct CalculateH5Type<unsigned short>
+{
+  static inline auto value()
+  {
+    return H5::PredType::NATIVE_USHORT;
+  };
+};
+
+template <>
+struct CalculateH5Type<unsigned int>
+{
+  static inline auto value()
+  {
+    return H5::PredType::NATIVE_UINT;
+  };
+};
 
 template <>
 struct CalculateH5Type<float>
@@ -65,6 +64,15 @@ struct CalculateH5Type<float>
   static inline auto value()
   {
     return H5::PredType::NATIVE_FLOAT;
+  };
+};
+
+template <>
+struct CalculateH5Type<double>
+{
+  static inline auto value()
+  {
+    return H5::PredType::NATIVE_DOUBLE;
   };
 };
 
@@ -94,27 +102,20 @@ struct CalculateH5Type<Matrix<T, M, N>>
     if constexpr (M == 1 || N == 1)
     {
       const hsize_t dims[] = {M * N};
-      return {h5_native_type<T>::value(), 1, dims};
+      return {calculate_h5_type<T>(), 1, dims};
     }
     else
     {
       const hsize_t dims[] = {M, N};
-      return {h5_native_type<T>::value(), 2, dims};
+      return {calculate_h5_type<T>(), 2, dims};
     }
   };
 };
 
 
-template <typename T>
-inline auto calculate_h5_type()
-{
-  return CalculateH5Type<T>::value();
-}
-
-
 #define INSERT_MEMBER(comp_type, struct_t, member_name)                        \
   {                                                                            \
-    using member_type = decltype(struct_t{}.member_name);                      \
+    using member_type = decltype(std::declval<struct_t>().member_name);        \
     const auto member_h5_type = calculate_h5_type<member_type>();              \
     comp_type.insertMember(#member_name, HOFFSET(struct_t, member_name),       \
                            member_h5_type);                                    \

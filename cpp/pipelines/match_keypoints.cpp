@@ -49,10 +49,10 @@ GRAPHICS_MAIN()
   auto adj_list = SpMatrixXi{N, N};
   adj_list.setFromTriplets(edges.begin(), edges.end());
 
-  using EssentialGraph =
-      std::unordered_map<Eigen::Vector2i, sara::EssentialMatrix<double>>;
-  using FundamentalGraph =
-      std::unordered_map<Eigen::Vector2i, sara::FundamentalMatrix<double>>;
+  //using EssentialGraph =
+  //    std::unordered_map<Eigen::Vector2i, sara::EssentialMatrix<double>>;
+  //using FundamentalGraph =
+  //    std::unordered_map<Eigen::Vector2i, sara::FundamentalMatrix<double>>;
 
   for (int i = 0; i < N; ++i)
   {
@@ -76,8 +76,8 @@ GRAPHICS_MAIN()
       sara::set_antialiasing();
       sara::check_matches(Ii, Ij, Mij, true, scale);
 
-      auto Fij = sara::estimate_fundamental_matrix(Mij);
-      auto Eij = sara::estimate_essential_matrix(Mij);
+      //auto Fij = sara::estimate_fundamental_matrix(Mij);
+      //auto Eij = sara::estimate_essential_matrix(Mij);
 
       for (size_t m = 0; m < Mij.size(); ++m)
       {

@@ -40,6 +40,17 @@ auto from_csv(const std::string& filename,
 }
 
 
+template <typename>
+struct is_tuple : std::false_type
+{
+};
+
+template <typename... T>
+struct is_tuple<std::tuple<T...>> : std::true_type
+{
+};
+
+
 template <typename Tuple>
 auto to_csv(const std::vector<Tuple>& array, const std::string& filename)
 {
@@ -47,13 +58,18 @@ auto to_csv(const std::vector<Tuple>& array, const std::string& filename)
   if (!file)
     throw std::runtime_error{"Could not create CSV file!"};
 
-  for (const auto& row: array)
+  for (const auto& row : array)
   {
-    std::apply(
-        [&file](const auto&... elements) {
-          ((file << elements << ","), ...);
-          file << "\n";
-        },
-        row);
+    if constexpr (is_tuple<Tuple>::value)
+    {
+      std::apply(
+          [&file](const auto&... elements) {
+            ((file << elements << ","), ...);
+            file << "\n";
+          },
+          row);
+    }
+    else
+      file << row << "\n";
   }
 }
