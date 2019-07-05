@@ -12,6 +12,7 @@ if (MSVC)
   add_definitions(
     /D_SCL_SECURE_NO_WARNINGS
     /D_CRT_SECURE_NO_DEPRECATE
+    /bigobj
     /wd4251)
   message(STATUS "  - Disabled annoying warnings in MSVC.")
 

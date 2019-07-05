@@ -17,7 +17,7 @@
 #include <DO/Sara/Core/Tensor.hpp>
 #include <DO/Sara/Features/Feature.hpp>
 
-#if defined(__APPLE__)
+#if defined(__APPLE__) || defined(_WIN32)
 # include <H5Cpp.h>
 #else
 # include <hdf5/serial/H5Cpp.h>
