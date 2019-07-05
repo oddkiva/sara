@@ -18,8 +18,11 @@ foreach (file ${pipelines_SOURCE_FILES})
   target_link_libraries(${filename} ${DO_Sara_LIBRARIES})
 endforeach ()
 
+target_include_directories(extract_exif PRIVATE ${HDF5_INCLUDE_DIRS})
+target_link_libraries(extract_exif ${DO_Sara_LIBRARIES} ${HDF5_LIBRARIES})
+
 target_include_directories(detect_sift PRIVATE ${HDF5_INCLUDE_DIRS})
 target_link_libraries(detect_sift ${DO_Sara_LIBRARIES} ${HDF5_LIBRARIES})
 
-target_include_directories(extract_exif PRIVATE ${HDF5_INCLUDE_DIRS})
-target_link_libraries(extract_exif ${DO_Sara_LIBRARIES} ${HDF5_LIBRARIES})
+target_include_directories(match_keypoints PRIVATE ${HDF5_INCLUDE_DIRS})
+target_link_libraries(match_keypoints ${DO_Sara_LIBRARIES} ${HDF5_LIBRARIES})

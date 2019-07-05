@@ -57,13 +57,7 @@ struct CalculateH5Type<ExifMetadata>
   static inline auto value() -> H5::CompType
   {
     auto h5_comp_type = H5::CompType{sizeof(ExifMetadata)};
-
-    using member_type =
-        decltype(std::declval<DO::Sara::ExifMetadata>().focal_length);
-    const auto member_h5_type = calculate_h5_type<member_type>();
-
     INSERT_MEMBER(h5_comp_type, ExifMetadata, focal_length);
-
     INSERT_MEMBER(h5_comp_type, ExifMetadata, focal_length_in_35_mm);
     INSERT_MEMBER(h5_comp_type, ExifMetadata, image_width);
     INSERT_MEMBER(h5_comp_type, ExifMetadata, image_height);

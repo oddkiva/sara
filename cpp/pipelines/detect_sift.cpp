@@ -22,11 +22,19 @@ namespace sara = DO::Sara;
 
 void detect_keypoints()
 {
+#if defined(__APPLE__)
+  const auto dirpath = fs::path{"/Users/david/Desktop/Datasets/sfm/castle_int"};
+  const auto image_paths = sara::ls(dirpath.string(), ".png");
+
+  auto h5_file = sara::H5File{
+      "/Users/david/Desktop/Datasets/sfm/castle_int.h5", H5F_ACC_TRUNC};
+#else
   const auto dirpath = fs::path{"/home/david/Desktop/Datasets/sfm/castle_int"};
   const auto image_paths = sara::ls(dirpath.string(), ".png");
 
   auto h5_file = sara::H5File{
       "/home/david/Desktop/Datasets/sfm/castle_int.h5", H5F_ACC_TRUNC};
+#endif
 
   std::for_each(
       std::begin(image_paths), std::end(image_paths), [&](const auto& path) {
@@ -45,16 +53,21 @@ void detect_keypoints()
         h5_file.write_dataset(group_name + "/" + "features", tensor_view(f));
         h5_file.write_dataset(group_name + "/" + "descriptors", v);
       });
-
 }
 
 void read_keypoints()
 {
+#if defined(__APPLE__)
+  const auto dirpath = fs::path{"/Users/david/Desktop/Datasets/sfm/castle_int"};
+  auto h5_file = sara::H5File{"/Users/david/Desktop/Datasets/sfm/castle_int.h5",
+                              H5F_ACC_RDONLY};
+#else
   const auto dirpath = fs::path{"/home/david/Desktop/Datasets/sfm/castle_int"};
-  auto image_paths = sara::ls(dirpath.string(), ".png");
-
   auto h5_file = sara::H5File{"/home/david/Desktop/Datasets/sfm/castle_int.h5",
                               H5F_ACC_RDONLY};
+#endif
+
+  const auto image_paths = sara::ls(dirpath.string(), ".png");
 
   std::for_each(
       std::begin(image_paths), std::end(image_paths), [&](const auto& path) {
@@ -92,8 +105,7 @@ void read_keypoints()
 
 GRAPHICS_MAIN()
 {
-  //detect_keypoints();
+  detect_keypoints();
   read_keypoints();
-
   return 0;
 }

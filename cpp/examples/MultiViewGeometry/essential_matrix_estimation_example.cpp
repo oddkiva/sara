@@ -22,8 +22,13 @@ using namespace std;
 using namespace DO::Sara;
 
 
+#ifdef __APPLE__
+const auto data_dir =
+    std::string{"/Users/david/Desktop/Datasets/sfm/castle_int"};
+#else
 const auto data_dir =
     std::string{"/home/david/Desktop/Datasets/sfm/castle_int"};
+#endif
 const auto file1 = "0000.png";
 const auto file2 = "0001.png";
 

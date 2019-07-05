@@ -59,6 +59,15 @@ struct CalculateH5Type<unsigned int>
 };
 
 template <>
+struct CalculateH5Type<int>
+{
+  static inline auto value()
+  {
+    return H5::PredType::NATIVE_INT;
+  };
+};
+
+template <>
 struct CalculateH5Type<float>
 {
   static inline auto value()
@@ -184,6 +193,51 @@ struct H5File
     dataset.write(data.data(), data_type);
 
     return dataset;
+  }
+
+  template <typename T>
+  auto read_dataset(const std::string& dataset_name, std::vector<T>& data)
+  {
+    using vector_type = Matrix<hsize_t, 1, Dynamic>;
+    auto dataset = H5::DataSet(file->openDataSet(dataset_name));
+
+    // File data space.
+    auto file_data_space = dataset.getSpace();
+    auto file_data_rank = file_data_space.getSimpleExtentNdims();
+    SARA_DEBUG << "file data rank = " << file_data_rank << std::endl;
+
+    auto file_data_dims = vector_type(file_data_rank);
+    file_data_space.getSimpleExtentDims(file_data_dims.data(), nullptr);
+    SARA_DEBUG << "file data dims = " << file_data_dims.transpose()
+               << std::endl;
+
+    // Select the portion of the file data.
+    const vector_type file_offset = vector_type::Zero(file_data_rank);
+    const auto file_count = file_data_dims;
+    file_data_space.selectHyperslab(H5S_SELECT_SET, file_count.data(),
+                                    file_offset.data());
+    SARA_DEBUG << "Selected src offset = " << file_offset << std::endl;
+    SARA_DEBUG << "Selected src count = " << file_count << std::endl;
+
+    // Select the portion of the destination data.
+    const vector_type dst_offset = vector_type::Zero(file_data_rank);
+    const auto dst_count = file_data_dims;
+    const auto dst_space = H5::DataSpace{file_data_rank, dst_count.data()};
+    dst_space.selectHyperslab(H5S_SELECT_SET, dst_count.data(),
+                              dst_offset.data());
+
+    // Resize the data.
+    auto data_sizes = std::vector<size_t>(file_data_rank);
+    for (auto i = 0; i < file_data_rank; ++i)
+      data_sizes[i] = dst_count[i];
+    const auto data_flat_size =
+        std::accumulate(data_sizes.begin(), data_sizes.end(), size_t(1),
+                        std::multiplies<size_t>());
+    data.resize(data_flat_size);
+
+    // Read the data.
+    dataset.read(data.data(), calculate_h5_type<T>(), dst_space,
+                 file_data_space);
   }
 
   template <typename T, int Rank>
