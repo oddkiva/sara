@@ -14,7 +14,6 @@
 #include <DO/Sara/Defines.hpp>
 
 #include <DO/Sara/Core/Tensor.hpp>
-#include <DO/Sara/FeatureMatching.hpp>
 
 #include <algorithm>
 #include <random>
@@ -31,7 +30,6 @@ namespace DO { namespace Sara {
                       int sample_size,      //
                       int num_data_points)  //
       -> Tensor_<int, 2>;
-
 
   template <typename T>
   inline auto shuffle(const TensorView_<T, 1>& x) -> Tensor_<T, 1>
@@ -120,41 +118,6 @@ namespace DO { namespace Sara {
     R << std::cos(kappa), -std::sin(kappa), T(0), std::sin(kappa),
         std::cos(kappa), T(0), T(0), T(0), T(1);
     return R;
-  }
-
-  // Data transformations.
-  DO_SARA_EXPORT
-  auto extract_centers(const std::vector<OERegion>& features)
-      -> Tensor_<float, 2>;
-
-  DO_SARA_EXPORT
-  auto to_point_indices(const TensorView_<int, 2>& samples,
-                        const TensorView_<int, 2>& matches)  //
-      -> Tensor_<int, 3>;
-
-  template <typename T>
-  auto to_coordinates(const TensorView_<int, 3>& point_indices,
-                      const TensorView_<T, 2>& p1,
-                      const TensorView_<T, 2>& p2)  //
-  {
-    const auto num_samples = point_indices.size(0);
-    const auto sample_size = point_indices.size(1);
-    const auto num_points = 2;
-    const auto coords_dim = p1.size(1);
-
-    auto p = Tensor_<T, 4>{{num_samples, sample_size, num_points, coords_dim}};
-
-    for (auto s = 0; s < num_samples; ++s)
-      for (auto m = 0; m < sample_size; ++m)
-      {
-        auto p1_idx = point_indices(s, m, 0);
-        auto p2_idx = point_indices(s, m, 1);
-
-        p[s][m][0].flat_array() = p1[p1_idx].flat_array();
-        p[s][m][1].flat_array() = p2[p2_idx].flat_array();
-      }
-
-    return p;
   }
 
 } /* namespace Sara */

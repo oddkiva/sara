@@ -65,15 +65,6 @@ auto print_3d_array(const TensorView_<float, 3>& x)
   cout << "]" << endl;
 }
 
-auto to_tensor(const vector<Match>& matches)
-{
-  auto match_tensor = Tensor_<int, 2>{int(matches.size()), 2};
-  for (auto i = 0u; i < matches.size(); ++i)
-    match_tensor[i].flat_array() << matches[i].x_index(), matches[i].y_index();
-  return match_tensor;
-}
-
-
 // =============================================================================
 // I/O utilities.
 //
@@ -189,13 +180,6 @@ void estimate_homography(const Image<Rgb8>& image1, const Image<Rgb8>& image2,
 
   // ==========================================================================
   // Prepare the data for RANSAC.
-  auto to_tensor = [](const vector<Match>& matches) -> Tensor_<int, 2> {
-    auto match_tensor = Tensor_<int, 2>{int(matches.size()), 2};
-    for (auto i = 0u; i < matches.size(); ++i)
-      match_tensor[i].flat_array() << matches[i].x_index(),
-          matches[i].y_index();
-    return match_tensor;
-  };
   const auto M = to_tensor(matches);
   const auto I = to_point_indices(S, M);
   const auto p = to_coordinates(I, p1, p2).transpose({0, 2, 1, 3});

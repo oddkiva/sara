@@ -11,7 +11,9 @@
 
 #pragma once
 
+#include <DO/Sara/MultiViewGeometry/DataTransformations.hpp>
 #include <DO/Sara/MultiViewGeometry/Utilities.hpp>
 
 #include <DO/Sara/MultiViewGeometry/Geometry/Fundamental.hpp>
+
 #include <DO/Sara/MultiViewGeometry/Estimators/EightPointAlgorithms.hpp>
