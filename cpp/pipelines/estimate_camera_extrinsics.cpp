@@ -21,10 +21,11 @@
 
 #include <Eigen/Sparse>
 
+#include <boost/filesystem.hpp>
 
+
+namespace fs = boost::filesystem;
 namespace sara = DO::Sara;
-
-using namespace std;
 
 const auto file1 = src_path("../../../data/All.tif");
 const auto file2 = src_path("../../../data/GuardOnBlonde.tif");

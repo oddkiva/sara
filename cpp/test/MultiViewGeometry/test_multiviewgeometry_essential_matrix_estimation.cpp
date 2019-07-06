@@ -274,14 +274,14 @@ BOOST_AUTO_TEST_CASE(test_compute_normalizer)
 
 BOOST_AUTO_TEST_CASE(test_apply_transform)
 {
-  auto X = Tensor_<float, 2>{3, 3};
+  auto X = Tensor_<double, 2>{3, 3};
   X.matrix() <<
     1, 1, 1,
     2, 2, 1,
     3, 3, 1;
 
   // From Oxford affine covariant features dataset, graf, H1to5P homography.
-  auto H = Matrix3f{};
+  auto H = Matrix3d{};
   H <<
     6.2544644e-01,  5.7759174e-02,  2.2201217e+02,
     2.2240536e-01,  1.1652147e+00, -2.5605611e+01,
@@ -289,7 +289,7 @@ BOOST_AUTO_TEST_CASE(test_apply_transform)
 
   auto HX = apply_transform(H, X);
 
-  BOOST_CHECK(HX.matrix().col(2) == Vector3f::Ones());
+  BOOST_CHECK(HX.matrix().col(2) == Vector3d::Ones());
 }
 
 

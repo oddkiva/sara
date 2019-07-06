@@ -15,9 +15,12 @@
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO/Details/Exif.hpp>
 
+#include <boost/filesystem.hpp>
+
 #include <iterator>
 
 
+namespace fs = boost::filesystem;
 namespace sara = DO::Sara;
 
 
@@ -65,13 +68,13 @@ struct CalculateH5Type<ExifMetadata>
   }
 };
 
-
 } /* namespace DO::Sara */
 
 
 void extract_exif()
 {
-  const auto dirpath = fs::path{"/mnt/a1cc5981-3655-4f74-9c62-37253d79c82d/sfm/Trafalgar/images"};
+  const auto dirpath = fs::path{
+      "/mnt/a1cc5981-3655-4f74-9c62-37253d79c82d/sfm/Trafalgar/images"};
   const auto image_paths = sara::ls(dirpath.string(), ".jpg");
 
   to_csv(image_paths, "/home/david/Desktop/Datasets/Trafalgar.csv");
@@ -97,26 +100,27 @@ void extract_exif()
 
   SARA_CHECK(exif_data.size());
 
-  auto h5_file = sara::H5File{
-      "/home/david/Desktop/Datasets/Trafalgar.h5", H5F_ACC_TRUNC};
+  auto h5_file =
+      sara::H5File{"/home/david/Desktop/Datasets/Trafalgar.h5", H5F_ACC_TRUNC};
   auto exif_view = tensor_view(exif_data);
   h5_file.write_dataset("exif_metadata", exif_view);
 }
 
 void read_exif()
 {
-  const auto dirpath = fs::path{"/mnt/a1cc5981-3655-4f74-9c62-37253d79c82d/sfm/Trafalgar/images"};
+  const auto dirpath = fs::path{
+      "/mnt/a1cc5981-3655-4f74-9c62-37253d79c82d/sfm/Trafalgar/images"};
 
   auto exif_data = sara::Tensor_<sara::ExifMetadata, 1>{};
 
   SARA_CHECK(exif_data.size());
 
-  auto h5_file = sara::H5File{
-      "/home/david/Desktop/Datasets/Trafalgar.h5", H5F_ACC_RDONLY};
+  auto h5_file =
+      sara::H5File{"/home/david/Desktop/Datasets/Trafalgar.h5", H5F_ACC_RDONLY};
 
   h5_file.read_dataset("exif_metadata", exif_data);
 
-  for (const auto& exif: exif_data)
+  for (const auto& exif : exif_data)
     SARA_DEBUG << "fl = " << exif.focal_length
                << " fl35: " << exif.focal_length_in_35_mm
                << " w: " << exif.image_width << " h: " << exif.image_width
