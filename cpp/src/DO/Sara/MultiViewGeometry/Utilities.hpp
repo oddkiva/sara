@@ -122,7 +122,6 @@ namespace DO { namespace Sara {
     return R;
   }
 
-
   // Data transformations.
   DO_SARA_EXPORT
   auto extract_centers(const std::vector<OERegion>& features)
