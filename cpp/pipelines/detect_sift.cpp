@@ -106,6 +106,7 @@ void read_keypoints()
       });
 }
 
+
 GRAPHICS_MAIN()
 {
   detect_keypoints();

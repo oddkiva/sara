@@ -1,5 +1,6 @@
 #pragma once
 
+#include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/Tensor.hpp>
 #include <DO/Sara/MultiViewGeometry/DataTransformations.hpp>
 
@@ -12,7 +13,7 @@ auto ransac(const TensorView_<int, 2>& matches,      //
             const TensorView_<T, 2>& p1,             //
             const TensorView_<T, 2>& p2,             //
             Estimator estimator, Distance distance,  //
-            int num_samples, int tuple_size, T dist_threshold)
+            int num_samples, T dist_threshold)
 {
   // ==========================================================================
   // Point coordinates.
@@ -29,8 +30,8 @@ auto ransac(const TensorView_<int, 2>& matches,      //
 
   // ==========================================================================
   // Generate random samples for RANSAC.
-  constexpr auto N = num_samples;
-  constexpr auto L = tuple_size;
+  const auto& N = num_samples;
+  constexpr auto L = Estimator::num_points;
 
   // M = list of matches.
   const auto& M = matches;

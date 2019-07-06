@@ -15,7 +15,7 @@
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/MultiViewGeometry/DataTransformations.hpp>
 #include <DO/Sara/MultiViewGeometry/Utilities.hpp>
-#include <DO/Sara/MultiViewGeometry/Estimators/FivePointAlgorithms.hpp>
+#include <DO/Sara/MultiViewGeometry/Estimators/EssentialMatrixEstimators.hpp>
 
 #include <boost/test/unit_test.hpp>
 

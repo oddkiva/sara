@@ -1,7 +1,8 @@
 #define BOOST_TEST_MODULE "MultiViewGeometry/Eight Point Algorithm"
 
-#include <DO/Sara/MultiViewGeometry/Estimators/EightPointAlgorithms.hpp>
-#include <DO/Sara/MultiViewGeometry/Geometry/Fundamental.hpp>
+#include <DO/Sara/Core/DebugUtilities.hpp>
+#include <DO/Sara/MultiViewGeometry/Estimators/FundamentalMatrixEstimators.hpp>
+#include <DO/Sara/MultiViewGeometry/Geometry/FundamentalMatrix.hpp>
 
 #include <boost/test/unit_test.hpp>
 
@@ -14,8 +15,12 @@ using namespace std;
 
 BOOST_AUTO_TEST_SUITE(TestEightPoingAlgorithm)
 
-BOOST_AUTO_TEST_CASE(test_solve)
+
+BOOST_AUTO_TEST_CASE(test_eight_point_algorithm)
 {
+  // Check this so that it can be serialized with HDF5.
+  static_assert(sizeof(FundamentalMatrix{}) == sizeof(Eigen::Matrix3d{}));
+
   auto left = Matrix<double, 3, 8>{};
   auto right = Matrix<double, 3, 8>{};
 
@@ -29,15 +34,38 @@ BOOST_AUTO_TEST_CASE(test_solve)
     0.644436, 0.515263, 0.596448, 0.504156, 0.603078, 0.498954, 0.115756, 0.604387,
            1,        1,        1,        1,        1,        1,        1,        1;
 
-  auto F = FundamentalMatrix<>{};
-  eight_point_fundamental_matrix(left, right, F);
+  const auto [F] = EightPointAlgorithm{}(left, right);
 
-  std::cout << "Algebraic errors" << std::endl;
   for (int i = 0; i < 8; ++i)
   {
-    std::cout << right.col(i).transpose() * F.matrix() * left.col(i) << std::endl;
     const double error = right.col(i).transpose() * F.matrix() * left.col(i);
-    BOOST_CHECK_LE(error, 1e-12);
+    BOOST_CHECK_LE(error, 1e-3);
+  }
+
+  // Is rank 2?
+  BOOST_CHECK(F.rank_two_predicate());
+
+  const auto [el, er] = F.extract_epipoles();
+
+  for (int i = 0; i < 8; ++i)
+  {
+    const auto xl = left.col(i);
+    const auto xr = right.col(i);
+
+    const double err1 = er.transpose() * F.matrix() * xl;
+    const double err2 = xr.transpose() * F.matrix() * el;
+
+    BOOST_CHECK_SMALL(err1, 1e-12);
+    BOOST_CHECK_SMALL(err2, 1e-12);
+
+    // Check that the right epipole is lying in each right epipolar line.
+    const double err1a = er.transpose() * F.right_epipolar_line(xl);
+
+    // Check that the left epipole is lying in each left epipolar line.
+    const double err2a = F.left_epipolar_line(xr).transpose() * el;
+
+    BOOST_CHECK_SMALL(err1a, 1e-12);
+    BOOST_CHECK_SMALL(err2a, 1e-12);
   }
 }
 

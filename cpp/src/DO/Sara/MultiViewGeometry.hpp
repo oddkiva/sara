@@ -14,6 +14,8 @@
 #include <DO/Sara/MultiViewGeometry/DataTransformations.hpp>
 #include <DO/Sara/MultiViewGeometry/Utilities.hpp>
 
-#include <DO/Sara/MultiViewGeometry/Geometry/Fundamental.hpp>
+#include <DO/Sara/MultiViewGeometry/Geometry/FundamentalMatrix.hpp>
 
-#include <DO/Sara/MultiViewGeometry/Estimators/EightPointAlgorithms.hpp>
+#include <DO/Sara/MultiViewGeometry/Estimators/EssentialMatrixEstimators.hpp>
+#include <DO/Sara/MultiViewGeometry/Estimators/FundamentalMatrixEstimators.hpp>
+#include <DO/Sara/MultiViewGeometry/Estimators/HomographyEstimator.hpp>

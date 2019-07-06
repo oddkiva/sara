@@ -107,14 +107,20 @@ auto read_matches(H5File& file, const std::string& name)
 
 GRAPHICS_MAIN()
 {
+#if defined(__APPLE__)
   const auto dirpath = fs::path{"/Users/david/Desktop/Datasets/sfm/castle_int"};
-  auto image_paths = sara::ls(dirpath.string(), ".png");
-  std::sort(image_paths.begin(), image_paths.end());
-  const auto N = int(image_paths.size());
-
   auto h5_file = sara::H5File{"/Users/david/Desktop/Datasets/sfm/castle_int.h5",
                               H5F_ACC_RDWR};
+#else
+  const auto dirpath = fs::path{"/home/david/Desktop/Datasets/sfm/castle_int"};
+  auto h5_file = sara::H5File{"/home/david/Desktop/Datasets/sfm/castle_int.h5",
+                              H5F_ACC_RDWR};
+#endif
 
+  auto image_paths = sara::ls(dirpath.string(), ".png");
+  std::sort(image_paths.begin(), image_paths.end());
+
+  const auto N = int(image_paths.size());
   for (int i = 0; i < N; ++i)
   {
     for (int j = i + 1; j < N; ++j)

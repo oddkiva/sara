@@ -14,7 +14,6 @@
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/Match.hpp>
 #include <DO/Sara/MultiViewGeometry.hpp>
-#include <DO/Sara/MultiViewGeometry/Estimators/FivePointAlgorithms.hpp>
 #include <DO/Sara/SfM/Detectors/SIFT.hpp>
 
 
@@ -84,8 +83,8 @@ auto read_internal_camera_parameters(const std::string& filepath) -> Matrix3f
 // =============================================================================
 // Feature detection and matching.
 //
-auto compute_keypoints(KeypointList<OERegion, float>& keys1,
-                       KeypointList<OERegion, float>& keys2)
+auto get_keypoints(KeypointList<OERegion, float>& keys1,
+                   KeypointList<OERegion, float>& keys2)
 {
   print_stage("Computing/Reading keypoints");
 
@@ -100,7 +99,6 @@ auto compute_keypoints(KeypointList<OERegion, float>& keys1,
 
   write_keypoints(f1, d1, data_dir + "/" + "0000.key");
   write_keypoints(f2, d2, data_dir + "/" + "0001.key");
-
 #else
   auto& [f1, d1] = keys1;
   auto& [f2, d2] = keys2;
@@ -333,6 +331,8 @@ void estimate_fundamental_matrix(const Image<Rgb8>& image1,
   auto num_inliers_best = 0;
   auto subset_best = 0;
 
+  auto f_estimator = EightPointAlgorithm{};
+
   auto algebraic_error = [](const auto& F, const auto& X, const auto& Y) {
     return std::abs(Y.transpose() * F.matrix() * X);
   };
@@ -348,8 +348,7 @@ void estimate_fundamental_matrix(const Image<Rgb8>& image1,
     const Matrix<double, 3, 8> Yn = Pn[n][1].colmajor_view().matrix();
 
     // Estimate the fundamental matrix.
-    auto F = FundamentalMatrix<>{};
-    eight_point_fundamental_matrix(Xn, Yn, F);
+    auto [F] = f_estimator(Xn, Yn);
 
     // Unnormalize the fundamental matrix.
     F.matrix() = T2.transpose() * F.matrix().normalized() * T1;
@@ -739,7 +738,7 @@ GRAPHICS_MAIN()
 
   auto keys1 = KeypointList<OERegion, float>{};
   auto keys2 = KeypointList<OERegion, float>{};
-  compute_keypoints(keys1, keys2);
+  get_keypoints(keys1, keys2);
 
   const auto matches = compute_matches(keys1, keys2);
 

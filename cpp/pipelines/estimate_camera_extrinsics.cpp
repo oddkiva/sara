@@ -15,8 +15,8 @@
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
-#include <DO/Sara/MultiViewGeometry/Geometry/Essential.hpp>
-#include <DO/Sara/MultiViewGeometry/Geometry/Fundamental.hpp>
+#include <DO/Sara/MultiViewGeometry/Geometry/EssentialMatrix.hpp>
+#include <DO/Sara/MultiViewGeometry/Geometry/FundamentalMatrix.hpp>
 #include <DO/Sara/SfM/Detectors/SIFT.hpp>
 
 #include <Eigen/Sparse>
