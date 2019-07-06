@@ -311,7 +311,6 @@ void estimate_fundamental_matrix(const Image<Rgb8>& image1,
   const auto P1 = homogeneous(p1);
   const auto P2 = homogeneous(p2);
 
-//#define OLD_CODE
 #ifdef OLD_CODE
   // Normalization transformation.
   const auto T1 = compute_normalizer(P1);
@@ -531,7 +530,7 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
   const auto P1 = apply_transform(K1_inv, homogeneous(p1));
   const auto P2 = apply_transform(K2_inv, homogeneous(p2));
 
-#define OLD_CODE
+//#define OLD_CODE
 #ifdef OLD_CODE
   // Normalization transformation.
   auto T1 = compute_normalizer(P1);
