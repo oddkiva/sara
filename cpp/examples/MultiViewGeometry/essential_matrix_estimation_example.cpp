@@ -14,6 +14,7 @@
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/Match.hpp>
 #include <DO/Sara/MultiViewGeometry.hpp>
+#include <DO/Sara/MultiViewGeometry/RANSAC.hpp>
 #include <DO/Sara/SfM/Detectors/SIFT.hpp>
 
 
@@ -310,6 +311,8 @@ void estimate_fundamental_matrix(const Image<Rgb8>& image1,
   const auto P1 = homogeneous(p1);
   const auto P2 = homogeneous(p2);
 
+//#define OLD_CODE
+#ifdef OLD_CODE
   // Normalization transformation.
   const auto T1 = compute_normalizer(P1);
   const auto T2 = compute_normalizer(P2);
@@ -338,7 +341,7 @@ void estimate_fundamental_matrix(const Image<Rgb8>& image1,
   };
 
   auto inlier_predicate = [&](const auto& F, const auto& X, const auto& Y) {
-    return algebraic_error(F, X, Y) < 1e-2;
+    return algebraic_error(F, X, Y) < 1e-3;
   };
 
   for (auto n = 0; n < N; ++n)
@@ -380,7 +383,6 @@ void estimate_fundamental_matrix(const Image<Rgb8>& image1,
       subset_best = n;
     }
   }
-
 
   // Display the result.
   const auto& F = F_best;
@@ -444,6 +446,52 @@ void estimate_fundamental_matrix(const Image<Rgb8>& image1,
 
   get_key();
   close_window();
+#else
+
+  const auto M = to_tensor(matches);
+
+  auto f_estimator = EightPointAlgorithm{};
+  auto distance = [](const FundamentalMatrix& F, const Vector3d& left,
+                     const Vector3d& right) {
+    return std::abs(double(right.transpose() * F.matrix() * left));
+  };
+
+  double thres = 1e-2;
+  double num_samples = 10;
+  const auto [F_best, num_inliers] =
+      ransac(M, P1, P2, f_estimator, distance, num_samples, thres);
+
+  SARA_CHECK(F_best);
+  SARA_CHECK(num_inliers);
+  SARA_CHECK(matches.size());
+
+  drawer.display_images();
+
+  for (size_t i = 0; i < matches.size(); ++i)
+  {
+    const Vector3d X1 = matches[i].x_pos().cast<double>().homogeneous();
+    const Vector3d X2 = matches[i].y_pos().cast<double>().homogeneous();
+
+    // inlier predicate.
+    if (distance(F_best, X1, X2) > thres)
+      continue;
+
+    drawer.draw_match(matches[i], Blue8, false);
+
+    if (i % 50 == 0)
+    {
+      const auto proj_X1 = F_best.right_epipolar_line(X1);
+      const auto proj_X2 = F_best.left_epipolar_line(X2);
+
+      drawer.draw_line_from_eqn(0, proj_X2.cast<float>(), Cyan8, 1);
+      drawer.draw_line_from_eqn(1, proj_X1.cast<float>(), Cyan8, 1);
+    }
+  }
+
+  get_key();
+  close_window();
+#endif
+
 }
 
 void estimate_essential_matrix(const Image<Rgb8>& image1,
@@ -483,6 +531,8 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
   const auto P1 = apply_transform(K1_inv, homogeneous(p1));
   const auto P2 = apply_transform(K2_inv, homogeneous(p2));
 
+#define OLD_CODE
+#ifdef OLD_CODE
   // Normalization transformation.
   auto T1 = compute_normalizer(P1);
   auto T2 = compute_normalizer(P2);
@@ -542,13 +592,14 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
     // Unnormalize the essential matrices.
     for (auto& E : Es)
     {
-      E = E.normalized();
-      E = (T2.transpose() * E * T1).normalized();
+      E.matrix() = E.matrix().normalized();
+      E.matrix() = (T2.transpose() * E.matrix() * T1).normalized();
     }
 
     for (const auto& E: Es)
     {
-      const Matrix3d F = (K2_inv.transpose() * E * K1_inv).normalized();
+      const Matrix3d F =
+          (K2_inv.transpose() * E.matrix() * K1_inv).normalized();
 
       auto num_inliers = 0;
       for (size_t i = 0; i < matches.size(); ++i)
@@ -722,6 +773,55 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
 
   get_key();
   close_window();
+#else
+  const auto M = to_tensor(matches);
+
+  auto e_estimator = NisterFivePointAlgorithm{};
+  auto distance = [](const EssentialMatrix& E, const Vector3d& left,
+                     const Vector3d& right) {
+    return std::abs(double(right.transpose() * E.matrix() * left));
+  };
+
+  double thres = 1e-3;
+  double num_samples = 1000;
+  const auto [E_best, num_inliers] =
+      ransac(M, P1, P2, e_estimator, distance, num_samples, thres);
+
+  SARA_CHECK(E_best);
+  SARA_CHECK(num_inliers);
+  SARA_CHECK(matches.size());
+
+
+  auto F_best = FundamentalMatrix{};
+  F_best.matrix() =
+      (K2_inv.transpose() * E_best.matrix() * K1_inv).normalized();
+
+  drawer.display_images();
+
+  for (size_t i = 0; i < matches.size(); ++i)
+  {
+    const Vector3d X1 = matches[i].x_pos().cast<double>().homogeneous();
+    const Vector3d X2 = matches[i].y_pos().cast<double>().homogeneous();
+
+    // inlier predicate.
+    if (distance(E_best, K1_inv * X1, K2_inv * X2) > thres)
+      continue;
+
+    drawer.draw_match(matches[i], Blue8, false);
+
+    if (i % 50 == 0)
+    {
+      const auto proj_X1 = F_best.right_epipolar_line(X1);
+      const auto proj_X2 = F_best.left_epipolar_line(X2);
+
+      drawer.draw_line_from_eqn(0, proj_X2.cast<float>(), Cyan8, 1);
+      drawer.draw_line_from_eqn(1, proj_X1.cast<float>(), Cyan8, 1);
+    }
+  }
+
+  get_key();
+  close_window();
+#endif
 }
 
 
@@ -743,7 +843,7 @@ GRAPHICS_MAIN()
   const auto matches = compute_matches(keys1, keys2);
 
   // estimate_homography(image1, image2, keys1, keys2, matches);
-  estimate_fundamental_matrix(image1, image2, keys1, keys2, matches);
+  //estimate_fundamental_matrix(image1, image2, keys1, keys2, matches);
   estimate_essential_matrix(image1, image2, K1, K2, keys1, keys2, matches);
 
   return 0;

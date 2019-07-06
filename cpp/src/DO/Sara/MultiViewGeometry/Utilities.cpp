@@ -9,6 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/MultiViewGeometry/Utilities.hpp>
 
 
@@ -28,12 +29,12 @@ namespace DO { namespace Sara {
   {
     auto indices = range(num_data_points);
 
-    auto samples = Tensor_<int, 2>{{sample_size, num_samples}};
-    for (int i = 0; i < sample_size; ++i)
-      samples[i].flat_array() =
-          shuffle(indices).flat_array().head(num_samples);
-
-    samples = samples.transpose({1, 0});
+    auto samples = Tensor_<int, 2>{{num_samples, sample_size}};
+    for (int i = 0; i < num_samples; ++i)
+    {
+      auto indices_shuffled = shuffle(indices);
+      samples[i].flat_array() = indices_shuffled.flat_array().head(sample_size);
+    }
 
     return samples;
   }

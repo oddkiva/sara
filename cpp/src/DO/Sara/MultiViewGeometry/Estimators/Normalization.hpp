@@ -7,25 +7,19 @@ namespace DO { namespace Sara {
 
   MatrixXd homogeneous(const MatrixXd& p)
   {
-    MatrixXd hp(p.rows() + 1, p.cols());
-    hp.block(0, 0, p.rows(), p.cols()) = p;
-    hp.row(p.rows()) = RowVectorXd::Ones(p.cols());
-    return hp;
+    return p.colwise().homogeneous();
   }
 
   Vector2d mean(const MatrixXd& p)
   {
-    auto mean = p.rowwise().sum();
-    mean /= p.cols();
-    return mean;
+    return p.rowwise().sum() / p.cols();
   }
 
   Matrix3d isotropic_scaling(const MatrixXd& p)
   {
     const auto m = mean(p);
     MatrixXd cov = p;
-    cov.array() = cov.array().square();
-    cov /= p.cols();
+    cov.array() = cov.array().square() / p.cols();
     cov -= m;
 
     Matrix3d T;

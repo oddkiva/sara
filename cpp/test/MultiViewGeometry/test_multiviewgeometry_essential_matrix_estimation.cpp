@@ -95,33 +95,6 @@ void print_3d_array(const TensorView_<float, 3>& x)
 
 BOOST_AUTO_TEST_SUITE(TestMultiViewGeometry)
 
-BOOST_AUTO_TEST_CASE(test_range)
-{
-  auto a = range(3);
-  BOOST_CHECK(a.vector() == Vector3i(0, 1, 2));
-}
-
-BOOST_AUTO_TEST_CASE(test_random_shuffle)
-{
-  auto a = range(4);
-  a = shuffle(a);
-  BOOST_CHECK(a.vector() != Vector4i(0, 1, 2, 3));
-}
-
-BOOST_AUTO_TEST_CASE(test_random_samples)
-{
-  constexpr auto num_samples = 2;
-  constexpr auto sample_size = 5;
-  constexpr auto num_data_points = 10;
-  auto samples = random_samples(num_samples, sample_size, num_data_points);
-
-  BOOST_CHECK_EQUAL(samples.size(0), num_samples);
-  BOOST_CHECK_EQUAL(samples.size(1), sample_size);
-  BOOST_CHECK(samples.matrix().minCoeff() >=  0);
-  BOOST_CHECK(samples.matrix().maxCoeff() <  10);
-}
-
-
 BOOST_AUTO_TEST_CASE(test_extract_centers)
 {
   auto features = std::vector<OERegion>{{Point2f::Ones() * 0, 1.f},
@@ -403,7 +376,7 @@ BOOST_AUTO_TEST_CASE(test_nister_five_point_algorithm)
   // Check essential matrix constraints.
   for (auto i = 0u; i < Es.size(); ++i)
   {
-    const auto& Ei = Es[i];
+    const auto& Ei = Es[i].matrix();
 
     //SARA_DEBUG << "i = " << i << endl;
     //SARA_DEBUG << "Ein =\n" << Ei.normalized() << endl;
@@ -446,7 +419,7 @@ BOOST_AUTO_TEST_CASE(test_stewenius_five_point_algorithm)
   // Check essential matrix constraints.
   for (auto i = 0u; i < Es.size(); ++i)
   {
-    const auto& Ei = Es[i];
+    const auto& Ei = Es[i].matrix();
 
     //SARA_DEBUG << "i = " << i << endl;
     //SARA_DEBUG << "Ein =\n" << Ei.normalized() << endl;
