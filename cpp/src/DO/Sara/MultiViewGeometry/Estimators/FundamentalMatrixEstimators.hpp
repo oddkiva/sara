@@ -16,6 +16,8 @@
 #include <DO/Sara/Core/EigenExtension.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/FundamentalMatrix.hpp>
 
+#include <array>
+
 
 namespace DO::Sara {
 

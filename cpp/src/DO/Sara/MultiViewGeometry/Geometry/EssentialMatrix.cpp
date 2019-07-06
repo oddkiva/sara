@@ -1,5 +1,7 @@
 #include <DO/Sara/MultiViewGeometry/Geometry/EssentialMatrix.hpp>
 
+#include <array>
+
 
 namespace DO::Sara {
 

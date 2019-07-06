@@ -126,6 +126,42 @@ auto compute_matches(const KeypointList<OERegion, float>& keys1,
 }
 
 
+auto f_estimator = EightPointAlgorithm{};
+auto e_estimator = NisterFivePointAlgorithm{};
+auto algebraic_error(const FundamentalMatrix& F, const Vector3d& X,
+                          const Vector3d& Y) {
+  return std::abs(Y.transpose() * F.matrix() * X);
+};
+
+double thresh = 1e-2;
+auto inlier_predicate(const FundamentalMatrix& F, const Vector3d& X, const Vector3d& Y) {
+  return algebraic_error(F, X, Y) < thresh;
+};
+
+// Count the inliers.
+auto count_inliers(const FundamentalMatrix& F, const TensorView_<int, 2>& M,
+        const TensorView_<double, 2>& P1, const TensorView_<double, 2>& P2) {
+      const auto P1mat = P1.colmajor_view().matrix();
+      const auto P2mat = P2.colmajor_view().matrix();
+      auto num_inliers = 0;
+      for (auto m = 0; m < M.size(0); ++m)
+      {
+        const auto i = M(m, 0);
+        const auto j = M(m, 1);
+
+        const Vector3d xi = P1mat.col(i);
+        const Vector3d yj = P2mat.col(j);
+
+        // inlier predicate.
+        if (!inlier_predicate(F, xi, yj))
+          continue;
+
+        ++num_inliers;
+      }
+
+      return num_inliers;
+    };
+
 // =============================================================================
 // Multiview geometry estimation.
 //
@@ -293,12 +329,8 @@ void estimate_fundamental_matrix(const Image<Rgb8>& image1,
   drawer.set_viz_params(scale, scale, PairWiseDrawer::CatH);
 
 
-  // ==========================================================================
-  // Generate random samples for RANSAC.
-  constexpr auto N = 1000;
-  constexpr auto L = 8;
-  const auto S = random_samples(N, L, int(matches.size()));
-
+  // Transform matches to an array of indices.
+  const auto M = to_tensor(matches);
 
   // ==========================================================================
   // Image coordinates.
@@ -311,7 +343,15 @@ void estimate_fundamental_matrix(const Image<Rgb8>& image1,
   const auto P1 = homogeneous(p1);
   const auto P2 = homogeneous(p2);
 
+#define OLD_CODE
 #ifdef OLD_CODE
+  // ==========================================================================
+  // Generate random samples for RANSAC.
+  constexpr auto N = 1000;
+  constexpr auto L = EightPointAlgorithm::num_points;
+  const auto S = random_samples(N, L, M.size(0));
+  SARA_CHECK(M.size(0));
+
   // Normalization transformation.
   const auto T1 = compute_normalizer(P1);
   const auto T2 = compute_normalizer(P2);
@@ -320,28 +360,16 @@ void estimate_fundamental_matrix(const Image<Rgb8>& image1,
   const auto P1n = apply_transform(T1, P1);
   const auto P2n = apply_transform(T2, P2);
 
-
   // ==========================================================================
   // Prepare the data for RANSAC.
-  const auto M = to_tensor(matches);
   const auto I = to_point_indices(S, M);
   const auto p = to_coordinates(I, p1, p2).transpose({0, 2, 1, 3});
   const auto P = to_coordinates(I, P1, P2).transpose({0, 2, 1, 3});
   const auto Pn = to_coordinates(I, P1n, P2n).transpose({0, 2, 1, 3});
 
-  auto F_best = Matrix<double, 3, 3>{};
+  auto F_best = FundamentalMatrix{};
   auto num_inliers_best = 0;
   auto subset_best = 0;
-
-  auto f_estimator = EightPointAlgorithm{};
-
-  auto algebraic_error = [](const auto& F, const auto& X, const auto& Y) {
-    return std::abs(Y.transpose() * F.matrix() * X);
-  };
-
-  auto inlier_predicate = [&](const auto& F, const auto& X, const auto& Y) {
-    return algebraic_error(F, X, Y) < 1e-3;
-  };
 
   for (auto n = 0; n < N; ++n)
   {
@@ -356,24 +384,7 @@ void estimate_fundamental_matrix(const Image<Rgb8>& image1,
     F.matrix() = T2.transpose() * F.matrix().normalized() * T1;
     F.matrix() = F.matrix().normalized();
 
-    // Count the inliers.
-    auto num_inliers = 0;
-    for (size_t i = 0; i < matches.size(); ++i)
-    {
-      Vector3d X1;
-      X1.head(2) = matches[i].x_pos().cast<double>();
-      X1(2) = 1;
-
-      Vector3d X2;
-      X2.head(2) = matches[i].y_pos().cast<double>();
-      X2(2) = 1;
-
-      // inlier predicate.
-      if (!inlier_predicate(F, X1, X2))
-        continue;
-
-      ++num_inliers;
-    }
+    const auto num_inliers = count_inliers(F, M, P1, P2);
 
     if (num_inliers > num_inliers_best)
     {
@@ -382,6 +393,15 @@ void estimate_fundamental_matrix(const Image<Rgb8>& image1,
       subset_best = n;
     }
   }
+#else
+  double num_samples = 1000;
+  const auto [F_best, num_inliers, subset_best] =
+      ransac(M, P1, P2, f_estimator, distance, num_samples, thresh);
+
+  SARA_CHECK(F_best);
+  SARA_CHECK(num_inliers);
+  SARA_CHECK(matches.size());
+#endif
 
   // Display the result.
   const auto& F = F_best;
@@ -389,6 +409,7 @@ void estimate_fundamental_matrix(const Image<Rgb8>& image1,
 
   SARA_CHECK(F);
   SARA_CHECK(n);
+  SARA_CHECK(num_inliers_best);
 
   // Extract the points.
   const Matrix<double, 3, 8> X = P[n][0].colmajor_view().matrix();
@@ -416,69 +437,16 @@ void estimate_fundamental_matrix(const Image<Rgb8>& image1,
 
   for (size_t i = 0; i < matches.size(); ++i)
   {
-    Vector3d X1;
-    X1.head(2) = matches[i].x_pos().cast<double>();
-    X1(2) = 1;
-
-    Vector3d X2;
-    X2.head(2) = matches[i].y_pos().cast<double>();
-    X2(2) = 1;
-
-    // inlier predicate.
-    if (!inlier_predicate(F, X1, X2))
-      continue;
-
-    drawer.draw_match(matches[i], Blue8, false);
-
-    if (i % 50 == 0)
-    {
-      Vector3d proj_X1 = F.matrix() * X1;
-      proj_X1 /= proj_X1(2);
-
-      Vector3d proj_X2 = F.matrix().transpose() * X2;
-      proj_X2 /= proj_X2(2);
-
-      drawer.draw_line_from_eqn(0, proj_X2.cast<float>(), Cyan8, 1);
-      drawer.draw_line_from_eqn(1, proj_X1.cast<float>(), Cyan8, 1);
-    }
-  }
-
-  get_key();
-  close_window();
-#else
-
-  const auto M = to_tensor(matches);
-
-  auto f_estimator = EightPointAlgorithm{};
-  auto distance = [](const FundamentalMatrix& F, const Vector3d& left,
-                     const Vector3d& right) {
-    return std::abs(double(right.transpose() * F.matrix() * left));
-  };
-
-  double thres = 1e-2;
-  double num_samples = 10;
-  const auto [F_best, num_inliers] =
-      ransac(M, P1, P2, f_estimator, distance, num_samples, thres);
-
-  SARA_CHECK(F_best);
-  SARA_CHECK(num_inliers);
-  SARA_CHECK(matches.size());
-
-  drawer.display_images();
-
-  for (size_t i = 0; i < matches.size(); ++i)
-  {
     const Vector3d X1 = matches[i].x_pos().cast<double>().homogeneous();
     const Vector3d X2 = matches[i].y_pos().cast<double>().homogeneous();
 
-    // inlier predicate.
-    if (distance(F_best, X1, X2) > thres)
+    if (!inlier_predicate(F_best, X1, X2))
       continue;
 
-    drawer.draw_match(matches[i], Blue8, false);
-
-    if (i % 50 == 0)
+    if (i % 100 == 0)
     {
+      drawer.draw_match(matches[i], Blue8, false);
+
       const auto proj_X1 = F_best.right_epipolar_line(X1);
       const auto proj_X2 = F_best.left_epipolar_line(X2);
 
@@ -489,7 +457,6 @@ void estimate_fundamental_matrix(const Image<Rgb8>& image1,
 
   get_key();
   close_window();
-#endif
 
 }
 
@@ -842,8 +809,8 @@ GRAPHICS_MAIN()
   const auto matches = compute_matches(keys1, keys2);
 
   // estimate_homography(image1, image2, keys1, keys2, matches);
-  //estimate_fundamental_matrix(image1, image2, keys1, keys2, matches);
-  estimate_essential_matrix(image1, image2, K1, K2, keys1, keys2, matches);
+  estimate_fundamental_matrix(image1, image2, keys1, keys2, matches);
+  //estimate_essential_matrix(image1, image2, K1, K2, keys1, keys2, matches);
 
   return 0;
 }

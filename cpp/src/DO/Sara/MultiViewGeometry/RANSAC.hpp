@@ -82,6 +82,7 @@ auto ransac(const TensorView_<int, 2>& matches,      //
 
   auto model_best = typename Estimator::model_type{};
   auto num_inliers_best = 0;
+  auto subset_best = Tensor_<int, 1>{};
 
   for (auto n = 0; n < N; ++n)
   {
@@ -106,6 +107,7 @@ auto ransac(const TensorView_<int, 2>& matches,      //
       {
         model_best = model;
         num_inliers_best = num_inliers;
+        subset_best = S[n];
 
         SARA_CHECK(model_best);
         SARA_CHECK(num_inliers_best);
@@ -113,7 +115,7 @@ auto ransac(const TensorView_<int, 2>& matches,      //
     }
   }
 
-  return std::make_tuple(model_best, num_inliers_best);
+  return std::make_tuple(model_best, num_inliers_best, subset_best);
 }
 
 } /* namespace DO::Sara */
