@@ -14,7 +14,7 @@
 
 namespace DO::Sara {
 
-auto to_tensor(const vector<Match>& matches) -> Tensor_<int, 2>
+auto to_tensor(const std::vector<Match>& matches) -> Tensor_<int, 2>
 {
   auto match_tensor = Tensor_<int, 2>{int(matches.size()), 2};
   for (auto i = 0u; i < matches.size(); ++i)

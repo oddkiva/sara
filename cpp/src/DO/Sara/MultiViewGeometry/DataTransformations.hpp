@@ -20,7 +20,7 @@
 namespace DO::Sara {
 
 DO_SARA_EXPORT
-auto to_tensor(const vector<Match>& matches) -> Tensor_<int, 2>;
+auto to_tensor(const std::vector<Match>& matches) -> Tensor_<int, 2>;
 
 DO_SARA_EXPORT
 auto extract_centers(const std::vector<OERegion>& features)
