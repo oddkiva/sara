@@ -18,13 +18,17 @@
 #include <DO/Sara/Match.hpp>
 #include <DO/Sara/SfM/Detectors/SIFT.hpp>
 
+#include <boost/filesystem.hpp>
 
+
+namespace fs = boost::filesystem;
 namespace sara = DO::Sara;
 
 using namespace std;
 
 
-namespace DO::Sara {
+namespace DO::Sara
+{
 
 auto match(const sara::KeypointList<sara::OERegion, float>& keys1,
            const sara::KeypointList<sara::OERegion, float>& keys2)
@@ -44,8 +48,8 @@ struct IndexMatch
 
 struct EpipolarEdge
 {
-  int i; // left
-  int j; // right
+  int i;  // left
+  int j;  // right
   Matrix3d m;
 };
 
@@ -76,7 +80,8 @@ struct CalculateH5Type<EpipolarEdge>
 };
 
 
-KeypointList<OERegion, float> read_keypoints(H5File& h5_file, const std::string& group_name)
+KeypointList<OERegion, float> read_keypoints(H5File& h5_file,
+                                             const std::string& group_name)
 {
   auto features = std::vector<sara::OERegion>{};
   auto descriptors = sara::Tensor_<float, 2>{};
@@ -90,7 +95,8 @@ KeypointList<OERegion, float> read_keypoints(H5File& h5_file, const std::string&
   return {features, descriptors};
 }
 
-auto read_matches(H5File& file, const std::string& name){
+auto read_matches(H5File& file, const std::string& name)
+{
   auto matches = std::vector<IndexMatch>{};
   file.read_dataset(name, matches);
   return matches;
@@ -106,8 +112,8 @@ GRAPHICS_MAIN()
   std::sort(image_paths.begin(), image_paths.end());
   const auto N = int(image_paths.size());
 
-  auto h5_file = sara::H5File{
-      "/Users/david/Desktop/Datasets/sfm/castle_int.h5", H5F_ACC_RDWR};
+  auto h5_file = sara::H5File{"/Users/david/Desktop/Datasets/sfm/castle_int.h5",
+                              H5F_ACC_RDWR};
 
   for (int i = 0; i < N; ++i)
   {
@@ -129,10 +135,10 @@ GRAPHICS_MAIN()
       const auto Mij = match(Ki, Kj);
 
       auto Mij2 = std::vector<sara::IndexMatch>{};
-      std::transform(Mij.begin(), Mij.end(), std::back_inserter(Mij2),
-                     [](const auto& m) {
-                       return sara::IndexMatch{m.x_index(), m.y_index(), m.score()};
-                     });
+      std::transform(
+          Mij.begin(), Mij.end(), std::back_inserter(Mij2), [](const auto& m) {
+            return sara::IndexMatch{m.x_index(), m.y_index(), m.score()};
+          });
 
       const auto group_name = std::string{"matches"};
       h5_file.group(group_name);
@@ -141,8 +147,8 @@ GRAPHICS_MAIN()
           group_name + "/" + std::to_string(i) + "_" + std::to_string(j);
       h5_file.write_dataset(match_dataset, tensor_view(Mij2));
 
-      //auto Fij = sara::estimate_fundamental_matrix(Mij);
-      //auto Eij = sara::estimate_essential_matrix(Mij);
+      // auto Fij = sara::estimate_fundamental_matrix(Mij);
+      // auto Eij = sara::estimate_essential_matrix(Mij);
 
       const auto Ii = sara::imread<sara::Rgb8>(fi);
       const auto Ij = sara::imread<sara::Rgb8>(fj);
@@ -171,7 +177,6 @@ GRAPHICS_MAIN()
       }
       sara::get_key();
     }
-
   }
 
   return 0;

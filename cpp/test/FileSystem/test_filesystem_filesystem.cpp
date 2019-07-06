@@ -9,17 +9,17 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-
-#define BOOST_TEST_MODULE "SfM/Filesytem Utilities"
+#define BOOST_TEST_MODULE "Filesytem Utilities"
 
 #include <DO/Sara/Defines.hpp>
 #include <DO/Sara/FileSystem.hpp>
 
+#include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
 
 
+namespace fs = boost::filesystem;
 namespace sara = DO::Sara;
-using namespace std;
 
 
 BOOST_AUTO_TEST_SUITE(TestSfMFileSystem)

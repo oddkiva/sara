@@ -16,7 +16,10 @@
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/SfM/Detectors/SIFT.hpp>
 
+#include <boost/filesystem.hpp>
 
+
+namespace fs = boost::filesystem;
 namespace sara = DO::Sara;
 
 

@@ -34,7 +34,6 @@ message(STATUS "  - FLANN")
 add_subdirectory(flann)
 set_property(TARGET flann_cpp_s PROPERTY FOLDER ${THIRDPARTY_FOLDER_NAME})
 
-
 # Image I/O.
 find_package(ZLIB QUIET)
 find_package(JPEG QUIET)

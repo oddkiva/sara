@@ -1,4 +1,17 @@
+// ========================================================================== //
+// This file is part of Sara, a basic set of libraries in C++ for computer
+// vision.
+//
+// Copyright (C) 2019 David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
 #pragma once
+
+#include <DO/Sara/Defines.hpp>
 
 #include <DO/Sara/Core/Math/Polynomial.hpp>
 #include <DO/Sara/Core/Math/UnivariatePolynomial.hpp>
@@ -15,7 +28,7 @@ using Vector9d = Eigen::Matrix<double, 9, 1>;
 //! @}
 
 
-struct FivePointAlgorithmBase
+struct DO_SARA_EXPORT FivePointAlgorithmBase
 {
   const Monomial x{variable("x")};
   const Monomial y{variable("y")};
@@ -38,7 +51,7 @@ struct FivePointAlgorithmBase
 };
 
 
-struct NisterFivePointAlgorithm : FivePointAlgorithmBase
+struct DO_SARA_EXPORT NisterFivePointAlgorithm : FivePointAlgorithmBase
 {
   const std::array<Monomial, 20> monomials{
       x.pow(3),
@@ -49,14 +62,22 @@ struct NisterFivePointAlgorithm : FivePointAlgorithmBase
       x.pow(2),
       y.pow(2) * z,
       y.pow(2),
-      x * y* z,
+      x * y * z,
       x * y,
       //
-      x, x* z, x* z.pow(2),
+      x,
+      x * z,
+      x * z.pow(2),
       //
-      y, y* z, y* z.pow(2),
+      y,
+      y * z,
+      y * z.pow(2),
       //
-      one_, z, z.pow(2), z.pow(3)};
+      one_,
+      z,
+      z.pow(2),
+      z.pow(3)
+  };
 
   auto build_essential_matrix_constraints(const Polynomial<Matrix3d>& E) const
       -> Matrix<double, 10, 20>
@@ -67,8 +88,9 @@ struct NisterFivePointAlgorithm : FivePointAlgorithmBase
 
   auto inplace_gauss_jordan_elimination(Matrix<double, 10, 20>&) const -> void;
 
-  auto form_resultant_matrix(const Matrix<double, 6, 10>&,
-                             Univariate::UnivariatePolynomial<double>[3][3]) const
+  auto
+  form_resultant_matrix(const Matrix<double, 6, 10>&,
+                        Univariate::UnivariatePolynomial<double>[3][3]) const
       -> void;
 
   auto solve_essential_matrix_constraints(const std::array<Matrix3d, 4>&,
@@ -81,7 +103,7 @@ struct NisterFivePointAlgorithm : FivePointAlgorithmBase
 };
 
 
-struct SteweniusFivePointAlgorithm : FivePointAlgorithmBase
+struct DO_SARA_EXPORT SteweniusFivePointAlgorithm : FivePointAlgorithmBase
 {
   const std::array<Monomial, 20> monomials{
       x * x * x,
@@ -101,7 +123,10 @@ struct SteweniusFivePointAlgorithm : FivePointAlgorithmBase
       y * z,
       z * z,
       //  The solutions of interests
-      x, y, z, one_
+      x,
+      y,
+      z,
+      one_
   };
 
   auto build_essential_matrix_constraints(const Polynomial<Matrix3d>& E) const

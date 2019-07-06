@@ -9,6 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include <DO/Sara/Defines.hpp>
+
 #include <DO/Sara/Core/Image.hpp>
 #include <DO/Sara/FeatureDescriptors.hpp>
 #include <DO/Sara/FeatureDetectors.hpp>
@@ -17,6 +19,7 @@
 
 namespace DO::Sara {
 
+DO_SARA_EXPORT
 auto compute_sift_keypoints(const Image<float>& image)
     -> KeypointList<OERegion, float>;
 

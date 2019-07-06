@@ -13,8 +13,6 @@ foreach (file ${test_features_SOURCE_FILES})
 endforeach ()
 
 
-if (UNIX)
-  find_package(HDF5 COMPONENTS CXX REQUIRED)
-  target_include_directories(test_features_hdf5 PRIVATE ${HDF5_INCLUDE_DIRS})
-  target_link_libraries(test_features_hdf5 PRIVATE ${HDF5_LIBRARIES})
-endif ()
+find_package(HDF5 COMPONENTS CXX REQUIRED)
+target_include_directories(test_features_hdf5 PRIVATE ${HDF5_INCLUDE_DIRS})
+target_link_libraries(test_features_hdf5 PRIVATE ${HDF5_LIBRARIES})

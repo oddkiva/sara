@@ -14,7 +14,7 @@
 #include <DO/Sara/Defines.hpp>
 
 #include <DO/Sara/Core/Tensor.hpp>
-#include <DO/Sara/FeatureMatching.hpp>
+#include <DO/Sara/Features/Feature.hpp>
 
 #include <algorithm>
 #include <random>

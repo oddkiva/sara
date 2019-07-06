@@ -1,8 +1,13 @@
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/FileSystem/FileSystem.hpp>
 
+#include <boost/filesystem.hpp>
+
 #include <algorithm>
 #include <iostream>
+
+
+namespace fs = boost::filesystem;
 
 
 namespace DO::Sara {
