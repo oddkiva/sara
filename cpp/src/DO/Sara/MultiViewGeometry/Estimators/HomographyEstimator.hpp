@@ -15,6 +15,8 @@
 
 #include <DO/Sara/MultiViewGeometry/Geometry/Homography.hpp>
 
+#include <array>
+
 
 namespace DO { namespace Sara {
 

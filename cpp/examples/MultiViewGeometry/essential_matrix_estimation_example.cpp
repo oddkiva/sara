@@ -189,16 +189,6 @@ void estimate_homography_old(const Image<Rgb8>& image1,
   PairWiseDrawer drawer(image1, image2);
   drawer.set_viz_params(scale, scale, PairWiseDrawer::CatH);
 
-
-  // ==========================================================================
-  // Generate random samples for RANSAC.
-  constexpr auto N = 1000;
-  constexpr auto L = 4;
-  const auto S = random_samples(N, L, int(matches.size()));
-  //auto S = Tensor_<int, 2>{{1, L}};
-  //S[0] = range(8);
-
-
   // ==========================================================================
   // Normalize the points.
   const auto to_double = [](const float& src) { return double(src); };
@@ -207,16 +197,20 @@ void estimate_homography_old(const Image<Rgb8>& image1,
   const auto p1 = extract_centers(f1).cwise_transform(to_double);
   const auto p2 = extract_centers(f2).cwise_transform(to_double);
 
-  auto P1 = homogeneous(p1);
-  auto P2 = homogeneous(p2);
+  const auto P1 = homogeneous(p1);
+  const auto P2 = homogeneous(p2);
 
   const auto normalizer = Normalizer<Homography>{P1, P2};
 
   const auto [P1n, P2n] = normalizer.normalize(P1, P2);
 
-  // ==========================================================================
-  // Prepare the data for RANSAC.
   const auto M = to_tensor(matches);
+
+  // Generate random samples for RANSAC.
+  constexpr auto N = 1000;
+  constexpr auto L = FourPointAlgorithm::num_points;
+  const auto S = random_samples(N, L, int(matches.size()));
+
   const auto I = to_point_indices(S, M);
   const auto p = to_coordinates(I, p1, p2).transpose({0, 2, 1, 3});
   const auto P = to_coordinates(I, P1, P2).transpose({0, 2, 1, 3});
@@ -224,20 +218,28 @@ void estimate_homography_old(const Image<Rgb8>& image1,
 
   const auto h_estimator = FourPointAlgorithm{};
 
+  auto distance = [](const Matrix3d& H, const Vector3d& x,
+                     const Vector3d& y) -> double {
+    return ((H * x).hnormalized() - y.hnormalized()).norm() +
+           ((H.inverse() * y).hnormalized() - x.hnormalized()).norm();
+  };
+
   for (auto n = 0; n < N; ++n)
   {
     // Extract the point
-    const Matrix<double, 2, 4> x = p[n][0].colmajor_view().matrix();
-    const Matrix<double, 2, 4> y = p[n][1].colmajor_view().matrix();
+    const Matrix<double, 2, L> x = p[n][0].colmajor_view().matrix();
+    const Matrix<double, 2, L> y = p[n][1].colmajor_view().matrix();
 
-    const Matrix<double, 3, 4> X = P[n][0].colmajor_view().matrix();
-    const Matrix<double, 3, 4> Y = P[n][1].colmajor_view().matrix();
+    const Matrix<double, 3, L> X = P[n][0].colmajor_view().matrix();
+    const Matrix<double, 3, L> Y = P[n][1].colmajor_view().matrix();
 
-    const Matrix<double, 3, 4> Xn = Pn[n][0].colmajor_view().matrix();
-    const Matrix<double, 3, 4> Yn = Pn[n][1].colmajor_view().matrix();
+    const Matrix<double, 3, L> Xn = Pn[n][0].colmajor_view().matrix();
+    const Matrix<double, 3, L> Yn = Pn[n][1].colmajor_view().matrix();
 
     // 4-point algorithm
     auto [H] = h_estimator(Xn, Yn);
+    std::cout << "Before denormalization..." << std::endl;
+    std::cout << H.matrix() << std::endl;
 
     // Unnormalize the homography matrix.
     H.matrix() = normalizer.denormalize(H);
@@ -259,7 +261,6 @@ void estimate_homography_old(const Image<Rgb8>& image1,
       std::cout << (HX.col(i) - Y.col(i)).norm() << std::endl;
     std::cout << std::endl;
 
-
     // Display the result.
     drawer.display_images();
 
@@ -268,32 +269,122 @@ void estimate_homography_old(const Image<Rgb8>& image1,
       const Vector3d X1 = matches[i].x_pos().cast<double>().homogeneous();
       const Vector3d X2 = matches[i].y_pos().cast<double>().homogeneous();
 
-      //const Vector3d proj_X1 = (H.matrix() * X1).normalized().homogeneous();
-      //const Vector3d proj_X2 =
-      //    (H.matrix().inverse() * X2).normalized().homogeneous();
+      const Vector2d HX1 = (H.matrix() * X1).hnormalized();
+      const Vector2d HX2 = (H.matrix().inverse() * X2).hnormalized();
 
-      //if ((X1 - proj_X2).norm() + (proj_X1 - X2).norm() < 2)
-      //{
-      //  drawer.draw_match(matches[i], Blue8, false);
-      //  drawer.draw_point(0, proj_X2.head(2).cast<float>(), Cyan8, 5);
-      //  drawer.draw_point(1, proj_X1.head(2).cast<float>(), Cyan8, 5);
-      //}
+      if (distance(H, X1, X2) < 1.)
+      {
+        drawer.draw_match(matches[i], Blue8, false);
+        drawer.draw_point(0, HX2.cast<float>(), Cyan8, 5);
+        drawer.draw_point(1, HX1.cast<float>(), Cyan8, 5);
+      }
     };
-    //for (size_t i = 0; i < 4; ++i)
-    //{
-    //  drawer.draw_match(matches[S(n, i)], Red8, true);
+    for (size_t i = 0; i < 4; ++i)
+    {
+      drawer.draw_match(matches[S(n, i)], Red8, true);
 
-    //  drawer.draw_point(0, x.col(i).cast<float>(), Magenta8, 5);
-    //  drawer.draw_point(1, y.col(i).cast<float>(), Magenta8, 5);
+      drawer.draw_point(0, x.col(i).cast<float>(), Magenta8, 5);
+      drawer.draw_point(1, y.col(i).cast<float>(), Magenta8, 5);
 
-    //  drawer.draw_point(0, X.col(i).head(2).cast<float>(), Magenta8, 5);
-    //  drawer.draw_point(1, Y.col(i).head(2).cast<float>(), Magenta8, 5);
+      drawer.draw_point(0, X.col(i).hnormalized().cast<float>(), Magenta8, 5);
+      drawer.draw_point(1, Y.col(i).hnormalized().cast<float>(), Magenta8, 5);
 
-    //  drawer.draw_point(1, HX.col(i).cast<float>().normalized(), Blue8, 5);
-    //}
+      drawer.draw_point(1, HX.col(i).hnormalized().cast<float>(), Blue8, 5);
+    }
 
     get_key();
   }
+}
+
+void estimate_homography(const Image<Rgb8>& image1, const Image<Rgb8>& image2,
+                         const KeypointList<OERegion, float>& keys1,
+                         const KeypointList<OERegion, float>& keys2,
+                         const vector<Match>& matches)
+{
+  // ==========================================================================
+  // Setup the visualization.
+  const auto scale = .25f;
+  const auto w = int((image1.width() + image2.width()) * scale);
+  const auto h = max(image1.height(), image2.height()) * scale;
+
+  create_window(w, h);
+  set_antialiasing();
+
+  PairWiseDrawer drawer(image1, image2);
+  drawer.set_viz_params(scale, scale, PairWiseDrawer::CatH);
+
+  // ==========================================================================
+  // Normalize the points.
+  const auto to_double = [](const float& src) { return double(src); };
+  const auto& f1 = features(keys1);
+  const auto& f2 = features(keys2);
+  const auto p1 = extract_centers(f1).cwise_transform(to_double);
+  const auto p2 = extract_centers(f2).cwise_transform(to_double);
+
+  const auto P1 = homogeneous(p1);
+  const auto P2 = homogeneous(p2);
+
+  const auto M = to_tensor(matches);
+
+  // Generate random samples for RANSAC.
+  constexpr auto N = 1000;
+
+  const auto h_estimator = FourPointAlgorithm{};
+
+  const auto num_samples = 1000;
+  double h_err_thres = 1.;
+  auto distance = [](const Matrix3d& H, const Vector3d& x,
+                     const Vector3d& y) -> double {
+    return ((H * x).hnormalized() - y.hnormalized()).norm() +
+           ((H.inverse() * y).hnormalized() - x.hnormalized()).norm();
+  };
+
+  auto [H, num_inliers, sample_best] =
+      ransac(M, P1, P2, h_estimator, distance, num_samples, h_err_thres);
+
+  // Display the result.
+  drawer.display_images();
+
+  for (size_t i = 0; i < matches.size(); ++i)
+  {
+    const Vector3d X1 = matches[i].x_pos().cast<double>().homogeneous();
+    const Vector3d X2 = matches[i].y_pos().cast<double>().homogeneous();
+
+    if (distance(H, X1, X2) < 1.)
+      drawer.draw_match(matches[i], Blue8, false);
+  };
+
+  constexpr auto L = FourPointAlgorithm::num_points;
+  const auto s_best = sample_best.reshape(Vector2i{1, L});
+  const auto I = to_point_indices(s_best, M);
+  const auto P = to_coordinates(I, P1, P2).transpose({0, 2, 1, 3});
+
+  // Extract the points.
+  const Matrix<double, 3, L> X = P[0][0].colmajor_view().matrix();
+  const Matrix<double, 3, L> Y = P[0][1].colmajor_view().matrix();
+
+  // Project X to the right image.
+  Matrix<double, 3, L> proj_X = H.matrix() * X;
+  proj_X.array().rowwise() /= proj_X.row(2).array();
+
+  // Project Y to the left image.
+  Matrix<double, 3, L> proj_Y = H.matrix().transpose() * Y;
+  proj_Y.array().rowwise() /= proj_Y.row(2).array();
+
+  for (size_t i = 0; i < L; ++i)
+  {
+    // Draw the best elemental subset drawn by RANSAC.
+    drawer.draw_match(matches[sample_best(i)], Red8, true);
+
+    // Draw the corresponding projected points.
+    drawer.draw_point(1, proj_X.col(i).hnormalized().cast<float>(), Magenta8,
+                      1);
+    drawer.draw_point(0, proj_Y.col(i).hnormalized().cast<float>(), Magenta8,
+                      1);
+  }
+
+  get_key();
+  close_window();
 }
 
 void estimate_fundamental_matrix_old(const Image<Rgb8>& image1,
@@ -889,7 +980,8 @@ GRAPHICS_MAIN()
 
   const auto matches = compute_matches(keys1, keys2);
 
-  estimate_homography_old(image1, image2, keys1, keys2, matches);
+  //estimate_homography_old(image1, image2, keys1, keys2, matches);
+  estimate_homography(image1, image2, keys1, keys2, matches);
 
   // estimate_fundamental_matrix_old(image1, image2, keys1, keys2, matches);
   // estimate_fundamental_matrix(image1, image2, keys1, keys2, matches);

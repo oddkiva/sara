@@ -46,7 +46,7 @@ struct Normalizer<Homography>
 
   inline auto denormalize(const Eigen::Matrix3d& H) const
   {
-    return T2_inv * H * T1_inv;
+    return T2_inv * H * T1;
   }
 
   Eigen::Matrix3d T1;
