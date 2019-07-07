@@ -1,6 +1,9 @@
 #pragma once
 
+#include <DO/Sara/Defines.hpp>
 #include <DO/Sara/Core/EigenExtension.hpp>
+
+#include <iostream>
 
 
 namespace DO { namespace Sara {
