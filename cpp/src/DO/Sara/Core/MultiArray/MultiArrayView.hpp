@@ -140,7 +140,17 @@ namespace DO { namespace Sara {
       swap(other);
     }
 
+    //! @{
     //! @brief Constructor that wraps plain data with its known sizes.
+    inline explicit MultiArrayView(value_type *data, int size)
+      : _begin{data}
+      , _end{data + size}
+      , _sizes{size}
+      , _strides{1}
+    {
+      static_assert(N == 1, "MultiArray must be 1D!");
+    }
+
     inline explicit MultiArrayView(value_type *data, const vector_type& sizes)
       : _begin{data}
       , _end{data + compute_size<Dimension>(sizes)}
@@ -148,6 +158,7 @@ namespace DO { namespace Sara {
       , _strides{compute_strides(sizes)}
     {
     }
+    //! @}
 
     //! @brief Return the size vector of the MultiArray object.
     const vector_type& sizes() const
@@ -218,6 +229,12 @@ namespace DO { namespace Sara {
       return _begin[offset(pos)];
     }
 
+    inline reference operator()(int i)
+    {
+      static_assert(N == 1, "MultiArray must be 1D");
+      return _begin[i];
+    }
+
     inline reference operator()(int i, int j)
     {
       static_assert(N == 2, "MultiArray must be 2D");
@@ -233,6 +250,12 @@ namespace DO { namespace Sara {
     inline const_reference operator()(const vector_type& pos) const
     {
       return _begin[offset(pos)];
+    }
+
+    inline const_reference operator()(int i) const
+    {
+      static_assert(N == 1, "MultiArray must be 1D");
+      return _begin[i];
     }
 
     inline const_reference operator()(int i, int j) const

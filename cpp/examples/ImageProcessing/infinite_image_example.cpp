@@ -29,10 +29,9 @@ GRAPHICS_MAIN()
   auto pad = PeriodicPadding{};
   auto inf_image = make_infinite(image, pad);
 
-  const auto border = Vector2i::Ones() * 50;
-
 #define STEPPED
 #ifndef STEPPED
+  const auto border = Vector2i::Ones() * 50;
   const Vector2i begin = -border;
   const Vector2i end = image.sizes() + border;
 

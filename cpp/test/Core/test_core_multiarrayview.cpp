@@ -21,17 +21,23 @@ using namespace std;
 using namespace DO::Sara;
 
 
-namespace DO { namespace Sara {
-
-} /* namespace Sara */
-} /* namespace DO */
-
-
 BOOST_AUTO_TEST_SUITE(TestMultiArrayView)
 
-BOOST_AUTO_TEST_CASE(test_multiarrayview)
+BOOST_AUTO_TEST_CASE(test_multiarrayview_1d)
 {
+  auto r = std::vector<int>(10);
+  std::iota(std::begin(r), std::end(r), 0);
 
+  const auto const_r_view = MultiArrayView<int, 1>{r.data(), int(r.size())};
+  for (auto i = 0; i < int(const_r_view.size()); ++i)
+    BOOST_CHECK_EQUAL(const_r_view(i), i);
+
+  auto r_view = MultiArrayView<int, 1>{r.data(), int(r.size())};
+  for (auto i = 0u; i < const_r_view.size(); ++i)
+    r_view(i) = 0;
+
+  for (auto i = 0u; i < const_r_view.size(); ++i)
+    BOOST_CHECK_EQUAL(r_view(i), 0);
 }
 
 
