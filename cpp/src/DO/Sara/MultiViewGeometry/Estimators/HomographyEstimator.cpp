@@ -9,15 +9,15 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Sara/Core/DebugUtilities.hpp>
-#include <DO/Sara/Core/EigenExtension.hpp>
+#include <DO/Sara/MultiViewGeometry/Estimators/HomographyEstimator.hpp>
 
 
 namespace DO { namespace Sara {
 
-  void four_point_homography(const Matrix<double, 3, 4>& x,
-                             const Matrix<double, 3, 4>& y,  //
-                             Matrix3d& H)
+  auto FourPointAlgorithm::
+  operator()(const FourPointAlgorithm::matrix_view_type& x,
+             const FourPointAlgorithm::matrix_view_type& y) const
+      -> std::array<FourPointAlgorithm::model_type, 1>
   {
     const auto zero = RowVector3d::Zero();
 
@@ -35,10 +35,13 @@ namespace DO { namespace Sara {
 
     const Matrix<double, 8, 1> h = M.colPivHouseholderQr().solve(b);
 
-    H.row(0) = h.segment(0, 3).transpose();
-    H.row(1) = h.segment(3, 3).transpose();
-    H.row(2) << h.segment(6, 2).transpose(), 1;
-    SARA_CHECK(H);
+    auto H = Homography{};
+
+    H.matrix().row(0) = h.segment(0, 3).transpose();
+    H.matrix().row(1) = h.segment(3, 3).transpose();
+    H.matrix().row(2) << h.segment(6, 2).transpose(), 1;
+
+    return {H};
   }
 
 } /* namespace Sara */

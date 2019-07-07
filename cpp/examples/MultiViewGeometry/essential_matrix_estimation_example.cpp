@@ -14,6 +14,8 @@
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/Match.hpp>
 #include <DO/Sara/MultiViewGeometry.hpp>
+#include <DO/Sara/MultiViewGeometry/Estimators/HomographyEstimator.hpp>
+#include <DO/Sara/MultiViewGeometry/Geometry/Denormalizer.hpp>
 #include <DO/Sara/MultiViewGeometry/RANSAC.hpp>
 #include <DO/Sara/SfM/Detectors/SIFT.hpp>
 
@@ -169,10 +171,11 @@ auto count_inliers(const Matrix3d& F, const TensorView_<int, 2>& M,
 // =============================================================================
 // Multiview geometry estimation.
 //
-void estimate_homography(const Image<Rgb8>& image1, const Image<Rgb8>& image2,
-                         const KeypointList<OERegion, float>& keys1,
-                         const KeypointList<OERegion, float>& keys2,
-                         const vector<Match>& matches)
+void estimate_homography_old(const Image<Rgb8>& image1,
+                             const Image<Rgb8>& image2,
+                             const KeypointList<OERegion, float>& keys1,
+                             const KeypointList<OERegion, float>& keys2,
+                             const vector<Match>& matches)
 {
   // ==========================================================================
   // Setup the visualization.
@@ -198,22 +201,18 @@ void estimate_homography(const Image<Rgb8>& image1, const Image<Rgb8>& image2,
 
   // ==========================================================================
   // Normalize the points.
+  const auto to_double = [](const float& src) { return double(src); };
   const auto& f1 = features(keys1);
   const auto& f2 = features(keys2);
-  const auto p1 = extract_centers(f1);
-  const auto p2 = extract_centers(f2);
+  const auto p1 = extract_centers(f1).cwise_transform(to_double);
+  const auto p2 = extract_centers(f2).cwise_transform(to_double);
 
   auto P1 = homogeneous(p1);
   auto P2 = homogeneous(p2);
 
-  auto T1 = compute_normalizer(P1);
-  auto T2 = compute_normalizer(P2);
+  const auto normalizer = Normalizer<Homography>{P1, P2};
 
-  const auto P1n = apply_transform(T1, P1);
-  const auto P2n = apply_transform(T2, P2);
-
-
-
+  const auto [P1n, P2n] = normalizer.normalize(P1, P2);
 
   // ==========================================================================
   // Prepare the data for RANSAC.
@@ -223,35 +222,30 @@ void estimate_homography(const Image<Rgb8>& image1, const Image<Rgb8>& image2,
   const auto P = to_coordinates(I, P1, P2).transpose({0, 2, 1, 3});
   const auto Pn = to_coordinates(I, P1n, P2n).transpose({0, 2, 1, 3});
 
+  const auto h_estimator = FourPointAlgorithm{};
 
   for (auto n = 0; n < N; ++n)
   {
     // Extract the point
-    const Matrix<float, 2, 4> x = p[n][0].colmajor_view().matrix();
-    const Matrix<float, 2, 4> y = p[n][1].colmajor_view().matrix();
+    const Matrix<double, 2, 4> x = p[n][0].colmajor_view().matrix();
+    const Matrix<double, 2, 4> y = p[n][1].colmajor_view().matrix();
 
-    const Matrix<double, 3, 4> X =
-        P[n][0].colmajor_view().matrix().cast<double>();
-    const Matrix<double, 3, 4> Y =
-        P[n][1].colmajor_view().matrix().cast<double>();
+    const Matrix<double, 3, 4> X = P[n][0].colmajor_view().matrix();
+    const Matrix<double, 3, 4> Y = P[n][1].colmajor_view().matrix();
 
-    const Matrix<double, 3, 4> Xn =
-        Pn[n][0].colmajor_view().matrix().cast<double>();
-    const Matrix<double, 3, 4> Yn =
-        Pn[n][1].colmajor_view().matrix().cast<double>();
-
+    const Matrix<double, 3, 4> Xn = Pn[n][0].colmajor_view().matrix();
+    const Matrix<double, 3, 4> Yn = Pn[n][1].colmajor_view().matrix();
 
     // 4-point algorithm
-    auto H = Matrix3d{};
-    four_point_homography(Xn, Yn, H);
+    auto [H] = h_estimator(Xn, Yn);
 
-    // Unnormalize the fundamental matrix.
-    H = T2.cast<double>().inverse() * H * T1.cast<double>();
+    // Unnormalize the homography matrix.
+    H.matrix() = normalizer.denormalize(H);
 
     std::cout << "Check H..." << std::endl;
-    std::cout << H << std::endl;
+    std::cout << H.matrix() << std::endl;
 
-    MatrixXd HX = H * X;
+    MatrixXd HX = H.matrix() * X;
     HX.array().rowwise() /= HX.row(2).array();
 
     std::cout << "HX" << std::endl;
@@ -271,42 +265,32 @@ void estimate_homography(const Image<Rgb8>& image1, const Image<Rgb8>& image2,
 
     for (size_t i = 0; i < matches.size(); ++i)
     {
-      Vector3d X1;
-      X1.head(2) = matches[i].x_pos().cast<double>();
-      X1(2) = 1;
+      const Vector3d X1 = matches[i].x_pos().cast<double>().homogeneous();
+      const Vector3d X2 = matches[i].y_pos().cast<double>().homogeneous();
 
-      Vector3d X2;
-      X2.head(2) = matches[i].y_pos().cast<double>();
-      X2(2) = 1;
+      //const Vector3d proj_X1 = (H.matrix() * X1).normalized().homogeneous();
+      //const Vector3d proj_X2 =
+      //    (H.matrix().inverse() * X2).normalized().homogeneous();
 
-      Vector3d proj_X1 = H * X1;
-      proj_X1 /= proj_X1(2);
-
-      Vector3d proj_X2 = H.inverse() * X2;
-      proj_X2 /= proj_X2(2);
-
-
-      if ((X1 - proj_X2).norm() + (proj_X1 - X2).norm() < 2)
-      {
-        drawer.draw_match(matches[i], Blue8, false);
-        drawer.draw_point(0, proj_X2.head(2).cast<float>(), Cyan8, 5);
-        drawer.draw_point(1, proj_X1.head(2).cast<float>(), Cyan8, 5);
-      }
+      //if ((X1 - proj_X2).norm() + (proj_X1 - X2).norm() < 2)
+      //{
+      //  drawer.draw_match(matches[i], Blue8, false);
+      //  drawer.draw_point(0, proj_X2.head(2).cast<float>(), Cyan8, 5);
+      //  drawer.draw_point(1, proj_X1.head(2).cast<float>(), Cyan8, 5);
+      //}
     };
-    for (size_t i = 0; i < 4; ++i)
-    {
-      drawer.draw_match(matches[S(n, i)], Red8, true);
+    //for (size_t i = 0; i < 4; ++i)
+    //{
+    //  drawer.draw_match(matches[S(n, i)], Red8, true);
 
-      drawer.draw_point(0, x.col(i), Magenta8, 5);
-      drawer.draw_point(1, y.col(i), Magenta8, 5);
+    //  drawer.draw_point(0, x.col(i).cast<float>(), Magenta8, 5);
+    //  drawer.draw_point(1, y.col(i).cast<float>(), Magenta8, 5);
 
-      drawer.draw_point(0, X.col(i).cast<float>().head(2), Magenta8, 5);
-      drawer.draw_point(1, Y.col(i).cast<float>().head(2), Magenta8, 5);
+    //  drawer.draw_point(0, X.col(i).head(2).cast<float>(), Magenta8, 5);
+    //  drawer.draw_point(1, Y.col(i).head(2).cast<float>(), Magenta8, 5);
 
-      drawer.draw_point(1, HX.col(i).cast<float>().head(2), Blue8, 5);
-
-      // cout << matches[i] << endl;
-    }
+    //  drawer.draw_point(1, HX.col(i).cast<float>().normalized(), Blue8, 5);
+    //}
 
     get_key();
   }
@@ -905,13 +889,13 @@ GRAPHICS_MAIN()
 
   const auto matches = compute_matches(keys1, keys2);
 
-  // estimate_homography(image1, image2, keys1, keys2, matches);
+  estimate_homography_old(image1, image2, keys1, keys2, matches);
 
-  estimate_fundamental_matrix_old(image1, image2, keys1, keys2, matches);
-  estimate_fundamental_matrix(image1, image2, keys1, keys2, matches);
+  // estimate_fundamental_matrix_old(image1, image2, keys1, keys2, matches);
+  // estimate_fundamental_matrix(image1, image2, keys1, keys2, matches);
 
-  estimate_essential_matrix_old(image1, image2, K1, K2, keys1, keys2, matches);
-  estimate_essential_matrix(image1, image2, K1, K2, keys1, keys2, matches);
+  // estimate_essential_matrix_old(image1, image2, K1, K2, keys1, keys2, matches);
+  // estimate_essential_matrix(image1, image2, K1, K2, keys1, keys2, matches);
 
   return 0;
 }

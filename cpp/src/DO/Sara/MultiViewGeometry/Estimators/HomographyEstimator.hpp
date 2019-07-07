@@ -13,15 +13,30 @@
 
 #include <DO/Sara/Defines.hpp>
 
-#include <DO/Sara/Core/EigenExtension.hpp>
+#include <DO/Sara/MultiViewGeometry/Geometry/Homography.hpp>
 
 
 namespace DO { namespace Sara {
 
-  DO_SARA_EXPORT
-  void four_point_homography(const Matrix<double, 3, 4>& x,
-                             const Matrix<double, 3, 4>& y,  //
-                             Matrix3d& H);
+  struct DO_SARA_EXPORT FourPointAlgorithm
+  {
+    using model_type = Homography;
+    using matrix_type = Eigen::Matrix<double, 3, 4>;
+    using matrix_view_type = Eigen::Map<const matrix_type>;
+
+    static constexpr auto num_points = 4;
+
+    auto operator()(const matrix_view_type& x, const matrix_view_type& y) const
+        -> std::array<model_type, 1>;
+
+    auto operator()(const matrix_type& x, const matrix_type& y) const
+        -> std::array<model_type, 1>
+    {
+      const auto x_view = matrix_view_type{x.data()};
+      const auto y_view = matrix_view_type{y.data()};
+      return this->operator()(x_view, y_view);
+    }
+  };
 
 } /* namespace Sara */
 } /* namespace DO */

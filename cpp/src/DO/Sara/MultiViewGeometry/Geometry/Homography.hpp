@@ -29,6 +29,16 @@ namespace DO { namespace Sara {
       return _m;
     }
 
+    const auto& matrix() const
+    {
+      return _m;
+    }
+
+    auto& matrix()
+    {
+      return _m;
+    }
+
   protected:
     matrix_type _m;
   };
