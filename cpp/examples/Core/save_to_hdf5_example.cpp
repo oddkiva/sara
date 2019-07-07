@@ -99,8 +99,8 @@ void read_data()
   // Retrieve the data types (int, float, double...)?
   auto type_class = dataset.getTypeClass();
   auto float_type = dataset.getFloatType();
-  (void *) type_class;
-  (void *) float_type;
+  (void) type_class;
+  (void) float_type;
 
   // Retrieve the data endianness.
   auto order_string = H5std_string{};
