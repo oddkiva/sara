@@ -107,6 +107,7 @@ auto ransac(const TensorView_<int, 2>& matches,      //
 
         SARA_CHECK(model_best);
         SARA_CHECK(num_inliers_best);
+        SARA_CHECK(subset_best.row_vector());
       }
     }
   }
