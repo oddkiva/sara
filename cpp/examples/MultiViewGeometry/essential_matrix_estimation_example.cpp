@@ -128,15 +128,15 @@ auto compute_matches(const KeypointList<OERegion, float>& keys1,
 
 auto f_estimator = EightPointAlgorithm{};
 auto e_estimator = NisterFivePointAlgorithm{};
-auto algebraic_error(const FundamentalMatrix& F, const Vector3d& X,
-                     const Vector3d& Y)
+
+auto epipolar_distance(const Matrix3d& F, const Vector3d& X, const Vector3d& Y)
 {
-  return std::abs(Y.transpose() * F.matrix() * X);
+  return std::abs(Y.transpose() * F * X);
 };
 
 double thresh = 1e-2;
-auto inlier_predicate(const FundamentalMatrix& F, const Vector3d& X,
-                      const Vector3d& Y)
+auto inlier_epipolar_predicate(const Matrix3d& F, const Vector3d& X,
+                               const Vector3d& Y)
 {
   return algebraic_error(F, X, Y) < thresh;
 };
@@ -566,6 +566,284 @@ void estimate_fundamental_matrix(const Image<Rgb8>& image1,
   close_window();
 }
 
+void estimate_essential_matrix_old(const Image<Rgb8>& image1,
+                               const Image<Rgb8>& image2,
+                               const Matrix3f& K1f,
+                               const Matrix3f& K2f,
+                               const KeypointList<OERegion, float>& keys1,
+                               const KeypointList<OERegion, float>& keys2,
+                               const vector<Match>& matches)
+{
+  // ==========================================================================
+  // Setup the visualization.
+  const auto scale = 0.25f;
+  const auto w = int((image1.width() + image2.width()) * scale);
+  const auto h = max(image1.height(), image2.height()) * scale;
+
+  create_window(w, h);
+  set_antialiasing();
+
+  PairWiseDrawer drawer(image1, image2);
+  drawer.set_viz_params(scale, scale, PairWiseDrawer::CatH);
+
+
+  // ==========================================================================
+  // Image coordinates.
+  const auto to_double = [](const float& src) { return double(src); };
+  const auto& f1 = features(keys1);
+  const auto& f2 = features(keys2);
+  const auto p1 = extract_centers(f1).cwise_transform(to_double);
+  const auto p2 = extract_centers(f2).cwise_transform(to_double);
+
+  // Camera coordinates.
+  const Matrix3d K1 = K1f.cast<double>();
+  const Matrix3d K2 = K2f.cast<double>();
+  const Matrix3d K1_inv = K1.inverse();
+  const Matrix3d K2_inv = K2.inverse();
+  const auto P1 = apply_transform(K1_inv, homogeneous(p1));
+  const auto P2 = apply_transform(K2_inv, homogeneous(p2));
+
+  // Normalization transformation.
+  auto T1 = compute_normalizer(P1);
+  auto T2 = compute_normalizer(P2);
+
+  // Normalized camera coordinates.
+  const auto P1n = apply_transform(T1, P1);
+  const auto P2n = apply_transform(T2, P2);
+
+
+  // ==========================================================================
+  // Generate random samples for RANSAC.
+  constexpr auto N = 1000;
+  constexpr auto L = 5;
+
+  // M = list of matches.
+  const auto M = to_tensor(matches);
+  const auto card_M = M.size(0);
+
+  // S is the list of N groups of L matches.
+  const auto S = random_samples(N, L, card_M);
+  // Remap a match index to a pair of point indices.
+  const auto I = to_point_indices(S, M);
+
+  // Pixel coordinates.
+  const auto p = to_coordinates(I, homogeneous(p1), homogeneous(p2))
+                     .transpose({0, 2, 1, 3});
+  // Camera coordinates.
+  const auto P = to_coordinates(I, P1, P2).transpose({0, 2, 1, 3});
+  // Normalized camera coordinates.
+  const auto Pn = to_coordinates(I, P1n, P2n).transpose({0, 2, 1, 3});
+
+  // Nister 5-point algorithm.
+  auto solver = NisterFivePointAlgorithm{};
+
+  auto F_best = Matrix<double, 3, 3>{};
+  auto E_best = Matrix<double, 3, 3>{};
+  auto num_inliers_best = 0;
+  auto subset_best = 0;
+
+  auto algebraic_error = [](const auto& E, const auto& X, const auto& Y) {
+    return std::abs(Y.transpose() * E * X);
+  };
+
+  auto inlier_predicate = [&](const auto& E, const auto& X, const auto& Y) {
+    return algebraic_error(E, X, Y) < 1e-3;
+  };
+
+  for (auto n = 0; n < N; ++n)
+  {
+    // Normalized camera coordinates.
+    const Matrix<double, 3, L> Xn = Pn[n][0].colmajor_view().matrix();
+    const Matrix<double, 3, L> Yn = Pn[n][1].colmajor_view().matrix();
+
+    // Nister's 5-point algorithm.
+    auto Es = solver.find_essential_matrices(Xn, Yn);
+
+    // Unnormalize the essential matrices.
+    for (auto& E : Es)
+    {
+      E.matrix() = E.matrix().normalized();
+      E.matrix() = (T2.transpose() * E.matrix() * T1).normalized();
+    }
+
+    for (const auto& E: Es)
+    {
+      const Matrix3d F =
+          (K2_inv.transpose() * E.matrix() * K1_inv).normalized();
+
+      auto num_inliers = 0;
+      for (size_t i = 0; i < matches.size(); ++i)
+      {
+        // Image coordinates.
+        Vector3d x1;
+        x1.head(2) = matches[i].x_pos().cast<double>();
+        x1(2) = 1;
+
+        Vector3d x2;
+        x2.head(2) = matches[i].y_pos().cast<double>();
+        x2(2) = 1;
+
+        if (!inlier_predicate(F, x1, x2))
+          continue;
+
+        ++num_inliers;
+      }
+
+      if (num_inliers > num_inliers_best)
+      {
+        num_inliers_best = num_inliers;
+        E_best = E;
+        F_best = F;
+        subset_best = n;
+        SARA_CHECK(E_best);
+        SARA_CHECK(F_best);
+        SARA_CHECK(num_inliers_best);
+        SARA_CHECK(subset_best);
+
+        // =====================================================================
+        // Visualize.
+        //
+        // Calculate the projected lines.
+        const Matrix<double, 3, L> x = p[n][0].colmajor_view().matrix();
+        const Matrix<double, 3, L> y = p[n][1].colmajor_view().matrix();
+        //
+        Matrix<double, 3, L> proj_x = F * x;
+        proj_x.array().rowwise() /= proj_x.row(2).array();
+        //
+        Matrix<double, 3, L> proj_y = F.transpose() * y;
+        proj_y.array().rowwise() /= proj_y.row(2).array();
+
+        drawer.display_images();
+
+        // Show the inliers.
+        for (size_t i = 0; i < matches.size(); ++i)
+        {
+          Vector3d x1;
+          x1.head(2) = matches[i].x_pos().cast<double>();
+          x1(2) = 1;
+
+          Vector3d x2;
+          x2.head(2) = matches[i].y_pos().cast<double>();
+          x2(2) = 1;
+
+          // inlier predicate.
+          if (!inlier_predicate(F, x1, x2))
+            continue;
+
+          if (i % 20 == 0)
+          {
+            Vector3d proj_x1 = F.matrix() * x1;
+            proj_x1 /= proj_x1(2);
+
+            Vector3d proj_x2 = F.matrix().transpose() * x2;
+            proj_x2 /= proj_x2(2);
+
+            drawer.draw_line_from_eqn(0, proj_x2.cast<float>(), Cyan8, 1);
+            drawer.draw_line_from_eqn(1, proj_x1.cast<float>(), Cyan8, 1);
+            drawer.draw_match(matches[i], Yellow8, false);
+          }
+          else
+            drawer.draw_match(matches[i], Blue8, false);
+
+        }
+
+        // Redraw the best group of matches drawn by RANSAC.
+        for (auto i = 0; i < L; ++i)
+        {
+          // Draw the corresponding epipolar lines.
+          drawer.draw_line_from_eqn(1, proj_x.col(i).cast<float>(), Magenta8,
+                                    1);
+          drawer.draw_line_from_eqn(0, proj_y.col(i).cast<float>(), Magenta8,
+                                    1);
+          drawer.draw_match(matches[S(n, i)], Red8, true);
+        }
+      }
+    }
+  }
+
+
+  SARA_DEBUG << "FINAL RESULT" << endl;
+
+  // Display the result.
+  const auto& F = F_best;
+  const auto& E = E_best;
+  const auto& n = subset_best;
+
+  SARA_CHECK(F);
+  SARA_CHECK(E);
+  SARA_CHECK(n);
+  SARA_CHECK(num_inliers_best);
+
+  drawer.display_images();
+
+  // Extract the points.
+  const Matrix<double, 3, L> x = p[n][0].colmajor_view().matrix();
+  const Matrix<double, 3, L> y = p[n][1].colmajor_view().matrix();
+
+  // Project X to the right image.
+  Matrix<double, 3, L> proj_x = F.matrix() * x;
+  proj_x.array().rowwise() /= proj_x.row(2).array();
+
+  // Project Y to the left image.
+  Matrix<double, 3, L> proj_y = F.matrix().transpose() * y;
+  proj_y.array().rowwise() /= proj_y.row(2).array();
+
+  for (size_t i = 0; i < matches.size(); ++i)
+  {
+    Vector3d x1;
+    x1.head(2) = matches[i].x_pos().cast<double>();
+    x1(2) = 1;
+
+    Vector3d x2;
+    x2.head(2) = matches[i].y_pos().cast<double>();
+    x2(2) = 1;
+
+    // inlier predicate.
+    if (!inlier_predicate(E, K1_inv * x1, K2_inv * x2))
+      continue;
+
+    if (i % 50 == 0)
+    {
+      drawer.draw_match(matches[i], Yellow8, false);
+
+      Vector3d proj_x1 = F.matrix() * x1;
+      proj_x1 /= proj_x1(2);
+
+      Vector3d proj_x2 = F.matrix().transpose() * x2;
+      proj_x2 /= proj_x2(2);
+
+      drawer.draw_line_from_eqn(0, proj_x2.cast<float>(), Cyan8, 1);
+      drawer.draw_line_from_eqn(1, proj_x1.cast<float>(), Cyan8, 1);
+    }
+    else
+      drawer.draw_match(matches[i], Blue8, false);
+  }
+
+  for (size_t i = 0; i < L; ++i)
+  {
+    Vector3d x1;
+    x1.head(2) = matches[i].x_pos().cast<double>();
+    x1(2) = 1;
+
+    Vector3d x2;
+    x2.head(2) = matches[i].y_pos().cast<double>();
+    x2(2) = 1;
+
+    Vector3d proj_x1 = F.matrix() * x1;
+    proj_x1 /= proj_x1(2);
+
+    Vector3d proj_x2 = F.matrix().transpose() * x2;
+    proj_x2 /= proj_x2(2);
+
+    drawer.draw_match(matches[S(n, i)], Red8, true);
+    drawer.draw_line_from_eqn(0, proj_x2.cast<float>(), Magenta8, 1);
+    drawer.draw_line_from_eqn(1, proj_x1.cast<float>(), Magenta8, 1);
+  }
+
+  get_key();
+  close_window();
+}
+
 //void estimate_essential_matrix(const Image<Rgb8>& image1,
 //                               const Image<Rgb8>& image2,
 //                               const Matrix3f& K1f,
@@ -914,10 +1192,12 @@ GRAPHICS_MAIN()
 
   const auto matches = compute_matches(keys1, keys2);
 
+  // estimate_homography(image1, image2, keys1, keys2, matches);
+
   estimate_fundamental_matrix_old(image1, image2, keys1, keys2, matches);
   estimate_fundamental_matrix(image1, image2, keys1, keys2, matches);
 
-  // estimate_homography(image1, image2, keys1, keys2, matches);
+  estimate_essential_matrix_old(image1, image2, K1, K2, keys1, keys2, matches);
   //estimate_essential_matrix(image1, image2, K1, K2, keys1, keys2, matches);
 
   return 0;

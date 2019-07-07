@@ -99,8 +99,7 @@ void read_data()
   // Retrieve the data types (int, float, double...)?
   auto type_class = dataset.getTypeClass();
   auto float_type = dataset.getFloatType();
-  (void) type_class;
-  (void) float_type;
+  std::cout << "type_class = " << type_class << std::endl;
 
   // Retrieve the data endianness.
   auto order_string = H5std_string{};
@@ -118,7 +117,8 @@ void read_data()
 
   auto dims_out = std::array<hsize_t, 2>{};
   auto ndims = dataspace.getSimpleExtentDims(dims_out.data(), nullptr);
-  std::cout << "rank " << rank << ", dimensions "
+  std::cout << "ndims = " << ndims << std::endl;
+  std::cout << "rank = " << rank << ", dimensions = "
             << static_cast<unsigned long>(dims_out[0]) << " x "
             << static_cast<unsigned long>(dims_out[1]) << std::endl;
 
