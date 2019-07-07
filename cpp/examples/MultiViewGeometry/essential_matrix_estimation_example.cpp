@@ -650,14 +650,14 @@ void estimate_essential_matrix_old(const Image<Rgb8>& image1,
     // Unnormalize the essential matrices.
     for (auto& E : Es)
     {
-      E.matrix() = E.matrix().normalized();
+      //E.matrix() = E.matrix().normalized();
       E.matrix() = (T2.transpose() * E.matrix() * T1).normalized();
     }
 
     for (const auto& E: Es)
     {
       const Matrix3d F =
-          (K2_inv.transpose() * E.matrix() * K1_inv).normalized();
+          (K2_inv.transpose() * E.matrix() * K1_inv);  //.normalized();
 
       const auto num_inliers =
           count_inliers(F, M, p1, p2, epipolar_distance, e_err_thresh);
@@ -861,7 +861,6 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
     drawer.draw_line_from_eqn(1, proj_X.col(i).cast<float>(), Magenta8, 1);
     drawer.draw_line_from_eqn(0, proj_Y.col(i).cast<float>(), Magenta8, 1);
   }
-  get_key();
 
   // Draw the inliers.
   for (size_t i = 0; i < matches.size(); ++i)
@@ -870,7 +869,8 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
     const Vector3d X2 = matches[i].y_pos().cast<double>().homogeneous();
 
     // inlier predicate.
-    if (epipolar_distance(E, K1_inv * X1, K2_inv * X2) > e_err_thresh)
+    //if (epipolar_distance(E, K1_inv * X1, K2_inv * X2) > e_err_thresh)
+    if (epipolar_distance(F, X1, X2) > e_err_thresh)
       continue;
 
     if (i % 20 == 0)
@@ -884,7 +884,6 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
       drawer.draw_line_from_eqn(1, proj_X1.cast<float>(), Cyan8, 1);
     }
   }
-
 
   get_key();
   close_window();
@@ -913,7 +912,7 @@ GRAPHICS_MAIN()
   //estimate_fundamental_matrix_old(image1, image2, keys1, keys2, matches);
   //estimate_fundamental_matrix(image1, image2, keys1, keys2, matches);
 
-  //estimate_essential_matrix_old(image1, image2, K1, K2, keys1, keys2, matches);
+  estimate_essential_matrix_old(image1, image2, K1, K2, keys1, keys2, matches);
   estimate_essential_matrix(image1, image2, K1, K2, keys1, keys2, matches);
 
   return 0;
