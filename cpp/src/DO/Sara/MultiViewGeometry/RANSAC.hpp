@@ -38,6 +38,7 @@ auto ransac(const TensorView_<int, 2>& matches,      //
   // M = list of matches.
   const auto& M = matches;
   const auto card_M = M.size(0);
+  SARA_DEBUG << "card_M = " << card_M << std::endl;
 
   SARA_DEBUG << "M =\n" << M.matrix().topRows(10) << std::endl;
   SARA_DEBUG << "card_M = " << card_M << std::endl;
@@ -96,8 +97,8 @@ auto ransac(const TensorView_<int, 2>& matches,      //
     // Unnormalize the models.
     for (auto& model : models)
     {
-      model.matrix() = model.matrix().normalized();
       model.matrix() = (T2.transpose() * model.matrix() * T1).normalized();
+      model.matrix() = model.matrix().normalized();
     }
 
     for (const auto& model: models)
