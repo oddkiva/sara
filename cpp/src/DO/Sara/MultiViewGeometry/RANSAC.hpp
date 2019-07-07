@@ -16,7 +16,7 @@ auto ransac(const TensorView_<int, 2>& matches,      //
             const TensorView_<T, 2>& p2,             //
             Estimator estimator, Distance distance,  //
             int num_samples, T dist_threshold,
-            PairWiseDrawer *drawer = nullptr)
+            PairWiseDrawer * = nullptr)
 {
   // Normalization transformation.
   const auto T1 = compute_normalizer(p1);

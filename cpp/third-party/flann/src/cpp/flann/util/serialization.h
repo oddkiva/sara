@@ -15,11 +15,7 @@ struct access
     template<typename Archive, typename T>
     static inline void serialize(Archive& ar, T& type)
     {
-#ifdef _WIN32
-        (void) type;
-#else
         type.serialize(ar);
-#endif
     }
 };
 
@@ -27,7 +23,7 @@ struct access
 template<typename Archive, typename T>
 inline void serialize(Archive& ar, T& type)
 {
-    access::serialize(ar,type);
+    access::serialize(ar, type);
 }
 
 template<typename T>
@@ -311,18 +307,17 @@ public:
     {
     }
 
-    template<typename T>
+    template <typename T>
     void save(const T& val)
     {
-        size_ += sizeof(val);
+      size_ += sizeof(val);
     }
 
-    template<typename T>
-    void save_binary(T* ptr, size_t size)
+    template <typename T>
+    void save_binary(T*, size_t size)
     {
     	size_ += size;
     }
-
 
     void reset()
     {
@@ -383,7 +378,7 @@ public:
     }
 
     template<typename T>
-    void save(T* const& val)
+    void save(T* const&)
     {
     	// don't save pointers
         //fwrite(&val, sizeof(val), 1, handle_);
@@ -430,7 +425,7 @@ public:
     }
 
     template<typename T>
-    void load(T*& val)
+    void load(T*&)
     {
     	// don't load pointers
         //fread(&val, sizeof(val), 1, handle_);

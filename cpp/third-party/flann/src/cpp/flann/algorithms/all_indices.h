@@ -97,13 +97,13 @@ struct DummyDistance
     typedef float ResultType;
 
     template <typename Iterator1, typename Iterator2>
-    ResultType operator()(Iterator1 a, Iterator2 b, size_t size, ResultType /*worst_dist*/ = -1) const
+    ResultType operator()(Iterator1, Iterator2, size_t, ResultType /*worst_dist*/ = -1) const
     {
         return ResultType(0);
     }
 
     template <typename U, typename V>
-    inline ResultType accum_dist(const U& a, const V& b, int) const
+    inline ResultType accum_dist(const U&, const V&, int) const
     {
         return ResultType(0);
     }
@@ -133,10 +133,10 @@ inline NNIndex<Distance>* create_index_(flann::Matrix<T> data, const flann::Inde
 }
 
 template <template<typename> class Index, typename Distance, typename T>
-inline NNIndex<Distance>* create_index_(flann::Matrix<T> data, const flann::IndexParams& params, const Distance& distance,
+inline NNIndex<Distance>* create_index_(flann::Matrix<T>, const flann::IndexParams&, const Distance&,
 		typename disable_if<valid_combination<Index,Distance,T>::value,void>::type* = 0)
 {
-    return NULL;
+    return nullptr;
 }
 
 template<typename Distance>

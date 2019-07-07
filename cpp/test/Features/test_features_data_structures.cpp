@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE(test_methods)
 
   resize(set, 10, 2);
   BOOST_CHECK(size_consistency_predicate(set));
-  BOOST_CHECK_EQUAL(size(set), 10u);
+  BOOST_CHECK_EQUAL(size(set), 10);
   BOOST_CHECK_EQUAL(features(set).size(), 10u);
   BOOST_CHECK_EQUAL(descriptors(set).rows(), 10); // Test swap.
 

@@ -27,9 +27,6 @@
 namespace fs = boost::filesystem;
 namespace sara = DO::Sara;
 
-const auto file1 = src_path("../../../data/All.tif");
-const auto file2 = src_path("../../../data/GuardOnBlonde.tif");
-
 
 auto match(const sara::KeypointList<sara::OERegion, float>& keys1,
            const sara::KeypointList<sara::OERegion, float>& keys2)

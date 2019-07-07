@@ -14,6 +14,7 @@ extern "C" {
 # include <libavformat/avformat.h>
 # include <libavformat/avio.h>
 # include <libavutil/file.h>
+# include <libavutil/version.h>
 }
 
 #include "VideoStream.hpp"
@@ -57,15 +58,19 @@ namespace DO { namespace Sara {
 
 namespace DO { namespace Sara {
 
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(58, 9, 100)
   bool VideoStream::_registered_all_codecs = false;
+#endif
 
   VideoStream::VideoStream()
   {
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(58, 9, 100)
     if (!_registered_all_codecs)
     {
       av_register_all();
       _registered_all_codecs = true;
     }
+#endif
   }
 
   VideoStream::VideoStream(const std::string& file_path)

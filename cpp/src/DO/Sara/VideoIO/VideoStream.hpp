@@ -63,7 +63,9 @@ namespace DO { namespace Sara {
     }
 
   private:
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(58, 9, 100)
     static bool _registered_all_codecs;
+#endif
 
     AVFormatContext *_video_format_context = nullptr;
     int _video_stream = -1;
