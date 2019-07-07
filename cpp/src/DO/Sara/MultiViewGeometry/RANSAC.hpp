@@ -1,47 +1,47 @@
+// ========================================================================== //
+// This file is part of Sara, a basic set of libraries in C++ for computer
+// vision.
+//
+// Copyright (C) 2019 David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
 #pragma once
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/Tensor.hpp>
-#include <DO/Sara/Match.hpp>
 #include <DO/Sara/MultiViewGeometry/DataTransformations.hpp>
-#include <DO/Sara/MultiViewGeometry/Utilities.hpp>
+#include <DO/Sara/MultiViewGeometry/Geometry/Denormalizer.hpp>
 
 
 namespace DO::Sara {
 
 //! @brief Random Sample Consensus algorithm from Fischler and Bolles 1981.
-template <typename Estimator, typename Distance, typename T>
+template <typename Estimator, typename Distance>
 auto ransac(const TensorView_<int, 2>& matches,      //
-            const TensorView_<T, 2>& p1,             //
-            const TensorView_<T, 2>& p2,             //
+            const TensorView_<double, 2>& p1,        //
+            const TensorView_<double, 2>& p2,        //
             Estimator estimator, Distance distance,  //
-            int num_samples, T dist_threshold,
-            PairWiseDrawer * = nullptr)
+            int num_samples, double dist_threshold)
 {
+  using Model = typename Estimator::model_type;
+
   // Normalization transformation.
-  const auto T1 = compute_normalizer(p1);
-  const auto T2 = compute_normalizer(p2);
+  auto normalizer = Normalizer<Model>{p1, p2};
 
   // Normalized image coordinates.
-  const auto p1n = apply_transform(T1, p1);
-  const auto p2n = apply_transform(T2, p2);
+  const auto [p1n, p2n] = normalizer.normalize(p1, p2);
 
-  SARA_DEBUG << "p1n =\n" << p1n.matrix().topRows(10) << std::endl;
-  SARA_DEBUG << "p2n =\n" << p2n.matrix().topRows(10) << std::endl;
-
-  // ==========================================================================
   // Generate random samples for RANSAC.
   const auto& N = num_samples;
   constexpr auto L = Estimator::num_points;
-  SARA_DEBUG << "L = " << L << std::endl;
 
   // M = list of matches.
   const auto& M = matches;
   const auto card_M = M.size(0);
-  SARA_DEBUG << "card_M = " << card_M << std::endl;
-
-  SARA_DEBUG << "M =\n" << M.matrix().topRows(10) << std::endl;
-  SARA_DEBUG << "card_M = " << card_M << std::endl;
 
   if (card_M < Estimator::num_points)
     throw std::runtime_error{"Not enough matches!"};
@@ -59,12 +59,10 @@ auto ransac(const TensorView_<int, 2>& matches,      //
   // Normalized coordinates.
   const auto pn = to_coordinates(I, p1n, p2n).transpose({0, 2, 1, 3});
 
-
   // Helper function.
   const auto count_inliers = [&](const auto& model) {
-
-    const auto p1mat = p1.colmajor_view().matrix();
-    const auto p2mat = p2.colmajor_view().matrix();
+    const auto p1_mat = p1.colmajor_view().matrix();
+    const auto p2_mat = p2.colmajor_view().matrix();
 
     auto num_inliers = 0;
     for (auto m = 0; m < M.size(0); ++m)
@@ -72,8 +70,8 @@ auto ransac(const TensorView_<int, 2>& matches,      //
       const auto i = M(m, 0);
       const auto j = M(m, 1);
 
-      const auto xi = p1mat.col(i);
-      const auto yj = p2mat.col(j);
+      const auto xi = p1_mat.col(i);
+      const auto yj = p2_mat.col(j);
 
       if (distance(model, xi, yj) < dist_threshold)
         ++num_inliers;
@@ -96,10 +94,7 @@ auto ransac(const TensorView_<int, 2>& matches,      //
 
     // Unnormalize the models.
     for (auto& model : models)
-    {
-      model.matrix() = (T2.transpose() * model.matrix() * T1).normalized();
-      model.matrix() = model.matrix().normalized();
-    }
+      model.matrix() = normalizer.denormalize(model);
 
     for (const auto& model: models)
     {

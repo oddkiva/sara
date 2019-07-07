@@ -5,14 +5,12 @@
 
 namespace DO { namespace Sara {
 
-  template <typename T = double>
   class Homography
   {
   public:
-    using scalar_type = T;
-    using matrix_type = Matrix<T, 3, 3>;
-    using line_type = Matrix<T, 3, 1>;
-    using point_type = Matrix<T, 3, 1>;
+    using matrix_type = Matrix3d;
+    using line_type = Matrix3d;
+    using point_type = Vector3d;
 
     Homography() = default;
 
@@ -32,7 +30,6 @@ namespace DO { namespace Sara {
     }
 
   protected:
-    //! @brief Fundamental matrix container.
     matrix_type _m;
   };
 

@@ -196,8 +196,6 @@ void estimate_homography(const Image<Rgb8>& image1, const Image<Rgb8>& image2,
   //S[0] = range(8);
 
 
-
-
   // ==========================================================================
   // Normalize the points.
   const auto& f1 = features(keys1);
@@ -909,8 +907,8 @@ GRAPHICS_MAIN()
 
   // estimate_homography(image1, image2, keys1, keys2, matches);
 
-  //estimate_fundamental_matrix_old(image1, image2, keys1, keys2, matches);
-  //estimate_fundamental_matrix(image1, image2, keys1, keys2, matches);
+  estimate_fundamental_matrix_old(image1, image2, keys1, keys2, matches);
+  estimate_fundamental_matrix(image1, image2, keys1, keys2, matches);
 
   estimate_essential_matrix_old(image1, image2, K1, K2, keys1, keys2, matches);
   estimate_essential_matrix(image1, image2, K1, K2, keys1, keys2, matches);
