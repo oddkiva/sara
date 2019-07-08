@@ -177,7 +177,7 @@ auto check_epipolar_constraints(const Image<Rgb8>& Ii, const Image<Rgb8>& Ij,
     drawer.draw_line_from_eqn(0, proj_X2.cast<float>(), Magenta8, 1);
   }
 
-  get_key();
+  //get_key();
 }
 
 struct IndexMatch
@@ -331,8 +331,8 @@ GRAPHICS_MAIN()
       //F1.matrix() = Kj_inv.transpose() * E.matrix() * Ki_inv;
 
       // Visualize the estimated fundamental matrix.
-      const int display_step = 1;
-      sara::check_epipolar_constraints(Ii, Ij, F1, Mij, sample_best, err_thres,
+      const int display_step = 20;
+      sara::check_epipolar_constraints(Ii, Ij, F, Mij, sample_best, err_thres,
                                        display_step);
       //sara::check_epipolar_constraints(Ii, Ij, F1, Mij, sample_best_e,
       //                                 err_thres, display_step);
