@@ -14,7 +14,7 @@
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/Tensor.hpp>
 #include <DO/Sara/MultiViewGeometry/DataTransformations.hpp>
-#include <DO/Sara/MultiViewGeometry/Geometry/Denormalizer.hpp>
+#include <DO/Sara/MultiViewGeometry/Geometry/Normalizer.hpp>
 
 
 namespace DO::Sara {

@@ -14,9 +14,6 @@
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/Match.hpp>
 #include <DO/Sara/MultiViewGeometry.hpp>
-#include <DO/Sara/MultiViewGeometry/Estimators/HomographyEstimator.hpp>
-#include <DO/Sara/MultiViewGeometry/Geometry/Denormalizer.hpp>
-#include <DO/Sara/MultiViewGeometry/RANSAC.hpp>
 #include <DO/Sara/SfM/Detectors/SIFT.hpp>
 
 
@@ -129,7 +126,7 @@ auto compute_matches(const KeypointList<OERegion, float>& keys1,
 
 
 using FEstimator = EightPointAlgorithm;
-using EEstimator = SteweniusFivePointAlgorithm;
+using EEstimator = NisterFivePointAlgorithm;
 auto f_estimator = FEstimator{};
 auto e_estimator = EEstimator{};
 
@@ -983,11 +980,11 @@ GRAPHICS_MAIN()
   //estimate_homography_old(image1, image2, keys1, keys2, matches);
   estimate_homography(image1, image2, keys1, keys2, matches);
 
-  // estimate_fundamental_matrix_old(image1, image2, keys1, keys2, matches);
-  // estimate_fundamental_matrix(image1, image2, keys1, keys2, matches);
+  estimate_fundamental_matrix_old(image1, image2, keys1, keys2, matches);
+  estimate_fundamental_matrix(image1, image2, keys1, keys2, matches);
 
-  // estimate_essential_matrix_old(image1, image2, K1, K2, keys1, keys2, matches);
-  // estimate_essential_matrix(image1, image2, K1, K2, keys1, keys2, matches);
+  estimate_essential_matrix_old(image1, image2, K1, K2, keys1, keys2, matches);
+  estimate_essential_matrix(image1, image2, K1, K2, keys1, keys2, matches);
 
   return 0;
 }

@@ -7,24 +7,6 @@ namespace DO { namespace Sara {
 
   using Mat34d = Matrix<double, 3, 4>;
 
-  struct Camera
-  {
-    using matrix_type = Matrix<double, 3, 4>;
-
-    matrix_type& operator matrix_type()
-    {
-      return P;
-    }
-
-    const matrix_type& operator matrix_type() const
-    {
-      return P;
-    }
-
-    matrix_type _P;
-  };
-
-
   auto linear_triangulation(const Camera& P1, const Camera& P2,
                             const MatrixXd& u1, const MatrixXd& u2, MatrixXd& X)
   {

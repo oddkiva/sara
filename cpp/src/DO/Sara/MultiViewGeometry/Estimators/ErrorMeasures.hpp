@@ -1,38 +1,47 @@
 #pragma once
 
-#include <cmath>
+#include <Eigen/Core>
 
 
-namespace DO { namespace Sara {
+namespace DO::Sara {
 
-  /// @brief Functor evaluating distance of a point to its epipolar line.
-  class EpipolarDistance
+//! @brief Functor evaluating distance of a point to its epipolar line.
+struct EpipolarDistance
+{
+  EpipolarDistance(const Eigen::Matrix3d& F_)
+    : F{F_}
   {
-  public:
-    EpipolarDistance()
-    {
-    }
+  }
 
-    template <typename Fundamental, typename Point>
-    auto operator()(const Fundamental& F, const Point& x, const Point& y) const
-    {
-      const auto right_epipolar = F.right_line(x);
-      const auto d1 =
-          std::abs(right_epipolar.dot(y)) / right_epipolar.head(2).norm();
-
-      const auto left_epipolar = F.leftLine(x);
-      const auto d2 =
-          std::abs(left_epipolar.dot(x)) / left_epipolar.head(2).norm();
-
-      return std::fmax(d1, d2);
-    }
-
+  inline auto operator()(const Eigen::Vector3d& X,
+                         const Eigen::Vector3d& Y) const
+  {
+    return std::abs(Y.transpose() * F * X);
   };
 
-  /// @brief Functor evaluating distance of a point to its epipolar line.
-  class SampsonDistance
+  const Eigen::Matrix3d& F;
+};
+
+
+struct SymmetricTransferError
+{
+  inline SymmetricTransferError(Eigen::Matrix3d& H)
+    : H_{H}
+    , H_inv_{H.inverse()}
   {
+  }
+
+  inline auto operator()(const Eigen::Matrix3d& H,  //
+                         const Eigen::Vector3d& x,
+                         const Eigen::Vector3d& y) const -> double
+  {
+    return ((H_ * x).hnormalized() - y.hnormalized()).norm() +
+           ((H_inv_ * y).hnormalized() - x.hnormalized()).norm();
   };
 
-} /* namespace Sara */
-} /* namespace DO */
+  Eigen::Matrix3d H_;
+  Eigen::Matrix3d H_inv_;
+};
+
+
+} /* namespace DO::Sara */
