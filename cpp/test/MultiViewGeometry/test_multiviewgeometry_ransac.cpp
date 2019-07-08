@@ -1,6 +1,7 @@
 #define BOOST_TEST_MODULE "MultiViewGeometry/RANSAC Algorithm"
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
+#include <DO/Sara/MultiViewGeometry/Estimators/ErrorMeasures.hpp>
 #include <DO/Sara/MultiViewGeometry/Estimators/FundamentalMatrixEstimators.hpp>
 #include <DO/Sara/MultiViewGeometry/RANSAC.hpp>
 
@@ -66,11 +67,7 @@ BOOST_AUTO_TEST_CASE(test_ransac_with_eight_point_algorithm)
     matches[i].flat_array() << i, i;
 
   auto f_estimator = EightPointAlgorithm{};
-  auto distance = [](const FundamentalMatrix& F, const Vector3d& left,
-                     const Vector3d& right) {
-    return double(right.transpose() * F.matrix() * left);
-  };
-
+  auto distance = EpipolarDistance{};
 
   ransac(matches, left, right, f_estimator, distance, 10, 1e-3);
 }

@@ -61,6 +61,8 @@ auto ransac(const TensorView_<int, 2>& matches,      //
 
   // Helper function.
   const auto count_inliers = [&](const auto& model) {
+    distance = Distance(model);
+
     const auto p1_mat = p1.colmajor_view().matrix();
     const auto p2_mat = p2.colmajor_view().matrix();
 
@@ -73,7 +75,7 @@ auto ransac(const TensorView_<int, 2>& matches,      //
       const auto xi = p1_mat.col(i);
       const auto yj = p2_mat.col(j);
 
-      if (distance(model, xi, yj) < dist_threshold)
+      if (distance(xi, yj) < dist_threshold)
         ++num_inliers;
     }
     return num_inliers;

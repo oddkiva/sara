@@ -14,6 +14,7 @@
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/Match.hpp>
 #include <DO/Sara/MultiViewGeometry.hpp>
+#include <DO/Sara/MultiViewGeometry/Estimators/ErrorMeasures.hpp>
 #include <DO/Sara/SfM/Detectors/SIFT.hpp>
 
 
@@ -326,28 +327,25 @@ void estimate_homography(const Image<Rgb8>& image1, const Image<Rgb8>& image2,
   // Generate random samples for RANSAC.
   constexpr auto N = 1000;
 
-  const auto h_estimator = FourPointAlgorithm{};
-
   const auto num_samples = 1000;
   double h_err_thres = 1.;
-  auto distance = [](const Matrix3d& H, const Vector3d& x,
-                     const Vector3d& y) -> double {
-    return ((H * x).hnormalized() - y.hnormalized()).norm() +
-           ((H.inverse() * y).hnormalized() - x.hnormalized()).norm();
-  };
 
-  auto [H, num_inliers, sample_best] =
-      ransac(M, P1, P2, h_estimator, distance, num_samples, h_err_thres);
+  auto distance = SymmetricTransferError{};
+
+  auto [H, num_inliers, sample_best] = ransac(
+      M, P1, P2, FourPointAlgorithm{}, distance, num_samples, h_err_thres);
 
   // Display the result.
   drawer.display_images();
+
+  distance = SymmetricTransferError{H};
 
   for (size_t i = 0; i < matches.size(); ++i)
   {
     const Vector3d X1 = matches[i].x_pos().cast<double>().homogeneous();
     const Vector3d X2 = matches[i].y_pos().cast<double>().homogeneous();
 
-    if (distance(H, X1, X2) < 1.)
+    if (distance(X1, X2) < 1.)
       drawer.draw_match(matches[i], Blue8, false);
   };
 
@@ -576,7 +574,7 @@ void estimate_fundamental_matrix(const Image<Rgb8>& image1,
 
   double num_samples = 1000;
   const auto [F, num_inliers, sample_best] = ransac(
-      M, P1, P2, f_estimator, epipolar_distance, num_samples, f_err_thresh);
+      M, P1, P2, FEstimator{}, EpipolarDistance{}, num_samples, f_err_thresh);
 
   SARA_CHECK(F);
   SARA_CHECK(num_inliers);
@@ -892,8 +890,10 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
   const auto M = to_tensor(matches);
 
   double num_samples = 1000;
-  auto [E, num_inliers, sample_best] = ransac(
-      M, P1, P2, e_estimator, epipolar_distance, num_samples, e_err_thresh);
+  auto distance = EpipolarDistance{};
+
+  auto [E, num_inliers, sample_best] =
+      ransac(M, P1, P2, e_estimator, distance, num_samples, e_err_thresh);
 
   E.matrix() = E.matrix().normalized();
 
