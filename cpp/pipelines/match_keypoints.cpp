@@ -54,7 +54,9 @@ auto match(const KeypointList<OERegion, float>& keys1,
 
 auto estimate_fundamental_matrix(const std::vector<Match>& Mij,
                                  const KeypointList<OERegion, float>& ki,
-                                 const KeypointList<OERegion, float>& kj)
+                                 const KeypointList<OERegion, float>& kj,
+                                 int num_samples,
+                                 double err_thres)
 {
   const auto to_double = [](const float& src) { return double(src); };
   const auto& fi = features(ki);
@@ -69,11 +71,9 @@ auto estimate_fundamental_matrix(const std::vector<Match>& Mij,
 
   auto estimator = EightPointAlgorithm{};
   auto distance = EpipolarDistance{};
-  auto err_thresh = 1e-2;
 
-  const double num_samples = 1000;
   const auto [F, num_inliers, sample_best] =
-      ransac(Mij_tensor, Pi, Pj, estimator, distance, num_samples, err_thresh);
+      ransac(Mij_tensor, Pi, Pj, estimator, distance, num_samples, err_thres);
 
   SARA_CHECK(F);
   SARA_CHECK(num_inliers);
@@ -86,7 +86,9 @@ auto estimate_essential_matrix(const std::vector<Match>& Mij,
                                const KeypointList<OERegion, float>& ki,
                                const KeypointList<OERegion, float>& kj,
                                const Matrix3d& Ki_inv,
-                               const Matrix3d& Kj_inv)
+                               const Matrix3d& Kj_inv,
+                               int num_samples,
+                               double err_thres)
 {
   const auto to_double = [](const float& src) { return double(src); };
   const auto& fi = features(ki);
@@ -101,11 +103,9 @@ auto estimate_essential_matrix(const std::vector<Match>& Mij,
 
   auto estimator = NisterFivePointAlgorithm{};
   auto distance = EpipolarDistance{};
-  auto err_thresh = 1e-2;
 
-  const double num_samples = 1000;
   const auto [E, num_inliers, sample_best] =
-      ransac(Mij_tensor, Pi, Pj, estimator, distance, num_samples, err_thresh);
+      ransac(Mij_tensor, Pi, Pj, estimator, distance, num_samples, err_thres);
 
   SARA_CHECK(E);
   SARA_CHECK(num_inliers);
@@ -117,7 +117,8 @@ auto estimate_essential_matrix(const std::vector<Match>& Mij,
 auto check_epipolar_constraints(const Image<Rgb8>& Ii, const Image<Rgb8>& Ij,
                                 const FundamentalMatrix& F,
                                 const vector<Match>& Mij,
-                                const Tensor_<int, 1>& sample_best)
+                                const Tensor_<int, 1>& sample_best,
+                                double err_thres, int display_step)
 {
   const auto scale = 0.25f;
   const auto w = int((Ii.width() + Ij.width()) * scale + 0.5f);
@@ -138,7 +139,6 @@ auto check_epipolar_constraints(const Image<Rgb8>& Ii, const Image<Rgb8>& Ij,
 
   drawer.display_images();
 
-  auto err_thresh = 1.;
   auto distance = EpipolarDistance{F.matrix()};
 
   for (size_t m = 0; m < Mij.size(); ++m)
@@ -146,10 +146,10 @@ auto check_epipolar_constraints(const Image<Rgb8>& Ii, const Image<Rgb8>& Ij,
     const Vector3d X1 = Mij[m].x_pos().cast<double>().homogeneous();
     const Vector3d X2 = Mij[m].y_pos().cast<double>().homogeneous();
 
-    if (distance(X1, X2) > err_thresh)
+    if (distance(X1, X2) > err_thres)
       continue;
 
-    if (m % 100 == 0)
+    if (m % display_step == 0)
     {
       drawer.draw_match(Mij[m], Blue8, false);
 
@@ -248,14 +248,17 @@ auto read_matches(H5File& file, const std::string& name)
 
 GRAPHICS_MAIN()
 {
+  const auto dataset = std::string{"castle_int"};
+  //const auto dataset = std::string{"herzjesu_int"};
+
 #if defined(__APPLE__)
-  const auto dirpath = fs::path{"/Users/david/Desktop/Datasets/sfm/castle_int"};
-  auto h5_file = sara::H5File{"/Users/david/Desktop/Datasets/sfm/castle_int.h5",
-                              H5F_ACC_RDWR};
+  const auto dirpath = fs::path{"/Users/david/Desktop/Datasets/sfm/" + dataset};
+  auto h5_file = sara::H5File{
+      "/Users/david/Desktop/Datasets/sfm/" + dataset + ".h5", H5F_ACC_RDWR};
 #else
-  const auto dirpath = fs::path{"/home/david/Desktop/Datasets/sfm/castle_int"};
-  auto h5_file = sara::H5File{"/home/david/Desktop/Datasets/sfm/castle_int.h5",
-                              H5F_ACC_RDWR};
+  const auto dirpath = fs::path{"/home/david/Desktop/Datasets/sfm/" + dataset};
+  auto h5_file = sara::H5File{
+      "/home/david/Desktop/Datasets/sfm/" + dataset + ".h5", H5F_ACC_RDWR};
 #endif
 
   auto image_paths = sara::ls(dirpath.string(), ".png");
@@ -289,6 +292,8 @@ GRAPHICS_MAIN()
       // Load the keypoints.
       const auto ki = sara::read_keypoints(h5_file, gi);
       const auto kj = sara::read_keypoints(h5_file, gj);
+      //const auto ki = sara::compute_sift_keypoints(Ii.convert<float>());
+      //const auto kj = sara::compute_sift_keypoints(Ij.convert<float>());
 
 
       // Match keypoints.
@@ -310,18 +315,27 @@ GRAPHICS_MAIN()
       //h5_file.write_dataset(match_dataset, tensor_view(Mij2));
 
 
+      const auto num_samples = 1000;
+      const auto err_thres = 5e-3;
+
       // Estimate the fundamental matrix.
       const auto [F, num_inliers, sample_best] =
-          sara::estimate_fundamental_matrix(Mij, ki, kj);
+          sara::estimate_fundamental_matrix(Mij, ki, kj, num_samples,
+                                            err_thres);
 
-      const auto [E, num_inliers_e, sample_best_e] =
-          sara::estimate_essential_matrix(Mij, ki, kj, Ki_inv, Kj_inv);
+      //const auto [E, num_inliers_e, sample_best_e] =
+      //    sara::estimate_essential_matrix(Mij, ki, kj, Ki_inv, Kj_inv,
+      //                                    num_samples, err_thres);
 
-      auto F1 = sara::FundamentalMatrix{};
-      F1.matrix() = Kj_inv.transpose() * E.matrix() * Ki_inv;
+      //auto F1 = sara::FundamentalMatrix{};
+      //F1.matrix() = Kj_inv.transpose() * E.matrix() * Ki_inv;
 
       // Visualize the estimated fundamental matrix.
-      sara::check_epipolar_constraints(Ii, Ij, F1, Mij, sample_best);
+      const int display_step = 1;
+      sara::check_epipolar_constraints(Ii, Ij, F1, Mij, sample_best, err_thres,
+                                       display_step);
+      //sara::check_epipolar_constraints(Ii, Ij, F1, Mij, sample_best_e,
+      //                                 err_thres, display_step);
     }
   }
 
