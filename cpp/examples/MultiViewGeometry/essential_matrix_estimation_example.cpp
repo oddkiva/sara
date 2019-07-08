@@ -14,7 +14,6 @@
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/Match.hpp>
 #include <DO/Sara/MultiViewGeometry.hpp>
-#include <DO/Sara/MultiViewGeometry/Estimators/ErrorMeasures.hpp>
 #include <DO/Sara/SfM/Detectors/SIFT.hpp>
 
 

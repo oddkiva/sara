@@ -16,6 +16,7 @@
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/Match.hpp>
+#include <DO/Sara/MultiViewGeometry.hpp>
 #include <DO/Sara/SfM/Detectors/SIFT.hpp>
 
 #include <boost/filesystem.hpp>
@@ -27,17 +28,107 @@ namespace sara = DO::Sara;
 using namespace std;
 
 
-namespace DO::Sara
-{
+namespace DO::Sara {
 
-auto match(const sara::KeypointList<sara::OERegion, float>& keys1,
-           const sara::KeypointList<sara::OERegion, float>& keys2)
-    -> std::vector<sara::Match>
+auto match(const KeypointList<OERegion, float>& keys1,
+           const KeypointList<OERegion, float>& keys2)
+    -> std::vector<Match>
 {
-  sara::AnnMatcher matcher{keys1, keys2, 1.0f};
+  AnnMatcher matcher{keys1, keys2, 1.0f};
   return matcher.compute_matches();
 }
 
+auto estimate_fundamental_matrix(const std::vector<Match>& Mij,
+                                 const KeypointList<OERegion, float>& ki,
+                                 const KeypointList<OERegion, float>& kj)
+{
+  const auto to_double = [](const float& src) { return double(src); };
+  const auto& fi = features(ki);
+  const auto& fj = features(kj);
+  const auto pi = extract_centers(fi).cwise_transform(to_double);
+  const auto pj = extract_centers(fj).cwise_transform(to_double);
+
+  const auto Pi = homogeneous(pi);
+  const auto Pj = homogeneous(pj);
+
+  const auto Mij_tensor = to_tensor(Mij);
+
+  auto f_estimator = EightPointAlgorithm{};
+  auto distance = EpipolarDistance{};
+  auto f_err_thresh = 1e-2;
+
+  double num_samples = 1000;
+  return ransac(Mij_tensor, Pi, Pj, f_estimator, distance, num_samples,
+                f_err_thresh);
+}
+
+auto check_epipolar_constraints(const Image<Rgb8>& Ii, const Image<Rgb8>& Ij,
+                                const FundamentalMatrix& F,
+                                const vector<Match>& Mij,
+                                const Tensor_<int, 1>& sample_best)
+{
+  const auto scale = 0.25f;
+  const auto w = int((Ii.width() + Ij.width()) * scale + 0.5f);
+  const auto h = int(max(Ii.height(), Ij.height()) * scale + 0.5f);
+  const auto off = sara::Point2f{float(Ii.width()), 0.f};
+
+  if (!sara::active_window())
+  {
+    sara::create_window(w, h);
+    sara::set_antialiasing();
+  }
+
+  if (sara::get_sizes(sara::active_window()) != Eigen::Vector2i(w, h))
+    sara::resize_window(w, h);
+
+  PairWiseDrawer drawer(Ii, Ij);
+  drawer.set_viz_params(scale, scale, PairWiseDrawer::CatH);
+
+  drawer.display_images();
+
+  auto f_err_thresh = 1e-2;
+  auto distance = EpipolarDistance{F.matrix()};
+
+  for (size_t m = 0; m < Mij.size(); ++m)
+  {
+    const Vector3d X1 = Mij[m].x_pos().cast<double>().homogeneous();
+    const Vector3d X2 = Mij[m].y_pos().cast<double>().homogeneous();
+
+    if (distance(X1, X2) > f_err_thresh)
+      continue;
+
+    if (m % 100 == 0)
+    {
+
+    drawer.draw_match(Mij[m], Blue8, false);
+    get_key();
+
+      const auto proj_X1 = F.right_epipolar_line(X1);
+      const auto proj_X2 = F.left_epipolar_line(X2);
+
+      drawer.draw_line_from_eqn(0, proj_X2.cast<float>(), Cyan8, 1);
+      drawer.draw_line_from_eqn(1, proj_X1.cast<float>(), Cyan8, 1);
+    }
+  }
+
+  for (int m = 0; m < sample_best.size(); ++m)
+  {
+    // Draw the best elemental subset drawn by RANSAC.
+    drawer.draw_match(Mij[sample_best(m)], Red8, true);
+
+    const Vector3d X1 = Mij[sample_best(m)].x_pos().cast<double>().homogeneous();
+    const Vector3d X2 = Mij[sample_best(m)].y_pos().cast<double>().homogeneous();
+
+    const auto proj_X1 = F.right_epipolar_line(X1);
+    const auto proj_X2 = F.left_epipolar_line(X2);
+
+    // Draw the corresponding epipolar lines.
+    drawer.draw_line_from_eqn(1, proj_X1.cast<float>(), Magenta8, 1);
+    drawer.draw_line_from_eqn(0, proj_X2.cast<float>(), Magenta8, 1);
+  }
+
+  get_key();
+}
 
 struct IndexMatch
 {
@@ -125,6 +216,7 @@ GRAPHICS_MAIN()
   {
     for (int j = i + 1; j < N; ++j)
     {
+      // Specify the image pair to process.
       const auto& fi = image_paths[i];
       const auto& fj = image_paths[j];
 
@@ -133,55 +225,43 @@ GRAPHICS_MAIN()
 
       SARA_DEBUG << gi << std::endl;
       SARA_DEBUG << gj << std::endl;
-
-      // Load images.
-      const auto Ki = sara::read_keypoints(h5_file, gi);
-      const auto Kj = sara::read_keypoints(h5_file, gj);
-
-      const auto Mij = match(Ki, Kj);
-
-      auto Mij2 = std::vector<sara::IndexMatch>{};
-      std::transform(
-          Mij.begin(), Mij.end(), std::back_inserter(Mij2), [](const auto& m) {
-            return sara::IndexMatch{m.x_index(), m.y_index(), m.score()};
-          });
-
-      const auto group_name = std::string{"matches"};
-      h5_file.group(group_name);
-
-      const auto match_dataset =
-          group_name + "/" + std::to_string(i) + "_" + std::to_string(j);
-      h5_file.write_dataset(match_dataset, tensor_view(Mij2));
-
-      // auto Fij = sara::estimate_fundamental_matrix(Mij);
-      // auto Eij = sara::estimate_essential_matrix(Mij);
-
       const auto Ii = sara::imread<sara::Rgb8>(fi);
       const auto Ij = sara::imread<sara::Rgb8>(fj);
 
-      const auto scale = 0.25f;
-      const auto w = int((Ii.width() + Ij.width()) * scale + 0.5f);
-      const auto h = int(max(Ii.height(), Ij.height()) * scale + 0.5f);
-      const auto off = sara::Point2f{float(Ii.width()), 0.f};
 
-      if (!sara::active_window())
-      {
-        sara::create_window(w, h);
-        sara::set_antialiasing();
-      }
+      //// Load the keypoints.
+      //const auto Ki = sara::read_keypoints(h5_file, gi);
+      //const auto Kj = sara::read_keypoints(h5_file, gj);
+      const auto Ki = sara::compute_sift_keypoints(Ii.convert<float>());
+      const auto Kj = sara::compute_sift_keypoints(Ij.convert<float>());
 
-      if (sara::get_sizes(sara::active_window()) != Eigen::Vector2i(w, h))
-        sara::resize_window(w, h);
 
-      sara::draw_image_pair(Ii, Ij, off, scale);
-      for (size_t m = 0; m < 500; ++m)
-      {
-        sara::draw_match(Mij[m], sara::Red8, off, scale);
-        cout << Mij[m] << endl;
-        if (m % 100 == 0)
-          sara::get_key();
-      }
-      sara::get_key();
+      // Match keypoints.
+      const auto Mij = match(Ki, Kj);
+
+
+      //// Save the keypoints to HDF5
+      //auto Mij2 = std::vector<sara::IndexMatch>{};
+      //std::transform(
+      //    Mij.begin(), Mij.end(), std::back_inserter(Mij2), [](const auto& m) {
+      //      return sara::IndexMatch{m.x_index(), m.y_index(), m.score()};
+      //    });
+
+      //const auto group_name = std::string{"matches"};
+      //h5_file.group(group_name);
+
+      //const auto match_dataset =
+      //    group_name + "/" + std::to_string(i) + "_" + std::to_string(j);
+      //h5_file.write_dataset(match_dataset, tensor_view(Mij2));
+
+
+      // Estimate the fundamental matrix.
+      const auto [F, num_inliers, sample_best] =
+          sara::estimate_fundamental_matrix(Mij, Ki, Kj);
+
+
+      // Visualize the estimated fundamental matrix.
+      sara::check_epipolar_constraints(Ii, Ij, F, Mij, sample_best);
     }
   }
 

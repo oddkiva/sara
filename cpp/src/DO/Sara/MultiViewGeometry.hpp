@@ -20,6 +20,7 @@
 #include <DO/Sara/MultiViewGeometry/Geometry/Homography.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/Normalizer.hpp>
 
+#include <DO/Sara/MultiViewGeometry/Estimators/ErrorMeasures.hpp>
 #include <DO/Sara/MultiViewGeometry/Estimators/EssentialMatrixEstimators.hpp>
 #include <DO/Sara/MultiViewGeometry/Estimators/FundamentalMatrixEstimators.hpp>
 #include <DO/Sara/MultiViewGeometry/Estimators/HomographyEstimator.hpp>
