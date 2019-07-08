@@ -30,11 +30,25 @@ using namespace std;
 
 namespace DO::Sara {
 
+auto read_internal_camera_parameters(const std::string& filepath)
+    -> Matrix3d
+{
+  std::ifstream file{filepath};
+  if (!file)
+    throw std::runtime_error{"File " + filepath + "does not exist!"};
+
+  Matrix3d K;
+  file >> K;
+
+  return K;
+}
+
+
 auto match(const KeypointList<OERegion, float>& keys1,
            const KeypointList<OERegion, float>& keys2)
     -> std::vector<Match>
 {
-  AnnMatcher matcher{keys1, keys2, 1.0f};
+  AnnMatcher matcher{keys1, keys2, 0.6f};
   return matcher.compute_matches();
 }
 
@@ -53,13 +67,51 @@ auto estimate_fundamental_matrix(const std::vector<Match>& Mij,
 
   const auto Mij_tensor = to_tensor(Mij);
 
-  auto f_estimator = EightPointAlgorithm{};
+  auto estimator = EightPointAlgorithm{};
   auto distance = EpipolarDistance{};
-  auto f_err_thresh = 1e-2;
+  auto err_thresh = 1e-2;
 
-  double num_samples = 1000;
-  return ransac(Mij_tensor, Pi, Pj, f_estimator, distance, num_samples,
-                f_err_thresh);
+  const double num_samples = 1000;
+  const auto [F, num_inliers, sample_best] =
+      ransac(Mij_tensor, Pi, Pj, estimator, distance, num_samples, err_thresh);
+
+  SARA_CHECK(F);
+  SARA_CHECK(num_inliers);
+  SARA_CHECK(Mij.size());
+
+  return std::make_tuple(F, num_inliers, sample_best);
+}
+
+auto estimate_essential_matrix(const std::vector<Match>& Mij,
+                               const KeypointList<OERegion, float>& ki,
+                               const KeypointList<OERegion, float>& kj,
+                               const Matrix3d& Ki_inv,
+                               const Matrix3d& Kj_inv)
+{
+  const auto to_double = [](const float& src) { return double(src); };
+  const auto& fi = features(ki);
+  const auto& fj = features(kj);
+  const auto pi = extract_centers(fi).cwise_transform(to_double);
+  const auto pj = extract_centers(fj).cwise_transform(to_double);
+
+  const auto Pi = apply_transform(Ki_inv, homogeneous(pi));
+  const auto Pj = apply_transform(Kj_inv, homogeneous(pj));
+
+  const auto Mij_tensor = to_tensor(Mij);
+
+  auto estimator = NisterFivePointAlgorithm{};
+  auto distance = EpipolarDistance{};
+  auto err_thresh = 1e-2;
+
+  const double num_samples = 1000;
+  const auto [E, num_inliers, sample_best] =
+      ransac(Mij_tensor, Pi, Pj, estimator, distance, num_samples, err_thresh);
+
+  SARA_CHECK(E);
+  SARA_CHECK(num_inliers);
+  SARA_CHECK(Mij.size());
+
+  return std::make_tuple(E, num_inliers, sample_best);
 }
 
 auto check_epipolar_constraints(const Image<Rgb8>& Ii, const Image<Rgb8>& Ij,
@@ -86,7 +138,7 @@ auto check_epipolar_constraints(const Image<Rgb8>& Ii, const Image<Rgb8>& Ij,
 
   drawer.display_images();
 
-  auto f_err_thresh = 1e-2;
+  auto err_thresh = 1.;
   auto distance = EpipolarDistance{F.matrix()};
 
   for (size_t m = 0; m < Mij.size(); ++m)
@@ -94,14 +146,12 @@ auto check_epipolar_constraints(const Image<Rgb8>& Ii, const Image<Rgb8>& Ij,
     const Vector3d X1 = Mij[m].x_pos().cast<double>().homogeneous();
     const Vector3d X2 = Mij[m].y_pos().cast<double>().homogeneous();
 
-    if (distance(X1, X2) > f_err_thresh)
+    if (distance(X1, X2) > err_thresh)
       continue;
 
     if (m % 100 == 0)
     {
-
-    drawer.draw_match(Mij[m], Blue8, false);
-    get_key();
+      drawer.draw_match(Mij[m], Blue8, false);
 
       const auto proj_X1 = F.right_epipolar_line(X1);
       const auto proj_X2 = F.left_epipolar_line(X2);
@@ -111,7 +161,7 @@ auto check_epipolar_constraints(const Image<Rgb8>& Ii, const Image<Rgb8>& Ij,
     }
   }
 
-  for (int m = 0; m < sample_best.size(); ++m)
+  for (size_t m = 0; m < sample_best.size(); ++m)
   {
     // Draw the best elemental subset drawn by RANSAC.
     drawer.draw_match(Mij[sample_best(m)], Red8, true);
@@ -228,16 +278,21 @@ GRAPHICS_MAIN()
       const auto Ii = sara::imread<sara::Rgb8>(fi);
       const auto Ij = sara::imread<sara::Rgb8>(fj);
 
+      const auto Ki = sara::read_internal_camera_parameters(
+          dirpath.string() + "/" + gi + ".png.K");
+      const auto Kj = sara::read_internal_camera_parameters(
+          dirpath.string() + "/" + gj + ".png.K");
 
-      //// Load the keypoints.
-      //const auto Ki = sara::read_keypoints(h5_file, gi);
-      //const auto Kj = sara::read_keypoints(h5_file, gj);
-      const auto Ki = sara::compute_sift_keypoints(Ii.convert<float>());
-      const auto Kj = sara::compute_sift_keypoints(Ij.convert<float>());
+      const Eigen::Matrix3d Ki_inv = Ki.inverse();
+      const Eigen::Matrix3d Kj_inv = Kj.inverse();
+
+      // Load the keypoints.
+      const auto ki = sara::read_keypoints(h5_file, gi);
+      const auto kj = sara::read_keypoints(h5_file, gj);
 
 
       // Match keypoints.
-      const auto Mij = match(Ki, Kj);
+      const auto Mij = match(ki, kj);
 
 
       //// Save the keypoints to HDF5
@@ -257,11 +312,16 @@ GRAPHICS_MAIN()
 
       // Estimate the fundamental matrix.
       const auto [F, num_inliers, sample_best] =
-          sara::estimate_fundamental_matrix(Mij, Ki, Kj);
+          sara::estimate_fundamental_matrix(Mij, ki, kj);
 
+      const auto [E, num_inliers_e, sample_best_e] =
+          sara::estimate_essential_matrix(Mij, ki, kj, Ki_inv, Kj_inv);
+
+      auto F1 = sara::FundamentalMatrix{};
+      F1.matrix() = Kj_inv.transpose() * E.matrix() * Ki_inv;
 
       // Visualize the estimated fundamental matrix.
-      sara::check_epipolar_constraints(Ii, Ij, F, Mij, sample_best);
+      sara::check_epipolar_constraints(Ii, Ij, F1, Mij, sample_best);
     }
   }
 
