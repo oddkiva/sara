@@ -14,14 +14,15 @@
 #include <DO/Sara/FileSystem.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
-#include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/Match.hpp>
 #include <DO/Sara/MultiViewGeometry.hpp>
 #include <DO/Sara/SfM/Detectors/SIFT.hpp>
 
 #include <boost/filesystem.hpp>
+#include <boost/program_options.hpp>
 
 
+namespace po = boost::program_options;
 namespace fs = boost::filesystem;
 namespace sara = DO::Sara;
 
@@ -246,22 +247,17 @@ auto read_matches(H5File& file, const std::string& name)
 }  // namespace DO::Sara
 
 
-GRAPHICS_MAIN()
+void match_keypoints(const std::string& dirpath, const std::string& h5_filepath)
 {
-  const auto dataset = std::string{"castle_int"};
-  //const auto dataset = std::string{"herzjesu_int"};
+  // Create a backup.
+  if (!fs::exists(h5_filepath + ".bak"))
+    sara::cp(h5_filepath, h5_filepath + ".bak");
 
-#if defined(__APPLE__)
-  const auto dirpath = fs::path{"/Users/david/Desktop/Datasets/sfm/" + dataset};
-  auto h5_file = sara::H5File{
-      "/Users/david/Desktop/Datasets/sfm/" + dataset + ".h5", H5F_ACC_RDWR};
-#else
-  const auto dirpath = fs::path{"/home/david/Desktop/Datasets/sfm/" + dataset};
-  auto h5_file = sara::H5File{
-      "/home/david/Desktop/Datasets/sfm/" + dataset + ".h5", H5F_ACC_RDWR};
-#endif
+  auto h5_file = sara::H5File{h5_filepath, H5F_ACC_RDWR};
 
-  auto image_paths = sara::ls(dirpath.string(), ".png");
+  auto image_paths = std::vector<std::string>{};
+  append(image_paths, sara::ls(dirpath, ".png"));
+  append(image_paths, sara::ls(dirpath, ".jpg"));
   std::sort(image_paths.begin(), image_paths.end());
 
   const auto N = int(image_paths.size());
@@ -281,10 +277,10 @@ GRAPHICS_MAIN()
       const auto Ii = sara::imread<sara::Rgb8>(fi);
       const auto Ij = sara::imread<sara::Rgb8>(fj);
 
-      const auto Ki = sara::read_internal_camera_parameters(
-          dirpath.string() + "/" + gi + ".png.K");
-      const auto Kj = sara::read_internal_camera_parameters(
-          dirpath.string() + "/" + gj + ".png.K");
+      const auto Ki =
+          sara::read_internal_camera_parameters(dirpath + "/" + gi + ".png.K");
+      const auto Kj =
+          sara::read_internal_camera_parameters(dirpath + "/" + gj + ".png.K");
 
       const Eigen::Matrix3d Ki_inv = Ki.inverse();
       const Eigen::Matrix3d Kj_inv = Kj.inverse();
@@ -292,52 +288,105 @@ GRAPHICS_MAIN()
       // Load the keypoints.
       const auto ki = sara::read_keypoints(h5_file, gi);
       const auto kj = sara::read_keypoints(h5_file, gj);
-      //const auto ki = sara::compute_sift_keypoints(Ii.convert<float>());
-      //const auto kj = sara::compute_sift_keypoints(Ij.convert<float>());
 
 
       // Match keypoints.
       const auto Mij = match(ki, kj);
 
 
-      //// Save the keypoints to HDF5
-      //auto Mij2 = std::vector<sara::IndexMatch>{};
-      //std::transform(
-      //    Mij.begin(), Mij.end(), std::back_inserter(Mij2), [](const auto& m) {
-      //      return sara::IndexMatch{m.x_index(), m.y_index(), m.score()};
-      //    });
+      // Save the keypoints to HDF5
+      auto Mij2 = std::vector<sara::IndexMatch>{};
+      std::transform(
+          Mij.begin(), Mij.end(), std::back_inserter(Mij2), [](const auto& m) {
+            return sara::IndexMatch{m.x_index(), m.y_index(), m.score()};
+          });
 
-      //const auto group_name = std::string{"matches"};
-      //h5_file.group(group_name);
+      const auto group_name = std::string{"matches"};
+      h5_file.group(group_name);
 
-      //const auto match_dataset =
-      //    group_name + "/" + std::to_string(i) + "_" + std::to_string(j);
-      //h5_file.write_dataset(match_dataset, tensor_view(Mij2));
+      const auto match_dataset =
+          group_name + "/" + std::to_string(i) + "_" + std::to_string(j);
+      h5_file.write_dataset(match_dataset, tensor_view(Mij2));
 
 
       const auto num_samples = 1000;
       const auto err_thres = 5e-3;
 
-      // Estimate the fundamental matrix.
-      const auto [F, num_inliers, sample_best] =
-          sara::estimate_fundamental_matrix(Mij, ki, kj, num_samples,
-                                            err_thres);
+      //// Estimate the fundamental matrix.
+      //const auto [F, num_inliers, sample_best] =
+      //    sara::estimate_fundamental_matrix(Mij, ki, kj, num_samples,
+      //                                      err_thres);
 
-      //const auto [E, num_inliers_e, sample_best_e] =
-      //    sara::estimate_essential_matrix(Mij, ki, kj, Ki_inv, Kj_inv,
-      //                                    num_samples, err_thres);
+      const auto [E, num_inliers_e, sample_best_e] =
+          sara::estimate_essential_matrix(Mij, ki, kj, Ki_inv, Kj_inv,
+                                          num_samples, err_thres);
 
-      //auto F1 = sara::FundamentalMatrix{};
-      //F1.matrix() = Kj_inv.transpose() * E.matrix() * Ki_inv;
+      auto F1 = sara::FundamentalMatrix{};
+      F1.matrix() = Kj_inv.transpose() * E.matrix() * Ki_inv;
 
       // Visualize the estimated fundamental matrix.
       const int display_step = 20;
-      sara::check_epipolar_constraints(Ii, Ij, F, Mij, sample_best, err_thres,
-                                       display_step);
-      //sara::check_epipolar_constraints(Ii, Ij, F1, Mij, sample_best_e,
-      //                                 err_thres, display_step);
+      //sara::check_epipolar_constraints(Ii, Ij, F, Mij, sample_best, err_thres,
+      //                                 display_step);
+      sara::check_epipolar_constraints(Ii, Ij, F1, Mij, sample_best_e,
+                                       err_thres, display_step);
     }
   }
+}
 
-  return 0;
+
+int __main(int argc, char **argv)
+{
+  try
+  {
+    po::options_description desc{"Detect SIFT keypoints"};
+    desc.add_options()                                                 //
+        ("help, h", "Help screen")                                     //
+        ("dirpath", po::value<std::string>(), "Image directory path")  //
+        ("out_h5_file", po::value<std::string>(), "Output HDF5 file")  //
+        ("read", "Visualize detected keypoints")  //
+        ;
+
+    po::variables_map vm;
+    po::store(po::parse_command_line(argc, argv, desc), vm);
+    po::notify(vm);
+
+    if (vm.count("help"))
+    {
+      std::cout << desc << std::endl;
+      return 0;
+    }
+
+    if (!vm.count("dirpath"))
+    {
+      std::cout << "Missing image directory path" << std::endl;
+      return 0;
+    }
+    if (!vm.count("out_h5_file"))
+    {
+      std::cout << desc << std::endl;
+      std::cout << "Missing output H5 file path" << std::endl;
+      return 0;
+    }
+
+    const auto dirpath = vm["dirpath"].as<std::string>();
+    const auto h5_filepath = vm["out_h5_file"].as<std::string>();
+    match_keypoints(dirpath, h5_filepath);
+
+    return 0;
+  }
+  catch (const po::error& e)
+  {
+    std::cerr << e.what() << "\n";
+    return 1;
+  }
+
+}
+
+
+int main(int argc, char** argv)
+{
+  DO::Sara::GraphicsApplication app(argc, argv);
+  app.register_user_main(__main);
+  return app.exec();
 }
