@@ -15,7 +15,6 @@ using namespace std;
 
 BOOST_AUTO_TEST_SUITE(TestEightPoingAlgorithm)
 
-
 BOOST_AUTO_TEST_CASE(test_eight_point_algorithm)
 {
   // Check this so that it can be serialized with HDF5.

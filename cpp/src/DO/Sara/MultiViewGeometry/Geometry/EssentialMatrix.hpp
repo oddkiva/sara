@@ -11,32 +11,48 @@
 
 #pragma once
 
+#include <DO/Sara/Defines.hpp>
+
 #include <DO/Sara/MultiViewGeometry/Geometry/FundamentalMatrix.hpp>
+#include <DO/Sara/MultiViewGeometry/Utilities.hpp>
 
 
-namespace DO { namespace Sara {
+namespace DO::Sara {
 
-  class EssentialMatrix : public FundamentalMatrix
+struct Motion
+{
+  Matrix3d R{Matrix3d::Identity()};
+  Vector3d t{Vector3d::Zero()};
+};
+
+class EssentialMatrix : public FundamentalMatrix
+{
+  using base_type = FundamentalMatrix;
+
+public:
+  using matrix_type = typename base_type::matrix_type;
+  using point_type = typename base_type::point_type;
+  using vector_type = point_type;
+
+  EssentialMatrix() = default;
+
+  EssentialMatrix(const Motion& m)
+    : base_type{skew_symmetric_matrix(m.t) * m.R}
   {
-    using base_type = FundamentalMatrix;
+  }
 
-  public:
-    using matrix_type = typename base_type::matrix_type;
-    using point_type = typename base_type::point_type;
-    using vector_type = point_type;
+  EssentialMatrix(const matrix_type& E)
+    : base_type{E}
+  {
+  }
+};
 
-    using motion_type = std::pair<matrix_type, vector_type>;
+DO_SARA_EXPORT
+auto extract_relative_motion_svd(const Matrix3d& E)
+    -> std::vector<Motion>;
 
-    EssentialMatrix() = default;
+DO_SARA_EXPORT
+auto extract_relative_motion_horn(const Matrix3d& E)
+    -> std::vector<Motion>;
 
-    EssentialMatrix(const matrix_type& E)
-      : base_type{E}
-    {
-    }
-
-    auto extract_candidate_camera_motions() const
-        -> std::array<motion_type, 4>;
-  };
-
-} /* namespace Sara */
-} /* namespace DO */
+} /* namespace DO::Sara */

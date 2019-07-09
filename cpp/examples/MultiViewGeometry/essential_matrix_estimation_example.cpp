@@ -324,15 +324,15 @@ void estimate_homography(const Image<Rgb8>& image1, const Image<Rgb8>& image2,
   const auto M = to_tensor(matches);
 
   // Generate random samples for RANSAC.
-  constexpr auto N = 1000;
-
   const auto num_samples = 1000;
-  double h_err_thres = 1.;
+  const double h_err_thres = 1.;
 
   auto distance = SymmetricTransferError{};
 
-  auto [H, num_inliers, sample_best] = ransac(
+  const auto [H, num_inliers, sample_best] = ransac(
       M, P1, P2, FourPointAlgorithm{}, distance, num_samples, h_err_thres);
+
+  SARA_CHECK(num_inliers);
 
   // Display the result.
   drawer.display_images();

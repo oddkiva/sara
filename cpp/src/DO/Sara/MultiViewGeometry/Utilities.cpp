@@ -13,7 +13,7 @@
 #include <DO/Sara/MultiViewGeometry/Utilities.hpp>
 
 
-namespace DO { namespace Sara {
+namespace DO::Sara {
 
   auto range(int n) -> Tensor_<int, 1>
   {
@@ -39,5 +39,4 @@ namespace DO { namespace Sara {
     return samples;
   }
 
-} /* namespace Sara */
-} /* namespace DO */
+} /* namespace DO::Sara */

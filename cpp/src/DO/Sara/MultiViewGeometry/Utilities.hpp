@@ -19,106 +19,99 @@
 #include <random>
 
 
-namespace DO { namespace Sara {
+namespace DO::Sara {
 
-  // NumPy-like interface for tensors.
-  DO_SARA_EXPORT
-  auto range(int n) -> Tensor_<int, 1>;
+// NumPy-like interface for tensors.
+DO_SARA_EXPORT
+auto range(int n) -> Tensor_<int, 1>;
 
-  DO_SARA_EXPORT
-  auto random_samples(int num_samples,      //
-                      int sample_size,      //
-                      int num_data_points)  //
-      -> Tensor_<int, 2>;
+DO_SARA_EXPORT
+auto random_samples(int num_samples,      //
+                    int sample_size,      //
+                    int num_data_points)  //
+    -> Tensor_<int, 2>;
 
-  template <typename T>
-  inline auto shuffle(const TensorView_<T, 1>& x) -> Tensor_<T, 1>
-  {
-    auto x_shuffled = x;
-    std::shuffle(x_shuffled.begin(), x_shuffled.end(), std::mt19937{});
-    return x_shuffled;
-  }
-
-
-  // Geometry.
-  template <typename T>
-  inline auto homogeneous(const TensorView_<T, 2>& x) -> Tensor_<T, 2>
-  {
-    auto X = Tensor_<T, 2>(x.size(0), x.size(1) + 1);
-    X.matrix().leftCols(x.size(1)) = x.matrix();
-    X.matrix().col(x.size(1)).setOnes();
-    return X;
-  }
-
-  template <typename S>
-  inline auto compute_normalizer(const TensorView_<S, 2>& X) -> Matrix<S, 3, 3>
-  {
-    const Matrix<S, 1, 3> min = X.matrix().colwise().minCoeff();
-    const Matrix<S, 1, 3> max = X.matrix().colwise().maxCoeff();
-
-    const Matrix<S, 2, 2> scale =
-        (max - min).cwiseInverse().head(2).asDiagonal();
-
-    auto T = Matrix<S, 3, 3>{};
-    T.setZero();
-    T.template topLeftCorner<2, 2>() = scale;
-    T.col(2) << -min.cwiseQuotient(max - min).transpose().head(2), S(1);
-
-    return T;
-  }
-
-  template <typename S>
-  inline auto apply_transform(const Matrix<S, 3, 3>& T, const TensorView_<S, 2>& X)
-      -> Tensor_<S, 2>
-  {
-    auto TX = Tensor_<S, 2>{X.sizes()};
-    auto TX_ = TX.colmajor_view().matrix();
-
-    TX_ = T * X.colmajor_view().matrix();
-    TX_.array().rowwise() /= TX_.array().row(2);
-
-    return TX;
-  }
+template <typename T>
+inline auto shuffle(const TensorView_<T, 1>& x) -> Tensor_<T, 1>
+{
+  auto x_shuffled = x;
+  std::shuffle(x_shuffled.begin(), x_shuffled.end(), std::mt19937{});
+  return x_shuffled;
+}
 
 
-  // Elementary transformations.
-  template <typename T>
-  inline auto skew_symmetric_matrix(const Matrix<T, 3, 1>& a) -> Matrix<T, 3, 3>
-  {
-    auto A = Matrix<T, 3, 3>{};
-    A <<  T(0), -a(2),  a(1),
-          a(2),  T(0), -a(0),
-         -a(1),  a(0),  T(0);
+// Geometry.
+template <typename T>
+inline auto homogeneous(const TensorView_<T, 2>& x) -> Tensor_<T, 2>
+{
+  auto X = Tensor_<T, 2>(x.size(0), x.size(1) + 1);
+  X.matrix().leftCols(x.size(1)) = x.matrix();
+  X.matrix().col(x.size(1)).setOnes();
+  return X;
+}
 
-    return A;
-  }
+template <typename S>
+inline auto compute_normalizer(const TensorView_<S, 2>& X) -> Matrix<S, 3, 3>
+{
+  const Matrix<S, 1, 3> min = X.matrix().colwise().minCoeff();
+  const Matrix<S, 1, 3> max = X.matrix().colwise().maxCoeff();
 
-  template <typename T>
-  inline auto rotation_x(T theta) -> Matrix<T, 3, 3>
-  {
-    auto R = Matrix<T, 3, 3>{};
-    R << T(1), T(0), T(0), T(0), std::cos(theta), -std::sin(theta), T(0),
-        std::sin(theta), std::cos(theta);
-    return R;
-  }
+  const Matrix<S, 2, 2> scale = (max - min).cwiseInverse().head(2).asDiagonal();
 
-  template <typename T>
-  inline auto rotation_y(T phi) -> Matrix<T, 3, 3>
-  {
-    auto R = Matrix<T, 3, 3>{};
-    R << std::cos(phi), T(0), -std::sin(phi), T(0), T(1), T(0), std::sin(phi),
-        T(0), std::cos(phi);
-    return R;
-  }
+  auto T = Matrix<S, 3, 3>{};
+  T.setZero();
+  T.template topLeftCorner<2, 2>() = scale;
+  T.col(2) << -min.cwiseQuotient(max - min).transpose().head(2), S(1);
 
-  template <typename T>
-  inline auto rotation_z(T kappa) -> Matrix<T, 3, 3>
-  {
-    auto R = Matrix<T, 3, 3>{};
-    R << std::cos(kappa), -std::sin(kappa), T(0), std::sin(kappa),
-        std::cos(kappa), T(0), T(0), T(0), T(1);
-    return R;
-  }
+  return T;
+}
 
-} /* namespace Sara */
-} /* namespace DO */
+template <typename S>
+inline auto apply_transform(const Matrix<S, 3, 3>& T,
+                            const TensorView_<S, 2>& X) -> Tensor_<S, 2>
+{
+  auto TX = Tensor_<S, 2>{X.sizes()};
+  auto TX_ = TX.colmajor_view().matrix();
+
+  TX_ = T * X.colmajor_view().matrix();
+  TX_.array().rowwise() /= TX_.array().row(2);
+
+  return TX;
+}
+
+
+// Elementary transformations.
+inline auto cofactors_transposed(const Matrix3d& E)
+{
+  Matrix3d cofE;
+  cofE.col(0) = E.col(1).cross(E.col(2));
+  cofE.col(1) = E.col(2).cross(E.col(0));
+  cofE.col(2) = E.col(0).cross(E.col(1));
+  return cofE;
+}
+
+template <typename T>
+inline auto skew_symmetric_matrix(const Matrix<T, 3, 1>& a) -> Matrix<T, 3, 3>
+{
+  auto A = Matrix<T, 3, 3>{};
+  A << T(0), -a(2), a(1), a(2), T(0), -a(0), -a(1), a(0), T(0);
+
+  return A;
+}
+
+inline Matrix3d rotation_x(double angle)
+{
+  return Eigen::AngleAxisd(angle, Vector3d::UnitX()).toRotationMatrix();
+}
+
+inline Matrix3d rotation_y(double angle)
+{
+  return Eigen::AngleAxisd(angle, Vector3d::UnitY()).toRotationMatrix();
+}
+
+inline Matrix3d rotation_z(double angle)
+{
+  return Eigen::AngleAxisd(angle, Vector3d::UnitZ()).toRotationMatrix();
+}
+
+} /* namespace DO::Sara */

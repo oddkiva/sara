@@ -72,7 +72,6 @@ auto check_epipolar_constraints(const sara::Image<sara::Rgb8>& Ii,
   const auto scale = 0.25f;
   const auto w = int((Ii.width() + Ij.width()) * scale + 0.5f);
   const auto h = int(max(Ii.height(), Ij.height()) * scale + 0.5f);
-  const auto off = sara::Point2f{float(Ii.width()), 0.f};
 
   if (!sara::active_window())
   {
@@ -170,7 +169,6 @@ void estimate_essential_matrices(const std::string& dirpath, const std::string& 
                    return sara::read_keypoints(h5_file, group_name);
                  });
 
-  const auto N = int(image_paths.size());
   auto f_edges = std::vector<sara::EpipolarEdge>{};
   h5_file.read_dataset("f_edges", f_edges);
 
@@ -211,7 +209,6 @@ void estimate_essential_matrices(const std::string& dirpath, const std::string& 
   std::for_each(
       std::begin(edge_ids), std::end(edge_ids),
       [&](const auto& edge_id) {
-        auto& f_edge = f_edges[edge_id];
         auto& e_edge = e_edges[edge_id];
         const auto i = e_edge.i;
         const auto j = e_edge.j;
