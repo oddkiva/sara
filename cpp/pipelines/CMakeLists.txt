@@ -5,7 +5,7 @@ message(STATUS "  - DO_Pipelines")
 #set(Boost_DEBUG ON)
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
-find_package(Boost COMPONENTS filesystem system REQUIRED)
+find_package(Boost COMPONENTS filesystem system program_options REQUIRED)
 find_package(HDF5 COMPONENTS CXX REQUIRED)
 
 find_package(DO_Sara
