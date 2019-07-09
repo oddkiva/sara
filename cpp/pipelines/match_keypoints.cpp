@@ -260,7 +260,121 @@ void match_keypoints(const std::string& dirpath, const std::string& h5_filepath)
   append(image_paths, sara::ls(dirpath, ".jpg"));
   std::sort(image_paths.begin(), image_paths.end());
 
+  auto group_names = std::vector<std::string>{};
+  group_names.reserve(image_paths.size());
+  std::transform(std::begin(image_paths), std::end(image_paths),
+                 std::back_inserter(group_names),
+                 [&](const std::string& image_path) {
+                   return sara::basename(image_path);
+                 });
+
+  auto K_invs = std::vector<Eigen::Matrix3d>{};
+  K_invs.reserve(group_names.size());
+  std::transform(std::begin(group_names), std::end(group_names),
+                 std::back_inserter(group_names),
+                 [&](const std::string& group_name) {
+                   return sara::read_internal_camera_parameters(
+                              dirpath + "/" + group_name + ".png.K")
+                       .inverse();
+                 });
+
+  auto keypoints = std::vector<sara::KeypointList<sara::OERegion, float>>{};
+  keypoints.reserve(image_paths.size());
+  std::transform(std::begin(group_names), std::end(group_names),
+                 std::back_inserter(keypoints),
+                 [&](const std::string& group_name) {
+                   return sara::read_keypoints(h5_file, group_name);
+                 });
+
   const auto N = int(image_paths.size());
+  auto edges = std::vector<sara::EpipolarEdge>{};
+  edges.reserve(N * (N - 1) / 2);
+  for (int i = 0; i < N; ++i)
+    for (int j = i + 1; j < N; ++j)
+      edges.push_back({i, j, Eigen::Matrix3d::Zero()});
+
+  auto matches = std::vector<std::vector<sara::Match>>{};
+  matches.reserve(edges.size());
+  std::transform(std::begin(edges), std::end(edges),
+                 std::back_inserter(matches),
+                 [&](const sara::EpipolarEdge& edge) {
+                   const auto i = edge.i;
+                   const auto j = edge.j;
+                   return sara::match(keypoints[i], keypoints[j]);
+                 });
+
+  // Save matches to HDF5.
+  auto edge_ids = sara::range(edges.size());
+  std::for_each(
+      std::begin(edge_ids), std::end(edge_ids), [&](const auto& edge_id) {
+        const auto& edge = edges[edge_id];
+        const auto i = edge.i;
+        const auto j = edge.j;
+        const auto& matches_ij = matches[edge_id];
+
+        // Transform the data.
+        auto Mij = std::vector<sara::IndexMatch>{};
+        std::transform(
+            std::begin(matches_ij), std::end(matches_ij),
+            std::back_inserter(Mij), [](const auto& m) {
+              return sara::IndexMatch{m.x_index(), m.y_index(), m.score()};
+            });
+
+        // Save the keypoints to HDF5
+        const auto group_name = std::string{"matches"};
+        h5_file.group(group_name);
+
+        const auto match_dataset =
+            group_name + "/" + std::to_string(i) + "_" + std::to_string(j);
+        h5_file.write_dataset(match_dataset, tensor_view(Mij));
+      });
+
+  const auto num_samples = 1000;
+  const auto f_err_thres = 5e-3;
+  std::transform(
+      std::begin(edge_ids), std::end(edge_ids), std::begin(edges),
+      [&](const auto& edge_id) -> sara::EpipolarEdge {
+        const auto& edge = edges[edge_id];
+        const auto i = edge.i;
+        const auto j = edge.j;
+        const auto& Mij = matches[edge_id];
+        const auto& ki = keypoints[i];
+        const auto& kj = keypoints[j];
+
+        // Estimate the fundamental matrix.
+        const auto [F, num_inliers, sample_best] =
+            sara::estimate_fundamental_matrix(Mij, ki, kj, num_samples,
+                                              f_err_thres);
+
+        return num_inliers < 100 ? sara::EpipolarEdge{i, j, Matrix3d::Zero()}
+                                 : sara::EpipolarEdge{i, j, F.matrix()};
+      });
+
+  auto e_edges = edges;
+  const auto e_err_thres = 5e-3;
+  std::for_each(
+      std::begin(edge_ids), std::end(edge_ids),
+      [&](const auto& edge_id) {
+        auto& edge = e_edges[edge_id];
+        const auto i = edge.i;
+        const auto j = edge.j;
+        const auto& Mij = matches[edge_id];
+        const auto& ki = keypoints[i];
+        const auto& kj = keypoints[j];
+
+        const auto& Ki_inv = K_invs[i];
+        const auto& Kj_inv = K_invs[j];
+
+        if (edge.m == Eigen::Matrix3d::Zero())
+          return;
+
+        const auto [E, num_inliers_e, sample_best_e] =
+            sara::estimate_essential_matrix(Mij, ki, kj, Ki_inv, Kj_inv,
+                                            num_samples, e_err_thres);
+
+        edge.m = E;
+      });
+
   for (int i = 0; i < N; ++i)
   {
     for (int j = i + 1; j < N; ++j)
