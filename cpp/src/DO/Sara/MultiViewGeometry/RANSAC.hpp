@@ -48,7 +48,6 @@ auto ransac(const TensorView_<int, 2>& matches,      //
 
   // S is the list of N groups of L matches.
   const auto S = random_samples(N, L, card_M);
-  SARA_DEBUG << "S =\n" << S.matrix() << std::endl;
 
   // Remap each match index 'm' to a pair of point indices '(x, y)'.
   const auto I = to_point_indices(S, M);

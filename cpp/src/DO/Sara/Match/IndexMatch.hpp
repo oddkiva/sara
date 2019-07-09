@@ -12,7 +12,8 @@
 #pragma once
 
 #include <DO/Sara/Core/HDF5.hpp>
-#include <DO/Sara/Match.hpp>
+#include <DO/Sara/Features/KeypointList.hpp>
+#include <DO/Sara/Match/Match.hpp>
 
 
 namespace DO::Sara {
@@ -35,6 +36,29 @@ struct CalculateH5Type<IndexMatch>
     INSERT_MEMBER(h5_comp_type, IndexMatch, score);
     return h5_comp_type;
   }
+};
+
+inline auto to_match(const IndexMatch& m,
+                     const KeypointList<OERegion, float>& k1,
+                     const KeypointList<OERegion, float>& k2)
+{
+
+  const auto& f1 = std::get<0>(k1);
+  const auto& f2 = std::get<0>(k2);
+  return Match{&f1[m.i], &f2[m.j],  //
+               m.score,  Match::Direction::SourceToTarget,
+               m.i,      m.j};
+};
+
+inline auto to_match(const std::vector<IndexMatch>& im,
+                     const KeypointList<OERegion, float>& k1,
+                     const KeypointList<OERegion, float>& k2)
+{
+  auto m = std::vector<Match>{};
+  m.reserve(im.size());
+  std::transform(std::begin(im), std::end(im), std::back_inserter(m),
+                 [&](const auto& im) { return to_match(im, k1, k2); });
+  return m;
 };
 
 } /* namespace DO::Sara */

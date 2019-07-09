@@ -15,7 +15,6 @@
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/Match.hpp>
-#include <DO/Sara/Match/IndexMatch.hpp>
 #include <DO/Sara/MultiViewGeometry.hpp>
 #include <DO/Sara/MultiViewGeometry/Datasets/Strecha.hpp>
 #include <DO/Sara/MultiViewGeometry/EpipolarGraph.hpp>
@@ -31,36 +30,6 @@ namespace sara = DO::Sara;
 
 using namespace std;
 
-
-auto estimate_fundamental_matrix(
-    const std::vector<sara::Match>& Mij,
-    const sara::KeypointList<sara::OERegion, float>& ki,
-    const sara::KeypointList<sara::OERegion, float>& kj, int num_samples,
-    double err_thres)
-{
-  const auto to_double = [](const float& src) { return double(src); };
-  const auto& fi = features(ki);
-  const auto& fj = features(kj);
-  const auto pi = extract_centers(fi).cwise_transform(to_double);
-  const auto pj = extract_centers(fj).cwise_transform(to_double);
-
-  const auto Pi = homogeneous(pi);
-  const auto Pj = homogeneous(pj);
-
-  const auto Mij_tensor = to_tensor(Mij);
-
-  auto estimator = sara::EightPointAlgorithm{};
-  auto distance = sara::EpipolarDistance{};
-
-  const auto [F, num_inliers, sample_best] = sara::ransac(
-      Mij_tensor, Pi, Pj, estimator, distance, num_samples, err_thres);
-
-  SARA_CHECK(F);
-  SARA_CHECK(num_inliers);
-  SARA_CHECK(Mij.size());
-
-  return std::make_tuple(F, num_inliers, sample_best);
-}
 
 auto estimate_essential_matrix(
     const std::vector<sara::Match>& Mij,
@@ -162,7 +131,7 @@ auto check_epipolar_constraints(const sara::Image<sara::Rgb8>& Ii,
   //get_key();
 }
 
-void estimate_fundamental_matrices(const std::string& dirpath, const std::string& h5_filepath)
+void estimate_essential_matrices(const std::string& dirpath, const std::string& h5_filepath)
 {
   // Create a backup.
   if (!fs::exists(h5_filepath + ".bak"))
@@ -202,82 +171,42 @@ void estimate_fundamental_matrices(const std::string& dirpath, const std::string
                  });
 
   const auto N = int(image_paths.size());
-  auto edges = std::vector<sara::EpipolarEdge>{};
-  edges.reserve(N * (N - 1) / 2);
-  for (int i = 0; i < N; ++i)
-    for (int j = i + 1; j < N; ++j)
-      edges.push_back({i, j, Eigen::Matrix3d::Zero()});
+  auto f_edges = std::vector<sara::EpipolarEdge>{};
+  h5_file.read_dataset("f_edges", f_edges);
 
-  auto matches = std::vector<std::vector<sara::Match>>{};
-  matches.reserve(edges.size());
-  std::transform(std::begin(edges), std::end(edges),
-                 std::back_inserter(matches),
+  auto index_matches = std::vector<std::vector<sara::IndexMatch>>{};
+  index_matches.reserve(f_edges.size());
+  std::transform(std::begin(f_edges), std::end(f_edges),
+                 std::back_inserter(index_matches),
                  [&](const sara::EpipolarEdge& edge) {
                    const auto i = edge.i;
                    const auto j = edge.j;
-                   return sara::match(keypoints[i], keypoints[j]);
+
+                   const auto match_dataset = std::string{"matches"} + "/" +
+                                              std::to_string(i) + "_" +
+                                              std::to_string(j);
+
+                   auto mij = std::vector<sara::IndexMatch>{};
+                   h5_file.read_dataset(match_dataset, mij);
+
+                   return mij;
                  });
 
-  // Save matches to HDF5.
-  auto edge_ids = sara::range(edges.size());
-  std::for_each(
-      std::begin(edge_ids), std::end(edge_ids), [&](const auto& edge_id) {
-        const auto& edge = edges[edge_id];
-        const auto i = edge.i;
-        const auto j = edge.j;
-        const auto& matches_ij = matches[edge_id];
+  const auto edge_ids = sara::range(f_edges.size());
 
-        // Transform the data.
-        auto Mij = std::vector<sara::IndexMatch>{};
-        std::transform(
-            std::begin(matches_ij), std::end(matches_ij),
-            std::back_inserter(Mij), [](const auto& m) {
-              return sara::IndexMatch{m.x_index(), m.y_index(), m.score()};
-            });
+  auto matches = std::vector<std::vector<sara::Match>>{};
+  matches.reserve(f_edges.size());
+  std::transform(std::begin(edge_ids), std::end(edge_ids),
+                 std::back_inserter(matches), [&](int ij) {
+                 const auto i = f_edges[ij].i;
+                 const auto j = f_edges[ij].j;
+                   return sara::to_match(index_matches[ij], keypoints[i], keypoints[j]);
+                 });
 
-        // Save the keypoints to HDF5
-        const auto group_name = std::string{"matches"};
-        h5_file.group(group_name);
 
-        const auto match_dataset =
-            group_name + "/" + std::to_string(i) + "_" + std::to_string(j);
-        h5_file.write_dataset(match_dataset, tensor_view(Mij));
-      });
+  auto e_edges = f_edges;
 
   const auto num_samples = 1000;
-  const auto f_err_thres = 5e-3;
-  auto& f_edges = edges;
-  std::transform(
-      std::begin(edge_ids), std::end(edge_ids), std::begin(f_edges),
-      [&](const auto& edge_id) -> sara::EpipolarEdge {
-        const auto& edge = f_edges[edge_id];
-        const auto i = edge.i;
-        const auto j = edge.j;
-        const auto& Mij = matches[edge_id];
-        const auto& ki = keypoints[i];
-        const auto& kj = keypoints[j];
-
-        // Estimate the fundamental matrix.
-        const auto [F, num_inliers, sample_best] =
-            sara::estimate_fundamental_matrix(Mij, ki, kj, num_samples,
-                                              f_err_thres);
-
-        // Debug.
-        const int display_step = 20;
-        const auto Ii = sara::imread<sara::Rgb8>(image_paths[i]);
-        const auto Ij = sara::imread<sara::Rgb8>(image_paths[j]);
-        sara::check_epipolar_constraints(Ii, Ij, F, Mij, sample_best,
-                                         f_err_thres, display_step);
-
-        return num_inliers < 100
-                   ? sara::EpipolarEdge{i, j, Eigen::Matrix3d::Zero()}
-                   : sara::EpipolarEdge{i, j, F.matrix()};
-      });
-
-  // Save F-edges.
-  h5_file.write_dataset("f_edges", tensor_view(f_edges));
-
-  auto e_edges = edges;
   const auto e_err_thres = 5e-3;
   std::for_each(
       std::begin(edge_ids), std::end(edge_ids),
@@ -296,9 +225,8 @@ void estimate_fundamental_matrices(const std::string& dirpath, const std::string
         if (e_edge.m == Eigen::Matrix3d::Zero())
           return;
 
-        const auto [E, num_inliers, sample_best] =
-            sara::estimate_essential_matrix(Mij, ki, kj, Ki_inv, Kj_inv,
-                                            num_samples, e_err_thres);
+        const auto [E, num_inliers, sample_best] = estimate_essential_matrix(
+            Mij, ki, kj, Ki_inv, Kj_inv, num_samples, e_err_thres);
 
         const Eigen::Matrix3d F = Kj_inv.transpose() * E.matrix() * Ki_inv;
 
@@ -306,8 +234,8 @@ void estimate_fundamental_matrices(const std::string& dirpath, const std::string
         const int display_step = 20;
         const auto Ii = sara::imread<sara::Rgb8>(image_paths[i]);
         const auto Ij = sara::imread<sara::Rgb8>(image_paths[j]);
-        sara::check_epipolar_constraints(Ii, Ij, F, Mij, sample_best,
-                                         e_err_thres, display_step);
+        check_epipolar_constraints(Ii, Ij, F, Mij, sample_best, e_err_thres,
+                                   display_step);
 
         if (num_inliers > 100)
           e_edge.m = E;
@@ -324,7 +252,7 @@ int __main(int argc, char **argv)
 {
   try
   {
-    po::options_description desc{"Estimate fundamental matrices"};
+    po::options_description desc{"Estimate essential matrices"};
     desc.add_options()                                                 //
         ("help, h", "Help screen")                                     //
         ("dirpath", po::value<std::string>(), "Image directory path")  //
@@ -356,7 +284,7 @@ int __main(int argc, char **argv)
 
     const auto dirpath = vm["dirpath"].as<std::string>();
     const auto h5_filepath = vm["out_h5_file"].as<std::string>();
-    estimate_fundamental_matrices(dirpath, h5_filepath);
+    estimate_essential_matrices(dirpath, h5_filepath);
 
     return 0;
   }
