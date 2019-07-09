@@ -9,7 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#define BOOST_TEST_MODULE "HDF5 I/O"
+#define BOOST_TEST_MODULE "Core/HDF5 I/O"
 
 #include <DO/Sara/Core/HDF5.hpp>
 #include <DO/Sara/Core/Tensor.hpp>

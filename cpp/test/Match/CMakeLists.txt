@@ -7,4 +7,9 @@ message(STATUS "  - DO_Match_tests")
 
 find_package(DO_Sara COMPONENTS Match REQUIRED)
 
-sara_add_test(test_match test_match.cpp "${DO_Sara_LIBRARIES}" "Match")
+file(GLOB test_match_SOURCE_FILES FILES *.cpp)
+
+foreach (file ${test_match_SOURCE_FILES})
+  get_filename_component(filename "${file}" NAME_WE)
+  sara_add_test(${filename} ${file} "${DO_Sara_LIBRARIES}" "Match")
+endforeach ()

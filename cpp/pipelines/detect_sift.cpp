@@ -15,6 +15,8 @@
 #include <DO/Sara/FileSystem.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
+
+#include <DO/Sara/Features/Draw.hpp>
 #include <DO/Sara/SfM/Detectors/SIFT.hpp>
 
 #include <boost/filesystem.hpp>
@@ -46,11 +48,8 @@ void detect_keypoints(const std::string& dirpath,
         const auto group_name = sara::basename(path);
         h5_file.group(group_name);
 
-        const auto& [f, v] = keys;
-
         SARA_DEBUG << "Saving SIFT keypoints of " << path << "..." << std::endl;
-        h5_file.write_dataset(group_name + "/" + "features", tensor_view(f));
-        h5_file.write_dataset(group_name + "/" + "descriptors", v);
+        write_keypoints(h5_file, group_name, keys);
       });
 }
 
@@ -69,15 +68,11 @@ void read_keypoints(const std::string& dirpath, const std::string& h5_filepath)
 
         const auto group_name = sara::basename(path);
 
-        auto features = sara::Tensor_<sara::OERegion, 1>{};
-        auto descriptors = sara::Tensor_<float, 2>{};
+        SARA_DEBUG << "Read keypoints for " << group_name << "..." << std::endl;
+        const auto keys =
+            read_keypoints(h5_file, group_name + "/" + "descriptors");
 
-        SARA_DEBUG << "Read DoG features for " << group_name << "..." << std::endl;
-        h5_file.read_dataset(group_name + "/" + "features", features);
-
-        SARA_DEBUG << "Read SIFT descriptors for " << group_name << "..." << std::endl;
-        h5_file.read_dataset(group_name + "/" + "descriptors", descriptors);
-
+        const auto& features = std::get<0>(keys);
 
         // Visual inspection.
         if (!sara::active_window())
@@ -90,7 +85,7 @@ void read_keypoints(const std::string& dirpath, const std::string& h5_filepath)
           sara::resize_window(image.sizes() / 2);
 
         sara::display(image, 0, 0, 0.5);
-        sara::draw_oe_regions(features.begin(), features.end(), sara::Red8, 0.5f);
+        sara::draw_oe_regions(features, sara::Red8, 0.5f);
         sara::get_key();
         sara::close_window();
       });
@@ -145,7 +140,6 @@ int __main(int argc, char **argv)
     std::cerr << e.what() << "\n";
     return 1;
   }
-
 }
 
 

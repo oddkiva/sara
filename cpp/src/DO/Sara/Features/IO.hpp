@@ -13,9 +13,14 @@
 
 #pragma once
 
+#include <DO/Sara/Defines.hpp>
+
+#include <DO/Sara/Core/DebugUtilities.hpp>
+#include <DO/Sara/Core/HDF5.hpp>
 #include <DO/Sara/Core/Tensor.hpp>
 
 #include <DO/Sara/Features/Feature.hpp>
+#include <DO/Sara/Features/KeypointList.hpp>
 
 #include <fstream>
 #include <iostream>
@@ -97,6 +102,26 @@ namespace DO { namespace Sara {
     file.close();
 
     return true;
+  }
+
+  inline auto read_keypoints(H5File& h5_file, const std::string& group_name)
+      -> KeypointList<OERegion, float>
+  {
+    auto features = std::vector<OERegion>{};
+    auto descriptors = Tensor_<float, 2>{};
+
+    h5_file.read_dataset(group_name + "/" + "features", features);
+    h5_file.read_dataset(group_name + "/" + "descriptors", descriptors);
+
+    return {features, descriptors};
+  }
+
+  inline auto write_keypoints(H5File& h5_file, const std::string& group_name,
+                              const KeypointList<OERegion, float>& keys)
+  {
+    const auto& [f, v] = keys;
+    h5_file.write_dataset(group_name + "/" + "features", tensor_view(f));
+    h5_file.write_dataset(group_name + "/" + "descriptors", v);
   }
 
   //! @}

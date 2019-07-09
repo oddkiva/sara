@@ -15,7 +15,10 @@
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/Match.hpp>
+#include <DO/Sara/Match/IndexMatch.hpp>
 #include <DO/Sara/MultiViewGeometry.hpp>
+#include <DO/Sara/MultiViewGeometry/Datasets/Strecha.hpp>
+#include <DO/Sara/MultiViewGeometry/EpipolarGraph.hpp>
 #include <DO/Sara/SfM/Detectors/SIFT.hpp>
 
 #include <boost/filesystem.hpp>
@@ -30,20 +33,6 @@ using namespace std;
 
 
 namespace DO::Sara {
-
-auto read_internal_camera_parameters(const std::string& filepath)
-    -> Matrix3d
-{
-  std::ifstream file{filepath};
-  if (!file)
-    throw std::runtime_error{"File " + filepath + "does not exist!"};
-
-  Matrix3d K;
-  file >> K;
-
-  return K;
-}
-
 
 auto match(const KeypointList<OERegion, float>& keys1,
            const KeypointList<OERegion, float>& keys2)
@@ -181,69 +170,6 @@ auto check_epipolar_constraints(const Image<Rgb8>& Ii, const Image<Rgb8>& Ij,
   //get_key();
 }
 
-struct IndexMatch
-{
-  int i;
-  int j;
-  float score;
-};
-
-struct EpipolarEdge
-{
-  int i;  // left
-  int j;  // right
-  Matrix3d m;
-};
-
-template <>
-struct CalculateH5Type<IndexMatch>
-{
-  static inline auto value() -> H5::CompType
-  {
-    auto h5_comp_type = H5::CompType{sizeof(IndexMatch)};
-    INSERT_MEMBER(h5_comp_type, IndexMatch, i);
-    INSERT_MEMBER(h5_comp_type, IndexMatch, j);
-    INSERT_MEMBER(h5_comp_type, IndexMatch, score);
-    return h5_comp_type;
-  }
-};
-
-template <>
-struct CalculateH5Type<EpipolarEdge>
-{
-  static inline auto value() -> H5::CompType
-  {
-    auto h5_comp_type = H5::CompType{sizeof(EpipolarEdge)};
-    INSERT_MEMBER(h5_comp_type, EpipolarEdge, i);
-    INSERT_MEMBER(h5_comp_type, EpipolarEdge, j);
-    INSERT_MEMBER(h5_comp_type, EpipolarEdge, m);
-    return h5_comp_type;
-  }
-};
-
-
-KeypointList<OERegion, float> read_keypoints(H5File& h5_file,
-                                             const std::string& group_name)
-{
-  auto features = std::vector<sara::OERegion>{};
-  auto descriptors = sara::Tensor_<float, 2>{};
-
-  SARA_DEBUG << "Read features..." << std::endl;
-  h5_file.read_dataset(group_name + "/" + "features", features);
-
-  SARA_DEBUG << "Read descriptors..." << std::endl;
-  h5_file.read_dataset(group_name + "/" + "descriptors", descriptors);
-
-  return {features, descriptors};
-}
-
-auto read_matches(H5File& file, const std::string& name)
-{
-  auto matches = std::vector<IndexMatch>{};
-  file.read_dataset(name, matches);
-  return matches;
-}
-
 }  // namespace DO::Sara
 
 
@@ -271,7 +197,7 @@ void match_keypoints(const std::string& dirpath, const std::string& h5_filepath)
   auto K_invs = std::vector<Eigen::Matrix3d>{};
   K_invs.reserve(group_names.size());
   std::transform(std::begin(group_names), std::end(group_names),
-                 std::back_inserter(group_names),
+                 std::back_inserter(K_invs),
                  [&](const std::string& group_name) {
                    return sara::read_internal_camera_parameters(
                               dirpath + "/" + group_name + ".png.K")
@@ -331,10 +257,11 @@ void match_keypoints(const std::string& dirpath, const std::string& h5_filepath)
 
   const auto num_samples = 1000;
   const auto f_err_thres = 5e-3;
+  auto& f_edges = edges;
   std::transform(
-      std::begin(edge_ids), std::end(edge_ids), std::begin(edges),
+      std::begin(edge_ids), std::end(edge_ids), std::begin(f_edges),
       [&](const auto& edge_id) -> sara::EpipolarEdge {
-        const auto& edge = edges[edge_id];
+        const auto& edge = f_edges[edge_id];
         const auto i = edge.i;
         const auto j = edge.j;
         const auto& Mij = matches[edge_id];
@@ -346,18 +273,30 @@ void match_keypoints(const std::string& dirpath, const std::string& h5_filepath)
             sara::estimate_fundamental_matrix(Mij, ki, kj, num_samples,
                                               f_err_thres);
 
-        return num_inliers < 100 ? sara::EpipolarEdge{i, j, Matrix3d::Zero()}
-                                 : sara::EpipolarEdge{i, j, F.matrix()};
+        // Debug.
+        const int display_step = 20;
+        const auto Ii = sara::imread<sara::Rgb8>(image_paths[i]);
+        const auto Ij = sara::imread<sara::Rgb8>(image_paths[j]);
+        sara::check_epipolar_constraints(Ii, Ij, F, Mij, sample_best,
+                                         f_err_thres, display_step);
+
+        return num_inliers < 100
+                   ? sara::EpipolarEdge{i, j, Eigen::Matrix3d::Zero()}
+                   : sara::EpipolarEdge{i, j, F.matrix()};
       });
+
+  // Save F-edges.
+  h5_file.write_dataset("f_edges", tensor_view(f_edges));
 
   auto e_edges = edges;
   const auto e_err_thres = 5e-3;
   std::for_each(
       std::begin(edge_ids), std::end(edge_ids),
       [&](const auto& edge_id) {
-        auto& edge = e_edges[edge_id];
-        const auto i = edge.i;
-        const auto j = edge.j;
+        auto& f_edge = f_edges[edge_id];
+        auto& e_edge = e_edges[edge_id];
+        const auto i = e_edge.i;
+        const auto j = e_edge.j;
         const auto& Mij = matches[edge_id];
         const auto& ki = keypoints[i];
         const auto& kj = keypoints[j];
@@ -365,87 +304,30 @@ void match_keypoints(const std::string& dirpath, const std::string& h5_filepath)
         const auto& Ki_inv = K_invs[i];
         const auto& Kj_inv = K_invs[j];
 
-        if (edge.m == Eigen::Matrix3d::Zero())
+        if (e_edge.m == Eigen::Matrix3d::Zero())
           return;
 
-        const auto [E, num_inliers_e, sample_best_e] =
+        const auto [E, num_inliers, sample_best] =
             sara::estimate_essential_matrix(Mij, ki, kj, Ki_inv, Kj_inv,
                                             num_samples, e_err_thres);
 
-        edge.m = E;
+        const Eigen::Matrix3d F = Kj_inv.transpose() * E.matrix() * Ki_inv;
+
+        // Debug.
+        const int display_step = 20;
+        const auto Ii = sara::imread<sara::Rgb8>(image_paths[i]);
+        const auto Ij = sara::imread<sara::Rgb8>(image_paths[j]);
+        sara::check_epipolar_constraints(Ii, Ij, F, Mij, sample_best,
+                                         e_err_thres, display_step);
+
+        if (num_inliers > 100)
+          e_edge.m = E;
+        else
+          e_edge.m = Eigen::Matrix3d::Zero();
       });
 
-  for (int i = 0; i < N; ++i)
-  {
-    for (int j = i + 1; j < N; ++j)
-    {
-      // Specify the image pair to process.
-      const auto& fi = image_paths[i];
-      const auto& fj = image_paths[j];
-
-      const auto gi = sara::basename(fi);
-      const auto gj = sara::basename(fj);
-
-      SARA_DEBUG << gi << std::endl;
-      SARA_DEBUG << gj << std::endl;
-      const auto Ii = sara::imread<sara::Rgb8>(fi);
-      const auto Ij = sara::imread<sara::Rgb8>(fj);
-
-      const auto Ki =
-          sara::read_internal_camera_parameters(dirpath + "/" + gi + ".png.K");
-      const auto Kj =
-          sara::read_internal_camera_parameters(dirpath + "/" + gj + ".png.K");
-
-      const Eigen::Matrix3d Ki_inv = Ki.inverse();
-      const Eigen::Matrix3d Kj_inv = Kj.inverse();
-
-      // Load the keypoints.
-      const auto ki = sara::read_keypoints(h5_file, gi);
-      const auto kj = sara::read_keypoints(h5_file, gj);
-
-
-      // Match keypoints.
-      const auto Mij = match(ki, kj);
-
-
-      // Save the keypoints to HDF5
-      auto Mij2 = std::vector<sara::IndexMatch>{};
-      std::transform(
-          Mij.begin(), Mij.end(), std::back_inserter(Mij2), [](const auto& m) {
-            return sara::IndexMatch{m.x_index(), m.y_index(), m.score()};
-          });
-
-      const auto group_name = std::string{"matches"};
-      h5_file.group(group_name);
-
-      const auto match_dataset =
-          group_name + "/" + std::to_string(i) + "_" + std::to_string(j);
-      h5_file.write_dataset(match_dataset, tensor_view(Mij2));
-
-
-      const auto num_samples = 1000;
-      const auto err_thres = 5e-3;
-
-      //// Estimate the fundamental matrix.
-      //const auto [F, num_inliers, sample_best] =
-      //    sara::estimate_fundamental_matrix(Mij, ki, kj, num_samples,
-      //                                      err_thres);
-
-      const auto [E, num_inliers_e, sample_best_e] =
-          sara::estimate_essential_matrix(Mij, ki, kj, Ki_inv, Kj_inv,
-                                          num_samples, err_thres);
-
-      auto F1 = sara::FundamentalMatrix{};
-      F1.matrix() = Kj_inv.transpose() * E.matrix() * Ki_inv;
-
-      // Visualize the estimated fundamental matrix.
-      const int display_step = 20;
-      //sara::check_epipolar_constraints(Ii, Ij, F, Mij, sample_best, err_thres,
-      //                                 display_step);
-      sara::check_epipolar_constraints(Ii, Ij, F1, Mij, sample_best_e,
-                                       err_thres, display_step);
-    }
-  }
+  // Save E-edges.
+  h5_file.write_dataset("e_edges", tensor_view(e_edges));
 }
 
 
@@ -494,7 +376,6 @@ int __main(int argc, char **argv)
     std::cerr << e.what() << "\n";
     return 1;
   }
-
 }
 
 

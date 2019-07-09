@@ -24,3 +24,5 @@
 #include <DO/Sara/MultiViewGeometry/Estimators/EssentialMatrixEstimators.hpp>
 #include <DO/Sara/MultiViewGeometry/Estimators/FundamentalMatrixEstimators.hpp>
 #include <DO/Sara/MultiViewGeometry/Estimators/HomographyEstimator.hpp>
+
+#include <DO/Sara/MultiViewGeometry/HDF5.hpp>

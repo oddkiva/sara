@@ -2,6 +2,7 @@ project(DO_MultiViewGeometry_test)
 
 message(STATUS "  - DO_MultiViewGeometry_Tests")
 
+find_package(HDF5 COMPONENTS CXX REQUIRED)
 find_package(DO_Sara COMPONENTS MultiViewGeometry REQUIRED)
 
 file(GLOB test_multiviewgeometry_SOURCE_FILES FILES test_*.cpp)

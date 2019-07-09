@@ -150,6 +150,9 @@ namespace DO { namespace Sara {
   using Point4d = Vector4d;
   //! @}
 
+  //! @brief Useful for geometry.
+  using Matrix34d = Eigen::Matrix<double, 3, 4>;
+
   //! @{
   //! 128-dimensional vector type
   using Vector128ub = Matrix<unsigned char, 128, 1>;

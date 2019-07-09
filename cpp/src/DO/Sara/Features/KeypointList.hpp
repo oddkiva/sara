@@ -15,6 +15,7 @@
 
 #include <Eigen/StdVector>
 
+#include <DO/Sara/Core/HDF5.hpp>
 #include <DO/Sara/Core/Numpy.hpp>
 #include <DO/Sara/Core/StdVectorHelpers.hpp>
 #include <DO/Sara/Core/Tensor.hpp>
