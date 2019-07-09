@@ -29,148 +29,14 @@ namespace po = boost::program_options;
 namespace fs = boost::filesystem;
 namespace sara = DO::Sara;
 
-using namespace std;
 
-
-namespace DO::Sara {
-
-auto match(const KeypointList<OERegion, float>& keys1,
-           const KeypointList<OERegion, float>& keys2)
-    -> std::vector<Match>
+auto match(const sara::KeypointList<sara::OERegion, float>& keys1,
+           const sara::KeypointList<sara::OERegion, float>& keys2)
+    -> std::vector<sara::Match>
 {
-  AnnMatcher matcher{keys1, keys2, 0.6f};
+  sara::AnnMatcher matcher{keys1, keys2, 0.6f};
   return matcher.compute_matches();
 }
-
-auto estimate_fundamental_matrix(const std::vector<Match>& Mij,
-                                 const KeypointList<OERegion, float>& ki,
-                                 const KeypointList<OERegion, float>& kj,
-                                 int num_samples,
-                                 double err_thres)
-{
-  const auto to_double = [](const float& src) { return double(src); };
-  const auto& fi = features(ki);
-  const auto& fj = features(kj);
-  const auto pi = extract_centers(fi).cwise_transform(to_double);
-  const auto pj = extract_centers(fj).cwise_transform(to_double);
-
-  const auto Pi = homogeneous(pi);
-  const auto Pj = homogeneous(pj);
-
-  const auto Mij_tensor = to_tensor(Mij);
-
-  auto estimator = EightPointAlgorithm{};
-  auto distance = EpipolarDistance{};
-
-  const auto [F, num_inliers, sample_best] =
-      ransac(Mij_tensor, Pi, Pj, estimator, distance, num_samples, err_thres);
-
-  SARA_CHECK(F);
-  SARA_CHECK(num_inliers);
-  SARA_CHECK(Mij.size());
-
-  return std::make_tuple(F, num_inliers, sample_best);
-}
-
-auto estimate_essential_matrix(const std::vector<Match>& Mij,
-                               const KeypointList<OERegion, float>& ki,
-                               const KeypointList<OERegion, float>& kj,
-                               const Matrix3d& Ki_inv,
-                               const Matrix3d& Kj_inv,
-                               int num_samples,
-                               double err_thres)
-{
-  const auto to_double = [](const float& src) { return double(src); };
-  const auto& fi = features(ki);
-  const auto& fj = features(kj);
-  const auto pi = extract_centers(fi).cwise_transform(to_double);
-  const auto pj = extract_centers(fj).cwise_transform(to_double);
-
-  const auto Pi = apply_transform(Ki_inv, homogeneous(pi));
-  const auto Pj = apply_transform(Kj_inv, homogeneous(pj));
-
-  const auto Mij_tensor = to_tensor(Mij);
-
-  auto estimator = NisterFivePointAlgorithm{};
-  auto distance = EpipolarDistance{};
-
-  const auto [E, num_inliers, sample_best] =
-      ransac(Mij_tensor, Pi, Pj, estimator, distance, num_samples, err_thres);
-
-  SARA_CHECK(E);
-  SARA_CHECK(num_inliers);
-  SARA_CHECK(Mij.size());
-
-  return std::make_tuple(E, num_inliers, sample_best);
-}
-
-auto check_epipolar_constraints(const Image<Rgb8>& Ii, const Image<Rgb8>& Ij,
-                                const FundamentalMatrix& F,
-                                const vector<Match>& Mij,
-                                const Tensor_<int, 1>& sample_best,
-                                double err_thres, int display_step)
-{
-  const auto scale = 0.25f;
-  const auto w = int((Ii.width() + Ij.width()) * scale + 0.5f);
-  const auto h = int(max(Ii.height(), Ij.height()) * scale + 0.5f);
-  const auto off = sara::Point2f{float(Ii.width()), 0.f};
-
-  if (!sara::active_window())
-  {
-    sara::create_window(w, h);
-    sara::set_antialiasing();
-  }
-
-  if (sara::get_sizes(sara::active_window()) != Eigen::Vector2i(w, h))
-    sara::resize_window(w, h);
-
-  PairWiseDrawer drawer(Ii, Ij);
-  drawer.set_viz_params(scale, scale, PairWiseDrawer::CatH);
-
-  drawer.display_images();
-
-  auto distance = EpipolarDistance{F.matrix()};
-
-  for (size_t m = 0; m < Mij.size(); ++m)
-  {
-    const Vector3d X1 = Mij[m].x_pos().cast<double>().homogeneous();
-    const Vector3d X2 = Mij[m].y_pos().cast<double>().homogeneous();
-
-    if (distance(X1, X2) > err_thres)
-      continue;
-
-    if (m % display_step == 0)
-    {
-      drawer.draw_match(Mij[m], Blue8, false);
-
-      const auto proj_X1 = F.right_epipolar_line(X1);
-      const auto proj_X2 = F.left_epipolar_line(X2);
-
-      drawer.draw_line_from_eqn(0, proj_X2.cast<float>(), Cyan8, 1);
-      drawer.draw_line_from_eqn(1, proj_X1.cast<float>(), Cyan8, 1);
-    }
-  }
-
-  for (size_t m = 0; m < sample_best.size(); ++m)
-  {
-    // Draw the best elemental subset drawn by RANSAC.
-    drawer.draw_match(Mij[sample_best(m)], Red8, true);
-
-    const Vector3d X1 = Mij[sample_best(m)].x_pos().cast<double>().homogeneous();
-    const Vector3d X2 = Mij[sample_best(m)].y_pos().cast<double>().homogeneous();
-
-    const auto proj_X1 = F.right_epipolar_line(X1);
-    const auto proj_X2 = F.left_epipolar_line(X2);
-
-    // Draw the corresponding epipolar lines.
-    drawer.draw_line_from_eqn(1, proj_X1.cast<float>(), Magenta8, 1);
-    drawer.draw_line_from_eqn(0, proj_X2.cast<float>(), Magenta8, 1);
-  }
-
-  //get_key();
-}
-
-}  // namespace DO::Sara
 
 
 void match_keypoints(const std::string& dirpath, const std::string& h5_filepath)
@@ -192,16 +58,6 @@ void match_keypoints(const std::string& dirpath, const std::string& h5_filepath)
                  std::back_inserter(group_names),
                  [&](const std::string& image_path) {
                    return sara::basename(image_path);
-                 });
-
-  auto K_invs = std::vector<Eigen::Matrix3d>{};
-  K_invs.reserve(group_names.size());
-  std::transform(std::begin(group_names), std::end(group_names),
-                 std::back_inserter(K_invs),
-                 [&](const std::string& group_name) {
-                   return sara::read_internal_camera_parameters(
-                              dirpath + "/" + group_name + ".png.K")
-                       .inverse();
                  });
 
   auto keypoints = std::vector<sara::KeypointList<sara::OERegion, float>>{};
@@ -226,7 +82,7 @@ void match_keypoints(const std::string& dirpath, const std::string& h5_filepath)
                  [&](const sara::EpipolarEdge& edge) {
                    const auto i = edge.i;
                    const auto j = edge.j;
-                   return sara::match(keypoints[i], keypoints[j]);
+                   return match(keypoints[i], keypoints[j]);
                  });
 
   // Save matches to HDF5.
@@ -254,80 +110,6 @@ void match_keypoints(const std::string& dirpath, const std::string& h5_filepath)
             group_name + "/" + std::to_string(i) + "_" + std::to_string(j);
         h5_file.write_dataset(match_dataset, tensor_view(Mij));
       });
-
-  const auto num_samples = 1000;
-  const auto f_err_thres = 5e-3;
-  auto& f_edges = edges;
-  std::transform(
-      std::begin(edge_ids), std::end(edge_ids), std::begin(f_edges),
-      [&](const auto& edge_id) -> sara::EpipolarEdge {
-        const auto& edge = f_edges[edge_id];
-        const auto i = edge.i;
-        const auto j = edge.j;
-        const auto& Mij = matches[edge_id];
-        const auto& ki = keypoints[i];
-        const auto& kj = keypoints[j];
-
-        // Estimate the fundamental matrix.
-        const auto [F, num_inliers, sample_best] =
-            sara::estimate_fundamental_matrix(Mij, ki, kj, num_samples,
-                                              f_err_thres);
-
-        // Debug.
-        const int display_step = 20;
-        const auto Ii = sara::imread<sara::Rgb8>(image_paths[i]);
-        const auto Ij = sara::imread<sara::Rgb8>(image_paths[j]);
-        sara::check_epipolar_constraints(Ii, Ij, F, Mij, sample_best,
-                                         f_err_thres, display_step);
-
-        return num_inliers < 100
-                   ? sara::EpipolarEdge{i, j, Eigen::Matrix3d::Zero()}
-                   : sara::EpipolarEdge{i, j, F.matrix()};
-      });
-
-  // Save F-edges.
-  h5_file.write_dataset("f_edges", tensor_view(f_edges));
-
-  auto e_edges = edges;
-  const auto e_err_thres = 5e-3;
-  std::for_each(
-      std::begin(edge_ids), std::end(edge_ids),
-      [&](const auto& edge_id) {
-        auto& f_edge = f_edges[edge_id];
-        auto& e_edge = e_edges[edge_id];
-        const auto i = e_edge.i;
-        const auto j = e_edge.j;
-        const auto& Mij = matches[edge_id];
-        const auto& ki = keypoints[i];
-        const auto& kj = keypoints[j];
-
-        const auto& Ki_inv = K_invs[i];
-        const auto& Kj_inv = K_invs[j];
-
-        if (e_edge.m == Eigen::Matrix3d::Zero())
-          return;
-
-        const auto [E, num_inliers, sample_best] =
-            sara::estimate_essential_matrix(Mij, ki, kj, Ki_inv, Kj_inv,
-                                            num_samples, e_err_thres);
-
-        const Eigen::Matrix3d F = Kj_inv.transpose() * E.matrix() * Ki_inv;
-
-        // Debug.
-        const int display_step = 20;
-        const auto Ii = sara::imread<sara::Rgb8>(image_paths[i]);
-        const auto Ij = sara::imread<sara::Rgb8>(image_paths[j]);
-        sara::check_epipolar_constraints(Ii, Ij, F, Mij, sample_best,
-                                         e_err_thres, display_step);
-
-        if (num_inliers > 100)
-          e_edge.m = E;
-        else
-          e_edge.m = Eigen::Matrix3d::Zero();
-      });
-
-  // Save E-edges.
-  h5_file.write_dataset("e_edges", tensor_view(e_edges));
 }
 
 
@@ -335,7 +117,7 @@ int __main(int argc, char **argv)
 {
   try
   {
-    po::options_description desc{"Detect SIFT keypoints"};
+    po::options_description desc{"Match SIFT keypoints"};
     desc.add_options()                                                 //
         ("help, h", "Help screen")                                     //
         ("dirpath", po::value<std::string>(), "Image directory path")  //
