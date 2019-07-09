@@ -9,13 +9,13 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-
 #define BOOST_TEST_MODULE "MultiViewGeometry/Essential Matrix"
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/MultiViewGeometry/DataTransformations.hpp>
-#include <DO/Sara/MultiViewGeometry/Utilities.hpp>
 #include <DO/Sara/MultiViewGeometry/Estimators/EssentialMatrixEstimators.hpp>
+#include <DO/Sara/MultiViewGeometry/Geometry/PinholeCamera.hpp>
+#include <DO/Sara/MultiViewGeometry/Utilities.hpp>
 
 #include <boost/test/unit_test.hpp>
 
@@ -280,17 +280,9 @@ BOOST_AUTO_TEST_CASE(test_skew_symmetric_matrix)
 }
 
 
-auto essential_matrix = [](auto R, auto t) -> Matrix3d {
-  return skew_symmetric_matrix(t) * R;
-};
-
-auto camera_matrix = [](auto K, auto R, auto t) -> Matrix34d {
-  Matrix34d Rt = Matrix34d::Zero();
-  Rt.topLeftCorner(3, 3) = R;
-  Rt.col(3) = t;
-  return K * Rt;
-};
-
+//auto essential_matrix = [](auto R, auto t) -> Matrix3d {
+//  return skew_symmetric_matrix(t) * R;
+//};
 
 auto generate_test_data()
 {
@@ -302,14 +294,14 @@ auto generate_test_data()
      1.51121,  0.437918,   1.35859,   1.03883,  0.106923; //
   X.bottomRows<1>().fill(1.);
 
-  Matrix3d R = rotation_z(0.3) * rotation_x(0.1) * rotation_y(0.2);
-  Vector3d t{0.1, 0.2, 0.3};
+  const Matrix3d R = rotation_z(0.3) * rotation_x(0.1) * rotation_y(0.2);
+  const Vector3d t{0.1, 0.2, 0.3};
 
   const auto E = essential_matrix(R, t);
 
-  const auto C1 = camera_matrix(Matrix3d::Identity(), Matrix3d::Identity(),
-                                Vector3d::Zero());
-  const auto C2 = camera_matrix(Matrix3d::Identity(), R, t);
+  const Matrix34d C1 = PinholeCamera{Matrix3d::Identity(), Matrix3d::Identity(),
+                                     Vector3d::Zero()};
+  const Matrix34d C2 = PinholeCamera{Matrix3d::Identity(), R, t};
   MatrixXd x1 = C1 * X; x1.array().rowwise() /= x1.row(2).array();
   MatrixXd x2 = C2 * X; x2.array().rowwise() /= x2.row(2).array();
 
@@ -451,8 +443,35 @@ BOOST_AUTO_TEST_CASE(test_extract_relative_motions_functions)
     const auto motion_found =
         std::find_if(motions.begin(), motions.end(), motion_equality_predicate);
     BOOST_CHECK(motion_found != motions.end());
-    //SARA_DEBUG << motion_found->R - true_motion.R << endl;
-    //SARA_DEBUG << motion_found->t - true_motion.t << endl;
+    SARA_DEBUG << "Motion found" << std::endl;
+    SARA_DEBUG << "R =\n" << motion_found->R << endl;
+    SARA_DEBUG << "t = " << motion_found->t.normalized().transpose() << endl;
+    SARA_DEBUG << "ΔR =\n" << motion_found->R - true_motion.R << endl;
+    SARA_DEBUG << "Δt = "
+               << (motion_found->t.normalized() - true_motion.t.normalized())
+                      .transpose()
+               << endl;
+
+    for (const auto& m : motions)
+    {
+      SARA_DEBUG << "candidate camera =" << std::endl;
+      const auto cam = normalized_camera(m);
+      const Matrix34d C = cam;
+      std::cout << C << std::endl;
+
+      SARA_DEBUG << "ΔR = " << (m.R - true_motion.R).norm() << endl;
+      SARA_DEBUG << "Δt = "
+                 << (m.t.normalized() - true_motion.t.normalized()).norm()
+                 << endl;
+
+      SARA_DEBUG << "X =" << std::endl;
+      std::cout << X.colwise().hnormalized() << std::endl;
+
+      X.colwise().hnormalized().colwise() - cam.t;
+      SARA_DEBUG << "cheirality =" << std::endl;
+      std::cout << C * (X.colwise().hnormalized().colwise() - cam.t) << std::endl;
+      std::cout << std::endl;
+    }
   }
 
   {

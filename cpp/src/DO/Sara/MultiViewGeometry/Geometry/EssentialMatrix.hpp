@@ -36,16 +36,21 @@ public:
 
   EssentialMatrix() = default;
 
-  EssentialMatrix(const Motion& m)
-    : base_type{skew_symmetric_matrix(m.t) * m.R}
-  {
-  }
-
   EssentialMatrix(const matrix_type& E)
     : base_type{E}
   {
   }
 };
+
+inline auto essential_matrix(const Matrix3d& R, const Vector3d& t)
+{
+  return EssentialMatrix{skew_symmetric_matrix(t) * R};
+}
+
+inline auto essential_matrix(const Motion& m)
+{
+  return essential_matrix(m.R, m.t);
+}
 
 DO_SARA_EXPORT
 auto extract_relative_motion_svd(const Matrix3d& E)
