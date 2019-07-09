@@ -126,6 +126,7 @@ int __main(int argc, char **argv)
     }
     if (!vm.count("out_h5_file"))
     {
+      std::cout << desc << std::endl;
       std::cout << "Missing output H5 file path" << std::endl;
       return 0;
     }
