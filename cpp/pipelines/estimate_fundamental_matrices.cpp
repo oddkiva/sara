@@ -141,7 +141,7 @@ void estimate_fundamental_matrices(const std::string& dirpath, const std::string
 
   auto h5_file = sara::H5File{h5_filepath, H5F_ACC_RDWR};
 
-  auto pose_attributes = sara::PoseAttributes{};
+  auto photo_attributes = sara::PhotoAttributes{};
   pose_attributes.list_images(dirpath);
   pose_attributes.load_keypoints(h5_file);
 
@@ -160,8 +160,9 @@ void estimate_fundamental_matrices(const std::string& dirpath, const std::string
   auto& f_best_samples = f_edge_attributes.best_samples;
 
   // Preallocate space.
-  num_inliers.resize(f_edge_ids.size());
-  best_sample.resize(int(f_edge_ids.size()), FSolver::num_points);
+  f_noise.resize(f_edge_ids.size());
+  f_num_inliers.resize(f_edge_ids.size());
+  f_best_sample.resize(int(f_edge_ids.size()), FSolver::num_points);
 
   const auto num_samples = 1000;
   const auto f_err_thres = 5e-3;
@@ -183,7 +184,7 @@ void estimate_fundamental_matrices(const std::string& dirpath, const std::string
         const int display_step = 20;
         const auto Ii = imread<sara::Rgb8>(image_paths[i]);
         const auto Ij = imread<sara::Rgb8>(image_paths[j]);
-        check_epipolar_constraints(Ii, Ij, F, Mij, sample_best, f_err_thres,
+        check_epipolar_constraints(Ii, Ij, F, Mij, best_sample, f_err_thres,
                                    display_step);
 
         // Update.

@@ -30,6 +30,8 @@ namespace sara = DO::Sara;
 
 using namespace std;
 
+using ESolver = sara::NisterFivePointAlgorithm;
+
 
 auto estimate_essential_matrix(
     const std::vector<sara::Match>& Mij,
@@ -49,7 +51,7 @@ auto estimate_essential_matrix(
 
   const auto Mij_tensor = to_tensor(Mij);
 
-  auto estimator = sara::NisterFivePointAlgorithm{};
+  auto estimator = ESolver{};
   auto distance = sara::EpipolarDistance{};
 
   const auto [E, num_inliers, sample_best] =
@@ -138,18 +140,9 @@ void estimate_essential_matrices(const std::string& dirpath, const std::string& 
 
   auto h5_file = sara::H5File{h5_filepath, H5F_ACC_RDWR};
 
-  auto image_paths = std::vector<std::string>{};
-  append(image_paths, sara::ls(dirpath, ".png"));
-  append(image_paths, sara::ls(dirpath, ".jpg"));
-  std::sort(image_paths.begin(), image_paths.end());
-
-  auto group_names = std::vector<std::string>{};
-  group_names.reserve(image_paths.size());
-  std::transform(std::begin(image_paths), std::end(image_paths),
-                 std::back_inserter(group_names),
-                 [&](const std::string& image_path) {
-                   return sara::basename(image_path);
-                 });
+  auto photo_attributes = sara::PhotoAttributes{};
+  pose_attributes.list_images(dirpath);
+  pose_attributes.load_keypoints(h5_file);
 
   auto K_invs = std::vector<Eigen::Matrix3d>{};
   K_invs.reserve(group_names.size());
@@ -161,49 +154,26 @@ void estimate_essential_matrices(const std::string& dirpath, const std::string& 
                        .inverse();
                  });
 
-  auto keypoints = std::vector<sara::KeypointList<sara::OERegion, float>>{};
-  keypoints.reserve(image_paths.size());
-  std::transform(std::begin(group_names), std::end(group_names),
-                 std::back_inserter(keypoints),
-                 [&](const std::string& group_name) {
-                   return sara::read_keypoints(h5_file, group_name);
-                 });
+  const auto num_photos = int(photo_attributes.image_paths.size());
 
-  auto f_edges = std::vector<sara::EpipolarEdge>{};
+  auto f_edge_attributes = EpipolarEdgeAttributes{};
+  f_edge_attributes.initialize_edges(num_photos);
+  f_edge_attributes.read_matches(h5_file, photo_attributes);
+
+  auto& f_edges = f_edge_attributes.edges;
   h5_file.read_dataset("f_edges", f_edges);
 
-  auto index_matches = std::vector<std::vector<sara::IndexMatch>>{};
-  index_matches.reserve(f_edges.size());
-  std::transform(std::begin(f_edges), std::end(f_edges),
-                 std::back_inserter(index_matches),
-                 [&](const sara::EpipolarEdge& edge) {
-                   const auto i = edge.i;
-                   const auto j = edge.j;
+  auto e_edge_attributes = f_edge_attributes;
 
-                   const auto match_dataset = std::string{"matches"} + "/" +
-                                              std::to_string(i) + "_" +
-                                              std::to_string(j);
+  auto& e_edges = e_edge_attributes.edges;
+  auto& e_noise = e_edge_attributes.noise;
+  auto& e_num_inliers = e_edge_attributes.num_inliers;
+  auto& e_best_samples = e_edge_attributes.best_samples;
 
-                   auto mij = std::vector<sara::IndexMatch>{};
-                   h5_file.read_dataset(match_dataset, mij);
-
-                   return mij;
-                 });
-
-  const auto edge_ids = sara::range(f_edges.size());
-
-  auto matches = std::vector<std::vector<sara::Match>>{};
-  matches.reserve(f_edges.size());
-  std::transform(std::begin(edge_ids), std::end(edge_ids),
-                 std::back_inserter(matches), [&](int ij) {
-                 const auto i = f_edges[ij].i;
-                 const auto j = f_edges[ij].j;
-                   return sara::to_match(index_matches[ij], keypoints[i], keypoints[j]);
-                 });
-
-
-  auto e_edges = f_edges;
-  auto e_attributes = 
+  // Preallocate space.
+  e_noise.resize(e_edge_ids.size());
+  e_num_inliers.resize(e_edge_ids.size());
+  e_best_sample.resize(int(e_edge_ids.size()), ESolver::num_points);
 
   const auto num_samples = 1000;
   const auto e_err_thres = 5e-3;
@@ -220,10 +190,7 @@ void estimate_essential_matrices(const std::string& dirpath, const std::string& 
         const auto& Ki_inv = K_invs[i];
         const auto& Kj_inv = K_invs[j];
 
-        if (e_edge.m == Eigen::Matrix3d::Zero())
-          return;
-
-        const auto [E, num_inliers, sample_best] = estimate_essential_matrix(
+        const auto [E, num_inliers, best_sample] = estimate_essential_matrix(
             Mij, ki, kj, Ki_inv, Kj_inv, num_samples, e_err_thres);
 
         const Eigen::Matrix3d F = Kj_inv.transpose() * E.matrix() * Ki_inv;
@@ -232,17 +199,21 @@ void estimate_essential_matrices(const std::string& dirpath, const std::string& 
         const int display_step = 20;
         const auto Ii = sara::imread<sara::Rgb8>(image_paths[i]);
         const auto Ij = sara::imread<sara::Rgb8>(image_paths[j]);
-        check_epipolar_constraints(Ii, Ij, F, Mij, sample_best, e_err_thres,
+        check_epipolar_constraints(Ii, Ij, F, Mij, best_sample, e_err_thres,
                                    display_step);
 
-        if (num_inliers > 100)
-          e_edge.m = E;
-        else
-          e_edge.m = Eigen::Matrix3d::Zero();
+        // Update.
+        e_edges[edge_id] = sara::EpipolarEdge{i, j, E.matrix()};
+        e_num_inliers[edge_id] = num_inliers;
+        e_best_samples[edge_id].flat_array() = best_sample.flat_array();
+        e_noise[edge_id] = e_err_thres;
       });
 
   // Save E-edges.
   h5_file.write_dataset("e_edges", tensor_view(e_edges));
+  h5_file.write_dataset("e_num_inliers", tensor_view(e_num_inliers));
+  h5_file.write_dataset("e_best_samples", tensor_view(e_best_samples));
+  h5_file.write_dataset("e_noise", tensor_view(e_noise));
 }
 
 
