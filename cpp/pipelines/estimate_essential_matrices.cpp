@@ -203,6 +203,7 @@ void estimate_essential_matrices(const std::string& dirpath, const std::string& 
 
 
   auto e_edges = f_edges;
+  auto e_attributes = 
 
   const auto num_samples = 1000;
   const auto e_err_thres = 5e-3;

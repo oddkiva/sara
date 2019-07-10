@@ -29,7 +29,6 @@ namespace DO { namespace Sara {
     @ingroup feature_types
 
     @{
-
   */
 
   template <typename F, typename T>
@@ -37,7 +36,8 @@ namespace DO { namespace Sara {
 
 
   template <typename F, typename T>
-  inline auto features(const KeypointList<F, T>& keys) -> const std::vector<F>&
+  inline auto features(const KeypointList<F, T>& keys)
+    -> const std::vector<F>&
   {
     return std::get<0>(keys);
   }
@@ -75,7 +75,8 @@ namespace DO { namespace Sara {
   }
 
   template <typename F, typename T>
-  inline auto stack(const KeypointList<F, T>& keys1, const KeypointList<F, T>& keys2)
+  inline auto stack(const KeypointList<F, T>& keys1,
+                    const KeypointList<F, T>& keys2)
   {
     const auto& [f1, d1] = keys1;
     const auto& [f2, d2] = keys2;
@@ -85,7 +86,6 @@ namespace DO { namespace Sara {
 
     return std::make_tuple(f1, vstack(d1, d2));
   }
-
 
 
   template <typename F, typename T>
