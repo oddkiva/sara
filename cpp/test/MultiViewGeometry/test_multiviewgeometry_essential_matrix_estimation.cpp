@@ -280,10 +280,6 @@ BOOST_AUTO_TEST_CASE(test_skew_symmetric_matrix)
 }
 
 
-//auto essential_matrix = [](auto R, auto t) -> Matrix3d {
-//  return skew_symmetric_matrix(t) * R;
-//};
-
 auto generate_test_data()
 {
   // 3D points.
@@ -439,6 +435,7 @@ BOOST_AUTO_TEST_CASE(test_extract_relative_motions_functions)
 
 
   {
+    SARA_DEBUG << "Check SVD-based motion extraction" << std::endl;
     auto motions = extract_relative_motion_svd(E);
     const auto motion_found =
         std::find_if(motions.begin(), motions.end(), motion_equality_predicate);
@@ -446,41 +443,27 @@ BOOST_AUTO_TEST_CASE(test_extract_relative_motions_functions)
     SARA_DEBUG << "Motion found" << std::endl;
     SARA_DEBUG << "R =\n" << motion_found->R << endl;
     SARA_DEBUG << "t = " << motion_found->t.normalized().transpose() << endl;
-    SARA_DEBUG << "ΔR =\n" << motion_found->R - true_motion.R << endl;
-    SARA_DEBUG << "Δt = "
-               << (motion_found->t.normalized() - true_motion.t.normalized())
-                      .transpose()
-               << endl;
-
-    for (const auto& m : motions)
-    {
-      SARA_DEBUG << "candidate camera =" << std::endl;
-      const auto cam = normalized_camera(m);
-      const Matrix34d C = cam;
-      std::cout << C << std::endl;
-
-      SARA_DEBUG << "ΔR = " << (m.R - true_motion.R).norm() << endl;
-      SARA_DEBUG << "Δt = "
-                 << (m.t.normalized() - true_motion.t.normalized()).norm()
-                 << endl;
-
-      SARA_DEBUG << "X =" << std::endl;
-      std::cout << X.colwise().hnormalized() << std::endl;
-
-      X.colwise().hnormalized().colwise() - cam.t;
-      SARA_DEBUG << "cheirality =" << std::endl;
-      std::cout << C * (X.colwise().hnormalized().colwise() - cam.t) << std::endl;
-      std::cout << std::endl;
-    }
+    SARA_DEBUG << "ΔR = " << (motion_found->R - true_motion.R).norm() << endl;
+    SARA_DEBUG
+        << "Δt = "
+        << (motion_found->t.normalized() - true_motion.t.normalized()).norm()
+        << endl;
   }
 
   {
+    SARA_DEBUG << "Check Horn's motion extraction method" << std::endl;
     auto motions = extract_relative_motion_horn(E);
     const auto motion_found =
         std::find_if(motions.begin(), motions.end(), motion_equality_predicate);
     BOOST_CHECK(motion_found != motions.end());
-    //SARA_DEBUG << motion_found->R - true_motion.R << endl;
-    //SARA_DEBUG << motion_found->t - true_motion.t << endl;
+    SARA_DEBUG << "Motion found" << std::endl;
+    SARA_DEBUG << "R =\n" << motion_found->R << endl;
+    SARA_DEBUG << "t = " << motion_found->t.normalized().transpose() << endl;
+    SARA_DEBUG << "ΔR = " << (motion_found->R - true_motion.R).norm() << endl;
+    SARA_DEBUG
+        << "Δt = "
+        << (motion_found->t.normalized() - true_motion.t.normalized()).norm()
+        << endl;
   }
 }
 

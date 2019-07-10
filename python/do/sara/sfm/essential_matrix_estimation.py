@@ -12,6 +12,7 @@ def essential_matrix(R, t):
 def camera_matrix(R, t):
     return np.hstack((R, t))
 
+
 def project(X, P):
     x = P.dot(X)
     x /= x[2, :]
@@ -155,6 +156,7 @@ def expand_hartley_sturm_poly():
 
     return r_poly
 
+
 def expand_hartley_sturm_poly_abs():
     a, b, c, d, fl, fr, t = sp.symbols('a b c d fl fr t')
     A = 1
@@ -171,6 +173,7 @@ def expand_hartley_sturm_poly_abs():
         print(r_poly.coeff_monomial(t ** i))
 
     return r_poly
+
 
 def poly_hartley_sturm(a, b, c, d, fl, fr):
     r_coeff = np.array([
@@ -194,6 +197,7 @@ def poly_hartley_sturm(a, b, c, d, fl, fr):
     ])
     r_coeff /= r_coeff[-1]
     return r_coeff
+
 
 def poly_abs_hartley_sturm(a, b, c, d, fl, fr):
     r_coeff = np.array([
@@ -237,20 +241,26 @@ def poly_abs_hartley_sturm(a, b, c, d, fl, fr):
     r_coeff /= r_coeff[-1]
     return r_coeff
 
+
 def lambda_l(t, fl):
     return np.array([t * fl, 1, -t])
+
 
 def lambda_r(t, a, b, c, d, fr):
     return np.array([-fr * (c * t + d), a * t + b, c * t + d])
 
+
 def err_l(t, fl):
     return t ** 2 / (1 + t ** 2 * fl ** 2)
+
 
 def err_r(t, a, b, c, d, fr):
     return (c*t + d) ** 2 / ((a * t + b) ** 2 + fr ** 2 * (c * t + d) ** 2)
 
+
 def reproj_err(t, a, b, c, d, fl, fr):
     return err_l(t, fl) + err_r(t, a, b, c, d, fr)
+
 
 def triangulate_hartley_sturm(E, el, er, xl, xr, method='poly_abs'):
     """ Retrieve the 3D points from a set of point correspondences.
@@ -326,6 +336,7 @@ def triangulate_hartley_sturm(E, el, er, xl, xr, method='poly_abs'):
 
     return xl1, xr1
 
+
 def triangulate_lindstrom_iterative(E, xl, xr, K=2):
     """UNTESTED."""
     S = np.array([[1, 0, 0],
@@ -360,6 +371,7 @@ def triangulate_lindstrom_iterative(E, xl, xr, K=2):
         xr0 = xr1
 
     return (xl1, xr1)
+
 
 def triangulate_lindstrom_two_iterations(E, xl, xr):
     """UNTESTED."""
@@ -415,7 +427,10 @@ def test():
 
     benchmark_relative_motion_extraction_method(E, R, t)
     X_est = triangulate_longuet_higgins(R, t, x1, x2)
+    print("X =\n", X)
+    print("X_est =\n", X_est)
     print('3D point relative estimation error = ', la.norm(X_est - X) / la.norm(X))
+    return
 
     el, er = extract_epipoles(E)
     assert la.norm(er / er[-1] - t.flatten() / t[-1]) / la.norm(t / t[-1]) < 1e-12

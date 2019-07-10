@@ -170,5 +170,4 @@ struct DO_SARA_EXPORT SteweniusFivePointAlgorithm : FivePointAlgorithmBase
   }
 };
 
-
 } /* namespace DO::Sara */

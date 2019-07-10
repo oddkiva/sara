@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include <DO/Sara/Defines.hpp>
+
 #include <DO/Sara/Core/EigenExtension.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/EssentialMatrix.hpp>
 
@@ -21,7 +23,7 @@ struct PinholeCamera
 {
   operator Matrix34d() const
   {
-    Matrix34d Rt = Matrix34d::Zero();
+    Matrix34d Rt;
     Rt.topLeftCorner(3, 3) = R;
     Rt.col(3) = t;
     return K * Rt;
@@ -42,5 +44,9 @@ inline auto normalized_camera(const Motion& m)
 {
   return PinholeCamera{Eigen::Matrix3d::Identity(), m.R, m.t};
 }
+
+
+DO_SARA_EXPORT
+auto cheirality_predicate(const MatrixXd& X, const Matrix34d& P) -> bool;
 
 } /* namespace DO::Sara */
