@@ -17,35 +17,33 @@
 
 namespace DO::Sara {
 
-  struct TwoViewGeometry
-  {
-    PinholeCamera C1;
-    PinholeCamera C2;
-    MatrixXd X;
-  };
+struct TwoViewGeometry
+{
+  PinholeCamera C1;
+  PinholeCamera C2;
+  MatrixXd X;
+};
 
-  inline auto two_view_geometry(const Motion& m, const MatrixXd& x1,
-                                const MatrixXd& x2) -> TwoViewGeometry
-  {
-    const auto C1 = normalized_camera();
-    const auto C2 = normalized_camera(m.R, m.t.normalized());
-    const Matrix34d P1 = C1;
-    const Matrix34d P2 = C2;
-    const auto X = triangulate_linear_eigen(P1, P2, x1, x2);
-    return {C1, C2, X};
-  }
+inline auto two_view_geometry(const Motion& m, const MatrixXd& x1,
+                              const MatrixXd& x2) -> TwoViewGeometry
+{
+  const auto C1 = normalized_camera();
+  const auto C2 = normalized_camera(m.R, m.t.normalized());
+  const Matrix34d P1 = C1;
+  const Matrix34d P2 = C2;
+  const auto X = triangulate_linear_eigen(P1, P2, x1, x2);
+  return {C1, C2, X};
+}
 
-  inline auto remove_cheirality_inconsistent_geometries(
-      std::vector<TwoViewGeometry>& geometries)
-  {
-    geometries.erase(std::remove_if(std::begin(geometries),
-                                    std::end(geometries),
-                                    [&](const TwoViewGeometry& g) {
-                                      return !cheirality_predicate(g.X, g.C1) ||
-                                             !cheirality_predicate(g.X, g.C2);
-                                    }),
-                     std::end(geometries));
-  }
-
+inline auto remove_cheirality_inconsistent_geometries(
+    std::vector<TwoViewGeometry>& geometries)
+{
+  geometries.erase(std::remove_if(std::begin(geometries), std::end(geometries),
+                                  [&](const TwoViewGeometry& g) {
+                                    return !cheirality_predicate(g.X, g.C1) ||
+                                           !cheirality_predicate(g.X, g.C2);
+                                  }),
+                   std::end(geometries));
+}
 
 } /* namespace DO::Sara */

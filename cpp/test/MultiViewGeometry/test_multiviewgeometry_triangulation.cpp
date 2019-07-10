@@ -182,4 +182,5 @@ BOOST_AUTO_TEST_CASE(test_cheirality_predicate)
 
   const auto rel_ratio_diff = (max_ratio - min_ratio) / max_ratio;
   BOOST_CHECK_SMALL(rel_ratio_diff, 1e-12);
+  SARA_CHECK(rel_ratio_diff);
 }

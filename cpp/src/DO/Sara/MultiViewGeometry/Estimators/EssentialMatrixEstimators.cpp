@@ -401,8 +401,7 @@ auto SteweniusFivePointAlgorithm::find_essential_matrices(
   const auto E_constraints = build_essential_matrix_constraints(E_expr);
 
   // 3. Solve the epipolar constraints.
-  const auto Es = solve_essential_matrix_constraints(E_bases, E_constraints);
-  return Es;
+  return solve_essential_matrix_constraints(E_bases, E_constraints);
 }
 
 } /* namespace DO::Sara */

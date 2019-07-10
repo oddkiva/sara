@@ -14,6 +14,7 @@
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/Match.hpp>
 #include <DO/Sara/MultiViewGeometry.hpp>
+#include <DO/Sara/MultiViewGeometry/Geometry/TwoViewGeometry.hpp>
 #include <DO/Sara/SfM/Detectors/SIFT.hpp>
 
 
@@ -168,6 +169,7 @@ auto count_inliers(const Matrix3d& F, const TensorView_<int, 2>& M,
 // =============================================================================
 // Multiview geometry estimation.
 //
+#ifdef DEBUG
 void estimate_homography_old(const Image<Rgb8>& image1,
                              const Image<Rgb8>& image2,
                              const KeypointList<OERegion, float>& keys1,
@@ -291,94 +293,6 @@ void estimate_homography_old(const Image<Rgb8>& image1,
 
     get_key();
   }
-}
-
-void estimate_homography(const Image<Rgb8>& image1, const Image<Rgb8>& image2,
-                         const KeypointList<OERegion, float>& keys1,
-                         const KeypointList<OERegion, float>& keys2,
-                         const vector<Match>& matches)
-{
-  // ==========================================================================
-  // Setup the visualization.
-  const auto scale = .25f;
-  const auto w = int((image1.width() + image2.width()) * scale);
-  const auto h = max(image1.height(), image2.height()) * scale;
-
-  create_window(w, h);
-  set_antialiasing();
-
-  PairWiseDrawer drawer(image1, image2);
-  drawer.set_viz_params(scale, scale, PairWiseDrawer::CatH);
-
-  // ==========================================================================
-  // Normalize the points.
-  const auto to_double = [](const float& src) { return double(src); };
-  const auto& f1 = features(keys1);
-  const auto& f2 = features(keys2);
-  const auto p1 = extract_centers(f1).cwise_transform(to_double);
-  const auto p2 = extract_centers(f2).cwise_transform(to_double);
-
-  const auto P1 = homogeneous(p1);
-  const auto P2 = homogeneous(p2);
-
-  const auto M = to_tensor(matches);
-
-  // Generate random samples for RANSAC.
-  const auto num_samples = 1000;
-  const double h_err_thres = 1.;
-
-  auto distance = SymmetricTransferError{};
-
-  const auto [H, num_inliers, sample_best] = ransac(
-      M, P1, P2, FourPointAlgorithm{}, distance, num_samples, h_err_thres);
-
-  SARA_CHECK(num_inliers);
-
-  // Display the result.
-  drawer.display_images();
-
-  distance = SymmetricTransferError{H};
-
-  for (size_t i = 0; i < matches.size(); ++i)
-  {
-    const Vector3d X1 = matches[i].x_pos().cast<double>().homogeneous();
-    const Vector3d X2 = matches[i].y_pos().cast<double>().homogeneous();
-
-    if (distance(X1, X2) < 1.)
-      drawer.draw_match(matches[i], Blue8, false);
-  };
-
-  constexpr auto L = FourPointAlgorithm::num_points;
-  const auto s_best = sample_best.reshape(Vector2i{1, L});
-  const auto I = to_point_indices(s_best, M);
-  const auto P = to_coordinates(I, P1, P2).transpose({0, 2, 1, 3});
-
-  // Extract the points.
-  const Matrix<double, 3, L> X = P[0][0].colmajor_view().matrix();
-  const Matrix<double, 3, L> Y = P[0][1].colmajor_view().matrix();
-
-  // Project X to the right image.
-  Matrix<double, 3, L> proj_X = H.matrix() * X;
-  proj_X.array().rowwise() /= proj_X.row(2).array();
-
-  // Project Y to the left image.
-  Matrix<double, 3, L> proj_Y = H.matrix().transpose() * Y;
-  proj_Y.array().rowwise() /= proj_Y.row(2).array();
-
-  for (size_t i = 0; i < L; ++i)
-  {
-    // Draw the best elemental subset drawn by RANSAC.
-    drawer.draw_match(matches[sample_best(i)], Red8, true);
-
-    // Draw the corresponding projected points.
-    drawer.draw_point(1, proj_X.col(i).hnormalized().cast<float>(), Magenta8,
-                      1);
-    drawer.draw_point(0, proj_Y.col(i).hnormalized().cast<float>(), Magenta8,
-                      1);
-  }
-
-  get_key();
-  close_window();
 }
 
 void estimate_fundamental_matrix_old(const Image<Rgb8>& image1,
@@ -507,102 +421,6 @@ void estimate_fundamental_matrix_old(const Image<Rgb8>& image1,
   {
     // Draw the best elemental subset drawn by RANSAC.
     drawer.draw_match(matches[S(n, i)], Red8, true);
-
-    // Draw the corresponding epipolar lines.
-    drawer.draw_line_from_eqn(1, proj_X.col(i).cast<float>(), Magenta8, 1);
-    drawer.draw_line_from_eqn(0, proj_Y.col(i).cast<float>(), Magenta8, 1);
-  }
-  get_key();
-
-  for (size_t i = 0; i < matches.size(); ++i)
-  {
-    const Vector3d X1 = matches[i].x_pos().cast<double>().homogeneous();
-    const Vector3d X2 = matches[i].y_pos().cast<double>().homogeneous();
-
-    if (epipolar_distance(F, X1, X2) > f_err_thresh)
-      continue;
-
-    if (i % 100 == 0)
-    {
-      drawer.draw_match(matches[i], Blue8, false);
-
-      const auto proj_X1 = F.right_epipolar_line(X1);
-      const auto proj_X2 = F.left_epipolar_line(X2);
-
-      drawer.draw_line_from_eqn(0, proj_X2.cast<float>(), Cyan8, 1);
-      drawer.draw_line_from_eqn(1, proj_X1.cast<float>(), Cyan8, 1);
-    }
-  }
-
-  get_key();
-  close_window();
-}
-
-void estimate_fundamental_matrix(const Image<Rgb8>& image1,
-                                 const Image<Rgb8>& image2,
-                                 const KeypointList<OERegion, float>& keys1,
-                                 const KeypointList<OERegion, float>& keys2,
-                                 const vector<Match>& matches)
-{
-  // ==========================================================================
-  // Setup the visualization.
-  const auto scale = 0.25f;
-  const auto w = int((image1.width() + image2.width()) * scale);
-  const auto h = max(image1.height(), image2.height()) * scale;
-
-  create_window(w, h);
-  set_antialiasing();
-
-  PairWiseDrawer drawer(image1, image2);
-  drawer.set_viz_params(scale, scale, PairWiseDrawer::CatH);
-
-
-  // Transform matches to an array of indices.
-  const auto M = to_tensor(matches);
-
-  // ==========================================================================
-  // Image coordinates.
-  const auto to_double = [](const float& src) { return double(src); };
-  const auto& f1 = features(keys1);
-  const auto& f2 = features(keys2);
-  const auto p1 = extract_centers(f1).cwise_transform(to_double);
-  const auto p2 = extract_centers(f2).cwise_transform(to_double);
-
-  const auto P1 = homogeneous(p1);
-  const auto P2 = homogeneous(p2);
-
-  double num_samples = 1000;
-  const auto [F, num_inliers, sample_best] = ransac(
-      M, P1, P2, FEstimator{}, EpipolarDistance{}, num_samples, f_err_thresh);
-
-  SARA_CHECK(F);
-  SARA_CHECK(num_inliers);
-  SARA_CHECK(matches.size());
-
-  // Visualize the best sample drawn by RANSAC.
-  constexpr auto L = EightPointAlgorithm::num_points;
-  const auto s_best = sample_best.reshape(Vector2i{1, L});
-  const auto I = to_point_indices(s_best, M);
-  const auto P = to_coordinates(I, P1, P2).transpose({0, 2, 1, 3});
-
-  // Extract the points.
-  const Matrix<double, 3, 8> X = P[0][0].colmajor_view().matrix();
-  const Matrix<double, 3, 8> Y = P[0][1].colmajor_view().matrix();
-
-  // Project X to the right image.
-  Matrix<double, 3, 8> proj_X = F.matrix() * X;
-  proj_X.array().rowwise() /= proj_X.row(2).array();
-
-  // Project Y to the left image.
-  Matrix<double, 3, 8> proj_Y = F.matrix().transpose() * Y;
-  proj_Y.array().rowwise() /= proj_Y.row(2).array();
-
-  drawer.display_images();
-
-  for (size_t i = 0; i < 8; ++i)
-  {
-    // Draw the best elemental subset drawn by RANSAC.
-    drawer.draw_match(matches[sample_best(i)], Red8, true);
 
     // Draw the corresponding epipolar lines.
     drawer.draw_line_from_eqn(1, proj_X.col(i).cast<float>(), Magenta8, 1);
@@ -847,6 +665,191 @@ void estimate_essential_matrix_old(const Image<Rgb8>& image1,
   get_key();
   close_window();
 }
+#endif
+
+void estimate_homography(const Image<Rgb8>& image1, const Image<Rgb8>& image2,
+                         const KeypointList<OERegion, float>& keys1,
+                         const KeypointList<OERegion, float>& keys2,
+                         const vector<Match>& matches)
+{
+  // ==========================================================================
+  // Setup the visualization.
+  const auto scale = .25f;
+  const auto w = int((image1.width() + image2.width()) * scale);
+  const auto h = max(image1.height(), image2.height()) * scale;
+
+  create_window(w, h);
+  set_antialiasing();
+
+  PairWiseDrawer drawer(image1, image2);
+  drawer.set_viz_params(scale, scale, PairWiseDrawer::CatH);
+
+  // ==========================================================================
+  // Normalize the points.
+  const auto to_double = [](const float& src) { return double(src); };
+  const auto& f1 = features(keys1);
+  const auto& f2 = features(keys2);
+  const auto p1 = extract_centers(f1).cwise_transform(to_double);
+  const auto p2 = extract_centers(f2).cwise_transform(to_double);
+
+  const auto P1 = homogeneous(p1);
+  const auto P2 = homogeneous(p2);
+
+  const auto M = to_tensor(matches);
+
+  // Generate random samples for RANSAC.
+  const auto num_samples = 1000;
+  const double h_err_thres = 1.;
+
+  auto distance = SymmetricTransferError{};
+
+  const auto [H, num_inliers, sample_best] = ransac(
+      M, P1, P2, FourPointAlgorithm{}, distance, num_samples, h_err_thres);
+
+  SARA_CHECK(num_inliers);
+
+  // Display the result.
+  drawer.display_images();
+
+  distance = SymmetricTransferError{H};
+
+  for (size_t i = 0; i < matches.size(); ++i)
+  {
+    const Vector3d X1 = matches[i].x_pos().cast<double>().homogeneous();
+    const Vector3d X2 = matches[i].y_pos().cast<double>().homogeneous();
+
+    if (distance(X1, X2) < 1.)
+      drawer.draw_match(matches[i], Blue8, false);
+  };
+
+  constexpr auto L = FourPointAlgorithm::num_points;
+  const auto s_best = sample_best.reshape(Vector2i{1, L});
+  const auto I = to_point_indices(s_best, M);
+  const auto P = to_coordinates(I, P1, P2).transpose({0, 2, 1, 3});
+
+  // Extract the points.
+  const Matrix<double, 3, L> X = P[0][0].colmajor_view().matrix();
+  const Matrix<double, 3, L> Y = P[0][1].colmajor_view().matrix();
+
+  // Project X to the right image.
+  Matrix<double, 3, L> proj_X = H.matrix() * X;
+  proj_X.array().rowwise() /= proj_X.row(2).array();
+
+  // Project Y to the left image.
+  Matrix<double, 3, L> proj_Y = H.matrix().transpose() * Y;
+  proj_Y.array().rowwise() /= proj_Y.row(2).array();
+
+  for (size_t i = 0; i < L; ++i)
+  {
+    // Draw the best elemental subset drawn by RANSAC.
+    drawer.draw_match(matches[sample_best(i)], Red8, true);
+
+    // Draw the corresponding projected points.
+    drawer.draw_point(1, proj_X.col(i).hnormalized().cast<float>(), Magenta8,
+                      1);
+    drawer.draw_point(0, proj_Y.col(i).hnormalized().cast<float>(), Magenta8,
+                      1);
+  }
+
+  get_key();
+  close_window();
+}
+
+void estimate_fundamental_matrix(const Image<Rgb8>& image1,
+                                 const Image<Rgb8>& image2,
+                                 const KeypointList<OERegion, float>& keys1,
+                                 const KeypointList<OERegion, float>& keys2,
+                                 const vector<Match>& matches)
+{
+  // ==========================================================================
+  // Setup the visualization.
+  const auto scale = 0.25f;
+  const auto w = int((image1.width() + image2.width()) * scale);
+  const auto h = max(image1.height(), image2.height()) * scale;
+
+  create_window(w, h);
+  set_antialiasing();
+
+  PairWiseDrawer drawer(image1, image2);
+  drawer.set_viz_params(scale, scale, PairWiseDrawer::CatH);
+
+
+  // Transform matches to an array of indices.
+  const auto M = to_tensor(matches);
+
+  // ==========================================================================
+  // Image coordinates.
+  const auto to_double = [](const float& src) { return double(src); };
+  const auto& f1 = features(keys1);
+  const auto& f2 = features(keys2);
+  const auto p1 = extract_centers(f1).cwise_transform(to_double);
+  const auto p2 = extract_centers(f2).cwise_transform(to_double);
+
+  const auto P1 = homogeneous(p1);
+  const auto P2 = homogeneous(p2);
+
+  double num_samples = 1000;
+  const auto [F, num_inliers, sample_best] = ransac(
+      M, P1, P2, FEstimator{}, EpipolarDistance{}, num_samples, f_err_thresh);
+
+  SARA_CHECK(F);
+  SARA_CHECK(num_inliers);
+  SARA_CHECK(matches.size());
+
+  // Visualize the best sample drawn by RANSAC.
+  constexpr auto L = EightPointAlgorithm::num_points;
+  const auto s_best = sample_best.reshape(Vector2i{1, L});
+  const auto I = to_point_indices(s_best, M);
+  const auto P = to_coordinates(I, P1, P2).transpose({0, 2, 1, 3});
+
+  // Extract the points.
+  const Matrix<double, 3, 8> X = P[0][0].colmajor_view().matrix();
+  const Matrix<double, 3, 8> Y = P[0][1].colmajor_view().matrix();
+
+  // Project X to the right image.
+  Matrix<double, 3, 8> proj_X = F.matrix() * X;
+  proj_X.array().rowwise() /= proj_X.row(2).array();
+
+  // Project Y to the left image.
+  Matrix<double, 3, 8> proj_Y = F.matrix().transpose() * Y;
+  proj_Y.array().rowwise() /= proj_Y.row(2).array();
+
+  drawer.display_images();
+
+  for (size_t i = 0; i < 8; ++i)
+  {
+    // Draw the best elemental subset drawn by RANSAC.
+    drawer.draw_match(matches[sample_best(i)], Red8, true);
+
+    // Draw the corresponding epipolar lines.
+    drawer.draw_line_from_eqn(1, proj_X.col(i).cast<float>(), Magenta8, 1);
+    drawer.draw_line_from_eqn(0, proj_Y.col(i).cast<float>(), Magenta8, 1);
+  }
+  get_key();
+
+  for (size_t i = 0; i < matches.size(); ++i)
+  {
+    const Vector3d X1 = matches[i].x_pos().cast<double>().homogeneous();
+    const Vector3d X2 = matches[i].y_pos().cast<double>().homogeneous();
+
+    if (epipolar_distance(F, X1, X2) > f_err_thresh)
+      continue;
+
+    if (i % 100 == 0)
+    {
+      drawer.draw_match(matches[i], Blue8, false);
+
+      const auto proj_X1 = F.right_epipolar_line(X1);
+      const auto proj_X2 = F.left_epipolar_line(X2);
+
+      drawer.draw_line_from_eqn(0, proj_X2.cast<float>(), Cyan8, 1);
+      drawer.draw_line_from_eqn(1, proj_X1.cast<float>(), Cyan8, 1);
+    }
+  }
+
+  get_key();
+  close_window();
+}
 
 void estimate_essential_matrix(const Image<Rgb8>& image1,
                                const Image<Rgb8>& image2,
@@ -938,7 +941,6 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
     const Vector3d X2 = matches[i].y_pos().cast<double>().homogeneous();
 
     // inlier predicate.
-    //if (epipolar_distance(E, K1_inv * X1, K2_inv * X2) > e_err_thresh)
     if (epipolar_distance(F, X1, X2) > e_err_thresh)
       continue;
 
@@ -956,6 +958,19 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
 
   get_key();
   close_window();
+
+
+  // Check the cheirality filter.
+  const auto candidate_motions = extract_relative_motion_horn(E);
+
+  auto geometries = std::vector<TwoViewGeometry>{};
+  std::transform(std::begin(candidate_motions), std::end(candidate_motions),
+                 std::back_inserter(geometries), [&](const Motion& m) {
+                   return two_view_geometry(m, K1_inv * X, K2_inv * Y);
+                 });
+  remove_cheirality_inconsistent_geometries(geometries);
+
+  SARA_CHECK(geometries.size());
 }
 
 
@@ -976,13 +991,14 @@ GRAPHICS_MAIN()
 
   const auto matches = compute_matches(keys1, keys2);
 
-  //estimate_homography_old(image1, image2, keys1, keys2, matches);
-  estimate_homography(image1, image2, keys1, keys2, matches);
-
+#ifdef DEBUG
+  estimate_homography_old(image1, image2, keys1, keys2, matches);
   estimate_fundamental_matrix_old(image1, image2, keys1, keys2, matches);
-  estimate_fundamental_matrix(image1, image2, keys1, keys2, matches);
-
   estimate_essential_matrix_old(image1, image2, K1, K2, keys1, keys2, matches);
+#endif
+
+  // estimate_homography(image1, image2, keys1, keys2, matches);
+  // estimate_fundamental_matrix(image1, image2, keys1, keys2, matches);
   estimate_essential_matrix(image1, image2, K1, K2, keys1, keys2, matches);
 
   return 0;
