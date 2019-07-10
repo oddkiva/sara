@@ -12,6 +12,7 @@
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/Math/JenkinsTraub.hpp>
 #include <DO/Sara/MultiViewGeometry/Estimators/EssentialMatrixEstimators.hpp>
+#include <DO/Sara/MultiViewGeometry/Geometry/PinholeCamera.hpp>
 
 //#define SHOW_DEBUG_LOG
 
@@ -400,7 +401,8 @@ auto SteweniusFivePointAlgorithm::find_essential_matrices(
   const auto E_constraints = build_essential_matrix_constraints(E_expr);
 
   // 3. Solve the epipolar constraints.
-  return solve_essential_matrix_constraints(E_bases, E_constraints);
+  const auto Es = solve_essential_matrix_constraints(E_bases, E_constraints);
+  return Es;
 }
 
 } /* namespace DO::Sara */

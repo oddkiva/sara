@@ -9,14 +9,16 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/MultiViewGeometry/Estimators/Triangulation.hpp>
 
 
 namespace DO::Sara {
 
-auto triangulate_linear_eigen(const Matrix34d& P1, const Matrix34d& P2,
-                              const Vector3d& u1, const Vector3d& u2)
-    -> Vector4d
+auto triangulate_single_point_linear_eigen(const Matrix34d& P1,
+                                           const Matrix34d& P2,
+                                           const Vector3d& u1,
+                                           const Vector3d& u2) -> Vector4d
 {
   Matrix<double, 6, 6> M = Matrix<double, 6, 6>::Zero(6, 6);
 
@@ -31,6 +33,17 @@ auto triangulate_linear_eigen(const Matrix34d& P1, const Matrix34d& P2,
   JacobiSVD<MatrixXd> svd(M, Eigen::ComputeFullV);
   const MatrixXd& V = svd.matrixV();
   return V.col(5).head(4) / V(3, 5);
+}
+
+auto triangulate_linear_eigen(const Matrix34d& P1, const Matrix34d& P2,
+                              const MatrixXd& u1, const MatrixXd& u2)
+    -> MatrixXd
+{
+  auto X = MatrixXd{4, u1.cols()};
+  for (int i = 0; i < u1.cols(); ++i)
+    X.col(i) = triangulate_single_point_linear_eigen(
+        P1, P2, Vector3d{u1.col(i)}, Vector3d{u2.col(i)});
+  return X;
 }
 
 } /* namespace DO::Sara */

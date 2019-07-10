@@ -29,9 +29,9 @@ struct PinholeCamera
     return K * Rt;
   }
 
-  Eigen::Matrix3d K;
-  Eigen::Matrix3d R;
-  Eigen::Vector3d t;
+  Eigen::Matrix3d K{Eigen::Matrix3d::Identity()};
+  Eigen::Matrix3d R{Eigen::Matrix3d::Identity()};
+  Eigen::Vector3d t{Eigen::Vector3d::Zero()};
 };
 
 inline auto normalized_camera(const Eigen::Matrix3d& R,
@@ -40,7 +40,7 @@ inline auto normalized_camera(const Eigen::Matrix3d& R,
   return PinholeCamera{Eigen::Matrix3d::Identity(), R, t};
 }
 
-inline auto normalized_camera(const Motion& m)
+inline auto normalized_camera(const Motion& m = Motion{})
 {
   return PinholeCamera{Eigen::Matrix3d::Identity(), m.R, m.t};
 }

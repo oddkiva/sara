@@ -11,9 +11,11 @@
 
 #define BOOST_TEST_MODULE "MultiViewGeometry/Essential Matrix"
 
+#include <DO/Sara/Core/Numpy.hpp>
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/MultiViewGeometry/DataTransformations.hpp>
 #include <DO/Sara/MultiViewGeometry/Estimators/EssentialMatrixEstimators.hpp>
+#include <DO/Sara/MultiViewGeometry/Estimators/Triangulation.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/PinholeCamera.hpp>
 #include <DO/Sara/MultiViewGeometry/Utilities.hpp>
 
