@@ -9,6 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include <DO/Sara/FileSystem.hpp>
+#include <DO/Sara/Features.hpp>
 #include <DO/Sara/MultiViewGeometry/EpipolarGraph.hpp>
 
 
@@ -32,7 +34,7 @@ auto PhotoAttributes::list_images(const std::string& dirpath) -> void
       [&](const std::string& image_path) { return basename(image_path); });
 }
 
-auto PhotoAttributes::read_keypoints(H5File& h5_file)
+auto PhotoAttributes::read_keypoints(H5File& h5_file) -> void
 {
   if (!keypoints.empty())
     keypoints.clear();
@@ -41,7 +43,7 @@ auto PhotoAttributes::read_keypoints(H5File& h5_file)
   std::transform(std::begin(group_names), std::end(group_names),
                  std::back_inserter(keypoints),
                  [&](const std::string& group_name) {
-                   return read_keypoints(h5_file, group_name);
+                   return DO::Sara::read_keypoints(h5_file, group_name);
                  });
 }
 
@@ -59,7 +61,7 @@ auto EpipolarEdgeAttributes::initialize_edges(int num_vertices) -> void
   edges.reserve(N * (N - 1) / 2);
   for (int i = 0; i < N; ++i)
     for (int j = i + 1; j < N; ++j)
-      edges.emplace_back(i, j, Eigen::Matrix3d::Zero());
+      edges.push_back(EpipolarEdge{i, j, Eigen::Matrix3d::Zero()});
 }
 
 auto EpipolarEdgeAttributes::read_matches(

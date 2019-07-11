@@ -16,6 +16,7 @@
 #include <DO/Sara/Core/HDF5.hpp>
 #include <DO/Sara/Core/Image.hpp>
 #include <DO/Sara/Features/KeypointList.hpp>
+#include <DO/Sara/Match.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/PinholeCamera.hpp>
 
 #include <memory>

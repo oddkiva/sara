@@ -18,7 +18,6 @@
 #include <DO/Sara/MultiViewGeometry.hpp>
 #include <DO/Sara/MultiViewGeometry/Datasets/Strecha.hpp>
 #include <DO/Sara/MultiViewGeometry/EpipolarGraph.hpp>
-#include <DO/Sara/SfM/Detectors/SIFT.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
@@ -141,8 +140,11 @@ void estimate_essential_matrices(const std::string& dirpath, const std::string& 
   auto h5_file = sara::H5File{h5_filepath, H5F_ACC_RDWR};
 
   auto photo_attributes = sara::PhotoAttributes{};
-  pose_attributes.list_images(dirpath);
-  pose_attributes.load_keypoints(h5_file);
+  photo_attributes.list_images(dirpath);
+  photo_attributes.read_keypoints(h5_file);
+  const auto& image_paths = photo_attributes.image_paths;
+  const auto& group_names = photo_attributes.group_names;
+  const auto& keypoints = photo_attributes.keypoints;
 
   auto K_invs = std::vector<Eigen::Matrix3d>{};
   K_invs.reserve(group_names.size());
@@ -156,7 +158,7 @@ void estimate_essential_matrices(const std::string& dirpath, const std::string& 
 
   const auto num_photos = int(photo_attributes.image_paths.size());
 
-  auto f_edge_attributes = EpipolarEdgeAttributes{};
+  auto f_edge_attributes = sara::EpipolarEdgeAttributes{};
   f_edge_attributes.initialize_edges(num_photos);
   f_edge_attributes.read_matches(h5_file, photo_attributes);
 
@@ -165,6 +167,9 @@ void estimate_essential_matrices(const std::string& dirpath, const std::string& 
 
   auto e_edge_attributes = f_edge_attributes;
 
+  const auto& matches = e_edge_attributes.matches;
+
+  auto& e_edge_ids = e_edge_attributes.edge_ids;
   auto& e_edges = e_edge_attributes.edges;
   auto& e_noise = e_edge_attributes.noise;
   auto& e_num_inliers = e_edge_attributes.num_inliers;
@@ -173,12 +178,12 @@ void estimate_essential_matrices(const std::string& dirpath, const std::string& 
   // Preallocate space.
   e_noise.resize(e_edge_ids.size());
   e_num_inliers.resize(e_edge_ids.size());
-  e_best_sample.resize(int(e_edge_ids.size()), ESolver::num_points);
+  e_best_samples.resize(int(e_edge_ids.size()), ESolver::num_points);
 
   const auto num_samples = 1000;
   const auto e_err_thres = 5e-3;
   std::for_each(
-      std::begin(edge_ids), std::end(edge_ids),
+      std::begin(e_edge_ids), std::end(e_edge_ids),
       [&](const auto& edge_id) {
         auto& e_edge = e_edges[edge_id];
         const auto i = e_edge.i;
@@ -210,10 +215,10 @@ void estimate_essential_matrices(const std::string& dirpath, const std::string& 
       });
 
   // Save E-edges.
-  h5_file.write_dataset("e_edges", tensor_view(e_edges));
-  h5_file.write_dataset("e_num_inliers", tensor_view(e_num_inliers));
-  h5_file.write_dataset("e_best_samples", tensor_view(e_best_samples));
-  h5_file.write_dataset("e_noise", tensor_view(e_noise));
+  h5_file.write_dataset("e_edges", sara::tensor_view(e_edges));
+  h5_file.write_dataset("e_num_inliers", sara::tensor_view(e_num_inliers));
+  h5_file.write_dataset("e_best_samples", e_best_samples);
+  h5_file.write_dataset("e_noise", sara::tensor_view(e_noise));
 }
 
 
