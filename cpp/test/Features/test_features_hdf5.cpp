@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(test_hdf5_read_write_array)
   {
     auto h5file = H5File{filepath, H5F_ACC_TRUNC};
 
-    const auto group = h5file.group("0");
+    const auto group = h5file.get_group("0");
 
     // Create dummy features.
     auto features = Tensor_<OERegion, 1>{4};

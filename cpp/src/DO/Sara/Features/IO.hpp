@@ -117,11 +117,13 @@ namespace DO { namespace Sara {
   }
 
   inline auto write_keypoints(H5File& h5_file, const std::string& group_name,
-                              const KeypointList<OERegion, float>& keys)
+                              const KeypointList<OERegion, float>& keys,
+                              bool overwrite = false)
   {
     const auto& [f, v] = keys;
-    h5_file.write_dataset(group_name + "/" + "features", tensor_view(f));
-    h5_file.write_dataset(group_name + "/" + "descriptors", v);
+    h5_file.write_dataset(group_name + "/" + "features", tensor_view(f),
+                          overwrite);
+    h5_file.write_dataset(group_name + "/" + "descriptors", v, overwrite);
   }
 
   //! @}

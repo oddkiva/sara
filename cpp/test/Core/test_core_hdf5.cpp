@@ -26,22 +26,85 @@ BOOST_AUTO_TEST_CASE(test_hdf5_read_write_array)
   const auto filepath = (fs::temp_directory_path() / "test.h5").string();
 
   // Write data to HDF5.
+  SARA_DEBUG << "WRITE PHASE" << std::endl;
   {
     auto h5file = H5File{filepath, H5F_ACC_TRUNC};
 
-    h5file.group("some_group");
+    {
+      const auto group = h5file.find_group("some_group");
+      BOOST_CHECK(group == nullptr);
+    }
+    h5file.get_group("some_group");
+    {
+      const auto group = h5file.find_group("some_group");
+      BOOST_CHECK(group != nullptr);
+    }
 
     auto array = Tensor_<float, 2>{3, 2};
     array.matrix() <<
       1, 2,
       3, 4,
       5, 6;
+
+    {
+      const auto dataset = h5file.find_dataset("some_group/array");
+      BOOST_CHECK(dataset == nullptr);
+
+      BOOST_CHECK_THROW(h5file.delete_dataset("some_group/array"),
+                        std::exception);
+    }
+
     h5file.write_dataset("some_group/array", array);
+    BOOST_CHECK_THROW(
+        h5file.write_dataset("some_group/array", array, /* overwrite */ false),
+        std::runtime_error);
+    h5file.write_dataset("some_group/array", array, /* overwrite */ true);
+    {
+      const auto dataset = h5file.find_dataset("some_group/array");
+      BOOST_CHECK(dataset != nullptr);
+
+      const auto dataset_sizes = h5file.read_dataset_sizes(*dataset);
+      BOOST_CHECK(dataset_sizes.cast<int>() == Vector2i(3, 2));
+    }
+
+    // Delete the dataset and check the file.
+    h5file.delete_dataset("some_group/array");
+    {
+      const auto dataset = h5file.find_dataset("some_group/array");
+      BOOST_CHECK(dataset == nullptr);
+    }
+
+    // Rewrite it again.
+    h5file.write_dataset("some_group/array", array);
+    {
+      const auto dataset = h5file.find_dataset("some_group/array");
+      BOOST_CHECK(dataset != nullptr);
+    }
   }
 
   // Read data from from HDF5.
+  SARA_DEBUG << "READ PHASE" << std::endl;
   {
     auto h5file = H5File{filepath, H5F_ACC_RDONLY};
+
+    // Check that the group exists.
+    {
+      const auto group = h5file.find_group("some_group");
+      BOOST_CHECK(group != nullptr);
+    }
+    // Check that the dataset exists.
+    {
+      const auto dataset = h5file.find_dataset("some_group/array");
+      BOOST_CHECK(dataset != nullptr);
+
+      // Check that we cannot delete it because the file is open in READ-ONLY
+      // mode.
+      BOOST_CHECK_THROW(h5file.delete_dataset("some_group/array"),
+                        std::runtime_error);
+
+      const auto dataset_sizes = h5file.read_dataset_sizes(*dataset);
+      BOOST_CHECK(dataset_sizes.cast<int>() == Vector2i(3, 2));
+    }
 
     auto array = Tensor_<float, 2>{3, 2};
     h5file.read_dataset("some_group/array", array);

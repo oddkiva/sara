@@ -130,24 +130,33 @@ auto check_epipolar_constraints(const sara::Image<sara::Rgb8>& Ii,
   //get_key();
 }
 
-void estimate_fundamental_matrices(const std::string& dirpath, const std::string& h5_filepath)
+void estimate_fundamental_matrices(const std::string& dirpath,
+                                   const std::string& h5_filepath,
+                                   bool overwrite)
 {
   // Create a backup.
   if (!fs::exists(h5_filepath + ".bak"))
     sara::cp(h5_filepath, h5_filepath + ".bak");
 
+  SARA_DEBUG << "Opening file " << h5_filepath << "..." << std::endl;
   auto h5_file = sara::H5File{h5_filepath, H5F_ACC_RDWR};
 
   auto photo_attributes = sara::PhotoAttributes{};
+  SARA_DEBUG << "Listing images from:\n\t" << dirpath << std::endl;
   photo_attributes.list_images(dirpath);
+  SARA_DEBUG << "Reading keypoints from HDF5 file:\n\t" << h5_filepath << std::endl;
   photo_attributes.read_keypoints(h5_file);
   const auto& image_paths = photo_attributes.image_paths;
   const auto& keypoints = photo_attributes.keypoints;
 
   const auto num_vertices = int(photo_attributes.image_paths.size());
+  SARA_CHECK(num_vertices);
 
   auto f_edge_attributes = sara::EpipolarEdgeAttributes{};
+  SARA_DEBUG << "Initializing the epipolar edges..." << std::endl;
   f_edge_attributes.initialize_edges(num_vertices);
+
+  SARA_DEBUG << "Reading matches from HDF5 file:\n\t" << h5_filepath << std::endl;
   f_edge_attributes.read_matches(h5_file, photo_attributes);
 
   const auto& f_edge_ids = f_edge_attributes.edge_ids;
@@ -163,6 +172,10 @@ void estimate_fundamental_matrices(const std::string& dirpath, const std::string
   f_noise.resize(f_edge_ids.size());
   f_num_inliers.resize(f_edge_ids.size());
   f_best_samples.resize(int(f_edge_ids.size()), FSolver::num_points);
+  SARA_DEBUG << "OK" << std::endl;
+
+  SARA_CHECK(f_edge_ids.size());
+  SARA_CHECK(f_edges.size());
 
   const auto num_samples = 1000;
   const auto f_err_thres = 5e-3;
@@ -175,9 +188,19 @@ void estimate_fundamental_matrices(const std::string& dirpath, const std::string
         const auto& ki = keypoints[i];
         const auto& kj = keypoints[j];
 
+        SARA_DEBUG << "Calculating fundamental matrices between images:\n"
+                   << "- image[" << i
+                   << "] = " << photo_attributes.group_names[i] << "\n"
+                   << "- image[" << j
+                   << "] = " << photo_attributes.group_names[j] << "\n";
+        std::cout.flush();
+
         // Estimate the fundamental matrix.
         const auto [F, num_inliers, best_sample] =
             estimate_fundamental_matrix(Mij, ki, kj, num_samples, f_err_thres);
+        SARA_DEBUG << "F = \n" << F << std::endl;
+        SARA_CHECK(num_inliers);
+        SARA_CHECK(best_sample.row_vector());
 
         // Debug.
         const int display_step = 20;
@@ -194,10 +217,11 @@ void estimate_fundamental_matrices(const std::string& dirpath, const std::string
       });
 
   // Save F-f_edges.
-  h5_file.write_dataset("f_edges", sara::tensor_view(f_edges));
-  h5_file.write_dataset("f_num_inliers", sara::tensor_view(f_num_inliers));
-  h5_file.write_dataset("f_best_samples", f_best_samples);
-  h5_file.write_dataset("f_noise", sara::tensor_view(f_noise));
+  h5_file.write_dataset("f_edges", sara::tensor_view(f_edges), overwrite);
+  h5_file.write_dataset("f_num_inliers", sara::tensor_view(f_num_inliers),
+                        overwrite);
+  h5_file.write_dataset("f_best_samples", f_best_samples, overwrite);
+  h5_file.write_dataset("f_noise", sara::tensor_view(f_noise), overwrite);
 }
 
 
@@ -210,6 +234,7 @@ int __main(int argc, char **argv)
         ("help, h", "Help screen")                                     //
         ("dirpath", po::value<std::string>(), "Image directory path")  //
         ("out_h5_file", po::value<std::string>(), "Output HDF5 file")  //
+        ("overwrite", "Overwrite fundamental matrices and meta data")  //
         ("read", "Visualize detected keypoints")  //
         ;
 
@@ -237,7 +262,9 @@ int __main(int argc, char **argv)
 
     const auto dirpath = vm["dirpath"].as<std::string>();
     const auto h5_filepath = vm["out_h5_file"].as<std::string>();
-    estimate_fundamental_matrices(dirpath, h5_filepath);
+    const auto overwrite = vm.count("overwrite");
+
+    estimate_fundamental_matrices(dirpath, h5_filepath, overwrite);
 
     return 0;
   }

@@ -153,6 +153,12 @@ namespace DO::Sara {
 
 struct H5File
 {
+  using vector_type = Matrix<hsize_t, Dynamic, 1>;
+
+  template <int Rank>
+  using fixed_vector_type = Eigen::Matrix<hsize_t, Rank, 1>;
+
+
   H5File() = default;
 
   explicit H5File(const std::string& filename, unsigned int flags)
@@ -165,21 +171,59 @@ struct H5File
     file->close();
   }
 
-  auto group(const std::string& group_name)
+  auto find_group(const std::string& group_name)
   {
-    auto group_it = groups.find(group_name);
-    if (group_it != groups.end())
-      return group_it->second;
-
-    auto group = std::shared_ptr<H5::Group>{
-        new H5::Group{file->createGroup(group_name)}};
-    groups[group_name] = group;
+    auto group = std::unique_ptr<H5::Group>{};
+    if (H5Lexists(file->getId(), group_name.c_str(), H5P_DEFAULT) > 0)
+      group.reset(new H5::Group{file->openGroup(group_name)});
     return group;
+  }
+
+  auto get_group(const std::string& group_name)
+  {
+    auto group = find_group(group_name);
+    if (group == nullptr)
+      group.reset(new H5::Group{file->createGroup(group_name)});
+    return group;
+  }
+
+  auto find_dataset(const std::string& dataset_name)
+  {
+    auto dataset = std::unique_ptr<H5::DataSet>{};
+    if (H5Lexists(file->getId(), dataset_name.c_str(), H5P_DEFAULT) > 0)
+    {
+      SARA_DEBUG << "Find dataset " << dataset_name << "..." << std::endl;
+      dataset.reset(new H5::DataSet{file->openDataSet(dataset_name)});
+    }
+    return dataset;
+  }
+
+  auto read_dataset_sizes(const H5::DataSpace& file_data_space)
+  {
+    // File data space.
+    auto file_data_rank = file_data_space.getSimpleExtentNdims();
+#ifdef DEBUG
+    SARA_DEBUG << "file data rank = " << file_data_rank << std::endl;
+#endif
+
+    auto file_data_dims = vector_type(file_data_rank);
+    file_data_space.getSimpleExtentDims(file_data_dims.data(), nullptr);
+#ifdef DEBUG
+    SARA_DEBUG << "file data dims = " << file_data_dims.transpose()
+               << std::endl;
+#endif
+    return file_data_dims;
+  }
+
+  auto read_dataset_sizes(const H5::DataSet& dataset)
+  {
+    return read_dataset_sizes(dataset.getSpace());
   }
 
   template <typename T, int Rank>
   auto write_dataset(const std::string& dataset_name,
-                     const DO::Sara::TensorView_<T, Rank>& data)
+                     const DO::Sara::TensorView_<T, Rank>& data,
+                     bool overwrite = false)
   {
     const auto data_type = CalculateH5Type<T>::value();
 
@@ -189,8 +233,17 @@ struct H5File
                    [](auto val) { return hsize_t(val); });
     const auto data_space = H5::DataSpace{Rank, data_dims.data()};
 
-    auto dataset = file->createDataSet(dataset_name, data_type, data_space);
-    dataset.write(data.data(), data_type);
+    auto dataset = find_dataset(dataset_name);
+    if (dataset != nullptr && overwrite)
+      delete_dataset(dataset_name);
+
+    if (!overwrite && dataset != nullptr)
+      throw std::runtime_error{"Error: dataset \"" + dataset_name +
+                               "\" exists but overwriting is not permitted!"};
+
+    dataset.reset(new H5::DataSet{
+        file->createDataSet(dataset_name, data_type, data_space)});
+    dataset->write(data.data(), data_type);
 
     return dataset;
   }
@@ -198,26 +251,22 @@ struct H5File
   template <typename T>
   auto read_dataset(const std::string& dataset_name, std::vector<T>& data)
   {
-    using vector_type = Matrix<hsize_t, 1, Dynamic>;
     auto dataset = H5::DataSet(file->openDataSet(dataset_name));
 
     // File data space.
     auto file_data_space = dataset.getSpace();
-    auto file_data_rank = file_data_space.getSimpleExtentNdims();
-    SARA_DEBUG << "file data rank = " << file_data_rank << std::endl;
-
-    auto file_data_dims = vector_type(file_data_rank);
-    file_data_space.getSimpleExtentDims(file_data_dims.data(), nullptr);
-    SARA_DEBUG << "file data dims = " << file_data_dims.transpose()
-               << std::endl;
+    const auto file_data_dims = read_dataset_sizes(file_data_space);
+    const auto file_data_rank = int(file_data_dims.size());
 
     // Select the portion of the file data.
     const vector_type file_offset = vector_type::Zero(file_data_rank);
     const auto file_count = file_data_dims;
     file_data_space.selectHyperslab(H5S_SELECT_SET, file_count.data(),
                                     file_offset.data());
+#ifdef DEBUG
     SARA_DEBUG << "Selected src offset = " << file_offset << std::endl;
     SARA_DEBUG << "Selected src count = " << file_count << std::endl;
+#endif
 
     // Select the portion of the destination data.
     const vector_type dst_offset = vector_type::Zero(file_data_rank);
@@ -227,12 +276,10 @@ struct H5File
                               dst_offset.data());
 
     // Resize the data.
-    auto data_sizes = std::vector<size_t>(file_data_rank);
-    for (auto i = 0; i < file_data_rank; ++i)
-      data_sizes[i] = dst_count[i];
-    const auto data_flat_size =
-        std::accumulate(data_sizes.begin(), data_sizes.end(), size_t(1),
-                        std::multiplies<size_t>());
+    const auto data_sizes = dst_count.template cast<size_t>().eval();
+    const auto data_flat_size = std::accumulate(
+        data_sizes.data(), data_sizes.data() + data_sizes.size(), size_t(1),
+        std::multiplies<size_t>());
     data.resize(data_flat_size);
 
     // Read the data.
@@ -243,48 +290,56 @@ struct H5File
   template <typename T, int Rank>
   auto read_dataset(const std::string& dataset_name, Tensor_<T, Rank>& data)
   {
-    using vector_type = Eigen::Matrix<hsize_t, Rank, 1>;
-
     auto dataset = H5::DataSet(file->openDataSet(dataset_name));
 
     // File data space.
     auto file_data_space = dataset.getSpace();
+#ifdef DEBUG
     auto file_data_rank = file_data_space.getSimpleExtentNdims();
     SARA_DEBUG << "file data rank = " << file_data_rank << std::endl;
+#endif
 
-    auto file_data_dims = vector_type{};
+    auto file_data_dims = fixed_vector_type<Rank>{};
     file_data_space.getSimpleExtentDims(file_data_dims.data(), nullptr);
+#ifdef DEBUG
     SARA_DEBUG << "file data dims = " << file_data_dims.transpose()
                << std::endl;
+#endif
 
     // Select the portion of the file data.
-    const vector_type file_offset = vector_type::Zero();
+    const fixed_vector_type<Rank> file_offset = fixed_vector_type<Rank>::Zero();
     const auto file_count = file_data_dims;
     file_data_space.selectHyperslab(H5S_SELECT_SET, file_count.data(),
                                     file_offset.data());
+#ifdef DEBUG
     SARA_DEBUG << "Selected src offset = " << file_offset.transpose()
                << std::endl;
     SARA_DEBUG << "Selected src count = " << file_count.transpose() << std::endl;
+#endif
 
     // Select the portion of the destination data.
-    const vector_type dst_offset = vector_type::Zero();
+    const fixed_vector_type<Rank> dst_offset = fixed_vector_type<Rank>::Zero();
     const auto dst_count = file_data_dims;
     const auto dst_space = H5::DataSpace{Rank, dst_count.data()};
     dst_space.selectHyperslab(H5S_SELECT_SET, dst_count.data(),
                               dst_offset.data());
 
     // Resize the data.
-    auto data_sizes = typename DO::Sara::Tensor_<T, Rank>::vector_type{};
-    for (int i = 0; i < Rank; ++i)
-      data_sizes[i] = dst_count[i];
-    data.resize(data_sizes);
+    data.resize(dst_count.template cast<int>().eval());
 
     // Read the data.
     dataset.read(data.data(), calculate_h5_type<T>(), dst_space,
                  file_data_space);
   }
 
-  std::map<std::string, std::shared_ptr<H5::Group>> groups;
+  auto delete_dataset(const std::string& dataset_name) -> void
+  {
+    int result = H5Ldelete(file->getId(), dataset_name.c_str(), H5P_DEFAULT);
+    if (result < 0)
+      throw std::runtime_error{"Error: could not delete dataset: " +
+                               dataset_name};
+  }
+
   std::shared_ptr<H5::H5File> file;
 };
 

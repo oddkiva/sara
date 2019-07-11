@@ -160,39 +160,45 @@ namespace DO { namespace Sara {
     }
     //! @}
 
+    //! @brief Check if the MultiArray object is empty.
+    inline auto empty() const -> bool
+    {
+      return _end - _begin == 0;
+    }
+
     //! @brief Return the size vector of the MultiArray object.
-    const vector_type& sizes() const
+    inline const vector_type& sizes() const
     {
       return _sizes;
     }
 
     //! @brief Return the number of elements in the internal data array.
-    size_type size() const
+    inline size_type size() const
     {
       return _end - _begin;
     }
 
     //! @brief Return the size of the MultiArray object along the i-th
     //! dimension.
-    int size(int i) const
+    inline int size(int i) const
     {
       return _sizes[i];
     }
 
     //! @brief Return the number of rows.
-    int rows() const
+    inline int rows() const
     {
       return _sizes[0];
     }
 
     //! @brief Return the number of cols.
-    int cols() const
+    inline int cols() const
     {
       return _sizes[1];
     }
 
     //! @brief Return the depth size.
-    int depth() const
+    inline int depth() const
     {
       return _sizes[2];
     }

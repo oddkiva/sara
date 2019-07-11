@@ -131,7 +131,8 @@ auto check_epipolar_constraints(const sara::Image<sara::Rgb8>& Ii,
   //get_key();
 }
 
-void estimate_essential_matrices(const std::string& dirpath, const std::string& h5_filepath)
+void estimate_essential_matrices(const std::string& dirpath,
+                                 const std::string& h5_filepath, bool overwrite)
 {
   // Create a backup.
   if (!fs::exists(h5_filepath + ".bak"))
@@ -215,10 +216,11 @@ void estimate_essential_matrices(const std::string& dirpath, const std::string& 
       });
 
   // Save E-edges.
-  h5_file.write_dataset("e_edges", sara::tensor_view(e_edges));
-  h5_file.write_dataset("e_num_inliers", sara::tensor_view(e_num_inliers));
-  h5_file.write_dataset("e_best_samples", e_best_samples);
-  h5_file.write_dataset("e_noise", sara::tensor_view(e_noise));
+  h5_file.write_dataset("e_edges", sara::tensor_view(e_edges), overwrite);
+  h5_file.write_dataset("e_num_inliers", sara::tensor_view(e_num_inliers),
+                        overwrite);
+  h5_file.write_dataset("e_best_samples", e_best_samples, overwrite);
+  h5_file.write_dataset("e_noise", sara::tensor_view(e_noise), overwrite);
 }
 
 
@@ -231,7 +233,8 @@ int __main(int argc, char **argv)
         ("help, h", "Help screen")                                     //
         ("dirpath", po::value<std::string>(), "Image directory path")  //
         ("out_h5_file", po::value<std::string>(), "Output HDF5 file")  //
-        ("read", "Visualize detected keypoints")  //
+        ("overwrite", "Overwrite essential matrices and metadata")     //
+        ("read", "Visualize detected keypoints")                       //
         ;
 
     po::variables_map vm;
@@ -258,7 +261,8 @@ int __main(int argc, char **argv)
 
     const auto dirpath = vm["dirpath"].as<std::string>();
     const auto h5_filepath = vm["out_h5_file"].as<std::string>();
-    estimate_essential_matrices(dirpath, h5_filepath);
+    const auto overwrite = vm.count("overwrite");
+    estimate_essential_matrices(dirpath, h5_filepath, overwrite);
 
     return 0;
   }

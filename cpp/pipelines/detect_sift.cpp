@@ -29,7 +29,7 @@ namespace sara = DO::Sara;
 
 
 void detect_keypoints(const std::string& dirpath,
-                      const std::string& h5_filepath)
+                      const std::string& h5_filepath, bool overwrite)
 {
   auto h5_file = sara::H5File{h5_filepath, H5F_ACC_TRUNC};
 
@@ -46,10 +46,10 @@ void detect_keypoints(const std::string& dirpath,
         const auto keys = sara::compute_sift_keypoints(image);
 
         const auto group_name = sara::basename(path);
-        h5_file.group(group_name);
+        h5_file.get_group(group_name);
 
         SARA_DEBUG << "Saving SIFT keypoints of " << path << "..." << std::endl;
-        write_keypoints(h5_file, group_name, keys);
+        write_keypoints(h5_file, group_name, keys, overwrite);
       });
 }
 
@@ -101,7 +101,8 @@ int __main(int argc, char **argv)
         ("help, h", "Help screen")                                     //
         ("dirpath", po::value<std::string>(), "Image directory path")  //
         ("out_h5_file", po::value<std::string>(), "Output HDF5 file")  //
-        ("read", "Visualize detected keypoints")  //
+        ("overwrite", "Overwrite keypoints")                           //
+        ("read", "Visualize detected keypoints")                       //
         ;
 
     po::variables_map vm;
@@ -128,10 +129,11 @@ int __main(int argc, char **argv)
 
     const auto dirpath = vm["dirpath"].as<std::string>();
     const auto h5_filepath = vm["out_h5_file"].as<std::string>();
+    const auto overwrite = vm.count("overwrite");
     if (vm.count("read"))
       read_keypoints(dirpath, h5_filepath);
     else
-      detect_keypoints(dirpath, h5_filepath);
+      detect_keypoints(dirpath, h5_filepath, overwrite);
 
     return 0;
   }

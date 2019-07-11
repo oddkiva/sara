@@ -39,7 +39,8 @@ auto match(const sara::KeypointList<sara::OERegion, float>& keys1,
 }
 
 
-void match_keypoints(const std::string& dirpath, const std::string& h5_filepath)
+void match_keypoints(const std::string& dirpath, const std::string& h5_filepath,
+                     bool overwrite)
 {
   // Create a backup.
   if (!fs::exists(h5_filepath + ".bak"))
@@ -104,11 +105,11 @@ void match_keypoints(const std::string& dirpath, const std::string& h5_filepath)
 
         // Save the keypoints to HDF5
         const auto group_name = std::string{"matches"};
-        h5_file.group(group_name);
+        h5_file.get_group(group_name);
 
         const auto match_dataset =
             group_name + "/" + std::to_string(i) + "_" + std::to_string(j);
-        h5_file.write_dataset(match_dataset, tensor_view(Mij));
+        h5_file.write_dataset(match_dataset, tensor_view(Mij), overwrite);
       });
 }
 
@@ -122,7 +123,8 @@ int __main(int argc, char **argv)
         ("help, h", "Help screen")                                     //
         ("dirpath", po::value<std::string>(), "Image directory path")  //
         ("out_h5_file", po::value<std::string>(), "Output HDF5 file")  //
-        ("read", "Visualize detected keypoints")  //
+        ("overwrite", "Overwrite keypoint matches")                    //
+        ("read", "Visualize detected keypoints")                       //
         ;
 
     po::variables_map vm;
@@ -149,7 +151,9 @@ int __main(int argc, char **argv)
 
     const auto dirpath = vm["dirpath"].as<std::string>();
     const auto h5_filepath = vm["out_h5_file"].as<std::string>();
-    match_keypoints(dirpath, h5_filepath);
+    const auto overwrite = vm.count("overwrite");
+
+    match_keypoints(dirpath, h5_filepath, overwrite);
 
     return 0;
   }

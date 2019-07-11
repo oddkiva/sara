@@ -26,4 +26,7 @@ foreach (file ${pipelines_SOURCE_FILES})
     ${HDF5_LIBRARIES})
   target_compile_definitions(${filename} PRIVATE
     -DBOOST_ALL_DYN_LINK -DBOOST_ALL_NO_LIB)
+  set_property(
+      TARGET ${_test_name}
+      PROPERTY FOLDER "DO Sara Pipelines/SfM")
 endforeach ()

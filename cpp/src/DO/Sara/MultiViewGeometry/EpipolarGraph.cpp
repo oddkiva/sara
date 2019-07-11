@@ -49,14 +49,11 @@ auto PhotoAttributes::read_keypoints(H5File& h5_file) -> void
 
 auto EpipolarEdgeAttributes::initialize_edges(int num_vertices) -> void
 {
-  if (!edge_ids.empty())
-    edge_ids.clear();
+  const auto& N = num_vertices;
+  edge_ids = range(N * (N - 1) / 2);
 
   if (!edges.empty())
     edges.clear();
-
-  const auto& N = num_vertices;
-  const auto edge_ids = range(N * (N - 1) / 2);
 
   edges.reserve(N * (N - 1) / 2);
   for (int i = 0; i < N; ++i)

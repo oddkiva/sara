@@ -23,6 +23,20 @@ using namespace DO::Sara;
 
 BOOST_AUTO_TEST_SUITE(TestMultiArrayView)
 
+BOOST_AUTO_TEST_CASE(test_multiarrayview_empty)
+{
+  {
+    auto array_view = MultiArrayView<int, 2>{};
+    BOOST_CHECK(array_view.empty());
+  }
+
+  {
+    auto r = std::vector<int>(3 * 4);
+    auto array_view = MultiArrayView<int, 2>{r.data(), {3, 4}};
+    BOOST_CHECK(!array_view.empty());
+  }
+}
+
 BOOST_AUTO_TEST_CASE(test_multiarrayview_1d)
 {
   auto r = std::vector<int>(10);
@@ -39,6 +53,5 @@ BOOST_AUTO_TEST_CASE(test_multiarrayview_1d)
   for (auto i = 0u; i < const_r_view.size(); ++i)
     BOOST_CHECK_EQUAL(r_view(i), 0);
 }
-
 
 BOOST_AUTO_TEST_SUITE_END()

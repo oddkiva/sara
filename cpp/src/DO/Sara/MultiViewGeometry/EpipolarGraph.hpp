@@ -47,7 +47,7 @@ struct DO_SARA_EXPORT PhotoAttributes
 
 struct DO_SARA_EXPORT EpipolarEdgeAttributes
 {
-  std::vector<int> edge_ids;
+  Tensor_<int, 1> edge_ids;
   std::vector<EpipolarEdge> edges;
   std::vector<std::vector<IndexMatch>> index_matches;
   std::vector<std::vector<Match>> matches;
