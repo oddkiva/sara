@@ -25,3 +25,5 @@ endforeach()
 
 add_subdirectory(Qt3DExample)
 add_subdirectory(Qt3DMinimalExample)
+add_subdirectory(Qt3DMinimalExample2)
+add_subdirectory(Qt3DPointCloud)

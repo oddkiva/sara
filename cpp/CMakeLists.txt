@@ -11,3 +11,5 @@ if (SARA_BUILD_SAMPLES)
 endif ()
 
 add_subdirectory(pipelines)
+
+add_subdirectory(drafts)

@@ -13,6 +13,7 @@
 #include <Qt3DExtras/QOrbitCameraController>
 #include <Qt3DExtras/QPhongMaterial>
 
+
 Qt3DCore::QEntity* createTestScene()
 {
     Qt3DCore::QEntity* root = new Qt3DCore::QEntity;
@@ -54,7 +55,7 @@ int main(int argc, char* argv[])
     manipulator->setLinearSpeed(50.f);
     manipulator->setLookSpeed(180.f);
     manipulator->setCamera(camera);
-    
+
     view.setRootEntity(scene);
     view.show();
 

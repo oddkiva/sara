@@ -58,8 +58,8 @@ flags = [
 "-I", "/usr/include/x86_64-linux-gnu/qt5/QtXml",
 "-I", "/usr/include/x86_64-linux-gnu/qt5/QtSql",
 "-I", "/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64",
-# Boost headers.
-"-I", "/opt/boost-1.66.0/include",
+# Boost and HPX headers in /usr/local.
+"-I", "/usr/local/include",
 # CUDA header directories.
 "-I", "/usr/local/cuda/include",
 # Current header directories.
