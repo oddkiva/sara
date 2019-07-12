@@ -24,3 +24,4 @@ endforeach()
 
 
 add_subdirectory(Qt3DExample)
+add_subdirectory(Qt3DMinimalExample)
