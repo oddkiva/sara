@@ -21,3 +21,6 @@ foreach (file ${examples_SRC_FILES})
     DO_Kalpana_2D DO_Kalpana_3D DO_Kalpana_Math
     Qt5::Widgets Qt5::OpenGL Qt5::OpenGLExtensions)
 endforeach()
+
+
+add_subdirectory(Qt3DExample)
