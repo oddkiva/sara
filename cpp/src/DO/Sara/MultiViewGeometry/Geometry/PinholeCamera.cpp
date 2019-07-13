@@ -14,11 +14,15 @@
 
 namespace DO::Sara {
 
-auto cheirality_predicate(const MatrixXd& X, const Matrix34d& P) -> bool
+auto cheirality_predicate(const MatrixXd& X) -> Array<bool, 1, Dynamic>
 {
-  return ((P * X).row(2).array() > 0).redux([](bool a, bool b) {
-    return a && b;
-  });
+  return X.row(2).array() > 0;
+}
+
+auto relative_motion_cheirality_predicate(const MatrixXd& X, const Matrix34d& P)
+    -> Array<bool, 1, Dynamic>
+{
+  return cheirality_predicate(X) && cheirality_predicate(P * X);
 }
 
 } /* namespace DO::Sara */

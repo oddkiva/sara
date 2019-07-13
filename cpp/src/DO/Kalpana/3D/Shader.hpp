@@ -43,7 +43,7 @@ namespace DO { namespace Kalpana {
 
     bool detach();
 
-    bool use(bool on = true);
+    void use(bool on = true);
 
     bool set_uniform_matrix4f(const char *mat_name, const float* mat_coeffs);
 

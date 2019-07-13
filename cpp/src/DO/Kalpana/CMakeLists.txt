@@ -42,3 +42,5 @@ foreach (library ${DO_Kalpana_LIBRARIES})
       ${DO_Sara_LIBRARIES})
   endif ()
 endforeach ()
+
+target_link_libraries(DO_Kalpana_3D DO_Kalpana_Math)

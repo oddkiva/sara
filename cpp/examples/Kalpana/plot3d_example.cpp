@@ -1,8 +1,10 @@
-#include <iostream>
+#include <DO/Sara/Core.hpp>
+#include <DO/Kalpana.hpp>
 
 #include <QApplication>
+#include <QSurfaceFormat>
 
-#include <DO/Kalpana.hpp>
+#include <iostream>
 
 
 void build_scene(DO::Kalpana::Scene& scene)
@@ -57,13 +59,20 @@ int main(int argc, char **argv)
   using namespace std;
   using namespace DO::Kalpana;
 
+  QSurfaceFormat format;
+  format.setMajorVersion(3);
+  format.setMinorVersion(1);
+  format.setOption(QSurfaceFormat::DebugContext);
+  format.setProfile(QSurfaceFormat::CoreProfile);
+  QSurfaceFormat::setDefaultFormat(format);
+
   QApplication app{ argc, argv };
 
   Scene scene{};
   build_scene(scene);
 
   Canvas3D ax{&scene};
-
+  ax.setFormat(format);
   ax.resize(320, 240);
   ax.show();
 

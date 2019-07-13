@@ -891,7 +891,7 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
 
   const auto M = to_tensor(matches);
 
-  double num_samples = 1000;
+  double num_samples = 100;
   auto distance = EpipolarDistance{};
 
   auto [E, num_inliers, sample_best] =
@@ -930,8 +930,8 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
     drawer.draw_match(matches[sample_best(i)], Yellow8, true);
 
     // Draw the corresponding epipolar lines.
-    drawer.draw_line_from_eqn(1, proj_X.col(i).cast<float>(), Magenta8, 1);
-    drawer.draw_line_from_eqn(0, proj_Y.col(i).cast<float>(), Magenta8, 1);
+    drawer.draw_line_from_eqn(1, proj_X.col(i).cast<float>(), Red8, 1);
+    drawer.draw_line_from_eqn(0, proj_Y.col(i).cast<float>(), Red8, 1);
   }
 
   // Draw the inliers.
@@ -956,9 +956,6 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
     }
   }
 
-  get_key();
-  close_window();
-
 
   // Check the cheirality filter.
   const auto candidate_motions = extract_relative_motion_horn(E);
@@ -968,9 +965,97 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
                  std::back_inserter(geometries), [&](const Motion& m) {
                    return two_view_geometry(m, K1_inv * X, K2_inv * Y);
                  });
+  for (const auto& g: geometries)
+  {
+    SARA_DEBUG << "Triangulated points" << std::endl;
+    const Matrix34d C1 = g.C1;
+    const Matrix34d C2 = g.C2;
+    const MatrixXd C1X = C1 * g.X;
+    const MatrixXd C2X = C2 * g.X;
+    SARA_DEBUG << "C1 * X =\n" << C1X << std::endl;
+    SARA_DEBUG << "C2 * X =\n" << C2X << std::endl;
+
+    SARA_DEBUG << "(C1 * X).hnormalized() =\n"
+               << C1X.colwise().hnormalized() << std::endl;
+    SARA_DEBUG << "K1_inv * X =\n"
+               << (K1_inv * X).colwise().hnormalized() << std::endl;
+
+    SARA_DEBUG << "(C2 * X).hnormalized() =\n"
+               << C2X.colwise().hnormalized() << std::endl;
+    SARA_DEBUG << "(K2_inv * Y).hnormalized() =\n"
+               << (K2_inv * Y).colwise().hnormalized() << std::endl;
+    std::cout << std::endl;
+  }
+
+  SARA_DEBUG << "Filter geometry by cheirality consistency..." << std::endl;
   remove_cheirality_inconsistent_geometries(geometries);
 
-  SARA_CHECK(geometries.size());
+  if (geometries.size() != 1)
+    throw std::runtime_error{
+        "There must be one and only one valid 3D geometry!"};
+  SARA_DEBUG << "Number of valid geometries: " << geometries.size() << std::endl;
+
+  {
+    const Matrix34d P1_ = geometries.front().C1;
+    const Matrix34d P2_ = geometries.front().C2;
+
+    SARA_DEBUG << "Check cheirality consistent geometry" << std::endl;
+    SARA_DEBUG << "P1 =\n" << P1_ << std::endl;
+    SARA_DEBUG << "P2 =\n" << P2_ << std::endl;
+    SARA_DEBUG << "P1_ * X =\n" << P1_ * geometries.front().X << std::endl;
+    SARA_DEBUG << "P2_ * X =\n" << P2_ * geometries.front().X << std::endl;
+
+    SARA_DEBUG << "Triangulating matches" << std::endl;
+
+    auto indices = std::vector<int>(matches.size());
+    std::iota(std::begin(indices), std::end(indices), 0);
+
+    auto points_3d = std::vector<Vector3d>(matches.size());
+    auto is_inliers = std::vector<unsigned char>(matches.size());
+
+    std::for_each(std::begin(indices), std::end(indices), [&, E = E](int i) {
+      const auto& m = matches[i];
+      const Vector3d u1 = K1_inv * m.x_pos().cast<double>().homogeneous();
+      const Vector3d u2 = K2_inv * m.y_pos().cast<double>().homogeneous();
+
+      points_3d[i] =
+          triangulate_single_point_linear_eigen(P1_, P2_, u1, u2).hnormalized();
+      is_inliers[i] = std::abs(u2.transpose() * E.matrix() * u1) < e_err_thresh;
+    });
+
+    indices.erase(
+        std::remove_if(
+            std::begin(indices), std::end(indices),
+            [&](int i) -> bool {
+              return !(
+                  cheirality_predicate(P1_ * points_3d[i].homogeneous())[0] &&
+                  cheirality_predicate(P2_ * points_3d[i].homogeneous())[0] &&
+                  is_inliers[i]);
+            }),
+        std::begin(indices));
+    auto geom = TwoViewGeometry{};
+
+    //auto cameras = Tensor_<PinholeCamera, 1>{2};
+    //cameras(0) = geometries.front().C1;
+    //cameras(1) = geometries.front().C2;
+
+    //auto points_3d_tensor_view = TensorView_<float, 2>{
+    //    reinterpret_cast<float*>(points_3d.data()), {int(points_3d.size()), 3}};
+
+    //SARA_DEBUG << "3D points =\n"
+    //           << points_3d_tensor_view.matrix().topRows(10) << std::endl;
+    //SARA_DEBUG << "Number of 3D valid points = "
+    //           << points_3d_tensor_view.size(0) << std::endl;
+
+
+    //auto geom_h5_file =
+    //    H5File{"/Users/david/Desktop/geometry.h5", H5F_ACC_TRUNC};
+    //geom_h5_file.write_dataset("cameras", cameras, true);
+    //geom_h5_file.write_dataset("points", points_3d_tensor_view, true);
+  }
+
+  get_key();
+  close_window();
 }
 
 

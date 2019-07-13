@@ -1,6 +1,8 @@
 #define BOOST_TEST_MODULE "MultiViewGeometry/Eight Point Algorithm"
 
+#include <DO/Sara/Core/Expression/Debug.hpp>
 #include <DO/Sara/Core/DebugUtilities.hpp>
+#include <DO/Sara/MultiViewGeometry/Estimators/ErrorMeasures.hpp>
 #include <DO/Sara/MultiViewGeometry/Estimators/FundamentalMatrixEstimators.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/FundamentalMatrix.hpp>
 
@@ -33,13 +35,33 @@ BOOST_AUTO_TEST_CASE(test_eight_point_algorithm)
     0.644436, 0.515263, 0.596448, 0.504156, 0.603078, 0.498954, 0.115756, 0.604387,
            1,        1,        1,        1,        1,        1,        1,        1;
 
+  // Fundamental matrix computation.
   const auto [F] = EightPointAlgorithm{}(left, right);
 
+  // Check the residual errors.
+  RowVectorXd errors(8);
   for (int i = 0; i < 8; ++i)
   {
-    const double error = right.col(i).transpose() * F.matrix() * left.col(i);
-    BOOST_CHECK_LE(error, 1e-3);
+    errors[i] = std::abs(right.col(i).transpose() * F.matrix() * left.col(i));
+    BOOST_CHECK_SMALL(errors[i], 1e-3);
   }
+
+  // Also check the batched residual computation as well.
+  const auto batched_errors = EpipolarDistance{F}(left, right);
+  BOOST_CHECK_LE(batched_errors.norm(), 1e-3);
+
+  // Check that the batched distance computation is consistent for the unbatched
+  // version.
+  BOOST_CHECK_SMALL((batched_errors - errors).norm() / errors.norm(), 1e-12);
+
+  SARA_DEBUG << type_name<decltype((batched_errors.array() < 1e-4).eval())>()
+             << std::endl;
+  SARA_DEBUG << "Individual errors = " << errors << std::endl;
+  SARA_DEBUG << "Batched errors = " << batched_errors << std::endl;
+  SARA_DEBUG << "Inliers = " << (batched_errors.array() < 1e-4) << std::endl;
+  SARA_DEBUG << "Inlier count = " << (batched_errors.array() < 1e-4).count()
+             << std::endl;
+
 
   // Is rank 2?
   BOOST_CHECK(F.rank_two_predicate());

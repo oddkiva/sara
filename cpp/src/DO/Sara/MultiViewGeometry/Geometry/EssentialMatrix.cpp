@@ -19,7 +19,9 @@ auto extract_relative_motion_svd(const Matrix3d& E)
     Vt.row(2) *= -1;
 
   Matrix3d W;
-  W << 0, 1, 0, -1, 0, 0, 0, 0, 1;
+  W << 0, 1, 0,
+      -1, 0, 0,
+       0, 0, 1;
 
   Matrix3d Ra, Rb;
   Vector3d ta, tb;

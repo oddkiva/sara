@@ -1,5 +1,3 @@
-#define _USE_MATH_DEFINES
-
 #include <DO/Kalpana/Math/Projection.hpp>
 
 
@@ -27,7 +25,8 @@ namespace DO { namespace Kalpana {
     return frustum(l, r, b, t, z_near, z_far);
   }
 
-  Matrix4d orthographic(double l, double r, double b, double t, double n, double f)
+  Matrix4d orthographic(double l, double r, double b, double t, double n,
+                        double f)
   {
     auto proj = Matrix4d{};
     proj <<

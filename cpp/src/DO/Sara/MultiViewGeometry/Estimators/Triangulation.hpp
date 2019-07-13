@@ -21,9 +21,10 @@ namespace DO::Sara {
 //! @{
 //! @brief Invariant up to affine-transformations.
 DO_SARA_EXPORT
-auto triangulate_one_point_linear_eigen(const Matrix34d& P1,
-                                        const Matrix34d& P2, const Vector3d& u1,
-                                        const Vector3d& u2) -> Vector4d;
+auto triangulate_single_point_linear_eigen(const Matrix34d& P1,
+                                           const Matrix34d& P2,
+                                           const Vector3d& u1,
+                                           const Vector3d& u2) -> Vector4d;
 
 DO_SARA_EXPORT
 auto triangulate_linear_eigen(const Matrix34d& P1, const Matrix34d& P2,

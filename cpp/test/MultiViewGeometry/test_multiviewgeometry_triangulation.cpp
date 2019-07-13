@@ -92,17 +92,20 @@ BOOST_AUTO_TEST_CASE(test_cheirality_predicate)
       << (motion_found->t.normalized() - true_motion.t.normalized()).norm()
       << std::endl;
 
-  BOOST_CHECK(cheirality_predicate(X, normalized_camera(*motion_found)) &&
-              cheirality_predicate(X, P1));
+  BOOST_CHECK(relative_motion_cheirality_predicate(
+                  X, normalized_camera(*motion_found).matrix())
+                  .count() == 5);
 
-  for (auto motion = candidate_motions.begin(); motion != candidate_motions.end(); ++motion)
+  for (auto motion = candidate_motions.begin();
+       motion != candidate_motions.end(); ++motion)
   {
     if (motion_found == motion)
       continue;
 
     const Matrix34d P2_est = normalized_camera(motion->R, motion->t);
-    BOOST_CHECK(!cheirality_predicate(X, P2_est) ||
-                !cheirality_predicate(X, P1));
+    //BOOST_CHECK(!cheirality_predicate(X, P2_est) ||
+    //            !cheirality_predicate(X, P1));
+    BOOST_CHECK(relative_motion_cheirality_predicate(X, P2_est).count() < 5);
 
     auto X_est = triangulate_linear_eigen(P1, P2_est, x1, x2);
 
@@ -128,18 +131,14 @@ BOOST_AUTO_TEST_CASE(test_cheirality_predicate)
     SARA_DEBUG << "In front of camera P2 = "
                << ((P2_est * X_est).row(2).array() > 0) << std::endl;
 
-    SARA_DEBUG << "All in front of camera P1 = "
-               << X_est.row(2).array().redux(
-                      [](bool a, bool b) { return a && b; })
+    SARA_DEBUG << "All in front of camera P1 = " << X_est.row(2).array().count()
                << std::endl;
-    SARA_DEBUG << "cheirality_check = " << cheirality_predicate(X_est, P1)
+    SARA_DEBUG << "cheirality_check = " << cheirality_predicate(X_est)
                << std::endl;
 
     SARA_DEBUG << "All in front of camera P2 = "
-               << ((P2_est * X_est).row(2).array() > 0)
-                      .redux([](bool a, bool b) { return a && b; })
-               << std::endl;
-    SARA_DEBUG << "cheirality_check = " << cheirality_predicate(X_est, P2_est)
+               << ((P2_est * X_est).row(2).array() > 0).count() << std::endl;
+    SARA_DEBUG << "cheirality_check = " << cheirality_predicate(P2_est * X_est)
                << std::endl;
 
     std::cout << std::endl;
@@ -153,7 +152,9 @@ BOOST_AUTO_TEST_CASE(test_cheirality_predicate)
   auto geometries = std::vector<TwoViewGeometry>{};
   std::transform(std::begin(candidate_motions), std::end(candidate_motions),
                  std::back_inserter(geometries),
-                 [&](const Motion& m) { return two_view_geometry(m, x1, x2); });
+                 [&, x1 = std::cref(x1), x2 = std::cref(x2)](const Motion& m) {
+                   return two_view_geometry(m, x1, x2);
+                 });
   remove_cheirality_inconsistent_geometries(geometries);
 
   BOOST_CHECK_EQUAL(geometries.size(), 1u);

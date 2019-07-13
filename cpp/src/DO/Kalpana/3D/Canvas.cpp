@@ -1,5 +1,4 @@
-// ========================================================================== //
-// This file is part of Kalpana.
+// ========================================================================== // // This file is part of Kalpana.
 //
 // Copyright (C) 2015 David Ok <david.ok8@gmail.com>
 //
@@ -23,9 +22,9 @@ using namespace std;
 
 namespace DO { namespace Kalpana {
 
-  Canvas3D::Canvas3D(Scene *scene, QWidget *parent)
-    : QOpenGLWidget{ parent }
-    , m_scene{ scene }
+  Canvas3D::Canvas3D(Scene* scene, QWidget* parent)
+    : QOpenGLWidget{parent}
+    , m_scene{scene}
   {
     setAttribute(Qt::WA_DeleteOnClose);
     setAutoFillBackground(false);
@@ -36,7 +35,8 @@ namespace DO { namespace Kalpana {
     // TODO!
     //connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &GLWidget::cleanup);
 
-    initializeOpenGLFunctions();
+    if (!initializeOpenGLFunctions())
+      QException{}.raise();
 
     // Set background color
     glClearColor(m_backgroundColor[0], m_backgroundColor[1],

@@ -40,8 +40,9 @@ inline auto remove_cheirality_inconsistent_geometries(
 {
   geometries.erase(std::remove_if(std::begin(geometries), std::end(geometries),
                                   [&](const TwoViewGeometry& g) {
-                                    return !cheirality_predicate(g.X, g.C1) ||
-                                           !cheirality_predicate(g.X, g.C2);
+                                    return (cheirality_predicate(g.C1.matrix() * g.X) &&
+                                            cheirality_predicate(g.C2.matrix() * g.X))
+                                               .count() != g.X.cols();
                                   }),
                    std::end(geometries));
 }
