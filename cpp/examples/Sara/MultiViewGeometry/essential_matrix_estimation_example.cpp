@@ -12,10 +12,13 @@
 #include <DO/Sara/FeatureMatching.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
+#include <DO/Sara/ImageProcessing/Interpolation.hpp>
 #include <DO/Sara/Match.hpp>
 #include <DO/Sara/MultiViewGeometry.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/TwoViewGeometry.hpp>
 #include <DO/Sara/SfM/Detectors/SIFT.hpp>
+
+#include <tinyply-2.2/source/tinyply.h>
 
 
 using namespace std;
@@ -966,27 +969,27 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
                  std::back_inserter(geometries), [&](const Motion& m) {
                    return two_view_geometry(m, u1n_s, u2n_s);
                  });
-  for (const auto& g: geometries)
-  {
-    SARA_DEBUG << "Triangulated points" << std::endl;
-    const Matrix34d C1 = g.C1;
-    const Matrix34d C2 = g.C2;
-    const MatrixXd C1X = C1 * g.X;
-    const MatrixXd C2X = C2 * g.X;
-    SARA_DEBUG << "C1 * X =\n" << C1X << std::endl;
-    SARA_DEBUG << "C2 * X =\n" << C2X << std::endl;
+  // for (const auto& g: geometries)
+  // {
+  //   SARA_DEBUG << "Triangulated points" << std::endl;
+  //   const Matrix34d C1 = g.C1;
+  //   const Matrix34d C2 = g.C2;
+  //   const MatrixXd C1X = C1 * g.X;
+  //   const MatrixXd C2X = C2 * g.X;
+  //   SARA_DEBUG << "C1 * X =\n" << C1X << std::endl;
+  //   SARA_DEBUG << "C2 * X =\n" << C2X << std::endl;
 
-    SARA_DEBUG << "(C1 * X).hnormalized() =\n"
-               << C1X.colwise().hnormalized() << std::endl;
-    SARA_DEBUG << "u1n_s =\n"
-               << u1n_s.colwise().hnormalized() << std::endl;
+  //   SARA_DEBUG << "(C1 * X).hnormalized() =\n"
+  //              << C1X.colwise().hnormalized() << std::endl;
+  //   SARA_DEBUG << "u1n_s =\n"
+  //              << u1n_s.colwise().hnormalized() << std::endl;
 
-    SARA_DEBUG << "(C2 * X).hnormalized() =\n"
-               << C2X.colwise().hnormalized() << std::endl;
-    SARA_DEBUG << "u2n_s.hnormalized() =\n"
-               << u2n_s.colwise().hnormalized() << std::endl;
-    std::cout << std::endl;
-  }
+  //   SARA_DEBUG << "(C2 * X).hnormalized() =\n"
+  //              << C2X.colwise().hnormalized() << std::endl;
+  //   SARA_DEBUG << "u2n_s.hnormalized() =\n"
+  //              << u2n_s.colwise().hnormalized() << std::endl;
+  //   std::cout << std::endl;
+  // }
 
   // Find the best geometry, i.e., the one with the high cheirality degree.
   const auto best_geom =
@@ -1023,8 +1026,8 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
         u2n_matched_mat.col(m) = u2n_mat.col(M(m, 1));
       });
     }
-    SARA_DEBUG << "u1n_matched_mat =\n" << u1n_matched_mat.leftCols(10) << std::endl;
-    SARA_DEBUG << "u2n_matched_mat =\n" << u2n_matched_mat.leftCols(10) << std::endl;
+    //SARA_DEBUG << "u1n_matched_mat =\n" << u1n_matched_mat.leftCols(10) << std::endl;
+    //SARA_DEBUG << "u2n_matched_mat =\n" << u2n_matched_mat.leftCols(10) << std::endl;
 
     SARA_DEBUG << "Checking epipolar consistency and cheirality by "
                   "triangulating all points..."
@@ -1045,23 +1048,65 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
 
     // Get the cheiral 3D points.
     auto X = std::vector<Vector3d>{};
+    auto colors = std::vector<Rgb8>{};
     X.reserve(M.size(0));
+    colors.reserve(M.size(0));
+
+    const auto I1d = image1.convert<Rgb64f>();
+    const auto I2d = image2.convert<Rgb64f>();
+
     std::for_each(std::begin(mindices), std::end(mindices), [&](int m) {
-      if (inliers(m))
-        X.push_back(complete_cheiral_geom.X.col(m).hnormalized());
+      const bool inlierm = inliers(m);
+      const Vector3d Xm = complete_cheiral_geom.X.col(m).hnormalized();
+      const Vector2d um = (K1 * u1n_matched_mat.col(m)).hnormalized();
+      const Rgb8 rgbm = (interpolate(I1d, um) * 255).cast<unsigned char>();
+
+      if (inlierm &&                         //
+          Xm.cwiseAbs().minCoeff() > 1e-3 &&  //
+          Xm.cwiseAbs().maxCoeff() < 1e+2)
+      {
+        X.push_back(Xm);
+        colors.push_back(rgbm);
+        //SARA_DEBUG << "Adding 3D point: " << Xm.transpose() << std::endl;
+        //SARA_CHECK(inlierm);
+        //SARA_CHECK(Xm.cwiseAbs().minCoeff());
+        //SARA_CHECK(Xm.cwiseAbs().maxCoeff());
+      }
     });
 
-    auto X_tensor = TensorView_<float, 2>{reinterpret_cast<float*>(X.data()),
+    auto X_tensor = TensorView_<double, 2>{reinterpret_cast<double*>(X.data()),
                                           {int(X.size()), 3}};
 
     SARA_DEBUG << "3D points =\n" << X_tensor.matrix().topRows(10) << std::endl;
     SARA_DEBUG << "Number of 3D valid points = " << X_tensor.size(0)
                << std::endl;
+    SARA_DEBUG << "min coeff = " << X_tensor.matrix().minCoeff() << std::endl;
+    SARA_DEBUG << "max coeff = " << X_tensor.matrix().maxCoeff() << std::endl;
 
     auto geom_h5_file =
         H5File{"/Users/david/Desktop/geometry.h5", H5F_ACC_TRUNC};
     geom_h5_file.write_dataset("cameras", cameras, true);
     geom_h5_file.write_dataset("points", X_tensor, true);
+
+    {
+      std::filebuf fb;
+      fb.open("/Users/david/Desktop/geometry.ply", std::ios::out);
+      std::ostream ostr(&fb);
+      if (ostr.fail())
+        throw std::runtime_error{"Error: failed to create PLY!"};
+
+      tinyply::PlyFile geom_ply_file;
+      geom_ply_file.add_properties_to_element(
+          "vertex", {"x", "y", "z"}, tinyply::Type::FLOAT64, X_tensor.size(0),
+          reinterpret_cast<std::uint8_t*>(X_tensor.data()),
+          tinyply::Type::INVALID, 0);
+      geom_ply_file.add_properties_to_element(
+          "vertex", {"red", "green", "blue"}, tinyply::Type::UINT8, X_tensor.size(0),
+          reinterpret_cast<std::uint8_t*>(colors.data()),
+          tinyply::Type::INVALID, 0);
+
+      geom_ply_file.write(ostr, false);
+    }
   }
 
   get_key();

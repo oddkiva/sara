@@ -11,7 +11,8 @@ add_executable(essential_matrix_estimation_example
 
 set_target_properties(essential_matrix_estimation_example PROPERTIES
   COMPILE_FLAGS ${SARA_DEFINITIONS})
-target_link_libraries(essential_matrix_estimation_example ${DO_Sara_LIBRARIES})
+target_link_libraries(essential_matrix_estimation_example ${DO_Sara_LIBRARIES}
+  tinyply)
 
 set_property(TARGET essential_matrix_estimation_example
   PROPERTY

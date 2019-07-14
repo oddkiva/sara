@@ -68,3 +68,5 @@ if (WIN32)
   message(STATUS "  - FFMpeg")
   add_subdirectory(ffmpeg)
 endif ()
+
+add_subdirectory(tinyply-2.2)
