@@ -159,6 +159,7 @@ namespace DO { namespace Sara {
   using Vector128f = Matrix<float, 128, 1>;
   //! @}
 
+
   //! I/O.
   template <typename Derived>
   std::istream& operator>>(std::istream& in, Eigen::MatrixBase<Derived>& matrix)

@@ -92,9 +92,18 @@ BOOST_AUTO_TEST_CASE(test_cheirality_predicate)
       << (motion_found->t.normalized() - true_motion.t.normalized()).norm()
       << std::endl;
 
-  BOOST_CHECK(relative_motion_cheirality_predicate(
-                  X, normalized_camera(*motion_found).matrix())
-                  .count() == 5);
+  // Check the motion is completely cheiral w.r.t. to all the 5 point
+  // correspondences.
+  {
+    // Cheirality with respect to P1 = [I|0].
+    BOOST_CHECK_EQUAL(cheirality_predicate(X.colwise().hnormalized()).count(),
+                      5);
+    BOOST_CHECK_EQUAL(cheirality_predicate(X).count(), 5);
+    // Cheirality with respect to P2 = [R|t].
+    const Matrix34d P2 = normalized_camera(*motion_found);
+    BOOST_CHECK_EQUAL(cheirality_predicate(P2 * X).count(), 5);
+    BOOST_CHECK_EQUAL(relative_motion_cheirality_predicate(X, P2).count(), 5);
+  }
 
   for (auto motion = candidate_motions.begin();
        motion != candidate_motions.end(); ++motion)
@@ -103,12 +112,9 @@ BOOST_AUTO_TEST_CASE(test_cheirality_predicate)
       continue;
 
     const Matrix34d P2_est = normalized_camera(motion->R, motion->t);
-    //BOOST_CHECK(!cheirality_predicate(X, P2_est) ||
-    //            !cheirality_predicate(X, P1));
     BOOST_CHECK(relative_motion_cheirality_predicate(X, P2_est).count() < 5);
 
     auto X_est = triangulate_linear_eigen(P1, P2_est, x1, x2);
-
 
     SARA_DEBUG << "candidate camera =" << std::endl;
     std::cout << P2_est << std::endl;
@@ -155,7 +161,9 @@ BOOST_AUTO_TEST_CASE(test_cheirality_predicate)
                  [&, x1 = std::cref(x1), x2 = std::cref(x2)](const Motion& m) {
                    return two_view_geometry(m, x1, x2);
                  });
-  remove_cheirality_inconsistent_geometries(geometries);
+  geometries.erase(std::remove_if(
+      std::begin(geometries), std::end(geometries),
+      [&, X = X](const auto& g) { return g.cheirality.count() != X.cols(); }));
 
   BOOST_CHECK_EQUAL(geometries.size(), 1u);
 
@@ -184,4 +192,11 @@ BOOST_AUTO_TEST_CASE(test_cheirality_predicate)
   const auto rel_ratio_diff = (max_ratio - min_ratio) / max_ratio;
   BOOST_CHECK_SMALL(rel_ratio_diff, 1e-12);
   SARA_CHECK(rel_ratio_diff);
+}
+
+BOOST_AUTO_TEST_CASE(test_calculate_two_view_geometries)
+{
+  const auto [X, R, t, E, P1, P2, x1, x2] = generate_test_data();
+
+  const auto g = two_view_geometry(Motion{R, t}, x1, x2);
 }

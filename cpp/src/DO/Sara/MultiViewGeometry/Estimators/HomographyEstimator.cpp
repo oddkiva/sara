@@ -26,8 +26,8 @@ namespace DO { namespace Sara {
     {
       RowVector3d u_i = x.col(i).transpose();
       RowVector3d v_i = y.col(i).transpose();
-      M.row(2* i + 0) <<  u_i, zero, - u_i * v_i.x();
-      M.row(2* i + 1) << zero,  u_i, - u_i * v_i.y();
+      M.row(2* i + 0) <<  u_i, zero, - u_i.head(2) * v_i.x();
+      M.row(2* i + 1) << zero,  u_i, - u_i.head(2) * v_i.y();
     }
 
     const Matrix<double, 2, 4> y_euclidean = y.topRows<2>();

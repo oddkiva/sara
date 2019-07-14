@@ -12,7 +12,7 @@
 #pragma once
 
 #include <DO/Sara/Core/EigenExtension.hpp>
-#include <DO/Sara/MultiViewGeometry/Geometry/PinholeCamera.hpp>
+#include <DO/Sara/MultiViewGeometry/Geometry/TwoViewGeometry.hpp>
 
 
 namespace DO::Sara {
@@ -58,7 +58,7 @@ struct SymmetricTransferError
     return ((H_ * x).hnormalized() - y.hnormalized()).norm() +
            ((H_inv_ * y).hnormalized() - x.hnormalized()).norm();
   }
-  
+
   template <typename Mat>
   auto operator()(const Mat& u1, const Mat& u2) const -> RowVectorXd
   {
@@ -80,26 +80,34 @@ struct SymmetricTransferError
 //! @brief Joint cheirality and epipolar consistency for RANSAC.
 struct CheiralAndEpipolarConsistency
 {
+  using Model = TwoViewGeometry;
+
+  Model geometry;
   EpipolarDistance distance;
   double err_threshold;
-  PinholeCamera camera;
 
-  auto set_model(const Motion& model)
+  auto set_model(const Model& g)
   {
-    camera = normalized_camera(model.R, model.t.normalized());
-    distance = EpipolarDistance{essential_matrix(model)};
+    geometry = g;
   }
-  
+
+  // N.B.: this is not a const method. This triangulates the points from the
+  // point correspondences and updates the cheirality.
   template <typename Mat>
-  auto operator()(const Mat& u1, const Mat& u2) const
+  auto operator()(const Mat& u1, const Mat& u2)
   {
-    const auto epipolar_consistent = distance(u1, u2) < err_threshold;
-    const Matrix34d P1 = normalized_camera();
-    const Matrix34d P2 = camera;
-    const auto X = triangulate_linear_eigen(P1, P2, u1, u2);
-    const auto cheiral_consistent = relative_motion_cheirality_predicate(X, P2);
-    
-    return (epipolar_consistent && cheiral_consistent);
+    const auto epipolar_consistent = distance(u1, u2).array() < err_threshold;
+
+    const Matrix34d P1 = geometry.C1;
+    const Matrix34d P2 = geometry.C2;
+
+    auto& X = geometry.X;
+    auto& cheirality = geometry.cheirality;
+
+    X = triangulate_linear_eigen(P1, P2, u1, u2);
+    cheirality = relative_motion_cheirality_predicate(X, P2);
+
+    return epipolar_consistent && cheirality;
   }
 };
 

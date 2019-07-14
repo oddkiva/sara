@@ -21,30 +21,20 @@ struct TwoViewGeometry
 {
   PinholeCamera C1;
   PinholeCamera C2;
-  MatrixXd X;
+  Eigen::MatrixXd X;
+  Eigen::Array<bool, 1, Eigen::Dynamic> cheirality;
 };
 
-inline auto two_view_geometry(const Motion& m, const MatrixXd& x1,
-                              const MatrixXd& x2) -> TwoViewGeometry
+inline auto two_view_geometry(const Motion& m, const MatrixXd& u1,
+                              const MatrixXd& u2) -> TwoViewGeometry
 {
   const auto C1 = normalized_camera();
   const auto C2 = normalized_camera(m.R, m.t.normalized());
   const Matrix34d P1 = C1;
   const Matrix34d P2 = C2;
-  const auto X = triangulate_linear_eigen(P1, P2, x1, x2);
-  return {C1, C2, X};
-}
-
-inline auto remove_cheirality_inconsistent_geometries(
-    std::vector<TwoViewGeometry>& geometries)
-{
-  geometries.erase(std::remove_if(std::begin(geometries), std::end(geometries),
-                                  [&](const TwoViewGeometry& g) {
-                                    return (cheirality_predicate(g.C1.matrix() * g.X) &&
-                                            cheirality_predicate(g.C2.matrix() * g.X))
-                                               .count() != g.X.cols();
-                                  }),
-                   std::end(geometries));
+  const auto X = triangulate_linear_eigen(P1, P2, u1, u2);
+  const auto cheirality = relative_motion_cheirality_predicate(X, P2);
+  return {C1, C2, X, cheirality};
 }
 
 } /* namespace DO::Sara */

@@ -16,7 +16,13 @@ namespace DO::Sara {
 
 auto cheirality_predicate(const MatrixXd& X) -> Array<bool, 1, Dynamic>
 {
-  return X.row(2).array() > 0;
+  if (X.rows() == 3)
+    return X.row(2).array() > 0;
+
+  if (X.rows() == 4)
+    return X.colwise().hnormalized().row(2).array() > 0;
+
+  throw std::runtime_error{"Error: invalid 3D coordinates!"};
 }
 
 auto relative_motion_cheirality_predicate(const MatrixXd& X, const Matrix34d& P)
