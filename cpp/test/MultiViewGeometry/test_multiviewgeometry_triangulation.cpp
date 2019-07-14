@@ -91,6 +91,8 @@ BOOST_AUTO_TEST_CASE(test_cheirality_predicate)
       << "Δt = "
       << (motion_found->t.normalized() - true_motion.t.normalized()).norm()
       << std::endl;
+  std::cout << std::endl;
+  std::cout << std::endl;
 
   // Check the motion is completely cheiral w.r.t. to all the 5 point
   // correspondences.
@@ -125,24 +127,30 @@ BOOST_AUTO_TEST_CASE(test_cheirality_predicate)
     SARA_DEBUG << "Δt = " << (motion->t.normalized() - t.normalized()).norm()
                << std::endl;
     SARA_DEBUG << "ΔX = " << (X - X_est).norm() / X.norm() << std::endl;
+    std::cout << std::endl;
 
     SARA_DEBUG << "X_est =" << std::endl;
     std::cout << X_est << std::endl;
 
     SARA_DEBUG << "P2_est * X_est =" << std::endl;
     std::cout << (P2_est * X_est) << std::endl;
+    std::cout << std::endl;
 
     SARA_DEBUG << "In front of camera P1 = " << (X_est.row(2).array() > 0)
                << std::endl;
-    SARA_DEBUG << "In front of camera P2 = "
-               << ((P2_est * X_est).row(2).array() > 0) << std::endl;
-
-    SARA_DEBUG << "All in front of camera P1 = " << X_est.row(2).array().count()
-               << std::endl;
+    SARA_DEBUG << "All in front of camera P1 = "
+               << (X_est.row(2).array() > 0).all() << std::endl;
+    SARA_DEBUG << "Count in front of camera P1 = "
+               << (X_est.row(2).array() > 0).count() << std::endl;
     SARA_DEBUG << "cheirality_check = " << cheirality_predicate(X_est)
                << std::endl;
+    std::cout << std::endl;
 
+    SARA_DEBUG << "In front of camera P2 = "
+               << ((P2_est * X_est).row(2).array() > 0) << std::endl;
     SARA_DEBUG << "All in front of camera P2 = "
+               << ((P2_est * X_est).row(2).array() > 0).all() << std::endl;
+    SARA_DEBUG << "Count in front of camera P2 = "
                << ((P2_est * X_est).row(2).array() > 0).count() << std::endl;
     SARA_DEBUG << "cheirality_check = " << cheirality_predicate(P2_est * X_est)
                << std::endl;
@@ -161,9 +169,11 @@ BOOST_AUTO_TEST_CASE(test_cheirality_predicate)
                  [&, x1 = std::cref(x1), x2 = std::cref(x2)](const Motion& m) {
                    return two_view_geometry(m, x1, x2);
                  });
-  geometries.erase(std::remove_if(
-      std::begin(geometries), std::end(geometries),
-      [&, X = X](const auto& g) { return g.cheirality.count() != X.cols(); }));
+  geometries.erase(std::remove_if(std::begin(geometries), std::end(geometries),
+                                  [&, X = X](const auto& g) {
+                                    return g.cheirality.count() != X.cols();
+                                  }),
+                   std::end(geometries));
 
   BOOST_CHECK_EQUAL(geometries.size(), 1u);
 
@@ -199,4 +209,8 @@ BOOST_AUTO_TEST_CASE(test_calculate_two_view_geometries)
   const auto [X, R, t, E, P1, P2, x1, x2] = generate_test_data();
 
   const auto g = two_view_geometry(Motion{R, t}, x1, x2);
+  BOOST_CHECK(g.cheirality.all());
+  BOOST_CHECK_EQUAL(g.C1.matrix(), normalized_camera().matrix());
+  BOOST_CHECK_EQUAL(g.C2.matrix(),
+                    normalized_camera(R, t.normalized()).matrix());
 }

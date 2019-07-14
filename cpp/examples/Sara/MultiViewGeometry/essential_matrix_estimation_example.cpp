@@ -290,8 +290,6 @@ void estimate_homography_old(const Image<Rgb8>& image1,
 
       drawer.draw_point(1, HX.col(i).hnormalized().cast<float>(), Blue8, 5);
     }
-
-    get_key();
   }
 }
 
@@ -910,11 +908,14 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
   constexpr auto L = EEstimator::num_points;
   const auto s_best = sample_best.reshape(Vector2i{1, L});
   const auto I = to_point_indices(s_best, M);
-  const auto u = to_coordinates(I, u1, u2).transpose({0, 2, 1, 3});
+  const auto u_s = to_coordinates(I, u1, u2).transpose({0, 2, 1, 3});
+  const auto un_s = to_coordinates(I, u1n, u2n).transpose({0, 2, 1, 3});
 
   // Extract the points.
-  const Matrix<double, 3, L> u1_s = u[0][0].colmajor_view().matrix();
-  const Matrix<double, 3, L> u2_s = u[0][1].colmajor_view().matrix();
+  const Matrix<double, 3, L> u1_s = u_s[0][0].colmajor_view().matrix();
+  const Matrix<double, 3, L> u2_s = u_s[0][1].colmajor_view().matrix();
+  const Matrix<double, 3, L> u1n_s = un_s[0][0].colmajor_view().matrix();
+  const Matrix<double, 3, L> u2n_s = un_s[0][1].colmajor_view().matrix();
 
   // Project X to the right image.
   Matrix<double, 3, L> proj_u1_s = F.matrix() * u1_s;
@@ -963,7 +964,7 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
   auto geometries = std::vector<TwoViewGeometry>{};
   std::transform(std::begin(candidate_motions), std::end(candidate_motions),
                  std::back_inserter(geometries), [&](const Motion& m) {
-                   return two_view_geometry(m, u1n.matrix(), u2n.matrix());
+                   return two_view_geometry(m, u1n_s, u2n_s);
                  });
   for (const auto& g: geometries)
   {
@@ -977,13 +978,13 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
 
     SARA_DEBUG << "(C1 * X).hnormalized() =\n"
                << C1X.colwise().hnormalized() << std::endl;
-    SARA_DEBUG << "K1_inv * u1_s =\n"
-               << (K1_inv * u1_s).colwise().hnormalized() << std::endl;
+    SARA_DEBUG << "u1n_s =\n"
+               << u1n_s.colwise().hnormalized() << std::endl;
 
     SARA_DEBUG << "(C2 * X).hnormalized() =\n"
                << C2X.colwise().hnormalized() << std::endl;
-    SARA_DEBUG << "(K2_inv * u2_s).hnormalized() =\n"
-               << (K2_inv * u2_s).colwise().hnormalized() << std::endl;
+    SARA_DEBUG << "u2n_s.hnormalized() =\n"
+               << u2n_s.colwise().hnormalized() << std::endl;
     std::cout << std::endl;
   }
 
@@ -1022,15 +1023,19 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
         u2n_matched_mat.col(m) = u2n_mat.col(M(m, 1));
       });
     }
+    SARA_DEBUG << "u1n_matched_mat =\n" << u1n_matched_mat.leftCols(10) << std::endl;
+    SARA_DEBUG << "u2n_matched_mat =\n" << u2n_matched_mat.leftCols(10) << std::endl;
 
     SARA_DEBUG << "Checking epipolar consistency and cheirality by "
                   "triangulating all points..."
                << std::endl;
     auto inlier_predicate = CheiralAndEpipolarConsistency{};
+    inlier_predicate.err_threshold = e_err_thresh;
     inlier_predicate.set_model(*best_geom);
     const auto inliers = inlier_predicate(u1n_matched_mat, u2n_matched_mat);
+    SARA_CHECK(inliers.count());
 
-    // Get the complete geometry.
+    // GeRt the complete geometry.
     auto complete_cheiral_geom = inlier_predicate.geometry;
 
     // Get the left and right cameras.
@@ -1039,11 +1044,11 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
     cameras(1) = complete_cheiral_geom.C2;
 
     // Get the cheiral 3D points.
-    auto X = std::vector<Point3d>{};
+    auto X = std::vector<Vector3d>{};
     X.reserve(M.size(0));
     std::for_each(std::begin(mindices), std::end(mindices), [&](int m) {
       if (inliers(m))
-        X.push_back(complete_cheiral_geom.X.col(m));
+        X.push_back(complete_cheiral_geom.X.col(m).hnormalized());
     });
 
     auto X_tensor = TensorView_<float, 2>{reinterpret_cast<float*>(X.data()),
@@ -1081,7 +1086,7 @@ GRAPHICS_MAIN()
 
   const auto matches = compute_matches(keys1, keys2);
 
-#ifdef DEBUG
+#ifdef DEBUG_ME
   estimate_homography_old(image1, image2, keys1, keys2, matches);
   estimate_fundamental_matrix_old(image1, image2, keys1, keys2, matches);
   estimate_essential_matrix_old(image1, image2, K1, K2, keys1, keys2, matches);

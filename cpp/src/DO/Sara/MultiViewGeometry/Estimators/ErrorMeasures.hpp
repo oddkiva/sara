@@ -69,7 +69,7 @@ struct SymmetricTransferError
 
     auto hu1_u2_norm = hu1_u2.colwise().norm();
     auto hinv_u2_u1_norm = hinv_u2_u1.colwise().norm();
-    return (hu1_u2_norm + hinv_u2_u1_norm).eval();
+    return hu1_u2_norm + hinv_u2_u1_norm;
   }
 
   Eigen::Matrix3d H_;
@@ -95,6 +95,7 @@ struct CheiralAndEpipolarConsistency
   // point correspondences and updates the cheirality.
   template <typename Mat>
   auto operator()(const Mat& u1, const Mat& u2)
+      -> Eigen::Array<bool, 1, Eigen::Dynamic>
   {
     const auto epipolar_consistent = distance(u1, u2).array() < err_threshold;
 
