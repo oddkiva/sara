@@ -1,14 +1,14 @@
-#pragma once
+#ifndef SGEMM_HPP
+#define SGEMM_HPP
 
 #include <DO/Sara/Core/Tensor.hpp>
-
 #include <memory>
 
 
 namespace DO::Sara {
 
-struct Impl;
-struct ImplDeleter
+struct SGEMMImpl;
+struct SGEMMImplDeleter
 {
   void operator()(SGEMMImpl*) const;
 };
@@ -26,3 +26,5 @@ struct SGEMM
 };
 
 } /* namespace DO::Sara */
+
+#endif /* SGEMM_HPP */

@@ -9,27 +9,22 @@ if (APPLE)
   if (NOT Accelerate_LIBRARY)
     message(FATAL_ERROR "Could not find Accelerate library!")
   endif ()
-  message("Found Accelerate framework:\n\t${Accelerate_LIBRARY}")
-
-  sara_add_test(test_compute_accelerate
-    test_compute_accelerate.cpp "${DO_Sara_Libraries}")
-  target_include_directories(test_compute_accelerate PRIVATE ${Boost_INCLUDE_DIR})
-  target_compile_definitions(test_compute_accelerate PRIVATE -DBOOST_ALL_NO_LIB)
-  target_link_libraries(test_compute_accelerate
-    ${Boost_LIBRARIES}
-    ${Accelerate_LIBRARY})
+  message("Found Accelerate framework:\n"
+          "\t${Accelerate_LIBRARY}")
 
   find_library(Foundation_LIBRARY Foundation)
   if (NOT Foundation_LIBRARY)
     message(FATAL_ERROR "Could not find Foundation library!")
   endif ()
-  message("Found Foundation framework:\n\t${Foundation_LIBRARY}")
+  message("Found Foundation framework:\n"
+          "\t${Foundation_LIBRARY}")
 
   find_library(MetalPerformanceShaders_LIBRARY MetalPerformanceShaders)
-  if (NOT MPS_LIBRARY)
+  if (NOT MetalPerformanceShaders_LIBRARY)
     message(FATAL_ERROR "Could not find MetalPerformanceShaders library!")
   endif ()
-  message("Found MetalPerformanceShaders framework:\n\t${MPS_LIBRARY}")
+  message("Found MetalPerformanceShaders framework:\n"
+          "\t${MetalPerformanceShaders_LIBRARY}")
 
   set(DO_Sara_Compute_SOURCE_FILES
     MPS/Matrix.hpp MPS/Matrix.m
@@ -43,6 +38,15 @@ if (APPLE)
     "-framework Foundation"
     "-framework Metal"
     "-framework MetalPerformanceShaders")
+
+
+  sara_add_test(test_compute_accelerate
+    test_compute_accelerate.cpp "${DO_Sara_Libraries}")
+  target_include_directories(test_compute_accelerate PRIVATE ${Boost_INCLUDE_DIR})
+  target_compile_definitions(test_compute_accelerate PRIVATE -DBOOST_ALL_NO_LIB)
+  target_link_libraries(test_compute_accelerate
+    ${Boost_LIBRARIES}
+    ${Accelerate_LIBRARY})
 
   sara_add_test(test_compute_mps test_compute_mps.cpp "${DO_Sara_Libraries}")
   target_include_directories(test_compute_mps PRIVATE ${Boost_INCLUDE_DIR})

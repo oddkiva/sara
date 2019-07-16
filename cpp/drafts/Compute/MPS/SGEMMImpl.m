@@ -1,9 +1,21 @@
-#import "Matrix.hpp"
-#import "SGEMMImpl.hpp"
+// ========================================================================== //
+// This file is part of Sara, a basic set of libraries in C++ for computer
+// vision.
+//
+// Copyright (C) 2019 David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/Tensor.hpp>
+
 #include "SGEMM.hpp"
+
+#import "Matrix.hpp"
+#import "SGEMMImpl.hpp"
 
 #include <algorithm>
 #include <stdexcept>
@@ -26,7 +38,6 @@ DO::Sara::SGEMMImpl::SGEMMImpl()
 {
   if (!_device)
   {
-    NSLog(@"Dealloc self");
     id<MTLDevice> d = MTLCreateSystemDefaultDevice();
     _device.reset(reinterpret_cast<void *>(d));
   }
@@ -56,22 +67,18 @@ void DO::Sara::SGEMMImpl::operator()(int m, int n, int k, float alpha, const flo
   if (commandBuffer == nil)
     throw std::runtime_error{"Could not get valid command queue!"};
 
-  NSLog(@"Preparing A...");
   SaraMatrix* matA = [[SaraMatrix alloc] initWithDevice : device
                                                    rows : m
                                                    cols : k
                                                 options : MTLResourceStorageModeShared];
   std::copy(A, A + m * k, reinterpret_cast<float*>(matA.buffer.contents));
 
-  NSLog(@"Preparing B...");
   SaraMatrix* matB = [[SaraMatrix alloc] initWithDevice : device
                                                    rows : k
                                                    cols : n
                                                 options : MTLResourceStorageModeShared];
   std::copy(B, B + k * n, reinterpret_cast<float*>(matB.buffer.contents));
 
-
-  NSLog(@"Preparing C...");
   SaraMatrix* matC = [[SaraMatrix alloc] initWithDevice : device
                                                    rows : m
                                                    cols : n
@@ -89,21 +96,15 @@ void DO::Sara::SGEMMImpl::operator()(int m, int n, int k, float alpha, const flo
                                                beta : (double) beta];
 
   // Wrap the Metal program in a GPU operation.
-  //NSLog(@"Specifying the matmul operation with the appropriate parameters...");
   [sgemm encodeToCommandBuffer : commandBuffer
                     leftMatrix : matA.mat
                    rightMatrix : matB.mat
                   resultMatrix : matC.mat];
 
-  NSLog(@"Sending GEMM operation to GPU...");
   [commandBuffer commit];
 
-  NSLog(@"Waiting for GEMM operation to GPU...");
   [commandBuffer waitUntilCompleted];
 
-  NSLog(@"GPU operation finished!");
-
-  NSLog(@"Copying back to C++!");
   auto matC_ptr = reinterpret_cast<float*>(matC.buffer.contents);
   std::copy(matC_ptr, matC_ptr + m * n, C);
 
