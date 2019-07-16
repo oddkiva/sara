@@ -1,13 +1,14 @@
 #pragma once
 
 #include <DO/Sara/Core/Tensor.hpp>
+
 #include <memory>
 
 
 namespace DO::Sara {
 
-struct SGEMMImpl;
-struct SGEMMImplDeleter
+struct Impl;
+struct ImplDeleter
 {
   void operator()(SGEMMImpl*) const;
 };
