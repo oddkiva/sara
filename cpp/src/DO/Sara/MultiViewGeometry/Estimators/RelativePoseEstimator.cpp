@@ -58,6 +58,8 @@ auto RelativePoseEstimator<Method>::operator()(
 
   if (cheiral_criterion == CheiralityCriterion::CHEIRAL_COMPLETE)
     return cheiral_degree < N ? std::vector<TwoViewGeometry>{} : geometries;
+
+  throw std::runtime_error{"Not implemented for this cheirality criterion"};
 }
 
 

@@ -6,6 +6,10 @@ project(Sara CXX)
 set(DO_Sara_VERSION_MAJOR 1)
 set(DO_Sara_VERSION_MINOR 2)
 
+if (APPLE)
+  set (CMAKE_MACOSX_RPATH ON)
+endif ()
+
 # Set default build type to Release mode.
 set(CMAKE_BUILD_TYPE "Release" CACHE STRING
     "Build type options are: Debug, Release")

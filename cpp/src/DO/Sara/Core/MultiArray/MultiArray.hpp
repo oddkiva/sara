@@ -203,8 +203,5 @@ namespace DO { namespace Sara {
     allocator_type _allocator{};
   };
 
-
-  //! @}
-
 } /* namespace Sara */
 } /* namespace DO */
