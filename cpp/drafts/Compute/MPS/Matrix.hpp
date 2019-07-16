@@ -21,10 +21,10 @@
 @property(assign, readwrite) MPSMatrixDescriptor* desc;
 @property(assign, readwrite) MPSMatrix* mat;
 
-- (instancetype) initWithDevice:(id<MTLDevice>)device
-                           rows:(int)rows
-                           cols:(int)cols
-                        options:(MTLResourceOptions)options;
+- (instancetype) initWithDevice : (id<MTLDevice>)device
+                           rows : (int)rows
+                           cols : (int)cols
+                        options : (MTLResourceOptions)options;
 - (instancetype) setZero;
 - (instancetype) setIdentity;
 @end

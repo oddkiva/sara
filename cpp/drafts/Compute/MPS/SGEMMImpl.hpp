@@ -28,13 +28,6 @@ struct SGEMMImpl
 
   void operator()(int m, int n, int k, float alpha, const float* A,
                   const float* B, float beta, float* C) const;
-
-  struct DeviceDeleter
-  {
-    void operator()(const void*) const;
-  };
-
-  static std::unique_ptr<void, DeviceDeleter> _device;
 };
 
 } /* namespace DO::Sara */

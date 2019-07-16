@@ -10,7 +10,7 @@ namespace DO::Sara {
 struct SGEMMImpl;
 struct SGEMMImplDeleter
 {
-  void operator()(SGEMMImpl*) const;
+  void operator()(const SGEMMImpl*) const;
 };
 
 struct SGEMM

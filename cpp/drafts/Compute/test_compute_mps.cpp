@@ -18,6 +18,16 @@
 
 #include "MPS.hpp"
 
+#import <MetalPerformanceShaders/MetalPerformanceShaders.h>
+#import <Foundation/Foundation.h>
+
+
+BOOST_AUTO_TEST_CASE(test_available_compute_devices)
+{
+  NSLog(@"Checking Metal infrastructure");
+  NSArray<id<MTLDevice>>* devices = MTLCopyAllDevices();
+}
+
 
 BOOST_AUTO_TEST_CASE(test_mps_gemm)
 {
@@ -25,7 +35,7 @@ BOOST_AUTO_TEST_CASE(test_mps_gemm)
 
   // MPSMatrixMultiplication crashes for n = 4.
   // I don't know why...
-  for (auto n = 896; n <= 896; ++n)
+  for (auto n = 5; n <= 1024; ++n)
   {
     SARA_DEBUG << "iter = " << n << std::endl;
     auto r = Tensor_<float, 1>{n * n};

@@ -27,8 +27,8 @@ if (APPLE)
           "\t${MetalPerformanceShaders_LIBRARY}")
 
   set(DO_Sara_Compute_SOURCE_FILES
-    MPS/Matrix.hpp MPS/Matrix.m
-    MPS/SGEMMImpl.hpp MPS/SGEMMImpl.m
+    MPS/Matrix.hpp MPS/Matrix.mm
+    MPS/SGEMMImpl.hpp MPS/SGEMMImpl.mm
     MPS/SGEMM.hpp MPS/SGEMM.cpp)
   set_source_files_properties(${DO_Sara_Compute_SOURCE_FILES}
     PROPERTIES LANGUAGE CXX)
@@ -51,7 +51,11 @@ if (APPLE)
   sara_add_test(test_compute_mps test_compute_mps.cpp "${DO_Sara_Libraries}")
   target_include_directories(test_compute_mps PRIVATE ${Boost_INCLUDE_DIR})
   target_compile_definitions(test_compute_mps PRIVATE -DBOOST_ALL_NO_LIB)
+  target_compile_options(test_compute_mps PRIVATE -x objective-c++)
   target_link_libraries(test_compute_mps
     DO_Sara_Compute
+    "-framework Foundation"
+    "-framework Metal"
+    "-framework MetalPerformanceShaders"
     ${Boost_LIBRARIES})
 endif ()
