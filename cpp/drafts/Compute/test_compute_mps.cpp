@@ -26,6 +26,10 @@ BOOST_AUTO_TEST_CASE(test_available_compute_devices)
 {
   NSLog(@"Checking Metal infrastructure");
   NSArray<id<MTLDevice>>* devices = MTLCopyAllDevices();
+  BOOST_CHECK(devices.count > 0);
+
+  for (auto i = 0u; i < devices.count; ++i)
+    NSLog(@"Device [%d] description:\n %@", i, devices[i].description);
 }
 
 
