@@ -95,6 +95,7 @@ void DO::Sara::SGEMMImpl::operator()(int m, int n, int k, float alpha, const flo
     std::copy(matC_ptr, matC_ptr + m * n, C);
 
 #if ! __has_feature(objc_arc)
+#error "TODO: fix the memory leak happening here."
     [matA release];
     [matB release];
     [matC release];
