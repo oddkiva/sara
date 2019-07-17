@@ -93,6 +93,14 @@ void DO::Sara::SGEMMImpl::operator()(int m, int n, int k, float alpha, const flo
 
     auto matC_ptr = reinterpret_cast<float*>(matC.buffer.contents);
     std::copy(matC_ptr, matC_ptr + m * n, C);
+
+#if ! __has_feature(objc_arc)
+    [matA release];
+    [matB release];
+    [matC release];
+    [sgemm release];
+    [commandQueue release];
+#endif
   }
 }
 @end

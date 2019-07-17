@@ -27,13 +27,14 @@ if (APPLE)
           "\t${MetalPerformanceShaders_LIBRARY}")
 
   set(DO_Sara_Compute_SOURCE_FILES
+    MPS.hpp
     MPS/Matrix.hpp MPS/Matrix.mm
     MPS/SGEMMImpl.hpp MPS/SGEMMImpl.mm
     MPS/SGEMM.hpp MPS/SGEMM.cpp)
   set_source_files_properties(${DO_Sara_Compute_SOURCE_FILES}
     PROPERTIES LANGUAGE CXX)
   add_library(DO_Sara_Compute ${DO_Sara_Compute_SOURCE_FILES})
-  target_compile_options(DO_Sara_Compute PRIVATE -x objective-c++)
+  target_compile_options(DO_Sara_Compute PRIVATE -x objective-c++ -fobjc-arc)
   target_link_libraries(DO_Sara_Compute PRIVATE
     "-framework Foundation"
     "-framework Metal"

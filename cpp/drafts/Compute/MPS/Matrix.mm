@@ -14,10 +14,10 @@
 
 @implementation SaraMatrix
 
-- (instancetype) initWithDevice : (id<MTLDevice>)device
-                           rows : (int)rows
-                           cols : (int)cols
-                        options : (MTLResourceOptions)options
+- (instancetype) initWithDevice : (id<MTLDevice>) device
+                           rows : (int) rows
+                           cols : (int) cols
+                        options : (MTLResourceOptions) options
 {
   self.buffer = [device
     newBufferWithLength : rows * cols * sizeof(float) * sizeof(float)
@@ -32,6 +32,17 @@
 
   return self;
 }
+
+#if ! __has_feature(objc_arc)
+#error "TODO: ARC must be enabled: otherwise fix this!"
+- (void) dealloc
+{
+  [self.buffer release];
+  [self.desc release];
+  [self.mat release];
+  [super dealloc];
+}
+#endif
 
 - (instancetype) setZero
 {

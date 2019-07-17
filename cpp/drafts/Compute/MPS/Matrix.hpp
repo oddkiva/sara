@@ -17,14 +17,18 @@
 
 
 @interface SaraMatrix : NSObject
-@property(assign, readwrite) id<MTLBuffer> buffer;
-@property(assign, readwrite) MPSMatrixDescriptor* desc;
-@property(assign, readwrite) MPSMatrix* mat;
+@property(strong, readwrite) id<MTLBuffer> buffer;
+@property(strong, readwrite) MPSMatrixDescriptor* desc;
+@property(strong, readwrite) MPSMatrix* mat;
 
 - (instancetype) initWithDevice : (id<MTLDevice>)device
                            rows : (int)rows
                            cols : (int)cols
                         options : (MTLResourceOptions)options;
+#if ! __has_feature(objc_arc)
+#error "TODO: ARC must be enabled"
+- (void) dealloc;
+#endif
 - (instancetype) setZero;
 - (instancetype) setIdentity;
 @end
