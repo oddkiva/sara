@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(test_mps_gemm)
 
   // MPSMatrixMultiplication crashes for n = 4.
   // I don't know why...
-  for (auto n = 5; n <= 1024; ++n)
+  for (auto n = 5; n <= 8000; ++n)
   {
     SARA_DEBUG << "iter = " << n << std::endl;
     auto r = Tensor_<float, 1>{n * n};

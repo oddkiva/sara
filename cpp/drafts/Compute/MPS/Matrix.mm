@@ -19,9 +19,8 @@
                            cols : (int) cols
                         options : (MTLResourceOptions) options
 {
-  self.buffer = [device
-    newBufferWithLength : rows * cols * sizeof(float) * sizeof(float)
-                options : options];
+  self.buffer = [device newBufferWithLength : rows * cols * sizeof(float)
+                                    options : options];
   self.desc = [MPSMatrixDescriptor
     matrixDescriptorWithRows : rows
                      columns : cols

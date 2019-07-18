@@ -1,3 +1,4 @@
+find_package(DO_Sara COMPONENTS Core REQUIRED)
 find_package(Boost
   COMPONENTS filesystem serialization system unit_test_framework
   REQUIRED)
@@ -27,6 +28,13 @@ if (APPLE)
           "\t${MetalPerformanceShaders_LIBRARY}")
 
   set(DO_Sara_Compute_SOURCE_FILES
+    # Apple Accelerate backend.
+    Accelerate.hpp
+
+    # CLBlast backend.
+    CLBlast.hpp
+
+    # Metal backend.
     MPS.hpp
     MPS/Matrix.hpp MPS/Matrix.mm
     MPS/SGEMMImpl.hpp MPS/SGEMMImpl.mm
@@ -39,24 +47,38 @@ if (APPLE)
     "-framework Foundation"
     "-framework Metal"
     "-framework MetalPerformanceShaders")
+  set_target_properties(DO_Sara_Compute PROPERTIES FOLDER "DO Sara Libraries")
 
 
-  sara_add_test(test_compute_accelerate
-    test_compute_accelerate.cpp "${DO_Sara_Libraries}")
-  target_include_directories(test_compute_accelerate PRIVATE ${Boost_INCLUDE_DIR})
-  target_compile_definitions(test_compute_accelerate PRIVATE -DBOOST_ALL_NO_LIB)
-  target_link_libraries(test_compute_accelerate
-    ${Boost_LIBRARIES}
-    ${Accelerate_LIBRARY})
+  file(GLOB test_compute_SOURCE_FILES FILES test_*.cpp)
 
-  sara_add_test(test_compute_mps test_compute_mps.cpp "${DO_Sara_Libraries}")
-  target_include_directories(test_compute_mps PRIVATE ${Boost_INCLUDE_DIR})
-  target_compile_definitions(test_compute_mps PRIVATE -DBOOST_ALL_NO_LIB)
+  foreach (file ${test_compute_SOURCE_FILES})
+    get_filename_component(filename "${file}" NAME_WE)
+    sara_add_test(${filename} ${file} "${DO_Sara_Libraries}" "Compute")
+    target_include_directories(${filename} PRIVATE ${Boost_INCLUDE_DIR})
+    target_compile_definitions(${filename} PRIVATE -DBOOST_ALL_NO_LIB)
+    target_link_libraries(${filename}
+      DO_Sara_Compute
+      ${DO_Sara_LIBRARIES}
+      ${Boost_LIBRARIES})
+  endforeach ()
+
+  target_link_libraries(test_compute_accelerate ${Accelerate_LIBRARY})
+
   target_compile_options(test_compute_mps PRIVATE -x objective-c++)
   target_link_libraries(test_compute_mps
-    DO_Sara_Compute
     "-framework Foundation"
     "-framework Metal"
-    "-framework MetalPerformanceShaders"
-    ${Boost_LIBRARIES})
+    "-framework MetalPerformanceShaders")
+
+  find_package(OpenCL REQUIRED)
+  find_library(CLBlast_LIBRARY clBlast)
+  if (NOT Foundation_LIBRARY)
+    message(FATAL_ERROR "Could not find Foundation library!")
+  endif ()
+  message("Found CLBlast libraries: ${CLBlast_LIBRARY}")
+  target_include_directories(test_compute_clblast PRIVATE ${OpenCL_INCLUDE_DIR})
+  target_link_libraries(test_compute_clblast
+    ${CLBlast_LIBRARY}
+    ${OpenCL_LIBRARY})
 endif ()

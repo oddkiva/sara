@@ -35,21 +35,22 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_compute_accelerate_gemm, MultiArray,
   A.matrix() << 0, 1, //
                 2, 3, //
                 4, 5;
-  SARA_DEBUG << "A =\n" << A.matrix() << std::endl;
 
   auto B = MultiArray{2, 4};
   B.matrix() << 0, 1, 2, 3, //
                 4, 5, 6, 7;
-  SARA_DEBUG << "B =\n" << B.matrix() << std::endl;
 
   auto C = MultiArray{3, 4};
   gemm(A, B, C);
 
-  SARA_DEBUG << "C = A * B =\n" << C.matrix() << std::endl;
+  // Compare with Eigen backend.
   auto true_C = MultiArray{3, 4};
-  true_C.matrix() <<  4,  5,  6,  7,
-                     12, 17, 22, 27,
-                     20, 29, 38, 47;
-  BOOST_CHECK_EQUAL(C.matrix().template cast<int>(),
-                    true_C.matrix().template cast<int>());
+  true_C.matrix() = A.matrix() * B.matrix();
+  // true_C = np.array([[ 4,  5,  6,  7],
+  //                    [12, 17, 22, 27],
+  //                    [20, 29, 38, 47]])
+
+  const double rel_err =
+      (C.matrix() - true_C.matrix()).norm() / true_C.matrix().norm();
+  BOOST_CHECK_SMALL(rel_err, 1e-12);
 }

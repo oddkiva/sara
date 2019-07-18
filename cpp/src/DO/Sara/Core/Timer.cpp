@@ -29,7 +29,7 @@ namespace DO { namespace Sara {
     if (!QueryPerformanceFrequency(&freq))
     {
       auto msg = "Failed to initialize high resolution timer!";
-      throw std::runtime_error{ msg };
+      throw std::runtime_error{msg};
     }
     _frequency = static_cast<double>(freq.QuadPart);
 #endif
