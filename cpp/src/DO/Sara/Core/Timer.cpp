@@ -44,7 +44,7 @@ namespace DO { namespace Sara {
     _start = static_cast<double>(_li_start.QuadPart);
 #else
     timeval start;
-    gettimeofday(&start, NULL);
+    gettimeofday(&start, nullptr);
     _start = start.tv_sec + start.tv_usec * 1e-6;
 #endif
   }
