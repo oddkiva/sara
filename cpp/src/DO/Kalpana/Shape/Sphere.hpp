@@ -13,8 +13,8 @@ namespace DO { namespace Kalpana {
   {
   public:
     Sphere(const Vector3f& c = Vector3f::Zero(), float r = 1.f)
-      : _c{ c }
-      , _r{ r }
+      : _c{c}
+      , _r{r}
     {
     }
 

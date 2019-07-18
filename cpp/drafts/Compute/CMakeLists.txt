@@ -1,9 +1,17 @@
 find_package(DO_Sara COMPONENTS Core REQUIRED)
+
 find_package(Boost
   COMPONENTS filesystem serialization system unit_test_framework
   REQUIRED)
 find_package(DO_Sara COMPONENTS Core REQUIRED)
 
+find_package(OpenCL REQUIRED)
+
+find_library(CLBlast_LIBRARY clBlast)
+if (NOT Foundation_LIBRARY)
+  message(FATAL_ERROR "Could not find Foundation library!")
+endif ()
+message("Found CLBlast libraries: ${CLBlast_LIBRARY}")
 
 if (APPLE)
   find_library(Accelerate_LIBRARY Accelerate)
@@ -11,21 +19,21 @@ if (APPLE)
     message(FATAL_ERROR "Could not find Accelerate library!")
   endif ()
   message("Found Accelerate framework:\n"
-          "\t${Accelerate_LIBRARY}")
+    "\t${Accelerate_LIBRARY}")
 
   find_library(Foundation_LIBRARY Foundation)
   if (NOT Foundation_LIBRARY)
     message(FATAL_ERROR "Could not find Foundation library!")
   endif ()
   message("Found Foundation framework:\n"
-          "\t${Foundation_LIBRARY}")
+    "\t${Foundation_LIBRARY}")
 
   find_library(MetalPerformanceShaders_LIBRARY MetalPerformanceShaders)
   if (NOT MetalPerformanceShaders_LIBRARY)
     message(FATAL_ERROR "Could not find MetalPerformanceShaders library!")
   endif ()
   message("Found MetalPerformanceShaders framework:\n"
-          "\t${MetalPerformanceShaders_LIBRARY}")
+    "\t${MetalPerformanceShaders_LIBRARY}")
 
   set(DO_Sara_Compute_SOURCE_FILES
     # Apple Accelerate backend.
@@ -48,6 +56,10 @@ if (APPLE)
     "-framework Metal"
     "-framework MetalPerformanceShaders")
   set_target_properties(DO_Sara_Compute PROPERTIES FOLDER "DO Sara Libraries")
+  target_link_libraries(DO_Sara_Compute PRIVATE ${CLBlast_LIBRARY})
+  target_link_libraries(DO_Sara_Compute PUBLIC
+      ${CLBlast_LIBRARY}
+      ${OpenCL_LIBRARY})
 
 
   file(GLOB test_compute_SOURCE_FILES FILES test_*.cpp)
@@ -71,14 +83,6 @@ if (APPLE)
     "-framework Metal"
     "-framework MetalPerformanceShaders")
 
-  find_package(OpenCL REQUIRED)
-  find_library(CLBlast_LIBRARY clBlast)
-  if (NOT Foundation_LIBRARY)
-    message(FATAL_ERROR "Could not find Foundation library!")
-  endif ()
-  message("Found CLBlast libraries: ${CLBlast_LIBRARY}")
   target_include_directories(test_compute_clblast PRIVATE ${OpenCL_INCLUDE_DIR})
-  target_link_libraries(test_compute_clblast
-    ${CLBlast_LIBRARY}
-    ${OpenCL_LIBRARY})
+  target_link_libraries(test_compute_clblast)
 endif ()

@@ -1105,7 +1105,6 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
           reinterpret_cast<std::uint8_t*>(colors.data()),
           tinyply::Type::INVALID, 0);
 
-  host_c.flat_array().fill(0.f);
       geom_ply_file.write(ostr, false);
     }
   }
