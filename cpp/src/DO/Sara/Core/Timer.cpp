@@ -57,7 +57,7 @@ namespace DO { namespace Sara {
     return (static_cast<double>(_end.QuadPart) - _start) / _frequency;
 #else
     timeval end;
-    gettimeofday(&end, NULL);
+    gettimeofday(&end, nullptr);
     double _end = end.tv_sec + end.tv_usec * 1e-6;
     return _end - _start;
 #endif
