@@ -4,7 +4,7 @@ message(STATUS "  - DO_MultiViewGeometry_Tests")
 
 find_package(HDF5 COMPONENTS CXX REQUIRED)
 find_package(DO_Sara COMPONENTS MultiViewGeometry REQUIRED)
-find_package(Ceres REQUIRED)
+find_package(Ceres)
 
 file(GLOB test_multiviewgeometry_SOURCE_FILES FILES test_*.cpp)
 
@@ -13,7 +13,9 @@ foreach (file ${test_multiviewgeometry_SOURCE_FILES})
   sara_add_test(${filename} ${file} "${DO_Sara_LIBRARIES}" "MultiViewGeometry")
 endforeach ()
 
-target_include_directories(test_multiviewgeometry_ceres_solver_backend PRIVATE
-  ${CERES_INCLUDE_DIRS})
-target_link_libraries(test_multiviewgeometry_ceres_solver_backend
-  ${CERES_LIBRARIES})
+if (CERES_FOUND)
+  target_include_directories(test_multiviewgeometry_ceres_solver_backend PRIVATE
+    ${CERES_INCLUDE_DIRS})
+  target_link_libraries(test_multiviewgeometry_ceres_solver_backend
+    ${CERES_LIBRARIES})
+endif ()
