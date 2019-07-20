@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_SUITE(TestImageDatabase)
 
 BOOST_AUTO_TEST_CASE(test_image_database_iterator)
 {
-  const auto db_dir = string{src_path("../../../data/")};
+  const auto db_dir = string{src_path("../../../../data/")};
 
   const auto image_db = ImageDataSet<Image<Rgb8>>{{
       db_dir + "/" + "All.tif", db_dir + "/" + "ksmall.jpg",
@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_SUITE(TestTrainingDataSet)
 
 BOOST_AUTO_TEST_CASE(test_image_classification_training_data_set_initialization)
 {
-  const auto db_dir = string{src_path("../../../data/")};
+  const auto db_dir = string{src_path("../../../../data/")};
 
   auto training_data_set = ImageClassificationTrainingDataSet{};
 
@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE(test_image_classification_training_data_set_initialization)
 
 BOOST_AUTO_TEST_CASE(test_image_segmentation_training_data_set_initialization)
 {
-  const auto db_dir = string{src_path("../../../data/")};
+  const auto db_dir = string{src_path("../../../../data/")};
 
   auto training_data_set = ImageSegmentationTrainingDataSet{};
 
@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_SUITE(TestTransformedTrainingDataSet)
 BOOST_AUTO_TEST_CASE(
     test_transformed_image_classification_training_data_set_initialization)
 {
-  const auto db_dir = string{src_path("../../../data/")};
+  const auto db_dir = string{src_path("../../../../data/")};
 
   auto training_data_set = TransformedImageClassificationTrainingDataSet{};
 
@@ -240,7 +240,7 @@ BOOST_AUTO_TEST_CASE(
 BOOST_AUTO_TEST_CASE(
     test_transformed_image_segmentation_training_data_set_initialization)
 {
-  const auto db_dir = string{src_path("../../../data/")};
+  const auto db_dir = string{src_path("../../../../data/")};
 
   auto training_data_set = TransformedImageSegmentationTrainingDataSet{};
 

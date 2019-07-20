@@ -31,19 +31,19 @@ BOOST_AUTO_TEST_CASE(test_clblast_gemm_batched)
   // List the available compute (GPU/CPU) devices for the selected platform.
   auto devices = get_compute_devices(platform);
   auto device = devices[device_id];
-  
+
   // Initialize the compute context (resources + compute).
   const auto device_as_vector = std::vector<cl::Device>{device};
   const auto context = cl::Context(device_as_vector);
   const auto queue = cl::CommandQueue(context, device);
 
   const auto batch_count = 3;
-  for (int i = 2; i < 1000; ++i)
+  for (auto sz = 2; sz <= 256; sz *= 2)
   {
-    SARA_DEBUG << "iteration = " << i << std::endl;
-    const auto m = i;
-    const auto n = i;
-    const auto k = i;
+    SARA_DEBUG << "size = " << sz << std::endl;
+    const auto m = sz;
+    const auto n = sz;
+    const auto k = sz;
 
     // Initialize the data.
     auto range = Tensor_<float, 1>{m * k};

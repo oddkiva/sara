@@ -24,7 +24,7 @@ BOOST_AUTO_TEST_SUITE(TestDefinesAndMacros)
 BOOST_AUTO_TEST_CASE(test_defines_and_macros)
 {
   BOOST_CHECK(!string(DO_SARA_VERSION).empty());
-  BOOST_CHECK(string(src_path("")).find("test/Core") != string::npos);
+  BOOST_CHECK(string(src_path("")).find("test/Sara/Core") != string::npos);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -63,6 +63,7 @@ flags = [
 # CUDA header directories.
 "-I", "/usr/local/cuda/include",
 # Current header directories.
+"-I", "cpp",
 "-I", "cpp/src",
 # Build directory.
 "-I", "../sara-build/cpp/src",

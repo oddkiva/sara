@@ -29,7 +29,7 @@ namespace DO { namespace Kalpana {
   using namespace Eigen;
 
   //! @brief Class derived from QOpenGLWidget to view 3D scenes.
-  class Canvas3D : public QOpenGLWidget, protected QOpenGLFunctions_4_3_Core
+  class Canvas3D : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
   {
   public:
     Canvas3D(Scene *scene, QWidget *parent = 0);

@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(test_ls)
   }
 
   {
-    auto images = sara::ls(src_path("../../../data/"), ".jpg");
+    auto images = sara::ls(src_path("../../../../data/"), ".jpg");
     BOOST_CHECK(!images.empty());
   }
 }

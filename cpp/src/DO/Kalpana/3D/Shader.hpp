@@ -2,12 +2,12 @@
 
 #include <string>
 
-#include <QOpenGLFunctions_4_3_Core>
+#include <QOpenGLFunctions_3_3_Core>
 
 
 namespace DO { namespace Kalpana {
 
-  class Shader : protected QOpenGLFunctions_4_3_Core
+  class Shader : protected QOpenGLFunctions_3_3_Core
   {
   public:
     Shader() = default;
@@ -28,7 +28,7 @@ namespace DO { namespace Kalpana {
     GLuint _shader_object{ 0 };
   };
 
-  class ShaderProgram : protected QOpenGLFunctions_4_3_Core
+  class ShaderProgram : protected QOpenGLFunctions_3_3_Core
   {
   public:
     inline ShaderProgram() = default;
@@ -53,9 +53,9 @@ namespace DO { namespace Kalpana {
     bool clear();
 
   private:
-    GLuint _program_object{ 0 };
-    GLuint _vertex_shader{ 0 };
-    GLuint _fragment_shader{ 0 };
+    GLuint _program_object{0};
+    GLuint _vertex_shader{0};
+    GLuint _fragment_shader{0};
   };
 
 } /* namespace Kalpana */

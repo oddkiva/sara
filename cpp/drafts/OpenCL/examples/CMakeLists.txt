@@ -1,0 +1,3 @@
+add_subdirectory(hello_opencl)
+add_subdirectory(hello_triangle)
+add_subdirectory(image_processing)

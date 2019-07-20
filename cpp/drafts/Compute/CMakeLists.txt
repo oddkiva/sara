@@ -57,9 +57,7 @@ if (APPLE)
     "-framework MetalPerformanceShaders")
   set_target_properties(DO_Sara_Compute PROPERTIES FOLDER "DO Sara Libraries")
   target_link_libraries(DO_Sara_Compute PRIVATE ${CLBlast_LIBRARY})
-  target_link_libraries(DO_Sara_Compute PUBLIC
-      ${CLBlast_LIBRARY}
-      ${OpenCL_LIBRARY})
+  target_link_libraries(DO_Sara_Compute PUBLIC ${OpenCL_LIBRARY})
 
 
   file(GLOB test_compute_SOURCE_FILES FILES test_*.cpp)
@@ -84,5 +82,7 @@ if (APPLE)
     "-framework MetalPerformanceShaders")
 
   target_include_directories(test_compute_clblast PRIVATE ${OpenCL_INCLUDE_DIR})
-  target_link_libraries(test_compute_clblast)
+  target_link_libraries(test_compute_clblast
+    ${OpenCL_LIBRARY}
+    ${CLBlast_LIBRARY})
 endif ()
