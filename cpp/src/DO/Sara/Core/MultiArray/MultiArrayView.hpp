@@ -534,8 +534,11 @@ namespace DO { namespace Sara {
       -> MultiArray<T, Dimension, StorageOrder>
     {
       auto out_sizes = vector_type{};
-      for (int i = 0; i < Dimension; ++i)
-        out_sizes[i] = this->size(order[i]);
+      // We keep this to remember what it does:
+      // for (int i = 0; i < Dimension; ++i)
+      //   out_sizes[i] = this->size(order[i]);
+      std::transform(order.data(), order.data() + order.size(), out_sizes.data(),
+                     [&](int order_i) { return this->size(order_i); });
 
       auto out = MultiArray<T, Dimension, StorageOrder>{out_sizes};
 
@@ -544,8 +547,12 @@ namespace DO { namespace Sara {
 
       for (; !in_it.end(); ++in_it)
       {
-        for (int i = 0; i < Dimension; ++i)
-          out_coord[i] = in_it.position()[order[i]];
+        // We keep this to remember what it does:
+        // for (int i = 0; i < Dimension; ++i)
+        //   out_coord[i] = in_it.position()[order[i]];
+        std::transform(order.data(), order.data() + order.size(),
+                       out_coord.data(),
+                       [&](int order_i) { return in_it.position()[order_i]; });
 
         out(out_coord) = *in_it;
       }

@@ -179,14 +179,8 @@ namespace DO { namespace Sara {
         -> Image<decltype(op(std::declval<value_type>())), Dimension>
     {
       using Pixel = decltype(op(std::declval<value_type>()));
-
       auto dst = Image<Pixel, N>{this->sizes()};
-
-      auto src_pixel = this->begin();
-      auto dst_pixel = dst.begin();
-      for (; src_pixel != this->end(); ++src_pixel, ++dst_pixel)
-        *dst_pixel = op(*src_pixel);
-
+      std::transform(std::begin(*this), std::end(*this), std::begin(dst), op);
       return dst;
     }
   };
