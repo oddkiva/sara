@@ -9,6 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include <DO/Sara/Core/Numpy.hpp>
 #include <DO/Sara/MultiViewGeometry/Estimators/RelativePoseEstimator.hpp>
 
 

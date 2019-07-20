@@ -21,6 +21,12 @@ using namespace DO::Sara;
 namespace eigen = DO::Sara::EigenExt;
 
 
+BOOST_AUTO_TEST_CASE(test_range)
+{
+  auto a = range(3);
+  BOOST_CHECK(a.vector() == Vector3i(0, 1, 2));
+}
+
 BOOST_AUTO_TEST_CASE(test_arange)
 {
   static_assert(std::is_same_v<decltype(double{} * float{} * int{}), double>);
@@ -144,3 +150,17 @@ BOOST_AUTO_TEST_CASE(test_meshgrid)
    BOOST_CHECK_EQUAL(yv.cols(), 2);
    BOOST_CHECK(yv == true_yv);
 }
+
+BOOST_AUTO_TEST_CASE(test_indexing)
+{
+  const auto N = 2;
+  const auto C = 3;
+  const auto H = 4;
+  const auto W = 5;
+  auto x = range(N * C * H * W).cast<float>().reshape(Vector4i{N, C, H, W});
+
+  // This will fail if the reshape function is not defined for rvalue-reference
+  // to MultiArray<T, N, O> objects.
+  for (int i = 0; i < N * C * H * W; ++i)
+    BOOST_CHECK_EQUAL(x.flat_array()(i), float(i));
+};

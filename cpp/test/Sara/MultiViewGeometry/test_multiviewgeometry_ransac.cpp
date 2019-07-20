@@ -16,12 +16,6 @@ using namespace std;
 
 BOOST_AUTO_TEST_SUITE(TestRansac)
 
-BOOST_AUTO_TEST_CASE(test_range)
-{
-  auto a = range(3);
-  BOOST_CHECK(a.vector() == Vector3i(0, 1, 2));
-}
-
 BOOST_AUTO_TEST_CASE(test_random_shuffle)
 {
   auto a = range(4);
