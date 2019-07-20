@@ -37,6 +37,8 @@ if (SARA_USE_FROM_SOURCE)
     target_link_libraries(
       DO_Sara_Graphics
       Qt5::Widgets Qt5::OpenGL ${OPENGL_LIBRARIES})
+    target_compile_definitions(DO_Sara_Graphics PRIVATE
+      -DGL_SILENCE_DEPRECATION)
 
     if (WIN32)
       target_link_libraries(DO_Sara_Graphics Qt5::WinMain)

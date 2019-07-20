@@ -494,8 +494,7 @@ namespace DO { namespace Sara {
     template <typename Op>
     inline auto cwise_transform_inplace(Op op) -> self_type&
     {
-      for (auto pixel = begin(); pixel != end(); ++pixel)
-        op(*pixel);
+      std::for_each(std::begin(*this), std::end(*this), op);
       return *this;
     }
 
@@ -508,13 +507,14 @@ namespace DO { namespace Sara {
       using ValueType = decltype(op(std::declval<value_type>()));
 
       auto dst = MultiArray<ValueType, N, S>{sizes()};
-
-      auto src_pixel = begin();
-      auto dst_pixel = dst.begin();
-      for (; src_pixel != end(); ++src_pixel, ++dst_pixel)
-        *dst_pixel = op(*src_pixel);
-
+      std::transform(std::begin(*this), std::end(*this), std::begin(dst), op);
       return dst;
+    }
+
+    template <typename U>
+    inline auto cast() const -> MultiArray<U, Dimension, StorageOrder>
+    {
+      return cwise_transform([](const T& v) { return U(v); });
     }
 
     //! @brief Reshape the array with the new sizes.
