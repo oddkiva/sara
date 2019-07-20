@@ -1,6 +1,7 @@
 #include <drafts/OpenCL/GL.hpp>
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
+#include <DO/Sara/Core/HDF5.hpp>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -10,6 +11,9 @@
 
 #include <map>
 
+
+using namespace DO::Sara;
+using namespace std;
 
 
 inline auto init_gl_boilerplate()
@@ -32,11 +36,17 @@ inline auto init_gl_boilerplate()
 }
 
 
+Tensor_<float, 2> read_point_cloud(const std::string& h5_filepath)
+{
+  auto h5_file = H5File{h5_filepath, H5F_ACC_RDONLY};
+  auto coords = Tensor_<float, 2>{};
+  h5_file.read_dataset("points", coords);
+  return coords;
+}
+
+
 int main()
 {
-  using namespace DO::Sara;
-  using namespace std;
-
   init_gl_boilerplate();
 
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -104,12 +114,23 @@ int main()
   fragment_shader.destroy();
 
   // Encode the vertex data in a tensor.
-  auto vertices = Tensor_<float, 2>{{3, 6}};
-  vertices.flat_array() << //
-    // coords            color
-    -0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  // left
-     0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,  // right
-     0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f;  // top
+  auto coords = read_point_cloud("/Users/david/Desktop/geometry.h5");
+  //auto vertices = Tensor_<float, 2>{{3, 6}};
+  //vertices.flat_array() << //
+  //  // coords            color
+  //  -0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  // left
+  //   0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,  // right
+  //   0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f;  // top
+  auto vertices = Tensor_<float, 2>{{coords.size(0), 6}};
+  vertices.flat_array().fill(1.f);
+  vertices.matrix().leftCols(3) = coords.matrix();
+  vertices.matrix().col(2) *= -1.f;
+
+  SARA_DEBUG << "coords sizes = " << coords.sizes().transpose() << std::endl;
+
+  SARA_DEBUG << "coords =\n" << coords.matrix().topRows(10) << std::endl;
+  SARA_DEBUG << "vertices =\n" << vertices.matrix().topRows(10) << std::endl;
+
   const auto row_bytes = [](const TensorView_<float, 2>& data) {
     return data.size(1) * sizeof(float);
   };
@@ -164,10 +185,8 @@ int main()
     glClear(GL_COLOR_BUFFER_BIT);
 
     // Draw triangles
-    {
-      glBindVertexArray(vao); // geometry specified by the VAO.
-      glDrawArrays(GL_POINTS, 0, vertices.size(0)); //
-    }
+    glBindVertexArray(vao); // geometry specified by the VAO.
+    glDrawArrays(GL_POINTS, 0, vertices.size(0)); //
 
     glfwSwapBuffers(window);
     glfwPollEvents();

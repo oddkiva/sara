@@ -1,3 +1,4 @@
+find_package(HDF5 COMPONENTS CXX REQUIRED)
 find_package(GLFW3 REQUIRED)
 
 file(GLOB SRC_FILES FILES *.cpp *.hpp *.cl)
@@ -6,9 +7,9 @@ source_group("OpenCL Source Files" REGULAR_EXPRESSION
 
 add_executable(hello_triangle ${SRC_FILES})
 target_compile_definitions(hello_triangle PRIVATE -DGL_SILENCE_DEPRECATION)
+target_include_directories(hello_triangle PRIVATE ${HDF5_INCLUDE_DIRS})
 target_link_libraries(hello_triangle PRIVATE
-  ${DO_Sara_LIBRARIES}
-  glfw)
+  ${DO_Sara_LIBRARIES} ${HDF5_LIBRARIES} glfw)
 target_link_libraries(hello_triangle PRIVATE DO_Sara_OpenCL_GL)
 set_target_properties(hello_triangle PROPERTIES
   COMPILE_FLAGS "-DSRCDIR=${CMAKE_CURRENT_SOURCE_DIR}")
