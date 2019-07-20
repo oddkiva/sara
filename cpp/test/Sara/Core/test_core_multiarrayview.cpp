@@ -14,8 +14,10 @@
 #include <boost/mpl/list.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/MultiArray/MultiArrayView.hpp>
 #include <DO/Sara/Core/MultiArray/MultiArray.hpp>
+#include <DO/Sara/Core/Numpy.hpp>
 #include <DO/Sara/Core/Tensor.hpp>
 
 
@@ -71,6 +73,15 @@ BOOST_AUTO_TEST_CASE(test_multiarrayview_cast)
   std::iota(std::begin(true_rd), std::end(true_rd), 0);
 
   BOOST_CHECK(true_rd.vector() == rd.vector());
+}
+
+BOOST_AUTO_TEST_CASE(test_multiarrayview_flatten)
+{
+  auto r = range(10).reshape(Vector2i{2, 5});
+
+  auto r_flatten = r.flatten();
+
+  BOOST_CHECK(r_flatten == range(10));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

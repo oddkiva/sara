@@ -17,17 +17,18 @@
 #include <DO/Sara/Core/Tensor.hpp>
 
 
-namespace DO { namespace Sara {
+// On Eigen matrix data structures.
+namespace DO::Sara::EigenExt {
 
   template <typename T>
   inline auto arange(T start, T stop, T step)
       -> Eigen::Matrix<T, Eigen::Dynamic, 1>
   {
-    const auto num_samples = int((stop - start) / step);
-    Eigen::Matrix<T, Eigen::Dynamic, 1> samples(num_samples);
-    for (int i = 0; i < num_samples; ++i)
-      samples[i] = start + i * step;
-    return samples;
+    const auto bound = (stop - start) / step;
+    const auto num_samples = static_cast<int>(
+        bound - std::floor(bound) > 0 ? std::ceil(bound) : std::floor(bound));
+    stop = start + (num_samples - 1) * step;
+    return Eigen::Matrix<T, Eigen::Dynamic, 1>::LinSpaced(num_samples, start, stop);
   }
 
   template <typename Mat>
@@ -137,6 +138,31 @@ namespace DO { namespace Sara {
     return stack_x;
   }
 
+} /* namespace DO::Sara::EigenExt */
+
+
+// On the MultiArray class.
+namespace DO::Sara {
+
+  inline auto range(int n) -> Tensor_<int, 1>
+  {
+    auto indices = Tensor_<int, 1>{n};
+    std::iota(indices.begin(), indices.end(), 0);
+    return indices;
+  }
+
+  template <typename T>
+  inline auto arange(T start, T stop, T step) -> Tensor_<T, 1>
+  {
+    const auto bound = (stop - start) / step;
+    const auto num_samples = static_cast<int>(
+        bound - std::floor(bound) > 0 ? std::ceil(bound) : std::floor(bound));
+    stop = start + (num_samples - 1) * step;
+    auto r = range(num_samples).cast<T>();
+    std::for_each(std::begin(r), std::end(r),
+                  [&](auto& i) { i = start + i * step; });
+    return r;
+  }
 
   template <typename T, int O>
   inline auto vstack(const TensorView<T, 2, O>& x, const TensorView<T, 2, O>& y)
@@ -150,5 +176,4 @@ namespace DO { namespace Sara {
     return xy;
   }
 
-} /* namespace Sara */
-} /* namespace DO */
+} /* namespace DO::Sara */

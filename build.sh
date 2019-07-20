@@ -34,7 +34,11 @@ function build_library()
   fi
 
   # Generate makefile project.
-  cmake ../sara ${cmake_options}
+  if [ "${build_type}" == "emscripten" ]; then
+    emconfigure cmake ../sara
+  else
+    cmake ../sara ${cmake_options}
+  fi
 
   # Build the library.
   make -j$(nproc) VERBOSE=1

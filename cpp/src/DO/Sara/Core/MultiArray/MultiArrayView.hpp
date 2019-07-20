@@ -514,7 +514,7 @@ namespace DO { namespace Sara {
     template <typename U>
     inline auto cast() const -> MultiArray<U, Dimension, StorageOrder>
     {
-      return cwise_transform([](const T& v) { return U(v); });
+      return cwise_transform([](const T& v) -> U { return static_cast<U>(v); });
     }
 
     //! @brief Reshape the array with the new sizes.
@@ -527,6 +527,14 @@ namespace DO { namespace Sara {
         throw std::domain_error{"Invalid shape!"};
       return MultiArrayView<T, D, StorageOrder>{const_cast<T*>(_begin),
                                                 new_sizes};
+    }
+
+    //! @brief Reshape the array with the new sizes.
+    inline auto flatten() const
+        -> MultiArrayView<T, 1, StorageOrder>
+    {
+      return MultiArrayView<T, 1, StorageOrder>{const_cast<T*>(_begin),
+                                                static_cast<int>(size())};
     }
 
     //! @brief Transpose the array.

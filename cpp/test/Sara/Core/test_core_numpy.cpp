@@ -18,17 +18,65 @@
 
 
 using namespace DO::Sara;
+namespace eigen = DO::Sara::EigenExt;
 
 
 BOOST_AUTO_TEST_CASE(test_arange)
 {
-   auto samples = arange(0.5, 1.5, 0.1);
-   auto true_samples = Eigen::VectorXd(10);
-   true_samples << 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4;
-   BOOST_CHECK_LE((samples - true_samples).norm(), 1e-9);
+  static_assert(std::is_same_v<decltype(double{} * float{} * int{}), double>);
 
-   static_assert(std::is_same<decltype(double{} * float{} * int{}),
-                              double>::value, "");
+  {
+    const auto samples = eigen::arange(0.5, 1.5, 0.1);
+    auto true_samples = Eigen::VectorXd(10);
+    true_samples << 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4;
+    BOOST_CHECK_LE((samples - true_samples).norm() / true_samples.norm(),
+                   1e-12);
+  }
+
+  {
+    const auto samples = eigen::arange(0., 1., 0.1);
+    auto true_samples = Eigen::VectorXd(10);
+    true_samples << 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9;
+    BOOST_CHECK_LE((samples - true_samples).norm() / true_samples.norm(),
+                   1e-12);
+  }
+
+  {
+    // That's the precision limit here for clang.
+    const auto samples = eigen::arange(0., 1.000000000000001, 0.1);
+    auto true_samples = Eigen::VectorXd(11);
+    true_samples << 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0;
+    BOOST_CHECK_LE((samples - true_samples).norm() / true_samples.norm(),
+                   1e-12);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(test_arange_2)
+{
+  {
+    const auto samples = arange(0.5, 1.5, 0.1);
+    auto true_samples = Eigen::VectorXd(10);
+    true_samples << 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4;
+    BOOST_CHECK_LE(
+        (samples.vector() - true_samples).norm() / true_samples.norm(), 1e-12);
+  }
+
+  {
+    const auto samples = arange(0., 1., 0.1);
+    auto true_samples = Eigen::VectorXd(10);
+    true_samples << 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9;
+    BOOST_CHECK_LE((samples.vector() - true_samples).norm() / true_samples.norm(),
+                   1e-12);
+  }
+
+  {
+    // That's the precision limit here for clang.
+    const auto samples = arange(0., 1.000000000000001, 0.1);
+    auto true_samples = Eigen::VectorXd(11);
+    true_samples << 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0;
+    BOOST_CHECK_LE(
+        (samples.vector() - true_samples).norm() / true_samples.norm(), 1e-12);
+  }
 }
 
 BOOST_AUTO_TEST_CASE(test_vstack)
@@ -39,7 +87,7 @@ BOOST_AUTO_TEST_CASE(test_vstack)
     Eigen::MatrixXi::Ones(5, 3) * 3,
   };
 
-  auto vstack_res = vstack(matrices);
+  auto vstack_res = eigen::vstack(matrices);
 
   auto true_vstack_res = Eigen::MatrixXi(9, 3);
   true_vstack_res <<                   //
@@ -77,7 +125,7 @@ BOOST_AUTO_TEST_CASE(test_meshgrid)
    y << 0., 1.;
 
    Eigen::MatrixXd xv, yv;
-   std::tie(xv, yv) = meshgrid(x, y);
+   std::tie(xv, yv) = eigen::meshgrid(x, y);
 
    auto true_xv = Eigen::MatrixXd(3, 2);
    auto true_yv = Eigen::MatrixXd(3, 2);

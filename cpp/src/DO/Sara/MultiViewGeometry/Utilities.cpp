@@ -9,18 +9,12 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include <DO/Sara/Core/Numpy.hpp>
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/MultiViewGeometry/Utilities.hpp>
 
 
 namespace DO::Sara {
-
-  auto range(int n) -> Tensor_<int, 1>
-  {
-    auto indices = Tensor_<int, 1>{n};
-    std::iota(indices.begin(), indices.end(), 0);
-    return indices;
-  }
 
   auto random_samples(int num_samples,      //
                       int sample_size,      //

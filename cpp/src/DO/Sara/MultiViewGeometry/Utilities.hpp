@@ -23,9 +23,6 @@ namespace DO::Sara {
 
 // NumPy-like interface for tensors.
 DO_SARA_EXPORT
-auto range(int n) -> Tensor_<int, 1>;
-
-DO_SARA_EXPORT
 auto random_samples(int num_samples,      //
                     int sample_size,      //
                     int num_data_points)  //
