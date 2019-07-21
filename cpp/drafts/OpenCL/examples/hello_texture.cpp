@@ -2,6 +2,8 @@
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/HDF5.hpp>
+#include <DO/Sara/ImageIO.hpp>
+#include <DO/Sara/ImageProcessing/Flip.hpp>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -36,15 +38,6 @@ inline auto init_gl_boilerplate()
 }
 
 
-Tensor_<float, 2> read_point_cloud(const std::string& h5_filepath)
-{
-  auto h5_file = H5File{h5_filepath, H5F_ACC_RDONLY};
-  auto coords = Tensor_<float, 2>{};
-  h5_file.read_dataset("points", coords);
-  return coords;
-}
-
-
 int main()
 {
   init_gl_boilerplate();
@@ -65,20 +58,24 @@ int main()
 
   std::map<std::string, int> arg_pos = {{"in_coords", 0},  //
                                         {"in_color", 1},   //
+                                        {"in_tex_coords", 2},   //
                                         {"out_color", 0}};
 
   const auto vertex_shader_source = R"shader(
 #version 330 core
   layout (location = 0) in vec3 in_coords;
   layout (location = 1) in vec3 in_color;
+  layout (location = 2) in vec2 in_tex_coords;
 
   out vec3 out_color;
+  out vec2 out_tex_coords;
 
   void main()
   {
     gl_Position = vec4(in_coords, 1.0);
     gl_PointSize = 200.0;
     out_color = in_color;
+    out_tex_coords = vec2(in_tex_coords.x, in_tex_coords.y);
   }
   )shader";
   auto vertex_shader = GL::Shader{};
@@ -88,18 +85,14 @@ int main()
   const auto fragment_shader_source = R"shader(
 #version 330 core
   in vec3 out_color;
+  in vec2 out_tex_coords;
   out vec4 frag_color;
+
+  uniform sampler2D texture1;
 
   void main()
   {
-    vec2 circCoord = 2.0 * gl_PointCoord - 1.0;
-
-    float dist = length(gl_PointCoord - vec2(0.5));
-
-    if (dot(circCoord, circCoord) > 1.0)
-        discard;
-    float alpha = 1.0 - smoothstep(0.2, 0.5, dist);
-    frag_color = vec4(out_color, alpha);
+    frag_color = texture(texture1, out_tex_coords) * vec4(out_color, 1.0);
   }
   )shader";
   auto fragment_shader = GL::Shader{};
@@ -114,22 +107,18 @@ int main()
   fragment_shader.destroy();
 
   // Encode the vertex data in a tensor.
-  auto coords = read_point_cloud("/Users/david/Desktop/geometry.h5");
-  //auto vertices = Tensor_<float, 2>{{3, 6}};
-  //vertices.flat_array() << //
-  //  // coords            color
-  //  -0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  // left
-  //   0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,  // right
-  //   0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f;  // top
-  auto vertices = Tensor_<float, 2>{{coords.size(0), 6}};
-  vertices.flat_array().fill(1.f);
-  vertices.matrix().leftCols(3) = coords.matrix();
-  vertices.matrix().col(2) *= -1.f;
+  auto vertices = Tensor_<float, 2>{{4, 8}};
+  vertices.flat_array() << //
+    // coords            color              texture coords
+     0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f,  // bottom-right
+     0.5f,  0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  1.0f, 1.0f,  // top-right
+    -0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 0.0f,  0.0f, 1.0f,  // top-left
+    -0.5f, -0.5f, 0.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f;  // bottom-left
 
-  SARA_DEBUG << "coords sizes = " << coords.sizes().transpose() << std::endl;
-
-  SARA_DEBUG << "coords =\n" << coords.matrix().topRows(10) << std::endl;
-  SARA_DEBUG << "vertices =\n" << vertices.matrix().topRows(10) << std::endl;
+  auto triangles = Tensor_<unsigned int, 2>{{2, 3}};
+  triangles.flat_array() <<
+    0, 1, 2,
+    2, 3, 0;
 
   const auto row_bytes = [](const TensorView_<float, 2>& data) {
     return data.size(1) * sizeof(float);
@@ -141,38 +130,58 @@ int main()
   auto vao = GL::VertexArray{};
   vao.generate();
 
+  // Vertex attributes.
   auto vbo = GL::Buffer{};
   vbo.generate();
 
-  // Specify the vertex attributes here.
+  // Triangles data.
+  auto ebo = GL::Buffer{};
+  ebo.generate();
+
   {
     glBindVertexArray(vao);
 
-    // Copy the vertex data into the GPU buffer object.
-    vbo.bind_data(vertices);
+    // Copy vertex data.
+    vbo.bind_vertex_data(vertices);
 
-    // Specify that the vertex shader param 0 corresponds to the first 3 float
-    // data of the buffer object.
+    // Copy geometry data.
+    ebo.bind_triangles_data(triangles);
+
+    // Map the parameters to the argument position for the vertex shader.
+    //
+    // Vertex coordinates.
     glVertexAttribPointer(arg_pos["in_coords"], 3 /* 3D points */, GL_FLOAT,
                           GL_FALSE, row_bytes(vertices), float_pointer(0));
     glEnableVertexAttribArray(arg_pos["in_coords"]);
 
-    // Specify that the vertex shader param 1 corresponds to the first 3 float
-    // data of the buffer object.
+    // Colors.
     glVertexAttribPointer(arg_pos["in_color"], 3 /* 3D colors */, GL_FLOAT,
                           GL_FALSE, row_bytes(vertices), float_pointer(3));
     glEnableVertexAttribArray(arg_pos["in_color"]);
 
-    // Unbind the vbo to protect its data.
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+    // Texture coordinates.
+    glVertexAttribPointer(arg_pos["in_tex_coords"], 2 /* 3D colors */, GL_FLOAT,
+                          GL_FALSE, row_bytes(vertices), float_pointer(6));
+    glEnableVertexAttribArray(arg_pos["in_tex_coords"]);
   }
 
+  // Texture data.
+  auto texture = GL::Texture2D{};
+  texture.generate();
+  {
+    glActiveTexture(GL_TEXTURE0);
 
-  glEnable(GL_POINT_SMOOTH);
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glEnable(GL_PROGRAM_POINT_SIZE);
+    // Read the image from the disk.
+    auto image =
+        imread<Rgb8>("/Users/david/GitLab/DO-CV/sara/data/ksmall.jpg");
+    // Flip vertically so that the image data matches OpenGL image coordinate
+    // system.
+    flip_vertically(image);
+
+    // Copy the image to the GPU texture.
+    texture.initialize_with_pretty_defaults(image, 0);
+    glGenerateMipmap(GL_TEXTURE_2D);
+  }
 
   // Activate the shader program once and for all.
   shader_program.use(true);
@@ -184,9 +193,11 @@ int main()
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // Draw triangles
-    glBindVertexArray(vao); // geometry specified by the VAO.
-    glDrawArrays(GL_POINTS, 0, vertices.size(0)); //
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    // Draw triangles.
+    glBindVertexArray(vao);
+    glDrawElements(GL_TRIANGLES, triangles.size(), GL_UNSIGNED_INT, 0);
 
     glfwSwapBuffers(window);
     glfwPollEvents();
@@ -194,6 +205,7 @@ int main()
 
   vao.destroy();
   vbo.destroy();
+  ebo.destroy();
 
   // Clean up resources.
   glfwDestroyWindow(window);

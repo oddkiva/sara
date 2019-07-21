@@ -1,6 +1,10 @@
 #pragma once
 
-#ifndef __APPLE__
+#include <drafts/OpenCL/GL/PixelBuffer.hpp>
+
+#ifdef __APPLE__
+# include <OpenGL/gl3.h>
+#else
 # include <gl/glew.h>
 #endif
 
@@ -12,38 +16,52 @@ namespace DO::Sara { namespace GL {
 
 
   template <>
-  struct PixelTraits < float >
+  struct PixelTraits<float>
   {
-    enum {
-      PixelType = GL_FLOAT,
+    enum
+    {
+      ChannelType = GL_FLOAT,
       PixelFormat = GL_INTENSITY32F_ARB,
       ColorSpace = GL_INTENSITY
     };
   };
 
-
-  class Texture2D
+  template <>
+  struct PixelTraits<Rgb8>
   {
-  public:
-    Texture2D()
+    enum
     {
-      glGenTextures(1, &_tex_id);
+      ChannelType = GL_UNSIGNED_BYTE,
+      PixelFormat = GL_RGB,
+      ColorSpace = GL_INTENSITY
+    };
+  };
+
+  struct Texture2D
+  {
+    void generate()
+    {
+      if (!object)
+        glGenTextures(1, &object);
     }
 
-    ~Texture2D()
+    void destroy()
     {
-      glBindTexture(1, _tex_id);
-      glDeleteTextures(1, &_tex_id);
+      if (object)
+      {
+        glBindTexture(1, object);
+        glDeleteTextures(1, &object);
+      }
     }
 
     inline operator GLuint() const
     {
-      return _tex_id;
+      return object;
     }
 
     void bind() const
     {
-      glBindTexture(GL_TEXTURE_2D, _tex_id);
+      glBindTexture(GL_TEXTURE_2D, object);
     }
 
     void unbind() const
@@ -51,20 +69,40 @@ namespace DO::Sara { namespace GL {
       glBindTexture(GL_TEXTURE_2D, 0);
     }
 
-    template <typename T>
-    void upload(const PixelBuffer<T>& pixel_buffer,
-                int level = 0,
-                int border_type = GL_CLAMP_TO_EDGE)
+    void set_border_type(GLenum border_type = GL_REPEAT)
     {
-      glTexImage2D(
-        GL_TEXTURE_2D, level, PixelTraits<T>::PixelFormat,
-        pixel_buffer.width(), pixel_buffer.height(),
-        GL_CLAMP_TO_EDGE,
-        PixelTraits<T>::ColorSpace, PixelTraits<T>::PixelType);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, border_type);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, border_type);
     }
 
+    void set_interpolation_type(GLenum type = GL_LINEAR)
+    {
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, type);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, type);
+    }
+
+    template <typename T>
+    void initialize_data(const Image<T>& image, int mipmap_level = 0)
+    {
+      glTexImage2D(GL_TEXTURE_2D, mipmap_level, GL::PixelTraits<T>::PixelFormat,
+                   image.width(), image.height(),
+                   /* border */ 0, GL::PixelTraits<T>::PixelFormat,
+                   GL::PixelTraits<T>::ChannelType,
+                   reinterpret_cast<const void*>(image.data()));
+    }
+
+    template <typename T>
+    void setup_with_pretty_defaults(const Image<T>& image, int mipmap_level = 0)
+    {
+      bind();
+      set_border_type(GL_REPEAT);
+      set_interpolation_type(GL_LINEAR);
+      initialize_data(image, mipmap_level);
+    }
+
+
   private:
-    GLuint _tex_id;
+    GLuint object{0};
   };
 
 } /* namespace GL */
