@@ -11,6 +11,7 @@
 
 #define BOOST_TEST_MODULE "Core/ArrayIterators/Basic Functions"
 
+#include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/ArrayIterators.hpp>
 
 #include <boost/test/unit_test.hpp>
@@ -98,33 +99,65 @@ BOOST_AUTO_TEST_CASE(test_row_major_incrementer_2d)
       PositionIncrementer<RowMajor>::apply(coords, stop, start, end);
     }
   }
+  BOOST_REQUIRE_EQUAL(coords, Vector2i(5, 3));
   BOOST_REQUIRE(stop);
 }
 
 BOOST_AUTO_TEST_CASE(test_row_major_stepped_incrementer_2d)
 {
-  auto stop = false;
-  auto start = Vector2i{2, 3};
-  auto end = Vector2i{5, 10};
-  auto steps = Vector2i{2, 3};
-
-  auto coords = start;
-
-  auto true_visited_coords = std::vector<Vector2i>{
-    Vector2i{2, 3}, Vector2i{2, 6}, Vector2i{2, 9},
-    Vector2i{4, 3}, Vector2i{4, 6}, Vector2i{4, 9},
-  };
-
-  auto visited_coords = std::vector<Vector2i>{};
-  for (auto i = 0u; i < true_visited_coords.size(); ++i)
+  // (end - start)[i] coefficients are not multiples of steps[i].
   {
-    visited_coords.push_back(coords);
-    BOOST_REQUIRE(!stop);
-    PositionIncrementer<RowMajor>::apply(coords, stop, start, end, steps);
-  }
-  BOOST_REQUIRE(stop);
+    auto stop = false;
+    auto start = Vector2i{2, 3};
+    auto steps = Vector2i{2, 3};
+    auto end = Vector2i{5, 10};
 
-  BOOST_REQUIRE(true_visited_coords == visited_coords);
+    auto coords = start;
+
+    auto true_visited_coords = std::vector<Vector2i>{
+        Vector2i{2, 3}, Vector2i{2, 6}, Vector2i{2, 9},
+        Vector2i{4, 3}, Vector2i{4, 6}, Vector2i{4, 9},
+    };
+
+    auto visited_coords = std::vector<Vector2i>{};
+    for (auto i = 0u; i < true_visited_coords.size(); ++i)
+    {
+      visited_coords.push_back(coords);
+      BOOST_REQUIRE(!stop);
+      PositionIncrementer<RowMajor>::apply(coords, stop, start, end, steps);
+    }
+    BOOST_REQUIRE_EQUAL(coords, Vector2i(6, 3));
+    BOOST_REQUIRE(stop);
+
+    BOOST_REQUIRE(true_visited_coords == visited_coords);
+  }
+
+  // (end - start)[i] coefficients are multiples of steps[i].
+  {
+    auto stop = false;
+    auto start = Vector2i{2, 3};
+    auto steps = Vector2i{2, 3};
+    Vector2i end = start + steps.cwiseProduct(Vector2i{2, 3});
+
+    auto coords = start;
+
+    auto true_visited_coords = std::vector<Vector2i>{
+        Vector2i{2, 3}, Vector2i{2, 6}, Vector2i{2, 9},
+        Vector2i{4, 3}, Vector2i{4, 6}, Vector2i{4, 9},
+    };
+
+    auto visited_coords = std::vector<Vector2i>{};
+    for (auto i = 0u; i < true_visited_coords.size(); ++i)
+    {
+      visited_coords.push_back(coords);
+      BOOST_REQUIRE(!stop);
+      PositionIncrementer<RowMajor>::apply(coords, stop, start, end, steps);
+    }
+    BOOST_REQUIRE_EQUAL(coords, Vector2i(6, 3));
+    BOOST_REQUIRE(stop);
+
+    BOOST_REQUIRE(true_visited_coords == visited_coords);
+  }
 }
 
 BOOST_AUTO_TEST_CASE(test_col_major_incrementer_2d)
@@ -140,37 +173,78 @@ BOOST_AUTO_TEST_CASE(test_col_major_incrementer_2d)
     {
       BOOST_REQUIRE(!stop);
       BOOST_REQUIRE_EQUAL(coords, Vector2i(i, j));
+      // SARA_CHECK(coords.transpose());
       PositionIncrementer<ColMajor>::apply(coords, stop, start, end);
     }
   }
+  // SARA_CHECK(coords.transpose());
+  BOOST_REQUIRE_EQUAL(coords, Vector2i(2, 10));
   BOOST_REQUIRE(stop);
 }
 
 BOOST_AUTO_TEST_CASE(test_col_major_stepped_incrementer_2d)
 {
-  auto stop = false;
-  auto start = Vector2i{2, 3};
-  auto end = Vector2i{5, 10};
-  auto steps = Vector2i{2, 3};
-
-  auto coords = start;
-
-  auto true_visited_coords = std::vector<Vector2i>{
-      Vector2i{2, 3}, Vector2i{4, 3},  // Col 0
-      Vector2i{2, 6}, Vector2i{4, 6},  // Col 1
-      Vector2i{2, 9}, Vector2i{4, 9},  // Col 2
-  };
-
-  auto visited_coords = std::vector<Vector2i>{};
-  for (auto i = 0u; i < true_visited_coords.size(); ++i)
+  // (end - start)[i] coefficients are not multiples of steps[i].
   {
-    visited_coords.push_back(coords);
-    BOOST_REQUIRE(!stop);
-    PositionIncrementer<ColMajor>::apply(coords, stop, start, end, steps);
-  }
-  BOOST_REQUIRE(stop);
+    auto stop = false;
+    auto start = Vector2i{2, 3};
+    auto end = Vector2i{5, 10};
+    auto steps = Vector2i{2, 3};
 
-  BOOST_REQUIRE(true_visited_coords == visited_coords);
+    auto coords = start;
+
+    auto true_visited_coords = std::vector<Vector2i>{
+        Vector2i{2, 3}, Vector2i{4, 3},  // Col 0
+        Vector2i{2, 6}, Vector2i{4, 6},  // Col 1
+        Vector2i{2, 9}, Vector2i{4, 9},  // Col 2
+                                         // Vector2i{2, 12} == end
+    };
+
+    auto visited_coords = std::vector<Vector2i>{};
+    for (auto i = 0u; i < true_visited_coords.size(); ++i)
+    {
+      visited_coords.push_back(coords);
+      BOOST_REQUIRE(!stop);
+      // SARA_CHECK(coords.transpose());
+      PositionIncrementer<ColMajor>::apply(coords, stop, start, end, steps);
+    }
+    // SARA_CHECK(coords.transpose());
+    BOOST_REQUIRE_EQUAL(coords, Vector2i(2, 12));
+    BOOST_REQUIRE(stop);
+
+    BOOST_REQUIRE(true_visited_coords == visited_coords);
+  }
+
+  // (end - start)[i] coefficients are multiples of steps[i].
+  {
+    auto stop = false;
+    auto start = Vector2i{2, 3};
+    auto steps = Vector2i{2, 3};
+    Vector2i end = start + steps.cwiseProduct(Vector2i{2, 3});
+
+    auto coords = start;
+
+    auto true_visited_coords = std::vector<Vector2i>{
+        Vector2i{2, 3}, Vector2i{4, 3},  // Col 0
+        Vector2i{2, 6}, Vector2i{4, 6},  // Col 1
+        Vector2i{2, 9}, Vector2i{4, 9},  // Col 2
+                                         // Vector2i{2, 12} == end
+    };
+
+    auto visited_coords = std::vector<Vector2i>{};
+    for (auto i = 0u; i < true_visited_coords.size(); ++i)
+    {
+      visited_coords.push_back(coords);
+      BOOST_REQUIRE(!stop);
+      // SARA_CHECK(coords.transpose());
+      PositionIncrementer<ColMajor>::apply(coords, stop, start, end, steps);
+    }
+    // SARA_CHECK(coords.transpose());
+    BOOST_REQUIRE_EQUAL(coords, Vector2i(2, 12));
+    BOOST_REQUIRE(stop);
+
+    BOOST_REQUIRE(true_visited_coords == visited_coords);
+  }
 }
 
 
@@ -186,11 +260,14 @@ BOOST_AUTO_TEST_CASE(test_row_major_decrementer_2d)
   {
     for (auto j = end(1) - 1; j >= start(1); --j)
     {
+      //SARA_CHECK(coords.transpose());
       BOOST_REQUIRE(!stop);
       BOOST_REQUIRE_EQUAL(coords, Vector2i(i, j));
       PositionDecrementer<RowMajor>::apply(coords, stop, start, end);
     }
   }
+  //SARA_CHECK(coords.transpose());
+  BOOST_REQUIRE_EQUAL(coords, Vector2i(1, 9));
   BOOST_REQUIRE(stop);
 }
 
@@ -206,15 +283,19 @@ BOOST_AUTO_TEST_CASE(test_row_major_stepped_decrementer_2d)
   auto true_visited_coords = std::vector<Vector2i>{
     Vector2i{4, 9}, Vector2i{4, 6}, Vector2i{4, 3},
     Vector2i{2, 9}, Vector2i{2, 6}, Vector2i{2, 3},
+    // Vector2i{0, 9} == end
   };
 
   auto visited_coords = std::vector<Vector2i>{};
   for (auto i = 0u; i < true_visited_coords.size(); ++i)
   {
     visited_coords.push_back(coords);
+    //SARA_CHECK(coords.transpose());
     BOOST_REQUIRE(!stop);
     PositionDecrementer<RowMajor>::apply(coords, stop, start, end, steps);
   }
+  //SARA_CHECK(coords.transpose());
+  BOOST_REQUIRE_EQUAL(coords, Vector2i(0, 9));
   BOOST_REQUIRE(stop);
 
   BOOST_REQUIRE(true_visited_coords == visited_coords);
@@ -232,11 +313,14 @@ BOOST_AUTO_TEST_CASE(test_col_major_decrementer_2d)
   {
     for (int i = end(0) - 1; i >= start(0); --i)
     {
+      // SARA_CHECK(coords.transpose());
       BOOST_REQUIRE(!stop);
       BOOST_REQUIRE_EQUAL(coords, Vector2i(i, j));
       PositionDecrementer<ColMajor>::apply(coords, stop, start, end);
     }
   }
+  // SARA_CHECK(coords.transpose());
+  BOOST_REQUIRE_EQUAL(coords, Vector2i(4, 2));
   BOOST_REQUIRE(stop);
 }
 
@@ -253,15 +337,19 @@ BOOST_AUTO_TEST_CASE(test_col_major_stepped_decrementer_2d)
       Vector2i{4, 9}, Vector2i{2, 9}, // Col 2
       Vector2i{4, 6}, Vector2i{2, 6}, // Col 1
       Vector2i{4, 3}, Vector2i{2, 3}, // Col 0
+      // Vector{4, 0}
   };
 
   auto visited_coords = std::vector<Vector2i>{};
   for (auto i = 0u; i < true_visited_coords.size(); ++i)
   {
     visited_coords.push_back(coords);
+    //SARA_CHECK(coords.transpose());
     BOOST_REQUIRE(!stop);
     PositionDecrementer<ColMajor>::apply(coords, stop, start, end, steps);
   }
+  //SARA_CHECK(coords.transpose());
+  BOOST_CHECK_EQUAL(coords, Vector2i(4, 0));
   BOOST_REQUIRE(stop);
 
   BOOST_REQUIRE(true_visited_coords == visited_coords);

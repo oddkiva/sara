@@ -13,6 +13,7 @@
 
 #pragma once
 
+#include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/ArrayIterators.hpp>
 #include <DO/Sara/Core/MultiArray/ElementTraits.hpp>
 
@@ -434,6 +435,18 @@ namespace DO { namespace Sara {
         -> const_stepped_nd_iterator
     {
       return {false, _begin, start, end, _strides, _sizes, steps};
+    }
+
+    inline auto end_stepped_subarray(const vector_type& start,
+                                       const vector_type& end,
+                                       const vector_type& steps) const
+        -> const_stepped_nd_iterator
+    {
+      const_stepped_nd_iterator it{
+          false, _begin, start, end, _strides, _sizes, steps};
+      it += it.stepped_subarray_sizes().array() - 1;
+      ++it;
+      return it;
     }
     //! @}
 
