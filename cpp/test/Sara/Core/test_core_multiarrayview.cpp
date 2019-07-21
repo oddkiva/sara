@@ -15,9 +15,10 @@
 #include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
-#include <DO/Sara/Core/MultiArray/MultiArrayView.hpp>
 #include <DO/Sara/Core/MultiArray/MultiArray.hpp>
+#include <DO/Sara/Core/MultiArray/MultiArrayView.hpp>
 #include <DO/Sara/Core/Numpy.hpp>
+#include <DO/Sara/Core/StringFormat.hpp>
 #include <DO/Sara/Core/Tensor.hpp>
 
 
@@ -127,6 +128,11 @@ struct ViewSliced
     return view.end_stepped_subarray(start, stop, steps);
   }
 
+  auto sizes() const -> const vector_type&
+  {
+    return slice_sizes();
+  }
+
   auto make_copy() const
   {
     auto view_copy = MultiArray<T, N, O>{slice_sizes};
@@ -168,6 +174,15 @@ BOOST_AUTO_TEST_CASE(test_slice_view)
   const auto X = range(24).cast<float>().reshape(Vector2i{6, 4});
   auto X_sliced = slice(X, {{1, 6, 2}, {1, 4, 2}}).make_copy();
   SARA_DEBUG << "X_sliced =\n" << X_sliced.matrix() << std::endl;
+
+  static_assert(decltype(X_sliced)::StorageOrder == Eigen::RowMajor);
+
+
+  for (int y = 0; y < X_sliced.size(0); ++y)
+    for (int x = 0; x < X_sliced.size(1); ++x)
+      SARA_DEBUG << format("X_sliced(%d, %d) = %f", y, x,
+                           X_sliced(Vector2i{y, x}))
+                 << std::endl;
 }
 
 

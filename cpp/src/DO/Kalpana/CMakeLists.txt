@@ -16,9 +16,6 @@ if (Qt5_POSITION_INDEPENDENT_CODE)
   set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
-add_definitions(-DGL_GLEXT_PROTOTYPES)
-
-
 kalpana_dissect_version(${DO_Kalpana_VERSION})
 
 
@@ -38,9 +35,10 @@ foreach (library ${DO_Kalpana_LIBRARIES})
   if (NOT ${library} STREQUAL "Plot")
     target_link_libraries(DO_Kalpana_${library}
       Qt5::Core Qt5::Widgets Qt5::OpenGL Qt5::OpenGLExtensions
-      ${OPENGL_LIBRARIES}
-      ${DO_Sara_LIBRARIES})
+      ${OPENGL_LIBRARIES} ${DO_Sara_LIBRARIES})
   endif ()
 endforeach ()
 
 target_link_libraries(DO_Kalpana_3D DO_Kalpana_Math)
+# target_compile_definitions(-DGL_GLEXT_PROTOTYPES)
+target_compile_definitions(DO_Kalpana_3D PRIVATE -DGL_SILENCE_DEPRECATION)
