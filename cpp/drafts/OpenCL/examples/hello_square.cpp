@@ -1,7 +1,6 @@
 #include <drafts/OpenCL/GL.hpp>
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
-#include <DO/Sara/Core/HDF5.hpp>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -167,7 +166,6 @@ int main()
 
     // Draw triangles
     glBindVertexArray(vao); // geometry specified by the VAO.
-    //glDrawArrays(GL_POINTS, 0, vertices.size(0)); //
     glDrawElements(GL_TRIANGLES, triangles.size(), GL_UNSIGNED_INT, 0);
 
     glfwSwapBuffers(window);

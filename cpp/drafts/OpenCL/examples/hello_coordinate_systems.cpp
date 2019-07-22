@@ -138,7 +138,7 @@ int main()
   const auto width = 800;
   const auto height = 600;
   auto window =
-      glfwCreateWindow(width, height, "Hello Transformations", nullptr, nullptr);
+      glfwCreateWindow(width, height, "Hello Coordinate Systems", nullptr, nullptr);
   glfwMakeContextCurrent(window);
   glfwSetFramebufferSizeCallback(window, resize_framebuffer);
 

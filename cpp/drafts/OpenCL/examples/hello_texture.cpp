@@ -35,12 +35,6 @@ inline auto init_gl_boilerplate()
     return EXIT_FAILURE;
   }
 #endif
-}
-
-
-int main()
-{
-  init_gl_boilerplate();
 
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -48,6 +42,12 @@ int main()
 #ifdef __APPLE__
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
+}
+
+
+int main()
+{
+  init_gl_boilerplate();
 
   // Create a window.
   const auto width = 800;
