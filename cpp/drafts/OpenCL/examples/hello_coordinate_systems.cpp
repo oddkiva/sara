@@ -121,7 +121,8 @@ auto make_point_cloud()
   auto vertices = Tensor_<float, 2>{{coords.size(0), 5}};
   vertices.flat_array().fill(1.f);
   vertices.matrix().leftCols(3) = coords.matrix();
-  vertices.matrix().leftCols(3) *= -1.f;
+  vertices.matrix().col(1) *= -1.f;
+  vertices.matrix().col(2) *= -1.f;
 
   SARA_DEBUG << "coords sizes = " << coords.sizes().transpose() << std::endl;
   SARA_DEBUG << "coords =\n" << coords.matrix().topRows(10) << std::endl;
@@ -197,8 +198,8 @@ int main()
   fragment_shader.destroy();
 
   // Encode the vertex data in a tensor.
-  auto vertices = make_cube();
-  //auto vertices = make_point_cloud();
+  //auto vertices = make_cube();
+  auto vertices = make_point_cloud();
 
   Vector3f cubePositions[] = {
       Vector3f(0.0f, 0.0f, 0.0f),    Vector3f(2.0f, 5.0f, -15.0f),
@@ -301,7 +302,7 @@ int main()
 
     auto view = Transform<float, 3, Eigen::Projective>{};
     view.setIdentity();
-    view.translate(Vector3f{0.f, 0.f, -10.f});
+    view.translate(Vector3f{0.f, 0.f, -50.f});
     shader_program.set_uniform_matrix4f("view", view.matrix().data());
 
     const Matrix4f projection =
@@ -311,17 +312,18 @@ int main()
 
     // Draw triangles.
     glBindVertexArray(vao);
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 1; i++)
     {
       auto transform = Transform<float, 3, Eigen::Projective>{};
       transform.setIdentity();
       transform.translate(cubePositions[i]);
-      transform.rotate(AngleAxisf(std::pow(1.2, (i + 1) * 2) * timer.elapsed_ms() / 10000,
+      transform.rotate(AngleAxisf(std::pow(1.2, (i + 1) * 5) * timer.elapsed_ms() / 10000,
                                   Vector3f{0.5f, 1.0f, 0.0f}.normalized()));
       shader_program.set_uniform_matrix4f("transform",
                                           transform.matrix().data());
 
       glDrawArrays(GL_TRIANGLES, 0, vertices.size(0));
+      //glDrawArrays(GL_POINTS, 0, vertices.size(0));
     }
 
 
