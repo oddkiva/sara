@@ -39,12 +39,6 @@ namespace DO::Sara { namespace GL {
       object = 0;
     }
 
-    void vertex_attrib_pointer(int position, TensorView_<float, 2>& va)
-    {
-      glVertexAttribPointer(0, va.size(1), GL_FLOAT, GL_FALSE,
-                            va.stride(0) * sizeof(float), nullptr);
-    }
-
     GLuint object{0};
   };
 

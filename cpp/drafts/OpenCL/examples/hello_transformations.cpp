@@ -1,7 +1,7 @@
 #include <drafts/OpenCL/GL.hpp>
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
-#include <DO/Sara/Core/HDF5.hpp>
+#include <DO/Sara/Core/Timer.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing/Flip.hpp>
 
@@ -11,6 +11,8 @@
 
 #include <GLFW/glfw3.h>
 
+#include <Eigen/Geometry>
+
 #include <map>
 
 
@@ -18,7 +20,14 @@ using namespace DO::Sara;
 using namespace std;
 
 
-inline auto init_gl_boilerplate()
+auto resize_framebuffer(GLFWwindow*, int width, int height)
+{
+  // make sure the viewport matches the new window dimensions; note that width
+  // and height will be significantly larger than specified on retina displays.
+  glViewport(0, 0, width, height);
+}
+
+auto init_gl_boilerplate()
 {
   // Initialize the windows manager.
   if (!glfwInit())
@@ -35,12 +44,6 @@ inline auto init_gl_boilerplate()
     return EXIT_FAILURE;
   }
 #endif
-}
-
-
-int main()
-{
-  init_gl_boilerplate();
 
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -48,13 +51,19 @@ int main()
 #ifdef __APPLE__
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
+}
+
+int main()
+{
+  init_gl_boilerplate();
 
   // Create a window.
   const auto width = 800;
   const auto height = 600;
   auto window =
-      glfwCreateWindow(width, height, "Hello Triangle", nullptr, nullptr);
+      glfwCreateWindow(width, height, "Hello Transformations", nullptr, nullptr);
   glfwMakeContextCurrent(window);
+  glfwSetFramebufferSizeCallback(window, resize_framebuffer);
 
   std::map<std::string, int> arg_pos = {{"in_coords", 0},  //
                                         {"in_color", 1},   //
@@ -67,13 +76,14 @@ int main()
   layout (location = 1) in vec3 in_color;
   layout (location = 2) in vec2 in_tex_coords;
 
+  uniform mat4 transform;
+
   out vec3 out_color;
   out vec2 out_tex_coords;
 
   void main()
   {
-    gl_Position = vec4(in_coords, 1.0);
-    gl_PointSize = 200.0;
+    gl_Position = transform * vec4(in_coords, 1.0);
     out_color = in_color;
     out_tex_coords = vec2(in_tex_coords.x, in_tex_coords.y);
   }
@@ -88,11 +98,18 @@ int main()
   in vec2 out_tex_coords;
   out vec4 frag_color;
 
+  uniform sampler2D texture0;
   uniform sampler2D texture1;
 
   void main()
   {
-    frag_color = texture(texture1, out_tex_coords) * vec4(out_color, 1.0);
+    if (out_tex_coords.x > 0.5)
+      frag_color = texture(texture0, out_tex_coords);
+    else
+      frag_color = texture(texture1, out_tex_coords);
+    //frag_color = mix(texture(texture0, out_tex_coords),
+    //                 texture(texture1, out_tex_coords), 0.5)
+    //           * vec4(out_color, 1.0);
   }
   )shader";
   auto fragment_shader = GL::Shader{};
@@ -166,7 +183,7 @@ int main()
   }
 
   // Texture data.
-  auto texture = GL::Texture2D{};
+  auto texture0 = GL::Texture2D{};
   {
     // Read the image from the disk.
     auto image =
@@ -176,15 +193,31 @@ int main()
     flip_vertically(image);
 
     // Copy the image to the GPU texture.
-    texture.setup_with_pretty_defaults(image, 0);
+    glActiveTexture(GL_TEXTURE0);
+    texture0.setup_with_pretty_defaults(image, 0);
   }
 
-  // Activate the shader program once and for all.
-  shader_program.use(true);
+  auto texture1 = GL::Texture2D{};
+  {
+    // Read the image from the disk.
+    auto image =
+        imread<Rgb8>("/Users/david/GitLab/DO-CV/sara/data/sunflowerField.jpg");
+    // Flip vertically so that the image data matches OpenGL image coordinate
+    // system.
+    flip_vertically(image);
 
-  // Activate the texture 0 once for all.
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, texture);
+    // Copy the image to the GPU texture.
+    glActiveTexture(GL_TEXTURE1);
+    texture1.setup_with_pretty_defaults(image, 0);
+  }
+
+  shader_program.use(true);
+  // Specify that GL_TEXTURE0 is mapped to texture0 in the fragment shader code.
+  shader_program.set_uniform_param("texture0", 0);
+  // Specify that GL_TEXTURE1 is mapped to texture1 in the fragment shader code.
+  shader_program.set_uniform_param("texture1", 1);
+
+  auto timer = Timer{};
 
   // Display image.
   glfwSwapInterval(1);
@@ -192,6 +225,19 @@ int main()
   {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture0);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, texture1);
+
+    auto transform = Transform<float, 3, Eigen::Projective>{};
+    transform.setIdentity();
+    transform.rotate(AngleAxisf(timer.elapsed_ms() / 1000, Vector3f::UnitZ()));
+    transform.translate(Vector3f{0.25f, 0.25f, 0.f});
+
+    shader_program.set_uniform_matrix4f("transform", transform.matrix().data());
 
     // Draw triangles.
     glBindVertexArray(vao);

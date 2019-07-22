@@ -151,7 +151,7 @@ int main()
     glBindVertexArray(vao);
 
     // Copy the vertex data into the GPU buffer object.
-    vbo.bind_data(vertices);
+    vbo.bind_vertex_data(vertices);
 
     // Specify that the vertex shader param 0 corresponds to the first 3 float
     // data of the buffer object.
@@ -170,11 +170,11 @@ int main()
     glBindVertexArray(0);
   }
 
-
   glEnable(GL_POINT_SMOOTH);
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glEnable(GL_PROGRAM_POINT_SIZE);
+  glEnable(GL_DEPTH_TEST);
 
   // Activate the shader program once and for all.
   shader_program.use(true);
@@ -184,7 +184,7 @@ int main()
   while (!glfwWindowShouldClose(window))
   {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Draw triangles
     glBindVertexArray(vao); // geometry specified by the VAO.

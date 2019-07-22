@@ -89,19 +89,19 @@ namespace DO::Sara { namespace GL {
                    /* border */ 0, GL::PixelTraits<T>::PixelFormat,
                    GL::PixelTraits<T>::ChannelType,
                    reinterpret_cast<const void*>(image.data()));
+      glGenerateMipmap(GL_TEXTURE_2D);
     }
 
     template <typename T>
     void setup_with_pretty_defaults(const Image<T>& image, int mipmap_level = 0)
     {
+      generate();
       bind();
       set_border_type(GL_REPEAT);
       set_interpolation_type(GL_LINEAR);
       initialize_data(image, mipmap_level);
     }
 
-
-  private:
     GLuint object{0};
   };
 

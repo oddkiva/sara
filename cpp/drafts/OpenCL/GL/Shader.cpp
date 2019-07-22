@@ -200,7 +200,7 @@ namespace DO::Sara { namespace GL {
     auto mat_location = glGetUniformLocation(program_object, mat_name);
     if (GL_INVALID_VALUE == mat_location ||
         GL_INVALID_OPERATION == mat_location)
-      throw std::runtime_error{"Invalid shader program"};
+      throw std::runtime_error{"Invalid uniform parameter"};
 
     glUniformMatrix4fv(mat_location, 1, GL_FALSE, mat_coeffs);
   }

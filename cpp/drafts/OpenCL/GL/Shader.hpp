@@ -50,6 +50,22 @@ namespace DO::Sara { namespace GL {
 
     void clear();
 
+    template <typename T>
+    void set_uniform_param(const char* param_name, const T& param_value)
+    {
+      auto param_location = glGetUniformLocation(program_object, param_name);
+      if (GL_INVALID_VALUE == param_location ||
+          GL_INVALID_OPERATION == param_location)
+        throw std::runtime_error{"Invalid uniform parameter"};
+
+      if constexpr(std::is_same_v<T, int>)
+        glUniform1i(param_location, param_value);
+      else if constexpr(std::is_same_v<T, float>)
+        glUniform1f(param_location, param_value);
+      else
+        throw std::runtime_error{"Error: not implemented!"};
+    }
+
     void set_uniform_matrix4f(const char* mat_name, const float* mat_coeffs);
 
     GLuint program_object{0};
