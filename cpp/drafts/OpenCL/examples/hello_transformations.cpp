@@ -1,5 +1,6 @@
 #include <drafts/OpenCL/GL.hpp>
 
+#include <DO/Sara/Defines.hpp>
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/StringFormat.hpp>
 #include <DO/Sara/Core/Timer.hpp>
@@ -21,19 +22,23 @@ using namespace DO::Sara;
 using namespace std;
 
 
-auto resize_framebuffer(GLFWwindow*, int width, int height)
-{
-  // make sure the viewport matches the new window dimensions; note that width
-  // and height will be significantly larger than specified on retina displays.
-  glViewport(0, 0, width, height);
-}
-
-auto init_gl_boilerplate()
+inline auto init_glfw_boilerplate()
 {
   // Initialize the windows manager.
   if (!glfwInit())
     throw std::runtime_error{"Error: failed to initialize GLFW!"};
 
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+#ifdef __APPLE__
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+
+}
+
+inline auto init_glew_boilerplate()
+{
 #ifndef __APPLE__
   // Initialize GLEW.
   auto err = glewInit();
@@ -42,21 +47,22 @@ auto init_gl_boilerplate()
     std::cerr << format("Error: failed to initialize GLEW: %s",
                         glewGetErrorString(err))
               << std::endl;
-    return EXIT_FAILURE;
   }
-#endif
-
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-#ifdef __APPLE__
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 }
 
+
+auto resize_framebuffer(GLFWwindow*, int width, int height)
+{
+  // make sure the viewport matches the new window dimensions; note that width
+  // and height will be significantly larger than specified on retina displays.
+  glViewport(0, 0, width, height);
+}
+
+
 int main()
 {
-  init_gl_boilerplate();
+  init_glfw_boilerplate();
 
   // Create a window.
   const auto width = 800;
@@ -65,6 +71,8 @@ int main()
       glfwCreateWindow(width, height, "Hello Transformations", nullptr, nullptr);
   glfwMakeContextCurrent(window);
   glfwSetFramebufferSizeCallback(window, resize_framebuffer);
+
+  init_glew_boilerplate();
 
   std::map<std::string, int> arg_pos = {{"in_coords", 0},  //
                                         {"in_color", 1},   //
@@ -187,8 +195,7 @@ int main()
   auto texture0 = GL::Texture2D{};
   {
     // Read the image from the disk.
-    auto image =
-        imread<Rgb8>("/Users/david/GitLab/DO-CV/sara/data/ksmall.jpg");
+    auto image = imread<Rgb8>(src_path("../../../../data/ksmall.jpg"));
     // Flip vertically so that the image data matches OpenGL image coordinate
     // system.
     flip_vertically(image);
@@ -201,8 +208,7 @@ int main()
   auto texture1 = GL::Texture2D{};
   {
     // Read the image from the disk.
-    auto image =
-        imread<Rgb8>("/Users/david/GitLab/DO-CV/sara/data/sunflowerField.jpg");
+    auto image = imread<Rgb8>(src_path("../../../../data/sunflowerField.jpg"));
     // Flip vertically so that the image data matches OpenGL image coordinate
     // system.
     flip_vertically(image);

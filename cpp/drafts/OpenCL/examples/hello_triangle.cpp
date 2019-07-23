@@ -16,29 +16,11 @@ using namespace DO::Sara;
 using namespace std;
 
 
-inline auto init_gl_boilerplate()
+inline auto init_glfw_boilerplate()
 {
   // Initialize the windows manager.
   if (!glfwInit())
     throw std::runtime_error{"Error: failed to initialize GLFW!"};
-
-#ifndef __APPLE__
-  // Initialize GLEW.
-  auto err = glewInit();
-  if (err != GLEW_OK)
-  {
-    std::cerr << format("Error: failed to initialize GLEW: %s",
-                        glewGetErrorString(err))
-              << std::endl;
-    return EXIT_FAILURE;
-  }
-#endif
-}
-
-
-int main()
-{
-  init_gl_boilerplate();
 
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -47,12 +29,35 @@ int main()
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
+}
+
+inline auto init_glew_boilerplate()
+{
+#ifndef __APPLE__
+  // Initialize GLEW.
+  auto err = glewInit();
+  if (err != GLEW_OK)
+  {
+    std::cerr << format("Error: failed to initialize GLEW: %s",
+                        glewGetErrorString(err))
+              << std::endl;
+  }
+#endif
+}
+
+
+int main()
+{
+  init_glfw_boilerplate();
+
   // Create a window.
   const auto width = 800;
   const auto height = 600;
   auto window =
       glfwCreateWindow(width, height, "Hello Triangle", nullptr, nullptr);
   glfwMakeContextCurrent(window);
+
+  init_glew_boilerplate();
 
   std::map<std::string, int> arg_pos = {{"in_coords", 0},  //
                                         {"in_color", 1},   //

@@ -33,12 +33,23 @@ auto resize_framebuffer(GLFWwindow*, int width, int height)
   glViewport(0, 0, width, height);
 }
 
-auto init_gl_boilerplate()
+inline auto init_glfw_boilerplate()
 {
   // Initialize the windows manager.
   if (!glfwInit())
     throw std::runtime_error{"Error: failed to initialize GLFW!"};
 
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+#ifdef __APPLE__
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+
+}
+
+inline auto init_glew_boilerplate()
+{
 #ifndef __APPLE__
   // Initialize GLEW.
   auto err = glewInit();
@@ -47,17 +58,10 @@ auto init_gl_boilerplate()
     std::cerr << format("Error: failed to initialize GLEW: %s",
                         glewGetErrorString(err))
               << std::endl;
-    return EXIT_FAILURE;
   }
 #endif
-
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-#ifdef __APPLE__
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
 }
+
 
 auto make_cube()
 {
@@ -118,7 +122,7 @@ Tensor_<float, 2> read_point_cloud(const std::string& h5_filepath)
 auto make_point_cloud()
 {
   // Encode the vertex data in a tensor.
-  auto coords = read_point_cloud("/Users/david/Desktop/geometry.h5");
+  auto coords = read_point_cloud("/home/david/Desktop/geometry.h5");
   auto vertices = Tensor_<float, 2>{{coords.size(0), 5}};
   vertices.flat_array().fill(1.f);
   vertices.matrix().leftCols(3) = coords.matrix();
@@ -132,17 +136,20 @@ auto make_point_cloud()
   return vertices;
 }
 
+
 int main()
 {
-  init_gl_boilerplate();
+  init_glfw_boilerplate();
 
   // Create a window.
   const auto width = 800;
   const auto height = 600;
   auto window =
-      glfwCreateWindow(width, height, "Hello Coordinate Systems", nullptr, nullptr);
+      glfwCreateWindow(width, height, "Hello Triangle", nullptr, nullptr);
   glfwMakeContextCurrent(window);
   glfwSetFramebufferSizeCallback(window, resize_framebuffer);
+
+  init_glew_boilerplate();
 
   std::map<std::string, int> arg_pos = {{"in_coords", 0},  //
                                         {"in_tex_coords", 1},   //
@@ -246,7 +253,7 @@ int main()
   {
     // Read the image from the disk.
     auto image =
-        imread<Rgb8>("/Users/david/GitLab/DO-CV/sara/data/ksmall.jpg");
+        imread<Rgb8>("/home/david/GitHub/DO-CV/sara/data/ksmall.jpg");
     // Flip vertically so that the image data matches OpenGL image coordinate
     // system.
     flip_vertically(image);
@@ -260,7 +267,7 @@ int main()
   {
     // Read the image from the disk.
     auto image =
-        imread<Rgb8>("/Users/david/GitLab/DO-CV/sara/data/sunflowerField.jpg");
+        imread<Rgb8>("/home/david/GitHub/DO-CV/sara/data/sunflowerField.jpg");
     // Flip vertically so that the image data matches OpenGL image coordinate
     // system.
     flip_vertically(image);
@@ -323,8 +330,8 @@ int main()
       shader_program.set_uniform_matrix4f("transform",
                                           transform.matrix().data());
 
-      glDrawArrays(GL_TRIANGLES, 0, vertices.size(0));
-      //glDrawArrays(GL_POINTS, 0, vertices.size(0));
+      //glDrawArrays(GL_TRIANGLES, 0, vertices.size(0));
+      glDrawArrays(GL_POINTS, 0, vertices.size(0));
     }
 
 
