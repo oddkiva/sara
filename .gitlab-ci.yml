@@ -34,6 +34,8 @@ before_script:
   - Xvfb :1 -noreset 1>/dev/null 2>&1 &
   - export DISPLAY=:1
 
+  - ./scripts/install_clblast.sh
+
 job:
   script:
     - mkdir build
