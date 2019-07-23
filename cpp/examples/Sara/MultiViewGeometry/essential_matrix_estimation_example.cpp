@@ -892,7 +892,7 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
 
   const auto M = to_tensor(matches);
 
-  double num_samples = 100;
+  double num_samples = 1000;
   auto distance = EpipolarDistance{};
 
   auto [E, num_inliers, sample_best] =
@@ -1048,7 +1048,7 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
 
     // Get the cheiral 3D points.
     auto X = std::vector<Vector3d>{};
-    auto colors = std::vector<Rgb8>{};
+    auto colors = std::vector<Vector3d>{};
     X.reserve(M.size(0));
     colors.reserve(M.size(0));
 
@@ -1059,38 +1059,52 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
       const bool inlierm = inliers(m);
       const Vector3d Xm = complete_cheiral_geom.X.col(m).hnormalized();
       const Vector2d um = (K1 * u1n_matched_mat.col(m)).hnormalized();
-      const Rgb8 rgbm = (interpolate(I1d, um) * 255).cast<unsigned char>();
+      const Vector3d rgbm = interpolate(I1d, um);
+      // SARA_DEBUG << "um = " << um.transpose() << std::endl;
+      // SARA_DEBUG << "Interpolated color = " << rgbm.transpose() << std::endl;
+      // SARA_CHECK(inlierm);
+      // SARA_CHECK(Xm.cwiseAbs().minCoeff());
+      // SARA_CHECK(Xm.cwiseAbs().maxCoeff());
 
-      if (inlierm &&                         //
-          Xm.cwiseAbs().minCoeff() > 1e-3 &&  //
-          Xm.cwiseAbs().maxCoeff() < 1e+2)
+      if (inlierm)
       {
         X.push_back(Xm);
         colors.push_back(rgbm);
-        //SARA_DEBUG << "Adding 3D point: " << Xm.transpose() << std::endl;
-        //SARA_CHECK(inlierm);
-        //SARA_CHECK(Xm.cwiseAbs().minCoeff());
-        //SARA_CHECK(Xm.cwiseAbs().maxCoeff());
+        // SARA_DEBUG << "Adding 3D point: " << Xm.transpose() << std::endl;
       }
     });
 
     auto X_tensor = TensorView_<double, 2>{reinterpret_cast<double*>(X.data()),
                                           {int(X.size()), 3}};
 
-    SARA_DEBUG << "3D points =\n" << X_tensor.matrix().topRows(10) << std::endl;
+    auto color_tensor = TensorView_<double, 2>{
+        reinterpret_cast<double*>(colors.data()), {int(colors.size()), 3}};
+
+
+    SARA_DEBUG << "3D points =\n" << X_tensor.matrix().topRows(20) << std::endl;
+    SARA_DEBUG << "colors =\n" << color_tensor.matrix().topRows(20) << std::endl;
     SARA_DEBUG << "Number of 3D valid points = " << X_tensor.size(0)
                << std::endl;
-    SARA_DEBUG << "min coeff = " << X_tensor.matrix().minCoeff() << std::endl;
-    SARA_DEBUG << "max coeff = " << X_tensor.matrix().maxCoeff() << std::endl;
+    SARA_DEBUG << "X.min_coeff = " << X_tensor.matrix().minCoeff() << std::endl;
+    SARA_DEBUG << "X.max_coeff = " << X_tensor.matrix().maxCoeff() << std::endl;
+    SARA_DEBUG << "X.x_coord.min_coeff = " << X_tensor.matrix().col(0).minCoeff() << std::endl;
+    SARA_DEBUG << "X.x_coord.max_coeff = " << X_tensor.matrix().col(0).maxCoeff() << std::endl;
+    SARA_DEBUG << "X.y_coord.min_coeff = " << X_tensor.matrix().col(1).minCoeff() << std::endl;
+    SARA_DEBUG << "X.y_coord.max_coeff = " << X_tensor.matrix().col(1).maxCoeff() << std::endl;
+    SARA_DEBUG << "X.z_coord.min_coeff = " << X_tensor.matrix().col(2).minCoeff() << std::endl;
+    SARA_DEBUG << "X.z_coord.max_coeff = " << X_tensor.matrix().col(2).maxCoeff() << std::endl;
+    SARA_DEBUG << "colors.min_coeff = " << color_tensor.matrix().minCoeff() << std::endl;
+    SARA_DEBUG << "colors.max_coeff = " << color_tensor.matrix().maxCoeff() << std::endl;
 
     auto geom_h5_file =
-        H5File{"/Users/david/Desktop/geometry.h5", H5F_ACC_TRUNC};
+        H5File{"/home/david/Desktop/geometry.h5", H5F_ACC_TRUNC};
     geom_h5_file.write_dataset("cameras", cameras, true);
     geom_h5_file.write_dataset("points", X_tensor, true);
+    geom_h5_file.write_dataset("colors", color_tensor, true);
 
     {
       std::filebuf fb;
-      fb.open("/Users/david/Desktop/geometry.ply", std::ios::out);
+      fb.open("/home/david/Desktop/geometry.ply", std::ios::out);
       std::ostream ostr(&fb);
       if (ostr.fail())
         throw std::runtime_error{"Error: failed to create PLY!"};
@@ -1100,10 +1114,12 @@ void estimate_essential_matrix(const Image<Rgb8>& image1,
           "vertex", {"x", "y", "z"}, tinyply::Type::FLOAT64, X_tensor.size(0),
           reinterpret_cast<std::uint8_t*>(X_tensor.data()),
           tinyply::Type::INVALID, 0);
-      geom_ply_file.add_properties_to_element(
-          "vertex", {"red", "green", "blue"}, tinyply::Type::UINT8, X_tensor.size(0),
-          reinterpret_cast<std::uint8_t*>(colors.data()),
-          tinyply::Type::INVALID, 0);
+
+      //auto colors_rgb8 = image_view(tensor_view(colors)).convert<Rgb8>();
+      //geom_ply_file.add_properties_to_element(
+      //    "vertex", {"red", "green", "blue"}, tinyply::Type::UINT8, X_tensor.size(0),
+      //    reinterpret_cast<std::uint8_t*>(colors_rgb8.data()),
+      //    tinyply::Type::INVALID, 0);
 
       geom_ply_file.write(ostr, false);
     }
