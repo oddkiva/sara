@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(test_program)
 
   // Run the OpenCL program on a sample test.
   auto array = std::vector<float>{1.f, 2.f, 3.f, 4.f};
-  auto array_sz = array.size();
+  auto array_sz = static_cast<unsigned int>(array.size());
   DeviceBuffer<float> array_buffer(context, array.data(), array.size(),
                                    CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR);
 
