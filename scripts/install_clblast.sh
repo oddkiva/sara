@@ -3,8 +3,8 @@ set -ex
 
 
 git clone https://github.com/CNugteren/CLBlast
-git checkout 1.5.0
 cd CLBlast
+git checkout 1.5.0
 mkdir build
 cd build
 cmake ..
