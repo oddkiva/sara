@@ -7,9 +7,9 @@ find_package(DO_Sara COMPONENTS Core REQUIRED)
 
 find_package(OpenCL REQUIRED)
 
-find_library(CLBlast_LIBRARY clBlast)
-if (NOT Foundation_LIBRARY)
-  message(FATAL_ERROR "Could not find Foundation library!")
+find_library(CLBlast_LIBRARY clblast)
+if (NOT CLBlast_LIBRARY)
+  message(FATAL_ERROR "Could not find CLBlast library!")
 endif ()
 message("Found CLBlast libraries: ${CLBlast_LIBRARY}")
 

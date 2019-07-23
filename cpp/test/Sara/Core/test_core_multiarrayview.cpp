@@ -175,7 +175,7 @@ BOOST_AUTO_TEST_CASE(test_slice_view)
   auto X_sliced = slice(X, {{1, 6, 2}, {1, 4, 2}}).make_copy();
   SARA_DEBUG << "X_sliced =\n" << X_sliced.matrix() << std::endl;
 
-  static_assert(decltype(X_sliced)::StorageOrder == Eigen::RowMajor);
+  static_assert(int(decltype(X_sliced)::StorageOrder) == int(Eigen::RowMajor));
 
 
   for (int y = 0; y < X_sliced.size(0); ++y)

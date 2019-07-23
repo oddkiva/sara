@@ -1,6 +1,7 @@
 #include <drafts/OpenCL/GL.hpp>
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
+#include <DO/Sara/Core/StringFormat.hpp>
 
 #ifdef _WIN32
 #include <windows.h>

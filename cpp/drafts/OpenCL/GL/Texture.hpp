@@ -2,10 +2,12 @@
 
 #include <drafts/OpenCL/GL/PixelBuffer.hpp>
 
+#include <DO/Sara/Core/Pixel.hpp>
+
 #ifdef __APPLE__
 # include <OpenGL/gl3.h>
 #else
-# include <gl/glew.h>
+# include <GL/glew.h>
 #endif
 
 

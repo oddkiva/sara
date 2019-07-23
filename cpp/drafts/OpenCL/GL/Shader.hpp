@@ -7,6 +7,7 @@
 #endif
 
 #include <string>
+#include <stdexcept>
 
 
 namespace DO::Sara { namespace GL {

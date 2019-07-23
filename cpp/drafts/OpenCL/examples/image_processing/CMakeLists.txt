@@ -1,5 +1,3 @@
-find_package(GLFW3 REQUIRED)
-
 file(GLOB SRC_FILES FILES *.cpp *.hpp *.cl)
 source_group("OpenCL Source Files" REGULAR_EXPRESSION
   "${CMAKE_CURRENT_SOURCE_DIR}/.*\\.cl")

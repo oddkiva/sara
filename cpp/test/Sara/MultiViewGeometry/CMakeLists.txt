@@ -13,7 +13,7 @@ foreach (file ${test_multiviewgeometry_SOURCE_FILES})
   sara_add_test(${filename} ${file} "${DO_Sara_LIBRARIES}" "MultiViewGeometry")
 endforeach ()
 
-if (CERES_FOUND)
+if (Ceres_FOUND)
   target_include_directories(test_multiviewgeometry_ceres_solver_backend PRIVATE
     ${CERES_INCLUDE_DIRS})
   target_link_libraries(test_multiviewgeometry_ceres_solver_backend

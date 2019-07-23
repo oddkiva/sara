@@ -1,6 +1,7 @@
 #include <drafts/OpenCL/GL.hpp>
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
+#include <DO/Sara/Core/StringFormat.hpp>
 #include <DO/Sara/Core/Timer.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing/Flip.hpp>

@@ -4,18 +4,32 @@ image: nvidia/cudagl:10.1-runtime-ubuntu18.04
 before_script:
   - apt-get update -qq
   - apt-get install -y
+      # GNU C++ toolchain
       build-essential
       cmake
       doxygen
       git
+      # Boost
       libboost-all-dev
+      # HDF5
       libhdf5-dev
+      # Image I/O
       libjpeg-dev
       libpng-dev
       libtiff5-dev
+      # FFMPEG Video I/O
       libavcodec-dev
       libavformat-dev
       libavutil-dev
+      # OpenGL
+      libglew-dev
+      libglfw3-dev
+      # OpenCL
+      ocl-icd-opencl-dev
+      opencl-headers
+      # Ceres solver
+      libceres-dev
+      # Qt
       qtbase5-dev
       qt3d5-dev
       qt3d-assimpsceneimport-plugin

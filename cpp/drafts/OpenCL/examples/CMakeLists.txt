@@ -1,17 +1,12 @@
 add_subdirectory(hello_opencl)
 add_subdirectory(image_processing)
 
-
-find_package(HDF5 COMPONENTS CXX REQUIRED)
-find_package(GLFW3 REQUIRED)
-
 file(GLOB example_FILES FILES *.cpp)
 
 foreach (file ${example_FILES})
   get_filename_component(filename "${file}" NAME_WE)
 
   add_executable(${filename} ${file})
-  # message(FATAL_ERROR "${filename}")
   target_compile_definitions(${filename} PRIVATE -DGL_SILENCE_DEPRECATION)
   target_include_directories(${filename} PRIVATE ${HDF5_INCLUDE_DIRS})
   target_link_libraries(${filename}
