@@ -17,6 +17,8 @@
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/MultiArray/MultiArray.hpp>
 #include <DO/Sara/Core/MultiArray/MultiArrayView.hpp>
+#include <DO/Sara/Core/MultiArray/DataTransformations.hpp>
+#include <DO/Sara/Core/MultiArray/Slice.hpp>
 #include <DO/Sara/Core/Numpy.hpp>
 #include <DO/Sara/Core/StringFormat.hpp>
 #include <DO/Sara/Core/Tensor.hpp>
@@ -25,6 +27,21 @@
 using namespace std;
 using namespace DO::Sara;
 
+
+template <typename T, int N>
+auto as_col_vector_list(const TensorView_<T, 2>& t)
+{
+  using Vector = Eigen::Matrix<T, N, 1>;
+  return TensorView_<Vector, 1>{
+      const_cast<Vector*>(reinterpret_cast<const Vector*>(t.data())),
+      t.size(0)};
+}
+
+template <typename T, int M, int N>
+auto as_tensor(const Matrix<T, M, N>& x)
+{
+  return TensorView_<T, 1>{const_cast<T*>(x.data()), x.rows(), x.cols()};
+}
 
 BOOST_AUTO_TEST_SUITE(TestMultiArrayView)
 
@@ -85,90 +102,6 @@ BOOST_AUTO_TEST_CASE(test_multiarrayview_flatten)
   BOOST_CHECK(r_flatten == range(10));
 }
 
-
-struct AxisSlice
-{
-  int start{0};
-  int stop{0};
-  int step{1};
-};
-
-
-template <typename T, int N, int O>
-struct ViewSliced
-{
-  using vector_type = Matrix<int, N, 1>;
-  using view_type = MultiArrayView<T, N, O>;
-
-  auto operator()(const vector_type& x) -> T&
-  {
-    if ((x.array() < 0).any() || ((slice_sizes - x).array() <= 0).any())
-      throw std::runtime_error{
-          "Coordinates are not in the valid slices range!"};
-    const vector_type y = start + x.dot(steps);
-    return view(y);
-  }
-
-  auto operator()(const Matrix<int, N, 1>& x) const -> const T&
-  {
-    if ((x.array() < 0).any() || ((slice_sizes - x).array() <= 0).any())
-      throw std::runtime_error{
-          "Coordinates are not in the valid slices range!"};
-    const vector_type y = start + x.dot(steps);
-    return view(y);
-  }
-
-  auto begin() const
-  {
-    return view.begin_stepped_subarray(start, stop, steps);
-  }
-
-  auto end() const
-  {
-    return view.end_stepped_subarray(start, stop, steps);
-  }
-
-  auto sizes() const -> const vector_type&
-  {
-    return slice_sizes();
-  }
-
-  auto make_copy() const
-  {
-    auto view_copy = MultiArray<T, N, O>{slice_sizes};
-    std::transform(std::begin(*this), std::end(*this), std::begin(view_copy),
-                   [](const auto& v) { return v; });
-    return view_copy;
-  }
-
-  view_type view;
-  vector_type start;
-  vector_type stop;
-  vector_type steps;
-  vector_type slice_sizes;
-};
-
-
-template <typename T, int N, int O>
-auto slice(const MultiArrayView<T, N, O>& x,
-           const std::vector<AxisSlice>& slices)
-{
-  const auto ixs = range(N);
-  auto start = Matrix<int, N, 1>{};
-  auto stop = Matrix<int, N, 1>{};
-  auto step = Matrix<int, N, 1>{};
-  std::for_each(std::begin(ixs), std::end(ixs), [&](int i) {
-    start[i] = slices[i].start;
-    stop[i] = slices[i].stop;
-    step[i] = slices[i].step;
-  });
-
-  const auto slice_sizes =
-      x.begin_stepped_subarray(start, stop, step).stepped_subarray_sizes();
-
-  return ViewSliced<T, N, O>{x, start, stop, step, slice_sizes};
-}
-
 BOOST_AUTO_TEST_CASE(test_slice_view)
 {
   const auto X = range(24).cast<float>().reshape(Vector2i{6, 4});
@@ -185,5 +118,43 @@ BOOST_AUTO_TEST_CASE(test_slice_view)
                  << std::endl;
 }
 
+BOOST_AUTO_TEST_CASE(test_filtered_transformed_operations)
+{
+  auto v = arange(-10.f, 10.f, 1.f);
+
+  auto v2 = v
+    | filtered([](float x) { return x > 0; })
+    | transformed([](float x) { return int(x * x); });
+
+  SARA_DEBUG << v2.row_vector() << std::endl;
+}
+
+BOOST_AUTO_TEST_CASE(test_filtered_transformed_usage_case)
+{
+  auto indices = range(10);
+
+  auto cheiral = Eigen::Array<int, 1, Eigen::Dynamic>(10);
+  cheiral << true, true, true, false, false, true, true, false, false, false;
+
+  auto inliers = Eigen::Array<bool, 1, Eigen::Dynamic>(10);
+  inliers << false, true, false, false, false, true, true, false, true, false;
+
+  auto P = Matrix34d{};
+  P.leftCols(3) = Matrix3d::Identity() * 2;
+  P.col(3).setZero();
+  SARA_CHECK(P);
+
+  auto X = MatrixXd{4, 10};
+  for (int i = 0; i < X.cols(); ++i)
+    X.col(i) = Vector4d::Ones() * i;
+
+  //SARA_DEBUG << "X =\n" << X.matrix() << std::endl;
+
+  MatrixXd PX = P * X.matrix();
+  //SARA_DEBUG << "PX =\n" << PX << std::endl;
+
+  auto indices_filtered =
+      indices | filtered([&](int i) { return cheiral(i) && inliers(i); });
+}
 
 BOOST_AUTO_TEST_SUITE_END()

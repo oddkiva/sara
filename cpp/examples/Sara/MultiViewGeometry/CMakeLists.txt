@@ -6,14 +6,19 @@ find_package(DO_Sara COMPONENTS
   Core Graphics ImageIO Features FeatureDetectors FeatureDescriptors KDTree
   Match FeatureMatching MultiViewGeometry REQUIRED)
 
-add_executable(essential_matrix_estimation_example
-  essential_matrix_estimation_example.cpp)
 
-set_target_properties(essential_matrix_estimation_example PROPERTIES
-  COMPILE_FLAGS ${SARA_DEFINITIONS})
-target_link_libraries(essential_matrix_estimation_example ${DO_Sara_LIBRARIES}
-  tinyply)
+macro (sara_add_example example)
+  add_executable(${example} ${example}.cpp)
+  set_target_properties(${example} PROPERTIES
+    COMPILE_FLAGS ${SARA_DEFINITIONS})
+  target_link_libraries(${example} PRIVATE ${DO_Sara_LIBRARIES})
+  set_property(
+    TARGET ${example} PROPERTY
+    FOLDER "DO Sara Examples/ImageProcessing")
+endmacro()
 
-set_property(TARGET essential_matrix_estimation_example
-  PROPERTY
-  FOLDER "DO Sara Examples/MultiViewGeometry")
+
+sara_add_example(homography_estimation_example)
+sara_add_example(fundamental_matrix_estimation_example)
+sara_add_example(essential_matrix_estimation_example.2)
+target_link_libraries(essential_matrix_estimation_example.2 PRIVATE tinyply)

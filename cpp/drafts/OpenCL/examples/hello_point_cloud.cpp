@@ -241,7 +241,7 @@ int main()
     // View matrix.
     auto view = Transform<float, 3, Eigen::Projective>{};
     view.setIdentity();
-    view.translate(Vector3f{0.f, 0.f, -50.f});
+    view.translate(Vector3f{0.f, 0.f, -100.f});
     shader_program.set_uniform_matrix4f("view", view.matrix().data());
 
     // Projection matrix.

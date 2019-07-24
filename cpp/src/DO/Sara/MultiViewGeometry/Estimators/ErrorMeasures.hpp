@@ -34,9 +34,9 @@ struct EpipolarDistance
   }
 
   template <typename Mat>
-  auto operator()(const Mat& X, const Mat& Y) const
+  auto operator()(const Mat& X, const Mat& Y) const -> RowVectorXd
   {
-    return (Y.array() * (F * X).array()).colwise().sum().abs().matrix().eval();
+    return (Y.array() * (F * X).array()).colwise().sum().abs();
   }
 
   Eigen::Matrix3d F;

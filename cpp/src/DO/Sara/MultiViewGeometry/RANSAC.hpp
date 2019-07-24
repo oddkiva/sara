@@ -128,7 +128,9 @@ namespace v2 {
               const TensorView_<double, 2>& p2,    //
               Estimator estimator,                 //
               InlierPredicate_ inlier_predicate,   //
-              int num_samples)
+              int num_samples)                     //
+      -> std::tuple<typename Estimator::model_type, Tensor_<bool, 1>,
+                    Tensor_<int, 1>>
   {
     using Model = typename Estimator::model_type;
 

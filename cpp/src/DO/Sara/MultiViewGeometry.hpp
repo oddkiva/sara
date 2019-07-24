@@ -15,10 +15,13 @@
 #include <DO/Sara/MultiViewGeometry/Utilities.hpp>
 #include <DO/Sara/MultiViewGeometry/RANSAC.hpp>
 
+#include <DO/Sara/MultiViewGeometry/Datasets/Strecha.hpp>
+
 #include <DO/Sara/MultiViewGeometry/Geometry/EssentialMatrix.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/FundamentalMatrix.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/Homography.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/Normalizer.hpp>
+#include <DO/Sara/MultiViewGeometry/Geometry/TwoViewGeometry.hpp>
 
 #include <DO/Sara/MultiViewGeometry/Estimators/ErrorMeasures.hpp>
 #include <DO/Sara/MultiViewGeometry/Estimators/EssentialMatrixEstimators.hpp>
