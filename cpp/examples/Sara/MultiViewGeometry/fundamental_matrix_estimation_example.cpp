@@ -101,7 +101,7 @@ auto estimate_fundamental_matrix(const KeypointList<OERegion, float>& keys1,
   const auto P1 = homogeneous(p1);
   const auto P2 = homogeneous(p2);
 
-  const auto [F, inliers, sample_best] = v2::ransac(
+  const auto [F, inliers, sample_best] = ransac(
       M, P1, P2, FEstimator{}, EpipolarDistance{}, num_samples, f_err_thres);
 
   return std::make_tuple(F, inliers, sample_best);

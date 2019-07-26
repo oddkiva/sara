@@ -63,10 +63,7 @@ BOOST_AUTO_TEST_CASE(test_ransac_with_eight_point_algorithm)
   auto f_estimator = EightPointAlgorithm{};
   auto distance = EpipolarDistance{};
 
-  SARA_DEBUG << "RANSAC v1" << std::endl;
   ransac(matches, left, right, f_estimator, distance, 10, 1e-3);
-  SARA_DEBUG << "RANSAC v2" << std::endl;
-  v2::ransac(matches, left, right, f_estimator, distance, 10, 1e-3);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

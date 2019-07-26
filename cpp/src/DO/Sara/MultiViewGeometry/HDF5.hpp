@@ -13,21 +13,27 @@
 
 #include <DO/Sara/Core/HDF5.hpp>
 #include <DO/Sara/MultiViewGeometry/EpipolarGraph.hpp>
+#include <DO/Sara/MultiViewGeometry/Geometry/FundamentalMatrix.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/PinholeCamera.hpp>
 
 
 namespace DO::Sara {
 
 template <>
-struct CalculateH5Type<EpipolarEdge>
+struct CalculateH5Type<EssentialMatrix>
 {
-  static inline auto value() -> H5::CompType
+  static inline auto value()
   {
-    auto h5_comp_type = H5::CompType{sizeof(EpipolarEdge)};
-    INSERT_MEMBER(h5_comp_type, EpipolarEdge, i);
-    INSERT_MEMBER(h5_comp_type, EpipolarEdge, j);
-    INSERT_MEMBER(h5_comp_type, EpipolarEdge, m);
-    return h5_comp_type;
+    return CalculateH5Type<Matrix3d>::value();
+  }
+};
+
+template <>
+struct CalculateH5Type<FundamentalMatrix>
+{
+  static inline auto value()
+  {
+    return CalculateH5Type<Matrix3d>::value();
   }
 };
 

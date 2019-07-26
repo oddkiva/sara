@@ -41,6 +41,15 @@ inline auto calculate_h5_type()
 }
 
 template <>
+struct CalculateH5Type<bool>
+{
+  static inline auto value()
+  {
+    return H5::PredType::NATIVE_UINT8;
+  };
+};
+
+template <>
 struct CalculateH5Type<unsigned short>
 {
   static inline auto value()

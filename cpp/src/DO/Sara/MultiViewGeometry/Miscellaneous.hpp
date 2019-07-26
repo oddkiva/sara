@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/MultiViewGeometry.hpp>
 
 #include <tinyply-2.2/source/tinyply.h>

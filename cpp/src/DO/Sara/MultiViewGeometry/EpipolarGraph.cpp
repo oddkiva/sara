@@ -9,14 +9,17 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include <DO/Sara/Core/StringFormat.hpp>
 #include <DO/Sara/FileSystem.hpp>
 #include <DO/Sara/Features.hpp>
+#include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/MultiViewGeometry/EpipolarGraph.hpp>
+#include <DO/Sara/MultiViewGeometry/HDF5.hpp>
 
 
 namespace DO::Sara {
 
-auto PhotoAttributes::list_images(const std::string& dirpath) -> void
+auto ViewAttributes::list_images(const std::string& dirpath) -> void
 {
   if (!image_paths.empty())
     image_paths.clear();
@@ -34,7 +37,7 @@ auto PhotoAttributes::list_images(const std::string& dirpath) -> void
       [&](const std::string& image_path) { return basename(image_path); });
 }
 
-auto PhotoAttributes::read_keypoints(H5File& h5_file) -> void
+auto ViewAttributes::read_keypoints(H5File& h5_file) -> void
 {
   if (!keypoints.empty())
     keypoints.clear();
@@ -46,6 +49,18 @@ auto PhotoAttributes::read_keypoints(H5File& h5_file) -> void
                    return DO::Sara::read_keypoints(h5_file, group_name);
                  });
 }
+
+auto ViewAttributes::read_images() -> void
+{
+  images.resize(image_paths.size());
+  std::transform(std::begin(image_paths), std::end(image_paths),
+                 std::begin(images), [](const auto image_path) {
+                   SARA_DEBUG << "Reading image from:\n\t" << image_path
+                              << std::endl;
+                   return imread<Rgb8>(image_path);
+                 });
+}
+
 
 auto EpipolarEdgeAttributes::initialize_edges(int num_vertices)
     -> void
@@ -62,8 +77,9 @@ auto EpipolarEdgeAttributes::initialize_edges(int num_vertices)
       edges.push_back(std::make_pair(i, j));
 }
 
-auto EpipolarEdgeAttributes::read_matches(
-    H5File& h5_file, const PhotoAttributes& photo_attributes) -> void
+auto EpipolarEdgeAttributes::read_matches(H5File& h5_file,
+                                          const ViewAttributes& view_attributes)
+    -> void
 {
   if (!index_matches.empty() || !matches.empty())
   {
@@ -94,8 +110,8 @@ auto EpipolarEdgeAttributes::read_matches(
                    const auto i = edges[ij].first;
                    const auto j = edges[ij].second;
                    return to_match(index_matches[ij],
-                                   photo_attributes.keypoints[i],
-                                   photo_attributes.keypoints[j]);
+                                   view_attributes.keypoints[i],
+                                   view_attributes.keypoints[j]);
                  });
 }
 
@@ -109,7 +125,7 @@ auto EpipolarEdgeAttributes::resize_fundamental_edge_list()
   F_num_samples.resize(edges.size());
   F_noise.resize(edges.size());
   F_inliers.resize(edges.size());
-  F_best_samples.resize(edges.size());
+  F_best_samples.resize(edges.size(), FEstimator::num_points);
 }
 
 auto EpipolarEdgeAttributes::resize_essential_edge_list()
@@ -122,7 +138,61 @@ auto EpipolarEdgeAttributes::resize_essential_edge_list()
   E_num_samples.resize(edges.size());
   E_noise.resize(edges.size());
   E_inliers.resize(edges.size());
-  E_best_samples.resize(edges.size());
+  E_best_samples.resize(edges.size(), EEstimator::num_points);
+}
+
+auto EpipolarEdgeAttributes::read_fundamental_matrices(
+    const ViewAttributes& view_attributes, H5File& h5_file) -> void
+{
+  h5_file.read_dataset("F", F);
+  h5_file.read_dataset("F_num_samples", F_num_samples);
+  h5_file.read_dataset("F_noise", F_noise);
+  h5_file.read_dataset("F_best_samples", F_best_samples);
+
+  std::for_each(
+      std::begin(edge_ids), std::end(edge_ids), [&](const auto& ij) {
+        const auto& eij = edges[ij];
+        const auto i = eij.first;
+        const auto j = eij.second;
+
+        SARA_DEBUG << "Reading fundamental matrices between images:\n"
+                   << "- image[" << i << "] = "  //
+                   << view_attributes.group_names[i] << "\n"
+                   << "- image[" << j << "] = "  //
+                   << view_attributes.group_names[j] << "\n";
+        std::cout.flush();
+
+        // Estimate the fundamental matrix.
+        h5_file.read_dataset(format("F_inliers/%d_%d", i, j),
+                             F_inliers[ij]);
+      });
+}
+
+auto EpipolarEdgeAttributes::read_essential_matrices(
+    const ViewAttributes& view_attributes, H5File& h5_file) -> void
+{
+  h5_file.read_dataset("E", E);
+  h5_file.read_dataset("E_num_samples", E_num_samples);
+  h5_file.read_dataset("E_noise", E_noise);
+  h5_file.read_dataset("E_best_samples", E_best_samples);
+
+  std::for_each(
+      std::begin(edge_ids), std::end(edge_ids), [&](const auto& ij) {
+        const auto& eij = edges[ij];
+        const auto i = eij.first;
+        const auto j = eij.second;
+
+        SARA_DEBUG << "Reading fundamental matrices between images:\n"
+                   << "- image[" << i << "] = "  //
+                   << view_attributes.group_names[i] << "\n"
+                   << "- image[" << j << "] = "  //
+                   << view_attributes.group_names[j] << "\n";
+        std::cout.flush();
+
+        // Estimate the fundamental matrix.
+        h5_file.read_dataset(format("E_inliers/%d_%d", i, j),
+                             E_inliers[ij]);
+      });
 }
 
 } /* namespace DO::Sara */

@@ -103,7 +103,7 @@ auto estimate_homography(const KeypointList<OERegion, float>& keys1,
 
   // const auto [H, num_inliers, sample_best] = ransac(
   //     M, P1, P2, FourPointAlgorithm{}, distance, num_samples, h_err_thres);
-  const auto [H, inliers, sample_best] = v2::ransac(
+  const auto [H, inliers, sample_best] = ransac(
       M, P1, P2, FourPointAlgorithm{}, distance, num_samples, h_err_thres);
 
   return std::make_tuple(H, inliers, sample_best);

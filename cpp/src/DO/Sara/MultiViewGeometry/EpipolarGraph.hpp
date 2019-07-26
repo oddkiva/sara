@@ -17,15 +17,15 @@
 #include <DO/Sara/Core/Image.hpp>
 #include <DO/Sara/Features/KeypointList.hpp>
 #include <DO/Sara/Match.hpp>
+#include <DO/Sara/MultiViewGeometry/Estimators/EssentialMatrixEstimators.hpp>
+#include <DO/Sara/MultiViewGeometry/Estimators/FundamentalMatrixEstimators.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/PinholeCamera.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/TwoViewGeometry.hpp>
-
-#include <memory>
 
 
 namespace DO::Sara {
 
-struct DO_SARA_EXPORT PhotoAttributes
+struct DO_SARA_EXPORT ViewAttributes
 {
   std::vector<std::string> image_paths;
   std::vector<std::string> group_names;
@@ -36,12 +36,16 @@ struct DO_SARA_EXPORT PhotoAttributes
 
   auto list_images(const std::string& dirpath) -> void;
 
+  auto read_images() -> void;
   auto read_keypoints(H5File& h5_file) -> void;
 };
 
 
 struct DO_SARA_EXPORT EpipolarEdgeAttributes
 {
+  using EEstimator = NisterFivePointAlgorithm;
+  using FEstimator = EightPointAlgorithm;
+
   //! @brief An edge 'e' is an index the range [0, N * (N - 1)/ 2[.
   //! where N is the number of photographs.
   Tensor_<int, 1> edge_ids;
@@ -72,7 +76,7 @@ struct DO_SARA_EXPORT EpipolarEdgeAttributes
   //! @brief RANSAC metadata for each E[i,j].
   std::vector<int> E_num_samples;
   std::vector<double> E_noise;
-  std::vector<std::vector<int>> E_inliers;
+  std::vector<Tensor_<bool, 1>> E_inliers;
   Tensor_<int, 2> E_best_samples;
   //! @}
 
@@ -80,12 +84,17 @@ struct DO_SARA_EXPORT EpipolarEdgeAttributes
   std::vector<TwoViewGeometry> two_view_geometries;
 
   auto initialize_edges(int num_vertices) -> void;
-
-  auto read_matches(H5File& h5_file, const PhotoAttributes& photo_attributes)
-      -> void;
-
   auto resize_fundamental_edge_list() -> void;
   auto resize_essential_edge_list() -> void;
+
+  auto read_matches(H5File& h5_file, const ViewAttributes& view_attributes)
+      -> void;
+
+  auto read_fundamental_matrices(const ViewAttributes& view_attributes,
+                                 H5File& h5_file) -> void;
+  auto read_essential_matrices(const ViewAttributes& view_attributes,
+                               H5File& h5_file) -> void;
+  auto read_two_view_geometries(H5File& h5_file) -> void;
 };
 
 } /* namespace DO::Sara */

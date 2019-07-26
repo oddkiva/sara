@@ -9,87 +9,17 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Sara/Core/StdVectorHelpers.hpp>
-#include <DO/Sara/Core/DebugUtilities.hpp>
-#include <DO/Sara/Core/HDF5.hpp>
-#include <DO/Sara/FileSystem.hpp>
 #include <DO/Sara/Graphics.hpp>
-#include <DO/Sara/ImageIO.hpp>
+#include <DO/Sara/SfM/BuildingBlocks.hpp>
 
-#include <DO/Sara/Features/Draw.hpp>
-#include <DO/Sara/SfM/Detectors/SIFT.hpp>
-
-#include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
+
+#include <iostream>
+#include <string>
 
 
 namespace po = boost::program_options;
-namespace fs = boost::filesystem;
 namespace sara = DO::Sara;
-
-
-void detect_keypoints(const std::string& dirpath,
-                      const std::string& h5_filepath, bool overwrite)
-{
-  auto h5_file = sara::H5File{h5_filepath, H5F_ACC_TRUNC};
-
-  auto image_paths = std::vector<std::string>{};
-  append(image_paths, sara::ls(dirpath, ".png"));
-  append(image_paths, sara::ls(dirpath, ".jpg"));
-
-  std::for_each(
-      std::begin(image_paths), std::end(image_paths), [&](const auto& path) {
-        SARA_DEBUG << "Reading image " << path << "..." << std::endl;
-        const auto image = sara::imread<float>(path);
-
-        SARA_DEBUG << "Computing SIFT keypoints " << path << "..." << std::endl;
-        const auto keys = sara::compute_sift_keypoints(image);
-
-        const auto group_name = sara::basename(path);
-        h5_file.get_group(group_name);
-
-        SARA_DEBUG << "Saving SIFT keypoints of " << path << "..." << std::endl;
-        write_keypoints(h5_file, group_name, keys, overwrite);
-      });
-}
-
-
-void read_keypoints(const std::string& dirpath, const std::string& h5_filepath)
-{
-  auto h5_file = sara::H5File{h5_filepath, H5F_ACC_RDONLY};
-  auto image_paths = std::vector<std::string>{};
-  append(image_paths, sara::ls(dirpath, ".png"));
-  append(image_paths, sara::ls(dirpath, ".jpg"));
-
-  std::for_each(
-      std::begin(image_paths), std::end(image_paths), [&](const auto& path) {
-        SARA_DEBUG << "Reading image " << path << "..." << std::endl;
-        const auto image = sara::imread<float>(path);
-
-        const auto group_name = sara::basename(path);
-
-        SARA_DEBUG << "Read keypoints for " << group_name << "..." << std::endl;
-        const auto keys =
-            read_keypoints(h5_file, group_name + "/" + "descriptors");
-
-        const auto& features = std::get<0>(keys);
-
-        // Visual inspection.
-        if (!sara::active_window())
-        {
-          sara::create_window(image.sizes() / 2, group_name);
-          sara::set_antialiasing();
-        }
-
-        if (sara::get_sizes(sara::active_window()) != image.sizes() / 2)
-          sara::resize_window(image.sizes() / 2);
-
-        sara::display(image, 0, 0, 0.5);
-        sara::draw_oe_regions(features, sara::Red8, 0.5f);
-        sara::get_key();
-        sara::close_window();
-      });
-}
 
 
 int __main(int argc, char **argv)
@@ -131,9 +61,9 @@ int __main(int argc, char **argv)
     const auto h5_filepath = vm["out_h5_file"].as<std::string>();
     const auto overwrite = vm.count("overwrite");
     if (vm.count("read"))
-      read_keypoints(dirpath, h5_filepath);
+      sara::read_keypoints(dirpath, h5_filepath);
     else
-      detect_keypoints(dirpath, h5_filepath, overwrite);
+      sara::detect_keypoints(dirpath, h5_filepath, overwrite);
 
     return 0;
   }
@@ -147,7 +77,7 @@ int __main(int argc, char **argv)
 
 int main(int argc, char** argv)
 {
-  DO::Sara::GraphicsApplication app(argc, argv);
+  sara::GraphicsApplication app(argc, argv);
   app.register_user_main(__main);
   return app.exec();
 }

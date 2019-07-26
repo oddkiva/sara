@@ -406,7 +406,7 @@ GRAPHICS_MAIN()
   auto e_estimator = EEstimator{};
   auto distance = EpipolarDistance{};
   const auto [E_, inliers, sample_best] =
-      v2::ransac(M, un1, un2, e_estimator, distance, num_samples, e_err_thres);
+      ransac(M, un1, un2, e_estimator, distance, num_samples, e_err_thres);
 
 
   // Calculate the fundamental matrix.

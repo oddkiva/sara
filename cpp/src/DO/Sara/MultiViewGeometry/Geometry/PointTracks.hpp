@@ -19,7 +19,7 @@ namespace DO::Sara {
   {
     auto flat_id(const PointGID& gid) const
     {
-      return gid.image_idx * max_num_points_per_image + gid.feature_idx;
+      return gid.image_idx * max_num_points_per_image + gid.local_idx;
     }
 
     auto calculate_num_points_per_image()
