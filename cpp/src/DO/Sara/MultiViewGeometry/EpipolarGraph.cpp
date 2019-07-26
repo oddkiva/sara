@@ -47,7 +47,8 @@ auto PhotoAttributes::read_keypoints(H5File& h5_file) -> void
                  });
 }
 
-auto EpipolarEdgeAttributes::initialize_edges(int num_vertices) -> void
+auto EpipolarEdgeAttributes::initialize_edges(int num_vertices)
+    -> void
 {
   const auto& N = num_vertices;
   edge_ids = range(N * (N - 1) / 2);
@@ -58,7 +59,7 @@ auto EpipolarEdgeAttributes::initialize_edges(int num_vertices) -> void
   edges.reserve(N * (N - 1) / 2);
   for (int i = 0; i < N; ++i)
     for (int j = i + 1; j < N; ++j)
-      edges.push_back(EpipolarEdge{i, j, Eigen::Matrix3d::Zero()});
+      edges.push_back(std::make_pair(i, j));
 }
 
 auto EpipolarEdgeAttributes::read_matches(
@@ -73,9 +74,9 @@ auto EpipolarEdgeAttributes::read_matches(
   index_matches.reserve(edges.size());
   std::transform(std::begin(edges), std::end(edges),
                  std::back_inserter(index_matches),
-                 [&](const EpipolarEdge& edge) {
-                   const auto i = edge.i;
-                   const auto j = edge.j;
+                 [&](const std::pair<int, int>& edge) {
+                   const auto i = edge.first;
+                   const auto j = edge.second;
 
                    const auto match_dataset = std::string{"matches"} + "/" +
                                               std::to_string(i) + "_" +
@@ -90,12 +91,38 @@ auto EpipolarEdgeAttributes::read_matches(
   matches.reserve(edges.size());
   std::transform(std::begin(edge_ids), std::end(edge_ids),
                  std::back_inserter(matches), [&](int ij) {
-                   const auto i = edges[ij].i;
-                   const auto j = edges[ij].j;
+                   const auto i = edges[ij].first;
+                   const auto j = edges[ij].second;
                    return to_match(index_matches[ij],
                                    photo_attributes.keypoints[i],
                                    photo_attributes.keypoints[j]);
                  });
 }
 
-  } /* namespace DO::Sara */
+auto EpipolarEdgeAttributes::resize_fundamental_edge_list()
+    -> void
+{
+  if (edges.empty())
+    return;
+
+  F.resize(edges.size());
+  F_num_samples.resize(edges.size());
+  F_noise.resize(edges.size());
+  F_inliers.resize(edges.size());
+  F_best_samples.resize(edges.size());
+}
+
+auto EpipolarEdgeAttributes::resize_essential_edge_list()
+    -> void
+{
+  if (edges.empty())
+    return;
+
+  E.resize(edges.size());
+  E_num_samples.resize(edges.size());
+  E_noise.resize(edges.size());
+  E_inliers.resize(edges.size());
+  E_best_samples.resize(edges.size());
+}
+
+} /* namespace DO::Sara */

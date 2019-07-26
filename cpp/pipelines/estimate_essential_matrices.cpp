@@ -53,14 +53,14 @@ auto estimate_essential_matrix(
   auto estimator = ESolver{};
   auto distance = sara::EpipolarDistance{};
 
-  const auto [E, num_inliers, sample_best] =
+  const auto [E, inliers, sample_best] =
       ransac(Mij_tensor, Pi, Pj, estimator, distance, num_samples, err_thres);
 
   SARA_CHECK(E);
   SARA_CHECK(num_inliers);
   SARA_CHECK(Mij.size());
 
-  return std::make_tuple(E, num_inliers, sample_best);
+  return std::make_tuple(E, inliers, sample_best);
 }
 
 auto check_epipolar_constraints(const sara::Image<sara::Rgb8>& Ii,
@@ -127,8 +127,6 @@ auto check_epipolar_constraints(const sara::Image<sara::Rgb8>& Ii,
     drawer.draw_line_from_eqn(1, proj_X1.cast<float>(), sara::Magenta8, 1);
     drawer.draw_line_from_eqn(0, proj_X2.cast<float>(), sara::Magenta8, 1);
   }
-
-  //get_key();
 }
 
 void estimate_essential_matrices(const std::string& dirpath,
@@ -163,7 +161,7 @@ void estimate_essential_matrices(const std::string& dirpath,
   f_edge_attributes.initialize_edges(num_photos);
   f_edge_attributes.read_matches(h5_file, photo_attributes);
 
-  auto& f_edges = f_edge_attributes.edges;
+  auto& f_edges = f_edge_attributes.f_edges;
   h5_file.read_dataset("f_edges", f_edges);
 
   auto e_edge_attributes = f_edge_attributes;
@@ -171,10 +169,10 @@ void estimate_essential_matrices(const std::string& dirpath,
   const auto& matches = e_edge_attributes.matches;
 
   auto& e_edge_ids = e_edge_attributes.edge_ids;
-  auto& e_edges = e_edge_attributes.edges;
-  auto& e_noise = e_edge_attributes.noise;
-  auto& e_num_inliers = e_edge_attributes.num_inliers;
-  auto& e_best_samples = e_edge_attributes.best_samples;
+  auto& e_edges = e_edge_attributes.e_edges;
+  auto& e_noise = e_edge_attributes.e_noise;
+  auto& e_num_inliers = e_edge_attributes.e_inliers;
+  auto& e_best_samples = e_edge_attributes.e_best_samples;
 
   // Preallocate space.
   e_noise.resize(e_edge_ids.size());

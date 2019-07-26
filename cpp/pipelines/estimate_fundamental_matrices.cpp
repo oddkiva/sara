@@ -10,13 +10,12 @@
 // ========================================================================== //
 
 #include <DO/Sara/Core/HDF5.hpp>
+#include <DO/Sara/Core/StringFormat.hpp>
 #include <DO/Sara/FeatureMatching.hpp>
 #include <DO/Sara/FileSystem.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/MultiViewGeometry.hpp>
-#include <DO/Sara/MultiViewGeometry/Datasets/Strecha.hpp>
-#include <DO/Sara/MultiViewGeometry/EpipolarGraph.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
@@ -142,49 +141,54 @@ void estimate_fundamental_matrices(const std::string& dirpath,
   auto h5_file = sara::H5File{h5_filepath, H5F_ACC_RDWR};
 
   auto photo_attributes = sara::PhotoAttributes{};
+
+  // Load images (optional).
   SARA_DEBUG << "Listing images from:\n\t" << dirpath << std::endl;
   photo_attributes.list_images(dirpath);
+
+  // Load keypoints (optional).
   SARA_DEBUG << "Reading keypoints from HDF5 file:\n\t" << h5_filepath << std::endl;
   photo_attributes.read_keypoints(h5_file);
   const auto& image_paths = photo_attributes.image_paths;
   const auto& keypoints = photo_attributes.keypoints;
 
+  // Initialize the epipolar graph.
   const auto num_vertices = int(photo_attributes.image_paths.size());
   SARA_CHECK(num_vertices);
 
-  auto f_edge_attributes = sara::EpipolarEdgeAttributes{};
+  auto edge_attributes = sara::EpipolarEdgeAttributes{};
   SARA_DEBUG << "Initializing the epipolar edges..." << std::endl;
-  f_edge_attributes.initialize_edges(num_vertices);
+  edge_attributes.initialize_edges(num_vertices);
 
   SARA_DEBUG << "Reading matches from HDF5 file:\n\t" << h5_filepath << std::endl;
-  f_edge_attributes.read_matches(h5_file, photo_attributes);
+  edge_attributes.read_matches(h5_file, photo_attributes);
 
-  const auto& f_edge_ids = f_edge_attributes.edge_ids;
-  const auto& matches = f_edge_attributes.matches;
+  SARA_DEBUG << "Preallocate the F data structures..." << std::endl;
+  edge_attributes.resize_fundamental_edge_list();
+
+  const auto& edge_ids = edge_attributes.edge_ids;
+  const auto& edges = edge_attributes.edges;
+  const auto& matches = edge_attributes.matches;
 
   // Mutate these.
-  auto& f_edges = f_edge_attributes.edges;
-  auto& f_noise = f_edge_attributes.noise;
-  auto& f_num_inliers = f_edge_attributes.num_inliers;
-  auto& f_best_samples = f_edge_attributes.best_samples;
+  auto& F = edge_attributes.F;
+  auto& F_num_samples = edge_attributes.F_best_samples;
+  auto& F_noise = edge_attributes.F_noise;
+  auto& F_inliers = edge_attributes.F_inliers;
+  auto& F_best_samples = edge_attributes.F_best_samples;
 
   // Preallocate space.
-  f_noise.resize(f_edge_ids.size());
-  f_num_inliers.resize(f_edge_ids.size());
-  f_best_samples.resize(int(f_edge_ids.size()), FSolver::num_points);
-  SARA_DEBUG << "OK" << std::endl;
-
-  SARA_CHECK(f_edge_ids.size());
-  SARA_CHECK(f_edges.size());
+  SARA_CHECK(edge_ids.size());
+  SARA_CHECK(edges.size());
 
   const auto num_samples = 1000;
   const auto f_err_thres = 5e-3;
   std::for_each(
-      std::begin(f_edge_ids), std::end(f_edge_ids), [&](const auto& edge_id) {
-        const auto& edge = f_edges[edge_id];
-        const auto i = edge.i;
-        const auto j = edge.j;
-        const auto& Mij = matches[edge_id];
+      std::begin(edge_ids), std::end(edge_ids), [&](const auto& e) {
+        const auto& ij = edges[e];
+        const auto i = ij.first;
+        const auto j = ij.second;
+        const auto& Mij = matches[e];
         const auto& ki = keypoints[i];
         const auto& kj = keypoints[j];
 
@@ -196,7 +200,7 @@ void estimate_fundamental_matrices(const std::string& dirpath,
         std::cout.flush();
 
         // Estimate the fundamental matrix.
-        const auto [F, num_inliers, best_sample] =
+        const auto [Fij, F_inliers_ij, F_best_sample_ij] =
             estimate_fundamental_matrix(Mij, ki, kj, num_samples, f_err_thres);
         SARA_DEBUG << "F = \n" << F << std::endl;
         SARA_CHECK(num_inliers);
@@ -206,22 +210,28 @@ void estimate_fundamental_matrices(const std::string& dirpath,
         const int display_step = 20;
         const auto Ii = sara::imread<sara::Rgb8>(image_paths[i]);
         const auto Ij = sara::imread<sara::Rgb8>(image_paths[j]);
-        check_epipolar_constraints(Ii, Ij, F, Mij, best_sample, f_err_thres,
+        check_epipolar_constraints(Ii, Ij, Fij, Mij, F_best_sample_ij, f_err_thres,
                                    display_step);
 
         // Update.
-        f_edges[edge_id] = sara::EpipolarEdge{i, j, F.matrix()};
-        f_num_inliers[edge_id] = num_inliers;
-        f_best_samples[edge_id].flat_array() = best_sample.flat_array();
-        f_noise[edge_id] = f_err_thres;
+        F[ij] = Fij;
+        F_inliers[ij] = F_inliers_ij;
+        F_best_samples[ij] = F_best_sample_ij;
+        F_noise[ij] = f_err_thres;
       });
 
-  // Save F-f_edges.
-  h5_file.write_dataset("f_edges", sara::tensor_view(f_edges), overwrite);
-  h5_file.write_dataset("f_num_inliers", sara::tensor_view(f_num_inliers),
-                        overwrite);
-  h5_file.write_dataset("f_best_samples", f_best_samples, overwrite);
-  h5_file.write_dataset("f_noise", sara::tensor_view(f_noise), overwrite);
+  h5_file.write_dataset("F", sara::tensor_view(F), overwrite);
+  h5_file.write_dataset("F_num_samples", sara::tensor_view(F_num_samples), overwrite);
+  h5_file.write_dataset("F_noise", sara::tensor_view(F_noise), overwrite);
+  h5_file.write_dataset("F_best_samples", F_best_samples, overwrite);
+  // Save F-edges.
+  std::for_each(std::begin(edge_ids), std::end(edge_ids), [&](const auto& ij) {
+                const auto i = edges[ij].first;
+                const auto j = edges[ij].second;
+                h5_file.write_dataset(sara::format("F_inliers/%i/%j", i, j),
+                                      sara::tensor_view(F_inliers[ij]),
+                                      overwrite);
+  });
 }
 
 

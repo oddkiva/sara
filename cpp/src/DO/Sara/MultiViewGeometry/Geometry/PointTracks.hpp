@@ -1,26 +1,23 @@
 #pragma once
 
-#include <DO/Sara/DisjointSets.hpp>
+#include <boost/graph/connected_components.hpp>
 
 #include <vector>
+
 
 namespace DO::Sara {
 
   // This is a necessary step for the bundle adjustment step.
 
-  struct GlobalID {
-    int image_idx;
-    int feature_idx;
+  //! @brief Point Global ID.
+  struct PointGID {
+    int image_idx{-1};
+    int local_idx{-1};
   };
 
   struct PointTrackGraph
   {
-    //auto init(std::vector<KeypointList<OERegion, float>>& keys,
-    //          EpipolarGraph& g)
-    //{
-    //}
-
-    auto flat_id(const GlobalID& gid) const
+    auto flat_id(const PointGID& gid) const
     {
       return gid.image_idx * max_num_points_per_image + gid.feature_idx;
     }
@@ -38,10 +35,6 @@ namespace DO::Sara {
     std::vector<int> num_features;
 
     int max_num_points_per_image;
-
-    std::vector<GlobalID> gids;
-    std::vector<bool> exists;
-    AdjacencyList adj_list;
   };
 
 

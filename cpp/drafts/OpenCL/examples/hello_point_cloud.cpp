@@ -102,7 +102,7 @@ int main()
   const auto width = 800;
   const auto height = 600;
   auto window =
-      glfwCreateWindow(width, height, "Hello Triangle", nullptr, nullptr);
+      glfwCreateWindow(width, height, "Hello Point Cloud", nullptr, nullptr);
   glfwMakeContextCurrent(window);
   glfwSetFramebufferSizeCallback(window, resize_framebuffer);
 
