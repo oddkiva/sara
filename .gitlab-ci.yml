@@ -20,6 +20,7 @@ before_script:
       libglfw3-dev
       ocl-icd-opencl-dev
       opencl-headers
+      libpocl-dev
       libceres-dev
       qtbase5-dev
       qt3d5-dev
