@@ -539,7 +539,7 @@ auto estimate_essential_matrices(const std::string& dirpath,      //
             read_internal_camera_parameters(K_filepath);
       });
 
-  // Load keypoints (optional).
+  // Load keypoints.
   SARA_DEBUG << "Reading keypoints from HDF5 file:\n\t" << h5_filepath << std::endl;
   view_attributes.read_keypoints(h5_file);
   const auto& keypoints = view_attributes.keypoints;
@@ -614,7 +614,7 @@ auto estimate_essential_matrices(const std::string& dirpath,      //
 
         auto Eij = EssentialMatrix{};
         auto E_best_sample_ij = Tensor_<int, 1>{ESolver::num_points};
-        auto E_inliers_ij = Tensor_<bool, 1>{Mij.size()};
+        auto E_inliers_ij = Tensor_<bool, 1>{static_cast<int>(Mij.size())};
         auto Fij = FundamentalMatrix{};
         if (F_num_inliers(ij) >= min_F_inliers)
         {
@@ -691,7 +691,7 @@ auto inspect_essential_matrices(const std::string& dirpath,
   view_attributes.list_images(dirpath);
   view_attributes.read_images();
 
-  // Load keypoints (optional).
+  // Load keypoints.
   SARA_DEBUG << "Reading keypoints from HDF5 file:\n\t" << h5_filepath << std::endl;
   view_attributes.read_keypoints(h5_file);
   const auto& images = view_attributes.images;
@@ -748,8 +748,6 @@ auto inspect_essential_matrices(const std::string& dirpath,
 
         const auto& Ki = view_attributes.cameras[i].K;
         const auto& Kj = view_attributes.cameras[j].K;
-        const auto Ki_inv = Ki.inverse();
-        const auto Kj_inv = Kj.inverse();
 
         SARA_DEBUG << "Internal camera matrices :\n"
                    << "- K[" << i << "] =\n" << Ki << "\n"

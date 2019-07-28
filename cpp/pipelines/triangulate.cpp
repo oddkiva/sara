@@ -10,15 +10,20 @@
 // ========================================================================== //
 
 #include <DO/Sara/Core/HDF5.hpp>
+#include <DO/Sara/Core/MultiArray/DataTransformations.hpp>
+#include <DO/Sara/Core/Tensor.hpp>
 #include <DO/Sara/FeatureMatching.hpp>
 #include <DO/Sara/FileSystem.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
+#include <DO/Sara/ImageProcessing/Interpolation.hpp>
 #include <DO/Sara/Match.hpp>
 #include <DO/Sara/MultiViewGeometry.hpp>
-#include <DO/Sara/MultiViewGeometry/Datasets/Strecha.hpp>
-#include <DO/Sara/MultiViewGeometry/EpipolarGraph.hpp>
+#include <DO/Sara/MultiViewGeometry/Miscellaneous.hpp>
+#include <DO/Sara/SfM/BuildingBlocks/Triangulation.hpp>
 #include <DO/Sara/SfM/Detectors/SIFT.hpp>
+
+#include <DO/Sara/MultiViewGeometry/Miscellaneous.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
@@ -26,31 +31,118 @@
 
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
-namespace sara = DO::Sara;
 
 using namespace std;
+using namespace DO::Sara;
 
 
 void triangulate(const std::string& dirpath, const std::string& h5_filepath)
 {
   // Create a backup.
   if (!fs::exists(h5_filepath + ".bak"))
-    sara::cp(h5_filepath, h5_filepath + ".bak");
+    cp(h5_filepath, h5_filepath + ".bak");
 
-  auto h5_file = sara::H5File{h5_filepath, H5F_ACC_RDWR};
+  SARA_DEBUG << "Opening file " << h5_filepath << "..." << std::endl;
+  auto h5_file = H5File{h5_filepath, H5F_ACC_RDONLY};
 
-  auto image_paths = std::vector<std::string>{};
-  append(image_paths, sara::ls(dirpath, ".png"));
-  append(image_paths, sara::ls(dirpath, ".jpg"));
-  std::sort(image_paths.begin(), image_paths.end());
+  auto view_attributes = ViewAttributes{};
 
-  auto group_names = std::vector<std::string>{};
-  group_names.reserve(image_paths.size());
-  std::transform(std::begin(image_paths), std::end(image_paths),
-                 std::back_inserter(group_names),
-                 [&](const std::string& image_path) {
-                   return sara::basename(image_path);
-                 });
+  // Load images (necessary if we want to extract the colors).
+  SARA_DEBUG << "Listing images from:\n\t" << dirpath << std::endl;
+  view_attributes.list_images(dirpath);
+  view_attributes.read_images();
+
+  // Load keypoints.
+  SARA_DEBUG << "Reading keypoints from HDF5 file:\n\t" << h5_filepath << std::endl;
+  view_attributes.read_keypoints(h5_file);
+  const auto& images = view_attributes.images;
+
+  // Load the internal camera matrices from Strecha dataset.
+  // N.B.: this is an ad-hoc code.
+  SARA_DEBUG << "Reading internal camera matrices in Strecha's data format"
+             << std::endl;
+  std::for_each(
+      std::begin(view_attributes.image_paths),
+      std::end(view_attributes.image_paths), [&](const auto& image_path) {
+        const auto K_filepath = dirpath + "/" + basename(image_path) + ".png.K";
+        SARA_DEBUG << "Reading internal camera matrix from:\n\t" << K_filepath
+                   << std::endl;
+        view_attributes.cameras.push_back(normalized_camera());
+        view_attributes.cameras.back().K =
+            read_internal_camera_parameters(K_filepath);
+      });
+
+  // Initialize the epipolar graph.
+  const auto num_vertices = int(view_attributes.image_paths.size());
+  SARA_CHECK(num_vertices);
+
+  auto edge_attributes = EpipolarEdgeAttributes{};
+  SARA_DEBUG << "Initializing the epipolar edges..." << std::endl;
+  edge_attributes.initialize_edges(num_vertices);
+
+  SARA_DEBUG << "Reading matches from HDF5 file:\n\t" << h5_filepath << std::endl;
+  edge_attributes.read_matches(h5_file, view_attributes);
+
+  SARA_DEBUG << "Reading the essential matrices..." << std::endl;
+  edge_attributes.resize_essential_edge_list();
+  edge_attributes.read_essential_matrices(view_attributes, h5_file);
+
+  // Convenient references.
+  const auto& edge_ids = edge_attributes.edge_ids;
+  const auto& edges = edge_attributes.edges;
+  const auto& matches = edge_attributes.matches;
+
+  const auto& E = edge_attributes.E;
+  const auto& E_num_samples = edge_attributes.E_num_samples;
+  const auto& E_noise = edge_attributes.E_noise;
+  const auto& E_best_samples = edge_attributes.E_best_samples;
+  const auto& E_inliers = edge_attributes.E_inliers;
+
+  std::for_each(
+      std::begin(edge_ids), std::end(edge_ids), [&](const auto& ij) {
+        const auto& eij = edges[ij];
+        const auto i = eij.first;
+        const auto j = eij.second;
+        const auto& Mij = matches[ij];
+
+        const auto& Eij = E[ij];
+        const auto& E_inliers_ij = E_inliers[ij];
+        const auto& E_best_sample_ij = E_best_samples[ij];
+
+        const auto& Ki = view_attributes.cameras[i].K;
+        const auto& Kj = view_attributes.cameras[j].K;
+        SARA_DEBUG << "Internal camera matrices :\n"
+                   << "- K[" << i << "] =\n" << Ki << "\n"
+                   << "- K[" << j << "] =\n" << Kj << "\n";
+        const Matrix3d Ki_inv = Ki.inverse();
+        const Matrix3d Kj_inv = Kj.inverse();
+
+        print_stage("Performing data transformations...");
+        // Tensors of image coordinates.
+        const auto& fi = features(view_attributes.keypoints[i]);
+        const auto& fj = features(view_attributes.keypoints[j]);
+        const auto ui = homogeneous(extract_centers(fi)); // .cast<double>();
+        const auto uj = homogeneous(extract_centers(fj)); // .cast<double>();
+        //// Tensors of camera coordinates.
+        //const auto uni = apply_transform(Ki_inv, ui);
+        //const auto unj = apply_transform(Kj_inv, uj);
+        //static_assert(std::is_same_v<decltype(uni), const Tensor_<double, 2>>);
+        //// List the matches as a 2D-tensor where each row encodes a match 'm' as
+        //// a pair of point indices (i, j).
+        //const auto index_matches_ij = to_tensor(matches);
+
+        //auto geometry = estimate_two_view_geometry(index_matches_ij, uni, unj,
+        //                                           Eij, E_inliers_ij, E_best_sample_ij);
+
+        //keep_cheiral_inliers_only(geometry, E_inliers_ij);
+
+        //// Add the internal camera matrices to the camera.
+        //geometry.C1.K = Ki;
+        //geometry.C2.K = Kj;
+        //auto colors = extract_colors(view_attributes.images[i],
+        //                             view_attributes.images[j], geometry);
+        //save_to_hdf5(geometry, colors);
+      });
 }
 
 

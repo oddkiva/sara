@@ -10,5 +10,6 @@ if (SARA_USE_FROM_SOURCE)
     sara_set_internal_dependencies("SfM"
       "Features;FeatureDetectors;FeatureDescriptors;FeatureMatching;MultiViewGeometry")
     sara_generate_library("SfM")
+    target_link_libraries(DO_Sara_SfM tinyply)
   endif ()
 endif ()
