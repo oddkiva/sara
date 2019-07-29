@@ -55,7 +55,6 @@ void triangulate(const std::string& dirpath, const std::string& h5_filepath)
   // Load keypoints.
   SARA_DEBUG << "Reading keypoints from HDF5 file:\n\t" << h5_filepath << std::endl;
   view_attributes.read_keypoints(h5_file);
-  const auto& images = view_attributes.images;
 
   // Load the internal camera matrices from Strecha dataset.
   // N.B.: this is an ad-hoc code.
@@ -93,7 +92,6 @@ void triangulate(const std::string& dirpath, const std::string& h5_filepath)
   const auto& matches = edge_attributes.matches;
 
   const auto& E = edge_attributes.E;
-  const auto& E_num_samples = edge_attributes.E_num_samples;
   const auto& E_best_samples = edge_attributes.E_best_samples;
   const auto& E_inliers = edge_attributes.E_inliers;
 
