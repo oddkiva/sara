@@ -23,8 +23,8 @@ auto estimate_two_view_geometry(const TensorView_<int, 2>& M,
   -> TwoViewGeometry;
 
 
-auto keep_cheiral_inliers_only(TwoViewGeometry& complete_geom,
-                               const TensorView_<int, 1>& inliers) -> void;
+auto keep_cheiral_inliers_only(TwoViewGeometry& geometry,
+                               const TensorView_<bool, 1>& inliers) -> void;
 
 
 auto extract_colors(const Image<Rgb8>& image1,             //

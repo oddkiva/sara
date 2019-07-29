@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_SUITE(TestDisjointSets)
 
 BOOST_AUTO_TEST_CASE(test_on_image)
 {
-  auto regions = Image<int>{ 5, 5 };
+  auto regions = Image<int>{5, 5};
   regions.matrix() <<
 //  0  1  2  3  4
     0, 0, 1, 2, 3,

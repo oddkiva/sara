@@ -148,7 +148,7 @@ auto estimate_two_view_geometry(const TensorView_<int, 2>& M,
 }
 
 auto keep_cheiral_inliers_only(TwoViewGeometry& complete_geom,
-                               const TensorView_<int, 1>& inliers) -> void
+                               const TensorView_<bool, 1>& inliers) -> void
 {
   auto& X = complete_geom.X;
   const auto& cheirality = complete_geom.cheirality;

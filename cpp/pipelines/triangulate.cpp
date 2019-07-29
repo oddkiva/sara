@@ -94,7 +94,6 @@ void triangulate(const std::string& dirpath, const std::string& h5_filepath)
 
   const auto& E = edge_attributes.E;
   const auto& E_num_samples = edge_attributes.E_num_samples;
-  const auto& E_noise = edge_attributes.E_noise;
   const auto& E_best_samples = edge_attributes.E_best_samples;
   const auto& E_inliers = edge_attributes.E_inliers;
 
@@ -121,27 +120,42 @@ void triangulate(const std::string& dirpath, const std::string& h5_filepath)
         // Tensors of image coordinates.
         const auto& fi = features(view_attributes.keypoints[i]);
         const auto& fj = features(view_attributes.keypoints[j]);
-        const auto ui = homogeneous(extract_centers(fi)); // .cast<double>();
-        const auto uj = homogeneous(extract_centers(fj)); // .cast<double>();
-        //// Tensors of camera coordinates.
-        //const auto uni = apply_transform(Ki_inv, ui);
-        //const auto unj = apply_transform(Kj_inv, uj);
-        //static_assert(std::is_same_v<decltype(uni), const Tensor_<double, 2>>);
-        //// List the matches as a 2D-tensor where each row encodes a match 'm' as
-        //// a pair of point indices (i, j).
-        //const auto index_matches_ij = to_tensor(matches);
+        const auto ui = homogeneous(extract_centers(fi)).template cast<double>();
+        const auto uj = homogeneous(extract_centers(fj)).template cast<double>();
+        // Tensors of camera coordinates.
+        const auto uni = apply_transform(Ki_inv, ui);
+        const auto unj = apply_transform(Kj_inv, uj);
+        static_assert(std::is_same_v<decltype(uni), const Tensor_<double, 2>>);
+        // List the matches as a 2D-tensor where each row encodes a match 'm' as
+        // a pair of point indices (i, j).
+        const auto index_matches_ij = to_tensor(Mij);
 
-        //auto geometry = estimate_two_view_geometry(index_matches_ij, uni, unj,
-        //                                           Eij, E_inliers_ij, E_best_sample_ij);
+        auto geometry = estimate_two_view_geometry(index_matches_ij, uni, unj,
+                                                   Eij, E_inliers_ij, E_best_sample_ij);
 
-        //keep_cheiral_inliers_only(geometry, E_inliers_ij);
+        keep_cheiral_inliers_only(geometry, E_inliers_ij);
 
-        //// Add the internal camera matrices to the camera.
-        //geometry.C1.K = Ki;
-        //geometry.C2.K = Kj;
-        //auto colors = extract_colors(view_attributes.images[i],
-        //                             view_attributes.images[j], geometry);
-        //save_to_hdf5(geometry, colors);
+        // Add the internal camera matrices to the camera.
+        geometry.C1.K = Ki;
+        geometry.C2.K = Kj;
+        auto colors = extract_colors(view_attributes.images[i],
+                                     view_attributes.images[j], geometry);
+        {
+          // Get the left and right cameras.
+          auto cameras = Tensor_<PinholeCamera, 1>{2};
+          cameras(0) = geometry.C1;
+          cameras(1) = geometry.C2;
+
+          const MatrixXd X_euclidean = geometry.X.colwise().hnormalized();
+          auto X_data = const_cast<double*>(
+              reinterpret_cast<const double*>(X_euclidean.data()));
+          auto X_tensor =
+              TensorView_<double, 2>{X_data, {int(geometry.X.cols()), 3}};
+          h5_file.write_dataset("cameras/%d_%d", cameras, true);
+          h5_file.write_dataset("points/%d_%d", X_tensor, true);
+          h5_file.write_dataset("colors/%d_%d", X_tensor, true);
+        }
+
       });
 }
 
