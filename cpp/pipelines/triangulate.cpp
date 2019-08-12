@@ -131,7 +131,7 @@ void triangulate(const std::string& dirpath, const std::string& h5_filepath)
         auto geometry = estimate_two_view_geometry(index_matches_ij, uni, unj,
                                                    Eij, E_inliers_ij, E_best_sample_ij);
 
-        keep_cheiral_inliers_only(geometry, E_inliers_ij);
+        //keep_cheiral_inliers_only(geometry, E_inliers_ij);
 
         // Add the internal camera matrices to the camera.
         geometry.C1.K = Ki;
