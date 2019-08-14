@@ -63,6 +63,141 @@ inline auto init_glew_boilerplate()
 }
 
 
+struct View
+{
+  View()
+  {
+    view.setIdentity();
+    view.translate(Vector3f{0.f, 0.f, -100.f});
+  }
+
+  auto move_left(float delta)
+  {
+    view.translate(-scale * delta * Vector3f::UnitX());
+  }
+
+  auto move_right(float delta)
+  {
+    view.translate(scale * delta * Vector3f::UnitX());
+  }
+
+  auto move_backward(float delta)
+  {
+    view.translate(-scale * delta * Vector3f::UnitZ());
+  }
+
+  auto move_forward(float delta)
+  {
+    view.translate(scale * delta * Vector3f::UnitZ());
+  }
+
+  auto matrix() const -> const Matrix4f&
+  {
+    return view.matrix();
+  }
+
+  Transform<float, 3, Eigen::Projective> view;
+
+  float scale = 1e-1f;
+};
+
+struct Time
+{
+  void update()
+  {
+    last_frame = current_frame;
+    current_frame = timer.elapsed_ms();
+    delta_time = current_frame - last_frame;
+  }
+
+  Timer timer;
+  float delta_time = 0.f;
+  float last_frame = 0.f;
+  float current_frame = 0.f;
+};
+
+auto move_camera_from_keyboard(GLFWwindow* window, View& view, Time& time)
+{
+  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    view.move_forward(time.delta_time);
+  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    view.move_backward(time.delta_time);
+  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    view.move_left(time.delta_time);
+  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    view.move_right(time.delta_time);
+}
+
+
+bool mouse_pressed = true;
+float last_x = 800.f / 2.f;
+float last_y = 600.f / 2.f;
+Eigen::Quaternionf rotation = Eigen::Quaternionf::Identity();
+Eigen::Matrix4f rot_mat = Eigen::Matrix4f::Identity();
+
+void project_to_sphere(Vector3f& x)
+{
+  auto sqr_z = 1. - x.squaredNorm();
+  if (sqr_z > 0)
+    x.z() = std::sqrt(sqr_z);
+  else
+    x = x.normalized();
+}
+
+auto move_camera_from_mouse(GLFWwindow* window, double x_pos, double y_pos)
+{
+  const auto state = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
+
+  if (state == GLFW_RELEASE && mouse_pressed)
+  {
+    mouse_pressed = false;
+    std::cout << "Mouse released at " << x_pos << " " << y_pos << std::endl;
+    return;
+  }
+
+  if (state != GLFW_PRESS)
+    return;
+
+  if (!mouse_pressed)
+  {
+    last_x = x_pos;
+    last_y = y_pos;
+    mouse_pressed = true;
+  }
+
+  std::cout << "Before pressed at " << last_x << " " << last_y << std::endl;
+  std::cout << "Now    pressed at " << x_pos << " " << y_pos << std::endl;
+
+  const float xoff = x_pos - last_x;
+  const float yoff = -(y_pos - last_y);
+  const auto delta = sqrt(xoff * xoff + yoff * yoff);
+  SARA_CHECK(delta);
+
+  // Get the last position and project it on the sphere
+  auto lastPos3D = Vector3f(last_x, last_y, 0.0f);
+  project_to_sphere(lastPos3D);
+  // Get the current position and project it on the sphere
+  auto currentPos3D = Vector3f(x_pos, y_pos, 0.0f);
+  project_to_sphere(currentPos3D);
+
+  // Compute the new axis by cross product
+  auto axis = lastPos3D.cross(currentPos3D);
+  axis.normalize();
+  // Compose the old rotation with the new rotation. Remember that quaternions
+  // do not commute.
+  Eigen::Quaternionf delta_rot; 
+  delta_rot = Eigen::AngleAxisf(2.f, axis);
+  rotation = delta_rot * rotation;
+
+  rot_mat.topLeftCorner(3, 3) = rotation.toRotationMatrix();
+
+  // Remember the current position as the last position when move is called
+  // again.
+  last_x = x_pos;
+  last_y = y_pos;
+}
+
+
 auto read_point_cloud(const std::string& h5_filepath) -> Tensor_<float, 2>
 {
   auto h5_file = H5File{h5_filepath, H5F_ACC_RDONLY};
@@ -105,6 +240,7 @@ int main()
       glfwCreateWindow(width, height, "Hello Point Cloud", nullptr, nullptr);
   glfwMakeContextCurrent(window);
   glfwSetFramebufferSizeCallback(window, resize_framebuffer);
+  glfwSetCursorPosCallback(window, move_camera_from_mouse);
 
   init_glew_boilerplate();
 
@@ -220,12 +356,26 @@ int main()
   // You absolutely need this for 3D objects!
   glEnable(GL_DEPTH_TEST);
 
-  auto timer = Timer{};
+
+  auto view = View{};
+  auto time = Time{};
+
 
   // Display image.
   glfwSwapInterval(1);
   while (!glfwWindowShouldClose(window))
   {
+    // Calculate the elapsed time.
+    time.update();
+
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+      glfwSetWindowShouldClose(window, true);
+
+    // Camera interaction with keyboard.
+    move_camera_from_keyboard(window, view, time);
+    view.view.matrix() = rot_mat * view.view.matrix();
+
+
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     // Important.
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -233,15 +383,11 @@ int main()
     // Transform matrix.
     auto transform = Transform<float, 3, Eigen::Projective>{};
     transform.setIdentity();
-    transform.rotate(
-        AngleAxisf(std::pow(1.5, 5) * timer.elapsed_ms() / 10000,
-                   Vector3f{0.5f, 1.0f, 0.0f}.normalized()));
+    //transform.rotate(AngleAxisf(std::pow(1.5, 5) * time.last_frame / 10000,
+    //                            Vector3f{0.5f, 1.0f, 0.0f}.normalized()));
     shader_program.set_uniform_matrix4f("transform", transform.matrix().data());
 
     // View matrix.
-    auto view = Transform<float, 3, Eigen::Projective>{};
-    view.setIdentity();
-    view.translate(Vector3f{0.f, 0.f, -100.f});
     shader_program.set_uniform_matrix4f("view", view.matrix().data());
 
     // Projection matrix.

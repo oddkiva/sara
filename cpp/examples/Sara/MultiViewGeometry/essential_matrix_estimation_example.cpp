@@ -318,7 +318,7 @@ void inspect_fundamental_matrix_estimation(const Image<Rgb8>& image1,
     const auto& mi = matches[sample_best(i)];
     X.col(i) = mi.x_pos().cast<double>().homogeneous();
     Y.col(i) = mi.y_pos().cast<double>().homogeneous();
-  };
+  }
 
   // Project X to the right image.
   Matrix<double, 3, L> proj_X = F.matrix() * X;
