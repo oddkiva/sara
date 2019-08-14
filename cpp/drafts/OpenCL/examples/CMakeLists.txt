@@ -13,6 +13,7 @@ foreach (file ${example_FILES})
     PRIVATE ${DO_Sara_LIBRARIES}
             ${HDF5_LIBRARIES}
             DO_Kalpana_Math
+            DO_Kalpana_3D
             glfw)
   target_link_libraries(${filename} PRIVATE DO_Sara_OpenCL_GL)
   set_target_properties(${filename} PROPERTIES

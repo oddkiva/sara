@@ -55,7 +55,11 @@ auto save_to_hdf5(const TwoViewGeometry& complete_geom,
   SARA_DEBUG << "colors.max_coeff = " << colors.matrix().maxCoeff()
              << std::endl;
 
+#ifdef __APPLE__
+  auto geom_h5_file = H5File{"/Users/david/Desktop/geometry.h5", H5F_ACC_TRUNC};
+#else
   auto geom_h5_file = H5File{"/home/david/Desktop/geometry.h5", H5F_ACC_TRUNC};
+#endif
   geom_h5_file.write_dataset("cameras", cameras, true);
   geom_h5_file.write_dataset("points", X_tensor, true);
   geom_h5_file.write_dataset("colors", colors, true);

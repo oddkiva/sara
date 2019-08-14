@@ -8,6 +8,7 @@
 #include <DO/Sara/ImageProcessing/Flip.hpp>
 
 #include <DO/Kalpana/Math/Projection.hpp>
+#include <DO/Kalpana/3D/TrackBall.hpp>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -129,20 +130,11 @@ auto move_camera_from_keyboard(GLFWwindow* window, View& view, Time& time)
 }
 
 
-bool mouse_pressed = true;
+auto mouse_pressed = false;
+auto trackball = kalpana::TrackBall{};
 float last_x = 800.f / 2.f;
 float last_y = 600.f / 2.f;
-Eigen::Quaternionf rotation = Eigen::Quaternionf::Identity();
-Eigen::Matrix4f rot_mat = Eigen::Matrix4f::Identity();
-
-void project_to_sphere(Vector3f& x)
-{
-  auto sqr_z = 1. - x.squaredNorm();
-  if (sqr_z > 0)
-    x.z() = std::sqrt(sqr_z);
-  else
-    x = x.normalized();
-}
+QQuaternion rotation;
 
 auto move_camera_from_mouse(GLFWwindow* window, double x_pos, double y_pos)
 {
@@ -152,6 +144,7 @@ auto move_camera_from_mouse(GLFWwindow* window, double x_pos, double y_pos)
   {
     mouse_pressed = false;
     std::cout << "Mouse released at " << x_pos << " " << y_pos << std::endl;
+    trackball.release(QPointF(last_x, last_y));
     return;
   }
 
@@ -163,38 +156,13 @@ auto move_camera_from_mouse(GLFWwindow* window, double x_pos, double y_pos)
     last_x = x_pos;
     last_y = y_pos;
     mouse_pressed = true;
+    trackball.push(QPointF(last_x, last_y), trackball.rotation());
   }
 
   std::cout << "Before pressed at " << last_x << " " << last_y << std::endl;
   std::cout << "Now    pressed at " << x_pos << " " << y_pos << std::endl;
-
-  const float xoff = x_pos - last_x;
-  const float yoff = -(y_pos - last_y);
-  const auto delta = sqrt(xoff * xoff + yoff * yoff);
-  SARA_CHECK(delta);
-
-  // Get the last position and project it on the sphere
-  auto lastPos3D = Vector3f(last_x, last_y, 0.0f);
-  project_to_sphere(lastPos3D);
-  // Get the current position and project it on the sphere
-  auto currentPos3D = Vector3f(x_pos, y_pos, 0.0f);
-  project_to_sphere(currentPos3D);
-
-  // Compute the new axis by cross product
-  auto axis = lastPos3D.cross(currentPos3D);
-  axis.normalize();
-  // Compose the old rotation with the new rotation. Remember that quaternions
-  // do not commute.
-  Eigen::Quaternionf delta_rot; 
-  delta_rot = Eigen::AngleAxisf(2.f, axis);
-  rotation = delta_rot * rotation;
-
-  rot_mat.topLeftCorner(3, 3) = rotation.toRotationMatrix();
-
-  // Remember the current position as the last position when move is called
-  // again.
-  last_x = x_pos;
-  last_y = y_pos;
+  trackball.move(QPointF(last_x, last_y));
+  qDebug() << trackball.rotation();
 }
 
 
@@ -220,7 +188,11 @@ auto read_point_cloud(const std::string& h5_filepath) -> Tensor_<float, 2>
 auto make_point_cloud()
 {
   // Encode the vertex data in a tensor.
+#ifdef __APPLE__
+  const auto vertex_data = read_point_cloud("/Users/david/Desktop/geometry.h5");
+#else
   const auto vertex_data = read_point_cloud("/home/david/Desktop/geometry.h5");
+#endif
   SARA_DEBUG << "vertices =\n" << vertex_data.matrix() << std::endl;
   return vertex_data;
 }
@@ -373,8 +345,6 @@ int main()
 
     // Camera interaction with keyboard.
     move_camera_from_keyboard(window, view, time);
-    view.view.matrix() = rot_mat * view.view.matrix();
-
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     // Important.
