@@ -8,7 +8,6 @@
 #include <DO/Sara/ImageProcessing/Flip.hpp>
 
 #include <DO/Kalpana/Math/Projection.hpp>
-#include <DO/Kalpana/3D/TrackBall.hpp>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -102,6 +101,76 @@ struct View
   float scale = 1e-1f;
 };
 
+
+// Default camera values
+static const float YAW         = -90.0f;
+static const float PITCH       =  0.0f;
+static const float SPEED       =  2.5f;
+static const float SENSITIVITY =  0.1f;
+static const float ZOOM        =  45.0f;
+
+// The explorer's eye.
+struct Eye
+{
+  Vector3f position{Vector3f::Zero()};
+  Vector3f front{-Vector3f::UnitZ()};
+  Vector3f up{Vector3f::UnitY()};
+  Vector3f right;
+  Vector3f world_up;
+
+  float yaw{YAW};
+  float pitch{PITCH};
+
+  float movement_speed{SPEED};
+  float movement_sensitivity{SENSITIVITY};
+  float zoom{ZOOM};
+
+  auto move_x(float delta)
+  {
+    position.x() += movement_speed * delta;
+  }
+
+  auto move_y(float delta)
+  {
+    position.y() += movement_speed * delta;
+  }
+
+  auto move_z(float delta)
+  {
+    position.z() += movement_speed * delta;
+  }
+
+  // pitch
+  auto yes_head_move(float delta)
+  {
+    pitch += movement_sensitivity * delta;
+  }
+
+  // yaw
+  auto no_head_movement(float delta)
+  {
+    yaw += movement_sensitivity * delta;
+  }
+
+  auto update()
+  {
+    Vector3f front1;
+    front1 << cos(yaw * M_PI / 180) * cos(pitch * M_PI / 180.f),
+              sin(pitch * M_PI / 180.f),
+              sin(yaw * M_PI / 180.f) * cos(pitch * M_PI / 180.f);
+    front = front1.normalized();
+
+    right = front.cross(world_up).normalized();
+    up = right.cross(front).normalized();
+  }
+
+  auto view_matrix() -> Matrix4f
+  {
+    return {};
+  }
+};
+
+
 struct Time
 {
   void update()
@@ -130,39 +199,24 @@ auto move_camera_from_keyboard(GLFWwindow* window, View& view, Time& time)
 }
 
 
-auto mouse_pressed = false;
-auto trackball = kalpana::TrackBall{};
+auto first_mouse = true;
 float last_x = 800.f / 2.f;
 float last_y = 600.f / 2.f;
-QQuaternion rotation;
 
 auto move_camera_from_mouse(GLFWwindow* window, double x_pos, double y_pos)
 {
-  const auto state = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
-
-  if (state == GLFW_RELEASE && mouse_pressed)
-  {
-    mouse_pressed = false;
-    std::cout << "Mouse released at " << x_pos << " " << y_pos << std::endl;
-    trackball.release(QPointF(last_x, last_y));
-    return;
-  }
-
-  if (state != GLFW_PRESS)
-    return;
-
-  if (!mouse_pressed)
+  if (first_mouse)
   {
     last_x = x_pos;
     last_y = y_pos;
-    mouse_pressed = true;
-    trackball.push(QPointF(last_x, last_y), trackball.rotation());
+    first_mouse = false;
   }
 
-  std::cout << "Before pressed at " << last_x << " " << last_y << std::endl;
-  std::cout << "Now    pressed at " << x_pos << " " << y_pos << std::endl;
-  trackball.move(QPointF(last_x, last_y));
-  qDebug() << trackball.rotation();
+  const auto xoff = x_pos - last_x;
+  const auto yoff = y_pos - last_y;
+
+  last_x = x_pos;
+  last_y = y_pos;
 }
 
 
@@ -345,6 +399,7 @@ int main()
 
     // Camera interaction with keyboard.
     move_camera_from_keyboard(window, view, time);
+    view.view.matrix() = rot_mat * view.view.matrix();
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     // Important.
