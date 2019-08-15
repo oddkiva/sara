@@ -63,50 +63,11 @@ inline auto init_glew_boilerplate()
 }
 
 
-struct View
-{
-  View()
-  {
-    view.setIdentity();
-    view.translate(Vector3f{0.f, 0.f, -100.f});
-  }
-
-  auto move_left(float delta)
-  {
-    view.translate(-scale * delta * Vector3f::UnitX());
-  }
-
-  auto move_right(float delta)
-  {
-    view.translate(scale * delta * Vector3f::UnitX());
-  }
-
-  auto move_backward(float delta)
-  {
-    view.translate(-scale * delta * Vector3f::UnitZ());
-  }
-
-  auto move_forward(float delta)
-  {
-    view.translate(scale * delta * Vector3f::UnitZ());
-  }
-
-  auto matrix() const -> const Matrix4f&
-  {
-    return view.matrix();
-  }
-
-  Transform<float, 3, Eigen::Projective> view;
-
-  float scale = 1e-1f;
-};
-
-
 // Default camera values
 static const float YAW         = -90.0f;
 static const float PITCH       =  0.0f;
-static const float SPEED       =  2.5f;
-static const float SENSITIVITY =  0.1f;
+static const float SPEED       =  1e-1f;
+static const float SENSITIVITY =  1e-1f;
 static const float ZOOM        =  45.0f;
 
 // The explorer's eye.
@@ -114,34 +75,49 @@ struct Eye
 {
   Vector3f position{Vector3f::Zero()};
   Vector3f front{-Vector3f::UnitZ()};
-  Vector3f up{Vector3f::UnitY()};
-  Vector3f right;
-  Vector3f world_up;
+  Vector3f up{Vector3f::UnitY()}; Vector3f right;
+  Vector3f world_up{Vector3f::UnitY()};
 
   float yaw{YAW};
   float pitch{PITCH};
+  float roll{0.f};
 
   float movement_speed{SPEED};
   float movement_sensitivity{SENSITIVITY};
   float zoom{ZOOM};
 
-  auto move_x(float delta)
+  auto move_left(float delta)
   {
-    position.x() += movement_speed * delta;
+    position -= movement_speed * delta * right;
   }
 
-  auto move_y(float delta)
+  auto move_right(float delta)
   {
-    position.y() += movement_speed * delta;
+    position += movement_speed * delta * right;
   }
 
-  auto move_z(float delta)
+  auto move_forward(float delta)
   {
-    position.z() += movement_speed * delta;
+    position += movement_speed * delta * front;
+  }
+
+  auto move_backward(float delta)
+  {
+    position -= movement_speed * delta * front;
+  }
+
+  auto move_up(float delta)
+  {
+    position += movement_speed * delta * up;
+  }
+
+  auto move_down(float delta)
+  {
+    position -= movement_speed * delta * up;
   }
 
   // pitch
-  auto yes_head_move(float delta)
+  auto yes_head_movement(float delta)
   {
     pitch += movement_sensitivity * delta;
   }
@@ -152,9 +128,15 @@ struct Eye
     yaw += movement_sensitivity * delta;
   }
 
+  auto maybe_head_movement(float delta)
+  {
+    roll += movement_sensitivity * delta;
+  }
+
   auto update()
   {
     Vector3f front1;
+
     front1 << cos(yaw * M_PI / 180) * cos(pitch * M_PI / 180.f),
               sin(pitch * M_PI / 180.f),
               sin(yaw * M_PI / 180.f) * cos(pitch * M_PI / 180.f);
@@ -162,12 +144,34 @@ struct Eye
 
     right = front.cross(world_up).normalized();
     up = right.cross(front).normalized();
+
+    SARA_DEBUG << "front = " << front.transpose() << std::endl;
+    SARA_DEBUG << "right = " << right.transpose() << std::endl;
+    SARA_DEBUG << "up = " << up.transpose() << std::endl;
   }
 
   auto view_matrix() -> Matrix4f
   {
-    return {};
+    return look_at(position, position + front, up);
   }
+
+  auto look_at(const Vector3f& eye, const Vector3f& center, const Vector3f& up)
+      -> Matrix4f
+  {
+    Vector3f f = (center - eye).normalized();
+    Vector3f u = up.normalized();
+    Vector3f s = f.cross(u).normalized();
+    u = s.cross(f);
+
+    Matrix4f res;
+    res <<
+       s.x(),  s.y(),  s.z(), -s.dot(eye),
+       u.x(),  u.y(),  u.z(), -u.dot(eye),
+      -f.x(), -f.y(), -f.z(),  f.dot(eye),
+           0,      0,      0,           1;
+
+    return res;
+    }
 };
 
 
@@ -186,37 +190,33 @@ struct Time
   float current_frame = 0.f;
 };
 
-auto move_camera_from_keyboard(GLFWwindow* window, View& view, Time& time)
+auto move_camera_from_keyboard(GLFWwindow* window, Eye& eye, Time& time)
 {
   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-    view.move_forward(time.delta_time);
+    eye.move_forward(time.delta_time);
   if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-    view.move_backward(time.delta_time);
+    eye.move_backward(time.delta_time);
   if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-    view.move_left(time.delta_time);
+    eye.move_left(time.delta_time);
   if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-    view.move_right(time.delta_time);
-}
+    eye.move_right(time.delta_time);
 
+  if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+    eye.no_head_movement(-time.delta_time); // CCW
+  if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+    eye.no_head_movement(+time.delta_time); // CW
 
-auto first_mouse = true;
-float last_x = 800.f / 2.f;
-float last_y = 600.f / 2.f;
+  if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
+    eye.yes_head_movement(+time.delta_time);
+  if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
+    eye.yes_head_movement(-time.delta_time);
 
-auto move_camera_from_mouse(GLFWwindow* window, double x_pos, double y_pos)
-{
-  if (first_mouse)
-  {
-    last_x = x_pos;
-    last_y = y_pos;
-    first_mouse = false;
-  }
+  if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS)
+    eye.move_up(time.delta_time);
+  if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS)
+    eye.move_down(time.delta_time);
 
-  const auto xoff = x_pos - last_x;
-  const auto yoff = y_pos - last_y;
-
-  last_x = x_pos;
-  last_y = y_pos;
+  eye.update();
 }
 
 
@@ -266,7 +266,7 @@ int main()
       glfwCreateWindow(width, height, "Hello Point Cloud", nullptr, nullptr);
   glfwMakeContextCurrent(window);
   glfwSetFramebufferSizeCallback(window, resize_framebuffer);
-  glfwSetCursorPosCallback(window, move_camera_from_mouse);
+  //glfwSetCursorPosCallback(window, move_camera_from_mouse);
 
   init_glew_boilerplate();
 
@@ -383,7 +383,7 @@ int main()
   glEnable(GL_DEPTH_TEST);
 
 
-  auto view = View{};
+  auto eye = Eye{};
   auto time = Time{};
 
 
@@ -398,8 +398,8 @@ int main()
       glfwSetWindowShouldClose(window, true);
 
     // Camera interaction with keyboard.
-    move_camera_from_keyboard(window, view, time);
-    view.view.matrix() = rot_mat * view.view.matrix();
+    move_camera_from_keyboard(window, eye, time);
+    auto view_matrix = eye.view_matrix();
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     // Important.
@@ -408,12 +408,12 @@ int main()
     // Transform matrix.
     auto transform = Transform<float, 3, Eigen::Projective>{};
     transform.setIdentity();
-    //transform.rotate(AngleAxisf(std::pow(1.5, 5) * time.last_frame / 10000,
-    //                            Vector3f{0.5f, 1.0f, 0.0f}.normalized()));
+    transform.rotate(AngleAxisf(std::pow(1.5, 5) * time.last_frame / 10000,
+                                Vector3f{0.5f, 1.0f, 0.0f}.normalized()));
     shader_program.set_uniform_matrix4f("transform", transform.matrix().data());
 
     // View matrix.
-    shader_program.set_uniform_matrix4f("view", view.matrix().data());
+    shader_program.set_uniform_matrix4f("view", view_matrix.data());
 
     // Projection matrix.
     const Matrix4f projection =
