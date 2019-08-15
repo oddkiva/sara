@@ -145,9 +145,9 @@ struct Eye
     right = front.cross(world_up).normalized();
     up = right.cross(front).normalized();
 
-    SARA_DEBUG << "front = " << front.transpose() << std::endl;
-    SARA_DEBUG << "right = " << right.transpose() << std::endl;
-    SARA_DEBUG << "up = " << up.transpose() << std::endl;
+    // SARA_DEBUG << "front = " << front.transpose() << std::endl;
+    // SARA_DEBUG << "right = " << right.transpose() << std::endl;
+    // SARA_DEBUG << "up = " << up.transpose() << std::endl;
   }
 
   auto view_matrix() -> Matrix4f
@@ -251,6 +251,163 @@ auto make_point_cloud()
   return vertex_data;
 }
 
+struct PointCloudObject
+{
+  PointCloudObject(const Tensor_<float, 2>& vertices_)
+    : vertices{vertices_}
+  {
+    shader_program = make_point_cloud_shader();
+
+    // =========================================================================
+    // Encode the vertex data in a tensor.
+    //
+    const auto row_bytes = [](const TensorView_<float, 2>& data) {
+      return data.size(1) * sizeof(float);
+    };
+    const auto float_pointer = [](int offset) {
+      return reinterpret_cast<void*>(offset * sizeof(float));
+    };
+
+    vao.generate();
+
+
+    // =========================================================================
+    // Setup Vertex attributes on the GPU side.
+    //
+    vbo.generate();
+    {
+      glBindVertexArray(vao);
+
+      // Copy vertex data.
+      vbo.bind_vertex_data(vertices);
+
+      // Map the parameters to the argument position for the vertex shader.
+      //
+      // Vertex coordinates.
+      glVertexAttribPointer(arg_pos["in_coords"], 3 /* 3D points */, GL_FLOAT,
+                            GL_FALSE, row_bytes(vertices), float_pointer(0));
+      glEnableVertexAttribArray(arg_pos["in_coords"]);
+
+      // Texture coordinates.
+      glVertexAttribPointer(arg_pos["in_color"], 3 /* RGB_COLOR */, GL_FLOAT,
+                            GL_FALSE, row_bytes(vertices), float_pointer(3));
+      glEnableVertexAttribArray(arg_pos["in_color"]);
+    }
+  }
+
+  auto make_point_cloud_shader() -> GL::ShaderProgram
+  {
+    const auto vertex_shader_source = R"shader(
+#version 330 core
+  layout (location = 0) in vec3 in_coords;
+  layout (location = 1) in vec3 in_color;
+
+  uniform mat4 transform;
+  uniform mat4 view;
+  uniform mat4 projection;
+
+  out vec3 out_color;
+
+  void main()
+  {
+    gl_Position = projection * view * transform * vec4(in_coords, 1.0);
+    gl_PointSize = 5.0;
+    out_color = in_color;
+  }
+  )shader";
+    auto vertex_shader = GL::Shader{};
+    vertex_shader.create_from_source(GL_VERTEX_SHADER, vertex_shader_source);
+
+
+    const auto fragment_shader_source = R"shader(
+#version 330 core
+  in vec3 out_color;
+  out vec4 frag_color;
+
+  void main()
+  {
+    vec2 circCoord = 2.0 * gl_PointCoord - 1.0;
+    if (dot(circCoord, circCoord) > 1.0)
+        discard;
+
+    float dist = length(gl_PointCoord - vec2(0.5));
+    float alpha = 1.0 - smoothstep(0.2, 0.5, dist);
+
+    frag_color = vec4(out_color, alpha);
+  }
+  )shader";
+    auto fragment_shader = GL::Shader{};
+    fragment_shader.create_from_source(GL_FRAGMENT_SHADER,
+                                       fragment_shader_source);
+
+    auto shader_program = GL::ShaderProgram{};
+    shader_program.create();
+    shader_program.attach(vertex_shader, fragment_shader);
+
+    vertex_shader.destroy();
+    fragment_shader.destroy();
+
+    return shader_program;
+  }
+
+  void destroy()
+  {
+    vao.destroy();
+    vbo.destroy();
+  }
+
+  Tensor_<float, 2> vertices;
+  GL::Buffer vbo;
+  GL::VertexArray vao;
+  GL::ShaderProgram shader_program;
+  std::map<std::string, int> arg_pos = {{"in_coords", 0},  //
+                                        {"in_color", 1}};
+};
+
+auto make_standard_shader()
+{
+  const auto vertex_shader_source = R"shader(
+#version 330 core
+  layout (location = 0) in vec3 in_coords;
+  layout (location = 1) in vec3 in_color;
+
+  out vec3 out_color;
+
+  void main()
+  {
+    gl_Position = vec4(in_coords, 1.0);
+    gl_PointSize = 200.0;
+    out_color = in_color;
+  }
+  )shader";
+  auto vertex_shader = GL::Shader{};
+  vertex_shader.create_from_source(GL_VERTEX_SHADER, vertex_shader_source);
+
+
+  const auto fragment_shader_source = R"shader(
+#version 330 core
+  in vec3 out_color;
+  out vec4 frag_color;
+
+  void main()
+  {
+    frag_color = vec4(out_color, 1.0);
+  }
+  )shader";
+  auto fragment_shader = GL::Shader{};
+  fragment_shader.create_from_source(GL_FRAGMENT_SHADER,
+                                     fragment_shader_source);
+
+  auto shader_program = GL::ShaderProgram{};
+  shader_program.create();
+  shader_program.attach(vertex_shader, fragment_shader);
+
+  vertex_shader.destroy();
+  fragment_shader.destroy();
+
+  return shader_program;
+}
+
 
 int main()
 {
@@ -271,105 +428,8 @@ int main()
   init_glew_boilerplate();
 
 
-  // ==========================================================================
-  // Shader program setup.
-  //
-  std::map<std::string, int> arg_pos = {{"in_coords", 0},  //
-                                        {"in_color", 1}};
-
-
-  const auto vertex_shader_source = R"shader(
-#version 330 core
-  layout (location = 0) in vec3 in_coords;
-  layout (location = 1) in vec3 in_color;
-
-  uniform mat4 transform;
-  uniform mat4 view;
-  uniform mat4 projection;
-
-  out vec3 out_color;
-
-  void main()
-  {
-    gl_Position = projection * view * transform * vec4(in_coords, 1.0);
-    gl_PointSize = 5.0;
-    out_color = in_color;
-  }
-  )shader";
-  auto vertex_shader = GL::Shader{};
-  vertex_shader.create_from_source(GL_VERTEX_SHADER, vertex_shader_source);
-
-
-  const auto fragment_shader_source = R"shader(
-#version 330 core
-  in vec3 out_color;
-  out vec4 frag_color;
-
-  void main()
-  {
-    vec2 circCoord = 2.0 * gl_PointCoord - 1.0;
-    if (dot(circCoord, circCoord) > 1.0)
-        discard;
-
-    float dist = length(gl_PointCoord - vec2(0.5));
-    float alpha = 1.0 - smoothstep(0.2, 0.5, dist);
-
-    frag_color = vec4(out_color, alpha);
-  }
-  )shader";
-  auto fragment_shader = GL::Shader{};
-  fragment_shader.create_from_source(GL_FRAGMENT_SHADER,
-                                     fragment_shader_source);
-
-  auto shader_program = GL::ShaderProgram{};
-  shader_program.create();
-  shader_program.attach(vertex_shader, fragment_shader);
-
-  vertex_shader.destroy();
-  fragment_shader.destroy();
-
-
-  // ==========================================================================
-  // Encode the vertex data in a tensor.
-  //
-  auto vertices = make_point_cloud();
-
-  const auto row_bytes = [](const TensorView_<float, 2>& data) {
-    return data.size(1) * sizeof(float);
-  };
-  const auto float_pointer = [](int offset) {
-    return reinterpret_cast<void*>(offset * sizeof(float));
-  };
-
-  auto vao = GL::VertexArray{};
-  vao.generate();
-
-
-  // ==========================================================================
-  // Setup Vertex attributes on the GPU side.
-  //
-  auto vbo = GL::Buffer{};
-  vbo.generate();
-  {
-    glBindVertexArray(vao);
-
-    // Copy vertex data.
-    vbo.bind_vertex_data(vertices);
-
-    // Map the parameters to the argument position for the vertex shader.
-    //
-    // Vertex coordinates.
-    glVertexAttribPointer(arg_pos["in_coords"], 3 /* 3D points */, GL_FLOAT,
-                          GL_FALSE, row_bytes(vertices), float_pointer(0));
-    glEnableVertexAttribArray(arg_pos["in_coords"]);
-
-    // Texture coordinates.
-    glVertexAttribPointer(arg_pos["in_color"], 3 /* RGB_COLOR */, GL_FLOAT,
-                          GL_FALSE, row_bytes(vertices), float_pointer(3));
-    glEnableVertexAttribArray(arg_pos["in_color"]);
-  }
-
-  shader_program.use(true);
+  auto point_cloud_object = PointCloudObject{make_point_cloud()};
+  point_cloud_object.shader_program.use(true);
 
 
   // ==========================================================================
@@ -408,28 +468,50 @@ int main()
     // Transform matrix.
     auto transform = Transform<float, 3, Eigen::Projective>{};
     transform.setIdentity();
+
+    // glBegin(GL_TRIANGLES);
+    // for (int y = -10; y < 10; ++y)
+    // {
+    //   for (int x = -10; x < 10; ++x)
+    //   {
+    //     if (y * 200 + x % 2 == 0)
+    //       glColor3f(1, 0, 0);
+    //     else
+    //       glColor3f(0, 0, 0);
+
+    //     glVertex3f(x + 10 * 0.f, y + 10 * 0.f, -10.0);
+    //     glVertex3f(x + 10 * 1.f, y + 10 * 0.f, -10.0);
+    //     glVertex3f(x + 10 * 1.f, y + 10 * 1.f, -10.0);
+    //     // glVertex3f(x + 10 * 0.f, y + 10 * 1.f, -100.0);
+    //   }
+    // }
+    // glEnd();
+
+
     transform.rotate(AngleAxisf(std::pow(1.5, 5) * time.last_frame / 10000,
                                 Vector3f{0.5f, 1.0f, 0.0f}.normalized()));
-    shader_program.set_uniform_matrix4f("transform", transform.matrix().data());
+    point_cloud_object.shader_program.set_uniform_matrix4f(
+        "transform", transform.matrix().data());
 
     // View matrix.
-    shader_program.set_uniform_matrix4f("view", view_matrix.data());
+    point_cloud_object.shader_program.set_uniform_matrix4f("view",
+                                                           view_matrix.data());
 
     // Projection matrix.
     const Matrix4f projection =
         kalpana::perspective(45., 800. / 600., .1, 1000.).cast<float>();
-    shader_program.set_uniform_matrix4f("projection", projection.data());
+    point_cloud_object.shader_program.set_uniform_matrix4f("projection",
+                                                           projection.data());
 
     // Draw triangles.
-    glBindVertexArray(vao);
-    glDrawArrays(GL_POINTS, 0, vertices.size(0));
+    glBindVertexArray(point_cloud_object.vao);
+    glDrawArrays(GL_POINTS, 0, point_cloud_object.vertices.size(0));
 
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
 
-  vao.destroy();
-  vbo.destroy();
+  point_cloud_object.destroy();
 
   // Clean up resources.
   glfwDestroyWindow(window);
