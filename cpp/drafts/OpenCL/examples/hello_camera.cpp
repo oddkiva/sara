@@ -142,21 +142,13 @@ struct Eye
               sin(yaw * M_PI / 180.f) * cos(pitch * M_PI / 180.f);
     front = front1.normalized();
 
-    //Matrix3f m = (AngleAxisf(pitch * float(M_PI) / 180, Vector3f::UnitX()) *
-    //              AngleAxisf(yaw * float(M_PI) / 180, Vector3f::UnitY()))
-    //                 .toRotationMatrix();  //*
-    //front = (m * front).normalized();
-    //front = AngleAxisf(roll * float(M_PI) / 180, Vector3f::UnitZ())
-    //            .toRotationMatrix() *
-    //        front;
-    //front.normalize();
-
     right = front.cross(world_up).normalized();
+    right =
+        AngleAxisf(roll * float(M_PI) / 180, front).toRotationMatrix() * right;
+    right.normalize();
+
     up = right.cross(front).normalized();
 
-    // SARA_DEBUG << "front = " << front.transpose() << std::endl;
-    // SARA_DEBUG << "right = " << right.transpose() << std::endl;
-    // SARA_DEBUG << "up = " << up.transpose() << std::endl;
   }
 
   auto view_matrix() -> Matrix4f
