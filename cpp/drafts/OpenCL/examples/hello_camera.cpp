@@ -142,6 +142,15 @@ struct Eye
               sin(yaw * M_PI / 180.f) * cos(pitch * M_PI / 180.f);
     front = front1.normalized();
 
+    //Matrix3f m = (AngleAxisf(pitch * float(M_PI) / 180, Vector3f::UnitX()) *
+    //              AngleAxisf(yaw * float(M_PI) / 180, Vector3f::UnitY()))
+    //                 .toRotationMatrix();  //*
+    //front = (m * front).normalized();
+    //front = AngleAxisf(roll * float(M_PI) / 180, Vector3f::UnitZ())
+    //            .toRotationMatrix() *
+    //        front;
+    //front.normalize();
+
     right = front.cross(world_up).normalized();
     up = right.cross(front).normalized();
 
@@ -215,6 +224,11 @@ auto move_camera_from_keyboard(GLFWwindow* window, Eye& eye, Time& time)
     eye.move_up(time.delta_time);
   if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS)
     eye.move_down(time.delta_time);
+
+  if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+    eye.maybe_head_movement(-time.delta_time);
+  if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
+    eye.maybe_head_movement(+time.delta_time);
 
   eye.update();
 }
@@ -364,9 +378,10 @@ struct PointCloudObject
                                         {"in_color", 1}};
 };
 
+
 struct CheckerBoardObject
 {
-  CheckerBoardObject(int rows_ = 20, int cols_ = 20)
+  CheckerBoardObject(int rows_ = 20, int cols_ = 20, float scale = 10.f)
     : rows{rows_}
     , cols{cols_}
   {
@@ -410,7 +425,7 @@ struct CheckerBoardObject
     v_mat.col(0).array() -= rows / 2.f;
     v_mat.col(2).array() -= cols / 2.f;
     // Rescale.
-    v_mat.leftCols(3) *= 10;
+    v_mat.leftCols(3) *= scale;
 
     const auto row_bytes = [](const TensorView_<float, 2>& data) {
       return data.size(1) * sizeof(float);
