@@ -143,6 +143,11 @@ auto estimate_two_view_geometry(const TensorView_<int, 2>& M,
 
   SARA_DEBUG << "Calculating cheirality..." << std::endl;
   best_geom->cheirality = relative_motion_cheirality_predicate(best_geom->X, P2);
+  SARA_CHECK(best_geom->cheirality.count());
+
+  SARA_DEBUG << "Cheiral inliers count = "
+             << (best_geom->cheirality && inliers.row_vector().array()).count()
+             << std::endl;
 
   return *best_geom;
 }
@@ -193,29 +198,33 @@ auto extract_colors(const Image<Rgb8>& image1,             //
   const MatrixXd u1 = (P1 * complete_geom.X).colwise().hnormalized();
   const MatrixXd u2 = (P2 * complete_geom.X).colwise().hnormalized();
 
+  const Vector2d sizes1 = image1.sizes().cast<double>();
+  const Vector2d sizes2 = image2.sizes().cast<double>();
+
   auto colors_mat = colors.matrix();
 
   const Array<bool, 1, Dynamic> in_image_1 =
-      ((u1.array() >= 0) &&
-       (u1.array() < image1.sizes().cast<double>().array()))
-          .colwise()
-          .all();
+      (u1.array() >= 0).colwise().all() &&
+      (u1.array().row(0) < sizes1.x()) &&
+      (u1.array().row(1) < sizes1.y());
+  SARA_CHECK(in_image_1.count());
 
   const Array<bool, 1, Dynamic> in_image_2 =
-      ((u2.array() >= 0) &&
-       (u2.array() < image2.sizes().cast<double>().array()))
-          .colwise()
-          .all();
+      (u2.array() >= 0).colwise().all() &&
+      (u2.array().row(0) < sizes2.x()) &&
+      (u2.array().row(1) < sizes2.y());
+  SARA_CHECK(in_image_2.count());
+
 
   std::for_each(std::begin(indices), std::end(indices), [&](int i) {
     Vector2d u1_i = u1.col(i);
     Vector2d u2_i = u2.col(i);
 
-    const bool in_images = in_image_1(i) && in_image_2(i);
     colors_mat.row(i) =
-        in_images * 0.5 *
-            (interpolate(I1d, u1_i) + interpolate(I2d, u2_i)).transpose() +
-        (1 - in_images) * RowVector3d::Zero();
+        in_image_1(i) && in_image_2(i)
+            ? 0.5 *
+                  (interpolate(I1d, u1_i) + interpolate(I2d, u2_i)).transpose()
+            : RowVector3d::Zero().eval();
   });
 
   return colors;

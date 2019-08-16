@@ -20,10 +20,9 @@
 #include <DO/Sara/Match.hpp>
 #include <DO/Sara/MultiViewGeometry.hpp>
 #include <DO/Sara/MultiViewGeometry/Miscellaneous.hpp>
+#include <DO/Sara/SfM/BuildingBlocks.hpp>
 #include <DO/Sara/SfM/BuildingBlocks/Triangulation.hpp>
 #include <DO/Sara/SfM/Detectors/SIFT.hpp>
-
-#include <DO/Sara/MultiViewGeometry/Miscellaneous.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
@@ -92,8 +91,12 @@ void triangulate(const std::string& dirpath, const std::string& h5_filepath)
   const auto& matches = edge_attributes.matches;
 
   const auto& E = edge_attributes.E;
+  const auto& E_num_samples = edge_attributes.E_num_samples;
+  const auto& E_noise = edge_attributes.E_noise;
   const auto& E_best_samples = edge_attributes.E_best_samples;
   const auto& E_inliers = edge_attributes.E_inliers;
+
+  int display_step = 20;
 
   std::for_each(
       std::begin(edge_ids), std::end(edge_ids), [&](const auto& ij) {
@@ -114,6 +117,33 @@ void triangulate(const std::string& dirpath, const std::string& h5_filepath)
         const Matrix3d Ki_inv = Ki.inverse();
         const Matrix3d Kj_inv = Kj.inverse();
 
+
+        // =====================================================================
+        // Check the epipolar geometry first.
+        //
+        SARA_DEBUG
+            << "Forming the fundamental matrix from the essential matrix:\n";
+        std::cout.flush();
+        auto Fij = FundamentalMatrix{};
+        Fij.matrix() = Kj.inverse().transpose() * Eij.matrix() * Ki.inverse();
+
+        SARA_DEBUG << "Fij = \n" << E[ij] << std::endl;
+        SARA_CHECK(E_num_samples[ij]);
+        SARA_CHECK(E_noise[ij]);
+        SARA_CHECK(E_inliers[ij].row_vector());
+        SARA_CHECK(E_inliers[ij].row_vector().count());
+        SARA_CHECK(E_best_samples[ij].row_vector());
+
+        const auto& Ii = view_attributes.images[i];
+        const auto& Ij = view_attributes.images[j];
+        check_epipolar_constraints(Ii, Ij, Fij, Mij, E_best_samples[ij],
+                                   E_inliers[ij], display_step,
+                                   /* wait_key */ false);
+
+
+        // =====================================================================
+        // Perform triangulation.
+        //
         print_stage("Performing data transformations...");
         // Tensors of image coordinates.
         const auto& fi = features(view_attributes.keypoints[i]);
@@ -128,9 +158,11 @@ void triangulate(const std::string& dirpath, const std::string& h5_filepath)
         // a pair of point indices (i, j).
         const auto index_matches_ij = to_tensor(Mij);
 
+
         auto geometry = estimate_two_view_geometry(index_matches_ij, uni, unj,
                                                    Eij, E_inliers_ij, E_best_sample_ij);
 
+        // Further processing for point cloud preview.
         //keep_cheiral_inliers_only(geometry, E_inliers_ij);
 
         // Add the internal camera matrices to the camera.
@@ -138,21 +170,25 @@ void triangulate(const std::string& dirpath, const std::string& h5_filepath)
         geometry.C2.K = Kj;
         auto colors = extract_colors(view_attributes.images[i],
                                      view_attributes.images[j], geometry);
-        {
-          // Get the left and right cameras.
-          auto cameras = Tensor_<PinholeCamera, 1>{2};
-          cameras(0) = geometry.C1;
-          cameras(1) = geometry.C2;
 
-          const MatrixXd X_euclidean = geometry.X.colwise().hnormalized();
-          auto X_data = const_cast<double*>(
-              reinterpret_cast<const double*>(X_euclidean.data()));
-          auto X_tensor =
-              TensorView_<double, 2>{X_data, {int(geometry.X.cols()), 3}};
-          h5_file.write_dataset("cameras/%d_%d", cameras, true);
-          h5_file.write_dataset("points/%d_%d", X_tensor, true);
-          h5_file.write_dataset("colors/%d_%d", X_tensor, true);
-        }
+        //// Save the data to HDF5.
+        //{
+        //  // Get the left and right cameras.
+        //  auto cameras = Tensor_<PinholeCamera, 1>{2};
+        //  cameras(0) = geometry.C1;
+        //  cameras(1) = geometry.C2;
+
+        //  const MatrixXd X_euclidean = geometry.X.colwise().hnormalized();
+        //  auto X_data = const_cast<double*>(
+        //      reinterpret_cast<const double*>(X_euclidean.data()));
+        //  auto X_tensor =
+        //      TensorView_<double, 2>{X_data, {int(geometry.X.cols()), 3}};
+        //  h5_file.write_dataset("cameras/%d_%d", cameras, true);
+        //  h5_file.write_dataset("points/%d_%d", X_tensor, true);
+        //  h5_file.write_dataset("colors/%d_%d", X_tensor, true);
+        //}
+
+        get_key();
 
       });
 }
@@ -182,13 +218,13 @@ int __main(int argc, char **argv)
 
     if (!vm.count("dirpath"))
     {
-      std::cout << "Missing image directory path" << std::endl;
+      std::cout << "[--dirpath]: missing image directory path" << std::endl;
       return 0;
     }
     if (!vm.count("out_h5_file"))
     {
       std::cout << desc << std::endl;
-      std::cout << "Missing output H5 file path" << std::endl;
+      std::cout << "[--out_h5_file]: missing output H5 file path" << std::endl;
       return 0;
     }
 
