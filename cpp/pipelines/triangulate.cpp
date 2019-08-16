@@ -35,7 +35,8 @@ using namespace std;
 using namespace DO::Sara;
 
 
-void triangulate(const std::string& dirpath, const std::string& h5_filepath)
+void triangulate(const std::string& dirpath, const std::string& h5_filepath,
+                 bool debug)
 {
   // Create a backup.
   if (!fs::exists(h5_filepath + ".bak"))
@@ -121,24 +122,26 @@ void triangulate(const std::string& dirpath, const std::string& h5_filepath)
         // =====================================================================
         // Check the epipolar geometry first.
         //
-        SARA_DEBUG
-            << "Forming the fundamental matrix from the essential matrix:\n";
-        std::cout.flush();
-        auto Fij = FundamentalMatrix{};
-        Fij.matrix() = Kj.inverse().transpose() * Eij.matrix() * Ki.inverse();
+        if (debug)
+        {
+          SARA_DEBUG
+              << "Forming the fundamental matrix from the essential matrix:\n";
+          std::cout.flush();
+          auto Fij = FundamentalMatrix{};
+          Fij.matrix() = Kj.inverse().transpose() * Eij.matrix() * Ki.inverse();
 
-        SARA_DEBUG << "Fij = \n" << Fij << std::endl;
-        SARA_CHECK(E_num_samples[ij]);
-        SARA_CHECK(E_noise[ij]);
-        SARA_CHECK(E_inliers[ij].row_vector());
-        SARA_CHECK(E_inliers[ij].row_vector().count());
-        SARA_CHECK(E_best_samples[ij].row_vector());
+          SARA_DEBUG << "Fij = \n" << Fij << std::endl;
+          SARA_CHECK(E_num_samples[ij]);
+          SARA_CHECK(E_noise[ij]);
+          SARA_CHECK(E_inliers[ij].row_vector().count());
+          SARA_CHECK(E_best_samples[ij].row_vector());
 
-        const auto& Ii = view_attributes.images[i];
-        const auto& Ij = view_attributes.images[j];
-        check_epipolar_constraints(Ii, Ij, Fij, Mij, E_best_sample_ij,
-                                   E_inliers_ij, display_step,
-                                   /* wait_key */ false);
+          const auto& Ii = view_attributes.images[i];
+          const auto& Ij = view_attributes.images[j];
+          check_epipolar_constraints(Ii, Ij, Fij, Mij, E_best_sample_ij,
+                                     E_inliers_ij, display_step,
+                                     /* wait_key */ false);
+        }
 
 
         // =====================================================================
@@ -158,6 +161,8 @@ void triangulate(const std::string& dirpath, const std::string& h5_filepath)
         // a pair of point indices (i, j).
         const auto index_matches_ij = to_tensor(Mij);
 
+        // Reminder: do not try to calculate the two-view geometry if the
+        // essential matrix estimation failed.
         if (E_inliers_ij.flat_array().count() == 0)
           return;
 
@@ -168,17 +173,28 @@ void triangulate(const std::string& dirpath, const std::string& h5_filepath)
         auto geometry = estimate_two_view_geometry(index_matches_ij, uni, unj,
                                                    Eij, E_inliers_ij, E_best_sample_ij);
 
+        // I choose to keep every point information inliers or not, cheiral or
+        // not.
+        //
+        // The following function can be used to keep cheiral inliers and view
+        // the cleaned point cloud.
+        // keep_cheiral_inliers(geometry, inliers);
+
         // Add the internal camera matrices to the camera.
         geometry.C1.K = Ki;
         geometry.C2.K = Kj;
 
-        auto colors = extract_colors(view_attributes.images[i],
-                                     view_attributes.images[j], geometry);
+        const auto colors = extract_colors(view_attributes.images[i],
+                                           view_attributes.images[j], geometry);
+
+        const auto cheirality_tensor = TensorView_<bool, 1>{
+            geometry.cheirality.data(), {geometry.cheirality.size()}};
 
         // Save the data to HDF5.
         h5_file.get_group("two_view_geometries");
         h5_file.get_group("two_view_geometries/cameras");
         h5_file.get_group("two_view_geometries/points");
+        h5_file.get_group("two_view_geometries/cheirality");
         h5_file.get_group("two_view_geometries/colors");
         {
           // Get the left and right cameras.
@@ -191,13 +207,16 @@ void triangulate(const std::string& dirpath, const std::string& h5_filepath)
               reinterpret_cast<const double*>(X_euclidean.data()));
           auto X_tensor =
               TensorView_<double, 2>{X_data, {int(geometry.X.cols()), 3}};
-          h5_file.write_dataset("two_view_geometries/cameras/%d_%d", cameras, true);
-          h5_file.write_dataset("two_view_geometries/points/%d_%d", X_tensor, true);
-          h5_file.write_dataset("two_view_geometries/colors/%d_%d", X_tensor, true);
-          h5_file.write_dataset("two_view_geometries/cheirality/%d_%d", X_tensor, true);
+          h5_file.write_dataset(
+              format("two_view_geometries/cameras/%d_%d", i, j), cameras, true);
+          h5_file.write_dataset(
+              format("two_view_geometries/points/%d_%d", i, j), X_tensor, true);
+          h5_file.write_dataset(
+              format("two_view_geometries/cheirality/%d_%d", i, j),
+              cheirality_tensor, true);
+          h5_file.write_dataset(
+              format("two_view_geometries/colors/%d_%d", i, j), colors, true);
         }
-
-        get_key();
 
       });
 }
@@ -212,7 +231,7 @@ int __main(int argc, char **argv)
         ("help, h", "Help screen")                                     //
         ("dirpath", po::value<std::string>(), "Image directory path")  //
         ("out_h5_file", po::value<std::string>(), "Output HDF5 file")  //
-        ("read", "Visualize detected keypoints")  //
+        ("debug", "Inspect visually the epipolar geometry")  //
         ;
 
     po::variables_map vm;
@@ -239,7 +258,8 @@ int __main(int argc, char **argv)
 
     const auto dirpath = vm["dirpath"].as<std::string>();
     const auto h5_filepath = vm["out_h5_file"].as<std::string>();
-    triangulate(dirpath, h5_filepath);
+    const auto debug = vm.count("debug");
+    triangulate(dirpath, h5_filepath, debug);
 
     return 0;
   }

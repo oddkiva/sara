@@ -15,4 +15,5 @@ make -j$(nproc) -C ${SARA_BUILD_DIR}
 # Triangulation.
 ${SARA_BUILD_DIR}/bin/triangulate \
   --dirpath ${HOME}/Desktop/Datasets/sfm/castle_int \
-  --out_h5_file ${HOME}/Desktop/Datasets/sfm/castle_int.h5
+  --out_h5_file ${HOME}/Desktop/Datasets/sfm/castle_int.h5 \
+  --debug
