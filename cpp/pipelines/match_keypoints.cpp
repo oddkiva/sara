@@ -31,7 +31,6 @@ int __main(int argc, char **argv)
         ("dirpath", po::value<std::string>(), "Image directory path")  //
         ("out_h5_file", po::value<std::string>(), "Output HDF5 file")  //
         ("overwrite", "Overwrite keypoint matches")                    //
-        ("read", "Visualize detected keypoints")                       //
         ;
 
     po::variables_map vm;

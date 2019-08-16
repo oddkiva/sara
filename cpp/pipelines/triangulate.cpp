@@ -36,7 +36,7 @@ using namespace DO::Sara;
 
 
 void triangulate(const std::string& dirpath, const std::string& h5_filepath,
-                 bool debug)
+                 bool overwrite, bool debug)
 {
   // Create a backup.
   if (!fs::exists(h5_filepath + ".bak"))
@@ -187,9 +187,6 @@ void triangulate(const std::string& dirpath, const std::string& h5_filepath,
         const auto colors = extract_colors(view_attributes.images[i],
                                            view_attributes.images[j], geometry);
 
-        const auto cheirality_tensor = TensorView_<bool, 1>{
-            geometry.cheirality.data(), {geometry.cheirality.size()}};
-
         // Save the data to HDF5.
         h5_file.get_group("two_view_geometries");
         h5_file.get_group("two_view_geometries/cameras");
@@ -205,19 +202,26 @@ void triangulate(const std::string& dirpath, const std::string& h5_filepath,
           const MatrixXd X_euclidean = geometry.X.colwise().hnormalized();
           auto X_data = const_cast<double*>(
               reinterpret_cast<const double*>(X_euclidean.data()));
-          auto X_tensor =
-              TensorView_<double, 2>{X_data, {int(geometry.X.cols()), 3}};
+          const auto X_tensor = TensorView_<double, 2>{
+              X_data, {static_cast<int>(geometry.X.cols()), 3}};
+          const auto cheirality_tensor = TensorView_<bool, 1>{
+              geometry.cheirality.data(),
+              {static_cast<int>(geometry.cheirality.size())}};
+
+
           h5_file.write_dataset(
-              format("two_view_geometries/cameras/%d_%d", i, j), cameras, true);
+              format("two_view_geometries/cameras/%d_%d", i, j), cameras,
+              overwrite);
           h5_file.write_dataset(
-              format("two_view_geometries/points/%d_%d", i, j), X_tensor, true);
+              format("two_view_geometries/points/%d_%d", i, j), X_tensor,
+              overwrite);
           h5_file.write_dataset(
               format("two_view_geometries/cheirality/%d_%d", i, j),
-              cheirality_tensor, true);
+              cheirality_tensor, overwrite);
           h5_file.write_dataset(
-              format("two_view_geometries/colors/%d_%d", i, j), colors, true);
+              format("two_view_geometries/colors/%d_%d", i, j), colors,
+              overwrite);
         }
-
       });
 }
 
@@ -231,7 +235,8 @@ int __main(int argc, char **argv)
         ("help, h", "Help screen")                                     //
         ("dirpath", po::value<std::string>(), "Image directory path")  //
         ("out_h5_file", po::value<std::string>(), "Output HDF5 file")  //
-        ("debug", "Inspect visually the epipolar geometry")  //
+        ("debug", "Inspect visually the epipolar geometry")            //
+        ("overwrite", "Overwrite triangulation")                       //
         ;
 
     po::variables_map vm;
@@ -259,7 +264,8 @@ int __main(int argc, char **argv)
     const auto dirpath = vm["dirpath"].as<std::string>();
     const auto h5_filepath = vm["out_h5_file"].as<std::string>();
     const auto debug = vm.count("debug");
-    triangulate(dirpath, h5_filepath, debug);
+    const auto overwrite = vm.count("overwrite");
+    triangulate(dirpath, h5_filepath, overwrite, debug);
 
     return 0;
   }

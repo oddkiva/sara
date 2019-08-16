@@ -20,6 +20,9 @@ namespace DO { namespace Kalpana {
     return orthographic(-w / 2, w / 2, -h / 2, h / 2, n, f);
   }
 
+  auto look_at(const Vector3f& eye, const Vector3f& center, const Vector3f& up)
+      -> Matrix4f;
+
 } /* namespace Kalpana */
 } /* namespace DO */
 
