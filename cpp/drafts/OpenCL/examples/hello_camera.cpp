@@ -73,7 +73,7 @@ static const float ZOOM        =  45.0f;
 // The explorer's eye.
 struct Eye
 {
-  Vector3f position{Vector3f::Zero()};
+  Vector3f position{10.f * Vector3f::UnitY()};
   Vector3f front{-Vector3f::UnitZ()};
   Vector3f up{Vector3f::UnitY()}; Vector3f right;
   Vector3f world_up{Vector3f::UnitY()};
@@ -256,7 +256,7 @@ struct PointCloudObject
   PointCloudObject(const Tensor_<float, 2>& vertices_)
     : vertices{vertices_}
   {
-    shader_program = make_point_cloud_shader();
+    shader_program = make_shader();
 
     // =========================================================================
     // Encode the vertex data in a tensor.
@@ -295,7 +295,7 @@ struct PointCloudObject
     }
   }
 
-  auto make_point_cloud_shader() -> GL::ShaderProgram
+  auto make_shader() -> GL::ShaderProgram
   {
     const auto vertex_shader_source = R"shader(
 #version 330 core
@@ -364,49 +364,160 @@ struct PointCloudObject
                                         {"in_color", 1}};
 };
 
-auto make_standard_shader()
+struct CheckerBoardObject
 {
-  const auto vertex_shader_source = R"shader(
+  CheckerBoardObject(int rows_ = 20, int cols_ = 20)
+    : rows{rows_}
+    , cols{cols_}
+  {
+    shader_program = make_shader();
+
+    vertices = Tensor_<float, 2>{{4 * rows * cols, 6}};
+    triangles = Tensor_<unsigned int, 2>{{2 * rows * cols, 3}};
+
+    auto v_mat = vertices.matrix();
+    auto t_mat = triangles.matrix();
+    for (int i = 0; i < rows; ++i)
+    {
+      for (int j = 0; j < cols; ++j)
+      {
+        const auto ij = cols * i + j;
+
+        // Coordinates.
+        v_mat.block(4 * ij, 0, 4, 3) << //
+          // coords
+          i +  0.5f, 0.0f, j +  0.5f,  // top-right
+          i +  0.5f, 0.0f, j + -0.5f,  // bottom-right
+          i + -0.5f, 0.0f, j + -0.5f,  // bottom-left
+          i + -0.5f, 0.0f, j +  0.5f;  // top-left
+
+        // Set colors.
+        if (i % 2 == 0 and j % 2 == 0)
+          v_mat.block(4 * ij, 3, 4, 3).setZero();
+        else if (i % 2 == 0 and j % 2 == 1)
+          v_mat.block(4 * ij, 3, 4, 3).setOnes();
+        else if (i % 2 == 1 and j % 2 == 0)
+          v_mat.block(4 * ij, 3, 4, 3).setOnes();
+        else // (i % 2 == 1 and j % 2 == 0)
+          v_mat.block(4 * ij, 3, 4, 3).setZero();
+
+        t_mat.block(2 * ij, 0, 2, 3) <<
+          4 * ij + 0, 4 * ij + 1, 4 * ij + 2,
+          4 * ij + 2, 4 * ij + 3, 4 * ij + 0;
+      }
+    }
+    // Translate.
+    v_mat.col(0).array() -= rows / 2.f;
+    v_mat.col(2).array() -= cols / 2.f;
+    // Rescale.
+    v_mat.leftCols(3) *= 10;
+
+    const auto row_bytes = [](const TensorView_<float, 2>& data) {
+      return data.size(1) * sizeof(float);
+    };
+    const auto float_pointer = [](int offset) {
+      return reinterpret_cast<void*>(offset * sizeof(float));
+    };
+
+    vao.generate();
+    vbo.generate();
+    ebo.generate();
+
+    // Specify the vertex attributes here.
+    {
+      glBindVertexArray(vao);
+
+      // Copy the vertex data into the GPU buffer object.
+      vbo.bind_vertex_data(vertices);
+
+      // Copy the triangles data into the GPU buffer object.
+      ebo.bind_triangles_data(triangles);
+
+      // Specify that the vertex shader param 0 corresponds to the first 3 float
+      // data of the buffer object.
+      glVertexAttribPointer(arg_pos["in_coords"], 3 /* 3D points */, GL_FLOAT,
+                            GL_FALSE, row_bytes(vertices), float_pointer(0));
+      glEnableVertexAttribArray(arg_pos["in_coords"]);
+
+      // Specify that the vertex shader param 1 corresponds to the first 3 float
+      // data of the buffer object.
+      glVertexAttribPointer(arg_pos["in_color"], 3 /* 3D colors */, GL_FLOAT,
+                            GL_FALSE, row_bytes(vertices), float_pointer(3));
+      glEnableVertexAttribArray(arg_pos["in_color"]);
+
+      // Unbind the vbo to protect its data.
+      glBindBuffer(GL_ARRAY_BUFFER, 0);
+      glBindVertexArray(0);
+    }
+  }
+
+  auto make_shader() -> GL::ShaderProgram
+  {
+    const auto vertex_shader_source = R"shader(
 #version 330 core
   layout (location = 0) in vec3 in_coords;
   layout (location = 1) in vec3 in_color;
+
+  uniform mat4 transform;
+  uniform mat4 view;
+  uniform mat4 projection;
 
   out vec3 out_color;
 
   void main()
   {
-    gl_Position = vec4(in_coords, 1.0);
+    gl_Position = projection * view * transform * vec4(in_coords, 1.0);
     gl_PointSize = 200.0;
     out_color = in_color;
   }
   )shader";
-  auto vertex_shader = GL::Shader{};
-  vertex_shader.create_from_source(GL_VERTEX_SHADER, vertex_shader_source);
+    auto vertex_shader = GL::Shader{};
+    vertex_shader.create_from_source(GL_VERTEX_SHADER, vertex_shader_source);
 
 
-  const auto fragment_shader_source = R"shader(
+    const auto fragment_shader_source = R"shader(
 #version 330 core
   in vec3 out_color;
   out vec4 frag_color;
 
   void main()
   {
-    frag_color = vec4(out_color, 1.0);
+    frag_color = vec4(out_color, 0.1);
   }
   )shader";
-  auto fragment_shader = GL::Shader{};
-  fragment_shader.create_from_source(GL_FRAGMENT_SHADER,
-                                     fragment_shader_source);
+    auto fragment_shader = GL::Shader{};
+    fragment_shader.create_from_source(GL_FRAGMENT_SHADER,
+                                       fragment_shader_source);
 
-  auto shader_program = GL::ShaderProgram{};
-  shader_program.create();
-  shader_program.attach(vertex_shader, fragment_shader);
+    auto shader_program = GL::ShaderProgram{};
+    shader_program.create();
+    shader_program.attach(vertex_shader, fragment_shader);
 
-  vertex_shader.destroy();
-  fragment_shader.destroy();
+    vertex_shader.destroy();
+    fragment_shader.destroy();
 
-  return shader_program;
-}
+    return shader_program;
+  }
+
+  void destroy()
+  {
+    vao.destroy();
+    vbo.destroy();
+    ebo.destroy();
+  }
+
+  int rows{100};
+  int cols{100};
+  Tensor_<float, 2> vertices;
+  Tensor_<unsigned int, 2> triangles;
+  GL::Buffer vbo;
+  GL::Buffer ebo;
+  GL::VertexArray vao;
+  GL::ShaderProgram shader_program;
+  std::map<std::string, int> arg_pos = {{"in_coords", 0},  //
+                                        {"in_color", 1},   //
+                                        {"out_color", 0}};
+};
 
 
 int main()
@@ -429,7 +540,7 @@ int main()
 
 
   auto point_cloud_object = PointCloudObject{make_point_cloud()};
-  point_cloud_object.shader_program.use(true);
+  auto checkerboard = CheckerBoardObject{};
 
 
   // ==========================================================================
@@ -442,9 +553,12 @@ int main()
   // You absolutely need this for 3D objects!
   glEnable(GL_DEPTH_TEST);
 
-
   auto eye = Eye{};
   auto time = Time{};
+
+  // Initialize the projection matrix once for all.
+  const Matrix4f projection =
+      kalpana::perspective(45., 800. / 600., .1, 1000.).cast<float>();
 
 
   // Display image.
@@ -469,49 +583,41 @@ int main()
     auto transform = Transform<float, 3, Eigen::Projective>{};
     transform.setIdentity();
 
-    // glBegin(GL_TRIANGLES);
-    // for (int y = -10; y < 10; ++y)
-    // {
-    //   for (int x = -10; x < 10; ++x)
-    //   {
-    //     if (y * 200 + x % 2 == 0)
-    //       glColor3f(1, 0, 0);
-    //     else
-    //       glColor3f(0, 0, 0);
-
-    //     glVertex3f(x + 10 * 0.f, y + 10 * 0.f, -10.0);
-    //     glVertex3f(x + 10 * 1.f, y + 10 * 0.f, -10.0);
-    //     glVertex3f(x + 10 * 1.f, y + 10 * 1.f, -10.0);
-    //     // glVertex3f(x + 10 * 0.f, y + 10 * 1.f, -100.0);
-    //   }
-    // }
-    // glEnd();
+    // Draw the checkerboard.
+    checkerboard.shader_program.use();
+    checkerboard.shader_program.set_uniform_matrix4f(
+        "transform", transform.matrix().data());
+    checkerboard.shader_program.set_uniform_matrix4f("view",
+                                                     view_matrix.data());
+    checkerboard.shader_program.set_uniform_matrix4f("projection",
+                                                     projection.data());
+    glBindVertexArray(checkerboard.vao);
+    glDrawElements(GL_TRIANGLES, checkerboard.triangles.size(), GL_UNSIGNED_INT, 0);
 
 
+    // Rotate the point cloud.
     transform.rotate(AngleAxisf(std::pow(1.5, 5) * time.last_frame / 10000,
                                 Vector3f{0.5f, 1.0f, 0.0f}.normalized()));
+
+    // Draw point cloud.
+    point_cloud_object.shader_program.use();
     point_cloud_object.shader_program.set_uniform_matrix4f(
         "transform", transform.matrix().data());
-
-    // View matrix.
     point_cloud_object.shader_program.set_uniform_matrix4f("view",
                                                            view_matrix.data());
-
-    // Projection matrix.
-    const Matrix4f projection =
-        kalpana::perspective(45., 800. / 600., .1, 1000.).cast<float>();
     point_cloud_object.shader_program.set_uniform_matrix4f("projection",
                                                            projection.data());
 
-    // Draw triangles.
     glBindVertexArray(point_cloud_object.vao);
     glDrawArrays(GL_POINTS, 0, point_cloud_object.vertices.size(0));
+
 
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
 
   point_cloud_object.destroy();
+  checkerboard.destroy();
 
   // Clean up resources.
   glfwDestroyWindow(window);
