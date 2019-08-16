@@ -258,6 +258,33 @@ struct H5File
   }
 
   template <typename T>
+  auto
+  write_dataset(const std::string& dataset_name,
+                const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>& data,
+                bool overwrite = false)
+  {
+    const auto data_type = CalculateH5Type<T>::value();
+
+    const auto data_dims = std::array<hsize_t, 2>{
+        static_cast<hsize_t>(data.rows()), static_cast<hsize_t>(data.cols())};
+    const auto data_space = H5::DataSpace{2, data_dims.data()};
+
+    auto dataset = find_dataset(dataset_name);
+    if (dataset != nullptr && overwrite)
+      delete_dataset(dataset_name);
+
+    if (!overwrite && dataset != nullptr)
+      throw std::runtime_error{"Error: dataset \"" + dataset_name +
+                               "\" exists but overwriting is not permitted!"};
+
+    dataset.reset(new H5::DataSet{
+        file->createDataSet(dataset_name, data_type, data_space)});
+    dataset->write(data.data(), data_type);
+
+    return dataset;
+  }
+
+  template <typename T>
   auto read_dataset(const std::string& dataset_name, std::vector<T>& data)
   {
     auto dataset = H5::DataSet(file->openDataSet(dataset_name));
@@ -294,6 +321,47 @@ struct H5File
     // Read the data.
     dataset.read(data.data(), calculate_h5_type<T>(), dst_space,
                  file_data_space);
+  }
+
+  template <typename T>
+  auto read_dataset(const std::string& dataset_name,
+                    Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>& data)
+  {
+    auto dataset = H5::DataSet(file->openDataSet(dataset_name));
+
+    // File data space.
+    auto file_data_space = dataset.getSpace();
+    const auto file_data_dims = read_dataset_sizes(file_data_space);
+    const auto file_data_rank = int(file_data_dims.size());
+
+    // Select the portion of the file data.
+    const vector_type file_offset = vector_type::Zero(file_data_rank);
+    const auto file_count = file_data_dims;
+    file_data_space.selectHyperslab(H5S_SELECT_SET, file_count.data(),
+                                    file_offset.data());
+#ifdef DEBUG
+    SARA_DEBUG << "Selected src offset = " << file_offset.transpose()
+               << std::endl;
+    SARA_DEBUG << "Selected src count = " << file_count.transpose()
+               << std::endl;
+#endif
+
+    // Select the portion of the destination data.
+    const vector_type dst_offset = vector_type::Zero(file_data_rank);
+    const auto dst_count = file_data_dims;
+    const auto dst_space = H5::DataSpace{file_data_rank, dst_count.data()};
+    dst_space.selectHyperslab(H5S_SELECT_SET, dst_count.data(),
+                              dst_offset.data());
+
+    // Resize the data.
+    const auto rows = static_cast<int>(dst_count(0));
+    const auto cols = static_cast<int>(dst_count(1));
+    data.resize(rows, cols);
+
+    // Read the data.
+    dataset.read(data.data(), calculate_h5_type<T>(), dst_space,
+                 file_data_space);
+
   }
 
   template <typename T, int Rank>

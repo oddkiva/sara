@@ -39,7 +39,7 @@ auto track_points(const std::string& dirpath, const std::string& h5_filepath,
   // Load images (necessary if we want to extract the colors).
   SARA_DEBUG << "Listing images from:\n\t" << dirpath << std::endl;
   view_attributes.list_images(dirpath);
- 
+
   // Load keypoints.
   SARA_DEBUG << "Reading keypoints from HDF5 file:\n\t" << h5_filepath << std::endl;
   view_attributes.read_keypoints(h5_file);
@@ -55,7 +55,6 @@ auto track_points(const std::string& dirpath, const std::string& h5_filepath,
 
   SARA_DEBUG << "Reading matches from HDF5 file:\n\t" << h5_filepath << std::endl;
   edge_attributes.read_matches(h5_file, view_attributes);
-
 
   SARA_DEBUG << "Reading the essential matrices..." << std::endl;
   edge_attributes.resize_essential_edge_list();
