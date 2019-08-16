@@ -71,7 +71,7 @@ static const float SENSITIVITY =  1e-1f;
 static const float ZOOM        =  45.0f;
 
 // The explorer's eye.
-struct Eye
+struct Camera
 {
   Vector3f position{10.f * Vector3f::UnitY()};
   Vector3f front{-Vector3f::UnitZ()};
@@ -191,38 +191,38 @@ struct Time
   float current_frame = 0.f;
 };
 
-auto move_camera_from_keyboard(GLFWwindow* window, Eye& eye, Time& time)
+auto move_camera_from_keyboard(GLFWwindow* window, Camera& camera, Time& time)
 {
   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-    eye.move_forward(time.delta_time);
+    camera.move_forward(time.delta_time);
   if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-    eye.move_backward(time.delta_time);
+    camera.move_backward(time.delta_time);
   if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-    eye.move_left(time.delta_time);
+    camera.move_left(time.delta_time);
   if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-    eye.move_right(time.delta_time);
+    camera.move_right(time.delta_time);
 
   if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-    eye.no_head_movement(-time.delta_time); // CCW
+    camera.no_head_movement(-time.delta_time); // CCW
   if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-    eye.no_head_movement(+time.delta_time); // CW
+    camera.no_head_movement(+time.delta_time); // CW
 
   if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
-    eye.yes_head_movement(+time.delta_time);
+    camera.yes_head_movement(+time.delta_time);
   if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
-    eye.yes_head_movement(-time.delta_time);
+    camera.yes_head_movement(-time.delta_time);
 
   if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS)
-    eye.move_up(time.delta_time);
+    camera.move_up(time.delta_time);
   if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS)
-    eye.move_down(time.delta_time);
+    camera.move_down(time.delta_time);
 
   if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
-    eye.maybe_head_movement(-time.delta_time);
+    camera.maybe_head_movement(-time.delta_time);
   if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
-    eye.maybe_head_movement(+time.delta_time);
+    camera.maybe_head_movement(+time.delta_time);
 
-  eye.update();
+  camera.update();
 }
 
 
@@ -530,7 +530,7 @@ struct CheckerBoardObject
 int main()
 {
   // ==========================================================================
-  // Display initialization.
+  // Boilerplate code for display initialization.
   //
   init_glfw_boilerplate();
 
@@ -546,8 +546,12 @@ int main()
   init_glew_boilerplate();
 
 
+  // ==========================================================================
+  // Create objects to display.
+  //
   auto point_cloud_object = PointCloudObject{make_point_cloud()};
   auto checkerboard = CheckerBoardObject{};
+  auto camera = Camera{};
 
 
   // ==========================================================================
@@ -560,7 +564,6 @@ int main()
   // You absolutely need this for 3D objects!
   glEnable(GL_DEPTH_TEST);
 
-  auto eye = Eye{};
   auto time = Time{};
 
   // Initialize the projection matrix once for all.
@@ -579,8 +582,8 @@ int main()
       glfwSetWindowShouldClose(window, true);
 
     // Camera interaction with keyboard.
-    move_camera_from_keyboard(window, eye, time);
-    auto view_matrix = eye.view_matrix();
+    move_camera_from_keyboard(window, camera, time);
+    auto view_matrix = camera.view_matrix();
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     // Important.
