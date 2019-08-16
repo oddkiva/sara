@@ -42,7 +42,7 @@ void triangulate(const std::string& dirpath, const std::string& h5_filepath)
     cp(h5_filepath, h5_filepath + ".bak");
 
   SARA_DEBUG << "Opening file " << h5_filepath << "..." << std::endl;
-  auto h5_file = H5File{h5_filepath, H5F_ACC_RDONLY};
+  auto h5_file = H5File{h5_filepath, H5F_ACC_RDWR};
 
   auto view_attributes = ViewAttributes{};
 
@@ -127,7 +127,7 @@ void triangulate(const std::string& dirpath, const std::string& h5_filepath)
         auto Fij = FundamentalMatrix{};
         Fij.matrix() = Kj.inverse().transpose() * Eij.matrix() * Ki.inverse();
 
-        SARA_DEBUG << "Fij = \n" << E[ij] << std::endl;
+        SARA_DEBUG << "Fij = \n" << Fij << std::endl;
         SARA_CHECK(E_num_samples[ij]);
         SARA_CHECK(E_noise[ij]);
         SARA_CHECK(E_inliers[ij].row_vector());
@@ -136,8 +136,8 @@ void triangulate(const std::string& dirpath, const std::string& h5_filepath)
 
         const auto& Ii = view_attributes.images[i];
         const auto& Ij = view_attributes.images[j];
-        check_epipolar_constraints(Ii, Ij, Fij, Mij, E_best_samples[ij],
-                                   E_inliers[ij], display_step,
+        check_epipolar_constraints(Ii, Ij, Fij, Mij, E_best_sample_ij,
+                                   E_inliers_ij, display_step,
                                    /* wait_key */ false);
 
 
@@ -158,35 +158,44 @@ void triangulate(const std::string& dirpath, const std::string& h5_filepath)
         // a pair of point indices (i, j).
         const auto index_matches_ij = to_tensor(Mij);
 
+        if (E_inliers_ij.flat_array().count() == 0)
+          return;
 
+        // Estimate the two-view geometry, i.e.:
+        // 1. Find the cheiral-most relative camera motion.
+        // 2. Calculate the 3D points from every feature matches
+        // 3. Calculate their cheirality.
         auto geometry = estimate_two_view_geometry(index_matches_ij, uni, unj,
                                                    Eij, E_inliers_ij, E_best_sample_ij);
-
-        // Further processing for point cloud preview.
-        //keep_cheiral_inliers_only(geometry, E_inliers_ij);
 
         // Add the internal camera matrices to the camera.
         geometry.C1.K = Ki;
         geometry.C2.K = Kj;
+
         auto colors = extract_colors(view_attributes.images[i],
                                      view_attributes.images[j], geometry);
 
-        //// Save the data to HDF5.
-        //{
-        //  // Get the left and right cameras.
-        //  auto cameras = Tensor_<PinholeCamera, 1>{2};
-        //  cameras(0) = geometry.C1;
-        //  cameras(1) = geometry.C2;
+        // Save the data to HDF5.
+        h5_file.get_group("two_view_geometries");
+        h5_file.get_group("two_view_geometries/cameras");
+        h5_file.get_group("two_view_geometries/points");
+        h5_file.get_group("two_view_geometries/colors");
+        {
+          // Get the left and right cameras.
+          auto cameras = Tensor_<PinholeCamera, 1>{2};
+          cameras(0) = geometry.C1;
+          cameras(1) = geometry.C2;
 
-        //  const MatrixXd X_euclidean = geometry.X.colwise().hnormalized();
-        //  auto X_data = const_cast<double*>(
-        //      reinterpret_cast<const double*>(X_euclidean.data()));
-        //  auto X_tensor =
-        //      TensorView_<double, 2>{X_data, {int(geometry.X.cols()), 3}};
-        //  h5_file.write_dataset("cameras/%d_%d", cameras, true);
-        //  h5_file.write_dataset("points/%d_%d", X_tensor, true);
-        //  h5_file.write_dataset("colors/%d_%d", X_tensor, true);
-        //}
+          const MatrixXd X_euclidean = geometry.X.colwise().hnormalized();
+          auto X_data = const_cast<double*>(
+              reinterpret_cast<const double*>(X_euclidean.data()));
+          auto X_tensor =
+              TensorView_<double, 2>{X_data, {int(geometry.X.cols()), 3}};
+          h5_file.write_dataset("two_view_geometries/cameras/%d_%d", cameras, true);
+          h5_file.write_dataset("two_view_geometries/points/%d_%d", X_tensor, true);
+          h5_file.write_dataset("two_view_geometries/colors/%d_%d", X_tensor, true);
+          h5_file.write_dataset("two_view_geometries/cheirality/%d_%d", X_tensor, true);
+        }
 
         get_key();
 
