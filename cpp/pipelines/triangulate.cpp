@@ -198,7 +198,6 @@ void triangulate(const std::string& dirpath, const std::string& h5_filepath,
               geometry.cheirality.data(),
               {static_cast<int>(geometry.cheirality.size())}};
 
-
           h5_file.write_dataset(
               format("two_view_geometries/cameras/%d_%d", i, j), cameras,
               overwrite);

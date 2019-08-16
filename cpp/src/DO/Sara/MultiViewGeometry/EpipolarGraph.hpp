@@ -94,7 +94,8 @@ struct DO_SARA_EXPORT EpipolarEdgeAttributes
                                  H5File& h5_file) -> void;
   auto read_essential_matrices(const ViewAttributes& view_attributes,
                                H5File& h5_file) -> void;
-  auto read_two_view_geometries(H5File& h5_file) -> void;
+  auto read_two_view_geometries(const ViewAttributes& view_attributes,
+                                H5File& h5_file) -> void;
 };
 
 } /* namespace DO::Sara */
