@@ -1,6 +1,6 @@
-project(DO_Pipelines)
+project(DO_Sara_SfM_Pipelines)
 
-message(STATUS "  - DO_Pipelines")
+message(STATUS "  - DO_Sara_SfM_Pipelines")
 
 #set(Boost_DEBUG ON)
 set(Boost_USE_STATIC_LIBS OFF)
@@ -14,6 +14,7 @@ find_package(DO_Sara
 
 file(GLOB pipelines_SOURCE_FILES FILES *.cpp)
 
+
 foreach (file ${pipelines_SOURCE_FILES})
   get_filename_component(filename "${file}" NAME_WE)
   add_executable(${filename} ${file})
@@ -25,8 +26,9 @@ foreach (file ${pipelines_SOURCE_FILES})
     ${Boost_LIBRARIES}
     ${HDF5_LIBRARIES})
   target_compile_definitions(${filename} PRIVATE
+    ${SARA_DEFINITIONS}  # so that the `src_path()` macro becomes valid.
     -DBOOST_ALL_DYN_LINK -DBOOST_ALL_NO_LIB)
   set_property(
-      TARGET ${_test_name}
+      TARGET ${filename}
       PROPERTY FOLDER "DO Sara Pipelines/SfM")
 endforeach ()

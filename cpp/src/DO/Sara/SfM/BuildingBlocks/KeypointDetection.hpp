@@ -11,7 +11,18 @@
 
 #pragma once
 
-#include <DO/Sara/SfM/BuildingBlocks/KeypointDetection.hpp>
-#include <DO/Sara/SfM/BuildingBlocks/KeypointMatching.hpp>
-#include <DO/Sara/SfM/BuildingBlocks/FundamentalMatrixEstimation.hpp>
-#include <DO/Sara/SfM/BuildingBlocks/EssentialMatrixEstimation.hpp>
+#include <string>
+
+
+namespace DO::Sara {
+
+//! @{
+//! @brief Keypoint detection.
+auto detect_keypoints(const std::string& dirpath,
+                      const std::string& h5_filepath, bool overwrite) -> void;
+
+auto read_keypoints(const std::string& dirpath, const std::string& h5_filepath)
+    -> void;
+//! @}
+
+} /* namespace DO::Sara */

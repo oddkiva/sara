@@ -9,22 +9,22 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Sara/Core/HDF5.hpp>
-#include <DO/Sara/Core/StdVectorHelpers.hpp>
-#include <DO/Sara/Core/StringFormat.hpp>
-#include <DO/Sara/FeatureMatching.hpp>
-#include <DO/Sara/Features/Draw.hpp>
-#include <DO/Sara/FileSystem.hpp>
-#include <DO/Sara/Graphics.hpp>
-#include <DO/Sara/ImageIO.hpp>
+#pragma once
+
 #include <DO/Sara/Match.hpp>
-#include <DO/Sara/Match/IndexMatch.hpp>
-#include <DO/Sara/SfM/BuildingBlocks.hpp>
-#include <DO/Sara/SfM/Detectors/SIFT.hpp>
-
-#include <boost/filesystem.hpp>
-
-#include <iostream>
 
 
-namespace fs = boost::filesystem;
+namespace DO::Sara {
+
+//! @{
+//! @brief Keypoint matching.
+auto match(const KeypointList<OERegion, float>& keys1,
+           const KeypointList<OERegion, float>& keys2,
+           float lowe_ratio = 0.6f)
+    -> std::vector<Match>;
+
+auto match_keypoints(const std::string& dirpath, const std::string& h5_filepath,
+                     bool overwrite) -> void;
+//! @}
+
+} /* namespace DO::Sara */
