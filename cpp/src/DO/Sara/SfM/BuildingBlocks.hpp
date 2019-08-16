@@ -15,3 +15,4 @@
 #include <DO/Sara/SfM/BuildingBlocks/KeypointMatching.hpp>
 #include <DO/Sara/SfM/BuildingBlocks/FundamentalMatrixEstimation.hpp>
 #include <DO/Sara/SfM/BuildingBlocks/EssentialMatrixEstimation.hpp>
+#include <DO/Sara/SfM/BuildingBlocks/Triangulation.hpp>

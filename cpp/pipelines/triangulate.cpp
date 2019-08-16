@@ -9,19 +9,9 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Sara/Core/HDF5.hpp>
-#include <DO/Sara/Core/MultiArray/DataTransformations.hpp>
-#include <DO/Sara/Core/Tensor.hpp>
-#include <DO/Sara/FeatureMatching.hpp>
 #include <DO/Sara/FileSystem.hpp>
 #include <DO/Sara/Graphics.hpp>
-#include <DO/Sara/ImageIO.hpp>
-#include <DO/Sara/ImageProcessing/Interpolation.hpp>
-#include <DO/Sara/Match.hpp>
-#include <DO/Sara/MultiViewGeometry.hpp>
-#include <DO/Sara/MultiViewGeometry/Miscellaneous.hpp>
 #include <DO/Sara/SfM/BuildingBlocks.hpp>
-#include <DO/Sara/SfM/BuildingBlocks/Triangulation.hpp>
 #include <DO/Sara/SfM/Detectors/SIFT.hpp>
 
 #include <boost/filesystem.hpp>
