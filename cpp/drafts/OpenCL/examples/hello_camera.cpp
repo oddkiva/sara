@@ -202,24 +202,24 @@ auto move_camera_from_keyboard(GLFWwindow* window, Camera& camera, Time& time)
   if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
     camera.move_right(time.delta_time);
 
-  if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+  if (glfwGetKey(window, GLFW_KEY_DELETE) == GLFW_PRESS)
     camera.no_head_movement(-time.delta_time); // CCW
-  if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+  if (glfwGetKey(window, GLFW_KEY_PAGE_DOWN) == GLFW_PRESS)
     camera.no_head_movement(+time.delta_time); // CW
 
-  if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
+  if (glfwGetKey(window, GLFW_KEY_HOME) == GLFW_PRESS)
     camera.yes_head_movement(+time.delta_time);
-  if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
+  if (glfwGetKey(window, GLFW_KEY_END) == GLFW_PRESS)
     camera.yes_head_movement(-time.delta_time);
 
-  if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS)
+  if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
     camera.move_up(time.delta_time);
-  if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS)
+  if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
     camera.move_down(time.delta_time);
 
-  if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+  if (glfwGetKey(window, GLFW_KEY_INSERT) == GLFW_PRESS)
     camera.maybe_head_movement(-time.delta_time);
-  if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
+  if (glfwGetKey(window, GLFW_KEY_PAGE_UP) == GLFW_PRESS)
     camera.maybe_head_movement(+time.delta_time);
 
   camera.update();
