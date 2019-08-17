@@ -32,63 +32,100 @@ struct ConnectedComponents
   }
 
   FeatureGraph& g;
-  std::vector<Rank> rank;
+  std::vector<VertexIndex> rank;
   std::vector<Vertex> parent;
 };
 
 using DisjointSets = boost::disjoint_sets<ConnectedComponents::Rank,
                                           ConnectedComponents::Parent>;
 
-
-BOOST_AUTO_TEST_CASE(test_feature_graph)
+BOOST_AUTO_TEST_CASE(test_connected_components)
 {
-  auto g = FeatureGraph{};
+  const int N = 6;
+  FeatureGraph G(N);
+  boost::add_edge(0, 1, G);
+  boost::add_edge(1, 4, G);
+  boost::add_edge(4, 0, G);
+  boost::add_edge(2, 5, G);
 
-  auto v1 = boost::add_vertex({0, 0}, g);
-  auto v2 = boost::add_vertex({0, 1}, g);
-  auto v3 = boost::add_vertex({1, 1}, g);
-  auto v4 = boost::add_vertex({1, 1}, g);
+  std::vector<int> c(num_vertices(G));
+  int num = boost::connected_components(
+      G, make_iterator_property_map(c.begin(),
+                                    boost::get(boost::vertex_index, G), c[0]));
 
-  SARA_DEBUG << "g[v1] = " << format("(%d, %d)", g[v1].image_id, g[v1].local_id)
-             << std::endl;
-  SARA_DEBUG << "g[v2] = " << format("(%d, %d)", g[v2].image_id, g[v2].local_id)
-             << std::endl;
-  SARA_DEBUG << "g[v3] = " << format("(%d, %d)", g[v3].image_id, g[v3].local_id)
-             << std::endl;
-  SARA_DEBUG << "g[v4] = " << format("(%d, %d)", g[v4].image_id, g[v4].local_id)
-             << std::endl;
+  std::cout << std::endl;
+  std::cout << "Total number of components: " << num << std::endl;
+  for (auto i = c.begin(); i != c.end(); ++i)
+    std::cout << "Vertex " << i - c.begin() << " is in component " << *i
+              << std::endl;
+  std::cout << std::endl;
+}
 
-  const auto [e1, b1] = boost::add_edge(v1, v4, g);
-  const auto [e2, b2] = boost::add_edge(v2, v3, g);
+BOOST_AUTO_TEST_CASE(test_incremental_connected_components)
+{
+  using Vertex = boost::graph_traits<FeatureGraph>::vertex_descriptor;
+  using VertexIndex = boost::graph_traits<FeatureGraph>::vertices_size_type;
 
-  SARA_CHECK(e1);
-  SARA_CHECK(e2);
+  using Rank = VertexIndex*;
+  using Parent = Vertex*;
 
-  BOOST_CHECK(b1);
-  BOOST_CHECK(b2);
+  // constexpr auto VERTEX_COUNT = 6;
+  // auto graph = FeatureGraph(VERTEX_COUNT);
+  auto graph = FeatureGraph{};
+  auto v0 = boost::add_vertex({0, 0}, graph);
+  auto v1 = boost::add_vertex({0, 1}, graph);
+  auto v2 = boost::add_vertex({0, 2}, graph);
+  auto v3 = boost::add_vertex({1, 0}, graph);
+  auto v4 = boost::add_vertex({1, 1}, graph);
+  auto v5 = boost::add_vertex({1, 2}, graph);
 
-  boost::print_graph(g, "");
+  auto rank = std::vector<VertexIndex>(num_vertices(graph));
+  auto parent = std::vector<Vertex>(num_vertices(graph));
 
-  auto tracks = ConnectedComponents{g};
-  //DisjointSets ds(tracks.rank[0], tracks.parent[0]);
+  boost::disjoint_sets<Rank, Parent> ds(&rank[0], &parent[0]);
 
-  //boost::initialize_incremental_components(g, ds);
-  //boost::incremental_components(g, ds);
+  boost::initialize_incremental_components(graph, ds);
+  boost::incremental_components(graph, ds);
 
-  //ConnectedComponents::Components components(tracks.parent.begin(),
-  //                                           tracks.parent.end());
-  //// Iterate through the component indices
-  //BOOST_FOREACH (ConnectedComponents::VertexIndex current_index, components)
-  //{
-  //  std::cout << "component " << current_index << " contains: ";
+  boost::graph_traits<FeatureGraph>::edge_descriptor edge;
+  bool flag;
 
-  //  // Iterate through the child vertex indices for [current_index]
-  //  BOOST_FOREACH (ConnectedComponents::VertexIndex child_index,
-  //                 components[current_index])
-  //  {
-  //    std::cout << child_index << " ";
-  //  }
+  boost::tie(edge, flag) = boost::add_edge(v0, v1, graph);
+  ds.union_set(v0, v1);
 
-  //  std::cout << std::endl;
-  //}
+  boost::tie(edge, flag) = boost::add_edge(v1, v4, graph);
+  ds.union_set(v1, v4);
+
+  boost::tie(edge, flag) = boost::add_edge(v4, v0, graph);
+  ds.union_set(v4, v0);
+
+  boost::tie(edge, flag) = boost::add_edge(v2, v5, graph);
+  ds.union_set(v2, v5);
+
+  std::cout << "An undirected graph:" << std::endl;
+  boost::print_graph(graph, boost::get(boost::vertex_index, graph));
+  std::cout << std::endl;
+
+  for (auto [v, v_end] = boost::vertices(graph); v != v_end; ++v) {
+    std::cout << "representative[" << *v << "] = " <<
+    ds.find_set(*v) << std::endl;
+  }
+
+  std::cout << std::endl;
+
+  using Components = boost::component_index<VertexIndex>;
+
+  Components components(parent.begin(), parent.end());
+
+  // Iterate through the component indices
+  for (auto c: components) {
+    std::cout << "component " << c << " contains: ";
+
+    // Iterate through the child vertex indices for [c]
+    for(auto [child, child_end] = components[c]; child != child_end; ++child) {
+      std::cout << *child << " ";
+    }
+
+    std::cout << std::endl;
+  }
 }
