@@ -96,8 +96,8 @@ auto track_points(const std::string& dirpath, const std::string& h5_filepath,
       const auto p = PQij_tensor(m, 0);
       const auto q = PQij_tensor(m, 1);
 
-      const auto ip = make_pair(i, p);
-      const auto jq = make_pair(j, q);
+      const auto ip = std::make_pair(i, p);
+      const auto jq = std::make_pair(j, q);
 
       // TODO: connect ip and jq in a boost graph.
     }
