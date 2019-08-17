@@ -201,9 +201,6 @@ auto EpipolarEdgeAttributes::read_two_view_geometries(
 {
   two_view_geometries.resize(edges.size());
 
-  // Get the left and right cameras.
-  auto cameras = Tensor_<PinholeCamera, 1>{2};
-
   std::for_each(
       std::begin(edge_ids), std::end(edge_ids), [&](const auto& ij) {
         const auto& eij = edges[ij];
@@ -217,12 +214,36 @@ auto EpipolarEdgeAttributes::read_two_view_geometries(
                    << view_attributes.group_names[j] << "\n";
         std::cout.flush();
 
-        // Estimate the fundamental matrix.
+        if (E_inliers[ij].flat_array().count() == 0)
+        {
+          SARA_DEBUG << "No inliers... SKIPPING!" << std::endl << std::endl;
+          return;
+        }
+
+        SARA_DEBUG << "Reading two-view geometries..." << std::endl;
+        // Read the cameras.
+        auto cameras = Tensor_<PinholeCamera, 1>{2};
         h5_file.read_dataset(format("two_view_geometries/cameras/%d_%d", i, j),
                              cameras);
-
         two_view_geometries[ij].C1 = cameras(0);
         two_view_geometries[ij].C2 = cameras(1);
+
+        cameras(0).K.setIdentity();
+        cameras(1).K.setIdentity();
+        SARA_DEBUG << "Normalized C1 =\n" << cameras(0).matrix() << std::endl;
+        SARA_DEBUG << "Normalized C2 =\n" << cameras(1).matrix() << std::endl;
+
+        // Read the cameras.
+        h5_file.read_dataset(format("two_view_geometries/points/%d_%d", i, j),
+                             two_view_geometries[ij].X);
+        SARA_DEBUG << "X =\n"
+                   << two_view_geometries[ij].X.leftCols(20) << std::endl;
+
+        h5_file.read_dataset(format("two_view_geometries/cheirality/%d_%d", i, j),
+                             two_view_geometries[ij].cheirality);
+        SARA_DEBUG << "cheirality = "
+                   << two_view_geometries[ij].cheirality.leftCols(20)
+                   << std::endl << std::endl;
       });
 }
 

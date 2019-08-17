@@ -28,27 +28,23 @@ auto save_to_hdf5(const TwoViewGeometry& complete_geom,
   cameras(1) = complete_geom.C2;
 
   const MatrixXd X_euclidean = complete_geom.X.colwise().hnormalized();
-  auto X_data =
-      const_cast<double*>(reinterpret_cast<const double*>(X_euclidean.data()));
-  auto X_tensor =
-      TensorView_<double, 2>{X_data, {int(complete_geom.X.cols()), 3}};
+  SARA_DEBUG << "3D points =\n" << X_euclidean.leftCols(20) << std::endl;
 
-  SARA_DEBUG << "3D points =\n" << X_tensor.matrix().topRows(20) << std::endl;
   SARA_DEBUG << "colors =\n" << colors.matrix().topRows(20) << std::endl;
-  SARA_DEBUG << "Number of 3D valid points = " << X_tensor.size(0) << std::endl;
-  SARA_DEBUG << "X.min_coeff = " << X_tensor.matrix().minCoeff() << std::endl;
-  SARA_DEBUG << "X.max_coeff = " << X_tensor.matrix().maxCoeff() << std::endl;
-  SARA_DEBUG << "X.x_coord.min_coeff = " << X_tensor.matrix().col(0).minCoeff()
+  SARA_DEBUG << "Number of 3D valid points = " << X_euclidean.cols() << std::endl;
+  SARA_DEBUG << "X.min_coeff = " << X_euclidean.minCoeff() << std::endl;
+  SARA_DEBUG << "X.max_coeff = " << X_euclidean.maxCoeff() << std::endl;
+  SARA_DEBUG << "X.x_coord.min_coeff = " << X_euclidean.col(0).minCoeff()
              << std::endl;
-  SARA_DEBUG << "X.x_coord.max_coeff = " << X_tensor.matrix().col(0).maxCoeff()
+  SARA_DEBUG << "X.x_coord.max_coeff = " << X_euclidean.col(0).maxCoeff()
              << std::endl;
-  SARA_DEBUG << "X.y_coord.min_coeff = " << X_tensor.matrix().col(1).minCoeff()
+  SARA_DEBUG << "X.y_coord.min_coeff = " << X_euclidean.col(1).minCoeff()
              << std::endl;
-  SARA_DEBUG << "X.y_coord.max_coeff = " << X_tensor.matrix().col(1).maxCoeff()
+  SARA_DEBUG << "X.y_coord.max_coeff = " << X_euclidean.col(1).maxCoeff()
              << std::endl;
-  SARA_DEBUG << "X.z_coord.min_coeff = " << X_tensor.matrix().col(2).minCoeff()
+  SARA_DEBUG << "X.z_coord.min_coeff = " << X_euclidean.col(2).minCoeff()
              << std::endl;
-  SARA_DEBUG << "X.z_coord.max_coeff = " << X_tensor.matrix().col(2).maxCoeff()
+  SARA_DEBUG << "X.z_coord.max_coeff = " << X_euclidean.col(2).maxCoeff()
              << std::endl;
   SARA_DEBUG << "colors.min_coeff = " << colors.matrix().minCoeff()
              << std::endl;
@@ -61,7 +57,7 @@ auto save_to_hdf5(const TwoViewGeometry& complete_geom,
   auto geom_h5_file = H5File{"/home/david/Desktop/geometry.h5", H5F_ACC_TRUNC};
 #endif
   geom_h5_file.write_dataset("cameras", cameras, true);
-  geom_h5_file.write_dataset("points", X_tensor, true);
+  geom_h5_file.write_dataset("points", X_euclidean, true);
   geom_h5_file.write_dataset("colors", colors, true);
 }
 

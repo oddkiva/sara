@@ -92,6 +92,15 @@ BOOST_AUTO_TEST_CASE(test_hdf5_read_write_array)
       BOOST_CHECK(dataset != nullptr);
     }
 
+    auto D = ArrayXXd{3, 4};
+    D.setZero();
+    D.leftCols(3).matrix().setIdentity();
+
+    h5file.write_dataset("some_group/D", D);
+    {
+      const auto dataset = h5file.find_dataset("some_group/D");
+      BOOST_CHECK(dataset != nullptr);
+    }
   }
 
   // Read data from from HDF5.
@@ -136,6 +145,10 @@ BOOST_AUTO_TEST_CASE(test_hdf5_read_write_array)
     true_C.setZero();
     true_C.leftCols(3).setIdentity();
     BOOST_CHECK_EQUAL(C, true_C);
+
+    auto D = ArrayXXd{};
+    h5file.read_dataset("some_group/D", D);
+    BOOST_CHECK_EQUAL(D.matrix(), true_C);
   }
 
   fs::remove(filepath);

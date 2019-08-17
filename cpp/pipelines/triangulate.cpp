@@ -190,23 +190,18 @@ void triangulate(const std::string& dirpath, const std::string& h5_filepath,
           cameras(1) = geometry.C2;
 
           const MatrixXd X_euclidean = geometry.X.colwise().hnormalized();
-          auto X_data = const_cast<double*>(
-              reinterpret_cast<const double*>(X_euclidean.data()));
-          const auto X_tensor = TensorView_<double, 2>{
-              X_data, {static_cast<int>(geometry.X.cols()), 3}};
-          const auto cheirality_tensor = TensorView_<bool, 1>{
-              geometry.cheirality.data(),
-              {static_cast<int>(geometry.cheirality.size())}};
+          SARA_DEBUG << "X =\n" << X_euclidean.leftCols(20) << std::endl;
+          SARA_DEBUG << "cheirality =\n" << geometry.cheirality.leftCols(20) << std::endl;
 
           h5_file.write_dataset(
               format("two_view_geometries/cameras/%d_%d", i, j), cameras,
               overwrite);
           h5_file.write_dataset(
-              format("two_view_geometries/points/%d_%d", i, j), X_tensor,
+              format("two_view_geometries/points/%d_%d", i, j), X_euclidean,
               overwrite);
           h5_file.write_dataset(
               format("two_view_geometries/cheirality/%d_%d", i, j),
-              cheirality_tensor, overwrite);
+              geometry.cheirality, overwrite);
           h5_file.write_dataset(
               format("two_view_geometries/colors/%d_%d", i, j), colors,
               overwrite);

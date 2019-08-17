@@ -60,6 +60,9 @@ auto track_points(const std::string& dirpath, const std::string& h5_filepath,
   edge_attributes.resize_essential_edge_list();
   edge_attributes.read_essential_matrices(view_attributes, h5_file);
 
+  SARA_DEBUG << "Reading the two-view geometries..." << std::endl;
+  edge_attributes.read_two_view_geometries(view_attributes, h5_file);
+
   // Convenient references.
   const auto& edge_ids = edge_attributes.edge_ids;
   const auto& edges = edge_attributes.edges;
