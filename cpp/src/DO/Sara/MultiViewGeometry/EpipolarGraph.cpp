@@ -182,7 +182,7 @@ auto EpipolarEdgeAttributes::read_essential_matrices(
         const auto i = eij.first;
         const auto j = eij.second;
 
-        SARA_DEBUG << "Reading fundamental matrices between images:\n"
+        SARA_DEBUG << "Reading essential matrices between images:\n"
                    << "- image[" << i << "] = "  //
                    << view_attributes.group_names[i] << "\n"
                    << "- image[" << j << "] = "  //

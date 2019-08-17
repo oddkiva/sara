@@ -73,6 +73,35 @@ auto track_points(const std::string& dirpath, const std::string& h5_filepath,
   const auto& E_noise = edge_attributes.E_noise;
   const auto& E_best_samples = edge_attributes.E_best_samples;
   const auto& E_inliers = edge_attributes.E_inliers;
+
+  std::for_each(std::begin(edge_ids), std::end(edge_ids), [&](const auto& ij) {
+    const auto& eij = edges[ij];
+    const auto i = eij.first;
+    const auto j = eij.second;
+    const auto& Mij = matches[ij];
+    const auto& inliers_ij = E_inliers[ij];
+    const auto& cheirality_ij =
+        edge_attributes.two_view_geometries[ij].cheirality;
+
+    const Array<bool, 1, Dynamic> cheiral_inliers =
+        inliers_ij.row_vector().array() && cheirality_ij;
+
+    const auto PQij_tensor = to_tensor(Mij);
+
+    for (int m = 0; m < PQij_tensor.size(0); ++m)
+    {
+      if (!cheiral_inliers(m))
+        continue;
+
+      const auto p = PQij_tensor(m, 0);
+      const auto q = PQij_tensor(m, 1);
+
+      const auto ip = make_pair(i, p);
+      const auto jq = make_pair(j, q);
+
+      // TODO: connect ip and jq in a boost graph.
+    }
+  });
 }
 
 

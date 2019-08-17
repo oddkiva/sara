@@ -32,11 +32,10 @@ auto estimate_essential_matrix(
     int num_samples, double err_thres)
   -> std::tuple<EssentialMatrix, Tensor_<bool, 1>, Tensor_<int, 1>>
 {
-  const auto to_double = [](const float& src) { return double(src); };
   const auto& fi = features(ki);
   const auto& fj = features(kj);
-  const auto ui = extract_centers(fi).cwise_transform(to_double);
-  const auto uj = extract_centers(fj).cwise_transform(to_double);
+  const auto ui = extract_centers(fi).cast<double>();
+  const auto uj = extract_centers(fj).cast<double>();
 
   const auto uni = apply_transform(Ki_inv, homogeneous(ui));
   const auto unj = apply_transform(Kj_inv, homogeneous(uj));

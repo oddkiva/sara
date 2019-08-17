@@ -34,11 +34,10 @@ auto estimate_fundamental_matrix(
     double err_thres)
   -> std::tuple<FundamentalMatrix, Tensor_<bool, 1>, Tensor_<int, 1>>
 {
-  const auto to_double = [](const float& src) { return double(src); };
   const auto& fi = features(ki);
   const auto& fj = features(kj);
-  const auto pi = extract_centers(fi).cwise_transform(to_double);
-  const auto pj = extract_centers(fj).cwise_transform(to_double);
+  const auto pi = extract_centers(fi).cast<double>();
+  const auto pj = extract_centers(fj).cast<double>();
 
   const auto Pi = homogeneous(pi);
   const auto Pj = homogeneous(pj);
