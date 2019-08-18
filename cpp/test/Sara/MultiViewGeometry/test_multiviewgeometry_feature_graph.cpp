@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(test_incremental_connected_components)
   auto graph = FeatureGraph{};
   // The documentation states that the algorithm is incremental w.r.t. to the
   // growing number of edges.
-  // 
+  //
   // Things become problematic when you also try to grow the number of vertices.
   // So as a workaround two solutions:
   // - preallocate a very big number of vertices before and only add edges.
