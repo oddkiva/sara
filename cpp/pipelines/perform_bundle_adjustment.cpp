@@ -68,59 +68,18 @@ auto perform_bundle_adjustment(const std::string& dirpath,
   // Convenient references.
   const auto& edge_ids = edge_attributes.edge_ids;
   const auto& edges = edge_attributes.edges;
-  const auto& matches = edge_attributes.matches;
-
-  const auto& E = edge_attributes.E;
-  const auto& E_num_samples = edge_attributes.E_num_samples;
-  const auto& E_noise = edge_attributes.E_noise;
-  const auto& E_best_samples = edge_attributes.E_best_samples;
   const auto& E_inliers = edge_attributes.E_inliers;
 
-  const auto& keypoints = view_attributes.keypoints;
-  const auto num_keypoints =
-      std::accumulate(std::begin(keypoints), std::end(keypoints), size_t(0),
-                      [](const auto& sum, const auto& keys) -> size_t {
-                        return sum + features(keys).size();
-                      });
-  SARA_CHECK(num_keypoints);
-
+  // Populate the vertices.
   const auto image_ids = range(num_vertices);
   SARA_CHECK(image_ids.row_vector());
-
-  auto populate_gids = [&](auto image_id) {
-    const auto num_features =
-        static_cast<int>(features(keypoints[image_id]).size());
-    auto lids = range(num_features);
-    auto gids = std::vector<FeatureGID>(lids.size());
-    std::transform(std::begin(lids), std::end(lids), std::begin(gids),
-                   [&](auto lid) -> FeatureGID {
-                     return {image_id, lid};
-                   });
-    return gids;
-  };
-  const auto gids = std::accumulate(
-      std::begin(image_ids), std::end(image_ids), std::vector<FeatureGID>{},
-      [&](const auto& gids, const auto image_id) {
-        SARA_CHECK(image_id);
-        auto gids_union = gids;
-        ::append(gids_union, populate_gids(image_id));
-        return gids_union;
-      });
-  SARA_CHECK(gids.size());
-
-  // Populate the vertices.
   auto graph = PoseGraph(num_vertices);
-  std::for_each(std::begin(image_ids), std::end(image_ids), [&](auto id) {
-    graph[id].id = id;
-    graph[id].score = 0.;
-  });
 
   // Populate the edges.
   std::for_each(std::begin(edge_ids), std::end(edge_ids), [&](const auto& ij) {
     const auto& eij = edges[ij];
     const auto i = eij.first;
     const auto j = eij.second;
-    const auto& Mij = matches[ij];
     const auto& inliers_ij = E_inliers[ij];
     const auto& cheirality_ij =
         edge_attributes.two_view_geometries[ij].cheirality;
@@ -128,16 +87,45 @@ auto perform_bundle_adjustment(const std::string& dirpath,
     std::cout << std::endl;
     SARA_DEBUG << "Processing image pair " << i << " " << j << std::endl;
 
-    auto [e, b] = boost::add_edge(i, j);
+    SARA_DEBUG << "Checking if there are inliers..." << std::endl;
+    SARA_CHECK(cheirality_ij.count());
+    SARA_CHECK(inliers_ij.flat_array().count());
+    if (inliers_ij.flat_array().count() == 0)
+    {
+      SARA_DEBUG << "NO INLIERS: SKIPPING..." << std::endl;
+      return;
+    }
+
+    auto [e, b] = boost::add_edge(i, j, graph);
     if (!b)
       throw std::runtime_error{
           "Error: failed to add edge: edge already exists!"};
 
-    const auto num_inliers_ij = inliers_ij.flat_array().count();
-    graph[i].score += num_inliers_ij;
-    graph[j].score += num_inliers_ij;
-    graph[e].score = num_inliers_ij;
+    SARA_DEBUG << "Calculating cheiral inliers..." << std::endl;
+    SARA_CHECK(cheirality_ij.size());
+    SARA_CHECK(inliers_ij.size());
+    if (cheirality_ij.size() != inliers_ij.size())
+        throw std::runtime_error{"cheirality_ij.size() != inliers_ij.size()"};
+
+    const Array<bool, 1, Dynamic> cheiral_inliers =
+        inliers_ij.row_vector().array() && cheirality_ij;
+
+    const auto num_cheiral_inliers = cheiral_inliers.count();
+    SARA_CHECK(num_cheiral_inliers);
+
+    graph[i].weight += num_cheiral_inliers;
+    graph[j].weight += num_cheiral_inliers;
+    graph[e].id = ij;
+    graph[e].weight = num_cheiral_inliers;
   });
+
+  SARA_DEBUG << "Inspecting vertex weights..." << std::endl;
+  for (auto [v, v_end] = boost::vertices(graph); v != v_end; ++v)
+    SARA_DEBUG << format("weight[%d] = %f", *v, graph[*v].weight) << std::endl;
+
+  SARA_DEBUG << "Inspecting edge weights..." << std::endl;
+  for (auto [e, e_end] = boost::edges(graph); e != e_end; ++e)
+    SARA_DEBUG << format("weight[%d] = %f", graph[*e].id, graph[*e].weight) << std::endl;
 
 
   // TODO: Perform incremental bundle adjustment using a Dijkstra growing scheme.

@@ -230,20 +230,26 @@ auto EpipolarEdgeAttributes::read_two_view_geometries(
 
         cameras(0).K.setIdentity();
         cameras(1).K.setIdentity();
+#ifdef DEBUG
         SARA_DEBUG << "Normalized C1 =\n" << cameras(0).matrix() << std::endl;
         SARA_DEBUG << "Normalized C2 =\n" << cameras(1).matrix() << std::endl;
+#endif
 
         // Read the cameras.
         h5_file.read_dataset(format("two_view_geometries/points/%d_%d", i, j),
                              two_view_geometries[ij].X);
+#ifdef DEBUG
         SARA_DEBUG << "X =\n"
                    << two_view_geometries[ij].X.leftCols(20) << std::endl;
+#endif
 
         h5_file.read_dataset(format("two_view_geometries/cheirality/%d_%d", i, j),
                              two_view_geometries[ij].cheirality);
+#ifdef DEBUG
         SARA_DEBUG << "cheirality = "
                    << two_view_geometries[ij].cheirality.leftCols(20)
                    << std::endl << std::endl;
+#endif
       });
 }
 

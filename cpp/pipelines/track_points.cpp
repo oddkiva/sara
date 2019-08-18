@@ -180,7 +180,6 @@ auto track_points(const std::string& dirpath, const std::string& h5_filepath,
     if (cheirality_ij.size() != inliers_ij.size())
         throw std::runtime_error{"cheirality_ij.size() != inliers_ij.size()"};
 
-
     const Array<bool, 1, Dynamic> cheiral_inliers =
         inliers_ij.row_vector().array() && cheirality_ij;
     SARA_CHECK(cheiral_inliers.size());
