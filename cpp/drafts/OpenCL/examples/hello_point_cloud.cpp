@@ -63,7 +63,7 @@ inline auto init_glew_boilerplate()
 }
 
 
-Tensor_<float, 2> read_point_cloud(const std::string& h5_filepath)
+auto read_point_cloud(const std::string& h5_filepath) -> Tensor_<float, 2>
 {
   auto h5_file = H5File{h5_filepath, H5F_ACC_RDONLY};
 

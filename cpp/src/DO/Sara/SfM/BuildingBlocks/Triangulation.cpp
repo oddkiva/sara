@@ -143,6 +143,11 @@ auto estimate_two_view_geometry(const TensorView_<int, 2>& M,
 
   SARA_DEBUG << "Calculating cheirality..." << std::endl;
   best_geom->cheirality = relative_motion_cheirality_predicate(best_geom->X, P2);
+  SARA_CHECK(best_geom->cheirality.count());
+
+  SARA_DEBUG << "Cheiral inliers count = "
+             << (best_geom->cheirality && inliers.row_vector().array()).count()
+             << std::endl;
 
   return *best_geom;
 }
@@ -177,28 +182,52 @@ auto keep_cheiral_inliers_only(TwoViewGeometry& complete_geom,
 
 auto extract_colors(const Image<Rgb8>& image1,             //
                     const Image<Rgb8>& image2,             //
-                    const TwoViewGeometry& complete_geom)  //
+                    const TwoViewGeometry& geometry)  //
   -> Tensor_<double, 2>
 {
-  const int num_points = complete_geom.X.cols();
+  const int num_points = geometry.X.cols();
   const auto indices = range(num_points);
-  auto colors = Tensor_<double, 2>{num_points, 3};
 
+  // Convert the image to a pixel format with floating-point channel type.
   const auto I1d = image1.convert<Rgb64f>();
   const auto I2d = image2.convert<Rgb64f>();
+  // Image sizes.
+  const Vector2d imsizes1 = image1.sizes().cast<double>();
+  const Vector2d imsizes2 = image2.sizes().cast<double>();
 
-  const auto P1 = complete_geom.C1.matrix();
-  const auto P2 = complete_geom.C2.matrix();
+  // Retrieve the camera matrices.
+  const auto P1 = geometry.C1.matrix();
+  const auto P2 = geometry.C2.matrix();
 
-  const MatrixXd u1 = (P1 * complete_geom.X).colwise().hnormalized();
-  const MatrixXd u2 = (P2 * complete_geom.X).colwise().hnormalized();
+  // Calculate the image coordinates from the normalized camera coordinates.
+  const MatrixXd u1 = (P1 * geometry.X).colwise().hnormalized();
+  const MatrixXd u2 = (P2 * geometry.X).colwise().hnormalized();
 
+  // Only keep image coordinates that lie within the image domain.
+  const Array<bool, 1, Dynamic> in_image_1 =
+      (u1.array() >= 0).colwise().all() &&
+      (u1.array().row(0) < imsizes1.x()) &&
+      (u1.array().row(1) < imsizes1.y());
+  SARA_CHECK(in_image_1.count());
+
+  const Array<bool, 1, Dynamic> in_image_2 =
+      (u2.array() >= 0).colwise().all() &&
+      (u2.array().row(0) < imsizes2.x()) &&
+      (u2.array().row(1) < imsizes2.y());
+  SARA_CHECK(in_image_2.count());
+
+  // Finally retrieve the colors for each 3D points.
+  auto colors = Tensor_<double, 2>{num_points, 3};
   auto colors_mat = colors.matrix();
   std::for_each(std::begin(indices), std::end(indices), [&](int i) {
-    Vector2d u1_i = u1.col(i);
-    Vector2d u2_i = u2.col(i);
-    colors_mat.row(i) =
-        0.5 * (interpolate(I1d, u1_i) + interpolate(I2d, u2_i)).transpose();
+    const Vector2d u1_i = u1.col(i);
+    const Vector2d u2_i = u2.col(i);
+
+    if (in_image_1(i) && in_image_2(i))
+      colors_mat.row(i) =
+          0.5 * (interpolate(I1d, u1_i) + interpolate(I2d, u2_i)).transpose();
+    else
+      colors_mat.row(i) = RowVector3d::Zero().eval();
   });
 
   return colors;

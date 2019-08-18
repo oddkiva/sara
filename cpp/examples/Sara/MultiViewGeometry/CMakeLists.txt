@@ -4,7 +4,7 @@ message(STATUS "  - DO_FeatureMatching_Examples")
 
 find_package(DO_Sara COMPONENTS
   Core Graphics ImageIO Features FeatureDetectors FeatureDescriptors KDTree
-  Match FeatureMatching MultiViewGeometry REQUIRED)
+  Match FeatureMatching MultiViewGeometry SfM REQUIRED)
 
 
 macro (sara_add_example example)
