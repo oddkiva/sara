@@ -100,6 +100,8 @@ void triangulate(const std::string& dirpath, const std::string& h5_filepath,
         const auto& E_inliers_ij = E_inliers[ij];
         const auto& E_best_sample_ij = E_best_samples[ij];
 
+        std::cout << std::endl;
+        SARA_DEBUG << "Processing image pair " << i << " " << j << std::endl;
         const auto& Ki = view_attributes.cameras[i].K;
         const auto& Kj = view_attributes.cameras[j].K;
         SARA_DEBUG << "Internal camera matrices :\n"

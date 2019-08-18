@@ -90,11 +90,9 @@ auto track_points(const std::string& dirpath, const std::string& h5_filepath,
     const auto num_features =
         static_cast<int>(features(keypoints[image_id]).size());
     auto lids = range(num_features);
-    SARA_DEBUG << "lids = " << lids.row_vector() << std::endl;
     auto gids = std::vector<FeatureGID>(lids.size());
     std::transform(std::begin(lids), std::end(lids), std::begin(gids),
                    [&](auto lid) -> FeatureGID {
-                     SARA_CHECK(lid);
                      return {image_id, lid};
                    });
     return gids;
@@ -167,13 +165,32 @@ auto track_points(const std::string& dirpath, const std::string& h5_filepath,
     const auto& cheirality_ij =
         edge_attributes.two_view_geometries[ij].cheirality;
 
+    std::cout << std::endl;
+    SARA_DEBUG << "Processing image pair " << i << " " << j << std::endl;
+
+    SARA_DEBUG << "Checking if there are inliers..." << std::endl;
+    SARA_CHECK(cheirality_ij.count());
+    SARA_CHECK(inliers_ij.flat_array().count());
+    if (inliers_ij.flat_array().count() == 0)
+      return;
+
     SARA_DEBUG << "Calculating cheiral inliers..." << std::endl;
+    SARA_CHECK(cheirality_ij.size());
+    SARA_CHECK(inliers_ij.size());
+    if (cheirality_ij.size() != inliers_ij.size())
+        throw std::runtime_error{"cheirality_ij.size() != inliers_ij.size()"};
+
+
     const Array<bool, 1, Dynamic> cheiral_inliers =
         inliers_ij.row_vector().array() && cheirality_ij;
+    SARA_CHECK(cheiral_inliers.size());
+    SARA_CHECK(cheiral_inliers.count());
 
     // Convert each match 'm' to a pair of point indices '(p, q)'.
     SARA_DEBUG << "Transforming matches..." << std::endl;
     const auto pq_tensor = to_tensor(Mij);
+    SARA_CHECK(Mij.size());
+    SARA_CHECK(pq_tensor.size(0));
 
     if (pq_tensor.empty())
       return;
@@ -184,27 +201,26 @@ auto track_points(const std::string& dirpath, const std::string& h5_filepath,
       if (!cheiral_inliers(m))
         continue;
 
-      SARA_CHECK(m);
-
       const auto p = pq_tensor(m, 0);
       const auto q = pq_tensor(m, 1);
-      SARA_CHECK(p);
-      SARA_CHECK(q);
 
-      SARA_CHECK(i);
-      SARA_CHECK(j);
-
-      // TODO: connect ip and jq in a boost graph.
       const auto &p_off = feature_id_offset[i];
       const auto &q_off = feature_id_offset[j];
-      SARA_CHECK(p_off);
-      SARA_CHECK(q_off);
 
       const auto vp = p_off + p;
-      SARA_CHECK(vp);
       const auto vq = q_off + q;
-      SARA_CHECK(vq);
 
+#ifdef DEBUG
+      SARA_CHECK(m);
+      SARA_CHECK(p);
+      SARA_CHECK(q);
+      SARA_CHECK(p_off);
+      SARA_CHECK(q_off);
+      SARA_CHECK(vp);
+      SARA_CHECK(vq);
+#endif
+
+      // Runtime checks.
       if (graph[vp].image_id != i)
         throw std::runtime_error{"image_id[vp] != i"};
       if (graph[vp].local_id != p)
@@ -215,6 +231,7 @@ auto track_points(const std::string& dirpath, const std::string& h5_filepath,
       if (graph[vq].local_id != q)
         throw std::runtime_error{"local_id[vq] != q"};
 
+      // Update the graph and the disjoint sets.
       add_edge(vp, vq);
     }
   });
