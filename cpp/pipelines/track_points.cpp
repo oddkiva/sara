@@ -239,6 +239,9 @@ auto track_points(const std::string& dirpath, const std::string& h5_filepath,
   // Calculate the connected components.
   const auto components = ICC::get_components(parent);
   print_components(components);
+
+
+  // TODO: save to HDF5.
 }
 
 
