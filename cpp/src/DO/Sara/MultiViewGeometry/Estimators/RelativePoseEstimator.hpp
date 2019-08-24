@@ -93,9 +93,9 @@ struct RelativePoseEstimator : Method
   }
 };
 
-DO_SARA_EXPIMP_TEMPLATE template struct DO_SARA_EXPORT
+extern template struct DO_SARA_EXPORT
     RelativePoseEstimator<NisterFivePointAlgorithm>;
-DO_SARA_EXPIMP_TEMPLATE template struct DO_SARA_EXPORT
+extern template struct DO_SARA_EXPORT
     RelativePoseEstimator<SteweniusFivePointAlgorithm>;
 
 } /* namespace DO::Sara */
