@@ -49,7 +49,7 @@ struct ExifMetadata
     , focal_length_in_35_mm{e.FocalLengthIn35mm}
     , image_width{e.ImageWidth}
     , image_height{e.ImageHeight}
-    //, geo_location{e.GeoLocation}
+  //, geo_location{e.GeoLocation}
   {
   }
 };

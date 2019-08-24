@@ -19,6 +19,8 @@
 
 #include <DO/Sara/Core/Timer.hpp>
 
+#include <stdexcept>
+
 
 namespace DO { namespace Sara {
 

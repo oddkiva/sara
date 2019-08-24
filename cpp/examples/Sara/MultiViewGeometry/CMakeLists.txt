@@ -1,6 +1,6 @@
 project(DO_MultiViewGeometry_Examples)
 
-message(STATUS "  - DO_FeatureMatching_Examples")
+message(STATUS "  - DO_MultiViewGeometry_Examples")
 
 find_package(DO_Sara COMPONENTS
   Core Graphics ImageIO Features FeatureDetectors FeatureDescriptors KDTree
@@ -14,7 +14,7 @@ macro (sara_add_example example)
   target_link_libraries(${example} PRIVATE ${DO_Sara_LIBRARIES})
   set_property(
     TARGET ${example} PROPERTY
-    FOLDER "DO Sara Examples/ImageProcessing")
+    FOLDER "DO Sara Examples/MultiViewGeometry")
 endmacro()
 
 

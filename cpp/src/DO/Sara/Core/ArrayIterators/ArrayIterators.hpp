@@ -42,18 +42,16 @@ namespace DO { namespace Sara {
 
   //! @{
   //! Convenient typedefs.
-#define ITERATOR_BASE_TYPE(IsConst)                       \
-  std::iterator<                                          \
-    std::random_access_iterator_tag, T, std::ptrdiff_t,   \
-    typename Meta::Choose<IsConst, const T *, T *>::Type, \
-    typename Meta::Choose<IsConst, const T&, T&>::Type    \
-  >
+#define ITERATOR_BASE_TYPE(IsConst)                                            \
+  std::iterator<std::random_access_iterator_tag, T, std::ptrdiff_t,            \
+                typename Meta::Choose<IsConst, const T*, T*>::Type,            \
+                typename Meta::Choose<IsConst, const T&, T&>::Type>
 
-#define TYPEDEF_ITERATOR_TYPES(IteratorType)                      \
-  using value_type = typename base_type::value_type;              \
-  using difference_type = typename base_type::difference_type;    \
-  using pointer = typename base_type::pointer;                    \
-  using reference = typename base_type::reference;                \
+#define TYPEDEF_ITERATOR_TYPES(IteratorType)                                   \
+  using value_type = typename base_type::value_type;                           \
+  using difference_type = typename base_type::difference_type;                 \
+  using pointer = typename base_type::pointer;                                 \
+  using reference = typename base_type::reference;                             \
   using iterator_category = typename base_type::iterator_category
   //! @}
 
@@ -62,13 +60,14 @@ namespace DO { namespace Sara {
   template <bool IsConst, typename T, int Axis, int N>
   class AxisIterator : public ITERATOR_BASE_TYPE(IsConst)
   {
-    static_assert(
-      Axis >= 0 && Axis < N,
-      "Axis must be nonnegative and less than N");
+    static_assert(Axis >= 0 && Axis < N,
+                  "Axis must be nonnegative and less than N");
 
     // Friend classes.
-    template <bool, typename, int, int> friend class AxisIterator;
-    template <bool, typename, int, int> friend class ArrayIteratorBase;
+    template <bool, typename, int, int>
+    friend class AxisIterator;
+    template <bool, typename, int, int>
+    friend class ArrayIteratorBase;
 
     // Private typedefs.
     using base_type = ITERATOR_BASE_TYPE(IsConst);
@@ -80,10 +79,8 @@ namespace DO { namespace Sara {
 
   public: /* interface */
     //! Constructor.
-    inline AxisIterator(pointer& ptr,
-                        vector_type& pos,
-                        const vector_type& strides,
-                        const vector_type& sizes)
+    inline AxisIterator(pointer& ptr, vector_type& pos,
+                        const vector_type& strides, const vector_type& sizes)
       : cur_ptr_(ptr)
       , cur_pos_(pos)
       , strides_(strides)
@@ -122,7 +119,8 @@ namespace DO { namespace Sara {
 
     //! Equality operator.
     template <bool IsConst2, int StorageOrder>
-    inline bool operator==(const ArrayIteratorBase<IsConst2, T, N, StorageOrder>& rhs) const
+    inline bool
+    operator==(const ArrayIteratorBase<IsConst2, T, N, StorageOrder>& rhs) const
     {
       return cur_ptr_ == rhs.cur_ptr_;
     }
@@ -150,7 +148,7 @@ namespace DO { namespace Sara {
     }
 
     //! Inequality operator.
-    inline bool operator!=(const T *ptr) const
+    inline bool operator!=(const T* ptr) const
     {
       return !operator==(ptr);
     }
@@ -202,7 +200,7 @@ namespace DO { namespace Sara {
       return old;
     }
 
-  private: /* data members. */
+  private:                        /* data members. */
     pointer& cur_ptr_;            //!< current pointer.
     vector_type& cur_pos_;        //!< current coordinates.
     const vector_type& strides_;  //!< strides.
@@ -218,8 +216,10 @@ namespace DO { namespace Sara {
   class ArrayIteratorBase : public ITERATOR_BASE_TYPE(IsConst)
   {
     using base_type = ITERATOR_BASE_TYPE(IsConst);
-    template <bool, typename, int, int> friend class AxisIterator;
-    template <bool, typename, int, int> friend class ArrayIteratorBase;
+    template <bool, typename, int, int>
+    friend class AxisIterator;
+    template <bool, typename, int, int>
+    friend class ArrayIteratorBase;
 
   public: /* typedefs */
     TYPEDEF_ITERATOR_TYPES(base_type);
@@ -231,9 +231,7 @@ namespace DO { namespace Sara {
 
   public: /* interface */
     //! @brief Constructor
-    inline ArrayIteratorBase(bool stop,
-                             pointer ptr,
-                             const vector_type& pos,
+    inline ArrayIteratorBase(bool stop, pointer ptr, const vector_type& pos,
                              const vector_type& strides,
                              const vector_type& sizes)
       : base_type{}
@@ -274,7 +272,7 @@ namespace DO { namespace Sara {
     }
 
     //! Equality operator.
-    inline bool operator==(const T *ptr) const
+    inline bool operator==(const T* ptr) const
     {
       return cur_ptr_ == ptr;
     }
@@ -294,7 +292,7 @@ namespace DO { namespace Sara {
     }
 
     //! Inequality operator.
-    inline bool operator!=(const T *ptr) const
+    inline bool operator!=(const T* ptr) const
     {
       return !operator==(ptr);
     }
@@ -304,8 +302,8 @@ namespace DO { namespace Sara {
     inline reference operator()(const vector_type& offset) const
     {
       vector_type pos(cur_pos_ + offset);
-      if (pos.minCoeff() < 0 || (pos-sizes_).minCoeff() >= 0)
-        throw std::out_of_range{ "Range iterator out of range!" };
+      if (pos.minCoeff() < 0 || (pos - sizes_).minCoeff() >= 0)
+        throw std::out_of_range{"Range iterator out of range!"};
       return *(cur_ptr_ + jump(offset, strides_));
     }
 
@@ -326,23 +324,23 @@ namespace DO { namespace Sara {
     //! Special access operator.
     inline reference delta(int axis_i, int step_i) const
     {
-      return *(cur_ptr_ + strides_[axis_i]*step_i);
+      return *(cur_ptr_ + strides_[axis_i] * step_i);
     }
 
     //! Special access operator (mostly for the Hessian matrix).
     inline reference delta(int axis_i, int step_i, int axis_j, int step_j) const
     {
-      return *(cur_ptr_ + strides_[axis_i]*step_i + strides_[axis_j]*step_j);
+      return *(cur_ptr_ + strides_[axis_i] * step_i +
+               strides_[axis_j] * step_j);
     }
 
     //! Special access operator (mostly for the Hessian matrix).
-    template<int I, int J>
+    template <int I, int J>
     inline reference delta(int step_i, int step_j) const
     {
-      static_assert(
-        I >= 0 && I < N && J >= 0 && J < N,
-        "I and J must between 0 and N");
-      return *(cur_ptr_ + strides_[I]*step_i + strides_[J]*step_j);
+      static_assert(I >= 0 && I < N && J >= 0 && J < N,
+                    "I and J must between 0 and N");
+      return *(cur_ptr_ + strides_[I] * step_i + strides_[J] * step_j);
     }
 
     //! Axis iterator getter.
@@ -351,8 +349,8 @@ namespace DO { namespace Sara {
     template <int Axis>
     inline AxisIterator<IsConst, T, Axis, N> axis()
     {
-      return AxisIterator<IsConst, T, Axis, N>(
-        cur_ptr_, cur_pos_, strides_, sizes_);
+      return AxisIterator<IsConst, T, Axis, N>(cur_ptr_, cur_pos_, strides_,
+                                               sizes_);
     }
 
     //! X-axis iterator getter.
@@ -422,8 +420,8 @@ namespace DO { namespace Sara {
 
     using base_type::cur_pos_;
     using base_type::cur_ptr_;
-    using base_type::stop_;
     using base_type::sizes_;
+    using base_type::stop_;
     using base_type::strides_;
 
   public:
@@ -462,7 +460,7 @@ namespace DO { namespace Sara {
     //! Postfix increment operator.
     inline self_type operator++(int)
     {
-      self_type old{ *this };
+      self_type old{*this};
       operator++();
       return old;
     }
@@ -470,7 +468,7 @@ namespace DO { namespace Sara {
     //! Postfix decrement operator.
     inline self_type operator--(int)
     {
-      self_type old{ *this };
+      self_type old{*this};
       operator--();
       return old;
     }
@@ -478,9 +476,9 @@ namespace DO { namespace Sara {
     //! Addition operator (slow).
     inline void operator+=(const vector_type& offset)
     {
-      vector_type pos{ cur_pos_ + offset };
-      if (pos.minCoeff() < 0 || (pos-sizes_).minCoeff() >= 0)
-        throw std::out_of_range{ "Range iterator out of range!" };
+      vector_type pos{cur_pos_ + offset};
+      if (pos.minCoeff() < 0 || (pos - sizes_).minCoeff() >= 0)
+        throw std::out_of_range{"Range iterator out of range!"};
       cur_ptr_ += jump(offset, strides_);
       cur_pos_ = pos;
     }
@@ -507,9 +505,9 @@ namespace DO { namespace Sara {
     using incrementer = PositionIncrementer<StorageOrder>;
     using decrementer = PositionDecrementer<StorageOrder>;
 
-    using base_type::stop_;
     using base_type::cur_pos_;
     using base_type::cur_ptr_;
+    using base_type::stop_;
     using base_type::strides_;
 
   public: /* typedefs. */
@@ -569,11 +567,11 @@ namespace DO { namespace Sara {
     inline void operator+=(const vector_type& offset)
     {
       vector_type pos{cur_pos_ + offset};
-      if ((pos-begin_pos_).minCoeff() < 0 || (pos-end_pos_).minCoeff() >= 0)
+      if ((pos - begin_pos_).minCoeff() < 0 || (pos - end_pos_).minCoeff() >= 0)
       {
         std::ostringstream msg;
         msg << "Subrange iterator out of range: pos = " << offset.transpose();
-        throw std::out_of_range{ msg.str() };
+        throw std::out_of_range{msg.str()};
       }
       cur_pos_ = pos;
       cur_ptr_ += jump(offset, strides_);
@@ -593,7 +591,7 @@ namespace DO { namespace Sara {
 
   template <bool IsConst, typename T, int N, int StorageOrder = ColMajor>
   class SteppedSubarrayIterator
-      : public ArrayIteratorBase<IsConst, T, N, StorageOrder>
+    : public ArrayIteratorBase<IsConst, T, N, StorageOrder>
   {
     static_assert(N >= 0, "Number of dimensions must be nonnegative");
 
@@ -602,9 +600,9 @@ namespace DO { namespace Sara {
     using incrementer = PositionIncrementer<StorageOrder>;
     using decrementer = PositionDecrementer<StorageOrder>;
 
-    using base_type::stop_;
     using base_type::cur_pos_;
     using base_type::cur_ptr_;
+    using base_type::stop_;
     using base_type::strides_;
 
   public: /* typedefs. */
@@ -694,6 +692,16 @@ namespace DO { namespace Sara {
       }
       return sizes;
     }
+
+#ifdef _WIN32
+    //! @brief It is a workaround for Visual Studio STL implementation.
+    //!
+    //! PLEASE DO NOT USE IT! IT DOES NOT HAVE ANY MEANINGFUL SIGNIFICATION.
+    inline auto operator-(const self_type& other) const
+    {
+      return cur_ptr_ - other.cur_ptr_;
+    }
+#endif
 
   protected: /* data members. */
     pointer begin_;

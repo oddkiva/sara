@@ -105,11 +105,12 @@ BOOST_AUTO_TEST_CASE(test_multiarrayview_flatten)
 BOOST_AUTO_TEST_CASE(test_slice_view)
 {
   const auto X = range(24).cast<float>().reshape(Vector2i{6, 4});
+  SARA_DEBUG << "X =\n" << X.matrix() << std::endl;
+
   auto X_sliced = slice(X, {{1, 6, 2}, {1, 4, 2}}).make_copy();
   SARA_DEBUG << "X_sliced =\n" << X_sliced.matrix() << std::endl;
 
   static_assert(int(decltype(X_sliced)::StorageOrder) == int(Eigen::RowMajor));
-
 
   for (int y = 0; y < X_sliced.size(0); ++y)
     for (int x = 0; x < X_sliced.size(1); ++x)
@@ -148,10 +149,10 @@ BOOST_AUTO_TEST_CASE(test_filtered_transformed_usage_case)
   for (int i = 0; i < X.cols(); ++i)
     X.col(i) = Vector4d::Ones() * i;
 
-  //SARA_DEBUG << "X =\n" << X.matrix() << std::endl;
+  SARA_DEBUG << "X =\n" << X.matrix() << std::endl;
 
   MatrixXd PX = P * X.matrix();
-  //SARA_DEBUG << "PX =\n" << PX << std::endl;
+  SARA_DEBUG << "PX =\n" << PX << std::endl;
 
   auto indices_filtered =
       indices | filtered([&](int i) { return cheiral(i) && inliers(i); });

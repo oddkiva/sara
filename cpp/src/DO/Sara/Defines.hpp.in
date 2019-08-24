@@ -16,10 +16,13 @@
 #if defined(_WIN32) || defined(_WIN32_WCE)
 # ifdef DO_SARA_EXPORTS
 #   define DO_SARA_EXPORT __declspec(dllexport) /* We are building the libraries */
+# 	define DO_SARA_EXPIMP_TEMPLATE
 # elif defined(DO_SARA_STATIC)
 #   define DO_SARA_EXPORT
+# 	define DO_SARA_EXPIMP_TEMPLATE
 # else
 #   define DO_SARA_EXPORT __declspec(dllimport) /* We are using the libraries */
+# 	define DO_SARA_EXPIMP_TEMPLATE extern
 # endif
 #else
 # define DO_SARA_EXPORT
