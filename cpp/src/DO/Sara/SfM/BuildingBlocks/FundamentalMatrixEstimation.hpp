@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include <DO/Sara/Defines.hpp>
 #include <DO/Sara/MultiViewGeometry.hpp>
 
 
@@ -18,16 +19,19 @@ namespace DO::Sara {
 
 //! @{
 //! @brief Fundamental matrix estimation.
+DO_SARA_EXPORT
 auto estimate_fundamental_matrix(const std::vector<Match>& Mij,
                                  const KeypointList<OERegion, float>& ki,
                                  const KeypointList<OERegion, float>& kj,
                                  int num_samples, double err_thres)
     -> std::tuple<FundamentalMatrix, Tensor_<bool, 1>, Tensor_<int, 1>>;
 
+DO_SARA_EXPORT
 auto estimate_fundamental_matrices(const std::string& dirpath,
                                    const std::string& h5_filepath,
                                    bool overwrite, bool debug) -> void;
 
+DO_SARA_EXPORT
 auto check_epipolar_constraints(const Image<Rgb8>& Ii,
                                 const Image<Rgb8>& Ij,
                                 const FundamentalMatrix& F,
@@ -37,6 +41,7 @@ auto check_epipolar_constraints(const Image<Rgb8>& Ii,
                                 int display_step,
                                 bool wait_key = true) -> void;
 
+DO_SARA_EXPORT
 auto inspect_fundamental_matrices(const std::string& dirpath,
                                   const std::string& h5_filepath,
                                   int display_step,
