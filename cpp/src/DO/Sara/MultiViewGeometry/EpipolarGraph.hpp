@@ -27,11 +27,17 @@ namespace DO::Sara {
 
 struct DO_SARA_EXPORT ViewAttributes
 {
-  std::vector<std::string> image_paths;
+  //! @brief Image metadata.
   std::vector<std::string> group_names;
-
+  std::vector<std::string> image_paths;
+  //! @brief Image data.
   std::vector<Image<Rgb8>> images;
+  //! @brief Keypoints.
   std::vector<KeypointList<OERegion, float>> keypoints;
+  //! @brief Absolute camera poses.
+  //!
+  //! TODO: use more sophisticated camera to estimate distortion parameters
+  //!later on.
   std::vector<PinholeCamera> cameras;
 
   auto list_images(const std::string& dirpath) -> void;
