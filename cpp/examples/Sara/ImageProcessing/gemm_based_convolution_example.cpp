@@ -24,7 +24,7 @@ using namespace DO::Sara;
 void convolution_example()
 {
   // Read an image.
-  auto image = imread<Rgb32f>(src_path("../../../data/ksmall.jpg"));
+  auto image = imread<Rgb32f>(src_path("../../../../data/ksmall.jpg"));
 
   const auto w = image.width();
   const auto h = image.height();
