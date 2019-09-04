@@ -11,13 +11,18 @@
 
 #define BOOST_TEST_MODULE "MultiViewGeometry/Geometry/Point Tracks"
 
+#include <DO/Sara/Core/Expression/Debug.hpp>
+#include <DO/Sara/Core/HDF5.hpp>
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/StringFormat.hpp>
+#include <DO/Sara/Match/IndexMatch.hpp>
 #include <DO/Sara/MultiViewGeometry/FeatureGraph.hpp>
 
+#include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
 
 
+namespace fs = boost::filesystem;
 using namespace DO::Sara;
 
 
@@ -131,4 +136,65 @@ BOOST_AUTO_TEST_CASE(test_incremental_connected_components)
     std::cout << "OK" << std::endl;
     print_components(components);
   }
+}
+
+BOOST_AUTO_TEST_CASE(test_read_write_graph_to_hdf5)
+{
+  auto graph = FeatureGraph{};
+  auto v0 = boost::add_vertex({0, 0}, graph);
+  auto v1 = boost::add_vertex({0, 1}, graph);
+  auto v2 = boost::add_vertex({0, 2}, graph);
+  auto v3 = boost::add_vertex({1, 0}, graph);
+  auto v4 = boost::add_vertex({1, 1}, graph);
+  auto v5 = boost::add_vertex({1, 2}, graph);
+
+  boost::add_edge(v0, v5, graph);
+  boost::add_edge(v1, v3, graph);
+
+  const auto filepath = (fs::temp_directory_path() / "feature_graph.h5").string();
+
+  // Write data to HDF5.
+  SARA_DEBUG << "WRITE PHASE" << std::endl;
+  {
+    auto features = std::vector<FeatureGID>{};
+    auto matches = std::vector<Vector2i>{};
+
+    features.push_back({0, 0});
+    features.push_back({0, 1});
+    features.push_back({0, 2});
+    features.push_back({1, 0});
+    features.push_back({1, 1});
+    features.push_back({1, 2});
+
+    for (auto [v, v_end] = boost::vertices(graph); v != v_end; ++v)
+      std::cout << *v << std::endl;
+
+    for (auto [e, e_end] = boost::edges(graph); e != e_end; ++e)
+      matches.push_back({boost::source(*e, graph), boost::target(*e, graph)});
+
+    auto h5file = H5File{filepath, H5F_ACC_TRUNC};
+    h5file.write_dataset("features", tensor_view(features));
+    h5file.write_dataset("matches", tensor_view(matches));
+  }
+
+  // Read data to HDF5.
+  SARA_DEBUG << "READ PHASE" << std::endl;
+  {
+    auto h5file = H5File{filepath, H5F_ACC_RDONLY};
+
+    auto features = std::vector<FeatureGID>{};
+    auto matches = std::vector<Vector2i>{};
+
+    h5file.read_dataset("features", features);
+    h5file.read_dataset("matches", matches);
+
+    // Reconstruct the graph.
+    auto g = FeatureGraph{features.size()};
+    for (const auto& v: features)
+      boost::add_vertex(v, g);
+
+    for (const auto& m: matches)
+      boost::add_edge(m(0), m(1), g);
+  }
+
 }

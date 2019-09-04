@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include <DO/Sara/Core/HDF5.hpp>
+
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/connected_components.hpp>
 #include <boost/graph/graph_utility.hpp>
@@ -27,6 +29,19 @@ struct FeatureGID
 {
   int image_id{-1};
   int local_id{-1};
+};
+
+
+template <>
+struct CalculateH5Type<FeatureGID>
+{
+  static inline auto value() -> H5::CompType
+  {
+    auto h5_comp_type = H5::CompType{sizeof(FeatureGID)};
+    INSERT_MEMBER(h5_comp_type, FeatureGID, image_id);
+    INSERT_MEMBER(h5_comp_type, FeatureGID, local_id);
+    return h5_comp_type;
+  }
 };
 
 
