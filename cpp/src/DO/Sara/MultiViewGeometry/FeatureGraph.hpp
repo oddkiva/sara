@@ -22,8 +22,6 @@
 
 namespace DO::Sara {
 
-// This is a necessary step for the bundle adjustment step.
-
 //! @brief Feature GID.
 struct FeatureGID
 {
@@ -91,5 +89,14 @@ struct IncrementalConnectedComponentsHelper
     boost::incremental_components(graph, ds);
   }
 };
+
+
+//! @brief write feature graph to HDF5.
+auto write_feature_graph(const FeatureGraph& graph, H5File& file,
+                         const std::string& group_name) -> void;
+
+//! @brief read feature graph from HDF5.
+auto read_feature_graph(H5File& file, const std::string& group_name)
+    -> FeatureGraph;
 
 } /* namespace DO::Sara */

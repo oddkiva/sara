@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include <DO/Sara/Core/HDF5.hpp>
+
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/connected_components.hpp>
 #include <boost/graph/graph_utility.hpp>
@@ -22,19 +24,25 @@ namespace DO::Sara {
 
 // This is a necessary step for the bundle adjustment step.
 
-//! @brief Feature GID.
 struct PoseID
 {
   double weight{0};
 };
 
-struct EdgeID
+struct EpipolarEdgeID
 {
   int id{-1};
   double weight{0};
 };
 
 using PoseGraph = boost::adjacency_list<boost::vecS, boost::vecS,
-                                        boost::undirectedS, PoseID, EdgeID>;
+                                        boost::undirectedS, PoseID, EpipolarEdgeID>;
+
+//! @brief write feature graph to HDF5.
+auto write_pose_graph(const PoseGraph& graph, H5File& file,
+                      const std::string& group_name) -> void;
+
+//! @brief read feature graph from HDF5.
+auto read_pose_graph(H5File& file, const std::string& group_name) -> PoseGraph;
 
 } /* namespace DO::Sara */

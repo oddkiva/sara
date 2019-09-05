@@ -156,45 +156,32 @@ BOOST_AUTO_TEST_CASE(test_read_write_graph_to_hdf5)
   // Write data to HDF5.
   SARA_DEBUG << "WRITE PHASE" << std::endl;
   {
-    auto features = std::vector<FeatureGID>{};
-    auto matches = std::vector<Vector2i>{};
-
-    features.push_back({0, 0});
-    features.push_back({0, 1});
-    features.push_back({0, 2});
-    features.push_back({1, 0});
-    features.push_back({1, 1});
-    features.push_back({1, 2});
-
-    for (auto [v, v_end] = boost::vertices(graph); v != v_end; ++v)
-      std::cout << *v << std::endl;
-
-    for (auto [e, e_end] = boost::edges(graph); e != e_end; ++e)
-      matches.push_back({boost::source(*e, graph), boost::target(*e, graph)});
-
     auto h5file = H5File{filepath, H5F_ACC_TRUNC};
-    h5file.write_dataset("features", tensor_view(features));
-    h5file.write_dataset("matches", tensor_view(matches));
+    write_feature_graph(graph, h5file, "feature_graph");
   }
 
   // Read data to HDF5.
   SARA_DEBUG << "READ PHASE" << std::endl;
   {
     auto h5file = H5File{filepath, H5F_ACC_RDONLY};
+    const auto graph_read = read_feature_graph(h5file, "feature_graph");
 
-    auto features = std::vector<FeatureGID>{};
-    auto matches = std::vector<Vector2i>{};
+    for (auto [v, v_end] = boost::vertices(graph_read); v != v_end; ++v)
+    {
+      BOOST_CHECK_EQUAL(graph_read[*v].image_id, graph_read[*v].image_id);
+      BOOST_CHECK_EQUAL(graph_read[*v].local_id, graph_read[*v].local_id);
+    }
 
-    h5file.read_dataset("features", features);
-    h5file.read_dataset("matches", matches);
+    for (auto [e, e_end] = boost::edges(graph_read); e != e_end; ++e)
+    {
+      const auto u = boost::source(*e, graph_read);
+      const auto v = boost::target(*e, graph_read);
+      const auto edge_found = boost::edge(u, v, graph).second;
+      BOOST_CHECK(edge_found);
+    }
 
-    // Reconstruct the graph.
-    auto g = FeatureGraph{features.size()};
-    for (const auto& v: features)
-      boost::add_vertex(v, g);
-
-    for (const auto& m: matches)
-      boost::add_edge(m(0), m(1), g);
+    BOOST_CHECK_EQUAL(boost::num_vertices(graph),
+                      boost::num_vertices(graph_read));
+    BOOST_CHECK_EQUAL(boost::num_edges(graph), boost::num_edges(graph_read));
   }
-
 }
