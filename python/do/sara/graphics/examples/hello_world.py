@@ -1,7 +1,7 @@
 import random
 import sys
 
-from PySide2 import QtCore, QtWidgets, QtGui
+from PySide2 import QtCore, QtWidgets
 
 
 class MyWidget(QtWidgets.QWidget):
