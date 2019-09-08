@@ -239,8 +239,8 @@ auto track_points(const std::string& dirpath, const std::string& h5_filepath,
   const auto components = ICC::get_components(parent);
   print_components(components);
 
-
-  // TODO: save to HDF5.
+  // Save the graph of features in HDF5 format.
+  write_feature_graph(graph, h5_file, "feature_graph");
 }
 
 

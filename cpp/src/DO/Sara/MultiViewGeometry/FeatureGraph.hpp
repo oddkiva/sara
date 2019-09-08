@@ -30,19 +30,6 @@ struct FeatureGID
 };
 
 
-template <>
-struct CalculateH5Type<FeatureGID>
-{
-  static inline auto value() -> H5::CompType
-  {
-    auto h5_comp_type = H5::CompType{sizeof(FeatureGID)};
-    INSERT_MEMBER(h5_comp_type, FeatureGID, image_id);
-    INSERT_MEMBER(h5_comp_type, FeatureGID, local_id);
-    return h5_comp_type;
-  }
-};
-
-
 using FeatureGraph = boost::adjacency_list<boost::vecS, boost::vecS,
                                            boost::undirectedS, FeatureGID>;
 

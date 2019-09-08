@@ -14,6 +14,19 @@
 
 namespace DO::Sara {
 
+template <>
+struct CalculateH5Type<FeatureGID>
+{
+  static inline auto value() -> H5::CompType
+  {
+    auto h5_comp_type = H5::CompType{sizeof(FeatureGID)};
+    INSERT_MEMBER(h5_comp_type, FeatureGID, image_id);
+    INSERT_MEMBER(h5_comp_type, FeatureGID, local_id);
+    return h5_comp_type;
+  }
+};
+
+
 auto write_feature_graph(const FeatureGraph& graph, H5File& file,
                                 const std::string& group_name) -> void
 {

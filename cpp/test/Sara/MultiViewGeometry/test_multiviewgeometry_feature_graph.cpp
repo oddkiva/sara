@@ -9,13 +9,9 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#define BOOST_TEST_MODULE "MultiViewGeometry/Geometry/Point Tracks"
+#define BOOST_TEST_MODULE "MultiViewGeometry/Geometry/Feature Graph"
 
-#include <DO/Sara/Core/Expression/Debug.hpp>
-#include <DO/Sara/Core/HDF5.hpp>
 #include <DO/Sara/Core/DebugUtilities.hpp>
-#include <DO/Sara/Core/StringFormat.hpp>
-#include <DO/Sara/Match/IndexMatch.hpp>
 #include <DO/Sara/MultiViewGeometry/FeatureGraph.hpp>
 
 #include <boost/filesystem.hpp>
@@ -138,7 +134,7 @@ BOOST_AUTO_TEST_CASE(test_incremental_connected_components)
   }
 }
 
-BOOST_AUTO_TEST_CASE(test_read_write_graph_to_hdf5)
+BOOST_AUTO_TEST_CASE(test_read_write_feature_graph_to_hdf5)
 {
   auto graph = FeatureGraph{};
   auto v0 = boost::add_vertex({0, 0}, graph);

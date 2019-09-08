@@ -11,6 +11,7 @@
 
 #include <DO/Sara/FileSystem.hpp>
 #include <DO/Sara/Graphics.hpp>
+#include <DO/Sara/MultiViewGeometry/FeatureGraph.hpp>
 #include <DO/Sara/MultiViewGeometry/PoseGraph.hpp>
 #include <DO/Sara/SfM/BuildingBlocks.hpp>
 #include <DO/Sara/SfM/Detectors/SIFT.hpp>
@@ -73,7 +74,7 @@ auto perform_bundle_adjustment(const std::string& dirpath,
   // Populate the vertices.
   const auto image_ids = range(num_vertices);
   SARA_CHECK(image_ids.row_vector());
-  auto graph = PoseGraph(num_vertices);
+  auto pose_graph = PoseGraph(num_vertices);
 
   // Populate the edges.
   std::for_each(std::begin(edge_ids), std::end(edge_ids), [&](const auto& ij) {
@@ -96,7 +97,7 @@ auto perform_bundle_adjustment(const std::string& dirpath,
       return;
     }
 
-    auto [e, b] = boost::add_edge(i, j, graph);
+    auto [e, b] = boost::add_edge(i, j, pose_graph);
     if (!b)
       throw std::runtime_error{
           "Error: failed to add edge: edge already exists!"};
@@ -113,19 +114,24 @@ auto perform_bundle_adjustment(const std::string& dirpath,
     const auto num_cheiral_inliers = cheiral_inliers.count();
     SARA_CHECK(num_cheiral_inliers);
 
-    graph[i].weight += num_cheiral_inliers;
-    graph[j].weight += num_cheiral_inliers;
-    graph[e].id = ij;
-    graph[e].weight = num_cheiral_inliers;
+    pose_graph[i].weight += num_cheiral_inliers;
+    pose_graph[j].weight += num_cheiral_inliers;
+    pose_graph[e].id = ij;
+    pose_graph[e].weight = num_cheiral_inliers;
   });
 
   SARA_DEBUG << "Inspecting vertex weights..." << std::endl;
-  for (auto [v, v_end] = boost::vertices(graph); v != v_end; ++v)
-    SARA_DEBUG << format("weight[%d] = %f", *v, graph[*v].weight) << std::endl;
+  for (auto [v, v_end] = boost::vertices(pose_graph); v != v_end; ++v)
+    SARA_DEBUG << format("weight[%d] = %f", *v, pose_graph[*v].weight)
+               << std::endl;
 
   SARA_DEBUG << "Inspecting edge weights..." << std::endl;
-  for (auto [e, e_end] = boost::edges(graph); e != e_end; ++e)
-    SARA_DEBUG << format("weight[%d] = %f", graph[*e].id, graph[*e].weight) << std::endl;
+  for (auto [e, e_end] = boost::edges(pose_graph); e != e_end; ++e)
+    SARA_DEBUG << format("weight[%d] = %f", pose_graph[*e].id,
+                         pose_graph[*e].weight)
+               << std::endl;
+
+  write_pose_graph(pose_graph, h5_file, "pose_graph");
 
 
   // TODO: Perform incremental bundle adjustment using a Dijkstra growing scheme.
@@ -134,7 +140,8 @@ auto perform_bundle_adjustment(const std::string& dirpath,
   // if Bundler does not do like this.
   view_attributes.cameras.resize(num_vertices);
 
-  // TODO: reload the point tracks.
+  // Reload the point tracks.
+  const auto feature_graph = read_feature_graph(h5_file, "feature_graph");
 
   // TODO: collect the 3D points visible over the set of images.
   // 1. Initialize the absolute camera poses from the relative camera poses.

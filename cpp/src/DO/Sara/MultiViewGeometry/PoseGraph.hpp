@@ -22,8 +22,8 @@
 
 namespace DO::Sara {
 
-// This is a necessary step for the bundle adjustment step.
-
+//! @{
+//! @brief Pose graph data structures.
 struct PoseID
 {
   double weight{0};
@@ -35,8 +35,11 @@ struct EpipolarEdgeID
   double weight{0};
 };
 
-using PoseGraph = boost::adjacency_list<boost::vecS, boost::vecS,
-                                        boost::undirectedS, PoseID, EpipolarEdgeID>;
+using PoseGraph =
+    boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS, PoseID,
+                          EpipolarEdgeID>;
+//! @}
+
 
 //! @brief write feature graph to HDF5.
 auto write_pose_graph(const PoseGraph& graph, H5File& file,

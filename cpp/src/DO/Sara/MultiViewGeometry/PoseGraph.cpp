@@ -69,6 +69,7 @@ auto write_pose_graph(const PoseGraph& graph, H5File& file,
   file.write_dataset(group_name + "/" + "epipolar_edges", tensor_view(epipolar_edges));
 }
 
+
 auto read_pose_graph(H5File& file, const std::string& group_name) -> PoseGraph
 {
   auto poses = std::vector<PoseID>{};
