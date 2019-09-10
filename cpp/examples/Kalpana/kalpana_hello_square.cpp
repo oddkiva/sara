@@ -11,7 +11,6 @@
 
 #include <DO/Kalpana/3D/OpenGLWindow.hpp>
 
-#include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/Tensor.hpp>
 
 #include <QGuiApplication>

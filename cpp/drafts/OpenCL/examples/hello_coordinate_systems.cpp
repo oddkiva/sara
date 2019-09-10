@@ -305,7 +305,7 @@ int main()
 
     // Draw triangles.
     glBindVertexArray(vao);
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 10; ++i)
     {
       auto transform = Transform<float, 3, Eigen::Projective>{};
       transform.setIdentity();

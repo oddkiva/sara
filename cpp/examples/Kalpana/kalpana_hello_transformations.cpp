@@ -13,11 +13,8 @@
 
 #include <DO/Sara/Defines.hpp>
 #include <DO/Sara/Core/DebugUtilities.hpp>
-#include <DO/Sara/Core/StringFormat.hpp>
 #include <DO/Sara/Core/Tensor.hpp>
 #include <DO/Sara/Core/Timer.hpp>
-#include <DO/Sara/ImageIO.hpp>
-#include <DO/Sara/ImageProcessing/Flip.hpp>
 
 #include <Eigen/Geometry>
 
@@ -265,14 +262,11 @@ public:
 
     //m_program->bind();
 
-    //auto transform = Transform<float, 3, Eigen::Projective>{};
-    //transform.setIdentity();
-    //transform.rotate(AngleAxisf(timer.elapsed_ms() / 1000, Vector3f::UnitZ()));
-    //transform.translate(Vector3f{0.25f, 0.25f, 0.f});
     auto transform = QMatrix4x4{};
     transform.setToIdentity();
     transform.rotate(timer.elapsed_ms() / 10, QVector3D{0, 0, 1});
     transform.translate(QVector3D{0.25f, 0.25f, -2.f});
+
     auto projection = QMatrix4x4{};
     projection.setToIdentity();
     projection.perspective(45.f, float(width()) / height(), 0.1f, 100.f);
@@ -281,7 +275,7 @@ public:
 
     // Draw triangles.
     m_vao->bind();
-    glDrawElements(GL_TRIANGLES, m_triangles.size(), GL_UNSIGNED_INT, 0);
+    glDrawArrays(GL_TRIANGLES, 0, m_vertices.size());
 
     //m_program->release();
   }
