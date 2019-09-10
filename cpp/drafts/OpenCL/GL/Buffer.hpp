@@ -44,6 +44,7 @@ namespace DO::Sara { namespace GL {
     {
       return object;
     }
+
     operator GLuint() const
     {
       return object;

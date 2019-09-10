@@ -2,12 +2,14 @@
 
 #include <QtGui/QWindow>
 #include <QtGui/QOpenGLFunctions>
+#include <QtGui/QOpenGLExtraFunctions>
 
 
 class QOpenGLPaintDevice;
 
 
-class OpenGLWindow : public QWindow, protected QOpenGLFunctions
+class OpenGLWindow : public QWindow,
+                     protected QOpenGLExtraFunctions
 {
   Q_OBJECT
 

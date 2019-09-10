@@ -20,7 +20,7 @@ void build_scene(DO::Kalpana::Scene& scene)
 
   // Put this in Canvas3D::initializeGL()
   auto vertex_shader = string{ R"(
-    #version 450
+    #version 330
 
     uniform mat4 proj_mat;
     uniform mat4 modelview_mat;
@@ -39,7 +39,7 @@ void build_scene(DO::Kalpana::Scene& scene)
     })" };
 
   auto fragment_shader = string{ R"(
-    #version 450
+    #version 330
 
     in vec4 vert_color;
     out vec4 frag_color;
@@ -61,12 +61,12 @@ int main(int argc, char **argv)
 
   QSurfaceFormat format;
   format.setMajorVersion(3);
-  format.setMinorVersion(1);
+  format.setMinorVersion(3);
   format.setOption(QSurfaceFormat::DebugContext);
   format.setProfile(QSurfaceFormat::CoreProfile);
   QSurfaceFormat::setDefaultFormat(format);
 
-  QApplication app{ argc, argv };
+  QApplication app{argc, argv};
 
   Scene scene{};
   build_scene(scene);

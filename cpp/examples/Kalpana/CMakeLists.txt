@@ -12,7 +12,7 @@ if (UNIX)
 endif ()
 add_definitions(-DGL_GLEXT_PROTOTYPES)
 
-file(GLOB examples_SRC_FILES FILES *.cpp  *.hpp)
+file(GLOB examples_SRC_FILES FILES *.cpp)
 foreach (file ${examples_SRC_FILES})
   get_filename_component(filename "${file}" NAME_WE)
   kalpana_add_example(${filename} ${file})
@@ -21,6 +21,3 @@ foreach (file ${examples_SRC_FILES})
     DO_Kalpana_2D DO_Kalpana_3D DO_Kalpana_Math
     Qt5::Widgets Qt5::OpenGL Qt5::OpenGLExtensions)
 endforeach()
-
-
-add_subdirectory(ShaderExample)
