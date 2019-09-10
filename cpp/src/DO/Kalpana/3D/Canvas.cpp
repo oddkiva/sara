@@ -32,12 +32,6 @@ namespace DO { namespace Kalpana {
 
   void Canvas3D::initializeGL()
   {
-    // TODO!
-    //connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &GLWidget::cleanup);
-
-    if (!initializeOpenGLFunctions())
-      QException{}.raise();
-
     // Set background color
     glClearColor(m_backgroundColor[0], m_backgroundColor[1],
                  m_backgroundColor[2], m_backgroundColor[3]);

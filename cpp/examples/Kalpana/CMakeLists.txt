@@ -10,7 +10,6 @@ if (UNIX)
   set(CMAKE_CXX_FLAGS
       "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
 endif ()
-add_definitions(-DGL_GLEXT_PROTOTYPES)
 
 file(GLOB examples_SRC_FILES FILES *.cpp)
 foreach (file ${examples_SRC_FILES})
@@ -20,4 +19,6 @@ foreach (file ${examples_SRC_FILES})
     ${filename}
     DO_Kalpana_2D DO_Kalpana_3D DO_Kalpana_Math
     Qt5::Widgets Qt5::OpenGL Qt5::OpenGLExtensions)
+  set_target_properties(${filename} PROPERTIES
+                        COMPILE_FLAGS ${SARA_DEFINITIONS})
 endforeach()
