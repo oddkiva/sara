@@ -25,6 +25,7 @@
 #include <QSurfaceFormat>
 #include <QtCore/QException>
 #include <QtGui/QOpenGLBuffer>
+#include <QtGui/QOpenGLDebugLogger>
 #include <QtGui/QOpenGLShaderProgram>
 #include <QtGui/QOpenGLTexture>
 #include <QtGui/QOpenGLVertexArrayObject>
@@ -36,17 +37,7 @@ using namespace DO::Sara;
 using namespace std;
 
 
-class Window : public OpenGLWindow
-{
-private:
-  QOpenGLShaderProgram* m_program{nullptr};
-
-  std::map<std::string, int> arg_pos = {{"in_coords", 0},  //
-                                        {"in_color", 1},   //
-                                        {"in_tex_coords", 2},   //
-                                        {"out_color", 0}};
-
-  const char* vertex_shader_source = R"shader(
+const char* vertex_shader_source = R"shader(
 #version 330 core
   layout (location = 0) in vec3 in_coords;
   layout (location = 1) in vec3 in_color;
@@ -65,7 +56,7 @@ private:
   }
   )shader";
 
-  const char* fragment_shader_source = R"shader(
+const char* fragment_shader_source = R"shader(
 #version 330 core
   in vec3 out_color;
   in vec2 out_tex_coords;
@@ -86,14 +77,26 @@ private:
   }
   )shader";
 
+std::map<std::string, int> arg_pos = {{"in_coords", 0},      //
+                                      {"in_color", 1},       //
+                                      {"in_tex_coords", 2},  //
+                                      {"out_color", 0}};
+
+
+class Window : public OpenGLWindow
+{
+private:
+  QOpenGLShaderProgram* m_program{nullptr};
+  QOpenGLDebugLogger *m_logger{nullptr};
+
   Tensor_<float, 2> m_vertices;
   Tensor_<unsigned int, 2> m_triangles;
   QOpenGLVertexArrayObject* m_vao{nullptr};
   QOpenGLBuffer m_vbo{QOpenGLBuffer::VertexBuffer};
   QOpenGLBuffer m_ebo{QOpenGLBuffer::IndexBuffer};
 
-  QOpenGLTexture texture0{QOpenGLTexture::Target2D};
-  QOpenGLTexture texture1{QOpenGLTexture::Target2D};
+  QOpenGLTexture* m_texture0;
+  QOpenGLTexture* m_texture1;
 
   Timer timer;
 
@@ -102,19 +105,32 @@ public:
 
   ~Window()
   {
-    m_vao->release();
-    m_vao->destroy();
+    m_context->makeCurrent(this);
+    {
+      m_vao->release();
+      m_vao->destroy();
 
-    m_vbo.release();
-    m_vbo.destroy();
+      m_vbo.release();
+      m_vbo.destroy();
 
-    m_ebo.release();
-    m_ebo.destroy();
+      m_ebo.release();
+      m_ebo.destroy();
+
+      m_texture0->release();
+      m_texture0->destroy();
+      delete m_texture0;
+
+      m_texture1->release();
+      m_texture1->destroy();
+      delete m_texture1;
+    }
+    m_context->doneCurrent();
   }
 
   void initialize_shader_program()
   {
     SARA_DEBUG << "Initialize shader program" << std::endl;
+
     m_program = new QOpenGLShaderProgram{this};
     m_program->addShaderFromSourceCode(QOpenGLShader::Vertex,
                                        vertex_shader_source);
@@ -197,11 +213,13 @@ public:
 
     // Texture coordinates.
     m_program->enableAttributeArray(arg_pos["in_tex_coords"]);
-    m_program->setAttributeBuffer(/* location */ arg_pos["in_color"],
+    m_program->setAttributeBuffer(/* location */ arg_pos["in_tex_coords"],
                                   /* GL_ENUM */ GL_FLOAT,
                                   /* offset */ float_pointer(6),
                                   /* tupleSize */ 2,
                                   /* stride */ row_bytes(m_vertices));
+
+    m_vao->release();
   }
 
   void initialize_texture_on_gpu()
@@ -209,37 +227,28 @@ public:
     SARA_DEBUG << "Initialize texture data on GPU" << std::endl;
 
     // Texture 0.
-    {
-      const auto image_path = src_path("data/ksmall.jpg");
-      SARA_DEBUG << image_path << endl;
-      const auto image = QImage{QString{image_path}}.mirrored();
-
-      texture0.setData(image);
-      texture0.setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
-      texture0.setMagnificationFilter(QOpenGLTexture::Linear);
-      texture0.setWrapMode(QOpenGLTexture::Repeat);
-    }
+    const auto image0 = QImage{QString{src_path("data/ksmall.jpg")}}.mirrored();
+    m_texture0 = new QOpenGLTexture{image0};
+    m_texture0->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
+    m_texture0->setMagnificationFilter(QOpenGLTexture::Linear);
+    m_texture0->setWrapMode(QOpenGLTexture::Repeat);
+    m_texture0->bind(0);
+    m_program->setUniformValue("texture0", 0);
 
     // Texture 1.
-    {
-      const auto image_path = src_path("data/sunflowerField.jpg");
-      SARA_DEBUG << image_path << endl;
-      const auto image = QImage{QString{image_path}}.mirrored();
-      texture1.setData(image);
-      texture1.setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
-      texture1.setMagnificationFilter(QOpenGLTexture::Linear);
-    }
-
-    // Specify that GL_TEXTURE0 is mapped to texture0 in the fragment shader
-    // code.
-    m_program->setUniformValue("texture0", 0);
-    // Specify that GL_TEXTURE1 is mapped to texture1 in the fragment shader
-    // code.
+    const auto image1 =
+        QImage{QString{src_path("data/sunflowerField.jpg")}}.mirrored();
+    m_texture1 = new QOpenGLTexture{image1};
+    m_texture1->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
+    m_texture1->setMagnificationFilter(QOpenGLTexture::Linear);
+    m_texture1->bind(1);
     m_program->setUniformValue("texture1", 1);
   }
 
   void initialize() override
   {
+    glEnable(GL_DEPTH_TEST);
+
     initialize_shader_program();
     initialize_geometry();
     initialize_geometry_on_gpu();
@@ -248,35 +257,33 @@ public:
 
   void render() override
   {
-    SARA_DEBUG << "Rendering" << std::endl;
-
     const qreal retinaScale = devicePixelRatio();
     glViewport(0, 0, width() * retinaScale, height() * retinaScale);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glActiveTexture(GL_TEXTURE0);
-    glActiveTexture(GL_TEXTURE1);
+    //m_program->bind();
 
-    texture0.bind(GL_TEXTURE0);
-    texture1.bind(GL_TEXTURE1);
-    SARA_DEBUG << "OK" << std::endl;
+    //auto transform = Transform<float, 3, Eigen::Projective>{};
+    //transform.setIdentity();
+    //transform.rotate(AngleAxisf(timer.elapsed_ms() / 1000, Vector3f::UnitZ()));
+    //transform.translate(Vector3f{0.25f, 0.25f, 0.f});
+    auto transform = QMatrix4x4{};
+    transform.setToIdentity();
+    transform.rotate(timer.elapsed_ms() / 10, QVector3D{0, 0, 1});
+    transform.translate(QVector3D{0.25f, 0.25f, -2.f});
+    auto projection = QMatrix4x4{};
+    projection.setToIdentity();
+    projection.perspective(45.f, float(width()) / height(), 0.1f, 100.f);
 
-    auto transform = Transform<float, 3, Eigen::Projective>{};
-    transform.setIdentity();
-    transform.rotate(AngleAxisf(timer.elapsed_ms() / 1000, Vector3f::UnitZ()));
-    transform.translate(Vector3f{0.25f, 0.25f, 0.f});
+    m_program->setUniformValue("transform", projection * transform);
 
-    const GLfloat *transform_data = transform.matrix().data();
-    SARA_DEBUG << "OK" << std::endl;
+    // Draw triangles.
+    m_vao->bind();
+    glDrawElements(GL_TRIANGLES, m_triangles.size(), GL_UNSIGNED_INT, 0);
 
-    m_program->setUniformValueArray("transform", transform_data, 4, 4);
-    SARA_DEBUG << "OK" << std::endl;
-
-    //// Draw triangles.
-    //m_vao->bind();
-    //glDrawElements(GL_TRIANGLES, m_triangles.size(), GL_UNSIGNED_INT, 0);
+    //m_program->release();
   }
 };
 
@@ -285,6 +292,7 @@ int main(int argc, char **argv)
 {
   QGuiApplication app(argc, argv);
   QSurfaceFormat format;
+  format.setOption(QSurfaceFormat::DebugContext);
   format.setProfile(QSurfaceFormat::CoreProfile);
   format.setVersion(3, 3);
 
@@ -292,7 +300,6 @@ int main(int argc, char **argv)
   window.setFormat(format);
   window.resize(800, 600);
   window.show();
-
   window.setAnimating(true);
 
   return app.exec();

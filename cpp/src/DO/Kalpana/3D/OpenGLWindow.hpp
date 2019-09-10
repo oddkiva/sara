@@ -29,13 +29,12 @@ public slots:
   void renderNow();
 
 protected:
-    bool event(QEvent *event) override;
+  bool event(QEvent* event) override;
+  void exposeEvent(QExposeEvent* event) override;
 
-    void exposeEvent(QExposeEvent *event) override;
+protected:
+  bool m_animating;
 
-private:
-    bool m_animating;
-
-    QOpenGLContext *m_context;
-    QOpenGLPaintDevice *m_device;
+  QOpenGLContext* m_context;
+  QOpenGLPaintDevice* m_device;
 };
