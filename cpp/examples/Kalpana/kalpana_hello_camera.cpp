@@ -45,8 +45,8 @@ static const float ZOOM        =  45.0f;
 // The explorer's eye.
 struct Camera
 {
-  Vector3f position{10.f * Vector3f::UnitY()};
-  Vector3f front{-Vector3f::UnitZ()};
+  Vector3f position{0.f, 10.f, 10.f};
+  Vector3f front{0, 0, -1};
   Vector3f up{Vector3f::UnitY()};
   Vector3f right;
   Vector3f world_up{Vector3f::UnitY()};
@@ -123,31 +123,17 @@ struct Camera
     up = right.cross(front).normalized();
   }
 
-  auto view_matrix() -> QMatrix4x4
+  auto view_matrix() const -> QMatrix4x4
   {
+    const auto qpos = QVector3D{position.x(), position.y(), position.z()};
+    const auto qfront = QVector3D{front.x(), front.y(), front.z()};
+    const auto qup = QVector3D{up.x(), up.y(), up.z()};
+
     auto view = QMatrix4x4{};
-    auto qpos = QVector3D{position.x(), position.y(), position.z()};
-    auto qfront = QVector3D{front.x(), front.y(), front.z()};
-    auto qup = QVector3D{up.x(), up.y(), up.z()};
     view.lookAt(qpos, qpos + qfront, qup);
+
     return view;
   }
-};
-
-
-struct Time
-{
-  void update()
-  {
-    last_frame = current_frame;
-    current_frame = timer.elapsed_ms();
-    delta_time = current_frame - last_frame;
-  }
-
-  Timer timer;
-  float delta_time = 0.f;
-  float last_frame = 0.f;
-  float current_frame = 0.f;
 };
 
 
@@ -545,6 +531,204 @@ private:
 };
 
 
+class ImagePlane : public QObject
+{
+public:
+  ImagePlane(QObject* parent = nullptr)
+    : QObject{parent}
+  {
+    initialize_geometry();
+    initialize_shader();
+    initialize_geometry_on_gpu();
+  }
+
+  ~ImagePlane()
+  {
+    m_vao->release();
+    m_vao->destroy();
+
+    m_vbo.release();
+    m_vbo.destroy();
+
+    m_ebo.release();
+    m_ebo.destroy();
+
+    m_texture->release();
+    m_texture->destroy();
+    delete m_texture;
+  }
+
+  auto initialize_geometry() -> void
+  {
+    SARA_DEBUG << "Initialize geometry..." << std::endl;
+
+    m_vertices = Tensor_<float, 2>{{4, 5}};
+    m_vertices.flat_array() << //
+      // coords            texture coords
+       0.5f, -0.5f, 0.0f,  1.0f, 0.0f,  // bottom-right
+       0.5f,  0.5f, 0.0f,  1.0f, 1.0f,  // top-right
+      -0.5f,  0.5f, 0.0f,  0.0f, 1.0f,  // top-left
+      -0.5f, -0.5f, 0.0f,  0.0f, 0.0f;  // bottom-left
+
+    m_triangles = Tensor_<unsigned int, 2>{{2, 3}};
+    m_triangles.flat_array() <<
+      0, 1, 2,
+      2, 3, 0;
+  }
+
+  auto initialize_shader() -> void
+  {
+    SARA_DEBUG << "Initialize shader..." << std::endl;
+
+    const auto vertex_shader_source = R"shader(
+#version 330 core
+  layout (location = 0) in vec3 in_coords;
+  layout (location = 1) in vec3 in_tex_coords;
+
+  uniform mat4 transform;
+  uniform mat4 view;
+  uniform mat4 projection;
+
+  out vec2 out_tex_coords;
+
+  void main()
+  {
+    gl_Position = projection * view * transform * vec4(in_coords, 1.0);
+    out_tex_coords = vec2(in_tex_coords.x, in_tex_coords.y);
+  }
+  )shader";
+
+    const auto fragment_shader_source = R"shader(
+#version 330 core
+  in vec2 out_tex_coords;
+  out vec4 frag_color;
+
+  uniform sampler2D texture0;
+
+  void main()
+  {
+    frag_color = texture(texture0, out_tex_coords);
+    frag_color.w = 0.15;
+  }
+  )shader";
+
+    m_program = new QOpenGLShaderProgram{this};
+    m_program->addShaderFromSourceCode(QOpenGLShader::Vertex,
+                                       vertex_shader_source);
+    m_program->addShaderFromSourceCode(QOpenGLShader::Fragment,
+                                       fragment_shader_source);
+    m_program->link();
+  }
+
+  auto initialize_geometry_on_gpu() -> void
+  {
+    SARA_DEBUG << "Initialize image plane geometry data on GPU..." << std::endl;
+    m_vao = new QOpenGLVertexArrayObject{this};
+    if (!m_vao->create())
+      throw QException{};
+
+    if (!m_vbo.create())
+      throw QException{};
+
+    if (!m_ebo.create())
+      throw QException{};
+
+    const auto row_bytes = [](const TensorView_<float, 2>& data) {
+      return data.size(1) * sizeof(float);
+    };
+
+    const auto float_pointer = [](int offset) {
+      return offset * sizeof(float);
+    };
+
+    m_vao->bind();
+
+    // Copy the vertex data into the GPU buffer object.
+    m_vbo.bind();
+    m_vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    m_vbo.allocate(m_vertices.data(), m_vertices.size() * sizeof(float));
+
+    // Copy the triangles data into the GPU buffer object.
+    m_ebo.bind();
+    m_ebo.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    m_ebo.allocate(m_triangles.data(),
+                   m_triangles.size() * sizeof(unsigned int));
+
+    // Specify that the vertex shader param 0 corresponds to the first 3 float
+    // data of the buffer object.
+    m_program->enableAttributeArray(arg_pos["in_coords"]);
+    m_program->setAttributeBuffer(/* location */ arg_pos["in_coords"],
+                                  /* GL_ENUM */ GL_FLOAT,
+                                  /* offset */ float_pointer(0),
+                                  /* tupleSize */ 3,
+                                  /* stride */ row_bytes(m_vertices));
+
+    // Specify that the vertex shader param 1 corresponds to the first 3 float
+    // data of the buffer object.
+    m_program->enableAttributeArray(arg_pos["in_tex_coords"]);
+    m_program->setAttributeBuffer(/* location */ arg_pos["in_tex_coords"],
+                                  /* GL_ENUM */ GL_FLOAT,
+                                  /* offset */ float_pointer(3),
+                                  /* tupleSize */ 2,
+                                  /* stride */ row_bytes(m_vertices));
+
+    // Unbind the vbo to protect its data.
+    m_vao->release();
+  }
+
+  auto set_image(const string& image_path =
+                     src_path("../../../data/sunflowerField.jpg")) -> void
+  {
+    const auto image = QImage{QString::fromStdString(image_path)}.mirrored();
+    m_image_sizes << image.width(), image.height();
+
+    SARA_DEBUG << image.width() << " " << image.height() << std::endl;
+    m_texture = new QOpenGLTexture{image};
+    m_texture->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
+    m_texture->setMagnificationFilter(QOpenGLTexture::Linear);
+  }
+
+  auto render(const QMatrix4x4& projection,  //
+              const QMatrix4x4& view,        //
+              const QMatrix4x4& transform) -> void
+  {
+    m_program->bind();
+    {
+      m_program->setUniformValue("projection", projection);
+      m_program->setUniformValue("view", view);
+      m_program->setUniformValue("transform", transform);
+
+      m_texture->bind(0);
+
+      m_vao->bind();
+      glDrawElements(GL_TRIANGLES, m_triangles.size(), GL_UNSIGNED_INT, 0);
+      m_vao->release();
+    }
+    m_program->release();
+  }
+
+private:
+  //! @{
+  //! @brief CPU data.
+  Vector2i m_image_sizes;
+  Tensor_<float, 2> m_vertices;
+  Tensor_<unsigned int, 2> m_triangles;
+  //! @}
+
+  //! @{
+  //! @brief GPU data.
+  QOpenGLShaderProgram *m_program{nullptr};
+  QOpenGLVertexArrayObject *m_vao{nullptr};
+  QOpenGLBuffer m_vbo{QOpenGLBuffer::VertexBuffer};
+  QOpenGLBuffer m_ebo{QOpenGLBuffer::IndexBuffer};
+  QOpenGLTexture *m_texture{nullptr};
+  std::map<std::string, int> arg_pos = {{"in_coords", 0},  //
+                                        {"in_tex_coords", 1},   //
+                                        {"out_color", 0}};
+  //! @}
+};
+
+
 class Window : public OpenGLWindow
 {
 private:
@@ -552,10 +736,11 @@ private:
   QMatrix4x4 m_view;
   QMatrix4x4 m_transform;
 
-  Camera camera;
-  Time time;
+  Camera m_camera;
+  Timer m_timer;
   CheckerBoardObject *m_checkerboard{nullptr};
   PointCloudObject *m_pointCloud{nullptr};
+  ImagePlane *m_imagePlane{nullptr};
 
 public:
   Window() = default;
@@ -583,6 +768,17 @@ public:
     // Instantiate the objects.
     m_checkerboard = new CheckerBoardObject{20, 20, 10, this};
     m_pointCloud = new PointCloudObject{make_point_cloud(), this};
+    m_imagePlane = new ImagePlane{this};
+
+#ifdef __APPLE__
+    const auto data_dir =
+        std::string{"/Users/david/Desktop/Datasets/sfm/castle_int"};
+#else
+    const auto data_dir =
+        std::string{"/home/david/Desktop/Datasets/sfm/castle_int"};
+#endif
+    const auto file1 = "0000.png";
+    m_imagePlane->set_image(data_dir + "/" + file1);
   }
 
   void render() override
@@ -598,14 +794,16 @@ public:
     m_projection.perspective(45.f, float(width()) / height(), 0.1f, 1000.f);
 
     // Update the view matrix.
-    m_view = camera.view_matrix();
+    m_view = m_camera.view_matrix();
 
     // Checkerboard.
     m_transform.setToIdentity();
-    m_checkerboard->render(m_projection, m_view, m_transform);
+    //m_checkerboard->render(m_projection, m_view, m_transform);
 
-    m_transform.rotate(std::pow(1.5, 5) * time.timer.elapsed_ms() / 500,
-                       QVector3D{0.5f, 1.0f, 0.0f}.normalized());
+    m_imagePlane->render(m_projection, m_view, m_transform);
+
+    //m_transform.rotate(std::pow(1.5, 5) * m_timer.elapsed_ms() / 500,
+    //                   QVector3D{0.5f, 1.0f, 0.0f}.normalized());
     m_pointCloud->render(m_projection, m_view, m_transform);
   }
 
@@ -617,83 +815,82 @@ protected:
 
   auto move_camera_from_keyboard(int key) -> void
   {
-    time.update();
-    auto delta = 40.f;//time.delta_time;
+    const auto delta = 140.f;
     if (Qt::Key_W == key)
     {
-      camera.move_forward(delta);
-      camera.update();
-      renderNow();
+      m_camera.move_forward(delta);
+      m_camera.update();
+      renderLater();
     }
     if (Qt::Key_S == key)
     {
-      camera.move_backward(delta);
-      camera.update();
-      renderNow();
+      m_camera.move_backward(delta);
+      m_camera.update();
+      renderLater();
     }
     if (Qt::Key_A == key)
     {
-      camera.move_left(delta);
-      camera.update();
-      renderNow();
+      m_camera.move_left(delta);
+      m_camera.update();
+      renderLater();
     }
     if (Qt::Key_D == key)
     {
-      camera.move_right(delta);
-      camera.update();
-      renderNow();
+      m_camera.move_right(delta);
+      m_camera.update();
+      renderLater();
     }
 
     if (Qt::Key_Delete == key)
     {
-      camera.no_head_movement(-delta);  // CCW
-      camera.update();
-      renderNow();
+      m_camera.no_head_movement(-delta);  // CCW
+      m_camera.update();
+      renderLater();
     }
     if (Qt::Key_PageDown == key)
     {
-      camera.no_head_movement(+delta);  // CW
-      camera.update();
-      renderNow();
+      m_camera.no_head_movement(+delta);  // CW
+      m_camera.update();
+      renderLater();
     }
 
     if (Qt::Key_Home == key)
     {
-      camera.yes_head_movement(+delta);
-      camera.update();
-      renderNow();
+      m_camera.yes_head_movement(+delta);
+      m_camera.update();
+      renderLater();
     }
     if (Qt::Key_End == key)
     {
-      camera.yes_head_movement(-delta);
-      camera.update();
-      renderNow();
+      m_camera.yes_head_movement(-delta);
+      m_camera.update();
+      renderLater();
     }
 
     if (Qt::Key_R == key)
     {
-      camera.move_up(delta);
-      camera.update();
-      renderNow();
+      m_camera.move_up(delta);
+      m_camera.update();
+      renderLater();
     }
     if (Qt::Key_F == key)
     {
-      camera.move_down(delta);
-      camera.update();
-      renderNow();
+      m_camera.move_down(delta);
+      m_camera.update();
+      renderLater();
     }
 
     if (Qt::Key_Insert == key)
     {
-      camera.maybe_head_movement(-delta);
-      camera.update();
-      renderNow();
+      m_camera.maybe_head_movement(-delta);
+      m_camera.update();
+      renderLater();
     }
     if (Qt::Key_PageUp == key)
     {
-      camera.maybe_head_movement(+delta);
-      camera.update();
-      renderNow();
+      m_camera.maybe_head_movement(+delta);
+      m_camera.update();
+      renderLater();
     }
   }
 };
