@@ -11,6 +11,8 @@
 
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
+#include <DO/Sara/MultiViewGeometry/EpipolarGraph.hpp>
+#include <DO/Sara/MultiViewGeometry/FeatureGraph.hpp>
 #include <DO/Sara/MultiViewGeometry/Miscellaneous.hpp>
 
 #include <DO/Sara/SfM/BuildingBlocks/EssentialMatrixEstimation.hpp>
@@ -62,83 +64,134 @@ auto get_keypoints(const Image<Rgb8>& image1,
 
 GRAPHICS_MAIN()
 {
+  // Use the following data structure to load images, keypoints, camera
+  // parameters.
+  auto views = ViewAttributes{};
+
   // Load images.
   print_stage("Loading images...");
-#ifdef __APPLE__
   const auto data_dir =
+#ifdef __APPLE__
       std::string{"/Users/david/Desktop/Datasets/sfm/castle_int"};
 #else
-  const auto data_dir =
       std::string{"/home/david/Desktop/Datasets/sfm/castle_int"};
 #endif
-  const auto file1 = "0000.png";
-  const auto file2 = "0001.png";
-
-  const auto image1 = imread<Rgb8>(data_dir + "/" + file1);
-  const auto image2 = imread<Rgb8>(data_dir + "/" + file2);
+  views.image_paths = {
+      data_dir + "/" + "0000.png",
+      data_dir + "/" + "0001.png",
+  };
+  views.read_images();
 
 
   print_stage("Loading the internal camera matrices...");
-  const Matrix3d K1 =
+  views.cameras.resize(2 /* views */);
+  views.cameras[0].K =
       read_internal_camera_parameters(data_dir + "/" + "0000.png.K")
           .cast<double>();
-  const Matrix3d K2 =
+  views.cameras[1].K =
       read_internal_camera_parameters(data_dir + "/" + "0001.png.K")
           .cast<double>();
-  const Matrix3d K1_inv = K1.inverse();
-  const Matrix3d K2_inv = K2.inverse();
 
 
   print_stage("Getting keypoints...");
-  auto keys1 = KeypointList<OERegion, float>{};
-  auto keys2 = KeypointList<OERegion, float>{};
-  get_keypoints(image1, image2,               //
-                data_dir + "/" + "0000.key",  //
-                data_dir + "/" + "0001.key",  //
-                keys1, keys2);
+  views.keypoints.resize(2 /* views */);
+  get_keypoints(views.images[0], views.images[1],  //
+                data_dir + "/" + "0000.key",       //
+                data_dir + "/" + "0001.key",       //
+                views.keypoints[0], views.keypoints[1]);
+
+
+  // Use the following data structures to store the epipolar geometry data.
+  auto epipolar_edges = EpipolarEdgeAttributes{};
+  epipolar_edges.initialize_edges(2 /* views */);
+  epipolar_edges.resize_fundamental_edge_list();
+  epipolar_edges.resize_essential_edge_list();
 
 
   print_stage("Matching keypoints...");
-  const auto matches = match(keys1, keys2);
+  epipolar_edges.matches = {match(views.keypoints[0], views.keypoints[1])};
+  const auto& matches = epipolar_edges.matches[0];
 
 
   print_stage("Performing data transformations...");
+  // Invert the internal camera matrices.
+  const auto K_inv = std::array<Matrix3d, 2>{views.cameras[0].K.inverse(),
+                                             views.cameras[1].K.inverse()};
   // Tensors of image coordinates.
-  const auto& f1 = features(keys1);
-  const auto& f2 = features(keys2);
-  const auto u1 = homogeneous(extract_centers(f1)).cast<double>();
-  const auto u2 = homogeneous(extract_centers(f2)).cast<double>();
+  const auto& f0 = features(views.keypoints[0]);
+  const auto& f1 = features(views.keypoints[1]);
+  const auto u = std::array{homogeneous(extract_centers(f0)).cast<double>(),
+                            homogeneous(extract_centers(f1)).cast<double>()};
   // Tensors of camera coordinates.
-  const auto un1 = apply_transform(K1_inv, u1);
-  const auto un2 = apply_transform(K2_inv, u2);
-  static_assert(std::is_same_v<decltype(un1), const Tensor_<double,2>>);
+  const auto un = std::array{apply_transform(K_inv[0], u[0]),
+                             apply_transform(K_inv[1], u[1])};
+  static_assert(std::is_same_v<decltype(un[0]), const Tensor_<double, 2>&>);
   // List the matches as a 2D-tensor where each row encodes a match 'm' as a
   // pair of point indices (i, j).
   const auto M = to_tensor(matches);
 
 
   print_stage("Estimating the essential matrix...");
-  const auto num_samples = 1000;
-  const auto e_err_thres = 1e-3;
-  auto e_estimator = EEstimator{};
+  auto& E = epipolar_edges.E[0];
+  auto& num_samples = epipolar_edges.E_num_samples[0];
+  auto& err_thres = epipolar_edges.E_noise[0];
+  auto& inliers = epipolar_edges.E_inliers[0];
+  auto sample_best = Tensor_<int, 1>{};
+  auto estimator = EEstimator{};
   auto distance = EpipolarDistance{};
-  const auto [E_, inliers, sample_best] =
-      ransac(M, un1, un2, e_estimator, distance, num_samples, e_err_thres);
+  {
+    num_samples = 1000;
+    err_thres = 1e-3;
+    std::tie(E, inliers, sample_best) =
+        ransac(M, un[0], un[1], estimator, distance, num_samples, err_thres);
+    E.matrix() = E.matrix().normalized();
+
+    epipolar_edges.E_inliers[0] = inliers;
+    epipolar_edges.E_best_samples[0] = sample_best;
+  }
 
 
   // Calculate the fundamental matrix.
   print_stage("Computing the fundamental matrix...");
-  EssentialMatrix E = E_;
-  E.matrix() = E_.matrix().normalized();
-  auto F = FundamentalMatrix{};
-  F.matrix() = K2_inv.transpose() * E.matrix() * K1_inv;
+  auto& F = epipolar_edges.F[0];
+  {
+    F.matrix() = K_inv[1].transpose() * E.matrix() * K_inv[0];
+
+    epipolar_edges.F_num_samples[0] = 1000;
+    epipolar_edges.F_noise = epipolar_edges.E_noise;
+    epipolar_edges.F_inliers = epipolar_edges.E_inliers;
+    epipolar_edges.F_best_samples = epipolar_edges.E_best_samples;
+  }
 
 
   // Extract the two-view geometry.
   print_stage("Estimating the two-view geometry...");
   auto geometry =
-      estimate_two_view_geometry(M, un1, un2, E, inliers, sample_best);
+      estimate_two_view_geometry(M, un[0], un[1], E, inliers, sample_best);
 
+
+  // Construct the graph of features.
+  // We take the complicated way because it generalizes to N views.
+  const auto view_ids = range(int(views.images.size()));
+  SARA_CHECK(view_ids.row_vector());
+
+  const auto feature_gids = populate_feature_gids(views.keypoints);
+  SARA_CHECK(feature_gids.size());
+
+
+  //  // Adjust bundles for the two-view geometry.
+  //  const Array<bool, 1, Eigen::Dynamic> cheiral_inliers =
+  //      inliers.row_vector().array() && geometry.cheirality;
+  //
+  //  SARA_DEBUG << "cheiral_inliers = " << cheiral_inliers << std::endl;
+  //  SARA_CHECK(cheiral_inliers.count());
+  //
+  //  const auto num_points = cheiral_inliers.count();
+  //  const auto num_observations = 2 * num_points;
+  //  const auto num_cameras = 2;
+  //
+  //
+#ifdef SAVE_TWO_VIEW_GEOMETRY
   keep_cheiral_inliers_only(geometry, inliers);
 
   // Add the internal camera matrices to the camera.
@@ -146,11 +199,13 @@ GRAPHICS_MAIN()
   geometry.C2.K = K2;
   auto colors = extract_colors(image1, image2, geometry);
   save_to_hdf5(geometry, colors);
+#endif
 
 
   // Inspect the fundamental matrix.
   print_stage("Inspecting the fundamental matrix estimation...");
-  check_epipolar_constraints(image1, image2, F, matches, sample_best, inliers,
+  check_epipolar_constraints(views.images[0], views.images[1], F, matches,
+                             sample_best, inliers,
                              /* display_step */ 20, /* wait_key */ true);
 
   return 0;

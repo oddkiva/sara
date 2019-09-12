@@ -11,7 +11,11 @@
 
 #pragma once
 
+#include <DO/Sara/Defines.hpp>
+
 #include <DO/Sara/Core/HDF5.hpp>
+#include <DO/Sara/Features/KeypointList.hpp>
+#include <DO/Sara/MultiViewGeometry/EpipolarGraph.hpp>
 
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/connected_components.hpp>
@@ -27,6 +31,11 @@ struct FeatureGID
 {
   int image_id{-1};
   int local_id{-1};
+
+  auto operator==(const FeatureGID& other) const -> bool
+  {
+    return image_id == other.image_id && local_id == other.local_id;
+  }
 };
 
 
@@ -78,11 +87,30 @@ struct IncrementalConnectedComponentsHelper
 };
 
 
+DO_SARA_EXPORT
+auto populate_feature_gids(
+    const std::vector<KeypointList<OERegion, float>>& keypoints)
+    -> std::vector<FeatureGID>;
+
+DO_SARA_EXPORT
+auto calculate_feature_id_offsets(
+    const std::vector<KeypointList<OERegion, float>>& keypoints)
+    -> std::vector<int>;
+
+DO_SARA_EXPORT
+auto populate_feature_tracks(const ViewAttributes& views,
+                             const EpipolarEdgeAttributes& epipolar_edges)
+    -> std::pair<FeatureGraph,
+                 IncrementalConnectedComponentsHelper::Components>;
+
+
 //! @brief write feature graph to HDF5.
+DO_SARA_EXPORT
 auto write_feature_graph(const FeatureGraph& graph, H5File& file,
                          const std::string& group_name) -> void;
 
 //! @brief read feature graph from HDF5.
+DO_SARA_EXPORT
 auto read_feature_graph(H5File& file, const std::string& group_name)
     -> FeatureGraph;
 

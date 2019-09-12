@@ -83,28 +83,7 @@ auto track_points(const std::string& dirpath, const std::string& h5_filepath,
                       });
   SARA_CHECK(num_keypoints);
 
-  const auto image_ids = range(num_vertices);
-  SARA_CHECK(image_ids.row_vector());
-
-  auto populate_gids = [&](auto image_id) {
-    const auto num_features =
-        static_cast<int>(features(keypoints[image_id]).size());
-    auto lids = range(num_features);
-    auto gids = std::vector<FeatureGID>(lids.size());
-    std::transform(std::begin(lids), std::end(lids), std::begin(gids),
-                   [&](auto lid) -> FeatureGID {
-                     return {image_id, lid};
-                   });
-    return gids;
-  };
-  const auto gids = std::accumulate(
-      std::begin(image_ids), std::end(image_ids), std::vector<FeatureGID>{},
-      [&](const auto& gids, const auto image_id) {
-        SARA_CHECK(image_id);
-        auto gids_union = gids;
-        ::append(gids_union, populate_gids(image_id));
-        return gids_union;
-      });
+  const auto gids = populate_feature_gids(keypoints);
   SARA_CHECK(gids.size());
 
   // Populate the vertices.
@@ -261,15 +240,15 @@ auto track_points(const std::string& dirpath, const std::string& h5_filepath,
   }
 
   const auto num_points = components_filtered.size();
-  
+  SARA_CHECK(num_points);
+
   auto num_observations = 0;
   for (const auto& component : components_filtered)
     num_observations += component.size();
+  SARA_CHECK(num_observations);
 
-  const auto cameras = num_vertices;
-
-
-  BundleAdjustmentProblem ba;
+  const auto num_cameras = num_vertices;
+  SARA_CHECK(num_cameras);
 }
 
 

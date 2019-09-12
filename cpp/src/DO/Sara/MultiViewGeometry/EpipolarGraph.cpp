@@ -37,6 +37,18 @@ auto ViewAttributes::list_images(const std::string& dirpath) -> void
       [&](const std::string& image_path) { return basename(image_path); });
 }
 
+auto ViewAttributes::read_images() -> void
+{
+  images.resize(image_paths.size());
+  std::transform(std::begin(image_paths), std::end(image_paths),
+                 std::begin(images),  //
+                 [](const auto image_path) {
+                   SARA_DEBUG << "Reading image from:\n\t" << image_path
+                              << std::endl;
+                   return imread<Rgb8>(image_path);
+                 });
+}
+
 auto ViewAttributes::read_keypoints(H5File& h5_file) -> void
 {
   if (!keypoints.empty())
@@ -47,17 +59,6 @@ auto ViewAttributes::read_keypoints(H5File& h5_file) -> void
                  std::back_inserter(keypoints),
                  [&](const std::string& group_name) {
                    return DO::Sara::read_keypoints(h5_file, group_name);
-                 });
-}
-
-auto ViewAttributes::read_images() -> void
-{
-  images.resize(image_paths.size());
-  std::transform(std::begin(image_paths), std::end(image_paths),
-                 std::begin(images), [](const auto image_path) {
-                   SARA_DEBUG << "Reading image from:\n\t" << image_path
-                              << std::endl;
-                   return imread<Rgb8>(image_path);
                  });
 }
 
