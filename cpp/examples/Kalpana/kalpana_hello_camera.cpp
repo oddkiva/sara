@@ -16,6 +16,8 @@
 #include <DO/Sara/Core/Tensor.hpp>
 #include <DO/Sara/Core/Timer.hpp>
 #include <DO/Sara/Defines.hpp>
+#include <DO/Sara/MultiViewGeometry/Geometry/PinholeCamera.hpp>
+#include <DO/Sara/MultiViewGeometry/Datasets/Strecha.hpp>
 
 #include <QGuiApplication>
 #include <QSurfaceFormat>
@@ -45,7 +47,7 @@ static const float ZOOM        =  45.0f;
 // The explorer's eye.
 struct Camera
 {
-  Vector3f position{0.f, 10.f, 10.f};
+  Vector3f position{0.f, 0.f, 0.f};
   Vector3f front{0, 0, -1};
   Vector3f up{Vector3f::UnitY()};
   Vector3f right;
@@ -58,6 +60,11 @@ struct Camera
   float movement_speed{SPEED};
   float movement_sensitivity{SENSITIVITY};
   float zoom{ZOOM};
+
+  Camera()
+  {
+    update();
+  }
 
   auto move_left(float delta)
   {
@@ -106,7 +113,7 @@ struct Camera
     roll += movement_sensitivity * delta;
   }
 
-  auto update()
+  auto update() -> void
   {
     Vector3f front1;
 
@@ -143,7 +150,12 @@ auto read_point_cloud(const std::string& h5_filepath) -> Tensor_<float, 2>
 
   auto coords = MatrixXd{};
   h5_file.read_dataset("points", coords);
-  coords.matrix() *= -1;
+  // In OpenGL, the y-axis is going up and in the image coordinates, it is going
+  // down.
+  coords.row(1) *= -1;
+  // In OpenGL, the cheiral constraint is actually a negative z.
+  coords.row(2) *= -1;
+
   auto coords_tensorview =
       TensorView_<double, 2>{coords.data(), {coords.cols(), coords.rows()}};
 
@@ -537,9 +549,7 @@ public:
   ImagePlane(QObject* parent = nullptr)
     : QObject{parent}
   {
-    initialize_geometry();
     initialize_shader();
-    initialize_geometry_on_gpu();
   }
 
   ~ImagePlane()
@@ -560,15 +570,40 @@ public:
 
   auto initialize_geometry() -> void
   {
-    SARA_DEBUG << "Initialize geometry..." << std::endl;
+    SARA_DEBUG << "Initialize image plane geometry..." << std::endl;
 
+    const double w = m_image_sizes(0);
+    const double h = m_image_sizes(1);
+
+    // Encode the pixel coordinates of the image corners.
+    auto corners = Matrix<double, 3, 4>{};
+    corners <<
+      w, w, 0, 0,
+      0, h, h, 0,
+      1, 1, 1, 1;
+    //SARA_DEBUG << "Pixel corners =\n" << corners << std::endl;
+
+    // Calculate the normalized camera coordinates.
+    const Matrix3d K_inv = m_camera.K.inverse();
+    corners = K_inv * corners;
+    //SARA_DEBUG << "Normalized corners =\n" << corners << std::endl;
+
+    // Because the z is negative in OpenGL.
+    corners.row(2) *= -1;
+    //SARA_DEBUG << "Z-negative normalized corners =\n" << corners << std::endl;
+
+    // Vertex coordinates.
     m_vertices = Tensor_<float, 2>{{4, 5}};
-    m_vertices.flat_array() << //
-      // coords            texture coords
-       0.5f, -0.5f, 0.0f,  1.0f, 0.0f,  // bottom-right
-       0.5f,  0.5f, 0.0f,  1.0f, 1.0f,  // top-right
-      -0.5f,  0.5f, 0.0f,  0.0f, 1.0f,  // top-left
-      -0.5f, -0.5f, 0.0f,  0.0f, 0.0f;  // bottom-left
+    m_vertices.matrix().block<4, 3>(0, 0) = corners.transpose().cast<float>();
+
+    // Texture coordinates.
+    m_vertices.matrix().block<4, 2>(0, 3) <<
+      1.0f, 0.0f,  // bottom-right
+      1.0f, 1.0f,  // top-right
+      0.0f, 1.0f,  // top-left
+      0.0f, 0.0f;  // bottom-left
+
+    SARA_DEBUG << "m_vertices =\n" << m_vertices.matrix() << std::endl;
 
     m_triangles = Tensor_<unsigned int, 2>{{2, 3}};
     m_triangles.flat_array() <<
@@ -608,7 +643,7 @@ public:
   void main()
   {
     frag_color = texture(texture0, out_tex_coords);
-    frag_color.w = 0.15;
+    frag_color.w = 0.2;
   }
   )shader";
 
@@ -676,16 +711,25 @@ public:
     m_vao->release();
   }
 
-  auto set_image(const string& image_path =
-                     src_path("../../../data/sunflowerField.jpg")) -> void
+  auto set_image(const string& image_path) -> void
   {
     const auto image = QImage{QString::fromStdString(image_path)}.mirrored();
     m_image_sizes << image.width(), image.height();
 
-    SARA_DEBUG << image.width() << " " << image.height() << std::endl;
     m_texture = new QOpenGLTexture{image};
     m_texture->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
     m_texture->setMagnificationFilter(QOpenGLTexture::Linear);
+  }
+
+  auto set_camera(const PinholeCamera& camera)
+  {
+    m_camera = camera;
+    //SARA_DEBUG << "K = \n" << m_camera.K << std::endl;
+    //SARA_DEBUG << "R = \n" << m_camera.R << std::endl;
+    //SARA_DEBUG << "t = " << m_camera.t.transpose() << std::endl;
+
+    initialize_geometry();
+    initialize_geometry_on_gpu();
   }
 
   auto render(const QMatrix4x4& projection,  //
@@ -711,6 +755,7 @@ private:
   //! @{
   //! @brief CPU data.
   Vector2i m_image_sizes;
+  PinholeCamera m_camera{normalized_camera()};
   Tensor_<float, 2> m_vertices;
   Tensor_<unsigned int, 2> m_triangles;
   //! @}
@@ -756,14 +801,14 @@ public:
 
   void initialize() override
   {
+    // You absolutely need this for 3D objects!
+    glEnable(GL_DEPTH_TEST);
+
     // Setup options for point cloud rendering.
+    glEnable(GL_PROGRAM_POINT_SIZE);
     glEnable(GL_POINT_SMOOTH);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_PROGRAM_POINT_SIZE);
-
-    // You absolutely need this for 3D objects!
-    glEnable(GL_DEPTH_TEST);
 
     // Instantiate the objects.
     m_checkerboard = new CheckerBoardObject{20, 20, 10, this};
@@ -777,8 +822,16 @@ public:
     const auto data_dir =
         std::string{"/home/david/Desktop/Datasets/sfm/castle_int"};
 #endif
-    const auto file1 = "0000.png";
-    m_imagePlane->set_image(data_dir + "/" + file1);
+    const auto image = "0000.png";
+    m_imagePlane->set_image(data_dir + "/" + image);
+
+    const auto K = "0000.png.K";
+    auto camera = PinholeCamera{
+      read_internal_camera_parameters(data_dir + "/" + K),
+      Matrix3d::Identity(),
+      Vector3d::Zero()
+    };
+    m_imagePlane->set_camera(camera);
   }
 
   void render() override
@@ -798,13 +851,13 @@ public:
 
     // Checkerboard.
     m_transform.setToIdentity();
-    //m_checkerboard->render(m_projection, m_view, m_transform);
-
-    m_imagePlane->render(m_projection, m_view, m_transform);
 
     //m_transform.rotate(std::pow(1.5, 5) * m_timer.elapsed_ms() / 500,
     //                   QVector3D{0.5f, 1.0f, 0.0f}.normalized());
+
+    //m_checkerboard->render(m_projection, m_view, m_transform);
     m_pointCloud->render(m_projection, m_view, m_transform);
+    m_imagePlane->render(m_projection, m_view, m_transform);
   }
 
 protected:
@@ -908,7 +961,7 @@ int main(int argc, char **argv)
   window.setFormat(format);
   window.resize(800, 600);
   window.show();
-  window.setAnimating(true);
+  //window.setAnimating(true);
 
   return app.exec();
 }
