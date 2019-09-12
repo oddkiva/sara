@@ -241,6 +241,35 @@ auto track_points(const std::string& dirpath, const std::string& h5_filepath,
 
   // Save the graph of features in HDF5 format.
   write_feature_graph(graph, h5_file, "feature_graph");
+
+
+  // Prepare the bundle adjustment problem.
+  auto components_filtered = std::vector<std::vector<int>>{};
+  for (const auto& c : components)
+  {
+    int sz = 0;
+    for (auto [v, v_end] = components[c]; v != v_end; ++v)
+      ++sz;
+    if (sz <= 1)
+      continue;
+
+    auto comp = std::vector<int>{};
+    for (auto [v, v_end] = components[c]; v != v_end; ++v)
+      comp.push_back(*v);
+
+    components_filtered.push_back(comp);
+  }
+
+  const auto num_points = components_filtered.size();
+  
+  auto num_observations = 0;
+  for (const auto& component : components_filtered)
+    num_observations += component.size();
+
+  const auto cameras = num_vertices;
+
+
+  BundleAdjustmentProblem ba;
 }
 
 

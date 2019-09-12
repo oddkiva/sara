@@ -133,7 +133,6 @@ auto perform_bundle_adjustment(const std::string& dirpath,
 
   write_pose_graph(pose_graph, h5_file, "pose_graph");
 
-
   // TODO: Perform incremental bundle adjustment using a Dijkstra growing scheme.
   //
   // Let's just choose a heuristics for the incremental bundle adjustment even
@@ -148,6 +147,28 @@ auto perform_bundle_adjustment(const std::string& dirpath,
   // 2. Recalculate the 3D points in the world coordinate frame.
 
   // TODO: readapt the Ceres sample code for bundle adjustment.
+#ifdef CERES_BUNDLE_ADJUSTMENT
+  ceres::Problem problem;
+  for (int i = 0; i < bal_problem.num_observations(); ++i)
+  {
+    auto cost_fn =
+        SnavelyReprojectionError::Create(bal_problem.observations()[2 * i + 0],
+                                         bal_problem.observations()[2 * i + 1]);
+
+    problem.AddResidualBlock(cost_function,
+                             nullptr /* squared loss */,
+                             bal_problem.mutable_camera_for_observation(i),
+                             bal_problem.mutable_point_for_observation(i));
+  }
+
+  auto options = ceres::Solver::Options{};
+  options.linear_solver_type = ceres::DENSE_SCHUR;
+  options.minimizer_progress_to_stdout = true;
+  auto summary = ceres::Solver::Summary{};
+
+  ceres::Solve(options, &problem, &summary);
+  std::cout << summary.FullReport() << "\n";
+#endif
 
   // TODO: save the point cloud.
 
