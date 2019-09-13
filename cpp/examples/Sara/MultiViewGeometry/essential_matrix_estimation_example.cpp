@@ -26,42 +26,6 @@ using namespace std;
 using namespace DO::Sara;
 
 
-using EEstimator = NisterFivePointAlgorithm;
-
-
-// Detect or read SIFT keypoints.
-auto get_keypoints(const Image<Rgb8>& image1,
-                   const Image<Rgb8>& image2,
-                   const std::string& keys1_filepath,
-                   const std::string& keys2_filepath,
-                   KeypointList<OERegion, float>& keys1,
-                   KeypointList<OERegion, float>& keys2)
-{
-  print_stage("Computing/Reading keypoints");
-
-#ifdef COMPUTE_KEYPOINTS
-  keys1 = compute_sift_keypoints(image1.convert<float>());
-  keys2 = compute_sift_keypoints(image2.convert<float>());
-  cout << "Image 1: " << keys1.size() << " keypoints" << endl;
-  cout << "Image 2: " << keys2.size() << " keypoints" << endl;
-
-  const auto& [f1, d1] = keys1;
-  const auto& [f2, d2] = keys2;
-
-  write_keypoints(f1, d1, keys1_filepath);
-  write_keypoints(f2, d2, keys2_filepath);
-#else
-  (void) image1;
-  (void) image2;
-  auto& [f1, d1] = keys1;
-  auto& [f2, d2] = keys2;
-
-  read_keypoints(f1, d1, keys1_filepath);
-  read_keypoints(f2, d2, keys2_filepath);
-#endif
-}
-
-
 GRAPHICS_MAIN()
 {
   // Use the following data structure to load images, keypoints, camera
@@ -93,13 +57,9 @@ GRAPHICS_MAIN()
           .cast<double>();
 
 
-  print_stage("Getting keypoints...");
-  views.keypoints.resize(2 /* views */);
-  get_keypoints(views.images[0], views.images[1],  //
-                data_dir + "/" + "0000.key",       //
-                data_dir + "/" + "0001.key",       //
-                views.keypoints[0], views.keypoints[1]);
-
+  print_stage("Computing keypoints...");
+  views.keypoints = {compute_sift_keypoints(views.images[0].convert<float>()),
+                     compute_sift_keypoints(views.images[1].convert<float>())};
 
   // Use the following data structures to store the epipolar geometry data.
   auto epipolar_edges = EpipolarEdgeAttributes{};
@@ -137,7 +97,7 @@ GRAPHICS_MAIN()
   auto& err_thres = epipolar_edges.E_noise[0];
   auto& inliers = epipolar_edges.E_inliers[0];
   auto sample_best = Tensor_<int, 1>{};
-  auto estimator = EEstimator{};
+  auto estimator = NisterFivePointAlgorithm{};
   auto distance = EpipolarDistance{};
   {
     num_samples = 1000;
@@ -169,9 +129,24 @@ GRAPHICS_MAIN()
   epipolar_edges.two_view_geometries = {
       estimate_two_view_geometry(M, un[0], un[1], E, inliers, sample_best)
   };
+  const auto& two_view_geometry = epipolar_edges.two_view_geometries.front();
 
 
-  std::map<FeatureGID, int> feature_gids_to_3d_point_indices;
+  print_stage("Mapping feature to match");
+  std::map<FeatureGID, int> match_index;
+  for (auto m = 0; m < M.size(0); ++ m)
+  {
+    if (inliers(m) && two_view_geometry.cheirality(m))
+    {
+      match_index[{0, M(m, 0)}] = m;
+      match_index[{1, M(m, 1)}] = m;
+    }
+  }
+
+  // For N views where N > 2.
+  //std::vector<std::set<FeatureGID>>{};
+  //Tensor_<double, 3> points{};
+  //std::multimap<FeatureGID, MatchGID> match_index;
 
 
   // Populate the feature tracks.
@@ -179,10 +154,50 @@ GRAPHICS_MAIN()
       populate_feature_tracks(views, epipolar_edges);
 
   // Keep feature tracks of size 2 at least.
-  const auto feature_tracks = filter_feature_tracks(feature_graph, components);
+  print_stage("Checking the feature tracks...");
+  auto feature_tracks = filter_feature_tracks(feature_graph, components);
+  for (const auto& track: feature_tracks)
+  {
+    //if (track.size() <= 2)
+    //  continue;
+
+    std::cout << "Component: " << std::endl;
+    std::cout << "Size = " << track.size() << std::endl;
+    for (const auto& fgid : track)
+    {
+      const auto& f = features(views.keypoints[fgid.image_id])[fgid.local_id];
+      const auto point_index = match_index[fgid];
+      std::cout << "- {" << fgid.image_id << ", " << fgid.local_id << "} : "
+                << "STR: " << f.extremum_value << "  "
+                << "TYP: " << int(f.extremum_type) << "  "
+                << "2D:  " << f.center().transpose() << "     "
+                << "3D:  " << two_view_geometry.X.col(point_index).transpose()
+                << std::endl;
+    }
+    std::cout << std::endl;
+  }
+  SARA_CHECK(feature_tracks.size());
+
+  // Easy approach: remove ambiguity by consider only feature tracks of size 2
+  // in the two view problem.
+  {
+    auto unambiguous_feature_tracks = std::set<std::set<FeatureGID>>{};
+    for (const auto& track : feature_tracks)
+      if (track.size() == 2)
+        unambiguous_feature_tracks.insert(track);
+    SARA_CHECK(unambiguous_feature_tracks.size());
+    feature_tracks.swap(unambiguous_feature_tracks);
+  }
 
 
-  // Prepare the bundle adjustment problem formulation.
+  // More careful approach:
+  //
+  // - Use the 2D feature points with the strongest (absolute) response value in
+  //   the feature detection
+
+
+
+  // Prepare the bundle adjustment problem formulation .
   //
   // 1. Count the number of 3D points.
   const auto num_points = static_cast<int>(feature_tracks.size());
@@ -255,7 +270,34 @@ GRAPHICS_MAIN()
     observations(i, 1) = y;
 
     // Initialize the 3D points.
-    //parameters[9 * num_cameras + point_indices[i] + 0] =
+    const auto m = match_index[ref.gid];
+    const auto point_3d = two_view_geometry.X.col(m);
+    parameters[9 * num_cameras + point_indices[i] + 0] = point_3d.x();
+    parameters[9 * num_cameras + point_indices[i] + 1] = point_3d.y();
+    parameters[9 * num_cameras + point_indices[i] + 2] = point_3d.z();
+  }
+
+  // Initialize the 3D points.
+  for (auto p = 0; p < num_points; ++p)
+  {
+    const auto point_3d = two_view_geometry.X.col(m);
+    parameters[9 * num_cameras + point_indices[i] + 0] = point_3d.x();
+    parameters[9 * num_cameras + point_indices[i] + 1] = point_3d.y();
+    parameters[9 * num_cameras + point_indices[i] + 2] = point_3d.z();
+  }
+
+  // Initialize the cameras parameters.
+  for (auto c = 0; c < num_cameras; ++c)
+  {
+    //parameters[9 * camera_indices[i] + 0] = ...
+    //parameters[9 * camera_indices[i] + 1] = ...
+    //parameters[9 * camera_indices[i] + 2] = ...
+    //parameters[9 * camera_indices[i] + 3] = ...
+    //parameters[9 * camera_indices[i] + 4] = ...
+    //parameters[9 * camera_indices[i] + 5] = ...
+    //parameters[9 * camera_indices[i] + 6] = ...
+    //parameters[9 * camera_indices[i] + 7] = ...
+    //parameters[9 * camera_indices[i] + 8] = ...
   }
 
 #ifdef SAVE_TWO_VIEW_GEOMETRY
