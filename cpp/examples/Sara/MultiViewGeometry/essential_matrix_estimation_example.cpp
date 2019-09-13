@@ -171,7 +171,7 @@ GRAPHICS_MAIN()
   };
 
 
-  std::map<FeatureGID, int> from_2d_to_3d;
+  std::map<FeatureGID, int> feature_gids_to_3d_point_indices;
 
 
   // Populate the feature tracks.
