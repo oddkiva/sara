@@ -1,0 +1,8 @@
+# b2 -j%NUMBER_OF_PROCESSORS% toolset=msvc-14.1 address-model=64 architecture=x86 link=shared threading=multi runtime-link=shared --build-type=complete stage
+
+using python
+  : 3.7
+  : "C:\\Users\\David\\AppData\\Local\\Programs\\Python\\Python37\\python.exe"
+  : "C:\\Users\\David\\AppData\\Local\\Programs\\Python\\Python37\\include"
+  : "C:\\Users\\David\\AppData\\Local\\Programs\\Python\\Python37\\libs"
+  ;
