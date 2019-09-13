@@ -26,7 +26,7 @@
 
 namespace DO::Sara {
 
-//! @brief Feature GID.
+//! @brief Feature global ID (GID).
 struct FeatureGID
 {
   int image_id{-1};
@@ -41,6 +41,25 @@ struct FeatureGID
   {
     return std::make_pair(image_id, local_id) <
            std::make_pair(other.image_id, other.local_id);
+  }
+};
+
+
+//! @brief Match global ID (GID).
+struct MatchGID
+{
+  int ij;
+  int m;
+
+  auto operator==(const MatchGID& other) const -> bool
+  {
+    return ij == other.ij && m == other.m;
+  }
+
+  auto operator<(const MatchGID& other) const -> bool
+  {
+    return std::make_pair(ij, m) <
+           std::make_pair(other.ij, other.m);
   }
 };
 

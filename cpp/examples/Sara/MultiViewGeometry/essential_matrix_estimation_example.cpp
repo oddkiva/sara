@@ -11,6 +11,7 @@
 
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
+#include <DO/Sara/MultiViewGeometry/BundleAdjustmentProblem.hpp>
 #include <DO/Sara/MultiViewGeometry/EpipolarGraph.hpp>
 #include <DO/Sara/MultiViewGeometry/FeatureGraph.hpp>
 #include <DO/Sara/MultiViewGeometry/Miscellaneous.hpp>
@@ -133,20 +134,15 @@ GRAPHICS_MAIN()
 
 
   print_stage("Mapping feature to match");
-  std::map<FeatureGID, int> match_index;
+  std::multimap<FeatureGID, MatchGID> match_index;
   for (auto m = 0; m < M.size(0); ++ m)
   {
     if (inliers(m) && two_view_geometry.cheirality(m))
     {
-      match_index[{0, M(m, 0)}] = m;
-      match_index[{1, M(m, 1)}] = m;
+      match_index.insert({{0, M(m, 0)}, {0, m}});
+      match_index.insert({{1, M(m, 1)}, {0, m}});
     }
   }
-
-  // For N views where N > 2.
-  //std::vector<std::set<FeatureGID>>{};
-  //Tensor_<double, 3> points{};
-  //std::multimap<FeatureGID, MatchGID> match_index;
 
 
   // Populate the feature tracks.
@@ -166,13 +162,17 @@ GRAPHICS_MAIN()
     for (const auto& fgid : track)
     {
       const auto& f = features(views.keypoints[fgid.image_id])[fgid.local_id];
-      const auto point_index = match_index[fgid];
-      std::cout << "- {" << fgid.image_id << ", " << fgid.local_id << "} : "
-                << "STR: " << f.extremum_value << "  "
-                << "TYP: " << int(f.extremum_type) << "  "
-                << "2D:  " << f.center().transpose() << "     "
-                << "3D:  " << two_view_geometry.X.col(point_index).transpose()
-                << std::endl;
+      for (auto [m, m_end] = match_index.equal_range(fgid); m != m_end; ++m)
+      {
+        const auto point_index = m->second.m;
+        std::cout << "- {" << fgid.image_id << ", " << fgid.local_id << "} : "
+                  << "STR: " << f.extremum_value << "  "
+                  << "TYP: " << int(f.extremum_type) << "  "
+                  << "2D:  " << f.center().transpose() << "     "
+                  << "3D:  "
+                  << two_view_geometry.X.col(point_index).transpose()
+                  << std::endl;
+      }
     }
     std::cout << std::endl;
   }
@@ -192,113 +192,18 @@ GRAPHICS_MAIN()
 
   // More careful approach:
   //
-  // - Use the 2D feature points with the strongest (absolute) response value in
+  // - If in the two-view problem, a feature tracks contains more than 1 feature
+  //   in image 0 or 1, use the 2D points with the strongest (absolute) response value in
   //   the feature detection
-
+  //
+  // Treat this case later.
 
 
   // Prepare the bundle adjustment problem formulation .
-  //
-  // 1. Count the number of 3D points.
-  const auto num_points = static_cast<int>(feature_tracks.size());
-  SARA_CHECK(num_points);
+  auto ba_problem = BundleAdjustmentProblem{};
+  ba_problem.populate_data_from_two_view_geometry(
+      feature_tracks, views.keypoints, match_index, two_view_geometry);
 
-  // 2. Count the number of 2D observations.
-  auto num_observations_per_points = std::vector<int>(num_points);
-  std::transform(
-      std::begin(feature_tracks), std::end(feature_tracks),
-      std::begin(num_observations_per_points),
-      [](const auto& track) { return static_cast<int>(track.size()); });
-
-  const auto num_observations =
-      std::accumulate(std::begin(num_observations_per_points),
-                      std::end(num_observations_per_points), 0);
-  SARA_CHECK(num_observations);
-
-  // 3. Count the number of cameras, which should be equal to the number of
-  //    images.
-  auto image_ids = std::set<int>{};
-  for (const auto& track : feature_tracks)
-    for (const auto& f : track)
-      image_ids.insert(f.image_id);
-
-  const auto num_cameras = static_cast<int>(image_ids.size());
-  SARA_CHECK(num_cameras);
-
-  const auto num_parameters = 9 * num_cameras + 3 * num_points;
-  SARA_CHECK(num_parameters);
-
-  // 4. Transform the data for convenience.
-  struct ObservationRef {
-    FeatureGID gid;
-    // TODO: needs the match_index;
-    int camera_id;
-    int point_id;
-  };
-  auto obs_refs = std::vector<ObservationRef>{};
-  {
-    obs_refs.reserve(num_observations);
-
-    auto point_id = 0;
-    for (const auto& track : feature_tracks)
-    {
-      for (const auto& f: track)
-        obs_refs.push_back({f, f.image_id, point_id});
-      ++point_id;
-    }
-  }
-
-  // 5. Prepare the data for Ceres.
-  auto observations = Tensor_<double, 2>{{num_observations, 2}};
-  auto point_indices = std::vector<int>(num_observations);
-  auto camera_indices = std::vector<int>(num_observations);
-  auto parameters = std::vector<double>(num_parameters);
-  for (int i = 0; i < num_observations; ++i)
-  {
-    const auto& ref = obs_refs[i];
-
-    // Easy things first.
-    point_indices[i] = ref.point_id;
-    camera_indices[i] = ref.camera_id;
-
-    // Initialize the 2D observations.
-    const auto& image_id = ref.gid.image_id;
-    const auto& local_id = ref.gid.local_id;
-    const double x = un[image_id](local_id, 0);
-    const double y = un[image_id](local_id, 1);
-    observations(i, 0) = x;
-    observations(i, 1) = y;
-
-    // Initialize the 3D points.
-    const auto m = match_index[ref.gid];
-    const auto point_3d = two_view_geometry.X.col(m);
-    parameters[9 * num_cameras + point_indices[i] + 0] = point_3d.x();
-    parameters[9 * num_cameras + point_indices[i] + 1] = point_3d.y();
-    parameters[9 * num_cameras + point_indices[i] + 2] = point_3d.z();
-  }
-
-  // Initialize the 3D points.
-  for (auto p = 0; p < num_points; ++p)
-  {
-    const auto point_3d = two_view_geometry.X.col(m);
-    parameters[9 * num_cameras + point_indices[i] + 0] = point_3d.x();
-    parameters[9 * num_cameras + point_indices[i] + 1] = point_3d.y();
-    parameters[9 * num_cameras + point_indices[i] + 2] = point_3d.z();
-  }
-
-  // Initialize the cameras parameters.
-  for (auto c = 0; c < num_cameras; ++c)
-  {
-    //parameters[9 * camera_indices[i] + 0] = ...
-    //parameters[9 * camera_indices[i] + 1] = ...
-    //parameters[9 * camera_indices[i] + 2] = ...
-    //parameters[9 * camera_indices[i] + 3] = ...
-    //parameters[9 * camera_indices[i] + 4] = ...
-    //parameters[9 * camera_indices[i] + 5] = ...
-    //parameters[9 * camera_indices[i] + 6] = ...
-    //parameters[9 * camera_indices[i] + 7] = ...
-    //parameters[9 * camera_indices[i] + 8] = ...
-  }
 
 #ifdef SAVE_TWO_VIEW_GEOMETRY
   keep_cheiral_inliers_only(geometry, inliers);
