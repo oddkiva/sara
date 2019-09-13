@@ -180,7 +180,7 @@ int __main(int argc, char **argv)
 {
   try
   {
-    po::options_description desc{"Estimate essential matrices"};
+    po::options_description desc{"Perform bundle adjustment"};
     desc.add_options()                                                 //
         ("help, h", "Help screen")                                     //
         ("dirpath", po::value<std::string>(), "Image directory path")  //

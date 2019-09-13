@@ -36,6 +36,12 @@ struct FeatureGID
   {
     return image_id == other.image_id && local_id == other.local_id;
   }
+
+  auto operator<(const FeatureGID& other) const -> bool
+  {
+    return std::make_pair(image_id, local_id) <
+           std::make_pair(other.image_id, other.local_id);
+  }
 };
 
 
@@ -100,8 +106,12 @@ auto calculate_feature_id_offsets(
 DO_SARA_EXPORT
 auto populate_feature_tracks(const ViewAttributes& views,
                              const EpipolarEdgeAttributes& epipolar_edges)
-    -> std::pair<FeatureGraph,
-                 IncrementalConnectedComponentsHelper::Components>;
+    -> std::pair<FeatureGraph, std::vector<std::vector<int>>>;
+
+DO_SARA_EXPORT
+auto filter_feature_tracks(const FeatureGraph& graph,
+                           const std::vector<std::vector<int>>& components)
+    -> std::set<std::set<FeatureGID>>;
 
 
 //! @brief write feature graph to HDF5.

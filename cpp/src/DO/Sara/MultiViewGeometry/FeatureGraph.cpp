@@ -64,7 +64,7 @@ auto calculate_feature_id_offsets(
 
 auto populate_feature_tracks(const ViewAttributes& view_attributes,
                              const EpipolarEdgeAttributes& epipolar_edges)
-    -> std::pair<FeatureGraph, IncrementalConnectedComponentsHelper::Components>
+    -> std::pair<FeatureGraph, std::vector<std::vector<int>>>
 {
   const auto& keypoints = view_attributes.keypoints;
 
@@ -90,32 +90,6 @@ auto populate_feature_tracks(const ViewAttributes& view_attributes,
   auto add_edge = [&](auto u, auto v) {
     boost::add_edge(u, v, graph);
     ds.union_set(u, v);
-  };
-
-  auto find_sets = [&](const auto& graph, auto& ds) {
-    for (auto [v, v_end] = boost::vertices(graph); v != v_end; ++v)
-      std::cout << "representative[" << *v << "] = " << ds.find_set(*v)
-                << std::endl;
-    std::cout << std::endl;
-  };
-
-  auto print_graph = [&](const auto& graph) {
-    std::cout << "An undirected graph:" << std::endl;
-    boost::print_graph(graph, boost::get(boost::vertex_index, graph));
-    std::cout << std::endl;
-  };
-
-  auto print_components = [&](const auto& components) {
-    for (auto c : components)
-    {
-      std::cout << "component " << c << " contains: ";
-
-      for (auto [child, child_end] = components[c]; child != child_end; ++child)
-        std::cout << "GID[" << *child << "] = "
-                  << "{" << graph[*child].image_id << ", "
-                  << graph[*child].local_id << "}, ";
-      std::cout << std::endl;
-    }
   };
 
   const auto& edge_ids = epipolar_edges.edge_ids;
@@ -177,16 +151,6 @@ auto populate_feature_tracks(const ViewAttributes& view_attributes,
       const auto vp = p_off + p;
       const auto vq = q_off + q;
 
-#ifdef DEBUG
-      SARA_CHECK(m);
-      SARA_CHECK(p);
-      SARA_CHECK(q);
-      SARA_CHECK(p_off);
-      SARA_CHECK(q_off);
-      SARA_CHECK(vp);
-      SARA_CHECK(vq);
-#endif
-
       // Runtime checks.
       if (graph[vp].image_id != i)
         throw std::runtime_error{"image_id[vp] != i"};
@@ -204,12 +168,39 @@ auto populate_feature_tracks(const ViewAttributes& view_attributes,
   });
 
   // Calculate the connected components.
-  const auto components = ICC::get_components(parent);
-  print_components(components);
+  auto components = std::vector<std::vector<int>>{};
+  {
+    const auto components_tmp = ICC::get_components(parent);
+    components.resize(components_tmp.size());
+    for (auto c : components_tmp)
+      for (auto [child, child_end] = components_tmp[c]; child != child_end; ++child)
+        components[c].push_back(*child);
+  }
+
 
   return {graph, components};
 }
 
+auto filter_feature_tracks(const FeatureGraph& graph,
+                           const std::vector<std::vector<int>>& components)
+    -> std::set<std::set<FeatureGID>>
+{
+  auto feature_tracks_filtered = std::set<std::set<FeatureGID>>{};
+  for (const auto& component: components)
+  {
+    auto feature_track = std::set<FeatureGID>{};
+    std::transform(component.begin(), component.end(),
+                   std::inserter(feature_track, std::begin(feature_track)),
+                   [&](const auto v) { return graph[v]; });
+
+    // We are only interested in features that have correspondences.
+    // So we must collect only components of size 2 at least.
+    if (feature_track.size() >= 2)
+      feature_tracks_filtered.insert(feature_track);
+  }
+
+  return feature_tracks_filtered;
+}
 
 template <>
 struct CalculateH5Type<FeatureGID>

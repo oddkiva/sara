@@ -23,111 +23,6 @@ namespace fs = boost::filesystem;
 using namespace DO::Sara;
 
 
-BOOST_AUTO_TEST_CASE(test_populate_feature_gids)
-{
-  auto keys = std::vector{
-    KeypointList<OERegion, float>{},
-    KeypointList<OERegion, float>{},
-    KeypointList<OERegion, float>{}
-  };
-
-  features(keys[0]).resize(3);
-  features(keys[1]).resize(1);
-  features(keys[2]).resize(2);
-
-  descriptors(keys[0]).resize({3, 10});
-  descriptors(keys[1]).resize({1, 10});
-  descriptors(keys[2]).resize({2, 10});
-
-  const auto feature_gids = populate_feature_gids(keys);
-  const auto true_feature_gids =
-      std::vector<FeatureGID>{{0, 0}, {0, 1}, {0, 2}, {1, 0}, {2, 0}, {2, 1}};
-  BOOST_CHECK(feature_gids == true_feature_gids);
-}
-
-BOOST_AUTO_TEST_CASE(test_calculate_of_feature_id_offset)
-{
-  auto keys = std::vector{
-    KeypointList<OERegion, float>{},
-    KeypointList<OERegion, float>{},
-    KeypointList<OERegion, float>{}
-  };
-
-  features(keys[0]).resize(3);
-  features(keys[1]).resize(1);
-  features(keys[2]).resize(2);
-
-  descriptors(keys[0]).resize({3, 10});
-  descriptors(keys[1]).resize({1, 10});
-  descriptors(keys[2]).resize({2, 10});
-
-  const auto fid_offsets = calculate_feature_id_offsets(keys);
-  const auto true_fid_offsets = std::vector{0, 3, 4};
-  BOOST_CHECK(fid_offsets == true_fid_offsets);
-}
-
-BOOST_AUTO_TEST_CASE(test_populate_feature_tracks)
-{
-  // Construct a dataset containing 3 views.
-  const auto num_views = 3;
-  auto views = ViewAttributes{};
-  {
-    views.keypoints.resize(3);
-    features(views.keypoints[0]).resize(3);
-    features(views.keypoints[1]).resize(4);
-    features(views.keypoints[2]).resize(2);
-
-    descriptors(views.keypoints[0]).resize({3, 10});
-    descriptors(views.keypoints[1]).resize({4, 10});
-    descriptors(views.keypoints[2]).resize({2, 10});
-  }
-
-  // Construct matches.
-  auto epipolar_edges = EpipolarEdgeAttributes{};
-  epipolar_edges.matches = {
-      // Image 0 - Image 1
-      //
-      // (0, 0) - (1, 0)
-      // (0, 1) - (1, 1)
-      // (0, 2) - (1, 2)
-      {make_index_match(0, 0), make_index_match(1, 1), make_index_match(2, 2)},
-      // Image 0 - Image 2
-      //
-      // (0, 0) - (2, 0)
-      // (0, 1) - (2, 1)
-      {make_index_match(0, 0), make_index_match(1, 1)},
-      // Image 1 - Image 2
-      //
-      // (1, 0) - (2, 0)
-      // (1, 1) - (2, 1)
-      {make_index_match(0, 0), make_index_match(1, 1)}};
-
-  // Allocate the edges.
-  epipolar_edges.initialize_edges(num_views);
-  epipolar_edges.resize_essential_edge_list();
-
-  // Make sure the matches are marked as inliers.
-  for (const auto& ij : epipolar_edges.edge_ids)
-  {
-    const auto& matches_ij = epipolar_edges.matches[ij];
-    auto& E_inliers_ij = epipolar_edges.E_inliers[ij];
-    E_inliers_ij = Tensor_<bool, 1>{int(matches_ij.size())};
-    E_inliers_ij.flat_array().fill(true);
-  }
-
-  // Make sure the matches are also marked as cheiral.
-  epipolar_edges.two_view_geometries.resize(3);
-  for (const auto& ij : epipolar_edges.edge_ids)
-  {
-    const auto& matches_ij = epipolar_edges.matches[ij];
-    auto& cheirality_ij = epipolar_edges.two_view_geometries[ij].cheirality;
-    cheirality_ij.resize(matches_ij.size());
-    cheirality_ij.fill(true);
-  }
-
-  const auto [graph, components] = populate_feature_tracks(views, epipolar_edges);
-}
-
 BOOST_AUTO_TEST_CASE(test_connected_components)
 {
   constexpr auto N = 6;
@@ -240,6 +135,7 @@ BOOST_AUTO_TEST_CASE(test_incremental_connected_components)
   }
 }
 
+
 BOOST_AUTO_TEST_CASE(test_read_write_feature_graph_to_hdf5)
 {
   auto graph = FeatureGraph{};
@@ -286,4 +182,166 @@ BOOST_AUTO_TEST_CASE(test_read_write_feature_graph_to_hdf5)
                       boost::num_vertices(graph_read));
     BOOST_CHECK_EQUAL(boost::num_edges(graph), boost::num_edges(graph_read));
   }
+}
+
+
+BOOST_AUTO_TEST_CASE(test_populate_feature_gids)
+{
+  auto keys = std::vector{
+    KeypointList<OERegion, float>{},
+    KeypointList<OERegion, float>{},
+    KeypointList<OERegion, float>{}
+  };
+
+  features(keys[0]).resize(3);
+  features(keys[1]).resize(1);
+  features(keys[2]).resize(2);
+
+  descriptors(keys[0]).resize({3, 10});
+  descriptors(keys[1]).resize({1, 10});
+  descriptors(keys[2]).resize({2, 10});
+
+  const auto feature_gids = populate_feature_gids(keys);
+  const auto true_feature_gids =
+      std::vector<FeatureGID>{{0, 0}, {0, 1}, {0, 2}, {1, 0}, {2, 0}, {2, 1}};
+  BOOST_CHECK(feature_gids == true_feature_gids);
+}
+
+BOOST_AUTO_TEST_CASE(test_calculate_of_feature_id_offset)
+{
+  auto keys = std::vector{
+    KeypointList<OERegion, float>{},
+    KeypointList<OERegion, float>{},
+    KeypointList<OERegion, float>{}
+  };
+
+  features(keys[0]).resize(3);
+  features(keys[1]).resize(1);
+  features(keys[2]).resize(2);
+
+  descriptors(keys[0]).resize({3, 10});
+  descriptors(keys[1]).resize({1, 10});
+  descriptors(keys[2]).resize({2, 10});
+
+  const auto fid_offsets = calculate_feature_id_offsets(keys);
+  const auto true_fid_offsets = std::vector{0, 3, 4};
+  BOOST_CHECK(fid_offsets == true_fid_offsets);
+}
+
+BOOST_AUTO_TEST_CASE(test_populate_feature_tracks)
+{
+  // Construct a dataset containing 3 views.
+  const auto num_views = 3;
+  auto views = ViewAttributes{};
+  {
+    views.keypoints.resize(3);
+    features(views.keypoints[0]).resize(3);
+    features(views.keypoints[1]).resize(4);
+    features(views.keypoints[2]).resize(2);
+
+    descriptors(views.keypoints[0]).resize({3, 10});
+    descriptors(views.keypoints[1]).resize({4, 10});
+    descriptors(views.keypoints[2]).resize({2, 10});
+  }
+
+  // Construct matches.
+  auto epipolar_edges = EpipolarEdgeAttributes{};
+  epipolar_edges.matches = {
+      // Image 0 - Image 1
+      //
+      // (0, 0) - (1, 0)
+      // (0, 1) - (1, 1)
+      // (0, 2) - (1, 2)
+      {make_index_match(0, 0), make_index_match(1, 1), make_index_match(2, 2)},
+      // Image 0 - Image 2
+      //
+      // (0, 0) - (2, 0)
+      // (0, 1) - (2, 1)
+      {make_index_match(0, 0), make_index_match(1, 1)},
+      // Image 1 - Image 2
+      //
+      // (1, 0) - (2, 0)
+      // (1, 1) - (2, 1)
+      {make_index_match(0, 0), make_index_match(1, 1)}};
+
+  // Allocate the edges.
+  epipolar_edges.initialize_edges(num_views);
+  epipolar_edges.resize_essential_edge_list();
+
+  // Make sure the matches are marked as inliers.
+  for (const auto& ij : epipolar_edges.edge_ids)
+  {
+    const auto& matches_ij = epipolar_edges.matches[ij];
+    auto& E_inliers_ij = epipolar_edges.E_inliers[ij];
+    E_inliers_ij = Tensor_<bool, 1>{int(matches_ij.size())};
+    E_inliers_ij.flat_array().fill(true);
+  }
+
+  // Make sure the matches are also marked as cheiral.
+  epipolar_edges.two_view_geometries.resize(3);
+  for (const auto& ij : epipolar_edges.edge_ids)
+  {
+    const auto& matches_ij = epipolar_edges.matches[ij];
+    auto& cheirality_ij = epipolar_edges.two_view_geometries[ij].cheirality;
+    cheirality_ij.resize(matches_ij.size());
+    cheirality_ij.fill(true);
+  }
+
+  const auto [g_, c_] = populate_feature_tracks(views, epipolar_edges);
+  const auto graph = g_;
+  const auto components = c_;
+
+  BOOST_CHECK_EQUAL(boost::num_vertices(graph), 9);
+  BOOST_CHECK_EQUAL(boost::num_edges(graph), 7);
+  BOOST_CHECK_EQUAL(components.size(), 4);
+
+  for (auto c = 0u; c < components.size(); ++c)
+  {
+    const auto& component = components[c];
+
+    std::cout << "Component " << c << " : ";
+    for (const auto& v: component)
+      std::cout << "GID[" << v << "] = {" << graph[v].image_id << ", "
+                << graph[v].local_id << "}, ";
+    std::cout << std::endl;
+  }
+
+
+  const auto feature_tracks_filtered = filter_feature_tracks(graph, components);
+  for (const auto& feature_track : feature_tracks_filtered)
+  {
+    std::cout << "feature track : ";
+    for (const auto& f : feature_track)
+      std::cout << "{" << f.image_id << ", " << f.local_id << "}, ";
+    std::cout << std::endl;
+  }
+
+  // Construct the connected components manually from the following matches:
+  //
+  // Image 0 - Image 1
+  // (0, 0) - (1, 0)
+  // (0, 1) - (1, 1)
+  // (0, 2) - (1, 2)
+  //
+  // Image 0 - Image 2
+  // (0, 0) - (2, 0)
+  // (0, 1) - (2, 1)
+  //
+  // Image 1 - Image 2
+  // (1, 0) - (2, 0)
+  // (1, 1) - (2, 1)
+  //
+  //
+  // The connected components of size at least 2 are:
+  // (0, 0) - (1, 0) - (2, 0)
+  // (0, 1) - (1, 1) - (2, 1)
+  // (0, 2) - (1, 2)
+  auto true_feature_tracks_filtered = std::set<std::set<FeatureGID>>{};
+  true_feature_tracks_filtered.insert(
+      std::set<FeatureGID>{{0, 0}, {1, 0}, {2, 0}});
+  true_feature_tracks_filtered.insert(
+      std::set<FeatureGID>{{0, 1}, {1, 1}, {2, 1}});
+  true_feature_tracks_filtered.insert(std::set<FeatureGID>{{0, 2}, {1, 2}});
+
+  BOOST_CHECK(feature_tracks_filtered == true_feature_tracks_filtered);
 }

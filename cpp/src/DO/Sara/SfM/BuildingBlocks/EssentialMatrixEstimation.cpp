@@ -138,9 +138,9 @@ auto estimate_essential_matrices(const std::string& dirpath,      //
   auto F_num_inliers = [&](const auto& ij) {
     return F_inliers[ij].vector().count();
   };
-  auto F_inlier_ratio = [&](const auto& ij) {
-    return double(F_num_inliers(ij)) / F_inliers[ij].size();
-  };
+  // auto F_inlier_ratio = [&](const auto& ij) {
+  //   return double(F_num_inliers(ij)) / F_inliers[ij].size();
+  // };
 
   std::for_each(
       std::begin(edge_ids), std::end(edge_ids), [&](const auto& ij) {

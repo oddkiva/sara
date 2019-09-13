@@ -11,6 +11,7 @@
 
 #include <DO/Sara/FileSystem.hpp>
 #include <DO/Sara/Graphics.hpp>
+#include <DO/Sara/MultiViewGeometry/BundleAdjustmentProblem.hpp>
 #include <DO/Sara/MultiViewGeometry/FeatureGraph.hpp>
 #include <DO/Sara/SfM/BuildingBlocks.hpp>
 #include <DO/Sara/SfM/Detectors/SIFT.hpp>
@@ -64,191 +65,90 @@ auto track_points(const std::string& dirpath, const std::string& h5_filepath,
   SARA_DEBUG << "Reading the two-view geometries..." << std::endl;
   edge_attributes.read_two_view_geometries(view_attributes, h5_file);
 
-  // Convenient references.
-  const auto& edge_ids = edge_attributes.edge_ids;
-  const auto& edges = edge_attributes.edges;
-  const auto& matches = edge_attributes.matches;
 
-  const auto& E = edge_attributes.E;
-  const auto& E_num_samples = edge_attributes.E_num_samples;
-  const auto& E_noise = edge_attributes.E_noise;
-  const auto& E_best_samples = edge_attributes.E_best_samples;
-  const auto& E_inliers = edge_attributes.E_inliers;
-
-  const auto& keypoints = view_attributes.keypoints;
-  const auto num_keypoints =
-      std::accumulate(std::begin(keypoints), std::end(keypoints), size_t(0),
-                      [](const auto& sum, const auto& keys) -> size_t {
-                        return sum + features(keys).size();
-                      });
-  SARA_CHECK(num_keypoints);
-
-  const auto gids = populate_feature_gids(keypoints);
-  SARA_CHECK(gids.size());
-
-  // Populate the vertices.
-  const auto feature_ids = range(static_cast<int>(gids.size()));
-  auto graph = FeatureGraph{num_keypoints};
-  std::for_each(std::begin(feature_ids), std::end(feature_ids),
-                [&](auto v) { graph[v] = gids[v]; });
-
-  auto feature_id_offset = std::vector<int>(num_vertices);
-  feature_id_offset[0] = 0;
-  for (auto i = 1; i < num_vertices; ++i)
-    feature_id_offset[i] =
-        feature_id_offset[i - 1] + features(keypoints[i - 1]).size();
-
-  // Incremental connected components.
-  using ICC = IncrementalConnectedComponentsHelper;
-  auto rank = ICC::initialize_ranks(graph);
-  auto parent = ICC::initialize_parents(graph);
-  auto ds = ICC::initialize_disjoint_sets(rank, parent);
-  ICC::initialize_incremental_components(graph, ds);
-
-  auto add_edge = [&](auto u, auto v) {
-    boost::add_edge(u, v, graph);
-    ds.union_set(u, v);
-  };
-
-  auto find_sets = [&](const auto& graph, auto& ds) {
-    for (auto [v, v_end] = boost::vertices(graph); v != v_end; ++v)
-      std::cout << "representative[" << *v << "] = " << ds.find_set(*v)
-                << std::endl;
-    std::cout << std::endl;
-  };
-
-  auto print_graph = [&](const auto& graph) {
-    std::cout << "An undirected graph:" << std::endl;
-    boost::print_graph(graph, boost::get(boost::vertex_index, graph));
-    std::cout << std::endl;
-  };
-
-  auto print_components = [&](const auto& components) {
-    for (auto c : components)
-    {
-      std::cout << "component " << c << " contains: ";
-
-      for (auto [child, child_end] = components[c]; child != child_end; ++child)
-        std::cout << *child << " ";
-      std::cout << std::endl;
-    }
-  };
-
-  // Populate the edges.
-  std::for_each(std::begin(edge_ids), std::end(edge_ids), [&](const auto& ij) {
-    const auto& eij = edges[ij];
-    const auto i = eij.first;
-    const auto j = eij.second;
-    const auto& Mij = matches[ij];
-    const auto& inliers_ij = E_inliers[ij];
-    const auto& cheirality_ij =
-        edge_attributes.two_view_geometries[ij].cheirality;
-
-    std::cout << std::endl;
-    SARA_DEBUG << "Processing image pair " << i << " " << j << std::endl;
-
-    SARA_DEBUG << "Checking if there are inliers..." << std::endl;
-    SARA_CHECK(cheirality_ij.count());
-    SARA_CHECK(inliers_ij.flat_array().count());
-    if (inliers_ij.flat_array().count() == 0)
-      return;
-
-    SARA_DEBUG << "Calculating cheiral inliers..." << std::endl;
-    SARA_CHECK(cheirality_ij.size());
-    SARA_CHECK(inliers_ij.size());
-    if (cheirality_ij.size() != inliers_ij.size())
-        throw std::runtime_error{"cheirality_ij.size() != inliers_ij.size()"};
-
-    const Array<bool, 1, Dynamic> cheiral_inliers =
-        inliers_ij.row_vector().array() && cheirality_ij;
-    SARA_CHECK(cheiral_inliers.size());
-    SARA_CHECK(cheiral_inliers.count());
-
-    // Convert each match 'm' to a pair of point indices '(p, q)'.
-    SARA_DEBUG << "Transforming matches..." << std::endl;
-    const auto pq_tensor = to_tensor(Mij);
-    SARA_CHECK(Mij.size());
-    SARA_CHECK(pq_tensor.size(0));
-
-    if (pq_tensor.empty())
-      return;
-
-    SARA_DEBUG << "Updating disjoint sets..." << std::endl;
-    for (int m = 0; m < pq_tensor.size(0); ++m)
-    {
-      if (!cheiral_inliers(m))
-        continue;
-
-      const auto p = pq_tensor(m, 0);
-      const auto q = pq_tensor(m, 1);
-
-      const auto &p_off = feature_id_offset[i];
-      const auto &q_off = feature_id_offset[j];
-
-      const auto vp = p_off + p;
-      const auto vq = q_off + q;
-
-#ifdef DEBUG
-      SARA_CHECK(m);
-      SARA_CHECK(p);
-      SARA_CHECK(q);
-      SARA_CHECK(p_off);
-      SARA_CHECK(q_off);
-      SARA_CHECK(vp);
-      SARA_CHECK(vq);
-#endif
-
-      // Runtime checks.
-      if (graph[vp].image_id != i)
-        throw std::runtime_error{"image_id[vp] != i"};
-      if (graph[vp].local_id != p)
-        throw std::runtime_error{"local_id[vp] != p"};
-
-      if (graph[vq].image_id != j)
-        throw std::runtime_error{"image_id[vq] != j"};
-      if (graph[vq].local_id != q)
-        throw std::runtime_error{"local_id[vq] != q"};
-
-      // Update the graph and the disjoint sets.
-      add_edge(vp, vq);
-    }
-  });
-
-  // Calculate the connected components.
-  const auto components = ICC::get_components(parent);
-  print_components(components);
+  // Populate the feature tracks.
+  const auto [feature_graph, components] =
+      populate_feature_tracks(view_attributes, edge_attributes);
 
   // Save the graph of features in HDF5 format.
-  write_feature_graph(graph, h5_file, "feature_graph");
+  write_feature_graph(feature_graph, h5_file, "feature_graph");
+
+  // Keep feature tracks of size 2 at least.
+  const auto feature_tracks = filter_feature_tracks(feature_graph, components);
 
 
-  // Prepare the bundle adjustment problem.
-  auto components_filtered = std::vector<std::vector<int>>{};
-  for (const auto& c : components)
-  {
-    int sz = 0;
-    for (auto [v, v_end] = components[c]; v != v_end; ++v)
-      ++sz;
-    if (sz <= 1)
-      continue;
-
-    auto comp = std::vector<int>{};
-    for (auto [v, v_end] = components[c]; v != v_end; ++v)
-      comp.push_back(*v);
-
-    components_filtered.push_back(comp);
-  }
-
-  const auto num_points = components_filtered.size();
+  // Prepare the bundle adjustment problem formulation.
+  //
+  // 1. Count the number of 3D points.
+  const auto num_points = static_cast<int>(feature_tracks.size());
   SARA_CHECK(num_points);
 
-  auto num_observations = 0;
-  for (const auto& component : components_filtered)
-    num_observations += component.size();
+  // 2. Count the number of 2D observations.
+  const auto num_observations_per_points = std::vector<int>(num_points);
+  std::transform(
+      std::begin(feature_tracks), std::end(feature_tracks),
+      std::begin(num_observations_per_points),
+      [](const auto& track) { return static_cast<int>(track.size()); });
+
+  const auto num_observations =
+      std::accumulate(std::begin(num_observations_per_points),
+                      std::end(num_observations_per_points), 0);
   SARA_CHECK(num_observations);
 
-  const auto num_cameras = num_vertices;
+  // 3. Count the number of cameras, which should be equal to the number of
+  //    images.
+  auto image_ids = std::set<int>{};
+  for (const auto& track : feature_tracks)
+    for (const auto& f : track)
+      image_ids.insert(f.image_id);
+
+  const auto num_cameras = static_cast<int>(image_ids.size());
   SARA_CHECK(num_cameras);
+
+  const auto num_parameters = 9 * num_cameras + 3 * num_points;
+
+  // 4. Transform the data for convenience.
+  struct ObservationRef {
+    FeatureGID gid;
+    int camera_id;
+    int point_id;
+  };
+  auto obs_refs = std::vector<ObservationRef>{};
+  {
+    obs_refs.reserve(num_observations);
+
+    auto point_id = 0;
+    for (const auto& track : feature_tracks)
+    {
+      for (const auto& f: track)
+        obs_refs.push_back({f, f.image_id, point_id});
+      ++point_id;
+    }
+  }
+
+  // 5. Prepare the data for Ceres.
+  auto observations = Tensor_<double, 2>{{num_observations, 2}};
+  auto parameters = Tensor_<double, 1>{num_parameters};
+  auto point_indices = std::vector<int>(num_points);
+  auto camera_indices = std::vector<int>(num_cameras);
+  for (int i = 0; i < num_observations; ++i)
+  {
+    const auto& ref = obs_refs[i];
+
+    // Easy things first.
+    point_indices[i] = ref.point_id;
+    camera_indices[i] = ref.camera_id;
+
+    // Initialize the 2D observations.
+    const auto& image_id = ref.gid.image_id;
+    const auto& local_id = ref.gid.local_id;
+    const auto& F = features(view_attributes.keypoints[image_id]);
+    const double x = F[local_id].x();
+    const double y = F[local_id].y();
+    observations[i].matrix() << x, y;
+
+    // Initialize the 3D points.
+  }
 }
 
 
