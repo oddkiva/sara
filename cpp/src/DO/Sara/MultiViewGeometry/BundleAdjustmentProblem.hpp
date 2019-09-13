@@ -48,6 +48,7 @@ struct BundleAdjustmentProblem
   auto resize(int num_observations,  //
               int num_points_, int num_cameras_, int camera_dof_)
   {
+    SARA_DEBUG << "Resizing data..." << std::endl;
     observations = Tensor_<double, 2>{{num_observations, 2}};
     point_indices = std::vector<int>(num_observations);
     camera_indices = std::vector<int>(num_observations);
@@ -58,16 +59,20 @@ struct BundleAdjustmentProblem
     const auto num_parameters = num_cameras * camera_dof + num_points * 3;
     parameters = std::vector<double>(num_parameters);
 
-    points_abs_coords_3d = TensorView_<double, 2>{
+    auto points_abs_coords_3d_new = TensorView_<double, 2>{
         parameters.data() + 9 * num_cameras, {num_points, 3}};
-    camera_parameters =
-        TensorView_<double, 2>{parameters.data(), {num_cameras, 9}};
+    auto camera_parameters_new =
+        TensorView_<double, 2>{parameters.data(), {num_cameras, camera_dof}};
+
+    points_abs_coords_3d.swap(points_abs_coords_3d_new);
+    camera_parameters.swap(camera_parameters_new);
   }
 
   auto populate_observations(
       const std::vector<ObservationRef>& obs_refs,
       const std::vector<KeypointList<OERegion, float>>& keypoints) -> void
   {
+    SARA_DEBUG << "Populating observations..." << std::endl;
     const auto num_observations = observations.size(0);
     for (int i = 0; i < num_observations; ++i)
     {
@@ -92,21 +97,26 @@ struct BundleAdjustmentProblem
       const std::multimap<FeatureGID, MatchGID>& match_index,
       const TwoViewGeometry& two_view_geometry) -> void
   {
-    auto points_view = points_abs_coords_3d.colmajor_view().matrix();
+    SARA_DEBUG << "Populating 3D points..." << std::endl;
 
+    auto points_view = points_abs_coords_3d.colmajor_view().matrix();
     for (auto [t, track] = std::make_pair(0, feature_tracks.begin());
          track != feature_tracks.end(); ++t, ++track)
     {
       const auto p = match_index.find(*track->begin())->second.m;
       const auto point_p = two_view_geometry.X.col(p);
       points_view.col(t) = point_p.hnormalized();
+#if DEBUG
       SARA_DEBUG << "Point[" << t << "] = "  //
                  << points_view.col(t).transpose() << std::endl;
+#endif
     }
   }
 
   auto populate_camera_parameters() -> void
   {
+    SARA_DEBUG << "Populating camera parameters..." << std::endl;
+
     auto cam_matrix = camera_parameters.matrix();
     for (auto c = 0; c < num_cameras; ++c)
     {
@@ -143,7 +153,8 @@ struct BundleAdjustmentProblem
     const auto num_cameras = static_cast<int>(image_ids.size());
     SARA_CHECK(num_cameras);
 
-    const auto num_parameters = 9 * num_cameras + 3 * num_points;
+    const auto camera_dof_ = 9;
+    const auto num_parameters = camera_dof_ * num_cameras + 3 * num_points;
     SARA_CHECK(num_parameters);
 
     // 4. Transform the data for convenience.
@@ -158,8 +169,7 @@ struct BundleAdjustmentProblem
       }
     }
 
-    resize(num_observations, num_points, num_cameras, 9);
-    resize(num_observations, num_points, num_cameras, 9);
+    resize(num_observations, num_points, num_cameras, camera_dof_);
     populate_observations(obs_refs, keypoints);
     populate_3d_points_from_two_view_geometry(feature_tracks, match_index,
                                               two_view_geometry);

@@ -30,6 +30,36 @@ using namespace std;
 using namespace DO::Sara;
 
 
+struct CameraModelView
+{
+  auto angles() -> double*
+  {
+    return parameters;
+  }
+
+  auto translation() -> double*
+  {
+    return parameters + 3;
+  }
+
+  auto focal() -> double&
+  {
+    return parameters[6];
+  }
+
+  auto l1() -> double&
+  {
+    return parameters[7];
+  }
+
+  auto l2() -> double&
+  {
+    return parameters[8];
+  }
+
+  double* parameters;
+};
+
 struct ReprojectionError
 {
   ReprojectionError(double observed_x, double observed_y)
@@ -53,9 +83,8 @@ struct ReprojectionError
     p[2] += camera[5];
 
     // Center of the distortion.
-    // Snavely assumes the camera coordinate system has a negative z axis.
-    T xp = -p[0] / p[2];
-    T yp = -p[1] / p[2];
+    T xp = p[0] / p[2];
+    T yp = p[1] / p[2];
 
     // Apply second and fourth order order radial distortion.
     const T& l1 = camera[7];
@@ -86,6 +115,31 @@ struct ReprojectionError
   double observed_x;
   double observed_y;
 };
+
+
+auto map_feature_gid_to_match_gid(const EpipolarEdgeAttributes& epipolar_edges)
+{
+  auto mapping = std::multimap<FeatureGID, MatchGID>{};
+  for (const auto& ij: epipolar_edges.edge_ids)
+  {
+    const auto view_i = epipolar_edges.edges[ij].first;
+    const auto view_j = epipolar_edges.edges[ij].second;
+    const auto& M_ij = epipolar_edges.matches[ij];
+    const auto& E_inliers_ij = epipolar_edges.E_inliers[ij];
+    const auto& two_view_geometry_ij = epipolar_edges.two_view_geometries[ij];
+
+    for (auto m = 0; m < int(M_ij.size()); ++m)
+    {
+      if (E_inliers_ij(m) && two_view_geometry_ij.cheirality(m))
+      {
+        mapping.insert({{view_i, M_ij[m].x_index()}, {ij, m}});
+        mapping.insert({{view_j, M_ij[m].y_index()}, {ij, m}});
+      }
+    }
+  }
+
+  return mapping;
+}
 
 
 GRAPHICS_MAIN()
@@ -194,19 +248,11 @@ GRAPHICS_MAIN()
   const auto& two_view_geometry = epipolar_edges.two_view_geometries.front();
 
 
-  print_stage("Mapping feature to match");
-  std::multimap<FeatureGID, MatchGID> match_index;
-  for (auto m = 0; m < M.size(0); ++ m)
-  {
-    if (inliers(m) && two_view_geometry.cheirality(m))
-    {
-      match_index.insert({{0, M(m, 0)}, {0, m}});
-      match_index.insert({{1, M(m, 1)}, {0, m}});
-    }
-  }
+  print_stage("Mapping feature GID to match GID...");
+  const auto match_index = map_feature_gid_to_match_gid(epipolar_edges);
 
 
-  // Populate the feature tracks.
+  print_stage("Populating the feature tracks...");
   const auto [feature_graph, components] =
       populate_feature_tracks(views, epipolar_edges);
 
@@ -215,6 +261,9 @@ GRAPHICS_MAIN()
   auto feature_tracks = filter_feature_tracks(feature_graph, components);
   for (const auto& track: feature_tracks)
   {
+    if (track.size() <= 2)
+      continue;
+
     std::cout << "Component: " << std::endl;
     std::cout << "Size = " << track.size() << std::endl;
     for (const auto& fgid : track)
