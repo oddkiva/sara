@@ -30,36 +30,6 @@ using namespace std;
 using namespace DO::Sara;
 
 
-struct CameraModelView
-{
-  auto angles() -> double*
-  {
-    return parameters;
-  }
-
-  auto translation() -> double*
-  {
-    return parameters + 3;
-  }
-
-  auto focal() -> double&
-  {
-    return parameters[6];
-  }
-
-  auto l1() -> double&
-  {
-    return parameters[7];
-  }
-
-  auto l2() -> double&
-  {
-    return parameters[8];
-  }
-
-  double* parameters;
-};
-
 struct ReprojectionError
 {
   ReprojectionError(double observed_x, double observed_y)
@@ -74,28 +44,31 @@ struct ReprojectionError
                   T* residuals) const
   {
     T p[3];
-    // camera[0, 1, 2] are the angle axis rotation.
-    ceres::AngleAxisRotatePoint(camera, point, p);
 
-    // Camera
-    p[0] += camera[3];
-    p[1] += camera[4];
-    p[2] += camera[5];
+    auto camera_view = CameraModelView<T>{camera};
 
-    // Center of the distortion.
+    // Rotate the point.
+    ceres::AngleAxisRotatePoint(camera_view.angle_axis(), point, p);
+    // Translate the point.
+    p[0] += camera_view.t()[0];
+    p[1] += camera_view.t()[1];
+    p[2] += camera_view.t()[2];
+
+    // Normalized camera coordinates.
     T xp = p[0] / p[2];
     T yp = p[1] / p[2];
 
     // Apply second and fourth order order radial distortion.
-    const T& l1 = camera[7];
-    const T& l2 = camera[8];
+    const auto& l1 = camera_view.l1();
+    const auto& l2 = camera_view.l2();
     const auto r2 = xp * xp + yp * yp;
     const auto distortion = T(1) + r2 * (l1 + l2 * r2);
+    xp *= distortion;
+    yp *= distortion;
 
-    const T& focal = camera[6];
-    const T predicted_x = focal * distortion * xp;
-    const T predicted_y = focal * distortion * yp;
-
+    // Apply the internal camera matrix.
+    const auto predicted_x = camera_view.fx() * xp + camera_view.x0();
+    const auto predicted_y = camera_view.fy() * yp + camera_view.y0();
 
     residuals[0] = predicted_x - T(observed_x);
     residuals[1] = predicted_y - T(observed_y);
@@ -245,7 +218,9 @@ GRAPHICS_MAIN()
   epipolar_edges.two_view_geometries = {
       estimate_two_view_geometry(M, un[0], un[1], E, inliers, sample_best)
   };
-  const auto& two_view_geometry = epipolar_edges.two_view_geometries.front();
+  auto& two_view_geometry = epipolar_edges.two_view_geometries.front();
+  two_view_geometry.C1.K = views.cameras[0].K;
+  two_view_geometry.C2.K = views.cameras[1].K;
 
 
   print_stage("Mapping feature GID to match GID...");
@@ -312,18 +287,28 @@ GRAPHICS_MAIN()
   ba_problem.populate_data_from_two_view_geometry(
       feature_tracks, views.keypoints, match_index, two_view_geometry);
 
-  // ceres::Problem problem;
-  // for (int i = 0; i < ba_problem.num_observations(); ++i)
-  // {
-  //   auto cost_fn =
-  //       ReprojectionError::Create(ba_problem.observations(i, 0),
-  //                                 ba_problem.observations(i, 1]);
-  //
-  //   problem.AddResidualBlock(cost_function,
-  //                            nullptr /* squared loss */,
-  //                            bal_problem.mutable_camera_for_observation(i),
-  //                            bal_problem.mutable_point_for_observation(i));
-  // }
+
+  // Solve the bundle adjustment problem with Ceres.
+  ceres::Problem problem;
+  for (int i = 0; i < ba_problem.observations.size(0); ++i)
+  {
+    auto cost_fn = ReprojectionError::Create(ba_problem.observations(i, 0),
+                                             ba_problem.observations(i, 1));
+
+    problem.AddResidualBlock(cost_fn, nullptr /* squared loss */,
+                             ba_problem.camera_parameters.data() +
+                                 ba_problem.camera_indices[i] * 12,
+                             ba_problem.points_abs_coords_3d.data() +
+                                 ba_problem.point_indices[i] * 3);
+  }
+
+  auto options = ceres::Solver::Options{};
+  options.linear_solver_type = ceres::DENSE_QR;
+  options.minimizer_progress_to_stdout = true;
+
+  auto summary = ceres::Solver::Summary{};
+  ceres::Solve(options, &problem, &summary);
+  std::cout << summary.BriefReport() << std::endl;
 
 
 #ifdef SAVE_TWO_VIEW_GEOMETRY
@@ -334,14 +319,13 @@ GRAPHICS_MAIN()
   geometry.C2.K = K2;
   auto colors = extract_colors(image1, image2, geometry);
   save_to_hdf5(geometry, colors);
-#endif
-
 
   // Inspect the fundamental matrix.
   print_stage("Inspecting the fundamental matrix estimation...");
   check_epipolar_constraints(views.images[0], views.images[1], F, matches,
                              sample_best, inliers,
                              /* display_step */ 20, /* wait_key */ true);
+#endif
 
   return 0;
 }

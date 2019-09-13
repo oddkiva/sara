@@ -19,6 +19,22 @@
 
 namespace DO::Sara {
 
+template <typename T>
+struct CameraModelView
+{
+  auto angle_axis() const -> const T* { return parameters; }
+  auto t() const -> const T* { return parameters + 3; }
+  auto fx() const -> const T& { return parameters[6]; }
+  auto fy() const -> const T& { return parameters[7]; }
+  auto x0() const -> const T& { return parameters[8]; }
+  auto y0() const -> const T& { return parameters[9]; }
+  auto l1() const -> const T& { return parameters[10]; }
+  auto l2() const -> const T& { return parameters[11]; }
+  static auto dof() { return 12; };
+
+  const T* parameters;
+};
+
 struct ObservationRef
 {
   FeatureGID gid;
@@ -113,15 +129,47 @@ struct BundleAdjustmentProblem
     }
   }
 
-  auto populate_camera_parameters() -> void
+  auto populate_camera_parameters(const TwoViewGeometry& two_view_geometry)
+      -> void
   {
     SARA_DEBUG << "Populating camera parameters..." << std::endl;
 
     auto cam_matrix = camera_parameters.matrix();
-    for (auto c = 0; c < num_cameras; ++c)
-    {
-      cam_matrix.row(c) << VectorXd::Zero(9);
-    }
+    // Angle axis vector.
+    auto cam_0 = cam_matrix.row(0);
+    auto angle_axis_0 = Eigen::AngleAxisd{two_view_geometry.C1.R};
+    auto aaxis0 = angle_axis_0.angle() * angle_axis_0.axis();
+    cam_0.segment(0, 3) = aaxis0.transpose();
+    // translation.
+    const auto& t0 = two_view_geometry.C1.t;
+    cam_0.segment(3, 3) = t0;
+    // Internal parameters.
+    SARA_DEBUG << "K1 =\n" << two_view_geometry.C1.K << std::endl;
+    cam_0(6) = two_view_geometry.C1.K(0, 0);  // fx
+    cam_0(7) = two_view_geometry.C1.K(1, 1);  // fy
+    cam_0(8) = two_view_geometry.C1.K(0, 2);  // x0
+    cam_0(9) = two_view_geometry.C1.K(1, 2);  // y0
+    cam_0(10) = 1.0; // l1
+    cam_0(11) = 1.0; // l2
+
+    // Angle axis vector.
+    auto cam_1 = cam_matrix.row(1);
+    auto angle_axis_1 = Eigen::AngleAxisd{two_view_geometry.C2.R};
+    auto aaxis1 = angle_axis_1.angle() * angle_axis_1.axis();
+    cam_1.segment(0, 3) = aaxis1.transpose();
+    // translation.
+    const auto& t1 = two_view_geometry.C2.t;
+    cam_1.segment(3, 3) = t1;
+    // Internal parameters.
+    SARA_DEBUG << "K2 =\n" << two_view_geometry.C2.K << std::endl;
+    cam_1(6) = two_view_geometry.C2.K(0, 0);  // fx
+    cam_1(7) = two_view_geometry.C2.K(1, 1);  // fy
+    cam_1(8) = two_view_geometry.C2.K(0, 2);  // x0
+    cam_1(9) = two_view_geometry.C2.K(1, 2);  // y0
+    cam_1(10) = 1.0; // l1
+    cam_1(11) = 1.0; // l2
+
+    SARA_DEBUG << "cam_matrix =\n" << cam_matrix << std::endl;
   }
 
   auto populate_data_from_two_view_geometry(
@@ -153,7 +201,7 @@ struct BundleAdjustmentProblem
     const auto num_cameras = static_cast<int>(image_ids.size());
     SARA_CHECK(num_cameras);
 
-    const auto camera_dof_ = 9;
+    const auto camera_dof_ = CameraModelView<double>::dof();
     const auto num_parameters = camera_dof_ * num_cameras + 3 * num_points;
     SARA_CHECK(num_parameters);
 
@@ -173,7 +221,7 @@ struct BundleAdjustmentProblem
     populate_observations(obs_refs, keypoints);
     populate_3d_points_from_two_view_geometry(feature_tracks, match_index,
                                               two_view_geometry);
-    populate_camera_parameters();
+    populate_camera_parameters(two_view_geometry);
   }
 
 };
