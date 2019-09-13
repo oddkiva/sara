@@ -166,31 +166,98 @@ GRAPHICS_MAIN()
 
   // Extract the two-view geometry.
   print_stage("Estimating the two-view geometry...");
-  auto geometry =
-      estimate_two_view_geometry(M, un[0], un[1], E, inliers, sample_best);
+  epipolar_edges.two_view_geometries = {
+      estimate_two_view_geometry(M, un[0], un[1], E, inliers, sample_best)
+  };
 
 
-  // Construct the graph of features.
-  // We take the complicated way because it generalizes to N views.
-  const auto view_ids = range(int(views.images.size()));
-  SARA_CHECK(view_ids.row_vector());
-
-  const auto feature_gids = populate_feature_gids(views.keypoints);
-  SARA_CHECK(feature_gids.size());
+  std::map<FeatureGID, int> from_2d_to_3d;
 
 
-  //  // Adjust bundles for the two-view geometry.
-  //  const Array<bool, 1, Eigen::Dynamic> cheiral_inliers =
-  //      inliers.row_vector().array() && geometry.cheirality;
+  // Populate the feature tracks.
+  const auto [feature_graph, components] =
+      populate_feature_tracks(views, epipolar_edges);
+
+  // Keep feature tracks of size 2 at least.
+  const auto feature_tracks = filter_feature_tracks(feature_graph, components);
+
+
+  // Prepare the bundle adjustment problem formulation.
   //
-  //  SARA_DEBUG << "cheiral_inliers = " << cheiral_inliers << std::endl;
-  //  SARA_CHECK(cheiral_inliers.count());
-  //
-  //  const auto num_points = cheiral_inliers.count();
-  //  const auto num_observations = 2 * num_points;
-  //  const auto num_cameras = 2;
-  //
-  //
+  // 1. Count the number of 3D points.
+  const auto num_points = static_cast<int>(feature_tracks.size());
+  SARA_CHECK(num_points);
+
+  // 2. Count the number of 2D observations.
+  auto num_observations_per_points = std::vector<int>(num_points);
+  std::transform(
+      std::begin(feature_tracks), std::end(feature_tracks),
+      std::begin(num_observations_per_points),
+      [](const auto& track) { return static_cast<int>(track.size()); });
+
+  const auto num_observations =
+      std::accumulate(std::begin(num_observations_per_points),
+                      std::end(num_observations_per_points), 0);
+  SARA_CHECK(num_observations);
+
+  // 3. Count the number of cameras, which should be equal to the number of
+  //    images.
+  auto image_ids = std::set<int>{};
+  for (const auto& track : feature_tracks)
+    for (const auto& f : track)
+      image_ids.insert(f.image_id);
+
+  const auto num_cameras = static_cast<int>(image_ids.size());
+  SARA_CHECK(num_cameras);
+
+  const auto num_parameters = 9 * num_cameras + 3 * num_points;
+  SARA_CHECK(num_parameters);
+
+  // 4. Transform the data for convenience.
+  struct ObservationRef {
+    FeatureGID gid;
+    // TODO: needs the match_index;
+    int camera_id;
+    int point_id;
+  };
+  auto obs_refs = std::vector<ObservationRef>{};
+  {
+    obs_refs.reserve(num_observations);
+
+    auto point_id = 0;
+    for (const auto& track : feature_tracks)
+    {
+      for (const auto& f: track)
+        obs_refs.push_back({f, f.image_id, point_id});
+      ++point_id;
+    }
+  }
+
+  // 5. Prepare the data for Ceres.
+  auto observations = Tensor_<double, 2>{{num_observations, 2}};
+  auto point_indices = std::vector<int>(num_observations);
+  auto camera_indices = std::vector<int>(num_observations);
+  auto parameters = std::vector<double>(num_parameters);
+  for (int i = 0; i < num_observations; ++i)
+  {
+    const auto& ref = obs_refs[i];
+
+    // Easy things first.
+    point_indices[i] = ref.point_id;
+    camera_indices[i] = ref.camera_id;
+
+    // Initialize the 2D observations.
+    const auto& image_id = ref.gid.image_id;
+    const auto& local_id = ref.gid.local_id;
+    const double x = un[image_id](local_id, 0);
+    const double y = un[image_id](local_id, 1);
+    observations(i, 0) = x;
+    observations(i, 1) = y;
+
+    // Initialize the 3D points.
+    //parameters[9 * num_cameras + point_indices[i] + 0] =
+  }
+
 #ifdef SAVE_TWO_VIEW_GEOMETRY
   keep_cheiral_inliers_only(geometry, inliers);
 

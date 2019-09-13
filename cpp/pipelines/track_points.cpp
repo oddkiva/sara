@@ -84,7 +84,7 @@ auto track_points(const std::string& dirpath, const std::string& h5_filepath,
   SARA_CHECK(num_points);
 
   // 2. Count the number of 2D observations.
-  const auto num_observations_per_points = std::vector<int>(num_points);
+  auto num_observations_per_points = std::vector<int>(num_points);
   std::transform(
       std::begin(feature_tracks), std::end(feature_tracks),
       std::begin(num_observations_per_points),
@@ -145,9 +145,13 @@ auto track_points(const std::string& dirpath, const std::string& h5_filepath,
     const auto& F = features(view_attributes.keypoints[image_id]);
     const double x = F[local_id].x();
     const double y = F[local_id].y();
-    observations[i].matrix() << x, y;
+    observations(i, 0) = x;
+    observations(i, 1) = y;
 
     // Initialize the 3D points.
+    // TODO: cannot do yet.
+    //
+    // Need another data structure that initializes the 3D points.
   }
 }
 
