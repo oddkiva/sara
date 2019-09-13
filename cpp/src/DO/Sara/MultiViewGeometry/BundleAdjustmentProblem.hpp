@@ -76,7 +76,7 @@ struct BundleAdjustmentProblem
     parameters = std::vector<double>(num_parameters);
 
     auto points_abs_coords_3d_new = TensorView_<double, 2>{
-        parameters.data() + 9 * num_cameras, {num_points, 3}};
+        parameters.data() + camera_dof * num_cameras, {num_points, 3}};
     auto camera_parameters_new =
         TensorView_<double, 2>{parameters.data(), {num_cameras, camera_dof}};
 

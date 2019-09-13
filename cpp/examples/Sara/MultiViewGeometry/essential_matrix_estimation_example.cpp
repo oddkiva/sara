@@ -311,6 +311,13 @@ GRAPHICS_MAIN()
   std::cout << summary.BriefReport() << std::endl;
 
 
+  print_stage("Check the SfM...");
+  SARA_DEBUG << "camera_parameters =\n"
+             << ba_problem.camera_parameters.matrix() << std::endl;
+  SARA_DEBUG << "points =\n"
+             << ba_problem.points_abs_coords_3d.matrix() << std::endl;
+
+
 #ifdef SAVE_TWO_VIEW_GEOMETRY
   keep_cheiral_inliers_only(geometry, inliers);
 
