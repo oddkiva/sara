@@ -22,9 +22,70 @@
 #include <DO/Sara/SfM/BuildingBlocks/Triangulation.hpp>
 #include <DO/Sara/SfM/Detectors/SIFT.hpp>
 
+#include <ceres/ceres.h>
+#include <ceres/rotation.h>
+
 
 using namespace std;
 using namespace DO::Sara;
+
+
+struct ReprojectionError
+{
+  ReprojectionError(double observed_x, double observed_y)
+    : observed_x{observed_x}
+    , observed_y{observed_y}
+  {
+  }
+
+  template <typename T>
+  bool operator()(const T* const camera, // (1) camera parameters to optimize.
+                  const T* const point,  // (2) 3D points to optimize
+                  T* residuals) const
+  {
+    T p[3];
+    // camera[0, 1, 2] are the angle axis rotation.
+    ceres::AngleAxisRotatePoint(camera, point, p);
+
+    // Camera
+    p[0] += camera[3];
+    p[1] += camera[4];
+    p[2] += camera[5];
+
+    // Center of the distortion.
+    // Snavely assumes the camera coordinate system has a negative z axis.
+    T xp = -p[0] / p[2];
+    T yp = -p[1] / p[2];
+
+    // Apply second and fourth order order radial distortion.
+    const T& l1 = camera[7];
+    const T& l2 = camera[8];
+    const auto r2 = xp * xp + yp * yp;
+    const auto distortion = T(1) + r2 * (l1 + l2 * r2);
+
+    const T& focal = camera[6];
+    const T predicted_x = focal * distortion * xp;
+    const T predicted_y = focal * distortion * yp;
+
+
+    residuals[0] = predicted_x - T(observed_x);
+    residuals[1] = predicted_y - T(observed_y);
+
+    return true;
+  }
+
+  static ceres::CostFunction* Create(const double observed_x,
+                                     const double observed_y)
+  {
+    constexpr auto NumParams = 6 /* camera paramters */ + 3 /* points */;
+    return new ceres::AutoDiffCostFunction<ReprojectionError, 2,
+                                           NumParams, 3>{
+        new ReprojectionError{observed_x, observed_y}};
+  }
+
+  double observed_x;
+  double observed_y;
+};
 
 
 GRAPHICS_MAIN()
@@ -154,9 +215,6 @@ GRAPHICS_MAIN()
   auto feature_tracks = filter_feature_tracks(feature_graph, components);
   for (const auto& track: feature_tracks)
   {
-    //if (track.size() <= 2)
-    //  continue;
-
     std::cout << "Component: " << std::endl;
     std::cout << "Size = " << track.size() << std::endl;
     for (const auto& fgid : track)
@@ -178,6 +236,9 @@ GRAPHICS_MAIN()
   }
   SARA_CHECK(feature_tracks.size());
 
+
+  // Post-processing for feature tracks.
+  //
   // Easy approach: remove ambiguity by consider only feature tracks of size 2
   // in the two view problem.
   {
@@ -188,8 +249,6 @@ GRAPHICS_MAIN()
     SARA_CHECK(unambiguous_feature_tracks.size());
     feature_tracks.swap(unambiguous_feature_tracks);
   }
-
-
   // More careful approach:
   //
   // - If in the two-view problem, a feature tracks contains more than 1 feature
@@ -203,6 +262,19 @@ GRAPHICS_MAIN()
   auto ba_problem = BundleAdjustmentProblem{};
   ba_problem.populate_data_from_two_view_geometry(
       feature_tracks, views.keypoints, match_index, two_view_geometry);
+
+  // ceres::Problem problem;
+  // for (int i = 0; i < ba_problem.num_observations(); ++i)
+  // {
+  //   auto cost_fn =
+  //       ReprojectionError::Create(ba_problem.observations(i, 0),
+  //                                 ba_problem.observations(i, 1]);
+  //
+  //   problem.AddResidualBlock(cost_function,
+  //                            nullptr /* squared loss */,
+  //                            bal_problem.mutable_camera_for_observation(i),
+  //                            bal_problem.mutable_point_for_observation(i));
+  // }
 
 
 #ifdef SAVE_TWO_VIEW_GEOMETRY
