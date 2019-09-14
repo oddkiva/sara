@@ -224,7 +224,7 @@ public:
     SARA_DEBUG << "Initialize texture data on GPU" << std::endl;
 
     // Texture 0.
-    const auto image0 = QImage{QString{src_path("data/ksmall.jpg")}}.mirrored();
+    const auto image0 = QImage{QString{src_path("../../../data/ksmall.jpg")}}.mirrored();
     m_texture0 = new QOpenGLTexture{image0};
     m_texture0->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
     m_texture0->setMagnificationFilter(QOpenGLTexture::Linear);
@@ -234,7 +234,7 @@ public:
 
     // Texture 1.
     const auto image1 =
-        QImage{QString{src_path("data/sunflowerField.jpg")}}.mirrored();
+        QImage{QString{src_path("../../../data/sunflowerField.jpg")}}.mirrored();
     m_texture1 = new QOpenGLTexture{image1};
     m_texture1->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
     m_texture1->setMagnificationFilter(QOpenGLTexture::Linear);
@@ -275,7 +275,7 @@ public:
 
     // Draw triangles.
     m_vao->bind();
-    glDrawArrays(GL_TRIANGLES, 0, m_vertices.size());
+    glDrawElements(GL_TRIANGLES, m_triangles.size(), GL_UNSIGNED_INT, 0);
 
     //m_program->release();
   }

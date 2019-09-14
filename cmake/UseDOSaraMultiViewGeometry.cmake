@@ -9,10 +9,10 @@ if (SARA_USE_FROM_SOURCE)
       "Core;Features;FileSystem;ImageIO")
     sara_generate_library("MultiViewGeometry")
 
-    target_include_directories(DO_Sara_MultiViewGeometry PRIVATE
-      ${Boost_INCLUDE_DIR}
-      ${DO_Sara_INCLUDE_DIR}
-      ${DO_Sara_ThirdParty_DIR}/eigen)
+    target_include_directories(DO_Sara_MultiViewGeometry
+      PUBLIC ${Boost_INCLUDE_DIR}
+             ${DO_Sara_INCLUDE_DIR}
+             ${DO_Sara_ThirdParty_DIR}/eigen)
     target_include_directories(DO_Sara_MultiViewGeometry PRIVATE ${HDF5_INCLUDE_DIRS})
     target_link_libraries(DO_Sara_MultiViewGeometry PUBLIC ${HDF5_LIBRARIES})
   endif ()

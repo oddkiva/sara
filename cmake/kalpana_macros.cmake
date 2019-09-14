@@ -167,7 +167,7 @@ macro (kalpana_append_library _library_name
     # Form the compiled library output name.
     set(_library_output_basename
         DO_Kalpana_${_library_name})
-    if (kalpana_BUILD_SHARED_LIBS)
+    if (BUILD_SHARED_LIBS)
       set (_library_output_name "${_library_output_basename}")
       set (_library_output_name_debug "${_library_output_basename}-d")
     else ()
@@ -185,10 +185,10 @@ macro (kalpana_append_library _library_name
       OUTPUT_NAME_DEBUG ${_library_output_name_debug})
 
     # Set correct compile definitions when building the libraries.
-    if (kalpana_BUILD_SHARED_LIBS)
-      set(_library_defs "DO_kalpana_EXPORTS")
+    if (BUILD_SHARED_LIBS)
+      set(_library_defs "DO_KALPANA_EXPORTS")
     else ()
-      set(_library_defs "DO_kalpana_STATIC")
+      set(_library_defs "DO_KALPANA_STATIC")
     endif ()
     set_target_properties(
       DO_Kalpana_${_library_name}

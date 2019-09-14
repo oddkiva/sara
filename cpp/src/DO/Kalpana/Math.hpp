@@ -1,7 +1,3 @@
-#ifndef DO_KALPANA_MATH_HPP
-#define DO_KALPANA_MATH_HPP
+#pragma once
 
 #include <DO/Kalpana/Math/Projection.hpp>
-
-
-#endif /* DO_KALPANA_3D_HPP */

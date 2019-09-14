@@ -384,11 +384,11 @@ public:
           i + -0.5f, 0.0f, j +  0.5f;  // top-left
 
         // Set colors.
-        if (i % 2 == 0 and j % 2 == 0)
+        if (i % 2 == 0 && j % 2 == 0)
           v_mat.block(4 * ij, 3, 4, 3).setZero();
-        else if (i % 2 == 0 and j % 2 == 1)
+        else if (i % 2 == 0 && j % 2 == 1)
           v_mat.block(4 * ij, 3, 4, 3).setOnes();
-        else if (i % 2 == 1 and j % 2 == 0)
+        else if (i % 2 == 1 && j % 2 == 0)
           v_mat.block(4 * ij, 3, 4, 3).setOnes();
         else // (i % 2 == 1 and j % 2 == 0)
           v_mat.block(4 * ij, 3, 4, 3).setZero();

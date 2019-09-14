@@ -1,15 +1,17 @@
 #pragma once
 
-#include <QtGui/QWindow>
-#include <QtGui/QOpenGLFunctions>
+#include <DO/Kalpana/Defines.hpp>
+
 #include <QtGui/QOpenGLExtraFunctions>
+#include <QtGui/QOpenGLFunctions>
+#include <QtGui/QWindow>
 
 
 class QOpenGLPaintDevice;
 
 
-class OpenGLWindow : public QWindow,
-                     protected QOpenGLExtraFunctions
+class DO_KALPANA_EXPORT OpenGLWindow : public QWindow,
+                                       protected QOpenGLExtraFunctions
 {
   Q_OBJECT
 

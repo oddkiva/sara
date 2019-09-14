@@ -252,7 +252,7 @@ macro (sara_append_library _library_name
     sara_step_message("Linking project 'DO_Sara_${_library_name}' with "
                       "'${_lib_dependencies}'")
 
-    target_link_libraries(DO_Sara_${_library_name} PRIVATE ${_lib_dependencies})
+    target_link_libraries(DO_Sara_${_library_name} PUBLIC ${_lib_dependencies})
 
     # Form the compiled library output name.
     set(_library_output_basename DO_Sara_${_library_name})
