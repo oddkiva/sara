@@ -70,6 +70,9 @@
 #include "ceres/parallel_for.h"
 #endif
 
+#include <random>
+
+
 namespace ceres {
 namespace internal {
 
@@ -155,7 +158,9 @@ void SchurEliminator<kRowBlockSize, kEBlockSize, kFBlockSize>::Init(
 
   uneliminated_row_begins_ = chunk.start + chunk.size;
   if (num_threads_ > 1) {
-    random_shuffle(chunks_.begin(), chunks_.end());
+    std::random_device rng;
+    std::mt19937 urng(rng());
+    std::shuffle(chunks_.begin(), chunks_.end(), urng);
   }
 
   buffer_.reset(new double[buffer_size_ * num_threads_]);
