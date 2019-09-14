@@ -15,6 +15,7 @@ addons:
       - cmake
       - doxygen
       - git
+      - lcov
       - libboost-all-dev
       - libhdf5-dev
       - libjpeg-dev
