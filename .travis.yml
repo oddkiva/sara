@@ -7,33 +7,40 @@ services:
 
 cache:
   bundler: true
-  directories:
-  - $HOME/ffmpeg
 
 addons:
   apt:
-    sources:
-    - ubuntu-sdk-team
-    - ubuntu-toolchain-r-test
     packages:
-    - qtbase5-dev
-    - lcov
-    - libceres-dev
-    - libboost-all-dev
-    - libhdf5-dev
-    - libqt5opengl5
-    - libqt5opengl5-dev
-    - yasm
+      - build-essential
+      - cmake
+      - doxygen
+      - git
+      - libboost-all-dev
+      - libhdf5-dev
+      - libjpeg-dev
+      - libpng-dev
+      - libtiff5-dev
+      - libavcodec-dev
+      - libavformat-dev
+      - libavutil-dev
+      - libglew-dev
+      - libglfw3-dev
+      - ocl-icd-opencl-dev
+      - opencl-headers
+      - libpocl-dev
+      - libceres-dev
+      - python3-dev
+      - qtbase5-dev
+      - qt3d5-dev
+      - qt3d-assimpsceneimport-plugin
+      - qt3d-defaultgeometryloader-plugin
+      - qt3d-gltfsceneio-plugin
+      - qt3d-scene2d-plugin
 
 compiler:
   - gcc
 
 install:
-  # Use gcc 7 and g++ 7.
-  - export CC=$(which gcc-7)
-  - export CXX=$(which g++-7)
-  # Build and install third-party locally.
-  - ./scripts/travis-build-and-install-ffmpeg.sh
   - bundle install
 
 script:
