@@ -162,7 +162,7 @@ int main(int argc, char** argv)
 
       // Fill with new image data.
       std::cout << "[Process 1] Refilling image data" << std::endl;
-      image.flat_array().fill(i);
+      image.flat_array().fill(static_cast<float>(i));
 
       std::cout << "[Process 1] Refilled image data" << std::endl;
       message->image_batch_filling_iter = i;

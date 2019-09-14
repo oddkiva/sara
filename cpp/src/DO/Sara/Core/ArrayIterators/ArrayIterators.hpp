@@ -39,13 +39,25 @@ namespace DO { namespace Sara {
   class AxisIterator;
   //! @}
 
+  //! @brief Iterator helper class to replace std::iterator as it is marked as
+  //! deprecated by VS2017 when compiling in C++17.
+  template <class Category, class T, class Distance = std::ptrdiff_t,
+            class Pointer = T*, class Reference = T&>
+  struct IteratorHelper
+  {
+    typedef Category iterator_category;
+    typedef T value_type;
+    typedef Distance difference_type;
+    typedef Pointer pointer;
+    typedef Reference reference;
+  };
 
   //! @{
   //! Convenient typedefs.
 #define ITERATOR_BASE_TYPE(IsConst)                                            \
-  std::iterator<std::random_access_iterator_tag, T, std::ptrdiff_t,            \
-                typename Meta::Choose<IsConst, const T*, T*>::Type,            \
-                typename Meta::Choose<IsConst, const T&, T&>::Type>
+  IteratorHelper<std::random_access_iterator_tag, T, std::ptrdiff_t,           \
+                 std::conditional_t<IsConst, const T*, T*>,                    \
+                 std::conditional_t<IsConst, const T&, T&>>
 
 #define TYPEDEF_ITERATOR_TYPES(IteratorType)                                   \
   using value_type = typename base_type::value_type;                           \
