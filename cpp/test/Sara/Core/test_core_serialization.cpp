@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE(test_tensor_serialization)
 {
   auto t_write = Tensor_<float, 3>{{2, 3, 4}};
   for (auto i = 0u; i < t_write.size(); ++i)
-    t_write.data()[i] = i;
+    t_write.data()[i] = static_cast<float>(i);
 
   const auto file =
       (boost::filesystem::temp_directory_path() / "tensor").string();

@@ -2,7 +2,7 @@ if (SARA_USE_FROM_SOURCE)
   get_property(DO_Sara_FileSystem_ADDED GLOBAL PROPERTY _DO_Sara_FileSystem_INCLUDED)
 
   if (NOT DO_Sara_FileSystem_ADDED)
-	#set(Boost_DEBUG ON)
+    #set(Boost_DEBUG ON)
     set(Boost_USE_STATIC_LIBS OFF)
     set(Boost_USE_MULTITHREADED ON)
     find_package(Boost COMPONENTS filesystem system REQUIRED)

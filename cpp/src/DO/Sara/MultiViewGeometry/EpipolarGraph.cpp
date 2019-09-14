@@ -126,7 +126,7 @@ auto EpipolarEdgeAttributes::resize_fundamental_edge_list()
   F_num_samples.resize(edges.size());
   F_noise.resize(edges.size());
   F_inliers.resize(edges.size());
-  F_best_samples.resize(edges.size(), FEstimator::num_points);
+  F_best_samples.resize(static_cast<int>(edges.size()), FEstimator::num_points);
 }
 
 auto EpipolarEdgeAttributes::resize_essential_edge_list()
@@ -139,7 +139,7 @@ auto EpipolarEdgeAttributes::resize_essential_edge_list()
   E_num_samples.resize(edges.size());
   E_noise.resize(edges.size());
   E_inliers.resize(edges.size());
-  E_best_samples.resize(edges.size(), EEstimator::num_points);
+  E_best_samples.resize(static_cast<int>(edges.size()), EEstimator::num_points);
 }
 
 auto EpipolarEdgeAttributes::read_fundamental_matrices(

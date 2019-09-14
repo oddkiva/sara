@@ -174,7 +174,7 @@ auto populate_feature_tracks(const ViewAttributes& view_attributes,
     components.resize(components_tmp.size());
     for (auto c : components_tmp)
       for (auto [child, child_end] = components_tmp[c]; child != child_end; ++child)
-        components[c].push_back(*child);
+        components[c].push_back(static_cast<int>(*child));
   }
 
 

@@ -22,6 +22,7 @@
 #include <DO/Sara/SfM/BuildingBlocks/Triangulation.hpp>
 #include <DO/Sara/SfM/Detectors/SIFT.hpp>
 
+#define CERES_USING_SHARED_LIBRARY
 #include <ceres/ceres.h>
 #include <ceres/rotation.h>
 
@@ -39,8 +40,8 @@ struct ReprojectionError
   }
 
   template <typename T>
-  bool operator()(const T* const camera, // (1) camera parameters to optimize.
-                  const T* const point,  // (2) 3D points to optimize
+  bool operator()(const T* const camera,  // (1) camera parameters to optimize.
+                  const T* const point,   // (2) 3D points to optimize
                   T* residuals) const
   {
     T p[3];
@@ -80,8 +81,7 @@ struct ReprojectionError
                                      const double observed_y)
   {
     constexpr auto NumParams = 6 /* camera paramters */ + 3 /* points */;
-    return new ceres::AutoDiffCostFunction<ReprojectionError, 2,
-                                           NumParams, 3>{
+    return new ceres::AutoDiffCostFunction<ReprojectionError, 2, NumParams, 3>{
         new ReprojectionError{observed_x, observed_y}};
   }
 
@@ -93,7 +93,7 @@ struct ReprojectionError
 auto map_feature_gid_to_match_gid(const EpipolarEdgeAttributes& epipolar_edges)
 {
   auto mapping = std::multimap<FeatureGID, MatchGID>{};
-  for (const auto& ij: epipolar_edges.edge_ids)
+  for (const auto& ij : epipolar_edges.edge_ids)
   {
     const auto view_i = epipolar_edges.edges[ij].first;
     const auto view_j = epipolar_edges.edges[ij].second;
@@ -216,8 +216,7 @@ GRAPHICS_MAIN()
   // Extract the two-view geometry.
   print_stage("Estimating the two-view geometry...");
   epipolar_edges.two_view_geometries = {
-      estimate_two_view_geometry(M, un[0], un[1], E, inliers, sample_best)
-  };
+      estimate_two_view_geometry(M, un[0], un[1], E, inliers, sample_best)};
   auto& two_view_geometry = epipolar_edges.two_view_geometries.front();
   two_view_geometry.C1.K = views.cameras[0].K;
   two_view_geometry.C2.K = views.cameras[1].K;
@@ -234,7 +233,7 @@ GRAPHICS_MAIN()
   // Keep feature tracks of size 2 at least.
   print_stage("Checking the feature tracks...");
   auto feature_tracks = filter_feature_tracks(feature_graph, components);
-  for (const auto& track: feature_tracks)
+  for (const auto& track : feature_tracks)
   {
     if (track.size() <= 2)
       continue;
@@ -251,8 +250,7 @@ GRAPHICS_MAIN()
                   << "STR: " << f.extremum_value << "  "
                   << "TYP: " << int(f.extremum_type) << "  "
                   << "2D:  " << f.center().transpose() << "     "
-                  << "3D:  "
-                  << two_view_geometry.X.col(point_index).transpose()
+                  << "3D:  " << two_view_geometry.X.col(point_index).transpose()
                   << std::endl;
       }
     }
@@ -276,8 +274,8 @@ GRAPHICS_MAIN()
   // More careful approach:
   //
   // - If in the two-view problem, a feature tracks contains more than 1 feature
-  //   in image 0 or 1, use the 2D points with the strongest (absolute) response value in
-  //   the feature detection
+  //   in image 0 or 1, use the 2D points with the strongest (absolute) response
+  //   value in the feature detection
   //
   // Treat this case later.
 

@@ -8,13 +8,18 @@ if (NOT SARA_BOOST_PYTHON_VERSION AND PYTHON_VERSION_MAJOR STREQUAL 3)
   set(SARA_BOOST_PYTHON_VERSION ${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR})
 endif ()
 
+set(Boost_USE_STATIC_LIBS OFF)
+set(Boost_USE_MULTITHREADED ON)
 find_package(Boost)
-
 if (Boost_VERSION VERSION_LESS 1.63)
-  find_package(Boost COMPONENTS python${SARA_BOOST_PYTHON_VERSION} REQUIRED)
+  find_package(Boost
+    COMPONENTS python${SARA_BOOST_PYTHON_VERSION}
+    REQUIRED)
 else ()
-  find_package(Boost COMPONENTS python${SARA_BOOST_PYTHON_VERSION}
-    numpy${SARA_BOOST_PYTHON_VERSION} REQUIRED)
+  find_package(Boost
+    COMPONENTS python${SARA_BOOST_PYTHON_VERSION}
+               numpy${SARA_BOOST_PYTHON_VERSION}
+    REQUIRED)
 endif ()
 
 
@@ -51,6 +56,8 @@ if (SARA_BUILD_VIDEOIO)
   endif ()
 endif ()
 
+target_compile_definitions(DO_Sara_FileSystem
+  PRIVATE -DBOOST_ALL_DYN_LINK -DBOOST_ALL_NO_LIB)
 
 # ============================================================================ #
 # Install the library in the currently active python environment.

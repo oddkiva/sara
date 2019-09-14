@@ -103,7 +103,7 @@ auto ransac(const TensorView_<int, 2>& matches,  //
       // Count the inliers.
       inlier_predicate.set_model(model);
       const auto inliers = inlier_predicate(p1_matched_mat, p2_matched_mat);
-      const auto num_inliers = inliers.count();
+      const auto num_inliers = static_cast<int>(inliers.count());
 
       if (num_inliers > num_inliers_best)
       {

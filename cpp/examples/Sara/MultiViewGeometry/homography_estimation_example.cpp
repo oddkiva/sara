@@ -123,8 +123,9 @@ void inspect_homography_estimation(const Image<Rgb8>& image1,
   // ==========================================================================
   // Setup the visualization.
   const auto scale = .25f;
-  const auto w = int((image1.width() + image2.width()) * scale);
-  const auto h = max(image1.height(), image2.height()) * scale;
+  const auto w = static_cast<int>((image1.width() + image2.width()) * scale);
+  const auto h =
+      static_cast<int>(max(image1.height(), image2.height()) * scale);
 
   create_window(w, h);
   set_antialiasing();

@@ -159,7 +159,7 @@ auto keep_cheiral_inliers_only(TwoViewGeometry& complete_geom,
   const auto& cheirality = complete_geom.cheirality;
   SARA_DEBUG << "Keep cheiral inliers..." << std::endl;
   const auto X_cheiral =
-      range(X.cols())                                                 //
+      range(static_cast<int>(X.cols()))                               //
       | filtered([&](int i) { return cheirality(i) && inliers(i); })  //
       | transformed([&](int i) -> Vector4d { return X.col(i); });
   SARA_CHECK(X_cheiral.size());
@@ -185,7 +185,7 @@ auto extract_colors(const Image<Rgb8>& image1,             //
                     const TwoViewGeometry& geometry)  //
   -> Tensor_<double, 2>
 {
-  const int num_points = geometry.X.cols();
+  const auto num_points = static_cast<int>(geometry.X.cols());
   const auto indices = range(num_points);
 
   // Convert the image to a pixel format with floating-point channel type.

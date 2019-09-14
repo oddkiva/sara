@@ -52,9 +52,9 @@ struct RelativePoseEstimator : Method
   {
     const auto Es = this->Method::find_essential_matrices(left, right);
 
-    auto indices = range(Es.size());
+    auto indices = range(static_cast<int>(Es.size()));
 
-    auto motions = Tensor_<Motion, 2>{{int(Es.size()), 4}};
+    auto motions = Tensor_<Motion, 2>{{static_cast<int>(Es.size()), 4}};
     std::for_each(std::begin(indices), std::end(indices), [&](int i) {
       motions[i] = tensor_view(extract_relative_motion_horn(Es[i]));
     });
