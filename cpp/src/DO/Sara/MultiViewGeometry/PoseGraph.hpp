@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include <DO/Sara/Defines.hpp>
+
 #include <DO/Sara/Core/HDF5.hpp>
 
 #include <boost/graph/adjacency_list.hpp>
@@ -42,10 +44,12 @@ using PoseGraph =
 
 
 //! @brief write feature graph to HDF5.
+DO_SARA_EXPORT
 auto write_pose_graph(const PoseGraph& graph, H5File& file,
                       const std::string& group_name) -> void;
 
 //! @brief read feature graph from HDF5.
+DO_SARA_EXPORT
 auto read_pose_graph(H5File& file, const std::string& group_name) -> PoseGraph;
 
 } /* namespace DO::Sara */

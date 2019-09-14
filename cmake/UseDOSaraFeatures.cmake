@@ -12,6 +12,6 @@ if (SARA_USE_FROM_SOURCE)
     sara_generate_library("Features")
 
     target_include_directories(DO_Sara_Features PUBLIC ${HDF5_INCLUDE_DIRS})
-    target_link_libraries(DO_Sara_Features ${HDF5_LIBRARIES})
+    target_link_libraries(DO_Sara_Features PUBLIC ${HDF5_LIBRARIES})
   endif ()
 endif ()

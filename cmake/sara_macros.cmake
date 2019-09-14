@@ -252,7 +252,7 @@ macro (sara_append_library _library_name
     sara_step_message("Linking project 'DO_Sara_${_library_name}' with "
                       "'${_lib_dependencies}'")
 
-    target_link_libraries(DO_Sara_${_library_name} ${_lib_dependencies})
+    target_link_libraries(DO_Sara_${_library_name} PRIVATE ${_lib_dependencies})
 
     # Form the compiled library output name.
     set(_library_output_basename DO_Sara_${_library_name})
@@ -334,9 +334,11 @@ function (sara_add_test _test_name _srcs _additional_lib_deps)
 
   # Create the unit test project.
   add_executable(${_test_name} ${_srcs_var})
-  target_link_libraries(${_test_name} ${_additional_lib_deps}
-                        ${Boost_LIBRARIES})
-  target_compile_definitions(${_test_name} PRIVATE -DBOOST_TEST_DYN_LINK)
+  target_link_libraries(${_test_name}
+    PRIVATE ${_additional_lib_deps}
+            ${Boost_LIBRARIES})
+  target_compile_definitions(${_test_name}
+    PRIVATE -DBOOST_TEST_DYN_LINK)
 
   set_target_properties(${_test_name}
     PROPERTIES

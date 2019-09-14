@@ -5,7 +5,8 @@ project(DO_FeatureMatching_tests)
 
 message(STATUS "  - DO_Match_tests")
 
-find_package(DO_Sara COMPONENTS Match REQUIRED)
+find_package(DO_Sara COMPONENTS Core Features Match REQUIRED)
+find_package(HDF5 COMPONENTS CXX REQUIRED)
 
 file(GLOB test_match_SOURCE_FILES FILES *.cpp)
 

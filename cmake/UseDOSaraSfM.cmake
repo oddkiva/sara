@@ -19,6 +19,7 @@ if (SARA_USE_FROM_SOURCE)
       ${DO_Sara_INCLUDE_DIR})
     target_compile_definitions(DO_Sara_SfM
       PRIVATE -DBOOST_ALL_DYN_LINK -DBOOST_ALL_NO_LIB)
-    target_link_libraries(DO_Sara_SfM tinyply)
+    target_link_libraries(DO_Sara_SfM
+      PRIVATE tinyply)
   endif ()
 endif ()
