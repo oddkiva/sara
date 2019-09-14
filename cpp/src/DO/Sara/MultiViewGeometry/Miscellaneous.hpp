@@ -19,6 +19,7 @@
 
 namespace DO::Sara {
 
+inline
 auto save_to_hdf5(const TwoViewGeometry& complete_geom,
                   const TensorView_<double, 2>& colors)
 {
@@ -61,7 +62,7 @@ auto save_to_hdf5(const TwoViewGeometry& complete_geom,
   geom_h5_file.write_dataset("colors", colors, true);
 }
 
-
+inline
 auto save_to_ply(const TwoViewGeometry& complete_geom,
                  const TensorView_<double, 2>& colors)
 {

@@ -28,9 +28,9 @@ BOOST_AUTO_TEST_CASE(test_read_write_pose_graph_to_hdf5)
   auto graph = PoseGraph{};
   auto v0 = boost::add_vertex({0}, graph);
   auto v1 = boost::add_vertex({1}, graph);
-  auto v2 = boost::add_vertex({2}, graph);
+  /* auto v2 = */boost::add_vertex({2}, graph);
   auto v3 = boost::add_vertex({3}, graph);
-  auto v4 = boost::add_vertex({4}, graph);
+  /* auto v4 = */ boost::add_vertex({4}, graph);
   auto v5 = boost::add_vertex({5}, graph);
 
   auto [e0, b0] = boost::add_edge(v0, v5, graph);
