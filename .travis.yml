@@ -20,6 +20,7 @@ addons:
     - g++-7
     - qtbase5-dev
     - lcov
+    - libceres-dev
     - libboost-all-dev
     - libhdf5-dev
     - libqt5opengl5
