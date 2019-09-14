@@ -1,7 +1,7 @@
 language: cpp
 
 sudo: required
-dist: xenial
+dist: bionic
 services:
   - xvfb
 
@@ -16,8 +16,6 @@ addons:
     - ubuntu-sdk-team
     - ubuntu-toolchain-r-test
     packages:
-    - gcc-7
-    - g++-7
     - qtbase5-dev
     - lcov
     - libceres-dev
