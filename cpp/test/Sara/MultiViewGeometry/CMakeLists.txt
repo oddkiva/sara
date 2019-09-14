@@ -19,8 +19,8 @@ foreach (file ${test_multiviewgeometry_SOURCE_FILES})
 endforeach ()
 
 if (Ceres_FOUND)
-  target_include_directories(test_multiviewgeometry_ceres_solver_backend PRIVATE
-    ${CERES_INCLUDE_DIRS})
+  target_include_directories(test_multiviewgeometry_ceres_solver_backend
+    PRIVATE ${CERES_INCLUDE_DIRS})
   target_link_libraries(test_multiviewgeometry_ceres_solver_backend
-    ${CERES_LIBRARIES})
+    PRIVATE ${CERES_LIBRARIES})
 endif ()

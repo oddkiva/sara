@@ -71,4 +71,12 @@ if (WIN32)
   add_subdirectory(ffmpeg)
 endif ()
 
+if (WIN32)
+  message(STATUS "  - Ceres")
+  set(EIGEN_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/eigen)
+  set(MINIGLOG TRUE)
+  add_subdirectory(ceres-solver-1.14.0)
+endif ()
+
+message(STATUS "  - tinyply")
 add_subdirectory(tinyply-2.2)
