@@ -42,7 +42,7 @@ compiler:
   - gcc
 
 install:
-  - ./scripts/install_clblast.sh
+  - sudo ./scripts/install_clblast.sh
   - bundle install
 
 script:
