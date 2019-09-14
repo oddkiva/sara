@@ -22,7 +22,6 @@
 #include <DO/Sara/SfM/BuildingBlocks/Triangulation.hpp>
 #include <DO/Sara/SfM/Detectors/SIFT.hpp>
 
-#define CERES_USING_SHARED_LIBRARY
 #include <ceres/ceres.h>
 #include <ceres/rotation.h>
 

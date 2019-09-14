@@ -17,7 +17,8 @@ struct CostFunctor
 };
 
 
-struct SnavelyReprojectionError {
+struct SnavelyReprojectionError
+{
   SnavelyReprojectionError(double observed_x, double observed_y)
     : observed_x{observed_x}
     , observed_y{observed_y}
@@ -25,8 +26,8 @@ struct SnavelyReprojectionError {
   }
 
   template <typename T>
-  bool operator()(const T* const camera, // (1) camera parameters to optimize.
-                  const T* const point,  // (2) 3D points to optimize
+  bool operator()(const T* const camera,  // (1) camera parameters to optimize.
+                  const T* const point,   // (2) 3D points to optimize
                   T* residuals) const
   {
     T p[3];
@@ -97,14 +98,16 @@ BOOST_AUTO_TEST_CASE(test_ceres_solver_hello_world_tutorial)
   std::cout << "x : " << initial_x << " -> " << x << "\n";
 }
 
-//BOOST_AUTO_TEST_CASE(test_ceres_solver_bundle_adjustment_tutorial)
+// BOOST_AUTO_TEST_CASE(test_ceres_solver_bundle_adjustment_tutorial)
 //{
 //  ceres::Problem problem;
 //  for (int i = 0; i < bal_problem.num_observations(); ++i)
 //  {
 //    auto cost_fn =
-//        SnavelyReprojectionError::Create(bal_problem.observations()[2 * i + 0],
-//                                         bal_problem.observations()[2 * i + 1]);
+//        SnavelyReprojectionError::Create(bal_problem.observations()[2 * i +
+//        0],
+//                                         bal_problem.observations()[2 * i +
+//                                         1]);
 //
 //    problem.AddResidualBlock(cost_function,
 //                             nullptr /* squared loss */,

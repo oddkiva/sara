@@ -36,6 +36,7 @@ if (WIN32)
     PRIVATE ceres)
   target_compile_definitions(essential_matrix_estimation_example
     PRIVATE -DCERES_USING_SHARED_LIBRARY
+            -DCERES_MSVC_USE_UNDERSCORE_PREFIXED_BESSEL_FUNCTIONS
             -DCERES_USE_OPENMP
             -DMAX_LOG_LEVEL=2)
 else ()
