@@ -53,16 +53,19 @@ if (CMAKE_COMPILER_IS_GNUCXX)
                            --base-directory=${DO_Sara_SOURCE_DIR}
                            --capture
                            --output-file=coverage.info
-      COMMAND ${LCOV_PATH} --remove coverage.info 'usr/*'
+      COMMAND ${LCOV_PATH} --remove coverage.info '/usr/*'
                            --output-file coverage.info
-      COMMAND ${LCOV_PATH} --remove coverage.info 'third-party/*'
-                           --output-file coverage.info
-      COMMAND ${LCOV_PATH} --remove coverage.info 'test/*'
-                           --output-file coverage.info
-      COMMAND ${LCOV_PATH} --remove coverage.info '${CMAKE_BINARY_DIR}/moc_*'
-                           --output-file coverage.info
+      COMMAND ${LCOV_PATH}
+              --remove coverage.info '${DO_Sara_DIR}/cpp/third-party/*'
+              --output-file coverage.info
+      COMMAND ${LCOV_PATH}
+              --remove coverage.info '${DO_Sara_DIR}/cpp/test/*'
+              --output-file coverage.info
+      COMMAND ${LCOV_PATH}
+              --remove coverage.info '${CMAKE_BINARY_DIR}/*'
+              --output-file coverage.info
       COMMAND ${GENHTML_PATH} coverage.info
-                              --output-directory=${CMAKE_BINARY_DIR}/coverage
+              --output-directory=${CMAKE_BINARY_DIR}/coverage
     )
   endif ()
 endif ()
