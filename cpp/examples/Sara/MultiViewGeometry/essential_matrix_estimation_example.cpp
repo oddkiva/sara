@@ -30,90 +30,6 @@ using namespace std;
 using namespace DO::Sara;
 
 
-struct ReprojectionError
-{
-  ReprojectionError(double observed_x, double observed_y)
-    : observed_x{observed_x}
-    , observed_y{observed_y}
-  {
-  }
-
-  template <typename T>
-  bool operator()(const T* const camera,  // (1) camera parameters to optimize.
-                  const T* const point,   // (2) 3D points to optimize
-                  T* residuals) const
-  {
-    T p[3];
-
-    auto camera_view = CameraModelView<T>{camera};
-
-    // Rotate the point.
-    ceres::AngleAxisRotatePoint(camera_view.angle_axis(), point, p);
-    // Translate the point.
-    p[0] += camera_view.t()[0];
-    p[1] += camera_view.t()[1];
-    p[2] += camera_view.t()[2];
-
-    // Normalized camera coordinates.
-    T xp = p[0] / p[2];
-    T yp = p[1] / p[2];
-
-    // Apply second and fourth order order radial distortion.
-    const auto& l1 = camera_view.l1();
-    const auto& l2 = camera_view.l2();
-    const auto r2 = xp * xp + yp * yp;
-    const auto distortion = T(1) + r2 * (l1 + l2 * r2);
-    xp *= distortion;
-    yp *= distortion;
-
-    // Apply the internal camera matrix.
-    const auto predicted_x = camera_view.fx() * xp + camera_view.x0();
-    const auto predicted_y = camera_view.fy() * yp + camera_view.y0();
-
-    residuals[0] = predicted_x - T(observed_x);
-    residuals[1] = predicted_y - T(observed_y);
-
-    return true;
-  }
-
-  static ceres::CostFunction* Create(const double observed_x,
-                                     const double observed_y)
-  {
-    constexpr auto NumParams = 6 /* camera paramters */ + 3 /* points */;
-    return new ceres::AutoDiffCostFunction<ReprojectionError, 2, NumParams, 3>{
-        new ReprojectionError{observed_x, observed_y}};
-  }
-
-  double observed_x;
-  double observed_y;
-};
-
-
-auto map_feature_gid_to_match_gid(const EpipolarEdgeAttributes& epipolar_edges)
-{
-  auto mapping = std::multimap<FeatureGID, MatchGID>{};
-  for (const auto& ij : epipolar_edges.edge_ids)
-  {
-    const auto view_i = epipolar_edges.edges[ij].first;
-    const auto view_j = epipolar_edges.edges[ij].second;
-    const auto& M_ij = epipolar_edges.matches[ij];
-    const auto& E_inliers_ij = epipolar_edges.E_inliers[ij];
-    const auto& two_view_geometry_ij = epipolar_edges.two_view_geometries[ij];
-
-    for (auto m = 0; m < int(M_ij.size()); ++m)
-    {
-      if (E_inliers_ij(m) && two_view_geometry_ij.cheirality(m))
-      {
-        mapping.insert({{view_i, M_ij[m].x_index()}, {ij, m}});
-        mapping.insert({{view_j, M_ij[m].y_index()}, {ij, m}});
-      }
-    }
-  }
-
-  return mapping;
-}
-
-
 GRAPHICS_MAIN()
 {
   // Use the following data structure to load images, keypoints, camera
@@ -216,120 +132,23 @@ GRAPHICS_MAIN()
   print_stage("Estimating the two-view geometry...");
   epipolar_edges.two_view_geometries = {
       estimate_two_view_geometry(M, un[0], un[1], E, inliers, sample_best)};
+
+  // Filter the 3D points.
   auto& two_view_geometry = epipolar_edges.two_view_geometries.front();
-  two_view_geometry.C1.K = views.cameras[0].K;
-  two_view_geometry.C2.K = views.cameras[1].K;
-
-
-  print_stage("Mapping feature GID to match GID...");
-  const auto match_index = map_feature_gid_to_match_gid(epipolar_edges);
-
-
-  print_stage("Populating the feature tracks...");
-  const auto [feature_graph, components] =
-      populate_feature_tracks(views, epipolar_edges);
-
-  // Keep feature tracks of size 2 at least.
-  print_stage("Checking the feature tracks...");
-  auto feature_tracks = filter_feature_tracks(feature_graph, components);
-  for (const auto& track : feature_tracks)
-  {
-    if (track.size() <= 2)
-      continue;
-
-    std::cout << "Component: " << std::endl;
-    std::cout << "Size = " << track.size() << std::endl;
-    for (const auto& fgid : track)
-    {
-      const auto& f = features(views.keypoints[fgid.image_id])[fgid.local_id];
-      for (auto [m, m_end] = match_index.equal_range(fgid); m != m_end; ++m)
-      {
-        const auto point_index = m->second.m;
-        std::cout << "- {" << fgid.image_id << ", " << fgid.local_id << "} : "
-                  << "STR: " << f.extremum_value << "  "
-                  << "TYP: " << int(f.extremum_type) << "  "
-                  << "2D:  " << f.center().transpose() << "     "
-                  << "3D:  " << two_view_geometry.X.col(point_index).transpose()
-                  << std::endl;
-      }
-    }
-    std::cout << std::endl;
-  }
-  SARA_CHECK(feature_tracks.size());
-
-
-  // Post-processing for feature tracks.
-  //
-  // Easy approach: remove ambiguity by consider only feature tracks of size 2
-  // in the two view problem.
-  {
-    auto unambiguous_feature_tracks = std::set<std::set<FeatureGID>>{};
-    for (const auto& track : feature_tracks)
-      if (track.size() == 2)
-        unambiguous_feature_tracks.insert(track);
-    SARA_CHECK(unambiguous_feature_tracks.size());
-    feature_tracks.swap(unambiguous_feature_tracks);
-  }
-  // More careful approach:
-  //
-  // - If in the two-view problem, a feature tracks contains more than 1 feature
-  //   in image 0 or 1, use the 2D points with the strongest (absolute) response
-  //   value in the feature detection
-  //
-  // Treat this case later.
-
-
-  // Prepare the bundle adjustment problem formulation .
-  auto ba_problem = BundleAdjustmentProblem{};
-  ba_problem.populate_data_from_two_view_geometry(
-      feature_tracks, views.keypoints, match_index, two_view_geometry);
-
-
-  // Solve the bundle adjustment problem with Ceres.
-  ceres::Problem problem;
-  for (int i = 0; i < ba_problem.observations.size(0); ++i)
-  {
-    auto cost_fn = ReprojectionError::Create(ba_problem.observations(i, 0),
-                                             ba_problem.observations(i, 1));
-
-    problem.AddResidualBlock(cost_fn, nullptr /* squared loss */,
-                             ba_problem.camera_parameters.data() +
-                                 ba_problem.camera_indices[i] * 12,
-                             ba_problem.points_abs_coords_3d.data() +
-                                 ba_problem.point_indices[i] * 3);
-  }
-
-  auto options = ceres::Solver::Options{};
-  options.linear_solver_type = ceres::DENSE_QR;
-  options.minimizer_progress_to_stdout = true;
-
-  auto summary = ceres::Solver::Summary{};
-  ceres::Solve(options, &problem, &summary);
-  std::cout << summary.BriefReport() << std::endl;
-
-
-  print_stage("Check the SfM...");
-  SARA_DEBUG << "camera_parameters =\n"
-             << ba_problem.camera_parameters.matrix() << std::endl;
-  SARA_DEBUG << "points =\n"
-             << ba_problem.points_abs_coords_3d.matrix() << std::endl;
-
-
-#ifdef SAVE_TWO_VIEW_GEOMETRY
-  keep_cheiral_inliers_only(geometry, inliers);
+  keep_cheiral_inliers_only(two_view_geometry, inliers);
 
   // Add the internal camera matrices to the camera.
-  geometry.C1.K = K1;
-  geometry.C2.K = K2;
-  auto colors = extract_colors(image1, image2, geometry);
-  save_to_hdf5(geometry, colors);
+  two_view_geometry.C1.K = views.cameras[0].K;
+  two_view_geometry.C2.K = views.cameras[1].K;
+  auto colors =
+      extract_colors(views.images[0], views.images[1], two_view_geometry);
+  save_to_hdf5(two_view_geometry, colors);
 
   // Inspect the fundamental matrix.
   print_stage("Inspecting the fundamental matrix estimation...");
   check_epipolar_constraints(views.images[0], views.images[1], F, matches,
                              sample_best, inliers,
                              /* display_step */ 20, /* wait_key */ true);
-#endif
 
   return 0;
 }
