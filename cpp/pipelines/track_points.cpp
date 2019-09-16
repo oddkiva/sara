@@ -73,86 +73,13 @@ auto track_points(const std::string& dirpath, const std::string& h5_filepath,
   // Save the graph of features in HDF5 format.
   write_feature_graph(feature_graph, h5_file, "feature_graph");
 
-  // Keep feature tracks of size 2 at least.
-  const auto feature_tracks = filter_feature_tracks(feature_graph, components);
-
-
-  // Prepare the bundle adjustment problem formulation.
-  //
-  // 1. Count the number of 3D points.
-  const auto num_points = static_cast<int>(feature_tracks.size());
-  SARA_CHECK(num_points);
-
-  // 2. Count the number of 2D observations.
-  auto num_observations_per_points = std::vector<int>(num_points);
-  std::transform(
-      std::begin(feature_tracks), std::end(feature_tracks),
-      std::begin(num_observations_per_points),
-      [](const auto& track) { return static_cast<int>(track.size()); });
-
-  const auto num_observations =
-      std::accumulate(std::begin(num_observations_per_points),
-                      std::end(num_observations_per_points), 0);
-  SARA_CHECK(num_observations);
-
-  // 3. Count the number of cameras, which should be equal to the number of
-  //    images.
-  auto image_ids = std::set<int>{};
-  for (const auto& track : feature_tracks)
-    for (const auto& f : track)
-      image_ids.insert(f.image_id);
-
-  const auto num_cameras = static_cast<int>(image_ids.size());
-  SARA_CHECK(num_cameras);
-
-  const auto num_parameters = 9 * num_cameras + 3 * num_points;
-
-  // 4. Transform the data for convenience.
-  struct ObservationRef {
-    FeatureGID gid;
-    int camera_id;
-    int point_id;
-  };
-  auto obs_refs = std::vector<ObservationRef>{};
-  {
-    obs_refs.reserve(num_observations);
-
-    auto point_id = 0;
-    for (const auto& track : feature_tracks)
-    {
-      for (const auto& f: track)
-        obs_refs.push_back({f, f.image_id, point_id});
-      ++point_id;
-    }
-  }
-
-  // 5. Prepare the data for Ceres.
-  auto observations = Tensor_<double, 2>{{num_observations, 2}};
-  auto parameters = Tensor_<double, 1>{num_parameters};
-  auto point_indices = std::vector<int>(num_points);
-  auto camera_indices = std::vector<int>(num_cameras);
-  for (int i = 0; i < num_observations; ++i)
-  {
-    const auto& ref = obs_refs[i];
-
-    // Easy things first.
-    point_indices[i] = ref.point_id;
-    camera_indices[i] = ref.camera_id;
-
-    // Initialize the 2D observations.
-    const auto& image_id = ref.gid.image_id;
-    const auto& local_id = ref.gid.local_id;
-    const auto& F = features(view_attributes.keypoints[image_id]);
-    const double x = F[local_id].x();
-    const double y = F[local_id].y();
-    observations(i, 0) = x;
-    observations(i, 1) = y;
-
-    // Initialize the 3D points.
-    // TODO: cannot do yet.
-    //
-    // Need another data structure that initializes the 3D points.
-  }
+  // Postprocess the feature tracks, i.e.:
+  // - Keep feature tracks of size 2 at least.
+  // - A feature tracks should contain only one 2D feature point in each image,
+  //   if it has more than one feature point in one image, we keep the feature
+  //   point with the strongest feature detection response.
+  const auto feature_tracks =
+      filter_feature_tracks(feature_graph, components, view_attributes);
 }
 
 

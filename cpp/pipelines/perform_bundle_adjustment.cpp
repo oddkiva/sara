@@ -142,33 +142,7 @@ auto perform_bundle_adjustment(const std::string& dirpath,
   // Reload the point tracks.
   const auto feature_graph = read_feature_graph(h5_file, "feature_graph");
 
-  // TODO: collect the 3D points visible over the set of images.
-  // 1. Initialize the absolute camera poses from the relative camera poses.
-  // 2. Recalculate the 3D points in the world coordinate frame.
-
-  // TODO: readapt the Ceres sample code for bundle adjustment.
-#ifdef CERES_BUNDLE_ADJUSTMENT
-  ceres::Problem problem;
-  for (int i = 0; i < bal_problem.num_observations(); ++i)
-  {
-    auto cost_fn =
-        SnavelyReprojectionError::Create(bal_problem.observations()[2 * i + 0],
-                                         bal_problem.observations()[2 * i + 1]);
-
-    problem.AddResidualBlock(cost_function,
-                             nullptr /* squared loss */,
-                             bal_problem.mutable_camera_for_observation(i),
-                             bal_problem.mutable_point_for_observation(i));
-  }
-
-  auto options = ceres::Solver::Options{};
-  options.linear_solver_type = ceres::DENSE_SCHUR;
-  options.minimizer_progress_to_stdout = true;
-  auto summary = ceres::Solver::Summary{};
-
-  ceres::Solve(options, &problem, &summary);
-  std::cout << summary.FullReport() << "\n";
-#endif
+  // TODO: bundle adjustment.
 
   // TODO: save the point cloud.
 

@@ -129,7 +129,8 @@ auto populate_feature_tracks(const ViewAttributes& views,
 
 DO_SARA_EXPORT
 auto filter_feature_tracks(const FeatureGraph& graph,
-                           const std::vector<std::vector<int>>& components)
+                           const std::vector<std::vector<int>>& components,
+                           ViewAttributes& views)
     -> std::set<std::set<FeatureGID>>;
 
 

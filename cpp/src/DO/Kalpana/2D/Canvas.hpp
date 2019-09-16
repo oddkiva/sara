@@ -8,10 +8,7 @@
 #include <Eigen/Core>
 
 
-namespace DO
-{
-namespace Kalpana
-{
+namespace DO { namespace Kalpana {
 
   using namespace Eigen;
 

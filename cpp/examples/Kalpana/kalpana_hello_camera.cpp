@@ -714,8 +714,6 @@ public:
   auto set_image(const string& image_path) -> void
   {
     const auto image = QImage{QString::fromStdString(image_path)}.mirrored();
-    m_image_sizes << image.width(), image.height();
-
     m_texture = new QOpenGLTexture{image};
     m_texture->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
     m_texture->setMagnificationFilter(QOpenGLTexture::Linear);
@@ -724,10 +722,6 @@ public:
   auto set_camera(const PinholeCamera& camera)
   {
     m_camera = camera;
-    //SARA_DEBUG << "K = \n" << m_camera.K << std::endl;
-    //SARA_DEBUG << "R = \n" << m_camera.R << std::endl;
-    //SARA_DEBUG << "t = " << m_camera.t.transpose() << std::endl;
-
     initialize_geometry();
     initialize_geometry_on_gpu();
   }

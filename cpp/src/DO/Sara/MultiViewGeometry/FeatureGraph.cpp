@@ -182,25 +182,79 @@ auto populate_feature_tracks(const ViewAttributes& view_attributes,
 }
 
 auto filter_feature_tracks(const FeatureGraph& graph,
-                           const std::vector<std::vector<int>>& components)
+                           const std::vector<std::vector<int>>& components,
+                           ViewAttributes& views)
     -> std::set<std::set<FeatureGID>>
 {
-  auto feature_tracks_filtered = std::set<std::set<FeatureGID>>{};
-  for (const auto& component: components)
+  // Populate the feature tracks regardless of their cardinality.
+  auto feature_tracks = std::set<std::set<FeatureGID>>{};
+  for (const auto& component : components)
   {
     auto feature_track = std::set<FeatureGID>{};
     std::transform(component.begin(), component.end(),
                    std::inserter(feature_track, std::begin(feature_track)),
                    [&](const auto v) { return graph[v]; });
 
-    // We are only interested in features that have correspondences.
-    // So we must collect only components of size 2 at least.
-    if (feature_track.size() >= 2)
-      feature_tracks_filtered.insert(feature_track);
+    feature_tracks.insert(feature_track);
   }
 
-  return feature_tracks_filtered;
+  // Remove redundant features across images.
+  using ImageID = int;
+  using FeatureID = int;
+
+  auto filtered_feature_tracks_dict = std::set<std::map<ImageID, FeatureID>>{};
+  for (const auto& track : feature_tracks)
+  {
+    auto filtered_track = std::map<ImageID, FeatureID>{};
+    for (const auto& f : track)
+    {
+      const auto current_feature = filtered_track.find(f.image_id);
+      const auto current_feature_found =
+          current_feature != filtered_track.end();
+
+      if (!current_feature_found)
+        filtered_track[f.image_id] = f.local_id;
+
+      // Replace the feature if the response is stronger.
+      else  // image_id == f.image_id
+      {
+        const auto& features_list = features(views.keypoints[f.image_id]);
+
+        // The feature local IDs.
+        const auto& current_feature_id = current_feature->second;
+        const auto current_feature_response =
+            std::abs(features_list[current_feature_id].extremum_value);
+
+        const auto feature_response =
+            std::abs(features_list[f.local_id].extremum_value);
+
+        if (feature_response > current_feature_response)
+          filtered_track[f.image_id] = f.local_id;
+      }
+    }
+
+    filtered_feature_tracks_dict.insert(filtered_track);
+  }
+
+  // Transform the filtered feature tracks again.
+  auto filtered_feature_tracks = std::set<std::set<FeatureGID>>{};
+  for (const auto& track_dict : filtered_feature_tracks_dict)
+  {
+    if (track_dict.size() == 1)
+      continue;
+
+    auto track_set = std::set<FeatureGID>{};
+    for (const auto& gid : track_dict)
+      track_set.insert({gid.first, gid.second});
+    filtered_feature_tracks.insert(track_set);
+  }
+
+  // Replace the feature tracks.
+  feature_tracks.swap(filtered_feature_tracks);
+
+  return feature_tracks;
 }
+
 
 template <>
 struct CalculateH5Type<FeatureGID>

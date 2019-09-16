@@ -231,12 +231,10 @@ GRAPHICS_MAIN()
 
   // Keep feature tracks of size 2 at least.
   print_stage("Checking the feature tracks...");
-  auto feature_tracks = filter_feature_tracks(feature_graph, components);
+  const auto feature_tracks =
+      filter_feature_tracks(feature_graph, components, views);
   for (const auto& track : feature_tracks)
   {
-    if (track.size() <= 2)
-      continue;
-
     std::cout << "Component: " << std::endl;
     std::cout << "Size = " << track.size() << std::endl;
     for (const auto& fgid : track)
@@ -258,27 +256,6 @@ GRAPHICS_MAIN()
   SARA_CHECK(feature_tracks.size());
 
 
-  // Post-processing for feature tracks.
-  //
-  // Easy approach: remove ambiguity by consider only feature tracks of size 2
-  // in the two view problem.
-  {
-    auto unambiguous_feature_tracks = std::set<std::set<FeatureGID>>{};
-    for (const auto& track : feature_tracks)
-      if (track.size() == 2)
-        unambiguous_feature_tracks.insert(track);
-    SARA_CHECK(unambiguous_feature_tracks.size());
-    feature_tracks.swap(unambiguous_feature_tracks);
-  }
-  // More careful approach:
-  //
-  // - If in the two-view problem, a feature tracks contains more than 1 feature
-  //   in image 0 or 1, use the 2D points with the strongest (absolute) response
-  //   value in the feature detection
-  //
-  // Treat this case later.
-
-
   // Prepare the bundle adjustment problem formulation .
   auto ba_problem = BundleAdjustmentProblem{};
   ba_problem.populate_data_from_two_view_geometry(
@@ -294,7 +271,8 @@ GRAPHICS_MAIN()
 
     problem.AddResidualBlock(cost_fn, nullptr /* squared loss */,
                              ba_problem.camera_parameters.data() +
-                                 ba_problem.camera_indices[i] * 12,
+                                 ba_problem.camera_indices[i] *
+                                     CameraModelView<double>::dof(),
                              ba_problem.points_abs_coords_3d.data() +
                                  ba_problem.point_indices[i] * 3);
   }
@@ -314,6 +292,7 @@ GRAPHICS_MAIN()
   SARA_DEBUG << "points =\n"
              << ba_problem.points_abs_coords_3d.matrix() << std::endl;
 
+  // TODO: check the point reprojection errors.
 
   return 0;
 }

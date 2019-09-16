@@ -307,7 +307,8 @@ BOOST_AUTO_TEST_CASE(test_populate_feature_tracks)
   }
 
 
-  const auto feature_tracks_filtered = filter_feature_tracks(graph, components);
+  const auto feature_tracks_filtered =
+      filter_feature_tracks(graph, components, views);
   for (const auto& feature_track : feature_tracks_filtered)
   {
     std::cout << "feature track : ";
