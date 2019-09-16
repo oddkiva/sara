@@ -18,126 +18,42 @@
 
 namespace DO { namespace Sara { namespace Projective {
 
-  //! Rudimentary polynomial class.
+  //! TODO: a bit overkill, remove?
   template <typename T, int N>
   class MatrixBasedObject
   {
   public:
     enum { Dimension = N };
-    using Mat = Matrix<T, N+1, N+1>;
-    using HVec = Matrix<T, N+1, 1>; // in projective space
-    using Vec = Matrix<T, N  , 1>;  // in Euclidean space
+    using matrix_type = Matrix<T, N + 1, N + 1>;
+    using homogeneous_vector_type = Matrix<T, N + 1, 1>;  // in projective space
+    using euclidean_vector_type = Matrix<T, N, 1>;        // in Euclidean space
 
     //! @{
     //! @brief Common constructors
     MatrixBasedObject() = default;
 
-    inline MatrixBasedObject(const MatrixBasedObject& other)
+    inline MatrixBasedObject(const matrix_type& m)
+      : _m{m}
     {
-      copy(other);
-    }
-
-    inline MatrixBasedObject(const Mat& data)
-      : _mat(data)
-    {
-    }
-    //! @}
-
-    //! @brief Assignment operator.
-    MatrixBasedObject& operator=(const MatrixBasedObject& other)
-    {
-      copy(other);
-      return *this;
-    }
-
-    //! @{
-    //! @brief Matrix accessor.
-    inline Mat& matrix()
-    {
-      return _mat;
-    }
-
-    inline const Mat& matrix() const { return _mat; }
-    //! @}
-
-    //! @{
-    //! @brief Coefficient accessor.
-    inline T& operator()(int i, int j)
-    {
-      return _mat(i,j);
-    }
-
-    inline T operator()(int i, int j) const
-    {
-      return _mat(i,j);
     }
     //! @}
 
     //! @{
-    //! @brief Comparison operator.
-    inline bool operator==(const MatrixBasedObject& other) const
+    //! @brief Implicit cast operator.
+    inline operator matrix_type&()
     {
-      return _mat == other._mat;
+      return _m;
     }
 
-    inline bool operator!=(const MatrixBasedObject& other) const
+    inline operator const matrix_type&() const
     {
-      return !operator=(other);
+      return _m;
     }
     //! @}
-
-  private:
-    inline void copy(const MatrixBasedObject& other)
-    {
-      _mat = other._mat;
-    }
 
   protected:
-    Mat _mat;
+    matrix_type _m;
   };
-
-
-  template <typename T, int N>
-  class Homography : public MatrixBasedObject<T,N>
-  {
-    using Base = MatrixBasedObject<T, N>;
-    using Base::_mat;
-
-  public:
-    using Base::Dimension;
-    using Mat = typename Base::Mat;
-    using HVec = typename Base::HVec;
-    using Vec = typename Base::Vec;
-
-    //! @{
-    //! @brief Common constructors
-    Homography() = default;
-
-    inline Homography(const Base& other)
-      : Base(other)
-    {
-    }
-
-    inline Homography(const Mat& data)
-      : Base(data)
-    {
-    }
-    //! @}
-
-    //! @{
-    //! @brief Evaluation at point 'x'.
-    inline T operator()(const HVec& x) const
-    {
-      return x.transpose()*_mat*x;
-    }
-
-    inline T operator()(const Vec& x) const
-    {
-      return (*this)((HVec() << x, 1).finished());
-    }
-    //! @}
-  };
-
 
 } /* namespace Sara */
 } /* namespace Projective */

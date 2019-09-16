@@ -23,7 +23,7 @@ public:
 
     auto image = image_view_2d<Rgb8>(inout);
     if (!read(image))
-      throw std::runtime_error{ "Error: could not read image frame" };
+      throw std::runtime_error{"Error: could not read image frame"};
   }
 
   bp::tuple sizes_tuple() const

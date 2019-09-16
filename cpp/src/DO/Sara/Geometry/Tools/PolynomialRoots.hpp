@@ -27,10 +27,10 @@ namespace DO { namespace Sara {
     const T& a = P[2];
     const T& b = P[1];
     const T& c = P[0];
-    T delta = b*b-4*a*c;
-    x1 = (-b - sqrt(std::complex<T>(delta))) / (2*a);
-    x2 = (-b + sqrt(std::complex<T>(delta))) / (2*a);
-    if(delta >= 0)
+    T delta = b * b - 4 * a * c;
+    x1 = (-b - sqrt(std::complex<T>(delta))) / (2 * a);
+    x2 = (-b + sqrt(std::complex<T>(delta))) / (2 * a);
+    if (delta >= 0)
       real_roots = true;
     else
       real_roots = false;

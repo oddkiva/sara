@@ -21,7 +21,6 @@
 #include <stdexcept>
 
 
-
 namespace DO { namespace Sara {
 
   //! @ingroup MultiArrayIterators
@@ -105,7 +104,10 @@ namespace DO { namespace Sara {
         coords[i] = start[i];
       }
       if (coords[0] == start[0])
+      {
+        coords[0] = end[0];
         stop = true;
+      }
     }
 
     template <typename Index, int N>
@@ -123,7 +125,14 @@ namespace DO { namespace Sara {
       }
 
       if (coords[0] == start[0])
+      {
+        const auto len = end[0] - start[0];
+        const auto modulo = len % steps[0];
+        const auto quotient = len / steps[0];
+        const auto num_steps = quotient + int(modulo != 0);
+        coords[0] = start[0] + num_steps * steps[0];
         stop = true;
+      }
     }
 
     template <typename Index, int N>
@@ -151,7 +160,10 @@ namespace DO { namespace Sara {
         coords[i] = start[i];
       }
       if (coords[N - 1] == start[N - 1])
+      {
+        coords[N - 1] = end[N - 1];
         stop = true;
+      }
     }
 
     template <typename Index, int N>
@@ -168,7 +180,14 @@ namespace DO { namespace Sara {
         coords[i] = start[i];
       }
       if (coords[N - 1] == start[N - 1])
+      {
+        const auto len = end[N - 1] - start[N - 1];
+        const auto modulo = len % steps[N - 1];
+        const auto quotient = len / steps[N - 1];
+        const auto num_steps = quotient + int(modulo != 0);
+        coords[N - 1] = start[N - 1] + num_steps * steps[N - 1];
         stop = true;
+      }
     }
 
     template <typename Index, int N>
@@ -200,7 +219,10 @@ namespace DO { namespace Sara {
       }
 
       if (coords[0] == end[0] - 1)
+      {
+        coords[0] = start[0] - 1;
         stop = true;
+      }
     }
 
     template <typename Index, int N>
@@ -223,7 +245,10 @@ namespace DO { namespace Sara {
 
       const auto n_0 = (end[0] - start[0]) / steps[0];
       if (coords[0] == start[0] + n_0 * steps[0])
+      {
+        coords[0] = start[0] - steps[0];
         stop = true;
+      }
     }
 
     template <typename Index, int N>
@@ -255,7 +280,10 @@ namespace DO { namespace Sara {
       }
 
       if (coords[N - 1] == end[N - 1] - 1)
+      {
+        coords[N - 1] = start[N - 1] - 1;
         stop = true;
+      }
     }
 
     template <typename Index, int N>
@@ -278,7 +306,10 @@ namespace DO { namespace Sara {
 
       const auto n_last = (end[N - 1] - start[N - 1]) / steps[N - 1];
       if (coords[N - 1] == start[N - 1] + n_last * steps[N - 1])
+      {
+        coords[N - 1] = start[N - 1] - steps[N - 1];
         stop = true;
+      }
     }
 
     template <typename Index, int N>

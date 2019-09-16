@@ -43,12 +43,13 @@ namespace DO { namespace Sara {
 
     inline T operator()(const Vector& a, const Vector& b) const
     {
-      return (b-a).dot(_covariance_matrix*(b-a));
+      return (b - a).dot(_covariance_matrix * (b - a));
     }
 
-    inline bool is_quasi_isotropic(T threshold = 0.9) const
+    friend inline bool is_quasi_isotropic(const SquaredRefDistance& dist,
+                                          T threshold = 0.9)
     {
-      Eigen::JacobiSVD<Matrix> svd(_covariance_matrix);
+      Eigen::JacobiSVD<Matrix> svd(dist._covariance_matrix);
       const Vector S = svd.singularValues();
       return S(N - 1) / S(0) > threshold;
     }
@@ -83,9 +84,10 @@ namespace DO { namespace Sara {
       return (b-a).dot(_m*(b-a));
     }
 
-    inline bool is_quasi_isotropic(T threshold = 0.9) const
+    friend inline bool is_quasi_isotropic(const SquaredDistance& dist,
+                                          T threshold = 0.9)
     {
-      Eigen::JacobiSVD<Matrix> svd(_m);
+      Eigen::JacobiSVD<Matrix> svd(dist._m);
       const Vector S = svd.singularValues();
       return S(N - 1) / S(0) > threshold;
     }

@@ -36,17 +36,17 @@
 #define FLANN_LSH_TABLE_H_
 
 #include <algorithm>
-#include <iostream>
+#include <climits>
+#include <cmath>
+#include <cstddef>
 #include <iomanip>
-#include <limits.h>
-// TODO as soon as we use C++0x, use the code in USE_UNORDERED_MAP
-#if USE_UNORDERED_MAP
+#include <iostream>
+#include <random>
+#ifdef USE_UNORDERED_MAP
 #include <unordered_map>
 #else
 #include <map>
 #endif
-#include <math.h>
-#include <stddef.h>
 
 #include "flann/util/dynamic_bitset.h"
 #include "flann/util/matrix.h"
@@ -187,7 +187,7 @@ public:
      */
     void add(const std::vector< std::pair<size_t, ElementType*> >& features)
     {
-#if USE_UNORDERED_MAP
+#ifdef USE_UNORDERED_MAP
         buckets_space_.rehash((buckets_space_.size() + features.size()) * 1.2);
 #endif
         // Add the features to the table
@@ -318,9 +318,9 @@ private:
     	if (speed_level_==kBitsetHash || speed_level_==kHash) {
     		ar & buckets_space_;
     	}
-		if (speed_level_==kBitsetHash) {
-			ar & key_bitset_;
-		}
+      if (speed_level_==kBitsetHash) {
+        ar & key_bitset_;
+      }
     }
     friend struct serialization::access;
 
@@ -363,8 +363,12 @@ inline LshTable<unsigned char>::LshTable(unsigned int feature_size, unsigned int
 
     // A bit brutal but fast to code
     std::vector<size_t> indices(feature_size * CHAR_BIT);
-    for (size_t i = 0; i < feature_size * CHAR_BIT; ++i) indices[i] = i;
-    std::random_shuffle(indices.begin(), indices.end());
+    for (size_t i = 0; i < feature_size * CHAR_BIT; ++i)
+        indices[i] = i;
+
+    std::random_device rd;
+    std::mt19937 g(rd());
+    std::shuffle(indices.begin(), indices.end(), g);
 
     // Generate a random set of order of subsignature_size_ bits
     for (unsigned int i = 0; i < key_size_; ++i) {

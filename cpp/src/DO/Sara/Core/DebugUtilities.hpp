@@ -16,7 +16,11 @@
 #include <iostream>
 #include <string>
 
-#define CHECK(x) std::cout << #x << " = " << x << std::endl
+
+#define SARA_DEBUG std::cout << "[" << __FUNCTION__ << ":" << __LINE__ << "] "
+#define SARA_CHECK(x)                                                          \
+  std::cout << "[" << __FUNCTION__ << ":" << __LINE__ << "] " << #x << " = "   \
+            << x << std::endl
 
 
 namespace DO { namespace Sara {

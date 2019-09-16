@@ -13,6 +13,7 @@
 
 #pragma once
 
+#include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/ArrayIterators.hpp>
 #include <DO/Sara/Core/MultiArray/ElementTraits.hpp>
 
@@ -112,6 +113,21 @@ namespace DO { namespace Sara {
                          Dynamic, StorageOrder>>;
     //! @}
 
+    //! @{
+    //! @brief Vector views for linear algebra.
+    using vector_view_type =
+        Map<Matrix<typename ElementTraits<T>::value_type, Dynamic, 1>>;
+
+    using const_vector_view_type =
+        Map<const Matrix<typename ElementTraits<T>::value_type, Dynamic, 1>>;
+
+    using row_vector_view_type =
+        Map<Matrix<typename ElementTraits<T>::value_type, 1, Dynamic>>;
+
+    using const_row_vector_view_type =
+        Map<const Matrix<typename ElementTraits<T>::value_type, 1, Dynamic>>;
+    //! @}
+
   public: /* methods */
     //! @brief Default constructor.
     inline MultiArrayView() = default;
@@ -125,7 +141,17 @@ namespace DO { namespace Sara {
       swap(other);
     }
 
+    //! @{
     //! @brief Constructor that wraps plain data with its known sizes.
+    inline explicit MultiArrayView(value_type *data, int size)
+      : _begin{data}
+      , _end{data + size}
+      , _sizes{size}
+      , _strides{1}
+    {
+      static_assert(N == 1, "MultiArray must be 1D!");
+    }
+
     inline explicit MultiArrayView(value_type *data, const vector_type& sizes)
       : _begin{data}
       , _end{data + compute_size<Dimension>(sizes)}
@@ -133,40 +159,47 @@ namespace DO { namespace Sara {
       , _strides{compute_strides(sizes)}
     {
     }
+    //! @}
+
+    //! @brief Check if the MultiArray object is empty.
+    inline auto empty() const -> bool
+    {
+      return _end - _begin == 0;
+    }
 
     //! @brief Return the size vector of the MultiArray object.
-    const vector_type& sizes() const
+    inline const vector_type& sizes() const
     {
       return _sizes;
     }
 
     //! @brief Return the number of elements in the internal data array.
-    size_type size() const
+    inline size_type size() const
     {
       return _end - _begin;
     }
 
     //! @brief Return the size of the MultiArray object along the i-th
     //! dimension.
-    int size(int i) const
+    inline int size(int i) const
     {
       return _sizes[i];
     }
 
     //! @brief Return the number of rows.
-    int rows() const
+    inline int rows() const
     {
       return _sizes[0];
     }
 
     //! @brief Return the number of cols.
-    int cols() const
+    inline int cols() const
     {
       return _sizes[1];
     }
 
     //! @brief Return the depth size.
-    int depth() const
+    inline int depth() const
     {
       return _sizes[2];
     }
@@ -203,6 +236,12 @@ namespace DO { namespace Sara {
       return _begin[offset(pos)];
     }
 
+    inline reference operator()(int i)
+    {
+      static_assert(N == 1, "MultiArray must be 1D");
+      return _begin[i];
+    }
+
     inline reference operator()(int i, int j)
     {
       static_assert(N == 2, "MultiArray must be 2D");
@@ -218,6 +257,12 @@ namespace DO { namespace Sara {
     inline const_reference operator()(const vector_type& pos) const
     {
       return _begin[offset(pos)];
+    }
+
+    inline const_reference operator()(int i) const
+    {
+      static_assert(N == 1, "MultiArray must be 1D");
+      return _begin[i];
     }
 
     inline const_reference operator()(int i, int j) const
@@ -295,6 +340,36 @@ namespace DO { namespace Sara {
     //! @}
 
     //! @{
+    //! @brief Apply the vectorization math operation and return a vector view
+    //! object ! for linear algebra with Eigen libraries.
+    inline auto vector() -> vector_view_type
+    {
+      return {reinterpret_cast<typename ElementTraits<T>::pointer>(data()),
+              static_cast<int64_t>(size())};
+    }
+
+    inline auto vector() const -> const_vector_view_type
+    {
+      return {
+          reinterpret_cast<typename ElementTraits<T>::const_pointer>(data()),
+          static_cast<int64_t>(size())};
+    }
+
+    inline auto row_vector() -> row_vector_view_type
+    {
+      return {reinterpret_cast<typename ElementTraits<T>::pointer>(data()),
+              static_cast<int64_t>(size())};
+    }
+
+    inline auto row_vector() const -> const_row_vector_view_type
+    {
+      return {
+          reinterpret_cast<typename ElementTraits<T>::const_pointer>(data()),
+          static_cast<int64_t>(size())};
+    }
+    //! @}
+
+    //! @{
     //! @brief Return the matrix view for linear algebra with Eigen libraries.
     inline matrix_view_type matrix()
     {
@@ -361,6 +436,18 @@ namespace DO { namespace Sara {
     {
       return {false, _begin, start, end, _strides, _sizes, steps};
     }
+
+    inline auto end_stepped_subarray(const vector_type& start,
+                                       const vector_type& end,
+                                       const vector_type& steps) const
+        -> const_stepped_nd_iterator
+    {
+      const_stepped_nd_iterator it{
+          false, _begin, start, end, _strides, _sizes, steps};
+      it += it.stepped_subarray_sizes().array() - 1;
+      ++it;
+      return it;
+    }
     //! @}
 
     //! @}
@@ -420,8 +507,7 @@ namespace DO { namespace Sara {
     template <typename Op>
     inline auto cwise_transform_inplace(Op op) -> self_type&
     {
-      for (auto pixel = begin(); pixel != end(); ++pixel)
-        op(*pixel);
+      std::for_each(std::begin(*this), std::end(*this), op);
       return *this;
     }
 
@@ -434,13 +520,14 @@ namespace DO { namespace Sara {
       using ValueType = decltype(op(std::declval<value_type>()));
 
       auto dst = MultiArray<ValueType, N, S>{sizes()};
-
-      auto src_pixel = begin();
-      auto dst_pixel = dst.begin();
-      for (; src_pixel != end(); ++src_pixel, ++dst_pixel)
-        *dst_pixel = op(*src_pixel);
-
+      std::transform(std::begin(*this), std::end(*this), std::begin(dst), op);
       return dst;
+    }
+
+    template <typename U>
+    inline auto cast() const -> MultiArray<U, Dimension, StorageOrder>
+    {
+      return cwise_transform([](const T& v) -> U { return static_cast<U>(v); });
     }
 
     //! @brief Reshape the array with the new sizes.
@@ -455,13 +542,24 @@ namespace DO { namespace Sara {
                                                 new_sizes};
     }
 
+    //! @brief Reshape the array with the new sizes.
+    inline auto flatten() const
+        -> MultiArrayView<T, 1, StorageOrder>
+    {
+      return MultiArrayView<T, 1, StorageOrder>{const_cast<T*>(_begin),
+                                                static_cast<int>(size())};
+    }
+
     //! @brief Transpose the array.
     inline auto transpose(const vector_type& order) const
       -> MultiArray<T, Dimension, StorageOrder>
     {
       auto out_sizes = vector_type{};
-      for (int i = 0; i < Dimension; ++i)
-        out_sizes[i] = this->size(order[i]);
+      // We keep this to remember what it does:
+      // for (int i = 0; i < Dimension; ++i)
+      //   out_sizes[i] = this->size(order[i]);
+      std::transform(order.data(), order.data() + order.size(), out_sizes.data(),
+                     [&](int order_i) { return this->size(order_i); });
 
       auto out = MultiArray<T, Dimension, StorageOrder>{out_sizes};
 
@@ -470,8 +568,12 @@ namespace DO { namespace Sara {
 
       for (; !in_it.end(); ++in_it)
       {
-        for (int i = 0; i < Dimension; ++i)
-          out_coord[i] = in_it.position()[order[i]];
+        // We keep this to remember what it does:
+        // for (int i = 0; i < Dimension; ++i)
+        //   out_coord[i] = in_it.position()[order[i]];
+        std::transform(order.data(), order.data() + order.size(),
+                       out_coord.data(),
+                       [&](int order_i) { return in_it.position()[order_i]; });
 
         out(out_coord) = *in_it;
       }
@@ -540,7 +642,7 @@ namespace DO { namespace Sara {
                            const MultiArrayView<T, N, StorageOrder>& M)
   {
     os << M.sizes() << std::endl;
-    os << M.array() << std::endl;
+    os << M.flat_array() << std::endl;
     return os;
   }
 

@@ -179,6 +179,8 @@ pip-log.txt
 #############
 ## Project-specific files
 #############
+compile_commands.json
+
 cmake/DOVersion.cmake
 
 src/DO/Sara/Defines.hpp

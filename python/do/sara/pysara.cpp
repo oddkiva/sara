@@ -6,6 +6,7 @@
 #ifdef PYSARA_BUILD_VIDEOIO
 # include "VideoIO.hpp"
 #endif
+# include "IPC.hpp"
 
 
 BOOST_PYTHON_MODULE(pysara)
@@ -18,4 +19,5 @@ BOOST_PYTHON_MODULE(pysara)
 #ifdef PYSARA_BUILD_VIDEOIO
   expose_video_io();
 #endif
+  expose_ipc();
 }

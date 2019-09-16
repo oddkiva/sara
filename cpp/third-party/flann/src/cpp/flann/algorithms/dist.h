@@ -106,23 +106,24 @@ struct L2_3D
     typedef typename Accumulator<T>::Type ResultType;
 
     template <typename Iterator1, typename Iterator2>
-    ResultType operator()(Iterator1 a, Iterator2 b, size_t size, ResultType /*worst_dist*/ = -1) const
+    ResultType operator()(Iterator1 a, Iterator2 b, size_t,
+                          ResultType /*worst_dist*/ = -1) const
     {
-        ResultType result = ResultType();        
+        ResultType result = ResultType();
         ResultType diff;
         diff = *a++ - *b++;
-        result += diff*diff;
+        result += diff * diff;
         diff = *a++ - *b++;
-        result += diff*diff;
+        result += diff * diff;
         diff = *a++ - *b++;
-        result += diff*diff;        
+        result += diff * diff;
         return result;
     }
 
     template <typename U, typename V>
     inline ResultType accum_dist(const U& a, const V& b, int) const
     {
-        return (a-b)*(a-b);
+        return (a - b) * (a - b);
     }
 };
 
@@ -185,7 +186,7 @@ struct L2
     template <typename U, typename V>
     inline ResultType accum_dist(const U& a, const V& b, int) const
     {
-        return (a-b)*(a-b);
+        return (a - b) * (a - b);
     }
 };
 

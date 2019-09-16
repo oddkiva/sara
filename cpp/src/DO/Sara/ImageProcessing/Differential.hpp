@@ -95,6 +95,9 @@ namespace DO { namespace Sara {
     using ScalarField = Image<Scalar<Field>, Field::Dimension>;
 
     template <typename Field>
+    using ScalarFieldView = ImageView<Scalar<Field>, Field::Dimension>;
+
+    template <typename Field>
     inline auto operator()(typename Field::const_array_iterator& in,
                            Scalar<Field>& out) const -> void
     {
@@ -128,8 +131,9 @@ namespace DO { namespace Sara {
       return out;
     }
 
-    template <typename InField, typename OutField>
-    auto operator()(const InField& in, OutField& out) const -> void
+    template <typename Field>
+    auto operator()(const Field& in, ScalarFieldView<Field>& out) const
+        -> void
     {
       if (in.sizes() != out.sizes())
         throw std::domain_error{
@@ -139,13 +143,13 @@ namespace DO { namespace Sara {
       auto in_i = in.begin_array();
       auto out_i = out.begin();
       for ( ; !in_i.end(); ++in_i, ++out_i)
-        operator()<InField>(in_i, *out_i);
+        operator()<Field>(in_i, *out_i);
     }
 
     template <typename Field>
     auto operator()(const Field& in) const -> ScalarField<Field>
     {
-      auto out = ScalarField<Field>{ in.sizes() };
+      auto out = ScalarField<Field>{in.sizes()};
       operator()(in, out);
       return out;
     }
@@ -265,9 +269,11 @@ namespace DO { namespace Sara {
     @return laplacian value
   */
   template <typename T, int N>
-  inline T laplacian(const ImageView<T, N>& f, const Matrix<int, N, 1>& x)
+  inline T laplacian(const ImageView<T, N>& f,
+                     const typename ImageView<T, N>::vector_type& x)
   {
-    return Laplacian{}(f, x);
+    const T val = Laplacian{}.operator()<ImageView<T, N>>(f, x);
+    return val;
   }
 
   /*!
@@ -278,7 +284,7 @@ namespace DO { namespace Sara {
   template <typename T, int N>
   inline Image<T, N> laplacian(const ImageView<T, N>& in)
   {
-    return Laplacian{}(in);
+    return Laplacian{}.operator()<ImageView<T, N>>(in);
   }
 
   /*!

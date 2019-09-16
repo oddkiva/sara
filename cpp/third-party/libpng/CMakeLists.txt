@@ -62,12 +62,19 @@ set(libpng_sources
 if(MSVC)
   add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
 endif(MSVC)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR} ../zlib)
+
+if (WIN32)
+  # We are building from source.
+  set(ZLIB_INCLUDE_DIR ../zlib)
+  set(ZLIB_LIBRARY zlib)
+endif ()
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${ZLIB_INCLUDE_DIR})
 add_library(png STATIC ${libpng_sources})
 set_target_properties(png
   PROPERTIES
   OUTPUT_NAME_DEBUG png-d)
-target_link_libraries(png zlib ${M_LIBRARY})
+target_link_libraries(png ${ZLIB_LIBRARY} ${M_LIBRARY})
 
 if (WIN32)
   install(TARGETS png

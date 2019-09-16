@@ -22,23 +22,21 @@
 
 namespace DO { namespace Sara {
 
-	class DO_SARA_EXPORT KeyProximity
-	{
-	public:
-		KeyProximity(float metric_dist_thres = .5f,
-                 float pixel_dist_thres = 10.f)
-      : _squared_metric_dist{ metric_dist_thres*metric_dist_thres }
-      , _squared_dist_thres{ pixel_dist_thres*pixel_dist_thres }
+  class DO_SARA_EXPORT KeyProximity
+  {
+  public:
+    KeyProximity(float metric_dist_thres = .5f, float pixel_dist_thres = 10.f)
+      : _squared_metric_dist{metric_dist_thres * metric_dist_thres}
+      , _squared_dist_thres{pixel_dist_thres * pixel_dist_thres}
     {
     }
 
-    SquaredRefDistance<float, 2>
-    mapped_squared_metric(const OERegion& f) const
+    SquaredRefDistance<float, 2> mapped_squared_metric(const OERegion& f) const
     {
-      return SquaredRefDistance<float, 2>(f.shape_matrix());
+      return SquaredRefDistance<float, 2>(f.shape_matrix);
     }
 
-		bool operator()(const OERegion& f1, const OERegion& f2) const;
+    bool operator()(const OERegion& f1, const OERegion& f2) const;
 
   private:
     float _squared_metric_dist;

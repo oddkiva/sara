@@ -7,6 +7,8 @@
 
 #include <numpy/ndarrayobject.h>
 
+#include <boost/version.hpp>
+
 #if BOOST_VERSION <= 106300
 # include <boost/python/numeric.hpp>
 #else
