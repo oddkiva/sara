@@ -31,12 +31,6 @@ set(SARA_USE_FROM_SOURCE TRUE CACHE INTERNAL "Build Sara libraries")
 set(BUILD_SHARED_LIBS ${SARA_BUILD_SHARED_LIBS})
 
 
-if (WIN32 AND SARA_USE_CONAN)
-  include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-  conan_basic_setup()
-endif ()
-
-
 # Add Sara to the CMake module path.
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
