@@ -1,43 +1,56 @@
 #pragma once
 
-#include <DO/Sara/Core/Tensor.hpp>
+//#include <DO/Sara/Core/Expression/Expression.hpp>
+
+#include <string>
 
 
-namespace DO { namespace Sara {
+namespace DO::Sara {
 
-  template <typename X>
-  struct Expr
+  //template <typename E>
+  //using Expression = sara::expression::Expression<E>;
+
+
+  struct Symbol  // : public Expression<Symbol>
   {
-  };
-
-
-  template <typename T>
-  struct Variable : public Expr<Variable<T>>
-  {
-    T value;
     std::string name;
 
-    inline operator T&()
+    Symbol() = default;
+
+    Symbol(const std::string& name)
+      : name{name}
     {
-      return value;
     }
 
-    inline operator const T&()
+    auto operator<(const Symbol& other) const -> bool
     {
-      return value;
+      return name < other.name;
+    }
+
+    auto operator==(const Symbol& other) const -> bool
+    {
+      return name == other.name;
     }
   };
 
-
-  template <typename F, typename X>
-  struct FuncXpr : public Expr<FuncXpr<F, X>>
+  template <typename T>
+  struct Placeholder : Symbol
   {
+    Placeholder() = default;
+
+    T value;
   };
 
-  template <typename X, typename Y>
-  struct PlusXpr : public Expr<PlusXpr<X, Y>>
+  template <typename T>
+  struct Variable : Placeholder<T>
   {
+    Variable() = default;
   };
 
-} /* namespace Sara */
-} /* namespace DO */
+  template <typename T>
+  struct Constant : Placeholder<T>
+  {
+    const T value;
+  };
+
+} /* namespace DO::Sara */

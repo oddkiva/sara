@@ -67,6 +67,7 @@ macro (sara_populate_available_components)
   # Base libraries.
   sara_append_components(DO_Sara_COMPONENTS Core)
   sara_append_components(DO_Sara_COMPONENTS Graphics)
+  sara_append_components(DO_Sara_COMPONENTS FileSystem)
 
   # Image and Video I/O.
   sara_append_components(DO_Sara_COMPONENTS ImageIO)
@@ -88,6 +89,7 @@ macro (sara_populate_available_components)
 
   # Multiple view geometry.
   sara_append_components(DO_Sara_COMPONENTS MultiViewGeometry)
+  sara_append_components(DO_Sara_COMPONENTS SfM)
 
   # Disjoint sets.
   sara_append_components(DO_Sara_COMPONENTS DisjointSets)
@@ -232,12 +234,7 @@ macro (sara_append_library _library_name
   # 2. Bookmark the project to make sure the library is created only once.
   set_property(GLOBAL PROPERTY _DO_Sara_${_library_name}_INCLUDED 1)
 
-  # 3. Include third-party library directories.
-  if (NOT "${_include_dirs}" STREQUAL "")
-    include_directories(${_include_dirs})
-  endif ()
-
-  # 4. Create the project:
+  # 3. Create the project:
   if (NOT "${_src_files}" STREQUAL "")
     # - Case 1: the project contains 'cpp' source files
     #   Specify the source files.
@@ -245,11 +242,17 @@ macro (sara_append_library _library_name
       ${DO_Sara_DIR}/cmake/UseDOSara${_library_name}.cmake
       ${_hdr_files} ${_src_files})
 
-    # Link with other libraries.
+    # 4. Include third-party library directories.
+    if (NOT "${_include_dirs}" STREQUAL "")
+      target_include_directories(DO_Sara_${_library_name} PRIVATE
+        ${_include_dirs})
+    endif ()
+
+    # 5. Link with other libraries.
     sara_step_message("Linking project 'DO_Sara_${_library_name}' with "
                       "'${_lib_dependencies}'")
 
-    target_link_libraries( DO_Sara_${_library_name} ${_lib_dependencies})
+    target_link_libraries(DO_Sara_${_library_name} PUBLIC ${_lib_dependencies})
 
     # Form the compiled library output name.
     set(_library_output_basename DO_Sara_${_library_name})
@@ -317,10 +320,6 @@ endmacro ()
 set_property(GLOBAL PROPERTY _DO_SARA_TESTS "")
 
 function (sara_add_test _test_name _srcs _additional_lib_deps)
-  if (POLICY CMP0020)
-    cmake_policy(SET CMP0020 OLD)
-  endif (POLICY CMP0020)
-
   # Create a variable containing the list of source files
   set(_srcs_var ${_srcs})
 
@@ -335,9 +334,11 @@ function (sara_add_test _test_name _srcs _additional_lib_deps)
 
   # Create the unit test project.
   add_executable(${_test_name} ${_srcs_var})
-  target_link_libraries(${_test_name} ${_additional_lib_deps}
-                        ${Boost_LIBRARIES})
-  target_compile_definitions(${_test_name} PRIVATE -DBOOST_TEST_DYN_LINK)
+  target_link_libraries(${_test_name}
+    PRIVATE ${_additional_lib_deps}
+            ${Boost_LIBRARIES})
+  target_compile_definitions(${_test_name}
+    PRIVATE -DBOOST_TEST_DYN_LINK)
 
   set_target_properties(${_test_name}
     PROPERTIES

@@ -13,13 +13,20 @@
 
 #pragma once
 
+#include <DO/Sara/Defines.hpp>
+
+#include <DO/Sara/Core/DebugUtilities.hpp>
+#include <DO/Sara/Core/HDF5.hpp>
+#include <DO/Sara/Core/Tensor.hpp>
+
+#include <DO/Sara/Features/Feature.hpp>
+#include <DO/Sara/Features/KeypointList.hpp>
+
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
 
-#include <DO/Sara/Features/Feature.hpp>
-#include <DO/Sara/Features/DescriptorMatrix.hpp>
 
 
 namespace DO { namespace Sara {
@@ -31,7 +38,7 @@ namespace DO { namespace Sara {
 
   template <typename T>
   bool read_keypoints(std::vector<OERegion>& features,
-                      DescriptorMatrix<T>& descriptors,
+                      Tensor_<T, 2>& descriptors,
                       const std::string& name)
   {
     using namespace std;
@@ -47,13 +54,16 @@ namespace DO { namespace Sara {
 
     features.resize(num_features);
     descriptors.resize(num_features, descriptor_dim);
-    Matrix<T, Dynamic, 1> descriptor_i(descriptor_dim, 1);
 
+    using RowVectorXT = Matrix<T, 1, Dynamic>;
+    auto descriptor_i = RowVectorXT{descriptor_dim};
+
+    auto dmat = descriptors.matrix();
     for (int i = 0; i < num_features; ++i)
     {
       file >> features[i];
       file >> descriptor_i;
-      descriptors[i] = descriptor_i;
+      dmat.row(i) = descriptor_i;
     }
 
     file.close();
@@ -63,35 +73,57 @@ namespace DO { namespace Sara {
 
   template <typename T>
   bool write_keypoints(const std::vector<OERegion>& features,
-                       const DescriptorMatrix<T>& descriptors,
+                       const TensorView_<T, 2>& descriptors,
                        const std::string& name)
   {
     using namespace std;
-    ofstream file{ name.c_str() };
+    ofstream file{name.c_str()};
     if (!file.is_open())
     {
       cerr << "Can't open file" << std::endl;
       return false;
     }
 
-    file << features.size() << " " << descriptors.dimension() << std::endl;
+    file << features.size() << " " << descriptors.cols() << std::endl;
     for(size_t i = 0; i < features.size(); ++i)
     {
       const OERegion& feat = features[i];
 
       file << feat.x() << ' ' << feat.y() << ' ';
-      file << Map<const RowVector4f>(feat.shape_matrix().data()) << ' ';
-      file << feat.orientation() << ' ';
-      file << int(feat.type()) << ' ';
+      file << Map<const RowVector4f>(feat.shape_matrix.data()) << ' ';
+      file << feat.orientation << ' ';
+      file << int(feat.type) << ' ';
 
       file << Map<const Matrix<T, 1, Dynamic> >(
         descriptors[static_cast<int>(i)].data(),
-        1, descriptors.dimension() ) << endl;
+        1, descriptors.cols() ) << endl;
     }
 
     file.close();
 
     return true;
+  }
+
+  inline auto read_keypoints(H5File& h5_file, const std::string& group_name)
+      -> KeypointList<OERegion, float>
+  {
+    auto features = std::vector<OERegion>{};
+    auto descriptors = Tensor_<float, 2>{};
+
+    h5_file.read_dataset(group_name + "/" + "features", features);
+    h5_file.read_dataset(group_name + "/" + "descriptors", descriptors);
+
+    return {features, descriptors};
+  }
+
+  inline auto write_keypoints(H5File& h5_file, const std::string& group_name,
+                              const KeypointList<OERegion, float>& keys,
+                              bool overwrite = false)
+  {
+    const auto& [f, v] = keys;
+    h5_file.write_dataset(group_name + "/" + "features", tensor_view(f),
+                          overwrite);
+    h5_file.write_dataset(group_name + "/" + "descriptors", v, overwrite);
   }
 
   //! @}

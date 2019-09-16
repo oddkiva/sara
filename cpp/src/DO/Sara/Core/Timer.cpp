@@ -19,6 +19,8 @@
 
 #include <DO/Sara/Core/Timer.hpp>
 
+#include <stdexcept>
+
 
 namespace DO { namespace Sara {
 
@@ -29,7 +31,7 @@ namespace DO { namespace Sara {
     if (!QueryPerformanceFrequency(&freq))
     {
       auto msg = "Failed to initialize high resolution timer!";
-      throw std::runtime_error{ msg };
+      throw std::runtime_error{msg};
     }
     _frequency = static_cast<double>(freq.QuadPart);
 #endif
@@ -44,7 +46,7 @@ namespace DO { namespace Sara {
     _start = static_cast<double>(_li_start.QuadPart);
 #else
     timeval start;
-    gettimeofday(&start, NULL);
+    gettimeofday(&start, nullptr);
     _start = start.tv_sec + start.tv_usec * 1e-6;
 #endif
   }
@@ -57,7 +59,7 @@ namespace DO { namespace Sara {
     return (static_cast<double>(_end.QuadPart) - _start) / _frequency;
 #else
     timeval end;
-    gettimeofday(&end, NULL);
+    gettimeofday(&end, nullptr);
     double _end = end.tv_sec + end.tv_usec * 1e-6;
     return _end - _start;
 #endif

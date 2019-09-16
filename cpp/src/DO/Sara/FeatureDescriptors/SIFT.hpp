@@ -15,12 +15,12 @@
 
 #include <DO/Sara/Core/EigenExtension.hpp>
 #include <DO/Sara/Core/Image/Image.hpp>
+#include <DO/Sara/Core/Tensor.hpp>
 
 #include <DO/Sara/Geometry/Tools/Utilities.hpp>
 
 #include <DO/Sara/Graphics.hpp>
 
-#include <DO/Sara/Features/DescriptorMatrix.hpp>
 #include <DO/Sara/Features/Feature.hpp>
 
 #include <DO/Sara/ImageProcessing/ImagePyramid.hpp>
@@ -200,31 +200,36 @@ namespace DO { namespace Sara {
     }
 
     //! @brief Computes the **upright** SIFT descriptor for keypoint \$(x,y,\sigma)\f$.
-    descriptor_type operator()(float x, float y, float sigma,
-                               const ImageView<Vector2f>& grad_polar_coords) const
+    descriptor_type
+    operator()(float x, float y, float sigma,
+               const ImageView<Vector2f>& grad_polar_coords) const
     {
       return this->operator()(x, y, sigma, 0.f, grad_polar_coords);
     }
 
     //! Helper member function.
-    descriptor_type operator()(const OERegion& f,
-                               const ImageView<Vector2f>& grad_polar_coords) const
+    descriptor_type
+    operator()(const OERegion& f,
+               const ImageView<Vector2f>& grad_polar_coords) const
     {
-      return this->operator()(f.x(), f.y(), f.scale(), f.orientation(), grad_polar_coords);
+      return this->operator()(f.x(), f.y(), f.scale(), f.orientation,
+                              grad_polar_coords);
     }
 
     //! Helper member function.
-    DescriptorMatrix<float>
+    Tensor_<float, 2>
     operator()(const std::vector<OERegion>& features,
                const std::vector<Point2i>& scale_octave_pairs,
                const ImagePyramid<Vector2f>& gradient_polar_coords) const
     {
-      DescriptorMatrix<float> sifts{features.size(), Dim};
+      auto sifts = Tensor_<float, 2>{{int(features.size()), Dim}};
       for (size_t i = 0; i < features.size(); ++i)
       {
-        sifts[i] = this->operator()(
-            features[i], gradient_polar_coords(scale_octave_pairs[i](0),
-                                               scale_octave_pairs[i](1)));
+        sifts.matrix().row(i) =
+            this->operator()(features[i],
+                             gradient_polar_coords(scale_octave_pairs[i](0),
+                                                   scale_octave_pairs[i](1)))
+                .transpose();
       }
       return sifts;
     }
@@ -236,27 +241,29 @@ namespace DO { namespace Sara {
     {
       const auto lambda = 3.f;
       const auto l = lambda * sigma;
-      Vector2f grid[N+1][N+1];
+      Vector2f grid[N + 1][N + 1];
 
       auto T = Matrix2f{};
       theta = 0;
-      T << cos(theta),-sin(theta),
-           sin(theta), cos(theta);
+      T << cos(theta), -sin(theta),
+           sin(theta),  cos(theta);
       T *= l;
 
-      for (auto v = 0; v < N+1; ++v)
-        for (auto u = 0; u < N+1; ++u)
-          grid[u][v] = (Vector2f{ x, y } + T*Vector2f{ u - N / 2.f, v - N / 2.f })*octave_scale_factor;
-      for (auto i = 0; i < N+1; ++i)
+      for (auto v = 0; v < N + 1; ++v)
+        for (auto u = 0; u < N + 1; ++u)
+          grid[u][v] =
+              (Vector2f{x, y} + T * Vector2f{u - N / 2.f, v - N / 2.f}) *
+              octave_scale_factor;
+      for (auto i = 0; i < N + 1; ++i)
         draw_line(grid[0][i], grid[N][i], Green8, pen_width);
-      for (auto i = 0; i < N+1; ++i)
+      for (auto i = 0; i < N + 1; ++i)
         draw_line(grid[i][0], grid[i][N], Green8, pen_width);
 
-      auto a = Vector2f{ x, y };
+      auto a = Vector2f{x, y};
       a *= octave_scale_factor;
       auto b = Vector2f{};
-      b = a + octave_scale_factor * N / 2.f * T * Vector2f{ 1.f, 0.f };
-      draw_line(a, b, Red8, pen_width+2);
+      b = a + octave_scale_factor * N / 2.f * T * Vector2f{1.f, 0.f};
+      draw_line(a, b, Red8, pen_width + 2);
     }
 
   private: /* member functions. */

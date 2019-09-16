@@ -340,5 +340,6 @@ namespace DO { namespace Sara {
 
     return out;
   }
+
 } /* namespace Sara */
 } /* namespace DO */

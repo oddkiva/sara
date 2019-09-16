@@ -12,6 +12,8 @@ if (MSVC)
   add_definitions(
     /D_SCL_SECURE_NO_WARNINGS
     /D_CRT_SECURE_NO_DEPRECATE
+    /D_SILENCE_CXX17_ADAPTOR_TYPEDEFS_DEPRECATION_WARNING  # Eigen
+    /bigobj
     /wd4251)
   message(STATUS "  - Disabled annoying warnings in MSVC.")
 
@@ -61,12 +63,6 @@ elseif (CMAKE_COMPILER_IS_GNUCXX)
   if (GCC_VERSION VERSION_GREATER 4.8)
     sara_substep_message("Enable colored output of GCC.")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color=always")
-  endif ()
-
-  # Silence some annoying compiler warnings in Eigen since GCC 7.0.
-  if (GCC_VERSION VERSION_GREATER 7.0 OR
-      GCC_VERSION VERSION_EQUAL 7.0)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-int-in-bool-context")
   endif ()
 endif ()
 

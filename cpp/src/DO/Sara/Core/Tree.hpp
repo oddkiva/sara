@@ -571,10 +571,9 @@ namespace DO { namespace Sara {
       //! @{
       //! @brief STL style typedefs.
       using self_type = NodeHandle;
-      using node_pointer =
-        typename Meta::Choose<IsConst, const Node *, Node *>::Type;
-      using reference = typename Meta::Choose<IsConst, const T&, T&>::Type;
-      using pointer = typename Meta::Choose<IsConst, const T *, T *>::Type;
+      using node_pointer = std::conditional_t<IsConst, const Node*, Node*>;
+      using reference = std::conditional_t<IsConst, const T&, T&>;
+      using pointer = std::conditional_t<IsConst, const T *, T *>;
       //! @}
 
       inline NodeHandle(node_pointer node_ptr = nullptr)

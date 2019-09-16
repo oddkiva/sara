@@ -16,13 +16,26 @@ before_script:
       libavcodec-dev
       libavformat-dev
       libavutil-dev
+      libglew-dev
+      libglfw3-dev
+      ocl-icd-opencl-dev
+      opencl-headers
+      libpocl-dev
+      libceres-dev
       qtbase5-dev
+      qt3d5-dev
+      qt3d-assimpsceneimport-plugin
+      qt3d-defaultgeometryloader-plugin
+      qt3d-gltfsceneio-plugin
+      qt3d-scene2d-plugin
   - apt-get install -qq
       libboost-python-dev
       python3-dev
   - apt-get install -y xvfb
-  - Xvfb :1 -noreset &
+  - Xvfb :1 -noreset 1>/dev/null 2>&1 &
   - export DISPLAY=:1
+
+  - ./scripts/install_clblast.sh
 
 job:
   script:
@@ -34,5 +47,5 @@ job:
         -DSARA_BUILD_SAMPLES:BOOL=ON
         -DSARA_BUILD_TESTS:BOOL=ON
     - make  -j$(nproc)
-    - ctest --output-on-failure --exclude-regex "test_graphics_*|test_features_draw|test_core_ipc_cond1"
+    - DISPLAY=:1 ctest --output-on-failure --exclude-regex "test_graphics_*|test_core_ipc_cond1"
     - make package

@@ -18,7 +18,7 @@
 
 namespace DO { namespace Sara { namespace Projective {
 
-  //! Rudimentary polynomial class.
+  //! TODO: a bit overkill, remove?
   template <typename T, int N>
   class MatrixBasedObject
   {
@@ -54,53 +54,6 @@ namespace DO { namespace Sara { namespace Projective {
   protected:
     matrix_type _m;
   };
-
-
-  template <typename T, int N>
-  class Homography : public MatrixBasedObject<T,N>
-  {
-    using base_type = MatrixBasedObject<T, N>;
-    using base_type::_m;
-
-  public:
-    using base_type::Dimension;
-    using matrix_type = typename base_type::matrix_type;
-    using homogeneous_vector_type = typename base_type::homogeneous_vector_type;
-    using euclidean_vector_type = typename base_type::euclidean_vector_type;
-
-    //! @{
-    //! @brief Common constructors
-    Homography() = default;
-
-    inline Homography(const base_type& other)
-      : base_type{other}
-    {
-    }
-
-    inline Homography(const matrix_type& data)
-      : base_type{data}
-    {
-    }
-    //! @}
-
-    //! @{
-    //! @brief Evaluation at point 'x'.
-    inline auto operator()(const homogeneous_vector_type& x) const
-        -> homogeneous_vector_type
-    {
-      homogeneous_vector_type h_x = (_m * x);
-      h_x /= h_x(2);
-      return h_x;
-    }
-
-    inline auto operator()(const euclidean_vector_type& x) const
-        -> euclidean_vector_type
-    {
-      return (*this)((homogeneous_vector_type{} << x, 1).finished());
-    }
-    //! @}
-  };
-
 
 } /* namespace Sara */
 } /* namespace Projective */

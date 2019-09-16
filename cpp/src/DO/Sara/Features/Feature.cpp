@@ -24,63 +24,31 @@ namespace DO { namespace Sara {
     return static_cast<typename std::underlying_type<Enumeration>::type>(value);
   }
 
-  std::ostream& InterestPoint::print(std::ostream& os) const
-  {
-    os << "Feature type:\t";
-    switch (type())
-    {
-    case InterestPoint::Type::DoG:
-      os << "DoG" << endl;
-      break;
-    case InterestPoint::Type::HarAff:
-      os << "Harris-Affine" << endl;
-      break;
-    case InterestPoint::Type::HesAff:
-      os << "Hessian-Affine" << endl;
-      break;
-    case InterestPoint::Type::MSER:
-      os << "MSER" << endl;
-      break;
-    default:
-      break;
-    }
-    os << "Position:\t" << coords().transpose() << endl;
-    os << "Extremum type:\t" << as_integer(extremum_type()) << endl;
-    os << "Extremum value:\t" << extremum_value() << endl;
-    return os;
-  }
-
-  std::istream& InterestPoint::read(std::istream& in)
-  {
-    return in >> x() >> y();
-  }
-
   //! Computes and return the scale given an input orientation
   float OERegion::radius(float angle) const
   {
-    JacobiSVD<Matrix2f> svd(_shape_matrix, Eigen::ComputeFullU);
+    JacobiSVD<Matrix2f> svd(shape_matrix, Eigen::ComputeFullU);
     const Vector2f radii(svd.singularValues().cwiseSqrt().cwiseInverse());
     const Matrix2f& U(svd.matrixU());
-    //std::cout << theta/M_PI*180<< "degrees" << std::endl;
-    Vector2f u{ cos(angle), sin(angle) };
+    Vector2f u{cos(angle), sin(angle)};
     auto e1 = U.col(0);
     auto e2 = U.col(1);
-    auto x = radii(0)*e1.dot(u);
-    auto y = radii(1)*e2.dot(u);
-    return sqrt(x*x+y*y);
+    auto x = radii(0) * e1.dot(u);
+    auto y = radii(1) * e2.dot(u);
+    return sqrt(x * x + y * y);
   }
 
   Matrix3f OERegion::affinity() const
   {
-    Matrix2f M{ shape_matrix() };
-    auto Q = Rotation2D<float>(orientation()).matrix();
+    Matrix2f M = shape_matrix;
+    auto Q = Rotation2D<float>(orientation).matrix();
     M = Q.transpose() * M * Q;
-    Matrix2f R{ Matrix2f{ M.llt().matrixU() }.inverse() };
+    Matrix2f R = Matrix2f{M.llt().matrixU()}.inverse();
 
     Matrix3f A;
     A.setZero();
-    A.block(0,0,2,2) = Q*R;
-    A.block(0,2,3,1) << center(), 1.f;
+    A.block(0, 0, 2, 2) = Q * R;
+    A.block(0, 2, 3, 1) << center(), 1.f;
     return A;
   }
 
@@ -89,21 +57,39 @@ namespace DO { namespace Sara {
      return radian / float(M_PI) * 180.f;
   }
 
-  ostream& OERegion::print(ostream& os) const
+  ostream& operator<<(ostream& os, const OERegion& f)
   {
-    return InterestPoint::print(os)
-      << "shape matrix:\n" << shape_matrix() << endl
-      << "orientation:\t" << to_degree(orientation()) << " degrees" << endl;
+    os << "Feature type:\t";
+    switch (f.type)
+    {
+    case OERegion::Type::DoG:
+      os << "DoG" << endl;
+      break;
+    case OERegion::Type::HarAff:
+      os << "Harris-Affine" << endl;
+      break;
+    case OERegion::Type::HesAff:
+      os << "Hessian-Affine" << endl;
+      break;
+    case OERegion::Type::MSER:
+      os << "MSER" << endl;
+      break;
+    default:
+      break;
+    }
+    os << "Position:\t" << f.coords.transpose() << endl;
+    os << "Extremum type:\t" << as_integer(f.extremum_type) << endl;
+    os << "Extremum value:\t" << f.extremum_value << endl;
+    os << "shape matrix:\n" << f.shape_matrix << endl;
+    os << "orientation:\t" << to_degree(f.orientation) << " degrees" << endl;
+    return os;
   }
 
-  istream& OERegion::read(istream& in)
+  istream& operator>>(istream& in, OERegion& f)
   {
     auto feature_type = int{};
-    InterestPoint::read(in)
-      >> _shape_matrix
-      >> _orientation
-      >> feature_type;
-    type() = static_cast<Type>(feature_type);
+    in >> f.x() >> f.y() >> f.shape_matrix >> f.orientation >> feature_type;
+    f.type = static_cast<OERegion::Type>(feature_type);
     return in;
   }
 

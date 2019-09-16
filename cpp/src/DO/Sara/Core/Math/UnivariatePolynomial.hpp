@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+#include <cmath>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -33,7 +35,7 @@ namespace DO::Sara::Univariate {
 
     int degree() const
     {
-      return _coeff.size() - 1;
+      return int(_coeff.size()) - 1;
     }
 
     UnivariatePolynomial operator+(const UnivariatePolynomial& other) const
@@ -87,7 +89,7 @@ namespace DO::Sara::Univariate {
     auto remove_leading_zeros()
     {
       auto d = degree();
-      while (std::abs((*this)[d]) < std::numeric_limits<double>::epsilon())
+      while (std::abs(_coeff[d]) < std::numeric_limits<double>::epsilon())
         --d;
       _coeff.resize(d + 1);
     }

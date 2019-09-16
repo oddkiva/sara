@@ -1,5 +1,7 @@
 #pragma once
 
+#include <DO/Sara/Defines.hpp>
+
 #include <DO/Sara/Core/EigenExtension.hpp>
 #include <DO/Sara/Core/Math/UnivariatePolynomial.hpp>
 
@@ -13,10 +15,11 @@ namespace DO::Sara::Univariate {
 
   //! @{
   //! @brief Some basic tools needed for Jenkins-Traub algorithm.
+  DO_SARA_EXPORT
   auto compute_root_moduli_lower_bound(const UnivariatePolynomial<double>& P)
       -> double;
 
-  auto linear_root(UnivariatePolynomial<double>& P)
+  inline auto linear_root(UnivariatePolynomial<double>& P)
   {
     return -P[0] / P[1];
   }
@@ -116,7 +119,8 @@ namespace DO::Sara::Univariate {
 
   auto next_linear_shift_polynomial(const UnivariatePolynomial<double>& K0,
                                     const UnivariatePolynomial<double>& P,
-                                    double s_i, double P_si, double K0_si)
+                                    const LinearFactor& linear_factor,
+                                    double P_si, double K0_si)
       -> UnivariatePolynomial<double>;
 
   auto next_quadratic_shift_polymomial(const QuadraticFactor& sigma,
@@ -172,7 +176,7 @@ namespace DO::Sara::Univariate {
 
 
   //! @brief the pipeline for the root-finding algorithm.
-  struct JenkinsTraub
+  struct DO_SARA_EXPORT JenkinsTraub
   {
     JenkinsTraub(const UnivariatePolynomial<double>& P)
       : P{P}
@@ -224,6 +228,7 @@ namespace DO::Sara::Univariate {
 
 
   //! @brief Find all the roots using Jenkins-Traub algorithm.
+  DO_SARA_EXPORT
   auto rpoly(const UnivariatePolynomial<double>& P, int stage3_max_iter = 20,
              double root_abs_tol = 1e-12) -> std::vector<std::complex<double>>;
 

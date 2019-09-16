@@ -104,8 +104,8 @@ namespace DO { namespace Sara {
   GraphicsApplication::Impl::
   closeWindow(QWidget *w)
    {
-     QList<QPointer<QWidget> >::iterator wi = qFind(
-       m_createdWindows.begin(), m_createdWindows.end(), w);
+    QList<QPointer<QWidget>>::iterator wi =
+        std::find(m_createdWindows.begin(), m_createdWindows.end(), w);
      if (wi == m_createdWindows.end())
      {
        qFatal("Could not find window!");
@@ -113,9 +113,9 @@ namespace DO { namespace Sara {
      }
 
      // Store closing result here.
-     bool closed = false;
+     auto closed = false;
      // Close the painting window if it is one.
-     PaintingWindow *paintingWindow = qobject_cast<PaintingWindow *>(*wi);
+     auto paintingWindow = qobject_cast<PaintingWindow *>(*wi);
      if (paintingWindow)
        closed = paintingWindow->scrollArea()->close();
      else
@@ -134,9 +134,8 @@ namespace DO { namespace Sara {
   GraphicsApplication::Impl::
   getFileFromDialogBox()
   {
-    m_dialogBoxInfo.filename =
-      QFileDialog::getOpenFileName(0, "Open File", "/home",
-      "Images (*.png *.xpm *.jpg)");
+    m_dialogBoxInfo.filename = QFileDialog::getOpenFileName(
+        0, "Open File", "/home", "Images (*.png *.xpm *.jpg)");
   }
 
   bool
@@ -167,14 +166,13 @@ namespace DO { namespace Sara {
     // User thread listens to mouse events.
     if (qobject_cast<PaintingWindow *>(w))
       connect(w, SIGNAL(releasedMouseButtons(int, int, Qt::MouseButtons)),
-              &m_userThread, SLOT(pressedMouseButtons(int, int,
-                                                      Qt::MouseButtons)));
+              &m_userThread,
+              SLOT(pressedMouseButtons(int, int, Qt::MouseButtons)));
     // User thread listens to keyboard events.
-    connect(w, SIGNAL(pressedKey(int)),
-            &m_userThread, SLOT(pressedKey(int)));
+    connect(w, SIGNAL(pressedKey(int)), &m_userThread, SLOT(pressedKey(int)));
     // User thread listens to a generic event.
-    connect(w, SIGNAL(sendEvent(Event)),
-            &m_userThread, SLOT(receivedEvent(Event)));
+    connect(w, SIGNAL(sendEvent(Event)), &m_userThread,
+            SLOT(receivedEvent(Event)));
   }
 
   void

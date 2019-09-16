@@ -97,7 +97,7 @@ namespace DO { namespace Sara {
         so2.push_back(scale_octave_pairs[i]);
         e2.push_back(extrema[i]);
         // Assign dominant orientation.
-        e2.back().orientation() = orientations[o];
+        e2.back().orientation = orientations[o];
       }
     }
 

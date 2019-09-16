@@ -34,6 +34,11 @@ namespace DO { namespace Sara {
     using base_type::_sizes;
     using base_type::_strides;
 
+    //! Necessary for tensor reshape operations.
+    template <typename SomeArrayView_, template <typename> class SomeAlloc_>
+    friend class MultiArrayBase;
+
+
   public:
     using base_type::Dimension;
     using base_type::StorageOrder;
@@ -168,6 +173,42 @@ namespace DO { namespace Sara {
       deallocate();
     }
 
+    //! @brief Reshape the array with the new sizes.
+    template <typename Array>
+    inline auto reshape(const Array& new_sizes) &&
+        -> MultiArray<value_type, ElementTraits<Array>::size, StorageOrder>
+    {
+      using T = value_type;
+      constexpr int Rank = ElementTraits<Array>::size;
+      using array_type = MultiArray<T, Rank, StorageOrder>;
+
+      if (base_type::template compute_size<Rank>(new_sizes) != base_type::size())
+        throw std::domain_error{"Invalid shape!"};
+
+      // Swap the data members;
+      auto res = array_type{};
+
+      // Set the sizes and strides.
+      res._sizes = new_sizes;
+      res._strides = res.compute_strides(new_sizes);
+
+      this->_sizes.fill(0);
+      this->_strides.fill(0);
+
+      // Swap the pointers.
+      std::swap(res._begin, this->_begin);
+      std::swap(res._end, this->_end);
+
+      return res;
+    }
+
+    //! @brief Reshape the array with the new sizes.
+    template <typename Array>
+    inline auto reshape(const Array& new_sizes) const&
+    {
+      return const_view().reshape(new_sizes);
+    }
+
   private: /* helper functions for offset computation. */
     //! @{
     //! @brief Allocate the internal array of the MultiArray object.
@@ -202,9 +243,6 @@ namespace DO { namespace Sara {
   private:
     allocator_type _allocator{};
   };
-
-
-  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

@@ -93,7 +93,8 @@ namespace DO { namespace Sara {
       return operator+=(-offset);
     }
 
-    inline bool end() const {
+    inline bool end() const
+    {
       return _stop;
     }
 

@@ -18,13 +18,14 @@
 #include <DO/Sara/ImageProcessing/Flip.hpp>
 
 
+DO_SARA_EXPORT
+std::ostream& operator<<(std::ostream& os, const EXIFInfo& exifInfo);
+
+
 namespace DO { namespace Sara {
 
   DO_SARA_EXPORT
   bool read_exif_info(EXIFInfo& exif_info, const std::string& file_path);
-
-  DO_SARA_EXPORT
-  std::ostream& operator<<(std::ostream& os, const EXIFInfo& exifInfo);
 
 
   enum ExifOrientationTag
@@ -83,8 +84,6 @@ namespace DO { namespace Sara {
       break;
     }
   }
-
-
 
 } /* namespace Sara */
 } /* namespace DO */

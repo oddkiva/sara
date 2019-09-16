@@ -54,6 +54,9 @@ if (SARA_USE_FROM_SOURCE)
     sara_set_internal_dependencies(
       "ImageIO" "Core")
     sara_generate_library("ImageIO")
-    target_link_libraries(DO_Sara_ImageIO easyexif ${DO_ImageIO_THIRD_PARTY_LIBRARIES})
+
+    target_link_libraries(DO_Sara_ImageIO
+      PRIVATE ${DO_ImageIO_THIRD_PARTY_LIBRARIES}
+      PUBLIC  easyexif)
   endif ()
 endif ()

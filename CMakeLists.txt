@@ -1,14 +1,14 @@
 cmake_minimum_required(VERSION 2.8.12)
 
-project(Sara)
+project(Sara CXX)
 
 # Set the version major and minor manually.
 set(DO_Sara_VERSION_MAJOR 1)
 set(DO_Sara_VERSION_MINOR 2)
 
-if (POLICY CMP0020)
-  cmake_policy(SET CMP0020 OLD)
-endif (POLICY CMP0020)
+if (APPLE)
+  set (CMAKE_MACOSX_RPATH ON)
+endif ()
 
 # Set default build type to Release mode.
 set(CMAKE_BUILD_TYPE "Release" CACHE STRING
