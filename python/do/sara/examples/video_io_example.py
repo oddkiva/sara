@@ -1,7 +1,7 @@
 import numpy as np
 
 import matplotlib
-matplotlib.use('Qt5Agg')
+# matplotlib.use('Qt5Agg')
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
@@ -9,8 +9,8 @@ from do.sara import VideoStream
 
 
 video_stream = VideoStream()
-video_stream.open(('/home/david/Desktop/GitHub/DO-CV/sara/examples/VideoIO/'
-                  'orion_1.mpg'))
+video_stream.open(('/home/david/GitHub/DO-CV/sara/cpp/examples/Sara/VideoIO/'
+                   'orion_1.mpg'))
 
 video_frame = np.empty(video_stream.sizes(), dtype=np.uint8)
 

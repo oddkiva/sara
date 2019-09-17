@@ -14,7 +14,6 @@ class TestIPC(unittest.TestCase):
     def test_ipc_with_cpp(self):
         ipc_medium = IpcMedium("MySharedMemory")
 
-
         context = zmq.Context()
         socket = context.socket(zmq.REQ)
         socket.connect("tcp://localhost:5555")
@@ -22,7 +21,6 @@ class TestIPC(unittest.TestCase):
         while True:
             print('[Python] Sending request')
             socket.send(b"1")
-
 
             image = ipc_medium.tensor("image")
             print('[Python] before image =\n', image)
