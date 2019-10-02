@@ -9,8 +9,6 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Kalpana/3D/OpenGLWindow.hpp>
-
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/HDF5.hpp>
 #include <DO/Sara/Core/Tensor.hpp>
@@ -22,12 +20,15 @@
 #include <QGuiApplication>
 #include <QSurfaceFormat>
 #include <QtCore/QException>
+#include <QtCore/QObject>
+#include <QtCore/QTimer>
 #include <QtGui/QKeyEvent>
 #include <QtGui/QOpenGLBuffer>
 #include <QtGui/QOpenGLDebugLogger>
 #include <QtGui/QOpenGLShaderProgram>
 #include <QtGui/QOpenGLTexture>
 #include <QtGui/QOpenGLVertexArrayObject>
+#include <QtGui/QOpenGLWindow>
 
 #include <map>
 
@@ -245,7 +246,7 @@ public:
   }
   )shader";
 
-    m_program = new QOpenGLShaderProgram{this};
+    m_program = new QOpenGLShaderProgram{parent()};
     m_program->addShaderFromSourceCode(QOpenGLShader::Vertex,
                                        vertex_shader_source);
     m_program->addShaderFromSourceCode(QOpenGLShader::Fragment,
@@ -440,7 +441,7 @@ public:
   }
   )shader";
 
-    m_program = new QOpenGLShaderProgram{this};
+    m_program = new QOpenGLShaderProgram{parent()};
     m_program->addShaderFromSourceCode(QOpenGLShader::Vertex,
                                        vertex_shader_source);
     m_program->addShaderFromSourceCode(QOpenGLShader::Fragment,
@@ -581,12 +582,12 @@ public:
       w, w, 0, 0,
       0, h, h, 0,
       1, 1, 1, 1;
-    //SARA_DEBUG << "Pixel corners =\n" << corners << std::endl;
+    SARA_DEBUG << "Pixel corners =\n" << corners << std::endl;
 
     // Calculate the normalized camera coordinates.
     const Matrix3d K_inv = m_camera.K.inverse();
     corners = K_inv * corners;
-    //SARA_DEBUG << "Normalized corners =\n" << corners << std::endl;
+    SARA_DEBUG << "Normalized corners =\n" << corners << std::endl;
 
     // Because the z is negative in OpenGL.
     corners.row(2) *= -1;
@@ -647,7 +648,7 @@ public:
   }
   )shader";
 
-    m_program = new QOpenGLShaderProgram{this};
+    m_program = new QOpenGLShaderProgram{parent()};
     m_program->addShaderFromSourceCode(QOpenGLShader::Vertex,
                                        vertex_shader_source);
     m_program->addShaderFromSourceCode(QOpenGLShader::Fragment,
@@ -714,6 +715,8 @@ public:
   auto set_image(const string& image_path) -> void
   {
     const auto image = QImage{QString::fromStdString(image_path)}.mirrored();
+    qDebug() << image.width() << " " << image.height();
+    m_image_sizes << image.width(), image.height();
     m_texture = new QOpenGLTexture{image};
     m_texture->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
     m_texture->setMagnificationFilter(QOpenGLTexture::Linear);
@@ -768,7 +771,7 @@ private:
 };
 
 
-class Window : public OpenGLWindow
+class Window : public QOpenGLWindow
 {
 private:
   QMatrix4x4 m_projection;
@@ -786,14 +789,14 @@ public:
 
   ~Window()
   {
-    m_context->makeCurrent(this);
+    makeCurrent();
     {
       //
     }
-    m_context->doneCurrent();
+    doneCurrent();
   }
 
-  void initialize() override
+  void initializeGL() override
   {
     // You absolutely need this for 3D objects!
     glEnable(GL_DEPTH_TEST);
@@ -805,9 +808,9 @@ public:
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // Instantiate the objects.
-    m_checkerboard = new CheckerBoardObject{20, 20, 10, this};
-    m_pointCloud = new PointCloudObject{make_point_cloud(), this};
-    m_imagePlane = new ImagePlane{this};
+    m_checkerboard = new CheckerBoardObject{20, 20, 10, context()};
+    m_pointCloud = new PointCloudObject{make_point_cloud(), context()};
+    m_imagePlane = new ImagePlane{context()};
 
 #ifdef __APPLE__
     const auto data_dir =
@@ -828,7 +831,7 @@ public:
     m_imagePlane->set_camera(camera);
   }
 
-  void render() override
+  void paintGL() override
   {
     const qreal retinaScale = devicePixelRatio();
     glViewport(0, 0, width() * retinaScale, height() * retinaScale);
@@ -867,77 +870,77 @@ protected:
     {
       m_camera.move_forward(delta);
       m_camera.update();
-      renderLater();
+      update();
     }
     if (Qt::Key_S == key)
     {
       m_camera.move_backward(delta);
       m_camera.update();
-      renderLater();
+      update();
     }
     if (Qt::Key_A == key)
     {
       m_camera.move_left(delta);
       m_camera.update();
-      renderLater();
+      update();
     }
     if (Qt::Key_D == key)
     {
       m_camera.move_right(delta);
       m_camera.update();
-      renderLater();
+      update();
     }
 
     if (Qt::Key_Delete == key)
     {
       m_camera.no_head_movement(-delta);  // CCW
       m_camera.update();
-      renderLater();
+      update();
     }
     if (Qt::Key_PageDown == key)
     {
       m_camera.no_head_movement(+delta);  // CW
       m_camera.update();
-      renderLater();
+      update();
     }
 
     if (Qt::Key_Home == key)
     {
       m_camera.yes_head_movement(+delta);
       m_camera.update();
-      renderLater();
+      update();
     }
     if (Qt::Key_End == key)
     {
       m_camera.yes_head_movement(-delta);
       m_camera.update();
-      renderLater();
+      update();
     }
 
     if (Qt::Key_R == key)
     {
       m_camera.move_up(delta);
       m_camera.update();
-      renderLater();
+      update();
     }
     if (Qt::Key_F == key)
     {
       m_camera.move_down(delta);
       m_camera.update();
-      renderLater();
+      update();
     }
 
     if (Qt::Key_Insert == key)
     {
       m_camera.maybe_head_movement(-delta);
       m_camera.update();
-      renderLater();
+      update();
     }
     if (Qt::Key_PageUp == key)
     {
       m_camera.maybe_head_movement(+delta);
       m_camera.update();
-      renderLater();
+      update();
     }
   }
 };
@@ -950,12 +953,17 @@ int main(int argc, char **argv)
   format.setOption(QSurfaceFormat::DebugContext);
   format.setProfile(QSurfaceFormat::CoreProfile);
   format.setVersion(3, 3);
+  format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+  format.setSwapInterval(1);
 
   Window window;
   window.setFormat(format);
   window.resize(800, 600);
   window.show();
-  //window.setAnimating(true);
+
+  QTimer timer;
+  timer.start(20);
+  QObject::connect(&timer, SIGNAL(timeout()), &window, SLOT(update()));
 
   return app.exec();
 }

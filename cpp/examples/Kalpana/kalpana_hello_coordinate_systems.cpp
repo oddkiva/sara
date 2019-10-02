@@ -9,8 +9,6 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Kalpana/3D/OpenGLWindow.hpp>
-
 #include <DO/Sara/Defines.hpp>
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/Tensor.hpp>
@@ -19,11 +17,14 @@
 #include <QGuiApplication>
 #include <QSurfaceFormat>
 #include <QtCore/QException>
+#include <QtCore/QObject>
+#include <QtCore/QTimer>
 #include <QtGui/QOpenGLBuffer>
 #include <QtGui/QOpenGLDebugLogger>
 #include <QtGui/QOpenGLShaderProgram>
 #include <QtGui/QOpenGLTexture>
 #include <QtGui/QOpenGLVertexArrayObject>
+#include <QtGui/QOpenGLWindow>
 
 #include <map>
 
@@ -123,7 +124,7 @@ auto make_cube()
 }
 
 
-class Window : public OpenGLWindow
+class Window : public QOpenGLWindow
 {
 private:
   QOpenGLShaderProgram* m_program{nullptr};
@@ -147,7 +148,7 @@ public:
 
   ~Window()
   {
-    m_context->makeCurrent(this);
+    makeCurrent();
     {
       m_vao->release();
       m_vao->destroy();
@@ -163,14 +164,14 @@ public:
       m_texture1->destroy();
       delete m_texture1;
     }
-    m_context->doneCurrent();
+    doneCurrent();
   }
 
   void initialize_shader_program()
   {
     SARA_DEBUG << "Initialize shader program" << std::endl;
 
-    m_program = new QOpenGLShaderProgram{this};
+    m_program = new QOpenGLShaderProgram{context()};
     m_program->addShaderFromSourceCode(QOpenGLShader::Vertex,
                                        vertex_shader_source);
     m_program->addShaderFromSourceCode(QOpenGLShader::Fragment,
@@ -264,7 +265,7 @@ public:
     m_program->setUniformValue("texture1", 1);
   }
 
-  void initialize() override
+  void initializeGL() override
   {
     glEnable(GL_DEPTH_TEST);
 
@@ -285,7 +286,7 @@ public:
     m_vao->bind();
   }
 
-  void render() override
+  void paintGL() override
   {
     const qreal retinaScale = devicePixelRatio();
     glViewport(0, 0, width() * retinaScale, height() * retinaScale);
@@ -332,7 +333,10 @@ int main(int argc, char **argv)
   window.setFormat(format);
   window.resize(800, 600);
   window.show();
-  window.setAnimating(true);
+
+  QTimer timer;
+  timer.start(20);
+  QObject::connect(&timer, SIGNAL(timeout()), &window, SLOT(update()));
 
   return app.exec();
 }
