@@ -7,7 +7,6 @@ class TriangleWindow(QtGui.QOpenGLWindow):
 
     def __init__(self):
         super(TriangleWindow, self).__init__()
-        self.setup_shader_program()
 
     def setup_shader_program(self):
         self._program = QtGui.QOpenGLShaderProgram(self.context())
@@ -46,10 +45,11 @@ class TriangleWindow(QtGui.QOpenGLWindow):
 
         self._arg_pos = {'in_coords': 0, 'in_color': 1, 'out_color': 0}
 
-        self._program.addCacheableShaderFromSource(
-            QtGui.QOpenGLShader.VERTEX, self._vertex_shader_source)
-        self._program.addCacheableShaderFromSource(
-            QtGui.QOpenGLShader.FRAGMENT, self._vertex_shader_source)
+        self._program.addCacheableShaderFromSourceCode(
+            QtGui.QOpenGLShader.Vertex, self._vertex_shader_source)
+        self._program.addCacheableShaderFromSourceCode(
+            QtGui.QOpenGLShader.Fragment, self._vertex_shader_source)
+
 
     def initializeGL(self):
         super(TriangleWindow, self).initializeGL()
