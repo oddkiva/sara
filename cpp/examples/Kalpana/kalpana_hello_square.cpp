@@ -49,7 +49,7 @@ public:
 
   void initialize_shader_program()
   {
-    m_program = new QOpenGLShaderProgram{this};
+    m_program = new QOpenGLShaderProgram{parent()};
     m_program->addShaderFromSourceCode(QOpenGLShader::Vertex,
                                        vertex_shader_source);
     m_program->addShaderFromSourceCode(QOpenGLShader::Fragment,
@@ -82,7 +82,7 @@ public:
       return offset * sizeof(float);
     };
 
-    m_vao = new QOpenGLVertexArrayObject{this};
+    m_vao = new QOpenGLVertexArrayObject{parent()};
     if (!m_vao->create())
       throw QException{};
 
@@ -186,7 +186,7 @@ public:
 
   void initializeGL() override
   {
-    m_square = new SquareObject{this};
+    m_square = new SquareObject{context()};
   }
 
   void paintGL() override

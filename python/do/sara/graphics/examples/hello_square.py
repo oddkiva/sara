@@ -124,8 +124,7 @@ class SquareObject(QObject):
         self.program.bind()
         self.vao.bind()
         gl.glDrawElements(gl.GL_TRIANGLES, self.triangles.size,
-                          gl.GL_UNSIGNED_INT, 0)
-        # gl.glDrawArrays(gl.GL_POINTS, 0, 4)
+                          gl.GL_UNSIGNED_INT, None)
         self.program.release()
 
 
