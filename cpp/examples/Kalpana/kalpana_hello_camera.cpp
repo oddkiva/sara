@@ -35,6 +35,7 @@
 
 using namespace DO::Sara;
 using namespace std;
+using namespace std::string_literals;
 
 
 // Default camera values
@@ -814,10 +815,10 @@ public:
 
 #ifdef __APPLE__
     const auto data_dir =
-        std::string{"/Users/david/Desktop/Datasets/sfm/castle_int"};
+        "/Users/david/Desktop/Datasets/sfm/castle_int"s;
 #else
     const auto data_dir =
-        std::string{"/home/david/Desktop/Datasets/sfm/castle_int"};
+        "/home/david/Desktop/Datasets/sfm/castle_int"s;
 #endif
     const auto image = "0000.png";
     m_imagePlane->set_image(data_dir + "/" + image);
