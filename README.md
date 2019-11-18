@@ -62,31 +62,36 @@ speed with the library usage.
 Why yet another library?
 ------------------------
 
-I started writing *Sara* in 2009, when I started my PhD at the [IMAGINE
-lab](http://imagine.enpc.fr/) in [Ecole des Ponts,
+I am aware that *OpenCV* exists.
+
+I simply like crafting software from the ground up and understanding Computer
+Vision algorithms by reimplementing them from A to Z. Besides, not everybody in
+the industry likes and uses *OpenCV*.
+
+I used OpenCV C API for the first time during my research internship at Siemens
+in 2008 and was not aware of its C++ API at all. It was a very frustrating
+experience especially for the inexperienced programmer that I was back then.
+
+After a while, I started writing the library as a hobby to have a more
+easy-to-use library and also to gain a better mastery of the C++ language. Then
+the library *Sara* became more structured in 2009, when I started my PhD at the
+[IMAGINE lab](http://imagine.enpc.fr/) in [Ecole des Ponts,
 ParisTech](http://www.enpc.fr).
 
-Historically, I started writing DO-CV before openCV came up with a new C++ API
-(In late 2015, a computer vision researcher was shocked when I told him that I
-don't like openCV and told me patronizingly that the openCV C++ API was actually
-released in 2007. Well I did not know about computer vision yet. Anyways so
-what?)
+Parts of the library may be be reused for applications in the industry as I do
+myself. If you are looking for real-time performance, the library is not made
+for this and look for OpenCV instead.
 
-I used openCV for the first time during my research internship at Siemens. That
-was in 2008 (quite some time, now that I think of it!). I was very frustrated
-with it. After a while, I started writing the library as a hobby to have a more
-easy-to-use library and also to gain a better mastery of the C++ language. Now,
-the library keeps evolving and can be reused for serious applications in the
-industry.
-
-Today openCV has evolved a lot. Despite that openCV has yet to convince me to
-use it, API-wise. Besides, not everybody in the industry uses *openCV*.
-
-I like my library and it is still *alive*, *lightweight*, *tested* since 2009!
+Time has flown. Years after years I try to keep the library alive but things
+happen a lot slowly.
 
 
 Build the libraries
 -------------------
+
+**The information below is a bit outdated but the detailed steps are still
+useful. Your best bet is to have a look at the CI scripts like `.gitlab-ci.yml`
+or `.travis.yml`**
 
 To build the libraries, run:
 
