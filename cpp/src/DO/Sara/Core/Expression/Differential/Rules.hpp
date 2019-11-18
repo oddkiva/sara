@@ -66,13 +66,6 @@ namespace sara::expression {
     using y_type = typename std::decay_t<Y>::decayed_type;
     using x_type = typename std::decay_t<X>::decayed_type;
     using dy_dx_type = derivative_t<y_type, x_type>;
-
-    using f_type = f_t<Y, X>;
-    using g_type = g_t<Y, X>;
-
-    using df_type = df_t<Y, X>;
-    using dg_type = dg_t<Y, X>;
-
     return dy_dx_type{std::forward(y), std::forward(x)};
   }
 
@@ -113,6 +106,15 @@ namespace sara::expression {
     return cos_(y) * dy_dx_t{}(x);
   }
 
+  template <typename Y, typename X>
+  inline auto derivative(FunXpr<decltype(cos_), Y> cosy, X x) noexcept
+  {
+    using diff_t = Diff<FunXpr<Sin, Y>, X>;
+    using dsiny_dx_t = typename diff_t::result_type;
+    using dy_dx_t = typename diff_t::dy_dx_type;
+    auto y = std::get<1>(cosy.exprs);
+    return (-sin_)(y) * dy_dx_t{}(x);
+  }
 }  // namespace sara::expression
 
 

@@ -130,9 +130,6 @@ class SquareObject(QObject):
 
 class Window(QOpenGLWindow):
 
-    def __init__(self):
-        super(Window, self).__init__()
-
     def initializeGL(self):
         super(Window, self).initializeGL()
         self.square = SquareObject(parent=self.context())
