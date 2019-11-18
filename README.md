@@ -74,8 +74,9 @@ the library *Sara* became more structured in 2009, when I started my PhD at the
 ParisTech](http://www.enpc.fr).
 
 Parts of the library may be be reused for applications in the industry as I do
-myself. If you are looking for real-time performance, the library is not made
-for this and look for OpenCV instead.
+myself. The library is not designed for real-time critical applications and you
+should use **OpenCV** (among others) instead. In most use cases, the library
+should be fine otherwise.
 
 Time has flown. Years after years I try to keep the library alive but things
 happen a lot slowly.
