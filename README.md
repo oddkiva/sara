@@ -21,20 +21,15 @@ Sara: C++ Computer Vision Library
    algorithms,
 3. **rigorous testing**.
 
-The design of *Sara* libraries is driven by the KISS principle.
-
-Try it and feel free to become involved with the development of the libraries.
-
-I dedicate lots of patience and love to maintain *Sara* and make it evolve as
-much as my time and energy allow it.
+The design of *Sara* libraries is driven by the KISS principle. I enjoy
+maintaining *Sara* and making it evolve when I feel like it.
 
 *Sara* is licensed with the [Mozilla Public License version
 2.0](https://github.com/DO-CV/DO-CV/raw/master/COPYING.MPL2).
 
 
-**As of June 12, 2019, Sara is now a C++ 17 only project.** The small
-improvements in the language made my life much easier and the code more
-pythonic.
+**As of June 12, 2019, Sara is now a C++ 17 only project.** The improvements in
+the language are compelling enough to make the library more readable.
 
 **Supported compilers:**
 - Visual Studio 2017 and above
