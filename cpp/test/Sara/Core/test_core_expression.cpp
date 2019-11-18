@@ -271,25 +271,15 @@ BOOST_AUTO_TEST_CASE(test_derive_chain)
   constexpr auto x = abc::x<double>{M_PI / 2.};
   const auto x_ = make_terminal(x);
 
-  using y_type = std::decay_t<decltype(sin_(x_))>::decayed_type;
-  using x_type = std::decay_t<decltype(x_)>::decayed_type;
-  using dy_dx_type = derivative_t<y_type, x_type>;
-  using df_type = df_t<y_type, x_type>;
-  using dg_type = dg_t<y_type, x_type>;
-
-  std::cout << "y = " << type_name<y_type>() << std::endl;
-  std::cout << "x = " << type_name<x_type>() << std::endl;
-  std::cout << "dy_dx = " << type_name<dy_dx_type>() << std::endl;
-  std::cout << "df = " << type_name<df_type>() << std::endl;
-  std::cout << "dg = " << type_name<dg_type>() << std::endl;
-  std::cout << "decltype(sin_(x_)) = " << type_name<decltype(sin_(x_))>() << std::endl;
-
   auto d_sin_x = derivative(sin_(x_), x_);
   std::cout << "d_sin_x = " << type_name<decltype(d_sin_x)>() << std::endl;
+  std::cout << "d_sin_x.eval() = " << d_sin_x.eval() << std::endl;
 
-  //auto d_cos_x = derivative(cos_(x_), x_);
-  //std::cout << "d_cos_x = " << type_name<decltype(d_cos_x)>() << std::endl;
-  //std::cout << "d_cos_x.eval() = " << d_cos_x.eval() << std::endl;
+  auto d_sinsinx = derivative(sin_(sin_(x_)), x_);
+  std::cout << "d_sinsinx = " << type_name<decltype(d_sinsinx)>() << std::endl;
+
+  auto d_cos_x = derivative(cos_(x_), x_);
+  std::cout << "d_cos_x = " << type_name<decltype(d_cos_x)>() << std::endl;
 
   //auto log_exp_sin_x = log_.circle(exp_).circle(sin_)(x);
   //std::cout << "log_exp_sin_x.eval() = " << log_exp_sin_x.eval() << std::endl;

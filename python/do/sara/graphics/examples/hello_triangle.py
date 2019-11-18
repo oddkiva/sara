@@ -110,6 +110,7 @@ class TriangleWindow(QtGui.QOpenGLWindow):
 
 if __name__ == '__main__':
     app = QtGui.QGuiApplication(sys.argv)
+
     format = QtGui.QSurfaceFormat()
     format.setProfile(QtGui.QSurfaceFormat.CoreProfile)
     format.setVersion(3, 3)
