@@ -73,7 +73,7 @@ the library *Sara* became more structured in 2009, when I started my PhD at the
 [IMAGINE lab](http://imagine.enpc.fr/) in [Ecole des Ponts,
 ParisTech](http://www.enpc.fr).
 
-Parts of the library may be be reused for applications in the industry as I do
+Parts of the library may be reused for applications in the industry as I do
 myself. The library is not designed for real-time critical applications and you
 should use **OpenCV** (among others) instead. In most use cases, the library
 should be fine otherwise.
