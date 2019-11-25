@@ -1,6 +1,11 @@
 #!/bin/bash
 set -ex
 
+# C++17 for xenial please.
+if [ "$(cat /etc/os-release | grep VERSION_ID)" == "VERSION_ID=\"16.04\"" ]; then
+  export CC="/usr/local/bin/ccache-clang"
+  export CXX="/usr/local/bin/ccache-clang++"
+fi
 
 if [ -z "$1" ]; then
   build_type=Release;
@@ -21,14 +26,21 @@ function build_library()
   else
     local cmake_options="-DCMAKE_BUILD_TYPE=${build_type} "
   fi
+
+  # Use the gold linker.
+  if [ "$(uname -s)" == "Linux" ]; then
+    cmake_options+="-DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=gold "
+  fi
+
   cmake_options+="-DCMAKE_EXPORT_COMPILE_COMMANDS=ON "
-  cmake_options+="-DCMAKE_PREFIX_PATH=/opt/Qt5.10.1;/opt/boost-1.66.0 "
+  cmake_options+="-DCMAKE_PREFIX_PATH=${HOME}/Qt/5.12.6/gcc_64 "
   cmake_options+="-DSARA_BUILD_VIDEOIO=ON "
   cmake_options+="-DSARA_BUILD_PYTHON_BINDINGS=ON "
   cmake_options+="-DSARA_BUILD_SHARED_LIBS=ON "
   cmake_options+="-DSARA_BUILD_TESTS=ON "
   cmake_options+="-DSARA_BUILD_SAMPLES=ON "
 
+  # Qt 5 directory for Darwin.
   if [ "$(uname -s)" == "Darwin" ]; then
     cmake_options+="-DQt5_DIR=$(brew --prefix qt)/lib/cmake/Qt5 "
   fi
