@@ -13,13 +13,16 @@
 
 #pragma once
 
-#include <DO/Sara/Core/Image.hpp>
+#include <DO/Sara/ImageProcessing/LevelSets/FiniteDifferences.hpp>
 
 
 namespace DO { namespace Sara {
 
   constexpr double flux_delta = 1.;
 
+  //! @brief Evaluate the advection value <v, ∇u> at point p.
+  //! - v is the velocity field value evaluated at point p.
+  //! - ∇ is the spatial gradient operator.
   template <typename FiniteDifference, typename T, int N>
   inline T advection(const ImageView<T, N>& u, const Matrix<int, N, 1>& p,
                      const Matrix<T, N, 1>& v)
@@ -33,6 +36,7 @@ namespace DO { namespace Sara {
     return delta;
   }
 
+  //! @brief Evaluate the normal motion value β * |∇u|^2 at point p.
   template <typename FiniteDifference, typename T, int N>
   inline T normal_motion(const ImageView<T, N>& u, const Matrix<int, N, 1>& p,
                          const T beta)
@@ -65,17 +69,29 @@ namespace DO { namespace Sara {
     return -beta * std::sqrt(delta);
   }
 
+  //! @brief Evaluate ∇u/|∇u| at point p.
+  template <typename FiniteDifference, typename T, typename U, int N>
+  inline Matrix<T, N, 1> normal(const ImageView<T, N>& u, const Matrix<int, N, 1>& p)
+  {
+    auto n = Matrix<T, N, 1>::Zero();
+    for (auto i = 0; i < N; ++i)
+      n(i) = Centered::centered(u, p, i);
+    return n / n.norm();
+  }
 
   template <typename FiniteDifference, typename T, typename U, int N>
-  T extension(const ImageView<T, N>& u, const Image<U, N>& d,
+  T extension(const ImageView<T, N>& u, const ImageView<U, N>& d,
               const Matrix<int, N, 1>& p)
   {
-    Matrix<T, N, 1> v;
-    normal(u, p, v);
+    //! Evaluate the normal ∇u/|∇u| at point p.
+    const auto v = normal(u, p);
+
+    //! Rescale v with s(p) = u(p) / sqrt(df^2 + u(p)^2).
     const T u0 = u(p);
     const T s = u0 / sqrt(u0 * u0 + T(flux_delta) * T(flux_delta));
     v *= s;
 
+    // Advection operator <v, ∇d> at point p.
     return advection<FiniteDifference>(d, p, v);
   }
 
