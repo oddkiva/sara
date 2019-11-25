@@ -22,9 +22,9 @@ namespace DO { namespace Sara {
   class Centered
   {
     template <typename PaddedMultiArray>
-    static inline auto u_i(const PaddedMultiArray& u,
-                           const typename PaddedMultiArray::vector_type& p,
-                           int i)
+    static inline auto centered(const PaddedMultiArray& u,
+                                const typename PaddedMultiArray::vector_type& p,
+                                int i)
     {
       using T = typename PaddedMultiArray::value_type;
       using vector_type = typename PaddedMultiArray::vector_type;
@@ -33,19 +33,19 @@ namespace DO { namespace Sara {
     }
 
     template <typename PaddedMultiArray>
-    static inline auto u_pi(const PaddedMultiArray& u,
-                            const typename PaddedMultiArray::vector_type& p,
-                            int i)
+    static inline auto forward(const PaddedMultiArray& u,
+                               const typename PaddedMultiArray::vector_type& p,
+                               int i)
     {
-      return u_i(u, p, i);
+      return centered(u, p, i);
     }
 
     template <typename PaddedMultiArray>
-    static inline auto u_mi(const PaddedMultiArray& u,
-                            const typename PaddedMultiArray::vector_type& p,
-                            int i)
+    static inline auto backward(const PaddedMultiArray& u,
+                                const typename PaddedMultiArray::vector_type& p,
+                                int i)
     {
-      return u_i(u, p, i);
+      return centered(u, p, i);
     }
   };
 
@@ -55,9 +55,9 @@ namespace DO { namespace Sara {
   {
   public:
     template <typename PaddedMultiArray>
-    static inline auto u_pi(const PaddedMultiArray& u,
-                            const typename PaddedMultiArray::vector_type& p,
-                            int i)
+    static inline auto forward(const PaddedMultiArray& u,
+                               const typename PaddedMultiArray::vector_type& p,
+                               int i)
     {
       using T = typename PaddedMultiArray::value_type;
       using vector_type = typename PaddedMultiArray::vector_type;
@@ -66,9 +66,9 @@ namespace DO { namespace Sara {
     }
 
     template <typename PaddedMultiArray>
-    static inline auto u_mi(const PaddedMultiArray& u,
-                            const typename PaddedMultiArray::vector_type& p,
-                            int i)
+    static inline auto backward(const PaddedMultiArray& u,
+                                const typename PaddedMultiArray::vector_type& p,
+                                int i)
     {
       using T = typename PaddedMultiArray::value_type;
       using vector_type = typename PaddedMultiArray::vector_type;
@@ -98,9 +98,9 @@ namespace DO { namespace Sara {
     }
 
     template <typename PaddedMultiArray>
-    static inline auto u_pi(const PaddedMultiArray& u,
-                            const typename PaddedMultiArray::vector_type& p,
-                            int i)
+    static inline auto forward(const PaddedMultiArray& u,
+                               const typename PaddedMultiArray::vector_type& p,
+                               int i)
     {
       using vector_type = typename PaddedMultiArray::vector_type;
       const vector_type ei = vector_type::unit(i);
@@ -114,9 +114,9 @@ namespace DO { namespace Sara {
     }
 
     template <typename PaddedMultiArray>
-    static inline auto u_mi(const PaddedMultiArray& u,
-                            const typename PaddedMultiArray::vector_type& p,
-                            int i)
+    static inline auto backward(const PaddedMultiArray& u,
+                                const typename PaddedMultiArray::vector_type& p,
+                                int i)
     {
       using vector_type = typename PaddedMultiArray::vector_type;
       const vector_type ei = vector_type::unit(i);
@@ -142,8 +142,7 @@ namespace DO { namespace Sara {
     {
       T s1 = 13 * sqr(v1 - 2 * v2 + v3) / 12 + sqr(v1 - 4 * v2 + 3 * v3) / 4;
       T s2 = 13 * sqr(v2 - 2 * v3 + v4) / 12 + sqr(v2 - v4) / 4;
-      T s3 = 13 * sqr(v3 - 2 * v4 + v5) / 12 +
-             sqr(3 * v3 - 4 * v4 + v5) / 4;
+      T s3 = 13 * sqr(v3 - 2 * v4 + v5) / 12 + sqr(3 * v3 - 4 * v4 + v5) / 4;
 
       s1 = 1 / sqr(T(eps) + s1);
       s2 = 6 / sqr(T(eps) + s2);
@@ -155,9 +154,9 @@ namespace DO { namespace Sara {
     }
 
     template <typename PaddedMultiArray>
-    static inline auto u_pi(const PaddedMultiArray& u,
-                            const typename PaddedMultiArray::vector_type& p,
-                            int i)
+    static inline auto forward(const PaddedMultiArray& u,
+                               const typename PaddedMultiArray::vector_type& p,
+                               int i)
     {
       using vector_type = typename PaddedMultiArray::vector_type;
       const vector_type ei = vector_type::unit(i);
@@ -171,9 +170,9 @@ namespace DO { namespace Sara {
     }
 
     template <typename PaddedMultiArray>
-    static inline auto u_mi(const PaddedMultiArray& u,
-                            const typename PaddedMultiArray::vector_type& p,
-                            int i)
+    static inline auto backward(const PaddedMultiArray& u,
+                                const typename PaddedMultiArray::vector_type& p,
+                                int i)
     {
       using vector_type = typename PaddedMultiArray::vector_type;
       const vector_type ei = vector_type::unit(i);
@@ -187,8 +186,6 @@ namespace DO { namespace Sara {
       return combine(dus[1], dus[2], dus[3], dus[4], dus[5]);
     }
   };
-
-  //! @}
 
 }  // namespace Sara
 }  // namespace DO
