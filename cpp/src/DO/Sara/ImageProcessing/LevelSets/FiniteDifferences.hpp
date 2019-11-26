@@ -16,176 +16,175 @@
 #include <DO/Sara/Core/Image.hpp>
 
 
-namespace DO { namespace Sara {
+namespace DO::Sara {
 
-  //! @brief Centered difference.
-  class Centered
+//! @brief Centered difference.
+class Centered
+{
+  template <typename PaddedMultiArray>
+  static inline auto centered(const PaddedMultiArray& u,
+                              const typename PaddedMultiArray::vector_type& p,
+                              int i)
   {
-    template <typename PaddedMultiArray>
-    static inline auto centered(const PaddedMultiArray& u,
-                                const typename PaddedMultiArray::vector_type& p,
-                                int i)
-    {
-      using T = typename PaddedMultiArray::value_type;
-      using vector_type = typename PaddedMultiArray::vector_type;
-      const auto ei = vector_type::unit(i);
-      return (u(p + ei) - u(p - ei)) / 2;
-    }
+    using T = typename PaddedMultiArray::value_type;
+    using vector_type = typename PaddedMultiArray::vector_type;
+    const auto ei = vector_type::unit(i);
+    return (u(p + ei) - u(p - ei)) / 2;
+  }
 
-    template <typename PaddedMultiArray>
-    static inline auto forward(const PaddedMultiArray& u,
-                               const typename PaddedMultiArray::vector_type& p,
-                               int i)
-    {
-      return centered(u, p, i);
-    }
-
-    template <typename PaddedMultiArray>
-    static inline auto backward(const PaddedMultiArray& u,
-                                const typename PaddedMultiArray::vector_type& p,
-                                int i)
-    {
-      return centered(u, p, i);
-    }
-  };
-
-
-  //! @brief Upwind difference.
-  class Upwind
+  template <typename PaddedMultiArray>
+  static inline auto forward(const PaddedMultiArray& u,
+                             const typename PaddedMultiArray::vector_type& p,
+                             int i)
   {
-  public:
-    template <typename PaddedMultiArray>
-    static inline auto forward(const PaddedMultiArray& u,
-                               const typename PaddedMultiArray::vector_type& p,
-                               int i)
-    {
-      using T = typename PaddedMultiArray::value_type;
-      using vector_type = typename PaddedMultiArray::vector_type;
-      const auto ei = vector_type::unit(i);
-      return u(p + ei) - u(p);
-    }
+    return centered(u, p, i);
+  }
 
-    template <typename PaddedMultiArray>
-    static inline auto backward(const PaddedMultiArray& u,
-                                const typename PaddedMultiArray::vector_type& p,
-                                int i)
-    {
-      using T = typename PaddedMultiArray::value_type;
-      using vector_type = typename PaddedMultiArray::vector_type;
-      const vector_type ei = vector_type::unit(i);
-      return u(p) - u(p - ei);
-    }
-  };
+  template <typename PaddedMultiArray>
+  static inline auto backward(const PaddedMultiArray& u,
+                              const typename PaddedMultiArray::vector_type& p,
+                              int i)
+  {
+    return centered(u, p, i);
+  }
+};
 
+
+//! @brief Upwind difference.
+class Upwind
+{
+public:
+  template <typename PaddedMultiArray>
+  static inline auto forward(const PaddedMultiArray& u,
+                             const typename PaddedMultiArray::vector_type& p,
+                             int i)
+  {
+    using T = typename PaddedMultiArray::value_type;
+    using vector_type = typename PaddedMultiArray::vector_type;
+    const auto ei = vector_type::unit(i);
+    return u(p + ei) - u(p);
+  }
+
+  template <typename PaddedMultiArray>
+  static inline auto backward(const PaddedMultiArray& u,
+                              const typename PaddedMultiArray::vector_type& p,
+                              int i)
+  {
+    using T = typename PaddedMultiArray::value_type;
+    using vector_type = typename PaddedMultiArray::vector_type;
+    const vector_type ei = vector_type::unit(i);
+    return u(p) - u(p - ei);
+  }
+};
+
+
+template <typename T>
+inline auto sqr(T x)
+{
+  return x * x;
+};
+
+//! @brief WENO3.
+struct Weno3
+{
+  static constexpr auto eps = 1e-12;
 
   template <typename T>
-  inline auto sqr(T x)
+  static inline T combine(const T v1, const T v2, const T v3)
   {
-    return x * x;
-  };
+    auto s = (T(eps) + sqr(v2 - v1)) / (T(eps) + sqr(v3 - v2));
+    s = 1 / (1 + 2 * s * s);
+    return (v2 + v3 - s * (v1 - 2 * v2 + v3)) / 2;
+  }
 
-  //! @brief WENO3.
-  struct Weno3
+  template <typename PaddedMultiArray>
+  static inline auto forward(const PaddedMultiArray& u,
+                             const typename PaddedMultiArray::vector_type& p,
+                             int i)
   {
-    static constexpr auto eps = 1e-12;
+    using vector_type = typename PaddedMultiArray::vector_type;
+    const vector_type ei = vector_type::unit(i);
 
-    template <typename T>
-    static inline T combine(const T v1, const T v2, const T v3)
-    {
-      auto s = (T(eps) + sqr(v2 - v1)) / (T(eps) + sqr(v3 - v2));
-      s = 1 / (1 + 2 * s * s);
-      return (v2 + v3 - s * (v1 - 2 * v2 + v3)) / 2;
-    }
+    const auto us = std::array{u(p - ei), u(p), u(p + ei), u(p + 2 * ei)};
 
-    template <typename PaddedMultiArray>
-    static inline auto forward(const PaddedMultiArray& u,
-                               const typename PaddedMultiArray::vector_type& p,
-                               int i)
-    {
-      using vector_type = typename PaddedMultiArray::vector_type;
-      const vector_type ei = vector_type::unit(i);
+    auto dus = decltype(us){};
+    std::adjacent_difference(std::begin(us), std::end(us), std::begin(dus));
 
-      const auto us = std::array{u(p - ei), u(p), u(p + ei), u(p + 2 * ei)};
+    return combine(dus[3], dus[2], dus[1]);
+  }
 
-      auto dus = decltype(us){};
-      std::adjacent_difference(std::begin(us), std::end(us), std::begin(dus));
-
-      return combine(dus[3], dus[2], dus[1]);
-    }
-
-    template <typename PaddedMultiArray>
-    static inline auto backward(const PaddedMultiArray& u,
-                                const typename PaddedMultiArray::vector_type& p,
-                                int i)
-    {
-      using vector_type = typename PaddedMultiArray::vector_type;
-      const vector_type ei = vector_type::unit(i);
-
-      const auto us = std::array{u(p - 2 * ei), u(p - ei), u(p), u(p + ei)};
-
-      auto dus = decltype(us){};
-      std::adjacent_difference(std::begin(us), std::end(us), std::begin(dus));
-
-      return combine(dus[1], dus[2], dus[3]);
-    }
-  };
-
-
-  //! @brief WENO5.
-  struct Weno5
+  template <typename PaddedMultiArray>
+  static inline auto backward(const PaddedMultiArray& u,
+                              const typename PaddedMultiArray::vector_type& p,
+                              int i)
   {
-    static constexpr auto eps = 1e-12;
+    using vector_type = typename PaddedMultiArray::vector_type;
+    const vector_type ei = vector_type::unit(i);
 
-    template <typename T>
-    static inline T combine(const T v1, const T v2, const T v3, const T v4,
-                            const T v5)
-    {
-      T s1 = 13 * sqr(v1 - 2 * v2 + v3) / 12 + sqr(v1 - 4 * v2 + 3 * v3) / 4;
-      T s2 = 13 * sqr(v2 - 2 * v3 + v4) / 12 + sqr(v2 - v4) / 4;
-      T s3 = 13 * sqr(v3 - 2 * v4 + v5) / 12 + sqr(3 * v3 - 4 * v4 + v5) / 4;
+    const auto us = std::array{u(p - 2 * ei), u(p - ei), u(p), u(p + ei)};
 
-      s1 = 1 / sqr(T(eps) + s1);
-      s2 = 6 / sqr(T(eps) + s2);
-      s3 = 3 / sqr(T(eps) + s3);
+    auto dus = decltype(us){};
+    std::adjacent_difference(std::begin(us), std::end(us), std::begin(dus));
 
-      return (s1 * (2 * v1 - 7 * v2 + 11 * v3) + s2 * (-v2 + 5 * v3 + 2 * v4) +
-              s3 * (2 * v3 + 5 * v4 - v5)) /
-             6 / (s1 + s2 + s3);
-    }
+    return combine(dus[1], dus[2], dus[3]);
+  }
+};
 
-    template <typename PaddedMultiArray>
-    static inline auto forward(const PaddedMultiArray& u,
-                               const typename PaddedMultiArray::vector_type& p,
-                               int i)
-    {
-      using vector_type = typename PaddedMultiArray::vector_type;
-      const vector_type ei = vector_type::unit(i);
 
-      const auto us = std::array{u(p - 2 * ei), u(p - ei),     u(p),
-                                 u(p + ei),     u(p + 2 * ei), u(p + 3 * ei)};
-      auto dus = decltype(us){};
-      std::adjacent_difference(std::begin(us), std::end(us), std::begin(dus));
+//! @brief WENO5.
+struct Weno5
+{
+  static constexpr auto eps = 1e-12;
 
-      return combine(dus[5], dus[4], dus[3], dus[2], dus[1]);
-    }
+  template <typename T>
+  static inline T combine(const T v1, const T v2, const T v3, const T v4,
+                          const T v5)
+  {
+    T s1 = 13 * sqr(v1 - 2 * v2 + v3) / 12 + sqr(v1 - 4 * v2 + 3 * v3) / 4;
+    T s2 = 13 * sqr(v2 - 2 * v3 + v4) / 12 + sqr(v2 - v4) / 4;
+    T s3 = 13 * sqr(v3 - 2 * v4 + v5) / 12 + sqr(3 * v3 - 4 * v4 + v5) / 4;
 
-    template <typename PaddedMultiArray>
-    static inline auto backward(const PaddedMultiArray& u,
-                                const typename PaddedMultiArray::vector_type& p,
-                                int i)
-    {
-      using vector_type = typename PaddedMultiArray::vector_type;
-      const vector_type ei = vector_type::unit(i);
+    s1 = 1 / sqr(T(eps) + s1);
+    s2 = 6 / sqr(T(eps) + s2);
+    s3 = 3 / sqr(T(eps) + s3);
 
-      const auto us = std::array{u(p - 3 * ei), u(p - 2 * ei), u(p - ei),
-                                 u(p),          u(p + ei),     u(p + 2 * ei)};
+    return (s1 * (2 * v1 - 7 * v2 + 11 * v3) + s2 * (-v2 + 5 * v3 + 2 * v4) +
+            s3 * (2 * v3 + 5 * v4 - v5)) /
+           6 / (s1 + s2 + s3);
+  }
 
-      auto dus = decltype(us){};
-      std::adjacent_difference(std::begin(us), std::end(us), std::begin(dus));
+  template <typename PaddedMultiArray>
+  static inline auto forward(const PaddedMultiArray& u,
+                             const typename PaddedMultiArray::vector_type& p,
+                             int i)
+  {
+    using vector_type = typename PaddedMultiArray::vector_type;
+    const vector_type ei = vector_type::unit(i);
 
-      return combine(dus[1], dus[2], dus[3], dus[4], dus[5]);
-    }
-  };
+    const auto us = std::array{u(p - 2 * ei), u(p - ei),     u(p),
+                               u(p + ei),     u(p + 2 * ei), u(p + 3 * ei)};
+    auto dus = decltype(us){};
+    std::adjacent_difference(std::begin(us), std::end(us), std::begin(dus));
 
-}  // namespace Sara
-}  // namespace DO
+    return combine(dus[5], dus[4], dus[3], dus[2], dus[1]);
+  }
+
+  template <typename PaddedMultiArray>
+  static inline auto backward(const PaddedMultiArray& u,
+                              const typename PaddedMultiArray::vector_type& p,
+                              int i)
+  {
+    using vector_type = typename PaddedMultiArray::vector_type;
+    const vector_type ei = vector_type::unit(i);
+
+    const auto us = std::array{u(p - 3 * ei), u(p - 2 * ei), u(p - ei),
+                               u(p),          u(p + ei),     u(p + 2 * ei)};
+
+    auto dus = decltype(us){};
+    std::adjacent_difference(std::begin(us), std::end(us), std::begin(dus));
+
+    return combine(dus[1], dus[2], dus[3], dus[4], dus[5]);
+  }
+};
+
+}  // namespace DO::Sara
