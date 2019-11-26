@@ -41,6 +41,19 @@ def equisolid_angle(points, f):
     return r
 
 
+def openmvg_mapping_fn(points, f):
+    k = [0.1, 0.1, 0.1, 0.1]
+    r = radial_distance(points)
+    z = 1
+    theta = np.arctan(r / z)
+    theta3 = theta ** 3
+    theta5 = theta ** 5
+    theta7 = theta ** 7
+    theta9 = theta ** 9
+    f = theta + k[0] * theta3 + k[1] * theta5 + k[2] * theta7 + k[3] * theta9
+    return f / r
+
+
 def fisheye(points, f, mapping_fn):
     # Apply the mapping function.
     r = mapping_fn(points, f)
@@ -87,17 +100,25 @@ a1 = np.stack((np.ones(len(a1)), a1)).T
 a2 = np.arange(-1, 1, 0.1, dtype=np.float)
 a2 = np.stack((a2, np.ones(len(a2)))).T
 
-a = np.concatenate((a1, a2))
+a3 = np.arange(-1, 1, 0.1, dtype=np.float)
+a3 = np.stack((-np.ones(len(a3)), a3)).T
+
+a4 = np.arange(-1, 1, 0.1, dtype=np.float)
+a4 = np.stack((a4, -np.ones(len(a4)))).T
+
+a = np.concatenate([a1, a2, a3, a4])
 
 # The focal length.
 f = 1.2
 
 # Apply the fisheye distortion model.
-a_d = [fisheye(a, f, rectilinear),
+a_d = [#fisheye(a, f, rectilinear),
        fisheye(a, f, equidistant),
        fisheye(a, f, equisolid_angle),
+       fisheye(a, f, openmvg_mapping_fn),
        opensfm_fisheye(a, f),
-       opensfm_spherical(a)]
+       opensfm_spherical(a)
+]
 
 # Display the distortion models.
 pylab.scatter(a[:, 0], a[:, 1])
