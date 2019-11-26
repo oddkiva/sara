@@ -7,7 +7,7 @@ def tangent_of_angle_from_optical_axis(points):
     # All the 2D points correspond to 3D points lying on the plane z = 1.
     x = points[:, 0]
     y = points[:, 1]
-    z = 1.2
+    z = 1.
     return np.sqrt(x ** 2 + y ** 2) / z
 
 
@@ -89,19 +89,21 @@ a2 = np.stack((a2, np.ones(len(a2)))).T
 
 
 # The focal length.
-f = 1.
+f = 1.2
 
+# The 3D points lying on the plane z = 1.
 a = np.concatenate((a1, a2))
 
 # Apply the fisheye distortion model.
-# a_d = fisheye(a, f, rectilinear)
-# a_d = fisheye(a, f, equidistant)
-a_d = fisheye(a, f, equisolid_angle)
-# a_d = opensfm_fisheye(a, f)
-# a_d = opensfm_spherical(a)
+a_d = [fisheye(a, f, rectilinear),
+       fisheye(a, f, equidistant),
+       fisheye(a, f, equisolid_angle),
+       opensfm_fisheye(a, f),
+       opensfm_spherical(a)]
 
 pylab.scatter(a[:, 0], a[:, 1])
-pylab.scatter(a_d[:, 0], a_d[:, 1])
+for a_di in a_d:
+    pylab.scatter(a_di[:, 0], a_di[:, 1])
 
 
 pylab.show()
