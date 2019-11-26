@@ -80,19 +80,17 @@ def opensfm_spherical(points):
     return np.stack((u, v)).T
 
 
-# The points.
+# The 3D points lying on the plane z = 1.
 a1 = np.arange(-1, 1, 0.1, dtype=np.float)
 a1 = np.stack((np.ones(len(a1)), a1)).T
 
 a2 = np.arange(-1, 1, 0.1, dtype=np.float)
 a2 = np.stack((a2, np.ones(len(a2)))).T
 
+a = np.concatenate((a1, a2))
 
 # The focal length.
 f = 1.2
-
-# The 3D points lying on the plane z = 1.
-a = np.concatenate((a1, a2))
 
 # Apply the fisheye distortion model.
 a_d = [fisheye(a, f, rectilinear),
@@ -101,9 +99,9 @@ a_d = [fisheye(a, f, rectilinear),
        opensfm_fisheye(a, f),
        opensfm_spherical(a)]
 
+# Display the distortion models.
 pylab.scatter(a[:, 0], a[:, 1])
 for a_di in a_d:
     pylab.scatter(a_di[:, 0], a_di[:, 1])
-
 
 pylab.show()
