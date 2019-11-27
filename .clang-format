@@ -50,7 +50,7 @@ AllowShortBlocksOnASingleLine: false
 AllowShortCaseLabelsOnASingleLine: false
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
-AllowShortFunctionsOnASingleLine: None
+AllowShortFunctionsOnASingleLine: false
 
 # Do not enforce the following definition declaration style:
 # int
@@ -106,7 +106,7 @@ IndentFunctionDeclarationAfterType: false
 MaxEmptyLinesToKeep: 2
 
 KeepEmptyLinesAtTheStartOfBlocks: true
-NamespaceIndentation: Inner
+NamespaceIndentation: All
 ObjCBlockIndentWidth: 2
 ObjCSpaceAfterProperty: false
 ObjCSpaceBeforeProtocolList: true
