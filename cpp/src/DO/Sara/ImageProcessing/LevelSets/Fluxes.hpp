@@ -18,8 +18,6 @@
 
 namespace DO::Sara {
 
-constexpr double flux_delta = 1.;
-
 //! @brief Evaluate the advection value <v, ∇u> at point p.
 //! - v is the velocity field value evaluated at point p.
 //! - ∇ is the spatial gradient operator.
@@ -72,15 +70,15 @@ inline T normal_motion(const ImageView<T, N>& u, const Matrix<int, N, 1>& p,
 //! @brief Evaluate ∇u/|∇u| at point p.
 template <typename FiniteDifference, typename T, typename U, int N>
 inline Matrix<T, N, 1> normal(const ImageView<T, N>& u,
-                              const Matrix<int, N, 1>& p)
+                              const Matrix<int, N, 1>& p, T eps = 1e-6)
 {
   auto n = Matrix<T, N, 1>::Zero();
   for (auto i = 0; i < N; ++i)
     n(i) = Centered::centered(u, p, i);
 
   const auto nn = norm(n);
-  if (nn < T(IMAGE_SCHEME_EPS))
-    nn = T(IMAGE_SCHEME_EPS);
+  if (nn < eps)
+    nn = eps;
   n /= nn;
 
   return n / n.norm();
@@ -88,7 +86,7 @@ inline Matrix<T, N, 1> normal(const ImageView<T, N>& u,
 
 template <typename FiniteDifference, typename T, typename U, int N>
 T extension(const ImageView<T, N>& u, const ImageView<U, N>& d,
-            const Matrix<int, N, 1>& p)
+            const Matrix<int, N, 1>& p, T flux_delta = 1)
 {
   //! Evaluate the normal ∇u/|∇u| at point p.
   const auto v = normal(u, p);
@@ -103,10 +101,11 @@ T extension(const ImageView<T, N>& u, const ImageView<U, N>& d,
 }
 
 template <typename FiniteDifference, typename T, int N>
-T reinitialization(const ImageView<T, N>& u, const Matrix<int, N, 1>& p)
+T reinitialization(const ImageView<T, N>& u, const Matrix<int, N, 1>& p,
+                   T flux_delta = 1)
 {
   const T u0 = u(p);
-  const T s = u0 / std::sqrt(u0 * u0 + T(flux_delta) * T(flux_delta));
+  const T s = u0 / std::sqrt(u0 * u0 + flux_delta * flux_delta);
   return s + normal_motion<FiniteDifference>(u, p, s);
 }
 

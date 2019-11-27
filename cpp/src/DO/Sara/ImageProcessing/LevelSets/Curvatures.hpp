@@ -18,21 +18,19 @@
 
 namespace DO::Sara {
 
-constexpr auto IMAGE_SCHEME_EPS = 1e-6;
-
 //! @brief Evaluate the mean curvature at point p of the isosurface u = 0.
 //!
 //! The mean curvature formula is
 //!   (∇u Hu ∇u.T - 2 * |∇u|^2 trace(Hu)) / (2 * |∇u|^3).
 template <typename T, int N>
-T mean_curvature(const Image<T, N>& u, const Matrix<int, N, 1>& p)
+T mean_curvature(const Image<T, N>& u, const Matrix<int, N, 1>& p, T eps = 1e-6)
 {
   const Matrix<T, 3, 1> du = gradient(u, p);
   const Matrix<T, 3, 3> d2u = hessian(u, p);
   const auto du_norm_2 = du.squaredNorm();
   const auto du_norm_3 = du_norm_2 * du.norm();
 
-  if (du_norm_2 < T(IMAGE_SCHEME_EPS))
+  if (du_norm_2 < eps)
     return 0;
 
   return (du.transpose() * d2u * du - du_norm_2 * d2u.trace()) /
@@ -44,13 +42,13 @@ T mean_curvature(const Image<T, N>& u, const Matrix<int, N, 1>& p)
 //! The mean curvature motion is:
 //!   (∇u Hu ∇u.T - 2 * |∇u|^2 trace(Hu)) / (2 * |∇u|^2).
 template <typename T, int N>
-T mean_curvature_motion(const Image<T, N>& u, const Matrix<int, N, 1>& p)
+T mean_curvature_motion(const Image<T, N>& u, const Matrix<int, N, 1>& p, T eps = 1e-6)
 {
   const Matrix<T, 3, 1> du = gradient(u, p);
   const Matrix<T, 3, 3> d2u = hessian(u, p);
   const auto du_norm_2 = du.squaredNorm();
 
-  if (du_norm_2 < T(IMAGE_SCHEME_EPS))
+  if (du_norm_2 < eps)
     return 0;
 
   return (du.transpose() * d2u * du - du_norm_2 * d2u.trace()) /
@@ -58,8 +56,9 @@ T mean_curvature_motion(const Image<T, N>& u, const Matrix<int, N, 1>& p)
 }
 
 
+//! Evaluate the Gaussian curvature motion at point p of the isosurface u = 0.
 template <typename T>
-T gaussian_curvature(const Image<T, 3>& u, Vector3i& p)
+T gaussian_curvature(const Image<T, 3>& u, Vector3i& p, T eps = 1e-6)
 {
   const Matrix<T, 3, 1> du = gradient(u, p);
   const Matrix<T, 3, 3> d2u = hessian(u, p);
@@ -80,7 +79,7 @@ T gaussian_curvature(const Image<T, 3>& u, Vector3i& p)
   const auto uz2 = uz * uz;
   const auto grad = du.squaredNorm();
 
-  if (grad < T(IMAGE_SCHEME_EPS))
+  if (grad < eps)
     return 0;
 
   return (ux2 * (uyy * uzz - uyz * uyz) +
