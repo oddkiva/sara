@@ -72,7 +72,7 @@ public:
   {
     using T = typename PaddedMultiArray::value_type;
     using vector_type = typename PaddedMultiArray::vector_type;
-    const vector_type ei = vector_type::unit(i);
+    const auto ei = vector_type::unit(i);
     return u(p) - u(p - ei);
   }
 };
@@ -140,9 +140,9 @@ struct Weno5
   static inline T combine(const T v1, const T v2, const T v3, const T v4,
                           const T v5)
   {
-    T s1 = 13 * sqr(v1 - 2 * v2 + v3) / 12 + sqr(v1 - 4 * v2 + 3 * v3) / 4;
-    T s2 = 13 * sqr(v2 - 2 * v3 + v4) / 12 + sqr(v2 - v4) / 4;
-    T s3 = 13 * sqr(v3 - 2 * v4 + v5) / 12 + sqr(3 * v3 - 4 * v4 + v5) / 4;
+    auto s1 = 13 * sqr(v1 - 2 * v2 + v3) / 12 + sqr(v1 - 4 * v2 + 3 * v3) / 4;
+    auto s2 = 13 * sqr(v2 - 2 * v3 + v4) / 12 + sqr(v2 - v4) / 4;
+    auto s3 = 13 * sqr(v3 - 2 * v4 + v5) / 12 + sqr(3 * v3 - 4 * v4 + v5) / 4;
 
     s1 = 1 / sqr(T(eps) + s1);
     s2 = 6 / sqr(T(eps) + s2);
