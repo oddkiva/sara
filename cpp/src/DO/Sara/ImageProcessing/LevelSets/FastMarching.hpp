@@ -14,66 +14,10 @@
 #include <DO/Sara/Core/Image.hpp>
 
 #include <numeric>
+#include <set>
 
 
 namespace DO::Sara {
-
-
-  namespace dijkstra_details {
-
-    template <typename Graph>
-    auto initialize(Graph& g)
-    {
-      auto v = vertices(g);
-      auto d = distances(V);
-      auto p = predecessor(V);
-      for (auto& v : v)
-      {
-        d[v] = std::numeric_limits<double>::max();
-        p[v] = nullptr;
-      }
-    }
-
-    template <typename Vertex, typename Graph, typename Weight>
-    auto relax(Vertex u, Vertex v, Graph& g, Weight& w)
-    {
-      auto V = vertices(G);
-
-      auto d = distances(V);
-      auto p = predecessor(V);
-
-      const auto tentative_dv = d[u] + w(u, v);
-      if (d[v] > tentative_dv)
-      {
-        d[v] = tentative_dv;
-        p[v] = u;
-      }
-    }
-
-  }  // namespace dijkstra_details
-
-  template <typename Graph, typename Weight>
-  auto disjktra(Graph& g, Weight w)
-  {
-    using vertex_type = typename Graph::vertex_type;
-    dijkstra_details::initialize(g);
-    //dijkstra_details::set_sources(g);
-
-    auto s = std::deque<vertex_type>{};
-    auto q = std::priority_queue<vertex_type>{vertices(g)};
-
-    while (!q.empty())
-    {
-      auto u = q.top();
-      q.pop();
-      s.push_back(u);
-
-      for (auto& v : g[u])
-      {
-        dijkstra_details::relax(u, v, g, w);
-      }
-    }
-  }
 
 
   enum class State : std::uint8_t
@@ -90,45 +34,49 @@ namespace DO::Sara {
   {
     using coords_type = Matrix<int, N, 1>;
 
-    struct CoordsVal
-    {
-      T val;
-      coords_type coords;
-
-      inline bool operator<(CoordsVal& other) const
-      {
-        return val < other.val;
-      }
-    };
-
     Image<State, N> states;
     Image<T, N> distances;
     Image<std::optional<coords_type>, N> predecessors;
   };
 
 
-  template <typename T, int N, typename WeightFunction>
+  template <typename T, int N, typename WeightFn>
   struct FastMarching
   {
     using value_type = T;
     using image_based_graph_type = ImageBasedGraph<T, N>;
     using coords_type = typename image_based_graph_type::coords_type;
-    using coords_val_type = typename ImageBasedGraph<T, N>::CoordsVal;
+    using weight_function_type = WeightFn;
 
-    using trial_priority_queue_type = std::priority_queue<coords_val_type>;
-    using alive_container_type = std::priority_queue<coords_val_type>;
+    struct CoordsVal
+    {
+      T val;
+      coords_type coords;
 
+      inline auto operator<(CoordsVal& other) const
+      {
+        return val < other.val;
+      }
+    };
+
+    using coords_val_type = CoordsVal;
+    using trial_container_type = std::set<coords_val_type>;
+    using alive_container_type = std::set<coords_val_type>;
+
+    //! @brief Time complexity: O(V)
     void initialize()
     {
       // Initialize all vertices.
       g.states.fill(State::Far);
       g.distances.fill(std::numeric_limits<T>::max());
-      g.predecessors.fill({});
+      g.predecessors.fill(std::nullopt);
 
-      trial = trial_priority_queue_type{};
+      trial = trial_container_type{};
       alive = alive_container_type{};
     }
 
+    //! @brief Time complexity: O(1). (Reusing Dijkstra terminology in CLRS
+    //! book).
     void relax(const coords_type& u, coords_type& v,
                image_based_graph_type& g)
     {
@@ -137,18 +85,32 @@ namespace DO::Sara {
       {
         g.distances[v] = dv_candidate;
         g.predecessors[v] = u;
-        
       }
     }
 
+    //! @brief Time complexity: O(1). (Reusing Dijkstra terminology in CLRS
+    //! book).
     auto extract_min()
     {
-      auto u = trial.top();
-      std::pop_heap(std::begin(trial), std::end(trial));
-      trial.pop_back();
-      return u;
+#ifdef DEBUG
+      if (trial.empty())
+        throw std::runtime_error("List is empty!");
+#endif
+      auto min_it = std::begin(trial);
+      const auto min = *min_it;
+      trial.erase(min_it);
+      return min;
     }
 
+    auto increase_priority(const coords_val_type& v)
+    {
+      if (g.distances[v.coords] < v.value)
+      {
+        const auto v_it = trial.find(v);
+        trial.erase(v_it);
+        trial.emplace(v.coords, g.distances[v.coords]);
+      }
+    }
 
     void operator()() const
     {
@@ -161,8 +123,8 @@ namespace DO::Sara {
 
       while (!trial.empty())
       {
-        // extract min.
-        auto u = extract_min();
+        // Extract min.
+        const auto u = extract_min();
 
         // Update its state.
         alive.push_back(u);
@@ -170,40 +132,41 @@ namespace DO::Sara {
 
         // @TODO: check if we reach the limit.
 
-
         // Update the neighbors.
         for (auto& v: g.neighbors(u))
         {
+          if (g.states[v] == State::Alive || g.states[v] == State::Forbidden)
+            continue;
+
+          // From there, a point is either `Far` or `Trial` now.
+          //
+          // Update its distance value in both cases.
+          relax(u.coords, v.coords, g);
+
           if (g.states[v] == State::Far)
           {
-            // Update state and value.
-            relax(u.coords, v.coords, g);
+            // Update its state.
+            g.states[v.coords] = State::Trial;
 
-            // Push in the heap.
-            trial.push_back(v);
-            std::push_heap(std::begin(trial), std::end(trial));
+            // Insert it into the list of trial points.
+            trial.emplace(v.coords, g.distance[v.coords]);
           }
 
-          if (g.states[v] == State::Trial)
-          {
-            // Update state and value.
-            relax(u.coords, v.coords, g);
-
-            // Increase the point priority in the heap.
-          }
+          // Increase the priority of the point if necessary.
+          if (g.states[v.coords] == State::Trial)
+            increase_priority(v);
         }
-
       }
     }
 
-    graph_type g;
+    image_based_graph_type g;
 
     // Weight function typically the Eikonal equation.
-    WeightFunction w;
+    weight_function_type w;
 
     // Dijkstra algorithm.
-    std::vector<coords_val_type> trial;
-    std::vector<coords_val_type> alive;
+    trial_container_type trial;
+    alive_container_type alive;
     T limit;
   };
 

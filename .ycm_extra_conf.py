@@ -47,6 +47,7 @@ flags = [
 "-fPIE",
 # Qt5 header directories.
 "-I", "/usr/include",
+"-I", "/usr/include/x86_64-linux-gnu",
 "-I", "/usr/include/x86_64-linux-gnu/qt5",
 "-I", "/usr/include/x86_64-linux-gnu/qt5/QtQuick",
 "-I", "/usr/include/x86_64-linux-gnu/qt5/QtQml",

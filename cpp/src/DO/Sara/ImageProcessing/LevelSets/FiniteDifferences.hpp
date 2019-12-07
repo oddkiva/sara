@@ -19,7 +19,7 @@
 namespace DO::Sara {
 
 //! @brief Centered difference.
-class Centered
+struct Centered
 {
   template <typename PaddedMultiArray>
   static inline auto centered(const PaddedMultiArray& u,
@@ -51,7 +51,7 @@ class Centered
 
 
 //! @brief Upwind difference.
-class Upwind
+struct Upwind
 {
 public:
   template <typename PaddedMultiArray>
