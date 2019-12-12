@@ -18,173 +18,216 @@
 
 namespace DO::Sara {
 
-//! @brief Centered difference.
-struct Centered
-{
-  template <typename PaddedMultiArray>
-  static inline auto centered(const PaddedMultiArray& u,
-                              const typename PaddedMultiArray::vector_type& p,
-                              int i)
+  //! @brief Centered difference.
+  struct Centered
   {
-    using T = typename PaddedMultiArray::value_type;
-    using vector_type = typename PaddedMultiArray::vector_type;
-    const auto ei = vector_type::unit(i);
-    return (u(p + ei) - u(p - ei)) / 2;
-  }
+    template <typename ArrayView>
+    static inline auto centered(const ArrayView& u,
+                                const typename ArrayView::vector_type& p, int i)
+    {
+      using vector_type = typename ArrayView::vector_type;
+      const auto ei = vector_type::Unit(i);
+      return (u(p + ei) - u(p - ei)) / 2;
+    }
 
-  template <typename PaddedMultiArray>
-  static inline auto forward(const PaddedMultiArray& u,
-                             const typename PaddedMultiArray::vector_type& p,
-                             int i)
+    template <typename ArrayView>
+    static inline auto forward(const ArrayView& u,
+                               const typename ArrayView::vector_type& p, int i)
+    {
+      return centered(u, p, i);
+    }
+
+    template <typename ArrayView>
+    static inline auto backward(const ArrayView& u,
+                                const typename ArrayView::vector_type& p, int i)
+    {
+      return centered(u, p, i);
+    }
+  };
+
+
+  //! @brief Upwind difference.
+  struct Upwind
   {
-    return centered(u, p, i);
-  }
+  public:
+    template <typename ArrayView>
+    static inline auto forward(const ArrayView& u,
+                               const typename ArrayView::vector_type& p, int i)
+    {
+      using vector_type = typename ArrayView::vector_type;
+      const auto ei = vector_type::unit(i);
+      return u(p + ei) - u(p);
+    }
 
-  template <typename PaddedMultiArray>
-  static inline auto backward(const PaddedMultiArray& u,
-                              const typename PaddedMultiArray::vector_type& p,
-                              int i)
-  {
-    return centered(u, p, i);
-  }
-};
+    template <typename ArrayView>
+    static inline auto backward(const ArrayView& u,
+                                const typename ArrayView::vector_type& p, int i)
+    {
+      using vector_type = typename ArrayView::vector_type;
+      const auto ei = vector_type::unit(i);
+      return u(p) - u(p - ei);
+    }
+  };
 
-
-//! @brief Upwind difference.
-struct Upwind
-{
-public:
-  template <typename PaddedMultiArray>
-  static inline auto forward(const PaddedMultiArray& u,
-                             const typename PaddedMultiArray::vector_type& p,
-                             int i)
-  {
-    using T = typename PaddedMultiArray::value_type;
-    using vector_type = typename PaddedMultiArray::vector_type;
-    const auto ei = vector_type::unit(i);
-    return u(p + ei) - u(p);
-  }
-
-  template <typename PaddedMultiArray>
-  static inline auto backward(const PaddedMultiArray& u,
-                              const typename PaddedMultiArray::vector_type& p,
-                              int i)
-  {
-    using T = typename PaddedMultiArray::value_type;
-    using vector_type = typename PaddedMultiArray::vector_type;
-    const auto ei = vector_type::unit(i);
-    return u(p) - u(p - ei);
-  }
-};
-
-
-template <typename T>
-inline auto sqr(T x)
-{
-  return x * x;
-};
-
-//! @brief WENO3.
-struct Weno3
-{
-  static constexpr auto eps = 1e-12;
 
   template <typename T>
-  static inline T combine(const T v1, const T v2, const T v3)
+  inline auto sqr(T x)
   {
-    auto s = (T(eps) + sqr(v2 - v1)) / (T(eps) + sqr(v3 - v2));
-    s = 1 / (1 + 2 * s * s);
-    return (v2 + v3 - s * (v1 - 2 * v2 + v3)) / 2;
-  }
+    return x * x;
+  };
 
-  template <typename PaddedMultiArray>
-  static inline auto forward(const PaddedMultiArray& u,
-                             const typename PaddedMultiArray::vector_type& p,
-                             int i)
+  //! @brief WENO3.
+  struct Weno3
   {
-    using vector_type = typename PaddedMultiArray::vector_type;
-    const vector_type ei = vector_type::unit(i);
+    static constexpr auto eps = 1e-12;
 
-    const auto us = std::array{u(p - ei), u(p), u(p + ei), u(p + 2 * ei)};
+    template <typename T>
+    static inline T combine(const T v1, const T v2, const T v3)
+    {
+      auto s = (T(eps) + sqr(v2 - v1)) / (T(eps) + sqr(v3 - v2));
+      s = 1 / (1 + 2 * s * s);
+      return (v2 + v3 - s * (v1 - 2 * v2 + v3)) / 2;
+    }
 
-    auto dus = decltype(us){};
-    std::adjacent_difference(std::begin(us), std::end(us), std::begin(dus));
+    template <typename ArrayView>
+    static inline auto forward(const ArrayView& u,
+                               const typename ArrayView::vector_type& p, int i)
+    {
+      using vector_type = typename ArrayView::vector_type;
+      const vector_type ei = vector_type::unit(i);
 
-    return combine(dus[3], dus[2], dus[1]);
-  }
+      const auto us = std::array{u(p - ei), u(p), u(p + ei), u(p + 2 * ei)};
 
-  template <typename PaddedMultiArray>
-  static inline auto backward(const PaddedMultiArray& u,
-                              const typename PaddedMultiArray::vector_type& p,
-                              int i)
+      auto dus = decltype(us){};
+      std::adjacent_difference(std::begin(us), std::end(us), std::begin(dus));
+
+      return combine(dus[3], dus[2], dus[1]);
+    }
+
+    template <typename ArrayView>
+    static inline auto backward(const ArrayView& u,
+                                const typename ArrayView::vector_type& p, int i)
+    {
+      using vector_type = typename ArrayView::vector_type;
+      const vector_type ei = vector_type::unit(i);
+
+      const auto us = std::array{u(p - 2 * ei), u(p - ei), u(p), u(p + ei)};
+
+      auto dus = decltype(us){};
+      std::adjacent_difference(std::begin(us), std::end(us), std::begin(dus));
+
+      return combine(dus[1], dus[2], dus[3]);
+    }
+  };
+
+
+  //! @brief WENO5.
+  struct Weno5
   {
-    using vector_type = typename PaddedMultiArray::vector_type;
-    const vector_type ei = vector_type::unit(i);
+    static constexpr auto eps = 1e-12;
 
-    const auto us = std::array{u(p - 2 * ei), u(p - ei), u(p), u(p + ei)};
+    template <typename T>
+    static inline T combine(const T v1, const T v2, const T v3, const T v4,
+                            const T v5)
+    {
+      auto s1 = 13 * sqr(v1 - 2 * v2 + v3) / 12 + sqr(v1 - 4 * v2 + 3 * v3) / 4;
+      auto s2 = 13 * sqr(v2 - 2 * v3 + v4) / 12 + sqr(v2 - v4) / 4;
+      auto s3 = 13 * sqr(v3 - 2 * v4 + v5) / 12 + sqr(3 * v3 - 4 * v4 + v5) / 4;
 
-    auto dus = decltype(us){};
-    std::adjacent_difference(std::begin(us), std::end(us), std::begin(dus));
+      s1 = 1 / sqr(T(eps) + s1);
+      s2 = 6 / sqr(T(eps) + s2);
+      s3 = 3 / sqr(T(eps) + s3);
 
-    return combine(dus[1], dus[2], dus[3]);
-  }
-};
+      return (s1 * (2 * v1 - 7 * v2 + 11 * v3) + s2 * (-v2 + 5 * v3 + 2 * v4) +
+              s3 * (2 * v3 + 5 * v4 - v5)) /
+             6 / (s1 + s2 + s3);
+    }
+
+    template <typename ArrayView>
+    static inline auto forward(const ArrayView& u,
+                               const typename ArrayView::vector_type& p, int i)
+    {
+      using vector_type = typename ArrayView::vector_type;
+      const vector_type ei = vector_type::unit(i);
+
+      const auto us = std::array{u(p - 2 * ei), u(p - ei),     u(p),
+                                 u(p + ei),     u(p + 2 * ei), u(p + 3 * ei)};
+      auto dus = decltype(us){};
+      std::adjacent_difference(std::begin(us), std::end(us), std::begin(dus));
+
+      return combine(dus[5], dus[4], dus[3], dus[2], dus[1]);
+    }
+
+    template <typename ArrayView>
+    static inline auto backward(const ArrayView& u,
+                                const typename ArrayView::vector_type& p, int i)
+    {
+      using vector_type = typename ArrayView::vector_type;
+      const vector_type ei = vector_type::unit(i);
+
+      const auto us = std::array{u(p - 3 * ei), u(p - 2 * ei), u(p - ei),
+                                 u(p),          u(p + ei),     u(p + 2 * ei)};
+
+      auto dus = decltype(us){};
+      std::adjacent_difference(std::begin(us), std::end(us), std::begin(dus));
+
+      return combine(dus[1], dus[2], dus[3], dus[4], dus[5]);
+    }
+  };
 
 
-//! @brief WENO5.
-struct Weno5
-{
-  static constexpr auto eps = 1e-12;
-
-  template <typename T>
-  static inline T combine(const T v1, const T v2, const T v3, const T v4,
-                          const T v5)
+  template <typename FiniteDifference>
+  struct Derivative
   {
-    auto s1 = 13 * sqr(v1 - 2 * v2 + v3) / 12 + sqr(v1 - 4 * v2 + 3 * v3) / 4;
-    auto s2 = 13 * sqr(v2 - 2 * v3 + v4) / 12 + sqr(v2 - v4) / 4;
-    auto s3 = 13 * sqr(v3 - 2 * v4 + v5) / 12 + sqr(3 * v3 - 4 * v4 + v5) / 4;
+    template <typename Field>
+    using Coords = typename Field::vector_type;
 
-    s1 = 1 / sqr(T(eps) + s1);
-    s2 = 6 / sqr(T(eps) + s2);
-    s3 = 3 / sqr(T(eps) + s3);
+    template <typename Field>
+    using Scalar = typename Field::value_type;
 
-    return (s1 * (2 * v1 - 7 * v2 + 11 * v3) + s2 * (-v2 + 5 * v3 + 2 * v4) +
-            s3 * (2 * v3 + 5 * v4 - v5)) /
-           6 / (s1 + s2 + s3);
-  }
+    template <typename Field>
+    using Vector = Matrix<Scalar<Field>, Field::Dimension, 1>;
 
-  template <typename PaddedMultiArray>
-  static inline auto forward(const PaddedMultiArray& u,
-                             const typename PaddedMultiArray::vector_type& p,
-                             int i)
-  {
-    using vector_type = typename PaddedMultiArray::vector_type;
-    const vector_type ei = vector_type::unit(i);
+    template <typename Field>
+    using GradientField = Image<Vector<Field>, Field::Dimension>;
 
-    const auto us = std::array{u(p - 2 * ei), u(p - ei),     u(p),
-                               u(p + ei),     u(p + 2 * ei), u(p + 3 * ei)};
-    auto dus = decltype(us){};
-    std::adjacent_difference(std::begin(us), std::end(us), std::begin(dus));
+    template <typename Field>
+    inline auto forward(const Field& u,
+                        const Coords<Field>& x) const -> Vector<Field>
+    {
+      constexpr auto N = Field::Dimension;
 
-    return combine(dus[5], dus[4], dus[3], dus[2], dus[1]);
-  }
+      auto du = Vector<Field>{};
+      for (auto i = 0; i < N; ++i)
+        du(i) = FiniteDifference::forward(u, x, i);
 
-  template <typename PaddedMultiArray>
-  static inline auto backward(const PaddedMultiArray& u,
-                              const typename PaddedMultiArray::vector_type& p,
-                              int i)
-  {
-    using vector_type = typename PaddedMultiArray::vector_type;
-    const vector_type ei = vector_type::unit(i);
+      return du;
+    }
 
-    const auto us = std::array{u(p - 3 * ei), u(p - 2 * ei), u(p - ei),
-                               u(p),          u(p + ei),     u(p + 2 * ei)};
+    template <typename Field>
+    inline auto backward(const Field& u, const Coords<Field>& x) const
+        -> Vector<Field>
+    {
+      constexpr auto N = Field::Dimension;
 
-    auto dus = decltype(us){};
-    std::adjacent_difference(std::begin(us), std::end(us), std::begin(dus));
+      auto du = Vector<Field>{};
+      for (auto i = 0; i < N; ++i)
+        du(i) = FiniteDifference::backward(u, x, i);
 
-    return combine(dus[1], dus[2], dus[3], dus[4], dus[5]);
-  }
-};
+      return du;
+    }
+
+    template <typename Field>
+    auto forward(const Field& in, GradientField<Field>& out) const
+    {
+      if (out.sizes() != in.sizes())
+        throw std::runtime_error{"Invalid shape!"};
+
+      auto in_i = in.begin_array();
+      auto out_i = out.begin();
+      for (; !in_i.end(); ++in_i, ++out_i)
+        *out_i = forward<Field>(in, in_i.position());
+    }
+  };
 
 }  // namespace DO::Sara

@@ -148,13 +148,13 @@ namespace DO { namespace Sara {
     if (_video_codec_context)
     {
       avcodec_close(_video_codec_context);
-      avcodec_free_context(&_video_codec_context);
-      _video_codec_context = nullptr;
-      _video_codec = nullptr;
     }
 
     if (_video_format_context)
-      _video_format_context = nullptr;
+    {
+      avformat_close_input(&_video_format_context);
+      assert(_video_format_context == nullptr);
+    }
   }
 
   void

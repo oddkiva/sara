@@ -58,7 +58,7 @@ function build_library()
   # Run C++ tests.
   export BOOST_TEST_LOG_LEVEL=all
   export BOOST_TEST_COLOR_OUTPUT=1
-  ctest --output-on-failure
+  ctest --output-on-failure -T memcheck
 
   # Run Python tests.
   make pytest

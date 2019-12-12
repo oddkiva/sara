@@ -438,8 +438,8 @@ namespace DO { namespace Sara {
     }
 
     inline auto end_stepped_subarray(const vector_type& start,
-                                       const vector_type& end,
-                                       const vector_type& steps) const
+                                     const vector_type& end,
+                                     const vector_type& steps) const
         -> const_stepped_nd_iterator
     {
       const_stepped_nd_iterator it{
@@ -450,7 +450,6 @@ namespace DO { namespace Sara {
     }
     //! @}
 
-    //! @}
     //! @brief Swap multi-array objects.
     inline void swap(self_type& other)
     {

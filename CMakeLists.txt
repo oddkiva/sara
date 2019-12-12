@@ -56,6 +56,7 @@ include(sara_installation_settings)
 
 # Enable testing before building the library.
 if (SARA_BUILD_TESTS)
+  include(CTest)
   enable_testing()
 endif ()
 
