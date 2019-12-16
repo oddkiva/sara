@@ -64,14 +64,19 @@ AllowShortFunctionsOnASingleLine: None
 # {
 #   return 0;
 # }
-AlwaysBreakAfterDefinitionReturnType: false
+# AlwaysBreakAfterDefinitionReturnType: false  # deprecated
 AlwaysBreakTemplateDeclarations: true
 
-# TODO: understand what these means.
+# true:                       false:
+# aaaa =              vs.     aaaa = "bbbb"
+#     "bbbb"                         "cccc";
+#     "cccc";
+#
 AlwaysBreakBeforeMultilineStrings: false
 BreakBeforeBinaryOperators: None
 BreakBeforeTernaryOperators: true
 BreakConstructorInitializersBeforeComma: true
+
 BinPackParameters: true
 BinPackArguments: true
 
@@ -83,6 +88,7 @@ ConstructorInitializerIndentWidth: 2
 DerivePointerAlignment: false
 ExperimentalAutoDetectBinPacking: false
 IndentCaseLabels: false
+IndentPPDirectives: AfterHash
 IndentWrappedFunctionNames: false
 IndentFunctionDeclarationAfterType: false
 
@@ -106,7 +112,10 @@ IndentFunctionDeclarationAfterType: false
 MaxEmptyLinesToKeep: 2
 
 KeepEmptyLinesAtTheStartOfBlocks: true
-NamespaceIndentation: Inner
+
+CompactNamespaces: true
+NamespaceIndentation: All
+
 ObjCBlockIndentWidth: 2
 ObjCSpaceAfterProperty: false
 ObjCSpaceBeforeProtocolList: true
@@ -123,7 +132,18 @@ Standard:        Cpp11
 IndentWidth:     2
 TabWidth:        2
 UseTab:          Never
-BreakBeforeBraces: Allman
+
+# BreakBeforeBraces: 'Allman'
+BreakBeforeBraces: 'Custom'
+BraceWrapping:
+  AfterClass: true
+  AfterControlStatement: true
+  AfterEnum: true
+  AfterFunction: true
+  AfterObjCDeclaration: true
+  AfterStruct: true
+  BeforeElse: true
+
 
 # Pretty clear
 SpacesInParentheses: false
