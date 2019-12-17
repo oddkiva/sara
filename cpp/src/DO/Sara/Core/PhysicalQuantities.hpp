@@ -28,45 +28,55 @@ namespace DO::Sara {
     {
     }
 
-    constexpr auto operator+(const QuantityBase& other) const
+    inline explicit constexpr operator const scalar_type() const
+    {
+      return value;
+    }
+
+    inline explicit operator scalar_type&()
+    {
+      return value;
+    }
+
+    inline constexpr auto operator+(const QuantityBase& other) const
     {
       return QuantityBase{value + other.value};
     }
 
-    constexpr auto operator-(const QuantityBase& other) const
+    inline constexpr auto operator-(const QuantityBase& other) const
     {
       return QuantityBase{value + other.value};
     }
 
-    constexpr auto operator*(scalar_type scale) const -> QuantityBase
+    inline constexpr auto operator*(scalar_type scale) const -> QuantityBase
     {
       return QuantityBase{value * scale};
     }
 
-    constexpr auto operator/(scalar_type scale) const -> QuantityBase
+    inline constexpr auto operator/(scalar_type scale) const -> QuantityBase
     {
       return QuantityBase{value / scale};
     }
 
-    auto operator+=(const QuantityBase& other) -> QuantityBase&
+    inline auto operator+=(const QuantityBase& other) -> QuantityBase&
     {
       value += other.value;
       return *this;
     }
 
-    auto operator-=(const QuantityBase& other) -> QuantityBase
+    inline auto operator-=(const QuantityBase& other) -> QuantityBase
     {
       value -= other.value;
       return *this;
     }
 
-    auto operator*=(scalar_type scale) -> QuantityBase&
+    inline auto operator*=(scalar_type scale) -> QuantityBase&
     {
       value *= scale;
       return *this;
     }
 
-    auto operator/=(scalar_type scale) -> QuantityBase&
+    inline auto operator/=(scalar_type scale) -> QuantityBase&
     {
       value /= scale;
       return *this;
@@ -76,7 +86,7 @@ namespace DO::Sara {
   };
 
   template <typename T, typename... Q>
-  constexpr auto operator*(T scale, const QuantityBase<T, Q...>& q)
+  inline constexpr auto operator*(T scale, const QuantityBase<T, Q...>& q)
   {
     return QuantityBase<T, Q...>{scale * q.value};
   }
@@ -111,7 +121,7 @@ namespace DO::Sara {
             typename m2, typename l2, typename t2,                //
             typename I2, typename T2, typename n2, typename Iv2,  //
             typename T>
-  constexpr auto
+  inline constexpr auto
   operator*(const PhysicalQuantity<m1, l1, t1, I1, T1, n1, Iv1, T>& q1,
             const PhysicalQuantity<m2, l2, t2, I2, T2, n2, Iv2, T>& q2)
   {
@@ -131,7 +141,7 @@ namespace DO::Sara {
             typename m2, typename l2, typename t2,                //
             typename I2, typename T2, typename n2, typename Iv2,  //
             typename T>
-  constexpr auto
+  inline constexpr auto
   operator/(const PhysicalQuantity<m1, l1, t1, I1, T1, n1, Iv1, T>& q1,
             const PhysicalQuantity<m2, l2, t2, I2, T2, n2, Iv2, T>& q2)
   {
@@ -148,10 +158,10 @@ namespace DO::Sara {
 
 
   template <typename T, typename Exp, typename... Q>
-  constexpr auto pow(QuantityBase<T, Q...> q, Exp)
+  auto pow(QuantityBase<T, Q...> q, Exp)
       -> QuantityBase<T, std::ratio_multiply<Q, Exp>...>
   {
-    return {std::pow(q, static_cast<long double>(Exp::num) / Exp::denum)};
+    return {std::pow(q.value, static_cast<long double>(Exp::num) / Exp::den)};
   }
 
 
@@ -175,8 +185,8 @@ namespace DO::Sara {
   using LuminousIntensity =
       PhysicalQuantity<Exp<0>, Exp<0>, Exp<0>, Exp<0>, Exp<0>, Exp<0>, Exp<1>>;
 
-  using Area = decltype(pow(Length{}, Exp<2>{}));
-  using Volume = decltype(pow(Length{}, Exp<3>{}));
+  using Area = decltype(Length{} * Length{});
+  using Volume = decltype(Length{} * Length{} * Length{});
 
   using Speed = decltype(Length{} / Time{});
   using AccelerationScalar = decltype(Speed{} / Time{});
@@ -184,7 +194,7 @@ namespace DO::Sara {
 
   using Pressure = decltype(ForceScalar{} / Area{});
 
-  using Energy = decltype(Mass{} * pow(Speed{}, Exp<2>{}));
+  using Energy = decltype(Mass{} * Speed{} * Speed{});
   using Work = decltype(ForceScalar{} * Length{});
 
 
@@ -216,42 +226,62 @@ namespace DO::Sara {
   struct DimensionlessQuantity : Number
   {
     using base_type = Number;
+    using self_type = DimensionlessQuantity;
     using derived_type = Derived;
+
     using scalar_type = Number::scalar_type;
 
     inline constexpr DimensionlessQuantity() = default;
-    inline constexpr DimensionlessQuantity(const DimensionlessQuantity&) =
-        default;
+
+    inline constexpr DimensionlessQuantity(const base_type& other)
+      : base_type{other}
+    {
+    }
+
+    inline constexpr DimensionlessQuantity(base_type&& other)
+      : base_type{other}
+    {
+    }
+
     inline constexpr DimensionlessQuantity(long double v)
       : Number{v}
     {
     }
 
-    auto operator=(const DimensionlessQuantity&)
-        -> DimensionlessQuantity& = default;
-
-    operator scalar_type() const
-    {
-      return base_type::value;
-    }
-
-    operator scalar_type&() const
-    {
-      return base_type::value;
-    }
+    auto operator=(const self_type&) -> self_type& = default;
   };
 
+
+#define MAKE_DIMENSIONLESS_QUANTITY(ClassName)                                 \
+  struct ClassName : DimensionlessQuantity<ClassName>                          \
+  {                                                                            \
+    using base_type = DimensionlessQuantity<ClassName>;                        \
+                                                                               \
+    inline constexpr ClassName() = default;                                    \
+                                                                               \
+    inline constexpr ClassName(const base_type& v)                             \
+      : base_type{v}                                                           \
+    {                                                                          \
+    }                                                                          \
+                                                                               \
+    inline constexpr ClassName(long double v)                                  \
+      : base_type{v}                                                           \
+    {                                                                          \
+    }                                                                          \
+                                                                               \
+    auto operator=(const ClassName&) -> ClassName& = default;                  \
+  }
 
   // Geometric quantities.
-  struct Angle : DimensionlessQuantity<Angle>
-  {
-  };
+  MAKE_DIMENSIONLESS_QUANTITY(Angle);
+  MAKE_DIMENSIONLESS_QUANTITY(SolidAngle);
 
 
   // Some SI units.
   constexpr auto kilogram = Mass{1};
 
   constexpr auto meter = Length{1};
+  constexpr auto kilometer = meter * 1000;
   constexpr auto centimeter = meter / 100;
   constexpr auto millimeter = meter / 1000;
 
@@ -275,7 +305,7 @@ namespace DO::Sara {
 
   constexpr auto operator""_km(long double v)
   {
-    return v * (meter * 1000.L);
+    return v * kilometer;
   }
 
   constexpr auto operator""_m(long double v)
@@ -304,11 +334,6 @@ namespace DO::Sara {
     return v * hertz;
   }
 
-  constexpr auto operator""_fps(long double v)
-  {
-    return v * hertz;
-  }
-
 
   constexpr auto operator""_radian(long double v) -> Angle
   {
@@ -327,19 +352,25 @@ namespace DO::Sara {
 namespace DO::Sara {
 
   // Image quantities.
-  struct PixelsPerInch : DimensionlessQuantity<PixelsPerInch>
-  {
-  };
+  MAKE_DIMENSIONLESS_QUANTITY(PixelUnit);
 
-  //! @brief A pixel has no physical dimension.
-  struct Pixel : DimensionlessQuantity<Pixel>
-  {
-  };
+  using PixelUnitPerLength = decltype(PixelUnit{} / Length{});
+
+  template <int N>
+  using PixelUnits = Eigen::Matrix<PixelUnit, N, 1>;
+
+  template <int N>
+  using PixelUnitsPerLength = Eigen::Matrix<PixelUnitPerLength, N, 1>;
 
 
-  constexpr auto operator""_pixel(long double v) -> Pixel
+  constexpr auto operator""_px(long double v) -> PixelUnit
   {
     return {v};
+  }
+
+  constexpr auto operator""_fps(long double v)
+  {
+    return v * hertz;
   }
 
 
@@ -351,15 +382,6 @@ namespace DO::Sara {
   }
 
 
-  template <int N>
-  using PixelCounts = Eigen::Matrix<Pixel, N, 1>;
-
-  using PixelCountPerLength = decltype(Pixel{} / Length{});
-
-  template <int N>
-  using PixelCountsPerLength = Eigen::Matrix<PixelCountPerLength, N, 1>;
-
-
   // Sizes = [1920, 1080] -> 16/9
   auto aspect_ratio(Sizes<2> sensor_sizes)
   {
@@ -368,34 +390,23 @@ namespace DO::Sara {
     return sensor_width / sensor_height;
   }
 
-  auto pixels_per_length(const PixelCounts<2>& image_sizes,
-                         const Sizes<2>& sensor_sizes)
-      -> PixelCountsPerLength<2>
+  auto pixels_per_length(const PixelUnits<2>& image_sizes,
+                         const Sizes<2>& sensor_sizes) -> PixelUnitsPerLength<2>
   {
-    return image_sizes.cast<double>()
-        .cwiseQuotient(sensor_sizes.cast<double>())
-        .cast<PixelCountPerLength>();
+    return image_sizes.cast<long double>()
+        .cwiseQuotient(sensor_sizes.cast<long double>())
+        .cast<PixelUnitPerLength>();
   }
 
 
   // N.B.: this is true only if pixels are square!
-  auto focal_lengths_in_pixels(const PixelCountsPerLength<2>& image_sizes,  //
-                               const Sizes<2>& sensor_sizes,                //
-                               Length focal_length)                         //
-      -> Pixel
+  auto focal_lengths_in_pixels(const PixelUnits<2>& image_sizes,  //
+                               const Sizes<2>& sensor_sizes,      //
+                               Length focal_length)               //
+      -> PixelUnits<2>
   {
-    const auto ratio = sensor_sizes / focal_length;
-    return image_sizes * ratio;
+    const auto ratio = sensor_sizes.cast<long double>() / focal_length.value;
+    return image_sizes.cast<long double>().cwiseProduct(ratio).cast<PixelUnit>();
   }
-
-  // N.B.: normalized image coordinates have no dimensions and are purely
-  // abstract quantities.
-  //
-  // They are neither in meter units nor in pixel units.
-  //
-  // Indeed by dimension analysis:
-  // u_normalized = x/z where x and z are in meters.
-  // v_normalized = y/z where x and z are in meters.
-  // w_normalized = z/z = 1 where z are in meters.
 
 }  // namespace DO::Sara
