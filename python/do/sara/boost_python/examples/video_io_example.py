@@ -1,7 +1,10 @@
 import numpy as np
 
 import matplotlib
-# matplotlib.use('Qt5Agg')
+try:
+    matplotlib.use('Qt5Agg')
+except:
+    print('Failed to load Qt5 backend for matplotlib')
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
@@ -9,7 +12,7 @@ from do.sara import VideoStream
 
 
 video_stream = VideoStream()
-video_stream.open(('/home/david/GitHub/DO-CV/sara/cpp/examples/Sara/VideoIO/'
+video_stream.open(('/Users/david/GitLab/DO-CV/sara/cpp/examples/Sara/VideoIO/'
                    'orion_1.mpg'))
 
 video_frame = np.empty(video_stream.sizes(), dtype=np.uint8)
