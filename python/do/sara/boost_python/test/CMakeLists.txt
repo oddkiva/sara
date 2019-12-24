@@ -26,7 +26,7 @@ add_custom_command(TARGET copy_pysara_module
 # ============================================================================ #
 # Run the unit tests.
 add_custom_target(pytest
-  COMMAND ${NOSETESTS_EXECUTABLE} --verbosity=2 --with-coverage --cover-package=do
+  COMMAND ${NOSETESTS_EXECUTABLE} --ipdb --nocapture --verbosity=2 --with-coverage --cover-package=do
   WORKING_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
   COMMENT "Running Python tests.")
 

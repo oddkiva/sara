@@ -44,17 +44,17 @@ namespace DO { namespace Sara {
     using descriptor_type = Matrix<float, Dim, 1>;
 
     //! @brief Constructor.
-    ComputeSIFTDescriptor(float bin_scale_unit_length = 3.f,
-                          float max_bin_value = 0.2f)
+    inline ComputeSIFTDescriptor(float bin_scale_unit_length = 3.f,
+                                 float max_bin_value = 0.2f)
       : _bin_scale_unit_length{bin_scale_unit_length}
       , _max_bin_value{max_bin_value}
     {
     }
 
     //! @brief Computes the SIFT descriptor for keypoint \$(x,y,\sigma,\theta)\f$.
-    descriptor_type
-    operator()(float x, float y, float sigma, float theta,
-               const ImageView<Vector2f>& grad_polar_coords) const
+    auto operator()(float x, float y, float sigma, float theta,
+                    const ImageView<Vector2f>& grad_polar_coords) const
+        -> descriptor_type
     {
       const auto pi = static_cast<float>(M_PI);
       /*
@@ -200,27 +200,27 @@ namespace DO { namespace Sara {
     }
 
     //! @brief Computes the **upright** SIFT descriptor for keypoint \$(x,y,\sigma)\f$.
-    descriptor_type
-    operator()(float x, float y, float sigma,
-               const ImageView<Vector2f>& grad_polar_coords) const
+    auto operator()(float x, float y, float sigma,
+                    const ImageView<Vector2f>& grad_polar_coords) const
+        -> descriptor_type
     {
       return this->operator()(x, y, sigma, 0.f, grad_polar_coords);
     }
 
     //! Helper member function.
-    descriptor_type
-    operator()(const OERegion& f,
-               const ImageView<Vector2f>& grad_polar_coords) const
+    auto operator()(const OERegion& f,
+                    const ImageView<Vector2f>& grad_polar_coords) const
+        -> descriptor_type
     {
       return this->operator()(f.x(), f.y(), f.scale(), f.orientation,
                               grad_polar_coords);
     }
 
     //! Helper member function.
-    Tensor_<float, 2>
-    operator()(const std::vector<OERegion>& features,
-               const std::vector<Point2i>& scale_octave_pairs,
-               const ImagePyramid<Vector2f>& gradient_polar_coords) const
+    auto operator()(const std::vector<OERegion>& features,
+                    const std::vector<Point2i>& scale_octave_pairs,
+                    const ImagePyramid<Vector2f>& gradient_polar_coords) const
+        -> Tensor_<float, 2>
     {
       auto sifts = Tensor_<float, 2>{{int(features.size()), Dim}};
       for (size_t i = 0; i < features.size(); ++i)

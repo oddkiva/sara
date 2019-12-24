@@ -1,3 +1,7 @@
 breathe
 coverage
+ipdb
+ipdbplugin
+nose
+numpy
 jinja2

@@ -19,7 +19,7 @@ from PySide2.QtGui import (QGuiApplication,
                            QVector3D)
 
 
-DATA_DIR = path.abspath('../../../../../data')
+DATA_DIR = path.join(path.dirname(__file__), '../../../../..', 'data')
 
 
 class SquareObject(QObject):

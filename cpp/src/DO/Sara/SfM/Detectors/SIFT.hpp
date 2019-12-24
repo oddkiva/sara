@@ -20,7 +20,7 @@
 namespace DO::Sara {
 
 DO_SARA_EXPORT
-auto compute_sift_keypoints(const Image<float>& image)
+auto compute_sift_keypoints(const ImageView<float>& image)
     -> KeypointList<OERegion, float>;
 
 } /* namespace DO::Sara */

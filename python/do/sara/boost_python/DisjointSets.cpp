@@ -1,3 +1,14 @@
+// ========================================================================== //
+// This file is part of Sara, a basic set of libraries in C++ for computer
+// vision.
+//
+// Copyright (C) 2019 David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
+
 #include <boost/python.hpp>
 
 #include <DO/Sara/DisjointSets.hpp>
@@ -14,7 +25,7 @@ bp::list compute_adjacency_list_2d(PyObject* labels)
 {
   using namespace sara;
 
-  auto im = image_view_2d<int>(labels);
+  const auto im = image_view_2d<int>(labels);
   auto adj_list = compute_adjacency_list_2d(im);
 
   auto adj_pylist = bp::list{};

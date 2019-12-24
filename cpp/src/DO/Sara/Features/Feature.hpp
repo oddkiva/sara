@@ -29,12 +29,13 @@ namespace DO { namespace Sara {
     @{
   */
 
+  //! @brief The oriented elliptic region class.
   /*!
-    The 'OERegion' class stands for 'Oriented Elliptic Region' and is
-    dedicated to store important geometric features such as:
-    - DoG
-    - Harris-Affine
-    - Hessian-Affine features and so on...
+   *  The 'OERegion' class stands for 'Oriented Elliptic Region' and is
+   *  dedicated to store important geometric features such as:
+   *  - DoG
+   *  - Harris-Affine
+   *  - Hessian-Affine features and so on...
    */
   class DO_SARA_EXPORT OERegion
   {
@@ -88,7 +89,7 @@ namespace DO { namespace Sara {
       return coords(0);
     }
 
-    auto x()-> float&
+    auto x() -> float&
     {
       return coords(0);
     }
@@ -123,10 +124,14 @@ namespace DO { namespace Sara {
       return radius(radian);
     }
 
-    //! Get the affine transform $A$ that transforms the unit circle to that
-    //! oriented ellipse of the region.
-    //! We compute $A$ from a QR decomposition and by observing
-    //! $M = (A^{-1})^T A^{-1}$ where $M$ is the shape matrix.
+    //! @brief Return the affine transform encoded by the shape matrix.
+    /*!
+     *  Get the affine transform $A$ that transforms the unit circle to that
+     *  oriented ellipse of the region.
+     *
+     *  We compute $A$ from its QR decomposition and by observing that
+     *  $M = (A^{-1})^T A^{-1}$ where $M$ is the shape matrix.
+     */
     Matrix3f affinity() const;
 
     //! @brief Compare two regions.
@@ -152,17 +157,19 @@ namespace DO { namespace Sara {
     Point2f coords{Point2f::Zero()};
 
     //! @brief Shape matrix encoding the ellipticity of the region.
-    //!
-    //! The shape matrix is the matrix $M$ that describes the ellipse
-    //! $\varepsilon$, i.e.:
-    //! $$ \varepsilon = \{ x \in R^2 : (x-c)^T M (x-c) = 1 \} $$
-    //! where $c$ is the center of the region.
+    /*!
+     *  The shape matrix is the matrix $M$ that describes the ellipse
+     *  $\varepsilon$, i.e.:
+     *  $$ \varepsilon = \{ x \in R^2 : (x-c)^T M (x-c) = 1 \} $$
+     *  where $c$ is the center of the region.
+     */
     Matrix2f shape_matrix{Matrix2f::Zero()};
 
     //! @brief Orientation of the region **after** shape normalization.
-    //!
-    //! This completely determines the affine transformation that transforms the
-    //! unit circle to the elliptic shape of the region.
+    /*!
+     *  This completely determines the affine transformation that transforms the
+     *  unit circle to the elliptic shape of the region.
+     */
     float orientation{0};
 
     //! @{
@@ -175,5 +182,4 @@ namespace DO { namespace Sara {
 
   //! @}
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara
