@@ -1,6 +1,6 @@
 #include <pybind11/pybind11.h>
 
-#include "SfM.hpp"
+#include "sfm.hpp"
 
 
 PYBIND11_MODULE(pysara_pybind11, m)

@@ -9,7 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include "SfM.hpp"
+#include "sfm.hpp"
 
 #include <DO/Sara/Core/MultiArray.hpp>
 #include <DO/Sara/SfM/Detectors/SIFT.hpp>
