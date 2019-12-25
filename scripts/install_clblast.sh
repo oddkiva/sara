@@ -34,10 +34,12 @@ pushd ${REPOSITORY_DIR}
 
   pushd build
   {
-    cmake -DTESTS:BOOL=ON -DTUNERS:BOOL=ON ..
-    make -j$(nproc)
+    # cmake -DTESTS:BOOL=ON -DTUNERS:BOOL=ON ..
     # ctest --verbose -j$(nproc)
-    sudo make install
+    # sudo make install
+    cmake ..
+    make -j$(nproc)
+    make install
   }
   popd
 }
