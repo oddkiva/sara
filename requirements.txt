@@ -1,7 +1,8 @@
 breathe
 coverage
+imageio
 ipdb
 ipdbplugin
+jinja2
 nose
 numpy
-jinja2
