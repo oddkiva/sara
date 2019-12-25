@@ -36,7 +36,7 @@ pushd ${REPOSITORY_DIR}
   {
     cmake -DTESTS:BOOL=ON -DTUNERS:BOOL=ON ..
     make -j$(nproc)
-    ctest --verbose -j$(nproc)
+    # ctest --verbose -j$(nproc)
     sudo make install
   }
   popd
