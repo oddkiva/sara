@@ -62,7 +62,8 @@ namespace DO::Sara {
                                    double noise,                    //
                                    int min_F_inliers,               //
                                    bool overwrite,                  //
-                                   bool debug) -> void
+                                   bool debug,                      //
+                                   bool wait_key) -> void
   {
     // Create a backup.
     if (!fs::exists(h5_filepath + ".bak"))
@@ -206,8 +207,7 @@ namespace DO::Sara {
             const auto& Ii = view_attributes.images[i];
             const auto& Ij = view_attributes.images[j];
             check_epipolar_constraints(Ii, Ij, Fij, Mij, E_best_sample_ij,
-                                       E_inliers_ij, display_step,
-                                       /* wait_key */ false);
+                                       E_inliers_ij, display_step, wait_key);
           }
 
           // Update.

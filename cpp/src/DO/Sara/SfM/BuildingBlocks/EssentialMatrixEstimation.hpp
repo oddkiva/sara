@@ -34,7 +34,8 @@ auto estimate_essential_matrices(const std::string& dirpath,      //
                                  int num_samples,                 //
                                  double noise,                    //
                                  int min_F_inliers,               //
-                                 bool overwrite, bool debug) -> void;
+                                 bool overwrite, bool debug,
+                                 bool wait_key = false) -> void;
 
 DO_SARA_EXPORT
 auto inspect_essential_matrices(const std::string& dirpath,

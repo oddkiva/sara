@@ -86,7 +86,8 @@ int __main(int argc, char **argv)
                                        wait_key);
     else
       sara::estimate_essential_matrices(dirpath, h5_filepath, num_samples,
-                                        noise, min_F_inliers, overwrite, debug);
+                                        noise, min_F_inliers, overwrite, debug,
+                                        wait_key);
 
     return 0;
   }

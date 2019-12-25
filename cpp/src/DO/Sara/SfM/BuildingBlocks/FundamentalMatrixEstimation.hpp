@@ -29,7 +29,8 @@ auto estimate_fundamental_matrix(const std::vector<Match>& Mij,
 DO_SARA_EXPORT
 auto estimate_fundamental_matrices(const std::string& dirpath,
                                    const std::string& h5_filepath,
-                                   bool overwrite, bool debug) -> void;
+                                   bool overwrite, bool debug,
+                                   bool wait_key = false) -> void;
 
 DO_SARA_EXPORT
 auto check_epipolar_constraints(const Image<Rgb8>& Ii,

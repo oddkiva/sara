@@ -12,8 +12,16 @@ find_package(DO_Sara
   COMPONENTS Graphics ImageIO FileSystem FeatureMatching MultiViewGeometry SfM
   REQUIRED)
 
-file(GLOB pipelines_SOURCE_FILES FILES *.cpp)
 
+add_custom_target(copy_pipeline_script)
+
+add_custom_command(TARGET copy_pipeline_script
+  DEPENDS sfm_pipeline.sh
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/sfm_pipeline.sh
+                                   ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+
+
+file(GLOB pipelines_SOURCE_FILES FILES *.cpp)
 
 foreach (file ${pipelines_SOURCE_FILES})
   get_filename_component(filename "${file}" NAME_WE)

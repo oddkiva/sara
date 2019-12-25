@@ -96,7 +96,7 @@ auto read_point_cloud(const std::string& h5_filepath) -> Tensor_<float, 2>
 auto make_point_cloud()
 {
   // Encode the vertex data in a tensor.
-  const auto vertex_data = read_point_cloud("/home/david/Desktop/geometry.h5");
+  const auto vertex_data = read_point_cloud("/Users/david/Desktop/geometry.h5");
   SARA_DEBUG << "vertices =\n" << vertex_data.matrix() << std::endl;
   return vertex_data;
 }
