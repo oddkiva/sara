@@ -14,8 +14,8 @@
 #include <DO/Sara/Core/Tensor.hpp>
 #include <DO/Sara/Core/Timer.hpp>
 #include <DO/Sara/Defines.hpp>
-#include <DO/Sara/MultiViewGeometry/Geometry/PinholeCamera.hpp>
 #include <DO/Sara/MultiViewGeometry/Datasets/Strecha.hpp>
+#include <DO/Sara/MultiViewGeometry/Geometry/PinholeCamera.hpp>
 
 #include <QGuiApplication>
 #include <QSurfaceFormat>
@@ -152,8 +152,7 @@ auto read_point_cloud(const std::string& h5_filepath) -> Tensor_<float, 2>
 
   auto coords = MatrixXd{};
   h5_file.read_dataset("points", coords);
-  // In OpenGL, the y-axis is going up and in the image coordinates, it is going
-  // down.
+  // In OpenGL the y-axis is upwards. In the image coordinates, it is downwards.
   coords.row(1) *= -1;
   // In OpenGL, the cheiral constraint is actually a negative z.
   coords.row(2) *= -1;
@@ -180,6 +179,8 @@ auto make_point_cloud()
   const auto vertex_data = read_point_cloud("/home/david/Desktop/geometry.h5");
 #endif
   SARA_DEBUG << "vertices =\n" << vertex_data.matrix().topRows(20) << std::endl;
+  SARA_DEBUG << "min =\n" << vertex_data.matrix().colwise().minCoeff() << std::endl;
+  SARA_DEBUG << "max =\n" << vertex_data.matrix().colwise().maxCoeff() << std::endl;
   return vertex_data;
 }
 
@@ -224,7 +225,7 @@ public:
   void main()
   {
     gl_Position = projection * view * transform * vec4(in_coords, 1.0);
-    gl_PointSize = 5.0;
+    gl_PointSize = 20.0;
     out_color = in_color;
   }
   )shader";
@@ -556,6 +557,8 @@ public:
 
   ~ImagePlane()
   {
+    m_program->release();
+
     m_vao->release();
     m_vao->destroy();
 
@@ -564,10 +567,6 @@ public:
 
     m_ebo.release();
     m_ebo.destroy();
-
-    m_texture->release();
-    m_texture->destroy();
-    delete m_texture;
   }
 
   auto initialize_geometry() -> void
@@ -585,6 +584,8 @@ public:
       1, 1, 1, 1;
     SARA_DEBUG << "Pixel corners =\n" << corners << std::endl;
 
+    SARA_DEBUG << "K =\n" << m_camera.K << std::endl;
+
     // Calculate the normalized camera coordinates.
     const Matrix3d K_inv = m_camera.K.inverse();
     corners = K_inv * corners;
@@ -593,6 +594,7 @@ public:
     // Because the z is negative in OpenGL.
     corners.row(2) *= -1;
     //SARA_DEBUG << "Z-negative normalized corners =\n" << corners << std::endl;
+    SARA_DEBUG << "Z-negative corners =\n" << corners << std::endl;
 
     // Vertex coordinates.
     m_vertices = Tensor_<float, 2>{{4, 5}};
@@ -749,6 +751,18 @@ public:
     m_program->release();
   }
 
+  auto destroy_texture()
+  {
+    if (m_texture == nullptr)
+      return;
+
+    m_texture->release();
+    m_texture->destroy();
+    delete m_texture;
+
+    m_texture = nullptr;
+  }
+
 private:
   //! @{
   //! @brief CPU data.
@@ -792,7 +806,9 @@ public:
   {
     makeCurrent();
     {
-      //
+      // TODO: refactor this kludge.
+      if (m_imagePlane != nullptr)
+        m_imagePlane->destroy_texture();
     }
     doneCurrent();
   }
@@ -853,7 +869,7 @@ public:
     //m_transform.rotate(std::pow(1.5, 5) * m_timer.elapsed_ms() / 500,
     //                   QVector3D{0.5f, 1.0f, 0.0f}.normalized());
 
-    //m_checkerboard->render(m_projection, m_view, m_transform);
+    m_checkerboard->render(m_projection, m_view, m_transform);
     m_pointCloud->render(m_projection, m_view, m_transform);
     m_imagePlane->render(m_projection, m_view, m_transform);
   }
@@ -892,26 +908,26 @@ protected:
       update();
     }
 
-    if (Qt::Key_Delete == key)
+    if (Qt::Key_H == key)
     {
       m_camera.no_head_movement(-delta);  // CCW
       m_camera.update();
       update();
     }
-    if (Qt::Key_PageDown == key)
+    if (Qt::Key_L == key)
     {
       m_camera.no_head_movement(+delta);  // CW
       m_camera.update();
       update();
     }
 
-    if (Qt::Key_Home == key)
+    if (Qt::Key_K == key)
     {
       m_camera.yes_head_movement(+delta);
       m_camera.update();
       update();
     }
-    if (Qt::Key_End == key)
+    if (Qt::Key_J == key)
     {
       m_camera.yes_head_movement(-delta);
       m_camera.update();
@@ -931,13 +947,13 @@ protected:
       update();
     }
 
-    if (Qt::Key_Insert == key)
+    if (Qt::Key_U == key)
     {
       m_camera.maybe_head_movement(-delta);
       m_camera.update();
       update();
     }
-    if (Qt::Key_PageUp == key)
+    if (Qt::Key_I == key)
     {
       m_camera.maybe_head_movement(+delta);
       m_camera.update();
