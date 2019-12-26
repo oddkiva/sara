@@ -142,6 +142,7 @@ BraceWrapping:
   AfterFunction: true
   AfterObjCDeclaration: true
   AfterStruct: true
+  BeforeCatch: true
   BeforeElse: true
 
 

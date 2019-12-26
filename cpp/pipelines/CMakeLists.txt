@@ -13,12 +13,15 @@ find_package(DO_Sara
   REQUIRED)
 
 
-add_custom_target(copy_pipeline_script)
-
-add_custom_command(TARGET copy_pipeline_script
-  DEPENDS sfm_pipeline.sh
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/sfm_pipeline.sh
-                                   ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+add_custom_target(sfm_pipeline_helper ALL)
+add_custom_command(TARGET sfm_pipeline_helper
+  POST_BUILD
+  DEPENDS sfm_pipeline.py
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/sfm_pipeline.py
+          ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  COMMENT "Copy the Python helper program to use the SfM pipeline")
+set_property(TARGET sfm_pipeline_helper
+  PROPERTY FOLDER "DO Sara Pipelines/SfM")
 
 
 file(GLOB pipelines_SOURCE_FILES FILES *.cpp)
