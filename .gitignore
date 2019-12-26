@@ -182,10 +182,6 @@ pip-log.txt
 #############
 compile_commands.json
 
-cmake/DOVersion.cmake
-
-src/DO/Sara/Defines.hpp
-
 third-party/zlib/zconf.h
 third-party/libjpeg/jconfig.h
 third-party/libpng/pnglibconf.h
