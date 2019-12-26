@@ -8,9 +8,9 @@ from jinja2 import Environment, FileSystemLoader
 # Input source directory and input list of directories.
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 DO_PROJECT_NAME = 'DO-CV'
-DO_SOURCE_DIR = os.path.abspath(os.path.join(CURRENT_DIR, '../src'))
+DO_SOURCE_DIR = os.path.abspath(os.path.join(CURRENT_DIR, '../cpp/src'))
 DO_LIBRARIES = sorted(
-    os.walk(os.path.join(DO_SOURCE_DIR, 'DO')).next()[1]
+    next(os.walk(os.path.join(DO_SOURCE_DIR, 'DO')))[1]
 )
 
 # Input directory containing Jinja2-based templates.
@@ -19,9 +19,9 @@ REF_DOC_TEMPLATE_DIR = 'ref_doc_templates'
 # Output directory in which we put the reference documentation.
 OUTPUT_REF_DOC_DIR = 'source/reference'
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
-env = Environment(loader=FileSystemLoader(REF_DOC_TEMPLATE_DIR))
+ENV = Environment(loader=FileSystemLoader(REF_DOC_TEMPLATE_DIR))
 
 
 def list_source_files(library_path):
@@ -34,7 +34,7 @@ def list_source_files(library_path):
 
     """
 
-    logger.info("Listing header files in directory: '{}'".format(library_path))
+    LOGGER.info("Listing header files in directory: '{}'".format(library_path))
 
     source_files = []
     for dir, sub_dirs, files in os.walk(library_path):
@@ -43,7 +43,7 @@ def list_source_files(library_path):
             if file.endswith('.hpp'):
                 file_path = os.path.join(dir, file)
                 source_files.append(file_path)
-                logger.info("Appended '{}'".format(file_path))
+                LOGGER.info("Appended '{}'".format(file_path))
 
     return sorted(source_files)
 
@@ -70,25 +70,25 @@ def generate_module_doc(library, module):
 
     # Create the directory if necessary.
     output_dir = os.path.join(OUTPUT_REF_DOC_DIR, module_dir_relpath)
-    logger.info("Try to create directory: '{}'".format(output_dir))
+    LOGGER.info("Try to create directory: '{}'".format(output_dir))
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
     # Generate the reference documentation.
-    template = env.get_template('module.rst')
+    template = ENV.get_template('module.rst')
     title, _ = os.path.splitext(os.path.basename(module))
     context_data = {
         'section': generate_section(title),
         'module': module_relpath
     }
-    logger.info("Generate context data {}".format(context_data))
+    LOGGER.info("Generate context data {}".format(context_data))
 
     rendered_template = template.render(**context_data)
 
     # Save the rendered documentation to file.
     output_file_path = '{}.rst'.format(os.path.join(output_dir, title))
     with open(output_file_path, 'w') as output_file:
-        logger.info("Save module documentation '{}'".format(output_file_path))
+        LOGGER.info("Save module documentation '{}'".format(output_file_path))
         output_file.write(rendered_template)
 
 
@@ -103,11 +103,10 @@ def generate_library_ref_doc(library, header_filepath_list):
 
     header_filepath_list: list(str)
         The list of relative paths of header files in the library.
-
     """
 
     # Render the reference documentation.
-    template = env.get_template('library.rst')
+    template = ENV.get_template('library.rst')
     # The list of documentation files for each module.
     header_filepath_list = [
         os.path.relpath(header, os.path.join(DO_SOURCE_DIR, 'DO'))
@@ -124,7 +123,7 @@ def generate_library_ref_doc(library, header_filepath_list):
         'master_header': master_header_filepath,
         'modules': doc_files
     }
-    logger.info("Generate context data {}".format(context_data))
+    LOGGER.info("Generate context data {}".format(context_data))
 
     rendered_template = template.render(**context_data)
 
@@ -134,33 +133,31 @@ def generate_library_ref_doc(library, header_filepath_list):
 
     output_file_path = '{}.rst'.format(os.path.join(OUTPUT_REF_DOC_DIR,
                                                     library))
-    logger.info("Save library doc: '{}'".format(output_file_path))
+    LOGGER.info("Save library doc: '{}'".format(output_file_path))
     with open(output_file_path, 'w') as output_file:
         output_file.write(rendered_template)
 
 
 def generate_ref_doc_toc():
     """ Generate the table of contents of the reference documentation.
-
     """
 
-    template = env.get_template('ref_doc_toc.rst')
+    template = ENV.get_template('ref_doc_toc.rst')
     context_data = {
         'libraries': DO_LIBRARIES
     }
     msg = "Generate table of contents from the following libraries: {}"
-    logger.info(msg.format(DO_LIBRARIES))
+    LOGGER.info(msg.format(DO_LIBRARIES))
 
     rendered_template = template.render(**context_data)
     output_filepath = os.path.join('source', 'ref_doc_toc.rst')
-    logger.info("Save ref doc toc: '{}'".format(output_filepath))
+    LOGGER.info("Save ref doc toc: '{}'".format(output_filepath))
     with open(output_filepath, 'w') as output_file:
         output_file.write(rendered_template)
 
 
 def generate_all_ref_doc():
     """ Convenience function to generate all the reference documentation.
-
     """
 
     # Generate the documentation index.
@@ -188,6 +185,7 @@ def parse_command_line_args():
         help="enable verbose logging"
     )
     return parser.parse_args()
+
 
 if __name__ == '__main__':
     args = parse_command_line_args()
