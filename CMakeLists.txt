@@ -1,11 +1,5 @@
 cmake_minimum_required(VERSION 2.8.12)
 
-# Use ccache if available!
-find_program(CCACHE_PROGRAM ccache)
-if (CCACHE_PROGRAM)
-  set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ${CCACHE_PROGRAM})
-endif ()
-
 project(Sara CXX)
 
 # Set the version major and minor manually.
@@ -39,8 +33,8 @@ set(BUILD_SHARED_LIBS ${SARA_BUILD_SHARED_LIBS})
 # Add Sara to the CMake module path.
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
-# Configure CMake generator.
-include(sara_configure_generator)
+# Activate the usage of CCache to speed up builds if available.
+include(sara_use_ccache)
 
 # Configure Sara library version.
 include(sara_macros)
