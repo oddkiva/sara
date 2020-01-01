@@ -27,12 +27,13 @@ the :math:`x`-axis and the axis :math:`b` along the :math:`y`-axis. Then the equ
 Ellipse Area
 ************
 
-.. tikz::
-   :include: figures/ellipsearea.tex
-   :label: fig:riemannsum
-   :scale: 50 %
+.. _figriemannsum:
+.. figure:: figures/ellipsearea.png
+    :align: center
+    :figclass: align-center
+    :scale: 90 %
 
-   Riemann sum approximating the upper quadrant area of the ellipse.
+    Riemann sum approximating the upper quadrant area of the ellipse.
 
 By symmetry the area of ellipse :math:`\mathcal{E}` is :math:`4` times the upper
 quadrant area of the ellipse, *i.e.*,
@@ -46,7 +47,7 @@ quadrant area of the ellipse, *i.e.*,
     = \pi a b
 
 The integral is the limit of the Riemann sum as illustrated in
-Figure~\ref{fig:riemannsum}.
+Figure :numref:`figriemannsum`.
 
 Let us detail the computation. We use the :math:`\mathcal{C}^1`-diffeomorphism
 change of variable :math:`\frac{x}{a} = \sin \theta` which is valid for
@@ -63,7 +64,7 @@ Differentiating, :math:`\operatorname{d}x = a \cos(\theta) \operatorname{d}
     \text{area}(\mathcal{E})
     = 4ab \int_{0}^{\pi/2} \cos^2(\theta) \operatorname{d} \theta \\
     = 4ab \int_{0}^{\pi/2} \frac{1 + \cos(2\theta)}{2} \operatorname{d} \theta \\
-    = 4ab \left[ \frac{x}{2} + \frac{\sin(2\theta)}{4} \right]_{0}^{\pi/2} \\
+    = 4ab \left[ \frac{\theta}{2} + \frac{\sin(2\theta)}{4} \right]_{0}^{\pi/2} \\
     = \pi a b.
 
 
@@ -74,16 +75,19 @@ In this part, we review the computation of the area of an ellipse sector. It has
 already been covered in :cite:`Eberly` but computation details are not expanded
 in :cite:`Eberly`.
 
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=0.9\textwidth]{figures/ellipticalsector.pdf}
-  \caption[Ellipse sector delimited by the polar angles `(\theta_1, \theta_2)`.]{The ellipse sector delimited by the polar angles `(\theta_1, \theta_2)` is colored in blue}
-  :label:{fig:ellsector}
-\end{figure}
+.. _figellsector:
+
+.. figure:: figures/ellipticalsector.png
+    :align: center
+    :figclass: align-center
+    :scale: 90 %
+
+    The ellipse sector delimited by the polar angles :math:`(\theta_1,
+    \theta_2)` is colored in blue.
 
 The elliptic sector area is delimited in polar coordinates by :math:`[\theta_1,
 \theta_2]` with :math:`\theta_1 < \theta_2` as illustrated in
-Figure :ref:`fig:ellsector`. Using polar coordinates, it equals to the following
+Figure :numref:`figellsector`. Using polar coordinates, it equals to the following
 nonnegative integral
 
 .. math::
