@@ -1,5 +1,10 @@
 Geometry
 ========
 
+This chapter explains in more details the implementation of some geometric
+problems that `Sara` solves.
 
-.. include:: geometry/ellipse_intersection.rst
+.. toctree::
+   :maxdepth: 2
+
+   geometry/ellipse_intersection.rst

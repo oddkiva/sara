@@ -1,7 +1,12 @@
 Welcome to Sara's documentation!
 =================================
 
-Sara is a small and easy-to-use C++ computer vision library.
+.. _index-sara:
+*Sara* is a small and easy-to-use C++ computer vision library.
+
+*Sara* (सार) is a *Sanskrit* word meaning *essence*. On a less serious note, I was
+looking for a nice simple *human* name and the Spanish transliteration into this
+lovely female name was then chosen intentionally.
 
 Sara focuses on:
 
@@ -17,14 +22,14 @@ Sara is licensed with the `Mozilla Public License version
 Table of Contents
 -----------------
 .. toctree::
-   :maxdepth: 2
-
-   examples
-   third_party_libraries
+   :maxdepth: 1
 
    geometry
    descriptors
    sfm
+
+   examples
+   third_party_libraries
 
 
 # api/library_root

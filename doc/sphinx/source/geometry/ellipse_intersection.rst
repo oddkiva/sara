@@ -1,11 +1,11 @@
-.. _chap-ellipse-intersection:
+.. _sec-ellipse-intersection:
 
 Ellipse Intersections
 *********************
 
-This section explains the implementation of ellipse intersections in **Sara**.
-This section is extracted from my thesis :cite:Ok:2013:phdthesis and has been
-retouched a bit.
+This section details the implementation of ellipse intersections in **Sara**.
+This section is extracted from the appendix of my thesis
+:cite:`Ok:2013:phdthesis` and has been retouched a bit.
 
 :cite:`Eberly` provides a comprehensive study on the computation of ellipses
 intersection, namely the computation of its area and its intersection points.
@@ -16,31 +16,33 @@ ellipses.
 Origin-Centered Axis-Aligned Ellipses
 -------------------------------------
 
-Let :math:`\mathcal{E}` be an ellipse with semi-major axis :math:`a` and
-semi-minor axis :math:`b`. Let us first suppose that :math:`\mathcal{E}` is
-centered at the origin and is axis-aligned oriented, i.e., such that the axis
-:math:`a` is along the :math:`x`-axis and the axis :math:`b` along the
-:math:`y`-axis. Then the equation of ellipse :math:`\mathcal{E}` is
+Let :math:`\mathcal{E}` be a ellipse with semi-major axis :math:`a` and
+semi-minor axis :math:`b`, *i.e.*, :math:`\, a \geq b > 0`. Let us first suppose
+that :math:`\mathcal{E}` is centered at the origin and is axis-aligned oriented,
+*i.e*., such that the axis :math:`a` is along the :math:`x`-axis and the axis
+:math:`b` along the :math:`y`-axis. Then,
 
-.. math::
-    :label: eq-elleq
+.. important::
+   the equation of ellipse :math:`\mathcal{E}` is
 
-    \frac{x^2}{a^2} + \frac{y^2}{b^2} = 1
+   .. math::
+      :label: eq-elleq
+
+      \frac{x^2}{a^2} + \frac{y^2}{b^2} = 1
 
 
 Ellipse Area
 ~~~~~~~~~~~~
 
 .. _figriemannsum:
-.. figure:: figures/ellipsearea.png
+.. figure:: ../figures/ellipsearea.png
     :align: center
     :scale: 90%
 
     Riemann sum approximating the upper quadrant area of the ellipse.
 
-By using symmetry property of the ellipse, the area of ellipse
-:math:`\mathcal{E}` is :math:`4` times the upper quadrant area of the ellipse,
-i.e.,
+Using the symmetry in the ellipse, the area of ellipse :math:`\mathcal{E}` is
+:math:`4` times the upper quadrant area of the ellipse, *i.e.*,
 
 .. math:: \mathop{\mathrm{area}}(\mathcal{E}) = 4 \int_{0}^{a} y(x) \mathop{\mathrm{d}x} = 4 b \int_{0}^{a} \sqrt{1 - \frac{x^2}{a^2}} \mathop{\mathrm{d}x} = \pi a b
 
@@ -53,28 +55,28 @@ change of variable :math:`\frac{x}{a} = \sin \theta` which is valid for
 :math:`\mathcal{C}^1`-diffeomorphism is an invertible differentiable function
 with continuous derivative.
 
-Differentiating, :math:`\mathop{\mathrm{d}x} = a \cos(\theta)
-\mathop{\mathrm{d}\theta}`, and hence,
+The differential is :math:`\mathop{\mathrm{d}x} = a \cos(\theta)
+\mathop{\mathrm{d}\theta}` and hence,
 
-.. math::
+.. important::
+   .. math::
 
-    \begin{aligned}
-    \mathop{\mathrm{area}}(\mathcal{E})
-      &= 4ab \int_{0}^{\pi/2} \cos^2(\theta) \mathop{\mathrm{d}\theta} \\
-      &= 4ab \int_{0}^{\pi/2} \frac{1 + \cos(2\theta)}{2} \mathop{\mathrm{d}\theta} \\
-      &= 4ab \left[ \frac{\theta}{2} + \frac{\sin(2\theta)}{4} \right]_{0}^{\pi/2} \\
-      &= \pi a b.
-    \end{aligned}
+      \begin{aligned}
+      \mathop{\mathrm{area}}(\mathcal{E})
+        &= 4ab \int_{0}^{\pi/2} \cos^2(\theta) \mathop{\mathrm{d}\theta} \\
+        &= 4ab \int_{0}^{\pi/2} \frac{1 + \cos(2\theta)}{2} \mathop{\mathrm{d}\theta} \\
+        &= 4ab \left[ \frac{\theta}{2} + \frac{\sin(2\theta)}{4} \right]_{0}^{\pi/2} \\
+        &= \pi a b.
+      \end{aligned}
 
 Area of an Elliptical Sector
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In this part, we review the computation of the area of an ellipse sector. It has
-already been covered in :cite:`Eberly` but computation details are omitted in
-:cite:`Eberly`.
+In this part, we review the computation of the area of an ellipse sector. We
+complement :cite:`Eberly` with a bit more details.
 
 .. _fig-ellsector:
-.. figure:: figures/ellipticalsector.png
+.. figure:: ../figures/ellipticalsector.png
     :align: center
     :width: 90.0%
 
@@ -111,7 +113,7 @@ Plugging the formula of :math:`r` in the integral,
 Now the integrand
 :math:`\frac{\mathop{\mathrm{d}\theta}}{b^2 \cos^2(\theta) + a^2 \sin^2(\theta)}`
 is invariant by the transformation :math:`\theta \mapsto \theta+\pi`,
-i.e.,
+*i.e.*,
 
 .. math::
 
@@ -185,16 +187,17 @@ it is defined in :math:`]-\pi, \pi]` as follows
 Hence, the elliptic sector area equals to the following *nonnegative*
 quantity
 
-.. math::
+.. important::
+   .. math::
 
-   \forall (\theta_1, \theta_2) \in ]-\pi, \pi], \ A(\theta_1, \theta_2) =
-   \left| F(\theta_2) - F(\theta_1) \right|.
+      \forall (\theta_1, \theta_2) \in ]-\pi, \pi], \ A(\theta_1, \theta_2) =
+      \left| F(\theta_2) - F(\theta_1) \right|.
 
 Area Bounded by a Line Segment and an Elliptical Arc
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. _figellsector2:
-.. figure:: figures/ellipticalsector2.png
+.. figure:: ../figures/ellipticalsector2.png
     :width: 90.0%
 
     The ellipse sector bounded by a line segment and the elliptical arc
@@ -224,25 +227,26 @@ where :math:`(x_i,y_i) = (r_i\cos\theta_i, r_i\sin\theta_i)` and
 \sin^2(\theta_i)}}` for :math:`i \in \{1,2\}`.
 
 Note that the other portion corresponding to the red one in
-Figure `1.3 <#fig:ellsector2>`__ has an area which equals to
+Figure `3 <#fig:ellsector2>`__ has an area which equals to
 :math:`\pi a b - B(\theta_1, \theta_2) \geq B(\theta_1, \theta_2)` if
 :math:`|\theta_2 - \theta_1| \leq \pi`.
 
 To summarize, our portion of interest, illustrated by the blue elliptic
-portion in Figure `1.3 <#fig:ellsector2>`__, has an area which equals to
+portion in Figure `3 <#fig:ellsector2>`__, has an area which equals to
 
-.. math::
+.. important::
+   For any :math:`(\theta_1, \theta_2) \in ]-\pi, \pi]`,
 
-   \forall (\theta_1, \theta_2) \in ]-\pi, \pi],
-     \ B(\theta_1, \theta_2) =
-     \left\{
-     \begin{array}{cl}
-       \displaystyle A(\theta_1, \theta_2) - \frac{1}{2} |x_2y_1 - x_1y_2| &
-       \textrm{if} \  |\theta_2 - \theta_1| \leq \pi \\
-       \displaystyle \pi a b - A(\theta_1, \theta_2)  + \frac{1}{2} |x_2y_1 - x_1y_2| &
-       \textrm{otherwise}
-     \end{array}
-     \right. .
+   .. math::
+        \ B(\theta_1, \theta_2) =
+        \left\{
+        \begin{array}{cl}
+          \displaystyle A(\theta_1, \theta_2) - \frac{1}{2} |x_2y_1 - x_1y_2| &
+          \textrm{if} \  |\theta_2 - \theta_1| \leq \pi \\
+          \displaystyle \pi a b - A(\theta_1, \theta_2)  + \frac{1}{2} |x_2y_1 - x_1y_2| &
+          \textrm{otherwise}
+        \end{array}
+        \right. .
 
 General Ellipse Parameterization
 --------------------------------
@@ -254,12 +258,9 @@ ellipse :math:`\mathcal{E}` is entirely defined by the following
 geometric information
 
 -  a center :math:`\mathbf{x}_{\mathcal{E}}`,
-
 -  axis radii :math:`(a_{\mathcal{E}}, b_{\mathcal{E}})`,
-
--  an orientation :math:`\theta_{\mathcal{E}}`, i.e., the oriented angle
-   between the :math:`x`-axis and the axis of radius
-   :math:`a_{\mathcal{E}}`.
+-  an orientation :math:`\theta_{\mathcal{E}}`, *i.e.*, the oriented angle
+   between the :math:`x`-axis and the axis of radius :math:`a_{\mathcal{E}}`.
 
 or more concisely by the pair
 :math:`(\mathbf{x}_{\mathcal{E}}, \mathbf{\Sigma}_{\mathcal{E}})` where
@@ -268,7 +269,7 @@ the positive definite matrix
 is such that
 
 .. math::
-    :label: eq:sigma_eps
+    :label: eq-sigma_eps
 
     \mathbf{\Sigma}_{\mathcal{E}} = \mathbf{R}_{\mathcal{E}} \mathbf{D}_{\mathcal{E}} \mathbf{R}_{\mathcal{E}}^T
 
@@ -288,26 +289,30 @@ and :math:`\mathbf{D}_{\mathcal{E}}` is the diagonal matrix defined as
 
    \mathbf{D}_{\mathcal{E}} \overset{\textrm{def}}{=}
    \begin{bmatrix}
-     1/a_{\mathcal{E}}^2 & 0\\
-     0 & 1/b_{\mathcal{E}}^2 & \\
+     1/b_{\mathcal{E}}^2 & 0\\
+     0 & 1/a_{\mathcal{E}}^2 & \\
    \end{bmatrix}
 
-Note that Equation (`[eq:sigma_eps] <#eq:sigma_eps>`__) is the singular
-value decomposition of :math:`\mathbf{\Sigma}_{\mathcal{E}}` if the axis
-radii satisfy :math:`a_{\mathcal{E}} < b_{\mathcal{E}}`. Using these
-information, ellipse :math:`\mathcal{E}` can be parameterized by the
-following equation:
+Note that Equation :eq:`eq-sigma_eps` is the singular value decomposition of
+:math:`\mathbf{\Sigma}_{\mathcal{E}}` if the axis radii satisfy
+:math:`a_{\mathcal{E}} \geq b_{\mathcal{E}}`. Thus more generally,
 
-.. math:: (\mathbf{x}-\mathbf{x}_{\mathcal{E}})^T \mathbf{\Sigma}_{\mathcal{E}} (\mathbf{x}- \mathbf{x}_{\mathcal{E}}) = 1
+.. important::
+
+   The ellipse :math:`\mathcal{E}` is characterized by the equation
+
+   .. math::
+
+      (\mathbf{x}-\mathbf{x}_{\mathcal{E}})^T \mathbf{\Sigma}_{\mathcal{E}} (\mathbf{x}- \mathbf{x}_{\mathcal{E}}) = 1
 
 Or
 
 .. math:: \mathbf{x}^T \mathbf{A}_{\mathcal{E}} \mathbf{x}+ \mathbf{b}_{\mathcal{E}}^T \mathbf{x}+ c_{\mathcal{E}} = 0
 
-with :math:`\mathbf{A}_{\mathcal{E}} = \mathbf{\Sigma}_{\mathcal{E}}`,
+where :math:`\mathbf{A}_{\mathcal{E}} = \mathbf{\Sigma}_{\mathcal{E}}`,
 :math:`\mathbf{b}_{\mathcal{E}} = 2 \mathbf{\Sigma}_{\mathcal{E}} \mathbf{x}_{\mathcal{E}}`
 and
-:math:`c_{\mathcal{E}} = \mathbf{x}_{\mathcal{E}}^T \mathbf{\Sigma}_{\mathcal{E}} \mathbf{x}_{\mathcal{E}} -1`.
+:math:`c_{\mathcal{E}} = \mathbf{x}_{\mathcal{E}}^T \mathbf{\Sigma}_{\mathcal{E}} \mathbf{x}_{\mathcal{E}} - 1`.
 Denoting :math:`\mathbf{x}^T = [x, y]`, ellipse :math:`\mathcal{E}` can
 be defined algebraically as
 
@@ -323,26 +328,27 @@ intersecting ellipses.
 Intersection Points of Two Ellipses
 -----------------------------------
 
-In this section, we sketch the computation of the intersection points.  Our
-presentation slightly differs from :cite:`Eberly`. First, let
-:math:`(\mathcal{E}_i)_{1 \leq i \leq 2}` be two ellipses defined as
+We explain how we can retrieve the intersection points of two ellipses. Our
+presentation complements :cite:`Eberly`.
+
+First let :math:`(\mathcal{E}_i)_{1 \leq i \leq 2}` be two ellipses defined as
 
 .. math::
-    :label: eq:twoellipses
+    :label: eq-twoellipses
 
     (x,y) \in \mathcal{E}_i \iff
     E_i(x,y) = e_{i1} x^2 + e_{i2} xy + e_{i3} y^2 + e_{i4} x + e_{i5} y + e_{i6} = 0
 
 The intersection points of ellipses :math:`(\mathcal{E}_i)_{1 \leq i \leq 2}`
-satisfy Equation (`[eq:twoellipses] <#eq:twoellipses>`__) for :math:`i \in \{1,
-2\}`, i.e., the following equation system holds for intersection points
+satisfy Equation :eq:`eq-twoellipses` for :math:`i \in \{1, 2\}`, *i.e.*, the
+following equation system holds for intersection points
 
 .. math::
-    :label: eq:system
+    :label: eq-system
 
     \left\{ \begin{matrix} E_1(x,y) = 0 \\ E_2(x,y) = 0 \end{matrix} \right.
 
-Now let us rewrite :math:`E_i(x,y)` as a quadratic polynomial in :math:`x`, i.e.
+Now let us rewrite :math:`E_i(x,y)` as a quadratic polynomial in :math:`x`, *i.e.*,
 
 .. math::
 
@@ -350,7 +356,7 @@ Now let us rewrite :math:`E_i(x,y)` as a quadratic polynomial in :math:`x`, i.e.
                + (e_{i2} y + e_{i4}) x
                + (e_{i3} y^2 + e_{i5} y + e_{i6}) = 0
 
-For convenience we define
+Conveniently we define auxiliary polynomials in :math:`y`
 
 .. math::
 
@@ -363,36 +369,45 @@ For convenience we define
       q_2(y) &= e_{21}
     \end{aligned}
 
-Using the notations above we observe that :math:`x` can be computed as follows
+Introducing the polynomials above, Equation :eq:`eq-twoellipses` is rewritten as
 
 .. math::
 
-    \begin{aligned}
-      (:ref:`eq:system`) \iff &
-      \left\{
-        \begin{matrix}
-          p_2(y) x^2 + p_1(y) x + p_0(y) = 0 \\
-          q_2(y) x^2 + q_1(y) x + q_0(y) = 0
-        \end{matrix}
-      \right. \\
-      \Longrightarrow &
-      \left\{
-        \begin{matrix}
-          q_2(y) \times \left( p_2(y) x^2 + p_1(y) x + p_0(y) \right)= 0\times q_2(y)\\
-          p_2(y) \times \left( q_2(y) x^2 + q_1(y) x + q_0(y) \right)= 0\times p_2(y)
-        \end{matrix}
-      \right.
-    \end{aligned}
+   \left\{
+   \begin{matrix}
+   p_2(y) x^2 + p_1(y) x + p_0(y) = 0 \\
+   q_2(y) x^2 + q_1(y) x + q_0(y) = 0
+   \end{matrix}
+   \right.
 
-Then subtracting the first equation from the second equation, we get
+
+Suppose we know the :math:`y`-coordinate of an intersection point, we can
+calculate the :math:`x`-coordinate of this intersection point.
+
+Indeed we multiply the first equation by :math:`q_2(y)` and the second equation
+by :math:`p_2(y)`.
 
 .. math::
-    :label: eq:xinter
 
-    x = \frac{p_0(y)q_2(y) - p_2(y)q_0(y)}{p_1(y)q_2(y) - p_2(y)q_1(y)}.
+   \left\{
+   \begin{matrix}
+   q_2(y) \times \left( p_2(y) x^2 + p_1(y) x + p_0(y) \right)= 0\times q_2(y)\\
+   p_2(y) \times \left( q_2(y) x^2 + q_1(y) x + q_0(y) \right)= 0\times p_2(y)
+   \end{matrix}
+   \right.
 
-Furthermore, Equation System (`[eq:system] <#eq:system>`__) is equivalent to the
-following augmented equation system
+Then subtracting the first equation from the second equation, the monomial
+:math:`x^2` disappears. Thus:
+
+.. important::
+
+   .. math::
+      :label: eq:xinter
+
+      x = \frac{p_0(y)q_2(y) - p_2(y)q_0(y)}{p_1(y)q_2(y) - p_2(y)q_1(y)}.
+
+Furthermore, Equation :eq:`eq-system` is equivalent to the following augmented
+equation system
 
 .. math::
 
@@ -405,69 +420,88 @@ following augmented equation system
      \end{array}
    \right.,
 
-which is equivalent to
+And we see more clearly in matrix notation that
 
-.. math::
-    :label: eq:system2
+.. important::
 
-    \underbrace{
-      \begin{bmatrix}
-        p_{0}(y) & p_{1}(y) & p_{2}(y) & 0  \\
-        0  & p_{0}(y) & p_{1}(y) & p_{2}(y) \\
-        q_{0}(y) & q_{1}(y) & q_{2}(y) & 0  \\
-        0  & q_{0}(y) & q_{1}(y) & q_{2}(y)
-      \end{bmatrix}
-    }_{\mathbf{B}(y)}
-    \begin{bmatrix}
-      1 \\ x \\ x^2 \\ x^3
-    \end{bmatrix}
-    =
-    \begin{bmatrix}
-      0 \\ 0 \\ 0 \\ 0
-    \end{bmatrix}
+   :math:`[1, x, x^2, x^3]^T` is in the nullspace of :math:`\mathbf{B}(y)`,
+   where :math:`\mathbf{B}(y)` is defined as
 
-We recognize a linear system in the vector :math:`[1, x, x^2, x^3]^T`.  More
-particularly, :math:`[1, x, x^2, x^3]^T` is in the nullspace of
-:math:`\mathbf{B}(y)`, which then must have a zero determinant. Note that all
-the equations systems are *equivalent*, so Equation System (`[eq:system]
-<#eq:system>`__) holds if and only if the determinant of :math:`\mathbf{B}(y)`
-is zero. Letting the resultant be
+   .. math::
+       :label: eq-system2
 
-.. math::
+       \underbrace{
+         \begin{bmatrix}
+           p_{0}(y) & p_{1}(y) & p_{2}(y) & 0  \\
+           0  & p_{0}(y) & p_{1}(y) & p_{2}(y) \\
+           q_{0}(y) & q_{1}(y) & q_{2}(y) & 0  \\
+           0  & q_{0}(y) & q_{1}(y) & q_{2}(y)
+         \end{bmatrix}
+       }_{\mathbf{B}(y)}
+       \begin{bmatrix}
+         1 \\ x \\ x^2 \\ x^3
+       \end{bmatrix}
+       =
+       \begin{bmatrix}
+         0 \\ 0 \\ 0 \\ 0
+       \end{bmatrix}
 
-   R = \left( p_{0}q_{2} - p_{2}q_{0} \right)^2 -
-         \left( p_{0}q_{1} - p_{1}q_{0} \right)
-         \left( p_{1}q_{2} - p_{2}q_{1} \right),
 
-Equation System (`[eq:system] <#eq:system>`__) is equivalent to the following
-quartic equation in :math:`y`.
+We observe that the vector :math:`[1, x, x^2, x^3]^T` is never zero for any
+real value :math:`x`. Thus necessarily the nullspace
+:math:`\text{Null}(\mathbf{B}(y)` is always nontrivial and that means the
+determinant of :math:`\mathbf{B}(y)` has to be zero.
 
-.. math::
-    :label: eq:detBy
+.. important::
+   Let the polynomial :math:`R` be defined as
 
-    \det(\mathbf{B}(y)) = R(y) = 0,
+   .. math::
 
-This quartic equation can be solved either by SVD from the
-characteristic polynomial of the companion matrix. The SVD is computed
-either from a direct method or from Jacobi’s iterative and numerically
-stable method. Instead we compute the roots with Ferrari’s method. While
-it is a tedious method, it has the advantage of being direct. Also, we
-experimentally observe Ferrari’s method can sometimes be numerically
-inaccurate in particular situations, e.g., one of the ellipse is
-quasi-degenerate. Therefore, some tuning may be required for numerical
-accuracy.
+      R \overset{\textrm{def}}{=}
+      \left( p_{0}q_{2} - p_{2}q_{0} \right)^2 -
+      \left( p_{0}q_{1} - p_{1}q_{0} \right)
+      \left( p_{1}q_{2} - p_{2}q_{1} \right),
 
-Using any polynomial solver, we get the :math:`4` roots
-:math:`(y_i)_{1\leq i\leq 4}` of the quartic polynomial :math:`R` and
-only keep those that are real. Finally :math:`(x_i)_{1\leq i \leq 4}`
-are deduced from Equation (`[eq:xinter] <#eq:xinter>`__).
+   Equation :eq:`eq-system` is equivalent to the following quartic equation in
+   :math:`y`.
+
+   .. math::
+      :label: eq-detBy
+
+      \det(\mathbf{B}(y)) = R(y) = 0,
+
+Using any polynomial solver, we get the :math:`4` roots :math:`(y_i)_{1\leq
+i\leq 4}` of the quartic polynomial :math:`R` and only keep those that are real.
+Finally :math:`(x_i)_{1\leq i \leq 4}` are deduced from
+Equation :eq:`eq:xinter`.
+
+Implementation Notes
+~~~~~~~~~~~~~~~~~~~~
+
+In *Sara*, we can use several solvers to retrieve the roots of polynomial
+:math:`R`.
+
+1. **Companion matrix** approach: since *Sara* depends on *Eigen*, *Eigen* has
+   an unsupported Polynomial solver using this simple approach.
+2. **Jenkins-Traub** iterative but very accurate approach also available in
+   *Sara*.
+3. **Ferrari**’s method available in *Sara*.
+
+The implementation in *Sara* uses Ferrari's method. While more tedious to
+implement, the method has the advantage of being direct. Also, we experimentally
+observe Ferrari’s method can sometimes be numerically inaccurate in particular
+situations where for example one of the ellipse is quasi-degenerate.
+
+In the future, depending on the use case, we can polish the roots to refine the
+root values.
+
 
 Intersection Area of Two Ellipses
 ---------------------------------
 
-Our presentation is different from :cite:`Eberly` and
-details are added. In the rest of the section, we consider two ellipses
-:math:`(\mathcal{E}_i)_{1 \leq i \leq 2}` and we respectively denote
+Our presentation complements :cite:`Eberly`. In the rest of the section, we
+consider two ellipses :math:`(\mathcal{E}_i)_{1 \leq i \leq 2}` and we
+respectively denote
 
 -  the axes of ellipse :math:`\mathcal{E}_i` by :math:`(a_i, b_i)`, the
    ellipse center by :math:`\mathbf{x}_i`, the orientation by
@@ -487,7 +521,7 @@ details are added. In the rest of the section, we consider two ellipses
 
 -  the intersection points by :math:`\mathbf{p}_i` for
    :math:`i \in \llbracket 1, L \rrbracket`, sorted in a
-   counter-clockwise order, i.e.
+   counter-clockwise order, *i.e.*,
 
    .. math::
        :label: eq:counterclockwise
@@ -501,7 +535,7 @@ details are added. In the rest of the section, we consider two ellipses
 -  the polar angles of points :math:`(\mathbf{p}_i)_{1\leq i \leq L}`
    with respect to ellipses :math:`\mathcal{E}_1` and
    :math:`\mathcal{E}_2` by :math:`(\phi_i)_{1\leq i \leq 2}` and
-   :math:`(\psi_i)_{1\leq i \leq 2}`, i.e.
+   :math:`(\psi_i)_{1\leq i \leq 2}`, *i.e.*,
 
    .. math::
 
@@ -514,13 +548,10 @@ details are added. In the rest of the section, we consider two ellipses
 Retrieving the polar angles
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To retrieve the polar angles, we need to place ourselves in the
-reference frame :math:`(\mathbf{x}_i, \mathbf{u}_i, \mathbf{v}_i)`,
-where :math:`\mathbf{x}_i` is the origin of the reference frame and
-:math:`\mathbf{u}_i` and :math:`\mathbf{v}_i` are the direction vectors
-determining the ellipse orientation. Using the convenient
-:math:`\mathrm{atan2}` function giving values ranging in
-:math:`]-\pi,\pi]`, we have
+To retrieve the polar angles, we need to place ourselves in the coordinate
+system :math:`(\mathbf{x}_i, \mathbf{u}_i, \mathbf{v}_i)`. Using the convenient
+function :math:`\mathrm{atan2}` giving values in :math:`]-\pi,\pi]`, we
+have
 
 .. math::
 
@@ -545,11 +576,11 @@ illustrated in Figure [:ref:`figinter01`].
 .. _figinter01:
 .. table:: Cases where there is zero or one intersection point.
 
-    +----------------------------------+----------------------------------+
-    | .. image:: figures/test0a.png    | .. image:: figures/test0b.png    |
-    +----------------------------------+----------------------------------+
-    | .. image:: figures/test1a.png    | .. image:: figures/test1b.png    |
-    +----------------------------------+----------------------------------+
+   +----------------------------------+----------------------------------+
+   | .. image:: ../figures/test0a.png | .. image:: ../figures/test0b.png |
+   +----------------------------------+----------------------------------+
+   | .. image:: ../figures/test1a.png | .. image:: ../figures/test1b.png |
+   +----------------------------------+----------------------------------+
 
 An ellipse, say :math:`\mathcal{E}_1`, is contained in the other
 :math:`\mathcal{E}_2` if and only if its center satisfies
@@ -558,7 +589,7 @@ just the area of ellipse :math:`\mathcal{E}_1`.  Otherwise, if there is no
 containment, the intersection area is zero. In summary,
 
 .. math::
-    :label: eq:area01
+    :label: eq-area01
 
     \mathop{\mathrm{area}}(\mathcal{E}_1 \cap \mathcal{E}_2) = \left\{
     \begin{array}{ll}
@@ -571,37 +602,35 @@ containment, the intersection area is zero. In summary,
 2 intersection points
 ~~~~~~~~~~~~~~~~~~~~~
 
-We will not detail the case when Polynomial (`[eq:detBy] <#eq:detBy>`__)
-have 2 roots with multiplicity 2. This still corresponds to the case
-where there are two intersection points. But because of the root
-multiplicities, one ellipse is contained in the other one and then
-Formula (`[eq:area01] <#eq:area01>`__) gives the correct intersection
-area.
+We will not detail the case when Polynomial :eq:`eq-detBy` have :math:`2` roots
+with multiplicity :math:`2`. This still corresponds to the case where there are
+two intersection points. But because of the root multiplicities, one ellipse is
+contained in the other one and then Equation eq:`eq-area01` gives the correct
+intersection area.
 
 Otherwise, we have to consider two cases as illustrated in
-Figure [:ref:`figinter2`], which :cite:`Eberly`
-apparently forgot to consider. Namely, the cases correspond to whether
-the center of ellipses :math:`\mathcal{E}_1` and :math:`\mathcal{E}_2`
-are on the same side or on opposite side with respect to the line
-:math:`(\mathbf{p}_1, \mathbf{p}_2)`.
+Figure [:ref:`figinter2`], which :cite:`Eberly` apparently forgot to consider.
+Namely, the cases correspond to whether the center of ellipses
+:math:`\mathcal{E}_1` and :math:`\mathcal{E}_2` are on the same side or on
+opposite side with respect to the line :math:`(\mathbf{p}_1, \mathbf{p}_2)`.
 
 .. _figinter2:
 .. table:: Cases where there are two intersection points.
 
-    +----------------------------------+----------------------------------+
-    | .. image:: figures/inter2a.png   | .. image:: figures/inter2b.png   |
-    +----------------------------------+----------------------------------+
+    +-----------------------------------+-----------------------------------+
+    | .. image:: ../figures/inter2a.png | .. image:: ../figures/inter2b.png |
+    +-----------------------------------+-----------------------------------+
 
 Denoting a unit normal of the line going across the intersection points
 :math:`(\mathbf{p}_1, \mathbf{p}_2)` by :math:`\mathbf{n}` (cf.
 Figure `1.9 <#fig:inter2>`__). If the ellipse centers
 :math:`\mathbf{x}_1` and :math:`\mathbf{x}_2` are on opposite side with
-respect to the line :math:`(\mathbf{p}_1, \mathbf{p}_2)`, i.e.,
+respect to the line :math:`(\mathbf{p}_1, \mathbf{p}_2)`, *i.e.*,
 
 .. math::
 
-    \langle \mathbf{n}, \mathbf{x}_1 - \mathbf{p}_1 \rangle \langle \mathbf{n},
-    \mathbf{x}_2 - \mathbf{p}_1 \rangle < 0,
+   \langle \mathbf{n}, \mathbf{x}_1 - \mathbf{p}_1 \rangle \langle \mathbf{n},
+   \mathbf{x}_2 - \mathbf{p}_1 \rangle < 0,
 
 then
 
@@ -611,7 +640,7 @@ then
        B_1(\phi_1, \phi_2) + B_2(\psi_1, \psi_2)
 
 If they are on the same side with respect to the line
-:math:`(\mathbf{p}_1, \mathbf{p}_2)`, i.e.,
+:math:`(\mathbf{p}_1, \mathbf{p}_2)`, *i.e.*,
 
 .. math::
 
@@ -652,15 +681,15 @@ smaller than the distance of ellipse center :math:`\mathbf{x}_2` to the line
 3 and 4 intersection points
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. _figinter34:
+.. _fig-inter34:
 .. table:: Cases where there are three of four intersection points.
 
-    +---------------------------------+--------------------------------+
-    | .. image:: figures/inter3.png   | .. image:: figures/inter4.png  |
-    +---------------------------------+--------------------------------+
+    +-----------------------------------+-----------------------------------+
+    | .. image:: ../figures/inter3.png  | .. image:: ../figures/inter4.png  |
+    +-----------------------------------+-----------------------------------+
 
 These cases are rather easy to handle. Indeed, we see geometrically from
-Figure [:ref:`fig:inter34`],
+Figure [:ref:`fig-inter34`],
 
 .. math::
 
@@ -680,4 +709,5 @@ with :math:`\phi_{L+1} = \phi_1`, :math:`\psi_{L+1} = \psi_1` and
 
 .. rubric:: References
 
-.. bibliography:: phd.bib
+.. bibliography:: ../phd.bib
+   :encoding: latin

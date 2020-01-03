@@ -56,7 +56,7 @@ namespace DO { namespace Sara {
                     const ImageView<Vector2f>& grad_polar_coords) const
         -> descriptor_type
     {
-      const auto pi = static_cast<float>(M_PI);
+      constexpr auto pi = static_cast<float>(M_PI);
       /*
         The oriented keypoint is denoted by $k = (x,y,\sigma,\theta)$.
         SIFT describes keypoint $k$ in a similarity-invariant manner.
@@ -285,30 +285,32 @@ namespace DO { namespace Sara {
       //
       // Note that a gradient at the boundary like $(-1,-1)$ contributes only
       // to P_{0,0}.
-      auto xfrac = pos.x() - floor(pos.x());
-      auto yfrac = pos.y() - floor(pos.y());
-      auto orifrac = ori - floor(ori);
-      auto xi = int(pos.x());
-      auto yi = int(pos.y());
-      auto orii = int(ori);
+      const auto xfrac = pos.x() - floor(pos.x());
+      const auto yfrac = pos.y() - floor(pos.y());
+      const auto orifrac = ori - floor(ori);
+      const auto xi = int(pos.x());
+      const auto yi = int(pos.y());
+      const auto orii = int(ori);
 
       for (auto dy = 0; dy < 2; ++dy)
       {
-        auto y = yi + dy;
+        const auto y = yi + dy;
         if (y < 0 || y >= N)
           continue;
 
-        auto wy = (dy == 0) ? 1.f - yfrac : yfrac;
+        const auto wy = (dy == 0) ? 1.f - yfrac : yfrac;
         for (auto dx = 0; dx < 2; ++dx)
         {
-          auto x = xi + dx;
+          const auto x = xi + dx;
           if (x < 0 || x >= N)
             continue;
-          auto wx = (dx == 0) ? 1.f - xfrac : xfrac;
+
+          const auto wx = (dx == 0) ? 1.f - xfrac : xfrac;
           for (auto dori = 0; dori < 2; ++dori)
           {
-            auto o = (orii + dori) % O;
-            auto wo = (dori == 0) ? 1.f - orifrac : orifrac;
+            const auto o = (orii + dori) % O;
+            const auto wo = (dori == 0) ? 1.f - orifrac : orifrac;
+
             // Trilinear interpolation:
             h[at(y, x, o)] += wy * wx * wo * weight * mag;
           }
