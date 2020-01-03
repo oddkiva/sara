@@ -1,4 +1,5 @@
 Geometry
 ========
 
-.. include:: geometry/ellipse_intersection.md
+
+.. include:: geometry/ellipse_intersection.rst

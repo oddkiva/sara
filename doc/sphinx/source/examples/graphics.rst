@@ -31,7 +31,7 @@ The example below shows how to:
    :encoding: latin-1
    :language: cpp
 
-.. note::
+.. code-block::
 
    To run the code snippets below, create a file `CMakeLists.txt` and place it
    in the same folder as where the source code lives::

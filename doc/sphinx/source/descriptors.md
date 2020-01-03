@@ -63,7 +63,8 @@ orientations. The orientations are calculated with respect to the **oriented**
 .. math::
 
     \mathcal{C}_k =
-      \left(\mathbf{x}, \mathbf{u}_\theta, \mathbf{v}_{\theta} \right)
+    \left(\mathbf{x}, \mathbf{u}_\theta, \mathbf{v}_{\theta} \right)
+
 to ensure invariance to rotation.
 
 
