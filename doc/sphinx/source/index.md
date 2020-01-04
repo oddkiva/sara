@@ -31,6 +31,8 @@ Table of Contents
    examples
    third_party_libraries
 
+   bibliography
+
 
 # api/library_root
 

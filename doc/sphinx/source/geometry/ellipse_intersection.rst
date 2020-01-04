@@ -705,9 +705,3 @@ Figure [:ref:`fig-inter34`],
 
 with :math:`\phi_{L+1} = \phi_1`, :math:`\psi_{L+1} = \psi_1` and
 :math:`\mathbf{p}_{L+1} = \mathbf{p}_1`.
-
-
-.. rubric:: References
-
-.. bibliography:: ../phd.bib
-   :encoding: latin
