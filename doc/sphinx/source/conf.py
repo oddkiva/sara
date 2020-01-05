@@ -21,8 +21,8 @@ import sys
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
-# breathe_projects = {"Sara": "/Users/david/GitLab/DO-CV/sara-build-Release/doc/xml"}
-# breathe_default_project = "Sara"
+breathe_projects = {"Sara": "/Users/david/GitLab/DO-CV/sara-build-Release/doc/xml"}
+breathe_default_project = "Sara"
 
 # Setup the exhale extension
 exhale_args = {
@@ -56,7 +56,7 @@ highlight_language = 'cpp'
 # ones.
 extensions = [
     'breathe',
-    # 'exhale',
+    'exhale',
     'recommonmark',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',

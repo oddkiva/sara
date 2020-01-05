@@ -502,6 +502,8 @@ We can implement the computation of SIFT in *C++* as follows:
           trilinear_interpolation(h, pos, ori, weight, mag);
         }
       }
+
+      return h;
     }
 
 
