@@ -29,7 +29,7 @@ exhale_args = {
     # These arguments are required
     "containmentFolder":     "@CMAKE_CURRENT_SOURCE_DIR@/source/api",
     "rootFileName":          "library_root.rst",
-    "rootFileTitle":         "Sara C++ Reference API",
+    "rootFileTitle":         "C++ Reference API",
     "doxygenStripFromPath":  "..",
     # Suggested optional arguments
     "createTreeView":        True,
@@ -55,13 +55,13 @@ highlight_language = 'cpp'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'breathe',
-    'exhale',
+    # 'breathe',
+    # 'exhale',
     'recommonmark',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
     'sphinxcontrib.bibtex',
-    'sphinxcontrib.katex',
+    'sphinxcontrib.katex'
 ]
 # We want to number figures and reference them.
 numfig = True

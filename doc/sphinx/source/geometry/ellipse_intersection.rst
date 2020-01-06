@@ -449,7 +449,7 @@ And we see more clearly in matrix notation that
 
 We observe that the vector :math:`[1, x, x^2, x^3]^T` is never zero for any
 real value :math:`x`. Thus necessarily the nullspace
-:math:`\text{Null}(\mathbf{B}(y)` is always nontrivial and that means the
+:math:`\text{Null}(\mathbf{B}(y))` is always nontrivial and that means the
 determinant of :math:`\mathbf{B}(y)` has to be zero.
 
 .. important::

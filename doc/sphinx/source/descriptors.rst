@@ -67,7 +67,7 @@ to be identical.
 Grid of Overlapping Patches and Overlapping Histogram Bins
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-We dissect the anatomy of the SIFT descriptors further.  To compute a SIFT
+We dissect the anatomy of the SIFT descriptor further.  To compute a SIFT
 descriptor, we consider an oriented square image patch :math:`\mathcal{P}`:
 
 - centered in :math:`\mathbf{x} = (x, y)` and,
@@ -210,7 +210,7 @@ Thus the centers are
    \end{array}
    \right]\\
 
-Or in a *numpy-array*-like notation:
+Equivalently with array broadcasting (cf. *Numpy* concept):
 
 .. math::
    \left[
@@ -319,7 +319,7 @@ The pixel :math:`(u, v)` belongs up to :math:`4` patches:
 - :math:`\mathcal{P}_{ \lfloor \hat{v} \rfloor + 1, \lfloor \hat{u} \rfloor  + 1}`
 
 We say "up to :math:`4`" because for example a gradient at the boundary
-:math:`(-1,-1)` contributes only to :math:`P_{00}`.
+:math:`(-1,-1)` contributes only to :math:`\mathcal{P}_{00}`.
 
 Histogram of Gradients
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -328,6 +328,8 @@ Consider a pixel :math:`\mathbf{u} \in \mathcal{P}_{ij}`. Its contribution in
 histogram :math:`\mathbf{h}_{ij}` is
 
 .. math::
+   \boxed{
+
    w(\mathbf{u}) =
    \underbrace{
    \exp \left( - \frac{\| \tilde{\mathbf{u}} \|^2}{2 (N/2)^2} \right)
@@ -336,6 +338,8 @@ histogram :math:`\mathbf{h}_{ij}` is
    \underbrace{
    \| \nabla g_\sigma * I(\mathbf{u}) \|_2
    }_{\text{gradient magnitude}}
+
+   }
 
 :cite:`Lowe:2004:ijcv` chooses to give more emphasis to gradients close to the
 keypoint center :math:`\mathbf{x}` to compensate for the noisy estimation of
@@ -347,11 +351,11 @@ becomes:
 .. math::
    \displaystyle
    w_{\text{final}}(\mathbf{u}) = w(\mathbf{u})
-                                  \left( 1 + i - \hat{v} \right)
-                                  \left( 1 + j - \hat{u} \right)
+                                  \left( 1 - |\hat{u} - j| \right)
+                                  \left( 1 - |\hat{v} - i| \right)
 
-The orientation of the gradient :math:`\nabla I_\sigma(\mathbf{u})` is
-calculated as:
+In the local coordinate system, the orientation of the gradient :math:`\nabla
+I_\sigma(\mathbf{u})` is calculated as:
 
 .. math::
    \phi = \text{atan2}(\nabla I_\sigma(\mathbf{u})) - \theta \\
@@ -387,9 +391,9 @@ The contribution will be distributed to the two bins as follows
       \displaystyle
       \mathbf{h}[i, j, o] = \sum_{\mathbf{u} \in \mathcal{P}_{ij}}
       w(\mathbf{u})
-      \left( 1 + i - \hat{u} \right)
-      \left( 1 + j - \hat{v} \right)
-      \left( 1 + o - \hat{\phi} \right)
+      \left( 1 - | \hat{u} - j | \right)
+      \left( 1 - | \hat{v} - i | \right)
+      \left( 1 - | \hat{\phi} - o | \right)
       \mathbf{1}_{\left|\ \hat{\phi} - o \right| < 1}
 
 
@@ -403,7 +407,7 @@ enough image patch, e.g., radius
 
 .. math::
 
-   r = \sqrt{2} \frac{N + 1}{2} \lambda_{\text{zoom}} \sigma
+   \boxed{r = \sqrt{2} \frac{N + 1}{2} \lambda_{\text{zoom}} \sigma}
 
 In the above formula, notice that:
 
@@ -416,9 +420,9 @@ In the above formula, notice that:
   :math:`r = \frac{N + 1}{2} \lambda_{\text{zoom}} \sigma` would have been
   sufficient.
 - the factor :math:`\frac{(N + 1)}{2}`: this accounts for gradients for patches
-  "at the border" of the image region. These gradients "at the border" may
-  belong to only one histogram ("at the corners") or two histograms (at the
-  edges).
+  "at the border" of the image patch :math:`\mathcal{P}`. These gradients "at
+  the border" may belong to only one histogram ("at the corners") or two
+  histograms ("at the edges").
 
 The SIFT descriptor for keypoint :math:`k` is calculated as follows:
 
@@ -440,7 +444,7 @@ The SIFT descriptor for keypoint :math:`k` is calculated as follows:
    In practice the gradients are precomputed only once in polar coordinates for
    efficiency at every scale of the Gaussian pyramid.
 
-We can implement the computation of SIFT in *C++* as follows:
+The computation of SIFT in *C++* can be sketched as follows:
 
 .. code-block:: cpp
 
@@ -450,7 +454,7 @@ We can implement the computation of SIFT in *C++* as follows:
                                  const Image<Vector2f, 2>& grad_polar_coords)
         -> descriptor_type
     {
-      static constexpr auto lambda_zoom = 3.f;
+      constexpr auto lambda_zoom = 3.f;
 
       // The SIFT descriptor.
       descriptor_type h = descriptor_type::Zero();
@@ -510,7 +514,7 @@ We can implement the computation of SIFT in *C++* as follows:
 Trilinear Interpolation
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-We can implement the trilinear interpolation in C++ as follows:
+We can sketch the trilinear interpolation in C++ as follows:
 
 .. code-block:: cpp
 
@@ -561,19 +565,20 @@ Robustness to illumination changes
   brightness change by construction.
 - a contrast change in image amounts to multiplying image intensities by a
   constant factor. Normalizing the descriptor cancels the multiplication factor.
-  So we must normalize the descriptor at the end.
-- There are still other nonlinear illumination changes (camera saturation and
-  surface reflective properties). :cite:`Lowe:2004:ijcv` have found
-  experimentally that (1) clamping histogram bins to :math:`0.2` and then (2)
-  renormalizing the descriptor again worked well to account for these on a
-  specific dataset consisting of 3D objects photographed under different
-  lighting conditions.
+  So we must normalize the descriptor once the histogram of gradients are
+  accumulated.
+- There are still other nonlinear illumination changes. They arise for example
+  from camera saturation and surface reflective properties.
+  :cite:`Lowe:2004:ijcv` have found experimentally that (1) clamping histogram
+  bins to :math:`0.2` and then (2) renormalizing the descriptor again worked
+  well to account for these on a dataset consisting of 3D objects photographed
+  under different lighting conditions.
 
 Using *Eigen*, we can express these in *C++*:
 
 .. code-block:: cpp
 
-   void normalize(descriptor_type& h)
+   auto enforce_invariance_to_illumination_changes(descriptor_type& h) -> void
    {
      // SIFT is by construction invariant to brightness change since it is based
      // on gradients.
