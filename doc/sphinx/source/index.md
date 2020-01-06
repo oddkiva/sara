@@ -33,7 +33,7 @@ Table of Contents
 
    bibliography
 
-#   api/library_root
+   api/library_root
 
 
 Indices and tables
