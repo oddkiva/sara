@@ -21,13 +21,18 @@ import sys
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
-breathe_projects = {"Sara": "/Users/david/GitLab/DO-CV/sara-build-Release/doc/xml"}
+this_dir = os.path.dirname(__file__)
+project_dir = os.path.abspath(os.path.join(this_dir, "../../..", "cpp/src"))
+if not os.path.exists(project_dir):
+    raise ValueError("{} directory does not exist".format(project_dir))
+
+breathe_projects = {"Sara": os.path.join(this_dir, "xml")}
 breathe_default_project = "Sara"
 
 # Setup the exhale extension
 exhale_args = {
     # These arguments are required
-    "containmentFolder":     "/Users/david/GitLab/DO-CV/sara/doc/sphinx/source/api",
+    "containmentFolder":     os.path.join(this_dir, "api"),
     "rootFileName":          "library_root.rst",
     "rootFileTitle":         "C++ Reference API",
     "doxygenStripFromPath":  "..",
@@ -36,7 +41,7 @@ exhale_args = {
     # TIP: if using the sphinx-bootstrap-theme, you need
     # "treeViewIsBootstrap": True,
     "exhaleExecutesDoxygen": True,
-    "exhaleDoxygenStdin": "INPUT = /Users/david/GitLab/DO-CV/sara/cpp/src"
+    "exhaleDoxygenStdin": "INPUT = {}".format(project_dir)
 }
 
 # Tell sphinx what the primary language being documented is.
@@ -55,8 +60,8 @@ highlight_language = 'cpp'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    # 'breathe',
-    # 'exhale',
+    'breathe',
+    'exhale',
     'recommonmark',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',

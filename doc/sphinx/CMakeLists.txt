@@ -4,10 +4,6 @@ if (SPHINX_EXECUTABLE)
   set(SPHINX_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/source)
   set(SPHINX_BUILD ${CMAKE_BINARY_DIR}/doc/sphinx)
 
-  configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/source/conf.py.in
-    ${CMAKE_CURRENT_SOURCE_DIR}/source/conf.py @ONLY)
-
   add_custom_target(doc_sphinx
     COMMAND ${SPHINX_EXECUTABLE} -b html ${SPHINX_SOURCE} ${SPHINX_BUILD}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/source
