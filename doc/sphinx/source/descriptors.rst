@@ -140,11 +140,11 @@ descriptor abruptly changes as a sample shifts smoothly from being within one
 histogram to another or from one orientation to another."*
 
 First trilinear interpolation compensates for the **noisy** estimation of
-keypoint :math:`k`. In particular that a pixel in the patch :math:`\mathcal{P}`
-can belong up to :math:`4` adjacent patches :math:`\mathcal{P}_{i'j'}` for
-:math:`i \leq i' \leq i + 1` and :math:`j \leq j' \leq j + 1` to compensate for
-the noisy scale :math:`\sigma` and location :math:`\mathbf{x}`. In other words,
-patches overlap.
+keypoint :math:`k`. In particular a pixel in the patch :math:`\mathcal{P}` can
+belong up to :math:`4` adjacent patches :math:`\mathcal{P}_{i'j'}` for :math:`i
+\leq i' \leq i + 1` and :math:`j \leq j' \leq j + 1` to compensate for the noisy
+scale :math:`\sigma` and location :math:`\mathbf{x}`. In other words, patches
+overlap.
 
 Then we encode the photometric information of each patch
 :math:`\mathcal{P}_{ij}` into a histogram :math:`\mathbf{h}_{ij} \in
