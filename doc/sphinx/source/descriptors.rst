@@ -58,56 +58,14 @@ By similarity invariance, we mean that
 then we would detect that salient region in each image as a keypoint :math:`k_i`
 with perfect pixel localisation, scale and orientation.
 
-Normalizing the image patch around this salient region with scale :math:`\sigma`
-and orientation with :math:`\theta` would yield the same image. The SIFT
-descriptors :math:`\mathbf{h}_i` simply compress the relevant image information
-in each normalized patch around the keypoint :math:`k_i` and are thus expected
-to be identical.
+Normalizing the image patch around this salient region with scale
+:math:`\sigma_i` and orientation with :math:`\theta_i` would yield the same
+image. The SIFT descriptors :math:`\mathbf{h}_i` simply compress the relevant
+image information in each normalized patch around the keypoint :math:`k_i` and
+are thus expected to be identical.
 
-Grid of Overlapping Patches and Overlapping Histogram Bins
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-We dissect the anatomy of the SIFT descriptor further.  To compute a SIFT
-descriptor, we consider an oriented square image patch :math:`\mathcal{P}`:
-
-- centered in :math:`\mathbf{x} = (x, y)` and,
-- oriented with an angle :math:`\theta` w.r.t. the image axes to enforce
-  invariance to rotation,
-- with a side length proportional to the scale :math:`\sigma` to enforce
-  invariance to scale change.
-
-.. note::
-   We divide the square patch :math:`\mathcal{P}` into a grid of :math:`N \times
-   N` **overlapping** square patches :math:`\mathcal{P}_{ij}` for :math:`{0 \leq
-   i,j < N},` each of them having a *radius* :math:`s = \lambda_{\text{zoom}}
-   \sigma` pixels.  This means that the whole square patch :math:`\mathcal{P}`
-   has a side length equal to :math:`(N + 1) s`
-
-   In the original implementation of :cite:`Lowe:2004:ijcv` the magnification factor
-   :math:`\lambda_{\text{zoom}}` is set to :math:`3`.
-
-We stress that the patches do **overlap**. We will see later that the trilinear
-interpolation used in :cite:`Lowe:2004:ijcv` amounts to doing this. And this is
-one key ingredient to compensate for the **noisy** estimation of keypoint
-:math:`k`. This means that a pixel in the patch can belong up to :math:`4`
-adjacent patches :math:`\mathcal{P}_{i'j'}` for :math:`i \leq i' \leq i + 1` and
-:math:`j \leq j' \leq j + 1`.
-
-We quote :cite:`Lowe:2004:ijcv` to explain the rationale behind this: *"It is
-important to avoid all boundary affects in which the descriptor abruptly changes
-as a sample shifts smoothly from being within one histogram to another or from
-one orientationto another."*
-
-Then we encode the photometric information of each patch
-:math:`\mathcal{P}_{ij}` into a histogram :math:`\mathbf{h}_{ij} \in
-\mathbb{R}^O` of *gradient orientations*, where the orientations are binned into
-:math:`O` principal orientations. Again, because of the trilinear interpolation,
-
-.. note::
-   The histogram bins :math:`\mathbf{h}[i, j, o]` **overlap** as each of them
-   covers the interval of orientations :math:`[\frac{2 \pi (o - 1)}{O}, \frac{2
-   \pi (o + 1)}{O}]`.
-
+This leads us to define the local coordinate system and its associated
+normalizing transform.
 
 Local Coordinate System and Normalizing Transform
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -119,7 +77,10 @@ local coordinate system is equivalently characterized by a similarity transform
 
 .. important::
 
-   In matrix notation and using homogeneous coordinates, the normalizing
+   Let :math:`\lambda_\text{zoom}` be a magnification factor. The scale of the
+   normalizing transform is :math:`s = \lambda_\text{zoom} \sigma`.
+
+   Thus in matrix notation and using homogeneous coordinates, the normalizing
    transform :math:`\mathbf{T}` transforms *image coordinates* :math:`\mathbf{u}
    = (u, v)` to *normalized coordinates* :math:`\tilde{\mathbf{u}} = (\tilde{u},
    \tilde{v})` as follows
@@ -148,6 +109,53 @@ local coordinate system is equivalently characterized by a similarity transform
         \right]
 
         \begin{bmatrix} \mathbf{u} \\ 1 \end{bmatrix}
+
+Grid of Overlapping Patches and Overlapping Histogram Bins
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To compute a SIFT descriptor we consider an oriented square image patch
+:math:`\mathcal{P}`:
+
+- centered in :math:`\mathbf{x} = (x, y)` and,
+- oriented with an angle :math:`\theta` w.r.t. the image axes to enforce
+  invariance to rotation,
+
+.. note::
+   We divide the square patch :math:`\mathcal{P}` into a grid of :math:`N \times
+   N` **overlapping** square patches :math:`\mathcal{P}_{ij}` for :math:`{0 \leq
+   i,j < N},` each of them having a *radius* :math:`s = \lambda_{\text{zoom}}
+   \sigma` pixels. This means that the whole square patch :math:`\mathcal{P}`
+   has a side length equal to :math:`(N + 1) s`
+
+   In the original implementation of :cite:`Lowe:2004:ijcv` the magnification factor
+   :math:`\lambda_{\text{zoom}}` is set to :math:`3`.
+
+Now let us explain why the **overlapping** is due to the trilinear interpolation
+before we detail the geometry of the patches :math:`\mathcal{P}_{ij}` in the
+next section.
+
+Quoting :cite:`Lowe:2004:ijcv` the trilinear interpolation is key to avoid the
+following: *"It is important to avoid all boundary affects in which the
+descriptor abruptly changes as a sample shifts smoothly from being within one
+histogram to another or from one orientation to another."*
+
+First trilinear interpolation compensates for the **noisy** estimation of
+keypoint :math:`k`. In particular that a pixel in the patch :math:`\mathcal{P}`
+can belong up to :math:`4` adjacent patches :math:`\mathcal{P}_{i'j'}` for
+:math:`i \leq i' \leq i + 1` and :math:`j \leq j' \leq j + 1` to compensate for
+the noisy scale :math:`\sigma` and location :math:`\mathbf{x}`. In other words,
+patches overlap.
+
+Then we encode the photometric information of each patch
+:math:`\mathcal{P}_{ij}` into a histogram :math:`\mathbf{h}_{ij} \in
+\mathbb{R}^O` of *gradient orientations*, where the orientations are binned into
+:math:`O` principal orientations. Again with trilinear interpolation, we
+compensate with the noisy orientation :math:`\theta` and as a result
+
+.. note::
+   The histogram bins :math:`\mathbf{h}[i, j, o]` **overlap** as each of them
+   covers the interval of orientations :math:`[\frac{2 \pi (o - 1)}{O}, \frac{2
+   \pi (o + 1)}{O}]`.
 
 
 Geometry of Overlapping Patches
@@ -345,7 +353,7 @@ histogram :math:`\mathbf{h}_{ij}` is
 keypoint center :math:`\mathbf{x}` to compensate for the noisy estimation of
 keypoint.
 
-Using trilinear interpolation, its contribution to :math:`\mathbf{h}_{ij}`
+With the trilinear interpolation, its contribution to :math:`\mathbf{h}_{ij}`
 becomes:
 
 .. math::
