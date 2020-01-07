@@ -60,8 +60,8 @@ highlight_language = 'cpp'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'breathe',
-    'exhale',
+    # 'breathe',
+    # 'exhale',
     'recommonmark',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
