@@ -150,7 +150,7 @@ Then we encode the photometric information of each patch
 :math:`\mathcal{P}_{ij}` into a histogram :math:`\mathbf{h}_{ij} \in
 \mathbb{R}^O` of *gradient orientations*, where the orientations are binned into
 :math:`O` principal orientations. Again with trilinear interpolation, we
-compensate with the noisy orientation :math:`\theta` and as a result
+compensate for the noisy orientation :math:`\theta` and as a result
 
 .. note::
    The histogram bins :math:`\mathbf{h}[i, j, o]` **overlap** as each of them
