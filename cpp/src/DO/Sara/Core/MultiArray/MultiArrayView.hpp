@@ -23,7 +23,15 @@
 
 namespace DO { namespace Sara {
 
-  //! @{
+  /*!
+   *  @ingroup Core
+   *  @defgroup MultiArray MultiArray or Tensors
+   *
+   *  @{
+   *  @ingroup MultiArray
+   *
+   */
+
   //! @brief Forward declaration of the multi-dimensional array classes.
   template <typename T, int N, int StorageOrder = ColMajor>
   class MultiArrayView;
@@ -38,6 +46,7 @@ namespace DO { namespace Sara {
   //! @}
 
 
+  //! @brief Multiarray view class.
   template <typename T, int N, int S>
   class MultiArrayView
   {
@@ -646,5 +655,6 @@ namespace DO { namespace Sara {
     return os;
   }
 
+  //! @}
 
 }}  // namespace DO::Sara

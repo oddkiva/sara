@@ -18,6 +18,11 @@
 
 namespace DO { namespace Sara {
 
+  /*!
+   *  @ingroup MultiArray
+   *  @{
+   */
+
   template <typename T>
   class ConstantPadding
   {
@@ -116,6 +121,8 @@ namespace DO { namespace Sara {
       return f(y);
     }
   };
+
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */
