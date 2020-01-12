@@ -12,6 +12,7 @@
 #pragma once
 
 #include <DO/Sara/Defines.hpp>
+
 #include <DO/Sara/Core/Image.hpp>
 
 

@@ -1,14 +1,12 @@
 PROJECT_NAME = "Sara"
 
 INPUT = @CMAKE_CURRENT_SOURCE_DIR@ \
-        @CMAKE_SOURCE_DIR@/doc/sphinx/source \
         @CMAKE_SOURCE_DIR@/cpp/src \
         @CMAKE_SOURCE_DIR@/cpp/examples \
         @CMAKE_SOURCE_DIR@/cpp/pipelines
 RECURSIVE = YES
 EXCLUDE_PATTERNS += */src/*.cpp
 
-USE_MDFILE_AS_MAINPAGE = @CMAKE_SOURCE_DIR@/doc/sphinx/source/index.md
 MARKDOWN_SUPPORT = YES
 TOC_INCLUDE_HEADINGS = 2
 

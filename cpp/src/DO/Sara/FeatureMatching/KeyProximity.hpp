@@ -22,6 +22,12 @@
 
 namespace DO { namespace Sara {
 
+  /*!
+    @ingroup FeatureMatching
+    @{
+  */
+
+  //! @brief Functor for geometric filtering purpose.
   class DO_SARA_EXPORT KeyProximity
   {
   public:
@@ -42,6 +48,8 @@ namespace DO { namespace Sara {
     float _squared_metric_dist;
     float _squared_dist_thres;
   };
+
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */
