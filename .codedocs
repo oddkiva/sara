@@ -1,13 +1,11 @@
 PROJECT_NAME = "Sara"
 
-INPUT = doc/sphinx/source \
-        cpp/src \
+INPUT = cpp/src \
         cpp/examples \
         cpp/pipelines
 RECURSIVE = YES
 EXCLUDE_PATTERNS += */src/*.cpp
 
-USE_MDFILE_AS_MAINPAGE = doc/sphinx/source/index.md
 MARKDOWN_SUPPORT = YES
 TOC_INCLUDE_HEADINGS = 2
 
