@@ -20,10 +20,9 @@ Sara is licensed with the `Mozilla Public License version
 
 
 The documentation chooses to emphasize more on the mathematical details to
-explain the implementation details. I believe that my API is most of the time
-straightforward enough. The audience I am targeting here is students, scientists
-or software developers who want to understand those kind of details in Computer
-Vision.
+explain some algorithmic implementation. I believe that my API is most of the
+time straightforward enough. The audience I am targeting here is students,
+scientists or software developers who want to understand those kind of details.
 
 
 Table of Contents
