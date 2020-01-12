@@ -25,6 +25,7 @@ Table of Contents
    :maxdepth: 1
 
    geometry
+   features
    descriptors
    sfm
 

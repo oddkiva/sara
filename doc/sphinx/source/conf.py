@@ -139,6 +139,29 @@ pygments_style = 'sphinx'
 #keep_warnings = False
 
 
+katex_options = r'''{
+    displayMode: true,
+    macros: {
+        "\\eqdef": "\\overset{\\textrm{def}}{=}",
+        "\\M": "\\mathcal{M}",
+        "\\R": "\\mathcal{R}",
+        "\\X": "\\mathcal{X}",
+        "\\Y": "\\mathcal{Y}",
+        "\\Shape": "\\mathcal{S}",
+        "\\x": "\\mathbf{x}",
+        "\\y": "\\mathbf{y}",
+        "\\z": "\\mathbf{z}",
+        "\\bo": "\\mathbf{o}",
+        "\\bL": "\\mathbf{L}",
+        "\\bM": "\\mathbf{M}",
+        "\\bQ": "\\mathbf{Q}",
+        "\\bR": "\\mathbf{R}",
+        "\\bSigma": "\\mathbf{\\Sigma}",
+        "\\bT": "\\mathbf{T}"
+    }
+}'''
+
+
 # -- Options for HTML output ----------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
