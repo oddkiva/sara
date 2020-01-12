@@ -14,16 +14,27 @@
 #include <easyexif/exif.h>
 
 #include <DO/Sara/Defines.hpp>
+
 #include <DO/Sara/Core/Image.hpp>
 #include <DO/Sara/ImageProcessing/Flip.hpp>
 
+/*!
+ *  @ingroup ImageIOLib
+ *  @{
+ */
 
 DO_SARA_EXPORT
 std::ostream& operator<<(std::ostream& os, const EXIFInfo& exifInfo);
 
+//! @}
 
-namespace DO { namespace Sara {
 
+namespace DO::Sara {
+
+  /*!
+   *  @ingroup ImageIOLib
+   *  @{
+   */
   DO_SARA_EXPORT
   bool read_exif_info(EXIFInfo& exif_info, const std::string& file_path);
 
@@ -43,40 +54,41 @@ namespace DO { namespace Sara {
   };
 
   template <typename T>
-  void make_upright_from_exif(Image<T>& image, unsigned short exif_orientation_tag)
+  void make_upright_from_exif(Image<T>& image,
+                              unsigned short exif_orientation_tag)
   {
     switch (exif_orientation_tag)
     {
-    case Unspecified:           // 0
-    case Upright:               // 1
-    case Undefined:             // 9
+    case Unspecified:  // 0
+    case Upright:      // 1
+    case Undefined:    // 9
       break;
 
-    case FlippedHorizontally:   // 2
+    case FlippedHorizontally:  // 2
       flip_horizontally(image);
       break;
 
-    case RotatedCCW_180:        // 3
+    case RotatedCCW_180:  // 3
       rotate_ccw_180(image);
       break;
 
-    case FlippedVertically:     // 4
+    case FlippedVertically:  // 4
       flip_vertically(image);
       break;
 
-    case Transposed:            // 5
+    case Transposed:  // 5
       transpose(image);
       break;
 
-    case RotatedCCW_90:         // 6
+    case RotatedCCW_90:  // 6
       rotate_cw_90(image);
       break;
 
-    case Transversed:           // 7
+    case Transversed:  // 7
       transverse(image);
       break;
 
-    case RotatedCW_90:          // 8
+    case RotatedCW_90:  // 8
       rotate_ccw_90(image);
       break;
 
@@ -85,5 +97,6 @@ namespace DO { namespace Sara {
     }
   }
 
-} /* namespace Sara */
-} /* namespace DO */
+  //! @}
+
+}  // namespace DO::Sara

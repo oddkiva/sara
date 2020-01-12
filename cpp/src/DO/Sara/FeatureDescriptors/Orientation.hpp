@@ -28,18 +28,17 @@
 namespace DO { namespace Sara {
 
   /*!
-    @ingroup FeatureDesriptors
-    @defgroup Orientation Dominant Orientation Assignment
-    @{
+   *  @ingroup FeatureDescriptors
+   *  @defgroup Orientation Dominant Orientation Assignment
+   *  @{
   */
 
+  //! @brief Computes the image gradients of image \f$I\f$ in polar coordinates.
   /*!
-    @brief Computes the image gradients of image \f$I\f$ in polar coordinates.
-
-    In each pixel \f$(x,y) \in [0,w[ \times [0,h[\f$,
-    \f$\nabla I(x,y)\f$ is the 2D vector \f$(r,\theta)\f$ where:
-    - \f$r = 2 ||\nabla I(x,y)||\f$,
-    - \f$\theta = \mathrm{angle}( \nabla I(x,y) )\f$.
+      In each pixel \f$(x,y) \in [0,w[ \times [0,h[\f$,
+      \f$\nabla I(x,y)\f$ is the 2D vector \f$(r,\theta)\f$ where:
+      - \f$r = 2 ||\nabla I(x,y)||\f$,
+      - \f$\theta = \mathrm{angle}( \nabla I(x,y) )\f$.
    */
   template <typename T>
   Image<Matrix<T,2,1>> gradient_polar_coordinates(const ImageView<T>& f)
@@ -54,10 +53,8 @@ namespace DO { namespace Sara {
     return nabla_f;
   }
 
-  /*!
-    @brief Computes the image gradients in polar coordinates for each image in
-    the pyramid.
-   */
+  //! @brief Computes the image gradients in polar coordinates for each image in
+  //! the pyramid.
   template <typename T>
   ImagePyramid<Matrix<T, 2, 1>> gradient_polar_coordinates(const ImagePyramid<T>& pyramid)
   {
@@ -77,10 +74,8 @@ namespace DO { namespace Sara {
     return gradient_pyramid;
   }
 
-  /*!
-    @brief  Computes the orientation histogram on a local patch around keypoint
-    \f$(x,y,\sigma)\f$.
-   */
+  //! @brief Computes the orientation histogram on a local patch around keypoint
+  //! \f$(x,y,\sigma)\f$.
   template <typename T, int N>
   void compute_orientation_histogram(Array<T, N, 1>& orientation_histogram,
                                      const ImageView<Matrix<T,2,1>>& grad_polar_coords,
@@ -128,11 +123,11 @@ namespace DO { namespace Sara {
     }
   }
 
+  //! @brief This is used in [Lowe, IJCV 2004] to determine keypoint
+  //! orientations.
   /*!
-    @brief This is used in [Lowe, IJCV 2004] to determine keypoint orientations.
-
-    Basically, the histogram is convolved 6 times with the mean kernel
-    \f$[1/3, 1/3, 1/3]\f$.
+      Basically, the histogram is convolved 6 times with the mean kernel
+      \f$[1/3, 1/3, 1/3]\f$.
    */
   template <typename T, int N>
   void lowe_smooth_histogram(Array<T, N, 1>& orientation_histogram)
@@ -151,14 +146,13 @@ namespace DO { namespace Sara {
     }
   }
 
+  //! @brief This is used in [Lowe, IJCV 2004] to find histogram peaks.
   /*!
-    @brief  This is used in [Lowe, IJCV 2004] to find histogram peaks.
+      A histogram peak is by definition the index \f$i\f$ such that:
+      - \f$h_{i} > h_{i+1}\f$
+      - \f$h_{i} > h_{i-1}\f$
 
-    A histogram peak is by definition the index \f$i\f$ such that:
-    - \f$h_{i} > h_{i+1}\f$
-    - \f$h_{i} > h_{i-1}\f$
-
-    Only histogram peaks \f$i\f$ such that \f$h_i \geq 0.8 \max_j h_j\f$
+      Only histogram peaks \f$i\f$ such that \f$h_i \geq 0.8 \max_j h_j\f$
    */
   template <typename T, int N>
   std::vector<int> find_peaks(const Array<T, N, 1>& orientation_histogram,
@@ -175,10 +169,8 @@ namespace DO { namespace Sara {
     return orientation_peaks;
   }
 
-  /*!
-    @brief Refine peaks as in [Lowe, IJCV 2004] by interpolation based on a
-    second-order Taylor approximation.
-   */
+  //! @brief Refine peaks as in [Lowe, IJCV 2004] by interpolation based on a
+  //! second-order Taylor approximation.
   template <typename T, int N>
   T refine_peak(const Array<T, N, 1>& orientation_histogram, int i)
   {
@@ -211,7 +203,7 @@ namespace DO { namespace Sara {
     return oriT;
   }
 
-  //! @brief Basically a helper class.
+  //! @brief Helper class.
   class DO_SARA_EXPORT ComputeDominantOrientations
   {
   public:

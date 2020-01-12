@@ -18,6 +18,11 @@
 
 namespace DO { namespace Sara {
 
+  /*!
+   *  @ingroup ImageIOLib
+   *  @{
+   */
+
   namespace Detail {
 
     DO_SARA_EXPORT
@@ -74,6 +79,7 @@ namespace DO { namespace Sara {
   void imwrite(const Image<Rgb8>& image, const std::string& filepath,
                int quality = 85);
 
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

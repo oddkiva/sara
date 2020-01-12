@@ -15,4 +15,7 @@
 
 #include <DO/Sara/ImageIO/Database/ImageDataSet.hpp>
 
-//! @defgroup ImageIO Image I/O.
+/*!
+ *  @defgroup ImageIOLib  Image I/O
+ *  @brief Image I/O module
+ */
