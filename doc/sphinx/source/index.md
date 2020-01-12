@@ -19,6 +19,13 @@ Sara is licensed with the `Mozilla Public License version
 2.0 <https://github.com/DO-CV/DO-CV/raw/master/COPYING.MPL2>`_.
 
 
+The documentation chooses to emphasize more on the mathematical details to
+explain the implementation details. I believe that my API is most of the time
+straightforward enough. The audience I am targeting here is students, scientists
+or software developers who want to understand those kind of details in Computer
+Vision.
+
+
 Table of Contents
 -----------------
 .. toctree::
