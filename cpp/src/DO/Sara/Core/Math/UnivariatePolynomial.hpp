@@ -10,6 +10,10 @@
 
 namespace DO::Sara::Univariate {
 
+  //! @ingroup Core
+  //! @defgroup Math
+  //! @{
+
   template <typename Coeff>
   class UnivariatePolynomial
   {
@@ -273,5 +277,7 @@ namespace DO::Sara::Univariate {
   {
     return P / Q.to_polynomial<T>();
   }
+
+  //! @}
 
 } /* namespace DO::Sara::Univariate */

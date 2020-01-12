@@ -20,7 +20,7 @@
 
 namespace DO { namespace Sara {
 
-  //! @ingroup Image
+  //! @addtogroup Image
   //! @{
 
   //! @{
@@ -63,7 +63,7 @@ namespace DO { namespace Sara {
 // Generic color conversion of images.
 namespace DO { namespace Sara {
 
-  //! @ingroup Image
+  //! @addtogroup Image
   //! @{
 
   //! @brief Convert color of image.
@@ -92,7 +92,7 @@ namespace DO { namespace Sara {
 // Image rescaling functions.
 namespace DO { namespace Sara {
 
-  //! @ingroup Image
+  //! @addtogroup Image
   //! @{
 
   //! @{
@@ -205,6 +205,11 @@ namespace DO { namespace Sara {
 
 // Image crop functions.
 namespace DO { namespace Sara {
+
+  /*!
+   *  @addtogroup Image
+   *  @{
+   */
 
   //! @{
   //! @brief Crop an image unsafely without checking the domain range.
@@ -324,12 +329,19 @@ namespace DO { namespace Sara {
   };
   //! @}
 
+  //! @}
+
 } /* namespace Sara */
 } /* namespace DO */
 
 
 // Generic ND-Array crop functions.
 namespace DO { namespace Sara {
+
+  /*!
+   *  @addtogroup Image
+   *  @{
+   */
 
   template <typename DstArrayView, typename SrcArrayView>
   void crop(DstArrayView& dst, const SrcArrayView& src,
@@ -371,6 +383,7 @@ namespace DO { namespace Sara {
       *dst_i = *src_i;
   }
 
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

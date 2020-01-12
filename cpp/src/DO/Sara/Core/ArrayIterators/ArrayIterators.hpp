@@ -19,13 +19,16 @@
 
 namespace DO { namespace Sara {
 
-  //! @ingroup Core
-  //! @defgroup MultiArrayIterators ND-array iterator classes.
-  //! @{
+  /*!
+   *  @ingroup Core
+   *
+   *  @defgroup MultiArrayIterators ND-array Iterator Classes
+   *  @{
+   *
+   */
 
-
   //! @{
-  //! MultiArray iterator classes.
+  //! @brief MultiArray iterator classes.
   template <bool IsConst, typename T, int N, int StorageOrder>
   class ArrayIteratorBase;
 
@@ -39,8 +42,11 @@ namespace DO { namespace Sara {
   class AxisIterator;
   //! @}
 
-  //! @brief Iterator helper class to replace std::iterator as it is marked as
-  //! deprecated by VS2017 when compiling in C++17.
+  //! @brief Iterator helper class.
+  /*!
+   *  The reason of being of this class is to replace std::iterator as it is
+   *  marked as deprecated by VS2017 when compiling C++17.
+   */
   template <class Category, class T, class Distance = std::ptrdiff_t,
             class Pointer = T*, class Reference = T&>
   struct IteratorHelper
@@ -53,7 +59,7 @@ namespace DO { namespace Sara {
   };
 
   //! @{
-  //! Convenient typedefs.
+  //! Convenient aliases.
 #define ITERATOR_BASE_TYPE(IsConst)                                            \
   IteratorHelper<std::random_access_iterator_tag, T, std::ptrdiff_t,           \
                  std::conditional_t<IsConst, const T*, T*>,                    \
@@ -221,9 +227,11 @@ namespace DO { namespace Sara {
 
 
   //! @brief Multidimensional iterator base class.
-  //! The 'ArrayIteratorBase' class is a heavy object. It is mostly useful
-  //! for differential calculus. When possible, prefer using more elementary
-  //! iterator instead.
+  /*!
+   *  The 'ArrayIteratorBase' class is a heavy object. It is mostly useful for
+   *  differential calculus. When possible, prefer using more elementary
+   *  iterator instead.
+   */
   template <bool IsConst, typename T, int N, int StorageOrder>
   class ArrayIteratorBase : public ITERATOR_BASE_TYPE(IsConst)
   {
@@ -418,9 +426,11 @@ namespace DO { namespace Sara {
 
 
   //! @brief Multidimensional iterator class.
-  //! The 'ArrayIterator' class is a heavy object. It is mostly useful for
-  //! differential calculus. When possible, prefer using more elementary
-  //! iterator instead.
+  /*!
+   *  The 'ArrayIterator' class is a heavy object. It is mostly useful for
+   *  differential calculus. When possible, prefer using more elementary
+   *  iterator instead.
+   */
   template <bool IsConst, typename T, int N, int StorageOrder>
   class ArrayIterator : public ArrayIteratorBase<IsConst, T, N, StorageOrder>
   {
@@ -504,9 +514,11 @@ namespace DO { namespace Sara {
 
 
   //! @brief Multidimensional iterator base class.
-  //! The 'SubarrayIterator' class is a heavy object. It is mostly useful for
-  //! differential calculus. When possible, prefer using more elementary
-  //! iterator instead.
+  /*!
+   *  The 'SubarrayIterator' class is a heavy object. It is mostly useful for
+   *  differential calculus. When possible, prefer using more elementary
+   *  iterator instead.
+   */
   template <bool IsConst, typename T, int N, int StorageOrder = ColMajor>
   class SubarrayIterator : public ArrayIteratorBase<IsConst, T, N, StorageOrder>
   {
@@ -601,6 +613,7 @@ namespace DO { namespace Sara {
     vector_type end_pos_;
   };
 
+  //! @brief Stepped subarray iterator class.
   template <bool IsConst, typename T, int N, int StorageOrder = ColMajor>
   class SteppedSubarrayIterator
     : public ArrayIteratorBase<IsConst, T, N, StorageOrder>
@@ -721,6 +734,7 @@ namespace DO { namespace Sara {
     vector_type end_pos_;
     vector_type steps_;
   };
+
   //! @}
 
 } /* namespace Sara */

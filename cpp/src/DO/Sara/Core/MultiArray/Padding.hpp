@@ -19,7 +19,7 @@
 namespace DO { namespace Sara {
 
   /*!
-   *  @ingroup MultiArray
+   *  @addtogroup MultiArray
    *  @{
    */
 

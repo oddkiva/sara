@@ -20,7 +20,8 @@
 namespace DO { namespace Sara {
 
   /*!
-   *  @ingroup MultiArray
+   *  @addtogroup MultiArray
+   *  @{
    */
 
   //! @brief The multidimensional array class.

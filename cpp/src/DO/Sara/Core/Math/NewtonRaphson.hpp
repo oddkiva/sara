@@ -5,6 +5,9 @@
 
 namespace DO::Sara::Univariate {
 
+  //! @addtogroup Math
+  //! @{
+
   template <typename T>
   inline auto derivative(const UnivariatePolynomial<T>& P)
       -> UnivariatePolynomial<T>
@@ -42,5 +45,7 @@ namespace DO::Sara::Univariate {
     const UnivariatePolynomial<T>& p;
     UnivariatePolynomial<T> p_prime;
   };
+
+  //! @}
 
 } /* namespace DO::Sara::Univariate */
