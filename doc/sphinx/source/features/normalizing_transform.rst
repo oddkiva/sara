@@ -12,12 +12,13 @@ Let us remark the following proposition which relates the normalizing transform
    Let :math:`L` be an invertible linear transformation in :math:`\mathbb{R}^2`
    whose matrix is denoted by :math:`\bL`.  For any point :math:`\x` in the
    zero-centered unit circle in :math:`\mathbb{R}^2`, its transformed point by
-   :math:`L` is in the ellipse defined by 
+   :math:`L` is in the ellipse defined by
 
    .. math::
 
-      \left\{ \z \in \mathbb{R}^{2} | \z^T (\bL^{T})^{-1} \bL^{-1} \z = 1
-      \right\}`
+      \left\{
+      \z \in \mathbb{R}^{2} | \z^T (\bL^{T})^{-1} \bL^{-1} \z = 1
+      \right\}
 
 
 .. note::
@@ -27,23 +28,23 @@ Let us remark the following proposition which relates the normalizing transform
    Fix a point :math:`\begin{bmatrix} \cos(t) \\ \sin(t) \end{bmatrix}` of
    the unit circle in :math:`\mathbb{R}^2`. We write its transformed point
    by :math:`L` as
-   
+
    .. math::
-   
+
       \begin{bmatrix} u \\ v \end{bmatrix} = \bL \begin{bmatrix} \cos(t) \\ \sin(t) \end{bmatrix}.
-   
+
    Since :math:`\bL` is invertible
-   
+
    .. math:: \bL^{-1} \begin{bmatrix} u \\ v \end{bmatrix} = \begin{bmatrix} \cos(t) \\ \sin(t) \end{bmatrix}
-   
+
    The squared Euclidean norm of the equality yields
-   
+
    .. math::
-   
+
       \begin{bmatrix} u & v \end{bmatrix} (\bL^{-1})^T \bL^{-1} \begin{bmatrix} u \\ v \end{bmatrix} = \begin{bmatrix} \cos(t) & \sin(t) \end{bmatrix} \begin{bmatrix} \cos(t) \\ \sin(t) \end{bmatrix} = 1
-   
+
    We recognize the equation of an ellipse, which concludes the proof of
-   proposition `[eq:lin_transform] <#eq:lin_transform>`__.
+   proposition.
 
 
 Geometric interpretation of the QR factorization
@@ -91,7 +92,7 @@ we have
    \cos(\theta_x) & -\sin(\theta_x) \\
    \sin(\theta_x) &  \cos(\theta_x)
    \end{bmatrix}
-   
+
 and expanding Equation :eq:`eq-sigma_l` yields
 
 .. math::
@@ -121,29 +122,29 @@ The algorithm below summarizes how to compute :math:`\bT_x`.
 .. important::
 
    - Calculate the angle
-   
+
      .. math::
-   
+
         \theta_x :=
         \mathrm{atan2}\left(
         \left\langle \bo_x, \begin{bmatrix}0\\1\end{bmatrix}\right\rangle,
         \left\langle \bo_x, \begin{bmatrix}1\\0\end{bmatrix}\right\rangle
         \right)
-           
+
    - Form the rotation matrix
-     
-     .. math:: 
-   
-        \bQ := \begin{bmatrix} 
+
+     .. math::
+
+        \bQ := \begin{bmatrix}
         \cos(\theta_x) & -\sin(\theta_x) \\
         \sin(\theta_x) &  \cos(\theta_x)
         \end{bmatrix}
-   
+
    - Decompose the ellipse matrix
      :math:`\bM := \mathrm{Cholesky}(\bQ^T \bSigma_x \bQ)`
-   
+
    - :math:`\bM` is a lower triangular matrix such that
-   
+
      - :math:`\bM \bM^T = \bQ^T \bSigma_x \bQ`
      - :math:`\bR := (\bM^T)^{-1}`
      - :math:`\bL := \bQ \bR`
