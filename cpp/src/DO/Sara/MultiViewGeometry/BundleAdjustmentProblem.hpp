@@ -20,7 +20,7 @@
 namespace DO::Sara {
 
   /*!
-   *  @ingroup MultiViewGeometry
+   *  @addtogroup MultiViewGeometry
    *  @{
    */
 
