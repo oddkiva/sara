@@ -26,10 +26,21 @@
 using namespace std;
 using namespace DO::Sara;
 
+struct TestData
+{
+  MatrixXd X;
 
-BOOST_AUTO_TEST_SUITE(TestMultiViewGeometry)
+  Matrix3d R;
+  Vector3d t;
+  EssentialMatrix E;
 
-auto generate_test_data()
+  Matrix34d C1;
+  Matrix34d C2;
+
+  MatrixXd u1, u2;
+};
+
+auto generate_test_data() -> TestData
 {
   // 3D points.
   MatrixXd X(4, 5);  // coefficients are in [-1, 1].
@@ -50,13 +61,18 @@ auto generate_test_data()
   MatrixXd x1 = C1 * X; x1.array().rowwise() /= x1.row(2).array();
   MatrixXd x2 = C2 * X; x2.array().rowwise() /= x2.row(2).array();
 
-  return std::make_tuple(X, R, t, E, C1, C2, x1, x2);
+  return {X, R, t, E, C1, C2, x1, x2};
 }
+
+BOOST_AUTO_TEST_SUITE(TestMultiViewGeometry)
 
 
 BOOST_AUTO_TEST_CASE(test_relative_pose_estimator)
 {
-  const auto [X, R, t, E, C1, C2, u1, u2] = generate_test_data();
+  // const auto [X, R, t, E, C1, C2, u1, u2] = generate_test_data();
+  const auto test_data = generate_test_data();
+  const auto& u1 = test_data.u1;
+  const auto& u2 = test_data.u2;
 
   const auto motions1 =
       RelativePoseEstimator<NisterFivePointAlgorithm>{}(u1, u2);

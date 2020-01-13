@@ -12,6 +12,11 @@
 //! @file
 //! @brief Master header file of the SfM module.
 
+#pragma once
+
+#include <DO/Sara/SfM/BuildingBlocks.hpp>
+#include <DO/Sara/SfM/Detectors/SIFT.hpp>
+
 /*!
  *  @defgroup SfM Structure-from-Motion Building Blocks
  */

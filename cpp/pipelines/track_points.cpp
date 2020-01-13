@@ -26,10 +26,8 @@ namespace po = boost::program_options;
 using namespace DO::Sara;
 
 
-auto track_points(const std::string& dirpath,
-                  const std::string& h5_filepath,
-                  bool overwrite,
-                  bool debug)
+auto track_points(const std::string& dirpath, const std::string& h5_filepath,
+                  bool /* overwrite */, bool /* debug */)
 {
   // Create a backup.
   if (!fs::exists(h5_filepath + ".bak"))

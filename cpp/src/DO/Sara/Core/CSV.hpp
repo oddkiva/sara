@@ -10,6 +10,7 @@
 
 namespace DO::Sara {
 
+  //! @ingroup Core
   //! @defgroup CSV
   //! @{
 

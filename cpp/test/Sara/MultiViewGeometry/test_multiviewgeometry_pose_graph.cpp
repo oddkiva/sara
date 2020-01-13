@@ -36,6 +36,9 @@ BOOST_AUTO_TEST_CASE(test_read_write_pose_graph_to_hdf5)
   auto [e0, b0] = boost::add_edge(v0, v5, graph);
   auto [e1, b1] = boost::add_edge(v1, v3, graph);
 
+  (void) b0;
+  (void) b1;
+
   graph[e0].id = 0;
   graph[e0].weight = 6;
 
