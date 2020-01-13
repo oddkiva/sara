@@ -21,7 +21,7 @@
 namespace DO { namespace Sara {
 
   /*!
-    @ingroup Features
+    @addtogroup Features
     @{
   */
   inline auto draw_oe_regions(const OERegion* begin, const OERegion* end,

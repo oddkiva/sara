@@ -18,6 +18,9 @@
 
 namespace DO { namespace Sara {
 
+  //! @addtogroup GeometryObjects
+  //! @{
+
   class Sphere
   {
     Point3d _c;
@@ -44,6 +47,8 @@ namespace DO { namespace Sara {
       return (x - _c).squaredNorm() < _r*_r;
     }
   };
+
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

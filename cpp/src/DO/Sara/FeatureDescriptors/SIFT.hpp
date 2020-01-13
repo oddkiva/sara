@@ -29,8 +29,7 @@
 namespace DO { namespace Sara {
 
   /*!
-    @ingroup FeatureDescriptors
-    @defgroup Descriptors
+    @addtogroup FeatureDescriptors
     @{
    */
 

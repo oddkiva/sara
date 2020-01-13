@@ -21,6 +21,9 @@
 
 namespace DO { namespace Sara {
 
+  //! @addtogroup GeometryAlgorithms
+  //! @{
+
   namespace detail {
 
     DO_SARA_EXPORT
@@ -32,6 +35,8 @@ namespace DO { namespace Sara {
   DO_SARA_EXPORT
   std::vector<Point2d> ramer_douglas_peucker(std::vector<Point2d> contours,
                                              double eps);
+
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

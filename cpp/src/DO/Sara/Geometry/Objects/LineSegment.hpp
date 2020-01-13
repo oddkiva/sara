@@ -18,6 +18,9 @@
 
 namespace DO { namespace Sara {
 
+  //! @addtogroup GeometryObjects
+  //! @{
+
   class LineSegment : private std::pair<Point2d, Point2d>
   {
   public:
@@ -62,6 +65,8 @@ namespace DO { namespace Sara {
     'p' is the intersection point if it exists.
    */
   bool intersection(const LineSegment& s1, const LineSegment& s2, Point2d& p);
+
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

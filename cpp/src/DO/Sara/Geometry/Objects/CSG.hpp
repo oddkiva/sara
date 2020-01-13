@@ -16,6 +16,9 @@
 
 namespace DO { namespace Sara { namespace CSG {
 
+  //! @addtogroup GeometryObjects
+  //! @{
+
   class Object
   {
   public:
@@ -117,6 +120,8 @@ namespace DO { namespace Sara { namespace CSG {
   {
     return Union(&o1, &o2);
   }
+
+  //! @}
 
 } /* namespace CSG */
 } /* namespace Sara */

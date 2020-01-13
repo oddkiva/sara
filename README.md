@@ -42,11 +42,13 @@ Documentation
 I don't have much time to maintain the documentation. **I'd love your help**.
 
 What I can easily do is to keep up-to-date the reference documentation
-[here](http://do-cv.github.io/sara/). There is also some more friendly
-documentation on at the [readthedocs.org](https://readthedocs.org/) but it is
-not up-to-date.
+[here](http://do-cv.github.io/sara/).
 
-Honestly you will be much better off consulting the [examples
+I also write documentation at the
+[readthedocs.org](https://sara-github.readthedocs.org/) where I provide more
+mathematical details about my implementations.
+
+In any case you are always better off consulting the [examples
 folder](https://github.com/DO-CV/sara/tree/master/cpp/examples) and the [test
 folder](https://github.com/DO-CV/sara/tree/master/cpp/test).
 
