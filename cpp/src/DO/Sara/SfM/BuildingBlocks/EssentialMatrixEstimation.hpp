@@ -17,30 +17,35 @@
 
 namespace DO::Sara {
 
-//! @{
-//! @brief Essential matrix estimation.
-DO_SARA_EXPORT
-auto estimate_essential_matrix(
-    const std::vector<Match>& Mij,
-    const KeypointList<OERegion, float>& ki,
-    const KeypointList<OERegion, float>& kj,
-    const Eigen::Matrix3d& Ki_inv, const Eigen::Matrix3d& Kj_inv,
-    int num_samples, double err_thres)
-  -> std::tuple<EssentialMatrix, Tensor_<bool, 1>, Tensor_<int, 1>>;
+  //! @addtogroup SfM
+  //! @{
 
-DO_SARA_EXPORT
-auto estimate_essential_matrices(const std::string& dirpath,      //
-                                 const std::string& h5_filepath,  //
-                                 int num_samples,                 //
-                                 double noise,                    //
-                                 int min_F_inliers,               //
-                                 bool overwrite, bool debug,
-                                 bool wait_key = false) -> void;
+  //! @{
+  //! @brief Essential matrix estimation.
+  DO_SARA_EXPORT
+  auto estimate_essential_matrix(const std::vector<Match>& Mij,
+                                 const KeypointList<OERegion, float>& ki,
+                                 const KeypointList<OERegion, float>& kj,
+                                 const Eigen::Matrix3d& Ki_inv,
+                                 const Eigen::Matrix3d& Kj_inv, int num_samples,
+                                 double err_thres)
+      -> std::tuple<EssentialMatrix, Tensor_<bool, 1>, Tensor_<int, 1>>;
 
-DO_SARA_EXPORT
-auto inspect_essential_matrices(const std::string& dirpath,
-                                const std::string& h5_filepath,
-                                int display_step, bool wait_key) -> void;
-//! @}
+  DO_SARA_EXPORT
+  auto estimate_essential_matrices(const std::string& dirpath,      //
+                                   const std::string& h5_filepath,  //
+                                   int num_samples,                 //
+                                   double noise,                    //
+                                   int min_F_inliers,               //
+                                   bool overwrite, bool debug,
+                                   bool wait_key = false) -> void;
+
+  DO_SARA_EXPORT
+  auto inspect_essential_matrices(const std::string& dirpath,
+                                  const std::string& h5_filepath,
+                                  int display_step, bool wait_key) -> void;
+  //! @}
+
+  //! @}
 
 } /* namespace DO::Sara */

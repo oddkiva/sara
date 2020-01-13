@@ -17,16 +17,21 @@
 
 namespace DO::Sara {
 
-//! @{
-//! @brief Keypoint matching.
-DO_SARA_EXPORT
-auto match(const KeypointList<OERegion, float>& keys1,
-           const KeypointList<OERegion, float>& keys2, float lowe_ratio = 0.6f)
-    -> std::vector<Match>;
+  //! @addtogroup SfM
+  //! @{
 
-DO_SARA_EXPORT
-auto match_keypoints(const std::string& dirpath, const std::string& h5_filepath,
-                     bool overwrite) -> void;
-//! @}
+  //! @{
+  //! @brief Keypoint matching.
+  DO_SARA_EXPORT
+  auto match(const KeypointList<OERegion, float>& keys1,
+             const KeypointList<OERegion, float>& keys2,
+             float lowe_ratio = 0.6f) -> std::vector<Match>;
+
+  DO_SARA_EXPORT
+  auto match_keypoints(const std::string& dirpath,
+                       const std::string& h5_filepath, bool overwrite) -> void;
+  //! @}
+
+  //! @}
 
 } /* namespace DO::Sara */

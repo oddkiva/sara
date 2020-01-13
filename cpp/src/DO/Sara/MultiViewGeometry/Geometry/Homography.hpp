@@ -8,6 +8,9 @@
 
 namespace DO { namespace Sara {
 
+  //! @addtogroup MultiViewGeometry
+  //! @{
+
   class Homography
   {
   public:
@@ -49,6 +52,8 @@ namespace DO { namespace Sara {
 
   DO_SARA_EXPORT
   std::ostream& operator<<(std::ostream&, const Homography&);
+
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

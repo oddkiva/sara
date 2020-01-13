@@ -19,8 +19,13 @@
 
 namespace DO::Sara {
 
-DO_SARA_EXPORT
-auto compute_sift_keypoints(const ImageView<float>& image)
-    -> KeypointList<OERegion, float>;
+  //! @addtogroup SfM Structure-from-Motion Building Blocks
+  //! @{
+
+  DO_SARA_EXPORT
+  auto compute_sift_keypoints(const ImageView<float>& image)
+      -> KeypointList<OERegion, float>;
+
+  //! @}
 
 } /* namespace DO::Sara */

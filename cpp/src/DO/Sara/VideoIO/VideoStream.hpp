@@ -24,6 +24,9 @@ struct AVFrame;
 
 namespace DO { namespace Sara {
 
+  //! @defgroup VideoIO Video I/O
+  //! @{
+
   class DO_SARA_EXPORT VideoStream : public std::streambuf
   {
   public:
@@ -72,6 +75,8 @@ namespace DO { namespace Sara {
     AVFrame *_video_frame = nullptr;
     size_t _video_frame_pos = std::numeric_limits<size_t>::max();
   };
+
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

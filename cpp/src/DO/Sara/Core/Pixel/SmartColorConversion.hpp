@@ -18,6 +18,9 @@
 #include <DO/Sara/Core/Pixel/ColorConversion.hpp>
 
 
+//! @addtogroup Color
+//! @{
+
 // Smart color conversion between colorspace regardless of the channel type.
 // We will treat the grayscale conversion separately.
 namespace DO { namespace Sara {
@@ -303,3 +306,5 @@ namespace DO { namespace Sara {
 
 } /* namespace Sara */
 } /* namespace DO */
+
+//! @}

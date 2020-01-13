@@ -20,6 +20,9 @@
 
 namespace DO { namespace Sara {
 
+  //! @addtogroup ImageIO
+  //! @{
+
   namespace details {
     template <typename Out>
     void split(const std::string& s, char delim, Out result)
@@ -262,6 +265,8 @@ namespace DO { namespace Sara {
   DO_SARA_EXPORT
   void write_to_csv(const ImageSegmentationTrainingDataSet& data_set,
                     const std::string& csv_filepath);
+
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

@@ -22,6 +22,9 @@
 // Pixel data structures.
 namespace DO { namespace Sara {
 
+  //! @addtogroup Color
+  //! @{
+
   //! @brief 3D packed pixel.
   template <typename _BitField, int _Sz0, int _Sz1, int _Sz2>
   struct PackedPixelBase_3
@@ -237,6 +240,7 @@ namespace DO { namespace Sara {
     }
   };
 
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

@@ -22,6 +22,9 @@
 
 namespace DO { namespace Sara {
 
+  //! @addtogroup ImageIO
+  //! @{
+
   //! @brief Iterator class for image dataset.
   template <typename _Image>
   class ImageDataSetIterator;
@@ -160,6 +163,7 @@ namespace DO { namespace Sara {
     container_type _image_filepaths;
   };
 
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

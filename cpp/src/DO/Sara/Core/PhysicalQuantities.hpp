@@ -13,6 +13,10 @@
 
 namespace DO::Sara {
 
+  //! @ingroup Core
+  //! @defgroup Physics Physics
+  //! @{
+
   //! @brief Generic physical quantity
   template <typename T, typename... Q>
   struct QuantityBase
@@ -345,11 +349,16 @@ namespace DO::Sara {
     return {v * degree.value};
   }
 
+  //! @} Physics
+
 }  // namespace DO::Sara
 
 
 // Computer vision units.
 namespace DO::Sara {
+
+  //! @addtogroup Physics
+  //! @{
 
   // Image quantities.
   MAKE_DIMENSIONLESS_QUANTITY(PixelUnit);

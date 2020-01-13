@@ -19,22 +19,16 @@
 #include <DO/Sara/ImageProcessing/Flip.hpp>
 
 /*!
- *  @ingroup ImageIOLib
+ *  @addtogroup ImageIO
  *  @{
  */
 
 DO_SARA_EXPORT
 std::ostream& operator<<(std::ostream& os, const EXIFInfo& exifInfo);
 
-//! @}
-
 
 namespace DO::Sara {
 
-  /*!
-   *  @ingroup ImageIOLib
-   *  @{
-   */
   DO_SARA_EXPORT
   bool read_exif_info(EXIFInfo& exif_info, const std::string& file_path);
 
@@ -97,6 +91,6 @@ namespace DO::Sara {
     }
   }
 
-  //! @}
-
 }  // namespace DO::Sara
+
+//! @}

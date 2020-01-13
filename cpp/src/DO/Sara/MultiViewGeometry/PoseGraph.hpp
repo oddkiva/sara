@@ -24,32 +24,38 @@
 
 namespace DO::Sara {
 
-//! @{
-//! @brief Pose graph data structures.
-struct PoseID
-{
-  double weight{0};
-};
+  //! @addtogroup MultiViewGeometry
+  //! @{
 
-struct EpipolarEdgeID
-{
-  int id{-1};
-  double weight{0};
-};
+  //! @{
+  //! @brief Pose graph data structures.
+  struct PoseID
+  {
+    double weight{0};
+  };
 
-using PoseGraph =
-    boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS, PoseID,
-                          EpipolarEdgeID>;
-//! @}
+  struct EpipolarEdgeID
+  {
+    int id{-1};
+    double weight{0};
+  };
+
+  using PoseGraph =
+      boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS,
+                            PoseID, EpipolarEdgeID>;
+  //! @}
 
 
-//! @brief write feature graph to HDF5.
-DO_SARA_EXPORT
-auto write_pose_graph(const PoseGraph& graph, H5File& file,
-                      const std::string& group_name) -> void;
+  //! @brief write feature graph to HDF5.
+  DO_SARA_EXPORT
+  auto write_pose_graph(const PoseGraph& graph, H5File& file,
+                        const std::string& group_name) -> void;
 
-//! @brief read feature graph from HDF5.
-DO_SARA_EXPORT
-auto read_pose_graph(H5File& file, const std::string& group_name) -> PoseGraph;
+  //! @brief read feature graph from HDF5.
+  DO_SARA_EXPORT
+  auto read_pose_graph(H5File& file, const std::string& group_name)
+      -> PoseGraph;
+
+  //! @}
 
 } /* namespace DO::Sara */

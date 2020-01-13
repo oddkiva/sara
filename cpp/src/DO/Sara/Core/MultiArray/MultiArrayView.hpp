@@ -25,14 +25,11 @@ namespace DO { namespace Sara {
 
   /*!
    *  @ingroup Core
-   *  @defgroup MultiArray MultiArray or Tensors
+   *  @defgroup MultiArray MultiArray/Tensors Classes
    *
    *  @{
-   *  @ingroup MultiArray
-   *
    */
 
-  //! @brief Forward declaration of the multi-dimensional array classes.
   template <typename T, int N, int StorageOrder = ColMajor>
   class MultiArrayView;
 
@@ -43,7 +40,6 @@ namespace DO { namespace Sara {
             template <typename> class Allocator = std::allocator>
   using MultiArray =
       MultiArrayBase<MultiArrayView<T, N, StorageOrder>, Allocator>;
-  //! @}
 
 
   //! @brief Multiarray view class.

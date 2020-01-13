@@ -18,6 +18,9 @@
 
 namespace DO::Sara {
 
+  //! @addtogroup MultiViewGeometry
+  //! @{
+
   //! @brief Functor evaluating distance of a point to its epipolar line.
   struct EpipolarDistance
   {
@@ -112,5 +115,7 @@ namespace DO::Sara {
       return epipolar_consistent && cheirality;
     }
   };
+
+  //! @}
 
 } /* namespace DO::Sara */

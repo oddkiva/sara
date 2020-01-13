@@ -21,6 +21,9 @@
 
 namespace DO::Sara {
 
+  //! @addtogroup MultiViewGeometry
+  //! @{
+
   struct DO_SARA_EXPORT EightPointAlgorithm
   {
     using model_type = FundamentalMatrix;
@@ -40,5 +43,7 @@ namespace DO::Sara {
       return this->operator()(x_view, y_view);
     }
   };
+
+  //! @}
 
 } /* namespace DO::Sara */
