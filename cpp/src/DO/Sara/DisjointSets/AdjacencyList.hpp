@@ -20,6 +20,9 @@
 
 namespace DO { namespace Sara {
 
+  //! @addtogroup DisjointSets
+  //! @{
+
   //! @brief Adjacency list.
   class AdjacencyList
   {
@@ -73,6 +76,7 @@ namespace DO { namespace Sara {
   std::vector<std::vector<std::size_t>>
   compute_adjacency_list_2d(const ImageView<int>& labels);
 
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

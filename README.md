@@ -11,6 +11,8 @@ Sara: C++ Computer Vision Library
 <a href="https://ci.appveyor.com/project/do-cv/sara"><img src="https://ci.appveyor.com/api/projects/status/github/do-cv/sara?branch=master&svg=true" alt="Build Status: Windows" /></a>
 [![Coverage Status](https://coveralls.io/repos/DO-CV/sara/badge.svg?branch=master)](https://coveralls.io/r/DO-CV/sara?branch=master)
 [![License](https://img.shields.io/badge/license-MPL2-blue.svg)](LICENSE)
+[![Read the Docs Documentation](https://readthedocs.org/projects/sara-github/badge/?version=latest)](https://sara-github.readthedocs.io/en/latest/?badge=latest)
+[![Codedocs Reference API Documentation](https://codedocs.xyz/DO-CV/sara.svg)](https://codedocs.xyz/DO-CV/sara/)
 
 *Sara* (सार) is a Sanskrit word meaning *essence*.
 
@@ -41,12 +43,14 @@ Documentation
 
 I don't have much time to maintain the documentation. **I'd love your help**.
 
-What I can easily do is to keep up-to-date the reference documentation
-[here](http://do-cv.github.io/sara/). There is also some more friendly
-documentation on at the [readthedocs.org](https://readthedocs.org/) but it is
-not up-to-date.
+What I can easily do is to keep up-to-date the [reference API
+documentation](https://codedocs.xyz/DO-CV/sara/) hosted in **codedocs.xyz**.
 
-Honestly you will be much better off consulting the [examples
+I also write [documentation](https://sara-github.readthedocs.org/) at
+**readthedocs.org** where I provide more mathematical details about my
+implementations.
+
+In any case you are always better off consulting the [examples
 folder](https://github.com/DO-CV/sara/tree/master/cpp/examples) and the [test
 folder](https://github.com/DO-CV/sara/tree/master/cpp/test).
 

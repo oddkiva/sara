@@ -12,6 +12,11 @@ file(GLOB test_core_SOURCE_FILES FILES *.cpp)
 
 foreach (file ${test_core_SOURCE_FILES})
   get_filename_component(filename "${file}" NAME_WE)
+
+  if (${filename} STREQUAL "test_core_expression")
+    continue ()
+  endif ()
+
   sara_add_test(${filename} ${file} "${DO_Sara_LIBRARIES}" ${TestGroupName})
 endforeach ()
 

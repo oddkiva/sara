@@ -308,7 +308,7 @@ namespace DO { namespace Sara {
   }
 
   std::vector<Point2d>
-  approximage_intersection(const Ellipse& e1, const Ellipse& e2, int n)
+  approximate_intersection(const Ellipse& e1, const Ellipse& e2, int n)
   {
     std::vector<Point2d> p1(discretize_ellipse(e1,n));
     std::vector<Point2d> p2(discretize_ellipse(e2,n));
@@ -321,10 +321,8 @@ namespace DO { namespace Sara {
   }
 
   double approximate_jaccard_similarity(const Ellipse& e1, const Ellipse& e2,
-                                        int n, double limit)
+                                        int n, double /* limit */)
   {
-    (void) limit;
-
     std::vector<Point2d> p1(discretize_ellipse(e1,n));
     std::vector<Point2d> p2(discretize_ellipse(e2,n));
     std::vector<Point2d> inter;

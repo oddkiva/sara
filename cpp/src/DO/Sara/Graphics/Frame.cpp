@@ -12,7 +12,7 @@
 #include <DO/Sara/Graphics/Frame.hpp>
 
 
-namespace GLObject {
+namespace DO::Sara::GL {
 
   Frame::Frame()
   {

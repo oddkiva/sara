@@ -19,6 +19,9 @@
 
 namespace DO { namespace Sara {
 
+  //! @addtogroup GeometryObjects
+  //! @{
+
   template <int N>
   class Cone
   {
@@ -133,6 +136,7 @@ namespace DO { namespace Sara {
   DO_SARA_EXPORT
   AffineCone2 affine_cone2(double theta0, double theta1, const Point2d& vertex);
 
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

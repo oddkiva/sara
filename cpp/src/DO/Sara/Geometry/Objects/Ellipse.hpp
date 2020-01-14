@@ -24,7 +24,10 @@
 
 namespace DO { namespace Sara {
 
-  //! Ellipse class
+  //! @addtogroup GeometryObjects
+  //! @{
+
+  //! @brief Ellipse class
   class DO_SARA_EXPORT Ellipse
   {
   public:
@@ -138,6 +141,8 @@ namespace DO { namespace Sara {
   DO_SARA_EXPORT
   Ellipse construct_from_shape_matrix(const Matrix2d& shape_matrix,
                                       const Point2d& c);
+
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

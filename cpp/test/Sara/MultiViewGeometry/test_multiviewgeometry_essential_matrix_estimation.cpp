@@ -282,7 +282,21 @@ BOOST_AUTO_TEST_CASE(test_skew_symmetric_matrix)
 }
 
 
-auto generate_test_data()
+struct TestData
+{
+  MatrixXd X;
+
+  Matrix3d R;
+  Vector3d t;
+  EssentialMatrix E;
+
+  Matrix34d C1;
+  Matrix34d C2;
+
+  MatrixXd u1, u2;
+};
+
+auto generate_test_data() -> TestData
 {
   // 3D points.
   MatrixXd X(4, 5);  // coefficients are in [-1, 1].
@@ -303,16 +317,15 @@ auto generate_test_data()
   MatrixXd x1 = C1 * X; x1.array().rowwise() /= x1.row(2).array();
   MatrixXd x2 = C2 * X; x2.array().rowwise() /= x2.row(2).array();
 
-  return std::make_tuple(X, R, t, E, C1, C2, x1, x2);
+  return {X, R, t, E, C1, C2, x1, x2};
 }
 
 
 BOOST_AUTO_TEST_CASE(test_null_space_extraction)
 {
-  auto [X, R, t, E, C1, C2, x1, x2] = generate_test_data();
-  //SARA_DEBUG << "3D points = \n" << X << endl;
-  //SARA_DEBUG << "Left points = \n" << x1 << endl;
-  //SARA_DEBUG << "Right points = \n" << x2 << endl;
+  const auto test_data = generate_test_data();
+  const auto& x1 = test_data.u1;
+  const auto& x2 = test_data.u2;
 
   auto solver = NisterFivePointAlgorithm{};
 
@@ -333,7 +346,9 @@ BOOST_AUTO_TEST_CASE(test_null_space_extraction)
 
 BOOST_AUTO_TEST_CASE(test_nister_five_point_algorithm)
 {
-  const auto [X, R, t, E, C1, C2, x1, x2] = generate_test_data();
+  const auto test_data = generate_test_data();
+  const auto& x1 = test_data.u1;
+  const auto& x2 = test_data.u2;
 
   auto solver = NisterFivePointAlgorithm{};
 
@@ -376,7 +391,9 @@ BOOST_AUTO_TEST_CASE(test_nister_five_point_algorithm)
 
 BOOST_AUTO_TEST_CASE(test_stewenius_five_point_algorithm)
 {
-  const auto [X, R, t, E, C1, C2, x1, x2] = generate_test_data();
+  const auto test_data = generate_test_data();
+  const auto& x1 = test_data.u1;
+  const auto& x2 = test_data.u2;
 
   auto solver = SteweniusFivePointAlgorithm{};
 
@@ -421,6 +438,8 @@ BOOST_AUTO_TEST_CASE(test_stewenius_five_point_algorithm)
 BOOST_AUTO_TEST_CASE(test_extract_relative_motions_functions)
 {
   const auto [X, R, t, E, C1, C2, x1, x2] = generate_test_data();
+  (void) C1;
+  (void) C2;
 
   const auto true_motion = Motion{R, t};
   const double thres = 1e-12;

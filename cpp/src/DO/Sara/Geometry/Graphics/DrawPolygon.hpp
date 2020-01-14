@@ -23,6 +23,9 @@
 
 namespace DO { namespace Sara {
 
+  //! @addtogroup GeometryGraphics
+  //! @{
+
   //! @{
   //! Drawing functions
   DO_SARA_EXPORT
@@ -62,6 +65,8 @@ namespace DO { namespace Sara {
   DO_SARA_EXPORT
   void draw_affine_cone(const AffineCone2& K, double arrow_length = 50.,
                         const Color3ub& color = Black8);
+  //! @}
+
   //! @}
 
 } /* namespace Sara */
