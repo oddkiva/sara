@@ -172,7 +172,7 @@ namespace DO { namespace Sara {
   DO_SARA_EXPORT
   int any_get_key();
 
-  //! @Brief Listen to events sent from the active window.
+  //! @brief Listen to events sent from the active window.
   DO_SARA_EXPORT
   void get_event(int ms, Event& e);
 

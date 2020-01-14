@@ -9,8 +9,6 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Kalpana/3D/OpenGLWindow.hpp>
-
 #include <DO/Sara/Core/Tensor.hpp>
 
 #include <QGuiApplication>
@@ -19,6 +17,7 @@
 #include <QtGui/QOpenGLBuffer>
 #include <QtGui/QOpenGLShaderProgram>
 #include <QtGui/QOpenGLVertexArrayObject>
+#include <QtGui/QOpenGLWindow>
 
 
 using namespace DO::Sara;
@@ -50,7 +49,7 @@ public:
 
   void initialize_shader_program()
   {
-    m_program = new QOpenGLShaderProgram{this};
+    m_program = new QOpenGLShaderProgram{parent()};
     m_program->addShaderFromSourceCode(QOpenGLShader::Vertex,
                                        vertex_shader_source);
     m_program->addShaderFromSourceCode(QOpenGLShader::Fragment,
@@ -83,7 +82,7 @@ public:
       return offset * sizeof(float);
     };
 
-    m_vao = new QOpenGLVertexArrayObject{this};
+    m_vao = new QOpenGLVertexArrayObject{parent()};
     if (!m_vao->create())
       throw QException{};
 
@@ -178,19 +177,19 @@ protected:
 };
 
 
-class Window : public OpenGLWindow
+class Window : public QOpenGLWindow
 {
   SquareObject* m_square{nullptr};
 
 public:
   Window() = default;
 
-  void initialize() override
+  void initializeGL() override
   {
-    m_square = new SquareObject{this};
+    m_square = new SquareObject{context()};
   }
 
-  void render() override
+  void paintGL() override
   {
     const qreal retinaScale = devicePixelRatio();
     glViewport(0, 0, width() * retinaScale, height() * retinaScale);

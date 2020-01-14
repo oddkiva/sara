@@ -150,7 +150,7 @@ BOOST_AUTO_TEST_CASE(test_methods)
   BOOST_CHECK_EQUAL(size(set2), 10);
 
   // Test append.
-  set = stack(set, set2);
+  set = DO::Sara::stack(set, set2);
   BOOST_CHECK_EQUAL(size(set), 30);
 
   // Test accessors.

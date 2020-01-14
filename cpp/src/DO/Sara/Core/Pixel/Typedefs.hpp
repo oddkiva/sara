@@ -20,8 +20,11 @@
 
 namespace DO { namespace Sara {
 
-  //! @defgroup ColorTypes Color typedefs
-  //! @{
+  /*!
+   *  @ingroup Color
+   *  @defgroup ColorTypes Color Aliases
+   *  @{
+   */
 
   // ======================================================================== //
   //! Macro for generic color typedefs like in OpenGL.
@@ -76,8 +79,11 @@ namespace DO { namespace Sara {
 
 
   // ======================================================================== //
-  //! @defgroup PrimaryColors Primary Colors in RGB.
-  //! @{
+  /*!
+   *  @ingroup Color
+   *  @defgroup PrimaryColors Primary Colors in RGB
+   *  @{
+   */
 
   //! White color function.
   template <typename T> inline Matrix<T, 3, 1> white()

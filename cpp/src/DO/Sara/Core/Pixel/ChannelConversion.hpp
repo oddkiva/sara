@@ -18,6 +18,9 @@
 // Channel conversion from a type to another.
 namespace DO { namespace Sara {
 
+  //! @addtogroup Color
+  //! @{
+
   //! @brief Return minimum value for channel of type 'T'.
   template <typename T>
   inline T channel_min_value()
@@ -151,6 +154,7 @@ namespace DO { namespace Sara {
       convert_channel(src[i], dst[i]);
   }
 
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

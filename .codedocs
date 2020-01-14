@@ -1,0 +1,17 @@
+PROJECT_NAME = "Sara"
+
+INPUT = cpp/src \
+        cpp/examples \
+        cpp/pipelines
+RECURSIVE = YES
+EXCLUDE = cling \
+          cmake \
+          cpp/third-party \
+          cpp/test \
+          data \
+          doc \
+          scripts
+EXCLUDE_PATTERNS += */src/*.cpp
+
+MARKDOWN_SUPPORT = YES
+TOC_INCLUDE_HEADINGS = 2

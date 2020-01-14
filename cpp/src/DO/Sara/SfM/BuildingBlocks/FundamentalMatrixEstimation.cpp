@@ -63,7 +63,7 @@ auto estimate_fundamental_matrix(
 auto estimate_fundamental_matrices(const std::string& dirpath,
                                    const std::string& h5_filepath,
                                    bool overwrite,
-                                   bool debug) -> void
+                                   bool debug, bool wait_key) -> void
 {
   // Create a backup.
   if (!fs::exists(h5_filepath + ".bak"))
@@ -145,7 +145,7 @@ auto estimate_fundamental_matrices(const std::string& dirpath,
           const auto& Ii = view_attributes.images[i];
           const auto& Ij = view_attributes.images[j];
           check_epipolar_constraints(Ii, Ij, Fij, Mij, F_best_sample_ij,
-                                     F_inliers_ij, display_step);
+                                     F_inliers_ij, display_step, wait_key);
         }
 
         // Update.

@@ -11,3 +11,7 @@
 
 //! @file
 //! @brief Master header file of the SfM module.
+
+/*!
+ *  @defgroup SfM Structure-from-Motion Building Blocks
+ */

@@ -19,44 +19,49 @@
 
 namespace DO::Sara {
 
-struct PinholeCamera
-{
-  operator Matrix34d() const
+  //! @addtogroup MultiViewGeometry
+  //! @{
+
+  struct PinholeCamera
   {
-    return matrix();
+    operator Matrix34d() const
+    {
+      return matrix();
+    }
+
+    auto matrix() const -> Matrix34d
+    {
+      Matrix34d Rt;
+      Rt.topLeftCorner(3, 3) = R;
+      Rt.col(3) = t;
+      return K * Rt;
+    }
+
+    Eigen::Matrix3d K{Eigen::Matrix3d::Identity()};
+    Eigen::Matrix3d R{Eigen::Matrix3d::Identity()};
+    Eigen::Vector3d t{Eigen::Vector3d::Zero()};
+  };
+
+  inline auto normalized_camera(const Eigen::Matrix3d& R,
+                                const Eigen::Vector3d& t)
+  {
+    return PinholeCamera{Eigen::Matrix3d::Identity(), R, t};
   }
 
-  auto matrix() const -> Matrix34d
+  inline auto normalized_camera(const Motion& m = Motion{})
   {
-    Matrix34d Rt;
-    Rt.topLeftCorner(3, 3) = R;
-    Rt.col(3) = t;
-    return K * Rt;
+    return PinholeCamera{Eigen::Matrix3d::Identity(), m.R, m.t};
   }
 
-  Eigen::Matrix3d K{Eigen::Matrix3d::Identity()};
-  Eigen::Matrix3d R{Eigen::Matrix3d::Identity()};
-  Eigen::Vector3d t{Eigen::Vector3d::Zero()};
-};
+  DO_SARA_EXPORT
+  auto cheirality_predicate(const Eigen::MatrixXd& X)
+      -> Eigen::Array<bool, 1, Eigen::Dynamic>;
 
-inline auto normalized_camera(const Eigen::Matrix3d& R,
-                              const Eigen::Vector3d& t)
-{
-  return PinholeCamera{Eigen::Matrix3d::Identity(), R, t};
-}
+  DO_SARA_EXPORT
+  auto relative_motion_cheirality_predicate(const Eigen::MatrixXd& X,
+                                            const Matrix34d& P)
+      -> Eigen::Array<bool, 1, Eigen::Dynamic>;
 
-inline auto normalized_camera(const Motion& m = Motion{})
-{
-  return PinholeCamera{Eigen::Matrix3d::Identity(), m.R, m.t};
-}
-
-DO_SARA_EXPORT
-auto cheirality_predicate(const Eigen::MatrixXd& X)
-    -> Eigen::Array<bool, 1, Eigen::Dynamic>;
-
-DO_SARA_EXPORT
-auto relative_motion_cheirality_predicate(const Eigen::MatrixXd& X,
-                                          const Matrix34d& P)
-    -> Eigen::Array<bool, 1, Eigen::Dynamic>;
+  //! @}
 
 } /* namespace DO::Sara */

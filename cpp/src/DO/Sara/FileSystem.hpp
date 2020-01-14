@@ -14,3 +14,7 @@
 #pragma once
 
 #include <DO/Sara/FileSystem/FileSystem.hpp>
+
+
+//! @defgroup FileSystem File System Helpers
+//! @brief This module consists of small file system utility functions.

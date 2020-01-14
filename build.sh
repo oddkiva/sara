@@ -11,7 +11,7 @@ fi
 
 function install_python_packages_via_pip()
 {
-  pip install numpy nose
+  pip install coverage numpy nose
 }
 
 function build_library()

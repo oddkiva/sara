@@ -17,10 +17,9 @@
 namespace DO { namespace Sara {
 
   /*!
-    @ingroup Graphics
-    @defgroup Draw3D Drawing 3D
-
-    @{
+   *  @ingroup Graphics
+   *  @defgroup Draw3D Drawing 3D
+   *  @{
    */
 
   //! @brief Display a mesh in the active OpenGLWindow window.

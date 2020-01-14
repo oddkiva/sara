@@ -19,6 +19,11 @@
 
 namespace DO { namespace Sara {
 
+  /*!
+   *  @addtogroup MultiArray
+   *  @{
+   */
+
   //! @brief The multidimensional array class.
   template <typename MultiArrayView, template <typename> class Allocator>
   class MultiArrayBase : public MultiArrayView
@@ -243,6 +248,8 @@ namespace DO { namespace Sara {
   private:
     allocator_type _allocator{};
   };
+
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

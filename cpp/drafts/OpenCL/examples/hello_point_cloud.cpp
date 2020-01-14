@@ -78,16 +78,21 @@ auto read_point_cloud(const std::string& h5_filepath) -> Tensor_<float, 2>
 {
   auto h5_file = H5File{h5_filepath, H5F_ACC_RDONLY};
 
-  auto coords = Tensor_<double, 2>{};
+  auto coords = MatrixXd{};
   h5_file.read_dataset("points", coords);
-  coords.matrix() *= -1;
+  coords.transposeInPlace();
+  coords.col(1) *= -1;
+  coords.col(2) *= -1;
+  SARA_DEBUG << "Read coords OK" << std::endl;
+  SARA_DEBUG << "coords =\n" << coords.topRows(20) << std::endl;
 
   auto colors = Tensor_<double, 2>{};
   h5_file.read_dataset("colors", colors);
-  SARA_DEBUG << "OK" << std::endl;
+  SARA_DEBUG << "Read colors OK" << std::endl;
+  SARA_DEBUG << "colors =\n" << colors.matrix().topRows(20) << std::endl;
 
   // Concatenate the data.
-  auto vertex_data = Tensor_<double, 2>{{coords.size(0), 6}};
+  auto vertex_data = Tensor_<double, 2>{{coords.rows(), 6}};
   vertex_data.matrix() << coords.matrix(), colors.matrix();
 
   return vertex_data.cast<float>();
@@ -96,7 +101,7 @@ auto read_point_cloud(const std::string& h5_filepath) -> Tensor_<float, 2>
 auto make_point_cloud()
 {
   // Encode the vertex data in a tensor.
-  const auto vertex_data = read_point_cloud("/home/david/Desktop/geometry.h5");
+  const auto vertex_data = read_point_cloud("/Users/david/Desktop/geometry.h5");
   SARA_DEBUG << "vertices =\n" << vertex_data.matrix() << std::endl;
   return vertex_data;
 }

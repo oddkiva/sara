@@ -27,6 +27,7 @@
 
 
 using namespace std;
+using namespace std::string_literals;
 using namespace DO::Sara;
 
 
@@ -40,9 +41,9 @@ GRAPHICS_MAIN()
   print_stage("Loading images...");
   const auto data_dir =
 #ifdef __APPLE__
-      std::string{"/Users/david/Desktop/Datasets/sfm/castle_int"};
+      "/Users/david/Desktop/Datasets/sfm/castle_int"s;
 #else
-      std::string{"/home/david/Desktop/Datasets/sfm/castle_int"};
+      "/home/david/Desktop/Datasets/sfm/castle_int"s;
 #endif
   views.image_paths = {
       data_dir + "/" + "0000.png",
