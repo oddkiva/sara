@@ -47,7 +47,7 @@ What I can easily do is to keep up-to-date the [reference API
 documentation](https://codedocs.xyz/DO-CV/sara/) hosted in **codedocs.xyz**.
 
 I also write [documentation](https://sara-github.readthedocs.org/) at
-**readthedocs.org**: where I provide more mathematical details about my
+**readthedocs.org** where I provide more mathematical details about my
 implementations.
 
 In any case you are always better off consulting the [examples
