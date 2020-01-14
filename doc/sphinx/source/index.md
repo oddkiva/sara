@@ -24,6 +24,13 @@ explain some algorithmic implementation. I believe that my API is most of the
 time straightforward enough. The audience I am targeting here is students,
 scientists or software developers who want to understand those kind of details.
 
+For the reference API documentation, refer to the **Doxygen**-based
+documentation hosted `here at Codedocs.xyz`_:
+
+.. image:: https://codedocs.xyz/DO-CV/sara.svg
+   :target: https://codedocs.xyz/DO-CV/sara/
+
+.. _`here at Codedocs.xyz`: https://codedocs.xyz/DO-CV/sara/
 
 Table of Contents
 -----------------
