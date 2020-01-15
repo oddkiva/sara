@@ -16,13 +16,15 @@ import os
 import re
 import subprocess
 import sys
+import textwrap
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
 this_dir = os.path.dirname(__file__)
-project_dir = os.path.abspath(os.path.join(this_dir, "../../..", "cpp/src"))
+source_dir = os.path.abspath(os.path.join(this_dir, "../../.."))
+project_dir = os.path.join(source_dir, "cpp/src")
 if not os.path.exists(project_dir):
     raise ValueError("{} directory does not exist".format(project_dir))
 
@@ -41,7 +43,20 @@ exhale_args = {
     # TIP: if using the sphinx-bootstrap-theme, you need
     # "treeViewIsBootstrap": True,
     "exhaleExecutesDoxygen": True,
-    "exhaleDoxygenStdin": "INPUT = {}".format(project_dir)
+    "exhaleDoxygenStdin": textwrap.dedent('''
+        INPUT = {source_dir}/cpp/src \
+                {source_dir}/cpp/examples \
+                {source_dir}/cpp/pipelines
+        RECURSIVE = YES
+        EXCLUDE_PATTERNS += *.cpp
+        PREDEFINED += DOXYGEN_SHOULD_SKIP_THIS
+
+        MARKDOWN_SUPPORT = YES
+        TOC_INCLUDE_HEADINGS = 2
+
+        ENABLE_PREPROCESSING = YES
+        MACRO_EXPANSION = YES
+    '''.format(source_dir=source_dir))
 }
 
 # Tell sphinx what the primary language being documented is.
