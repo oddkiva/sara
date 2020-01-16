@@ -1,14 +1,10 @@
 Structure-from-Motion
 =====================
 
-Under construction...
+This chapter details the classical algorithm that `Sara` implements in Multiple
+View Geometry.
 
-.. math::
+.. toctree::
+   :maxdepth: 2
 
-  \text{Rendered with \KaTeX} \\[18pt]
-
-  \gdef \f #1 {f(#1)}
-
-  \f{x} = \int_{-\infty}^\infty
-    \hat \f\xi\, e^{2 \pi i \xi x}
-    \,d\xi
+   multiviewgeometry/nister.rst
