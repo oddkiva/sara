@@ -6,6 +6,10 @@ if (NOT WIN32)
   add_subdirectory(OpenCL)
 endif ()
 
-if (USE_HPX)
+if (SARA_USE_HPX)
   add_subdirectory(Parallel)
+endif ()
+
+if (SARA_USE_HALIDE)
+  add_subdirectory(Halide)
 endif ()
