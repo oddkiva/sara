@@ -51,10 +51,10 @@ namespace DO { namespace Sara {
         edgeRatioThres
         the Hessian matrix \f$\mathbf{H}\f$ at the local scale-space extremum
         must satisfy
-        \f[
-          \frac{\mathrm{det}(\mathbf{H})}{\mathrm{tr}(\mathbf{H}} >
+        @f[
+          \frac{\mathrm{det}(\mathbf{H})}{\mathrm{tr}(\mathbf{H})} >
           \frac{(r+1)^2}{r}
-        \f]
+        @f]
         where \f$r\f$ corresponds to the variable **edgeRatioThres**.
         In terms of implementation, we use the function **DO::onEdge()**.
         We use the \f$r=10\f$ as stated in [Lowe, IJCV 2004].
