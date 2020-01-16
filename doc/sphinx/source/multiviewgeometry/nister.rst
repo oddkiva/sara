@@ -25,15 +25,19 @@ Denoting the vectorized matrix :math:`\mathbf{E}` as
 Expanding the system of five equations, we have:
 
 .. math::
-   \mathbf{A} \mathbf{e} = 0
+   \mathbf{Q} \mathbf{e} = 0
 
 with
 
 .. math::
-   \mathbf{A}[i, :] =  \text{vec}(\mathbf{p}_{i} \mathbf{q}_i^T)
+   \mathbf{Q}[i, :] =  \text{vec}(\mathbf{p}_{i} \mathbf{q}_i^T)
 
 :math:`\mathbf{e}` lives in the nullspace of :math:`\mathbf{A}` which is of
 dimension :math:`4`.
+
+
+Nullspace Extraction
+--------------------
 
 Using decompose the nullspace of :math:`\mathbf{A}` with basis vectors
 :math:`(\mathbf{x}, \mathbf{y}, \mathbf{z}, \mathbf{w})` using singular value
@@ -41,7 +45,7 @@ decomposition, the vectorized essential matrix :math:`\mathbf{e}` is a linear
 combination of these :math:`4` basis vectors:
 
 .. math::
-   \text{Null}(\mathbf{A}) =
+   \text{Null}(\mathbf{Q}) =
    \text{span}(\mathbf{x}, \mathbf{y}, \mathbf{z}, \mathbf{w}) \\
 
    \mathbf{e} = x \mathbf{x} + y \mathbf{y} + z \mathbf{z} + \mathbf{w}
@@ -65,7 +69,11 @@ Gauss-Jordan Elimination
 ------------------------
 
 
+Real Root Extraction
+--------------------
 
+Instead of using Sturm sequences, we extract the roots of the polynomials using
+Jenkins-Traub algorithm.
 
 
 Under construction...
