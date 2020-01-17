@@ -21,7 +21,7 @@
 
 struct AVCodec;
 struct AVCodecContext;
-struct AVCodecParserContext;
+struct AVCodecParameters;
 struct AVFormatContext;
 struct AVFrame;
 struct AVPacket;
@@ -32,7 +32,7 @@ namespace DO { namespace Sara {
   //! @defgroup VideoIO Video I/O
   //! @{
 
-  class DO_SARA_EXPORT VideoStream : public std::streambuf
+  class DO_SARA_EXPORT VideoStream
   {
   public:
     VideoStream();
@@ -43,85 +43,51 @@ namespace DO { namespace Sara {
 
     ~VideoStream();
 
-    VideoStream& operator=(const VideoStream&) = delete;
+    auto open(const std::string& file_path) -> void;
 
-    int width() const;
+    auto close() -> void;
 
-    int height() const;
+    auto read(ImageView<Rgb8>& video_frame) -> bool;
 
-    Vector2i sizes() const
+    auto seek(std::size_t frame_pos) -> void;
+
+    auto frame_rate() const -> float;
+
+    auto width() const -> int;
+
+    auto height() const -> int;
+
+    auto sizes() const -> Vector2i
     {
       return Vector2i{width(), height()};
     }
-
-    void open(const std::string& file_path);
-
-    void close();
-
-    void seek(std::size_t frame_pos);
-
-    bool read(ImageView<Rgb8>& video_frame);
 
     friend inline VideoStream& operator>>(VideoStream& video_stream,
                                           ImageView<Rgb8>& video_frame)
     {
       if (!video_stream.read(video_frame))
-        video_frame = Image<Rgb8>();
+        video_frame = {};
       return video_stream;
     }
 
   private:
-    static bool _registered_all_codecs;
-
-    AVFormatContext* _video_format_context = nullptr;
-    int _video_stream = -1;
-    AVCodec* _video_codec = nullptr;
-    AVCodecContext* _video_codec_context = nullptr;
-    AVFrame* _video_frame = nullptr;
-    size_t _video_frame_pos = std::numeric_limits<size_t>::max();
-  };
-
-
-  class DO_SARA_EXPORT VideoStream2
-  {
-  public:
-    VideoStream2();
-
-    ~VideoStream2();
-
-    auto open(const std::string& file_path) -> void;
-
-    auto close() -> void;
-
-    auto read() -> bool;
-
     auto decode(AVCodecContext* dec_ctx, AVFrame* frame, AVPacket* pkt) -> bool;
 
-    auto frame() const -> Image<Rgb8>;
-
-    auto frame_rate() const -> float;
-
   private:
-    static constexpr auto INBUF_SIZE = 4096;
+    static bool _registered_all_codecs;
 
     // FFmpeg internals.
-    static bool _registered_all_codecs;
-    const AVCodec* _codec = nullptr;
-    AVCodecParserContext* parser = nullptr;
-    AVCodecContext* c = nullptr;
+    int _video_stream_index = -1;
+    const AVCodecParameters* _video_codec_params = nullptr;
+    const AVCodec* _video_codec = nullptr;
+    AVFormatContext* _video_format_context = nullptr;
+    AVCodecContext* _video_codec_context = nullptr;
     AVFrame* _picture = nullptr;
     AVPacket* _pkt = nullptr;
 
-    //! @brief Video file handle.
-    std::FILE* _file = nullptr;
-
-    uint8_t inbuf[INBUF_SIZE + 32];
-
-    uint8_t* data = nullptr;
-    size_t data_size;
-
-    // @brief Current frame number.
-    int _current_frame_number{};
+    bool _end_of_stream{true};
+    int _got_frame{};
+    int _i{};
   };
 
   //! @}

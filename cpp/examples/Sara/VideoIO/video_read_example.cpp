@@ -26,29 +26,6 @@
 namespace sara = DO::Sara;
 
 
-// GRAPHICS_MAIN()
-// {
-//   using namespace std;
-//   using namespace DO::Sara;
-//
-//   const string video_filepath = src_path("orion_1.mpg");
-//
-//   VideoStream video_stream(video_filepath);
-//   auto video_frame = Image<Rgb8>{video_stream.sizes()};
-//
-//   while (true)
-//   {
-//     video_stream >> video_frame;
-//     if (!active_window())
-//       create_window(video_frame.sizes());
-//
-//     if (!video_frame.data())
-//       break;
-//     display(video_frame);
-//   }
-// }
-
-
 GRAPHICS_MAIN()
 {
   using namespace std::string_literals;
@@ -57,22 +34,19 @@ GRAPHICS_MAIN()
       "/home/david/Desktop/humanising-autonomy/barberX.mp4"s;
   //const std::string video_filepath = src_path("orion_1.mpg");
 
-  sara::VideoStream2 video_stream;
-  video_stream.open(video_filepath);
+  sara::VideoStream video_stream{video_filepath};
 
   SARA_DEBUG << "Frame rate = " << video_stream.frame_rate() << std::endl;
+  SARA_DEBUG << "Frame sizes = " << video_stream.sizes().transpose() << std::endl;
 
-  while (video_stream.read())
+  auto video_frame = sara::Image<sara::Rgb8>{video_stream.sizes()};
+
+  while (video_stream.read(video_frame))
   {
-    const auto frame = video_stream.frame();
+    if (sara::active_window() == nullptr)
+      sara::create_window(video_frame.sizes());
 
-    if (!sara::active_window())
-    {
-      SARA_DEBUG << frame.sizes() << std::endl;
-      sara::create_window(frame.sizes());
-    }
-
-    sara::display(frame);
+    sara::display(video_frame);
   }
 
   sara::close_window();
