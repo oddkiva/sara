@@ -12,6 +12,19 @@
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <memory>
+
+#include "libavcodec/avcodec.h"
+#include "libavutil/common.h"
+#include "libavutil/imgutils.h"
+#include "libavutil/mathematics.h"
+
+
+namespace sara = DO::Sara;
+
 
 GRAPHICS_MAIN()
 {
@@ -33,6 +46,30 @@ GRAPHICS_MAIN()
       break;
     display(video_frame);
   }
-
-  return 0;
 }
+
+
+// GRAPHICS_MAIN()
+// {
+//   using namespace std::string_literals;
+// 
+//   const auto video_filepath =
+//       "/home/david/Desktop/humanising-autonomy/barberX.mp4"s;
+// 
+//   sara::VideoStream2 video_stream;
+//   video_stream.open(video_filepath);
+// 
+//   while (video_stream.read())
+//   {
+//     const auto frame = video_stream.frame();
+// 
+//     if (sara::active_window() == nullptr)
+//       sara::create_window(frame.sizes());
+// 
+//     sara::display(frame);
+//   }
+// 
+//   sara::close_window();
+// 
+//   return 0;
+// }

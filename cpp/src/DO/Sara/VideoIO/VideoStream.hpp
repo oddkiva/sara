@@ -15,11 +15,16 @@
 
 #include <DO/Sara/Core/Image.hpp>
 
+#include <cstdio>
+#include <memory>
+
 
 struct AVCodec;
 struct AVCodecContext;
+struct AVCodecParserContext;
 struct AVFormatContext;
 struct AVFrame;
+struct AVPacket;
 
 
 namespace DO { namespace Sara {
@@ -46,7 +51,7 @@ namespace DO { namespace Sara {
 
     Vector2i sizes() const
     {
-      return Vector2i{ width(), height() };
+      return Vector2i{width(), height()};
     }
 
     void open(const std::string& file_path);
@@ -68,15 +73,55 @@ namespace DO { namespace Sara {
   private:
     static bool _registered_all_codecs;
 
-    AVFormatContext *_video_format_context = nullptr;
+    AVFormatContext* _video_format_context = nullptr;
     int _video_stream = -1;
-    AVCodec *_video_codec = nullptr;
-    AVCodecContext *_video_codec_context = nullptr;
-    AVFrame *_video_frame = nullptr;
+    AVCodec* _video_codec = nullptr;
+    AVCodecContext* _video_codec_context = nullptr;
+    AVFrame* _video_frame = nullptr;
     size_t _video_frame_pos = std::numeric_limits<size_t>::max();
+  };
+
+
+  class DO_SARA_EXPORT VideoStream2
+  {
+  public:
+    VideoStream2();
+
+    ~VideoStream2();
+
+    auto open(const std::string& file_path) -> void;
+
+    auto close() -> void;
+
+    auto read() -> bool;
+
+    auto decode() -> void;
+
+    auto frame() const -> ImageView<Rgb8>;
+
+  private:
+    static constexpr auto INBUF_SIZE = 4096;
+
+    // FFmpeg internals.
+    static bool _registered_all_codecs;
+    const AVCodec* codec = nullptr;
+    AVCodecParserContext* parser = nullptr;
+    AVCodecContext* c = nullptr;
+    AVFrame* picture = nullptr;
+    AVPacket* _pkt = nullptr;
+
+    //! @brief Video file handle.
+    std::FILE* _file = nullptr;
+
+    std::vector<uint8_t> inbuf;
+
+    uint8_t* data = nullptr;
+    size_t data_size;
+
+    // @brief Current frame number.
+    int _current_frame_number{};
   };
 
   //! @}
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara

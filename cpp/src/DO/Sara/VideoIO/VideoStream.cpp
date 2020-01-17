@@ -10,21 +10,27 @@
 // ========================================================================== //
 
 extern "C" {
-# include <libavcodec/avcodec.h>
-# include <libavformat/avformat.h>
-# include <libavformat/avio.h>
-# include <libavutil/file.h>
+#include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
+#include <libavformat/avio.h>
+#include <libavutil/file.h>
+
+#include <libavcodec/avcodec.h>
 }
 
+#include <DO/Sara/Core/DebugUtilities.hpp>
 #include "VideoStream.hpp"
 
+#include <cstdio>
+#include <cstdlib>
 
-namespace DO { namespace Sara {
 
-  inline static Yuv8 get_yuv_pixel(const AVFrame *frame, int x, int y)
+namespace DO::Sara {
+
+  inline static Yuv8 get_yuv_pixel(const AVFrame* frame, int x, int y)
   {
     Yuv8 yuv;
-    yuv(0) = frame->data[0][y*frame->linesize[0] + x];
+    yuv(0) = frame->data[0][y * frame->linesize[0] + x];
     yuv(1) = frame->data[1][y / 2 * frame->linesize[1] + x / 2];
     yuv(2) = frame->data[2][y / 2 * frame->linesize[2] + x / 2];
     return yuv;
@@ -51,13 +57,13 @@ namespace DO { namespace Sara {
     return rgb;
   }
 
-} /* namespace Sara */
-} /* namespace DO */
+}  // namespace DO::Sara
 
 
-namespace DO { namespace Sara {
+namespace DO::Sara {
 
   bool VideoStream::_registered_all_codecs = false;
+  bool VideoStream2::_registered_all_codecs = false;
 
   VideoStream::VideoStream()
   {
@@ -89,12 +95,11 @@ namespace DO { namespace Sara {
     return _video_codec_context->height;
   }
 
-  void
-  VideoStream::open(const std::string& file_path)
+  void VideoStream::open(const std::string& file_path)
   {
     // Read the video file.
-    if (avformat_open_input(&_video_format_context, file_path.c_str(),
-                            nullptr, nullptr) != 0)
+    if (avformat_open_input(&_video_format_context, file_path.c_str(), nullptr,
+                            nullptr) != 0)
       throw std::runtime_error("Could not open video file!");
 
     // Read the video stream metadata.
@@ -106,7 +111,8 @@ namespace DO { namespace Sara {
     _video_stream = -1;
     for (unsigned i = 0; i != _video_format_context->nb_streams; ++i)
     {
-      if (_video_format_context->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO)
+      if (_video_format_context->streams[i]->codec->codec_type ==
+          AVMEDIA_TYPE_VIDEO)
       {
         _video_stream = i;
         break;
@@ -135,8 +141,7 @@ namespace DO { namespace Sara {
     _video_frame_pos = 0;
   }
 
-  void
-  VideoStream::close()
+  void VideoStream::close()
   {
     if (_video_frame)
     {
@@ -157,20 +162,17 @@ namespace DO { namespace Sara {
       _video_format_context = nullptr;
   }
 
-  void
-  VideoStream::seek(std::size_t frame_pos)
+  void VideoStream::seek(std::size_t frame_pos)
   {
     av_seek_frame(_video_format_context, _video_stream, frame_pos,
                   AVSEEK_FLAG_BACKWARD);
   }
 
-  bool
-  VideoStream::read(ImageView<Rgb8>& video_frame)
+  bool VideoStream::read(ImageView<Rgb8>& video_frame)
   {
     if (video_frame.sizes() != sizes())
       throw std::domain_error{
-        "Video frame sizes and video stream sizes are not equal!"
-      };
+          "Video frame sizes and video stream sizes are not equal!"};
 
     AVPacket _video_packet;
     auto length = int{};
@@ -209,5 +211,152 @@ namespace DO { namespace Sara {
   }
 
 
-} /* namespace Sara */
-} /* namespace DO */
+  VideoStream2::VideoStream2()
+  {
+    if (!_registered_all_codecs)
+    {
+      av_register_all();
+      _registered_all_codecs = true;
+    }
+  }
+
+  VideoStream2::~VideoStream2()
+  {
+    close();
+  }
+
+  void VideoStream2::open(const std::string& file_path)
+  {
+    _file = fopen(file_path.c_str(), "rb");
+    if (_file == nullptr)
+      throw std::runtime_error("Could not open video file!");
+
+    if (_pkt == nullptr)
+    {
+      _pkt = av_packet_alloc();
+      if (_pkt == nullptr)
+        throw std::runtime_error("Could not allocate video packet!");
+      else
+        SARA_DEBUG << "Allocated video packet!" << std::endl;
+    }
+
+    // Set end of buffer to 0.
+    //
+    // This ensures that no overreading happens for damaged MPEG streams.
+    inbuf.resize(INBUF_SIZE + AV_INPUT_BUFFER_PADDING_SIZE);
+    std::memset(inbuf.data() + INBUF_SIZE, 0, AV_INPUT_BUFFER_PADDING_SIZE);
+
+    // Find the MPEG-1 video decoder.
+    codec = avcodec_find_decoder(AV_CODEC_ID_MPEG1VIDEO);
+    if (codec == nullptr)
+      throw std::runtime_error{"Could not find video codec!"};
+
+    parser = av_parser_init(codec->id);
+    if (parser == nullptr)
+      throw std::runtime_error{"Could not find video parser!"};
+
+    c = avcodec_alloc_context3(codec);
+
+    picture = av_frame_alloc();
+
+    // For some codecs, such as msmpeg4 and mpeg4, width and height MUST be
+    // initialized there because this information is not available in the
+    // bitstream.
+    //
+    // Open it.
+    if (avcodec_open2(c, codec, NULL) < 0)
+      throw std::runtime_error{"Could not open video codec!"};
+
+    SARA_DEBUG << "Width = " << parser->coded_width << std::endl;
+    SARA_DEBUG << "Height = " << parser->coded_height << std::endl;
+  }
+
+  void VideoStream2::close()
+  {
+    if (_file != nullptr)
+    {
+      fclose(_file);
+      _file = nullptr;
+    }
+
+    inbuf.clear();
+
+    // Flush the decoder.
+    this->decode();
+    av_parser_close(parser);
+    avcodec_free_context(&c);
+    av_frame_free(&picture);
+    av_packet_free(&_pkt);
+
+    // Reset the frame number.
+    _current_frame_number = 0;
+  }
+
+  bool VideoStream2::read()
+  {
+    while (!feof(_file))
+    {
+      /* read raw data from the input file */
+      data_size = fread(inbuf.data(), 1, INBUF_SIZE, _file);
+      if (data_size == 0)
+        return false;
+
+      /* use the parser to split the data into frames */
+      data = inbuf.data();
+      while (data_size > 0)
+      {
+        const auto ret =
+          av_parser_parse2(parser, c, &_pkt->data, &_pkt->size, data, data_size,
+                           AV_NOPTS_VALUE, AV_NOPTS_VALUE, 0);
+        if (ret < 0)
+          throw std::runtime_error{"Error while parsing video buffer"};
+
+        data += ret;
+        data_size -= ret;
+        if (_pkt->size)
+        {
+          decode();
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  auto VideoStream2::decode() -> void
+  {
+    auto ret = int{};
+
+    ret = avcodec_send_packet(c, _pkt);
+    if (ret < 0)
+      throw std::runtime_error{"Error sending a packet for decoding!"};
+
+    while (ret >= 0)
+    {
+      ret = avcodec_receive_frame(c, picture);
+      if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
+        return;
+      else if (ret < 0)
+        throw std::runtime_error{"Error during decoding!"};
+
+      std::cout  << "Read frame number = " << _current_frame_number << std::endl;
+
+      ++_current_frame_number;
+
+      /* the picture is allocated by the decoder. no need to
+         free it */
+      // snprintf(buf, sizeof(buf), filename, dec_ctx->frame_number);
+
+      // pgm_save(frame->data[0], frame->linesize[0],
+      //          frame->width, frame->height, buf);
+    }
+  }
+
+  auto VideoStream2::frame() const -> ImageView<Rgb8>
+  {
+    return {reinterpret_cast<Rgb8*>(picture->data[0]),
+            {picture->width, picture->height}};
+  }
+
+}  // namespace DO::Sara
