@@ -26,50 +26,56 @@
 namespace sara = DO::Sara;
 
 
-GRAPHICS_MAIN()
-{
-  using namespace std;
-  using namespace DO::Sara;
-
-  const string video_filepath = src_path("orion_1.mpg");
-
-  VideoStream video_stream(video_filepath);
-  auto video_frame = Image<Rgb8>{video_stream.sizes()};
-
-  while (true)
-  {
-    video_stream >> video_frame;
-    if (!active_window())
-      create_window(video_frame.sizes());
-
-    if (!video_frame.data())
-      break;
-    display(video_frame);
-  }
-}
-
-
 // GRAPHICS_MAIN()
 // {
-//   using namespace std::string_literals;
-// 
-//   const auto video_filepath =
-//       "/home/david/Desktop/humanising-autonomy/barberX.mp4"s;
-// 
-//   sara::VideoStream2 video_stream;
-//   video_stream.open(video_filepath);
-// 
-//   while (video_stream.read())
+//   using namespace std;
+//   using namespace DO::Sara;
+//
+//   const string video_filepath = src_path("orion_1.mpg");
+//
+//   VideoStream video_stream(video_filepath);
+//   auto video_frame = Image<Rgb8>{video_stream.sizes()};
+//
+//   while (true)
 //   {
-//     const auto frame = video_stream.frame();
-// 
-//     if (sara::active_window() == nullptr)
-//       sara::create_window(frame.sizes());
-// 
-//     sara::display(frame);
+//     video_stream >> video_frame;
+//     if (!active_window())
+//       create_window(video_frame.sizes());
+//
+//     if (!video_frame.data())
+//       break;
+//     display(video_frame);
 //   }
-// 
-//   sara::close_window();
-// 
-//   return 0;
 // }
+
+
+GRAPHICS_MAIN()
+{
+  using namespace std::string_literals;
+
+  const auto video_filepath =
+      "/home/david/Desktop/humanising-autonomy/barberX.mp4"s;
+  //const std::string video_filepath = src_path("orion_1.mpg");
+
+  sara::VideoStream2 video_stream;
+  video_stream.open(video_filepath);
+
+  SARA_DEBUG << "Frame rate = " << video_stream.frame_rate() << std::endl;
+
+  while (video_stream.read())
+  {
+    const auto frame = video_stream.frame();
+
+    if (!sara::active_window())
+    {
+      SARA_DEBUG << frame.sizes() << std::endl;
+      sara::create_window(frame.sizes());
+    }
+
+    sara::display(frame);
+  }
+
+  sara::close_window();
+
+  return 0;
+}

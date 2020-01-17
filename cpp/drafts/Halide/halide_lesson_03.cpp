@@ -48,9 +48,6 @@ GRAPHICS_MAIN()
   //                       padded(x + 0, y + 1, c) + padded(x + 0, y - 1, c)) /
   //                          4.f;
 
-  // filter(x, y, c) =
-  //     padded(x, y, c) - (padded(x + 1, y + 0, c) + padded(x - 1, y + 0, c)) / 2.f;
-
   filter(x, y, c) = (padded(x, y + 1, c) - padded(x, y - 1, c)) / 2.f;
 
   auto filter_rescaled = Halide::Func{};

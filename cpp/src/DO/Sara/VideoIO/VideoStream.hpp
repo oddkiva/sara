@@ -95,25 +95,27 @@ namespace DO { namespace Sara {
 
     auto read() -> bool;
 
-    auto decode() -> void;
+    auto decode(AVCodecContext* dec_ctx, AVFrame* frame, AVPacket* pkt) -> bool;
 
-    auto frame() const -> ImageView<Rgb8>;
+    auto frame() const -> Image<Rgb8>;
+
+    auto frame_rate() const -> float;
 
   private:
     static constexpr auto INBUF_SIZE = 4096;
 
     // FFmpeg internals.
     static bool _registered_all_codecs;
-    const AVCodec* codec = nullptr;
+    const AVCodec* _codec = nullptr;
     AVCodecParserContext* parser = nullptr;
     AVCodecContext* c = nullptr;
-    AVFrame* picture = nullptr;
+    AVFrame* _picture = nullptr;
     AVPacket* _pkt = nullptr;
 
     //! @brief Video file handle.
     std::FILE* _file = nullptr;
 
-    std::vector<uint8_t> inbuf;
+    uint8_t inbuf[INBUF_SIZE + 32];
 
     uint8_t* data = nullptr;
     size_t data_size;

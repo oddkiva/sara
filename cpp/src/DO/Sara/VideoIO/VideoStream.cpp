@@ -18,8 +18,8 @@ extern "C" {
 #include <libavcodec/avcodec.h>
 }
 
-#include <DO/Sara/Core/DebugUtilities.hpp>
 #include "VideoStream.hpp"
+#include <DO/Sara/Core/DebugUtilities.hpp>
 
 #include <cstdio>
 #include <cstdlib>
@@ -243,29 +243,31 @@ namespace DO::Sara {
     // Set end of buffer to 0.
     //
     // This ensures that no overreading happens for damaged MPEG streams.
-    inbuf.resize(INBUF_SIZE + AV_INPUT_BUFFER_PADDING_SIZE);
-    std::memset(inbuf.data() + INBUF_SIZE, 0, AV_INPUT_BUFFER_PADDING_SIZE);
+    std::memset(inbuf + INBUF_SIZE, 0, AV_INPUT_BUFFER_PADDING_SIZE);
 
     // Find the MPEG-1 video decoder.
-    codec = avcodec_find_decoder(AV_CODEC_ID_MPEG1VIDEO);
-    if (codec == nullptr)
+    _codec = avcodec_find_decoder(AV_CODEC_ID_MPEG1VIDEO);
+    if (_codec == nullptr)
       throw std::runtime_error{"Could not find video codec!"};
 
-    parser = av_parser_init(codec->id);
+    parser = av_parser_init(_codec->id);
     if (parser == nullptr)
       throw std::runtime_error{"Could not find video parser!"};
 
-    c = avcodec_alloc_context3(codec);
+    c = avcodec_alloc_context3(_codec);
 
-    picture = av_frame_alloc();
+    _picture = av_frame_alloc();
 
     // For some codecs, such as msmpeg4 and mpeg4, width and height MUST be
     // initialized there because this information is not available in the
     // bitstream.
     //
     // Open it.
-    if (avcodec_open2(c, codec, NULL) < 0)
+    if (avcodec_open2(c, _codec, NULL) < 0)
       throw std::runtime_error{"Could not open video codec!"};
+
+    SARA_DEBUG << "Video context height = " << c->height << std::endl;
+    SARA_DEBUG << "Video context width = " << c->width << std::endl;
 
     SARA_DEBUG << "Width = " << parser->coded_width << std::endl;
     SARA_DEBUG << "Height = " << parser->coded_height << std::endl;
@@ -279,13 +281,13 @@ namespace DO::Sara {
       _file = nullptr;
     }
 
-    inbuf.clear();
+    // Flush the decoder (draining mode.)
+    this->decode(c, _picture, nullptr);
 
-    // Flush the decoder.
-    this->decode();
+    // Free the data structures.
     av_parser_close(parser);
     avcodec_free_context(&c);
-    av_frame_free(&picture);
+    av_frame_free(&_picture);
     av_packet_free(&_pkt);
 
     // Reset the frame number.
@@ -297,26 +299,32 @@ namespace DO::Sara {
     while (!feof(_file))
     {
       /* read raw data from the input file */
-      data_size = fread(inbuf.data(), 1, INBUF_SIZE, _file);
+      data_size = fread(inbuf, 1, INBUF_SIZE, _file);
       if (data_size == 0)
         return false;
 
       /* use the parser to split the data into frames */
-      data = inbuf.data();
+      data = inbuf;
       while (data_size > 0)
       {
-        const auto ret =
-          av_parser_parse2(parser, c, &_pkt->data, &_pkt->size, data, data_size,
-                           AV_NOPTS_VALUE, AV_NOPTS_VALUE, 0);
-        if (ret < 0)
+        // Parse a packet.
+        const auto input_bitstream_bytesize =
+            av_parser_parse2(parser, c, &_pkt->data, &_pkt->size, data,
+                             data_size, AV_NOPTS_VALUE, AV_NOPTS_VALUE, 0);
+        // Sanity check.
+        if (input_bitstream_bytesize < 0)
           throw std::runtime_error{"Error while parsing video buffer"};
 
-        data += ret;
-        data_size -= ret;
+        data += input_bitstream_bytesize;
+        data_size -= input_bitstream_bytesize;
         if (_pkt->size)
         {
-          decode();
-          return true;
+          if (this->decode(c, _picture, _pkt))
+          {
+            SARA_DEBUG << "Read frame number = " << c->frame_number
+                       << std::endl;
+            return true;
+          }
         }
       }
     }
@@ -324,39 +332,66 @@ namespace DO::Sara {
     return false;
   }
 
-  auto VideoStream2::decode() -> void
+  auto VideoStream2::decode(AVCodecContext* dec_ctx, AVFrame* frame,
+                            AVPacket* pkt) -> bool
   {
     auto ret = int{};
 
-    ret = avcodec_send_packet(c, _pkt);
+    // Transfer raw compressed video data to the packet.
+    ret = avcodec_send_packet(dec_ctx, pkt);
     if (ret < 0)
       throw std::runtime_error{"Error sending a packet for decoding!"};
 
     while (ret >= 0)
     {
-      ret = avcodec_receive_frame(c, picture);
+      // Decode the compressed video data into an uncompressed video frame.
+      ret = avcodec_receive_frame(dec_ctx, frame);
+
       if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
-        return;
-      else if (ret < 0)
+        return false;
+
+      if (ret < 0)
         throw std::runtime_error{"Error during decoding!"};
 
-      std::cout  << "Read frame number = " << _current_frame_number << std::endl;
+      // The video frame is fully decoded.
+      SARA_DEBUG << "Fully decoded video frame!" << std::endl;
+      SARA_DEBUG << "video frame sizes = "  //
+                 << frame->width << "x" << frame->height << std::endl;
+      SARA_DEBUG << "video linesize = "  //
+                 << frame->linesize[0] << std::endl;
+      return true;
 
-      ++_current_frame_number;
-
-      /* the picture is allocated by the decoder. no need to
-         free it */
-      // snprintf(buf, sizeof(buf), filename, dec_ctx->frame_number);
-
-      // pgm_save(frame->data[0], frame->linesize[0],
-      //          frame->width, frame->height, buf);
     }
+
+    return false;
   }
 
-  auto VideoStream2::frame() const -> ImageView<Rgb8>
+  auto VideoStream2::frame() const -> Image<Rgb8>
   {
-    return {reinterpret_cast<Rgb8*>(picture->data[0]),
-            {picture->width, picture->height}};
+    // return {reinterpret_cast<Rgb8*>(_picture->data[0]),
+    //         {_picture->width, _picture->height}};
+
+    const auto w = _picture->width;
+    const auto h = _picture->height;
+
+    auto frame = Image<Rgb8>{w, h};
+    std::cout << frame.sizes().transpose() << std::endl;
+
+    for (int y = 0; y < h; ++y)
+    {
+      for (int x = 0; x < w; ++x)
+      {
+        auto yuv = get_yuv_pixel(_picture, x, y);
+        frame(x, y) = Sara::convert(yuv);
+      }
+    }
+
+    return frame;
+  }
+
+  auto VideoStream2::frame_rate() const -> float
+  {
+    return static_cast<float>(c->framerate.num) / c->framerate.den;
   }
 
 }  // namespace DO::Sara
