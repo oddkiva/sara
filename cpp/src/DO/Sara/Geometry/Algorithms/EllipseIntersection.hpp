@@ -19,11 +19,14 @@
 
 namespace DO { namespace Sara {
 
+  //! @addtogroup GeometryAlgorithms
+  //! @{
+
   /*!
    * Compute the approximate intersection-union ratio by approximating ellipses
    * with polygons.
    */
-  std::vector<Point2d> approximage_intersection(const Ellipse& e1,
+  std::vector<Point2d> approximate_intersection(const Ellipse& e1,
                                                 const Ellipse& e2,
                                                 int ellipse_discretization);
 
@@ -56,6 +59,7 @@ namespace DO { namespace Sara {
    */
   double analytic_jaccard_similarity(const Ellipse& e1, const Ellipse& e2);
 
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

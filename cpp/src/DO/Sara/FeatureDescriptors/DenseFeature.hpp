@@ -24,6 +24,9 @@
 
 namespace DO { namespace Sara {
 
+  //! @addtogroup FeatureDescriptors
+  //! @{
+
   //! @brief Dense Feature Computer class.
   template <typename BaseFeatureComputer = ComputeSIFTDescriptor<>>
   class DenseFeatureComputer
@@ -75,6 +78,8 @@ namespace DO { namespace Sara {
   DO_SARA_EXPORT
   Image<ComputeSIFTDescriptor<>::descriptor_type>
   compute_dense_sift(const ImageView<float>& image, int local_patch_size = 8);
+
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

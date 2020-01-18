@@ -18,6 +18,9 @@
 
 namespace DO { namespace Sara {
 
+  //! @addtogroup GeometryObjects
+  //! @{
+
   class HalfSpace3
   {
     //! @brief Outward normal.
@@ -55,6 +58,8 @@ namespace DO { namespace Sara {
       return _n0.dot(p - _p0) <= eps;
     }
   };
+
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

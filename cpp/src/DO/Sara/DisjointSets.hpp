@@ -17,3 +17,5 @@
 #include <DO/Sara/Defines.hpp>
 #include <DO/Sara/DisjointSets/AdjacencyList.hpp>
 #include <DO/Sara/DisjointSets/DisjointSets.hpp>
+
+//! @defgroup DisjointSets

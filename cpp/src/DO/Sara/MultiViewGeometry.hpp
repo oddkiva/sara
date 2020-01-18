@@ -9,6 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+//! @file
+
 #pragma once
 
 #include <DO/Sara/MultiViewGeometry/DataTransformations.hpp>
@@ -29,3 +31,5 @@
 #include <DO/Sara/MultiViewGeometry/Estimators/HomographyEstimator.hpp>
 
 #include <DO/Sara/MultiViewGeometry/HDF5.hpp>
+
+//! @defgroup MultiViewGeometry Multi-View Geometry

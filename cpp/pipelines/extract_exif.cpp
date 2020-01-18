@@ -77,7 +77,7 @@ void extract_exif()
       "/mnt/a1cc5981-3655-4f74-9c62-37253d79c82d/sfm/Trafalgar/images"};
   const auto image_paths = sara::ls(dirpath.string(), ".jpg");
 
-  to_csv(image_paths, "/home/david/Desktop/Datasets/Trafalgar.csv");
+  sara::to_csv(image_paths, "/home/david/Desktop/Datasets/Trafalgar.csv");
 
   auto exif_data = std::vector<sara::ExifMetadata>{};
   exif_data.reserve(image_paths.size());

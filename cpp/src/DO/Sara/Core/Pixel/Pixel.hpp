@@ -21,6 +21,9 @@
 // Pixel data structures.
 namespace DO { namespace Sara {
 
+  //! @addtogroup Core
+  //! @{
+
   //! @brief Simple pixel class implemented as a vector.
   template <typename _T, typename _ColorSpace>
   class Pixel : public Matrix<_T, _ColorSpace::size, 1>
@@ -85,6 +88,8 @@ namespace DO { namespace Sara {
       return _ColorSpace::size;
     }
   };
+
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

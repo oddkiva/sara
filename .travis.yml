@@ -24,6 +24,7 @@ addons:
       - libavcodec-dev
       - libavformat-dev
       - libavutil-dev
+      - libswscale-dev
       - libglew-dev
       - libglfw3-dev
       - libqt5opengl5-dev
@@ -33,11 +34,6 @@ addons:
       - libceres-dev
       - python3-dev
       - qtbase5-dev
-      - qt3d5-dev
-      - qt3d-assimpsceneimport-plugin
-      - qt3d-defaultgeometryloader-plugin
-      - qt3d-gltfsceneio-plugin
-      - qt3d-scene2d-plugin
 
 compiler:
   - gcc

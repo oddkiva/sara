@@ -28,3 +28,6 @@
 
 // Constructive Solid Geometry.
 #include <DO/Sara/Geometry/Objects/CSG.hpp>
+
+//! @ingroup Geometry
+//! @defgroup GeometryObjects Geometric Objects

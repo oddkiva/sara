@@ -27,7 +27,7 @@ using namespace DO::Sara;
 
 
 auto track_points(const std::string& dirpath, const std::string& h5_filepath,
-                  bool overwrite, bool debug)
+                  bool /* overwrite */, bool /* debug */)
 {
   // Create a backup.
   if (!fs::exists(h5_filepath + ".bak"))
@@ -43,7 +43,8 @@ auto track_points(const std::string& dirpath, const std::string& h5_filepath,
   view_attributes.list_images(dirpath);
 
   // Load keypoints.
-  SARA_DEBUG << "Reading keypoints from HDF5 file:\n\t" << h5_filepath << std::endl;
+  SARA_DEBUG << "Reading keypoints from HDF5 file:\n\t" << h5_filepath
+             << std::endl;
   view_attributes.read_keypoints(h5_file);
 
 
@@ -55,7 +56,8 @@ auto track_points(const std::string& dirpath, const std::string& h5_filepath,
   SARA_DEBUG << "Initializing the epipolar edges..." << std::endl;
   edge_attributes.initialize_edges(num_vertices);
 
-  SARA_DEBUG << "Reading matches from HDF5 file:\n\t" << h5_filepath << std::endl;
+  SARA_DEBUG << "Reading matches from HDF5 file:\n\t" << h5_filepath
+             << std::endl;
   edge_attributes.read_matches(h5_file, view_attributes);
 
   SARA_DEBUG << "Reading the essential matrices..." << std::endl;
@@ -83,7 +85,7 @@ auto track_points(const std::string& dirpath, const std::string& h5_filepath,
 }
 
 
-int __main(int argc, char **argv)
+auto __main(int argc, char** argv) -> int
 {
   try
   {
@@ -136,7 +138,7 @@ int __main(int argc, char **argv)
 }
 
 
-int main(int argc, char** argv)
+auto main(int argc, char** argv) -> int
 {
   DO::Sara::GraphicsApplication app(argc, argv);
   app.register_user_main(__main);

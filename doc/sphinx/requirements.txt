@@ -1,0 +1,8 @@
+breathe
+exhale
+recommonmark
+sphinx
+sphinx_rtd_theme
+sphinx-autobuild
+sphinxcontrib-bibtex
+sphinxcontrib-katex

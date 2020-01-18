@@ -20,6 +20,9 @@
 
 namespace DO { namespace Sara {
 
+  //! @addtogroup GeometryTools
+  //! @{
+
   template <typename T>
   void roots(const Polynomial<T, 2>& P, std::complex<T>& x1,
              std::complex<T>& x2, bool& real_roots)
@@ -154,6 +157,8 @@ namespace DO { namespace Sara {
     z3 -= a3/4;
     z4 -= a3/4;
   }
+
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

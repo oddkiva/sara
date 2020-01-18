@@ -15,15 +15,12 @@
 
 
 /*!
-  @ingroup Core
-  @defgroup Meta Meta
-  @{
-    \namespace DO::Meta
-    @brief This namespace contains meta-programming structures and functions.
-  @}
+ *  @ingroup Core
+ *  @defgroup Meta Meta
+ *  @{
  */
 
-namespace DO { namespace Sara { namespace Meta {
+namespace DO::Sara::Meta {
 
   //! @brief Static 3D array of integers.
   template <int _Value0, int _Value1, int _Value2>
@@ -137,6 +134,6 @@ namespace DO { namespace Sara { namespace Meta {
   { enum { value = 3 }; };
   //! @}
 
-} /* namespace Meta */
-} /* namespace Sara */
-} /* namespace DO */
+}  // namespace DO::Sara::Meta
+
+//! @}

@@ -20,3 +20,6 @@
 
 // Basic feature matching
 #include "FeatureMatching/AnnMatcher.hpp"
+
+
+//! @defgroup FeatureMatching Feature Matching

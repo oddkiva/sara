@@ -22,6 +22,9 @@
 
 namespace DO::Sara { namespace GL {
 
+  //! @addtogroup OpenGL
+  //! @{
+
   struct Buffer
   {
     static void generate(Buffer* begin, Buffer* end)
@@ -68,6 +71,8 @@ namespace DO::Sara { namespace GL {
 
     GLuint object{0};
   };
+
+  //! @}
 
 } /* namespace GL */
 } /* namespace DO::Sara */

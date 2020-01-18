@@ -150,7 +150,8 @@ int main(int argc, char** argv)
     const auto command = std::string{argv[0]} + " 1";
     std::thread t([&command]() {
       std::cout << "running " << command << std::endl;
-      std::system(command.c_str());
+      const auto retval = std::system(command.c_str());
+      (void) retval;
     });
     t.detach();
 

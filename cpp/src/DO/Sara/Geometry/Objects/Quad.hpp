@@ -23,6 +23,9 @@
 
 namespace DO { namespace Sara {
 
+  //! @addtogroup GeometryObjects
+  //! @{
+
   class DO_SARA_EXPORT Quad : public SmallPolygon<4>
   {
   public:
@@ -34,6 +37,8 @@ namespace DO { namespace Sara {
          const Point2d& c, const Point2d& d);
     //! @}
   };
+
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

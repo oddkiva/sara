@@ -13,23 +13,23 @@
 
 #include <QtOpenGL>
 #ifdef __APPLE__
-# include <OpenGL/GLU.h>
+#  include <OpenGL/GLU.h>
 #else
-# include <GL/glu.h>
+#  include <GL/glu.h>
 #endif
 
 
-namespace GLObject {
+namespace DO::Sara::GL {
 
-  const GLfloat red[]   = { 1.0f, 0.0f, 0.0f, 1.0f };
-  const GLfloat green[] = { 0.0f, 1.0f, 0.0f, 1.0f };
-  const GLfloat blue[]  = { 0.0f, 0.0f, 1.0f, 1.0f };
-  const GLfloat yellow[]= { 1.0f, 1.0f, 0.0f, 1.0f };
-  const GLfloat white[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-  const GLfloat defaultAmbient[] = { 0.2f, 0.2f, 0.2f, 1.0f };
+  constexpr GLfloat red[] = {1.0f, 0.0f, 0.0f, 1.0f};
+  constexpr GLfloat green[] = {0.0f, 1.0f, 0.0f, 1.0f};
+  constexpr GLfloat blue[] = {0.0f, 0.0f, 1.0f, 1.0f};
+  constexpr GLfloat yellow[] = {1.0f, 1.0f, 0.0f, 1.0f};
+  constexpr GLfloat white[] = {1.0f, 1.0f, 1.0f, 1.0f};
+  constexpr GLfloat defaultAmbient[] = {0.2f, 0.2f, 0.2f, 1.0f};
 
-  const double defaultAxisLength = 10.0;
-  const double defaultAxisRadius = 0.125;
+  constexpr double defaultAxisLength = 10.0;
+  constexpr double defaultAxisRadius = 0.125;
 
   class Frame
   {
@@ -41,12 +41,11 @@ namespace GLObject {
     ~Frame();
 
     //! @brief Draw frame in the window.
-    void draw(double axisLength,
-              double axisRadius = defaultAxisRadius);
+    void draw(double axisLength, double axisRadius = defaultAxisRadius);
 
   private:
-    GLUquadricObj * pQuadObj;
+    GLUquadricObj* pQuadObj;
   };
 
 
-}
+}  // namespace DO::Sara::GL

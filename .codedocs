@@ -1,0 +1,25 @@
+PROJECT_NAME = "Sara"
+
+INPUT = cpp/src \
+        cpp/drafts/ \
+        cpp/examples \
+        cpp/pipelines
+RECURSIVE = YES
+EXCLUDE = cling \
+          cmake \
+          cpp/third-party \
+          cpp/test \
+          data \
+          doc \
+          scripts
+EXCLUDE_PATTERNS += */src/*.cpp \
+                    */drafts/*.cpp
+
+GENERATE_TREEVIEW = YES
+HTML_DYNAMIC_SECTIONS = YES
+MARKDOWN_SUPPORT = YES
+TOC_INCLUDE_HEADINGS = 2
+
+ENABLE_PREPROCESSING = YES
+MACRO_EXPANSION = YES
+PREDEFINED = DOXYGEN_SHOULD_SKIP_THIS

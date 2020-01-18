@@ -29,6 +29,9 @@
 
 namespace DO::Sara {
 
+  //! @addtogroup OpenCL
+  //! @{
+
   class Kernel
   {
   public:
@@ -140,5 +143,7 @@ namespace DO::Sara {
   private: /* data members. */
     cl_kernel _kernel = nullptr;
   };
+
+  //! @}
 
 } /* namespace DO::Sara */

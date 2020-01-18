@@ -13,8 +13,8 @@
 
 #pragma once
 
-#include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/ArrayIterators.hpp>
+#include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/MultiArray/ElementTraits.hpp>
 
 #include <cstdint>
@@ -23,8 +23,13 @@
 
 namespace DO { namespace Sara {
 
-  //! @{
-  //! @brief Forward declaration of the multi-dimensional array classes.
+  /*!
+   *  @ingroup Core
+   *  @defgroup MultiArray MultiArray/Tensors Classes
+   *
+   *  @{
+   */
+
   template <typename T, int N, int StorageOrder = ColMajor>
   class MultiArrayView;
 
@@ -35,9 +40,9 @@ namespace DO { namespace Sara {
             template <typename> class Allocator = std::allocator>
   using MultiArray =
       MultiArrayBase<MultiArrayView<T, N, StorageOrder>, Allocator>;
-  //! @}
 
 
+  //! @brief Multiarray view class.
   template <typename T, int N, int S>
   class MultiArrayView
   {
@@ -56,12 +61,12 @@ namespace DO { namespace Sara {
     using size_type = std::size_t;
     using difference_type = std::ptrdiff_t;
     using value_type = T;
-    using pointer = T *;
-    using const_pointer = const T *;
+    using pointer = T*;
+    using const_pointer = const T*;
     using reference = T&;
     using const_reference = const T&;
-    using iterator = T *;
-    using const_iterator = const T *;
+    using iterator = T*;
+    using const_iterator = const T*;
     //! @}
 
     //! @{
@@ -143,7 +148,7 @@ namespace DO { namespace Sara {
 
     //! @{
     //! @brief Constructor that wraps plain data with its known sizes.
-    inline explicit MultiArrayView(value_type *data, int size)
+    inline explicit MultiArrayView(value_type* data, int size)
       : _begin{data}
       , _end{data + size}
       , _sizes{size}
@@ -152,7 +157,7 @@ namespace DO { namespace Sara {
       static_assert(N == 1, "MultiArray must be 1D!");
     }
 
-    inline explicit MultiArrayView(value_type *data, const vector_type& sizes)
+    inline explicit MultiArrayView(value_type* data, const vector_type& sizes)
       : _begin{data}
       , _end{data + compute_size<Dimension>(sizes)}
       , _sizes{sizes}
@@ -438,12 +443,12 @@ namespace DO { namespace Sara {
     }
 
     inline auto end_stepped_subarray(const vector_type& start,
-                                       const vector_type& end,
-                                       const vector_type& steps) const
+                                     const vector_type& end,
+                                     const vector_type& steps) const
         -> const_stepped_nd_iterator
     {
-      const_stepped_nd_iterator it{
-          false, _begin, start, end, _strides, _sizes, steps};
+      const_stepped_nd_iterator it{false,    _begin, start, end,
+                                   _strides, _sizes, steps};
       it += it.stepped_subarray_sizes().array() - 1;
       ++it;
       return it;
@@ -453,6 +458,15 @@ namespace DO { namespace Sara {
     //! @}
     //! @brief Swap multi-array objects.
     inline void swap(self_type& other)
+    {
+      using std::swap;
+      swap(_begin, other._begin);
+      swap(_end, other._end);
+      swap(_sizes, other._sizes);
+      swap(_strides, other._strides);
+    }
+
+    inline void swap(self_type&& other)
     {
       using std::swap;
       swap(_begin, other._begin);
@@ -543,8 +557,7 @@ namespace DO { namespace Sara {
     }
 
     //! @brief Reshape the array with the new sizes.
-    inline auto flatten() const
-        -> MultiArrayView<T, 1, StorageOrder>
+    inline auto flatten() const -> MultiArrayView<T, 1, StorageOrder>
     {
       return MultiArrayView<T, 1, StorageOrder>{const_cast<T*>(_begin),
                                                 static_cast<int>(size())};
@@ -552,13 +565,14 @@ namespace DO { namespace Sara {
 
     //! @brief Transpose the array.
     inline auto transpose(const vector_type& order) const
-      -> MultiArray<T, Dimension, StorageOrder>
+        -> MultiArray<T, Dimension, StorageOrder>
     {
       auto out_sizes = vector_type{};
       // We keep this to remember what it does:
       // for (int i = 0; i < Dimension; ++i)
       //   out_sizes[i] = this->size(order[i]);
-      std::transform(order.data(), order.data() + order.size(), out_sizes.data(),
+      std::transform(order.data(), order.data() + order.size(),
+                     out_sizes.data(),
                      [&](int order_i) { return this->size(order_i); });
 
       auto out = MultiArray<T, Dimension, StorageOrder>{out_sizes};
@@ -626,9 +640,9 @@ namespace DO { namespace Sara {
 
   protected: /* data members. */
     //! @brief First element of the internal array.
-    value_type *_begin{nullptr};
+    value_type* _begin{nullptr};
     //! @brief Last element of the internal array.
-    value_type *_end{nullptr};
+    value_type* _end{nullptr};
     //! @brief Sizes vector.
     vector_type _sizes{vector_type::Zero().eval()};
     //! @brief Strides vector.
@@ -646,6 +660,6 @@ namespace DO { namespace Sara {
     return os;
   }
 
+  //! @}
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara

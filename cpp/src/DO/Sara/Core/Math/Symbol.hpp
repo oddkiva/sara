@@ -5,6 +5,9 @@
 
 namespace DO { namespace Sara {
 
+  //! @addtogroup Math
+  //! @{
+
   class Expression
   {
   public:
@@ -48,6 +51,8 @@ namespace DO { namespace Sara {
   {
     return {"0", false};
   }
+
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

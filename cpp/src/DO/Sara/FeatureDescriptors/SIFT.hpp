@@ -29,8 +29,7 @@
 namespace DO { namespace Sara {
 
   /*!
-    @ingroup FeatureDescriptors
-    @defgroup Descriptors
+    @addtogroup FeatureDescriptors
     @{
    */
 
@@ -39,112 +38,41 @@ namespace DO { namespace Sara {
   class ComputeSIFTDescriptor
   {
   public: /* interface. */
-    enum { Dim = N * N * O };
+    static constexpr auto Dim = N * N * O;
 
     using descriptor_type = Matrix<float, Dim, 1>;
 
     //! @brief Constructor.
-    ComputeSIFTDescriptor(float bin_scale_unit_length = 3.f,
-                          float max_bin_value = 0.2f)
+    inline ComputeSIFTDescriptor(float bin_scale_unit_length = 3.f,
+                                 float max_bin_value = 0.2f)
       : _bin_scale_unit_length{bin_scale_unit_length}
       , _max_bin_value{max_bin_value}
     {
     }
 
     //! @brief Computes the SIFT descriptor for keypoint \$(x,y,\sigma,\theta)\f$.
-    descriptor_type
-    operator()(float x, float y, float sigma, float theta,
-               const ImageView<Vector2f>& grad_polar_coords) const
+    auto operator()(float x, float y, float sigma, float theta,
+                    const ImageView<Vector2f>& grad_polar_coords) const
+        -> descriptor_type
     {
-      const auto pi = static_cast<float>(M_PI);
-      /*
-        The oriented keypoint is denoted by $k = (x,y,\sigma,\theta)$.
-        SIFT describes keypoint $k$ in a similarity-invariant manner.
+      constexpr auto pi = static_cast<float>(M_PI);
 
-        To do so, we consider a square image patch which:
-        - is centered in $(x,y)$
-        - has an orientation angle $\theta$ w.r.t. the image frame coordinates:
-        => to ensure rotation invariance
-        - has a side length proportional to the scale $\sigma$:
-        => to ensure scale invariance
-        This square patch is denoted by $P(x,y,\sigma,\theta) = P(k)$.
-
-        The square patch $P(x,y,\sigma,\theta)$ is itself divided into NxN
-        smaller square patches $(P_{i,j})_{1 \leq i \leq N, j \leq j \leq N}$.
-
-        Notice that we omit the variables $(x,y,\sigma,\theta)$ which the
-        patches $P_{i,j}$ actually depend on.
-
-        $N$ corresponds to the template argument 'int N' which should be 4 as
-        stated in the paper [Lowe, IJCV 2004]).
-
-        In the image, each small square patch $P_{i,j}$ has a side length $l$
-        proportional to the scale $\sigma$ of the keypoint, i.e.,
-        $l = \lambda \sigma$.
-       */
-      const auto lambda = _bin_scale_unit_length;
+      // The radius of each overlapping patches.
+      const auto& lambda = _bin_scale_unit_length;
       const auto l = lambda * sigma;
-      /*
-        It is important to note that $\lambda$ is some 'universal' constant
-        used for all SIFT descriptors to ensure the scale-invariance of the
-        descriptor.
-        */
 
-      /*
-        Now in each image square patch $P_{i,j}$, we build a histogram of
-        gradient orientations $\mathbf{h}_{i,j} \in \mathbb{R}^d$, which
-        quantizes the gradient orientations into $O$ principal orientations.
-        $O$ corresponds to the template argument 'int O'.
-
-        Let us initialize the SIFT descriptor consisting of the NxN histograms
-        $\mathbf{h}_{i,j}$, each in $\mathbf{R}^O$ as follows.
-       */
-      descriptor_type h{descriptor_type::Zero()};
-
-      /*
-        In the rescaled and oriented coordinate frame bound to the patch $P(k)$,
-        - keypoint $k$ is located at (0,0)
-        - centers $C_{i,j}$ of patch $P_{i,j}$ are located at
-          $[ -(N+1)/2 + i, -(N+1)/2 + j ]$
-
-        For example for $N=4$, they are at:
-          (-1.5,-1.5) (-0.5,-1.5) (0.5,-1.5) (1.5,-1.5)
-          (-1.5,-0.5) (-0.5,-0.5) (0.5,-0.5) (1.5,-0.5)
-          (-1.5, 0.5) (-0.5, 0.5) (0.5, 0.5) (1.5, 0.5)
-          (-1.5, 1.5) (-0.5, 1.5) (0.5, 1.5) (1.5, 1.5)
-
-        Gradients in $[x_i-1, x_i+1] \times [y_i-1, y_i+1]$ contributes
-        to histogram $\mathbf{h}_{i,j}$, namely gradients in the square patch
-        $Q_{i,j}$
-        - centered in $C_{i,j}$ as square patch $P_{i,j}$,
-        - with side length $2$.
-        That is because we want to do trilinear interpolation in order to make
-        SIFT robust to small shift in rotation, translation.
-
-        Therefore, to compute the SIFT descriptor we need to scan all the pixels
-        on a larger circular image patch with radius $r$:
-       */
+      // The radius of the total patch.
       const auto r = sqrt(2.f) * l * (N + 1) / 2.f;
-      /*
-        In the above formula, notice:
-        - the factor $\sqrt{2}$ because diagonal corners of the furthest patches
-          $P_{i,j}$ from the center $(x,y)$ must be in the circular patch.
-        - the factor $(N+1)/2$ because we have to include the gradients in larger
-          patches $Q_{i,j}$ for each $P_{i,j}$.
 
-        I recommend to make a drawing to convince oneself.
-       */
-
-      // To build the SIFT descriptor, we do the following procedure:
-      // - we work in the image reference frame;
-      // - we scan in the convolved image $G_\sigma$ the position $(x+u, y+v)$
-      //   where $(u,v) \in [-r,r]^2$;
-      // - we retrieve its coordinates in the oriented frame of the patch
-      //   $P(x,y,\sigma,\theta)$ with inverse transform $T = 1/l R_\theta^T$
+      // Linear part of the patch normalization transform.
       auto T = Matrix2f{};
       T << cos(theta), sin(theta),
           -sin(theta), cos(theta);
       T /= l;
+
+      // The SIFT descriptor.
+      descriptor_type h = descriptor_type::Zero();
+
       // Loop to perform interpolation
       const int rounded_r = int_round(r);
       const int rounded_x = int_round(x);
@@ -153,42 +81,40 @@ namespace DO { namespace Sara {
       {
         for (auto u = -rounded_r; u <= rounded_r; ++u)
         {
-          // Compute the coordinates in the rescaled and oriented coordinate
-          // frame bound to patch $P(k)$.
+          // Retrieve the normalized coordinates.
           auto pos = Vector2f{T * Vector2f(u, v)};
           // subpixel correction?
-          /*pos.x() -= (x - rounded_x);
-          pos.y() -= (y - rounded_y);*/
+          /*
+           * pos.x() -= (x - rounded_x);
+           * pos.y() -= (y - rounded_y);
+           */
 
+          // Boundary check.
           if (rounded_x + u < 0 || rounded_x + u >= grad_polar_coords.width() ||
               rounded_y + v < 0 || rounded_y + v >= grad_polar_coords.height())
             continue;
 
-          // Compute the Gaussian weight which gives more emphasis to gradient
-          // closer to the center.
+          // Compute the Gaussian weight which gives less emphasis to gradient
+          // far from the center.
           auto weight = exp(-pos.squaredNorm() / (2.f * pow(N / 2.f, 2)));
+
+          // Read the precomputed gradient (in polar coordinates).
           auto mag = grad_polar_coords(rounded_x + u, rounded_y + v)(0);
           auto ori = grad_polar_coords(rounded_x + u, rounded_y + v)(1) - theta;
+
+          // Normalize the orientation.
           ori = ori < 0.f ? ori + 2.f * pi : ori;
           ori *= float(O) / (2.f * pi);
 
-          // The coordinate frame is centered in the patch center, thus:
-          // $(x,y)$ is in $[-(N+1)/2, (N+1)/2]^2$.
-          //
-          // Change the coordinate frame so that $(x,y)$ is in $[-1, N]^2$. Thus,
-          // translate by $[ (N-1)/2, (N-1)/2 ]$.
+          // Shift the coordinates to retrieve the "SIFT" coordinate system so
+          // that $(x,y)$ is in $[-1, N]^2$.
           pos.array() += N / 2.f - 0.5f;
+
+          // Discard pixels that are not in the oriented patch.
           if (pos.minCoeff() <= -1.f || pos.maxCoeff() >= static_cast<float>(N))
             continue;
-          // In the translated coordinate frame, note that for $N=4$ the centers
-          // are now located at:
-          //   (0,0) (1,0) (2,0) (3,0)
-          //   (0,1) (1,1) (2,1) (3,1)
-          //   (0,2) (1,1) (2,2) (3,2)
-          //   (0,3) (1,1) (2,3) (3,3)
-          //
 
-          // Update the SIFT descriptor using trilinear interpolation.
+          // Accumulate the histogram bins using trilinear interpolation.
           accumulate(h, pos, ori, weight, mag);
         }
       }
@@ -200,27 +126,27 @@ namespace DO { namespace Sara {
     }
 
     //! @brief Computes the **upright** SIFT descriptor for keypoint \$(x,y,\sigma)\f$.
-    descriptor_type
-    operator()(float x, float y, float sigma,
-               const ImageView<Vector2f>& grad_polar_coords) const
+    auto operator()(float x, float y, float sigma,
+                    const ImageView<Vector2f>& grad_polar_coords) const
+        -> descriptor_type
     {
       return this->operator()(x, y, sigma, 0.f, grad_polar_coords);
     }
 
     //! Helper member function.
-    descriptor_type
-    operator()(const OERegion& f,
-               const ImageView<Vector2f>& grad_polar_coords) const
+    auto operator()(const OERegion& f,
+                    const ImageView<Vector2f>& grad_polar_coords) const
+        -> descriptor_type
     {
       return this->operator()(f.x(), f.y(), f.scale(), f.orientation,
                               grad_polar_coords);
     }
 
     //! Helper member function.
-    Tensor_<float, 2>
-    operator()(const std::vector<OERegion>& features,
-               const std::vector<Point2i>& scale_octave_pairs,
-               const ImagePyramid<Vector2f>& gradient_polar_coords) const
+    auto operator()(const std::vector<OERegion>& features,
+                    const std::vector<Point2i>& scale_octave_pairs,
+                    const ImagePyramid<Vector2f>& gradient_polar_coords) const
+        -> Tensor_<float, 2>
     {
       auto sifts = Tensor_<float, 2>{{int(features.size()), Dim}};
       for (size_t i = 0; i < features.size(); ++i)
@@ -271,45 +197,32 @@ namespace DO { namespace Sara {
     void accumulate(descriptor_type& h, const Vector2f& pos, float ori,
                     float weight, float mag) const
     {
-      // By trilinear interpolation, we mean that in this translated coordinate
-      // frame, a gradient with orientation $\theta$ and located at
-      // $(x,y) \in [-1,N]^2$ contributes to the 4 histograms:
-      //  - $\mathbf{h}_{ floor(y)  , floor(x)  }$
-      //  - $\mathbf{h}_{ floor(y)  , floor(x)+1}$
-      //  - $\mathbf{h}_{ floor(y)+1, floor(x)  }$
-      //  - $\mathbf{h}_{ floor(y)+1, floor(x)+1}$
-      // In each of these histograms, the following bins are accumulated:
-      //  - $\mathbf{h}_{o}$
-      //  - $\mathbf{h}_{o+1}$
-      // where $o = floor(\theta * O/ (2*\pi))$
-      //
-      // Note that a gradient at the boundary like $(-1,-1)$ contributes only
-      // to P_{0,0}.
-      auto xfrac = pos.x() - floor(pos.x());
-      auto yfrac = pos.y() - floor(pos.y());
-      auto orifrac = ori - floor(ori);
-      auto xi = int(pos.x());
-      auto yi = int(pos.y());
-      auto orii = int(ori);
+      const auto xfrac = pos.x() - floor(pos.x());
+      const auto yfrac = pos.y() - floor(pos.y());
+      const auto orifrac = ori - floor(ori);
+      const auto xi = int(pos.x());
+      const auto yi = int(pos.y());
+      const auto orii = int(ori);
 
       for (auto dy = 0; dy < 2; ++dy)
       {
-        auto y = yi + dy;
+        const auto y = yi + dy;
         if (y < 0 || y >= N)
           continue;
 
-        auto wy = (dy == 0) ? 1.f - yfrac : yfrac;
+        const auto wy = (dy == 0) ? 1.f - yfrac : yfrac;
         for (auto dx = 0; dx < 2; ++dx)
         {
-          auto x = xi + dx;
+          const auto x = xi + dx;
           if (x < 0 || x >= N)
             continue;
-          auto wx = (dx == 0) ? 1.f - xfrac : xfrac;
+
+          const auto wx = (dx == 0) ? 1.f - xfrac : xfrac;
           for (auto dori = 0; dori < 2; ++dori)
           {
-            auto o = (orii + dori) % O;
-            auto wo = (dori == 0) ? 1.f - orifrac : orifrac;
-            // Trilinear interpolation:
+            const auto o = (orii + dori) % O;
+            const auto wo = (dori == 0) ? 1.f - orifrac : orifrac;
+
             h[at(y, x, o)] += wy * wx * wo * weight * mag;
           }
         }
@@ -319,12 +232,14 @@ namespace DO { namespace Sara {
     //! Normalize in a contrast-invariant way.
     void normalize(descriptor_type& h)
     {
-      // Euclidean normalization.
+      // Euclidean normalization to account for contrast change.
       h.normalize();
-      // Clamp histogram bin values $h_i$ to 0.2 for enhanced robustness to
-      // lighting change.
+
+      // Make the descriptor robustness to nonlinear illumination change.
+      //
+      // 1) Clamp histogram bin values to 0.2.
       h = h.cwiseMin(descriptor_type::Ones() * _max_bin_value);
-      // Renormalize again.
+      // 2) Renormalize again.
       h.normalize();
     }
 

@@ -21,6 +21,9 @@
 
 namespace DO { namespace Sara {
 
+  //! @addtogroup Color
+  //! @{
+
   template <typename T>
   struct PixelTraits
   {
@@ -149,6 +152,8 @@ namespace DO { namespace Sara {
       }
     };
   };
+
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

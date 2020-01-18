@@ -18,7 +18,10 @@
 #include <array>
 
 
-namespace DO { namespace Sara {
+namespace DO::Sara {
+
+  //! @addtogroup MultiViewGeometry
+  //! @{
 
   struct DO_SARA_EXPORT FourPointAlgorithm
   {
@@ -40,5 +43,6 @@ namespace DO { namespace Sara {
     }
   };
 
-} /* namespace Sara */
-} /* namespace DO */
+  //! @}
+
+}  // namespace DO::Sara
