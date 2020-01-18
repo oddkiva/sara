@@ -4,7 +4,12 @@ INPUT = cpp/src \
         cpp/drafts/ \
         cpp/examples \
         cpp/pipelines
+
+EXAMPLE_PATH = cpp/examples \
+               cpp/drafts/OpenCL/examples
+
 RECURSIVE = YES
+
 EXCLUDE = cling \
           cmake \
           cpp/third-party \
@@ -12,8 +17,10 @@ EXCLUDE = cling \
           data \
           doc \
           scripts
-EXCLUDE_PATTERNS += */src/*.cpp \
-                    */drafts/*.cpp
+
+EXCLUDE_PATTERNS += */cpp/src/**.cpp \
+                    */cpp/drafts/*/test/*.cpp \
+                    */cpp/drafts/Halide/*
 
 GENERATE_TREEVIEW = YES
 HTML_DYNAMIC_SECTIONS = YES
