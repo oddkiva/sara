@@ -2,10 +2,16 @@ PROJECT_NAME = "Sara"
 
 INPUT = @CMAKE_CURRENT_SOURCE_DIR@ \
         @CMAKE_SOURCE_DIR@/cpp/src \
+        @CMAKE_SOURCE_DIR@/cpp/drafts \
         @CMAKE_SOURCE_DIR@/cpp/examples \
         @CMAKE_SOURCE_DIR@/cpp/pipelines
 RECURSIVE = YES
-EXCLUDE_PATTERNS += *.cpp
+EXCLUDE_PATTERNS += */cpp/src/**.cpp \
+                    */cpp/drafts/**.cpp \
+                    */cpp/drafts/Halide/*
+
+EXAMPLE_PATH = @CMAKE_SOURCE_DIR@/cpp/examples \
+               @CMAKE_SOURCE_DIR@/cpp/drafts/OpenCL/examples
 
 MARKDOWN_SUPPORT = YES
 TOC_INCLUDE_HEADINGS = 2

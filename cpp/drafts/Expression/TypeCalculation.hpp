@@ -1,11 +1,14 @@
 #pragma once
 
-#include <DO/Sara/Core/Expression/ForwardDeclarations.hpp>
+#include <drafts/Expression/ForwardDeclarations.hpp>
 
 #include <type_traits>
 
 
 namespace sara::expression {
+
+  //! @addtogroup Expression
+  //! @{
 
   //! @{
   //! @brief Type calculations.
@@ -48,6 +51,8 @@ namespace sara::expression {
       typename T::decayed_type,                                 //
       wrap_as_terminal_t<std::remove_cv_t<std::remove_reference_t<T>>>  //
       >;
+  //! @}
+
   //! @}
 
 } /* namespace sara::expression */

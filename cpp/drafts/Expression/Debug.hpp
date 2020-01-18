@@ -1,10 +1,13 @@
 #pragma once
 
-#include <boost/core/demangle.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/core/demangle.hpp>
 
 #include <string>
 
+
+//! @addtogroup Expression
+//! @{
 
 template <class T>
 std::string type_name()
@@ -32,3 +35,5 @@ std::string type_name()
     r += "&&";
   return r;
 }
+
+//! @}

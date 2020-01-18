@@ -1,11 +1,14 @@
 #pragma once
 
-#include <DO/Sara/Core/Expression/ForwardDeclarations.hpp>
+#include <drafts/Expression/ForwardDeclarations.hpp>
 
 #include <tuple>
 
 
 namespace sara::expression {
+
+  //! @addtogroup Expression
+  //! @{
 
   template <typename L, typename R>
   struct AddXpr : Expression<AddXpr<L, R>>
@@ -319,5 +322,7 @@ namespace sara::expression {
       return -expr.eval();
     }
   };
+
+  //! @}
 
 } /* namespace sara::expression */

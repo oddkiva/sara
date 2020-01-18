@@ -1,9 +1,9 @@
 #define BOOST_TEST_MODULE "Arithmetic Symbolic Calculus"
-#include <DO/Sara/Core/Expression.hpp>
-#include <DO/Sara/Core/Expression/Debug.hpp>
-#include <DO/Sara/Core/Expression/UsualFunctions.hpp>
-#include <DO/Sara/Core/Expression/Differential/Variable.hpp>
-#include <DO/Sara/Core/Expression/Differential/Rules.hpp>
+#include <drafts/Expression.hpp>
+#include <drafts/Expression/Debug.hpp>
+#include <drafts/Expression/UsualFunctions.hpp>
+#include <drafts/Expression/Differential/Variable.hpp>
+#include <drafts/Expression/Differential/Rules.hpp>
 
 #include <boost/test/unit_test.hpp>
 

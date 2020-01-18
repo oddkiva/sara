@@ -5,29 +5,11 @@
 
 auto main() -> int
 {
-  // Instantiate a builder and automatically manage its memory.
-  auto builder_deleter = [](nvinfer1::IBuilder* builder) {
-    if (builder == nullptr)
-      return;
-    builder->destroy();
-    builder = nullptr;
-  };
-
-  auto builder = std::unique_ptr<nvinfer1::IBuilder, decltype(builder_deleter)>{
-      nvinfer1::createInferBuilder(Logger::instance()), builder_deleter};
-
+  namespace sara = DO::Sara;
+  auto builder = sara::TensorRT::make_builder();
 
   // Instantiate a network and automatically manager its memory.
-  auto network_deleter = [](nvinfer1::INetworkDefinition* network) {
-    if (network == nullptr)
-      return;
-    network->destroy();
-    network = nullptr;
-  };
-
-  auto network =
-      std::unique_ptr<nvinfer1::INetworkDefinition, decltype(network_deleter)>{
-          builder->createNetworkV2(0u), network_deleter};
+  auto network = sara::TensorRT::make_network(builder.get());
 
 
   // Instantiate an input data.

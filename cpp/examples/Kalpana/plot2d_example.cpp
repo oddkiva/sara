@@ -1,3 +1,5 @@
+//! @example
+
 #include <QApplication>
 
 #include <DO/Kalpana.hpp>

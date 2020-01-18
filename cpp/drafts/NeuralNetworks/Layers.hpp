@@ -1,7 +1,6 @@
 #pragma once
 
 #include <DO/Sara/ImageProcessing/GemmBasedConvolution.hpp>
-#include <DO/Sara/NeuralNetworks/Variables.hpp>
 
 #include <memory>
 

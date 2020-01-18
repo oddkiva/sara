@@ -1,11 +1,14 @@
 #pragma once
 
-#include <DO/Sara/Core/Expression/ForwardDeclarations.hpp>
-#include <DO/Sara/Core/Expression/TypeCalculation.hpp>
-#include <DO/Sara/Core/Expression/Arithmetics.hpp>
+#include <drafts/Expression/ForwardDeclarations.hpp>
+#include <drafts/Expression/TypeCalculation.hpp>
+#include <drafts/Expression/Arithmetics.hpp>
 
 
 namespace sara::expression {
+
+  //! @addtogroup Expression
+  //! @{
 
   template <typename Derived>
   struct Expression
@@ -281,5 +284,7 @@ namespace sara::expression {
       };
     }
   };
+
+  //! @}
 
 } /* namespace sara::expression */

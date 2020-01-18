@@ -1,6 +1,6 @@
 #pragma once
 
-#include <DO/Sara/Core/Expression/Terminal.hpp>
+#include <drafts/Expression/Terminal.hpp>
 
 #include <cmath>
 #include <functional>
@@ -8,6 +8,9 @@
 
 // Usual functions.
 namespace sara::expression {
+
+  //! @addtogroup Expression
+  //! @{
 
   struct sin_t
   {
@@ -42,5 +45,7 @@ namespace sara::expression {
 
   using Sin = Terminal<sin_t>;  // decltype(sin_);
   using Cos = Terminal<cos_t>;  // decltype(cos_);
+
+  //! @}
 
 }  // namespace sara::expression

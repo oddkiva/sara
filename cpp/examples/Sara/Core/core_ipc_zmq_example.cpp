@@ -9,6 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+//! @example
+
 #include <DO/Sara/Core/MultiArray.hpp>
 
 #include <boost/interprocess/containers/vector.hpp>

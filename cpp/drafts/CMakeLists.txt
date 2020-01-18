@@ -6,10 +6,13 @@ if (SARA_BUILD_TESTS)
 endif ()
 
 if (NOT WIN32)
-  add_subdirectory(Core)
+  # add_subdirectory(Core)
   add_subdirectory(Compute)
   add_subdirectory(OpenCL)
 endif ()
+
+add_subdirectory(Expression)
+add_subdirectory(NeuralNetworks)
 
 if (SARA_USE_HPX)
   add_subdirectory(Parallel)

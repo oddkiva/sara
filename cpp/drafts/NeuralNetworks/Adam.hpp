@@ -6,7 +6,7 @@
 namespace DO::Sara {
 
   //! @ingroup Drafts
-  //! @addtogroup NeuralNetworks
+  //! @addtogroup NeuralNetworks Neural Networks
   //! @{
 
   struct Adam

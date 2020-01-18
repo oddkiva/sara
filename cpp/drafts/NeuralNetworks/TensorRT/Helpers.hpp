@@ -54,7 +54,7 @@ namespace DO::Sara::TensorRT {
     return {nvinfer1::createInferBuilder(Logger::instance()), &delete_builder};
   }
 
-  static auto make_network(nvinfer1::IBuilder* builder)
+  inline auto make_network(nvinfer1::IBuilder* builder)
       -> std::unique_ptr<nvinfer1::INetworkDefinition,
                          decltype(&delete_network_def)>
   {
