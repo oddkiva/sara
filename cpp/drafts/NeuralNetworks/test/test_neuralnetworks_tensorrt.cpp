@@ -1,25 +1,6 @@
-#include <NvInfer.h>
+#include <drafts/NeuralNetworks/TensorRT/Helpers.hpp>
 
-#include <iostream>
-#include <memory>
 #include <vector>
-
-
-class Logger : public nvinfer1::ILogger
-{
-public:
-  static auto instance() -> Logger&
-  {
-    static Logger instance;
-    return instance;
-  }
-
-  void log(Severity severity, const char* msg) override
-  {
-    if (severity != Severity::kINFO)
-      std::cout << msg << std::endl;
-  }
-};
 
 
 auto main() -> int

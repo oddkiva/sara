@@ -5,6 +5,10 @@
 
 namespace DO::Sara {
 
+  //! @ingroup Drafts
+  //! @addtogroup NeuralNetworks
+  //! @{
+
   struct Adam
   {
     void step(const TensorView_<float, 4>& grad_theta0,
@@ -33,5 +37,7 @@ namespace DO::Sara {
     Tensor_<float, 4> m0, v0;
     int t{0};
   };
+
+  //! @}
 
 } /* namespace DO::Sara */

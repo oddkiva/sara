@@ -1,5 +1,3 @@
-find_package(Boost COMPONENTS
-  filesystem serialization system unit_test_framework REQUIRED)
 find_package(OpenCL REQUIRED)
 find_package(OpenGL REQUIRED)
 if (NOT APPLE)
@@ -12,5 +10,7 @@ find_package(DO_Sara COMPONENTS Core ImageIO REQUIRED)
 add_subdirectory(Core)
 add_subdirectory(GL)
 
-add_subdirectory(test)
+if (SARA_BUILD_TESTS)
+  add_subdirectory(test)
+endif ()
 add_subdirectory(examples)

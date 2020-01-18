@@ -1,5 +1,3 @@
-project(DO_MultiViewGeometry_test)
-
 message(STATUS "  - DO_NeuralNetworks_Tests")
 
 find_package(DO_Sara COMPONENTS Core REQUIRED)

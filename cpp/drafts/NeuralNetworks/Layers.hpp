@@ -8,7 +8,10 @@
 
 namespace DO { namespace Sara {
 
-  // A calculator.
+  //! @ingroup Drafts
+  //! @defgroup NeuralNetworks
+  //! @{
+
   template <typename Padding = PeriodicPadding>
   struct Conv2D
   {
@@ -100,6 +103,8 @@ namespace DO { namespace Sara {
   class CrossEntropyLoss
   {
   };
+
+  //! @}
 
 
 } /* namespace Sara */
