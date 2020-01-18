@@ -15,11 +15,17 @@
 
 #include <DO/Sara/Core/Image.hpp>
 
+#include <cstdio>
+#include <memory>
+
 
 struct AVCodec;
 struct AVCodecContext;
+struct AVCodecParameters;
 struct AVFormatContext;
 struct AVFrame;
+struct AVPacket;
+struct SwsContext;
 
 
 namespace DO { namespace Sara {
@@ -27,7 +33,7 @@ namespace DO { namespace Sara {
   //! @defgroup VideoIO Video I/O
   //! @{
 
-  class DO_SARA_EXPORT VideoStream : public std::streambuf
+  class DO_SARA_EXPORT VideoStream
   {
   public:
     VideoStream();
@@ -38,45 +44,60 @@ namespace DO { namespace Sara {
 
     ~VideoStream();
 
-    VideoStream& operator=(const VideoStream&) = delete;
+    auto open(const std::string& file_path) -> void;
 
-    int width() const;
+    auto close() -> void;
 
-    int height() const;
+    auto read() -> bool;
 
-    Vector2i sizes() const
+    auto frame() const -> ImageView<Rgb8>;
+
+    auto seek(std::size_t frame_pos) -> void;
+
+    auto frame_rate() const -> float;
+
+    auto width() const -> int;
+
+    auto height() const -> int;
+
+    auto sizes() const -> Vector2i
     {
-      return Vector2i{ width(), height() };
+      return Vector2i{width(), height()};
     }
-
-    void open(const std::string& file_path);
-
-    void close();
-
-    void seek(std::size_t frame_pos);
-
-    bool read(ImageView<Rgb8>& video_frame);
 
     friend inline VideoStream& operator>>(VideoStream& video_stream,
                                           ImageView<Rgb8>& video_frame)
     {
-      if (!video_stream.read(video_frame))
-        video_frame = Image<Rgb8>();
+      if (!video_stream.read())
+        video_frame = {};
+      else
+        video_frame = video_stream.frame();
       return video_stream;
     }
 
   private:
+    auto decode(AVCodecContext* dec_ctx, AVFrame* frame, AVPacket* pkt) -> bool;
+
+  private:
     static bool _registered_all_codecs;
 
-    AVFormatContext *_video_format_context = nullptr;
-    int _video_stream = -1;
-    AVCodec *_video_codec = nullptr;
-    AVCodecContext *_video_codec_context = nullptr;
-    AVFrame *_video_frame = nullptr;
-    size_t _video_frame_pos = std::numeric_limits<size_t>::max();
+    // FFmpeg internals.
+    int _video_stream_index = -1;
+    const AVCodecParameters* _video_codec_params = nullptr;
+    const AVCodec* _video_codec = nullptr;
+    AVFormatContext* _video_format_context = nullptr;
+    AVCodecContext* _video_codec_context = nullptr;
+    AVFrame* _picture = nullptr;
+    AVPacket* _pkt = nullptr;
+
+    SwsContext *_sws_context = nullptr;
+    AVFrame* _picture_rgb = nullptr;
+
+    bool _end_of_stream{true};
+    int _got_frame{};
+    int _i{};
   };
 
   //! @}
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara

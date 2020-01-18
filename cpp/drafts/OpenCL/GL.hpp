@@ -16,3 +16,6 @@
 #include <drafts/OpenCL/GL/Shader.hpp>
 #include <drafts/OpenCL/GL/Texture.hpp>
 #include <drafts/OpenCL/GL/VertexArray.hpp>
+
+//! @ingroup Drafts
+//! @defgroup OpenGL

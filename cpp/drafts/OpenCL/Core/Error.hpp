@@ -20,6 +20,9 @@
 
 namespace DO::Sara {
 
+  //! @addtogroup OpenCL
+  //! @{
+
   const char * get_error_string(cl_int error)
   {
     switch (error)
@@ -164,5 +167,7 @@ namespace DO::Sara {
       return "Unknown OpenCL error";
     }
   }
+
+  //! @}
 
 } /* namespace DO::Sara */

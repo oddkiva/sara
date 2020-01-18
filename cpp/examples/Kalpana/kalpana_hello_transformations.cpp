@@ -9,6 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+//! @example
+
 #include <DO/Sara/Defines.hpp>
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/Tensor.hpp>

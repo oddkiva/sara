@@ -1,6 +1,7 @@
 PROJECT_NAME = "Sara"
 
 INPUT = cpp/src \
+        cpp/drafts/ \
         cpp/examples \
         cpp/pipelines
 RECURSIVE = YES
@@ -11,7 +12,8 @@ EXCLUDE = cling \
           data \
           doc \
           scripts
-EXCLUDE_PATTERNS += */src/*.cpp
+EXCLUDE_PATTERNS += */src/*.cpp \
+                    */drafts/*.cpp
 
 GENERATE_TREEVIEW = YES
 HTML_DYNAMIC_SECTIONS = YES

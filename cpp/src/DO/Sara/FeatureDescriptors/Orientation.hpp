@@ -33,12 +33,12 @@ namespace DO { namespace Sara {
    *  @{
   */
 
-  //! @brief Computes the image gradients of image \f$I\f$ in polar coordinates.
+  //! @brief Computes the image gradients of image @f$I@f$ in polar coordinates.
   /*!
-      In each pixel \f$(x,y) \in [0,w[ \times [0,h[\f$,
-      \f$\nabla I(x,y)\f$ is the 2D vector \f$(r,\theta)\f$ where:
-      - \f$r = 2 ||\nabla I(x,y)||\f$,
-      - \f$\theta = \mathrm{angle}( \nabla I(x,y) )\f$.
+      In each pixel @f$(x,y) \in [0,w[ \times [0,h[@f$,
+      @f$\nabla I(x,y)@f$ is the 2D vector @f$(r,\theta)@f$ where:
+      - @f$r = 2 ||\nabla I(x,y)||@f$,
+      - @f$\theta = \mathrm{angle}( \nabla I(x,y) )@f$.
    */
   template <typename T>
   Image<Matrix<T,2,1>> gradient_polar_coordinates(const ImageView<T>& f)
@@ -75,7 +75,7 @@ namespace DO { namespace Sara {
   }
 
   //! @brief Computes the orientation histogram on a local patch around keypoint
-  //! \f$(x,y,\sigma)\f$.
+  //! @f$(x,y,\sigma)@f$.
   template <typename T, int N>
   void compute_orientation_histogram(Array<T, N, 1>& orientation_histogram,
                                      const ImageView<Matrix<T,2,1>>& grad_polar_coords,

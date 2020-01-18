@@ -25,6 +25,9 @@
 
 namespace DO::Sara { namespace GL {
 
+  //! @addtogroup OpenGL
+  //! @{
+
   template <typename T, int N = 2>
   class PixelBuffer
   {
@@ -104,6 +107,8 @@ namespace DO::Sara { namespace GL {
     GLuint _pbo_id;
     std::array<size_t, N> _dims;
   };
+
+  //! @}
 
 } /* namespace GL */
 } /* namespace DO::Sara */

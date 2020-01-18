@@ -23,11 +23,6 @@ before_script:
       libpocl-dev
       libceres-dev
       qtbase5-dev
-      qt3d5-dev
-      qt3d-assimpsceneimport-plugin
-      qt3d-defaultgeometryloader-plugin
-      qt3d-gltfsceneio-plugin
-      qt3d-scene2d-plugin
   - apt-get install -qq
       libboost-python-dev
       python3-dev

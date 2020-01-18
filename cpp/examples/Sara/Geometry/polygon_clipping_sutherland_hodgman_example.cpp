@@ -9,6 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+//! @example
+
 #include <DO/Sara/Geometry.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/Core/Timer.hpp>

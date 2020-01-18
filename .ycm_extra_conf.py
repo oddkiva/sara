@@ -63,6 +63,9 @@ flags = [
 "-I", "/usr/local/include",
 # CUDA header directories.
 "-I", "/usr/local/cuda/include",
+# Halide.
+"-I", "/opt/halide/include",
+"-I", "/opt/halide/tools",
 # Current header directories.
 "-I", "cpp",
 "-I", "cpp/src",

@@ -9,30 +9,47 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+//! @example
+
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/VideoIO.hpp>
+
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <memory>
+
+#include "libavcodec/avcodec.h"
+#include "libavutil/common.h"
+#include "libavutil/imgutils.h"
+#include "libavutil/mathematics.h"
+
+
+namespace sara = DO::Sara;
 
 
 GRAPHICS_MAIN()
 {
-  using namespace std;
-  using namespace DO::Sara;
+  using namespace std::string_literals;
 
-  const string video_filepath = src_path("orion_1.mpg");
+  const auto video_filepath =
+      "/home/david/Desktop/humanising-autonomy/bollardX.mp4"s;
+  //const std::string video_filepath = src_path("orion_1.mpg");
 
-  VideoStream video_stream(video_filepath);
-  auto video_frame = Image<Rgb8>{video_stream.sizes()};
+  sara::VideoStream video_stream{video_filepath};
 
-  while (true)
+  SARA_DEBUG << "Frame rate = " << video_stream.frame_rate() << std::endl;
+  SARA_DEBUG << "Frame sizes = " << video_stream.sizes().transpose() << std::endl;
+
+  while (video_stream.read())
   {
-    video_stream >> video_frame;
-    if (!active_window())
-      create_window(video_frame.sizes());
+    if (sara::active_window() == nullptr)
+      sara::create_window(video_stream.sizes());
 
-    if (!video_frame.data())
-      break;
-    display(video_frame);
+    sara::display(video_stream.frame());
   }
+
+  sara::close_window();
 
   return 0;
 }

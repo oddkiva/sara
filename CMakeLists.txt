@@ -16,6 +16,7 @@ set(CMAKE_BUILD_TYPE "Release" CACHE STRING
 
 # Set options.
 option(SARA_USE_VLD "Enable Visual Leak Detector for unit tests" OFF)
+option(SARA_USE_HALIDE "Enable Halide" OFF)
 option(SARA_BUILD_VIDEOIO "Build Sara's Video I/O module" OFF)
 option(SARA_BUILD_PYTHON_BINDINGS "Build Python bindings" OFF)
 option(SARA_BUILD_TESTS "Build unit tests for DO-Sara libraries" OFF)
@@ -52,6 +53,7 @@ include(sara_installation_settings)
 
 # Enable testing before building the library.
 if (SARA_BUILD_TESTS)
+  include(CTest)
   enable_testing()
 endif ()
 

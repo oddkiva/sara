@@ -27,6 +27,9 @@
 
 namespace DO::Sara {
 
+  //! @addtogroup OpenCL
+  //! @{
+
   class Device
   {
   public:
@@ -160,5 +163,7 @@ namespace DO::Sara {
 
     return devices;
   }
+
+  //! @}
 
 } /* namespace DO::Sara */
