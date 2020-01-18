@@ -1,77 +1,77 @@
-language: cpp
-
-sudo: required
-dist: bionic
-services:
-  - xvfb
-
-cache:
-  # For coveralls.
-  bundler: true
-  # Try to speed up builds with ccache.
-  ccache: true
-
-
-addons:
-  apt:
-    packages:
-      # C++ toolchain
-      - build-essential
-      - cmake
-      - doxygen
-      - git
-      - lcov
-      # Boost libraries
-      - libboost-all-dev
-      # HDF5
-      - libhdf5-dev
-      # Image I/O
-      - libjpeg-dev
-      - libpng-dev
-      - libtiff5-dev
-      # FFmpeg libraries
-      - libavcodec-dev
-      - libavformat-dev
-      - libavutil-dev
-      - libswscale-dev
-      # OpenGL
-      - libglew-dev
-      - libglfw3-dev
-      - ocl-icd-opencl-dev
-      # Python bindings (TODO)
-      - python3-dev
-      # OpenCL
-      - opencl-headers
-      - libpocl-dev
-      # Ceres
-      - libceres-dev
-      # Qt5
-      - libqt5opengl5-dev
-      - qtbase5-dev
-
-compiler:
-  - gcc
-
-install:
-  - sudo ./scripts/install_clblast.sh
-  - bundle install
-
-script:
-  # Build libraries.
-  - mkdir build
-  - cd build
-  - cmake -DCMAKE_BUILD_TYPE=Debug -DSARA_BUILD_TESTS=ON -DSARA_BUILD_SAMPLES=ON -DSARA_BUILD_VIDEOIO=ON -DSARA_FFMPEG_DIR=$HOME/ffmpeg ..
-  - make -j$(nproc)
-  # Run tests except OpenCL tests until I know how to fix them on Travis CI...
-  - ctest --output-on-failure --exclude-regex "test_opencl_*"
-  # Make package.
-  - make package
-
-after_success:
-  - cd ..
-  - lcov --compat-libtool --directory build --base-directory=cpp/src --capture --output-file=coverage.info
-  - lcov --remove coverage.info '/usr/*' --output-file coverage.info
-  - lcov --remove coverage.info '/home/travis/build/DO-CV/sara/cpp/third-party/*' --output-file coverage.info
-  - lcov --remove coverage.info '/home/travis/build/DO-CV/sara/cpp/test/*' --output-file coverage.info
-  - lcov --remove coverage.info '/home/travis/build/DO-CV/sara/build/*' --output-file coverage.info
-  - coveralls-lcov coverage.info
+language: cpp
+
+sudo: required
+dist: bionic
+services:
+  - xvfb
+
+cache:
+  # For coveralls.
+  bundler: true
+  # Try to speed up builds with ccache.
+  ccache: true
+
+
+addons:
+  apt:
+    packages:
+      # C++ toolchain
+      - build-essential
+      - cmake
+      - doxygen
+      - git
+      - lcov
+      # Boost libraries
+      - libboost-all-dev
+      # HDF5
+      - libhdf5-dev
+      # Image I/O
+      - libjpeg-dev
+      - libpng-dev
+      - libtiff5-dev
+      # FFmpeg libraries
+      - libavcodec-dev
+      - libavformat-dev
+      - libavutil-dev
+      - libswscale-dev
+      # OpenGL
+      - libglew-dev
+      - libglfw3-dev
+      - ocl-icd-opencl-dev
+      # Python bindings (TODO)
+      - python3-dev
+      # OpenCL
+      - opencl-headers
+      - libpocl-dev
+      # Ceres
+      - libceres-dev
+      # Qt5
+      - libqt5opengl5-dev
+      - qtbase5-dev
+
+compiler:
+  - gcc
+
+install:
+  - sudo ./scripts/install_clblast.sh
+  - bundle install
+
+script:
+  # Build libraries.
+  - mkdir build
+  - cd build
+  - cmake -DCMAKE_BUILD_TYPE=Debug -DSARA_BUILD_TESTS=ON -DSARA_BUILD_SAMPLES=ON -DSARA_BUILD_VIDEOIO=ON ..
+  - make -j$(nproc)
+  # Run tests except OpenCL tests until I know how to fix them on Travis CI...
+  - ctest --output-on-failure --exclude-regex "test_opencl_*"
+  # Make package.
+  - make package
+
+after_success:
+  - cd ..
+  - lcov --compat-libtool --directory build --base-directory=cpp/src --capture --output-file=coverage.info
+  - lcov --remove coverage.info '/usr/*' --output-file coverage.info
+  - lcov --remove coverage.info '/home/travis/build/DO-CV/sara/cpp/third-party/*' --output-file coverage.info
+  - lcov --remove coverage.info '/home/travis/build/DO-CV/sara/cpp/test/*' --output-file coverage.info
+  - lcov --remove coverage.info '/home/travis/build/DO-CV/sara/build/*' --output-file coverage.info
+  - coveralls-lcov coverage.info
