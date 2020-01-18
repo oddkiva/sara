@@ -7,9 +7,9 @@ services:
 
 cache:
   # For coveralls.
-  bundler: true
+  - bundler
   # Try to speed up builds with ccache.
-  ccache: true
+  - ccache
 
 
 addons:
