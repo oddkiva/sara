@@ -466,6 +466,15 @@ namespace DO { namespace Sara {
       swap(_strides, other._strides);
     }
 
+    inline void swap(self_type&& other)
+    {
+      using std::swap;
+      swap(_begin, other._begin);
+      swap(_end, other._end);
+      swap(_sizes, other._sizes);
+      swap(_strides, other._strides);
+    }
+
     //! @{
     //! @brief Equality comparison.
     inline bool operator==(const self_type& other) const

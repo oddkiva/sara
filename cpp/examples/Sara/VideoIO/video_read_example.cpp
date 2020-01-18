@@ -39,14 +39,14 @@ GRAPHICS_MAIN()
   SARA_DEBUG << "Frame rate = " << video_stream.frame_rate() << std::endl;
   SARA_DEBUG << "Frame sizes = " << video_stream.sizes().transpose() << std::endl;
 
-  auto video_frame = sara::Image<sara::Rgb8>{video_stream.sizes()};
+  auto video_frame = sara::ImageView<sara::Rgb8>{};
 
-  while (video_stream.read(video_frame))
+  while (video_stream.read2())
   {
     if (sara::active_window() == nullptr)
-      sara::create_window(video_frame.sizes());
+      sara::create_window(video_stream.sizes());
 
-    sara::display(video_frame);
+    sara::display(video_stream.frame());
   }
 
   sara::close_window();

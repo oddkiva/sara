@@ -25,6 +25,7 @@ struct AVCodecParameters;
 struct AVFormatContext;
 struct AVFrame;
 struct AVPacket;
+struct SwsContext;
 
 
 namespace DO { namespace Sara {
@@ -48,6 +49,9 @@ namespace DO { namespace Sara {
     auto close() -> void;
 
     auto read(ImageView<Rgb8>& video_frame) -> bool;
+
+    auto read2() -> bool;
+    auto frame() const -> ImageView<Rgb8>;
 
     auto seek(std::size_t frame_pos) -> void;
 
@@ -84,6 +88,9 @@ namespace DO { namespace Sara {
     AVCodecContext* _video_codec_context = nullptr;
     AVFrame* _picture = nullptr;
     AVPacket* _pkt = nullptr;
+
+    SwsContext *_sws_context = nullptr;
+    AVFrame* _picture_rgb = nullptr;
 
     bool _end_of_stream{true};
     int _got_frame{};

@@ -12,16 +12,12 @@
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
-#include <libavformat/avio.h>
-#include <libavutil/file.h>
 #include <libavutil/imgutils.h>
+#include <libswscale/swscale.h>
 }
 
-#include "VideoStream.hpp"
 #include <DO/Sara/Core/DebugUtilities.hpp>
-
-#include <cstdio>
-#include <cstdlib>
+#include <DO/Sara/VideoIO/VideoStream.hpp>
 
 
 namespace DO::Sara {
@@ -143,16 +139,40 @@ namespace DO::Sara {
       throw std::runtime_error{"VideoStream error: unsupported pixel format! "
                                "Extend the implementation please!"};
 
+    // Get video format converter to RGB24.
+    _sws_context = sws_getContext(
+        width(), height(), _video_codec_context->pix_fmt, width(), height(),
+        AV_PIX_FMT_RGB24, SWS_POINT, nullptr, nullptr, nullptr);
+    if (_sws_context == nullptr)
+      throw std::runtime_error{"Could not allocate SWS context!"};
+
+    // The converted the video frame.
+    if (_picture_rgb == nullptr)
+      _picture_rgb = av_frame_alloc();
+    if (_picture_rgb == nullptr)
+      throw std::runtime_error{"Could not allocate video frame!"};
+
+    // @TODO: make it 32 to optimize for SSE/AVX2.
+    constexpr auto alignment_size = 1;
+    const auto byte_size =
+        av_image_alloc(_picture_rgb->data, _picture_rgb->linesize, width(),
+                       height(), AV_PIX_FMT_RGB24, alignment_size);
+    if (byte_size != width() * height() * 3)
+      throw std::runtime_error{
+          "Allocated memory size for the converted video frame is wrong!"};
+
     _end_of_stream = false;
   }
 
   auto VideoStream::close() -> void
   {
     // Flush the decoder (draining mode.)
-    this->decode(_video_codec_context, _picture, nullptr);
+    if (_video_format_context != nullptr)
+      this->decode(_video_codec_context, _picture, nullptr);
 
     // Free the data structures.
-    av_packet_unref(_pkt);
+    if (_pkt != nullptr)
+      av_packet_unref(_pkt);
     av_frame_free(&_picture);
     avcodec_close(_video_codec_context);
     avformat_close_input(&_video_format_context);
@@ -163,6 +183,11 @@ namespace DO::Sara {
     _video_stream_index = -1;
     _video_codec_params = nullptr;
     _video_codec = nullptr;
+
+    sws_freeContext(_sws_context);
+    if (_picture_rgb != nullptr)
+      av_freep(_picture_rgb->data);
+    av_frame_free(&_picture_rgb);
 
     _end_of_stream = true;
   }
@@ -193,30 +218,6 @@ namespace DO::Sara {
           _pkt->pts = _pkt->dts = _i;
 
         // Decompress the video frame.
-#ifdef OLD_WAY
-        const auto bytes_used = avcodec_decode_video2(
-            _video_codec_context, _picture, &_got_frame, _pkt);
-        if (bytes_used < 0)
-          throw std::runtime_error{"Could not decode video frame!"};
-
-        if (_got_frame)
-        {
-          const auto w = width();
-          const auto h = height();
-          auto video_frame_data = video_frame.data();
-
-          for (auto y = 0; y < h; ++y)
-          {
-            for (auto x = 0; x < w; ++x)
-            {
-              auto yuv = get_yuv_pixel(_picture, x, y);
-              *video_frame_data = Sara::convert(yuv);
-              ++video_frame_data;
-            }
-          }
-          return true;
-        }
-#else
         _got_frame = decode(_video_codec_context, _picture, _pkt);
 
         if (_got_frame)
@@ -240,12 +241,59 @@ namespace DO::Sara {
 
           return true;
         }
-#endif
       }
       ++_i;
     } while (!_end_of_stream || _got_frame);
 
     return false;
+  }
+
+  auto VideoStream::read2() -> bool
+  {
+    do
+    {
+      if (!_end_of_stream)
+        if (av_read_frame(_video_format_context, _pkt) < 0)
+          _end_of_stream = true;
+
+      if (_end_of_stream)
+      {
+        _pkt->data = nullptr;
+        _pkt->size = 0;
+        return false;
+      }
+
+      if (_pkt->stream_index == _video_stream_index || _end_of_stream)
+      {
+        _got_frame = 0;
+
+        if (_pkt->pts == AV_NOPTS_VALUE)
+          _pkt->pts = _pkt->dts = _i;
+
+        // Decompress the video frame.
+        _got_frame = decode(_video_codec_context, _picture, _pkt);
+
+        if (_got_frame)
+        {
+          av_packet_unref(_pkt);
+          av_init_packet(_pkt);
+
+          // Convert to RGB24 pixel format.
+          sws_scale(_sws_context, _picture->data, _picture->linesize, 0,
+                    height(), _picture_rgb->data, _picture_rgb->linesize);
+
+          return true;
+        }
+      }
+      ++_i;
+    } while (!_end_of_stream || _got_frame);
+
+    return false;
+  }
+
+  auto VideoStream::frame() const -> ImageView<Rgb8>
+  {
+    return {reinterpret_cast<Rgb8*>(_picture_rgb->data[0]), sizes()};
   }
 
   auto VideoStream::seek(std::size_t frame_pos) -> void

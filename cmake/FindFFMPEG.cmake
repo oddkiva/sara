@@ -11,7 +11,7 @@ elseif (MSVC)
     set(FFMPEG_LINK_DIR ${DO_Sara_DIR}/../../../lib)
   endif ()
 
-  set(FFMPEG_LIBRARIES avcodec avformat avutil)
+  set(FFMPEG_LIBRARIES avcodec avformat avutil swscale)
 
 else ()
 
@@ -26,28 +26,34 @@ else ()
     pkg_check_modules(_FFMPEG_AVCODEC REQUIRED libavcodec>=55.28.1)
     pkg_check_modules(_FFMPEG_AVFORMAT libavformat)
     pkg_check_modules(_FFMPEG_AVUTIL libavutil)
+    pkg_check_modules(_FFMPEG_SWSCALE libswscale)
   endif (PKG_CONFIG_FOUND)
 
   find_path(FFMPEG_AVCODEC_INCLUDE_DIR
     NAMES libavcodec/avcodec.h
     PATHS ${_FFMPEG_AVCODEC_INCLUDE_DIRS}
-          /usr/include /usr/local/include /opt/local/include /sw/include
+          /usr/include /usr/local/include /opt/local/include
     PATH_SUFFIXES ffmpeg libav)
 
   find_library(FFMPEG_LIBAVCODEC
     NAMES avcodec
     PATHS ${_FFMPEG_AVCODEC_LIBRARY_DIRS}
-          /usr/lib /usr/local/lib /opt/local/lib /sw/lib)
+          /usr/lib /usr/local/lib /opt/local/lib)
 
   find_library(FFMPEG_LIBAVFORMAT
     NAMES avformat
     PATHS ${_FFMPEG_AVFORMAT_LIBRARY_DIRS}
-          /usr/lib /usr/local/lib /opt/local/lib /sw/lib)
+          /usr/lib /usr/local/lib /opt/local/lib)
 
   find_library(FFMPEG_LIBAVUTIL
     NAMES avutil
     PATHS ${_FFMPEG_AVUTIL_LIBRARY_DIRS}
-          /usr/lib /usr/local/lib /opt/local/lib /sw/lib)
+          /usr/lib /usr/local/lib /opt/local/lib)
+
+  find_library(FFMPEG_LIBSWSCALE
+    NAMES swscale
+    PATHS ${_FFMPEG_AVUTIL_LIBRARY_DIRS}
+          /usr/lib /usr/local/lib /opt/local/lib)
 
   if (FFMPEG_LIBAVCODEC AND FFMPEG_LIBAVFORMAT)
     set(FFMPEG_FOUND TRUE)
@@ -59,7 +65,8 @@ else ()
     set(FFMPEG_LIBRARIES
       ${FFMPEG_LIBAVCODEC}
       ${FFMPEG_LIBAVFORMAT}
-      ${FFMPEG_LIBAVUTIL})
+      ${FFMPEG_LIBAVUTIL}
+      ${FFMPEG_LIBSWSCALE})
   endif (FFMPEG_FOUND)
 
   if (FFMPEG_FOUND)
