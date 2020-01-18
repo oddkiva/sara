@@ -2,7 +2,7 @@
 find_program(CCACHE_PROGRAM ccache)
 
 if (CCACHE_PROGRAM)
-  message("Found ccache: ${CCACHE_PROGRAM}: USE IT!")
+  sara_message("Found ccache: ${CCACHE_PROGRAM}, let's use it!")
   set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ${CCACHE_PROGRAM})
 endif ()
 

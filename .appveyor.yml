@@ -3,18 +3,45 @@ version: 1.0.{build}
 image:
   - Visual Studio 2017
 
+cache: c:\tools\vcpkg\installed\
+
 environment:
   matrix:
+  # These environment variables will be picked up in CMake.
+  - VCPKG_TOOLCHAIN_FILE: c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake
   - QTDIR: C:\Qt\5.12.2\msvc2017_64
+  - BOOST_ROOT: C:\Libraries\boost_1_69_0
 
 install:
+  # Set up Qt5.
   - set PATH=%QTDIR%\bin;%PATH%
+
+  # Update vcpkg.
+  - cd c:\tools\vcpkg
+  - git pull
+  - .\bootstrap-vcpkg.bat
+  - cd %APPVEYOR_BUILD_FOLDER%
+
+  # Image I/O.
+  - vcpkg install libjpeg-turbo:x64-windows
+  - vcpkg install libpng:x64-windows
+  - vcpkg install tiff:x64-windows
+  # Video I/O.
+  - vcpkg install ffmpeg:x64-windows
+  # HDF5.
+  - vcpkg install hdf5[cpp]:x64-windows
+  # Ceres
+  - vcpkg install ceres:x64-windows
+
+  # Integrate vcpkg with msbuild.
+  - cd c:\tools\vcpkg
+  - vcpkg integrate install
 
 configuration:
 - Release
 
 before_build:
-  - cmake -H. -Bbuild -G "Visual Studio 15 2017 Win64" -DSARA_BUILD_VIDEOIO=ON -DSARA_BUILD_TESTS=ON -DSARA_BUILD_SAMPLES=ON -DBOOST_ROOT="C:\Libraries\boost_1_69_0"
+  - cmake -H. -Bbuild -G "Visual Studio 15 2017 Win64" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=%VCPKG_TOOLCHAIN_FILE% -DSARA_BUILD_VIDEOIO:BOOL=ON -DSARA_BUILD_TESTS:BOOL=ON -DSARA_BUILD_SAMPLES:BOOL=ON"
 
 build_script:
   - '"C:\Program Files (x86)\MSBuild\15.0\Bin\MSBuild.exe" build\Sara.sln /m /verbosity:minimal'

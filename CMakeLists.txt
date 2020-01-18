@@ -12,7 +12,7 @@ endif ()
 
 # Set default build type to Release mode.
 set(CMAKE_BUILD_TYPE "Release" CACHE STRING
-    "Build type options are: Debug, Release")
+  "Build type options are: Debug, Release")
 
 # Set options.
 option(SARA_USE_VLD "Enable Visual Leak Detector for unit tests" OFF)
@@ -35,11 +35,27 @@ set(BUILD_SHARED_LIBS ${SARA_BUILD_SHARED_LIBS})
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 # Activate the usage of CCache to speed up builds if available.
-include(sara_use_ccache)
-
 # Configure Sara library version.
 include(sara_macros)
 sara_dissect_version()
+
+if (WIN32 AND NOT CMAKE_TOOLCHAIN_FILE)
+  find_file(CMAKE_TOOLCHAIN_FILE NAMES vcpkg.cmake PATHS
+    $ENV{VCPKG_TOOLCHAIN_FILE}
+    C:/vcpkg/scripts/buildsystems
+    C:/tools/vcpkg/scripts/buildsystems)
+
+  if (NOT CMAKE_TOOLCHAIN_FILE)
+    sara_message(FATAL_ERROR
+      "[Sara] Could not find vpkg toolchain file: "
+      "please specify it to build Sara on Windows!")
+  endif ()
+
+  sara_message("Including CMAKE_TOOLCHAIN_FILE = ${CMAKE_TOOLCHAIN_FILE}")
+  include (${CMAKE_TOOLCHAIN_FILE})
+endif ()
+
+include(sara_use_ccache)
 
 # We are ready to build Sara.
 find_package(DO_Sara REQUIRED)

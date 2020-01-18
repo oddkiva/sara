@@ -35,8 +35,10 @@ pushd ${REPOSITORY_DIR}
   pushd build
   {
     cmake ..
+
     #  make -j$(nproc) check
     make -j$(nproc)
+
     sudo make install
   }
   popd
