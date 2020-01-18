@@ -6,11 +6,10 @@ image:
 cache: c:\tools\vcpkg\installed\
 
 environment:
-  matrix:
   # These environment variables will be picked up in CMake.
-  - VCPKG_TOOLCHAIN_FILE: c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake
-  - QTDIR: C:\Qt\5.12.2\msvc2017_64
-  - BOOST_ROOT: C:\Libraries\boost_1_69_0
+  VCPKG_TOOLCHAIN_FILE: c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake
+  QTDIR: C:\Qt\5.12.2\msvc2017_64
+  BOOST_ROOT: C:\Libraries\boost_1_69_0
 
 install:
   # Set up Qt5.
