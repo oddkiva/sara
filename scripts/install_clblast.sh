@@ -37,7 +37,8 @@ pushd ${REPOSITORY_DIR}
     # cmake -DTESTS:BOOL=ON -DTUNERS:BOOL=ON ..
     # ctest --verbose -j$(nproc)
     # sudo make install
-    cmake ..
+
+    cmake -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ..
     make -j$(nproc)
     make install
   }

@@ -36,8 +36,6 @@ before_script:
   - mkdir -p ccache
   - export CCACHE_BASEDIR=${PWD}
   - export CCACHE_DIR=${PWD}/ccache
-  # Build CLBlast manually
-  - ./scripts/install_clblast.sh
 
 cache:
   paths:
@@ -46,6 +44,10 @@ cache:
 
 job:
   script:
+    # Build CLBlast.
+    - ./scripts/install_clblast.sh
+
+    # Build Sara.
     - mkdir build
     - cd build
     - cmake ..
