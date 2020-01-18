@@ -6,6 +6,7 @@ before_script:
   # All the packages to compile the C++ codebase.
   - apt-get install -y -qq
       build-essential
+      ccache
       cmake
       doxygen
       git
