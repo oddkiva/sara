@@ -28,6 +28,9 @@
 
 namespace DO::Sara {
 
+  //! @addtogroup OpenCL
+  //! @{
+
   class CommandQueue
   {
   public:
@@ -120,5 +123,7 @@ namespace DO::Sara {
     cl_command_queue _queue = nullptr;
     cl_command_queue_properties _properties = 0;
   };
+
+  //! @}
 
 } /* namespace DO::Sara */

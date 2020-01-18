@@ -16,6 +16,9 @@
 
 namespace DO::Sara {
 
+  //! @addtogroup OpenCL
+  //! @{
+
   template <typename T>
   class DeviceBuffer
   {
@@ -59,5 +62,7 @@ namespace DO::Sara {
     size_t _size = 0;
     cl_mem _buffer = nullptr;
   };
+
+  //! @}
 
 } /* namespace DO::Sara */
