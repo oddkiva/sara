@@ -6,33 +6,47 @@ services:
   - xvfb
 
 cache:
+  # For coveralls.
   bundler: true
+  # Try to speed up builds with ccache.
+  ccache: true
+
 
 addons:
   apt:
     packages:
+      # C++ toolchain
       - build-essential
       - cmake
       - doxygen
       - git
       - lcov
+      # Boost libraries
       - libboost-all-dev
+      # HDF5
       - libhdf5-dev
+      # Image I/O
       - libjpeg-dev
       - libpng-dev
       - libtiff5-dev
+      # FFmpeg libraries
       - libavcodec-dev
       - libavformat-dev
       - libavutil-dev
       - libswscale-dev
+      # OpenGL
       - libglew-dev
       - libglfw3-dev
-      - libqt5opengl5-dev
       - ocl-icd-opencl-dev
+      # Python bindings (TODO)
+      - python3-dev
+      # OpenCL
       - opencl-headers
       - libpocl-dev
+      # Ceres
       - libceres-dev
-      - python3-dev
+      # Qt5
+      - libqt5opengl5-dev
       - qtbase5-dev
 
 compiler:
