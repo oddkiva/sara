@@ -48,9 +48,8 @@ namespace DO { namespace Sara {
 
     auto close() -> void;
 
-    auto read(ImageView<Rgb8>& video_frame) -> bool;
+    auto read() -> bool;
 
-    auto read2() -> bool;
     auto frame() const -> ImageView<Rgb8>;
 
     auto seek(std::size_t frame_pos) -> void;
@@ -69,8 +68,10 @@ namespace DO { namespace Sara {
     friend inline VideoStream& operator>>(VideoStream& video_stream,
                                           ImageView<Rgb8>& video_frame)
     {
-      if (!video_stream.read(video_frame))
+      if (!video_stream.read())
         video_frame = {};
+      else
+        video_frame = video_stream.frame();
       return video_stream;
     }
 

@@ -135,10 +135,6 @@ namespace DO::Sara {
         << _video_format_context->streams[_video_stream_index]->time_base.den
         << std::endl;
 
-    if (_video_codec_context->pix_fmt != AV_PIX_FMT_YUV420P)
-      throw std::runtime_error{"VideoStream error: unsupported pixel format! "
-                               "Extend the implementation please!"};
-
     // Get video format converter to RGB24.
     _sws_context = sws_getContext(
         width(), height(), _video_codec_context->pix_fmt, width(), height(),
@@ -192,63 +188,7 @@ namespace DO::Sara {
     _end_of_stream = true;
   }
 
-  auto VideoStream::read(ImageView<Rgb8>& video_frame) -> bool
-  {
-    if (video_frame.sizes() != sizes())
-      throw std::domain_error{
-          "Video frame sizes and video stream sizes are not equal!"};
-    do
-    {
-      if (!_end_of_stream)
-        if (av_read_frame(_video_format_context, _pkt) < 0)
-          _end_of_stream = true;
-
-      if (_end_of_stream)
-      {
-        _pkt->data = nullptr;
-        _pkt->size = 0;
-        return false;
-      }
-
-      if (_pkt->stream_index == _video_stream_index || _end_of_stream)
-      {
-        _got_frame = 0;
-
-        if (_pkt->pts == AV_NOPTS_VALUE)
-          _pkt->pts = _pkt->dts = _i;
-
-        // Decompress the video frame.
-        _got_frame = decode(_video_codec_context, _picture, _pkt);
-
-        if (_got_frame)
-        {
-          av_packet_unref(_pkt);
-          av_init_packet(_pkt);
-
-          const auto w = width();
-          const auto h = height();
-          auto video_frame_data = video_frame.data();
-
-          for (auto y = 0; y < h; ++y)
-          {
-            for (auto x = 0; x < w; ++x)
-            {
-              auto yuv = get_yuv_pixel(_picture, x, y);
-              *video_frame_data = Sara::convert(yuv);
-              ++video_frame_data;
-            }
-          }
-
-          return true;
-        }
-      }
-      ++_i;
-    } while (!_end_of_stream || _got_frame);
-
-    return false;
-  }
-
-  auto VideoStream::read2() -> bool
+  auto VideoStream::read() -> bool
   {
     do
     {

@@ -28,13 +28,16 @@ using namespace std;
 class VideoStream : public sara::VideoStream
 {
 public:
-  void read_rgb_frame(PyObject *inout)
+  bool read_rgb_frame(PyObject *inout)
   {
     using namespace sara;
 
     auto image = image_view_2d<Rgb8>(inout);
-    if (!read(image))
-      throw std::runtime_error{"Error: could not read image frame"};
+    if (!read())
+      return false;
+
+    image = this->frame();
+    return true;
   }
 
   bp::tuple sizes_tuple() const

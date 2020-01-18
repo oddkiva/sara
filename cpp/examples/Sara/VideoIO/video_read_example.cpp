@@ -31,7 +31,7 @@ GRAPHICS_MAIN()
   using namespace std::string_literals;
 
   const auto video_filepath =
-      "/home/david/Desktop/humanising-autonomy/barberX.mp4"s;
+      "/home/david/Desktop/humanising-autonomy/bollardX.mp4"s;
   //const std::string video_filepath = src_path("orion_1.mpg");
 
   sara::VideoStream video_stream{video_filepath};
@@ -39,9 +39,7 @@ GRAPHICS_MAIN()
   SARA_DEBUG << "Frame rate = " << video_stream.frame_rate() << std::endl;
   SARA_DEBUG << "Frame sizes = " << video_stream.sizes().transpose() << std::endl;
 
-  auto video_frame = sara::ImageView<sara::Rgb8>{};
-
-  while (video_stream.read2())
+  while (video_stream.read())
   {
     if (sara::active_window() == nullptr)
       sara::create_window(video_stream.sizes());
