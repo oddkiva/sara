@@ -9,7 +9,7 @@ environment:
   # These environment variables will be picked up in CMake.
   MSBUILD_FLAGS: /maxcpucount
   VCPKG_TOOLCHAIN_FILE: C:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake
-  QTDIR: C:\Qt\5.12.2\msvc2017_64
+  QTDIR: C:/Qt/5.12.2/msvc2017_64
   BOOST_ROOT: C:\Libraries\boost_1_69_0
   matrix:
     - generator: "Visual Studio 15 2017 Win64"
@@ -53,5 +53,5 @@ build_script:
   # Then like in UNIX.
   - mkdir build
   - cd build
-  - cmake %APPVEYOR_BUILD_FOLDER% -G "%generator%" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=%VCPKG_TOOLCHAIN_FILE% -DSARA_BUILD_VIDEOIO:BOOL=OFF -DSARA_BUILD_TESTS:BOOL=ON -DSARA_BUILD_SAMPLES:BOOL=ON"
+  - cmake %APPVEYOR_BUILD_FOLDER% -G "%generator%" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=%VCPKG_TOOLCHAIN_FILE% -DSARA_BUILD_VIDEOIO:BOOL=OFF -DSARA_BUILD_TESTS:BOOL=ON -DSARA_BUILD_SAMPLES:BOOL=ON -DCMAKE_PREFIX_PATH:PATH=%QTDIR%
   - cmake --build . --target ALL_BUILD --config %configuration% -- /nologo
