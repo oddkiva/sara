@@ -29,8 +29,8 @@ install:
   - vcpkg install libpng:x64-windows
   - vcpkg install tiff:x64-windows
 
-  # # Install Video I/O libraries. (25 minutes to build)
-  # - vcpkg install ffmpeg:x64-windows
+  # Install Video I/O libraries. (25 minutes to build)
+  - vcpkg install ffmpeg:x64-windows
 
   # Install HDF5 libraries. (4 minutes to build).
   - vcpkg install hdf5[cpp]:x64-windows
