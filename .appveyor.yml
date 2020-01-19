@@ -7,9 +7,12 @@ cache: c:\tools\vcpkg\installed\
 
 environment:
   # These environment variables will be picked up in CMake.
+  MSBUILD_FLAGS: /maxcpucount
   VCPKG_TOOLCHAIN_FILE: C:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake
   QTDIR: C:\Qt\5.12.2\msvc2017_64
   BOOST_ROOT: C:\Libraries\boost_1_69_0
+  matrix:
+    - generator: "Visual Studio 15 2017 Win64"
 
 install:
   # Set up Qt5.
@@ -19,33 +22,36 @@ install:
   - cd c:\tools\vcpkg
   - git pull
   - .\bootstrap-vcpkg.bat
-  - cd %APPVEYOR_BUILD_FOLDER%
 
-  # Image I/O.
+  # Install Image I/O libraries. (less than 5 minutes to build)
   - vcpkg install libjpeg-turbo:x64-windows
   - vcpkg install libpng:x64-windows
   - vcpkg install tiff:x64-windows
-  # Video I/O.
-  - vcpkg install ffmpeg:x64-windows
-  # HDF5.
+
+  # # Install Video I/O libraries. (25 minutes to build)
+  # - vcpkg install ffmpeg:x64-windows
+
+  # Install HDF5 libraries. (4 minutes to build).
   - vcpkg install hdf5[cpp]:x64-windows
-  # Ceres
-  #- vcpkg install ceres:x64-windows
+
+  # # Install Ceres libraries. (23 minutes to build)
+  #
+  # - vcpkg install ceres:x64-windows
 
   # Integrate vcpkg with msbuild.
   - cd c:\tools\vcpkg
   - vcpkg integrate install
 
 configuration:
-- Release
+  - Release
 
 before_build:
-   - cmake -H. -Bbuild -G "Visual Studio 15 2017 Win64" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=%VCPKG_TOOLCHAIN_FILE% -DSARA_BUILD_VIDEOIO:BOOL=ON -DSARA_BUILD_TESTS:BOOL=ON -DSARA_BUILD_SAMPLES:BOOL=ON"
 
-# build_script:
-#   - '"C:\Program Files (x86)\MSBuild\15.0\Bin\MSBuild.exe" build\Sara.sln /m /verbosity:minimal'
-#
-# build:
-#   project: c:\projects\do-cv\build\Sara.sln
-#   verbosity: minimal
-#   parallel: true
+build_script:
+  # Go back the repository folder so that we can run CMake.
+  - cd %APPVEYOR_BUILD_FOLDER%
+  # Then like in UNIX.
+  - mkdir build
+  - cd build
+  - cmake -H. -Bbuild -G %generator% -DCMAKE_TOOLCHAIN_FILE:FILEPATH=%VCPKG_TOOLCHAIN_FILE% -DSARA_BUILD_VIDEOIO:BOOL=OFF -DSARA_BUILD_TESTS:BOOL=ON -DSARA_BUILD_SAMPLES:BOOL=ON"
+  - cmake --build . --target ALL_BUILD --config %configuration% -- /nologo

@@ -8,10 +8,13 @@ if (SPHINX_EXECUTABLE)
     COMMAND ${SPHINX_EXECUTABLE} -b html ${SPHINX_SOURCE} ${SPHINX_BUILD}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/source
     COMMENT "Generating documentation with Sphinx")
+  set_property(TARGET doc_sphinx PROPERTY FOLDER "Documentation")
+
 
   add_custom_target(sphinx_autobuild
     COMMAND sphinx-autobuild ${SPHINX_SOURCE} ${SPHINX_BUILD}
             --open-browser -s 1
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     COMMENT "Launching sphinx-autobuild server")
+  set_property(TARGET sphinx_autobuild PROPERTY FOLDER "Documentation")
 endif ()
