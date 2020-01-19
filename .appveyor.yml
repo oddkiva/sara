@@ -47,7 +47,7 @@ configuration:
 before_build:
   # Go back the repository folder so that we can run CMake.
   - cd %APPVEYOR_BUILD_FOLDER%
-  - cmake -H.' -B./build -G "%generator%" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=%VCPKG_TOOLCHAIN_FILE% -DSARA_BUILD_VIDEOIO:BOOL=OFF -DSARA_BUILD_TESTS:BOOL=ON -DSARA_BUILD_SAMPLES:BOOL=ON -DCMAKE_PREFIX_PATH="%QTDIR%"
+  - cmake -H. -B./build -G "%generator%" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=%VCPKG_TOOLCHAIN_FILE% -DSARA_BUILD_VIDEOIO:BOOL=OFF -DSARA_BUILD_TESTS:BOOL=ON -DSARA_BUILD_SAMPLES:BOOL=ON -DCMAKE_PREFIX_PATH="%QTDIR%"
 
   # Does not finish for some reason with CMake.
   # - cmake --build . --target ALL_BUILD --config %configuration% -- /nologo
