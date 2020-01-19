@@ -55,4 +55,5 @@ build_script:
   - mkdir build
   - cd build
   - cmake -S "%APPVEYOR_BUILD_FOLDER%" -B "." -G "%generator%" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=%VCPKG_TOOLCHAIN_FILE% -DSARA_BUILD_VIDEOIO:BOOL=OFF -DSARA_BUILD_TESTS:BOOL=ON -DSARA_BUILD_SAMPLES:BOOL=ON -DCMAKE_PREFIX_PATH="%QTDIR%"
-  - cmake --build . --target ALL_BUILD --config %configuration% -- /nologo
+  # - cmake --build . --target ALL_BUILD --config %configuration% -- /nologo
+  - '"C:\Program Files (x86)\MSBuild\15.0\Bin\MSBuild.exe" .\Sara.sln /m /verbosity:minimal /maxcpucount'
