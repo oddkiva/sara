@@ -35,8 +35,8 @@ install:
   # Install HDF5 libraries. (4 minutes to build).
   - vcpkg install hdf5[cpp]:x64-windows
 
-  # # Install Ceres libraries. (23 minutes to build)
-  # - vcpkg install ceres:x64-windows
+  # Install Ceres libraries. (23 minutes to build)
+  - vcpkg install ceres:x64-windows
 
   # Integrate vcpkg with msbuild.
   - cd c:\tools\vcpkg
