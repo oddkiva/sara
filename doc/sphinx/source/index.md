@@ -1,8 +1,6 @@
 Welcome to Sara's documentation!
 ================================
 
-.. _index-sara:
-
 *Sara* is a small and easy-to-use C++ computer vision library.
 
 *Sara* (सार) is a *Sanskrit* word meaning *essence*. On a less serious note, I was
