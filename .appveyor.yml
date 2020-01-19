@@ -51,6 +51,7 @@ build_script:
   # Go back the repository folder so that we can run CMake.
   - cd %APPVEYOR_BUILD_FOLDER%
   # Then like in UNIX.
+  - cd ..
   - mkdir build
   - cd build
   - cmake -S "%APPVEYOR_BUILD_FOLDER%" -B "." -G "%generator%" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=%VCPKG_TOOLCHAIN_FILE% -DSARA_BUILD_VIDEOIO:BOOL=OFF -DSARA_BUILD_TESTS:BOOL=ON -DSARA_BUILD_SAMPLES:BOOL=ON -DCMAKE_PREFIX_PATH="%QTDIR%"
