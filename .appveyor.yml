@@ -52,8 +52,23 @@ build_script:
   - cd %APPVEYOR_BUILD_FOLDER%
   # Then like in UNIX.
   - cd ..
-  - mkdir build
-  - cd build
+  - mkdir sara-build
+  - cd sara-build
   - cmake -S "%APPVEYOR_BUILD_FOLDER%" -B "." -G "%generator%" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=%VCPKG_TOOLCHAIN_FILE% -DSARA_BUILD_VIDEOIO:BOOL=OFF -DSARA_BUILD_TESTS:BOOL=ON -DSARA_BUILD_SAMPLES:BOOL=ON -DCMAKE_PREFIX_PATH="%QTDIR%"
+
+  # Some strange errors happening when CMake is trying to create the "bin" folder.
   # - cmake --build . --target ALL_BUILD --config %configuration% -- /nologo
-  - '"C:\Program Files (x86)\MSBuild\15.0\Bin\MSBuild.exe" .\Sara.sln /m /verbosity:minimal /maxcpucount'
+  - cmake --build . --target DO_Sara_Core --config %configuration% -- /nologo
+  - cmake --build . --target DO_Sara_DisjointSets --config %configuration% -- /nologo
+  - cmake --build . --target DO_Sara_FeatureDescriptors --config %configuration% -- /nologo
+  - cmake --build . --target DO_Sara_FeatureDetectors --config %configuration% -- /nologo
+  - cmake --build . --target DO_Sara_FeatureMatching --config %configuration% -- /nologo
+  - cmake --build . --target DO_Sara_Features --config %configuration% -- /nologo
+  - cmake --build . --target DO_Sara_Geometry --config %configuration% -- /nologo
+  - cmake --build . --target DO_Sara_Graphics --config %configuration% -- /nologo
+  - cmake --build . --target DO_Sara_ImageIO --config %configuration% -- /nologo
+  - cmake --build . --target DO_Sara_ImageProcessing --config %configuration% -- /nologo
+  - cmake --build . --target DO_Sara_KDTree --config %configuration% -- /nologo
+  - cmake --build . --target DO_Sara_Match --config %configuration% -- /nologo
+  - cmake --build . --target DO_Sara_MultiViewGeometry --config %configuration% -- /nologo
+  - cmake --build . --target DO_Sara_SfM --config
