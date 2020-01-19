@@ -1,21 +1,22 @@
 #pragma once
 
-#include <vector>
+#include <DO/Kalpana/Defines.hpp>
 
-#include <Eigen/Core>
+#include <DO/Kalpana/3D.hpp>
+#include <DO/Kalpana/3D/Shader.hpp>
 
 #include <QOpenGLFunctions_4_3_Core>
 
-#include <DO/Kalpana/3D/Shader.hpp>
-#include <DO/Kalpana/3D.hpp>
+#include <Eigen/Core>
+
+#include <vector>
 
 
-namespace DO { namespace Kalpana {
+namespace DO::Kalpana {
 
   using namespace Eigen;
 
-
-  class SceneItem : protected QOpenGLFunctions_4_3_Core
+  class DO_KALPANA_EXPORT SceneItem : protected QOpenGLFunctions_4_3_Core
   {
   public:
     SceneItem() = default;
@@ -46,8 +47,8 @@ namespace DO { namespace Kalpana {
 
     //! @{
     //! @brief Vertex data in device memory.
-    GLuint _vbo = { 0 };
-    GLuint _vao = { 0 };
+    GLuint _vbo{0};
+    GLuint _vao{0};
     //! @}
 
     //! @{
@@ -87,5 +88,4 @@ namespace DO { namespace Kalpana {
     std::vector<Vertex> _vertices;
   };
 
-} /* namespace Kalpana */
-} /* namespace DO */
+}  // namespace DO::Kalpana

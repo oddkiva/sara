@@ -7,7 +7,7 @@ cache: c:\tools\vcpkg\installed\
 
 environment:
   # These environment variables will be picked up in CMake.
-  VCPKG_TOOLCHAIN_FILE: c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake
+  VCPKG_TOOLCHAIN_FILE: C:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake
   QTDIR: C:\Qt\5.12.2\msvc2017_64
   BOOST_ROOT: C:\Libraries\boost_1_69_0
 
@@ -30,7 +30,7 @@ install:
   # HDF5.
   - vcpkg install hdf5[cpp]:x64-windows
   # Ceres
-  - vcpkg install ceres:x64-windows
+  #- vcpkg install ceres:x64-windows
 
   # Integrate vcpkg with msbuild.
   - cd c:\tools\vcpkg
@@ -39,9 +39,9 @@ install:
 configuration:
 - Release
 
-# before_build:
-#   - cmake -H. -Bbuild -G "Visual Studio 15 2017 Win64" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=%VCPKG_TOOLCHAIN_FILE% -DSARA_BUILD_VIDEOIO:BOOL=ON -DSARA_BUILD_TESTS:BOOL=ON -DSARA_BUILD_SAMPLES:BOOL=ON"
-#
+before_build:
+   - cmake -H. -Bbuild -G "Visual Studio 15 2017 Win64" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=%VCPKG_TOOLCHAIN_FILE% -DSARA_BUILD_VIDEOIO:BOOL=ON -DSARA_BUILD_TESTS:BOOL=ON -DSARA_BUILD_SAMPLES:BOOL=ON"
+
 # build_script:
 #   - '"C:\Program Files (x86)\MSBuild\15.0\Bin\MSBuild.exe" build\Sara.sln /m /verbosity:minimal'
 #
