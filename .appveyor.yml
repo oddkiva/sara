@@ -9,7 +9,7 @@ environment:
   # These environment variables will be picked up in CMake.
   MSBUILD_FLAGS: /maxcpucount
   VCPKG_TOOLCHAIN_FILE: C:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake
-  QTDIR: C:/Qt/5.12.2/msvc2017_64
+  QTDIR: C:/Qt/5.13.2/msvc2017_64
   BOOST_ROOT: C:\Libraries\boost_1_69_0
   matrix:
     - generator: "Visual Studio 15 2017 Win64"
