@@ -32,6 +32,6 @@ if (Ceres_FOUND)
     get_filename_component(filename "${file}" NAME_WE)
     target_include_directories(${filename} ${file}
       PRIVATE ${CERES_INCLUDE_DIRS})
-    target_link_libraries(${file} PRIVATE ${CERES_LIBRARIES})
+    target_link_libraries(${filename} PRIVATE ${CERES_LIBRARIES})
   endforeach()
 endif ()
