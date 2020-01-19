@@ -13,7 +13,6 @@
 
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
-#include <DO/Sara/MultiViewGeometry/BundleAdjustmentProblem.hpp>
 #include <DO/Sara/MultiViewGeometry/EpipolarGraph.hpp>
 #include <DO/Sara/MultiViewGeometry/FeatureGraph.hpp>
 #include <DO/Sara/MultiViewGeometry/Miscellaneous.hpp>
@@ -23,9 +22,6 @@
 #include <DO/Sara/SfM/BuildingBlocks/KeypointMatching.hpp>
 #include <DO/Sara/SfM/BuildingBlocks/Triangulation.hpp>
 #include <DO/Sara/SfM/Detectors/SIFT.hpp>
-
-#include <ceres/ceres.h>
-#include <ceres/rotation.h>
 
 
 using namespace std;
