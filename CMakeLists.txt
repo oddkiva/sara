@@ -12,7 +12,7 @@ endif ()
 
 # Check that vcpkg toolchain is specified when running CMake!
 if (WIN32 AND NOT CMAKE_TOOLCHAIN_FILE)
-  sara_message(FATAL_ERROR
+  message(FATAL_ERROR
     "[Sara] Could not find vpkg toolchain file: "
     "please specify it to build Sara on Windows!")
 endif ()
