@@ -7,7 +7,6 @@ cache: c:\tools\vcpkg\installed\
 
 environment:
   # These environment variables will be picked up in CMake.
-  MSBUILD_FLAGS: /maxcpucount
   VCPKG_TOOLCHAIN_FILE: C:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake
   QTDIR: C:/Qt/5.13.2/msvc2017_64
   BOOST_ROOT: C:\Libraries\boost_1_69_0
@@ -46,29 +45,13 @@ configuration:
   - Release
 
 before_build:
-
-build_script:
   # Go back the repository folder so that we can run CMake.
   - cd %APPVEYOR_BUILD_FOLDER%
-  # Then like in UNIX.
-  - cd ..
-  - mkdir sara-build
-  - cd sara-build
-  - cmake -S "%APPVEYOR_BUILD_FOLDER%" -B "." -G "%generator%" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=%VCPKG_TOOLCHAIN_FILE% -DSARA_BUILD_VIDEOIO:BOOL=OFF -DSARA_BUILD_TESTS:BOOL=ON -DSARA_BUILD_SAMPLES:BOOL=ON -DCMAKE_PREFIX_PATH="%QTDIR%"
+  - cmake -H.' -B./build -G "%generator%" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=%VCPKG_TOOLCHAIN_FILE% -DSARA_BUILD_VIDEOIO:BOOL=OFF -DSARA_BUILD_TESTS:BOOL=ON -DSARA_BUILD_SAMPLES:BOOL=ON -DCMAKE_PREFIX_PATH="%QTDIR%"
 
-  # Some strange errors happening when CMake is trying to create the "bin" folder.
+  # Does not finish for some reason with CMake.
   # - cmake --build . --target ALL_BUILD --config %configuration% -- /nologo
-  - cmake --build . --target DO_Sara_Core --config %configuration% -- /nologo
-  - cmake --build . --target DO_Sara_DisjointSets --config %configuration% -- /nologo
-  - cmake --build . --target DO_Sara_FeatureDescriptors --config %configuration% -- /nologo
-  - cmake --build . --target DO_Sara_FeatureDetectors --config %configuration% -- /nologo
-  - cmake --build . --target DO_Sara_FeatureMatching --config %configuration% -- /nologo
-  - cmake --build . --target DO_Sara_Features --config %configuration% -- /nologo
-  - cmake --build . --target DO_Sara_Geometry --config %configuration% -- /nologo
-  - cmake --build . --target DO_Sara_Graphics --config %configuration% -- /nologo
-  - cmake --build . --target DO_Sara_ImageIO --config %configuration% -- /nologo
-  - cmake --build . --target DO_Sara_ImageProcessing --config %configuration% -- /nologo
-  - cmake --build . --target DO_Sara_KDTree --config %configuration% -- /nologo
-  - cmake --build . --target DO_Sara_Match --config %configuration% -- /nologo
-  - cmake --build . --target DO_Sara_MultiViewGeometry --config %configuration% -- /nologo
-  - cmake --build . --target DO_Sara_SfM --config
+
+build:
+  parallel: true
+  verbosity: minimal
