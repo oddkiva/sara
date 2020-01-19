@@ -39,13 +39,13 @@ install:
 configuration:
 - Release
 
-before_build:
-  - cmake -H. -Bbuild -G "Visual Studio 15 2017 Win64" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=%VCPKG_TOOLCHAIN_FILE% -DSARA_BUILD_VIDEOIO:BOOL=ON -DSARA_BUILD_TESTS:BOOL=ON -DSARA_BUILD_SAMPLES:BOOL=ON"
-
-build_script:
-  - '"C:\Program Files (x86)\MSBuild\15.0\Bin\MSBuild.exe" build\Sara.sln /m /verbosity:minimal'
-
-build:
-  project: c:\projects\do-cv\build\Sara.sln
-  verbosity: minimal
-  parallel: true
+# before_build:
+#   - cmake -H. -Bbuild -G "Visual Studio 15 2017 Win64" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=%VCPKG_TOOLCHAIN_FILE% -DSARA_BUILD_VIDEOIO:BOOL=ON -DSARA_BUILD_TESTS:BOOL=ON -DSARA_BUILD_SAMPLES:BOOL=ON"
+#
+# build_script:
+#   - '"C:\Program Files (x86)\MSBuild\15.0\Bin\MSBuild.exe" build\Sara.sln /m /verbosity:minimal'
+#
+# build:
+#   project: c:\projects\do-cv\build\Sara.sln
+#   verbosity: minimal
+#   parallel: true
