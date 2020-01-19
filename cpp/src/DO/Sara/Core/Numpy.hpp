@@ -119,7 +119,10 @@ namespace DO::Sara::EigenExt {
         throw std::runtime_error(
             "The number of columns are not equal for vstack!");
 
-    auto num_rows = 0;
+    using index_type = decltype(x.front().rows());
+    static_assert(index_type{} == 0);
+
+    auto num_rows = index_type{};
     for (const auto& xi : x)
       num_rows += xi.rows();
 
@@ -127,8 +130,7 @@ namespace DO::Sara::EigenExt {
         Eigen::Matrix<typename Mat::Scalar, Eigen::Dynamic, Eigen::Dynamic>;
     OutMat stack_x(num_rows, x.front().cols());
 
-    auto start_row = 0;
-
+    auto start_row = index_type{};
     for (auto i = 0u; i < x.size(); ++i)
     {
       stack_x.block(start_row, 0, x[i].rows(), x[i].cols()) = x[i];
@@ -144,9 +146,11 @@ namespace DO::Sara::EigenExt {
 // On the MultiArray class.
 namespace DO::Sara {
 
-  inline auto range(int n) -> Tensor_<int, 1>
+  template <typename T>
+  inline auto range(T n) -> Tensor_<T, 1>
   {
-    auto indices = Tensor_<int, 1>{n};
+    static_assert(std::numeric_limits<T>::is_integer);
+    auto indices = Tensor_<T, 1>{static_cast<int>(n)};
     std::iota(indices.begin(), indices.end(), 0);
     return indices;
   }
