@@ -10,6 +10,13 @@ if (APPLE)
   set (CMAKE_MACOSX_RPATH ON)
 endif ()
 
+# Check that vcpkg toolchain is specified when running CMake!
+if (WIN32 AND NOT CMAKE_TOOLCHAIN_FILE)
+  sara_message(FATAL_ERROR
+    "[Sara] Could not find vpkg toolchain file: "
+    "please specify it to build Sara on Windows!")
+endif ()
+
 # Set default build type to Release mode.
 set(CMAKE_BUILD_TYPE "Release" CACHE STRING
   "Build type options are: Debug, Release")
@@ -38,22 +45,6 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 # Configure Sara library version.
 include(sara_macros)
 sara_dissect_version()
-
-if (WIN32 AND NOT CMAKE_TOOLCHAIN_FILE)
-  find_file(CMAKE_TOOLCHAIN_FILE NAMES vcpkg.cmake PATHS
-    $ENV{VCPKG_TOOLCHAIN_FILE}
-    C:/vcpkg/scripts/buildsystems
-    C:/tools/vcpkg/scripts/buildsystems)
-
-  if (NOT CMAKE_TOOLCHAIN_FILE)
-    sara_message(FATAL_ERROR
-      "[Sara] Could not find vpkg toolchain file: "
-      "please specify it to build Sara on Windows!")
-  endif ()
-
-  sara_message("Including CMAKE_TOOLCHAIN_FILE = ${CMAKE_TOOLCHAIN_FILE}")
-  include (${CMAKE_TOOLCHAIN_FILE})
-endif ()
 
 include(sara_use_ccache)
 

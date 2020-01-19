@@ -3,7 +3,7 @@ if (FFMPEG_LIBRARIES AND FFMPEG_INCLUDE_DIR)
 
 elseif (WIN32)
   # TODO: make it better but for now just trust vcpkg.
-  set(FFMPEG_LIBRARIES avcodec avformat avutil swscale)
+  find_package(FFMPEG REQUIRED)
 else ()
   # use pkg-config to get the directories and then use these values
   # in the FIND_PATH() and FIND_LIBRARY() calls
@@ -47,7 +47,7 @@ else ()
   endif()
 
   if (FFMPEG_FOUND)
-    set(FFMPEG_INCLUDE_DIR ${FFMPEG_AVCODEC_INCLUDE_DIR})
+    set(FFMPEG_INCLUDE_DIRS ${FFMPEG_AVCODEC_INCLUDE_DIR})
 
     set(FFMPEG_LIBRARIES
       ${FFMPEG_LIBAVCODEC}
