@@ -1,24 +1,10 @@
 if (FFMPEG_LIBRARIES AND FFMPEG_INCLUDE_DIR)
-  # in cache already
   set(FFMPEG_FOUND TRUE)
 
-elseif (MSVC)
-  if (SARA_USE_FROM_SOURCE)
-    set(FFMPEG_INCLUDE_DIR ${DO_Sara_ThirdParty_DIR}/ffmpeg/include)
-    set(FFMPEG_LINK_DIR ${DO_Sara_ThirdParty_DIR}/ffmpeg/lib)
-  else ()
-    set(FFMPEG_INCLUDE_DIR ${DO_Sara_DIR}/../../../include)
-    set(FFMPEG_LINK_DIR ${DO_Sara_DIR}/../../../lib)
-  endif ()
-
+elseif (WIN32)
+  # TODO: make it better but for now just trust vcpkg.
   set(FFMPEG_LIBRARIES avcodec avformat avutil swscale)
-
 else ()
-
-  if (SARA_FFMPEG_DIR)
-    set(ENV{PKG_CONFIG_PATH} "${SARA_FFMPEG_DIR}/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}")
-  endif ()
-
   # use pkg-config to get the directories and then use these values
   # in the FIND_PATH() and FIND_LIBRARY() calls
   find_package(PkgConfig)
@@ -55,7 +41,8 @@ else ()
     PATHS ${_FFMPEG_AVUTIL_LIBRARY_DIRS}
           /usr/lib /usr/local/lib /opt/local/lib)
 
-  if (FFMPEG_LIBAVCODEC AND FFMPEG_LIBAVFORMAT)
+  if (FFMPEG_LIBAVCODEC AND FFMPEG_LIBAVFORMAT AND FFMPEG_LIBAVUTIL AND
+      FFMPEG_LIBSWSCALE)
     set(FFMPEG_FOUND TRUE)
   endif()
 
@@ -67,16 +54,7 @@ else ()
       ${FFMPEG_LIBAVFORMAT}
       ${FFMPEG_LIBAVUTIL}
       ${FFMPEG_LIBSWSCALE})
-  endif (FFMPEG_FOUND)
-
-  if (FFMPEG_FOUND)
-    if (NOT FFMPEG_FIND_QUIETLY)
-      message(STATUS "Found FFMPEG or Libav: ${FFMPEG_LIBRARIES}, ${FFMPEG_INCLUDE_DIR}")
-    endif (NOT FFMPEG_FIND_QUIETLY)
-  else (FFMPEG_FOUND)
-    if (FFMPEG_FIND_REQUIRED)
-      message(FATAL_ERROR "Could not find libavcodec or libavformat or libavutil")
-    endif (FFMPEG_FIND_REQUIRED)
-  endif (FFMPEG_FOUND)
-
+  else ()
+      message(FATAL_ERROR "Could not find all FFmpeg libraries!")
+  endif ()
 endif ()
