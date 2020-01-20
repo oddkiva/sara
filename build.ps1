@@ -7,9 +7,44 @@ $vsver2 = $cmake_vsver2[$vsver]
 
 $build_type = "shared"
 
-$source_dir = "sara"
+$source_dir = $pwd
 $build_dir = "sara-build-vs$vsver-$build_type"
 $cmake_toolset = $cmake_vsver[$vsver]
+
+
+echo "========================================================================="
+echo "Install dependencies with vcpkg..."
+cd c:/vcpkg/
+git pull
+.\bootstrap-vcpkg.bat
+
+# Install Image I/O libraries.
+iex ".\vcpkg.exe install libjpeg-turbo:x64-windows"
+iex ".\vcpkg.exe install libpng:x64-windows"
+iex ".\vcpkg.exe install tiff:x64-windows"
+
+# Install Video I/O libraries.
+iex ".\vcpkg.exe install ffmpeg:x64-windows"
+
+# Install HDF5 libraries.
+iex ".\vcpkg.exe install hdf5[cpp]:x64-windows"
+
+# Install Ceres libraries.
+iex ".\vcpkg.exe install ceres[cxsparse,suitesparse]:x64-windows"
+echo `n
+
+
+
+# Go back to the source directory
+cd $source_dir
+
+
+echo "========================================================================="
+echo "Installing Python packages"
+iex "pip install -U pip"
+iex "pip install -r requirements.txt"
+echo `n
+
 
 echo "========================================================================="
 echo "Checking if directory ..\$build_dir exists"
@@ -18,11 +53,12 @@ if (Test-Path ..\$build_dir) {
   rm ..\$build_dir -r -fo
 }
 
-echo "Creating directory ..\$build_dir..."
+echo "Creating directory `"..\$build_dir`" ..."
 iex "New-Item -ItemType directory -Path ..\$build_dir"
 echo "`n"
 
-# Configure the build solution with CMake.
+
+
 echo "========================================================================="
 echo "Configuring for CMake..."
 $vcpkg_toolchain_file = "c:/vcpkg/scripts/buildsystems/vcpkg.cmake"
@@ -36,11 +72,8 @@ $cmake_options += "-DSARA_BUILD_TESTS:BOOL=ON"
 echo "CMake options = $cmake_options"
 echo "`n"
 
-# Invoke CMake command.
-echo "========================================================================="
-echo "Configuring for CMake..."
 cd ..\$build_dir
-$cmake_command  = "cmake -S `"..\$source_dir`" -B `".`" -G `"Visual Studio $vsver2 $vsver Win64`" "
+$cmake_command  = "cmake -S `"$source_dir`" -B `".`" -G `"Visual Studio $vsver2 $vsver Win64`" "
 $cmake_command += "-T `"$cmake_toolset`" "
 $cmake_command += "$cmake_options"
 echo "$cmake_command"
@@ -48,9 +81,15 @@ iex "$cmake_command"
 echo "`n"
 
 echo "========================================================================="
-echo "Configuring for CMake..."
+echo "Building the libraries in Debug mode..."
 iex "cmake --build . --target ALL_BUILD -config Debug -j12"
 iex "cmake --build . --target RUN_TESTS -config Debug -j12"
 
+echo "Building the libraries in Release mode..."
 iex "cmake --build . --target ALL_BUILD -config Release -j12"
 iex "cmake --build . --target RUN_TESTS -config Release -j12"
+
+
+
+Write-Host -NoNewLine 'Press any key to exit...';
+$null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
