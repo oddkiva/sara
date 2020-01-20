@@ -5,7 +5,7 @@ $build_shared_libs = @{"static"="OFF"; "shared"="ON"};
 $vsver = 2017
 $vsver2 = $cmake_vsver2[$vsver]
 
-$build_type = "static"
+$build_type = "shared"
 
 $source_dir = "sara"
 $build_dir = "sara-build-vs$vsver-$build_type"
@@ -41,11 +41,16 @@ echo "========================================================================="
 echo "Configuring for CMake..."
 cd ..\$build_dir
 $cmake_command  = "cmake -S `"..\$source_dir`" -B `".`" -G `"Visual Studio $vsver2 $vsver Win64`" "
-# $cmake_command += "-T `"$cmake_toolset`" "
+$cmake_command += "-T `"$cmake_toolset`" "
 $cmake_command += "$cmake_options"
-
 echo "$cmake_command"
 iex "$cmake_command"
-iex "cmake --build . --target ALL_BUILD"
-return
+echo "`n"
 
+echo "========================================================================="
+echo "Configuring for CMake..."
+iex "cmake --build . --target ALL_BUILD -config Debug -j12"
+iex "cmake --build . --target RUN_TESTS -config Debug -j12"
+
+iex "cmake --build . --target ALL_BUILD -config Release -j12"
+iex "cmake --build . --target RUN_TESTS -config Release -j12"
