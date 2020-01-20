@@ -82,12 +82,12 @@ echo "`n"
 
 echo "========================================================================="
 echo "Building the libraries in Debug mode..."
-iex "cmake --build . --target ALL_BUILD -config Debug -j12"
-iex "cmake --build . --target RUN_TESTS -config Debug -j12"
+iex "cmake --build . --target ALL_BUILD --config Debug -j12"
+iex "cmake --build . --target RUN_TESTS --config Debug -j12"
 
 echo "Building the libraries in Release mode..."
-iex "cmake --build . --target ALL_BUILD -config Release -j12"
-iex "cmake --build . --target RUN_TESTS -config Release -j12"
+iex "cmake --build . --target ALL_BUILD --config Release -j12"
+iex "cmake --build . --target RUN_TESTS --config Release -j12"
 
 
 
