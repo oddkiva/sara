@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(test_mkdir)
 BOOST_AUTO_TEST_CASE(test_cp)
 {
   const auto src = sara::ls(src_path("../../../../data/"), ".jpg")[0];
-  const auto dst = (fs::path{"/tmp"} / sara::basename(src)).string();
+  const auto dst = (fs::temp_directory_path() / fs::path{src}.filename()).string();
   sara::cp(src, dst);
   BOOST_CHECK(fs::exists(dst));
 

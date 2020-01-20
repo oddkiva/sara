@@ -28,5 +28,12 @@ foreach (file ${examples_SRC_FILES})
             Qt5::Widgets Qt5::OpenGL Qt5::OpenGLExtensions)
 
   set_target_properties(${filename}
-    PROPERTIES COMPILE_FLAGS ${SARA_DEFINITIONS})
+    PROPERTIES
+    COMPILE_FLAGS ${SARA_DEFINITIONS})
+
+  if (NOT BUILD_SHARED_LIBS)
+    set_target_properties(${filename}
+      PROPERTIES
+      COMPILE_DEFINITIONS "DO_KALPANA_STATIC")
+  endif ()
 endforeach()

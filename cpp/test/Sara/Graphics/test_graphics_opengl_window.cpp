@@ -78,7 +78,7 @@ public:
 
 #ifdef _WIN32
     _wait_ms = 100;
-    _event_time_ms = 10;
+    _event_time_ms = 20;
 #else
     _wait_ms = 10;
     _event_time_ms = 1;
@@ -87,7 +87,7 @@ public:
 
   virtual ~TestFixtureForOpenGLWindowEvents()
   {
-    _test_window->deleteLater();
+    delete _test_window;
   }
 
   void compare_key_event(QSignalSpy& spy) const

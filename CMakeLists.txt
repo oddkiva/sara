@@ -10,9 +10,16 @@ if (APPLE)
   set (CMAKE_MACOSX_RPATH ON)
 endif ()
 
+# Check that vcpkg toolchain is specified when running CMake!
+if (WIN32 AND NOT CMAKE_TOOLCHAIN_FILE)
+  message(FATAL_ERROR
+    "[Sara] Could not find vpkg toolchain file: "
+    "please specify it to build Sara on Windows!")
+endif ()
+
 # Set default build type to Release mode.
 set(CMAKE_BUILD_TYPE "Release" CACHE STRING
-    "Build type options are: Debug, Release")
+  "Build type options are: Debug, Release")
 
 # Set options.
 option(SARA_USE_VLD "Enable Visual Leak Detector for unit tests" OFF)
@@ -35,11 +42,11 @@ set(BUILD_SHARED_LIBS ${SARA_BUILD_SHARED_LIBS})
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 # Activate the usage of CCache to speed up builds if available.
-include(sara_use_ccache)
-
 # Configure Sara library version.
 include(sara_macros)
 sara_dissect_version()
+
+include(sara_use_ccache)
 
 # We are ready to build Sara.
 find_package(DO_Sara REQUIRED)

@@ -17,32 +17,31 @@ namespace DO { namespace Sara {
 
   void PairWiseDrawer::display_images() const
   {
-    using namespace std;
-    display(image1, (offF(0)*scale(0)).cast<int>(), _z1);
-    display(image2, (offF(1)*scale(0)).cast<int>(), _z2);
+    display(image1, (offF(0) * scale(0)).cast<int>(), _z1);
+    display(image2, (offF(1) * scale(0)).cast<int>(), _z2);
   }
 
   void PairWiseDrawer::draw_point(int i, const Point2f& p, const Color3ub& c, int r) const
   {
     assert(i == 0 || i == 1);
-    fill_circle( (p+offF(i))*scale(i), float(r), c);
+    fill_circle((p + offF(i)) * scale(i), float(r), c);
   }
 
   void PairWiseDrawer::draw_line(int i, const Point2f& pa, const Point2f& pb,
                                 const Color3ub& c, int penWidth) const
   {
     assert(i == 0 || i == 1);
-    Vector2f a((pa + offF(i)) * scale(i));
-    Vector2f b((pb + offF(i)) * scale(i));
+    const Vector2f a = (pa + offF(i)) * scale(i);
+    const Vector2f b = (pb + offF(i)) * scale(i);
     Sara::draw_line(a, b, c, penWidth);
   }
 
   void PairWiseDrawer::draw_arrow(int i, const Point2f& pa, const Point2f& pb, const Color3ub& c, int penWidth) const
   {
     assert(i == 0 || i == 1);
-    Vector2f a( (pa+offF(i))*scale(i) );
-    Vector2f b( (pb+offF(i))*scale(i) );
-    Sara::draw_line(a, b, c, penWidth);
+    const Vector2f a = (pa + offF(i)) * scale(i);
+    const Vector2f b = (pb + offF(i)) * scale(i);
+    Sara::draw_arrow(a, b, c, penWidth);
   }
 
   void PairWiseDrawer::draw_triangle(int i, const Point2f& pa, const Point2f& pb, const Point2f& pc,
@@ -57,10 +56,17 @@ namespace DO { namespace Sara {
   void PairWiseDrawer::draw_rect(int i, const Point2f& p1, const Point2f& p2, int r, const Color3ub& c) const
   {
     assert(i==0 || i==1);
-    Point2f s, e, d;
-    s = scale(i)*p1+offF(i)*scale(0);
-    e = scale(i)*p2+offF(i)*scale(0);
-    d = e-s;
+    const Point2i s = (scale(i) * p1 + offF(i) * scale(0))
+                          .array()
+                          .round()
+                          .matrix()
+                          .cast<int>();
+    const Point2i e = (scale(i) * p2 + offF(i) * scale(0))
+                          .array()
+                          .round()
+                          .matrix()
+                          .cast<int>();
+    const Point2i d = e - s;
 
     Sara::draw_rect(s.x(), s.y(), d.x(), d.y(), c, r);
   }
@@ -92,7 +98,8 @@ namespace DO { namespace Sara {
     if(drawLine)
     {
       Vector2f a,b;
-      a = scale(0)*m.x_pos(); b = scale(1)*(m.y_pos()+offF(1));
+      a = scale(0) * m.x_pos();
+      b = scale(1) * (m.y_pos() + offF(1));
       Sara::draw_line(a, b, c);
     }
   }

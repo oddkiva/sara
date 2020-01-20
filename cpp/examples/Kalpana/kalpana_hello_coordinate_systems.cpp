@@ -220,25 +220,28 @@ public:
     // Copy the vertex data into the GPU buffer object.
     m_vbo.bind();
     m_vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
-    m_vbo.allocate(m_vertices.data(), m_vertices.size() * sizeof(float));
+    m_vbo.allocate(m_vertices.data(),
+                   static_cast<int>(m_vertices.size() * sizeof(float)));
 
     // Map the parameters to the argument position for the vertex shader.
     //
     // Vertex coordinates.
     m_program->enableAttributeArray(arg_pos["in_coords"]);
-    m_program->setAttributeBuffer(/* location */ arg_pos["in_coords"],
-                                  /* GL_ENUM */ GL_FLOAT,
-                                  /* offset */ float_pointer(0),
-                                  /* tupleSize */ 3,
-                                  /* stride */ row_bytes(m_vertices));
+    m_program->setAttributeBuffer(
+        /* location */ arg_pos["in_coords"],
+        /* GL_ENUM */ GL_FLOAT,
+        /* offset */ float_pointer(0),
+        /* tupleSize */ 3,
+        /* stride */ static_cast<int>(row_bytes(m_vertices)));
 
     // Texture coordinates.
     m_program->enableAttributeArray(arg_pos["in_tex_coords"]);
-    m_program->setAttributeBuffer(/* location */ arg_pos["in_tex_coords"],
-                                  /* GL_ENUM */ GL_FLOAT,
-                                  /* offset */ float_pointer(3),
-                                  /* tupleSize */ 2,
-                                  /* stride */ row_bytes(m_vertices));
+    m_program->setAttributeBuffer(
+        /* location */ arg_pos["in_tex_coords"],
+        /* GL_ENUM */ GL_FLOAT,
+        /* offset */ float_pointer(3),
+        /* tupleSize */ 2,
+        /* stride */ static_cast<int>(row_bytes(m_vertices)));
 
     m_vao->release();
   }
