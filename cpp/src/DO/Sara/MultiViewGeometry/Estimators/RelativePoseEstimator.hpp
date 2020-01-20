@@ -14,8 +14,6 @@
 
 #include <Eigen/StdVector>
 
-#include <DO/Sara/Defines.hpp>
-
 #include <DO/Sara/Core/Numpy.hpp>
 #include <DO/Sara/MultiViewGeometry/Estimators/EssentialMatrixEstimators.hpp>
 #include <DO/Sara/MultiViewGeometry/Geometry/TwoViewGeometry.hpp>
@@ -95,10 +93,8 @@ namespace DO::Sara {
     }
   };
 
-  extern template struct DO_SARA_EXPORT
-      RelativePoseEstimator<NisterFivePointAlgorithm>;
-  extern template struct DO_SARA_EXPORT
-      RelativePoseEstimator<SteweniusFivePointAlgorithm>;
+  extern template struct RelativePoseEstimator<NisterFivePointAlgorithm>;
+  extern template struct RelativePoseEstimator<SteweniusFivePointAlgorithm>;
 
   //! @}
 

@@ -75,10 +75,10 @@ As mentioned in Nister's paper:
 
    This gives :math:`3 \times 3 = 9` polynomial equations :math:`\langle e_{ij}
    \rangle` in the monomials :math:`x^\alpha y^\beta z^\gamma` where
-   :math:`\alpha + \beta + \gamma = 3`.
+   :math:`\alpha + \beta + \gamma \leq 3`.
 
 2. the essential matrix :math:`\bE` has rank 2, so its determinant must be
-   zero.
+   zero:
 
    .. math::
       \langle d \rangle \iff \text{det}(\bE) = 0
@@ -89,7 +89,7 @@ As mentioned in Nister's paper:
 So we have in total :math:`10` polynomial equations in the monomials
 :math:`x^\alpha y^\beta z^\gamma`. There are 20 monomials in total.
 
-Nister enumerates the monomials in the following order:
+Nister enumerates these monomials in the following order:
 
 .. math::
 
@@ -148,17 +148,27 @@ Nister enumerates the monomials in the following order:
    \hline
    \end{array}
 
-
 In his paper, Nister does not use the Groebner basis to solve the system of
-:math:`10` equations. Rather he uses elementary linear algebra operations, which
-is very neat. We detail how he does it.
+:math:`10` polynomial equations. Rather he uses elementary linear algebra
+operations, which is very neat. We detail how he does it.
 
 
 Gauss-Jordan Elimination
 ------------------------
 
-Using the Gauss-Jordan Elimination we can reduce the system of polynomial
-equation so that many zeros appear.
+Using the Gauss-Jordan elimination we can reduce the system of polynomial
+equation so that the left block of the matrix above is zero everywhere except
+one on the diagonal.
+
+We will realize that it is actually sufficient to apply the Gauss-Jordan
+elimination. Specifically,
+
+1. perform the full sweep downward so that lower diagonal part
+   is fully zero
+2. then in the sweep upward stop halfway,
+
+until the system of polynomial equations looks like the system of equations
+:eq:`eq-gaussjordan` below:
 
 .. math::
    :label: eq-gaussjordan
@@ -218,8 +228,8 @@ equation so that many zeros appear.
    \hline
    \end{array}
 
-Let's look again at the reduced system of equations :eq:`eq-gaussjordan`. We can
-again reduce it by doing
+Let's look again at the last :math:`6` equations :eq:`eq-gaussjordan`. We can
+again reduce it by multiplying by :math:`z` and subtracting as follows:
 
 .. math::
    :label: eq-klm
@@ -230,20 +240,22 @@ again reduce it by doing
    \langle m \rangle &= \langle e_{22} \rangle - z \langle d \rangle
    \end{aligned}
 
-Now Equation :eq:`eq-klm` depends only the following groups of monomials
+Now the system of equations :eq:`eq-klm` depends only the following groups of
+monomials:
 
 - :math:`\left\{ x, x z, x z^2, x z^3 \right\}`
 - :math:`\left\{ y, y z, y z^2, x z^3 \right\}`
 - :math:`\left\{ 1, z, z^2, z^3, z^4 \right\}`
 
 The nice thing is that when we group coefficients using these three subgroups,
-we see coefficients:
+we see that:
 
-- in the variable :math:`x` forms a polynomial in `z` of degree `3`,
-- in the variable :math:`y` forms a polynomial in `z` of degree `3`,
-- in the variable :math:`z` forms a polynomial in `z` of degree `4`.
+- coefficients in the variable :math:`x` forms a polynomial in `z` of degree `3`,
+- coefficients in the variable :math:`y` forms a polynomial in `z` of degree `3`,
+- coefficients in the variable :math:`z` forms a polynomial in `z` of degree `4`.
 
-In Nister's paper, Equation :eq:`eq-klm` is rewritten as
+In Nister's paper, the system of polynomial equations :eq:`eq-klm` is rewritten
+as
 
 .. math::
    :label: eq-B

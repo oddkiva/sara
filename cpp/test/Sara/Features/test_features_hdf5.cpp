@@ -39,10 +39,10 @@ BOOST_AUTO_TEST_CASE(test_hdf5_read_write_array)
     auto farray = features.flat_array();
     for (int i = 0; i < 4; ++i)
     {
-      farray(i).center() << i, i;
+      farray(i).center() << float(i), float(i);
       farray(i).shape_matrix = Eigen::Matrix2f::Ones() * (i + 0.5f);
-      farray(i).orientation = 30 * i;
-      farray(i).extremum_value = 10 * i;
+      farray(i).orientation = 30.f * i;
+      farray(i).extremum_value = 10.f * i;
     }
 
     auto dataset = h5file.write_dataset("0/features", features);

@@ -50,10 +50,10 @@ auto calculate_feature_id_offsets(
     const std::vector<KeypointList<OERegion, float>>& keypoints)
     -> std::vector<int>
 {
-  auto fid_offsets = std::vector<int>(3, 0);
+  auto fid_offsets = std::vector<int>(keypoints.size(), 0);
   std::transform(std::begin(keypoints), std::end(keypoints) - 1,
                  std::begin(fid_offsets) + 1, [](const auto& keypoints) {
-                   return features(keypoints).size();
+                   return static_cast<int>(features(keypoints).size());
                  });
 
   std::partial_sum(std::begin(fid_offsets), std::end(fid_offsets),

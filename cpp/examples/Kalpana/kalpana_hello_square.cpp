@@ -100,22 +100,24 @@ public:
     // Copy the vertex data into the GPU buffer object.
     m_vbo.bind();
     m_vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
-    m_vbo.allocate(m_vertices.data(), m_vertices.size() * sizeof(float));
+    m_vbo.allocate(m_vertices.data(),
+                   static_cast<int>(m_vertices.size() * sizeof(float)));
 
     // Copy the triangles data into the GPU buffer object.
     m_ebo.bind();
     m_ebo.setUsagePattern(QOpenGLBuffer::StaticDraw);
     m_ebo.allocate(m_triangles.data(),
-                   m_triangles.size() * sizeof(unsigned int));
+                   static_cast<int>(m_triangles.size() * sizeof(unsigned int)));
 
     // Specify that the vertex shader param 0 corresponds to the first 3 float
     // data of the buffer object.
     m_program->enableAttributeArray(arg_pos["in_coords"]);
-    m_program->setAttributeBuffer(/* location */ arg_pos["in_coords"],
-                                  /* GL_ENUM */ GL_FLOAT,
-                                  /* offset */ float_pointer(0),
-                                  /* tupleSize */ 3,
-                                  /* stride */ row_bytes(m_vertices));
+    m_program->setAttributeBuffer(
+        /* location */ arg_pos["in_coords"],
+        /* GL_ENUM */ GL_FLOAT,
+        /* offset */ float_pointer(0),
+        /* tupleSize */ 3,
+        /* stride */ static_cast<int>(row_bytes(m_vertices)));
 
     // Specify that the vertex shader param 1 corresponds to the first 3 float
     // data of the buffer object.

@@ -12,9 +12,7 @@ namespace DO { namespace Kalpana {
     auto colors = vector<Vector3f>(points.size(), Vector3f::Ones());
     auto sizes = vector<float>(points.size(), 10.f);
 
-    unique_ptr<SceneItem> point_cloud{new PointCloud{points, colors, sizes}};
-
-    _objects.push_back(std::move(point_cloud));
+    _objects.emplace_back(new PointCloud(points, colors, sizes));
 
     return dynamic_cast<PointCloud*>(_objects.back().get());
   }

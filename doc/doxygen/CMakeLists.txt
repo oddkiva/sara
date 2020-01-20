@@ -8,4 +8,6 @@ if(DOXYGEN_FOUND)
     ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/doc
     COMMENT "Generating API documentation with Doxygen" VERBATIM)
+
+  set_property(TARGET doc PROPERTY FOLDER "Documentation")
 endif(DOXYGEN_FOUND)

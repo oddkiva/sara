@@ -82,7 +82,7 @@ namespace DO { namespace Sara {
     // Boundary case 2.
     if (features2.size() == 1 && !self_matching)
     {
-      auto m = Match{&features2[i1], &features2[0], 1.f, dir, i1, 0};
+      auto m = Match{&features1[i1], &features2[0], 1.f, dir, i1, 0};
       m.rank() = 1;
 
       if (dir == Match::Direction::TargetToSource)

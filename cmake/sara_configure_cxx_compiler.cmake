@@ -32,35 +32,13 @@ if (MSVC)
 
 # GNU compiler
 elseif (CMAKE_COMPILER_IS_GNUCXX)
-  exec_program(${CMAKE_C_COMPILER}
-               ARGS "-dumpversion"
-               OUTPUT_VARIABLE _gcc_version_info)
-  string(REGEX REPLACE "^([0-9]+).*$" "\\1"
-         GCC_MAJOR ${_gcc_version_info})
-  string(REGEX REPLACE
-         "^[0-9]+\\.([0-9]+).*$" "\\1"
-         GCC_MINOR ${_gcc_version_info})
-  string(REGEX REPLACE
-         "^[0-9]+\\.[0-9]+\\.([0-9]+).*$" "\\1"
-         GCC_PATCH ${_gcc_version_info})
-  if(GCC_PATCH MATCHES "\\.+")
-    set(GCC_PATCH "")
-  endif()
-  if(GCC_MINOR MATCHES "\\.+")
-    set(GCC_MINOR "")
-  endif()
-  if(GCC_MAJOR MATCHES "\\.+")
-    set(GCC_MAJOR "")
-  endif()
-  set(GCC_VERSION "${GCC_MAJOR}.${GCC_MINOR}")
-
   sara_substep_message(
-    "${CMAKE_CXX_COMPILER_ID} compiler version: ${GCC_VERSION}")
+    "${CMAKE_CXX_COMPILER_ID} compiler version: ${CMAKE_CXX_COMPILER_VERSION}")
 
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmessage-length=72")
 
   # Enable colors in gcc log output.
-  if (GCC_VERSION VERSION_GREATER 4.8)
+  if (${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER 4.8)
     sara_substep_message("Enable colored output of GCC.")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color=always")
   endif ()
@@ -76,9 +54,10 @@ if (UNIX)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wunused-variable")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-long-long")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIE")
-  #if (DEFINED ENABLE_CXX11)
-  #  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ENABLE_CXX11}")
-  #endif ()
+  if (UNIX AND SARA_BUILD_SHARED_LIBS)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+  endif ()
+
   #Additional flags for Release builds.
   set(CMAKE_CXX_RELEASE_FLAGS "-03 -ffast-math")
   # Additional flags for Debug builds, which include code coverage.

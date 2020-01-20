@@ -14,16 +14,6 @@
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <memory>
-
-#include "libavcodec/avcodec.h"
-#include "libavutil/common.h"
-#include "libavutil/imgutils.h"
-#include "libavutil/mathematics.h"
-
 
 namespace sara = DO::Sara;
 
@@ -32,9 +22,9 @@ GRAPHICS_MAIN()
 {
   using namespace std::string_literals;
 
-  const auto video_filepath =
-      "/home/david/Desktop/humanising-autonomy/bollardX.mp4"s;
-  //const std::string video_filepath = src_path("orion_1.mpg");
+  //const auto video_filepath =
+  //    "/home/david/Desktop/humanising-autonomy/bollardX.mp4"s;
+  const std::string video_filepath = src_path("orion_1.mpg");
 
   sara::VideoStream video_stream{video_filepath};
 
