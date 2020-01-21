@@ -10,7 +10,7 @@ GRAPHICS_MAIN()
   using namespace std;
   using namespace DO::Sara;
 
-  //const string video_filepath = "/home/david/Desktop/test.mp4";
+  // const string video_filepath = "/home/david/Desktop/test.mp4";
   const auto video_filepath =
       "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4";
 
@@ -18,18 +18,19 @@ GRAPHICS_MAIN()
 
   // Input.
   auto in_video_frame = video_stream.frame();
-  auto out_video_frame = Image<Rgb8>{video_stream.sizes()};
+  auto in_video_frame_rgba = Image<Rgba8>{video_stream.sizes()};
+  auto out_video_frame = Image<Rgba8>{video_stream.sizes()};
 
   // Timer.
   auto timer = Timer{};
 
   // Image processing pipeline.
-  auto input =
-      Halide::Buffer<uint8_t>{reinterpret_cast<uint8_t*>(in_video_frame.data()),
-                              {video_stream.width(), video_stream.height(), 3}};
+  auto input = Halide::Buffer<uint8_t>{
+      reinterpret_cast<uint8_t*>(in_video_frame_rgba.data()),
+      {video_stream.width(), video_stream.height(), 4}};
   auto output = Halide::Buffer<uint8_t>{
       reinterpret_cast<uint8_t*>(out_video_frame.data()),
-      {out_video_frame.width(), out_video_frame.height(), 3}};
+      {out_video_frame.width(), out_video_frame.height(), 4}};
 
   auto x = Halide::Var{};
   auto y = Halide::Var{};
@@ -67,17 +68,38 @@ GRAPHICS_MAIN()
 
   create_window(video_stream.sizes());
 
-  while (video_stream.read())
+  auto elapsed = double{};
+
+  while (true)
   {
+    timer.restart();
+    if (!video_stream.read())
+    {
+      std::cout << "Reached the end of the video!" << std::endl;
+      break;
+    }
+    elapsed = timer.elapsed_ms();
+    std::cout << "Video decoding time = " << elapsed << " ms" << std::endl;
+
+    timer.restart();
+    {
+      std::transform(in_video_frame.begin(), in_video_frame.end(),
+                     in_video_frame_rgba.begin(), [](const Rgb8& c) -> Rgba8 {
+                       return {c[0], c[1], c[2], 255};
+                     });
+    }
+    elapsed = timer.elapsed_ms();
+    std::cout << "Color conversion time = " << elapsed << " ms" << std::endl;
+
     timer.restart();
     {
       filter_rescaled.realize(output);
       output.copy_to_host();
     }
-    const auto elapsed = timer.elapsed_ms();
-    std::cout << "Computation time = " << elapsed << " ms" << std::endl;
+    elapsed = timer.elapsed_ms();
+    std::cout << "Halide computation time = " << elapsed << " ms" << std::endl;
 
-    display(out_video_frame);
+    display(in_video_frame);
   }
 
   return 0;
