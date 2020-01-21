@@ -18,6 +18,7 @@ before_script:
       libavcodec-dev
       libavformat-dev
       libavutil-dev
+      libswscale-dev
       libglew-dev
       libglfw3-dev
       ocl-icd-opencl-dev
@@ -54,6 +55,7 @@ job:
     - cmake ..
         -DCMAKE_BUILD_TYPE:STRING=Debug
         -DSARA_BUILD_SHARED_LIBS:BOOL=ON
+        -DSARA_BUILD_VIDEOIO:BOOL=ON
         -DSARA_BUILD_SAMPLES:BOOL=ON
         -DSARA_BUILD_TESTS:BOOL=ON
     - make -j$(nproc)
