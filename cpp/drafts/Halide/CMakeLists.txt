@@ -30,6 +30,27 @@ if (WIN32)
   set(HALIDE_LIBRARIES
     debug ${HALIDE_LIBRARY_DEBUG}
     optimized ${HALIDE_LIBRARY_RELEASE})
+
+  find_file(HALIDE_DLL_DEBUG NAMES Halide.dll
+    PATHS ${HALIDE_DISTRIB_DIR}/Debug)
+  find_file(HALIDE_DLL_RELEASE NAMES Halide.dll
+    PATHS ${HALIDE_DISTRIB_DIR}/Release)
+
+  if (NOT HALIDE_DLL_DEBUG OR NOT HALIDE_DLL_RELEASE)
+    message(FATAL_ERROR "Could not find Halide DLLs")
+  endif ()
+
+  set(HALIDE_DLLS
+    debug ${HALIDE_DLL_DEBUG}
+    optimized ${HALIDE_DLL_RELEASE})
+
+  # Distribute the DLLs in the binary folder.
+  if (WIN32)
+    file(COPY ${HALIDE_DLL_DEBUG}   DESTINATION ${CMAKE_BINARY_DIR}/bin/Debug)
+    file(COPY ${HALIDE_DLL_RELEASE} DESTINATION ${CMAKE_BINARY_DIR}/bin/Release)
+    file(COPY ${HALIDE_DLL_RELEASE} DESTINATION ${CMAKE_BINARY_DIR}/bin/RelWithDebInfo)
+    file(COPY ${HALIDE_DLL_RELEASE} DESTINATION ${CMAKE_BINARY_DIR}/bin/MinSizeRel)
+  endif ()
 else ()
   find_library(HALIDE_LIBRARIES NAMES Halide
     PATHS ${HALIDE_DISTRIB_DIR}/bin)

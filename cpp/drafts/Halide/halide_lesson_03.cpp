@@ -10,7 +10,9 @@ GRAPHICS_MAIN()
   using namespace std;
   using namespace DO::Sara;
 
-  const string video_filepath = "/home/david/Desktop/test.mp4";
+  //const string video_filepath = "/home/david/Desktop/test.mp4";
+  const auto video_filepath =
+      "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4";
 
   VideoStream video_stream(video_filepath);
 
