@@ -55,7 +55,3 @@ build:
   project: c:\projects\sara-build\Sara.sln
   parallel: true
   verbosity: minimal
-
-test_script:
-  - cd ..\sara-build
-  - cmake --build . --target RUN_TESTS
