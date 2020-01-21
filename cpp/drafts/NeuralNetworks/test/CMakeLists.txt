@@ -23,6 +23,9 @@ if (CUDA_FOUND AND TensorRT_FOUND)
 
     cuda_add_executable(${filename} ${file})
 
+    target_include_directories(${filename}
+      PRIVATE ${TensorRT_INCLUDE_DIRS})
+
     target_compile_definitions(${filename}
       PRIVATE -DBOOST_TEST_DYN_LINK)
 

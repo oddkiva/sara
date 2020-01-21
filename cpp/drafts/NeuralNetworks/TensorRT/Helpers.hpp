@@ -2,10 +2,12 @@
 
 #include <NvInfer.h>
 
+#include <array>
 #include <functional>
 #include <iostream>
 #include <map>
 #include <memory>
+#include <string>
 
 
 namespace DO::Sara::TensorRT {
@@ -174,11 +176,11 @@ namespace DO::Sara::TensorRT {
   }
 
   inline auto conv_2d(nvinfer1::ITensor& x,              //
-               int num_filters,                   //
-               nvinfer1::DimsHW kernel_sizes,     //
-               const std::vector<float>& w = {},  //
-               const std::vector<float>& b = {},
-               const std::string& name = {})  //
+                      int num_filters,                   //
+                      nvinfer1::DimsHW kernel_sizes,     //
+                      const std::vector<float>& w = {},  //
+                      const std::vector<float>& b = {},
+                      const std::string& name = {})  //
       -> nvinfer1::ITensor&
   {
     auto model = Network::current().model();
@@ -200,7 +202,8 @@ namespace DO::Sara::TensorRT {
     {
       w_name = "conv/weights/" + std::to_string(Network::current_var_index());
       if (weights.find(w_name) != weights.end())
-        throw std::runtime_error{"Error: convolution weight name already used!"};
+        throw std::runtime_error{
+            "Error: convolution weight name already used!"};
       weights[w_name] = w;
 
       b_name = "conv/bias/" + std::to_string(Network::current_var_index());

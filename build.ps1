@@ -11,6 +11,10 @@ $source_dir = $pwd
 $build_dir = "sara-build-vs$vsver-$build_type"
 $cmake_toolset = $cmake_vsver[$vsver]
 
+$halide_dir = "C:\local\halide"
+$cudnn_dir = "C:\local\cudnn"
+$tensorrt_dir = "C:\local\TensorRT-7.0.0.11"
+
 
 echo "========================================================================="
 echo "Install dependencies with vcpkg..."
@@ -64,10 +68,13 @@ echo "Configuring for CMake..."
 $vcpkg_toolchain_file = "c:/vcpkg/scripts/buildsystems/vcpkg.cmake"
 
 $cmake_options  = "-DCMAKE_TOOLCHAIN_FILE:FILEPATH=$vcpkg_toolchain_file "
+$cmake_options += "-DCMAKE_PREFIX_PATH=`"$cudnn_dir;$tensorrt_dir`" "
 $cmake_options += "-DSARA_BUILD_VIDEOIO:BOOL=ON "
 $cmake_options += "-DSARA_BUILD_SHARED_LIBS:BOOL=$($build_shared_libs[$build_type]) "
 $cmake_options += "-DSARA_BUILD_SAMPLES:BOOL=ON "
-$cmake_options += "-DSARA_BUILD_TESTS:BOOL=ON"
+$cmake_options += "-DSARA_BUILD_TESTS:BOOL=ON "
+$cmake_options += "-DSARA_USE_HALIDE:BOOL=ON "
+$cmake_options += "-DHALIDE_DISTRIB_DIR:PATH=$halide_dir "
 
 echo "CMake options = $cmake_options"
 echo "`n"
