@@ -4,12 +4,40 @@ cmake_minimum_required(VERSION 3.0)
 find_package(DO_Sara COMPONENTS Core Graphics VideoIO REQUIRED)
 find_package(OpenMP REQUIRED)
 
+if (HALIDE_DISTRIB_DIR)
+  find_file(HALIDE_CMAKE_FILEPATH NAMES halide.cmake
+    PATHS ${HALIDE_DISTRIB_DIR})
 
-set(HALIDE_DISTRIB_DIR /opt/halide)
-include("${HALIDE_DISTRIB_DIR}/halide.cmake")
+  if (HALIDE_CMAKE_FILEPATH)
+    include(${HALIDE_CMAKE_FILEPATH})
+  else ()
+    message(FATAL_ERROR "Provided HALIDE_DISTRIB_DIR is invalid!")
+  endif ()
+else ()
+  return ()
+endif ()
 
-find_library(HALIDE_LIBRARY NAMES Halide
-  PATHS ${HALIDE_DISTRIB_DIR}/bin)
+if (WIN32)
+  find_library(HALIDE_LIBRARY_DEBUG NAMES Halide
+    PATHS ${HALIDE_DISTRIB_DIR}/Debug)
+  find_library(HALIDE_LIBRARY_RELEASE NAMES Halide
+    PATHS ${HALIDE_DISTRIB_DIR}/Release)
+
+  if (NOT HALIDE_LIBRARY_DEBUG OR NOT HALIDE_LIBRARY_RELEASE)
+    message(FATAL_ERROR "Could not find Halide libraries")
+  endif ()
+
+  set(HALIDE_LIBRARIES
+    debug ${HALIDE_LIBRARY_DEBUG}
+    optimized ${HALIDE_LIBRARY_RELEASE})
+else ()
+  find_library(HALIDE_LIBRARIES NAMES Halide
+    PATHS ${HALIDE_DISTRIB_DIR}/bin)
+
+  if (NOT HALIDE_LIBRARIES)
+    message(FATAL_ERROR "Could not find Halide libraries")
+  endif ()
+endif ()
 
 
 file(GLOB LESSONS_SOURCE_FILES
@@ -45,7 +73,7 @@ function (add_halide_executable source_file)
 
   target_compile_options(${name} PRIVATE ${OpenMP_CXX_FLAGS})
   target_link_libraries(${name} PRIVATE
-    ${HALIDE_LIBRARY}
+    ${HALIDE_LIBRARIES}
     ${JPEG_LIBRARIES}
     ${PNG_LIBRARIES}
     ${OpenMP_CXX_FLAGS})
@@ -59,7 +87,7 @@ function (add_halide_executable source_file)
   if (NOT MSVC)
     target_compile_options(${name} PRIVATE -Wno-unknown-pragmas)
   else()
-    target_compile_options(${name} PRIVATE /Wd4068)
+    target_compile_options(${name} PRIVATE /wd4068)
   endif()
 endfunction ()
 
@@ -82,7 +110,7 @@ foreach (lesson ${LESSONS_SOURCE_FILES})
   target_compile_options(${lesson_name} PRIVATE ${OpenMP_CXX_FLAGS})
   target_link_libraries(${lesson_name} PRIVATE
     ${DO_Sara_LIBRARIES}
-    ${HALIDE_LIBRARY}
+    ${HALIDE_LIBRARIES}
     ${OpenMP_CXX_FLAGS})
 
   if (UNIX)
@@ -94,6 +122,6 @@ foreach (lesson ${LESSONS_SOURCE_FILES})
   if (NOT MSVC)
     target_compile_options(${lesson_name} PRIVATE -Wno-unknown-pragmas)
   else()
-    target_compile_options(${lesson_name} PRIVATE /Wd4068)
+    target_compile_options(${lesson_name} PRIVATE /wd4068)
   endif()
 endforeach()
