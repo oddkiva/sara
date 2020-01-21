@@ -1,6 +1,7 @@
 #include <DO/Sara/Core.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/VideoIO.hpp>
+#include <DO/Sara/ImageProcessing.hpp>
 
 #include "Halide.h"
 
@@ -18,13 +19,21 @@ GRAPHICS_MAIN()
 
   // Input.
   auto in_video_frame = video_stream.frame();
+  auto in_float = Image<float>{video_stream.sizes()};
+  auto grad = Image<Vector2f>{video_stream.sizes()};
+  auto grad_norm = Image<float>{video_stream.sizes()};
+  auto grad_norm_rgb = Image<Rgb8>{video_stream.sizes()};
+
   auto in_video_frame_rgba = Image<Rgba8>{video_stream.sizes()};
   auto out_video_frame = Image<Rgba8>{video_stream.sizes()};
 
   // Timer.
   auto timer = Timer{};
 
-  // Image processing pipeline.
+  // Sara pipeline
+  auto compute_gradient = Gradient{};
+
+  // Halide pipeline.
   auto input = Halide::Buffer<uint8_t>{
       reinterpret_cast<uint8_t*>(in_video_frame_rgba.data()),
       {video_stream.width(), video_stream.height(), 4}};
@@ -83,23 +92,32 @@ GRAPHICS_MAIN()
 
     timer.restart();
     {
-      std::transform(in_video_frame.begin(), in_video_frame.end(),
-                     in_video_frame_rgba.begin(), [](const Rgb8& c) -> Rgba8 {
-                       return {c[0], c[1], c[2], 255};
-                     });
+      convert(in_video_frame, in_float);
     }
     elapsed = timer.elapsed_ms();
     std::cout << "Color conversion time = " << elapsed << " ms" << std::endl;
 
     timer.restart();
     {
-      filter_rescaled.realize(output);
-      output.copy_to_host();
+      compute_gradient(in_float, grad);
+      std::transform(grad.begin(), grad.end(), grad_norm.begin(),
+                     [](const Vector2f& g) { return g.norm(); });
+      grad_norm = color_rescale(grad_norm);
+      convert(grad_norm, grad_norm_rgb);
     }
     elapsed = timer.elapsed_ms();
-    std::cout << "Halide computation time = " << elapsed << " ms" << std::endl;
+    std::cout << "Sara computation time = " << elapsed << " ms" << std::endl;
 
-    display(in_video_frame);
+    // timer.restart();
+    //{
+    //  filter_rescaled.realize(output);
+    //  output.copy_to_host();
+    //}
+    // elapsed = timer.elapsed_ms();
+    // std::cout << "Halide computation time = " << elapsed << " ms" <<
+    // std::endl;
+
+    display(grad_norm_rgb);
   }
 
   return 0;
