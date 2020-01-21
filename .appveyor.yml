@@ -10,15 +10,17 @@ clone_folder: c:\projects\sara
 environment:
   # These environment variables will be picked up in CMake.
   VCPKG_TOOLCHAIN_FILE: C:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake
-  QTDIR: C:/Qt/5.13.2/msvc2017_64
+  QTDIR: C:/Qt/latest/msvc2017_64
   BOOST_ROOT: C:/Libraries/boost_1_69_0
   matrix:
     - generator: "Visual Studio 15 2017 Win64"
 
-install:
-  # Set up Qt5.
-  - set PATH=%QTDIR%\bin;%PATH%
+init:
+  # This gives us credentials to access the the VM that is building Sara via
+  # RDP.
+  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
+install:
   # Update vcpkg.
   - cd c:\tools\vcpkg
   - git pull
@@ -49,9 +51,19 @@ configuration:
 before_build:
   # Go back the repository folder so that we can run CMake.
   - cd %APPVEYOR_BUILD_FOLDER%
-  - cmake -H. -B../sara-build -G "%generator%" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=%VCPKG_TOOLCHAIN_FILE% -DSARA_BUILD_SHARED_LIBS=ON -DSARA_BUILD_VIDEOIO:BOOL=ON -DSARA_BUILD_TESTS:BOOL=ON -DSARA_BUILD_SAMPLES:BOOL=ON -DCMAKE_PREFIX_PATH="%QTDIR%" -DBOOST_ROOT=%BOOST_ROOT%
+  - cmake -H. -B..\sara-build -G "%generator%" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=%VCPKG_TOOLCHAIN_FILE% -DSARA_BUILD_SHARED_LIBS=ON -DSARA_BUILD_VIDEOIO:BOOL=ON -DSARA_BUILD_TESTS:BOOL=ON -DSARA_BUILD_SAMPLES:BOOL=ON -DCMAKE_PREFIX_PATH="%QTDIR%" -DBOOST_ROOT=%BOOST_ROOT%
 
 build:
   project: c:\projects\sara-build\Sara.sln
   parallel: true
   verbosity: minimal
+
+test_script:
+  # Set up the PATH environment variable so that we can run the tests.
+  #
+  # Found via Remote Desktop Connection in Windows.
+  - set PATH=%QTDIR%\bin;%BOOST_ROOT%\lib64-msvc-14.1;%PATH%
+
+  # Run the tests.
+  - cd ..\sara-build
+  - ctest -C "Release"
