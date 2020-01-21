@@ -23,6 +23,9 @@
 
 namespace DO::Sara { namespace GL {
 
+  //! @addtogroup OpenGL
+  //! @{
+
   struct Shader
   {
     operator GLuint() const
@@ -84,6 +87,8 @@ namespace DO::Sara { namespace GL {
     GLuint vertex_shader{0};
     GLuint fragment_shader{0};
   };
+
+  //! @}
 
 } /* namespace GL */
 } /* namespace DO::Sara */

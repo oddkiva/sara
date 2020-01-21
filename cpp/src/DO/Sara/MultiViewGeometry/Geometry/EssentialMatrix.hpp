@@ -19,45 +19,48 @@
 
 namespace DO::Sara {
 
-struct Motion
-{
-  Eigen::Matrix3d R{Eigen::Matrix3d::Identity()};
-  Eigen::Vector3d t{Eigen::Vector3d::Zero()};
-};
+  //! @addtogroup MultiViewGeometry
+  //! @{
 
-class EssentialMatrix : public FundamentalMatrix
-{
-  using base_type = FundamentalMatrix;
-
-public:
-  using matrix_type = typename base_type::matrix_type;
-  using point_type = typename base_type::point_type;
-  using vector_type = point_type;
-
-  EssentialMatrix() = default;
-
-  EssentialMatrix(const matrix_type& E)
-    : base_type{E}
+  struct Motion
   {
+    Eigen::Matrix3d R{Eigen::Matrix3d::Identity()};
+    Eigen::Vector3d t{Eigen::Vector3d::Zero()};
+  };
+
+  class EssentialMatrix : public FundamentalMatrix
+  {
+    using base_type = FundamentalMatrix;
+
+  public:
+    using matrix_type = typename base_type::matrix_type;
+    using point_type = typename base_type::point_type;
+    using vector_type = point_type;
+
+    EssentialMatrix() = default;
+
+    EssentialMatrix(const matrix_type& E)
+      : base_type{E}
+    {
+    }
+  };
+
+  inline auto essential_matrix(const Matrix3d& R, const Vector3d& t)
+  {
+    return EssentialMatrix{skew_symmetric_matrix(t) * R};
   }
-};
 
-inline auto essential_matrix(const Matrix3d& R, const Vector3d& t)
-{
-  return EssentialMatrix{skew_symmetric_matrix(t) * R};
-}
+  inline auto essential_matrix(const Motion& m)
+  {
+    return essential_matrix(m.R, m.t);
+  }
 
-inline auto essential_matrix(const Motion& m)
-{
-  return essential_matrix(m.R, m.t);
-}
+  DO_SARA_EXPORT
+  auto extract_relative_motion_svd(const Matrix3d& E) -> std::vector<Motion>;
 
-DO_SARA_EXPORT
-auto extract_relative_motion_svd(const Matrix3d& E)
-    -> std::vector<Motion>;
+  DO_SARA_EXPORT
+  auto extract_relative_motion_horn(const Matrix3d& E) -> std::vector<Motion>;
 
-DO_SARA_EXPORT
-auto extract_relative_motion_horn(const Matrix3d& E)
-    -> std::vector<Motion>;
+  //! @}
 
 } /* namespace DO::Sara */

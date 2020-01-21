@@ -13,15 +13,17 @@
 #ifndef DO_KALPANA_3D_CANVAS_HPP
 #define DO_KALPANA_3D_CANVAS_HPP
 
-#include <QOpenGLWidget>
-#include <QOpenGLFunctions>
-
-#include <Eigen/Core>
+#include <DO/Kalpana/Defines.hpp>
 
 #include <DO/Kalpana/3D/Frame.hpp>
 #include <DO/Kalpana/3D/Scene.hpp>
 #include <DO/Kalpana/3D/SceneItem.hpp>
 #include <DO/Kalpana/3D/TrackBall.hpp>
+
+#include <QOpenGLWidget>
+#include <QOpenGLFunctions>
+
+#include <Eigen/Core>
 
 
 namespace DO { namespace Kalpana {
@@ -29,7 +31,8 @@ namespace DO { namespace Kalpana {
   using namespace Eigen;
 
   //! @brief Class derived from QOpenGLWidget to view 3D scenes.
-  class Canvas3D : public QOpenGLWidget, protected QOpenGLFunctions
+  class DO_KALPANA_EXPORT Canvas3D : public QOpenGLWidget,
+                                     protected QOpenGLFunctions
   {
   public:
     Canvas3D(Scene *scene, QWidget *parent = 0);

@@ -18,6 +18,12 @@
 
 namespace DO { namespace Sara {
 
+  /*!
+   *  @addtogroup MultiArrayIterators
+   *  @{
+   *
+   */
+
   template <typename ArrayView>
   class CoordinatesIterator
   {
@@ -207,6 +213,8 @@ namespace DO { namespace Sara {
     vector_type _steps;
     bool _stop;
   };
+
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

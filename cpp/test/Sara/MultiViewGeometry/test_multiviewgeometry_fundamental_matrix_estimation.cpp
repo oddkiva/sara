@@ -1,6 +1,5 @@
 #define BOOST_TEST_MODULE "MultiViewGeometry/Eight Point Algorithm"
 
-#include <DO/Sara/Core/Expression/Debug.hpp>
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/MultiViewGeometry/Estimators/ErrorMeasures.hpp>
 #include <DO/Sara/MultiViewGeometry/Estimators/FundamentalMatrixEstimators.hpp>
@@ -54,14 +53,11 @@ BOOST_AUTO_TEST_CASE(test_eight_point_algorithm)
   // version.
   BOOST_CHECK_SMALL((batched_errors - errors).norm() / errors.norm(), 1e-12);
 
-  SARA_DEBUG << type_name<decltype((batched_errors.array() < 1e-4).eval())>()
-             << std::endl;
   SARA_DEBUG << "Individual errors = " << errors << std::endl;
   SARA_DEBUG << "Batched errors = " << batched_errors << std::endl;
   SARA_DEBUG << "Inliers = " << (batched_errors.array() < 1e-4) << std::endl;
   SARA_DEBUG << "Inlier count = " << (batched_errors.array() < 1e-4).count()
              << std::endl;
-
 
   // Is rank 2?
   BOOST_CHECK(F.rank_two_predicate());

@@ -20,6 +20,9 @@
 
 namespace DO { namespace Sara {
 
+  //! @addtogroup MultiArray
+  //! @{
+
   //! @{
   //! @brief Tensor classes are simple aliases for MultiArray-based classes.
   template <typename T, int Dimension, int StorageOrder = ColMajor>
@@ -215,6 +218,8 @@ namespace DO { namespace Sara {
 
     return out;
   }
+  //! @}
+
   //! @}
 
 } /* namespace Sara */

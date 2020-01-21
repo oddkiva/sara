@@ -20,10 +20,10 @@ class QImage;
 namespace DO { namespace Sara {
 
   /*!
-    @ingroup Graphics
-
-    @defgroup ImageIO Image I/O
-    @{
+   *  @ingroup Graphics
+   *
+   *  @defgroup GraphicsImageIO Image I/O (slow using Qt5)
+   *  @{
    */
 
   //! @brief Load image.

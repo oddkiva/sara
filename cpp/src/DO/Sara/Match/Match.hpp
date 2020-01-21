@@ -20,6 +20,9 @@
 
 namespace DO { namespace Sara {
 
+  //! @addtogroup Match
+  //! @{
+
   class Match
   {
   public:
@@ -227,6 +230,8 @@ namespace DO { namespace Sara {
   void check_matches(const Image<Rgb8>& I1, const Image<Rgb8>& I2,
                      const std::vector<Match>& matches,
                      bool redraw_everytime = false, float z = 1.f);
+  //! @}
+
   //! @}
 
 } /* namespace Sara */

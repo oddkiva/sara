@@ -24,8 +24,8 @@
 namespace DO { namespace Sara {
 
   /*!
-    \addtogroup Draw3D
-    @{
+   *  @addtogroup Draw3D
+   *  @{
    */
 
   //! @brief Triangle face consisting of 3 vertex indices

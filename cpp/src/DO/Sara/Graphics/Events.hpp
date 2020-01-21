@@ -17,11 +17,11 @@
 namespace DO { namespace Sara {
 
   /*!
-    @ingroup Graphics
-
-    @defgroup Event Event handling functions
-    \todo Investigate if it is useful. I don't remember.
-    @{
+   *  @ingroup Graphics
+   *
+   *  @defgroup Event Event Handling Functions
+   *  @todo Investigate if it is useful. I don't remember.
+   *  @{
    */
 
   //! @brief I/O event types.
@@ -166,6 +166,8 @@ namespace DO { namespace Sara {
     e.mousePos << x, y;
     return e;
   }
+
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

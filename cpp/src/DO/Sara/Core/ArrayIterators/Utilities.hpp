@@ -23,7 +23,7 @@
 
 namespace DO { namespace Sara {
 
-  //! @ingroup MultiArrayIterators
+  //! @addtogroup MultiArrayIterators
   //! @{
 
   //! @brief The offset computer class for N-dimensional arrays.

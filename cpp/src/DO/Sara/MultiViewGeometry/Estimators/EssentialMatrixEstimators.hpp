@@ -22,152 +22,125 @@
 
 namespace DO::Sara {
 
-//! @{
-using Matrix10d = Eigen::Matrix<double, 10, 10>;
-using Vector10d = Eigen::Matrix<double, 10, 10>;
-using Vector9d = Eigen::Matrix<double, 9, 1>;
-//! @}
+  //! @addtogroup MultiViewGeometry
+  //! @{
+
+  //! @{
+  using Matrix10d = Eigen::Matrix<double, 10, 10>;
+  using Vector10d = Eigen::Matrix<double, 10, 10>;
+  using Vector9d = Eigen::Matrix<double, 9, 1>;
+  //! @}
 
 
-struct DO_SARA_EXPORT FivePointAlgorithmBase
-{
-  const Monomial x{variable("x")};
-  const Monomial y{variable("y")};
-  const Monomial z{variable("z")};
-  const Monomial one_{one()};
+  struct DO_SARA_EXPORT FivePointAlgorithmBase
+  {
+    const Monomial x{variable("x")};
+    const Monomial y{variable("y")};
+    const Monomial z{variable("z")};
+    const Monomial one_{one()};
 
-  auto extract_null_space(const Matrix<double, 3, 5>& p_left,
-                          const Matrix<double, 3, 5>& p_right) const
-      -> Matrix<double, 9, 4>;
+    auto extract_null_space(const Matrix<double, 3, 5>& p_left,
+                            const Matrix<double, 3, 5>& p_right) const
+        -> Matrix<double, 9, 4>;
 
-  auto reshape_null_space(const Matrix<double, 9, 4>&) const
-      -> std::array<Matrix3d, 4>;
+    auto reshape_null_space(const Matrix<double, 9, 4>&) const
+        -> std::array<Matrix3d, 4>;
 
-  auto essential_matrix_expression(const std::array<Matrix3d, 4>&) const
-      -> Polynomial<Matrix3d>;
+    auto essential_matrix_expression(const std::array<Matrix3d, 4>&) const
+        -> Polynomial<Matrix3d>;
 
-  auto build_essential_matrix_constraints(const Polynomial<Matrix3d>&,
-                                          const std::array<Monomial, 20>&) const
-      -> Matrix<double, 10, 20>;
-};
-
-
-struct DO_SARA_EXPORT NisterFivePointAlgorithm : FivePointAlgorithmBase
-{
-  using model_type = EssentialMatrix;
-  using matrix_type = Eigen::Matrix<double, 3, 5>;
-  using matrix_view_type = Eigen::Map<const matrix_type>;
-
-  static constexpr auto num_points = 5;
-
-  const std::array<Monomial, 20> monomials{
-      x.pow(3),
-      y.pow(3),
-      x.pow(2) * y,
-      x * y.pow(2),
-      x.pow(2) * z,
-      x.pow(2),
-      y.pow(2) * z,
-      y.pow(2),
-      x * y * z,
-      x * y,
-      //
-      x,
-      x * z,
-      x * z.pow(2),
-      //
-      y,
-      y * z,
-      y * z.pow(2),
-      //
-      one_,
-      z,
-      z.pow(2),
-      z.pow(3)
+    auto
+    build_essential_matrix_constraints(const Polynomial<Matrix3d>&,
+                                       const std::array<Monomial, 20>&) const
+        -> Matrix<double, 10, 20>;
   };
 
-  auto build_essential_matrix_constraints(const Polynomial<Matrix3d>& E) const
-      -> Matrix<double, 10, 20>
+
+  struct DO_SARA_EXPORT NisterFivePointAlgorithm : FivePointAlgorithmBase
   {
-    return FivePointAlgorithmBase::build_essential_matrix_constraints(
-        E, monomials);
-  }
+    using model_type = EssentialMatrix;
+    using matrix_type = Eigen::Matrix<double, 3, 5>;
+    using matrix_view_type = Eigen::Map<const matrix_type>;
 
-  auto inplace_gauss_jordan_elimination(Matrix<double, 10, 20>&) const -> void;
+    static constexpr auto num_points = 5;
 
-  auto
-  form_resultant_matrix(const Matrix<double, 6, 10>&,
-                        Univariate::UnivariatePolynomial<double>[3][3]) const
-      -> void;
+    const std::array<Monomial, 20> monomials{
+        x.pow(3), y.pow(3), x.pow(2) * y, x* y.pow(2), x.pow(2) * z, x.pow(2),
+        y.pow(2) * z, y.pow(2), x* y* z, x* y,
+        //
+        x, x* z, x* z.pow(2),
+        //
+        y, y* z, y* z.pow(2),
+        //
+        one_, z, z.pow(2), z.pow(3)};
 
-  auto solve_essential_matrix_constraints(const std::array<Matrix3d, 4>&,
-                                          const Matrix<double, 10, 20>&) const
-      -> std::vector<EssentialMatrix>;
+    auto build_essential_matrix_constraints(const Polynomial<Matrix3d>& E) const
+        -> Matrix<double, 10, 20>
+    {
+      return FivePointAlgorithmBase::build_essential_matrix_constraints(
+          E, monomials);
+    }
 
-  auto find_essential_matrices(const Matrix<double, 3, 5>& left,
-                               const Matrix<double, 3, 5>& right) const
-      -> std::vector<EssentialMatrix>;
+    auto inplace_gauss_jordan_elimination(Matrix<double, 10, 20>&) const
+        -> void;
 
-  auto operator()(const Matrix<double, 3, 5>& left,
-                  const Matrix<double, 3, 5>& right) const
-  {
-    return find_essential_matrices(left, right);
-  }
-};
+    auto
+    form_resultant_matrix(const Matrix<double, 6, 10>&,
+                          Univariate::UnivariatePolynomial<double>[3][3]) const
+        -> void;
 
+    auto solve_essential_matrix_constraints(const std::array<Matrix3d, 4>&,
+                                            const Matrix<double, 10, 20>&) const
+        -> std::vector<EssentialMatrix>;
 
-struct DO_SARA_EXPORT SteweniusFivePointAlgorithm : FivePointAlgorithmBase
-{
-  using model_type = EssentialMatrix;
-  using matrix_type = Eigen::Matrix<double, 3, 5>;
-  using matrix_view_type = Eigen::Map<const matrix_type>;
+    auto find_essential_matrices(const Matrix<double, 3, 5>& left,
+                                 const Matrix<double, 3, 5>& right) const
+        -> std::vector<EssentialMatrix>;
 
-  static constexpr auto num_points = 5;
-
-  const std::array<Monomial, 20> monomials{
-      x * x * x,
-      x * x * y,
-      x * y * y,
-      y * y * y,
-      x * x * z,
-      x * y * z,
-      y * y * z,
-      x * z * z,
-      y * z * z,
-      z * z * z,
-      x * x,
-      x * y,
-      y * y,
-      x * z,
-      y * z,
-      z * z,
-      //  The solutions of interests
-      x,
-      y,
-      z,
-      one_
+    auto operator()(const Matrix<double, 3, 5>& left,
+                    const Matrix<double, 3, 5>& right) const
+    {
+      return find_essential_matrices(left, right);
+    }
   };
 
-  auto build_essential_matrix_constraints(const Polynomial<Matrix3d>& E) const
-      -> Matrix<double, 10, 20>
+
+  struct DO_SARA_EXPORT SteweniusFivePointAlgorithm : FivePointAlgorithmBase
   {
-    return FivePointAlgorithmBase::build_essential_matrix_constraints(
-        E, monomials);
-  }
+    using model_type = EssentialMatrix;
+    using matrix_type = Eigen::Matrix<double, 3, 5>;
+    using matrix_view_type = Eigen::Map<const matrix_type>;
 
-  auto solve_essential_matrix_constraints(const Matrix<double, 9, 4>&,
-                                          const Matrix<double, 10, 20>&) const
-      -> std::vector<EssentialMatrix>;
+    static constexpr auto num_points = 5;
 
-  auto find_essential_matrices(const Matrix<double, 3, 5>& left,
-                               const Matrix<double, 3, 5>& right) const
-      -> std::vector<EssentialMatrix>;
+    const std::array<Monomial, 20> monomials{
+        x * x * x, x* x* y, x* y* y, y* y* y, x* x* z, x* y* z, y* y* z,
+        x* z* z, y* z* z, z* z* z, x* x, x* y, y* y, x* z, y* z, z* z,
+        //  The solutions of interests
+        x, y, z, one_};
 
-  auto operator()(const Matrix<double, 3, 5>& left,
-                  const Matrix<double, 3, 5>& right) const
-  {
-    return find_essential_matrices(left, right);
-  }
-};
+    auto build_essential_matrix_constraints(const Polynomial<Matrix3d>& E) const
+        -> Matrix<double, 10, 20>
+    {
+      return FivePointAlgorithmBase::build_essential_matrix_constraints(
+          E, monomials);
+    }
+
+    auto solve_essential_matrix_constraints(const Matrix<double, 9, 4>&,
+                                            const Matrix<double, 10, 20>&) const
+        -> std::vector<EssentialMatrix>;
+
+    auto find_essential_matrices(const Matrix<double, 3, 5>& left,
+                                 const Matrix<double, 3, 5>& right) const
+        -> std::vector<EssentialMatrix>;
+
+    auto operator()(const Matrix<double, 3, 5>& left,
+                    const Matrix<double, 3, 5>& right) const
+    {
+      return find_essential_matrices(left, right);
+    }
+  };
+
+  //! @}
 
 } /* namespace DO::Sara */

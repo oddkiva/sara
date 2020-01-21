@@ -21,6 +21,9 @@
 
 namespace DO { namespace Sara {
 
+  //! @addtogroup GeometryObjects
+  //! @{
+
   // Triangle (a,b,c) enumerated in CCW order.
   class DO_SARA_EXPORT Triangle : public SmallPolygon<3>
   {
@@ -29,6 +32,8 @@ namespace DO { namespace Sara {
 
     Triangle(const Point2d& a, const Point2d& b, const Point2d& c);
   };
+
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

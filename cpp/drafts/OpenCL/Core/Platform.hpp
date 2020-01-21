@@ -31,6 +31,9 @@
 
 namespace DO::Sara {
 
+  //! @addtogroup OpenCL
+  //! @{
+
   struct Platform
   {
     cl_platform_id id;
@@ -113,5 +116,7 @@ namespace DO::Sara {
 
     return platforms;
   }
+
+  //! @}
 
 } /* namespace DO::Sara */

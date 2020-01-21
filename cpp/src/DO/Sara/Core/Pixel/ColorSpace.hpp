@@ -23,7 +23,7 @@ namespace DO { namespace Sara {
     @defgroup Color Color
     @{
 
-    @defgroup ColorSpace Color spaces
+    @defgroup ColorSpace Color Spaces
     @{
    */
   // RGB, RGBA color spaces.

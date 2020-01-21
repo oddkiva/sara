@@ -22,6 +22,12 @@
 
 namespace DO { namespace Sara {
 
+  /*!
+    @ingroup FeatureMatching
+    @{
+  */
+
+  //! @brief Feature matcher class using FLANN's KD-Tree.
   class DO_SARA_EXPORT AnnMatcher
   {
   public:
@@ -59,6 +65,8 @@ namespace DO { namespace Sara {
     std::vector<float> _vec_dists;
     bool _self_matching;
   };
+
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

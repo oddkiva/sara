@@ -20,15 +20,20 @@
 
 namespace DO::Sara {
 
-struct SGEMMImpl
-{
-  SGEMMImpl();
+  //! @addtogroup Compute
+  //! @{
 
-  ~SGEMMImpl();
+  struct SGEMMImpl
+  {
+    SGEMMImpl();
 
-  void operator()(int m, int n, int k, float alpha, const float* A,
-                  const float* B, float beta, float* C) const;
-};
+    ~SGEMMImpl();
+
+    void operator()(int m, int n, int k, float alpha, const float* A,
+                    const float* B, float beta, float* C) const;
+  };
+
+  //! @}
 
 } /* namespace DO::Sara */
 

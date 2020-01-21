@@ -12,3 +12,7 @@
 #pragma once
 
 #include <DO/Sara/Geometry/Graphics/DrawPolygon.hpp>
+
+
+//! @ingroup Geometry
+//! @defgroup GeometryGraphics Graphics Utilities

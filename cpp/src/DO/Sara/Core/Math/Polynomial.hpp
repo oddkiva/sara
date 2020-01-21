@@ -9,6 +9,9 @@
 
 namespace DO::Sara {
 
+  //! @addtogroup Math
+  //! @{
+
   //! @{
   //! @brief These implementations assume commutativity of elements.
   class Monomial : public Expression
@@ -359,6 +362,8 @@ namespace DO::Sara {
 
     return P(0, 0) * det0 - P(0, 1) * det1 + P(0, 2) * det2;
   }
+  //! @}
+
   //! @}
 
 } /* namespace DO::Sara */

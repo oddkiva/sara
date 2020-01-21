@@ -16,7 +16,7 @@ fi
 
 function install_python_packages_via_pip()
 {
-  pip install numpy nose
+  pip install coverage numpy nose
 }
 
 function build_library()
@@ -33,12 +33,13 @@ function build_library()
   fi
 
   cmake_options+="-DCMAKE_EXPORT_COMPILE_COMMANDS=ON "
-  cmake_options+="-DCMAKE_PREFIX_PATH=${HOME}/Qt/5.12.6/gcc_64 "
+  cmake_options+="-DCMAKE_PREFIX_PATH=${HOME}/Qt/5.12.6/gcc_64;/opt/boost-1.66.0 "
   cmake_options+="-DSARA_BUILD_VIDEOIO=ON "
   cmake_options+="-DSARA_BUILD_PYTHON_BINDINGS=ON "
   cmake_options+="-DSARA_BUILD_SHARED_LIBS=ON "
   cmake_options+="-DSARA_BUILD_TESTS=ON "
   cmake_options+="-DSARA_BUILD_SAMPLES=ON "
+  cmake_options+="-DSARA_USE_HALIDE=ON "
 
   # Qt 5 directory for Darwin.
   if [ "$(uname -s)" == "Darwin" ]; then

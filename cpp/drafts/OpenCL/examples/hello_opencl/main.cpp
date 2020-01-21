@@ -9,6 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+//! @example
+
 #include <drafts/OpenCL/Core/CommandQueue.hpp>
 #include <drafts/OpenCL/Core/DeviceBuffer.hpp>
 

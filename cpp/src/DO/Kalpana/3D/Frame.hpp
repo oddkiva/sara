@@ -11,6 +11,8 @@
 #ifndef DO_KALPANA_GRAPHICS_FRAME_HPP
 #define DO_KALPANA_GRAPHICS_FRAME_HPP
 
+#include <DO/Kalpana/Defines.hpp>
+
 #include <QtOpenGL>
 
 
@@ -19,17 +21,17 @@ class GLUquadric;
 
 namespace DO { namespace Kalpana {
 
-  const GLfloat red[]   = { 1.0f, 0.0f, 0.0f, 1.0f };
-  const GLfloat green[] = { 0.0f, 1.0f, 0.0f, 1.0f };
-  const GLfloat blue[]  = { 0.0f, 0.0f, 1.0f, 1.0f };
-  const GLfloat yellow[]= { 1.0f, 1.0f, 0.0f, 1.0f };
-  const GLfloat white[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-  const GLfloat defaultAmbient[] = { 0.2f, 0.2f, 0.2f, 1.0f };
+  constexpr GLfloat red[] = {1.0f, 0.0f, 0.0f, 1.0f};
+  constexpr GLfloat green[] = {0.0f, 1.0f, 0.0f, 1.0f};
+  constexpr GLfloat blue[] = {0.0f, 0.0f, 1.0f, 1.0f};
+  constexpr GLfloat yellow[] = {1.0f, 1.0f, 0.0f, 1.0f};
+  constexpr GLfloat white[] = {1.0f, 1.0f, 1.0f, 1.0f};
+  constexpr GLfloat default_ambient[] = {0.2f, 0.2f, 0.2f, 1.0f};
 
-  const double defaultAxisLength = 10.0;
-  const double defaultAxisRadius = 0.125;
+  constexpr auto default_axis_length = 10.0;
+  constexpr auto default_axis_radius = 0.125;
 
-  class Frame
+  class DO_KALPANA_EXPORT Frame
   {
   public:
     //! @brief Default constructor.
@@ -39,15 +41,13 @@ namespace DO { namespace Kalpana {
     ~Frame();
 
     //! @brief Draw frame in the window.
-    void draw(double axisLength,
-              double axisRadius = defaultAxisRadius);
+    void draw(double axisLength, double axisRadius = default_axis_radius);
 
   private:
-    GLUquadric *pQuadObj;
+    GLUquadric* pQuadObj;
   };
 
-} /* namespace Kalpana */
-} /* namespace DO */
+}}  // namespace DO::Kalpana
 
 
 #endif /* DO_KALPANA_GRAPHICS_FRAME_HPP */

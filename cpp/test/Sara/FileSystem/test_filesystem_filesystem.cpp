@@ -22,17 +22,44 @@ namespace fs = boost::filesystem;
 namespace sara = DO::Sara;
 
 
-BOOST_AUTO_TEST_SUITE(TestSfMFileSystem)
+BOOST_AUTO_TEST_SUITE(TestFileSystem)
+
+BOOST_AUTO_TEST_CASE(test_basename)
+{
+  const auto filepath = "/tmp/basename.txt";
+  BOOST_CHECK_EQUAL(sara::basename(filepath), "basename");
+}
+
+BOOST_AUTO_TEST_CASE(test_mkdir)
+{
+  const auto tmp_dir = fs::temp_directory_path() / "tmp_test_dir";
+  sara::mkdir(tmp_dir.string());
+  BOOST_CHECK(fs::exists(tmp_dir));
+
+  fs::remove(tmp_dir.string());
+  BOOST_CHECK(!fs::exists(tmp_dir));
+}
+
+BOOST_AUTO_TEST_CASE(test_cp)
+{
+  const auto src = sara::ls(src_path("../../../../data/"), ".jpg")[0];
+  const auto dst = (fs::temp_directory_path() / fs::path{src}.filename()).string();
+  sara::cp(src, dst);
+  BOOST_CHECK(fs::exists(dst));
+
+  fs::remove(dst);
+  BOOST_CHECK(!fs::exists(dst));
+}
 
 BOOST_AUTO_TEST_CASE(test_ls)
 {
   {
-    auto images = sara::ls(fs::temp_directory_path().string(), ".jpg");
+    const auto images = sara::ls(fs::temp_directory_path().string(), ".jpg");
     BOOST_CHECK(images.empty());
   }
 
   {
-    auto images = sara::ls(src_path("../../../../data/"), ".jpg");
+    const auto images = sara::ls(src_path("../../../../data/"), ".jpg");
     BOOST_CHECK(!images.empty());
   }
 }

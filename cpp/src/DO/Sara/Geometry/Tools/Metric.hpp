@@ -20,6 +20,9 @@
 
 namespace DO { namespace Sara {
 
+  //! @addtogroup GeometryTools
+  //! @{
+
   template <typename T, int N>
   class SquaredRefDistance
   {
@@ -139,6 +142,8 @@ namespace DO { namespace Sara {
     const T _radius;
     const SquaredDistance& _squared_distance;
   };
+
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

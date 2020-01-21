@@ -9,9 +9,10 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+//! @example
+
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
-#include <DO/Sara/MultiViewGeometry/BundleAdjustmentProblem.hpp>
 #include <DO/Sara/MultiViewGeometry/EpipolarGraph.hpp>
 #include <DO/Sara/MultiViewGeometry/FeatureGraph.hpp>
 #include <DO/Sara/MultiViewGeometry/Miscellaneous.hpp>
@@ -22,11 +23,9 @@
 #include <DO/Sara/SfM/BuildingBlocks/Triangulation.hpp>
 #include <DO/Sara/SfM/Detectors/SIFT.hpp>
 
-#include <ceres/ceres.h>
-#include <ceres/rotation.h>
-
 
 using namespace std;
+using namespace std::string_literals;
 using namespace DO::Sara;
 
 
@@ -40,9 +39,9 @@ GRAPHICS_MAIN()
   print_stage("Loading images...");
   const auto data_dir =
 #ifdef __APPLE__
-      std::string{"/Users/david/Desktop/Datasets/sfm/castle_int"};
+      "/Users/david/Desktop/Datasets/sfm/castle_int"s;
 #else
-      std::string{"/home/david/Desktop/Datasets/sfm/castle_int"};
+      "/home/david/Desktop/Datasets/sfm/castle_int"s;
 #endif
   views.image_paths = {
       data_dir + "/" + "0000.png",

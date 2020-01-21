@@ -9,7 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Kalpana/3D/OpenGLWindow.hpp>
+//! @example
 
 #include <DO/Sara/Core/Tensor.hpp>
 
@@ -19,6 +19,7 @@
 #include <QtGui/QOpenGLBuffer>
 #include <QtGui/QOpenGLShaderProgram>
 #include <QtGui/QOpenGLVertexArrayObject>
+#include <QtGui/QOpenGLWindow>
 
 
 using namespace DO::Sara;
@@ -50,7 +51,7 @@ public:
 
   void initialize_shader_program()
   {
-    m_program = new QOpenGLShaderProgram{this};
+    m_program = new QOpenGLShaderProgram{parent()};
     m_program->addShaderFromSourceCode(QOpenGLShader::Vertex,
                                        vertex_shader_source);
     m_program->addShaderFromSourceCode(QOpenGLShader::Fragment,
@@ -83,7 +84,7 @@ public:
       return offset * sizeof(float);
     };
 
-    m_vao = new QOpenGLVertexArrayObject{this};
+    m_vao = new QOpenGLVertexArrayObject{parent()};
     if (!m_vao->create())
       throw QException{};
 
@@ -99,22 +100,24 @@ public:
     // Copy the vertex data into the GPU buffer object.
     m_vbo.bind();
     m_vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
-    m_vbo.allocate(m_vertices.data(), m_vertices.size() * sizeof(float));
+    m_vbo.allocate(m_vertices.data(),
+                   static_cast<int>(m_vertices.size() * sizeof(float)));
 
     // Copy the triangles data into the GPU buffer object.
     m_ebo.bind();
     m_ebo.setUsagePattern(QOpenGLBuffer::StaticDraw);
     m_ebo.allocate(m_triangles.data(),
-                   m_triangles.size() * sizeof(unsigned int));
+                   static_cast<int>(m_triangles.size() * sizeof(unsigned int)));
 
     // Specify that the vertex shader param 0 corresponds to the first 3 float
     // data of the buffer object.
     m_program->enableAttributeArray(arg_pos["in_coords"]);
-    m_program->setAttributeBuffer(/* location */ arg_pos["in_coords"],
-                                  /* GL_ENUM */ GL_FLOAT,
-                                  /* offset */ float_pointer(0),
-                                  /* tupleSize */ 3,
-                                  /* stride */ row_bytes(m_vertices));
+    m_program->setAttributeBuffer(
+        /* location */ arg_pos["in_coords"],
+        /* GL_ENUM */ GL_FLOAT,
+        /* offset */ float_pointer(0),
+        /* tupleSize */ 3,
+        /* stride */ static_cast<int>(row_bytes(m_vertices)));
 
     // Specify that the vertex shader param 1 corresponds to the first 3 float
     // data of the buffer object.
@@ -178,19 +181,19 @@ protected:
 };
 
 
-class Window : public OpenGLWindow
+class Window : public QOpenGLWindow
 {
   SquareObject* m_square{nullptr};
 
 public:
   Window() = default;
 
-  void initialize() override
+  void initializeGL() override
   {
-    m_square = new SquareObject{this};
+    m_square = new SquareObject{context()};
   }
 
-  void render() override
+  void paintGL() override
   {
     const qreal retinaScale = devicePixelRatio();
     glViewport(0, 0, width() * retinaScale, height() * retinaScale);

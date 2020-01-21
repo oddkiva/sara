@@ -93,7 +93,7 @@ namespace DO { namespace Sara {
   private:
     GLfloat m_scale;
     Point3f m_center;
-    GLObject::Frame m_frame;
+    GL::Frame m_frame;
     TrackBall m_trackball;
 
     SimpleTriangleMesh3f m_mesh;

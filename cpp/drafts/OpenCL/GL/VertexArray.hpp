@@ -22,6 +22,9 @@
 
 namespace DO::Sara { namespace GL {
 
+  //! @addtogroup OpenGL
+  //! @{
+
   struct VertexArray
   {
     static void generate(VertexArray* begin, VertexArray* end)
@@ -52,6 +55,8 @@ namespace DO::Sara { namespace GL {
 
     GLuint object{0};
   };
+
+  //! @}
 
 } /* namespace GL */
 } /* namespace DO::Sara */

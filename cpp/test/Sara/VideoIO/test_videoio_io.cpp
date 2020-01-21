@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(test_read_valid_video_with_invalid_image_frame)
 {
   VideoStream video_stream{video_filename};
   auto frame = Image<Rgb8>{};
-  BOOST_CHECK_THROW(video_stream.read(frame), std::domain_error);
+  BOOST_CHECK_THROW(video_stream >> frame, std::domain_error);
 }
 
 BOOST_AUTO_TEST_CASE(test_read_frames_sequentially)
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(test_seek_frame)
   auto frame2 = Image<Rgb8>{video_stream.sizes()};
 
   video_stream.seek(4);
-  video_stream2.read(frame2);
+  video_stream2 >> frame2;
 
   for (auto p = frame.begin(), p2 = frame2.begin(); p != frame.end(); ++p, ++p2)
     BOOST_REQUIRE_EQUAL(*p, *p2);

@@ -20,6 +20,9 @@
 
 namespace DO { namespace Sara {
 
+  //! @addtogroup GeometryObjects
+  //! @{
+
   template <std::size_t N>
   class SmallPolygon
   {
@@ -178,6 +181,8 @@ namespace DO { namespace Sara {
   }
 
   double area(const std::vector<Point2d>& polygon);
+  //! @}
+
   //! @}
 
 } /* namespace Sara */

@@ -18,9 +18,14 @@
 
 namespace DO { namespace Sara {
 
+  //! @addtogroup DisjointSets
+  //! @{
+
   DO_SARA_EXPORT
   auto two_pass_connected_components(const ImageView<int, 2>& values)
       -> Image<int, 2>;
+
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

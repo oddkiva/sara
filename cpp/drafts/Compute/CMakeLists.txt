@@ -50,11 +50,12 @@ if (APPLE)
   set_source_files_properties(${DO_Sara_Compute_SOURCE_FILES}
     PROPERTIES LANGUAGE CXX)
   add_library(DO_Sara_Compute ${DO_Sara_Compute_SOURCE_FILES})
-  target_compile_options(DO_Sara_Compute PRIVATE -x objective-c++ -fobjc-arc)
-  target_link_libraries(DO_Sara_Compute PRIVATE
-    "-framework Foundation"
-    "-framework Metal"
-    "-framework MetalPerformanceShaders")
+  target_compile_options(DO_Sara_Compute
+    PRIVATE -x objective-c++ -fobjc-arc)
+  target_link_libraries(DO_Sara_Compute
+    PRIVATE "-framework Foundation"
+            "-framework Metal"
+            "-framework MetalPerformanceShaders")
   set_target_properties(DO_Sara_Compute PROPERTIES FOLDER "DO Sara Libraries")
   target_link_libraries(DO_Sara_Compute PRIVATE ${CLBlast_LIBRARY})
   target_link_libraries(DO_Sara_Compute PUBLIC ${OpenCL_LIBRARY})
@@ -65,24 +66,28 @@ if (APPLE)
   foreach (file ${test_compute_SOURCE_FILES})
     get_filename_component(filename "${file}" NAME_WE)
     sara_add_test(${filename} ${file} "${DO_Sara_Libraries}" "Compute")
-    target_include_directories(${filename} PRIVATE ${Boost_INCLUDE_DIR})
-    target_compile_definitions(${filename} PRIVATE -DBOOST_ALL_NO_LIB)
+    target_include_directories(${filename}
+      PRIVATE ${Boost_INCLUDE_DIR})
+    target_compile_definitions(${filename}
+      PRIVATE -DBOOST_ALL_NO_LIB)
     target_link_libraries(${filename}
-      DO_Sara_Compute
-      ${DO_Sara_LIBRARIES}
-      ${Boost_LIBRARIES})
+      PRIVATE DO_Sara_Compute
+              ${DO_Sara_LIBRARIES}
+              ${Boost_LIBRARIES})
   endforeach ()
 
-  target_link_libraries(test_compute_accelerate ${Accelerate_LIBRARY})
+  target_link_libraries(test_compute_accelerate
+    PRIVATE ${Accelerate_LIBRARY})
 
   target_compile_options(test_compute_mps PRIVATE -x objective-c++)
   target_link_libraries(test_compute_mps
-    "-framework Foundation"
-    "-framework Metal"
-    "-framework MetalPerformanceShaders")
+    PRIVATE "-framework Foundation"
+            "-framework Metal"
+            "-framework MetalPerformanceShaders")
 
-  target_include_directories(test_compute_clblast PRIVATE ${OpenCL_INCLUDE_DIR})
+  target_include_directories(test_compute_clblast
+    PRIVATE ${OpenCL_INCLUDE_DIR})
   target_link_libraries(test_compute_clblast
-    ${OpenCL_LIBRARY}
-    ${CLBlast_LIBRARY})
+    PRIVATE ${OpenCL_LIBRARY}
+            ${CLBlast_LIBRARY})
 endif ()

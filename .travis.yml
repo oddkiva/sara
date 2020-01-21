@@ -6,38 +6,48 @@ services:
   - xvfb
 
 cache:
-  bundler: true
+  # For coveralls.
+  - bundler
+  # Try to speed up builds with ccache.
+  - ccache
+
 
 addons:
   apt:
     packages:
+      # C++ toolchain
       - build-essential
       - cmake
       - doxygen
       - git
       - lcov
+      # Boost libraries
       - libboost-all-dev
+      # HDF5
       - libhdf5-dev
+      # Image I/O
       - libjpeg-dev
       - libpng-dev
       - libtiff5-dev
+      # FFmpeg libraries
       - libavcodec-dev
       - libavformat-dev
       - libavutil-dev
+      - libswscale-dev
+      # OpenGL
       - libglew-dev
       - libglfw3-dev
-      - libqt5opengl5-dev
       - ocl-icd-opencl-dev
+      # Python bindings (TODO)
+      - python3-dev
+      # OpenCL
       - opencl-headers
       - libpocl-dev
+      # Ceres
       - libceres-dev
-      - python3-dev
+      # Qt5
+      - libqt5opengl5-dev
       - qtbase5-dev
-      - qt3d5-dev
-      - qt3d-assimpsceneimport-plugin
-      - qt3d-defaultgeometryloader-plugin
-      - qt3d-gltfsceneio-plugin
-      - qt3d-scene2d-plugin
 
 compiler:
   - gcc
@@ -50,7 +60,7 @@ script:
   # Build libraries.
   - mkdir build
   - cd build
-  - cmake -DCMAKE_BUILD_TYPE=Debug -DSARA_BUILD_TESTS=ON -DSARA_BUILD_SAMPLES=ON -DSARA_BUILD_VIDEOIO=ON -DSARA_FFMPEG_DIR=$HOME/ffmpeg ..
+  - cmake -DCMAKE_BUILD_TYPE=Debug -DSARA_BUILD_TESTS=ON -DSARA_BUILD_SAMPLES=ON -DSARA_BUILD_VIDEOIO=ON ..
   - make -j$(nproc)
   # Run tests except OpenCL tests until I know how to fix them on Travis CI...
   - ctest --output-on-failure --exclude-regex "test_opencl_*"

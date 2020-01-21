@@ -17,3 +17,6 @@
 #include <DO/Sara/Geometry/Tools/Polynomial.hpp>
 #include <DO/Sara/Geometry/Tools/PolynomialRoots.hpp>
 #include <DO/Sara/Geometry/Tools/Projective.hpp>
+
+//! @ingroup Geometry
+//! @defgroup GeometryTools Geometric Tools

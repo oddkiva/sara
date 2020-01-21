@@ -19,17 +19,22 @@
 
 namespace DO::Sara {
 
-inline auto read_internal_camera_parameters(const std::string& filepath)
-    -> Eigen::Matrix3d
-{
-  std::ifstream file{filepath};
-  if (!file)
-    throw std::runtime_error{"File " + filepath + "does not exist!"};
+  //! @addtogroup MultiViewGeometry
+  //! @{
 
-  Eigen::Matrix3d K;
-  file >> K;
+  inline auto read_internal_camera_parameters(const std::string& filepath)
+      -> Eigen::Matrix3d
+  {
+    std::ifstream file{filepath};
+    if (!file)
+      throw std::runtime_error{"File " + filepath + "does not exist!"};
 
-  return K;
-}
+    Eigen::Matrix3d K;
+    file >> K;
+
+    return K;
+  }
+
+  //! @}
 
 } /* namespace DO::Sara */
