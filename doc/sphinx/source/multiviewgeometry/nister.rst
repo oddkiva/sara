@@ -57,6 +57,8 @@ combination of these :math:`4` basis vectors:
    \text{Null}(\bQ) = \text{span}(\x, \y, \z, \w) \\
    \be = x \x + y \y + z \z + \w
 
+The goal is to determine the value of the real scalars :math:`x, y, z`.
+
 Essential Matrix Constraints
 ----------------------------
 As mentioned in Nister's paper:
@@ -165,68 +167,130 @@ elimination. Specifically,
 
 1. perform the full sweep downward so that lower diagonal part
    is fully zero
-2. then in the sweep upward stop halfway,
 
-until the system of polynomial equations looks like the system of equations
-:eq:`eq-gaussjordan` below:
+   .. math::
+      :label: eq-sweep-downward
 
-.. math::
-   :label: eq-gaussjordan
+      \scriptsize
+      \begin{array}{|c|cccccccccc|ccc|ccc|cccc|}
+      \hline
 
-   \scriptsize
-   \begin{array}{|c|cccccccccc|ccc|ccc|cccc|}
-   \hline
+      &
+      x^3 & y^3 & x^2 y & x y^2 & x^2 z & x^2 & y^2 z & y^2 & xyz & xy &
+      x & x z & x z^2 & y & y z & y z^2 & 1 & z & z^2 & z^3 \\
 
-   &
-   x^3 & y^3 & x^2 y & x y^2 & x^2 z & x^2 & y^2 z & y^2 & xyz & xy &
-   x & x z & x z^2 & y & y z & y z^2 & 1 & z & z^2 & z^3 \\
+      \hline
 
-   \hline
+      \langle e_{00} \rangle &
+      1 & . & . & . & . & . & . & . & . & . &
+      . & . & . & . & . & . & . & . & . & . \\
 
-   \langle e_{00} \rangle &
-   1 & . & . & . & . & . & . & . & . & . &
-   . & . & . & . & . & . & . & . & . & . \\
+      \langle e_{01} \rangle &
+      0 & 1 & . & . & . & . & . & . & . & . &
+      . & . & . & . & . & . & . & . & . & . \\
 
-   \langle e_{01} \rangle &
-   0 & 1 & . & . & . & . & . & . & . & . &
-   . & . & . & . & . & . & . & . & . & . \\
+      \langle e_{02} \rangle &
+      0 & 0 & 1 & . & . & . & . & . & . & . &
+      . & . & . & . & . & . & . & . & . & . \\
 
-   \langle e_{02} \rangle &
-   0 & 0 & 1 & . & . & . & . & . & . & . &
-   . & . & . & . & . & . & . & . & . & . \\
+      \langle e_{10} \rangle &
+      0 & 0 & 0 & 1 & . & . & . & . & . & . &
+      . & . & . & . & . & . & . & . & . & . \\
 
-   \langle e_{10} \rangle &
-   0 & 0 & 0 & 1 & . & . & . & . & . & . &
-   . & . & . & . & . & . & . & . & . & . \\
+      \langle e_{11} \rangle &
+      0 & 0 & 0 & 0 & 1 & . & . & . & . & . &
+      . & . & . & . & . & . & . & . & . & . \\
 
-   \langle e_{11} \rangle &
-   0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 &
-   . & . & . & . & . & . & . & . & . & . \\
+      \langle e_{12} \rangle &
+      0 & 0 & 0 & 0 & 0 & 1 & . & . & . & . &
+      . & . & . & . & . & . & . & . & . & . \\
 
-   \langle e_{12} \rangle &
-   0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 &
-   . & . & . & . & . & . & . & . & . & . \\
+      \langle e_{20} \rangle &
+      0 & 0 & 0 & 0 & 0 & 0 & 1 & . & . & . &
+      . & . & . & . & . & . & . & . & . & . \\
 
-   \langle e_{20} \rangle &
-   0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 &
-   . & . & . & . & . & . & . & . & . & . \\
+      \langle e_{21} \rangle &
+      0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & . & . &
+      . & . & . & . & . & . & . & . & . & . \\
 
-   \langle e_{21} \rangle &
-   0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 &
-   . & . & . & . & . & . & . & . & . & . \\
+      \langle e_{22} \rangle &
+      0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & . &
+      . & . & . & . & . & . & . & . & . & . \\
 
-   \langle e_{22} \rangle &
-   0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 &
-   . & . & . & . & . & . & . & . & . & . \\
+      \hline
 
-   \hline
+      \langle d \rangle &
+      0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 &
+      . & . & . & . & . & . & . & . & . & . \\
 
-   \langle d \rangle &
-   0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 &
-   . & . & . & . & . & . & . & . & . & . \\
+      \hline
+      \end{array}
 
-   \hline
-   \end{array}
+   **TODO** write pseudo-code or sketch C++ code.
+
+2. then in the sweep upward, stop halfway until the system of polynomial
+   equations looks like the system of equations :eq:`eq-gaussjordan` below:
+
+   .. math::
+      :label: eq-gaussjordan
+
+      \scriptsize
+      \begin{array}{|c|cccccccccc|ccc|ccc|cccc|}
+      \hline
+
+      &
+      x^3 & y^3 & x^2 y & x y^2 & x^2 z & x^2 & y^2 z & y^2 & xyz & xy &
+      x & x z & x z^2 & y & y z & y z^2 & 1 & z & z^2 & z^3 \\
+
+      \hline
+
+      \langle e_{00} \rangle &
+      1 & . & . & . & . & . & . & . & . & . &
+      . & . & . & . & . & . & . & . & . & . \\
+
+      \langle e_{01} \rangle &
+      0 & 1 & . & . & . & . & . & . & . & . &
+      . & . & . & . & . & . & . & . & . & . \\
+
+      \langle e_{02} \rangle &
+      0 & 0 & 1 & . & . & . & . & . & . & . &
+      . & . & . & . & . & . & . & . & . & . \\
+
+      \langle e_{10} \rangle &
+      0 & 0 & 0 & 1 & . & . & . & . & . & . &
+      . & . & . & . & . & . & . & . & . & . \\
+
+      \langle e_{11} \rangle &
+      0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 &
+      . & . & . & . & . & . & . & . & . & . \\
+
+      \langle e_{12} \rangle &
+      0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 &
+      . & . & . & . & . & . & . & . & . & . \\
+
+      \langle e_{20} \rangle &
+      0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 &
+      . & . & . & . & . & . & . & . & . & . \\
+
+      \langle e_{21} \rangle &
+      0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 &
+      . & . & . & . & . & . & . & . & . & . \\
+
+      \langle e_{22} \rangle &
+      0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 &
+      . & . & . & . & . & . & . & . & . & . \\
+
+      \hline
+
+      \langle d \rangle &
+      0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 &
+      . & . & . & . & . & . & . & . & . & . \\
+
+      \hline
+      \end{array}
+
+   **TODO** write pseudo-code or sketch C++ code.
+
 
 Let's look again at the last :math:`6` equations :eq:`eq-gaussjordan`. We can
 again reduce it by multiplying by :math:`z` and subtracting as follows:
