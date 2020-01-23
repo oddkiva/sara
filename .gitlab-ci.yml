@@ -80,11 +80,16 @@ job:
 
 pages:
   script:
+    # Build CLBlast.
+    - ./scripts/install_clblast.sh
+
+    # Build Sara documentation.
     - mkdir build
     - cd build
     - cmake ..
     - make doc
     - mv doc/html public/
+
   artifacts:
     paths:
     - public
