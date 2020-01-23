@@ -3,26 +3,25 @@ version: 1.0.{build}
 image:
   - Visual Studio 2017
 
-cache: c:\tools\vcpkg\installed
+cache: c:\Tools\vcpkg\installed
 
-clone_folder: c:\projects\sara
+clone_folder: C:\projects\sara
 
 environment:
   # These environment variables will be picked up in CMake.
-  VCPKG_TOOLCHAIN_FILE: C:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake
-  QTDIR: C:/Qt/latest/msvc2017_64
-  BOOST_ROOT: C:/Libraries/boost_1_69_0
+  VCPKG_TOOLCHAIN_FILE: C:\Tools\vcpkg\scripts\buildsystems\vcpkg.cmake
+  QTDIR: C:\Qt\latest\msvc2017_64
+  BOOST_ROOT: C:\Libraries\boost_1_69_0
   matrix:
     - generator: "Visual Studio 15 2017 Win64"
 
 init:
-  # This gives us credentials to access the the VM that is building Sara via
-  # RDP.
+  # This gives us credentials to access the VM that is building Sara via RDP.
   - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 install:
   # Update vcpkg.
-  - cd c:\tools\vcpkg
+  - cd c:\Tools\vcpkg
   - git pull
   - .\bootstrap-vcpkg.bat
 
@@ -41,7 +40,7 @@ install:
   - vcpkg install ceres:x64-windows
 
   # Integrate vcpkg with msbuild.
-  - cd c:\tools\vcpkg
+  - cd C:\Tools\vcpkg
   - vcpkg integrate install
 
 configuration:
@@ -54,7 +53,7 @@ before_build:
   - cmake -H. -B..\sara-build -G "%generator%" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=%VCPKG_TOOLCHAIN_FILE% -DSARA_BUILD_SHARED_LIBS=ON -DSARA_BUILD_VIDEOIO:BOOL=ON -DSARA_BUILD_TESTS:BOOL=ON -DSARA_BUILD_SAMPLES:BOOL=ON -DCMAKE_PREFIX_PATH="%QTDIR%" -DBOOST_ROOT=%BOOST_ROOT%
 
 build:
-  project: c:\projects\sara-build\Sara.sln
+  project: C:\projects\sara-build\Sara.sln
   parallel: true
   verbosity: minimal
 
@@ -66,4 +65,4 @@ test_script:
 
   # Run the tests.
   - cd ..\sara-build
-  - ctest -C "Release"
+  - ctest -C %configuration% -V
