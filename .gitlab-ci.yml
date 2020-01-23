@@ -6,6 +6,8 @@ cache:
   paths:
     - .apt/
     - ccache/
+    - /usr/local/include
+    - /usr/local/lib
 
 before_script:
   # Configure APT caching
@@ -28,6 +30,7 @@ before_script:
       build-essential
       ccache
       cmake
+      cppcheck
       git
       libboost-all-dev
       libhdf5-dev
@@ -60,12 +63,17 @@ before_script:
   - export CCACHE_BASEDIR=${PWD}
   - export CCACHE_DIR=${PWD}/ccache
 
+  # Build CLBlast.
+  - [ -f /usr/local/include/clblast.h ] && echo "CLBlast is installed" || ./scripts/install_clblast.sh
 
-check:
-  stage: check
+cppcheck:
   script:
-    # Build CLBlast.
-    - ./scripts/install_clblast.sh
+    - cppcheck --enable=all --inconclusive --verbose cpp/src
+
+
+build:
+  stage: build
+  script:
     # Build Sara.
     - mkdir build
     - cd build
@@ -75,24 +83,35 @@ check:
         -DSARA_BUILD_SAMPLES:BOOL=ON
         -DSARA_BUILD_TESTS:BOOL=ON
     - make -j$(nproc)
-    # Run tests.
-    - DISPLAY=:1 ctest --output-on-failure --exclude-regex "test_graphics_*|test_core_ipc_cond1"
-    # Debian packaging.
+    # Create deb package.
     - make package
-
   artifacts:
     paths:
     - build
 
+
+test:
+  stage: test
+  script:
+    - cd build
+    - DISPLAY=:1 ctest
+        -j$(nproc)
+        --verbose
+        --output-on-failure
+        --exclude-regex "test_graphics_*|test_core_ipc_cond1"
+    - make -j$(nproc) coverage
+  dependencies:
+    - build
+
+
 pages:
   script:
-    # Go back to the build folder.
     - cd build
-    - make doc
+    - make -j$(nproc) doc
     # Move the generated documentation in the right place.
     - mv doc/html/ ../public/
   dependencies:
-    - check
+    - build
   artifacts:
     paths:
     - public
