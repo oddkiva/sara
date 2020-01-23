@@ -1,14 +1,33 @@
 image: nvidia/cudagl:10.1-runtime-ubuntu18.04
 
 
+
+cache:
+  paths:
+    - ccache/
+    - .apt/
+
 before_script:
-  - apt-get update -qq
+  # Configure APT caching
+  - echo $CI_PROJECT_DIR
+  - export APT_DIR=$CI_PROJECT_DIR/.apt
+  - export APT_STATE_LISTS=$APT_DIR/lists
+  - export APT_CACHE_ARCHIVES=$APT_DIR/archives
+
+  - printf "dir::state::lists    ${APT_STATE_LISTS};\ndir::cache::archives    ${APT_CACHE_ARCHIVES};\n" > /etc/apt/apt.conf
+  - mkdir -p "${APT_STATE_LISTS}/partial" && mkdir -p "${APT_CACHE_ARCHIVES}/partial"
+
+  # For the documentation.
+  - apk update
+  - apk add doxygen
+  - apk add ttf-freefont graphviz
+
   # All the packages to compile the C++ codebase.
+  - apt-get update -y -qq
   - apt-get install -y -qq
       build-essential
       ccache
       cmake
-      doxygen
       git
       libboost-all-dev
       libhdf5-dev
@@ -25,22 +44,21 @@ before_script:
       libpocl-dev
       libceres-dev
       qtbase5-dev
+
   # Python dependencies (TODO).
   - apt-get install -y -qq
       libboost-python-dev
       python3-dev
+
   # Setup for GUI testing.
   - apt-get install -y xvfb
   - Xvfb :1 -noreset 1>/dev/null 2>&1 &
   - export DISPLAY=:1
+
   # Setup ccache to speed up builds.
   - mkdir -p ccache
   - export CCACHE_BASEDIR=${PWD}
   - export CCACHE_DIR=${PWD}/ccache
-
-cache:
-  paths:
-    - ccache/
 
 
 job:
@@ -59,3 +77,12 @@ job:
     - make -j$(nproc)
     - DISPLAY=:1 ctest --output-on-failure --exclude-regex "test_graphics_*|test_core_ipc_cond1"
     - make package
+
+pages:
+  script:
+    # Build doc.
+    - make doc
+    - mv doc/html public/
+  artifacts:
+    paths:
+    - public

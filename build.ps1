@@ -43,11 +43,13 @@ echo `n
 cd $source_dir
 
 
+
 echo "========================================================================="
 echo "Installing Python packages"
 iex "pip install -U pip"
 iex "pip install -r requirements.txt"
 echo `n
+
 
 
 echo "========================================================================="
@@ -86,6 +88,8 @@ $cmake_command += "$cmake_options"
 echo "$cmake_command"
 iex "$cmake_command"
 echo "`n"
+
+
 
 echo "========================================================================="
 echo "Building the libraries in Debug mode..."
