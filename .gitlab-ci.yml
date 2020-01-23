@@ -33,6 +33,7 @@ before_script:
       cmake
       cppcheck
       git
+      lcov
       libboost-all-dev
       libhdf5-dev
       libjpeg-dev
@@ -84,11 +85,10 @@ build:
     # Run tests.
     - DISPLAY=:1 ctest
         -j$(nproc)
-        --verbose
         --output-on-failure
         --exclude-regex "test_graphics_*|test_core_ipc_cond1"
     # Run coverage.
-    #- make -j$(nproc) coverage
+    - make -j$(nproc) coverage
 
 pages:
   script:
