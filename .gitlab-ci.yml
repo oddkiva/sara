@@ -61,7 +61,7 @@ before_script:
   - export CCACHE_DIR=${PWD}/ccache
 
 
-job:
+check:
   script:
     # Build CLBlast.
     - ./scripts/install_clblast.sh
@@ -75,7 +75,11 @@ job:
         -DSARA_BUILD_SAMPLES:BOOL=ON
         -DSARA_BUILD_TESTS:BOOL=ON
     - make -j$(nproc)
+
+    # Run tests.
     - DISPLAY=:1 ctest --output-on-failure --exclude-regex "test_graphics_*|test_core_ipc_cond1"
+
+    # Debian packaging.
     - make package
 
 pages:
@@ -88,7 +92,9 @@ pages:
     - cd build
     - cmake ..
     - make doc
-    - mv doc/html/ public/
+
+    # Move the generated in the right place.
+    - mv doc/html/ ../public/
 
   artifacts:
     paths:
