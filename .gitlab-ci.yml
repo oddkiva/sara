@@ -87,8 +87,8 @@ build:
         -j$(nproc)
         --output-on-failure
         --exclude-regex "test_graphics_*|test_core_ipc_cond1"
-    # Run coverage.
-    - make -j$(nproc) coverage
+    # Run coverage (disabled for now).
+    #- make -j$(nproc) coverage
 
 pages:
   script:
