@@ -4,8 +4,8 @@ image: nvidia/cudagl:10.1-runtime-ubuntu18.04
 
 cache:
   paths:
-    - ccache/
     - .apt/
+    - ccache/
 
 before_script:
   # Configure APT caching
