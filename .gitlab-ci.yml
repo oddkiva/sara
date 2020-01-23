@@ -4,8 +4,6 @@ cache:
   paths:
     - .apt/
     - ccache/
-    - /usr/local/include
-    - /usr/local/lib
 
 before_script:
   # Configure APT caching
@@ -16,6 +14,11 @@ before_script:
 
   - printf "dir::state::lists    ${APT_STATE_LISTS};\ndir::cache::archives    ${APT_CACHE_ARCHIVES};\n" > /etc/apt/apt.conf
   - mkdir -p "${APT_STATE_LISTS}/partial" && mkdir -p "${APT_CACHE_ARCHIVES}/partial"
+
+  # Setup ccache to speed up builds.
+  - mkdir -p ccache
+  - export CCACHE_BASEDIR=${PWD}
+  - export CCACHE_DIR=${PWD}/ccache
 
   # For the documentation.
   - apt-get update -y -qq
@@ -51,18 +54,13 @@ before_script:
       libboost-python-dev
       python3-dev
 
+  # Build CLBlast.
+  - ./scripts/install_clblast.sh
+
   # Setup for GUI testing.
   - apt-get install -y xvfb
   - Xvfb :1 -noreset 1>/dev/null 2>&1 &
   - export DISPLAY=:1
-
-  # Setup ccache to speed up builds.
-  - mkdir -p ccache
-  - export CCACHE_BASEDIR=${PWD}
-  - export CCACHE_DIR=${PWD}/ccache
-
-  # Build CLBlast.
-  - test -f /usr/local/include/clblast.h && echo "CLBlast is installed" || ./scripts/install_clblast.sh
 
 cppcheck:
   stage: build
