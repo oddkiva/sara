@@ -88,7 +88,7 @@ pages:
     - cd build
     - cmake ..
     - make doc
-    - mv doc/html public/
+    - mv doc/html/ public/
 
   artifacts:
     paths:
