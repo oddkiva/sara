@@ -92,6 +92,7 @@ build:
 
 pages:
   script:
+    - mkdir build
     - cd build
     - make -j$(nproc) doc
     # Move the generated documentation in the right place.
