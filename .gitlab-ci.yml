@@ -62,10 +62,10 @@ before_script:
 
 
 check:
+  stage: check
   script:
     # Build CLBlast.
     - ./scripts/install_clblast.sh
-
     # Build Sara.
     - mkdir build
     - cd build
@@ -75,27 +75,24 @@ check:
         -DSARA_BUILD_SAMPLES:BOOL=ON
         -DSARA_BUILD_TESTS:BOOL=ON
     - make -j$(nproc)
-
     # Run tests.
     - DISPLAY=:1 ctest --output-on-failure --exclude-regex "test_graphics_*|test_core_ipc_cond1"
-
     # Debian packaging.
     - make package
 
+  artifacts:
+    paths:
+    - build
+
 pages:
   script:
-    # Build CLBlast.
-    - ./scripts/install_clblast.sh
-
-    # Build Sara documentation.
-    - mkdir build
+    # Go back to the build folder.
     - cd build
-    - cmake ..
     - make doc
-
-    # Move the generated in the right place.
+    # Move the generated documentation in the right place.
     - mv doc/html/ ../public/
-
+  dependencies:
+    - check
   artifacts:
     paths:
     - public
