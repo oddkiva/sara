@@ -18,12 +18,12 @@ before_script:
   - mkdir -p "${APT_STATE_LISTS}/partial" && mkdir -p "${APT_CACHE_ARCHIVES}/partial"
 
   # For the documentation.
-  - apk update
-  - apk add doxygen
-  - apk add ttf-freefont graphviz
+  - apt-get update -y -qq
+  - apt-get install -y -qq
+      doxygen
+      graphviz
 
   # All the packages to compile the C++ codebase.
-  - apt-get update -y -qq
   - apt-get install -y -qq
       build-essential
       ccache
@@ -80,7 +80,9 @@ job:
 
 pages:
   script:
-    # Build doc.
+    - mkdir build
+    - cd build
+    - cmake ..
     - make doc
     - mv doc/html public/
   artifacts:
