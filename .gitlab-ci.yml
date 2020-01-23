@@ -92,8 +92,10 @@ build:
 
 pages:
   script:
+    # Configure the documentation build.
     - mkdir build
     - cd build
+    - cmake ..
     - make -j$(nproc) doc
     # Move the generated documentation in the right place.
     - mv doc/html/ ../public/
