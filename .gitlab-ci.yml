@@ -81,22 +81,14 @@ build:
     - make -j$(nproc)
     # Create deb package.
     - make package
-  artifacts:
-    paths:
-    - build
-
-test:
-  stage: test
-  script:
-    - cd build
+    # Run tests.
     - DISPLAY=:1 ctest
         -j$(nproc)
         --verbose
         --output-on-failure
         --exclude-regex "test_graphics_*|test_core_ipc_cond1"
-    - make -j$(nproc) coverage
-  dependencies:
-    - build
+    # Run coverage.
+    #- make -j$(nproc) coverage
 
 pages:
   script:
