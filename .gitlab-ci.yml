@@ -65,6 +65,7 @@ before_script:
   - test -f /usr/local/include/clblast.h && echo "CLBlast is installed" || ./scripts/install_clblast.sh
 
 cppcheck:
+  stage: build
   script:
     - cppcheck --enable=all --inconclusive --verbose cpp/src
 
