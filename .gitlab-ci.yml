@@ -1,7 +1,5 @@
 image: nvidia/cudagl:10.1-runtime-ubuntu18.04
 
-
-
 cache:
   paths:
     - .apt/
@@ -64,12 +62,11 @@ before_script:
   - export CCACHE_DIR=${PWD}/ccache
 
   # Build CLBlast.
-  - [ -f /usr/local/include/clblast.h ] && echo "CLBlast is installed" || ./scripts/install_clblast.sh
+  - test -f /usr/local/include/clblast.h && echo "CLBlast is installed" || ./scripts/install_clblast.sh
 
 cppcheck:
   script:
     - cppcheck --enable=all --inconclusive --verbose cpp/src
-
 
 build:
   stage: build
@@ -89,7 +86,6 @@ build:
     paths:
     - build
 
-
 test:
   stage: test
   script:
@@ -102,7 +98,6 @@ test:
     - make -j$(nproc) coverage
   dependencies:
     - build
-
 
 pages:
   script:
