@@ -1,15 +1,39 @@
 image: nvidia/cudagl:10.1-runtime-ubuntu18.04
 
+cache:
+  paths:
+    - .apt/
+    - ccache/
 
 before_script:
-  - apt-get update -qq
+  # Configure APT caching
+  - echo $CI_PROJECT_DIR
+  - export APT_DIR=$CI_PROJECT_DIR/.apt
+  - export APT_STATE_LISTS=$APT_DIR/lists
+  - export APT_CACHE_ARCHIVES=$APT_DIR/archives
+
+  - printf "dir::state::lists    ${APT_STATE_LISTS};\ndir::cache::archives    ${APT_CACHE_ARCHIVES};\n" > /etc/apt/apt.conf
+  - mkdir -p "${APT_STATE_LISTS}/partial" && mkdir -p "${APT_CACHE_ARCHIVES}/partial"
+
+  # Setup ccache to speed up builds.
+  - mkdir -p ccache
+  - export CCACHE_BASEDIR=${PWD}
+  - export CCACHE_DIR=${PWD}/ccache
+
+  # For the documentation.
+  - apt-get update -y -qq
+  - apt-get install -y -qq
+      doxygen
+      graphviz
+
   # All the packages to compile the C++ codebase.
   - apt-get install -y -qq
       build-essential
       ccache
       cmake
-      doxygen
+      cppcheck
       git
+      lcov
       libboost-all-dev
       libhdf5-dev
       libjpeg-dev
@@ -25,29 +49,28 @@ before_script:
       libpocl-dev
       libceres-dev
       qtbase5-dev
+
   # Python dependencies (TODO).
   - apt-get install -y -qq
       libboost-python-dev
       python3-dev
+
+  # Build CLBlast.
+  - ./scripts/install_clblast.sh
+
   # Setup for GUI testing.
   - apt-get install -y xvfb
   - Xvfb :1 -noreset 1>/dev/null 2>&1 &
   - export DISPLAY=:1
-  # Setup ccache to speed up builds.
-  - mkdir -p ccache
-  - export CCACHE_BASEDIR=${PWD}
-  - export CCACHE_DIR=${PWD}/ccache
 
-cache:
-  paths:
-    - ccache/
-
-
-job:
+cppcheck:
+  stage: build
   script:
-    # Build CLBlast.
-    - ./scripts/install_clblast.sh
+    - cppcheck --enable=all --inconclusive --verbose cpp/src
 
+build:
+  stage: build
+  script:
     # Build Sara.
     - mkdir build
     - cd build
@@ -57,5 +80,27 @@ job:
         -DSARA_BUILD_SAMPLES:BOOL=ON
         -DSARA_BUILD_TESTS:BOOL=ON
     - make -j$(nproc)
-    - DISPLAY=:1 ctest --output-on-failure --exclude-regex "test_graphics_*|test_core_ipc_cond1"
+    # Create deb package.
     - make package
+    # Run tests.
+    - DISPLAY=:1 ctest
+        -j$(nproc)
+        --output-on-failure
+        --exclude-regex "test_graphics_*|test_core_ipc_cond1"
+    # Run coverage (disabled for now).
+    #- make -j$(nproc) coverage
+
+pages:
+  script:
+    # Configure the documentation build.
+    - mkdir build
+    - cd build
+    - cmake ..
+    - make -j$(nproc) doc
+    # Move the generated documentation in the right place.
+    - mv doc/html/ ../public/
+  dependencies:
+    - build
+  artifacts:
+    paths:
+    - public
