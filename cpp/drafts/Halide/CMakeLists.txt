@@ -73,7 +73,7 @@ file(GLOB LESSONS_SOURCE_FILES
   # lesson_09*.cpp
   # lesson_10*.cpp
   lesson_11*.cpp
-  # lesson_12*.cpp
+  lesson_12*.cpp
   lesson_13*.cpp
   lesson_14*.cpp
   # lesson_15*.cpp

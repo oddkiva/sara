@@ -5,6 +5,12 @@
 
 #include "Halide.h"
 
+#ifdef _WIN32
+#  include <windows.h>
+#else
+#  include <dlfcn.h>
+#endif
+
 
 using namespace std;
 using namespace DO::Sara;
@@ -66,6 +72,45 @@ auto sara_pipeline() -> void
   }
 }
 
+auto find_gpu_target() -> Halide::Target
+{
+  using namespace Halide;
+
+  // Start with a target suitable for the machine you're running this on.
+  Target target = get_host_target();
+
+  // Uncomment the following lines to try CUDA instead:
+  target.set_feature(Target::CUDA);
+  return target;
+
+#ifdef _WIN32
+  if (LoadLibraryA("d3d12.dll") != nullptr)
+  {
+    target.set_feature(Target::D3D12Compute);
+  }
+  else if (LoadLibraryA("OpenCL.dll") != nullptr)
+  {
+    target.set_feature(Target::OpenCL);
+  }
+#elif __APPLE__
+  // OS X doesn't update its OpenCL drivers, so they tend to be broken.
+  // CUDA would also be a fine choice on machines with NVidia GPUs.
+  if (dlopen(
+          "/System/Library/Frameworks/Metal.framework/Versions/Current/Metal",
+          RTLD_LAZY) != NULL)
+  {
+    target.set_feature(Target::Metal);
+  }
+#else
+  if (dlopen("libOpenCL.so", RTLD_LAZY) != NULL)
+  {
+    target.set_feature(Target::OpenCL);
+  }
+#endif
+
+  return target;
+}
+
 
 auto halide_pipeline() -> void
 {
@@ -75,6 +120,11 @@ auto halide_pipeline() -> void
 
   VideoStream video_stream(video_filepath);
 
+  // Configure Halide to use CUDA before we compile the pipeline.
+  auto target = Halide::get_host_target();
+  target.set_feature(Halide::Target::CUDA);
+  //target.set_feature(Halide::Target::Debug);
+
   // Input and output images.
   auto input_image = video_stream.frame();
   auto output_image = Image<Rgb8>{video_stream.sizes()};
@@ -83,6 +133,7 @@ auto halide_pipeline() -> void
   auto input_buffer = Halide::Buffer<uint8_t>::make_interleaved(
       reinterpret_cast<uint8_t*>(input_image.data()), input_image.width(),
       input_image.height(), 3);
+
   auto output_buffer = Halide::Buffer<uint8_t>::make_interleaved(
       reinterpret_cast<uint8_t*>(output_image.data()),
       output_image.width(), output_image.height(), 3);
@@ -107,21 +158,21 @@ auto halide_pipeline() -> void
                          c);
 
   auto laplacian = Halide::Func{"laplacian"};
-  laplacian(x, y, c) =
+  laplacian(x, y, c) = Halide::abs(
       padded(x, y, c) - (padded(x + 1, y + 0, c) + padded(x - 1, y + 0, c) +
                          padded(x + 0, y + 1, c) + padded(x + 0, y - 1, c)) /
-                            4.f;
+                            4.f);
 
   // The output result.
   auto filter_rescaled = Halide::Func{"rescaled"};
-  filter_rescaled(x, y, c) = Halide::cast<uint8_t>((laplacian(x, y, c) + 0.5f)* 255.f);
-  //filter_rescaled.gpu_tile(x, y, xo, yo, xi, yi, 16, 16);
-  //filter_rescaled.reorder(c, x, y).bound(c, 0, 3).unroll(c);
+  filter_rescaled(x, y, c) = Halide::cast<uint8_t>((laplacian(x, y, c) / 2.f)* 255.f);
+  filter_rescaled.reorder(c, x, y).bound(c, 0, 3).unroll(c);
+  filter_rescaled.gpu_tile(x, y, xo, yo, xi, yi, 16, 16);
 
   // Calculate the padded image as an intermediate result for the laplacian
   // calculation in a shared memory.
-  //padded.compute_at(filter_rescaled, xo);
-  //padded.gpu_threads(x, y);
+  padded.compute_at(filter_rescaled, xo);
+  padded.gpu_threads(x, y);
 
   // Specify that the output buffer is in interleaved RGB format.
   filter_rescaled.output_buffer()
@@ -131,10 +182,6 @@ auto halide_pipeline() -> void
       .set_stride(1)
       .set_bounds(0, 3);
 
-  // Run on CUDA.
-  auto target = Halide::get_host_target();
-  target.set_feature(Halide::Target::CUDA);
-  //target.set_feature(Halide::Target::Debug);
   filter_rescaled.compile_jit(target);
 
   // Timer.
@@ -155,6 +202,7 @@ auto halide_pipeline() -> void
 
     timer.restart();
     {
+      input_buffer.set_host_dirty();
       filter_rescaled.realize(output_buffer);
       output_buffer.copy_to_host();
     }
