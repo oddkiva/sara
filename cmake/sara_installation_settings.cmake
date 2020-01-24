@@ -16,7 +16,7 @@ if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
   set(CPACK_COMPONENT_ThirdParty_REQUIRED 1)
 
   # License files.
-  install(FILES ${DO_Sara_DIR}/LICENSE.txt
+  install(FILES ${DO_Sara_DIR}/LICENSE
                 ${DO_Sara_DIR}/COPYRIGHTS.md
           DESTINATION include/DO/Sara
           COMPONENT Sources)
@@ -79,7 +79,7 @@ endif ()
 set(CPACK_PACKAGE_VENDOR "DO-CV")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY
     "Sara: An easy-to-use C++ set of libraries for computer vision")
-set(CPACK_RESOURCE_FILE_LICENSE "${DO_Sara_DIR}/LICENSE.txt")
+set(CPACK_RESOURCE_FILE_LICENSE "${DO_Sara_DIR}/LICENSE")
 set(CPACK_PACKAGE_CONTACT "David OK <david.ok8@gmail.com>")
 set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
 
