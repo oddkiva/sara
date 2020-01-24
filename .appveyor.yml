@@ -65,4 +65,4 @@ test_script:
 
   # Run the tests.
   - cd ..\sara-build
-  - ctest --output-on-failure -C %configuration% 
+  - ctest --output-on-failure -C %configuration%
