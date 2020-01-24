@@ -72,16 +72,12 @@ auto sara_pipeline() -> void
   }
 }
 
+
 auto find_gpu_target() -> Halide::Target
 {
   using namespace Halide;
 
-  // Start with a target suitable for the machine you're running this on.
   Target target = get_host_target();
-
-  // Uncomment the following lines to try CUDA instead:
-  target.set_feature(Target::CUDA);
-  return target;
 
 #ifdef _WIN32
   if (LoadLibraryA("d3d12.dll") != nullptr)
@@ -111,19 +107,25 @@ auto find_gpu_target() -> Halide::Target
   return target;
 }
 
-
 auto halide_pipeline() -> void
 {
-  // const string video_filepath = "/home/david/Desktop/test.mp4";
+  using namespace std::string_literals;
+  // const auto video_filepath = "/home/david/Desktop/test.mp4"s;
   const auto video_filepath =
-      "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4";
+      "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4"s;
 
   VideoStream video_stream(video_filepath);
 
   // Configure Halide to use CUDA before we compile the pipeline.
-  auto target = Halide::get_host_target();
-  target.set_feature(Halide::Target::CUDA);
-  //target.set_feature(Halide::Target::Debug);
+  constexpr auto use_cuda = true;
+  auto target = Halide::Target{};
+  if constexpr (use_cuda)
+  {
+    target = Halide::get_host_target();
+    target.set_feature(Halide::Target::CUDA);
+  }
+  else
+    target = find_gpu_target();
 
   // Input and output images.
   auto input_image = video_stream.frame();
