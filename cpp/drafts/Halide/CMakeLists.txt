@@ -94,6 +94,7 @@ function (add_halide_executable source_file)
 
   target_compile_options(${name} PRIVATE ${OpenMP_CXX_FLAGS})
   target_link_libraries(${name} PRIVATE
+    ${DO_Sara_LIBRARIES}
     ${HALIDE_LIBRARIES}
     ${JPEG_LIBRARIES}
     ${PNG_LIBRARIES}
