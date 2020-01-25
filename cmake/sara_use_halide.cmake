@@ -116,10 +116,10 @@ else ()
     INTERFACE_LINK_LIBRARIES "${HALIDE_LIBRARIES}")
 endif ()
 
-# # Quick and dirty: distribute the DLLs in the binary folders.
-# if (WIN32)
-#   file(COPY ${HALIDE_DLL_DEBUG}   DESTINATION ${CMAKE_BINARY_DIR}/bin/Debug)
-#   file(COPY ${HALIDE_DLL_RELEASE} DESTINATION ${CMAKE_BINARY_DIR}/bin/Release)
-#   file(COPY ${HALIDE_DLL_RELEASE} DESTINATION ${CMAKE_BINARY_DIR}/bin/RelWithDebInfo)
-#   file(COPY ${HALIDE_DLL_RELEASE} DESTINATION ${CMAKE_BINARY_DIR}/bin/MinSizeRel)
-# endif ()
+# Quick and dirty: distribute the DLLs in the binary folders.
+if (WIN32)
+  file(COPY ${HALIDE_DLL_DEBUG}   DESTINATION ${CMAKE_BINARY_DIR}/bin/Debug)
+  file(COPY ${HALIDE_DLL_RELEASE} DESTINATION ${CMAKE_BINARY_DIR}/bin/Release)
+  file(COPY ${HALIDE_DLL_RELEASE} DESTINATION ${CMAKE_BINARY_DIR}/bin/RelWithDebInfo)
+  file(COPY ${HALIDE_DLL_RELEASE} DESTINATION ${CMAKE_BINARY_DIR}/bin/MinSizeRel)
+endif ()
