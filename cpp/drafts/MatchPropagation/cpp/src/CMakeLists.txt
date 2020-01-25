@@ -3,7 +3,7 @@ find_package(DO_Sara Graphics REQUIRED)
 
 # ==============================================================================
 # Region data structures
-add_library(DO_Region
+add_library(DO_Sara_Region
             Region.cpp Region.hpp
             RegionBoundary.cpp RegionBoundary.hpp)
 # do_use_modules(DO_Region ${DO_Sara_LIBRARIES})
