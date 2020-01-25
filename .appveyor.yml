@@ -1,3 +1,11 @@
+# If the builds fail again:
+# 1. Update vcpkg and rebuild the image I/O, HDF5 and Ceres.
+#    Disable the build of the Video I/O API.
+#    Disable the tests and samples
+# 2. Reinstate tests and seamples
+# 3. Reinstate FFmpeg
+# 4. Reinstate the build of Video I/O API.
+
 version: 1.0.{build}
 
 image:
