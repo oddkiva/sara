@@ -112,11 +112,15 @@ auto find_gpu_target() -> Halide::Target
 auto halide_pipeline() -> void
 {
   using namespace std::string_literals;
-  // const auto video_filepath = "/home/david/Desktop/test.mp4"s;
-  // const auto video_filepath =
-  //     "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4"s;
+#ifdef _WIN32
+  const auto video_filepath =
+      "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4"s;
+#elif __APPLE__
   const auto video_filepath =
       "/Users/david/GitLab/DO-CV/sara/cpp/examples/Sara/VideoIO/orion_1.mpg"s;
+#else
+  const auto video_filepath = "/home/david/Desktop/test.mp4"s;
+#endif
 
   VideoStream video_stream(video_filepath);
 
@@ -180,10 +184,10 @@ auto halide_pipeline() -> void
   //     padded(x, y, c) - (padded(x + 1, y + 0, c) + padded(x - 1, y + 0, c) +
   //                        padded(x + 0, y + 1, c) + padded(x + 0, y - 1, c)) /
   //                           4.f);
-  // Blue.
+  // Blur.
   filter(x, y, c) = (padded(x - 1, y - 1, c) + padded(x - 0, y - 1, c) + padded(x + 1, y - 1, c)
                    + padded(x - 1, y + 0, c) + padded(x - 0, y + 0, c) + padded(x + 1, y + 0, c)
-                   + padded(x - 1, y + 1, c) + padded(x - 0, y + 1, c) + padded(x + 1, y + 1, c)) / 3.f;
+                   + padded(x - 1, y + 1, c) + padded(x - 0, y + 1, c) + padded(x + 1, y + 1, c)) / 9.f;
 
   // The output result.
   auto filter_rescaled = Halide::Func{"rescaled"};

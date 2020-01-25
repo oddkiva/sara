@@ -55,7 +55,7 @@ if (WIN32)
     HALIDE_LIBRARIES
     HALIDE_DLLS)
 else ()
-  find_library(HALIDE_LIBRARIES NAMES Halide
+  find_library(HALIDE_LIBRARY NAMES Halide
     PATHS ${HALIDE_DISTRIB_DIR}
     PATH_SUFFIXES bin)
 
@@ -63,6 +63,10 @@ else ()
   # find_library(HALIDE_LIBRARIES NAMES libHalide.a Halide
   #   PATHS ${HALIDE_DISTRIB_DIR}
   #   PATH_SUFFIXES lib bin)
+
+  if (UNIX)
+    set(HALIDE_LIBRARIES ${HALIDE_LIBRARY} dl CACHE STRING "")
+  endif ()
 
   mark_as_advanced(HALIDE_FOUND
     HALIDE_CMAKE_FILEPATH
@@ -83,14 +87,14 @@ else()
     "-Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable -Wno-missing-field-initializers -Wno-unknown-pragmas")
 endif()
 
-message("INCLUDE = ${HALIDE_INCLUDE_DIRS}")
-message("LIB = ${HALIDE_LIBRARIES}")
+# include(${HALIDE_CMAKE_CONFIG_FILEPATH})
+# include(${HALIDE_CMAKE_FILEPATH})
 
 add_library(Halide INTERFACE IMPORTED)
 set_target_properties(Halide PROPERTIES
   INTERFACE_INCLUDE_DIRECTORIES "${HALIDE_INCLUDE_DIRS}"
   # Dynamic linking.
-  INTERFACE_LINK_LIBRARIES ${HALIDE_LIBRARIES}
+  INTERFACE_LINK_LIBRARIES "${HALIDE_LIBRARIES}"
   # Keep this for future reference if we want to link statically.
   # INTERFACE_LINK_LIBRARIES "${HALIDE_LIBRARIES};${ZLIB_LIBRARIES}"
   INTERFACE_COMPILE_OPTIONS ${HALIDE_COMPILE_OPTIONS})
