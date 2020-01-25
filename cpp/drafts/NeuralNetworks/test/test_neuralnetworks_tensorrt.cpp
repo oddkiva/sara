@@ -1,9 +1,13 @@
+#include <DO/Sara/Core/DebugUtilities.hpp>
+
 #include <drafts/NeuralNetworks/TensorRT/Helpers.hpp>
 
 #include <fstream>
 #include <sstream>
 #include <string>
 #include <vector>
+
+#include <termcolor/termcolor.hpp>
 
 
 auto engine_deleter(nvinfer1::ICudaEngine* engine) -> void
@@ -13,141 +17,205 @@ auto engine_deleter(nvinfer1::ICudaEngine* engine) -> void
   engine = nullptr;
 }
 
-using CudaEngineUniquePtr = std::unique_ptr<nvinfer1::ICudaEngine, decltype(&engine_deleter)>;
+auto runtime_deleter(nvinfer1::IRuntime* runtime) -> void
+{
+  if (runtime != nullptr)
+    runtime->destroy();
+  runtime = nullptr;
+}
+
+auto config_deleter(nvinfer1::IBuilderConfig* config) -> void
+{
+  if (config != nullptr)
+    config->destroy();
+  config = nullptr;
+}
+
+auto context_deleter(nvinfer1::IExecutionContext* context) -> void {
+  if (context != nullptr)
+    context->destroy();
+  context = nullptr;
+};
+
+using CudaEngineUniquePtr =
+    std::unique_ptr<nvinfer1::ICudaEngine, decltype(&engine_deleter)>;
+using RuntimeUniquePtr =
+    std::unique_ptr<nvinfer1::IRuntime, decltype(&runtime_deleter)>;
+using ConfigUniquePtr =
+    std::unique_ptr<nvinfer1::IBuilderConfig, decltype(&config_deleter)>;
+using ContextUniquePtr =
+    std::unique_ptr<nvinfer1::IExecutionContext, decltype(&context_deleter)>;
+
+
+template <typename NVInferObject>
+auto delete_nvinfer_object(NVInferObject *object) -> void
+{
+  if (object != nullptr)
+    object->destroy();
+  object = nullptr;
+}
+
+
+auto load_from_model_weights(const std::string& trt_model_weights_filepath)
+{
+  auto runtime =
+      std::unique_ptr<nvinfer1::IRuntime, decltype(&runtime_deleter)>{
+          nvinfer1::createInferRuntime(DO::Sara::TensorRT::Logger::instance()),
+          &runtime_deleter};
+
+  auto model_weights_file = std::ifstream{trt_model_weights_filepath};
+  if (!model_weights_file)
+    throw std::runtime_error{"Failed to open model weights file!"};
+
+  auto model_weights_stream = std::stringstream{};
+  model_weights_stream << model_weights_file.rdbuf();
+
+  // Count the number of bytes.
+  model_weights_stream.seekg(0, std::ios::end);
+  const auto model_weights_byte_size = model_weights_stream.tellg();
+
+  // Rewind to the beginning of the file.
+  model_weights_stream.seekg(0, std::ios::beg);
+
+  // Read the file and transfer the data to the array of the bytes.
+  auto model_weights = std::vector<char>(model_weights_byte_size);
+  model_weights_stream.read(model_weights.data(), model_weights.size());
+
+  // Deserialize the model weights data to initialize the CUDA inference engine.
+  return CudaEngineUniquePtr{runtime->deserializeCudaEngine(
+                                 model_weights.data(), model_weights.size()),
+                             &engine_deleter};
+}
+
+auto save_model_weights(nvinfer1::ICudaEngine* engine,
+                        const std::string& model_weights_filepath) -> void
+{
+  // Memory management.
+  auto model_weights_deleter = [](nvinfer1::IHostMemory* model_stream) {
+    if (model_stream != nullptr)
+      model_stream->destroy();
+    model_stream = nullptr;
+  };
+
+  // Serialize the model weights into the following data buffer.
+  auto model_weights =
+      std::unique_ptr<nvinfer1::IHostMemory, decltype(model_weights_deleter)>{
+          engine->serialize(), model_weights_deleter};
+
+  // Save in the disk.
+  auto model_weights_stream = std::stringstream{};
+  model_weights_stream.seekg(0, model_weights_stream.beg);
+  model_weights_stream.write(static_cast<const char*>(model_weights->data()),
+                             model_weights->size());
+
+  auto model_weights_file = std::ofstream{model_weights_filepath};
+  if (!model_weights_file)
+    throw std::runtime_error{"Failed to create model weights file!"};
+  model_weights_file << model_weights_stream.rdbuf();
+}
 
 auto main() -> int
 {
   namespace sara = DO::Sara;
+
   auto builder = sara::TensorRT::make_builder();
 
   // Instantiate a network and automatically manager its memory.
   auto network = sara::TensorRT::make_network(builder.get());
+  {
+    SARA_DEBUG << termcolor::green << "Creating the network from scratch!"
+               << std::endl;
+
+    // Instantiate an input data.
+    auto image_tensor = network->addInput("image", nvinfer1::DataType::kFLOAT,
+                                          nvinfer1::Dims3{1, 28, 28});
+
+    // Create artificial weights.
+    const auto conv1_kernel_weights_vector =
+        std::vector<float>(5 * 5 * 1 * 20, 0.f);
+    const auto conv1_bias_weights_vector = std::vector<float>(20, 0.f);
 
 
-  // Instantiate an input data.
-  auto image_tensor = network->addInput("image", nvinfer1::DataType::kFLOAT,
-                                        nvinfer1::Dims3{1, 28, 28});
+    // Encapsulate the weights using TensorRT data structures.
+    const auto conv1_kernel_weights = nvinfer1::Weights{
+        nvinfer1::DataType::kFLOAT,
+        reinterpret_cast<const void*>(conv1_kernel_weights_vector.data()),
+        static_cast<std::int64_t>(conv1_kernel_weights_vector.size())};
+    const auto conv1_bias_weights = nvinfer1::Weights{
+        nvinfer1::DataType::kFLOAT,
+        reinterpret_cast<const void*>(conv1_bias_weights_vector.data()),
+        static_cast<std::int64_t>(conv1_bias_weights_vector.size())};
 
 
-  // Create artificial weights.
-  const auto conv1_kernel_weights_vector =
-      std::vector<float>(5 * 5 * 1 * 20, 0.f);
-  const auto conv1_bias_weights_vector = std::vector<float>(20, 0.f);
+    // Create a convolutional function.
+    const auto conv1_fn = network->addConvolution(
+        *image_tensor,
+        20,                    // number of filters
+        {5, 5},                // kernel sizes
+        conv1_kernel_weights,  // convolution kernel weights
+        conv1_bias_weights);   // bias weight
 
 
-  // Encapsulate the weights using TensorRT data structures.
-  const auto conv1_kernel_weights = nvinfer1::Weights{
-      nvinfer1::DataType::kFLOAT,
-      reinterpret_cast<const void*>(conv1_kernel_weights_vector.data()),
-      static_cast<std::int64_t>(conv1_kernel_weights_vector.size())};
-  const auto conv1_bias_weights = nvinfer1::Weights{
-      nvinfer1::DataType::kFLOAT,
-      reinterpret_cast<const void*>(conv1_bias_weights_vector.data()),
-      static_cast<std::int64_t>(conv1_bias_weights_vector.size())};
+    // Get the ouput tensor.
+    auto conv1 = conv1_fn->getOutput(0);
+    network->markOutput(*conv1);
+  }
 
-
-  // Create a convolutional function.
-  const auto conv1_fn = network->addConvolution(
-      *image_tensor,
-      20,                    // number of filters
-      {5, 5},                // kernel sizes
-      conv1_kernel_weights,  // convolution kernel weights
-      conv1_bias_weights);   // bias weight
-
-
-  // Get the ouput tensor.
-  /*  auto conv1 = */ conv1_fn->getOutput(0);
-
-
+  SARA_DEBUG << termcolor::green
+             << "Setting the inference engine with the right configuration!"
+             << termcolor::reset << std::endl;
   // Setup the engine.
   builder->setMaxBatchSize(1);
-  builder->setMaxWorkspaceSize(32);
-  builder->allowGPUFallback(true);
-  builder->setHalf2Mode(true);
 
+  // Create a inference configuration object.
+  auto config =
+      ConfigUniquePtr{builder->createBuilderConfig(), &config_deleter};
+  config->setMaxWorkspaceSize(32);
+  config->setFlag(nvinfer1::BuilderFlag::kGPU_FALLBACK);
+  // If the GPU supports FP16 operations.
+  // config->setFlag(nvinfer1::BuilderFlag::kFP16);
 
-  // Create an engine.
+  // Create or load an engine.
   auto engine = CudaEngineUniquePtr{nullptr, &engine_deleter};
-
-  // Load inference engine from a model weights.
-  constexpr auto load_engine = false;
-  if constexpr (load_engine)
   {
-    auto runtime_deleter = [](nvinfer1::IRuntime* runtime) {
-      if (runtime != nullptr)
-        runtime->destroy();
-      runtime = nullptr;
-    };
-    auto runtime =
-        std::unique_ptr<nvinfer1::IRuntime, decltype(runtime_deleter)>{
-            nvinfer1::createInferRuntime(sara::TensorRT::Logger::instance()),
-            runtime_deleter};
 
-    auto model_weights_file = std::ifstream{"model_weights.trt"};
-    if (!model_weights_file)
-      throw std::runtime_error{"Failed to open model weights file!"};
-
-    auto model_weights_stream = std::stringstream{};
-    model_weights_stream << model_weights_file.rdbuf();
-
-    model_weights_stream.seekg(0, std::ios::end);
-    const auto model_weights_byte_size = model_weights_stream.tellg();
-
-    model_weights_stream.seekg(0, std::ios::beg);
-    auto model_weights = std::vector<char>(model_weights_byte_size);
-    model_weights_stream.read(model_weights.data(), model_weights.size());
-
-    engine =
-        CudaEngineUniquePtr{runtime->deserializeCudaEngine(
-                                model_weights.data(), model_weights.size()),
-                            &engine_deleter};
-  }
-  // Build the engine.
-  else
-  {
-    engine = CudaEngineUniquePtr{builder->buildCudaEngine(*network),
-                                 &engine_deleter};
-
-    // Save the model weights.
-    constexpr auto save_model_weights = false;
-    if constexpr (save_model_weights)
+    // Load inference engine from a model weights.
+    constexpr auto load_engine_from_disk = false;
+    if constexpr (load_engine_from_disk)
+      engine = load_from_model_weights("");
+    else
     {
-      auto model_weights_deleter = [](nvinfer1::IHostMemory* model_stream) {
-        if (model_stream != nullptr)
-          model_stream->destroy();
-        model_stream = nullptr;
-      };
-      auto model_weights = std::unique_ptr<nvinfer1::IHostMemory,
-                                          decltype(model_weights_deleter)>{
-          engine->serialize(), model_weights_deleter};
-
-      auto model_weights_stream = std::stringstream{};
-      model_weights_stream.seekg(0, model_weights_stream.beg);
-      model_weights_stream.write(
-          static_cast<const char*>(model_weights->data()),
-          model_weights->size());
-
-      auto model_weights_file = std::ofstream{"model_weights.trt"};
-      if (!model_weights_file)
-        throw std::runtime_error{"Failed to create model weights file!"};
-      model_weights_file << model_weights_stream.rdbuf();
+      engine = CudaEngineUniquePtr{
+          builder->buildEngineWithConfig(*network, *config),  //
+          &engine_deleter};
+      // save_model_weights("");
     }
   }
 
+  // Perform a context to enqueue inference operations in C++.
+  SARA_DEBUG << termcolor::green << "Setting the inference context!"
+             << termcolor::reset << std::endl;
+  auto context = ContextUniquePtr{engine->createExecutionContext(),  //
+                                  &context_deleter};
 
-  // Perform inference in C++.
-  auto context_deleter = [](nvinfer1::IExecutionContext* context) {
-    if (context != nullptr)
-      context->destroy();
-    context = nullptr;
-  };
-  auto context =
-      std::unique_ptr<nvinfer1::IExecutionContext, decltype(context_deleter)>{
-          engine->createExecutionContext(), context_deleter};
+  // @todo create some fake data and create two GPU device buffers.
+  SARA_DEBUG << termcolor::red
+             << "TODO: create some input data and two device buffers!"
+             << termcolor::reset
+             << std::endl;
 
-  // Fill some buffers
+  // Fill some GPU buffers and perform inference.
+  SARA_DEBUG << termcolor::green << "Perform inference on GPU!"
+             << termcolor::reset << std::endl;
   std::vector<void*> device_buffers(2, nullptr);
   context->execute(1, device_buffers.data());
+
+  SARA_DEBUG << termcolor::red << "TODO: crashing... Finish the job!"
+             << termcolor::reset << std::endl;
+
+  // Transfer data back from GPU device memory to host memory.
+  SARA_DEBUG << termcolor::red << "TODO: copy data back to host memory!"
+             << termcolor::reset << std::endl;
 
   return 0;
 }

@@ -11,7 +11,7 @@ fi
 
 function install_python_packages_via_pip()
 {
-  pip install coverage numpy nose
+  pip install -r ../sara/requirements.txt
 }
 
 function build_library()
@@ -27,18 +27,22 @@ function build_library()
     cmake_options+="-DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=gold "
   fi
 
+  if [ "$(uname -s)" == "Darwin" ]; then
+    cmake_options+="-DQt5_DIR=$(brew --prefix qt)/lib/cmake/Qt5 "
+  else
+    cmake_options+="-DCMAKE_PREFIX_PATH=/home/david/Qt/5.12.6/gcc_64 "
+  fi
+
   cmake_options+="-DCMAKE_EXPORT_COMPILE_COMMANDS=ON "
-  cmake_options+="-DCMAKE_PREFIX_PATH=${HOME}/Qt/5.12.6/gcc_64 "
+
   cmake_options+="-DSARA_BUILD_VIDEOIO=ON "
   cmake_options+="-DSARA_BUILD_PYTHON_BINDINGS=ON "
   cmake_options+="-DSARA_BUILD_SHARED_LIBS=ON "
   cmake_options+="-DSARA_BUILD_TESTS=ON "
   cmake_options+="-DSARA_BUILD_SAMPLES=ON "
 
-  # Qt 5 directory for Darwin.
-  if [ "$(uname -s)" == "Darwin" ]; then
-    cmake_options+="-DQt5_DIR=$(brew --prefix qt)/lib/cmake/Qt5 "
-  fi
+  cmake_options+="-DSARA_USE_HALIDE=ON "
+  cmake_options+="-DHALIDE_DISTRIB_DIR=/opt/halide"
 
   # Generate makefile project.
   if [ "${build_type}" == "emscripten" ]; then

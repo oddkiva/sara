@@ -81,6 +81,7 @@ $cmake_options += "-DSARA_BUILD_VIDEOIO:BOOL=ON "
 $cmake_options += "-DSARA_BUILD_SHARED_LIBS:BOOL=$($build_shared_libs[$build_type]) "
 $cmake_options += "-DSARA_BUILD_SAMPLES:BOOL=ON "
 $cmake_options += "-DSARA_BUILD_TESTS:BOOL=ON "
+$cmake_options += "-DSARA_USE_HALIDE:BOOL=ON "
 
 echo "CMake options = $cmake_options"
 echo "`n"
