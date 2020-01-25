@@ -16,11 +16,16 @@
 #include <iostream>
 #include <string>
 
+#include <termcolor/termcolor.hpp>
 
-#define SARA_DEBUG std::cout << "[" << __FUNCTION__ << ":" << __LINE__ << "] "
+
+#define SARA_DEBUG                                                             \
+  std::cout << termcolor::bold << termcolor::red << "[" << __FUNCTION__ << ":" \
+            << __LINE__ << "] " << termcolor::reset
 #define SARA_CHECK(x)                                                          \
-  std::cout << "[" << __FUNCTION__ << ":" << __LINE__ << "] " << #x << " = "   \
-            << x << std::endl
+  std::cout << termcolor::bold << termcolor::red << "[" << __FUNCTION__ << ":" \
+            << __LINE__ << "] " << termcolor::reset << #x << " = " << x        \
+            << std::endl
 
 
 namespace DO { namespace Sara {

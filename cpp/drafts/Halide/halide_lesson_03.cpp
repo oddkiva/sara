@@ -111,8 +111,8 @@ auto halide_pipeline() -> void
   const auto video_filepath =
       "/Users/david/GitLab/DO-CV/sara/cpp/examples/Sara/VideoIO/orion_1.mpg"s;
 #else
-  const auto video_filepath = "/home/david/Desktop/test.mp4"s;
-  //const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
+  //const auto video_filepath = "/home/david/Desktop/test.mp4"s;
+  const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
 #endif
 
   VideoStream video_stream(video_filepath);
@@ -175,21 +175,21 @@ auto halide_pipeline() -> void
   auto filter = Halide::Func{"filter"};
 
   // Laplacian.
-  //filter(x, y, c) = Halide::abs(
-  //    padded(x, y, c) - (padded(x + 1, y + 0, c) + padded(x - 1, y + 0, c) +
-  //                       padded(x + 0, y + 1, c) + padded(x + 0, y - 1, c)) /
-  //                          4.f);
+  filter(x, y, c) = Halide::abs(
+      padded(x, y, c) - (padded(x + 1, y + 0, c) + padded(x - 1, y + 0, c) +
+                         padded(x + 0, y + 1, c) + padded(x + 0, y - 1, c)) /
+                            4.f);
 
   // Blur.
-  filter(x, y, c) = (padded(x - 1, y - 1, c) + padded(x - 0, y - 1, c) + padded(x + 1, y - 1, c)
-                   + padded(x - 1, y + 0, c) + padded(x - 0, y + 0, c) + padded(x + 1, y + 0, c)
-                   + padded(x - 1, y + 1, c) + padded(x - 0, y + 1, c) + padded(x + 1, y + 1, c)) / 9.f;
+  //filter(x, y, c) = (padded(x - 1, y - 1, c) + padded(x - 0, y - 1, c) + padded(x + 1, y - 1, c)
+  //                 + padded(x - 1, y + 0, c) + padded(x - 0, y + 0, c) + padded(x + 1, y + 0, c)
+  //                 + padded(x - 1, y + 1, c) + padded(x - 0, y + 1, c) + padded(x + 1, y + 1, c)) / 9.f;
 
   // The output result to show on the screen.
   auto filter_rescaled = Halide::Func{"rescaled"};
-  // filter_rescaled(x, y, c) =
-  //     Halide::cast<uint8_t>((filter(x, y, c) / 2.f) * 255.f);
-  filter_rescaled(x, y, c) = Halide::cast<uint8_t>(filter(x, y, c) * 255.f);
+  filter_rescaled(x, y, c) =
+      Halide::cast<uint8_t>((filter(x, y, c) / 2.f) * 255.f);
+  //filter_rescaled(x, y, c) = Halide::cast<uint8_t>(filter(x, y, c) * 255.f);
 
   // Specify that the output buffer is in interleaved RGB format.
   filter_rescaled.output_buffer()
