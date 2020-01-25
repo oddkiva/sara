@@ -21,14 +21,16 @@
 #pragma once
 
 // To avoid compilation error with Eigen
-#if defined(_WIN32) || defined(_WIN32_WCE)
-# define NOMINMAX
+#if (defined(_WIN32) || defined(_WIN32_WCE)) && !defined(NOMINMAX)
+#  define NOMINMAX
 #endif
 
 // This is a specific compiling issue with MSVC 2008
 #if (_MSC_VER >= 1500 && _MSC_VER < 1600)
-# define EIGEN_DONT_ALIGN
-# pragma warning ( disable : 4181 ) // "../Core/Locator.hpp(444) : warning C4181: qualifier applied to reference type; ignored"
+#  define EIGEN_DONT_ALIGN
+#  pragma warning(                                                             \
+      disable : 4181)  // "../Core/Locator.hpp(444) : warning C4181: qualifier
+                       // applied to reference type; ignored"
 #endif
 
 #include <Eigen/Eigen>
@@ -48,7 +50,7 @@ namespace Eigen {
   //! For example, when an Array<Matrix2d, 2, 2> type is instantiated,
   //! multiplication and addition operations are properly defined.
   template <typename T, int M, int N>
-  struct NumTraits<Array<T, M, N> >
+  struct NumTraits<Array<T, M, N>>
   {
     //! @{
     //! Eigen internals.
@@ -57,7 +59,8 @@ namespace Eigen {
     using Nested = Array<T, M, N>;
     using Literal = Array<T, M, N>;
 
-    enum {
+    enum
+    {
       IsComplex = 0,
       IsInteger = 0,
       IsSigned = 0,
@@ -86,7 +89,7 @@ namespace Eigen {
   //! @brief NumTraits template class specialization in case the scalar type
   //! is actually a matrix.
   template <typename T, int M, int N>
-  struct NumTraits<Matrix<T, M, N> >
+  struct NumTraits<Matrix<T, M, N>>
   {
     //! @{
     //! Eigen internals.
@@ -95,7 +98,8 @@ namespace Eigen {
     using Nested = Matrix<T, M, N>;
     using Literal = Matrix<T, M, N>;
 
-    enum {
+    enum
+    {
       IsComplex = 0,
       IsInteger = 0,
       IsSigned = 0,
@@ -121,7 +125,7 @@ namespace Eigen {
     //! @}
   };
 
-}
+}  // namespace Eigen
 //! @}
 
 
@@ -166,7 +170,7 @@ namespace DO { namespace Sara {
   {
     for (int i = 0; i < matrix.rows(); ++i)
       for (int j = 0; j < matrix.cols(); ++j)
-        in >> matrix(i,j);
+        in >> matrix(i, j);
     return in;
   }
 
@@ -179,8 +183,10 @@ namespace DO { namespace Sara {
     int i = 0;
     while (i != m1.size())
     {
-      if (i==m2.size() || m2(i) < m1(i)) return false;
-      else if (m1(i) < m2(i)) return true;
+      if (i == m2.size() || m2(i) < m1(i))
+        return false;
+      else if (m1(i) < m2(i))
+        return true;
       ++i;
     }
     return (i != m2.size());
@@ -193,12 +199,11 @@ namespace DO { namespace Sara {
     inline bool operator()(const Eigen::MatrixBase<Derived>& m1,
                            const Eigen::MatrixBase<Derived>& m2) const
     {
-       return lexicographical_compare(m1, m2);
+      return lexicographical_compare(m1, m2);
     }
   };
   //! @}
 
   //! @}
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara

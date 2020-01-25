@@ -12,11 +12,15 @@
 //! @file
 
 #pragma once
+// To avoid compilation error with Eigen
+#if (defined(_WIN32) || defined(_WIN32_WCE)) && !defined(NOMINMAX)
+#  define NOMINMAX
+#endif
+
+#include <termcolor/termcolor.hpp>
 
 #include <iostream>
 #include <string>
-
-#include <termcolor/termcolor.hpp>
 
 
 #define SARA_DEBUG                                                             \
@@ -35,7 +39,10 @@ namespace DO { namespace Sara {
   inline void print_stage(const std::string& stageName)
   {
     std::cout << std::endl;
-    std::cout << "// ======================================================================= //" << std::endl;
+    std::cout << "// "
+                 "============================================================="
+                 "========== //"
+              << std::endl;
     std::cout << "// " << stageName << std::endl;
   }
 
@@ -47,5 +54,4 @@ namespace DO { namespace Sara {
     std::cin.ignore();
   }
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara
