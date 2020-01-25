@@ -78,7 +78,7 @@ int __main(int argc, char **argv)
                                          wait_key);
     else
       sara::estimate_fundamental_matrices(dirpath, h5_filepath, overwrite,
-                                          debug);
+                                          debug, wait_key);
 
     return 0;
   }

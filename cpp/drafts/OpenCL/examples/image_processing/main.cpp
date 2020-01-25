@@ -9,6 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+//! @example
+
 #ifdef _WIN32
 # include <windows.h>
 #endif

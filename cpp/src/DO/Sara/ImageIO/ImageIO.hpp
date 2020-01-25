@@ -12,10 +12,16 @@
 #pragma once
 
 #include <DO/Sara/Defines.hpp>
+
 #include <DO/Sara/Core/Image.hpp>
 
 
 namespace DO { namespace Sara {
+
+  /*!
+   *  @addtogroup ImageIO
+   *  @{
+   */
 
   namespace Detail {
 
@@ -73,6 +79,7 @@ namespace DO { namespace Sara {
   void imwrite(const Image<Rgb8>& image, const std::string& filepath,
                int quality = 85);
 
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

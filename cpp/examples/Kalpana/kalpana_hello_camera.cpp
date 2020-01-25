@@ -9,31 +9,35 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Kalpana/3D/OpenGLWindow.hpp>
+//! @example
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/HDF5.hpp>
 #include <DO/Sara/Core/Tensor.hpp>
 #include <DO/Sara/Core/Timer.hpp>
 #include <DO/Sara/Defines.hpp>
-#include <DO/Sara/MultiViewGeometry/Geometry/PinholeCamera.hpp>
 #include <DO/Sara/MultiViewGeometry/Datasets/Strecha.hpp>
+#include <DO/Sara/MultiViewGeometry/Geometry/PinholeCamera.hpp>
 
 #include <QGuiApplication>
 #include <QSurfaceFormat>
 #include <QtCore/QException>
+#include <QtCore/QObject>
+#include <QtCore/QTimer>
 #include <QtGui/QKeyEvent>
 #include <QtGui/QOpenGLBuffer>
 #include <QtGui/QOpenGLDebugLogger>
 #include <QtGui/QOpenGLShaderProgram>
 #include <QtGui/QOpenGLTexture>
 #include <QtGui/QOpenGLVertexArrayObject>
+#include <QtGui/QOpenGLWindow>
 
 #include <map>
 
 
 using namespace DO::Sara;
 using namespace std;
+using namespace std::string_literals;
 
 
 // Default camera values
@@ -150,8 +154,7 @@ auto read_point_cloud(const std::string& h5_filepath) -> Tensor_<float, 2>
 
   auto coords = MatrixXd{};
   h5_file.read_dataset("points", coords);
-  // In OpenGL, the y-axis is going up and in the image coordinates, it is going
-  // down.
+  // In OpenGL the y-axis is upwards. In the image coordinates, it is downwards.
   coords.row(1) *= -1;
   // In OpenGL, the cheiral constraint is actually a negative z.
   coords.row(2) *= -1;
@@ -178,6 +181,8 @@ auto make_point_cloud()
   const auto vertex_data = read_point_cloud("/home/david/Desktop/geometry.h5");
 #endif
   SARA_DEBUG << "vertices =\n" << vertex_data.matrix().topRows(20) << std::endl;
+  SARA_DEBUG << "min =\n" << vertex_data.matrix().colwise().minCoeff() << std::endl;
+  SARA_DEBUG << "max =\n" << vertex_data.matrix().colwise().maxCoeff() << std::endl;
   return vertex_data;
 }
 
@@ -222,7 +227,7 @@ public:
   void main()
   {
     gl_Position = projection * view * transform * vec4(in_coords, 1.0);
-    gl_PointSize = 5.0;
+    gl_PointSize = 20.0;
     out_color = in_color;
   }
   )shader";
@@ -245,7 +250,7 @@ public:
   }
   )shader";
 
-    m_program = new QOpenGLShaderProgram{this};
+    m_program = new QOpenGLShaderProgram{parent()};
     m_program->addShaderFromSourceCode(QOpenGLShader::Vertex,
                                        vertex_shader_source);
     m_program->addShaderFromSourceCode(QOpenGLShader::Fragment,
@@ -440,7 +445,7 @@ public:
   }
   )shader";
 
-    m_program = new QOpenGLShaderProgram{this};
+    m_program = new QOpenGLShaderProgram{parent()};
     m_program->addShaderFromSourceCode(QOpenGLShader::Vertex,
                                        vertex_shader_source);
     m_program->addShaderFromSourceCode(QOpenGLShader::Fragment,
@@ -554,6 +559,8 @@ public:
 
   ~ImagePlane()
   {
+    m_program->release();
+
     m_vao->release();
     m_vao->destroy();
 
@@ -562,10 +569,6 @@ public:
 
     m_ebo.release();
     m_ebo.destroy();
-
-    m_texture->release();
-    m_texture->destroy();
-    delete m_texture;
   }
 
   auto initialize_geometry() -> void
@@ -581,16 +584,19 @@ public:
       w, w, 0, 0,
       0, h, h, 0,
       1, 1, 1, 1;
-    //SARA_DEBUG << "Pixel corners =\n" << corners << std::endl;
+    SARA_DEBUG << "Pixel corners =\n" << corners << std::endl;
+
+    SARA_DEBUG << "K =\n" << m_camera.K << std::endl;
 
     // Calculate the normalized camera coordinates.
     const Matrix3d K_inv = m_camera.K.inverse();
     corners = K_inv * corners;
-    //SARA_DEBUG << "Normalized corners =\n" << corners << std::endl;
+    SARA_DEBUG << "Normalized corners =\n" << corners << std::endl;
 
     // Because the z is negative in OpenGL.
     corners.row(2) *= -1;
     //SARA_DEBUG << "Z-negative normalized corners =\n" << corners << std::endl;
+    SARA_DEBUG << "Z-negative corners =\n" << corners << std::endl;
 
     // Vertex coordinates.
     m_vertices = Tensor_<float, 2>{{4, 5}};
@@ -647,7 +653,7 @@ public:
   }
   )shader";
 
-    m_program = new QOpenGLShaderProgram{this};
+    m_program = new QOpenGLShaderProgram{parent()};
     m_program->addShaderFromSourceCode(QOpenGLShader::Vertex,
                                        vertex_shader_source);
     m_program->addShaderFromSourceCode(QOpenGLShader::Fragment,
@@ -714,6 +720,8 @@ public:
   auto set_image(const string& image_path) -> void
   {
     const auto image = QImage{QString::fromStdString(image_path)}.mirrored();
+    qDebug() << image.width() << " " << image.height();
+    m_image_sizes << image.width(), image.height();
     m_texture = new QOpenGLTexture{image};
     m_texture->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
     m_texture->setMagnificationFilter(QOpenGLTexture::Linear);
@@ -745,6 +753,18 @@ public:
     m_program->release();
   }
 
+  auto destroy_texture()
+  {
+    if (m_texture == nullptr)
+      return;
+
+    m_texture->release();
+    m_texture->destroy();
+    delete m_texture;
+
+    m_texture = nullptr;
+  }
+
 private:
   //! @{
   //! @brief CPU data.
@@ -768,7 +788,7 @@ private:
 };
 
 
-class Window : public OpenGLWindow
+class Window : public QOpenGLWindow
 {
 private:
   QMatrix4x4 m_projection;
@@ -786,14 +806,16 @@ public:
 
   ~Window()
   {
-    m_context->makeCurrent(this);
+    makeCurrent();
     {
-      //
+      // TODO: refactor this kludge.
+      if (m_imagePlane != nullptr)
+        m_imagePlane->destroy_texture();
     }
-    m_context->doneCurrent();
+    doneCurrent();
   }
 
-  void initialize() override
+  void initializeGL() override
   {
     // You absolutely need this for 3D objects!
     glEnable(GL_DEPTH_TEST);
@@ -805,16 +827,16 @@ public:
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // Instantiate the objects.
-    m_checkerboard = new CheckerBoardObject{20, 20, 10, this};
-    m_pointCloud = new PointCloudObject{make_point_cloud(), this};
-    m_imagePlane = new ImagePlane{this};
+    m_checkerboard = new CheckerBoardObject{20, 20, 10, context()};
+    m_pointCloud = new PointCloudObject{make_point_cloud(), context()};
+    m_imagePlane = new ImagePlane{context()};
 
 #ifdef __APPLE__
     const auto data_dir =
-        std::string{"/Users/david/Desktop/Datasets/sfm/castle_int"};
+        "/Users/david/Desktop/Datasets/sfm/castle_int"s;
 #else
     const auto data_dir =
-        std::string{"/home/david/Desktop/Datasets/sfm/castle_int"};
+        "/home/david/Desktop/Datasets/sfm/castle_int"s;
 #endif
     const auto image = "0000.png";
     m_imagePlane->set_image(data_dir + "/" + image);
@@ -828,7 +850,7 @@ public:
     m_imagePlane->set_camera(camera);
   }
 
-  void render() override
+  void paintGL() override
   {
     const qreal retinaScale = devicePixelRatio();
     glViewport(0, 0, width() * retinaScale, height() * retinaScale);
@@ -849,7 +871,7 @@ public:
     //m_transform.rotate(std::pow(1.5, 5) * m_timer.elapsed_ms() / 500,
     //                   QVector3D{0.5f, 1.0f, 0.0f}.normalized());
 
-    //m_checkerboard->render(m_projection, m_view, m_transform);
+    m_checkerboard->render(m_projection, m_view, m_transform);
     m_pointCloud->render(m_projection, m_view, m_transform);
     m_imagePlane->render(m_projection, m_view, m_transform);
   }
@@ -867,77 +889,77 @@ protected:
     {
       m_camera.move_forward(delta);
       m_camera.update();
-      renderLater();
+      update();
     }
     if (Qt::Key_S == key)
     {
       m_camera.move_backward(delta);
       m_camera.update();
-      renderLater();
+      update();
     }
     if (Qt::Key_A == key)
     {
       m_camera.move_left(delta);
       m_camera.update();
-      renderLater();
+      update();
     }
     if (Qt::Key_D == key)
     {
       m_camera.move_right(delta);
       m_camera.update();
-      renderLater();
+      update();
     }
 
-    if (Qt::Key_Delete == key)
+    if (Qt::Key_H == key)
     {
       m_camera.no_head_movement(-delta);  // CCW
       m_camera.update();
-      renderLater();
+      update();
     }
-    if (Qt::Key_PageDown == key)
+    if (Qt::Key_L == key)
     {
       m_camera.no_head_movement(+delta);  // CW
       m_camera.update();
-      renderLater();
+      update();
     }
 
-    if (Qt::Key_Home == key)
+    if (Qt::Key_K == key)
     {
       m_camera.yes_head_movement(+delta);
       m_camera.update();
-      renderLater();
+      update();
     }
-    if (Qt::Key_End == key)
+    if (Qt::Key_J == key)
     {
       m_camera.yes_head_movement(-delta);
       m_camera.update();
-      renderLater();
+      update();
     }
 
     if (Qt::Key_R == key)
     {
       m_camera.move_up(delta);
       m_camera.update();
-      renderLater();
+      update();
     }
     if (Qt::Key_F == key)
     {
       m_camera.move_down(delta);
       m_camera.update();
-      renderLater();
+      update();
     }
 
-    if (Qt::Key_Insert == key)
+    if (Qt::Key_U == key)
     {
       m_camera.maybe_head_movement(-delta);
       m_camera.update();
-      renderLater();
+      update();
     }
-    if (Qt::Key_PageUp == key)
+    if (Qt::Key_I == key)
     {
       m_camera.maybe_head_movement(+delta);
       m_camera.update();
-      renderLater();
+      update();
     }
   }
 };
@@ -950,12 +972,17 @@ int main(int argc, char **argv)
   format.setOption(QSurfaceFormat::DebugContext);
   format.setProfile(QSurfaceFormat::CoreProfile);
   format.setVersion(3, 3);
+  format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+  format.setSwapInterval(1);
 
   Window window;
   window.setFormat(format);
   window.resize(800, 600);
   window.show();
-  //window.setAnimating(true);
+
+  QTimer timer;
+  timer.start(20);
+  QObject::connect(&timer, SIGNAL(timeout()), &window, SLOT(update()));
 
   return app.exec();
 }

@@ -39,11 +39,11 @@ namespace DO { namespace Sara {
       @param[in]
         extremum_thres
         the response threshold which the DoG extremum absolute value
-        \f$
+        @f$
           \left|
             \left( g_{\sigma(s+1,o)} - g_{\sigma(s,o)} \right) * I
           \right| (\mathbf{x})
-        \f$
+        @f$
         must exceed.
         Note that \f$ \sigma(s',o') = 2^{s'/S+o'}\f$  where \f$S\f$ is the
         number of scales per octave.
@@ -51,10 +51,10 @@ namespace DO { namespace Sara {
         edge_ratio_thres
         the Hessian matrix \f$\mathbf{H}\f$ at the local scale-space extremum
         must satisfy
-        \f[
-          \frac{\mathrm{det}(\mathbf{H})}{\mathrm{tr}(\mathbf{H}} >
+        @f[
+          \frac{\mathrm{det}(\mathbf{H})}{\mathrm{tr}(\mathbf{H})} >
           \frac{(r+1)^2}{r}
-        \f]
+        @f]
         where \f$r\f$ corresponds to the variable **edge_ratio_thres**.
         In terms of implementation, we use the function **DO::Sara::on_edge()**.
         We use the \f$r=10\f$ as stated in [Lowe, IJCV 2004].
@@ -86,10 +86,10 @@ namespace DO { namespace Sara {
       @brief Localizes DoG extrema for a given image.
 
       This function does the following:
-      1. Constructs a gaussian pyramid \f$\nabla g_{\sigma(s,o)} * I\f$ from
-      the image \f$I\f$, where \f$(s,o)\f$ are integers. Here:
-      \f$\sigma(s,o) = 2^{s/S + o}\f$ where \f$S\f$ is the number of scales per
-      octaves.
+      1. Constructs a gaussian pyramid @f$\nabla g_{\sigma(s,o)} * I@f$ from
+      the image @f$I@f$, where \f$(s,o)\f$ are integers. Here:
+      @f$\sigma(s,o) = 2^{\frac{s}{S} + o}@f$ where @f$S@f$ is the number of
+      scales per octaves.
 
       2. Localize extrema in each difference of Gaussians
       \f$\left( g_{\sigma(s+1,o)} - g_{\sigma(s,o)} \right) * I \f$

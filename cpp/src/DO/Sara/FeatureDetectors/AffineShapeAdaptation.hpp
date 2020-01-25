@@ -20,76 +20,75 @@
 namespace DO { namespace Sara {
 
   /*!
-    @ingroup FeatureDetectors
-    @defgroup AffineAdaptation Affine Shape Adaptation
-    @{
-  */
+   *  @ingroup FeatureDetectors
+   *  @defgroup AffineAdaptation Affine Shape Adaptation
+   *  @{
+   */
 
   /*!
-    @brief Functor that adapts the feature scale to the local shape from the
-    second-moment matrix (cf. [Mikolajczyk & Schmid, ECCV 2002]).
-
-    Given a feature \f$(\mathbf{x}, \sigma)\f$, the local affine shape adaptation
-    is based on the estimation of the second moment matrix
-    \f[
-      \mu(\mathbf{x}, \sigma) =
-      (g_\sigma) * \left[ (\nabla I) (\nabla I)^T \right] (\mathbf{x})
-    \f]
-    which is also the Mahalanobis distance reflecting the anisotropy of the
-    local shape.
+   *  @brief Functor that adapts the feature scale to the local shape from the
+   *  second-moment matrix (cf. [Mikolajczyk & Schmid, ECCV 2002]).
+   *
+   *  Given a feature @f$(\mathbf{x}, \sigma)@f$, the local affine shape adaptation
+   *  is based on the estimation of the second moment matrix
+   *
+   *  @f[
+   *    \mu(\mathbf{x}, \sigma) =
+   *    (g_\sigma) * \left[ (\nabla I) (\nabla I)^T \right] (\mathbf{x}),
+   *  @f]
+   *
+   *  which is also the Mahalanobis distance reflecting the anisotropy of the
+   *  local shape.
    */
   class DO_SARA_EXPORT AdaptFeatureAffinelyToLocalShape
   {
   public:
     /*!
-      \todo: redo because there are hard-coded parameters in the default
-     constructor.
+     *  @todo: redo because there are hard-coded parameters in the default
+     *  constructor.
      */
     AdaptFeatureAffinelyToLocalShape();
 
     /*!
-      Estimates the local shape at some given point of an image.
-      @param[in,out]
-        affAdaptTransfmMat
-        the affine adaptation transformation matrix, i.e., the Mahalanobis
-        distance reflecting the anisotropy of the local shape
-      @param[in] I the input image
-      @param[in]
-        feature
-        the point on which we estimate the local shape in image I.
+     *  Estimates the local shape at some given point of an image.
+     *  @param[in,out]
+     *    affAdaptTransfmMat
+     *    the affine adaptation transformation matrix, i.e., the Mahalanobis
+     *    distance reflecting the anisotropy of the local shape
+     *  @param[in] I the input image
+     *  @param[in]
+     *    feature
+     *    the point on which we estimate the local shape in image I.
      */
     bool operator()(Matrix2f& affine_adaptation_transform,
                     const Image<float>& image,
                     const OERegion& feature);
 
-  private:
     /*!
-      Return:
-      - true if the normalized patch does not touch the image boundaries.
-      - false otherwise.
-      If false is returned, then
+     *  Return:
+     *  - true if the normalized patch does not touch the image boundaries.
+     *  - false otherwise.
      */
     bool warp_patch(const Image<float>& src,
                     Image<float>& dst,
                     const Matrix3f& homography_from_dst_to_src);
 
     /*!
-      Return:
-      - true if the normalized patch does not touch the image boundaries.
-      - false otherwise.
-      If false is returned, then
+     *  Return:
+     *  - true if the normalized patch does not touch the image boundaries.
+     *  - false otherwise.
      */
     bool update_normalized_patch(const Image<float>& image,
                                  const OERegion& feature,
                                  const Matrix2f& affine_adaptation_transform);
 
     /*!
-      Given a feature $(\mathbf{x}, \sigma)\f$, computes \f$\mathbf{x}\f$ at
-      the second moment matrix \f$mu(x, \sigma)\f$ defined as
-      \f[
-        mu(\mathbf{x}, \sigma) =
-        (g_\sigma) * (\nabla I) (\nabla I)^T (\mathbf{x})
-      \f]
+     *  Given a feature @f$(\mathbf{x}, \sigma)@f$, computes @f$\mathbf{x}@f$ at
+     *  the second moment matrix @f$\mu(x, \sigma)@f$ defined as
+     *  @f[
+     *    \mu(\mathbf{x}, \sigma) =
+     *    (g_\sigma) * (\nabla I) (\nabla I)^T (\mathbf{x})
+     *  @f]
      */
     Matrix2f compute_moment_matrix_from_patch();
 

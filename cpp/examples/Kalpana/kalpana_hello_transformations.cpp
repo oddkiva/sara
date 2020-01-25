@@ -9,7 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Kalpana/3D/OpenGLWindow.hpp>
+//! @example
 
 #include <DO/Sara/Defines.hpp>
 #include <DO/Sara/Core/DebugUtilities.hpp>
@@ -21,11 +21,14 @@
 #include <QGuiApplication>
 #include <QSurfaceFormat>
 #include <QtCore/QException>
+#include <QtCore/QObject>
+#include <QtCore/QTimer>
 #include <QtGui/QOpenGLBuffer>
 #include <QtGui/QOpenGLDebugLogger>
 #include <QtGui/QOpenGLShaderProgram>
 #include <QtGui/QOpenGLTexture>
 #include <QtGui/QOpenGLVertexArrayObject>
+#include <QtGui/QOpenGLWindow>
 
 #include <map>
 
@@ -80,7 +83,7 @@ std::map<std::string, int> arg_pos = {{"in_coords", 0},      //
                                       {"out_color", 0}};
 
 
-class Window : public OpenGLWindow
+class Window : public QOpenGLWindow
 {
 private:
   QOpenGLShaderProgram* m_program{nullptr};
@@ -102,7 +105,7 @@ public:
 
   ~Window()
   {
-    m_context->makeCurrent(this);
+    makeCurrent();
     {
       m_vao->release();
       m_vao->destroy();
@@ -121,14 +124,14 @@ public:
       m_texture1->destroy();
       delete m_texture1;
     }
-    m_context->doneCurrent();
+    doneCurrent();
   }
 
   void initialize_shader_program()
   {
     SARA_DEBUG << "Initialize shader program" << std::endl;
 
-    m_program = new QOpenGLShaderProgram{this};
+    m_program = new QOpenGLShaderProgram{context()};
     m_program->addShaderFromSourceCode(QOpenGLShader::Vertex,
                                        vertex_shader_source);
     m_program->addShaderFromSourceCode(QOpenGLShader::Fragment,
@@ -242,7 +245,7 @@ public:
     m_program->setUniformValue("texture1", 1);
   }
 
-  void initialize() override
+  void initializeGL() override
   {
     glEnable(GL_DEPTH_TEST);
 
@@ -252,15 +255,13 @@ public:
     initialize_texture_on_gpu();
   }
 
-  void render() override
+  void paintGL() override
   {
     const qreal retinaScale = devicePixelRatio();
     glViewport(0, 0, width() * retinaScale, height() * retinaScale);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    //m_program->bind();
 
     auto transform = QMatrix4x4{};
     transform.setToIdentity();
@@ -276,8 +277,6 @@ public:
     // Draw triangles.
     m_vao->bind();
     glDrawElements(GL_TRIANGLES, m_triangles.size(), GL_UNSIGNED_INT, 0);
-
-    //m_program->release();
   }
 };
 
@@ -289,12 +288,17 @@ int main(int argc, char **argv)
   format.setOption(QSurfaceFormat::DebugContext);
   format.setProfile(QSurfaceFormat::CoreProfile);
   format.setVersion(3, 3);
+  format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+  format.setSwapInterval(1);
 
   Window window;
   window.setFormat(format);
   window.resize(800, 600);
   window.show();
-  window.setAnimating(true);
+
+  QTimer timer;
+  timer.start(20);
+  QObject::connect(&timer, SIGNAL(timeout()), &window, SLOT(update()));
 
   return app.exec();
 }

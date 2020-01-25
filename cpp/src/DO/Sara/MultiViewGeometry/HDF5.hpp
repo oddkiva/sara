@@ -19,35 +19,40 @@
 
 namespace DO::Sara {
 
-template <>
-struct CalculateH5Type<EssentialMatrix>
-{
-  static inline auto value()
-  {
-    return CalculateH5Type<Matrix3d>::value();
-  }
-};
+  //! @addtogroup MultiViewGeometry
+  //! @{
 
-template <>
-struct CalculateH5Type<FundamentalMatrix>
-{
-  static inline auto value()
+  template <>
+  struct CalculateH5Type<EssentialMatrix>
   {
-    return CalculateH5Type<Matrix3d>::value();
-  }
-};
+    static inline auto value()
+    {
+      return CalculateH5Type<Matrix3d>::value();
+    }
+  };
 
-template <>
-struct CalculateH5Type<PinholeCamera>
-{
-  static inline auto value() -> H5::CompType
+  template <>
+  struct CalculateH5Type<FundamentalMatrix>
   {
-    auto h5_comp_type = H5::CompType{sizeof(PinholeCamera)};
-    INSERT_MEMBER(h5_comp_type, PinholeCamera, K);
-    INSERT_MEMBER(h5_comp_type, PinholeCamera, R);
-    INSERT_MEMBER(h5_comp_type, PinholeCamera, t);
-    return h5_comp_type;
-  }
-};
+    static inline auto value()
+    {
+      return CalculateH5Type<Matrix3d>::value();
+    }
+  };
+
+  template <>
+  struct CalculateH5Type<PinholeCamera>
+  {
+    static inline auto value() -> H5::CompType
+    {
+      auto h5_comp_type = H5::CompType{sizeof(PinholeCamera)};
+      INSERT_MEMBER(h5_comp_type, PinholeCamera, K);
+      INSERT_MEMBER(h5_comp_type, PinholeCamera, R);
+      INSERT_MEMBER(h5_comp_type, PinholeCamera, t);
+      return h5_comp_type;
+    }
+  };
+
+  //! @}
 
 } /* namespace DO::Sara */

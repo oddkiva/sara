@@ -17,6 +17,9 @@
 
 namespace DO { namespace Sara {
 
+  //! @addtogroup Match
+  //! @{
+
   class Match;
 
   class DO_SARA_EXPORT PairWiseDrawer
@@ -128,6 +131,8 @@ namespace DO { namespace Sara {
     Point2i _off2;
     float _z1, _z2;
   };
+
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

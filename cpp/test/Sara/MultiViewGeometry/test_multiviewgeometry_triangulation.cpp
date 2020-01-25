@@ -52,6 +52,9 @@ auto generate_test_data()
 BOOST_AUTO_TEST_CASE(test_triangulate_linear_eigen)
 {
   const auto [X, R, t, E, C1, C2, x1, x2] = generate_test_data();
+  (void) R;
+  (void) t;
+  (void) E;
 
   MatrixXd X_est = triangulate_linear_eigen(C1, C2, x1, x2);
 
@@ -207,6 +210,10 @@ BOOST_AUTO_TEST_CASE(test_cheirality_predicate)
 BOOST_AUTO_TEST_CASE(test_calculate_two_view_geometries)
 {
   const auto [X, R, t, E, P1, P2, x1, x2] = generate_test_data();
+  (void) X;
+  (void) E;
+  (void) P1;
+  (void) P2;
 
   const auto g = two_view_geometry(Motion{R, t}, x1, x2);
   BOOST_CHECK(g.cheirality.all());

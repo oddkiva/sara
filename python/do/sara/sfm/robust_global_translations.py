@@ -8,4 +8,4 @@
 # Combinatorial cleaning: statistical accumulator, threshold tau.
 
 # Solving the translation problems.
-Levenberg-Marquadt using CERES.
+# Levenberg-Marquadt using CERES.

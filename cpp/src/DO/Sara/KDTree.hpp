@@ -12,3 +12,5 @@
 #pragma once
 
 #include <DO/Sara/KDTree/KDTree.hpp>
+
+//! @defgroup KDTree kD-Tree

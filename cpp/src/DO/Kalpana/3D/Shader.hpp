@@ -1,20 +1,25 @@
 #pragma once
 
-#include <string>
+#include <DO/Kalpana/Defines.hpp>
 
 #include <QOpenGLFunctions_3_3_Core>
+
+#include <string>
 
 
 namespace DO { namespace Kalpana {
 
-  class Shader : protected QOpenGLFunctions_3_3_Core
+  class DO_KALPANA_EXPORT Shader : protected QOpenGLFunctions_3_3_Core
   {
   public:
     Shader() = default;
 
     ~Shader();
 
-    operator GLuint() const { return _shader_object; }
+    operator GLuint() const
+    {
+      return _shader_object;
+    }
 
     bool create_from_source(GLenum shader_type, const std::string& source);
 
@@ -25,10 +30,10 @@ namespace DO { namespace Kalpana {
 
   private:
     GLenum _shader_type;
-    GLuint _shader_object{ 0 };
+    GLuint _shader_object{0};
   };
 
-  class ShaderProgram : protected QOpenGLFunctions_3_3_Core
+  class DO_KALPANA_EXPORT ShaderProgram : protected QOpenGLFunctions_3_3_Core
   {
   public:
     inline ShaderProgram() = default;
@@ -37,7 +42,10 @@ namespace DO { namespace Kalpana {
 
     ~ShaderProgram();
 
-    operator GLuint() const { return _program_object; }
+    operator GLuint() const
+    {
+      return _program_object;
+    }
 
     bool attach(const Shader& vertex_shader, const Shader& fragment_shader);
 
@@ -45,7 +53,7 @@ namespace DO { namespace Kalpana {
 
     void use(bool on = true);
 
-    bool set_uniform_matrix4f(const char *mat_name, const float* mat_coeffs);
+    bool set_uniform_matrix4f(const char* mat_name, const float* mat_coeffs);
 
   protected:
     bool create();
@@ -58,5 +66,4 @@ namespace DO { namespace Kalpana {
     GLuint _fragment_shader{0};
   };
 
-} /* namespace Kalpana */
-} /* namespace DO */
+}}  // namespace DO::Kalpana

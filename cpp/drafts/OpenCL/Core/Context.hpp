@@ -26,6 +26,9 @@
 
 namespace DO::Sara {
 
+  //! @addtogroup OpenCL
+  //! @{
+
   class Context
   {
   public:
@@ -66,5 +69,7 @@ namespace DO::Sara {
     cl_uint _ref_count = 0;
     std::vector<cl_context_properties> _properties;
   };
+
+  //! @}
 
 } /* namespace DO::Sara */

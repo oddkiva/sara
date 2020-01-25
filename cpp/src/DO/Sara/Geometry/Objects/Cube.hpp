@@ -18,6 +18,9 @@
 
 namespace DO { namespace Sara {
 
+  //! @addtogroup GeometryObjects
+  //! @{
+
   class Cube
   {
     Point3d _a, _b;
@@ -51,6 +54,8 @@ namespace DO { namespace Sara {
       return std::pow((c._b - c._a)(0), 3);
     }
   };
+
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

@@ -18,6 +18,9 @@
 
 namespace DO { namespace Sara {
 
+  //! @addtogroup DisjointSets
+  //! @{
+
   //! @brief Disjoint-set data structure.
   class DO_SARA_EXPORT DisjointSets
   {
@@ -113,6 +116,8 @@ namespace DO { namespace Sara {
   private:
     std::vector<Node> _vertices;
   };
+
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

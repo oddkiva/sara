@@ -10,21 +10,22 @@
 // ========================================================================== //
 
 extern "C" {
-# include <libavcodec/avcodec.h>
-# include <libavformat/avformat.h>
-# include <libavformat/avio.h>
-# include <libavutil/file.h>
+#include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
+#include <libavutil/imgutils.h>
+#include <libswscale/swscale.h>
 }
 
-#include "VideoStream.hpp"
+#include <DO/Sara/Core/DebugUtilities.hpp>
+#include <DO/Sara/VideoIO/VideoStream.hpp>
 
 
-namespace DO { namespace Sara {
+namespace DO::Sara {
 
-  inline static Yuv8 get_yuv_pixel(const AVFrame *frame, int x, int y)
+  inline static Yuv8 get_yuv_pixel(const AVFrame* frame, int x, int y)
   {
     Yuv8 yuv;
-    yuv(0) = frame->data[0][y*frame->linesize[0] + x];
+    yuv(0) = frame->data[0][y * frame->linesize[0] + x];
     yuv(1) = frame->data[1][y / 2 * frame->linesize[1] + x / 2];
     yuv(2) = frame->data[2][y / 2 * frame->linesize[2] + x / 2];
     return yuv;
@@ -51,11 +52,10 @@ namespace DO { namespace Sara {
     return rgb;
   }
 
-} /* namespace Sara */
-} /* namespace DO */
+}  // namespace DO::Sara
 
 
-namespace DO { namespace Sara {
+namespace DO::Sara {
 
   bool VideoStream::_registered_all_codecs = false;
 
@@ -79,135 +79,206 @@ namespace DO { namespace Sara {
     close();
   }
 
-  int VideoStream::width() const
-  {
-    return _video_codec_context->width;
-  }
-
-  int VideoStream::height() const
-  {
-    return _video_codec_context->height;
-  }
-
-  void
-  VideoStream::open(const std::string& file_path)
+  auto VideoStream::open(const std::string& file_path) -> void
   {
     // Read the video file.
-    if (avformat_open_input(&_video_format_context, file_path.c_str(),
-                            nullptr, nullptr) != 0)
+    if (avformat_open_input(&_video_format_context, file_path.c_str(), nullptr,
+                            nullptr) < 0)
       throw std::runtime_error("Could not open video file!");
 
     // Read the video stream metadata.
     if (avformat_find_stream_info(_video_format_context, nullptr) != 0)
-      throw std::runtime_error("Could not retrieve video stream info!");
-    av_dump_format(_video_format_context, 0, file_path.c_str(), 0);
+      throw std::runtime_error("Could not get video stream info!");
 
-    // Retrieve video stream.
-    _video_stream = -1;
-    for (unsigned i = 0; i != _video_format_context->nb_streams; ++i)
-    {
-      if (_video_format_context->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO)
-      {
-        _video_stream = i;
-        break;
-      }
-    }
-    if (_video_stream == -1)
-      throw std::runtime_error("Could not retrieve video stream!");
+    // Find the video decoder.
+    _video_stream_index = av_find_best_stream(
+        _video_format_context, AVMEDIA_TYPE_VIDEO, -1, -1, nullptr, 0);
 
-    // Retrieve the video codec context.
-    _video_codec_context = _video_format_context->streams[_video_stream]->codec;
+    _video_codec_params =
+        _video_format_context->streams[_video_stream_index]->codecpar;
 
-    // Retrieve the video codec.
-    _video_codec = avcodec_find_decoder(_video_codec_context->codec_id);
-    if (!_video_codec)
-      throw std::runtime_error("Could not find supported codec!");
+    _video_codec = avcodec_find_decoder(_video_codec_params->codec_id);
+    if (_video_codec == nullptr)
+      throw std::runtime_error{"Could not find video decoder!"};
 
-    // Open the video codec.
+    // Create a decoder context.
+    _video_codec_context = avcodec_alloc_context3(_video_codec);
+    if (_video_codec_context == nullptr)
+      throw std::runtime_error{"Could not allocate video decoder context!"};
+
+    if (avcodec_parameters_to_context(_video_codec_context,
+                                      _video_codec_params))
+      throw std::runtime_error{"Could not copy video decoder context!"};
+
+    // Open it.
     if (avcodec_open2(_video_codec_context, _video_codec, nullptr) < 0)
-      throw std::runtime_error("Could not open video codec!");
+      throw std::runtime_error{"Could not open video decoder!"};
 
-    // Allocate video frame.
-    _video_frame = av_frame_alloc();
-    if (!_video_frame)
-      throw std::runtime_error("Could not allocate video frame!");
+    // Allocate buffer to read the video frame.
+    if (_picture == nullptr)
+      _picture = av_frame_alloc();
+    if (_picture == nullptr)
+      throw std::runtime_error{"Could not allocate video frame!"};
 
-    _video_frame_pos = 0;
+    // Initialize a video packet.
+    if (_pkt == nullptr)
+      _pkt = av_packet_alloc();
+    if (_pkt == nullptr)
+      throw std::runtime_error("Could not allocate video packet!");
+    av_init_packet(_pkt);
+
+    SARA_DEBUG << "#[VideoStream] sizes = " << sizes().transpose() << std::endl;
+    SARA_DEBUG
+        << "#[VideoStream] time base = " << _video_stream_index << ": "  //
+        << _video_format_context->streams[_video_stream_index]->time_base.num
+        << "/"
+        << _video_format_context->streams[_video_stream_index]->time_base.den
+        << std::endl;
+
+    // Get video format converter to RGB24.
+    _sws_context = sws_getContext(
+        width(), height(), _video_codec_context->pix_fmt, width(), height(),
+        AV_PIX_FMT_RGB24, SWS_POINT, nullptr, nullptr, nullptr);
+    if (_sws_context == nullptr)
+      throw std::runtime_error{"Could not allocate SWS context!"};
+
+    // The converted the video frame.
+    if (_picture_rgb == nullptr)
+      _picture_rgb = av_frame_alloc();
+    if (_picture_rgb == nullptr)
+      throw std::runtime_error{"Could not allocate video frame!"};
+
+    // @TODO: make it 32 to optimize for SSE/AVX2.
+    constexpr auto alignment_size = 1;
+    const auto byte_size =
+        av_image_alloc(_picture_rgb->data, _picture_rgb->linesize, width(),
+                       height(), AV_PIX_FMT_RGB24, alignment_size);
+    if (byte_size != width() * height() * 3)
+      throw std::runtime_error{
+          "Allocated memory size for the converted video frame is wrong!"};
+
+    _end_of_stream = false;
   }
 
-  void
-  VideoStream::close()
+  auto VideoStream::close() -> void
   {
-    if (_video_frame)
-    {
-      av_frame_free(&_video_frame);
-      _video_frame = nullptr;
-      _video_frame_pos = std::numeric_limits<size_t>::max();
-    }
+    // Flush the decoder (draining mode.)
+    if (_video_format_context != nullptr)
+      this->decode(_video_codec_context, _picture, nullptr);
 
-    if (_video_codec_context)
-    {
-      avcodec_close(_video_codec_context);
-    }
+    // Free the data structures.
+    if (_pkt != nullptr)
+      av_packet_unref(_pkt);
+    av_frame_free(&_picture);
+    avcodec_close(_video_codec_context);
+    avformat_close_input(&_video_format_context);
+    avcodec_free_context(&_video_codec_context);
+    av_packet_free(&_pkt);
 
-    if (_video_format_context)
-    {
-      avformat_close_input(&_video_format_context);
-      assert(_video_format_context == nullptr);
-    }
+    // No need to deallocate these.
+    _video_stream_index = -1;
+    _video_codec_params = nullptr;
+    _video_codec = nullptr;
+
+    sws_freeContext(_sws_context);
+    if (_picture_rgb != nullptr)
+      av_freep(_picture_rgb->data);
+    av_frame_free(&_picture_rgb);
+
+    _end_of_stream = true;
   }
 
-  void
-  VideoStream::seek(std::size_t frame_pos)
+  auto VideoStream::read() -> bool
   {
-    av_seek_frame(_video_format_context, _video_stream, frame_pos,
-                  AVSEEK_FLAG_BACKWARD);
-  }
-
-  bool
-  VideoStream::read(ImageView<Rgb8>& video_frame)
-  {
-    if (video_frame.sizes() != sizes())
-      throw std::domain_error{
-        "Video frame sizes and video stream sizes are not equal!"
-      };
-
-    AVPacket _video_packet;
-    auto length = int{};
-    auto got_video_frame = int{};
-    auto video_frame_data = video_frame.data();
-
-    while (av_read_frame(_video_format_context, &_video_packet) >= 0)
+    do
     {
-      length = avcodec_decode_video2(_video_codec_context, _video_frame,
-                                     &got_video_frame, &_video_packet);
+      if (!_end_of_stream)
+        if (av_read_frame(_video_format_context, _pkt) < 0)
+          _end_of_stream = true;
 
-      if (length < 0)
-        return false;
-
-      if (got_video_frame)
+      if (_end_of_stream)
       {
-        auto w = width();
-        auto h = height();
-
-        for (int y = 0; y < h; ++y)
-        {
-          for (int x = 0; x < w; ++x)
-          {
-            auto yuv = get_yuv_pixel(_video_frame, x, y);
-            *video_frame_data = Sara::convert(yuv);
-            ++video_frame_data;
-          }
-        }
-
-        ++_video_frame_pos;
-        return true;
+        _pkt->data = nullptr;
+        _pkt->size = 0;
+        return false;
       }
-    }
+
+      if (_pkt->stream_index == _video_stream_index || _end_of_stream)
+      {
+        _got_frame = 0;
+
+        if (_pkt->pts == AV_NOPTS_VALUE)
+          _pkt->pts = _pkt->dts = _i;
+
+        // Decompress the video frame.
+        _got_frame = decode(_video_codec_context, _picture, _pkt);
+
+        if (_got_frame)
+        {
+          av_packet_unref(_pkt);
+          av_init_packet(_pkt);
+
+          // Convert to RGB24 pixel format.
+          sws_scale(_sws_context, _picture->data, _picture->linesize, 0,
+                    height(), _picture_rgb->data, _picture_rgb->linesize);
+
+          return true;
+        }
+      }
+      ++_i;
+    } while (!_end_of_stream || _got_frame);
 
     return false;
   }
 
+  auto VideoStream::frame() const -> ImageView<Rgb8>
+  {
+    return {reinterpret_cast<Rgb8*>(_picture_rgb->data[0]), sizes()};
+  }
 
-} /* namespace Sara */
-} /* namespace DO */
+  auto VideoStream::seek(std::size_t frame_pos) -> void
+  {
+    av_seek_frame(_video_format_context, _video_stream_index, frame_pos,
+                  AVSEEK_FLAG_BACKWARD);
+  }
+
+  auto VideoStream::decode(AVCodecContext* dec_ctx, AVFrame* frame,
+                           AVPacket* pkt) -> bool
+  {
+    auto ret = int{};
+
+    // Transfer raw compressed video data to the packet.
+    ret = avcodec_send_packet(dec_ctx, pkt);
+    if (ret < 0)
+      throw std::runtime_error{"Error sending a packet for decoding!"};
+
+    // Decode the compressed video data into an uncompressed video frame.
+    ret = avcodec_receive_frame(dec_ctx, frame);
+
+    if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
+      return false;
+
+    if (ret < 0)
+      throw std::runtime_error{"Error during decoding!"};
+
+    return true;
+  }
+
+  auto VideoStream::frame_rate() const -> float
+  {
+    return static_cast<float>(_video_codec_context->framerate.num) /
+           _video_codec_context->framerate.den;
+  }
+
+  auto VideoStream::width() const -> int
+  {
+    return _video_codec_context->width;
+  }
+
+  auto VideoStream::height() const -> int
+  {
+    return _video_codec_context->height;
+  }
+
+
+}  // namespace DO::Sara

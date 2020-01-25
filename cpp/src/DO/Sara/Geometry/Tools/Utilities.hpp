@@ -9,7 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-//! @file \todo Refactor this file. It needs code review.
+//! @file
+//! @todo Refactor this file. It needs code review.
 
 #pragma once
 
@@ -20,18 +21,14 @@
 
 namespace DO { namespace Sara {
 
+  //! @addtogroup GeometryTools
   //! @{
-  //! @brief Rounding function.
-  template <typename T>
-  inline T round(T x)
-  {
-    return floor(x + T(0.5));
-  }
 
+  //! @{
   template <typename T>
   inline int int_round(T x)
   {
-    return static_cast<int>(round(x));
+    return static_cast<int>(std::round(x));
   }
   //! @}
 
@@ -46,20 +43,18 @@ namespace DO { namespace Sara {
   template <typename T>
   inline T to_radian(T degree)
   {
-    static_assert(
-      !std::numeric_limits<T>::is_integer,
-      "Scalar must be of floating type");
-    return degree*static_cast<T>(M_PI)/static_cast<T>(180);
+    static_assert(!std::numeric_limits<T>::is_integer,
+                  "Scalar must be of floating type");
+    return degree * static_cast<T>(M_PI) / static_cast<T>(180);
   }
 
   //! @brief Radian to degree conversion.
   template <typename T>
   inline T to_degree(T radian)
   {
-    static_assert(
-      !std::numeric_limits<T>::is_integer,
-      "Scalar must be of floating type");
-    return radian*static_cast<T>(180)/static_cast<T>(M_PI);
+    static_assert(!std::numeric_limits<T>::is_integer,
+                  "Scalar must be of floating type");
+    return radian * static_cast<T>(180) / static_cast<T>(M_PI);
   }
 
   //! @{
@@ -77,7 +72,7 @@ namespace DO { namespace Sara {
   inline T cross(const Matrix<T, 2, 1>& a, const Matrix<T, 2, 1>& b,
                  const Matrix<T, 2, 1>& c)
   {
-    return cross(Matrix<T,2,1>(b-a), Matrix<T,2,1>(c-a));
+    return cross((b - a).eval(), (c - a).eval());
   }
   //! @}
 
@@ -92,15 +87,14 @@ namespace DO { namespace Sara {
   inline int ccw(const Matrix<T, 2, 1>& a, const Matrix<T, 2, 1>& b,
                  const Matrix<T, 2, 1>& c)
   {
-    return signum( cross(a, b, c) );
+    return signum(cross(a, b, c));
   }
 
   template <typename T>
   inline Matrix<T, 2, 1> unit_vector2(T radian)
   {
-    static_assert(
-      !std::numeric_limits<T>::is_integer,
-      "Scalar must be of floating type");
+    static_assert(!std::numeric_limits<T>::is_integer,
+                  "Scalar must be of floating type");
     return Matrix<T, 2, 1>(std::cos(radian), std::sin(radian));
   }
 
@@ -109,18 +103,16 @@ namespace DO { namespace Sara {
   template <typename T>
   inline Matrix<T, 2, 2> rotation2(T radian)
   {
-    static_assert(
-      !std::numeric_limits<T>::is_integer,
-      "Scalar must be of floating type");
+    static_assert(!std::numeric_limits<T>::is_integer,
+                  "Scalar must be of floating type");
     return Eigen::Rotation2D<T>(radian).toRotationMatrix();
   }
 
   template <typename T>
   inline Matrix<T, 2, 2> isometry2(T radian, T scale)
   {
-    static_assert(
-      !std::numeric_limits<T>::is_integer,
-      "Scalar must be of floating type");
+    static_assert(!std::numeric_limits<T>::is_integer,
+                  "Scalar must be of floating type");
     return Eigen::Rotation2D<T>(radian).toRotationMatrix()*scale;
   }
 
@@ -244,6 +236,8 @@ namespace DO { namespace Sara {
     H_p /= H_p(2);
     return H_p.head(2);
   }
+
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

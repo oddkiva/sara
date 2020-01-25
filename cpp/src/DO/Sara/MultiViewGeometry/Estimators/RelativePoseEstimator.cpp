@@ -9,12 +9,15 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+
+#include <DO/Sara/Defines.hpp>
+
 #include <DO/Sara/MultiViewGeometry/Estimators/RelativePoseEstimator.hpp>
 
 
 namespace DO::Sara {
 
-template struct RelativePoseEstimator<NisterFivePointAlgorithm>;
-template struct RelativePoseEstimator<SteweniusFivePointAlgorithm>;
+template struct DO_SARA_EXPORT RelativePoseEstimator<NisterFivePointAlgorithm>;
+template struct DO_SARA_EXPORT RelativePoseEstimator<SteweniusFivePointAlgorithm>;
 
 } /* namespace DO::Sara */

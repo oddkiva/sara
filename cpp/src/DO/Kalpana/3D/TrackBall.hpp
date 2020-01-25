@@ -9,7 +9,7 @@
 
 namespace DO { namespace Kalpana {
 
-  class TrackBall
+  class DO_KALPANA_EXPORT TrackBall
   {
   public:
     TrackBall();

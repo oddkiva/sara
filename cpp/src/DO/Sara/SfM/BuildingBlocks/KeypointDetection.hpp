@@ -18,15 +18,20 @@
 
 namespace DO::Sara {
 
-//! @{
-//! @brief Keypoint detection.
-DO_SARA_EXPORT
-auto detect_keypoints(const std::string& dirpath,
-                      const std::string& h5_filepath, bool overwrite) -> void;
+  //! @addtogroup SfM
+  //! @{
 
-DO_SARA_EXPORT
-auto read_keypoints(const std::string& dirpath, const std::string& h5_filepath)
-    -> void;
-//! @}
+  //! @{
+  //! @brief Keypoint detection.
+  DO_SARA_EXPORT
+  auto detect_keypoints(const std::string& dirpath,
+                        const std::string& h5_filepath, bool overwrite) -> void;
+
+  DO_SARA_EXPORT
+  auto read_keypoints(const std::string& dirpath,
+                      const std::string& h5_filepath) -> void;
+  //! @}
+
+  //! @}
 
 } /* namespace DO::Sara */

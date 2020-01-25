@@ -27,8 +27,9 @@ using namespace DO::Sara;
 
 
 auto perform_bundle_adjustment(const std::string& dirpath,
-                               const std::string& h5_filepath, bool overwrite,
-                               bool debug)
+                               const std::string& h5_filepath,
+                               bool /* overwrite */,
+                               bool /* debug */)
 {
   // Create a backup.
   if (!fs::exists(h5_filepath + ".bak"))
@@ -44,7 +45,8 @@ auto perform_bundle_adjustment(const std::string& dirpath,
   view_attributes.list_images(dirpath);
 
   // Load keypoints.
-  SARA_DEBUG << "Reading keypoints from HDF5 file:\n\t" << h5_filepath << std::endl;
+  SARA_DEBUG << "Reading keypoints from HDF5 file:\n\t" << h5_filepath
+             << std::endl;
   view_attributes.read_keypoints(h5_file);
 
 
@@ -56,7 +58,8 @@ auto perform_bundle_adjustment(const std::string& dirpath,
   SARA_DEBUG << "Initializing the epipolar edges..." << std::endl;
   edge_attributes.initialize_edges(num_vertices);
 
-  SARA_DEBUG << "Reading matches from HDF5 file:\n\t" << h5_filepath << std::endl;
+  SARA_DEBUG << "Reading matches from HDF5 file:\n\t" << h5_filepath
+             << std::endl;
   edge_attributes.read_matches(h5_file, view_attributes);
 
   SARA_DEBUG << "Reading the essential matrices..." << std::endl;
@@ -106,7 +109,7 @@ auto perform_bundle_adjustment(const std::string& dirpath,
     SARA_CHECK(cheirality_ij.size());
     SARA_CHECK(inliers_ij.size());
     if (cheirality_ij.size() != inliers_ij.size())
-        throw std::runtime_error{"cheirality_ij.size() != inliers_ij.size()"};
+      throw std::runtime_error{"cheirality_ij.size() != inliers_ij.size()"};
 
     const Array<bool, 1, Dynamic> cheiral_inliers =
         inliers_ij.row_vector().array() && cheirality_ij;
@@ -133,7 +136,8 @@ auto perform_bundle_adjustment(const std::string& dirpath,
 
   write_pose_graph(pose_graph, h5_file, "pose_graph");
 
-  // TODO: Perform incremental bundle adjustment using a Dijkstra growing scheme.
+  // TODO: Perform incremental bundle adjustment using a Dijkstra growing
+  // scheme.
   //
   // Let's just choose a heuristics for the incremental bundle adjustment even
   // if Bundler does not do like this.
@@ -150,7 +154,7 @@ auto perform_bundle_adjustment(const std::string& dirpath,
 }
 
 
-int __main(int argc, char **argv)
+int __main(int argc, char** argv)
 {
   try
   {

@@ -24,6 +24,9 @@
 
 namespace DO::Sara { namespace GL {
 
+  //! @addtogroup OpenGL
+  //! @{
+
   template <typename T>
   struct PixelTraits;
 
@@ -117,6 +120,8 @@ namespace DO::Sara { namespace GL {
 
     GLuint object{0};
   };
+
+  //! @}
 
 } /* namespace GL */
 } /* namespace DO::Sara */

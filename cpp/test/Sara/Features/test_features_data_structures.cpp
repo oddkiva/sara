@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE(test_read_write)
   BOOST_REQUIRE_EQUAL(features.size(), features2.size());
   BOOST_REQUIRE_EQUAL(descriptors.size(), descriptors2.size());
 
-  for (size_t i = 0; i < num_features; ++i)
+  for (auto i = 0; i < num_features; ++i)
   {
     BOOST_REQUIRE_EQUAL(features[i], features2[i]);
     BOOST_REQUIRE_EQUAL(descriptors[i], descriptors2[i]);
@@ -150,7 +150,7 @@ BOOST_AUTO_TEST_CASE(test_methods)
   BOOST_CHECK_EQUAL(size(set2), 10);
 
   // Test append.
-  set = stack(set, set2);
+  set = DO::Sara::stack(set, set2);
   BOOST_CHECK_EQUAL(size(set), 30);
 
   // Test accessors.

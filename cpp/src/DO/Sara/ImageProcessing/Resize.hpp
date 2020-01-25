@@ -22,8 +22,8 @@
 namespace DO { namespace Sara {
 
   /*!
-    @ingroup MultiArrayProcessing
-    @defgroup Scaling Reduce, enlarge, warp image...
+    @ingroup ImageProcessing
+    @defgroup Scaling Image Resizing Functions
     @{
    */
 

@@ -13,6 +13,9 @@
 
 namespace DO::Sara::Univariate {
 
+  //! @addtogroup Math
+  //! @{
+
   //! @{
   //! @brief Some basic tools needed for Jenkins-Traub algorithm.
   DO_SARA_EXPORT
@@ -30,7 +33,7 @@ namespace DO::Sara::Univariate {
 
 
   //! @{
-  //! @brief Convenient data structure for Jenkins-Traub algorithm.
+  //! @brief Convenient data structures for Jenkins-Traub algorithm.
   //!
   //! In case the Jenkins-Traub algorithm has determined convergence to a linear
   //! factor, the algorithm returns this data structure.
@@ -71,7 +74,6 @@ namespace DO::Sara::Univariate {
     //! @brief Memoized root moduli lower bound.
     double beta;
   };
-  //! @}
 
   //! @brief Polynomial decomposition variables in Jenkins-Traub algorithm.
   //! This is used when the quadratic factor is involved.
@@ -231,5 +233,7 @@ namespace DO::Sara::Univariate {
   DO_SARA_EXPORT
   auto rpoly(const UnivariatePolynomial<double>& P, int stage3_max_iter = 20,
              double root_abs_tol = 1e-12) -> std::vector<std::complex<double>>;
+
+  //! @}
 
 } /* namespace DO::Sara::Univariate */

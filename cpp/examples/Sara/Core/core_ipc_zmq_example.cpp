@@ -9,6 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+//! @example
+
 #include <DO/Sara/Core/MultiArray.hpp>
 
 #include <boost/interprocess/containers/vector.hpp>
@@ -90,7 +92,7 @@ int main(int argc, char** argv)
   // Start Process 2 by running a command in an asynchronous way.
   auto command = std::string{"python "
                              "/home/david/GitHub/DO-CV/sara-build-Debug/lib/"
-                             "do/sara/test/test_ipc_example.py"};
+                             "do/sara/examples/ipc_example.py"};
   std::thread t([&command]() {
     std::cout << "running " << command << std::endl;
     std::system(command.c_str());

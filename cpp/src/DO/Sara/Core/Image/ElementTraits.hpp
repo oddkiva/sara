@@ -20,7 +20,7 @@
 namespace DO { namespace Sara {
 
   /*!
-    @ingroup Image Image
+    @addtogroup Image
     @{
    */
 

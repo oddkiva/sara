@@ -18,6 +18,8 @@
 
 namespace DO { namespace Sara { namespace Projective {
 
+  //! @addtogroup GeometryTools
+
   //! TODO: a bit overkill, remove?
   template <typename T, int N>
   class MatrixBasedObject
@@ -54,6 +56,8 @@ namespace DO { namespace Sara { namespace Projective {
   protected:
     matrix_type _m;
   };
+
+  //! @}
 
 } /* namespace Sara */
 } /* namespace Projective */

@@ -32,4 +32,4 @@
 #include <DO/Sara/FeatureDescriptors/DenseFeature.hpp>
 
 
-//! @defgroup FeatureDescriptors
+//! @defgroup FeatureDescriptors Feature Descriptors

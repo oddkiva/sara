@@ -1,3 +1,5 @@
+//! @example
+
 // N.B.: there is an easy API that does this in a very few lines of code. But we
 // keep it as a code reference.
 //

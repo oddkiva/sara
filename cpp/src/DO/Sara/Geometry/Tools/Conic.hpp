@@ -18,6 +18,9 @@
 
 namespace DO { namespace Sara { namespace Projective {
 
+  //! @addtogroup GeometryTools
+  //! @{
+
   template <typename T, int N>
   class Conic : public MatrixBasedObject<T,N>
   {
@@ -62,6 +65,8 @@ namespace DO { namespace Sara { namespace Projective {
   //! @brief I/O.
   template <typename T, int N>
   std::ostream& operator<<(std::ostream& os, const Conic<T, N>& P);
+
+  //! @}
 
 } /* namespace Projective */
 } /* namespace Sara */

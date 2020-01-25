@@ -29,8 +29,8 @@ namespace DO { namespace Sara {
     if(event->spontaneous())
     {
       qWarning() << "\n\nWarning: you closed a window unexpectedly!\n\n";
-      qWarning() << "Graphical application is terminating...";
-      qApp->exit(0);
+      qWarning() << "Warning: the graphical application cannot terminate by design:";
+      qWarning() << "Warning: please kill the application again manually...";
     }
   }
 
@@ -39,11 +39,13 @@ namespace DO { namespace Sara {
   PaintingWindow::PaintingWindow(int width, int height,
                                  const QString& windowTitle, int x, int y,
                                  QWidget* parent)
-    : QWidget(parent)
+    : QWidget{}
     , m_scrollArea(new ScrollArea(parent))
     , m_pixmap(width, height)
     , m_painter(&m_pixmap)
   {
+    setParent(m_scrollArea);
+
     setFocusPolicy(Qt::WheelFocus);
 
     // Set event listener.
@@ -59,8 +61,8 @@ namespace DO { namespace Sara {
     m_scrollArea->setFocusProxy(this);
 
     // Maximize if necessary.
-    if ( width >= qApp->desktop()->width()   ||
-         height >= qApp->desktop()->height() )
+    if (width >= qApp->desktop()->width() ||
+        height >= qApp->desktop()->height())
       m_scrollArea->showMaximized();
     // Resize the scroll area with the size plus a two-pixel offset.
     else

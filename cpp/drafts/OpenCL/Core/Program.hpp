@@ -27,6 +27,9 @@
 
 namespace DO::Sara {
 
+  //! @addtogroup OpenCL
+  //! @{
+
   class Program
   {
   public:
@@ -154,5 +157,7 @@ namespace DO::Sara {
     std::vector<Device> _devices;
     std::vector<std::string> _binaries;
   };
+
+  //! @}
 
 } /* namespace DO::Sara */

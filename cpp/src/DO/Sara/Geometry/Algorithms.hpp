@@ -16,3 +16,6 @@
 #include <DO/Sara/Geometry/Algorithms/RamerDouglasPeucker.hpp>
 #include <DO/Sara/Geometry/Algorithms/Region.hpp>
 #include <DO/Sara/Geometry/Algorithms/SutherlandHodgman.hpp>
+
+//! @ingroup Geometry
+//! @defgroup GeometryAlgorithms Some Algorithms in Computational Geometry

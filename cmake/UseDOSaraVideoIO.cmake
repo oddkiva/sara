@@ -1,11 +1,6 @@
-find_package(FFMPEG REQUIRED)
-
-if (MSVC)
-  link_directories(${FFMPEG_LINK_DIR})
-endif ()
-
-
 if (SARA_USE_FROM_SOURCE)
+  find_package(SaraFFMPEG REQUIRED)
+
   get_property(DO_Sara_VideoIO_ADDED GLOBAL PROPERTY _DO_Sara_VideoIO_INCLUDED)
   if (NOT DO_Sara_VideoIO_ADDED)
     sara_glob_directory(${DO_Sara_SOURCE_DIR}/VideoIO)
@@ -13,11 +8,10 @@ if (SARA_USE_FROM_SOURCE)
     sara_generate_library("VideoIO")
 
     target_include_directories(DO_Sara_VideoIO PRIVATE
-      ${FFMPEG_INCLUDE_DIR}
+      ${FFMPEG_INCLUDE_DIRS}
       ${DO_Sara_INCLUDE_DIR}
       ${DO_ThirdParty_DIR}/
       ${DO_ThirdParty_DIR}/eigen)
-    target_link_libraries(DO_Sara_VideoIO PRIVATE
-      ${FFMPEG_LIBRARIES})
+    target_link_libraries(DO_Sara_VideoIO PRIVATE ${FFMPEG_LIBRARIES})
   endif ()
 endif ()

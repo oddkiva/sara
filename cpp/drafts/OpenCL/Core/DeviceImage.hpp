@@ -18,6 +18,9 @@
 
 namespace DO::Sara {
 
+  //! @addtogroup OpenCL
+  //! @{
+
   template <typename T>
   struct CLPixelTraits;
 
@@ -110,5 +113,7 @@ namespace DO::Sara {
     std::array<size_t, N> _sizes;
     cl_mem _buffer = nullptr;
   };
+
+  //! @}
 
 } /* namespace DO::Sara */

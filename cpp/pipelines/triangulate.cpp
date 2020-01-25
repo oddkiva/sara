@@ -43,7 +43,8 @@ void triangulate(const std::string& dirpath, const std::string& h5_filepath,
   view_attributes.read_images();
 
   // Load keypoints.
-  SARA_DEBUG << "Reading keypoints from HDF5 file:\n\t" << h5_filepath << std::endl;
+  SARA_DEBUG << "Reading keypoints from HDF5 file:\n\t" << h5_filepath
+             << std::endl;
   view_attributes.read_keypoints(h5_file);
 
   // Load the internal camera matrices from Strecha dataset.
@@ -69,7 +70,8 @@ void triangulate(const std::string& dirpath, const std::string& h5_filepath,
   SARA_DEBUG << "Initializing the epipolar edges..." << std::endl;
   edge_attributes.initialize_edges(num_vertices);
 
-  SARA_DEBUG << "Reading matches from HDF5 file:\n\t" << h5_filepath << std::endl;
+  SARA_DEBUG << "Reading matches from HDF5 file:\n\t" << h5_filepath
+             << std::endl;
   edge_attributes.read_matches(h5_file, view_attributes);
 
   SARA_DEBUG << "Reading the essential matrices..." << std::endl;
@@ -89,130 +91,129 @@ void triangulate(const std::string& dirpath, const std::string& h5_filepath,
 
   int display_step = 20;
 
-  std::for_each(
-      std::begin(edge_ids), std::end(edge_ids), [&](const auto& ij) {
-        const auto& eij = edges[ij];
-        const auto i = eij.first;
-        const auto j = eij.second;
-        const auto& Mij = matches[ij];
+  std::for_each(std::begin(edge_ids), std::end(edge_ids), [&](const auto& ij) {
+    const auto& eij = edges[ij];
+    const auto i = eij.first;
+    const auto j = eij.second;
+    const auto& Mij = matches[ij];
 
-        const auto& Eij = E[ij];
-        const auto& E_inliers_ij = E_inliers[ij];
-        const auto& E_best_sample_ij = E_best_samples[ij];
+    const auto& Eij = E[ij];
+    const auto& E_inliers_ij = E_inliers[ij];
+    const auto& E_best_sample_ij = E_best_samples[ij];
 
-        std::cout << std::endl;
-        SARA_DEBUG << "Processing image pair " << i << " " << j << std::endl;
-        const auto& Ki = view_attributes.cameras[i].K;
-        const auto& Kj = view_attributes.cameras[j].K;
-        SARA_DEBUG << "Internal camera matrices :\n"
-                   << "- K[" << i << "] =\n" << Ki << "\n"
-                   << "- K[" << j << "] =\n" << Kj << "\n";
-        const Matrix3d Ki_inv = Ki.inverse();
-        const Matrix3d Kj_inv = Kj.inverse();
-
-
-        // =====================================================================
-        // Check the epipolar geometry first.
-        //
-        if (debug)
-        {
-          SARA_DEBUG
-              << "Forming the fundamental matrix from the essential matrix:\n";
-          std::cout.flush();
-          auto Fij = FundamentalMatrix{};
-          Fij.matrix() = Kj.inverse().transpose() * Eij.matrix() * Ki.inverse();
-
-          SARA_DEBUG << "Fij = \n" << Fij << std::endl;
-          SARA_CHECK(E_num_samples[ij]);
-          SARA_CHECK(E_noise[ij]);
-          SARA_CHECK(E_inliers[ij].row_vector().count());
-          SARA_CHECK(E_best_samples[ij].row_vector());
-
-          const auto& Ii = view_attributes.images[i];
-          const auto& Ij = view_attributes.images[j];
-          check_epipolar_constraints(Ii, Ij, Fij, Mij, E_best_sample_ij,
-                                     E_inliers_ij, display_step,
-                                     /* wait_key */ false);
-        }
+    std::cout << std::endl;
+    SARA_DEBUG << "Processing image pair " << i << " " << j << std::endl;
+    const auto& Ki = view_attributes.cameras[i].K;
+    const auto& Kj = view_attributes.cameras[j].K;
+    SARA_DEBUG << "Internal camera matrices :\n"
+               << "- K[" << i << "] =\n"
+               << Ki << "\n"
+               << "- K[" << j << "] =\n"
+               << Kj << "\n";
+    const Matrix3d Ki_inv = Ki.inverse();
+    const Matrix3d Kj_inv = Kj.inverse();
 
 
-        // =====================================================================
-        // Perform triangulation.
-        //
-        print_stage("Performing data transformations...");
-        // Tensors of image coordinates.
-        const auto& fi = features(view_attributes.keypoints[i]);
-        const auto& fj = features(view_attributes.keypoints[j]);
-        const auto ui = homogeneous(extract_centers(fi)).template cast<double>();
-        const auto uj = homogeneous(extract_centers(fj)).template cast<double>();
-        // Tensors of camera coordinates.
-        const auto uni = apply_transform(Ki_inv, ui);
-        const auto unj = apply_transform(Kj_inv, uj);
-        static_assert(std::is_same_v<decltype(uni), const Tensor_<double, 2>>);
-        // List the matches as a 2D-tensor where each row encodes a match 'm' as
-        // a pair of point indices (i, j).
-        const auto index_matches_ij = to_tensor(Mij);
+    // =====================================================================
+    // Check the epipolar geometry first.
+    //
+    if (debug)
+    {
+      SARA_DEBUG
+          << "Forming the fundamental matrix from the essential matrix:\n";
+      std::cout.flush();
+      auto Fij = FundamentalMatrix{};
+      Fij.matrix() = Kj.inverse().transpose() * Eij.matrix() * Ki.inverse();
 
-        // Reminder: do not try to calculate the two-view geometry if the
-        // essential matrix estimation failed.
-        if (E_inliers_ij.flat_array().count() == 0)
-          return;
+      SARA_DEBUG << "Fij = \n" << Fij << std::endl;
+      SARA_CHECK(E_num_samples[ij]);
+      SARA_CHECK(E_noise[ij]);
+      SARA_CHECK(E_inliers[ij].row_vector().count());
+      SARA_CHECK(E_best_samples[ij].row_vector());
 
-        // Estimate the two-view geometry, i.e.:
-        // 1. Find the cheiral-most relative camera motion.
-        // 2. Calculate the 3D points from every feature matches
-        // 3. Calculate their cheirality.
-        auto geometry = estimate_two_view_geometry(index_matches_ij, uni, unj,
-                                                   Eij, E_inliers_ij, E_best_sample_ij);
+      const auto& Ii = view_attributes.images[i];
+      const auto& Ij = view_attributes.images[j];
+      check_epipolar_constraints(Ii, Ij, Fij, Mij, E_best_sample_ij,
+                                 E_inliers_ij, display_step,
+                                 /* wait_key */ false);
+    }
 
-        // I choose to keep every point information inliers or not, cheiral or
-        // not.
-        //
-        // The following function can be used to keep cheiral inliers and view
-        // the cleaned point cloud.
-        // keep_cheiral_inliers(geometry, inliers);
 
-        // Add the internal camera matrices to the camera.
-        geometry.C1.K = Ki;
-        geometry.C2.K = Kj;
+    // =====================================================================
+    // Perform triangulation.
+    //
+    print_stage("Performing data transformations...");
+    // Tensors of image coordinates.
+    const auto& fi = features(view_attributes.keypoints[i]);
+    const auto& fj = features(view_attributes.keypoints[j]);
+    const auto ui = homogeneous(extract_centers(fi)).template cast<double>();
+    const auto uj = homogeneous(extract_centers(fj)).template cast<double>();
+    // Tensors of camera coordinates.
+    const auto uni = apply_transform(Ki_inv, ui);
+    const auto unj = apply_transform(Kj_inv, uj);
+    static_assert(std::is_same_v<decltype(uni), const Tensor_<double, 2>>);
+    // List the matches as a 2D-tensor where each row encodes a match 'm' as
+    // a pair of point indices (i, j).
+    const auto index_matches_ij = to_tensor(Mij);
 
-        const auto colors = extract_colors(view_attributes.images[i],
-                                           view_attributes.images[j], geometry);
+    // Reminder: do not try to calculate the two-view geometry if the
+    // essential matrix estimation failed.
+    if (E_inliers_ij.flat_array().count() == 0)
+      return;
 
-        // Save the data to HDF5.
-        h5_file.get_group("two_view_geometries");
-        h5_file.get_group("two_view_geometries/cameras");
-        h5_file.get_group("two_view_geometries/points");
-        h5_file.get_group("two_view_geometries/cheirality");
-        h5_file.get_group("two_view_geometries/colors");
-        {
-          // Get the left and right cameras.
-          auto cameras = Tensor_<PinholeCamera, 1>{2};
-          cameras(0) = geometry.C1;
-          cameras(1) = geometry.C2;
+    // Estimate the two-view geometry, i.e.:
+    // 1. Find the cheiral-most relative camera motion.
+    // 2. Calculate the 3D points from every feature matches
+    // 3. Calculate their cheirality.
+    auto geometry = estimate_two_view_geometry(index_matches_ij, uni, unj, Eij,
+                                               E_inliers_ij, E_best_sample_ij);
 
-          const MatrixXd X_euclidean = geometry.X.colwise().hnormalized();
-          SARA_DEBUG << "X =\n" << X_euclidean.leftCols(20) << std::endl;
-          SARA_DEBUG << "cheirality =\n" << geometry.cheirality.leftCols(20) << std::endl;
+    // I choose to keep every point information inliers or not, cheiral or
+    // not.
+    //
+    // The following function can be used to keep cheiral inliers and view
+    // the cleaned point cloud.
+    // keep_cheiral_inliers(geometry, inliers);
 
-          h5_file.write_dataset(
-              format("two_view_geometries/cameras/%d_%d", i, j), cameras,
-              overwrite);
-          h5_file.write_dataset(
-              format("two_view_geometries/points/%d_%d", i, j), X_euclidean,
-              overwrite);
-          h5_file.write_dataset(
-              format("two_view_geometries/cheirality/%d_%d", i, j),
-              geometry.cheirality, overwrite);
-          h5_file.write_dataset(
-              format("two_view_geometries/colors/%d_%d", i, j), colors,
-              overwrite);
-        }
-      });
+    // Add the internal camera matrices to the camera.
+    geometry.C1.K = Ki;
+    geometry.C2.K = Kj;
+
+    const auto colors = extract_colors(view_attributes.images[i],
+                                       view_attributes.images[j], geometry);
+
+    // Save the data to HDF5.
+    h5_file.get_group("two_view_geometries");
+    h5_file.get_group("two_view_geometries/cameras");
+    h5_file.get_group("two_view_geometries/points");
+    h5_file.get_group("two_view_geometries/cheirality");
+    h5_file.get_group("two_view_geometries/colors");
+    {
+      // Get the left and right cameras.
+      auto cameras = Tensor_<PinholeCamera, 1>{2};
+      cameras(0) = geometry.C1;
+      cameras(1) = geometry.C2;
+
+      const MatrixXd X_euclidean = geometry.X.colwise().hnormalized();
+      SARA_DEBUG << "X =\n" << X_euclidean.leftCols(20) << std::endl;
+      SARA_DEBUG << "cheirality =\n"
+                 << geometry.cheirality.leftCols(20) << std::endl;
+
+      h5_file.write_dataset(format("two_view_geometries/cameras/%d_%d", i, j),
+                            cameras, overwrite);
+      h5_file.write_dataset(format("two_view_geometries/points/%d_%d", i, j),
+                            X_euclidean, overwrite);
+      h5_file.write_dataset(
+          format("two_view_geometries/cheirality/%d_%d", i, j),
+          geometry.cheirality, overwrite);
+      h5_file.write_dataset(format("two_view_geometries/colors/%d_%d", i, j),
+                            colors, overwrite);
+    }
+  });
 }
 
 
-int __main(int argc, char **argv)
+int __main(int argc, char** argv)
 {
   try
   {

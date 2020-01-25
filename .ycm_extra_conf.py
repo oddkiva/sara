@@ -28,6 +28,7 @@ flags = [
 # compiled as C headers. You don't want that so ALWAYS specify the '-x' flag.
 # For a C project, you would set this to 'c' instead of 'c++'.
 '-x', 'objective-c++',
+"-isystem", "/usr/include/x86_64-linux-gnu",
 '-isystem', get_python_inc(),
 '-isystem', 'cpp/llvm/include',
 '-isystem', 'cpp/llvm/tools/clang/include',
@@ -63,6 +64,9 @@ flags = [
 "-I", "/usr/local/include",
 # CUDA header directories.
 "-I", "/usr/local/cuda/include",
+# Halide.
+"-I", "/opt/halide/include",
+"-I", "/opt/halide/tools",
 # Current header directories.
 "-I", "cpp",
 "-I", "cpp/src",

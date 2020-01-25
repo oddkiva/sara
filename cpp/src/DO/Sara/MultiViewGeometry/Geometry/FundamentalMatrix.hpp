@@ -18,6 +18,9 @@
 
 namespace DO { namespace Sara {
 
+  //! @addtogroup MultiViewGeometry
+  //! @{
+
   class DO_SARA_EXPORT FundamentalMatrix
   {
   public:
@@ -70,6 +73,8 @@ namespace DO { namespace Sara {
 
   DO_SARA_EXPORT
   std::ostream& operator<<(std::ostream&, const FundamentalMatrix&);
+
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

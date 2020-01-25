@@ -20,6 +20,9 @@
 
 namespace DO { namespace Sara {
 
+  //! @addtogroup GeometryObjects
+  //! @{
+
   class DO_SARA_EXPORT BBox
   {
   public:
@@ -191,6 +194,7 @@ namespace DO { namespace Sara {
   //! @brief Return the intersection of two BBoxes.
   DO_SARA_EXPORT BBox intersection(const BBox& bbox1, const BBox& bbox2);
 
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */
