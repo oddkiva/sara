@@ -21,6 +21,8 @@ auto sara_pipeline() -> void
   // const string video_filepath = "/home/david/Desktop/test.mp4";
   const auto video_filepath =
       "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4";
+  // const auto video_filepath =
+  //     "/Users/david/GitLab/DO-CV/sara/cpp/examples/Sara/VideoIO/orion_1.mpg"s;
 
   VideoStream video_stream(video_filepath);
 
@@ -111,13 +113,20 @@ auto halide_pipeline() -> void
 {
   using namespace std::string_literals;
   // const auto video_filepath = "/home/david/Desktop/test.mp4"s;
+  // const auto video_filepath =
+  //     "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4"s;
   const auto video_filepath =
-      "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4"s;
+      "/Users/david/GitLab/DO-CV/sara/cpp/examples/Sara/VideoIO/orion_1.mpg"s;
 
   VideoStream video_stream(video_filepath);
 
   // Configure Halide to use CUDA before we compile the pipeline.
-  constexpr auto use_cuda = true;
+  constexpr auto use_cuda =
+#if defined(__APPLE__)
+      false;
+#else
+      true;
+#endif
   auto target = Halide::Target{};
   if constexpr (use_cuda)
   {
@@ -125,7 +134,13 @@ auto halide_pipeline() -> void
     target.set_feature(Halide::Target::CUDA);
   }
   else
+  {
+    // We Will try to use in this order:
+    // - Microsoft DirectX
+    // - Apple Metal Performance Shaders
+    // - OpenCL
     target = find_gpu_target();
+  }
 
   // Input and output images.
   auto input_image = video_stream.frame();
@@ -159,15 +174,21 @@ auto halide_pipeline() -> void
                          clamp(y, 0, input_buffer.height() - 1),  //
                          c);
 
-  auto laplacian = Halide::Func{"laplacian"};
-  laplacian(x, y, c) = Halide::abs(
-      padded(x, y, c) - (padded(x + 1, y + 0, c) + padded(x - 1, y + 0, c) +
-                         padded(x + 0, y + 1, c) + padded(x + 0, y - 1, c)) /
-                            4.f);
+  auto filter = Halide::Func{"filter"};
+  // Laplacian.
+  // filter(x, y, c) = Halide::abs(
+  //     padded(x, y, c) - (padded(x + 1, y + 0, c) + padded(x - 1, y + 0, c) +
+  //                        padded(x + 0, y + 1, c) + padded(x + 0, y - 1, c)) /
+  //                           4.f);
+  // Blue.
+  filter(x, y, c) = (padded(x - 1, y - 1, c) + padded(x - 0, y - 1, c) + padded(x + 1, y - 1, c)
+                   + padded(x - 1, y + 0, c) + padded(x - 0, y + 0, c) + padded(x + 1, y + 0, c)
+                   + padded(x - 1, y + 1, c) + padded(x - 0, y + 1, c) + padded(x + 1, y + 1, c)) / 3.f;
 
   // The output result.
   auto filter_rescaled = Halide::Func{"rescaled"};
-  filter_rescaled(x, y, c) = Halide::cast<uint8_t>((laplacian(x, y, c) / 2.f)* 255.f);
+  //filter_rescaled(x, y, c) = Halide::cast<uint8_t>((filter(x, y, c) / 2.f)* 255.f);
+  filter_rescaled(x, y, c) = Halide::cast<uint8_t>(filter(x, y, c) * 255.f);
   filter_rescaled.reorder(c, x, y).bound(c, 0, 3).unroll(c);
   filter_rescaled.gpu_tile(x, y, xo, yo, xi, yi, 16, 16);
 

@@ -25,7 +25,7 @@ function build_library()
   if [ "$(uname -s)" == "Darwin" ]; then
     cmake_options+="-DQt5_DIR=$(brew --prefix qt)/lib/cmake/Qt5 "
   else
-    cmake_options+="-DCMAKE_PREFIX_PATH=/home/david/Qt/5.12.6/gcc_64;/opt/boost-1.66.0 "
+    cmake_options+="-DCMAKE_PREFIX_PATH=/home/david/Qt/5.12.6/gcc_64 "
   fi
 
   cmake_options+="-DCMAKE_EXPORT_COMPILE_COMMANDS=ON "
