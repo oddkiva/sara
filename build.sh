@@ -1,11 +1,6 @@
 #!/bin/bash
 set -ex
 
-# C++17 for xenial please.
-if [ "$(cat /etc/os-release | grep VERSION_ID)" == "VERSION_ID=\"16.04\"" ]; then
-  export CC="/usr/local/bin/ccache-clang"
-  export CXX="/usr/local/bin/ccache-clang++"
-fi
 
 if [ -z "$1" ]; then
   build_type=Release;
