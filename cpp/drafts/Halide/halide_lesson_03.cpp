@@ -21,6 +21,8 @@ auto sara_pipeline() -> void
   // const string video_filepath = "/home/david/Desktop/test.mp4";
   const auto video_filepath =
       "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4";
+  // const auto video_filepath =
+  //     "/Users/david/GitLab/DO-CV/sara/cpp/examples/Sara/VideoIO/orion_1.mpg"s;
 
   VideoStream video_stream(video_filepath);
 
@@ -81,27 +83,19 @@ auto find_gpu_target() -> Halide::Target
 
 #ifdef _WIN32
   if (LoadLibraryA("d3d12.dll") != nullptr)
-  {
     target.set_feature(Target::D3D12Compute);
-  }
   else if (LoadLibraryA("OpenCL.dll") != nullptr)
-  {
     target.set_feature(Target::OpenCL);
-  }
 #elif __APPLE__
   // OS X doesn't update its OpenCL drivers, so they tend to be broken.
   // CUDA would also be a fine choice on machines with NVidia GPUs.
   if (dlopen(
           "/System/Library/Frameworks/Metal.framework/Versions/Current/Metal",
           RTLD_LAZY) != NULL)
-  {
     target.set_feature(Target::Metal);
-  }
 #else
   if (dlopen("libOpenCL.so", RTLD_LAZY) != NULL)
-  {
     target.set_feature(Target::OpenCL);
-  }
 #endif
 
   return target;
@@ -110,14 +104,26 @@ auto find_gpu_target() -> Halide::Target
 auto halide_pipeline() -> void
 {
   using namespace std::string_literals;
-  // const auto video_filepath = "/home/david/Desktop/test.mp4"s;
+#ifdef _WIN32
   const auto video_filepath =
       "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4"s;
+#elif __APPLE__
+  const auto video_filepath =
+      "/Users/david/GitLab/DO-CV/sara/cpp/examples/Sara/VideoIO/orion_1.mpg"s;
+#else
+  //const auto video_filepath = "/home/david/Desktop/test.mp4"s;
+  const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
+#endif
 
   VideoStream video_stream(video_filepath);
 
   // Configure Halide to use CUDA before we compile the pipeline.
-  constexpr auto use_cuda = true;
+  constexpr auto use_cuda =
+#if defined(__APPLE__)
+      false;
+#else
+      true;
+#endif
   auto target = Halide::Target{};
   if constexpr (use_cuda)
   {
@@ -125,7 +131,13 @@ auto halide_pipeline() -> void
     target.set_feature(Halide::Target::CUDA);
   }
   else
+  {
+    // We Will try to use in this order:
+    // - Microsoft DirectX
+    // - Apple Metal Performance Shaders
+    // - OpenCL
     target = find_gpu_target();
+  }
 
   // Input and output images.
   auto input_image = video_stream.frame();
@@ -159,22 +171,25 @@ auto halide_pipeline() -> void
                          clamp(y, 0, input_buffer.height() - 1),  //
                          c);
 
-  auto laplacian = Halide::Func{"laplacian"};
-  laplacian(x, y, c) = Halide::abs(
+  // The filter
+  auto filter = Halide::Func{"filter"};
+
+  // Laplacian.
+  filter(x, y, c) = Halide::abs(
       padded(x, y, c) - (padded(x + 1, y + 0, c) + padded(x - 1, y + 0, c) +
                          padded(x + 0, y + 1, c) + padded(x + 0, y - 1, c)) /
                             4.f);
 
-  // The output result.
-  auto filter_rescaled = Halide::Func{"rescaled"};
-  filter_rescaled(x, y, c) = Halide::cast<uint8_t>((laplacian(x, y, c) / 2.f)* 255.f);
-  filter_rescaled.reorder(c, x, y).bound(c, 0, 3).unroll(c);
-  filter_rescaled.gpu_tile(x, y, xo, yo, xi, yi, 16, 16);
+  // Blur.
+  //filter(x, y, c) = (padded(x - 1, y - 1, c) + padded(x - 0, y - 1, c) + padded(x + 1, y - 1, c)
+  //                 + padded(x - 1, y + 0, c) + padded(x - 0, y + 0, c) + padded(x + 1, y + 0, c)
+  //                 + padded(x - 1, y + 1, c) + padded(x - 0, y + 1, c) + padded(x + 1, y + 1, c)) / 9.f;
 
-  // Calculate the padded image as an intermediate result for the laplacian
-  // calculation in a shared memory.
-  padded.compute_at(filter_rescaled, xo);
-  padded.gpu_threads(x, y);
+  // The output result to show on the screen.
+  auto filter_rescaled = Halide::Func{"rescaled"};
+  filter_rescaled(x, y, c) =
+      Halide::cast<uint8_t>((filter(x, y, c) / 2.f) * 255.f);
+  //filter_rescaled(x, y, c) = Halide::cast<uint8_t>(filter(x, y, c) * 255.f);
 
   // Specify that the output buffer is in interleaved RGB format.
   filter_rescaled.output_buffer()
@@ -183,6 +198,13 @@ auto halide_pipeline() -> void
       .dim(2)
       .set_stride(1)
       .set_bounds(0, 3);
+  filter_rescaled.reorder(c, x, y).bound(c, 0, 3).unroll(c);
+  filter_rescaled.gpu_tile(x, y, xo, yo, xi, yi, 16, 16);
+
+  // Calculate the padded image as an intermediate result for the laplacian
+  // calculation in a shared memory.
+  padded.compute_at(filter_rescaled, xo);
+  padded.gpu_threads(x, y);
 
   filter_rescaled.compile_jit(target);
 
