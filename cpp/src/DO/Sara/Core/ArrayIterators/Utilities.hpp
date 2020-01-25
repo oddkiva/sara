@@ -13,17 +13,17 @@
 
 #pragma once
 
+#include <DO/Sara/Core/EigenExtension.hpp>
+#include <DO/Sara/Core/Meta.hpp>
+
 #include <iterator>
 #include <sstream>
 #include <stdexcept>
 
-#include <DO/Sara/Core/EigenExtension.hpp>
-#include <DO/Sara/Core/Meta.hpp>
-
 
 namespace DO { namespace Sara {
 
-  //! @ingroup MultiArrayIterators
+  //! @addtogroup MultiArrayIterators
   //! @{
 
   //! @brief The offset computer class for N-dimensional arrays.
@@ -96,7 +96,7 @@ namespace DO { namespace Sara {
                              const Matrix<Index, N, 1>& start,
                              const Matrix<Index, N, 1>& end)
     {
-      for (int i = N-1; i >= 0; --i)
+      for (int i = N - 1; i >= 0; --i)
       {
         ++coords[i];
         if (coords[i] != end[i])
@@ -104,7 +104,35 @@ namespace DO { namespace Sara {
         coords[i] = start[i];
       }
       if (coords[0] == start[0])
+      {
+        coords[0] = end[0];
         stop = true;
+      }
+    }
+
+    template <typename Index, int N>
+    static inline void apply(Matrix<Index, N, 1>& coords, bool& stop,
+                             const Matrix<Index, N, 1>& start,
+                             const Matrix<Index, N, 1>& end,
+                             const Matrix<Index, N, 1>& steps)
+    {
+      for (int i = N - 1; i >= 0; --i)
+      {
+        coords[i] += steps[i];
+        if (coords[i] < end[i])
+          return;
+        coords[i] = start[i];
+      }
+
+      if (coords[0] == start[0])
+      {
+        const auto len = end[0] - start[0];
+        const auto modulo = len % steps[0];
+        const auto quotient = len / steps[0];
+        const auto num_steps = quotient + int(modulo != 0);
+        coords[0] = start[0] + num_steps * steps[0];
+        stop = true;
+      }
     }
 
     template <typename Index, int N>
@@ -113,7 +141,6 @@ namespace DO { namespace Sara {
     {
       apply<Index, N>(coords, stop, Matrix<Index, N, 1>::Zero(), sizes);
     }
-
   };
 
   //! @brief Increment the current position in an N-dimensional array.
@@ -132,8 +159,35 @@ namespace DO { namespace Sara {
           return;
         coords[i] = start[i];
       }
-      if (coords[N-1] == start[N-1])
+      if (coords[N - 1] == start[N - 1])
+      {
+        coords[N - 1] = end[N - 1];
         stop = true;
+      }
+    }
+
+    template <typename Index, int N>
+    static inline void apply(Matrix<Index, N, 1>& coords, bool& stop,
+                             const Matrix<Index, N, 1>& start,
+                             const Matrix<Index, N, 1>& end,
+                             const Matrix<Index, N, 1>& steps)
+    {
+      for (int i = 0; i < N; ++i)
+      {
+        coords[i] += steps[i];
+        if (coords[i] < end[i])
+          return;
+        coords[i] = start[i];
+      }
+      if (coords[N - 1] == start[N - 1])
+      {
+        const auto len = end[N - 1] - start[N - 1];
+        const auto modulo = len % steps[N - 1];
+        const auto quotient = len / steps[N - 1];
+        const auto num_steps = quotient + int(modulo != 0);
+        coords[N - 1] = start[N - 1] + num_steps * steps[N - 1];
+        stop = true;
+      }
     }
 
     template <typename Index, int N>
@@ -153,17 +207,48 @@ namespace DO { namespace Sara {
                              const Matrix<Index, N, 1>& start,
                              const Matrix<Index, N, 1>& end)
     {
-      for (int i = N-1; i >= 0; --i)
+      for (int i = N - 1; i >= 0; --i)
       {
         if (coords[i] != start[i])
         {
           --coords[i];
           return;
         }
-        coords[i] = end[i]-1;
+
+        coords[i] = end[i] - 1;
       }
-      if (coords[0] == end[0]-1)
+
+      if (coords[0] == end[0] - 1)
+      {
+        coords[0] = start[0] - 1;
         stop = true;
+      }
+    }
+
+    template <typename Index, int N>
+    static inline void apply(Matrix<Index, N, 1>& coords, bool& stop,
+                             const Matrix<Index, N, 1>& start,
+                             const Matrix<Index, N, 1>& end,
+                             const Matrix<Index, N, 1>& steps)
+    {
+      for (int i = N - 1; i >= 0; --i)
+      {
+        if (coords[i] >= start[i] + steps[i])
+        {
+          coords[i] -= steps[i];
+          return;
+        }
+
+        const auto n_i = (end[i] - start[i]) / steps[i];
+        coords[i] = start[i] + n_i * steps[i];
+      }
+
+      const auto n_0 = (end[0] - start[0]) / steps[0];
+      if (coords[0] == start[0] + n_0 * steps[0])
+      {
+        coords[0] = start[0] - steps[0];
+        stop = true;
+      }
     }
 
     template <typename Index, int N>
@@ -190,10 +275,41 @@ namespace DO { namespace Sara {
           --coords[i];
           return;
         }
-        coords[i] = end[i]-1;
+
+        coords[i] = end[i] - 1;
       }
-      if (coords[N-1] == end[N-1]-1)
+
+      if (coords[N - 1] == end[N - 1] - 1)
+      {
+        coords[N - 1] = start[N - 1] - 1;
         stop = true;
+      }
+    }
+
+    template <typename Index, int N>
+    static inline void apply(Matrix<Index, N, 1>& coords, bool& stop,
+                             const Matrix<Index, N, 1>& start,
+                             const Matrix<Index, N, 1>& end,
+                             const Matrix<Index, N, 1>& steps)
+    {
+      for (int i = 0; i < N; ++i)
+      {
+        if (coords[i] >= start[i] + steps[i])
+        {
+          coords[i] -= steps[i];
+          return;
+        }
+
+        const auto n_i = (end[i] - start[i]) / steps[i];
+        coords[i] = start[i] + n_i * steps[i];
+      }
+
+      const auto n_last = (end[N - 1] - start[N - 1]) / steps[N - 1];
+      if (coords[N - 1] == start[N - 1] + n_last * steps[N - 1])
+      {
+        coords[N - 1] = start[N - 1] - steps[N - 1];
+        stop = true;
+      }
     }
 
     template <typename Index, int N>

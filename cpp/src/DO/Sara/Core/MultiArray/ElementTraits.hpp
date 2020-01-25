@@ -39,6 +39,7 @@ namespace DO { namespace Sara {
     using iterator = T *;
     using const_iterator = const T *;
     static const bool is_scalar = true;
+    static constexpr int size = 1;
     //! @}
   };
 
@@ -54,10 +55,9 @@ namespace DO { namespace Sara {
     //! @{
     //! STL-compatible interface.
     const static bool is_square_matrix = (M == N);
-    using value_type = typename Meta::Choose<
-      is_square_matrix,
-      Matrix<T, N, N>,
-      Array<T, M, N> >::Type;
+    using value_type = std::conditional_t<is_square_matrix,  //
+                                          Matrix<T, N, N>,   //
+                                          Array<T, M, N>>;
     using size_type = size_t;
     using pointer = value_type *;
     using const_pointer = const value_type *;
@@ -66,6 +66,7 @@ namespace DO { namespace Sara {
     using iterator = value_type *;
     using const_iterator = const value_type *;
     static const bool is_scalar = false;
+    static constexpr int size = M * N;
     //! @}
   };
 
@@ -85,6 +86,7 @@ namespace DO { namespace Sara {
     using iterator = value_type *;
     using const_iterator = const value_type *;
     static const bool is_scalar = false;
+    static constexpr int size = M * N;
     //! @}
   };
 

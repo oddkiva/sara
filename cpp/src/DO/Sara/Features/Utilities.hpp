@@ -15,13 +15,13 @@
 
 #include <DO/Sara/Defines.hpp>
 
-#include <DO/Sara/Features/Key.hpp>
+#include <DO/Sara/Core/Tensor.hpp>
 
 
 namespace DO { namespace Sara {
 
   /*!
-    @ingroup Features
+    @addtogroup Features
     @{
   */
 
@@ -29,12 +29,7 @@ namespace DO { namespace Sara {
   //! @brief remove redundant features.
   DO_SARA_EXPORT
   void remove_redundant_features(std::vector<OERegion>& features,
-                                 DescriptorMatrix<float>& descriptors);
-
-  inline void remove_redundant_features(Set<OERegion, RealDescriptor>& keys)
-  {
-    remove_redundant_features(keys.features, keys.descriptors);
-  }
+                                 Tensor_<float, 2>& descriptors);
   //! @}
 
   //! @}

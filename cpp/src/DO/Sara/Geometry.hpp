@@ -19,3 +19,5 @@
 #include <DO/Sara/Geometry/Algorithms.hpp>
 //! Graphics.
 #include <DO/Sara/Geometry/Graphics.hpp>
+
+//! @defgroup Geometry

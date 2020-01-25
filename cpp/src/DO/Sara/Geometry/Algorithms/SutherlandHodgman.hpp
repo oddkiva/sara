@@ -21,6 +21,9 @@
 
 namespace DO { namespace Sara {
 
+  //! @addtogroup GeometryAlgorithms
+  //! @{
+
   /*!
     Intersection test between lines.
     'u' is the intersection point if it exists.
@@ -36,6 +39,8 @@ namespace DO { namespace Sara {
   DO_SARA_EXPORT
   std::vector<Point2d> sutherland_hodgman(const std::vector<Point2d>& subject,
                                           const std::vector<Point2d>& clip);
+
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

@@ -22,6 +22,9 @@
 
 namespace DO { namespace Sara {
 
+  //! @addtogroup ImageIO
+  //! @{
+
   //! @brief Iterator class for image dataset.
   template <typename _Image>
   class ImageDataSetIterator;
@@ -84,7 +87,7 @@ namespace DO { namespace Sara {
     {
       if (_file_i != _file_read)
       {
-        imread(_image_read, *_file_i);
+        _image_read =  imread<T>(*_file_i);
         _file_read = _file_i;
       }
       return &_image_read;
@@ -94,7 +97,7 @@ namespace DO { namespace Sara {
     {
       if (_file_i != _file_read)
       {
-        imread(_image_read, *_file_i);
+        _image_read =  imread<T>(*_file_i);
         _file_read = _file_i;
       }
       return _image_read;
@@ -160,6 +163,7 @@ namespace DO { namespace Sara {
     container_type _image_filepaths;
   };
 
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

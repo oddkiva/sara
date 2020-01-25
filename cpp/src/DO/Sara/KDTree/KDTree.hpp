@@ -20,6 +20,9 @@
 
 namespace DO { namespace Sara {
 
+  //! @addtogroup KDTree
+  //! @{
+
   /*!
    *  N.B.: MatrixXd uses a *** COLUMN-MAJOR *** storage in the core library.
    *  The matrix must be transposed before.
@@ -130,6 +133,8 @@ namespace DO { namespace Sara {
     flann::KDTreeIndexParams _index_params;
     flann::SearchParams _search_params;
   };
+
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

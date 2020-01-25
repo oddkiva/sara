@@ -11,14 +11,15 @@
 
 #pragma once
 
-#include <unordered_map>
-
 #include <DO/Sara/Defines.hpp>
 
 #include <DO/Sara/DisjointSets/AdjacencyList.hpp>
 
 
 namespace DO { namespace Sara {
+
+  //! @addtogroup DisjointSets
+  //! @{
 
   //! @brief Disjoint-set data structure.
   class DO_SARA_EXPORT DisjointSets
@@ -33,10 +34,17 @@ namespace DO { namespace Sara {
     using vertex_type = AdjacencyList::vertex_type;
     using adjacent_vertex_iterator = AdjacencyList::const_out_vertex_iterator;
 
-    DisjointSets(size_t num_elements, const AdjacencyList& adjacency_list)
-      : _adj_list(adjacency_list)
-      , _vertices(num_elements)
+    DisjointSets() = default;
+
+    DisjointSets(size_type num_vertices)
+      : _vertices(num_vertices)
     {
+    }
+
+
+    inline void clear()
+    {
+      _vertices.clear();
     }
 
     inline void make_set(vertex_type v)
@@ -74,7 +82,17 @@ namespace DO { namespace Sara {
       return parent - &_vertices[0];
     }
 
-    void compute_connected_components();
+    node_ptr node(vertex_type v)
+    {
+      return &_vertices[v];
+    }
+
+    vertex_type vertex(node_ptr n)
+    {
+      return n - &_vertices[0];
+    }
+
+    void compute_connected_components(const AdjacencyList& adj_list);
 
     std::vector<std::vector<vertex_type>> get_connected_components() const;
 
@@ -96,9 +114,10 @@ namespace DO { namespace Sara {
     };
 
   private:
-    const AdjacencyList& _adj_list;
     std::vector<Node> _vertices;
   };
+
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

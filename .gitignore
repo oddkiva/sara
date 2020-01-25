@@ -145,7 +145,8 @@ Desktop.ini
 ## Python
 #############
 
-*.py[co]
+*.pyc
+*.pyo
 
 # Packages
 *.egg
@@ -179,9 +180,7 @@ pip-log.txt
 #############
 ## Project-specific files
 #############
-cmake/DOVersion.cmake
-
-src/DO/Sara/Defines.hpp
+compile_commands.json
 
 third-party/zlib/zconf.h
 third-party/libjpeg/jconfig.h

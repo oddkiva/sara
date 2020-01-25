@@ -11,14 +11,16 @@
 
 // Disable FLANN warnings
 #ifdef _MSC_VER
-# pragma warning ( disable : 4244 4267 4800 4305 4291 4996)
+#pragma warning(disable : 4244 4267 4800 4305 4291 4996)
 #endif
 
-#include <flann/flann.hpp>
-
+#include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/Timer.hpp>
 
 #include <DO/Sara/FeatureMatching.hpp>
+
+#include <flann/flann.hpp>
+
 
 
 using namespace std;
@@ -27,49 +29,45 @@ using namespace std;
 namespace DO { namespace Sara {
 
   //! Create FLANN matrix
-  flann::Matrix<float>
-  create_flann_matrix(const DescriptorMatrix<float>& descriptors)
+  auto create_flann_matrix(const Tensor_<float, 2>& descriptors)
   {
     if (descriptors.size() == 0)
       throw runtime_error{ "Error: the list of key-points is empty!"};
 
-    const auto size = int(descriptors.size());
-    const auto dim = descriptors.dimension();
+    SARA_DEBUG
+        << "Gentle Warning: make sure every key has distinct descriptors..."
+        << endl;
 
-    // Print summary.
-    cout << "Gentle Warning: make sure every key has distinct descriptors..." << endl;
-    cout << "Number of descriptors = " << size << endl;
+    SARA_DEBUG << "Number of descriptors = " << descriptors.rows() << endl;
+    SARA_DEBUG << "Descriptor dimension = " << descriptors.cols() << endl;
 
-    // Create a matrix that will contain a set of descriptors.
-    flann::Matrix<float> matrix(
-      const_cast<float *>(descriptors.matrix().data()), size, dim);
+    auto matrix = flann::Matrix<float>{const_cast<float*>(descriptors.data()),
+                                       size_t(descriptors.rows()),
+                                       size_t(descriptors.cols())};
     return matrix;
   }
 
   //! Find the nearest neighbors in the descriptor space using FLANN.
   void append_nearest_neighbors(
-    size_t i1,
-    const Set<OERegion, RealDescriptor>& keys1,
-    const Set<OERegion, RealDescriptor>& keys2,
-    vector<Match>& matches,
-    const flann::Matrix<float>& /*data2*/,
-    flann::Index<flann::L2<float>>& tree2,
-    float squared_ratio_thres,
-    Match::Direction dir,
-    bool self_matching, const KeyProximity& is_redundant, // self-matching
-    vector<int>& vec_indices,
-    vector<float>& vec_dists,
-    size_t num_max_neighbors) // internal storage parameters
+      int i1, const KeypointList<OERegion, float>& keys1,
+      const KeypointList<OERegion, float>& keys2, vector<Match>& matches,
+      const flann::Matrix<float>& /*data2*/,
+      flann::Index<flann::L2<float>>& tree2, float squared_ratio_thres,
+      Match::Direction dir, bool self_matching,
+      const KeyProximity& is_redundant,  // self-matching
+      vector<int>& vec_indices, vector<float>& vec_dists,
+      size_t num_max_neighbors)  // internal storage parameters
   {
+    const auto& [features1, dmat1] = keys1;
+    const auto& features2 = features(keys2);
+
     // Prepare the query matrix
-    flann::Matrix<float> query{
-      const_cast<float *>(&(keys1.descriptors.matrix()(0, i1))),
-      1, keys1.descriptors.dimension()
-    };
+    auto query = flann::Matrix<float>{const_cast<float*>(dmat1[i1].data()), 1u,
+                                      size_t(dmat1.cols())};
 
     // Prepare the indices and distances.
-    flann::Matrix<int> indices{ &vec_indices[0], 1, num_max_neighbors };
-    flann::Matrix<float> dists{ &vec_dists[0], 1, num_max_neighbors };
+    auto indices = flann::Matrix<int>{vec_indices.data(), 1, num_max_neighbors};
+    auto dists = flann::Matrix<float>{vec_dists.data(), 1, num_max_neighbors};
 
     // Create search parameters.
     flann::SearchParams search_params;
@@ -78,17 +76,16 @@ namespace DO { namespace Sara {
     // ambiguity score does not really make sense.
     //
     // Boundary case 1.
-    if (keys2.size() == 0)
+    if (features2.size() == 0)
       return;
+
     // Boundary case 2.
-    if (keys2.size() == 1 && !self_matching)
+    if (features2.size() == 1 && !self_matching)
     {
-      auto m = Match{
-        &keys1.features[i1], &keys2.features[0], 1.f, dir, int(i1), 0
-      };
+      auto m = Match{&features1[i1], &features2[0], 1.f, dir, i1, 0};
       m.rank() = 1;
 
-      if(dir == Match::Direction::TargetToSource)
+      if (dir == Match::Direction::TargetToSource)
       {
         swap(m.x_pointer(), m.y_pointer());
         swap(m.x_index(), m.y_index());
@@ -98,16 +95,14 @@ namespace DO { namespace Sara {
         matches.push_back(m);
       return;
     }
+
     // Boundary case 3.
-    if (keys2.size() == 2 && self_matching)
+    if (features2.size() == 2 && self_matching)
     {
       tree2.knnSearch(query, indices, dists, 2, search_params);
 
       const auto i2 = indices[0][1]; // The first index can't be indices[0][0], which is i1.
-      auto m = Match{
-        &keys1.features[i1], &keys2.features[i2], 1.f, dir,
-        int(i1), i2
-      };
+      auto m = Match{&features1[i1], &features2[i2], 1.f, dir, i1, i2};
       m.rank() = 1;
 
       if(dir == Match::Direction::TargetToSource)
@@ -121,7 +116,6 @@ namespace DO { namespace Sara {
 
       return;
     }
-
 
     // Now treat the generic case.
     //
@@ -159,12 +153,12 @@ namespace DO { namespace Sara {
       auto i2 = indices[0][rank];
 
       // Ignore the match if keys1 == keys2.
-      if (self_matching && is_redundant(keys1.features[i1], keys2.features[i2]))
+      if (self_matching && is_redundant(features1[i1], features2[i2]))
         continue;
 
-      Match m(&keys1.features[i1], &keys2.features[i2], score, dir, i1, i2);
-      m.rank() = top1_index == 0 ? rank+1 : rank;
-      if(dir == Match::Direction::TargetToSource)
+      Match m(&features1[i1], &features2[i2], score, dir, i1, i2);
+      m.rank() = top1_index == 0 ? rank + 1 : rank;
+      if (dir == Match::Direction::TargetToSource)
       {
         swap(m.x_pointer(), m.y_pointer());
         swap(m.x_index(), m.y_index());
@@ -174,20 +168,25 @@ namespace DO { namespace Sara {
     }
   }
 
-  AnnMatcher::AnnMatcher(const Set<OERegion, RealDescriptor>& keys1,
-                         const Set<OERegion, RealDescriptor>& keys2,
+  AnnMatcher::AnnMatcher(const KeypointList<OERegion, float>& keys1,
+                         const KeypointList<OERegion, float>& keys2,
                          float sift_ratio_thres)
     : _keys1(keys1)
     , _keys2(keys2)
-    , _squared_ratio_thres(sift_ratio_thres*sift_ratio_thres)
-    , _max_neighbors(std::max(keys1.size(), keys2.size()))
+    , _squared_ratio_thres(sift_ratio_thres * sift_ratio_thres)
+    , _max_neighbors(std::max(size(keys1), size(keys2)))
     , _self_matching(false)
   {
+    if (!size_consistency_predicate(_keys1) ||
+        !size_consistency_predicate(_keys2))
+      throw std::runtime_error{
+          "The list of keypoints are inconsistent in size!"};
+
     _vec_indices.resize(_max_neighbors);
     _vec_dists.resize(_max_neighbors);
   }
 
-  AnnMatcher::AnnMatcher(const Set<OERegion, RealDescriptor>& keys,
+  AnnMatcher::AnnMatcher(const KeypointList<OERegion, float>& keys,
                          float sift_ratio_thres,
                          float min_max_metric_dist_thres,
                          float pixel_dist_thres)
@@ -195,46 +194,50 @@ namespace DO { namespace Sara {
     , _keys2(keys)
     , _squared_ratio_thres(sift_ratio_thres*sift_ratio_thres)
     , _is_too_close(min_max_metric_dist_thres, pixel_dist_thres)
-    , _max_neighbors(keys.size())
+    , _max_neighbors(size(keys))
     , _self_matching(true)
   {
+    if (!size_consistency_predicate(_keys1))
+      throw std::runtime_error{
+          "The list of keypoints are inconsistent in size!"};
+
     _vec_indices.resize(_max_neighbors);
     _vec_dists.resize(_max_neighbors);
   }
 
   //! Compute candidate matches using the Euclidean distance.
-  vector<Match> AnnMatcher::compute_matches()
+  auto AnnMatcher::compute_matches() -> vector<Match>
   {
-    Timer t;
+    auto t = Timer{};
 
-    flann::KDTreeIndexParams params{ 8 };
-    flann::Matrix<float> data1, data2;
-    data1 = create_flann_matrix(_keys1.descriptors);
-    data2 = create_flann_matrix(_keys2.descriptors);
+    const auto& dmat1 = descriptors(_keys1);
+    const auto& dmat2 = descriptors(_keys2);
 
-    flann::Index<flann::L2<float> > tree1(data1, params);
-    flann::Index<flann::L2<float> > tree2(data2, params);
+    flann::KDTreeIndexParams params{8};
+    auto data1 = create_flann_matrix(dmat1);
+    auto data2 = create_flann_matrix(dmat2);
+
+    flann::Index<flann::L2<float>> tree1(data1, params);
+    flann::Index<flann::L2<float>> tree2(data2, params);
     tree1.buildIndex();
     tree2.buildIndex();
-    cout << "Built trees in " << t.elapsed() << " seconds." << endl;
+    SARA_DEBUG << "Built trees in " << t.elapsed() << " seconds." << endl;
 
-    vector<Match> matches;
+    auto matches = vector<Match>{};
     matches.reserve(1e5);
 
     t.restart();
-    for (auto i1 = 0u; i1 < _keys1.size(); ++i1)
+    for (auto i1 = 0; i1 < dmat1.rows(); ++i1)
       append_nearest_neighbors(
-        i1, _keys1, _keys2, matches, data2, tree2,
-        _squared_ratio_thres, Match::Direction::SourceToTarget,
-        _self_matching, _is_too_close, _vec_indices, _vec_dists,
-        _max_neighbors);
+          i1, _keys1, _keys2, matches, data2, tree2, _squared_ratio_thres,
+          Match::Direction::SourceToTarget, _self_matching, _is_too_close,
+          _vec_indices, _vec_dists, _max_neighbors);
 
-    for (auto i2 = 0u; i2 < _keys2.size(); ++i2)
+    for (auto i2 = 0; i2 < dmat2.rows(); ++i2)
       append_nearest_neighbors(
-        i2, _keys2, _keys1, matches, data1, tree1,
-        _squared_ratio_thres, Match::Direction::TargetToSource,
-        _self_matching, _is_too_close, _vec_indices, _vec_dists,
-        _max_neighbors);
+          i2, _keys2, _keys1, matches, data1, tree1, _squared_ratio_thres,
+          Match::Direction::TargetToSource, _self_matching, _is_too_close,
+          _vec_indices, _vec_dists, _max_neighbors);
 
     // Lexicographical comparison between matches.
     auto compare_match = [](const Match& m1, const Match& m2)
@@ -254,13 +257,13 @@ namespace DO { namespace Sara {
     // We keep the one with the best Lowe score.
     matches.resize(unique(matches.begin(), matches.end()) - matches.begin());
 
-    sort(matches.begin(), matches.end(),
-      [&](const Match& m1, const Match& m2) {
-        return m1.score() < m2.score();
-      }
-    );
+    // Reorder the matches again.
+    sort(matches.begin(), matches.end(), [&](const Match& m1, const Match& m2) {
+      return m1.score() < m2.score();
+    });
 
-    cout << "Computed " << matches.size() << " matches in " << t.elapsed() << " seconds." << endl;
+    SARA_DEBUG << "Computed " << matches.size() << " matches in " << t.elapsed()
+               << " seconds." << endl;
 
     return matches;
   }

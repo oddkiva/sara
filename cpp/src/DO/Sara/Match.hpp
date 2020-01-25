@@ -16,5 +16,8 @@
 
 #include <DO/Sara/Features.hpp>
 
+#include <DO/Sara/Match/IndexMatch.hpp>
 #include <DO/Sara/Match/Match.hpp>
 #include <DO/Sara/Match/PairWiseDrawer.hpp>
+
+//! @defgroup Match

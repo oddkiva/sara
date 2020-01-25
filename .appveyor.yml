@@ -1,19 +1,76 @@
+# If the builds fail again:
+# 1. Update vcpkg and rebuild the image I/O, HDF5 and Ceres.
+#    Disable the build of the Video I/O API.
+#    Disable the tests and samples
+# 2. Reinstate tests and seamples
+# 3. Reinstate FFmpeg
+# 4. Reinstate the build of Video I/O API.
+
 version: 1.0.{build}
 
-os: unstable
+image:
+  - Visual Studio 2017
+
+cache: c:\Tools\vcpkg\installed
+
+clone_folder: C:\projects\sara
 
 environment:
+  # These environment variables will be picked up in CMake.
+  VCPKG_TOOLCHAIN_FILE: C:\Tools\vcpkg\scripts\buildsystems\vcpkg.cmake
+  QTDIR: C:\Qt\latest\msvc2017_64
+  BOOST_ROOT: C:\Libraries\boost_1_69_0
   matrix:
-  - QTDIR: C:\Qt\5.7\msvc2015_64
+    - generator: "Visual Studio 15 2017 Win64"
+
+init:
+  # This gives us credentials to access the VM that is building Sara via RDP.
+  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 install:
-  - set PATH=%QTDIR%\bin;%PATH%
+  # Update vcpkg.
+  #- cd c:\Tools\vcpkg
+  #- git pull
+  #- .\bootstrap-vcpkg.bat
+
+  # Install Image I/O libraries. (less than 5 minutes to build)
+  #- vcpkg install libjpeg-turbo:x64-windows
+  #- vcpkg install libpng:x64-windows
+  #- vcpkg install tiff:x64-windows
+
+  # Install Video I/O libraries. (25 minutes to build)
+  #- vcpkg install ffmpeg:x64-windows
+
+  # Install HDF5 libraries. (4 minutes to build).
+  #- vcpkg install hdf5[cpp]:x64-windows
+
+  # Install Ceres libraries. (23 minutes to build)
+  #- vcpkg install ceres:x64-windows
+
+  # Integrate vcpkg with msbuild.
+  #- cd C:\Tools\vcpkg
+  #- vcpkg integrate install
 
 configuration:
-- Release
+  # - Debug
+  - Release
 
 before_build:
-  - cmake -H. -Bbuild -G "Visual Studio 14 2015 Win64" -DSARA_BUILD_VIDEOIO=ON -DSARA_BUILD_TESTS=ON -DSARA_BUILD_SAMPLES=ON -DBOOST_ROOT="C:\Libraries\boost_1_63_0"
+  # Go back the repository folder so that we can run CMake.
+  - cd %APPVEYOR_BUILD_FOLDER%
+  - cmake -H. -B..\sara-build -G "%generator%" -DCMAKE_TOOLCHAIN_FILE:FILEPATH=%VCPKG_TOOLCHAIN_FILE% -DSARA_BUILD_SHARED_LIBS=ON -DSARA_BUILD_VIDEOIO:BOOL=ON -DSARA_BUILD_TESTS:BOOL=ON -DSARA_BUILD_SAMPLES:BOOL=ON -DCMAKE_PREFIX_PATH="%QTDIR%" -DBOOST_ROOT=%BOOST_ROOT%
 
-build_script:
-  - '"C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe" build\Sara.sln /m /verbosity:minimal'
+build:
+  project: C:\projects\sara-build\Sara.sln
+  parallel: true
+  verbosity: minimal
+
+test_script:
+  # Set up the PATH environment variable so that we can run the tests.
+  #
+  # Found via Remote Desktop Connection in Windows.
+  - set PATH=%QTDIR%\bin;%BOOST_ROOT%\lib64-msvc-14.1;%PATH%
+
+  # Run the tests.
+  - cd ..\sara-build
+  - ctest --output-on-failure -C %configuration%

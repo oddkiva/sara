@@ -20,6 +20,9 @@
 
 namespace DO { namespace Sara {
 
+  //! @addtogroup MultiArray
+  //! @{
+
   //! @{
   //! @brief Tensor classes are simple aliases for MultiArray-based classes.
   template <typename T, int Dimension, int StorageOrder = ColMajor>
@@ -29,6 +32,47 @@ namespace DO { namespace Sara {
             template <typename> class Allocator = std::allocator>
   using Tensor = MultiArray<T, N, StorageOrder, Allocator>;
   //! @}
+
+
+  //! @{
+  //! @brief In this world everything, everything is **ROW-MAJOR** like in
+  //! TensorFlow.
+  template <typename T, int N>
+  using TensorView_ = TensorView<T, N, RowMajor>;
+
+  template <typename T, int N>
+  using Tensor_ = Tensor<T, N, RowMajor>;
+  //! @}
+
+
+  //! @{
+  //! @brief View a std::vector as a rank-1 tensor.
+  template <typename T>
+  inline auto tensor_view(const std::vector<T>& v)
+  {
+    using TensorView = TensorView_<T, 1>;
+    return TensorView{const_cast<T*>(v.data()),
+                      typename TensorView::vector_type{int(v.size())}};
+  }
+
+  template <typename T>
+  inline auto tensor_view(std::vector<T>& v)
+  {
+    using TensorView = TensorView_<T, 1>;
+    return TensorView{v.data(),
+                      typename TensorView::vector_type{int(v.size())}};
+  }
+  //! @}
+
+
+  //! @brief Reinterpret the tensor view object  as an image view object.
+  template <typename T, int N>
+  auto image_view(TensorView_<T, N> in) -> ImageView<T, N>
+  {
+    auto out_sizes = in.sizes();
+    std::reverse(out_sizes.data(), out_sizes.data() + N);
+    return ImageView<T, N>{in.data(), out_sizes};
+  }
 
 
   //! @{
@@ -80,6 +124,7 @@ namespace DO { namespace Sara {
     return tensor_type{reinterpret_cast<T*>(in.data()), out_sizes};
   }
   //! @}
+
 
   //! @{
   //! @brief Provide tensor views for image objects.
@@ -134,6 +179,7 @@ namespace DO { namespace Sara {
   }
   //! @}
 
+
   //! @{
   //! @brief Convert image data structures to tensor data structures.
   template <typename T, int N>
@@ -174,6 +220,7 @@ namespace DO { namespace Sara {
   }
   //! @}
 
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

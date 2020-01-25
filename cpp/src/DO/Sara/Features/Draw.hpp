@@ -21,14 +21,25 @@
 namespace DO { namespace Sara {
 
   /*!
-    @ingroup Features
+    @addtogroup Features
     @{
   */
-  DO_SARA_EXPORT
-  void draw_oe_regions(const std::vector<OERegion>& features,
-                       const Color3ub& c,
-                       float scale = 1.f,
-                       const Point2f& off = Point2f::Zero());
+  inline auto draw_oe_regions(const OERegion* begin, const OERegion* end,
+                              const Color3ub& color, float scale = 1.f,
+                              const Point2f& offset = Point2f::Zero())
+  {
+    std::for_each(begin, end,
+                  [&](const auto& f) { f.draw(color, scale, offset); });
+  }
+
+  inline auto draw_oe_regions(const std::vector<OERegion>& features,
+                              const Color3ub& color, float scale = 1.f,
+                              const Point2f& offset = Point2f::Zero())
+  {
+    draw_oe_regions(features.data(), features.data() + features.size(), color,
+                    scale, offset);
+  }
+
 
   //! @}
 

@@ -18,23 +18,30 @@
 #include <DO/Sara/Geometry/Objects/Polygon.hpp>
 
 
-namespace DO { namespace Sara { namespace Detail {
+namespace DO::Sara::Detail {
 
-    using PtCotg = std::pair<Point2d, double>;
+  //! @addtogroup GeometryAlgorithms
+  //! @{
 
-    void sort_points_by_polar_angle(Point2d *points, PtCotg *workArray,
-                                    std::size_t num_points);
+  using PtCotg = std::pair<Point2d, double>;
 
-} /* namespace Detail */
-} /* namespace Sara */
-} /* namespace DO */
+  void sort_points_by_polar_angle(Point2d* points, PtCotg* workArray,
+                                  std::size_t num_points);
+
+  //! @}
+
+}  // namespace DO::Sara::Detail
 
 
-namespace DO { namespace Sara {
+namespace DO::Sara {
+
+  //! @addtogroup GeometryAlgorithms
+  //! @{
 
   DO_SARA_EXPORT
   std::vector<Point2d>
   graham_scan_convex_hull(const std::vector<Point2d>& points);
 
-} /* namespace Sara */
-} /* namespace DO */
+  //! @}
+
+}  // namespace DO::Sara

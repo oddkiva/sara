@@ -11,16 +11,19 @@
 
 #pragma once
 
-#include <functional>
-#include <stdexcept>
-
 #include <DO/Sara/Core/EigenExtension.hpp>
 #include <DO/Sara/Core/Meta.hpp>
 #include <DO/Sara/Core/Pixel/ColorSpace.hpp>
 
+#include <functional>
+#include <stdexcept>
+
 
 // Pixel data structures.
 namespace DO { namespace Sara {
+
+  //! @addtogroup Color
+  //! @{
 
   //! @brief 3D packed pixel.
   template <typename _BitField, int _Sz0, int _Sz1, int _Sz2>
@@ -237,6 +240,7 @@ namespace DO { namespace Sara {
     }
   };
 
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

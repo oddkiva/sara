@@ -1,2 +1,11 @@
 breathe
+coverage
+imageio
+ipdb
+ipdbplugin
 jinja2
+nose
+numpy
+sphinx
+sphinx_rtd_theme
+sphinxcontrib-katex

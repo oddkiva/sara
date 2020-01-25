@@ -1,21 +1,29 @@
 cmake_minimum_required(VERSION 2.8.12)
 
-project(Sara)
+project(Sara CXX)
 
 # Set the version major and minor manually.
 set(DO_Sara_VERSION_MAJOR 1)
 set(DO_Sara_VERSION_MINOR 2)
 
-if (POLICY CMP0020)
-  cmake_policy(SET CMP0020 OLD)
-endif (POLICY CMP0020)
+if (APPLE)
+  set (CMAKE_MACOSX_RPATH ON)
+endif ()
+
+# Check that vcpkg toolchain is specified when running CMake!
+if (WIN32 AND NOT CMAKE_TOOLCHAIN_FILE)
+  message(FATAL_ERROR
+    "[Sara] Could not find vpkg toolchain file: "
+    "please specify it to build Sara on Windows!")
+endif ()
 
 # Set default build type to Release mode.
 set(CMAKE_BUILD_TYPE "Release" CACHE STRING
-    "Build type options are: Debug, Release")
+  "Build type options are: Debug, Release")
 
 # Set options.
 option(SARA_USE_VLD "Enable Visual Leak Detector for unit tests" OFF)
+option(SARA_USE_HALIDE "Enable Halide" OFF)
 option(SARA_BUILD_VIDEOIO "Build Sara's Video I/O module" OFF)
 option(SARA_BUILD_PYTHON_BINDINGS "Build Python bindings" OFF)
 option(SARA_BUILD_TESTS "Build unit tests for DO-Sara libraries" OFF)
@@ -33,9 +41,12 @@ set(BUILD_SHARED_LIBS ${SARA_BUILD_SHARED_LIBS})
 # Add Sara to the CMake module path.
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
+# Activate the usage of CCache to speed up builds if available.
 # Configure Sara library version.
 include(sara_macros)
 sara_dissect_version()
+
+include(sara_use_ccache)
 
 # We are ready to build Sara.
 find_package(DO_Sara REQUIRED)
@@ -49,6 +60,7 @@ include(sara_installation_settings)
 
 # Enable testing before building the library.
 if (SARA_BUILD_TESTS)
+  include(CTest)
   enable_testing()
 endif ()
 

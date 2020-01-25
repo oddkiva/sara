@@ -19,8 +19,13 @@
 
 namespace DO { namespace Sara {
 
+  //! @addtogroup Utility
+  //! @{
+
   DO_SARA_EXPORT
   std::string format(const char *fmt, ...);
+
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

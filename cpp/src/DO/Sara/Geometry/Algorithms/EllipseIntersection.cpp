@@ -171,7 +171,7 @@ namespace DO { namespace Sara {
 #else
     /*if (numInter > 0)
     {
-      CHECK(numInter);*/
+      SARA_CHECK(numInter);*/
       if (!active_window())
         set_antialiasing(create_window(512, 512));
       clear_window();
@@ -199,8 +199,8 @@ namespace DO { namespace Sara {
       Matrix2d S_0 = delta.asDiagonal()*shape_matrix(E_0)*delta.asDiagonal();
       Matrix2d S_1 = delta.asDiagonal()*shape_matrix(E_1)*delta.asDiagonal();
 
-      CHECK(shape_matrix(E_0));
-      CHECK(S_0);
+      SARA_CHECK(shape_matrix(E_0));
+      SARA_CHECK(S_0);
 
 
       Vector2d c_0 = E_0.center() - center;
@@ -308,7 +308,7 @@ namespace DO { namespace Sara {
   }
 
   std::vector<Point2d>
-  approximage_intersection(const Ellipse& e1, const Ellipse& e2, int n)
+  approximate_intersection(const Ellipse& e1, const Ellipse& e2, int n)
   {
     std::vector<Point2d> p1(discretize_ellipse(e1,n));
     std::vector<Point2d> p2(discretize_ellipse(e2,n));
@@ -321,10 +321,8 @@ namespace DO { namespace Sara {
   }
 
   double approximate_jaccard_similarity(const Ellipse& e1, const Ellipse& e2,
-                                        int n, double limit)
+                                        int n, double /* limit */)
   {
-    (void) limit;
-
     std::vector<Point2d> p1(discretize_ellipse(e1,n));
     std::vector<Point2d> p2(discretize_ellipse(e2,n));
     std::vector<Point2d> inter;
@@ -332,14 +330,14 @@ namespace DO { namespace Sara {
     if (inter.empty())
       inter = sutherland_hodgman(p2, p1);
 
-		if (!inter.empty())
-		{
-			double interArea = area(inter);
-			double unionArea = area(p1)+area(p2)-interArea;
-			return interArea/unionArea;
-		}
-		else
-			return 0.;
+    if (!inter.empty())
+    {
+      double interArea = area(inter);
+      double unionArea = area(p1)+area(p2)-interArea;
+      return interArea/unionArea;
+    }
+    else
+      return 0.;
   }
 
 } /* namespace Sara */

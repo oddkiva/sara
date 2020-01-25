@@ -14,5 +14,6 @@
 #pragma once
 
 #include <DO/Sara/Core/MultiArray/ElementTraits.hpp>
+#include <DO/Sara/Core/MultiArray/InfiniteMultiArrayView.hpp>
 #include <DO/Sara/Core/MultiArray/MultiArray.hpp>
 #include <DO/Sara/Core/MultiArray/MultiArrayView.hpp>

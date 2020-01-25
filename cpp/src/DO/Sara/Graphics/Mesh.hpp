@@ -24,8 +24,8 @@
 namespace DO { namespace Sara {
 
   /*!
-    \addtogroup Draw3D
-    @{
+   *  @addtogroup Draw3D
+   *  @{
    */
 
   //! @brief Triangle face consisting of 3 vertex indices
@@ -111,23 +111,23 @@ namespace DO { namespace Sara {
       mesh = SimpleMesh<Vector, Face3>();
       // Fill the mesh data structure.
       std::string line;
-      while ( std::getline(file, line) )
+      while (std::getline(file, line))
       {
         std::stringstream ss;
         ss << line;
         char type;
         ss >> type;
-        if(type=='v')
+        if (type == 'v')
         {
           double x, y, z;
           ss >> x >> y >> z;
           mesh.vertices().push_back(Vector3d(x, y, z).cast<float>());
         }
-        if(type=='f')
+        if (type == 'f')
         {
           size_t a, b, c;
           ss >> a >> b >> c;
-          mesh.faces().push_back(Face3(a-1, b-1, c-1));
+          mesh.faces().push_back(Face3(a - 1, b - 1, c - 1));
         }
       }
       // Read mesh successfully.

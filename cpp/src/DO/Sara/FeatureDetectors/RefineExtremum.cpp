@@ -273,9 +273,9 @@ namespace DO { namespace Sara {
         // Store the DoG extremum.
         auto dog = OERegion(pos.head<2>(), pos.z());
 
-        dog.extremum_value() = val;
-        dog.extremum_type() = type == 1 ? OERegion::ExtremumType::Max
-                                        : OERegion::ExtremumType::Min;
+        dog.extremum_value = val;
+        dog.extremum_type = type == 1 ? OERegion::ExtremumType::Max
+                                      : OERegion::ExtremumType::Min;
         extrema.push_back(dog);
         map(static_cast<int>(x), static_cast<int>(y)) = 1;
       }
@@ -304,7 +304,8 @@ namespace DO { namespace Sara {
       return false;
 
     // First patch at the closest scale.
-    auto nearest_patch = nearest_gaussian.compute<SafeCrop>(x, y, patch_radius);
+    auto nearest_patch =
+        nearest_gaussian.compute<SafeCrop>(Point2i{x, y}, patch_radius);
 
 //#define DEBUG_SELECT_SCALE
 #ifdef DEBUG_SELECT_SCALE
@@ -459,10 +460,10 @@ namespace DO { namespace Sara {
         // Store the extremum.
         auto c = OERegion{};
         c.center() = p;
-        c.shape_matrix() = Matrix2f::Identity() * pow(scale, -2);
-        c.orientation() = 0.f;
-        c.extremum_type() = OERegion::ExtremumType::Max;
-        c.extremum_value() = val;
+        c.shape_matrix = Matrix2f::Identity() * pow(scale, -2);
+        c.orientation = 0.f;
+        c.extremum_type = OERegion::ExtremumType::Max;
+        c.extremum_value = val;
         corners.push_back(c);
       }
     }

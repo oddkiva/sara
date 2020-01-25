@@ -34,6 +34,7 @@
 #include <algorithm>
 #include <map>
 #include <cassert>
+#include <cmath>
 #include <cstring>
 #include <stdarg.h>
 
@@ -252,7 +253,7 @@ protected:
     void buildIndexImpl()
     {
         // Create a permutable array of indices to the input vectors.
-    	std::vector<int> ind(size_);
+        std::vector<int> ind(size_);
         for (size_t i = 0; i < size_; ++i) {
             ind[i] = int(i);
         }
@@ -261,10 +262,14 @@ protected:
         var_ = new DistanceType[veclen_];
 
         tree_roots_.resize(trees_);
+
+        std::random_device rd;
+        std::mt19937 g(rd());
+
         /* Construct the randomized trees. */
         for (int i = 0; i < trees_; i++) {
             /* Randomize the order of vectors to allow for unbiased sampling. */
-            std::random_shuffle(ind.begin(), ind.end());
+            std::shuffle(ind.begin(), ind.end(), g);
             tree_roots_[i] = divideTree(&ind[0], int(size_) );
         }
         delete[] mean_;
@@ -663,7 +668,7 @@ private:
             ElementType max_span = 0;
             size_t div_feat = 0;
             for (size_t i=0;i<veclen_;++i) {
-                ElementType span = abs(point[i]-leaf_point[i]);
+                ElementType span = std::abs(point[i]-leaf_point[i]);
                 if (span > max_span) {
                     max_span = span;
                     div_feat = i;

@@ -20,6 +20,9 @@
 
 namespace DO { namespace Sara {
 
+  //! @addtogroup DisjointSets
+  //! @{
+
   //! @brief Adjacency list.
   class AdjacencyList
   {
@@ -32,6 +35,11 @@ namespace DO { namespace Sara {
     AdjacencyList(std::vector<std::vector<vertex_type>>& adjacency_data)
       : _a(adjacency_data)
     {
+    }
+
+    size_type num_vertices() const
+    {
+      return _a.size();
     }
 
     size_type out_degree(vertex_type v) const
@@ -68,6 +76,7 @@ namespace DO { namespace Sara {
   std::vector<std::vector<std::size_t>>
   compute_adjacency_list_2d(const ImageView<int>& labels);
 
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

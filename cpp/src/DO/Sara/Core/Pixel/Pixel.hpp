@@ -11,15 +11,18 @@
 
 #pragma once
 
-#include <functional>
-#include <stdexcept>
-
 #include <DO/Sara/Core/EigenExtension.hpp>
 #include <DO/Sara/Core/Meta.hpp>
+
+#include <functional>
+#include <stdexcept>
 
 
 // Pixel data structures.
 namespace DO { namespace Sara {
+
+  //! @addtogroup Core
+  //! @{
 
   //! @brief Simple pixel class implemented as a vector.
   template <typename _T, typename _ColorSpace>
@@ -40,13 +43,13 @@ namespace DO { namespace Sara {
 
     //! Custom constructor.
     inline Pixel(_T x, _T y, _T z)
-      : base_type{ x, y, z }
+      : base_type{x, y, z}
     {
     }
 
     //! Custom constructor.
     inline Pixel(_T x, _T y, _T z, _T t)
-      : base_type{ x, y, z, t }
+      : base_type{x, y, z, t}
     {
     }
 
@@ -85,6 +88,8 @@ namespace DO { namespace Sara {
       return _ColorSpace::size;
     }
   };
+
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

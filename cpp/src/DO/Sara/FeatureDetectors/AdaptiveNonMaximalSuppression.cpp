@@ -30,11 +30,12 @@ namespace DO { namespace Sara {
     };
 
     // Create the ordered list sorted by decreasing strength.
-    auto idx_score_pairs = vector<IndexScore>{ features.size() };
+    auto idx_score_pairs = vector<IndexScore>{features.size()};
 
     // Notice that I readily multiply the scores by $c_\textrm{robust}$.
     for (size_t i = 0; i != features.size(); ++i)
-      idx_score_pairs[i] = make_pair(i, c_robust*features[i].extremum_value());
+      idx_score_pairs[i] =
+          make_pair(i, c_robust * features[i].extremum_value);
 
     // Sort features by decreasing strength.
     sort(idx_score_pairs.begin(), idx_score_pairs.end(),

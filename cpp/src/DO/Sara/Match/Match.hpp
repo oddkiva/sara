@@ -20,26 +20,33 @@
 
 namespace DO { namespace Sara {
 
+  //! @addtogroup Match
+  //! @{
+
   class Match
   {
   public:
-    enum class Direction { SourceToTarget, TargetToSource };
+    enum class Direction : std::uint8_t
+    {
+      SourceToTarget,
+      TargetToSource
+    };
 
   public:
     //! @{
     //! @brief Constructors.
     inline Match() = default;
 
-    inline Match(const OERegion *x,
-                 const OERegion *y,
+    inline Match(const OERegion* x, const OERegion* y,
                  float score = std::numeric_limits<float>::max(),
                  Direction matching_dir = Direction::SourceToTarget,
-                 int x_index = -1,
-                 int y_index = -1)
-      : _x(x), _y(y)
-      , _x_index(x_index), _y_index(y_index)
+                 int x_index = -1, int y_index = -1)
+      : _x(x)
+      , _y(y)
+      , _x_index(x_index)
+      , _y_index(y_index)
       , _rank(-1)
-      ,_score(score)
+      , _score(score)
       , _matching_dir(matching_dir)
     {
     }
@@ -47,12 +54,12 @@ namespace DO { namespace Sara {
 
     //! @{
     //! Constant accessors.
-    const OERegion * x_pointer() const
+    const OERegion* x_pointer() const
     {
       return _x;
     }
 
-    const OERegion * y_pointer() const
+    const OERegion* y_pointer() const
     {
       return _y;
     }
@@ -60,14 +67,14 @@ namespace DO { namespace Sara {
     const OERegion& x() const
     {
       if (_x == nullptr)
-        throw std::runtime_error{ "x is null" };
+        throw std::runtime_error{"x is null"};
       return *_x;
     }
 
     const OERegion& y() const
     {
       if (_y == nullptr)
-        throw std::runtime_error{ "y is null" };
+        throw std::runtime_error{"y is null"};
       return *_y;
     }
 
@@ -153,27 +160,24 @@ namespace DO { namespace Sara {
     //! Key match equality.
     bool operator==(const Match& m) const
     {
-      return (x() == m.x() && y() == m.y());
+      return x() == m.x() && y() == m.y();
     }
 
   private: /* data members */
-    const OERegion *_x{ nullptr };
-    const OERegion *_y{ nullptr };
-    int _x_index{ -1 };
-    int _y_index{ -1 };
-    int _rank{ -1 };
-    float _score{ std::numeric_limits<float>::max() };
-    Direction _matching_dir{ Direction::SourceToTarget };
+    const OERegion* _x{nullptr};
+    const OERegion* _y{nullptr};
+    int _x_index{-1};
+    int _y_index{-1};
+    int _rank{-1};
+    float _score{std::numeric_limits<float>::max()};
+    Direction _matching_dir{Direction::SourceToTarget};
   };
 
   inline Match make_index_match(int i1, int i2,
                                 float score = std::numeric_limits<float>::max())
   {
-    return Match{
-      nullptr, nullptr,
-      score, Match::Direction::SourceToTarget,
-      i1, i2
-    };
+    return Match{nullptr, nullptr, score, Match::Direction::SourceToTarget,
+                 i1,      i2};
   }
 
   //! @{
@@ -226,6 +230,8 @@ namespace DO { namespace Sara {
   void check_matches(const Image<Rgb8>& I1, const Image<Rgb8>& I2,
                      const std::vector<Match>& matches,
                      bool redraw_everytime = false, float z = 1.f);
+  //! @}
+
   //! @}
 
 } /* namespace Sara */

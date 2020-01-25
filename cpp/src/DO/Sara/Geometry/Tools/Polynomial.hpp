@@ -21,6 +21,9 @@
 
 namespace DO { namespace Sara {
 
+  //! @addtogroup GeometryTools
+  //! @{
+
   //! Monomial class.
   template <typename T>
   class Monomial
@@ -189,6 +192,8 @@ namespace DO { namespace Sara {
   private:
     T _coeff[N+1];
   };
+
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

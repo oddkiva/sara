@@ -11,15 +11,18 @@
 
 #pragma once
 
-#include <functional>
-#include <stdexcept>
-
 #include <DO/Sara/Core/EigenExtension.hpp>
 #include <DO/Sara/Core/Pixel/ChannelConversion.hpp>
 #include <DO/Sara/Core/Pixel/Pixel.hpp>
 
+#include <functional>
+#include <stdexcept>
+
 
 namespace DO { namespace Sara {
+
+  //! @addtogroup Color
+  //! @{
 
   template <typename T>
   struct PixelTraits
@@ -149,6 +152,8 @@ namespace DO { namespace Sara {
       }
     };
   };
+
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

@@ -19,6 +19,9 @@
 // Color space conversion with floating-point values.
 namespace DO { namespace Sara {
 
+  //! @addtogroup Color
+  //! @{
+
   //! Convert RGB color to gray color.
   template <typename T, int N>
   inline void rgb_to_gray(const Matrix<T, N, 1>& rgb, T& gray)
@@ -193,6 +196,8 @@ namespace DO { namespace Sara {
   {
     gray_to_yuv<T>(src, dst);
   }
+
+  //! @}
 
 } /* namespace Sara */
 } /* namespace DO */

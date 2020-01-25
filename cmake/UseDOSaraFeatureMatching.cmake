@@ -1,8 +1,3 @@
-include_directories(
-  ${DO_Sara_INCLUDE_DIR}
-  ${DO_Sara_ThirdParty_DIR}/eigen
-  ${DO_Sara_ThirdParty_DIR}/flann/src/cpp)
-
 if (SARA_USE_FROM_SOURCE)
   get_property(DO_Sara_FeatureMatching_ADDED GLOBAL PROPERTY
                _DO_Sara_FeatureMatching_INCLUDED)
@@ -13,5 +8,10 @@ if (SARA_USE_FROM_SOURCE)
       "FeatureMatching"
       "Core;Features;Graphics;KDTree;Match")
     sara_generate_library("FeatureMatching")
+
+    target_include_directories(DO_Sara_FeatureMatching PRIVATE
+      ${DO_Sara_INCLUDE_DIR}
+      ${DO_Sara_ThirdParty_DIR}/eigen
+      ${DO_Sara_ThirdParty_DIR}/flann/src/cpp)
   endif ()
 endif ()
