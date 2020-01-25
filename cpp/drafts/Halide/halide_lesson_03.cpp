@@ -120,6 +120,7 @@ auto halide_pipeline() -> void
       "/Users/david/GitLab/DO-CV/sara/cpp/examples/Sara/VideoIO/orion_1.mpg"s;
 #else
   const auto video_filepath = "/home/david/Desktop/test.mp4"s;
+  //const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
 #endif
 
   VideoStream video_stream(video_filepath);
@@ -178,28 +179,24 @@ auto halide_pipeline() -> void
                          clamp(y, 0, input_buffer.height() - 1),  //
                          c);
 
+  // The filter
   auto filter = Halide::Func{"filter"};
+
   // Laplacian.
   // filter(x, y, c) = Halide::abs(
   //     padded(x, y, c) - (padded(x + 1, y + 0, c) + padded(x - 1, y + 0, c) +
   //                        padded(x + 0, y + 1, c) + padded(x + 0, y - 1, c)) /
   //                           4.f);
+
   // Blur.
   filter(x, y, c) = (padded(x - 1, y - 1, c) + padded(x - 0, y - 1, c) + padded(x + 1, y - 1, c)
                    + padded(x - 1, y + 0, c) + padded(x - 0, y + 0, c) + padded(x + 1, y + 0, c)
                    + padded(x - 1, y + 1, c) + padded(x - 0, y + 1, c) + padded(x + 1, y + 1, c)) / 9.f;
 
-  // The output result.
+  // The output result to show on the screen.
   auto filter_rescaled = Halide::Func{"rescaled"};
   //filter_rescaled(x, y, c) = Halide::cast<uint8_t>((filter(x, y, c) / 2.f)* 255.f);
   filter_rescaled(x, y, c) = Halide::cast<uint8_t>(filter(x, y, c) * 255.f);
-  filter_rescaled.reorder(c, x, y).bound(c, 0, 3).unroll(c);
-  filter_rescaled.gpu_tile(x, y, xo, yo, xi, yi, 16, 16);
-
-  // Calculate the padded image as an intermediate result for the laplacian
-  // calculation in a shared memory.
-  padded.compute_at(filter_rescaled, xo);
-  padded.gpu_threads(x, y);
 
   // Specify that the output buffer is in interleaved RGB format.
   filter_rescaled.output_buffer()
@@ -208,6 +205,13 @@ auto halide_pipeline() -> void
       .dim(2)
       .set_stride(1)
       .set_bounds(0, 3);
+  filter_rescaled.reorder(c, x, y).bound(c, 0, 3).unroll(c);
+  filter_rescaled.gpu_tile(x, y, xo, yo, xi, yi, 16, 16);
+
+  // Calculate the padded image as an intermediate result for the laplacian
+  // calculation in a shared memory.
+  padded.compute_at(filter_rescaled, xo);
+  padded.gpu_threads(x, y);
 
   filter_rescaled.compile_jit(target);
 
