@@ -1,7 +1,19 @@
 #include <drafts/NeuralNetworks/TensorRT/Helpers.hpp>
 
+#include <fstream>
+#include <sstream>
+#include <string>
 #include <vector>
 
+
+auto engine_deleter(nvinfer1::ICudaEngine* engine) -> void
+{
+  if (engine != nullptr)
+    engine->destroy();
+  engine = nullptr;
+}
+
+using CudaEngineUniquePtr = std::unique_ptr<nvinfer1::ICudaEngine, decltype(&engine_deleter)>;
 
 auto main() -> int
 {
@@ -45,6 +57,97 @@ auto main() -> int
 
   // Get the ouput tensor.
   /*  auto conv1 = */ conv1_fn->getOutput(0);
+
+
+  // Setup the engine.
+  builder->setMaxBatchSize(1);
+  builder->setMaxWorkspaceSize(32);
+  builder->allowGPUFallback(true);
+  builder->setHalf2Mode(true);
+
+
+  // Create an engine.
+  auto engine = CudaEngineUniquePtr{nullptr, &engine_deleter};
+
+  // Load inference engine from a model weights.
+  constexpr auto load_engine = false;
+  if constexpr (load_engine)
+  {
+    auto runtime_deleter = [](nvinfer1::IRuntime* runtime) {
+      if (runtime != nullptr)
+        runtime->destroy();
+      runtime = nullptr;
+    };
+    auto runtime =
+        std::unique_ptr<nvinfer1::IRuntime, decltype(runtime_deleter)>{
+            nvinfer1::createInferRuntime(sara::TensorRT::Logger::instance()),
+            runtime_deleter};
+
+    auto model_weights_file = std::ifstream{"model_weights.trt"};
+    if (!model_weights_file)
+      throw std::runtime_error{"Failed to open model weights file!"};
+
+    auto model_weights_stream = std::stringstream{};
+    model_weights_stream << model_weights_file.rdbuf();
+
+    model_weights_stream.seekg(0, std::ios::end);
+    const auto model_weights_byte_size = model_weights_stream.tellg();
+
+    model_weights_stream.seekg(0, std::ios::beg);
+    auto model_weights = std::vector<char>(model_weights_byte_size);
+    model_weights_stream.read(model_weights.data(), model_weights.size());
+
+    engine =
+        CudaEngineUniquePtr{runtime->deserializeCudaEngine(
+                                model_weights.data(), model_weights.size()),
+                            &engine_deleter};
+  }
+  // Build the engine.
+  else
+  {
+    engine = CudaEngineUniquePtr{builder->buildCudaEngine(*network),
+                                 &engine_deleter};
+
+    // Save the model weights.
+    constexpr auto save_model_weights = false;
+    if constexpr (save_model_weights)
+    {
+      auto model_weights_deleter = [](nvinfer1::IHostMemory* model_stream) {
+        if (model_stream != nullptr)
+          model_stream->destroy();
+        model_stream = nullptr;
+      };
+      auto model_weights = std::unique_ptr<nvinfer1::IHostMemory,
+                                          decltype(model_weights_deleter)>{
+          engine->serialize(), model_weights_deleter};
+
+      auto model_weights_stream = std::stringstream{};
+      model_weights_stream.seekg(0, model_weights_stream.beg);
+      model_weights_stream.write(
+          static_cast<const char*>(model_weights->data()),
+          model_weights->size());
+
+      auto model_weights_file = std::ofstream{"model_weights.trt"};
+      if (!model_weights_file)
+        throw std::runtime_error{"Failed to create model weights file!"};
+      model_weights_file << model_weights_stream.rdbuf();
+    }
+  }
+
+
+  // Perform inference in C++.
+  auto context_deleter = [](nvinfer1::IExecutionContext* context) {
+    if (context != nullptr)
+      context->destroy();
+    context = nullptr;
+  };
+  auto context =
+      std::unique_ptr<nvinfer1::IExecutionContext, decltype(context_deleter)>{
+          engine->createExecutionContext(), context_deleter};
+
+  // Fill some buffers
+  std::vector<void*> device_buffers(2, nullptr);
+  context->execute(1, device_buffers.data());
 
   return 0;
 }

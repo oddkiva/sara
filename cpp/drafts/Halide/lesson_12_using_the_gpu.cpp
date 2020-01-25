@@ -11,7 +11,9 @@ using namespace Halide;
 using namespace Halide::Tools;
 
 // Include a clock to do performance testing.
-#include "clock.h"
+#include <DO/Sara/Core/Tensor.hpp>
+#include <DO/Sara/Core/Timer.hpp>
+#include <DO/Sara/Graphics.hpp>
 
 Target find_gpu_target();
 
@@ -183,28 +185,22 @@ public:
     curved.realize(output);
 
     // Now take the best of 3 runs for timing.
+    auto timer = DO::Sara::Timer{};
     double best_time = 0.0;
     for (int i = 0; i < 3; i++)
     {
-
-      double t1 = current_time();
+      timer.restart();
 
       // Run the filter 100 times.
       for (int j = 0; j < 100; j++)
-      {
         curved.realize(output);
-      }
 
       // Force any GPU code to finish by copying the buffer back to the CPU.
       output.copy_to_host();
 
-      double t2 = current_time();
-
-      double elapsed = (t2 - t1) / 100;
+      double elapsed = timer.elapsed_ms() / 100;
       if (i == 0 || elapsed < best_time)
-      {
         best_time = elapsed;
-      }
     }
 
     printf("%1.4f milliseconds\n", best_time);
@@ -235,10 +231,32 @@ public:
   }
 };
 
-int main(int argc, char** argv)
+
+using namespace DO::Sara;
+
+
+inline auto convert_to_interleaved_rgb(const Halide::Buffer<uint8_t>& input)
+{
+  auto in_array = MultiArrayView<uint8_t, 3, RowMajor>{
+      input.data(), {3, input.height(), input.width()}};
+
+  auto image_interleaved = Image<Rgb8>{input.width(), input.height()};
+
+  auto image_as_tensor = MultiArrayView<uint8_t, 3, RowMajor>{
+      reinterpret_cast<uint8_t*>(image_interleaved.data()),
+      {input.height(), input.width(), 3}};
+
+  image_as_tensor = in_array.transpose({1, 2, 0});
+
+  return image_interleaved;
+}
+
+
+GRAPHICS_MAIN()
 {
   // Load an input image.
-  Buffer<uint8_t> input = load_image("images/rgb.png");
+  Buffer<uint8_t> input =
+      load_image("C:/Users/David/Desktop/GitLab/sara/data/sunflowerField.jpg");
 
   // Allocated an image that will store the correct output
   Buffer<uint8_t> reference_output(input.width(), input.height(),
@@ -271,6 +289,12 @@ int main(int argc, char** argv)
     p2.test_performance();
   }
 
+  create_window({input.width(), input.height()});
+  display(convert_to_interleaved_rgb(input));
+  get_key();
+  display(convert_to_interleaved_rgb(reference_output));
+  get_key();
+
   return 0;
 }
 
@@ -290,8 +314,8 @@ Target find_gpu_target()
   Target target = get_host_target();
 
   // Uncomment the following lines to try CUDA instead:
-  // target.set_feature(Target::CUDA);
-  // return target;
+  target.set_feature(Target::CUDA);
+  return target;
 
 #ifdef _WIN32
   if (LoadLibraryA("d3d12.dll") != nullptr)
