@@ -21,8 +21,6 @@ function build_library()
   else
     local cmake_options="-DCMAKE_BUILD_TYPE=${build_type} "
   fi
-  cmake_options+="-DCMAKE_C_COMPILER=/usr/bin/gcc-7 "
-  cmake_options+="-DCMAKE_CXX_COMPILER=/usr/bin/g++-7 "
   cmake_options+="-DCMAKE_EXPORT_COMPILE_COMMANDS=ON "
   cmake_options+="-DCMAKE_PREFIX_PATH=/home/david/Qt/5.12.6/gcc_64;/opt/boost-1.66.0 "
   cmake_options+="-DSARA_BUILD_VIDEOIO=ON "
@@ -30,7 +28,6 @@ function build_library()
   cmake_options+="-DSARA_BUILD_SHARED_LIBS=ON "
   cmake_options+="-DSARA_BUILD_TESTS=ON "
   cmake_options+="-DSARA_BUILD_SAMPLES=ON "
-  cmake_options+="-DSARA_USE_HALIDE=ON "
 
   if [ "$(uname -s)" == "Darwin" ]; then
     cmake_options+="-DQt5_DIR=$(brew --prefix qt)/lib/cmake/Qt5 "

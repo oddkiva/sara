@@ -39,6 +39,9 @@ if (CUDA_FOUND AND TensorRT_FOUND)
       COMPILE_FLAGS ${SARA_DEFINITIONS}
       RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
+    set_property(TARGET ${filename} PROPERTY
+      FOLDER "DO Sara Tests/DRAFTS/NeuralNetworks")
+
     add_test(NAME ${filename} COMMAND $<TARGET_FILE:${filename}>)
   endforeach()
 endif ()

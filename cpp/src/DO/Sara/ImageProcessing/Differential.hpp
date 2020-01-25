@@ -41,6 +41,9 @@ namespace DO { namespace Sara {
     using GradientField = Image<Vector<Field>, Field::Dimension>;
 
     template <typename Field>
+    using GradientFieldView = ImageView<Vector<Field>, Field::Dimension>;
+
+    template <typename Field>
     inline auto operator()(const typename Field::const_array_iterator& in,
                            Vector<Field>& out) const -> void
     {
@@ -70,10 +73,25 @@ namespace DO { namespace Sara {
       return out;
     }
 
+
+    template <typename Field>
+    auto operator()(const Field& in, GradientFieldView<Field>& out)
+    {
+      if (out.sizes() != out.sizes())
+        throw std::domain_error{
+            "Error: input and output must have the same sizes!"};
+
+      auto in_i = in.begin_array();
+      auto out_i = out.begin();
+      for (; !in_i.end(); ++in_i, ++out_i)
+        operator()<Field>(in_i, *out_i);
+    }
+
     template <typename Field>
     auto operator()(const Field& in) const -> GradientField<Field>
     {
       auto out = GradientField<Field>{ in.sizes() };
+      auto out_view = out.view();
 
       auto in_i = in.begin_array();
       auto out_i = out.begin();

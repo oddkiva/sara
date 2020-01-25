@@ -1,3 +1,11 @@
+# If the builds fail again:
+# 1. Update vcpkg and rebuild the image I/O, HDF5 and Ceres.
+#    Disable the build of the Video I/O API.
+#    Disable the tests and samples
+# 2. Reinstate tests and seamples
+# 3. Reinstate FFmpeg
+# 4. Reinstate the build of Video I/O API.
+
 version: 1.0.{build}
 
 image:
@@ -21,27 +29,27 @@ init:
 
 install:
   # Update vcpkg.
-  - cd c:\Tools\vcpkg
-  - git pull
-  - .\bootstrap-vcpkg.bat
+  #- cd c:\Tools\vcpkg
+  #- git pull
+  #- .\bootstrap-vcpkg.bat
 
   # Install Image I/O libraries. (less than 5 minutes to build)
-  - vcpkg install libjpeg-turbo:x64-windows
-  - vcpkg install libpng:x64-windows
-  - vcpkg install tiff:x64-windows
+  #- vcpkg install libjpeg-turbo:x64-windows
+  #- vcpkg install libpng:x64-windows
+  #- vcpkg install tiff:x64-windows
 
   # Install Video I/O libraries. (25 minutes to build)
-  - vcpkg install ffmpeg:x64-windows
+  #- vcpkg install ffmpeg:x64-windows
 
   # Install HDF5 libraries. (4 minutes to build).
-  - vcpkg install hdf5[cpp]:x64-windows
+  #- vcpkg install hdf5[cpp]:x64-windows
 
   # Install Ceres libraries. (23 minutes to build)
-  - vcpkg install ceres:x64-windows
+  #- vcpkg install ceres:x64-windows
 
   # Integrate vcpkg with msbuild.
-  - cd C:\Tools\vcpkg
-  - vcpkg integrate install
+  #- cd C:\Tools\vcpkg
+  #- vcpkg integrate install
 
 configuration:
   # - Debug
@@ -65,4 +73,4 @@ test_script:
 
   # Run the tests.
   - cd ..\sara-build
-  - ctest -C %configuration% -V
+  - ctest --output-on-failure -C %configuration%
