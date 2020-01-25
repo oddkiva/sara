@@ -27,6 +27,7 @@
 
 using namespace std;
 using namespace DO::Sara;
+namespace sara = DO::Sara;
 
 
 class TestFixtureForEllipse : public TestFixtureForPolygon
@@ -50,7 +51,7 @@ BOOST_FIXTURE_TEST_SUITE(TestEllipse, TestFixtureForEllipse)
 
 BOOST_AUTO_TEST_CASE(test_rho)
 {
-  const auto E = Ellipse{_a, _b, to_radian(_theta_degree), _center};
+  const auto E = sara::Ellipse{_a, _b, to_radian(_theta_degree), _center};
 
   // Change of variable in polar coordinates.
   // x = rho * cos(theta)
@@ -72,7 +73,7 @@ BOOST_AUTO_TEST_CASE(test_rho)
 
 BOOST_AUTO_TEST_CASE(test_overloaded_operator)
 {
-  const auto E = Ellipse{_a, _b, to_radian(_theta_degree), _center};
+  const auto E = sara::Ellipse{_a, _b, to_radian(_theta_degree), _center};
 
   // Change of variable in polar coordinates.
   // x = rho * cos(theta)
@@ -95,7 +96,7 @@ BOOST_AUTO_TEST_CASE(test_overloaded_operator)
 
 BOOST_AUTO_TEST_CASE(test_orientation)
 {
-  const auto E = Ellipse{_a, _b, to_radian(_theta_degree), _center};
+  const auto E = sara::Ellipse{_a, _b, to_radian(_theta_degree), _center};
 
   const auto N = 10;
   for (int i = 0; i < N; ++i)
@@ -108,7 +109,7 @@ BOOST_AUTO_TEST_CASE(test_orientation)
 
 BOOST_AUTO_TEST_CASE(test_ellipse_ostream)
 {
-  const auto E = Ellipse{250, 150, to_radian(_theta_degree), _center};
+  const auto E = sara::Ellipse{250, 150, to_radian(_theta_degree), _center};
 
   stringstream buffer;
   CoutRedirect cout_redirect{buffer.rdbuf()};
@@ -124,9 +125,9 @@ BOOST_AUTO_TEST_CASE(test_ellipse_ostream)
 
  BOOST_AUTO_TEST_CASE(test_sector_area)
 {
-  const auto E = Ellipse{_a, _b, to_radian(_theta_degree), _center};
+  const auto E = sara::Ellipse{_a, _b, to_radian(_theta_degree), _center};
 
-  const auto ell = CSG::Singleton<Ellipse>{E};
+  const auto ell = CSG::Singleton<sara::Ellipse>{E};
 
   try
   {
@@ -179,7 +180,7 @@ BOOST_AUTO_TEST_CASE(test_ellipse_ostream)
 
 BOOST_AUTO_TEST_CASE(test_segment_area)
 {
-  const auto E = Ellipse{_a, _b, to_radian(_theta_degree), _center};
+  const auto E = sara::Ellipse{_a, _b, to_radian(_theta_degree), _center};
 
   try
   {
@@ -224,7 +225,7 @@ BOOST_AUTO_TEST_CASE(test_construct_from_shape_matrix)
 
 BOOST_AUTO_TEST_CASE(test_oriented_bbox)
 {
-  const auto E = Ellipse{_a, _b, 0, Point2d::Zero()};
+  const auto E = sara::Ellipse{_a, _b, 0, Point2d::Zero()};
   const auto actual_bbox = oriented_bbox(E);
   const auto expected_bbox = Quad{BBox{-Point2d{_a, _b}, Point2d{_a, _b}}};
   for (int i = 0; i < 4; ++i)
