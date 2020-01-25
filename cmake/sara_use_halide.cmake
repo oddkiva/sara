@@ -90,19 +90,29 @@ endif()
 # include(${HALIDE_CMAKE_CONFIG_FILEPATH})
 # include(${HALIDE_CMAKE_FILEPATH})
 
-add_library(Halide INTERFACE IMPORTED)
+add_library(Halide SHARED IMPORTED)
 set_target_properties(Halide PROPERTIES
   INTERFACE_INCLUDE_DIRECTORIES "${HALIDE_INCLUDE_DIRS}"
-  # Dynamic linking.
-  INTERFACE_LINK_LIBRARIES "${HALIDE_LIBRARIES}"
-  # Keep this for future reference if we want to link statically.
-  # INTERFACE_LINK_LIBRARIES "${HALIDE_LIBRARIES};${ZLIB_LIBRARIES}"
   INTERFACE_COMPILE_OPTIONS ${HALIDE_COMPILE_OPTIONS})
-
-# Quick and dirty: distribute the DLLs in the binary folders.
 if (WIN32)
-  file(COPY ${HALIDE_DLL_DEBUG}   DESTINATION ${CMAKE_BINARY_DIR}/bin/Debug)
-  file(COPY ${HALIDE_DLL_RELEASE} DESTINATION ${CMAKE_BINARY_DIR}/bin/Release)
-  file(COPY ${HALIDE_DLL_RELEASE} DESTINATION ${CMAKE_BINARY_DIR}/bin/RelWithDebInfo)
-  file(COPY ${HALIDE_DLL_RELEASE} DESTINATION ${CMAKE_BINARY_DIR}/bin/MinSizeRel)
+  set_target_properties(Halide PROPERTIES
+    IMPORTED_IMPLIB_DEBUG ${HALIDE_LIBRARY_DEBUG}
+    IMPORTED_IMPLIB_RELEASE ${HALIDE_LIBRARY_RELEASE}
+    IMPORTED_LOCATION_DEBUG ${HALIDE_DLL_DEBUG}
+    IMPORTED_LOCATION_RELEASE ${HALIDE_DLL_RELEASE})
+else ()
+  set_target_properties(Halide PROPERTIES
+    # Keep this for future reference if we want to link statically.
+    # INTERFACE_LINK_LIBRARIES "${HALIDE_LIBRARIES};${ZLIB_LIBRARIES}"
+    #
+    # Dynamic linking.
+    INTERFACE_LINK_LIBRARIES "${HALIDE_LIBRARIES}")
 endif ()
+
+# # Quick and dirty: distribute the DLLs in the binary folders.
+# if (WIN32)
+#   file(COPY ${HALIDE_DLL_DEBUG}   DESTINATION ${CMAKE_BINARY_DIR}/bin/Debug)
+#   file(COPY ${HALIDE_DLL_RELEASE} DESTINATION ${CMAKE_BINARY_DIR}/bin/Release)
+#   file(COPY ${HALIDE_DLL_RELEASE} DESTINATION ${CMAKE_BINARY_DIR}/bin/RelWithDebInfo)
+#   file(COPY ${HALIDE_DLL_RELEASE} DESTINATION ${CMAKE_BINARY_DIR}/bin/MinSizeRel)
+# endif ()
