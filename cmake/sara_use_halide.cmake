@@ -64,8 +64,9 @@ else ()
   #   PATHS ${HALIDE_DISTRIB_DIR}
   #   PATH_SUFFIXES lib bin)
 
-  if (UNIX)
-    set(HALIDE_LIBRARIES ${HALIDE_LIBRARY} dl CACHE STRING "")
+  set(HALIDE_LIBRARIES ${HALIDE_LIBRARY})
+  if (NOT APPLE)
+    list(APPEND HALIDE_LIBRARIES dl)
   endif ()
 
   mark_as_advanced(HALIDE_FOUND
@@ -90,10 +91,16 @@ endif()
 # include(${HALIDE_CMAKE_CONFIG_FILEPATH})
 # include(${HALIDE_CMAKE_FILEPATH})
 
-add_library(Halide SHARED IMPORTED)
+if (WIN32)
+  add_library(Halide SHARED IMPORTED)
+else ()
+  add_library(Halide INTERFACE IMPORTED)
+endif ()
+
 set_target_properties(Halide PROPERTIES
   INTERFACE_INCLUDE_DIRECTORIES "${HALIDE_INCLUDE_DIRS}"
   INTERFACE_COMPILE_OPTIONS ${HALIDE_COMPILE_OPTIONS})
+
 if (WIN32)
   set_target_properties(Halide PROPERTIES
     IMPORTED_IMPLIB_DEBUG ${HALIDE_LIBRARY_DEBUG}
