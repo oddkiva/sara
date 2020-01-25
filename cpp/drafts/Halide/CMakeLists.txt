@@ -1,9 +1,7 @@
-cmake_minimum_required(VERSION 3.0)
-
-
 find_package(DO_Sara COMPONENTS Core Graphics VideoIO REQUIRED)
 find_package(OpenMP REQUIRED)
 
+# Halide binaries.
 if (HALIDE_DISTRIB_DIR)
   find_file(HALIDE_CMAKE_FILEPATH NAMES halide.cmake
     PATHS ${HALIDE_DISTRIB_DIR})
@@ -92,13 +90,12 @@ function (add_halide_executable source_file)
     PRIVATE ${HALIDE_DISTRIB_DIR}/include
             ${HALIDE_DISTRIB_DIR}/tools)
 
-  target_compile_options(${name} PRIVATE ${OpenMP_CXX_FLAGS})
   target_link_libraries(${name} PRIVATE
     ${DO_Sara_LIBRARIES}
     ${HALIDE_LIBRARIES}
     ${JPEG_LIBRARIES}
     ${PNG_LIBRARIES}
-    ${OpenMP_CXX_FLAGS})
+    ${OpenMP_CXX_LIBRARIES})
 
   if (UNIX)
     target_compile_options(${name} PRIVATE
@@ -125,15 +122,13 @@ foreach (lesson ${LESSONS_SOURCE_FILES})
   add_executable(${lesson_name} ${lesson})
   set_target_properties(${lesson_name} PROPERTIES
     COMPILE_FLAGS ${SARA_DEFINITIONS})
-  target_compile_options(${lesson_name} PRIVATE ${OpenMP_CXX_FLAGS})
   target_include_directories(${lesson_name}
     PRIVATE ${HALIDE_DISTRIB_DIR}/include
             ${HALIDE_DISTRIB_DIR}/tools)
-  target_compile_options(${lesson_name} PRIVATE ${OpenMP_CXX_FLAGS})
   target_link_libraries(${lesson_name} PRIVATE
     ${DO_Sara_LIBRARIES}
     ${HALIDE_LIBRARIES}
-    ${OpenMP_CXX_FLAGS})
+    ${OpenMP_CXX_LIBRARIES})
 
   if (UNIX)
     target_compile_options(${lesson_name} PRIVATE
