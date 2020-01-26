@@ -22,6 +22,8 @@
 
 #include "StudyOnMikolajczykDataset.hpp"
 
+#include <DO/Sara/Match/PairWiseDrawer.hpp>
+
 namespace DO::Sara {
 
   class DO_SARA_EXPORT EvalQualityOfLocalAffApprox

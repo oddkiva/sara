@@ -18,15 +18,16 @@
  *  ACCV 2012, Daejeon, South Korea.
  */
 
-#ifdef _OPENMP
-#  include <omp.h>
-#endif
+#include "EvaluateQualityOfLocalAffineApproximation.hpp"
 
 #include "../GrowMultipleRegions.hpp"
 #include "../MatchNeighborhood.hpp"
-#include "EvaluateQualityOfLocalAffineApproximation.hpp"
 
 #include <DO/Sara/FileSystem.hpp>
+
+#ifdef _OPENMP
+#  include <omp.h>
+#endif
 
 
 using namespace std;
@@ -35,7 +36,7 @@ using namespace std;
 namespace DO::Sara {
 
   bool EvalQualityOfLocalAffApprox::operator()(float squared_ell,
-                                               size_t numRegionGrowths,
+                                               size_t num_region_growths,
                                                size_t K, double rho_min) const
   {
     // ====================================================================== //
@@ -89,7 +90,7 @@ namespace DO::Sara {
           int ub = lb + 1;
           bool success;
           success = run(M, M_sorted, H, j, squared_ell, thres[lb], thres[ub],
-                        numRegionGrowths, K, rho_min, drawer);
+                        num_region_growths, K, rho_min, drawer);
           if (!success)
           {
             if (_display)
@@ -136,7 +137,7 @@ namespace DO::Sara {
     vector<size_t> I(get_matches(M_sorted, lb, ub));
     // We want to perform our analysis on this particular subset of matches of
     // interest.
-    bool verbose = _debug && drawer;
+    bool verbose = _debug && (drawer != nullptr);
     RegionGrowingAnalyzer analyzer(M, H, verbose);
     analyzer.set_subset_of_interest(I);
 

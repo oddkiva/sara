@@ -32,8 +32,10 @@ namespace DO::Sara {
   {
     // Store stats.
     vector<Statistics> stat_N_Ks, stat_hatN_Ks, stat_diffs;
-    vector<Statistics> stat_N_Ks_inliers, stat_hatN_Ks_inliers, stat_diffs_inliers;
-    vector<Statistics> stat_N_Ks_outliers, stat_hatN_Ks_outliers, stat_diffs_outliers;
+    vector<Statistics> stat_N_Ks_inliers, stat_hatN_Ks_inliers,
+        stat_diffs_inliers;
+    vector<Statistics> stat_N_Ks_outliers, stat_hatN_Ks_outliers,
+        stat_diffs_outliers;
 
     for (int j = 1; j < 6; ++j)
     {
@@ -55,47 +57,50 @@ namespace DO::Sara {
 
         // ComputeMatchNeighborhood computeNeighborhood(filteredM, 1e3, &drawer,
         // true);
-        NearestMatchNeighborhoodComputer computeN_K(M, 1e3);
+        NearestMatchNeighborhoodComputer computeN_K(M, std::size_t(1e3));
 
         // Get inliers and outliers.
         vector<size_t> inliers, outliers;
         get_inliers_and_outliers(inliers, outliers, M, dataset().H(j),
-                              inlier_thres);
+                                 inlier_thres);
         cout << "inliers.size() = " << inliers.size() << endl;
         cout << "outliers.size() = " << outliers.size() << endl;
 
         // Compute neighborhoods.
-        vector<vector<size_t>> N_K(computeN_K(K, squaredRhoMin));
-        vector<vector<size_t>> hatN_K(computeN_K(N_K));
+        const auto N_K = computeN_K(K, squaredRhoMin);
+        const auto hatN_K = compute_hat_N_K(N_K);
 
         // General stats.
         Statistics stat_N_K, stat_hatN_K, stat_diff;
-        getStat(stat_N_K, stat_hatN_K, stat_diff, N_K, hatN_K);
+        compute_statistics(stat_N_K, stat_hatN_K, stat_diff, N_K, hatN_K);
         stat_N_Ks.push_back(stat_N_K);
         stat_hatN_Ks.push_back(stat_hatN_K);
         stat_diffs.push_back(stat_diff);
+
         // Stats with inliers only.
         Statistics inlier_stat_N_K, inlier_stat_hatN_K, inlier_stat_diff;
-        getStat(inlier_stat_N_K, inlier_stat_hatN_K, inlier_stat_diff, inliers,
-                N_K, hatN_K);
+        compute_statistics(inlier_stat_N_K, inlier_stat_hatN_K,
+                           inlier_stat_diff, inliers, N_K, hatN_K);
         stat_N_Ks_inliers.push_back(inlier_stat_N_K);
         stat_hatN_Ks_inliers.push_back(inlier_stat_hatN_K);
         stat_diffs_inliers.push_back(inlier_stat_diff);
+
         // Stats with outliers only.
         Statistics outlier_stat_N_K, outlier_stat_hatN_K, outlier_stat_diff;
-        getStat(outlier_stat_N_K, outlier_stat_hatN_K, outlier_stat_diff,
-                outliers, N_K, hatN_K);
+        compute_statistics(outlier_stat_N_K, outlier_stat_hatN_K,
+                           outlier_stat_diff, outliers, N_K, hatN_K);
         stat_N_Ks_outliers.push_back(outlier_stat_N_K);
         stat_hatN_Ks_outliers.push_back(outlier_stat_hatN_K);
         stat_diffs_outliers.push_back(outlier_stat_diff);
       }
+
       close_window_for_image_pair();
     }
 
-    string folder(dataset().name());
-    folder = string_src_path(folder);
-    string folder_inlier = folder + "_inlier";
-    string folder_outlier = folder + "_outlier";
+    const auto folder = string_src_path(dataset().name());
+    const auto folder_inlier = folder + "_inlier";
+    const auto folder_outlier = folder + "_outlier";
+
     mkdir(folder);
     mkdir(folder_inlier);
     mkdir(folder_outlier);
@@ -103,25 +108,29 @@ namespace DO::Sara {
     const string name("squaredEll_" + to_string(squared_ell) + "_K_" +
                       to_string(K) + "_squaredRhoMin_" +
                       to_string(squaredRhoMin) + dataset().featType() + ".txt");
-    // General stats
-    if (!saveStats(folder + "/" + name, stat_N_Ks, stat_hatN_Ks, stat_diffs))
+
+    // General stats.
+    if (!compute_statistics(folder + "/" + name, stat_N_Ks, stat_hatN_Ks,
+                            stat_diffs))
     {
       cerr << "Could not save stats:\n" << string(folder + name) << endl;
       return false;
     }
     cout << "Saved stats:\n" << string(folder + "/" + name) << endl;
-    // Inlier stats
-    if (!saveStats(folder_inlier + "/" + name, stat_N_Ks_inliers,
-                   stat_hatN_Ks_inliers, stat_diffs_inliers))
+
+    // Inlier stats.
+    if (!compute_statistics(folder_inlier + "/" + name, stat_N_Ks_inliers,
+                            stat_hatN_Ks_inliers, stat_diffs_inliers))
     {
       cerr << "Could not save stats:\n"
            << string(folder_inlier + "/" + name) << endl;
       return false;
     }
     cout << "Saved stats:\n" << string(folder_inlier + "/" + name) << endl;
-    // Outlier stats
-    if (!saveStats(folder_outlier + "/" + name, stat_N_Ks_outliers,
-                   stat_hatN_Ks_outliers, stat_diffs_outliers))
+
+    // Outlier stats.
+    if (!compute_statistics(folder_outlier + "/" + name, stat_N_Ks_outliers,
+                            stat_hatN_Ks_outliers, stat_diffs_outliers))
     {
       cerr << "Could not save stats:\n" << string(folder + name) << endl;
       return false;
@@ -131,9 +140,11 @@ namespace DO::Sara {
     return true;
   }
 
-  void Study_N_K_m::getStat(Statistics& stat_N_K, Statistics& stat_hatN_K, Statistics& stat_diff,
-                            const vector<vector<size_t>>& N_K,
-                            const vector<vector<size_t>>& hatN_K)
+  void Study_N_K_m::compute_statistics(Statistics& stat_N_K,
+                                       Statistics& stat_hatN_K,
+                                       Statistics& stat_diff,
+                                       const vector<vector<size_t>>& N_K,
+                                       const vector<vector<size_t>>& hatN_K)
   {
     vector<int> diff_size(N_K.size());
     vector<int> size_N_K(N_K.size());
@@ -150,11 +161,12 @@ namespace DO::Sara {
     stat_hatN_K.compute_statistics(size_hatN_K);
   }
 
-  void Study_N_K_m::checkNeighborhood(const vector<vector<size_t>>& N_K,
-                                      const vector<Match>& M,
-                                      const PairWiseDrawer& drawer)
+  void Study_N_K_m::check_neighborhood(const vector<vector<size_t>>& N_K,
+                                       const vector<Match>& M,
+                                       const PairWiseDrawer& drawer)
   {
     drawer.display_images();
+
     for (size_t i = 0; i != M.size(); ++i)
     {
       cout << "N_K[" << i << "].size() = " << N_K[i].size() << "\n ";
@@ -169,16 +181,19 @@ namespace DO::Sara {
         drawer.draw_match(M[indj]);
       }
       drawer.draw_match(M[i], Red8);
-      string name = "N_K_" + to_string(i) + ".png";
+
+      const auto name = "N_K_" + to_string(i) + ".png";
       save_screen(active_window(), string_src_path(name));
       get_key();
     }
   }
 
-  void Study_N_K_m::getStat(Statistics& stat_N_K, Statistics& stat_hatN_K, Statistics& stat_diff,
-                            const vector<size_t>& indices,
-                            const vector<vector<size_t>>& all_N_K,
-                            const vector<vector<size_t>>& all_hatN_K)
+  void Study_N_K_m::compute_statistics(Statistics& stat_N_K,
+                                       Statistics& stat_hatN_K,
+                                       Statistics& stat_diff,
+                                       const vector<size_t>& indices,
+                                       const vector<vector<size_t>>& all_N_K,
+                                       const vector<vector<size_t>>& all_hatN_K)
   {
     vector<vector<size_t>> N_K;
     vector<vector<size_t>> hatN_K;
@@ -188,8 +203,8 @@ namespace DO::Sara {
 
     for (size_t i = 0; i != indices.size(); ++i)
     {
-      N_K[i].reserve(1e3);
-      hatN_K[i].reserve(1e3);
+      N_K[i].reserve(std::size_t(1e3));
+      hatN_K[i].reserve(std::size_t(1e3));
     }
 
     for (size_t i = 0; i != indices.size(); ++i)
@@ -198,12 +213,13 @@ namespace DO::Sara {
       hatN_K[i] = all_hatN_K[indices[i]];
     }
 
-    getStat(stat_N_K, stat_hatN_K, stat_diff, N_K, hatN_K);
+    compute_statistics(stat_N_K, stat_hatN_K, stat_diff, N_K, hatN_K);
   }
 
-  bool Study_N_K_m::saveStats(const string& name, const vector<Statistics>& stat_N_Ks,
-                              const vector<Statistics>& stat_hatN_Ks,
-                              const vector<Statistics>& stat_diffs)
+  bool Study_N_K_m::compute_statistics(const string& name,
+                                       const vector<Statistics>& stat_N_Ks,
+                                       const vector<Statistics>& stat_hatN_Ks,
+                                       const vector<Statistics>& stat_diffs)
   {
     ofstream out(name.c_str());
     if (!out.is_open())

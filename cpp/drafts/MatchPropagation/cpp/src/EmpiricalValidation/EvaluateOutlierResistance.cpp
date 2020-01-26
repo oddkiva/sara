@@ -33,7 +33,7 @@ using namespace std;
 namespace DO::Sara {
 
   bool EvaluateOutlierResistance::operator()(float squared_ell,
-                                         size_t numRegionGrowths, size_t K,
+                                         size_t num_region_growths, size_t K,
                                          size_t k, double rho_min) const
   {
     // ====================================================================== //
@@ -80,7 +80,7 @@ namespace DO::Sara {
         for (size_t t = 0; t != thres.size(); ++t)
         {
           bool success;
-          success = run(M, H, j, squared_ell, thres[t], numRegionGrowths, K, k,
+          success = run(M, H, j, squared_ell, thres[t], num_region_growths, K, k,
                         rho_min, drawer.get());
           if (!success)
           {

@@ -22,6 +22,8 @@
 
 #include "StudyOnMikolajczykDataset.hpp"
 
+#include <DO/Sara/Match/PairWiseDrawer.hpp>
+
 
 namespace DO::Sara {
 
@@ -37,23 +39,26 @@ namespace DO::Sara {
                     double squaredRhoMin);
 
   private:
-    void getStat(Statistics& stat_N_K, Statistics& stat_hatN_K, Statistics& stat_diff,
-                 const std::vector<std::vector<size_t>>& N_K,
-                 const std::vector<std::vector<size_t>>& hatN_K);
-
-    void getStat(Statistics& stat_N_K, Statistics& stat_hatN_K, Statistics& stat_diff,
-                 const std::vector<size_t>& indices,
-                 const std::vector<std::vector<size_t>>& N_K,
-                 const std::vector<std::vector<size_t>>& hatN_K);
-
-
-    void checkNeighborhood(const std::vector<std::vector<size_t>>& N_K,
+    void check_neighborhood(const std::vector<std::vector<size_t>>& N_K,
                            const std::vector<Match>& M,
                            const PairWiseDrawer& drawer);
 
-    bool saveStats(const std::string& name, const std::vector<Statistics>& stat_N_Ks,
-                   const std::vector<Statistics>& stat_hatN_Ks,
-                   const std::vector<Statistics>& stat_diffs);
+    void compute_statistics(Statistics& stat_N_K, Statistics& stat_hatN_K,
+                            Statistics& stat_diff,
+                            const std::vector<std::vector<size_t>>& N_K,
+                            const std::vector<std::vector<size_t>>& hatN_K);
+
+    void compute_statistics(Statistics& stat_N_K, Statistics& stat_hatN_K,
+                            Statistics& stat_diff,
+                            const std::vector<size_t>& indices,
+                            const std::vector<std::vector<size_t>>& N_K,
+                            const std::vector<std::vector<size_t>>& hatN_K);
+
+
+    bool compute_statistics(const std::string& name,
+                            const std::vector<Statistics>& stat_N_Ks,
+                            const std::vector<Statistics>& stat_hatN_Ks,
+                            const std::vector<Statistics>& stat_diffs);
   };
 
 }  // namespace DO::Sara

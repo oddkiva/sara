@@ -21,7 +21,7 @@ set(Study_INC
   #Learn_P_f.hpp
   EvaluateQualityOfLocalAffineApproximation.hpp
   EvaluateOutlierResistance.hpp
-  #Study_N_K_m.hpp
+  Study_N_K_m.hpp
   #StudyPerfWithHatN_K.hpp
   )
 set(Study_SRC
@@ -29,7 +29,7 @@ set(Study_SRC
   #Learn_P_f.cpp
   EvaluateQualityOfLocalAffineApproximation.cpp
   EvaluateOutlierResistance.cpp
-  #Study_N_K_m.cpp
+  Study_N_K_m.cpp
   #StudyPerfWithHatN_K.cpp
   )
 set(Study_DEPS
