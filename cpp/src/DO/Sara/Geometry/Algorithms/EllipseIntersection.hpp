@@ -26,6 +26,7 @@ namespace DO { namespace Sara {
    * Compute the approximate intersection-union ratio by approximating ellipses
    * with polygons.
    */
+  DO_SARA_EXPORT
   std::vector<Point2d> approximate_intersection(const Ellipse& e1,
                                                 const Ellipse& e2,
                                                 int ellipse_discretization);
@@ -34,6 +35,7 @@ namespace DO { namespace Sara {
    * Compute the approximate Jaccard distance by approximating ellipses with
    * polygons.
    */
+  DO_SARA_EXPORT
   double approximate_jaccard_similarity(const Ellipse& e1,
                                         const Ellipse& e2,
                                         int ellipse_discretization = 36,
@@ -41,6 +43,7 @@ namespace DO { namespace Sara {
 
   //! Compute intersection points between two ellipses and return the number of
   //! intersection points.
+  DO_SARA_EXPORT
   int compute_intersection_points(Point2d intersections[],
                                   const Ellipse& e1,
                                   const Ellipse& e2);
@@ -50,6 +53,7 @@ namespace DO { namespace Sara {
     CAUTION: Numerical issues are not totally solved. We are almost there...
     Investigation is still ongoing.
    */
+  DO_SARA_EXPORT
   double analytic_intersection(const Ellipse& e1, const Ellipse& e2);
 
   /*!
@@ -57,6 +61,7 @@ namespace DO { namespace Sara {
     CAUTION: Numerical issues are not totally solved. We are almost there...
     Investigation is still ongoing.
    */
+  DO_SARA_EXPORT
   double analytic_jaccard_similarity(const Ellipse& e1, const Ellipse& e2);
 
   //! @}

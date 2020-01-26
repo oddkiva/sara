@@ -23,13 +23,14 @@
 #include "MatchNeighborhood.hpp"
 
 #ifdef _OPENMP
-# include <omp.h>
+#  include <omp.h>
 #endif
 
 
 using namespace std;
 
-namespace DO { namespace Sara {
+
+namespace DO::Sara {
 
   inline void ellRadii(float& a, float& b, const Matrix2f& M)
   {
@@ -42,94 +43,83 @@ namespace DO { namespace Sara {
 
   float sqIsoRadius(const Matrix2f& M)
   {
-    return 1.f/sqrt(M.determinant());
+    return 1.f / sqrt(M.determinant());
   }
 
-  ComputeN_K::
-  ComputeN_K(const vector<Match>& matches,
-             size_t neighborhoodMaxSize,
-             const PairWiseDrawer *pDrawer,
-             bool verbose)
-    : M_(matches)
-    , verbose_(verbose), drawer_ptr_(pDrawer)
-    , neighborhood_max_size_(neighborhoodMaxSize)
-    , x_index_ptr_(0)
-    , y_index_ptr_(0)
+  NearestMatchNeighborhoodComputer::NearestMatchNeighborhoodComputer(
+      const vector<Match>& matches, size_t neighborhoodMaxSize,
+      const PairWiseDrawer* pDrawer, bool verbose)
+    : _M(matches)
+    , _verbose(verbose)
+    , _drawer(pDrawer)
+    , _neighborhood_max_size(neighborhoodMaxSize)
   {
-    createAndSortXY();
-    createXMat();
-    createYMat();
-    createXYMat();
-    createXToM();
-    createYToM();
-    createXYToM();
-    buildKDTrees();
+    create_and_sort_xy();
+    create_x_matrix();
+    create_y_matrix();
+    create_xy_matrix();
+    create_x_to_m();
+    create_y_to_m();
+    create_xy_to_m();
+    build_kdtrees();
   }
 
-  ComputeN_K::~ComputeN_K()
-  {
-    if (x_index_ptr_)
-      delete x_index_ptr_;
-    if (y_index_ptr_)
-      delete y_index_ptr_;
-  }
-
-  vector<size_t>
-  ComputeN_K::operator()(size_t i, size_t K, double squaredRhoMin)
+  vector<size_t> NearestMatchNeighborhoodComputer::
+  operator()(size_t i, size_t K, double squaredRhoMin)
   {
     vector<size_t> N_K_i;
-    N_K_i.reserve(neighborhood_max_size_);
+    N_K_i.reserve(_neighborhood_max_size);
 
     // Match $m_i = (x_i, y_i)$
-    Vector2d xi(M_[i].posX().cast<double>());
-    Vector2d yi(M_[i].posY().cast<double>());
+    Vector2d xi(_M[i].x_pos().cast<double>());
+    Vector2d yi(_M[i].y_pos().cast<double>());
     // Collect the K nearest matches $\mathb{x}_j$ to $\mathb{x}_i$.
-    x_index_ptr_->knnSearch(xi, K, x_indices_, sq_dists_, true);
+    _x_index_ptr->knn_search(xi, K, _x_indices, _sq_dists);
     // Collect the K nearest matches $\mathb{y}_j$ to $\mathb{y}_i$
-    y_index_ptr_->knnSearch(yi, K, y_indices_, sq_dists_, true);
+    _y_index_ptr->knn_search(yi, K, _y_indices, _sq_dists);
 
 
     // Reset list of neighboring matches.
-    index_scores_.clear();
+    _index_scores.clear();
     //#define DEBUG
 #ifdef DEBUG
-    if (verbose_ && drawer_ptr_)
-      drawer_ptr_->displayImages();
+    if (_verbose && _drawer)
+      _drawer->display_images();
 #endif
-    getMatchesFromX(index_scores_, i, x_indices_, squaredRhoMin);
-    getMatchesFromY(index_scores_, i, y_indices_, squaredRhoMin);
-    keepBestScaleConsistentMatches(N_K_i, index_scores_, 10*K);
+    get_matches_from_x(_index_scores, i, _x_indices, squaredRhoMin);
+    get_matches_from_y(_index_scores, i, _y_indices, squaredRhoMin);
+    keep_best_scale_consistent_matches(N_K_i, _index_scores, 10 * K);
 #ifdef DEBUG
-    if (verbose_ && drawer_ptr_)
+    if (_verbose && _drawer)
     {
-      cout << "M_["<<i<<"] =\n" << M_[i] << endl;
-      cout << "N_K["<<i<<"].size() = " << N_K_i.size() << endl;
-      cout << "indexScores.size() = " << index_scores_.size() << endl;
-      for (size_t j = 0; j != index_scores_.size(); ++j)
-        cout << j << "\t" << index_scores_[j].first << " " << index_scores_[j].second << endl;
+      cout << "_M[" << i << "] =\n" << _M[i] << endl;
+      cout << "N_K[" << i << "].size() = " << N_K_i.size() << endl;
+      cout << "indexScores.size() = " << _index_scores.size() << endl;
+      for (size_t j = 0; j != _index_scores.size(); ++j)
+        cout << j << "\t" << _index_scores[j].first << " "
+             << _index_scores[j].second << endl;
       for (size_t j = 0; j != K; ++j)
       {
-        drawer_ptr_->drawMatch(M_[N_K_i[j]]);
-        drawer_ptr_->drawPoint(0, M_[N_K_i[j]].posX(), Cyan8, 3);
-        drawer_ptr_->drawPoint(1, M_[N_K_i[j]].posY(), Cyan8, 3);
+        _drawer->draw_match(_M[N_K_i[j]]);
+        _drawer->drawPoint(0, _M[N_K_i[j]].x_pos(), Cyan8, 3);
+        _drawer->drawPoint(1, _M[N_K_i[j]].y_pos(), Cyan8, 3);
       }
-      drawer_ptr_->drawMatch(M_[i], Cyan8);
-      getKey();
+      _drawer->draw_match(_M[i], Cyan8);
+      get_key();
     }
 #endif
     return N_K_i;
   }
 
-  vector<vector<size_t> >
-  ComputeN_K::operator()(const vector<size_t>& indices,
-                         size_t K, double squaredRhoMin)
+  vector<vector<size_t>> NearestMatchNeighborhoodComputer::
+  operator()(const vector<size_t>& indices, size_t K, double squaredRhoMin)
   {
-    vector<vector<size_t> > N_K_indices;
+    vector<vector<size_t>> N_K_indices;
     N_K_indices.resize(indices.size());
 
-    vector<vector<IndexScore> > indexScores;
-    vector<vector<int> > xIndices, yIndices;
-    vector<vector<double> > sqDists;
+    vector<vector<IndexScore>> indexScores;
+    vector<vector<int>> xIndices, yIndices;
+    vector<vector<double>> sqDists;
     indexScores.resize(indices.size());
     xIndices.resize(indices.size());
     yIndices.resize(indices.size());
@@ -143,33 +133,33 @@ namespace DO { namespace Sara {
     MatrixXd yis(2, indices.size());
     for (size_t i = 0; i != indices.size(); ++i)
     {
-      xis.col(i) = M_[indices[i]].posX().cast<double>();
-      yis.col(i) = M_[indices[i]].posY().cast<double>();
+      xis.col(i) = _M[indices[i]].x_pos().cast<double>();
+      yis.col(i) = _M[indices[i]].y_pos().cast<double>();
     }
     // Collect the K nearest matches $\mathb{x}_j$ to $\mathb{x}_i$.
-    x_index_ptr_->knnSearch(xis, K, xIndices, sqDists, true);
+    _x_index_ptr->knn_search(xis, K, xIndices, sqDists, true);
     // Collect the K nearest matches $\mathb{y}_j$ to $\mathb{y}_i$
-    y_index_ptr_->knnSearch(yis, K, yIndices, sqDists, true);
+    _y_index_ptr->knn_search(yis, K, yIndices, sqDists, true);
 #else
     for (size_t i = 0; i != indices.size(); ++i)
     {
-      Vector2d xi(M_[indices[i]].posX().cast<double>());
-      Vector2d yi(M_[indices[i]].posY().cast<double>());
-      x_index_ptr_->knnSearch(xi, K, xIndices[i], sqDists[0], true);
+      Vector2d xi(_M[indices[i]].x_pos().cast<double>());
+      Vector2d yi(_M[indices[i]].y_pos().cast<double>());
+      _x_index_ptr->knn_search(xi, K, xIndices[i], sqDists[0]);
       // Collect the K nearest matches $\mathb{y}_j$ to $\mathb{y}_i$
-      y_index_ptr_->knnSearch(yi, K, yIndices[i], sqDists[0], true);
+      _y_index_ptr->knn_search(yi, K, yIndices[i], sqDists[0]);
     }
 #endif
 
     int num_indices = static_cast<int>(indices.size());
 #ifdef _OPENMP
-# pragma omp parallel for
+#  pragma omp parallel for
 #endif
     for (int i = 0; i < num_indices; ++i)
     {
-      getMatchesFromX(indexScores[i], indices[i], xIndices[i], squaredRhoMin);
-      getMatchesFromY(indexScores[i], indices[i], yIndices[i], squaredRhoMin);
-      keepBestScaleConsistentMatches(N_K_indices[i], indexScores[i], 10*K);
+      get_matches_from_x(indexScores[i], indices[i], xIndices[i], squaredRhoMin);
+      get_matches_from_y(indexScores[i], indices[i], yIndices[i], squaredRhoMin);
+      keep_best_scale_consistent_matches(N_K_indices[i], indexScores[i], 10 * K);
     }
 
     return N_K_indices;
@@ -177,41 +167,40 @@ namespace DO { namespace Sara {
 
   // ======================================================================== //
   // 1. Sort matches by positions and match positions.
-  void ComputeN_K::createAndSortXY()
+  void NearestMatchNeighborhoodComputer::create_and_sort_xy()
   {
-    if (verbose_)
-      timer_.restart();
+    if (_verbose)
+      _timer.restart();
     // Construct the set of matches ordered by position x and y,
     // and by position matches (x,y).
-    X_.resize(M_.size());
-    Y_.resize(M_.size());
-    XY_.resize(M_.size());
-    for (size_t i = 0; i != M_.size(); ++i)
+    _X.resize(_M.size());
+    _Y.resize(_M.size());
+    _XY.resize(_M.size());
+    for (size_t i = 0; i != _M.size(); ++i)
     {
-      X_[i] = make_pair(M_[i].posX(), i);
-      Y_[i] = make_pair(M_[i].posY(), i);
-      XY_[i].first << M_[i].posX(), M_[i].posY();
-      XY_[i].second = i;
+      _X[i] = make_pair(_M[i].x_pos(), i);
+      _Y[i] = make_pair(_M[i].y_pos(), i);
+      _XY[i].first << _M[i].x_pos(), _M[i].y_pos();
+      _XY[i].second = i;
     }
     // Sort the set of matches.
     CompareByPos compareByPos;
     CompareByXY compareByXY;
-    sort(X_.begin(), X_.end(), compareByPos);
-    sort(Y_.begin(), Y_.end(), compareByPos);
-    sort(XY_.begin(), XY_.end(), compareByXY);
-    if (verbose_)
+    sort(_X.begin(), _X.end(), compareByPos);
+    sort(_Y.begin(), _Y.end(), compareByPos);
+    sort(_XY.begin(), _XY.end(), compareByXY);
+    if (_verbose)
     {
-      elapsed_ = timer_.elapsed();
-      printStage("Storing matrices of unique positions and match positions");
-      cout << "Time elapsed = " << elapsed_ << " seconds" << endl;
+      _elapsed = _timer.elapsed();
+      print_stage("Storing matrices of unique positions and match positions");
+      cout << "Time elapsed = " << _elapsed << " seconds" << endl;
     }
   }
 
   // ======================================================================== //
   // 2. Create data matrix for nearest neighbor search.
-  size_t
-  ComputeN_K::
-  countUniquePositions(const vector<PosIndex>& X)
+  size_t NearestMatchNeighborhoodComputer::count_unique_positions(
+      const vector<PosIndex>& X)
   {
     // Count the number of unique positions $\mathbf{x}_i$.
     size_t numPosX = 1;
@@ -224,49 +213,49 @@ namespace DO { namespace Sara {
         pos = X[i].first;
       }
     }
-    if(verbose_)
+    if (_verbose)
     {
       cout << "Check number of unique positions x" << endl;
       cout << "numPosX = " << numPosX << endl;
       cout << "X.size() = " << X.size() << endl;
-      cout << "M_.size() = " << M_.size() << endl;
+      cout << "_M.size() = " << _M.size() << endl;
     }
     return numPosX;
   }
 
-  size_t ComputeN_K::countUniquePosMatches()
+  size_t NearestMatchNeighborhoodComputer::count_unique_pos_matches()
   {
-    if (verbose_)
-      timer_.restart();
+    if (_verbose)
+      _timer.restart();
     // Count the number of unique positions $(\mathbf{x}_i, \mathbf{y}_i)$.
     size_t numPosXY = 1;
-    Vector4f match = XY_[0].first;
-    for (size_t i = 1; i != XY_.size(); ++i)
+    Vector4f match = _XY[0].first;
+    for (size_t i = 1; i != _XY.size(); ++i)
     {
-      if (XY_[i].first != match)
+      if (_XY[i].first != match)
       {
         ++numPosXY;
-        match = XY_[i].first;
+        match = _XY[i].first;
       }
     }
-    if (verbose_)
+    if (_verbose)
     {
-      cout << "Check number of unique position match (x,y)" << endl;;
+      cout << "Check number of unique position match (x,y)" << endl;
+      ;
       cout << "numPosXY = " << numPosXY << endl;
-      cout << "matchesByXY.size() = " << XY_.size() << endl;
-      cout << "matches.size() = " << M_.size() << endl;
-      elapsed_ = timer_.elapsed();
+      cout << "matchesByXY.size() = " << _XY.size() << endl;
+      cout << "matches.size() = " << _M.size() << endl;
+      _elapsed = _timer.elapsed();
       cout << "Counting number of unique positions (x,y)." << endl;
-      cout << "Time elapsed = " << elapsed_ << " seconds" << endl;
+      cout << "Time elapsed = " << _elapsed << " seconds" << endl;
     }
     return numPosXY;
   }
 
   MatrixXd
-  ComputeN_K::
-  createPosMat(const vector<PosIndex>& X)
+  NearestMatchNeighborhoodComputer::create_position_matrix(const vector<PosIndex>& X)
   {
-    size_t numPosX = countUniquePositions(X);
+    size_t numPosX = count_unique_positions(X);
     // Store the matrix of positions $\mathbf{x}_i$ without duplicate.
     MatrixXd xMat(2, numPosX);
     size_t xInd = 0;
@@ -281,7 +270,7 @@ namespace DO { namespace Sara {
         xMat.col(xInd) = pos.cast<double>();
       }
     }
-    if (verbose_)
+    if (_verbose)
     {
       cout << "Stacking position vectors." << endl;
       cout << "xInd = " << xInd << endl;
@@ -289,81 +278,80 @@ namespace DO { namespace Sara {
     return xMat;
   }
 
-  void ComputeN_K::createXMat()
+  void NearestMatchNeighborhoodComputer::create_x_matrix()
   {
-    if (verbose_)
-      printStage("X matrix");
-    X_mat_ = createPosMat(X_);
-    if (verbose_ && drawer_ptr_)
+    if (_verbose)
+      print_stage("X matrix");
+    _X_mat = create_position_matrix(_X);
+    if (_verbose && _drawer)
     {
-      for (size_t i = 0; i != X_mat_.cols(); ++i)
+      for (size_t i = 0; i != _X_mat.cols(); ++i)
       {
-        Vector2f xi(X_mat_.col(i).cast<float>());
-        //drawer_ptr_->drawPoint(0, xi, Red8, 5);
+        Vector2f xi(_X_mat.col(i).cast<float>());
+        // _drawer->drawPoint(0, xi, Red8, 5);
       }
     }
   }
 
-  void ComputeN_K::createYMat()
+  void NearestMatchNeighborhoodComputer::create_y_matrix()
   {
-    if (verbose_)
-      printStage("Y matrix");
+    if (_verbose)
+      print_stage("Y matrix");
 
-    Y_mat_ = createPosMat(Y_);
+    _Y_mat = create_position_matrix(_Y);
 
-    if (verbose_ && drawer_ptr_)
+    if (_verbose && _drawer)
     {
-      for (size_t i = 0; i != Y_mat_.cols(); ++i)
+      for (size_t i = 0; i != _Y_mat.cols(); ++i)
       {
-        Vector2f yi(Y_mat_.col(i).cast<float>());
-        //drawer_ptr_->drawPoint(1, yi, Blue8, 5);
+        Vector2f yi(_Y_mat.col(i).cast<float>());
+        // _drawer->drawPoint(1, yi, Blue8, 5);
       }
     }
   }
 
-  void ComputeN_K::createXYMat()
+  void NearestMatchNeighborhoodComputer::create_xy_matrix()
   {
-    if (verbose_)
-      printStage("XY matrix");
+    if (_verbose)
+      print_stage("XY matrix");
     // Store the matrix of position matches $(\mathbf{x}_i, \mathbf{y}_i)$
     // without duplicate.
-    size_t numPosXY = countUniquePosMatches();
-    XY_mat_ = MatrixXd(4, numPosXY);
+    size_t numPosXY = count_unique_pos_matches();
+    _XY_mat = MatrixXd(4, numPosXY);
     size_t xyInd = 0;
-    Vector4f match(XY_[0].first);
-    XY_mat_.col(0) = match.cast<double>();
-    for (size_t i = 1; i != XY_.size(); ++i)
+    Vector4f match(_XY[0].first);
+    _XY_mat.col(0) = match.cast<double>();
+    for (size_t i = 1; i != _XY.size(); ++i)
     {
-      if (XY_[i].first != match)
+      if (_XY[i].first != match)
       {
         ++xyInd;
-        match = XY_[i].first;
-        XY_mat_.col(xyInd) = match.cast<double>();
+        match = _XY[i].first;
+        _XY_mat.col(xyInd) = match.cast<double>();
       }
     }
-    if (verbose_ && drawer_ptr_)
+    if (_verbose && _drawer)
     {
       cout << "xyInd = " << xyInd << endl;
-      /*for (size_t i = 0; i != XY_mat_.cols(); ++i)
+      /*for (size_t i = 0; i != _XY_mat.cols(); ++i)
       {
-        Vector2f xi(XY_mat_.block(0,i,2,1).cast<float>());
-        drawer_ptr_->drawPoint(0, xi, Magenta8, 5);
-        Vector2f yi(XY_mat_.block(2,i,2,1).cast<float>());
-        drawer_ptr_->drawPoint(1, yi, Magenta8, 5);
+        Vector2f xi(_XY_mat.block(0,i,2,1).cast<float>());
+        _drawer->drawPoint(0, xi, Magenta8, 5);
+        Vector2f yi(_XY_mat.block(2,i,2,1).cast<float>());
+        _drawer->drawPoint(1, yi, Magenta8, 5);
       }*/
     }
   }
 
-  vector<vector<size_t> >
-  ComputeN_K::
-  createPosToMatchTable(const vector<PosIndex>& X, const MatrixXd& xMat)
+  auto NearestMatchNeighborhoodComputer::create_position_to_match_table(
+      const vector<PosIndex>& X, const MatrixXd& xMat) -> vector<vector<size_t>>
   {
     // Store the indices of matches $(\mathbf{x}_i, .)$.
     size_t numPosX = xMat.cols();
-    vector<vector<size_t> > xToM(numPosX);
+    vector<vector<size_t>> xToM(numPosX);
     // Allocate memory first.
     for (size_t i = 0; i != numPosX; ++i)
-      xToM[i].reserve(neighborhood_max_size_);
+      xToM[i].reserve(_neighborhood_max_size);
     // Loop
     size_t xInd = 0;
     Vector2f pos(X[0].first);
@@ -375,11 +363,11 @@ namespace DO { namespace Sara {
         ++xInd;
         pos = X[i].first;
       }
-      xToM[xInd].push_back( X[i].second );
+      xToM[xInd].push_back(X[i].second);
     }
-    if (verbose_)
+    if (_verbose)
     {
-      printStage("Check number of positions for x");
+      print_stage("Check number of positions for x");
       size_t num_positions_x = xToM.size();
       size_t num_matches_x = 0;
       for (size_t i = 0; i != xToM.size(); ++i)
@@ -392,221 +380,224 @@ namespace DO { namespace Sara {
 
   // ======================================================================== //
   // 3. Create lookup tables to find matches with corresponding positions.
-  void ComputeN_K::createXToM()
+  void NearestMatchNeighborhoodComputer::create_x_to_m()
   {
-    if (verbose_)
+    if (_verbose)
     {
-      printStage("Create X to M");
-      timer_.restart();
+      print_stage("Create X to M");
+      _timer.restart();
     }
-    X_to_M_ = createPosToMatchTable(X_, X_mat_);
-    if (verbose_)
+    _X_to_M = create_position_to_match_table(_X, _X_mat);
+    if (_verbose)
     {
-      size_t num_positions_x = X_to_M_.size();
+      size_t num_positions_x = _X_to_M.size();
       size_t num_matches_x = 0;
-      for (size_t i = 0; i != X_to_M_.size(); ++i)
-        num_matches_x += X_to_M_[i].size();
+      for (size_t i = 0; i != _X_to_M.size(); ++i)
+        num_matches_x += _X_to_M[i].size();
       cout << "num_positions_x = " << num_positions_x << endl;
       cout << "num_matches_x = " << num_matches_x << endl;
     }
   }
 
-  void ComputeN_K::createYToM()
+  void NearestMatchNeighborhoodComputer::create_y_to_m()
   {
-    if (verbose_)
+    if (_verbose)
     {
-      printStage("Create Y to M");
-      timer_.restart();
+      print_stage("Create Y to M");
+      _timer.restart();
     }
-    Y_to_M_ = createPosToMatchTable(Y_, Y_mat_);
-    if (verbose_)
+    _Y_to_M = create_position_to_match_table(_Y, _Y_mat);
+    if (_verbose)
     {
-      printStage("Check number of positions for y");
-      size_t num_positions_y = Y_to_M_.size();
+      print_stage("Check number of positions for y");
+      size_t num_positions_y = _Y_to_M.size();
       size_t num_matches_y = 0;
-      for (size_t i = 0; i != Y_to_M_.size(); ++i)
-        num_matches_y += Y_to_M_[i].size();
+      for (size_t i = 0; i != _Y_to_M.size(); ++i)
+        num_matches_y += _Y_to_M[i].size();
       cout << "num_positions_y = " << num_positions_y << endl;
       cout << "num_matches_y = " << num_matches_y << endl;
     }
   }
 
-  void ComputeN_K::createXYToM()
+  void NearestMatchNeighborhoodComputer::create_xy_to_m()
   {
-    if (verbose_)
+    if (_verbose)
     {
-      printStage("Create XY to M");
-      timer_.restart();
+      print_stage("Create XY to M");
+      _timer.restart();
     }
     // Store the indices of matches with corresponding positions
     // $(\mathbf{x}_i,\mathbf{y}_i)$.
-    size_t numXY = XY_mat_.cols();
-    XY_to_M_.resize(numXY);
+    size_t numXY = _XY_mat.cols();
+    _XY_to_M.resize(numXY);
     // Allocate memory first.
     for (size_t i = 0; i != numXY; ++i)
-      XY_to_M_[i].reserve(neighborhood_max_size_);
+      _XY_to_M[i].reserve(_neighborhood_max_size);
     // Loop
     size_t xyInd = 0;
-    Vector4f xy(XY_[0].first);
-    XY_to_M_[0].push_back(XY_[0].second);
-    for (size_t i = 1; i != XY_.size(); ++i)
+    Vector4f xy(_XY[0].first);
+    _XY_to_M[0].push_back(_XY[0].second);
+    for (size_t i = 1; i != _XY.size(); ++i)
     {
-      if (XY_[i].first != xy)
+      if (_XY[i].first != xy)
       {
         ++xyInd;
-        xy = XY_[i].first;
+        xy = _XY[i].first;
       }
-      XY_to_M_[xyInd].push_back( XY_[i].second );
+      _XY_to_M[xyInd].push_back(_XY[i].second);
     }
-    if (verbose_)
+    if (_verbose)
     {
-      printStage("Check number of positions for xy");
-      size_t num_positions_xy = XY_to_M_.size();
+      print_stage("Check number of positions for xy");
+      size_t num_positions_xy = _XY_to_M.size();
       size_t num_matches_xy = 0;
-      for (size_t i = 0; i != XY_to_M_.size(); ++i)
-        num_matches_xy += XY_to_M_[i].size();
+      for (size_t i = 0; i != _XY_to_M.size(); ++i)
+        num_matches_xy += _XY_to_M[i].size();
       cout << "num_positions_xy = " << num_positions_xy << endl;
       cout << "num_matches_xy = " << num_matches_xy << endl;
 
-      elapsed_ = timer_.elapsed();
-      cout << "Storing list of indices of matches with positions (x_i,y_i)." << endl;
-      cout << "Time elapsed = " << elapsed_ << " seconds" << endl;
+      _elapsed = _timer.elapsed();
+      cout << "Storing list of indices of matches with positions (x_i,y_i)."
+           << endl;
+      cout << "Time elapsed = " << _elapsed << " seconds" << endl;
     }
 
-    //drawer_ptr_->displayImages();
-    //for (size_t i = 1798; i != XY_to_M_.size(); ++i)
+    // _drawer->display_images();
+    // for (size_t i = 1798; i != _XY_to_M.size(); ++i)
     //{
-    //  /*if (XY_to_M_[i].size() == 1)
+    //  /*if (_XY_to_M[i].size() == 1)
     //    continue;*/
 
     //  cout << "\ni = " << i << " ";
-    //  cout << "XY_to_M_["<<i<<"].size() = " << XY_to_M_[i].size() << endl;
-    //  cout << "XY_mat_.col("<<i<<") = " << XY_mat_.col(i).transpose() << endl;
+    //  cout << "_XY_to_M["<<i<<"].size() = " << _XY_to_M[i].size() << endl;
+    //  cout << "_XY_mat.col("<<i<<") = " << _XY_mat.col(i).transpose() << endl;
 
     //  Rgb8 col(rand()%256, rand()%256, rand()%256);
-    //  for (size_t j = 0; j != XY_to_M_[i].size(); ++j)
+    //  for (size_t j = 0; j != _XY_to_M[i].size(); ++j)
     //  {
-    //    cout << " " << XY_to_M_[i][j] << endl;
-    //    cout << M_[XY_to_M_[i][j]] << endl;
-    //    drawer_ptr_->drawMatch(M_[XY_to_M_[i][j]], col);
+    //    cout << " " << _XY_to_M[i][j] << endl;
+    //    cout << _M[_XY_to_M[i][j]] << endl;
+    //    _drawer->draw_match(_M[_XY_to_M[i][j]], col);
     //  }
-    //  getKey();
+    //  get_key();
     //}
   }
 
   // ======================================================================== //
   // 4. Build kD-trees.
-  void ComputeN_K::buildKDTrees()
+  void NearestMatchNeighborhoodComputer::build_kdtrees()
   {
     // Construct the kD-trees.
-    if (verbose_)
+    if (_verbose)
     {
-      printStage("kD-Tree construction");
-      timer_.restart();
+      print_stage("kD-Tree construction");
+      _timer.restart();
     }
-    x_index_ptr_ = new KDTree(X_mat_);
-    y_index_ptr_ = new KDTree(Y_mat_);
-    if (verbose_)
+    _x_index_ptr.reset(new KDTree{_X_mat});
+    _y_index_ptr.reset(new KDTree{_Y_mat});
+    if (_verbose)
     {
-      elapsed_ = timer_.elapsed();
+      _elapsed = _timer.elapsed();
       cout << "KD-Tree building time" << endl;
-      cout << "Time elapsed = " << elapsed_ << " seconds" << endl;
+      cout << "Time elapsed = " << _elapsed << " seconds" << endl;
     }
 
     // Prepare work arrays.
-    x_indices_.reserve(2*neighborhood_max_size_);
-    y_indices_.reserve(2*neighborhood_max_size_);
-    sq_dists_.reserve(2*neighborhood_max_size_);
-    index_scores_.reserve(2*neighborhood_max_size_*100);
+    _x_indices.reserve(2 * _neighborhood_max_size);
+    _y_indices.reserve(2 * _neighborhood_max_size);
+    _sq_dists.reserve(2 * _neighborhood_max_size);
+    _index_scores.reserve(2 * _neighborhood_max_size * 100);
   }
 
   // ======================================================================== //
   // 5. Compute neighborhoods with kD-tree data structures for efficient
   //    neighbor search.
-  vector<vector<size_t> >
-  ComputeN_K::computeNeighborhoods(size_t K, double squaredRhoMin)
+  vector<vector<size_t>>
+  NearestMatchNeighborhoodComputer::compute_neighborhoods(size_t K,
+                                                         double squaredRhoMin)
   {
     // Preallocate array of match neighborhoods.
-    vector<vector<size_t> > N_K(M_.size());
+    vector<vector<size_t>> N_K(_M.size());
     for (size_t i = 0; i != N_K.size(); ++i)
-      N_K[i].reserve(neighborhood_max_size_);
+      N_K[i].reserve(_neighborhood_max_size);
 
     // Now query the kD-trees.
-    if (verbose_)
+    if (_verbose)
     {
-      printStage("Querying neighborhoods");
-      timer_.restart();
+      print_stage("Querying neighborhoods");
+      _timer.restart();
     }
 
     // Let's go.
-    for (size_t i = 0; i != M_.size(); ++i)
+    for (size_t i = 0; i != _M.size(); ++i)
     {
       // Match $m_i = (x_i, y_i)$
-      Vector2d xi(M_[i].posX().cast<double>());
-      Vector2d yi(M_[i].posY().cast<double>());
+      Vector2d xi(_M[i].x_pos().cast<double>());
+      Vector2d yi(_M[i].y_pos().cast<double>());
       // Collect the indices of $\mathb{x}_j$ such that
       // $|| \mathbf{x}_j - \mathbf{x}_i ||_2 < thres$.
-      x_index_ptr_->knnSearch(xi, K, x_indices_, sq_dists_);
+      _x_index_ptr->knn_search(xi, K, _x_indices, _sq_dists);
       // Collect the indices of $\mathb{y}_j$ such that
       // $|| \mathbf{y}_j - \mathbf{x}_i ||_2 < thres$.
-      y_index_ptr_->knnSearch(yi, K, y_indices_, sq_dists_);
+      _y_index_ptr->knn_search(yi, K, _y_indices, _sq_dists);
       // Reset list of neighboring matches.
-      index_scores_.clear();
+      _index_scores.clear();
 //#define DEBUG
 #ifdef DEBUG
-      if (verbose_ && drawer_ptr_)
-        drawer_ptr_->displayImages();
+      if (_verbose && _drawer)
+        _drawer->display_images();
 #endif
-      getMatchesFromX(index_scores_, i, x_indices_, squaredRhoMin);
-      getMatchesFromY(index_scores_, i, y_indices_, squaredRhoMin);
-      keepBestScaleConsistentMatches(N_K[i], index_scores_, 10*K);
+      get_matches_from_x(_index_scores, i, _x_indices, squaredRhoMin);
+      get_matches_from_y(_index_scores, i, _y_indices, squaredRhoMin);
+      keep_best_scale_consistent_matches(N_K[i], _index_scores, 10 * K);
 #ifdef DEBUG
-      if (verbose_ && drawer_ptr_)
+      if (_verbose && _drawer)
       {
-        cout << "M_["<<i<<"] =\n" << M_[i] << endl;
-        cout << "N_K["<<i<<"].size() = " << N_K[i].size() << endl;
-        cout << "indexScores.size() = " << index_scores_.size() << endl;
-        for (size_t j = 0; j != index_scores_.size(); ++j)
-          cout << j << "\t" << index_scores_[j].first << " " << index_scores_[j].second << endl;
+        cout << "_M[" << i << "] =\n" << _M[i] << endl;
+        cout << "N_K[" << i << "].size() = " << N_K[i].size() << endl;
+        cout << "indexScores.size() = " << _index_scores.size() << endl;
+        for (size_t j = 0; j != _index_scores.size(); ++j)
+          cout << j << "\t" << _index_scores[j].first << " "
+               << _index_scores[j].second << endl;
         for (size_t j = 0; j != K; ++j)
         {
-          drawer_ptr_->drawMatch(M_[N_K[i][j]]);
-          drawer_ptr_->drawPoint(0, M_[N_K[i][j]].posX(), Cyan8, 3);
-          drawer_ptr_->drawPoint(1, M_[N_K[i][j]].posY(), Cyan8, 3);
+          _drawer->draw_match(_M[N_K[i][j]]);
+          _drawer->drawPoint(0, _M[N_K[i][j]].x_pos(), Cyan8, 3);
+          _drawer->drawPoint(1, _M[N_K[i][j]].y_pos(), Cyan8, 3);
         }
-        drawer_ptr_->drawMatch(M_[i], Cyan8);
-        getKey();
+        _drawer->draw_match(_M[i], Cyan8);
+        get_key();
       }
 #endif
     }
 
-    if (verbose_)
+    if (_verbose)
     {
-      elapsed_ = timer_.elapsed();
+      _elapsed = _timer.elapsed();
       cout << "Match nearest neighbor search." << endl;
-      cout << "Time elapsed = " << elapsed_ << " seconds" << endl;
+      cout << "Time elapsed = " << _elapsed << " seconds" << endl;
     }
 
     return N_K;
   }
 
-  void ComputeN_K::getMatchesFromX(vector<IndexScore>& indexScores,
-                                   size_t i,
-                                   const vector<int>& xIndices,
-                                   double squaredRhoMin)
+  void NearestMatchNeighborhoodComputer::get_matches_from_x(
+      vector<IndexScore>& indexScores, size_t i, const vector<int>& xIndices,
+      double squaredRhoMin)
   {
     for (size_t j = 0; j != xIndices.size(); ++j)
     {
       size_t ind = xIndices[j];
-      for (size_t k = 0; k != X_to_M_[ind].size(); ++k)
+      for (size_t k = 0; k != _X_to_M[ind].size(); ++k)
       {
-        size_t ix = X_to_M_[ind][k];
-        double score = rho(M_[i], M_[ix]);
+        size_t ix = _X_to_M[ind][k];
+        double score = rho(_M[i], _M[ix]);
 #ifdef DEBUG
-        if (verbose_ && drawer_ptr_)
+        if (_verbose && _drawer)
         {
-          drawer_ptr_->drawPoint(0, Vector2f(X_mat_.col(ind).cast<float>()), Blue8, 10);
-          //drawer_ptr_->drawMatch(M_[ix], Blue8);
+          _drawer->drawPoint(0, Vector2f(_X_mat.col(ind).cast<float>()), Blue8,
+                             10);
+          // _drawer->draw_match(_M[ix], Blue8);
         }
 #endif
         if (score >= squaredRhoMin)
@@ -615,23 +606,23 @@ namespace DO { namespace Sara {
     }
   }
 
-  void ComputeN_K::getMatchesFromY(vector<IndexScore>& indexScores,
-                                   size_t i,
-                                   const vector<int>& yIndices,
-                                   double squaredRhoMin)
+  void NearestMatchNeighborhoodComputer::get_matches_from_y(
+      vector<IndexScore>& indexScores, size_t i, const vector<int>& yIndices,
+      double squaredRhoMin)
   {
     for (size_t j = 0; j != yIndices.size(); ++j)
     {
       size_t ind = yIndices[j];
-      for (size_t k = 0; k != Y_to_M_[ind].size(); ++k)
+      for (size_t k = 0; k != _Y_to_M[ind].size(); ++k)
       {
-        size_t ix = Y_to_M_[ind][k];
-        double score = rho(M_[i], M_[ix]);
+        size_t ix = _Y_to_M[ind][k];
+        double score = rho(_M[i], _M[ix]);
 #ifdef DEBUG
-        if (verbose_ && drawer_ptr_)
+        if (_verbose && _drawer)
         {
-          drawer_ptr_->drawPoint(1, Vector2f(Y_mat_.col(ind).cast<float>()), Blue8, 10);
-          //drawer_ptr_->drawMatch(M_[ix], Blue8);
+          _drawer->drawPoint(1, Vector2f(_Y_mat.col(ind).cast<float>()), Blue8,
+                             10);
+          // _drawer->draw_match(_M[ix], Blue8);
         }
 #endif
         if (score >= squaredRhoMin)
@@ -642,20 +633,17 @@ namespace DO { namespace Sara {
 
   // ======================================================================== //
   // 6. (Optional) Compute redundancies before computing the neighborhoods.
-  void
-  ComputeN_K::
-  keepBestScaleConsistentMatches(vector<size_t>& N_K_i,
-                                  vector<IndexScore>& indexScores,
-                                  size_t N)
+  void NearestMatchNeighborhoodComputer::keep_best_scale_consistent_matches(
+      vector<size_t>& N_K_i, vector<IndexScore>& indexScores, size_t N)
   {
     // Sort matches by scaled consistency ratio/distrust score.
-    sort(indexScores.begin(), indexScores.end(), compare_index_score_1_);
+    sort(indexScores.begin(), indexScores.end(), _compare_index_score_1);
     vector<IndexScore>::iterator it =
-      unique(indexScores.begin(), indexScores.end(), equal_index_score_1_);
+        unique(indexScores.begin(), indexScores.end(), _equal_index_score_1);
     indexScores.resize(it - indexScores.begin());
     for (size_t j = 0; j != indexScores.size(); ++j)
-      indexScores[j].second = -M_[indexScores[j].first].score();
-    sort(indexScores.begin(), indexScores.end(), compare_index_score_2_);
+      indexScores[j].second = -_M[indexScores[j].first].score();
+    sort(indexScores.begin(), indexScores.end(), _compare_index_score_2);
     size_t sz = min(indexScores.size(), N);
 
     N_K_i.resize(sz);
@@ -663,83 +651,85 @@ namespace DO { namespace Sara {
       N_K_i[j] = indexScores[j].first;
   }
 
-  vector<vector<size_t> >
-  ComputeN_K::computeRedundancies(double thres)
+  vector<vector<size_t>>
+  NearestMatchNeighborhoodComputer::compute_redundancies(double thres)
   {
-    vector<vector<size_t> > redundancies(M_.size());
+    vector<vector<size_t>> redundancies(_M.size());
     for (size_t i = 0; i != redundancies.size(); ++i)
       redundancies[i].reserve(1000);
 
     // Construct the kD-trees.
-    if (verbose_)
+    if (_verbose)
     {
-      printStage("kD-Tree construction");
-      timer_.restart();
+      print_stage("kD-Tree construction");
+      _timer.restart();
     }
-    KDTree xIndex(X_mat_);
-    KDTree yIndex(Y_mat_);
-    if (verbose_)
+    KDTree xIndex(_X_mat);
+    KDTree yIndex(_Y_mat);
+    if (_verbose)
     {
-      elapsed_ = timer_.elapsed();
+      _elapsed = _timer.elapsed();
       cout << "KD-Tree building time" << endl;
-      cout << "Time elapsed = " << elapsed_ << " seconds" << endl;
+      cout << "Time elapsed = " << _elapsed << " seconds" << endl;
     }
 
     // Now query the kD-trees.
-    if (verbose_)
+    if (_verbose)
     {
-      printStage("Querying neighborhoods");
-      timer_.restart();
+      print_stage("Querying neighborhoods");
+      _timer.restart();
     }
     vector<int> xIndices, yIndices;
     vector<double> sqDists;
     vector<size_t> matchIndices;
-    xIndices.reserve(neighborhood_max_size_);
-    yIndices.reserve(neighborhood_max_size_);
-    sqDists.reserve(neighborhood_max_size_);
-    matchIndices.reserve(neighborhood_max_size_*2);
+    xIndices.reserve(_neighborhood_max_size);
+    yIndices.reserve(_neighborhood_max_size);
+    sqDists.reserve(_neighborhood_max_size);
+    matchIndices.reserve(_neighborhood_max_size * 2);
 
     // Do the dumb way first.
-    for (size_t i = 0; i != M_.size(); ++i)
+    for (size_t i = 0; i != _M.size(); ++i)
     {
 //#define DEBUG
 #ifdef DEBUG
-      if (verbose_ && drawer_ptr_)
+      if (_verbose && _drawer)
       {
         cout << i << endl;
-        drawer_ptr_->displayImages();
+        _drawer->display_images();
       }
 #endif
       // Match $m_i = (x_i, y_i)$
-      Vector2d xi(M_[i].posX().cast<double>());
-      Vector2d yi(M_[i].posY().cast<double>());
+      Vector2d xi(_M[i].x_pos().cast<double>());
+      Vector2d yi(_M[i].y_pos().cast<double>());
 #ifdef DEBUG
-      if (verbose_ && drawer_ptr_)
+      if (_verbose && _drawer)
       {
-        drawer_ptr_->drawMatch(M_[i]);
-        cout << M_[i] << endl;
-        drawer_ptr_->drawPoint(0, xi.cast<float>(), Red8, 5);
-        drawer_ptr_->drawPoint(1, yi.cast<float>(), Blue8, 5);
+        _drawer->draw_match(_M[i]);
+        cout << _M[i] << endl;
+        _drawer->drawPoint(0, xi.cast<float>(), Red8, 5);
+        _drawer->drawPoint(1, yi.cast<float>(), Blue8, 5);
       }
 #endif
 
       // Collect the indices of $\mathb{x}_j$ such that
       // $|| \mathbf{x}_j - \mathbf{x}_i ||_2 < thres$.
-      xIndex.radiusSearch(xi, thres*thres, xIndices, sqDists);
+      xIndex.radius_search(xi, thres * thres, xIndices, sqDists);
       // Collect the indices of $\mathb{y}_j$ such that
       // $|| \mathbf{y}_j - \mathbf{x}_i ||_2 < thres$.
-      yIndex.radiusSearch(yi, thres*thres, yIndices, sqDists);
+      yIndex.radius_search(yi, thres * thres, yIndices, sqDists);
 
 #ifdef DEBUG
-      if (drawer_ptr_)
+      if (_drawer)
       {
         cout << "xIndices.size() = " << xIndices.size() << endl;
         cout << "yIndices.size() = " << yIndices.size() << endl;
         for (size_t j = 0; j < xIndices.size(); ++j)
-          drawer_ptr_->drawPoint(0, Vector2f(X_mat_.col(xIndices[j]).cast<float>()), Red8);
+          _drawer->drawPoint(0, Vector2f(_X_mat.col(xIndices[j]).cast<float>()),
+                             Red8);
         for (size_t j = 0; j < yIndices.size(); ++j)
-          drawer_ptr_->drawPoint(1, Vector2f(Y_mat_.col(yIndices[j]).cast<float>()), Blue8);
-        getKey();
+          _drawer->drawPoint(1, Vector2f(_Y_mat.col(yIndices[j]).cast<float>()),
+                             Blue8);
+        get_key();
       }
 #endif
 
@@ -748,157 +738,155 @@ namespace DO { namespace Sara {
       // Collect all the matches that have position $\mathbf{x}_j$.
       for (size_t j = 0; j != xIndices.size(); ++j)
       {
-        size_t indXj = xIndices[j]; // index of $\mathbf{x}_j$
-        for (size_t k = 0; k!= X_to_M_[indXj].size(); ++k)
+        size_t indXj = xIndices[j];  // index of $\mathbf{x}_j$
+        for (size_t k = 0; k != _X_to_M[indXj].size(); ++k)
         {
-          size_t matchInd = X_to_M_[indXj][k];
+          size_t matchInd = _X_to_M[indXj][k];
           matchIndices.push_back(matchInd);
         }
       }
       // Collect all the matches that have position $\mathbf{y}_j$.
       for (size_t j = 0; j != yIndices.size(); ++j)
       {
-        size_t indYj = yIndices[j]; // index of $\mathbf{y}_j$
-        for (size_t k = 0; k!= Y_to_M_[indYj].size(); ++k)
+        size_t indYj = yIndices[j];  // index of $\mathbf{y}_j$
+        for (size_t k = 0; k != _Y_to_M[indYj].size(); ++k)
         {
-          size_t matchInd = Y_to_M_[indYj][k];
+          size_t matchInd = _Y_to_M[indYj][k];
           matchIndices.push_back(matchInd);
         }
       }
 #ifdef DEBUG
-      if (verbose_)
+      if (_verbose)
         cout << "matchIndices = " << matchIndices.size() << endl;
 #endif
 
       // Keep only matches $m_j$ such that
       // $|| \mathbf{x}_j - \mathbf{x}_i || < thres$ and
       // $|| \mathbf{y}_j - \mathbf{y}_i || < thres$.
-      const Match& mi = M_[i];
+      const Match& mi = _M[i];
       for (size_t j = 0; j != matchIndices.size(); ++j)
       {
         size_t indj = matchIndices[j];
-        const Match& mj = M_[indj];
-        if ( (mi.posX() - mj.posX()).squaredNorm() < thres*thres &&
-             (mi.posY() - mj.posY()).squaredNorm() < thres*thres )
+        const Match& mj = _M[indj];
+        if ((mi.x_pos() - mj.x_pos()).squaredNorm() < thres * thres &&
+            (mi.y_pos() - mj.y_pos()).squaredNorm() < thres * thres)
         {
           redundancies[i].push_back(indj);
 #ifdef DEBUG
-          if (drawer_ptr_)
-            drawer_ptr_->drawMatch(mj, Cyan8);
+          if (_drawer)
+            _drawer->draw_match(mj, Cyan8);
 #endif
         }
 #ifdef DEBUG
-        else if (drawer_ptr_)
-          drawer_ptr_->drawMatch(mj, Black8);
+        else if (_drawer)
+          _drawer->draw_match(mj, Black8);
 #endif
       }
 #ifdef DEBUG
-      if (verbose_)
+      if (_verbose)
       {
         cout << "redundancies[i].size() = " << redundancies[i].size() << endl;
-        getKey();
+        get_key();
       }
 #endif
     }
-    if (verbose_)
+    if (_verbose)
     {
-      elapsed_ = timer_.elapsed();
+      _elapsed = _timer.elapsed();
       cout << "Nearest neighbor search." << endl;
-      cout << "Time elapsed = " << elapsed_ << " seconds" << endl;
+      cout << "Time elapsed = " << _elapsed << " seconds" << endl;
     }
     return redundancies;
   }
 
-  /*
-  void
-  ComputeN_K::
-  getRedundancyComponentsAndRepresenters(vector<vector<size_t> >& components,
-                                         vector<size_t>& representers,
-                                         const vector<Match>& matches,
-                                         double thres)
-  {
-    if (verbose_)
-      printStage("Compute match redundancy component");
+  //auto
+  //NearestMatchNeighborhoodComputer::get_redundancy_components_and_representers(
+  //    vector<vector<size_t>>& components, vector<size_t>& representers,
+  //    const vector<Match>& matches, double thres) -> void
+  //{
+  //  if (_verbose)
+  //    print_stage("Compute match redundancy component");
 
-    vector<vector<size_t> > redundancies = computeRedundancies(thres);
+  //  vector<vector<size_t>> redundancies = compute_redundancies(thres);
 
-    using namespace boost;
-    typedef adjacency_list <vecS, vecS, undirectedS> Graph;
+  //  using namespace boost;
+  //  typedef adjacency_list <vecS, vecS, undirectedS> Graph;
 
-    // Construct the graph.
-    Graph g(matches.size());
-    for (size_t i = 0; i < redundancies.size(); ++i)
-      for (vector<int>::size_type j = 0; j < redundancies[i].size(); ++j)
-        add_edge(i, redundancies[i][j], g);
+  //  // Construct the graph.
+  //  Graph g(matches.size());
+  //  for (size_t i = 0; i < redundancies.size(); ++i)
+  //    for (vector<int>::size_type j = 0; j < redundancies[i].size(); ++j)
+  //      add_edge(i, redundancies[i][j], g);
 
-    // Compute the connected components.
-    vector<size_t> component(num_vertices(g));
-    size_t num_components = connected_components(g, &component[0]);
+  //  // Compute the connected components.
+  //  vector<size_t> component(num_vertices(g));
+  //  size_t num_components = connected_components(g, &component[0]);
 
-    // Store the components.
-    components = vector<vector<size_t> >(num_components);
-    for (size_t i = 0; i != component.size(); ++i)
-      components.reserve(100);
-    for (size_t i = 0; i != component.size(); ++i)
-      components[component[i]].push_back(i);
+  //  // Store the components.
+  //  components = vector<vector<size_t> >(num_components);
+  //  for (size_t i = 0; i != component.size(); ++i)
+  //    components.reserve(100);
+  //  for (size_t i = 0; i != component.size(); ++i)
+  //    components[component[i]].push_back(i);
 
-    // Store the best representer for each component.
-    representers.resize(num_components);
-    for (size_t i = 0; i != components.size(); ++i)
-    {
-      size_t index_best_match = components[i][0];
-      for (size_t j = 0; j < components[i].size(); ++j)
-      {
-        size_t index = components[i][j];
-        if (matches[index_best_match].score() > matches[index].score())
-          index_best_match = index;
-      }
-      representers[i] = index_best_match;
-    }
+  //  // Store the best representer for each component.
+  //  representers.resize(num_components);
+  //  for (size_t i = 0; i != components.size(); ++i)
+  //  {
+  //    size_t index_best_match = components[i][0];
+  //    for (size_t j = 0; j < components[i].size(); ++j)
+  //    {
+  //      size_t index = components[i][j];
+  //      if (matches[index_best_match].score() > matches[index].score())
+  //        index_best_match = index;
+  //    }
+  //    representers[i] = index_best_match;
+  //  }
 
-    if (verbose_)
-    {
-      cout << "Checksum components" << endl;
-      size_t num_matches_from_components = 0;
-      for (size_t i = 0; i != components.size(); ++i)
-        num_matches_from_components += components[i].size();
-      cout << "num_matches_from_components = " << num_matches_from_components << endl;
-      cout << "num_components = " << num_components << endl;
+  //  if (_verbose)
+  //  {
+  //    cout << "Checksum components" << endl;
+  //    size_t num_matches_from_components = 0;
+  //    for (size_t i = 0; i != components.size(); ++i)
+  //      num_matches_from_components += components[i].size();
+  //    cout << "num_matches_from_components = " << num_matches_from_components
+  //         << endl;
+  //    cout << "num_components = " << num_components << endl;
 
-      if (drawer_ptr_)
-        drawer_ptr_->displayImages();
-      for (size_t i = 0; i != components.size(); ++i)
-      {
-        for (size_t j = 0; j < components[i].size(); ++j)
-        {
-          size_t index = components[i][j];
-          if (drawer_ptr_)
-            drawer_ptr_->drawMatch(M_[index]);
-        }
-        if (drawer_ptr_)
-        {
-          drawer_ptr_->drawMatch(M_[representers[i]], Red8);
-          cout << "components["<<i<<"].size() = " << components[i].size() << endl;
-        }
-        if (drawer_ptr_)
-          getKey();
-      }
-      getKey();
-    }
-  }
-  */
+  //    if (_drawer)
+  //      _drawer->display_images();
+  //    for (size_t i = 0; i != components.size(); ++i)
+  //    {
+  //      for (size_t j = 0; j < components[i].size(); ++j)
+  //      {
+  //        size_t index = components[i][j];
+  //        if (_drawer)
+  //          _drawer->draw_match(_M[index]);
+  //      }
+  //      if (_drawer)
+  //      {
+  //        _drawer->draw_match(_M[representers[i]], Red8);
+  //        cout << "components[" << i << "].size() = " << components[i].size()
+  //             << endl;
+  //      }
+  //      if (_drawer)
+  //        get_key();
+  //    }
+  //    get_key();
+  //  }
+  //}
 
   // ======================================================================== //
-  // Symmetrized version of ComputeN_K.
-  vector<vector<size_t> > computeHatN_K(const vector<vector<size_t> >& N_K)
+  // Symmetrized version of NearestMatchNeighborhoodComputer.
+  vector<vector<size_t>> compute_hat_N_K(const vector<vector<size_t>>& N_K)
   {
-    printStage("\\hat{N}_K(m)");
+    print_stage("\\hat{N}_K(m)");
     Timer t;
     double elapsed;
 
-    vector<vector<size_t> > hatNK(N_K.size());
+    vector<vector<size_t>> hatNK(N_K.size());
     for (size_t i = 0; i != hatNK.size(); ++i)
-      hatNK[i].reserve(N_K[0].size()*2);
+      hatNK[i].reserve(N_K[0].size() * 2);
     for (size_t i = 0; i != hatNK.size(); ++i)
     {
       hatNK[i] = N_K[i];
@@ -910,7 +898,7 @@ namespace DO { namespace Sara {
     {
       sort(hatNK[i].begin(), hatNK[i].end());
       vector<size_t>::iterator it = unique(hatNK[i].begin(), hatNK[i].end());
-      hatNK[i].resize(it-hatNK[i].begin());
+      hatNK[i].resize(it - hatNK[i].begin());
     }
 
     elapsed = t.elapsed();
@@ -919,5 +907,4 @@ namespace DO { namespace Sara {
     return hatNK;
   }
 
-} /* namespace Sara */
-} /* namespace DO */
+}  // namespace DO::Sara

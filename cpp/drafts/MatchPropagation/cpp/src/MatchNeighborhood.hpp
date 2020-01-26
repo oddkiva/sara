@@ -25,7 +25,7 @@
 #include <DO/Sara/Match.hpp>
 
 
-namespace DO { namespace Sara { namespace MatchPropagation {
+namespace DO::Sara {
 
   //! Affine Covariant Match Distance denoted as $\rho_m$
   class AffineCovariantMatchDistance
@@ -33,8 +33,8 @@ namespace DO { namespace Sara { namespace MatchPropagation {
   public:
     AffineCovariantMatchDistance(const Match& m)
       : _m(m)
-      , _Sigma_x(m.x().shape_matrix())
-      , _Sigma_y(m.y().shape_matrix())
+      , _Sigma_x(m.x().shape_matrix)
+      , _Sigma_y(m.y().shape_matrix)
     {
     }
 
@@ -87,8 +87,6 @@ namespace DO { namespace Sara { namespace MatchPropagation {
                                       const PairWiseDrawer *drawer = 0,
                                       bool verbose = false);
 
-    ~NearestMatchNeighborhoodComputer();
-
     auto operator()(size_t i, size_t K, double squared_rho_min)
         -> std::vector<size_t>;
 
@@ -98,7 +96,7 @@ namespace DO { namespace Sara { namespace MatchPropagation {
     auto operator()(size_t K, double squared_rho_min)
         -> std::vector<std::vector<size_t>>
     {
-      return computeNeighborhoods(K, squared_rho_min);
+      return compute_neighborhoods(K, squared_rho_min);
     }
 
     auto operator()(std::vector<std::vector<size_t>>& components,
@@ -172,8 +170,8 @@ namespace DO { namespace Sara { namespace MatchPropagation {
     auto create_y_matrix() -> void;
     auto create_xy_matrix() -> void;
 
-    auto create_position_to_match_dict(const std::vector<PosIndex>& X,
-                                       const MatrixXd& X_mat)
+    auto create_position_to_match_table(const std::vector<PosIndex>& X,
+                                        const MatrixXd& X_mat)
         -> std::vector<std::vector<size_t>>;
     //! @}
 
@@ -229,7 +227,7 @@ namespace DO { namespace Sara { namespace MatchPropagation {
     // @}
 
     // Internal allocation.
-    size_t _neighborhood_max_size_;
+    size_t _neighborhood_max_size;
 
     //! @{
     //! @brief For internal computation.
@@ -241,8 +239,8 @@ namespace DO { namespace Sara { namespace MatchPropagation {
 
     //! @{
     //! @brief KDTree
-    KDTree *_x_index_ptr;
-    KDTree *_y_index_ptr;
+    std::unique_ptr<KDTree> _x_index_ptr;
+    std::unique_ptr<KDTree> _y_index_ptr;
     std::vector<int> _x_indices, _y_indices;
     std::vector<double> _sq_dists;
     std::vector<IndexScore> _index_scores;
@@ -256,7 +254,4 @@ namespace DO { namespace Sara { namespace MatchPropagation {
   auto compute_hat_N_K(const std::vector<std::vector<size_t>>& N_K)
       -> std::vector<std::vector<size_t>>;
 
-
-} /* MatchPropagation */
-} /* namespace Sara */
-} /* namespace DO */
+}  // namespace DO::Sara

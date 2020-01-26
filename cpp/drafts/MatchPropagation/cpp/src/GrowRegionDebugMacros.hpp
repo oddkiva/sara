@@ -25,7 +25,7 @@
 if (pDrawer) \
 { \
   printStage("Check the region $R$ and the region boundary $\\partial R$ after adding seed match"); \
-  pDrawer->displayImages(); \
+  pDrawer->display_images(); \
   checkGrowingState(R, dR, pDrawer, true); \
 }
 #else
@@ -46,8 +46,8 @@ if (pDrawer) \
 { \
   cout << "Trying M_[" << q[3] << "]\n" << M(q[3])  << endl; \
   checkGrowingState(R, dR, pDrawer); \
-  pDrawer->drawMatch(*m, Red8); \
-  getKey(); \
+  pDrawer->draw_match(*m, Red8); \
+  get_key(); \
 }
 #else
 # define CHECK_CANDIDATE_FOURTH_MATCH_FOR_SEED_QUADRUPLE
@@ -66,8 +66,8 @@ if (pDrawer) \
 { \
   cout << "Trying M_[" << q[3] << "]\n" << M(q[3])  << endl; \
   checkGrowingState(R, dR, pDrawer); \
-  pDrawer->drawMatch(*m, Yellow8); \
-  getKey(); \
+  pDrawer->draw_match(*m, Yellow8); \
+  get_key(); \
 }
 #else
 # define CHECK_CANDIDATE_MATCH_AND_GROWING_STATE
@@ -86,13 +86,13 @@ if (verbose_) \
 if (pDrawer) \
 { \
   cout << "Drawing N_k\n"; \
-  pDrawer->displayImages(); \
+  pDrawer->display_images(); \
   checkRegion(R, pDrawer); \
   for (size_t j = 0; j != N_k.size(); ++j) \
   { \
-    pDrawer->drawMatch(M(N_k[j]), Cyan8); \
+    pDrawer->draw_match(M(N_k[j]), Cyan8); \
   } \
-  pDrawer->drawMatch(M(m), Yellow8); \
+  pDrawer->draw_match(M(m), Yellow8); \
 }
 #else
 # define DISPLAY_N_k
@@ -102,22 +102,22 @@ if (pDrawer) \
 # define DISPLAY_NON_DEGENERATE_TRIPLE \
 if (pDrawer) \
 { \
-  pDrawer->displayImages(); \
+  pDrawer->display_images(); \
   checkRegion(R, pDrawer); \
   for (size_t j = 0; j != N_k.size(); ++j) \
-    pDrawer->drawMatch(M(N_k[j]), Cyan8); \
+    pDrawer->draw_match(M(N_k[j]), Cyan8); \
   cout << "Found good triple" << endl; \
   cout << "t = { "; \
   for (int i = 0; i < 3; ++i) \
   { \
-    pDrawer->drawMatch(M(t[i]), Blue8); \
+    pDrawer->draw_match(M(t[i]), Blue8); \
     cout << t[i]; \
     if (i<2) \
       cout << ", "; \
   } \
   cout << " }" << endl; \
-  pDrawer->drawMatch(M(m), Yellow8); \
-  getKey(); \
+  pDrawer->draw_match(M(m), Yellow8); \
+  get_key(); \
 }
 #else
 # define DISPLAY_NON_DEGENERATE_TRIPLE
@@ -126,7 +126,7 @@ if (pDrawer) \
 #ifdef DEBUG
 # define PAUSE_SEED_TRIPLE_SEARCH \
 if (pDrawer) \
-  getKey();
+  get_key();
 #else
 # define PAUSE_SEED_TRIPLE_SEARCH
 #endif

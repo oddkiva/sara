@@ -20,12 +20,13 @@
 
 #pragma once
 
-#include "../HyperParameterLearning/Stat.hpp"
+#include "Statistics.hpp"
 
 #include <DO/Sara/Core/Timer.hpp>
 #include <DO/Sara/Match.hpp>
 
 #include <set>
+
 
 namespace DO::Sara {
 
@@ -35,101 +36,109 @@ namespace DO::Sara {
   //! In any case, it is unavoidable that outliers will be added anyway !!!!
   //! The issue is to get the best parameters to optimize both accuracy and
   //! recall rate.
-  class RegionGrowingAnalyzer
+  class DO_SARA_EXPORT RegionGrowingAnalyzer
   {
   public:
     RegionGrowingAnalyzer(const std::vector<Match>& M, const Matrix3f& H,
                           bool verbose = false)
-      : M_(M)
-      , H_(H.cast<double>())
-      , verbose_(verbose)
-      , num_fusions_(0)
-      , num_regions_(0)
+      : _M(M)
+      , _H(H.cast<double>())
+      , _verbose(verbose)
     {
     }
 
     //! Set data of interest.
-    void setInliers(const std::vector<size_t>& inliers);
-    void setSubsetOfInterest(const std::vector<size_t>& subsetOfInterest);
-    void analyzeQuad(const size_t t[3], size_t m);
+    void set_inliers(const std::vector<size_t>& inliers);
+    void set_subset_of_interest(const std::vector<size_t>& subsetOfInterest);
+    void analyze_quad(const size_t t[3], size_t m);
 
     //! Easy accessors.
     const Match& M(size_t i) const
     {
-      return M_[i];
+      return _M[i];
     }
-    bool isInlier(size_t i) const
+
+    bool is_inlier(size_t i) const
     {
-      return inliers_.find(i) != inliers_.end();
+      return _inliers.find(i) != _inliers.end();
     }
-    bool isOfInterest(size_t i) const
+
+    bool is_of_interest(size_t i) const
     {
-      return subset_of_interest_.find(i) != subset_of_interest_.end();
+      return _subset_of_interest.find(i) != _subset_of_interest.end();
     }
 
     //! Quantify the quality of affine estimation.
-    void computeLocalAffineConsistencyStats();
-    bool saveLocalAffineConsistencyStats(const std::string& name) const;
+    void compute_local_affine_consistency_statistics();
+    bool
+    save_local_affine_consistency_statistics(const std::string& name) const;
 
     //! Evaluate the performance of the region growing.
-    void computePosAndNeg(const std::vector<size_t>& foundMatches);
-    bool savePrecRecallEtc(const std::string& name) const;
+    void
+    compute_positives_and_negatives(const std::vector<size_t>& foundMatches);
+    bool save_precision_recall_etc(const std::string& name) const;
 
     //! Monitoring the number of regions and the number of fusions.
-    void incrementNumFusions()
+    void increment_num_fusions()
     {
-      ++num_fusions_;
+      ++_num_fusions;
     }
-    void setNumRegions(int numRegions)
+
+    void set_num_regions(int num_regions)
     {
-      num_regions_ = numRegions;
+      _num_regions = num_regions;
     }
-    void setNumAttemptedGrowths(int numGrowths)
+
+    void set_num_attempted_growths(int num_growths)
     {
-      num_attempted_growths_ = numGrowths;
+      _num_attempted_growths = num_growths;
     }
-    int numFusions() const
+
+    int num_fusions() const
     {
-      return num_fusions_;
+      return _num_fusions;
     }
-    int numRegions() const
+
+    int num_regions() const
     {
-      return num_regions_;
+      return _num_regions;
     }
-    int numGrowths() const
+
+    int num_growths() const
     {
-      return num_attempted_growths_;
+      return _num_attempted_growths;
     }
-    bool saveNumRegionStats(const std::string& name) const;
+
+    bool save_region_number_statistics(const std::string& name) const;
 
     //! Monitor the number of $\partial R$.
-    void resetEvolDR()
+    void reset_region_boundary_evolution()
     {
-      size_dR_.clear();
-      good_.clear();
-      time_.clear();
+      _size_dR.clear();
+      _good.clear();
+      _time.clear();
     }
     void push(size_t size_dR, size_t good, double time)
     {
-      size_dR_.push_back(size_dR);
-      good_.push_back(good);
-      time_.push_back(time);
+      _size_dR.push_back(size_dR);
+      _good.push_back(good);
+      _time.push_back(time);
     }
-    bool saveEvolDR(const std::string& name) const;
+    bool save_boundary_region_evolution(const std::string& name) const;
 
   private:
     // Input data.
-    const std::vector<Match>& M_;
-    Matrix3d H_;
-    std::set<size_t> inliers_;
-    std::set<size_t> outliers_;
-    std::set<size_t> subset_of_interest_;
+    const std::vector<Match>& _M;
+    Matrix3d _H;
+    std::set<size_t> _inliers;
+    std::set<size_t> _outliers;
+    std::set<size_t> _subset_of_interest;
 
     //! Debugging flag.
-    bool verbose_;
+    bool _verbose;
 
     //! For speed measurements.
-    Timer timer_;
+    Timer _timer;
 
     // ====================================================================== //
     /*! Whenever an affine-consistent quadruple is found, check the quality
@@ -147,34 +156,34 @@ namespace DO::Sara {
      *
      */
     //! To quantify the level of triple degeneracy.
-    std::vector<double> triple_angles_[3];
+    std::vector<double> _triple_angles[3];
     //! To quantify the quality of affine estimation of (t,m);
-    std::vector<double> pix_dist_error_, ell_overlap_error_,
-        angle_est_error_degree_;
+    std::vector<double> _pix_dist_error, _ell_overlap_error,
+        _angle_est_error_degree;
     //! Quality of local affine approximation.
-    std::vector<Matrix3d> diff_approx_;
-    std::vector<double> abs_diff_approx_;
-    std::vector<double> rel_diff_approx_;
+    std::vector<Matrix3d> _diff_approx;
+    std::vector<double> _abs_diff_approx;
+    std::vector<double> _rel_diff_approx;
     //! Statistics on the quality of affine approximation.
-    Stat pix_dist_error_stat_, ell_overlap_error_stat_, angle_est_error_stat_;
+    Statistics _pix_dist_error_stat, _ell_overlap_error_stat, _angle_est_error_stat;
     /*Stat diff_approx_stat_, abs_diff_approx_stat_, rel_diff_approx_stat_;*/
 
 
     // ====================================================================== //
     //! Below are data dedicated for the analysis of the
     //! class 'GrowMultipleRegions'.
-    int num_fusions_;
-    int num_regions_;
-    int num_attempted_growths_;
+    int _num_fusions{};
+    int _num_regions{};
+    int _num_attempted_growths;
     int tp, fp, tn, fn;
 
 
     // ====================================================================== //
     //! Monitor the number of $\partial R$.
-    std::vector<size_t> size_dR_;
-    std::vector<size_t> good_;
-    std::vector<double> time_;
-    std::vector<double> spurious_pix_dist_error_;
+    std::vector<size_t> _size_dR;
+    std::vector<size_t> _good;
+    std::vector<double> _time;
+    std::vector<double> _spurious_pix_dist_error;
   };
 
 }  // namespace DO::Sara

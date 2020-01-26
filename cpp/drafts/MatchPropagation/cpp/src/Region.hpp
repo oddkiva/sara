@@ -2,20 +2,21 @@
 // This file is part of Sara, a basic set of libraries in C++ for computer
 // vision.
 //
-// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2013-present David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-// ========================================================================== //
-//  Efficient and Scalable 4th-order Match Propagation
-//  David Ok, Renaud Marlet, and Jean-Yves Audibert.
-//  ACCV 2012, Daejeon, South Korea.
-//
-// Copyright (c) 2013. David Ok, Imagine (ENPC/CSTB).
-// ========================================================================== //
+//! @file
+/*!
+ *  This file implements a part of the method published in:
+ *
+ *  Efficient and Scalable 4th-order Match Propagation
+ *  David Ok, Renaud Marlet, and Jean-Yves Audibert.
+ *  ACCV 2012, Daejeon, South Korea.
+ */
 
 #pragma once
 
@@ -27,19 +28,19 @@
 
 namespace DO::Sara {
 
+  //! @brief This class defines a region for matches (instead of points).
   /*!
    *  We use the following notations:
-   *  - $R$ denotes a region,
-   *  - $M$ denotes the set of initial matches.
+   *  - @f$R@f$ denotes a region,
+   *  - @f$M@f$ denotes the set of initial matches.
    *
-   *  Besides, please note that for every method that takes as input
-   *  'const Match& m, const std::vector<Match>& M', 'm' must be a reference to
-   *  an element of the array 'M'.
+   *  Note that for every method that takes as input
+   *  'const Match& m, const std::vector<Match>& M':
    *
-   *  Maybe change the API because this may be confusing...
+   *  - 'm' must be a reference to an element in the array 'M'.
    *
    */
-  class Region
+  class DO_SARA_EXPORT Region
   {
     //! Alias.
     using container_type = std::set<size_t>;
@@ -114,6 +115,7 @@ namespace DO::Sara {
     //! @}
 
     //! @brief I/O
+    DO_SARA_EXPORT
     friend auto operator<<(std::ostream&, const Region&) -> std::ostream&;
 
     //! TODO: make it private?

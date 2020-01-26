@@ -107,7 +107,7 @@ namespace DO::Sara {
     void build_hat_N_Ks()
     {
       /*for (size_t i = 0; i != N_K_.size(); ++i)
-        updateN_K(i);*/
+        update_N_K(i);*/
       auto indices = std::vector<size_t>(_N_K.size());
       for (auto i = 0u; i != _N_K.size(); ++i)
         indices[i] = i;

@@ -20,7 +20,7 @@
 
 #include "RegionGrowingAnalyzer.hpp"
 
-#include "../LocalAffineConsistency.hpp"
+#include "LocalAffineConsistency.hpp"
 
 #include <DO/Sara/Graphics.hpp>
 
@@ -30,27 +30,27 @@ using namespace std;
 
 namespace DO::Sara {
 
-  void RegionGrowingAnalyzer::setInliers(const vector<size_t>& inliers)
+  void RegionGrowingAnalyzer::set_inliers(const vector<size_t>& inliers)
   {
     // Fill set of inliers.
     for (size_t i = 0; i != inliers.size(); ++i)
-      inliers_.insert(inliers[i]);
+      _inliers.insert(inliers[i]);
     // Fill set of outliers.
-    for (size_t i = 0; i != M_.size(); ++i)
-      if (!isInlier(i))
-        outliers_.insert(i);
+    for (size_t i = 0; i != _M.size(); ++i)
+      if (!is_inlier(i))
+        _outliers.insert(i);
   }
 
-  void RegionGrowingAnalyzer::setSubsetOfInterest(
+  void RegionGrowingAnalyzer::set_subset_of_interest(
       const vector<size_t>& subsetOfInterest)
   {
     for (size_t i = 0; i != subsetOfInterest.size(); ++i)
-      subset_of_interest_.insert(subsetOfInterest[i]);
+      _subset_of_interest.insert(subsetOfInterest[i]);
   }
 
-  void RegionGrowingAnalyzer::analyzeQuad(const size_t t[3], size_t m)
+  void RegionGrowingAnalyzer::analyze_quad(const size_t t[3], size_t m)
   {
-    if (verbose_)
+    if (_verbose)
     {
       cout << "With inlier M[" << m << "]:\n" << M(m) << endl;
       cout << "Treating the quality of the triple: " << endl;
@@ -62,7 +62,7 @@ namespace DO::Sara {
           cout << ", ";
       }
       cout << " }" << endl;
-      getKey();
+      get_key();
     }
 
     // Shortcut.
@@ -71,45 +71,45 @@ namespace DO::Sara {
 
     // Compute the local affinity.
     Matrix3f phi, inv_phi;
-    phi = affinityFromXToY(M(t[0]), M(t[1]), M(t[2]));
+    phi = affinity_from_x_to_y(M(t[0]), M(t[1]), M(t[2]));
     inv_phi = phi.inverse();
 
     // Otherwise compute intersection area of intersecting ellipses.
-    OERegion phi_x(transformOERegion(x, phi));
-    OERegion inv_phi_y(transformOERegion(y, inv_phi));
+    OERegion phi_x(transform_oeregion(x, phi));
+    OERegion inv_phi_y(transform_oeregion(y, inv_phi));
 
 
     // Compute quality of approximations.
-    Matrix3d true_phi(affinity(H_, x.center().cast<double>()));
+    Matrix3d true_phi(affinity(_H, x.center().cast<double>()));
     Matrix3d phid(phi.cast<double>());
     Matrix3d diff_approx(true_phi - phid);
-    diff_approx_.push_back(diff_approx);
-    abs_diff_approx_.push_back(diff_approx.norm());
-    rel_diff_approx_.push_back(diff_approx.norm() / true_phi.norm());
+    _diff_approx.push_back(diff_approx);
+    _abs_diff_approx.push_back(diff_approx.norm());
+    _rel_diff_approx.push_back(diff_approx.norm() / true_phi.norm());
 
     // Compute quality of triangles.
     double angleX[3], angleY[3];
     Point2d px[3], py[3];
     for (int i = 0; i < 3; ++i)
     {
-      px[i] = M(t[i]).posX().cast<double>();
-      py[i] = M(t[i]).posY().cast<double>();
+      px[i] = M(t[i]).x_pos().cast<double>();
+      py[i] = M(t[i]).y_pos().cast<double>();
     }
-    getTriangleAnglesDegree(angleX, px);
-    getTriangleAnglesDegree(angleY, py);
+    get_triangle_angles_in_degree(angleX, px);
+    get_triangle_angles_in_degree(angleY, py);
     for (int i = 0; i < 3; ++i)
     {
-      triple_angles_[i].push_back(angleX[i]);
-      triple_angles_[i].push_back(angleY[i]);
+      _triple_angles[i].push_back(angleX[i]);
+      _triple_angles[i].push_back(angleY[i]);
     }
-    if (verbose_)
+    if (_verbose)
     {
       for (int i = 0; i < 3; ++i)
       {
         cout << "angleX[" << i << "] = " << angleX[i] << " ";
         cout << "angleY[" << i << "] = " << angleY[i] << endl;
       }
-      getKey();
+      get_key();
     }
 
 
@@ -117,43 +117,43 @@ namespace DO::Sara {
     float pix_dist_error[2];
     double angle_est_error_radian[2];
     double overlapRatio[2];
-    compareOERegion(pix_dist_error[0], angle_est_error_radian[0],
-                    overlapRatio[0], phi_x, y);
-    compareOERegion(pix_dist_error[1], angle_est_error_radian[1],
-                    overlapRatio[1], inv_phi_y, x);
+    compare_oeregions(pix_dist_error[0], angle_est_error_radian[0],
+                      overlapRatio[0], phi_x, y);
+    compare_oeregions(pix_dist_error[1], angle_est_error_radian[1],
+                      overlapRatio[1], inv_phi_y, x);
     for (int i = 0; i < 2; ++i)
     {
-      pix_dist_error_.push_back(pix_dist_error[i]);
-      ell_overlap_error_.push_back(1 - overlapRatio[i]);
-      angle_est_error_degree_.push_back(toDegree(angle_est_error_radian[i]));
+      _pix_dist_error.push_back(pix_dist_error[i]);
+      _ell_overlap_error.push_back(1 - overlapRatio[i]);
+      _angle_est_error_degree.push_back(to_degree(angle_est_error_radian[i]));
     }
-    if (verbose_)
+    if (_verbose)
     {
       for (int i = 0; i < 2; ++i)
       {
         cout << "pix_dist_error[" << i << "] = " << pix_dist_error[i] << endl;
         cout << "ell_overlap_error[" << i << "] = " << 1. - overlapRatio[i]
              << endl;
-        cout << "angle_est_error_degree_[" << i
-             << "] = " << toDegree(angle_est_error_radian[i]) << endl;
+        cout << "_angle_est_error_degree[" << i
+             << "] = " << to_degree(angle_est_error_radian[i]) << endl;
       }
-      getKey();
+      get_key();
     }
   }
 
-  void RegionGrowingAnalyzer::computeLocalAffineConsistencyStats()
+  void RegionGrowingAnalyzer::compute_local_affine_consistency_statistics()
   {
-    if (subset_of_interest_.empty())
+    if (_subset_of_interest.empty())
     {
       const char* msg = "FATAL ERROR: cannot perform analysis because the "
                         "subset of matches of interest is empty!";
       throw std::runtime_error(msg);
     }
 
-    pix_dist_error_stat_.computeStats(pix_dist_error_);
-    ell_overlap_error_stat_.computeStats(ell_overlap_error_);
-    angle_est_error_stat_.computeStats(angle_est_error_degree_);
-    // diff_approx_stat_.computeStats(pix_dist_error_);
+    _pix_dist_error_stat.compute_statistics(_pix_dist_error);
+    _ell_overlap_error_stat.compute_statistics(_ell_overlap_error);
+    _angle_est_error_stat.compute_statistics(_angle_est_error_degree);
+    // diff_approx_stat_.computeStats(_pix_dist_error);
     // cout << "diff_approx_stat_OK" << endl;
     // abs_diff_approx_stat_.computeStats(abs_diff_approx_);
     // cout << "abs_diff_approx_stat_OK" << endl;
@@ -161,7 +161,7 @@ namespace DO::Sara {
     // cout << "rel_diff_approx_stat_OK" << endl;
   }
 
-  bool RegionGrowingAnalyzer::saveLocalAffineConsistencyStats(
+  bool RegionGrowingAnalyzer::save_local_affine_consistency_statistics(
       const string& name) const
   {
     ofstream out(name.c_str());
@@ -169,11 +169,11 @@ namespace DO::Sara {
       return false;
 
     out << "Statistics: diff dist center" << endl;
-    out << pix_dist_error_stat_;
+    out << _pix_dist_error_stat;
     out << "Statistics: jaccard" << endl;
-    out << ell_overlap_error_stat_;
+    out << _ell_overlap_error_stat;
     out << "Statistics: diff angle error" << endl;
-    out << angle_est_error_stat_;
+    out << _angle_est_error_stat;
     // out << "Statistics: diff_approx_stat_" << endl;
     // out << diff_approx_stat_;
     // out << "Statistics: abs_diff_approx_stat_" << endl;
@@ -186,9 +186,9 @@ namespace DO::Sara {
   }
 
   void
-  RegionGrowingAnalyzer::computePosAndNeg(const vector<size_t>& foundMatches)
+  RegionGrowingAnalyzer::compute_positives_and_negatives(const vector<size_t>& foundMatches)
   {
-    if (inliers_.empty())
+    if (_inliers.empty())
     {
       const char* msg = "FATAL ERROR: set of inliers is empty!";
       throw std::runtime_error(msg);
@@ -197,20 +197,20 @@ namespace DO::Sara {
     tp = fp = tn = fn = 0;
     for (size_t i = 0; i != foundMatches.size(); ++i)
     {
-      if (isInlier(foundMatches[i]))
+      if (is_inlier(foundMatches[i]))
         ++tp;
       else
         ++fp;
     }
 
-    vector<int> myNeg(M_.size(), 1);
+    vector<int> myNeg(_M.size(), 1);
     for (size_t i = 0; i != foundMatches.size(); ++i)
       myNeg[foundMatches[i]] = 0;
     for (size_t i = 0; i != myNeg.size(); ++i)
     {
       if (myNeg[i] == 1)
       {
-        bool isOutlier = !isInlier(i);
+        bool isOutlier = !is_inlier(i);
         if (isOutlier)
           ++tn;
         else
@@ -218,14 +218,14 @@ namespace DO::Sara {
       }
     }
 
-    if (fn + tn + tp + fp != M_.size())
+    if (fn + tn + tp + fp != _M.size())
     {
-      const char* msg = "FATAL ERROR: fn+tn+tp+fp != M_.size()";
+      const char* msg = "FATAL ERROR: fn+tn+tp+fp != _M.size()";
       throw std::runtime_error(msg);
     }
   }
 
-  bool RegionGrowingAnalyzer::savePrecRecallEtc(const string& name) const
+  bool RegionGrowingAnalyzer::save_precision_recall_etc(const string& name) const
   {
     double prec = double(tp) / double(tp + fp);
     double recall = double(tp) / double(tp + fn);
@@ -252,7 +252,7 @@ namespace DO::Sara {
     return true;
   }
 
-  bool RegionGrowingAnalyzer::saveNumRegionStats(const string& name) const
+  bool RegionGrowingAnalyzer::save_region_number_statistics(const string& name) const
   {
     ofstream out(name.c_str());
     if (!out.is_open())
@@ -261,15 +261,16 @@ namespace DO::Sara {
       return false;
     }
 
-    out << "num_fusion = " << num_fusions_ << endl;
-    out << "num_regions = " << num_regions_ << endl;
-    out << "num_attempted_growths = " << num_attempted_growths_ << endl;
+    out << "num_fusion = " << _num_fusions << endl;
+    out << "num_regions = " << _num_regions << endl;
+    out << "num_attempted_growths = " << _num_attempted_growths << endl;
     out.close();
 
     return true;
   }
 
-  bool RegionGrowingAnalyzer::saveEvolDR(const string& name) const
+  bool RegionGrowingAnalyzer::save_boundary_region_evolution(
+      const string& name) const
   {
     ofstream out(name.c_str());
     if (!out.is_open())
@@ -278,8 +279,8 @@ namespace DO::Sara {
       return false;
     }
     out << "iter  size_dR  good  time_sec" << endl;
-    for (size_t i = 0; i != size_dR_.size(); ++i)
-      out << i << " " << size_dR_[i] << " " << good_[i] << " " << time_[i]
+    for (size_t i = 0; i != _size_dR.size(); ++i)
+      out << i << " " << _size_dR[i] << " " << _good[i] << " " << _time[i]
           << endl;
     out.close();
     return true;

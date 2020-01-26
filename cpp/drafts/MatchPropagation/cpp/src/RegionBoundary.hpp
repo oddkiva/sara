@@ -20,19 +20,19 @@
 
 #pragma once
 
+#include <DO/Sara/Match.hpp>
+
 #include <map>
 #include <set>
-
-#include <DO/Sara/Match.hpp>
 
 
 namespace DO::Sara {
 
-  class RegionBoundary
+  class DO_SARA_EXPORT RegionBoundary
   {
     //! Forward class declarations.
-    using set_type = std::set<size_t> set_type;
-    using multimap_type = std::multimap<float, size_t> multimap_type;
+    using set_type = std::set<size_t>;
+    using multimap_type = std::multimap<float, size_t>;
 
     template <typename MultiMapIterator_, typename Match_>
     class Iterator;

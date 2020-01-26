@@ -42,7 +42,7 @@ namespace DO { namespace Sara {
                          DynamicMatchGraph& g,
                          const GrowthParams& params,
                          bool verbose)
-    : seed_(seed), G_(g), params_(params), verbose_(verbose)
+    : _seed(seed), G_(g), _params(params), _verbose(verbose)
   {
   }
 
@@ -67,7 +67,7 @@ namespace DO { namespace Sara {
     RegionBoundary dR(M());
     vector<size_t> indices;
     // Try initializing the region with an affine-consistent quadruple.
-    if (!initAffQuad(R, dR, pDrawer, pAnalyzer))
+    if (!initialize_affine_quadruple(R, dR, pDrawer, pAnalyzer))
       return make_pair(R, indices);
 
     // If initialization is successful, grow the region regularly.
@@ -77,12 +77,12 @@ namespace DO { namespace Sara {
 
   // ======================================================================== //
   // 1. Try initializing the region with an affine-consistent quadruple.
-  bool GrowRegion::initAffQuad(Region& R, RegionBoundary& dR,
+  bool GrowRegion::initialize_affine_quadruple(Region& R, RegionBoundary& dR,
                                const PairWiseDrawer *pDrawer,
                                RegionGrowingAnalyzer *pAnalyzer)
   {
     // Initialize the region $R$ and the region boundary $\partial R$.
-    updateRegionAndBoundary(R, dR, seed_);
+    update_region_and_boundary(R, dR, _seed);
     CHECK_STATE_AFTER_ADDING_SEED_MATCH;
 
     // Choose a seed triple 't' heuristically.
@@ -90,27 +90,27 @@ namespace DO { namespace Sara {
     size_t q[4];
     // 'q[i] = t[i]' for $i \in \{ 0, 1, 2 \}$.
     // 'q[3] == m'.
-    if (!buildSeedTriple(q, dR))
+    if (!build_seed_triple(q, dR))
        return false;
 
     for (int i = 0; i < 3; ++i)
     {
-      updateRegionAndBoundary(R, dR, q[i]);
+      update_region_and_boundary(R, dR, q[i]);
       CHECK_INCREMENTAL_SEED_TRIPLE_CONSTRUCTION;
     }
     // Find a match $m$ such that the quadruple $q = (t, m)$ is affine-consistent.
-    if (verbose_)
-      printStage("Looking for an affine-consistent seed quadruple");
+    if (_verbose)
+      print_stage("Looking for an affine-consistent seed quadruple");
     bool foundAffSeedQuad = false;
     for (RegionBoundary::iterator m = dR.begin(); m != dR.end(); ++m)
     {
       q[3] = m.index();
       CHECK_CANDIDATE_FOURTH_MATCH_FOR_SEED_QUADRUPLE;
       int very_spurious = false;
-      foundAffSeedQuad = affineConsistent(q, very_spurious, pDrawer);
+      foundAffSeedQuad = affine_consistent(q, very_spurious, pDrawer);
       if (foundAffSeedQuad)
       {
-        updateRegionAndBoundary(R, dR, q[3]);
+        update_region_and_boundary(R, dR, q[3]);
         CHECK_GROWING_STATE_AFTER_FINDING_AFFINE_SEED_QUADRUPLE;
         break;
       }
@@ -128,8 +128,8 @@ namespace DO { namespace Sara {
                         const PairWiseDrawer *pDrawer,
                         RegionGrowingAnalyzer *pAnalyzer)
   {
-    if (verbose_)
-      printStage("Growing region regularly");
+    if (_verbose)
+      print_stage("Growing region regularly");
 
 //#define PROFILE_REGION_GROWING
 #ifdef PROFILE_REGION_GROWING
@@ -172,7 +172,7 @@ namespace DO { namespace Sara {
       // ==================================================================== //
 #endif
       vector<vector<size_t> > N_K_cap_R(vec_dR.size());
-      G_.updateN_K(vec_dR);
+      G_.update_N_K(vec_dR);
 #ifdef PROFILE_REGION_GROWING
       // =============== TOC (NEIGHBORHOOD COMPUTATION TIME) ================ //
       elapsed = t.elapsed();
@@ -202,15 +202,15 @@ namespace DO { namespace Sara {
         q[m][3] = vec_dR[m];
         CHECK_CANDIDATE_MATCH_AND_GROWING_STATE;
 
-        if (!findTriple(&q[m][0], N_K_cap_R[m], pDrawer))
+        if (!find_triple(&q[m][0], N_K_cap_R[m], pDrawer))
           continue;
 
-        if (affineConsistent(&q[m][0], spurious[m], pDrawer))
+        if (affine_consistent(&q[m][0], spurious[m], pDrawer))
         {
           isGoodMatch[m] = 1;
 #pragma omp critical
           {
-            analyzeQuadruple(&q[m][0], pAnalyzer);
+            analyze_quadruple(&q[m][0], pAnalyzer);
           }
         }
       }
@@ -248,11 +248,11 @@ namespace DO { namespace Sara {
       {
         if (isGoodMatch[m] == 0)
           continue;
-        updateRegionAndBoundary(R, dR, vec_dR[m]);
+        update_region_and_boundary(R, dR, vec_dR[m]);
         if (pDrawer)
         {
           //checkGrowingState(R, dR, pDrawer, false);
-          pDrawer->drawMatch(M(vec_dR[m]), Green8);
+          pDrawer->draw_match(M(vec_dR[m]), Green8);
         }
       }
 
@@ -260,7 +260,7 @@ namespace DO { namespace Sara {
       // 8. Do we go to the next iteration in the region growing process?
       if (num_good_matches != 0 && intersection)
       {
-        if (verbose_)
+        if (_verbose)
         {
           cout << "\n\n[INTERRUPTING REGION GROWING:] ";
           cout << "$R$ intersects with the following regions:" << endl;
@@ -268,18 +268,18 @@ namespace DO { namespace Sara {
             cout << indices[i] << " ";
           cout << endl;
           cout << "Final region size = " << R.size() << endl;
-          //getKey();
+          //get_key();
         }
         break;
       }
       if (num_good_matches == 0)
       {
-        if (verbose_)
+        if (_verbose)
         {
           cout << "\n\n[Finished region growing!] Check indices.size() = "
                << indices.size() << endl;
           cout << "Final region size = " << R.size() << endl;
-          //getKey();
+          //get_key();
         }
         // TODO: for some reason, we have to clear the array of indices...
         // I have not figured out why...
@@ -294,19 +294,19 @@ namespace DO { namespace Sara {
 
   // This initializes an empty region $R$ heuristically with a triple of matches
   // $t = (m_i)_{1 \leq i \leq 3$.
-  bool GrowRegion::buildSeedTriple(size_t t[3], const RegionBoundary& dR) const
+  bool GrowRegion::build_seed_triple(size_t t[3], const RegionBoundary& dR) const
   {
     if (dR.empty())
       return false;
-    if (verbose_)
-      printStage("Choose seed triple heuristically");
-    t[0] = seed_;
+    if (_verbose)
+      print_stage("Choose seed triple heuristically");
+    t[0] = _seed;
     t[1] = dR.begin().index();
     RegionBoundary::const_iterator tt = dR.begin();
     for (++tt; tt != dR.end(); ++tt)
     {
       t[2] = tt.index();
-      if (!isDegenerate(t))
+      if (!is_degenerate(t))
         return true;
     }
     return false;
@@ -314,7 +314,7 @@ namespace DO { namespace Sara {
 
   // ======================================================================== //
   // Subroutine member functions
-  void GrowRegion::updateBoundary(RegionBoundary& dR,
+  void GrowRegion::update_boundary(RegionBoundary& dR,
                                   const Region& R,
                                   size_t m)
   {
@@ -336,7 +336,7 @@ namespace DO { namespace Sara {
       // When updating, make sure the candidate match $m_j$ is not in the
       // region $R$. Otherwise, the region growing may loop forever.
       if (!R.find(ind_m_j) &&
-          very_spurious_.find(ind_m_j) == very_spurious_.end())
+          _very_spurious.find(ind_m_j) == _very_spurious.end())
         dR.insert(ind_m_j);
     }
 
@@ -352,22 +352,22 @@ namespace DO { namespace Sara {
       spurious[i] = 0;
     }
     for (size_t i = 0; i != spurious.size(); ++i)
-      if (very_spurious_.find(candidates[i]) != very_spurious_.end())
+      if (_very_spurious.find(candidates[i]) != _very_spurious.end())
         spurious[i] = 1;
     for (size_t i = 0; i != spurious.size(); ++i)
       if (spurious[i] == 1)
         dR.erase(candidates[i]);
   }
 
-  void GrowRegion::updateRegionAndBoundary(Region& R,
+  void GrowRegion::update_region_and_boundary(Region& R,
                                            RegionBoundary& dR,
                                            size_t m)
   {
-    if (verbose_)
+    if (_verbose)
       cout << "Updating $R$ and $\\partial R$ by inserting M_["<< m << "]:\n"
            << M(m) << endl;
     R.insert(m);
-    updateBoundary(dR, R, m);
+    update_boundary(dR, R, m);
   }
 
   vector<size_t> GrowRegion::get_N_K_m_cap_R(size_t m, const Region& R)
@@ -379,7 +379,7 @@ namespace DO { namespace Sara {
     return N_K_cap_R;
   }
 
-  bool GrowRegion::findTriple(size_t t[3],
+  bool GrowRegion::find_triple(size_t t[3],
                               const vector<size_t>& N_K_m_cap_R,
                               const PairWiseDrawer *pDrawer) const
   {
@@ -401,7 +401,7 @@ namespace DO { namespace Sara {
         for (size_t c = b+1; c != N_K_m_cap_R.size(); ++c)
         {
           t[2] = N_K_m_cap_R[c];
-          if (!isDegenerate(t))
+          if (!is_degenerate(t))
           {
             DISPLAY_NON_DEGENERATE_TRIPLE;
             return true;
@@ -413,23 +413,23 @@ namespace DO { namespace Sara {
     return false;
   }
 
-  bool GrowRegion::findTriple(size_t t[3], size_t m, const Region& R,
+  bool GrowRegion::find_triple(size_t t[3], size_t m, const Region& R,
                               const PairWiseDrawer *pDrawer)
   {
     // Get the subset of matches $\mathcal{N}_K(m) \cap R$.
     vector<size_t> N_K_m_cap_R(get_N_K_m_cap_R(m, R));
-    return findTriple(t, N_K_m_cap_R);
+    return find_triple(t, N_K_m_cap_R);
   }
 
-  bool GrowRegion::isDegenerate(size_t t[3]) const
+  bool GrowRegion::is_degenerate(size_t t[3]) const
   {
     Vector2d x[3], y[3];
     for (int i = 0; i < 3; ++i)
     {
-      x[i] = M(t[i]).posX().cast<double>();
-      y[i] = M(t[i]).posY().cast<double>();
+      x[i] = M(t[i]).x_pos().cast<double>();
+      y[i] = M(t[i]).y_pos().cast<double>();
     }
-    return (params_.isFlat(x) || params_.isFlat(y));
+    return (_params.is_flat(x) || _params.is_flat(y));
   }
 
   bool GrowRegion::overlap(const size_t q[4], const Region& R) const
@@ -462,7 +462,7 @@ namespace DO { namespace Sara {
 
   // ======================================================================== //
   // Affine consistency test functions.
-  bool GrowRegion::affineConsistent(const size_t q[4], int& very_spurious,
+  bool GrowRegion::affine_consistent(const size_t q[4], int& very_spurious,
                                     const PairWiseDrawer *pDrawer) const
   {
     Match m[4];
@@ -473,7 +473,7 @@ namespace DO { namespace Sara {
     {
       // Compute the local affinity.
       Matrix3f phi, inv_phi;
-      phi = affinityFromXToY(m[i], m[(i+1)%4], m[(i+2)%4]);
+      phi = affinity_from_x_to_y(m[i], m[(i+1)%4], m[(i+2)%4]);
       inv_phi = phi.inverse();
 
 //#define IT_MAKES_SENSE_TO_DILATE_KEYPOINTS
@@ -513,18 +513,18 @@ namespace DO { namespace Sara {
 #endif
 
       // Otherwise compute intersection area of intersecting ellipses.
-      OERegion phi_x(transformOERegion(x,phi));
-      OERegion inv_phi_y(transformOERegion(y,inv_phi));
+      OERegion phi_x(transform_oeregion(x,phi));
+      OERegion inv_phi_y(transform_oeregion(y,inv_phi));
       // Get the original ellipses.
-      Ellipse S_x(ellipseFromOERegion(x));
-      Ellipse S_y(ellipseFromOERegion(y));
+      Ellipse S_x(ellipse_from_oeregion(x));
+      Ellipse S_y(ellipse_from_oeregion(y));
       // Compute the transformed ellipses.
-      Ellipse phi_S_x(ellipseFromOERegion(phi_x));
-      Ellipse inv_phi_S_y(ellipseFromOERegion(inv_phi_y));
+      Ellipse phi_S_x(ellipse_from_oeregion(phi_x));
+      Ellipse inv_phi_S_y(ellipse_from_oeregion(inv_phi_y));
       // intersection/union area ratio.
       double overlapRatio[2] = {
-        analyticJaccardSimilarity(phi_S_x, S_y),
-        analyticJaccardSimilarity(S_x, inv_phi_S_y)
+        analytic_jaccard_similarity(phi_S_x, S_y),
+        analytic_jaccard_similarity(S_x, inv_phi_S_y)
       };
 
       // Uncomment this only for debugging
@@ -541,44 +541,44 @@ namespace DO { namespace Sara {
 
   // ======================================================================== //
   // Visual debugging member functions.
-  void GrowRegion::checkRegion(const Region& R,
+  void GrowRegion::check_region(const Region& R,
                                const PairWiseDrawer *pDrawer,
                                bool pause) const
   {
-    if (verbose_)
+    if (_verbose)
       cout << "Check Region" << endl;
     R.view(M(), *pDrawer, Blue8);
     if (pause)
-      getKey();
+      get_key();
   }
 
-  void GrowRegion::checkRegionBoundary(const RegionBoundary& dR,
+  void GrowRegion::check_region_boundary(const RegionBoundary& dR,
                                        const PairWiseDrawer *pDrawer,
                                        bool pause) const
   {
-    if (verbose_)
+    if (_verbose)
       cout << "Check Region Boundary" << endl;
     dR.view(*pDrawer);
     if (pause)
-      getKey();
+      get_key();
   }
 
-  void GrowRegion::checkGrowingState(const Region& R, const RegionBoundary& dR,
+  void GrowRegion::check_region_growing_state(const Region& R, const RegionBoundary& dR,
                                      const PairWiseDrawer *pDrawer,
                                      bool pause) const
   {
-    pDrawer->displayImages();
-    checkRegionBoundary(dR, pDrawer);
-    checkRegion(R, pDrawer);
-    if (verbose_)
+    pDrawer->display_images();
+    check_region_boundary(dR, pDrawer);
+    check_region(R, pDrawer);
+    if (_verbose)
       cout << R << endl;
     if (pause)
-      getKey();
+      get_key();
   }
 
   void
   GrowRegion::
-  checkLocalAffineConsistency(const OERegion& x, const OERegion& y,
+  check_local_affine_consistency(const OERegion& x, const OERegion& y,
                               const OERegion& phi_x, const OERegion& inv_phi_y,
                               const double overlapRatio[2],
                               const Match m[4],
@@ -588,35 +588,35 @@ namespace DO { namespace Sara {
     {
       // Check visually.
       Match rescaled_m;
-      rescaled_m.ptrX() = &x;
-      rescaled_m.ptrY() = &y;
+      rescaled_m.x_pointer() = &x;
+      rescaled_m.y_pointer() = &y;
       // Check visually.
       Match phi_m;
-      phi_m.ptrX() = &inv_phi_y;
-      phi_m.ptrY() = &phi_x;
+      phi_m.x_pointer() = &inv_phi_y;
+      phi_m.y_pointer() = &phi_x;
       // Verbose
       cout << "Precision of Match Triple" << endl;
       for (int i = 0; i < 2; ++i)
         cout << "ratio[" << i+1 << "] = " << overlapRatio[i] << endl;
-      pDrawer->displayImages();
+      pDrawer->display_images();
       for (int i = 0; i < 3; ++i)
-        pDrawer->drawMatch(m[i], Green8);
-      pDrawer->drawMatch(m[3], Cyan8);
-      pDrawer->drawMatch(rescaled_m, Magenta8);
+        pDrawer->draw_match(m[i], Green8);
+      pDrawer->draw_match(m[3], Cyan8);
+      pDrawer->draw_match(rescaled_m, Magenta8);
       if (overlapRatio[0] < 0.2 || overlapRatio[1] < 0.2)
-        pDrawer->drawMatch(phi_m, Red8);
+        pDrawer->draw_match(phi_m, Red8);
       else
-        pDrawer->drawMatch(phi_m, Yellow8);
-      getKey();
+        pDrawer->draw_match(phi_m, Yellow8);
+      get_key();
     }
   }
 
   // ======================================================================== //
   // Functions for performance analysis.
-  void GrowRegion::analyzeQuadruple(const size_t q[4],
+  void GrowRegion::analyze_quadruple(const size_t q[4],
                                     RegionGrowingAnalyzer *pAnalyzer)
   {
-    if (verbose_)
+    if (_verbose)
       cout << "Analyzing quadruple" << endl;
     if (pAnalyzer)
     {
@@ -624,8 +624,8 @@ namespace DO { namespace Sara {
       {
         size_t t[3] = { q[i], q[(i+1)%4], q[(i+2)%4] };
         size_t mm = q[(i+3)%4];
-        if (pAnalyzer->isOfInterest(mm))
-          pAnalyzer->analyzeQuad(t, mm);
+        if (pAnalyzer->is_of_interest(mm))
+          pAnalyzer->analyze_quad(t, mm);
       }
     }
   }

@@ -32,7 +32,7 @@
 
 namespace DO { namespace Sara {
 
-  class GrowRegion
+  class DO_SARA_EXPORT GrowRegion
   {
   public: /* interface. */
     //! Constructor
@@ -53,15 +53,15 @@ namespace DO { namespace Sara {
                RegionGrowingAnalyzer *pAnalyzer = 0);
     //! For debugging purposes, activate the debug flag.
     void setVerbose(bool on = true)
-    { verbose_ = on; }
+    { _verbose = on; }
 
     const std::set<size_t>& getSpuriousMatches() const
-    { return very_spurious_; }
+    { return _very_spurious; }
 
   private: /* important member functions. */
     //! A region growing is done in two steps.
     //! 1. Try initializing the region with an affine-consistent quadruple.
-    bool initAffQuad(Region& R, RegionBoundary& dR,
+    bool initialize_affine_quadruple(Region& R, RegionBoundary& dR,
                      const PairWiseDrawer *pDrawer = 0,
                      RegionGrowingAnalyzer *pAnalyzer = 0);
     //! 2. If initialization is successful, grow the region.
@@ -84,12 +84,12 @@ namespace DO { namespace Sara {
      *  which then finds a match $m in \bigcup_{m \in t} \mathcal{N}_K(m)$ such
      *  that $q = (t, m)$ forms an affine-consistent quadruple.
      */
-    bool buildSeedTriple(size_t t[3], const RegionBoundary& dR) const;
+    bool build_seed_triple(size_t t[3], const RegionBoundary& dR) const;
 
   private: /* subroutine member functions. */
     //! Update functions when we find an affine-consistent match $m$.
-    void updateBoundary(RegionBoundary& dR, const Region& R, size_t m);
-    void updateRegionAndBoundary(Region& R, RegionBoundary& dR, size_t m);
+    void update_boundary(RegionBoundary& dR, const Region& R, size_t m);
+    void update_region_and_boundary(Region& R, RegionBoundary& dR, size_t m);
     /*! This method returns the set of matches that are neighbors of match $m$
      *  and that are also in the region $R$, i.e., $\mathcal{N}_K(m) \cap R$.
      */
@@ -98,17 +98,17 @@ namespace DO { namespace Sara {
      *  matches $t = (m_i)_{1 \leq i \leq 3$ such that
      *  $t \in \mathcal{N}_K(m)^3$.
      */
-    bool findTriple(size_t t[3], const std::vector<size_t>& N_K_m_cap_R,
-                    const PairWiseDrawer *pDrawer = 0) const;
+    bool find_triple(size_t t[3], const std::vector<size_t>& N_K_m_cap_R,
+                     const PairWiseDrawer* pDrawer = 0) const;
     //! DEPRECATED:
     //! Don't use it anymore as it is not suitable for parallelization.
-    bool findTriple(size_t t[3], size_t m, const Region& R,
-                    const PairWiseDrawer *pDrawer = 0);
+    bool find_triple(size_t t[3], size_t m, const Region& R,
+                     const PairWiseDrawer* pDrawer = 0);
     //! Check that the triple of match $t$ is not degenerate.
-    bool isDegenerate(size_t t[3]) const;
+    bool is_degenerate(size_t t[3]) const;
     //! $q$ denotes a quadruple of matches $(m_i)_{1 \leq i \leq 4$.
-    bool affineConsistent(const size_t q[4], int& very_spurious,
-                          const PairWiseDrawer *pDrawer = 0) const;
+    bool affine_consistent(const size_t q[4], int& very_spurious,
+                           const PairWiseDrawer* pDrawer = 0) const;
     /*! A quadruple of matches $q = (m_i)_{1 \leq i \leq 4}$ overlaps with a
      *  region $R$ if at least three matches of $q$ are in the region $R$.
      *
@@ -126,25 +126,21 @@ namespace DO { namespace Sara {
                  const std::vector<Region>& RR,
                  const size_t q[4]) const;
   private: /* visual debugging member functions. */
-    void checkRegion(const Region& R,
-                     const PairWiseDrawer *pDrawer,
-                     bool pause = false) const;
-    void checkRegionBoundary(const RegionBoundary& dR,
-                             const PairWiseDrawer *pDrawer,
-                             bool pause = false) const;
-    void checkGrowingState(const Region& R, const RegionBoundary& dR,
-                           const PairWiseDrawer *pDrawer,
-                           bool pause = false) const;
-    void checkLocalAffineConsistency(const OERegion& x,
-                                     const OERegion& y,
-                                     const OERegion& phi_x,
-                                     const OERegion& inv_phi_y,
-                                     const double overlapRatio[2],
-                                     const Match m[4],
-                                     const PairWiseDrawer *pDrawer =  0) const;
+    void check_region(const Region& R, const PairWiseDrawer* pDrawer,
+                      bool pause = false) const;
+    void check_region_boundary(const RegionBoundary& dR,
+                               const PairWiseDrawer* pDrawer,
+                               bool pause = false) const;
+    void check_region_growing_state(const Region& R, const RegionBoundary& dR,
+                                    const PairWiseDrawer* pDrawer,
+                                    bool pause = false) const;
+    void check_local_affine_consistency(
+        const OERegion& x, const OERegion& y, const OERegion& phi_x,
+        const OERegion& inv_phi_y, const double overlapRatio[2],
+        const Match m[4], const PairWiseDrawer* pDrawer = 0) const;
 
   private: /* functions for performance analysis. */
-    void analyzeQuadruple(const size_t q[4], RegionGrowingAnalyzer *pAnalyzer);
+    void analyze_quadruple(const size_t q[4], RegionGrowingAnalyzer *pAnalyzer);
 
   private: /* helper functions */
     const Match& M(size_t i) const { return G_.M(i); }
@@ -160,20 +156,20 @@ namespace DO { namespace Sara {
      * element 'g_.M(seed_)'.
      *
      */
-    size_t seed_;
+    size_t _seed;
 
     //! @brief Dynamic graph of matches containing the set of initial matches
     //! $\mathcal{M}$.
     DynamicMatchGraph& G_;
 
     //! @brief Growth parameters.
-    GrowthParams params_;
+    GrowthParams _params;
 
     //! @brief Verbose flag for debugging.
-    bool verbose_;
+    bool _verbose;
 
     //! @brief EXPERIMENTAL.
-    std::set<size_t> very_spurious_;
+    std::set<size_t> _very_spurious;
   };
 
 } /* namespace Sara */

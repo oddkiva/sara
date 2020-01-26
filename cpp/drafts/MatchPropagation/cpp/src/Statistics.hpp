@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include <DO/Sara/Defines.hpp>
+
 #include <algorithm>
 #include <cmath>
 #include <fstream>
@@ -28,14 +30,14 @@
 
 namespace DO::Sara {
 
-  class Stat
+  class Statistics
   {
   public:
     double min, max, median, mean, sigma;
     size_t size;
 
     template <typename T>
-    void computeStats(const std::vector<T>& numbers)
+    void compute_statistics(const std::vector<T>& numbers)
     {
       if (!numbers.empty())
       {
@@ -63,9 +65,11 @@ namespace DO::Sara {
       }
     }
 
-    friend std::ostream& operator<<(std::ostream& os, const Stat& s);
+    DO_SARA_EXPORT
+    friend std::ostream& operator<<(std::ostream& os, const Statistics& s);
   };
 
-  void writeStats(std::ofstream& out, const std::vector<Stat>& stats);
+  DO_SARA_EXPORT
+  void write_statistics(std::ofstream& out, const std::vector<Statistics>& stats);
 
 } /* namespace DO::Sara */

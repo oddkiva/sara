@@ -25,7 +25,7 @@
 
 namespace DO::Sara {
 
-  class GrowMultipleRegions
+  class DO_SARA_EXPORT GrowMultipleRegions
   {
   public: /* interface. */
     GrowMultipleRegions(const std::vector<Match>& matches,
@@ -37,7 +37,7 @@ namespace DO::Sara {
 
     void build_hat_N_Ks()
     {
-      G_.buildHatN_Ks();
+      G_.build_hat_N_Ks();
     }
 
   private:

@@ -31,7 +31,7 @@ namespace DO::Sara {
   GrowMultipleRegions::GrowMultipleRegions(const vector<Match>& M,
                                            const GrowthParams& params,
                                            int verbose)
-    : G_(M, params.K(), float(params.rhoMin()))
+    : G_(M, params.K(), float(params.rho_min()))
     , params_(params)
     , verbose_(verbose)
   {
@@ -63,7 +63,7 @@ namespace DO::Sara {
       if (!result.second.empty())
       {
         if (pAnalyzer)
-          pAnalyzer->incrementNumFusions();
+          pAnalyzer->increment_num_fusions();
 
         // Try growing $T$ different regions at most.
         if (verbose_ >= 2)
@@ -107,7 +107,7 @@ namespace DO::Sara {
         // Add to the partition of consistent regions.
         R_.push_back(result.first);
         // Remember not to grow from the following matches.
-        mark_reliableatches(allR, result.first);
+        mark_reliable_matches(allR, result.first);
         // Check visually the set of regions.
         // if (pDrawer)
         //{
@@ -129,8 +129,8 @@ namespace DO::Sara {
     }
     if (pDrawer)
     {
-      checkRegions(R_, pDrawer);
-      // getKey();
+      check_regions(R_, pDrawer);
+      // get_key();
     }
     if (pAnalyzer)
     {
@@ -185,12 +185,12 @@ namespace DO::Sara {
     Rs.swap(newRs);
   }
 
-  void GrowMultipleRegions::checkRegions(const vector<Region>& RR,
-                                         const PairWiseDrawer* pDrawer) const
+  void GrowMultipleRegions::check_regions(const vector<Region>& RR,
+                                          const PairWiseDrawer* pDrawer) const
   {
     if (pDrawer)
     {
-      pDrawer->displayImages();
+      pDrawer->display_images();
       srand(500);
       for (size_t i = 0; i != RR.size(); ++i)
       {

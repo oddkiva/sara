@@ -18,7 +18,7 @@
  *  ACCV 2012, Daejeon, South Korea.
  */
 
-#include "Stat.hpp"
+#include "Statistics.hpp"
 
 
 using namespace std;
@@ -26,7 +26,7 @@ using namespace std;
 
 namespace DO::Sara {
 
-  ostream& operator<<(ostream& os, const Stat& s)
+  ostream& operator<<(ostream& os, const Statistics& s)
   {
     os << "size   = " << s.size << endl;
     os << "min    = " << s.min << endl;
@@ -37,7 +37,7 @@ namespace DO::Sara {
     return os;
   }
 
-  void writeStats(ofstream& out, const vector<Stat>& stats)
+  void write_statistics(ofstream& out, const vector<Statistics>& stats)
   {
     out << "size\t";
     for (size_t i = 0; i != stats.size(); ++i)
