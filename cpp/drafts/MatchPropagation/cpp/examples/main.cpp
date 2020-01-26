@@ -199,6 +199,7 @@ GRAPHICS_MAIN()
     return 1;
   }
   shelf = rotate_ccw(shelf);
+  shelf = reduce(shelf, 2);
 
   // Open a window.
   float scale = 0.5;
@@ -247,7 +248,8 @@ GRAPHICS_MAIN()
 
   const auto num_region_growing = 2000;
   const auto growth_params = GrowthParams{};
-  GrowMultipleRegions grow_regions(initial_matches, growth_params);
+  const auto verbose_level = 2;
+  GrowMultipleRegions grow_regions(initial_matches, growth_params, verbose_level);
   regions = grow_regions(num_region_growing, 0, &drawer);
   elapsed = timer.elapsed_ms();
   cout << "Matching time = " << elapsed << " ms" << endl << endl;

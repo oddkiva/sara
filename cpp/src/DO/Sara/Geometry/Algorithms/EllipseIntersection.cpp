@@ -199,8 +199,8 @@ namespace DO { namespace Sara {
       Matrix2d S_0 = delta.asDiagonal()*shape_matrix(E_0)*delta.asDiagonal();
       Matrix2d S_1 = delta.asDiagonal()*shape_matrix(E_1)*delta.asDiagonal();
 
-      SARA_CHECK(shape_matrix(E_0));
-      SARA_CHECK(S_0);
+      //SARA_CHECK(shape_matrix(E_0));
+      //SARA_CHECK(S_0);
 
 
       Vector2d c_0 = E_0.center() - center;

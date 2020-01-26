@@ -24,9 +24,9 @@
 # define CHECK_STATE_AFTER_ADDING_SEED_MATCH \
 if (drawer) \
 { \
-  printStage("Check the region $R$ and the region boundary $\\partial R$ after adding seed match"); \
+  print_stage("Check the region $R$ and the region boundary $\\partial R$ after adding seed match"); \
   drawer->display_images(); \
-  checkGrowingState(R, dR, drawer, true); \
+  check_region_growing_state(R, dR, drawer, true); \
 }
 #else
 # define CHECK_STATE_AFTER_ADDING_SEED_MATCH
@@ -35,7 +35,7 @@ if (drawer) \
 #ifdef DEBUG
 # define CHECK_INCREMENTAL_SEED_TRIPLE_CONSTRUCTION \
 if (drawer) \
-  checkGrowingState(R, dR, drawer, true);
+  check_region_growing_state(R, dR, drawer, true);
 #else
 # define CHECK_INCREMENTAL_SEED_TRIPLE_CONSTRUCTION
 #endif
@@ -45,7 +45,7 @@ if (drawer) \
 if (drawer) \
 { \
   cout << "Trying M_[" << q[3] << "]\n" << M(q[3])  << endl; \
-  checkGrowingState(R, dR, drawer); \
+  check_region_growing_state(R, dR, drawer); \
   drawer->draw_match(*m, Red8); \
   get_key(); \
 }
@@ -55,7 +55,7 @@ if (drawer) \
 
 #ifdef DEBUG
 # define CHECK_GROWING_STATE_AFTER_FINDING_AFFINE_SEED_QUADRUPLE \
-checkGrowingState(R, dR, drawer, true);
+check_region_growing_state(R, dR, drawer, true);
 #else
 # define CHECK_GROWING_STATE_AFTER_FINDING_AFFINE_SEED_QUADRUPLE
 #endif
@@ -64,8 +64,8 @@ checkGrowingState(R, dR, drawer, true);
 # define CHECK_CANDIDATE_MATCH_AND_GROWING_STATE \
 if (drawer) \
 { \
-  cout << "Trying M_[" << q[3] << "]\n" << M(q[3])  << endl; \
-  checkGrowingState(R, dR, drawer); \
+  cout << "Trying M_[" << q[m][3] << "]\n" << M(q[m][3])  << endl; \
+  check_region_growing_state(R, dR, drawer); \
   drawer->draw_match(*m, Yellow8); \
   get_key(); \
 }
@@ -75,11 +75,15 @@ if (drawer) \
 
 #ifdef DEBUG
 # define NOTIFY_CANNOT_CONSTRUCT_N_k \
-if (verbose_) \
-  cout << "N_k[" << m << "].size() < 3" << endl;
+if (_verbose) \
+  cout << "N_K_m_cap_R.size() < 3" << endl;
 #else
 # define NOTIFY_CANNOT_CONSTRUCT_N_k
 #endif
+
+  //drawer->display_images(); \
+  //check_region(R, drawer);
+  //drawer->draw_match(M(m), Yellow8); \
 
 #ifdef DEBUG
 # define DISPLAY_N_k \
@@ -87,25 +91,26 @@ if (drawer) \
 { \
   cout << "Drawing N_k\n"; \
   drawer->display_images(); \
-  checkRegion(R, drawer); \
-  for (size_t j = 0; j != N_k.size(); ++j) \
+  for (size_t j = 0; j != N_K_m_cap_R.size(); ++j) \
   { \
-    drawer->draw_match(M(N_k[j]), Cyan8); \
+    drawer->draw_match(M(N_K_m_cap_R[j]), Cyan8); \
   } \
-  drawer->draw_match(M(m), Yellow8); \
 }
 #else
 # define DISPLAY_N_k
 #endif
+
+  //drawer->display_images(); \
+  //check_region(R, drawer); \
+  drawer->draw_match(M(m), Yellow8); \
 
 #ifdef DEBUG
 # define DISPLAY_NON_DEGENERATE_TRIPLE \
 if (drawer) \
 { \
   drawer->display_images(); \
-  checkRegion(R, drawer); \
-  for (size_t j = 0; j != N_k.size(); ++j) \
-    drawer->draw_match(M(N_k[j]), Cyan8); \
+  for (size_t j = 0; j != N_K_m_cap_R.size(); ++j) \
+    drawer->draw_match(M(N_K_m_cap_R[j]), Cyan8); \
   cout << "Found good triple" << endl; \
   cout << "t = { "; \
   for (int i = 0; i < 3; ++i) \
@@ -116,7 +121,6 @@ if (drawer) \
       cout << ", "; \
   } \
   cout << " }" << endl; \
-  drawer->draw_match(M(m), Yellow8); \
   get_key(); \
 }
 #else

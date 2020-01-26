@@ -18,6 +18,7 @@
  *  ACCV 2012, Daejeon, South Korea.
  */
 
+#include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Graphics.hpp>
 
 #include "GrowMultipleRegions.hpp"
@@ -50,6 +51,7 @@ namespace DO::Sara {
     size_t n = 0;
     for (size_t m = 0; m != G_.size(); ++m)
     {
+      SARA_DEBUG << "REGION GROWTH ITER " << m << std::endl;
       // Can we use the following match as a seed?
       if (all_R.find(m))
         continue;
@@ -68,22 +70,24 @@ namespace DO::Sara {
         // Try growing $T$ different regions at most.
         if (verbose_ >= 2)
         {
-          cout << "[" << n << "] with match M[" << m << "]: Overlapping"
-               << endl;
-          cout << "region size = " << result.first.size() << endl;
+          SARA_DEBUG << "[" << n << "] with match M[" << m << "]: Overlapping"
+                     << endl;
+          SARA_DEBUG << "region size = " << result.first.size() << endl;
         }
-        // if (drawer)
-        //{
-        //  for (size_t i = 0; i != result.second.size(); ++i)
-        //    cout << result.second[i] << endl;
-        //  drawer->displayImages();
-        //  checkRegions(R_, drawer);
-        //  result.first.view(G_.M(), *drawer, Cyan8);
-        //  getKey();
-        //}
+
+        if (drawer)
+        {
+          for (size_t i = 0; i != result.second.size(); ++i)
+            SARA_DEBUG << result.second[i] << endl;
+          drawer->display_images();
+          check_regions(R_, drawer);
+          result.first.view(G_.M(), *drawer, Cyan8);
+          get_key();
+        }
 
         if (verbose_ >= 2)
-          cout << "Before merging: number of regions = " << R_.size() << endl;
+          SARA_DEBUG << "Before merging: number of regions = " << R_.size()
+                     << endl;
         // Merge the overlapping regions.
         merge_regions(R_, result);
         // Remember not to grow from the following matches.
@@ -91,7 +95,8 @@ namespace DO::Sara {
 
         // Check visually the set of regions.
         if (verbose_ >= 2)
-          cout << "After merging: number of regions = " << R_.size() << endl;
+          SARA_DEBUG << "After merging: number of regions = " << R_.size()
+                     << endl;
         // check_regions(R_, drawer);
       }
       // if the region has significant size, add it to the list of region.
@@ -100,9 +105,9 @@ namespace DO::Sara {
         // Try growing $T$ different regions at most.
         if (verbose_ >= 2)
         {
-          cout << "[" << n << "] with match M[" << m
-               << "]: Regular region growing" << endl;
-          cout << "region size = " << result.first.size() << endl;
+          SARA_DEBUG << "[" << n << "] with match M[" << m
+                     << "]: Regular region growing" << endl;
+          SARA_DEBUG << "region size = " << result.first.size() << endl;
         }
         // Add to the partition of consistent regions.
         R_.push_back(result.first);
@@ -123,9 +128,9 @@ namespace DO::Sara {
 
     if (verbose_ >= 1)
     {
-      cout << "FINISHED GROWING MULTIPLE REGIONS:" << endl;
-      cout << "number of regions = " << R_.size() << endl;
-      cout << "number of matches = " << all_R.size() << endl;
+      SARA_DEBUG << "FINISHED GROWING MULTIPLE REGIONS:" << endl;
+      SARA_DEBUG << "number of regions = " << R_.size() << endl;
+      SARA_DEBUG << "number of matches = " << all_R.size() << endl;
     }
     if (drawer)
     {
@@ -153,13 +158,13 @@ namespace DO::Sara {
   {
     // Merge regions.
     if (verbose_ >= 2)
-      cout << "Merging regions:" << endl;
+      SARA_DEBUG << "Merging regions:" << endl;
     Region merged_R;
     for (size_t i = 0; i != result.second.size(); ++i)
     {
       size_t index = result.second[i];
       if (verbose_ >= 2)
-        cout << index << " ";
+        SARA_DEBUG << index << " ";
       for (Region::iterator m = Rs[index].begin(); m != Rs[index].end(); ++m)
         merged_R.insert(*m);
       for (Region::iterator m = result.first.begin(); m != result.first.end();
@@ -167,7 +172,7 @@ namespace DO::Sara {
         merged_R.insert(*m);
     }
     if (verbose_ >= 2)
-      cout << endl;
+      SARA_DEBUG << endl;
 
     // Erase the overlapping regions and put the region resulting from the
     // merging
