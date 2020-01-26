@@ -18,20 +18,20 @@
  *  ACCV 2012, Daejeon, South Korea.
  */
 
-#include "StudyPerfWithHatN_K.hpp"
+#include "StudyInfluenceOfMatchNeighborhoodSizeOnPerformance.hpp"
+
 #include "../GrowMultipleRegions.hpp"
 
 using namespace std;
 
 namespace DO::Sara {
 
-  bool
-  StudyPerfWithHat_N_K::
-  operator()(float squared_ell, size_t numRegionGrowths,
-             size_t K, double rho_min)
+  bool StudyInfluenceOfMatchNeighborhoodSizeOnPerformance::
+  operator()(float squared_ell, size_t numRegionGrowths, size_t K,
+             double rho_min)
   {
     // ====================================================================== //
-    /* Below: Mikolajczyk et al.'s parameter in their IJCV 2005 paper. 
+    /* Below: Mikolajczyk et al.'s parameter in their IJCV 2005 paper.
      *
      * Let (x,y) be a match. It is an inlier if it satisfies:
      * $$\| \mathbf{H} \mathbf{x} - \mathbf{y} \|_2 < 1.5 \ \textrm{pixels}$$
@@ -39,7 +39,8 @@ namespace DO::Sara {
      * where $\mathbf{H}$ is the ground truth homography.
      * 1.5 pixels is used in the above-mentioned paper.
      */
-    float mikolajczykInlierThres = 1.5f;    
+    float mikolajczykInlierThres = 1.5f;
+
     // Set of thresholds.
     vector<float> thres;
     thres.push_back(mikolajczykInlierThres);
@@ -47,7 +48,7 @@ namespace DO::Sara {
 
     for (int j = 1; j < 6; ++j)
     {
-      PairWiseDrawer *drawer = 0;
+      PairWiseDrawer* drawer = 0;
       if (_display)
       {
         // View the image pair.
@@ -71,12 +72,10 @@ namespace DO::Sara {
         for (size_t t = 0; t != thres.size(); ++t)
         {
           bool success;
-          success = run(M, H, j, squared_ell,
-                             thres[t],
-                             numRegionGrowths, K, rho_min, false, drawer);
-          success = run(M, H, j, squared_ell,
-                             thres[t],
-                             numRegionGrowths, K, rho_min, true, drawer);
+          success = run(M, H, j, squared_ell, thres[t], numRegionGrowths, K,
+                        rho_min, false, drawer);
+          success = run(M, H, j, squared_ell, thres[t], numRegionGrowths, K,
+                        rho_min, true, drawer);
           if (!success)
           {
             if (_display)
@@ -97,23 +96,18 @@ namespace DO::Sara {
       }
     }
 
-    
+
     return true;
   }
 
-  bool
-  StudyPerfWithHat_N_K::
-  run(const vector<Match>& M,
-           const Matrix3f& H, size_t image_index,
-           float squared_ell, float inlier_thres,
-           size_t numRegionGrowths,
-           size_t K, double rho_min,
-           bool useHatN_K,
-           const PairWiseDrawer *drawer) const
+  bool StudyInfluenceOfMatchNeighborhoodSizeOnPerformance::run(
+      const vector<Match>& M, const Matrix3f& H, size_t image_index,
+      float squared_ell, float inlier_thres, size_t numRegionGrowths, size_t K,
+      double rho_min, bool useHatN_K, const PairWiseDrawer* drawer) const
   {
     string comment;
-    comment  = "Evaluating outlier resistance on dataset '";
-    comment += dataset().name() + ":\n\tpair 1-"+to_string(image_index+1);
+    comment = "Evaluating outlier resistance on dataset '";
+    comment += dataset().name() + ":\n\tpair 1-" + to_string(image_index + 1);
     comment += (useHatN_K ? "\n\thatN_K" : "\n\tN_K");
     comment += "\n\tfeatType = " + dataset().feature_type();
     comment += "\n\tsquaredEll = " + to_string(squared_ell);
@@ -125,7 +119,8 @@ namespace DO::Sara {
     // Get subset of matches.
     vector<size_t> inliers, outliers;
     get_inliers_and_outliers(inliers, outliers, M, H, inlier_thres);
-    // We want to perform our analysis on this particular subset of matches of interest.
+    // We want to perform our analysis on this particular subset of matches of
+    // interest.
     bool verbose = _debug && (drawer != nullptr);
     RegionGrowingAnalyzer analyzer(M, H, verbose);
     analyzer.set_inliers(inliers);
@@ -133,10 +128,10 @@ namespace DO::Sara {
     // Grow multiple regions.
     cout << "Growing Regions... ";
     GrowthParams params(K, rho_min);
-    GrowMultipleRegions growMultipleRegions(M, params, _debug ? 1 : 0);
+    GrowMultipleRegions grow_regions(M, params, _debug ? 1 : 0);
     if (useHatN_K)
-      growMultipleRegions.build_hat_N_Ks();
-    vector<Region> RR(growMultipleRegions(numRegionGrowths, &analyzer, drawer));
+      grow_regions.build_hat_N_Ks();
+    vector<Region> RR(grow_regions(numRegionGrowths, &analyzer, drawer));
     cout << "Done!" << endl;
 
     // Compute the statistics.
@@ -157,8 +152,8 @@ namespace DO::Sara {
 
     // Save stats.
     cout << "Saving stats... ";
-    string folder; 
-    folder = dataset().name()+"/performance_hat_N_K";
+    string folder;
+    folder = dataset().name() + "/performance_hat_N_K";
     folder = string_src_path(folder);
 #pragma omp critical
     {
@@ -167,45 +162,39 @@ namespace DO::Sara {
 
     string neighborhoodName = useHatN_K ? "_HatN_K_" : "_N_K_";
 
-    const string namePrecRecall("prec_recall_"
-                              + dataset().name() 
-                              + "_" + to_string(1) + "_" + to_string(image_index+1)
-                              + neighborhoodName
-                              + "_sqEll_" + to_string(squared_ell)
-                              + "_nReg_ " + to_string(numRegionGrowths)
-                              + "_K_"  + to_string(K)
-                              + "_rhoMin_" + to_string(rho_min)
-                              + "_inlierThres_" + to_string(inlier_thres)
-                              + dataset().feature_type()
-                              + ".txt");
+    const string namePrecRecall(
+        "prec_recall_" + dataset().name() + "_" + to_string(1) + "_" +
+        to_string(image_index + 1) + neighborhoodName + "_sqEll_" +
+        to_string(squared_ell) + "_nReg_ " + to_string(numRegionGrowths) +
+        "_K_" + to_string(K) + "_rhoMin_" + to_string(rho_min) +
+        "_inlierThres_" + to_string(inlier_thres) + dataset().feature_type() +
+        ".txt");
 
-    const string nameStatRegions("stat_regions_"
-                               + dataset().name() 
-                               + "_" + to_string(1) + "_" + to_string(image_index+1)
-                               + neighborhoodName
-                               + "_sqEll_" + to_string(squared_ell)
-                               + "_nReg_ " + to_string(numRegionGrowths)
-                               + "_K_"  + to_string(K)
-                               + "_rhoMin_" + to_string(rho_min)
-                               + "_inlierThres_" + to_string(inlier_thres)
-                               + dataset().feature_type()
-                               + ".txt");
+    const string nameStatRegions(
+        "stat_regions_" + dataset().name() + "_" + to_string(1) + "_" +
+        to_string(image_index + 1) + neighborhoodName + "_sqEll_" +
+        to_string(squared_ell) + "_nReg_ " + to_string(numRegionGrowths) +
+        "_K_" + to_string(K) + "_rhoMin_" + to_string(rho_min) +
+        "_inlierThres_" + to_string(inlier_thres) + dataset().feature_type() +
+        ".txt");
 
     bool success;
-#pragma omp critical 
+#pragma omp critical
     {
-      success = analyzer.save_precision_recall_etc(string(folder+"/"+namePrecRecall)) &&
-                analyzer.save_region_number_statistics(string(folder+"/"+nameStatRegions));
+      success = analyzer.save_precision_recall_etc(
+                    string(folder + "/" + namePrecRecall)) &&
+                analyzer.save_region_number_statistics(
+                    string(folder + "/" + nameStatRegions));
     }
     if (!success)
     {
       cerr << "Could not save stats:" << endl
-           << string(folder+"/"+namePrecRecall)  << endl
-           << string(folder+"/"+nameStatRegions) << endl;
+           << string(folder + "/" + namePrecRecall) << endl
+           << string(folder + "/" + nameStatRegions) << endl;
       return false;
     }
     cout << "Done!" << endl;
-    return true; 
+    return true;
   }
 
-} /* namespace DO */
+}  // namespace DO::Sara

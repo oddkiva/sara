@@ -48,10 +48,10 @@ namespace DO::Sara {
 
   NearestMatchNeighborhoodComputer::NearestMatchNeighborhoodComputer(
       const vector<Match>& matches, size_t neighborhoodMaxSize,
-      const PairWiseDrawer* pDrawer, bool verbose)
+      const PairWiseDrawer* drawer, bool verbose)
     : _M(matches)
     , _verbose(verbose)
-    , _drawer(pDrawer)
+    , _drawer(drawer)
     , _neighborhood_max_size(neighborhoodMaxSize)
   {
     create_and_sort_xy();

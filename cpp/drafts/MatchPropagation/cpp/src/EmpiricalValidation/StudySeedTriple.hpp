@@ -25,16 +25,16 @@
 
 namespace DO::Sara {
 
-  class StudySeedTriple : public StudyOnMikolajczykDataset
+  class DO_SARA_EXPORT StudySeedTriple : public StudyOnMikolajczykDataset
   {
   public:
-    StudySeedTriple(const std::string& absParentFolderPath,
-                    const std::string& name, const std::string& featType)
-      : StudyOnMikolajczykDataset(absParentFolderPath, name, featType)
+    StudySeedTriple(const std::string& abs_parent_folder_path,
+                    const std::string& name, const std::string& feature_type)
+      : StudyOnMikolajczykDataset(abs_parent_folder_path, name, feature_type)
     {
     }
-    bool operator()(float inlierThres, float squaredEll, size_t K, size_t k,
-                    double squaredRhoMin);
+
+    bool operator()(float inlier_thres, float squared_ell);
   };
 
 }  // namespace DO::Sara

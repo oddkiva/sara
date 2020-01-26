@@ -38,32 +38,32 @@ namespace DO::Sara {
   }
 
   vector<Region> GrowMultipleRegions::
-  operator()(size_t N, RegionGrowingAnalyzer* pAnalyzer,
-             const PairWiseDrawer* pDrawer)
+  operator()(size_t N, RegionGrowingAnalyzer* analyzer,
+             const PairWiseDrawer* drawer)
   {
     vector<Region> R_;
     R_.reserve(1000);
 
-    Region allR;
-    size_t maxRegionSize = numeric_limits<size_t>::max();
+    Region all_R;
+    size_t max_region_size = numeric_limits<size_t>::max();
 
     size_t n = 0;
     for (size_t m = 0; m != G_.size(); ++m)
     {
       // Can we use the following match as a seed?
-      if (allR.find(m))
+      if (all_R.find(m))
         continue;
 
       // Attempt region growing.
       GrowRegion growRegion(m, G_, params_);
       pair<Region, vector<size_t>> result =
-          growRegion(R_, maxRegionSize, pDrawer, pAnalyzer);
+          growRegion(R_, max_region_size, drawer, analyzer);
 
       // Merge regions if overlapping!
       if (!result.second.empty())
       {
-        if (pAnalyzer)
-          pAnalyzer->increment_num_fusions();
+        if (analyzer)
+          analyzer->increment_num_fusions();
 
         // Try growing $T$ different regions at most.
         if (verbose_ >= 2)
@@ -72,13 +72,13 @@ namespace DO::Sara {
                << endl;
           cout << "region size = " << result.first.size() << endl;
         }
-        // if (pDrawer)
+        // if (drawer)
         //{
         //  for (size_t i = 0; i != result.second.size(); ++i)
         //    cout << result.second[i] << endl;
-        //  pDrawer->displayImages();
-        //  checkRegions(R_, pDrawer);
-        //  result.first.view(G_.M(), *pDrawer, Cyan8);
+        //  drawer->displayImages();
+        //  checkRegions(R_, drawer);
+        //  result.first.view(G_.M(), *drawer, Cyan8);
         //  getKey();
         //}
 
@@ -87,12 +87,12 @@ namespace DO::Sara {
         // Merge the overlapping regions.
         merge_regions(R_, result);
         // Remember not to grow from the following matches.
-        mark_reliable_matches(allR, result.first);
+        mark_reliable_matches(all_R, result.first);
 
         // Check visually the set of regions.
         if (verbose_ >= 2)
           cout << "After merging: number of regions = " << R_.size() << endl;
-        // check_regions(R_, pDrawer);
+        // check_regions(R_, drawer);
       }
       // if the region has significant size, add it to the list of region.
       else if (result.first.size() > 7)
@@ -107,11 +107,11 @@ namespace DO::Sara {
         // Add to the partition of consistent regions.
         R_.push_back(result.first);
         // Remember not to grow from the following matches.
-        mark_reliable_matches(allR, result.first);
+        mark_reliable_matches(all_R, result.first);
         // Check visually the set of regions.
-        // if (pDrawer)
+        // if (drawer)
         //{
-        //  checkRegions(R_, pDrawer);
+        //  checkRegions(R_, drawer);
         //  milliSleep(250);
         //}
       }
@@ -125,17 +125,17 @@ namespace DO::Sara {
     {
       cout << "FINISHED GROWING MULTIPLE REGIONS:" << endl;
       cout << "number of regions = " << R_.size() << endl;
-      cout << "number of matches = " << allR.size() << endl;
+      cout << "number of matches = " << all_R.size() << endl;
     }
-    if (pDrawer)
+    if (drawer)
     {
-      check_regions(R_, pDrawer);
+      check_regions(R_, drawer);
       // get_key();
     }
-    if (pAnalyzer)
+    if (analyzer)
     {
-      pAnalyzer->set_num_regions(int(R_.size()));
-      pAnalyzer->set_num_attempted_growths(int(N));
+      analyzer->set_num_regions(int(R_.size()));
+      analyzer->set_num_attempted_growths(int(N));
     }
     return R_;
   }
@@ -154,48 +154,48 @@ namespace DO::Sara {
     // Merge regions.
     if (verbose_ >= 2)
       cout << "Merging regions:" << endl;
-    Region mergedR;
+    Region merged_R;
     for (size_t i = 0; i != result.second.size(); ++i)
     {
       size_t index = result.second[i];
       if (verbose_ >= 2)
         cout << index << " ";
       for (Region::iterator m = Rs[index].begin(); m != Rs[index].end(); ++m)
-        mergedR.insert(*m);
+        merged_R.insert(*m);
       for (Region::iterator m = result.first.begin(); m != result.first.end();
            ++m)
-        mergedR.insert(*m);
+        merged_R.insert(*m);
     }
     if (verbose_ >= 2)
       cout << endl;
 
     // Erase the overlapping regions and put the region resulting from the
     // merging
-    vector<Region> newRs;
-    newRs.reserve(1000);
+    vector<Region> new_Rs;
+    new_Rs.reserve(1000);
     // Find the regions we have to keep.
-    vector<int> indicesToKeep(Rs.size(), 1);
+    vector<int> indices_to_keep(Rs.size(), 1);
     for (size_t i = 0; i != result.second.size(); ++i)
-      indicesToKeep[result.second[i]] = 0;
+      indices_to_keep[result.second[i]] = 0;
     // Store the desired regions.
-    newRs.push_back(mergedR);
+    new_Rs.push_back(merged_R);
     for (size_t i = 0; i != Rs.size(); ++i)
-      if (indicesToKeep[i] == 1)
-        newRs.push_back(Rs[i]);
-    Rs.swap(newRs);
+      if (indices_to_keep[i] == 1)
+        new_Rs.push_back(Rs[i]);
+    Rs.swap(new_Rs);
   }
 
   void GrowMultipleRegions::check_regions(const vector<Region>& RR,
-                                          const PairWiseDrawer* pDrawer) const
+                                          const PairWiseDrawer* drawer) const
   {
-    if (pDrawer)
+    if (drawer)
     {
-      pDrawer->display_images();
+      drawer->display_images();
       srand(500);
       for (size_t i = 0; i != RR.size(); ++i)
       {
         Rgb8 c(rand() % 256, rand() % 256, rand() % 256);
-        RR[i].view(G_.M(), *pDrawer, c);
+        RR[i].view(G_.M(), *drawer, c);
       }
     }
   }

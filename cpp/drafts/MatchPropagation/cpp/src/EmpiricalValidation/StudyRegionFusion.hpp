@@ -28,12 +28,13 @@ namespace DO::Sara {
   class StudyRegionFusion : public StudyOnMikolajczykDataset
   {
   public:
-    StudyRegionFusion(const std::string& absParentFolderPath,
-                      const std::string& name, const std::string& featType)
-      : StudyOnMikolajczykDataset(absParentFolderPath, name, featType)
+    StudyRegionFusion(const std::string& abs_parent_folder,
+                      const std::string& name, const std::string& feature_type)
+      : StudyOnMikolajczykDataset(abs_parent_folder, name, feature_type)
     {
     }
-    bool operator()(float inlierThres, float squaredEll, size_t K, size_t k,
+
+    bool operator()(float inlier_thres, float squared_ell, size_t K,
                     double squaredRhoMin);
   };
 
