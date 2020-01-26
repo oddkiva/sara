@@ -43,9 +43,9 @@ namespace DO::Sara {
     };
 
     // Constructor
-    StudyOnMikolajczykDataset(const std::string& absParentFolderPath,
+    StudyOnMikolajczykDataset(const std::string& abs_parent_folder_path,
                               const std::string& name,
-                              const std::string& featType);
+                              const std::string& feature_type);
 
     // Viewing, convenience functions...
     const MikolajczykDataset& dataset() const

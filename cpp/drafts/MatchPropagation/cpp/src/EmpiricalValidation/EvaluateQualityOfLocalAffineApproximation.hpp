@@ -26,30 +26,42 @@
 
 namespace DO::Sara {
 
-  class DO_SARA_EXPORT EvalQualityOfLocalAffApprox
+  //! @brief This class evaluates the quality of the local affine approximation.
+  /*! 
+   *  Mikolajczyk et al.'s parameter in their IJCV 2005 paper.
+   *
+   *  Let (x,y) be a match. It is an inlier if it satisfies:
+   *  $$\| \mathbf{H} \mathbf{x} - \mathbf{y} \|_2 < 1.5 \ \textrm{pixels}$$
+   *
+   *  where $\mathbf{H}$ is the ground truth homography.
+   *  1.5 pixels is used in the paper.
+   *
+   *  This class enables us to do the same thing but for various thresholds.
+   *
+   */
+  class DO_SARA_EXPORT EvaluateQualityOfLocalAffineApproximation
     : public StudyOnMikolajczykDataset
   {
   public:
-    EvalQualityOfLocalAffApprox(const std::string& absParentFolderPath,
-                                const std::string& name,
-                                const std::string& featType)
-      : StudyOnMikolajczykDataset(absParentFolderPath, name, featType)
-      , _debug(false)
-      , _display(false)
+    EvaluateQualityOfLocalAffineApproximation(
+        const std::string& abs_parent_folder_path, const std::string& name,
+        const std::string& feature_type)
+      : StudyOnMikolajczykDataset(abs_parent_folder_path, name, feature_type)
     {
     }
     bool operator()(float squared_ell, size_t numRegionGrowths, size_t K,
                     double rho_min) const;
 
   private:
-    bool run(const std::vector<Match>& M, const std::vector<IndexDist>& M_sorted,
-             const Matrix3f& H, size_t imgIndex, float squared_ell, float lb,
-             float ub, size_t numRegionGrowths, size_t K, double rho_min,
+    bool run(const std::vector<Match>& M,
+             const std::vector<IndexDist>& M_sorted, const Matrix3f& H,
+             size_t image_index, float squared_ell, float lb, float ub,
+             size_t numRegionGrowths, size_t K, double rho_min,
              const PairWiseDrawer* drawer = 0) const;
 
   private:
-    bool _debug;
-    bool _display;
+    bool _debug{false};
+    bool _display{false};
   };
 
 }  // namespace DO::Sara

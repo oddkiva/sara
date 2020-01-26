@@ -24,15 +24,15 @@ using namespace std;
 
 namespace DO::Sara {
 
-  bool MikolajczykDataset::load_keys(const string& featType)
+  bool MikolajczykDataset::load_keys(const string& feature_type)
   {
-    _feat_type = featType;
-    print_stage("Loading keypoints: " + featType + " for Dataset: " + _name);
+    _feat_type = feature_type;
+    print_stage("Loading keypoints: " + feature_type + " for Dataset: " + _name);
     _keys.resize(_image.size());
     for (size_t i = 0; i != _keys.size(); ++i)
     {
       if (!read_keypoints(features(_keys[i]), descriptors(_keys[i]),
-                          folder_path() + "/img" + to_string(i + 1) + featType))
+                          folder_path() + "/img" + to_string(i + 1) + feature_type))
         return false;
     }
     return true;

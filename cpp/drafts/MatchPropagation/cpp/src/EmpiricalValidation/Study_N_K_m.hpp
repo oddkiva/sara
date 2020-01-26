@@ -30,9 +30,9 @@ namespace DO::Sara {
   class Study_N_K_m : public StudyOnMikolajczykDataset
   {
   public:
-    Study_N_K_m(const std::string& absParentFolderPath, const std::string& name,
-                const std::string& featType)
-      : StudyOnMikolajczykDataset(absParentFolderPath, name, featType)
+    Study_N_K_m(const std::string& abs_parent_folder_path, const std::string& name,
+                const std::string& feature_type)
+      : StudyOnMikolajczykDataset(abs_parent_folder_path, name, feature_type)
     {
     }
     bool operator()(float inlier_thres, float squared_ell, size_t K,

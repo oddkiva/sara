@@ -104,7 +104,7 @@ namespace DO::Sara {
   bool
   StudyPerfWithHat_N_K::
   run(const vector<Match>& M,
-           const Matrix3f& H, size_t imgIndex,
+           const Matrix3f& H, size_t image_index,
            float squared_ell, float inlier_thres,
            size_t numRegionGrowths,
            size_t K, double rho_min,
@@ -113,9 +113,9 @@ namespace DO::Sara {
   {
     string comment;
     comment  = "Evaluating outlier resistance on dataset '";
-    comment += dataset().name() + ":\n\tpair 1-"+to_string(imgIndex+1);
+    comment += dataset().name() + ":\n\tpair 1-"+to_string(image_index+1);
     comment += (useHatN_K ? "\n\thatN_K" : "\n\tN_K");
-    comment += "\n\tfeatType = " + dataset().featType();
+    comment += "\n\tfeatType = " + dataset().feature_type();
     comment += "\n\tsquaredEll = " + to_string(squared_ell);
     comment += "\n\tK = " + to_string(K);
     comment += "\n\trho_min = " + to_string(rho_min);
@@ -169,26 +169,26 @@ namespace DO::Sara {
 
     const string namePrecRecall("prec_recall_"
                               + dataset().name() 
-                              + "_" + to_string(1) + "_" + to_string(imgIndex+1)
+                              + "_" + to_string(1) + "_" + to_string(image_index+1)
                               + neighborhoodName
                               + "_sqEll_" + to_string(squared_ell)
                               + "_nReg_ " + to_string(numRegionGrowths)
                               + "_K_"  + to_string(K)
                               + "_rhoMin_" + to_string(rho_min)
                               + "_inlierThres_" + to_string(inlier_thres)
-                              + dataset().featType()
+                              + dataset().feature_type()
                               + ".txt");
 
     const string nameStatRegions("stat_regions_"
                                + dataset().name() 
-                               + "_" + to_string(1) + "_" + to_string(imgIndex+1)
+                               + "_" + to_string(1) + "_" + to_string(image_index+1)
                                + neighborhoodName
                                + "_sqEll_" + to_string(squared_ell)
                                + "_nReg_ " + to_string(numRegionGrowths)
                                + "_K_"  + to_string(K)
                                + "_rhoMin_" + to_string(rho_min)
                                + "_inlierThres_" + to_string(inlier_thres)
-                               + dataset().featType()
+                               + dataset().feature_type()
                                + ".txt");
 
     bool success;

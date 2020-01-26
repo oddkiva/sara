@@ -24,20 +24,21 @@ using namespace std;
 
 namespace DO::Sara {
 
-  StudyOnMikolajczykDataset::
-  StudyOnMikolajczykDataset(const std::string& absParentFolderPath,
-                            const std::string& name,
-                            const std::string& featType)
-    : _dataset(absParentFolderPath, name)
+  StudyOnMikolajczykDataset::StudyOnMikolajczykDataset(
+      const std::string& abs_parent_folder_path, const std::string& name,
+      const std::string& feature_type)
+    : _dataset(abs_parent_folder_path, name)
   {
-    _dataset.load_keys(featType);
-    //dataset_.check();
+    _dataset.load_keys(feature_type);
+    // dataset_.check();
   }
-  
-  void StudyOnMikolajczykDataset::open_window_for_image_pair(size_t i, size_t j) const
+
+  void StudyOnMikolajczykDataset::open_window_for_image_pair(size_t i,
+                                                             size_t j) const
   {
-    int w = int((dataset().image(0).width() + dataset().image(1).width()));
-    int h = max(dataset().image(0).height(), dataset().image(1).height());
+    const auto w = dataset().image(0).width() + dataset().image(1).width();
+    const auto h = max(dataset().image(0).height(),  //
+                       dataset().image(1).height());
     create_window(w, h);
     set_antialiasing();
   }
@@ -47,26 +48,20 @@ namespace DO::Sara {
     close_window();
   }
 
-  vector<Match>
-  StudyOnMikolajczykDataset::
-  compute_matches(const KeypointList<OERegion, float>& X,
-                 const KeypointList<OERegion, float>& Y,
-                 float squaredEll) const
+  vector<Match> StudyOnMikolajczykDataset::compute_matches(
+      const KeypointList<OERegion, float>& X,
+      const KeypointList<OERegion, float>& Y, float squared_ell) const
   {
-    print_stage("Computing initial matches $\\mathcal{M}$ with $\\ell = "
-              + to_string(sqrt(squaredEll)) + "$");
-    vector<Match> M;
-    AnnMatcher matcher(X, Y, squaredEll);
-    M = matcher.compute_matches();
+    print_stage("Computing initial matches $\\mathcal{M}$ with $\\ell = " +
+                to_string(sqrt(squared_ell)) + "$");
+    AnnMatcher matcher(X, Y, squared_ell);
+    const auto M = matcher.compute_matches();
     return M;
   }
 
-  void 
-  StudyOnMikolajczykDataset::get_inliers_and_outliers(vector<size_t>& inliers,
-                                                   vector<size_t>& outliers,
-                                                   const vector<Match>& matches,
-                                                   const Matrix3f& H,
-                                                   float thres) const
+  void StudyOnMikolajczykDataset::get_inliers_and_outliers(
+      vector<size_t>& inliers, vector<size_t>& outliers,
+      const vector<Match>& matches, const Matrix3f& H, float thres) const
   {
     inliers.reserve(matches.size());
     for (size_t i = 0; i != matches.size(); ++i)
@@ -74,7 +69,7 @@ namespace DO::Sara {
       const auto& x = matches[i].x_pos();
       const auto& y = matches[i].y_pos();
 
-      const Eigen::Vector2f Hx = (H * x.homogeneous()).hnormalized();
+      const Vector2f Hx = (H * x.homogeneous()).hnormalized();
 
       if ((Hx - y).squaredNorm() < thres * thres)
         inliers.push_back(i);
@@ -87,33 +82,39 @@ namespace DO::Sara {
   StudyOnMikolajczykDataset::sort_matches_by_reprojection_error(
       const vector<Match>& M, const Matrix3f& H) const
   {
-    CompareIndexDist cmp;
-    vector<IndexDist> indexDists(M.size());
+    auto index_dists = vector<IndexDist>(M.size());
+
     for (size_t i = 0; i != M.size(); ++i)
     {
       const Vector2f H_x = (H * M[i].x_pos().homogeneous()).hnormalized();
       const Vector2f& y = M[i].y_pos();
-      indexDists[i] = make_pair(i, (H_x - y).norm());
+      index_dists[i] = make_pair(i, (H_x - y).norm());
     }
-    sort(indexDists.begin(), indexDists.end(), cmp);
 
-    return indexDists;
+    auto cmp = CompareIndexDist{};
+    sort(index_dists.begin(), index_dists.end(), cmp);
+
+    return index_dists;
   }
 
-  vector<size_t>
-  StudyOnMikolajczykDataset::get_matches(const vector<IndexDist>& sortedMatches,
-                                        float reprojLowerBound,
-                                        float reprojUpperBound) const
+  auto StudyOnMikolajczykDataset::get_matches(
+      const vector<IndexDist>& sorted_matches,  //
+      float reprojection_lower_bound,           //
+      float reprojection_upper_bound) const     //
+      -> vector<size_t>
   {
-    vector<size_t> indices;
-    indices.reserve(sortedMatches.size());
-    for (int i = 0; i != sortedMatches.size(); ++i)
+    auto indices = vector<size_t>{};
+    indices.reserve(sorted_matches.size());
+
+    for (int i = 0; i != sorted_matches.size(); ++i)
     {
-      if (sortedMatches[i].second < reprojLowerBound)
+      if (sorted_matches[i].second < reprojection_lower_bound)
         continue;
-      if (sortedMatches[i].second >= reprojUpperBound)
+
+      if (sorted_matches[i].second >= reprojection_upper_bound)
         break;
-      indices.push_back(sortedMatches[i].first);
+
+      indices.push_back(sorted_matches[i].first);
     }
     return indices;
   }

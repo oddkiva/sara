@@ -20,10 +20,10 @@
 
 #pragma once
 
-#include <DO/Sara/Graphics.hpp>
-#include <DO/Sara/Features.hpp>
 #include <DO/Sara/FeatureDetectors.hpp>
 #include <DO/Sara/FeatureMatching.hpp>
+#include <DO/Sara/Features.hpp>
+#include <DO/Sara/Graphics.hpp>
 
 namespace DO::Sara {
 
@@ -39,15 +39,38 @@ namespace DO::Sara {
       load_ground_truth_homographies();
     }
 
-    bool load_keys(const std::string& featType);
+    bool load_keys(const std::string& feature_type);
     void check() const;
 
-    const std::string& featType() const { return _feat_type; }
-    const std::string& name() const { return _name; }
-    std::string folder_path() const { return _parent_folder_path+"/"+_name; }
-    const Image<Rgb8>& image(size_t i) const { return _image[i]; }
-    const Matrix3f& H(size_t i) const { return _H[i]; }
-    const KeypointList<OERegion, float>& keys(size_t i) const { return _keys[i]; }
+    const std::string& feature_type() const
+    {
+      return _feat_type;
+    }
+
+    const std::string& name() const
+    {
+      return _name;
+    }
+
+    std::string folder_path() const
+    {
+      return _parent_folder_path + "/" + _name;
+    }
+
+    const Image<Rgb8>& image(size_t i) const
+    {
+      return _image[i];
+    }
+
+    const Matrix3f& H(size_t i) const
+    {
+      return _H[i];
+    }
+
+    const KeypointList<OERegion, float>& keys(size_t i) const
+    {
+      return _keys[i];
+    }
 
   private:
     bool load_images();

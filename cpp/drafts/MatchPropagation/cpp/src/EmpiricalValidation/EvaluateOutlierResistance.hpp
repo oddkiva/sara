@@ -26,7 +26,8 @@
 
 namespace DO::Sara {
 
-  class EvaluateOutlierResistance : public StudyOnMikolajczykDataset
+  class DO_SARA_EXPORT EvaluateOutlierResistance
+    : public StudyOnMikolajczykDataset
   {
   public:
     EvaluateOutlierResistance(const std::string& abs_parent_folder_path,

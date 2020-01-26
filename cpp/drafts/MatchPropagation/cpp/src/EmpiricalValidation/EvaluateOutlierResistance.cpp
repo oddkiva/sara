@@ -109,7 +109,7 @@ namespace DO::Sara {
     auto comment = std::string{};
     comment = "Evaluating outlier resistance on dataset '";
     comment += dataset().name() + "' :\n\tpair 1-" + to_string(img_index + 1);
-    comment += "\n\tfeatType = " + dataset().featType();
+    comment += "\n\tfeatType = " + dataset().feature_type();
     comment += "\n\tsquaredEll = " + to_string(squared_ell);
     comment += "\n\tK = " + to_string(K);
     comment += "\n\trho_min = " + to_string(rho_min);
@@ -162,7 +162,7 @@ namespace DO::Sara {
         dataset().name() + "_" + to_string(1) + "_" + to_string(img_index + 1) +
         "_sqEll_" + to_string(squared_ell) + "_nReg_ " + to_string(num_growths) +
         "_K_" + to_string(K) + "_rhoMin_" + to_string(rho_min) + "_inlierThres_" +
-        to_string(inlier_thres) + dataset().featType() + ".txt");
+        to_string(inlier_thres) + dataset().feature_type() + ".txt");
 
     bool success;
 #pragma omp critical

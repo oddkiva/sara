@@ -22,16 +22,14 @@ set(Study_INC
   EvaluateQualityOfLocalAffineApproximation.hpp
   EvaluateOutlierResistance.hpp
   Study_N_K_m.hpp
-  #StudyPerfWithHatN_K.hpp
-  )
+  StudyPerfWithHatN_K.hpp)
 set(Study_SRC
   #DebugEllipseInterArea.cpp
   #Learn_P_f.cpp
   EvaluateQualityOfLocalAffineApproximation.cpp
   EvaluateOutlierResistance.cpp
   Study_N_K_m.cpp
-  #StudyPerfWithHatN_K.cpp
-  )
+  StudyPerfWithHatN_K.cpp)
 set(Study_DEPS
   "${DO_Sara_LIBRARIES};DO::Sara::Region;DO::Sara::MatchPropagation;DO::Sara::MikolajczykDataset")
 

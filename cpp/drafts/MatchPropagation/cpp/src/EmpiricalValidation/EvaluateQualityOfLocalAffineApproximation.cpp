@@ -35,28 +35,12 @@ using namespace std;
 
 namespace DO::Sara {
 
-  bool EvalQualityOfLocalAffApprox::operator()(float squared_ell,
-                                               size_t num_region_growths,
-                                               size_t K, double rho_min) const
+  bool EvaluateQualityOfLocalAffineApproximation::
+  operator()(float squared_ell, size_t num_region_growths, size_t K,
+             double rho_min) const
   {
-    // ====================================================================== //
-    /* Below: Mikolajczyk et al.'s parameter in their IJCV 2005 paper.
-     *
-     * Let (x,y) be a match. It is an inlier if it satisfies:
-     * $$\| \mathbf{H} \mathbf{x} - \mathbf{y} \|_2 < 1.5 \ \textrm{pixels}$$
-     *
-     * where $\mathbf{H}$ is the ground truth homography.
-     * 1.5 pixels is used in the above-mentioned paper.
-     */
-    // float mikolajczykInlierThres = 1.5f;
     // Set of thresholds.
-    vector<float> thres;
-    thres.push_back(0.f);
-    thres.push_back(1.5f);
-    thres.push_back(5.f);
-    thres.push_back(10.f);
-    thres.push_back(20.f);
-    thres.push_back(30.f);
+    const auto thres = vector<float>{0.f, 1.5f, 5.f, 10.f, 20.f, 30.f};
 
     // ====================================================================== //
     // Let's go.
@@ -115,17 +99,15 @@ namespace DO::Sara {
     return true;
   }
 
-  bool EvalQualityOfLocalAffApprox::run(const vector<Match>& M,
-                                        const vector<IndexDist>& M_sorted,
-                                        const Matrix3f& H, size_t img_index,
-                                        float squared_ell, float lb, float ub,
-                                        size_t num_growths, size_t K,
-                                        double rho_min,
-                                        const PairWiseDrawer* drawer) const
+  bool EvaluateQualityOfLocalAffineApproximation::run(
+      const vector<Match>& M, const vector<IndexDist>& M_sorted,
+      const Matrix3f& H, size_t img_index, float squared_ell, float lb,
+      float ub, size_t num_growths, size_t K, double rho_min,
+      const PairWiseDrawer* drawer) const
   {
     auto comment = std::string{};
     comment = dataset().name() + ":\n\tpair 1-" + to_string(img_index + 1);
-    comment += "\n\tfeatType = " + dataset().featType();
+    comment += "\n\tfeatType = " + dataset().feature_type();
     comment += "\n\tsquaredEll = " + to_string(squared_ell);
     comment += "\n\tK = " + to_string(K);
     comment += "\n\trho_min = " + to_string(rho_min);
@@ -163,12 +145,12 @@ namespace DO::Sara {
       mkdir(folder);
     }
 
-    const string name(dataset().name() + "_" + to_string(1) + "_" +
-                      to_string(img_index + 1) + "_sqEll_" +
-                      to_string(squared_ell) + "_nReg_ " +
-                      to_string(num_growths) + "_K_" + to_string(K) +
-                      "_rhoMin_" + to_string(rho_min) + "_lb_" + to_string(lb) +
-                      "_ub_" + to_string(ub) + dataset().featType() + ".txt");
+    const string name(
+        dataset().name() + "_" + to_string(1) + "_" + to_string(img_index + 1) +
+        "_sqEll_" + to_string(squared_ell) + "_nReg_ " +
+        to_string(num_growths) + "_K_" + to_string(K) + "_rhoMin_" +
+        to_string(rho_min) + "_lb_" + to_string(lb) + "_ub_" + to_string(ub) +
+        dataset().feature_type() + ".txt");
 
     bool success;
 #pragma omp critical

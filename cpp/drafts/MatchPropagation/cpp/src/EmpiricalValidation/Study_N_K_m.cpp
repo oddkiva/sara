@@ -107,7 +107,7 @@ namespace DO::Sara {
 
     const string name("squaredEll_" + to_string(squared_ell) + "_K_" +
                       to_string(K) + "_squaredRhoMin_" +
-                      to_string(squaredRhoMin) + dataset().featType() + ".txt");
+                      to_string(squaredRhoMin) + dataset().feature_type() + ".txt");
 
     // General stats.
     if (!compute_statistics(folder + "/" + name, stat_N_Ks, stat_hatN_Ks,

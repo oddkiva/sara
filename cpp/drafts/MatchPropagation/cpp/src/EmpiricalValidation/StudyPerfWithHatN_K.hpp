@@ -28,9 +28,9 @@ namespace DO::Sara {
   class StudyPerfWithHat_N_K : public StudyOnMikolajczykDataset
   {
   public:
-    StudyPerfWithHat_N_K(const std::string& absParentFolderPath,
-                         const std::string& name, const std::string& featType)
-      : StudyOnMikolajczykDataset(absParentFolderPath, name, featType)
+    StudyPerfWithHat_N_K(const std::string& abs_parent_folder_path,
+                         const std::string& name, const std::string& feature_type)
+      : StudyOnMikolajczykDataset(abs_parent_folder_path, name, feature_type)
       , _debug(false)
       , _display(false)
     {
@@ -40,7 +40,7 @@ namespace DO::Sara {
 
   private:
     bool run(const std::vector<Match>& M, const Matrix3f& H,
-                  size_t imgIndex, float squared_ell, float inlier_thres,
+                  size_t image_index, float squared_ell, float inlier_thres,
                   size_t numRegionGrowths, size_t K, double rho_min,
                   bool useHatN_K, const PairWiseDrawer* drawer = 0) const;
 
