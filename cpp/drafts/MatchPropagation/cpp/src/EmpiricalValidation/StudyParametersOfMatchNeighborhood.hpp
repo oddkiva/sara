@@ -27,21 +27,22 @@
 
 namespace DO::Sara {
 
-  class Study_N_K_m : public StudyOnMikolajczykDataset
+  class StudyParametersOfMatchNeighborhood : public StudyOnMikolajczykDataset
   {
   public:
-    Study_N_K_m(const std::string& abs_parent_folder_path, const std::string& name,
-                const std::string& feature_type)
+    StudyParametersOfMatchNeighborhood(
+        const std::string& abs_parent_folder_path, const std::string& name,
+        const std::string& feature_type)
       : StudyOnMikolajczykDataset(abs_parent_folder_path, name, feature_type)
     {
     }
     bool operator()(float inlier_thres, float squared_ell, size_t K,
-                    double squaredRhoMin);
+                    double squared_rho_min);
 
   private:
     void check_neighborhood(const std::vector<std::vector<size_t>>& N_K,
-                           const std::vector<Match>& M,
-                           const PairWiseDrawer& drawer);
+                            const std::vector<Match>& M,
+                            const PairWiseDrawer& drawer);
 
     void compute_statistics(Statistics& stat_N_K, Statistics& stat_hatN_K,
                             Statistics& stat_diff,

@@ -32,8 +32,8 @@ namespace DO::Sara {
                         const GrowthParams& params, int verbose = 0);
 
     std::vector<Region> operator()(size_t N,
-                                   RegionGrowingAnalyzer* pAnalyzer = 0,
-                                   const PairWiseDrawer* pDrawer = 0);
+                                   RegionGrowingAnalyzer* analyzer = 0,
+                                   const PairWiseDrawer* drawer = 0);
 
     void build_hat_N_Ks()
     {
@@ -48,7 +48,7 @@ namespace DO::Sara {
                   const std::pair<Region, std::vector<size_t>>& result) const;
 
     void check_regions(const std::vector<Region>& RR,
-                       const PairWiseDrawer* pDrawer) const;
+                       const PairWiseDrawer* drawer) const;
 
   private: /* data members. */
     //! Dynamic graph of matches containing the set of initial matches

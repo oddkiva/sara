@@ -28,13 +28,12 @@ namespace DO::Sara {
   class StudyAffineMetric : public StudyOnMikolajczykDataset
   {
   public:
-    StudyAffineMetric(const std::string& absParentFolderPath,
-                      const std::string& name, const std::string& featType)
-      : StudyOnMikolajczykDataset(absParentFolderPath, name, featType)
+    StudyAffineMetric(const std::string& abs_parent_folder_path,
+                      const std::string& name, const std::string& feature_type)
+      : StudyOnMikolajczykDataset(abs_parent_folder_path, name, feature_type)
     {
     }
-    bool operator()(float inlierThres, float squaredEll, size_t K,
-                    double squaredRhoMin);
+    bool operator()(float inlier_thres, float squared_ell);
   };
 
 } /* namespace DO::Sara */

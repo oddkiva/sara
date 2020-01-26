@@ -126,8 +126,8 @@ namespace DO::Sara {
     // Grow multiple regions.
     cout << "Growing Regions... ";
     GrowthParams params(K, rho_min);
-    GrowMultipleRegions growMultipleRegions(M, params, _debug ? 1 : 0);
-    vector<Region> RR(growMultipleRegions(num_growths, &analyzer, drawer));
+    GrowMultipleRegions grow_regions(M, params, _debug ? 1 : 0);
+    vector<Region> RR(grow_regions(num_growths, &analyzer, drawer));
     cout << "Done!" << endl;
 
     // Compute the statistics.

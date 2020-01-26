@@ -17,19 +17,21 @@ sara_make_library("MikolajczykDataset"
 # Validate empirically all the parameters.
 set(Study_INC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(Study_INC
-  #DebugEllipseInterArea.hpp
-  #Learn_P_f.hpp
   EvaluateQualityOfLocalAffineApproximation.hpp
   EvaluateOutlierResistance.hpp
-  Study_N_K_m.hpp
-  StudyPerfWithHatN_K.hpp)
+  StudyAffineMetric.hpp
+  StudyInfluenceOfMatchNeighborhoodSizeOnPerformance.hpp
+  StudyParametersOfMatchNeighborhood.hpp
+  StudyRegionFusion.hpp
+  StudySeedTriple.hpp)
 set(Study_SRC
-  #DebugEllipseInterArea.cpp
-  #Learn_P_f.cpp
   EvaluateQualityOfLocalAffineApproximation.cpp
   EvaluateOutlierResistance.cpp
-  Study_N_K_m.cpp
-  StudyPerfWithHatN_K.cpp)
+  StudyAffineMetric.cpp
+  StudyInfluenceOfMatchNeighborhoodSizeOnPerformance.cpp
+  StudyParametersOfMatchNeighborhood.cpp
+  StudyRegionFusion.cpp
+  StudySeedTriple.cpp)
 set(Study_DEPS
   "${DO_Sara_LIBRARIES};DO::Sara::Region;DO::Sara::MatchPropagation;DO::Sara::MikolajczykDataset")
 

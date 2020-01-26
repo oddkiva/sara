@@ -18,7 +18,7 @@
  *  ACCV 2012, Daejeon, South Korea.
  */
 
-#include "Study_N_K_m.hpp"
+#include "StudyParametersOfMatchNeighborhood.hpp"
 
 #include "../MatchNeighborhood.hpp"
 
@@ -27,8 +27,10 @@ using namespace std;
 
 namespace DO::Sara {
 
-  bool Study_N_K_m::operator()(float inlier_thres, float squared_ell, size_t K,
-                               double squaredRhoMin)
+  bool StudyParametersOfMatchNeighborhood::operator()(float inlier_thres,
+                                                      float squared_ell,
+                                                      size_t K,
+                                                      double squared_rho_min)
   {
     // Store stats.
     vector<Statistics> stat_N_Ks, stat_hatN_Ks, stat_diffs;
@@ -67,7 +69,7 @@ namespace DO::Sara {
         cout << "outliers.size() = " << outliers.size() << endl;
 
         // Compute neighborhoods.
-        const auto N_K = computeN_K(K, squaredRhoMin);
+        const auto N_K = computeN_K(K, squared_rho_min);
         const auto hatN_K = compute_hat_N_K(N_K);
 
         // General stats.
@@ -107,7 +109,8 @@ namespace DO::Sara {
 
     const string name("squaredEll_" + to_string(squared_ell) + "_K_" +
                       to_string(K) + "_squaredRhoMin_" +
-                      to_string(squaredRhoMin) + dataset().feature_type() + ".txt");
+                      to_string(squared_rho_min) + dataset().feature_type() +
+                      ".txt");
 
     // General stats.
     if (!compute_statistics(folder + "/" + name, stat_N_Ks, stat_hatN_Ks,
@@ -140,11 +143,9 @@ namespace DO::Sara {
     return true;
   }
 
-  void Study_N_K_m::compute_statistics(Statistics& stat_N_K,
-                                       Statistics& stat_hatN_K,
-                                       Statistics& stat_diff,
-                                       const vector<vector<size_t>>& N_K,
-                                       const vector<vector<size_t>>& hatN_K)
+  void StudyParametersOfMatchNeighborhood::compute_statistics(
+      Statistics& stat_N_K, Statistics& stat_hatN_K, Statistics& stat_diff,
+      const vector<vector<size_t>>& N_K, const vector<vector<size_t>>& hatN_K)
   {
     vector<int> diff_size(N_K.size());
     vector<int> size_N_K(N_K.size());
@@ -161,9 +162,9 @@ namespace DO::Sara {
     stat_hatN_K.compute_statistics(size_hatN_K);
   }
 
-  void Study_N_K_m::check_neighborhood(const vector<vector<size_t>>& N_K,
-                                       const vector<Match>& M,
-                                       const PairWiseDrawer& drawer)
+  void StudyParametersOfMatchNeighborhood::check_neighborhood(
+      const vector<vector<size_t>>& N_K, const vector<Match>& M,
+      const PairWiseDrawer& drawer)
   {
     drawer.display_images();
 
@@ -188,12 +189,10 @@ namespace DO::Sara {
     }
   }
 
-  void Study_N_K_m::compute_statistics(Statistics& stat_N_K,
-                                       Statistics& stat_hatN_K,
-                                       Statistics& stat_diff,
-                                       const vector<size_t>& indices,
-                                       const vector<vector<size_t>>& all_N_K,
-                                       const vector<vector<size_t>>& all_hatN_K)
+  void StudyParametersOfMatchNeighborhood::compute_statistics(
+      Statistics& stat_N_K, Statistics& stat_hatN_K, Statistics& stat_diff,
+      const vector<size_t>& indices, const vector<vector<size_t>>& all_N_K,
+      const vector<vector<size_t>>& all_hatN_K)
   {
     vector<vector<size_t>> N_K;
     vector<vector<size_t>> hatN_K;
@@ -216,10 +215,10 @@ namespace DO::Sara {
     compute_statistics(stat_N_K, stat_hatN_K, stat_diff, N_K, hatN_K);
   }
 
-  bool Study_N_K_m::compute_statistics(const string& name,
-                                       const vector<Statistics>& stat_N_Ks,
-                                       const vector<Statistics>& stat_hatN_Ks,
-                                       const vector<Statistics>& stat_diffs)
+  bool StudyParametersOfMatchNeighborhood::compute_statistics(
+      const string& name, const vector<Statistics>& stat_N_Ks,
+      const vector<Statistics>& stat_hatN_Ks,
+      const vector<Statistics>& stat_diffs)
   {
     ofstream out(name.c_str());
     if (!out.is_open())

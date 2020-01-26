@@ -22,31 +22,33 @@
 
 #include "StudyOnMikolajczykDataset.hpp"
 
+#include <DO/Sara/Match/PairWiseDrawer.hpp>
+
 
 namespace DO::Sara {
 
-  class StudyPerfWithHat_N_K : public StudyOnMikolajczykDataset
+  class StudyInfluenceOfMatchNeighborhoodSizeOnPerformance
+    : public StudyOnMikolajczykDataset
   {
   public:
-    StudyPerfWithHat_N_K(const std::string& abs_parent_folder_path,
-                         const std::string& name, const std::string& feature_type)
+    StudyInfluenceOfMatchNeighborhoodSizeOnPerformance(
+        const std::string& abs_parent_folder_path, const std::string& name,
+        const std::string& feature_type)
       : StudyOnMikolajczykDataset(abs_parent_folder_path, name, feature_type)
-      , _debug(false)
-      , _display(false)
     {
     }
     bool operator()(float squared_ell, size_t numRegionGrowths, size_t K,
                     double rho_min);
 
   private:
-    bool run(const std::vector<Match>& M, const Matrix3f& H,
-                  size_t image_index, float squared_ell, float inlier_thres,
-                  size_t numRegionGrowths, size_t K, double rho_min,
-                  bool useHatN_K, const PairWiseDrawer* drawer = 0) const;
+    bool run(const std::vector<Match>& M, const Matrix3f& H, size_t image_index,
+             float squared_ell, float inlier_thres, size_t numRegionGrowths,
+             size_t K, double rho_min, bool useHatN_K,
+             const PairWiseDrawer* drawer = 0) const;
 
   private:
-    bool _debug;
-    bool _display;
+    bool _debug{false};
+    bool _display{false};
   };
 
 }  // namespace DO::Sara
