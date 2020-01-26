@@ -799,82 +799,82 @@ namespace DO::Sara {
     return redundancies;
   }
 
-  //auto
-  //NearestMatchNeighborhoodComputer::get_redundancy_components_and_representers(
-  //    vector<vector<size_t>>& components, vector<size_t>& representers,
-  //    const vector<Match>& matches, double thres) -> void
-  //{
-  //  if (_verbose)
-  //    print_stage("Compute match redundancy component");
+  auto
+  NearestMatchNeighborhoodComputer::get_redundancy_components_and_representers(
+      vector<vector<size_t>>& components, vector<size_t>& representers,
+      const vector<Match>& matches, double thres) -> void
+  {
+    //if (_verbose)
+    //  print_stage("Compute match redundancy component");
 
-  //  vector<vector<size_t>> redundancies = compute_redundancies(thres);
+    //vector<vector<size_t>> redundancies = compute_redundancies(thres);
 
-  //  using namespace boost;
-  //  typedef adjacency_list <vecS, vecS, undirectedS> Graph;
+    //using namespace boost;
+    //typedef adjacency_list <vecS, vecS, undirectedS> Graph;
 
-  //  // Construct the graph.
-  //  Graph g(matches.size());
-  //  for (size_t i = 0; i < redundancies.size(); ++i)
-  //    for (vector<int>::size_type j = 0; j < redundancies[i].size(); ++j)
-  //      add_edge(i, redundancies[i][j], g);
+    //// Construct the graph.
+    //Graph g(matches.size());
+    //for (size_t i = 0; i < redundancies.size(); ++i)
+    //  for (vector<int>::size_type j = 0; j < redundancies[i].size(); ++j)
+    //    add_edge(i, redundancies[i][j], g);
 
-  //  // Compute the connected components.
-  //  vector<size_t> component(num_vertices(g));
-  //  size_t num_components = connected_components(g, &component[0]);
+    //// Compute the connected components.
+    //vector<size_t> component(num_vertices(g));
+    //size_t num_components = connected_components(g, &component[0]);
 
-  //  // Store the components.
-  //  components = vector<vector<size_t> >(num_components);
-  //  for (size_t i = 0; i != component.size(); ++i)
-  //    components.reserve(100);
-  //  for (size_t i = 0; i != component.size(); ++i)
-  //    components[component[i]].push_back(i);
+    //// Store the components.
+    //components = vector<vector<size_t> >(num_components);
+    //for (size_t i = 0; i != component.size(); ++i)
+    //  components.reserve(100);
+    //for (size_t i = 0; i != component.size(); ++i)
+    //  components[component[i]].push_back(i);
 
-  //  // Store the best representer for each component.
-  //  representers.resize(num_components);
-  //  for (size_t i = 0; i != components.size(); ++i)
-  //  {
-  //    size_t index_best_match = components[i][0];
-  //    for (size_t j = 0; j < components[i].size(); ++j)
-  //    {
-  //      size_t index = components[i][j];
-  //      if (matches[index_best_match].score() > matches[index].score())
-  //        index_best_match = index;
-  //    }
-  //    representers[i] = index_best_match;
-  //  }
+    //// Store the best representer for each component.
+    //representers.resize(num_components);
+    //for (size_t i = 0; i != components.size(); ++i)
+    //{
+    //  size_t index_best_match = components[i][0];
+    //  for (size_t j = 0; j < components[i].size(); ++j)
+    //  {
+    //    size_t index = components[i][j];
+    //    if (matches[index_best_match].score() > matches[index].score())
+    //      index_best_match = index;
+    //  }
+    //  representers[i] = index_best_match;
+    //}
 
-  //  if (_verbose)
-  //  {
-  //    cout << "Checksum components" << endl;
-  //    size_t num_matches_from_components = 0;
-  //    for (size_t i = 0; i != components.size(); ++i)
-  //      num_matches_from_components += components[i].size();
-  //    cout << "num_matches_from_components = " << num_matches_from_components
-  //         << endl;
-  //    cout << "num_components = " << num_components << endl;
+    //if (_verbose)
+    //{
+    //  cout << "Checksum components" << endl;
+    //  size_t num_matches_from_components = 0;
+    //  for (size_t i = 0; i != components.size(); ++i)
+    //    num_matches_from_components += components[i].size();
+    //  cout << "num_matches_from_components = " << num_matches_from_components
+    //       << endl;
+    //  cout << "num_components = " << num_components << endl;
 
-  //    if (_drawer)
-  //      _drawer->display_images();
-  //    for (size_t i = 0; i != components.size(); ++i)
-  //    {
-  //      for (size_t j = 0; j < components[i].size(); ++j)
-  //      {
-  //        size_t index = components[i][j];
-  //        if (_drawer)
-  //          _drawer->draw_match(_M[index]);
-  //      }
-  //      if (_drawer)
-  //      {
-  //        _drawer->draw_match(_M[representers[i]], Red8);
-  //        cout << "components[" << i << "].size() = " << components[i].size()
-  //             << endl;
-  //      }
-  //      if (_drawer)
-  //        get_key();
-  //    }
-  //    get_key();
-  //  }
-  //}
+    //  if (_drawer)
+    //    _drawer->display_images();
+    //  for (size_t i = 0; i != components.size(); ++i)
+    //  {
+    //    for (size_t j = 0; j < components[i].size(); ++j)
+    //    {
+    //      size_t index = components[i][j];
+    //      if (_drawer)
+    //        _drawer->draw_match(_M[index]);
+    //    }
+    //    if (_drawer)
+    //    {
+    //      _drawer->draw_match(_M[representers[i]], Red8);
+    //      cout << "components[" << i << "].size() = " << components[i].size()
+    //           << endl;
+    //    }
+    //    if (_drawer)
+    //      get_key();
+    //  }
+    //  get_key();
+    //}
+  }
 
   // ======================================================================== //
   // Symmetrized version of NearestMatchNeighborhoodComputer.

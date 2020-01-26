@@ -24,7 +24,8 @@
 
 namespace DO::Sara {
 
-  class EvalQualityOfLocalAffApprox : public StudyOnMikolajczykDataset
+  class DO_SARA_EXPORT EvalQualityOfLocalAffApprox
+    : public StudyOnMikolajczykDataset
   {
   public:
     EvalQualityOfLocalAffApprox(const std::string& absParentFolderPath,

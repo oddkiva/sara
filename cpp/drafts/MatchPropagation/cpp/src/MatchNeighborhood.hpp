@@ -79,7 +79,7 @@ namespace DO::Sara {
 
   //! @brief Functor class that computes the K nearest matches denoted as
   //! $\mathcal{N}_K(.)$.
-  class NearestMatchNeighborhoodComputer
+  class DO_SARA_EXPORT NearestMatchNeighborhoodComputer
   {
   public: /* interface. */
     NearestMatchNeighborhoodComputer(const std::vector<Match>& matches,
@@ -251,6 +251,7 @@ namespace DO::Sara {
   };
 
   //! Symmetrized version of ComputeN_K.
+  DO_SARA_EXPORT
   auto compute_hat_N_K(const std::vector<std::vector<size_t>>& N_K)
       -> std::vector<std::vector<size_t>>;
 

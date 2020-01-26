@@ -26,6 +26,8 @@
 #include "../MatchNeighborhood.hpp"
 #include "EvaluateQualityOfLocalAffineApproximation.hpp"
 
+#include <DO/Sara/FileSystem.hpp>
+
 
 using namespace std;
 
@@ -87,7 +89,7 @@ namespace DO::Sara {
           int ub = lb + 1;
           bool success;
           success = run(M, M_sorted, H, j, squared_ell, thres[lb], thres[ub],
-                             numRegionGrowths, K, rho_min, drawer);
+                        numRegionGrowths, K, rho_min, drawer);
           if (!success)
           {
             if (_display)
@@ -160,17 +162,18 @@ namespace DO::Sara {
       mkdir(folder);
     }
 
-    const string name(
-        dataset().name() + "_" + to_string(1) + "_" + to_string(img_index + 1) +
-        "_sqEll_" + to_string(squared_ell) + "_nReg_ " + to_string(num_growths) +
-        "_K_" + to_string(K) + "_rhoMin_" + to_string(rho_min) + "_lb_" +
-        to_string(lb) + "_ub_" + to_string(ub) + dataset().featType() + ".txt");
+    const string name(dataset().name() + "_" + to_string(1) + "_" +
+                      to_string(img_index + 1) + "_sqEll_" +
+                      to_string(squared_ell) + "_nReg_ " +
+                      to_string(num_growths) + "_K_" + to_string(K) +
+                      "_rhoMin_" + to_string(rho_min) + "_lb_" + to_string(lb) +
+                      "_ub_" + to_string(ub) + dataset().featType() + ".txt");
 
     bool success;
 #pragma omp critical
     {
-      success =
-          analyzer.save_local_affine_consistency_statistics(string(folder + "/" + name));
+      success = analyzer.save_local_affine_consistency_statistics(
+          string(folder + "/" + name));
     }
     if (!success)
     {
