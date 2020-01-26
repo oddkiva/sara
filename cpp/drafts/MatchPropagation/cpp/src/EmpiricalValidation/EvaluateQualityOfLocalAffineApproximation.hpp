@@ -35,14 +35,14 @@ namespace DO::Sara {
       , _display(false)
     {
     }
-    bool operator()(float squaredEll, size_t numRegionGrowths, size_t K,
+    bool operator()(float squared_ell, size_t numRegionGrowths, size_t K,
                     double rho_min) const;
 
   private:
-    bool run(const std::vector<Match>& M, const std::vector<IndexDist>& sortedM,
-             const Matrix3f& H, size_t imgIndex, float squaredEll, float lb,
+    bool run(const std::vector<Match>& M, const std::vector<IndexDist>& M_sorted,
+             const Matrix3f& H, size_t imgIndex, float squared_ell, float lb,
              float ub, size_t numRegionGrowths, size_t K, double rho_min,
-             const PairWiseDrawer* pDrawer = 0) const;
+             const PairWiseDrawer* drawer = 0) const;
 
   private:
     bool _debug;

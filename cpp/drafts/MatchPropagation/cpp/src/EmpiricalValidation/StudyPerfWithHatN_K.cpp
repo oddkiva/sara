@@ -23,11 +23,11 @@
 
 using namespace std;
 
-namespace DO {
+namespace DO::Sara {
 
   bool
   StudyPerfWithHat_N_K::
-  operator()(float squaredEll, size_t numRegionGrowths,
+  operator()(float squared_ell, size_t numRegionGrowths,
              size_t K, double rho_min)
   {
     // ====================================================================== //
@@ -47,53 +47,53 @@ namespace DO {
 
     for (int j = 1; j < 6; ++j)
     {
-      PairWiseDrawer *pDrawer = 0;
-      if (display_)
+      PairWiseDrawer *drawer = 0;
+      if (_display)
       {
         // View the image pair.
-        pDrawer = new PairWiseDrawer(dataset().image(0), dataset().image(j));
-        openWindowForImagePair(0, j);
-        pDrawer->setVizParams(1.0f, 1.0f, PairWiseDrawer::CatH);
-        pDrawer->displayImages();
+        drawer = new PairWiseDrawer(dataset().image(0), dataset().image(j));
+        open_window_for_image_pair(0, j);
+        drawer->set_viz_params(1.0f, 1.0f, PairWiseDrawer::CatH);
+        drawer->display_images();
       }
 
       // The job is here.
       {
         // Read the set of keypoints $\mathcal{X}$ in image 1.
-        const Set<OERegion, RealDescriptor>& X = dataset().keys(0);
+        const KeypointList<OERegion, float>& X = dataset().keys(0);
         // Read the set of keypoints $\mathcal{Y}$ in image 2.
-        const Set<OERegion, RealDescriptor>& Y = dataset().keys(j);
+        const KeypointList<OERegion, float>& Y = dataset().keys(j);
         // Compute initial matches $\mathcal{M}$.
-        vector<Match> M(computeMatches(X, Y, squaredEll));
+        vector<Match> M(compute_matches(X, Y, squared_ell));
         // Get ground truth homography
         const Matrix3f& H = dataset().H(j);
 
         for (size_t t = 0; t != thres.size(); ++t)
         {
           bool success;
-          success = doTheJob(M, H, j, squaredEll,
+          success = run(M, H, j, squared_ell,
                              thres[t],
-                             numRegionGrowths, K, rho_min, false, pDrawer);
-          success = doTheJob(M, H, j, squaredEll,
+                             numRegionGrowths, K, rho_min, false, drawer);
+          success = run(M, H, j, squared_ell,
                              thres[t],
-                             numRegionGrowths, K, rho_min, true, pDrawer);
+                             numRegionGrowths, K, rho_min, true, drawer);
           if (!success)
           {
-            if (display_)
+            if (_display)
             {
-              closeWindowForImagePair();
-              if (pDrawer)
-                delete pDrawer;
+              close_window_for_image_pair();
+              if (drawer)
+                delete drawer;
             }
             return false;
           }
         }
       }
-      if (display_)
+      if (_display)
       {
-        closeWindowForImagePair();
-        if (pDrawer)
-          delete pDrawer;
+        close_window_for_image_pair();
+        if (drawer)
+          delete drawer;
       }
     }
 
@@ -103,99 +103,99 @@ namespace DO {
 
   bool
   StudyPerfWithHat_N_K::
-  doTheJob(const vector<Match>& M,
+  run(const vector<Match>& M,
            const Matrix3f& H, size_t imgIndex,
-           float squaredEll, float inlierThres,
+           float squared_ell, float inlier_thres,
            size_t numRegionGrowths,
            size_t K, double rho_min,
            bool useHatN_K,
-           const PairWiseDrawer *pDrawer) const
+           const PairWiseDrawer *drawer) const
   {
     string comment;
     comment  = "Evaluating outlier resistance on dataset '";
-    comment += dataset().name() + ":\n\tpair 1-"+toString(imgIndex+1);
+    comment += dataset().name() + ":\n\tpair 1-"+to_string(imgIndex+1);
     comment += (useHatN_K ? "\n\thatN_K" : "\n\tN_K");
     comment += "\n\tfeatType = " + dataset().featType();
-    comment += "\n\tsquaredEll = " + toString(squaredEll);
-    comment += "\n\tK = " + toString(K);
-    comment += "\n\trho_min = " + toString(rho_min);
-    comment += "\n\tinlierThres = " + toString(inlierThres);
-    printStage(comment);
+    comment += "\n\tsquaredEll = " + to_string(squared_ell);
+    comment += "\n\tK = " + to_string(K);
+    comment += "\n\trho_min = " + to_string(rho_min);
+    comment += "\n\tinlierThres = " + to_string(inlier_thres);
+    print_stage(comment);
 
     // Get subset of matches.
     vector<size_t> inliers, outliers;
-    getInliersAndOutliers(inliers, outliers, M, H, inlierThres);
+    get_inliers_and_outliers(inliers, outliers, M, H, inlier_thres);
     // We want to perform our analysis on this particular subset of matches of interest.
-    bool verbose = debug_ && pDrawer;
+    bool verbose = _debug && (drawer != nullptr);
     RegionGrowingAnalyzer analyzer(M, H, verbose);
-    analyzer.setInliers(inliers);
+    analyzer.set_inliers(inliers);
 
     // Grow multiple regions.
     cout << "Growing Regions... ";
     GrowthParams params(K, rho_min);
-    GrowMultipleRegions growMultipleRegions(M, params, debug_ ? 1 : 0);
+    GrowMultipleRegions growMultipleRegions(M, params, _debug ? 1 : 0);
     if (useHatN_K)
-      growMultipleRegions.buildHatN_Ks();
-    vector<Region> RR(growMultipleRegions(numRegionGrowths, &analyzer, pDrawer));
+      growMultipleRegions.build_hat_N_Ks();
+    vector<Region> RR(growMultipleRegions(numRegionGrowths, &analyzer, drawer));
     cout << "Done!" << endl;
 
     // Compute the statistics.
     cout << "Computing stats... ";
     // Get found matches in a proper container.
-    vector<size_t> allMatches;
+    vector<size_t> all_matches;
     {
       Region allR;
       for (size_t i = 0; i != RR.size(); ++i)
         for (Region::iterator j = RR[i].begin(); j != RR[i].end(); ++j)
           allR.insert(*j);
-      allMatches.reserve(allR.size());
+      all_matches.reserve(allR.size());
       for (Region::iterator i = allR.begin(); i != allR.end(); ++i)
-        allMatches.push_back(*i);
+        all_matches.push_back(*i);
     }
-    analyzer.computePosAndNeg(allMatches);
+    analyzer.compute_positives_and_negatives(all_matches);
 
 
     // Save stats.
     cout << "Saving stats... ";
     string folder; 
     folder = dataset().name()+"/performance_hat_N_K";
-    folder = stringSrcPath(folder);
+    folder = string_src_path(folder);
 #pragma omp critical
     {
-      createDirectory(folder);
+      mkdir(folder);
     }
 
     string neighborhoodName = useHatN_K ? "_HatN_K_" : "_N_K_";
 
     const string namePrecRecall("prec_recall_"
                               + dataset().name() 
-                              + "_" + toString(1) + "_" + toString(imgIndex+1)
+                              + "_" + to_string(1) + "_" + to_string(imgIndex+1)
                               + neighborhoodName
-                              + "_sqEll_" + toString(squaredEll)
-                              + "_nReg_ " + toString(numRegionGrowths)
-                              + "_K_"  + toString(K)
-                              + "_rhoMin_" + toString(rho_min)
-                              + "_inlierThres_" + toString(inlierThres)
+                              + "_sqEll_" + to_string(squared_ell)
+                              + "_nReg_ " + to_string(numRegionGrowths)
+                              + "_K_"  + to_string(K)
+                              + "_rhoMin_" + to_string(rho_min)
+                              + "_inlierThres_" + to_string(inlier_thres)
                               + dataset().featType()
                               + ".txt");
 
     const string nameStatRegions("stat_regions_"
                                + dataset().name() 
-                               + "_" + toString(1) + "_" + toString(imgIndex+1)
+                               + "_" + to_string(1) + "_" + to_string(imgIndex+1)
                                + neighborhoodName
-                               + "_sqEll_" + toString(squaredEll)
-                               + "_nReg_ " + toString(numRegionGrowths)
-                               + "_K_"  + toString(K)
-                               + "_rhoMin_" + toString(rho_min)
-                               + "_inlierThres_" + toString(inlierThres)
+                               + "_sqEll_" + to_string(squared_ell)
+                               + "_nReg_ " + to_string(numRegionGrowths)
+                               + "_K_"  + to_string(K)
+                               + "_rhoMin_" + to_string(rho_min)
+                               + "_inlierThres_" + to_string(inlier_thres)
                                + dataset().featType()
                                + ".txt");
 
     bool success;
 #pragma omp critical 
     {
-      success = analyzer.savePrecRecallEtc(string(folder+"/"+namePrecRecall)) &&
-                analyzer.saveNumRegionStats(string(folder+"/"+nameStatRegions));
+      success = analyzer.save_precision_recall_etc(string(folder+"/"+namePrecRecall)) &&
+                analyzer.save_region_number_statistics(string(folder+"/"+nameStatRegions));
     }
     if (!success)
     {

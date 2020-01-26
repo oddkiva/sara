@@ -31,22 +31,22 @@ namespace DO::Sara {
     StudyPerfWithHat_N_K(const std::string& absParentFolderPath,
                          const std::string& name, const std::string& featType)
       : StudyOnMikolajczykDataset(absParentFolderPath, name, featType)
-      , debug_(false)
-      , display_(false)
+      , _debug(false)
+      , _display(false)
     {
     }
-    bool operator()(float squaredEll, size_t numRegionGrowths, size_t K,
+    bool operator()(float squared_ell, size_t numRegionGrowths, size_t K,
                     double rho_min);
 
   private:
-    bool doTheJob(const std::vector<Match>& M, const Matrix3f& H,
-                  size_t imgIndex, float squaredEll, float inlierThres,
+    bool run(const std::vector<Match>& M, const Matrix3f& H,
+                  size_t imgIndex, float squared_ell, float inlier_thres,
                   size_t numRegionGrowths, size_t K, double rho_min,
-                  bool useHatN_K, const PairWiseDrawer* pDrawer = 0) const;
+                  bool useHatN_K, const PairWiseDrawer* drawer = 0) const;
 
   private:
-    bool debug_;
-    bool display_;
+    bool _debug;
+    bool _display;
   };
 
 }  // namespace DO::Sara

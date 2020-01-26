@@ -33,15 +33,15 @@ namespace DO::Sara {
       : StudyOnMikolajczykDataset(absParentFolderPath, name, featType)
     {
     }
-    bool operator()(float inlierThres, float squaredEll, size_t K,
+    bool operator()(float inlier_thres, float squared_ell, size_t K,
                     double squaredRhoMin);
 
   private:
-    void getStat(Stat& stat_N_K, Stat& stat_hatN_K, Stat& stat_diff,
+    void getStat(Statistics& stat_N_K, Statistics& stat_hatN_K, Statistics& stat_diff,
                  const std::vector<std::vector<size_t>>& N_K,
                  const std::vector<std::vector<size_t>>& hatN_K);
 
-    void getStat(Stat& stat_N_K, Stat& stat_hatN_K, Stat& stat_diff,
+    void getStat(Statistics& stat_N_K, Statistics& stat_hatN_K, Statistics& stat_diff,
                  const std::vector<size_t>& indices,
                  const std::vector<std::vector<size_t>>& N_K,
                  const std::vector<std::vector<size_t>>& hatN_K);
@@ -51,9 +51,9 @@ namespace DO::Sara {
                            const std::vector<Match>& M,
                            const PairWiseDrawer& drawer);
 
-    bool saveStats(const std::string& name, const std::vector<Stat>& stat_N_Ks,
-                   const std::vector<Stat>& stat_hatN_Ks,
-                   const std::vector<Stat>& stat_diffs);
+    bool saveStats(const std::string& name, const std::vector<Statistics>& stat_N_Ks,
+                   const std::vector<Statistics>& stat_hatN_Ks,
+                   const std::vector<Statistics>& stat_diffs);
   };
 
 }  // namespace DO::Sara

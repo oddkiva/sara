@@ -1,5 +1,5 @@
 find_package(DO_Sara COMPONENTS
-  Features FeatureMatching Geometry KDTree Match REQUIRED)
+  Features FeatureMatching Graphics Geometry KDTree Match REQUIRED)
 
 include (CMakePackageConfigHelpers)
 include (CMakeFindDependencyMacro)
@@ -161,8 +161,6 @@ sara_make_library("MatchPropagation"
   "${MatchPropagation_SRC}"
   "${MatchPropagation_DEPS}")
 
-# add_subdirectory(HyperParameterLearning)
-#
-# if (SARA_BUILD_EXPERIMENTAL_VALIDATION_PROGRAMS)
-#   add_subdirectory(EmpiricalValidation)
-# endif ()
+add_subdirectory(EmpiricalValidation)
+add_subdirectory(HyperParameterLearning)
+

@@ -21,6 +21,7 @@
 #pragma once
 
 #include "StudyOnMikolajczykDataset.hpp"
+#include <DO/Sara/Match/PairWiseDrawer.hpp>
 
 
 namespace DO::Sara {

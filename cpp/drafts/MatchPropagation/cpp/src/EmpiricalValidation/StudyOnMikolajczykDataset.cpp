@@ -22,47 +22,47 @@
 
 using namespace std;
 
-namespace DO {
+namespace DO::Sara {
 
   StudyOnMikolajczykDataset::
   StudyOnMikolajczykDataset(const std::string& absParentFolderPath,
                             const std::string& name,
                             const std::string& featType)
-    : dataset_(absParentFolderPath, name)
+    : _dataset(absParentFolderPath, name)
   {
-    dataset_.loadKeys(featType);
+    _dataset.load_keys(featType);
     //dataset_.check();
   }
   
-  void StudyOnMikolajczykDataset::openWindowForImagePair(size_t i, size_t j) const
+  void StudyOnMikolajczykDataset::open_window_for_image_pair(size_t i, size_t j) const
   {
-    int w = int((dataset().image(0).width()+dataset().image(1).width()));
+    int w = int((dataset().image(0).width() + dataset().image(1).width()));
     int h = max(dataset().image(0).height(), dataset().image(1).height());
-    openWindow(w, h);
-    setAntialiasing();
+    create_window(w, h);
+    set_antialiasing();
   }
 
-  void StudyOnMikolajczykDataset::closeWindowForImagePair() const
+  void StudyOnMikolajczykDataset::close_window_for_image_pair() const
   {
-    closeWindow();
+    close_window();
   }
 
   vector<Match>
   StudyOnMikolajczykDataset::
-  computeMatches(const Set<OERegion, RealDescriptor>& X,
-                 const Set<OERegion, RealDescriptor>& Y,
+  compute_matches(const KeypointList<OERegion, float>& X,
+                 const KeypointList<OERegion, float>& Y,
                  float squaredEll) const
   {
-    printStage("Computing initial matches $\\mathcal{M}$ with $\\ell = "
-              + toString(sqrt(squaredEll)) + "$");
+    print_stage("Computing initial matches $\\mathcal{M}$ with $\\ell = "
+              + to_string(sqrt(squaredEll)) + "$");
     vector<Match> M;
     AnnMatcher matcher(X, Y, squaredEll);
-    M = matcher.computeMatches();
+    M = matcher.compute_matches();
     return M;
   }
 
   void 
-  StudyOnMikolajczykDataset::getInliersAndOutliers(vector<size_t>& inliers,
+  StudyOnMikolajczykDataset::get_inliers_and_outliers(vector<size_t>& inliers,
                                                    vector<size_t>& outliers,
                                                    const vector<Match>& matches,
                                                    const Matrix3f& H,
@@ -71,14 +71,12 @@ namespace DO {
     inliers.reserve(matches.size());
     for (size_t i = 0; i != matches.size(); ++i)
     {
-      Vector3f x;
-      x << matches[i].posX(), 1.f;
-      const Vector2f& y = matches[i].posY();
-      
-      Vector3f Hx_ = H*x; Hx_ /= Hx_(2);
-      Vector2f Hx(Hx_(0), Hx_(1));
+      const auto& x = matches[i].x_pos();
+      const auto& y = matches[i].y_pos();
 
-      if ( (Hx-y).squaredNorm() < thres*thres )
+      const Eigen::Vector2f Hx = (H * x.homogeneous()).hnormalized();
+
+      if ((Hx - y).squaredNorm() < thres * thres)
         inliers.push_back(i);
       else
         outliers.push_back(i);
@@ -86,17 +84,15 @@ namespace DO {
   }
 
   vector<StudyOnMikolajczykDataset::IndexDist>
-  StudyOnMikolajczykDataset::sortMatchesByReprojError(const vector<Match>& M,
-                                                      const Matrix3f& H) const
+  StudyOnMikolajczykDataset::sort_matches_by_reprojection_error(
+      const vector<Match>& M, const Matrix3f& H) const
   {
     CompareIndexDist cmp;
     vector<IndexDist> indexDists(M.size());
     for (size_t i = 0; i != M.size(); ++i)
     {
-      Vector3f xh; xh << M[i].posX(), 1.f;
-      Vector3f H_xh = H*xh; H_xh/= H_xh(2);
-      Vector2f H_x(H_xh.block(0,0,2,1));
-      const Vector2f& y = M[i].posY();
+      const Vector2f H_x = (H * M[i].x_pos().homogeneous()).hnormalized();
+      const Vector2f& y = M[i].y_pos();
       indexDists[i] = make_pair(i, (H_x - y).norm());
     }
     sort(indexDists.begin(), indexDists.end(), cmp);
@@ -105,7 +101,7 @@ namespace DO {
   }
 
   vector<size_t>
-  StudyOnMikolajczykDataset::getMatches(const vector<IndexDist>& sortedMatches,
+  StudyOnMikolajczykDataset::get_matches(const vector<IndexDist>& sortedMatches,
                                         float reprojLowerBound,
                                         float reprojUpperBound) const
   {
@@ -122,5 +118,4 @@ namespace DO {
     return indices;
   }
 
-
-} /* namespace DO */
+}  // namespace DO::Sara

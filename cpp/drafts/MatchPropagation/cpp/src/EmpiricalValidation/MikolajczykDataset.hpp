@@ -27,39 +27,39 @@
 
 namespace DO::Sara {
 
-  class MikolajczykDataset
+  class DO_SARA_EXPORT MikolajczykDataset
   {
   public:
     MikolajczykDataset(const std::string& parentFolderPath,
                        const std::string& name)
-      : parent_folder_path_(parentFolderPath)
-      , name_(name)
+      : _parent_folder_path(parentFolderPath)
+      , _name(name)
     {
-      loadImages();
-      loadGroundTruthHs();
+      load_images();
+      load_ground_truth_homographies();
     }
 
-    bool loadKeys(const std::string& featType);
+    bool load_keys(const std::string& featType);
     void check() const;
 
-    const std::string& featType() const { return feat_type_; }
-    const std::string& name() const { return name_; }
-    std::string folderPath() const { return parent_folder_path_+"/"+name_; }
-    const Image<Rgb8>& image(size_t i) const { return image_[i]; }
-    const Matrix3f& H(size_t i) const { return H_[i]; }
-    const Set<OERegion, RealDescriptor>& keys(size_t i) const { return keys_[i]; }
+    const std::string& featType() const { return _feat_type; }
+    const std::string& name() const { return _name; }
+    std::string folder_path() const { return _parent_folder_path+"/"+_name; }
+    const Image<Rgb8>& image(size_t i) const { return _image[i]; }
+    const Matrix3f& H(size_t i) const { return _H[i]; }
+    const KeypointList<OERegion, float>& keys(size_t i) const { return _keys[i]; }
 
   private:
-    bool loadImages();
-    bool loadGroundTruthHs();
+    bool load_images();
+    bool load_ground_truth_homographies();
 
   private:
-    std::string parent_folder_path_;
-    std::string name_;
-    std::string feat_type_;
-    std::vector<Image<Rgb8> > image_;
-    std::vector<Matrix3f> H_;
-    std::vector<Set<OERegion, RealDescriptor> > keys_;
+    std::string _parent_folder_path;
+    std::string _name;
+    std::string _feat_type;
+    std::vector<Image<Rgb8>> _image;
+    std::vector<Matrix3f> _H;
+    std::vector<KeypointList<OERegion, float>> _keys;
   };
 
 } /* namespace DO::Sara */

@@ -24,15 +24,15 @@ using namespace std;
 
 namespace DO::Sara {
 
-  bool MikolajczykDataset::loadKeys(const string& featType)
+  bool MikolajczykDataset::load_keys(const string& featType)
   {
-    feat_type_ = featType;
-    printStage("Loading Keypoints: " + featType + " for Dataset: " + name_);
-    keys_.resize(image_.size());
-    for (size_t i = 0; i != keys_.size(); ++i)
+    _feat_type = featType;
+    print_stage("Loading keypoints: " + featType + " for Dataset: " + _name);
+    _keys.resize(_image.size());
+    for (size_t i = 0; i != _keys.size(); ++i)
     {
-      if (!readKeypoints(keys_[i].features, keys_[i].descriptors,
-                         folderPath() + "/img" + toString(i + 1) + featType))
+      if (!read_keypoints(features(_keys[i]), descriptors(_keys[i]),
+                          folder_path() + "/img" + to_string(i + 1) + featType))
         return false;
     }
     return true;
@@ -40,30 +40,30 @@ namespace DO::Sara {
 
   void MikolajczykDataset::check() const
   {
-    printStage("Checking images");
-    openWindow(image_.front().width(), image_.front().height());
-    for (int i = 0; i < image_.size(); ++i)
+    print_stage("Checking images");
+    create_window(_image.front().width(), _image.front().height());
+    for (int i = 0; i < _image.size(); ++i)
     {
-      display(image_[i]);
-      getKey();
+      display(_image[i]);
+      get_key();
     }
-    closeWindow();
+    close_window();
 
-    printStage("Checking ground truth homographies");
+    print_stage("Checking ground truth homographies");
     for (int i = 0; i < 6; ++i)
-      cout << "H[" << i << "]=\n" << H_[i] << endl;
+      cout << "H[" << i << "]=\n" << _H[i] << endl;
   }
 
-  bool MikolajczykDataset::loadImages()
+  bool MikolajczykDataset::load_images()
   {
-    printStage("Loading images of Dataset: " + name_);
-    image_.resize(6);
+    print_stage("Loading images of Dataset: " + _name);
+    _image.resize(6);
     for (int i = 0; i < 6; ++i)
     {
-      string path = folderPath() + "/img" + toString(i + 1) + ".ppm";
-      string path2 = folderPath() + "/img" + toString(i + 1) + ".pgm";
-      bool readOk = load(image_[i], path) || load(image_[i], path2);
-      if (!readOk)
+      const auto path = folder_path() + "/img" + to_string(i + 1) + ".ppm";
+      const auto path2 = folder_path() + "/img" + to_string(i + 1) + ".pgm";
+      const auto read = load(_image[i], path) || load(_image[i], path2);
+      if (!read)
       {
         cerr << "Error: could not load image from path:\n" << path << endl;
         return false;
@@ -72,19 +72,19 @@ namespace DO::Sara {
     return true;
   }
 
-  bool MikolajczykDataset::loadGroundTruthHs()
+  bool MikolajczykDataset::load_ground_truth_homographies()
   {
-    printStage("Loading ground truth homographies of Dataset: " + name_);
-    H_.resize(6);
+    print_stage("Loading ground truth homographies of Dataset: " + _name);
+    _H.resize(6);
     for (int i = 0; i < 6; ++i)
     {
       if (i == 0)
       {
-        H_[i].setZero();
+        _H[i].setZero();
         continue;
       }
 
-      string path = folderPath() + "/H1to" + toString(i + 1) + "p";
+      string path = folder_path() + "/H1to" + to_string(i + 1) + "p";
       ifstream f(path.c_str());
       if (!f.is_open())
       {
@@ -93,7 +93,7 @@ namespace DO::Sara {
         return false;
       }
 
-      f >> H_[i];
+      f >> _H[i];
     }
     return true;
   }

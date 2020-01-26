@@ -22,13 +22,13 @@
 
 #include "MikolajczykDataset.hpp"
 
-#include "../HyperParameterLearning/Stat.hpp"
+#include "../Statistics.hpp"
 
 #include <DO/Sara/FileSystem.hpp>
 
-namespace DO {
+namespace DO::Sara {
 
-  class StudyOnMikolajczykDataset
+  class DO_SARA_EXPORT StudyOnMikolajczykDataset
   {
   public:
     // Index Distance Pair
@@ -45,34 +45,41 @@ namespace DO {
                               const std::string& featType);
 
     // Viewing, convenience functions...
-    const MikolajczykDataset& dataset() const { return dataset_; }
-    void openWindowForImagePair(size_t i, size_t j) const;
-    void closeWindowForImagePair() const;
+    const MikolajczykDataset& dataset() const { return _dataset; }
+
+    void open_window_for_image_pair(size_t i, size_t j) const;
+
+    void close_window_for_image_pair() const;
+
     // Match related functions.
-    std::vector<Match> computeMatches(const Set<OERegion, RealDescriptor>& X,
-                                      const Set<OERegion, RealDescriptor>& Y,
+    std::vector<Match> compute_matches(const KeypointList<OERegion, float>& X,
+                                      const KeypointList<OERegion, float>& Y,
                                       float squaredEll) const;
-    void getInliersAndOutliers(std::vector<size_t>& inliers,
+
+    void get_inliers_and_outliers(std::vector<size_t>& inliers,
                                std::vector<size_t>& outliers,
                                const std::vector<Match>& matches,
                                const Matrix3f& H,
                                float thres) const;
-    std::vector<IndexDist> sortMatchesByReprojError(const std::vector<Match>& M,
+
+    std::vector<IndexDist> sort_matches_by_reprojection_error(const std::vector<Match>& M,
                                                     const Matrix3f& H) const;
-    std::vector<size_t> getMatches(const std::vector<IndexDist>& sortedMatches, 
+
+    std::vector<size_t> get_matches(const std::vector<IndexDist>& sortedMatches, 
                                    float reprojLowerBound,
                                    float reprojUpperBound) const;
-    std::vector<size_t> getMatches(const std::vector<Match>& M,
+
+    std::vector<size_t> get_matches(const std::vector<Match>& M,
                                    const Matrix3f& H,
                                    float reprojLowerBound,
                                    float reprojUpperBound) const
     {
-      return getMatches(sortMatchesByReprojError(M, H),
+      return get_matches(sort_matches_by_reprojection_error(M, H),
                         reprojLowerBound, reprojUpperBound);
     }
 
   private:
-    MikolajczykDataset dataset_;
+    MikolajczykDataset _dataset;
   };
 
 } /* namespace DO */

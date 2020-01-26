@@ -32,7 +32,7 @@ using namespace std;
 
 namespace DO::Sara {
 
-  bool EvaluateOutlierResistance::operator()(float squaredEll,
+  bool EvaluateOutlierResistance::operator()(float squared_ell,
                                          size_t numRegionGrowths, size_t K,
                                          size_t k, double rho_min) const
   {
@@ -55,37 +55,37 @@ namespace DO::Sara {
     // Let's go.
     for (int j = 1; j < 6; ++j)
     {
-      auto pDrawer = unique_ptr<PairWiseDrawer>{};
+      auto drawer = unique_ptr<PairWiseDrawer>{};
       if (_display)
       {
         // View the image pair.
-        pDrawer.reset(
+        drawer.reset(
             new PairWiseDrawer(dataset().image(0), dataset().image(j)));
-        openWindowForImagePair(0, j);
-        pDrawer->setVizParams(1.0f, 1.0f, PairWiseDrawer::CatH);
-        pDrawer->displayImages();
+        open_window_for_image_pair(0, j);
+        drawer->set_viz_params(1.0f, 1.0f, PairWiseDrawer::CatH);
+        drawer->display_images();
       }
 
       // The job is here.
       {
         // Read the set of keypoints $\mathcal{X}$ in image 1.
-        const Set<OERegion, RealDescriptor>& X = dataset().keys(0);
+        const KeypointList<OERegion, float>& X = dataset().keys(0);
         // Read the set of keypoints $\mathcal{Y}$ in image 2.
-        const Set<OERegion, RealDescriptor>& Y = dataset().keys(j);
+        const KeypointList<OERegion, float>& Y = dataset().keys(j);
         // Compute initial matches $\mathcal{M}$.
-        vector<Match> M(computeMatches(X, Y, squaredEll));
+        vector<Match> M(compute_matches(X, Y, squared_ell));
         // Get ground truth homography
         const Matrix3f& H = dataset().H(j);
 
         for (size_t t = 0; t != thres.size(); ++t)
         {
           bool success;
-          success = doTheJob(M, H, j, squaredEll, thres[t], numRegionGrowths, K,
-                             k, rho_min, pDrawer);
+          success = run(M, H, j, squared_ell, thres[t], numRegionGrowths, K, k,
+                        rho_min, drawer.get());
           if (!success)
           {
             if (_display)
-              closeWindowForImagePair();
+              close_window_for_image_pair();
 
             return false;
           }
@@ -93,13 +93,13 @@ namespace DO::Sara {
       }
 
       if (_display)
-        closeWindowForImagePair();
+        close_window_for_image_pair();
     }
 
     return true;
   }
 
-  bool EvaluateOutlierResistance::doTheJob(const vector<Match>& M,
+  bool EvaluateOutlierResistance::run(const vector<Match>& M,
                                        const Matrix3f& H, size_t img_index,
                                        float squared_ell, float inlier_thres,
                                        size_t num_growths, size_t K, size_t k,
@@ -110,64 +110,64 @@ namespace DO::Sara {
     comment = "Evaluating outlier resistance on dataset '";
     comment += dataset().name() + "' :\n\tpair 1-" + to_string(img_index + 1);
     comment += "\n\tfeatType = " + dataset().featType();
-    comment += "\n\tsquaredEll = " + to_string(squaredEll);
+    comment += "\n\tsquaredEll = " + to_string(squared_ell);
     comment += "\n\tK = " + to_string(K);
     comment += "\n\trho_min = " + to_string(rho_min);
-    comment + "_inlierThres_" + to_string(inlierThres);
+    comment + "_inlierThres_" + to_string(inlier_thres);
     print_stage(comment);
 
     // Get subset of matches.
     vector<size_t> inliers, outliers;
-    getInliersAndOutliers(inliers, outliers, M, H, inlierThres);
+    get_inliers_and_outliers(inliers, outliers, M, H, inlier_thres);
 
     // We want to perform our analysis on this particular subset of matches of
     // interest.
-    bool verbose = debug_ && pDrawer;
+    bool verbose = _debug && (drawer != nullptr);
     RegionGrowingAnalyzer analyzer(M, H, verbose);
-    analyzer.setInliers(inliers);
+    analyzer.set_inliers(inliers);
 
     // Grow multiple regions.
     cout << "Growing Regions... ";
     GrowthParams params(K, rho_min);
-    GrowMultipleRegions growMultipleRegions(M, params, debug_ ? 1 : 0);
-    vector<Region> RR(growMultipleRegions(numGrowths, &analyzer, pDrawer));
+    GrowMultipleRegions growMultipleRegions(M, params, _debug ? 1 : 0);
+    vector<Region> RR(growMultipleRegions(num_growths, &analyzer, drawer));
     cout << "Done!" << endl;
 
     // Compute the statistics.
     cout << "Computing stats... ";
     // Get found matches in a proper container.
-    vector<size_t> allMatches;
+    vector<size_t> all_matches;
     {
-      Region allR;
+      Region all_R;
       for (size_t i = 0; i != RR.size(); ++i)
         for (Region::iterator j = RR[i].begin(); j != RR[i].end(); ++j)
-          allR.insert(*j);
-      allMatches.reserve(allR.size());
-      for (Region::iterator i = allR.begin(); i != allR.end(); ++i)
-        allMatches.push_back(*i);
+          all_R.insert(*j);
+      all_matches.reserve(all_R.size());
+      for (Region::iterator i = all_R.begin(); i != all_R.end(); ++i)
+        all_matches.push_back(*i);
     }
-    analyzer.computePosAndNeg(allMatches);
+    analyzer.compute_positives_and_negatives(all_matches);
 
     // Save stats.
     cout << "Saving stats... ";
     string folder;
     folder = dataset().name() + "/outlier_resistance";
-    folder = stringSrcPath(folder);
+    folder = string_src_path(folder);
 #pragma omp critical
     {
-      createDirectory(folder);
+      mkdir(folder);
     }
 
     const string name(
-        dataset().name() + "_" + toString(1) + "_" + toString(imgIndex + 1) +
-        "_sqEll_" + toString(squaredEll) + "_nReg_ " + toString(numGrowths) +
-        "_K_" + toString(K) + "_rhoMin_" + toString(rho_min) + "_inlierThres_" +
-        toString(inlierThres) + dataset().featType() + ".txt");
+        dataset().name() + "_" + to_string(1) + "_" + to_string(img_index + 1) +
+        "_sqEll_" + to_string(squared_ell) + "_nReg_ " + to_string(num_growths) +
+        "_K_" + to_string(K) + "_rhoMin_" + to_string(rho_min) + "_inlierThres_" +
+        to_string(inlier_thres) + dataset().featType() + ".txt");
 
     bool success;
 #pragma omp critical
     {
-      success = analyzer.savePrecRecallEtc(string(folder + "/" + name));
+      success = analyzer.save_precision_recall_etc(string(folder + "/" + name));
     }
     if (!success)
     {
