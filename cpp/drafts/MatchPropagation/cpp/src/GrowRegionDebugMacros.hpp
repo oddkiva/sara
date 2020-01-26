@@ -21,112 +21,114 @@
 #pragma once
 
 #ifdef DEBUG
-# define CHECK_STATE_AFTER_ADDING_SEED_MATCH \
-if (pDrawer) \
-{ \
-  printStage("Check the region $R$ and the region boundary $\\partial R$ after adding seed match"); \
-  pDrawer->display_images(); \
-  checkGrowingState(R, dR, pDrawer, true); \
-}
+#  define CHECK_STATE_AFTER_ADDING_SEED_MATCH(pDrawer)                         \
+    if (pDrawer)                                                               \
+    {                                                                          \
+      print_stage(                                                             \
+          "Check the region $R$ and the region boundary $\\partial R$ "        \
+          "after adding seed match");                                          \
+      pDrawer->display_images();                                               \
+      check_region_growing_state(R, dR, pDrawer, true);                        \
+    }
 #else
-# define CHECK_STATE_AFTER_ADDING_SEED_MATCH
+#  define CHECK_STATE_AFTER_ADDING_SEED_MATCH
 #endif
 
 #ifdef DEBUG
-# define CHECK_INCREMENTAL_SEED_TRIPLE_CONSTRUCTION \
-if (pDrawer) \
-  checkGrowingState(R, dR, pDrawer, true);
+#  define CHECK_INCREMENTAL_SEED_TRIPLE_CONSTRUCTION                           \
+    if (pDrawer)                                                               \
+      check_region_growing_state(R, dR, pDrawer, true);
 #else
-# define CHECK_INCREMENTAL_SEED_TRIPLE_CONSTRUCTION
+#  define CHECK_INCREMENTAL_SEED_TRIPLE_CONSTRUCTION
 #endif
 
 #ifdef DEBUG
-#define CHECK_CANDIDATE_FOURTH_MATCH_FOR_SEED_QUADRUPLE \
-if (pDrawer) \
-{ \
-  cout << "Trying M_[" << q[3] << "]\n" << M(q[3])  << endl; \
-  checkGrowingState(R, dR, pDrawer); \
-  pDrawer->draw_match(*m, Red8); \
-  get_key(); \
-}
+#  define CHECK_CANDIDATE_FOURTH_MATCH_FOR_SEED_QUADRUPLE                      \
+    if (pDrawer)                                                               \
+    {                                                                          \
+      cout << "Trying M_[" << q[3] << "]\n" << M(q[3]) << endl;                \
+      check_region_growing_state(R, dR, pDrawer);                              \
+      pDrawer->draw_match(*m, Red8);                                           \
+      get_key();                                                               \
+    }
 #else
-# define CHECK_CANDIDATE_FOURTH_MATCH_FOR_SEED_QUADRUPLE
+#  define CHECK_CANDIDATE_FOURTH_MATCH_FOR_SEED_QUADRUPLE
 #endif
 
 #ifdef DEBUG
-# define CHECK_GROWING_STATE_AFTER_FINDING_AFFINE_SEED_QUADRUPLE \
-checkGrowingState(R, dR, pDrawer, true);
+#  define CHECK_GROWING_STATE_AFTER_FINDING_AFFINE_SEED_QUADRUPLE              \
+    check_region_growing_state(R, dR, pDrawer, true);
 #else
-# define CHECK_GROWING_STATE_AFTER_FINDING_AFFINE_SEED_QUADRUPLE
+#  define CHECK_GROWING_STATE_AFTER_FINDING_AFFINE_SEED_QUADRUPLE
 #endif
 
 #ifdef DEBUG
-# define CHECK_CANDIDATE_MATCH_AND_GROWING_STATE \
-if (pDrawer) \
-{ \
-  cout << "Trying M_[" << q[3] << "]\n" << M(q[3])  << endl; \
-  checkGrowingState(R, dR, pDrawer); \
-  pDrawer->draw_match(*m, Yellow8); \
-  get_key(); \
-}
+#  define CHECK_CANDIDATE_MATCH_AND_GROWING_STATE                              \
+    if (pDrawer)                                                               \
+    {                                                                          \
+      cout << "Trying M_[" << q[3] << "]\n" << M(q[3]) << endl;                \
+      check_region_growing_state(R, dR, pDrawer);                              \
+      pDrawer->draw_match(*m, Yellow8);                                        \
+      get_key();                                                               \
+    }
 #else
-# define CHECK_CANDIDATE_MATCH_AND_GROWING_STATE
+#  define CHECK_CANDIDATE_MATCH_AND_GROWING_STATE
 #endif
 
 #ifdef DEBUG
-# define NOTIFY_CANNOT_CONSTRUCT_N_k \
-if (verbose_) \
-  cout << "N_k[" << m << "].size() < 3" << endl;
+#  define NOTIFY_CANNOT_CONSTRUCT_N_k                                          \
+    if (verbose_)                                                              \
+      cout << "N_k[" << m << "].size() < 3" << endl;
 #else
-# define NOTIFY_CANNOT_CONSTRUCT_N_k
+#  define NOTIFY_CANNOT_CONSTRUCT_N_k
 #endif
 
 #ifdef DEBUG
-# define DISPLAY_N_k \
-if (pDrawer) \
-{ \
-  cout << "Drawing N_k\n"; \
-  pDrawer->display_images(); \
-  checkRegion(R, pDrawer); \
-  for (size_t j = 0; j != N_k.size(); ++j) \
-  { \
-    pDrawer->draw_match(M(N_k[j]), Cyan8); \
-  } \
-  pDrawer->draw_match(M(m), Yellow8); \
-}
+#  define DISPLAY_N_k                                                          \
+    if (pDrawer)                                                               \
+    {                                                                          \
+      cout << "Drawing N_k\n";                                                 \
+      pDrawer->display_images();                                               \
+      checkRegion(R, pDrawer);                                                 \
+      for (size_t j = 0; j != N_k.size(); ++j)                                 \
+      {                                                                        \
+        pDrawer->draw_match(M(N_k[j]), Cyan8);                                 \
+      }                                                                        \
+      pDrawer->draw_match(M(m), Yellow8);                                      \
+    }
 #else
-# define DISPLAY_N_k
+#  define DISPLAY_N_k
 #endif
 
 #ifdef DEBUG
-# define DISPLAY_NON_DEGENERATE_TRIPLE \
-if (pDrawer) \
-{ \
-  pDrawer->display_images(); \
-  checkRegion(R, pDrawer); \
-  for (size_t j = 0; j != N_k.size(); ++j) \
-    pDrawer->draw_match(M(N_k[j]), Cyan8); \
-  cout << "Found good triple" << endl; \
-  cout << "t = { "; \
-  for (int i = 0; i < 3; ++i) \
-  { \
-    pDrawer->draw_match(M(t[i]), Blue8); \
-    cout << t[i]; \
-    if (i<2) \
-      cout << ", "; \
-  } \
-  cout << " }" << endl; \
-  pDrawer->draw_match(M(m), Yellow8); \
-  get_key(); \
-}
+#  define DISPLAY_NON_DEGENERATE_TRIPLE                                        \
+    if (pDrawer)                                                               \
+    {                                                                          \
+      pDrawer->display_images();                                               \
+      checkRegion(R, pDrawer);                                                 \
+      for (size_t j = 0; j != N_k.size(); ++j)                                 \
+        pDrawer->draw_match(M(N_k[j]), Cyan8);                                 \
+      cout << "Found good triple" << endl;                                     \
+      cout << "t = { ";                                                        \
+      for (int i = 0; i < 3; ++i)                                              \
+      {                                                                        \
+        pDrawer->draw_match(M(t[i]), Blue8);                                   \
+        cout << t[i];                                                          \
+        if (i < 2)                                                             \
+          cout << ", ";                                                        \
+      }                                                                        \
+      cout << " }" << endl;                                                    \
+      pDrawer->draw_match(M(m), Yellow8);                                      \
+      get_key();                                                               \
+    }
 #else
-# define DISPLAY_NON_DEGENERATE_TRIPLE
+#  define DISPLAY_NON_DEGENERATE_TRIPLE
 #endif
 
 #ifdef DEBUG
-# define PAUSE_SEED_TRIPLE_SEARCH \
-if (pDrawer) \
-  get_key();
+#  define PAUSE_SEED_TRIPLE_SEARCH                                             \
+    if (pDrawer)                                                               \
+      get_key();
 #else
-# define PAUSE_SEED_TRIPLE_SEARCH
+#  define PAUSE_SEED_TRIPLE_SEARCH
 #endif

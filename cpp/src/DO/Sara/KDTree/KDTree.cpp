@@ -10,7 +10,7 @@
 // ========================================================================== //
 
 #ifdef _MSC_VER
-# pragma warning(disable : 4244 4267 4291)
+#  pragma warning(disable : 4244 4267 4291)
 #endif
 
 
@@ -26,8 +26,8 @@ namespace DO { namespace Sara {
                  const flann::KDTreeIndexParams& index_params,
                  const flann::SearchParams& search_params)
     : _row_major_matrix_view{const_cast<double *>(data_matrix.data()),
-                             data_matrix.cols(),
-                             data_matrix.rows()}
+                             static_cast<size_t>(data_matrix.cols()),
+                             static_cast<size_t>(data_matrix.rows())}
     , _index{_row_major_matrix_view, index_params}
     , _index_params{index_params}
     , _search_params{search_params}
@@ -37,8 +37,7 @@ namespace DO { namespace Sara {
 
   // ======================================================================== //
   // k-NN search methods.
-  void KDTree::knn_search(const double *query_vector,
-                          int num_nearest_neighbors,
+  void KDTree::knn_search(const double* query_vector, int num_nearest_neighbors,
                           vector<int>& nn_indices,
                           vector<double>& nn_squared_distances)
   {
@@ -47,10 +46,8 @@ namespace DO { namespace Sara {
     auto temp_nn_indices = vector<vector<int>>{};
     auto temp_nn_squared_distances = vector<vector<double>>{};
 
-    _index.knnSearch(query_row_vectors,
-                     temp_nn_indices,
-                     temp_nn_squared_distances,
-                     num_nearest_neighbors,
+    _index.knnSearch(query_row_vectors, temp_nn_indices,
+                     temp_nn_squared_distances, num_nearest_neighbors,
                      _search_params);
 
     nn_indices = temp_nn_indices[0];
@@ -71,31 +68,28 @@ namespace DO { namespace Sara {
 
     // View the matrix in a row-major format.
     // Each column is a row in this view.
-    auto query_row_vectors = flann::Matrix<double>{
-        const_cast<double*>(query_column_vectors.data()),
-        static_cast<size_t>(query_column_vectors.cols()),
-        static_cast<size_t>(query_column_vectors.rows())};
+    auto query_row_vectors =
+        flann::Matrix<double>{const_cast<double*>(query_column_vectors.data()),
+                              static_cast<size_t>(query_column_vectors.cols()),
+                              static_cast<size_t>(query_column_vectors.rows())};
 
     _index.knnSearch(query_row_vectors, nn_indices, nn_squared_distances,
                      num_nearest_neighbors, _search_params);
   }
 
-  void KDTree::knn_search(size_t query_vector_index,
-                          int num_nearest_neighbors,
+  void KDTree::knn_search(size_t query_vector_index, int num_nearest_neighbors,
                           vector<int>& nn_indices,
                           vector<double>& nn_squared_distances)
   {
-    auto query_row_vectors = flann::Matrix<double>{
-      _row_major_matrix_view[query_vector_index],
-      1, _row_major_matrix_view.cols};
+    auto query_row_vectors =
+        flann::Matrix<double>{_row_major_matrix_view[query_vector_index], 1,
+                              _row_major_matrix_view.cols};
 
     auto temp_nn_indices = vector<vector<int>>{};
     auto temp_nn_squared_distances = vector<vector<double>>{};
 
-    _index.knnSearch(query_row_vectors,
-                     temp_nn_indices,
-                     temp_nn_squared_distances,
-                     num_nearest_neighbors+1,
+    _index.knnSearch(query_row_vectors, temp_nn_indices,
+                     temp_nn_squared_distances, num_nearest_neighbors + 1,
                      _search_params);
 
     nn_indices = temp_nn_indices[0];
@@ -131,7 +125,7 @@ namespace DO { namespace Sara {
 
   // ======================================================================== //
   // Radius search methods.
-  int KDTree::radius_search(const double *query_vector_data,
+  int KDTree::radius_search(const double* query_vector_data,
                             double squared_search_radius,
                             vector<int>& nn_indices,
                             vector<double>& nn_squared_distances,
@@ -149,11 +143,9 @@ namespace DO { namespace Sara {
     _search_params.max_neighbors = max_num_nearest_neighbors;
 
     // Search.
-    _index.radiusSearch(query_vector,
-                        temp_nn_indices,
-                        temp_nn_squared_distances,
-                        static_cast<float>(squared_search_radius),
-                        _search_params);
+    _index.radiusSearch(
+        query_vector, temp_nn_indices, temp_nn_squared_distances,
+        static_cast<float>(squared_search_radius), _search_params);
 
     nn_indices = temp_nn_indices[0];
     nn_squared_distances = temp_nn_squared_distances[0];
@@ -175,9 +167,7 @@ namespace DO { namespace Sara {
       ++max_num_nearest_neighbors;
 
     radius_search(_row_major_matrix_view[query_vector_index],
-                  squared_search_radius,
-                  nn_indices,
-                  nn_squared_distances,
+                  squared_search_radius, nn_indices, nn_squared_distances,
                   max_num_nearest_neighbors);
 
     nn_indices.erase(nn_indices.begin());
@@ -188,8 +178,8 @@ namespace DO { namespace Sara {
 
   void KDTree::radius_search(const MatrixXd& queries,
                              double squared_search_radius,
-                             vector<vector<int> >& nn_indices,
-                             vector<vector<double> >& nn_squared_distances,
+                             vector<vector<int>>& nn_indices,
+                             vector<vector<double>>& nn_squared_distances,
                              int max_num_nearest_neighbors)
   {
     if (static_cast<size_t>(queries.rows()) != _row_major_matrix_view.cols)
@@ -209,21 +199,18 @@ namespace DO { namespace Sara {
                               static_cast<size_t>(queries.cols()),
                               static_cast<size_t>(queries.rows())};
 
-    _index.radiusSearch(query_vectors,
-                        nn_indices,
-                        nn_squared_distances,
+    _index.radiusSearch(query_vectors, nn_indices, nn_squared_distances,
                         static_cast<float>(squared_search_radius),
                         _search_params);
 
     // Restore the initial maximum number of neighbors.
     _search_params.max_neighbors = saved_max_neighbors;
-
- }
+  }
 
   void KDTree::radius_search(const vector<size_t>& query_vector_indices,
                              double squared_search_radius,
-                             vector<vector<int> >& nn_indices,
-                             vector<vector<double> >& nn_squared_distances,
+                             vector<vector<int>>& nn_indices,
+                             vector<vector<double>>& nn_squared_distances,
                              int max_num_nearest_neighbors)
   {
     if (max_num_nearest_neighbors != -1 &&
@@ -238,11 +225,8 @@ namespace DO { namespace Sara {
         query_column_vectors(j, i) =
             _row_major_matrix_view[query_vector_indices[i]][j];
 
-    radius_search(query_column_vectors,
-                  squared_search_radius,
-                  nn_indices,
-                  nn_squared_distances,
-                  max_num_nearest_neighbors);
+    radius_search(query_column_vectors, squared_search_radius, nn_indices,
+                  nn_squared_distances, max_num_nearest_neighbors);
 
     // Don't include the first neighbor which is the query vector itself.
     for (size_t i = 0; i != nn_indices.size(); ++i)
@@ -252,5 +236,4 @@ namespace DO { namespace Sara {
     }
   }
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara
