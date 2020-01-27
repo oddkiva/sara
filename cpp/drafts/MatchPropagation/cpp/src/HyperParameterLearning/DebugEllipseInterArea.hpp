@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "StudyOnMikolajczykDataset.hpp"
+#include "../EmpiricalValidation/StudyOnMikolajczykDataset.hpp"
 
 
 namespace DO::Sara {
@@ -37,15 +37,16 @@ namespace DO::Sara {
     bool operator()(float inlierThres, float squaredEll);
 
   private:
-    void checkReprojectedEllipse(const Match& m, const PairWiseDrawer& drawer,
-                                 Ellipse& y, Ellipse& H_Sx,
-                                 double polyApproxOverlap,
-                                 double analyticalOverlap, double angle_phi_ox,
-                                 double angle_y, double error) const;
+    void check_reprojected_ellipse(const Match& m, const PairWiseDrawer& drawer,
+                                   Ellipse& y, Ellipse& H_Sx,
+                                   double polyApproxOverlap,
+                                   double analyticalOverlap,
+                                   double angle_phi_ox, double angle_y,
+                                   double error) const;
 
-    bool saveStats(const std::string& name,
-                   const std::vector<Stat>& stat_overlaps,
-                   const std::vector<Stat>& stat_angles) const;
+    bool save_statistics(const std::string& name,
+                         const std::vector<Statistics>& stat_overlaps,
+                         const std::vector<Statistics>& stat_angles) const;
 
   private:
     bool debug_;
