@@ -51,13 +51,15 @@ namespace DO::Sara {
     size_t n = 0;
     for (size_t m = 0; m != G_.size(); ++m)
     {
-      SARA_DEBUG << "REGION GROWTH ITER " << m << std::endl;
       // Can we use the following match as a seed?
       if (all_R.find(m))
         continue;
 
       // Attempt region growing.
       GrowRegion growRegion(m, G_, params_);
+      if (verbose_ >= 3)
+        growRegion.set_verbose(true);
+
       pair<Region, vector<size_t>> result =
           growRegion(R_, max_region_size, drawer, analyzer);
 
@@ -75,15 +77,15 @@ namespace DO::Sara {
           SARA_DEBUG << "region size = " << result.first.size() << endl;
         }
 
-        if (drawer)
-        {
-          for (size_t i = 0; i != result.second.size(); ++i)
-            SARA_DEBUG << result.second[i] << endl;
-          drawer->display_images();
-          check_regions(R_, drawer);
-          result.first.view(G_.M(), *drawer, Cyan8);
-          get_key();
-        }
+        //if (drawer)
+        //{
+        //  for (size_t i = 0; i != result.second.size(); ++i)
+        //    SARA_DEBUG << result.second[i] << endl;
+        //  drawer->display_images();
+        //  check_regions(R_, drawer);
+        //  result.first.view(G_.M(), *drawer, Cyan8);
+        //  get_key();
+        //}
 
         if (verbose_ >= 2)
           SARA_DEBUG << "Before merging: number of regions = " << R_.size()
@@ -97,7 +99,6 @@ namespace DO::Sara {
         if (verbose_ >= 2)
           SARA_DEBUG << "After merging: number of regions = " << R_.size()
                      << endl;
-        // check_regions(R_, drawer);
       }
       // if the region has significant size, add it to the list of region.
       else if (result.first.size() > 7)
@@ -113,12 +114,6 @@ namespace DO::Sara {
         R_.push_back(result.first);
         // Remember not to grow from the following matches.
         mark_reliable_matches(all_R, result.first);
-        // Check visually the set of regions.
-        // if (drawer)
-        //{
-        //  checkRegions(R_, drawer);
-        //  milliSleep(250);
-        //}
       }
 
       ++n;
@@ -132,11 +127,10 @@ namespace DO::Sara {
       SARA_DEBUG << "number of regions = " << R_.size() << endl;
       SARA_DEBUG << "number of matches = " << all_R.size() << endl;
     }
+
     if (drawer)
-    {
       check_regions(R_, drawer);
-      // get_key();
-    }
+
     if (analyzer)
     {
       analyzer->set_num_regions(int(R_.size()));
@@ -175,7 +169,7 @@ namespace DO::Sara {
       SARA_DEBUG << endl;
 
     // Erase the overlapping regions and put the region resulting from the
-    // merging
+    // merging.
     vector<Region> new_Rs;
     new_Rs.reserve(1000);
     // Find the regions we have to keep.

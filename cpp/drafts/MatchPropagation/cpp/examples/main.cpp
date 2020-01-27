@@ -199,7 +199,6 @@ GRAPHICS_MAIN()
     return 1;
   }
   shelf = rotate_ccw(shelf);
-  shelf = reduce(shelf, 2);
 
   // Open a window.
   float scale = 0.5;
@@ -228,9 +227,7 @@ GRAPHICS_MAIN()
   //   r = 3 * (N + 1) / 2 with N = 4
   //   r = 3 * (4 + 1) / 2
   //   r = 7.5
-  //
-  // Here we choose only r = 4, so we are even more conservative!
-  constexpr auto dilation_factor = 4.f;
+  constexpr auto dilation_factor = 7.5f;
   dilate_key_scales(features(shelf_keypoints), dilation_factor);
   dilate_key_scales(features(product_keypoints), dilation_factor);
 
@@ -248,7 +245,7 @@ GRAPHICS_MAIN()
 
   const auto num_region_growing = 2000;
   const auto growth_params = GrowthParams{};
-  const auto verbose_level = 2;
+  const auto verbose_level = 0;
   GrowMultipleRegions grow_regions(initial_matches, growth_params, verbose_level);
   regions = grow_regions(num_region_growing, 0, &drawer);
   elapsed = timer.elapsed_ms();
