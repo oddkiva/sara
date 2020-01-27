@@ -1,7 +1,7 @@
 set(DO_Shakti_VERSION_MAJOR 0)
 set(DO_Shakti_VERSION_MINOR 1)
 
-project(Shakti)
+project(DO::Shakti CXX CUDA)
 
 if (POLICY CMP0020)
   cmake_policy(SET CMP0020 NEW)
@@ -18,8 +18,7 @@ option(SHAKTI_SELF_CONTAINED_INSTALLATION
 
 
 # ============================================================================ #
-# Find third-party libraries.
-find_package(CUDA 7.0 REQUIRED)
+# Find required dependencies from Sara.
 find_package(DO_Sara COMPONENTS Core Graphics FeatureDescriptors ImageIO
              REQUIRED)
 
