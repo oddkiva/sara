@@ -28,7 +28,7 @@
 
 namespace DO::Sara {
 
-  class LearnPf : public StudyOnMikolajczykDataset
+  class DO_SARA_EXPORT LearnPf : public StudyOnMikolajczykDataset
   {
   public:
     LearnPf(const std::string& abs_parent_folder_path, const std::string& name,

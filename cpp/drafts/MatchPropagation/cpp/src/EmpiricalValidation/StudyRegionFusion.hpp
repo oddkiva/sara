@@ -25,7 +25,7 @@
 
 namespace DO::Sara {
 
-  class StudyRegionFusion : public StudyOnMikolajczykDataset
+  class DO_SARA_EXPORT StudyRegionFusion : public StudyOnMikolajczykDataset
   {
   public:
     StudyRegionFusion(const std::string& abs_parent_folder,

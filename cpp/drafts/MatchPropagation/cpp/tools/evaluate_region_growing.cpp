@@ -198,8 +198,8 @@ void testOnImage(const string& file1, const string& file2)
   float scale = 1.f;
   int w = int((image1.width()+image2.width())*scale);
   int h = int(max(image1.height(), image2.height())*scale);
-  openWindow(w, h);
-  setAntialiasing(activeWindow());
+  create_window(w, h);
+  set_antialiasing(active_window());
 
   // Setup viewing.
   PairWiseDrawer drawer(image1, image2);
@@ -208,10 +208,10 @@ void testOnImage(const string& file1, const string& file2)
   get_key();
 
   // Compute keypoints.
-  const auto keys1 = DoGSiftDetector().run(image1.convert<unsigned char>());
-  const auto keys2 = DoGSiftDetector().run(image2.convert<unsigned char>());
-  cout << "Image 1: " << keys1.size() << " keypoints" << endl;
-  cout << "Image 2: " << keys2.size() << " keypoints" << endl;
+  const auto keys1 = compute_sift_keypoints(image1.convert<float>());
+  const auto keys2 = compute_sift_keypoints(image2.convert<float>());
+  cout << "Image 1: " << size(keys1) << " keypoints" << endl;
+  cout << "Image 2: " << size(keys2) << " keypoints" << endl;
 
   // Compute initial matches
   float ell = 1.0f;
@@ -232,7 +232,7 @@ void testOnImage(const string& file1, const string& file2)
   int verbose = 2;
   GrowMultipleRegions growMultipleRegions(M, params, verbose);
   vector<Region> RR(growMultipleRegions(N, 0, &drawer));
-  saveScreen(activeWindow(), srcPath("result.png"));
+  save_screen(active_window(), src_path("result.png"));
 }
 
 

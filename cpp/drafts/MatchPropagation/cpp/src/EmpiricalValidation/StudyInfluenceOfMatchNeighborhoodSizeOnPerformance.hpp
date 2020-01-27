@@ -27,7 +27,7 @@
 
 namespace DO::Sara {
 
-  class StudyInfluenceOfMatchNeighborhoodSizeOnPerformance
+  class DO_SARA_EXPORT StudyInfluenceOfMatchNeighborhoodSizeOnPerformance
     : public StudyOnMikolajczykDataset
   {
   public:

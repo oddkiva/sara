@@ -25,7 +25,7 @@
 
 namespace DO::Sara {
 
-  class StudyAffineMetric : public StudyOnMikolajczykDataset
+  class DO_SARA_EXPORT StudyAffineMetric : public StudyOnMikolajczykDataset
   {
   public:
     StudyAffineMetric(const std::string& abs_parent_folder_path,

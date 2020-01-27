@@ -1,5 +1,6 @@
 find_package(DO_Sara COMPONENTS
-  Features FeatureMatching FileSystem Graphics Geometry KDTree Match REQUIRED)
+  Features FeatureMatching FileSystem Graphics Geometry KDTree Match SfM
+  REQUIRED)
 
 include (CMakePackageConfigHelpers)
 include (CMakeFindDependencyMacro)

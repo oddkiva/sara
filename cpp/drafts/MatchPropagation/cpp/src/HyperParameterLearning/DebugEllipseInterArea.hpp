@@ -28,7 +28,7 @@
 
 namespace DO::Sara {
 
-  class DebugEllipseInterArea : public StudyOnMikolajczykDataset
+  class DO_SARA_EXPORT DebugEllipseInterArea : public StudyOnMikolajczykDataset
   {
   public:
     DebugEllipseInterArea(const std::string& abs_parent_folder_path,
