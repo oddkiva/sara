@@ -32,27 +32,13 @@ using namespace std;
 
 namespace DO::Sara {
 
-  inline void ellRadii(float& a, float& b, const Matrix2f& M)
-  {
-    JacobiSVD<Matrix2f> svd(M, ComputeFullU);
-    const Vector2f& D = svd.singularValues();
-    const Vector2f radii(D.cwiseSqrt().cwiseInverse());
-    b = radii(0);
-    a = radii(1);
-  }
-
-  float sqIsoRadius(const Matrix2f& M)
-  {
-    return 1.f / sqrt(M.determinant());
-  }
-
   NearestMatchNeighborhoodComputer::NearestMatchNeighborhoodComputer(
-      const vector<Match>& matches, size_t neighborhoodMaxSize,
+      const vector<Match>& matches, size_t neighborhood_max_size,
       const PairWiseDrawer* drawer, bool verbose)
     : _M(matches)
     , _verbose(verbose)
     , _drawer(drawer)
-    , _neighborhood_max_size(neighborhoodMaxSize)
+    , _neighborhood_max_size(neighborhood_max_size)
   {
     create_and_sort_xy();
     create_x_matrix();
@@ -64,8 +50,9 @@ namespace DO::Sara {
     build_kdtrees();
   }
 
-  vector<size_t> NearestMatchNeighborhoodComputer::
-  operator()(size_t i, size_t K, double squaredRhoMin)
+  vector<size_t>
+  NearestMatchNeighborhoodComputer::operator()(size_t i, size_t K,
+                                               double squaredRhoMin)
   {
     vector<size_t> N_K_i;
     N_K_i.reserve(_neighborhood_max_size);
@@ -94,15 +81,15 @@ namespace DO::Sara {
     {
       cout << "_M[" << i << "] =\n" << _M[i] << endl;
       cout << "N_K[" << i << "].size() = " << N_K_i.size() << endl;
-      cout << "indexScores.size() = " << _index_scores.size() << endl;
+      cout << "index_scores.size() = " << _index_scores.size() << endl;
       for (size_t j = 0; j != _index_scores.size(); ++j)
         cout << j << "\t" << _index_scores[j].first << " "
              << _index_scores[j].second << endl;
       for (size_t j = 0; j != K; ++j)
       {
         _drawer->draw_match(_M[N_K_i[j]]);
-        _drawer->drawPoint(0, _M[N_K_i[j]].x_pos(), Cyan8, 3);
-        _drawer->drawPoint(1, _M[N_K_i[j]].y_pos(), Cyan8, 3);
+        _drawer->draw_point(0, _M[N_K_i[j]].x_pos(), Cyan8, 3);
+        _drawer->draw_point(1, _M[N_K_i[j]].y_pos(), Cyan8, 3);
       }
       _drawer->draw_match(_M[i], Cyan8);
       get_key();
@@ -111,19 +98,20 @@ namespace DO::Sara {
     return N_K_i;
   }
 
-  vector<vector<size_t>> NearestMatchNeighborhoodComputer::
-  operator()(const vector<size_t>& indices, size_t K, double squaredRhoMin)
+  vector<vector<size_t>>
+  NearestMatchNeighborhoodComputer::operator()(const vector<size_t>& indices,
+                                               size_t K, double squaredRhoMin)
   {
     vector<vector<size_t>> N_K_indices;
     N_K_indices.resize(indices.size());
 
-    vector<vector<IndexScore>> indexScores;
-    vector<vector<int>> xIndices, yIndices;
-    vector<vector<double>> sqDists;
-    indexScores.resize(indices.size());
-    xIndices.resize(indices.size());
-    yIndices.resize(indices.size());
-    sqDists.resize(indices.size());
+    vector<vector<IndexScore>> index_scores;
+    vector<vector<int>> x_indices, y_indices;
+    vector<vector<double>> squared_distances;
+    index_scores.resize(indices.size());
+    x_indices.resize(indices.size());
+    y_indices.resize(indices.size());
+    squared_distances.resize(indices.size());
 
 //#define PARALLEL_QUERY
 #ifdef PARALLEL_QUERY
@@ -137,17 +125,17 @@ namespace DO::Sara {
       yis.col(i) = _M[indices[i]].y_pos().cast<double>();
     }
     // Collect the K nearest matches $\mathb{x}_j$ to $\mathb{x}_i$.
-    _x_index_ptr->knn_search(xis, K, xIndices, sqDists, true);
+    _x_index_ptr->knn_search(xis, K, x_indices, squared_distances, true);
     // Collect the K nearest matches $\mathb{y}_j$ to $\mathb{y}_i$
-    _y_index_ptr->knn_search(yis, K, yIndices, sqDists, true);
+    _y_index_ptr->knn_search(yis, K, y_indices, squared_distances, true);
 #else
     for (size_t i = 0; i != indices.size(); ++i)
     {
       Vector2d xi(_M[indices[i]].x_pos().cast<double>());
       Vector2d yi(_M[indices[i]].y_pos().cast<double>());
-      _x_index_ptr->knn_search(xi, K, xIndices[i], sqDists[0]);
+      _x_index_ptr->knn_search(xi, K, x_indices[i], squared_distances[0]);
       // Collect the K nearest matches $\mathb{y}_j$ to $\mathb{y}_i$
-      _y_index_ptr->knn_search(yi, K, yIndices[i], sqDists[0]);
+      _y_index_ptr->knn_search(yi, K, y_indices[i], squared_distances[0]);
     }
 #endif
 
@@ -157,9 +145,12 @@ namespace DO::Sara {
 #endif
     for (int i = 0; i < num_indices; ++i)
     {
-      get_matches_from_x(indexScores[i], indices[i], xIndices[i], squaredRhoMin);
-      get_matches_from_y(indexScores[i], indices[i], yIndices[i], squaredRhoMin);
-      keep_best_scale_consistent_matches(N_K_indices[i], indexScores[i], 10 * K);
+      get_matches_from_x(index_scores[i], indices[i], x_indices[i],
+                         squaredRhoMin);
+      get_matches_from_y(index_scores[i], indices[i], y_indices[i],
+                         squaredRhoMin);
+      keep_best_scale_consistent_matches(N_K_indices[i], index_scores[i],
+                                         10 * K);
     }
 
     return N_K_indices;
@@ -252,8 +243,8 @@ namespace DO::Sara {
     return numPosXY;
   }
 
-  MatrixXd
-  NearestMatchNeighborhoodComputer::create_position_matrix(const vector<PosIndex>& X)
+  MatrixXd NearestMatchNeighborhoodComputer::create_position_matrix(
+      const vector<PosIndex>& X)
   {
     size_t numPosX = count_unique_positions(X);
     // Store the matrix of positions $\mathbf{x}_i$ without duplicate.
@@ -285,10 +276,10 @@ namespace DO::Sara {
     _X_mat = create_position_matrix(_X);
     if (_verbose && _drawer)
     {
-      for (size_t i = 0; i != _X_mat.cols(); ++i)
+      for (auto i = 0; i != _X_mat.cols(); ++i)
       {
         Vector2f xi(_X_mat.col(i).cast<float>());
-        // _drawer->drawPoint(0, xi, Red8, 5);
+        // _drawer->draw_point(0, xi, Red8, 5);
       }
     }
   }
@@ -302,10 +293,10 @@ namespace DO::Sara {
 
     if (_verbose && _drawer)
     {
-      for (size_t i = 0; i != _Y_mat.cols(); ++i)
+      for (auto i = 0; i != _Y_mat.cols(); ++i)
       {
         Vector2f yi(_Y_mat.col(i).cast<float>());
-        // _drawer->drawPoint(1, yi, Blue8, 5);
+        // _drawer->draw_point(1, yi, Blue8, 5);
       }
     }
   }
@@ -514,7 +505,7 @@ namespace DO::Sara {
   //    neighbor search.
   vector<vector<size_t>>
   NearestMatchNeighborhoodComputer::compute_neighborhoods(size_t K,
-                                                         double squaredRhoMin)
+                                                          double squaredRhoMin)
   {
     // Preallocate array of match neighborhoods.
     vector<vector<size_t>> N_K(_M.size());
@@ -555,15 +546,15 @@ namespace DO::Sara {
       {
         cout << "_M[" << i << "] =\n" << _M[i] << endl;
         cout << "N_K[" << i << "].size() = " << N_K[i].size() << endl;
-        cout << "indexScores.size() = " << _index_scores.size() << endl;
+        cout << "index_scores.size() = " << _index_scores.size() << endl;
         for (size_t j = 0; j != _index_scores.size(); ++j)
           cout << j << "\t" << _index_scores[j].first << " "
                << _index_scores[j].second << endl;
         for (size_t j = 0; j != K; ++j)
         {
           _drawer->draw_match(_M[N_K[i][j]]);
-          _drawer->drawPoint(0, _M[N_K[i][j]].x_pos(), Cyan8, 3);
-          _drawer->drawPoint(1, _M[N_K[i][j]].y_pos(), Cyan8, 3);
+          _drawer->draw_point(0, _M[N_K[i][j]].x_pos(), Cyan8, 3);
+          _drawer->draw_point(1, _M[N_K[i][j]].y_pos(), Cyan8, 3);
         }
         _drawer->draw_match(_M[i], Cyan8);
         get_key();
@@ -582,12 +573,12 @@ namespace DO::Sara {
   }
 
   void NearestMatchNeighborhoodComputer::get_matches_from_x(
-      vector<IndexScore>& indexScores, size_t i, const vector<int>& xIndices,
+      vector<IndexScore>& index_scores, size_t i, const vector<int>& x_indices,
       double squaredRhoMin)
   {
-    for (size_t j = 0; j != xIndices.size(); ++j)
+    for (size_t j = 0; j != x_indices.size(); ++j)
     {
-      size_t ind = xIndices[j];
+      size_t ind = x_indices[j];
       for (size_t k = 0; k != _X_to_M[ind].size(); ++k)
       {
         size_t ix = _X_to_M[ind][k];
@@ -595,24 +586,24 @@ namespace DO::Sara {
 #ifdef DEBUG
         if (_verbose && _drawer)
         {
-          _drawer->drawPoint(0, Vector2f(_X_mat.col(ind).cast<float>()), Blue8,
-                             10);
+          _drawer->draw_point(0, Vector2f(_X_mat.col(ind).cast<float>()), Blue8,
+                              10);
           // _drawer->draw_match(_M[ix], Blue8);
         }
 #endif
         if (score >= squaredRhoMin)
-          indexScores.push_back(make_pair(ix, score));
+          index_scores.push_back(make_pair(ix, score));
       }
     }
   }
 
   void NearestMatchNeighborhoodComputer::get_matches_from_y(
-      vector<IndexScore>& indexScores, size_t i, const vector<int>& yIndices,
+      vector<IndexScore>& index_scores, size_t i, const vector<int>& y_indices,
       double squaredRhoMin)
   {
-    for (size_t j = 0; j != yIndices.size(); ++j)
+    for (size_t j = 0; j != y_indices.size(); ++j)
     {
-      size_t ind = yIndices[j];
+      size_t ind = y_indices[j];
       for (size_t k = 0; k != _Y_to_M[ind].size(); ++k)
       {
         size_t ix = _Y_to_M[ind][k];
@@ -620,13 +611,13 @@ namespace DO::Sara {
 #ifdef DEBUG
         if (_verbose && _drawer)
         {
-          _drawer->drawPoint(1, Vector2f(_Y_mat.col(ind).cast<float>()), Blue8,
-                             10);
+          _drawer->draw_point(1, Vector2f(_Y_mat.col(ind).cast<float>()), Blue8,
+                              10);
           // _drawer->draw_match(_M[ix], Blue8);
         }
 #endif
         if (score >= squaredRhoMin)
-          indexScores.push_back(make_pair(ix, score));
+          index_scores.push_back(make_pair(ix, score));
       }
     }
   }
@@ -634,21 +625,21 @@ namespace DO::Sara {
   // ======================================================================== //
   // 6. (Optional) Compute redundancies before computing the neighborhoods.
   void NearestMatchNeighborhoodComputer::keep_best_scale_consistent_matches(
-      vector<size_t>& N_K_i, vector<IndexScore>& indexScores, size_t N)
+      vector<size_t>& N_K_i, vector<IndexScore>& index_scores, size_t N)
   {
     // Sort matches by scaled consistency ratio/distrust score.
-    sort(indexScores.begin(), indexScores.end(), _compare_index_score_1);
+    sort(index_scores.begin(), index_scores.end(), _compare_index_score_1);
     vector<IndexScore>::iterator it =
-        unique(indexScores.begin(), indexScores.end(), _equal_index_score_1);
-    indexScores.resize(it - indexScores.begin());
-    for (size_t j = 0; j != indexScores.size(); ++j)
-      indexScores[j].second = -_M[indexScores[j].first].score();
-    sort(indexScores.begin(), indexScores.end(), _compare_index_score_2);
-    size_t sz = min(indexScores.size(), N);
+        unique(index_scores.begin(), index_scores.end(), _equal_index_score_1);
+    index_scores.resize(it - index_scores.begin());
+    for (size_t j = 0; j != index_scores.size(); ++j)
+      index_scores[j].second = -_M[index_scores[j].first].score();
+    sort(index_scores.begin(), index_scores.end(), _compare_index_score_2);
+    size_t sz = min(index_scores.size(), N);
 
     N_K_i.resize(sz);
     for (size_t j = 0; j != sz; ++j)
-      N_K_i[j] = indexScores[j].first;
+      N_K_i[j] = index_scores[j].first;
   }
 
   vector<vector<size_t>>
@@ -679,13 +670,13 @@ namespace DO::Sara {
       print_stage("Querying neighborhoods");
       _timer.restart();
     }
-    vector<int> xIndices, yIndices;
-    vector<double> sqDists;
-    vector<size_t> matchIndices;
-    xIndices.reserve(_neighborhood_max_size);
-    yIndices.reserve(_neighborhood_max_size);
-    sqDists.reserve(_neighborhood_max_size);
-    matchIndices.reserve(_neighborhood_max_size * 2);
+    vector<int> x_indices, y_indices;
+    vector<double> squared_distances;
+    vector<size_t> match_indices;
+    x_indices.reserve(_neighborhood_max_size);
+    y_indices.reserve(_neighborhood_max_size);
+    squared_distances.reserve(_neighborhood_max_size);
+    match_indices.reserve(_neighborhood_max_size * 2);
 
     // Do the dumb way first.
     for (size_t i = 0; i != _M.size(); ++i)
@@ -706,67 +697,67 @@ namespace DO::Sara {
       {
         _drawer->draw_match(_M[i]);
         cout << _M[i] << endl;
-        _drawer->drawPoint(0, xi.cast<float>(), Red8, 5);
-        _drawer->drawPoint(1, yi.cast<float>(), Blue8, 5);
+        _drawer->draw_point(0, xi.cast<float>(), Red8, 5);
+        _drawer->draw_point(1, yi.cast<float>(), Blue8, 5);
       }
 #endif
 
       // Collect the indices of $\mathb{x}_j$ such that
       // $|| \mathbf{x}_j - \mathbf{x}_i ||_2 < thres$.
-      xIndex.radius_search(xi, thres * thres, xIndices, sqDists);
+      xIndex.radius_search(xi, thres * thres, x_indices, squared_distances);
       // Collect the indices of $\mathb{y}_j$ such that
       // $|| \mathbf{y}_j - \mathbf{x}_i ||_2 < thres$.
-      yIndex.radius_search(yi, thres * thres, yIndices, sqDists);
+      yIndex.radius_search(yi, thres * thres, y_indices, squared_distances);
 
 #ifdef DEBUG
       if (_drawer)
       {
-        cout << "xIndices.size() = " << xIndices.size() << endl;
-        cout << "yIndices.size() = " << yIndices.size() << endl;
-        for (size_t j = 0; j < xIndices.size(); ++j)
-          _drawer->drawPoint(0, Vector2f(_X_mat.col(xIndices[j]).cast<float>()),
-                             Red8);
-        for (size_t j = 0; j < yIndices.size(); ++j)
-          _drawer->drawPoint(1, Vector2f(_Y_mat.col(yIndices[j]).cast<float>()),
-                             Blue8);
+        cout << "x_indices.size() = " << x_indices.size() << endl;
+        cout << "y_indices.size() = " << y_indices.size() << endl;
+        for (size_t j = 0; j < x_indices.size(); ++j)
+          _drawer->draw_point(
+              0, Vector2f(_X_mat.col(x_indices[j]).cast<float>()), Red8);
+        for (size_t j = 0; j < y_indices.size(); ++j)
+          _drawer->draw_point(
+              1, Vector2f(_Y_mat.col(y_indices[j]).cast<float>()), Blue8);
         get_key();
       }
 #endif
 
-      matchIndices.clear();
-      matchIndices.clear();
+      match_indices.clear();
+      match_indices.clear();
       // Collect all the matches that have position $\mathbf{x}_j$.
-      for (size_t j = 0; j != xIndices.size(); ++j)
+      for (size_t j = 0; j != x_indices.size(); ++j)
       {
-        size_t indXj = xIndices[j];  // index of $\mathbf{x}_j$
+        size_t indXj = x_indices[j];  // index of $\mathbf{x}_j$
         for (size_t k = 0; k != _X_to_M[indXj].size(); ++k)
         {
-          size_t matchInd = _X_to_M[indXj][k];
-          matchIndices.push_back(matchInd);
+          size_t match_index = _X_to_M[indXj][k];
+          match_indices.push_back(match_index);
         }
       }
       // Collect all the matches that have position $\mathbf{y}_j$.
-      for (size_t j = 0; j != yIndices.size(); ++j)
+      for (size_t j = 0; j != y_indices.size(); ++j)
       {
-        size_t indYj = yIndices[j];  // index of $\mathbf{y}_j$
+        size_t indYj = y_indices[j];  // index of $\mathbf{y}_j$
         for (size_t k = 0; k != _Y_to_M[indYj].size(); ++k)
         {
-          size_t matchInd = _Y_to_M[indYj][k];
-          matchIndices.push_back(matchInd);
+          size_t match_index = _Y_to_M[indYj][k];
+          match_indices.push_back(match_index);
         }
       }
 #ifdef DEBUG
       if (_verbose)
-        cout << "matchIndices = " << matchIndices.size() << endl;
+        cout << "match_indices = " << match_indices.size() << endl;
 #endif
 
       // Keep only matches $m_j$ such that
       // $|| \mathbf{x}_j - \mathbf{x}_i || < thres$ and
       // $|| \mathbf{y}_j - \mathbf{y}_i || < thres$.
       const Match& mi = _M[i];
-      for (size_t j = 0; j != matchIndices.size(); ++j)
+      for (size_t j = 0; j != match_indices.size(); ++j)
       {
-        size_t indj = matchIndices[j];
+        size_t indj = match_indices[j];
         const Match& mj = _M[indj];
         if ((mi.x_pos() - mj.x_pos()).squaredNorm() < thres * thres &&
             (mi.y_pos() - mj.y_pos()).squaredNorm() < thres * thres)
@@ -804,34 +795,34 @@ namespace DO::Sara {
       vector<vector<size_t>>& components, vector<size_t>& representers,
       const vector<Match>& matches, double thres) -> void
   {
-    //if (_verbose)
+    // if (_verbose)
     //  print_stage("Compute match redundancy component");
 
-    //vector<vector<size_t>> redundancies = compute_redundancies(thres);
+    // vector<vector<size_t>> redundancies = compute_redundancies(thres);
 
-    //using namespace boost;
-    //typedef adjacency_list <vecS, vecS, undirectedS> Graph;
+    // using namespace boost;
+    // typedef adjacency_list <vecS, vecS, undirectedS> Graph;
 
     //// Construct the graph.
-    //Graph g(matches.size());
-    //for (size_t i = 0; i < redundancies.size(); ++i)
+    // Graph g(matches.size());
+    // for (size_t i = 0; i < redundancies.size(); ++i)
     //  for (vector<int>::size_type j = 0; j < redundancies[i].size(); ++j)
     //    add_edge(i, redundancies[i][j], g);
 
     //// Compute the connected components.
-    //vector<size_t> component(num_vertices(g));
-    //size_t num_components = connected_components(g, &component[0]);
+    // vector<size_t> component(num_vertices(g));
+    // size_t num_components = connected_components(g, &component[0]);
 
     //// Store the components.
-    //components = vector<vector<size_t> >(num_components);
-    //for (size_t i = 0; i != component.size(); ++i)
+    // components = vector<vector<size_t> >(num_components);
+    // for (size_t i = 0; i != component.size(); ++i)
     //  components.reserve(100);
-    //for (size_t i = 0; i != component.size(); ++i)
+    // for (size_t i = 0; i != component.size(); ++i)
     //  components[component[i]].push_back(i);
 
     //// Store the best representer for each component.
-    //representers.resize(num_components);
-    //for (size_t i = 0; i != components.size(); ++i)
+    // representers.resize(num_components);
+    // for (size_t i = 0; i != components.size(); ++i)
     //{
     //  size_t index_best_match = components[i][0];
     //  for (size_t j = 0; j < components[i].size(); ++j)
@@ -843,7 +834,7 @@ namespace DO::Sara {
     //  representers[i] = index_best_match;
     //}
 
-    //if (_verbose)
+    // if (_verbose)
     //{
     //  cout << "Checksum components" << endl;
     //  size_t num_matches_from_components = 0;

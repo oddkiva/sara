@@ -80,6 +80,7 @@ namespace DO::Sara {
       , delta_x_(delta_x)
       , delta_S_x_(delta_S_x)
       , delta_theta_(delta_theta)
+      , squared_rho_min_{squaredRhoMin}
     {
     }
 
