@@ -46,12 +46,6 @@ Window open_window_for_image_pair(const Image<Rgb8>& image1,
   return create_window(w, h);
 }
 
-void dilate_key_scales(vector<OERegion>& features, float dilation_factor)
-{
-  for (size_t i = 0; i != features.size(); ++i)
-    features[i].shape_matrix /= dilation_factor * dilation_factor;
-}
-
 
 // ========================================================================== //
 // SIFT Detector.
@@ -157,7 +151,23 @@ public:
       DoGs[i].shape_matrix /= pow(octave_scale_factor, 2);
     }
 
+    rescale_shape_matrices(DoGs);
+
     return keys;
+  }
+
+  void rescale_shape_matrices(vector<OERegion>& features) const
+  {
+    // Dilate SIFT circular shape before matching keypoints.
+    //
+    // We are not cheating because the SIFT descriptor is calculated on an image
+    // patch with actually a quite large radius:
+    //   r = 3 * (N + 1) / 2 with N = 4
+    //   r = 3 * (4 + 1) / 2
+    //   r = 7.5
+    constexpr auto dilation_factor = 7.5f;
+    for (size_t i = 0; i != features.size(); ++i)
+      features[i].shape_matrix /= dilation_factor * dilation_factor;
   }
 
 private:
@@ -219,17 +229,6 @@ GRAPHICS_MAIN()
   product_keypoints = detector.run(product.convert<float>());
   elapsed = timer.elapsed_ms();
   cout << "Detection time = " << elapsed << " ms" << endl;
-
-  // Dilate SIFT circular shape before matching keypoints.
-  //
-  // We are not cheating because the SIFT descriptor is calculated on an image
-  // patch with actually a quite large radius:
-  //   r = 3 * (N + 1) / 2 with N = 4
-  //   r = 3 * (4 + 1) / 2
-  //   r = 7.5
-  constexpr auto dilation_factor = 7.5f;
-  dilate_key_scales(features(shelf_keypoints), dilation_factor);
-  dilate_key_scales(features(product_keypoints), dilation_factor);
 
   // Compute initial matches.
   print_stage("Compute initial matches");

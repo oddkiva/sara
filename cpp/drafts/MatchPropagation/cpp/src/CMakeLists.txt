@@ -86,25 +86,25 @@ macro (sara_make_library _library_name
     FOLDER "DO Sara Libraries")
 
 
+  # Figure out the rest later.
   # 6. Specify where to install the library.
-  install(TARGETS DO-Sara-${_library_name}
-    EXPORT DO-Sara-${_library_name}-Targets
-    RUNTIME  DESTINATION bin     COMPONENT Libraries
-    LIBRARY  DESTINATION lib     COMPONENT Libraries
-    ARCHIVE  DESTINATION lib     COMPONENT Libraries
-    INCLUDES DESTINATION include COMPONENT LIBRARIES)
+  # install(TARGETS DO-Sara-${_library_name}
+  #   EXPORT DO-Sara-${_library_name}-Targets
+  #   RUNTIME  DESTINATION bin     COMPONENT Libraries
+  #   LIBRARY  DESTINATION lib     COMPONENT Libraries
+  #   ARCHIVE  DESTINATION lib     COMPONENT Libraries
+  #   INCLUDES DESTINATION include COMPONENT LIBRARIES)
 
-  # 7. Versioning.
-  write_basic_package_version_file(
-    "DO-Sara-${_library_name}-Version.cmake"
-    VERSION DO-Sara-${DO_Sara_VERSION}
-    COMPATIBILITY SameMajorVersion)
+  # # 7. Versioning.
+  # write_basic_package_version_file(
+  #   "DO-Sara-${_library_name}-Version.cmake"
+  #   VERSION DO-Sara-${DO_Sara_VERSION}
+  #   COMPATIBILITY SameMajorVersion)
 
-  install(FILES "DO-Sara-${_library_name}-Config.cmake"
-                "DO-Sara-${_library_name}-Version.cmake"
-          DESTINATION lib/cmake/DO)
+  # install(FILES "DO-Sara-${_library_name}-Config.cmake"
+  #               "DO-Sara-${_library_name}-Version.cmake"
+  #         DESTINATION lib/cmake/DO)
 
-  # Figure this out later.
   # 8. For library reuse.
   # install(EXPORT DO-Sara-${_library_name}-Targets
   #   FILE DO-Sara-${_library_name}-Targets.cmake
