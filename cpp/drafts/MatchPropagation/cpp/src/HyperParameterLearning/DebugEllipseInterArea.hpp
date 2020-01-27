@@ -21,6 +21,8 @@
 #pragma once
 
 #include "../EmpiricalValidation/StudyOnMikolajczykDataset.hpp"
+#include <DO/Sara/Match/PairWiseDrawer.hpp>
+#include <DO/Sara/Geometry/Objects/Ellipse.hpp>
 
 
 namespace DO::Sara {

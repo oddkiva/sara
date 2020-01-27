@@ -72,7 +72,7 @@ namespace DO::Sara {
           float diff_center = sqrt((H_x.center() - y.center()).squaredNorm());
           Matrix2f diff_shape_mat = H_x.shape_matrix - y.shape_matrix;
           float rel_diff_shape_mat =
-              diff_shape_mat.squaredNorm() / y.shape_matrix).squaredNorm();
+              diff_shape_mat.squaredNorm() / y.shape_matrix.squaredNorm();
 
           /*if (debug_)
           {
@@ -84,11 +84,11 @@ namespace DO::Sara {
           const auto num_inter = compute_intersection_points(inter, H_Sx, Sy);
 
           const auto polyApproxOverlap =
-              approximate_intersection(H_Sx, Sy, 36);
+              area(approximate_intersection(H_Sx, Sy, 36));
           const auto analyticalOverlap = analytic_intersection(H_Sx, Sy);
           const auto angle_phi_ox = compute_orientation(m, H);
-          // double angle_x = m.featX().orientation();
-          const auto angle_y = m.y().orientation();
+          // double angle_x = m.featX().orientation;
+          const auto angle_y = m.y().orientation;
           const auto error =
               (polyApproxOverlap - analyticalOverlap) / polyApproxOverlap;
 
@@ -103,8 +103,8 @@ namespace DO::Sara {
 
             drawer.display_images();
             check_reprojected_ellipse(m, drawer, Sy, H_Sx, polyApproxOverlap,
-                                    analyticalOverlap, angle_phi_ox, angle_y,
-                                    error);
+                                      analyticalOverlap, angle_phi_ox, angle_y,
+                                      error);
             // drawer.drawKeypoint(1, H_x, Yellow8);
             get_key();
           }
@@ -170,17 +170,17 @@ namespace DO::Sara {
     Phi_ox *= 20.;
     Vector2d p1, p2;
     Vector2d off(drawer.offF(1).cast<double>());
-    p1 = H_Sx.c() + off;
+    p1 = H_Sx.center() + off;
     p2 = p1 + Phi_ox;
     draw_arrow(p1.x(), p1.y(), p2.x(), p2.y(), Blue8);
     // Draw transformed ellipse.
-    H_Sx.c() += off;
-    H_Sx.draw_on_screen(Blue8);
-    fillCircle(H_Sx.c().x(), H_Sx.c().y(), 5, Blue8);
+    H_Sx.center() += off;
+    draw_ellipse(H_Sx, Blue8);
+    fill_circle(H_Sx.center().x(), H_Sx.center().y(), 5, Blue8);
 
-    y.c() += off;
-    y.drawOnScreen(Red8);
-    fillCircle(y.c().x(), y.c().y(), 5, Blue8);
+    y.center() += off;
+    draw_ellipse(y, Red8);
+    fill_circle(y.center().x(), y.center().y(), 5, Blue8);
   }
 
   bool
