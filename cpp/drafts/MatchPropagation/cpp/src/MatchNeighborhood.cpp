@@ -52,7 +52,7 @@ namespace DO::Sara {
 
   vector<size_t>
   NearestMatchNeighborhoodComputer::operator()(size_t i, size_t K,
-                                               double squaredRhoMin)
+                                               double squared_rho_min)
   {
     vector<size_t> N_K_i;
     N_K_i.reserve(_neighborhood_max_size);
@@ -73,8 +73,8 @@ namespace DO::Sara {
     if (_verbose && _drawer)
       _drawer->display_images();
 #endif
-    get_matches_from_x(_index_scores, i, _x_indices, squaredRhoMin);
-    get_matches_from_y(_index_scores, i, _y_indices, squaredRhoMin);
+    get_matches_from_x(_index_scores, i, _x_indices, squared_rho_min);
+    get_matches_from_y(_index_scores, i, _y_indices, squared_rho_min);
     keep_best_scale_consistent_matches(N_K_i, _index_scores, 10 * K);
 #ifdef DEBUG
     if (_verbose && _drawer)
@@ -100,7 +100,7 @@ namespace DO::Sara {
 
   vector<vector<size_t>>
   NearestMatchNeighborhoodComputer::operator()(const vector<size_t>& indices,
-                                               size_t K, double squaredRhoMin)
+                                               size_t K, double squared_rho_min)
   {
     vector<vector<size_t>> N_K_indices;
     N_K_indices.resize(indices.size());
@@ -146,9 +146,9 @@ namespace DO::Sara {
     for (int i = 0; i < num_indices; ++i)
     {
       get_matches_from_x(index_scores[i], indices[i], x_indices[i],
-                         squaredRhoMin);
+                         squared_rho_min);
       get_matches_from_y(index_scores[i], indices[i], y_indices[i],
-                         squaredRhoMin);
+                         squared_rho_min);
       keep_best_scale_consistent_matches(N_K_indices[i], index_scores[i],
                                          10 * K);
     }
@@ -219,13 +219,13 @@ namespace DO::Sara {
     if (_verbose)
       _timer.restart();
     // Count the number of unique positions $(\mathbf{x}_i, \mathbf{y}_i)$.
-    size_t numPosXY = 1;
+    size_t num_pos_xy = 1;
     Vector4f match = _XY[0].first;
     for (size_t i = 1; i != _XY.size(); ++i)
     {
       if (_XY[i].first != match)
       {
-        ++numPosXY;
+        ++num_pos_xy;
         match = _XY[i].first;
       }
     }
@@ -233,14 +233,14 @@ namespace DO::Sara {
     {
       cout << "Check number of unique position match (x,y)" << endl;
       ;
-      cout << "numPosXY = " << numPosXY << endl;
+      cout << "num_pos_xy = " << num_pos_xy << endl;
       cout << "matchesByXY.size() = " << _XY.size() << endl;
       cout << "matches.size() = " << _M.size() << endl;
       _elapsed = _timer.elapsed();
       cout << "Counting number of unique positions (x,y)." << endl;
       cout << "Time elapsed = " << _elapsed << " seconds" << endl;
     }
-    return numPosXY;
+    return num_pos_xy;
   }
 
   MatrixXd NearestMatchNeighborhoodComputer::create_position_matrix(
@@ -305,25 +305,27 @@ namespace DO::Sara {
   {
     if (_verbose)
       print_stage("XY matrix");
+
     // Store the matrix of position matches $(\mathbf{x}_i, \mathbf{y}_i)$
     // without duplicate.
-    size_t numPosXY = count_unique_pos_matches();
-    _XY_mat = MatrixXd(4, numPosXY);
-    size_t xyInd = 0;
+    size_t num_pos_xy = count_unique_pos_matches();
+    _XY_mat = MatrixXd(4, num_pos_xy);
+
+    size_t xy_index = 0;
     Vector4f match(_XY[0].first);
     _XY_mat.col(0) = match.cast<double>();
     for (size_t i = 1; i != _XY.size(); ++i)
     {
       if (_XY[i].first != match)
       {
-        ++xyInd;
+        ++xy_index;
         match = _XY[i].first;
-        _XY_mat.col(xyInd) = match.cast<double>();
+        _XY_mat.col(xy_index) = match.cast<double>();
       }
     }
     if (_verbose && _drawer)
     {
-      cout << "xyInd = " << xyInd << endl;
+      cout << "xy_index = " << xy_index << endl;
       /*for (size_t i = 0; i != _XY_mat.cols(); ++i)
       {
         Vector2f xi(_XY_mat.block(0,i,2,1).cast<float>());
@@ -425,18 +427,19 @@ namespace DO::Sara {
     for (size_t i = 0; i != numXY; ++i)
       _XY_to_M[i].reserve(_neighborhood_max_size);
     // Loop
-    size_t xyInd = 0;
+    size_t xy_index = 0;
     Vector4f xy(_XY[0].first);
     _XY_to_M[0].push_back(_XY[0].second);
     for (size_t i = 1; i != _XY.size(); ++i)
     {
       if (_XY[i].first != xy)
       {
-        ++xyInd;
+        ++xy_index;
         xy = _XY[i].first;
       }
-      _XY_to_M[xyInd].push_back(_XY[i].second);
+      _XY_to_M[xy_index].push_back(_XY[i].second);
     }
+
     if (_verbose)
     {
       print_stage("Check number of positions for xy");
@@ -505,7 +508,7 @@ namespace DO::Sara {
   //    neighbor search.
   vector<vector<size_t>>
   NearestMatchNeighborhoodComputer::compute_neighborhoods(size_t K,
-                                                          double squaredRhoMin)
+                                                          double squared_rho_min)
   {
     // Preallocate array of match neighborhoods.
     vector<vector<size_t>> N_K(_M.size());
@@ -538,8 +541,8 @@ namespace DO::Sara {
       if (_verbose && _drawer)
         _drawer->display_images();
 #endif
-      get_matches_from_x(_index_scores, i, _x_indices, squaredRhoMin);
-      get_matches_from_y(_index_scores, i, _y_indices, squaredRhoMin);
+      get_matches_from_x(_index_scores, i, _x_indices, squared_rho_min);
+      get_matches_from_y(_index_scores, i, _y_indices, squared_rho_min);
       keep_best_scale_consistent_matches(N_K[i], _index_scores, 10 * K);
 #ifdef DEBUG
       if (_verbose && _drawer)
@@ -574,7 +577,7 @@ namespace DO::Sara {
 
   void NearestMatchNeighborhoodComputer::get_matches_from_x(
       vector<IndexScore>& index_scores, size_t i, const vector<int>& x_indices,
-      double squaredRhoMin)
+      double squared_rho_min)
   {
     for (size_t j = 0; j != x_indices.size(); ++j)
     {
@@ -591,7 +594,7 @@ namespace DO::Sara {
           // _drawer->draw_match(_M[ix], Blue8);
         }
 #endif
-        if (score >= squaredRhoMin)
+        if (score >= squared_rho_min)
           index_scores.push_back(make_pair(ix, score));
       }
     }
@@ -599,7 +602,7 @@ namespace DO::Sara {
 
   void NearestMatchNeighborhoodComputer::get_matches_from_y(
       vector<IndexScore>& index_scores, size_t i, const vector<int>& y_indices,
-      double squaredRhoMin)
+      double squared_rho_min)
   {
     for (size_t j = 0; j != y_indices.size(); ++j)
     {
@@ -616,7 +619,7 @@ namespace DO::Sara {
           // _drawer->draw_match(_M[ix], Blue8);
         }
 #endif
-        if (score >= squaredRhoMin)
+        if (score >= squared_rho_min)
           index_scores.push_back(make_pair(ix, score));
       }
     }

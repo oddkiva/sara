@@ -35,7 +35,7 @@ namespace DO::Sara {
     }
 
     bool operator()(float inlier_thres, float squared_ell, size_t K,
-                    double squaredRhoMin);
+                    double squared_rho_min);
   };
 
 }  // namespace DO::Sara

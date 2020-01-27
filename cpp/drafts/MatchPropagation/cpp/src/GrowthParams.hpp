@@ -75,32 +75,32 @@ namespace DO::Sara {
   {
   public:
     PredParams(int featType, double delta_x, double delta_S_x,
-               double delta_theta, double squaredRhoMin)
+               double delta_theta, double squared_rho_min)
       : feat_type_(featType)
       , delta_x_(delta_x)
       , delta_S_x_(delta_S_x)
       , delta_theta_(delta_theta)
-      , squared_rho_min_{squaredRhoMin}
+      , squared_rho_min_{squared_rho_min}
     {
     }
 
-    int featType() const
+    int feature_type() const
     {
       return feat_type_;
     }
-    double deltaX() const
+    double delta_x() const
     {
       return delta_x_;
     }
-    double deltaSx() const
+    double delta_S_x() const
     {
       return delta_S_x_;
     }
-    double deltaTheta() const
+    double delta_theta() const
     {
       return delta_theta_;
     }
-    double squaredRhoMin() const
+    double squared_rho_min() const
     {
       return squared_rho_min_;
     }
