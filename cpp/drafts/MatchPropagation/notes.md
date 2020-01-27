@@ -1,7 +1,7 @@
 Improvements for the Match Propagation
 ======================================
 
-Years later, it is always nice to see the match propagation method  in action.
+Years later, it is always nice to see the match propagation method in action.
 Still the method suffers from an algorithmic efficiency problem during the
 region growing process because of the combinatorial search to estimate as
 accurately the local affine transformation.
