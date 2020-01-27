@@ -25,8 +25,11 @@
 
 namespace DO::Sara {
 
-  void getRedundancyComponentsAndRepresenters(
-      std::vector<std::vector<int>>& redundancies,
-      std::vector<int>& representers, const std::vector<Match>& initialMatches,
-      double thres = 1.5);
-}
+  //! @brief Non maxima suppression of matches by connected components
+  void
+  filter_redundant_matches(std::vector<std::vector<int>>& redundancy_components,
+                           std::vector<int>& maxima,
+                           const std::vector<Match>& initial_matches,
+                           double position_distance_thres = 1.5);
+
+}  // namespace DO::Sara

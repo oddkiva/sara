@@ -18,20 +18,22 @@
  *  ACCV 2012, Daejeon, South Korea.
  */
 
-#include <DO/LoweSIFTWrapper.hpp>
+#include <DO/Sara/SfM/Detectors/SIFT.hpp>
 #include "StudyOnMikolajczykDataset.hpp"
-#include "DO/MatchPropagation.hpp"
+#include "MatchPropagation.hpp"
+
 
 using namespace std;
-using namespace DO;
+using namespace DO::Sara;
+
 
 class TestGrowRegion : public StudyOnMikolajczykDataset
 {
 public:
-  TestGrowRegion(const string& absParentFolderPath,
+  TestGrowRegion(const string& abs_parent_folder_path,
                  const string& name,
-                 const string& featType)
-    : StudyOnMikolajczykDataset(absParentFolderPath, name, featType)
+                 const string& feature_type)
+    : StudyOnMikolajczykDataset(abs_parent_folder_path, name, feature_type)
   {}
 
   void operator()()
@@ -49,59 +51,59 @@ public:
     for (int j = 5; j < 6; ++j)
     {
       // View the image pair.
-      openWindowForImagePair(0, j);
+      open_window_for_image_pair(0, j);
       PairWiseDrawer drawer(dataset().image(0), dataset().image(j));
-      drawer.setVizParams(1.0f, 1.0f, PairWiseDrawer::CatH);
-      drawer.displayImages();
+      drawer.set_viz_params(1.0f, 1.0f, PairWiseDrawer::CatH);
+      drawer.display_images();
       {
         // Set of keypoints $\mathcal{X}$ in image 1.
-        const Set<OERegion, RealDescriptor>& X = dataset().keys(0);
+        const auto& X = dataset().keys(0);
         // Set of keypoints $\mathcal{Y}$ in image 2.
-        const Set<OERegion, RealDescriptor>& Y = dataset().keys(j);
+        const auto& Y = dataset().keys(j);
         // Ground truth homography from image 1 to image 2.
         const Matrix3f& H = dataset().H(j);
         // Compute initial matches.
-        vector<Match> M(computeMatches(X, Y, ell*ell));
+        vector<Match> M(compute_matches(X, Y, ell*ell));
         // Get inliers and outliers.
         vector<size_t> inliers, outliers;
-        getInliersAndOutliers(inliers, outliers, M, H, inlierThres);
+        get_inliers_and_outliers(inliers, outliers, M, H, inlierThres);
         cout << "inliers.size() = " << inliers.size() << endl;
         cout << "outliers.size() = " << outliers.size() << endl;
         // View inliers.
         if (displayInliers)
         {
           for (size_t i = 0; i != inliers.size(); ++i)
-            drawer.drawMatch(M[inliers[i]], Cyan8);
-          getKey();
-          drawer.displayImages();
+            drawer.draw_match(M[inliers[i]], Cyan8);
+          get_key();
+          drawer.display_images();
         }
 
         RegionGrowingAnalyzer analyzer(M, H);
-        analyzer.setSubsetOfInterest(inliers);
+        analyzer.set_subset_of_interest(inliers);
 
         // Grow region from the first seed
         size_t seed = inliers[0];
         GrowthParams growthParams(K, rho_min, angleDeg1, angleDeg2);
-        DynamicMatchGraph G(M, growthParams.K(), growthParams.rhoMin());
+        DynamicMatchGraph G(M, growthParams.K(), growthParams.rho_min());
         GrowRegion growRegion(seed, G, growthParams);
         Region R(growRegion(numeric_limits<size_t>::max(), &drawer, &analyzer));
 
-        analyzer.computeLocalAffineConsistencyStats();
-        /*string aff_stats_name = "local_aff_stat_" + toString(1) + "_" + toString(j+1)
-                              + dataset().featType()
+        analyzer.compute_local_affine_consistency_statistics();
+        /*string aff_stats_name = "local_aff_stat_" + to_string(1) + "_" + to_string(j+1)
+                              + dataset().feature_type()
                               + ".txt";
-        aff_stats_name = stringSrcPath(aff_stats_name);
+        aff_stats_name = string_src_path(aff_stats_name);
         analyzer.saveLocalAffineConsistencyStats(aff_stats_name);*/
 
         string dR_stat_name = "evol_dR_size_"
-                            + toString(1) + "_" + toString(j+1)
-                            + "_ell_" + toString(ell)
-                            + dataset().featType()
+                            + to_string(1) + "_" + to_string(j+1)
+                            + "_ell_" + to_string(ell)
+                            + dataset().feature_type()
                             + ".txt";
-        dR_stat_name = stringSrcPath(dR_stat_name);
-        analyzer.saveEvolDR(dR_stat_name);
+        dR_stat_name = string_src_path(dR_stat_name);
+        analyzer.save_boundary_region_evolution(dR_stat_name);
       }
-      closeWindowForImagePair();
+      close_window_for_image_pair();
     }
   }
 };
@@ -109,10 +111,10 @@ public:
 class TestGrowMultipleRegions : public StudyOnMikolajczykDataset
 {
 public:
-  TestGrowMultipleRegions(const string& absParentFolderPath,
+  TestGrowMultipleRegions(const string& abs_parent_folder_path,
                           const string& name,
-                          const string& featType)
-    : StudyOnMikolajczykDataset(absParentFolderPath, name, featType)
+                          const string& feature_type)
+    : StudyOnMikolajczykDataset(abs_parent_folder_path, name, feature_type)
   {}
 
   void operator()()
@@ -130,20 +132,20 @@ public:
     for (int j = 4; j < 6; ++j)
     {
       // View the image pair.
-      openWindowForImagePair(0, j);
+      open_window_for_image_pair(0, j);
       PairWiseDrawer drawer(dataset().image(0), dataset().image(j));
-      drawer.setVizParams(1.0f, 1.0f, PairWiseDrawer::CatH);
-      drawer.displayImages();
+      drawer.set_viz_params(1.0f, 1.0f, PairWiseDrawer::CatH);
+      drawer.display_images();
       {
         // Read the set of keypoints $\mathcal{X}$ in image 1.
-        const Set<OERegion, RealDescriptor>& X = dataset().keys(0);
+        const auto& X = dataset().keys(0);
         // Read the set of keypoints $\mathcal{Y}$ in image 2.
-        const Set<OERegion, RealDescriptor>& Y = dataset().keys(j);
+        const auto& Y = dataset().keys(j);
         // Compute initial matches.
-        vector<Match> M(computeMatches(X, Y, ell*ell));
+        vector<Match> M(compute_matches(X, Y, ell*ell));
 //#define REDUNDANCY
 #ifdef REDUNDANCY
-        printStage("Removing redundant matches");
+        print_stage("Removing redundant matches");
         // Get the redundancy components.
         vector<vector<size_t> > components;
         vector<size_t> representers;
@@ -159,16 +161,16 @@ public:
 #endif
         // Get inliers and outliers.
         vector<size_t> inliers, outliers;
-        getInliersAndOutliers(inliers, outliers, filteredM, dataset().H(j), inlierThres);
+        get_inliers_and_outliers(inliers, outliers, filteredM, dataset().H(j), inlierThres);
         cout << "inliers.size() = " << inliers.size() << endl;
         cout << "outliers.size() = " << outliers.size() << endl;
         // View inliers.
         if (displayInliers)
         {
           for (size_t i = 0; i != inliers.size(); ++i)
-            drawer.drawMatch(M[inliers[i]], Cyan8);
-          getKey();
-          drawer.displayImages();
+            drawer.draw_match(M[inliers[i]], Cyan8);
+          get_key();
+          drawer.display_images();
         }
 
         // Grow multiple regions.
@@ -179,10 +181,11 @@ public:
         //growMultipleRegions.buildHatN_Ks();
         vector<Region> RR(growMultipleRegions(N, 0, &drawer));
       }
-      closeWindowForImagePair();
+      close_window_for_image_pair();
     }
   }
 };
+
 
 void testOnImage(const string& file1, const string& file2)
 {
@@ -191,7 +194,7 @@ void testOnImage(const string& file1, const string& file2)
   load(image2, file2);
 
   // View the image pair.
-  printStage("Display image pair and the features");
+  print_stage("Display image pair and the features");
   float scale = 1.f;
   int w = int((image1.width()+image2.width())*scale);
   int h = int(max(image1.height(), image2.height())*scale);
@@ -200,20 +203,20 @@ void testOnImage(const string& file1, const string& file2)
 
   // Setup viewing.
   PairWiseDrawer drawer(image1, image2);
-  drawer.setVizParams(scale, scale, PairWiseDrawer::CatH);
-  drawer.displayImages();
-  getKey();
+  drawer.set_viz_params(scale, scale, PairWiseDrawer::CatH);
+  drawer.display_images();
+  get_key();
 
   // Compute keypoints.
-  Set<OERegion, RealDescriptor> keys1 = DoGSiftDetector().run(image1.convert<unsigned char>());
-  Set<OERegion, RealDescriptor> keys2 = DoGSiftDetector().run(image2.convert<unsigned char>());
+  const auto keys1 = DoGSiftDetector().run(image1.convert<unsigned char>());
+  const auto keys2 = DoGSiftDetector().run(image2.convert<unsigned char>());
   cout << "Image 1: " << keys1.size() << " keypoints" << endl;
   cout << "Image 2: " << keys2.size() << " keypoints" << endl;
 
   // Compute initial matches
   float ell = 1.0f;
   AnnMatcher matcher(keys1, keys2, ell);
-  vector<Match> M = matcher.computeMatches();
+  vector<Match> M = matcher.compute_matches();
   cout << M.size() << " matches" << endl;
 
   // Growing parameters.
@@ -232,15 +235,11 @@ void testOnImage(const string& file1, const string& file2)
   saveScreen(activeWindow(), srcPath("result.png"));
 }
 
+
 int main()
 {
-#ifdef VM_DATA_DIR
-# define VM_STRINGIFY(s)  #s
-# define VM_EVAL(s) VM_STRINGIFY(s)"/"
-#endif
-
   // Dataset paths.
-  string mikolajczyk_dataset_folder = string(VM_EVAL(VM_DATA_DIR)) + "Mikolajczyk/";
+  const auto mikolajczyk_dataset_folder = string("Mikolajczyk/");
   cout << mikolajczyk_dataset_folder << endl;
   const string folders[8] = { 
     "bark", "bikes", "boat", "graf", "leuven", "trees", "ubc", "wall" 

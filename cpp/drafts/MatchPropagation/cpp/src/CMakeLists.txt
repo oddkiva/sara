@@ -85,7 +85,6 @@ macro (sara_make_library _library_name
     TARGET DO-Sara-${_library_name} PROPERTY
     FOLDER "DO Sara Libraries")
 
-
   # Figure out the rest later.
   # 6. Specify where to install the library.
   # install(TARGETS DO-Sara-${_library_name}
@@ -114,46 +113,40 @@ macro (sara_make_library _library_name
   #   find_dependency(${_lib} ${DO_Sara_VERSION})
   # endforeach ()
   # include("${CMAKE_CURRENT_LIST_DIR}/DO-Sara-${_library_name}-Targets.cmake")
-
 endmacro ()
-
-
-# ==============================================================================
-# Region data structures
-set(Region_INC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-set(Region_INC Region.hpp RegionBoundary.hpp)
-set(Region_SRC Region.cpp RegionBoundary.cpp)
-set(Region_DEPS "${DO_Sara_LIBRARIES}")
-message("Region_DEPS = ${Region_DEPS}")
-
-sara_make_library("Region"
-  "${Region_INC_DIR}"
-  "${Region_INC}"
-  "${Region_SRC}"
-  "${Region_DEPS}")
 
 
 # ==============================================================================
 # The region growing algorithm.
 set(MatchPropagation_INC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(MatchPropagation_INC
-  LocalAffineConsistency.hpp
+  # Region data structures.
+  Region.hpp
+  RegionBoundary.hpp
+  # Neighborhood definition.
   MatchNeighborhood.hpp
-  GrowthParams.hpp
+  # Graph data structure for the match propagation.
   DynamicMatchGraph.hpp
+  # Geometry consistency.
+  LocalAffineConsistency.hpp
+  # Match propagation engine.
+  GrowthParams.hpp
   GrowRegionDebugMacros.hpp
   GrowRegion.hpp
   GrowMultipleRegions.hpp
+  # For performance analysis
   RegionGrowingAnalyzer.hpp
   Statistics.hpp)
 set(MatchPropagation_SRC
-  LocalAffineConsistency.cpp
+  Region.cpp
+  RegionBoundary.cpp
   MatchNeighborhood.cpp
+  LocalAffineConsistency.cpp
   GrowRegion.cpp
   GrowMultipleRegions.cpp
   RegionGrowingAnalyzer.cpp
   Statistics.cpp)
-set(MatchPropagation_DEPS "${DO_Sara_LIBRARIES};DO::Sara::Region")
+set(MatchPropagation_DEPS "${DO_Sara_LIBRARIES}")
 
 sara_make_library("MatchPropagation"
   "${MatchPropagation_INC_DIR}"

@@ -27,13 +27,15 @@ namespace DO::Sara {
   class LearnPf : public StudyOnMikolajczykDataset
   {
   public:
-    LearnPf(const std::string& absParentFolderPath,
+    LearnPf(const std::string& abs_parent_folder_path,
             const std::string& name,
-            const std::string& featType)
-      : StudyOnMikolajczykDataset(absParentFolderPath, name, featType)
+            const std::string& feature_type)
+      : StudyOnMikolajczykDataset(abs_parent_folder_path, name, feature_type)
     {}
-    bool operator()(float inlierThres, float squaredEll);
 
+    bool operator()(float inlier_thres, float squared_ell);
+
+    bool _debug{false};
   };
 
 } /* namespace DO::Sara */

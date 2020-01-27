@@ -1,13 +1,32 @@
-add_executable(DO_MikolajczykDataset_test DO_MikolajczykDataset_test.cpp)
-do_use_modules(DO_MikolajczykDataset_test "${DO_Sara_LIBRARIES};DO_MikolajczykDataset")
-set_property(TARGET DO_MikolajczykDataset_test PROPERTY FOLDER "DO 4th-Order Match Propagation")
+add_executable(evaluate_on_mikolajczyk evaluate_on_mikolajczyk.cpp)
+target_link_libraries(evaluate_on_mikolajczyk
+  ${DO_Sara_LIBRARIES}
+  DO::Sara::MikolajczykDataset
+  DO::Sara::MatchPropagation)
+set_property(TARGET evaluate_on_mikolajczyk PROPERTY
+  FOLDER "DO Sara Tools/MatchPropagation")
 
-add_executable(DO_Region_test DO_Region_test.cpp)
-do_use_modules(DO_Region_test "${DO_Sara_LIBRARIES};DO_MikolajczykDataset;DO_Region")
-set_property(TARGET DO_Region_test PROPERTY FOLDER "DO 4th-Order Match Propagation")
+add_executable(evaluate_region evaluate_region.cpp)
+target_link_libraries(evaluate_region
+  ${DO_Sara_LIBRARIES}
+  DO::Sara::MikolajczykDataset
+  DO::Sara::MatchPropagation)
+set_property(TARGET evaluate_region PROPERTY
+  FOLDER "DO Sara Tools/MatchPropagation")
 
-add_executable(DO_GrowRegion_test DO_GrowRegion_test.cpp)
-do_use_modules(DO_GrowRegion_test
-  "${DO_Sara_LIBRARIES};DO_GrowRegion;DO_MikolajczykDataset;DO_Region;DO_LoweSIFTWrapper")
-set_property(TARGET DO_GrowRegion_test PROPERTY FOLDER "DO 4th-Order Match Propagation")
+add_executable(evaluate_region_growing evaluate_region_growing.cpp)
+target_link_libraries(evaluate_region_growing
+  ${DO_Sara_LIBRARIES}
+  DO::Sara::MikolajczykDataset
+  DO::Sara::MatchPropagation)
+set_property(TARGET evaluate_region_growing PROPERTY
+  FOLDER "DO Sara Tools/MatchPropagation")
+
+add_executable(validate_region_growing_neighborhood_params validate_region_growing_neighborhood_params.cpp)
+target_link_libraries(validate_region_growing_neighborhood_params
+  ${DO_Sara_LIBRARIES}
+  DO::Sara::MikolajczykDataset
+  DO::Sara::MatchPropagation)
+set_property(TARGET validate_region_growing_neighborhood_params PROPERTY
+  FOLDER "DO Sara Tools/MatchPropagation")
 

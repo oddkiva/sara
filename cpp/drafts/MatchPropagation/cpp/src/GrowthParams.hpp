@@ -74,9 +74,9 @@ namespace DO::Sara {
   class PredParams
   {
   public:
-    PredParams(int featType, double delta_x, double delta_S_x,
+    PredParams(int feature_type, double delta_x, double delta_S_x,
                double delta_theta, double squared_rho_min)
-      : feat_type_(featType)
+      : feat_type_(feature_type)
       , delta_x_(delta_x)
       , delta_S_x_(delta_S_x)
       , delta_theta_(delta_theta)
@@ -114,10 +114,10 @@ namespace DO::Sara {
   class GrowthParams
   {
   public:
-    GrowthParams(size_t K = 80, double rhoMin = 0.5, double angleDeg1 = 15,
+    GrowthParams(size_t K = 80, double rho_min = 0.5, double angleDeg1 = 15,
                  double angleDeg2 = 25)
       : K_(K)
-      , rho_min_(rhoMin)
+      , rho_min_(rho_min)
       , flat_triangle_test_(angleDeg1, angleDeg2)
     {
     }

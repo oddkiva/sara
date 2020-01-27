@@ -32,8 +32,8 @@ namespace DO { namespace Sara {
                                                 int ellipse_discretization);
 
   /*!
-   * Compute the approximate Jaccard distance by approximating ellipses with
-   * polygons.
+   *  Compute the approximate Jaccard distance by approximating ellipses with
+   *  polygons.
    */
   DO_SARA_EXPORT
   double approximate_jaccard_similarity(const Ellipse& e1,
@@ -49,17 +49,20 @@ namespace DO { namespace Sara {
                                   const Ellipse& e2);
 
   /*!
-    Compute the intersection union ratio exactly.
-    CAUTION: Numerical issues are not totally solved. We are almost there...
-    Investigation is still ongoing.
+     Compute the ellipse intersection area exactly.
+
+     CAUTION: Numerical issues are not totally solved. We are almost there...
+     @todo Investigate.
+
    */
   DO_SARA_EXPORT
-  double analytic_intersection(const Ellipse& e1, const Ellipse& e2);
+  double analytic_intersection_area(const Ellipse& e1, const Ellipse& e2);
 
   /*!
-    Compute the intersection union ratio exactly.
-    CAUTION: Numerical issues are not totally solved. We are almost there...
-    Investigation is still ongoing.
+      Compute the intersection union ratio exactly.
+
+      CAUTION: Numerical issues are not totally solved. We are almost there...
+     @todo Investigate.
    */
   DO_SARA_EXPORT
   double analytic_jaccard_similarity(const Ellipse& e1, const Ellipse& e2);

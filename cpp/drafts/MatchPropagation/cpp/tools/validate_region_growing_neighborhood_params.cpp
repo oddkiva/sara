@@ -18,51 +18,57 @@
  *  ACCV 2012, Daejeon, South Korea.
  */
 
+#include "EmpiricalValidation/EvaluateOutlierResistance.hpp"
+#include "EmpiricalValidation/EvaluateQualityOfLocalAffineApproximation.hpp"
+#include "EmpiricalValidation/StudyParametersOfMatchNeighborhood.hpp"
+#include "EmpiricalValidation/StudyInfluenceOfMatchNeighborhoodSizeOnPerformance.hpp"
+
+#include "HyperParameterLearning/Learn_P_f.hpp"
+#include "MatchNeighborhood.hpp"
+
 #include <DO/Sara/FeatureDetectors.hpp>
 #include <DO/Sara/FeatureMatching.hpp>
 #include <DO/Sara/Graphics.hpp>
-
-#include "EvaluateOutlierResistance.hpp"
-#include "EvaluateQualityOfLocalAffineApproximation.hpp"
-#include "Learn_P_f.hpp"
-#include "MatchNeighborhood.hpp"
-#include "StudyPerfWithHatN_K.hpp"
-#include "Study_N_K_m.hpp"
 
 #ifdef _OPENMP
 #  include <omp.h>
 #endif
 
+
 using namespace std;
-using namespace DO;
+using namespace DO::Sara;
 
 // Dataset paths.
-const string mikolajczyk_dataset_folder(
-    "C:/Users/David/Desktop/doplusplus/trunk/DO/ValidateRegionGrowing");
+const string mikolajczyk_dataset_folder("Mikolajczyk");
 const string folders[8] = {"bark",   "bikes", "boat", "graf",
                            "leuven", "trees", "ubc",  "wall"};
 const string ext[4] = {".dog", ".haraff", ".hesaff", ".mser"};
 
-bool performLearningOfP_f()
+bool learn_pf_predicate()
 {
   // Extended Lowe's score threshold.
   float ell = 1.2f;
+
   // Parallelize these tasks.
   int num_dataset = 8;
   int num_feat_type = 4;
   int num_tasks = num_dataset * num_feat_type;
-  bool approxInterEllArea = true;
+  bool approx_inter_ell_area = true;
+
 #pragma omp parallel for
   for (int t = 0; t < num_tasks; ++t)
   {
-    LearnPf* pLearnPf = 0;
+    LearnPf* pLearnPf = nullptr;
+
     int dataset = t / num_feat_type;
     int feat_type = t % num_feat_type;
+
 #pragma omp critical
     {
       pLearnPf = new LearnPf(mikolajczyk_dataset_folder, folders[dataset],
-                             ext[feat_type], approxInterEllArea);
+                             ext[feat_type], approx_inter_ell_area);
     }
+
     if (pLearnPf)
     {
       (*pLearnPf)(ell * ell);
@@ -73,7 +79,7 @@ bool performLearningOfP_f()
   return true;
 }
 
-bool performEvalQualLocalAff()
+bool evaluate_quality_of_quadruple_based_local_affine()
 {
   // Extended Lowe's score threshold.
   float ell = 1.0f;
@@ -90,12 +96,12 @@ bool performEvalQualLocalAff()
 #pragma omp parallel for
   for (int t = 0; t < num_tasks; ++t)
   {
-    EvalQualityOfLocalAffApprox* evalQualLocalAff = 0;
+    EvaluateQualityOfLocalAffineApproximation* evalQualLocalAff = 0;
     int dataset = t / num_feat_type;
     int feat_type = t % num_feat_type;
 #pragma omp critical
     {
-      evalQualLocalAff = new EvalQualityOfLocalAffApprox(
+      evalQualLocalAff = new EvaluateQualityOfLocalAffineApproximation(
           mikolajczyk_dataset_folder, folders[dataset], ext[feat_type]);
     }
     if (evalQualLocalAff)
@@ -108,7 +114,7 @@ bool performEvalQualLocalAff()
   return true;
 }
 
-bool performEvalOutlierResistance()
+bool evaluate_outlier_resistance()
 {
   // Extended Lowe's score threshold.
   float ell = 1.0f;
@@ -125,12 +131,12 @@ bool performEvalOutlierResistance()
 #pragma omp parallel for
   for (int t = 0; t < num_tasks; ++t)
   {
-    EvalOutlierResistance* evalOutlierResistance = 0;
+    EvaluateOutlierResistance* evalOutlierResistance = 0;
     int dataset = t / num_feat_type;
     int feat_type = t % num_feat_type;
 #pragma omp critical
     {
-      evalOutlierResistance = new EvalOutlierResistance(
+      evalOutlierResistance = new EvaluateOutlierResistance(
           mikolajczyk_dataset_folder, folders[dataset], ext[feat_type]);
     }
     if (evalOutlierResistance)
@@ -171,7 +177,7 @@ bool performStudyOnHatN_K()
   {
     for (int j = 0; j < 4; ++j)
     {
-      Study_N_K_m study(mikolajczyk_dataset_folder, folders[i], ext[j]);
+      StudyParametersOfMatchNeighborhood study(mikolajczyk_dataset_folder, folders[i], ext[j]);
 
       for (size_t k = 0; k != K.size(); ++k)
         for (size_t l = 0; l != squaredRhoMin.size(); ++l)
@@ -221,8 +227,8 @@ bool performStudyPerfWithHatN_K()
   {
     for (int d = 7; d < 8; ++d)
     {
-      StudyPerfWithHat_N_K studyPerfOnHatN_K(mikolajczyk_dataset_folder,
-                                             folders[d], ext[f]);
+      StudyInfluenceOfMatchNeighborhoodSizeOnPerformance studyPerfOnHatN_K(
+          mikolajczyk_dataset_folder, folders[d], ext[f]);
       studyPerfOnHatN_K(ell * ell, num_growths, K, rho_min);
     }
   }

@@ -30,10 +30,10 @@ using namespace DO::Sara;
 class TestRegion : public StudyOnMikolajczykDataset
 {
 public:
-  TestRegion(const string& absParentFolderPath,
+  TestRegion(const string& abs_parent_folder_path,
              const string& name,
-             const string& featType)
-    : StudyOnMikolajczykDataset(absParentFolderPath, name, featType)
+             const string& feature_type)
+    : StudyOnMikolajczykDataset(abs_parent_folder_path, name, feature_type)
   {}
 
   void operator()()
@@ -41,25 +41,29 @@ public:
     for (int j = 1; j < 6; ++j)
     {
       // View the image pair.
-      openWindowForImagePair(0, j);
+      open_window_for_image_pair(0, j);
       PairWiseDrawer drawer(dataset().image(0), dataset().image(j));
-      drawer.setVizParams(1.0f, 1.0f, PairWiseDrawer::CatH);
-      drawer.displayImages();
+      drawer.set_viz_params(1.0f, 1.0f, PairWiseDrawer::CatH);
+      drawer.display_images();
       {
         // Read the set of keypoints $\mathcal{X}$ in image 1.
-        const Set<OERegion, RealDescriptor>& X = dataset().keys(0);
+        const auto& X = dataset().keys(0);
+
         // Read the set of keypoints $\mathcal{Y}$ in image 2.
-        const Set<OERegion, RealDescriptor>& Y = dataset().keys(j);
+        const auto& Y = dataset().keys(j);
+
         // Compute initial matches.
-        vector<Match> M(computeMatches(X, Y, 1.2f*1.2f));
+        vector<Match> M(compute_matches(X, Y, 1.2f * 1.2f));
+
         // Get inliers and outliers.
         vector<size_t> inliers, outliers;
-        getInliersAndOutliers(inliers, outliers, M, dataset().H(j), 1.5f);
+        get_inliers_and_outliers(inliers, outliers, M, dataset().H(j), 1.5f);
         cout << "inliers.size() = " << inliers.size() << endl;
         cout << "outliers.size() = " << outliers.size() << endl;
+
         // View inliers.
         for (size_t i = 0; i != inliers.size(); ++i)
-          drawer.drawMatch(M[inliers[i]]);
+          drawer.draw_match(M[inliers[i]]);
 
         // Region
         Region R;
@@ -78,10 +82,10 @@ public:
             cout << "M["<<inliers[i]<<"] correctly inserted" << endl;*/
         }
         cout << "R.size() = " << R.size() << endl;
-        getKey();
+        get_key();
 
       }
-      closeWindowForImagePair();
+      close_window_for_image_pair();
     }
   }
 };
@@ -89,10 +93,10 @@ public:
 class TestRegionBoundary : public StudyOnMikolajczykDataset
 {
 public:
-  TestRegionBoundary(const string& absParentFolderPath,
+  TestRegionBoundary(const string& abs_parent_folder_path,
                      const string& name,
-                     const string& featType)
-    : StudyOnMikolajczykDataset(absParentFolderPath, name, featType)
+                     const string& feature_type)
+    : StudyOnMikolajczykDataset(abs_parent_folder_path, name, feature_type)
   {}
 
   void operator()()
@@ -100,25 +104,29 @@ public:
     for (int j = 1; j < 6; ++j)
     {
       // View the image pair.
-      openWindowForImagePair(0, j);
+      open_window_for_image_pair(0, j);
       PairWiseDrawer drawer(dataset().image(0), dataset().image(j));
-      drawer.setVizParams(1.0f, 1.0f, PairWiseDrawer::CatH);
-      drawer.displayImages();
+      drawer.set_viz_params(1.0f, 1.0f, PairWiseDrawer::CatH);
+      drawer.display_images();
       {
         // Read the set of keypoints $\mathcal{X}$ in image 1.
-        const Set<OERegion, RealDescriptor>& X = dataset().keys(0);
+        const auto& X = dataset().keys(0);
+
         // Read the set of keypoints $\mathcal{Y}$ in image 2.
-        const Set<OERegion, RealDescriptor>& Y = dataset().keys(j);
+        const auto& Y = dataset().keys(j);
+
         // Compute initial matches.
-        vector<Match> M(computeMatches(X, Y, 1.2f*1.2f));
+        vector<Match> M(compute_matches(X, Y, 1.2f*1.2f));
+
         // Get inliers and outliers.
         vector<size_t> inliers, outliers;
-        getInliersAndOutliers(inliers, outliers, M, dataset().H(j), 1.5f);
+        get_inliers_and_outliers(inliers, outliers, M, dataset().H(j), 1.5f);
         cout << "inliers.size() = " << inliers.size() << endl;
         cout << "outliers.size() = " << outliers.size() << endl;
+
         // View inliers.
         for (size_t i = 0; i != inliers.size(); ++i)
-          drawer.drawMatch(M[inliers[i]]);
+          drawer.draw_match(M[inliers[i]]);
         
         // ================================================================== //
         // Region boundary.
@@ -140,14 +148,16 @@ public:
           cout << "dR.size() = " << dR.size() << endl;
         }
         cout << "dR.size() = " << dR.size() << endl;
-        getKey();
+        get_key();
+
         // Testing iterators.
         for (RegionBoundary::const_iterator m = dR.begin(); m != dR.end(); ++m)
         {
           cout << "M[" << m.index() << "] = \n" << *m << endl;
-          drawer.drawMatch(*m, Red8);
+          drawer.draw_match(*m, Red8);
         }
-        getKey();
+        get_key();
+
         // Testing erasing.
         RegionBoundary dR2(M);
         dR2.insert(inliers[0]);
@@ -155,27 +165,23 @@ public:
         for (RegionBoundary::const_iterator m = dR2.begin(); m != dR2.end(); ++m)
         {
           cout << "M[" << m.index() << "] = \n" << *m << endl;
-          drawer.drawMatch(*m, Red8);
+          drawer.draw_match(*m, Red8);
         }
-        getKey();
+        get_key();
         dR2.erase(inliers[0]);
         cout << "dR2.size() = " << dR2.size() << endl;
-        getKey();
+        get_key();
       }
-      closeWindowForImagePair();
+      close_window_for_image_pair();
     }
   }
 };
 
-int main()
-{
-#ifdef VM_DATA_DIR
-# define VM_STRINGIFY(s)  #s
-# define VM_EVAL(s) VM_STRINGIFY(s)"/"
-#endif
 
+GRAPHICS_MAIN()
+{
   // Dataset paths.
-  const string mikolajczyk_dataset_folder = VM_EVAL(VM_DATA_DIR);
+  const string mikolajczyk_dataset_folder = "mikolajczyk";
   const string folders[8] = { 
     "bark", "bikes", "boat", "graf", "leuven", "trees", "ubc", "wall" 
   };

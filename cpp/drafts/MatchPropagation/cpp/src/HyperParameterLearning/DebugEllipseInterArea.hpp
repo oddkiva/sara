@@ -21,8 +21,9 @@
 #pragma once
 
 #include "../EmpiricalValidation/StudyOnMikolajczykDataset.hpp"
-#include <DO/Sara/Match/PairWiseDrawer.hpp>
+
 #include <DO/Sara/Geometry/Objects/Ellipse.hpp>
+#include <DO/Sara/Match/PairWiseDrawer.hpp>
 
 
 namespace DO::Sara {
@@ -30,19 +31,19 @@ namespace DO::Sara {
   class DebugEllipseInterArea : public StudyOnMikolajczykDataset
   {
   public:
-    DebugEllipseInterArea(const std::string& absParentFolderPath,
-                          const std::string& name, const std::string& featType)
-      : StudyOnMikolajczykDataset(absParentFolderPath, name, featType)
-      , debug_(true)
+    DebugEllipseInterArea(const std::string& abs_parent_folder_path,
+                          const std::string& name, const std::string& feature_type)
+      : StudyOnMikolajczykDataset(abs_parent_folder_path, name, feature_type)
+      , _debug(true)
     {
     }
-    bool operator()(float inlierThres, float squaredEll);
+    bool operator()(float inlier_thres, float squared_ell);
 
   private:
     void check_reprojected_ellipse(const Match& m, const PairWiseDrawer& drawer,
                                    Ellipse& y, Ellipse& H_Sx,
-                                   double polyApproxOverlap,
-                                   double analyticalOverlap,
+                                   double polygonal_overlap,
+                                   double analytical_overlap,
                                    double angle_phi_ox, double angle_y,
                                    double error) const;
 
@@ -51,7 +52,7 @@ namespace DO::Sara {
                          const std::vector<Statistics>& stat_angles) const;
 
   private:
-    bool debug_;
+    bool _debug;
   };
 
 } /* namespace DO::Sara */

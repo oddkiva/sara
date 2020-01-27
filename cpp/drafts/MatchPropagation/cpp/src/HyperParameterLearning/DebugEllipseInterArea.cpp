@@ -23,11 +23,12 @@
 #include "../LocalAffineConsistency.hpp"
 #include "Statistics.hpp"
 
+
 using namespace std;
 
 namespace DO::Sara {
 
-  bool DebugEllipseInterArea::operator()(float inlierThres, float squaredEll)
+  bool DebugEllipseInterArea::operator()(float inlier_thres, float squared_ell)
   {
     vector<Statistics> stat_overlaps, stat_angles;
 
@@ -45,12 +46,12 @@ namespace DO::Sara {
         const auto& Y = dataset().keys(j);
 
         // Compute initial matches $\mathcal{M}$.
-        const auto M = compute_matches(X, Y, squaredEll);
+        const auto M = compute_matches(X, Y, squared_ell);
 
         // Get inliers
         vector<size_t> inliers, outliers;
         const Matrix3f& H = dataset().H(j);
-        get_inliers_and_outliers(inliers, outliers, M, H, inlierThres);
+        get_inliers_and_outliers(inliers, outliers, M, H, inlier_thres);
         cout << "inliers.size() = " << inliers.size() << endl;
         cout << "outliers.size() = " << outliers.size() << endl;
         get_key();
@@ -74,25 +75,25 @@ namespace DO::Sara {
           float rel_diff_shape_mat =
               diff_shape_mat.squaredNorm() / y.shape_matrix.squaredNorm();
 
-          /*if (debug_)
+          /*if (_debug)
           {
-            drawer.drawMatch(m, Green8);
+            drawer.draw_match(m, Green8);
             cout << H_Sx << endl;
           }*/
 
           Point2d inter[4];
           const auto num_inter = compute_intersection_points(inter, H_Sx, Sy);
 
-          const auto polyApproxOverlap =
-              area(approximate_intersection(H_Sx, Sy, 36));
-          const auto analyticalOverlap = analytic_intersection(H_Sx, Sy);
+          const auto polygonal_overlap =
+              approximate_jaccard_similarity(H_Sx, Sy, 36);
+          const auto analytical_overlap = analytic_jaccard_similarity(H_Sx, Sy);
+
           const auto angle_phi_ox = compute_orientation(m, H);
-          // double angle_x = m.featX().orientation;
           const auto angle_y = m.y().orientation;
           const auto error =
-              (polyApproxOverlap - analyticalOverlap) / polyApproxOverlap;
+              (polygonal_overlap - analytical_overlap) / polygonal_overlap;
 
-          if (debug_ && (error > 0.2))
+          if (_debug && (error > 0.2))
           {
             ++num_error;
             cout << "M[" << i << "] = " << endl;
@@ -102,14 +103,13 @@ namespace DO::Sara {
             cout << "num_inter = " << num_inter << endl;
 
             drawer.display_images();
-            check_reprojected_ellipse(m, drawer, Sy, H_Sx, polyApproxOverlap,
-                                      analyticalOverlap, angle_phi_ox, angle_y,
+            check_reprojected_ellipse(m, drawer, Sy, H_Sx, polygonal_overlap,
+                                      analytical_overlap, angle_phi_ox, angle_y,
                                       error);
-            // drawer.drawKeypoint(1, H_x, Yellow8);
             get_key();
           }
 
-          overlaps.push_back(1 - polyApproxOverlap);
+          overlaps.push_back(1 - polygonal_overlap);
           angles.push_back(to_degree(abs(angle_phi_ox - angle_y)));
         }
         cout << "num error (ellipse) = " << num_error << endl;
@@ -128,8 +128,9 @@ namespace DO::Sara {
     const auto folder = string_src_path(dataset().name() + "/P_f");
     mkdir(folder);
 
-    const string name("inlierThres_" + to_string(inlierThres) + "_squaredEll_" +
-                      to_string(squaredEll) + dataset().feature_type() + ".txt");
+    const string name("inlierThres_" + to_string(inlier_thres) + "_squaredEll_" +
+                      to_string(squared_ell) + dataset().feature_type() +
+                      ".txt");
 
     if (!save_statistics(folder + "/" + name, stat_overlaps, stat_angles))
     {
@@ -141,15 +142,16 @@ namespace DO::Sara {
 
   void DebugEllipseInterArea::check_reprojected_ellipse(
       const Match& m, const PairWiseDrawer& drawer, Ellipse& y, Ellipse& H_Sx,
-      double polyApproxOverlap, double analyticalOverlap, double angle_phi_ox,
+      double polygonal_overlap, double analytical_overlap, double angle_phi_ox,
       double angle_y, double error) const
   {
     Vector2d Phi_ox(unit_vector2(angle_phi_ox));
     Vector2d oy(unit_vector2(angle_y));
 
     // Verbose comment
-    cout << "(Polygonal Approx.) Overlap ratio = " << polyApproxOverlap << endl;
-    cout << "(Analytical Comp. ) Overlap ratio = " << analyticalOverlap << endl;
+    cout << "(Polygonal Approx.) Overlap ratio = " << polygonal_overlap << endl;
+    cout << "(Analytical Comp. ) Overlap ratio = " << analytical_overlap
+         << endl;
     cout << "angle_phi_ox = " << to_degree(angle_phi_ox) << " deg" << endl;
     cout << "angle_y     = " << to_degree(angle_y) << " deg" << endl;
     cout << "Phi(ox)*oy = " << Phi_ox.dot(oy) << endl;
@@ -164,7 +166,7 @@ namespace DO::Sara {
     /*}*/
 
     // Draw match
-    // drawer.drawMatch(m);
+    // drawer.draw_match(m);
 
     // Draw orientation.
     Phi_ox *= 20.;
@@ -183,10 +185,9 @@ namespace DO::Sara {
     fill_circle(y.center().x(), y.center().y(), 5, Blue8);
   }
 
-  bool
-  DebugEllipseInterArea::save_statistics(const string& name,
-                                   const vector<Statistics>& stat_overlaps,
-                                   const vector<Statistics>& stat_angles) const
+  bool DebugEllipseInterArea::save_statistics(
+      const string& name, const vector<Statistics>& stat_overlaps,
+      const vector<Statistics>& stat_angles) const
   {
     ofstream out(name.c_str());
     if (!out.is_open())
@@ -194,8 +195,10 @@ namespace DO::Sara {
 
     out << "Statistics: overlaps" << endl;
     write_statistics(out, stat_overlaps);
+
     out << "Statistics: angles" << endl;
     write_statistics(out, stat_angles);
+
     out.close();
 
     return true;

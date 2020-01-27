@@ -20,40 +20,40 @@
 
 #pragma once
 
-#include "StudyOnMikolajczykDataset.hpp"
+#include "../EmpiricalValidation/StudyOnMikolajczykDataset.hpp"
+#include "../Statistics.hpp"
+
+#include <DO/Sara/Match/PairWiseDrawer.hpp>
+
 
 namespace DO::Sara {
 
   class LearnPf : public StudyOnMikolajczykDataset
   {
   public:
-    LearnPf(const std::string& absParentFolderPath,
-            const std::string& name,
-            const std::string& featType,
-            bool approxEllInterArea = false)
-      : StudyOnMikolajczykDataset(absParentFolderPath, name, featType)
+    LearnPf(const std::string& abs_parent_folder_path, const std::string& name,
+            const std::string& feature_type, bool approx_ell_inter_area = false)
+      : StudyOnMikolajczykDataset(abs_parent_folder_path, name, feature_type)
       , debug_(false)
       , display_(false)
-      , approx_ell_inter_area_(approxEllInterArea)
-    {}
-    bool operator()(float squaredEll) const;
+      , approx_ell_inter_area_(approx_ell_inter_area)
+    {
+    }
+    bool operator()(float squared_ell) const;
 
   private:
-    bool saveStats(const std::string& name,
-                   const std::vector<Stat>& stat_overlaps,
-                   const std::vector<Stat>& stat_angles) const;
+    bool save_statistics(const std::string& name,
+                         const std::vector<Statistics>& stat_overlaps,
+                         const std::vector<Statistics>& stat_angles) const;
 
-    void doTheJob(Stat& stat_overlap, Stat& stat_angle,
-                  const std::vector<Match>& M,
-                  const std::vector<IndexDist>& sortedM,
-                  const Matrix3f& H,
-                  float lb, float ub,
-                  const PairWiseDrawer *pDrawer = 0) const;
+    void run(Statistics& stat_overlap, Statistics& stat_angle,
+             const std::vector<Match>& M, const std::vector<IndexDist>& M_sorted,
+             const Matrix3f& H, float lb, float ub,
+             PairWiseDrawer* drawer = 0) const;
 
   private:
     bool debug_;
     bool display_;
-    //bool find_dilation_;
     bool approx_ell_inter_area_;
   };
 

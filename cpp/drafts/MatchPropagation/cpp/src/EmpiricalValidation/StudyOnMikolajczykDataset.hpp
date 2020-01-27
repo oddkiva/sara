@@ -60,7 +60,7 @@ namespace DO::Sara {
     // Match related functions.
     std::vector<Match> compute_matches(const KeypointList<OERegion, float>& X,
                                        const KeypointList<OERegion, float>& Y,
-                                       float squaredEll) const;
+                                       float squared_ell) const;
 
     void get_inliers_and_outliers(std::vector<size_t>& inliers,
                                   std::vector<size_t>& outliers,
@@ -71,16 +71,16 @@ namespace DO::Sara {
     sort_matches_by_reprojection_error(const std::vector<Match>& M,
                                        const Matrix3f& H) const;
 
-    std::vector<size_t> get_matches(const std::vector<IndexDist>& sortedMatches,
-                                    float reprojLowerBound,
-                                    float reprojUpperBound) const;
+    std::vector<size_t> get_matches(const std::vector<IndexDist>& sorted_matches,
+                                    float reproj_lower_bound,
+                                    float reproj_upper_bound) const;
 
     std::vector<size_t> get_matches(const std::vector<Match>& M,
-                                    const Matrix3f& H, float reprojLowerBound,
-                                    float reprojUpperBound) const
+                                    const Matrix3f& H, float reproj_lower_bound,
+                                    float reproj_upper_bound) const
     {
       return get_matches(sort_matches_by_reprojection_error(M, H),
-                         reprojLowerBound, reprojUpperBound);
+                         reproj_lower_bound, reproj_upper_bound);
     }
 
   private:

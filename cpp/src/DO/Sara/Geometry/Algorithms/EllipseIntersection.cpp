@@ -164,7 +164,7 @@ namespace DO { namespace Sara {
   // ======================================================================== //
   // Computation of the area of intersecting ellipses.
   // ======================================================================== //
-  double analytic_intersection(const Ellipse& E_0, const Ellipse& E_1)
+  double analytic_intersection_area(const Ellipse& E_0, const Ellipse& E_1)
   {
     // Find the intersection points of the two ellipses.
     Point2d inter_pts[4];
@@ -283,7 +283,7 @@ namespace DO { namespace Sara {
 
   double analytic_jaccard_similarity(const Ellipse& e1, const Ellipse& e2)
   {
-    double interArea = analytic_intersection(e1, e2);
+    double interArea = analytic_intersection_area(e1, e2);
     double unionArea = area(e1) + area(e2) - interArea;
     return interArea / unionArea;
   }
