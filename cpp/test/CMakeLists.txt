@@ -1,5 +1,16 @@
+find_package(CUDA 7.0)
+
 add_subdirectory(Sara)
 
+if (NOT CUDA_FOUND)
+  sara_message("Cannot use DO::Shakti libraries!")
+else ()
+  sara_message("Building DO::Shakti Libraries")
+  add_subdirectory(Shakti)
+endif ()
+
+
+# Configure code coverage.
 if (CMAKE_COMPILER_IS_GNUCXX)
   find_program(LCOV_PATH lcov)
   find_program(GCOV_PATH gcov)
