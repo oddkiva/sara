@@ -192,48 +192,48 @@ GRAPHICS_MAIN()
   auto elapsed = double{};
 
   // Where are the images?
-  const string shelf_image_path = src_path("shelves/shelf-1.jpg");
-  const string shampoo_bottle_image_path =
-      src_path("products/garnier-shampoing.jpg");
+  const string query_image_path =
+      src_path("targets/garnier-shampoing.jpg");
+  const string target_image_path = src_path("shelves/query-1.jpg");
 
-  // Load the shelf and product images.
-  Image<Rgb8> shelf, product;
-  if (!load(shelf, shelf_image_path))
+  // Load the query and target images.
+  Image<Rgb8> query, target;
+  if (!load(query, target_image_path))
   {
-    cerr << "Cannot load shelf image: " << shelf_image_path << endl;
+    cerr << "Cannot load query image: " << target_image_path << endl;
     return 1;
   }
-  if (!load(product, shampoo_bottle_image_path))
+  if (!load(target, query_image_path))
   {
-    cerr << "Cannot load product image: " << shampoo_bottle_image_path << endl;
+    cerr << "Cannot load target image: " << query_image_path << endl;
     return 1;
   }
-  shelf = rotate_ccw(shelf);
+  query = rotate_ccw(query);
 
   // Open a window.
   float scale = 0.5;
-  open_window_for_image_pair(product, shelf, scale);
+  open_window_for_image_pair(target, query, scale);
   set_antialiasing();
 
-  PairWiseDrawer drawer(product, shelf);
+  PairWiseDrawer drawer(target, query);
   drawer.set_viz_params(scale, scale, PairWiseDrawer::CatH);
   drawer.display_images();
 
   // Detect keys.
   print_stage("Detecting SIFT keypoints");
-  KeypointList<OERegion, float> shelf_keypoints, product_keypoints;
+  KeypointList<OERegion, float> query_keypoints, target_keypoints;
   SIFTDetector detector;
   detector.set_first_octave(0);
   timer.restart();
-  shelf_keypoints = detector.run(shelf.convert<float>());
-  product_keypoints = detector.run(product.convert<float>());
+  query_keypoints = detector.run(query.convert<float>());
+  target_keypoints = detector.run(target.convert<float>());
   elapsed = timer.elapsed_ms();
   cout << "Detection time = " << elapsed << " ms" << endl;
 
   // Compute initial matches.
   print_stage("Compute initial matches");
   const auto nearest_neighbor_ratio = 1.f;
-  AnnMatcher matcher(product_keypoints, shelf_keypoints,
+  AnnMatcher matcher(target_keypoints, query_keypoints,
                      nearest_neighbor_ratio);
   const auto initial_matches = matcher.compute_matches();
 
