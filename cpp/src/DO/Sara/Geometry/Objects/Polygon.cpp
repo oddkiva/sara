@@ -19,14 +19,14 @@ namespace DO { namespace Sara {
     //! Computation derived from Green's formula
     double A = 0.;
     int N = int(polygon.size());
-    for (int i1 = N-1, i2 = 0; i2 < N; i1=i2++)
+    for (int i1 = N - 1, i2 = 0; i2 < N; i1 = i2++)
     {
       Matrix2d M;
       M.col(0) = polygon[i1];
       M.col(1) = polygon[i2];
       A += M.determinant();
     }
-    return fabs(0.5*A);
+    return fabs(0.5 * A);
   }
 
 } /* namespace Sara */
