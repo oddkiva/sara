@@ -21,6 +21,7 @@ endif ()
 if (SARA_USE_HALIDE)
   add_subdirectory(Halide)
 endif ()
+add_subdirectory(MatchPropagation)
 add_subdirectory(NeuralNetworks)
 
 if (SARA_USE_HPX)

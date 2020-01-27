@@ -12,5 +12,5 @@ formats: []
 python:
   version: 3.7
   install:
-    - requirements: doc/sphinx/requirements.txt
+    - requirements: doc/sphinx/rtd_requirements.txt
 

@@ -232,9 +232,7 @@ namespace DO { namespace Sara {
   template <typename T>
   Matrix<T, 2, 1> apply(const Matrix<T, 3, 3>& H, const Matrix<T, 2, 1>& p)
   {
-    const auto H_p = H * Matrix<T, 3, 1>{p.x(), p.y(), 1.f};
-    H_p /= H_p(2);
-    return H_p.head(2);
+    return (H * p.homogeneous()).hnormalized();
   }
 
   //! @}
