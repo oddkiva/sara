@@ -35,7 +35,7 @@ set(Study_SRC
 set(Study_DEPS
   "${DO_Sara_LIBRARIES};DO::Sara::Region;DO::Sara::MatchPropagation;DO::Sara::MikolajczykDataset")
 
-sara_make_library("StudyRegionGrowingParameters"
+sara_make_library("EmpiricalValidation"
   "${Study_INC_DIR}"
   "${Study_INC}"
   "${Study_SRC}"

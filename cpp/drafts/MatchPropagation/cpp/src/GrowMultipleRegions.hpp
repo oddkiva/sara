@@ -40,7 +40,6 @@ namespace DO::Sara {
       G_.build_hat_N_Ks();
     }
 
-  private:
     void mark_reliable_matches(Region& allR, const Region& R) const;
 
     void

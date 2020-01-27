@@ -12,21 +12,19 @@
 using namespace std;
 using namespace DO::Sara;
 
+
 // ========================================================================== //
 // Helper functions.
-inline Rgb8 randRgb8()
-{
-  return Rgb8(rand() % 256, rand() % 256, rand() % 256);
-}
-
 template <typename T>
-Image<T> rotateCCW(const Image<T>& image)
+Image<T> rotate_ccw(const Image<T>& image)
 {
-  Image<T> dst(image.height(), image.width());
+  auto dst = Image<T>{image.height(), image.width()};
+
   // Transpose.
   for (int y = 0; y < image.height(); ++y)
     for (int x = 0; x < image.width(); ++x)
       dst(y, x) = image(x, y);
+
   // Reverse rows.
   for (int y = 0; y < dst.height(); ++y)
     for (int x = 0; x < dst.width(); ++x)
@@ -36,21 +34,22 @@ Image<T> rotateCCW(const Image<T>& image)
         break;
       std::swap(dst(x, y), dst(n_x, y));
     }
+
   return dst;
 }
 
-Window openImgPairWindow(const Image<Rgb8>& image1, const Image<Rgb8>& image2,
-                         float scale)
+Window open_window_for_image_pair(const Image<Rgb8>& image1,
+                                  const Image<Rgb8>& image2, float scale)
 {
-  int w = int((image1.width() + image2.width()) * scale);
-  int h = int(max(image1.height(), image2.height()) * scale);
-  return openWindow(w, h);
+  const auto w = int((image1.width() + image2.width()) * scale);
+  const auto h = int(max(image1.height(), image2.height()) * scale);
+  return create_window(w, h);
 }
 
-void dilateKeyScales(vector<OERegion>& features, float dilationFactor)
+void dilate_key_scales(vector<OERegion>& features, float dilation_factor)
 {
   for (size_t i = 0; i != features.size(); ++i)
-    features[i].shapeMat() /= dilationFactor * dilationFactor;
+    features[i].shape_matrix /= dilation_factor * dilation_factor;
 }
 
 
@@ -59,109 +58,103 @@ void dilateKeyScales(vector<OERegion>& features, float dilationFactor)
 class SIFTDetector
 {
 public:
-  SIFTDetector()
-    : firstOctave(-1)
-    , numOctaves(-1)
-    , numScales(3)
-    , edgeThresh(10.0f)
-    , peakThresh(0.04f)
+  SIFTDetector() = default;
+
+  void set_num_octaves(int n)
   {
+    num_octaves = n;
   }
 
-  void setNumOctaves(int n)
+  void set_num_scales(int n)
   {
-    numOctaves = n;
+    num_scales = n;
   }
-  void setNumScales(int n)
+
+  void set_first_octave(int n)
   {
-    numScales = n;
+    first_octave = n;
   }
-  void setFirstOctave(int n)
-  {
-    firstOctave = n;
-  }
-  void setEdgeThresh(float t)
+
+  void set_edge_threshold(float t)
   {
     edgeThresh = t;
   }
-  void setPeakThresh(float t)
+
+  void set_peak_threshold(float t)
   {
     peakThresh = t;
   }
 
-  //! N.B.: I have multiplied the scale by 8. to have higher circle.
-  //! Rationale behind this is that SIFT descriptor are computed over a
-  //! 16*16 window patch at the scale = 1.
-  Set<OERegion, RealDescriptor> run(const Image<float>& image) const
+  KeypointList<OERegion, float> run(const Image<float>& image) const
   {
-    Set<OERegion, RealDescriptor> keys;
-    vector<OERegion>& DoGs = keys.features;
-    DescriptorMatrix<float>& SIFTDescriptors = keys.descriptors;
+    KeypointList<OERegion, float> keys;
+    auto& DoGs = features(keys);
+    auto& sift_descriptors = descriptors(keys);
 
     // Time everything.
-    HighResTimer timer;
-    double elapsed = 0.;
-    double DoGDetectionTime, oriAssignTime, SIFTDescriptionTime,
-        gradGaussianTime;
+    auto timer = Timer{};
+    auto elapsed = 0.;
+    double dog_detection_time, orientation_assignment_time,
+        sift_description_time, gradients_computation_time;
 
     // 1. Feature extraction.
-    printStage("Computing DoG extrema");
+    print_stage("Computing DoG extrema");
     timer.restart();
     ImagePyramidParams pyrParams;  //(0);
     ComputeDoGExtrema computeDoGs(pyrParams, 0.01f);
-    vector<Point2i> scaleOctPairs;
-    DoGs = computeDoGs(image, &scaleOctPairs);
-    DoGDetectionTime = timer.elapsedMs();
-    elapsed += DoGDetectionTime;
-    cout << "DoG detection time = " << DoGDetectionTime << " ms" << endl;
+    vector<Point2i> scale_octave_pairs;
+    DoGs = computeDoGs(image, &scale_octave_pairs);
+    dog_detection_time = timer.elapsed_ms();
+    elapsed += dog_detection_time;
+    cout << "DoG detection time = " << dog_detection_time << " ms" << endl;
     cout << "DoGs.size() = " << DoGs.size() << endl;
 
     // 2. Feature orientation.
     // Prepare the computation of gradients on gaussians.
-    printStage("Computing gradients of Gaussians");
+    print_stage("Computing gradients of Gaussians");
     timer.restart();
-    ImagePyramid<Vector2f> gradG;
-    gradG = gradPolar(computeDoGs.gaussians());
-    gradGaussianTime = timer.elapsedMs();
-    elapsed += gradGaussianTime;
-    cout << "gradient of Gaussian computation time = " << gradGaussianTime
-         << " ms" << endl;
+    auto gradients = ImagePyramid<Vector2f>{};
+    gradients = gradient_polar_coordinates(computeDoGs.gaussians());
+    gradients_computation_time = timer.elapsed_ms();
+    elapsed += gradients_computation_time;
+    cout << "gradient of Gaussian computation time = "
+         << gradients_computation_time << " ms" << endl;
     cout << "DoGs.size() = " << DoGs.size() << endl;
 
-
     // Find dominant gradient orientations.
-    printStage(
+    print_stage(
         "Assigning (possibly multiple) dominant orientations to DoG extrema");
     timer.restart();
-    ComputeDominantOrientations assignOrientations;
-    assignOrientations(gradG, DoGs, scaleOctPairs);
-    oriAssignTime = timer.elapsedMs();
-    elapsed += oriAssignTime;
-    cout << "orientation assignment time = " << oriAssignTime << " ms" << endl;
+    ComputeDominantOrientations assign_orientations;
+    assign_orientations(gradients, DoGs, scale_octave_pairs);
+    orientation_assignment_time = timer.elapsed_ms();
+    elapsed += orientation_assignment_time;
+    cout << "orientation assignment time = " << orientation_assignment_time << " ms" << endl;
     cout << "DoGs.size() = " << DoGs.size() << endl;
 
 
     // 3. Feature description.
-    printStage("Describe DoG extrema with SIFT descriptors");
+    print_stage("Describe DoG extrema with SIFT descriptors");
     timer.restart();
-    ComputeSIFTDescriptor<> computeSIFT;
-    SIFTDescriptors = computeSIFT(DoGs, scaleOctPairs, gradG);
-    SIFTDescriptionTime = timer.elapsedMs();
-    elapsed += SIFTDescriptionTime;
-    cout << "description time = " << SIFTDescriptionTime << " ms" << endl;
-    cout << "sifts.size() = " << SIFTDescriptors.size() << endl;
+    auto compute_sift = ComputeSIFTDescriptor<>{};
+    sift_descriptors = compute_sift(DoGs, scale_octave_pairs, gradients);
+    sift_description_time = timer.elapsed_ms();
+    elapsed += sift_description_time;
+    cout << "description time = " << sift_description_time << " ms" << endl;
+    cout << "sifts.size() = " << sift_descriptors.size() << endl;
 
     // Summary in terms of computation time.
-    printStage("Total Detection/Description time");
+    print_stage("Total Detection/Description time");
     cout << "SIFT computation time = " << elapsed << " ms" << endl;
 
     // 4. Rescale  the feature position and scale $(x,y,\sigma)$ with the octave
     //    scale.
     for (size_t i = 0; i != DoGs.size(); ++i)
     {
-      float octScaleFact = gradG.octaveScalingFactor(scaleOctPairs[i](1));
-      DoGs[i].center() *= octScaleFact;
-      DoGs[i].shapeMat() /= pow(octScaleFact, 2);
+      const auto octave_scale_factor =
+          gradients.octave_scaling_factor(scale_octave_pairs[i](1));
+      DoGs[i].center() *= octave_scale_factor;
+      DoGs[i].shape_matrix /= pow(octave_scale_factor, 2);
     }
 
     return keys;
@@ -169,95 +162,98 @@ public:
 
 private:
   // First Octave Index.
-  int firstOctave;
+  int first_octave{-1};
   // Number of octaves.
-  int numOctaves;
+  int num_octaves{-1};
   // Number of scales per octave.
-  int numScales;
+  int num_scales{3};
   // Max ratio of Hessian eigenvalues.
-  float edgeThresh;
+  float edgeThresh{10.f};
   // Min contrast.
-  float peakThresh;
+  float peakThresh{0.04};
 };
 
 
 // ========================================================================== //
 // Matching demo.
-void imagePairMatching()
+GRAPHICS_MAIN()
 {
-  HighResTimer timer;
-  double elapsed;
+  auto timer = Timer{};
+  auto elapsed = double{};
 
   // Where are the images?
-  string shelfPath = srcPath("shelves/shelf-1.jpg");
-  string productPath = srcPath("products/garnier-shampoing.jpg");
+  const string shelf_image_path = src_path("shelves/shelf-1.jpg");
+  const string shampoo_bottle_image_path =
+      src_path("products/garnier-shampoing.jpg");
 
   // Load the shelf and product images.
   Image<Rgb8> shelf, product;
-  if (!load(shelf, shelfPath))
+  if (!load(shelf, shelf_image_path))
   {
-    cerr << "Cannot load shelf image: " << shelfPath << endl;
-    return;
+    cerr << "Cannot load shelf image: " << shelf_image_path << endl;
+    return 1;
   }
-  if (!load(product, productPath))
+  if (!load(product, shampoo_bottle_image_path))
   {
-    cerr << "Cannot load product image: " << productPath << endl;
-    return;
+    cerr << "Cannot load product image: " << shampoo_bottle_image_path << endl;
+    return 1;
   }
-  shelf = rotateCCW(shelf);
+  shelf = rotate_ccw(shelf);
 
-  // Run GUI graphics.
+  // Open a window.
   float scale = 0.5;
-  Window imagePairWin = openImgPairWindow(product, shelf, scale);
-  setAntialiasing();
+  open_window_for_image_pair(product, shelf, scale);
+  set_antialiasing();
+
   PairWiseDrawer drawer(product, shelf);
-  drawer.setVizParams(scale, scale, PairWiseDrawer::CatH);
-  drawer.displayImages();
+  drawer.set_viz_params(scale, scale, PairWiseDrawer::CatH);
+  drawer.display_images();
 
   // Detect keys.
-  printStage("Detecting SIFT keypoints");
-  Set<OERegion, RealDescriptor> shelfKeys, productKeys;
+  print_stage("Detecting SIFT keypoints");
+  KeypointList<OERegion, float> shelf_keypoints, product_keypoints;
   SIFTDetector detector;
-  detector.setFirstOctave(0);
+  detector.set_first_octave(0);
   timer.restart();
-  shelfKeys = detector.run(shelf.convert<float>());
-  productKeys = detector.run(product.convert<float>());
-  elapsed = timer.elapsedMs();
+  shelf_keypoints = detector.run(shelf.convert<float>());
+  product_keypoints = detector.run(product.convert<float>());
+  elapsed = timer.elapsed_ms();
   cout << "Detection time = " << elapsed << " ms" << endl;
 
-  // Dilate SIFT scales before matching keypoints.
-  const float scaleFactor = 4.f;
-  dilateKeyScales(shelfKeys.features, scaleFactor);
-  dilateKeyScales(productKeys.features, scaleFactor);
+  // Dilate SIFT circular shape before matching keypoints.
+  //
+  // We are not cheating because the SIFT descriptor is calculated on an image
+  // patch with actually a quite large radius:
+  //   r = 3 * (N + 1) / 2 with N = 4
+  //   r = 3 * (4 + 1) / 2
+  //   r = 7.5
+  constexpr auto dilation_factor = 7.5f;
+  dilate_key_scales(features(shelf_keypoints), dilation_factor);
+  dilate_key_scales(features(product_keypoints), dilation_factor);
 
   // Compute initial matches.
-  printStage("Compute initial matches");
-  float lowe_ratio_threshold = 1.f;
-  AnnMatcher matcher(productKeys, shelfKeys, lowe_ratio_threshold);
-  vector<Match> initialMatches(matcher.computeMatches());
-
+  print_stage("Compute initial matches");
+  const auto nearest_neighbor_ratio = 1.f;
+  AnnMatcher matcher(product_keypoints, shelf_keypoints,
+                     nearest_neighbor_ratio);
+  const auto initial_matches = matcher.compute_matches();
 
   // Match keypoints.
-  printStage("Filter matches by region growing robustly");
+  print_stage("Filter matches by region growing robustly");
   timer.restart();
-  vector<Region> regions;
+  auto regions = vector<Region>{};
 
-  int num_region_growing = 2000;
-  GrowthParams params;
-  GrowMultipleRegions growRegions(initialMatches, params);
-  regions = growRegions(num_region_growing, 0, &drawer);
-  elapsed = timer.elapsedMs();
+  const auto num_region_growing = 2000;
+  const auto growth_params = GrowthParams{};
+  const auto verbose_level = 0;
+  GrowMultipleRegions grow_regions(initial_matches, growth_params, verbose_level);
+  regions = grow_regions(num_region_growing, 0, &drawer);
+  elapsed = timer.elapsed_ms();
   cout << "Matching time = " << elapsed << " ms" << endl << endl;
 
-  getKey();
-}
-
-
-// ========================================================================== //
-// Main.
-int main()
-{
-  imagePairMatching();
+  // Show the regions.
+  grow_regions.check_regions(regions, &drawer);
+  get_key();
 
   return 0;
 }
