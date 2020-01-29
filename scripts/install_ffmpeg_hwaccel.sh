@@ -75,10 +75,6 @@ pushd ${ffmpeg_dirpath}
   git fetch origin --prune
   # git checkout n${FFMPEG_VERSION}
 
-  # System libraries.
-  ffmpeg_options="--libdir=/usr/lib/x86_64-linux-gnu "
-  ffmpeg_options+="--incdir=/usr/include/x86_64-linux-gnu "
-
   # Disable stripping for debug information.
   ffmpeg_options+="--disable-stripping "
 
