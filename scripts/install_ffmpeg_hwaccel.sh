@@ -2,14 +2,62 @@
 # This script configures and build FFmpeg with CUDA acceleration.
 set -ex
 
-sudo apt install -y yasm libx264-dev
+# sudo apt install -y \
+#   flite1-dev \
+#   ladspa-sdk \
+#   libavc1394-dev \
+#   libbluray-dev \
+#   libbs2b-dev \
+#   libcaca-dev \
+#   libdc1394-22-dev \
+#   libfribidi-dev \
+#   libgme-dev \
+#   libgsm1-dev \
+#   libiec61883-dev \
+#   libopus-dev \
+#   libpulse-dev \
+#   libshine-dev \
+#   libsnappy-dev \
+#   libwavpack-dev \
+#   libx264-dev \
+#   libwebp-dev \
+#   yasm
 
+sudo apt install -y \
+  libbluray-dev \
+  libtheora-dev \
+  libtwolame-dev \
+  libvpx-dev \
+  libwebp-dev \
+  libx264-dev \
+  libx265-dev \
+  libxvidcore-dev \
+  yasm
 
 GIT_MASTER_REPOSITORY_PATH=${HOME}/GitHub
 REPOSITORY_URLS=(
   "https://git.videolan.org/git/ffmpeg/nv-codec-headers.git"
-  "hhttps://git.ffmpeg.org/ffmpeg.git"
+  "https://git.ffmpeg.org/ffmpeg.git"
 )
+
+FFMPEG_VERSION="4.2.2"
+
+
+function url_basename()
+{
+  local url=$1
+  local url_name=$(basename ${url})
+  local url_basename=${url_name%.*}
+  echo ${url_basename}
+}
+
+function repo_dirpath()
+{
+  local url=$1
+  echo ${GIT_MASTER_REPOSITORY_PATH}/$(url_basename ${url})
+}
+
+
 
 if [ ! -d "${GIT_MASTER_REPOSITORY_PATH}" ]; then
   mkdir -p ${GIT_MASTER_REPOSITORY_PATH}
@@ -17,15 +65,15 @@ fi
 
 
 # Clone repositories.
-cd ${GIT_MASTER_REPOSITORY_PATH}
+pushd ${GIT_MASTER_REPOSITORY_PATH}
 {
   for url in "${REPOSITORY_URLS[@]}"; do
-    url_name="${$(basename ${url})%.*}"
-    if [ -d "${url_name}" ]; then
-      echo "${url_name} repository exists, skipping git clone cmd..."
+    repo_name=$(url_basename ${url})
+    if [ -d "${repo_name}" ]; then
+      echo "${repo_name} repository exists, skipping git clone cmd..."
       continue
     else
-      echo "Cloning ${url} to ${url_name}..."
+      echo "Cloning ${url} to ${url_basename}..."
     fi
     git clone ${url}
   done
@@ -33,18 +81,26 @@ cd ${GIT_MASTER_REPOSITORY_PATH}
 popd
 
 
-url_name=$(basename ${REPOSITORY_URLS[0]})
-pushd ${GIT_MASTER_REPOSITORY_PATH}/${url_name}
+nv_codec_dirpath=$(repo_dirpath ${REPOSITORY_URLS[0]})
+pushd ${nv_codec_dirpath}
 {
   sudo make install
 }
 popd
 
-url_name=$(basename ${REPOSITORY_URLS[1]})
-pushd ${GIT_MASTER_REPOSITORY_PATH}/${url_name}
+# FFmpeg
+ffmpeg_dirpath=$(repo_dirpath ${REPOSITORY_URLS[1]})
+pushd ${ffmpeg_dirpath}
 {
+  git fetch origin --prune
+  # git checkout n${FFMPEG_VERSION}
+
+  # System libraries.
+  ffmpeg_options="--libdir=/usr/lib/x86_64-linux-gnu "
+  ffmpeg_options+="--incdir=/usr/include/x86_64-linux-gnu "
+
   # Disable stripping for debug information.
-  ffmpeg_options="--disable-stripping "
+  ffmpeg_options+="--disable-stripping "
 
   ffmpeg_options+="--enable-shared "
   ffmpeg_options+="--enable-nonfree  "
@@ -52,55 +108,62 @@ pushd ${GIT_MASTER_REPOSITORY_PATH}/${url_name}
 
   # From FFmpeg verions shipped in Ubuntu.
   ffmpeg_options+="--enable-avresample "
+
+  # Decypher these.
+  # ffmpeg_options+="--enable-gnutls "
+  # ffmpeg_options+="--enable-ladspa "
+  # ffmpeg_options+="--enable-libass "
+  # ffmpeg_options+="--enable-libbs2b "
+  # ffmpeg_options+="--enable-libcaca "
+  # ffmpeg_options+="--enable-libcdio "
+  # ffmpeg_options+="--enable-libflite "
+  # ffmpeg_options+="--enable-libfontconfig "
+  # ffmpeg_options+="--enable-libfreetype "
+  # ffmpeg_options+="--enable-libfribidi "
+  # ffmpeg_options+="--enable-libgme "
+  # ffmpeg_options+="--enable-libgsm "
+  # ffmpeg_options+="--enable-libmysofa "
+  # ffmpeg_options+="--enable-libopencv "
+  # ffmpeg_options+="--enable-libopenjpeg "
+  # ffmpeg_options+="--enable-libopenmpt "
+  # ffmpeg_options+="--enable-libopus "
+  # ffmpeg_options+="--enable-librubberband "
+  # ffmpeg_options+="--enable-librsvg "
+  # ffmpeg_options+="--enable-libsnappy "
+  # ffmpeg_options+="--enable-libsoxr "
+  # ffmpeg_options+="--enable-libspeex "
+  # ffmpeg_options+="--enable-libssh "
+
+  # Audio codecs.
+  # ffmpeg_options+="--enable-libvorbis "
+  # ffmpeg_options+="--enable-libmp3lame "
+  # ffmpeg_options+="--enable-libpulse "
+  # ffmpeg_options+="--enable-libshine "
+
+  # Video codecs.
   ffmpeg_options+="--enable-avisynth "
-  ffmpeg_options+="--enable-gnutls "
-  ffmpeg_options+="--enable-ladspa "
-  ffmpeg_options+="--enable-libass "
   ffmpeg_options+="--enable-libbluray "
-  ffmpeg_options+="--enable-libbs2b "
-  ffmpeg_options+="--enable-libcaca "
-  ffmpeg_options+="--enable-libcdio "
-  ffmpeg_options+="--enable-libflite "
-  ffmpeg_options+="--enable-libfontconfig "
-  ffmpeg_options+="--enable-libfreetype "
-  ffmpeg_options+="--enable-libfribidi "
-  ffmpeg_options+="--enable-libgme "
-  ffmpeg_options+="--enable-libgsm "
-  ffmpeg_options+="--enable-libmp3lame "
-  ffmpeg_options+="--enable-libmysofa "
-  ffmpeg_options+="--enable-libopencv "
-  ffmpeg_options+="--enable-libopenjpeg "
-  ffmpeg_options+="--enable-libopenmpt "
-  ffmpeg_options+="--enable-libopus "
-  ffmpeg_options+="--enable-libpulse "
-  ffmpeg_options+="--enable-librubberband "
-  ffmpeg_options+="--enable-librsvg "
-  ffmpeg_options+="--enable-libshine "
-  ffmpeg_options+="--enable-libsnappy "
-  ffmpeg_options+="--enable-libsoxr "
-  ffmpeg_options+="--enable-libspeex "
-  ffmpeg_options+="--enable-libssh "
   ffmpeg_options+="--enable-libtheora "
   ffmpeg_options+="--enable-libtwolame "
-  ffmpeg_options+="--enable-libvorbis "
   ffmpeg_options+="--enable-libvpx "
   ffmpeg_options+="--enable-libwavpack "
   ffmpeg_options+="--enable-libwebp "
-  ffmpeg_options+="--enable-libx265 "
-  ffmpeg_options+="--enable-libxml2 "
-  ffmpeg_options+="--enable-libxvid "
-  ffmpeg_options+="--enable-libzmq "
-  ffmpeg_options+="--enable-libzvbi "
-  ffmpeg_options+="--enable-omx "
-  ffmpeg_options+="--enable-openal "
-  ffmpeg_options+="--enable-opengl "
-  ffmpeg_options+="--enable-sdl2 "
-  ffmpeg_options+="--enable-libdc1394 "
-  ffmpeg_options+="--enable-libdrm "
-  ffmpeg_options+="--enable-libiec61883 "
-  ffmpeg_options+="--enable-chromaprint "
-  ffmpeg_options+="--enable-frei0r "
   ffmpeg_options+="--enable-libx264 "
+  ffmpeg_options+="--enable-libx265 "
+  ffmpeg_options+="--enable-libxvid "
+
+  # ffmpeg_options+="--enable-libxml2 "
+  # ffmpeg_options+="--enable-libzmq "
+  # ffmpeg_options+="--enable-libzvbi "
+  # ffmpeg_options+="--enable-omx "
+  # ffmpeg_options+="--enable-openal "
+  # ffmpeg_options+="--enable-opengl "
+  # ffmpeg_options+="--enable-sdl2 "
+  # ffmpeg_options+="--enable-libdc1394 "
+  # ffmpeg_options+="--enable-libdrm "
+  # ffmpeg_options+="--enable-libiec61883 "
+  # ffmpeg_options+="--enable-chromaprint "
+  # ffmpeg_options+="--enable-frei0r "
 
   # CUDA acceleration.
   ffmpeg_options+="--enable-libnpp "

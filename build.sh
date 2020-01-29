@@ -8,6 +8,10 @@ else
   build_type=$1;
 fi
 
+platform_name=$(uname -s)
+os_name=$(lsb_release -is)
+os_version=$(lsb_release -rs)
+
 
 function install_python_packages_via_pip()
 {
@@ -22,7 +26,12 @@ function build_library()
     local cmake_options="-DCMAKE_BUILD_TYPE=${build_type} "
   fi
 
-  if [ "$(uname -s)" == "Darwin" ]; then
+  if [[ ${os_name} == "Ubuntu" ]] && [[ ${os_version} == "16.04" ]]; then
+    cmake_options+="-DCMAKE_C_COMPILER=$(which gcc-7) "
+    cmake_options+="-DCMAKE_CXX_COMPILER=$(which g++-7) "
+  fi
+
+  if [ "${platform_name}" == "Darwin" ]; then
     cmake_options+="-DQt5_DIR=$(brew --prefix qt)/lib/cmake/Qt5 "
   else
     cmake_options+="-DCMAKE_PREFIX_PATH=/home/david/Qt/5.12.6/gcc_64 "
