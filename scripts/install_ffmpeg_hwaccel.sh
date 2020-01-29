@@ -16,12 +16,21 @@ if [ ! -d "${GIT_MASTER_REPOSITORY_PATH}" ]; then
 fi
 
 
+# Clone repositories.
 cd ${GIT_MASTER_REPOSITORY_PATH}
-
-for url in "${REPOSITORY_URLS[@]}"; do
-  url_name=$(basename ${url})
-  git clone ${url}
-done
+{
+  for url in "${REPOSITORY_URLS[@]}"; do
+    url_name="${$(basename ${url})%.*}"
+    if [ -d "${url_name}" ]; then
+      echo "${url_name} repository exists, skipping git clone cmd..."
+      continue
+    else
+      echo "Cloning ${url} to ${url_name}..."
+    fi
+    git clone ${url}
+  done
+}
+popd
 
 
 url_name=$(basename ${REPOSITORY_URLS[0]})
@@ -31,7 +40,7 @@ pushd ${GIT_MASTER_REPOSITORY_PATH}/${url_name}
 }
 popd
 
-url_name=$(basename ${REPOSITORY_URLS[0]})
+url_name=$(basename ${REPOSITORY_URLS[1]})
 pushd ${GIT_MASTER_REPOSITORY_PATH}/${url_name}
 {
   # Disable stripping for debug information.
