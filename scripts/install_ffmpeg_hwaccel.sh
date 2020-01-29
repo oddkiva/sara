@@ -1,27 +1,7 @@
 #!/bin/bash
+#
 # This script configures and build FFmpeg with CUDA acceleration.
 set -ex
-
-# sudo apt install -y \
-#   flite1-dev \
-#   ladspa-sdk \
-#   libavc1394-dev \
-#   libbluray-dev \
-#   libbs2b-dev \
-#   libcaca-dev \
-#   libdc1394-22-dev \
-#   libfribidi-dev \
-#   libgme-dev \
-#   libgsm1-dev \
-#   libiec61883-dev \
-#   libopus-dev \
-#   libpulse-dev \
-#   libshine-dev \
-#   libsnappy-dev \
-#   libwavpack-dev \
-#   libx264-dev \
-#   libwebp-dev \
-#   yasm
 
 sudo apt install -y \
   libbluray-dev \
@@ -109,6 +89,8 @@ pushd ${ffmpeg_dirpath}
   # From FFmpeg verions shipped in Ubuntu.
   ffmpeg_options+="--enable-avresample "
 
+  # Add the options only if we need them.
+  #
   # Decypher these.
   # ffmpeg_options+="--enable-gnutls "
   # ffmpeg_options+="--enable-ladspa "
@@ -133,6 +115,18 @@ pushd ${ffmpeg_dirpath}
   # ffmpeg_options+="--enable-libsoxr "
   # ffmpeg_options+="--enable-libspeex "
   # ffmpeg_options+="--enable-libssh "
+  # ffmpeg_options+="--enable-libxml2 "
+  # ffmpeg_options+="--enable-libzmq "
+  # ffmpeg_options+="--enable-libzvbi "
+  # ffmpeg_options+="--enable-omx "
+  # ffmpeg_options+="--enable-openal "
+  # ffmpeg_options+="--enable-opengl "
+  # ffmpeg_options+="--enable-sdl2 "
+  # ffmpeg_options+="--enable-libdc1394 "
+  # ffmpeg_options+="--enable-libdrm "
+  # ffmpeg_options+="--enable-libiec61883 "
+  # ffmpeg_options+="--enable-chromaprint "
+  # ffmpeg_options+="--enable-frei0r "
 
   # Audio codecs.
   # ffmpeg_options+="--enable-libvorbis "
@@ -151,19 +145,6 @@ pushd ${ffmpeg_dirpath}
   ffmpeg_options+="--enable-libx264 "
   ffmpeg_options+="--enable-libx265 "
   ffmpeg_options+="--enable-libxvid "
-
-  # ffmpeg_options+="--enable-libxml2 "
-  # ffmpeg_options+="--enable-libzmq "
-  # ffmpeg_options+="--enable-libzvbi "
-  # ffmpeg_options+="--enable-omx "
-  # ffmpeg_options+="--enable-openal "
-  # ffmpeg_options+="--enable-opengl "
-  # ffmpeg_options+="--enable-sdl2 "
-  # ffmpeg_options+="--enable-libdc1394 "
-  # ffmpeg_options+="--enable-libdrm "
-  # ffmpeg_options+="--enable-libiec61883 "
-  # ffmpeg_options+="--enable-chromaprint "
-  # ffmpeg_options+="--enable-frei0r "
 
   # CUDA acceleration.
   ffmpeg_options+="--enable-libnpp "
