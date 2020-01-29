@@ -139,6 +139,7 @@ pushd ${ffmpeg_dirpath}
   # ffmpeg_options+="--enable-libmp3lame "
   # ffmpeg_options+="--enable-libpulse "
   # ffmpeg_options+="--enable-libshine "
+  # ffmpeg_options+="--enable-libwavpack "
 
   # Video codecs.
   ffmpeg_options+="--enable-avisynth "
@@ -146,7 +147,6 @@ pushd ${ffmpeg_dirpath}
   ffmpeg_options+="--enable-libtheora "
   ffmpeg_options+="--enable-libtwolame "
   ffmpeg_options+="--enable-libvpx "
-  ffmpeg_options+="--enable-libwavpack "
   ffmpeg_options+="--enable-libwebp "
   ffmpeg_options+="--enable-libx264 "
   ffmpeg_options+="--enable-libx265 "
@@ -175,5 +175,7 @@ pushd ${ffmpeg_dirpath}
   ffmpeg_options+="--extra-ldflags=-L/usr/local/cuda/lib64 "
 
   ./configure ${ffmpeg_options}
+  make -j$(nproc)
+  sudo make install
 }
 popd
