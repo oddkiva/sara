@@ -1,41 +1,45 @@
 #include <thread>
+#include <vector>
 
-// void VideoOutput::startUp () {
-//   _thread = new std::thread ([ this ] () {
-//     while (_running) {
-//       std::unique_lock<std::mutex> lock (_mutex);
-// 
-//       _cv.wait (lock, [ this ] () {
-//         if (_notified || !_running) {
-//           _notified = false;
-//           return true;
-//         }
-// 
-//         return _notified;
-//       });
-// 
-//       if (!_running || !_frames.size()) break; // we want to finish the thread
-// 
-//       _running = _display.show (_frames.front().first, _frames.front().second);
-// 
-//       _frames.pop();
-//     }
-//   });
-// }
-// 
-// // ----------------------------------------------------------------------------
-// // VideoOutput::display
-// // ----------------------------------------------------------------------------
-// bool VideoOutput::display (cv::Mat &frame, const FrameData &data) {
-//   std::unique_lock<std::mutex> lock (this->_mutex);
-// 
-//   _frames.emplace (std::make_pair (std::move (frame), std::move (data)));
-// 
-//   _notified = true;
-//   _cv.notify_one();
-// 
-//   return _running;
-// }
+#include <boost/circular_buffer.hpp>
+
+
+auto m = std::mutex{};
+auto cv = std::condition_variable{};
+auto wait_for_something = false;
+auto quit = false;
+
+auto queue = std::queue<std::vector<float>>{};
+
+auto consumer()
+{
+  while (true)
+  {
+    std::unique_lock<std::mutex> auto lock{m};
+
+    if (queue.empty())
+      continue;
+
+    auto& image = 
+
+    queue.pop()
+
+    if (quit)
+      break;
+  }
+}
+
+auto producer() {
+  while (true)
+  {
+    std::scoped_lock<std::mutex> lock{m};
+    queue.push(std::vector<float>(320 * 240, 0));
+    cv.notify_one();
+
+    if (quit)
+      break;
+  }
+}
 
 auto main() -> int
 {
