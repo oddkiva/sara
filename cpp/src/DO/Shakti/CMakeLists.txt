@@ -35,11 +35,13 @@ include(shakti_installation_settings)
 # ============================================================================ #
 # Build the following directories.
 #
-include_directories(
+set(SHAKTI_BASE_INCLUDE_DIRS
   ${CUDA_TOOLKIT_INCLUDE}
   ${DO_Sara_INCLUDE_DIRS}
-  ${CMAKE_BINARY_DIR}/src
-  src)
+  ${CMAKE_BINARY_DIR}/src)
+
+set(SHAKTI_BASE_DEPS
+  ${CUDA_CUDART_LIBRARY})
 
 # Group projects by category.
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -52,40 +54,46 @@ set(DO_Shakti_LIBRARIES MultiArray ImageProcessing Segmentation Utilities)
 foreach (library ${DO_Shakti_LIBRARIES})
   shakti_glob_directory(${DO_Shakti_SOURCE_DIR}/${library})
   shakti_create_common_variables("${library}")
-  shakti_generate_library("${library}")
-  target_link_libraries(DO_Shakti_${library}
-    ${DO_Sara_Core_LIBRARIES}
-    ${CUDA_CUDART_LIBRARY})
+  # shakti_generate_library("${library}")
+  # target_link_libraries(DO_Shakti_${library}
+  #   ${DO_Sara_LIBRARIES}
+  #   ${CUDA_CUDART_LIBRARY})
+  shakti_append_library(${library}
+    "${SHAKTI_BASE_INCLUDE_DIRS}"
+    "${DO_Shakti_${library}_HEADER_FILES}"
+    "${DO_Shakti_${library}_CPP_FILES}"
+    "${DO_Shakti_${library}_CU_FILES}"
+    "")
 endforeach ()
 
 
-if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
-  # Install license files.
-  install(FILES ${DO_Shakti_DIR}/COPYING.README
-                ${DO_Shakti_DIR}/COPYING.MPL2
-          DESTINATION include/DO/Shakti
-          COMPONENT Sources)
-
-  # Install CMake scripts.
-  configure_file(${DO_Shakti_DIR}/cmake/DO_ShaktiConfig.cmake.in
-                 ${CMAKE_BINARY_DIR}/cmake/DO_ShaktiConfig.cmake @ONLY)
-  file(GLOB SHAKTI_CMAKE_SCRIPTS ${DO_Shakti_DIR}/cmake/shakti_*.cmake)
-  file(COPY ${SHAKTI_CMAKE_SCRIPTS} DESTINATION ${CMAKE_BINARY_DIR}/cmake)
-  install(DIRECTORY ${CMAKE_BINARY_DIR}/cmake
-          DESTINATION share/DO_Shakti
-          COMPONENT Sources)
-
-  # Install source files.
-  install(FILES ${CMAKE_BINARY_DIR}/src/DO/Shakti/Defines.hpp
-          DESTINATION include/DO/Shakti
-          COMPONENT Sources)
-
-  install(DIRECTORY ${DO_Shakti_DIR}/src/DO
-          DESTINATION include
-          COMPONENT Sources)
-
-  set(CPACK_COMPONENT_Sources_REQUIRED 1)
-endif ()
+# if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+#   # Install license files.
+#   install(FILES ${DO_Shakti_DIR}/COPYING.README
+#                 ${DO_Shakti_DIR}/COPYING.MPL2
+#           DESTINATION include/DO/Shakti
+#           COMPONENT Sources)
+#
+#   # Install CMake scripts.
+#   configure_file(${DO_Shakti_DIR}/cmake/DO_ShaktiConfig.cmake.in
+#                  ${CMAKE_BINARY_DIR}/cmake/DO_ShaktiConfig.cmake @ONLY)
+#   file(GLOB SHAKTI_CMAKE_SCRIPTS ${DO_Shakti_DIR}/cmake/shakti_*.cmake)
+#   file(COPY ${SHAKTI_CMAKE_SCRIPTS} DESTINATION ${CMAKE_BINARY_DIR}/cmake)
+#   install(DIRECTORY ${CMAKE_BINARY_DIR}/cmake
+#           DESTINATION share/DO_Shakti
+#           COMPONENT Sources)
+#
+#   # Install source files.
+#   install(FILES ${CMAKE_BINARY_DIR}/src/DO/Shakti/Defines.hpp
+#           DESTINATION include/DO/Shakti
+#           COMPONENT Sources)
+#
+#   install(DIRECTORY ${DO_Shakti_DIR}/src/DO
+#           DESTINATION include
+#           COMPONENT Sources)
+#
+#   set(CPACK_COMPONENT_Sources_REQUIRED 1)
+# endif ()
 
 
 # if (SHAKTI_BUILD_PYTHON_BINDINGS)

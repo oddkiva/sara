@@ -61,15 +61,11 @@ void draw_grid(const Vector2i& sizes, const Vector2i block_sizes)
     }
 }
 
+
 void demo_on_image()
 {
-  auto image_path = src_path("examples/Segmentation/sunflower_field.jpg");
-  auto image = Image<Rgba32f>{};
-  if (!imread(image, image_path))
-  {
-    cout << "Cannot read image:\n" << image_path << endl;
-    return;
-  }
+  auto image_path = src_path("Segmentation/sunflower_field.jpg");
+  auto image = sara::imread<Rgba32f>(image_path);
 
   // Display the image.
   create_window(image.sizes());
@@ -88,8 +84,8 @@ void demo_on_image()
   cout << "Segmentation time = " << t.elapsed_ms() << "ms" << endl;
 
   auto segmentation = Image<Rgba32f>{labels.sizes()};
-  auto means = vector<Rgba32f>(labels.array().maxCoeff() + 1, Rgba32f::Zero());
-  auto cardinality = vector<int>(labels.array().maxCoeff() + 1, 0);
+  auto means = vector<Rgba32f>(labels.flat_array().maxCoeff() + 1, Rgba32f::Zero());
+  auto cardinality = vector<int>(labels.flat_array().maxCoeff() + 1, 0);
 
   for (int y = 0; y < segmentation.height(); ++y)
     for (int x = 0; x < segmentation.width(); ++x)
@@ -111,15 +107,22 @@ void demo_on_image()
   close_window();
 }
 
+
 void demo_on_video()
 {
   auto devices = shakti::get_devices();
   devices.front().make_current_device();
   cout << devices.front() << endl;
 
-  VideoStream video_stream{src_path("examples/Segmentation/orion_1.mpg")};
+  const auto video_filepath = src_path("Segmentation/orion_1.mpg");
+  // const string video_filepath = "/home/david/Desktop/test.mp4";
+  // const auto video_filepath =
+  //     "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4";
+  cout << video_filepath << endl;
+  VideoStream video_stream{video_filepath};
+
   auto video_frame_index = int{0};
-  auto video_frame = Image<Rgb8>{};
+  auto video_frame = video_stream.frame();
 
   auto rgba32f_image = Image<Rgba32f>{};
   auto labels = Image<int>{};
@@ -127,11 +130,10 @@ void demo_on_video()
   auto means = vector<Rgba32f>{};
   auto cardinality = vector<int>{};
 
-
   shakti::SegmentationSLIC slic;
   slic.set_distance_weight(1e-4f);
 
-  while (video_stream.read(video_frame))
+  while (video_stream.read())
   {
     cout << "[Read frame] " << video_frame_index << "" << endl;
 
@@ -153,8 +155,8 @@ void demo_on_video()
     cout << "Segmentation time = " << t.elapsed_ms() << "ms" << endl;
 
     segmentation.resize(video_frame.sizes());
-    means = vector<Rgba32f>(labels.array().maxCoeff() + 1, Rgba32f::Zero());
-    cardinality = vector<int>(labels.array().maxCoeff() + 1, 0);
+    means = vector<Rgba32f>(labels.flat_array().maxCoeff() + 1, Rgba32f::Zero());
+    cardinality = vector<int>(labels.flat_array().maxCoeff() + 1, 0);
 
     for (int y = 0; y < segmentation.height(); ++y)
     {
@@ -179,11 +181,12 @@ void demo_on_video()
   }
 }
 
+
 GRAPHICS_MAIN()
 {
   try
   {
-    // demo_on_image();
+    //demo_on_image();
     demo_on_video();
   }
   catch (exception& e)

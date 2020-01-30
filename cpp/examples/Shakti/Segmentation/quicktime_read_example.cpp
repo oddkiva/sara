@@ -131,7 +131,7 @@ void gaussian_demo()
   auto in_frame = sara::Image<float>{};
   auto out_frame = sara::Image<float>{};
 
-  const auto sigma = float{3.f};
+  const auto sigma = 3.f;
   auto apply_gaussian_filter = shakti::GaussianFilter{sigma};
 
   video_stream.bind_frame_rows(video_frame);

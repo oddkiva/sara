@@ -170,23 +170,32 @@ macro (shakti_append_library _library_name
   # 2. Bookmark the project to make sure the library is created only once.
   set_property(GLOBAL PROPERTY _DO_Shakti_${_library_name}_INCLUDED 1)
 
-  # 3. Include third-party library directories.
-  if (NOT "${_include_dirs}" STREQUAL "")
-    include_directories(${_include_dirs})
-  endif ()
-
-  # 4. Create the project:
+  # 3. Create the project:
   cuda_add_library(DO_Shakti_${_library_name}
     ${_hdr_files} ${_cpp_files} ${_cu_files})
+  add_library(DO::Shakti::${_library_name} ALIAS DO_Shakti_${_library_name})
+
+  set_target_properties(DO_Shakti_${_library_name}
+    PROPERTIES
+    CXX_STANDARD 14
+    CXX_STANDARD_REQUIRED YES)
+
+  # 4. Include third-party library directories.
+  if (NOT "${_include_dirs}" STREQUAL "")
+    target_include_directories(DO_Shakti_${_library_name}
+      PUBLIC
+      $<BUILD_INTERFACE:${_include_dirs}>
+      $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+  endif ()
+
 
   if (NOT "${_cu_files}${_cpp_files}" STREQUAL "")
     # Link with other libraries.
     message(STATUS
-      "[Shakti] Linking project 'DO_Shakti_${_library_name}' with "
-      "'${_lib_dependencies}'"
-    )
-    target_link_libraries(
-      DO_Shakti_${_library_name} ${_lib_dependencies})
+      "[Shakti] Linking project 'DO::Shakti::${_library_name}' with "
+      "'${_lib_dependencies}'")
+
+    target_link_libraries(DO_Shakti_${_library_name} ${_lib_dependencies})
 
     # Form the compiled library output name.
     set(_library_output_basename
@@ -271,26 +280,12 @@ function (shakti_add_example)
   message(STATUS "CPP_SOURCE_FILES = ${CPP_SOURCE_FILES}")
 
   # Add the C++ test executable.
-  add_executable(${EXAMPLE_NAME} ${CPP_SOURCE_FILES})
-  set_property(TARGET ${EXAMPLE_NAME} PROPERTY FOLDER "DO Shakti Examples")
-  set_target_properties(
-    ${EXAMPLE_NAME} PROPERTIES
+  cuda_add_executable(${EXAMPLE_NAME} ${CPP_SOURCE_FILES} ${CUDA_SOURCE_FILES})
+
+  set_target_properties(${EXAMPLE_NAME}
+    PROPERTIES
     COMPILE_FLAGS ${SARA_DEFINITIONS}
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
-    )
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-  # Create an auxilliary library for CUDA based code.
-  # This is a workaround to do unit-test CUDA code with gtest.
-  if (NOT "${CUDA_SOURCE_FILES}" STREQUAL "")
-    source_group("CUDA Source Files" REGULAR_EXPRESSION ".*\\.cu$")
-    cuda_add_library(${EXAMPLE_NAME}_CUDA_AUX ${CUDA_SOURCE_FILES})
-    target_link_libraries(${EXAMPLE_NAME}_CUDA_AUX
-      DO_Shakti_Utilities
-      ${DO_LIBRARIES})
-    # Group the unit test in the "Tests" folder.
-    set_property(
-      TARGET ${EXAMPLE_NAME}_CUDA_AUX PROPERTY FOLDER "CUDA Examples")
-
-    target_link_libraries(${EXAMPLE_NAME} ${EXAMPLE_NAME}_CUDA_AUX ${DO_LIBRARIES})
-  endif ()
+  set_property(TARGET ${EXAMPLE_NAME} PROPERTY FOLDER "DO Shakti Examples")
 endfunction ()

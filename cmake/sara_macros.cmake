@@ -228,30 +228,31 @@ macro (sara_append_library _library_name
                            _hdr_files
                            _src_files
                            _lib_dependencies)
-  # 1. Verbose comment.
+  # Verbose comment.
   sara_message("[Sara] Creating project 'DO_Sara_${_library_name}'")
 
-  # 2. Bookmark the project to make sure the library is created only once.
+  # Bookmark the project to make sure the library is created only once.
   set_property(GLOBAL PROPERTY _DO_Sara_${_library_name}_INCLUDED 1)
 
-  # 3. Create the project:
+  # Create the project:
   if (NOT "${_src_files}" STREQUAL "")
     # - Case 1: the project contains 'cpp' source files
     #   Specify the source files.
     add_library(DO_Sara_${_library_name}
       ${DO_Sara_DIR}/cmake/UseDOSara${_library_name}.cmake
       ${_hdr_files} ${_src_files})
+    add_library(DO::Sara::${_library_name} ALIAS DO_Sara_${_library_name})
 
-    # 4. Include third-party library directories.
-    if (NOT "${_include_dirs}" STREQUAL "")
-      target_include_directories(DO_Sara_${_library_name} PRIVATE
-        ${_include_dirs})
-    endif ()
+    target_include_directories(DO_Sara_${_library_name}
+      PUBLIC
+      $<BUILD_INTERFACE:${DO_Sara_SOURCE_DIR}>
+      $<BUILD_INTERFACE:${_include_dirs}>
+      $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
-    # 5. Link with other libraries.
-    sara_step_message("Linking project 'DO_Sara_${_library_name}' with "
-                      "'${_lib_dependencies}'")
-
+    # Link with other libraries.
+    sara_step_message(
+      "Linking project 'DO_Sara_${_library_name}' with "
+      "'${_lib_dependencies}'")
     target_link_libraries(DO_Sara_${_library_name} PUBLIC ${_lib_dependencies})
 
     # Form the compiled library output name.
@@ -266,10 +267,11 @@ macro (sara_append_library _library_name
 
     # Specify output name and version.
     set_target_properties(DO_Sara_${_library_name}
-      PROPERTIES VERSION ${DO_Sara_VERSION}
-                 SOVERSION ${DO_Sara_SOVERSION}
-                 OUTPUT_NAME ${_library_output_name}
-                 OUTPUT_NAME_DEBUG ${_library_output_name_debug})
+      PROPERTIES
+      VERSION ${DO_Sara_VERSION}
+      SOVERSION ${DO_Sara_SOVERSION}
+      OUTPUT_NAME ${_library_output_name}
+      OUTPUT_NAME_DEBUG ${_library_output_name_debug})
 
     # Set correct compile definitions when building the libraries.
     if (SARA_BUILD_SHARED_LIBS)
@@ -287,19 +289,76 @@ macro (sara_append_library _library_name
       LIBRARY DESTINATION lib COMPONENT Libraries
       ARCHIVE DESTINATION lib COMPONENT Libraries)
   else ()
-
     # - Case 2: the project is a header-only library
     #   Specify the source files.
     message(STATUS
       "[Sara] No linking needed for header-only project "
       "'DO_Sara_${_library_name}'")
-    add_custom_target(DO_Sara_${_library_name} SOURCES ${_hdr_files})
+    add_library(DO_Sara_${_library_name} INTERFACE)
+    target_sources(DO_Sara_${_library_name}
+      INTERFACE
+      ${DO_Sara_DIR}/cmake/UseDOSara${_library_name}.cmake
+      ${_hdr_files} ${_src_files})
+
+    if(MSVC)
+      add_custom_target(DO_Sara_${_library_name}
+        SOURCES
+        ${DO_Sara_DIR}/cmake/UseDOSara${_library_name}.cmake
+        ${_hdr_files})
+    endif()
+
+    target_include_directories(DO_Sara_${_library_name}
+      INTERFACE
+      $<BUILD_INTERFACE:${DO_Sara_SOURCE_DIR}>
+      $<BUILD_INTERFACE:${_include_dirs}>
+      $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
   endif ()
 
-  # 5. Put the library into the folder "DO Libraries".
+  # Drop older compiler support in favor of C++17.
+  #
+  # I know it is a controversial decision.
+  set_target_properties(DO_Sara_${_library_name}
+    PROPERTIES
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED YES)
+
+  # Propagate C++17 to any project linking against the library.
+  target_compile_features(DO_Sara_${_library_name}
+    INTERFACE cxx_std_17)
+
+  # Put the library into the folder "DO Libraries".
   set_property(
     TARGET DO_Sara_${_library_name} PROPERTY
     FOLDER "DO Sara Libraries")
+
+  # Figure out the rest later.
+  # 6. Specify where to install the library.
+  # install(TARGETS DO-Sara-${_library_name}
+  #   EXPORT DO-Sara-${_library_name}-Targets
+  #   RUNTIME  DESTINATION bin     COMPONENT Libraries
+  #   LIBRARY  DESTINATION lib     COMPONENT Libraries
+  #   ARCHIVE  DESTINATION lib     COMPONENT Libraries
+  #   INCLUDES DESTINATION include COMPONENT LIBRARIES)
+
+  # # 7. Versioning.
+  # write_basic_package_version_file(
+  #   "DO-Sara-${_library_name}-Version.cmake"
+  #   VERSION DO-Sara-${DO_Sara_VERSION}
+  #   COMPATIBILITY SameMajorVersion)
+
+  # install(FILES "DO-Sara-${_library_name}-Config.cmake"
+  #               "DO-Sara-${_library_name}-Version.cmake"
+  #         DESTINATION lib/cmake/DO)
+
+  # 8. For library reuse.
+  # install(EXPORT DO-Sara-${_library_name}-Targets
+  #   FILE DO-Sara-${_library_name}-Targets.cmake
+  #   NAMESPACE DO::Sara::
+  #   DESTINATION lib/cmake/DO)
+  # foreach (lib ${_lib_dependencies})
+  #   find_dependency(${_lib} ${DO_Sara_VERSION})
+  # endforeach ()
+  # include("${CMAKE_CURRENT_LIST_DIR}/DO-Sara-${_library_name}-Targets.cmake")
 endmacro ()
 
 

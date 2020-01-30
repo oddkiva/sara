@@ -3,7 +3,7 @@ if (POLICY CMP0020)
 endif()
 
 
-find_package(CUDA 7.0 REQUIRED)
+find_package(CUDA 10.0 REQUIRED)
 include_directories(${CUDA_TOOLKIT_INCLUDE})
 
 

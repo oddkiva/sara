@@ -1,9 +1,9 @@
 shakti_add_example(segmentation_example segmentation_example.cpp)
 target_link_libraries(segmentation_example
-  PRIVATE ${DO_Sara_LIBRARIES}
-          DO_Shakti_ImageProcessing
-          DO_Shakti_Segmentation
-          DO_Shakti_Utilities
+  ${DO_Sara_LIBRARIES}
+  DO::Shakti::ImageProcessing
+  DO::Shakti::Segmentation
+  DO::Shakti::Utilities
 )
 
 
@@ -25,7 +25,7 @@ if (LIBQUICKTIME_LIBRARY AND LIBQUICKTIME_INCLUDE_DIRS)
   target_link_libraries(quicktime_read_example
     ${LIBQUICKTIME_LIBRARY}
     ${DO_Sara_LIBRARIES}
-    DO_Shakti_ImageProcessing
-    DO_Shakti_Segmentation
-    DO_Shakti_Utilities)
+    DO::Shakti::ImageProcessing
+    DO::Shakti::Segmentation
+    DO::Shakti::Utilities)
 endif ()
