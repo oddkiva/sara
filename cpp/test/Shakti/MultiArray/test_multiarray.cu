@@ -9,7 +9,9 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <gtest/gtest.h>
+#define BOOST_BOOST_AUTO_TEST_CASE_MODULE "Shakti/MultiArray/MultiArray"
+
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Shakti/MultiArray.hpp>
 
@@ -19,37 +21,37 @@ namespace shakti = DO::Shakti;
 using namespace std;
 
 
-TEST(TestMultiArray, test_constructor_1d)
+BOOST_AUTO_TEST_CASE(test_constructor_1d)
 {
   shakti::Array<float> array{ 10 };
-  EXPECT_EQ(10, array.sizes());
+  BOOST_CHECK_EQUAL(10, array.sizes());
 }
 
-TEST(TestMultiArray, test_constructor_2d)
+BOOST_AUTO_TEST_CASE(test_constructor_2d)
 {
   shakti::MultiArray<float, 2> matrix{ { 3, 4 } };
-  EXPECT_EQ(shakti::Vector2i(3, 4), matrix.sizes());
-  EXPECT_EQ(3, matrix.size(0));
-  EXPECT_EQ(4, matrix.size(1));
+  BOOST_CHECK_EQUAL(shakti::Vector2i(3, 4), matrix.sizes());
+  BOOST_CHECK_EQUAL(3, matrix.size(0));
+  BOOST_CHECK_EQUAL(4, matrix.size(1));
 
-  EXPECT_EQ(3, matrix.width());
-  EXPECT_EQ(4, matrix.height());
+  BOOST_CHECK_EQUAL(3, matrix.width());
+  BOOST_CHECK_EQUAL(4, matrix.height());
 }
 
-TEST(TestMultiArray, test_constructor_3d)
+BOOST_AUTO_TEST_CASE(test_constructor_3d)
 {
   shakti::MultiArray<float, 3> matrix{ { 3, 4, 5 } };
-  EXPECT_EQ(shakti::Vector3i(3, 4, 5), matrix.sizes());
-  EXPECT_EQ(3, matrix.size(0));
-  EXPECT_EQ(4, matrix.size(1));
-  EXPECT_EQ(5, matrix.size(2));
+  BOOST_CHECK_EQUAL(shakti::Vector3i(3, 4, 5), matrix.sizes());
+  BOOST_CHECK_EQUAL(3, matrix.size(0));
+  BOOST_CHECK_EQUAL(4, matrix.size(1));
+  BOOST_CHECK_EQUAL(5, matrix.size(2));
 
-  EXPECT_EQ(3, matrix.width());
-  EXPECT_EQ(4, matrix.height());
-  EXPECT_EQ(5, matrix.depth());
+  BOOST_CHECK_EQUAL(3, matrix.width());
+  BOOST_CHECK_EQUAL(4, matrix.height());
+  BOOST_CHECK_EQUAL(5, matrix.depth());
 }
 
-TEST(MultiArray, test_copy_between_host_and_device_2d)
+BOOST_AUTO_TEST_CASE(test_copy_between_host_and_device_2d)
 {
   const int w = 3;
   const int h = 4;
@@ -67,10 +69,10 @@ TEST(MultiArray, test_copy_between_host_and_device_2d)
   float out_host_data[w*h];
   out_device_image.copy_to_host(out_host_data);
 
-  EXPECT_TRUE(equal(in_host_data, in_host_data + w*h, out_host_data));
+  BOOST_CHECK(equal(in_host_data, in_host_data + w*h, out_host_data));
 }
 
-TEST(MultiArray, test_copy_between_host_and_device_3d)
+BOOST_AUTO_TEST_CASE(test_copy_between_host_and_device_3d)
 {
   const int w = 3;
   const int h = 4;
@@ -86,11 +88,5 @@ TEST(MultiArray, test_copy_between_host_and_device_3d)
   float out_host_data[w*h*d];
   out_device_image.copy_to_host(out_host_data);
 
-  EXPECT_TRUE(equal(in_host_data, in_host_data + w*h*d, out_host_data));
-}
-
-int main(int argc, char **argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+  BOOST_CHECK(equal(in_host_data, in_host_data + w*h*d, out_host_data));
 }

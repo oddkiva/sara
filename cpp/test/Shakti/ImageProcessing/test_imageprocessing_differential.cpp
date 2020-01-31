@@ -9,8 +9,9 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#define BOOST_TEST_MODULE "ImageProcessing/Image Pyramid"
 
-#include <gtest/gtest.h>
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/Core.hpp>
 
@@ -22,16 +23,17 @@
 namespace sara = DO::Sara;
 namespace shakti = DO::Shakti;
 
+
 using namespace std;
 using namespace sara;
 
 
-class TestDifferential : public testing::Test
+class TestDifferential
 {
 protected:
   Image<float> _src_image;
 
-  TestDifferential() : testing::Test()
+  TestDifferential()
   {
     _src_image.resize(3, 3);
     _src_image.matrix() <<
@@ -41,7 +43,7 @@ protected:
   }
 };
 
-TEST_F(TestDifferential, test_gradient)
+BOOST_FIXTURE_TEST_CASE(test_gradient, TestDifferential)
 {
   auto& f = _src_image;
 
@@ -84,7 +86,7 @@ TEST_F(TestDifferential, test_gradient)
   }
 }
 
-TEST_F(TestDifferential, test_laplacian)
+BOOST_FIXTURE_TEST_CASE(test_laplacian, TestDifferential)
 {
   auto& f = _src_image;
   f.matrix() <<
@@ -100,7 +102,7 @@ TEST_F(TestDifferential, test_laplacian)
   EXPECT_MATRIX_NEAR(laplacian.matrix(), true_laplacian, 1e-5);
 }
 
-TEST_F(TestDifferential, test_laplacian_2)
+BOOST_FIXTURE_TEST_CASE(test_laplacian_2, TestDifferential)
 {
   /*
     We test the following function:
@@ -124,7 +126,7 @@ TEST_F(TestDifferential, test_laplacian_2)
   EXPECT_MATRIX_EQ(expected_central_block, actual_central_block);
 }
 
-//TEST_F(TestDifferential, test_hessian)
+//BOOST_FIXTURE_TEST_CASE(test_hessian, TestDifferential)
 //{
 //  auto& f = _src_image;
 //  f.matrix() <<
@@ -146,7 +148,7 @@ TEST_F(TestDifferential, test_laplacian_2)
 //  }
 //}
 
-//TEST_F(TestDifferential, test_hessian_2)
+//BOOST_FIXTURE_TEST_CASE(test_hessian_2, TestDifferential)
 //{
 //  /*
 //    We test the following function:
@@ -177,9 +179,3 @@ TEST_F(TestDifferential, test_laplacian_2)
 //}
 //
 //
-
-int main(int argc, char** argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}

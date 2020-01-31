@@ -1,16 +1,21 @@
-#include <gtest/gtest.h>
+// ========================================================================== //
+// This file is part of Sara, a basic set of libraries in C++ for computer
+// vision.
+//
+// Copyright (C) 2020-present David Ok <david.ok8@gmail.com>
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License v. 2.0. If a copy of the MPL was not distributed with this file,
+// you can obtain one at http://mozilla.org/MPL/2.0/.
+// ========================================================================== //
 
-#include <DO/Sara/FeatureDescriptors.hpp>
+#define BOOST_TEST_MODULE "Shakti/ImageProcessing/Dense SIFT"
+
+#include <boost/test/unit_test.hpp>
 
 
-TEST(TestDenseSIFT, test_dense_sift_cuda)
+BOOST_AUTO_TEST_SUITE(TestDenseSIFT)
+
+BOOST_AUTO_TEST_CASE(test_dense_sift_cuda)
 {
-
-}
-
-
-int main(int argc, char **argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
 }

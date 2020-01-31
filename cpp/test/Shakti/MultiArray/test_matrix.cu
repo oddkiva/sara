@@ -9,7 +9,9 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE "Shakti/MultiArray/Matrix"
+
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Shakti/MultiArray.hpp>
 
@@ -18,36 +20,29 @@ using namespace std;
 using namespace DO::Shakti;
 
 
-TEST(TestMatrix, test_constructor_1d)
+BOOST_AUTO_TEST_CASE(test_constructor_1d)
 {
-  Vector1i p{ 10 };
-  EXPECT_EQ(10, p);
+  Vector1i p{10};
+  BOOST_CHECK_EQUAL(10, p);
 
   int& p_as_scalar = p;
   const int& p_as_const_scalar = p;
-  EXPECT_EQ(10, p_as_scalar);
-  EXPECT_EQ(10, p_as_const_scalar);
+  BOOST_CHECK_EQUAL(10, p_as_scalar);
+  BOOST_CHECK_EQUAL(10, p_as_const_scalar);
 
   p_as_scalar = 12;
-  EXPECT_EQ(12, p_as_scalar);
-  EXPECT_EQ(12, p_as_const_scalar);
+  BOOST_CHECK_EQUAL(12, p_as_scalar);
+  BOOST_CHECK_EQUAL(12, p_as_const_scalar);
 }
 
-TEST(TestMatrix, test_constructor_2d)
+BOOST_AUTO_TEST_CASE(test_constructor_2d)
 {
-  Vector2i p{ 2, 1 };
-  EXPECT_EQ(p.x(), 2);
-  EXPECT_EQ(p.y(), 1);
+  Vector2i p{2, 1};
+  BOOST_CHECK_EQUAL(p.x(), 2);
+  BOOST_CHECK_EQUAL(p.y(), 1);
 
-  const int sizes[] = { 1, 3 };
+  const int sizes[] = {1, 3};
   p = sizes;
-  EXPECT_EQ(p.x(), sizes[0]);
-  EXPECT_EQ(p.y(), sizes[1]);
-}
-
-
-int main(int argc, char **argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+  BOOST_CHECK_EQUAL(p.x(), sizes[0]);
+  BOOST_CHECK_EQUAL(p.y(), sizes[1]);
 }

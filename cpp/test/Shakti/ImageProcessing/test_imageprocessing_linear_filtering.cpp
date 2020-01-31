@@ -9,8 +9,9 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#define BOOST_TEST_MODULE "Shakti/ImageProcessing/Linear Filtering"
 
-#include <gtest/gtest.h>
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/Core.hpp>
 #include <DO/Shakti/ImageProcessing.hpp>
@@ -25,13 +26,13 @@ using namespace std;
 using namespace sara;
 
 
-class TestFilters : public testing::Test
+class TestFilters
 {
 protected:
   Image<float> _src_image;
   vector<float> _kernel;
 
-  TestFilters() : testing::Test()
+  TestFilters()
   {
     _src_image.resize(3, 3);
     _src_image.matrix() <<
@@ -46,7 +47,7 @@ protected:
   }
 };
 
-TEST_F(TestFilters, test_column_based_convolution)
+BOOST_FIXTURE_TEST_CASE(test_column_based_convolution, TestFilters)
 {
   Image<float> dst_image{ 3, 3 };
   MatrixXf true_matrix(3, 3);
@@ -60,7 +61,7 @@ TEST_F(TestFilters, test_column_based_convolution)
   EXPECT_MATRIX_EQ(true_matrix, dst_image.matrix());
 }
 
-TEST_F(TestFilters, test_row_based_convolution)
+BOOST_FIXTURE_TEST_CASE(test_row_based_convolution, TestFilters)
 {
   Image<float> dst_image{ 3, 3 };
   MatrixXf true_matrix(3, 3);
@@ -72,7 +73,7 @@ TEST_F(TestFilters, test_row_based_convolution)
   EXPECT_MATRIX_EQ(true_matrix, dst_image.matrix());
 }
 
-TEST_F(TestFilters, test_x_derivative)
+BOOST_FIXTURE_TEST_CASE(test_x_derivative, TestFilters)
 {
   Image<float> dst_image{ 3, 3 };
   MatrixXf true_matrix(3, 3);
@@ -85,7 +86,7 @@ TEST_F(TestFilters, test_x_derivative)
   EXPECT_MATRIX_EQ(true_matrix, dst_image.matrix());
 }
 
-TEST_F(TestFilters, test_y_derivative)
+BOOST_FIXTURE_TEST_CASE(test_y_derivative, TestFilters)
 {
   Image<float> dst_image{ 3, 3 };
   MatrixXf true_matrix(3, 3);
@@ -96,7 +97,7 @@ TEST_F(TestFilters, test_y_derivative)
   EXPECT_MATRIX_EQ(true_matrix, dst_image.matrix());
 }
 
-TEST_F(TestFilters, test_gaussian)
+BOOST_FIXTURE_TEST_CASE(test_gaussian, TestFilters)
 {
   // Convolve with Dirac.
   const auto n = _src_image.sizes()[0];
@@ -111,16 +112,9 @@ TEST_F(TestFilters, test_gaussian)
   true_matrix /= true_matrix.sum();
 
   auto dst_image = Image<float>{ _src_image.sizes() };
- 
+
   auto apply_gaussian_filter = shakti::GaussianFilter{ 1.f, 1 };
   apply_gaussian_filter(
     dst_image.data(), _src_image.data(), _src_image.sizes().data());
   EXPECT_MATRIX_NEAR(true_matrix, dst_image.matrix(), 1e-5);
-}
-
-
-int main(int argc, char** argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
 }

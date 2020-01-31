@@ -9,7 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <gtest/gtest.h>
+#define BOOST_BOOST_AUTO_TEST_CASE_MODULE "Shakti/MultiArray/Texture Array"
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Shakti/ImageProcessing/Kernels/Globals.hpp>
 
@@ -39,7 +40,7 @@ void copy_from_texture_to_global_memory(float *out)
   out[i] = tex2D(in_float_texture, p.x(), p.y());
 }
 
-TEST(TestCudaArray, test_constructor)
+BOOST_AUTO_TEST_CASE(TestCudaArray, test_constructor)
 {
   const int w = 3;
   const int h = 4;
@@ -54,11 +55,11 @@ TEST(TestCudaArray, test_constructor)
 
   float out[w * h];
   in_array.copy_to_host(out) ;
-  EXPECT_TRUE(equal(in, in + w*h, out));
+  BOOST_CHECK(equal(in, in + w*h, out));
   //check(out, { w, h });
 }
 
-TEST(TestCudaArray, test_operation_from_cuda_array_to_multiarray)
+BOOST_AUTO_TEST_CASE(TestCudaArray, test_operation_from_cuda_array_to_multiarray)
 {
   Vector2i sizes{ 3, 4 };
   float in[] = {
@@ -80,11 +81,5 @@ TEST(TestCudaArray, test_operation_from_cuda_array_to_multiarray)
 
   float out[3 * 4];
   out_array.copy_to_host(out);
-  EXPECT_TRUE(equal(in, in + sizes[0] * sizes[1], out));
-}
-
-int main(int argc, char **argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+  BOOST_CHECK(equal(in, in + sizes[0] * sizes[1], out));
 }
