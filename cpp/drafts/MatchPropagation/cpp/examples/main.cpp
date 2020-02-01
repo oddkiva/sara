@@ -193,8 +193,8 @@ GRAPHICS_MAIN()
 
   // Where are the images?
   const string query_image_path =
-      src_path("targets/garnier-shampoing.jpg");
-  const string target_image_path = src_path("shelves/query-1.jpg");
+      src_path("products/garnier-shampoing.jpg");
+  const string target_image_path = src_path("shelves/shelf-1.jpg");
 
   // Load the query and target images.
   Image<Rgb8> query, target;
