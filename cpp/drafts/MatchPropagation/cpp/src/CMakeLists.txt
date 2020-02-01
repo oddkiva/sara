@@ -84,7 +84,7 @@ macro (sara_make_library _library_name
   # 5. Put the library into the folder "DO Libraries".
   set_property(
     TARGET DO-Sara-${_library_name} PROPERTY
-    FOLDER "DO Sara Libraries")
+    FOLDER "Libraries/Sara")
 
   # Figure out the rest later.
   # 6. Specify where to install the library.

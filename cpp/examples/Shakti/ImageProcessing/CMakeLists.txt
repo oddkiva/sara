@@ -1,7 +1,3 @@
-project(DO_Shakti_Examples)
-
-message(STATUS "  - DO_Shakti_Examples")
-
 find_package(OpenMP)
 if (OPENMP_FOUND)
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")

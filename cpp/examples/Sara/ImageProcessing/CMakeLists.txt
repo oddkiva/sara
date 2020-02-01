@@ -1,9 +1,3 @@
-cmake_minimum_required(VERSION 2.6)
-
-project(DO_ImageProcessing_Examples)
-
-message(STATUS "  - DO_ImageProcessing_Examples")
-
 find_package(DO_Sara COMPONENTS Core Graphics ImageIO ImageProcessing REQUIRED)
 
 macro (sara_add_example example)
@@ -13,7 +7,7 @@ macro (sara_add_example example)
   target_link_libraries(${example} ${DO_Sara_LIBRARIES})
   set_property(
     TARGET ${example} PROPERTY
-    FOLDER "DO Sara Examples/ImageProcessing")
+    FOLDER "Examples/Sara/ImageProcessing")
 endmacro()
 
 sara_add_example(image_processing_example)

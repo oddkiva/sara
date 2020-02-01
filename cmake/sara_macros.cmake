@@ -315,21 +315,15 @@ macro (sara_append_library _library_name
   endif ()
 
   # Drop older compiler support in favor of C++17.
-  #
-  # I know it is a controversial decision.
   set_target_properties(DO_Sara_${_library_name}
     PROPERTIES
     CXX_STANDARD 17
-    CXX_STANDARD_REQUIRED YES)
+    CXX_STANDARD_REQUIRED YES
+    FOLDER "Libraries/Sara")
 
   # Propagate C++17 to any project linking against the library.
   target_compile_features(DO_Sara_${_library_name}
     INTERFACE cxx_std_17)
-
-  # Put the library into the folder "DO Libraries".
-  set_property(
-    TARGET DO_Sara_${_library_name} PROPERTY
-    FOLDER "DO Sara Libraries")
 
   # Figure out the rest later.
   # 6. Specify where to install the library.
@@ -409,7 +403,7 @@ function (sara_add_test _test_name _srcs _additional_lib_deps)
   if (DEFINED test_group_name)
     set_property(
       TARGET ${_test_name}
-      PROPERTY FOLDER "DO Sara Tests/${test_group_name}")
+      PROPERTY FOLDER "Tests/Sara/${test_group_name}")
   endif ()
 
   get_property(DO_SARA_TESTS GLOBAL PROPERTY _DO_SARA_TESTS)

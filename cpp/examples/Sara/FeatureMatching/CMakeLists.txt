@@ -1,7 +1,3 @@
-project(DO_FeatureMatching_Examples)
-
-message(STATUS "  - DO_FeatureMatching_Examples")
-
 find_package(DO_Sara COMPONENTS
   Core Graphics ImageIO
   Features FeatureDetectors FeatureDescriptors
@@ -14,7 +10,7 @@ macro (sara_add_example example)
   target_link_libraries(${example} ${DO_Sara_LIBRARIES})
   set_property(TARGET ${example}
     PROPERTY
-    FOLDER "DO Sara Examples/FeatureMatching")
+    FOLDER "Examples/Sara/FeatureMatching")
 endmacro ()
 
 sara_add_example(matching_example)
