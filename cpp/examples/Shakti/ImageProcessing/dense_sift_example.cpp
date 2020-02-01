@@ -125,8 +125,10 @@ Image<Vector128f> cpu_compute_sifts(const Image<float>& image)
   omp_set_num_threads(4);
 #endif
 
-  // Compute the feature vector in each pixel.
-#pragma omp for schedule(static, 1) collapse(2)
+// Compute the feature vector in each pixel.
+#if !defined(_WIN32)
+#  pragma omp for schedule(static, 1) collapse(2)
+#endif
   for (auto y = 0; y < image.height(); ++y)
   {
     for (auto x = 0; x < image.width(); ++x)
