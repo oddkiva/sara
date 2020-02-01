@@ -1,5 +1,6 @@
 sara_step_message("Found ${CMAKE_CXX_COMPILER_ID} compiler:")
 
+
 # By default, use the math constants defined in <cmath> header.
 add_definitions(-D_USE_MATH_DEFINES)
 

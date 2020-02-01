@@ -17,7 +17,7 @@ function (shakti_add_test)
   get_filename_component(_filename "${shakti_add_test_SOURCES}" NAME_WE)
   set (_test_name shakti_${_filename})
 
-  cuda_add_executable(${_test_name} ${shakti_add_test_SOURCES})
+  add_executable(${_test_name} ${shakti_add_test_SOURCES})
   target_link_libraries(${_test_name}
     ${Boost_LIBRARIES}
     ${shakti_add_test_DEPENDENCIES})

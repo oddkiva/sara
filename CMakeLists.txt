@@ -2,6 +2,24 @@ cmake_minimum_required(VERSION 2.8.12)
 
 project(Sara CXX)
 
+
+# We are in 2020 now: please let's all look to the future.
+set(CMAKE_CXX_STANDARD 14)
+
+# Activate CUDA if it is installed.
+include(CheckLanguage)
+check_language(CUDA)
+if (CMAKE_CUDA_COMPILER)
+  enable_language(CUDA)
+  if (NOT DEFINED CMAKE_CUDA_STANDARD)
+    set(CMAKE_CUDA_STANDARD 14)
+    set(CMAKE_CUDA_STANDARD_REQUIRED ON)
+  endif ()
+else()
+  message(STATUS "No CUDA support")
+endif()
+
+
 # Set the version major and minor manually.
 set(DO_Sara_VERSION_MAJOR 1)
 set(DO_Sara_VERSION_MINOR 2)
@@ -31,10 +49,6 @@ option(SARA_BUILD_SAMPLES "Build sample programs using DO-Sara libraries" OFF)
 option(SARA_BUILD_SHARED_LIBS "Build shared libraries for DO-Sara libraries" OFF)
 option(SARA_SELF_CONTAINED_INSTALLATION
   "Install C++ and Python libraries in a single self contained directory" OFF)
-
-
-# Project wide dependencies.
-find_package(CUDA 10.0)
 
 
 # Set the following internal switches to build Sara.
