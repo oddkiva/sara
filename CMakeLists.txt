@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.12)
 
-project(Sara CXX CUDA)
+project(Sara CXX)
 
 # Set the version major and minor manually.
 set(DO_Sara_VERSION_MAJOR 1)
