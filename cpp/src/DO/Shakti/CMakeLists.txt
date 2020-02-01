@@ -1,4 +1,4 @@
-project(DO::Shakti CXX CUDA)
+project(Shakti CXX CUDA)
 
 
 # Set the version major and minor manually.
