@@ -1,5 +1,3 @@
-find_package(CUDA 10.0)
-
 add_subdirectory(Kalpana)
 
 add_subdirectory(Sara)

@@ -9,7 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#define BOOST_BOOST_AUTO_TEST_CASE_MODULE "Shakti/MultiArray/MultiArray"
+#define BOOST_TEST_MODULE "Shakti/MultiArray/MultiArray"
 
 #include <boost/test/unit_test.hpp>
 

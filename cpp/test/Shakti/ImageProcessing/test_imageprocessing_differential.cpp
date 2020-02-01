@@ -62,7 +62,7 @@ BOOST_FIXTURE_TEST_CASE(test_gradient, TestDifferential)
         0
       };
       const auto& nabla_f_xy = nabla_f(x, y);
-      EXPECT_MATRIX_NEAR(expected_nabla_f_xy, nabla_f_xy, 1e-5);
+      BOOST_CHECK_SMALL((expected_nabla_f_xy - nabla_f_xy).norm(), 1e-5f);
     }
   }
 
@@ -81,7 +81,7 @@ BOOST_FIXTURE_TEST_CASE(test_gradient, TestDifferential)
         y == 1 ? 1 : 0.5f,
       };
       const auto& nabla_f_xy = nabla_f(x, y);
-      EXPECT_MATRIX_NEAR(expected_nabla_f_xy, nabla_f_xy, 1e-5);
+      BOOST_CHECK_SMALL((expected_nabla_f_xy - nabla_f_xy).norm(), 1e-5f);
     }
   }
 }
@@ -99,7 +99,7 @@ BOOST_FIXTURE_TEST_CASE(test_laplacian, TestDifferential)
   true_laplacian.setZero();
 
   shakti::compute_laplacian(laplacian.data(), f.data(), f.sizes().data());
-  EXPECT_MATRIX_NEAR(laplacian.matrix(), true_laplacian, 1e-5);
+  BOOST_CHECK_SMALL((laplacian.matrix() - true_laplacian).norm(), 1e-5f);
 }
 
 BOOST_FIXTURE_TEST_CASE(test_laplacian_2, TestDifferential)
@@ -123,7 +123,7 @@ BOOST_FIXTURE_TEST_CASE(test_laplacian_2, TestDifferential)
 
   Matrix2f actual_central_block = laplacian_f.matrix().block<2, 2>(1, 1);
   Matrix2f expected_central_block = 4 * Matrix2f::Ones();
-  EXPECT_MATRIX_EQ(expected_central_block, actual_central_block);
+  BOOST_CHECK(expected_central_block == actual_central_block);
 }
 
 //BOOST_FIXTURE_TEST_CASE(test_hessian, TestDifferential)
@@ -143,7 +143,7 @@ BOOST_FIXTURE_TEST_CASE(test_laplacian_2, TestDifferential)
 //      Matrix2f true_hessian;
 //      true_hessian.setZero();
 //      Matrix2f hessian = hessian_f(x, y);
-//      EXPECT_MATRIX_NEAR(true_hessian, hessian, 1e-5);
+//      BOOST_CHECK_SMALL(true_hessian, hessian, 1e-5);
 //    }
 //  }
 //}
@@ -175,7 +175,5 @@ BOOST_FIXTURE_TEST_CASE(test_laplacian_2, TestDifferential)
 //    1, 0;
 //  for (int y = 1; y < 3; ++y)
 //    for (int x = 1; x < 3; ++x)
-//      ASSERT_MATRIX_EQ(expected_hessian, Hf(x, y));
+//      BOOST_CHECK(expected_hessian == Hf(x, y));
 //}
-//
-//

@@ -402,7 +402,7 @@ function (sara_add_test _test_name _srcs _additional_lib_deps)
   set_target_properties(${_test_name}
     PROPERTIES
     COMPILE_FLAGS ${SARA_DEFINITIONS}
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
   add_test(NAME ${_test_name} COMMAND $<TARGET_FILE:${_test_name}>)
 

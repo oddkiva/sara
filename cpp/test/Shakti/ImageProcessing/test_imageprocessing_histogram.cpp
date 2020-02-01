@@ -9,8 +9,9 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#define BOOST_TEST_MODULE "ImageProcessing/Histogram"
 
-#include <gtest/gtest.h>
+#include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/Core.hpp>
 
@@ -26,7 +27,7 @@ using namespace std;
 using namespace sara;
 
 
-TEST(TestHistogram, test_histogram)
+BOOST_AUTO_TEST_CASE(test_histogram)
 {
   using sara::Rgba8;
 
@@ -55,18 +56,12 @@ TEST(TestHistogram, test_histogram)
         const auto coord = Vector3i{ x, y, z };
         cout << coord.transpose() << endl;
         if (coord == Vector3i::Zero())
-          ASSERT_NEAR(23.f/(image.size()), histogram(x,y,z), 1e-6f);
+          BOOST_REQUIRE_CLOSE(23.f/(image.size()), histogram(x,y,z), 1e-6f);
         else if (coord == Vector3i{ 2, 0, 0 })
-          ASSERT_NEAR(2.f/(image.size()), histogram(x,y,z), 1e-6f);
+          BOOST_REQUIRE_CLOSE(2.f/(image.size()), histogram(x,y,z), 1e-6f);
         else
-          ASSERT_NEAR(0.f, histogram(coord), 1e-6f);
+          BOOST_REQUIRE_CLOSE(0.f, histogram(coord), 1e-6f);
       }
     }
   }
-}
-
-int main(int argc, char** argv)
-{
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
 }

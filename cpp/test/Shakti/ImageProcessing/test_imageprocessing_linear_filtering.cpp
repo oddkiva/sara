@@ -47,6 +47,7 @@ protected:
   }
 };
 
+
 BOOST_FIXTURE_TEST_CASE(test_column_based_convolution, TestFilters)
 {
   Image<float> dst_image{ 3, 3 };
@@ -58,7 +59,7 @@ BOOST_FIXTURE_TEST_CASE(test_column_based_convolution, TestFilters)
   shakti::apply_column_based_convolution(
     dst_image.data(), _src_image.data(), _kernel.data(),
     static_cast<int>(_kernel.size()), _src_image.sizes().data());
-  EXPECT_MATRIX_EQ(true_matrix, dst_image.matrix());
+  BOOST_CHECK(true_matrix == dst_image.matrix());
 }
 
 BOOST_FIXTURE_TEST_CASE(test_row_based_convolution, TestFilters)
@@ -70,7 +71,7 @@ BOOST_FIXTURE_TEST_CASE(test_row_based_convolution, TestFilters)
   shakti::apply_row_based_convolution(
     dst_image.data(), _src_image.data(), _kernel.data(),
     static_cast<int>(_kernel.size()), _src_image.sizes().data());
-  EXPECT_MATRIX_EQ(true_matrix, dst_image.matrix());
+  BOOST_CHECK(true_matrix == dst_image.matrix());
 }
 
 BOOST_FIXTURE_TEST_CASE(test_x_derivative, TestFilters)
@@ -83,7 +84,7 @@ BOOST_FIXTURE_TEST_CASE(test_x_derivative, TestFilters)
 
   shakti::compute_x_derivative(
     dst_image.data(), _src_image.data(), _src_image.sizes().data());
-  EXPECT_MATRIX_EQ(true_matrix, dst_image.matrix());
+  BOOST_CHECK(true_matrix == dst_image.matrix());
 }
 
 BOOST_FIXTURE_TEST_CASE(test_y_derivative, TestFilters)
@@ -94,7 +95,7 @@ BOOST_FIXTURE_TEST_CASE(test_y_derivative, TestFilters)
 
   shakti::compute_y_derivative(
     dst_image.data(), _src_image.data(), _src_image.sizes().data());
-  EXPECT_MATRIX_EQ(true_matrix, dst_image.matrix());
+  BOOST_CHECK(true_matrix == dst_image.matrix());
 }
 
 BOOST_FIXTURE_TEST_CASE(test_gaussian, TestFilters)
@@ -116,5 +117,5 @@ BOOST_FIXTURE_TEST_CASE(test_gaussian, TestFilters)
   auto apply_gaussian_filter = shakti::GaussianFilter{ 1.f, 1 };
   apply_gaussian_filter(
     dst_image.data(), _src_image.data(), _src_image.sizes().data());
-  EXPECT_MATRIX_NEAR(true_matrix, dst_image.matrix(), 1e-5);
+  BOOST_CHECK_SMALL((true_matrix - dst_image.matrix()).norm(), 1e-5f);
 }

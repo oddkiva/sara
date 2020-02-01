@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.12)
 
-project(Sara CXX)
+project(Sara CXX CUDA)
 
 # Set the version major and minor manually.
 set(DO_Sara_VERSION_MAJOR 1)
@@ -33,10 +33,13 @@ option(SARA_SELF_CONTAINED_INSTALLATION
   "Install C++ and Python libraries in a single self contained directory" OFF)
 
 
+# Project wide dependencies.
+find_package(CUDA 10.0)
+
+
 # Set the following internal switches to build Sara.
 set(SARA_USE_FROM_SOURCE TRUE CACHE INTERNAL "Build Sara libraries")
 set(BUILD_SHARED_LIBS ${SARA_BUILD_SHARED_LIBS})
-
 
 # Add Sara to the CMake module path.
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
@@ -51,7 +54,6 @@ include(sara_use_ccache)
 # We are ready to build Sara.
 find_package(DO_Sara REQUIRED)
 
-
 # Group projects by category.
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -60,6 +62,7 @@ include(sara_installation_settings)
 
 # Enable testing before building the library.
 if (SARA_BUILD_TESTS)
+  include(sara_configure_code_coverage)
   include(CTest)
   enable_testing()
 endif ()

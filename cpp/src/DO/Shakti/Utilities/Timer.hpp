@@ -9,8 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_SHAKTI_UTILITIES_TIMER_HPP
-#define DO_SHAKTI_UTILITIES_TIMER_HPP
+#pragma once
 
 #include <driver_types.h>
 
@@ -43,6 +42,3 @@ namespace DO { namespace Shakti {
 
 } /* namespace Shakti */
 } /* namespace DO */
-
-
-#endif /* DO_SHAKTI_UTILITIES_TIMER_HPP */

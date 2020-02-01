@@ -9,7 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#define BOOST_BOOST_AUTO_TEST_CASE_MODULE "Shakti/MultiArray/Texture Array"
+#define BOOST_TEST_MODULE "Shakti/MultiArray/Texture Array"
 #include <boost/test/unit_test.hpp>
 
 #include <DO/Shakti/ImageProcessing/Kernels/Globals.hpp>
@@ -40,7 +40,7 @@ void copy_from_texture_to_global_memory(float *out)
   out[i] = tex2D(in_float_texture, p.x(), p.y());
 }
 
-BOOST_AUTO_TEST_CASE(TestCudaArray, test_constructor)
+BOOST_AUTO_TEST_CASE(test_constructor)
 {
   const int w = 3;
   const int h = 4;
@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(TestCudaArray, test_constructor)
   //check(out, { w, h });
 }
 
-BOOST_AUTO_TEST_CASE(TestCudaArray, test_operation_from_cuda_array_to_multiarray)
+BOOST_AUTO_TEST_CASE(test_operation_from_cuda_array_to_multiarray)
 {
   Vector2i sizes{ 3, 4 };
   float in[] = {

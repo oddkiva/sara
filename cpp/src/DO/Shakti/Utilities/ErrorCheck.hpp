@@ -9,14 +9,13 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_SHAKTI_UTILITIES_ERRORCHECK_HPP
-#define DO_SHAKTI_UTILITIES_ERRORCHECK_HPP
+#pragma once
 
 #include <stdexcept>
 
 #include <cuda_runtime_api.h>
 
-#include <DO/Sara/Core/StringFormat.hpp>
+#include <DO/Shakti/Utilities/StringFormat.hpp>
 
 
 #define SHAKTI_SAFE_CUDA_CALL(err) \
@@ -28,13 +27,10 @@ namespace DO { namespace Shakti {
   inline void __check_cuda_error(cudaError err, const char *file, const int line)
   {
     if (err != cudaSuccess)
-      throw std::runtime_error(Sara::format(
+      throw std::runtime_error(Shakti::format(
       "CUDA Runtime API error = %02d from file <%s>, line %i: %s\n",
       err, file, line, cudaGetErrorString(err)).c_str());
   }
 
 } /* namespace Shakti */
 } /* namespace DO */
-
-
-#endif /* DO_SHAKTI_UTILITIES_ERRORCHECK_HPP */

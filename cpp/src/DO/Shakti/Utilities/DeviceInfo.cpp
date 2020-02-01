@@ -1,17 +1,13 @@
+#include <DO/Shakti/Utilities/StringFormat.hpp>
+#include "DeviceInfo.hpp"
+#include "ErrorCheck.hpp"
+
 #include <sstream>
 #include <stdexcept>
 #include <string>
 
-#include <DO/Sara/Core/StringFormat.hpp>
-
-#include "DeviceInfo.hpp"
-#include "ErrorCheck.hpp"
-
 
 namespace DO { namespace Shakti {
-
-  using DO::Sara::format;
-
 
   int Device::convert_sm_version_to_cores(int major, int minor) const
   {

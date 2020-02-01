@@ -212,10 +212,10 @@ BOOST_FIXTURE_TEST_CASE(test_update_means, TestSegmentationSLIC)
     {
       // Check the color.
       const auto v = float(x + N * y) / (N * N);
-      ASSERT_NEAR(v, out_host_clusters[at(x, y)].color.x(), 1e-4f);
-      ASSERT_NEAR(v, out_host_clusters[at(x, y)].color.y(), 1e-4f);
-      ASSERT_NEAR(v, out_host_clusters[at(x, y)].color.z(), 1e-4f);
-      ASSERT_NEAR(0, out_host_clusters[at(x, y)].color.w(), 1e-4f);
+      BOOST_REQUIRE_SMALL((v - out_host_clusters[at(x, y)].color.x()), 1e-4f);
+      BOOST_REQUIRE_SMALL((v - out_host_clusters[at(x, y)].color.y()), 1e-4f);
+      BOOST_REQUIRE_SMALL((v - out_host_clusters[at(x, y)].color.z()), 1e-4f);
+      BOOST_REQUIRE_SMALL((0 - out_host_clusters[at(x, y)].color.w()), 1e-4f);
 
       // Check the number of points.
       BOOST_REQUIRE_EQUAL(B * B, out_host_clusters[at(x, y)].num_points);

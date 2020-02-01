@@ -9,8 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_SHAKTI_UTILITIES_DEVICEINFO_HPP
-#define DO_SHAKTI_UTILITIES_DEVICEINFO_HPP
+#pragma once
 
 #include <iostream>
 #include <vector>
@@ -69,6 +68,3 @@ namespace DO { namespace Shakti {
 
 } /* namespace Shakti */
 } /* namespace DO */
-
-
-#endif /* DO_SHAKTI_UTILITIES_DEVICEINFO_HPP */
