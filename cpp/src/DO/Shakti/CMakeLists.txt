@@ -15,6 +15,8 @@ option(SHAKTI_BUILD_TESTS "Build unit tests for Shakti libraries"
 option(SHAKTI_SELF_CONTAINED_INSTALLATION
   "Install C++ and Python libraries in a single self-contained directory"
   ${SARA_SELF_CONTAINED_INSTALLATION})
+option(SHAKTI_BUILD_SHARED_LIBS "Build shared libraries for DO-Sara libraries"
+  ${SARA_BUILD_SHARED_LIBS})
 
 # Find required dependencies from Sara.
 find_package(DO_Sara COMPONENTS Core REQUIRED)
@@ -37,5 +39,6 @@ foreach (library ${DO_Shakti_LIBRARIES})
 endforeach ()
 
 target_link_libraries(DO_Shakti_ImageProcessing DO::Shakti::Utilities)
+target_link_libraries(DO_Shakti_Segmentation DO::Shakti::Utilities)
 # target_compile_features(DO_Shakti_Utilities PRIVATE cxx_std_17)
 # set_property(TARGET DO_Shakti_Utilities PROPERTY CUDA_STANDARD 14)
