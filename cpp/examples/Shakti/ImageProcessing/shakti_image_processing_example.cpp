@@ -123,73 +123,68 @@ void draw_sift(const Vector128f& sift, float x, float y, float s,
 
 GRAPHICS_MAIN()
 {
-  try
+  auto devices = shakti::get_devices();
+  devices.front().make_current_device();
+  cout << devices.front() << endl;
+
+  // const auto video_filepath = src_path("Segmentation/orion_1.mpg");
+  // const string video_filepath = "/home/david/Desktop/test.mp4";
+  const auto video_filepath =
+      "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4";
+  cout << video_filepath << endl;
+  VideoStream video_stream{video_filepath};
+  auto video_frame_index = int{0};
+  auto video_frame = video_stream.frame();
+
+  auto in_frame = Image<float>{video_stream.sizes()};
+  auto out_frame = Image<float>{video_stream.sizes()};
+  out_frame.flat_array().fill(0);
+  auto apply_gaussian_filter = shakti::GaussianFilter{3.f};
+
+  // auto sifts = Image<Vector128f>{};
+  // auto sift_computer = shakti::DenseSiftComputer{};
+
+  auto cpu_timer = sara::Timer{};
+  auto cpu_time = 0.;
+
+  create_window(video_frame.sizes());
+
+  while (true)
   {
-    auto devices = shakti::get_devices();
-    devices.front().make_current_device();
-    cout << devices.front() << endl;
+    cpu_timer.restart();
+    if (!video_stream.read())
+      break;
+    cpu_time = cpu_timer.elapsed_ms();
+    std::cout << "[CPU video decoding time] " << cpu_time << "ms" << std::endl;
 
-    //const auto video_filepath = src_path("Segmentation/orion_1.mpg");
-    //const string video_filepath = "/home/david/Desktop/test.mp4";
-    const auto video_filepath =
-        "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4";
-    cout << video_filepath << endl;
-    VideoStream video_stream{video_filepath};
-    auto video_frame_index = int{0};
-    auto video_frame = video_stream.frame();
+    cpu_timer.restart();
+    std::transform(video_frame.begin(), video_frame.end(), in_frame.begin(),
+                   [](const Rgb8& c) -> float {
+                     auto gray = float{};
+                     sara::smart_convert_color(c, gray);
+                     return gray;
+                   });
+    cpu_time = cpu_timer.elapsed_ms();
+    std::cout << "[CPU color conversion time] " << cpu_time << "ms"
+              << std::endl;
 
-    auto in_frame = Image<float>{video_stream.sizes()};
-    auto out_frame = Image<float>{video_stream.sizes()};
-    auto apply_gaussian_filter = shakti::GaussianFilter{3.f};
+    shakti::tic();
+    apply_gaussian_filter(out_frame.data(), in_frame.data(),
+                          in_frame.sizes().data());
+    shakti::toc("GPU gaussian filter");
 
-    // auto sifts = Image<Vector128f>{};
-    // auto sift_computer = shakti::DenseSiftComputer{};
+    // shakti::tic();
+    // sifts.resize(in_frame.sizes());
+    // sift_computer(reinterpret_cast<float*>(sifts.data()), out_frame.data(),
+    //               out_frame.sizes().data());
+    // shakti::toc("Dense SIFT");
 
-    auto cpu_timer = sara::Timer{};
-    auto cpu_time = 0.;
+    display(out_frame);
+    // draw_sift(sifts(160, 120), 160, 120, 10.f);
+    // draw_sift(sifts(160, 120), 160, 120, 1.6f, 3.f);
 
-    create_window(video_frame.sizes());
-
-    while (true)
-    {
-      cpu_timer.restart();
-      if (!video_stream.read())
-        break;
-      cpu_time = cpu_timer.elapsed_ms();
-      std::cout << "[CPU video decoding time] " << cpu_time << "ms" << std::endl;
-
-      cpu_timer.restart();
-      std::transform(video_frame.begin(), video_frame.end(), in_frame.begin(),
-                     [](const Rgb8& c) -> float {
-                       auto gray = float{};
-                       sara::smart_convert_color(c, gray);
-                       return gray;
-                     });
-      cpu_time = cpu_timer.elapsed_ms();
-      std::cout << "[CPU color conversion time] " << cpu_time << "ms" << std::endl;
-
-      shakti::tic();
-      apply_gaussian_filter(out_frame.data(), in_frame.data(),
-                            in_frame.sizes().data());
-      shakti::toc("GPU gaussian filter");
-
-      // shakti::tic();
-      // sifts.resize(in_frame.sizes());
-      // sift_computer(reinterpret_cast<float*>(sifts.data()), out_frame.data(),
-      //               out_frame.sizes().data());
-      // shakti::toc("Dense SIFT");
-
-      display(out_frame);
-      // draw_sift(sifts(160, 120), 160, 120, 10.f);
-      // draw_sift(sifts(160, 120), 160, 120, 1.6f, 3.f);
-
-      ++video_frame_index;
-      cout << endl;
-    }
-  }
-  catch (std::exception& e)
-  {
-    cout << e.what() << endl;
+    ++video_frame_index;
+    cout << endl;
   }
 
   return 0;

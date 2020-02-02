@@ -14,12 +14,6 @@ if (MSVC)
     /wd4251)
   message(STATUS "  - Disabled annoying warnings in MSVC.")
 
-  add_definitions(/EHsc)
-  message(STATUS
-          "  - Using /EHsc: catches C++ exceptions only and tells the "
-          "compiler to assume that extern C functions never throw a C++ "
-          "exception.")
-
 # GNU compiler
 elseif (CMAKE_COMPILER_IS_GNUCXX)
   sara_substep_message(
