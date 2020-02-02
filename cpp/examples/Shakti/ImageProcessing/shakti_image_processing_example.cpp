@@ -129,8 +129,10 @@ GRAPHICS_MAIN()
     devices.front().make_current_device();
     cout << devices.front() << endl;
 
-    const auto video_filepath = src_path("Segmentation/orion_1.mpg");
+    //const auto video_filepath = src_path("Segmentation/orion_1.mpg");
     //const string video_filepath = "/home/david/Desktop/test.mp4";
+    const auto video_filepath =
+        "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4";
     cout << video_filepath << endl;
     VideoStream video_stream{video_filepath};
     auto video_frame_index = int{0};

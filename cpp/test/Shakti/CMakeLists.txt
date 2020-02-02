@@ -21,11 +21,10 @@ function (shakti_add_test)
     ${shakti_add_test_DEPENDENCIES})
 
   target_compile_features(${_test_name} PRIVATE cxx_std_14)
+
   set_target_properties(${_test_name}
     PROPERTIES
     CUDA_STANDARD 14
-    # CUDA_SEPARABLE_COMPILATION ON
-    # CUDA_RESOLVE_DEVICE_SYMBOLS ON
     FOLDER "Tests/Shakti")
 
   target_compile_definitions(${_test_name}

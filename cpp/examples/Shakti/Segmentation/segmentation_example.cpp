@@ -116,8 +116,8 @@ void demo_on_video()
 
   const auto video_filepath = src_path("Segmentation/orion_1.mpg");
   // const string video_filepath = "/home/david/Desktop/test.mp4";
-  // const auto video_filepath =
-  //     "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4";
+   //const auto video_filepath =
+   //    "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4";
   cout << video_filepath << endl;
   VideoStream video_stream{video_filepath};
 
@@ -137,10 +137,6 @@ void demo_on_video()
   {
     cout << "[Read frame] " << video_frame_index << "" << endl;
 
-#ifdef _WIN32
-    // For some reason, if I don't resize the image, it crashes on windows...
-    video_frame = enlarge(video_frame, 1.5);
-#endif
     rgba32f_image = video_frame.convert<Rgba32f>();
 
     if (!active_window())

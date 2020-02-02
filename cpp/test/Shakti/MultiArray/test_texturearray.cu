@@ -22,7 +22,7 @@ using namespace std;
 using namespace DO::Shakti;
 
 
-void check(const float *res, const Vector2i& sizes)
+void check(const float* res, const Vector2i& sizes)
 {
   for (int y = 0; y < sizes[1]; ++y)
   {
@@ -32,8 +32,7 @@ void check(const float *res, const Vector2i& sizes)
   }
 }
 
-__global__
-void copy_from_texture_to_global_memory(float *out)
+__global__ void copy_from_texture_to_global_memory(float* out)
 {
   const auto i = offset<2>();
   const auto p = coords<2>();
@@ -44,38 +43,28 @@ BOOST_AUTO_TEST_CASE(test_constructor)
 {
   const int w = 3;
   const int h = 4;
-  float in[] = {
-    0, 1, 2,
-    3, 4, 5,
-    6, 7, 8,
-    9, 10, 11
-  };
+  float in[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
 
-  TextureArray<float> in_array{ in, { w, h } };
+  TextureArray<float> in_array{in, {w, h}};
 
   float out[w * h];
-  in_array.copy_to_host(out) ;
-  BOOST_CHECK(equal(in, in + w*h, out));
-  //check(out, { w, h });
+  in_array.copy_to_host(out);
+  BOOST_CHECK(equal(in, in + w * h, out));
 }
 
 BOOST_AUTO_TEST_CASE(test_operation_from_cuda_array_to_multiarray)
 {
-  Vector2i sizes{ 3, 4 };
-  float in[] = {
-    0, 1, 2,
-    3, 4, 5,
-    6, 7, 8,
-    9, 10, 11
-  };
+  Vector2i sizes{3, 4};
+  float in[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
 
-  TextureArray<float> in_array{ in, { sizes[0], sizes[1] } };
-  MultiArray<float, 2> out_array{ { sizes[0], sizes[1] } };
+  TextureArray<float> in_array{in, {sizes[0], sizes[1]}};
+  MultiArray<float, 2> out_array{{sizes[0], sizes[1]}};
   {
     SHAKTI_SAFE_CUDA_CALL(cudaBindTextureToArray(in_float_texture, in_array));
     const auto block_size = default_block_size_2d();
     const auto grid_size = grid_size_2d(out_array);
-    copy_from_texture_to_global_memory<<<grid_size, block_size>>>(out_array.data());
+    copy_from_texture_to_global_memory<<<grid_size, block_size>>>(
+        out_array.data());
     SHAKTI_SAFE_CUDA_CALL(cudaUnbindTexture(in_float_texture));
   }
 

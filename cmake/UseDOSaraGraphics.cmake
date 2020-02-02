@@ -17,15 +17,18 @@ if (SARA_USE_FROM_SOURCE)
     sara_create_common_variables("Graphics")
     sara_generate_library("Graphics")
 
-    target_include_directories(DO_Sara_Graphics PUBLIC
+    target_include_directories(DO_Sara_Graphics
+      PUBLIC
       ${Qt5Widgets_INCLUDE_DIRS}
       ${Qt5OpenGL_INCLUDE_DIRS}
       ${DO_Sara_INCLUDE_DIR})
     target_link_libraries(DO_Sara_Graphics
-      PUBLIC Qt5::Widgets Qt5::OpenGL
-             ${OPENGL_LIBRARIES})
+      PUBLIC
+      Qt5::Widgets Qt5::OpenGL
+      ${OPENGL_LIBRARIES})
     target_compile_definitions(DO_Sara_Graphics
-      PRIVATE -DGL_SILENCE_DEPRECATION)
+      PRIVATE
+      -DGL_SILENCE_DEPRECATION)
 
     if (WIN32)
       target_link_libraries(DO_Sara_Graphics PRIVATE Qt5::WinMain)

@@ -279,8 +279,8 @@ macro (sara_append_library _library_name
     else ()
       set(_library_defs "DO_SARA_STATIC")
     endif ()
-    set_target_properties(DO_Sara_${_library_name}
-      PROPERTIES COMPILE_DEFINITIONS ${_library_defs})
+    target_compile_definitions(DO_Sara_${_library_name}
+      PUBLIC ${_library_defs})
 
     # Specify where to install the static library.
     install(

@@ -105,9 +105,6 @@ sara_step_message("DO_SaraConfig.cmake running for project '${PROJECT_NAME}'")
 
 # List the compile flags needed by Sara.
 set(SARA_DEFINITIONS "-DSRCDIR=${CMAKE_CURRENT_SOURCE_DIR}")
-if (SARA_USE_STATIC_LIBS OR NOT SARA_BUILD_SHARED_LIBS)
-  add_definitions("-DDO_SARA_STATIC")
-endif ()
 
 if (NOT DO_Sara_FIND_COMPONENTS)
   set(DO_Sara_USE_COMPONENTS ${DO_Sara_COMPONENTS})

@@ -171,14 +171,22 @@ macro (shakti_append_library _library_name
   set_property(GLOBAL PROPERTY _DO_Shakti_${_library_name}_INCLUDED 1)
 
   # 3. Create the project:
-  cuda_add_library(DO_Shakti_${_library_name}
+  # if (SHAKTI_BUILD_SHARED_LIBS)
+  #   set(_library_type SHARED)
+  # else ()
+  #   set(_library_type STATIC)
+  # endif ()
+  # Force to build static libraries for now: for some reason, it does not work
+  # on Windows.
+  cuda_add_library(DO_Shakti_${_library_name} STATIC
     ${_hdr_files} ${_cpp_files} ${_cu_files})
   add_library(DO::Shakti::${_library_name} ALIAS DO_Shakti_${_library_name})
 
   set_target_properties(DO_Shakti_${_library_name}
     PROPERTIES
     CXX_STANDARD 14
-    CXX_STANDARD_REQUIRED YES)
+    CXX_STANDARD_REQUIRED YES
+    CUDA_SEPARABLE_COMPILATION ON)
 
   # 4. Include third-party library directories.
   if (NOT "${_include_dirs}" STREQUAL "")
@@ -221,12 +229,10 @@ macro (shakti_append_library _library_name
     if (SHAKTI_BUILD_SHARED_LIBS)
       set(_library_defs "DO_SHAKTI_EXPORTS")
     else ()
-      set(_library_defs "DO_SHAKTI_STATIC")
+    set(_library_defs "DO_SHAKTI_STATIC")
     endif ()
-    set_target_properties(
-      DO_Shakti_${_library_name}
-      PROPERTIES
-      COMPILE_DEFINITIONS ${_library_defs})
+    target_compile_definitions(DO_Shakti_${_library_name}
+      PUBLIC ${_library_defs})
 
     # Specify where to install the static library.
     install(
@@ -239,7 +245,7 @@ macro (shakti_append_library _library_name
   # 5. Put the library into the folder "DO Shakti Libraries".
   set_property(
     TARGET DO_Shakti_${_library_name} PROPERTY
-    FOLDER "DO Shakti Libraries")
+    FOLDER "Libraries/Shakti")
 endmacro ()
 
 
@@ -287,5 +293,5 @@ function (shakti_add_example)
     COMPILE_FLAGS ${SARA_DEFINITIONS}
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-  set_property(TARGET ${EXAMPLE_NAME} PROPERTY FOLDER "DO Shakti Examples")
+  set_property(TARGET ${EXAMPLE_NAME} PROPERTY FOLDER "Examples/Shakti")
 endfunction ()
