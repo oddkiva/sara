@@ -17,7 +17,7 @@ endif ()
 
 add_subdirectory(Sara)
 
-if (CMAKE_CUDA_COMPILER)
+if (CUDA_FOUND)
   sara_message("Building DO::Shakti Libraries")
   add_subdirectory(Shakti)
 else ()

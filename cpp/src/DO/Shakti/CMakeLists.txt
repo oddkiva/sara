@@ -24,7 +24,6 @@ find_package(DO_Sara COMPONENTS Core REQUIRED)
 # Use custom CMake macros.
 set(DO_Shakti_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(DO_Shakti_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-include(shakti_macros)
 shakti_dissect_version()
 
 # Group projects by category.
@@ -40,5 +39,3 @@ endforeach ()
 
 target_link_libraries(DO_Shakti_ImageProcessing DO::Shakti::Utilities)
 target_link_libraries(DO_Shakti_Segmentation DO::Shakti::Utilities)
-# target_compile_features(DO_Shakti_Utilities PRIVATE cxx_std_17)
-# set_property(TARGET DO_Shakti_Utilities PROPERTY CUDA_STANDARD 14)
