@@ -262,36 +262,22 @@ endmacro ()
 
 
 function (shakti_add_example)
-  # Get the test executable name.
-  list(GET ARGN 0 EXAMPLE_NAME)
-  message(STATUS "EXAMPLE NAME = ${EXAMPLE_NAME}")
+  set(_options OPTIONAL)
+  set(_executable_name NAME)
+  set(_multiple_value_args SOURCES DEPENDENCIES)
+  cmake_parse_arguments(example
+    "${_options}" "${_executable_name}" "${_multiple_value_args}" ${ARGN})
 
-  # Get the list of source files.
-  list(REMOVE_ITEM ARGN ${EXAMPLE_NAME})
-  message(STATUS "SOURCE FILES = ${ARGN}")
+  message(STATUS "NAME = shakti_${example_NAME}")
+  message(STATUS "SOURCES = ${example_SOURCES}")
+  message(STATUS "DEPENDENCIES = ${example_DEPENDENCIES}")
 
-  # Split the list of source files in two sub-lists:
-  # - list of CUDA source files.
-  # - list of regular C++ source files.
-  set (CUDA_SOURCE_FILES "")
-  set (CPP_SOURCE_FILES "")
-  foreach (SOURCE ${ARGN})
-    if (${SOURCE} MATCHES "(.*).cu$")
-      list(APPEND CUDA_SOURCE_FILES ${SOURCE})
-    else ()
-      list(APPEND CPP_SOURCE_FILES ${SOURCE})
-    endif()
-  endforeach ()
-  message(STATUS "CUDA_SOURCE_FILES = ${CUDA_SOURCE_FILES}")
-  message(STATUS "CPP_SOURCE_FILES = ${CPP_SOURCE_FILES}")
+  cuda_add_executable(${example_NAME} ${example_SOURCES})
+  target_link_libraries(${example_NAME} ${example_DEPENDENCIES})
 
-  # Add the C++ test executable.
-  cuda_add_executable(${EXAMPLE_NAME} ${CPP_SOURCE_FILES} ${CUDA_SOURCE_FILES})
-
-  set_target_properties(${EXAMPLE_NAME}
+  set_target_properties(${example_NAME}
     PROPERTIES
     COMPILE_FLAGS ${SARA_DEFINITIONS}
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-
-  set_property(TARGET ${EXAMPLE_NAME} PROPERTY FOLDER "Examples/Shakti")
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+    FOLDER "Examples/Shakti")
 endfunction ()

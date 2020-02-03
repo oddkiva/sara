@@ -11,12 +11,14 @@
 
 #pragma once
 
-#include <iostream>
-#include <stdexcept>
+#include <DO/Shakti/Utilities/StringFormat.hpp>
+
+#include <termcolor/termcolor.hpp>
 
 #include <cuda_runtime_api.h>
 
-#include <DO/Shakti/Utilities/StringFormat.hpp>
+#include <iostream>
+#include <stdexcept>
 
 
 #define SHAKTI_SAFE_CUDA_CALL(err)                                             \
@@ -32,23 +34,36 @@
   SHAKTI_CHECK_LAST_ERROR();                                                   \
   SHAKTI_SYNCHRONIZE()
 
+#define SHAKTI_STDOUT                                                          \
+  std::cout << termcolor::bold << termcolor::green << "[" << __FUNCTION__      \
+            << ":" << __LINE__ << "] " << termcolor::reset
+
+#define SHAKTI_STDERR                                                          \
+  std::cerr << termcolor::bold << termcolor::red << "[" << __FUNCTION__ << ":" \
+            << __LINE__ << "] " << termcolor::reset
+
+
 namespace DO { namespace Shakti {
 
-  inline void __check_cuda_error(cudaError err, const char *file, const int line)
+  inline void __check_cuda_error(cudaError err, const char* file,
+                                 const int line)
   {
     if (err != cudaSuccess)
     {
+      throw std::runtime_error{
+          Shakti::format("[SYNCHRONIZATION] CUDA Runtime API error = %02d from "
+                         "file <%s>, line %i: %s\n",
+                         err, file, line, cudaGetErrorString(err))};
+
       std::cerr
           << Shakti::format(
                  "CUDA Runtime API error = %02d from file <%s>, line %i: %s\n",
                  err, file, line, cudaGetErrorString(err))
           << std::endl;
-
-      throw std::runtime_error{Shakti::format(
-          "CUDA Runtime API error = %02d from file <%s>, line %i: %s\n", err,
-          file, line, cudaGetErrorString(err))};
+      std::abort();
     }
 
+#ifdef SYNCHRONIZE_CUDA_DEVICE
     err = cudaDeviceSynchronize();
     if (err != cudaSuccess)
     {
@@ -57,13 +72,9 @@ namespace DO { namespace Shakti {
                        "file <%s>, line %i: %s\n",
                        err, file, line, cudaGetErrorString(err))
                 << std::endl;
-      throw std::runtime_error{
-          Shakti::format("[SYNCHRONIZATION] CUDA Runtime API error = %02d from "
-                         "file <%s>, line %i: %s\n",
-                         err, file, line, cudaGetErrorString(err))};
+      std::abort();
     }
-
+#endif
   }
 
-} /* namespace Shakti */
-} /* namespace DO */
+}}  // namespace DO::Shakti

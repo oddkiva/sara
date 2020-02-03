@@ -46,10 +46,7 @@ namespace DO { namespace Shakti {
                                       const float* kernel, int kernel_size,
                                       const int* sizes)
   {
-    TextureArray<float> in_array{
-        in,
-        sizes,
-    };
+    TextureArray<float> in_array{in, sizes};
     MultiArray<float, 2> out_array{sizes};
 
     const auto block_size = default_block_size_2d();
@@ -73,92 +70,91 @@ namespace DO { namespace Shakti {
 
 namespace DO { namespace Shakti {
 
-  void GaussianFilter::set_sigma(float sigma)
-  {
-    auto kernel_size = static_cast<int>(2.f * _truncation_factor * sigma + 1.f);
-    kernel_size = std::max(3, kernel_size);
-    if (kernel_size % 2 == 0)
-      ++kernel_size;
-
-    auto sum = float{0.f};
-    _kernel.resize(kernel_size);
-    for (auto i = int{0}; i < kernel_size; ++i)
+    void GaussianFilter::set_sigma(float sigma)
     {
-      auto x = i - kernel_size / 2;
-      _kernel[i] = exp(-x * x / (2.f * sigma * sigma));
-      sum += _kernel[i];
+      auto kernel_size =
+          static_cast<int>(2.f * _truncation_factor * sigma + 1.f);
+      kernel_size = std::max(3, kernel_size);
+      if (kernel_size % 2 == 0)
+        ++kernel_size;
+
+      auto sum = float{0.f};
+      _kernel.resize(kernel_size);
+      for (auto i = int{0}; i < kernel_size; ++i)
+      {
+        auto x = i - kernel_size / 2;
+        _kernel[i] = exp(-x * x / (2.f * sigma * sigma));
+        sum += _kernel[i];
+      }
+      for (auto i = int{0}; i < kernel_size; ++i)
+        _kernel[i] /= sum;
+
+      SHAKTI_SAFE_CUDA_CALL(cudaMemcpyToSymbol(Shakti::kernel, _kernel.data(),
+                                               sizeof(float) * _kernel.size()));
+      SHAKTI_SYNCHRONIZED_CHECK();
+
+      SHAKTI_SAFE_CUDA_CALL(
+          cudaMemcpyToSymbol(Shakti::kernel_size, &kernel_size, sizeof(int)));
+      SHAKTI_SYNCHRONIZED_CHECK();
     }
-    for (auto i = int{0}; i < kernel_size; ++i)
-      _kernel[i] /= sum;
 
-    SHAKTI_SAFE_CUDA_CALL(cudaMemcpyToSymbol(Shakti::kernel, _kernel.data(),
-                                             sizeof(float) * _kernel.size()));
-    SHAKTI_SAFE_CUDA_CALL(
-        cudaMemcpyToSymbol(Shakti::kernel_size, &kernel_size, sizeof(int)));
-  }
-
-  void GaussianFilter::operator()(float* out, const float* in,
-                                  const int* sizes) const
-  {
-    try
+    void GaussianFilter::operator()(float* out, const float* in,
+                                    const int* sizes) const
     {
       TextureArray<float> in_array{
           in, {sizes[0], sizes[1]}, sizes[0] * sizeof(float)};
       MultiArray<float, 2> out_array{{sizes[0], sizes[1]}};
 
-      const auto block_size = default_block_size_2d();
-      const auto grid_size = grid_size_2d(out_array);
+      // Don't do that for now:
+      // const auto block_size = default_block_size_2d();
 
-      SARA_DEBUG << "bind texture" << std::endl;
-      SHAKTI_SAFE_CUDA_CALL(cudaBindTextureToArray(in_float_texture, in_array));
-      SHAKTI_SYNCHRONIZED_CHECK();
+      // TEMPORARY WORKAROUND so that CUDA does not with illegal memory access
+      // for image sizes 1920 x 1080!
+      const auto block_size = dim3{16, 8};
+      const auto grid_size = grid_size_2d(out_array, block_size);
+
+      // Sanity check.
+      if ((grid_size.x * block_size.x != out_array.padded_width()) ||
+          (grid_size.y * block_size.y != out_array.height()))
       {
-      //  SARA_DEBUG << "col conv" << std::endl;
-      //  apply_column_based_convolution<<<grid_size, block_size>>>(
-      //      out_array.data());
-      //  SHAKTI_SYNCHRONIZED_CHECK();
-
-      //  SARA_DEBUG << "input copy from out" << std::endl;
-      //  in_array.copy_from(out_array.data(), out_array.sizes(),
-      //                     out_array.pitch(), cudaMemcpyDeviceToDevice);
-      //  SHAKTI_SYNCHRONIZED_CHECK();
-
-      //  SARA_DEBUG << "row conv" << std::endl;
-      //  apply_row_based_convolution<<<grid_size, block_size>>>(
-      //      out_array.data());
-      //  SHAKTI_SYNCHRONIZED_CHECK();
+        SHAKTI_STDOUT << "TODO: the image size is not supported in the "
+                         "current implementation!"
+                      << std::endl;
+        std::abort();
       }
-      SARA_DEBUG << "unbind" << std::endl;
+
+      SHAKTI_SAFE_CUDA_CALL(cudaBindTextureToArray(in_float_texture, in_array));
+      {
+        apply_column_based_convolution<<<grid_size, block_size>>>(
+            out_array.data());
+        in_array.copy_from(out_array.data(), out_array.sizes(),
+                           out_array.pitch(), cudaMemcpyDeviceToDevice);
+        apply_row_based_convolution<<<grid_size, block_size>>>(
+            out_array.data());
+      }
       SHAKTI_SAFE_CUDA_CALL(cudaUnbindTexture(in_float_texture));
-      SHAKTI_SYNCHRONIZED_CHECK();
 
-      //SARA_DEBUG << "copy device to host" << std::endl;
-      //out_array.copy_to_host(out);
-      //SHAKTI_SYNCHRONIZED_CHECK();
+      out_array.copy_to_host(out);
     }
-    catch (const std::exception& e)
+
+    MultiArray<float, 2> GaussianFilter::
+    operator()(TextureArray<float>& in) const
     {
-      SARA_DEBUG << e.what() << std::endl;
+      MultiArray<float, 2> out{in.sizes()};
+
+      const auto block_size = default_block_size_2d();
+      const auto grid_size = grid_size_2d(out);
+
+      SHAKTI_SAFE_CUDA_CALL(cudaBindTextureToArray(in_float_texture, in));
+      {
+        apply_column_based_convolution<<<grid_size, block_size>>>(out.data());
+        in.copy_from(out.data(), out.sizes(), out.pitch(),
+                     cudaMemcpyDeviceToDevice);
+        apply_row_based_convolution<<<grid_size, block_size>>>(out.data());
+      }
+      SHAKTI_SAFE_CUDA_CALL(cudaUnbindTexture(in_float_texture));
+
+      return out;
     }
-  }
-
-  MultiArray<float, 2> GaussianFilter::operator()(TextureArray<float>& in) const
-  {
-    MultiArray<float, 2> out{in.sizes()};
-
-    const auto block_size = default_block_size_2d();
-    const auto grid_size = grid_size_2d(out);
-
-    SHAKTI_SAFE_CUDA_CALL(cudaBindTextureToArray(in_float_texture, in));
-    {
-      apply_column_based_convolution<<<grid_size, block_size>>>(out.data());
-      in.copy_from(out.data(), out.sizes(), out.pitch(),
-                   cudaMemcpyDeviceToDevice);
-      apply_row_based_convolution<<<grid_size, block_size>>>(out.data());
-    }
-    SHAKTI_SAFE_CUDA_CALL(cudaUnbindTexture(in_float_texture));
-
-    return out;
-  }
 
 }}  // namespace DO::Shakti
