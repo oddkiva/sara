@@ -43,7 +43,12 @@ BOOST_AUTO_TEST_CASE(test_constructor)
 {
   const int w = 3;
   const int h = 4;
-  float in[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
+  float in[] = {
+    0, 1, 2,
+    3, 4, 5,
+    6, 7, 8,
+    9, 10, 11
+  };
 
   TextureArray<float> in_array{in, {w, h}};
 
@@ -55,7 +60,12 @@ BOOST_AUTO_TEST_CASE(test_constructor)
 BOOST_AUTO_TEST_CASE(test_operation_from_cuda_array_to_multiarray)
 {
   Vector2i sizes{3, 4};
-  float in[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
+  float in[] = {
+    0, 1, 2,
+    3, 4, 5,
+    6, 7, 8,
+    9, 10, 11
+  };
 
   TextureArray<float> in_array{in, {sizes[0], sizes[1]}};
   MultiArray<float, 2> out_array{{sizes[0], sizes[1]}};
