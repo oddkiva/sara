@@ -1,9 +1,3 @@
-cmake_minimum_required(VERSION 2.6)
-
-project(DO_FeatureDetectors_Examples)
-
-message(STATUS "  - DO_FeatureDetectors_Examples")
-
 find_package(DO_Sara COMPONENTS Graphics Features FeatureDetectors REQUIRED)
 if (UNIX)
   find_package(HDF5 COMPONENTS CXX REQUIRED)
@@ -16,7 +10,7 @@ macro (sara_add_example example)
   target_link_libraries(${example} ${DO_Sara_LIBRARIES})
   set_property(TARGET ${example}
     PROPERTY
-    FOLDER "DO Sara Examples/FeatureDetectors")
+    FOLDER "Examples/Sara/FeatureDetectors")
 endmacro ()
 
 file(GLOB example_SOURCE_FILES FILES *example.cpp)

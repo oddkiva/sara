@@ -1,6 +1,7 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.10)
 
-project(Sara CXX)
+project(Sara LANGUAGES CXX)
+
 
 # Set the version major and minor manually.
 set(DO_Sara_VERSION_MAJOR 1)
@@ -33,16 +34,34 @@ option(SARA_SELF_CONTAINED_INSTALLATION
   "Install C++ and Python libraries in a single self contained directory" OFF)
 
 
-# Project wide dependencies.
-find_package(CUDA 10.0)
-
-
 # Set the following internal switches to build Sara.
 set(SARA_USE_FROM_SOURCE TRUE CACHE INTERNAL "Build Sara libraries")
 set(BUILD_SHARED_LIBS ${SARA_BUILD_SHARED_LIBS})
 
 # Add Sara to the CMake module path.
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
+
+# We are in 2020 now: let's all look to the future please.
+set(CMAKE_CXX_STANDARD 14)
+
+# Use CUDA if available.
+#
+# Fix the modern way to use CUDA.
+#
+# include(CheckLanguage)
+# check_language(CUDA)
+# if (CMAKE_CUDA_COMPILER)
+#   enable_language(CUDA)
+# else ()
+#   message(STATUS "No CUDA support!")
+# endif()
+set(CMAKE_CUDA_FLAGS ”-arch=sm_60”)
+find_package(CUDA 10.0)
+if (CUDA_FOUND)
+  set(CUDA_VERBOSE_BUILD ON)
+  include(shakti_macros)
+endif ()
 
 # Activate the usage of CCache to speed up builds if available.
 # Configure Sara library version.

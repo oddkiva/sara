@@ -34,8 +34,9 @@ if (CUDA_FOUND AND TensorRT_FOUND)
 
     target_link_libraries(${filename}
       ${Boost_LIBRARIES}
-      ${CUDA_LIBRARIES}
-      ${TensorRT_LIBRARIES})
+      ${TensorRT_LIBRARIES}
+      ${DO_Sara_LIBRARIES}
+      DO::Shakti::Utilities)
 
     set_target_properties(${filename}
       PROPERTIES
@@ -43,7 +44,7 @@ if (CUDA_FOUND AND TensorRT_FOUND)
       RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
     set_property(TARGET ${filename} PROPERTY
-      FOLDER "DO Sara Tests/DRAFTS/NeuralNetworks")
+      FOLDER "Tests/DRAFTS/NeuralNetworks")
 
     add_test(NAME ${filename} COMMAND $<TARGET_FILE:${filename}>)
   endforeach()

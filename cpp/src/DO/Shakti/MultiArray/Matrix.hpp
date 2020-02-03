@@ -9,19 +9,18 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_SHAKTI_MULTIARRAY_MATRIX_HPP
-#define DO_SHAKTI_MULTIARRAY_MATRIX_HPP
+#pragma once
+
+#include <DO/Shakti/Utilities/ErrorCheck.hpp>
 
 #include <iostream>
 #include <stdexcept>
 #include <vector>
 
-#include <DO/Shakti/Utilities/ErrorCheck.hpp>
-
 
 namespace DO { namespace Shakti {
 
-  //! \brief Matrix class.
+  //! @brief Matrix class.
   template <typename T, int M, int N>
   class Matrix
   {
@@ -509,6 +508,3 @@ namespace DO { namespace Shakti {
 
 } /* namespace Shakti */
 } /* namespace DO */
-
-
-#endif /* DO_SHAKTI_MULTIARRAY_MATRIX_HPP */

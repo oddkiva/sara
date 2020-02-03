@@ -24,11 +24,11 @@ namespace DO { namespace Shakti {
   __global__
   void apply_column_based_convolution(T *dst)
   {
-    const int i{offset<2>()};
-    const Vector2i p{coords<2>()};
+    const auto i = offset<2>();
+    const auto p = coords<2>();
+    const auto kernel_radius = kernel_size / 2;
 
     auto convolved_value = T{0};
-    auto kernel_radius = kernel_size / 2;
 #pragma unroll
     for (int i = 0; i < kernel_size; ++i)
       convolved_value +=
@@ -42,9 +42,9 @@ namespace DO { namespace Shakti {
   {
     const auto i = offset<2>();
     const auto p = coords<2>();
+    const auto kernel_radius = kernel_size / 2;
 
     auto convolved_value = T{0};
-    auto kernel_radius = kernel_size / 2;
 #pragma unroll
     for (int i = 0; i < kernel_size; ++i)
       convolved_value +=

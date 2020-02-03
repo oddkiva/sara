@@ -9,15 +9,16 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_SHAKTI_MULTIARRAY_MULTIARRAY_HPP
-#define DO_SHAKTI_MULTIARRAY_MULTIARRAY_HPP
+#pragma once
+
+#include <DO/Shakti/MultiArray/MultiArrayView.hpp>
+
+#include "DO/Sara/Core/Meta.hpp"
 
 #include <iostream>
 #include <stdexcept>
 #include <vector>
 
-#include <DO/Shakti/MultiArray/MultiArrayView.hpp>
-#include "DO/Sara/Core/Meta.hpp"
 
 
 namespace DO { namespace Shakti {
@@ -205,6 +206,3 @@ namespace DO { namespace Shakti {
 
 } /* namespace Shakti */
 } /* namespace DO */
-
-
-#endif /* DO_SHAKTI_MULTIARRAY_MULTIARRAY_HPP */

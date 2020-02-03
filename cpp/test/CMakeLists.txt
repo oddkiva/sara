@@ -17,9 +17,9 @@ endif ()
 
 add_subdirectory(Sara)
 
-if (NOT CUDA_FOUND)
-  sara_message("Cannot use DO::Shakti libraries!")
-else ()
+if (CUDA_FOUND)
   sara_message("Building DO::Shakti Libraries")
   add_subdirectory(Shakti)
+else ()
+  sara_message("Cannot use DO::Shakti libraries!")
 endif ()

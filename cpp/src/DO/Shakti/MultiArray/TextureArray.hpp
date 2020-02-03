@@ -15,6 +15,7 @@
 #include <cuda_runtime.h>
 
 #include <DO/Shakti/MultiArray/Matrix.hpp>
+#include <DO/Shakti/MultiArray/MultiArray.hpp>
 
 
 namespace DO { namespace Shakti {
@@ -117,8 +118,25 @@ namespace DO { namespace Shakti {
     inline void copy_to_host(T *host_data)
     {
       SHAKTI_SAFE_CUDA_CALL(cudaMemcpy2DFromArray(
-        host_data, _sizes[0] * sizeof(T), _array,
-        0, 0, _sizes[0]*sizeof(float), _sizes[1], cudaMemcpyDeviceToHost));
+          host_data,                  // destination pointer
+          _sizes[0] * sizeof(T),      // destination pitch
+          _array,                     // source
+          0, 0,                       // source (x, y)-offset
+          _sizes[0] * sizeof(float),  // source width in bytes
+          _sizes[1],                  // source height
+          cudaMemcpyDeviceToHost));
+    }
+
+    __host__
+    inline void copy_to_device(MultiArray<T, 2>& device_array)
+    {
+      SHAKTI_SAFE_CUDA_CALL(cudaMemcpy2DFromArray(
+          device_array.data(), device_array.pitch(),  // destination
+          _array,                                     // source array
+          0, 0,                                       // source (x, y)-offset
+          _sizes[0] * sizeof(float),                  // source width in bytes
+          _sizes[1],                                  // source height
+          cudaMemcpyDeviceToDevice));
     }
 
     __host__
@@ -134,8 +152,8 @@ namespace DO { namespace Shakti {
     }
 
   protected:
-    cudaArray *_array{ nullptr };
-    Vector2i _sizes{ Vector2i::Zero() };
+    cudaArray* _array{nullptr};
+    Vector2i _sizes{Vector2i::Zero()};
   };
 
 } /* namespace Shakti */

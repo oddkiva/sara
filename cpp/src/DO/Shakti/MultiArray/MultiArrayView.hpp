@@ -282,13 +282,13 @@ namespace DO { namespace Shakti {
 
   protected: /* data members. */
     //! @brief Internal storage array.
-    value_type *_data{ nullptr };
+    value_type* _data{nullptr};
     //! @brief Vector of size along each dimension.
-    vector_type _sizes{ vector_type::Zero() };
+    vector_type _sizes{vector_type::Zero()};
     //! @brief Vector of stride for each dimension.
-    vector_type _strides{ vector_type::Zero() };
+    vector_type _strides{vector_type::Zero()};
     //! @brief Pitch size in number of bytes.
-    size_type _pitch{ 0 };
+    size_type _pitch{};
   };
 
 } /* namespace Shakti */

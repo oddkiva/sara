@@ -166,7 +166,7 @@ GRAPHICS_MAIN()
 {
   try
   {
-    auto image_path = src_path("examples/Segmentation/sunflower_field.jpg");
+    auto image_path = src_path("Segmentation/sunflower_field.jpg");
     auto image = imread<float>(image_path);
 
     image = reduce(image, Vector2i{640, 480});
