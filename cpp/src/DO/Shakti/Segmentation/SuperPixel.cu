@@ -298,7 +298,6 @@ namespace DO { namespace Shakti {
         (sizes.x() + _image_block_sizes.x - 1) / _image_block_sizes.x,
         // Number of clusters per rows.
         (sizes.y() + _image_block_sizes.y - 1) / _image_block_sizes.y);
-    SHAKTI_STDOUT << "num_clusters = " << num_clusters << std::endl;
 
     // Initialize the clusters with the block centers.
     MultiArray<Cluster, 2> clusters{num_clusters};
