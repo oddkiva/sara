@@ -46,17 +46,15 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_CXX_STANDARD 14)
 
 # Use CUDA if available.
-#
-# Fix the modern way to use CUDA.
-#
-# include(CheckLanguage)
-# check_language(CUDA)
-# if (CMAKE_CUDA_COMPILER)
-#   enable_language(CUDA)
-# else ()
-#   message(STATUS "No CUDA support!")
-# endif()
-set(CMAKE_CUDA_FLAGS ”-arch=sm_60”)
+include(CheckLanguage)
+check_language(CUDA)
+if (CMAKE_CUDA_COMPILER)
+  enable_language(CUDA)
+else ()
+  message(STATUS "No CUDA support!")
+endif()
+# set(CMAKE_CUDA_FLAGS -arch=sm_60)
+# set(CMAKE_CUDA_FLAGS -arch=sm_75)
 find_package(CUDA 10.0)
 if (CUDA_FOUND)
   set(CUDA_VERBOSE_BUILD ON)
