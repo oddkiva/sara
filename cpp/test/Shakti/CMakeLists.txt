@@ -16,6 +16,9 @@ function (shakti_add_test)
   set (_test_name shakti_${_filename})
 
   cuda_add_executable(${_test_name} ${shakti_add_test_SOURCES})
+  target_include_directories(${_test_name}
+    PRIVATE
+    ${Boost_INCLUDE_DIR})
   target_link_libraries(${_test_name}
     ${Boost_LIBRARIES}
     ${shakti_add_test_DEPENDENCIES})

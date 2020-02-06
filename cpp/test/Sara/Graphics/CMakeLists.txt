@@ -18,9 +18,10 @@ file(GLOB test_graphics_SOURCE_FILES FILES test_graphics_*.cpp)
 foreach (file ${test_graphics_SOURCE_FILES})
   get_filename_component(filename "${file}" NAME_WE)
   sara_add_test(
-    ${filename} ${file}
-    "${DO_Sara_LIBRARIES};Qt5::Test;test_graphics_common"
-    "Graphics")
-  set_target_properties(${filename} PROPERTIES
-                        COMPILE_FLAGS ${SARA_DEFINITIONS})
+    NAME ${filename}
+    SOURCES ${file}
+    DEPENDENCIES ${DO_Sara_LIBRARIES} Qt5::Test test_graphics_common
+    FOLDER Graphics)
+  target_compile_definitions(${filename}
+    PRIVATE ${SARA_DEFINITIONS})
 endforeach ()

@@ -4,8 +4,6 @@ set(Boost_USE_MULTITHREADED ON)
 find_package(Boost
   COMPONENTS filesystem serialization system unit_test_framework
   REQUIRED)
-include_directories(${Boost_INCLUDE_DIR})
-add_definitions(-DBOOST_ALL_NO_LIB)
 
 # Visual leak detector.
 if (WIN32 AND SARA_USE_VLD)

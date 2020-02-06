@@ -14,7 +14,11 @@ endforeach()
 
 foreach (file ${test_neuralnetworks_SOURCE_FILES})
   get_filename_component(filename "${file}" NAME_WE)
-  sara_add_test(${filename} ${file} "${DO_Sara_LIBRARIES}" "DRAFTS/NeuralNetworks")
+  sara_add_test(
+    NAME ${filename}
+    SOURCES ${file}
+    DEPENDENCIES ${DO_Sara_LIBRARIES}
+    FOLDER "DRAFTS/NeuralNetworks")
 endforeach ()
 
 if (CUDA_FOUND AND TensorRT_FOUND)
