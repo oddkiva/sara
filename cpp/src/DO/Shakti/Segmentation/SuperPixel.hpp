@@ -34,7 +34,7 @@ namespace DO { namespace Shakti {
   {
   public:
     //! @brief Constructor.
-    SegmentationSLIC();
+    SegmentationSLIC(const Vector2i& cluster_sizes = {16, 16});
 
     //! @{
     //! @brief Getters.

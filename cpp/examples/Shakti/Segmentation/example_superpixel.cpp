@@ -62,28 +62,18 @@ GRAPHICS_MAIN()
   auto means = vector<Rgba32f>{};
   auto cardinality = vector<int>{};
 
-  shakti::SegmentationSLIC slic;
+  const auto cluster_sizes = shakti::Vector2i{32, 30};
+  shakti::SegmentationSLIC slic{cluster_sizes};
   slic.set_distance_weight(1e-4f);
 
   while (video_stream.read())
   {
     cout << "[Read frame] " << video_frame_index << "" << endl;
 
-    if (video_frame_index % 5 != 0)
-    {
-      ++video_frame_index;
-      continue;
-    }
-
     rgba32f_image = video_frame.convert<Rgba32f>();
 
-    // This is a workaround because the algorithm only supports image sizes that
-    // are multiple of 16.
-    if constexpr (!use_low_resolution_video)
-      rgba32f_image = resize(rgba32f_image, {1920, 1088});
-
     if (!active_window())
-      create_window(rgba32f_image.sizes());
+      set_active_window(create_window(rgba32f_image.sizes()));
 
     sara::Timer t;
     t.restart();

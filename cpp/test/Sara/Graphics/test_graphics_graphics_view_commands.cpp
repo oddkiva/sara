@@ -17,7 +17,7 @@
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/Graphics/GraphicsUtilities.hpp>
 
-#include "event_scheduler.cpp"
+#include "event_scheduler.hpp"
 
 
 using namespace DO::Sara;

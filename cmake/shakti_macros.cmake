@@ -226,13 +226,13 @@ macro (shakti_append_library _library_name
       OUTPUT_NAME_DEBUG ${_library_output_name_debug})
 
     # Set correct compile definitions when building the libraries.
-    if (SHAKTI_BUILD_SHARED_LIBS)
-      set(_library_defs "DO_SHAKTI_EXPORTS")
-    else ()
-    set(_library_defs "DO_SHAKTI_STATIC")
-    endif ()
+    # if (SHAKTI_BUILD_SHARED_LIBS)
+    #   target_compile_definitions(DO_Shakti_${_library_name}
+    #     PRIVATE DO_SHAKTI_EXPORTS)
+    # else ()
     target_compile_definitions(DO_Shakti_${_library_name}
-      PUBLIC ${_library_defs})
+      PUBLIC DO_SHAKTI_STATIC)
+    # endif ()
 
     # Specify where to install the static library.
     install(

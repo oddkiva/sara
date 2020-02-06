@@ -54,7 +54,6 @@ BOOST_AUTO_TEST_CASE(test_histogram)
       for (int x = 0; x < histogram.width(); ++x)
       {
         const auto coord = Vector3i{ x, y, z };
-        cout << coord.transpose() << endl;
         if (coord == Vector3i::Zero())
           BOOST_REQUIRE_CLOSE(23.f/(image.size()), histogram(x,y,z), 1e-6f);
         else if (coord == Vector3i{ 2, 0, 0 })

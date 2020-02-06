@@ -275,12 +275,12 @@ macro (sara_append_library _library_name
 
     # Set correct compile definitions when building the libraries.
     if (SARA_BUILD_SHARED_LIBS)
-      set(_library_defs "DO_SARA_EXPORTS")
+      target_compile_definitions(DO_Sara_${_library_name}
+        PRIVATE DO_SARA_EXPORTS)
     else ()
-      set(_library_defs "DO_SARA_STATIC")
+      target_compile_definitions(DO_Sara_${_library_name}
+        PUBLIC DO_SARA_STATIC)
     endif ()
-    target_compile_definitions(DO_Sara_${_library_name}
-      PUBLIC ${_library_defs})
 
     # Specify where to install the static library.
     install(
@@ -372,41 +372,42 @@ endmacro ()
 # Bookmark the list of all unit tests in a global property.
 set_property(GLOBAL PROPERTY _DO_SARA_TESTS "")
 
-function (sara_add_test _test_name _srcs _additional_lib_deps)
-  # Create a variable containing the list of source files
-  set(_srcs_var ${_srcs})
+function (sara_add_test)
+  set(_options OPTIONS)
+  set(_single_value_args FOLDER NAME)
+  set(_multiple_value_args SOURCES DEPENDENCIES)
+  cmake_parse_arguments(test
+    "${_options}" "${_single_value_args}" "${_multiple_value_args}" ${ARGN})
 
-  # Get extra arguments.
-  set(extra_macro_args ${ARGN})
-  list(LENGTH extra_macro_args num_extra_args)
-
-  # Check if a name is defined for a group of unit tests.
-  if (${num_extra_args} GREATER 0)
-    list(GET extra_macro_args 0 test_group_name)
-  endif ()
-
+  # message(FATAL_ERROR "${test_NAME}")
   # Create the unit test project.
-  add_executable(${_test_name} ${_srcs_var})
-  target_link_libraries(${_test_name}
-    PRIVATE ${_additional_lib_deps}
-            ${Boost_LIBRARIES})
-  target_compile_definitions(${_test_name}
-    PRIVATE -DBOOST_TEST_DYN_LINK)
+  add_executable(${test_NAME} ${test_SOURCES})
+  target_include_directories(${test_NAME}
+    PRIVATE
+    ${Boost_INCLUDE_DIR})
+  target_link_libraries(${test_NAME}
+    PRIVATE
+    ${Boost_LIBRARIES}
+    ${test_DEPENDENCIES})
+  target_compile_definitions(${test_NAME}
+    PRIVATE
+    BOOST_ALL_NO_LIB
+    BOOST_TEST_DYN_LINK)
 
-  set_target_properties(${_test_name}
+  set_target_properties(${test_NAME}
     PROPERTIES
     COMPILE_FLAGS ${SARA_DEFINITIONS}
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-  add_test(NAME ${_test_name} COMMAND $<TARGET_FILE:${_test_name}>)
+  add_test(NAME ${test_NAME} COMMAND $<TARGET_FILE:${test_NAME}>)
 
-  if (DEFINED test_group_name)
+  if (test_FOLDER)
     set_property(
-      TARGET ${_test_name}
-      PROPERTY FOLDER "Tests/Sara/${test_group_name}")
+      TARGET ${test_NAME}
+      PROPERTY FOLDER "Tests/Sara/${test_FOLDER}")
   endif ()
 
   get_property(DO_SARA_TESTS GLOBAL PROPERTY _DO_SARA_TESTS)
-  list(APPEND DO_SARA_TESTS ${_test_name})
+  list(APPEND DO_SARA_TESTS ${test_NAME})
   set_property(GLOBAL PROPERTY _DO_SARA_TESTS "${DO_SARA_TESTS}")
 endfunction ()
