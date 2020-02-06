@@ -275,12 +275,12 @@ macro (sara_append_library _library_name
 
     # Set correct compile definitions when building the libraries.
     if (SARA_BUILD_SHARED_LIBS)
-      set(_library_defs "DO_SARA_EXPORTS")
+      target_compile_definitions(DO_Sara_${_library_name}
+        PRIVATE DO_SARA_EXPORTS)
     else ()
-      set(_library_defs "DO_SARA_STATIC")
+      target_compile_definitions(DO_Sara_${_library_name}
+        PUBLIC DO_SARA_STATIC)
     endif ()
-    target_compile_definitions(DO_Sara_${_library_name}
-      PUBLIC ${_library_defs})
 
     # Specify where to install the static library.
     install(
