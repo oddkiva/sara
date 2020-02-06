@@ -70,16 +70,10 @@ GRAPHICS_MAIN()
   {
     cout << "[Read frame] " << video_frame_index << "" << endl;
 
-    if (video_frame_index % 5 != 0)
-    {
-      ++video_frame_index;
-      continue;
-    }
-
     rgba32f_image = video_frame.convert<Rgba32f>();
 
     if (!active_window())
-      create_window(rgba32f_image.sizes());
+      set_active_window(create_window(rgba32f_image.sizes()));
 
     sara::Timer t;
     t.restart();

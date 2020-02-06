@@ -310,7 +310,7 @@ namespace DO { namespace Shakti {
         Shakti::clusters_padded_width, &cluster_padded_width, sizeof(int)));
 
     // Set the cluster grid for CUDA.
-    _cluster_block_sizes = dim3(1, 1);
+    _cluster_block_sizes = dim3{1, 1};
     _cluster_grid_sizes = grid_size_2d(clusters, _cluster_block_sizes);
 
     Shakti::init_clusters<<<_cluster_grid_sizes, _cluster_block_sizes>>>(
