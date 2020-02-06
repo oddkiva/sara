@@ -20,7 +20,7 @@
 
 namespace DO { namespace Shakti {
 
-  //! @brief ND-array view class.
+  //! @brief Device multi-array view class.
   template <typename T, int N, typename Strides>
   class MultiArrayView
   {

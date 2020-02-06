@@ -20,10 +20,9 @@
 #include <vector>
 
 
-
 namespace DO { namespace Shakti {
 
-  //! @brief ND-array class.
+  //! @brief Device multi-array class.
   template <typename T, int N, typename Strides = RowMajorStrides>
   class MultiArray : public MultiArrayView<T, N, Strides>
   {

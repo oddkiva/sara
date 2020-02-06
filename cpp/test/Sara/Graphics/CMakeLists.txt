@@ -21,4 +21,6 @@ foreach (file ${test_graphics_SOURCE_FILES})
     ${filename} ${file}
     "${DO_Sara_LIBRARIES};${Qt5Test_LIBRARIES};test_graphics_common"
     "Graphics")
+  set_target_properties(${filename} PROPERTIES
+                        COMPILE_FLAGS ${SARA_DEFINITIONS})
 endforeach ()
