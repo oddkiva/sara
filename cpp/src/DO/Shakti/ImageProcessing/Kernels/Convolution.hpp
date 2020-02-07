@@ -24,8 +24,11 @@ namespace DO { namespace Shakti {
   __global__
   void apply_column_based_convolution(T *dst)
   {
-    const auto i = offset<2>();
     const auto p = coords<2>();
+    if (p.x() >= image_sizes.x || p.y() >= image_sizes.y)
+      return;
+
+    const auto i = p.dot(grid_strides<2>());
     const auto kernel_radius = kernel_size / 2;
 
     auto convolved_value = T{0};
@@ -33,6 +36,7 @@ namespace DO { namespace Shakti {
     for (int i = 0; i < kernel_size; ++i)
       convolved_value +=
           tex2D(in_float_texture, p.x() - kernel_radius + i, p.y()) * kernel[i];
+
     dst[i] = convolved_value;
   }
 
@@ -40,8 +44,11 @@ namespace DO { namespace Shakti {
   __global__
   void apply_row_based_convolution(T *dst)
   {
-    const auto i = offset<2>();
     const auto p = coords<2>();
+    if (p.x() >= image_sizes.x || p.y() >= image_sizes.y)
+      return;
+
+    const auto i = offset<2>();  // p.dot(grid_strides<2>());
     const auto kernel_radius = kernel_size / 2;
 
     auto convolved_value = T{0};
@@ -49,6 +56,7 @@ namespace DO { namespace Shakti {
     for (int i = 0; i < kernel_size; ++i)
       convolved_value +=
           tex2D(in_float_texture, p.x(), p.y() - kernel_radius + i) * kernel[i];
+
     dst[i] = convolved_value;
   }
 

@@ -20,6 +20,7 @@ namespace DO { namespace Shakti {
 
   __constant__ float kernel[1024];
   __constant__ int kernel_size;
+  __constant__ int2 image_sizes;
 
 } /* namespace Shakti */
 } /* namespace DO */
