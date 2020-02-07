@@ -11,8 +11,8 @@
 
 #define BOOST_TEST_MODULE "HDF5 I/O"
 
-#include <DO/Sara/Core/HDF5.hpp>
 #include <DO/Sara/Core/Tensor.hpp>
+#include <DO/Sara/Features/IO.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>

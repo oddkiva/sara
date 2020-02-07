@@ -23,6 +23,7 @@ if (SARA_USE_HALIDE)
 endif ()
 add_subdirectory(MatchPropagation)
 add_subdirectory(NeuralNetworks)
+add_subdirectory(Taskflow)
 
 if (SARA_USE_HPX)
   add_subdirectory(Parallel)

@@ -65,15 +65,11 @@ if (APPLE)
 
   foreach (file ${test_compute_SOURCE_FILES})
     get_filename_component(filename "${file}" NAME_WE)
-    sara_add_test(${filename} ${file} "${DO_Sara_Libraries}" "Compute")
-    target_include_directories(${filename}
-      PRIVATE ${Boost_INCLUDE_DIR})
-    target_compile_definitions(${filename}
-      PRIVATE -DBOOST_ALL_NO_LIB)
-    target_link_libraries(${filename}
-      PRIVATE DO_Sara_Compute
-              ${DO_Sara_LIBRARIES}
-              ${Boost_LIBRARIES})
+    sara_add_test(
+      NAME ${filename}
+      SOURCES ${file}
+      DEPENDENCIES ${DO_Sara_Libraries}
+      FOLDER Compute)
   endforeach ()
 
   target_link_libraries(test_compute_accelerate

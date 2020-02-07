@@ -1,13 +1,14 @@
-#include <DO/Sara/Core/DebugUtilities.hpp>
-
 #include <drafts/NeuralNetworks/TensorRT/Helpers.hpp>
+
+#include <DO/Sara/Core/DebugUtilities.hpp>
+#include <DO/Sara/Core/StringFormat.hpp>
+
+#include <DO/Shakti/Utilities/DeviceInfo.hpp>
+
+#include <termcolor/termcolor.hpp>
 
 #include <fstream>
 #include <sstream>
-#include <string>
-#include <vector>
-
-#include <termcolor/termcolor.hpp>
 
 
 auto engine_deleter(nvinfer1::ICudaEngine* engine) -> void
@@ -31,7 +32,8 @@ auto config_deleter(nvinfer1::IBuilderConfig* config) -> void
   config = nullptr;
 }
 
-auto context_deleter(nvinfer1::IExecutionContext* context) -> void {
+auto context_deleter(nvinfer1::IExecutionContext* context) -> void
+{
   if (context != nullptr)
     context->destroy();
   context = nullptr;
@@ -48,7 +50,7 @@ using ContextUniquePtr =
 
 
 template <typename NVInferObject>
-auto delete_nvinfer_object(NVInferObject *object) -> void
+auto delete_nvinfer_object(NVInferObject* object) -> void
 {
   if (object != nullptr)
     object->destroy();
@@ -117,6 +119,13 @@ auto save_model_weights(nvinfer1::ICudaEngine* engine,
 auto main() -> int
 {
   namespace sara = DO::Sara;
+  namespace shakti = DO::Shakti;
+
+  // List the available GPU devices.
+  const auto devices = shakti::get_devices();
+  for (const auto& device : devices)
+    std::cout << device << std::endl;
+
 
   auto builder = sara::TensorRT::make_builder();
 
@@ -201,8 +210,7 @@ auto main() -> int
   // @todo create some fake data and create two GPU device buffers.
   SARA_DEBUG << termcolor::red
              << "TODO: create some input data and two device buffers!"
-             << termcolor::reset
-             << std::endl;
+             << termcolor::reset << std::endl;
 
   // Fill some GPU buffers and perform inference.
   SARA_DEBUG << termcolor::green << "Perform inference on GPU!"
