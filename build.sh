@@ -9,8 +9,6 @@ else
 fi
 
 platform_name=$(uname -s)
-os_name=$(lsb_release -is)
-os_version=$(lsb_release -rs)
 
 
 function install_python_packages_via_pip()
@@ -25,10 +23,19 @@ function build_library()
   else
     local cmake_options="-DCMAKE_BUILD_TYPE=${build_type} "
   fi
+  if [[ "${platform_name}" == "Darwin" ]] &&
+     [[ "${build_type}" == "Xcode" ]]; then
+    # Workaround for Xcode generator
+    cmake_options+="-DCMAKE_C_COMPILER=$(which clang) "
+    cmake_options+="-DCMAKE_CXX_COMPILER=$(which clang++) "
+  elif [ ! "${platform_name}" == "Darwin" ]; then
+    local os_name=$(lsb_release -is)
+    local os_version=$(lsb_release -rs)
 
-  if [[ ${os_name} == "Ubuntu" ]] && [[ ${os_version} == "16.04" ]]; then
-    cmake_options+="-DCMAKE_C_COMPILER=$(which gcc-7) "
-    cmake_options+="-DCMAKE_CXX_COMPILER=$(which g++-7) "
+    if [[ ${os_name} == "Ubuntu" ]] && [[ ${os_version} == "16.04" ]]; then
+      cmake_options+="-DCMAKE_C_COMPILER=$(which gcc-7) "
+      cmake_options+="-DCMAKE_CXX_COMPILER=$(which g++-7) "
+    fi
   fi
 
   if [ "${platform_name}" == "Darwin" ]; then
@@ -55,12 +62,18 @@ function build_library()
   fi
 
   # Build the library.
-  make -j$(nproc) VERBOSE=1
+  # make -j$(nproc) VERBOSE=1
+  cmake --build . -j$(nproc) -v
 
   # Run C++ tests.
   export BOOST_TEST_LOG_LEVEL=all
   export BOOST_TEST_COLOR_OUTPUT=1
-  ctest --output-on-failure
+
+  local test_options="--output-on-failure "
+  if [[ "${build_type}" == "Xcode" ]]; then
+    test_options+="-C Debug"
+  fi
+  ctest ${test_options}
 
   # Run Python tests.
   make pytest
