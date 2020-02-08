@@ -17,7 +17,7 @@ foreach (file ${test_core_SOURCE_FILES})
 endforeach ()
 
 if (UNIX AND NOT APPLE)
-  target_link_libraries(test_core_ipc_cond1 PRIVATE rt)
+  target_link_libraries(test_core_ipc_cond1 PRIVATE rt pthread)
 endif ()
 
 find_package(HDF5 COMPONENTS CXX REQUIRED)
