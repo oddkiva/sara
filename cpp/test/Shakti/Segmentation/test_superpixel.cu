@@ -47,9 +47,7 @@ protected:
       {
         auto val = float(x / B + N * (y / B)) / (N * N);
         in_host_image[at(x, y)] = Vector4f{val, val, val, 0.f};
-        // cout << val << " ";
       }
-      // cout << endl;
     }
   }
 
