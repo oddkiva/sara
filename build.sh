@@ -68,7 +68,12 @@ function build_library()
   # Run C++ tests.
   export BOOST_TEST_LOG_LEVEL=all
   export BOOST_TEST_COLOR_OUTPUT=1
-  ctest --output-on-failure
+
+  local test_options="--output-on-failure "
+  if [[ "${build_type}" == "Xcode" ]]; then
+    test_options+="-C Debug"
+  fi
+  ctest ${test_options}
 
   # Run Python tests.
   make pytest
