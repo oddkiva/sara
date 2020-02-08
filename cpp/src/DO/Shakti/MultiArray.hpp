@@ -9,9 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_SHAKTI_MULTIARRAY_HPP
-#define DO_SHAKTI_MULTIARRAY_HPP
-
+#pragma once
 
 #include <DO/Shakti/MultiArray/Grid.hpp>
 #include <DO/Shakti/MultiArray/Matrix.hpp>
@@ -20,6 +18,3 @@
 #include <DO/Shakti/MultiArray/PinnedAllocator.hpp>
 #include <DO/Shakti/MultiArray/Strides.hpp>
 #include <DO/Shakti/MultiArray/TextureArray.hpp>
-
-
-#endif /* DO_SHAKTI_MULTIARRAY_HPP */

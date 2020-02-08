@@ -1,8 +1,8 @@
 #include <math_constants.h>
 
-#include <DO/Shakti/Utilities/ErrorCheck.hpp>
 #include <DO/Shakti/MultiArray/Grid.hpp>
 #include <DO/Shakti/MultiArray/Offset.hpp>
+#include <DO/Shakti/Utilities/ErrorCheck.hpp>
 
 #include <DO/Shakti/Segmentation/SuperPixel.hpp>
 
@@ -39,24 +39,25 @@ namespace DO { namespace Shakti {
   // At the beginning a cluster corresponds to a block in a grid.
   __global__ void init_clusters(Cluster* out_clusters, const Vector4f* in_image)
   {
-    // i_b = flat index of the block.
-    const auto i_b = offset<2>();
-    // p_b = (x, y)-coordinates of the cluster
-    const auto p_b = coords<2>();
+    const auto cluster_coords = coords<2>();
+    const auto cluster_index = cluster_coords.dot(grid_strides<2>());
 
     // The image coordinates of the top-left corner of the block is:
-    const auto tl_b =
-        Vector2f{p_b.x() * cluster_sizes.x(), p_b.y() * cluster_sizes.y()};
+    const auto cluster_top_left_corner =
+        Vector2f{cluster_coords.x() * cluster_sizes.x(),
+                 cluster_coords.y() * cluster_sizes.y()};
 
     // The 2D image coordinates of the block center is:
-    const Vector2f c_b =
-        tl_b + Vector2f{cluster_sizes.x() / 2, cluster_sizes.y() / 2};
-    // The image offset of the block center is:
-    const int o_c_b = c_b.x() + c_b.y() * image_padded_width;
+    const auto cluster_center =
+        cluster_top_left_corner +
+        Vector2f{cluster_sizes.x() / 2, cluster_sizes.y() / 2};
+    // The block center has the following flattened index:
+    const int cluster_center_flat_index =
+        cluster_center.dot({1, image_padded_width});
 
-    out_clusters[i_b].num_points = 0;
-    out_clusters[i_b].center = c_b;
-    out_clusters[i_b].color = in_image[o_c_b];
+    out_clusters[cluster_index].num_points = 0;
+    out_clusters[cluster_index].center = cluster_center;
+    out_clusters[cluster_index].color = in_image[cluster_center_flat_index];
   }
 
   __global__ void assign_means(int* out_labels, const Cluster* in_clusters,
@@ -65,15 +66,17 @@ namespace DO { namespace Shakti {
     // For each thread in the block, populate the list of nearest cluster
     // centers.
     __shared__ int x1, y1, x2, y2;
-    __shared__ Vector4f
-        I_c[3][3];  // I(c) = color value of a cluster center $c$.
-    __shared__ Vector2f p_c[3][3];  // p(c) = coordinates of cluster center $c$.
+    // Let us denote by I(c) the color value of a cluster center $c$.
+    __shared__ Vector4f I_c[3][3];
+    // Let us denote by p(c) = coordinates of cluster center $c$.
+    __shared__ Vector2f p_c[3][3];
 
-    // Get the pixel 2D coordinates
+    // Get the pixel 2D coordinates.
     const auto _p_i = coords<2>();
     // Stop the kernel if we process the padded region of the image.
     if (_p_i.x() >= image_sizes.x() || _p_i.y() >= image_sizes.y())
       return;
+
     // Get the offset and color value.
     const auto p_i = Vector2f{_p_i.x(), _p_i.y()};
     const auto i = offset<2>();
@@ -243,10 +246,9 @@ namespace DO { namespace Shakti {
     if ((_image_grid_sizes.x * _image_block_sizes.x != padded_width) ||
         (_image_grid_sizes.y * _image_block_sizes.y != sizes.y()))
     {
-      SHAKTI_STDOUT << "TODO: the image size is not supported in the "
-                       "current implementation!"
+      SHAKTI_STDOUT << "WARNING: the algorithm may crash: The CUDA block sizes "
+                       "and grid sizes do not coincide with the image sizes!"
                     << std::endl;
-      std::abort();
     }
   }
 

@@ -9,8 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_SHAKTI_IMAGEPROCESSING_CUDA_GLOBALS_HPP
-#define DO_SHAKTI_IMAGEPROCESSING_CUDA_GLOBALS_HPP
+#pragma once
 
 
 namespace DO { namespace Shakti {
@@ -20,9 +19,6 @@ namespace DO { namespace Shakti {
 
   __constant__ float kernel[1024];
   __constant__ int kernel_size;
+  __constant__ int2 image_sizes;
 
-} /* namespace Shakti */
-} /* namespace DO */
-
-
-#endif /* DO_SHAKTI_IMAGEPROCESSING_CUDA_GLOBALS_HPP */
+}}  // namespace DO::Shakti
