@@ -20,4 +20,4 @@ if (NOT APPLE)
 endif ()
 
 set_target_properties(DO_Sara_OpenCL_GL PROPERTIES
-  FOLDER "DO Sara Libraries")
+  FOLDER "Libraries/Sara")
