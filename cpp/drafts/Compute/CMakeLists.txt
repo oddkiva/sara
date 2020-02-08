@@ -56,10 +56,13 @@ if (APPLE)
     PRIVATE "-framework Foundation"
             "-framework Metal"
             "-framework MetalPerformanceShaders")
-  set_target_properties(DO_Sara_Compute PROPERTIES FOLDER "DO Sara Libraries")
+  set_target_properties(DO_Sara_Compute
+    PROPERTIES FOLDER "DO Sara Libraries")
   target_link_libraries(DO_Sara_Compute PRIVATE ${CLBlast_LIBRARY})
-  target_link_libraries(DO_Sara_Compute PUBLIC ${OpenCL_LIBRARY})
-
+  target_link_libraries(DO_Sara_Compute
+    PUBLIC
+    ${OpenCL_LIBRARY}
+    ${DO_Sara_LIBRARIES})
 
   file(GLOB test_compute_SOURCE_FILES FILES test_*.cpp)
 
@@ -68,7 +71,7 @@ if (APPLE)
     sara_add_test(
       NAME ${filename}
       SOURCES ${file}
-      DEPENDENCIES ${DO_Sara_Libraries}
+      DEPENDENCIES DO_Sara_Compute
       FOLDER Compute)
   endforeach ()
 
