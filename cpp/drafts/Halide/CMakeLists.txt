@@ -1,6 +1,5 @@
 find_package(DO_Sara COMPONENTS Core Graphics VideoIO REQUIRED)
 
-include(sara_use_openmp)
 include(sara_use_halide)
 
 
