@@ -9,8 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_SHAKTI_IMAGEPROCESSING_CUDA_CONVOLUTION_HPP
-#define DO_SHAKTI_IMAGEPROCESSING_CUDA_CONVOLUTION_HPP
+#pragma once
 
 #include <DO/Shakti/ImageProcessing/Kernels/Globals.hpp>
 
@@ -48,7 +47,7 @@ namespace DO { namespace Shakti {
     if (p.x() >= image_sizes.x || p.y() >= image_sizes.y)
       return;
 
-    const auto i = offset<2>();  // p.dot(grid_strides<2>());
+    const auto i = p.dot(grid_strides<2>());
     const auto kernel_radius = kernel_size / 2;
 
     auto convolved_value = T{0};
@@ -60,8 +59,4 @@ namespace DO { namespace Shakti {
     dst[i] = convolved_value;
   }
 
-} /* namespace Shakti */
-} /* namespace DO */
-
-
-#endif /* DO_SHAKTI_IMAGEPROCESSING_CUDA_CONVOLUTION_HPP */
+}}  // namespace DO::Shakti

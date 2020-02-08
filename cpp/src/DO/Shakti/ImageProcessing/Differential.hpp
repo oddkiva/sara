@@ -9,8 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_SHAKTI_IMAGEPROCESSING_DIFFERENTIAL_HPP
-#define DO_SHAKTI_IMAGEPROCESSING_DIFFERENTIAL_HPP
+#pragma once
 
 #include <DO/Shakti/Defines.hpp>
 
@@ -35,8 +34,7 @@ namespace DO { namespace Shakti {
   DO_SHAKTI_EXPORT
   MultiArray<float, 2> squared_norm(const MultiArray<Vector2f, 2>& in);
 
-} /* namespace Shakti */
-} /* namespace DO */
+}}  // namespace DO::Shakti
 
 
 namespace DO { namespace Shakti {
@@ -57,9 +55,4 @@ namespace DO { namespace Shakti {
   DO_SHAKTI_EXPORT
   void compute_laplacian(float *out, const float *in, const int *sizes);
 
-
-} /* namespace Shakti */
-} /* namespace DO */
-
-
-#endif /* DO_SHAKTI_IMAGEPROCESSING_DIFFERENTIAL_HPP */
+}}  // namespace DO::Shakti

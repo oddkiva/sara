@@ -9,8 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_SHAKTI_IMAGEPROCESSING_IMAGEPYRAMID_HPP
-#define DO_SHAKTI_IMAGEPROCESSING_IMAGEPYRAMID_HPP
+#pragma once
 
 #include <DO/Shakti/MultiArray/Matrix.hpp>
 
@@ -31,8 +30,4 @@ namespace DO { namespace Shakti {
     T *_device_data;
   };
 
-} /* namespace Shakti */
-} /* namespace DO */
-
-
-#endif /* DO_SHAKTI_IMAGEPROCESSING_IMAGEPYRAMID_HPP */
+}}  // namespace DO::Shakti

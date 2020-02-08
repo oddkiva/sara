@@ -63,7 +63,7 @@ namespace DO { namespace Shakti {
     SHAKTI_SAFE_CUDA_CALL(
         cudaMemcpyToSymbol(Shakti::kernel_size, &kernel_size, sizeof(int)));
     SHAKTI_SAFE_CUDA_CALL(
-        cudaMemcpyToSymbol(&Shakti::image_sizes, sizes, sizeof(int2)));
+        cudaMemcpyToSymbol(Shakti::image_sizes, sizes, sizeof(int2)));
 
     apply_column_based_convolution<<<grid_size, block_size>>>(out_array.data());
     SHAKTI_CHECK_LAST_ERROR();

@@ -9,8 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_SHAKTI_IMAGEPROCESSING_HISTOGRAM_HPP
-#define DO_SHAKTI_IMAGEPROCESSING_HISTOGRAM_HPP
+#pragma once
 
 #include <DO/Shakti/Defines.hpp>
 
@@ -28,8 +27,7 @@ namespace DO { namespace Shakti {
   MultiArray<float, 3>
   normalize_color_histogram(const MultiArray<Vector4f, 2>& in);
 
-} /* namespace Shakti */
-} /* namespace DO */
+}}  // namespace DO::Shakti
 
 
 namespace DO { namespace Shakti {
@@ -55,8 +53,4 @@ namespace DO { namespace Shakti {
                                quantization_steps);
   }
 
-} /* namespace Shakti */
-} /* namespace DO */
-
-
-#endif /* DO_SHAKTI_IMAGEPROCESSING_HISTOGRAM_HPP */
+}}  // namespace DO::Shakti
