@@ -25,13 +25,15 @@ function build_library()
   fi
   if [[ "${platform_name}" == "Darwin" ]] &&
      [[ "${build_type}" == "Xcode" ]]; then
-    # Workaround for Xcode generator
+    # Workaround for Xcode generator on Apple platforms.
     cmake_options+="-DCMAKE_C_COMPILER=$(which clang) "
     cmake_options+="-DCMAKE_CXX_COMPILER=$(which clang++) "
-  elif [ ! "${platform_name}" == "Darwin" ]; then
+
+  elif [ "${platform_name}" == "Linux" ]; then
     local os_name=$(lsb_release -is)
     local os_version=$(lsb_release -rs)
 
+    # I really want C++17.
     if [[ ${os_name} == "Ubuntu" ]] && [[ ${os_version} == "16.04" ]]; then
       cmake_options+="-DCMAKE_C_COMPILER=$(which gcc-7) "
       cmake_options+="-DCMAKE_CXX_COMPILER=$(which g++-7) "
@@ -62,7 +64,6 @@ function build_library()
   fi
 
   # Build the library.
-  # make -j$(nproc) VERBOSE=1
   cmake --build . -j$(nproc) -v
 
   # Run C++ tests.

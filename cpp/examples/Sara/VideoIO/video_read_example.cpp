@@ -22,9 +22,10 @@ GRAPHICS_MAIN()
 {
   using namespace std::string_literals;
 
-  const auto video_filepath =
-      "/home/david/Downloads/big-buck-bunny_trailer.webm"s;
-  //const std::string video_filepath = src_path("orion_1.mpg");
+  // const std::string video_filepath = src_path("orion_1.mpg");
+  // const auto video_filepath =
+  //     "/home/david/Downloads/big-buck-bunny_trailer.webm"s;
+  const auto video_filepath = "/home/david/Desktop/GOPR0542.MP4"s;
 
   sara::VideoStream video_stream{video_filepath};
 
@@ -34,7 +35,7 @@ GRAPHICS_MAIN()
   while (video_stream.read())
   {
     if (sara::active_window() == nullptr)
-      sara::create_window(video_stream.sizes());
+      sara::set_active_window(sara::create_window(video_stream.sizes()));
 
     sara::display(video_stream.frame());
   }
