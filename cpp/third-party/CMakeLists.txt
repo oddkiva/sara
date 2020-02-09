@@ -1,6 +1,6 @@
 sara_step_message("Appending third-party libraries:")
 
-set(THIRDPARTY_FOLDER_NAME "Third-Party/Sara")
+set(THIRDPARTY_FOLDER_NAME "Third-Party")
 
 message(STATUS "  - easyexif")
 add_subdirectory(easyexif)
