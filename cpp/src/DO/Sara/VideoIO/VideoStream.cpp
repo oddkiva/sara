@@ -63,7 +63,11 @@ namespace DO::Sara {
   {
     if (!_registered_all_codecs)
     {
+      // av_register_all() got deprecated in lavf 58.9.100.
+      // We don't need to use it anymore since FFmpeg 4.0.
+#if (LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(58,9,100))
       av_register_all();
+#endif
       _registered_all_codecs = true;
     }
   }
