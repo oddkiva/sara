@@ -32,17 +32,85 @@ namespace DO { namespace Shakti {
    */
 
   //! @brief Apply Deriche filter with specified order $o$ to dimension $d$.
-  template <typename T>
+  __global__ template <typename T>
   void inplace_deriche_2d(T* inout_signal, const Vector2i& sizes, T sigma,
                           int derivative_order, int axis, bool neumann = true)
+  {
+    const auto p = coords<2>();
+
+    // Bound checking.
+    if (p.x() >= sizes[0] || p.y() >= sizes[1])
+      return;
+
+    // Increase if necessary.
+    __shared__ T y_causal[4096];
+    __shared__ T y_anticausal[4096];
+
+    // In 2D, we scan the beginning of each row/columns.
+    // We must be at the beginning of each row or column.
+    const auto i = p.dot(grid_strides<2>());
+    //
+    const auto ptr = inout_signal + i;
+
+    // Causal signal: i == 0.
+    T* forward_x[2] = {inout_signal + i, inout_signal + i + step};
+    y_causal[0] = sumg0 * *forward_x[0];
+
+    // Causal signal: i == 1.
+#pragma unroll
+    for (auto k = 0; k < 2; ++k)
+      forward_x[k] += step;
+    y_causal[1] = g0 * *forward_x[0] + sumg1 * *forward_x[1];
+
+    // Causal signal: i = 2 .. size-1
+#pragma unroll
+    for (auto i = 2; i < size; ++i)
+    {
+      for (auto k = 0; k < 2; ++k)
+        forward_x[k] += step;
+      y_causal[i] = a1 * *forward_x[0] + a2 * *forward_x[1] +
+                    b1 * y_causal[i - 1] + b2 * y_causal[i - 2];
+    }
+
+    // Anti-causal signal: i == size-1
+    T* backward_x[2] = {ptr + (size - 1) * step, ptr + size * step};
+    y_anticausal[size - 1] = parity * sumg1 * *backward_x[0];
+
+    // Anti-causal signal: i == size-2
+#pragma unroll
+    for (auto k = 0; k < 2; ++k)
+      forward_x[k] += step;
+    y_anticausal[size - 2] = y_anticausal[size - 1];
+
+    // Anti-causal signal: i == size-3 .. 0
+#pragma unroll
+    for (auto i = size - 3; i >= 0; --i)
+    {
+      for (auto k = 0; k < 2; ++k)
+        backward_x[k] -= step;
+      y_anticausal[i] = a3 * *backward_x[0] + a4 * *backward_x[1] +
+                        b1 * y_anticausal[i + 1] + b2 * y_anticausal[i + 2];
+    }
+
+    *ptr = y_causal[i] + y_anticausal[i];
+//     // Store the sum of the two signals.
+// #pragma unroll
+//     for (auto i = 0; i < size; ++i)
+//     {
+//       *ptr = y_causal[i] + y_anticausal[i];
+//       ptr += step;
+//     }
+  }
+
+  void deriche()
   {
     // Sanity check.
     if (sigma <= 0)
       throw std::runtime_error("sigma must be positive");
     if (derivative_order < 0 || derivative_order >= 3)
       throw std::runtime_error("derivative order must be between 0 and 2");
-    if (axis < 0 || axis >= N)
-      throw std::runtime_error("axis of derivative must be between 0 and N-1");
+    if (axis < 0 || axis >= 2)
+      throw std::runtime_error("axis of derivative must be between 0 and 1");
 
     // Compute the coefficients of the recursive filter.
     //
@@ -118,64 +186,17 @@ namespace DO { namespace Shakti {
       break;
     }
 
-    // Initialize two temporary arrays.
-    const auto size = inout_signal.size(axis);
-    const auto step = inout_signal.stride(axis);
-    auto y_causal = std::vector<T>(size);
-    auto y_anticausal = std::vector<T>(size);
-
     const auto start = Vector2i::Zero();
     auto end = sizes;
     end[axis] = 1;
 
-    // In 2D, we scan the beginning of each row/columns.
-    for (auto it = inout_signal.begin_subarray(start, end); !it.end(); ++it)
-    {
-      auto ptr = &(*it);
+    // Initialize two temporary arrays.
+    const auto size = inout_signal.size(axis);
+    const auto step = inout_signal.stride(axis);
 
-      // Causal signal: i == 0.
-      T* forward_x[2] = {ptr, ptr - step};
-      y_causal[0] = sumg0 * *forward_x[0];
-
-      // Causal signal: i == 1.
-      for (auto k = 0; k < 2; ++k)
-        forward_x[k] += step;
-      y_causal[1] = g0 * *forward_x[0] + sumg1 * *forward_x[1];
-
-      // Causal signal: i = 2 .. size-1
-      for (auto i = 2; i < size; ++i)
-      {
-        for (auto k = 0; k < 2; ++k)
-          forward_x[k] += step;
-        y_causal[i] = a1 * *forward_x[0] + a2 * *forward_x[1] +
-                      b1 * y_causal[i - 1] + b2 * y_causal[i - 2];
-      }
-
-      // Anti-causal signal: i == size-1
-      T* backward_x[2] = {ptr + (size - 1) * step, ptr + size * step};
-      y_anticausal[size - 1] = parity * sumg1 * *backward_x[0];
-
-      // Anti-causal signal: i == size-2
-      for (auto k = 0; k < 2; ++k)
-        forward_x[k] += step;
-      y_anticausal[size - 2] = y_anticausal[size - 1];
-
-      // Anti-causal signal: i == size-3 .. 0
-      for (auto i = size - 3; i >= 0; --i)
-      {
-        for (auto k = 0; k < 2; ++k)
-          backward_x[k] -= step;
-        y_anticausal[i] = a3 * *backward_x[0] + a4 * *backward_x[1] +
-                          b1 * y_anticausal[i + 1] + b2 * y_anticausal[i + 2];
-      }
-
-      // Store the sum of the two signals.
-      for (auto i = 0; i < size; ++i)
-      {
-        *ptr = y_causal[i] + y_anticausal[i];
-        ptr += step;
-      }
-    }
+    inplace_deriche<<<grid_sizes, block_sizes>>>(
+        inout_signal.data(), inout_signal.sizes(), inout_signal.padded_width(),
+        sigma, ek, a1, a2, a3, a4, b1, b2, g0, sumg0, sumg1);
   }
 
   //! @}
