@@ -1,8 +1,8 @@
 // ========================================================================== //
-// This file is part of Sara, a basic set of libraries in C++ for computer
-// vision.
+// This file is part of Shakti, a basic set of CUDA accelerated libraries in
+// C++ for computer vision.
 //
-// Copyright (C) 2013-2016 David Ok <david.ok8@gmail.com>
+// Copyright (C) 2015 David Ok <david.ok8@gmail.com>
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -13,10 +13,13 @@
 
 #pragma once
 
-#include <DO/Sara/Core/Image.hpp>
+#include <DO/Shakti/MultiArray/MultiArrayView.hpp>
+
+#include <array>
+#include <cmath>
 
 
-namespace DO { namespace Sara {
+namespace DO { namespace Shakti {
 
   /*!
     @ingroup ImageProcessing
@@ -29,14 +32,10 @@ namespace DO { namespace Sara {
    */
 
   //! @brief Apply Deriche filter with specified order $o$ to dimension $d$.
-  template <typename T, int N>
-  void inplace_deriche(ImageView<T, N>& inout_signal,
-                       typename PixelTraits<T>::channel_type sigma,
-                       int derivative_order, int axis, bool neumann = true)
+  template <typename T>
+  void inplace_deriche_2d(T* inout_signal, const Vector2i& sizes, T sigma,
+                          int derivative_order, int axis, bool neumann = true)
   {
-    using S = typename PixelTraits<T>::channel_type;
-    using Vector = typename Image<T, N>::vector_type;
-
     // Sanity check.
     if (sigma <= 0)
       throw std::runtime_error("sigma must be positive");
@@ -49,17 +48,17 @@ namespace DO { namespace Sara {
     //
     // The constant 1.695 is mysterious... Also found in CImg library.
     // TODO: ask where this constant comes from.
-    const auto alpha = static_cast<S>(1.695) / sigma;
+    const auto alpha = static_cast<T>(1.695) / sigma;
     const auto ea = std::exp(alpha);
     const auto ema = std::exp(-alpha);
     const auto em2a = ema * ema;
     const auto b1 = 2 * ema;
     const auto b2 = -em2a;
 
-    S ek, ekn;
-    S parity;
-    S a1, a2, a3, a4;
-    S g0, sumg1, sumg0;
+    T ek, ekn;
+    T parity;
+    T a1, a2, a3, a4;
+    T g0, sumg1, sumg0;
 
     switch (derivative_order)
     {
@@ -125,8 +124,8 @@ namespace DO { namespace Sara {
     auto y_causal = std::vector<T>(size);
     auto y_anticausal = std::vector<T>(size);
 
-    auto start = Vector::Zero();
-    auto end = inout_signal.sizes();
+    const auto start = Vector2i::Zero();
+    auto end = sizes;
     end[axis] = 1;
 
     // In 2D, we scan the beginning of each row/columns.
@@ -179,76 +178,6 @@ namespace DO { namespace Sara {
     }
   }
 
-  //! @brief Apply Deriche blurring.
-  template <typename T, int N>
-  void inplace_deriche_blur(
-      ImageView<T, N>& inout_signal,
-      const Matrix<typename PixelTraits<T>::channel_type, N, 1>& sigmas,
-      bool neumann = true)
-  {
-    for (auto i = 0; i < N; ++i)
-      inplace_deriche(inout_signal, sigmas[i], 0, i, neumann);
-  }
-
-  //! @brief Apply Deriche blurring.
-  template <typename T, int N>
-  void inplace_deriche_blur(ImageView<T, N>& inout_signal,
-                            typename PixelTraits<T>::channel_type sigma,
-                            bool neumann = true)
-  {
-    using S = typename PixelTraits<T>::channel_type;
-    auto sigmas = Matrix<S, N, 1>{};
-    sigmas.fill(sigma);
-    inplace_deriche_blur(inout_signal, sigmas, neumann);
-  }
-
-  //! @brief Return the blurred image using Deriche filter.
-  template <typename T, int N>
-  Image<T, N> deriche_blur(const ImageView<T, N>& in_signal,
-                           typename PixelTraits<T>::channel_type sigma,
-                           bool neumann = true)
-  {
-    auto out_signal = Image<T, N>{in_signal};
-    inplace_deriche_blur(out_signal, sigma, neumann);
-    return out_signal;
-  }
-
-  //! @brief Return the blurred image using Deriche filter.
-  template <typename T, int N>
-  Image<T, N> deriche_blur(
-      const ImageView<T, N>& I,
-      const Matrix<typename PixelTraits<T>::channel_type, N, 1>& sigmas,
-      bool neumann = true)
-
-  {
-    auto J = I;
-    inplace_deriche_blur(J, sigmas, neumann);
-    return J;
-  }
-
-  //! @brief Wrapper class to use: Image<T,N>::compute<DericheBlur>(T sigma)
-  struct DericheBlur
-  {
-    template <typename ImageView>
-    using Pixel = typename ImageView::pixel_type;
-
-    template <typename ImageView, typename Sigma>
-    inline auto operator()(const ImageView& src, const Sigma& sigma,
-                           bool neumann = true) const
-        -> Image<Pixel<ImageView>, ImageView::Dimension>
-    {
-      return deriche_blur(src, sigma, neumann);
-    }
-
-    template <typename SrcImageView, typename DstImageView, typename Sigma>
-    inline void operator()(const SrcImageView& src, DstImageView& dst,
-                           const Sigma& sigma, bool neumann = true) const
-    {
-      dst.copy(src);
-      inplace_deriche_blur(dst, sigma, neumann);
-    }
-  };
-
   //! @}
 
-}}  // namespace DO::Sara
+}}  // namespace DO::Shakti

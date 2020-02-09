@@ -71,7 +71,7 @@ public:
         if (bStop || !dpFrame) {
             return false;
         }
-        
+
         *pdpFrame = (uint8_t *)dpFrame;
         *pnPitch = nWidth * 4;
         return true;
@@ -185,7 +185,7 @@ private:
         glutDisplayFunc(DisplayProc);
         // Register window close event callback function
         glutCloseFunc(CloseWindowProc);
-        
+
         ck(cuCtxSetCurrent(cuContext));
         ck(cuMemAlloc(&dpFrame, nWidth * nHeight * 4));
         ck(cuMemsetD8(dpFrame, 0, nWidth * nHeight * 4));
@@ -285,7 +285,7 @@ private:
             iFont = 0;
         }
         void *font = fontData[iFont].font;
-        int d1 = fontData[iFont].d1, d2 = fontData[iFont].d2, d = d1 + d2, 
+        int d1 = fontData[iFont].d1, d2 = fontData[iFont].d2, d = d1 + d2,
             w = glutGet(GLUT_WINDOW_WIDTH), h = glutGet(GLUT_WINDOW_HEIGHT);
 
         glMatrixMode(GL_PROJECTION);
