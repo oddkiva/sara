@@ -40,6 +40,8 @@ function (add_halide_executable source_file)
     ${PNG_LIBRARIES}
     ${OpenMP_CXX_LIBRARIES}
     Halide)
+
+  set_property(TARGET ${name} PROPERTY FOLDER "Tutorials/Halide")
 endfunction ()
 
 foreach (lesson ${LESSONS_SOURCE_FILES})
@@ -58,4 +60,5 @@ foreach (lesson ${LESSONS_SOURCE_FILES})
     ${DO_Sara_LIBRARIES}
     ${OpenMP_CXX_LIBRARIES}
     Halide)
+  set_property(TARGET ${lesson_name} PROPERTY FOLDER "Tutorials/Halide")
 endforeach()

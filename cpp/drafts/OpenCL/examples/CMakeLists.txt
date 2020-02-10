@@ -24,4 +24,6 @@ foreach (file ${example_FILES})
       "${GLEW_DLL}"
       "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/glew32.dll")
   endif ()
+
+  set_property(TARGET ${filename} PROPERTY FOLDER "Tutorials/OpenGL")
 endforeach ()

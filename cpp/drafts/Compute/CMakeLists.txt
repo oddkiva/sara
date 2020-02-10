@@ -57,7 +57,7 @@ if (APPLE)
             "-framework Metal"
             "-framework MetalPerformanceShaders")
   set_target_properties(DO_Sara_Compute
-    PROPERTIES FOLDER "DO Sara Libraries")
+    PROPERTIES FOLDER "Libraries/Sara")
   target_link_libraries(DO_Sara_Compute PRIVATE ${CLBlast_LIBRARY})
   target_link_libraries(DO_Sara_Compute
     PUBLIC
