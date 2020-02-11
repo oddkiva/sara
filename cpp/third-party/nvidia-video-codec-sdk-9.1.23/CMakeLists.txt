@@ -1,4 +1,4 @@
-if (NOT NV_VIDEOCODEC_ROOT)
+if (NOT NvidiaVideoCodec_ROOT)
   message(FATAL_ERROR "Please specify path to nVidia Video Codec SDK folder!")
   return ()
 endif ()
@@ -9,5 +9,11 @@ file(GLOB_RECURSE NV_VIDEOCODEC_SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}
   *.cpp *.h *.cu)
 
 cuda_add_library(nvidia_VideoCodecHelpers ${NV_VIDEOCODEC_SOURCE_FILES})
+target_include_directories(nvidia_VideoCodecHelpers
+  PRIVATE
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/NvCodec>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/NvDecoder>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/NvEncoder>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Utils>)
 target_link_libraries(nvidia_VideoCodecHelpers nvidia::VideoCodec)
 add_library(nvidia::VideoCodecHelpers ALIAS nvidia_VideoCodecHelpers)

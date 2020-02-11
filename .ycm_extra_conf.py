@@ -66,9 +66,12 @@ flags = [
 # Halide.
 "-I", "/opt/halide/include",
 "-I", "/opt/halide/tools",
+# nVidia Video Codec SDK.
+"-I", "/opt/Video_Codec_SDK_9.1.23/include",
 # Current header directories.
 "-I", "cpp",
 "-I", "cpp/src",
+"-I", "cpp/third-party/nvidia-video-codec-sdk-9.1.23",
 # Build directory.
 "-I", "../sara-build/cpp/src",
 "-I", "../sara-build-Release/cpp/src",

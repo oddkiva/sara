@@ -54,7 +54,8 @@ function build_library()
   cmake_options+="-DSARA_BUILD_SAMPLES=ON "
 
   cmake_options+="-DSARA_USE_HALIDE=ON "
-  cmake_options+="-DHALIDE_DISTRIB_DIR=/opt/halide"
+  cmake_options+="-DHALIDE_DISTRIB_DIR=/opt/halide "
+  cmake_options+="-DNvidiaVideoCodec_ROOT=/opt/Video_Codec_SDK_9.1.23"
 
   # Generate makefile project.
   if [ "${build_type}" == "emscripten" ]; then

@@ -20,10 +20,10 @@
 #
 set(_NvidiaVideoCodec_SEARCHES)
 
-if(NvidiaVideoCodec_ROOT)
+if (NvidiaVideoCodec_ROOT)
   set(_NvidiaVideoCodec_SEARCH_ROOT PATHS ${NvidiaVideoCodec_ROOT} NO_DEFAULT_PATH)
   list(APPEND _NvidiaVideoCodec_SEARCHES _NvidiaVideoCodec_SEARCH_ROOT)
-endif()
+endif ()
 
 # Appends some common paths
 set (_NvidiaVideoCodec_SEARCH_NORMAL PATHS "/usr" "/opt")
@@ -44,33 +44,44 @@ if (NOT NvidiaVideoCodec_LIBRARY)
   endforeach ()
 endif ()
 
+
 mark_as_advanced(NvidiaVideoCodec_INCLUDE_DIR)
 
-if (NvidiaVideoCodec_INCLUDE_DIR AND
-    EXISTS "${NvidiaVideoCodec_INCLUDE_DIR}/NvInfer.h")
-    file(STRINGS "${NvidiaVideoCodec_INCLUDE_DIR}/NvInfer.h" NvidiaVideoCodec_MAJOR REGEX "^#define NV_VIDEOCODEC_MAJOR [0-9]+.*$")
-    file(STRINGS "${NvidiaVideoCodec_INCLUDE_DIR}/NvInfer.h" NvidiaVideoCodec_MINOR REGEX "^#define NV_VIDEOCODEC_MINOR [0-9]+.*$")
-    file(STRINGS "${NvidiaVideoCodec_INCLUDE_DIR}/NvInfer.h" NvidiaVideoCodec_PATCH REGEX "^#define NV_VIDEOCODEC_PATCH [0-9]+.*$")
-
-    string(REGEX REPLACE "^#define NV_VIDEOCODEC_MAJOR ([0-9]+).*$" "\\1" NvidiaVideoCodec_VERSION_MAJOR "${NvidiaVideoCodec_MAJOR}")
-    string(REGEX REPLACE "^#define NV_VIDEOCODEC_MINOR ([0-9]+).*$" "\\1" NvidiaVideoCodec_VERSION_MINOR "${NvidiaVideoCodec_MINOR}")
-    string(REGEX REPLACE "^#define NV_VIDEOCODEC_PATCH ([0-9]+).*$" "\\1" NvidiaVideoCodec_VERSION_PATCH "${NvidiaVideoCodec_PATCH}")
-    set(NvidiaVideoCodec_VERSION_STRING "${NvidiaVideoCodec_VERSION_MAJOR}.${NvidiaVideoCodec_VERSION_MINOR}.${NvidiaVideoCodec_VERSION_PATCH}")
-endif()
+# if (NvidiaVideoCodec_INCLUDE_DIR AND
+#     EXISTS "${NvidiaVideoCodec_INCLUDE_DIR}/nvcuvid.h")
+#   file(STRINGS "${NvidiaVideoCodec_INCLUDE_DIR}/nvcuvid.h"
+#     NvidiaVideoCodec_MAJOR REGEX "^#define NV_VIDEOCODEC_MAJOR [0-9]+.*$")
+#   file(STRINGS "${NvidiaVideoCodec_INCLUDE_DIR}/nvcuvid.h"
+#     NvidiaVideoCodec_MINOR REGEX "^#define NV_VIDEOCODEC_MINOR [0-9]+.*$")
+#   file(STRINGS "${NvidiaVideoCodec_INCLUDE_DIR}/nvcuvid.h" NvidiaVideoCodec_PATCH REGEX
+#     "^#define NV_VIDEOCODEC_PATCH [0-9]+.*$")
+#
+#   string(REGEX REPLACE "^#define NV_VIDEOCODEC_MAJOR ([0-9]+).*$" "\\1" NvidiaVideoCodec_VERSION_MAJOR "${NvidiaVideoCodec_MAJOR}")
+#   string(REGEX REPLACE "^#define NV_VIDEOCODEC_MINOR ([0-9]+).*$" "\\1" NvidiaVideoCodec_VERSION_MINOR "${NvidiaVideoCodec_MINOR}")
+#   string(REGEX REPLACE "^#define NV_VIDEOCODEC_PATCH ([0-9]+).*$" "\\1" NvidiaVideoCodec_VERSION_PATCH "${NvidiaVideoCodec_PATCH}")
+#   set(NvidiaVideoCodec_VERSION_STRING "${NvidiaVideoCodec_VERSION_MAJOR}.${NvidiaVideoCodec_VERSION_MINOR}.${NvidiaVideoCodec_VERSION_PATCH}")
+# endif()
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(NvidiaVideoCodec REQUIRED_VARS NvidiaVideoCodec_LIBRARY NvidiaVideoCodec_INCLUDE_DIR VERSION_VAR NvidiaVideoCodec_VERSION_STRING)
+find_package_handle_standard_args(NvidiaVideoCodec
+  REQUIRED_VARS
+  NvidiaVideoCodec_LIBRARY
+  NvidiaVideoCodec_INCLUDE_DIR)
+  # VERSION_VAR
+  # NvidiaVideoCodec_VERSION_STRING)
 
-if(NvidiaVideoCodec_FOUND)
+if (NvidiaVideoCodec_FOUND)
   set(NvidiaVideoCodec_INCLUDE_DIRS ${NvidiaVideoCodec_INCLUDE_DIR})
 
-  if(NOT NvidiaVideoCodec_LIBRARIES)
+  if (NOT NvidiaVideoCodec_LIBRARIES)
     set(NvidiaVideoCodec_LIBRARIES ${NvidiaVideoCodec_LIBRARY})
-  endif()
+  endif ()
 
-  if(NOT TARGET NvidiaVideoCodec::NvidiaVideoCodec)
-    add_library(NvidiaVideoCodec::NvidiaVideoCodec UNKNOWN IMPORTED)
-    set_target_properties(NvidiaVideoCodec::NvidiaVideoCodec PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${NvidiaVideoCodec_INCLUDE_DIRS}")
-    set_property(TARGET NvidiaVideoCodec::NvidiaVideoCodec APPEND PROPERTY IMPORTED_LOCATION "${NvidiaVideoCodec_LIBRARY}")
-  endif()
-endif()
+  if (NOT TARGET nvidia::VideoCodec)
+    add_library(nvidia::VideoCodec INTERFACE IMPORTED)
+    set_target_properties(nvidia::VideoCodec
+      PROPERTIES
+      INTERFACE_INCLUDE_DIRECTORIES ${NvidiaVideoCodec_INCLUDE_DIRS}
+      INTERFACE_LINK_LIBRARIES ${NvidiaVideoCodec_LIBRARY})
+  endif ()
+endif ()

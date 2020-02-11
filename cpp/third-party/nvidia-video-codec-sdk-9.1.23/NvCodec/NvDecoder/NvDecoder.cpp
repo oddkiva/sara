@@ -13,9 +13,9 @@
 #include <chrono>
 #include <iostream>
 
-#include "../Utils/NvCodecUtils.h"
-#include "NvDecoder/NvDecoder.h"
 #include "nvcuvid.h"
+#include "../Utils/NvCodecUtils.h"
+#include "NvDecoder.h"
 
 #define START_TIMER auto start = std::chrono::high_resolution_clock::now();
 #define STOP_TIMER(print_message)                                              \
