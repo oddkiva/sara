@@ -19,8 +19,10 @@
 //! https://developer.nvidia.com/nvidia-video-codec-sdk#NVDECFeatures
 //---------------------------------------------------------------------------
 
-#include <cuda.h>
 #include <iostream>
+#include <thread>
+
+#include <cuda.h>
 
 #include "nvidia-video-codec-sdk-9.1.23/NvCodec/NvDecoder/NvDecoder.h"
 #include "nvidia-video-codec-sdk-9.1.23/Utils/ColorSpace.h"
@@ -75,6 +77,9 @@ auto decode(CUcontext cuContext, char* szInFilePath) -> int
 
     for (auto i = 0; i < num_frames_returned; ++i)
     {
+      using namespace std::chrono_literals;
+      std::this_thread::sleep_for(20ms);
+
       // Specify the frame data to render on OpenGL.
       presenter.GetDeviceFrameBuffer(&frame_device_ptr, &frame_pitch);
 

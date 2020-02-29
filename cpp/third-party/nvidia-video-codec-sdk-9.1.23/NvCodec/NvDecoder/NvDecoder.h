@@ -36,18 +36,22 @@ public:
   virtual ~NVDECException() throw()
   {
   }
+
   virtual const char* what() const throw()
   {
     return m_errorString.c_str();
   }
+
   CUresult getErrorCode() const
   {
     return m_errorCode;
   }
+
   const std::string& getErrorString() const
   {
     return m_errorString;
   }
+
   static NVDECException makeNVDECException(const std::string& errorStr,
                                            const CUresult errorCode,
                                            const std::string& functionName,
@@ -117,6 +121,7 @@ public:
             std::mutex* pMutex = NULL, bool bLowLatency = false,
             bool bDeviceFramePitched = false, const Rect* pCropRect = NULL,
             const Dim* pResizeDim = NULL, int maxWidth = 0, int maxHeight = 0);
+
   ~NvDecoder();
 
   /**
@@ -231,20 +236,21 @@ public:
   }
 
   /**
-  *   @brief  This function decodes a frame and returns frames that are
-  available for display. The frames should be used or buffered before making
-  subsequent calls to the Decode function again
-  *   @param  pData - pointer to the data buffer that is to be decoded
-  *   @param  nSize - size of the data buffer in bytes
-  *   @param  pppFrame - CUvideopacketflags for setting decode options
-  *   @param  pnFrameReturned	 - pointer to array of decoded frames that are
-  returned
-  *   @param  flags - CUvideopacketflags for setting decode options
-  *   @param  ppTimestamp - pointer to array of timestamps for decoded frames
-  that are returned
-  *   @param  timestamp - presentation timestamp
-  *   @param  stream - CUstream to be used for post-processing operations
-  */
+   *   @brief  This function decodes a frame and returns frames that are
+   *   available for display. The frames should be used or buffered before
+   *   making subsequent calls to the Decode function again
+   *
+   *   @param  pData - pointer to the data buffer that is to be decoded
+   *   @param  nSize - size of the data buffer in bytes
+   *   @param  pppFrame - CUvideopacketflags for setting decode options
+   *   @param  pnFrameReturned	 - pointer to array of decoded frames that are
+   *   returned
+   *   @param  flags - CUvideopacketflags for setting decode options
+   *   @param  ppTimestamp - pointer to array of timestamps for decoded frames
+   *   that are returned
+   *   @param  timestamp - presentation timestamp
+   *   @param  stream - CUstream to be used for post-processing operations
+   */
   bool Decode(const uint8_t* pData, int nSize, uint8_t*** pppFrame,
               int* pnFrameReturned, uint32_t flags = 0,
               int64_t** ppTimestamp = NULL, int64_t timestamp = 0,
@@ -299,7 +305,7 @@ private:
 
   /**
    *   @brief  Callback function to be registered for getting a callback when a
-   * decoded frame is ready to be decoded
+   *   decoded frame is ready to be decoded
    */
   static int CUDAAPI HandlePictureDecodeProc(void* pUserData,
                                              CUVIDPICPARAMS* pPicParams)
@@ -309,7 +315,7 @@ private:
 
   /**
    *   @brief  Callback function to be registered for getting a callback when a
-   * decoded frame is available for display
+   *   decoded frame is available for display
    */
   static int CUDAAPI HandlePictureDisplayProc(void* pUserData,
                                               CUVIDPARSERDISPINFO* pDispInfo)
@@ -318,9 +324,9 @@ private:
   }
 
   /**
-  *   @brief  This function gets called when a sequence is ready to be decoded.
-  The function also gets called when there is format change
-  */
+   *   @brief  This function gets called when a sequence is ready to be decoded.
+   *   The function also gets called when there is format change
+   */
   int HandleVideoSequence(CUVIDEOFORMAT* pVideoFormat);
 
   /**
@@ -330,14 +336,14 @@ private:
   int HandlePictureDecode(CUVIDPICPARAMS* pPicParams);
 
   /**
-  *   @brief  This function gets called after a picture is decoded and available
-  for display. Frames are fetched and stored in internal buffer
-  */
+   *   @brief  This function gets called after a picture is decoded and
+   *   available for display. Frames are fetched and stored in internal buffer
+   */
   int HandlePictureDisplay(CUVIDPARSERDISPINFO* pDispInfo);
 
   /**
    *   @brief  This function reconfigure decoder if there is a change in
-   * sequence params.
+   *   sequence params.
    */
   int ReconfigureDecoder(CUVIDEOFORMAT* pVideoFormat);
 
@@ -348,9 +354,11 @@ private:
   CUvideoparser m_hParser = NULL;
   CUvideodecoder m_hDecoder = NULL;
   bool m_bUseDeviceFrame;
+
   // dimension of the output
   unsigned int m_nWidth = 0, m_nLumaHeight = 0, m_nChromaHeight = 0;
   unsigned int m_nNumChromaPlanes = 0;
+
   // height of the mapped surface
   int m_nSurfaceHeight = 0;
   int m_nSurfaceWidth = 0;

@@ -35,18 +35,22 @@ public:
   virtual ~NVENCException() throw()
   {
   }
+
   virtual const char* what() const throw()
   {
     return m_errorString.c_str();
   }
+
   NVENCSTATUS getErrorCode() const
   {
     return m_errorCode;
   }
+
   const std::string& getErrorString() const
   {
     return m_errorString;
   }
+
   static NVENCException makeNVENCException(const std::string& errorStr,
                                            const NVENCSTATUS errorCode,
                                            const std::string& functionName,
