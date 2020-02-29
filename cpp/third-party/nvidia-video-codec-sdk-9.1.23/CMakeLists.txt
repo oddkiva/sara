@@ -5,10 +5,36 @@ endif ()
 
 find_package(NvidiaVideoCodec)
 
-file(GLOB_RECURSE NV_VIDEOCODEC_SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}
-  *.cpp *.h *.cu)
+set(NvDecoder_SOURCE_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/NvCodec/NvDecoder/NvDecoder.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/NvCodec/NvDecoder/NvDecoder.h)
 
-cuda_add_library(nvidia_VideoCodecHelpers ${NV_VIDEOCODEC_SOURCE_FILES})
+list (APPEND NvEncoder_SOURCE_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/NvCodec/NvEncoder/NvEncoder.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/NvCodec/NvEncoder/NvEncoder.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/NvCodec/NvEncoder/NvEncoderCuda.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/NvCodec/NvEncoder/NvEncoderCuda.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/NvCodec/NvEncoder/NvEncoderGL.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/NvCodec/NvEncoder/NvEncoderGL.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/NvCodec/NvEncoder/NvEncoderOutputInVidMemCuda.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/NvCodec/NvEncoder/NvEncoderOutputInVidMemCuda.h)
+
+if (WIN32 AND USE_DIRECT3D)
+  list (APPEND NvEncoder_SOURCE_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/NvCodec/NvEncoder/NvEncoderD3D11.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/NvCodec/NvEncoder/NvEncoderD3D11.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/NvCodec/NvEncoder/NvEncoderD3D9.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/NvCodec/NvEncoder/NvEncoderD3D9.h)
+endif ()
+
+file (GLOB Utils_SOURCE_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/Utils/*.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/Utils/*.cu)
+
+cuda_add_library(nvidia_VideoCodecHelpers
+  ${NvDecoder_SOURCE_FILES}
+  ${NvEncoder_SOURCE_FILES}
+  ${Utils_SOURCE_FILES})
 target_include_directories(nvidia_VideoCodecHelpers
   PRIVATE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/NvCodec>

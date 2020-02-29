@@ -19,16 +19,17 @@
 //! https://developer.nvidia.com/nvidia-video-codec-sdk#NVDECFeatures
 //---------------------------------------------------------------------------
 
-#include "AppDecUtils.h"
-#include "FramePresenterGL.h"
+#include <cuda.h>
+#include <iostream>
 
 #include "nvidia-video-codec-sdk-9.1.23/NvCodec/NvDecoder/NvDecoder.h"
 #include "nvidia-video-codec-sdk-9.1.23/Utils/ColorSpace.h"
 #include "nvidia-video-codec-sdk-9.1.23/Utils/FFmpegDemuxer.h"
 #include "nvidia-video-codec-sdk-9.1.23/Utils/NvCodecUtils.h"
 
-#include <cuda.h>
-#include <iostream>
+#include "AppDecUtils.h"
+#include "FramePresenterGL.h"
+
 
 simplelogger::Logger *logger = simplelogger::LoggerFactory::CreateConsoleLogger();
 

@@ -23,8 +23,8 @@
 #include <GL/freeglut_ext.h>
 #include <cuda.h>
 #include <cudaGL.h>
-#include "../Utils/NvCodecUtils.h"
-#include "../Utils/Logger.h"
+#include "nvidia-video-codec-sdk-9.1.23/Utils/NvCodecUtils.h"
+#include "nvidia-video-codec-sdk-9.1.23/Utils/Logger.h"
 
 class FramePresenterGL;
 static FramePresenterGL *pInstance;

@@ -8,11 +8,6 @@
 #
 # ::
 #
-#   NvidiaVideoCodec_VERSION_STRING - version (x.y.z)
-#   NvidiaVideoCodec_VERSION_MAJOR  - major version (x)
-#   NvidiaVideoCodec_VERSION_MINOR  - minor version (y)
-#   NvidiaVideoCodec_VERSION_PATCH  - patch version (z)
-#
 # Hints
 # ^^^^^
 # A user may set ``NvidiaVideoCodec_ROOT`` to an installation root to tell this
@@ -38,8 +33,13 @@ endforeach ()
 
 if (NOT NvidiaVideoCodec_LIBRARY)
   foreach (search ${_NvidiaVideoCodec_SEARCHES})
-    find_library(NvidiaVideoCodec_LIBRARY
-      NAMES nvcuvid ${${search}}
+    find_library(NvidiaVideoCodec_nvcuvid_LIBRARY
+      NAMES nvcuvid
+      ${${search}}
+      PATH_SUFFIXES Lib/linux/stubs/x86_64)
+    find_library(NvidiaVideoCodec_encode_LIBRARY
+      NAMES nvidia-encode
+      ${${search}}
       PATH_SUFFIXES Lib/linux/stubs/x86_64)
   endforeach ()
 endif ()
@@ -47,34 +47,20 @@ endif ()
 
 mark_as_advanced(NvidiaVideoCodec_INCLUDE_DIR)
 
-# if (NvidiaVideoCodec_INCLUDE_DIR AND
-#     EXISTS "${NvidiaVideoCodec_INCLUDE_DIR}/nvcuvid.h")
-#   file(STRINGS "${NvidiaVideoCodec_INCLUDE_DIR}/nvcuvid.h"
-#     NvidiaVideoCodec_MAJOR REGEX "^#define NV_VIDEOCODEC_MAJOR [0-9]+.*$")
-#   file(STRINGS "${NvidiaVideoCodec_INCLUDE_DIR}/nvcuvid.h"
-#     NvidiaVideoCodec_MINOR REGEX "^#define NV_VIDEOCODEC_MINOR [0-9]+.*$")
-#   file(STRINGS "${NvidiaVideoCodec_INCLUDE_DIR}/nvcuvid.h" NvidiaVideoCodec_PATCH REGEX
-#     "^#define NV_VIDEOCODEC_PATCH [0-9]+.*$")
-#
-#   string(REGEX REPLACE "^#define NV_VIDEOCODEC_MAJOR ([0-9]+).*$" "\\1" NvidiaVideoCodec_VERSION_MAJOR "${NvidiaVideoCodec_MAJOR}")
-#   string(REGEX REPLACE "^#define NV_VIDEOCODEC_MINOR ([0-9]+).*$" "\\1" NvidiaVideoCodec_VERSION_MINOR "${NvidiaVideoCodec_MINOR}")
-#   string(REGEX REPLACE "^#define NV_VIDEOCODEC_PATCH ([0-9]+).*$" "\\1" NvidiaVideoCodec_VERSION_PATCH "${NvidiaVideoCodec_PATCH}")
-#   set(NvidiaVideoCodec_VERSION_STRING "${NvidiaVideoCodec_VERSION_MAJOR}.${NvidiaVideoCodec_VERSION_MINOR}.${NvidiaVideoCodec_VERSION_PATCH}")
-# endif()
-
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(NvidiaVideoCodec
   REQUIRED_VARS
-  NvidiaVideoCodec_LIBRARY
+  NvidiaVideoCodec_nvcuvid_LIBRARY
+  NvidiaVideoCodec_encode_LIBRARY
   NvidiaVideoCodec_INCLUDE_DIR)
-  # VERSION_VAR
-  # NvidiaVideoCodec_VERSION_STRING)
 
 if (NvidiaVideoCodec_FOUND)
   set(NvidiaVideoCodec_INCLUDE_DIRS ${NvidiaVideoCodec_INCLUDE_DIR})
 
   if (NOT NvidiaVideoCodec_LIBRARIES)
-    set(NvidiaVideoCodec_LIBRARIES ${NvidiaVideoCodec_LIBRARY})
+    set(NvidiaVideoCodec_LIBRARIES
+      ${NvidiaVideoCodec_nvcuvid_LIBRARY}
+      ${NvidiaVideoCodec_encode_LIBRARY})
   endif ()
 
   if (NOT TARGET nvidia::VideoCodec)
@@ -82,6 +68,6 @@ if (NvidiaVideoCodec_FOUND)
     set_target_properties(nvidia::VideoCodec
       PROPERTIES
       INTERFACE_INCLUDE_DIRECTORIES ${NvidiaVideoCodec_INCLUDE_DIRS}
-      INTERFACE_LINK_LIBRARIES ${NvidiaVideoCodec_LIBRARY})
+      INTERFACE_LINK_LIBRARIES "${NvidiaVideoCodec_LIBRARIES}")
   endif ()
 endif ()
