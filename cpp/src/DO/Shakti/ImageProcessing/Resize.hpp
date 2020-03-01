@@ -11,23 +11,16 @@
 
 #pragma once
 
-#include <DO/Shakti/MultiArray/Matrix.hpp>
+#include <DO/Shakti/MultiArray/MultiArrayView.hpp>
 
 
 namespace DO { namespace Shakti {
 
-  template <typename T, int N>
-  class ImagePyramid
+  //! @brief Resize the image.
+  template <typename T, int N, typename Strides>
+  void resize(const MultiArrayView<T, N, Strides>& src,
+              MultiArrayView<T, N, Strides>& dst)
   {
-  public:
-    using scalar_type = T;
-
-    ImagePyramid(const Vector2i& image_sizes);
-
-  private:
-    scalar_type _scale_initial;
-    scalar_type _scale_geometric_factor;
-    T *_device_data;
-  };
+  }
 
 }}  // namespace DO::Shakti

@@ -16,65 +16,6 @@ using namespace std;
 using namespace DO::Sara;
 
 
-auto sara_pipeline() -> void
-{
-  const string video_filepath = "/home/david/Desktop/test.mp4";
-  // const auto video_filepath =
-  //     "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4";
-  // const auto video_filepath =
-  //     "/Users/david/GitLab/DO-CV/sara/cpp/examples/Sara/VideoIO/orion_1.mpg"s;
-
-  VideoStream video_stream(video_filepath);
-
-  // Input.
-  auto in_video_frame = video_stream.frame();
-  auto in_float = Image<float>{video_stream.sizes()};
-  auto grad = Image<Vector2f>{video_stream.sizes()};
-  auto grad_norm = Image<float>{video_stream.sizes()};
-  auto grad_norm_rgb = Image<Rgb8>{video_stream.sizes()};
-
-  // Timer.
-  auto timer = Timer{};
-  auto elapsed = double{};
-
-  // Sara pipeline
-  auto compute_gradient = Gradient{};
-
-  create_window(video_stream.sizes());
-  while (true)
-  {
-    timer.restart();
-    if (!video_stream.read())
-    {
-      std::cout << "Reached the end of the video!" << std::endl;
-      break;
-    }
-    elapsed = timer.elapsed_ms();
-    std::cout << "Video decoding time = " << elapsed << " ms" << std::endl;
-
-    timer.restart();
-    {
-      convert(in_video_frame, in_float);
-    }
-    elapsed = timer.elapsed_ms();
-    std::cout << "Color conversion time = " << elapsed << " ms" << std::endl;
-
-    timer.restart();
-    {
-      compute_gradient(in_float, grad);
-      std::transform(grad.begin(), grad.end(), grad_norm.begin(),
-                     [](const Vector2f& g) { return g.norm(); });
-      grad_norm = color_rescale(grad_norm);
-      convert(grad_norm, grad_norm_rgb);
-    }
-    elapsed = timer.elapsed_ms();
-    std::cout << "Sara computation time = " << elapsed << " ms" << std::endl;
-
-    display(grad_norm_rgb);
-  }
-}
-
-
 auto find_gpu_target() -> Halide::Target
 {
   using namespace Halide;
