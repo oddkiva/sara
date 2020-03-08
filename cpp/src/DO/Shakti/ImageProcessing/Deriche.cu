@@ -31,6 +31,9 @@ namespace DO { namespace Shakti {
    *  @{
    */
 
+  // Reuse Nehab's implementation to have a really efficient implementation
+  // available here: https://github.com/andmax/gpufilter
+
 //  //! @brief Apply Deriche filter with specified order $o$ to dimension $d$.
 //  __global__ template <typename T>
 //  void inplace_deriche_2d(T* inout_signal, const Vector2i& sizes, T sigma,

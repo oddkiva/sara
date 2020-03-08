@@ -21,6 +21,7 @@ namespace DO { namespace Shakti {
   void resize(const MultiArrayView<T, N, Strides>& src,
               MultiArrayView<T, N, Strides>& dst)
   {
+    // Let's make it simple to get things done.
   }
 
 }}  // namespace DO::Shakti

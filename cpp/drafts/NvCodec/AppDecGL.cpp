@@ -33,7 +33,8 @@
 #include "FramePresenterGL.h"
 
 
-simplelogger::Logger *logger = simplelogger::LoggerFactory::CreateConsoleLogger();
+simplelogger::Logger* logger =
+    simplelogger::LoggerFactory::CreateConsoleLogger();
 
 /**
  *   @brief  Function to decode media file pointed by "szInFilePath" parameter.
@@ -48,11 +49,12 @@ auto decode(CUcontext cuContext, char* szInFilePath) -> int
 
   FFmpegDemuxer demuxer(szInFilePath);
   NvDecoder dec(cuContext, true, FFmpeg2NvCodecId(demuxer.GetVideoCodec()));
-  FramePresenterGL presenter(
-      cuContext, demuxer.GetWidth(), demuxer.GetHeight());
+  FramePresenterGL presenter(cuContext, demuxer.GetWidth(),
+                             demuxer.GetHeight());
 
   // Check whether we have valid NVIDIA libraries installed
-  if (!presenter.isVendorNvidia()) {
+  if (!presenter.isVendorNvidia())
+  {
     std::cout << "\nFailed to find NVIDIA libraries\n";
     return 0;
   }
@@ -68,9 +70,11 @@ auto decode(CUcontext cuContext, char* szInFilePath) -> int
   auto num_frames_returned = int{};
   auto num_frames = int{};
 
-  do {
+  do
+  {
     demuxer.Demux(&video_data_buffer, &video_byte_size);
-    dec.Decode(video_data_buffer, video_byte_size, &frame_packet_flags, &num_frames_returned);
+    dec.Decode(video_data_buffer, video_byte_size, &frame_packet_flags,
+               &num_frames_returned);
 
     if (!num_frames && num_frames_returned)
       LOG(INFO) << dec.GetVideoInfo();
@@ -85,20 +89,28 @@ auto decode(CUcontext cuContext, char* szInFilePath) -> int
 
       // Launch cuda kernels for colorspace conversion from raw video to raw
       // image formats which OpenGL textures can work with
-      if (dec.GetBitDepth() == 8) {
+      if (dec.GetBitDepth() == 8)
+      {
         if (dec.GetOutputFormat() == cudaVideoSurfaceFormat_YUV444)
-          YUV444ToColor32<BGRA32>((uint8_t*)frame_packet_flags[i], dec.GetWidth(),
-              (uint8_t*)frame_device_ptr, frame_pitch, dec.GetWidth(), dec.GetHeight());
-        else // default assumed NV12
-          Nv12ToColor32<BGRA32>((uint8_t*)frame_packet_flags[i], dec.GetWidth(),
-              (uint8_t*)frame_device_ptr, frame_pitch, dec.GetWidth(), dec.GetHeight());
-      } else {
+          YUV444ToColor32<BGRA32>((uint8_t*) frame_packet_flags[i],
+                                  dec.GetWidth(), (uint8_t*) frame_device_ptr,
+                                  frame_pitch, dec.GetWidth(), dec.GetHeight());
+        else  // default assumed NV12
+          Nv12ToColor32<BGRA32>((uint8_t*) frame_packet_flags[i],
+                                dec.GetWidth(), (uint8_t*) frame_device_ptr,
+                                frame_pitch, dec.GetWidth(), dec.GetHeight());
+      }
+      else
+      {
         if (dec.GetOutputFormat() == cudaVideoSurfaceFormat_YUV444)
-          YUV444P16ToColor32<BGRA32>((uint8_t*)frame_packet_flags[i], 2 * dec.GetWidth(),
-              (uint8_t*)frame_device_ptr, frame_pitch, dec.GetWidth(), dec.GetHeight());
-        else // default assumed P016
-          P016ToColor32<BGRA32>((uint8_t*)frame_packet_flags[i], 2 * dec.GetWidth(),
-              (uint8_t*)frame_device_ptr, frame_pitch, dec.GetWidth(), dec.GetHeight());
+          YUV444P16ToColor32<BGRA32>((uint8_t*) frame_packet_flags[i],
+                                     2 * dec.GetWidth(),
+                                     (uint8_t*) frame_device_ptr, frame_pitch,
+                                     dec.GetWidth(), dec.GetHeight());
+        else  // default assumed P016
+          P016ToColor32<BGRA32>((uint8_t*) frame_packet_flags[i],
+                                2 * dec.GetWidth(), (uint8_t*) frame_device_ptr,
+                                frame_pitch, dec.GetWidth(), dec.GetHeight());
       }
     }
     num_frames += num_frames_returned;
@@ -114,14 +126,16 @@ int main(int argc, char** argv)
   char szInFilePath[256] = "";
   auto iGpu = 0;
 
-  try {
+  try
+  {
     ParseCommandLine(argc, argv, szInFilePath, NULL, iGpu, NULL, NULL);
     CheckInputFile(szInFilePath);
 
     ck(cuInit(0));
     auto nGpu = 0;
     ck(cuDeviceGetCount(&nGpu));
-    if (iGpu < 0 || iGpu >= nGpu) {
+    if (iGpu < 0 || iGpu >= nGpu)
+    {
       std::ostringstream err;
       err << "GPU ordinal out of range. Should be within [" << 0 << ", "
           << nGpu - 1 << "]" << std::endl;
@@ -133,7 +147,9 @@ int main(int argc, char** argv)
 
     std::cout << "Decode with NvDecoder." << std::endl;
     decode(cuContext, szInFilePath);
-  } catch (const std::exception& ex) {
+  }
+  catch (const std::exception& ex)
+  {
     std::cout << ex.what();
     exit(1);
   }
