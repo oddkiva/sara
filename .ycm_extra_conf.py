@@ -72,10 +72,13 @@ flags = [
 "-I", "cpp",
 "-I", "cpp/src",
 "-I", "cpp/third-party/nvidia-video-codec-sdk-9.1.23",
+"-I", "cpp/third-party/gpufilter/include",
 # Build directory.
 "-I", "../sara-build/cpp/src",
 "-I", "../sara-build-Release/cpp/src",
 "-I", "../sara-build-Debug/cpp/src",
+# Halide Generated Files.
+"-I", "../sara-build-Debug/genfiles/sara_halide_rgb_to_gray",
 ]
 
 # Clang automatically sets the '-std=' flag to 'c++14' for MSVC 2015 or later,
