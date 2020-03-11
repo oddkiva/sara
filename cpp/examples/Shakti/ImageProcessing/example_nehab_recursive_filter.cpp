@@ -21,7 +21,7 @@
 #include <DO/Shakti/Utilities/DeviceInfo.hpp>
 #include <DO/Shakti/Utilities/Timer.hpp>
 
-#include <third-party/gpufilter/include/gpufilter.h>
+#include <gpufilter.h>
 
 
 namespace sara = DO::Sara;

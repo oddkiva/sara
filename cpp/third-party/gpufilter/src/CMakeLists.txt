@@ -1,5 +1,5 @@
 cuda_compile(CUDA_SOURCES gpudefs.cu)
-cuda_add_library(gpufilter timer.cpp defs.cpp ${CUDA_SOURCES})
+cuda_add_library(gpufilter timer.cpp defs.cpp gpufilter.cu ${CUDA_SOURCES})
 target_include_directories(gpufilter
   PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}/../include

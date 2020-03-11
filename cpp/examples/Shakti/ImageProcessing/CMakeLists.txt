@@ -17,5 +17,6 @@ foreach (file ${examples_SRC_FILES})
     DEPENDENCIES
     ${DO_Sara_LIBRARIES}
     DO::Shakti::ImageProcessing
-    DO::Shakti::Utilities)
+    DO::Shakti::Utilities
+    gpufilter)
 endforeach ()

@@ -62,3 +62,7 @@ foreach (lesson ${LESSONS_SOURCE_FILES})
     Halide)
   set_property(TARGET ${lesson_name} PROPERTY FOLDER "Tutorials/Halide")
 endforeach()
+
+
+include(${HALIDE_CMAKE_FILEPATH})
+halide_library(halide_image_processing SRCS halide_image_processing.cpp)

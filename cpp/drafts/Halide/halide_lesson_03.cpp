@@ -277,6 +277,74 @@ namespace DO::Sara::HalideBackend {
     };
   };
 
+  struct RgbToGray : public CastToFloat
+  {
+    using base_type = CastToFloat;
+
+    mutable Halide::Func gray{"Gray"};
+
+    RgbToGray(Halide::Buffer<std::uint8_t>& input)
+      : base_type{input}
+    {
+      auto r = cast(x, y, 0);
+      auto g = cast(x, y, 1);
+      auto b = cast(x, y, 2);
+      gray(x, y) = 0.2125f * r + 0.7154f * g + 0.0721f * b;
+    }
+
+    auto operator()(Halide::Buffer<float>& output_buffer) const -> void
+    {
+      input_buffer.set_host_dirty();
+      cast.realize(output_buffer);
+      output_buffer.copy_to_host();
+    }
+  };
+
+  struct Gaussian : public RgbToGray
+  {
+    using base_type = RgbToGray;
+
+    mutable Halide::Func padded{"Padded"};
+    mutable Halide::Func conv_x{"ConvX"};
+    mutable Halide::Func conv_y{"ConvY"};
+    mutable Halide::Func kernel{"Kernel"};
+
+    Gaussian(Halide::Buffer<std::uint8_t>& input, float sigma, float gaussian_truncation_factor = 4.f)
+      : base_type{input}
+    {
+      using namespace Halide;
+
+      // Padded image with edge repeat.
+      const auto w = input.width();
+      const auto h = input.height();
+      auto x_clamped = clamp(x, 0, w - 1);
+      auto y_clamped = clamp(y, 0, h - 1);
+      padded(x, y) = gray(x_clamped, y_clamped);
+
+      // Define the Gaussian kernel.
+      const auto kernel_size = int(sigma / 2) * gaussian_truncation_factor + 1;
+      Halide::RDom r{-kernel_size / 2, kernel_size / 2};
+      kernel(x) = exp(-(x * x) / (2 * sigma * sigma));
+      auto normalization_factor = sum(kernel(x + r));
+      kernel(x) /= normalization_factor;
+
+      conv_x(x, y) = sum(padded(x + r, y + 0) * kernel(r));
+      conv_x(x, y) = conv_x(x_clamped, y_clamped);
+
+      conv_y(x, y) = sum(conv_x(x + 0, y + r) * kernel(r));
+
+      // Precompute the Gaussian kernel.
+      kernel.compute_root();
+    }
+
+    auto operator()(Halide::Buffer<float>& output_buffer) const -> void
+    {
+      input_buffer.set_host_dirty();
+      cast.realize(output_buffer);
+      output_buffer.copy_to_host();
+    }
+  };
+
 }  // namespace DO::Sara::halide
 
 
@@ -311,8 +379,8 @@ auto halide_pipeline() -> void
   const auto video_filepath =
       "/Users/david/GitLab/DO-CV/sara/cpp/examples/Sara/VideoIO/orion_1.mpg"s;
 #else
-  const auto video_filepath = "/home/david/Desktop/test.mp4"s;
-  // const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
+  //const auto video_filepath = "/home/david/Desktop/test.mp4"s;
+  const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
 #endif
 
   VideoStream video_stream(video_filepath);
@@ -326,8 +394,8 @@ auto halide_pipeline() -> void
   auto output_buffer = halide::as_interleaved_rgb_buffer(output_image);
 
   // Blur pipeline.
-  //const auto pipeline = halide::Blur3x3Vis{input_buffer};
-  const auto pipeline = halide::LaplacianVis{input_buffer};
+  const auto pipeline = halide::Blur3x3Vis{input_buffer};
+  //const auto pipeline = halide::LaplacianVis{input_buffer};
 
 
   create_window(video_stream.sizes());
