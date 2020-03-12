@@ -4,7 +4,8 @@
 #include <DO/Sara/VideoIO.hpp>
 
 #include "Halide.h"
-#include "sara_halide_rgb_to_gray.h"
+#include "shakti_halide_rgb_to_gray.h"
+#include "shakti_halide_gray32f_to_rgb.h"
 
 #ifdef _WIN32
 #  include <windows.h>
@@ -80,10 +81,11 @@ namespace DO::Sara::HalideBackend {
         3);
   }
 
-  auto as_float_buffer(ImageView<float>& image)
+  template <typename T>
+  auto as_buffer(ImageView<T>& image)
   {
-    return Halide::Runtime::Buffer<float>(image.data(), image.width(),
-                                          image.height());
+    return Halide::Runtime::Buffer<T>(image.data(), image.width(),
+                                      image.height());
   }
 
 }  // namespace DO::Sara::halide
@@ -127,13 +129,16 @@ auto halide_pipeline() -> void
   VideoStream video_stream(video_filepath);
 
   // Input and output images.
-  auto input_image = video_stream.frame();
-  auto output_image = Image<float>{video_stream.sizes()};
+  auto frame_rgb8 = video_stream.frame();
+  auto frame_gray32f = Image<float>{video_stream.sizes()};
+  auto frame_gray_as_rgb = Image<Rgb8>{video_stream.sizes()};
 
   // Halide input and output buffers.
-  auto input_buffer = halide::as_interleaved_rgb_buffer(input_image);
-  auto output_buffer = halide::as_float_buffer(output_image);
+  auto buffer_rgb = halide::as_interleaved_rgb_buffer(frame_rgb8);
+  auto buffer_gray32f = halide::as_buffer<float>(frame_gray32f);
+  auto buffer_gray8 = halide::as_interleaved_rgb_buffer(frame_gray_as_rgb);
 
+  const auto target = halide::get_gpu_target();
 
   create_window(video_stream.sizes());
   while (true)
@@ -147,10 +152,13 @@ auto halide_pipeline() -> void
     toc("Video Decoding");
 
     tic();
-    sara_halide_rgb_to_gray(input_buffer, output_buffer);
+    //buffer_rgb.set_host_dirty();
+    shakti_halide_rgb_to_gray(buffer_rgb, buffer_gray32f);
+    shakti_halide_gray32f_to_rgb(buffer_gray32f, buffer_gray8);
+    buffer_gray8.copy_to_host();
     toc("Halide");
 
-    display(output_image);
+    display(frame_gray_as_rgb);
   }
 }
 

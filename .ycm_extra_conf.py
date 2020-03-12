@@ -78,7 +78,7 @@ flags = [
 "-I", "../sara-build-Release/cpp/src",
 "-I", "../sara-build-Debug/cpp/src",
 # Halide Generated Files.
-"-I", "../sara-build-Debug/genfiles/sara_halide_rgb_to_gray",
+"-I", "../sara-build-Debug/genfiles/shakti_halide_rgb_to_gray",
 ]
 
 # Clang automatically sets the '-std=' flag to 'c++14' for MSVC 2015 or later,

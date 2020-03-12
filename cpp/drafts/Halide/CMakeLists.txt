@@ -65,5 +65,10 @@ endforeach()
 
 
 include(${HALIDE_CMAKE_FILEPATH})
-halide_library(sara_halide_rgb_to_gray SRCS sara_halide_rgb_to_gray.cpp)
-target_link_libraries(halide_lesson_04 PRIVATE sara_halide_rgb_to_gray)
+halide_library(shakti_halide_rgb_to_gray SRCS shakti_halide_rgb_to_gray.cpp)
+halide_library(shakti_halide_gray32f_to_rgb SRCS shakti_halide_gray32f_to_rgb.cpp)
+
+target_link_libraries(halide_lesson_04
+  PRIVATE
+  shakti_halide_rgb_to_gray
+  shakti_halide_gray32f_to_rgb)
