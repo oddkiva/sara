@@ -6,6 +6,7 @@
 #include "Halide.h"
 #include "shakti_halide_rgb_to_gray.h"
 #include "shakti_halide_gray32f_to_rgb.h"
+#include "shakti_halide_gaussian_blur.h"
 
 #ifdef _WIN32
 #  include <windows.h>
@@ -131,14 +132,19 @@ auto halide_pipeline() -> void
   // Input and output images.
   auto frame_rgb8 = video_stream.frame();
   auto frame_gray32f = Image<float>{video_stream.sizes()};
+  auto frame_gray32f_blurred = Image<float>{video_stream.sizes()};
   auto frame_gray_as_rgb = Image<Rgb8>{video_stream.sizes()};
 
   // Halide input and output buffers.
   auto buffer_rgb = halide::as_interleaved_rgb_buffer(frame_rgb8);
   auto buffer_gray32f = halide::as_buffer<float>(frame_gray32f);
+  auto buffer_gray32f_blurred = halide::as_buffer<float>(frame_gray32f);
   auto buffer_gray8 = halide::as_interleaved_rgb_buffer(frame_gray_as_rgb);
 
   const auto target = halide::get_gpu_target();
+
+  // shakti_halide_rgb_to_gray_argv(target);
+  // shakti_halide_gray32f_to_rgb_argv(target);
 
   create_window(video_stream.sizes());
   while (true)
@@ -152,10 +158,15 @@ auto halide_pipeline() -> void
     toc("Video Decoding");
 
     tic();
-    //buffer_rgb.set_host_dirty();
-    shakti_halide_rgb_to_gray(buffer_rgb, buffer_gray32f);
-    shakti_halide_gray32f_to_rgb(buffer_gray32f, buffer_gray8);
-    buffer_gray8.copy_to_host();
+    {
+      buffer_rgb.set_host_dirty();
+
+      shakti_halide_rgb_to_gray(buffer_rgb, buffer_gray32f);
+      shakti_halide_gaussian_blur(buffer_gray32f, buffer_gray32f_blurred);
+      shakti_halide_gray32f_to_rgb(buffer_gray32f_blurred, buffer_gray8);
+
+      buffer_gray8.copy_to_host();
+    }
     toc("Halide");
 
     display(frame_gray_as_rgb);

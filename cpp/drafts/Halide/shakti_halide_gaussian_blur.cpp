@@ -17,29 +17,35 @@ namespace {
     Input<Buffer<float>> input{"f", 2};
     Output<Buffer<float>> output{"conv_f", 2};
 
-    Var x{"x"}, y{"y"}, xi{"xi"}, yi{"yi"};
+    Var x{"x"}, y{"y"}, xo{"xo"}, yo{"yo"}, xi{"xi"}, yi{"yi"};
 
     void generate()
     {
-      const auto kernel_size = int(sigma / 2) * truncation_factor + 1;
+      const auto radius = int(sigma / 2) * truncation_factor;
 
-      auto gaussian = Func{"gaussian"};
-      gaussian(x) = exp(-(x * x) / (2 * sigma * sigma));
-
-      auto r = RDom(-kernel_size / 2, kernel_size / 2);
-      gaussian(x) /= sum(gaussian(r));
+      auto gaussian_unnormalized = Func{"gaussian_unnormalized"};
+      gaussian_unnormalized(x) = exp(-(x * x) / (2 * sigma * sigma));
 
       auto input_padded = BoundaryConditions::repeat_edge(input);
 
+      auto k = RDom(-radius, 2 * radius + 1);
+      auto gaussian = Func{"gaussian"};
+      gaussian(x) = gaussian_unnormalized(x) / sum(gaussian_unnormalized(k));
+
+      const auto w = input.width();
+      const auto h = input.height();
+
       auto conv_x = Func{"conv_x"};
-      conv_x(x, y) = sum(input_padded(x + r, y) * gaussian(r));
+      output(x, y) = sum(input_padded(x + k, y) * gaussian(k));
 
-      auto conv_x_padded = BoundaryConditions::repeat_edge(conv_x);
-      output(x, y) = sum(conv_x_padded(x, y + r) * gaussian(r));
+      // output(x, y) = sum(conv_x(x, clamp(y + k - kernel_size / 2, 0, h - 1)) *
+      //                    gaussian(k));
 
+      // Compute the gaussian first.
       gaussian.compute_root();
+      output.split(y, yo, yi, 8).parallel(yo).vectorize(x, 8);
 
-      schedule_algorithm();
+      //schedule_algorithm();
     }
 
     void schedule_algorithm()
@@ -70,4 +76,4 @@ namespace {
 }  // namespace
 
 
-HALIDE_REGISTER_GENERATOR(RgbToGray, shakti_halide_rgb_to_gray)
+HALIDE_REGISTER_GENERATOR(GaussianBlur, shakti_halide_gaussian_blur)

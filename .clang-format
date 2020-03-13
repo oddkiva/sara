@@ -18,7 +18,7 @@ AlignEscapedNewlinesLeft: false
 #
 # int aaa = bbbbbbbbbbbbbbb +
 #           ccccccccccccccc;
-AlignOperands:   true
+AlignOperands: true
 
 # We want aligned trailing comments, e.g.:
 # void someFunction()
