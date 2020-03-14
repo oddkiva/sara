@@ -15,7 +15,6 @@ using namespace DO::Sara;
 
 auto halide_pipeline() -> void
 {
-
   using namespace std::string_literals;
 
 #ifdef _WIN32
@@ -25,7 +24,7 @@ auto halide_pipeline() -> void
   const auto video_filepath =
       "/Users/david/GitLab/DO-CV/sara/cpp/examples/Sara/VideoIO/orion_1.mpg"s;
 #else
-  //const auto video_filepath = "/home/david/Desktop/test.mp4"s;
+  // const auto video_filepath = "/home/david/Desktop/test.mp4"s;
   const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
 #endif
 
@@ -41,8 +40,7 @@ auto halide_pipeline() -> void
 
   // Blur pipeline.
   const auto pipeline = halide::Blur3x3Vis{input_buffer};
-  //const auto pipeline = halide::LaplacianVis{input_buffer};
-
+  // const auto pipeline = halide::LaplacianVis{input_buffer};
 
   create_window(video_stream.sizes());
   while (true)

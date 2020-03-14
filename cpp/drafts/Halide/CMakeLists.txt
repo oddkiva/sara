@@ -66,9 +66,21 @@ endforeach()
 
 if (NOT APPLE)
   include(${HALIDE_CMAKE_FILEPATH})
-  halide_library(shakti_halide_rgb_to_gray SRCS shakti_halide_rgb_to_gray.cpp)
-  halide_library(shakti_halide_gray32f_to_rgb SRCS shakti_halide_gray32f_to_rgb.cpp)
-  halide_library(shakti_halide_gaussian_blur SRCS shakti_halide_gaussian_blur.cpp)
+  halide_library(shakti_halide_rgb_to_gray
+    SRCS shakti_halide_rgb_to_gray.cpp)
+  halide_library(shakti_halide_gray32f_to_rgb
+    SRCS shakti_halide_gray32f_to_rgb.cpp)
+  halide_library(shakti_halide_gaussian_blur
+    SRCS shakti_halide_gaussian_blur.cpp)
+
+  add_executable(halide_aot_example halide_aot_example.cpp)
+  set_target_properties(halide_aot_example PROPERTIES
+    COMPILE_FLAGS ${SARA_DEFINITIONS})
+  target_link_libraries(halide_aot_example PRIVATE
+    ${DO_Sara_LIBRARIES}
+    ${OpenMP_CXX_LIBRARIES}
+    Halide)
+  set_property(TARGET halide_aot_example PROPERTY FOLDER "Tutorials/Halide")
 
   target_link_libraries(halide_lesson_04
     PRIVATE
