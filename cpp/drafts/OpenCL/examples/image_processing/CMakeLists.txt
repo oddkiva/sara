@@ -19,7 +19,7 @@ if (NOT APPLE)
 endif ()
 set_target_properties(image_processing PROPERTIES
   COMPILE_FLAGS "-DSRCDIR=${CMAKE_CURRENT_SOURCE_DIR}")
-set_property(TARGET image_processing PROPERTY FOLDER "Tutorials/OpenGL")
+set_property(TARGET image_processing PROPERTY FOLDER "Tutorials/OpenCL")
 
 
 if (MSVC)
