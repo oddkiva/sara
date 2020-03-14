@@ -19,7 +19,6 @@ using namespace DO::Sara;
 
 auto halide_pipeline() -> void
 {
-
   using namespace std::string_literals;
 
 #ifdef _WIN32

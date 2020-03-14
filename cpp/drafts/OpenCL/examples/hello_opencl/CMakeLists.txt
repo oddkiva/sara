@@ -6,3 +6,4 @@ target_link_libraries(hello_opencl PRIVATE ${DO_Sara_LIBRARIES} ${OpenCL_LIBRARY
 target_compile_definitions(hello_opencl PRIVATE -DCL_SILENCE_DEPRECATION)
 set_target_properties(hello_opencl PROPERTIES
   COMPILE_FLAGS "-DSRCDIR=${CMAKE_CURRENT_SOURCE_DIR}")
+set_property(TARGET hello_opencl PROPERTY FOLDER "Tutorials/OpenCL")
