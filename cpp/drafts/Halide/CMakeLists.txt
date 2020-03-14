@@ -74,3 +74,10 @@ target_link_libraries(halide_lesson_04
   shakti_halide_rgb_to_gray
   shakti_halide_gray32f_to_rgb
   shakti_halide_gaussian_blur)
+# target_compile_definitions(halide_lesson_04
+#   PUBLIC -Wunused-parameter)
+
+
+if (SARA_BUILD_TESTS)
+  add_subdirectory(test)
+endif ()

@@ -1,5 +1,3 @@
-message(STATUS "  - DO_NeuralNetworks_Tests")
-
 find_package(DO_Sara COMPONENTS Core REQUIRED)
 
 find_package(TensorRT)

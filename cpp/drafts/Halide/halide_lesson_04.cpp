@@ -3,116 +3,22 @@
 #include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
-#include "Halide.h"
+#include "shakti_halide_utilities.hpp"
+
 #include "shakti_halide_rgb_to_gray.h"
 #include "shakti_halide_gray32f_to_rgb.h"
 #include "shakti_halide_gaussian_blur.h"
 
-#ifdef _WIN32
-#  include <windows.h>
-#else
-#  include <dlfcn.h>
-#endif
+
+namespace halide = DO::Shakti::HalideBackend;
 
 
 using namespace std;
 using namespace DO::Sara;
 
 
-namespace DO::Sara::HalideBackend {
-
-  auto find_non_cuda_gpu_target() -> Halide::Target
-  {
-    using namespace Halide;
-
-    Target target = get_host_target();
-
-#ifdef _WIN32
-    if (LoadLibraryA("d3d12.dll") != nullptr)
-      target.set_feature(Target::D3D12Compute);
-    else if (LoadLibraryA("OpenCL.dll") != nullptr)
-      target.set_feature(Target::OpenCL);
-#elif __APPLE__
-    // OS X doesn't update its OpenCL drivers, so they tend to be broken.
-    // CUDA would also be a fine choice on machines with NVidia GPUs.
-    if (dlopen(
-            "/System/Library/Frameworks/Metal.framework/Versions/Current/Metal",
-            RTLD_LAZY) != NULL)
-      target.set_feature(Target::Metal);
-#else
-    if (dlopen("libOpenCL.so", RTLD_LAZY) != NULL)
-      target.set_feature(Target::OpenCL);
-#endif
-
-    return target;
-  }
-
-  auto get_gpu_target() -> Halide::Target
-  {
-    // Configure Halide to use CUDA before we compile the pipeline.
-    constexpr auto use_cuda =
-#if defined(__APPLE__)
-        false;
-#else
-        true;
-#endif
-
-    auto target = Halide::Target{};
-    if constexpr (use_cuda)
-    {
-      target = Halide::get_host_target();
-      target.set_feature(Halide::Target::CUDA);
-    }
-    else
-    {
-      // We Will try to use in this order:
-      // - Microsoft DirectX
-      // - Apple Metal Performance Shaders
-      // - OpenCL
-      target = find_non_cuda_gpu_target();
-    }
-
-    return target;
-  }
-
-  auto as_interleaved_rgb_buffer(ImageView<Rgb8>& image)
-  {
-    return Halide::Runtime::Buffer<uint8_t>::make_interleaved(
-        reinterpret_cast<uint8_t*>(image.data()), image.width(), image.height(),
-        3);
-  }
-
-  template <typename T>
-  auto as_buffer(ImageView<T>& image)
-  {
-    return Halide::Runtime::Buffer<T>(image.data(), image.width(),
-                                      image.height());
-  }
-
-}  // namespace DO::Sara::halide
-
-
-struct TicToc {
-  // Timer.
-  Timer timer;
-  double elapsed;
-} tictoc;
-
-void tic()
-{
-  tictoc.timer.restart();
-}
-
-void toc(const std::string& what)
-{
-  const auto elapsed = tictoc.timer.elapsed_ms();
-  std::cout << "[" << what << "] " << elapsed <<  " ms" << std::endl;
-}
-
-
 auto halide_pipeline() -> void
 {
-  namespace halide = HalideBackend;
 
   using namespace std::string_literals;
 
@@ -136,12 +42,12 @@ auto halide_pipeline() -> void
   auto frame_gray_as_rgb = Image<Rgb8>{video_stream.sizes()};
 
   // Halide input and output buffers.
-  auto buffer_rgb = halide::as_interleaved_rgb_buffer(frame_rgb8);
-  auto buffer_gray32f = halide::as_buffer<float>(frame_gray32f);
-  auto buffer_gray32f_blurred = halide::as_buffer<float>(frame_gray32f);
-  auto buffer_gray8 = halide::as_interleaved_rgb_buffer(frame_gray_as_rgb);
+  auto buffer_rgb = halide::as_interleaved_rgb_runtime_buffer(frame_rgb8);
+  auto buffer_gray32f = halide::as_runtime_buffer<float>(frame_gray32f);
+  auto buffer_gray32f_blurred = halide::as_runtime_buffer<float>(frame_gray32f);
+  auto buffer_gray8 = halide::as_interleaved_rgb_runtime_buffer(frame_gray_as_rgb);
 
-  const auto target = halide::get_gpu_target();
+  /* const auto target = */ halide::get_gpu_target();
 
   // shakti_halide_rgb_to_gray_argv(target);
   // shakti_halide_gray32f_to_rgb_argv(target);
