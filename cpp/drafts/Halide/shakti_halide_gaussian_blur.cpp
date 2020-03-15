@@ -10,10 +10,11 @@ namespace {
   public:
     GeneratorParam<int> tile_x{"tile_x", 32};
     GeneratorParam<int> tile_y{"tile_y", 32};
-    GeneratorParam<float> sigma{"sigma", 10.f};
-    GeneratorParam<int> truncation_factor{"trunc", 4};
 
     Input<Buffer<float>> input{"f", 2};
+    Input<float> sigma{"sigma"};
+    Input<int> truncation_factor{"truncation_factor"};
+
     Output<Buffer<float>> output{"conv_f", 2};
 
     Var x{"x"}, y{"y"}, xo{"xo"}, yo{"yo"}, xi{"xi"}, yi{"yi"};
@@ -22,7 +23,7 @@ namespace {
     {
       const auto w = input.width();
       const auto h = input.height();
-      const auto radius = int(sigma / 2) * truncation_factor;
+      const auto radius = cast<int>(sigma / 2) * truncation_factor;
 
       // Define the unnormalized gaussian function.
       auto gaussian_unnormalized = Func{"gaussian_unnormalized"};

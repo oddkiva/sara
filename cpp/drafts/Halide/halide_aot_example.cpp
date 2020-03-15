@@ -48,10 +48,8 @@ auto halide_pipeline() -> void
   auto buffer_gray8 =
       halide::as_interleaved_rgb_runtime_buffer(frame_gray_as_rgb);
 
-  /* const auto target = */ halide::get_gpu_target();
-
-  // shakti_halide_rgb_to_gray_argv(target);
-  // shakti_halide_gray32f_to_rgb_argv(target);
+  const auto sigma = 10.f;
+  const auto truncation_factor = 4;
 
   create_window(video_stream.sizes());
   while (true)
@@ -95,19 +93,20 @@ auto halide_pipeline() -> void
       // On the GPU, with sigma = 80.f, the processing time is about ~15ms!
       {
         buffer_gray32f.set_host_dirty();
-        shakti_halide_gaussian_blur(buffer_gray32f, buffer_gray32f_blurred);
+        shakti_halide_gaussian_blur(buffer_gray32f, sigma, truncation_factor,
+                                    buffer_gray32f_blurred);
         buffer_gray32f_blurred.copy_to_host();
       }
       shakti_halide_gray32f_to_rgb(buffer_gray32f_blurred, buffer_gray8);
 #elif defined(USE_SARA_GAUSSIAN_BLUR_IMPLEMENTATION)
       // Sara's unoptimized code takes 240 ms to blur (no SSE instructions and
       // no column-based transposition)
-      apply_gaussian_filter(frame_gray32f, frame_gray32f_blurred, 10.f);
+      apply_gaussian_filter(frame_gray32f, frame_gray32f_blurred, sigma);
       shakti_halide_gray32f_to_rgb(buffer_gray32f_blurred, buffer_gray8);
 #elif defined(USE_SARA_DERICHE_IMPLEMENTATION)
       // Without parallelization and anything, deriche filter is still running
       // reasonably fast (between 45 and 50ms).
-      inplace_deriche_blur(frame_gray32f, 10.f);
+      inplace_deriche_blur(frame_gray32f, sigma);
       shakti_halide_gray32f_to_rgb(buffer_gray32f, buffer_gray8);
 #endif
     }
