@@ -20,25 +20,30 @@ namespace {
 
     void generate()
     {
+      const auto w = input.width();
+      const auto h = input.height();
       const auto radius = int(sigma / 2) * truncation_factor;
 
+      // Define the unnormalized gaussian function.
       auto gaussian_unnormalized = Func{"gaussian_unnormalized"};
       gaussian_unnormalized(x) = exp(-(x * x) / (2 * sigma * sigma));
 
+      // Define the summation variable `k` defined on a summation domain.
+      auto k = RDom(-radius, 2 * radius + 1);
+      // Calculate the normalization factor by summing with the summation
+      // variable.
+      auto normalization_factor = sum(gaussian_unnormalized(k));
+
+      auto gaussian = Func{"gaussian"};
+      gaussian(x) = gaussian_unnormalized(x) / normalization_factor;
+
+      // 1st pass: transpose and convolve the columns.
       auto input_t = Func{"input_transposed"};
       input_t(y, x) = input(x, y);
 
-      auto k = RDom(-radius, 2 * radius + 1);
-      auto gaussian = Func{"gaussian"};
-      auto normalization_factor = sum(gaussian_unnormalized(k));
-      gaussian(x) = gaussian_unnormalized(x) / normalization_factor;
-
-      const auto w = input.width();
-      const auto h = input.height();
-
-      // 1st pass: transpose and convolve the columns.
       auto conv_y_t = Func{"conv_y_t"};
       conv_y_t(x, y) = sum(input_t(clamp(x + k, 0, h - 1), y) * gaussian(k));
+
 
       // 2nd pass: transpose and convolve the rows.
       auto conv_y = Func{"conv_y"};
@@ -47,7 +52,7 @@ namespace {
       auto& conv_x = output;
       conv_x(x, y) = sum(conv_y(clamp(x + k, 0, w - 1), y) * gaussian(k));
 
-      // The schedule.
+      // The CPU schedule.
       {
         // Compute the gaussian first.
         gaussian.compute_root();
@@ -76,14 +81,14 @@ namespace {
 
         output.hexagon()
             .prefetch(input, y, 2)
-            .split(y, y, yi, 128)
-            .parallel(y)
+            .split(y, yo, yi, 128)
+            .parallel(yo)
             .vectorize(x, vector_size);
       }
 
       // CPU schedule.
       else
-        output.split(y, y, yi, 8).parallel(y).vectorize(x, 8);
+        output.split(y, yo, yi, 8).parallel(yo).vectorize(x, 8);
     }
   };
 
