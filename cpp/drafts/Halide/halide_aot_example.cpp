@@ -43,7 +43,8 @@ auto halide_pipeline() -> void
   // Halide input and output buffers.
   auto buffer_rgb = halide::as_interleaved_rgb_runtime_buffer(frame_rgb8);
   auto buffer_gray32f = halide::as_runtime_buffer<float>(frame_gray32f);
-  auto buffer_gray32f_blurred = halide::as_runtime_buffer<float>(frame_gray32f_blurred);
+  auto buffer_gray32f_blurred =
+      halide::as_runtime_buffer<float>(frame_gray32f_blurred);
   auto buffer_gray8 =
       halide::as_interleaved_rgb_runtime_buffer(frame_gray_as_rgb);
 
@@ -65,39 +66,50 @@ auto halide_pipeline() -> void
 
     tic();
     {
-      buffer_rgb.set_host_dirty();
-
       // Use parallelisation and vectorization.
       shakti_halide_rgb_to_gray(buffer_rgb, buffer_gray32f);
 
-      // The strategy is to transposing so that:
-      // (1) we convolve the columns first
-      // (2) then the rows
-      // On a CPU, using SSE instructions to vectorise the data divides by 4 the
-      // computation time:
+#define USE_HALIDE_AOT_IMPLEMENTATION
+#ifdef USE_HALIDE_AOT_IMPLEMENTATION
+      // The strategy is to transpose the array and then convolve the rows. So
+      // (1) we transpose the matrix and convolve the (transposed) columns.
+      // (2) we transpose the matrix and convolve the rows.
+      //
+      // The timing are reported on a machine with:
+      // - CPU Intel(R) Core(TM) i7-6800K CPU @ 3.40GHz (cat /proc/cpuinfo)
+      // - nVidia Titan X (Pascal) (nvidia-smi)
+      //
+      // On the CPU, using SSE instructions to vectorise the data divides by 4
+      // the computation time:
       // - convolving a 1920x1080 image goes down from ~210ms to ~50ms.
       //   which is a dramatic improvement.
-      // - Then parallelizing over the columns on the transposed data divides by more
+      // - Then parallelizing over the columns on the transposed data divides by
+      // more
       //   than 3 the computation time (from ~50ms to ~15ms)
       //
       // The cumulated improvements are spectacular (14x faster) all along with
       // very little effort.
       //
-      shakti_halide_gaussian_blur(buffer_gray32f, buffer_gray32f_blurred);
+      // On a CUDA-capable GPU, it takes ~7ms to process the same images. So the
+      // CPU version is quite fast.
+      // On the GPU, with sigma = 80.f, the processing time is about ~15ms!
+      {
+        buffer_gray32f.set_host_dirty();
+        shakti_halide_gaussian_blur(buffer_gray32f, buffer_gray32f_blurred);
+        buffer_gray32f_blurred.copy_to_host();
+      }
       shakti_halide_gray32f_to_rgb(buffer_gray32f_blurred, buffer_gray8);
-
+#elif defined(USE_SARA_GAUSSIAN_BLUR_IMPLEMENTATION)
       // Sara's unoptimized code takes 240 ms to blur (no SSE instructions and
       // no column-based transposition)
-      //
-      // apply_gaussian_filter(frame_gray32f, frame_gray32f_blurred, 10.f);
-      // shakti_halide_gray32f_to_rgb(buffer_gray32f_blurred, buffer_gray8);
-
+      apply_gaussian_filter(frame_gray32f, frame_gray32f_blurred, 10.f);
+      shakti_halide_gray32f_to_rgb(buffer_gray32f_blurred, buffer_gray8);
+#elif defined(USE_SARA_DERICHE_IMPLEMENTATION)
       // Without parallelization and anything, deriche filter is still running
       // reasonably fast (between 45 and 50ms).
-      // inplace_deriche_blur(frame_gray32f, 10.f);
-      // shakti_halide_gray32f_to_rgb(buffer_gray32f, buffer_gray8);
-
-      buffer_gray8.copy_to_host();
+      inplace_deriche_blur(frame_gray32f, 10.f);
+      shakti_halide_gray32f_to_rgb(buffer_gray32f, buffer_gray8);
+#endif
     }
     toc("Halide");
 

@@ -65,6 +65,7 @@ AllowShortFunctionsOnASingleLine: None
 #   return 0;
 # }
 # AlwaysBreakAfterDefinitionReturnType: false  # deprecated
+
 AlwaysBreakTemplateDeclarations: true
 
 # true:                       false:

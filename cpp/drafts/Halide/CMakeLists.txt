@@ -64,6 +64,17 @@ foreach (lesson ${LESSONS_SOURCE_FILES})
 endforeach()
 
 
+if (NOT SARA_HALIDE_GPU_TARGETS)
+  if (APPLE)
+    set (SARA_HALIDE_GPU_TARGETS metal)
+  elseif (CUDA_FOUND)
+    set (SARA_HALIDE_GPU_TARGETS cuda)
+  else ()
+    set (SARA_HALIDE_GPU_TARGETS opencl)
+  endif ()
+endif ()
+
+
 if (NOT APPLE)
   include(${HALIDE_CMAKE_FILEPATH})
   halide_library(shakti_halide_rgb_to_gray
@@ -71,7 +82,8 @@ if (NOT APPLE)
   halide_library(shakti_halide_gray32f_to_rgb
     SRCS shakti_halide_gray32f_to_rgb.cpp)
   halide_library(shakti_halide_gaussian_blur
-    SRCS shakti_halide_gaussian_blur.cpp)
+    SRCS shakti_halide_gaussian_blur.cpp
+    HALIDE_TARGET_FEATURES ${SARA_HALIDE_GPU_TARGETS})
 
   add_executable(halide_aot_example halide_aot_example.cpp)
   set_target_properties(halide_aot_example PROPERTIES

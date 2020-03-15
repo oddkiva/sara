@@ -13,7 +13,7 @@ public:
   Input<Buffer<float>> input{"gray32f", 2};
   Output<Buffer<std::uint8_t>> output{"packed_rgb888", 3};
 
-  //Target target{get_gpu_target()};
+  // Target target{get_gpu_target()};
 
   Var x{"x"}, y{"y"}, c{"c"}, xi{"xi"}, yi{"yi"};
 

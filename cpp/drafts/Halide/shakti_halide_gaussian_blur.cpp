@@ -52,7 +52,48 @@ namespace {
       auto& conv_x = output;
       conv_x(x, y) = sum(conv_y(clamp(x + k, 0, w - 1), y) * gaussian(k));
 
-      // The CPU schedule.
+      // GPU schedule.
+      if (get_target().has_gpu_feature())
+      {
+        // Compute the gaussian first.
+        gaussian.compute_root();
+
+        // 1st pass: transpose and convolve the columns
+        conv_y_t.compute_root();
+        conv_y_t.gpu_tile(x, y, xo, yo, xi, yi, tile_x, tile_y);
+
+        // 2nd pass: transpose and convolve the rows.
+        conv_x.gpu_tile(x, y, xo, yo, xi, yi, tile_x, tile_y);
+      }
+
+      // Hexagon schedule.
+      else if (get_target().features_any_of({Target::HVX_64, Target::HVX_128}))
+      {
+        const auto vector_size =
+            get_target().has_feature(Target::HVX_128) ? 128 : 64;
+
+        // Compute the gaussian first.
+        gaussian.compute_root();
+
+        // 1st pass: transpose and convolve the columns
+        conv_y_t.compute_root();
+        conv_y_t.hexagon()
+            .prefetch(conv_y_t, y, 2)
+            .split(y, yo, yi, 128)
+            .parallel(yo)
+            .vectorize(x, vector_size);
+
+        // 2nd pass: transpose and convolve the rows.
+        conv_y.compute_root();
+        conv_x.hexagon()
+            .prefetch(conv_y_t, y, 2)
+            .split(y, yo, yi, 128)
+            .parallel(yo)
+            .vectorize(x, vector_size);
+      }
+
+      // CPU schedule.
+      else
       {
         // Compute the gaussian first.
         gaussian.compute_root();
@@ -65,30 +106,6 @@ namespace {
         conv_y.compute_root();
         conv_x.split(y, yo, yi, 8).parallel(yo).vectorize(x, 8);
       }
-    }
-
-    void schedule_algorithm()
-    {
-      // GPU schedule.
-      if (get_target().has_gpu_feature())
-        output.gpu_tile(x, y, xi, yi, tile_x, tile_y);
-
-      // Hexagon schedule.
-      else if (get_target().features_any_of({Target::HVX_64, Target::HVX_128}))
-      {
-        const auto vector_size =
-            get_target().has_feature(Target::HVX_128) ? 128 : 64;
-
-        output.hexagon()
-            .prefetch(input, y, 2)
-            .split(y, yo, yi, 128)
-            .parallel(yo)
-            .vectorize(x, vector_size);
-      }
-
-      // CPU schedule.
-      else
-        output.split(y, yo, yi, 8).parallel(yo).vectorize(x, 8);
     }
   };
 
