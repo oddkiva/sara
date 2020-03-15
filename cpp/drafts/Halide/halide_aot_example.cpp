@@ -5,9 +5,9 @@
 
 #include "shakti_halide_utilities.hpp"
 
-#include "shakti_halide_rgb_to_gray.h"
-#include "shakti_halide_gray32f_to_rgb.h"
 #include "shakti_halide_gaussian_blur.h"
+#include "shakti_halide_gray32f_to_rgb.h"
+#include "shakti_halide_rgb_to_gray.h"
 
 
 namespace halide = DO::Shakti::HalideBackend;
@@ -29,7 +29,7 @@ auto halide_pipeline() -> void
       "/Users/david/GitLab/DO-CV/sara/cpp/examples/Sara/VideoIO/orion_1.mpg"s;
 #else
   const auto video_filepath = "/home/david/Desktop/test.mp4"s;
-  //const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
+  // const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
 #endif
 
   VideoStream video_stream(video_filepath);
@@ -44,7 +44,8 @@ auto halide_pipeline() -> void
   auto buffer_rgb = halide::as_interleaved_rgb_runtime_buffer(frame_rgb8);
   auto buffer_gray32f = halide::as_runtime_buffer<float>(frame_gray32f);
   auto buffer_gray32f_blurred = halide::as_runtime_buffer<float>(frame_gray32f);
-  auto buffer_gray8 = halide::as_interleaved_rgb_runtime_buffer(frame_gray_as_rgb);
+  auto buffer_gray8 =
+      halide::as_interleaved_rgb_runtime_buffer(frame_gray_as_rgb);
 
   /* const auto target = */ halide::get_gpu_target();
 

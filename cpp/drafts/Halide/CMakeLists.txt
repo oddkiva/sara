@@ -82,12 +82,12 @@ if (NOT APPLE)
     Halide)
   set_property(TARGET halide_aot_example PROPERTY FOLDER "Tutorials/Halide")
 
-  target_link_libraries(halide_lesson_04
+  target_link_libraries(halide_aot_example
     PRIVATE
     shakti_halide_rgb_to_gray
     shakti_halide_gray32f_to_rgb
     shakti_halide_gaussian_blur)
-  # target_compile_definitions(halide_lesson_04
+  # target_compile_definitions(halide_aot_example
   #   PUBLIC -Wunused-parameter)
 endif ()
 

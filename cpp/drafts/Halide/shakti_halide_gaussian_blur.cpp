@@ -5,13 +5,12 @@ namespace {
 
   using namespace Halide;
 
-
   class GaussianBlur : public Halide::Generator<GaussianBlur>
   {
   public:
     GeneratorParam<int> tile_x{"tile_x", 32};
     GeneratorParam<int> tile_y{"tile_y", 32};
-    GeneratorParam<float> sigma{"sigma", 3.f};
+    GeneratorParam<float> sigma{"sigma", 10.f};
     GeneratorParam<int> truncation_factor{"trunc", 4};
 
     Input<Buffer<float>> input{"f", 2};
@@ -26,26 +25,41 @@ namespace {
       auto gaussian_unnormalized = Func{"gaussian_unnormalized"};
       gaussian_unnormalized(x) = exp(-(x * x) / (2 * sigma * sigma));
 
-      auto input_padded = BoundaryConditions::repeat_edge(input);
+      auto input_t = Func{"input_transposed"};
+      input_t(y, x) = input(x, y);
 
       auto k = RDom(-radius, 2 * radius + 1);
       auto gaussian = Func{"gaussian"};
-      gaussian(x) = gaussian_unnormalized(x) / sum(gaussian_unnormalized(k));
+      auto normalization_factor = sum(gaussian_unnormalized(k));
+      gaussian(x) = gaussian_unnormalized(x) / normalization_factor;
 
       const auto w = input.width();
       const auto h = input.height();
 
-      auto conv_x = Func{"conv_x"};
-      output(x, y) = sum(input_padded(x + k, y) * gaussian(k));
+      // 1st pass: transpose and convolve the columns.
+      auto conv_y_t = Func{"conv_y_t"};
+      conv_y_t(x, y) = sum(input_t(clamp(x + k, 0, h - 1), y) * gaussian(k));
 
-      // output(x, y) = sum(conv_x(x, clamp(y + k - kernel_size / 2, 0, h - 1)) *
-      //                    gaussian(k));
+      // 2nd pass: transpose and convolve the rows.
+      auto conv_y = Func{"conv_y"};
+      conv_y(x, y) = conv_y_t(y, x);
 
-      // Compute the gaussian first.
-      gaussian.compute_root();
-      output.split(y, yo, yi, 8).parallel(yo).vectorize(x, 8);
+      auto& conv_x = output;
+      conv_x(x, y) = sum(conv_y(clamp(x + k, 0, w - 1), y) * gaussian(k));
 
-      //schedule_algorithm();
+      // The schedule.
+      {
+        // Compute the gaussian first.
+        gaussian.compute_root();
+
+        // 1st pass: transpose and convolve the columns
+        conv_y_t.compute_root();
+        conv_y_t.split(y, yo, yi, 8).parallel(yo).vectorize(x, 8);
+
+        // 2nd pass: transpose and convolve the rows.
+        conv_y.compute_root();
+        conv_x.split(y, yo, yi, 8).parallel(yo).vectorize(x, 8);
+      }
     }
 
     void schedule_algorithm()
@@ -74,6 +88,5 @@ namespace {
   };
 
 }  // namespace
-
 
 HALIDE_REGISTER_GENERATOR(GaussianBlur, shakti_halide_gaussian_blur)
