@@ -43,7 +43,8 @@ GRAPHICS_MAIN()
 #ifdef _WIN32
           "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4"
 #else
-          "/home/david/Desktop/test.mp4"
+          // "/home/david/Desktop/GOPR0542.MP4"
+          "/home/david/Desktop/Datasets/sfm/Family.mp4"
 #endif
       ;
   std::cout << video_filepath << std::endl;
@@ -56,9 +57,9 @@ GRAPHICS_MAIN()
   auto out_frame = sara::Image<float>{video_stream.sizes()};
   out_frame.flat_array().fill(0);
 
-  // The pipeline is far from being optimized but despite that we almost get
-  // real-time image processing.
-  auto apply_gaussian_filter = shakti::GaussianFilter{3.f};
+  // The pipeline is far from being optimized but despite that we get real-time
+  // image processing.
+  const auto apply_gaussian_filter = shakti::GaussianFilter{10.f};
 
   auto cpu_timer = sara::Timer{};
   auto cpu_time = 0.;
