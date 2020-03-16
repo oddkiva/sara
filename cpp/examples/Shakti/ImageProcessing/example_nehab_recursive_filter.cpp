@@ -76,12 +76,10 @@ GRAPHICS_MAIN()
   auto video_frame = video_stream.frame();
 
   auto in_frame = sara::Image<float>{video_stream.sizes()};
-  auto out_frame = sara::Image<float>{video_stream.sizes()};
-  out_frame.flat_array().fill(0);
 
   // The pipeline is far from being optimized but despite that we almost get
   // real-time image processing.
-  const auto sigma = 3.f;
+  const auto sigma = 10.f;
 
   sara::create_window(video_frame.sizes());
 
@@ -106,11 +104,11 @@ GRAPHICS_MAIN()
     shakti::tic();
     {
       gpufilter::gaussian_gpu(in_frame.data(), in_frame.width(),
-                              in_frame.height(), 1, sigma);
+                              in_frame.height(), sigma);
     }
     shakti::toc("Nehab's GPU gaussian filter");
 
-    sara::display(out_frame);
+    sara::display(in_frame);
 
     ++video_frame_index;
     std::cout << std::endl;

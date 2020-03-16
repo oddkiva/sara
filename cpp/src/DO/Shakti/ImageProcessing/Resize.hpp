@@ -21,9 +21,6 @@
 
 namespace DO { namespace Shakti {
 
-  template <typename T>
-  struct NppType;
-
   //! @brief Resize the image.
   template <typename Strides>
   void resize(const MultiArrayView<std::uint8_t, 3, Strides>& src,
@@ -50,8 +47,8 @@ namespace DO { namespace Shakti {
 
   //! @brief Resize the image.
   template <typename Strides>
-  void resize(const MultiArrayView<float, 3, Strides>& src, // host pinned memory
-              MultiArrayView<float, 3, Strides>& dst, // GPU data
+  void resize(const MultiArrayView<float, 3, Strides>& src,
+              MultiArrayView<float, 3, Strides>& dst,
               NppiInterpolationMode interpolation_mode = NPPI_INTER_CUBIC)
   {
     // Resize the image to the appropriate size
@@ -95,4 +92,5 @@ namespace DO { namespace Shakti {
     if (status != NPP_SUCCESS)
       throw std::runtime_error{"Error resizing image!"};
   }
+
 }}  // namespace DO::Shakti
