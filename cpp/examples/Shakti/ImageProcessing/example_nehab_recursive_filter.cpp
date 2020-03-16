@@ -34,7 +34,6 @@ using uchar = unsigned char;
 struct TicToc {
   // Timer.
   sara::Timer timer;
-  double elapsed;
 } tictoc;
 
 void tic()
