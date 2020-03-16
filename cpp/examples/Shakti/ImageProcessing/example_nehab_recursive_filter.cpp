@@ -66,7 +66,7 @@ GRAPHICS_MAIN()
 #ifdef _WIN32
           "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4"
 #else
-          "/home/david/Desktop/test.mp4"
+          "/home/david/Desktop/Datasets/sfm/Family.mp4"
 #endif
       ;
   std::cout << video_filepath << std::endl;
@@ -101,6 +101,14 @@ GRAPHICS_MAIN()
     }
     toc("CPU color conversion time");
 
+    // I don't see crazy speed ups compared to the vanilla CUDA implementation.
+    // Maybe the memory transfer from host CPU memory to CUDA GPU memory is
+    // dominating...
+    //
+    // The recursive Gaussian implementation takes about 7ms to blur the image
+    // just like the vanilla CUDA implementation.
+    //
+    // So a bit more investigation would be needed to understand why.
     shakti::tic();
     {
       gpufilter::gaussian_gpu(in_frame.data(), in_frame.width(),
