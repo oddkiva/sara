@@ -28,22 +28,23 @@ namespace sara = DO::Sara;
 namespace shakti = DO::Shakti;
 
 
-using uchar = unsigned char;
-
-
-struct TicToc {
-  // Timer.
-  sara::Timer timer;
-} tictoc;
+struct TicToc : sara::Timer
+{
+  static auto instance() -> TicToc&
+  {
+    static auto instance_ = TicToc();
+    return instance_;
+  }
+};
 
 void tic()
 {
-  tictoc.timer.restart();
+  TicToc::instance().restart();
 }
 
 void toc(const std::string& what)
 {
-  const auto elapsed = tictoc.timer.elapsed_ms();
+  const auto elapsed = TicToc::instance().elapsed_ms();
   std::cout << "[" << what << "] " << elapsed <<  " ms" << std::endl;
 }
 
