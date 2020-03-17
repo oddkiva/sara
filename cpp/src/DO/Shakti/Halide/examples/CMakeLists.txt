@@ -76,5 +76,3 @@ if (NOT APPLE)
     shakti_halide_gaussian_blur)
   set_property(TARGET halide_aot_example PROPERTY FOLDER "Tutorials/Halide")
 endif ()
-
-
