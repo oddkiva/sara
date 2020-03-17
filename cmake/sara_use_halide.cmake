@@ -123,3 +123,28 @@ if (WIN32)
   file(COPY ${HALIDE_DLL_RELEASE} DESTINATION ${CMAKE_BINARY_DIR}/bin/RelWithDebInfo)
   file(COPY ${HALIDE_DLL_RELEASE} DESTINATION ${CMAKE_BINARY_DIR}/bin/MinSizeRel)
 endif ()
+
+
+if (NOT SHAKTI_HALIDE_GPU_TARGETS)
+  if (APPLE)
+    set (SHAKTI_HALIDE_GPU_TARGETS metal)
+  elseif (CUDA_FOUND)
+    set (SHAKTI_HALIDE_GPU_TARGETS cuda)
+  else ()
+    set (SHAKTI_HALIDE_GPU_TARGETS opencl)
+  endif ()
+endif ()
+
+include(${HALIDE_CMAKE_FILEPATH})
+
+function (shakti_halide_library _source_filepath)
+  get_filename_component(_source_filename ${_source_filepath} NAME_WE)
+  halide_library(${_source_filename} SRCS ${_source_filepath})
+endfunction ()
+
+function (shakti_halide_gpu_library _source_filepath)
+  get_filename_component(_source_filename ${_source_filepath} NAME_WE)
+  halide_library(${_source_filename}
+    SRCS ${_source_filepath}
+    HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+endfunction ()

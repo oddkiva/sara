@@ -1,7 +1,5 @@
 find_package(DO_Sara COMPONENTS Core Graphics VideoIO REQUIRED)
 
-include(sara_use_halide)
-
 
 file(GLOB LESSONS_SOURCE_FILES
   lesson_01*.cpp
@@ -64,46 +62,19 @@ foreach (lesson ${LESSONS_SOURCE_FILES})
 endforeach()
 
 
-if (NOT SARA_HALIDE_GPU_TARGETS)
-  if (APPLE)
-    set (SARA_HALIDE_GPU_TARGETS metal)
-  elseif (CUDA_FOUND)
-    set (SARA_HALIDE_GPU_TARGETS cuda)
-  else ()
-    set (SARA_HALIDE_GPU_TARGETS opencl)
-  endif ()
-endif ()
-
-
 if (NOT APPLE)
-  include(${HALIDE_CMAKE_FILEPATH})
-  halide_library(shakti_halide_rgb_to_gray
-    SRCS shakti_halide_rgb_to_gray.cpp)
-  halide_library(shakti_halide_gray32f_to_rgb
-    SRCS shakti_halide_gray32f_to_rgb.cpp)
-  halide_library(shakti_halide_gaussian_blur
-    SRCS shakti_halide_gaussian_blur.cpp
-    HALIDE_TARGET_FEATURES ${SARA_HALIDE_GPU_TARGETS})
-
   add_executable(halide_aot_example halide_aot_example.cpp)
-  set_target_properties(halide_aot_example PROPERTIES
+  set_target_properties(halide_aot_example
+    PROPERTIES
     COMPILE_FLAGS ${SARA_DEFINITIONS})
   target_link_libraries(halide_aot_example PRIVATE
     ${DO_Sara_LIBRARIES}
     ${OpenMP_CXX_LIBRARIES}
-    Halide)
-  set_property(TARGET halide_aot_example PROPERTY FOLDER "Tutorials/Halide")
-
-  target_link_libraries(halide_aot_example
-    PRIVATE
+    Halide
     shakti_halide_rgb_to_gray
     shakti_halide_gray32f_to_rgb
     shakti_halide_gaussian_blur)
-  # target_compile_definitions(halide_aot_example
-  #   PUBLIC -Wunused-parameter)
+  set_property(TARGET halide_aot_example PROPERTY FOLDER "Tutorials/Halide")
 endif ()
 
 
-if (SARA_BUILD_TESTS)
-  add_subdirectory(test)
-endif ()
