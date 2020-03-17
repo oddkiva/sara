@@ -165,199 +165,155 @@ namespace DO::Shakti::HalideBackend {
     }
   };
 
-  struct Padded : public CastToFloat
+  struct RgbToGray32f : public Pipeline<std::uint8_t>
   {
-    using base_type = CastToFloat;
+    using base_type = Pipeline<std::uint8_t>;
+
+    mutable Halide::Func to_gray{"rgb_to_gray32f"};
+
+    RgbToGray32f(Halide::Buffer<std::uint8_t>& input)
+      : base_type{input}
+    {
+      auto r = input(x, y, 0) / 255.f;
+      auto g = input(x, y, 1) / 255.f;
+      auto b = input(x, y, 2) / 255.f;
+
+      to_gray(x, y) = 0.2125f * r + 0.7154f * g + 0.0721f * b;
+
+      to_gray.compile_jit(target);
+    }
+
+    auto operator()(Halide::Buffer<float>& output_buffer) const -> void
+    {
+      input_buffer.set_host_dirty();
+      to_gray.realize(output_buffer);
+      output_buffer.copy_to_host();
+    }
+  };
+
+  template <typename T>
+  struct Padded : public Pipeline<T>
+  {
+    using base_type = Pipeline<T>;
 
     mutable Halide::Func padded{"Padded"};
 
-    Padded(Halide::Buffer<std::uint8_t>& input)
+    Padded(Halide::Buffer<T>& input)
       : base_type{input}
     {
+      using base_type::x;
+      using base_type::y;
+      using base_type::c;
+      using base_type::input_buffer;
       padded(x, y, c) = cast(clamp(x, 0, input_buffer.width() - 1),   //
                              clamp(y, 0, input_buffer.height() - 1),  //
                              c);
     }
   };
 
-  struct Blur3x3 : public Padded
+  struct Gaussian : public Pipeline<float>
   {
-    using base_type = Padded;
-
-    mutable Halide::Func blur{"Blur3x3"};
-
-    Blur3x3(Halide::Buffer<std::uint8_t>& input)
-      : base_type{input}
-    {
-      blur(x, y, c) = (padded(x - 1, y - 1, c) + padded(x - 0, y - 1, c) +
-                       padded(x + 1, y - 1, c) + padded(x - 1, y + 0, c) +
-                       padded(x - 0, y + 0, c) + padded(x + 1, y + 0, c) +
-                       padded(x - 1, y + 1, c) + padded(x - 0, y + 1, c) +
-                       padded(x + 1, y + 1, c)) /
-                      9.f;
-    }
-  };
-
-  struct Laplacian : public Padded
-  {
-    using base_type = Padded;
-
-    mutable Halide::Func laplacian{"Laplacian"};
-
-    Laplacian(Halide::Buffer<std::uint8_t>& input)
-      : base_type{input}
-    {
-      laplacian(x, y, c) = padded(x, y, c) -
-                           (padded(x + 1, y + 0, c) + padded(x - 1, y + 0, c) +
-                            padded(x + 0, y + 1, c) + padded(x + 0, y - 1, c)) /
-                               4.f;
-    }
-  };
-
-  struct Blur3x3Vis : public Blur3x3
-  {
-    using base_type = Blur3x3;
-
-    mutable Halide::Func rescaled{"Rescaled"};
-
-    Blur3x3Vis(Halide::Buffer<std::uint8_t>& input)
-      : base_type{input}
-    {
-      // The output result to show on the screen.
-      rescaled(x, y, c) = Halide::cast<uint8_t>(blur(x, y, c) * 255.f);
-
-      set_output_format_to_packed_rgb(rescaled);
-
-      // Calculate the padded image as an intermediate result for the laplacian
-      // calculation in a shared memory.
-      padded.compute_at(rescaled, xo);
-      padded.gpu_threads(x, y);
-
-      rescaled.compile_jit(target);
-    }
-
-    auto operator()(Halide::Buffer<std::uint8_t>& output_buffer) const -> void
-    {
-      input_buffer.set_host_dirty();
-      rescaled.realize(output_buffer);
-      output_buffer.copy_to_host();
-    }
-  };
-
-  struct LaplacianVis : public Laplacian
-  {
-    using base_type = Laplacian;
-
-    mutable Halide::Func rescaled{"Rescaled"};
-
-    LaplacianVis(Halide::Buffer<std::uint8_t>& input)
-      : base_type{input}
-    {
-      // The output result to show on the screen.
-      rescaled(x, y, c) = Halide::cast<uint8_t>(laplacian(x, y, c) * 255.f);
-
-      set_output_format_to_packed_rgb(rescaled);
-
-      // Calculate the padded image as an intermediate result for the laplacian
-      // calculation in a shared memory.
-      padded.compute_at(rescaled, xo);
-      padded.gpu_threads(x, y);
-
-      rescaled.compile_jit(target);
-    }
-
-    auto operator()(Halide::Buffer<std::uint8_t>& output_buffer) const -> void
-    {
-      input_buffer.set_host_dirty();
-      rescaled.realize(output_buffer);
-      output_buffer.copy_to_host();
-    }
-  };
-
-  struct Deriche : Pipeline<std::uint8_t>
-  {
-    using base_type = Pipeline<std::uint8_t>;
-
-    Halide::Func deriche{"Deriche"};
-
-    Deriche(Halide::Buffer<std::uint8_t>& input)
-      : base_type{input}
-    {
-      deriche(x, y, c) = input_buffer(x, y, c) / 255.f;
-
-      deriche
-          .output_buffer()    //
-          .dim(0)             // x
-          .set_stride(3)      // because of the packed pixel format.
-          .dim(2)             // c
-          .set_stride(1)      // because of the packed pixel format
-          .set_bounds(0, 3);  // RGB = [0, 1, 2] so 3 channels.
-
-      deriche.reorder(c, x, y).bound(c, 0, 3).unroll(c);
-
-      deriche.gpu_tile(x, y, xo, yo, xi, yi, 16, 16);
-    };
-  };
-
-  struct RgbToGray : public CastToFloat
-  {
-    using base_type = CastToFloat;
-
-    mutable Halide::Func gray{"Gray"};
-
-    RgbToGray(Halide::Buffer<std::uint8_t>& input)
-      : base_type{input}
-    {
-      auto r = cast(x, y, 0);
-      auto g = cast(x, y, 1);
-      auto b = cast(x, y, 2);
-      gray(x, y) = 0.2125f * r + 0.7154f * g + 0.0721f * b;
-    }
-
-    auto operator()(Halide::Buffer<float>& output_buffer) const -> void
-    {
-      input_buffer.set_host_dirty();
-      cast.realize(output_buffer);
-      output_buffer.copy_to_host();
-    }
-  };
-
-  struct Gaussian : public RgbToGray
-  {
-    using base_type = RgbToGray;
+    using base_type = Pipeline<float>;
 
     mutable Halide::Func padded{"Padded"};
     mutable Halide::Func conv_x{"ConvX"};
     mutable Halide::Func conv_y{"ConvY"};
     mutable Halide::Func kernel{"Kernel"};
 
-    Gaussian(Halide::Buffer<std::uint8_t>& input, float sigma,
+    Gaussian(Halide::Buffer<float>& input, float sigma,
              float gaussian_truncation_factor = 4.f)
       : base_type{input}
     {
       using namespace Halide;
 
-      // Padded image with edge repeat.
       const auto w = input.width();
       const auto h = input.height();
-      auto x_clamped = clamp(x, 0, w - 1);
-      auto y_clamped = clamp(y, 0, h - 1);
-      padded(x, y) = gray(x_clamped, y_clamped);
+      const auto radius = cast<int>(sigma / 2) * truncation_factor;
 
-      // Define the Gaussian kernel.
-      const auto kernel_size = int(sigma / 2) * gaussian_truncation_factor + 1;
-      Halide::RDom r{-kernel_size / 2, kernel_size / 2};
-      kernel(x) = exp(-(x * x) / (2 * sigma * sigma));
-      auto normalization_factor = sum(kernel(x + r));
-      kernel(x) /= normalization_factor;
+      // Define the unnormalized gaussian function.
+      auto gaussian_unnormalized = Func{"gaussian_unnormalized"};
+      gaussian_unnormalized(x) = exp(-(x * x) / (2 * sigma * sigma));
 
-      conv_x(x, y) = sum(padded(x + r, y + 0) * kernel(r));
-      conv_x(x, y) = conv_x(x_clamped, y_clamped);
+      // Define the summation variable `k` defined on a summation domain.
+      auto k = RDom(-radius, 2 * radius + 1);
+      // Calculate the normalization factor by summing with the summation
+      // variable.
+      auto normalization_factor = sum(gaussian_unnormalized(k));
 
-      conv_y(x, y) = sum(conv_x(x + 0, y + r) * kernel(r));
+      auto gaussian = Func{"gaussian"};
+      gaussian(x) = gaussian_unnormalized(x) / normalization_factor;
 
-      // Precompute the Gaussian kernel.
-      kernel.compute_root();
+      // 1st pass: transpose and convolve the columns.
+      auto input_t = Func{"input_transposed"};
+      input_t(y, x) = input(x, y);
+
+      auto conv_y_t = Func{"conv_y_t"};
+      conv_y_t(x, y) = sum(input_t(clamp(x + k, 0, h - 1), y) * gaussian(k));
+
+
+      // 2nd pass: transpose and convolve the rows.
+      auto conv_y = Func{"conv_y"};
+      conv_y(x, y) = conv_y_t(y, x);
+
+      auto& conv_x = output;
+      conv_x(x, y) = sum(conv_y(clamp(x + k, 0, w - 1), y) * gaussian(k));
+
+      // GPU schedule.
+      if (target)
+      {
+        // Compute the gaussian first.
+        gaussian.compute_root();
+
+        // 1st pass: transpose and convolve the columns
+        conv_y_t.compute_root();
+        conv_y_t.gpu_tile(x, y, xo, yo, xi, yi, tile_x, tile_y);
+
+        // 2nd pass: transpose and convolve the rows.
+        conv_x.gpu_tile(x, y, xo, yo, xi, yi, tile_x, tile_y);
+      }
+
+      // Hexagon schedule.
+      else if (get_target().features_any_of({Target::HVX_64, Target::HVX_128}))
+      {
+        const auto vector_size =
+            get_target().has_feature(Target::HVX_128) ? 128 : 64;
+
+        // Compute the gaussian first.
+        gaussian.compute_root();
+
+        // 1st pass: transpose and convolve the columns
+        conv_y_t.compute_root();
+        conv_y_t.hexagon()
+            .prefetch(conv_y_t, y, 2)
+            .split(y, yo, yi, 128)
+            .parallel(yo)
+            .vectorize(x, vector_size);
+
+        // 2nd pass: transpose and convolve the rows.
+        conv_y.compute_root();
+        conv_x.hexagon()
+            .prefetch(conv_y_t, y, 2)
+            .split(y, yo, yi, 128)
+            .parallel(yo)
+            .vectorize(x, vector_size);
+      }
+
+      // CPU schedule.
+      else
+      {
+        // Compute the gaussian first.
+        gaussian.compute_root();
+
+        // 1st pass: transpose and convolve the columns
+        conv_y_t.compute_root();
+        conv_y_t.split(y, yo, yi, 8).parallel(yo).vectorize(x, 8);
+
+        // 2nd pass: transpose and convolve the rows.
+        conv_y.compute_root();
+        conv_x.split(y, yo, yi, 8).parallel(yo).vectorize(x, 8);
+      }
+
+      conv_x.compile_jit(target);
     }
 
     auto operator()(Halide::Buffer<float>& output_buffer) const -> void

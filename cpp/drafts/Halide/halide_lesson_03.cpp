@@ -39,8 +39,9 @@ auto halide_pipeline() -> void
   auto output_buffer = halide::as_interleaved_rgb_buffer(output_image);
 
   // Blur pipeline.
-  const auto pipeline = halide::Blur3x3Vis{input_buffer};
+  // const auto pipeline = halide::Blur3x3Vis{input_buffer};
   // const auto pipeline = halide::LaplacianVis{input_buffer};
+  const auto to_gray = halide::RgbToGray32f{input_buffer};
 
   create_window(video_stream.sizes());
   while (true)
