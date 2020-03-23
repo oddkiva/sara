@@ -54,7 +54,3 @@ endif ()
 if (SARA_BUILD_SHARED_LIBS)
   set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif ()
-
-
-# Propagate OpenMP everywhere by default.
-include(sara_use_openmp)

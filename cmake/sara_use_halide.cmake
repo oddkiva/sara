@@ -139,7 +139,9 @@ include(${HALIDE_CMAKE_FILEPATH})
 
 function (shakti_halide_library _source_filepath)
   get_filename_component(_source_filename ${_source_filepath} NAME_WE)
-  halide_library(${_source_filename} SRCS ${_source_filepath})
+  halide_library(${_source_filename}
+    SRCS ${_source_filepath}
+    HALIDE_TARGET x86-64-sse41)
 endfunction ()
 
 function (shakti_halide_gpu_library _source_filepath)
@@ -147,4 +149,9 @@ function (shakti_halide_gpu_library _source_filepath)
   halide_library(${_source_filename}
     SRCS ${_source_filepath}
     HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+  if (APPLE)
+    target_link_libraries(${_source_filename}
+      INTERFACE "-framework Foundation"
+                "-framework Metal")
+  endif ()
 endfunction ()

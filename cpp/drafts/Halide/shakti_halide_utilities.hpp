@@ -211,118 +211,118 @@ namespace DO::Shakti::HalideBackend {
     }
   };
 
-  struct Gaussian : public Pipeline<float>
-  {
-    using base_type = Pipeline<float>;
+  // struct Gaussian : public Pipeline<float>
+  // {
+  //   using base_type = Pipeline<float>;
 
-    mutable Halide::Func padded{"Padded"};
-    mutable Halide::Func conv_x{"ConvX"};
-    mutable Halide::Func conv_y{"ConvY"};
-    mutable Halide::Func kernel{"Kernel"};
+  //   mutable Halide::Func padded{"Padded"};
+  //   mutable Halide::Func conv_x{"ConvX"};
+  //   mutable Halide::Func conv_y{"ConvY"};
+  //   mutable Halide::Func kernel{"Kernel"};
 
-    Gaussian(Halide::Buffer<float>& input, float sigma,
-             float gaussian_truncation_factor = 4.f)
-      : base_type{input}
-    {
-      using namespace Halide;
+  //   Gaussian(Halide::Buffer<float>& input, float sigma,
+  //            float gaussian_truncation_factor = 4.f)
+  //     : base_type{input}
+  //   {
+  //     using namespace Halide;
 
-      const auto w = input.width();
-      const auto h = input.height();
-      const auto radius = cast<int>(sigma / 2) * truncation_factor;
+  //     const auto w = input.width();
+  //     const auto h = input.height();
+  //     const auto radius = cast<int>(sigma / 2) * gaussian_truncation_factor;
 
-      // Define the unnormalized gaussian function.
-      auto gaussian_unnormalized = Func{"gaussian_unnormalized"};
-      gaussian_unnormalized(x) = exp(-(x * x) / (2 * sigma * sigma));
+  //     // Define the unnormalized gaussian function.
+  //     auto gaussian_unnormalized = Func{"gaussian_unnormalized"};
+  //     gaussian_unnormalized(x) = exp(-(x * x) / (2 * sigma * sigma));
 
-      // Define the summation variable `k` defined on a summation domain.
-      auto k = RDom(-radius, 2 * radius + 1);
-      // Calculate the normalization factor by summing with the summation
-      // variable.
-      auto normalization_factor = sum(gaussian_unnormalized(k));
+  //     // Define the summation variable `k` defined on a summation domain.
+  //     auto k = RDom(-radius, 2 * radius + 1);
+  //     // Calculate the normalization factor by summing with the summation
+  //     // variable.
+  //     auto normalization_factor = sum(gaussian_unnormalized(k));
 
-      auto gaussian = Func{"gaussian"};
-      gaussian(x) = gaussian_unnormalized(x) / normalization_factor;
+  //     auto gaussian = Func{"gaussian"};
+  //     gaussian(x) = gaussian_unnormalized(x) / normalization_factor;
 
-      // 1st pass: transpose and convolve the columns.
-      auto input_t = Func{"input_transposed"};
-      input_t(y, x) = input(x, y);
+  //     // 1st pass: transpose and convolve the columns.
+  //     auto input_t = Func{"input_transposed"};
+  //     input_t(y, x) = input(x, y);
 
-      auto conv_y_t = Func{"conv_y_t"};
-      conv_y_t(x, y) = sum(input_t(clamp(x + k, 0, h - 1), y) * gaussian(k));
+  //     auto conv_y_t = Func{"conv_y_t"};
+  //     conv_y_t(x, y) = sum(input_t(clamp(x + k, 0, h - 1), y) * gaussian(k));
 
 
-      // 2nd pass: transpose and convolve the rows.
-      auto conv_y = Func{"conv_y"};
-      conv_y(x, y) = conv_y_t(y, x);
+  //     // 2nd pass: transpose and convolve the rows.
+  //     auto conv_y = Func{"conv_y"};
+  //     conv_y(x, y) = conv_y_t(y, x);
 
-      auto& conv_x = output;
-      conv_x(x, y) = sum(conv_y(clamp(x + k, 0, w - 1), y) * gaussian(k));
+  //     auto& conv_x = output;
+  //     conv_x(x, y) = sum(conv_y(clamp(x + k, 0, w - 1), y) * gaussian(k));
 
-      // GPU schedule.
-      if (target)
-      {
-        // Compute the gaussian first.
-        gaussian.compute_root();
+  //     // GPU schedule.
+  //     if (target)
+  //     {
+  //       // Compute the gaussian first.
+  //       gaussian.compute_root();
 
-        // 1st pass: transpose and convolve the columns
-        conv_y_t.compute_root();
-        conv_y_t.gpu_tile(x, y, xo, yo, xi, yi, tile_x, tile_y);
+  //       // 1st pass: transpose and convolve the columns
+  //       conv_y_t.compute_root();
+  //       conv_y_t.gpu_tile(x, y, xo, yo, xi, yi, tile_x, tile_y);
 
-        // 2nd pass: transpose and convolve the rows.
-        conv_x.gpu_tile(x, y, xo, yo, xi, yi, tile_x, tile_y);
-      }
+  //       // 2nd pass: transpose and convolve the rows.
+  //       conv_x.gpu_tile(x, y, xo, yo, xi, yi, tile_x, tile_y);
+  //     }
 
-      // Hexagon schedule.
-      else if (get_target().features_any_of({Target::HVX_64, Target::HVX_128}))
-      {
-        const auto vector_size =
-            get_target().has_feature(Target::HVX_128) ? 128 : 64;
+  //     // Hexagon schedule.
+  //     else if (get_target().features_any_of({Target::HVX_64, Target::HVX_128}))
+  //     {
+  //       const auto vector_size =
+  //           get_target().has_feature(Target::HVX_128) ? 128 : 64;
 
-        // Compute the gaussian first.
-        gaussian.compute_root();
+  //       // Compute the gaussian first.
+  //       gaussian.compute_root();
 
-        // 1st pass: transpose and convolve the columns
-        conv_y_t.compute_root();
-        conv_y_t.hexagon()
-            .prefetch(conv_y_t, y, 2)
-            .split(y, yo, yi, 128)
-            .parallel(yo)
-            .vectorize(x, vector_size);
+  //       // 1st pass: transpose and convolve the columns
+  //       conv_y_t.compute_root();
+  //       conv_y_t.hexagon()
+  //           .prefetch(conv_y_t, y, 2)
+  //           .split(y, yo, yi, 128)
+  //           .parallel(yo)
+  //           .vectorize(x, vector_size);
 
-        // 2nd pass: transpose and convolve the rows.
-        conv_y.compute_root();
-        conv_x.hexagon()
-            .prefetch(conv_y_t, y, 2)
-            .split(y, yo, yi, 128)
-            .parallel(yo)
-            .vectorize(x, vector_size);
-      }
+  //       // 2nd pass: transpose and convolve the rows.
+  //       conv_y.compute_root();
+  //       conv_x.hexagon()
+  //           .prefetch(conv_y_t, y, 2)
+  //           .split(y, yo, yi, 128)
+  //           .parallel(yo)
+  //           .vectorize(x, vector_size);
+  //     }
 
-      // CPU schedule.
-      else
-      {
-        // Compute the gaussian first.
-        gaussian.compute_root();
+  //     // CPU schedule.
+  //     else
+  //     {
+  //       // Compute the gaussian first.
+  //       gaussian.compute_root();
 
-        // 1st pass: transpose and convolve the columns
-        conv_y_t.compute_root();
-        conv_y_t.split(y, yo, yi, 8).parallel(yo).vectorize(x, 8);
+  //       // 1st pass: transpose and convolve the columns
+  //       conv_y_t.compute_root();
+  //       conv_y_t.split(y, yo, yi, 8).parallel(yo).vectorize(x, 8);
 
-        // 2nd pass: transpose and convolve the rows.
-        conv_y.compute_root();
-        conv_x.split(y, yo, yi, 8).parallel(yo).vectorize(x, 8);
-      }
+  //       // 2nd pass: transpose and convolve the rows.
+  //       conv_y.compute_root();
+  //       conv_x.split(y, yo, yi, 8).parallel(yo).vectorize(x, 8);
+  //     }
 
-      conv_x.compile_jit(target);
-    }
+  //     conv_x.compile_jit(target);
+  //   }
 
-    auto operator()(Halide::Buffer<float>& output_buffer) const -> void
-    {
-      input_buffer.set_host_dirty();
-      cast.realize(output_buffer);
-      output_buffer.copy_to_host();
-    }
-  };
+  //   auto operator()(Halide::Buffer<float>& output_buffer) const -> void
+  //   {
+  //     input_buffer.set_host_dirty();
+  //     cast.realize(output_buffer);
+  //     output_buffer.copy_to_host();
+  //   }
+  // };
 
 }  // namespace DO::Shakti::HalideBackend
 

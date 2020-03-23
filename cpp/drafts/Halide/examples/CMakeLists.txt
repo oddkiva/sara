@@ -1,3 +1,4 @@
+find_package(OpenMP)
 find_package(DO_Sara COMPONENTS Core Graphics VideoIO REQUIRED)
 
 
@@ -56,23 +57,27 @@ foreach (lesson ${LESSONS_SOURCE_FILES})
     COMPILE_FLAGS ${SARA_DEFINITIONS})
   target_link_libraries(${lesson_name} PRIVATE
     ${DO_Sara_LIBRARIES}
-    ${OpenMP_CXX_LIBRARIES}
     Halide)
+  if (OpenMP_CXX_FOUND)
+    target_link_libraries(${lesson_name} PRIVATE
+      OpenMP::OpenMP_CXX)
+  endif ()
   set_property(TARGET ${lesson_name} PROPERTY FOLDER "Tutorials/Halide")
 endforeach()
 
 
-if (NOT APPLE)
-  add_executable(halide_aot_example halide_aot_example.cpp)
-  set_target_properties(halide_aot_example
-    PROPERTIES
-    COMPILE_FLAGS ${SARA_DEFINITIONS})
+add_executable(halide_aot_example halide_aot_example.cpp)
+set_target_properties(halide_aot_example
+  PROPERTIES
+  COMPILE_FLAGS ${SARA_DEFINITIONS})
+target_link_libraries(halide_aot_example PRIVATE
+  ${DO_Sara_LIBRARIES}
+  Halide
+  shakti_halide_rgb_to_gray
+  shakti_halide_gray32f_to_rgb
+  shakti_halide_gaussian_blur)
+if (OpenMP_CXX_FOUND)
   target_link_libraries(halide_aot_example PRIVATE
-    ${DO_Sara_LIBRARIES}
-    ${OpenMP_CXX_LIBRARIES}
-    Halide
-    shakti_halide_rgb_to_gray
-    shakti_halide_gray32f_to_rgb
-    shakti_halide_gaussian_blur)
-  set_property(TARGET halide_aot_example PROPERTY FOLDER "Tutorials/Halide")
+    OpenMP::OpenMP_CXX)
 endif ()
+set_property(TARGET halide_aot_example PROPERTY FOLDER "Tutorials/Halide")

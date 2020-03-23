@@ -3,7 +3,7 @@
 #include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
-#include "shakti_halide_utilities.hpp"
+#include "../shakti_halide_utilities.hpp"
 
 #include "shakti_halide_gaussian_blur.h"
 #include "shakti_halide_gray32f_to_rgb.h"
@@ -25,8 +25,7 @@ auto halide_pipeline() -> void
   const auto video_filepath =
       "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4"s;
 #elif __APPLE__
-  const auto video_filepath =
-      "/Users/david/GitLab/DO-CV/sara/cpp/examples/Sara/VideoIO/orion_1.mpg"s;
+  const auto video_filepath = "/Users/david/Desktop/Datasets/humanising-autonomy/turn_bikes.mp4"s;
 #else
   const auto video_filepath = "/home/david/Desktop/test.mp4"s;
   // const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
@@ -48,7 +47,7 @@ auto halide_pipeline() -> void
   auto buffer_gray8 =
       halide::as_interleaved_rgb_runtime_buffer(frame_gray_as_rgb);
 
-  const auto sigma = 10.f;
+  const auto sigma = 3.f;
   const auto truncation_factor = 4;
 
   create_window(video_stream.sizes());

@@ -3,7 +3,7 @@
 #include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
-#include "shakti_halide_utilities.hpp"
+#include "../shakti_halide_utilities.hpp"
 
 
 namespace halide = DO::Shakti::HalideBackend;
@@ -55,7 +55,7 @@ auto halide_pipeline() -> void
     toc("Video Decoding");
 
     tic();
-    pipeline(output_buffer);
+    //pipeline(output_buffer);
     toc("Halide");
 
     display(output_image);

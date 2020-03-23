@@ -28,3 +28,7 @@ endif ()
 if (SARA_USE_HPX)
   add_subdirectory(Parallel)
 endif ()
+
+if (SARA_USE_HALIDE)
+  add_subdirectory(Halide)
+endif ()

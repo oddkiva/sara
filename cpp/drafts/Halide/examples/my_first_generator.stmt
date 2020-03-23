@@ -1,0 +1,77 @@
+module name=my_first_generator, target=x86-64-osx-avx-avx2-f16c-fma-sse41
+external_plus_metadata func my_first_generator (offset, input, brighter) {
+assert((reinterpret(uint64, input.buffer) != (uint64)0), halide_error_buffer_argument_is_null("input"))
+assert((reinterpret(uint64, brighter.buffer) != (uint64)0), halide_error_buffer_argument_is_null("brighter"))
+let brighter = _halide_buffer_get_host(brighter.buffer)
+let brighter.type = _halide_buffer_get_type(brighter.buffer)
+let brighter.dimensions = _halide_buffer_get_dimensions(brighter.buffer)
+let brighter.min.0 = _halide_buffer_get_min(brighter.buffer, 0)
+let brighter.extent.0 = _halide_buffer_get_extent(brighter.buffer, 0)
+let brighter.stride.0 = _halide_buffer_get_stride(brighter.buffer, 0)
+let brighter.min.1 = _halide_buffer_get_min(brighter.buffer, 1)
+let brighter.extent.1 = _halide_buffer_get_extent(brighter.buffer, 1)
+let brighter.stride.1 = _halide_buffer_get_stride(brighter.buffer, 1)
+let input = _halide_buffer_get_host(input.buffer)
+let input.type = _halide_buffer_get_type(input.buffer)
+let input.dimensions = _halide_buffer_get_dimensions(input.buffer)
+let input.min.0 = _halide_buffer_get_min(input.buffer, 0)
+let input.extent.0 = _halide_buffer_get_extent(input.buffer, 0)
+let input.stride.0 = _halide_buffer_get_stride(input.buffer, 0)
+let input.min.1 = _halide_buffer_get_min(input.buffer, 1)
+let input.extent.1 = _halide_buffer_get_extent(input.buffer, 1)
+let input.stride.1 = _halide_buffer_get_stride(input.buffer, 1)
+let brighter.extent.0.required.s = (min((((brighter.extent.0 + -1)/16)*16), (brighter.extent.0 + -16)) - min(brighter.extent.0, 16))
+if (_halide_buffer_is_bounds_query(brighter.buffer)) {
+  _halide_buffer_init(brighter.buffer, _halide_buffer_get_shape(brighter.buffer), reinterpret((void *), (uint64)0), (uint64)0, reinterpret((halide_device_interface_t *), (uint64)0), 1, 8, 2, make_struct((halide_dimension_t *), ((min(brighter.extent.0, 16) + brighter.min.0) + -16), (brighter.extent.0.required.s + 32), 1, 0, brighter.min.1, brighter.extent.1, (brighter.extent.0.required.s + 32), 0), (uint64)0)
+}
+if (_halide_buffer_is_bounds_query(input.buffer)) {
+  _halide_buffer_init(input.buffer, _halide_buffer_get_shape(input.buffer), reinterpret((void *), (uint64)0), (uint64)0, reinterpret((halide_device_interface_t *), (uint64)0), 1, 8, 2, make_struct((halide_dimension_t *), ((min(brighter.extent.0, 16) + brighter.min.0) + -16), (brighter.extent.0.required.s + 32), 1, 0, brighter.min.1, brighter.extent.1, (brighter.extent.0.required.s + 32), 0), (uint64)0)
+}
+if (!(_halide_buffer_is_bounds_query(brighter.buffer) || _halide_buffer_is_bounds_query(input.buffer))) {
+  assert((brighter.type == (uint32)67585), halide_error_bad_type("Output buffer brighter", brighter.type, (uint32)67585))
+  assert((brighter.dimensions == 2), halide_error_bad_dimensions("Output buffer brighter", brighter.dimensions, 2))
+  assert((input.type == (uint32)67585), halide_error_bad_type("Input buffer input", input.type, (uint32)67585))
+  assert((input.dimensions == 2), halide_error_bad_dimensions("Input buffer input", input.dimensions, 2))
+  assert(((16 <= brighter.extent.0) && ((((min(brighter.extent.0, 16) + brighter.min.0) + brighter.extent.0.required.s) + 16) <= (brighter.extent.0 + brighter.min.0))), halide_error_access_out_of_bounds("Output buffer brighter", 0, ((min(brighter.extent.0, 16) + brighter.min.0) + -16), (((min(brighter.extent.0, 16) + brighter.min.0) + brighter.extent.0.required.s) + 15), brighter.min.0, ((brighter.extent.0 + brighter.min.0) + -1)))
+  assert((0 <= brighter.extent.1), halide_error_buffer_extents_negative("Output buffer brighter", 1, brighter.extent.1))
+  assert(((input.min.0 <= brighter.min.0) && (((brighter.extent.0.required.s + brighter.min.0) + 32) <= (input.extent.0 + input.min.0))), halide_error_access_out_of_bounds("Input buffer input", 0, brighter.min.0, ((brighter.extent.0.required.s + brighter.min.0) + 31), input.min.0, ((input.extent.0 + input.min.0) + -1)))
+  assert((0 <= input.extent.0), halide_error_buffer_extents_negative("Input buffer input", 0, input.extent.0))
+  assert(((input.min.1 <= brighter.min.1) && ((brighter.extent.1 + brighter.min.1) <= (input.extent.1 + input.min.1))), halide_error_access_out_of_bounds("Input buffer input", 1, brighter.min.1, ((brighter.extent.1 + brighter.min.1) + -1), input.min.1, ((input.extent.1 + input.min.1) + -1)))
+  assert((0 <= input.extent.1), halide_error_buffer_extents_negative("Input buffer input", 1, input.extent.1))
+  assert((brighter.stride.0 == 1), halide_error_constraint_violated("brighter.stride.0", brighter.stride.0, "1", 1))
+  assert((input.stride.0 == 1), halide_error_constraint_violated("input.stride.0", input.stride.0, "1", 1))
+  let brighter.total_extent.1 = (int64(brighter.extent.1)*int64(brighter.extent.0))
+  let input.total_extent.1 = (int64(input.extent.1)*int64(input.extent.0))
+  assert((abs(int64(brighter.extent.0)) <= (uint64)2147483647), halide_error_buffer_allocation_too_large("brighter", abs(int64(brighter.extent.0)), (uint64)2147483647))
+  assert((abs((int64(brighter.extent.1)*int64(brighter.stride.1))) <= (uint64)2147483647), halide_error_buffer_allocation_too_large("brighter", abs((int64(brighter.extent.1)*int64(brighter.stride.1))), (uint64)2147483647))
+  assert((brighter.total_extent.1 <= (int64)2147483647), halide_error_buffer_extents_too_large("brighter", brighter.total_extent.1, (int64)2147483647))
+  assert((abs(int64(input.extent.0)) <= (uint64)2147483647), halide_error_buffer_allocation_too_large("input", abs(int64(input.extent.0)), (uint64)2147483647))
+  assert((abs((int64(input.extent.1)*int64(input.stride.1))) <= (uint64)2147483647), halide_error_buffer_allocation_too_large("input", abs((int64(input.extent.1)*int64(input.stride.1))), (uint64)2147483647))
+  assert((input.total_extent.1 <= (int64)2147483647), halide_error_buffer_extents_too_large("input", input.total_extent.1, (int64)2147483647))
+  assert((brighter != reinterpret((void *), (uint64)0)), halide_error_host_is_null("Output buffer brighter"))
+  assert((input != reinterpret((void *), (uint64)0)), halide_error_host_is_null("Input buffer input"))
+  produce brighter {
+    let t10 = (brighter.extent.0 + brighter.min.0)
+    let t11 = (brighter.min.1*brighter.stride.1)
+    let t12 = (input.min.1*input.stride.1)
+    let t7 = (0 < (brighter.extent.0 % 16))
+    let t4 = (brighter.extent.0/16)
+    let t5 = ((brighter.min.0 - t12) - input.min.0)
+    let t6 = (0 - t11)
+    let t8 = (((t10 - t12) - input.min.0) + -16)
+    let t9 = (((t10 - t11) - brighter.min.0) + -16)
+    parallel (brighter.s0.y, brighter.min.1, brighter.extent.1) {
+      let t13 = ((brighter.s0.y*input.stride.1) + t5)
+      let t14 = ((brighter.s0.y*brighter.stride.1) + t6)
+      for (brighter.s0.x.x, 0, t4) {
+        brighter[ramp(((brighter.s0.x.x*16) + t14), 1, 16)] = (input[ramp(((brighter.s0.x.x*16) + t13), 1, 16)] + x16(offset))
+      }
+      if (t7) {
+        brighter[ramp(((brighter.s0.y*brighter.stride.1) + t9), 1, 16)] = (input[ramp(((brighter.s0.y*input.stride.1) + t8), 1, 16)] + x16(offset))
+      }
+    }
+  }
+}
+}
+
+

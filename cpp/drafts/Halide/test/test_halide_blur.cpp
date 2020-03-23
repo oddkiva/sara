@@ -2,7 +2,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <DO/Shakti/Halide/shakti_halide_utilities.hpp>
+#include "../shakti_halide_utilities.hpp"
 
 
 using namespace Halide;
