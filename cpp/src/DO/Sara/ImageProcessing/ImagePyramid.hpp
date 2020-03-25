@@ -19,9 +19,9 @@
 namespace DO { namespace Sara {
 
   /*!
-    @ingroup ImageProcessing
-    @defgroup ScaleSpace Scale-Space Representation
-    @{
+   *  @ingroup ImageProcessing
+   *  @defgroup ScaleSpace Scale-Space Representation
+   *  @{
    */
 
 

@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE "CSV I/O"
+#define BOOST_TEST_MODULE "Halide Backend"
 
 #include <boost/test/unit_test.hpp>
 
