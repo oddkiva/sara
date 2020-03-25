@@ -34,8 +34,6 @@ namespace DO::Shakti::HalideBackend {
   gaussian_pyramid(const Sara::ImageView<T>& image,
                    const Sara::ImagePyramidParams& params = Sara::ImagePyramidParams())
   {
-    using Scalar = typename ImagePyramid<T>::scalar_type;
-
     // Resize the image with the appropriate factor.
     const auto resize_factor = pow(2.f, -params.first_octave_index());
     auto I = enlarge(image, resize_factor);

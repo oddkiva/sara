@@ -16,7 +16,7 @@
 #include <DO/Sara/Core/Tensor.hpp>
 
 
-namespace DO { namespace Shakti { namespace HalideBackend {
+namespace DO::Shakti::HalideBackend {
 
   /*!
    *  The image pyramid is regular, i.e., it has:
@@ -161,4 +161,4 @@ namespace DO { namespace Shakti { namespace HalideBackend {
 
   //! @}
 
-}}}  // namespace DO::Shakti::HalideBackend
+}  // namespace DO::Shakti::HalideBackend

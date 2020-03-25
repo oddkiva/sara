@@ -1,6 +1,7 @@
 #define BOOST_TEST_MODULE "Halide/Image Pyramid"
 
 #include <boost/test/unit_test.hpp>
+#include <type_traits>
 
 #include "../ImagePyramid.hpp"
 
@@ -13,7 +14,7 @@ BOOST_AUTO_TEST_CASE(test_image_pyramid)
   const auto num_octaves = 2;
   const auto num_scales_per_octave = 3;
   const auto sigma_initial = 1.6f;
-  const auto scale_geometric_factor = pow(2.f, 1 / 3.f);
+  const auto scale_geometric_factor = std::pow(2.f, 1.f / 3.f);
 
   const auto hw_sizes = Eigen::Vector2i{768, 1024};
 
