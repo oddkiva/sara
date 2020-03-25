@@ -25,19 +25,16 @@ namespace {
       const float w_out = input.width();
       const float h_out = input.height();
 
-      auto xx = clamp(x, 0, w_out - 1) * w_in / w_out;
-      auto yy = clamp(y, 0, h_out - 1) * h_in / h_out;
+      auto xx = x * w_in / w_out;
+      auto yy = y * h_in / h_out;
 
-      auto wx = xx - floor(xx);
-      auto wy = yy - floor(yy);
+      auto weights = Func{"weights"};
+      weights(x, y) = abs(1 - xx - x) * abs(1 - yy - y);
 
-      Expr xin[2] = {floor(xx), ceil(xx)};
-      Expr yin[2] = {floor(yy), ceil(yy)};
+      auto input_padded = BoundaryConditions::repeat_edge(input);
 
-      output(x, y, c) = (1 - wx) * (1 - wy) * input(xin[0], yin[0], c) +
-                        wx * (1 - wy) * input(xin[1], yin[0], c) +
-                        (1 - wx) * wy * input(xin[0], yin[1], c) +
-                        wx * wy * input(xin[1], yin[1], c);
+      auto r = RDom{floor(xx), 2, floor(yy), 2};
+      output(x, y, c) = sum(weights(r) * input_padded(r.x, r.y, c));
 
       // GPU schedule.
       if (get_target().has_gpu_feature())
