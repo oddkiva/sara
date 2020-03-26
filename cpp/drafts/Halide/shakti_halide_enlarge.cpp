@@ -19,6 +19,10 @@ namespace {
 
     void generate()
     {
+      // Deal with interleaved RGB pixel format.
+      input.dim(0).set_stride(3).dim(2).set_stride(1);
+      input.dim(2).set_bounds(0, 3);
+
       const float w_in = input.width();
       const float h_in = input.height();
 
@@ -61,4 +65,4 @@ namespace {
 
 }  // namespace
 
-HALIDE_REGISTER_GENERATOR(Enlarge, shakti_halide_enlarge)
+HALIDE_REGISTER_GENERATOR(Enlarge<float>, shakti_halide_enlarge)
