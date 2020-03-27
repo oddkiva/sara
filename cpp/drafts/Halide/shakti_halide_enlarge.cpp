@@ -5,40 +5,41 @@ namespace {
 
   using namespace Halide;
 
-  template <typename T>
-  class Enlarge : public Halide::Generator<Enlarge<T>>
+  class Enlarge : public Halide::Generator<Enlarge>
   {
   public:
     GeneratorParam<int> tile_x{"tile_x", 32};
     GeneratorParam<int> tile_y{"tile_y", 32};
 
-    Input<Buffer<T>> input{"f", 2};
-    Output<Buffer<T>> output{"g", 2};
+    Input<Buffer<float>> input{"input", 2};
+    Input<int[2]> in_sizes{"in_sizes"};
+    Input<int[2]> out_sizes{"out_sizes"};
+    Output<Buffer<float>> output{"enlarged_input", 2};
 
-    Var x{"x"}, y{"y"}, c{"c"}, xo{"xo"}, yo{"yo"}, xi{"xi"}, yi{"yi"};
+    Var x{"x"}, y{"y"}, xo{"xo"}, yo{"yo"}, xi{"xi"}, yi{"yi"};
 
     void generate()
     {
-      // Deal with interleaved RGB pixel format.
-      input.dim(0).set_stride(3).dim(2).set_stride(1);
-      input.dim(2).set_bounds(0, 3);
+      Expr w_in = cast<float>(in_sizes[0]);
+      Expr h_in = cast<float>(in_sizes[1]);
+      Expr w_out = cast<float>(out_sizes[0]);
+      Expr h_out = cast<float>(out_sizes[1]);
 
-      const float w_in = input.width();
-      const float h_in = input.height();
-
-      const float w_out = input.width();
-      const float h_out = input.height();
-
-      auto xx = x * w_in / w_out;
-      auto yy = y * h_in / h_out;
-
-      auto weights = Func{"weights"};
-      weights(x, y) = abs(1 - xx - x) * abs(1 - yy - y);
+      Expr xx = x * w_in / w_out;
+      Expr yy = y * h_in / h_out;
 
       auto input_padded = BoundaryConditions::repeat_edge(input);
 
-      auto r = RDom{floor(xx), 2, floor(yy), 2};
-      output(x, y, c) = sum(weights(r) * input_padded(r.x, r.y, c));
+      auto wx = xx - floor(xx);
+      auto wy = yy - floor(yy);
+
+      auto xr = cast<int>(xx);
+      auto yr = cast<int>(yy);
+
+      output(x, y) = (1 - wx) * (1 - wy) * input_padded(xr, yr) +  //
+                     wx * (1 - wy) * input_padded(xr + 1, yr) +    //
+                     (1 - wx) * wy * input_padded(xr, yr + 1) +    //
+                     wx * wy * input_padded(xr + 1, yr + 1);
 
       // GPU schedule.
       if (get_target().has_gpu_feature())
@@ -65,4 +66,4 @@ namespace {
 
 }  // namespace
 
-HALIDE_REGISTER_GENERATOR(Enlarge<float>, shakti_halide_enlarge)
+HALIDE_REGISTER_GENERATOR(Enlarge, shakti_halide_enlarge)

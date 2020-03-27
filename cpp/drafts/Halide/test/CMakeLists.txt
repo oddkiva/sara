@@ -9,3 +9,5 @@ foreach (file ${test_SOURCE_FILES})
     DEPENDENCIES ${DO_Sara_LIBRARIES} Halide
     FOLDER "DRAFTS/Halide")
 endforeach ()
+
+target_link_libraries(test_halide_enlarge PRIVATE shakti_halide_enlarge)

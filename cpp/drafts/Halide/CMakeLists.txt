@@ -6,6 +6,7 @@ include(sara_use_halide)
 shakti_halide_library(shakti_halide_rgb_to_gray.cpp)
 shakti_halide_library(shakti_halide_gray32f_to_rgb.cpp)
 shakti_halide_gpu_library(shakti_halide_gaussian_blur.cpp)
+shakti_halide_library(shakti_halide_enlarge.cpp)
 
 
 if (SARA_BUILD_SAMPLES)
