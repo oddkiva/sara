@@ -88,9 +88,6 @@ else()
     "-Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable -Wno-missing-field-initializers -Wno-unknown-pragmas")
 endif()
 
-# include(${HALIDE_CMAKE_CONFIG_FILEPATH})
-# include(${HALIDE_CMAKE_FILEPATH})
-
 if (WIN32)
   add_library(Halide SHARED IMPORTED)
 else ()

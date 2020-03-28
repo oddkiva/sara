@@ -84,12 +84,18 @@ namespace DO::Shakti::HalideBackend {
                                       image.height());
   }
 
-
   auto as_interleaved_rgb_runtime_buffer(sara::ImageView<sara::Rgb8>& image)
   {
     return Halide::Runtime::Buffer<uint8_t>::make_interleaved(
         reinterpret_cast<uint8_t*>(image.data()), image.width(), image.height(),
         3);
+  }
+  template <typename T, typename ColorSpace>
+  auto as_interleaved_runtime_buffer(sara::ImageView<sara::Pixel<T, ColorSpace>>& image)
+  {
+    return Halide::Runtime::Buffer<T>::make_interleaved(
+        reinterpret_cast<T*>(image.data()), image.width(), image.height(),
+        sara::Pixel<T, ColorSpace>::num_channels());
   }
 
   template <typename T>

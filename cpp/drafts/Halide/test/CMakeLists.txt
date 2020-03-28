@@ -10,4 +10,6 @@ foreach (file ${test_SOURCE_FILES})
     FOLDER "DRAFTS/Halide")
 endforeach ()
 
-target_link_libraries(test_halide_enlarge PRIVATE shakti_halide_enlarge)
+target_link_libraries(test_halide_enlarge
+  PRIVATE
+  shakti_halide_enlarge)

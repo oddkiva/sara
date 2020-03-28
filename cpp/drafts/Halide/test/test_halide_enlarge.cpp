@@ -11,6 +11,7 @@
 
 #define BOOST_TEST_MODULE "Halide/Image Resize"
 
+#include <DO/Sara/Core/Pixel.hpp>
 #include <DO/Sara/Core/Tensor.hpp>
 
 #include <boost/test/unit_test.hpp>
@@ -58,9 +59,10 @@ BOOST_AUTO_TEST_SUITE(TestImageResize)
 //   BOOST_CHECK_EQUAL(true_dst.matrix(), dst.matrix());
 // }
 
-BOOST_AUTO_TEST_CASE(test_enlarge_on_image_views)
+BOOST_AUTO_TEST_CASE(test_halide_enlarge_single_channel)
 {
-  // N.B.: because of vectorization, we must have image sizes of at least 8.
+  // N.B.: because of the internal parameters, we must have image sizes of at
+  // least 8.
 
   auto src = Image<float>{8, 8};
   src.matrix() <<
@@ -76,8 +78,8 @@ BOOST_AUTO_TEST_CASE(test_enlarge_on_image_views)
   auto dst = Image<float>{8, 16};
 
   namespace halide = DO::Shakti::HalideBackend;
-  auto src_buffer = halide::as_runtime_buffer<float>(src);
-  auto dst_buffer = halide::as_runtime_buffer<float>(dst);
+  auto src_buffer = halide::as_runtime_buffer_3d<float>(src);
+  auto dst_buffer = halide::as_runtime_buffer_3d<float>(dst);
   src_buffer.set_host_dirty();
   shakti_halide_enlarge(src_buffer, src_buffer.width(), src_buffer.height(),
                         dst_buffer.width(), dst_buffer.height(), dst_buffer);
@@ -103,6 +105,68 @@ BOOST_AUTO_TEST_CASE(test_enlarge_on_image_views)
     7.0, 7.0, 7.0, 7.0, 7.0, 7.0, 7.0, 7.0;
 
   BOOST_CHECK_LE((true_dst.matrix() - dst.matrix()).norm(), 1e-9);
+}
+
+BOOST_AUTO_TEST_CASE(test_halide_enlarge_multi_channel)
+{
+  // N.B.: because of the internal parameters, we must have image sizes of at
+  // least 8.
+
+  auto src = Image<Rgb32f>{8, 8};
+  for (int y = 0; y < src.height(); ++y)
+    src.matrix().row(y).fill(Rgb32f::Ones() * y);
+  // In each channel:
+  //
+  // src.matrix() <<
+  //   0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+  //   1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+  //   2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0,
+  //   3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0,
+  //   4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0,
+  //   5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0,
+  //   6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0,
+  //   7.0, 7.0, 7.0, 7.0, 7.0, 7.0, 7.0, 7.0;
+
+  auto dst = Image<Rgb32f>{8, 16};
+
+  namespace halide = DO::Shakti::HalideBackend;
+  auto src_buffer = halide::as_interleaved_runtime_buffer(src);
+  auto dst_buffer = halide::as_interleaved_runtime_buffer(dst);
+
+  src_buffer.set_host_dirty();
+  shakti_halide_enlarge(src_buffer, src_buffer.width(), src_buffer.height(),
+                        dst_buffer.width(), dst_buffer.height(), dst_buffer);
+  dst_buffer.copy_to_host();
+
+
+  auto true_dst = Image<Rgb32f>{8, 16};
+  for (int y = 0; y < true_dst.height() - 1; ++y)
+    true_dst.matrix().row(y).fill(Rgb32f::Ones() * (y / 2.f));
+  true_dst.matrix().row(15).fill(Rgb32f::Ones() * 7);
+  // In each channel:
+  //
+  // true_dst.matrix() <<
+  //   0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+  //   0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5,
+  //   1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+  //   1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5,
+  //   2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0,
+  //   2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5,
+  //   3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0,
+  //   3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5,
+  //   4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0,
+  //   4.5, 4.5, 4.5, 4.5, 4.5, 4.5, 4.5, 4.5,
+  //   5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0,
+  //   5.5, 5.5, 5.5, 5.5, 5.5, 5.5, 5.5, 5.5,
+  //   6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0,
+  //   6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5, 6.5,
+  //   7.0, 7.0, 7.0, 7.0, 7.0, 7.0, 7.0, 7.0,
+  //   7.0, 7.0, 7.0, 7.0, 7.0, 7.0, 7.0, 7.0;
+
+  for (auto y = 0; y < dst.height(); ++y)
+    for (auto x = 0; x < dst.width(); ++x)
+      BOOST_REQUIRE_SMALL((dst(x, y) - true_dst(x, y)).norm(),
+                          std::numeric_limits<float>::epsilon());
 }
 
 // BOOST_AUTO_TEST_CASE(test_enlarge)
