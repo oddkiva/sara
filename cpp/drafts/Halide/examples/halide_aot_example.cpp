@@ -3,7 +3,7 @@
 #include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
-#include "../shakti_halide_utilities.hpp"
+#include "../Utilities.hpp"
 
 #include "shakti_halide_gaussian_blur.h"
 #include "shakti_halide_gray32f_to_rgb.h"
@@ -40,12 +40,11 @@ auto halide_pipeline() -> void
   auto frame_gray_as_rgb = Image<Rgb8>{video_stream.sizes()};
 
   // Halide input and output buffers.
-  auto buffer_rgb = halide::as_interleaved_rgb_runtime_buffer(frame_rgb8);
+  auto buffer_rgb = halide::as_interleaved_runtime_buffer(frame_rgb8);
   auto buffer_gray32f = halide::as_runtime_buffer<float>(frame_gray32f);
   auto buffer_gray32f_blurred =
       halide::as_runtime_buffer<float>(frame_gray32f_blurred);
-  auto buffer_gray8 =
-      halide::as_interleaved_rgb_runtime_buffer(frame_gray_as_rgb);
+  auto buffer_gray8 = halide::as_interleaved_runtime_buffer(frame_gray_as_rgb);
 
   const auto sigma = 3.f;
   const auto truncation_factor = 4;

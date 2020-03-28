@@ -1,7 +1,7 @@
 #include <DO/Sara/Core.hpp>
 #include <DO/Sara/Graphics.hpp>
 
-#include "Halide.h"
+#include <Halide.h>
 
 
 namespace sara = DO::Sara;

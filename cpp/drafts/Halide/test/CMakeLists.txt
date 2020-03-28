@@ -8,6 +8,10 @@ foreach (file ${test_SOURCE_FILES})
     SOURCES ${file}
     DEPENDENCIES ${DO_Sara_LIBRARIES} Halide
     FOLDER "DRAFTS/Halide")
+  set_target_properties(${filename}
+    PROPERTIES
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED YES)
 endforeach ()
 
 target_link_libraries(test_halide_enlarge

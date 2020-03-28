@@ -2,7 +2,7 @@
 
 #include <DO/Sara/Core.hpp>
 
-#include "Halide.h"
+#include <Halide.h>
 
 #ifdef _WIN32
 #  include <windows.h>
@@ -70,32 +70,27 @@ namespace DO::Shakti::HalideBackend {
   }
 
 
-  auto as_interleaved_rgb_buffer(sara::ImageView<sara::Rgb8>& image)
-  {
-    return Halide::Buffer<uint8_t>::make_interleaved(
-        reinterpret_cast<uint8_t*>(image.data()), image.width(), image.height(),
-        3);
-  }
-
-  template <typename T>
-  auto as_buffer(sara::ImageView<T>& image)
-  {
-    return Halide::Buffer<T>(image.data(), image.width(),
-                                      image.height());
-  }
-
-  auto as_interleaved_rgb_runtime_buffer(sara::ImageView<sara::Rgb8>& image)
-  {
-    return Halide::Runtime::Buffer<uint8_t>::make_interleaved(
-        reinterpret_cast<uint8_t*>(image.data()), image.width(), image.height(),
-        3);
-  }
   template <typename T, typename ColorSpace>
-  auto as_interleaved_runtime_buffer(sara::ImageView<sara::Pixel<T, ColorSpace>>& image)
+  inline auto as_interleaved_buffer(sara::ImageView<sara::Pixel<T, ColorSpace>>& image)
+  {
+    return Halide::Buffer<T>::make_interleaved(
+        reinterpret_cast<T*>(image.data()), image.width(), image.height(),
+        sara::Pixel<T, ColorSpace>::num_channels());
+  }
+
+  template <typename T, typename ColorSpace>
+  auto as_interleaved_runtime_buffer(
+      sara::ImageView<sara::Pixel<T, ColorSpace>>& image)
   {
     return Halide::Runtime::Buffer<T>::make_interleaved(
         reinterpret_cast<T*>(image.data()), image.width(), image.height(),
         sara::Pixel<T, ColorSpace>::num_channels());
+  }
+
+  template <typename T>
+  inline auto as_buffer(sara::ImageView<T>& image)
+  {
+    return Halide::Buffer<T>(image.data(), image.width(), image.height());
   }
 
   template <typename T>
@@ -111,6 +106,18 @@ namespace DO::Shakti::HalideBackend {
     static constexpr auto num_channels = sara::PixelTraits<T>::num_channels;
     return Halide::Runtime::Buffer<T>(image.data(), image.width(),
                                       image.height(), num_channels);
+  }
+
+  template <typename T>
+  inline auto as_buffer(std::vector<T>& v)
+  {
+    return Halide::Buffer<T>(v.data(), v.size());
+  }
+
+  template <typename T>
+  inline auto as_runtime_buffer(std::vector<T>& v)
+  {
+    return Halide::Runtime::Buffer<T>(v.data(), v.size());
   }
 
   template <typename T = std::uint8_t>

@@ -1,4 +1,4 @@
-#include "Halide.h"
+#include <Halide.h>
 
 
 auto main() -> int

@@ -16,7 +16,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "../shakti_halide_utilities.hpp"
+#include "../Utilities.hpp"
 #include "shakti_halide_enlarge.h"
 
 

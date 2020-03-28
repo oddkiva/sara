@@ -3,7 +3,7 @@
 #include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
-#include "../shakti_halide_utilities.hpp"
+#include "../Utilities.hpp"
 
 
 namespace halide = DO::Shakti::HalideBackend;
@@ -35,8 +35,8 @@ auto halide_pipeline() -> void
   auto output_image = Image<Rgb8>{video_stream.sizes()};
 
   // Halide input and output buffers.
-  auto input_buffer = halide::as_interleaved_rgb_buffer(input_image);
-  auto output_buffer = halide::as_interleaved_rgb_buffer(output_image);
+  auto input_buffer = halide::as_interleaved_buffer(input_image);
+  auto output_buffer = halide::as_interleaved_buffer(output_image);
 
   // Blur pipeline.
   // const auto pipeline = halide::Blur3x3Vis{input_buffer};
