@@ -30,4 +30,21 @@ using namespace sara;
 
 BOOST_AUTO_TEST_CASE(test_gaussian_convolution)
 {
+  auto src = Image<float>{33, 33};
+  auto dst = Image<float>{33, 33};
+  src.flat_array().fill(0);
+  src(16, 16) = 1.f;
+
+  SARA_DEBUG << "src" << std::endl;
+  std::cout << src.matrix() << std::endl;
+
+  auto src_buffer = halide::as_runtime_buffer_3d(src);
+  auto dst_buffer = halide::as_runtime_buffer_3d(dst);
+
+  src_buffer.set_host_dirty();
+  GaussianConvolution(src_buffer, 3.f, 4, dst_buffer);
+  dst_buffer.copy_to_host();
+
+  SARA_DEBUG << "dst" << std::endl;
+  std::cout << dst.matrix() << std::endl;
 }

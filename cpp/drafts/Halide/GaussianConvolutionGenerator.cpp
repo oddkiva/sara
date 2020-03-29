@@ -25,13 +25,13 @@ namespace {
     GeneratorParam<int> tile_x{"tile_x", 32};
     GeneratorParam<int> tile_y{"tile_y", 32};
 
-    Input<Func> input{"input", Float(32), 3};
+    Input<Buffer<float>> input{"input", 3};
     Input<float> sigma{"sigma"};
     Input<int32_t> truncation_factor{"truncation_factor"};
 
     Func gaussian{"gaussian"};
 
-    Output<Func> output{"input_convolved", Float(32), 3};
+    Output<Buffer<float>> output{"input_convolved", 3};
 
     //! @brief Variables.
     //! @{
@@ -54,8 +54,10 @@ namespace {
       auto normalization_factor = sum(gaussian_unnormalized(k));
       gaussian(x) = gaussian_unnormalized(x) / normalization_factor;
 
+      auto input_padded = BoundaryConditions::repeat_edge(input);
+
       output = SeparableConvolution2d::generate(
-          this, {input, gaussian, kernel_shift, kernel_size});
+          this, {input_padded, gaussian, 0, kernel_size});
     }
 
     void schedule()

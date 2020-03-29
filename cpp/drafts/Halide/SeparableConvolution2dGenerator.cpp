@@ -38,9 +38,9 @@ namespace {
 
     //! @brief Variables.
     //! @{
-    Var x{"x"}, y{"y"};
-    Var xo{"xo"}, yo{"yo"};
-    Var xi{"xi"}, yi{"yi"};
+    Var x{"x"}, y{"y"}, c{"c"};
+    Var xo{"xo"}, yo{"yo"}, co{"co"};
+    Var xi{"xi"}, yi{"yi"}, ci{"ci"};
     //! @}
 
     void generate()
@@ -51,15 +51,15 @@ namespace {
 
       // 1st pass: transpose and convolve the columns.
       auto input_t = Func{"input_transposed"};
-      input_t(x, y, _) = input(y, x, _);
-      conv_y_t(x, y, _) = sum(input_t(x + k, y, _) * kernel(k));
+      input_t(x, y, c) = input(y, x, c);
+      conv_y_t(x, y, c) = sum(input_t(x + k, y, c) * kernel(k));
 
       // 2nd pass: transpose and convolve the rows.
       auto conv_y = Func{"conv_y"};
-      conv_y(x, y, _) = conv_y_t(y, x, _);
+      conv_y(x, y, c) = conv_y_t(y, x, c);
 
       auto& conv_x = output;
-      conv_x(x, y, _) = sum(conv_y(x + k, y, _) * kernel(k));
+      conv_x(x, y, c) = sum(conv_y(x + k, y, c) * kernel(k));
     }
 
     void schedule()
@@ -71,10 +71,10 @@ namespace {
       {
         // 1st pass: transpose and convolve the columns
         conv_y_t.compute_root();
-        conv_y_t.gpu_tile(x, y, xo, yo, xi, yi, tile_x, tile_y);
+        conv_y_t.gpu_tile(x, y, c, xo, yo, co, xi, yi, ci, tile_x, tile_y, 3);
 
         // 2nd pass: transpose and convolve the rows.
-        conv_x.gpu_tile(x, y, xo, yo, xi, yi, tile_x, tile_y);
+        conv_x.gpu_tile(x, y, c, xo, yo, co, xi, yi, ci, tile_x, tile_y, 3);
       }
 
       // Hexagon schedule.
