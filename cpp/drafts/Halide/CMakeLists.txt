@@ -10,6 +10,18 @@ shakti_halide_gpu_library(shakti_halide_enlarge.cpp)
 shakti_halide_gpu_library(shakti_halide_cast_to_float.cpp)
 
 
+shakti_halide_library_v2(
+  NAME SeparableConvolution2d
+  SRCS SeparableConvolution2dGenerator.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+shakti_halide_library_v2(
+  NAME GaussianConvolution
+  SRCS GaussianConvolutionGenerator.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS}
+  DEPS SeparableConvolution2d.generator)
+
+
 if (SARA_BUILD_SAMPLES)
   add_subdirectory(examples)
 endif ()
