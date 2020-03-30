@@ -1,3 +1,5 @@
+find_package(DO_Sara COMPONENTS Core Graphics REQUIRED)
+
 file(GLOB test_SOURCE_FILES FILES *.cpp)
 
 foreach (file ${test_SOURCE_FILES})

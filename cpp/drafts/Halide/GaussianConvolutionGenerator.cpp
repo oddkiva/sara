@@ -31,11 +31,13 @@ namespace {
 
     Func gaussian{"gaussian"};
 
+    Func conv_fn;
+
     Output<Buffer<float>> output{"input_convolved", 3};
 
     //! @brief Variables.
     //! @{
-    Var x{"x"}, y{"y"};
+    Var x{"x"}, y{"y"}, c{"c"};
     Var xo{"xo"}, yo{"yo"};
     Var xi{"xi"}, yi{"yi"};
     //! @}
@@ -46,7 +48,7 @@ namespace {
       auto gaussian_unnormalized = Func{"gaussian_unnormalized"};
       gaussian_unnormalized(x) = exp(-(x * x) / (2 * sigma * sigma));
 
-      const auto radius = cast<int>(sigma / 2) * truncation_factor;
+      const auto radius = cast<int>(0.5f * sigma * truncation_factor);
       const auto kernel_shift = -radius;
       const auto kernel_size = 2 * radius + 1;
 
@@ -56,14 +58,17 @@ namespace {
 
       auto input_padded = BoundaryConditions::repeat_edge(input);
 
-      output = SeparableConvolution2d::generate(
-          this, {input_padded, gaussian, 0, kernel_size});
+      conv_fn = SeparableConvolution2d::generate(
+          this, {input_padded, gaussian, kernel_size, kernel_shift});
+
+      output(x, y, c) = conv_fn(x, y, c);
     }
 
     void schedule()
     {
       gaussian.compute_root();
-      //conv.schedule();
+      conv_fn.compute_root();
+      output.split(y, yo, yi, 8).parallel(yo).vectorize(x, 8);
     }
   };
 

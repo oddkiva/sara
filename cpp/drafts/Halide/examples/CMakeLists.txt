@@ -81,3 +81,17 @@ if (OpenMP_CXX_FOUND)
     OpenMP::OpenMP_CXX)
 endif ()
 set_property(TARGET halide_aot_example PROPERTY FOLDER "Tutorials/Halide")
+
+
+add_executable(halide_gaussian_convolution_example
+  halide_gaussian_convolution_example.cpp)
+set_target_properties(halide_gaussian_convolution_example
+  PROPERTIES
+  COMPILE_FLAGS ${SARA_DEFINITIONS})
+target_link_libraries(halide_gaussian_convolution_example PRIVATE
+  ${DO_Sara_LIBRARIES}
+  Halide
+  GaussianConvolution)
+set_property(TARGET halide_gaussian_convolution_example
+  PROPERTY
+  FOLDER "Tutorials/Halide")

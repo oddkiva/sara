@@ -66,43 +66,43 @@ namespace {
     {
       auto& conv_x = output;
 
-      // GPU schedule.
-      if (get_target().has_gpu_feature())
-      {
-        // 1st pass: transpose and convolve the columns
-        conv_y_t.compute_root();
-        conv_y_t.gpu_tile(x, y, c, xo, yo, co, xi, yi, ci, tile_x, tile_y, 3);
+      //// GPU schedule.
+      //if (get_target().has_gpu_feature())
+      //{
+      //  // 1st pass: transpose and convolve the columns
+      //  conv_y_t.compute_root();
+      //  conv_y_t.gpu_tile(x, y, c, xo, yo, co, xi, yi, ci, tile_x, tile_y, 1);
 
-        // 2nd pass: transpose and convolve the rows.
-        conv_x.gpu_tile(x, y, c, xo, yo, co, xi, yi, ci, tile_x, tile_y, 3);
-      }
+      //  // 2nd pass: transpose and convolve the rows.
+      //  conv_x.gpu_tile(x, y, c, xo, yo, co, xi, yi, ci, tile_x, tile_y, 1);
+      //}
 
-      // Hexagon schedule.
-      else if (get_target().features_any_of({Target::HVX_64, Target::HVX_128}))
-      {
-        const auto vector_size =
-            get_target().has_feature(Target::HVX_128) ? 128 : 64;
+      //// Hexagon schedule.
+      //else if (get_target().features_any_of({Target::HVX_64, Target::HVX_128}))
+      //{
+      //  const auto vector_size =
+      //      get_target().has_feature(Target::HVX_128) ? 128 : 64;
 
-        // 1st pass: transpose and convolve the columns
-        conv_y_t.compute_root();
-        conv_y_t.hexagon()
-            .prefetch(conv_y_t, y, 2)
-            .split(y, yo, yi, 128)
-            .parallel(yo)
-            .vectorize(x, vector_size);
+      //  // 1st pass: transpose and convolve the columns
+      //  conv_y_t.compute_root();
+      //  conv_y_t.hexagon()
+      //      .prefetch(conv_y_t, y, 2)
+      //      .split(y, yo, yi, 128)
+      //      .parallel(yo)
+      //      .vectorize(x, vector_size);
 
-        // 2nd pass: transpose and convolve the rows.
-        conv_y.compute_root();
-        conv_x.hexagon()
-            .prefetch(conv_y_t, y, 2)
-            .split(y, yo, yi, 128)
-            .parallel(yo)
-            .vectorize(x, vector_size);
-      }
+      //  // 2nd pass: transpose and convolve the rows.
+      //  conv_y.compute_root();
+      //  conv_x.hexagon()
+      //      .prefetch(conv_y_t, y, 2)
+      //      .split(y, yo, yi, 128)
+      //      .parallel(yo)
+      //      .vectorize(x, vector_size);
+      //}
 
-      // CPU schedule.
-      else
-      {
+      //// CPU schedule.
+      //else
+      //{
         // 1st pass: transpose and convolve the columns
         conv_y_t.compute_root();
         conv_y_t.split(y, yo, yi, 8).parallel(yo).vectorize(x, 8);
@@ -110,7 +110,7 @@ namespace {
         // 2nd pass: transpose and convolve the rows.
         conv_y.compute_root();
         conv_x.split(y, yo, yi, 8).parallel(yo).vectorize(x, 8);
-      }
+      //}
     }
   };
 

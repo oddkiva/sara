@@ -12,6 +12,7 @@
 #define BOOST_TEST_MODULE "Halide Backend/GaussianConvolution"
 
 #include <DO/Sara/Core/Tensor.hpp>
+#include <DO/Sara/Graphics.hpp>
 
 #include <drafts/Halide/Helpers.hpp>
 #include <drafts/Halide/Utilities.hpp>
@@ -31,7 +32,7 @@ using namespace sara;
 BOOST_AUTO_TEST_CASE(test_gaussian_convolution)
 {
   auto src = Image<float>{33, 33};
-  auto dst = Image<float>{33, 33};
+  auto dst = Image<float>{src.sizes()};
   src.flat_array().fill(0);
   src(16, 16) = 1.f;
 
@@ -46,5 +47,6 @@ BOOST_AUTO_TEST_CASE(test_gaussian_convolution)
   dst_buffer.copy_to_host();
 
   SARA_DEBUG << "dst" << std::endl;
+  std::cout.precision(3);
   std::cout << dst.matrix() << std::endl;
 }
