@@ -22,7 +22,7 @@
 
 using namespace Halide;
 
-int main(int argc, char **argv) {
+int main() {
     // Declare some Vars to use below.
     Var x("x"), y("y"), i("i"), u("u"), v("v");
 

@@ -34,7 +34,7 @@ namespace {
     {
       const auto w = input.width();
       const auto h = input.height();
-      const auto radius = cast<int>(sigma / 2) * truncation_factor;
+      const auto radius = cast<int>(0.5f * sigma * truncation_factor);
 
       // Define the unnormalized gaussian function.
       auto gaussian_unnormalized = Func{"gaussian_unnormalized"};

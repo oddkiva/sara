@@ -22,7 +22,7 @@
 #include <algorithm>
 using namespace Halide;
 
-int main(int argc, char **argv) {
+int main() {
 
     // So far Funcs (such as the one below) have evaluated to a single
     // scalar value for each point in their domain.

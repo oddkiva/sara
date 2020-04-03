@@ -9,7 +9,16 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
+
 #include <Halide.h>
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 #include "SeparableConvolution2d.stub.h"
 
@@ -68,7 +77,6 @@ namespace {
     {
       gaussian.compute_root();
       conv_fn.compute_root();
-      output.split(y, yo, yi, 8).parallel(yo).vectorize(x, 8);
     }
   };
 

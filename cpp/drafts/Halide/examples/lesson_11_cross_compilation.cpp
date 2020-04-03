@@ -21,7 +21,7 @@
 #include <stdio.h>
 using namespace Halide;
 
-int main(int argc, char **argv) {
+int main() {
 
     // We'll define the simple one-stage pipeline that we used in lesson 10.
     Func brighter;

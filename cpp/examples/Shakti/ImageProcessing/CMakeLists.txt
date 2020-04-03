@@ -19,4 +19,8 @@ foreach (file ${examples_SRC_FILES})
     DO::Shakti::ImageProcessing
     DO::Shakti::Utilities
     gpufilter)
+
+  target_compile_options(shakti_${filename}
+    PRIVATE
+    -Wno-unknown-pragmas)
 endforeach ()

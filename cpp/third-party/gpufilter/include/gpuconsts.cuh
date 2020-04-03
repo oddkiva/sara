@@ -157,8 +157,7 @@ void up_constants_coefficients2( const float& b0,
 
     Matrix<float,R,B> AFP_T = fwd(Ir, Zrb, w),
                       ARE_T = rev(Zrb, Ir, w);
-    Matrix<float,B,B> AFB_T = fwd(Zbr, Ib, w),
-                      ARB_T = rev(Ib, Zbr, w);
+    Matrix<float,B,B> ARB_T = rev(Ib, Zbr, w);
 
     Matrix<float,R,R> AbF_T = tail<R>(AFP_T),
                       AbR_T = head<R>(ARE_T),

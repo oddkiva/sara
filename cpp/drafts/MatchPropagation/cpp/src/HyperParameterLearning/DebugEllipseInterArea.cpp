@@ -141,9 +141,12 @@ namespace DO::Sara {
   }
 
   void DebugEllipseInterArea::check_reprojected_ellipse(
-      const Match& m, const PairWiseDrawer& drawer, Ellipse& y, Ellipse& H_Sx,
-      double polygonal_overlap, double analytical_overlap, double angle_phi_ox,
-      double angle_y, double error) const
+      const Match& /* m */,                                 //
+      const PairWiseDrawer& drawer,                         //
+      Ellipse& y, Ellipse& H_Sx,                            //
+      double polygonal_overlap, double analytical_overlap,  //
+      double angle_phi_ox, double angle_y,                  //
+      double error) const
   {
     Vector2d Phi_ox(unit_vector2(angle_phi_ox));
     Vector2d oy(unit_vector2(angle_y));

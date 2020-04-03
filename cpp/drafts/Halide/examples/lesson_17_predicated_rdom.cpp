@@ -22,7 +22,7 @@
 
 using namespace Halide;
 
-int main(int argc, char **argv) {
+int main() {
 
     // In lesson 9, we learned how to use RDom to define a "reduction
     // domain" to use in a Halide update definition. The domain

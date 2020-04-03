@@ -3,7 +3,7 @@
 
 using namespace Halide;
 
-int main(int argc, char **argv) {
+int main() {
 
     // The last lesson was quite involved, and scheduling complex
     // multi-stage pipelines is ahead of us. As an interlude, let's

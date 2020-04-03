@@ -62,6 +62,9 @@ foreach (lesson ${LESSONS_SOURCE_FILES})
     target_link_libraries(${lesson_name} PRIVATE
       OpenMP::OpenMP_CXX)
   endif ()
+  target_compile_options(${lesson_name}
+    PRIVATE
+    -Wno-unused-but-set-variable)
   set_property(TARGET ${lesson_name} PROPERTY FOLDER "Tutorials/Halide")
 endforeach()
 
@@ -91,7 +94,8 @@ set_target_properties(halide_gaussian_convolution_example
 target_link_libraries(halide_gaussian_convolution_example PRIVATE
   ${DO_Sara_LIBRARIES}
   Halide
-  GaussianConvolution)
+  GaussianConvolution
+  shakti_halide_gaussian_blur)
 set_property(TARGET halide_gaussian_convolution_example
   PROPERTY
   FOLDER "Tutorials/Halide")

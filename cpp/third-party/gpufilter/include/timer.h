@@ -41,6 +41,8 @@ public:
                 size_t data_size = 0,
                 const std::string &unit = "" );
 
+    virtual ~base_timer() = default;
+
     /**
      *  @brief Start counting timing
      */
@@ -205,7 +207,7 @@ public:
     /**
      *  Destructor
      */
-    ~cpu_timer();
+    ~cpu_timer() = default;
 
 private:
 
