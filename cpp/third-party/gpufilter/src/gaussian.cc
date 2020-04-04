@@ -3,7 +3,7 @@
 
 #include "gpufilter.h"
 
-int main(int argc, char *argv[]) {
+int main(int, char *argv[]) {
 	double sigma = atof(argv[1]);
 	double b01, a11;
 	gpufilter::weights1(sigma, b01, a11);

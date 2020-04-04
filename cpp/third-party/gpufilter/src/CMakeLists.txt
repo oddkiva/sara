@@ -6,7 +6,6 @@ target_include_directories(gpufilter
   ${CUDA_INCLUDE_DIRS}
   ${CUDA_TOOLKIT_ROOT_DIR}/samples/common/inc)
 
-
 if (SARA_BUILD_SAMPLES)
   add_executable(ex1 example_sat1.cc)
   target_link_libraries(ex1 gpufilter)
