@@ -44,7 +44,7 @@ function (add_halide_executable source_file)
 
   target_compile_options(${name}
     PRIVATE
-    -Wno-unused-but-set-variable)
+    $<$<CXX_COMPILER_ID:GNU>:-Wno-unused-but-set-variable>)
 
   set_property(TARGET ${name} PROPERTY FOLDER "Tutorials/Halide")
 endfunction ()

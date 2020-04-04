@@ -29,6 +29,27 @@ shakti_dissect_version()
 # Group projects by category.
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+
+# shakti_glob_directory(${DO_Shakti_SOURCE_DIR}/MultiArray)
+# shakti_create_common_variables(MultiArray)
+# add_library(DO_Shakti_MultiArray INTERFACE)
+# target_sources(DO_Sara_MultiArray
+#   INTERFACE "${DO_Shakti_MultiArray_HEADER_FILES}")
+# target_include_directories(DO_Shakti_MultiArray
+#   INTERFACE
+#   $<BUILD_INTERFACE:${_include_dirs}>
+#   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+# target_compile_options(DO_Shakti_MultiArray
+#   INTERFACE
+#   $<$<CXX_COMPILER_ID:GNU>:-Wno-unknown-pragmas>)
+# set_target_properties(DO_Shakti_MultiArray
+#   PROPERTIES
+#   CXX_STANDARD 14
+#   CXX_STANDARD_REQUIRED YES
+#   CUDA_SEPARABLE_COMPILATION ON)
+# add_library(DO::Shakti::MultiArray ALIAS DO_Shakti_MultiArray)
+
+
 # Create the following libraries.
 set(DO_Shakti_LIBRARIES MultiArray ImageProcessing Segmentation Utilities)
 foreach (library ${DO_Shakti_LIBRARIES})
@@ -39,3 +60,4 @@ endforeach ()
 
 target_link_libraries(DO_Shakti_ImageProcessing DO::Shakti::Utilities)
 target_link_libraries(DO_Shakti_Segmentation DO::Shakti::Utilities)
+

@@ -44,10 +44,10 @@ target_include_directories(nvidia_VideoCodecHelpers
 target_link_libraries(nvidia_VideoCodecHelpers nvidia::VideoCodec)
 target_compile_options(nvidia_VideoCodecHelpers
   PRIVATE
-  -Wno-missing-field-initializers
-  -Wno-reorder
-  -Wno-sign-compare
-  -Wno-switch
-  -Wno-unused-parameter
-  -Wno-unused-variable)
+  $<$<CXX_COMPILER_ID:GNU>:-Wno-missing-field-initializers>
+  $<$<CXX_COMPILER_ID:GNU>:-Wno-reorder>
+  $<$<CXX_COMPILER_ID:GNU>:-Wno-sign-compare>
+  $<$<CXX_COMPILER_ID:GNU>:-Wno-switch>
+  $<$<CXX_COMPILER_ID:GNU>:-Wno-unused-parameter>
+  $<$<CXX_COMPILER_ID:GNU>:-Wno-unused-variable>)
 add_library(nvidia::VideoCodecHelpers ALIAS nvidia_VideoCodecHelpers)

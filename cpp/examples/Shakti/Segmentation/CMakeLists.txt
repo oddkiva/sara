@@ -11,10 +11,6 @@ shakti_add_example(
   DO::Shakti::Segmentation
   DO::Shakti::Utilities)
 
-target_compile_options(shakti_example_superpixel
-  PRIVATE
-  -Wno-unknown-pragmas)
-
 
 # TODO: put this in the Video I/O.
 find_library(LIBQUICKTIME_LIBRARY

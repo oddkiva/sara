@@ -22,11 +22,10 @@ else ()
 endif ()
 target_compile_options(tinyply
   PRIVATE
-  -Wno-sign-compare
-  -Wno-switch
-  -Wno-unused-parameter
-  -Wno-unused-variable)
-
+  $<$<CXX_COMPILER_ID:GNU>:-Wno-sign-compare>
+  $<$<CXX_COMPILER_ID:GNU>:-Wno-switch>
+  $<$<CXX_COMPILER_ID:GNU>:-Wno-unused-parameter>
+  $<$<CXX_COMPILER_ID:GNU>:-Wno-unused-variable>)
 
 # Example
 # add_executable(example source/example.cpp)
