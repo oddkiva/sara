@@ -20,6 +20,13 @@ if (${SHARED_LIB})
 else ()
     add_library(tinyply STATIC source/tinyply.cpp source/tinyply.h)
 endif ()
+target_compile_options(tinyply
+  PRIVATE
+  -Wno-sign-compare
+  -Wno-switch
+  -Wno-unused-parameter
+  -Wno-unused-variable)
+
 
 # Example
 # add_executable(example source/example.cpp)

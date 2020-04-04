@@ -30,15 +30,21 @@ function (add_halide_executable source_file)
   get_filename_component(name ${source_file} NAME_WE)
   add_executable(${name} ${source_file})
   target_include_directories(${name}
-    PRIVATE ${HALIDE_DISTRIB_DIR}/include
+    PRIVATE
+    ${HALIDE_DISTRIB_DIR}/include
     ${HALIDE_DISTRIB_DIR}/tools)
 
-  target_link_libraries(${name} PRIVATE
+  target_link_libraries(${name}
+    PRIVATE
     ${DO_Sara_LIBRARIES}
     ${JPEG_LIBRARIES}
     ${PNG_LIBRARIES}
     ${OpenMP_CXX_LIBRARIES}
     Halide)
+
+  target_compile_options(${name}
+    PRIVATE
+    -Wno-unused-but-set-variable)
 
   set_property(TARGET ${name} PROPERTY FOLDER "Tutorials/Halide")
 endfunction ()
@@ -62,9 +68,6 @@ foreach (lesson ${LESSONS_SOURCE_FILES})
     target_link_libraries(${lesson_name} PRIVATE
       OpenMP::OpenMP_CXX)
   endif ()
-  target_compile_options(${lesson_name}
-    PRIVATE
-    -Wno-unused-but-set-variable)
   set_property(TARGET ${lesson_name} PROPERTY FOLDER "Tutorials/Halide")
 endforeach()
 

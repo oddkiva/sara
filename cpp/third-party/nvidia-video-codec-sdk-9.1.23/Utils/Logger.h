@@ -43,6 +43,7 @@ enum LogLevel
 };
 
 namespace simplelogger {
+
   class Logger
   {
   public:
@@ -51,18 +52,22 @@ namespace simplelogger {
       , bPrintTimeStamp(bPrintTimeStamp)
     {
     }
+
     virtual ~Logger()
     {
     }
     virtual std::ostream& GetStream() = 0;
+
     virtual void FlushStream()
     {
     }
+
     bool ShouldLogFor(LogLevel l)
     {
       return l >= level;
     }
-    char* GetLead(LogLevel l, const char* szFile, int nLine, const char* szFunc)
+
+    char* GetLead(LogLevel l, const char*, int, const char*)
     {
       if (l < TRACE || l > FATAL)
       {
@@ -83,10 +88,12 @@ namespace simplelogger {
       }
       return szLead;
     }
+
     void EnterCriticalSection()
     {
       mtx.lock();
     }
+
     void LeaveCriticalSection()
     {
       mtx.unlock();
@@ -108,11 +115,13 @@ namespace simplelogger {
     {
       return new FileLogger(strFilePath, level, bPrintTimeStamp);
     }
+
     static Logger* CreateConsoleLogger(LogLevel level = INFO,
                                        bool bPrintTimeStamp = true)
     {
       return new ConsoleLogger(level, bPrintTimeStamp);
     }
+
     static Logger* CreateUdpLogger(char* szHost, unsigned uPort,
                                    LogLevel level = INFO,
                                    bool bPrintTimeStamp = true)
@@ -134,10 +143,12 @@ namespace simplelogger {
         pFileOut = new std::ofstream();
         pFileOut->open(strFilePath.c_str());
       }
+
       ~FileLogger()
       {
         pFileOut->close();
       }
+
       std::ostream& GetStream()
       {
         return *pFileOut;
@@ -154,10 +165,8 @@ namespace simplelogger {
         : Logger(level, bPrintTimeStamp)
       {
       }
-      std::ostream& GetStream()
-      {
-        return std::cout;
-      }
+
+      std::ostream& GetStream() { return std::cout; }
     };
 
     class UdpLogger : public Logger
