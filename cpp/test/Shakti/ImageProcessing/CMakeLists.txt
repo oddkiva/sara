@@ -2,7 +2,7 @@ message(STATUS "  - DO_ImageProcessing_tests")
 
 find_package(DO_Sara COMPONENTS Core ImageProcessing REQUIRED)
 
-file(GLOB test_imageprocessing_SOURCE_FILES FILES test_*.cpp)
+file(GLOB test_imageprocessing_SOURCE_FILES FILES test_*.cpp test_*.cu)
 
 set (DEPS
   ${DO_Sara_LIBRARIES}

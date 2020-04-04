@@ -63,7 +63,9 @@ namespace DO { namespace Shakti {
 
   public: /* methods */
     //! @brief Default constructor.
-    __host__ __device__ inline MultiArrayView() = default;
+    __host__ __device__ inline MultiArrayView()
+    {
+    }
 
     //! @{
     //! @brief Constructor that wraps plain data with its known sizes.

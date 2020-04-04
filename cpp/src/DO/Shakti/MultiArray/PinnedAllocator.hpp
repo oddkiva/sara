@@ -58,8 +58,9 @@ namespace DO { namespace Shakti {
       typedef PinnedAllocator<U> other;
     };
 
-    __host__ __device__
-    inline PinnedAllocator() = default;
+    __host__ __device__ inline PinnedAllocator()
+    {
+    }
 
     template<typename U>
     __host__ __device__

@@ -26,7 +26,7 @@ namespace DO { namespace Shakti {
   {
   public:
     __host__ __device__
-    inline Matrix() = default;
+    inline Matrix() {};
 
     __host__ __device__
     inline Matrix(const Matrix& other)

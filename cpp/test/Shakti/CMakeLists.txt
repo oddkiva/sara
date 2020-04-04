@@ -15,9 +15,10 @@ function (shakti_add_test)
   get_filename_component(_filename "${shakti_add_test_SOURCES}" NAME_WE)
   set (_test_name shakti_${_filename})
 
-  cuda_add_executable(${_test_name} ${shakti_add_test_SOURCES})
+  add_executable(${_test_name} ${shakti_add_test_SOURCES})
   target_include_directories(${_test_name}
     PRIVATE
+    ${CUDA_TOOLKIT_INCLUDE}
     ${Boost_INCLUDE_DIR})
   target_link_libraries(${_test_name}
     ${Boost_LIBRARIES}
@@ -40,6 +41,6 @@ function (shakti_add_test)
   add_test(NAME ${_test_name} COMMAND $<TARGET_FILE:${_test_name}>)
 endfunction ()
 
-add_subdirectory(ImageProcessing)
 add_subdirectory(MultiArray)
+add_subdirectory(ImageProcessing)
 add_subdirectory(Segmentation)
