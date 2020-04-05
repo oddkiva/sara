@@ -5,14 +5,6 @@ namespace DO::Shakti::HalideBackend {
 
   using namespace Halide;
 
-  template <typename T>
-  inline auto identity(const Buffer<T>& in, Var& x, Var& y)
-  {
-    auto f = Func{"identity"};
-    f(x, y) = BoundaryConditions::repeat_edge(in)(x, y);
-    return f;
-  }
-
   template <typename T, typename... Vars>
   inline auto identity(const Buffer<T>& in, Vars&... vars)
   {
@@ -55,7 +47,8 @@ namespace DO::Shakti::HalideBackend {
     return g;
   }
 
-  inline auto separable_conv_2d(Func& signal, Func& kernel, Var& x, Var& y, RDom& k)
+  inline auto separable_conv_2d(Func& signal, Func& kernel, Var& x, Var& y,
+                                RDom& k)
   {
     auto g = Func{};
     g = transpose(signal, x, y);
@@ -84,12 +77,32 @@ namespace DO::Shakti::HalideBackend {
     return g;
   }
 
-  inline auto gaussian_conv_2d(Func& signal, Expr& sigma, Var& x, Var& y, Expr truncation_factor)
+  inline auto gaussian_conv_2d(Func& signal, Expr& sigma, Var& x, Var& y,
+                               Expr truncation_factor)
   {
     const auto radius = cast<int>(sigma / 2) * truncation_factor;
     auto k = RDom(-radius, 2 * radius + 1);
     auto g = gaussian(x, sigma, k);
     return separable_conv_2d(signal, g, x, y, k);
   }
+
+
+  struct ConvX
+  {
+    RDom k;
+    Func src_fn;
+    Func ker_fn;
+    Func op;
+
+    ConvX(const Buffer<float>& src_buffer, const Buffer<float>& ker_buffer,
+          Var& x, Var& y)
+      : k{-ker_buffer.dim(0).extent() / 2, ker_buffer.dim(0).extent()}
+      , src_fn{BoundaryConditions::repeat_edge(src_buffer)}
+      , ker_fn{shift(ker_buffer, x, -ker_buffer.dim(0).extent() / 2)}
+      , op{conv_x(src_fn, ker_fn, x, y, k)}
+    {
+    }
+  };
+
 
 }  // namespace DO::Shakti::HalideBackend

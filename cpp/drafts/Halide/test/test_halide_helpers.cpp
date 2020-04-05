@@ -28,40 +28,34 @@ using namespace sara;
 
 BOOST_AUTO_TEST_CASE(test_transpose)
 {
+  const auto w = 3;
+  const auto h = 2;
+
+  auto src = sara::Image<int>{w, h};
+  src.matrix() <<
+    0, 1, 2,
+    3, 4, 5;
+
+  auto dst = sara::Image<int>{h, w};
+
+  auto src_buffer = halide::as_buffer(src);
+  auto dst_buffer = halide::as_buffer(dst);
+
   auto x = halide::Var{"x"};
   auto y = halide::Var{"y"};
 
-  const auto w = 3;
-  const auto h = 2;
-  auto in_func = halide::Func{};
-  in_func(x , y) = halide::cast<float>(y * w + x);
-
-  const halide::Buffer<float> in = in_func.realize(w, h);
-  // [[0, 1, 2],
-  //  [3, 4, 5]]
-  BOOST_CHECK_EQUAL(in(0, 0), 0.f);
-  BOOST_CHECK_EQUAL(in(1, 0), 1.f);
-  BOOST_CHECK_EQUAL(in(2, 0), 2.f);
-
-  BOOST_CHECK_EQUAL(in(0, 1), 3.f);
-  BOOST_CHECK_EQUAL(in(1, 1), 4.f);
-  BOOST_CHECK_EQUAL(in(2, 1), 5.f);
-
-  auto id = halide::identity(in, x, y);
+  auto id = halide::identity(src_buffer, x, y);
   auto f = halide::transpose(id, x, y);
 
-  const halide::Buffer<float> out = f.realize(h, w);
-  // [[0, 3],
-  //  [1, 4],
-  //  [2, 5]]
-  BOOST_CHECK_EQUAL(out(0, 0), 0.f);
-  BOOST_CHECK_EQUAL(out(1, 0), 3.f);
+  f.realize(dst_buffer);
 
-  BOOST_CHECK_EQUAL(out(0, 1), 1.f);
-  BOOST_CHECK_EQUAL(out(1, 1), 4.f);
+  auto true_dst_matrix = MatrixXf{h, w};
+  true_dst_matrix <<
+    0, 3,
+    1, 4,
+    2, 5;
 
-  BOOST_CHECK_EQUAL(out(0, 2), 2.f);
-  BOOST_CHECK_EQUAL(out(1, 2), 5.f);
+  BOOST_CHECK(true_dst_matrix == dst.matrix());
 }
 
 
@@ -80,9 +74,9 @@ protected:
       1, 2, 3;
 
     _kernel.resize(3);
-    _kernel[0] = -1./2;
-    _kernel[1] =  0;
-    _kernel[2] =  1./2;
+    _kernel[0] = -1. / 2;
+    _kernel[1] = 0;
+    _kernel[2] = 1. / 2;
   }
 };
 
@@ -114,8 +108,8 @@ BOOST_FIXTURE_TEST_CASE(test_conv_x, TestFilters)
 
 BOOST_FIXTURE_TEST_CASE(test_conv_y, TestFilters)
 {
-  Image<float> dst_image{ 3, 3 };
-  MatrixXf true_matrix(3, 3);
+  Image<float> dst_image{3, 3};
+  Matrix3f true_matrix;
   true_matrix.setZero();
 
   auto src_buffer = halide::as_buffer(_src_image);
@@ -124,10 +118,10 @@ BOOST_FIXTURE_TEST_CASE(test_conv_y, TestFilters)
 
   auto x = halide::Var{"x"};
   auto y = halide::Var{"y"};
-  auto src_func = halide::identity(src_buffer, x, y);
+  auto src_func = halide::BoundaryConditions::repeat_edge(src_buffer);
   auto ker_func = halide::shift(ker_buffer, x, -1);
 
-  auto r = halide::RDom{-1, 3};
+  auto r = halide::RDom{-1, ker_buffer.dim(0).extent()};
   auto conv_y = halide::conv_y(src_func, ker_func, x, y, r);
 
   conv_y.realize(dst_buffer);

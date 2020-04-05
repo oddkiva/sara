@@ -71,7 +71,8 @@ namespace DO::Shakti::HalideBackend {
 
 
   template <typename T, typename ColorSpace>
-  inline auto as_interleaved_buffer(sara::ImageView<sara::Pixel<T, ColorSpace>>& image)
+  inline auto
+  as_interleaved_buffer(sara::ImageView<sara::Pixel<T, ColorSpace>>& image)
   {
     return Halide::Buffer<T>::make_interleaved(
         reinterpret_cast<T*>(image.data()), image.width(), image.height(),
