@@ -34,9 +34,7 @@ namespace DO { namespace Shakti {
   {
     static inline cudaChannelFormatDesc type()
     {
-      cudaChannelFormatDesc format = {
-        32, 32, 0, 0, cudaChannelFormatKindFloat
-      };
+      cudaChannelFormatDesc format = {32, 32, 0, 0, cudaChannelFormatKindFloat};
       return format;
     }
   };
@@ -46,9 +44,8 @@ namespace DO { namespace Shakti {
   {
     static inline cudaChannelFormatDesc type()
     {
-      cudaChannelFormatDesc format = {
-        32, 32, 32, 32, cudaChannelFormatKindFloat
-      };
+      cudaChannelFormatDesc format = {32, 32, 32, 32,
+                                      cudaChannelFormatKindFloat};
       return format;
     }
   };
@@ -58,9 +55,8 @@ namespace DO { namespace Shakti {
   {
     static inline cudaChannelFormatDesc type()
     {
-      cudaChannelFormatDesc format = {
-        32, 32, 32, 32, cudaChannelFormatKindFloat
-      };
+      cudaChannelFormatDesc format = {32, 32, 32, 32,
+                                      cudaChannelFormatKindFloat};
       return format;
     }
   };
@@ -72,50 +68,43 @@ namespace DO { namespace Shakti {
     using self_type = TextureArray;
 
   public:
-    __host__
-    TextureArray() = default;
+    inline TextureArray() = default;
 
-    __host__
     inline TextureArray(const Vector2i& sizes)
-      : _sizes{ sizes }
+      : _sizes{sizes}
     {
       auto channel_descriptor = ChannelFormatDescriptor<T>::type();
-      SHAKTI_SAFE_CUDA_CALL(cudaMallocArray(
-        &_array, &channel_descriptor, sizes(0), sizes(1)));
+      SHAKTI_SAFE_CUDA_CALL(
+          cudaMallocArray(&_array, &channel_descriptor, sizes(0), sizes(1)));
     }
 
-    __host__
-    inline TextureArray(const T *data, const Vector2i& sizes,
+    inline TextureArray(const T* data, const Vector2i& sizes,
                         cudaMemcpyKind kind = cudaMemcpyHostToDevice)
-      : self_type{ sizes }
+      : self_type{sizes}
     {
       copy_from(data, sizes, sizes[0] * sizeof(T), kind);
     }
 
-    __host__
-    inline TextureArray(const T *data, const Vector2i& sizes, size_t pitch,
+    inline TextureArray(const T* data, const Vector2i& sizes, size_t pitch,
                         cudaMemcpyKind kind = cudaMemcpyHostToDevice)
-      : self_type{ sizes }
+      : self_type{sizes}
     {
       copy_from(data, sizes, pitch, kind);
     }
 
-    __host__
     inline ~TextureArray()
     {
       SHAKTI_SAFE_CUDA_CALL(cudaFreeArray(_array));
     }
 
-    __host__
-    inline void copy_from(const T *data, const Vector2i& sizes, size_t pitch,
+    inline void copy_from(const T* data, const Vector2i& sizes, size_t pitch,
                           cudaMemcpyKind kind)
     {
       SHAKTI_SAFE_CUDA_CALL(cudaMemcpy2DToArray(
-        _array, 0, 0, data, pitch, sizes[0] * sizeof(T), sizes[1], kind));
+          _array, 0, 0, data, pitch, sizes[0] * sizeof(T), sizes[1], kind));
     }
 
-    __host__
-    inline void copy_to_host(T *host_data)
+    inline void copy_to_host(T* host_data)
     {
       SHAKTI_SAFE_CUDA_CALL(cudaMemcpy2DFromArray(
           host_data,                  // destination pointer
@@ -127,7 +116,6 @@ namespace DO { namespace Shakti {
           cudaMemcpyDeviceToHost));
     }
 
-    __host__
     inline void copy_to_device(MultiArray<T, 2>& device_array)
     {
       SHAKTI_SAFE_CUDA_CALL(cudaMemcpy2DFromArray(
@@ -139,13 +127,11 @@ namespace DO { namespace Shakti {
           cudaMemcpyDeviceToDevice));
     }
 
-    __host__
-    inline operator cudaArray *() const
+    inline operator cudaArray*() const
     {
       return _array;
     }
 
-    __host__
     inline const Vector2i& sizes() const
     {
       return _sizes;
@@ -156,8 +142,7 @@ namespace DO { namespace Shakti {
     Vector2i _sizes{Vector2i::Zero()};
   };
 
-} /* namespace Shakti */
-} /* namespace DO */
+}}  // namespace DO::Shakti
 
 
 #endif /* DO_SHAKTI_MULTIARRAY_TEXTUREARRAY_HPP */

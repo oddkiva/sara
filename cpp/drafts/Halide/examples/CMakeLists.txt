@@ -30,15 +30,21 @@ function (add_halide_executable source_file)
   get_filename_component(name ${source_file} NAME_WE)
   add_executable(${name} ${source_file})
   target_include_directories(${name}
-    PRIVATE ${HALIDE_DISTRIB_DIR}/include
+    PRIVATE
+    ${HALIDE_DISTRIB_DIR}/include
     ${HALIDE_DISTRIB_DIR}/tools)
 
-  target_link_libraries(${name} PRIVATE
+  target_link_libraries(${name}
+    PRIVATE
     ${DO_Sara_LIBRARIES}
     ${JPEG_LIBRARIES}
     ${PNG_LIBRARIES}
     ${OpenMP_CXX_LIBRARIES}
     Halide)
+
+  target_compile_options(${name}
+    PRIVATE
+    $<$<CXX_COMPILER_ID:GNU>:-Wno-unused-but-set-variable>)
 
   set_property(TARGET ${name} PROPERTY FOLDER "Tutorials/Halide")
 endfunction ()
@@ -81,3 +87,18 @@ if (OpenMP_CXX_FOUND)
     OpenMP::OpenMP_CXX)
 endif ()
 set_property(TARGET halide_aot_example PROPERTY FOLDER "Tutorials/Halide")
+
+
+add_executable(halide_gaussian_convolution_example
+  halide_gaussian_convolution_example.cpp)
+set_target_properties(halide_gaussian_convolution_example
+  PROPERTIES
+  COMPILE_FLAGS ${SARA_DEFINITIONS})
+target_link_libraries(halide_gaussian_convolution_example PRIVATE
+  ${DO_Sara_LIBRARIES}
+  Halide
+  GaussianConvolution
+  shakti_halide_gaussian_blur)
+set_property(TARGET halide_gaussian_convolution_example
+  PROPERTY
+  FOLDER "Tutorials/Halide")

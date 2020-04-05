@@ -152,3 +152,29 @@ function (shakti_halide_gpu_library _source_filepath)
                 "-framework Metal")
   endif ()
 endfunction ()
+
+
+function (shakti_halide_library_v2)
+  set(_options OPTIONS)
+  set(_single_value_args NAME SRCS HALIDE_TARGET)
+  set(_multiple_value_args DEPS HALIDE_TARGET_FEATURES)
+  cmake_parse_arguments(generator
+    "${_options}" "${_single_value_args}" "${_multiple_value_args}" ${ARGN})
+
+  halide_generator(${generator_NAME}.generator
+    GENERATOR_NAME ${generator_NAME}
+    SRCS ${generator_SRCS}
+    DEPS ${generator_DEPS})
+
+  halide_library_from_generator(${generator_NAME}
+    GENERATOR ${generator_NAME}.generator
+    HALIDE_TARGET ${generator_HALIDE_TARGET}
+    HALIDE_TARGET_FEATURES ${generator_HALIDE_TARGET_FEATURES})
+
+  if (APPLE)
+    target_link_libraries(SeparableConvolution2d
+      INTERFACE
+      "-framework Foundation"
+      "-framework Metal")
+  endif ()
+endfunction ()

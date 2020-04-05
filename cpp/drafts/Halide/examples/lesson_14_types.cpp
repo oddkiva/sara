@@ -24,7 +24,7 @@ using namespace Halide;
 // this lesson.
 Expr average(Expr a, Expr b);
 
-int main(int argc, char **argv) {
+int main() {
 
     // All Exprs have a scalar type, and all Funcs evaluate to one or
     // more scalar types. The scalar types in Halide are unsigned

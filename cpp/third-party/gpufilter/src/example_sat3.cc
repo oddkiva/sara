@@ -43,7 +43,7 @@ void check_reference( const float *ref,
 }
 
 // Main
-int main(int argc, char *argv[]) {
+int main() {
 
     const int in_w = 4096, in_h = 4096;
 

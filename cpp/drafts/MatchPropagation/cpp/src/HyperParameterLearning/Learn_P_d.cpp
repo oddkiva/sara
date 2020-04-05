@@ -79,26 +79,27 @@ namespace DO::Sara {
           const auto analytical_overlap = analytic_intersection_area(H_Sx, Sy);
           const auto angle_phi_ox = compute_orientation(m, H);
 
-          const auto orient = compute_orientation(m, H);
-
-          const auto theta_x = m.x().orientation;
+          // const auto theta_x = m.x().orientation;
           const auto theta_y = m.y().orientation;
 
-          Vector2d Phi_ox = unit_vector2(orient);
+          Vector2d Phi_ox = unit_vector2(angle_phi_ox);
           const auto oy = unit_vector2(double(theta_y));
 
           if (_debug)
-          {         
+          {
             // Verbose comment
-            cout << "(Polygonal Approx.) Overlap ratio = " << polygonal_overlap << endl;
-            cout << "(Analytical Comp. ) Overlap ratio = " << analytical_overlap << endl;
-            cout << "Phi_theta_x ~ " << to_degree(orient) << " deg" << endl;
+            cout << "(Polygonal Approx.) Overlap ratio = " << polygonal_overlap
+                 << endl;
+            cout << "(Analytical Comp. ) Overlap ratio = " << analytical_overlap
+                 << endl;
+            cout << "Phi_theta_x ~ " << to_degree(angle_phi_ox) << " deg"
+                 << endl;
             cout << "theta_y     = " << to_degree(theta_y) << " deg" << endl;
             cout << "Phi(ox) * oy = " << Phi_ox.dot(oy) << endl;
             cout << "|Phi_theta_x - theta_y| = "
-                 << to_degree(abs(orient - theta_y)) << " deg" << endl;
+                 << to_degree(abs(angle_phi_ox - theta_y)) << " deg" << endl;
             cout << endl;
-          
+
             // Draw match
             drawer.draw_match(m);
 
@@ -122,7 +123,7 @@ namespace DO::Sara {
 
     const auto folder = string_src_path(dataset().name() + "/P_d");
     mkdir(folder);
-    
+
     return true;
   }
 

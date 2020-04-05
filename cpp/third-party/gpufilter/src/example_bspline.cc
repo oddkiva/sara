@@ -37,7 +37,7 @@ void check_reference( const float *ref,
 }
 
 // Main
-int main(int argc, char *argv[]) {
+int main() {
 
     const int in_w = 1024, in_h = 1024;
     const gpufilter::initcond ic = gpufilter::mirror;

@@ -95,10 +95,24 @@ namespace DO::Shakti::HalideBackend {
   }
 
   template <typename T>
+  inline auto as_buffer(sara::ImageView<T, 3>& image)
+  {
+    return Halide::Buffer<T>(image.data(), image.size(0), image.size(1),
+                             image.size(2));
+  }
+
+  template <typename T>
   auto as_runtime_buffer(sara::ImageView<T>& image)
   {
     return Halide::Runtime::Buffer<T>(image.data(), image.width(),
                                       image.height());
+  }
+
+  template <typename T>
+  inline auto as_runtime_buffer(sara::TensorView_<T, 3>& chw_tensor)
+  {
+    return Halide::Runtime::Buffer<T>(chw_tensor.data(), chw_tensor.size(2),
+                                      chw_tensor.size(1), chw_tensor.size(0));
   }
 
   template <typename T>

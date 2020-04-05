@@ -119,8 +119,9 @@ auto populate_feature_tracks(const ViewAttributes& view_attributes,
     SARA_DEBUG << "Calculating cheiral inliers..." << std::endl;
     SARA_CHECK(cheirality_ij.size());
     SARA_CHECK(inliers_ij.size());
-    if (cheirality_ij.size() != inliers_ij.size())
-        throw std::runtime_error{"cheirality_ij.size() != inliers_ij.size()"};
+    static_assert(std::is_same_v<decltype(inliers_ij.size()), std::size_t>);
+    if (static_cast<std::size_t>(cheirality_ij.size()) != inliers_ij.size())
+      throw std::runtime_error{"cheirality_ij.size() != inliers_ij.size()"};
 
     const Array<bool, 1, Dynamic> cheiral_inliers =
         inliers_ij.row_vector().array() && cheirality_ij;

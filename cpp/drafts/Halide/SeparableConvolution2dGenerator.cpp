@@ -16,66 +16,65 @@ namespace {
 
   using namespace Halide;
 
-  class GaussianBlur : public Halide::Generator<GaussianBlur>
+  class SeparableConvolution2d
+    : public Halide::Generator<SeparableConvolution2d>
   {
   public:
     GeneratorParam<int> tile_x{"tile_x", 32};
     GeneratorParam<int> tile_y{"tile_y", 32};
 
-    Input<Buffer<float>> input{"f", 2};
-    Input<float> sigma{"sigma"};
-    Input<int> truncation_factor{"truncation_factor"};
+    Input<Func> input{"input", Float(32), 3};
+    Input<Func> kernel{"kernel", Float(32), 1};
+    Input<int32_t> kernel_size{"kernel_size"};
+    Input<int32_t> kernel_shift{"kernel_shift"};
 
-    Output<Buffer<float>> output{"conv_f", 2};
+    //! @brief Intermediate function
+    //! @{
+    Func conv_y_t{"conv_y_transposed"};
+    Func conv_y{"conv_y"};
+    //! @}
 
-    Var x{"x"}, y{"y"}, xo{"xo"}, yo{"yo"}, xi{"xi"}, yi{"yi"};
+    Output<Func> output{"input_convolved", Float(32), 3};
+
+    //! @brief Variables.
+    //! @{
+    Var x{"x"}, y{"y"}, c{"c"};
+    Var xo{"xo"}, yo{"yo"}, co{"co"};
+    Var xi{"xi"}, yi{"yi"}, ci{"ci"};
+    //! @}
 
     void generate()
     {
-      const auto w = input.width();
-      const auto h = input.height();
-      const auto radius = cast<int>(0.5f * sigma * truncation_factor);
-
-      // Define the unnormalized gaussian function.
-      auto gaussian_unnormalized = Func{"gaussian_unnormalized"};
-      gaussian_unnormalized(x) = exp(-(x * x) / (2 * sigma * sigma));
-
-      // Define the summation variable `k` defined on a summation domain.
-      auto k = RDom(-radius, 2 * radius + 1);
-      // Calculate the normalization factor by summing with the summation
-      // variable.
-      auto normalization_factor = sum(gaussian_unnormalized(k));
-
-      auto gaussian = Func{"gaussian"};
-      gaussian(x) = gaussian_unnormalized(x) / normalization_factor;
+      // Define the summation variable `k` with its summation domain (a.k.a. the
+      // reduction domain variable).
+      auto k = RDom{kernel_shift, kernel_size};
 
       // 1st pass: transpose and convolve the columns.
       auto input_t = Func{"input_transposed"};
-      input_t(y, x) = input(x, y);
-
-      auto conv_y_t = Func{"conv_y_t"};
-      conv_y_t(x, y) = sum(input_t(clamp(x + k, 0, h - 1), y) * gaussian(k));
-
+      input_t(x, y, c) = input(y, x, c);
+      conv_y_t(x, y, c) = sum(input_t(x + k, y, c) * kernel(k));
 
       // 2nd pass: transpose and convolve the rows.
       auto conv_y = Func{"conv_y"};
-      conv_y(x, y) = conv_y_t(y, x);
+      conv_y(x, y, c) = conv_y_t(y, x, c);
 
       auto& conv_x = output;
-      conv_x(x, y) = sum(conv_y(clamp(x + k, 0, w - 1), y) * gaussian(k));
+      conv_x(x, y, c) = sum(conv_y(x + k, y, c) * kernel(k));
+    }
+
+    void schedule()
+    {
+      auto& conv_x = output;
 
       // GPU schedule.
       if (get_target().has_gpu_feature())
       {
-        // Compute the gaussian first.
-        gaussian.compute_root();
-
         // 1st pass: transpose and convolve the columns
         conv_y_t.compute_root();
-        conv_y_t.gpu_tile(x, y, xo, yo, xi, yi, tile_x, tile_y);
+        conv_y_t.gpu_tile(x, y, c, xo, yo, co, xi, yi, ci, tile_x, tile_y, 1);
 
         // 2nd pass: transpose and convolve the rows.
-        conv_x.gpu_tile(x, y, xo, yo, xi, yi, tile_x, tile_y);
+        conv_x.gpu_tile(x, y, c, xo, yo, co, xi, yi, ci, tile_x, tile_y, 1);
       }
 
       // Hexagon schedule.
@@ -83,9 +82,6 @@ namespace {
       {
         const auto vector_size =
             get_target().has_feature(Target::HVX_128) ? 128 : 64;
-
-        // Compute the gaussian first.
-        gaussian.compute_root();
 
         // 1st pass: transpose and convolve the columns
         conv_y_t.compute_root();
@@ -107,9 +103,6 @@ namespace {
       // CPU schedule.
       else
       {
-        // Compute the gaussian first.
-        gaussian.compute_root();
-
         // 1st pass: transpose and convolve the columns
         conv_y_t.compute_root();
         conv_y_t.split(y, yo, yi, 8).parallel(yo).vectorize(x, 8);
@@ -123,4 +116,6 @@ namespace {
 
 }  // namespace
 
-HALIDE_REGISTER_GENERATOR(GaussianBlur, shakti_halide_gaussian_blur)
+
+HALIDE_REGISTER_GENERATOR(SeparableConvolution2d, SeparableConvolution2d,
+                          DO::Shakti::HalideBackend::SeparableConvolution2d)

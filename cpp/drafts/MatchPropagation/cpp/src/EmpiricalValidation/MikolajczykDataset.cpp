@@ -29,7 +29,7 @@ namespace DO::Sara {
     _feat_type = feature_type;
     print_stage("Loading keypoints: " + feature_type + " for Dataset: " + _name);
     _keys.resize(_image.size());
-    for (size_t i = 0; i != _keys.size(); ++i)
+    for (auto i = 0u; i != _keys.size(); ++i)
     {
       if (!read_keypoints(features(_keys[i]), descriptors(_keys[i]),
                           folder_path() + "/img" + to_string(i + 1) + feature_type))
@@ -42,7 +42,7 @@ namespace DO::Sara {
   {
     print_stage("Checking images");
     create_window(_image.front().width(), _image.front().height());
-    for (int i = 0; i < _image.size(); ++i)
+    for (auto i = 0u; i < _image.size(); ++i)
     {
       display(_image[i]);
       get_key();

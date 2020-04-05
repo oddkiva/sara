@@ -11,8 +11,6 @@
 
 //! @file
 
-#pragma once
-
 #include <DO/Shakti/MultiArray/MultiArrayView.hpp>
 
 #include <array>

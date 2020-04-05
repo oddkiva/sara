@@ -38,7 +38,7 @@ void check_reference( const float *ref,
 }
 
 // Main
-int main(int argc, char *argv[]) {
+int main() {
 
     const int in_w = 4096, in_h = 4096;
     const float b0 = 0.992817, a1 = -0.00719617, a2 = 1.29475e-05;

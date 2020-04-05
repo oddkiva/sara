@@ -55,12 +55,14 @@ namespace DO { namespace Shakti {
                          "file <%s>, line %i: %s\n",
                          err, file, line, cudaGetErrorString(err))};
 
+#ifdef _WIN32
       std::cerr
           << Shakti::format(
                  "CUDA Runtime API error = %02d from file <%s>, line %i: %s\n",
                  err, file, line, cudaGetErrorString(err))
           << std::endl;
       std::abort();
+#endif
     }
 
 #ifdef SYNCHRONIZE_CUDA_DEVICE

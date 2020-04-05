@@ -27,7 +27,7 @@ void print_matrix( const float *img,
 }
 
 // Main
-int main(int argc, char *argv[]) {
+int main() {
 
     const int in_w = 8, in_h = 8;
 

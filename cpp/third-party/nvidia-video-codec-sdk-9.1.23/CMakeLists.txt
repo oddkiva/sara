@@ -42,4 +42,12 @@ target_include_directories(nvidia_VideoCodecHelpers
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/NvEncoder>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Utils>)
 target_link_libraries(nvidia_VideoCodecHelpers nvidia::VideoCodec)
+target_compile_options(nvidia_VideoCodecHelpers
+  PRIVATE
+  $<$<CXX_COMPILER_ID:GNU>:-Wno-missing-field-initializers>
+  $<$<CXX_COMPILER_ID:GNU>:-Wno-reorder>
+  $<$<CXX_COMPILER_ID:GNU>:-Wno-sign-compare>
+  $<$<CXX_COMPILER_ID:GNU>:-Wno-switch>
+  $<$<CXX_COMPILER_ID:GNU>:-Wno-unused-parameter>
+  $<$<CXX_COMPILER_ID:GNU>:-Wno-unused-variable>)
 add_library(nvidia::VideoCodecHelpers ALIAS nvidia_VideoCodecHelpers)
