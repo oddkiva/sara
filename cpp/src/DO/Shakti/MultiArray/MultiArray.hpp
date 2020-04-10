@@ -107,9 +107,7 @@ namespace DO { namespace Shakti {
             sizes[0] * sizeof(T), sizes[1], cudaMemcpyHostToDevice));
       else if (N == 3)
       {
-        cudaMemcpy3DParms params;
-        params.dstArray = nullptr;
-        params.dstPos = {0, 0, 0};
+        cudaMemcpy3DParms params = {0};
 
         params.srcPtr =
             make_cudaPitchedPtr(const_cast<T*>(host_data), sizes[0] * sizeof(T),

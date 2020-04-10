@@ -222,9 +222,7 @@ namespace DO { namespace Shakti {
       }
       else if (N == 3)
       {
-        cudaMemcpy3DParms params;
-        params.srcArray = nullptr;
-        params.srcPos = {0, 0, 0};
+        cudaMemcpy3DParms params = {0};
 
         params.srcPtr = make_cudaPitchedPtr(reinterpret_cast<void*>(_data),
                                             _pitch, _sizes[0], _sizes[1]);
