@@ -102,6 +102,14 @@ namespace DO::Shakti::HalideBackend {
   }
 
   template <typename T>
+  auto as_buffer_3d(sara::ImageView<T>& image)
+  {
+    static constexpr auto num_channels = sara::PixelTraits<T>::num_channels;
+    return Halide::Buffer<T>(image.data(), image.width(),
+                                      image.height(), num_channels);
+  }
+
+  template <typename T>
   auto as_runtime_buffer(sara::ImageView<T>& image)
   {
     return Halide::Runtime::Buffer<T>(image.data(), image.width(),
