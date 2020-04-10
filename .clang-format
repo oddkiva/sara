@@ -11,8 +11,8 @@ Language:        Cpp
 AccessModifierOffset: -2
 
 # TODO: understand what these means.
-AlignAfterOpenBracket: true
-AlignEscapedNewlinesLeft: false
+AlignAfterOpenBracket: Align
+AlignEscapedNewlinesLeft: Right
 
 # We want:
 #

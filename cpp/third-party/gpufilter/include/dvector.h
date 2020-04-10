@@ -39,7 +39,7 @@ public:
      *  Constructor
      *  @param[in] that Host (STL) Vector data (non-converted) to be copied into this object
      */
-    explicit dvector( const std::vector<T>& that ) : m_size(0), m_capacity(0), m_data(0), m_pitch(0) {
+    explicit dvector( const std::vector<T>& that ) : m_data(0), m_size(0), m_capacity(0), m_pitch(0) {
         *this = that;
     }
 
@@ -49,7 +49,7 @@ public:
      *  @param[in] size Vector data size
      */
     dvector( const T *data,
-             const size_t& _size ) : m_size(0), m_capacity(0), m_data(0), m_pitch(0) {
+             const size_t& _size ) : m_data(0), m_size(0), m_capacity(0), m_pitch(0) {
         copy_from( data, _size );
     }
 
@@ -65,7 +65,7 @@ public:
              const size_t& w_data,
              const size_t& h_data,
              const size_t& w,
-             const size_t& h ) : m_size(0), m_capacity(0), m_data(0), m_pitch(0) {
+             const size_t& h ) : m_data(0), m_size(0), m_capacity(0), m_pitch(0) {
         copy_from( data, w_data, h_data, w, h );
     }
 
@@ -73,7 +73,7 @@ public:
      *  Copy Constructor
      *  @param[in] that Copy that object to this object
      */
-    dvector( const dvector<T>& that ) : m_size(0), m_capacity(0), m_data(0), m_pitch(0) {
+    dvector( const dvector<T>& that ) : m_data(0), m_size(0), m_capacity(0), m_pitch(0) {
         *this = that;
     }
 
@@ -81,7 +81,7 @@ public:
      *  Default Constructor
      *  @param[in] size Vector data size
      */
-    dvector( const size_t& _size = 0 ) : m_size(0), m_capacity(0), m_data(0), m_pitch(0) {
+    dvector( const size_t& _size = 0 ) : m_data(0), m_size(0), m_capacity(0), m_pitch(0) {
         resize(_size);
     }
 
@@ -90,7 +90,7 @@ public:
      *  @param[w] width Width of the 2D array vector
      *  @param[h] height Width of the 2D array vector
      */
-    dvector( const size_t& w, const size_t& h ) : m_size(0), m_capacity(0), m_data(0), m_pitch(0) {
+    dvector( const size_t& w, const size_t& h ) : m_data(0), m_size(0), m_capacity(0), m_pitch(0) {
         resize(w, h);
     }
 
@@ -126,8 +126,8 @@ public:
 
     /**
      *  @brief Resize this vector
-     *  @param[w] w The width of the new 2D array vector 
-     *  @param[h] h The height of the new 2D array vector 
+     *  @param[w] w The width of the new 2D array vector
+     *  @param[h] h The height of the new 2D array vector
      */
     void resize( const size_t& w, const size_t& h ) {
         cuda_delete(m_data);
@@ -204,8 +204,8 @@ public:
      *  @param[in] h_data Height of the vector data to copy values to
      */
     void copy_to( T *_data,
-                  const size_t& w,
-                  const size_t& h,
+                  const size_t& /* w */,
+                  const size_t& /* h */,
                   const size_t& w_data,
                   const size_t& h_data ) const {
         cudaMemcpy2D(_data, w_data*sizeof(T),

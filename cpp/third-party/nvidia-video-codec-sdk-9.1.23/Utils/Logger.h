@@ -16,7 +16,8 @@
 #include <mutex>
 #include <sstream>
 #include <string>
-#include <time.h>
+#include <ctime>
+#include <cstring>
 
 #ifdef _WIN32
 #  include <windows.h>
@@ -204,7 +205,12 @@ namespace simplelogger {
 #else
           struct in_addr addr = {inet_addr(szHost)};
 #endif
-          struct sockaddr_in s = {AF_INET, htons(uPort), addr};
+          struct sockaddr_in s;
+          s.sin_family = AF_INET;
+          s.sin_port = htons(uPort);
+          s.sin_addr = addr;
+          memset(&s.sin_zero, 0, sizeof(s.sin_zero));
+
           server = s;
         }
         ~UdpOstream() throw()

@@ -42,7 +42,7 @@ public:
     *   @param  nHeight - Height of OpenGL texture
     */
     FramePresenterGL(CUcontext cuContext, int nWidth, int nHeight) :
-        cuContext(cuContext), nWidth(nWidth), nHeight(nHeight)
+        nWidth(nWidth), nHeight(nHeight), cuContext(cuContext)
     {
         pthMessageLoop = new std::thread(ThreadProc, this);
 

@@ -19,7 +19,7 @@
 #include <iostream>
 #include <sstream>
 
-static void ShowHelpAndExit(const char* szBadOption, char* szOutputFileName,
+inline void ShowHelpAndExit(const char* szBadOption, char* szOutputFileName,
                             bool* pbVerbose, int* piD3d)
 {
   std::ostringstream oss;
@@ -48,7 +48,7 @@ static void ShowHelpAndExit(const char* szBadOption, char* szOutputFileName,
   }
 }
 
-static void ParseCommandLine(int argc, char* argv[], char* szInputFileName,
+inline void ParseCommandLine(int argc, char* argv[], char* szInputFileName,
                              char* szOutputFileName, int& iGpu,
                              bool* pbVerbose = NULL, int* piD3d = NULL)
 {
@@ -116,7 +116,7 @@ static void ParseCommandLine(int argc, char* argv[], char* szInputFileName,
  * cudaVideoSurfaceFormat in decoder
  *   @param  OutputFormats     - Variable into which output string is written
  */
-static void getOutputFormatNames(unsigned short nOutputFormatMask,
+inline void getOutputFormatNames(unsigned short nOutputFormatMask,
                                  char* OutputFormats)
 {
   if (nOutputFormatMask == 0)
@@ -152,7 +152,7 @@ static void getOutputFormatNames(unsigned short nOutputFormatMask,
  *   @param  cuContext - Pointer to CUcontext. Updated by this function.
  *   @param  iGpu      - Device number to get handle for
  */
-static void createCudaContext(CUcontext* cuContext, int iGpu,
+inline void createCudaContext(CUcontext* cuContext, int iGpu,
                               unsigned int flags)
 {
   CUdevice cuDevice = 0;
@@ -166,7 +166,7 @@ static void createCudaContext(CUcontext* cuContext, int iGpu,
 /**
  *   @brief  Print decoder capabilities on std::cout
  */
-static void ShowDecoderCapability()
+inline void ShowDecoderCapability()
 {
   ck(cuInit(0));
   int nGpu = 0;

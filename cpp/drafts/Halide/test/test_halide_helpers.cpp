@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(test_transpose)
 
   f.realize(dst_buffer);
 
-  auto true_dst_matrix = MatrixXf{h, w};
+  auto true_dst_matrix = MatrixXi{h, w};
   true_dst_matrix <<
     0, 3,
     1, 4,

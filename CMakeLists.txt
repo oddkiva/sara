@@ -54,11 +54,15 @@ else ()
   message(STATUS "No CUDA support!")
 endif()
 
-# set(CMAKE_CUDA_FLAGS -arch=sm_60)
 # set(CMAKE_CUDA_FLAGS -arch=sm_75)
 find_package(CUDA 10.0)
 if (CUDA_FOUND)
   set(CUDA_VERBOSE_BUILD ON)
+  # Since we are still using the old CMake way style to compile CUDA code.
+  if (UNIX)
+    set (CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -Xcompiler=-Wno-unknown-pragmas)
+  endif ()
+
   include(shakti_macros)
 endif ()
 

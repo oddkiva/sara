@@ -43,6 +43,7 @@ target_include_directories(DO_Shakti_MultiArray
 if (UNIX)
   target_compile_options(DO_Shakti_MultiArray
     INTERFACE
+    $<$<COMPILE_LANGUAGE:CXX>:-Wno-unknown-pragmas>
     $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-Wno-unknown-pragmas>)
 endif ()
 add_library(DO::Shakti::MultiArray ALIAS DO_Shakti_MultiArray)
@@ -55,5 +56,5 @@ foreach (library ${DO_Shakti_LIBRARIES})
   shakti_generate_library("${library}")
 endforeach ()
 
-target_link_libraries(DO_Shakti_ImageProcessing DO_Shakti_Utilities)
-target_link_libraries(DO_Shakti_Segmentation DO_Shakti_Utilities)
+target_link_libraries(DO_Shakti_ImageProcessing DO_Shakti_MultiArray DO_Shakti_Utilities)
+target_link_libraries(DO_Shakti_Segmentation DO_Shakti_MultiArray DO_Shakti_Utilities)
