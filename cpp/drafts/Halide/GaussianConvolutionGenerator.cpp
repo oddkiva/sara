@@ -47,9 +47,9 @@ namespace {
       auto gaussian_unnormalized = Func{"gaussian_unnormalized"};
       gaussian_unnormalized(x) = exp(-(x * x) / (2 * sigma * sigma));
 
-      const auto radius = cast<int>(0.5f * sigma * truncation_factor);
-      const auto kernel_shift = -radius;
-      const auto kernel_size = 2 * radius + 1;
+      auto kernel_size = cast<int>(2 * sigma * truncation_factor + 1);
+      kernel_size = select(kernel_size % 2 == 0, kernel_size + 1, kernel_size);
+      const auto kernel_shift = -kernel_size / 2;
 
       auto k = RDom(kernel_shift, kernel_size);
       auto normalization_factor = sum(gaussian_unnormalized(k));

@@ -29,25 +29,29 @@ namespace {
     Output<Buffer<float>> output{"conv_f", 2};
 
     Var x{"x"}, y{"y"}, xo{"xo"}, yo{"yo"}, xi{"xi"}, yi{"yi"};
+    Var i{"i"};
 
     void generate()
     {
       const auto w = input.width();
       const auto h = input.height();
-      const auto radius = cast<int>(0.5f * sigma * truncation_factor);
+
+      auto kernel_size = cast<int>(2 * sigma * truncation_factor + 1);
+      kernel_size = select(kernel_size % 2 == 0, kernel_size + 1, kernel_size);
+      const auto kernel_shift = -kernel_size / 2;
 
       // Define the unnormalized gaussian function.
       auto gaussian_unnormalized = Func{"gaussian_unnormalized"};
-      gaussian_unnormalized(x) = exp(-(x * x) / (2 * sigma * sigma));
+      gaussian_unnormalized(i) = exp(-(i * i) / (2 * sigma * sigma));
 
       // Define the summation variable `k` defined on a summation domain.
-      auto k = RDom(-radius, 2 * radius + 1);
+      auto k = RDom(kernel_shift, kernel_size);
       // Calculate the normalization factor by summing with the summation
       // variable.
       auto normalization_factor = sum(gaussian_unnormalized(k));
 
       auto gaussian = Func{"gaussian"};
-      gaussian(x) = gaussian_unnormalized(x) / normalization_factor;
+      gaussian(i) = gaussian_unnormalized(i) / normalization_factor;
 
       // 1st pass: transpose and convolve the columns.
       auto input_t = Func{"input_transposed"};
