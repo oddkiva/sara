@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(test_transpose)
 
   f.realize(dst_buffer);
 
-  auto true_dst_matrix = MatrixXi{h, w};
+  auto true_dst_matrix = MatrixXi{w, h};
   true_dst_matrix <<
     0, 3,
     1, 4,
@@ -92,11 +92,12 @@ BOOST_FIXTURE_TEST_CASE(test_conv_x, TestFilters)
   auto src_buffer = halide::as_buffer(_src_image);
   auto dst_buffer = halide::as_buffer(dst_image);
   auto ker_buffer = halide::as_buffer(_kernel);
+  ker_buffer.set_min(-1);
 
   auto x = halide::Var{"x"};
   auto y = halide::Var{"y"};
-  auto src_func = halide::identity(src_buffer, x, y);
-  auto ker_func = halide::shift(ker_buffer, x, -1);
+  auto src_func = halide::BoundaryConditions::repeat_edge(src_buffer);
+  auto ker_func = halide::identity(ker_buffer, x);
 
   auto r = halide::RDom{-1, 3};
   auto conv_x = halide::conv_x(src_func, ker_func, x, y, r);
@@ -115,11 +116,12 @@ BOOST_FIXTURE_TEST_CASE(test_conv_y, TestFilters)
   auto src_buffer = halide::as_buffer(_src_image);
   auto dst_buffer = halide::as_buffer(dst_image);
   auto ker_buffer = halide::as_buffer(_kernel);
+  ker_buffer.set_min(-1);
 
   auto x = halide::Var{"x"};
   auto y = halide::Var{"y"};
   auto src_func = halide::BoundaryConditions::repeat_edge(src_buffer);
-  auto ker_func = halide::shift(ker_buffer, x, -1);
+  auto ker_func = halide::identity(ker_buffer, x);
 
   auto r = halide::RDom{-1, ker_buffer.dim(0).extent()};
   auto conv_y = halide::conv_y(src_func, ker_func, x, y, r);

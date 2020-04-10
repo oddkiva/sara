@@ -17,7 +17,7 @@ namespace DO::Shakti::HalideBackend {
   inline auto shift(const Buffer<T>& in, Var& i, int t)
   {
     auto f = Func{"shift"};
-    f(i) = in(i - t);
+    f(i) = in(i + t);
     return f;
   }
 
