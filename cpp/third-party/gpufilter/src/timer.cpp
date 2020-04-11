@@ -68,14 +68,14 @@ void base_timer::stop()
 }
 
 double base_timer::elapsed()
-{ 
+{
     if(m_elapsed == 0)
     {
         stop();
         m_elapsed = do_get_elapsed();
     }
 
-    return m_elapsed; 
+    return m_elapsed;
 }
 
 
@@ -126,7 +126,7 @@ void gpu_timer::do_stop()
 }
 
 double gpu_timer::do_get_elapsed() const
-{ 
+{
     float elapsed;
 
     cudaEventSynchronize(m_stop);
@@ -174,7 +174,7 @@ double cpu_timer::do_get_elapsed() const
     return m_stop_time - m_start_time;
 }
 
-scoped_timer_stop::scoped_timer_stop(base_timer &timer) 
+scoped_timer_stop::scoped_timer_stop(base_timer &timer)
     : m_timer(&timer)
 {
 }
@@ -244,7 +244,7 @@ void timer_pool::flush()
         std::string padding(it->level*2,' ');
         std::cout << it->timer->type_label() << padding;
 
-        while(parent_totals.size() > it->level)
+        while(static_cast<int>(parent_totals.size()) > it->level)
             parent_totals.pop();
 
         std::cout << std::setw(4)
@@ -266,9 +266,9 @@ void timer_pool::flush()
             else
                 base = 1000;
 
-            std::cout << " - " 
+            std::cout << " - "
                       << unit_value(it->timer->data_size()/it->timer->elapsed(),
-                                    base) 
+                                    base)
                       << it->timer->unit() << "/s";
         }
         std::cout << std::endl;
