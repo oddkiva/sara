@@ -36,27 +36,27 @@ if (SARA_BUILD_SAMPLES)
   target_link_libraries(ex6 PRIVATE gpufilter ${CUDA_LIBRARIES})
 
   add_executable(ex7 example_r4.cc)
-  target_link_libraries(ex7 gpufilter)
+  target_link_libraries(ex7 PRIVATE gpufilter)
 
   add_executable(ex8 example_r5.cu)
-  target_link_libraries(ex8 gpufilter)
+  target_link_libraries(ex8 PRIVATE gpufilter)
 
   add_executable(exB example_bspline.cc)
-  target_link_libraries(exB gpufilter)
+  target_link_libraries(exB PRIVATE gpufilter)
 
   add_executable(exG example_gauss.cc)
-  target_link_libraries(exG gpufilter)
+  target_link_libraries(exG PRIVATE gpufilter)
 
   add_executable(gaussian gaussian.cc)
-  target_link_libraries(gaussian gpufilter)
+  target_link_libraries(gaussian PRIVATE gpufilter)
 
   add_executable(alg5 run_alg5.cu)
-  target_link_libraries(alg5 gpufilter)
+  target_link_libraries(alg5 PRIVATE gpufilter)
 
   add_executable(alg5f4 run_alg5f4.cu)
-  target_link_libraries(alg5f4 gpufilter)
+  target_link_libraries(alg5f4 PRIVATE gpufilter)
 
-  #include_directories(${OPENCV_DIR})
-  #add_executable(recursive app_recursive.cc)
-  #target_link_libraries(recursive cv highgui gpufilter)
+  # include_directories(${OPENCV_DIR})
+  # add_executable(recursive app_recursive.cc)
+  # target_link_libraries(recursive cv highgui gpufilter)
 endif ()

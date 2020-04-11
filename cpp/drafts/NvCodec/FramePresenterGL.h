@@ -220,7 +220,7 @@ private:
         size_t nSize = 0;
         ck(cuGraphicsResourceGetMappedPointer(&dpBackBuffer, &nSize, cuResource));
 
-        CUDA_MEMCPY2D m = { 0 };
+        CUDA_MEMCPY2D m{};
         m.srcMemoryType = CU_MEMORYTYPE_DEVICE;
 
         // Source is dpFrame into which Decode() function writes data of individual frame present in BGRA32 format

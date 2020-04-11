@@ -57,7 +57,7 @@ endif()
 # set(CMAKE_CUDA_FLAGS -arch=sm_75)
 find_package(CUDA 10.0)
 if (CUDA_FOUND)
-  set(CUDA_VERBOSE_BUILD ON)
+  set(CUDA_VERBOSE_BUILD OFF)
   # Since we are still using the old CMake way style to compile CUDA code.
   if (UNIX)
     set (CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -Xcompiler=-Wno-unknown-pragmas)

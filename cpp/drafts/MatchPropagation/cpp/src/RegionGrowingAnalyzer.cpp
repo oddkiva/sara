@@ -185,8 +185,8 @@ namespace DO::Sara {
     return true;
   }
 
-  void
-  RegionGrowingAnalyzer::compute_positives_and_negatives(const vector<size_t>& foundMatches)
+  void RegionGrowingAnalyzer::compute_positives_and_negatives(
+      const vector<size_t>& foundMatches)
   {
     if (_inliers.empty())
     {
@@ -218,14 +218,15 @@ namespace DO::Sara {
       }
     }
 
-    if (fn + tn + tp + fp != _M.size())
+    if (fn + tn + tp + fp != static_cast<int>(_M.size()))
     {
       const char* msg = "FATAL ERROR: fn+tn+tp+fp != _M.size()";
       throw std::runtime_error(msg);
     }
   }
 
-  bool RegionGrowingAnalyzer::save_precision_recall_etc(const string& name) const
+  bool
+  RegionGrowingAnalyzer::save_precision_recall_etc(const string& name) const
   {
     double prec = double(tp) / double(tp + fp);
     double recall = double(tp) / double(tp + fn);
@@ -252,7 +253,8 @@ namespace DO::Sara {
     return true;
   }
 
-  bool RegionGrowingAnalyzer::save_region_number_statistics(const string& name) const
+  bool
+  RegionGrowingAnalyzer::save_region_number_statistics(const string& name) const
   {
     ofstream out(name.c_str());
     if (!out.is_open())

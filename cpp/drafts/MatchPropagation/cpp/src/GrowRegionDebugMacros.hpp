@@ -81,10 +81,6 @@ if (_verbose) \
 # define NOTIFY_CANNOT_CONSTRUCT_N_k
 #endif
 
-  //drawer->display_images(); \
-  //check_region(R, drawer);
-  //drawer->draw_match(M(m), Yellow8); \
-
 #ifdef DEBUG
 # define DISPLAY_N_k \
 if (drawer) \
@@ -99,10 +95,6 @@ if (drawer) \
 #else
 # define DISPLAY_N_k
 #endif
-
-  //drawer->display_images(); \
-  //check_region(R, drawer); \
-  drawer->draw_match(M(m), Yellow8); \
 
 #ifdef DEBUG
 # define DISPLAY_NON_DEGENERATE_TRIPLE \
