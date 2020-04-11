@@ -243,8 +243,10 @@ namespace DO { namespace Shakti {
     _image_grid_sizes = grid_size_2d(sizes, padded_width, _image_block_sizes);
 
     // Sanity check.
-    if ((_image_grid_sizes.x * _image_block_sizes.x != padded_width) ||
-        (_image_grid_sizes.y * _image_block_sizes.y != sizes.y()))
+    if (_image_grid_sizes.x * _image_block_sizes.x !=
+            static_cast<std::size_t>(padded_width) or
+        _image_grid_sizes.y * _image_block_sizes.y !=
+            static_cast<std::size_t>(sizes.y()))
     {
       SHAKTI_STDOUT << "WARNING: the algorithm may crash: The CUDA block sizes "
                        "and grid sizes do not coincide with the image sizes!"

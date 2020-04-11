@@ -241,8 +241,9 @@ public:
         fpIn.read(reinterpret_cast<char*>(pBuf), nSize).gcount();
     fpIn.close();
 
-    assert(nRead == nSize);
+    assert(nRead == static_cast<std::streamsize>(nSize));
   }
+
   ~BufferedFileReader()
   {
     if (pBuf)
@@ -250,6 +251,7 @@ public:
       delete[] pBuf;
     }
   }
+
   bool GetBuffer(uint8_t** ppBuf, uint64_t* pnSize)
   {
     if (!pBuf)

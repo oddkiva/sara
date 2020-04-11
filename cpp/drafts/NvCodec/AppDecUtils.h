@@ -196,13 +196,13 @@ inline void ShowDecoderCapability()
       cudaVideoChromaFormat_420, cudaVideoChromaFormat_420,
       cudaVideoChromaFormat_420, cudaVideoChromaFormat_420};
 
-  for (int iGpu = 0; iGpu < nGpu; iGpu++)
+  for (int iGpu = 0; iGpu < nGpu; ++iGpu)
   {
 
     CUcontext cuContext = NULL;
     createCudaContext(&cuContext, iGpu, 0);
 
-    for (int i = 0; i < sizeof(aeCodec) / sizeof(aeCodec[0]); i++)
+    for (auto i = 0u; i < sizeof(aeCodec) / sizeof(aeCodec[0]); ++i)
     {
 
       CUVIDDECODECAPS decodeCaps = {};
