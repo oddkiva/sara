@@ -37,7 +37,9 @@ if (CUDA_FOUND AND TensorRT_FOUND)
     target_link_libraries(${filename}
       ${Boost_LIBRARIES}
       ${TensorRT_LIBRARIES}
+      ${CUDA_LIBRARIES}
       ${DO_Sara_LIBRARIES}
+      DO::Shakti::MultiArray
       DO::Shakti::Utilities)
 
     set_target_properties(${filename}

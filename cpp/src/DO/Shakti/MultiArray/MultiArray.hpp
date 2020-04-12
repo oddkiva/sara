@@ -49,19 +49,19 @@ namespace DO { namespace Shakti {
     //! @brief Constructor.
     inline MultiArray() = default;
 
-    __host__ inline MultiArray(const vector_type& sizes)
+    inline MultiArray(const vector_type& sizes)
       : base_type{}
     {
       resize(sizes);
     }
 
-    __host__ inline MultiArray(size_type size)
+    inline MultiArray(size_type size)
       : self_type{vector_type{int(size)}}
     {
       static_assert(N == 1, "MultiArray must be 1D");
     }
 
-    __host__ inline MultiArray(const self_type& other)
+    inline MultiArray(const self_type& other)
       : self_type{other.sizes()}
     {
       if (N == 1)
@@ -74,7 +74,7 @@ namespace DO { namespace Shakti {
             _sizes[0] * sizeof(T), _sizes[1], cudaMemcpyDeviceToDevice));
       else if (N == 3)
       {
-        cudaMemcpy3DParms params = {0};
+        cudaMemcpy3DParms params{};
         params.srcPtr.ptr = (void*) other._data;
         params.srcPtr.pitch = other._pitch;
         params.srcPtr.xsize = other._sizes[0];
@@ -94,7 +94,7 @@ namespace DO { namespace Shakti {
         throw std::runtime_error{"Unsupported dimension!"};
     }
 
-    __host__ inline MultiArray(const T* host_data, const vector_type& sizes)
+    inline MultiArray(const T* host_data, const vector_type& sizes)
       : self_type{sizes}
     {
       if (N == 1)
@@ -124,7 +124,6 @@ namespace DO { namespace Shakti {
         throw std::runtime_error{"Unsupported dimension!"};
     }
 
-    __host__
     inline MultiArray(self_type&& other)
       : self_type{}
     {
@@ -143,14 +142,12 @@ namespace DO { namespace Shakti {
     }
 
     //! @brief Destructor.
-    __host__
     inline ~MultiArray()
     {
       SHAKTI_SAFE_CUDA_CALL(cudaFree(_data));
     }
 
     //! @brief Resize the multi-array.
-    __host__
     inline void resize(const vector_type& sizes)
     {
       if (_sizes == sizes)

@@ -2,13 +2,23 @@
 
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/StringFormat.hpp>
+#include <DO/Sara/Core/Tensor.hpp>
 
-#include <DO/Shakti/Utilities/DeviceInfo.hpp>
+#include <DO/Shakti/MultiArray.hpp>
+#include <DO/Shakti/Utilities.hpp>
 
 #include <termcolor/termcolor.hpp>
 
 #include <fstream>
 #include <sstream>
+
+
+namespace sara = DO::Sara;
+namespace shakti = DO::Shakti;
+
+
+template <typename T, int N>
+using PinnedTensor = sara::Tensor_<float, N, shakti::PinnedAllocator>;
 
 
 auto engine_deleter(nvinfer1::ICudaEngine* engine) -> void
@@ -118,14 +128,12 @@ auto save_model_weights(nvinfer1::ICudaEngine* engine,
 
 auto main() -> int
 {
-  namespace sara = DO::Sara;
-  namespace shakti = DO::Shakti;
-
   // List the available GPU devices.
   const auto devices = shakti::get_devices();
   for (const auto& device : devices)
     std::cout << device << std::endl;
 
+  auto cuda_stream = sara::TensorRT::make_cuda_stream();
 
   auto builder = sara::TensorRT::make_builder();
 
@@ -135,14 +143,14 @@ auto main() -> int
     SARA_DEBUG << termcolor::green << "Creating the network from scratch!"
                << std::endl;
 
-    // Instantiate an input data.
+    // Instantiate an input data.&
     auto image_tensor = network->addInput("image", nvinfer1::DataType::kFLOAT,
-                                          nvinfer1::Dims3{1, 28, 28});
+                                          nvinfer1::Dims3{1, 8, 8});
 
     // Create artificial weights.
     const auto conv1_kernel_weights_vector =
-        std::vector<float>(5 * 5 * 1 * 20, 0.f);
-    const auto conv1_bias_weights_vector = std::vector<float>(20, 0.f);
+        std::vector<float>(3 * 3 * 1 * 20, 1.f);
+    const auto conv1_bias_weights_vector = std::vector<float>(20, 1.f);
 
 
     // Encapsulate the weights using TensorRT data structures.
@@ -160,7 +168,7 @@ auto main() -> int
     const auto conv1_fn = network->addConvolution(
         *image_tensor,
         20,                    // number of filters
-        {5, 5},                // kernel sizes
+        {3, 3},                // kernel sizes
         conv1_kernel_weights,  // convolution kernel weights
         conv1_bias_weights);   // bias weight
 
@@ -187,7 +195,6 @@ auto main() -> int
   // Create or load an engine.
   auto engine = CudaEngineUniquePtr{nullptr, &engine_deleter};
   {
-
     // Load inference engine from a model weights.
     constexpr auto load_engine_from_disk = false;
     if constexpr (load_engine_from_disk)
@@ -209,21 +216,35 @@ auto main() -> int
 
   // @todo create some fake data and create two GPU device buffers.
   SARA_DEBUG << termcolor::red
-             << "TODO: create some input data and two device buffers!"
+             << "Create some input data and two device buffers!"
              << termcolor::reset << std::endl;
+  constexpr auto n = 1;
+  constexpr auto h = 8;
+  constexpr auto w = 8;
+  auto image = PinnedTensor<float, 2>{h, w};
+  image.matrix().fill(0.f);
+  image(4, 4) = 1.f;
+
+  auto image_convolved = PinnedTensor<float, 3>{{20, h, w}};
+  //auto image_convolved_gpu = shakti::MultiArray<float, 3>{{20, h, w}};
 
   // Fill some GPU buffers and perform inference.
   SARA_DEBUG << termcolor::green << "Perform inference on GPU!"
              << termcolor::reset << std::endl;
-  std::vector<void*> device_buffers(2, nullptr);
-  context->execute(1, device_buffers.data());
 
-  SARA_DEBUG << termcolor::red << "TODO: crashing... Finish the job!"
-             << termcolor::reset << std::endl;
+  auto device_buffers = std::vector{
+      reinterpret_cast<void*>(image.data()),               //
+      reinterpret_cast<void*>(image_convolved.data())  //
+  };
 
-  // Transfer data back from GPU device memory to host memory.
-  SARA_DEBUG << termcolor::red << "TODO: copy data back to host memory!"
-             << termcolor::reset << std::endl;
+  context->execute(n, device_buffers.data());
+
+
+  for (auto n = 0; n < image_convolved.size(0); ++n)
+  {
+    SARA_CHECK(n);
+    std::cout << image_convolved[0].matrix() << std::endl;
+  }
 
   return 0;
 }
