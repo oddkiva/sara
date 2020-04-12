@@ -9,7 +9,6 @@ target_compile_options(gpufilter
   PRIVATE
   $<$<COMPILE_LANGUAGE:CUDA>:
     --ptxas-options=-v
-    -O3
     -use_fast_math
     -arch=sm_${USE_SM}>
   PUBLIC
