@@ -391,8 +391,11 @@ namespace DO { namespace Sara {
     return N_K_cap_R;
   }
 
-  bool GrowRegion::find_triple(size_t t[3], const vector<size_t>& N_K_m_cap_R,
-                               const PairWiseDrawer* drawer) const
+
+  auto
+  GrowRegion::find_triple(size_t t[3], const vector<size_t>& N_K_m_cap_R,
+                          [[maybe_unused]] const PairWiseDrawer* drawer) const
+      -> bool
   {
     // Safety check. Otherwise we cannot construct any candidate triple...
     if (N_K_m_cap_R.size() < 3)
