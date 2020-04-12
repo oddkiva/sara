@@ -42,6 +42,7 @@ namespace DO::Sara::TensorRT {
     if (cuda_stream == nullptr)
       return;
     SHAKTI_SAFE_CUDA_CALL(cudaStreamDestroy(*cuda_stream));
+    delete cuda_stream;
     cuda_stream = nullptr;
   }
 
