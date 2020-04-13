@@ -9,16 +9,12 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#if defined(__APPLE__)
-# include <OpenCL/cl_gl.h>
-# include <OpenGL/gl3.h>
-#else
-# include <CL/cl_gl.h>
-# include <GL/glew.h>
-#endif
+#pragma once
 
-#include <string>
+#include <drafts/OpenCL/GL/OpenGL.hpp>
+
 #include <stdexcept>
+#include <string>
 
 
 namespace DO::Sara { namespace GL {
@@ -73,9 +69,9 @@ namespace DO::Sara { namespace GL {
           GL_INVALID_OPERATION == param_location)
         throw std::runtime_error{"Invalid uniform parameter"};
 
-      if constexpr(std::is_same_v<T, int>)
+      if constexpr (std::is_same_v<T, int>)
         glUniform1i(param_location, param_value);
-      else if constexpr(std::is_same_v<T, float>)
+      else if constexpr (std::is_same_v<T, float>)
         glUniform1f(param_location, param_value);
       else
         throw std::runtime_error{"Error: not implemented!"};
@@ -90,5 +86,4 @@ namespace DO::Sara { namespace GL {
 
   //! @}
 
-} /* namespace GL */
-} /* namespace DO::Sara */
+}}  // namespace DO::Sara::GL
