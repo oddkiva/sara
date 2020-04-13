@@ -8,12 +8,6 @@ target_sources(DO_Sara_OpenCL_Core
   INTERFACE
   ${DO_Sara_OpenCL_CORE_FILES})
 
-# set_target_properties(DO_Sara_OpenCL_Core
-#   PROPERTIES
-#   CXX_STANDARD 17
-#   CXX_STANDARD_REQUIRED YES
-#   FOLDER "Libraries/Sara")
-
 target_include_directories(DO_Sara_OpenCL_Core
   INTERFACE
   ${OpenCL_INCLUDE_DIR}
