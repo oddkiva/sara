@@ -83,10 +83,16 @@ list(APPEND HALIDE_INCLUDE_DIRS
 # Compile options
 if (MSVC)
   set(HALIDE_COMPILE_OPTIONS /wd4068)
-else()
+else ()
   set(HALIDE_COMPILE_OPTIONS
-    "-Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable -Wno-missing-field-initializers -Wno-unknown-pragmas")
-endif()
+    -Wno-unused-parameter
+    -Wno-unused-variable
+    -Wno-missing-field-initializers
+    -Wno-unknown-pragmas)
+  if (NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    list(APPEND HALIDE_COMPILE_OPTIONS -Wno-unused-but-set-variable)
+  endif ()
+endif ()
 
 if (WIN32)
   add_library(Halide SHARED IMPORTED)
@@ -94,9 +100,8 @@ else ()
   add_library(Halide INTERFACE IMPORTED)
 endif ()
 
-set_target_properties(Halide PROPERTIES
-  INTERFACE_INCLUDE_DIRECTORIES "${HALIDE_INCLUDE_DIRS}"
-  INTERFACE_COMPILE_OPTIONS ${HALIDE_COMPILE_OPTIONS})
+target_include_directories(Halide INTERFACE ${HALIDE_INCLUDE_DIRS})
+target_compile_options(Halide INTERFACE ${HALIDE_COMPILE_OPTIONS})
 
 if (WIN32)
   set_target_properties(Halide PROPERTIES
@@ -172,7 +177,7 @@ function (shakti_halide_library_v2)
     HALIDE_TARGET_FEATURES ${generator_HALIDE_TARGET_FEATURES})
 
   if (APPLE)
-    target_link_libraries(SeparableConvolution2d
+    target_link_libraries(${generator_NAME}
       INTERFACE
       "-framework Foundation"
       "-framework Metal")

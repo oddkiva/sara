@@ -87,7 +87,7 @@ class Window : public QOpenGLWindow
 {
 private:
   QOpenGLShaderProgram* m_program{nullptr};
-  QOpenGLDebugLogger *m_logger{nullptr};
+  [[maybe_unused]] QOpenGLDebugLogger *m_logger{nullptr};
 
   Tensor_<float, 2> m_vertices;
   Tensor_<unsigned int, 2> m_triangles;

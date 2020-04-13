@@ -22,10 +22,15 @@ else ()
 endif ()
 target_compile_options(tinyply
   PRIVATE
-  $<$<CXX_COMPILER_ID:GNU>:-Wno-sign-compare>
-  $<$<CXX_COMPILER_ID:GNU>:-Wno-switch>
-  $<$<CXX_COMPILER_ID:GNU>:-Wno-unused-parameter>
-  $<$<CXX_COMPILER_ID:GNU>:-Wno-unused-variable>)
+  $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:AppleClang>>:
+    -Wno-sign-compare>
+  $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:AppleClang>>:
+    -Wno-switch>
+  $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:AppleClang>>:
+    -Wno-unused-parameter>
+  $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:AppleClang>>:
+    -Wno-unused-variable>
+)
 
 # Example
 # add_executable(example source/example.cpp)
