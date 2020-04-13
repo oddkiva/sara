@@ -9,6 +9,10 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-field-initializers"
+#endif
 
 #ifdef __GNUC__
 #pragma GCC diagnostic push
@@ -21,3 +25,6 @@
 #pragma GCC diagnostic pop
 #endif
 
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif

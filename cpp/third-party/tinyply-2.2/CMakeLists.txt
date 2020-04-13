@@ -20,17 +20,16 @@ if (${SHARED_LIB})
 else ()
     add_library(tinyply STATIC source/tinyply.cpp source/tinyply.h)
 endif ()
-target_compile_options(tinyply
-  PRIVATE
-  $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:AppleClang>>:
-    -Wno-sign-compare>
-  $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:AppleClang>>:
-    -Wno-switch>
-  $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:AppleClang>>:
-    -Wno-unused-parameter>
-  $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:AppleClang>>:
-    -Wno-unused-variable>
-)
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR
+    CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  target_compile_options(tinyply
+    PRIVATE
+    -Wno-sign-compare
+    -Wno-switch
+    -Wno-unused-parameter
+    -Wno-unused-variable)
+endif ()
 
 # Example
 # add_executable(example source/example.cpp)

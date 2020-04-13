@@ -130,7 +130,7 @@ class Window : public QOpenGLWindow
 {
 private:
   QOpenGLShaderProgram* m_program{nullptr};
-  QOpenGLDebugLogger* m_logger{nullptr};
+  [[maybe_unused]] QOpenGLDebugLogger* m_logger{nullptr};
 
   std::array<Vector3f, 10> m_cubePositions;
   Tensor_<float, 2> m_vertices;
