@@ -237,7 +237,7 @@ public:
       return;
     }
 
-    std::streamsize nRead =
+    [[maybe_unused]] std::streamsize nRead =
         fpIn.read(reinterpret_cast<char*>(pBuf), nSize).gcount();
     fpIn.close();
 

@@ -3,24 +3,32 @@ source_group("OpenCL Source Files" REGULAR_EXPRESSION
   "${CMAKE_CURRENT_SOURCE_DIR}/.*\\.cl")
 
 add_executable(image_processing ${SRC_FILES})
-target_include_directories(image_processing PRIVATE
-  ${OpenCL_INCLUDE_DIR}
+
+target_include_directories(image_processing
+  PRIVATE
   ${GLEW_INCLUDE_DIR})
-target_compile_definitions(image_processing PRIVATE
-  -DCL_SILENCE_DEPRECATION
+
+target_compile_definitions(image_processing
+  PRIVATE
   -DGL_SILENCE_DEPRECATION)
-target_link_libraries(image_processing PRIVATE
+
+target_link_libraries(image_processing
+  PRIVATE
   ${DO_Sara_LIBRARIES}
-  ${OpenCL_LIBRARY}
+  DO_Sara_OpenCL_Core
   ${OPENGL_LIBRARIES}
   glfw)
-if (NOT APPLE)
-  target_link_libraries(image_processing PRIVATE ${GLEW_LIBRARIES})
-endif ()
-set_target_properties(image_processing PROPERTIES
-  COMPILE_FLAGS "-DSRCDIR=${CMAKE_CURRENT_SOURCE_DIR}")
-set_property(TARGET image_processing PROPERTY FOLDER "Tutorials/OpenCL")
 
+if (NOT APPLE)
+  target_link_libraries(image_processing
+    PRIVATE
+    ${GLEW_LIBRARIES})
+endif ()
+
+set_target_properties(image_processing
+  PROPERTIES
+  COMPILE_FLAGS "-DSRCDIR=${CMAKE_CURRENT_SOURCE_DIR}"
+  FOLDER "Tutorials/OpenCL")
 
 if (MSVC)
   # Works but cumbersome.
