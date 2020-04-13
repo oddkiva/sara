@@ -4,26 +4,12 @@ source_group("OpenCL Source Files" REGULAR_EXPRESSION
 
 add_executable(image_processing ${SRC_FILES})
 
-target_include_directories(image_processing
-  PRIVATE
-  ${GLEW_INCLUDE_DIR})
-
-target_compile_definitions(image_processing
-  PRIVATE
-  -DGL_SILENCE_DEPRECATION)
-
 target_link_libraries(image_processing
   PRIVATE
   ${DO_Sara_LIBRARIES}
   DO_Sara_OpenCL_Core
-  ${OPENGL_LIBRARIES}
+  DO_Sara_OpenCL_GL
   glfw)
-
-if (NOT APPLE)
-  target_link_libraries(image_processing
-    PRIVATE
-    ${GLEW_LIBRARIES})
-endif ()
 
 set_target_properties(image_processing
   PROPERTIES
