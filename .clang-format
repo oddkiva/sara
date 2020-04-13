@@ -1,3 +1,5 @@
+BasedOnStyle: Mozilla
+
 ---
 Language:        Cpp
 
@@ -51,20 +53,6 @@ AllowShortCaseLabelsOnASingleLine: false
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: None
-
-# Do not enforce the following definition declaration style:
-# int
-# function()
-# {
-#   return 0;
-# }
-#
-# Rather the following should also be considered correct:
-# int function()
-# {
-#   return 0;
-# }
-# AlwaysBreakAfterDefinitionReturnType: false  # deprecated
 
 AlwaysBreakTemplateDeclarations: true
 
