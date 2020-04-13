@@ -15,12 +15,6 @@
 
 #include <DO/Sara/Core/StringFormat.hpp>
 
-#ifdef __APPLE__
-# include <OpenCL/cl.h>
-#else
-# include <CL/cl.h>
-#endif
-
 #include <iomanip>
 #include <iostream>
 #include <stdexcept>
