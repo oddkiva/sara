@@ -80,28 +80,23 @@ list(APPEND HALIDE_INCLUDE_DIRS
   ${HALIDE_INCLUDE_DIR}
   ${HALIDE_DISTRIB_DIR}/tools)
 
-# Compile options
-if (MSVC)
-  set(HALIDE_COMPILE_OPTIONS /wd4068)
-else ()
-  set(HALIDE_COMPILE_OPTIONS
-    -Wno-unused-parameter
-    -Wno-unused-variable
-    -Wno-missing-field-initializers
-    -Wno-unknown-pragmas)
-  if (NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    list(APPEND HALIDE_COMPILE_OPTIONS -Wno-unused-but-set-variable)
-  endif ()
-endif ()
-
 if (WIN32)
   add_library(Halide SHARED IMPORTED)
 else ()
   add_library(Halide INTERFACE IMPORTED)
 endif ()
 
-target_include_directories(Halide INTERFACE ${HALIDE_INCLUDE_DIRS})
-target_compile_options(Halide INTERFACE ${HALIDE_COMPILE_OPTIONS})
+target_include_directories(Halide
+  INTERFACE
+  ${HALIDE_INCLUDE_DIRS})
+target_compile_options(Halide
+  INTERFACE
+  $<$<CXX_COMPILER_ID:MSVC>:/wd4068>
+  $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wno-unused-parameter>
+  $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wno-unused-variable>
+  $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wno-missing-field-initializers>
+  $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wno-unknown-pragmas>
+  $<$<CXX_COMPILER_ID:GNU>:-Wno-unused-but-set-variable>)
 
 if (WIN32)
   set_target_properties(Halide PROPERTIES

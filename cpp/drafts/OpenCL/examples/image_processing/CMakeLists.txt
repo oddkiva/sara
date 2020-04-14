@@ -22,7 +22,6 @@ set_target_properties(image_processing
   FOLDER "Tutorials/OpenCL")
 
 if (MSVC)
-  # Better.
   add_custom_command(TARGET image_processing POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
       "${GLEW_DLL}"
