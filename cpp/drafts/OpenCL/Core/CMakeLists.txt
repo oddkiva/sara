@@ -19,6 +19,7 @@ target_link_libraries( DO_Sara_OpenCL_Core
 
 target_compile_definitions(DO_Sara_OpenCL_Core
   INTERFACE
+  $<$<PLATFORM_ID:Darwin>:CL_SILENCE_DEPRECATION>
   CL_USE_DEPRECATED_OPENCL_1_0_APIS
   CL_USE_DEPRECATED_OPENCL_1_1_APIS
   CL_USE_DEPRECATED_OPENCL_1_2_APIS)
