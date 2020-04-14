@@ -49,20 +49,28 @@ if (APPLE)
     MPS/SGEMM.hpp MPS/SGEMM.cpp)
   set_source_files_properties(${DO_Sara_Compute_SOURCE_FILES}
     PROPERTIES LANGUAGE CXX)
+
   add_library(DO_Sara_Compute ${DO_Sara_Compute_SOURCE_FILES})
+
   target_compile_options(DO_Sara_Compute
-    PRIVATE -x objective-c++ -fobjc-arc)
-  target_link_libraries(DO_Sara_Compute
-    PRIVATE "-framework Foundation"
-            "-framework Metal"
-            "-framework MetalPerformanceShaders")
-  set_target_properties(DO_Sara_Compute
-    PROPERTIES FOLDER "Libraries/Sara")
-  target_link_libraries(DO_Sara_Compute PRIVATE ${CLBlast_LIBRARY})
+    PUBLIC -x objective-c++
+    PRIVATE -fobjc-arc)
+
+  target_include_directories(DO_Sara_Compute
+    PUBLIC ${OpenCL_INCLUDE_DIR})
+
   target_link_libraries(DO_Sara_Compute
     PUBLIC
+    ${DO_Sara_LIBRARIES}
     ${OpenCL_LIBRARY}
-    ${DO_Sara_LIBRARIES})
+    ${CLBlast_LIBRARY}
+    ${Accelerate_LIBRARY}
+    "-framework Foundation"
+    "-framework Metal"
+    "-framework MetalPerformanceShaders")
+
+  set_target_properties(DO_Sara_Compute
+    PROPERTIES FOLDER "Libraries/Sara")
 
   file(GLOB test_compute_SOURCE_FILES FILES test_*.cpp)
 
@@ -74,19 +82,4 @@ if (APPLE)
       DEPENDENCIES DO_Sara_Compute
       FOLDER Compute)
   endforeach ()
-
-  target_link_libraries(test_compute_accelerate
-    PRIVATE ${Accelerate_LIBRARY})
-
-  target_compile_options(test_compute_mps PRIVATE -x objective-c++)
-  target_link_libraries(test_compute_mps
-    PRIVATE "-framework Foundation"
-            "-framework Metal"
-            "-framework MetalPerformanceShaders")
-
-  target_include_directories(test_compute_clblast
-    PRIVATE ${OpenCL_INCLUDE_DIR})
-  target_link_libraries(test_compute_clblast
-    PRIVATE ${OpenCL_LIBRARY}
-            ${CLBlast_LIBRARY})
 endif ()
