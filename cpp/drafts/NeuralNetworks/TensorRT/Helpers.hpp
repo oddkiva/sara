@@ -16,7 +16,7 @@
 namespace DO::Sara::TensorRT {
 
   //! @ingroup NeuralNetworks
-  //! @defgroup TensorRT
+  //! @defgroup TensorRT TensorRT helper functions.
   //! @{
 
   class Logger : public nvinfer1::ILogger

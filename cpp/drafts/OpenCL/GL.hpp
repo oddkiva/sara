@@ -18,4 +18,4 @@
 #include <drafts/OpenCL/GL/VertexArray.hpp>
 
 //! @ingroup Drafts
-//! @defgroup OpenGL
+//! @defgroup OpenGL OpenGL Utility Functions

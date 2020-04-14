@@ -14,16 +14,14 @@ target_link_libraries(image_processing
 target_compile_definitions(image_processing
   PRIVATE
   SRCDIR=${CMAKE_CURRENT_SOURCE_DIR}
-  $<$<PLATFORM_ID:Darwin>:GL_DO_NOT_WARN_IF_MULTI_GL_VERSION_HEADERS_INCLUDED>)
+  $<$<PLATFORM_ID:Darwin>:GL_DO_NOT_WARN_IF_MULTI_GL_VERSION_HEADERS_INCLUDED>
+  $<$<PLATFORM_ID:Darwin>:CL_SILENCE_DEPRECATION>)
 
 set_target_properties(image_processing
   PROPERTIES
   FOLDER "Tutorials/OpenCL")
 
 if (MSVC)
-  # Works but cumbersome.
-  #install(FILES "${DIRS}/glew32.dll" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/\${CMAKE_INSTALL_CONFIG_NAME}")
-
   # Better.
   add_custom_command(TARGET image_processing POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
