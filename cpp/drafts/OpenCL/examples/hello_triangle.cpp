@@ -11,6 +11,8 @@
 
 //! @example
 
+#include <drafts/OpenCL/GL.hpp>
+
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/StringFormat.hpp>
 
@@ -21,8 +23,6 @@
 #include <GLFW/glfw3.h>
 
 #include <map>
-
-#include <drafts/OpenCL/GL.hpp>
 
 
 using namespace DO::Sara;

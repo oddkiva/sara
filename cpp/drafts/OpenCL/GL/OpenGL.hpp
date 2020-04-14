@@ -12,9 +12,9 @@
 #pragma once
 
 #if defined(__APPLE__)
-# include <OpenCL/cl_gl.h>
-# include <OpenGL/gl3.h>
+#  include <OpenCL/cl_gl.h>
+#  include <OpenGL/gl3.h>
 #else
-# include <CL/cl_gl.h>
-# include <GL/glew.h>
+#  include <GL/glew.h>
+#  include <CL/cl_gl.h>
 #endif
