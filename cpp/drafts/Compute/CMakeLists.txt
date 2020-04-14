@@ -35,18 +35,18 @@ if (APPLE)
   message("Found MetalPerformanceShaders framework:\n"
     "\t${MetalPerformanceShaders_LIBRARY}")
 
+  # Create the library.
   set(DO_Sara_Compute_SOURCE_FILES
     # Apple Accelerate backend.
     Accelerate.hpp
-
     # CLBlast backend.
     CLBlast.hpp
-
     # Metal backend.
     MPS.hpp
     MPS/Matrix.hpp MPS/Matrix.mm
     MPS/SGEMMImpl.hpp MPS/SGEMMImpl.mm
     MPS/SGEMM.hpp MPS/SGEMM.cpp)
+
   set_source_files_properties(${DO_Sara_Compute_SOURCE_FILES}
     PROPERTIES LANGUAGE CXX)
 
@@ -72,6 +72,8 @@ if (APPLE)
   set_target_properties(DO_Sara_Compute
     PROPERTIES FOLDER "Libraries/Sara")
 
+
+  # Add unit tests.
   file(GLOB test_compute_SOURCE_FILES FILES test_*.cpp)
 
   foreach (file ${test_compute_SOURCE_FILES})
