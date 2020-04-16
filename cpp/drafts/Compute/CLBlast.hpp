@@ -11,16 +11,12 @@
 
 #pragma once
 
-#define CL_USE_DEPRECATED_OPENCL_1_1_APIS
-#define CL_USE_DEPRECATED_OPENCL_1_2_APIS
-
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/StringFormat.hpp>
 #include <DO/Sara/Core/Tensor.hpp>
 #include <DO/Sara/Core/Timer.hpp>
 
 #if defined(__APPLE__) || defined(__MACOSX)
-#  define CL_SILENCE_DEPRECATION
 #  include <OpenCL/cl.hpp>
 #else
 #  include <CL/cl.hpp>
