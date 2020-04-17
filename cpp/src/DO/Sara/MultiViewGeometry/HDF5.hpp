@@ -19,9 +19,12 @@
 
 namespace DO::Sara {
 
-  //! @addtogroup MultiViewGeometry
+  //! @ingroup MultiViewGeometry
+  //! @defgroup MultiviewH5 HDF5 Data I/O
   //! @{
 
+  //! @brief Specialized helper structure to serialize an EssentialMatrix
+  //! object.
   template <>
   struct CalculateH5Type<EssentialMatrix>
   {
@@ -31,6 +34,8 @@ namespace DO::Sara {
     }
   };
 
+  //! @brief Specialized helper structure to serialize a FundamentalMatrix
+  //! object.
   template <>
   struct CalculateH5Type<FundamentalMatrix>
   {
@@ -40,6 +45,7 @@ namespace DO::Sara {
     }
   };
 
+  //! @brief Specialized helper structure to serialize a PinholeCamera object.
   template <>
   struct CalculateH5Type<PinholeCamera>
   {

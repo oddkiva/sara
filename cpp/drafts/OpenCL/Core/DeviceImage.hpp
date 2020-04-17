@@ -21,6 +21,7 @@ namespace DO::Sara {
   //! @addtogroup OpenCL
   //! @{
 
+  //! @brief OpenCL pixel traits structure.
   template <typename T>
   struct CLPixelTraits;
 
@@ -36,6 +37,7 @@ namespace DO::Sara {
     };
   };
 
+  //! @brief OpenCL device image class.
   template <typename T, int N = 2>
   class DeviceImage
   {

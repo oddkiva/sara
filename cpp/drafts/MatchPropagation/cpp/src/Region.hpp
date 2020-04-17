@@ -28,6 +28,9 @@
 
 namespace DO::Sara {
 
+  //! @addtogroup MatchPropagation
+  //! @{
+
   //! @brief This class defines a region for matches (instead of points).
   /*!
    *  We use the following notations:
@@ -121,5 +124,7 @@ namespace DO::Sara {
     //! TODO: make it private?
     container_type indices;
   };
+
+  //! @}
 
 }  // namespace DO::Sara

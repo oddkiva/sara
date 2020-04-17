@@ -25,7 +25,7 @@
 namespace DO { namespace Sara {
 
   /*!
-    @ingroup InterestPoint
+    @addtogroup InterestPoint
     @{
   */
 

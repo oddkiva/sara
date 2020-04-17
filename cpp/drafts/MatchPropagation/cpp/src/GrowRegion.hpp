@@ -32,6 +32,10 @@
 
 namespace DO { namespace Sara {
 
+  //! @addtogroup MatchPropagation
+  //! @{
+
+  //! @brief Piece of the match propagation algorithm.
   class DO_SARA_EXPORT GrowRegion
   {
   public: /* interface. */
@@ -198,5 +202,7 @@ namespace DO { namespace Sara {
     //! @brief EXPERIMENTAL.
     std::set<size_t> _very_spurious;
   };
+
+  //! @}
 
 }}  // namespace DO::Sara

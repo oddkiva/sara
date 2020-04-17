@@ -50,7 +50,7 @@ namespace DO { namespace Sara {
     {
     }
 
-    //! @brief Computes the SIFT descriptor for keypoint \$(x,y,\sigma,\theta)\f$.
+    //! @brief Computes the SIFT descriptor for keypoint @f$ (x,y,\sigma,\theta) @f$.
     auto operator()(float x, float y, float sigma, float theta,
                     const ImageView<Vector2f>& grad_polar_coords) const
         -> descriptor_type
@@ -125,7 +125,8 @@ namespace DO { namespace Sara {
       return h;
     }
 
-    //! @brief Computes the **upright** SIFT descriptor for keypoint \$(x,y,\sigma)\f$.
+    //! @brief Computes the **upright** SIFT descriptor for keypoint
+    //! @f$(x,y,\sigma) @f$.
     auto operator()(float x, float y, float sigma,
                     const ImageView<Vector2f>& grad_polar_coords) const
         -> descriptor_type

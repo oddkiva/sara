@@ -25,6 +25,10 @@
 
 namespace DO::Sara {
 
+  //! @addtogroup MatchPropagation
+  //! @{
+
+  //! @brief Match propagation algorithm.
   class DO_SARA_EXPORT GrowMultipleRegions
   {
   public: /* interface. */
@@ -60,5 +64,7 @@ namespace DO::Sara {
     //! Verbose flag for debugging.
     int verbose_;
   };
+
+  //! @}
 
 }  // namespace DO::Sara

@@ -28,6 +28,9 @@
 
 namespace DO::Sara {
 
+  //! @addtogroup MatchPropagation
+  //! @{
+
   class DO_SARA_EXPORT RegionBoundary
   {
     //! Forward class declarations.
@@ -55,6 +58,7 @@ namespace DO::Sara {
     bool insert(size_t i);
     void erase(size_t i);
 
+    //! @name Query methods
     //! @{
     /*!
      *
@@ -76,8 +80,8 @@ namespace DO::Sara {
     void erase(iterator m);
     //! @}
 
+    //! @name Iterators
     //! @{
-    //! @brief Iterators.
     iterator begin()
     {
       return iterator(lowe_score_index_pairs_.begin(), &M_);
@@ -99,8 +103,8 @@ namespace DO::Sara {
     }
     //! @}
 
+    //! @name Convenient helper member functions
     //! @{
-    //! @brief Convenient helper member functions.
     std::vector<Match> matches() const;
 
     void view(const PairWiseDrawer& drawer) const;
@@ -228,5 +232,7 @@ namespace DO::Sara {
     multimap_type lowe_score_index_pairs_;
     const std::vector<Match>& M_;
   };
+
+  //! @}
 
 }  // namespace DO::Sara

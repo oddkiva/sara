@@ -29,6 +29,7 @@
 
 namespace DO::Sara {
 
+  //! @brief Performance Analysis class on Mikolajczyk's dataset.
   class DO_SARA_EXPORT StudyOnMikolajczykDataset
   {
   public:

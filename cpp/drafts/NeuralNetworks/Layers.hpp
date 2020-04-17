@@ -8,7 +8,7 @@
 namespace DO { namespace Sara {
 
   //! @ingroup Drafts
-  //! @defgroup NeuralNetworks
+  //! @defgroup NeuralNetworks Neural Networks
   //! @{
 
   template <typename Padding = PeriodicPadding>

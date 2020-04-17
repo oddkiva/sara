@@ -26,7 +26,8 @@
 
 namespace DO::Sara {
 
-  //! @addtogroup MultiViewGeometry
+  //! @ingroup MultiViewGeometry
+  //! @defgroup FeatureGraph Feature Correspondence Graph
   //! @{
 
   //! @brief Feature global ID (GID).

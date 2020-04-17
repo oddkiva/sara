@@ -26,7 +26,7 @@ namespace DO { namespace Sara {
 
   /*!
     @ingroup FeatureDetectors
-    @defgroup UtilitiesDebug Utilities for visual inspection of features.
+    @defgroup UtilitiesDebug Visual Inspection Utilities
     @{
    */
 

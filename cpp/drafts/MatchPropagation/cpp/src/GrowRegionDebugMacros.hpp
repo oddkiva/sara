@@ -20,6 +20,12 @@
 
 #pragma once
 
+//! @addtogroup MatchPropagation
+//! @{
+
+//! @brief Debugging macros.
+//! @{
+
 #ifdef DEBUG
 # define CHECK_STATE_AFTER_ADDING_SEED_MATCH \
 if (drawer) \
@@ -126,3 +132,7 @@ if (drawer) \
 #else
 # define PAUSE_SEED_TRIPLE_SEARCH
 #endif
+
+//! @}
+
+//! @}

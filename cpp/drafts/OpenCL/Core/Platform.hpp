@@ -28,6 +28,7 @@ namespace DO::Sara {
   //! @addtogroup OpenCL
   //! @{
 
+  //! @brief OpenCL platform structure.
   struct Platform
   {
     cl_platform_id id;
@@ -52,6 +53,7 @@ namespace DO::Sara {
     }
   };
 
+  //! @brief Read the OpenCL platform.
   template <int _InfoType>
   std::string get_platform_info(cl_platform_id platform_id)
   {

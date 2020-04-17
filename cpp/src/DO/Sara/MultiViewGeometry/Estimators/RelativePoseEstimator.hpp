@@ -23,9 +23,10 @@
 
 namespace DO::Sara {
 
-  //! @addtogroup MultiViewGeometry
+  //! @addtogroup MinimalSolvers
   //! @{
 
+  //! @brief Cheirality criterion type.
   enum class CheiralityCriterion : std::uint8_t
   {
     CHEIRAL_COMPLETE,
@@ -34,6 +35,7 @@ namespace DO::Sara {
   };
 
 
+  //! @brief Relative pose estimator.
   template <typename Method>
   struct RelativePoseEstimator : Method
   {

@@ -25,9 +25,11 @@
 
 namespace DO::Sara {
 
-  //! @addtogroup MultiViewGeometry
+  //! @ingroup MultiViewGeometry
+  //! @defgroup EpipolarGraph Epipolar Graph
   //! @{
 
+  //! @brief View attribute structure.
   struct DO_SARA_EXPORT ViewAttributes
   {
     //! @brief Image metadata.

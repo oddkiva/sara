@@ -25,6 +25,10 @@
 
 namespace DO::Sara {
 
+  //! @addtogroup MatchPropagation
+  //! @{
+
+  //! @brief Dynamic match graph.
   class DynamicMatchGraph
   {
   public:
@@ -145,5 +149,7 @@ namespace DO::Sara {
     //! @brief Match neighborhood compute functor.
     NearestMatchNeighborhoodComputer _compute_N_K;
   };
+
+  //! @}
 
 }  // namespace DO::Sara

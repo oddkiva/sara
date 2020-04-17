@@ -21,6 +21,9 @@
 
 namespace DO { namespace Shakti {
 
+  //! @brief CUDA pinned memory allocator.
+  //! @{
+
   template <typename T>
   class PinnedAllocator;
 
@@ -123,6 +126,8 @@ namespace DO { namespace Shakti {
       return !operator==(x);
     }
   };
+
+  //! @}
 
 } /* namespace Shakti */
 } /* namespace DO */
