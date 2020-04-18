@@ -84,7 +84,7 @@ namespace DO { namespace Sara {
       G.octave_scaling_factor(o) =
           (o == 0) ? 1.f / resize_factor : G.octave_scaling_factor(o - 1) * 2;
 
-      // Compute the gaussians in octave \f$o\f$
+      // Compute the gaussians in octave @f$o@f$
       auto sigma_s_1 = init_sigma;
       G(0, o) = o == 0 ? I : downscale(G(downscale_index, o - 1), 2);
 
@@ -149,8 +149,8 @@ namespace DO { namespace Sara {
     return LoG;
   }
 
-  //! Computes the gradient vector of \f$I(x,y,\sigma)\f$ at \f$(x,y,\sigma)\f$,
-  //! where \f$\sigma = 2^{s/S + o}\f$ where \f$S\f$ is the number of scales per
+  //! Computes the gradient vector of @f$I(x,y,\sigma)@f$ at @f$(x,y,\sigma)@f$,
+  //! where @f$\sigma = 2^{s/S + o}@f$ where @f$S@f$ is the number of scales per
   //! octave.
   template <typename T>
   Matrix<T, 3, 1> gradient(const ImagePyramid<T>& I, int x, int y, int s, int o)
@@ -167,8 +167,8 @@ namespace DO { namespace Sara {
     return d;
   }
 
-  //! Computes the hessian matrix of \f$I(x,y,\sigma)\f$ at \f$(x,y,\sigma)\f$,
-  //! where \f$\sigma = 2^{s/S + o}\f$ where \f$S\f$ is the number of scales
+  //! Computes the hessian matrix of @f$I(x,y,\sigma)@f$ at @f$(x,y,\sigma)@f$,
+  //! where @f$\sigma = 2^{s/S + o}@f$ where @f$S@f$ is the number of scales
   //! per octave.
   template <typename T>
   Matrix<T, 3, 3> hessian(const ImagePyramid<T>& I, int x, int y, int s, int o)
