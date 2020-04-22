@@ -16,25 +16,14 @@ namespace {
 
   using namespace Halide;
 
-  class SeparableConvolution2d
-    : public Halide::Generator<SeparableConvolution2d>
+  class SeparableConvolutionComponent
   {
-  public:
-    GeneratorParam<int> tile_x{"tile_x", 32};
-    GeneratorParam<int> tile_y{"tile_y", 32};
-
-    Input<Func> input{"input", Float(32), 3};
-    Input<Func> kernel{"kernel", Float(32), 1};
-    Input<int32_t> kernel_size{"kernel_size"};
-    Input<int32_t> kernel_shift{"kernel_shift"};
-
+  protected:
     //! @brief Intermediate function
     //! @{
     Func conv_y_t{"conv_y_transposed"};
     Func conv_y{"conv_y"};
     //! @}
-
-    Output<Func> output{"input_convolved", Float(32), 3};
 
     //! @brief Variables.
     //! @{
@@ -43,8 +32,14 @@ namespace {
     Var xi{"xi"}, yi{"yi"}, ci{"ci"};
     //! @}
 
-    void generate()
+  public:
+    template <typename Input, typename Output>
+    void generate(Input& input, Func& kernel, Expr kernel_size,
+                  Expr kernel_shift, Output& output)
     {
+      const auto w = input.dim(0).extent();
+      const auto h = input.dim(1).extent();
+
       // Define the summation variable `k` with its summation domain (a.k.a. the
       // reduction domain variable).
       auto k = RDom{kernel_shift, kernel_size};
@@ -52,22 +47,27 @@ namespace {
       // 1st pass: transpose and convolve the columns.
       auto input_t = Func{"input_transposed"};
       input_t(x, y, c) = input(y, x, c);
-      conv_y_t(x, y, c) = sum(input_t(x + k, y, c) * kernel(k));
+      auto input_t_padded =
+          BoundaryConditions::repeat_edge(input_t, {{0, h}, {}, {}});
+      conv_y_t(x, y, c) = sum(input_t_padded(x + k, y, c) * kernel(k));
 
       // 2nd pass: transpose and convolve the rows.
       auto conv_y = Func{"conv_y"};
       conv_y(x, y, c) = conv_y_t(y, x, c);
-
+      auto conv_y_padded =
+          BoundaryConditions::repeat_edge(conv_y, {{0, w}, {}, {}});
       auto& conv_x = output;
-      conv_x(x, y, c) = sum(conv_y(x + k, y, c) * kernel(k));
+      conv_x(x, y, c) = sum(conv_y_padded(x + k, y, c) * kernel(k));
     }
 
-    void schedule()
+    template <typename Output>
+    void schedule(const Halide::Target& target, int32_t tile_x, int32_t tile_y,
+                  Output& output)
     {
       auto& conv_x = output;
 
       // GPU schedule.
-      if (get_target().has_gpu_feature())
+      if (target.has_gpu_feature())
       {
         // 1st pass: transpose and convolve the columns
         conv_y_t.compute_root();
@@ -78,10 +78,9 @@ namespace {
       }
 
       // Hexagon schedule.
-      else if (get_target().features_any_of({Target::HVX_64, Target::HVX_128}))
+      else if (target.features_any_of({Target::HVX_64, Target::HVX_128}))
       {
-        const auto vector_size =
-            get_target().has_feature(Target::HVX_128) ? 128 : 64;
+        const auto vector_size = target.has_feature(Target::HVX_128) ? 128 : 64;
 
         // 1st pass: transpose and convolve the columns
         conv_y_t.compute_root();
@@ -115,8 +114,3 @@ namespace {
   };
 
 }  // namespace
-
-
-HALIDE_REGISTER_GENERATOR(SeparableConvolution2d,
-                          shakti_separable_convolution_2d,
-                          DO::Shakti::HalideBackend::SeparableConvolution2d)

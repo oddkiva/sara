@@ -10,15 +10,14 @@
 // ========================================================================== //
 
 #include "MyHalide.hpp"
-#include "shakti_separable_convolution_2d.stub.h"
+#include "SeparableConvolutionComponent.hpp"
 
 
 namespace {
 
   using namespace Halide;
-  using DO::Shakti::HalideBackend::SeparableConvolution2d;
 
-  class GaussianConvolution : public Halide::Generator<GaussianConvolution>
+  class GaussianConvolutionV2 : public Halide::Generator<GaussianConvolutionV2>
   {
   public:
     GeneratorParam<int> tile_x{"tile_x", 32};
@@ -28,9 +27,8 @@ namespace {
     Input<float> sigma{"sigma"};
     Input<int32_t> truncation_factor{"truncation_factor"};
 
+    SeparableConvolutionComponent separable_conv_2d;
     Func gaussian{"gaussian"};
-
-    Func conv_fn;
 
     Output<Buffer<float>> output{"input_convolved", 3};
 
@@ -55,23 +53,16 @@ namespace {
       auto normalization_factor = sum(gaussian_unnormalized(k));
       gaussian(x) = gaussian_unnormalized(x) / normalization_factor;
 
-      // TODO: optimize this. I found that BoundaryConditions::repeat_edge is
-      // slower than clamp(y, ymin, ymax).
-      auto input_padded = BoundaryConditions::repeat_edge(input);
-
-      conv_fn = SeparableConvolution2d::generate(
-          this, {input_padded, gaussian, kernel_size, kernel_shift});
-
-      output(x, y, c) = conv_fn(x, y, c);
+      separable_conv_2d.generate(input, gaussian, kernel_size, kernel_shift, output);
     }
 
     void schedule()
     {
       gaussian.compute_root();
-      conv_fn.compute_root();
+      separable_conv_2d.schedule(get_target(), tile_x, tile_y, output);
     }
   };
 
 }  // namespace
 
-HALIDE_REGISTER_GENERATOR(GaussianConvolution, shakti_gaussian_convolution)
+HALIDE_REGISTER_GENERATOR(GaussianConvolutionV2, shakti_gaussian_convolution_v2)

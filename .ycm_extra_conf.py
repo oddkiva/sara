@@ -15,8 +15,6 @@ flags = [
 '-Wall',
 '-Wextra',
 '-Werror',
-'-Wno-long-long',
-'-Wno-variadic-macros',
 '-fexceptions',
 '-DNDEBUG',
 # You 100% do NOT need -DUSE_CLANG_COMPLETER and/or -DYCM_EXPORT in your flags;

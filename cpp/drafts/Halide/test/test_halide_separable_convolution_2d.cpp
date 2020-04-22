@@ -18,7 +18,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "SeparableConvolution2d.h"
+#include "shakti_separable_convolution_2d.h"
 
 
 namespace sara = DO::Sara;
