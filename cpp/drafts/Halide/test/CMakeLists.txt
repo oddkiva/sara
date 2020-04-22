@@ -16,18 +16,18 @@ foreach (file ${test_SOURCE_FILES})
     CXX_STANDARD_REQUIRED YES)
 endforeach ()
 
-target_link_libraries(test_halide_enlarge
-  PRIVATE
-  shakti_halide_enlarge)
-
 target_link_libraries(test_halide_cast
   PRIVATE
   shakti_halide_cast_to_float)
 
+target_link_libraries(test_halide_enlarge
+  PRIVATE
+  shakti_enlarge)
+
 target_link_libraries(test_halide_separable_convolution_2d
  PRIVATE
- SeparableConvolution2d)
+ shakti_separable_convolution_2d)
 
-target_link_libraries(test_halide_gaussian_convolution
+target_link_libraries(test_halide_im2col
   PRIVATE
-  GaussianConvolution)
+  shakti_im2col_32f)

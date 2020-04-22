@@ -117,5 +117,6 @@ namespace {
 }  // namespace
 
 
-HALIDE_REGISTER_GENERATOR(SeparableConvolution2d, SeparableConvolution2d,
+HALIDE_REGISTER_GENERATOR(SeparableConvolution2d,
+                          shakti_separable_convolution_2d,
                           DO::Shakti::HalideBackend::SeparableConvolution2d)

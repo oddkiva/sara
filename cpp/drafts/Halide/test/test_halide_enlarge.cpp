@@ -17,7 +17,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "../Utilities.hpp"
-#include "shakti_halide_enlarge.h"
+#include "shakti_enlarge.h"
 
 
 using namespace std;
@@ -81,8 +81,8 @@ BOOST_AUTO_TEST_CASE(test_halide_enlarge_single_channel)
   auto src_buffer = halide::as_runtime_buffer_3d<float>(src);
   auto dst_buffer = halide::as_runtime_buffer_3d<float>(dst);
   src_buffer.set_host_dirty();
-  shakti_halide_enlarge(src_buffer, src_buffer.width(), src_buffer.height(),
-                        dst_buffer.width(), dst_buffer.height(), dst_buffer);
+  shakti_enlarge(src_buffer, src_buffer.width(), src_buffer.height(),
+                 dst_buffer.width(), dst_buffer.height(), dst_buffer);
   dst_buffer.copy_to_host();
 
   auto true_dst = Image<float>{8, 16};
@@ -134,8 +134,8 @@ BOOST_AUTO_TEST_CASE(test_halide_enlarge_multi_channel)
   auto dst_buffer = halide::as_interleaved_runtime_buffer(dst);
 
   src_buffer.set_host_dirty();
-  shakti_halide_enlarge(src_buffer, src_buffer.width(), src_buffer.height(),
-                        dst_buffer.width(), dst_buffer.height(), dst_buffer);
+  shakti_enlarge(src_buffer, src_buffer.width(), src_buffer.height(),
+                 dst_buffer.width(), dst_buffer.height(), dst_buffer);
   dst_buffer.copy_to_host();
 
 

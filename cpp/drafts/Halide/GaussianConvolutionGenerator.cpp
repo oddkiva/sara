@@ -10,7 +10,7 @@
 // ========================================================================== //
 
 #include "MyHalide.hpp"
-#include "SeparableConvolution2d.stub.h"
+#include "shakti_separable_convolution_2d.stub.h"
 
 
 namespace {
@@ -55,6 +55,8 @@ namespace {
       auto normalization_factor = sum(gaussian_unnormalized(k));
       gaussian(x) = gaussian_unnormalized(x) / normalization_factor;
 
+      // TODO: optimize this. I found that BoundaryConditions::repeat_edge is
+      // slower than clamp(y, ymin, ymax).
       auto input_padded = BoundaryConditions::repeat_edge(input);
 
       conv_fn = SeparableConvolution2d::generate(
@@ -72,4 +74,4 @@ namespace {
 
 }  // namespace
 
-HALIDE_REGISTER_GENERATOR(GaussianConvolution, GaussianConvolution)
+HALIDE_REGISTER_GENERATOR(GaussianConvolution, shakti_gaussian_convolution)
