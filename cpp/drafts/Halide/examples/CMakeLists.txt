@@ -98,6 +98,7 @@ target_link_libraries(halide_gaussian_convolution_example PRIVATE
   ${DO_Sara_LIBRARIES}
   Halide
   shakti_gaussian_convolution
+  shakti_gaussian_convolution_v2
   shakti_halide_gaussian_blur)
 set_property(TARGET halide_gaussian_convolution_example
   PROPERTY

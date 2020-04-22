@@ -17,6 +17,7 @@
 #include <drafts/Halide/Utilities.hpp>
 
 #include "shakti_gaussian_convolution.h"
+#include "shakti_gaussian_convolution_v2.h"
 #include "shakti_halide_gaussian_blur.h"
 
 
@@ -73,6 +74,31 @@ auto gaussian_convolution_aot(sara::Image<float>& src, sara::Image<float>& dst)
   sara::get_key();
 }
 
+auto gaussian_convolution_aot_v2(sara::Image<float>& src,
+                                 sara::Image<float>& dst)
+{
+  const auto sigma = 100.f;
+  const auto truncation_factor = 4;
+
+  dst.matrix().fill(0);
+
+  auto src_buffer = halide::as_runtime_buffer_3d(src);
+  auto dst_buffer = halide::as_runtime_buffer_3d(dst);
+
+  for (auto i = 0; i < 100; ++i)
+  {
+    sara::tic();
+    src_buffer.set_host_dirty();
+    shakti_gaussian_convolution_v2(src_buffer, sigma, truncation_factor,
+                                   dst_buffer);
+    dst_buffer.copy_to_host();
+    sara::toc("[GENERATOR V2] Gaussian convolution");
+  }
+
+  sara::display(sara::color_rescale(dst));
+  sara::get_key();
+}
+
 GRAPHICS_MAIN()
 {
   auto sz = 1025;
@@ -86,6 +112,7 @@ GRAPHICS_MAIN()
 
   gaussian_convolution_aot_and_stub(src, dst);
   gaussian_convolution_aot(src, dst);
+  gaussian_convolution_aot_v2(src, dst);
 
   return 0;
 }
