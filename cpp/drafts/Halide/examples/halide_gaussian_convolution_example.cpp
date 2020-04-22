@@ -47,7 +47,6 @@ auto gaussian_convolution_aot_and_stub(sara::Image<float>& src, sara::Image<floa
   }
 
   sara::display(sara::color_rescale(dst));
-  sara::get_key();
 }
 
 auto gaussian_convolution_aot(sara::Image<float>& src, sara::Image<float>& dst)
@@ -71,7 +70,6 @@ auto gaussian_convolution_aot(sara::Image<float>& src, sara::Image<float>& dst)
   }
 
   sara::display(sara::color_rescale(dst));
-  sara::get_key();
 }
 
 auto gaussian_convolution_aot_v2(sara::Image<float>& src,
@@ -96,7 +94,6 @@ auto gaussian_convolution_aot_v2(sara::Image<float>& src,
   }
 
   sara::display(sara::color_rescale(dst));
-  sara::get_key();
 }
 
 GRAPHICS_MAIN()
@@ -113,6 +110,8 @@ GRAPHICS_MAIN()
   gaussian_convolution_aot_and_stub(src, dst);
   gaussian_convolution_aot(src, dst);
   gaussian_convolution_aot_v2(src, dst);
+
+  sara::get_key();
 
   return 0;
 }

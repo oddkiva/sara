@@ -47,15 +47,17 @@ namespace {
       // 1st pass: transpose and convolve the columns.
       auto input_t = Func{"input_transposed"};
       input_t(x, y, c) = input(y, x, c);
-      conv_y_t(x, y, c) =
-          sum(input_t(clamp(x + k, 0, h - 1), y, c) * kernel(k));
+      auto input_t_padded =
+          BoundaryConditions::repeat_edge(input_t, {{0, h}, {}, {}});
+      conv_y_t(x, y, c) = sum(input_t_padded(x + k, y, c) * kernel(k));
 
       // 2nd pass: transpose and convolve the rows.
       auto conv_y = Func{"conv_y"};
       conv_y(x, y, c) = conv_y_t(y, x, c);
-
+      auto conv_y_padded =
+          BoundaryConditions::repeat_edge(conv_y, {{0, w}, {}, {}});
       auto& conv_x = output;
-      conv_x(x, y, c) = sum(conv_y(clamp(x + k, 0, w - 1), y, c) * kernel(k));
+      conv_x(x, y, c) = sum(conv_y_padded(x + k, y, c) * kernel(k));
     }
 
     template <typename Output>
