@@ -14,8 +14,7 @@ target_link_libraries(image_processing
 target_compile_definitions(image_processing
   PRIVATE
   SRCDIR=${CMAKE_CURRENT_SOURCE_DIR}
-  $<$<PLATFORM_ID:Darwin>:GL_DO_NOT_WARN_IF_MULTI_GL_VERSION_HEADERS_INCLUDED>
-  $<$<PLATFORM_ID:Darwin>:CL_SILENCE_DEPRECATION>)
+  $<$<PLATFORM_ID:Darwin>:GL_DO_NOT_WARN_IF_MULTI_GL_VERSION_HEADERS_INCLUDED>)
 
 set_target_properties(image_processing
   PROPERTIES
