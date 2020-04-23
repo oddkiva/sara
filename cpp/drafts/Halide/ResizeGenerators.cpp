@@ -160,10 +160,13 @@ namespace {
       const auto wo = cast<float>(w_out);
       const auto ho = cast<float>(h_out);
 
-      const auto sigma_x = 1.6f * sqrt(w_in/ w_out - 0.99f);
+      const auto sx = wi / wo;
+      const auto sy = hi / ho;
+
+      const auto sigma_x = 1.6f * sqrt(sx * sx - 0.99f);
       gx.generate(sigma_x, truncation_factor);
 
-      const auto sigma_y = 1.6f * sqrt(h_in/ h_out - 0.99f);
+      const auto sigma_y = 1.6f * sqrt(sy * sy - 0.99f);
       gy.generate(sigma_y, truncation_factor);
 
       separable_conv_2d.generate(

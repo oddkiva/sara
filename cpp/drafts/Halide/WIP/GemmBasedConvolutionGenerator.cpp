@@ -9,7 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include "MyHalide.hpp"
+#include <drafts/Halide/MyHalide.hpp>
 
 
 namespace {
@@ -17,8 +17,7 @@ namespace {
   using namespace Halide;
 
   template <typename T>
-  class ConvolutionGenerator
-    : public Generator<ConvolutionGenerator<T>>
+  class ConvolutionGenerator : public Generator<ConvolutionGenerator<T>>
   {
   public:
     using Base = Generator<GemmBasedConvolutionGenerator<T>>;
@@ -60,7 +59,8 @@ namespace {
 
       auto r = RDom{x0, kw, y0, kh, c0, kc};
 
-      output(x, y, c, n) = sum(input(x + r.x, y + r.y, c + r.z, n) * kernel(r.x, r.y, r.z, c));
+      output(x, y, c, n) =
+          sum(input(x + r.x, y + r.y, c + r.z, n) * kernel(r.x, r.y, r.z, c));
     }
 
     void schedule()
