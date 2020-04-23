@@ -42,7 +42,7 @@ if ($update_vcpkg) {
   # Install Ceres libraries.
   iex ".\vcpkg.exe install ceres[cxsparse,suitesparse]:x64-windows"
 
-  # Install Ceres libraries.
+  # Install GLEW libraries.
   iex ".\vcpkg.exe install glew:x64-windows"
   echo `n
 }
