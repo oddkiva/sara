@@ -9,15 +9,14 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include "MyHalide.hpp"
+#include <drafts/Halide/MyHalide.hpp>
 
 
 namespace {
 
   using namespace Halide;
 
-  class SeparableConvolution2d
-    : public Halide::Generator<SeparableConvolution2d>
+  class SeparableConvolution2d : public Generator<SeparableConvolution2d>
   {
   public:
     GeneratorParam<int> tile_x{"tile_x", 32};

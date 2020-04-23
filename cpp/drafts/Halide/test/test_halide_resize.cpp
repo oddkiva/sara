@@ -16,50 +16,99 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "../Utilities.hpp"
+#include <drafts/Halide/Utilities.hpp>
+#include "shakti_scale_32f.h"
 #include "shakti_enlarge.h"
 
+
+namespace halide = DO::Shakti::HalideBackend;
 
 using namespace std;
 using namespace DO::Sara;
 
+
+auto scale(ImageView<float>& src, ImageView<float>& dst)
+{
+  auto src_tensor_view =
+      tensor_view(src).reshape(Vector4i{1, 1, src.width(), src.height()});
+  auto dst_tensor_view =
+      tensor_view(dst).reshape(Vector4i{1, 1, dst.width(), dst.height()});
+
+  auto src_buffer = halide::as_runtime_buffer(src_tensor_view);
+  auto dst_buffer = halide::as_runtime_buffer(dst_tensor_view);
+
+  src_buffer.set_host_dirty();
+  shakti_scale_32f(src_buffer, dst.width(), dst.height(), dst_buffer);
+  dst_buffer.copy_to_host();
+}
+
+
+auto enlarge(ImageView<float>& src, ImageView<float>& dst)
+{
+  auto src_buffer = halide::as_runtime_buffer_3d(src);
+  auto dst_buffer = halide::as_runtime_buffer_3d(dst);
+
+  src_buffer.set_host_dirty();
+  shakti_enlarge(src_buffer, src_buffer.width(), src_buffer.height(),
+                 dst_buffer.width(), dst_buffer.height(), dst_buffer);
+  dst_buffer.copy_to_host();
+}
+
+auto enlarge(ImageView<Rgb32f>& src, ImageView<Rgb32f>& dst)
+{
+  auto src_buffer = halide::as_interleaved_runtime_buffer(src);
+  auto dst_buffer = halide::as_interleaved_runtime_buffer(dst);
+
+  src_buffer.set_host_dirty();
+  shakti_enlarge(src_buffer, src_buffer.width(), src_buffer.height(),
+                 dst_buffer.width(), dst_buffer.height(), dst_buffer);
+  dst_buffer.copy_to_host();
+}
+
+
 BOOST_AUTO_TEST_SUITE(TestImageResize)
 
-// BOOST_AUTO_TEST_CASE(test_upscale)
-// {
-//   auto src = Image<float>{2, 2};
-//   src.matrix() << 0, 1, 2, 3;
-//
-//   auto dst = Image<float>{};
-//   dst = upscale(src, 2);
-//
-//   auto true_dst = Image<float>{4, 4};
-//   true_dst.matrix() <<  //
-//       0, 0, 1, 1,  //
-//       0, 0, 1, 1,  //
-//       2, 2, 3, 3,  //
-//       2, 2, 3, 3;
-//   BOOST_CHECK_EQUAL(true_dst.matrix(), dst.matrix());
-// }
+BOOST_AUTO_TEST_CASE(test_upscale)
+{
+  auto src = Image<float>{2, 2};
+  src.matrix() <<
+    0, 1,
+    2, 3;
 
-// BOOST_AUTO_TEST_CASE(test_downscale)
-// {
-//   auto src = Image<float>{4, 4};
-//   src.matrix() <<  //
-//       0, 0, 1, 1,  //
-//       0, 0, 1, 1,  //
-//       2, 2, 3, 3,  //
-//       2, 2, 3, 3;
-//
-//   auto dst = Image<float>{};
-//   dst = downscale(src, 2);
-//
-//   auto true_dst = Image<float>{2, 2};
-//   true_dst.matrix() << 0, 1, 2, 3;
-//   BOOST_CHECK_EQUAL(true_dst.matrix(), dst.matrix());
-// }
+  auto dst = Image<float>{4, 4};
 
-BOOST_AUTO_TEST_CASE(test_halide_enlarge_single_channel)
+  scale(src, dst);
+
+  auto true_dst = Image<float>{4, 4};
+  true_dst.matrix() <<  //
+      0, 0, 1, 1,  //
+      0, 0, 1, 1,  //
+      2, 2, 3, 3,  //
+      2, 2, 3, 3;
+  BOOST_CHECK_EQUAL(true_dst.matrix(), dst.matrix());
+}
+
+BOOST_AUTO_TEST_CASE(test_downscale)
+{
+  auto src = Image<float>{4, 4};
+  src.matrix() <<  //
+      0, 0, 1, 1,  //
+      0, 0, 1, 1,  //
+      2, 2, 3, 3,  //
+      2, 2, 3, 3;
+
+  auto dst = Image<float>{2, 2};
+
+  scale(src, dst);
+
+  auto true_dst = Image<float>{2, 2};
+  true_dst.matrix() <<
+    0, 1,
+    2, 3;
+  BOOST_CHECK_EQUAL(true_dst.matrix(), dst.matrix());
+}
+
+BOOST_AUTO_TEST_CASE(test_enlarge_single_channel)
 {
   // N.B.: because of the internal parameters, we must have image sizes of at
   // least 8.
@@ -77,13 +126,7 @@ BOOST_AUTO_TEST_CASE(test_halide_enlarge_single_channel)
 
   auto dst = Image<float>{8, 16};
 
-  namespace halide = DO::Shakti::HalideBackend;
-  auto src_buffer = halide::as_runtime_buffer_3d<float>(src);
-  auto dst_buffer = halide::as_runtime_buffer_3d<float>(dst);
-  src_buffer.set_host_dirty();
-  shakti_enlarge(src_buffer, src_buffer.width(), src_buffer.height(),
-                 dst_buffer.width(), dst_buffer.height(), dst_buffer);
-  dst_buffer.copy_to_host();
+  enlarge(src, dst);
 
   auto true_dst = Image<float>{8, 16};
   true_dst.matrix() <<
@@ -107,7 +150,7 @@ BOOST_AUTO_TEST_CASE(test_halide_enlarge_single_channel)
   BOOST_CHECK_LE((true_dst.matrix() - dst.matrix()).norm(), 1e-9);
 }
 
-BOOST_AUTO_TEST_CASE(test_halide_enlarge_multi_channel)
+BOOST_AUTO_TEST_CASE(test_enlarge_multi_channel)
 {
   // N.B.: because of the internal parameters, we must have image sizes of at
   // least 8.
@@ -129,15 +172,7 @@ BOOST_AUTO_TEST_CASE(test_halide_enlarge_multi_channel)
 
   auto dst = Image<Rgb32f>{8, 16};
 
-  namespace halide = DO::Shakti::HalideBackend;
-  auto src_buffer = halide::as_interleaved_runtime_buffer(src);
-  auto dst_buffer = halide::as_interleaved_runtime_buffer(dst);
-
-  src_buffer.set_host_dirty();
-  shakti_enlarge(src_buffer, src_buffer.width(), src_buffer.height(),
-                 dst_buffer.width(), dst_buffer.height(), dst_buffer);
-  dst_buffer.copy_to_host();
-
+  enlarge(src, dst);
 
   auto true_dst = Image<Rgb32f>{8, 16};
   for (int y = 0; y < true_dst.height() - 1; ++y)
@@ -169,29 +204,26 @@ BOOST_AUTO_TEST_CASE(test_halide_enlarge_multi_channel)
                           std::numeric_limits<float>::epsilon());
 }
 
-// BOOST_AUTO_TEST_CASE(test_enlarge)
-// {
-//   auto src = Image<float>{2, 2};
-//   src.matrix() <<
-//     0, 1,
-//     2, 3;
-//
-//   auto true_dst = Image<float>{4, 4};
-//   true_dst.matrix() <<
-//     0, 0.5, 1, 1,
-//     1, 1.5, 2, 2,
-//     2, 2.5, 3, 3,
-//     2, 2.5, 3, 3;
-//
-//   auto dst = Image<float>{};
-//
-//   dst = enlarge(src, {4, 4});
-//   BOOST_CHECK_EQUAL(true_dst.matrix(), dst.matrix());
-//
-//   dst = enlarge(src, 2);
-//   BOOST_CHECK_EQUAL(true_dst.matrix(), dst.matrix());
-// }
-//
+BOOST_AUTO_TEST_CASE(test_enlarge_small_image)
+{
+  auto src = Image<float>{2, 2};
+  src.matrix() <<
+    0, 1,
+    2, 3;
+
+  auto true_dst = Image<float>{4, 4};
+  true_dst.matrix() <<
+    0, 0.5, 1, 1,
+    1, 1.5, 2, 2,
+    2, 2.5, 3, 3,
+    2, 2.5, 3, 3;
+
+  auto dst = Image<float>{4, 4};
+
+  enlarge(src, dst);
+  BOOST_CHECK_EQUAL(true_dst.matrix(), dst.matrix());
+}
+
 // BOOST_AUTO_TEST_CASE(test_reduce_on_image_views)
 // {
 //   auto src = Image<float>{10, 10};

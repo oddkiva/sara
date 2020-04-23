@@ -14,7 +14,6 @@
 #include <DO/Sara/Core/Tensor.hpp>
 #include <DO/Sara/Core/TensorDebug.hpp>
 
-#include <drafts/Halide/Helpers.hpp>
 #include <drafts/Halide/Utilities.hpp>
 
 #include "shakti_im2col_32f.h"

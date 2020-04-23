@@ -9,7 +9,10 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include "MyHalide.hpp"
+#include <drafts/Halide/MyHalide.hpp>
+#include <drafts/Halide/Components/GaussianKernelComponent.hpp>
+#include <drafts/Halide/Components/ScaleComponent.hpp>
+#include <drafts/Halide/Components/SeparableConvolutionComponent.hpp>
 
 
 namespace {
@@ -17,10 +20,10 @@ namespace {
   using namespace Halide;
 
   template <typename T>
-  class Upscale : public Halide::Generator<Upscale<T>>
+  class Scale : public Generator<Scale<T>>
   {
   public:
-    using Base = Generator<Upscale<T>>;
+    using Base = Generator<Scale<T>>;
     using Base::get_target;
 
     template <typename T2>
@@ -29,11 +32,11 @@ namespace {
     template <typename T2>
     using Output = typename Base::template Output<T2>;
 
-
     GeneratorParam<int> tile_x{"tile_x", 32};
     GeneratorParam<int> tile_y{"tile_y", 32};
 
     Input<Buffer<T>> input{"input", 4};
+    Input<int32_t[2]> output_sizes{"output_sizes"};
     Output<Buffer<T>> output{"output", 4};
 
     Var x{"x"}, y{"y"}, c{"c"}, n{"n"};
@@ -44,25 +47,13 @@ namespace {
     {
       Expr w_in = cast<float>(input.dim(0).extent());
       Expr h_in = cast<float>(input.dim(1).extent());
-      Expr w_out = cast<float>(output.dim(0).extent());
-      Expr h_out = cast<float>(output.dim(1).extent());
+      Expr w_out = cast<float>(output_sizes[0]);
+      Expr h_out = cast<float>(output_sizes[1]);
 
-      Expr xx = x * w_in / w_out;
-      Expr yy = y * h_in / h_out;
+      Expr xx = cast<int32_t>(x * w_in / w_out);
+      Expr yy = cast<int32_t>(y * h_in / h_out);
 
-      auto input_padded = BoundaryConditions::repeat_edge(input);
-
-      auto wx = xx - floor(xx);
-      auto wy = yy - floor(yy);
-
-      auto xr = cast<int>(xx);
-      auto yr = cast<int>(yy);
-
-      output(x, y, c, n) =
-          (1 - wx) * (1 - wy) * input_padded(xr, yr, c, n) +  //
-          wx * (1 - wy) * input_padded(xr + 1, yr, c, n) +    //
-          (1 - wx) * wy * input_padded(xr, yr + 1, c, n) +    //
-          wx * wy * input_padded(xr + 1, yr + 1, c, n);
+      output(x, y, c, n) = input(xx, yy, c, n);
     }
 
     void schedule()
@@ -121,6 +112,75 @@ namespace {
             .reorder(c, x, y)
             .unroll(c);
       }
+    }
+  };
+
+  template <typename T>
+  class Reduce : public Generator<Reduce<T>>
+  {
+  public:
+    using Base = Generator<Reduce<T>>;
+    using Base::get_target;
+
+    template <typename T2>
+    using Input = typename Base::template Input<T2>;
+
+    template <typename T2>
+    using Output = typename Base::template Output<T2>;
+
+    GeneratorParam<int> tile_x{"tile_x", 32};
+    GeneratorParam<int> tile_y{"tile_y", 32};
+    GeneratorParam<int32_t> truncation_factor{"truncation_factor", 4};
+
+    Input<Buffer<float>> input{"input", 4};
+    Input<int32_t[2]> output_sizes{"output_sizes"};
+
+    // Gaussian convolution component.
+    GaussianKernelComponent gx;
+    GaussianKernelComponent gy;
+
+    SeparableConvolutionComponent separable_conv_2d;
+    Func input_blurred{"input_blurred"};
+
+    // Downscale component.
+    ScaleComponent downscale;
+
+    // The realization.
+    Output<Buffer<float>> output{"input_convolved", 4};
+
+    void generate()
+    {
+      const auto w_in = input.dim(0).extent();
+      const auto h_in = input.dim(1).extent();
+      const auto w_out = output_sizes[0];
+      const auto h_out = output_sizes[1];
+
+      const auto wi = cast<float>(w_in);
+      const auto hi = cast<float>(h_in);
+      const auto wo = cast<float>(w_out);
+      const auto ho = cast<float>(h_out);
+
+      const auto sigma_x = 1.6f * sqrt(w_in/ w_out - 0.99f);
+      gx.generate(sigma_x, truncation_factor);
+
+      const auto sigma_y = 1.6f * sqrt(h_in/ h_out - 0.99f);
+      gy.generate(sigma_y, truncation_factor);
+
+      separable_conv_2d.generate(
+          input,
+          gx.kernel, gx.kernel_size, gx.kernel_shift,
+          gy.kernel, gy.kernel_size, gy.kernel_shift,
+          input_blurred);
+
+      downscale.generate(input, output, w_in, h_in, w_out, h_out);
+    }
+
+    void schedule()
+    {
+      gx.schedule();
+      gy.schedule();
+      separable_conv_2d.schedule(get_target(), tile_x, tile_y, input_blurred);
+      downscale.schedule(get_target(), tile_x, tile_y, input_blurred, output);
     }
   };
 
@@ -225,5 +285,6 @@ namespace {
 }  // namespace
 
 
-HALIDE_REGISTER_GENERATOR(Upscale<float>, shakti_upscale_32f)
+HALIDE_REGISTER_GENERATOR(Scale<float>, shakti_scale_32f)
+HALIDE_REGISTER_GENERATOR(Reduce<float>, shakti_reduce_32f)
 HALIDE_REGISTER_GENERATOR(Enlarge, shakti_enlarge)

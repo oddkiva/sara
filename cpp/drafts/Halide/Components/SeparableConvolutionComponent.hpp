@@ -9,16 +9,15 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include "MyHalide.hpp"
+#include <drafts/Halide/MyHalide.hpp>
 
 
 namespace {
 
   using namespace Halide;
 
-  class SeparableConvolutionComponent
+  struct SeparableConvolutionComponent
   {
-  protected:
     //! @brief Intermediate function
     //! @{
     Func conv_y_t{"conv_y_transposed"};
@@ -32,24 +31,25 @@ namespace {
     Var xi{"xi"}, yi{"yi"}, ci{"ci"};
     //! @}
 
-  public:
     template <typename Input, typename Output>
-    void generate(Input& input, Func& kernel, Expr kernel_size,
-                  Expr kernel_shift, Output& output)
+    void generate(Input& input, Func& kernel_x, Expr kernel_x_size,
+                  Expr kernel_x_shift, Func& kernel_y, Expr kernel_y_size,
+                  Expr kernel_y_shift, Output& output)
     {
       const auto w = input.dim(0).extent();
       const auto h = input.dim(1).extent();
 
       // Define the summation variable `k` with its summation domain (a.k.a. the
       // reduction domain variable).
-      auto k = RDom{kernel_shift, kernel_size};
+      auto k = RDom{kernel_x_shift, kernel_x_size};
+      auto l = RDom{kernel_y_shift, kernel_y_size};
 
       // 1st pass: transpose and convolve the columns.
       auto input_t = Func{"input_transposed"};
       input_t(x, y, c) = input(y, x, c);
       auto input_t_padded =
           BoundaryConditions::repeat_edge(input_t, {{0, h}, {}, {}});
-      conv_y_t(x, y, c) = sum(input_t_padded(x + k, y, c) * kernel(k));
+      conv_y_t(x, y, c) = sum(input_t_padded(x + k, y, c) * kernel_y(k));
 
       // 2nd pass: transpose and convolve the rows.
       auto conv_y = Func{"conv_y"};
@@ -57,7 +57,7 @@ namespace {
       auto conv_y_padded =
           BoundaryConditions::repeat_edge(conv_y, {{0, w}, {}, {}});
       auto& conv_x = output;
-      conv_x(x, y, c) = sum(conv_y_padded(x + k, y, c) * kernel(k));
+      conv_x(x, y, c) = sum(conv_y_padded(x + l, y, c) * kernel_x(l));
     }
 
     template <typename Output>

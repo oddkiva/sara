@@ -9,8 +9,9 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include "MyHalide.hpp"
-#include "SeparableConvolutionComponent.hpp"
+#include <drafts/Halide/MyHalide.hpp>
+#include <drafts/Halide/Components/GaussianKernelComponent.hpp>
+#include <drafts/Halide/Components/SeparableConvolutionComponent.hpp>
 
 
 namespace {
@@ -27,8 +28,8 @@ namespace {
     Input<float> sigma{"sigma"};
     Input<int32_t> truncation_factor{"truncation_factor"};
 
+    GaussianKernelComponent gaussian;
     SeparableConvolutionComponent separable_conv_2d;
-    Func gaussian{"gaussian"};
 
     Output<Buffer<float>> output{"input_convolved", 3};
 
@@ -41,24 +42,17 @@ namespace {
 
     void generate()
     {
-      // Define the unnormalized gaussian function.
-      auto gaussian_unnormalized = Func{"gaussian_unnormalized"};
-      gaussian_unnormalized(x) = exp(-(x * x) / (2 * sigma * sigma));
-
-      auto kernel_size = cast<int>(2 * sigma * truncation_factor + 1);
-      kernel_size = select(kernel_size % 2 == 0, kernel_size + 1, kernel_size);
-      const auto kernel_shift = -kernel_size / 2;
-
-      auto k = RDom(kernel_shift, kernel_size);
-      auto normalization_factor = sum(gaussian_unnormalized(k));
-      gaussian(x) = gaussian_unnormalized(x) / normalization_factor;
-
-      separable_conv_2d.generate(input, gaussian, kernel_size, kernel_shift, output);
+      gaussian.generate(sigma, truncation_factor);
+      separable_conv_2d.generate(
+          input,
+          gaussian.kernel, gaussian.kernel_size, gaussian.kernel_shift,
+          gaussian.kernel, gaussian.kernel_size, gaussian.kernel_shift,
+          output);
     }
 
     void schedule()
     {
-      gaussian.compute_root();
+      gaussian.schedule();
       separable_conv_2d.schedule(get_target(), tile_x, tile_y, output);
     }
   };

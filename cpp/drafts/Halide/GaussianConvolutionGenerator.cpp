@@ -9,7 +9,7 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include "MyHalide.hpp"
+#include <drafts/Halide/MyHalide.hpp>
 #include "shakti_separable_convolution_2d.stub.h"
 
 

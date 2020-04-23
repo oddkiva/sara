@@ -20,8 +20,9 @@ target_link_libraries(test_halide_cast
   PRIVATE
   shakti_halide_cast_to_float)
 
-target_link_libraries(test_halide_enlarge
+target_link_libraries(test_halide_resize
   PRIVATE
+  shakti_scale_32f
   shakti_enlarge)
 
 target_link_libraries(test_halide_separable_convolution_2d
