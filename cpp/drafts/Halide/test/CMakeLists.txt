@@ -23,6 +23,7 @@ target_link_libraries(test_halide_cast
 target_link_libraries(test_halide_resize
   PRIVATE
   shakti_scale_32f
+  shakti_reduce_32f
   shakti_enlarge)
 
 target_link_libraries(test_halide_separable_convolution_2d

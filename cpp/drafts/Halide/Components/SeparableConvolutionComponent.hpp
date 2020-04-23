@@ -26,7 +26,7 @@ namespace {
 
     //! @brief Variables.
     //! @{
-    Var x{"x"}, y{"y"}, c{"c"};
+    Var x{"x"}, y{"y"}, c{"c"}, n{"n"};
     Var xo{"xo"}, yo{"yo"}, co{"co"};
     Var xi{"xi"}, yi{"yi"}, ci{"ci"};
     //! @}
@@ -46,18 +46,18 @@ namespace {
 
       // 1st pass: transpose and convolve the columns.
       auto input_t = Func{"input_transposed"};
-      input_t(x, y, c) = input(y, x, c);
+      input_t(x, y, c, n) = input(y, x, c, n);
       auto input_t_padded =
-          BoundaryConditions::repeat_edge(input_t, {{0, h}, {}, {}});
-      conv_y_t(x, y, c) = sum(input_t_padded(x + k, y, c) * kernel_y(k));
+          BoundaryConditions::repeat_edge(input_t, {{0, h}, {}, {}, {}});
+      conv_y_t(x, y, c, n) = sum(input_t_padded(x + k, y, c, n) * kernel_y(k));
 
       // 2nd pass: transpose and convolve the rows.
       auto conv_y = Func{"conv_y"};
-      conv_y(x, y, c) = conv_y_t(y, x, c);
+      conv_y(x, y, c, n) = conv_y_t(y, x, c, n);
       auto conv_y_padded =
-          BoundaryConditions::repeat_edge(conv_y, {{0, w}, {}, {}});
+          BoundaryConditions::repeat_edge(conv_y, {{0, w}, {}, {}, {}});
       auto& conv_x = output;
-      conv_x(x, y, c) = sum(conv_y_padded(x + l, y, c) * kernel_x(l));
+      conv_x(x, y, c, n) = sum(conv_y_padded(x + l, y, c, n) * kernel_x(l));
     }
 
     template <typename Output>

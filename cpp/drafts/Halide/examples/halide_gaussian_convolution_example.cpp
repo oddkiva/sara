@@ -80,8 +80,13 @@ auto gaussian_convolution_aot_v2(sara::Image<float>& src,
 
   dst.matrix().fill(0);
 
-  auto src_buffer = halide::as_runtime_buffer_3d(src);
-  auto dst_buffer = halide::as_runtime_buffer_3d(dst);
+  auto src_tensor_view =
+      tensor_view(src).reshape(Vector4i{1, 1, src.height(), src.width()});
+  auto dst_tensor_view =
+      tensor_view(dst).reshape(Vector4i{1, 1, dst.height(), dst.width()});
+
+  auto src_buffer = halide::as_runtime_buffer(src_tensor_view);
+  auto dst_buffer = halide::as_runtime_buffer(dst_tensor_view);
 
   for (auto i = 0; i < 100; ++i)
   {

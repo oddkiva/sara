@@ -59,15 +59,14 @@ file(GLOB LESSONS_SOURCE_FILES halide_lesson*.cpp)
 foreach (lesson ${LESSONS_SOURCE_FILES})
   get_filename_component(lesson_name ${lesson} NAME_WE)
   add_executable(${lesson_name} ${lesson})
-  set_target_properties(${lesson_name} PROPERTIES
+  set_target_properties(${lesson_name}
+    PROPERTIES
     COMPILE_FLAGS ${SARA_DEFINITIONS})
-  target_link_libraries(${lesson_name} PRIVATE
+  target_link_libraries(${lesson_name}
+    PRIVATE
     ${DO_Sara_LIBRARIES}
-    Halide)
-  if (OpenMP_CXX_FOUND)
-    target_link_libraries(${lesson_name} PRIVATE
-      OpenMP::OpenMP_CXX)
-  endif ()
+    Halide
+    $<$<BOOL:${OpenMP_CXX_FOUND}>:OpenMP::OpenMP_CXX>)
   set_property(TARGET ${lesson_name} PROPERTY FOLDER "Tutorials/Halide")
 endforeach()
 
@@ -76,16 +75,13 @@ add_executable(halide_aot_example halide_aot_example.cpp)
 set_target_properties(halide_aot_example
   PROPERTIES
   COMPILE_FLAGS ${SARA_DEFINITIONS})
-target_link_libraries(halide_aot_example PRIVATE
+target_link_libraries(halide_aot_example
+  PRIVATE
   ${DO_Sara_LIBRARIES}
   Halide
   shakti_halide_rgb_to_gray
   shakti_halide_gray32f_to_rgb
   shakti_halide_gaussian_blur)
-if (OpenMP_CXX_FOUND)
-  target_link_libraries(halide_aot_example PRIVATE
-    OpenMP::OpenMP_CXX)
-endif ()
 set_property(TARGET halide_aot_example PROPERTY FOLDER "Tutorials/Halide")
 
 
@@ -94,12 +90,29 @@ add_executable(halide_gaussian_convolution_example
 set_target_properties(halide_gaussian_convolution_example
   PROPERTIES
   COMPILE_FLAGS ${SARA_DEFINITIONS})
-target_link_libraries(halide_gaussian_convolution_example PRIVATE
+target_link_libraries(halide_gaussian_convolution_example
+  PRIVATE
   ${DO_Sara_LIBRARIES}
   Halide
   shakti_gaussian_convolution
   shakti_gaussian_convolution_v2
   shakti_halide_gaussian_blur)
 set_property(TARGET halide_gaussian_convolution_example
+  PROPERTY
+  FOLDER "Tutorials/Halide")
+
+add_executable(halide_resize_example
+  halide_resize_example.cpp)
+set_target_properties(halide_resize_example
+  PROPERTIES
+  COMPILE_FLAGS ${SARA_DEFINITIONS})
+target_link_libraries(halide_resize_example
+  PRIVATE
+  ${DO_Sara_LIBRARIES}
+  Halide
+  shakti_halide_rgb_to_gray
+  shakti_halide_gray32f_to_rgb
+  shakti_reduce_32f)
+set_property(TARGET halide_resize_example
   PROPERTY
   FOLDER "Tutorials/Halide")

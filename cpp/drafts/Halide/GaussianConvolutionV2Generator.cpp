@@ -24,21 +24,14 @@ namespace {
     GeneratorParam<int> tile_x{"tile_x", 32};
     GeneratorParam<int> tile_y{"tile_y", 32};
 
-    Input<Buffer<float>> input{"input", 3};
+    Input<Buffer<float>> input{"input", 4};
     Input<float> sigma{"sigma"};
     Input<int32_t> truncation_factor{"truncation_factor"};
 
     GaussianKernelComponent gaussian;
     SeparableConvolutionComponent separable_conv_2d;
 
-    Output<Buffer<float>> output{"input_convolved", 3};
-
-    //! @brief Variables.
-    //! @{
-    Var x{"x"}, y{"y"}, c{"c"};
-    Var xo{"xo"}, yo{"yo"};
-    Var xi{"xi"}, yi{"yi"};
-    //! @}
+    Output<Buffer<float>> output{"input_convolved", 4};
 
     void generate()
     {

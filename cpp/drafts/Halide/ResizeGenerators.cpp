@@ -132,7 +132,7 @@ namespace {
     GeneratorParam<int> tile_y{"tile_y", 32};
     GeneratorParam<int32_t> truncation_factor{"truncation_factor", 4};
 
-    Input<Buffer<float>> input{"input", 4};
+    Input<Buffer<T>> input{"input", 4};
     Input<int32_t[2]> output_sizes{"output_sizes"};
 
     // Gaussian convolution component.
@@ -146,7 +146,7 @@ namespace {
     ScaleComponent downscale;
 
     // The realization.
-    Output<Buffer<float>> output{"input_convolved", 4};
+    Output<Buffer<T>> output{"input_reduced", 4};
 
     void generate()
     {
@@ -175,14 +175,17 @@ namespace {
           gy.kernel, gy.kernel_size, gy.kernel_shift,
           input_blurred);
 
-      downscale.generate(input, output, w_in, h_in, w_out, h_out);
+      downscale.generate(input_blurred, output, w_in, h_in, w_out, h_out);
     }
 
     void schedule()
     {
       gx.schedule();
       gy.schedule();
+
       separable_conv_2d.schedule(get_target(), tile_x, tile_y, input_blurred);
+      input_blurred.compute_root();
+
       downscale.schedule(get_target(), tile_x, tile_y, input_blurred, output);
     }
   };

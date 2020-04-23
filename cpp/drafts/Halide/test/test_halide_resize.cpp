@@ -18,6 +18,7 @@
 
 #include <drafts/Halide/Utilities.hpp>
 #include "shakti_scale_32f.h"
+#include "shakti_reduce_32f.h"
 #include "shakti_enlarge.h"
 
 
@@ -30,9 +31,9 @@ using namespace DO::Sara;
 auto scale(ImageView<float>& src, ImageView<float>& dst)
 {
   auto src_tensor_view =
-      tensor_view(src).reshape(Vector4i{1, 1, src.width(), src.height()});
+      tensor_view(src).reshape(Vector4i{1, 1, src.height(), src.width()});
   auto dst_tensor_view =
-      tensor_view(dst).reshape(Vector4i{1, 1, dst.width(), dst.height()});
+      tensor_view(dst).reshape(Vector4i{1, 1, dst.height(), dst.width()});
 
   auto src_buffer = halide::as_runtime_buffer(src_tensor_view);
   auto dst_buffer = halide::as_runtime_buffer(dst_tensor_view);
@@ -42,6 +43,20 @@ auto scale(ImageView<float>& src, ImageView<float>& dst)
   dst_buffer.copy_to_host();
 }
 
+auto reduce(ImageView<float>& src, ImageView<float>& dst)
+{
+  auto src_tensor_view =
+      tensor_view(src).reshape(Vector4i{1, 1, src.height(), src.width()});
+  auto dst_tensor_view =
+      tensor_view(dst).reshape(Vector4i{1, 1, dst.height(), dst.width()});
+
+  auto src_buffer = halide::as_runtime_buffer(src_tensor_view);
+  auto dst_buffer = halide::as_runtime_buffer(dst_tensor_view);
+
+  src_buffer.set_host_dirty();
+  shakti_reduce_32f(src_buffer, dst.width(), dst.height(), dst_buffer);
+  dst_buffer.copy_to_host();
+}
 
 auto enlarge(ImageView<float>& src, ImageView<float>& dst)
 {
@@ -224,42 +239,45 @@ BOOST_AUTO_TEST_CASE(test_enlarge_small_image)
   BOOST_CHECK_EQUAL(true_dst.matrix(), dst.matrix());
 }
 
-// BOOST_AUTO_TEST_CASE(test_reduce_on_image_views)
-// {
-//   auto src = Image<float>{10, 10};
-//   for (int y = 0; y < 10; ++y)
-//     src.matrix().row(y).fill(static_cast<float>(y));
-//
-//   auto dst = Image<float>{10, 5};
-//   reduce(src, dst);
-//
-//   // Make the following check except for y = 0, which should be sorted out
-//   // later.
-//   for (int y = 1; y < dst.height(); ++y)
-//   {
-//     auto true_value = RowVectorXf{10};
-//     true_value.fill(y * 2.f);
-//     BOOST_CHECK_LE(std::abs(true_value[0] - dst.matrix().row(y)[0]), 0.05);
-//   }
-// }
-//
-// BOOST_AUTO_TEST_CASE(test_reduce_single_channel)
-// {
-//   auto src = Image<float>{4, 4};
-//   src.matrix() << 0, 0.5, 1, 1, 1, 1.5, 2, 2, 2, 2.5, 3, 3, 2, 2.5, 3, 3;
-//
-//   auto true_dst = Image<float>{2, 2};
-//   true_dst.matrix() << 0, 1, 2, 3;
-//
-//   auto dst = Image<float>{};
-//
-//   dst = reduce(src, {2, 2});
-//   BOOST_CHECK_LE((true_dst.matrix() - dst.matrix()).lpNorm<Infinity>(), 0.4);
-//
-//   dst = reduce(src, 2);
-//   BOOST_CHECK_LE((true_dst.matrix() - dst.matrix()).lpNorm<Infinity>(), 0.4);
-// }
-//
+BOOST_AUTO_TEST_CASE(test_reduce_on_image_views)
+{
+  auto src = Image<float>{10, 10};
+  for (int y = 0; y < 10; ++y)
+    src.matrix().row(y).fill(static_cast<float>(y));
+
+  auto dst = Image<float>{10, 5};
+  reduce(src, dst);
+
+  // Make the following check except for y = 0, which should be sorted out
+  // later.
+  for (int y = 1; y < dst.height(); ++y)
+  {
+    auto true_value = RowVectorXf{10};
+    true_value.fill(y * 2.f);
+    BOOST_CHECK_LE(std::abs(true_value[0] - dst.matrix().row(y)[0]), 1e-9);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(test_reduce_single_channel)
+{
+  auto src = Image<float>{4, 4};
+  src.matrix() <<
+    0, 0.5, 1, 1,
+    1, 1.5, 2, 2,
+    2, 2.5, 3, 3,
+    2, 2.5, 3, 3;
+
+  auto true_dst = Image<float>{2, 2};
+  true_dst.matrix() <<
+    0, 1,
+    2, 3;
+
+  auto dst = Image<float>{2, 2};
+
+  reduce(src, dst);
+  BOOST_CHECK_LE((true_dst.matrix() - dst.matrix()).lpNorm<Infinity>(), 1e-6);
+}
+
 // BOOST_AUTO_TEST_CASE(test_reduce_rgb)
 // {
 //   auto lambda = [](double lambda) { return Rgb64f{lambda, lambda, lambda}; };

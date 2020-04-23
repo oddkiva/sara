@@ -40,6 +40,12 @@ shakti_halide_library_v2(
 
 # Enlarge function.
 shakti_halide_library_v2(
+  NAME shakti_reduce_32f
+  SRCS ResizeGenerators.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+# Enlarge function.
+shakti_halide_library_v2(
   NAME shakti_enlarge
   SRCS ResizeGenerators.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
