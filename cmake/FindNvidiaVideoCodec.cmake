@@ -33,14 +33,27 @@ endforeach ()
 
 if (NOT NvidiaVideoCodec_LIBRARY)
   foreach (search ${_NvidiaVideoCodec_SEARCHES})
-    find_library(NvidiaVideoCodec_nvcuvid_LIBRARY
-      NAMES nvcuvid
-      ${${search}}
-      PATH_SUFFIXES Lib/linux/stubs/x86_64)
-    find_library(NvidiaVideoCodec_encode_LIBRARY
-      NAMES nvidia-encode
-      ${${search}}
-      PATH_SUFFIXES Lib/linux/stubs/x86_64)
+    if (WIN32)
+      find_library(NvidiaVideoCodec_nvcuvid_LIBRARY
+        NAMES nvcuvid
+        ${${search}}
+        PATH_SUFFIXES Lib/x64)
+
+      find_library(NvidiaVideoCodec_encode_LIBRARY
+        NAMES nvencodeapi
+        ${${search}}
+        PATH_SUFFIXES Lib/x64)
+    else ()
+      find_library(NvidiaVideoCodec_nvcuvid_LIBRARY
+        NAMES nvcuvid
+        ${${search}}
+        PATH_SUFFIXES Lib/linux/stubs/x86_64)
+
+      find_library(NvidiaVideoCodec_encode_LIBRARY
+        NAMES nvidia-encode
+        ${${search}}
+        PATH_SUFFIXES Lib/linux/stubs/x86_64)
+    endif ()
   endforeach ()
 endif ()
 

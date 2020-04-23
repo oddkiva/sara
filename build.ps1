@@ -15,6 +15,7 @@ $boost_dir = "C:\local\boost_1_71_0"
 $halide_dir = "C:\local\halide"
 $cudnn_dir = "C:\local\cudnn"
 $tensorrt_dir = "C:\local\TensorRT-7.0.0.11"
+$nvidia_codec_sdk_dir = "C:\local\Video_Codec_SDK_9.1.23"
 
 $update_vcpkg = $false
 
@@ -40,6 +41,9 @@ if ($update_vcpkg) {
 
   # Install Ceres libraries.
   iex ".\vcpkg.exe install ceres[cxsparse,suitesparse]:x64-windows"
+
+  # Install Ceres libraries.
+  iex ".\vcpkg.exe install glew:x64-windows"
   echo `n
 }
 
@@ -82,6 +86,7 @@ $cmake_options += "-DSARA_BUILD_SHARED_LIBS:BOOL=$($build_shared_libs[$build_typ
 $cmake_options += "-DSARA_BUILD_SAMPLES:BOOL=ON "
 $cmake_options += "-DSARA_BUILD_TESTS:BOOL=ON "
 $cmake_options += "-DSARA_USE_HALIDE:BOOL=ON "
+$cmake_options += "-DNvidiaVideoCodec_ROOT=$nvidia_codec_sdk_dir "
 
 echo "CMake options = $cmake_options"
 echo "`n"
