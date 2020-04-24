@@ -1,6 +1,8 @@
 find_package(OpenMP)
 find_package(DO_Sara COMPONENTS Core Graphics VideoIO REQUIRED)
 
+# N.B.: with MSVC, this link helped to solve already defined symbol errors:
+# https://github.com/halide/Halide/issues/740
 
 file(GLOB LESSONS_SOURCE_FILES
   lesson_01*.cpp
