@@ -13,6 +13,7 @@
 
 #include <DO/Sara/Core/Pixel.hpp>
 #include <DO/Sara/Core/Tensor.hpp>
+#include <DO/Sara/ImageProcessing/Resize.hpp>
 
 #include <boost/test/unit_test.hpp>
 
@@ -248,14 +249,12 @@ BOOST_AUTO_TEST_CASE(test_reduce_on_image_views)
   auto dst = Image<float>{10, 5};
   reduce(src, dst);
 
-  // Make the following check except for y = 0, which should be sorted out
-  // later.
-  for (int y = 1; y < dst.height(); ++y)
-  {
-    auto true_value = RowVectorXf{10};
-    true_value.fill(y * 2.f);
-    BOOST_CHECK_LE(std::abs(true_value[0] - dst.matrix().row(y)[0]), 1e-9);
-  }
+  auto dst_ref = Image<float>{10, 5};
+  DO::Sara::reduce(src, dst_ref);
+  std::cout << dst.matrix() << std::endl;
+  std::cout << dst_ref.matrix() << std::endl;
+
+  BOOST_CHECK_LE((dst.matrix() - dst_ref.matrix()).lpNorm<Infinity>(), 1e-1);
 }
 
 BOOST_AUTO_TEST_CASE(test_reduce_single_channel)
