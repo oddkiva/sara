@@ -47,8 +47,8 @@ namespace {
       output.dim(0).set_stride(Expr());
 
       Expr output_is_planar = output.dim(0).stride() == 1;
-      Expr output_is_interleaved = output.dim(0).stride() == 3 and  //
-                                   output.dim(2).stride() == 1 and  //
+      Expr output_is_interleaved = output.dim(0).stride() == 3 &&  //
+                                   output.dim(2).stride() == 1 &&  //
                                    output.dim(2).extent() == 3;
 
       // GPU schedule.

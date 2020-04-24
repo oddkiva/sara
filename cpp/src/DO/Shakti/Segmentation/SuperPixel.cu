@@ -244,7 +244,7 @@ namespace DO { namespace Shakti {
 
     // Sanity check.
     if (_image_grid_sizes.x * _image_block_sizes.x !=
-            static_cast<std::size_t>(padded_width) or
+            static_cast<std::size_t>(padded_width) ||
         _image_grid_sizes.y * _image_block_sizes.y !=
             static_cast<std::size_t>(sizes.y()))
     {

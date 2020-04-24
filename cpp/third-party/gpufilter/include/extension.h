@@ -192,8 +192,8 @@ T lookat( const T *img,
     if( !img ) return (T)0;
     switch( ic ) {
     case zero:
-        if( i < 0 or j < 0 ) return (T)0;
-        else if( i >= h or j >= w ) return (T)0;
+        if( i < 0 || j < 0 ) return (T)0;
+        else if( i >= h || j >= w ) return (T)0;
         else return img[i*w+j];
     case clamp:
         _clamp c;

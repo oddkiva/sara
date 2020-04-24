@@ -197,14 +197,15 @@ namespace DO { namespace Sara {
       }
 #endif
       vector<vector<size_t>> q(vec_dR.size());  // Set of quadruples.
+      const auto vec_dR_size = static_cast<int>(vec_dR.size());
 #pragma omp parallel for
-      for (auto m = 0u; m < vec_dR.size(); ++m)
+      for (int m = 0; m < vec_dR_size; ++m)
         q[m].resize(4);
 
-      vector<int> spurious(vec_dR.size(), 0);  // $m$ is spurious.
+      vector<int> spurious(vec_dR_size, 0);  // $m$ is spurious.
 
 #pragma omp parallel for
-      for (auto m = 0u; m < vec_dR.size(); ++m)
+      for (int m = 0; m < vec_dR_size; ++m)
       {
         q[m][3] = vec_dR[m];
         // CHECK_CANDIDATE_MATCH_AND_GROWING_STATE;
