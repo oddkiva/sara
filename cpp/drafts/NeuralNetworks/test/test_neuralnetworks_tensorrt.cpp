@@ -1,11 +1,11 @@
-#include <drafts/NeuralNetworks/TensorRT/Helpers.hpp>
-
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/StringFormat.hpp>
 #include <DO/Sara/Core/Tensor.hpp>
 
 #include <DO/Shakti/MultiArray.hpp>
 #include <DO/Shakti/Utilities.hpp>
+
+#include <drafts/NeuralNetworks/TensorRT/Helpers.hpp>
 
 #include <termcolor/termcolor.hpp>
 
@@ -258,7 +258,7 @@ auto main() -> int
   };
 
   // Enqueue the CPU pinned <-> GPU tranfers and the convolution task.
-  if (not context->enqueue(1, device_buffers.data(), *cuda_stream, nullptr))
+  if (!context->enqueue(1, device_buffers.data(), *cuda_stream, nullptr))
   {
     SARA_DEBUG << termcolor::red << "Execution failed!" << termcolor::reset
                << std::endl;

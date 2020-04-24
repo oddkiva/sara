@@ -23,7 +23,7 @@ if (CUDA_FOUND AND TensorRT_FOUND)
   foreach(file ${test_tensorrt_SOURCE_FILES})
     get_filename_component(filename ${file} NAME_WE)
 
-    cuda_add_executable(${filename} ${file})
+    add_executable(${filename} ${file})
 
     target_include_directories(${filename}
       PRIVATE ${TensorRT_INCLUDE_DIRS})
