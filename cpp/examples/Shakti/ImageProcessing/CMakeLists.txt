@@ -15,9 +15,6 @@ foreach (file ${examples_SRC_FILES})
     DO::Shakti::MultiArray
     DO::Shakti::ImageProcessing
     DO::Shakti::Utilities
-    gpufilter)
-
-  if (OpenMP_CXX_FOUND)
-    target_link_libraries(shakti_${filename} OpenMP::OpenMP_CXX)
-  endif ()
+    $<$<PLATFORM_ID:Linux>:gpufilter>
+    $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
 endforeach ()
