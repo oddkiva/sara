@@ -15,12 +15,13 @@ function (shakti_add_test)
   get_filename_component(_filename "${shakti_add_test_SOURCES}" NAME_WE)
   set (_test_name shakti_${_filename})
 
-  add_executable(${_test_name} ${shakti_add_test_SOURCES})
+  cuda_add_executable(${_test_name} ${shakti_add_test_SOURCES})
   target_include_directories(${_test_name}
     PRIVATE
     ${CUDA_TOOLKIT_INCLUDE}
     ${Boost_INCLUDE_DIR})
   target_link_libraries(${_test_name}
+    PRIVATE
     ${Boost_LIBRARIES}
     ${shakti_add_test_DEPENDENCIES})
 
@@ -28,6 +29,7 @@ function (shakti_add_test)
 
   set_target_properties(${_test_name}
     PROPERTIES
+    CUDA_SEPARABLE_COMPILATION ON
     CUDA_STANDARD 14
     FOLDER "Tests/Shakti")
 

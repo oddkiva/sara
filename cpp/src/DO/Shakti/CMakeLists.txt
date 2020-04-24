@@ -40,12 +40,12 @@ target_include_directories(DO_Shakti_MultiArray
   INTERFACE
   $<BUILD_INTERFACE:${DO_Sara_DIR}/cpp/src>
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
-if (UNIX)
-  target_compile_options(DO_Shakti_MultiArray
-    INTERFACE
-    $<$<COMPILE_LANGUAGE:CXX>:-Wno-unknown-pragmas>
-    $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-Wno-unknown-pragmas>)
-endif ()
+target_compile_options(DO_Shakti_MultiArray
+  INTERFACE
+  $<$<COMPILE_LANG_AND_ID:CXX,GNU,AppleClang,Clang>:-Wno-unknown-pragmas>
+  $<$<COMPILE_LANG_AND_ID:CUDA,GNU,AppleClang,Clang>:-Xcompiler=-Wno-unknown-pragmas>
+  $<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/wd4068>
+  $<$<COMPILE_LANG_AND_ID:CUDA,MSVC>:-Xcompiler "/wd4068">)
 add_library(DO::Shakti::MultiArray ALIAS DO_Shakti_MultiArray)
 
 # Create the reamining libraries.
@@ -56,5 +56,11 @@ foreach (library ${DO_Shakti_LIBRARIES})
   shakti_generate_library("${library}")
 endforeach ()
 
-target_link_libraries(DO_Shakti_ImageProcessing DO_Shakti_MultiArray DO_Shakti_Utilities)
-target_link_libraries(DO_Shakti_Segmentation DO_Shakti_MultiArray DO_Shakti_Utilities)
+target_link_libraries(DO_Shakti_ImageProcessing
+  PUBLIC
+  DO_Shakti_MultiArray
+  DO_Shakti_Utilities)
+target_link_libraries(DO_Shakti_Segmentation
+  PUBLIC
+  DO_Shakti_MultiArray
+  DO_Shakti_Utilities)

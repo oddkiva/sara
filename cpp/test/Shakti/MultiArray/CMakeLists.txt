@@ -4,6 +4,10 @@ file(GLOB test_multiarray_SOURCE_FILES FILES test_*.cu)
 
 foreach (file ${test_multiarray_SOURCE_FILES})
   shakti_add_test(
-    SOURCES ${file}
-    DEPENDENCIES DO::Shakti::MultiArray DO::Shakti::Utilities)
+    SOURCES
+    ${file}
+
+    DEPENDENCIES
+    DO::Shakti::MultiArray
+    DO::Shakti::Utilities)
 endforeach ()
