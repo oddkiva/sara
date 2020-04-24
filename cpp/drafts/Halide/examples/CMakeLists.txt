@@ -77,7 +77,8 @@ add_executable(halide_aot_example halide_aot_example.cpp)
 target_compile_definitions(halide_aot_example
   PRIVATE ${SARA_DEFINITIONS})
 target_link_options(halide_aot_example
-  PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/force>)
+  PRIVATE
+  $<$<CXX_COMPILER_ID:MSVC>:/INCREMENTAL:NO /FORCE /IGNORE:4006>)
 target_link_libraries(halide_aot_example
   PRIVATE
   ${DO_Sara_LIBRARIES}
@@ -108,7 +109,8 @@ add_executable(halide_resize_example
 target_compile_definitions(halide_resize_example
   PRIVATE ${SARA_DEFINITIONS})
 target_link_options(halide_resize_example
-  PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/force>)
+  PRIVATE
+  $<$<CXX_COMPILER_ID:MSVC>:/INCREMENTAL:NO /FORCE /IGNORE:4006>)
 target_link_libraries(halide_resize_example
   PRIVATE
   ${DO_Sara_LIBRARIES}
