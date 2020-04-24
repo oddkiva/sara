@@ -63,7 +63,7 @@ auto halide_pipeline() -> void
 
     tic();
     {
-      // Use parallelisation and vectorization.
+      // Use parallelization and vectorization.
       shakti_halide_rgb_to_gray(buffer_rgb, buffer_gray32f);
 
 #define USE_HALIDE_AOT_IMPLEMENTATION

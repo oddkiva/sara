@@ -72,9 +72,10 @@ endforeach()
 
 
 add_executable(halide_aot_example halide_aot_example.cpp)
-set_target_properties(halide_aot_example
-  PROPERTIES
-  COMPILE_FLAGS ${SARA_DEFINITIONS})
+target_compile_definitions(halide_aot_example
+  PRIVATE ${SARA_DEFINITIONS})
+target_link_options(halide_aot_example
+  PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/force>)
 target_link_libraries(halide_aot_example
   PRIVATE
   ${DO_Sara_LIBRARIES}
@@ -87,9 +88,8 @@ set_property(TARGET halide_aot_example PROPERTY FOLDER "Tutorials/Halide")
 
 add_executable(halide_gaussian_convolution_example
   halide_gaussian_convolution_example.cpp)
-set_target_properties(halide_gaussian_convolution_example
-  PROPERTIES
-  COMPILE_FLAGS ${SARA_DEFINITIONS})
+target_compile_definitions(halide_gaussian_convolution_example
+  PRIVATE ${SARA_DEFINITIONS})
 target_link_libraries(halide_gaussian_convolution_example
   PRIVATE
   ${DO_Sara_LIBRARIES}
@@ -103,9 +103,10 @@ set_property(TARGET halide_gaussian_convolution_example
 
 add_executable(halide_resize_example
   halide_resize_example.cpp)
-set_target_properties(halide_resize_example
-  PROPERTIES
-  COMPILE_FLAGS ${SARA_DEFINITIONS})
+target_compile_definitions(halide_resize_example
+  PRIVATE ${SARA_DEFINITIONS})
+target_link_options(halide_resize_example
+  PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/force>)
 target_link_libraries(halide_resize_example
   PRIVATE
   ${DO_Sara_LIBRARIES}
