@@ -3,7 +3,10 @@ if (WIN32)
 else ()
   add_library(gpufilter timer.cpp defs.cpp gpufilter.cu gpudefs.cu)
 endif ()
-set_target_properties(gpufilter PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+set_target_properties(gpufilter
+  PROPERTIES
+  CUDA_SEPARABLE_COMPILATION ON
+  FOLDER "Third-Party")
 target_include_directories(gpufilter
   PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}/../include

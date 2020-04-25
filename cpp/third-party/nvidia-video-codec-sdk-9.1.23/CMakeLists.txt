@@ -50,4 +50,7 @@ target_compile_options(nvidia_VideoCodecHelpers
   $<$<CXX_COMPILER_ID:GNU>:-Wno-switch>
   $<$<CXX_COMPILER_ID:GNU>:-Wno-unused-parameter>
   $<$<CXX_COMPILER_ID:GNU>:-Wno-unused-variable>)
+set_target_properties(nvidia_VideoCodecHelpers
+  PROPERTIES
+  FOLDER "Third-Party")
 add_library(nvidia::VideoCodecHelpers ALIAS nvidia_VideoCodecHelpers)
