@@ -1,3 +1,5 @@
+set(BUILD_SHARED_LIBS OFF)
+
 include(sara_use_halide)
 
 # N.B.: in Mac OS X, the genfiles directory is not formed correctly because of a

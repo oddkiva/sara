@@ -45,7 +45,7 @@ target_compile_options(DO_Shakti_MultiArray
   $<$<COMPILE_LANG_AND_ID:CXX,GNU,AppleClang,Clang>:-Wno-unknown-pragmas>
   $<$<COMPILE_LANG_AND_ID:CUDA,GNU,AppleClang,Clang>:-Xcompiler=-Wno-unknown-pragmas>
   $<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/wd4068>
-  $<$<COMPILE_LANG_AND_ID:CUDA,MSVC>:-Xcompiler "/wd4068">)
+  $<$<COMPILE_LANG_AND_ID:CUDA,MSVC>:-Xcompiler /wd4068>)
 add_library(DO::Shakti::MultiArray ALIAS DO_Shakti_MultiArray)
 
 # Create the reamining libraries.

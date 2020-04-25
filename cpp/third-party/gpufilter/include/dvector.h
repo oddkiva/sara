@@ -11,6 +11,7 @@
 
 //== INCLUDES =================================================================
 
+#include <algorithm>
 #include <vector>
 
 #include <alloc.h>

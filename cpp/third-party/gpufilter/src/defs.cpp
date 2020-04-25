@@ -45,7 +45,7 @@ void calc_borders( int& left,
 bool extend( const int& w,
              const int& h,
              const int& extb ) {
-    return (w%32>0 or h%32>0 or extb>0);
+    return (w%32>0 || h%32>0 || extb>0);
 }
 
 //=============================================================================
