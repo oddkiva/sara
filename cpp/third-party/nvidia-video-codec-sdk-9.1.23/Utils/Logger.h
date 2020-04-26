@@ -284,6 +284,7 @@ namespace simplelogger {
       pLogger->EnterCriticalSection();
       pLogger->GetStream() << pLogger->GetLead(level, szFile, nLine, szFunc);
     }
+
     ~LogTransaction()
     {
       if (!pLogger)
@@ -303,6 +304,7 @@ namespace simplelogger {
         exit(1);
       }
     }
+
     std::ostream& GetStream()
     {
       if (!pLogger)

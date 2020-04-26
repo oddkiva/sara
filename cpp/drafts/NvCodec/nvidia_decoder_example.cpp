@@ -474,6 +474,7 @@ int main()
 #else
   // const auto video_filepath = "/home/david/Desktop/test.mp4"s;
   const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
+  //const auto video_filepath = "/home/david/Desktop/GOPR0542.MP4"s;
 #endif
 
   // Initialize a CUDA-powered video streamer object.
