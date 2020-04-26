@@ -25,6 +25,9 @@ namespace DO { namespace Shakti {
     const auto block_size = default_block_size_2d();
     const auto grid_size = grid_size_2d(out);
 
+    SHAKTI_SAFE_CUDA_CALL(cudaMemcpyToSymbol(Shakti::image_sizes,
+                                             in.sizes().data(), sizeof(int2)));
+
     SHAKTI_SAFE_CUDA_CALL(cudaBindTextureToArray(in_float_texture, in));
     apply_gradient_kernel<<<grid_size, block_size>>>(out.data());
     SHAKTI_SAFE_CUDA_CALL(cudaUnbindTexture(in_float_texture));
@@ -38,6 +41,9 @@ namespace DO { namespace Shakti {
 
     const auto block_size = default_block_size_2d();
     const auto grid_size = grid_size_2d(out);
+
+    SHAKTI_SAFE_CUDA_CALL(cudaMemcpyToSymbol(Shakti::image_sizes,
+                                             in.sizes().data(), sizeof(int2)));
 
     SHAKTI_SAFE_CUDA_CALL(cudaBindTextureToArray(in_float_texture, in));
     apply_gradient_polar_coordinates_kernel<<<grid_size, block_size>>>(
@@ -54,6 +60,9 @@ namespace DO { namespace Shakti {
     const auto block_size = default_block_size_2d();
     const auto grid_size = grid_size_2d(out);
 
+    SHAKTI_SAFE_CUDA_CALL(cudaMemcpyToSymbol(Shakti::image_sizes,
+                                             in.sizes().data(), sizeof(int2)));
+
     SHAKTI_SAFE_CUDA_CALL(cudaBindTextureToArray(in_float_texture, in));
     apply_gradient_squared_norms_kernel<<<grid_size, block_size>>>(out.data());
     SHAKTI_SAFE_CUDA_CALL(cudaUnbindTexture(in_float_texture));
@@ -68,6 +77,9 @@ namespace DO { namespace Shakti {
     const auto block_size = default_block_size_2d();
     const auto grid_size = grid_size_2d(out);
 
+    SHAKTI_SAFE_CUDA_CALL(cudaMemcpyToSymbol(Shakti::image_sizes,
+                                             in.sizes().data(), sizeof(int2)));
+
     apply_squared_norms_kernel<<<grid_size, block_size>>>(out.data(),
                                                           in.data());
     return out;
@@ -79,6 +91,9 @@ namespace DO { namespace Shakti {
 
     const auto block_size = default_block_size_2d();
     const auto grid_size = grid_size_2d(out);
+
+    SHAKTI_SAFE_CUDA_CALL(cudaMemcpyToSymbol(Shakti::image_sizes,
+                                             in.sizes().data(), sizeof(int2)));
 
     SHAKTI_SAFE_CUDA_CALL(cudaBindTextureToArray(in_float_texture, in));
     apply_laplacian_kernel<<<grid_size, block_size>>>(out.data());
@@ -95,36 +110,38 @@ namespace DO { namespace Shakti {
 
   void compute_x_derivative(float *out, const float *in, const int *sizes)
   {
-    const float kernel[] = { -1.f, 0.f, 1.f };
-    const int kernel_size{ 3 };
+    const float kernel[] = {-1.f, 0.f, 1.f};
+    const int kernel_size{3};
     apply_column_based_convolution(out, in, kernel, kernel_size, sizes);
   }
 
-  void compute_y_derivative(float *out, const float *in, const int *sizes)
+  void compute_y_derivative(float* out, const float* in, const int* sizes)
   {
-    const float kernel[] = { -1.f, 0.f, 1.f };
-    const int kernel_size{ 3 };
+    const float kernel[] = {-1.f, 0.f, 1.f};
+    const int kernel_size{3};
     apply_row_based_convolution(out, in, kernel, kernel_size, sizes);
   }
 
-  void compute_gradient(Vector2f *out, const float *in, const int *sizes)
+  void compute_gradient(Vector2f* out, const float* in, const int* sizes)
   {
-    TextureArray<float> in_cuda_array{ in, { sizes[0], sizes[1] } };
-    MultiArray<Vector2f, 2> gradients{ gradient(in_cuda_array) };
+    TextureArray<float> in_cuda_array{in, {sizes[0], sizes[1]}};
+    MultiArray<Vector2f, 2> gradients{gradient(in_cuda_array)};
     gradients.copy_to_host(out);
   }
 
-  void compute_gradient_squared_norms(float *out, const float *in, const int *sizes)
+  void compute_gradient_squared_norms(float* out, const float* in,
+                                      const int* sizes)
   {
-    TextureArray<float> in_cuda_array{ in, { sizes[0], sizes[1] } };
-    MultiArray<float, 2> gradient_squared_norms{ gradient_squared_norm(in_cuda_array) };
+    TextureArray<float> in_cuda_array{in, {sizes[0], sizes[1]}};
+    MultiArray<float, 2> gradient_squared_norms{
+        gradient_squared_norm(in_cuda_array)};
     gradient_squared_norms.copy_to_host(out);
   }
 
-  void compute_laplacian(float *out, const float *in, const int *sizes)
+  void compute_laplacian(float* out, const float* in, const int* sizes)
   {
-    TextureArray<float> in_cuda_array{ in, { sizes[0], sizes[1] } };
-    MultiArray<float, 2> laplacians{ laplacian(in_cuda_array) };
+    TextureArray<float> in_cuda_array{in, {sizes[0], sizes[1]}};
+    MultiArray<float, 2> laplacians{laplacian(in_cuda_array)};
     laplacians.copy_to_host(out);
   }
 

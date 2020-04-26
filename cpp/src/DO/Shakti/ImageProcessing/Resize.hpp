@@ -19,7 +19,7 @@
 #include <nppi_geometry_transforms.h>
 
 
-namespace DO { namespace Shakti {
+namespace DO { namespace Shakti { namespace NPPI {
 
   //! @brief Resize the image.
   template <typename Strides>
@@ -93,4 +93,4 @@ namespace DO { namespace Shakti {
       throw std::runtime_error{"Error resizing image!"};
   }
 
-}}  // namespace DO::Shakti
+}}}  // namespace DO::Shakti::NPPI
