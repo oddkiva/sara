@@ -76,10 +76,10 @@ int main()
   kernel.set_argument(N, 2);
 
   // Execute the kernel.
-  size_t work_dims = 1;
-  size_t work_items_per_kernel[] = {N};
+  constexpr size_t work_dims = 1;
+  constexpr size_t work_items_per_kernel[] = {N};
   command_queue.enqueue_nd_range_kernel(
-    kernel, 1, nullptr, work_items_per_kernel, nullptr);
+    kernel, work_dims, nullptr, work_items_per_kernel, nullptr);
 
   // Wait for the commands to get serviced before reading back results.
   command_queue.finish();

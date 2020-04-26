@@ -18,4 +18,4 @@
 #include <DO/Sara/DisjointSets/AdjacencyList.hpp>
 #include <DO/Sara/DisjointSets/DisjointSets.hpp>
 
-//! @defgroup DisjointSets
+//! @defgroup DisjointSets Disjoint Sets and Connected Components for Images

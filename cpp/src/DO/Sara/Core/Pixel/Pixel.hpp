@@ -54,7 +54,7 @@ namespace DO { namespace Sara {
     }
 
     //! Copy constructor.
-    template<typename OtherDerived>
+    template <typename OtherDerived>
     inline Pixel(const Eigen::MatrixBase<OtherDerived>& other)
       : base_type(other)
     {
@@ -62,7 +62,8 @@ namespace DO { namespace Sara {
 
     //! Assignment operator.
     template <typename _OtherDerived>
-    inline auto operator=(const Eigen::MatrixBase<_OtherDerived>& other) -> Pixel&
+    inline auto operator=(const Eigen::MatrixBase<_OtherDerived>& other)
+        -> Pixel&
     {
       this->base_type::operator=(other);
       return *this;
@@ -91,5 +92,4 @@ namespace DO { namespace Sara {
 
   //! @}
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara

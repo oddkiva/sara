@@ -1,64 +1,68 @@
-find_package(DO_Sara COMPONENTS Core Graphics VideoIO REQUIRED)
+set(BUILD_SHARED_LIBS OFF)
 
 include(sara_use_halide)
 
+# N.B.: in Mac OS X, the genfiles directory is not formed correctly because of a
+# bug in the CMake script in `Halide.cmake` is using the variable
+# `CMAKE_CFG_INTDIR` incorrectly.
 
-file(GLOB LESSONS_SOURCE_FILES
-  lesson_01*.cpp
-  lesson_02*.cpp
-  lesson_03*.cpp
-  lesson_04*.cpp
-  lesson_05*.cpp
-  lesson_06*.cpp
-  lesson_07*.cpp
-  lesson_08*.cpp
-  # lesson_09*.cpp
-  # lesson_10*.cpp
-  lesson_11*.cpp
-  lesson_12*.cpp
-  lesson_13*.cpp
-  lesson_14*.cpp
-  # lesson_15*.cpp
-  # lesson_16*.cpp
-  lesson_17*.cpp
-  lesson_18*.cpp
-  lesson_19*.cpp
-  lesson_20*.cpp
-  # lesson_21*.cpp
-  )
+# Color conversions.
+shakti_halide_library(shakti_halide_rgb_to_gray.cpp)
+shakti_halide_library(shakti_halide_gray32f_to_rgb.cpp)
+shakti_halide_gpu_library(shakti_halide_cast_to_float.cpp)
 
-function (add_halide_executable source_file)
-  get_filename_component(name ${source_file} NAME_WE)
-  add_executable(${name} ${source_file})
-  target_include_directories(${name}
-    PRIVATE ${HALIDE_DISTRIB_DIR}/include
-    ${HALIDE_DISTRIB_DIR}/tools)
-
-  target_link_libraries(${name} PRIVATE
-    ${DO_Sara_LIBRARIES}
-    ${JPEG_LIBRARIES}
-    ${PNG_LIBRARIES}
-    ${OpenMP_CXX_LIBRARIES}
-    Halide)
-
-  set_property(TARGET ${name} PROPERTY FOLDER "Tutorials/Halide")
-endfunction ()
-
-foreach (lesson ${LESSONS_SOURCE_FILES})
-  add_halide_executable(${lesson})
-endforeach ()
+# Fastest gaussian convolution at the moment
+shakti_halide_gpu_library(shakti_halide_gaussian_blur.cpp)
 
 
-file(GLOB LESSONS_SOURCE_FILES halide_lesson*.cpp)
+# Separable convolution 2D
+shakti_halide_library_v2(
+  NAME shakti_separable_convolution_2d
+  SRCS SeparableConvolution2dGenerator.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
-foreach (lesson ${LESSONS_SOURCE_FILES})
-  get_filename_component(lesson_name ${lesson} NAME_WE)
-  add_executable(${lesson_name} ${lesson})
-  set_target_properties(${lesson_name} PROPERTIES
-    COMPILE_FLAGS ${SARA_DEFINITIONS})
-  target_link_libraries(${lesson_name} PRIVATE
-    ${DO_Sara_LIBRARIES}
-    ${OpenMP_CXX_LIBRARIES}
-    Halide)
-  set_property(TARGET ${lesson_name} PROPERTY FOLDER "Tutorials/Halide")
-endforeach()
+# Gaussian convolution (slower implementation).
+shakti_halide_library_v2(
+  NAME shakti_gaussian_convolution
+  SRCS GaussianConvolutionGenerator.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS}
+  DEPS shakti_separable_convolution_2d.generator)
+
+# Gaussian convolution V2 (teeny-tiny bit slower).
+shakti_halide_library_v2(
+  NAME shakti_gaussian_convolution_v2
+  SRCS GaussianConvolutionV2Generator.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+# Upscale function.
+shakti_halide_library_v2(
+  NAME shakti_scale_32f
+  SRCS ResizeGenerators.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+# Enlarge function.
+shakti_halide_library_v2(
+  NAME shakti_reduce_32f
+  SRCS ResizeGenerators.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+# Enlarge function.
+shakti_halide_library_v2(
+  NAME shakti_enlarge
+  SRCS ResizeGenerators.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+
+# Im2Col.
+shakti_halide_library_v2(
+  NAME shakti_im2col_32f
+  SRCS Im2ColGenerator.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+if (SARA_BUILD_SAMPLES)
+  add_subdirectory(examples)
+endif ()
+
+if (SARA_BUILD_TESTS)
+  add_subdirectory(test)
+endif ()

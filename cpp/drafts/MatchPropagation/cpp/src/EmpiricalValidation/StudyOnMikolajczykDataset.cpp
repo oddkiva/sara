@@ -36,9 +36,9 @@ namespace DO::Sara {
   void StudyOnMikolajczykDataset::open_window_for_image_pair(size_t i,
                                                              size_t j) const
   {
-    const auto w = dataset().image(0).width() + dataset().image(1).width();
-    const auto h = max(dataset().image(0).height(),  //
-                       dataset().image(1).height());
+    const auto w = dataset().image(i).width() + dataset().image(j).width();
+    const auto h = max(dataset().image(i).height(),  //
+                       dataset().image(j).height());
     create_window(w, h);
     set_antialiasing();
   }
@@ -106,7 +106,7 @@ namespace DO::Sara {
     auto indices = vector<size_t>{};
     indices.reserve(sorted_matches.size());
 
-    for (int i = 0; i != sorted_matches.size(); ++i)
+    for (auto i = 0u; i < sorted_matches.size(); ++i)
     {
       if (sorted_matches[i].second < reprojection_lower_bound)
         continue;

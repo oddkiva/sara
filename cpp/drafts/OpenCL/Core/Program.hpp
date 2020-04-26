@@ -13,12 +13,7 @@
 
 #include <drafts/OpenCL/Core/Context.hpp>
 #include <drafts/OpenCL/Core/Device.hpp>
-
-#ifdef __APPLE__
-# include <OpenCL/cl.h>
-#else
-# include <CL/cl.h>
-#endif
+#include <drafts/OpenCL/Core/OpenCL.hpp>
 
 #include <fstream>
 #include <streambuf>
@@ -64,15 +59,16 @@ namespace DO::Sara {
     bool create_from_source(const std::string& source)
     {
       auto err = cl_int{};
-      const auto *source_data = &source[0];
+      const auto* source_data = &source[0];
       auto source_size = source.size();
-      _program = clCreateProgramWithSource(
-        _context, 1, &source_data, &source_size, &err);
+      _program = clCreateProgramWithSource(_context, 1, &source_data,
+                                           &source_size, &err);
 
       if (err < 0)
       {
         std::cerr << format("Error: failed to create program from source: %s",
-                            source.c_str()) << std::endl;
+                            source.c_str())
+                  << std::endl;
         return false;
       }
 
@@ -91,7 +87,7 @@ namespace DO::Sara {
       }
 
       auto source = std::string{};
-      file.seekg(0, std::ios::end);   
+      file.seekg(0, std::ios::end);
       source.reserve(file.tellg());
 
       file.seekg(0, std::ios::beg);
@@ -104,14 +100,15 @@ namespace DO::Sara {
     bool build()
     {
       auto device_ids = to_id(_devices);
-      cl_int err = clBuildProgram(
-        _program, static_cast<cl_uint>(device_ids.size()), &device_ids[0],
-        nullptr, nullptr, nullptr);
+      cl_int err =
+          clBuildProgram(_program, static_cast<cl_uint>(device_ids.size()),
+                         &device_ids[0], nullptr, nullptr, nullptr);
 
       if (err < 0)
       {
         std::cerr << format("Error: failed to build OpenCL program:\n%s",
-                            get_build_logs().c_str()) << std::endl;
+                            get_build_logs().c_str())
+                  << std::endl;
         return false;
       }
 

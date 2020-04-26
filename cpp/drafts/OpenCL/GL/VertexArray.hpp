@@ -9,15 +9,9 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Sara/Core/Tensor.hpp>
+#include <drafts/OpenCL/GL/OpenGL.hpp>
 
-#if defined(__APPLE__)
-# include <OpenCL/cl_gl.h>
-# include <OpenGL/gl3.h>
-#else
-# include <CL/cl_gl.h>
-# include <GL/glew.h>
-#endif
+#include <DO/Sara/Core/Tensor.hpp>
 
 
 namespace DO::Sara { namespace GL {

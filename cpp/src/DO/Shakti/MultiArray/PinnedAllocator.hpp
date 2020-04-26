@@ -21,9 +21,13 @@
 
 namespace DO { namespace Shakti {
 
-  template<typename T> class PinnedAllocator;
+  //! @brief CUDA pinned memory allocator.
+  //! @{
 
-  template<>
+  template <typename T>
+  class PinnedAllocator;
+
+  template <>
   class PinnedAllocator<void>
   {
   public:
@@ -38,9 +42,9 @@ namespace DO { namespace Shakti {
     {
       using other = PinnedAllocator<U>;
     };
-  }; 
+  };
 
-  template<typename T>
+  template <typename T>
   class PinnedAllocator
   {
   public:
@@ -52,14 +56,16 @@ namespace DO { namespace Shakti {
     using size_type = std::size_t;
     using difference_type = std::ptrdiff_t;
 
-    template<typename U>
+    template <typename U>
     struct rebind
     {
-      typedef PinnedAllocator<U> other;
+      using other = PinnedAllocator<U>;
     };
 
     __host__ __device__
-    inline PinnedAllocator() = default;
+    inline PinnedAllocator()
+    {
+    }
 
     template<typename U>
     __host__ __device__
@@ -95,7 +101,7 @@ namespace DO { namespace Shakti {
     }
 
     __host__
-    inline void deallocate(pointer p, size_type cnt)
+    inline void deallocate(pointer p, size_type)
     {
       auto error = cudaFreeHost(p);
       if (error)
@@ -109,7 +115,7 @@ namespace DO { namespace Shakti {
     }
 
     __host__ __device__
-    inline bool operator==(PinnedAllocator const& x)
+    inline bool operator==(PinnedAllocator const&)
     {
       return true;
     }
@@ -120,6 +126,8 @@ namespace DO { namespace Shakti {
       return !operator==(x);
     }
   };
+
+  //! @}
 
 } /* namespace Shakti */
 } /* namespace DO */

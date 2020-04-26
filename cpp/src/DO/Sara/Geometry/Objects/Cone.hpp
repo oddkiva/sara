@@ -22,6 +22,7 @@ namespace DO { namespace Sara {
   //! @addtogroup GeometryObjects
   //! @{
 
+  //! @brief Cone class.
   template <int N>
   class Cone
   {

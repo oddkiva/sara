@@ -181,6 +181,7 @@ pip-log.txt
 ## Project-specific files
 #############
 compile_commands.json
+.gdb_history
 
 third-party/zlib/zconf.h
 third-party/libjpeg/jconfig.h

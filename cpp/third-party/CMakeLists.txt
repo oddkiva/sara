@@ -16,4 +16,5 @@ set_property(TARGET tinyply PROPERTY FOLDER ${THIRDPARTY_FOLDER_NAME})
 
 if (CUDA_FOUND)
   add_subdirectory(nvidia-video-codec-sdk-9.1.23)
+  add_subdirectory(gpufilter)
 endif ()

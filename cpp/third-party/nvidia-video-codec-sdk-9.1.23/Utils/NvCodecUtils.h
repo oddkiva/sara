@@ -212,7 +212,7 @@ public:
       try
       {
         pBuf = new uint8_t[(size_t) nSize];
-        if (nSize != st.st_size)
+        if (nSize != static_cast<uint64_t>(st.st_size))
         {
           LOG(WARNING) << "File is too large - only " << std::setprecision(4)
                        << 100.0 * nSize / st.st_size << "% is loaded";
@@ -241,8 +241,11 @@ public:
         fpIn.read(reinterpret_cast<char*>(pBuf), nSize).gcount();
     fpIn.close();
 
-    assert(nRead == nSize);
+    (void) nRead;
+
+    assert(nRead == static_cast<std::streamsize>(nSize));
   }
+
   ~BufferedFileReader()
   {
     if (pBuf)
@@ -250,6 +253,7 @@ public:
       delete[] pBuf;
     }
   }
+
   bool GetBuffer(uint8_t** ppBuf, uint64_t* pnSize)
   {
     if (!pBuf)

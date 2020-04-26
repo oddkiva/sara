@@ -21,9 +21,10 @@
 
 namespace DO::Sara {
 
-  //! @addtogroup MultiViewGeometry
+  //! @addtogroup MinimalSolvers
   //! @{
 
+  //! @brief Eight point algorithm for the fundamental matrix.
   struct DO_SARA_EXPORT EightPointAlgorithm
   {
     using model_type = FundamentalMatrix;

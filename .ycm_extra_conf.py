@@ -15,8 +15,6 @@ flags = [
 '-Wall',
 '-Wextra',
 '-Werror',
-'-Wno-long-long',
-'-Wno-variadic-macros',
 '-fexceptions',
 '-DNDEBUG',
 # You 100% do NOT need -DUSE_CLANG_COMPLETER and/or -DYCM_EXPORT in your flags;
@@ -72,10 +70,14 @@ flags = [
 "-I", "cpp",
 "-I", "cpp/src",
 "-I", "cpp/third-party/nvidia-video-codec-sdk-9.1.23",
+"-I", "cpp/third-party/gpufilter/include",
 # Build directory.
 "-I", "../sara-build/cpp/src",
+"-I", "../sara-build-Xcode/cpp/src",
 "-I", "../sara-build-Release/cpp/src",
 "-I", "../sara-build-Debug/cpp/src",
+# Halide Generated Files.
+"-I", "../sara-build-Debug/genfiles/shakti_halide_rgb_to_gray",
 ]
 
 # Clang automatically sets the '-std=' flag to 'c++14' for MSVC 2015 or later,

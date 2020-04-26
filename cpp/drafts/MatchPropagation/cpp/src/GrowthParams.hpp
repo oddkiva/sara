@@ -26,6 +26,9 @@
 
 namespace DO::Sara {
 
+  //! @addtogroup MatchPropagation
+  //! @{
+
   //! @brief Simple criterion to test if the triangle is too flat.
   class TriangleFlatness
   {
@@ -71,6 +74,7 @@ namespace DO::Sara {
     const double lb2;
   };
 
+  //! @brief Predicate parameters for the region growing algorithm.
   class PredParams
   {
   public:
@@ -111,6 +115,7 @@ namespace DO::Sara {
     double squared_rho_min_;
   };
 
+  //! @brief Region growing parameters.
   class GrowthParams
   {
   public:
@@ -164,5 +169,6 @@ namespace DO::Sara {
     std::vector<PredParams> pf_params_;
   };
 
+  //! @}
 
 }  // namespace DO::Sara

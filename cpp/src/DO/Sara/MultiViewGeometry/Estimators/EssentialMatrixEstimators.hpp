@@ -22,9 +22,11 @@
 
 namespace DO::Sara {
 
-  //! @addtogroup MultiViewGeometry
+  //! @ingroup MultiViewGeometry
+  //! @defgroup MinimalSolvers Minimal Solvers
   //! @{
 
+  //! @brief Matrix aliases.
   //! @{
   using Matrix10d = Eigen::Matrix<double, 10, 10>;
   using Vector10d = Eigen::Matrix<double, 10, 10>;
@@ -32,6 +34,8 @@ namespace DO::Sara {
   //! @}
 
 
+  //! @brief Five-point algorithm for the essential matrix.
+  //! @{
   struct DO_SARA_EXPORT FivePointAlgorithmBase
   {
     const Monomial x{variable("x")};
@@ -140,6 +144,7 @@ namespace DO::Sara {
       return find_essential_matrices(left, right);
     }
   };
+  //! @}
 
   //! @}
 

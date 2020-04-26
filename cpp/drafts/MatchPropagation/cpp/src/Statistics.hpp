@@ -30,6 +30,9 @@
 
 namespace DO::Sara {
 
+  //! @addtogroup MatchPropagation
+  //! @{
+
   class Statistics
   {
   public:
@@ -71,5 +74,7 @@ namespace DO::Sara {
 
   DO_SARA_EXPORT
   void write_statistics(std::ofstream& out, const std::vector<Statistics>& stats);
+
+  //! @}
 
 } /* namespace DO::Sara */

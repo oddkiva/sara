@@ -23,16 +23,16 @@
 namespace DO { namespace Sara {
 
   /*!
-    @ingroup FeatureMatching
-    @{
-  */
+   *  @addtogroup FeatureMatching
+   *  @{
+   */
 
   //! @brief Feature matcher class using FLANN's KD-Tree.
   class DO_SARA_EXPORT AnnMatcher
   {
   public:
-    //! @{
     //! @brief Constructors.
+    //! @{
     AnnMatcher(const KeypointList<OERegion, float>& keys1,
                const KeypointList<OERegion, float>& keys2,
                float sift_ratio_thres = 1.2f);

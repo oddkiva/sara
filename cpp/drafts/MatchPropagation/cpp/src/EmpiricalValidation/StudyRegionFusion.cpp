@@ -26,7 +26,8 @@ using namespace std;
 namespace DO::Sara {
 
   bool StudyRegionFusion::operator()(float inlier_thres, float squared_ell,
-                                     size_t K, double squared_rho_min)
+                                     [[maybe_unused]] size_t K,
+                                     [[maybe_unused]] double squared_rho_min)
   {
     auto num_regions = vector<int>{};
     for (int j = 1; j < 6; ++j)

@@ -26,18 +26,19 @@
 namespace DO { namespace Sara {
 
   /*!
-    @addtogroup Features
+   *  @addtogroup Features
+   *  @{
+   */
 
-    @{
-  */
-
+  //! @name Keypoint list API
+  //! @brief Minimal list of helper functions.
+  //! @{
   template <typename F, typename T>
   using KeypointList = std::tuple<std::vector<F>, Tensor_<T, 2>>;
 
 
   template <typename F, typename T>
-  inline auto features(const KeypointList<F, T>& keys)
-    -> const std::vector<F>&
+  inline auto features(const KeypointList<F, T>& keys) -> const std::vector<F>&
   {
     return std::get<0>(keys);
   }
@@ -49,7 +50,8 @@ namespace DO { namespace Sara {
   }
 
   template <typename F, typename T>
-  inline auto descriptors(const KeypointList<F, T>& keys) -> const Tensor_<T, 2>&
+  inline auto descriptors(const KeypointList<F, T>& keys)
+      -> const Tensor_<T, 2>&
   {
     return std::get<1>(keys);
   }
@@ -93,8 +95,8 @@ namespace DO { namespace Sara {
   {
     return int(features(keys).size()) == descriptors(keys).rows();
   }
+  //! @}
 
   //! @}
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara

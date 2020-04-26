@@ -11,12 +11,7 @@
 
 #pragma once
 
-#if defined(__APPLE__)
-# include <OpenGL/gl.h>
-#else
-# include <GL/gl.h>
-# include <GL/glew.h>
-#endif
+#include <drafts/OpenCL/GL/OpenGL.hpp>
 
 #include <array>
 #include <numeric>

@@ -15,8 +15,10 @@ $boost_dir = "C:\local\boost_1_71_0"
 $halide_dir = "C:\local\halide"
 $cudnn_dir = "C:\local\cudnn"
 $tensorrt_dir = "C:\local\TensorRT-7.0.0.11"
+$nvidia_codec_sdk_dir = "C:\local\Video_Codec_SDK_9.1.23"
 
 $update_vcpkg = $false
+$build_from_scratch = $false
 
 
 
@@ -40,6 +42,12 @@ if ($update_vcpkg) {
 
   # Install Ceres libraries.
   iex ".\vcpkg.exe install ceres[cxsparse,suitesparse]:x64-windows"
+
+  # Install GLEW libraries.
+  iex ".\vcpkg.exe install glew:x64-windows"
+
+  # Install GLFW libraries.
+  iex ".\vcpkg.exe install glfw3:x64-windows"
   echo `n
 }
 
@@ -57,16 +65,17 @@ echo `n
 
 
 echo "========================================================================="
-echo "Checking if directory ..\$build_dir exists"
-if (Test-Path ..\$build_dir) {
-  echo "Removing existing directory to rebuild from scratch..."
-  rm ..\$build_dir -r -fo
+if ($build_from_scratch) {
+  echo "Checking if directory ..\$build_dir exists"
+  if (Test-Path ..\$build_dir) {
+    echo "Removing existing directory to rebuild from scratch..."
+    rm ..\$build_dir -r -fo
+  }
+
+  echo "Creating directory `"..\$build_dir`" ..."
+  iex "New-Item -ItemType directory -Path ..\$build_dir"
+  echo "`n"
 }
-
-echo "Creating directory `"..\$build_dir`" ..."
-iex "New-Item -ItemType directory -Path ..\$build_dir"
-echo "`n"
-
 
 
 echo "========================================================================="
@@ -82,6 +91,7 @@ $cmake_options += "-DSARA_BUILD_SHARED_LIBS:BOOL=$($build_shared_libs[$build_typ
 $cmake_options += "-DSARA_BUILD_SAMPLES:BOOL=ON "
 $cmake_options += "-DSARA_BUILD_TESTS:BOOL=ON "
 $cmake_options += "-DSARA_USE_HALIDE:BOOL=ON "
+$cmake_options += "-DNvidiaVideoCodec_ROOT=$nvidia_codec_sdk_dir "
 
 echo "CMake options = $cmake_options"
 echo "`n"

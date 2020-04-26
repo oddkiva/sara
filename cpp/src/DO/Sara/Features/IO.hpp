@@ -35,6 +35,7 @@ namespace DO { namespace Sara {
    *  @{
    */
 
+  //! @brief Specialized class to serialize an OERegion::Type value.
   template <>
   struct CalculateH5Type<OERegion::Type>
   {
@@ -44,6 +45,7 @@ namespace DO { namespace Sara {
     };
   };
 
+  //! @brief Specialized class to serialize an OERegion::ExtremumType value.
   template <>
   struct CalculateH5Type<OERegion::ExtremumType>
   {
@@ -53,6 +55,7 @@ namespace DO { namespace Sara {
     };
   };
 
+  //! @brief Specialized class to serialize an OERegion object.
   template <>
   struct CalculateH5Type<OERegion>
   {
@@ -69,6 +72,8 @@ namespace DO { namespace Sara {
     }
   };
 
+  //! @brief Keypoints readable serialization API.
+  //! @
   template <typename T>
   bool read_keypoints(std::vector<OERegion>& features,
                       Tensor_<T, 2>& descriptors, const std::string& name)
@@ -136,7 +141,10 @@ namespace DO { namespace Sara {
 
     return true;
   }
+  //! @}
 
+  //! @brief Keypoints HDF5 serialization API.
+  //! @
   inline auto read_keypoints(H5File& h5_file, const std::string& group_name)
       -> KeypointList<OERegion, float>
   {
@@ -158,6 +166,7 @@ namespace DO { namespace Sara {
                           overwrite);
     h5_file.write_dataset(group_name + "/" + "descriptors", v, overwrite);
   }
+  //! @}
 
   //! @}
 

@@ -20,13 +20,16 @@
 namespace DO::Sara {
 
   /*!
-   *  @ingroup FileSystem
+   *  @addtogroup FileSystem
    *  @{
    */
 
+  //! @brief Return the basename of a file path.
   DO_SARA_EXPORT
   auto basename(const std::string& filepath) -> std::string;
 
+  //! @brief Minimal subset of command line like API.
+  //! @{
   DO_SARA_EXPORT
   auto mkdir(const std::string& dirpath) -> void;
 
@@ -36,6 +39,7 @@ namespace DO::Sara {
   DO_SARA_EXPORT
   auto ls(const std::string& dirpath, const std::string& ext_filter)
       -> std::vector<std::string>;
+  //! @}
 
   //! @}
 

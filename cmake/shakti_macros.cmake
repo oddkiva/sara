@@ -273,7 +273,7 @@ function (shakti_add_example)
   message(STATUS "DEPENDENCIES = ${example_DEPENDENCIES}")
 
   cuda_add_executable(${example_NAME} ${example_SOURCES})
-  target_link_libraries(${example_NAME} ${example_DEPENDENCIES})
+  target_link_libraries(${example_NAME} PRIVATE ${example_DEPENDENCIES})
 
   set_target_properties(${example_NAME}
     PROPERTIES

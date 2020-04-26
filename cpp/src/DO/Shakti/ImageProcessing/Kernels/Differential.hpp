@@ -9,9 +9,9 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#ifndef DO_SHAKTI_IMAGEPROCESSING_CUDA_DIFFERENTIAL_HPP
-#define DO_SHAKTI_IMAGEPROCESSING_CUDA_DIFFERENTIAL_HPP
+#pragma once
 
+#include <DO/Shakti/ImageProcessing/Kernels/Globals.hpp>
 #include <DO/Shakti/MultiArray/Offset.hpp>
 
 
@@ -22,6 +22,9 @@ namespace DO { namespace Shakti {
   {
     const auto i = offset<2>();
     const auto p = coords<2>();
+
+    if (p.x() >= image_sizes.x || p.y() >= image_sizes.y)
+      return;
 
     Vector2f nabla_f{tex2D(in_float_texture, p.x() + 1, p.y()) -
                          tex2D(in_float_texture, p.x() - 1, p.y()),
@@ -36,6 +39,9 @@ namespace DO { namespace Shakti {
   {
     const auto i = offset<2>();
     const auto p = coords<2>();
+
+    if (p.x() >= image_sizes.x || p.y() >= image_sizes.y)
+      return;
 
     const auto f_x = tex2D(in_float_texture, p.x() + 1, p.y()) -
                      tex2D(in_float_texture, p.x() - 1, p.y());
@@ -52,6 +58,11 @@ namespace DO { namespace Shakti {
   void apply_squared_norms_kernel(float *out, const Vector<float, 2> *in)
   {
     const auto i = offset<2>();
+    const auto p = coords<2>();
+
+    if (p.x() >= image_sizes.x || p.y() >= image_sizes.y)
+      return;
+
     const auto f_i = in[i];
 
     out[i] = f_i.squared_norm();
@@ -62,6 +73,9 @@ namespace DO { namespace Shakti {
   {
     const auto i = offset<2>();
     const auto p = coords<2>();
+
+    if (p.x() >= image_sizes.x || p.y() >= image_sizes.y)
+      return;
 
     auto u_x = 0.5f * (tex2D(in_float_texture, p.x() + 1, p.y()) -
                        tex2D(in_float_texture, p.x() - 1, p.y()));
@@ -76,6 +90,9 @@ namespace DO { namespace Shakti {
     const auto i = offset<2>();
     const auto p = coords<2>();
 
+    if (p.x() >= image_sizes.x || p.y() >= image_sizes.y)
+      return;
+
     const auto u_x = tex2D(in_float_texture, p.x(), p.y());
     const auto u_e = tex2D(in_float_texture, p.x() + 1, p.y());
     const auto u_w = tex2D(in_float_texture, p.x() - 1, p.y());
@@ -84,8 +101,6 @@ namespace DO { namespace Shakti {
 
     dst[i] = u_e + u_w + u_n + u_s - 4 * u_x;
   }
+
 } /* namespace Shakti */
 } /* namespace DO */
-
-
-#endif /* DO_SHAKTI_IMAGEPROCESSING_CUDA_DIFFERENTIAL_HPP */

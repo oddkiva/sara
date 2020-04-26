@@ -11,15 +11,10 @@
 
 #pragma once
 
+#include <drafts/OpenCL/GL/OpenGL.hpp>
 #include <drafts/OpenCL/GL/PixelBuffer.hpp>
 
 #include <DO/Sara/Core/Pixel.hpp>
-
-#ifdef __APPLE__
-# include <OpenGL/gl3.h>
-#else
-# include <GL/glew.h>
-#endif
 
 
 namespace DO::Sara { namespace GL {
@@ -37,8 +32,7 @@ namespace DO::Sara { namespace GL {
     enum
     {
       ChannelType = GL_FLOAT,
-      PixelFormat = GL_INTENSITY32F_ARB,
-      ColorSpace = GL_INTENSITY
+      PixelFormat = GL_DEPTH_COMPONENT
     };
   };
 
@@ -48,8 +42,7 @@ namespace DO::Sara { namespace GL {
     enum
     {
       ChannelType = GL_UNSIGNED_BYTE,
-      PixelFormat = GL_RGB,
-      ColorSpace = GL_INTENSITY
+      PixelFormat = GL_RGB
     };
   };
 
@@ -123,5 +116,4 @@ namespace DO::Sara { namespace GL {
 
   //! @}
 
-} /* namespace GL */
-} /* namespace DO::Sara */
+}}  // namespace DO::Sara::GL

@@ -18,7 +18,8 @@
 
 namespace DO::Sara {
 
-  //! @addtogroup MultiViewGeometry
+  //! @ingroup MultiViewGeometry
+  //! @defgroup MultiviewErrorMeasures Error Measures
   //! @{
 
   //! @brief Functor evaluating distance of a point to its epipolar line.

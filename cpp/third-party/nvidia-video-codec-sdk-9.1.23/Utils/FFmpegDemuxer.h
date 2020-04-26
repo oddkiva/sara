@@ -246,11 +246,13 @@ public:
     : FFmpegDemuxer(CreateFormatContext(szFilePath))
   {
   }
+
   FFmpegDemuxer(DataProvider* pDataProvider)
     : FFmpegDemuxer(CreateFormatContext(pDataProvider))
   {
     avioc = fmtc->pb;
   }
+
   ~FFmpegDemuxer()
   {
 
@@ -286,30 +288,37 @@ public:
       av_free(pDataWithHeader);
     }
   }
+
   AVCodecID GetVideoCodec()
   {
     return eVideoCodec;
   }
+
   AVPixelFormat GetChromaFormat()
   {
     return eChromaFormat;
   }
+
   int GetWidth()
   {
     return nWidth;
   }
+
   int GetHeight()
   {
     return nHeight;
   }
+
   int GetBitDepth()
   {
     return nBitDepth;
   }
+
   int GetFrameSize()
   {
     return nWidth * (nHeight + nChromaHeight) * nBPP;
   }
+
   bool Demux(uint8_t** ppVideo, int* pnVideoBytes, int64_t* pts = NULL)
   {
     if (!fmtc)

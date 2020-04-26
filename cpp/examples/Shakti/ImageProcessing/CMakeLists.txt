@@ -1,8 +1,4 @@
 find_package(OpenMP)
-if (OPENMP_FOUND)
-  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-endif()
 
 file(GLOB examples_SRC_FILES FILES *.cpp)
 
@@ -16,6 +12,9 @@ foreach (file ${examples_SRC_FILES})
 
     DEPENDENCIES
     ${DO_Sara_LIBRARIES}
+    DO::Shakti::MultiArray
     DO::Shakti::ImageProcessing
-    DO::Shakti::Utilities)
+    DO::Shakti::Utilities
+    gpufilter
+    $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
 endforeach ()

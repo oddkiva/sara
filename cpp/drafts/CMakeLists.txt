@@ -18,9 +18,6 @@ if (NOT WIN32)
 endif ()
 
 # add_subdirectory(Expression)
-if (SARA_USE_HALIDE)
-  add_subdirectory(Halide)
-endif ()
 add_subdirectory(MatchPropagation)
 add_subdirectory(NeuralNetworks)
 add_subdirectory(Taskflow)
@@ -30,4 +27,8 @@ endif ()
 
 if (SARA_USE_HPX)
   add_subdirectory(Parallel)
+endif ()
+
+if (SARA_USE_HALIDE)
+  add_subdirectory(Halide)
 endif ()

@@ -16,7 +16,8 @@
 #include <mutex>
 #include <sstream>
 #include <string>
-#include <time.h>
+#include <ctime>
+#include <cstring>
 
 #ifdef _WIN32
 #  include <windows.h>
@@ -43,6 +44,7 @@ enum LogLevel
 };
 
 namespace simplelogger {
+
   class Logger
   {
   public:
@@ -51,18 +53,22 @@ namespace simplelogger {
       , bPrintTimeStamp(bPrintTimeStamp)
     {
     }
+
     virtual ~Logger()
     {
     }
     virtual std::ostream& GetStream() = 0;
+
     virtual void FlushStream()
     {
     }
+
     bool ShouldLogFor(LogLevel l)
     {
       return l >= level;
     }
-    char* GetLead(LogLevel l, const char* szFile, int nLine, const char* szFunc)
+
+    char* GetLead(LogLevel l, const char*, int, const char*)
     {
       if (l < TRACE || l > FATAL)
       {
@@ -83,10 +89,12 @@ namespace simplelogger {
       }
       return szLead;
     }
+
     void EnterCriticalSection()
     {
       mtx.lock();
     }
+
     void LeaveCriticalSection()
     {
       mtx.unlock();
@@ -108,11 +116,13 @@ namespace simplelogger {
     {
       return new FileLogger(strFilePath, level, bPrintTimeStamp);
     }
+
     static Logger* CreateConsoleLogger(LogLevel level = INFO,
                                        bool bPrintTimeStamp = true)
     {
       return new ConsoleLogger(level, bPrintTimeStamp);
     }
+
     static Logger* CreateUdpLogger(char* szHost, unsigned uPort,
                                    LogLevel level = INFO,
                                    bool bPrintTimeStamp = true)
@@ -134,10 +144,12 @@ namespace simplelogger {
         pFileOut = new std::ofstream();
         pFileOut->open(strFilePath.c_str());
       }
+
       ~FileLogger()
       {
         pFileOut->close();
       }
+
       std::ostream& GetStream()
       {
         return *pFileOut;
@@ -154,10 +166,8 @@ namespace simplelogger {
         : Logger(level, bPrintTimeStamp)
       {
       }
-      std::ostream& GetStream()
-      {
-        return std::cout;
-      }
+
+      std::ostream& GetStream() { return std::cout; }
     };
 
     class UdpLogger : public Logger
@@ -195,7 +205,12 @@ namespace simplelogger {
 #else
           struct in_addr addr = {inet_addr(szHost)};
 #endif
-          struct sockaddr_in s = {AF_INET, htons(uPort), addr};
+          struct sockaddr_in s;
+          s.sin_family = AF_INET;
+          s.sin_port = htons(uPort);
+          s.sin_addr = addr;
+          memset(&s.sin_zero, 0, sizeof(s.sin_zero));
+
           server = s;
         }
         ~UdpOstream() throw()
@@ -269,6 +284,7 @@ namespace simplelogger {
       pLogger->EnterCriticalSection();
       pLogger->GetStream() << pLogger->GetLead(level, szFile, nLine, szFunc);
     }
+
     ~LogTransaction()
     {
       if (!pLogger)
@@ -288,6 +304,7 @@ namespace simplelogger {
         exit(1);
       }
     }
+
     std::ostream& GetStream()
     {
       if (!pLogger)

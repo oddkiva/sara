@@ -54,7 +54,11 @@ function build_library()
   cmake_options+="-DSARA_BUILD_SAMPLES=ON "
 
   cmake_options+="-DSARA_USE_HALIDE=ON "
-  cmake_options+="-DHALIDE_DISTRIB_DIR=/opt/halide "
+  if [ "${platform_name}" == "Darwin" ]; then
+    cmake_options+="-DHALIDE_DISTRIB_DIR=/usr/local "
+  else
+    cmake_options+="-DHALIDE_DISTRIB_DIR=/opt/halide "
+  fi
   cmake_options+="-DNvidiaVideoCodec_ROOT=/opt/Video_Codec_SDK_9.1.23"
 
   # Generate makefile project.

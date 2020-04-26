@@ -30,6 +30,9 @@
 
 namespace DO::Sara {
 
+  //! @addtogroup MatchPropagation
+  //! @{
+
   //! In any case we need to decide good thresholds value,
   //! For that, one option is to think an extremely permissive thresholds.
 
@@ -185,5 +188,7 @@ namespace DO::Sara {
     std::vector<double> _time;
     std::vector<double> _spurious_pix_dist_error;
   };
+
+  //! @}
 
 }  // namespace DO::Sara

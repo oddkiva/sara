@@ -84,6 +84,7 @@ public:
       return;
     }
   }
+
   ~FFmpegStreamer()
   {
     if (oc)

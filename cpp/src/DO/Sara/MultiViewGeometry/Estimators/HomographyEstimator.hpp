@@ -20,9 +20,10 @@
 
 namespace DO::Sara {
 
-  //! @addtogroup MultiViewGeometry
+  //! @addtogroup MinimalSolvers
   //! @{
 
+  //! @brief Four-point algorithm for the homography.
   struct DO_SARA_EXPORT FourPointAlgorithm
   {
     using model_type = Homography;

@@ -241,8 +241,8 @@ int main()
   // Dataset paths.
   const auto mikolajczyk_dataset_folder = string("Mikolajczyk/");
   cout << mikolajczyk_dataset_folder << endl;
-  const string folders[8] = { 
-    "bark", "bikes", "boat", "graf", "leuven", "trees", "ubc", "wall" 
+  const string folders[8] = {
+    "bark", "bikes", "boat", "graf", "leuven", "trees", "ubc", "wall"
   };
   const string ext[4] = { ".dog", ".haraff", ".hesaff", ".mser" };
 
@@ -261,7 +261,7 @@ int main()
   }
   if (test_growMultipleRegions)
   {
-    TestGrowMultipleRegions 
+    TestGrowMultipleRegions
       testGrowMultipleRegions(mikolajczyk_dataset_folder,
                               folders[dataset], ext[ext_index]);
     testGrowMultipleRegions();
@@ -269,6 +269,6 @@ int main()
 
   testOnImage(mikolajczyk_dataset_folder + "bark/img1.ppm",
               mikolajczyk_dataset_folder + "bark/img4.ppm");
-  
+
   return 0;
 }

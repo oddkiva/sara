@@ -22,41 +22,6 @@ extern "C" {
 
 namespace DO::Sara {
 
-  inline static Yuv8 get_yuv_pixel(const AVFrame* frame, int x, int y)
-  {
-    Yuv8 yuv;
-    yuv(0) = frame->data[0][y * frame->linesize[0] + x];
-    yuv(1) = frame->data[1][y / 2 * frame->linesize[1] + x / 2];
-    yuv(2) = frame->data[2][y / 2 * frame->linesize[2] + x / 2];
-    return yuv;
-  }
-
-  inline static unsigned char clamp(int value)
-  {
-    if (value < 0)
-      return 0;
-    if (value > 255)
-      return 255;
-    return value;
-  }
-
-  inline static Rgb8 convert(const Yuv8& yuv)
-  {
-    Rgb8 rgb;
-    int C = yuv(0) - 16;
-    int D = yuv(1) - 128;
-    int E = yuv(2) - 128;
-    rgb(0) = clamp((298 * C + 409 * E + 128) >> 8);
-    rgb(1) = clamp((298 * C - 100 * D - 208 * E + 128) >> 8);
-    rgb(2) = clamp((298 * C + 516 * D + 128) >> 8);
-    return rgb;
-  }
-
-}  // namespace DO::Sara
-
-
-namespace DO::Sara {
-
   bool VideoStream::_registered_all_codecs = false;
 
   VideoStream::VideoStream()

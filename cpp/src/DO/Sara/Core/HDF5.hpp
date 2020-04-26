@@ -29,6 +29,8 @@
 
 namespace DO::Sara {
 
+  //! @brief Helpers to serialize objects in HDF5.
+  //! @{
   template <typename T>
   struct CalculateH5Type;
 
@@ -38,7 +40,10 @@ namespace DO::Sara {
   {
     return CalculateH5Type<T>::value();
   }
+  //! @}
 
+  //! @brief Specialized helpers to serialize usual type values in HDF5.
+  //! @{
   template <>
   struct CalculateH5Type<bool>
   {
@@ -110,8 +115,9 @@ namespace DO::Sara {
       }
     };
   };
+  //! @}
 
-
+  //! @brief Helper macros for HDF5 serialization.
 #define INSERT_MEMBER(comp_type, struct_t, member_name)                        \
   {                                                                            \
     using member_type = decltype(std::declval<struct_t>().member_name);        \
@@ -125,6 +131,7 @@ namespace DO::Sara {
 
 namespace DO::Sara {
 
+  //! @brief HDF5 file API.
   struct H5File
   {
     using vector_type = Matrix<hsize_t, Dynamic, 1>;

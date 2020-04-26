@@ -66,7 +66,7 @@ namespace DO { namespace Sara {
     RegionBoundary dR(M());
     vector<size_t> indices;
     // Try initializing the region with an affine-consistent quadruple.
-    if (!initialize_affine_quadruple(R, dR, drawer, analyzer))
+    if (!initialize_affine_quadruple(R, dR, drawer))
       return make_pair(R, indices);
 
     // If initialization is successful, grow the region regularly.
@@ -77,8 +77,7 @@ namespace DO { namespace Sara {
   // ===========================================================================
   // 1. Try initializing the region with an affine-consistent quadruple.
   bool GrowRegion::initialize_affine_quadruple(Region& R, RegionBoundary& dR,
-                                               const PairWiseDrawer* drawer,
-                                               RegionGrowingAnalyzer* analyzer)
+                                               const PairWiseDrawer* drawer)
   {
     // Initialize the region $R$ and the region boundary $\partial R$.
     update_region_and_boundary(R, dR, _seed);
@@ -198,14 +197,15 @@ namespace DO { namespace Sara {
       }
 #endif
       vector<vector<size_t>> q(vec_dR.size());  // Set of quadruples.
+      const auto vec_dR_size = static_cast<int>(vec_dR.size());
 #pragma omp parallel for
-      for (int m = 0; m < vec_dR.size(); ++m)
+      for (int m = 0; m < vec_dR_size; ++m)
         q[m].resize(4);
 
-      vector<int> spurious(vec_dR.size(), 0);  // $m$ is spurious.
+      vector<int> spurious(vec_dR_size, 0);  // $m$ is spurious.
 
 #pragma omp parallel for
-      for (int m = 0; m < vec_dR.size(); ++m)
+      for (int m = 0; m < vec_dR_size; ++m)
       {
         q[m][3] = vec_dR[m];
         // CHECK_CANDIDATE_MATCH_AND_GROWING_STATE;
@@ -392,8 +392,11 @@ namespace DO { namespace Sara {
     return N_K_cap_R;
   }
 
-  bool GrowRegion::find_triple(size_t t[3], const vector<size_t>& N_K_m_cap_R,
-                               const PairWiseDrawer* drawer) const
+
+  auto
+  GrowRegion::find_triple(size_t t[3], const vector<size_t>& N_K_m_cap_R,
+                          [[maybe_unused]] const PairWiseDrawer* drawer) const
+      -> bool
   {
     // Safety check. Otherwise we cannot construct any candidate triple...
     if (N_K_m_cap_R.size() < 3)
@@ -425,8 +428,7 @@ namespace DO { namespace Sara {
     return false;
   }
 
-  bool GrowRegion::find_triple(size_t t[3], size_t m, const Region& R,
-                               const PairWiseDrawer* drawer)
+  bool GrowRegion::find_triple(size_t t[3], size_t m, const Region& R)
   {
     // Get the subset of matches $\mathcal{N}_K(m) \cap R$.
     vector<size_t> N_K_m_cap_R(get_N_K_m_cap_R(m, R));
@@ -474,8 +476,9 @@ namespace DO { namespace Sara {
 
   // ========================================================================
   // // Affine consistency test functions.
-  bool GrowRegion::affine_consistent(const size_t q[4], int& very_spurious,
-                                     const PairWiseDrawer* drawer) const
+  bool GrowRegion::affine_consistent(const size_t q[4],
+                                     int& very_spurious,
+                                     const PairWiseDrawer* /* drawer */) const
   {
     Match m[4];
     for (int i = 0; i < 4; ++i)

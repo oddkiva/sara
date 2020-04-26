@@ -18,4 +18,4 @@
 #include <drafts/OpenCL/Core/Program.hpp>
 
 //! @ingroup Drafts
-//! @defgroup OpenCL
+//! @defgroup OpenCL OpenCL utility functions.

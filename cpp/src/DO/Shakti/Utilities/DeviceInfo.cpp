@@ -232,11 +232,6 @@ namespace DO { namespace Shakti {
     SHAKTI_SAFE_CUDA_CALL(cudaSetDevice(id));
   }
 
-  void Device::make_current_gl_device()
-  {
-    SHAKTI_SAFE_CUDA_CALL(cudaGLSetGLDevice(id));
-  }
-
   void Device::reset()
   {
     SHAKTI_SAFE_CUDA_CALL(cudaDeviceReset());

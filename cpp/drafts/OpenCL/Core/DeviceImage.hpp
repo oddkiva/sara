@@ -21,27 +21,32 @@ namespace DO::Sara {
   //! @addtogroup OpenCL
   //! @{
 
+  //! @brief OpenCL pixel traits structure.
   template <typename T>
   struct CLPixelTraits;
 
   template <>
   struct CLPixelTraits<float>
   {
-    typedef float value_type;
+    using value_type = float;
 
-    enum {
+    enum
+    {
       PixelType = CL_FLOAT,
       ColorSpace = CL_INTENSITY
     };
   };
 
+  //! @brief OpenCL device image class.
   template <typename T, int N = 2>
   class DeviceImage
   {
   public:
-    typedef T pixel_type;
-    typedef CLPixelTraits<T> pixel_traits;
-    enum {
+    using pixel_type = T;
+    using pixel_traits = CLPixelTraits<T>;
+
+    enum
+    {
       PixelType = pixel_traits::PixelType,
       ColorSpace = pixel_traits::ColorSpace
     };
@@ -61,9 +66,9 @@ namespace DO::Sara {
       _buffer = clCreateImage2D(context, flags, &image_format, _sizes[0],
                                 _sizes[1], 0, (void*) data, &err);
       if (err < 0)
-        throw std::runtime_error(format(
-        "Error: failed to allocate buffer in device memory! %s\n",
-        get_error_string(err)));
+        throw std::runtime_error(
+            format("Error: failed to allocate buffer in device memory! %s\n",
+                   get_error_string(err)));
     }
 
     DeviceImage(Context& context, size_t width, size_t height, size_t depth,
@@ -75,9 +80,9 @@ namespace DO::Sara {
       _buffer = clCreateImage3D(context, flags, &image_format, _sizes[0],
                                 _sizes[1], _sizes[2], 0, (void*) data, &err);
       if (err < 0)
-        throw std::runtime_error(format(
-        "Error: failed to allocate buffer in device memory! %s\n",
-        get_error_string(err)));
+        throw std::runtime_error(
+            format("Error: failed to allocate buffer in device memory! %s\n",
+                   get_error_string(err)));
     }
 
     ~DeviceImage()
@@ -85,8 +90,9 @@ namespace DO::Sara {
       auto err = clReleaseMemObject(_buffer);
       if (err < 0)
         std::cerr << format(
-          "Error: failed to release buffer in device memory! %s",
-          get_error_string(err)) << std::endl;
+                         "Error: failed to release buffer in device memory! %s",
+                         get_error_string(err))
+                  << std::endl;
     }
 
     inline operator cl_mem&()
