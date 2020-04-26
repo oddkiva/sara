@@ -30,7 +30,7 @@ namespace DO { namespace Sara {
       !std::numeric_limits<T>::is_integer,
       "Conversion from rgb to gray is supported only for floating point type");
 
-    gray = T(0.2125)*rgb[0] + T(0.7154)*rgb[1] + T(0.0721)*rgb[2];
+    gray = T(0.2125) * rgb[0] + T(0.7154) * rgb[1] + T(0.0721) * rgb[2];
   }
 
   //! Convert Grayscale color to RGB color.
@@ -48,9 +48,9 @@ namespace DO { namespace Sara {
       !std::numeric_limits<T>::is_integer,
       "Conversion from gray to RGB is supported only for floating point type");
 
-    yuv[0] = T(0.299)*rgb[0] + T(0.587)*rgb[1] + T(0.114)*rgb[2];
-    yuv[1] = T(0.492)*(rgb[2] - yuv[0]);
-    yuv[2] = T(0.877)*(rgb[0] - yuv[0]);
+    yuv[0] = T(0.299) * rgb[0] + T(0.587) * rgb[1] + T(0.114) * rgb[2];
+    yuv[1] = T(0.492) * (rgb[2] - yuv[0]);
+    yuv[2] = T(0.877) * (rgb[0] - yuv[0]);
   }
 
   //! Convert YUV color to RGB color.
@@ -61,9 +61,9 @@ namespace DO { namespace Sara {
       !std::numeric_limits<T>::is_integer,
       "Conversion from gray to RGB is supported only for floating point type");
 
-    rgb[0] = yuv[0]                     + T(1.13983)*yuv[2];
-    rgb[1] = yuv[0] - T(0.39465)*yuv[1] - T(0.58060)*yuv[2];
-    rgb[2] = yuv[0] + T(2.03211)*yuv[1];
+    rgb[0] = yuv[0]                       + T(1.13983) * yuv[2];
+    rgb[1] = yuv[0] - T(0.39465) * yuv[1] - T(0.58060) * yuv[2];
+    rgb[2] = yuv[0] + T(2.03211) * yuv[1];
   }
 
   //! Convert YUV color to gray color.

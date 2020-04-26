@@ -35,5 +35,3 @@
 # pragma message("WARNING: You need to implement DO_KALPANA_DEPRECATED for this compiler")
 # define DO_KALPANA_DEPRECATED
 #endif
-
-//! @}

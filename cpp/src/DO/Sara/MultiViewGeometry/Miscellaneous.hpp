@@ -19,7 +19,8 @@
 
 namespace DO::Sara {
 
-  //! @addtogroup MultiViewGeometry
+  //! @ingroup MultiViewGeometry
+  //! @defgroup MultiviewMisc Miscellaneous I/O
   //! @{
 
   inline auto save_to_hdf5(const TwoViewGeometry& complete_geom,

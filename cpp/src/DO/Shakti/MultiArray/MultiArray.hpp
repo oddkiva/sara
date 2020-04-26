@@ -31,40 +31,36 @@ namespace DO { namespace Shakti {
     using strides_type = Strides;
 
     using base_type::_data;
+    using base_type::_pitch;
     using base_type::_sizes;
     using base_type::_strides;
-    using base_type::_pitch;
 
   public:
     using vector_type = typename base_type::vector_type;
     using slice_vector_type = typename base_type::slice_vector_type;
 
     using slice_type = typename base_type::slice_type;
-    using const_slice_type = const MultiArray<T, N-1, Strides>;
+    using const_slice_type = const MultiArray<T, N - 1, Strides>;
 
     using size_type = typename base_type::size_type;
 
   public:
     //! @{
     //! @brief Constructor.
-    __host__
     inline MultiArray() = default;
 
-    __host__
     inline MultiArray(const vector_type& sizes)
       : base_type{}
     {
       resize(sizes);
     }
 
-    __host__
     inline MultiArray(size_type size)
       : self_type{vector_type{int(size)}}
     {
       static_assert(N == 1, "MultiArray must be 1D");
     }
 
-    __host__
     inline MultiArray(const self_type& other)
       : self_type{other.sizes()}
     {
@@ -78,7 +74,7 @@ namespace DO { namespace Shakti {
             _sizes[0] * sizeof(T), _sizes[1], cudaMemcpyDeviceToDevice));
       else if (N == 3)
       {
-        cudaMemcpy3DParms params = {0};
+        cudaMemcpy3DParms params{};
         params.srcPtr.ptr = (void*) other._data;
         params.srcPtr.pitch = other._pitch;
         params.srcPtr.xsize = other._sizes[0];
@@ -98,7 +94,6 @@ namespace DO { namespace Shakti {
         throw std::runtime_error{"Unsupported dimension!"};
     }
 
-    __host__
     inline MultiArray(const T* host_data, const vector_type& sizes)
       : self_type{sizes}
     {
@@ -112,7 +107,7 @@ namespace DO { namespace Shakti {
             sizes[0] * sizeof(T), sizes[1], cudaMemcpyHostToDevice));
       else if (N == 3)
       {
-        cudaMemcpy3DParms params = {0};
+        auto params = cudaMemcpy3DParms{};
 
         params.srcPtr =
             make_cudaPitchedPtr(const_cast<T*>(host_data), sizes[0] * sizeof(T),
@@ -129,7 +124,6 @@ namespace DO { namespace Shakti {
         throw std::runtime_error{"Unsupported dimension!"};
     }
 
-    __host__
     inline MultiArray(self_type&& other)
       : self_type{}
     {
@@ -148,14 +142,12 @@ namespace DO { namespace Shakti {
     }
 
     //! @brief Destructor.
-    __host__
     inline ~MultiArray()
     {
       SHAKTI_SAFE_CUDA_CALL(cudaFree(_data));
     }
 
     //! @brief Resize the multi-array.
-    __host__
     inline void resize(const vector_type& sizes)
     {
       if (_sizes == sizes)
@@ -166,7 +158,7 @@ namespace DO { namespace Shakti {
       _sizes = sizes;
       _strides = strides_type::compute(sizes);
 
-      auto void_data = reinterpret_cast<void **>(&_data);
+      auto void_data = reinterpret_cast<void**>(&_data);
 
       if (N == 1)
       {
@@ -176,12 +168,12 @@ namespace DO { namespace Shakti {
       else if (N == 2)
       {
         SHAKTI_SAFE_CUDA_CALL(cudaMallocPitch(
-          void_data, &_pitch, _sizes[0] * sizeof(T), _sizes[1]));
+            void_data, &_pitch, _sizes[0] * sizeof(T), _sizes[1]));
       }
       else if (N == 3)
       {
-        cudaPitchedPtr pitched_device_ptr = { 0, 0, 0, 0 };
-        auto extent = make_cudaExtent(sizes[0]*sizeof(T), sizes[1], sizes[2]);
+        cudaPitchedPtr pitched_device_ptr = {0, 0, 0, 0};
+        auto extent = make_cudaExtent(sizes[0] * sizeof(T), sizes[1], sizes[2]);
         SHAKTI_SAFE_CUDA_CALL(cudaMalloc3D(&pitched_device_ptr, extent));
         _pitch = pitched_device_ptr.pitch;
         *void_data = pitched_device_ptr.ptr;
@@ -203,5 +195,4 @@ namespace DO { namespace Shakti {
   template <typename T>
   using Array = MultiArray<T, 1>;
 
-} /* namespace Shakti */
-} /* namespace DO */
+}}  // namespace DO::Shakti

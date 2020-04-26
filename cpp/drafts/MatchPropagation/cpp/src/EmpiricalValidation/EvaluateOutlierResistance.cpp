@@ -102,7 +102,7 @@ namespace DO::Sara {
   bool EvaluateOutlierResistance::run(const vector<Match>& M,
                                        const Matrix3f& H, size_t img_index,
                                        float squared_ell, float inlier_thres,
-                                       size_t num_growths, size_t K, size_t k,
+                                       size_t num_growths, size_t K, size_t /* k */,
                                        double rho_min,
                                        const PairWiseDrawer* drawer) const
   {

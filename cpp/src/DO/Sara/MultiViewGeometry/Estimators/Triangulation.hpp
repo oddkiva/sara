@@ -18,7 +18,7 @@
 
 namespace DO::Sara {
 
-  //! @addtogroup MultiViewGeometry
+  //! @addtogroup MinimalSolvers
   //! @{
 
   //! @{

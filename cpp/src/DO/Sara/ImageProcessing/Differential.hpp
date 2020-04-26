@@ -90,8 +90,7 @@ namespace DO { namespace Sara {
     template <typename Field>
     auto operator()(const Field& in) const -> GradientField<Field>
     {
-      auto out = GradientField<Field>{ in.sizes() };
-      auto out_view = out.view();
+      auto out = GradientField<Field>{in.sizes()};
 
       auto in_i = in.begin_array();
       auto out_i = out.begin();

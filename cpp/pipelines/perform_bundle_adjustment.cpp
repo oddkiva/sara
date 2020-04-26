@@ -108,7 +108,7 @@ auto perform_bundle_adjustment(const std::string& dirpath,
     SARA_DEBUG << "Calculating cheiral inliers..." << std::endl;
     SARA_CHECK(cheirality_ij.size());
     SARA_CHECK(inliers_ij.size());
-    if (cheirality_ij.size() != inliers_ij.size())
+    if (cheirality_ij.size() != static_cast<Eigen::Index>(inliers_ij.size()))
       throw std::runtime_error{"cheirality_ij.size() != inliers_ij.size()"};
 
     const Array<bool, 1, Dynamic> cheiral_inliers =

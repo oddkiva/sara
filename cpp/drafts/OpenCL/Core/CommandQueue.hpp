@@ -11,19 +11,13 @@
 
 #pragma once
 
-#ifdef __APPLE__
-#  include <OpenCL/cl.h>
-#else
-#  define CL_USE_DEPRECATED_OPENCL_1_2_APIS
-#  include <CL/cl.h>
-#endif
-
 #include <drafts/OpenCL/Core/Context.hpp>
 #include <drafts/OpenCL/Core/Device.hpp>
 #include <drafts/OpenCL/Core/DeviceBuffer.hpp>
 #include <drafts/OpenCL/Core/DeviceImage.hpp>
 #include <drafts/OpenCL/Core/Error.hpp>
 #include <drafts/OpenCL/Core/Kernel.hpp>
+#include <drafts/OpenCL/Core/OpenCL.hpp>
 
 
 namespace DO::Sara {

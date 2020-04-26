@@ -2,6 +2,8 @@
 
 #include <NvInfer.h>
 
+#include <DO/Shakti/Utilities/ErrorCheck.hpp>
+
 #include <array>
 #include <functional>
 #include <iostream>
@@ -14,7 +16,7 @@
 namespace DO::Sara::TensorRT {
 
   //! @ingroup NeuralNetworks
-  //! @defgroup TensorRT
+  //! @defgroup TensorRT TensorRT helper functions.
   //! @{
 
   class Logger : public nvinfer1::ILogger
@@ -34,8 +36,19 @@ namespace DO::Sara::TensorRT {
   };
 
 
+  inline auto delete_cuda_stream(cudaStream_t* cuda_stream)
+  {
+    SHAKTI_STDOUT << "DELETING CUDA STREAM" << std::endl;
+    if (cuda_stream == nullptr)
+      return;
+    SHAKTI_SAFE_CUDA_CALL(cudaStreamDestroy(*cuda_stream));
+    delete cuda_stream;
+    cuda_stream = nullptr;
+  }
+
   inline auto delete_network_def(nvinfer1::INetworkDefinition* network_def)
   {
+    SHAKTI_STDOUT << "DELETING NETWORK DEFINITION" << std::endl;
     if (network_def == nullptr)
       return;
     network_def->destroy();
@@ -44,12 +57,20 @@ namespace DO::Sara::TensorRT {
 
   inline auto delete_builder(nvinfer1::IBuilder* builder)
   {
+    SHAKTI_STDOUT << "DELETING BUILDER" << std::endl;
     if (builder == nullptr)
       return;
     builder->destroy();
     builder = nullptr;
   };
 
+  inline auto make_cuda_stream()
+      -> std::unique_ptr<cudaStream_t, decltype(&delete_cuda_stream)>
+  {
+    auto cuda_stream_ptr = new cudaStream_t{};
+    SHAKTI_SAFE_CUDA_CALL(cudaStreamCreate(cuda_stream_ptr));
+    return {cuda_stream_ptr, &delete_cuda_stream};
+  }
 
   inline auto make_builder()
       -> std::unique_ptr<nvinfer1::IBuilder, decltype(&delete_builder)>
@@ -61,8 +82,9 @@ namespace DO::Sara::TensorRT {
       -> std::unique_ptr<nvinfer1::INetworkDefinition,
                          decltype(&delete_network_def)>
   {
-    return {builder->createNetworkV2(0u), delete_network_def};
+    return {builder->createNetworkV2(0u), &delete_network_def};
   }
+
 
   class Network
   {

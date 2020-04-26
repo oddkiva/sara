@@ -1,8 +1,8 @@
 add_subdirectory(Kalpana)
 
-if (NOT CUDA_FOUND)
-  sara_message("Cannot use DO::Shakti libraries!")
-else ()
+if (CMAKE_CUDA_COMPILER)
   sara_message("Building DO::Shakti Libraries")
   add_subdirectory(Shakti)
+else ()
+  sara_message("Cannot use DO::Shakti libraries!")
 endif ()

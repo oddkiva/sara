@@ -80,26 +80,23 @@ list(APPEND HALIDE_INCLUDE_DIRS
   ${HALIDE_INCLUDE_DIR}
   ${HALIDE_DISTRIB_DIR}/tools)
 
-# Compile options
-if (MSVC)
-  set(HALIDE_COMPILE_OPTIONS /wd4068)
-else()
-  set(HALIDE_COMPILE_OPTIONS
-    "-Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable -Wno-missing-field-initializers -Wno-unknown-pragmas")
-endif()
-
-# include(${HALIDE_CMAKE_CONFIG_FILEPATH})
-# include(${HALIDE_CMAKE_FILEPATH})
-
 if (WIN32)
   add_library(Halide SHARED IMPORTED)
 else ()
   add_library(Halide INTERFACE IMPORTED)
 endif ()
 
-set_target_properties(Halide PROPERTIES
-  INTERFACE_INCLUDE_DIRECTORIES "${HALIDE_INCLUDE_DIRS}"
-  INTERFACE_COMPILE_OPTIONS ${HALIDE_COMPILE_OPTIONS})
+target_include_directories(Halide
+  INTERFACE
+  ${HALIDE_INCLUDE_DIRS})
+target_compile_options(Halide
+  INTERFACE
+  $<$<CXX_COMPILER_ID:MSVC>:/wd4068>
+  $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wno-unused-parameter>
+  $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wno-unused-variable>
+  $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wno-missing-field-initializers>
+  $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wno-unknown-pragmas>
+  $<$<CXX_COMPILER_ID:GNU>:-Wno-unused-but-set-variable>)
 
 if (WIN32)
   set_target_properties(Halide PROPERTIES
@@ -123,3 +120,61 @@ if (WIN32)
   file(COPY ${HALIDE_DLL_RELEASE} DESTINATION ${CMAKE_BINARY_DIR}/bin/RelWithDebInfo)
   file(COPY ${HALIDE_DLL_RELEASE} DESTINATION ${CMAKE_BINARY_DIR}/bin/MinSizeRel)
 endif ()
+
+
+if (NOT SHAKTI_HALIDE_GPU_TARGETS)
+  if (APPLE)
+    set (SHAKTI_HALIDE_GPU_TARGETS metal)
+  elseif (CUDA_FOUND)
+    set (SHAKTI_HALIDE_GPU_TARGETS cuda)
+  else ()
+    set (SHAKTI_HALIDE_GPU_TARGETS opencl)
+  endif ()
+endif ()
+
+include(${HALIDE_CMAKE_FILEPATH})
+
+function (shakti_halide_library _source_filepath)
+  get_filename_component(_source_filename ${_source_filepath} NAME_WE)
+  halide_library(${_source_filename}
+    SRCS ${_source_filepath}
+    HALIDE_TARGET x86-64-sse41)
+endfunction ()
+
+function (shakti_halide_gpu_library _source_filepath)
+  get_filename_component(_source_filename ${_source_filepath} NAME_WE)
+  halide_library(${_source_filename}
+    SRCS ${_source_filepath}
+    HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+  if (APPLE)
+    target_link_libraries(${_source_filename}
+      INTERFACE "-framework Foundation"
+                "-framework Metal")
+  endif ()
+endfunction ()
+
+
+function (shakti_halide_library_v2)
+  set(_options OPTIONS)
+  set(_single_value_args NAME SRCS HALIDE_TARGET)
+  set(_multiple_value_args DEPS HALIDE_TARGET_FEATURES)
+  cmake_parse_arguments(generator
+    "${_options}" "${_single_value_args}" "${_multiple_value_args}" ${ARGN})
+
+  halide_generator(${generator_NAME}.generator
+    GENERATOR_NAME ${generator_NAME}
+    SRCS ${generator_SRCS}
+    DEPS ${generator_DEPS})
+
+  halide_library_from_generator(${generator_NAME}
+    GENERATOR ${generator_NAME}.generator
+    HALIDE_TARGET ${generator_HALIDE_TARGET}
+    HALIDE_TARGET_FEATURES ${generator_HALIDE_TARGET_FEATURES})
+
+  if (APPLE)
+    target_link_libraries(${generator_NAME}
+      INTERFACE
+      "-framework Foundation"
+      "-framework Metal")
+  endif ()
+endfunction ()

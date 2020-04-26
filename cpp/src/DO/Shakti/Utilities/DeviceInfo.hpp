@@ -39,8 +39,6 @@ namespace DO { namespace Shakti {
 
     void make_current_device();
 
-    void make_current_gl_device();
-
     void reset();
 
     int warp_size() const;

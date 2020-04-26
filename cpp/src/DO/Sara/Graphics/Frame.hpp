@@ -33,6 +33,7 @@ namespace DO::Sara::GL {
   constexpr double defaultAxisLength = 10.0;
   constexpr double defaultAxisRadius = 0.125;
 
+  //! @brief Coordinate system frame class.
   class DO_SARA_EXPORT Frame
   {
   public:

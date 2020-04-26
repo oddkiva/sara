@@ -20,12 +20,6 @@
 #include <memory>
 #include <vector>
 
-#ifdef __APPLE__
-# include <OpenCL/cl.h>
-#else
-# include <CL/cl.h>
-#endif
-
 
 namespace DO::Sara {
 
@@ -113,22 +107,24 @@ namespace DO::Sara {
       err = clCreateKernelsInProgram(program, 0, nullptr, &num_kernels);
       if (err < 0)
       {
-        std::cerr << format(
-          "Error: failed to fetch the number of kernels from program! %s",
-          get_error_string(err)) << std::endl;
+        std::cerr << format("Error: failed to fetch the number of kernels from "
+                            "program! %s",
+                            get_error_string(err))
+                  << std::endl;
         return false;
       }
 
       // Create the list of cl_kernels.
       auto cl_kernels = std::vector<cl_kernel>(num_kernels);
-      err = clCreateKernelsInProgram(
-        program, static_cast<cl_uint>(cl_kernels.size()), &cl_kernels[0],
-        nullptr);
+      err = clCreateKernelsInProgram(program,
+                                     static_cast<cl_uint>(cl_kernels.size()),
+                                     &cl_kernels[0], nullptr);
       if (err < 0)
       {
-        std::cerr << format(
-          "Error: failed to fetch the number of kernels from program! %s",
-          get_error_string(err)) << std::endl;
+        std::cerr << format("Error: failed to fetch the number of kernels from "
+                            "program! %s",
+                            get_error_string(err))
+                  << std::endl;
         return false;
       }
 

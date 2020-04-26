@@ -1,5 +1,3 @@
-message(STATUS "  - DO_NeuralNetworks_Tests")
-
 find_package(DO_Sara COMPONENTS Core REQUIRED)
 
 find_package(TensorRT)
@@ -25,10 +23,12 @@ if (CUDA_FOUND AND TensorRT_FOUND)
   foreach(file ${test_tensorrt_SOURCE_FILES})
     get_filename_component(filename ${file} NAME_WE)
 
-    cuda_add_executable(${filename} ${file})
+    add_executable(${filename} ${file})
 
     target_include_directories(${filename}
-      PRIVATE ${TensorRT_INCLUDE_DIRS})
+      PRIVATE
+      ${CUDA_TOOLKIT_INCLUDE}
+      ${TensorRT_INCLUDE_DIRS})
 
     target_compile_definitions(${filename}
       PRIVATE -DBOOST_TEST_DYN_LINK)
@@ -38,8 +38,10 @@ if (CUDA_FOUND AND TensorRT_FOUND)
 
     target_link_libraries(${filename}
       ${Boost_LIBRARIES}
+      ${CUDA_LIBRARIES}
       ${TensorRT_LIBRARIES}
       ${DO_Sara_LIBRARIES}
+      DO::Shakti::MultiArray
       DO::Shakti::Utilities)
 
     set_target_properties(${filename}

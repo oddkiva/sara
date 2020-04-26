@@ -27,6 +27,7 @@
 
 namespace DO::Sara {
 
+  //! @brief Mikolajczyk dataset structure.
   class DO_SARA_EXPORT MikolajczykDataset
   {
   public:

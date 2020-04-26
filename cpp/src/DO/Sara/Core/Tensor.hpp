@@ -40,8 +40,9 @@ namespace DO { namespace Sara {
   template <typename T, int N>
   using TensorView_ = TensorView<T, N, RowMajor>;
 
-  template <typename T, int N>
-  using Tensor_ = Tensor<T, N, RowMajor>;
+  template <typename T, int N,
+            template <typename> class Allocator = std::allocator>
+  using Tensor_ = Tensor<T, N, RowMajor, Allocator>;
   //! @}
 
 

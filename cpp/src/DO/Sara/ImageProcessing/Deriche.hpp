@@ -49,11 +49,11 @@ namespace DO { namespace Sara {
     //
     // The constant 1.695 is mysterious... Also found in CImg library.
     // TODO: ask where this constant comes from.
-    const auto alpha = static_cast<S>(1.695)/sigma;
+    const auto alpha = static_cast<S>(1.695) / sigma;
     const auto ea = std::exp(alpha);
     const auto ema = std::exp(-alpha);
-    const auto em2a = ema*ema;
-    const auto b1 = 2*ema;
+    const auto em2a = ema * ema;
+    const auto b1 = 2 * ema;
     const auto b2 = -em2a;
 
     S ek, ekn;
@@ -61,18 +61,18 @@ namespace DO { namespace Sara {
     S a1, a2, a3, a4;
     S g0, sumg1, sumg0;
 
-    switch(derivative_order)
+    switch (derivative_order)
     {
     // first-order derivative
     case 1:
-      ek = -(1-ema)*(1-ema)*(1-ema)/(2*(ema+1)*ema);
+      ek = -(1 - ema) * (1 - ema) * (1 - ema) / (2 * (ema + 1) * ema);
       a1 = a4 = 0;
-      a2 = ek*ema;
-      a3 = -ek*ema;
+      a2 = ek * ema;
+      a3 = -ek * ema;
       parity = -1;
       if (neumann)
       {
-        sumg1 = (ek*ea) / ((ea-1)*(ea-1));
+        sumg1 = (ek * ea) / ((ea - 1) * (ea - 1));
         g0 = 0;
         sumg0 = g0 + sumg1;
       }
@@ -82,16 +82,17 @@ namespace DO { namespace Sara {
 
     // second-order derivative
     case 2:
-      ekn = ( -2*(-1+3*ea-3*ea*ea+ea*ea*ea)/(3*ea+1+3*ea*ea+ea*ea*ea) );
-      ek = -(em2a-1)/(2*alpha*ema);
+      ekn = (-2 * (-1 + 3 * ea - 3 * ea * ea + ea * ea * ea) /
+             (3 * ea + 1 + 3 * ea * ea + ea * ea * ea));
+      ek = -(em2a - 1) / (2 * alpha * ema);
       a1 = ekn;
-      a2 = -ekn*(1+ek*alpha)*ema;
-      a3 = ekn*(1-ek*alpha)*ema;
-      a4 = -ekn*em2a;
+      a2 = -ekn * (1 + ek * alpha) * ema;
+      a3 = ekn * (1 - ek * alpha) * ema;
+      a4 = -ekn * em2a;
       parity = 1;
       if (neumann)
       {
-        sumg1 = ekn/2;
+        sumg1 = ekn / 2;
         g0 = ekn;
         sumg0 = g0 + sumg1;
       }
@@ -101,14 +102,15 @@ namespace DO { namespace Sara {
 
     // smoothing
     default:
-      ek = (1-ema)*(1-ema) / (1+2*alpha*ema - em2a);
+      ek = (1 - ema) * (1 - ema) / (1 + 2 * alpha * ema - em2a);
       a1 = ek;
-      a2 = ek*ema*(alpha-1);
-      a3 = ek*ema*(alpha+1);
-      a4 = -ek*em2a;
+      a2 = ek * ema * (alpha - 1);
+      a3 = ek * ema * (alpha + 1);
+      a4 = -ek * em2a;
       parity = 1;
-      if (neumann) {
-        sumg1 = ek*(alpha*ea+ea-1) / ((ea-1)*(ea-1));
+      if (neumann)
+      {
+        sumg1 = ek * (alpha * ea + ea - 1) / ((ea - 1) * (ea - 1));
         g0 = ek;
         sumg0 = g0 + sumg1;
       }
@@ -133,8 +135,8 @@ namespace DO { namespace Sara {
       auto ptr = &(*it);
 
       // Causal signal: i == 0.
-      T *forward_x[2] =  { ptr, ptr - step };
-      y_causal[0] = sumg0* *forward_x[0];
+      T* forward_x[2] = {ptr, ptr - step};
+      y_causal[0] = sumg0 * *forward_x[0];
 
       // Causal signal: i == 1.
       for (auto k = 0; k < 2; ++k)
@@ -146,26 +148,26 @@ namespace DO { namespace Sara {
       {
         for (auto k = 0; k < 2; ++k)
           forward_x[k] += step;
-        y_causal[i] = a1 * *forward_x[0] + a2 * *forward_x[1]
-                    + b1 * y_causal[i-1] + b2 * y_causal[i-2];
+        y_causal[i] = a1 * *forward_x[0] + a2 * *forward_x[1] +
+                      b1 * y_causal[i - 1] + b2 * y_causal[i - 2];
       }
 
       // Anti-causal signal: i == size-1
-      T *backward_x[2] =  { ptr + (size-1)*step, ptr + size*step };
-      y_anticausal[size-1] = parity * sumg1 * *backward_x[0];
+      T* backward_x[2] = {ptr + (size - 1) * step, ptr + size * step};
+      y_anticausal[size - 1] = parity * sumg1 * *backward_x[0];
 
       // Anti-causal signal: i == size-2
       for (auto k = 0; k < 2; ++k)
         forward_x[k] += step;
-      y_anticausal[size-2] = y_anticausal[size-1];
+      y_anticausal[size - 2] = y_anticausal[size - 1];
 
       // Anti-causal signal: i == size-3 .. 0
       for (auto i = size - 3; i >= 0; --i)
       {
         for (auto k = 0; k < 2; ++k)
           backward_x[k] -= step;
-        y_anticausal[i] = a3 * *backward_x[0] + a4 * *backward_x[1]
-                        + b1 * y_anticausal[i+1] + b2 * y_anticausal[i+2];
+        y_anticausal[i] = a3 * *backward_x[0] + a4 * *backward_x[1] +
+                          b1 * y_anticausal[i + 1] + b2 * y_anticausal[i + 2];
       }
 
       // Store the sum of the two signals.
@@ -185,7 +187,7 @@ namespace DO { namespace Sara {
       bool neumann = true)
   {
     for (auto i = 0; i < N; ++i)
-      inplace_deriche(inout_signal,sigmas[i], 0, i, neumann);
+      inplace_deriche(inout_signal, sigmas[i], 0, i, neumann);
   }
 
   //! @brief Apply Deriche blurring.
@@ -206,7 +208,7 @@ namespace DO { namespace Sara {
                            typename PixelTraits<T>::channel_type sigma,
                            bool neumann = true)
   {
-    auto out_signal = Image<T, N>{ in_signal };
+    auto out_signal = Image<T, N>{in_signal};
     inplace_deriche_blur(out_signal, sigma, neumann);
     return out_signal;
   }
@@ -249,5 +251,4 @@ namespace DO { namespace Sara {
 
   //! @}
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara

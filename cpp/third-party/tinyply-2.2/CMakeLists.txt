@@ -21,6 +21,16 @@ else ()
     add_library(tinyply STATIC source/tinyply.cpp source/tinyply.h)
 endif ()
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR
+    CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  target_compile_options(tinyply
+    PRIVATE
+    -Wno-sign-compare
+    -Wno-switch
+    -Wno-unused-parameter
+    -Wno-unused-variable)
+endif ()
+
 # Example
 # add_executable(example source/example.cpp)
 # target_link_libraries(example PRIVATE tinyply)

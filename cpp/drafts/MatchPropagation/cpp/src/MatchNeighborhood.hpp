@@ -27,7 +27,10 @@
 
 namespace DO::Sara {
 
-  //! Affine Covariant Match Distance denoted as $\rho_m$
+  //! @addtogroup MatchPropagation
+  //! @{
+
+  //! Affine Covariant Match Distance denoted as @f$\rho_m @f$
   class AffineCovariantMatchDistance
   {
   public:
@@ -78,7 +81,7 @@ namespace DO::Sara {
 
 
   //! @brief Functor class that computes the K nearest matches denoted as
-  //! $\mathcal{N}_K(.)$.
+  //! @f$ \mathcal{N}_K(.) @f$.
   class DO_SARA_EXPORT NearestMatchNeighborhoodComputer
   {
   public: /* interface. */
@@ -108,8 +111,8 @@ namespace DO::Sara {
     }
 
   private: /* member functions. */
-    //! @{
     //! @brief Comparison by lexicographical order.
+    //! @{
     using PosIndex = std::pair<Vector2f, size_t>;
     using MatchIndex = std::pair<Vector4f, size_t>;
     using IndexScore = std::pair<size_t, float>;
@@ -158,8 +161,8 @@ namespace DO::Sara {
     // @brief  1. Sort matches by positions and match positions.
     auto create_and_sort_xy() -> void;
 
+    //! @brief  2. Create data matrix for nearest neighbor search.
     //! @{
-    // @brief  2. Create data matrix for nearest neighbor search.
     auto count_unique_positions(const std::vector<PosIndex>& x) -> size_t;
 
     auto count_unique_pos_matches() -> size_t;
@@ -184,9 +187,9 @@ namespace DO::Sara {
     //! @brief  4. Build kD-trees.
     void build_kdtrees();
 
-    //! @{
     //! @brief 5. Compute neighborhoods with kD-tree data structures for
     //! efficient neighbor search.
+    //! @{
     auto compute_neighborhoods(size_t K, double squared_rho_min)
         -> std::vector<std::vector<size_t>>;
 
@@ -204,9 +207,9 @@ namespace DO::Sara {
                                        size_t K) -> void;
     //! @}
 
-    //! @{
     //! @brief  6. (Optional) Compute redundancies before computing the
     //! neighborhoods.
+    //! @{
     auto compute_redundancies(double thres) -> std::vector<std::vector<size_t>>;
 
     auto get_redundancy_components_and_representers(
@@ -229,16 +232,16 @@ namespace DO::Sara {
     // Internal allocation.
     size_t _neighborhood_max_size;
 
-    //! @{
     //! @brief For internal computation.
+    //! @{
     std::vector<PosIndex> _X, _Y;
     std::vector<MatchIndex> _XY;
     MatrixXd _X_mat, _Y_mat, _XY_mat;
     std::vector<std::vector<size_t>> _X_to_M, _Y_to_M, _XY_to_M;
     //! @}
 
-    //! @{
     //! @brief KDTree
+    //! @{
     std::unique_ptr<KDTree> _x_index_ptr;
     std::unique_ptr<KDTree> _y_index_ptr;
     std::vector<int> _x_indices, _y_indices;
@@ -254,5 +257,7 @@ namespace DO::Sara {
   DO_SARA_EXPORT
   auto compute_hat_N_K(const std::vector<std::vector<size_t>>& N_K)
       -> std::vector<std::vector<size_t>>;
+
+  //! @}
 
 }  // namespace DO::Sara

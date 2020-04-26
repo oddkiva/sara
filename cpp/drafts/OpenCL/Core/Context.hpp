@@ -14,14 +14,9 @@
 #include <DO/Sara/Core/StringFormat.hpp>
 
 #include <drafts/OpenCL/Core/Device.hpp>
+#include <drafts/OpenCL/Core/OpenCL.hpp>
 
 #include <vector>
-
-#ifdef __APPLE__
-# include <OpenCL/cl.h>
-#else
-# include <CL/cl.h>
-#endif
 
 
 namespace DO::Sara {
@@ -35,10 +30,13 @@ namespace DO::Sara {
     Context(const Device& device)
     {
       auto err = cl_int{};
-      _context = clCreateContext(nullptr, 1, &device.id, nullptr, nullptr, &err);
+      _context =
+          clCreateContext(nullptr, 1, &device.id, nullptr, nullptr, &err);
       if (err < 0)
-        std::cerr << format("Error: failed to create context from device: %d! %s\n",
-                            device.id, get_error_string(err)) << std::endl;
+        std::cerr
+            << format("Error: failed to create context from device: %d! %s\n",
+                      device.id, get_error_string(err))
+            << std::endl;
 
       err = clGetContextInfo(_context, CL_CONTEXT_REFERENCE_COUNT,
                              sizeof(_ref_count), &_ref_count, nullptr);
@@ -49,7 +47,8 @@ namespace DO::Sara {
       auto err = clReleaseContext(_context);
       if (err < 0)
         std::cerr << format("Error: failed to release OpenCL program! %s\n",
-                            get_error_string(err)) << std::endl;
+                            get_error_string(err))
+                  << std::endl;
     }
 
     operator cl_context() const

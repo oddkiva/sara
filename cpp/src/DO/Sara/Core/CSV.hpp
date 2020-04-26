@@ -11,7 +11,7 @@
 namespace DO::Sara {
 
   //! @ingroup Core
-  //! @defgroup CSV
+  //! @defgroup CSV CSV  I/O functions
   //! @{
 
   auto split(const std::string& line, const std::string& delimiters)

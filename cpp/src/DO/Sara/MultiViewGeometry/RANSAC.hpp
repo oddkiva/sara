@@ -20,7 +20,8 @@
 
 namespace DO::Sara {
 
-  //! @addtogroup MultiViewGeometry
+  //! @ingroup MultiViewGeometry
+  //! @defgroup RANSAC RANSAC
   //! @{
 
   //! @brief Random Sample Consensus algorithm from Fischler and Bolles 1981.

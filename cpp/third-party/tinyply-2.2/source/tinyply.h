@@ -687,7 +687,7 @@ std::shared_ptr<PlyData> PlyFile::PlyFileImpl::request_properties_from_element(c
                 auto result = userData.insert(std::pair<uint32_t, ParsingHelper>(hash_fnv1a(element.name + property.name), helper));
                 if (result.second == false)
                 {
-                    throw std::invalid_argument("element-property key has already been requested: " + hash_fnv1a(element.name + property.name));
+                    throw std::invalid_argument("element-property key has already been requested: " + std::to_string(hash_fnv1a(element.name + property.name)));
                 }
             }
             else keys_not_found.push_back(key);

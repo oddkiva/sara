@@ -19,9 +19,12 @@
 
 namespace DO::Sara {
 
-  //! @addtogroup MultiViewGeometry
+  //! @ingroup MultiViewGeometry
+  //! @defgroup EssentialMatrix Essential Matrix
   //! @{
 
+  //! @brief Relative Pose
+  //! @{
   struct Motion
   {
     Eigen::Matrix3d R{Eigen::Matrix3d::Identity()};
@@ -60,6 +63,7 @@ namespace DO::Sara {
 
   DO_SARA_EXPORT
   auto extract_relative_motion_horn(const Matrix3d& E) -> std::vector<Motion>;
+  //! @}
 
   //! @}
 

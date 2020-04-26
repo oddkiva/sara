@@ -27,13 +27,16 @@
 
 namespace DO::Sara {
 
+  //! @addtogroup MatchPropagation
+  //! @{
+
   void get_triangle_angles_in_degree(double angles[3], const Point2d t[3]);
 
-  // Convenience function.
+  //! @brief Convenience function.
   DO_SARA_EXPORT
   Matrix3f affinity_from_x_to_y(const Match& a, const Match& b, const Match& c);
 
-  // Remember Jacobian $\mathbf{J} = (\nabla \mathbf{H})^T$.
+  //! @brief Remember Jacobian @f$ \mathbf{J} = (\nabla \mathbf{H})^T @f$.
   DO_SARA_EXPORT
   Matrix2d jacobian(const Matrix3d& H, const Vector2d& x);
 
@@ -41,7 +44,8 @@ namespace DO::Sara {
   DO_SARA_EXPORT
   Matrix3d affinity(const Matrix3d& H, const Vector2d& x);
 
-  // Helper function.
+  //! @brief Helper function.
+  //! @{
   DO_SARA_EXPORT
   Ellipse ellipse_from_oeregion(const OERegion& f);
 
@@ -56,6 +60,7 @@ namespace DO::Sara {
 
   DO_SARA_EXPORT
   float center_difference(const OERegion& H_x, const OERegion& y);
+  //! @}
 
   // Actually more reliable but so much slower, also the times when the
   // analytical computation of ellipses intersection is wrong (because of
@@ -64,5 +69,7 @@ namespace DO::Sara {
   void compare_oeregions(float& dist, double& diff_angle_radian,
                          double& overlapRatio, const OERegion& H_x,
                          const OERegion& y, bool approxEllInterArea = false);
+
+  //! @}
 
 }  // namespace DO::Sara

@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include <drafts/OpenCL/GL/OpenGL.hpp>
+
 #include <drafts/OpenCL/GL/Buffer.hpp>
 #include <drafts/OpenCL/GL/PixelBuffer.hpp>
 #include <drafts/OpenCL/GL/Shader.hpp>
@@ -18,4 +20,4 @@
 #include <drafts/OpenCL/GL/VertexArray.hpp>
 
 //! @ingroup Drafts
-//! @defgroup OpenGL
+//! @defgroup OpenGL OpenGL Utility Functions

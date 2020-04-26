@@ -51,27 +51,6 @@ int main()
   using namespace DO::Sara;
   using namespace std;
 
-  // Initialize the windows manager.
-  if (!glfwInit())
-  {
-    std::cerr << "Error: cannot start GLFW!" << std::endl;
-    return EXIT_FAILURE;
-  }
-  SARA_DEBUG << "Init GLFW OK" << std::endl;
-
-#ifndef __APPLE__
-  // Initialize GLEW.
-  auto err = glewInit();
-  if (err != GLEW_OK)
-  {
-    std::cerr << format("Error: could not start GLEW: %s",
-                        glewGetErrorString(err))
-              << std::endl;
-    return EXIT_FAILURE;
-  }
-  SARA_DEBUG << "Init GLEW OK" << std::endl;
-#endif
-
   // Query the list of OpenCL platform.
   auto platforms = get_platforms();
 
@@ -87,17 +66,38 @@ int main()
 
   // Create a 2D pixel buffer.
   auto cpu_image =
-      imread<float>("/Users/david/Desktop/Datasets/sfm/herzjesu_int/0000.png")
+      imread<float>("/home/david/Desktop/Datasets/sfm/herzjesu_int/0000.png")
           .compute<Resize>(Vector2i{640, 480});
   SARA_DEBUG << "Read image OK" << std::endl;
   SARA_DEBUG << "cpu_image.sizes() = " << cpu_image.sizes().transpose()
              << std::endl;
+
+  // Initialize the windows manager.
+  if (!glfwInit())
+  {
+    std::cerr << "Error: cannot start GLFW!" << std::endl;
+    return EXIT_FAILURE;
+  }
+  SARA_DEBUG << "Init GLFW OK" << std::endl;
 
   // Create a window.
   auto window = glfwCreateWindow(cpu_image.width(), cpu_image.height(),
                                  "Image Processing", nullptr, nullptr);
   glfwMakeContextCurrent(window);
   SARA_DEBUG << "Open window OK" << std::endl;
+
+#ifndef __APPLE__
+  // Initialize GLEW.
+  auto err = glewInit();
+  if (err != GLEW_OK)
+  {
+    std::cerr << format("Error: could not start GLEW: %s",
+                        glewGetErrorString(err))
+              << std::endl;
+    return EXIT_FAILURE;
+  }
+  SARA_DEBUG << "Init GLEW OK" << std::endl;
+#endif
 
   // Create a context with the GPU device.
   const auto& gpu_device = devices.front();

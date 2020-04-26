@@ -19,13 +19,14 @@ if (SARA_USE_FROM_SOURCE)
       PUBLIC
       Qt5::Widgets
       Qt5::OpenGL
-      ${OPENGL_LIBRARIES})
+      ${OPENGL_LIBRARIES}
 
-    if (WIN32)
-      target_link_libraries(DO_Sara_Graphics PRIVATE Qt5::WinMain)
-    endif ()
+      PRIVATE
+      $<$<PLATFORM_ID:Windows>:Qt5::WinMain>)
 
-    target_compile_definitions(DO_Sara_Graphics PRIVATE GL_SILENCE_DEPRECATION)
+    target_compile_definitions(DO_Sara_Graphics
+      PUBLIC
+      $<$<PLATFORM_ID:Darwin>:GL_SILENCE_DEPRECATION>)
 
     set(CMAKE_AUTOMOC OFF)
     set(CMAKE_INCLUDE_CURRENT_DIR OFF)

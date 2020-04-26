@@ -50,22 +50,29 @@ include(CheckLanguage)
 check_language(CUDA)
 if (CMAKE_CUDA_COMPILER)
   enable_language(CUDA)
+
+  find_package(CUDA 10.0)
+
+  # set(CMAKE_CUDA_FLAGS -arch=sm_75)
+  set(CUDA_VERBOSE_BUILD OFF)
+  set(CUDA_LINK_LIBRARIES_KEYWORD PUBLIC)
+  # Since we are still using the old CMake way style to compile CUDA code.
+  if (UNIX)
+    set (CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -Xcompiler=-Wno-unknown-pragmas)
+  endif ()
+
+  include(shakti_macros)
 else ()
   message(STATUS "No CUDA support!")
 endif()
-# set(CMAKE_CUDA_FLAGS -arch=sm_60)
-# set(CMAKE_CUDA_FLAGS -arch=sm_75)
-find_package(CUDA 10.0)
-if (CUDA_FOUND)
-  set(CUDA_VERBOSE_BUILD ON)
-  include(shakti_macros)
-endif ()
 
-# Activate the usage of CCache to speed up builds if available.
-# Configure Sara library version.
+
+
+# Import macros and configure Sara library version.
 include(sara_macros)
 sara_dissect_version()
 
+# Use CCache if available to speed up builds.
 include(sara_use_ccache)
 
 # We are ready to build Sara.

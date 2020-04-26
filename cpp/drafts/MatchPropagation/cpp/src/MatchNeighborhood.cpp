@@ -795,8 +795,10 @@ namespace DO::Sara {
 
   auto
   NearestMatchNeighborhoodComputer::get_redundancy_components_and_representers(
-      vector<vector<size_t>>& components, vector<size_t>& representers,
-      const vector<Match>& matches, double thres) -> void
+      vector<vector<size_t>>& /*components*/,  //
+      vector<size_t>& /* representers */,      //
+      const vector<Match>& /* matches */,      //
+      double /* thres */) -> void
   {
     // if (_verbose)
     //  print_stage("Compute match redundancy component");

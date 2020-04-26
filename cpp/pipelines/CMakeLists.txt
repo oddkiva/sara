@@ -29,16 +29,20 @@ file(GLOB pipelines_SOURCE_FILES FILES *.cpp)
 foreach (file ${pipelines_SOURCE_FILES})
   get_filename_component(filename "${file}" NAME_WE)
   add_executable(${filename} ${file})
-  target_include_directories(${filename} PRIVATE
+  target_include_directories(${filename}
+    PRIVATE
     ${Boost_INCLUDE_DIR}
     ${HDF5_INCLUDE_DIRS})
-  target_link_libraries(${filename} PRIVATE
+  target_link_libraries(${filename}
+    PRIVATE
     ${DO_Sara_LIBRARIES}
     ${Boost_LIBRARIES}
     ${HDF5_LIBRARIES})
-  target_compile_definitions(${filename} PRIVATE
+  target_compile_definitions(${filename}
+    PRIVATE
     ${SARA_DEFINITIONS}  # so that the `src_path()` macro becomes valid.
-    -DBOOST_ALL_DYN_LINK -DBOOST_ALL_NO_LIB)
+    BOOST_ALL_DYN_LINK
+    BOOST_ALL_NO_LIB)
   set_property(
       TARGET ${filename}
       PROPERTY FOLDER "Pipelines/Sara/SfM")

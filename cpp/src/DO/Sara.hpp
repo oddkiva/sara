@@ -14,8 +14,9 @@
 
 #pragma once
 
-#include <DO/Sara/Core.hpp>
 #include <DO/Sara/Defines.hpp>
+
+#include <DO/Sara/Core.hpp>
 #include <DO/Sara/DisjointSets.hpp>
 #include <DO/Sara/FeatureDescriptors.hpp>
 #include <DO/Sara/FeatureDetectors.hpp>

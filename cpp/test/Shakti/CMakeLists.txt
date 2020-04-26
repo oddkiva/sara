@@ -18,8 +18,10 @@ function (shakti_add_test)
   cuda_add_executable(${_test_name} ${shakti_add_test_SOURCES})
   target_include_directories(${_test_name}
     PRIVATE
+    ${CUDA_TOOLKIT_INCLUDE}
     ${Boost_INCLUDE_DIR})
   target_link_libraries(${_test_name}
+    PRIVATE
     ${Boost_LIBRARIES}
     ${shakti_add_test_DEPENDENCIES})
 
@@ -27,6 +29,7 @@ function (shakti_add_test)
 
   set_target_properties(${_test_name}
     PROPERTIES
+    CUDA_SEPARABLE_COMPILATION ON
     CUDA_STANDARD 14
     FOLDER "Tests/Shakti")
 
@@ -40,6 +43,6 @@ function (shakti_add_test)
   add_test(NAME ${_test_name} COMMAND $<TARGET_FILE:${_test_name}>)
 endfunction ()
 
-add_subdirectory(ImageProcessing)
 add_subdirectory(MultiArray)
+add_subdirectory(ImageProcessing)
 add_subdirectory(Segmentation)

@@ -32,6 +32,10 @@
 
 namespace DO { namespace Sara {
 
+  //! @addtogroup MatchPropagation
+  //! @{
+
+  //! @brief Piece of the match propagation algorithm.
   class DO_SARA_EXPORT GrowRegion
   {
   public: /* interface. */
@@ -67,8 +71,7 @@ namespace DO { namespace Sara {
     //! A region growing is done in two steps.
     //! 1. Try initializing the region with an affine-consistent quadruple.
     bool initialize_affine_quadruple(Region& R, RegionBoundary& dR,
-                                     const PairWiseDrawer* drawer = 0,
-                                     RegionGrowingAnalyzer* analyzer = 0);
+                                     const PairWiseDrawer* drawer = 0);
 
     //! 2. If initialization is successful, grow the region.
     //!    However, the growing process stops if it intersects with other grown
@@ -111,8 +114,7 @@ namespace DO { namespace Sara {
 
     //! DEPRECATED:
     //! Don't use it anymore as it is not suitable for parallelization.
-    bool find_triple(size_t t[3], size_t m, const Region& R,
-                     const PairWiseDrawer* drawer = nullptr);
+    bool find_triple(size_t t[3], size_t m, const Region& R);
 
     //! Check that the triple of match $t$ is not degenerate.
     bool is_degenerate(size_t t[3]) const;
@@ -200,5 +202,7 @@ namespace DO { namespace Sara {
     //! @brief EXPERIMENTAL.
     std::set<size_t> _very_spurious;
   };
+
+  //! @}
 
 }}  // namespace DO::Sara

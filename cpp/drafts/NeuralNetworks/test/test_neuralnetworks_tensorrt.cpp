@@ -1,14 +1,24 @@
-#include <drafts/NeuralNetworks/TensorRT/Helpers.hpp>
-
 #include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Core/StringFormat.hpp>
+#include <DO/Sara/Core/Tensor.hpp>
 
-#include <DO/Shakti/Utilities/DeviceInfo.hpp>
+#include <DO/Shakti/MultiArray.hpp>
+#include <DO/Shakti/Utilities.hpp>
+
+#include <drafts/NeuralNetworks/TensorRT/Helpers.hpp>
 
 #include <termcolor/termcolor.hpp>
 
 #include <fstream>
 #include <sstream>
+
+
+namespace sara = DO::Sara;
+namespace shakti = DO::Shakti;
+
+
+template <typename T, int N>
+using PinnedTensor = sara::Tensor_<float, N, shakti::PinnedAllocator>;
 
 
 auto engine_deleter(nvinfer1::ICudaEngine* engine) -> void
@@ -118,16 +128,29 @@ auto save_model_weights(nvinfer1::ICudaEngine* engine,
 
 auto main() -> int
 {
-  namespace sara = DO::Sara;
-  namespace shakti = DO::Shakti;
-
   // List the available GPU devices.
   const auto devices = shakti::get_devices();
   for (const auto& device : devices)
     std::cout << device << std::endl;
 
+  auto cuda_stream = sara::TensorRT::make_cuda_stream();
 
   auto builder = sara::TensorRT::make_builder();
+
+  // Create a simple convolution operation.
+  constexpr auto n = 1;
+  constexpr auto h = 8;
+  constexpr auto w = 8;
+  constexpr auto kh = 3;
+  constexpr auto kw = 3;
+  constexpr auto ci = 1;
+  constexpr auto co = 20;
+
+  // Create artificial weights.
+  const auto conv1_kernel_weights_vector =
+      std::vector<float>(kh * kw * ci * co, 1.f);
+  const auto conv1_bias_weights_vector = std::vector<float>(ci * co, 0.f);
+
 
   // Instantiate a network and automatically manager its memory.
   auto network = sara::TensorRT::make_network(builder.get());
@@ -135,16 +158,24 @@ auto main() -> int
     SARA_DEBUG << termcolor::green << "Creating the network from scratch!"
                << std::endl;
 
-    // Instantiate an input data.
+    // Instantiate an input data.&
     auto image_tensor = network->addInput("image", nvinfer1::DataType::kFLOAT,
-                                          nvinfer1::Dims3{1, 28, 28});
+                                          nvinfer1::Dims3{n, h, w});
 
-    // Create artificial weights.
-    const auto conv1_kernel_weights_vector =
-        std::vector<float>(5 * 5 * 1 * 20, 0.f);
-    const auto conv1_bias_weights_vector = std::vector<float>(20, 0.f);
+#ifdef CHECK_SCALE_OP
+    const float scale = 3.f;
+    const auto scale_weights =
+        nvinfer1::Weights{nvinfer1::DataType::kFLOAT,             //
+                          reinterpret_cast<const void*>(&scale),  //
+                          1};
 
+    auto scale_op = network->addScale(
+        *image_tensor, nvinfer1::ScaleMode::kUNIFORM, {}, scale_weights, {});
 
+    // Get the ouput tensor.
+    auto image_scaled_tensor = scale_op->getOutput(0);
+    network->markOutput(*image_scaled_tensor);
+#else
     // Encapsulate the weights using TensorRT data structures.
     const auto conv1_kernel_weights = nvinfer1::Weights{
         nvinfer1::DataType::kFLOAT,
@@ -155,19 +186,18 @@ auto main() -> int
         reinterpret_cast<const void*>(conv1_bias_weights_vector.data()),
         static_cast<std::int64_t>(conv1_bias_weights_vector.size())};
 
-
     // Create a convolutional function.
     const auto conv1_fn = network->addConvolution(
         *image_tensor,
-        20,                    // number of filters
-        {5, 5},                // kernel sizes
+        co,                    // number of filters
+        {kh, kw},              // kernel sizes
         conv1_kernel_weights,  // convolution kernel weights
-        conv1_bias_weights);   // bias weight
-
+        conv1_bias_weights);   // bias weights
 
     // Get the ouput tensor.
     auto conv1 = conv1_fn->getOutput(0);
     network->markOutput(*conv1);
+#endif
   }
 
   SARA_DEBUG << termcolor::green
@@ -187,7 +217,6 @@ auto main() -> int
   // Create or load an engine.
   auto engine = CudaEngineUniquePtr{nullptr, &engine_deleter};
   {
-
     // Load inference engine from a model weights.
     constexpr auto load_engine_from_disk = false;
     if constexpr (load_engine_from_disk)
@@ -207,23 +236,43 @@ auto main() -> int
   auto context = ContextUniquePtr{engine->createExecutionContext(),  //
                                   &context_deleter};
 
-  // @todo create some fake data and create two GPU device buffers.
-  SARA_DEBUG << termcolor::red
-             << "TODO: create some input data and two device buffers!"
+  // Create som data and create two GPU device buffers.
+  SARA_DEBUG << termcolor::red << "Creating input data and two device buffers!"
              << termcolor::reset << std::endl;
+  auto image = PinnedTensor<float, 2>{h, w};
+  image.matrix().fill(0.f);
+  image(h / 2, w / 2) = 2.f;
+
+  // Inspect the TensorRT log output: there is no padding!
+  auto image_convolved =
+      PinnedTensor<float, 3>{{co, h - (kh / 2) * 2, w - (kw / 2) * 2}};
+  image_convolved.flat_array().fill(-1.f);
 
   // Fill some GPU buffers and perform inference.
   SARA_DEBUG << termcolor::green << "Perform inference on GPU!"
              << termcolor::reset << std::endl;
-  std::vector<void*> device_buffers(2, nullptr);
-  context->execute(1, device_buffers.data());
 
-  SARA_DEBUG << termcolor::red << "TODO: crashing... Finish the job!"
-             << termcolor::reset << std::endl;
+  auto device_buffers = std::vector{
+      reinterpret_cast<void*>(image.data()),           //
+      reinterpret_cast<void*>(image_convolved.data())  //
+  };
 
-  // Transfer data back from GPU device memory to host memory.
-  SARA_DEBUG << termcolor::red << "TODO: copy data back to host memory!"
-             << termcolor::reset << std::endl;
+  // Enqueue the CPU pinned <-> GPU tranfers and the convolution task.
+  if (!context->enqueue(1, device_buffers.data(), *cuda_stream, nullptr))
+  {
+    SARA_DEBUG << termcolor::red << "Execution failed!" << termcolor::reset
+               << std::endl;
+  }
+
+  // Wait for the completion of GPU operations.
+  cudaStreamSynchronize(*cuda_stream);
+
+
+  for (auto c = 0; c < co; ++c)
+  {
+    SARA_CHECK(c);
+    std::cout << image_convolved[c].matrix() << std::endl;
+  }
 
   return 0;
 }
