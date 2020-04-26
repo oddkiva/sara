@@ -19,6 +19,8 @@
 #include <nppi_geometry_transforms.h>
 
 
+//! TODO: write tests as these functions are untested.
+
 namespace DO { namespace Shakti { namespace NPPI {
 
   //! @brief Resize the image.

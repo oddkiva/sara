@@ -14,13 +14,13 @@
 #include <DO/Shakti/ImageProcessing/Kernels/Globals.hpp>
 #include <DO/Shakti/MultiArray/Offset.hpp>
 
+//! TODO: write tests as this is untested.
 
 namespace DO { namespace Shakti {
 
   __constant__ Vector2f scale;
 
-  __global__
-  void apply_gradient_kernel(Vector2f *dst)
+  __global__ void scale(Vector2f* dst)
   {
     const auto i = offset<2>();
     const auto p = coords<2>();
@@ -30,9 +30,6 @@ namespace DO { namespace Shakti {
     // TODO: check that the default texture value is done by nearest
     // interpolation and not linear.
     dst[i] = tex2D(in_float_texture, p.x() * scale.x(), p.y() * scale.y())
-  };
-;
   }
 
-} /* namespace Shakti */
-} /* namespace DO */
+}}  // namespace DO::Shakti
