@@ -27,6 +27,8 @@ namespace DO { namespace Shakti {
     if (p.x() >= image_sizes.x || p.y() >= image_sizes.y)
       return;
 
+    // TODO: check that the default texture value is done by nearest
+    // interpolation and not linear.
     dst[i] = tex2D(in_float_texture, p.x() * scale.x(), p.y() * scale.y())
   };
 ;
