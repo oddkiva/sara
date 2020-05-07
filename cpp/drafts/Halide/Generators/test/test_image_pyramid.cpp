@@ -3,7 +3,7 @@
 #include <boost/test/unit_test.hpp>
 #include <type_traits>
 
-#include "../ImagePyramid.hpp"
+#include <drafts/Halide/ImagePyramid.hpp>
 
 
 BOOST_AUTO_TEST_CASE(test_image_pyramid)

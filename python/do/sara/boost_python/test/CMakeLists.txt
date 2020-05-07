@@ -21,6 +21,7 @@ set(pysara_LIBRARY_PATH $<TARGET_FILE:pysara>)
 add_custom_command(TARGET copy_pysara_module
   COMMAND ${CMAKE_COMMAND} -E
   copy ${pysara_LIBRARY_PATH} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+set_target_properties(copy_pysara_module PROPERTIES FOLDER "Python")
 
 
 # ============================================================================ #
@@ -29,6 +30,7 @@ add_custom_target(pytest
   COMMAND ${NOSETESTS_EXECUTABLE} --ipdb --nocapture --verbosity=2 --with-coverage --cover-package=do
   WORKING_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
   COMMENT "Running Python tests.")
+set_target_properties(pytest PROPERTIES FOLDER "Python")
 
 
 # ============================================================================ #

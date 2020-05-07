@@ -15,87 +15,31 @@
 #include <DO/Sara/Core/Tensor.hpp>
 #include <DO/Sara/ImageProcessing/Resize.hpp>
 
-#include <boost/test/unit_test.hpp>
+#include <drafts/Halide/Resize.hpp>
 
-#include <drafts/Halide/Utilities.hpp>
-#include "shakti_scale_32f.h"
-#include "shakti_reduce_32f.h"
-#include "shakti_enlarge.h"
+#include <boost/test/unit_test.hpp>
 
 
 namespace halide = DO::Shakti::HalideBackend;
+namespace sara = DO::Sara;
 
 using namespace std;
-using namespace DO::Sara;
-
-
-auto scale(ImageView<float>& src, ImageView<float>& dst)
-{
-  auto src_tensor_view =
-      tensor_view(src).reshape(Vector4i{1, 1, src.height(), src.width()});
-  auto dst_tensor_view =
-      tensor_view(dst).reshape(Vector4i{1, 1, dst.height(), dst.width()});
-
-  auto src_buffer = halide::as_runtime_buffer(src_tensor_view);
-  auto dst_buffer = halide::as_runtime_buffer(dst_tensor_view);
-
-  src_buffer.set_host_dirty();
-  shakti_scale_32f(src_buffer, dst.width(), dst.height(), dst_buffer);
-  dst_buffer.copy_to_host();
-}
-
-auto reduce(ImageView<float>& src, ImageView<float>& dst)
-{
-  auto src_tensor_view =
-      tensor_view(src).reshape(Vector4i{1, 1, src.height(), src.width()});
-  auto dst_tensor_view =
-      tensor_view(dst).reshape(Vector4i{1, 1, dst.height(), dst.width()});
-
-  auto src_buffer = halide::as_runtime_buffer(src_tensor_view);
-  auto dst_buffer = halide::as_runtime_buffer(dst_tensor_view);
-
-  src_buffer.set_host_dirty();
-  shakti_reduce_32f(src_buffer, dst.width(), dst.height(), dst_buffer);
-  dst_buffer.copy_to_host();
-}
-
-auto enlarge(ImageView<float>& src, ImageView<float>& dst)
-{
-  auto src_buffer = halide::as_runtime_buffer_3d(src);
-  auto dst_buffer = halide::as_runtime_buffer_3d(dst);
-
-  src_buffer.set_host_dirty();
-  shakti_enlarge(src_buffer, src_buffer.width(), src_buffer.height(),
-                 dst_buffer.width(), dst_buffer.height(), dst_buffer);
-  dst_buffer.copy_to_host();
-}
-
-auto enlarge(ImageView<Rgb32f>& src, ImageView<Rgb32f>& dst)
-{
-  auto src_buffer = halide::as_interleaved_runtime_buffer(src);
-  auto dst_buffer = halide::as_interleaved_runtime_buffer(dst);
-
-  src_buffer.set_host_dirty();
-  shakti_enlarge(src_buffer, src_buffer.width(), src_buffer.height(),
-                 dst_buffer.width(), dst_buffer.height(), dst_buffer);
-  dst_buffer.copy_to_host();
-}
 
 
 BOOST_AUTO_TEST_SUITE(TestImageResize)
 
 BOOST_AUTO_TEST_CASE(test_upscale)
 {
-  auto src = Image<float>{2, 2};
+  auto src = sara::Image<float>{2, 2};
   src.matrix() <<
     0, 1,
     2, 3;
 
-  auto dst = Image<float>{4, 4};
+  auto dst = sara::Image<float>{4, 4};
 
-  scale(src, dst);
+  halide::scale(src, dst);
 
-  auto true_dst = Image<float>{4, 4};
+  auto true_dst = sara::Image<float>{4, 4};
   true_dst.matrix() <<  //
       0, 0, 1, 1,  //
       0, 0, 1, 1,  //
@@ -106,18 +50,18 @@ BOOST_AUTO_TEST_CASE(test_upscale)
 
 BOOST_AUTO_TEST_CASE(test_downscale)
 {
-  auto src = Image<float>{4, 4};
+  auto src = sara::Image<float>{4, 4};
   src.matrix() <<  //
       0, 0, 1, 1,  //
       0, 0, 1, 1,  //
       2, 2, 3, 3,  //
       2, 2, 3, 3;
 
-  auto dst = Image<float>{2, 2};
+  auto dst = sara::Image<float>{2, 2};
 
-  scale(src, dst);
+  halide::scale(src, dst);
 
-  auto true_dst = Image<float>{2, 2};
+  auto true_dst = sara::Image<float>{2, 2};
   true_dst.matrix() <<
     0, 1,
     2, 3;
@@ -129,7 +73,7 @@ BOOST_AUTO_TEST_CASE(test_enlarge_single_channel)
   // N.B.: because of the internal parameters, we must have image sizes of at
   // least 8.
 
-  auto src = Image<float>{8, 8};
+  auto src = sara::Image<float>{8, 8};
   src.matrix() <<
     0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
     1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
@@ -140,11 +84,11 @@ BOOST_AUTO_TEST_CASE(test_enlarge_single_channel)
     6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0,
     7.0, 7.0, 7.0, 7.0, 7.0, 7.0, 7.0, 7.0;
 
-  auto dst = Image<float>{8, 16};
+  auto dst = sara::Image<float>{8, 16};
 
-  enlarge(src, dst);
+  halide::enlarge(src, dst);
 
-  auto true_dst = Image<float>{8, 16};
+  auto true_dst = sara::Image<float>{8, 16};
   true_dst.matrix() <<
     0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
     0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5,
@@ -171,9 +115,9 @@ BOOST_AUTO_TEST_CASE(test_enlarge_multi_channel)
   // N.B.: because of the internal parameters, we must have image sizes of at
   // least 8.
 
-  auto src = Image<Rgb32f>{8, 8};
+  auto src = sara::Image<sara::Rgb32f>{8, 8};
   for (int y = 0; y < src.height(); ++y)
-    src.matrix().row(y).fill(Rgb32f::Ones() * y);
+    src.matrix().row(y).fill(sara::Rgb32f::Ones() * y);
   // In each channel:
   //
   // src.matrix() <<
@@ -186,14 +130,14 @@ BOOST_AUTO_TEST_CASE(test_enlarge_multi_channel)
   //   6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0,
   //   7.0, 7.0, 7.0, 7.0, 7.0, 7.0, 7.0, 7.0;
 
-  auto dst = Image<Rgb32f>{8, 16};
+  auto dst = sara::Image<sara::Rgb32f>{8, 16};
 
-  enlarge(src, dst);
+  halide::enlarge(src, dst);
 
-  auto true_dst = Image<Rgb32f>{8, 16};
+  auto true_dst = sara::Image<sara::Rgb32f>{8, 16};
   for (int y = 0; y < true_dst.height() - 1; ++y)
-    true_dst.matrix().row(y).fill(Rgb32f::Ones() * (y / 2.f));
-  true_dst.matrix().row(15).fill(Rgb32f::Ones() * 7);
+    true_dst.matrix().row(y).fill(sara::Rgb32f::Ones() * (y / 2.f));
+  true_dst.matrix().row(15).fill(sara::Rgb32f::Ones() * 7);
   // In each channel:
   //
   // true_dst.matrix() <<
@@ -222,35 +166,35 @@ BOOST_AUTO_TEST_CASE(test_enlarge_multi_channel)
 
 BOOST_AUTO_TEST_CASE(test_enlarge_small_image)
 {
-  auto src = Image<float>{2, 2};
+  auto src = sara::Image<float>{2, 2};
   src.matrix() <<
     0, 1,
     2, 3;
 
-  auto true_dst = Image<float>{4, 4};
+  auto true_dst = sara::Image<float>{4, 4};
   true_dst.matrix() <<
     0, 0.5, 1, 1,
     1, 1.5, 2, 2,
     2, 2.5, 3, 3,
     2, 2.5, 3, 3;
 
-  auto dst = Image<float>{4, 4};
+  auto dst = sara::Image<float>{4, 4};
 
-  enlarge(src, dst);
+  halide::enlarge(src, dst);
   BOOST_CHECK_EQUAL(true_dst.matrix(), dst.matrix());
 }
 
 BOOST_AUTO_TEST_CASE(test_reduce_on_image_views)
 {
-  auto src = Image<float>{10, 10};
+  auto src = sara::Image<float>{10, 10};
   for (int y = 0; y < 10; ++y)
     src.matrix().row(y).fill(static_cast<float>(y));
 
-  auto dst = Image<float>{10, 5};
-  reduce(src, dst);
+  auto dst = sara::Image<float>{10, 5};
+  halide::reduce(src, dst);
 
-  auto dst_ref = Image<float>{10, 5};
-  DO::Sara::reduce(src, dst_ref);
+  auto dst_ref = sara::Image<float>{10, 5};
+  sara::reduce(src, dst_ref);
   std::cout << src.matrix() << std::endl;
   std::cout << dst.matrix() << std::endl;
   std::cout << dst_ref.matrix() << std::endl;
@@ -258,21 +202,21 @@ BOOST_AUTO_TEST_CASE(test_reduce_on_image_views)
 
 BOOST_AUTO_TEST_CASE(test_reduce_single_channel)
 {
-  auto src = Image<float>{4, 4};
+  auto src = sara::Image<float>{4, 4};
   src.matrix() <<
     0, 0.5, 1, 1,
     1, 1.5, 2, 2,
     2, 2.5, 3, 3,
     2, 2.5, 3, 3;
 
-  auto true_dst = Image<float>{2, 2};
+  auto true_dst = sara::Image<float>{2, 2};
   true_dst.matrix() <<
     0, 1,
     2, 3;
 
-  auto dst = Image<float>{2, 2};
+  auto dst = sara::Image<float>{2, 2};
 
-  reduce(src, dst);
+  halide::reduce(src, dst);
 
   std::cout << src.matrix() << std::endl;
   std::cout << dst.matrix() << std::endl;

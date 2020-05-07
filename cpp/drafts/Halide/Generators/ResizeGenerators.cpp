@@ -128,8 +128,8 @@ namespace {
     template <typename T2>
     using Output = typename Base::template Output<T2>;
 
-    GeneratorParam<int> tile_x{"tile_x", 32};
-    GeneratorParam<int> tile_y{"tile_y", 32};
+    GeneratorParam<int> tile_x{"tile_x", 16};
+    GeneratorParam<int> tile_y{"tile_y", 16};
     GeneratorParam<int32_t> truncation_factor{"truncation_factor", 4};
 
     Input<Buffer<T>> input{"input", 4};

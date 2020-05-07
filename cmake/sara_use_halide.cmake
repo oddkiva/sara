@@ -139,6 +139,19 @@ function (shakti_halide_library _source_filepath)
   halide_library(${_source_filename}
     SRCS ${_source_filepath}
     HALIDE_TARGET x86-64-sse41)
+
+  foreach (suffix IN ITEMS _cc _cc_gen _lib_gen
+                           .generator_binary
+                           .generator_library
+                           .generator_stub_gen
+                           .run
+                           .rungen)
+    if (TARGET ${_source_filename}${suffix})
+      set_target_properties(${_source_filename}${suffix}
+        PROPERTIES
+        FOLDER "Halide/${_source_filename}")
+    endif ()
+  endforeach ()
 endfunction ()
 
 function (shakti_halide_gpu_library _source_filepath)
@@ -151,6 +164,19 @@ function (shakti_halide_gpu_library _source_filepath)
       INTERFACE "-framework Foundation"
                 "-framework Metal")
   endif ()
+
+  foreach (suffix IN ITEMS _cc _cc_gen _lib_gen
+                           .generator_binary
+                           .generator_library
+                           .generator_stub_gen
+                           .run
+                           .rungen)
+    if (TARGET ${_source_filename}${suffix})
+      set_target_properties(${_source_filename}${suffix}
+        PROPERTIES
+        FOLDER "Halide/${_source_filename}")
+    endif ()
+  endforeach ()
 endfunction ()
 
 
@@ -177,4 +203,17 @@ function (shakti_halide_library_v2)
       "-framework Foundation"
       "-framework Metal")
   endif ()
+
+  foreach (suffix IN ITEMS _cc _cc_gen _lib_gen
+                           .generator_binary
+                           .generator_library
+                           .generator_stub_gen
+                           .run
+                           .rungen)
+    if (TARGET ${generator_NAME}${suffix})
+      set_target_properties(${generator_NAME}${suffix}
+        PROPERTIES
+        FOLDER "Halide/${generator_NAME}")
+    endif ()
+  endforeach ()
 endfunction ()

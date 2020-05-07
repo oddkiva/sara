@@ -3,7 +3,7 @@
 #include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
-#include "../Utilities.hpp"
+#include <drafts/Halide/Utilities.hpp>
 
 #include "shakti_halide_gray32f_to_rgb.h"
 #include "shakti_halide_rgb_to_gray.h"

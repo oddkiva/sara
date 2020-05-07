@@ -3,7 +3,7 @@
 #include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
-#include "../Utilities.hpp"
+#include <drafts/Halide/Utilities.hpp>
 
 
 namespace halide = DO::Shakti::HalideBackend;
