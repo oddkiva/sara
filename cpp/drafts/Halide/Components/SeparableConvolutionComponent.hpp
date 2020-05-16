@@ -71,10 +71,12 @@ namespace {
       {
         // 1st pass: transpose and convolve the columns
         conv_y_t.compute_root();
-        conv_y_t.gpu_tile(x, y, c, xo, yo, co, xi, yi, ci, tile_x, tile_y, 1);
+        conv_y_t.gpu_tile(x, y, c, xo, yo, co, xi, yi, ci, tile_x, tile_y, 1,
+                          TailStrategy::GuardWithIf);
 
         // 2nd pass: transpose and convolve the rows.
-        conv_x.gpu_tile(x, y, c, xo, yo, co, xi, yi, ci, tile_x, tile_y, 1);
+        conv_x.gpu_tile(x, y, c, xo, yo, co, xi, yi, ci, tile_x, tile_y, 1,
+                        TailStrategy::GuardWithIf);
       }
 
       // Hexagon schedule.

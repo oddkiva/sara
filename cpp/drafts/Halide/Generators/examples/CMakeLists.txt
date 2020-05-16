@@ -1,5 +1,5 @@
 find_package(OpenMP)
-find_package(DO_Sara COMPONENTS Core Graphics VideoIO REQUIRED)
+find_package(DO_Sara COMPONENTS Core Graphics ImageIO VideoIO REQUIRED)
 
 # N.B.: with MSVC, this link helped to solve already defined symbol errors:
 # https://github.com/halide/Halide/issues/740
@@ -119,5 +119,26 @@ target_link_libraries(halide_resize_example
   shakti_halide_gray32f_to_rgb
   shakti_reduce_32f)
 set_property(TARGET halide_resize_example
+  PROPERTY
+  FOLDER "Tutorials/Halide")
+
+add_executable(halide_gaussian_pyramid
+  halide_gaussian_pyramid.cpp)
+target_compile_definitions(halide_gaussian_pyramid
+  PRIVATE ${SARA_DEFINITIONS})
+target_link_options(halide_gaussian_pyramid
+  PRIVATE
+  $<$<CXX_COMPILER_ID:MSVC>:/INCREMENTAL:NO /FORCE /IGNORE:4006>)
+target_link_libraries(halide_gaussian_pyramid
+  PRIVATE
+  ${DO_Sara_LIBRARIES}
+  Halide
+  shakti_halide_rgb_to_gray
+  shakti_halide_gray32f_to_rgb
+  shakti_enlarge
+  shakti_gaussian_convolution_v2
+  shakti_reduce_32f
+  shakti_scale_32f)
+set_property(TARGET halide_gaussian_pyramid
   PROPERTY
   FOLDER "Tutorials/Halide")

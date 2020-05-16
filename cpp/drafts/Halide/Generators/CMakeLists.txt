@@ -1,7 +1,3 @@
-set(BUILD_SHARED_LIBS OFF)
-
-include(sara_use_halide)
-
 # N.B.: in Mac OS X, the genfiles directory is not formed correctly because of a
 # bug in the CMake script in `Halide.cmake` is using the variable
 # `CMAKE_CFG_INTDIR` incorrectly.
@@ -58,6 +54,7 @@ shakti_halide_library_v2(
   NAME shakti_im2col_32f
   SRCS Im2ColGenerator.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
 
 if (SARA_BUILD_SAMPLES)
   add_subdirectory(examples)
