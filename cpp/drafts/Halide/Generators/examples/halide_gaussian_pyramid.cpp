@@ -38,12 +38,14 @@ GRAPHICS_MAIN()
   const auto image_filepath = "/Users/david/GitLab/DO-CV/sara/data/sunflowerField.jpg";
   auto image = sara::imread<float>(image_filepath);
 
-  auto pyramid = shakti::HalideBackend::gaussian_pyramid(image);
+  // auto pyramid = shakti::HalideBackend::gaussian_pyramid(image);
+  auto pyramid = shakti::HalideBackend::difference_of_gaussians_pyramid(image);
 
   sara::create_window(pyramid(0,0).sizes());
   for (auto o = 0; o < pyramid.num_octaves(); ++o)
     for (auto s = 0; s < pyramid.num_scales_per_octave(); ++s)
     {
+      pyramid(s, o).flat_array() = (pyramid(s, o).flat_array() + 1.f) / 2.f;
       auto buffer_gray = halide::as_runtime_buffer<float>(pyramid(s, o));
 
       auto image_rgb = sara::Image<sara::Rgb8>{pyramid(s, o).sizes()};
@@ -52,6 +54,8 @@ GRAPHICS_MAIN()
       shakti_halide_gray32f_to_rgb(buffer_gray, buffer_rgb);
       sara::display(image_rgb);
     }
+
+  sara::get_key();
 
   return 0;
 }

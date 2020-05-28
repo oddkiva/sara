@@ -33,3 +33,11 @@ target_link_libraries(test_halide_separable_convolution_2d
 target_link_libraries(test_halide_im2col
   PRIVATE
   shakti_im2col_32f)
+
+target_link_libraries(test_halide_binary_operators
+  PRIVATE
+  shakti_subtract_32f)
+
+target_link_libraries(test_halide_local_extrema
+  PRIVATE
+  shakti_local_max_32f)

@@ -21,6 +21,7 @@
 #include <DO/Sara/ImageProcessing/LinearFiltering.hpp>
 #include <DO/Sara/ImageProcessing/Resize.hpp>
 
+#include <drafts/Halide/BinaryOperators.hpp>
 #include <drafts/Halide/GaussianConvolution.hpp>
 #include <drafts/Halide/Resize.hpp>
 #include <drafts/Halide/Utilities.hpp>
@@ -109,6 +110,8 @@ namespace DO { namespace Shakti { namespace HalideBackend {
         Shakti::HalideBackend::scale(G(downscale_index, o - 1), G(0, o));
       }
       Sara::toc("Downscale");
+      std::cout << "Current image sizes = " << G(0, o).sizes().transpose()
+                << std::endl;
 
       for (auto s = 1; s < num_scales; ++s)
       {
@@ -118,11 +121,36 @@ namespace DO { namespace Shakti { namespace HalideBackend {
             sqrt(k * k * sigma_s_1 * sigma_s_1 - sigma_s_1 * sigma_s_1);
         gaussian_convolution(G(s - 1, o), G(s, o), sigma, 4);
         sigma_s_1 *= k;
-        Sara::toc(Sara::format("Convolve (s=%d, o=%d)", s, o));
+        Sara::toc(Sara::format("Convolve (s=%d, o=%d) and kernel sizes = %d", s,
+                               o, int(2 * sigma * 4 + 1)));
       }
     }
 
     return G;
+  }
+
+  //! Computes a pyramid of Gaussians.
+  inline auto difference_of_gaussians_pyramid(
+      Sara::ImageView<float>& image,
+      const Sara::ImagePyramidParams& params = Sara::ImagePyramidParams())
+      -> Sara::ImagePyramid<float>
+  {
+    auto G = gaussian_pyramid(image, params);
+    auto D = Sara::ImagePyramid<float>{};
+    D.reset(G.num_octaves(), G.num_scales_per_octave() - 1, G.scale_initial(),
+            G.scale_geometric_factor());
+
+    for (auto o = 0; o < D.num_octaves(); ++o)
+    {
+      D.octave_scaling_factor(o) = G.octave_scaling_factor(o);
+      for (auto s = 0; s < D.num_scales_per_octave(); ++s)
+      {
+        D(s, o).resize(G(s, o).sizes());
+        subtract(G(s + 1, o), G(s, o), D(s, o));
+      }
+    }
+
+    return D;
   }
 
 }}}  // namespace DO::Shakti::HalideBackend

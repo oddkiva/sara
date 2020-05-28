@@ -138,7 +138,8 @@ target_link_libraries(halide_gaussian_pyramid
   shakti_enlarge
   shakti_gaussian_convolution_v2
   shakti_reduce_32f
-  shakti_scale_32f)
+  shakti_scale_32f
+  shakti_subtract_32f)
 set_property(TARGET halide_gaussian_pyramid
   PROPERTY
   FOLDER "Tutorials/Halide")
