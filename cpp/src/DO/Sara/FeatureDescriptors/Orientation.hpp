@@ -91,10 +91,10 @@ namespace DO { namespace Sara {
     auto rounded_y = int_round(y);
 
     // std deviation of the gaussian weight (cf. [Lowe, IJCV 2004])
-    auto sigma = s*blur_factor;
+    auto sigma = s * blur_factor;
 
     // Patch radius on which the histogram of gradients is performed.
-    auto patch_radius = int_round(sigma*patch_truncation_factor);
+    auto patch_radius = int_round(sigma * patch_truncation_factor);
 
     // Accumulate the histogram of orientations.
     for (auto v = -patch_radius; v <= patch_radius; ++v)
@@ -105,8 +105,8 @@ namespace DO { namespace Sara {
             rounded_y + v < 0 || rounded_y + v >= grad_polar_coords.height())
           continue;
 
-        auto mag = grad_polar_coords(rounded_x+u, rounded_y+v)(0);
-        auto ori = grad_polar_coords(rounded_x+u, rounded_y+v)(1);
+        auto mag = grad_polar_coords(rounded_x + u, rounded_y + v)(0);
+        auto ori = grad_polar_coords(rounded_x + u, rounded_y + v)(1);
 
         // ori is in \f$]-\pi, \pi]\f$, so translate ori by \f$2*\pi\f$ if it is
         // negative.
@@ -116,9 +116,9 @@ namespace DO { namespace Sara {
 
         // Give more emphasis to gradient orientations that lie closer to the
         // keypoint location.
-        auto weight = exp(-(u*u + v*v) / (T(2)*sigma*sigma));
+        auto weight = exp(-(u * u + v * v) / (T(2) * sigma * sigma));
         // Also give more emphasis to gradient with large magnitude.
-        orientation_histogram(bin_index) += weight*mag;
+        orientation_histogram(bin_index) += weight * mag;
       }
     }
   }
@@ -177,15 +177,18 @@ namespace DO { namespace Sara {
     T y0 = orientation_histogram( (i-1+N) % N );
     T y1 = orientation_histogram( i );
     T y2 = orientation_histogram( (i+1) % N );
+
     // Denote the orientation histogram function by \f$f\f$.
     // perform a 2nd-order Taylor approximation:
     // \f$f(x+h) = f(x) + f'(x)h + f''(x) h^2/2\f$
     // We approximate \f$f'\f$ and \f$f''\f$ by finite difference.
     T fprime = (y2-y0) / 2.f;
     T fsecond = y0 - 2.f*y1 + y2;
+
     // Maximize w.r.t. to \f$h\f$, derive the expression.
     // Thus \f$h = -f'(x)/f''(x)\f$.
     T h = -fprime / fsecond;
+
     // Add the offset \f$h\f$ to get the refined orientation value.
     // Note that we also add the 0.5f offset, because samples are assumed taken
     // on the middle of the interval \f$[i, i+1)\f$.

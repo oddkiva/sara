@@ -77,7 +77,7 @@ auto compute_sift_keypoints(const ImageView<float>& image)
   SARA_DEBUG << "Total Detection/Description time" << endl;
   SARA_DEBUG << "SIFT computation time = " << elapsed << " ms" << endl;
 
-  // 4. Rescale  the feature position and scale $(x,y,\sigma)$ with the octave
+  // 4. Rescale  the feature position and scale $(x, y, \sigma)$ with the octave
   //    scale.
   for (size_t i = 0; i != DoGs.size(); ++i)
   {

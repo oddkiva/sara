@@ -134,14 +134,14 @@ namespace DO { namespace Sara {
     for (i = 0; i < num_iter; ++i)
     {
       // Range check at each iteration. The first iteration should always be OK.
-      if (x < border_sz || x >= I.width() - border_sz || y < border_sz ||
-          y >= I.height() - border_sz)
+      if (x < border_sz || x >= I.width() - border_sz ||  //
+          y < border_sz || y >= I.height() - border_sz)
         break;
 
       // Estimate the gradient and the hessian matrix by central finite
       // differentiation.
-      D_prime = gradient(I, Point2i{ x, y });
-      D_second = hessian(I, Point2i{ x, y });
+      D_prime = gradient(I, Point2i{x, y});
+      D_second = hessian(I, Point2i{x, y});
 
       // The interpolation or refinement is done conservatively depending on the
       // quality of the Hessian matrix estimate.
@@ -221,7 +221,7 @@ namespace DO { namespace Sara {
     auto extrema = std::vector<OERegion>{};
     extrema.reserve(10000);
 
-    auto map = Image<int>{ I(s, o).sizes() };
+    auto map = Image<int>{I(s, o).sizes()};
     map.flat_array().setZero();
 
 //#define STRICT_LOCAL_EXTREMA
