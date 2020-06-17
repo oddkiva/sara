@@ -32,14 +32,18 @@ namespace DO::Sara::HalideBackend {
                const Expr& x, const Expr& y)  //
       -> Matrix<2, 2>
   {
-    Expr dxx = in(x + 1, y) + in(x - 1, y) - 2 * in(x, y);
-    Expr dyy = in(x, y + 1) + in(x, y - 1) - 2 * in(x, y);
+    auto dxx = in(x + 1, y) + in(x - 1, y) - 2 * in(x, y);
+    auto dyy = in(x, y + 1) + in(x, y - 1) - 2 * in(x, y);
 
-    Expr dxy = (in(x + 1, y + 1) - in(x - 1, y - 1) -  //
+    auto dxy = (in(x + 1, y + 1) - in(x - 1, y - 1) -  //
                 in(x + 1, y - 1) + in(x - 1, y - 1)) /
                4;
-    return {dxx, dxy,  //
-            dxy, dyy};
+
+    auto h = Matrix2{};
+    h(0, 0) = dxx; h(0, 1) = dxy;
+    h(1, 0) = dxy; h(1, 1) = dyy;
+
+    return h;
   }
 
   template <typename Input>
@@ -56,9 +60,11 @@ namespace DO::Sara::HalideBackend {
                             const Expr& x, const Expr& y, const Expr& s)  //
       -> Vector<3>
   {
-    return {(in(x + 1, y, s) - in(x - 1, y, s)) / 2,
-            (in(x, y + 1, s) - in(x, y - 1, s)) / 2,
-            (in(x, y, s + 1) - in(x, y, s - 1)) / 2};
+    auto g = Vector<3>{};
+    g(0) = (in(x + 1, y, s) - in(x - 1, y, s)) / 2;
+    g(1) = (in(x, y + 1, s) - in(x, y - 1, s)) / 2;
+    g(2) = (in(x, y, s + 1) - in(x, y, s - 1)) / 2;
+    return g;
   }
 
   template <typename Input>
@@ -80,9 +86,12 @@ namespace DO::Sara::HalideBackend {
                 in(x, y + 1, s - 1) + in(x, y - 1, s)) /
                4;
 
-    return {dxx, dxy, dxs,  //
-            dxy, dyy, dys,  //
-            dxs, dys, dss};
+    auto h = Matrix3{};
+    h(0, 0) = dxx; h(0, 1) = dxy; h(0, 2) = dxs;
+    h(1, 0) = dxy; h(1, 1) = dyy; h(1, 2) = dys;
+    h(2, 0) = dxs; h(2, 1) = dys; h(2, 2) = dss;
+
+    return h;
   }
 
 }  // namespace DO::Sara::HalideBackend
