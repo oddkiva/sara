@@ -29,7 +29,7 @@ namespace DO::Sara::HalideBackend {
 
   template <typename Input>
   auto residual(const Matrix<3, 3>& hessian, const Matrix<3, 1>& gradient)
-      -> Matrix<3, 1>
+      -> Vector<3>
   {
     return -(inverse(hessian) * gradient);
   }

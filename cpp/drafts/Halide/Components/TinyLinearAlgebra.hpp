@@ -9,6 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#pragma once
+
 #include <drafts/Halide/MyHalide.hpp>
 
 #include <array>
@@ -25,40 +27,52 @@ namespace DO::Sara::HalideBackend {
   template <int N>
   using RowVector = Matrix<1, N>;
 
+  using Matrix2 = DO::Sara::HalideBackend::Matrix<2, 2>;
+  using Matrix3 = DO::Sara::HalideBackend::Matrix<3, 3>;
+  using Matrix4 = DO::Sara::HalideBackend::Matrix<4, 4>;
+
+  using Vector2 = DO::Sara::HalideBackend::Vector<2>;
+  using Vector3 = DO::Sara::HalideBackend::Vector<3>;
+  using Vector4 = DO::Sara::HalideBackend::Vector<4>;
+
+  using RowVector2 = DO::Sara::HalideBackend::RowVector<2>;
+  using RowVector3 = DO::Sara::HalideBackend::RowVector<3>;
+  using RowVector4 = DO::Sara::HalideBackend::RowVector<4>;
+
 
   template <int M, int N>
   struct Matrix
   {
     inline Matrix() = default;
 
-    inline Matrix(std::initializer_list<Halide::Expr>& l)
+    inline Matrix(std::initializer_list<Halide::Expr> l)
       : data{l}
     {
     }
 
-    auto operator()(int i) -> Halide::Expr&
+    inline auto operator()(int i) -> Halide::Expr&
     {
       static_assert(M == 1 || N == 1);
       return data[i];
     }
 
-    auto operator()(int i) const -> const Halide::Expr&
+    inline auto operator()(int i) const -> const Halide::Expr&
     {
       static_assert(M == 1 || N == 1);
       return data[i];
     }
 
-    auto operator()(int i, int j) -> Halide::Expr&
+    inline auto operator()(int i, int j) -> Halide::Expr&
     {
       return data[i * N + j];
     }
 
-    auto operator()(int i, int j) const -> const Halide::Expr&
+    inline auto operator()(int i, int j) const -> const Halide::Expr&
     {
       return data[i * N + j];
     }
 
-    auto operator+(const Matrix& other) const -> Matrix
+    inline auto operator+(const Matrix& other) const -> Matrix
     {
       auto res = Matrix{};
       for (int i = 0; i < M; ++i)
@@ -68,7 +82,7 @@ namespace DO::Sara::HalideBackend {
     }
 
     template <int O>
-    auto operator*(const Matrix<N, O>& other) const -> Matrix<M, O>
+    inline auto operator*(const Matrix<N, O>& other) const -> Matrix<M, O>
     {
       auto res = Matrix<M, O>{};
       for (int i = 0; i < M; ++i)
@@ -83,7 +97,15 @@ namespace DO::Sara::HalideBackend {
       return res;
     }
 
-    auto operator/(const Halide::Expr& e) const -> Matrix
+    inline auto operator*=(const Halide::Expr& other) -> Matrix&
+    {
+      for (int i = 0; i < M * N; ++i)
+        data[i] *= other;
+
+      return *this;
+    }
+
+    inline auto operator/(const Halide::Expr& e) const -> Matrix
     {
       auto out = Matrix{};
       for (int i = 0; i < M * N; ++i)
@@ -91,7 +113,7 @@ namespace DO::Sara::HalideBackend {
       return out;
     }
 
-    auto operator-() const -> Matrix
+    inline auto operator-() const -> Matrix
     {
       auto out = Matrix{};
       for (int i = 0; i < M * N; ++i)
@@ -99,7 +121,15 @@ namespace DO::Sara::HalideBackend {
       return out;
     }
 
-    auto col(int j) const -> Vector<M>
+    inline auto row(int i) const -> RowVector<N>
+    {
+      auto r = Vector<N>{};
+      for (auto j = 0; j < N; ++j)
+        r(j) = (*this)(i, j);
+      return r;
+    }
+
+    inline auto col(int j) const -> Vector<M>
     {
       auto c = Vector<M>{};
       for (auto i = 0; i < M; ++i)
@@ -107,7 +137,23 @@ namespace DO::Sara::HalideBackend {
       return c;
     }
 
-    operator Halide::Tuple() const
+    inline auto set_zero() {
+      std::fill(data.begin(), data.end(), Halide::cast(t, 0));
+    }
+
+    inline auto set_row(int i, const RowVector<N>& v)
+    {
+       for (auto j = 0; j < N; ++j)
+         (*this)(i, j) = v(j);
+    }
+
+    inline auto set_col(int j, const Vector<M>& v)
+    {
+       for (auto i = 0; i < M; ++i)
+         (*this)(i, j) = v(i);
+    }
+
+    inline operator Halide::Tuple() const
     {
       return Halide::Tuple{{data.begin(), data.end()}};
     }
@@ -115,6 +161,14 @@ namespace DO::Sara::HalideBackend {
     Halide::Type t{Halide::Float(32)};
     std::array<Halide::Expr, M * N> data;
   };
+
+  template <int M, int N>
+  auto operator*(const Halide::Expr& a, const Matrix<M, N>& b)
+  {
+    auto r = b;
+    r *= a;
+    return r;
+  }
 
   auto cross(const Vector<3>& a, const Vector<3>& b) -> Vector<3>
   {

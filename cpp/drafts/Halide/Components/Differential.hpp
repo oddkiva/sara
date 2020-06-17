@@ -21,8 +21,10 @@ namespace DO::Sara::HalideBackend {
                 const Expr& x, const Expr& y)  //
       -> Vector<2>
   {
-    return {(in(x + 1, y) - in(x - 1, y)) / 2,
-            (in(x, y + 1) - in(x, y - 1)) / 2};
+    auto g = Vector<2>{};
+    g(0) = (in(x + 1, y) - in(x - 1, y)) / 2;
+    g(1) = (in(x, y + 1) - in(x, y - 1)) / 2;
+    return g;
   }
 
   template <typename Input>

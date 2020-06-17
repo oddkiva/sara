@@ -1,7 +1,7 @@
 Difference of Gaussian extrema
 ==============================
 
-- [ ] Linear algebra.
+- [x] Linear algebra.
 - [x] Differential.
 - [ ] Pyramid octave datastructure.
 - [x] Gaussian pyramid
