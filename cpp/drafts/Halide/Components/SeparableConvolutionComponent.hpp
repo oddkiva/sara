@@ -34,10 +34,10 @@ namespace {
     template <typename Input, typename Output>
     void generate(Input& input, Func& kernel_x, Expr kernel_x_size,
                   Expr kernel_x_shift, Func& kernel_y, Expr kernel_y_size,
-                  Expr kernel_y_shift, Output& output)
+                  Expr kernel_y_shift, Output& output, int w, int h)
     {
-      const auto w = input.dim(0).extent();
-      const auto h = input.dim(1).extent();
+      // const auto w = input.dim(0).extent();
+      // const auto h = input.dim(1).extent();
 
       // Define the summation variable `k` with its summation domain (a.k.a. the
       // reduction domain variable).

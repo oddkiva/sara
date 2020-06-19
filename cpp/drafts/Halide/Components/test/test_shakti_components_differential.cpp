@@ -21,9 +21,9 @@
 #include <drafts/Halide/Components/Evaluation.hpp>
 
 
-using DO::Sara::HalideBackend::eval;
-using DO::Sara::HalideBackend::Matrix2;
-using DO::Sara::HalideBackend::Matrix3;
+using DO::Shakti::HalideBackend::eval;
+using DO::Shakti::HalideBackend::Matrix2;
+using DO::Shakti::HalideBackend::Matrix3;
 
 using namespace Halide;
 

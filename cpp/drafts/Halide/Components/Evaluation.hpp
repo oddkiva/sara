@@ -16,10 +16,10 @@
 #include <Eigen/Core>
 
 
-namespace DO::Sara::HalideBackend {
+namespace DO::Shakti::HalideBackend {
 
   template <int M, int N>
-  auto eval(const DO::Sara::HalideBackend::Matrix<M, N>& expr)
+  auto eval(const Matrix<M, N>& expr)
   {
     auto fn = Halide::Func{};
     auto x = Halide::Var{"x"};
@@ -46,4 +46,4 @@ namespace DO::Sara::HalideBackend {
     return Halide::Buffer<float>(r)(0);
   }
 
-}  // namespace DO::Sara::HalideBackend
+}  // namespace DO::Shakti::HalideBackend

@@ -12,7 +12,7 @@
 #include <drafts/Halide/Components/TinyLinearAlgebra.hpp>
 
 
-namespace DO::Sara::HalideBackend {
+namespace DO::Shakti::HalideBackend {
 
   using namespace Halide;
 
@@ -94,4 +94,4 @@ namespace DO::Sara::HalideBackend {
     return h;
   }
 
-}  // namespace DO::Sara::HalideBackend
+}  // namespace DO::Shakti::HalideBackend

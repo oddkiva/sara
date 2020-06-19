@@ -36,11 +36,15 @@ namespace {
     void generate()
     {
       gaussian.generate(sigma, truncation_factor);
+
+      const auto w = input.dim(0).extent();
+      const auto h = input.dim(1).extent();
+
       separable_conv_2d.generate(
           input,
           gaussian.kernel, gaussian.kernel_size, gaussian.kernel_shift,
           gaussian.kernel, gaussian.kernel_size, gaussian.kernel_shift,
-          output);
+          output, w, h);
     }
 
     void schedule()

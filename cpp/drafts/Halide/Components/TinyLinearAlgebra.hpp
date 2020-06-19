@@ -16,7 +16,7 @@
 #include <array>
 
 
-namespace DO::Sara::HalideBackend {
+namespace DO::Shakti::HalideBackend {
 
   template <int M, int N>
   struct Matrix;
@@ -27,17 +27,17 @@ namespace DO::Sara::HalideBackend {
   template <int N>
   using RowVector = Matrix<1, N>;
 
-  using Matrix2 = DO::Sara::HalideBackend::Matrix<2, 2>;
-  using Matrix3 = DO::Sara::HalideBackend::Matrix<3, 3>;
-  using Matrix4 = DO::Sara::HalideBackend::Matrix<4, 4>;
+  using Matrix2 = Matrix<2, 2>;
+  using Matrix3 = Matrix<3, 3>;
+  using Matrix4 = Matrix<4, 4>;
 
-  using Vector2 = DO::Sara::HalideBackend::Vector<2>;
-  using Vector3 = DO::Sara::HalideBackend::Vector<3>;
-  using Vector4 = DO::Sara::HalideBackend::Vector<4>;
+  using Vector2 = Vector<2>;
+  using Vector3 = Vector<3>;
+  using Vector4 = Vector<4>;
 
-  using RowVector2 = DO::Sara::HalideBackend::RowVector<2>;
-  using RowVector3 = DO::Sara::HalideBackend::RowVector<3>;
-  using RowVector4 = DO::Sara::HalideBackend::RowVector<4>;
+  using RowVector2 = RowVector<2>;
+  using RowVector3 = RowVector<3>;
+  using RowVector4 = RowVector<4>;
 
 
   template <int M, int N>
@@ -153,6 +153,15 @@ namespace DO::Sara::HalideBackend {
          (*this)(i, j) = v(i);
     }
 
+    inline auto transpose() const -> Matrix<N, M>
+    {
+      auto r = Matrix<N, M>{};
+      for (auto i = 0; i < M; ++i)
+        for (auto j = 0; j < N; ++j)
+          r(j, i) = (*this)(i, j);
+      return r;
+    }
+
     inline operator Halide::Tuple() const
     {
       return Halide::Tuple{{data.begin(), data.end()}};
@@ -224,4 +233,4 @@ namespace DO::Sara::HalideBackend {
     return inv_m / det(m);
   }
 
-}  // namespace DO::Sara::HalideBackend
+}  // namespace DO::Shakti::HalideBackend
