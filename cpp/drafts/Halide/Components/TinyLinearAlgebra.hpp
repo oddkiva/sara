@@ -45,9 +45,11 @@ namespace DO::Shakti::HalideBackend {
   {
     inline Matrix() = default;
 
-    inline Matrix(std::initializer_list<Halide::Expr> l)
-      : data{l}
+    inline Matrix(const Halide::Tuple& t)
     {
+      if (t.size() != M*N)
+        throw std::runtime_error{"Invalid tuple size!"};
+      std::copy(t.as_vector().begin(), t.as_vector().end(), data.begin());
     }
 
     inline auto operator()(int i) -> Halide::Expr&
