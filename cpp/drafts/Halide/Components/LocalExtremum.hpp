@@ -26,7 +26,7 @@ namespace {
     const auto r = RDom{-1, 3, -1, 3};
     return max(maximum(prev(x + r.x, y + r.y, n)),
                maximum(curr(x + r.x, y + r.y, n)),
-               maximum(next(x + r.x, y + r.y, n)));
+               maximum(next(x + r.x, y + r.y, n))) == curr(x, y, n);
   }
 
   template <typename Input>
@@ -37,7 +37,7 @@ namespace {
     const auto r = RDom{-1, 3, -1, 3};
     return min(minimum(prev(x + r.x, y + r.y, n)),
                minimum(curr(x + r.x, y + r.y, n)),
-               minimum(next(x + r.x, y + r.y, n)));
+               minimum(next(x + r.x, y + r.y, n))) == curr(x, y, n);
   }
 
 }

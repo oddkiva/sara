@@ -7,12 +7,37 @@
 #include <drafts/Halide/Components/Differential.hpp>
 #include <drafts/Halide/Components/GaussianConvolution2D.hpp>
 
+#define USE_SCHEDULE
+
 
 namespace hal = DO::Shakti::HalideBackend;
 namespace sara = DO::Sara;
 
 
 using namespace std;
+
+
+auto bool_to_rgb(const Halide::Func& f)
+{
+  auto x = Halide::Var{"x"};
+  auto y = Halide::Var{"y"};
+  auto yi = Halide::Var{"yi"};
+  auto c = Halide::Var{"c"};
+
+  auto f_rescaled = Halide::Func{f.name() + "_rescaled"};
+  f_rescaled(x, y, c) = cast<std::uint8_t>(f(x, y)) * 255;
+#ifdef USE_SCHEDULE
+  f_rescaled.split(y, y, yi, 4).parallel(y).vectorize(x, 8);
+#endif
+  f_rescaled.output_buffer()
+      .dim(0)
+      .set_stride(3)
+      .dim(2)
+      .set_stride(1)
+      .set_bounds(0, 3);
+
+  return f_rescaled;
+}
 
 
 GRAPHICS_MAIN()
@@ -59,7 +84,6 @@ GRAPHICS_MAIN()
     auto g = input_ext(x, y, 1);
     auto b = input_ext(x, y, 2);
     gray(x, y) = (0.2125f * r + 0.7154f * g + 0.0721f * b) / 255.f;
-#define USE_SCHEDULE
 #ifdef USE_SCHEDULE
     gray.split(y, y, yi, 4).parallel(y).vectorize(x, 8);
 #endif
@@ -116,6 +140,21 @@ GRAPHICS_MAIN()
     harris.compute_root();
   }
 
+
+  auto harris_local_max = Halide::Func{"harris_local_max"};
+  {
+    auto r = Halide::RDom{-1, 3, -1, 3};
+    harris_local_max(x, y) =
+        Halide::maximum(harris(x + r.x, y + r.y)) == harris(x, y);
+  }
+#ifdef USE_SCHEDULE
+  harris_local_max.split(y, y, yi, 4).parallel(y).vectorize(x, 8);
+#endif
+  harris_local_max.compute_root();
+
+  auto harris_local_max_rgb = bool_to_rgb(harris_local_max);
+
+
   auto r = Halide::RDom(0, frame.width(), 0, frame.height());
   auto harris_max = Halide::Func{};
   harris_max() = Halide::maximum(harris(r.x, r.y));
@@ -152,7 +191,8 @@ GRAPHICS_MAIN()
 
     sara::tic();
     {
-      harris_rescaled.realize(output);
+      //harris_rescaled.realize(output);
+      harris_local_max_rgb.realize(output);
     }
     sara::toc("Harris cornerness function");
 

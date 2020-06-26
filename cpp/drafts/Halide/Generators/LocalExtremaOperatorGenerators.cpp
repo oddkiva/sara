@@ -61,32 +61,32 @@ namespace {
 //       auto& prev = scale_prev;
 //       auto& curr = scale_curr;
 //       auto& next = scale_next;
-// 
+//
 //       prev.dim(0).set_stride(Expr());
 //       curr.dim(0).set_stride(Expr());
 //       next.dim(0).set_stride(Expr());
 //       out.dim(0).set_stride(Expr());
-// 
+//
 //       Expr prev_is_planar = prev.dim(0).stride() == 1;
 //       Expr prev_is_interleaved = prev.dim(0).stride() == 3 &&  //
 //                                  prev.dim(2).stride() == 1 &&  //
 //                                  prev.dim(2).extent() == 3;
-// 
+//
 //       Expr curr_is_planar = curr.dim(0).stride() == 1;
 //       Expr curr_is_interleaved = curr.dim(0).stride() == 3 &&  //
 //                                  curr.dim(2).stride() == 1 &&  //
 //                                  curr.dim(2).extent() == 3;
-// 
+//
 //       Expr next_is_planar = next.dim(0).stride() == 1;
 //       Expr next_is_interleaved = next.dim(0).stride() == 3 &&  //
 //                                  next.dim(2).stride() == 1 &&  //
 //                                  next.dim(2).extent() == 3;
-// 
+//
 //       Expr out_is_planar = out.dim(0).stride() == 1;
 //       Expr out_is_interleaved = out.dim(0).stride() == 3 &&  //
 //                                 out.dim(2).stride() == 1 &&  //
 //                                 out.dim(2).extent() == 3;
-// 
+//
 //       // GPU schedule.
 //       if (get_target().has_gpu_feature())
 //       {
@@ -94,19 +94,19 @@ namespace {
 //                        out_is_planar)
 //             .gpu_tile(x, y, c, xo, yo, co, xi, yi, ci, tile_x, tile_y, 1,
 //                       TailStrategy::GuardWithIf);
-// 
+//
 //         out.specialize(prev_is_interleaved && curr_is_interleaved &&
 //                        next_is_interleaved && out_is_interleaved)
 //             .gpu_tile(x, y, c, xo, yo, co, xi, yi, ci, tile_x, tile_y, 3,
 //                       TailStrategy::GuardWithIf);
 //       }
-// 
+//
 //       // Hexagon schedule.
 //       else if (get_target().features_any_of({Target::HVX_64, Target::HVX_128}))
 //       {
 //         const auto vector_size =
 //             get_target().has_feature(Target::HVX_128) ? 128 : 64;
-// 
+//
 //         out.specialize(prev_is_planar && curr_is_planar && next_is_planar &&
 //                        out_is_planar)
 //             .hexagon()
@@ -117,7 +117,7 @@ namespace {
 //             .parallel(yo)
 //             .vectorize(x, vector_size, TailStrategy::GuardWithIf);
 //       }
-// 
+//
 //       // CPU schedule.
 //       else
 //       {
@@ -126,7 +126,7 @@ namespace {
 //             .split(y, yo, yi, 8)
 //             .parallel(yo)
 //             .vectorize(x, 8, TailStrategy::GuardWithIf);
-// 
+//
 //         out.specialize(prev_is_interleaved && curr_is_interleaved &&
 //                        next_is_interleaved && out_is_interleaved)
 //             .reorder(c, x, y)
