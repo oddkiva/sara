@@ -3,9 +3,10 @@
 #include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
-#include <drafts/Halide/Utilities.hpp>
 #include <drafts/Halide/Components/Differential.hpp>
 #include <drafts/Halide/Components/GaussianConvolution2D.hpp>
+#include <drafts/Halide/Components/LocalExtremum.hpp>
+#include <drafts/Halide/Utilities.hpp>
 
 #define USE_SCHEDULE
 
@@ -39,6 +40,29 @@ auto bool_to_rgb(const Halide::Func& f)
   return f_rescaled;
 }
 
+auto rescale_to_rgb(const Halide::Func& f, int32_t w, int32_t h)
+{
+  auto r = Halide::RDom(0, w, 0, h);
+  auto f_min = Halide::Func{f.name() + "_max"};
+  auto f_max = Halide::Func{f.name() + "_min"};
+  f_max() = Halide::maximum(f(r.x, r.y));
+  f_min() = Halide::minimum(f(r.x, r.y));
+  f_max.compute_root();
+  f_min.compute_root();
+
+  auto x = Var{"x"};
+  auto y = Var{"y"};
+  auto c = Var{"c"};
+
+  auto f_rescaled = Halide::Func{f.name() + "_rescaled"};
+  f_rescaled(x, y, c) = cast<std::uint8_t>(  //
+      (f(x, y) - f_min()) /                  //
+      (f_max() - f_min()) * 255              //
+  );
+
+  return f_rescaled;
+}
+
 
 GRAPHICS_MAIN()
 {
@@ -61,14 +85,8 @@ GRAPHICS_MAIN()
   auto frame = video_stream.frame();
   auto harris_frame = sara::Image<sara::Rgb8>{frame.sizes()};
 
-  auto input = Halide::Buffer<uint8_t>::make_interleaved(  //
-      reinterpret_cast<uint8_t*>(frame.data()),            //
-      frame.width(), frame.height(), 3                     //
-  );
-  auto output = Halide::Buffer<uint8_t>::make_interleaved(  //
-      reinterpret_cast<uint8_t*>(harris_frame.data()),      //
-      harris_frame.width(), harris_frame.height(), 3        //
-  );
+  auto input = hal::as_interleaved_buffer(frame);
+  auto output = hal::as_interleaved_buffer(harris_frame);
 
   auto x = Halide::Var{"x"};
   auto y = Halide::Var{"y"};
@@ -127,7 +145,6 @@ GRAPHICS_MAIN()
   const auto kappa = 4.f;
   auto harris = Halide::Func{};
   {
-    // auto m = hal::Matrix<2, 2>{moment(x, y)};
     auto m = hal::Matrix<2, 2>{};
     m(0, 0) = gauss_int[0].output(x, y);
     m(0, 1) = gauss_int[1].output(x, y);
@@ -147,6 +164,7 @@ GRAPHICS_MAIN()
     harris_local_max(x, y) =
         Halide::maximum(harris(x + r.x, y + r.y)) == harris(x, y);
   }
+  // auto harris_local_max= hal::local_max(harris, x, y);
 #ifdef USE_SCHEDULE
   harris_local_max.split(y, y, yi, 4).parallel(y).vectorize(x, 8);
 #endif
@@ -154,20 +172,7 @@ GRAPHICS_MAIN()
 
   auto harris_local_max_rgb = bool_to_rgb(harris_local_max);
 
-
-  auto r = Halide::RDom(0, frame.width(), 0, frame.height());
-  auto harris_max = Halide::Func{};
-  harris_max() = Halide::maximum(harris(r.x, r.y));
-  auto harris_min = Halide::Func{};
-  harris_min() = Halide::minimum(harris(r.x, r.y));
-  harris_max.compute_root();
-  harris_min.compute_root();
-
-  auto harris_rescaled = Halide::Func{"harris_rescaled"};
-  harris_rescaled(x, y, c) = cast<std::uint8_t>(  //
-      (harris(x, y) - harris_min()) /             //
-      (harris_max() - harris_min()) * 255         //
-  );
+  auto harris_rescaled = rescale_to_rgb(harris, frame.width(), frame.height());
 #ifdef USE_SCHEDULE
   harris_rescaled.split(y, y, yi, 4).parallel(y).vectorize(x, 8);
 #endif

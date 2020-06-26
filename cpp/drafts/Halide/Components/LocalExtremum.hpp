@@ -13,16 +13,34 @@
 #include <drafts/Halide/MyHalide.hpp>
 
 
-namespace {
-
-  using namespace Halide;
-
+namespace DO::Shakti::HalideBackend {
 
   template <typename Input>
-  auto local_scale_space_max(                                   //
-      const Input& prev, const Input& curr, const Input& next,  //
-      const Var& x, const Var& y, const Var& n)                 //
+  auto local_max(const Input& f,                              //
+                 const Halide::Var& x, const Halide::Var& y)  //
   {
+    auto r = Halide::RDom{-1, 3, -1, 3};
+    auto f_local_max = Halide::Func{f.name() + "local_max"};
+    f_local_max(x, y) = Halide::maximum(f(x + r.x, y + r.y)) == f(x, y);
+    return f;
+  }
+
+  template <typename Input>
+  auto local_min(const Input& f,                              //
+                 const Halide::Var& x, const Halide::Var& y)  //
+  {
+    auto r = Halide::RDom{-1, 3, -1, 3};
+    auto f_local_min = Halide::Func{f.name() + "local_min"};
+    f_local_min(x, y) = Halide::minimum(f(x + r.x, y + r.y)) == f(x, y);
+    return f;
+  }
+
+  template <typename Input>
+  auto local_scale_space_max(                                            //
+      const Input& prev, const Input& curr, const Input& next,           //
+      const Halide::Var& x, const Halide::Var& y, const Halide::Var& n)  //
+  {
+    using namespace Halide;
     const auto r = RDom{-1, 3, -1, 3};
     return max(maximum(prev(x + r.x, y + r.y, n)),
                maximum(curr(x + r.x, y + r.y, n)),
@@ -30,14 +48,15 @@ namespace {
   }
 
   template <typename Input>
-  auto local_scale_space_min(                                   //
-      const Input& prev, const Input& curr, const Input& next,  //
-      const Var& x, const Var& y, const Var& n)                 //
+  auto local_scale_space_min(                                            //
+      const Input& prev, const Input& curr, const Input& next,           //
+      const Halide::Var& x, const Halide::Var& y, const Halide::Var& n)  //
   {
+    using namespace Halide;
     const auto r = RDom{-1, 3, -1, 3};
     return min(minimum(prev(x + r.x, y + r.y, n)),
                minimum(curr(x + r.x, y + r.y, n)),
                minimum(next(x + r.x, y + r.y, n))) == curr(x, y, n);
   }
 
-}
+}  // namespace DO::Shakti::HalideBackend
