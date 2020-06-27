@@ -256,7 +256,7 @@ GRAPHICS_MAIN()
 {
   // Load an input image.
   Buffer<uint8_t> input =
-      load_image("C:/Users/David/Desktop/GitLab/sara/data/sunflowerField.jpg");
+      load_image("/Users/David/GitLab/DO-CV/sara/data/sunflowerField.jpg");
 
   // Allocated an image that will store the correct output
   Buffer<uint8_t> reference_output(input.width(), input.height(),
@@ -313,9 +313,11 @@ Target find_gpu_target()
   // Start with a target suitable for the machine you're running this on.
   Target target = get_host_target();
 
+#if !defined(__APPLE__)
   // Uncomment the following lines to try CUDA instead:
   target.set_feature(Target::CUDA);
   return target;
+#endif
 
 #ifdef _WIN32
   if (LoadLibraryA("d3d12.dll") != nullptr)

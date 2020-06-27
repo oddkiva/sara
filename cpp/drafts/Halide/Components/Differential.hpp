@@ -9,6 +9,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#pragma once
+
 #include <drafts/Halide/Components/TinyLinearAlgebra.hpp>
 
 

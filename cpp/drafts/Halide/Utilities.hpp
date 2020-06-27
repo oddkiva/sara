@@ -32,7 +32,10 @@ namespace DO::Shakti::HalideBackend {
     if (dlopen(
             "/System/Library/Frameworks/Metal.framework/Versions/Current/Metal",
             RTLD_LAZY) != NULL)
+    {
+      std::cout << "METAL backend" << std::endl;
       target.set_feature(Target::Metal);
+    }
 #else
     if (dlopen("libOpenCL.so", RTLD_LAZY) != NULL)
       target.set_feature(Target::OpenCL);

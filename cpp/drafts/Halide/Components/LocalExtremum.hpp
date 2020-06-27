@@ -36,6 +36,18 @@ namespace DO::Shakti::HalideBackend {
   }
 
   template <typename Input>
+  auto local_scale_space_max(                                   //
+      const Input& prev, const Input& curr, const Input& next,  //
+      const Halide::Var& x, const Halide::Var& y)               //
+  {
+    using namespace Halide;
+    const auto r = RDom{-1, 3, -1, 3};
+    return max(maximum(prev(x + r.x, y + r.y)),
+               maximum(curr(x + r.x, y + r.y)),
+               maximum(next(x + r.x, y + r.y))) == curr(x, y);
+  }
+
+  template <typename Input>
   auto local_scale_space_max(                                            //
       const Input& prev, const Input& curr, const Input& next,           //
       const Halide::Var& x, const Halide::Var& y, const Halide::Var& n)  //
