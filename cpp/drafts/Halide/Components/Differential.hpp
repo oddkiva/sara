@@ -58,37 +58,43 @@ namespace DO::Shakti::HalideBackend {
 
 
   template <typename Input>
-  auto scale_space_gradient(const Input& in,                              //
-                            const Expr& x, const Expr& y, const Expr& s)  //
+  auto scale_space_gradient(const Input& in0,              //
+                            const Input& in1,              //
+                            const Input& in2,              //
+                            const Expr& x, const Expr& y)  //
       -> Vector<3>
   {
     auto g = Vector<3>{};
-    g(0) = (in(x + 1, y, s) - in(x - 1, y, s)) / 2;
-    g(1) = (in(x, y + 1, s) - in(x, y - 1, s)) / 2;
-    g(2) = (in(x, y, s + 1) - in(x, y, s - 1)) / 2;
+    g(0) = (in1(x + 1, y) - in1(x - 1, y)) / 2;
+    g(1) = (in1(x, y + 1) - in1(x, y - 1)) / 2;
+    g(2) = (in2(x, y) - in0(x, y)) / 2;
     return g;
   }
 
   template <typename Input>
-  auto scale_space_hessian(const Input& in,                              //
-                           const Expr& x, const Expr& y, const Expr& s)  //
+  auto scale_space_hessian(const Input& in0,              //
+                           const Input& in1,              //
+                           const Input& in2,              //
+                           const Expr& x, const Expr& y)  //
       -> Matrix<3, 3>
   {
-    Expr dxx = in(x + 1, y, s) + in(x - 1, y, s) - 2 * in(x, y, s);
-    Expr dyy = in(x, y + 1, s) + in(x, y - 1, s) - 2 * in(x, y, s);
-    Expr dss = in(x, y, s + 1) + in(x, y, s - 1) - 2 * in(x, y, s);
+    Expr dxx = in1(x + 1, y) - 2 * in1(x, y) + in1(x - 1, y);
+    Expr dyy = in1(x, y + 1) - 2 * in1(x, y) + in1(x, y - 1);
+    Expr dss = in2(x, y) - 2 * in1(x, y) + in0(x, y);
 
-    Expr dxy = (in(x + 1, y + 1, s) - in(x - 1, y - 1, s) -  //
-                in(x + 1, y - 1, s) + in(x - 1, y - 1, s)) /
-               4;
-    Expr dxs = (in(x + 1, y, s) - in(x - 1, y, s) -  //
-                in(x + 1, y, s - 1) + in(x - 1, y, s - 1)) /
-               4;
-    Expr dys = (in(x, y + 1, s) - in(x, y - 1, s) -  //
-                in(x, y + 1, s - 1) + in(x, y - 1, s)) /
+    Expr dxy = (in1(x + 1, y + 1) - in1(x - 1, y - 1) -  //
+                in1(x + 1, y - 1) + in1(x - 1, y - 1)) /
                4;
 
-    auto h = Matrix3{};
+    Expr dxs = (in2(x + 1, y) - in2(x - 1, y) -  //
+                in0(x + 1, y) + in0(x - 1, y)) /
+               4;
+
+    Expr dys = (in2(x, y + 1) - in2(x, y - 1) -  //
+                in0(x, y + 1) + in0(x, y - 1)) /
+               4;
+
+    auto h = Matrix<3, 3>{};
     h(0, 0) = dxx; h(0, 1) = dxy; h(0, 2) = dxs;
     h(1, 0) = dxy; h(1, 1) = dyy; h(1, 2) = dys;
     h(2, 0) = dxs; h(2, 1) = dys; h(2, 2) = dss;

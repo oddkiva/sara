@@ -10,6 +10,8 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#pragma once
+
 #include <drafts/Halide/MyHalide.hpp>
 
 
@@ -45,6 +47,19 @@ namespace DO::Shakti::HalideBackend {
     return max(maximum(prev(x + r.x, y + r.y)),
                maximum(curr(x + r.x, y + r.y)),
                maximum(next(x + r.x, y + r.y))) == curr(x, y);
+  }
+
+
+  template <typename Input>
+  auto local_scale_space_min(                                   //
+      const Input& prev, const Input& curr, const Input& next,  //
+      const Halide::Var& x, const Halide::Var& y)               //
+  {
+    using namespace Halide;
+    const auto r = RDom{-1, 3, -1, 3};
+    return min(minimum(prev(x + r.x, y + r.y)),
+               minimum(curr(x + r.x, y + r.y)),
+               minimum(next(x + r.x, y + r.y))) == curr(x, y);
   }
 
   template <typename Input>

@@ -119,7 +119,7 @@ namespace DO::Shakti::HalideBackend {
     {
       auto out = Matrix{};
       for (int i = 0; i < M * N; ++i)
-        out.data[i] *= -1;
+        out.data[i] = -data[i];
       return out;
     }
 
@@ -178,6 +178,17 @@ namespace DO::Shakti::HalideBackend {
   {
     auto r = b;
     r *= a;
+    return r;
+  }
+
+  template <int M, int N>
+  auto dot(const Matrix<M, N>& a, const Matrix<M, N>& b)
+  {
+    auto r = Halide::Expr{};
+    r = Halide::cast(a.t, 0);
+    for (auto i = 0; i < M; ++i)
+      for (auto j = 0; j < N; ++j)
+        r += a(i, j) * b(i, j);
     return r;
   }
 
