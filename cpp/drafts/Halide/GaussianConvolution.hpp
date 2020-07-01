@@ -22,9 +22,9 @@
 
 namespace DO { namespace Shakti { namespace HalideBackend {
 
-  auto gaussian_convolution(Sara::ImageView<float>& src,  //
-                            Sara::ImageView<float>& dst,  //
-                            float sigma, int truncation_factor)
+  auto gaussian_convolution(Sara::ImageView<float>& src,         //
+                            Sara::ImageView<float>& dst,         //
+                            float sigma, int truncation_factor)  //
   {
     auto src_tensor_view = tensor_view(src).reshape(
         Eigen::Vector4i{1, 1, src.height(), src.width()});

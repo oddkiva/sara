@@ -20,7 +20,7 @@
 using namespace Halide;
 
 
-BOOST_AUTO_TEST_CASE(test_gaussian_blur)
+BOOST_AUTO_TEST_CASE(test_subtraction)
 {
   using namespace DO::Sara;
 

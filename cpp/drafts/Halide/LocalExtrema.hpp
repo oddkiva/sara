@@ -25,16 +25,16 @@ namespace DO { namespace Shakti { namespace HalideBackend {
   auto local_max(Sara::ImageView<float>& a,  //
                  Sara::ImageView<float>& b,  //
                  Sara::ImageView<float>& c,  //
-                 Sara::ImageView<int32_t>& out)
+                 Sara::ImageView<std::uint8_t>& out)
   {
     auto a_tensor_view = tensor_view(a).reshape(
-        Eigen::Vector4i{1, 1, a.height(), a.width()});
+        Eigen::Vector3i{1, a.height(), a.width()});
     auto b_tensor_view = tensor_view(b).reshape(
-        Eigen::Vector4i{1, 1, b.height(), b.width()});
+        Eigen::Vector3i{1, b.height(), b.width()});
     auto c_tensor_view = tensor_view(c).reshape(
-        Eigen::Vector4i{1, 1, c.height(), c.width()});
+        Eigen::Vector3i{1, c.height(), c.width()});
     auto out_tensor_view = tensor_view(out).reshape(
-        Eigen::Vector4i{1, 1, out.height(), out.width()});
+        Eigen::Vector3i{1, out.height(), out.width()});
 
     auto a_buffer = as_runtime_buffer(a_tensor_view);
     auto b_buffer = as_runtime_buffer(b_tensor_view);

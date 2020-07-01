@@ -13,7 +13,6 @@
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageProcessing/LinearFiltering.hpp>
 
-#include <drafts/Halide/Helpers.hpp>
 #include <drafts/Halide/Utilities.hpp>
 
 #include "shakti_gaussian_convolution.h"
@@ -100,6 +99,7 @@ auto gaussian_convolution_aot_v2(sara::Image<float>& src,
 
   sara::display(sara::color_rescale(dst));
 }
+
 
 GRAPHICS_MAIN()
 {

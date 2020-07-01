@@ -14,7 +14,6 @@
 #include <DO/Sara/Core.hpp>
 #include <DO/Sara/Core/TensorDebug.hpp>
 
-#include <drafts/Halide/Helpers.hpp>
 #include <drafts/Halide/Utilities.hpp>
 
 #include "shakti_halide_cast_to_float.h"

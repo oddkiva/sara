@@ -21,7 +21,7 @@ shakti_halide_library_v2(
 # Local extrema operators.
 shakti_halide_library_v2(
   NAME shakti_local_max_32f
-  SRCS LocalExtremaOperatorGenerators.cpp
+  SRCS LocalExtremumGenerators.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 

@@ -27,8 +27,8 @@ BOOST_AUTO_TEST_CASE(test_gaussian_blur)
   auto a = Image<float>{3, 3};
   auto b = Image<float>{3, 3};
   auto c = Image<float>{3, 3};
-  auto res = Image<int32_t>{3, 3};
-  auto expected = Image<int32_t>{3, 3};
+  auto res = Image<std::uint8_t>{3, 3};
+  auto expected = Image<std::uint8_t>{3, 3};
 
   a.flat_array().fill(0);
   b.flat_array().fill(0);

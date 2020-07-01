@@ -26,10 +26,6 @@ target_link_libraries(test_halide_resize
   shakti_reduce_32f
   shakti_enlarge)
 
-target_link_libraries(test_halide_separable_convolution_2d
- PRIVATE
- shakti_separable_convolution_2d)
-
 target_link_libraries(test_halide_im2col
   PRIVATE
   shakti_im2col_32f)

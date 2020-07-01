@@ -75,3 +75,25 @@ BOOST_AUTO_TEST_CASE(test_gaussian_blur)
   for (auto k = 0; k < out_custom.dim(0).extent(); ++k)
     std::cout << k << " " << out_custom(k) << std::endl;
 }
+
+// BOOST_FIXTURE_TEST_CASE(test_gaussian, TestFilters)
+// {
+//   // Convolve with Dirac.
+//   const auto n = _src_image.sizes()[0];
+//   _src_image.flat_array().fill(0.f);
+//   _src_image(n / 2, n / 2) = 1.f;
+//
+//   MatrixXf true_matrix(3, 3);
+//   true_matrix <<
+//     exp(-1.0f), exp(-0.5f), exp(-1.0f),
+//     exp(-0.5f), exp(-0.0f), exp(-0.5f),
+//     exp(-1.0f), exp(-0.5f), exp(-1.f);
+//   true_matrix /= true_matrix.sum();
+//
+//   auto dst_image = Image<float>{ _src_image.sizes() };
+//
+//   auto apply_gaussian_filter = shakti::GaussianFilter{ 1.f, 1 };
+//   apply_gaussian_filter(
+//     dst_image.data(), _src_image.data(), _src_image.sizes().data());
+//   BOOST_CHECK_SMALL((true_matrix - dst_image.matrix()).norm(), 1e-5f);
+// }

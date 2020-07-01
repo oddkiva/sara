@@ -77,9 +77,7 @@ auto halide_pipeline() -> void
     {
       // Use parallelisation and vectorization.
       shakti_halide_rgb_to_gray(buffer_rgb, buffer_gray32f);
-
       reduce(frame_gray32f, frame_gray32f_reduced);
-
       shakti_halide_gray32f_to_rgb(buffer_gray32f_reduced, buffer_gray8);
     }
     toc("Halide");
