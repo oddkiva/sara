@@ -24,6 +24,10 @@ shakti_halide_library_v2(
   SRCS LocalExtremumGenerators.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
+shakti_halide_library_v2(
+  NAME shakti_local_scale_space_extremum_32f
+  SRCS LocalExtremumGenerators.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 # Separable convolution 2D
 shakti_halide_library_v2(

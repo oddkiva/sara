@@ -136,9 +136,12 @@ namespace DO { namespace Shakti { namespace HalideBackend {
       -> Sara::ImagePyramid<float>
   {
     auto G = gaussian_pyramid(image, params);
+
     auto D = Sara::ImagePyramid<float>{};
-    D.reset(G.num_octaves(), G.num_scales_per_octave() - 1, G.scale_initial(),
-            G.scale_geometric_factor());
+    D.reset(G.num_octaves(),                //
+            G.num_scales_per_octave() - 1,  //
+            G.scale_initial(),              //
+            G.scale_geometric_factor());    //
 
     for (auto o = 0; o < D.num_octaves(); ++o)
     {
@@ -146,7 +149,9 @@ namespace DO { namespace Shakti { namespace HalideBackend {
       for (auto s = 0; s < D.num_scales_per_octave(); ++s)
       {
         D(s, o).resize(G(s, o).sizes());
+        Sara::tic();
         subtract(G(s + 1, o), G(s, o), D(s, o));
+        Sara::toc(Sara::format("Subtracting at (s=%d, o=%d)", s, o));
       }
     }
 

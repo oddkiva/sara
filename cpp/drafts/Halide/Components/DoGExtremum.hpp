@@ -119,5 +119,4 @@ namespace DO::Shakti::HalideBackend {
     return {res(0), res(1), res(2), new_value, success};
   }
 
-
 }  // namespace DO::Sara::HalideBackend

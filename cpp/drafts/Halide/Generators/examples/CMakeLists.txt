@@ -137,6 +137,8 @@ target_link_libraries(halide_gaussian_pyramid
   shakti_halide_gray32f_to_rgb
   shakti_enlarge
   shakti_gaussian_convolution_v2
+  shakti_local_max_32f
+  shakti_local_scale_space_extremum_32f
   shakti_reduce_32f
   shakti_scale_32f
   shakti_subtract_32f)

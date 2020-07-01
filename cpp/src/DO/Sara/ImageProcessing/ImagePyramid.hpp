@@ -200,8 +200,8 @@ namespace DO { namespace Sara {
     //! @brief Reset image pyramid with the following parameters.
     void reset(int num_octaves,
                int num_scales_per_octave,
-               scalar_type scale_initial,
-               scalar_type scale_geometric_factor)
+               double scale_initial,
+               double scale_geometric_factor)
     {
       _octaves.clear();
       _oct_scaling_factors.clear();
@@ -234,83 +234,83 @@ namespace DO { namespace Sara {
     }
 
     //! @brief Mutable getter of the octave scaling factor.
-    scalar_type& octave_scaling_factor(int o)
+    auto octave_scaling_factor(int o) -> double&
     {
       return _oct_scaling_factors[o];
     }
 
     //! @brief Immutable octave getter.
-    const octave_type& operator()(int o) const
+    auto operator()(int o) const -> const octave_type&
     {
       return _octaves[o];
     }
 
     //! @brief Immutable image getter.
-    const image_type& operator()(int s, int o) const
+    auto operator()(int s, int o) const -> const image_type&
     {
       return _octaves[o][s];
     }
 
     //! @brief Immutable pixel getter.
-    const pixel_type& operator()(int x, int y, int s, int o) const
+    auto operator()(int x, int y, int s, int o) const -> const pixel_type&
     {
       return _octaves[o][s](x,y);
     }
 
     //! @brief Immutable getter of the octave scaling factor.
-    scalar_type octave_scaling_factor(int o) const
+    auto octave_scaling_factor(int o) const -> double
     {
       return _oct_scaling_factors[o];
     }
 
     //! @brief Immutable getter of the number of octaves.
-    int num_octaves() const
+    auto num_octaves() const
     {
       return static_cast<int>(_octaves.size());
     }
 
     //! @brief Immutable getter of the number of scales per octave.
-    int num_scales_per_octave() const
+    auto num_scales_per_octave() const
     {
       return static_cast<int>(_octaves.front().size());
     }
 
     //! @brief Immutable getter of the initial scale.
-    scalar_type scale_initial() const
+    auto scale_initial() const
     {
       return _scale_initial;
     }
 
     //! @brief Immutable getter of the scale geometric factor.
-    scalar_type scale_geometric_factor() const
+    auto scale_geometric_factor() const
     {
       return _scale_geometric_factor;
     }
 
     //! @brief Immutable getter of the relative scale w.r.t. an octave.
-    scalar_type scale_relative_to_octave(int s) const
+    auto scale_relative_to_octave(int s) const
     {
-      return pow(_scale_geometric_factor, s)*_scale_initial;
+      return pow(_scale_geometric_factor, s) * _scale_initial;
     }
 
     //! @brief Immutable getter of the scale relative to an octave.
 
-    scalar_type scale(int s, int o) const
+    auto scale(int s, int o) const
     {
-      return _oct_scaling_factors[o]*scale_relative_to_octave(s);
+      return _oct_scaling_factors[o] * scale_relative_to_octave(s);
     }
 
   protected: /* data members */
     //! @{
     //! @brief Parameters.
-    scalar_type _scale_initial;
-    scalar_type _scale_geometric_factor;
+    double _scale_initial;
+    double _scale_geometric_factor;
     //! @}
 
     //! @{
     //! @brief Image data.
     std::vector<octave_type> _octaves;
-    std::vector<scalar_type> _oct_scaling_factors;
+    std::vector<double> _oct_scaling_factors;
     //! @}
   };
 
