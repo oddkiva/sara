@@ -52,8 +52,9 @@ namespace {
       const auto curr_ext = BoundaryConditions::repeat_edge(scale_curr);
       const auto next_ext = BoundaryConditions::repeat_edge(scale_next);
 
-      out(x, y, n) = cast<int32_t>(
-          local_scale_space_max(prev_ext, curr_ext, next_ext, x, y, n));
+      out(x, y, n) =
+          cast<int32_t>(DO::Shakti::HalideBackend::local_scale_space_max(
+              prev_ext, curr_ext, next_ext, x, y, n));
     }
 
 //     void schedule()

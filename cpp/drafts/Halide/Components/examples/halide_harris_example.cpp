@@ -50,12 +50,12 @@ auto rescale_to_rgb(const Halide::Func& f, int32_t w, int32_t h)
   f_max.compute_root();
   f_min.compute_root();
 
-  auto x = Var{"x"};
-  auto y = Var{"y"};
-  auto c = Var{"c"};
+  auto x = Halide::Var{"x"};
+  auto y = Halide::Var{"y"};
+  auto c = Halide::Var{"c"};
 
   auto f_rescaled = Halide::Func{f.name() + "_rescaled"};
-  f_rescaled(x, y, c) = cast<std::uint8_t>(  //
+  f_rescaled(x, y, c) = Halide::cast<std::uint8_t>(  //
       (f(x, y) - f_min()) /                  //
       (f_max() - f_min()) * 255              //
   );

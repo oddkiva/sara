@@ -19,9 +19,9 @@
 #include <drafts/Halide/Components/Evaluation.hpp>
 
 
-using DO::Sara::HalideBackend::Matrix2;
-using DO::Sara::HalideBackend::Matrix3;
-using DO::Sara::HalideBackend::eval;
+using DO::Shakti::HalideBackend::Matrix2;
+using DO::Shakti::HalideBackend::Matrix3;
+using DO::Shakti::HalideBackend::eval;
 
 using namespace Halide;
 
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(test_matrix2_operations)
   BOOST_CHECK_EQUAL(eval(c), eval(2.f * (a * b)));
   std::cout << eval(2.f * (a * b)) << std::endl;
 
-  using DO::Sara::HalideBackend::inverse;
+  using DO::Shakti::HalideBackend::inverse;
   BOOST_CHECK_EQUAL(eval(c * inverse(c)), Eigen::Matrix2f::Identity());
   std::cout << eval(c * inverse(c)) << std::endl;
 }
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(test_matrix3_operations)
   BOOST_CHECK_CLOSE(eval(det(a)), 6.3f, 1e-5f);
   BOOST_CHECK_CLOSE(eval(trace(a)), 6.1f, 1e-6f);
 
-  using DO::Sara::HalideBackend::inverse;
+  using DO::Shakti::HalideBackend::inverse;
   std::cout << eval(a * inverse(a)) << std::endl;
   std::cout << eval(inverse(a)) << std::endl;
 

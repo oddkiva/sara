@@ -1,16 +1,16 @@
 #pragma once
 
 #include <drafts/Halide/MyHalide.hpp>
-#include <drafts/Halide/Components/GaussianKernelComponent.hpp>
-#include <drafts/Halide/Components/SeparableConvolutionComponent.hpp>
+#include <drafts/Halide/Components/GaussianKernel.hpp>
+#include <drafts/Halide/Components/SeparableConvolution.hpp>
 
 
 namespace DO::Shakti::HalideBackend {
 
   template <typename Output = Halide::Func>
   struct GaussianConvolution2D {
-    GaussianKernelComponent gaussian;
-    SeparableConvolutionComponent separable_conv_2d;
+    GaussianKernel gaussian;
+    SeparableConvolution separable_conv_2d;
 
     int32_t tile_x{16};
     int32_t tile_y{16};

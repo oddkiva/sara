@@ -84,7 +84,7 @@ auto rescale_to_rgb(const Halide::Func& f, int32_t w, int32_t h)
   f_min.compute_root();
 
   auto f_rescaled = Halide::Func{f.name() + "_rescaled"};
-  f_rescaled(x, y, c) = cast<std::uint8_t>(  //
+  f_rescaled(x, y, c) = Halide::cast<std::uint8_t>(  //
       (f(x, y) - f_min()) /                  //
       (f_max() - f_min()) * 255              //
   );
@@ -185,8 +185,7 @@ GRAPHICS_MAIN()
   const auto video_filepath =
       "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4"s;
 #elif __APPLE__
-  const auto video_filepath =
-      "/Users/david/Desktop/Datasets/humanising-autonomy/turn_bikes.mp4"s;
+  const auto video_filepath = "/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
 #else
   // const auto video_filepath = "/home/david/Desktop/test.mp4"s;
   const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
@@ -199,8 +198,8 @@ GRAPHICS_MAIN()
   auto dog_extrema = DoGExtrema{};
   auto dog_residuals = DoGResiduals{};
   // Fix a hard upper-bound.
-  dog_extrema.resize(1024);
-  dog_residuals.resize(1024);
+  dog_extrema.resize(4096);
+  dog_residuals.resize(4096);
 
   // Hardware-specific scheduling.
   constexpr auto use_gpu = false;
@@ -302,7 +301,7 @@ GRAPHICS_MAIN()
   //   polar_gradient_pyr.push_back(grad);
   // }
 
-  sara::create_window(video_stream.sizes());
+  sara::create_window(frame.sizes());
   sara::set_antialiasing(sara::active_window());
   while (true)
   {
@@ -326,7 +325,7 @@ GRAPHICS_MAIN()
     sara::tic();
     const auto num_dog_extrema = std::count_if(
         dog_map.begin(), dog_map.end(), [](const auto& v) { return v != 0; });
-    // SARA_CHECK(num_dog_extrema);
+    SARA_CHECK(num_dog_extrema);
     sara::toc("Extremum count");
 
     // Fill the arrays of DoG extrema.
@@ -349,7 +348,7 @@ GRAPHICS_MAIN()
       if (dog_index != num_dog_extrema)
         throw std::runtime_error{"Error counting DoG extrema!"};
     }
-    sara::toc("Filling array of DoG extrema");
+    sara::toc("DoG Array filling");
 
     sara::tic();
     {
@@ -367,7 +366,7 @@ GRAPHICS_MAIN()
       dog_values.copy_to_host();
       dog_successes.copy_to_host();
     }
-    sara::toc("Calculating DoG localization residuals");
+    sara::toc("DoG localization residuals");
 
     sara::tic();
     {

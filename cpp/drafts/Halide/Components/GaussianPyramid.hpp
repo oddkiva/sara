@@ -10,7 +10,7 @@
 // ========================================================================== //
 
 #include <drafts/Halide/MyHalide.hpp>
-#include <drafts/Halide/Components/GaussianKernelComponent.hpp>
+#include <drafts/Halide/Components/GaussianKernel.hpp>
 #include <drafts/Halide/Components/SeparableConvolutionComponent.hpp>
 
 
@@ -30,7 +30,7 @@ namespace {
 
   template <typename Input, typename Output>
   auto gaussian_octave(Input& input, std::vector<Output>& outputs,
-                       std::vector<GaussianKernelComponent>& gaussians,
+                       std::vector<GaussianKernel>& gaussians,
                        SeparableConvolutionComponent& separable_conv_2d)
   {
     for (auto s = 0u; s < gaussians.size(); ++s)

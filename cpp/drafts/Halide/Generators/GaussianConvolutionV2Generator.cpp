@@ -10,8 +10,8 @@
 // ========================================================================== //
 
 #include <drafts/Halide/MyHalide.hpp>
-#include <drafts/Halide/Components/GaussianKernelComponent.hpp>
-#include <drafts/Halide/Components/SeparableConvolutionComponent.hpp>
+#include <drafts/Halide/Components/GaussianKernel.hpp>
+#include <drafts/Halide/Components/SeparableConvolution.hpp>
 
 
 namespace {
@@ -28,8 +28,8 @@ namespace {
     Input<float> sigma{"sigma"};
     Input<int32_t> truncation_factor{"truncation_factor"};
 
-    GaussianKernelComponent gaussian;
-    SeparableConvolutionComponent separable_conv_2d;
+    DO::Shakti::HalideBackend::GaussianKernel gaussian;
+    DO::Shakti::HalideBackend::SeparableConvolution separable_conv_2d;
 
     Output<Buffer<float>> output{"input_convolved", 4};
 

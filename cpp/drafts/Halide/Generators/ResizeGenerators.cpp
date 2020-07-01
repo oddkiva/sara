@@ -10,9 +10,9 @@
 // ========================================================================== //
 
 #include <drafts/Halide/MyHalide.hpp>
-#include <drafts/Halide/Components/GaussianKernelComponent.hpp>
+#include <drafts/Halide/Components/GaussianKernel.hpp>
 #include <drafts/Halide/Components/ScaleComponent.hpp>
-#include <drafts/Halide/Components/SeparableConvolutionComponent.hpp>
+#include <drafts/Halide/Components/SeparableConvolution.hpp>
 
 
 namespace {
@@ -136,10 +136,10 @@ namespace {
     Input<int32_t[2]> output_sizes{"output_sizes"};
 
     // Gaussian convolution component.
-    GaussianKernelComponent gx;
-    GaussianKernelComponent gy;
+    DO::Shakti::HalideBackend::GaussianKernel gx;
+    DO::Shakti::HalideBackend::GaussianKernel gy;
 
-    SeparableConvolutionComponent separable_conv_2d;
+    DO::Shakti::HalideBackend::SeparableConvolution separable_conv_2d;
     Func input_blurred{"input_blurred"};
 
     // Downscale component.
@@ -173,7 +173,7 @@ namespace {
           input,
           gx.kernel, gx.kernel_size, gx.kernel_shift,
           gy.kernel, gy.kernel_size, gy.kernel_shift,
-          input_blurred);
+          input_blurred, w_in, h_in);
 
       downscale.generate(input_blurred, output, w_in, h_in, w_out, h_out);
     }
