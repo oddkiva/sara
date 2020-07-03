@@ -272,13 +272,16 @@ GRAPHICS_MAIN()
     auto ii = Halide::Var{"ii"};
     const auto tile_i = 32;
 
-    const auto x0 =
-        Halide::clamp(Halide::cast<int32_t>(dog_x(i)), 0, frame.width());
-    const auto y0 =
-        Halide::clamp(Halide::cast<int32_t>(dog_y(i)), 0, frame.height());
-    dog_residuals_fn(i) = hal::refine_extremum_v1(
-        dog_pyr[0], dog_pyr[1], dog_pyr[2],
-        x0, y0);
+    const auto x0 = Halide::clamp(Halide::cast<int32_t>(dog_x(i)),  //
+                                  0, frame.width());                //
+    const auto y0 = Halide::clamp(Halide::cast<int32_t>(dog_y(i)),  //
+                                  0, frame.height());               //
+    const auto r = hal::refine_extremum_v1(                         //
+        dog_pyr[0], dog_pyr[1], dog_pyr[2],                         //
+        x0, y0);                                                    //
+
+    dog_residuals_fn(i) = {r[0], r[1], r[2], r[3],
+                           Halide::cast<std::uint8_t>(r[4])};
     if (use_gpu)
       dog_residuals_fn.gpu_tile(i, ii, tile_i,
                                 Halide::TailStrategy::GuardWithIf);
@@ -287,19 +290,6 @@ GRAPHICS_MAIN()
     dog_residuals_fn.compile_jit(jit_target);
   }
 
-
-  // // 7. Gradient octave.
-  // auto polar_gradient_pyr = std::vector<Halide::Func>(num_scales);
-  // for (auto s = 0; s < num_scales; ++s)
-  // {
-  //   auto grad = Halide::Func{"gradient_" + std::to_string(s)};
-  //   auto g_cart = hal::gradient(gauss_pyr[s].output, x, y);
-  //   auto g_mag = Halide::sqrt(g_cart(0) * g_cart(0) + g_cart(1) * g_cart(1));
-  //   auto g_ori = Halide::atan2(g_cart(1), g_cart(0));
-
-  //   grad(x, y) = Halide::Tuple(g_mag, g_ori);
-  //   polar_gradient_pyr.push_back(grad);
-  // }
 
   sara::create_window(frame.sizes());
   sara::set_antialiasing(sara::active_window());
@@ -318,7 +308,6 @@ GRAPHICS_MAIN()
       frame_buffer.set_host_dirty();
       dog_extremum_map.realize(dog_map_buffer);
       dog_map_buffer.copy_to_host();
-
     }
     sara::toc("DoG");
 
@@ -389,12 +378,6 @@ GRAPHICS_MAIN()
         const auto s1 = dog_successes(i)
                             ? s * std::pow(scale_factor, res_s)
                             : s;
-
-        // SARA_CHECK(res_x);
-        // SARA_CHECK(res_y);
-        // SARA_CHECK(res_s);
-        // SARA_CHECK(dog_values(i));
-        // SARA_CHECK(int(dog_successes(i)));
 
         num_residual_successes += dog_successes(i);
         sara::draw_circle(x1, y1, s1 * std::sqrt(2.f), color, 2);

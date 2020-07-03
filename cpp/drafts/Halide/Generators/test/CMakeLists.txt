@@ -36,4 +36,5 @@ target_link_libraries(test_halide_binary_operators
 
 target_link_libraries(test_halide_local_extrema
   PRIVATE
-  shakti_local_max_32f)
+  shakti_local_max_32f
+  shakti_local_scale_space_extremum_32f)

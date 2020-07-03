@@ -1,6 +1,12 @@
 Improvements for the Match Propagation
 ======================================
 
+I have refactored the code and I believe the code has reached mature. It can
+prove to be a good tool for hard feature-based matching problems.
+
+Personal Thoughts
+=================
+
 Years later, it is always nice to see the match propagation method in action.
 Still the method suffers from an algorithmic efficiency problem during the
 region growing process because of the combinatorial search to estimate as

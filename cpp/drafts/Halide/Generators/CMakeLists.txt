@@ -11,24 +11,6 @@ shakti_halide_gpu_library(shakti_halide_cast_to_float.cpp)
 shakti_halide_gpu_library(shakti_halide_gaussian_blur.cpp)
 
 
-# Binary operators.
-shakti_halide_library_v2(
-  NAME shakti_subtract_32f
-  SRCS BinaryOperatorGenerators.cpp
-  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
-
-
-# Local extrema operators.
-shakti_halide_library_v2(
-  NAME shakti_local_max_32f
-  SRCS LocalExtremumGenerators.cpp
-  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
-
-shakti_halide_library_v2(
-  NAME shakti_local_scale_space_extremum_32f
-  SRCS LocalExtremumGenerators.cpp
-  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
-
 # Separable convolution 2D
 shakti_halide_library_v2(
   NAME shakti_separable_convolution_2d
@@ -74,7 +56,32 @@ shakti_halide_library_v2(
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 
+# Binary operators.
+shakti_halide_library_v2(
+  NAME shakti_subtract_32f
+  SRCS BinaryOperatorGenerators.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+
+# Local extrema operators.
+shakti_halide_library_v2(
+  NAME shakti_local_max_32f
+  SRCS LocalExtremumGenerators.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+shakti_halide_library_v2(
+  NAME shakti_local_scale_space_extremum_32f
+  SRCS LocalExtremumGenerators.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+shakti_halide_library_v2(
+  NAME shakti_refine_scale_space_extrema
+  SRCS RefineExtremumGenerators.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+
 if (SARA_BUILD_SAMPLES)
+  add_subdirectory(lessons)
   add_subdirectory(examples)
 endif ()
 

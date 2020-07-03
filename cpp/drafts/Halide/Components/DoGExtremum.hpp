@@ -84,9 +84,9 @@ namespace DO::Shakti::HalideBackend {
                    Halide::abs(res(1)) < 1.5f &&                    //
                    Halide::abs(I1(x, y)) < Halide::abs(new_value);  //
 
-    return {res(0), res(1), res(2),                //
-            new_value,                             //
-            Halide::cast<std::uint8_t>(success)};  //
+    return {res(0), res(1), res(2),  //
+            new_value,               //
+            success};                //
   }
 
   template <typename Input>

@@ -441,7 +441,7 @@ namespace DO { namespace Sara {
           continue;
 
         // Select the optimal scale using the normalized LoG.
-        auto scale = function.scale_relative_to_octave(s);
+        auto scale = static_cast<float>(function.scale_relative_to_octave(s));
 
         if (!select_laplace_scale(scale, x, y, s, o, gauss_pyramid, num_scales))
           continue;

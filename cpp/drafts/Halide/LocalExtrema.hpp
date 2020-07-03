@@ -29,14 +29,14 @@ namespace DO { namespace Shakti { namespace HalideBackend {
                         Sara::ImageView<float>& c,  //
                         Sara::ImageView<std::uint8_t>& out)
   {
-    auto a_tensor_view = tensor_view(a).reshape(
-        Eigen::Vector3i{1, a.height(), a.width()});
-    auto b_tensor_view = tensor_view(b).reshape(
-        Eigen::Vector3i{1, b.height(), b.width()});
-    auto c_tensor_view = tensor_view(c).reshape(
-        Eigen::Vector3i{1, c.height(), c.width()});
-    auto out_tensor_view = tensor_view(out).reshape(
-        Eigen::Vector3i{1, out.height(), out.width()});
+    auto a_tensor_view =
+        tensor_view(a).reshape(Eigen::Vector3i{1, a.height(), a.width()});
+    auto b_tensor_view =
+        tensor_view(b).reshape(Eigen::Vector3i{1, b.height(), b.width()});
+    auto c_tensor_view =
+        tensor_view(c).reshape(Eigen::Vector3i{1, c.height(), c.width()});
+    auto out_tensor_view =
+        tensor_view(out).reshape(Eigen::Vector3i{1, out.height(), out.width()});
 
     auto a_buffer = as_runtime_buffer(a_tensor_view);
     auto b_buffer = as_runtime_buffer(b_tensor_view);
@@ -65,9 +65,10 @@ namespace DO { namespace Shakti { namespace HalideBackend {
     a_buffer.set_host_dirty();
     b_buffer.set_host_dirty();
     c_buffer.set_host_dirty();
-    shakti_local_scale_space_extremum_32f(a_buffer, b_buffer, c_buffer,
-                                          edge_ratio, extremum_thres,
-                                          out_buffer);
+
+    shakti_local_scale_space_extremum_32f(
+        a_buffer, b_buffer, c_buffer, edge_ratio, extremum_thres, out_buffer);
+
     out_buffer.copy_to_host();
   }
 
@@ -91,7 +92,8 @@ namespace DO { namespace Shakti { namespace HalideBackend {
         out(s, o).resize(in(s, o).sizes());
         // Sara::tic();
         local_max(in(s, o), in(s + 1, o), in(s + 2, o), out(s, o));
-        // Sara::toc(Sara::format("Scale-space local max at (s=%d, o=%d)", s, o));
+        // Sara::toc(Sara::format("Scale-space local max at (s=%d, o=%d)", s,
+        // o));
       }
     }
 
@@ -121,7 +123,8 @@ namespace DO { namespace Shakti { namespace HalideBackend {
         // Sara::tic();
         local_scale_space_extrema(in(s, o), in(s + 1, o), in(s + 2, o),
                                   out(s, o), edge_ratio, extremum_thres);
-        // Sara::toc(Sara::format("Scale-space local extrema at (s=%d, o=%d)", s, o));
+        // Sara::toc(Sara::format("Scale-space local extrema at (s=%d, o=%d)",
+        // s, o));
       }
     }
 

@@ -130,12 +130,10 @@ namespace DO { namespace Shakti { namespace HalideBackend {
   }
 
   //! Computes a pyramid of Gaussians.
-  inline auto difference_of_gaussians_pyramid(
-      Sara::ImageView<float>& image,
-      const Sara::ImagePyramidParams& params = Sara::ImagePyramidParams())
+  inline auto subtract_pyramid(Sara::ImagePyramid<float>& gaussian_pyramid)
       -> Sara::ImagePyramid<float>
   {
-    auto G = gaussian_pyramid(image, params);
+    auto& G = gaussian_pyramid;
 
     auto D = Sara::ImagePyramid<float>{};
     D.reset(G.num_octaves(),                //
@@ -155,6 +153,17 @@ namespace DO { namespace Shakti { namespace HalideBackend {
       }
     }
 
+    return D;
+  }
+
+  //! Computes a pyramid of Gaussians.
+  inline auto difference_of_gaussians_pyramid(
+      Sara::ImageView<float>& image,
+      const Sara::ImagePyramidParams& params = Sara::ImagePyramidParams())
+      -> Sara::ImagePyramid<float>
+  {
+    auto G = gaussian_pyramid(image, params);
+    auto D = subtract_pyramid(G);
     return D;
   }
 
