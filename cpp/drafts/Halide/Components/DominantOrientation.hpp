@@ -10,117 +10,203 @@
 // ========================================================================== //
 
 #include <drafts/Halide/MyHalide.hpp>
+#include <drafts/Halide/Utilities.hpp>
 
 
-namespace {
+namespace DO::Shakti::HalideBackend {
 
-  using namespace Halide;
-
-  template <typename GradientInput, typename PositionInput, typename Output>
-  void compute_orientation_histogram(const GradientInput& grad_polar_coords,
-                                     const PositionInput& positions,
-                                     Output& orientation_histogram, int N,
-                                     const Expr& gaussian_truncation_factor = 3,
-                                     const Expr& length_in_scale_unit = 1.5)
+  auto schedule_histograms(Halide::Func& f,                               //
+                           const Halide::Var& o, const Halide::Var& k,    //
+                           const Halide::Var& oo, const Halide::Var& ko,  //
+                           const Halide::Var& oi, const Halide::Var& ki,  //
+                           std::int32_t tile_o, std::int32_t tile_k,      //
+                           bool use_gpu)                                  //
   {
-    Var k{"k"}, o{"o"};
-
-    auto x = positions(k, 0);
-    auto y = positions(k, 1);
-    auto s = positions(k, 2);
-
-    orientation_histogram(k, o) = 0;
-    auto rounded_x = round(x);
-    auto rounded_y = round(y);
-
-    auto sigma_gaussian = length_in_scale_unit * s;
-    auto patch_radius = sigma_gaussian * gaussian_truncation_factor;
-
-    auto r = RDom(-patch_radius, 2 * patch_radius + 1,   // x
-                  -patch_radius, 2 * patch_radius + 1);  // y
-
-    auto grad_polar_coords_ext =
-        BoundaryConditions::constant_exterior(grad_polar_coords, {0, 0});
-    auto mag = grad_polar_coords_ext(x + r.x, y + r.y, 0);
-    auto ori = grad_polar_coords_ext(x + r.x, y + r.y, 1);
-
-    auto ori_shift = select(ori < 0, ori + 2 * M_PI, ori);
-
-    auto weight = exp(-(r.x * r.x + r.y * r.y) /               //
-                      (2 * sigma_gaussian * sigma_gaussian));  //
-
-    auto bin_index = cast<int>(floor(ori_shift / (2 * M_PI) * N));
-    auto is_bin_o = select(bin_index == o, 0, 1);
-
-    orientation_histogram(k, o) = sum(weight * mag * is_bin_o);
+    if (use_gpu)
+      f.gpu_tile(o,k, oo, ko, oi, ki, tile_o, tile_k,
+                 Halide::TailStrategy::GuardWithIf);
+    else
+      f.split(k, k, ki, 4, Halide::TailStrategy::GuardWithIf)
+          .parallel(k)
+          .vectorize(o, 8);  // No need for bound checks here.
   }
 
-  void lowe_smooth_histogram(HistogramInput& hist_in, HistogramOutput& hist_out,
-                             int N)
+  auto compute_orientation_histogram(
+      const Halide::Func& mag_fn_ext,                        //
+      const Halide::Func& ori_fn_ext,                        //
+      const Halide::Expr& x,                                 //
+      const Halide::Expr& y,                                 //
+      const Halide::Expr& residual_sigma,                    //
+      const Halide::Expr& scale_max_factor,                  //
+      const Halide::Var& o,                                  //
+      const Halide::Expr& N = 36,                            //
+      const Halide::Expr& gaussian_truncation_factor = 3.f,  //
+      const Halide::Expr& length_in_scale_unit = 1.5f)       //
+      -> Halide::Expr
   {
-    Var k{"k"}, o{"o"};
-    auto current = Func();
-    auto next = Func();
+    const auto sigma_gaussian = length_in_scale_unit * scale_max_factor;
+    const auto patch_radius = Halide::cast<std::int32_t>(
+        Halide::floor(sigma_gaussian * gaussian_truncation_factor));
 
-    for (int i = 0; i < 6; ++i)
+    auto r = Halide::RDom(-patch_radius, 2 * patch_radius + 1,   // x
+                          -patch_radius, 2 * patch_radius + 1);  // y
+    r.where(x < length_in_scale_unit * residual_sigma &&
+            y < length_in_scale_unit * residual_sigma);
+
+    const auto rounded_x = Halide::cast<std::int32_t>(Halide::round(x));
+    const auto rounded_y = Halide::cast<std::int32_t>(Halide::round(y));
+
+    const auto mag = mag_fn_ext(rounded_x + r.x, rounded_y + r.y);
+    const auto ori = ori_fn_ext(rounded_x + r.x, rounded_y + r.y);
+
+    // Calculate the contribution this orientation.
+    const auto ori_weight = Halide::exp(         //
+        -(r.x * r.x + r.y * r.y) /               //
+        (2 * sigma_gaussian * sigma_gaussian));  //
+
+    // Calculate the best orientation bin.
+    //
+    // Recalculate the orientation value in [0, 2π]
+    constexpr auto two_pi = 2 * float(M_PI);
+    const auto ori_in_0_2_pi = Halide::select(ori < 0,       //
+                                              ori + two_pi,  //
+                                              ori);          //
+    // Normalize in [0, 1].
+    const auto ori_01_normalized = (ori_in_0_2_pi) / two_pi;
+
+    // Discretize the interval in [0, 2π[ in 36 smaller intervals centered in:
+    // {  0 deg,         10 deg,         20 deg, ...,    350 deg }
+    // Each bin cover the following intervals:
+    //  [-5, 5[,         [5, 15[,      [15, 25[, ..., [345, 355[
+    //
+    // Formalising a bit, this becomes:
+    // { 0 rad, Δ rad, 2Δ rad, ..., (N - 1)Δ rad }
+    //
+    // Each interval length is equal to:
+    // Δ = 2π / N
+    //
+    //
+    // The intervals are:
+    //  [     0  Δ - Δ/2,       0 Δ + Δ/2[,
+    //  [     1  Δ - Δ/2,       1 Δ + Δ/2[,
+    //  [     2  Δ - Δ/2,       2 Δ + Δ/2[
+    //  ...
+    //  [(N - 1) Δ - Δ/2, (N - 1) Δ + Δ/2[
+
+    // Find the best orientation bin index:
+    auto ori_bin = Halide::cast<int>(Halide::round(ori_01_normalized * N));
+    // Clamp the orientation bin index.
+    ori_bin = Halide::select(ori_bin == N, 0, ori_bin);
+
+    // Accumulation rule.
+    const auto is_bin_o = (ori_bin == o);
+
+    return Halide::sum(ori_weight * mag * is_bin_o);
+  }
+
+  auto box_blur_histograms(const Halide::Func& hist_fn,                   //
+                           const Halide::Var& o, const Halide::Var& k,    //
+                           const Halide::Var& oo, const Halide::Var& ko,  //
+                           const Halide::Var& oi, const Halide::Var& ki,  //
+                           std::int32_t tile_o, std::int32_t tile_k,      //
+                           const Halide::Expr& N,                         //
+                           bool use_gpu,                                  //
+                           int max_iters = 6)
+  {
+    auto box_blurs = std::vector<Halide::Func>(max_iters);
+
+    for (int i = 0; i < max_iters; ++i)
     {
-      if (i == 0)
-        current(k, o) = hist_in(k, o);
-      else
-        current(k, o) = next(k, o);
-      next(k, o) = (current(k, select((o - 1) < 0, N - 1, o - 1)) +  //
-                    current(k, o) +                                  //
-                    current(k, select((o + 1) == N, 0, o + 1)))      //
-                   / 3.f;
+      box_blurs[i] = Halide::Func{hist_fn.name() +                       //
+                                  "_box_blurred_" + std::to_string(i)};  //
+
+      auto o_prev = Halide::select((o - 1) < 0, N - 1, o - 1);
+      auto o_next = Halide::select((o + 1) == N, 0, o + 1);
+
+      auto& previous = (i == 0) ? hist_fn : box_blurs[i - 1];
+      box_blurs[i](o, k) = (previous(k, o_prev) +   //
+                            previous(k, o) +        //
+                            previous(k, o_next)) /  //
+                           3.f;
+      box_blurs[i].compute_root();
+      schedule_histograms(box_blurs[i],                          //
+                          o, k, oo, ko, oi, ki, tile_o, tile_k,  //
+                          use_gpu);                              //
     }
-    hist_out(k, o) = next(k, o);
+
+    box_blurs.back().compile_jit(get_gpu_target());
+
+    return box_blurs;
   }
 
-  void find_peaks(HistogramInput& hist_in, HistogramOutput& hist_out, int N,
-                  const Expr& peak_ratio_thres = 0.8)
+
+  template <typename PeriodicHistogram>
+  void localize_peaks(const PeriodicHistogram& hist,                            //
+                      Halide::Func& peak_map,                      //
+                      const Halide::Var& o, const Halide::Var& k,  //
+                      const Halide::Expr& N = 36,
+                      const Halide::Expr& peak_ratio_thres = 0.8f)
   {
-    Var k{"k"}, o{"o"};
+    auto r = Halide::RDom(0, N);
+    auto global_max = Halide::Func{hist.name() + "_global_max"};
+    global_max() = Halide::maximum(hist(r));
+    global_max.compute_root();
 
-    auto global_max = Func{};
-    auto r = RDom(0, N);
-    global_max(k) = maximum(hist_in(k, k + r));
+    auto is_local_max = Halide::max(                 //
+        hist(select((o - 1) < 0, N - 1, o - 1), k),  //
+        hist(o, k),                                  //
+        hist(select((o + 1) == N, 0, o + 1), k));    //
 
-    auto is_local_max = Func{};
-    is_local_max(o, k) = maximum(
-      hist_in(select((o - 1) < 0, N - 1, o - 1), k),
-      hist_in(o, k),
-      hist_in(select((o + 1) == N, 0, o + 1), k));
+    auto is_large_enough = hist(o, k) > peak_ratio_thres * global_max(k);
 
-    auto is_large_enough = Func{};
-    is_large_enough(k, o) = hist_in(k, o) > peak_ratio_thres * global_max(k);
-
-    hist_out(k, o) = is_large_enough(k, o) && is_local_max(k, o);
+    peak_map(o, k) = is_large_enough && is_local_max;
   }
 
-  void refine_peak(const HistogramInput& orientation_histogram,
-                   HistogramOutput& hist_out, int N)
+  template <typename PeriodicHistogram>
+  auto estimate_peak_residual(const PeriodicHistogram& hist,  //
+                              const Halide::Var& o,           //
+                              const Halide::Var& k,           //
+                              const Halide::Expr& N = 36)     //
   {
-    Var k{"k"}, o{"o"};
+    const auto o_prev = Halide::select((o - 1) < 0, N - 1, o - 1);
+    const auto o_next = Halide::select((o + 1) == N, 0, o + 1);
 
-    auto y0 = orientation_histogram((N + o - 1) % N, k);
-    auto y1 = orientation_histogram(o, k);
-    auto y2 = orientation_histogram((o + 1) % N, k);
+    const auto y0 = hist(o_prev, k);
+    const auto y1 = hist(o, k);
+    const auto y2 = hist(o_next, k);
 
-    // Denote the orientation histogram function by \f$f\f$.
-    // perform a 2nd-order Taylor approximation:
-    // \f$f(x+h) = f(x) + f'(x)h + f''(x) h^2/2\f$
-    // We approximate \f$f'\f$ and \f$f''\f$ by finite difference.
-    auto fprime = (y2-y0) / 2.f;
-    auto fsecond = y0 - 2.f*y1 + y2;
+    // Denoting the orientation histogram function by f, we perform a 2nd-order
+    // Taylor approximation:
+    //
+    //   f(x+h) = f(x) + f'(x) h + f''(x) h^2 / 2
+    //
+    // Let us approximate f'(x) and f''(x) using central finite difference.
+    const auto fprime = (y2 - y0) / 2.f;
+    const auto fsecond = y0 - 2.f * y1 + y2;
 
-    // Maximize w.r.t. to \f$h\f$, derive the expression.
-    // Thus \f$h = -f'(x)/f''(x)\f$.
-    auto h = -fprime / fsecond;
+    // The residual h maximizes the expression f(x + h), i.e., it also zeroes
+    // the derivative of this second order polynomial in variable h.
+    // h = -f'(x)/f''(x).
+    const auto residual = -fprime / fsecond;
 
-    // Add the offset \f$h\f$ to get the refined orientation value.
-    // Note that we also add the 0.5f offset, because samples are assumed taken
-    // on the middle of the interval \f$[i, i+1)\f$.
-    hist_out(o, k) = o + 0.5 + h;
+    // Each orientation histogram bin are centered in the following points:
+    // {0, 10, 20, ..., 350} as detailed inside the implementation of the
+    // function `compute_orientation_histogram`.
+    //
+    // The reason for this is because we use the rounding operation.
+    return residual;
   }
 
-}  // namespace
+  template <typename PeriodicHistogram, typename PeakMap>
+  auto compute_peak_residual_map(PeriodicHistogram& hist,     //
+                                 PeakMap& peak_map,           //
+                                 const Halide::Var& o,        //
+                                 const Halide::Var& k,        //
+                                 const Halide::Expr& N = 36)  //
+  {
+    return select(peak_map(o, k),                         //
+                  estimate_peak_residual(hist, o, k, N),  //
+                  0);                                     //
+  }
+
+}  // namespace DO::Shakti::HalideBackend

@@ -275,6 +275,12 @@ namespace DO { namespace Sara {
       return static_cast<int>(_octaves.front().size());
     }
 
+    //! @brief Returns the number of scales (across all octaves).
+    auto num_scales() const
+    {
+      return num_octaves() * num_scales_per_octave();
+    }
+
     //! @brief Immutable getter of the initial scale.
     auto scale_initial() const
     {

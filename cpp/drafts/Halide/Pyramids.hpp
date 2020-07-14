@@ -44,9 +44,13 @@ namespace DO { namespace Shakti { namespace HalideBackend {
 
     auto image_start = Sara::Image<float>{new_sizes};
 
+#ifdef DEBUG
     Sara::tic();
+#endif
     Shakti::HalideBackend::enlarge(image, image_start);
+#ifdef DEBUG
     Sara::toc("Enlarge");
+#endif
 
     // Adjust the new camera sigma with the appropriate factor.
     //
@@ -59,13 +63,17 @@ namespace DO { namespace Shakti { namespace HalideBackend {
     const auto scale_initial = params.scale_initial();
     if (scale_camera < scale_initial)
     {
+#ifdef DEBUG
       Sara::tic();
+#endif
       const auto sigma = std::sqrt(scale_initial * scale_initial -
                                    scale_camera * scale_camera);
       auto image_start_blurred = image_start;
       gaussian_convolution(image_start, image_start_blurred, sigma, 4);
       image_start.swap(image_start_blurred);
+#ifdef DEBUG
       Sara::toc("Blur to initial scale of the pyramid");
+#endif
     }
 
     // Deduce the maximum number of octaves.
@@ -100,7 +108,9 @@ namespace DO { namespace Shakti { namespace HalideBackend {
           (o == 0) ? 1.f / resize_factor : G.octave_scaling_factor(o - 1) * 2;
 
       // Compute the gaussians in octave @f$o@f$
+#ifdef DEBUG
       Sara::tic();
+#endif
       auto sigma_s_1 = scale_initial;
       if (o == 0)
         G(0, o) = image_start;
@@ -109,9 +119,11 @@ namespace DO { namespace Shakti { namespace HalideBackend {
         G(0, o).resize(G(downscale_index, o - 1).sizes() / 2);
         Shakti::HalideBackend::scale(G(downscale_index, o - 1), G(0, o));
       }
+#ifdef DEBUG
       Sara::toc("Downscale");
       std::cout << "Current image sizes = " << G(0, o).sizes().transpose()
                 << std::endl;
+#endif
 
       for (auto s = 1; s < num_scales; ++s)
       {
@@ -121,8 +133,10 @@ namespace DO { namespace Shakti { namespace HalideBackend {
             sqrt(k * k * sigma_s_1 * sigma_s_1 - sigma_s_1 * sigma_s_1);
         gaussian_convolution(G(s - 1, o), G(s, o), sigma, 4);
         sigma_s_1 *= k;
+#ifdef DEBUG
         Sara::toc(Sara::format("Convolve (s=%d, o=%d) and kernel sizes = %d", s,
                                o, int(2 * sigma * 4 + 1)));
+#endif
       }
     }
 
@@ -147,9 +161,13 @@ namespace DO { namespace Shakti { namespace HalideBackend {
       for (auto s = 0; s < D.num_scales_per_octave(); ++s)
       {
         D(s, o).resize(G(s, o).sizes());
+#ifdef DEBUG
         Sara::tic();
+#endif
         subtract(G(s + 1, o), G(s, o), D(s, o));
+#ifdef DEBUG
         Sara::toc(Sara::format("Subtracting at (s=%d, o=%d)", s, o));
+#endif
       }
     }
 

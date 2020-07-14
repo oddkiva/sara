@@ -12,7 +12,7 @@
 #include <drafts/Halide/MyHalide.hpp>
 
 
-namespace DO::Shakti::HalideBackend {
+namespace DO { namespace Shakti { namespace HalideBackend {
 
   struct SeparableConvolution
   {
@@ -204,4 +204,4 @@ namespace DO::Shakti::HalideBackend {
     }
   };
 
-}  // namespace DO::Shakti::HalideBackend
+}}}  // namespace DO::Shakti::HalideBackend

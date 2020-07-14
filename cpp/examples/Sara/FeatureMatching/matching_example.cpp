@@ -75,7 +75,6 @@ GRAPHICS_MAIN()
 
   create_window(w, h);
   set_antialiasing();
-  // checkMatches(image1, image2, matches, true, scale);
 
   for (size_t i = 0; i < matches.size(); ++i)
   {

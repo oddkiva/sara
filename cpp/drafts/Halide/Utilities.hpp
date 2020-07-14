@@ -33,7 +33,6 @@ namespace DO::Shakti::HalideBackend {
             "/System/Library/Frameworks/Metal.framework/Versions/Current/Metal",
             RTLD_LAZY) != NULL)
     {
-      std::cout << "METAL backend" << std::endl;
       target.set_feature(Target::Metal);
     }
 #else

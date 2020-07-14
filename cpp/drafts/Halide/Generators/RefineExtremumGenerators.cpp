@@ -74,8 +74,8 @@ namespace {
 
       const auto x_final = select(success, xf + dx, xf);
       const auto y_final = select(success, yf + dy, yf);
-      const Expr s_final = select(success,                        //
-                                  scale + pow(scale_factor, ds),  //
+      const auto s_final = select(success,                        //
+                                  scale * pow(scale_factor, ds),  //
                                   scale);                         //
       const auto val_final = select(success, val, f_curr(xi, yi));
 

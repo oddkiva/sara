@@ -47,6 +47,39 @@ namespace DO { namespace Shakti { namespace HalideBackend {
     std::vector<float> value;
     std::vector<std::int8_t> type;
 
+    struct View
+    {
+      float& x;
+      float& y;
+      float& s;
+      float& value;
+      std::int8_t& type;
+    };
+
+    struct ConstView
+    {
+      const float& x;
+      const float& y;
+      const float& s;
+      const float& value;
+      const std::int8_t& type;
+    };
+
+    auto operator[](int i) -> View
+    {
+      return {x[i], y[i], s[i], value[i], type[i]};
+    }
+
+    auto operator[](int i) const -> ConstView
+    {
+      return {x[i], y[i], s[i], value[i], type[i]};
+    }
+
+    auto size() const
+    {
+      return x.size();
+    }
+
     auto resize(std::size_t size)
     {
       x.resize(size);
@@ -163,9 +196,7 @@ namespace DO { namespace Shakti { namespace HalideBackend {
     auto dogf = std::vector<DoGExtremaRefined>(dogi.size());
 
     const auto num_scales_per_octave = dog.num_scales_per_octave() - 2;
-    const auto at = [&](int s, int o) {
-      return o * num_scales_per_octave + s;
-    };
+    const auto at = [&](int s, int o) { return o * num_scales_per_octave + s; };
 
     for (auto o = 0; o < dog.num_octaves(); ++o)
       for (auto s = 0; s < num_scales_per_octave; ++s)

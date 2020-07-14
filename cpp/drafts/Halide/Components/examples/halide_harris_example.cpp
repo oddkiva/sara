@@ -26,7 +26,7 @@ auto bool_to_rgb(const Halide::Func& f)
   auto c = Halide::Var{"c"};
 
   auto f_rescaled = Halide::Func{f.name() + "_rescaled"};
-  f_rescaled(x, y, c) = cast<std::uint8_t>(f(x, y)) * 255;
+  f_rescaled(x, y, c) = Halide::cast<std::uint8_t>(f(x, y)) * 255;
 #ifdef USE_SCHEDULE
   f_rescaled.split(y, y, yi, 4).parallel(y).vectorize(x, 8);
 #endif

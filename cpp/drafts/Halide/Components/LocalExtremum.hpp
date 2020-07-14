@@ -15,7 +15,7 @@
 #include <drafts/Halide/MyHalide.hpp>
 
 
-namespace DO::Shakti::HalideBackend {
+namespace DO { namespace Shakti { namespace HalideBackend {
 
   template <typename Input>
   auto local_max(const Input& f,                              //
@@ -86,4 +86,4 @@ namespace DO::Shakti::HalideBackend {
                minimum(next(x + r.x, y + r.y, n))) == curr(x, y, n);
   }
 
-}  // namespace DO::Shakti::HalideBackend
+}}}  // namespace DO::Shakti::HalideBackend

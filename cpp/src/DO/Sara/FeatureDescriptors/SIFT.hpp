@@ -34,7 +34,7 @@ namespace DO { namespace Sara {
    */
 
   //! @brief Functor class used to compute the SIFT Descriptor at some location.
-  template <int N=4, int O=8>
+  template <int N = 4, int O = 8>
   class ComputeSIFTDescriptor
   {
   public: /* interface. */

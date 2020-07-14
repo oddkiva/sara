@@ -15,7 +15,7 @@
 #include <drafts/Halide/Components/LocalExtremum.hpp>
 
 
-namespace DO::Shakti::HalideBackend {
+namespace DO { namespace Shakti { namespace HalideBackend {
 
   inline auto sign(const Halide::Expr& val)
   {
@@ -119,4 +119,4 @@ namespace DO::Shakti::HalideBackend {
     return {res(0), res(1), res(2), new_value, success};
   }
 
-}  // namespace DO::Sara::HalideBackend
+}}}  // namespace DO::Sara::HalideBackend

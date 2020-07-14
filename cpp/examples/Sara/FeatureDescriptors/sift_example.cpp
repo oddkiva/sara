@@ -39,7 +39,7 @@ bool check_descriptors(const TensorView_<float, 2>& descriptors)
 
 GRAPHICS_MAIN()
 {
-  const auto image_path = src_path("../../../data/sunflowerField.jpg");
+  const auto image_path = src_path("../../../../data/sunflowerField.jpg");
   const auto image = imread<float>(image_path);
 
   print_stage("Detecting SIFT features");

@@ -80,6 +80,8 @@ target_link_libraries(halide_dog_extrema
   shakti_local_scale_space_extremum_32f
   # Refine extrema.
   shakti_refine_scale_space_extrema
+  # Dominant gradient orientations.
+  shakti_polar_gradient_2d_32f
   )
 set_property(TARGET halide_dog_extrema
   PROPERTY

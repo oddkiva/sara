@@ -16,7 +16,7 @@
 #include <array>
 
 
-namespace DO::Shakti::HalideBackend {
+namespace DO { namespace Shakti { namespace HalideBackend {
 
   template <int M, int N>
   struct Matrix;
@@ -54,13 +54,13 @@ namespace DO::Shakti::HalideBackend {
 
     inline auto operator()(int i) -> Halide::Expr&
     {
-      static_assert(M == 1 || N == 1);
+      static_assert(M == 1 || N == 1, "");
       return data[i];
     }
 
     inline auto operator()(int i) const -> const Halide::Expr&
     {
-      static_assert(M == 1 || N == 1);
+      static_assert(M == 1 || N == 1, "");
       return data[i];
     }
 
@@ -192,6 +192,19 @@ namespace DO::Shakti::HalideBackend {
     return r;
   }
 
+  template <int M, int N>
+  auto squared_norm(const Matrix<M, N>& a)
+  {
+    return dot(a, a);
+  }
+
+  template <int M, int N>
+  auto norm(const Matrix<M, N>& a)
+  {
+    return Halide::sqrt(squared_norm(a));
+  }
+
+
   auto cross(const Vector<3>& a, const Vector<3>& b) -> Vector<3>
   {
     auto c = Vector<3>{};
@@ -246,4 +259,4 @@ namespace DO::Shakti::HalideBackend {
     return inv_m / det(m);
   }
 
-}  // namespace DO::Shakti::HalideBackend
+}}}  // namespace DO::Shakti::HalideBackend

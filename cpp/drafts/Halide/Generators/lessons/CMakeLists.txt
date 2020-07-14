@@ -1,3 +1,5 @@
+find_package(DO_Sara COMPONENTS Core Graphics REQUIRED)
+
 file(GLOB LESSONS_SOURCE_FILES
   lesson_01*.cpp
   lesson_02*.cpp

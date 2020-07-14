@@ -49,6 +49,13 @@ shakti_halide_library_v2(
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 
+# Gradient in polar coordinates in 2D.
+shakti_halide_library_v2(
+  NAME shakti_polar_gradient_2d_32f
+  SRCS DifferentialGenerators.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+
 # Im2Col.
 shakti_halide_library_v2(
   NAME shakti_im2col_32f

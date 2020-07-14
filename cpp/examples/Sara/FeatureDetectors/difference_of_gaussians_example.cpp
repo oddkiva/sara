@@ -43,7 +43,7 @@ vector<OERegion> compute_dog_extrema(const Image<float>& I, bool verbose = true)
     print_stage("Localizing DoG extrema");
     tic();
   }
-  auto pyramid_params = ImagePyramidParams{0};
+  auto pyramid_params = ImagePyramidParams{-1};
   auto compute_DoGs = ComputeDoGExtrema{pyramid_params};
   auto scale_octave_pairs = vector<Point2i>{};
   auto DoGs = compute_DoGs(I, &scale_octave_pairs);
@@ -146,7 +146,7 @@ GRAPHICS_MAIN()
   try
   {
     auto image = Image<float>{};
-    auto image_filepath = src_path("../../../data/sunflowerField.jpg");
+    auto image_filepath = src_path("../../../../data/sunflowerField.jpg");
     if (!load(image, image_filepath))
       return EXIT_FAILURE;
 
