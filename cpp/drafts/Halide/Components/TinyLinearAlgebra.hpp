@@ -99,10 +99,10 @@ namespace DO { namespace Shakti { namespace HalideBackend {
       return res;
     }
 
-    inline auto operator*=(const Halide::Expr& other) -> Matrix&
+    inline auto operator*=(const Halide::Expr& scalar) -> Matrix&
     {
       for (int i = 0; i < M * N; ++i)
-        data[i] *= other;
+        data[i] *= scalar;
 
       return *this;
     }
@@ -113,6 +113,14 @@ namespace DO { namespace Shakti { namespace HalideBackend {
       for (int i = 0; i < M * N; ++i)
         out.data[i] = data[i] / e;
       return out;
+    }
+
+    inline auto operator/=(const Halide::Expr& scalar) -> Matrix&
+    {
+      for (int i = 0; i < M * N; ++i)
+        data[i] /= scalar;
+
+      return *this;
     }
 
     inline auto operator-() const -> Matrix

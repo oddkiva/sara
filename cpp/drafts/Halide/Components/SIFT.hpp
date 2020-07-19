@@ -17,52 +17,51 @@ namespace DO::Shakti::HalideBackend {
 
   struct SIFT
   {
+    static constexpr auto two_pi = static_cast<float>(2 * M_PI);
+
     // We construct a grid of NxN histogram of gradients.
     const std::int32_t N{4};
     // Each histogram has 8 bins.
     const std::int32_t O{8};
 
     const float bin_length_in_scale_unit{3.f};
-    float max_bin_value{0.2f};
+    const float max_bin_value{0.2f};
 
     // Each image has a resolution scale (in pixels) associated to it.
-    float first_scale_of_octave;
-    // The resolution scale of the image is not bigger than twice the initial
-    // scale of the octave. Otherwise we calculate an equivalent SIFT descriptor
-    // on the downsampled image.
-    static constexpr float max_scale_factor_of_octave{2.f};
-    static constexpr auto two_pi{static_cast<float>(2 * M_PI)};
+    float scale_upper_bound;
 
-    auto patch_radius_bound() const
+    auto patch_radius_bound(const Halide::Expr& scale_upper_bound) const
     {
-      return static_cast<int>(std::round(first_scale_of_octave *
-                                         max_scale_factor_of_octave * (N + 1) /
-                                         2.f * std::sqrt(2.f)));
+      return Halide::cast<std::int32_t>(
+          Halide::round(bin_length_in_scale_unit * scale_upper_bound * (N + 1) /
+                        2.f * std::sqrt(2.f)));
     }
 
-    auto patch_radius(Halide::Expr sigma) const
+    auto patch_radius(const Halide::Expr& scale) const
     {
-      return Halide::cast<int>(Halide::round(bin_length_in_scale_unit * sigma *
+      return Halide::cast<int>(Halide::round(bin_length_in_scale_unit * scale *
                                              (N + 1) / 2.f * std::sqrt(2.f)));
     }
 
-    auto compute(const Halide::Func& grad_mag_fn,  //
-                 const Halide::Func& grad_ori_fn,  //
-                 const Halide::Var& i,             //
-                 const Halide::Var& j,             //
-                 const Halide::Var& o,             //
-                 const Halide::Expr& x,            //
-                 const Halide::Expr& y,            //
-                 const Halide::Expr& sigma,        //
-                 const Halide::Expr& theta)        //
+    auto compute_bin_value(const Halide::Var& i,             //
+                           const Halide::Var& j,             //
+                           const Halide::Var& o,             //
+                           const Halide::Func& grad_mag_fn,  //
+                           const Halide::Func& grad_ori_fn,  //
+                           const Halide::Expr& x,            //
+                           const Halide::Expr& y,            //
+                           const Halide::Expr& scale,        //
+                           const Halide::Expr& scale_max,    //
+                           const Halide::Expr& theta) const  //
     {
       // Calculate the radius upper-bound.
-      const auto r_max = patch_radius_bound();
+      const auto r_max = patch_radius_bound(scale_max);
       // Calculate the radius of the actual patch.
-      const auto r_actual = patch_radius(sigma);
+      const auto r_actual = patch_radius(scale);
 
-      // The reduction domain is actually:
-      auto r = Halide::RDom(-r_max, 2 * r_max, -r_max, 2 * r_max);
+      // Define the reduction domain.
+      auto r = Halide::RDom(-r_max, 2 * r_max + 1, -r_max, 2 * r_max + 1);
+      // The actual shape of the reduction domain is:
       r.where(Halide::abs(r.x) < r_actual &&  //
               Halide::abs(r.y) < r_actual);
 
@@ -74,21 +73,23 @@ namespace DO::Shakti::HalideBackend {
       // The orientation in the reoriented patch is:
       const auto ori_shifted = grad_ori_fn(xi + r.x, yi + r.y) - theta;
       // We have:
-      // -pi < ori < pi
-      // -pi < -theta < pi
-      // -2*pi < ori - theta < 2 * pi
-      // So we make sure that the orientation is [0, 2*pi[
-      const auto ori =
-          Halide::select(ori_shifted < 0, ori_shifted + two_pi, ori_shifted);
+      // -π < ori < π
+      // -π < -theta < π
+      // -2π < ori - theta < 2π
+      // So we make sure that the orientation is [0, 2π[ as follows:
+      const auto ori = Halide::select(ori_shifted < 0,       //
+                                      ori_shifted + two_pi,  //
+                                      ori_shifted);          //
 
-      auto ori_normalized = Halide::select(ori < 0, ori + two_pi, ori) / two_pi;
-      auto ori_index = ori_normalized * O;
+      const auto ori_normalized = ori / two_pi;
+      const auto ori_index = ori_normalized * O;
 
       // Linear part of the patch normalization transform.
+      const Halide::Expr bin_length_in_pixels = bin_length_in_scale_unit * scale;
       auto T = Matrix2{};
       T(0, 0) = Halide::cos(theta);  T(0, 1) = Halide::sin(theta);
       T(1, 0) = -Halide::sin(theta); T(1, 1) = Halide::cos(theta);
-      T /= Halide::Expr(bin_length_in_scale_unit * sigma);
+      T /= bin_length_in_pixels;
 
       auto p = Vector2{};
       p(0) = r.x;
@@ -113,7 +114,35 @@ namespace DO::Shakti::HalideBackend {
       auto wy = Halide::select(dy < 1, 1 - dy, 0);
       auto wo = Halide::select(dori < 1, 1 - dori, 0);
 
-      return sum(wx * wy * wo * mag);
+      return Halide::sum(wx * wy * wo * mag);
+    }
+
+    auto normalize(const Halide::Func& h,       //
+                   const Halide::Var& i,        //
+                   const Halide::Var& j,        //
+                   const Halide::Var& o,        //
+                   const Halide::Var& k) const  //
+    {
+      auto r = Halide::RDom(0, N, 0, N, 0, O);
+      auto contrast_norm = Halide::Func{"contrast_change_norm"};
+      contrast_norm(k) = Halide::sqrt(Halide::sum(Halide::pow(h(r.x, r.y, r.z, k), 2)));
+      contrast_norm.compute_root();
+
+      auto h_contrast_invariant = Halide::Func{"h_contrast_invariant"};
+      h_contrast_invariant(i, j, o, k) = h(i, j, o, k) / contrast_norm(k);
+      h_contrast_invariant.compute_root();
+
+      // Nonlinear illumination changes.
+      auto h_clamped = Halide::Func{"h_clamped"};
+      h_clamped(i, j, o, k) = Halide::min(h_contrast_invariant(i, j, o, k), 0.2f);
+
+      auto illumination_norm = Halide::Func{"illumination_norm"};
+      illumination_norm(k) = Halide::sqrt(Halide::sum(Halide::pow(h_clamped(r.x, r.y, r.z, k), 2)));
+      illumination_norm.compute_root();
+
+      auto h_illumination_invariant = Halide::Func{"h_illumination_invariant"};
+      h_illumination_invariant(i, j, o, k) = h_clamped(i, j, o, k) /  //
+                                             illumination_norm(k);
     }
   };
 
