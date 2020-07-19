@@ -131,9 +131,25 @@ namespace DO { namespace Shakti { namespace HalideBackend {
         continue;
       }
 
+      const auto N = dense_view.num_orientation_bins();
+      constexpr auto two_pi = 2 * static_cast<float>(M_PI);
       for (auto o = 0; o < dense_view.num_orientation_bins(); ++o)
-        if (dense_view.peak_map(k, o))
-          sparse_view.insert({k, o + dense_view.peak_residuals(k, o)});
+      {
+        if (!dense_view.peak_map(k, o))
+          continue;
+
+        auto ori = o + dense_view.peak_residuals(k, o);
+
+        // Make sure that the angle is in the interval [0, N[.
+        if (ori < 0)
+          ori += N;
+        else if (ori > N)
+          ori -= N;
+        // Convert to radians.
+        ori = ori * two_pi /  N;
+
+        sparse_view.insert({k, ori});
+      }
     }
 
     return sparse_view;

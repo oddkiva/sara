@@ -161,12 +161,14 @@ GRAPHICS_MAIN()
 
       for (auto i = 0u; i < extrema_so.x.size(); ++i)
       {
+#ifdef SHOW_QUANTIZED_EXTREMA
         const auto c0 =
             extrema_quantized_so.type[i] == 1 ? sara::Blue8 : sara::Red8;
         const auto& x0 = extrema_quantized_so.x[i];
         const auto& y0 = extrema_quantized_so.y[i];
         const auto r0 = dog_extrema_pyramid.scale(s, o) * std::sqrt(2.f);
         sara::draw_circle(x0 * oct_scale, y0 * oct_scale, r0, c0, 2 + 0);
+#endif
 
         const auto c1 = extrema_so.type[i] == 1 ? sara::Cyan8 : sara::Magenta8;
         const auto& x1 = extrema_so.x[i];
@@ -176,18 +178,29 @@ GRAPHICS_MAIN()
         const auto r1 = extrema_so.s[i] * oct_scale * std::sqrt(2.f);
         sara::draw_circle(x1 * oct_scale, y1 * oct_scale, r1, c1, 2 + 1);
 
+#ifdef DEBUG
         SARA_CHECK(i);
         SARA_CHECK(ori_so.peak_map[i].flat_array().size());
         SARA_CHECK(ori_so.peak_map[i].flat_array().transpose());
         SARA_CHECK(ori_so.peak_residuals[i].flat_array().size());
         SARA_CHECK(ori_so.peak_residuals[i].flat_array().transpose());
+#endif
 
         const auto orientations = dominant_orientations_sparse.dict.at({s, o}).equal_range(i);
         for (auto ori = orientations.first; ori != orientations.second; ++ori)
-          std::cout << "index = " << ori->first << "  ori = " << ori->second
-                    << std::endl;
+        {
+          const auto &angle = ori->second;
+          const Eigen::Vector2f a = Eigen::Vector2f{x1 * oct_scale, y1 * oct_scale};
+          const Eigen::Vector2f b =
+              a + r1 * Eigen::Vector2f{cos(angle), sin(angle)};
+          sara::draw_line(a, b, c1, 2);
 
-        sara::get_key();
+#ifdef DEBUG
+          std::cout << "index = " << ori->first
+                    << "  ori = " << angle * 180 / M_PI << " deg"
+                    << std::endl;
+#endif
+        }
       }
     }
   }
