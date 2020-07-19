@@ -49,13 +49,6 @@ shakti_halide_library_v2(
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 
-# Gradient in polar coordinates in 2D.
-shakti_halide_library_v2(
-  NAME shakti_polar_gradient_2d_32f
-  SRCS DifferentialGenerators.cpp
-  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
-
-
 # Im2Col.
 shakti_halide_library_v2(
   NAME shakti_im2col_32f
@@ -85,6 +78,26 @@ shakti_halide_library_v2(
   NAME shakti_refine_scale_space_extrema
   SRCS RefineExtremumGenerators.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+
+# Gradient in polar coordinates in 2D.
+shakti_halide_library_v2(
+  NAME shakti_polar_gradient_2d_32f
+  SRCS DifferentialGenerators.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+# Dominant gradient orientations.
+shakti_halide_library_v2(
+  NAME shakti_dominant_gradient_orientations
+  SRCS DominantGradientOrientationsGenerator.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+
+#  # SIFT descriptors.
+#  shakti_halide_library_v2(
+#    NAME shakti_sift_descriptors_32f
+#    SRCS SIFTGenerator.cpp
+#    HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 
 if (SARA_BUILD_SAMPLES)

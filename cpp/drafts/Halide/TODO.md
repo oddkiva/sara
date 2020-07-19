@@ -7,14 +7,14 @@ implementation details:
 Integration
 -----------
 - [x] Integrate the histogram localization
-- [ ] Integrate the peak localization
-- [ ] Integrate the peak refinement
+- [x] Integrate the peak localization
+- [x] Integrate the peak refinement
 
 
 Unit Tests
 ----------
-- [ ] Orientation histogram
-- [ ] Repeated box blur filters
-- [ ] Orientation peak localization
-- [ ] Orientation peak residual estimation
+- [x] Orientation histogram
+- [x] Repeated box blur filters
+- [x] Orientation peak localization
+- [x] Orientation peak residual estimation
 - [ ] SIFT descriptor

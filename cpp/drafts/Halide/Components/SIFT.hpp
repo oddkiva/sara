@@ -63,8 +63,8 @@ namespace DO::Shakti::HalideBackend {
 
       // The reduction domain is actually:
       auto r = Halide::RDom(-r_max, 2 * r_max, -r_max, 2 * r_max);
-      r.where(-r_actual < r.x && r.x < r_actual &&  //
-              -r_actual < r.y && r.y < r_actual);
+      r.where(Halide::abs(r.x) < r_actual &&  //
+              Halide::abs(r.y) < r_actual);
 
       // The gradient magnitude is:
       const auto xi = Halide::round(x);

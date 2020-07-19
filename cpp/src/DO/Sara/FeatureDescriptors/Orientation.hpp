@@ -162,9 +162,9 @@ namespace DO { namespace Sara {
     std::vector<int> orientation_peaks;
     orientation_peaks.reserve(N);
     for (int i = 0; i < N; ++i)
-      if ( orientation_histogram(i) >= peak_ratio_thres*max &&
-           orientation_histogram(i) > orientation_histogram((i - 1 + N) % N) &&
-           orientation_histogram(i) > orientation_histogram((i + 1) % N)     )
+      if (orientation_histogram(i) >= peak_ratio_thres * max &&
+          orientation_histogram(i) > orientation_histogram((i - 1 + N) % N) &&
+          orientation_histogram(i) > orientation_histogram((i + 1) % N))
         orientation_peaks.push_back(i);
     return orientation_peaks;
   }

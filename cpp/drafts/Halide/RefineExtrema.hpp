@@ -16,6 +16,7 @@
 #include <DO/Sara/Core/Tensor.hpp>
 #include <DO/Sara/ImageProcessing/ImagePyramid.hpp>
 
+#include <drafts/Halide/ExtremaDataStructures.hpp>
 #include <drafts/Halide/Utilities.hpp>
 
 #include "shakti_refine_scale_space_extrema.h"
@@ -23,92 +24,20 @@
 
 namespace DO { namespace Shakti { namespace HalideBackend {
 
-  struct DoGExtremaInitial
-  {
-    std::vector<std::int32_t> x;
-    std::vector<std::int32_t> y;
-    std::vector<std::int8_t> type;
-    float scale;
-    float scale_geometric_factor;
-
-    auto resize(std::size_t size)
-    {
-      x.resize(size);
-      y.resize(size);
-      type.resize(size);
-    }
-  };
-
-  struct DoGExtremaRefined
-  {
-    std::vector<float> x;
-    std::vector<float> y;
-    std::vector<float> s;
-    std::vector<float> value;
-    std::vector<std::int8_t> type;
-
-    struct View
-    {
-      float& x;
-      float& y;
-      float& s;
-      float& value;
-      std::int8_t& type;
-    };
-
-    struct ConstView
-    {
-      const float& x;
-      const float& y;
-      const float& s;
-      const float& value;
-      const std::int8_t& type;
-    };
-
-    auto operator[](int i) -> View
-    {
-      return {x[i], y[i], s[i], value[i], type[i]};
-    }
-
-    auto operator[](int i) const -> ConstView
-    {
-      return {x[i], y[i], s[i], value[i], type[i]};
-    }
-
-    auto size() const
-    {
-      return x.size();
-    }
-
-    auto resize(std::size_t size)
-    {
-      x.resize(size);
-      y.resize(size);
-      s.resize(size);
-      value.resize(size);
-      type.resize(size);
-    }
-  };
-
-
   inline auto populate_local_scale_space_extrema(
-      Sara::ImagePyramid<std::int8_t>& dog_extrema_pyramid)
+      Sara::ImagePyramid<std::int8_t>& extrema_map_pyramid)
   {
     sara::tic();
-    const auto num_scales = dog_extrema_pyramid.num_octaves() *
-                            dog_extrema_pyramid.num_scales_per_octave();
+    const auto num_scales = extrema_map_pyramid.num_octaves() *
+                            extrema_map_pyramid.num_scales_per_octave();
 
-    auto points = std::vector<DoGExtremaInitial>(num_scales);
+    auto extrema = Pyramid<QuantizedExtremaArray>{};
 
-    const auto at = [&](int s, int o) {
-      return o * dog_extrema_pyramid.num_scales_per_octave() + s;
-    };
-
-    for (auto o = 0; o < dog_extrema_pyramid.num_octaves(); ++o)
+    for (auto o = 0; o < extrema_map_pyramid.num_octaves(); ++o)
     {
-      for (auto s = 0; s < dog_extrema_pyramid.num_scales_per_octave(); ++s)
+      for (auto s = 0; s < extrema_map_pyramid.num_scales_per_octave(); ++s)
       {
-        const auto& dog_ext_map = dog_extrema_pyramid(s, o);
+        const auto& dog_ext_map = extrema_map_pyramid(s, o);
         const auto num_extrema = std::count_if(      //
             dog_ext_map.begin(), dog_ext_map.end(),  //
             [](const auto& v) { return v != 0; }     //
@@ -117,11 +46,18 @@ namespace DO { namespace Shakti { namespace HalideBackend {
         if (num_extrema == 0)
           continue;
 
-        auto& points_so = points[at(s, o)];
-        points_so.resize(num_extrema);
-        points_so.scale = dog_extrema_pyramid.scale_relative_to_octave(s);
-        points_so.scale_geometric_factor =
-            dog_extrema_pyramid.scale_geometric_factor();
+        // Map the index pair to the scale value, octave scaling factor.
+        extrema.scale_octave_pairs[{s, o}] = {
+            extrema_map_pyramid.scale_relative_to_octave(s),
+            extrema_map_pyramid.octave_scaling_factor(o)};
+
+        auto& extrema_so = extrema.dict[{s, o}];
+
+        // Populate the list of extrema for the corresponding scale.
+        extrema_so.resize(num_extrema);
+        extrema_so.scale = extrema_map_pyramid.scale_relative_to_octave(s);
+        extrema_so.scale_geometric_factor =
+            extrema_map_pyramid.scale_geometric_factor();
 
         auto i = 0;
         for (auto y = 0; y < dog_ext_map.height(); ++y)
@@ -131,9 +67,9 @@ namespace DO { namespace Shakti { namespace HalideBackend {
             if (dog_ext_map(x, y) == 0)
               continue;
 
-            points_so.x[i] = x;
-            points_so.y[i] = y;
-            points_so.type[i] = dog_ext_map(x, y);
+            extrema_so.x[i] = x;
+            extrema_so.y[i] = y;
+            extrema_so.type[i] = dog_ext_map(x, y);
             ++i;
           }
         }
@@ -141,28 +77,29 @@ namespace DO { namespace Shakti { namespace HalideBackend {
     }
     sara::toc("Populating DoG extrema");
 
-    return points;
+    return extrema;
   }
 
 
-  inline auto refine_scale_space_extrema(Sara::ImageView<float>& a,  //
-                                         Sara::ImageView<float>& b,  //
-                                         Sara::ImageView<float>& c,  //
-                                         DoGExtremaInitial& dogi,    //
-                                         DoGExtremaRefined& dogf)    //
+  inline auto
+  refine_scale_space_extrema(Sara::ImageView<float>& a,               //
+                             Sara::ImageView<float>& b,               //
+                             Sara::ImageView<float>& c,               //
+                             QuantizedExtremaArray& extrema_initial,  //
+                             ExtremaArray& extrema_refined)           //
   {
     auto a_buffer = as_runtime_buffer(a);
     auto b_buffer = as_runtime_buffer(b);
     auto c_buffer = as_runtime_buffer(c);
-    auto x_buffer = as_runtime_buffer(dogi.x);
-    auto y_buffer = as_runtime_buffer(dogi.y);
+    auto x_buffer = as_runtime_buffer(extrema_initial.x);
+    auto y_buffer = as_runtime_buffer(extrema_initial.y);
     const auto w = a.width();
     const auto h = a.height();
 
-    auto xf_buffer = as_runtime_buffer(dogf.x);
-    auto yf_buffer = as_runtime_buffer(dogf.y);
-    auto sf_buffer = as_runtime_buffer(dogf.s);
-    auto value_buffer = as_runtime_buffer(dogf.value);
+    auto xf_buffer = as_runtime_buffer(extrema_refined.x);
+    auto yf_buffer = as_runtime_buffer(extrema_refined.y);
+    auto sf_buffer = as_runtime_buffer(extrema_refined.s);
+    auto value_buffer = as_runtime_buffer(extrema_refined.value);
 
     a_buffer.set_host_dirty();
     b_buffer.set_host_dirty();
@@ -170,52 +107,53 @@ namespace DO { namespace Shakti { namespace HalideBackend {
     x_buffer.set_host_dirty();
     y_buffer.set_host_dirty();
 
-    shakti_refine_scale_space_extrema(a_buffer, b_buffer, c_buffer,  //
-                                      x_buffer, y_buffer,            //
-                                      w, h,                          //
-                                      dogi.scale,                    //
-                                      dogi.scale_geometric_factor,   //
-                                      xf_buffer,                     //
-                                      yf_buffer,                     //
-                                      sf_buffer,                     //
-                                      value_buffer);                 //
+    shakti_refine_scale_space_extrema(
+        a_buffer, b_buffer, c_buffer,            //
+        x_buffer, y_buffer,                      //
+        w, h,                                    //
+        extrema_initial.scale,                   //
+        extrema_initial.scale_geometric_factor,  //
+        xf_buffer,                               //
+        yf_buffer,                               //
+        sf_buffer,                               //
+        value_buffer);                           //
 
     xf_buffer.copy_to_host();
     yf_buffer.copy_to_host();
     sf_buffer.copy_to_host();
     value_buffer.copy_to_host();
 
-    dogf.type = dogi.type;
+    extrema_refined.type = extrema_initial.type;
   }
 
   //! @brief Extract local scale-space extrema.
-  inline auto refine_scale_space_extrema(Sara::ImagePyramid<float>& dog,
-                                         std::vector<DoGExtremaInitial>& dogi)
+  inline auto refine_scale_space_extrema(
+      Sara::ImagePyramid<float>& dog,
+      Pyramid<QuantizedExtremaArray>& extrema_initial)
   {
     sara::tic();
-    auto dogf = std::vector<DoGExtremaRefined>(dogi.size());
-
-    const auto num_scales_per_octave = dog.num_scales_per_octave() - 2;
-    const auto at = [&](int s, int o) { return o * num_scales_per_octave + s; };
+    auto extrema_refined = Pyramid<ExtremaArray>{};
+    extrema_refined.scale_octave_pairs = extrema_initial.scale_octave_pairs;
 
     for (auto o = 0; o < dog.num_octaves(); ++o)
-      for (auto s = 0; s < num_scales_per_octave; ++s)
-        dogf[at(s, o)].resize(dogi[at(s, o)].x.size());
+      for (auto s = 0; s < dog.num_scales_per_octave() -  2; ++s)
+        extrema_refined.dict[{s, o}].resize(extrema_initial.dict[{s, o}].size());
 
     for (auto o = 0; o < dog.num_octaves(); ++o)
     {
       for (auto s = 0; s < dog.num_scales_per_octave() - 2; ++s)
       {
-        if (dogi[at(s, o)].x.empty())
+        if (extrema_initial.dict[{s, o}].x.empty())
           continue;
 
         refine_scale_space_extrema(dog(s, o), dog(s + 1, o), dog(s + 2, o),  //
-                                   dogi[at(s, o)], dogf[at(s, o)]);          //
+                                   extrema_initial.dict[{s, o}],             //
+                                   extrema_refined.dict[{s, o}]);            //
       }
     }
     sara::toc("Refining DoG extrema");
 
-    return dogf;
+    return extrema_refined;
   }
 
 }}}  // namespace DO::Shakti::HalideBackend

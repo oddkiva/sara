@@ -119,6 +119,13 @@ namespace DO::Shakti::HalideBackend {
   }
 
   template <typename T>
+  inline auto as_runtime_buffer(sara::TensorView_<T, 2>& hw_tensor)
+  {
+    return Halide::Runtime::Buffer<T>(hw_tensor.data(), hw_tensor.size(1),
+                                      hw_tensor.size(0));
+  }
+
+  template <typename T>
   inline auto as_runtime_buffer(sara::TensorView_<T, 3>& chw_tensor)
   {
     return Halide::Runtime::Buffer<T>(chw_tensor.data(), chw_tensor.size(2),

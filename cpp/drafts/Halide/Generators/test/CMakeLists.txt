@@ -38,3 +38,9 @@ target_link_libraries(test_halide_local_extrema
   PRIVATE
   shakti_local_max_32f
   shakti_local_scale_space_extremum_32f)
+
+target_link_libraries(test_halide_dominant_gradient_orientations
+  PRIVATE
+  # Dominant gradient orientations.
+  shakti_polar_gradient_2d_32f
+  shakti_dominant_gradient_orientations)
