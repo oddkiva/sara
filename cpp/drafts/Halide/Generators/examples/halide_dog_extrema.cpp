@@ -75,7 +75,7 @@ auto draw_quantized_extrema(halide::QuantizedExtremaArray& extrema_quantized_so,
 }
 
 auto draw_dogs(const halide::Pyramid<halide::ExtremaArray>& extrema,
-               const halide::Pyramid<std::multimap<int, float>>&
+               const halide::Pyramid<halide::DominantOrientationMap>&
                    dominant_orientations_sparse)
 {
   for  (const auto& so: extrema.scale_octave_pairs)
@@ -107,14 +107,10 @@ auto draw_dogs(const halide::Pyramid<halide::ExtremaArray>& extrema,
 
       sara::draw_circle(x1, y1, r1, c1, 2 + 2);
 
-      const auto orientations = ori_so.equal_range(i);
-      auto num_orientations = 0;
-      for (auto ori = orientations.first; ori != orientations.second;
-           ++ori, ++num_orientations)
+      const auto orientations = ori_so.dominant_orientations(i);
+      for (const auto& o: orientations)
       {
-        const auto& angle = ori->second;
-        const Eigen::Vector2f p2 =
-            p1 + r1 * Eigen::Vector2f{cos(angle), sin(angle)};
+        const Eigen::Vector2f p2 = p1 + r1 * Eigen::Vector2f{cos(o), sin(o)};
         sara::draw_line(p1, p2, c1, 2);
       }
     }
@@ -131,70 +127,91 @@ const auto pyramid_params = sara::ImagePyramidParams(initial_pyramid_octave);
 
 namespace DO::Shakti::HalideBackend {
 
-  auto detect_dog_extrema(const Sara::Image<float>& image,
-                          const Sara::ImagePyramidParams& pyramid_params)
-  {
-    auto timer = Sara::Timer{};
+  struct SIFTExtractor {
+    struct Parameters {
+      //! @brief Pyramid construction.
+      int initial_pyramid_octave = 0;
 
-    timer.restart();
-    auto gauss_pyramid = gaussian_pyramid(image, pyramid_params);
-    auto dog_pyramid = subtract_pyramid(gauss_pyramid);
-    SARA_DEBUG << "DoG pyramid = " << timer.elapsed_ms() << " ms" << std::endl;
+      //! @brief Extrema detection thresholds.
+      float edge_ratio_thres = 10.f;
+      float extremum_thres = 0.01f;  // 0.03f;
 
-    timer.restart();
-    auto dog_extrema_pyramid = local_scale_space_extrema(
-        dog_pyramid, edge_ratio_thres, extremum_thres);
-    SARA_DEBUG << "DoG extrema = " << timer.elapsed_ms() << " ms" << std::endl;
+      //! @brief Dominant gradient orientations.
+      int num_orientation_bins = 36;
+      float gaussian_truncation_factor = 3.f;
+      float scale_multiplying_factor = 1.5f;
+      float peak_ratio_thres = 0.0f;
+    };
 
-    timer.restart();
-    auto mag_pyramid = sara::ImagePyramid<float>{};
-    auto ori_pyramid = sara::ImagePyramid<float>{};
-    std::tie(mag_pyramid, ori_pyramid) =
-        halide::polar_gradient_2d(gauss_pyramid);
-    SARA_DEBUG << "Gradient pyramid = " << timer.elapsed_ms() << " ms"
-               << std::endl;
+    struct Pipeline {
+      Sara::ImagePyramid<float> gaussian_pyramid;
+      Sara::ImagePyramid<float> dog_pyramid;
+      Sara::ImagePyramid<std::int8_t> dog_extrema_pyramid;
+      std::array<Sara::ImagePyramid<float>, 2> gradient_pyramid;
 
-    // Populate the DoG extrema.
-    auto extrema_quantized = populate_local_scale_space_extrema(  //
-        dog_extrema_pyramid);
+      Pyramid<QuantizedExtremaArray> extrema_quantized;
+      Pyramid<ExtremaArray> extrema;
 
-    // Refine the scale-space localization of each extremum.
-    auto extrema = refine_scale_space_extrema(dog_pyramid,         //
-                                              extrema_quantized);  //
+      Pyramid<DominantOrientationDenseMap> dominant_orientations_dense;
+      Pyramid<DominantOrientationMap> dominant_orientations;
+    };
 
-    // Estimate the dominant gradient orientations.
-    timer.restart();
-    auto dominant_orientations = Pyramid<DominantGradientOrientationMap>{};
-    dominant_gradient_orientations(mag_pyramid, ori_pyramid,  //
-                                   extrema,                   //
-                                   dominant_orientations,     //
-                                   num_orientation_bins,      //
-                                   3.f /* gaussian_truncation_factor */,
-                                   1.5f /* scale_multiplying_factor */,
-                                   0.0f /* peak_ratio_thres */);
-    SARA_DEBUG << "Dominant gradient orientations = " << timer.elapsed_ms()
-               << " ms" << std::endl;
+    Sara::Timer timer;
+    Parameters params;
+    Pipeline pipeline;
 
-    const auto dominant_orientations_sparse = compress(dominant_orientations);
+    auto operator()(const Sara::Image<float>& image,
+                    const Sara::ImagePyramidParams& pyramid_params)
+    {
+      timer.restart();
+      const auto pyr_params =
+          Sara::ImagePyramidParams{params.initial_pyramid_octave};
+      pipeline.gaussian_pyramid = gaussian_pyramid(image, pyr_params);
+      pipeline.dog_pyramid = subtract_pyramid(pipeline.gaussian_pyramid);
+      SARA_DEBUG << "DoG pyramid = " << timer.elapsed_ms() << " ms"
+                 << std::endl;
 
-#ifdef DEBUG
-    // Show the DoG pyramid.
-    sara::create_window(dog_pyramid(0, 0).sizes());
-    sara::set_antialiasing(sara::active_window());
-    show_pyramid(dog_pyramid);
-    // sara::get_key();
+      timer.restart();
+      pipeline.dog_extrema_pyramid = local_scale_space_extrema(  //
+          pipeline.dog_pyramid,                                  //
+          params.edge_ratio_thres,                               //
+          params.extremum_thres);
+      SARA_DEBUG << "DoG extrema = " << timer.elapsed_ms() << " ms"
+                 << std::endl;
 
-    SARA_DEBUG << "Gradient magnitude pyramid" << std::endl;
-    show_pyramid(mag_pyramid);
-    // sara::get_key();
+      timer.restart();
+      std::tie(pipeline.gradient_pyramid[0],                     //
+               pipeline.gradient_pyramid[1]) =                   //
+          halide::polar_gradient_2d(pipeline.gaussian_pyramid);  //
+      SARA_DEBUG << "Gradient pyramid = " << timer.elapsed_ms() << " ms"
+                 << std::endl;
 
-    SARA_DEBUG << "Gradient orientation pyramid" << std::endl;
-    show_pyramid(ori_pyramid);
-    // sara::get_key();
-#endif
+      // Populate the DoG extrema.
+      pipeline.extrema_quantized = populate_local_scale_space_extrema(  //
+          pipeline.dog_extrema_pyramid);
 
-    return std::make_pair(extrema, dominant_orientations_sparse);
-  }
+      // Refine the scale-space localization of each extremum.
+      pipeline.extrema = refine_scale_space_extrema(  //
+          pipeline.dog_pyramid,                       //
+          pipeline.extrema_quantized);                //
+
+      // Estimate the dominant gradient orientations.
+      timer.restart();
+      dominant_gradient_orientations(pipeline.gradient_pyramid[0],          //
+                                     pipeline.gradient_pyramid[1],          //
+                                     pipeline.extrema,                      //
+                                     pipeline.dominant_orientations_dense,  //
+                                     params.num_orientation_bins,           //
+                                     params.gaussian_truncation_factor,     //
+                                     params.scale_multiplying_factor,       //
+                                     params.peak_ratio_thres);
+      SARA_DEBUG << "Dominant gradient orientations = " << timer.elapsed_ms()
+                 << " ms" << std::endl;
+
+      pipeline.dominant_orientations =
+          compress(pipeline.dominant_orientations_dense);
+    }
+  };
 
 }
 
@@ -207,9 +224,12 @@ auto test_on_image()
   // "/Users/david/GitLab/DO-CV/sara/cpp/drafts/MatchPropagation/cpp/examples/shelves/shelf-1.jpg";
   auto image = sara::imread<float>(image_filepath);
 
-  const auto [extrema, dominant_orientations] = halide::detect_dog_extrema(  //
-      image,                                                                 //
-      pyramid_params);                                                       //
+  auto sift_extractor = halide::SIFTExtractor{};
+  sift_extractor(image, pyramid_params);
+
+  const auto& extrema = sift_extractor.pipeline.extrema;
+  const auto& dominant_orientations =
+      sift_extractor.pipeline.dominant_orientations;
 
   const auto num_keypoints = std::accumulate(
       extrema.dict.begin(), extrema.dict.end(), 0,
@@ -246,6 +266,8 @@ auto test_on_video()
   auto buffer_rgb = halide::as_interleaved_runtime_buffer(frame);
   auto buffer_gray32f = halide::as_runtime_buffer<float>(frame_gray32f);
 
+  auto sift_extractor = halide::SIFTExtractor{};
+
   // Show the local extrema.
   sara::create_window(frame.sizes());
   sara::set_antialiasing();
@@ -266,15 +288,13 @@ auto test_on_video()
     sara::toc("Grayscale");
 
     sara::tic();
-    const auto [extrema, dominant_orientations] =
-        halide::detect_dog_extrema(  //
-            frame_gray32f,           //
-            pyramid_params);         //
+    sift_extractor(frame_gray32f, pyramid_params);
     sara::toc("Oriented DoG");
 
     sara::tic();
     sara::display(frame);
-    draw_dogs(extrema, dominant_orientations);
+    draw_dogs(sift_extractor.pipeline.extrema,
+              sift_extractor.pipeline.dominant_orientations);
     sara::toc("Display");
   }
 }

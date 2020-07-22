@@ -115,15 +115,15 @@ namespace DO::Shakti::HalideBackend {
 
 
   //! @brief Dominant gradient orientation map for a given list of extrema.
-  struct DominantGradientOrientationMap
+  struct DominantOrientationDenseMap
   {
     Sara::Tensor_<bool, 2> peak_map;
     Sara::Tensor_<float, 2> peak_residuals;
 
-    DominantGradientOrientationMap() = default;
+    DominantOrientationDenseMap() = default;
 
-    DominantGradientOrientationMap(int num_keypoints,
-                                   int num_orientation_bins = 36)
+    DominantOrientationDenseMap(int num_keypoints,
+                                int num_orientation_bins = 36)
     {
       resize(num_keypoints, num_orientation_bins);
     }
@@ -144,6 +144,35 @@ namespace DO::Shakti::HalideBackend {
       return peak_map.size(1);
     }
   };
+
+  struct DominantOrientationMap {
+    using extremum_index_type = int;
+    using angle_type = float;
+    using OrientationMap = std::multimap<extremum_index_type, angle_type>;
+
+    OrientationMap orientation_map;
+
+    operator OrientationMap&() noexcept
+    {
+      return orientation_map;
+    }
+
+    operator const OrientationMap&() const noexcept
+    {
+      return orientation_map;
+    }
+
+    auto dominant_orientations(extremum_index_type i) const
+    {
+      auto orientations = std::vector<angle_type>{};
+      const auto [o_begin, o_end] = orientation_map.equal_range(i);
+      for (auto o = o_begin; o != o_end; ++o)
+        orientations.push_back(o->second);
+      return orientations;
+    };
+
+  };
+
 
   template <typename T>
   struct Pyramid

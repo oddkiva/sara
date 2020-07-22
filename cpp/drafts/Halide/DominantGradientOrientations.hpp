@@ -82,7 +82,7 @@ namespace DO { namespace Shakti { namespace HalideBackend {
       Sara::ImagePyramid<float>& gradient_mag_pyramid,                 //
       Sara::ImagePyramid<float>& gradient_ori_pyramid,                 //
       Pyramid<ExtremaArray>& dog_extrema,                              //
-      Pyramid<DominantGradientOrientationMap>& dominant_orientations,  //
+      Pyramid<DominantOrientationDenseMap>& dominant_orientations,  //
       int num_orientation_bins = 36,                                   //
       float gaussian_truncation_factor = 3.f,                          //
       float scale_multiplying_factor = 1.5f,                           //
@@ -116,7 +116,7 @@ namespace DO { namespace Shakti { namespace HalideBackend {
   }
 
 
-  auto compress(const DominantGradientOrientationMap& dense_view)
+  auto compress(const DominantOrientationDenseMap& dense_view)
   {
     auto sparse_view = std::multimap<int, float>{};
 
@@ -155,16 +155,18 @@ namespace DO { namespace Shakti { namespace HalideBackend {
     return sparse_view;
   }
 
-  auto compress(Pyramid<DominantGradientOrientationMap>& dense_views)
+  auto compress(Pyramid<DominantOrientationDenseMap>& dense_views)
   {
-    auto sparse_views = Pyramid<std::multimap<int, float>>{};
+    auto sparse_views = Pyramid<DominantOrientationMap>{};
 
     sparse_views.scale_octave_pairs = dense_views.scale_octave_pairs;
 
     std::transform(dense_views.dict.begin(), dense_views.dict.end(),
                    std::inserter(sparse_views.dict, sparse_views.dict.end()),
                    [](const auto& kv) {
-                     return std::make_pair(kv.first, compress(kv.second));
+                     return std::make_pair(                             //
+                         kv.first,                                      //
+                         DominantOrientationMap{compress(kv.second)});  //
                    });
 
     return sparse_views;
