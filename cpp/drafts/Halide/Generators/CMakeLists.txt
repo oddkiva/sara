@@ -93,11 +93,11 @@ shakti_halide_library_v2(
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 
-#  # SIFT descriptors.
-#  shakti_halide_library_v2(
-#    NAME shakti_sift_descriptors_32f
-#    SRCS SIFTGenerator.cpp
-#    HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+# SIFT descriptors.
+shakti_halide_library_v2(
+  NAME shakti_sift_descriptors
+  SRCS SIFTGenerator.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 
 if (SARA_BUILD_SAMPLES)

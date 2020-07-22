@@ -28,10 +28,8 @@ namespace DO { namespace Shakti { namespace HalideBackend {
       Sara::ImagePyramid<std::int8_t>& extrema_map_pyramid)
   {
     sara::tic();
-    const auto num_scales = extrema_map_pyramid.num_octaves() *
-                            extrema_map_pyramid.num_scales_per_octave();
 
-    auto extrema = Pyramid<QuantizedExtremaArray>{};
+    auto extrema = Pyramid<QuantizedExtremumArray>{};
 
     for (auto o = 0; o < extrema_map_pyramid.num_octaves(); ++o)
     {
@@ -85,8 +83,8 @@ namespace DO { namespace Shakti { namespace HalideBackend {
   refine_scale_space_extrema(Sara::ImageView<float>& a,               //
                              Sara::ImageView<float>& b,               //
                              Sara::ImageView<float>& c,               //
-                             QuantizedExtremaArray& extrema_initial,  //
-                             ExtremaArray& extrema_refined)           //
+                             QuantizedExtremumArray& extrema_initial,  //
+                             ExtremumArray& extrema_refined)           //
   {
     auto a_buffer = as_runtime_buffer(a);
     auto b_buffer = as_runtime_buffer(b);
@@ -129,10 +127,10 @@ namespace DO { namespace Shakti { namespace HalideBackend {
   //! @brief Extract local scale-space extrema.
   inline auto refine_scale_space_extrema(
       Sara::ImagePyramid<float>& dog,
-      Pyramid<QuantizedExtremaArray>& extrema_initial)
+      Pyramid<QuantizedExtremumArray>& extrema_initial)
   {
     sara::tic();
-    auto extrema_refined = Pyramid<ExtremaArray>{};
+    auto extrema_refined = Pyramid<ExtremumArray>{};
     extrema_refined.scale_octave_pairs = extrema_initial.scale_octave_pairs;
 
     for (auto o = 0; o < dog.num_octaves(); ++o)

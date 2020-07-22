@@ -64,34 +64,55 @@ auto show_pyramid(const sara::ImagePyramid<float>& pyramid)
       sara::display(sara::color_rescale(pyramid(s, o)));
 }
 
-auto draw_quantized_extrema(halide::QuantizedExtremaArray& extrema_quantized_so,
-                            int i, float oct_scale, float scale)
-{
-  const auto c0 = extrema_quantized_so.type[i] == 1 ? sara::Blue8 : sara::Red8;
-  const auto& x0 = extrema_quantized_so.x[i];
-  const auto& y0 = extrema_quantized_so.y[i];
-  const auto r0 = scale * std::sqrt(2.f);
-  sara::draw_circle(x0 * oct_scale, y0 * oct_scale, r0, c0, 2 + 0);
-}
-
-auto draw_dogs(const halide::Pyramid<halide::ExtremaArray>& extrema,
-               const halide::Pyramid<halide::DominantOrientationMap>&
-                   dominant_orientations_sparse)
+auto draw_quantized_extrema(const halide::Pyramid<halide::QuantizedExtremumArray>& extrema)
 {
   for  (const auto& so: extrema.scale_octave_pairs)
   {
     const auto& s = so.first.first;
     const auto& o = so.first.second;
 
-    const auto scale = so.second.first;
-    const auto octave_scaling_factor = so.second.second;
+    const auto& scale  = so.second.first;
+    const auto& octave_scaling_factor = so.second.second;
 
     auto eit = extrema.dict.find({s, o});
     if (eit == extrema.dict.end())
       continue;
 
     const auto& extrema_so = eit->second;
-    const auto& ori_so = dominant_orientations_sparse.dict.at({s, o});
+
+    for (auto i = 0u; i < extrema_so.x.size(); ++i)
+    {
+      const auto c0 = extrema_so.type[i] == 1 ? sara::Blue8 : sara::Red8;
+      const auto& x0 = extrema_so.x[i] * octave_scaling_factor;
+      const auto& y0 = extrema_so.y[i] * octave_scaling_factor;
+
+      // N.B.: the blob radius is the scale multiplied sqrt(2).
+      // http://www.cs.unc.edu/~lazebnik/spring11/lec08_blob.pdf
+      const auto r0 = scale * octave_scaling_factor * std::sqrt(2.f);
+
+      const auto p1 = Eigen::Vector2f{x0, y0};
+      const Eigen::Vector2f p2 = p1 + r0 * Eigen::Vector2f{cos(o), sin(o)};
+
+      sara::draw_line(p1, p2, c0, 2);
+      sara::draw_circle(x0, y0, r0, c0, 2 + 2);
+    }
+  }
+}
+
+auto draw_extrema(const halide::Pyramid<halide::OrientedExtremumArray>& extrema)
+{
+  for  (const auto& so: extrema.scale_octave_pairs)
+  {
+    const auto& s = so.first.first;
+    const auto& o = so.first.second;
+
+    const auto& octave_scaling_factor = so.second.second;
+
+    auto eit = extrema.dict.find({s, o});
+    if (eit == extrema.dict.end())
+      continue;
+
+    const auto& extrema_so = eit->second;
 
     for (auto i = 0u; i < extrema_so.x.size(); ++i)
     {
@@ -99,30 +120,20 @@ auto draw_dogs(const halide::Pyramid<halide::ExtremaArray>& extrema,
 
       const auto x1 = extrema_so.x[i] * octave_scaling_factor;
       const auto y1 = extrema_so.y[i] * octave_scaling_factor;
+      const auto& o1 = extrema_so.orientations[i];
       const auto p1 = Eigen::Vector2f{x1, y1};
 
       // N.B.: the blob radius is the scale multiplied sqrt(2).
       // http://www.cs.unc.edu/~lazebnik/spring11/lec08_blob.pdf
       const auto r1 = extrema_so.s[i] * octave_scaling_factor * std::sqrt(2.f);
 
-      sara::draw_circle(x1, y1, r1, c1, 2 + 2);
+      const Eigen::Vector2f p2 = p1 + r1 * Eigen::Vector2f{cos(o), sin(o)};
 
-      const auto orientations = ori_so.dominant_orientations(i);
-      for (const auto& o: orientations)
-      {
-        const Eigen::Vector2f p2 = p1 + r1 * Eigen::Vector2f{cos(o), sin(o)};
-        sara::draw_line(p1, p2, c1, 2);
-      }
+      sara::draw_line(p1, p2, c1, 2);
+      sara::draw_circle(x1, y1, r1, c1, 2 + 2);
     }
   }
 }
-
-
-constexpr auto edge_ratio_thres = 10.f;
-constexpr auto extremum_thres = 0.01f;  // 0.01f;
-constexpr auto num_orientation_bins = 36;
-const auto initial_pyramid_octave = 0;
-const auto pyramid_params = sara::ImagePyramidParams(initial_pyramid_octave);
 
 
 namespace DO::Shakti::HalideBackend {
@@ -149,19 +160,23 @@ namespace DO::Shakti::HalideBackend {
       Sara::ImagePyramid<std::int8_t> dog_extrema_pyramid;
       std::array<Sara::ImagePyramid<float>, 2> gradient_pyramid;
 
-      Pyramid<QuantizedExtremaArray> extrema_quantized;
-      Pyramid<ExtremaArray> extrema;
+      Pyramid<QuantizedExtremumArray> extrema_quantized;
+      Pyramid<ExtremumArray> extrema;
 
       Pyramid<DominantOrientationDenseMap> dominant_orientations_dense;
       Pyramid<DominantOrientationMap> dominant_orientations;
+
+      // The DoG extremum keypoints.
+      Pyramid<OrientedExtremumArray> oriented_extrema;
+      // The SIFT descriptors.
+      Pyramid<Sara::Tensor_<float, 4>> descriptors;
     };
 
     Sara::Timer timer;
     Parameters params;
     Pipeline pipeline;
 
-    auto operator()(const Sara::Image<float>& image,
-                    const Sara::ImagePyramidParams& pyramid_params)
+    auto operator()(const Sara::Image<float>& image)
     {
       timer.restart();
       const auto pyr_params =
@@ -210,6 +225,9 @@ namespace DO::Shakti::HalideBackend {
 
       pipeline.dominant_orientations =
           compress(pipeline.dominant_orientations_dense);
+
+      pipeline.oriented_extrema = to_oriented_extremum_array(
+          pipeline.extrema, pipeline.dominant_orientations);
     }
   };
 
@@ -225,12 +243,9 @@ auto test_on_image()
   auto image = sara::imread<float>(image_filepath);
 
   auto sift_extractor = halide::SIFTExtractor{};
-  sift_extractor(image, pyramid_params);
+  sift_extractor(image);
 
   const auto& extrema = sift_extractor.pipeline.extrema;
-  const auto& dominant_orientations =
-      sift_extractor.pipeline.dominant_orientations;
-
   const auto num_keypoints = std::accumulate(
       extrema.dict.begin(), extrema.dict.end(), 0,
       [](auto val, const auto& kv) { return val + kv.second.size(); });
@@ -240,7 +255,7 @@ auto test_on_image()
   sara::create_window(image.sizes());
   sara::set_antialiasing();
   sara::display(image);
-  draw_dogs(extrema, dominant_orientations);
+  draw_extrema(sift_extractor.pipeline.oriented_extrema);
   sara::get_key();
 }
 
@@ -288,13 +303,12 @@ auto test_on_video()
     sara::toc("Grayscale");
 
     sara::tic();
-    sift_extractor(frame_gray32f, pyramid_params);
+    sift_extractor(frame_gray32f);
     sara::toc("Oriented DoG");
 
     sara::tic();
     sara::display(frame);
-    draw_dogs(sift_extractor.pipeline.extrema,
-              sift_extractor.pipeline.dominant_orientations);
+    draw_extrema(sift_extractor.pipeline.oriented_extrema);
     sara::toc("Display");
   }
 }

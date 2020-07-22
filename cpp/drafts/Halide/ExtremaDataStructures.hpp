@@ -19,7 +19,7 @@
 namespace DO::Shakti::HalideBackend {
 
   //! @brief List of extrema localized in the discretized scale-space.
-  struct QuantizedExtremaArray
+  struct QuantizedExtremumArray
   {
     //! @brief Quantized localization.
     std::vector<std::int32_t> x;
@@ -31,9 +31,9 @@ namespace DO::Shakti::HalideBackend {
     //! @brief Extremum type.
     std::vector<std::int8_t> type;
 
-    QuantizedExtremaArray() = default;
+    QuantizedExtremumArray() = default;
 
-    QuantizedExtremaArray(std::size_t size)
+    QuantizedExtremumArray(std::size_t size)
     {
       resize(size);
     }
@@ -51,9 +51,8 @@ namespace DO::Shakti::HalideBackend {
     }
   };
 
-
   //! @brief List of refined extrema in the continuous scale-space.
-  struct ExtremaArray
+  struct ExtremumArray
   {
     //! @brief Coordinates of the extrema
     //! @{
@@ -145,7 +144,8 @@ namespace DO::Shakti::HalideBackend {
     }
   };
 
-  struct DominantOrientationMap {
+  struct DominantOrientationMap
+  {
     using extremum_index_type = int;
     using angle_type = float;
     using OrientationMap = std::multimap<extremum_index_type, angle_type>;
@@ -170,7 +170,42 @@ namespace DO::Shakti::HalideBackend {
         orientations.push_back(o->second);
       return orientations;
     };
+  };
 
+
+  //! @brief List of oriented extrema in the continuous scale-space.
+  struct OrientedExtremumArray : ExtremumArray
+  {
+    //! @brief Coordinates of the extrema
+    //! @{
+    std::vector<float> orientations;
+    //! @}
+
+    struct View : ExtremumArray::View
+    {
+      float& orientation;
+    };
+
+    struct ConstView : ExtremumArray::ConstView
+    {
+      const float& orientation;
+    };
+
+    auto operator[](int i) -> View
+    {
+      return {{x[i], y[i], s[i], value[i], type[i]}, orientations[i]};
+    }
+
+    auto operator[](int i) const -> ConstView
+    {
+      return {{x[i], y[i], s[i], value[i], type[i]}, orientations[i]};
+    }
+
+    auto resize(std::size_t size)
+    {
+      ExtremumArray::resize(size);
+      orientations.resize(size);
+    }
   };
 
 
@@ -180,4 +215,58 @@ namespace DO::Shakti::HalideBackend {
     std::map<std::pair<int, int>, std::pair<float, float>> scale_octave_pairs;
     std::map<std::pair<int, int>, T> dict;
   };
-}
+
+
+  auto to_oriented_extremum_array(const ExtremumArray& extrema,
+                                  const DominantOrientationMap& orientations)
+  {
+    auto oriented_extrema = OrientedExtremumArray{};
+    oriented_extrema.scale_quantized = extrema.scale_quantized;
+
+    for (auto e = 0u; e < extrema.size(); ++e)
+    {
+      const auto ei = extrema[e];
+      const auto ois = orientations.dominant_orientations(e);
+
+      for (const auto& oi : ois)
+      {
+        oriented_extrema.x.push_back(ei.x);
+        oriented_extrema.y.push_back(ei.y);
+        oriented_extrema.s.push_back(ei.s);
+        oriented_extrema.type.push_back(ei.type);
+        oriented_extrema.value.push_back(ei.value);
+        oriented_extrema.orientations.push_back(oi);
+      }
+    }
+
+    return oriented_extrema;
+  }
+
+  auto to_oriented_extremum_array(
+      const Pyramid<ExtremumArray>& extrema,
+      const Pyramid<DominantOrientationMap>& orientations)
+  {
+    auto oriented_extrema = Pyramid<OrientedExtremumArray>{};
+
+    oriented_extrema.scale_octave_pairs = extrema.scale_octave_pairs;
+
+    for (const auto& so : extrema.scale_octave_pairs)
+    {
+      const auto& s = so.first.first;
+      const auto& o = so.first.second;
+
+      auto eit = extrema.dict.find({s, o});
+      if (eit == extrema.dict.end())
+        continue;
+
+      const auto& extrema_so = eit->second;
+      const auto& ori_so = orientations.dict.at({s, o});
+
+      oriented_extrema.dict[{s, o}] = to_oriented_extremum_array(extrema_so,  //
+                                                                 ori_so);     //
+    }
+
+    return oriented_extrema;
+  }
+
+}  // namespace DO::Shakti::HalideBackend
