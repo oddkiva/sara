@@ -18,8 +18,9 @@
 
 #include <DO/Sara/Core.hpp>
 #include <DO/Sara/Graphics.hpp>
-#include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/VideoIO.hpp>
+#include <DO/Sara/FeatureDetectors/DoG.hpp>
+#include <DO/Sara/SfM/Detectors/SIFT.hpp>
 
 #include <drafts/Halide/Differential.hpp>
 #include <drafts/Halide/LocalExtrema.hpp>
@@ -29,6 +30,7 @@
 
 #include <drafts/Halide/Draw.hpp>
 #include <drafts/Halide/DominantGradientOrientations.hpp>
+#include <drafts/Halide/Resize.hpp>
 #include <drafts/Halide/SIFT.hpp>
 
 
@@ -86,12 +88,16 @@ namespace DO::Shakti::HalideBackend {
     Parameters params;
     Pipeline pipeline;
 
-    auto operator()(const Sara::Image<float>& image)
+    auto operator()(Sara::ImageView<float>& image)
     {
       timer.restart();
       const auto pyr_params =
           Sara::ImagePyramidParams{params.initial_pyramid_octave};
       pipeline.gaussian_pyramid = gaussian_pyramid(image, pyr_params);
+      SARA_DEBUG << "Gaussian pyramid = " << timer.elapsed_ms() << " ms"
+                 << std::endl;
+
+      timer.restart();
       pipeline.dog_pyramid = subtract_pyramid(pipeline.gaussian_pyramid);
       SARA_DEBUG << "DoG pyramid = " << timer.elapsed_ms() << " ms"
                  << std::endl;
@@ -195,22 +201,31 @@ auto test_on_video()
   const auto video_filepath = "/Users/david/Desktop/Datasets/humanising-autonomy/field.mp4"s;
 #else
   const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
+  // const auto video_filepath = "/home/david/Desktop/Datasets/ha/barberX.mp4"s;
 #endif
 
   // Input and output from Sara.
   sara::VideoStream video_stream(video_filepath);
   auto frame = video_stream.frame();
-  auto frame_gray32f = sara::Image<float>{video_stream.sizes()};
+  auto frame_gray32f = sara::Image<float>{frame.sizes()};
+
+  const auto scale_factor = 1;
+  auto frame_downsampled = sara::Image<float>{frame.sizes() / scale_factor};
 
   // Halide buffers.
   auto buffer_rgb = halide::as_interleaved_runtime_buffer(frame);
   auto buffer_gray32f = halide::as_runtime_buffer<float>(frame_gray32f);
 
   auto sift_extractor = halide::SIFTExtractor{};
+  auto compute_dog_extrema = sara::ComputeDoGExtrema{0};
+
 
   // Show the local extrema.
-  sara::create_window(frame.sizes());
+  sara::create_window(frame_downsampled.sizes());
   sara::set_antialiasing();
+
+  auto frames_read = 0;
+  auto skip = 1;
 
   while (true)
   {
@@ -222,18 +237,43 @@ auto test_on_video()
     }
     sara::toc("Video Decoding");
 
+    ++frames_read;
+    if (frames_read % skip != 0)
+      continue;
+
     // Use parallelization and vectorization.
     sara::tic();
     shakti_halide_rgb_to_gray(buffer_rgb, buffer_gray32f);
     sara::toc("Grayscale");
 
+    // Use parallelization and vectorization.
     sara::tic();
-    sift_extractor(frame_gray32f);
+    halide::scale(frame_gray32f, frame_downsampled);
+    sara::toc("Downsample");
+
+    sara::tic();
+// #define ORIGINAL
+#ifdef ORIGINAL
+    const auto [features, descriptors] = sara::compute_sift_keypoints(frame_downsampled);
+#else
+    sift_extractor(frame_downsampled);
+#endif
     sara::toc("Oriented DoG");
 
     sara::tic();
-    sara::display(frame);
+    sara::display(frame_downsampled);
+#ifdef ORIGINAL
+    for (size_t i = 0; i != features.size(); ++i)
+    {
+      const auto color =
+          features[i].extremum_type == sara::OERegion::ExtremumType::Max
+              ? sara::Red8
+              : sara::Blue8;
+      features[i].draw(color);
+    }
+#else
     draw_extrema(sift_extractor.pipeline.oriented_extrema);
+#endif
     sara::toc("Display");
   }
 }

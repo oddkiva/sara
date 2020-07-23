@@ -31,7 +31,8 @@ auto compute_sift_keypoints(const ImageView<float>& image)
   // 1. Feature extraction.
   SARA_DEBUG << "Computing DoG extrema" << endl;
   timer.restart();
-  ImagePyramidParams pyr_params(-1);
+  //ImagePyramidParams pyr_params(-1);
+  ImagePyramidParams pyr_params(0);
   ComputeDoGExtrema compute_DoGs{pyr_params, 0.01f};
   auto scale_octave_pairs = vector<Point2i>{};
   DoGs = compute_DoGs(image, &scale_octave_pairs);

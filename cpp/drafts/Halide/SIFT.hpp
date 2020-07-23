@@ -100,7 +100,7 @@ namespace DO { namespace Shakti { namespace HalideBackend {
       auto& k = kit->second;
 
       auto& d = descriptors.dict[{s, o}];
-      d.resize({k.size(), N, N, O});
+      d.resize({static_cast<int>(k.size()), N, N, O});
 
       compute_sift_descriptors(gradient_magnitudes(s, o),         //
                                gradient_orientations(s, o),       //

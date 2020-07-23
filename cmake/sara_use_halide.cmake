@@ -216,4 +216,9 @@ function (shakti_halide_library_v2)
         FOLDER "Halide/${generator_NAME}")
     endif ()
   endforeach ()
+
+  # I want C++17 here.
+  target_compile_features(${generator_NAME}.generator_library
+    PRIVATE
+    cxx_std_17)
 endfunction ()

@@ -1,5 +1,5 @@
 find_package(OpenMP)
-find_package(DO_Sara COMPONENTS Core Graphics ImageIO VideoIO REQUIRED)
+find_package(DO_Sara COMPONENTS Core Graphics ImageIO SfM VideoIO REQUIRED)
 
 # N.B.: with MSVC, this link helped to solve already defined symbol errors:
 # https://github.com/halide/Halide/issues/740
@@ -17,7 +17,8 @@ target_link_libraries(halide_aot_example
   Halide
   shakti_halide_rgb_to_gray
   shakti_halide_gray32f_to_rgb
-  shakti_halide_gaussian_blur)
+  shakti_halide_gaussian_blur
+  shakti_gaussian_convolution_v2)
 set_property(TARGET halide_aot_example PROPERTY FOLDER "Tutorials/Halide")
 
 

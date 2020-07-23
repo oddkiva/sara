@@ -3,6 +3,7 @@
 #include <DO/Sara/ImageProcessing.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
+#include <drafts/Halide/GaussianConvolution.hpp>
 #include <drafts/Halide/Utilities.hpp>
 
 #include "shakti_halide_gaussian_blur.h"
@@ -28,8 +29,8 @@ auto halide_pipeline() -> void
   const auto video_filepath =
       "/Users/david/Desktop/Datasets/humanising-autonomy/turn_bikes.mp4"s;
 #else
-  // const auto video_filepath = "/home/david/Desktop/test.mp4"s;
-  const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
+  // const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
+  const auto video_filepath = "/home/david/Desktop/Datasets/ha/barberX.mp4"s;
 #endif
 
   VideoStream video_stream(video_filepath);
@@ -66,8 +67,11 @@ auto halide_pipeline() -> void
       // Use parallelization and vectorization.
       shakti_halide_rgb_to_gray(buffer_rgb, buffer_gray32f);
 
-#define USE_HALIDE_AOT_IMPLEMENTATION
-#ifdef USE_HALIDE_AOT_IMPLEMENTATION
+//#define USE_HALIDE_AOT_IMPLEMENTATION_V1
+#define USE_HALIDE_AOT_IMPLEMENTATION_V2
+//#define USE_SARA_GAUSSIAN_BLUR_IMPLEMENTATION
+//#define USE_SARA_DERICHE_IMPLEMENTATION
+#ifdef USE_HALIDE_AOT_IMPLEMENTATION_V1
       // The strategy is to transpose the array and then convolve the rows. So
       // (1) we transpose the matrix and convolve the (transposed) columns.
       // (2) we transpose the matrix and convolve the rows.
@@ -97,19 +101,26 @@ auto halide_pipeline() -> void
         buffer_gray32f_blurred.copy_to_host();
       }
       shakti_halide_gray32f_to_rgb(buffer_gray32f_blurred, buffer_gray8);
+      toc("Halide Gaussian V1");
+#elif defined(USE_HALIDE_AOT_IMPLEMENTATION_V2)
+      halide::gaussian_convolution(frame_gray32f, frame_gray32f_blurred, sigma,
+                                   truncation_factor);
+      shakti_halide_gray32f_to_rgb(buffer_gray32f_blurred, buffer_gray8);
+      toc("Halide Gaussian V2");
 #elif defined(USE_SARA_GAUSSIAN_BLUR_IMPLEMENTATION)
       // Sara's unoptimized code takes 240 ms to blur (no SSE instructions and
       // no column-based transposition)
       apply_gaussian_filter(frame_gray32f, frame_gray32f_blurred, sigma);
       shakti_halide_gray32f_to_rgb(buffer_gray32f_blurred, buffer_gray8);
+      toc("Sara Gaussian");
 #elif defined(USE_SARA_DERICHE_IMPLEMENTATION)
       // Without parallelization and anything, deriche filter is still running
       // reasonably fast (between 45 and 50ms).
       inplace_deriche_blur(frame_gray32f, sigma);
       shakti_halide_gray32f_to_rgb(buffer_gray32f, buffer_gray8);
+      toc("Sara Deriche");
 #endif
     }
-    toc("Halide");
 
     display(frame_gray_as_rgb);
   }

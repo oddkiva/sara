@@ -16,15 +16,15 @@
 #include <DO/Sara/Core/StringFormat.hpp>
 #include <DO/Sara/Core/Tensor.hpp>
 
-#include <DO/Sara/ImageProcessing/Differential.hpp>
 #include <DO/Sara/ImageProcessing/ImagePyramid.hpp>
-#include <DO/Sara/ImageProcessing/LinearFiltering.hpp>
-#include <DO/Sara/ImageProcessing/Resize.hpp>
 
 #include <drafts/Halide/BinaryOperators.hpp>
 #include <drafts/Halide/GaussianConvolution.hpp>
 #include <drafts/Halide/Resize.hpp>
 #include <drafts/Halide/Utilities.hpp>
+
+
+// #define DEBUG
 
 
 namespace DO { namespace Shakti { namespace HalideBackend {
@@ -69,7 +69,8 @@ namespace DO { namespace Shakti { namespace HalideBackend {
       const auto sigma = std::sqrt(scale_initial * scale_initial -
                                    scale_camera * scale_camera);
       auto image_start_blurred = image_start;
-      gaussian_convolution(image_start, image_start_blurred, sigma, 4);
+      Shakti::HalideBackend::gaussian_convolution(
+          image_start, image_start_blurred, sigma, 4);
       image_start.swap(image_start_blurred);
 #ifdef DEBUG
       Sara::toc("Blur to initial scale of the pyramid");
@@ -131,7 +132,7 @@ namespace DO { namespace Shakti { namespace HalideBackend {
         Sara::tic();
         const auto sigma =
             sqrt(k * k * sigma_s_1 * sigma_s_1 - sigma_s_1 * sigma_s_1);
-        gaussian_convolution(G(s - 1, o), G(s, o), sigma, 4);
+        Shakti::HalideBackend::gaussian_convolution(G(s - 1, o), G(s, o), sigma, 4);
         sigma_s_1 *= k;
 #ifdef DEBUG
         Sara::toc(Sara::format("Convolve (s=%d, o=%d) and kernel sizes = %d", s,
@@ -164,7 +165,7 @@ namespace DO { namespace Shakti { namespace HalideBackend {
 #ifdef DEBUG
         Sara::tic();
 #endif
-        subtract(G(s + 1, o), G(s, o), D(s, o));
+        Shakti::HalideBackend::subtract(G(s + 1, o), G(s, o), D(s, o));
 #ifdef DEBUG
         Sara::toc(Sara::format("Subtracting at (s=%d, o=%d)", s, o));
 #endif
@@ -180,8 +181,8 @@ namespace DO { namespace Shakti { namespace HalideBackend {
       const Sara::ImagePyramidParams& params = Sara::ImagePyramidParams())
       -> Sara::ImagePyramid<float>
   {
-    auto G = gaussian_pyramid(image, params);
-    auto D = subtract_pyramid(G);
+    auto G = Shakti::HalideBackend::gaussian_pyramid(image, params);
+    auto D = Shakti::HalideBackend::subtract_pyramid(G);
     return D;
   }
 
