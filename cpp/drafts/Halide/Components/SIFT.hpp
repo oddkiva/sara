@@ -30,18 +30,10 @@ namespace DO::Shakti::HalideBackend {
     // Each image has a resolution scale (in pixels) associated to it.
     float scale_upper_bound;
 
-    auto patch_radius_bound(const Halide::Expr& scale_upper_bound) const
+    auto patch_radius(const Halide::Expr& scale_upper_bound) const
     {
-      return Halide::cast<std::int32_t>(                                //
-          Halide::round(bin_length_in_scale_unit * scale_upper_bound *  //
-                        (N + 1) / 2.f * std::sqrt(2.f)));
-    }
-
-    auto patch_radius(const Halide::Expr& scale) const
-    {
-      return Halide::cast<std::int32_t>(                    //
-          Halide::round(bin_length_in_scale_unit * scale *  //
-                        (N + 1) / 2.f * std::sqrt(2.f)));
+      return bin_length_in_scale_unit * scale_upper_bound *  //
+             (N + 1) / 2.f * std::sqrt(2.f);
     }
 
     auto compute_bin_value(const Halide::Var& i,             //
@@ -56,9 +48,11 @@ namespace DO::Shakti::HalideBackend {
                            const Halide::Expr& theta) const  //
     {
       // Calculate the radius upper-bound.
-      const auto r_max = patch_radius_bound(scale_max);
+      const auto r_max =
+          Halide::cast<std::int32_t>(Halide::round(patch_radius(scale_max)));
       // Calculate the radius of the actual patch.
-      const auto r_actual = patch_radius(scale);
+      const auto r_actual =
+          Halide::cast<std::int32_t>(Halide::round(patch_radius(scale)));
 
       // Define the reduction domain.
       auto r = Halide::RDom(-r_max, 2 * r_max + 1, -r_max, 2 * r_max + 1);
@@ -93,30 +87,46 @@ namespace DO::Shakti::HalideBackend {
 
       // For each point of the patch, i.e.:
       auto p = Vector2{};
-      p(0) = r.x;
-      p(1) = r.y;
+      p(0) = Halide::cast<float>(r.x);
+      p(1) = Halide::cast<float>(r.y);
 
       // Calculate the coordinates of the gradient in the reoriented normalized
       // patch.
       const auto Tp = T * p;  // 1. Apply the patch normalization transform.
-      auto Tp2 = Vector2{};   // 2. Find out which bin (i, j) it belongs to.
-      Tp2(0) = Tp(0) - N / 2.f - 0.5f;
-      Tp2(1) = Tp(1) - N / 2.f - 0.5f;
 
       // The weight of this gradient is:
-      const auto weight = Halide::exp(-squared_norm(Tp2) /  //
+      const auto weight = Halide::exp(-squared_norm(Tp) /  //
                                       (2 * Halide::pow(N / 2.f, 2)));
+
+      auto Tp2 = Vector2{};   // 2. Find out which bin (i, j) it belongs to.
+      Tp2(0) = Tp(0) + N / 2.f - 0.5f;
+      Tp2(1) = Tp(1) + N / 2.f - 0.5f;
 
       // Now the accumulation rule is based on trilinear interpolation:
       //
       // First calculate the absolute distance to the bin (i, j, o).
-      auto dx = Halide::abs(Halide::cast<float>(j) - Tp(0));
-      auto dy = Halide::abs(Halide::cast<float>(i) - Tp(1));
+      auto dx = Halide::abs(Halide::cast<float>(j) - Tp2(0));
+      auto dy = Halide::abs(Halide::cast<float>(i) - Tp2(1));
       auto dori = Halide::abs(Halide::cast<float>(o) - ori_index);
       // Accumulation rule based on trilinear interpolation.
       auto wx = Halide::select(dx < 1, 1 - dx, 0);
       auto wy = Halide::select(dy < 1, 1 - dy, 0);
       auto wo = Halide::select(dori < 1, 1 - dori, 0);
+
+#ifdef HALIDE_SIFT_OK
+      Halide::Expr magxy = grad_mag_fn(xi, yi);
+      return Halide::round(y);
+      return Halide::round(x);
+      return scale;
+      return theta;
+      return bin_length_in_pixels;
+      return Halide::sum(mag);
+      return Halide::sum(ori);
+      return Halide::sum(weight * mag);
+      return Halide::sum(weight * ori);
+      return Halide::sum(ori_index);
+      return Halide::sum(weight * ori_index);
+#endif
 
       return Halide::sum(wx * wy * wo * mag);
     }

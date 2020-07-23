@@ -44,3 +44,8 @@ target_link_libraries(test_halide_dominant_gradient_orientations
   # Dominant gradient orientations.
   shakti_polar_gradient_2d_32f
   shakti_dominant_gradient_orientations)
+
+target_link_libraries(test_halide_sift_descriptor
+  PRIVATE
+  shakti_polar_gradient_2d_32f
+  shakti_sift_descriptor)

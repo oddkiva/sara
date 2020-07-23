@@ -56,14 +56,14 @@ namespace {
       const auto theta = xyst[3](k);
 
       namespace halide = DO::Shakti::HalideBackend;
-      h(i, j, o, k) = sift.compute_bin_value(i, j, o,             //
+      h(o, j, i, k) = sift.compute_bin_value(i, j, o,             //
                                              mag_fn_ext,          //
                                              ori_fn_ext,          //
                                              x, y, s, scale_max,  //
                                              theta);
-      sift.normalize(h, i, j, o, k);
+      // sift.normalize(h, i, j, o, k);
 
-      descriptors(i, j, o, k) = h(i, j, o, k);
+      descriptors(o, j, i, k) = h(o, j, i, k);
     }
 
     void schedule()

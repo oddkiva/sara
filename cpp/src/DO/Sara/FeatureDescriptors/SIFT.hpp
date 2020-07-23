@@ -77,11 +77,22 @@ namespace DO { namespace Sara {
       const int rounded_r = int_round(r);
       const int rounded_x = int_round(x);
       const int rounded_y = int_round(y);
+
+// #define DEBUG_SIFT
+#ifdef DEBUG_SIFT
+      auto mag_sum = 0.f;
+      auto ori_sum = 0.f;
+      auto ori_index_sum = 0.f;
+      auto weighted_mag_sum = 0.f;
+      auto weighted_ori_sum = 0.f;
+      auto weighted_ori_index_sum = 0.f;
+#endif
+
       for (auto v = -rounded_r; v <= rounded_r; ++v)
       {
         for (auto u = -rounded_r; u <= rounded_r; ++u)
         {
-          // Retrieve the normalized coordinates.
+          // Retrieve the coordinates in the normalized patch coordinate frame.
           auto pos = Vector2f{T * Vector2f(u, v)};
           // subpixel correction?
           /*
@@ -98,6 +109,13 @@ namespace DO { namespace Sara {
           // far from the center.
           auto weight = exp(-pos.squaredNorm() / (2.f * pow(N / 2.f, 2)));
 
+#ifdef DEBUG_SIFT
+          mag_sum += grad_polar_coords(rounded_x + u, rounded_y + v)[0];
+          ori_sum += grad_polar_coords(rounded_x + u, rounded_y + v)[1] - theta;
+          weighted_mag_sum += weight * grad_polar_coords(rounded_x + u, rounded_y + v)[0];
+          weighted_ori_sum += weight * (grad_polar_coords(rounded_x + u, rounded_y + v)[1] - theta);
+#endif
+
           // Read the precomputed gradient (in polar coordinates).
           auto mag = grad_polar_coords(rounded_x + u, rounded_y + v)(0);
           auto ori = grad_polar_coords(rounded_x + u, rounded_y + v)(1) - theta;
@@ -105,6 +123,11 @@ namespace DO { namespace Sara {
           // Normalize the orientation.
           ori = ori < 0.f ? ori + 2.f * pi : ori;
           ori *= float(O) / (2.f * pi);
+
+#ifdef DEBUG_SIFT
+          ori_index_sum += ori;
+          weighted_ori_index_sum += weight * ori;
+#endif
 
           // Shift the coordinates to retrieve the "SIFT" coordinate system so
           // that $(x,y)$ is in $[-1, N]^2$.
@@ -118,11 +141,27 @@ namespace DO { namespace Sara {
           accumulate(h, pos, ori, weight, mag);
         }
       }
-
-      h.normalize();
-
-      h = (h * 512.f).cwiseMin(Matrix<float, Dim, 1>::Ones() * 255.f);
+#ifdef DEBUG_SIFT
+      // Everything is OK until here.
+      h.fill(grad_polar_coords(rounded_x, rounded_y)[0]);
+      h.fill(std::round(x));
+      h.fill(std::round(y));
+      h.fill(theta);
+      h.fill(sigma);
+      h.fill(l);
+      h.fill(mag_sum);
+      h.fill(ori_sum);
+      h.fill(weighted_mag_sum);
+      h.fill(weighted_ori_sum);
+      h.fill(ori_index_sum);
+      h.fill(weighted_ori_index_sum);
       return h;
+#endif
+      normalize(h);
+      h = (h * 512.f).cwiseMin(Matrix<float, Dim, 1>::Ones() * 255.f);
+
+      return h;
+
     }
 
     //! @brief Computes the **upright** SIFT descriptor for keypoint
@@ -198,12 +237,13 @@ namespace DO { namespace Sara {
     void accumulate(descriptor_type& h, const Vector2f& pos, float ori,
                     float weight, float mag) const
     {
-      const auto xfrac = pos.x() - floor(pos.x());
-      const auto yfrac = pos.y() - floor(pos.y());
-      const auto orifrac = ori - floor(ori);
-      const auto xi = int(pos.x());
-      const auto yi = int(pos.y());
-      const auto orii = int(ori);
+      float xif, yif, oriif;
+      const auto xfrac = std::modf(pos.x(), &xif);
+      const auto yfrac = std::modf(pos.y(), &yif);
+      const auto orifrac = std::modf(ori, &oriif);
+      const auto xi = int(xif);
+      const auto yi = int(yif);
+      const auto orii = int(oriif);
 
       for (auto dy = 0; dy < 2; ++dy)
       {
@@ -211,18 +251,18 @@ namespace DO { namespace Sara {
         if (y < 0 || y >= N)
           continue;
 
-        const auto wy = (dy == 0) ? 1.f - yfrac : yfrac;
+        const auto wy = (dy == 0) ? 1 - yfrac : yfrac;
         for (auto dx = 0; dx < 2; ++dx)
         {
           const auto x = xi + dx;
           if (x < 0 || x >= N)
             continue;
 
-          const auto wx = (dx == 0) ? 1.f - xfrac : xfrac;
+          const auto wx = (dx == 0) ? 1 - xfrac : xfrac;
           for (auto dori = 0; dori < 2; ++dori)
           {
             const auto o = (orii + dori) % O;
-            const auto wo = (dori == 0) ? 1.f - orifrac : orifrac;
+            const auto wo = (dori == 0) ? 1 - orifrac : orifrac;
 
             h[at(y, x, o)] += wy * wx * wo * weight * mag;
           }
@@ -230,8 +270,8 @@ namespace DO { namespace Sara {
       }
     }
 
-    //! Normalize in a contrast-invariant way.
-    void normalize(descriptor_type& h)
+    //! @brief Normalize in a contrast-invariant way.
+    void normalize(descriptor_type& h) const
     {
       // Euclidean normalization to account for contrast change.
       h.normalize();
