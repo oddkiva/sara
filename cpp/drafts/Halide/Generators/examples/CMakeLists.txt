@@ -83,6 +83,8 @@ target_link_libraries(halide_dog_extrema
   # Dominant gradient orientations.
   shakti_polar_gradient_2d_32f
   shakti_dominant_gradient_orientations
+  # SIFT descriptor.
+  shakti_sift_descriptor
   )
 set_property(TARGET halide_dog_extrema
   PROPERTY

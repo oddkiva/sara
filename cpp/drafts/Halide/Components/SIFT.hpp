@@ -32,15 +32,16 @@ namespace DO::Shakti::HalideBackend {
 
     auto patch_radius_bound(const Halide::Expr& scale_upper_bound) const
     {
-      return Halide::cast<std::int32_t>(
-          Halide::round(bin_length_in_scale_unit * scale_upper_bound * (N + 1) /
-                        2.f * std::sqrt(2.f)));
+      return Halide::cast<std::int32_t>(                                //
+          Halide::round(bin_length_in_scale_unit * scale_upper_bound *  //
+                        (N + 1) / 2.f * std::sqrt(2.f)));
     }
 
     auto patch_radius(const Halide::Expr& scale) const
     {
-      return Halide::cast<int>(Halide::round(bin_length_in_scale_unit * scale *
-                                             (N + 1) / 2.f * std::sqrt(2.f)));
+      return Halide::cast<std::int32_t>(                    //
+          Halide::round(bin_length_in_scale_unit * scale *  //
+                        (N + 1) / 2.f * std::sqrt(2.f)));
     }
 
     auto compute_bin_value(const Halide::Var& i,             //
@@ -66,8 +67,8 @@ namespace DO::Shakti::HalideBackend {
               Halide::abs(r.y) < r_actual);
 
       // The gradient magnitude is:
-      const auto xi = Halide::round(x);
-      const auto yi = Halide::round(y);
+      const auto xi = Halide::cast<std::int32_t>(Halide::round(x));
+      const auto yi = Halide::cast<std::int32_t>(Halide::round(y));
       const auto mag = grad_mag_fn(xi + r.x, yi + r.y);
 
       // The orientation in the reoriented patch is:
@@ -80,7 +81,6 @@ namespace DO::Shakti::HalideBackend {
       const auto ori = Halide::select(ori_shifted < 0,       //
                                       ori_shifted + two_pi,  //
                                       ori_shifted);          //
-
       const auto ori_normalized = ori / two_pi;
       const auto ori_index = ori_normalized * O;
 
@@ -91,14 +91,15 @@ namespace DO::Shakti::HalideBackend {
       T(1, 0) = -Halide::sin(theta); T(1, 1) = Halide::cos(theta);
       T /= bin_length_in_pixels;
 
+      // For each point of the patch, i.e.:
       auto p = Vector2{};
       p(0) = r.x;
       p(1) = r.y;
 
       // Calculate the coordinates of the gradient in the reoriented normalized
       // patch.
-      const auto Tp = T * p;
-      auto Tp2 = Vector2{};
+      const auto Tp = T * p;  // 1. Apply the patch normalization transform.
+      auto Tp2 = Vector2{};   // 2. Find out which bin (i, j) it belongs to.
       Tp2(0) = Tp(0) - N / 2.f - 0.5f;
       Tp2(1) = Tp(1) - N / 2.f - 0.5f;
 
@@ -106,10 +107,13 @@ namespace DO::Shakti::HalideBackend {
       const auto weight = Halide::exp(-squared_norm(Tp2) /  //
                                       (2 * Halide::pow(N / 2.f, 2)));
 
-      // Now the SIFT bin h(i, j, o) is calculated as:
+      // Now the accumulation rule is based on trilinear interpolation:
+      //
+      // First calculate the absolute distance to the bin (i, j, o).
       auto dx = Halide::abs(Halide::cast<float>(j) - Tp(0));
       auto dy = Halide::abs(Halide::cast<float>(i) - Tp(1));
       auto dori = Halide::abs(Halide::cast<float>(o) - ori_index);
+      // Accumulation rule based on trilinear interpolation.
       auto wx = Halide::select(dx < 1, 1 - dx, 0);
       auto wy = Halide::select(dy < 1, 1 - dy, 0);
       auto wo = Halide::select(dori < 1, 1 - dori, 0);
@@ -137,7 +141,8 @@ namespace DO::Shakti::HalideBackend {
       h_clamped(i, j, o, k) = Halide::min(h_contrast_invariant(i, j, o, k), 0.2f);
 
       auto illumination_norm = Halide::Func{"illumination_norm"};
-      illumination_norm(k) = Halide::sqrt(Halide::sum(Halide::pow(h_clamped(r.x, r.y, r.z, k), 2)));
+      illumination_norm(k) = Halide::sqrt(
+          Halide::sum(Halide::pow(h_clamped(r.x, r.y, r.z, k), 2)));
       illumination_norm.compute_root();
 
       auto h_illumination_invariant = Halide::Func{"h_illumination_invariant"};

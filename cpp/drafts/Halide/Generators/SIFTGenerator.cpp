@@ -18,8 +18,7 @@ namespace {
 
   using namespace Halide;
 
-  class SIFT
-    : public Generator<SIFT>
+  class SIFT : public Generator<SIFT>
   {
   public:
     GeneratorParam<int> tile_o{"tile_x", 16};
@@ -27,7 +26,7 @@ namespace {
 
     // Input data.
     Input<Buffer<float>[2]> polar_gradient{"gradients", 2};
-    Input<Buffer<float>[4]> xyst{"xyst", 4};
+    Input<Buffer<float>[4]> xyst{"xyst", 1};
     Input<float> scale_max{"scale_max"};
     Input<float> bin_length_in_scale_unit{"bin_length_in_scale_unit"};
     Input<std::int32_t> N{"N"};
@@ -41,9 +40,8 @@ namespace {
     DO::Shakti::HalideBackend::SIFT sift;
 
     Func h;
-    Func h_final;
 
-    Output<Buffer<float>> descriptors;
+    Output<Buffer<float>> descriptors{"SIFT", 4};
 
     void generate()
     {
@@ -58,18 +56,19 @@ namespace {
       const auto theta = xyst[3](k);
 
       namespace halide = DO::Shakti::HalideBackend;
-      h(i, j, o, k) = sift.compute_bin_value(i, j, o, mag_fn_ext, ori_fn_ext,
-                                             x, y, s, scale_max, theta);
-
+      h(i, j, o, k) = sift.compute_bin_value(i, j, o,             //
+                                             mag_fn_ext,          //
+                                             ori_fn_ext,          //
+                                             x, y, s, scale_max,  //
+                                             theta);
       sift.normalize(h, i, j, o, k);
 
-      descriptors(i, j, o, k) = h_final(i, j, o, k);
+      descriptors(i, j, o, k) = h(i, j, o, k);
     }
 
     void schedule()
     {
       using namespace DO::Shakti::HalideBackend;
-
     }
   };
 

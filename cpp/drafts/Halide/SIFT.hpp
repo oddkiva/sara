@@ -60,50 +60,55 @@ namespace DO { namespace Shakti { namespace HalideBackend {
     kijo_tensor_buffer.set_host_dirty();
 
     // Run the algorithm.
-    shakti_sift_descriptor(mag_buffer, ori_buffer,  //
-                           x_buffer,                //
-                           y_buffer,                //
-                           scale_buffer,            //
-                           orientation_buffer,      //
-                           scale_upper_bound,       //
-                           kijo_tensor_buffer);     //
+    shakti_sift_descriptor(mag_buffer, ori_buffer,    //
+                           x_buffer,                  //
+                           y_buffer,                  //
+                           scale_buffer,              //
+                           orientation_buffer,        //
+                           scale_upper_bound,         //
+                           bin_length_in_scale_unit,  //
+                           N, O,                      //
+                           kijo_tensor_buffer);
 
     // Copy back to GPU.
     kijo_tensor_buffer.copy_to_host();
   }
 
   auto compute_sift_descriptors(                         //
-      Sara::ImagePyramic<float>& gradient_magnitudes,    //
-      Sara::ImagePyramic<float>& gradient_orientations,  //
+      Sara::ImagePyramid<float>& gradient_magnitudes,    //
+      Sara::ImagePyramid<float>& gradient_orientations,  //
       Pyramid<OrientedExtremumArray>& keypoints,         //
       float bin_length_in_scale_unit = 3.f,              //
       int N = 4,                                         //
       int O = 8)                                         //
   {
-    auto descriptors = Pyramid<Tensor_<float, 4>>{};
+    auto descriptors = Pyramid<Sara::Tensor_<float, 4>>{};
 
-    descriptors.scale_octave_pairs = keyoints.scale_octave_pairs;
+    descriptors.scale_octave_pairs = keypoints.scale_octave_pairs;
 
-    const auto& scale_factor = gradient_mag_pyramid.scale_geometric_factor();
+    const auto& scale_factor = gradient_magnitudes.scale_geometric_factor();
 
     for (const auto& so : keypoints.scale_octave_pairs)
     {
+      const auto& s = so.first.first;
+      const auto& o = so.first.second;
+
       auto kit = keypoints.dict.find({s, o});
       if (kit == keypoints.dict.end())
         continue;
 
-      const auto& k = kit->second;
+      auto& k = kit->second;
 
-      auto& d  = descriptors.dict[{s, o}];
-      d.resize(k.size(), N, N, O);
+      auto& d = descriptors.dict[{s, o}];
+      d.resize({k.size(), N, N, O});
 
-      compute_sift_descriptors(gradient_magnitudes.dict.at[{s, o}],    //
-                               gradient_orientations.dict.at[{s, o}],  //
-                               k.x, k.y, k.s, k.orientations,          //
-                               k.scale_quantized * scale_factor,       //
-                               d,                                      //
-                               bin_length_in_scale_unit,               //
-                               N, N, O);
+      compute_sift_descriptors(gradient_magnitudes(s, o),         //
+                               gradient_orientations(s, o),       //
+                               k.x, k.y, k.s, k.orientations,     //
+                               k.scale_quantized * scale_factor,  //
+                               d,                                 //
+                               bin_length_in_scale_unit,          //
+                               N, O);                             //
     }
 
     return descriptors;

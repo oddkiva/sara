@@ -95,7 +95,7 @@ shakti_halide_library_v2(
 
 # SIFT descriptors.
 shakti_halide_library_v2(
-  NAME shakti_sift_descriptors
+  NAME shakti_sift_descriptor
   SRCS SIFTGenerator.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
