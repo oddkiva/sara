@@ -106,7 +106,7 @@ namespace DO::Shakti::HalideBackend {
                                               ori + two_pi,  //
                                               ori);          //
     // Normalize in [0, 1].
-    const auto ori_01_normalized = (ori_in_0_2_pi) / two_pi;
+    const auto ori_01_normalized = ori_in_0_2_pi / two_pi;
 
     // Discretize the interval in [0, 2π[ in 36 smaller intervals centered in:
     // {  0 deg,         10 deg,         20 deg, ...,    350 deg }
