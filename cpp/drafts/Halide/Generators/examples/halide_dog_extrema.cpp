@@ -197,11 +197,9 @@ auto test_on_video()
   const auto video_filepath =
       "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4"s;
 #elif __APPLE__
-  // const auto video_filepath = "/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
-  const auto video_filepath = "/Users/david/Desktop/Datasets/humanising-autonomy/field.mp4"s;
+  const auto video_filepath = "/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
 #else
   const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
-  // const auto video_filepath = "/home/david/Desktop/Datasets/ha/barberX.mp4"s;
 #endif
 
   // Input and output from Sara.
@@ -209,7 +207,7 @@ auto test_on_video()
   auto frame = video_stream.frame();
   auto frame_gray32f = sara::Image<float>{frame.sizes()};
 
-  const auto scale_factor = 1;
+  const auto scale_factor = 2;
   auto frame_downsampled = sara::Image<float>{frame.sizes() / scale_factor};
 
   // Halide buffers.
@@ -225,7 +223,7 @@ auto test_on_video()
   sara::set_antialiasing();
 
   auto frames_read = 0;
-  auto skip = 1;
+  auto skip = 3;
 
   while (true)
   {
