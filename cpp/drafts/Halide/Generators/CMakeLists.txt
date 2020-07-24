@@ -91,9 +91,11 @@ shakti_halide_library_v2(
   NAME shakti_dominant_gradient_orientations
   SRCS DominantGradientOrientationsGenerator.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
-# STRANGE ERROR here:
-target_link_libraries(shakti_dominant_gradient_orientations.generator_library
-  PRIVATE dl)
+if (NOT APPLE)
+  # STRANGE ERROR here:
+  target_link_libraries(shakti_dominant_gradient_orientations.generator_library
+    PRIVATE dl)
+endif ()
 
 
 # SIFT descriptors.

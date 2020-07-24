@@ -1,4 +1,5 @@
-find_package(DO_Sara COMPONENTS Core Graphics ImageIO ImageProcessing REQUIRED)
+find_package(DO_Sara COMPONENTS Core DisjointSets Graphics ImageIO
+  ImageProcessing VideoIO REQUIRED)
 
 macro (sara_add_example example)
   add_executable(${example} ${example}.cpp)
