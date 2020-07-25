@@ -16,7 +16,6 @@
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
-#include <DO/Sara/DisjointSets/DisjointSets.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
 
@@ -24,184 +23,117 @@ using namespace std;
 using namespace DO::Sara;
 
 
-auto non_max_suppression(const ImageView<float>& grad_mag,
-                         const ImageView<float>& grad_ori, float hiThres,
-                         float loThres)
+auto to_map(const std::map<int, std::vector<Eigen::Vector2i>>& contours,
+            const Eigen::Vector2i& image_sizes)
 {
-  auto edges = Image<uint8_t>{grad_mag.sizes()};
-  edges.flat_array().fill(0);
-  for (auto y = 1; y < grad_mag.height() - 1; ++y)
+  auto labeled_edges = Image<int>{image_sizes};
+  labeled_edges.flat_array().fill(-1);
+  for (const auto& [label, points] : contours)
   {
-    for (auto x = 1; x < grad_mag.width() - 1; ++x)
-    {
-      const auto& grad_curr = grad_mag(x, y);
-      if (grad_curr < loThres)
-        continue;
-
-      const auto& theta = grad_ori(x, y);
-      const Vector2d p = Vector2i(x, y).cast<double>();
-      const Vector2d d = Vector2f{cos(theta), sin(theta)}.cast<double>();
-      const Vector2d p0 = p - d;
-      const Vector2d p2 = p + d;
-      const auto grad_prev = interpolate(grad_mag, p0);
-      const auto grad_next = interpolate(grad_mag, p2);
-
-      const auto is_max = grad_curr > grad_prev &&  //
-                          grad_curr > grad_next;
-      if (!is_max)
-        continue;
-
-      edges(x, y) = grad_curr > hiThres ? 255 : 128;
-    }
+    for (const auto& p : points)
+      labeled_edges(p) = label;
   }
-  return edges;
+  return labeled_edges;
 }
 
-auto hysteresis(ImageView<std::uint8_t>& edges)
+auto random_colors(const std::map<int, std::vector<Eigen::Vector2i>>& contours)
 {
-  auto visited = Image<std::uint8_t>{edges.sizes()};
-  visited.flat_array().fill(0);
-
-  std::queue<Eigen::Vector2i> queue;
-  for (auto y = 0; y < edges.height(); ++y)
-  {
-    for (auto x = 0; x < edges.width(); ++x)
-    {
-      if (edges(x, y) == 255)
-      {
-        queue.emplace(x, y);
-        visited(x, y) = 1;
-      }
-    }
-  }
-
-  const auto dir = std::array<Eigen::Vector2i, 8>{
-      Eigen::Vector2i{1, 0},  Eigen::Vector2i{1, 1},  Eigen::Vector2i{0, 1},
-      Eigen::Vector2i{-1, 1}, Eigen::Vector2i{-1, 0}, Eigen::Vector2i{-1, -1},
-      Eigen::Vector2i{0, -1}, Eigen::Vector2i{1, -1}};
-  while (!queue.empty())
-  {
-    const auto& p = queue.front();
-
-    // Promote a weak edge to a strong edge.
-    if (edges(p) != 255)
-      edges(p) = 255;
-
-    // Add nonvisited weak edges.
-    for (const auto& d : dir)
-    {
-      const Eigen::Vector2i n = p + d;
-      // Boundary conditions.
-      if (n.x() < 0 || n.x() >= edges.width() ||  //
-          n.y() < 0 || n.y() >= edges.height())
-        continue;
-
-      if (edges(n) == 128 and not visited(n))
-      {
-        visited(n) = 1;
-        queue.emplace(n);
-      }
-    }
-
-    queue.pop();
-  }
+  auto colors = std::map<int, Rgb8>{};
+  for (const auto& [label, _] : contours)
+    colors[label] = Rgb8(rand() % 255, rand() % 255, rand() % 255);
+  return colors;
 }
 
-
-auto connected_components(const ImageView<std::uint8_t>& edges)
+#ifdef HISTOGRAMS
+auto orientation_histogram(const std::vector<Eigen::Vector2i>& contour,  //
+                           const ImageView<float>& orientations,         //
+                           int radius = 5,                               //
+                           int O = 36)
 {
-  const auto index = [&edges](const Eigen::Vector2i& p) {
-    return p.y() * edges.width() + p.x();
-  };
+  const auto N = static_cast<int>(contour.size());
+  auto histograms = Tensor_<float, 2>{N, O};
+  histograms.flat_array().fill(0.f);
 
-  const auto is_edgel = [&edges](const Eigen::Vector2i& p) {
-    return edges(p) == 255;
-  };
+  const auto& r = radius;
 
-  auto ds = DisjointSets(edges.size());
-  auto visited = Image<std::uint8_t>{edges.sizes()};
-  visited.flat_array().fill(0);
-
-  // Collect the edgels and make as many sets as pixels.
-  std::queue<Eigen::Vector2i> q;
-  for (auto y = 0; y < edges.height(); ++y)
+  for (auto n = 0; n < histograms.size(0); ++n)
   {
-    for (auto x = 0; x < edges.width(); ++x)
+    const auto& p = contour[n];
+
+    // Loop over the pixels in the patch centered in p.
+    for (auto v = -r; v <= r; ++v)
     {
-      ds.make_set(index({x, y}));
-      if (is_edgel({x, y}))
-        q.emplace(x, y);
-    }
-  }
-
-  const auto dir = std::array<Eigen::Vector2i, 8>{
-      Eigen::Vector2i{1, 0},    //
-      Eigen::Vector2i{1, 1},    //
-      Eigen::Vector2i{0, 1},    //
-      Eigen::Vector2i{-1, 1},   //
-      Eigen::Vector2i{-1, 0},   //
-      Eigen::Vector2i{-1, -1},  //
-      Eigen::Vector2i{0, -1},   //
-      Eigen::Vector2i{1, -1}    //
-  };
-
-  while (!q.empty())
-  {
-    const auto& p = q.front();
-    visited(p) = 2; // 2 = visited
-
-    if (!is_edgel(p))
-      throw std::runtime_error{"NOT AN EDGEL!"};
-
-    // Find its corresponding node in the disjoint set.
-    const auto node_p = ds.node(index(p));
-    // draw_point(p.x(), p.y(), Red8);
-
-    // Add nonvisited weak edges.
-    for (const auto& d : dir)
-    {
-      const Eigen::Vector2i n = p + d;
-      // Boundary conditions.
-      if (n.x() < 0 || n.x() >= edges.width() ||  //
-          n.y() < 0 || n.y() >= edges.height())
-        continue;
-
-      // Make sure that the neighbor is an edgel.
-      if (!is_edgel(n))
-        continue;
-
-      // draw_point(n.x(), n.y(), Yellow8);
-
-      // Merge component of p and component of n.
-      const auto node_n = ds.node(index(n));
-      ds.join(node_p, node_n);
-
-      // Enqueue the neighbor n if it is not already enqueued
-      if (visited(n) == 0)
+      for (auto u = -r; u <= r; ++u)
       {
-        // Enqueue the neighbor.
-        q.emplace(n);
-        visited(n) = 1;  // 1 = enqueued
+        if (u == 0 && v == 0)
+          continue;
+
+        const auto delta = Eigen::Vector2i{u, v};
+        const Eigen::Vector2i n = p + delta;
+        if (n.x() < 0 || n.x() >= orientations.width() ||  //
+            n.y() < 0 || n.y() >= orientations.height())
+          continue;
+
+        auto ori = orientations(n);
+        if (ori < 0)
+          ori += ori + 2 * M_PI;
+
+        const auto ori_0O = (ori / 2 * M_PI) * O;
+        auto ori_intf = decltype(ori_0O){};
+        const auto ori_frac = std::modf(ori_0O, &ori_intf);
+
+        auto ori_0 = int(ori_intf);
+        auto ori_1 = ori_0 + 1;
+        if (ori_1 == O)
+          ori_1 = 0;
+
+        histograms({n, ori_0}) += (1 - ori_frac);
+        histograms({n, ori_1}) += ori_frac;
       }
     }
-
-    q.pop();
+    histograms[n].flat_array() /= histograms[n].flat_array().sum();
   }
 
-  auto contours = std::map<int, std::vector<Point2i>>{};
-  for (auto y = 0; y < edges.height();++y)
-  {
-    for (auto x = 0; x < edges.width();++x)
-    {
-      const auto p = Eigen::Vector2i{x, y};
-      const auto index_p = index(p);
-      if (is_edgel(p))
-        contours[ds.component(index_p)].push_back(p);
-    }
-  }
-
-  return contours;
+  return histograms;
 }
+
+auto orientation_histograms(
+    const std::map<int, std::vector<Eigen::Vector2i>>& contours,  //
+    const ImageView<float>& orientations,                         //
+    int radius = 5, int O = 36)
+{
+  auto histograms = std::map<int, Tensor_<float, 2>>{};
+  for (const auto& [label, points] : contours)
+    histograms[label] = orientation_histogram(points, orientations, radius, O);
+  return histograms;
+}
+#endif
+
+auto shape_statistics(const std::vector<Eigen::Vector2i>& points)
+{
+  auto pmat = Eigen::MatrixXf(2, points.size());
+  for (auto i = 0u; i < points.size(); ++i)
+    pmat.col(i) = points[i].cast<float>();
+
+  const auto X = pmat.row(0);
+  const auto Y = pmat.row(1);
+
+
+  const auto x_mean = X.array().sum() / points.size();
+  const auto y_mean = Y.array().sum() / points.size();
+
+  const auto x2_mean =
+      X.array().square().sum() / points.size() - std::pow(x_mean, 2);
+  const auto y2_mean =
+      Y.array().square().sum() / points.size() - std::pow(y_mean, 2);
+  const auto xy_mean =
+      (X.array() * Y.array()).sum() / points.size() - x_mean * y_mean;
+
+  auto statistics = Eigen::Matrix<float, 5, 1>{};
+  statistics << x_mean, y_mean, x2_mean, y2_mean, xy_mean;
+  return statistics;
+}
+
 
 auto test_on_image()
 {
@@ -224,24 +156,24 @@ auto test_on_image()
     const auto grad_ori = grad.cwise_transform(
         [](const auto& v) { return std::atan2(v.y(), v.x()); });
 
-    const auto hiThres = grad_mag.flat_array().maxCoeff() * 0.2;
-    const auto loThres = hiThres * 0.05;
+    const auto hi_thres = grad_mag.flat_array().maxCoeff() * 0.2;
+    const auto lo_thres = hi_thres * 0.05;
 
-    auto edges = non_max_suppression(grad_mag, grad_ori, hiThres, loThres);
+    auto edges = suppress_non_maximum_edgels(grad_mag, grad_ori,  //
+                                             hi_thres, lo_thres);
 
     hysteresis(edges);
 
     const auto contours = connected_components(edges);
 
+    const auto labeled_contours = to_map(contours, edges.sizes());
+    const auto colors = random_colors(contours);
+
     auto grouped_edgels = Image<Rgb8>{edges.sizes()};
     grouped_edgels.flat_array().fill(Black8);
-    for (const auto& c: contours)
-    {
-      const auto& points = c.second;
-      const auto color = Rgb8(rand() % 255, rand() % 255, rand() % 255);
+    for (const auto& [label, points] : contours)
       for (const auto& p : points)
-        grouped_edgels(p) = color;
-    }
+        grouped_edgels(p) = colors.at(label);
     display(grouped_edgels);
 
     millisleep(1);
@@ -262,8 +194,14 @@ auto test_on_video()
   const auto video_filepath =
       "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4"s;
 #elif __APPLE__
-  // const auto video_filepath = "/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
-  const auto video_filepath = "/Users/david/Desktop/Datasets/humanising-autonomy/field.mp4"s;
+  // const auto video_filepath =
+  // "/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
+  const auto video_filepath =
+      "/Users/david/Desktop/Datasets/humanising-autonomy/field.mp4"s;
+      //"/Users/david/Desktop/Datasets/humanising-autonomy/turn_bikes.mp4"s;
+      //"/Users/david/Desktop/Datasets/humanising-autonomy/toyota.mp4"s;
+      //"/Users/david/Desktop/Datasets/humanising-autonomy/barberX.mp4"s;
+      //"/Users/david/Desktop/Datasets/humanising-autonomy/pass_family.mp4"s;
 #else
   const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
 #endif
@@ -277,6 +215,10 @@ auto test_on_video()
   create_window(frame.sizes());
   set_antialiasing();
 
+  constexpr auto high_threshold_ratio = 5e-2f;
+  constexpr auto low_threshold_ratio = 2e-2f;
+  constexpr auto angular_threshold = 20. / 180.f * M_PI;
+
   while (true)
   {
     if (!video_stream.read())
@@ -285,34 +227,72 @@ auto test_on_video()
       break;
     }
 
-    convert(frame, frame_gray32f);
+    frame_gray32f = frame.convert<float>();
 
+    // Blur.
     inplace_deriche_blur(frame_gray32f, std::sqrt(std::pow(1.6f, 2) - 1));
 
-    const auto grad = gradient(frame_gray32f);
-    const auto grad_mag = grad.cwise_transform(  //
+    // Canny.
+    const auto& grad = gradient(frame_gray32f);
+    const auto& grad_mag = grad.cwise_transform(  //
         [](const auto& v) { return v.norm(); });
-    const auto grad_ori = grad.cwise_transform(
+    const auto& grad_ori = grad.cwise_transform(
         [](const auto& v) { return std::atan2(v.y(), v.x()); });
 
-    const auto hiThres = grad_mag.flat_array().maxCoeff() * 0.2;
-    const auto loThres = hiThres * 0.05;
+    const auto& grad_mag_max = grad_mag.flat_array().maxCoeff();
+    const auto& high_thres = grad_mag_max * high_threshold_ratio;
+    const auto& low_thres = grad_mag_max * low_threshold_ratio;
 
-    auto edges = non_max_suppression(grad_mag, grad_ori, hiThres, loThres);
-
+    auto edges = suppress_non_maximum_edgels(grad_mag, grad_ori,  //
+                                             high_thres, low_thres);
     hysteresis(edges);
 
+    // Group edgels by contours.
     const auto contours = connected_components(edges);
+    const auto lines = connected_components(edges, grad_ori, angular_threshold);
 
-    auto grouped_edgels = Image<Rgb8>{frame.sizes()};
-    //convert(frame_gray32f, grouped_edgels);
-    grouped_edgels.flat_array().fill(Black8);
-    for (const auto& c: contours)
+    const auto labeled_contours = to_map(contours, edges.sizes());
+    const auto labeled_lines = to_map(lines, edges.sizes());
+
+    const auto contour_colors = random_colors(contours);
+    const auto line_colors = random_colors(lines);
+
+    // Filter contours.
+    std::map<int, bool> is_good_contours;
+    for (const auto& [label, points] : contours)
     {
-      const auto& points = c.second;
-      const auto color = Rgb8(rand() % 255, rand() % 255, rand() % 255);
+      auto is_good = false;
+      for (const auto& p: points)
+      {
+        const auto& line_id = labeled_lines(p);
+
+        // A contour is good if it contains at least one line.
+        const auto is_line_element = line_id > 0;
+        if (!is_line_element)
+          continue;
+
+        // And the line must be long enough.
+        if (lines.at(line_id).size() < 20)
+          continue;
+
+        is_good = true;
+        break;
+      }
+
+      is_good_contours[label] = is_good;
+    }
+
+    // Display the good contours.
+    // auto grouped_edgels = Image<Rgb8>{edges.sizes()};
+    // grouped_edgels.flat_array().fill(Black8);
+    auto grouped_edgels = frame;
+    for (const auto& [label, points] : contours)
+    {
+      if (!is_good_contours.at(label))
+        continue;
+
       for (const auto& p : points)
-        grouped_edgels(p) = color;
+        grouped_edgels(p) = contour_colors.at(label);
     }
     display(grouped_edgels);
   }
@@ -323,3 +303,17 @@ GRAPHICS_MAIN()
   test_on_video();
   return 0;
 }
+
+#ifdef SHAPE_STATS
+      const auto statistics = shape_statistics(points);
+      const auto& x = statistics(0);
+      const auto& y = statistics(1);
+      const auto& dx2 = statistics(2);
+      const auto& dy2 = statistics(3);
+      const auto& dxy = statistics(4);
+      SARA_CHECK(x);
+      SARA_CHECK(y);
+      SARA_CHECK(dx2);
+      SARA_CHECK(dy2);
+      SARA_CHECK(dxy);
+#endif
