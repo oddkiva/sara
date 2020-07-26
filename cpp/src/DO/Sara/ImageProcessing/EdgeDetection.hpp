@@ -25,9 +25,9 @@
 
 namespace DO { namespace Sara {
 
-  auto suppress_non_maximum_edgels(const ImageView<float>& grad_mag,
-                                   const ImageView<float>& grad_ori,
-                                   float high_thres, float low_thres)
+  inline auto suppress_non_maximum_edgels(const ImageView<float>& grad_mag,
+                                          const ImageView<float>& grad_ori,
+                                          float high_thres, float low_thres)
   {
     auto edges = Image<uint8_t>{grad_mag.sizes()};
     edges.flat_array().fill(0);
@@ -58,7 +58,7 @@ namespace DO { namespace Sara {
     return edges;
   }
 
-  auto hysteresis(ImageView<std::uint8_t>& edges)
+  inline auto hysteresis(ImageView<std::uint8_t>& edges)
   {
     auto visited = Image<std::uint8_t>{edges.sizes()};
     visited.flat_array().fill(0);
@@ -108,7 +108,7 @@ namespace DO { namespace Sara {
     }
   }
 
-  auto connected_components(const ImageView<std::uint8_t>& edges)
+  inline auto connected_components(const ImageView<std::uint8_t>& edges)
   {
     const auto index = [&edges](const Eigen::Vector2i& p) {
       return p.y() * edges.width() + p.x();
@@ -201,9 +201,9 @@ namespace DO { namespace Sara {
     return contours;
   }
 
-  auto connected_components(const ImageView<std::uint8_t>& edges,
-                            const ImageView<float>& orientations,
-                            float angular_threshold)
+  inline auto connected_components(const ImageView<std::uint8_t>& edges,
+                                   const ImageView<float>& orientations,
+                                   float angular_threshold)
   {
     const auto index = [&edges](const Eigen::Vector2i& p) {
       return p.y() * edges.width() + p.x();
@@ -217,6 +217,7 @@ namespace DO { namespace Sara {
       const auto& o = orientations(p);
       return Eigen::Vector2f{cos(o), sin(o)};
     };
+
     const auto angular_distance = [](const auto& a, const auto& b) {
       const auto c = a.dot(b);
       const auto s = a.homogeneous().cross(b.homogeneous())(2);
@@ -313,9 +314,9 @@ namespace DO { namespace Sara {
     return contours;
   }
 
-  auto canny(const ImageView<float>& frame_gray32f,
-             float high_threshold_ratio = 2e-2f,
-             float low_threshold_ratio = 1e-2f)
+  inline auto canny(const ImageView<float>& frame_gray32f,
+                    float high_threshold_ratio = 2e-2f,
+                    float low_threshold_ratio = 1e-2f)
   {
     if (!(low_threshold_ratio < high_threshold_ratio &&
           high_threshold_ratio < 1))
@@ -338,8 +339,8 @@ namespace DO { namespace Sara {
     return edges;
   }
 
-  auto harris_cornerness_function(const ImageView<float>& I,
-                                  float kappa = 0.04f, float sigma = 3.f)
+  inline auto harris_cornerness_function(const ImageView<float>& I,
+                                         float kappa = 0.04f, float sigma = 3.f)
   {
     return I
         .compute<Gradient>()            //

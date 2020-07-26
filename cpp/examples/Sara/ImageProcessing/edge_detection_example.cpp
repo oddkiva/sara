@@ -219,6 +219,8 @@ auto test_on_video()
   constexpr auto low_threshold_ratio = 2e-2f;
   constexpr auto angular_threshold = 20. / 180.f * M_PI;
 
+  auto frames_read = 0;
+  const auto skip = 2;
   while (true)
   {
     if (!video_stream.read())
@@ -226,6 +228,9 @@ auto test_on_video()
       std::cout << "Reached the end of the video!" << std::endl;
       break;
     }
+    ++frames_read;
+    if (frames_read % (skip + 1) != 0)
+       continue;
 
     frame_gray32f = frame.convert<float>();
 
@@ -283,9 +288,9 @@ auto test_on_video()
     }
 
     // Display the good contours.
-    // auto grouped_edgels = Image<Rgb8>{edges.sizes()};
-    // grouped_edgels.flat_array().fill(Black8);
-    auto grouped_edgels = frame;
+    auto grouped_edgels = Image<Rgb8>{edges.sizes()};
+    grouped_edgels.flat_array().fill(Black8);
+    // auto grouped_edgels = frame;
     for (const auto& [label, points] : contours)
     {
       if (!is_good_contours.at(label))

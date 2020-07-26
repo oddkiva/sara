@@ -21,8 +21,9 @@
 
 namespace DO { namespace Sara {
 
-  auto color_watershed(const ImageView<Rgb8>& image,
-                       float color_threshold = std::sqrt(std::pow(2, 2) * 3))
+  inline auto color_watershed(                                //
+      const ImageView<Rgb8>& image,                           //
+      float color_threshold = std::sqrt(std::pow(2, 2) * 3))  //
   {
     const auto squared_color_threshold = std::pow(color_threshold, 2);
     const auto index = [&image](const Eigen::Vector2i& p) {
@@ -31,7 +32,7 @@ namespace DO { namespace Sara {
 
     auto ds = DisjointSets(image.size());
 
-    // Collect the edgels and make as many sets as pixels.
+    // Make as many sets as pixels.
     for (auto y = 0; y < image.height(); ++y)
       for (auto x = 0; x < image.width(); ++x)
         ds.make_set(index({x, y}));
@@ -43,7 +44,8 @@ namespace DO { namespace Sara {
         // Find its corresponding node in the disjoint set.
         const auto p = Eigen::Vector2i{x, y};
         const auto node_p = ds.node(index(p));
-        const Vector3f color_p = image(p).cast<float>();
+
+        const Vector3f& color_p = image(p).cast<float>();
 
         for (auto v = 0; v <= 1; ++v)
         {
@@ -52,20 +54,14 @@ namespace DO { namespace Sara {
             if (u == 0 && v == 0)
               continue;
 
-            const Eigen::Vector2i n = p + Eigen::Vector2i{u, v};
+            const Eigen::Vector2i& n = p + Eigen::Vector2i{u, v};
             // Boundary conditions.
             if (n.x() >= image.width() || n.y() >= image.height())
               continue;
 
-            const Vector3f color_n = image(n).cast<float>();
+            const Vector3f& color_n = image(n).cast<float>();
 
             const auto dist = (color_p - color_n).squaredNorm();
-            // SARA_CHECK(p.transpose());
-            // SARA_CHECK(n.transpose());
-            // SARA_CHECK(color_p);
-            // SARA_CHECK(color_n);
-            // SARA_CHECK(dist);
-            // SARA_CHECK(squared_color_threshold);
 
             // Merge component of p and component of n if their colors are
             // close.

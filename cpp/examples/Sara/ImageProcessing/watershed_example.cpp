@@ -86,11 +86,10 @@ GRAPHICS_MAIN()
     if (frames_read % (skip + 1) != 0)
        continue;
 
-    DO::Sara::reduce(frame, frame_downsampled);
+    reduce(frame, frame_downsampled);
 
     // Watershed.
     const auto regions = color_watershed(frame_downsampled, color_threshold);
-    SARA_CHECK(regions.size());
 
     // Display the good regions.
     const auto colors = mean_colors(regions, frame_downsampled);
