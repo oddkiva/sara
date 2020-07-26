@@ -14,8 +14,6 @@
 #include <algorithm>
 #include <cmath>
 
-#include <Eigen/Sparse>
-
 #include <DO/Sara/Core.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/VideoIO.hpp>
@@ -155,6 +153,7 @@ namespace DO::Shakti::HalideBackend {
       SARA_DEBUG << "Populating oriented extrema = " << timer.elapsed_ms()
                  << " ms" << std::endl;
 
+#ifdef DEBUG_ME
       timer.restart();
       pipeline.descriptors = compute_sift_descriptors(
           pipeline.gradient_pyramid[0],
@@ -165,6 +164,7 @@ namespace DO::Shakti::HalideBackend {
           params.O);
       SARA_DEBUG << "SIFT descriptors = " << timer.elapsed_ms()
                  << " ms" << std::endl;
+#endif
     }
   };
 

@@ -67,8 +67,6 @@ namespace DO::Shakti::HalideBackend {
     //! @brief Extremum types.
     std::vector<std::int8_t> type;
 
-    float scale_quantized;
-
     struct View
     {
       float& x;
@@ -221,21 +219,20 @@ namespace DO::Shakti::HalideBackend {
                                   const DominantOrientationMap& orientations)
   {
     auto oriented_extrema = OrientedExtremumArray{};
-    oriented_extrema.scale_quantized = extrema.scale_quantized;
 
-    for (auto e = 0u; e < extrema.size(); ++e)
+    for (auto i = 0u; i < extrema.size(); ++i)
     {
-      const auto ei = extrema[e];
-      const auto ois = orientations.dominant_orientations(e);
+      const auto& ei = extrema[i];
+      const auto& thetas = orientations.dominant_orientations(i);
 
-      for (const auto& oi : ois)
+      for (const auto& theta : thetas)
       {
         oriented_extrema.x.push_back(ei.x);
         oriented_extrema.y.push_back(ei.y);
         oriented_extrema.s.push_back(ei.s);
         oriented_extrema.type.push_back(ei.type);
         oriented_extrema.value.push_back(ei.value);
-        oriented_extrema.orientations.push_back(oi);
+        oriented_extrema.orientations.push_back(theta);
       }
     }
 

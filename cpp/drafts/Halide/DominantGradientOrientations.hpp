@@ -89,7 +89,6 @@ namespace DO { namespace Shakti { namespace HalideBackend {
       float peak_ratio_thres = 0.8f)                                   //
       -> void
   {
-    const auto& scale_factor = gradient_mag_pyramid.scale_geometric_factor();
     for (auto o = 0; o < gradient_mag_pyramid.num_octaves(); ++o)
     {
       const auto oct_scale = gradient_mag_pyramid.octave_scaling_factor(o);
@@ -100,16 +99,18 @@ namespace DO { namespace Shakti { namespace HalideBackend {
         if (extrema.size() == 0)
           continue;
 
+        const auto& scale_max = *std::max_element(extrema.s.begin(), extrema.s.end());
+
         auto& dom_ori = dominant_orientations.dict[{s - 1, o}];
         dom_ori.resize(static_cast<std::int32_t>(extrema.size()),  //
                        num_orientation_bins);                      //
 
-        dominant_gradient_orientations(              //
-            gradient_mag_pyramid(s, o),              //
-            gradient_ori_pyramid(s, o),              //
-            extrema.x, extrema.y, extrema.s,         //
-            extrema.scale_quantized * scale_factor,  //
-            dom_ori.peak_map,                        //
+        dominant_gradient_orientations(       //
+            gradient_mag_pyramid(s, o),       //
+            gradient_ori_pyramid(s, o),       //
+            extrema.x, extrema.y, extrema.s,  //
+            scale_max,                //
+            dom_ori.peak_map,                 //
             dom_ori.peak_residuals);
       }
     }

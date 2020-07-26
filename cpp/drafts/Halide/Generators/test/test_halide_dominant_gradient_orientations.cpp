@@ -372,8 +372,12 @@ BOOST_AUTO_TEST_CASE(check_halide_impl_with_cpu_impl)
                                            scale_multiplying_factor,    //
                                            peak_ratio_thres);           //
 
-    SARA_CHECK(peak_map.matrix());
-    SARA_CHECK(peak_residuals.matrix());
+    SARA_DEBUG << "peak_map =\n" << peak_map.matrix() << std::endl;
+    SARA_DEBUG << "peak_residuals =\n" << peak_residuals.matrix() << std::endl;
+    BOOST_CHECK_EQUAL(peak_map.matrix().row(0),
+                      peak_map.matrix().row(1));
+    BOOST_CHECK_EQUAL(peak_residuals.matrix().row(0),
+                      peak_residuals.matrix().row(1));
 
     for (auto o = 0; o < O; ++o)
     {
