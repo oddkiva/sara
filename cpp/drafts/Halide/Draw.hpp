@@ -92,7 +92,7 @@ auto draw_extrema(const halide::Pyramid<halide::OrientedExtremumArray>& extrema)
 
     for (auto i = 0u; i < extrema_so.x.size(); ++i)
     {
-      const auto c1 = extrema_so.type[i] == 1 ? sara::Cyan8 : sara::Magenta8;
+      const auto c1 = extrema_so.type[i] == 1 ? sara::Red8 : sara::Blue8;
 
       const auto x1 = extrema_so.x[i] * octave_scaling_factor;
       const auto y1 = extrema_so.y[i] * octave_scaling_factor;

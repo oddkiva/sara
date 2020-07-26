@@ -82,6 +82,13 @@ namespace DO::Shakti::HalideBackend {
       Pyramid<OrientedExtremumArray> oriented_extrema;
       // The SIFT descriptors.
       Pyramid<Sara::Tensor_<float, 4>> descriptors;
+
+      auto num_keypoints() const
+      {
+        return std::accumulate(
+            oriented_extrema.dict.begin(), oriented_extrema.dict.end(), 0ul,
+            [](auto val, const auto& kv) { return val + kv.second.size(); });
+      }
     };
 
     Sara::Timer timer;
@@ -173,13 +180,13 @@ auto test_on_image()
   auto image = sara::imread<float>(image_filepath);
 
   auto sift_extractor = halide::SIFTExtractor{};
-  sift_extractor(image);
+  auto timer = sara::Timer{};
 
-  const auto& extrema = sift_extractor.pipeline.extrema;
-  const auto num_keypoints = std::accumulate(
-      extrema.dict.begin(), extrema.dict.end(), 0,
-      [](auto val, const auto& kv) { return val + kv.second.size(); });
-  SARA_CHECK(num_keypoints);
+  timer.restart();
+  sift_extractor(image);
+  SARA_DEBUG << "Halide SIFT computation time: "  //
+             << timer.elapsed_ms() << " ms" << std::endl;
+  SARA_CHECK(sift_extractor.pipeline.num_keypoints());
 
   // Show the local extrema.
   sara::create_window(image.sizes());
@@ -215,8 +222,6 @@ auto test_on_video()
   auto buffer_gray32f = halide::as_runtime_buffer<float>(frame_gray32f);
 
   auto sift_extractor = halide::SIFTExtractor{};
-  auto compute_dog_extrema = sara::ComputeDoGExtrema{0};
-
 
   // Show the local extrema.
   sara::create_window(frame_downsampled.sizes());
@@ -279,6 +284,7 @@ auto test_on_video()
 
 GRAPHICS_MAIN()
 {
-  test_on_video();
+  test_on_image();
+  // test_on_video();
   return 0;
 }
