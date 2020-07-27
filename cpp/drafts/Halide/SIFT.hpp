@@ -15,7 +15,7 @@
 
 #include <DO/Sara/Core/Tensor.hpp>
 
-#include <drafts/Halide/ExtremaDataStructures.hpp>
+#include <drafts/Halide/ExtremumDataStructures.hpp>
 #include <drafts/Halide/Utilities.hpp>
 
 #include "shakti_sift_descriptor.h"

@@ -15,7 +15,7 @@
 
 #include <DO/Sara/Core/Tensor.hpp>
 
-#include <drafts/Halide/ExtremaDataStructures.hpp>
+#include <drafts/Halide/ExtremumDataStructures.hpp>
 #include <drafts/Halide/Utilities.hpp>
 
 #include "shakti_dominant_gradient_orientations.h"
@@ -109,7 +109,7 @@ namespace DO { namespace Shakti { namespace HalideBackend {
             gradient_mag_pyramid(s, o),       //
             gradient_ori_pyramid(s, o),       //
             extrema.x, extrema.y, extrema.s,  //
-            scale_max,                //
+            scale_max,                        //
             dom_ori.peak_map,                 //
             dom_ori.peak_residuals);
       }
