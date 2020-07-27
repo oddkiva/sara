@@ -28,15 +28,15 @@ namespace DO { namespace Sara {
                        .compute<SecondMomentMatrix>()
                        .compute<Gaussian>(sigma_I);
 
-    // Compute the cornerness function.
     auto cornerness = Image<float>{I.sizes()};
-    auto M_it = M.begin();
-    auto c_it= cornerness.begin();
-    for (; c_it != cornerness.end(); ++c_it, ++M_it)
-      *c_it = M_it->determinant() - kappa * pow(M_it->trace(), 2);
+    std::transform(M.begin(), M.end(), cornerness.begin(),
+                   [kappa](const auto& m) {
+                     return m.determinant() - kappa * pow(m.trace(), 2);
+                   });
 
-    // Normalize the cornerness function.
+    // Rescale the cornerness function.
     cornerness.flat_array() *= pow(sigma_D, 2);
+
     return cornerness;
   }
 

@@ -112,7 +112,8 @@ namespace DO { namespace Sara {
 
     if ((type == 1 && oldval <= newval) || (type == -1 && oldval >= newval))
     {
-      pos += h;
+      pos.head(2) += h.head(2);
+      pos(2) *= std::pow(I.scale_geometric_factor(), h(2));
       val = newval;
     }
     else

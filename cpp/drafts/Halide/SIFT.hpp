@@ -15,7 +15,7 @@
 
 #include <DO/Sara/Core/Tensor.hpp>
 
-#include <drafts/Halide/ExtremaDataStructures.hpp>
+#include <drafts/Halide/ExtremumDataStructures.hpp>
 #include <drafts/Halide/Utilities.hpp>
 
 #include "shakti_sift_descriptor.h"
@@ -98,17 +98,18 @@ namespace DO { namespace Shakti { namespace HalideBackend {
         continue;
 
       auto& k = kit->second;
+      const auto& scale_max = *std::max_element(k.s.begin(), k.s.end());
 
-      auto& d = descriptors.dict[{s, o}];
-      d.resize({static_cast<int>(k.size()), N, N, O});
+      auto& descriptors_so = descriptors.dict[{s, o}];
+      descriptors_so.resize({static_cast<int>(k.size()), N, N, O});
 
-      compute_sift_descriptors(gradient_magnitudes(s, o),         //
-                               gradient_orientations(s, o),       //
-                               k.x, k.y, k.s, k.orientations,     //
-                               k.scale_quantized * scale_factor,  //
-                               d,                                 //
-                               bin_length_in_scale_unit,          //
-                               N, O);                             //
+      compute_sift_descriptors(gradient_magnitudes(s, o),      //
+                               gradient_orientations(s, o),    //
+                               k.x, k.y, k.s, k.orientations,  //
+                               scale_max,                      //
+                               descriptors_so,                 //
+                               bin_length_in_scale_unit,       //
+                               N, O);                          //
     }
 
     return descriptors;

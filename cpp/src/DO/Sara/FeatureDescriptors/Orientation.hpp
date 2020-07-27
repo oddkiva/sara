@@ -130,19 +130,24 @@ namespace DO { namespace Sara {
       \f$[1/3, 1/3, 1/3]\f$.
    */
   template <typename T, int N>
-  void lowe_smooth_histogram(Array<T, N, 1>& orientation_histogram)
+  void lowe_smooth_histogram(Array<T, N, 1>& orientation_histogram,
+                             int num_iters = 6)
   {
-    for (int iter = 0; iter < 6; ++iter)
+    // Smooth in place: it works.
+    for (int iter = 0; iter < num_iters; ++iter)
     {
-      float first = orientation_histogram(0);
-      float prev = orientation_histogram(N-1);
-      for (int i = 0; i < N-1; ++i)
+      const auto first = orientation_histogram(0);
+      auto prev = orientation_histogram(N - 1);
+      for (int i = 0; i < N - 1; ++i)
       {
-        float val = (prev+orientation_histogram(i)+orientation_histogram(i+1))/3.f;
+        const auto val =
+            (prev + orientation_histogram(i) + orientation_histogram(i + 1)) /
+            3.f;
         prev = orientation_histogram(i);
         orientation_histogram(i) = val;
       }
-      orientation_histogram(N-1) = (prev+orientation_histogram(N-1)+first)/3.f;
+      orientation_histogram(N - 1) =
+          (prev + orientation_histogram(N - 1) + first) / 3.f;
     }
   }
 
@@ -174,25 +179,25 @@ namespace DO { namespace Sara {
   template <typename T, int N>
   T refine_peak(const Array<T, N, 1>& orientation_histogram, int i)
   {
-    T y0 = orientation_histogram( (i-1+N) % N );
-    T y1 = orientation_histogram( i );
-    T y2 = orientation_histogram( (i+1) % N );
+    const auto y0 = orientation_histogram((i - 1 + N) % N);
+    const auto y1 = orientation_histogram(i);
+    const auto y2 = orientation_histogram((i + 1) % N);
 
     // Denote the orientation histogram function by \f$f\f$.
     // perform a 2nd-order Taylor approximation:
     // \f$f(x+h) = f(x) + f'(x)h + f''(x) h^2/2\f$
     // We approximate \f$f'\f$ and \f$f''\f$ by finite difference.
-    T fprime = (y2-y0) / 2.f;
-    T fsecond = y0 - 2.f*y1 + y2;
+    const auto fprime = (y2 - y0) / 2.f;
+    const auto fsecond = y0 - 2.f * y1 + y2;
 
     // Maximize w.r.t. to \f$h\f$, derive the expression.
     // Thus \f$h = -f'(x)/f''(x)\f$.
-    T h = -fprime / fsecond;
+    const auto h = -fprime / fsecond;
 
     // Add the offset \f$h\f$ to get the refined orientation value.
     // Note that we also add the 0.5f offset, because samples are assumed taken
     // on the middle of the interval \f$[i, i+1)\f$.
-    return T(i)+T(0.5)+h;
+    return T(i) + T(0.5) + h;
   }
 
   //! @brief Helper functions.
@@ -202,7 +207,7 @@ namespace DO { namespace Sara {
   {
     std::vector<T> oriT(ori.size());
     for (size_t i = 0; i < ori.size(); ++i)
-      oriT[i] = refine_peak<T,N>(orientation_histogram, ori[i]);
+      oriT[i] = refine_peak<T, N>(orientation_histogram, ori[i]);
     return oriT;
   }
 

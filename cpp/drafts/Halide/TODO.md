@@ -17,5 +17,5 @@ Unit Tests
 - [x] Repeated box blur filters
 - [x] Orientation peak localization
 - [x] Orientation peak residual estimation
-- [ ] SIFT descriptor
+- [x] SIFT descriptor
       Compare with the initial CPU implementation.

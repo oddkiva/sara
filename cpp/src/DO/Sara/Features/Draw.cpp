@@ -10,17 +10,16 @@
 // ========================================================================== //
 
 
+#include <DO/Sara/Core/DebugUtilities.hpp>
 #include <DO/Sara/Features.hpp>
 #include <DO/Sara/Graphics.hpp>
-#include <DO/Sara/Core/DebugUtilities.hpp>
 
 using namespace std;
 
 
 namespace DO { namespace Sara {
 
-  void OERegion::draw(const Color3ub& color,
-                      float scale,
+  void OERegion::draw(const Color3ub& color, float scale,
                       const Point2f& offset) const
   {
     const auto& z = scale;
@@ -33,16 +32,24 @@ namespace DO { namespace Sara {
     // Eigenvalues are l1 and l2.
     const Vector2f radii{D.cwiseSqrt().cwiseInverse()};
 
-    const auto& a = radii(0);
-    const auto& b = radii(1);
+    // Caveat: the shape matrix is actually the scale matrix up to a factor
+    // sqrt(2).
+    //
+    // In slides:
+    //   http://www.cs.unc.edu/~lazebnik/spring11/lec08_blob.pdf
+    // the blob radius is the scale multiplied sqrt(2).
+    constexpr auto sqrt_two = static_cast<float>(M_SQRT2);
+    const auto a = radii(0) * sqrt_two;
+    const auto b = radii(1) * sqrt_two;
 
     // Orientation.
-    auto ellipse_ori = atan2(U(1,0), U(0,0));
+    const auto ori_degree = atan2(U(1, 0), U(0, 0)) *  //
+                            180 / static_cast<float>(M_PI);
 
     // Start and end points of orientation line.
-    Matrix2f L{affinity().block(0, 0, 2, 2)};
-    Vector2f p1{z * (center() + offset)};
-    Vector2f p2{p1 + z * L * Vector2f{1.f, 0.f}};
+    const Matrix2f& L = affinity().block(0, 0, 2, 2);
+    const Vector2f& p1 = z * (center() + offset);
+    const Vector2f& p2 = p1 + z * sqrt_two * L * Vector2f::UnitX();
 
     // Draw.
     if (z * a > 1.f && z * b > 1.f && (p1 - p2).squaredNorm() > 1.f)
@@ -50,24 +57,22 @@ namespace DO { namespace Sara {
       // Contour of orientation line.
       draw_line(p1, p2, Black8, 5);
       // Contour of ellipse.
-      draw_ellipse(p1, z * a, z * b, 180.f * ellipse_ori / float(M_PI), Black8,
-                   5);
+      draw_ellipse(p1, z * a, z * b, ori_degree, Black8, 5);
       // Fill-in of orientation line.
       draw_line(p1, p2, color, 3);
       // Fill-in of ellipse.
-      draw_ellipse(p1, z * a, z * b, 180.f * ellipse_ori / float(M_PI), color,
-                   3);
+      draw_ellipse(p1, z * a, z * b, ori_degree, color, 3);
     }
     else
     {
       const auto& z = scale;
       const auto cross_offset = 3.0f;
 
-      Vector2f p1 = z * (center() + offset);
-      Vector2f c1 = p1 - Vector2f{cross_offset, 0.f};
-      Vector2f c2 = p1 + Vector2f{cross_offset, 0.f};
-      Vector2f c3 = p1 - Vector2f{0.f, cross_offset};
-      Vector2f c4 = p1 + Vector2f{0.f, cross_offset};
+      const Vector2f& p1 = z * (center() + offset);
+      const Vector2f& c1 = p1 - cross_offset * Vector2f::UnitX();
+      const Vector2f& c2 = p1 + cross_offset * Vector2f::UnitX();
+      const Vector2f& c3 = p1 - cross_offset * Vector2f::UnitY();
+      const Vector2f& c4 = p1 + cross_offset * Vector2f::UnitY();
 
       draw_line(c1, c2, Black8, 5);
       draw_line(c3, c4, Black8, 5);
@@ -76,5 +81,4 @@ namespace DO { namespace Sara {
     }
   }
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara

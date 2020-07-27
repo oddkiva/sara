@@ -25,29 +25,31 @@ GRAPHICS_MAIN()
   load(I, src_path("../../datasets/ksmall.jpg"));
 
   Event ev;
-  do {
-    get_event(500,ev); // Wait an event (return if no event for 500ms)
-    switch (ev.type){
+  do
+  {
+    get_event(500, ev);  // Wait an event (return if no event for 500ms)
+    switch (ev.type)
+    {
     case NO_EVENT:
       break;
     case MOUSE_PRESSED_AND_MOVED:
       clear_window();
-      display(I, ev.mousePos-I.sizes()*3/8, 0.75);
+      display(I, ev.mousePos - I.sizes() * 3 / 8, 0.75);
       cout << "Mouse moved. Position = " << endl << ev.mousePos << endl;
       break;
     case KEY_PRESSED:
-      cout << "Key " << ev.key << " pressed"<< endl;
+      cout << "Key " << ev.key << " pressed" << endl;
       break;
     case KEY_RELEASED:
-      cout << "Key " << ev.key << " released"<< endl;
+      cout << "Key " << ev.key << " released" << endl;
       break;
     case MOUSE_PRESSED:
       clear_window();
-      display(I, ev.mousePos-I.sizes()*3/8, 0.75);
-      cout << "Button " << ev.buttons << " pressed"<< endl;
+      display(I, ev.mousePos - I.sizes() * 3 / 8, 0.75);
+      cout << "Button " << ev.buttons << " pressed" << endl;
       break;
     case MOUSE_RELEASED:
-      cout << "Button " << ev.buttons << " released"<< endl;
+      cout << "Button " << ev.buttons << " released" << endl;
       break;
     }
   } while (ev.type != KEY_PRESSED || ev.key != KEY_UP);

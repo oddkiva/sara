@@ -195,11 +195,15 @@ namespace DO { namespace Shakti { namespace HalideBackend {
       {
         // 1st pass: transpose and convolve the columns
         conv_y_t.compute_root();
-        conv_y_t.split(y, yo, yi, 8).parallel(yo).vectorize(x, 8);
+        conv_y_t.split(y, yo, yi, 8)
+            .parallel(yo)
+            .vectorize(x, 8, Halide::TailStrategy::GuardWithIf);
 
         // 2nd pass: transpose and convolve the rows.
         conv_y.compute_root();
-        conv_x.split(y, yo, yi, 8).parallel(yo).vectorize(x, 8);
+        conv_x.split(y, yo, yi, 8)
+            .parallel(yo)
+            .vectorize(x, 8, Halide::TailStrategy::GuardWithIf);
       }
     }
   };

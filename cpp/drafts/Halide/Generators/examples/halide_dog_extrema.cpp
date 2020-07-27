@@ -14,8 +14,6 @@
 #include <algorithm>
 #include <cmath>
 
-#include <Eigen/Sparse>
-
 #include <DO/Sara/Core.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/VideoIO.hpp>
@@ -82,6 +80,13 @@ namespace DO::Shakti::HalideBackend {
       Pyramid<OrientedExtremumArray> oriented_extrema;
       // The SIFT descriptors.
       Pyramid<Sara::Tensor_<float, 4>> descriptors;
+
+      auto num_keypoints() const
+      {
+        return std::accumulate(
+            oriented_extrema.dict.begin(), oriented_extrema.dict.end(), 0ul,
+            [](auto val, const auto& kv) { return val + kv.second.size(); });
+      }
     };
 
     Sara::Timer timer;
@@ -148,6 +153,7 @@ namespace DO::Shakti::HalideBackend {
       SARA_DEBUG << "Populating oriented extrema = " << timer.elapsed_ms()
                  << " ms" << std::endl;
 
+#ifdef DEBUG_ME
       timer.restart();
       pipeline.descriptors = compute_sift_descriptors(
           pipeline.gradient_pyramid[0],
@@ -158,6 +164,7 @@ namespace DO::Shakti::HalideBackend {
           params.O);
       SARA_DEBUG << "SIFT descriptors = " << timer.elapsed_ms()
                  << " ms" << std::endl;
+#endif
     }
   };
 
@@ -173,13 +180,13 @@ auto test_on_image()
   auto image = sara::imread<float>(image_filepath);
 
   auto sift_extractor = halide::SIFTExtractor{};
-  sift_extractor(image);
+  auto timer = sara::Timer{};
 
-  const auto& extrema = sift_extractor.pipeline.extrema;
-  const auto num_keypoints = std::accumulate(
-      extrema.dict.begin(), extrema.dict.end(), 0,
-      [](auto val, const auto& kv) { return val + kv.second.size(); });
-  SARA_CHECK(num_keypoints);
+  timer.restart();
+  sift_extractor(image);
+  SARA_DEBUG << "Halide SIFT computation time: "  //
+             << timer.elapsed_ms() << " ms" << std::endl;
+  SARA_CHECK(sift_extractor.pipeline.num_keypoints());
 
   // Show the local extrema.
   sara::create_window(image.sizes());
@@ -199,7 +206,8 @@ auto test_on_video()
 #elif __APPLE__
   const auto video_filepath = "/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
 #else
-  const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
+  // const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
+  const auto video_filepath = "/home/david/Desktop/Datasets/ha/barberX.mp4"s;
 #endif
 
   // Input and output from Sara.
@@ -216,13 +224,12 @@ auto test_on_video()
 
   auto sift_extractor = halide::SIFTExtractor{};
 
-
   // Show the local extrema.
   sara::create_window(frame_downsampled.sizes());
   sara::set_antialiasing();
 
   auto frames_read = 0;
-  auto skip = 3;
+  auto skip = 2;
 
   while (true)
   {
@@ -235,7 +242,7 @@ auto test_on_video()
     sara::toc("Video Decoding");
 
     ++frames_read;
-    if (frames_read % skip != 0)
+    if (frames_read % (skip + 1) != 0)
       continue;
 
     // Use parallelization and vectorization.
@@ -278,6 +285,7 @@ auto test_on_video()
 
 GRAPHICS_MAIN()
 {
+  // test_on_image();
   test_on_video();
   return 0;
 }

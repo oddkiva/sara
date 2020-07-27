@@ -3,7 +3,7 @@
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageProcessing/ImagePyramid.hpp>
 
-#include <drafts/Halide/ExtremaDataStructures.hpp>
+#include <drafts/Halide/ExtremumDataStructures.hpp>
 #include <drafts/Halide/Utilities.hpp>
 
 #include "shakti_halide_gray32f_to_rgb.h"
@@ -92,21 +92,22 @@ auto draw_extrema(const halide::Pyramid<halide::OrientedExtremumArray>& extrema)
 
     for (auto i = 0u; i < extrema_so.x.size(); ++i)
     {
-      const auto c1 = extrema_so.type[i] == 1 ? sara::Cyan8 : sara::Magenta8;
+      const auto color = extrema_so.type[i] == 1 ? sara::Red8 : sara::Blue8;
 
-      const auto x1 = extrema_so.x[i] * octave_scaling_factor;
-      const auto y1 = extrema_so.y[i] * octave_scaling_factor;
-      const auto& o1 = extrema_so.orientations[i];
-      const auto p1 = Eigen::Vector2f{x1, y1};
+      const auto x = extrema_so.x[i] * octave_scaling_factor;
+      const auto y = extrema_so.y[i] * octave_scaling_factor;
+      const auto& theta = extrema_so.orientations[i];
+      const auto& center = Eigen::Vector2f{x, y};
 
       // N.B.: the blob radius is the scale multiplied sqrt(2).
       // http://www.cs.unc.edu/~lazebnik/spring11/lec08_blob.pdf
       const auto r1 = extrema_so.s[i] * octave_scaling_factor * std::sqrt(2.f);
+      const auto& p1 = center;
+      const Eigen::Vector2f& p2 =
+          center + r1 * Eigen::Vector2f{cos(theta), sin(theta)};
 
-      const Eigen::Vector2f p2 = p1 + r1 * Eigen::Vector2f{cos(o), sin(o)};
-
-      sara::draw_line(p1, p2, c1, 2);
-      sara::draw_circle(x1, y1, r1, c1, 2 + 2);
+      sara::draw_line(p1, p2, color, 2);
+      sara::draw_circle(center, r1, color, 2 + 2);
     }
   }
 }

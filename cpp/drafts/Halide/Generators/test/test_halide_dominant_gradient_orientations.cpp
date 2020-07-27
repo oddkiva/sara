@@ -9,12 +9,13 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#define BOOST_TEST_MODULE "Halide Backend/Tiny Linear Algebra"
+#define BOOST_TEST_MODULE "Halide Backend/Dominant Gradient Orientations"
 
 #include <boost/test/unit_test.hpp>
 
 #include <DO/Sara/Core/Image.hpp>
 #include <DO/Sara/ImageProcessing.hpp>
+#include <DO/Sara/FeatureDescriptors.hpp>
 
 #include <drafts/Halide/Differential.hpp>
 #include <drafts/Halide/Components/DominantGradientOrientations.hpp>
@@ -98,6 +99,10 @@ BOOST_AUTO_TEST_CASE(test_box_blur)
   BOOST_CHECK_CLOSE(h_blurred(13, 0), 1. / 3., 1e-3f);
   BOOST_CHECK_CLOSE(h_blurred(14, 0), 1. / 3., 1e-3f);
   BOOST_CHECK_CLOSE(h_blurred(15, 0), 1. / 3., 1e-3f);
+
+  for (auto o = 0; o < O; ++o)
+    std::cout << h_blurred(o) << " ";
+  std::cout << std::endl;
 }
 
 BOOST_AUTO_TEST_CASE(test_histogram_of_gradients)
@@ -291,6 +296,94 @@ BOOST_AUTO_TEST_CASE(test_histogram_of_gradients)
       SARA_DEBUG << "o = " << oi << " peak_residual = " << peak_residuals(0, oi)
                  << std::endl;
       BOOST_CHECK_CLOSE(peak_residuals(0, oi), peak_residual_buffer(oi, 0), 1e-3f);
+    }
+  }
+}
+
+BOOST_AUTO_TEST_CASE(check_halide_impl_with_cpu_impl)
+{
+  auto image = make_corner_image();
+
+  // Calculate the image gradients in polar coordinates.
+  auto mag = sara::Image<float>{image.sizes()};
+  auto ori = sara::Image<float>{image.sizes()};
+  halide::polar_gradient_2d(image, mag, ori);
+
+  auto polar_grad = sara::Image<Eigen::Vector2f>{image.sizes()};
+  std::transform(mag.begin(), mag.end(), ori.begin(), polar_grad.begin(),
+                 [](const auto& mag, const auto& ori) {
+                   return Eigen::Vector2f{mag, ori};
+                 });
+
+  const auto x  = 5.f;
+  const auto y  = 5.f;
+
+  // The scale at which the keypoint is detected.
+  const auto scale_at_detection = 1.f;
+
+  // Maximum scale.
+  const auto scale_residual_max = std::pow(2.f, 1.f / 3.f);  // 1.25992...
+  const auto scale_max = scale_at_detection * scale_residual_max;
+
+  // Keypoint scale.
+  const auto scale_residual_exponent = 0.5f;             // Between 0 and 1
+  const auto scale = scale_at_detection *                //
+                     std::pow(scale_residual_max,        // Between 1 and ~1.26
+                              scale_residual_exponent);  // Here: ~1.12
+
+  constexpr auto O = 36;
+  constexpr auto num_orientation_bins = O;
+  constexpr auto gaussian_truncation_factor = 3.f;
+  constexpr auto scale_multiplying_factor = 1.5f;
+  constexpr auto peak_ratio_thres = 0.f;
+
+  // Run the original CPU implementation.
+  const auto compute_dominant_orientations =
+      sara::ComputeDominantOrientations{peak_ratio_thres,            //
+                                        gaussian_truncation_factor,  //
+                                        scale_multiplying_factor};
+  const auto h_cpu = compute_dominant_orientations(polar_grad, x, y, scale);
+  SARA_DEBUG << "h_cpu" << std::endl;
+  for (const auto& hi: h_cpu)
+    std::cout << "orientation = " << hi << " rad" << std::endl;
+  std::cout << std::endl;
+
+
+  // Run the Halide implementation.
+  {
+    auto x_vec = std::vector{x, x};
+    auto y_vec = std::vector{y, y};
+
+    auto scale_vec = std::vector<float>{scale, scale};
+
+    // Row-major tensors.
+    auto peak_map = sara::Tensor_<bool, 2>{2, O};
+    auto peak_residuals = sara::Tensor_<float, 2>{2, O};
+
+    halide::dominant_gradient_orientations(mag, ori,                    //
+                                           x_vec,                       //
+                                           y_vec,                       //
+                                           scale_vec,                   //
+                                           scale_max,                   //
+                                           peak_map,                    //
+                                           peak_residuals,              //
+                                           num_orientation_bins,        //
+                                           gaussian_truncation_factor,  //
+                                           scale_multiplying_factor,    //
+                                           peak_ratio_thres);           //
+
+    SARA_DEBUG << "peak_map =\n" << peak_map.matrix() << std::endl;
+    SARA_DEBUG << "peak_residuals =\n" << peak_residuals.matrix() << std::endl;
+    BOOST_CHECK_EQUAL(peak_map.matrix().row(0),
+                      peak_map.matrix().row(1));
+    BOOST_CHECK_EQUAL(peak_residuals.matrix().row(0),
+                      peak_residuals.matrix().row(1));
+
+    for (auto o = 0; o < O; ++o)
+    {
+      if (peak_map(0, o) == 1)
+        std::cout << "orientation = "
+                  << (o + peak_residuals(0, o)) / O * (2 * M_PI) << std::endl;
     }
   }
 }

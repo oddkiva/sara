@@ -31,13 +31,13 @@ namespace DO { namespace Sara {
     bool operator()(T val, int x, int y, const ImageView<T>& I,
                     bool compareWithCenter) const
     {
-      for (int v=-1; v <= 1; ++v)
+      for (int v = -1; v <= 1; ++v)
       {
-        for (int u=-1; u <= 1; ++u)
+        for (int u = -1; u <= 1; ++u)
         {
-          if ( u==0 && v==0 && !compareWithCenter )
+          if (u == 0 && v == 0 && !compareWithCenter)
             continue;
-          if ( !_compare(val,I(x+u,y+v)) )
+          if (!_compare(val, I(x + u, y + v)))
             return false;
         }
       }
@@ -66,9 +66,9 @@ namespace DO { namespace Sara {
     inline bool operator()(int x, int y, int s, int o,
                            const ImagePyramid<T, 2>& I) const
     {
-      return _compare(I(x,y,s,o), x, y, I(s-1,o), true ) &&
-             _compare(I(x,y,s,o), x, y, I(s  ,o), false) &&
-             _compare(I(x,y,s,o), x, y, I(s+1,o), true );
+      return _compare(I(x, y, s, o), x, y, I(s - 1, o), true) &&
+             _compare(I(x, y, s, o), x, y, I(s, o), false) &&
+             _compare(I(x, y, s, o), x, y, I(s + 1, o), true);
     }
 
     CompareWithNeighborhood3<Compare, T> _compare;
@@ -80,10 +80,10 @@ namespace DO { namespace Sara {
   {
     LocalExtremum<Compare, T> local_extremum;
     auto extrema = std::vector<Point2i>{};
-    for (int y = 1; y < I.height()-1; ++y)
-      for (int x = 1; x < I.width()-1; ++x)
-        if (local_extremum(x,y,I))
-          extrema.push_back(Point2i(x,y));
+    for (int y = 1; y < I.height() - 1; ++y)
+      for (int x = 1; x < I.width() - 1; ++x)
+        if (local_extremum(x, y, I))
+          extrema.push_back(Point2i(x, y));
     return extrema;
   }
 
@@ -94,10 +94,10 @@ namespace DO { namespace Sara {
   {
     LocalScaleSpaceExtremum<Compare, T> local_extremum;
     auto extrema = std::vector<Point2i>{};
-    for (int y = 1; y < I(s,o).height()-1; ++y)
-      for (int x = 1; x < I(s,o).width()-1; ++x)
-        if (local_extremum(x,y,s,o,I))
-          extrema.push_back(Point2i(x,y));
+    for (int y = 1; y < I(s, o).height() - 1; ++y)
+      for (int x = 1; x < I(s, o).width() - 1; ++x)
+        if (local_extremum(x, y, s, o, I))
+          extrema.push_back(Point2i(x, y));
     return extrema;
   }
 
