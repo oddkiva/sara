@@ -97,13 +97,14 @@ auto draw_extrema(const halide::Pyramid<halide::OrientedExtremumArray>& extrema)
       const auto x = extrema_so.x[i] * octave_scaling_factor;
       const auto y = extrema_so.y[i] * octave_scaling_factor;
       const auto& theta = extrema_so.orientations[i];
-      const auto center = Eigen::Vector2f{x, y};
+      const auto& center = Eigen::Vector2f{x, y};
 
       // N.B.: the blob radius is the scale multiplied sqrt(2).
       // http://www.cs.unc.edu/~lazebnik/spring11/lec08_blob.pdf
       const auto r1 = extrema_so.s[i] * octave_scaling_factor * std::sqrt(2.f);
       const auto& p1 = center;
-      const auto p2 = center + r1 * Eigen::Vector2f{cos(theta), sin(theta)};
+      const Eigen::Vector2f& p2 =
+          center + r1 * Eigen::Vector2f{cos(theta), sin(theta)};
 
       sara::draw_line(p1, p2, color, 2);
       sara::draw_circle(center, r1, color, 2 + 2);
