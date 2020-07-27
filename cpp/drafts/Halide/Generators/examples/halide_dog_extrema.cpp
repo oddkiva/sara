@@ -215,7 +215,6 @@ auto test_on_video()
   auto buffer_gray32f = halide::as_runtime_buffer<float>(frame_gray32f);
 
   auto sift_extractor = halide::SIFTExtractor{};
-  auto compute_dog_extrema = sara::ComputeDoGExtrema{0};
 
 
   // Show the local extrema.
