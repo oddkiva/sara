@@ -205,7 +205,8 @@ auto test_on_video()
 #elif __APPLE__
   const auto video_filepath = "/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
 #else
-  const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
+  // const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
+  const auto video_filepath = "/home/david/Desktop/Datasets/ha/barberX.mp4"s;
 #endif
 
   // Input and output from Sara.
@@ -227,7 +228,7 @@ auto test_on_video()
   sara::set_antialiasing();
 
   auto frames_read = 0;
-  auto skip = 3;
+  auto skip = 2;
 
   while (true)
   {
@@ -240,7 +241,7 @@ auto test_on_video()
     sara::toc("Video Decoding");
 
     ++frames_read;
-    if (frames_read % skip != 0)
+    if (frames_read % (skip + 1) != 0)
       continue;
 
     // Use parallelization and vectorization.
