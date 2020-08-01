@@ -169,12 +169,12 @@ auto test_on_image()
     const auto labeled_contours = to_map(contours, edges.sizes());
     const auto colors = random_colors(contours);
 
-    auto grouped_edgels = Image<Rgb8>{edges.sizes()};
-    grouped_edgels.flat_array().fill(Black8);
+    auto contour_map = Image<Rgb8>{edges.sizes()};
+    contour_map.flat_array().fill(Black8);
     for (const auto& [label, points] : contours)
       for (const auto& p : points)
-        grouped_edgels(p) = colors.at(label);
-    display(grouped_edgels);
+        contour_map(p) = colors.at(label);
+    display(contour_map);
 
     millisleep(1);
 
@@ -194,10 +194,10 @@ auto test_on_video()
   const auto video_filepath =
       "C:/Users/David/Desktop/david-archives/gopro-backup-2/GOPR0542.MP4"s;
 #elif __APPLE__
-  const auto video_filepath = "/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
-  // const auto video_filepath =
-  //     "/Users/david/Desktop/Datasets/videos/sample1.mp4"s;
-  //     //"/Users/david/Desktop/Datasets/videos/sample4.mp4"s;
+  // const auto video_filepath = "/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
+  const auto video_filepath =
+      //"/Users/david/Desktop/Datasets/videos/sample1.mp4"s;
+      "/Users/david/Desktop/Datasets/videos/sample4.mp4"s;
   //     //"/Users/david/Desktop/Datasets/videos/sample10.mp4"s;
 #else
   const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
@@ -251,13 +251,13 @@ auto test_on_video()
 
     // Group edgels by contours.
     const auto contours = connected_components(edges);
-    const auto lines = connected_components(edges, grad_ori, angular_threshold);
+    const auto curves = connected_components(edges, grad_ori, angular_threshold);
 
     const auto labeled_contours = to_map(contours, edges.sizes());
-    const auto labeled_lines = to_map(lines, edges.sizes());
+    const auto labeled_curves = to_map(curves, edges.sizes());
 
     const auto contour_colors = random_colors(contours);
-    const auto line_colors = random_colors(lines);
+    const auto curve_colors = random_colors(curves);
 
     // Filter contours.
     std::map<int, bool> is_good_contours;
@@ -266,15 +266,15 @@ auto test_on_video()
       auto is_good = false;
       for (const auto& p: points)
       {
-        const auto& line_id = labeled_lines(p);
+        const auto& curve_id = labeled_curves(p);
 
-        // A contour is good if it contains at least one line.
-        const auto is_line_element = line_id > 0;
-        if (!is_line_element)
+        // A contour is good if it contains at least one curve.
+        const auto is_curve_element = curve_id > 0;
+        if (!is_curve_element)
           continue;
 
-        // And the line must be long enough.
-        if (lines.at(line_id).size() < 20)
+        // And the curve must be long enough.
+        if (curves.at(curve_id).size() < 20)
           continue;
 
         is_good = true;
@@ -285,18 +285,31 @@ auto test_on_video()
     }
 
     // Display the good contours.
-    auto grouped_edgels = Image<Rgb8>{edges.sizes()};
-    grouped_edgels.flat_array().fill(Black8);
-    // auto grouped_edgels = frame;
+    auto contour_map = Image<Rgb8>{edges.sizes()};
+    contour_map.flat_array().fill(Black8);
+    // auto contour_map = frame;
     for (const auto& [label, points] : contours)
     {
       if (!is_good_contours.at(label))
         continue;
 
       for (const auto& p : points)
-        grouped_edgels(p) = contour_colors.at(label);
+        contour_map(p) = contour_colors.at(label);
     }
-    display(grouped_edgels);
+    // display(contour_map);
+
+    // Display the good contours.
+    auto curve_map = Image<Rgb8>{edges.sizes()};
+    curve_map.flat_array().fill(Black8);
+    for (const auto& [label, points] : curves)
+    {
+      if (points.size() < 10)
+        continue;
+
+      for (const auto& p : points)
+        curve_map(p) = curve_colors.at(label);
+    }
+    display(curve_map);
   }
 }
 

@@ -92,7 +92,7 @@ shakti_halide_library_v2(
   SRCS DominantGradientOrientationsGenerator.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 if (NOT APPLE)
-  # STRANGE ERROR here:
+  # Workaround with Linux...
   target_link_libraries(shakti_dominant_gradient_orientations.generator_library
     PRIVATE dl)
 endif ()
@@ -104,6 +104,11 @@ shakti_halide_library_v2(
   SRCS SIFTGenerator.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
+# SIFT descriptors.
+shakti_halide_library_v2(
+  NAME shakti_sift_descriptor_v2
+  SRCS SIFTGeneratorV2.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
 if (SARA_BUILD_SAMPLES)
   add_subdirectory(lessons)

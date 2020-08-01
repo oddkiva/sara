@@ -80,6 +80,7 @@ namespace DO::Shakti::HalideBackend {
       Pyramid<OrientedExtremumArray> oriented_extrema;
       // The SIFT descriptors.
       Pyramid<Sara::Tensor_<float, 4>> descriptors;
+      Pyramid<Sara::Tensor_<float, 2>> descriptors_v2;
 
       auto num_keypoints() const
       {
@@ -153,9 +154,8 @@ namespace DO::Shakti::HalideBackend {
       SARA_DEBUG << "Populating oriented extrema = " << timer.elapsed_ms()
                  << " ms" << std::endl;
 
-#ifdef DEBUG_ME
       timer.restart();
-      pipeline.descriptors = compute_sift_descriptors(
+      pipeline.descriptors_v2= v2::compute_sift_descriptors(
           pipeline.gradient_pyramid[0],
           pipeline.gradient_pyramid[1],
           pipeline.oriented_extrema,
@@ -164,7 +164,6 @@ namespace DO::Shakti::HalideBackend {
           params.O);
       SARA_DEBUG << "SIFT descriptors = " << timer.elapsed_ms()
                  << " ms" << std::endl;
-#endif
     }
   };
 
@@ -284,7 +283,7 @@ auto test_on_video()
 
 GRAPHICS_MAIN()
 {
-  test_on_image();
-  // test_on_video();
+  // test_on_image();
+  test_on_video();
   return 0;
 }

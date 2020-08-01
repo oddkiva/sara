@@ -52,7 +52,8 @@ namespace DO { namespace Sara {
 
     //! @brief Computes the SIFT descriptor for keypoint @f$ (x,y,\sigma,\theta) @f$.
     auto operator()(float x, float y, float sigma, float theta,
-                    const ImageView<Vector2f>& grad_polar_coords) const
+                    const ImageView<Vector2f>& grad_polar_coords,
+                    bool do_normalization = true) const
         -> descriptor_type
     {
       constexpr auto pi = static_cast<float>(M_PI);
@@ -78,16 +79,6 @@ namespace DO { namespace Sara {
       const int rounded_x = int_round(x);
       const int rounded_y = int_round(y);
 
-// #define DEBUG_SIFT
-#ifdef DEBUG_SIFT
-      auto mag_sum = 0.f;
-      auto ori_sum = 0.f;
-      auto ori_index_sum = 0.f;
-      auto weighted_mag_sum = 0.f;
-      auto weighted_ori_sum = 0.f;
-      auto weighted_ori_index_sum = 0.f;
-#endif
-
       for (auto v = -rounded_r; v <= rounded_r; ++v)
       {
         for (auto u = -rounded_r; u <= rounded_r; ++u)
@@ -109,13 +100,6 @@ namespace DO { namespace Sara {
           // far from the center.
           auto weight = exp(-pos.squaredNorm() / (2.f * pow(N / 2.f, 2)));
 
-#ifdef DEBUG_SIFT
-          mag_sum += grad_polar_coords(rounded_x + u, rounded_y + v)[0];
-          ori_sum += grad_polar_coords(rounded_x + u, rounded_y + v)[1] - theta;
-          weighted_mag_sum += weight * grad_polar_coords(rounded_x + u, rounded_y + v)[0];
-          weighted_ori_sum += weight * (grad_polar_coords(rounded_x + u, rounded_y + v)[1] - theta);
-#endif
-
           // Read the precomputed gradient (in polar coordinates).
           auto mag = grad_polar_coords(rounded_x + u, rounded_y + v)(0);
           auto ori = grad_polar_coords(rounded_x + u, rounded_y + v)(1) - theta;
@@ -123,11 +107,6 @@ namespace DO { namespace Sara {
           // Normalize the orientation.
           ori = ori < 0.f ? ori + 2.f * pi : ori;
           ori *= float(O) / (2.f * pi);
-
-#ifdef DEBUG_SIFT
-          ori_index_sum += ori;
-          weighted_ori_index_sum += weight * ori;
-#endif
 
           // Shift the coordinates to retrieve the "SIFT" coordinate system so
           // that $(x,y)$ is in $[-1, N]^2$.
@@ -141,24 +120,12 @@ namespace DO { namespace Sara {
           accumulate(h, pos, ori, weight, mag);
         }
       }
-#ifdef DEBUG_SIFT
-      // Everything is OK until here.
-      h.fill(grad_polar_coords(rounded_x, rounded_y)[0]);
-      h.fill(std::round(x));
-      h.fill(std::round(y));
-      h.fill(theta);
-      h.fill(sigma);
-      h.fill(l);
-      h.fill(mag_sum);
-      h.fill(ori_sum);
-      h.fill(weighted_mag_sum);
-      h.fill(weighted_ori_sum);
-      h.fill(ori_index_sum);
-      h.fill(weighted_ori_index_sum);
-      return h;
-#endif
-      normalize(h);
-      h = (h * 512.f).cwiseMin(Matrix<float, Dim, 1>::Ones() * 255.f);
+
+      if (do_normalization)
+      {
+        normalize(h);
+        h = (h * 512.f).cwiseMin(Matrix<float, Dim, 1>::Ones() * 255.f);
+      }
 
       return h;
 

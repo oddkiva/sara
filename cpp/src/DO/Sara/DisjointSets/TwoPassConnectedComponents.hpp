@@ -13,8 +13,6 @@
 
 #include <DO/Sara/Defines.hpp>
 
-#include <DO/Sara/DisjointSets/DisjointSets.hpp>
-
 
 namespace DO { namespace Sara {
 

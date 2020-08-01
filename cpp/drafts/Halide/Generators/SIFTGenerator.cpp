@@ -21,8 +21,10 @@ namespace {
   class SIFT : public Generator<SIFT>
   {
   public:
-    GeneratorParam<int> tile_o{"tile_x", 16};
-    GeneratorParam<int> tile_k{"tile_y", 16};
+    GeneratorParam<int> tile_k{"tile_k", 32};
+    GeneratorParam<int> tile_i{"tile_i", 4};
+    GeneratorParam<int> tile_j{"tile_j", 4};
+    GeneratorParam<int> tile_o{"tile_o", 8};
 
     // Input data.
     Input<Buffer<float>[2]> polar_gradient{"gradients", 2};
@@ -32,10 +34,11 @@ namespace {
     Input<std::int32_t> N{"N"};
     Input<std::int32_t> O{"O"};
 
-
-    Var i{"i"}, j{"j"}, o{"o"}, k{"k"};
-    Var io{"i"}, jo{"j"}, oo{"oo"}, ko{"ko"};
-    Var ii{"i"}, ji{"j"}, oi{"oi"}, ki{"ki"};
+    Var k{"k"}, ko{"ko"}, ki{"ki"};
+    Var i{"i"}, j{"j"}, o{"o"};
+    Var fused{"n"};
+    Var fused_outer{"no"};
+    Var fused_inner{"ni"};
 
     DO::Shakti::HalideBackend::SIFT sift;
 
@@ -56,19 +59,45 @@ namespace {
       const auto theta = xyst[3](k);
 
       namespace halide = DO::Shakti::HalideBackend;
-      h(o, j, i, k) = sift.compute_bin_value(i, j, o,             //
-                                             mag_fn_ext,          //
-                                             ori_fn_ext,          //
-                                             x, y, s, scale_max,  //
-                                             theta);
+      // TODO: normalize.
+      // h(o, j, i, k) = sift.compute_bin_value(i, j, o,             //
+      //                                        mag_fn_ext,          //
+      //                                        ori_fn_ext,          //
+      //                                        x, y, s, scale_max,  //
+      //                                        theta);
       // sift.normalize(h, i, j, o, k);
-
-      descriptors(o, j, i, k) = h(o, j, i, k);
+      // descriptors(o, j, i, k) = h(o, j, i, k);
+      descriptors(o, j, i, k) = sift.compute_bin_value(i, j, o,             //
+                                                       mag_fn_ext,          //
+                                                       ori_fn_ext,          //
+                                                       x, y, s, scale_max,  //
+                                                       theta);
     }
 
     void schedule()
     {
-      using namespace DO::Shakti::HalideBackend;
+      // // GPU schedule.
+      // if (get_target().has_gpu_feature())
+      // {
+      //   descriptors.gpu_tile(k, ko, ki, tile_k,
+      //                        Halide::TailStrategy::GuardWithIf);
+      // }
+
+      // // Hexagon schedule.
+      // else if (get_target().features_any_of({Target::HVX_64,
+      // Target::HVX_128}))
+      // {
+      //   throw std::runtime_error{"Schedule not yet implemented for
+      //   Hexagon!"};
+      // }
+
+      // // CPU schedule.
+      // else
+      {
+        // TODO: study https://halide-lang.org/tutorials/tutorial_lesson_18_parallel_associative_reductions.html
+        // And reapply this for dominant gradient orientations.
+        descriptors.parallel(k);
+      }
     }
   };
 

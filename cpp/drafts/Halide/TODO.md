@@ -18,4 +18,5 @@ Unit Tests
 - [x] Orientation peak localization
 - [x] Orientation peak residual estimation
 - [x] SIFT descriptor
-      Compare with the initial CPU implementation.
+      Compare with the initial CPU implementation (without normalization).
+- [x] SIFT descriptor normalization
