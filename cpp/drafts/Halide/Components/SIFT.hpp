@@ -132,21 +132,6 @@ namespace DO::Shakti::HalideBackend {
       auto wy = Halide::select(dy < 1, 1 - dy, 0);
       auto wo = Halide::select(dori < 1, 1 - dori, 0);
 
-#ifdef HALIDE_SIFT_OK
-      Halide::Expr magxy = grad_mag_fn(xi, yi);
-      return Halide::round(y);
-      return Halide::round(x);
-      return scale;
-      return theta;
-      return bin_length_in_pixels;
-      return Halide::sum(mag);
-      return Halide::sum(ori);
-      return Halide::sum(weight * mag);
-      return Halide::sum(weight * ori);
-      return Halide::sum(ori_index);
-      return Halide::sum(weight * ori_index);
-#endif
-
       return Halide::sum(wx * wy * wo * mag);
     }
 
