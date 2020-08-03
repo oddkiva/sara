@@ -154,6 +154,7 @@ namespace DO::Shakti::HalideBackend {
       SARA_DEBUG << "Populating oriented extrema = " << timer.elapsed_ms()
                  << " ms" << std::endl;
 
+#ifdef USE_SIFT
       timer.restart();
       pipeline.descriptors_v2= v2::compute_sift_descriptors(
           pipeline.gradient_pyramid[0],
@@ -164,6 +165,7 @@ namespace DO::Shakti::HalideBackend {
           params.O);
       SARA_DEBUG << "SIFT descriptors = " << timer.elapsed_ms()
                  << " ms" << std::endl;
+#endif
     }
   };
 
