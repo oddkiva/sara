@@ -110,6 +110,12 @@ shakti_halide_library_v2(
   SRCS SIFTGeneratorV2.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
+# SIFT descriptors.
+shakti_halide_library_v2(
+  NAME shakti_sift_descriptor_v3
+  SRCS SIFTGeneratorV3.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
 if (SARA_BUILD_SAMPLES)
   add_subdirectory(lessons)
   add_subdirectory(examples)

@@ -319,6 +319,7 @@ GRAPHICS_MAIN()
   return 0;
 }
 
+
 #ifdef SHAPE_STATS
       const auto statistics = shape_statistics(points);
       const auto& x = statistics(0);

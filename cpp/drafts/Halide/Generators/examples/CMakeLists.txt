@@ -87,6 +87,7 @@ target_link_libraries(halide_dog_extrema
   # SIFT descriptor.
   shakti_sift_descriptor
   shakti_sift_descriptor_v2
+  shakti_sift_descriptor_v3
   )
 set_property(TARGET halide_dog_extrema
   PROPERTY

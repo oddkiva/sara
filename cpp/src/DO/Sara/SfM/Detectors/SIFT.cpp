@@ -71,7 +71,7 @@ auto compute_sift_keypoints(const ImageView<float>& image)
   auto sift_description_time = timer.elapsed_ms();
   elapsed += sift_description_time;
   SARA_DEBUG << "description time = " << sift_description_time << " ms" << endl;
-  SARA_DEBUG << "sifts.size() = " << SIFTDescriptors.size() << endl;
+  SARA_DEBUG << "sifts.size() = " << SIFTDescriptors.sizes().transpose() << endl;
 
   // Summary in terms of computation time.
   SARA_DEBUG << "Total Detection/Description time" << endl;

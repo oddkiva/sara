@@ -20,9 +20,10 @@
 
 #include "shakti_sift_descriptor.h"
 #include "shakti_sift_descriptor_v2.h"
+#include "shakti_sift_descriptor_v3.h"
 
 
-namespace DO { namespace Shakti { namespace HalideBackend {
+namespace DO::Shakti::HalideBackend {
 
   auto compute_sift_descriptors(                      //
       Sara::ImageView<float>& gradient_magnitudes,    //
@@ -117,6 +118,7 @@ namespace DO { namespace Shakti { namespace HalideBackend {
   }
 
   namespace v2 {
+
     auto compute_sift_descriptors(                      //
         Sara::ImageView<float>& gradient_magnitudes,    //
         Sara::ImageView<float>& gradient_orientations,  //
@@ -154,13 +156,13 @@ namespace DO { namespace Shakti { namespace HalideBackend {
       sift_tensor_buffer.set_host_dirty();
 
       // Run the algorithm.
-      shakti_sift_descriptor_v2(mag_buffer, ori_buffer,    //
-                                x_buffer,                  //
-                                y_buffer,                  //
-                                scale_buffer,              //
-                                orientation_buffer,        //
-                                scale_upper_bound,         //
-                                N, O,                      //
+      shakti_sift_descriptor_v2(mag_buffer, ori_buffer,  //
+                                x_buffer,                //
+                                y_buffer,                //
+                                scale_buffer,            //
+                                orientation_buffer,      //
+                                scale_upper_bound,       //
+                                N, O,                    //
                                 sift_tensor_buffer);
 
       // Copy back to GPU.
@@ -207,5 +209,102 @@ namespace DO { namespace Shakti { namespace HalideBackend {
 
       return descriptors;
     }
+
   }  // namespace v2
-}}}  // namespace DO::Shakti::HalideBackend
+
+  namespace v3 {
+
+    auto compute_sift_descriptors(                      //
+        Sara::ImageView<float>& gradient_magnitudes,    //
+        Sara::ImageView<float>& gradient_orientations,  //
+        std::vector<float>& x,                          //
+        std::vector<float>& y,                          //
+        std::vector<float>& scale,                      //
+        std::vector<float>& orientation,                //
+        float scale_upper_bound,                        //
+        sara::Tensor_<float, 3>& sifts,                 //
+        float bin_length_in_scale_unit = 3.f,           //
+        int N = 4,                                      //
+        int O = 8)                                      //
+        -> void
+    {
+      // Input buffers.
+      auto mag_buffer = as_runtime_buffer(gradient_magnitudes);
+      auto ori_buffer = as_runtime_buffer(gradient_orientations);
+      auto x_buffer = as_runtime_buffer(x);
+      auto y_buffer = as_runtime_buffer(y);
+      auto scale_buffer = as_runtime_buffer(scale);
+      auto orientation_buffer = as_runtime_buffer(orientation);
+
+      //  Output buffers.
+      auto sift_tensor_buffer = as_runtime_buffer(sifts);
+
+      // Input buffer to GPU.
+      mag_buffer.set_host_dirty();
+      ori_buffer.set_host_dirty();
+      x_buffer.set_host_dirty();
+      y_buffer.set_host_dirty();
+      scale_buffer.set_host_dirty();
+      orientation_buffer.set_host_dirty();
+
+      // Output buffer to GPU.
+      sift_tensor_buffer.set_host_dirty();
+
+      // Run the algorithm.
+      shakti_sift_descriptor_v3(mag_buffer, ori_buffer,  //
+                                x_buffer,                //
+                                y_buffer,                //
+                                scale_buffer,            //
+                                orientation_buffer,      //
+                                scale_upper_bound,       //
+                                N, O,                    //
+                                sift_tensor_buffer);
+
+      // Copy back to GPU.
+      sift_tensor_buffer.copy_to_host();
+    }
+
+    auto compute_sift_descriptors(                         //
+        Sara::ImagePyramid<float>& gradient_magnitudes,    //
+        Sara::ImagePyramid<float>& gradient_orientations,  //
+        Pyramid<OrientedExtremumArray>& keypoints,         //
+        float bin_length_in_scale_unit = 3.f,              //
+        int N = 4,                                         //
+        int O = 8)                                         //
+    {
+      auto descriptors = Pyramid<Sara::Tensor_<float, 3>>{};
+
+      descriptors.scale_octave_pairs = keypoints.scale_octave_pairs;
+
+      const auto& scale_factor = gradient_magnitudes.scale_geometric_factor();
+
+      for (const auto& so : keypoints.scale_octave_pairs)
+      {
+        const auto& s = so.first.first;
+        const auto& o = so.first.second;
+
+        auto kit = keypoints.dict.find({s, o});
+        if (kit == keypoints.dict.end())
+          continue;
+
+        auto& k = kit->second;
+        const auto& scale_max = *std::max_element(k.s.begin(), k.s.end());
+
+        auto& descriptors_so = descriptors.dict[{s, o}];
+        descriptors_so.resize({static_cast<int>(k.size()), N * N, O});
+
+        v3::compute_sift_descriptors(gradient_magnitudes(s, o),      //
+                                     gradient_orientations(s, o),    //
+                                     k.x, k.y, k.s, k.orientations,  //
+                                     scale_max,                      //
+                                     descriptors_so,                 //
+                                     bin_length_in_scale_unit,       //
+                                     N, O);                          //
+      }
+
+      return descriptors;
+    }
+
+  }  // namespace v3
+
+}  // namespace DO::Shakti::HalideBackend

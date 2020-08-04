@@ -48,7 +48,7 @@ GRAPHICS_MAIN()
   print_stage("Removing existing redundancies");
   remove_redundant_features(features, descriptors);
   SARA_CHECK(features.size());
-  SARA_CHECK(descriptors.size());
+  SARA_CHECK(descriptors.sizes().transpose());
 
   // Check the features visually.
   print_stage("Draw features");
