@@ -230,7 +230,7 @@ auto test_on_video()
   sara::set_antialiasing();
 
   auto frames_read = 0;
-  auto skip = 2;
+  auto skip = 0;
 
   while (true)
   {

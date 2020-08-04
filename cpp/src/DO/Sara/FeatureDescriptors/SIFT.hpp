@@ -85,28 +85,25 @@ namespace DO { namespace Sara {
         {
           // Retrieve the coordinates in the normalized patch coordinate frame.
           auto pos = Vector2f{T * Vector2f(u, v)};
-          // subpixel correction?
-          /*
-           * pos.x() -= (x - rounded_x);
-           * pos.y() -= (y - rounded_y);
-           */
 
           // Boundary check.
           if (rounded_x + u < 0 || rounded_x + u >= grad_polar_coords.width() ||
               rounded_y + v < 0 || rounded_y + v >= grad_polar_coords.height())
             continue;
 
-          // Compute the Gaussian weight which gives less emphasis to gradient
-          // far from the center.
-          auto weight = exp(-pos.squaredNorm() / (2.f * pow(N / 2.f, 2)));
+          // Compute the Gaussian weight which gives less emphasis to gradients
+          // further from the keypoint center.
+          const auto weight = exp(-pos.squaredNorm() / (2.f * pow(N / 2.f, 2)));
 
           // Read the precomputed gradient (in polar coordinates).
-          auto mag = grad_polar_coords(rounded_x + u, rounded_y + v)(0);
+          const auto& mag = grad_polar_coords(rounded_x + u, rounded_y + v)(0);
+          // Notice here the reoriented gradient orientation w.r.t. the dominant
+          // gradient orientation.
           auto ori = grad_polar_coords(rounded_x + u, rounded_y + v)(1) - theta;
 
-          // Normalize the orientation.
+          // Rescale the orientation to the interval [0, O[.
           ori = ori < 0.f ? ori + 2.f * pi : ori;
-          ori *= float(O) / (2.f * pi);
+          ori *= static_cast<float>(O) / (2.f * pi);
 
           // Shift the coordinates to retrieve the "SIFT" coordinate system so
           // that $(x,y)$ is in $[-1, N]^2$.
