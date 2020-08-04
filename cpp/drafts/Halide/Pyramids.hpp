@@ -32,7 +32,8 @@ namespace DO { namespace Shakti { namespace HalideBackend {
   //! Computes a pyramid of Gaussians.
   inline auto gaussian_pyramid(
       Sara::ImageView<float>& image,
-      const Sara::ImagePyramidParams& params = Sara::ImagePyramidParams())
+      const Sara::ImagePyramidParams& params = Sara::ImagePyramidParams(),
+      int gaussian_truncation_factor = 4)
       -> Sara::ImagePyramid<float>
   {
     // Resize the image with the appropriate factor.
@@ -70,7 +71,7 @@ namespace DO { namespace Shakti { namespace HalideBackend {
                                    scale_camera * scale_camera);
       auto image_start_blurred = image_start;
       Shakti::HalideBackend::gaussian_convolution(
-          image_start, image_start_blurred, sigma, 4);
+          image_start, image_start_blurred, sigma, gaussian_truncation_factor);
       image_start.swap(image_start_blurred);
 #ifdef DEBUG
       Sara::toc("Blur to initial scale of the pyramid");
@@ -130,13 +131,13 @@ namespace DO { namespace Shakti { namespace HalideBackend {
       {
         G(s, o).resize(G(0, o).sizes());
         Sara::tic();
-        const auto sigma =
-            sqrt(k * k * sigma_s_1 * sigma_s_1 - sigma_s_1 * sigma_s_1);
-        Shakti::HalideBackend::gaussian_convolution(G(s - 1, o), G(s, o), sigma, 4);
+        const auto sigma = sigma_s_1 * sqrt(k * k - 1);
+        Shakti::HalideBackend::gaussian_convolution(G(s - 1, o), G(s, o), sigma,
+                                                    gaussian_truncation_factor);
         sigma_s_1 *= k;
 #ifdef DEBUG
         Sara::toc(Sara::format("Convolve (s=%d, o=%d) and kernel sizes = %d", s,
-                               o, int(2 * sigma * 4 + 1)));
+                               o, int(2 * sigma * gaussian_truncation_factor + 1)));
 #endif
       }
     }

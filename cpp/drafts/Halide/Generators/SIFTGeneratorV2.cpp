@@ -52,7 +52,7 @@ namespace {
 
       namespace halide = DO::Shakti::HalideBackend;
       descriptors(ijo, k) = 0.f;
-      sift.compute_as_histogram(descriptors,                 //
+      sift.accumulate_histogram(descriptors,                 //
                                 k,                           //
                                 mag_fn_ext, ori_fn_ext,      //
                                 x, y, s, scale_max, theta);  //

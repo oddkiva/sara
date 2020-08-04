@@ -30,10 +30,17 @@ namespace DO::Shakti::HalideBackend {
     // Each image has a resolution scale (in pixels) associated to it.
     float scale_upper_bound;
 
+    // Radius of the whole image patch.
     auto patch_radius(const Halide::Expr& scale_upper_bound) const
     {
       return bin_length_in_scale_unit * scale_upper_bound *  //
              (N + 1) / 2.f * std::sqrt(2.f);
+    }
+
+    // Radius for each image sub-patch (i, j).
+    auto subpatch_radius(const Halide::Expr& scale_upper_bound) const
+    {
+      return bin_length_in_scale_unit * scale_upper_bound * std::sqrt(2.f);
     }
 
     auto reduction_domain(const Halide::Expr& scale,
@@ -55,6 +62,25 @@ namespace DO::Shakti::HalideBackend {
       return r;
     }
 
+    auto subpatch_reduction_domain(const Halide::Expr& scale,
+                                   const Halide::Expr& scale_max) const
+    {
+      // Calculate the radius upper-bound.
+      const auto r_max =
+          Halide::cast<std::int32_t>(Halide::round(subpatch_radius(scale_max)));
+      // Calculate the radius of the actual patch.
+      const auto r_actual =
+          Halide::cast<std::int32_t>(Halide::round(subpatch_radius(scale)));
+
+      // Define the reduction domain.
+      auto r = Halide::RDom(-r_max, 2 * r_max + 1, -r_max, 2 * r_max + 1);
+      // The actual shape of the reduction domain is:
+      r.where(Halide::abs(r.x) < r_actual &&  //
+              Halide::abs(r.y) < r_actual);
+
+      return r;
+    }
+
     auto compute_bin_value(const Halide::Var& i,             //
                            const Halide::Var& j,             //
                            const Halide::Var& o,             //
@@ -66,18 +92,8 @@ namespace DO::Shakti::HalideBackend {
                            const Halide::Expr& scale_max,    //
                            const Halide::Expr& theta) const  //
     {
-      // Calculate the radius upper-bound.
-      const auto r_max =
-          Halide::cast<std::int32_t>(Halide::round(patch_radius(scale_max)));
-      // Calculate the radius of the actual patch.
-      const auto r_actual =
-          Halide::cast<std::int32_t>(Halide::round(patch_radius(scale)));
-
       // Define the reduction domain.
-      auto r = Halide::RDom(-r_max, 2 * r_max + 1, -r_max, 2 * r_max + 1);
-      // The actual shape of the reduction domain is:
-      r.where(Halide::abs(r.x) < r_actual &&  //
-              Halide::abs(r.y) < r_actual);
+      auto r = reduction_domain(scale, scale_max);
 
       // The gradient magnitude is:
       const auto xi = Halide::cast<std::int32_t>(Halide::round(x));
@@ -135,8 +151,90 @@ namespace DO::Shakti::HalideBackend {
       return Halide::sum(wx * wy * wo * mag);
     }
 
+    // Calculate the value of the histogram bin (i, j, o).
+    auto compute_bin_value_v2(const Halide::Var& i,             //
+                              const Halide::Var& j,             //
+                              const Halide::Var& o,             //
+                              const Halide::Func& grad_mag_fn,  //
+                              const Halide::Func& grad_ori_fn,  //
+                              const Halide::Expr& x,            //
+                              const Halide::Expr& y,            //
+                              const Halide::Expr& scale,        //
+                              const Halide::Expr& scale_max,    //
+                              const Halide::Expr& theta) const  //
+    {
+      // Define the reduction domain of the subpatch (i, j).
+      auto r = subpatch_reduction_domain(scale, scale_max);
+
+      // Calculate the coordinates of the patch center (i, j).
+      //   0        1        2        3
+      //  -2       -1        0        1
+      // [-2, -1] [-1, -0] [+0, +1] [+1, +2]
+      //  -1.5     -0.5     +0.5     +1.5
+      const Halide::Expr bin_length_in_pixels =
+          bin_length_in_scale_unit * scale;
+      const auto dx_ij = cos(theta) * bin_length_in_pixels *
+                         (Halide::cast<float>(j) - N / 2.f + 0.5f);
+      const auto dy_ij = sin(theta) * bin_length_in_pixels *
+                         (Halide::cast<float>(i) - N / 2.f + 0.5f);
+
+      // The gradient magnitude is:
+      const auto x_ij = Halide::cast<std::int32_t>(Halide::round(x + dx_ij));
+      const auto y_ij = Halide::cast<std::int32_t>(Halide::round(y + dy_ij));
+      const auto mag = grad_mag_fn(x_ij + r.x, y_ij + r.y);
+
+      // The orientation in the reoriented patch is:
+      const auto ori_shifted = grad_ori_fn(x_ij + r.x, y_ij + r.y) - theta;
+      // We have:
+      // -π < ori < π
+      // -π < -theta < π
+      // -2π < ori - theta < 2π
+      // So we make sure that the orientation is [0, 2π[ as follows:
+      const auto ori = Halide::select(ori_shifted < 0,       //
+                                      ori_shifted + two_pi,  //
+                                      ori_shifted);          //
+      const auto ori_normalized = ori / two_pi;
+      const auto ori_index = ori_normalized * O;
+
+      // For each point of the patch, i.e.:
+      auto p = Vector2{};
+      p(0) = x_ij + Halide::cast<float>(r.x) - x;
+      p(1) = y_ij + Halide::cast<float>(r.y) - y;
+
+      // Define the patch normalization transform.
+      auto T = Matrix2{};
+      T(0, 0) = Halide::cos(theta);  T(0, 1) = Halide::sin(theta);
+      T(1, 0) = -Halide::sin(theta); T(1, 1) = Halide::cos(theta);
+      T /= bin_length_in_pixels;
+
+      // Calculate the coordinates of the gradient in the reoriented normalized
+      // patch.
+      const auto Tp = T * p;  // 1. Apply the patch normalization transform.
+
+      // The weight of this gradient is:
+      const auto weight = Halide::exp(-squared_norm(Tp) /  //
+                                      (2 * Halide::pow(N / 2.f, 2)));
+
+      auto Tp2 = Vector2{};   // 2. Find out which bin (i, j) it belongs to.
+      Tp2(0) = Tp(0) + N / 2.f - 0.5f;
+      Tp2(1) = Tp(1) + N / 2.f - 0.5f;
+
+      // Now the accumulation rule is based on trilinear interpolation:
+      //
+      // First calculate the absolute distance to the bin (i, j, o).
+      auto dx = Halide::abs(Halide::cast<float>(j) - Tp2(0));
+      auto dy = Halide::abs(Halide::cast<float>(i) - Tp2(1));
+      auto dori = Halide::abs(Halide::cast<float>(o) - ori_index);
+      // Accumulation rule based on trilinear interpolation.
+      auto wx = Halide::select(dx < 1, 1 - dx, 0);
+      auto wy = Halide::select(dy < 1, 1 - dy, 0);
+      auto wo = Halide::select(dori < 1, 1 - dori, 0);
+
+      return Halide::sum(wx * wy * wo * mag);
+    }
+
     template <typename FuncOrBuffer>
-    auto compute_as_histogram(FuncOrBuffer& h,                  //
+    auto accumulate_histogram(FuncOrBuffer& h,                  //
                               Halide::Var& k,                   //
                               const Halide::Func& grad_mag_fn,  //
                               const Halide::Func& grad_ori_fn,  //
@@ -202,7 +300,6 @@ namespace DO::Shakti::HalideBackend {
       const auto j1 = Halide::clamp(j_int + 1, 0, N - 1);
       const auto o1 = select(o0 == O - 1, 0, o0 + 1);
 
-
       // Now the accumulation rule is based on trilinear interpolation:
       //
       // First calculate the absolute distance to the bin (i, j, o).
@@ -236,6 +333,109 @@ namespace DO::Shakti::HalideBackend {
 
       h(at(i1, j1, o0), k) += wy1 * wx1 * wo0 * weight * mag;
       h(at(i1, j1, o1), k) += wy1 * wx1 * wo1 * weight * mag;
+    }
+
+    template <typename FuncOrBuffer>
+    auto accumulate_subhistogram(FuncOrBuffer& h,                  //
+                                 Halide::Var& ji,                  //
+                                 Halide::Var& k,                   //
+                                 const Halide::Func& grad_mag_fn,  //
+                                 const Halide::Func& grad_ori_fn,  //
+                                 const Halide::Expr& x,            //
+                                 const Halide::Expr& y,            //
+                                 const Halide::Expr& scale,        //
+                                 const Halide::Expr& scale_max,    //
+                                 const Halide::Expr& theta) const  //
+    {
+      // Define the reduction domain of the subpatch (i, j).
+      auto r = subpatch_reduction_domain(scale, scale_max);
+
+      // Retrieve the (i, j) coordinates of the corresponding image subpatch.
+      const auto i = ji / N;
+      const auto j = ji % N;
+
+      // Calculate the coordinates of the patch center (i, j).
+      //   0        1        2        3
+      //  -2       -1        0        1
+      // [-2, -1] [-1, -0] [+0, +1] [+1, +2]
+      //  -1.5     -0.5     +0.5     +1.5
+      const Halide::Expr bin_length_in_pixels =
+          bin_length_in_scale_unit * scale;
+      const auto dx_ij = cos(theta) * bin_length_in_pixels *
+                         (Halide::cast<float>(j) - N / 2.f + 0.5f);
+      const auto dy_ij = sin(theta) * bin_length_in_pixels *
+                         (Halide::cast<float>(i) - N / 2.f + 0.5f);
+
+      // The gradient magnitude is:
+      const auto x_ij = Halide::cast<std::int32_t>(Halide::round(x + dx_ij));
+      const auto y_ij = Halide::cast<std::int32_t>(Halide::round(y + dy_ij));
+      const auto mag = grad_mag_fn(x_ij + r.x, y_ij + r.y);
+
+      // The orientation in the reoriented patch is:
+      const auto ori_shifted = grad_ori_fn(x_ij + r.x, y_ij + r.y) - theta;
+      // We have:
+      // -π < ori < π
+      // -π < -theta < π
+      // -2π < ori - theta < 2π
+      // So we make sure that the orientation is [0, 2π[ as follows:
+      const auto ori = Halide::select(ori_shifted < 0,       //
+                                      ori_shifted + two_pi,  //
+                                      ori_shifted);          //
+      const auto ori_normalized = ori / two_pi;
+      const auto ori_index = ori_normalized * O;
+
+      // For each point of the patch, i.e.:
+      auto p = Vector2{};
+      p(0) = x_ij + Halide::cast<float>(r.x) - x;
+      p(1) = y_ij + Halide::cast<float>(r.y) - y;
+
+      // Define the patch normalization transform.
+      auto T = Matrix2{};
+      T(0, 0) = Halide::cos(theta);  T(0, 1) = Halide::sin(theta);
+      T(1, 0) = -Halide::sin(theta); T(1, 1) = Halide::cos(theta);
+      T /= bin_length_in_pixels;
+
+      // Calculate the coordinates of the gradient in the reoriented normalized
+      // patch.
+      const auto Tp = T * p;  // 1. Apply the patch normalization transform.
+
+      // The weight of this gradient is:
+      const auto weight = Halide::exp(-squared_norm(Tp) /  //
+                                      (2 * Halide::pow(N / 2.f, 2)));
+
+      auto Tp2 = Vector2{};   // 2. Find out which bin (i, j) it belongs to.
+      Tp2(0) = Tp(0) + N / 2.f - 0.5f;
+      Tp2(1) = Tp(1) + N / 2.f - 0.5f;
+
+      // Now the accumulation rule is based on trilinear interpolation:
+      //
+      // First calculate the absolute distance to the bin (i, j).
+      const auto dx = Halide::abs(Halide::cast<float>(j) - Tp2(0));
+      const auto dy = Halide::abs(Halide::cast<float>(i) - Tp2(1));
+      // Accumulation rule based on trilinear interpolation.
+      const auto wx = Halide::select(dx < 1, 1 - dx, 0);
+      const auto wy = Halide::select(dy < 1, 1 - dy, 0);
+
+      const auto o_int = Halide::cast<int>(ori_index);
+      const auto o0 = Halide::clamp(                     //
+          Halide::select(o_int >= O, o_int - O, o_int),  //
+          0,                                             //
+          O - 1);
+      const auto o1 = Halide::clamp(               //
+          Halide::select(o0 == O - 1, 0, o0 + 1),  //
+          0,                                       //
+          O - 1);
+
+      // Now the accumulation rule is based on trilinear interpolation:
+      //
+      // First calculate the absolute distance to the bin (i, j, o).
+      const auto dori = Halide::fract(ori_index);
+
+      auto wo0 = 1 - dori;
+      auto wo1 = dori;
+
+      h(o0, ji, k) += wo0 * wx * wy * weight * mag;
+      h(o1, ji, k) += wo1 * wx * wy * weight * mag;
     }
 
     auto normalize(const Halide::Func& h,       //

@@ -15,10 +15,10 @@
 #include <cmath>
 
 #include <DO/Sara/Core.hpp>
-#include <DO/Sara/Graphics.hpp>
-#include <DO/Sara/VideoIO.hpp>
 #include <DO/Sara/FeatureDetectors/DoG.hpp>
+#include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/SfM/Detectors/SIFT.hpp>
+#include <DO/Sara/VideoIO.hpp>
 
 #include <drafts/Halide/Differential.hpp>
 #include <drafts/Halide/LocalExtrema.hpp>
@@ -26,8 +26,8 @@
 #include <drafts/Halide/RefineExtrema.hpp>
 #include <drafts/Halide/Utilities.hpp>
 
-#include <drafts/Halide/Draw.hpp>
 #include <drafts/Halide/DominantGradientOrientations.hpp>
+#include <drafts/Halide/Draw.hpp>
 #include <drafts/Halide/Resize.hpp>
 #include <drafts/Halide/SIFT.hpp>
 
@@ -37,8 +37,10 @@ namespace shakti = DO::Shakti;
 
 namespace DO::Shakti::HalideBackend {
 
-  struct SIFTExtractor {
-    struct Parameters {
+  struct SIFTExtractor
+  {
+    struct Parameters
+    {
       //! @brief Pyramid construction.
       int initial_pyramid_octave = 0;
 
@@ -64,7 +66,8 @@ namespace DO::Shakti::HalideBackend {
       //! @}
     };
 
-    struct Pipeline {
+    struct Pipeline
+    {
       Sara::ImagePyramid<float> gaussian_pyramid;
       Sara::ImagePyramid<float> dog_pyramid;
       Sara::ImagePyramid<std::int8_t> dog_extrema_pyramid;
@@ -81,6 +84,7 @@ namespace DO::Shakti::HalideBackend {
       // The SIFT descriptors.
       Pyramid<Sara::Tensor_<float, 4>> descriptors;
       Pyramid<Sara::Tensor_<float, 2>> descriptors_v2;
+      Pyramid<Sara::Tensor_<float, 3>> descriptors_v3;
 
       auto num_keypoints() const
       {
@@ -154,22 +158,41 @@ namespace DO::Shakti::HalideBackend {
       SARA_DEBUG << "Populating oriented extrema = " << timer.elapsed_ms()
                  << " ms" << std::endl;
 
-#ifdef USE_SIFT
+// #define SIFT_V1
+// #define SIFT_V2
+#define SIFT_V3
+#if defined(SIFT_V1)
+      SARA_DEBUG << "RUNNING SIFT V1..." << std::endl;
       timer.restart();
-      pipeline.descriptors_v2= v2::compute_sift_descriptors(
-          pipeline.gradient_pyramid[0],
-          pipeline.gradient_pyramid[1],
-          pipeline.oriented_extrema,
-          params.bin_length_in_scale_unit,
-          params.N,
+      pipeline.descriptors = compute_sift_descriptors(
+          pipeline.gradient_pyramid[0], pipeline.gradient_pyramid[1],
+          pipeline.oriented_extrema, params.bin_length_in_scale_unit, params.N,
           params.O);
-      SARA_DEBUG << "SIFT descriptors = " << timer.elapsed_ms()
-                 << " ms" << std::endl;
+      SARA_DEBUG << "SIFT descriptors = " << timer.elapsed_ms() << " ms"
+                 << std::endl;
+#elif defined(SIFT_V2)
+      SARA_DEBUG << "RUNNING SIFT V2..." << std::endl;
+      timer.restart();
+      pipeline.descriptors_v2 = v2::compute_sift_descriptors(
+          pipeline.gradient_pyramid[0], pipeline.gradient_pyramid[1],
+          pipeline.oriented_extrema, params.bin_length_in_scale_unit, params.N,
+          params.O);
+      SARA_DEBUG << "SIFT descriptors = " << timer.elapsed_ms() << " ms"
+                 << std::endl;
+#elif defined(SIFT_V3)
+      SARA_DEBUG << "RUNNING SIFT V3..." << std::endl;
+      timer.restart();
+      pipeline.descriptors_v3 = v3::compute_sift_descriptors(
+          pipeline.gradient_pyramid[0], pipeline.gradient_pyramid[1],
+          pipeline.oriented_extrema, params.bin_length_in_scale_unit, params.N,
+          params.O);
+      SARA_DEBUG << "SIFT descriptors = " << timer.elapsed_ms() << " ms"
+                 << std::endl;
 #endif
     }
   };
 
-}
+}  // namespace DO::Shakti::HalideBackend
 
 
 auto test_on_image()
@@ -181,6 +204,7 @@ auto test_on_image()
   auto image = sara::imread<float>(image_filepath);
 
   auto sift_extractor = halide::SIFTExtractor{};
+  sift_extractor.params.initial_pyramid_octave = -1;
   auto timer = sara::Timer{};
 
   timer.restart();
@@ -216,7 +240,7 @@ auto test_on_video()
   auto frame = video_stream.frame();
   auto frame_gray32f = sara::Image<float>{frame.sizes()};
 
-  const auto scale_factor = 2;
+  const auto scale_factor = 1;
   auto frame_downsampled = sara::Image<float>{frame.sizes() / scale_factor};
 
   // Halide buffers.
@@ -259,7 +283,8 @@ auto test_on_video()
     sara::tic();
 // #define ORIGINAL
 #ifdef ORIGINAL
-    const auto [features, descriptors] = sara::compute_sift_keypoints(frame_downsampled);
+    const auto [features, descriptors] =
+        sara::compute_sift_keypoints(frame_downsampled);
 #else
     sift_extractor(frame_downsampled);
 #endif
