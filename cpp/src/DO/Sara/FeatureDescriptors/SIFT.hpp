@@ -25,12 +25,14 @@
 
 #include <DO/Sara/ImageProcessing/ImagePyramid.hpp>
 
+#include <omp.h>
+
 
 namespace DO { namespace Sara {
 
   /*!
-    @addtogroup FeatureDescriptors
-    @{
+   *  @addtogroup FeatureDescriptors
+   *  @{
    */
 
   //! @brief Functor class used to compute the SIFT Descriptor at some location.
@@ -149,17 +151,34 @@ namespace DO { namespace Sara {
     //! Helper member function.
     auto operator()(const std::vector<OERegion>& features,
                     const std::vector<Point2i>& scale_octave_pairs,
-                    const ImagePyramid<Vector2f>& gradient_polar_coords) const
+                    const ImagePyramid<Vector2f>& gradient_polar_coords,
+                    bool parallel = false) const
         -> Tensor_<float, 2>
     {
       auto sifts = Tensor_<float, 2>{{int(features.size()), Dim}};
-      for (size_t i = 0; i < features.size(); ++i)
+      if (parallel)
       {
-        sifts.matrix().row(i) =
-            this->operator()(features[i],
-                             gradient_polar_coords(scale_octave_pairs[i](0),
-                                                   scale_octave_pairs[i](1)))
-                .transpose();
+        const auto num_features = static_cast<int>(features.size());
+#pragma omp parallel for
+        for (auto i = 0; i < num_features; ++i)
+        {
+          sifts.matrix().row(i) =
+              this->operator()(features[i],
+                               gradient_polar_coords(scale_octave_pairs[i](0),
+                                                     scale_octave_pairs[i](1)))
+                  .transpose();
+        }
+      }
+      else
+      {
+        for (size_t i = 0; i < features.size(); ++i)
+        {
+          sifts.matrix().row(i) =
+              this->operator()(features[i],
+                               gradient_polar_coords(scale_octave_pairs[i](0),
+                                                     scale_octave_pairs[i](1)))
+                  .transpose();
+        }
       }
       return sifts;
     }
@@ -237,12 +256,12 @@ namespace DO { namespace Sara {
     //! @brief Normalize in a contrast-invariant way.
     void normalize(descriptor_type& h) const
     {
-      // Euclidean normalization to account for contrast change.
+      // Euclidean normalization to account for contrast changes.
       h.normalize();
 
-      // Make the descriptor robustness to nonlinear illumination change.
+      // Make the descriptor robustness to nonlinear illumination changes.
       //
-      // 1) Clamp histogram bin values to 0.2.
+      // 1) Clamp histogram bin values to 0.2. (as indicated in the paper).
       h = h.cwiseMin(descriptor_type::Ones() * _max_bin_value);
       // 2) Renormalize again.
       h.normalize();

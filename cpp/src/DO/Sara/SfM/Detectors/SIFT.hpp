@@ -23,7 +23,10 @@ namespace DO::Sara {
   //! @{
 
   DO_SARA_EXPORT
-  auto compute_sift_keypoints(const ImageView<float>& image)
+  auto compute_sift_keypoints(
+      const ImageView<float>& image,
+      const ImagePyramidParams& pyramid_params = ImagePyramidParams(),
+      bool parallel = false)
       -> KeypointList<OERegion, float>;
 
   //! @}
