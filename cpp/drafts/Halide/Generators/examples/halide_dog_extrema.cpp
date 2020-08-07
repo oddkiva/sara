@@ -198,7 +198,11 @@ namespace DO::Shakti::HalideBackend {
 auto test_on_image()
 {
   const auto image_filepath =
+#ifdef __APPLE__
       "/Users/david/GitLab/DO-CV/sara/data/sunflowerField.jpg";
+#else
+      "/home/david/GitLab/DO-CV/sara/data/sunflowerField.jpg";
+#endif
   // const auto image_filepath =
   // "/Users/david/GitLab/DO-CV/sara/cpp/drafts/MatchPropagation/cpp/examples/shelves/shelf-1.jpg";
   auto image = sara::imread<float>(image_filepath);
@@ -231,8 +235,8 @@ auto test_on_video()
 #elif __APPLE__
   const auto video_filepath = "/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
 #else
-  // const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
-  const auto video_filepath = "/home/david/Desktop/Datasets/ha/barberX.mp4"s;
+  const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
+  // const auto video_filepath = "/home/david/Desktop/Datasets/ha/barberX.mp4"s;
 #endif
 
   // Input and output from Sara.
@@ -311,7 +315,7 @@ auto test_on_video()
 
 GRAPHICS_MAIN()
 {
-  // test_on_image();
-  test_on_video();
+  test_on_image();
+  // test_on_video();
   return 0;
 }
