@@ -167,10 +167,10 @@ namespace DO::Shakti::HalideBackend {
       auto r = subpatch_reduction_domain(scale, scale_max);
 
       // Calculate the coordinates of the patch center (i, j).
-      //   0        1        2        3
-      //  -2       -1        0        1
-      // [-2, -1] [-1, -0] [+0, +1] [+1, +2]
-      //  -1.5     -0.5     +0.5     +1.5
+      // i          =   0        1        2        3
+      // i_centered =  -2       -1        0        1
+      // interval   = [-2, -1] [-1, -0] [+0, +1] [+1, +2]
+      // center     =  -1.5     -0.5     +0.5     +1.5
       const Halide::Expr bin_length_in_pixels =
           bin_length_in_scale_unit * scale;
       const auto dx_ij = cos(theta) * bin_length_in_pixels *
