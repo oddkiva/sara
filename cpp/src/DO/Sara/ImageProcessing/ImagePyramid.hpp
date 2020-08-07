@@ -30,12 +30,13 @@ namespace DO { namespace Sara {
   {
   public:
     //! @brief Constructor.
-    ImagePyramidParams(int first_octave_index = -1,
-                       int num_scales_per_octave = 3+3,
-                       double scale_geometric_factor = std::pow(2., 1./3.),
-                       int image_padding_size = 1,
-                       double scale_camera = 0.5,
-                       double scale_initial = 1.6)
+    ImagePyramidParams(                                         //
+        int first_octave_index = -1,                            //
+        int num_scales_per_octave = 3 + 3,                      //
+        double scale_geometric_factor = std::pow(2., 1. / 3.),  //
+        int image_padding_size = 1,                             //
+        double scale_camera = 0.5,                              //
+        double scale_initial = 1.6)
     {
       _scale_camera = scale_camera;
       _scale_initial = scale_initial;

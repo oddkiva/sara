@@ -26,19 +26,23 @@ GRAPHICS_MAIN()
   const auto image = imread<float>(image_path);
 
   print_stage("Detecting SIFT features");
-  auto [features, descriptors] = compute_sift_keypoints(image);
+  const auto pyramid_params = ImagePyramidParams(-1);
+  auto keypoints = compute_sift_keypoints(image, pyramid_params, true);
+  const auto& features = std::get<0>(keypoints);
 
+#ifdef REMOVE_REDUNDANCIES
   print_stage("Removing existing redundancies");
   remove_redundant_features(features, descriptors);
   SARA_CHECK(features.size());
   SARA_CHECK(descriptors.sizes().transpose());
+#endif
 
   // Check the features visually.
   print_stage("Draw features");
   create_window(image.width(), image.height());
   set_antialiasing();
   display(image);
-  for (const auto& f : features)
+  for (const auto& f: features)
   {
     const auto& color =
         f.extremum_type == OERegion::ExtremumType::Max ? Red8 : Blue8;
