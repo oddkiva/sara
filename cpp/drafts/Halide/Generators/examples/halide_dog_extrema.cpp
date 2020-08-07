@@ -311,7 +311,7 @@ auto test_on_video()
 
 GRAPHICS_MAIN()
 {
-  // test_on_image();
-  test_on_video();
+  test_on_image();
+  // test_on_video();
   return 0;
 }

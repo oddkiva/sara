@@ -66,7 +66,7 @@ namespace {
       // GPU schedule.
       if (get_target().has_gpu_feature())
       {
-        descriptors.gpu_tile(ji, k, jio, ko, tile_ji, tile_k,
+        descriptors.gpu_tile(ji, k, jio, ko, jii, ki, tile_ji, tile_k,
                              Halide::TailStrategy::GuardWithIf);
       }
 
