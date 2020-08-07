@@ -20,27 +20,27 @@ namespace DO::Shakti::HalideBackend {
     static constexpr auto two_pi = static_cast<float>(2 * M_PI);
 
     // We construct a grid of NxN histogram of gradients.
-    const std::int32_t N{4};
+    const std::int32_t N = 4;
     // Each histogram has 8 bins.
-    const std::int32_t O{8};
+    const std::int32_t O = 8;
 
-    const float bin_length_in_scale_unit{3.f};
-    const float max_bin_value{0.2f};
+    const float bin_length_in_scale_unit = 3.f;
+    const float max_bin_value = 0.2f;
 
     // Each image has a resolution scale (in pixels) associated to it.
     float scale_upper_bound;
 
     // Radius of the whole image patch.
-    auto patch_radius(const Halide::Expr& scale_upper_bound) const
+    auto patch_radius(const Halide::Expr& scale) const
     {
-      return bin_length_in_scale_unit * scale_upper_bound *  //
+      return bin_length_in_scale_unit * scale *  //
              (N + 1) / 2.f * std::sqrt(2.f);
     }
 
     // Radius for each image sub-patch (i, j).
-    auto subpatch_radius(const Halide::Expr& scale_upper_bound) const
+    auto subpatch_radius(const Halide::Expr& scale) const
     {
-      return bin_length_in_scale_unit * scale_upper_bound * std::sqrt(2.f);
+      return bin_length_in_scale_unit * scale * std::sqrt(2.f);
     }
 
     auto reduction_domain(const Halide::Expr& scale,
@@ -167,10 +167,11 @@ namespace DO::Shakti::HalideBackend {
       auto r = subpatch_reduction_domain(scale, scale_max);
 
       // Calculate the coordinates of the patch center (i, j).
-      // i          =   0        1        2        3
-      // i_centered =  -2       -1        0        1
-      // interval   = [-2, -1] [-1, -0] [+0, +1] [+1, +2]
-      // center     =  -1.5     -0.5     +0.5     +1.5
+      // i                         =   0        1        2        3
+      // i_centered                =  -2       -1        0        1
+      // nononverlapping intervals = [-2.0, -1.0] [-1.0, +0.0] [+0.0, +1.0] [+1.0, +2.0]
+      // center                    =    -1.5         -0.5         +0.5         +1.5
+      // overlapping intervals     = [-2.5, -0.5] [-1.5, +0.5] [-0.5, +1.5] [+0.5, +2.5]
       const Halide::Expr bin_length_in_pixels =
           bin_length_in_scale_unit * scale;
       const auto dx_ij = cos(theta) * bin_length_in_pixels *

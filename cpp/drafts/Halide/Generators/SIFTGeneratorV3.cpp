@@ -82,7 +82,7 @@ namespace {
         // TODO: study
         // https://halide-lang.org/tutorials/tutorial_lesson_18_parallel_associative_reductions.html
         // And reapply this for dominant gradient orientations.
-        descriptors.parallel(k);
+        descriptors.parallel(k);//.split(ji, jio, jii, tile_ji).vectorize(o, 8);
       }
     }
   };

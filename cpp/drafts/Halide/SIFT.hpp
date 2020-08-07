@@ -288,11 +288,26 @@ namespace DO::Shakti::HalideBackend {
           continue;
 
         auto& k = kit->second;
+        const auto& scale_min = *std::min_element(k.s.begin(), k.s.end());
         const auto& scale_max = *std::max_element(k.s.begin(), k.s.end());
+        SARA_CHECK(s);
+        SARA_CHECK(o);
+        SARA_CHECK(so.second.first);
+        SARA_CHECK(k.size());
+        SARA_CHECK(k.x.size());
+        SARA_CHECK(k.y.size());
+        SARA_CHECK(k.s.size());
+        SARA_CHECK(k.orientations.size());
+        SARA_CHECK(scale_min);
+        SARA_CHECK(scale_max);
+        SARA_CHECK(scale_min * std::sqrt(2.) * 3 * (4 + 1) / 2.f);
+        SARA_CHECK(scale_max * std::sqrt(2.) * 3 * (4 + 1) / 2.f);
 
         auto& descriptors_so = descriptors.dict[{s, o}];
         descriptors_so.resize({static_cast<int>(k.size()), N * N, O});
 
+        auto timer = Sara::Timer{};
+        timer.restart();
         v3::compute_sift_descriptors(gradient_magnitudes(s, o),      //
                                      gradient_orientations(s, o),    //
                                      k.x, k.y, k.s, k.orientations,  //
@@ -300,6 +315,8 @@ namespace DO::Shakti::HalideBackend {
                                      descriptors_so,                 //
                                      bin_length_in_scale_unit,       //
                                      N, O);                          //
+        auto elapsed_ms = timer.elapsed_ms();
+        SARA_DEBUG << "SIFT v3 = " << elapsed_ms << "ms" << std::endl << std::endl;
       }
 
       return descriptors;
