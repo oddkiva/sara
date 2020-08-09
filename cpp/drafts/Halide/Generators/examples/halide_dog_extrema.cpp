@@ -17,7 +17,7 @@
 #include <DO/Sara/Core.hpp>
 #include <DO/Sara/FeatureDetectors/DoG.hpp>
 #include <DO/Sara/Graphics.hpp>
-#include <DO/Sara/SfM/Detectors/SIFT.hpp>
+#include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/VideoIO.hpp>
 
 #include <drafts/Halide/Differential.hpp>
@@ -160,11 +160,12 @@ namespace DO::Shakti::HalideBackend {
 
 // #define SIFT_V1
 // #define SIFT_V2
-#define SIFT_V3
+// #define SIFT_V3
+#define SIFT_V4
 #if defined(SIFT_V1)
       SARA_DEBUG << "RUNNING SIFT V1..." << std::endl;
       timer.restart();
-      pipeline.descriptors = compute_sift_descriptors(
+      pipeline.descriptors = v1::compute_sift_descriptors(
           pipeline.gradient_pyramid[0], pipeline.gradient_pyramid[1],
           pipeline.oriented_extrema, params.bin_length_in_scale_unit, params.N,
           params.O);
@@ -186,6 +187,15 @@ namespace DO::Shakti::HalideBackend {
           pipeline.gradient_pyramid[0], pipeline.gradient_pyramid[1],
           pipeline.oriented_extrema, params.bin_length_in_scale_unit, params.N,
           params.O);
+      SARA_DEBUG << "SIFT descriptors = " << timer.elapsed_ms() << " ms"
+                 << std::endl;
+#elif defined(SIFT_V4)
+      SARA_DEBUG << "RUNNING SIFT V4..." << std::endl;
+      timer.restart();
+      pipeline.descriptors_v3 =
+          v4::compute_sift_descriptors(pipeline.gradient_pyramid[0],  //
+                                       pipeline.gradient_pyramid[1],  //
+                                       pipeline.oriented_extrema);
       SARA_DEBUG << "SIFT descriptors = " << timer.elapsed_ms() << " ms"
                  << std::endl;
 #endif

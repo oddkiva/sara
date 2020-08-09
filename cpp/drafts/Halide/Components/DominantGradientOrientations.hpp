@@ -139,23 +139,24 @@ namespace DO::Shakti::HalideBackend {
     return Halide::sum(ori_weight * mag * is_bin_o);
 #else
     // It makes more sense to use interpolation.
-    auto ori_0N = ori_01_normalized * N;
-#ifdef ENUMERATIVE_METHOD
+    const auto ori_0N = ori_01_normalized * N;
+
     auto ori_0N_floor = Halide::floor(ori_0N);
-    auto ori_0N_ceil = Halide::ceil(ori_0N);
-    ori_0N_ceil = Halide::select(ori_0N_ceil == N, 0, ori_0N_ceil);
-    auto ori_0N_frac = Halide::fract(ori_0N);
+    ori_0N_floor = Halide::select(ori_0N_floor == N, 0, ori_0N_floor);
+
+    const auto ori_0N_ceil =
+        Halide::select(ori_0N_floor == N - 1, 0, ori_0N_floor + 1);
+
+    const auto ori_0N_frac = Halide::fract(ori_0N);
+
     // Accumulation rule using linear interpolation.
-    auto interpolation_weight = Halide::select(  //
-        o == ori_0N_floor,                       //
-        (1 - ori_0N_frac),                       //
-        Halide::select(o == ori_0N_ceil,         //
-                       ori_0N_frac,              //
-                       0));                      //
-#else
-    auto delta_o = Halide::abs(Halide::cast<float>(o) - ori_0N);
-    auto interpolation_weight = Halide::select(delta_o < 1, 1 - delta_o, 0);
-#endif
+    const auto interpolation_weight = Halide::select(  //
+        o == ori_0N_floor,                             //
+        (1 - ori_0N_frac),                             //
+        Halide::select(o == ori_0N_ceil,               //
+                       ori_0N_frac,                    //
+                       0));                            //
+
     return Halide::sum(ori_weight * mag * interpolation_weight);
 #endif
   }

@@ -53,23 +53,24 @@ namespace DO { namespace Sara {
      *  In theory, this corresponds to the ideal image function where we would
      *  know the intensity value with perfect precision at any position @f$(x,
      *  y)@f$ at any fine resolution @f$\sigma@f$ in meters (millimeters,
-     *  microns, and so on...). The resolution is the scale.
+     *  microns, and so on...). The resolution is termed as scale.
      *
      *  There is this nice stackexchange answer:
      *  https://biology.stackexchange.com/questions/26189/whats-the-smallest-size-a-human-eye-can-see.
      *
-     *  Just like the smallest size that the human eye can perceive is of the
-     *  order of a tens of microns, the camera captures photographs with details
-     *  limited by its resolution @f$\sigma@f$. From this resolution and coarser
-     *  resolutions, the pixel value is known with good certainty.
+     *  Just like the human eye can perceive small objects whose size is of the
+     *  order of a tens of microns, the camera will capture photographs with
+     *  details at a fixed resolution @f$\sigma@f$ defined by the size of
+     *  photoreceptors. At this resolution and at coarser resolutions, the
+     *  average pixel value can be known with good certainty.
      *
      *  Each pixel of a photograph can be viewed as a local averaging of all
-     *  values @f$I(x, y)@f$ on a patch of size @f$\sigma@f$ meters. All these
-     *  pixel values would be known with infinitesimally small resolution
+     *  color values @f$I(x, y)@f$ on a patch of size @f$\sigma@f$ meters. And
+     *  these pixel values would be known with infinitesimally small resolution
      *  @f$\sigma \rightarrow 0@f$.
      *
-     *  In the scale-space framework, the local averaging function that is
-     *  chosen is the Gaussian kernel and the image function is augmented with
+     *  In the scale-space framework, the local averaging is modeled by a
+     *  Gaussian convolution and the image function is augmented with
      *  an additional dimension which is the scale:
      *
      *  @f$ I : (x,y,\sigma) \mapsto (g_\sigma * I)\ (x,y) @f$,
@@ -80,21 +81,22 @@ namespace DO { namespace Sara {
      *  We also denote by @f$ I_\sigma : (x,y) \mapsto I(x,y,\sigma) @f$ the
      *  image @f$I@f$ at scale @f$\sigma@f$.
      *
-     *
-     *  Because of the spatial sampling, the camera captures the real image
-     *  @f$I_0@f$ with some blurring and the camera-acquired image is
+     *  By design, the camera samples the perfect image @f$I_0@f$ at a
+     *  predefined scale and the image acquired by the camera is denoted as
      *  @f$I_{\sigma_\textrm{camera}}@f$.
      *
      *  Here scale_camera() corresponds to camera resolution
      *  @f$\sigma_\textrm{camera}@f$.
      *
-     *  The digital image that our computers read is
+     *  The digital image that computers read is
      *  @f$I_{\sigma_\textrm{camera}}@f$ and not @f$I@f$.
      *
      *  Now the caveat here is that @f$\sigma_\textrm{camera}@f$ is not known in
      *  meters and we work with pixels. The default parameter we use is
      *  @f$0.5@f$, which means that we assume we can estimate the pixel values
      *  with good confidence up to half a pixel resolution.
+     *  We can retrieve such color values every half pixels by using bilinear
+     *  interpolation.
      */
     double scale_camera() const
     {

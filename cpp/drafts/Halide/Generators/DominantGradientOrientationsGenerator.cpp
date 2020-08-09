@@ -36,8 +36,12 @@ namespace {
     Input<float> scale_mult_factor{"scale_multiplying_factor"};
     Input<float> peak_ratio_thres{"peak_ratio_thres"};
 
+    // Gradient weights.
+    Var u{"x"}, v{"y"};
+    Func gradient_weights{"gradient_weights"};
+
     // HoG.
-    Func hog;
+    Func hog{"hog"};
 
     // Iterated box-blurred HoG.
     static constexpr auto num_blur_iterations = 6;
@@ -64,6 +68,7 @@ namespace {
       const auto s = xys[2](k);
 
       namespace halide = DO::Shakti::HalideBackend;
+
       hog(o, k) = halide::compute_histogram_of_gradients(  //
           mag_fn_ext, ori_fn_ext,                          //
           x, y, s,                                         //
