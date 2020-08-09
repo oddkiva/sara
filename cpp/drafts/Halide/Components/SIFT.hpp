@@ -19,21 +19,31 @@ namespace DO::Shakti::HalideBackend {
   {
     static constexpr auto two_pi = static_cast<float>(2 * M_PI);
 
-    // SIFT build histograms from a grid of NxN patches of image gradients.
+    //! @brief SIFT build histograms from a grid of NxN patches of image
+    //! gradients.
     static constexpr std::int32_t N = 4;
-    // Each histogram of gradients consists of 8 orientation bins.
+    //! @brief Each histogram of gradients consists of O = 8 orientation bins.
+    /*!
+     *  Each bin are centered around the orientations:
+     *  bin index   = [0,   1,    2,    3, 4,    5,    6,    7]
+     *  orientation = [0, π/4,  π/2, 3π/4, π, 5π/4, 3π/2, 7π/4]
+     */
     static constexpr std::int32_t O = 8;
-    // Each bin are centered around the orientations:
-    // bin index   = [0,   1,    2,    3, 4,    5,    6,    7]
-    // orientation = [0, π/4,  π/2, 3π/4, π, 5π/4, 3π/2, 7π/4]
 
-    // Each image subpatch has a radius equal to:
+    //! @brief Each image subpatch has a radius equal to this value:
     static constexpr auto bin_length_in_scale_unit = 3.f;
-    // The diameter of each subpatch
+    //! @brief Each image subpatch has a diameter equal to this value:
     static constexpr auto subpatch_diameter = 2 * bin_length_in_scale_unit + 1;
 
-    //
+    //! @brief The magic constant value to enforce invariance to nonlinear
+    //! illumination changes as referenced in the paper.
     static constexpr auto max_bin_value = 0.2f;
+
+    Halide::Func contrast_norm{"contrast_change_norm"};
+    Halide::Func illumination_norm{"illumination_norm"};
+    Halide::Func hist_contrast_invariant{"hist_contrast_invariant"};
+    Halide::Func hist_clamped{"hist_clamped"};
+    Halide::Func hist_illumination_invariant{"hist_illumination_invariant"};
 
     //! @brief Radius of the whole image patch.
     auto patch_radius(const Halide::Expr& scale) const
@@ -722,33 +732,50 @@ namespace DO::Shakti::HalideBackend {
       h(o1, ji, k) += wo1 * wx_times_wy * mag;
     }
 
-    auto normalize(const Halide::Func& h,       //
-                   const Halide::Var& i,        //
-                   const Halide::Var& j,        //
-                   const Halide::Var& o,        //
-                   const Halide::Var& k) const  //
+    auto normalize_histogram(const Halide::Func& h,  //
+                             const Halide::Var& o,   //
+                             const Halide::Var& ji,  //
+                             const Halide::Var& k)   //
     {
-      auto r = Halide::RDom(0, N, 0, N, 0, O);
-      auto contrast_norm = Halide::Func{"contrast_change_norm"};
-      contrast_norm(k) = Halide::sqrt(Halide::sum(Halide::pow(h(r.x, r.y, r.z, k), 2)));
-      contrast_norm.compute_root();
+      const auto r = Halide::RDom(0, O, 0, N * N);
 
-      auto h_contrast_invariant = Halide::Func{"h_contrast_invariant"};
-      h_contrast_invariant(i, j, o, k) = h(i, j, o, k) / contrast_norm(k);
-      h_contrast_invariant.compute_root();
+      // 1.   Invariance to contrast changes.
+      {
+        contrast_norm(k) = Halide::sqrt(                 //
+            Halide::sum(Halide::pow(h(r.x, r.y, k), 2))  //
+        );
+        // contrast_norm.compute_at(h, k);
+        contrast_norm.compute_root();
 
-      // Nonlinear illumination changes.
-      auto h_clamped = Halide::Func{"h_clamped"};
-      h_clamped(i, j, o, k) = Halide::min(h_contrast_invariant(i, j, o, k), 0.2f);
+        hist_contrast_invariant(o, ji, k) = h(o, ji, k) / contrast_norm(k);
+        // hist_contrast_invariant.compute_at(contrast_norm, k);
+        hist_contrast_invariant.compute_root();
+      }
 
-      auto illumination_norm = Halide::Func{"illumination_norm"};
-      illumination_norm(k) = Halide::sqrt(
-          Halide::sum(Halide::pow(h_clamped(r.x, r.y, r.z, k), 2)));
-      illumination_norm.compute_root();
+      // 2.   Nonlinear illumination changes.
+      // 2.a) Clamp histogram values.
+      {
+        hist_clamped(o, ji, k) = Halide::min(   //
+            hist_contrast_invariant(o, ji, k),  //
+            max_bin_value                       //
+        );
+        //hist_clamped.compute_at(hist_contrast_invariant, k);
+        hist_clamped.compute_root();
+      }
 
-      auto h_illumination_invariant = Halide::Func{"h_illumination_invariant"};
-      h_illumination_invariant(i, j, o, k) = h_clamped(i, j, o, k) /  //
-                                             illumination_norm(k);
+      // 2.b) Normalize.
+      {
+        illumination_norm(k) = Halide::sqrt(                        //
+            Halide::sum(Halide::pow(hist_clamped(r.x, r.y, k), 2))  //
+        );
+        // illumination_norm.compute_at(hist_clamped, k);
+        illumination_norm.compute_root();
+
+        hist_illumination_invariant(o, ji, k) = hist_clamped(o, ji, k) /  //
+                                                illumination_norm(k);
+        // hist_illumination_invariant.compute_at(illumination_norm, k);
+        hist_illumination_invariant.compute_root();
+      }
     }
   };
 

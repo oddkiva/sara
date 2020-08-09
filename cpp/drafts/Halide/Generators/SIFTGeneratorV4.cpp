@@ -44,6 +44,7 @@ namespace {
     Halide::Func gradient_weight_fn{"gradient_weights"};
     Halide::Func spatial_weight_fn{"spatial_weights"};
     Halide::Func normalized_gradient_fn{"normalized_gradients"};
+    Halide::Func descriptors_unnormalized{"descriptor_unnormalized"};
 
     //! @brief Input data.
     Input<Buffer<float>[2]> polar_gradient { "gradients", 2 };
@@ -83,10 +84,23 @@ namespace {
           x, y, s, theta                                                  //
       );
 
-      descriptors(o, ji, k) = 0.f;
-      sift.accumulate_subhistogram_v3(descriptors, ji, k,
+#define NORMALIZE_SIFT
+#ifdef NORMALIZE_SIFT
+      descriptors_unnormalized(o, ji, k) = 0.f;
+      sift.accumulate_subhistogram_v3(descriptors_unnormalized,  //
+                                      ji, k,                     //
                                       normalized_gradient_fn,
                                       spatial_weight_fn);
+
+      sift.normalize_histogram(descriptors_unnormalized, o, ji, k);
+      descriptors(o, ji, k) = sift.hist_illumination_invariant(o, ji, k);
+#else
+      descriptors(o, ji, k) = 0.f;
+      sift.accumulate_subhistogram_v3(descriptors,  //
+                                      ji, k,        //
+                                      normalized_gradient_fn,
+                                      spatial_weight_fn);
+#endif
     }
 
     void schedule()
