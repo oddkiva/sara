@@ -15,7 +15,5 @@ if (SARA_USE_FROM_SOURCE)
     target_link_libraries(DO_Sara_KDTree
       PRIVATE flann_cpp_s
       PUBLIC $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
-    endif ()
-
   endif ()
 endif ()

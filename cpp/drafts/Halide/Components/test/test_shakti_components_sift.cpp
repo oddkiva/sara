@@ -11,6 +11,8 @@
 
 #define BOOST_TEST_MODULE "Halide Backend/SIFT components"
 
+#include <iomanip>
+
 #include <boost/test/unit_test.hpp>
 
 #include <Eigen/Dense>

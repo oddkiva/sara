@@ -39,8 +39,8 @@ auto to_map(const std::map<int, std::vector<Eigen::Vector2i>>& contours,
 auto random_colors(const std::map<int, std::vector<Eigen::Vector2i>>& contours)
 {
   auto colors = std::map<int, Rgb8>{};
-  for (const auto& [label, _] : contours)
-    colors[label] = Rgb8(rand() % 255, rand() % 255, rand() % 255);
+  for (const auto& c : contours)
+    colors[c.first] = Rgb8(rand() % 255, rand() % 255, rand() % 255);
   return colors;
 }
 
