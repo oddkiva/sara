@@ -59,8 +59,8 @@ namespace {
 
       auto r = RDom{x0, kw, y0, kh, c0, kc};
 
-      output(x, y, c, n) =
-          sum(input(x + r.x, y + r.y, c + r.z, n) * kernel(r.x, r.y, r.z, c));
+      output(x, y, c, n) = sum(input(x + r.x, y + r.y, c + r.z, n) *  //
+                               kernel(r.x, r.y, r.z, c));             //
     }
 
     void schedule()
@@ -96,5 +96,5 @@ namespace {
 
 }  // namespace
 
-HALIDE_REGISTER_GENERATOR(ConvolutionGenerator<float>, convolve_32f)
-HALIDE_REGISTER_GENERATOR(ConvolutionGenerator<double>, convolve_64f)
+HALIDE_REGISTER_GENERATOR(ConvolutionGenerator<float>, shakti_convolve_32f)
+HALIDE_REGISTER_GENERATOR(ConvolutionGenerator<double>, shakti_convolve_64f)

@@ -9,7 +9,9 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
+#include <DO/Sara/DisjointSets/DisjointSets.hpp>
 #include <DO/Sara/DisjointSets/TwoPassConnectedComponents.hpp>
+
 
 
 namespace DO { namespace Sara {

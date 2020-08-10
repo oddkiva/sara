@@ -35,8 +35,7 @@ void toc()
   cout << "Elapsed time = " << elapsed << " ms" << endl << endl;
 }
 
-vector<OERegion> compute_dog_extrema(const Image<float>& I,
-                                     bool verbose = true)
+vector<OERegion> compute_dog_extrema(const Image<float>& I, bool verbose = true)
 {
   // 1. Feature extraction.
   if (verbose)
@@ -44,8 +43,8 @@ vector<OERegion> compute_dog_extrema(const Image<float>& I,
     print_stage("Localizing DoG extrema");
     tic();
   }
-  auto pyramid_params = ImagePyramidParams{ 0 };
-  auto compute_DoGs = ComputeDoGExtrema{ pyramid_params };
+  auto pyramid_params = ImagePyramidParams{-1};
+  auto compute_DoGs = ComputeDoGExtrema{pyramid_params};
   auto scale_octave_pairs = vector<Point2i>{};
   auto DoGs = compute_DoGs(I, &scale_octave_pairs);
   if (verbose)
@@ -56,7 +55,8 @@ vector<OERegion> compute_dog_extrema(const Image<float>& I,
   const auto& DoG = compute_DoGs.diff_of_gaussians();
   for (size_t i = 0; i < DoGs.size(); ++i)
   {
-    auto octave_scale_factor = DoG.octave_scaling_factor(scale_octave_pairs[i](1));
+    auto octave_scale_factor =
+        DoG.octave_scaling_factor(scale_octave_pairs[i](1));
     DoGs[i].center() *= octave_scale_factor;
     DoGs[i].shape_matrix /= pow(octave_scale_factor, 2);
   }
@@ -74,8 +74,8 @@ vector<OERegion> compute_dog_affine_extrema(const Image<float>& I,
     tic();
   }
 
-  auto pyramid_params = ImagePyramidParams{ 0 };
-  auto compute_DoGs = ComputeDoGExtrema{ pyramid_params };
+  auto pyramid_params = ImagePyramidParams{0};
+  auto compute_DoGs = ComputeDoGExtrema{pyramid_params};
   auto scale_octave_pairs = vector<Point2i>{};
   auto DoGs = compute_DoGs(I, &scale_octave_pairs);
   if (verbose)
@@ -99,7 +99,7 @@ vector<OERegion> compute_dog_affine_extrema(const Image<float>& I,
     const auto& o = scale_octave_pairs[i](1);
 
     Matrix2f affine_adaptation_transform;
-    if (adapt_shape(affine_adaptation_transform, G(s,o), DoGs[i]))
+    if (adapt_shape(affine_adaptation_transform, G(s, o), DoGs[i]))
     {
       DoGs[i].shape_matrix = affine_adaptation_transform * DoGs[i].shape_matrix;
       keep_features[i] = 1;
@@ -109,8 +109,8 @@ vector<OERegion> compute_dog_affine_extrema(const Image<float>& I,
     toc();
 
   // 3. Rescale the kept features to original image dimensions.
-  auto num_kept_features = std::accumulate(
-    keep_features.begin(), keep_features.end(), 0);
+  auto num_kept_features =
+      std::accumulate(keep_features.begin(), keep_features.end(), 0);
 
   auto kept_DoGs = vector<OERegion>{};
   kept_DoGs.reserve(num_kept_features);
@@ -122,7 +122,6 @@ vector<OERegion> compute_dog_affine_extrema(const Image<float>& I,
       const auto fact = D.octave_scaling_factor(scale_octave_pairs[i](1));
       kept_DoGs.back().shape_matrix *= pow(fact, -2);
       kept_DoGs.back().coords *= fact;
-
     }
   }
 
@@ -136,8 +135,9 @@ void check_keys(const Image<float>& image, const vector<OERegion>& features)
   display(image);
   set_antialiasing();
   for (size_t i = 0; i != features.size(); ++i)
-    features[i].draw(features[i].extremum_type == OERegion::ExtremumType::Max ?
-                     Red8 : Blue8);
+    features[i].draw(features[i].extremum_type == OERegion::ExtremumType::Max
+                         ? Red8
+                         : Blue8);
   get_key();
 }
 
@@ -146,7 +146,7 @@ GRAPHICS_MAIN()
   try
   {
     auto image = Image<float>{};
-    auto image_filepath = src_path("../../../data/sunflowerField.jpg");
+    auto image_filepath = src_path("../../../../data/sunflowerField.jpg");
     if (!load(image, image_filepath))
       return EXIT_FAILURE;
 

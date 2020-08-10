@@ -25,16 +25,18 @@
 
 #include <DO/Sara/ImageProcessing/ImagePyramid.hpp>
 
+#include <omp.h>
+
 
 namespace DO { namespace Sara {
 
   /*!
-    @addtogroup FeatureDescriptors
-    @{
+   *  @addtogroup FeatureDescriptors
+   *  @{
    */
 
   //! @brief Functor class used to compute the SIFT Descriptor at some location.
-  template <int N=4, int O=8>
+  template <int N = 4, int O = 8>
   class ComputeSIFTDescriptor
   {
   public: /* interface. */
@@ -52,7 +54,8 @@ namespace DO { namespace Sara {
 
     //! @brief Computes the SIFT descriptor for keypoint @f$ (x,y,\sigma,\theta) @f$.
     auto operator()(float x, float y, float sigma, float theta,
-                    const ImageView<Vector2f>& grad_polar_coords) const
+                    const ImageView<Vector2f>& grad_polar_coords,
+                    bool do_normalization = true) const
         -> descriptor_type
     {
       constexpr auto pi = static_cast<float>(M_PI);
@@ -77,34 +80,32 @@ namespace DO { namespace Sara {
       const int rounded_r = int_round(r);
       const int rounded_x = int_round(x);
       const int rounded_y = int_round(y);
+
       for (auto v = -rounded_r; v <= rounded_r; ++v)
       {
         for (auto u = -rounded_r; u <= rounded_r; ++u)
         {
-          // Retrieve the normalized coordinates.
+          // Retrieve the coordinates in the normalized patch coordinate frame.
           auto pos = Vector2f{T * Vector2f(u, v)};
-          // subpixel correction?
-          /*
-           * pos.x() -= (x - rounded_x);
-           * pos.y() -= (y - rounded_y);
-           */
 
           // Boundary check.
           if (rounded_x + u < 0 || rounded_x + u >= grad_polar_coords.width() ||
               rounded_y + v < 0 || rounded_y + v >= grad_polar_coords.height())
             continue;
 
-          // Compute the Gaussian weight which gives less emphasis to gradient
-          // far from the center.
-          auto weight = exp(-pos.squaredNorm() / (2.f * pow(N / 2.f, 2)));
+          // Compute the Gaussian weight which gives less emphasis to gradients
+          // further from the keypoint center.
+          const auto weight = exp(-pos.squaredNorm() / (2.f * pow(N / 2.f, 2)));
 
           // Read the precomputed gradient (in polar coordinates).
-          auto mag = grad_polar_coords(rounded_x + u, rounded_y + v)(0);
+          const auto& mag = grad_polar_coords(rounded_x + u, rounded_y + v)(0);
+          // Notice here the reoriented gradient orientation w.r.t. the dominant
+          // gradient orientation.
           auto ori = grad_polar_coords(rounded_x + u, rounded_y + v)(1) - theta;
 
-          // Normalize the orientation.
+          // Rescale the orientation to the interval [0, O[.
           ori = ori < 0.f ? ori + 2.f * pi : ori;
-          ori *= float(O) / (2.f * pi);
+          ori *= static_cast<float>(O) / (2.f * pi);
 
           // Shift the coordinates to retrieve the "SIFT" coordinate system so
           // that $(x,y)$ is in $[-1, N]^2$.
@@ -119,10 +120,14 @@ namespace DO { namespace Sara {
         }
       }
 
-      h.normalize();
+      if (do_normalization)
+      {
+        normalize(h);
+        h = (h * 512.f).cwiseMin(Matrix<float, Dim, 1>::Ones() * 255.f);
+      }
 
-      h = (h * 512.f).cwiseMin(Matrix<float, Dim, 1>::Ones() * 255.f);
       return h;
+
     }
 
     //! @brief Computes the **upright** SIFT descriptor for keypoint
@@ -146,17 +151,34 @@ namespace DO { namespace Sara {
     //! Helper member function.
     auto operator()(const std::vector<OERegion>& features,
                     const std::vector<Point2i>& scale_octave_pairs,
-                    const ImagePyramid<Vector2f>& gradient_polar_coords) const
+                    const ImagePyramid<Vector2f>& gradient_polar_coords,
+                    bool parallel = false) const
         -> Tensor_<float, 2>
     {
       auto sifts = Tensor_<float, 2>{{int(features.size()), Dim}};
-      for (size_t i = 0; i < features.size(); ++i)
+      if (parallel)
       {
-        sifts.matrix().row(i) =
-            this->operator()(features[i],
-                             gradient_polar_coords(scale_octave_pairs[i](0),
-                                                   scale_octave_pairs[i](1)))
-                .transpose();
+        const auto num_features = static_cast<int>(features.size());
+#pragma omp parallel for
+        for (auto i = 0; i < num_features; ++i)
+        {
+          sifts.matrix().row(i) =
+              this->operator()(features[i],
+                               gradient_polar_coords(scale_octave_pairs[i](0),
+                                                     scale_octave_pairs[i](1)))
+                  .transpose();
+        }
+      }
+      else
+      {
+        for (size_t i = 0; i < features.size(); ++i)
+        {
+          sifts.matrix().row(i) =
+              this->operator()(features[i],
+                               gradient_polar_coords(scale_octave_pairs[i](0),
+                                                     scale_octave_pairs[i](1)))
+                  .transpose();
+        }
       }
       return sifts;
     }
@@ -198,12 +220,13 @@ namespace DO { namespace Sara {
     void accumulate(descriptor_type& h, const Vector2f& pos, float ori,
                     float weight, float mag) const
     {
-      const auto xfrac = pos.x() - floor(pos.x());
-      const auto yfrac = pos.y() - floor(pos.y());
-      const auto orifrac = ori - floor(ori);
-      const auto xi = int(pos.x());
-      const auto yi = int(pos.y());
-      const auto orii = int(ori);
+      float xif, yif, oriif;
+      const auto xfrac = std::modf(pos.x(), &xif);
+      const auto yfrac = std::modf(pos.y(), &yif);
+      const auto orifrac = std::modf(ori, &oriif);
+      const auto xi = int(xif);
+      const auto yi = int(yif);
+      const auto orii = int(oriif);
 
       for (auto dy = 0; dy < 2; ++dy)
       {
@@ -211,18 +234,18 @@ namespace DO { namespace Sara {
         if (y < 0 || y >= N)
           continue;
 
-        const auto wy = (dy == 0) ? 1.f - yfrac : yfrac;
+        const auto wy = (dy == 0) ? 1 - yfrac : yfrac;
         for (auto dx = 0; dx < 2; ++dx)
         {
           const auto x = xi + dx;
           if (x < 0 || x >= N)
             continue;
 
-          const auto wx = (dx == 0) ? 1.f - xfrac : xfrac;
+          const auto wx = (dx == 0) ? 1 - xfrac : xfrac;
           for (auto dori = 0; dori < 2; ++dori)
           {
             const auto o = (orii + dori) % O;
-            const auto wo = (dori == 0) ? 1.f - orifrac : orifrac;
+            const auto wo = (dori == 0) ? 1 - orifrac : orifrac;
 
             h[at(y, x, o)] += wy * wx * wo * weight * mag;
           }
@@ -230,15 +253,15 @@ namespace DO { namespace Sara {
       }
     }
 
-    //! Normalize in a contrast-invariant way.
-    void normalize(descriptor_type& h)
+    //! @brief Normalize in a contrast-invariant way.
+    void normalize(descriptor_type& h) const
     {
-      // Euclidean normalization to account for contrast change.
+      // Euclidean normalization to account for contrast changes.
       h.normalize();
 
-      // Make the descriptor robustness to nonlinear illumination change.
+      // Make the descriptor robustness to nonlinear illumination changes.
       //
-      // 1) Clamp histogram bin values to 0.2.
+      // 1) Clamp histogram bin values to 0.2. (as indicated in the paper).
       h = h.cwiseMin(descriptor_type::Ones() * _max_bin_value);
       // 2) Renormalize again.
       h.normalize();

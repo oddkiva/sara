@@ -35,7 +35,8 @@ namespace DO { namespace Sara {
              float x, float y, float sigma) const
   {
     // Compute histogram of gradients as in [Lowe, IJCV 2004].
-    auto orientation_histogram = Array<float, 36, 1>{};
+    constexpr auto O = 36;
+    auto orientation_histogram = Array<float, O, 1>{};
     compute_orientation_histogram(orientation_histogram, gradients, x, y, sigma,
                                   _patch_truncation_factor, _blur_factor);
 
@@ -50,10 +51,10 @@ namespace DO { namespace Sara {
     for (size_t i = 0; i != peaks.size(); ++i)
     {
       // Orientations in $[0, 2\pi[$
-      peaks[i] *= float(M_PI) / 18.f;
+      peaks[i] *= static_cast<float>(2 * M_PI) / O;
       // Orientations in $[-\pi, \pi[$
       if (peaks[i] > float(M_PI))
-        peaks[i] -= 2.f*float(M_PI);
+        peaks[i] -= 2.f * float(M_PI);
     }
 
     return peaks;

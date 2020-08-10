@@ -35,7 +35,8 @@ if (SARA_BUILD_VIDEOIO)
 endif ()
 set_target_properties(pysara_pybind11 PROPERTIES
   PREFIX "${PYTHON_MODULE_PREFIX}"
-  SUFFIX "${PYTHON_MODULE_EXTENSION}")
+  SUFFIX "${PYTHON_MODULE_EXTENSION}"
+  FOLDER "Python")
 add_dependencies(copy_pysara_module pysara_pybind11)
 
 # ============================================================================ #

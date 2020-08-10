@@ -37,11 +37,11 @@ namespace DO { namespace Sara {
     for (int o = 0; o < D.num_octaves(); ++o)
     {
       // Be careful of the bounds. We go from 1 to N-1.
-      for (int s = 1; s < D.num_scales_per_octave()-1; ++s)
+      for (int s = 1; s < D.num_scales_per_octave() - 1; ++s)
       {
         auto new_extrema = local_scale_space_extrema(
-          D, s, o, _extremum_thres, _edge_ratio_thres,
-          _img_padding_sz, _extremum_refinement_iter);
+            D, s, o, _extremum_thres, _edge_ratio_thres, _img_padding_sz,
+            _extremum_refinement_iter);
         append(extrema, new_extrema);
 
         if (scale_octave_pairs)

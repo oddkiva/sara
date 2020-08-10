@@ -6,6 +6,7 @@ if (SARA_USE_FROM_SOURCE)
     set(Boost_USE_STATIC_LIBS OFF)
     set(Boost_USE_MULTITHREADED ON)
     find_package(Boost COMPONENTS filesystem system REQUIRED)
+    find_package(OpenMP)
 
     sara_glob_directory(${DO_Sara_SOURCE_DIR}/SfM)
     sara_create_common_variables("SfM")
@@ -22,6 +23,8 @@ if (SARA_USE_FROM_SOURCE)
       PRIVATE
       BOOST_ALL_DYN_LINK
       BOOST_ALL_NO_LIB)
-    target_link_libraries(DO_Sara_SfM PRIVATE tinyply)
+    target_link_libraries(DO_Sara_SfM
+      PRIVATE tinyply
+      PUBLIC $<$<BOOL:OpenMP_CXX_FOUND>:OpenMP::OpenMP_CXX>)
   endif ()
 endif ()

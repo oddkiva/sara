@@ -1,4 +1,5 @@
-find_package(DO_Sara COMPONENTS Core Graphics ImageIO ImageProcessing REQUIRED)
+find_package(DO_Sara COMPONENTS Core Graphics ImageIO
+  ImageProcessing VideoIO REQUIRED)
 
 macro (sara_add_example example)
   add_executable(${example} ${example}.cpp)
@@ -13,3 +14,5 @@ endmacro()
 sara_add_example(image_processing_example)
 sara_add_example(infinite_image_example)
 sara_add_example(gemm_based_convolution_example)
+sara_add_example(edge_detection_example)
+sara_add_example(watershed_example)

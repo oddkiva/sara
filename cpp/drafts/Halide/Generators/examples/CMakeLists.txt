@@ -1,0 +1,95 @@
+find_package(OpenMP)
+find_package(DO_Sara COMPONENTS Core Graphics ImageIO SfM VideoIO REQUIRED)
+
+# N.B.: with MSVC, this link helped to solve already defined symbol errors:
+# https://github.com/halide/Halide/issues/740
+
+
+add_executable(halide_aot_example halide_aot_example.cpp)
+target_compile_definitions(halide_aot_example
+  PRIVATE ${SARA_DEFINITIONS})
+target_link_options(halide_aot_example
+  PRIVATE
+  $<$<CXX_COMPILER_ID:MSVC>:/INCREMENTAL:NO /FORCE /IGNORE:4006>)
+target_link_libraries(halide_aot_example
+  PRIVATE
+  ${DO_Sara_LIBRARIES}
+  Halide
+  shakti_halide_rgb_to_gray
+  shakti_halide_gray32f_to_rgb
+  shakti_halide_gaussian_blur
+  shakti_gaussian_convolution_v2)
+set_property(TARGET halide_aot_example PROPERTY FOLDER "Tutorials/Halide")
+
+
+add_executable(halide_gaussian_convolution_example
+  halide_gaussian_convolution_example.cpp)
+target_compile_definitions(halide_gaussian_convolution_example
+  PRIVATE ${SARA_DEFINITIONS})
+target_link_libraries(halide_gaussian_convolution_example
+  PRIVATE
+  ${DO_Sara_LIBRARIES}
+  Halide
+  shakti_gaussian_convolution
+  shakti_gaussian_convolution_v2
+  shakti_halide_gaussian_blur)
+set_property(TARGET halide_gaussian_convolution_example
+  PROPERTY
+  FOLDER "Tutorials/Halide")
+
+add_executable(halide_resize_example
+  halide_resize_example.cpp)
+target_compile_definitions(halide_resize_example
+  PRIVATE ${SARA_DEFINITIONS})
+target_link_options(halide_resize_example
+  PRIVATE
+  $<$<CXX_COMPILER_ID:MSVC>:/INCREMENTAL:NO /FORCE /IGNORE:4006>)
+target_link_libraries(halide_resize_example
+  PRIVATE
+  ${DO_Sara_LIBRARIES}
+  Halide
+  shakti_halide_rgb_to_gray
+  shakti_halide_gray32f_to_rgb
+  shakti_reduce_32f)
+set_property(TARGET halide_resize_example
+  PROPERTY
+  FOLDER "Tutorials/Halide")
+
+add_executable(halide_dog_extrema
+  halide_dog_extrema.cpp)
+target_compile_definitions(halide_dog_extrema
+  PRIVATE ${SARA_DEFINITIONS})
+target_link_options(halide_dog_extrema
+  PRIVATE
+  $<$<CXX_COMPILER_ID:MSVC>:/INCREMENTAL:NO /FORCE /IGNORE:4006>)
+target_link_libraries(halide_dog_extrema
+  PRIVATE
+  ${DO_Sara_LIBRARIES}
+  Halide
+  shakti_halide_rgb_to_gray
+  shakti_halide_gray32f_to_rgb
+  # Scale-space generation.
+  shakti_enlarge
+  shakti_reduce_32f
+  shakti_scale_32f
+  # Gaussian pyramid.
+  shakti_gaussian_convolution_v2
+  # DoG pyramid.
+  shakti_subtract_32f
+  # Scale-space extrema.
+  shakti_local_max_32f
+  shakti_local_scale_space_extremum_32f
+  # Refine extrema.
+  shakti_refine_scale_space_extrema
+  # Dominant gradient orientations.
+  shakti_polar_gradient_2d_32f
+  shakti_dominant_gradient_orientations
+  # SIFT descriptor.
+  shakti_sift_descriptor
+  shakti_sift_descriptor_v2
+  shakti_sift_descriptor_v3
+  shakti_sift_descriptor_v4
+  )
+set_property(TARGET halide_dog_extrema
+  PROPERTY
+  FOLDER "Tutorials/Halide")
