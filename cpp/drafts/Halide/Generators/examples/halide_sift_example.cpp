@@ -15,7 +15,6 @@
 #include <cmath>
 
 #include <DO/Sara/Core.hpp>
-#include <DO/Sara/FeatureDetectors/DoG.hpp>
 #include <DO/Sara/Graphics.hpp>
 #include <DO/Sara/ImageIO.hpp>
 #include <DO/Sara/VideoIO.hpp>
@@ -192,10 +191,10 @@ namespace DO::Shakti::HalideBackend {
 #elif defined(SIFT_V4)
       SARA_DEBUG << "RUNNING SIFT V4..." << std::endl;
       timer.restart();
-      pipeline.descriptors_v3 =
-          v4::compute_sift_descriptors(pipeline.gradient_pyramid[0],  //
-                                       pipeline.gradient_pyramid[1],  //
-                                       pipeline.oriented_extrema);
+      pipeline.descriptors_v3 = v4::compute_sift_descriptors(  //
+          pipeline.gradient_pyramid[0],                        //
+          pipeline.gradient_pyramid[1],                        //
+          pipeline.oriented_extrema);
       SARA_DEBUG << "SIFT descriptors = " << timer.elapsed_ms() << " ms"
                  << std::endl;
 #endif

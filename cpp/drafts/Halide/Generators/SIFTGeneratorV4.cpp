@@ -120,6 +120,15 @@ namespace {
           tile_u, tile_v, tile_k,       //
           Halide::TailStrategy::GuardWithIf);
 
+#ifdef NORMALIZE_SIFT
+      descriptors_unnormalized.compute_root();
+      descriptors_unnormalized.gpu_tile(o, ji, k,                 //
+                                        oo, jio, ko,              //
+                                        oi, jii, ki,              //
+                                        tile_o, tile_ji, tile_k,  //
+                                        TailStrategy::GuardWithIf);
+#endif
+
       descriptors.gpu_tile(o, ji, k,                 //
                            oo, jio, ko,              //
                            oi, jii, ki,              //

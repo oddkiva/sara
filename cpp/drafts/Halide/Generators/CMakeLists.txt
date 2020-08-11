@@ -79,12 +79,19 @@ shakti_halide_library_v2(
   SRCS RefineExtremumGenerators.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
 
-
-# Gradient in polar coordinates in 2D.
+# Gradients in polar coordinates.
 shakti_halide_library_v2(
   NAME shakti_polar_gradient_2d_32f
   SRCS DifferentialGenerators.cpp
   HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
+
+# SIFT octave.
+shakti_halide_library_v2(
+  NAME shakti_sift_octave
+  SRCS SIFTOctaveGenerator.cpp
+  HALIDE_TARGET_FEATURES ${SHAKTI_HALIDE_GPU_TARGETS})
+
 
 # Dominant gradient orientations.
 shakti_halide_library_v2(
