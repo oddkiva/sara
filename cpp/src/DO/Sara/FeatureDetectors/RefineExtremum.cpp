@@ -106,7 +106,7 @@ namespace DO { namespace Sara {
       break;
     }
 
-    pos = Vector3f{float(x), float(y), I.scale_relative_to_octave(s)};
+    pos = Vector3f(x, y, I.scale_relative_to_octave(s));
     const auto oldval = I(x, y, s, o);
     const auto newval = oldval + 0.5f * D_prime.dot(h);
 

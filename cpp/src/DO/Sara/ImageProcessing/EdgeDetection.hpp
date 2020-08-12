@@ -13,13 +13,17 @@
 
 #pragma once
 
+#include <DO/Sara/Core/EigenExtension.hpp>
+
 #include <DO/Sara/DisjointSets/DisjointSets.hpp>
+
 #include <DO/Sara/ImageProcessing/Differential.hpp>
 #include <DO/Sara/ImageProcessing/Interpolation.hpp>
 #include <DO/Sara/ImageProcessing/LinearFiltering.hpp>
 #include <DO/Sara/ImageProcessing/SecondMomentMatrix.hpp>
 
 #include <array>
+#include <cstdint>
 #include <queue>
 
 
@@ -97,7 +101,7 @@ namespace DO { namespace Sara {
             n.y() < 0 || n.y() >= edges.height())
           continue;
 
-        if (edges(n) == 128 and not visited(n))
+        if (edges(n) == 128 && !visited(n))
         {
           visited(n) = 1;
           queue.emplace(n);
