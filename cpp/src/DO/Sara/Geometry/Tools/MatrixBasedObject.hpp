@@ -25,7 +25,11 @@ namespace DO { namespace Sara { namespace Projective {
   class MatrixBasedObject
   {
   public:
-    enum { Dimension = N };
+    enum
+    {
+      Dimension = N
+    };
+
     using matrix_type = Matrix<T, N + 1, N + 1>;
     using homogeneous_vector_type = Matrix<T, N + 1, 1>;  // in projective space
     using euclidean_vector_type = Matrix<T, N, 1>;        // in Euclidean space
@@ -59,6 +63,4 @@ namespace DO { namespace Sara { namespace Projective {
 
   //! @}
 
-} /* namespace Sara */
-} /* namespace Projective */
-} /* namespace DO */
+}}}  // namespace DO::Sara::Projective

@@ -42,10 +42,9 @@ namespace DO { namespace Sara {
   // Discriminant precision: 1e-3.
   template <typename T>
   void roots(const Polynomial<T, 3>& P, std::complex<T>& z1,
-             std::complex<T>& z2, std::complex<T>& z3,
-             double eps = 1e-3)
+             std::complex<T>& z2, std::complex<T>& z3, double eps = 1e-3)
   {
-    const T pi = M_PI;//3.14159265358979323846;
+    const T pi = M_PI;  // 3.14159265358979323846;
 
     T a = P[3], b = P[2], c = P[1], d = P[0];
     b /= a;
@@ -54,37 +53,37 @@ namespace DO { namespace Sara {
     a = 1.0;
 
     // Cardano's formula.
-    const T p = (3*c-b*b)/3;
-    const T q = (-9*c*b + 27*d + 2*b*b*b)/27;
-    const T delta = q*q + 4*p*p*p/27;
+    const T p = (3 * c - b * b) / 3;
+    const T q = (-9 * c * b + 27 * d + 2 * b * b * b) / 27;
+    const T delta = q * q + 4 * p * p * p / 27;
 
-    if(delta < -eps)
+    if (delta < -eps)
     {
-      const T theta = std::acos( -q/2*std::sqrt(27/(-p*p*p)) )/3.0;
-      z1 = 2*std::sqrt(-p/3)*std::cos( theta );
-      z2 = 2*std::sqrt(-p/3)*std::cos( theta + 2*pi/3);
-      z3 = 2*std::sqrt(-p/3)*std::cos( theta + 4*pi/3);
+      const T theta = std::acos(-q / 2 * std::sqrt(27 / (-p * p * p))) / 3.0;
+      z1 = 2 * std::sqrt(-p / 3) * std::cos(theta);
+      z2 = 2 * std::sqrt(-p / 3) * std::cos(theta + 2 * pi / 3);
+      z3 = 2 * std::sqrt(-p / 3) * std::cos(theta + 4 * pi / 3);
     }
-    else if(delta <= eps)
+    else if (delta <= eps)
     {
-      z1 = 3*q/p;
-      z2 = z3 = -3*q/(2*p);
+      z1 = 3 * q / p;
+      z2 = z3 = -3 * q / (2 * p);
     }
     else
     {
-      T r1 = (-q+std::sqrt(delta))/2.0;
-      T r2 = (-q-std::sqrt(delta))/2.0;
-      T u = r1 < 0 ? -std::pow(-r1, 1.0/3.0) : std::pow(r1, 1.0/3.0);
-      T v = r2 < 0 ? -std::pow(-r2, 1.0/3.0) : std::pow(r2, 1.0/3.0);
-      std::complex<T> j(-0.5, std::sqrt(3.0)*0.5);
+      T r1 = (-q + std::sqrt(delta)) / 2.0;
+      T r2 = (-q - std::sqrt(delta)) / 2.0;
+      T u = r1 < 0 ? -std::pow(-r1, 1.0 / 3.0) : std::pow(r1, 1.0 / 3.0);
+      T v = r2 < 0 ? -std::pow(-r2, 1.0 / 3.0) : std::pow(r2, 1.0 / 3.0);
+      std::complex<T> j(-0.5, std::sqrt(3.0) * 0.5);
       z1 = u + v;
-      z2 = j*u+std::conj(j)*v;
-      z3 = j*j*u+std::conj(j*j)*v;
+      z2 = j * u + std::conj(j) * v;
+      z3 = j * j * u + std::conj(j * j) * v;
     }
 
-    z1 -= b/(3*a);
-    z2 -= b/(3*a);
-    z3 -= b/(3*a);
+    z1 -= b / (3 * a);
+    z2 -= b / (3 * a);
+    z3 -= b / (3 * a);
   }
 
   // Involves the precision of the cubic equation solver: (1e-3.)
@@ -94,49 +93,57 @@ namespace DO { namespace Sara {
              double eps = 1e-6)
   {
     T a4 = P[4], a3 = P[3], a2 = P[2], a1 = P[1], a0 = P[0];
-    a3 /= a4; a2/= a4; a1 /= a4; a0 /= a4; a4 = 1.0;
+    a3 /= a4;
+    a2 /= a4;
+    a1 /= a4;
+    a0 /= a4;
+    a4 = 1.0;
 
     Polynomial<T, 3> Q;
     Q[3] = 1.0;
     Q[2] = -a2;
-    Q[1] = a1*a3 - 4.0*a0;
-    Q[0] = 4.0*a2*a0 - a1*a1 - a3*a3*a0;
+    Q[1] = a1 * a3 - 4.0 * a0;
+    Q[0] = 4.0 * a2 * a0 - a1 * a1 - a3 * a3 * a0;
 
     std::complex<T> y1, y2, y3;
     roots<T>(Q, y1, y2, y3, eps);
 
     T yr = std::real(y1);
     T yi = std::abs(std::imag(y1));
-    if(yi > std::abs(std::imag(y2)))
+    if (yi > std::abs(std::imag(y2)))
     {
       yr = std::real(y2);
       yi = std::abs(std::imag(y2));
     }
-    if(yi > std::abs(std::imag(y3)))
+    if (yi > std::abs(std::imag(y3)))
     {
       yr = std::real(y3);
       yi = std::abs(std::imag(y3));
     }
 
-    std::complex<T> radicand = a3*a3/4.0 - a2 + yr;
-    std::complex<T> R( std::sqrt(radicand) );
+    std::complex<T> radicand = a3 * a3 / 4.0 - a2 + yr;
+    std::complex<T> R(std::sqrt(radicand));
     std::complex<T> D, E;
 
-    if(abs(R) > 0)
+    if (abs(R) > 0)
     {
-      D = std::sqrt( 3.0*a3*a3/4.0 - R*R - 2.0*a2 + (4.0*a3*a2 - 8.0*a1 - a3*a3*a3)/(4.0*R) );
-      E = std::sqrt( 3.0*a3*a3/4.0 - R*R - 2.0*a2 - (4.0*a3*a2 - 8.0*a1 - a3*a3*a3)/(4.0*R) );
+      D = std::sqrt(3.0 * a3 * a3 / 4.0 - R * R - 2.0 * a2 +
+                    (4.0 * a3 * a2 - 8.0 * a1 - a3 * a3 * a3) / (4.0 * R));
+      E = std::sqrt(3.0 * a3 * a3 / 4.0 - R * R - 2.0 * a2 -
+                    (4.0 * a3 * a2 - 8.0 * a1 - a3 * a3 * a3) / (4.0 * R));
     }
     else
     {
-      D = std::sqrt( 3.0*a3*a3/4.0 - 2.0*a2 + 2.0*std::sqrt(yr*yr - 4.0*a0) );
-      E = std::sqrt( 3.0*a3*a3/4.0 - 2.0*a2 - 2.0*std::sqrt(yr*yr - 4.0*a0) );
+      D = std::sqrt(3.0 * a3 * a3 / 4.0 - 2.0 * a2 +
+                    2.0 * std::sqrt(yr * yr - 4.0 * a0));
+      E = std::sqrt(3.0 * a3 * a3 / 4.0 - 2.0 * a2 -
+                    2.0 * std::sqrt(yr * yr - 4.0 * a0));
     }
 
-    z1 =  R/2.0 + D/2.0;
-    z2 =  R/2.0 - D/2.0;
-    z3 = -R/2.0 + E/2.0;
-    z4 = -R/2.0 - E/2.0;
+    z1 = R / 2.0 + D / 2.0;
+    z2 = R / 2.0 - D / 2.0;
+    z3 = -R / 2.0 + E / 2.0;
+    z4 = -R / 2.0 - E / 2.0;
 
     // Check Viete's formula.
     /*double p = a2 - 3*a3*a3/8;
@@ -152,13 +159,12 @@ namespace DO { namespace Sara {
     cout << "5pq = " << 5*p*q << endl;
     cout << pow(z1,5) + pow(z2,5) + pow(z3,5) + pow(z4,5) << endl;*/
 
-    z1 -= a3/4;
-    z2 -= a3/4;
-    z3 -= a3/4;
-    z4 -= a3/4;
+    z1 -= a3 / 4;
+    z2 -= a3 / 4;
+    z3 -= a3 / 4;
+    z4 -= a3 / 4;
   }
 
   //! @}
 
-} /* namespace Sara */
-} /* namespace DO */
+}}  // namespace DO::Sara
