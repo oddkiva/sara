@@ -22,6 +22,15 @@
 
 namespace DO { namespace Shakti { namespace HalideBackend {
 
+  //! @brief Calculate image gradients.
+  //! @{
+  inline auto polar_gradient_2d(Halide::Runtime::Buffer<float>& in,   //
+                                Halide::Runtime::Buffer<float>& mag,  //
+                                Halide::Runtime::Buffer<float>& ori)  //
+  {
+    shakti_polar_gradient_2d_32f(in, mag, ori);
+  }
+
   inline auto polar_gradient_2d(Sara::ImageView<float>& in,   //
                                 Sara::ImageView<float>& mag,  //
                                 Sara::ImageView<float>& ori)  //
@@ -34,13 +43,12 @@ namespace DO { namespace Shakti { namespace HalideBackend {
     mag_buffer.set_host_dirty();
     ori_buffer.set_host_dirty();
 
-    shakti_polar_gradient_2d_32f(in_buffer, mag_buffer, ori_buffer);
+    polar_gradient_2d(in_buffer, mag_buffer, ori_buffer);
 
     mag_buffer.copy_to_host();
     ori_buffer.copy_to_host();
   }
 
-  //! @brief Extract local scale-space max.
   inline auto polar_gradient_2d(Sara::ImagePyramid<float>& in)
     -> std::tuple<Sara::ImagePyramid<float>, Sara::ImagePyramid<float>>
   {
@@ -75,5 +83,6 @@ namespace DO { namespace Shakti { namespace HalideBackend {
 
     return std::make_tuple(mag, ori);
   }
+  //! @}.
 
 }}}  // namespace DO::Shakti::HalideBackend

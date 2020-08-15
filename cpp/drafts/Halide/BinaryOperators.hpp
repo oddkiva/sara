@@ -20,7 +20,14 @@
 #include "shakti_subtract_32f.h"
 
 
-namespace DO { namespace Shakti { namespace HalideBackend {
+namespace DO::Shakti::HalideBackend {
+
+  auto subtract(Halide::Runtime::Buffer<float>& a,  //
+                Halide::Runtime::Buffer<float>& b,  //
+                Halide::Runtime::Buffer<float>& out)
+  {
+    shakti_subtract_32f(a, b, out);
+  }
 
   auto subtract(Sara::ImageView<float>& a,  //
                 Sara::ImageView<float>& b,  //
@@ -39,8 +46,8 @@ namespace DO { namespace Shakti { namespace HalideBackend {
 
     a_buffer.set_host_dirty();
     b_buffer.set_host_dirty();
-    shakti_subtract_32f(a_buffer, b_buffer, out_buffer);
+    subtract(a_buffer, b_buffer, out_buffer);
     out_buffer.copy_to_host();
   }
 
-}}}  // namespace DO::Shakti::HalideBackend
+}  // namespace DO::Shakti::HalideBackend

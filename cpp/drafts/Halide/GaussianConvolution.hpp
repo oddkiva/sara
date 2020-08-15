@@ -20,7 +20,14 @@
 #include "shakti_gaussian_convolution_v2.h"
 
 
-namespace DO { namespace Shakti { namespace HalideBackend {
+namespace DO::Shakti::HalideBackend {
+
+  auto gaussian_convolution(Halide::Runtime::Buffer<float>& src,  //
+                            Halide::Runtime::Buffer<float>& dst,  //
+                            float sigma, int truncation_factor)   //
+  {
+    shakti_gaussian_convolution_v2(src, sigma, truncation_factor, dst);
+  }
 
   auto gaussian_convolution(Sara::ImageView<float>& src,         //
                             Sara::ImageView<float>& dst,         //
@@ -35,9 +42,8 @@ namespace DO { namespace Shakti { namespace HalideBackend {
     auto dst_buffer = as_runtime_buffer(dst_tensor_view);
 
     src_buffer.set_host_dirty();
-    shakti_gaussian_convolution_v2(src_buffer, sigma, truncation_factor,
-                                   dst_buffer);
+    gaussian_convolution(src_buffer, dst_buffer, sigma, truncation_factor);
     dst_buffer.copy_to_host();
   }
 
-}}}  // namespace DO::Shakti::HalideBackend
+}  // namespace DO::Shakti::HalideBackend
