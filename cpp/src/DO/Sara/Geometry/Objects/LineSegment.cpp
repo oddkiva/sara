@@ -23,23 +23,22 @@ namespace DO { namespace Sara {
       Thus
       s = (y0-x0) x (y1-y0) / (x1-x0) x (y1-y0)
      */
-    Vector2d dx, dy, d;
-    dx = s1.direction();
-    dy = s2.direction();
-    d  = s2.p1() - s1.p1();
+    const auto dx = s1.direction();
+    const auto dy = s2.direction();
+    const Eigen::Vector2d d  = s2.p1() - s1.p1();
 
     // Sanity check: lines must not be collinear.
-    double dxy = cross(dx, dy);
+    const auto dxy = cross(dx, dy);
     if (fabs(dxy) < std::numeric_limits<double>::epsilon())
       return false;
 
     // Compute the parameter 's'.
-    double s = cross(d, dy) / dxy;
+    const auto s = cross(d, dy) / dxy;
     if (s < 0 || s > 1)
       return false;
 
     // Plug parameter 's' back to the equation (1).
-    u = s1.p1() + s*dx;
+    u = s1.p1() + s * dx;
     return true;
   }
 

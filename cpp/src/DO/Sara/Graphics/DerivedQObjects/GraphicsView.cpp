@@ -54,8 +54,8 @@ namespace DO { namespace Sara {
     addItem(m_lastInsertedItem);
     if (randomPos)
       m_lastInsertedItem->setPos(QPointF(
-          QRandomGenerator::global()->generate() % 10240,
-          QRandomGenerator::global()->generate() % 7680));
+          QRandomGenerator::global()->bounded(10240u),
+          QRandomGenerator::global()->bounded(7680u)));
   }
 
   void GraphicsView::waitForEvent(int ms)
