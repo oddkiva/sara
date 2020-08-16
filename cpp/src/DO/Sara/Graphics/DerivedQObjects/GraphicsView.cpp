@@ -53,7 +53,9 @@ namespace DO { namespace Sara {
     m_lastInsertedItem = new GraphicsPixmapItem(QPixmap::fromImage(image));
     addItem(m_lastInsertedItem);
     if (randomPos)
-      m_lastInsertedItem->setPos(QPointF(qrand()%10240, qrand()%7680));
+      m_lastInsertedItem->setPos(QPointF(
+          QRandomGenerator::global()->generate() % 10240,
+          QRandomGenerator::global()->generate() % 7680));
   }
 
   void GraphicsView::waitForEvent(int ms)

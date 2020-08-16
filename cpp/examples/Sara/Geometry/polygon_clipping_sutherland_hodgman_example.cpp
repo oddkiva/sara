@@ -21,8 +21,8 @@ using namespace DO::Sara;
 
 GRAPHICS_MAIN()
 {
-  auto w = 400;
-  auto h = 400;
+  const auto w = 400;
+  const auto h = 400;
 
   auto timer = Timer{};
   auto elapsed = double{};
