@@ -9,9 +9,9 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <DO/Sara/Core/Numpy.hpp>
 #include <DO/Sara/Core/DebugUtilities.hpp>
-#include <DO/Sara/MultiViewGeometry/Utilities.hpp>
+#include <DO/Sara/Core/Numpy.hpp>
+#include <DO/Sara/Core/Random.hpp>
 
 
 namespace DO::Sara {

@@ -20,22 +20,22 @@ namespace DO::Sara::Projective {
   //! @{
 
   template <typename T, int N>
-  using Line = Eigen::Matrix<T, N + 1, 1>;
-
-  template <typename T, int N>
   using Point = Eigen::Matrix<T, N + 1, 1>;
 
   template <typename T>
-  using Line2 = Line<T, 2>;
+  using Point2 = Point<T, 2>;
 
   template <typename T>
-  using Line3 = Line<T, 3>;
+  using Point3 = Point<T, 3>;
+
 
   template <typename T>
-  using Point2 = Line<T, 2>;
+  using Line2 = Eigen::Matrix<T, 3, 1>;
+
 
   template <typename T>
-  using Point3 = Line<T, 3>;
+  using Plane3 = Eigen::Matrix<T, 4, 1>;
+
 
   template <typename T, int N>
   inline Point<T, N> euclidean(const Point<T, N>& p)

@@ -27,24 +27,6 @@ namespace DO::Sara {
    *  @{
    */
 
-  //! @brief NumPy-like interface for tensors.
-  //! @{
-  DO_SARA_EXPORT
-  auto random_samples(int num_samples,      //
-                      int sample_size,      //
-                      int num_data_points)  //
-      -> Tensor_<int, 2>;
-
-  template <typename T>
-  inline auto shuffle(const TensorView_<T, 1>& x) -> Tensor_<T, 1>
-  {
-    auto x_shuffled = x;
-    std::shuffle(x_shuffled.begin(), x_shuffled.end(), std::mt19937{});
-    return x_shuffled;
-  }
-  //! @}
-
-
   //! @brief Geometry.
   //! @{
   template <typename T>

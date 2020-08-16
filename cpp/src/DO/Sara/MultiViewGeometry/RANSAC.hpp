@@ -25,7 +25,7 @@ namespace DO::Sara {
   //! @{
 
   //! @brief Random Sample Consensus algorithm from Fischler and Bolles 1981.
-  //! batched computations and more generic API.
+  //! Batched computations and more generic API.
   template <typename Estimator, typename InlierPredicate_>
   auto ransac(const TensorView_<int, 2>& matches,  //
               const TensorView_<double, 2>& p1,    //

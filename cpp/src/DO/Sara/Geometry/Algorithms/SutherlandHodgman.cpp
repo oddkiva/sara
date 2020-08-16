@@ -14,8 +14,8 @@
 
 namespace DO { namespace Sara {
 
-  bool intersection(const Projective::Line2<double>& l1,
-                    const Projective::Line2<double>& l2,
+  bool intersection(const Projective::Line2<double>& l1,  //
+                    const Projective::Line2<double>& l2,  //
                     Eigen::Vector2d& u)
   {
     const auto P = Projective::intersection(l1, l2);
