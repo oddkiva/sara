@@ -45,19 +45,19 @@ namespace DO { namespace Sara {
     double& x2() noexcept { return p2().x(); }
     double& y2() noexcept { return p2().y(); }
 
-    inline auto dir() const -> Eigen::Vector2d
+    inline auto direction() const -> Eigen::Vector2d
     {
       return p2() - p1();
     }
 
     inline auto squared_length() const
     {
-      return dir().squaredNorm();
+      return direction().squaredNorm();
     }
 
     inline auto length() const
     {
-      return dir().norm();
+      return direction().norm();
     }
   };
 

@@ -24,8 +24,8 @@ namespace DO { namespace Sara {
       s = (y0-x0) x (y1-y0) / (x1-x0) x (y1-y0)
      */
     Vector2d dx, dy, d;
-    dx = s1.dir();
-    dy = s2.dir();
+    dx = s1.direction();
+    dy = s2.direction();
     d  = s2.p1() - s1.p1();
 
     // Sanity check: lines must not be collinear.
