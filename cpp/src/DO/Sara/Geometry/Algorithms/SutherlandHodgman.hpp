@@ -15,8 +15,9 @@
 
 #include <DO/Sara/Core/EigenExtension.hpp>
 
-#include <DO/Sara/Geometry/Tools/Utilities.hpp>
 #include <DO/Sara/Geometry/Objects/Polygon.hpp>
+#include <DO/Sara/Geometry/Tools/Utilities.hpp>
+#include <DO/Sara/Geometry/Tools/Projective.hpp>
 
 
 namespace DO { namespace Sara {
@@ -28,7 +29,8 @@ namespace DO { namespace Sara {
     Intersection test between lines.
     'u' is the intersection point if it exists.
    */
-  bool intersection(const P2::Line& line1, const P2::Line& line2,
+  bool intersection(const Projective::Line2<double>& line1,
+                    const Projective::Line2<double>& line2,
                     Vector2d& u);
 
   /*!

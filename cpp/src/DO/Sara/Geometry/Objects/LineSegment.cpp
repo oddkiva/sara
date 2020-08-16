@@ -9,23 +9,23 @@ namespace DO { namespace Sara {
   {
     /*
       The intersection point 'u' is such that
-      u = x0 + s(x1-x0)  (1)
-      u = y0 + t(y1-y0)  (2)
+      u = x0 + s(x1 - x0)  (1)
+      u = y0 + t(y1 - y0)  (2)
 
       The goal is to determine the parameter 's' or 't'.
       It is sufficient to compute 's' for example.
 
       Using (1) = (2), it follows that
-      s(x1-x0) - t(y1-y0) = y0-x0
+      s * (x1 - x0) - t * (y1 - y0) = y0 - x0
 
       Using cross-product with (y1-y0), we have
-      s (x1-x0)x(y1-y0) = (y0-x0)x(y1-y0)
+      s (x1-x0) x (y1-y0) = (y0-x0) x (y1-y0)
       Thus
-      s = (y0-x0)x(y1-y0) / (x1-x0)x(y1-y0)
+      s = (y0-x0) x (y1-y0) / (x1-x0) x (y1-y0)
      */
     Vector2d dx, dy, d;
-    dx = dir(s1);
-    dy = dir(s2);
+    dx = s1.dir();
+    dy = s2.dir();
     d  = s2.p1() - s1.p1();
 
     // Sanity check: lines must not be collinear.

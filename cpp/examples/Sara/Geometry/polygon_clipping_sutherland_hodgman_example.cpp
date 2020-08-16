@@ -45,11 +45,11 @@ GRAPHICS_MAIN()
       clip.push_back(p);
     }
   }
-  draw_poly(poly, Red8);
-  draw_poly(clip, Blue8);
+  draw_polygon(poly, Red8);
+  draw_polygon(clip, Blue8);
   get_key();
 
-  auto num_iter = 1000;
+  const auto num_iter = 1000;
   timer.restart();
   for (auto i = 0; i < num_iter; ++i)
     res = sutherland_hodgman(poly, clip);
@@ -57,7 +57,7 @@ GRAPHICS_MAIN()
   cout << "Intersection computation time = " << elapsed << " milliseconds"
        << endl;
 
-  draw_poly(res, Green8,5);
+  draw_polygon(res, Green8,5);
   get_key();
 
   return 0;
