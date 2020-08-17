@@ -23,11 +23,10 @@ namespace DO::Sara {
 
     static constexpr sample_size = 3;
 
-    inline auto operator()(const TensorView_<T, 2>& ab) const
+    template <typename Mat>
+    inline auto operator()(const Mat& pts) const
     {
-      const Eigen::Matrix<T, 3, 2> ab_matrix =
-          ab.matrix().transpose().colwise().homogeneous();
-      return line(a.col(0).eval(), b.col(1).eval());
+      return fit_circle_2d(pts.transpose());
     }
   };
 
@@ -36,15 +35,21 @@ namespace DO::Sara {
   {
     CirclePointDistance2D() = default;
 
-    CirclePointDistance2D(const Line2<T>& l) noexcept
-      : line{l}
+    CirclePointDistance2D(const Circle<T, 2>& c) noexcept
+      : circle{c}
     {
     }
 
     template <typename Mat>
     auto operator()(const Mat& points) -> Eigen::Matrix<T, Eigen::Dynamic, 1>
     {
-      return points;
+      return ((points.colwise() - circle.center)
+                  .colwise()
+                  .squaredNorm()
+                  .array() -
+              std::pow(circle.radius, 2))
+          .abs()
+          .matrix();
     }
 
     Circle<T, 2> circle;

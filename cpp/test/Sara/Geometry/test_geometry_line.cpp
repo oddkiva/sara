@@ -51,7 +51,8 @@ BOOST_AUTO_TEST_CASE(test_random_samples)
   auto point_samples = to_coordinates(index_samples, points);
 
   SARA_DEBUG << "points =\n" << points.matrix() << std::endl;
-  SARA_DEBUG << "points homogeneous =\n" << points.matrix().rowwise().homogeneous() << std::endl;
+  SARA_DEBUG << "points homogeneous =\n"
+             << points.matrix().rowwise().homogeneous() << std::endl;
   SARA_DEBUG << "indices sampled =\n" << index_samples.matrix() << std::endl;
 }
 

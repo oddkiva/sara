@@ -38,25 +38,38 @@ namespace DO::Sara::Projective {
 
 
   template <typename T, int N>
-  inline Point<T, N> euclidean(const Point<T, N>& p)
+  inline auto euclidean(const Point<T, N>& p) -> Point<T, N>
   {
     return p.hnormalized();
   }
 
   template <typename T>
-  inline Point2<T> intersection(const Line2<T>& l1, const Line2<T>& l2)
+  inline auto intersection(const Line2<T>& l1, const Line2<T>& l2) -> Point2<T>
   {
     return l1.cross(l2);
   }
 
   template <typename T>
-  inline Line2<T> line(const Point2<T>& p, const Point2<T>& q)
+  inline auto line(const Point2<T>& p, const Point2<T>& q) -> Line2<T>
   {
     return p.cross(q);
   }
 
   template <typename T>
-  inline double distance(const Point2<T>& p, const Line2<T>& l)
+  inline auto normal(const Line2<T>& l) -> Eigen::Matrix<T, 2, 1>
+  {
+    return l.head(2);
+  }
+
+  template <typename T>
+  inline auto tangent(const Line2<T>& l) -> Eigen::Matrix<T, 2, 1>
+  {
+    const auto n = normal(l);
+    return {-n(1), n(0)};
+  }
+
+  template <typename T>
+  inline auto point_to_line_distance(const Point2<T>& p, const Line2<T>& l)
   {
     return std::abs(l.dot(p) / l.head(2).norm());
   }
