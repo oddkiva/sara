@@ -9,9 +9,12 @@
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 // ========================================================================== //
 
-#include <QRandomGenerator>
+#include <QtGlobal>
 #include <QtGui>
 #include <QtOpenGL>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+#  include <QRandomGenerator>
+#endif
 
 #include <DO/Sara/Graphics/DerivedQObjects/GraphicsView.hpp>
 #include <DO/Sara/Graphics/DerivedQObjects/PixmapItem.hpp>
@@ -55,8 +58,14 @@ namespace DO { namespace Sara {
     addItem(m_lastInsertedItem);
     if (randomPos)
       m_lastInsertedItem->setPos(QPointF(
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
           QRandomGenerator::global()->bounded(10240u),
-          QRandomGenerator::global()->bounded(7680u)));
+          QRandomGenerator::global()->bounded(7680u)
+#else
+          qrand() % 10240,
+          qrand() % 7680
+#endif
+          ));
   }
 
   void GraphicsView::waitForEvent(int ms)

@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(test_fit_circle_2d)
                     1.0,               0.0,
                     0.0,               1.0,
       std::cos(M_PI/3.), std::sin(M_PI/3.);
-    pts.array () *= 5. * pts.array () + 10.;
+    pts.array () = 5. * pts.array () + 10.;
 
     const auto circle = fit_circle_2d (pts);
 
