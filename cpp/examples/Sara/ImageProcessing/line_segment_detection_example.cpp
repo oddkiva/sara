@@ -82,6 +82,9 @@ auto fit_line(const std::vector<Eigen::Vector2i>& curve_points,
                                                    inlier_predicate,  //
                                                    num_iterations);
 
+  if (inliers.flat_array().count() < 0.50 * curve_points.size())
+    return {false, {}};
+
   const Eigen::Vector2f t = Projective::tangent(line).cwiseAbs();
   const auto fast_axis = t.x() > t.y() ? Axis::X : Axis::Y;
 
