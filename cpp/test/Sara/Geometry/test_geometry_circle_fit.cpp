@@ -38,16 +38,14 @@ BOOST_AUTO_TEST_CASE(test_fit_circle_2d)
     BOOST_CHECK_CLOSE (circle.radius, 1., 1e-5);
   }
 
-  // Find the circle with center (10, 10) and with 
-  radius 5.
+  // Find the circle with center (10, 10) and with radius 5.
   {
     auto pts = Eigen::Matrix<double, 3, 2> {};
     pts <<
                     1.0,               0.0,
                     0.0,               1.0,
       std::cos(M_PI/3.), std::sin(M_PI/3.);
-    pts.array () *= 5.;
-    pts.array () += 10.;
+    pts.array () *= 5. * pts.array () + 10.;
 
     const auto circle = fit_circle_2d (pts);
 

@@ -92,9 +92,11 @@ namespace DO::Sara {
         inliers_best.flat_array() = inliers;
         subset_best = S[n];
 
+#ifdef DEBUG
         SARA_CHECK(model_best);
         SARA_CHECK(num_inliers);
         SARA_CHECK(subset_best.row_vector());
+#endif
       }
     }
 
