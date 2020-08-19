@@ -22,6 +22,8 @@
 #include <DO/Sara/Geometry/Algorithms/RobustEstimation/RANSAC.hpp>
 #include <DO/Sara/Geometry/Objects/LineSegment.hpp>
 
+#include <omp.h>
+
 
 using namespace std;
 using namespace DO::Sara;
@@ -48,8 +50,12 @@ auto random_colors(const std::map<int, std::vector<Eigen::Vector2i>>& contours)
   return colors;
 }
 
-auto fit_line(const std::vector<Eigen::Vector2i>& curve_points,
-              float error_threshold = 1.5f) -> std::tuple<bool, LineSegment>
+
+auto fit_line_segment(const std::vector<Eigen::Vector2i>& curve_points,
+                      int num_iterations,
+                      float error_threshold = 1.5f,
+                      float min_consensus_ratio = 0.5f)
+    -> std::tuple<bool, LineSegment>
 {
   enum class Axis : std::uint8_t
   {
@@ -74,50 +80,61 @@ auto fit_line(const std::vector<Eigen::Vector2i>& curve_points,
                               .homogeneous()   //
                               .cast<float>();  //
 
-  const auto num_iterations = std::clamp(                //
-      static_cast<int>(curve_points.size() * 0.20) + 1,  //
-      5, 20);
   const auto [line, inliers, subset_best] = ransac(points,            //
                                                    line_solver,       //
                                                    inlier_predicate,  //
                                                    num_iterations);
 
-  if (inliers.flat_array().count() < 0.50 * curve_points.size())
+  // Do we have sufficiently enough inliers?
+  const auto inlier_count = inliers.flat_array().count();
+  if (inlier_count < min_consensus_ratio * curve_points.size())
     return {false, {}};
 
-  const Eigen::Vector2f t = Projective::tangent(line).cwiseAbs();
-  const auto fast_axis = t.x() > t.y() ? Axis::X : Axis::Y;
-
-  const auto first_inlier = std::find(inliers.begin(), inliers.end(), 1);
-  if (first_inlier == inliers.end())
-    return {false, LineSegment{}};
-
-  auto i = std::size_t(first_inlier - inliers.begin());
-
-  auto tl = Eigen::Vector2f{};
-  auto br = Eigen::Vector2f{};
-  tl = br = point_matrix.row(i).transpose();
-
-  for (++i; i < inliers.size(); ++i)
+  auto inlier_coords = MatrixXf{inlier_count, 3};
+  for (auto i = 0, j = 0; i < point_matrix.rows(); ++i)
   {
     if (!inliers(i))
       continue;
 
-    if (fast_axis == Axis::X)
-    {
-      if (tl.x() > point_matrix(i, 0))
-        tl = point_matrix.row(i).hnormalized().transpose();
-      if (br.x() < point_matrix(i, 0))
-        br = point_matrix.row(i).hnormalized().transpose();
-    }
-    else
-    {
-      if (tl.y() > point_matrix(i, 1))
-        tl = point_matrix.row(i).hnormalized().transpose();
-      if (br.y() < point_matrix(i, 1))
-        br = point_matrix.row(i).hnormalized().transpose();
-    }
+    inlier_coords.row(j) = point_matrix.row(i);
+    ++j;
   }
+
+  const Eigen::Vector2f t = Projective::tangent(line).cwiseAbs();
+  const auto longest_axis = t.x() > t.y() ? Axis::X : Axis::Y;
+
+  auto min_index = 0;
+  auto max_index = 0;
+  if (longest_axis == Axis::X)
+  {
+    inlier_coords.col(0).minCoeff(&min_index);
+    inlier_coords.col(0).maxCoeff(&max_index);
+  }
+  else
+  {
+    inlier_coords.col(1).minCoeff(&min_index);
+    inlier_coords.col(1).maxCoeff(&max_index);
+  }
+  Eigen::Vector2f tl = inlier_coords.row(min_index).hnormalized().transpose();
+  Eigen::Vector2f br = inlier_coords.row(max_index).hnormalized().transpose();
+
+  // Polish the line segment.
+  // if (inlier_count > 3 && (tl - br).norm() > 3)
+  // {
+  //   auto svd = Eigen::BDCSVD<MatrixXf>{inlier_coords, Eigen::ComputeFullU |
+  //                                                         Eigen::ComputeFullV};
+  //   const auto l = svd.matrixV().col(2).normalized();
+  //   if (longest_axis == Axis::X)
+  //   {
+  //     tl.y() = -(l(0) * tl.x() + l(2)) / l(1);
+  //     br.y() = -(l(0) * br.x() + l(2)) / l(1);
+  //   }
+  //   else
+  //   {
+  //     tl.x() = -(l(1) * tl.y() + l(2)) / l(0);
+  //     br.x() = -(l(1) * br.y() + l(2)) / l(0);
+  //   }
+  // }
 
   return {true, {tl.cast<double>(), br.cast<double>()}};
 }
@@ -168,7 +185,11 @@ auto test_on_image()
     {
       if (curve_points.size() < 5)
         continue;
-      const auto [success, line_segment] = fit_line(curve_points);
+      const auto num_iterations = std::clamp(                //
+          static_cast<int>(curve_points.size() * 0.20) + 1,  //
+          5, 20);
+      const auto [success, line_segment] = fit_line_segment(curve_points,     //
+                                                            num_iterations);  //
       if (success)
         line_segments[curve_id] = line_segment;
     }
@@ -256,26 +277,43 @@ auto test_on_video()
     const auto labeled_curves = to_map(curves, edges.sizes());
     const auto curve_colors = random_colors(curves);
 
-    // Fit a line to each curve.
-    auto line_segments = std::map<int, LineSegment>{};
-    for (const auto& [curve_id, curve_points] : curves)
+    auto curve_list = std::vector<std::vector<Eigen::Vector2i>>{};
+    auto curve_ids = std::vector<int>{};
+    for (const auto& [id, curve] : curves)
     {
-      if (curve_points.size() < 5)
+      curve_list.emplace_back(curve);
+      curve_ids.emplace_back(id);
+    }
+
+    // Fit a line to each curve.
+    auto line_segments = std::vector<std::tuple<bool, LineSegment>>(curve_list.size());
+#pragma omp parallel for
+    for (auto i = 0u; i != curve_list.size(); ++i)
+    {
+      const auto& curve = curve_list[i];
+      if (curve.size() < 5)
         continue;
-      const auto [success, line_segment] = fit_line(curve_points);
-      if (success)
-        line_segments[curve_id] = line_segment;
+      const auto num_iterations = std::clamp(                //
+          static_cast<int>(curve.size() * 0.20) + 1,  //
+          5, 20);
+      line_segments[i] = fit_line_segment(curve, num_iterations);
     }
 
     // Display the fitted lines.
     fill_rect(0, 0, frame.width(), frame.height(), Black8);
-    for (const auto& [curve_id, line]: line_segments)
-      draw_line(line.p1(), line.p2(), curve_colors.at(curve_id), 2);
+    for (auto i = 0u; i < line_segments.size(); ++i)
+    {
+      auto& [success, l] = line_segments[i];
+      if (success)
+        draw_line(l.p1(), l.p2(), curve_colors.at(curve_ids[i]), 2);
+    }
   }
 }
 
 GRAPHICS_MAIN()
 {
+  omp_set_num_threads(omp_get_max_threads());
+
   // test_on_image();
   test_on_video();
   return 0;
