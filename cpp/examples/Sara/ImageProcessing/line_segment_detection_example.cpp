@@ -53,6 +53,7 @@ auto random_colors(const std::map<int, std::vector<Eigen::Vector2i>>& contours)
 
 auto fit_line_segment(const std::vector<Eigen::Vector2i>& curve_points,
                       int num_iterations,
+                      bool polish = false,
                       float error_threshold = 1.5f,
                       float min_consensus_ratio = 0.5f)
     -> std::tuple<bool, LineSegment>
@@ -80,10 +81,12 @@ auto fit_line_segment(const std::vector<Eigen::Vector2i>& curve_points,
                               .homogeneous()   //
                               .cast<float>();  //
 
-  const auto [line, inliers, subset_best] = ransac(points,            //
-                                                   line_solver,       //
-                                                   inlier_predicate,  //
-                                                   num_iterations);
+  const auto ransac_result = ransac(points,            //
+                                    line_solver,       //
+                                    inlier_predicate,  //
+                                    num_iterations);
+  const auto& line = std::get<0>(ransac_result);
+  const auto& inliers = std::get<1>(ransac_result);
 
   // Do we have sufficiently enough inliers?
   const auto inlier_count = inliers.flat_array().count();
@@ -100,8 +103,8 @@ auto fit_line_segment(const std::vector<Eigen::Vector2i>& curve_points,
     ++j;
   }
 
-  const Eigen::Vector2f t = Projective::tangent(line).cwiseAbs();
-  const auto longest_axis = t.x() > t.y() ? Axis::X : Axis::Y;
+  Eigen::Vector2f t = Projective::tangent(line).cwiseAbs();
+  auto longest_axis = t.x() > t.y() ? Axis::X : Axis::Y;
 
   auto min_index = 0;
   auto max_index = 0;
@@ -119,22 +122,26 @@ auto fit_line_segment(const std::vector<Eigen::Vector2i>& curve_points,
   Eigen::Vector2f br = inlier_coords.row(max_index).hnormalized().transpose();
 
   // Polish the line segment.
-  // if (inlier_count > 3 && (tl - br).norm() > 3)
-  // {
-  //   auto svd = Eigen::BDCSVD<MatrixXf>{inlier_coords, Eigen::ComputeFullU |
-  //                                                         Eigen::ComputeFullV};
-  //   const auto l = svd.matrixV().col(2).normalized();
-  //   if (longest_axis == Axis::X)
-  //   {
-  //     tl.y() = -(l(0) * tl.x() + l(2)) / l(1);
-  //     br.y() = -(l(0) * br.x() + l(2)) / l(1);
-  //   }
-  //   else
-  //   {
-  //     tl.x() = -(l(1) * tl.y() + l(2)) / l(0);
-  //     br.x() = -(l(1) * br.y() + l(2)) / l(0);
-  //   }
-  // }
+  if (polish && inlier_count > 3)
+  {
+    auto svd = Eigen::BDCSVD<MatrixXf>{inlier_coords, Eigen::ComputeFullU |
+                                                          Eigen::ComputeFullV};
+    const Eigen::Vector3f l = svd.matrixV().col(2);
+
+    t = Projective::tangent(l).cwiseAbs();
+    longest_axis = t.x() > t.y() ? Axis::X : Axis::Y;
+
+    if (longest_axis == Axis::X)
+    {
+      tl.y() = -(l(0) * tl.x() + l(2)) / l(1);
+      br.y() = -(l(0) * br.x() + l(2)) / l(1);
+    }
+    else
+    {
+      tl.x() = -(l(1) * tl.y() + l(2)) / l(0);
+      br.x() = -(l(1) * br.y() + l(2)) / l(0);
+    }
+  }
 
   return {true, {tl.cast<double>(), br.cast<double>()}};
 }
@@ -220,8 +227,8 @@ auto test_on_video()
   // const auto video_filepath = "/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
   const auto video_filepath =
       //"/Users/david/Desktop/Datasets/videos/sample1.mp4"s;
-      "/Users/david/Desktop/Datasets/videos/sample4.mp4"s;
-  //     //"/Users/david/Desktop/Datasets/videos/sample10.mp4"s;
+      //"/Users/david/Desktop/Datasets/videos/sample4.mp4"s;
+      "/Users/david/Desktop/Datasets/videos/sample10.mp4"s;
 #else
   const auto video_filepath = "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
 #endif
@@ -229,10 +236,11 @@ auto test_on_video()
   // Input and output from Sara.
   VideoStream video_stream(video_filepath);
   auto frame = video_stream.frame();
-  auto frame_gray32f = Image<float>{frame.sizes()};
+  const auto downscale_factor = 2;
+  auto frame_gray32f = Image<float>{frame.sizes() / downscale_factor};
 
   // Show the local extrema.
-  create_window(frame.sizes());
+  create_window(frame.sizes() / downscale_factor);
   set_antialiasing();
 
   constexpr auto high_threshold_ratio = 5e-2f;
@@ -256,6 +264,9 @@ auto test_on_video()
 
     // Blur.
     inplace_deriche_blur(frame_gray32f, std::sqrt(std::pow(1.6f, 2) - 1));
+
+    // Downscale.
+    frame_gray32f = downscale(frame_gray32f, downscale_factor);
 
     // Canny.
     const auto& grad = gradient(frame_gray32f);
@@ -286,26 +297,32 @@ auto test_on_video()
     }
 
     // Fit a line to each curve.
-    auto line_segments = std::vector<std::tuple<bool, LineSegment>>(curve_list.size());
+    auto line_segments = std::vector<std::tuple<bool, LineSegment>>(  //
+        curve_list.size(),                                            //
+        {false, {}}                                                   //
+    );
 #pragma omp parallel for
-    for (auto i = 0u; i != curve_list.size(); ++i)
+    for (auto i = 0u; i < curve_list.size(); ++i)
     {
       const auto& curve = curve_list[i];
       if (curve.size() < 5)
         continue;
-      const auto num_iterations = std::clamp(                //
+
+      const auto num_iterations = std::clamp(         //
           static_cast<int>(curve.size() * 0.20) + 1,  //
           5, 20);
-      line_segments[i] = fit_line_segment(curve, num_iterations);
+      line_segments[i] = fit_line_segment(curve,               //
+                                          num_iterations,      //
+                                          /* polish */ true);  //
     }
 
     // Display the fitted lines.
-    fill_rect(0, 0, frame.width(), frame.height(), Black8);
+    fill_rect(0, 0, frame_gray32f.width(), frame_gray32f.height(), Black8);
     for (auto i = 0u; i < line_segments.size(); ++i)
     {
       auto& [success, l] = line_segments[i];
       if (success)
-        draw_line(l.p1(), l.p2(), curve_colors.at(curve_ids[i]), 2);
+        draw_line(l.p1(), l.p2(), curve_colors.at(curve_ids[i]), 1);
     }
   }
 }
