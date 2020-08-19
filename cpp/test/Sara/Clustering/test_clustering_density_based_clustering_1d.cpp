@@ -28,9 +28,9 @@ BOOST_AUTO_TEST_CASE(test_density_based_clustering_1d)
 
   const auto clusters = compute_density_based_clustering_1d(f.data(), f.size());
   const auto clusters_expected = std::vector<Cluster1D>{
-    {6, {2, 10}},
-    {11, {9, 15}},
-    {20, {17, 23}}
+    {6, {2, 9 + 1}},
+    {11, {9, 14 + 1}},
+    {20, {17, 22 + 1}}
   };
 
   BOOST_CHECK(clusters == clusters_expected);
