@@ -160,7 +160,7 @@ namespace DO::Shakti::HalideBackend {
 // #define SIFT_V1
 // #define SIFT_V2
 // #define SIFT_V3
-#define SIFT_V4
+// #define SIFT_V4
 #if defined(SIFT_V1)
       SARA_DEBUG << "RUNNING SIFT V1..." << std::endl;
       timer.restart();

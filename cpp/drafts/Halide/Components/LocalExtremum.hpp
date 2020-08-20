@@ -17,6 +17,8 @@
 
 namespace DO { namespace Shakti { namespace HalideBackend {
 
+  //! @brief Local extremum predicate in Halide.
+  //! @{
   template <typename Input>
   auto local_max(const Input& f,                              //
                  const Halide::Var& x, const Halide::Var& y)  //
@@ -85,5 +87,69 @@ namespace DO { namespace Shakti { namespace HalideBackend {
                minimum(curr(x + r.x, y + r.y, n)),
                minimum(next(x + r.x, y + r.y, n))) == curr(x, y, n);
   }
+  //! @}
+
+
+  //! @brief Local extremum predicate in Halide.
+  /*!
+   *
+   *  Same implementation to support 4D tensors.
+   *  This is by design to support seamless interoperability GPU AOT
+   *  computation.
+   *
+   *  In practice we always have c == 1 and n == 1.
+   *
+   */
+  //! @{
+  template <typename Input>
+  auto local_max(const Input& f,                              //
+                 const Halide::Var& x, const Halide::Var& y,  //
+                 const Halide::Var& c, const Halide::Var& n)  //
+  {
+    auto r = Halide::RDom{-1, 3, -1, 3};
+    auto f_local_max = Halide::Func{f.name() + "local_max"};
+    f_local_max(x, y, c, n) =
+        Halide::maximum(f(x + r.x, y + r.y), c, n) == f(x, y, c, n);
+    return f;
+  }
+
+  template <typename Input>
+  auto local_min(const Input& f,                              //
+                 const Halide::Var& x, const Halide::Var& y,  //
+                 const Halide::Var& c, const Halide::Var& n)  //
+  {
+    auto r = Halide::RDom{-1, 3, -1, 3};
+    auto f_local_min = Halide::Func{f.name() + "local_min"};
+    f_local_min(x, y, c, n) =
+        Halide::minimum(f(x + r.x, y + r.y), c, n) == f(x, y, c, n);
+    return f;
+  }
+
+  template <typename Input>
+  auto local_scale_space_max(                                   //
+      const Input& prev, const Input& curr, const Input& next,  //
+      const Halide::Var& x, const Halide::Var& y,               //
+      const Halide::Var& c, const Halide::Var& n)               //
+  {
+    using namespace Halide;
+    const auto r = RDom{-1, 3, -1, 3};
+    return max(maximum(prev(x + r.x, y + r.y, c, n)),
+               maximum(curr(x + r.x, y + r.y, c, n)),
+               maximum(next(x + r.x, y + r.y, c, n))) == curr(x, y, c, n);
+  }
+
+  template <typename Input>
+  auto local_scale_space_min(                                   //
+      const Input& prev, const Input& curr, const Input& next,  //
+      const Halide::Var& x, const Halide::Var& y,               //
+      const Halide::Var& c, const Halide::Var& n)               //
+  {
+    using namespace Halide;
+    const auto r = RDom{-1, 3, -1, 3};
+    return min(minimum(prev(x + r.x, y + r.y, c, n)),
+               minimum(curr(x + r.x, y + r.y, c, n)),
+               minimum(next(x + r.x, y + r.y, c, n))) == curr(x, y, c, n);
+  }
+  //! @}
 
 }}}  // namespace DO::Shakti::HalideBackend

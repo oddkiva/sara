@@ -49,8 +49,8 @@ GRAPHICS_MAIN()
   const auto video_filepath = "/Users/david/Desktop/Datasets/sfm/Family.mp4"s;
 #else
   const auto video_filepath =
-      // "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
-      "/home/david/Desktop/GOPR0542.MP4"s;
+      "/home/david/Desktop/Datasets/sfm/Family.mp4"s;
+      // "/home/david/Desktop/GOPR0542.MP4"s;
 #endif
 
 
@@ -108,16 +108,32 @@ GRAPHICS_MAIN()
   for (auto i = 0u; i < sigmas.size(); ++i)
     sigmas[i] = std::sqrt(std::pow(scales[i + 1], 2) - std::pow(scales[i], 2));
 
+  // Octave of Gaussians.
   auto buffer_convs =
       std::vector<Halide::Runtime::Buffer<float>>(sigmas.size());
   for (auto i = 0u; i < buffer_convs.size(); ++i)
   {
-    buffer_convs[i] =
-        i != buffer_convs.size() - 1
+    // buffer_convs[i] =
+    //     i != buffer_convs.size() - 1
+    //         ? Halide::Runtime::Buffer<float>(buffer_gray_down_4d.width(),
+    //                                          buffer_gray_4d.height(), 1, 1)
+    //         : halide::as_runtime_buffer(frame_conv_tensor);
+    buffer_convs[i] = Halide::Runtime::Buffer<float>(
+        buffer_gray_down_4d.width(), buffer_gray_4d.height(), 1, 1);
+  }
+
+  // Octave of difference of Gaussians.
+  auto buffer_dogs =
+      std::vector<Halide::Runtime::Buffer<float>>(buffer_convs.size() - 1);
+  for (auto i = 0u; i < buffer_dogs.size(); ++i)
+  {
+    buffer_dogs[i] =
+        i != buffer_dogs.size() - 1
             ? Halide::Runtime::Buffer<float>(buffer_gray_down_4d.width(),
                                              buffer_gray_4d.height(), 1, 1)
             : halide::as_runtime_buffer(frame_conv_tensor);
   }
+
 
   auto buffer_conv_2d = halide::as_runtime_buffer(frame_conv);
   auto buffer_conv_as_rgb =
@@ -164,7 +180,7 @@ GRAPHICS_MAIN()
     auto& buffer_before_conv =
         downscale_factor == 1 ? buffer_gray_4d : buffer_gray_down_4d;
 
-    for (auto i = 0u; i < sigmas.size(); ++i)
+    for (auto i = 0u; i < buffer_convs.size(); ++i)
     {
       auto& conv_in = i == 0u? buffer_before_conv : buffer_convs[i - 1];
       auto& conv_out = buffer_convs[i];
@@ -173,8 +189,15 @@ GRAPHICS_MAIN()
       sara::toc("Gaussian convolution " + std::to_string(i) + ": " + std::to_string(sigmas[i]));
     }
 
+    for (auto i = 0u; i < buffer_dogs.size(); ++i)
+    {
+      sara::tic();
+      halide::subtract(buffer_convs[i + 1], buffer_convs[i], buffer_dogs[i]);
+      sara::toc("DoG " + std::to_string(i));
+    }
+
     sara::tic();
-    buffer_convs.back().copy_to_host();
+    buffer_dogs.back().copy_to_host();
     sara::toc("Copy to host");
 
     elapsed_ms = timer.elapsed_ms();
@@ -183,12 +206,16 @@ GRAPHICS_MAIN()
                << std::endl;
 
 
-    sara::tic();
-    shakti_halide_gray32f_to_rgb(buffer_conv_2d, buffer_conv_as_rgb);
-    sara::toc("Convert conv to RGB");
+    // sara::tic();
+    // shakti_halide_gray32f_to_rgb(buffer_conv_2d, buffer_conv_as_rgb);
+    // sara::toc("Convert conv to RGB");
+
+    // sara::tic();
+    // sara::display(frame_conv_as_rgb);
+    // sara::toc("Display");
 
     sara::tic();
-    sara::display(frame_conv_as_rgb);
+    sara::display(color_rescale(frame_conv));
     sara::toc("Display");
   }
 
